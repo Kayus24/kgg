@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KGG Handyplan</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f7fb;color:#111827;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+main{max-width:720px;margin:auto;padding:14px}.card{background:#fff;border:1px solid #dbe3ef;border-radius:18px;padding:14px;margin-bottom:12px}
+h1{font-size:24px;margin:0 0 6px}h2{font-size:18px;margin:0 0 8px}h3{font-size:17px;margin:0 0 8px}.muted{color:#64748b}
+.days{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:10px}.days button{min-height:44px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;font-weight:800}.days button.active{background:#111827;color:#fff}
+.ex{border:1px solid #cbd5e1;border-radius:16px;padding:12px;margin-top:10px}.set{border-top:1px dashed #cbd5e1;margin-top:10px;padding-top:10px}.set:first-of-type{border-top:0;margin-top:0;padding-top:0}
+.lr{display:grid;grid-template-columns:34px 1fr 1fr;gap:6px;align-items:center;margin-top:6px}.bi{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+input{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:12px;font-size:16px}.status{padding:10px;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:700}
+.hide{display:none}
+</style>
+</head>
+<body>
+<main>
+<section class="card">
+<h1>KGG Handyplan</h1>
+<p class="muted">Werte direkt am Handy eintragen.</p>
+<div id="status" class="status">Plan wird geladen…</div>
+</section>
+<section id="plan" class="card hide">
+<h2 id="title"></h2>
+<p id="meta" class="muted"></p>
+<div id="days" class="days"></div>
+<div id="list"></div>
+</section>
+</main>
+<script>
+let p=null,d=1,v={};
+const $=id=>document.getElementById(id);
+function decode(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return decodeURIComponent(escape(atob(s)))}
+function load(){
+ try{
+  const h=location.hash.slice(1);
+  if(!h.startsWith('KGGH2:'))throw Error('Kein gültiger Plan-Link.');
+  const x=JSON.parse(decode(h.slice(6)));
+  p={id:x.i||'plan',title:x.t||'KGG Trainingsplan',days:x.d||6,ex:x.e||[]};
+  try{v=JSON.parse(localStorage.getItem('kgg-'+p.id)||'{}')}catch(e){v={}}
+  $('status').textContent='Plan geladen.';
+  render();
+ }catch(e){$('status').textContent=e.message||'Plan konnte nicht geladen werden.'}
+}
+const k=(ei,s,side,kind)=>`${d}|${ei}|${s}|${side}|${kind}`;
+const val=(ei,s,side,kind)=>v[k(ei,s,side,kind)]||'';
+function put(ei,s,side,kind,x){v[k(ei,s,side,kind)]=x;localStorage.setItem('kgg-'+p.id,JSON.stringify(v))}
+function render(){
+ $('plan').classList.remove('hide');
+ $('title').textContent=p.title;
+ $('meta').textContent=`${p.ex.length} Übungen · ${p.days} Trainingstage`;
+ $('days').innerHTML=Array.from({length:p.days},(_,i)=>`<button class="${i+1===d?'active':''}" onclick="d=${i+1};render()">T${i+1}</button>`).join('');
+ $('list').innerHTML=p.ex.map((e,ei)=>{
+  const [n,sets,side,unit,metric]=e;
+  let rows='';
+  for(let s=1;s<=sets;s++){
+   rows+=side==='LR'
+   ? `<div class="set"><b>Satz ${s}</b><div class="lr"><span>Li</span><input placeholder="${unit}" value="${val(ei,s,'L','a')}" oninput="put(${ei},${s},'L','a',this.value)"><input placeholder="${metric}" value="${val(ei,s,'L','b')}" oninput="put(${ei},${s},'L','b',this.value)"></div><div class="lr"><span>Re</span><input placeholder="${unit}" value="${val(ei,s,'R','a')}" oninput="put(${ei},${s},'R','a',this.value)"><input placeholder="${metric}" value="${val(ei,s,'R','b')}" oninput="put(${ei},${s},'R','b',this.value)"></div></div>`
+   : `<div class="set"><b>Satz ${s}</b><div class="bi"><input placeholder="${unit}" value="${val(ei,s,'B','a')}" oninput="put(${ei},${s},'B','a',this.value)"><input placeholder="${metric}" value="${val(ei,s,'B','b')}" oninput="put(${ei},${s},'B','b',this.value)"></div></div>`;
+  }
+  return `<div class="ex"><h3>${n}</h3><div class="muted">${sets} Sätze · ${side==='LR'?'links/rechts':'beidseitig'} · ${unit} · ${metric}</div>${rows}</div>`;
+ }).join('');
+}
+load();
+</script>
+</body>
+</html>
