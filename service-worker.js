@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kgg-handyplan-v1';
+const CACHE_NAME = 'kgg-handyplan-v2';
 const APP_ASSETS = [
   './',
   './index.html',
