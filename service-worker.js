@@ -1,11 +1,13 @@
-const CACHE_NAME = 'kgg-handyplan-v5-collapse-cards';
+const CACHE_NAME = 'kgg-handyplan-v6-numpad-ui-fix';
 const COLLAPSE_SCRIPT = './collapse-cards.js';
+const NUMPAD_UI_FIX = './numpad-ui-fix.js';
 const APP_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icon.svg',
   COLLAPSE_SCRIPT,
+  NUMPAD_UI_FIX,
   'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js'
 ];
 
@@ -15,12 +17,16 @@ function isIndexRequest(request) {
   return url.pathname.endsWith('/kgg/') || url.pathname.endsWith('/kgg/index.html');
 }
 
-async function injectCollapseScript(response) {
+async function injectModules(response) {
   try {
-    const html = await response.clone().text();
-    if (html.includes('collapse-cards.js')) return response;
-    const patched = html.replace('</body>', '<script src="./collapse-cards.js"></script></body>');
-    return new Response(patched, {
+    let html = await response.clone().text();
+    if (!html.includes('collapse-cards.js')) {
+      html = html.replace('</body>', '<script src="./collapse-cards.js"></script></body>');
+    }
+    if (!html.includes('numpad-ui-fix.js')) {
+      html = html.replace('</body>', '<script src="./numpad-ui-fix.js"></script></body>');
+    }
+    return new Response(html, {
       status: response.status,
       statusText: response.statusText,
       headers: {
@@ -62,11 +68,11 @@ self.addEventListener('fetch', event => {
         .then(async response => {
           const copy = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy)).catch(() => {});
-          return injectCollapseScript(response);
+          return injectModules(response);
         })
         .catch(async () => {
           const cached = await caches.match('./index.html');
-          return cached ? injectCollapseScript(cached) : Response.error();
+          return cached ? injectModules(cached) : Response.error();
         })
     );
     return;
