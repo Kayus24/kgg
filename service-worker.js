@@ -1,6 +1,6 @@
-const CACHE_NAME = 'kgg-handyplan-v6-numpad-ui-fix';
-const COLLAPSE_SCRIPT = './collapse-cards.js';
-const NUMPAD_UI_FIX = './numpad-ui-fix.js';
+const CACHE_NAME = 'kgg-handyplan-v7-ui-polish';
+const COLLAPSE_SCRIPT = './collapse-cards.js?v=ui-polish-9';
+const NUMPAD_UI_FIX = './numpad-ui-fix.js?v=ui-polish-9';
 const APP_ASSETS = [
   './',
   './index.html',
@@ -20,18 +20,15 @@ function isIndexRequest(request) {
 async function injectModules(response) {
   try {
     let html = await response.clone().text();
-    if (!html.includes('collapse-cards.js')) {
-      html = html.replace('</body>', '<script src="./collapse-cards.js"></script></body>');
-    }
-    if (!html.includes('numpad-ui-fix.js')) {
-      html = html.replace('</body>', '<script src="./numpad-ui-fix.js"></script></body>');
-    }
+    html = html.replace(/<script src="\.\/collapse-cards\.js[^"']*"><\/script>/g, '');
+    html = html.replace(/<script src="\.\/numpad-ui-fix\.js[^"']*"><\/script>/g, '');
+    html = html.replace('</body>', '<script src="./collapse-cards.js?v=ui-polish-9"></script></body>');
     return new Response(html, {
       status: response.status,
       statusText: response.statusText,
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'no-cache'
+        'Cache-Control': 'no-store, no-cache, must-revalidate'
       }
     });
   } catch (e) {
@@ -74,6 +71,20 @@ self.addEventListener('fetch', event => {
           const cached = await caches.match('./index.html');
           return cached ? injectModules(cached) : Response.error();
         })
+    );
+    return;
+  }
+
+  const url = new URL(event.request.url);
+  if (url.pathname.endsWith('/collapse-cards.js') || url.pathname.endsWith('/numpad-ui-fix.js')) {
+    event.respondWith(
+      fetch(event.request, { cache: 'no-store' })
+        .then(response => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy)).catch(() => {});
+          return response;
+        })
+        .catch(() => caches.match(event.request))
     );
     return;
   }
