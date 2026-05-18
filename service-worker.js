@@ -1,13 +1,11 @@
-const CACHE_NAME = 'kgg-handyplan-v7-ui-polish';
-const COLLAPSE_SCRIPT = './collapse-cards.js?v=ui-polish-9';
-const NUMPAD_UI_FIX = './numpad-ui-fix.js?v=ui-polish-9';
+const CACHE_NAME = 'kgg-handyplan-v8-pad-outside-ok';
+const COLLAPSE_SCRIPT = './collapse-cards.js?v=pad-outside-ok-1';
 const APP_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icon.svg',
   COLLAPSE_SCRIPT,
-  NUMPAD_UI_FIX,
   'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js'
 ];
 
@@ -22,7 +20,7 @@ async function injectModules(response) {
     let html = await response.clone().text();
     html = html.replace(/<script src="\.\/collapse-cards\.js[^"']*"><\/script>/g, '');
     html = html.replace(/<script src="\.\/numpad-ui-fix\.js[^"']*"><\/script>/g, '');
-    html = html.replace('</body>', '<script src="./collapse-cards.js?v=ui-polish-9"></script></body>');
+    html = html.replace('</body>', '<script src="./collapse-cards.js?v=pad-outside-ok-1"></script></body>');
     return new Response(html, {
       status: response.status,
       statusText: response.statusText,
