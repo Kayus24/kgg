@@ -1,5 +1,5 @@
-const CACHE_NAME = 'kgg-handyplan-v9-start-scan';
-const COLLAPSE_SCRIPT = './collapse-cards.js?v=pad-outside-ok-1';
+const CACHE_NAME = 'kgg-handyplan-v10-plan-update-label';
+const COLLAPSE_SCRIPT = './collapse-cards.js?v=plan-update-label-1';
 const START_SCAN_SCRIPT = './patient-start-scan.js?v=start-scan-1';
 const APP_ASSETS = [
   './',
@@ -23,7 +23,7 @@ async function injectModules(response) {
     html = html.replace(/<script src="\.\/collapse-cards\.js[^"']*"><\/script>/g, '');
     html = html.replace(/<script src="\.\/numpad-ui-fix\.js[^"']*"><\/script>/g, '');
     html = html.replace(/<script src="\.\/patient-start-scan\.js[^"']*"><\/script>/g, '');
-    html = html.replace('</body>', '<script src="./collapse-cards.js?v=pad-outside-ok-1"></script><script src="./patient-start-scan.js?v=start-scan-1"></script></body>');
+    html = html.replace('</body>', '<script src="./collapse-cards.js?v=plan-update-label-1"></script><script src="./patient-start-scan.js?v=start-scan-1"></script></body>');
     return new Response(html, {
       status: response.status,
       statusText: response.statusText,
