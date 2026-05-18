@@ -1,5 +1,6 @@
 (()=>{
   const LANG_KEY='kggPatientLang';
+  const PLAN_KEY='kggCurrentPlanV1';
   const $=id=>document.getElementById(id);
   const lang=()=>localStorage.getItem(LANG_KEY)==='en'?'en':'de';
   const tr=(de,en)=>lang()==='en'?en:de;
@@ -7,6 +8,103 @@
 
   function ready(){
     try{return p&&Array.isArray(p.ex)&&typeof v==='object'&&typeof k==='function'}catch(e){return false}
+  }
+
+  function b64dec(s){
+    s=String(s||'').replace(/-/g,'+').replace(/_/g,'/');
+    while(s.length%4)s+='=';
+    return decodeURIComponent(escape(atob(s)));
+  }
+
+  function normName(s){
+    return String(s||'')
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/[^a-z0-9äöüß]+/g,' ')
+      .replace(/\s+/g,' ')
+      .trim();
+  }
+
+  function exObj(e){
+    if(!Array.isArray(e))e=[];
+    return {
+      n:e[0]||'Übung',
+      sets:Number(e[1])||3,
+      side:e[2]||'LR',
+      u:e[3]||'kg',
+      m:e[4]||'Wdh',
+      sl:e[5]||'',
+      sm:e[6]||'',
+      media:e[7]||'',
+      videoUrl:e[8]||'',
+      videoLabel:e[9]||'Video öffnen'
+    };
+  }
+
+  function exRaw(e){
+    return [e.n,e.sets,e.side,e.u,e.m,e.sl||'',e.sm||'',e.media||'',e.videoUrl||'',e.videoLabel||'Video öffnen'];
+  }
+
+  function rawFromCurrent(){
+    return {
+      i:p&&p.id?p.id:'plan',
+      t:p&&p.title?p.title:'KGG Trainingsplan',
+      v:p&&p.version?p.version:1,
+      d:p&&p.days?p.days:6,
+      extendDays:p?p.extendDays!==false:true,
+      stepDays:p&&p.stepDays?p.stepDays:6,
+      e:p&&Array.isArray(p.ex)?p.ex.map(exRaw):[]
+    };
+  }
+
+  function storeCurrentPlan(raw){
+    localStorage.setItem(PLAN_KEY,JSON.stringify({plan:raw,importedAt:new Date().toISOString()}));
+  }
+
+  function parsePlanFromText(raw){
+    const txt=String(raw||'');
+    const m=txt.match(/KGGH2:([A-Za-z0-9_-]+)/);
+    if(!m)return null;
+    return JSON.parse(b64dec(m[1]));
+  }
+
+  function mergePlanUpdate(nextRaw){
+    if(!ready()||!nextRaw||!Array.isArray(nextRaw.e))return false;
+    try{safeSave()}catch(e){}
+
+    const current=rawFromCurrent();
+    const merged=current.e.map(exObj);
+    const index=new Map();
+    merged.forEach((ex,i)=>index.set(normName(ex.n),i));
+
+    let added=0,updated=0;
+    nextRaw.e.map(exObj).forEach(next=>{
+      const key=normName(next.n);
+      if(key&&index.has(key)){
+        const i=index.get(key);
+        merged[i]={...merged[i],...next,n:next.n||merged[i].n};
+        updated++;
+      }else{
+        merged.push(next);
+        if(key)index.set(key,merged.length-1);
+        added++;
+      }
+    });
+
+    p.id=current.i;
+    p.title=nextRaw.t||current.t;
+    p.version=Number(nextRaw.v)||current.v||1;
+    p.days=Math.max(Number(current.d)||6,Number(nextRaw.d)||6);
+    p.extendDays=nextRaw.extendDays!==false;
+    p.stepDays=Number(nextRaw.stepDays)||Number(current.stepDays)||6;
+    p.ex=merged;
+
+    const out=rawFromCurrent();
+    storeCurrentPlan(out);
+    try{save()}catch(e){}
+    try{render()}catch(e){}
+    try{setStatus(tr('Plan aktualisiert. Werte behalten. Neue Übungen: ','Plan updated. Values kept. New exercises: ')+added,'ok')}catch(e){}
+    return true;
   }
 
   function autoFillStartValues(){
@@ -49,11 +147,11 @@
   }
 
   function handlePlanText(raw){
-    const txt=String(raw||'');
-    const m=txt.match(/KGGH2:[A-Za-z0-9_-]+/);
-    if(!m){alert(tr('Kein Plan-QR erkannt.','No plan QR detected.'));return;}
+    const nextRaw=parsePlanFromText(raw);
+    if(!nextRaw){alert(tr('Kein Plan-QR erkannt.','No plan QR detected.'));return;}
+    if(mergePlanUpdate(nextRaw))return;
     try{safeSave()}catch(e){}
-    location.href=location.origin+location.pathname+'#'+m[0];
+    location.href=location.origin+location.pathname+'#KGGH2:'+String(raw).match(/KGGH2:([A-Za-z0-9_-]+)/)[1];
     setTimeout(()=>location.reload(),80);
   }
 
