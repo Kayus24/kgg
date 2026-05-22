@@ -1,8 +1,9 @@
-const CACHE_NAME = 'kgg-handyplan-v14-card-settings-pain-scale';
+const CACHE_NAME = 'kgg-handyplan-v15-day-history';
 const COLLAPSE_SCRIPT = './collapse-cards.js?v=plan-update-label-1';
 const START_SCAN_SCRIPT = './patient-start-scan.js?v=qr-camera-scan-1';
 const MULTIPLAN_DB_SCRIPT = './patient-multiplan-db.js?v=clean-action-ui-1';
 const CARD_SETTINGS_SCRIPT = './patient-card-settings.js?v=card-settings-pain-scale-1';
+const DAY_HISTORY_SCRIPT = './patient-day-history.js?v=day-history-1';
 const APP_ASSETS = [
   './',
   './index.html',
@@ -12,6 +13,7 @@ const APP_ASSETS = [
   START_SCAN_SCRIPT,
   MULTIPLAN_DB_SCRIPT,
   CARD_SETTINGS_SCRIPT,
+  DAY_HISTORY_SCRIPT,
   'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js'
 ];
 
@@ -29,7 +31,8 @@ async function injectModules(response) {
     html = html.replace(/<script src="\.\/patient-start-scan\.js[^"']*"><\/script>/g, '');
     html = html.replace(/<script src="\.\/patient-multiplan-db\.js[^"']*"><\/script>/g, '');
     html = html.replace(/<script src="\.\/patient-card-settings\.js[^"']*"><\/script>/g, '');
-    html = html.replace('</body>', '<script src="./collapse-cards.js?v=plan-update-label-1"></script><script src="./patient-start-scan.js?v=qr-camera-scan-1"></script><script src="./patient-multiplan-db.js?v=clean-action-ui-1"></script><script src="./patient-card-settings.js?v=card-settings-pain-scale-1"></script></body>');
+    html = html.replace(/<script src="\.\/patient-day-history\.js[^"']*"><\/script>/g, '');
+    html = html.replace('</body>', '<script src="./collapse-cards.js?v=plan-update-label-1"></script><script src="./patient-start-scan.js?v=qr-camera-scan-1"></script><script src="./patient-multiplan-db.js?v=clean-action-ui-1"></script><script src="./patient-card-settings.js?v=card-settings-pain-scale-1"></script><script src="./patient-day-history.js?v=day-history-1"></script></body>');
     return new Response(html, {
       status: response.status,
       statusText: response.statusText,
@@ -83,7 +86,7 @@ self.addEventListener('fetch', event => {
   }
 
   const url = new URL(event.request.url);
-  if (url.pathname.endsWith('/collapse-cards.js') || url.pathname.endsWith('/numpad-ui-fix.js') || url.pathname.endsWith('/patient-start-scan.js') || url.pathname.endsWith('/patient-multiplan-db.js') || url.pathname.endsWith('/patient-card-settings.js')) {
+  if (url.pathname.endsWith('/collapse-cards.js') || url.pathname.endsWith('/numpad-ui-fix.js') || url.pathname.endsWith('/patient-start-scan.js') || url.pathname.endsWith('/patient-multiplan-db.js') || url.pathname.endsWith('/patient-card-settings.js') || url.pathname.endsWith('/patient-day-history.js')) {
     event.respondWith(
       fetch(event.request, { cache: 'no-store' })
         .then(response => {
