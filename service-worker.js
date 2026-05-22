@@ -1,7 +1,7 @@
-const CACHE_NAME = 'kgg-handyplan-v16-compact-history-bubbles';
+const CACHE_NAME = 'kgg-handyplan-v17-vertical-camera-bubbles';
 const COLLAPSE_SCRIPT = './collapse-cards.js?v=plan-update-label-1';
 const START_SCAN_SCRIPT = './patient-start-scan.js?v=qr-camera-scan-1';
-const MULTIPLAN_DB_SCRIPT = './patient-multiplan-db.js?v=camera-bubbles-1';
+const MULTIPLAN_DB_SCRIPT = './patient-multiplan-db.js?v=vertical-camera-bubbles-1';
 const CARD_SETTINGS_SCRIPT = './patient-card-settings.js?v=card-settings-pain-scale-1';
 const DAY_HISTORY_SCRIPT = './patient-day-history.js?v=compact-history-1';
 const APP_ASSETS = [
@@ -32,7 +32,7 @@ async function injectModules(response) {
     html = html.replace(/<script src="\.\/patient-multiplan-db\.js[^"']*"><\/script>/g, '');
     html = html.replace(/<script src="\.\/patient-card-settings\.js[^"']*"><\/script>/g, '');
     html = html.replace(/<script src="\.\/patient-day-history\.js[^"']*"><\/script>/g, '');
-    html = html.replace('</body>', '<script src="./collapse-cards.js?v=plan-update-label-1"></script><script src="./patient-start-scan.js?v=qr-camera-scan-1"></script><script src="./patient-multiplan-db.js?v=camera-bubbles-1"></script><script src="./patient-card-settings.js?v=card-settings-pain-scale-1"></script><script src="./patient-day-history.js?v=compact-history-1"></script></body>');
+    html = html.replace('</body>', '<script src="./collapse-cards.js?v=plan-update-label-1"></script><script src="./patient-start-scan.js?v=qr-camera-scan-1"></script><script src="./patient-multiplan-db.js?v=vertical-camera-bubbles-1"></script><script src="./patient-card-settings.js?v=card-settings-pain-scale-1"></script><script src="./patient-day-history.js?v=compact-history-1"></script></body>');
     return new Response(html, {
       status: response.status,
       statusText: response.statusText,
