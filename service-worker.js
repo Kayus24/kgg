@@ -1,7 +1,7 @@
-const CACHE_NAME = 'kgg-handyplan-v12-multiplan-db';
+const CACHE_NAME = 'kgg-handyplan-v13-clean-action-ui';
 const COLLAPSE_SCRIPT = './collapse-cards.js?v=plan-update-label-1';
 const START_SCAN_SCRIPT = './patient-start-scan.js?v=qr-camera-scan-1';
-const MULTIPLAN_DB_SCRIPT = './patient-multiplan-db.js?v=buttons-1';
+const MULTIPLAN_DB_SCRIPT = './patient-multiplan-db.js?v=clean-action-ui-1';
 const APP_ASSETS = [
   './',
   './index.html',
@@ -26,7 +26,7 @@ async function injectModules(response) {
     html = html.replace(/<script src="\.\/numpad-ui-fix\.js[^"']*"><\/script>/g, '');
     html = html.replace(/<script src="\.\/patient-start-scan\.js[^"']*"><\/script>/g, '');
     html = html.replace(/<script src="\.\/patient-multiplan-db\.js[^"']*"><\/script>/g, '');
-    html = html.replace('</body>', '<script src="./collapse-cards.js?v=plan-update-label-1"></script><script src="./patient-start-scan.js?v=qr-camera-scan-1"></script><script src="./patient-multiplan-db.js?v=buttons-1"></script></body>');
+    html = html.replace('</body>', '<script src="./collapse-cards.js?v=plan-update-label-1"></script><script src="./patient-start-scan.js?v=qr-camera-scan-1"></script><script src="./patient-multiplan-db.js?v=clean-action-ui-1"></script></body>');
     return new Response(html, {
       status: response.status,
       statusText: response.statusText,
