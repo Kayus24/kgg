@@ -1,5 +1,5 @@
 (()=>{
-  const ADDON_VERSION='v7_local_exercise_db_big_bubbles';
+  const ADDON_VERSION='v8_gray_transparent_fab';
   const LANG_KEY='kggPatientLang';
   const MULTI_KEY='kggPatientMultiPlansV1';
   const CURRENT_KEY='kggCurrentPlanV1';
@@ -20,8 +20,8 @@
       #kggLangSwitch{grid-column:1!important;display:inline-flex!important;align-items:center;justify-content:center;min-height:38px;border-radius:999px;border:1px solid #cbd5e1;background:#fff;color:#111827;padding:6px 10px;font-size:13px;font-weight:950;white-space:nowrap}
       #kggPatientDbBtn{grid-column:3!important;display:inline-flex!important;align-items:center;justify-content:center;min-height:38px;border-radius:999px;border:1px solid #cbd5e1;background:#fff;color:#111827;padding:6px 12px;font-size:13px;font-weight:950;white-space:nowrap;touch-action:manipulation}
       #kggPatientDbBtn:active,#kggLangSwitch:active{transform:scale(.96);background:#f8fafc}
-      #kggActionFab{position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:2600;width:56px;height:56px;border-radius:999px;border:1px solid #1d4ed8;background:#2563eb;color:white;box-shadow:0 12px 34px rgba(37,99,235,.30);font-size:25px;font-weight:950;display:flex;align-items:center;justify-content:center;touch-action:manipulation;transition:transform .12s ease,background .16s ease}
-      #kggActionFab:active{transform:scale(.92)}#kggActionFab.open{background:#111827;border-color:#111827}
+      #kggActionFab{position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:2600;width:56px;height:56px;border-radius:999px;border:1px solid rgba(148,163,184,.62);background:rgba(31,41,55,.72);color:white;box-shadow:0 12px 30px rgba(15,23,42,.24);font-size:25px;font-weight:950;display:flex;align-items:center;justify-content:center;touch-action:manipulation;transition:transform .12s ease,background .16s ease,border-color .16s ease;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+      #kggActionFab:active{transform:scale(.92)}#kggActionFab.open{background:rgba(17,24,39,.86);border-color:rgba(203,213,225,.82)}
       #kggActionBackdrop,#kggActionSheet{display:none!important}
       #kggActionBubbles{position:fixed;left:14px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:2601;display:flex;flex-direction:column;gap:8px;align-items:flex-start;pointer-events:none}
       #kggActionBubbles[hidden]{display:none!important}.kggBubble{min-height:56px;min-width:56px;border-radius:999px;border:1px solid #cbd5e1;background:#fff;color:#111827;padding:10px 16px;font-size:15px;font-weight:950;box-shadow:0 10px 28px rgba(15,23,42,.16);touch-action:manipulation;pointer-events:auto;animation:kggBubbleUp .20s cubic-bezier(.16,.84,.44,1) both;white-space:nowrap;display:flex;align-items:center;justify-content:center}.kggBubble.primary{background:#111827;color:#fff;border-color:#111827}.kggBubble:active{transform:scale(.96)}.kggBubble:nth-child(1){animation-delay:.02s}.kggBubble:nth-child(2){animation-delay:.065s}
