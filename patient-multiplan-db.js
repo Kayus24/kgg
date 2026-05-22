@@ -1,21 +1,24 @@
 (()=>{
-  const ADDON_VERSION='v3_left_stacked_plan_icon';
+  const ADDON_VERSION='v4_clean_action_ui';
   const LANG_KEY='kggPatientLang';
   const $=id=>document.getElementById(id);
   const isEn=()=>localStorage.getItem(LANG_KEY)==='en';
   const t=(de,en)=>isEn()?en:de;
 
   function ensureStyle(){
-    if($('kggMultiPlanDbStyle'))return;
+    const old=$('kggMultiPlanDbStyle');
+    if(old)old.remove();
     const s=document.createElement('style');
     s.id='kggMultiPlanDbStyle';
     s.textContent=`
-      #installSmall{display:flex!important;align-items:center!important;gap:8px!important;flex-wrap:wrap!important}
-      #installSmall .muted,#kggPlanScanBtn,#kggPatientDbBtn,#kggPatientAddPlanBtn{display:none!important}
-      #installSmall .btnSmall:not(#kggLangSwitch):not(#kggActionHomeBtn){display:none!important}
-      #kggLangSwitch{display:inline-flex!important;align-items:center;justify-content:center;min-height:38px;border-radius:999px;border:1px solid #cbd5e1;background:#fff;color:#111827;padding:6px 10px;font-size:13px;font-weight:950;white-space:nowrap}
-      #kggActionFab{position:fixed;left:14px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:2600;width:56px;height:56px;border-radius:999px;border:1px solid #1d4ed8;background:#111827;color:white;box-shadow:0 12px 34px rgba(15,23,42,.30);font-size:25px;font-weight:950;display:flex;align-items:center;justify-content:center;touch-action:manipulation;transition:transform .12s ease,background .16s ease}
-      #kggActionFab:active{transform:scale(.92)}#kggActionFab.open{background:#2563eb;border-color:#2563eb}
+      #installSmall{display:grid!important;grid-template-columns:auto 1fr auto!important;align-items:center!important;gap:8px!important;margin-top:10px!important}
+      #installSmall .muted,#kggPlanScanBtn,#kggPatientAddPlanBtn{display:none!important}
+      #installSmall .btnSmall:not(#kggLangSwitch):not(#kggPatientDbBtn){display:none!important}
+      #kggLangSwitch{grid-column:1!important;display:inline-flex!important;align-items:center;justify-content:center;min-height:38px;border-radius:999px;border:1px solid #cbd5e1;background:#fff;color:#111827;padding:6px 10px;font-size:13px;font-weight:950;white-space:nowrap}
+      #kggPatientDbBtn{grid-column:3!important;display:inline-flex!important;align-items:center;justify-content:center;min-height:38px;border-radius:999px;border:1px solid #cbd5e1;background:#fff;color:#111827;padding:6px 12px;font-size:13px;font-weight:950;white-space:nowrap;touch-action:manipulation}
+      #kggPatientDbBtn:active,#kggLangSwitch:active{transform:scale(.96);background:#f8fafc}
+      #kggActionFab{position:fixed;left:14px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:2600;width:56px;height:56px;border-radius:999px;border:1px solid #1d4ed8;background:#2563eb;color:white;box-shadow:0 12px 34px rgba(37,99,235,.30);font-size:25px;font-weight:950;display:flex;align-items:center;justify-content:center;touch-action:manipulation;transition:transform .12s ease,background .16s ease}
+      #kggActionFab:active{transform:scale(.92)}#kggActionFab.open{background:#111827;border-color:#111827}
       #kgg-collapse-toggle{left:14px!important;bottom:calc(14px + env(safe-area-inset-bottom))!important;right:auto!important}
       #kggActionSheet{position:fixed;left:12px;right:12px;bottom:calc(146px + env(safe-area-inset-bottom));z-index:2599;max-width:520px;margin:0 auto;background:#fff;border:1px solid #dbe3ef;border-radius:22px;padding:12px;box-shadow:0 22px 70px rgba(15,23,42,.24);transform-origin:bottom left;animation:kggSheetIn .18s ease both}
       #kggActionSheet[hidden]{display:none!important}
@@ -24,16 +27,15 @@
       .kggActionItem.primary{background:#111827;color:#fff;border-color:#111827}.kggActionItem.blue{background:#eff6ff;border-color:#bfdbfe}.kggActionItem:active{transform:scale(.985);filter:brightness(.98)}
       .kggSheetBackdrop{position:fixed;inset:0;z-index:2598;background:rgba(15,23,42,.20);animation:kggFadeIn .16s ease both}.kggSheetBackdrop[hidden]{display:none!important}
       @keyframes kggSheetIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes kggFadeIn{from{opacity:0}to{opacity:1}}
-      @media(max-width:430px){#kggActionFab{width:52px;height:52px;left:12px;bottom:76px;font-size:23px}#kgg-collapse-toggle{left:12px!important;bottom:12px!important}#kggActionSheet{bottom:140px}.kggActionItem{min-height:50px;font-size:15px}#kggLangSwitch{font-size:12px;padding:6px 9px}}
+      @media(max-width:430px){#kggActionFab{width:52px;height:52px;left:12px;bottom:76px;font-size:23px}#kgg-collapse-toggle{left:12px!important;bottom:12px!important}#kggActionSheet{bottom:140px}.kggActionItem{min-height:50px;font-size:15px}#kggLangSwitch,#kggPatientDbBtn{font-size:12px;padding:6px 9px}}
     `;
     document.head.appendChild(s);
   }
 
-  function ensureHiddenSourceButtons(){
+  function ensureSourceButtons(){
     const row=$('installSmall');
     if(!row)return;
     row.classList.remove('hide');
-    row.style.flexWrap='wrap';
 
     let db=$('kggPatientDbBtn');
     if(!db){
@@ -43,7 +45,7 @@
       db.onclick=e=>{e.preventDefault();e.stopPropagation();alert(t('Übungsdatenbank kommt als nächster Schritt.','Exercise database is the next step.'));};
       row.appendChild(db);
     }
-    db.textContent=t('Übungsdatenbank','Database');
+    db.textContent=t('📚 Übungsdatenbank','📚 Database');
 
     let add=$('kggPatientAddPlanBtn');
     if(!add){
@@ -72,17 +74,10 @@
     if(el)el.click();
     else alert(t('Funktion noch nicht geladen.','Function not loaded yet.'));
   }
-  function clickHome(){
-    closeSheet();
-    const row=$('installSmall');
-    const btn=row?[...row.querySelectorAll('button')].find(b=>!['kggLangSwitch','kggPlanScanBtn','kggPatientDbBtn','kggPatientAddPlanBtn','kggActionHomeBtn'].includes(b.id)):null;
-    if(btn)btn.click();
-    else alert(t('Startbildschirm-Hilfe noch nicht geladen.','Home screen help not loaded yet.'));
-  }
 
   function ensureActionMenu(){
     ensureStyle();
-    ensureHiddenSourceButtons();
+    ensureSourceButtons();
     if(!$('kggActionBackdrop')){
       const bd=document.createElement('div');bd.id='kggActionBackdrop';bd.className='kggSheetBackdrop';bd.hidden=true;bd.onclick=closeSheet;document.body.appendChild(bd);
     }
@@ -92,20 +87,16 @@
     }
     sh.innerHTML=`
       <h3>${t('Planaktionen','Plan actions')}</h3>
-      <button type="button" class="kggActionItem primary" id="kggActionScan">📋✎ ${t('Plan scannen / aktualisieren','Scan / update plan')}</button>
-      <button type="button" class="kggActionItem blue" id="kggActionAddPlan">➕ ${t('2. Plan hinzufügen','Add 2nd plan')}</button>
-      <button type="button" class="kggActionItem" id="kggActionDb">📚 ${t('Übungsdatenbank','Exercise database')}</button>
-      <button type="button" class="kggActionItem" id="kggActionHome">🏠 ${t('Startbildschirm','Home screen')}</button>`;
+      <button type="button" class="kggActionItem primary" id="kggActionScan">📷 ${t('Plan scannen / aktualisieren','Scan / update plan')}</button>
+      <button type="button" class="kggActionItem blue" id="kggActionAddPlan">➕ ${t('2. Plan hinzufügen','Add 2nd plan')}</button>`;
     $('kggActionScan').onclick=()=>clickSource('kggPlanScanBtn');
     $('kggActionAddPlan').onclick=()=>clickSource('kggPatientAddPlanBtn');
-    $('kggActionDb').onclick=()=>clickSource('kggPatientDbBtn');
-    $('kggActionHome').onclick=clickHome;
 
     let fab=$('kggActionFab');
     if(!fab){
-      fab=document.createElement('button');fab.id='kggActionFab';fab.type='button';fab.textContent='📋✎';fab.title=t('Planaktionen','Plan actions');fab.onclick=e=>{e.preventDefault();e.stopPropagation();toggleSheet();};document.body.appendChild(fab);
+      fab=document.createElement('button');fab.id='kggActionFab';fab.type='button';fab.textContent='📷';fab.title=t('Planaktionen','Plan actions');fab.onclick=e=>{e.preventDefault();e.stopPropagation();toggleSheet();};document.body.appendChild(fab);
     }
-    fab.textContent='📋✎';
+    fab.textContent='📷';
     fab.title=t('Planaktionen','Plan actions');
   }
 
