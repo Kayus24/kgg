@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='v1_pain_center_slide_cards_settings';
+  const VERSION='v2_pain_set_hide_global_align_exercise_pain';
   const STYLE='kggPatientUiMicroPolishStyle';
   const $=id=>document.getElementById(id);
 
@@ -9,6 +9,17 @@
     s.textContent=`
       .kggPainScale button{display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;line-height:1!important;padding:0!important;min-height:44px!important;font-variant-numeric:tabular-nums!important;-webkit-font-smoothing:antialiased!important}
       .kggPainScale button.on{transform:translateY(-2px)!important}.kggPainScale button:active{transform:scale(.94)!important}
+
+      /* Normale Übungs-Schmerzleiste etwas ruhiger/zentrierter im Kartenraum */
+      body.kggAlwaysCollapsed .ex .pain:not(.kggHiddenGlobalPain){padding-left:8px!important;padding-right:4px!important}
+      body.kggAlwaysCollapsed .ex .pain:not(.kggHiddenGlobalPain) .painRow{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:10px!important;align-items:center!important;width:100%!important}
+      body.kggAlwaysCollapsed .ex .pain:not(.kggHiddenGlobalPain) .kggPainScale{margin-top:0!important;min-width:0!important}
+      body.kggAlwaysCollapsed .ex .pain:not(.kggHiddenGlobalPain) .kggPainCaption{margin-top:0!important;min-width:46px!important;text-align:center!important;font-size:14px!important;align-self:center!important}
+
+      /* Wenn Schmerz pro Satz aktiv ist, darf die globale Schmerzleiste unten nicht zusätzlich erscheinen */
+      body.kggAlwaysCollapsed .ex.kggHasSetPain > .pain,
+      body.kggAlwaysCollapsed .ex .pain.kggHiddenGlobalPain{display:none!important;max-height:0!important;opacity:0!important;margin:0!important;padding:0!important;border:0!important;pointer-events:none!important}
+
       body.kggAlwaysCollapsed .ex{transition:box-shadow .20s ease,border-color .20s ease,background .20s ease,transform .18s ease!important}
       body.kggAlwaysCollapsed .ex .set,body.kggAlwaysCollapsed .ex .pain{display:block!important;overflow:hidden!important;opacity:1;transform:translateY(0);max-height:380px;transition:max-height .24s cubic-bezier(.16,.84,.44,1),opacity .18s ease,transform .22s cubic-bezier(.16,.84,.44,1),margin .20s ease,padding .20s ease,border-color .20s ease!important;will-change:max-height,opacity,transform}
       body.kggAlwaysCollapsed .ex .pain{max-height:270px}
@@ -18,10 +29,19 @@
       .kggSettingsBackdrop{animation:kggSettingsBackdropIn .16s ease both!important}.kggSettingsBackdrop.kggClosing{animation:kggSettingsBackdropOut .16s ease both!important}
       #kggSettingsSheet{transform-origin:bottom center!important;animation:kggSettingsSheetIn .22s cubic-bezier(.16,.84,.44,1) both!important;will-change:transform,opacity!important}#kggSettingsSheet.kggClosing{animation:kggSettingsSheetOut .16s ease both!important;pointer-events:none!important}
       @keyframes kggSettingsSheetIn{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes kggSettingsSheetOut{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(14px) scale(.985)}}@keyframes kggSettingsBackdropIn{from{opacity:0}to{opacity:1}}@keyframes kggSettingsBackdropOut{from{opacity:1}to{opacity:0}}
-      @media(max-width:430px){.kggPainScale button{min-height:40px!important;font-size:13px!important}}
+      @media(max-width:430px){.kggPainScale button{min-height:40px!important;font-size:13px!important}body.kggAlwaysCollapsed .ex .pain:not(.kggHiddenGlobalPain){padding-left:10px!important;padding-right:2px!important}body.kggAlwaysCollapsed .ex .pain:not(.kggHiddenGlobalPain) .painRow{gap:8px!important}body.kggAlwaysCollapsed .ex .pain:not(.kggHiddenGlobalPain) .kggPainCaption{min-width:42px!important}}
       @media(prefers-reduced-motion:reduce){body.kggAlwaysCollapsed .ex,body.kggAlwaysCollapsed .ex .set,body.kggAlwaysCollapsed .ex .pain,#kggSettingsSheet,.kggSettingsBackdrop{animation:none!important;transition:none!important}}
     `;
     document.head.appendChild(s);
+  }
+
+  function markPainModeCards(){
+    document.querySelectorAll('#list .ex').forEach(card=>{
+      const hasSetPain=!!card.querySelector('.kggSetPain');
+      card.classList.toggle('kggHasSetPain',hasSetPain);
+      const global=card.querySelector(':scope > .pain');
+      if(global)global.classList.toggle('kggHiddenGlobalPain',hasSetPain);
+    });
   }
 
   function softClose(e){
@@ -34,17 +54,18 @@
     setTimeout(()=>{sh.hidden=true;sh.classList.remove('kggClosing');if(bd){bd.hidden=true;bd.classList.remove('kggClosing')}},170);
   }
 
+  function apply(){ensureStyle();setTimeout(markPainModeCards,0);setTimeout(markPainModeCards,60)}
   function patchRender(){
     if(window.__kggUiMicroPolishRenderPatch||typeof render!=='function')return;
     window.__kggUiMicroPolishRenderPatch=1;
     const old=render;
-    render=function(){const r=old.apply(this,arguments);setTimeout(ensureStyle,30);return r};
+    render=function(){const r=old.apply(this,arguments);setTimeout(apply,30);return r};
   }
   function init(){
     if(window.__kggPatientUiMicroPolish===VERSION)return;
     window.__kggPatientUiMicroPolish=VERSION;
-    ensureStyle(); patchRender(); document.addEventListener('click',softClose,true);
-    setTimeout(ensureStyle,300); setTimeout(ensureStyle,1000); setTimeout(ensureStyle,2000);
+    apply(); patchRender(); document.addEventListener('click',softClose,true);
+    setTimeout(apply,300); setTimeout(apply,1000); setTimeout(apply,2000);
   }
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
 })();
