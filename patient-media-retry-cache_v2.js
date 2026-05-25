@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='v5_media_bundle_runtime_refs';
+  const VERSION='v6_inline_media_bundle';
   const STYLE='kggPatientMediaStyle';
   const DB='kgg_patient_media_v1';
   const STORE='images';
@@ -141,6 +141,7 @@
   }
   async function fetchEncrypted(item){
     if(window.KGGPatientMediaFetchAdapter&&typeof window.KGGPatientMediaFetchAdapter.fetch==='function')return window.KGGPatientMediaFetchAdapter.fetch(item);
+    if(item&&item.data)return new Blob([b64Bytes(item.data)],{type:'application/octet-stream'});
     if(!item.downloadUrl)throw new Error('Bild ist noch nicht bereit');
     const res=await fetch(item.downloadUrl,{cache:'no-store'});
     if(!res.ok)throw new Error('Bild konnte nicht geladen werden');
