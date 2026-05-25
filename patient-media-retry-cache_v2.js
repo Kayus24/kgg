@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='v4_media_bundle_prefetch';
+  const VERSION='v5_media_bundle_runtime_refs';
   const STYLE='kggPatientMediaStyle';
   const DB='kgg_patient_media_v1';
   const STORE='images';
@@ -69,6 +69,10 @@
     const media=(raw&&raw.m&&raw.m.media)||(raw&&raw.meta&&raw.meta.media)||{};
     return media.b||media.bundle||null;
   }
+  function normalizeMediaRef(item){
+    if(typeof item==='string')return {id:item,type:'image',bundleRef:true};
+    return item;
+  }
   function planExercises(){
     const runtime=safe(()=>typeof p!=='undefined'&&p&&Array.isArray(p.ex)?p.ex:null);
     if(runtime)return runtime;
@@ -109,11 +113,13 @@
   }
   function mediaList(ex){
     const media=ex&&ex.media;
-    if(Array.isArray(media))return media.filter(item=>item&&item.type!=='video');
+    if(Array.isArray(media))return media.map(normalizeMediaRef).filter(item=>item&&item.type!=='video');
     if(media&&typeof media==='object')return [media];
+    if(typeof media==='string')return [normalizeMediaRef(media)];
     return [];
   }
   function mediaId(item,exerciseIndex,mediaIndex){
+    if(typeof item==='string')return item;
     return String(item&&item.id||'media_'+exerciseIndex+'_'+mediaIndex);
   }
   function mediaBox(id){
@@ -173,10 +179,10 @@
   }
   async function resolveMediaItem(item){
     if(item&&item.downloadUrl)return item;
-    const id=String(item&&item.id||'');
+    const id=typeof item==='string'?item:String(item&&item.id||'');
     if(!id)return item;
     const bundle=await loadMediaBundle();
-    return bundle.get(id)||item;
+    return bundle.get(id)||normalizeMediaRef(item);
   }
   async function loadMedia(item,exerciseIndex,mediaIndex){
     const id=mediaId(item,exerciseIndex,mediaIndex);
