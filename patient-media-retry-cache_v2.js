@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='v3_media_prefetch_all';
+  const VERSION='v4_media_bundle_prefetch';
   const STYLE='kggPatientMediaStyle';
   const DB='kgg_patient_media_v1';
   const STORE='images';
@@ -11,6 +11,7 @@
   let patched=false;
   let scheduled=false;
   let observeTimer=null;
+  let mediaBundlePromise=null;
   const $=id=>document.getElementById(id);
   const esc=value=>String(value??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   const safe=fn=>{try{return fn()}catch(err){return null}};
@@ -46,7 +47,8 @@
   }
   function rawExerciseToRuntime(item){
     if(!Array.isArray(item))return item||{};
-    const media=Array.isArray(item[7])?item[7]:(item[7]?[item[7]]:[]);
+    const rawMedia=Array.isArray(item[7])?item[7]:(item[7]?[item[7]]:[]);
+    const media=rawMedia.map(entry=>typeof entry==='string'?{id:entry,type:'image',bundleRef:true}:entry);
     return {
       n:item[0]||'Uebung',
       sets:Number(item[1])||3,
@@ -61,6 +63,11 @@
   function storedPlan(){
     const saved=safe(()=>JSON.parse(localStorage.getItem(PLAN_KEY)||'null'));
     return saved&&saved.plan?saved.plan:null;
+  }
+  function mediaBundleInfo(){
+    const raw=decodeKggH2Payload()||storedPlan();
+    const media=(raw&&raw.m&&raw.m.media)||(raw&&raw.meta&&raw.meta.media)||{};
+    return media.b||media.bundle||null;
   }
   function planExercises(){
     const runtime=safe(()=>typeof p!=='undefined'&&p&&Array.isArray(p.ex)?p.ex:null);
@@ -142,6 +149,35 @@
     const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64Bytes(info.iv)},key,encrypted);
     return new Blob([plain],{type:item.mime||'image/jpeg'});
   }
+  function bundleCryptoInfo(bundle){
+    return {key:bundle&&((bundle.crypto&&bundle.crypto.key)||bundle.k||bundle.key),iv:bundle&&((bundle.crypto&&bundle.crypto.iv)||bundle.i||bundle.iv)};
+  }
+  async function loadMediaBundle(){
+    if(mediaBundlePromise)return mediaBundlePromise;
+    mediaBundlePromise=(async()=>{
+      const bundle=mediaBundleInfo();
+      if(!bundle)return new Map();
+      const downloadUrl=bundle.u||bundle.downloadUrl;
+      const info=bundleCryptoInfo(bundle);
+      if(!downloadUrl||!info.key||!info.iv)return new Map();
+      const res=await fetch(downloadUrl,{cache:'no-store'});
+      if(!res.ok)throw new Error('Medien-Bundle konnte nicht geladen werden');
+      const encrypted=await res.blob();
+      const plain=await decryptMedia({mime:'application/json',crypto:info},encrypted);
+      const data=JSON.parse(await plain.text());
+      const map=new Map();
+      (Array.isArray(data.items)?data.items:[]).forEach(item=>{if(item&&item.id)map.set(String(item.id),item);});
+      return map;
+    })().catch(err=>{mediaBundlePromise=null;throw err;});
+    return mediaBundlePromise;
+  }
+  async function resolveMediaItem(item){
+    if(item&&item.downloadUrl)return item;
+    const id=String(item&&item.id||'');
+    if(!id)return item;
+    const bundle=await loadMediaBundle();
+    return bundle.get(id)||item;
+  }
   async function loadMedia(item,exerciseIndex,mediaIndex){
     const id=mediaId(item,exerciseIndex,mediaIndex);
     const cached=await getCached(id).catch(()=>null);
@@ -150,9 +186,10 @@
       setBox(id,'<img src="'+url+'" alt="Uebungsbild"><small>Bild lokal gespeichert.</small>','ready');
       return true;
     }
-    const encrypted=await fetchEncrypted(item);
-    const blob=await decryptMedia(item,encrypted);
-    await putCached({id,blob,mime:item.mime||'image/jpeg',savedAt:new Date().toISOString()}).catch(()=>null);
+    const resolved=await resolveMediaItem(item);
+    const encrypted=await fetchEncrypted(resolved);
+    const blob=await decryptMedia(resolved,encrypted);
+    await putCached({id,blob,mime:resolved.mime||'image/jpeg',savedAt:new Date().toISOString()}).catch(()=>null);
     const url=objectUrl(id,blob);
     setBox(id,'<img src="'+url+'" alt="Uebungsbild"><small>Bild lokal gespeichert.</small>','ready');
     return true;
