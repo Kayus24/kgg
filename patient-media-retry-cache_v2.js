@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='v2_media_retry_cache_hardened';
+  const VERSION='v3_media_prefetch_all';
   const STYLE='kggPatientMediaStyle';
   const DB='kgg_patient_media_v1';
   const STORE='images';
@@ -177,11 +177,23 @@
     };
     tick();
   }
+  function prefetchAllMedia(){
+    const exercises=planExercises();
+    let found=false;
+    exercises.forEach((ex,exerciseIndex)=>{
+      mediaList(ex).forEach((item,mediaIndex)=>{
+        found=true;
+        retryMedia(item,exerciseIndex,mediaIndex);
+      });
+    });
+    return found;
+  }
   function renderMedia(){
     ensureStyle();
     const exercises=planExercises();
+    const hasPrefetch=prefetchAllMedia();
     const cards=[...document.querySelectorAll('#list .ex')];
-    if(!cards.length||!exercises.length)return false;
+    if(!cards.length||!exercises.length)return hasPrefetch;
     cards.forEach((card,exerciseIndex)=>{
       const media=mediaList(exercises[exerciseIndex]);
       const ids=media.map((item,mediaIndex)=>mediaId(item,exerciseIndex,mediaIndex)).join('|');
@@ -232,12 +244,12 @@
     ensureStyle();
     patchRender();
     observeList();
-    [60,300,900,1800,3200].forEach(delay=>setTimeout(()=>{patchRender();renderMedia();},delay));
+    [60,300,900,1800,3200].forEach(delay=>setTimeout(()=>{patchRender();prefetchAllMedia();renderMedia();},delay));
     observeTimer=setInterval(()=>{
-      if(patchRender()||renderMedia())clearInterval(observeTimer);
+      if(patchRender()||prefetchAllMedia()||renderMedia())clearInterval(observeTimer);
     },1200);
     setTimeout(()=>{if(observeTimer)clearInterval(observeTimer);},12000);
   }
-  window.KGGPatientMediaRetryCache={version:VERSION,render:renderMedia,planExercises};
+  window.KGGPatientMediaRetryCache={version:VERSION,render:renderMedia,prefetch:prefetchAllMedia,planExercises};
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
 })();
