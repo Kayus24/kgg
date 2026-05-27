@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='numpad-visibility-v2';
+  const VERSION='numpad-visibility-v3';
   if(window.__kggNumpadVisibility===VERSION)return;
   window.__kggNumpadVisibility=VERSION;
   const $=id=>document.getElementById(id);
@@ -13,9 +13,13 @@
   function move(){if(!activeInput||!open())return;space();const ph=h();const r=activeInput.getBoundingClientRect();const vv=window.visualViewport;const bottom=(vv?vv.height+vv.offsetTop:window.innerHeight)-ph-28;let dy=0;if(r.bottom>bottom)dy=r.bottom-bottom;if(r.top<18)dy=r.top-18;if(Math.abs(dy)>1)window.scrollBy({top:dy,left:0,behavior:'smooth'})}
   function ensure(){[20,90,180,360,650].forEach(t=>setTimeout(move,t))}
   function clearSoon(){setTimeout(()=>{const main=document.querySelector('main');if(main)main.style.paddingBottom='';document.body.classList.remove('kggPadOpen');const p=pad();if(p)p.classList.remove('kggPadPass');activeInput=null},120)}
-  function patch(){if(window.__kggNumpadVisibilityPatchedV2)return;window.__kggNumpadVisibilityPatchedV2=1;if(typeof window.openPad==='function'){const oldOpen=window.openPad;window.openPad=function(input,meta){if(open()&&input&&input!==activeInput&&typeof window.closePad==='function'){try{window.closePad(true)}catch(e){}}activeInput=input||document.activeElement;const r=oldOpen.apply(this,arguments);space();ensure();return r}}if(typeof window.closePad==='function'){const oldClose=window.closePad;window.closePad=function(){const r=oldClose.apply(this,arguments);clearSoon();return r}}}
-  document.addEventListener('focusin',e=>{if(e.target&&e.target.matches&&e.target.matches('input.num')){activeInput=e.target;if(open())ensure()}},true);
-  document.addEventListener('click',e=>{if(e.target&&e.target.matches&&e.target.matches('input.num')){activeInput=e.target;if(open())ensure()}},true);
+  function closeByOutsideTap(){if(!open()||typeof window.closePad!=='function')return;try{window.closePad(true)}catch(e){try{window.closePad(false)}catch(_){}}}
+  function isInputTarget(t){return !!(t&&t.matches&&t.matches('input.num'))}
+  function isPadTarget(t){return !!(t&&t.closest&&t.closest('#pad .padBox'))}
+  function patch(){if(window.__kggNumpadVisibilityPatchedV3)return;window.__kggNumpadVisibilityPatchedV3=1;if(typeof window.openPad==='function'){const oldOpen=window.openPad;window.openPad=function(input,meta){if(open()&&input&&input!==activeInput&&typeof window.closePad==='function'){try{window.closePad(true)}catch(e){}}activeInput=input||document.activeElement;const r=oldOpen.apply(this,arguments);space();ensure();return r}}if(typeof window.closePad==='function'){const oldClose=window.closePad;window.closePad=function(){const r=oldClose.apply(this,arguments);clearSoon();return r}}}
+  document.addEventListener('focusin',e=>{if(isInputTarget(e.target)){activeInput=e.target;if(open())ensure()}},true);
+  document.addEventListener('click',e=>{if(isInputTarget(e.target)){activeInput=e.target;if(open())ensure()}},true);
+  document.addEventListener('pointerdown',e=>{if(!open())return;const t=e.target;if(isPadTarget(t)||isInputTarget(t))return;closeByOutsideTap()},true);
   if(window.visualViewport)visualViewport.addEventListener('resize',ensure);
   addEventListener('orientationchange',()=>setTimeout(ensure,250));
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',patch):patch();
