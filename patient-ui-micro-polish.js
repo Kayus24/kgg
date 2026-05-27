@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='v3_input_focus_alignment_only';
+  const VERSION='v4_inner_input_focus_ring';
   const STYLE='kggPatientUiMicroPolishStyle';
   const $=id=>document.getElementById(id);
 
@@ -10,7 +10,7 @@
       .kggPainScale button{display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;line-height:1!important;padding:0!important;min-height:44px!important;font-variant-numeric:tabular-nums!important;-webkit-font-smoothing:antialiased!important}
       .kggPainScale button.on{transform:translateY(-2px)!important}.kggPainScale button:active{transform:scale(.94)!important}
       input.num{box-sizing:border-box!important;display:block!important;width:100%!important;line-height:1.15!important;transform:none!important;transition:background .16s ease,box-shadow .16s ease,border-color .16s ease!important}
-      input.num.kggEditing{outline:none!important;box-shadow:0 0 0 3px rgba(17,24,39,.92)!important;border-color:#111827!important;background:#f8fafc!important;transform:none!important;position:relative!important;z-index:2!important}
+      input.num.kggEditing{outline:none!important;box-shadow:inset 0 0 0 3px rgba(17,24,39,.92)!important;border-color:#111827!important;background:#f8fafc!important;transform:none!important;position:relative!important;z-index:2!important}
       .set input.num,.set .num{min-width:0!important}.set{align-items:stretch!important}
       body.kggAlwaysCollapsed .ex .pain:not(.kggHiddenGlobalPain){padding-left:10px!important;padding-right:10px!important;margin-top:18px!important}
       body.kggAlwaysCollapsed .ex .pain:not(.kggHiddenGlobalPain) .painRow{display:grid!important;grid-template-columns:minmax(0,1fr) 44px!important;gap:6px!important;align-items:center!important;width:100%!important}
