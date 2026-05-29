@@ -1,7 +1,9 @@
 (()=>{
-  const VERSION='v8_dynamic_pain_fit';
+  const VERSION='v9_dynamic_pain_fit_unit_labels';
   const STYLE='kggPatientUiMicroPolishStyle';
+  const LANG='kggPatientLang';
   const $=id=>document.getElementById(id);
+  const isEn=()=>localStorage.getItem(LANG)==='en';
 
   function ensureStyle(){
     const old=$(STYLE); if(old) old.remove();
@@ -44,8 +46,10 @@
   function markPainModeCards(){document.querySelectorAll('#list .ex').forEach(card=>{const hasSetPain=!!card.querySelector('.kggSetPain');card.classList.toggle('kggHasSetPain',hasSetPain);const global=card.querySelector(':scope > .pain');if(global)global.classList.toggle('kggHiddenGlobalPain',hasSetPain)})}
   function clipped(scale){const card=scale.closest('.ex'),pain=scale.closest('.pain,.kggSetPain');if(!card)return false;const r=scale.getBoundingClientRect(),cr=card.getBoundingClientRect(),pr=pain?pain.getBoundingClientRect():cr;const vw=innerWidth||document.documentElement.clientWidth;return r.right>vw-8||r.bottom>cr.bottom+2||r.bottom>pr.bottom+2}
   function fitPainScales(){document.querySelectorAll('.kggPainScale').forEach(scale=>{scale.classList.remove('kggPainFit5','kggPainFit4')});requestAnimationFrame(()=>{document.querySelectorAll('.kggPainScale').forEach(scale=>{if(!clipped(scale))return;scale.classList.add('kggPainFit5');requestAnimationFrame(()=>{if(clipped(scale)){scale.classList.remove('kggPainFit5');scale.classList.add('kggPainFit4')}})})})}
+  function unitText(text){let y=String(text||'');if(isEn()){y=y.replace(/\bWdh\b/g,'reps').replace(/\bwdh\b/g,'reps').replace(/\bSek\.?\b/g,'sec').replace(/\bbeidseitig\b/g,'bilateral').replace(/links\/rechts/g,'left/right')}else{y=y.replace(/\breps\b/g,'Wdh').replace(/\bsec\.?\b/g,'Sek.').replace(/\bbilateral\b/g,'beidseitig').replace(/left\/right/g,'links/rechts')}return y}
+  function normalizeUnits(){const roots=[document.getElementById('list'),document.getElementById('kggDayHub')].filter(Boolean);roots.forEach(root=>{const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode()){const old=n.nodeValue,nu=unitText(old);if(nu!==old)n.nodeValue=nu}})}
   function softClose(e){const sh=$('kggSettingsSheet'),bd=$('kggSettingsBackdrop');if(!sh||sh.hidden)return;const target=e.target;if(!(target&&((target.id==='kggSettingsBackdrop')||(target.closest&&target.closest('#kggSetCancel')))))return;e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();sh.classList.add('kggClosing');if(bd)bd.classList.add('kggClosing');setTimeout(()=>{sh.hidden=true;sh.classList.remove('kggClosing');if(bd){bd.hidden=true;bd.classList.remove('kggClosing')}},170)}
-  function apply(){ensureStyle();setTimeout(()=>{markPainModeCards();fitPainScales()},0);setTimeout(()=>{markPainModeCards();fitPainScales()},80);setTimeout(fitPainScales,240)}
+  function apply(){ensureStyle();setTimeout(()=>{markPainModeCards();normalizeUnits();fitPainScales()},0);setTimeout(()=>{markPainModeCards();normalizeUnits();fitPainScales()},80);setTimeout(()=>{normalizeUnits();fitPainScales()},240)}
   function patchRender(){if(window.__kggUiMicroPolishRenderPatch||typeof render!=='function')return;window.__kggUiMicroPolishRenderPatch=1;const old=render;render=function(){const r=old.apply(this,arguments);setTimeout(apply,30);return r}}
   function init(){if(window.__kggPatientUiMicroPolish===VERSION)return;window.__kggPatientUiMicroPolish=VERSION;apply();patchRender();document.addEventListener('click',softClose,true);addEventListener('resize',apply,{passive:true});addEventListener('orientationchange',()=>setTimeout(apply,180),{passive:true});setTimeout(apply,300);setTimeout(apply,1000);setTimeout(apply,2000)}
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
