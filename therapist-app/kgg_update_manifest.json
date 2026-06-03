@@ -1,14 +1,14 @@
 {
   "kind": "kgg_app_update_manifest",
   "version": 1,
-  "latestVersion": "KGG_APP_KOLLEGEN_v371_menu_webapp",
-  "latestAdminVersion": "KGG_APP_ADMIN_v372_iframe_menu",
-  "latestColleagueVersion": "KGG_APP_KOLLEGEN_v371_menu_webapp",
-  "adminUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v372/web/KGG_APP_ADMIN_v372_iframe_menu.html",
-  "colleagueUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v371/web/KGG_APP_KOLLEGEN_v371_menu_webapp.html",
-  "latestUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v371/web/KGG_APP_KOLLEGEN_v371_menu_webapp.html",
+  "latestVersion": "KGG_APP_KOLLEGEN_v366_mobile_floating_history_packages",
+  "latestAdminVersion": "KGG_APP_ADMIN_v366_mobile_floating_history_packages",
+  "latestColleagueVersion": "KGG_APP_KOLLEGEN_v366_mobile_floating_history_packages",
+  "adminUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v366/web/KGG_APP_ADMIN_v366_mobile_floating_history_packages.html",
+  "colleagueUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v366/web/KGG_APP_KOLLEGEN_v366_mobile_floating_history_packages.html",
+  "latestUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v366/web/KGG_APP_KOLLEGEN_v366_mobile_floating_history_packages.html",
   "latestAndroidShellVersion": "v369",
   "latestAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v369/android/KGG_ANDROID_SYNC_MVP_v369_camera_permission_flow_debug.apk",
   "latestAndroidApkSha256": "8d1a0cbce21c87463efbcd837df26e99df1633cedc2ac075045316e1419584b5",
-  "releaseNotes": "v372: Admin-Menue als stabile Wrapper-Version. Kolleginnen-Web-App v371. Android-Paket bleibt v369."
+  "releaseNotes": "Web UI wieder v366. Android Paket bleibt v369."
 }
