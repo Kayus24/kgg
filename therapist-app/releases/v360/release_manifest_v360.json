@@ -1,0 +1,49 @@
+{
+  "release": "v360",
+  "createdFor": "KGG Physio-App Rollout",
+  "files": [
+    {
+      "path": "android/KGG_ANDROID_SYNC_MVP_v360_debug.apk",
+      "bytes": 686018,
+      "sha256": "52E904EBA6579D492BB3C1C0CBEAF021E50F296B2CF10C0BEF59B252C61F65B7"
+    },
+    {
+      "path": "ios/KGG_APP_IOS_HTML_v360_sync_bundle_qr.html",
+      "bytes": 469649,
+      "sha256": "18E2478BC166D24FE18C6B7CDDFFAC52DBC096C883034CD70051FF46A2EBB514"
+    },
+    {
+      "path": "web/KGG_APP_KOLLEGEN_v360_sync_bundle_qr.html",
+      "bytes": 469649,
+      "sha256": "18E2478BC166D24FE18C6B7CDDFFAC52DBC096C883034CD70051FF46A2EBB514"
+    },
+    {
+      "path": "web/kgg_therapist_icon.svg",
+      "bytes": 481,
+      "sha256": "4999FA6F55317BDE263A392612D1E14650472B387DB8A6649D5695DFEB74ACE1"
+    },
+    {
+      "path": "web/kgg_therapist_manifest.webmanifest",
+      "bytes": 503,
+      "sha256": "CC1D407F55AC8235E0D865ED39126FCC0E5EACE4D76D82EE7D62C4EE9B627FD4"
+    },
+    {
+      "path": "web/kgg_therapist_sw.js",
+      "bytes": 1241,
+      "sha256": "4FCCBDC7C27DE62990AEC217ACDD210FE5F1893E2F6ED7FEE011F9D5AAB93D5B"
+    }
+  ],
+  "securityNotes": [
+    "No API keys included.",
+    "No patient data included.",
+    "No private admin safe files included.",
+    "No normal patient-facing JSON/Base64 output intended."
+  ],
+  "manualChecksStillNeeded": [
+    "Install Android APK on device.",
+    "Open iOS HTML in Safari.",
+    "Test QR/patient handoff on a real phone.",
+    "Test Sync QR between two Android devices.",
+    "Test PWA install and data persistence."
+  ]
+}
