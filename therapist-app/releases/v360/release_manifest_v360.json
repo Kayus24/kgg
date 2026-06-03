@@ -1,13 +1,13 @@
 {
   "release": "v360",
-  "legacyRetargetsTo": "v368-android-v366-web",
+  "legacyRetargetsTo": "v369-android-v366-web",
   "note": "Legacy-v360 QR/download paths intentionally serve the current app so old printed QR codes keep working.",
   "createdFor": "KGG Physio-App Rollout",
   "files": [
     {
       "path": "android/KGG_ANDROID_SYNC_MVP_v360_debug.apk",
-      "bytes": 3073504,
-      "sha256": "225A6846A0D99E937D8FD5F460A4660568BB0DB2A0DAEDB1D67D5CAEEDA02016"
+      "bytes": 3074604,
+      "sha256": "8D1A0CBCE21C87463EFBCD837DF26E99DF1633CEDC2AC075045316E1419584B5"
     },
     {
       "path": "ios/KGG_APP_IOS_HTML_v360_sync_bundle_qr.html",

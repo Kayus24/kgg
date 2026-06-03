@@ -1,0 +1,30 @@
+{
+  "release": "v369",
+  "createdFor": "KGG Android camera permission flow",
+  "androidShellVersion": "0.1.6-v369-camera-permission-flow",
+  "webVersion": "v366",
+  "files": [
+    {
+      "path": "android/KGG_ANDROID_SYNC_MVP_v369_camera_permission_flow_debug.apk",
+      "bytes": 3074604,
+      "sha256": "8D1A0CBCE21C87463EFBCD837DF26E99DF1633CEDC2AC075045316E1419584B5"
+    }
+  ],
+  "changes": [
+    "Kamera-Berechtigung wird vor dem Kamera-Start sauber angefragt.",
+    "Nach erteilter Berechtigung wird derselbe Scan-Klick automatisch fortgesetzt.",
+    "Kamera-Capture-URI bekommt explizite Grants und ClipData.",
+    "Launcher-Icon aus v368 bleibt enthalten."
+  ],
+  "securityNotes": [
+    "No API keys included.",
+    "No patient data included.",
+    "No private admin safe files included."
+  ],
+  "manualChecksStillNeeded": [
+    "Android APK auf einem echten Geraet installieren.",
+    "Plan scannen antippen und pruefen, ob die Kamera direkt oeffnet.",
+    "Falls Android nach Berechtigung fragt: erlauben und pruefen, dass danach direkt die Kamera oeffnet.",
+    "Foto / Datei antippen und pruefen, dass Galerie/Dateipicker oeffnet."
+  ]
+}
