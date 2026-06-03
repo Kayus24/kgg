@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a1024">
+<title>KGG Kolleginnen</title>
+<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#e8eef6;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}iframe{position:fixed;inset:0;width:100%;height:100%;border:0}.boot{position:fixed;inset:0;display:grid;place-items:center;background:#e8eef6;color:#071027;font-weight:900}.box{background:#fff;border:1px solid #dce3eb;border-radius:22px;padding:18px;box-shadow:0 10px 30px #0710271f}</style>
+</head>
+<body>
+<div class="boot" id="boot"><div class="box">KGG wird geladen…</div></div>
+<iframe id="f" title="KGG"></iframe>
+<script>
+(async()=>{
+  const fallback='https://kayus24.github.io/kgg/therapist-app/releases/v371/web/KGG_APP_KOLLEGEN_v371_menu_webapp.html';
+  const f=document.getElementById('f');
+  try{
+    const r=await fetch('./kgg_update_manifest.json?t='+Date.now(),{cache:'no-store'});
+    const m=await r.json();
+    const u=m.colleagueUrl||m.latestUrl||fallback;
+    f.src=u+(u.includes('?')?'&':'?')+'start='+Date.now();
+  }catch(e){f.src=fallback+'?fallback='+Date.now();}
+  f.onload=()=>document.getElementById('boot').style.display='none';
+})();
+</script>
+</body>
+</html>
