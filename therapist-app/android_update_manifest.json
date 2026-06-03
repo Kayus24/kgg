@@ -1,14 +1,14 @@
 {
   "kind": "kgg_android_web_update_manifest",
   "version": 1,
-  "latestWebVersion": "v366",
+  "latestWebVersion": "v370",
   "latestAndroidShellVersion": "v369",
   "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v366/web/KGG_APP_KOLLEGEN_v366_mobile_floating_history_packages.html",
   "colleagueSha256": "b70284b12ea8315a72302be864cf7337d807388770a07abb1401db865df076ef",
-  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v366/web/KGG_APP_ADMIN_v366_mobile_floating_history_packages.html",
-  "adminSha256": "a6f65f24e2565a0d2acc0ef394e4984d43d744935ef7af91070646205b9c2d94",
-  "sha256": "b70284b12ea8315a72302be864cf7337d807388770a07abb1401db865df076ef",
+  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v370/web/KGG_APP_ADMIN_v370_android_tablet_drawer_fix.html",
+  "adminSha256": "871646b5065af93319132aca41aaa6ce0801e4b8b970f1681f0ac94f806a615e",
+  "sha256": "871646b5065af93319132aca41aaa6ce0801e4b8b970f1681f0ac94f806a615e",
   "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v369/android/KGG_ANDROID_SYNC_MVP_v369_camera_permission_flow_debug.apk",
   "androidApkSha256": "8d1a0cbce21c87463efbcd837df26e99df1633cedc2ac075045316e1419584b5",
-  "notes": "v369 Android-Shell: Kamera-Berechtigung wird vor dem Kamera-Start sauber angefragt und der Scan-Klick danach fortgesetzt. Launcher-Icon aus v368 bleibt enthalten. Web-UI bleibt v366. Keine API-Keys."
+  "notes": "v370 Web UI: tablet compact layout and right side drawer menu. Android shell remains v369."
 }
