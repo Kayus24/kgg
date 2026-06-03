@@ -1,0 +1,12 @@
+{
+  "kind": "kgg_release_manifest",
+  "version": "v365",
+  "adminHtml": "web/KGG_APP_ADMIN_v365_finish_modal_output_buttons.html",
+  "colleagueHtml": "web/KGG_APP_KOLLEGEN_v365_finish_modal_output_buttons.html",
+  "adminSha256": "b05c5e73d3773f4b9de6f483e9fe481d2a6f129199ed00534107b2bd6029b70c",
+  "colleagueSha256": "fa3f824d889cfa9c8cbfdedd321f5b8562a8e8e70b756a6a3e250f31c6ad56f7",
+  "androidApk": "android/KGG_ANDROID_SYNC_MVP_v365_finish_modal_output_buttons_debug.apk",
+  "androidApkSha256": "6d61ef6f65b444f321e720e1378786cbc1011a6c0f2c0b826bab29b5eceeeb09",
+  "androidUpdateManifest": "../../android_update_manifest.json",
+  "notes": "Fertig-Modal: PDF nicht mehr schwarz priorisiert; PDF mit Papier-Icon; App erzeugen mit QR-Symbol."
+}
