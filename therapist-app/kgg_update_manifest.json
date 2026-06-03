@@ -7,8 +7,8 @@
   "adminUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v366/web/KGG_APP_ADMIN_v366_mobile_floating_history_packages.html",
   "colleagueUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v366/web/KGG_APP_KOLLEGEN_v366_mobile_floating_history_packages.html",
   "latestUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v366/web/KGG_APP_KOLLEGEN_v366_mobile_floating_history_packages.html",
-  "latestAndroidShellVersion": "v367",
-  "latestAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v367/android/KGG_ANDROID_SYNC_MVP_v367_camera_capture_intent_debug.apk",
-  "latestAndroidApkSha256": "ba3d2cb372a0059fadaa4102e151a87095801d83c7db0886eae6ccbe4346532b",
-  "releaseNotes": "v367: Android-App startet Plan scannen jetzt per explizitem Kamera-Intent. Web-UI bleibt v366. Keine API-Keys."
+  "latestAndroidShellVersion": "v368",
+  "latestAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v368/android/KGG_ANDROID_SYNC_MVP_v368_launcher_icon_debug.apk",
+  "latestAndroidApkSha256": "225a6846a0d99e937d8fd5f460a4660568bb0db2a0daedb1d67d5caeeda02016",
+  "releaseNotes": "v368: Android-App hat jetzt ein natives KGG-Launcher-Icon fuer den Startbildschirm. Kamera-Fix aus v367 bleibt enthalten. Web-UI bleibt v366. Keine API-Keys."
 }

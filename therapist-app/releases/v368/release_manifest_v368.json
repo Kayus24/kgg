@@ -1,0 +1,29 @@
+{
+  "release": "v368",
+  "createdFor": "KGG Android launcher icon",
+  "androidShellVersion": "0.1.5-v368-launcher-icon",
+  "webVersion": "v366",
+  "files": [
+    {
+      "path": "android/KGG_ANDROID_SYNC_MVP_v368_launcher_icon_debug.apk",
+      "bytes": 3073504,
+      "sha256": "225A6846A0D99E937D8FD5F460A4660568BB0DB2A0DAEDB1D67D5CAEEDA02016"
+    }
+  ],
+  "changes": [
+    "Android-App bekommt ein natives adaptives KGG-Launcher-Icon fuer den Startbildschirm.",
+    "Rundes Launcher-Icon ist ebenfalls gesetzt.",
+    "Kamera-Fix aus v367 bleibt enthalten."
+  ],
+  "securityNotes": [
+    "No API keys included.",
+    "No patient data included.",
+    "No private admin safe files included."
+  ],
+  "manualChecksStillNeeded": [
+    "Android APK auf einem echten Geraet installieren.",
+    "Startbildschirm/Icon im Launcher pruefen.",
+    "Plan scannen antippen und pruefen, dass die Kamera direkt oeffnet.",
+    "Foto / Datei antippen und pruefen, dass Galerie/Dateipicker oeffnet."
+  ]
+}

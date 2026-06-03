@@ -2,13 +2,13 @@
   "kind": "kgg_android_web_update_manifest",
   "version": 1,
   "latestWebVersion": "v366",
-  "latestAndroidShellVersion": "v367",
+  "latestAndroidShellVersion": "v368",
   "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v366/web/KGG_APP_KOLLEGEN_v366_mobile_floating_history_packages.html",
   "colleagueSha256": "b70284b12ea8315a72302be864cf7337d807388770a07abb1401db865df076ef",
   "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v366/web/KGG_APP_ADMIN_v366_mobile_floating_history_packages.html",
   "adminSha256": "a6f65f24e2565a0d2acc0ef394e4984d43d744935ef7af91070646205b9c2d94",
   "sha256": "b70284b12ea8315a72302be864cf7337d807388770a07abb1401db865df076ef",
-  "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v367/android/KGG_ANDROID_SYNC_MVP_v367_camera_capture_intent_debug.apk",
-  "androidApkSha256": "ba3d2cb372a0059fadaa4102e151a87095801d83c7db0886eae6ccbe4346532b",
-  "notes": "v367 Android-Shell: Plan scannen startet in der Android-App explizit die Kamera. Web-UI bleibt v366. Keine API-Keys."
+  "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v368/android/KGG_ANDROID_SYNC_MVP_v368_launcher_icon_debug.apk",
+  "androidApkSha256": "225a6846a0d99e937d8fd5f460a4660568bb0db2a0daedb1d67d5caeeda02016",
+  "notes": "v368 Android-Shell: natives KGG-Launcher-Icon fuer den Startbildschirm. Kamera-Fix aus v367 bleibt enthalten. Web-UI bleibt v366. Keine API-Keys."
 }
