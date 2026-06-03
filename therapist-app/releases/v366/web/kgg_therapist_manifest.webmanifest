@@ -1,0 +1,20 @@
+{
+  "name": "KGG Physio App",
+  "short_name": "KGG",
+  "description": "Lokale KGG-Plan-App fuer Therapeutinnen und Therapeuten.",
+  "id": "/kgg-physio-app",
+  "start_url": "./KGG_APP_KOLLEGEN_v366_mobile_floating_history_packages.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#e8eef6",
+  "theme_color": "#0a1024",
+  "icons": [
+    {
+      "src": "kgg_therapist_icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

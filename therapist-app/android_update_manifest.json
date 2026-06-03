@@ -1,12 +1,14 @@
 {
   "kind": "kgg_android_web_update_manifest",
   "version": 1,
-  "latestWebVersion": "v365",
-  "latestAndroidShellVersion": "v364",
-  "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v365/web/KGG_APP_KOLLEGEN_v365_finish_modal_output_buttons.html",
-  "colleagueSha256": "fa3f824d889cfa9c8cbfdedd321f5b8562a8e8e70b756a6a3e250f31c6ad56f7",
-  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v365/web/KGG_APP_ADMIN_v365_finish_modal_output_buttons.html",
-  "adminSha256": "b05c5e73d3773f4b9de6f483e9fe481d2a6f129199ed00534107b2bd6029b70c",
-  "sha256": "fa3f824d889cfa9c8cbfdedd321f5b8562a8e8e70b756a6a3e250f31c6ad56f7",
-  "notes": "v365 Web-UI fuer Android-Haupt-App: Fertig-Modal-Ausgabebuttons balanciert. Keine API-Keys."
+  "latestWebVersion": "v366",
+  "latestAndroidShellVersion": "v366",
+  "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v366/web/KGG_APP_KOLLEGEN_v366_mobile_floating_history_packages.html",
+  "colleagueSha256": "b70284b12ea8315a72302be864cf7337d807388770a07abb1401db865df076ef",
+  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v366/web/KGG_APP_ADMIN_v366_mobile_floating_history_packages.html",
+  "adminSha256": "a6f65f24e2565a0d2acc0ef394e4984d43d744935ef7af91070646205b9c2d94",
+  "sha256": "b70284b12ea8315a72302be864cf7337d807388770a07abb1401db865df076ef",
+  "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v366/android/KGG_ANDROID_SYNC_MVP_v366_mobile_floating_history_packages_debug.apk",
+  "androidApkSha256": "113808432bbb3133d303d4edf92b710c6b9393cccbe1032052729c456b8897c8",
+  "notes": "v366 Web-UI fuer Android-Haupt-App: mobile Historie/Pakete als schwebendes Drawer. Keine API-Keys."
 }
