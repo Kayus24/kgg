@@ -1,7 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#0a1024"/>
-  <rect x="70" y="92" width="372" height="328" rx="54" fill="#ffffff"/>
-  <path d="M132 170h248M132 242h248M132 314h176" fill="none" stroke="#0a1024" stroke-width="34" stroke-linecap="round"/>
-  <circle cx="360" cy="314" r="38" fill="#5ea7e8"/>
-  <path d="M348 314h24M360 302v24" fill="none" stroke="#ffffff" stroke-width="14" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="KGG App Icon">
+  <defs>
+    <linearGradient id="warm" x1="180" y1="120" x2="850" y2="900" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffe15a"/>
+      <stop offset="0.44" stop-color="#ffc43d"/>
+      <stop offset="1" stop-color="#f47b20"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="34%" cy="24%" r="80%">
+      <stop offset="0" stop-color="#fff6a8" stop-opacity="0.95"/>
+      <stop offset="0.45" stop-color="#ffc43d" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#f47b20" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="30" stdDeviation="28" flood-color="#4a2600" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <rect width="1024" height="1024" rx="232" fill="#0a1024"/>
+  <circle cx="360" cy="294" r="260" fill="url(#glow)"/>
+  <path d="M169 668c158 112 402 113 589 20 50-25 94-56 130-91" fill="none" stroke="url(#warm)" stroke-width="54" stroke-linecap="round" opacity="0.92"/>
+  <path d="M224 262c120-86 298-107 457-44 72 28 135 72 181 128" fill="none" stroke="url(#warm)" stroke-width="42" stroke-linecap="round" opacity="0.8"/>
+  <g filter="url(#softShadow)">
+    <text x="512" y="578" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="278" font-weight="900" letter-spacing="-8" fill="url(#warm)">KGG</text>
+  </g>
+  <circle cx="214" cy="759" r="26" fill="#ffe15a"/>
+  <circle cx="807" cy="242" r="22" fill="#f8a12d"/>
 </svg>

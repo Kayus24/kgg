@@ -1,26 +1,28 @@
 {
   "release": "v360",
+  "legacyRetargetsTo": "v366",
+  "note": "Legacy-v360 QR/download paths intentionally serve the current v366 app so old printed QR codes keep working.",
   "createdFor": "KGG Physio-App Rollout",
   "files": [
     {
       "path": "android/KGG_ANDROID_SYNC_MVP_v360_debug.apk",
-      "bytes": 686018,
-      "sha256": "52E904EBA6579D492BB3C1C0CBEAF021E50F296B2CF10C0BEF59B252C61F65B7"
+      "bytes": 1120253,
+      "sha256": "113808432BBB3133D303D4EDF92B710C6B9393CCCBE1032052729C456B8897C8"
     },
     {
       "path": "ios/KGG_APP_IOS_HTML_v360_sync_bundle_qr.html",
-      "bytes": 469649,
-      "sha256": "18E2478BC166D24FE18C6B7CDDFFAC52DBC096C883034CD70051FF46A2EBB514"
+      "bytes": 492493,
+      "sha256": "3C1C6E8DE2A8D1FB8B4481EAA4F98EB17E3CE1DF6087120524A2F890A7BF884B"
     },
     {
       "path": "web/KGG_APP_KOLLEGEN_v360_sync_bundle_qr.html",
-      "bytes": 469649,
-      "sha256": "18E2478BC166D24FE18C6B7CDDFFAC52DBC096C883034CD70051FF46A2EBB514"
+      "bytes": 492493,
+      "sha256": "3C1C6E8DE2A8D1FB8B4481EAA4F98EB17E3CE1DF6087120524A2F890A7BF884B"
     },
     {
       "path": "web/kgg_therapist_icon.svg",
-      "bytes": 481,
-      "sha256": "4999FA6F55317BDE263A392612D1E14650472B387DB8A6649D5695DFEB74ACE1"
+      "bytes": 1617,
+      "sha256": "3F7DEF7D0CC9ECDCFF73316A47F315F9701C7A03415E2EDC6B81A43301443D5D"
     },
     {
       "path": "web/kgg_therapist_manifest.webmanifest",
@@ -29,8 +31,8 @@
     },
     {
       "path": "web/kgg_therapist_sw.js",
-      "bytes": 1241,
-      "sha256": "4FCCBDC7C27DE62990AEC217ACDD210FE5F1893E2F6ED7FEE011F9D5AAB93D5B"
+      "bytes": 1225,
+      "sha256": "8178A9E78803C9CF53ABB1652491C82F3435D5AB671A257082FC82D61097CD24"
     }
   ],
   "securityNotes": [

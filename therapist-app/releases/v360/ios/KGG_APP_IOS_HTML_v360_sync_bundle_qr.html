@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="de">
 <head>
   <meta charset="utf-8">
@@ -9,7 +9,8 @@
   <meta name="apple-mobile-web-app-title" content="KGG Plan">
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
-  <title>KGG App Kollegen v360 Sync Bundle QR</title>
+  <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
+  <title>KGG App Kollegen v366 Mobile Floating History Packages</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -108,12 +109,12 @@
     .planCard.swipe-dragging{transition:none;will-change:transform,opacity,box-shadow;box-shadow:0 8px 22px rgba(7,16,39,.14)}
     .planCard.swipe-armed{background:#fffafa;box-shadow:0 0 0 2px rgba(226,59,84,.18),0 14px 34px rgba(7,16,39,.2)}
     .planCard.swipe-removing{pointer-events:none}
-    .planCard.swipe-dragging::after{content:"LÃ¶schen";position:absolute;top:50%;transform:translateY(-50%);padding:6px 10px;border-radius:999px;background:rgba(226,59,84,.1);color:#b01830;font-size:12px;font-weight:1000;opacity:var(--swipe-strength,0)}
+    .planCard.swipe-dragging::after{content:"Löschen";position:absolute;top:50%;transform:translateY(-50%);padding:6px 10px;border-radius:999px;background:rgba(226,59,84,.1);color:#b01830;font-size:12px;font-weight:1000;opacity:var(--swipe-strength,0)}
     .planCard.swipe-left::after{right:14px}.planCard.swipe-right::after{left:14px}
     .bankRow[data-bank-id]{touch-action:pan-y;overflow:hidden;position:relative}
     .bankRow.bank-swipe-dragging{transition:none;will-change:transform,opacity,box-shadow;box-shadow:0 8px 20px rgba(7,16,39,.12);z-index:1}
     .bankRow.bank-swipe-armed{background:#fffafa;box-shadow:0 0 0 2px rgba(226,59,84,.18),0 10px 26px rgba(7,16,39,.16)}
-    .bankRow.bank-swipe-dragging::after{content:"LÃ¶schen";position:absolute;top:50%;transform:translateY(-50%);padding:5px 9px;border-radius:999px;background:rgba(226,59,84,.1);color:#b01830;font-size:11px;font-weight:1000;opacity:var(--bank-swipe-strength,0)}
+    .bankRow.bank-swipe-dragging::after{content:"Löschen";position:absolute;top:50%;transform:translateY(-50%);padding:5px 9px;border-radius:999px;background:rgba(226,59,84,.1);color:#b01830;font-size:11px;font-weight:1000;opacity:var(--bank-swipe-strength,0)}
     .bankRow.bank-swipe-left::after{right:12px}.bankRow.bank-swipe-right::after{left:12px}
     .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px}.topbarText{min-width:0}.visionBtn{flex:0 0 auto;border:2px solid #071027;background:#fff;color:#071027;border-radius:14px;padding:9px 12px;font-weight:1000;font-size:17px;line-height:1;min-width:48px}
     body.a11y{--bg:#fff;--paper:#fff;--ink:#000;--muted:#172033;--line:#111;--blue:#e9f4ff;--blue2:#f6fbff;--accent:#000;--danger:#b00020;--shadow:none}
@@ -252,17 +253,17 @@
       #savePackageBtn.hidden + #baseToggle{grid-column:2/4}
       #createPanel:not(.planMode) #savePackageBtn.hidden{display:none!important}
 
-      /* Versteckte PlanflÃ¤che soll im Leerzustand keine unsichtbare groÃŸe Box erzwingen. */
+      /* Versteckte Planfläche soll im Leerzustand keine unsichtbare große Box erzwingen. */
       #createPanel:not(.planMode) #currentPlanBlock.hidden{display:none!important}
 
-      /* Untere Tablet-Aktionen bÃ¼ndig halten. */
+      /* Untere Tablet-Aktionen bündig halten. */
       #createPanel:not(.planMode) .planActions{grid-column:2;grid-row:5;display:grid;grid-template-columns:1fr;gap:14px;min-width:0}
       #createPanel:not(.planMode) #recentToggle{grid-column:1;grid-row:1;width:100%;height:64px;min-height:64px;justify-content:center}
       #createPanel:not(.planMode) #packageToggle{grid-column:3;grid-row:5;width:100%;justify-self:stretch;height:64px;min-height:64px}
       #createPanel.planMode #recentToggle,
       #createPanel.planMode #packageToggle{height:64px;min-height:64px;align-self:stretch}
 
-      /* Eingabe/DB links als eine ruhige Spalte; rechts PlanflÃ¤che voll ausnutzen. */
+      /* Eingabe/DB links als eine ruhige Spalte; rechts Planfläche voll ausnutzen. */
       #exerciseInput{width:100%;min-height:126px;max-height:190px}
       #bankArea:not(.bankOpen) .drawerBtn{width:100%;height:64px;min-height:64px}
       #currentPlanBlock .label{white-space:nowrap}
@@ -293,7 +294,7 @@
       /* Der Admin-Hinweis darf auf Tablet keinen Platz fressen und keine Buttons unten verdecken. */
       .adminTestBanner{display:none!important}
 
-      /* ScanPreview war der sichtbare Ãœberlappungsfehler: nicht mehr als dritte Zeile in .scanHub wachsen lassen. */
+      /* ScanPreview war der sichtbare Überlappungsfehler: nicht mehr als dritte Zeile in .scanHub wachsen lassen. */
       .scanHub{overflow:visible;z-index:30;align-self:stretch}
       .scanHub #scanPreview:not(.hidden){
         position:absolute;
@@ -337,11 +338,11 @@
 
 
 
-    /* v311 Tablet Textfeld Visibility Fix: Admin-Buttons dÃ¼rfen die Eingabezeile nicht Ã¼berdecken. */
+    /* v311 Tablet Textfeld Visibility Fix: Admin-Buttons dürfen die Eingabezeile nicht überdecken. */
     @media (min-width:760px){
       /* Im Admin-Modus erzeugen Admin-Konfig + DB-Teilen eine zweite ScanHub-Zeile.
-         Diese lief Ã¼ber grid-row:3 und verdeckte das Ãœbungseingabe-Textfeld.
-         FÃ¼r Tablet-Testlayout werden diese Nebenbuttons ausgeblendet; Scan/Datei bleiben sichtbar. */
+         Diese lief über grid-row:3 und verdeckte das Übungseingabe-Textfeld.
+         Für Tablet-Testlayout werden diese Nebenbuttons ausgeblendet; Scan/Datei bleiben sichtbar. */
       .adminMode .scanHub .adminConfigBtn,
       .adminMode .scanHub .sharedBankBtn{
         display:none!important;
@@ -439,7 +440,7 @@
 
 
 
-    /* v316 Tablet Anchor Overlay Manager: Panels bleiben im sicheren Layer, Ã¶ffnen aber aus ihrem Button-Anker. Keine Scan/PDF/QR/DB-Datenlogik. */
+    /* v316 Tablet Anchor Overlay Manager: Panels bleiben im sicheren Layer, öffnen aber aus ihrem Button-Anker. Keine Scan/PDF/QR/DB-Datenlogik. */
     @media (min-width:760px){
       body.kggTabletOverlayActive .app{isolation:isolate}
       /* Basisdaten, Plan-Historie und Pakete werden auf Tablet dynamisch am jeweiligen Button positioniert. */
@@ -490,7 +491,7 @@
     }
 
 
-    /* v317 Plan-Card-Polish auf Basis v316: Medien-Badge + gelbe Neu/PrÃ¼fen-Karten wie im schÃ¶neren Planlayout. */
+    /* v317 Plan-Card-Polish auf Basis v316: Medien-Badge + gelbe Neu/Prüfen-Karten wie im schöneren Planlayout. */
     .planCard{
       background:#fff;
       border:1px solid rgba(220,227,235,.95);
@@ -661,7 +662,7 @@
 
 
 
-    /* v319 Gescannte-PlÃ¤ne-Inbox: Scan-Ergebnisse getrennt vom Textfeld, Toggle gegen Ãœbungen im Plan. */
+    /* v319 Gescannte-Pläne-Inbox: Scan-Ergebnisse getrennt vom Textfeld, Toggle gegen Übungen im Plan. */
     .rightPlanStack{display:flex;flex-direction:column;gap:10px;min-width:0;min-height:0;transition:gap .18s ease}
     .rightPlanStack.hidden{display:none!important}
     .planSection{background:#fff;border:2px solid #111827;border-radius:24px;box-shadow:var(--shadow);overflow:hidden;min-width:0;transition:transform .20s cubic-bezier(.2,.85,.2,1),max-height .20s cubic-bezier(.2,.85,.2,1),opacity .16s ease,background .16s ease}
@@ -721,15 +722,15 @@
     /* v321 Tablet Layout/Caret Fix:
        - Aktueller-Plan-Titel im Tablet-Planmodus ausblenden
        - Fertig eine Zeile tiefer setzen
-       - +Paket-Button auf HÃ¶he von "Ãœbungen im Plan" andocken
-       - Gescannte PlÃ¤ne/Ãœbungen im Plan wirklich vollstÃ¤ndig kollabieren
-       - Carets fÃ¼r Basisdaten / Ãœbungen im Plan / Gescannte PlÃ¤ne stabilisieren
-       - Aktive Floating-Button-Anker bleiben Ã¼ber dem Popup klickbar */
+       - +Paket-Button auf Höhe von "Übungen im Plan" andocken
+       - Gescannte Pläne/Übungen im Plan wirklich vollständig kollabieren
+       - Carets für Basisdaten / Übungen im Plan / Gescannte Pläne stabilisieren
+       - Aktive Floating-Button-Anker bleiben über dem Popup klickbar */
     .planSectionHeader{
       justify-content:flex-start;
     }
     .planSectionHeader::before{
-      content:"â–¶";
+      content:"▶";
       flex:0 0 auto;
       display:inline-grid;
       place-items:center;
@@ -740,7 +741,7 @@
       color:#071027;
     }
     .planSectionHeader[aria-expanded="true"]::before{
-      content:"â–¼";
+      content:"▼";
     }
     .planSectionHeader > span{
       flex:1 1 auto;
@@ -771,7 +772,7 @@
     }
 
     @media (min-width:760px){
-      /* GroÃŸer doppelter Titel "Aktueller Plan" ist im Planmodus Ã¼berflÃ¼ssig. */
+      /* Großer doppelter Titel "Aktueller Plan" ist im Planmodus überflüssig. */
       #createPanel.planMode .planHeader .panelTitle{
         display:none!important;
       }
@@ -831,7 +832,7 @@
         overflow:hidden!important;
       }
 
-      /* Der zugehÃ¶rige Button bleibt als aktiver Anker Ã¼ber dem schwebenden Fenster. */
+      /* Der zugehörige Button bleibt als aktiver Anker über dem schwebenden Fenster. */
       .kggOverlayAnchorActive{
         position:relative!important;
         z-index:190!important;
@@ -857,16 +858,16 @@
     }
 
 
-    /* v324: In beiden UI-Varianten heiÃŸt der Ã¼bergeordnete Planbereich wieder "Aktueller Plan". */
+    /* v324: In beiden UI-Varianten heißt der übergeordnete Planbereich wieder "Aktueller Plan". */
     @media (min-width:760px){
       #createPanel.planMode .planHeader .panelTitle{display:block!important}
     }
 
     /* v324 Aktueller-Plan/Scan-Dock Fix:
-       Mobile-only: "Gescannte PlÃ¤ne" sitzt auÃŸerhalb der Aktueller-Plan-Bubble, oberhalb davon.
-       Keine PDF/QR/Patienten-App/Parser/Scan-Core-Ã„nderungen. */
+       Mobile-only: "Gescannte Pläne" sitzt außerhalb der Aktueller-Plan-Bubble, oberhalb davon.
+       Keine PDF/QR/Patienten-App/Parser/Scan-Core-Änderungen. */
     @media (max-width:759px){
-      /* Aktueller Plan ist wieder die Ãœberschrift fÃ¼r Basisdaten + Ãœbungskarten. */
+      /* Aktueller Plan ist wieder die Überschrift für Basisdaten + Übungskarten. */
       #createPanel.planMode .planHeader{display:grid!important;grid-template-columns:minmax(0,1fr) auto;align-items:center;margin:0 0 8px;min-height:0}
       #createPanel.planMode .planHeader .panelTitle{display:block!important;font-size:26px;line-height:1.05;margin:0;letter-spacing:-.4px}
       #createPanel.scanPanelOpen .planHeader{display:grid!important}
@@ -882,7 +883,7 @@
       .mobileScannedPlansDock .planSection.collapsed{flex:0 0 48px!important;height:48px!important;min-height:48px!important;max-height:48px!important;border-color:#bfe8c5!important;background:#f7fff8!important}
       .mobileScannedPlansDock .planSection.collapsed .scanInboxList{display:none!important;height:0!important;min-height:0!important;max-height:0!important;padding:0!important;margin:0!important;overflow:hidden!important}
 
-      /* Rechte Planstruktur enthÃ¤lt auf Handy nur noch den Ãœbungsbereich; Scans sitzen im Dock darÃ¼ber. */
+      /* Rechte Planstruktur enthält auf Handy nur noch den Übungsbereich; Scans sitzen im Dock darüber. */
       .rightPlanStack{gap:8px;margin:8px 0 10px}
       .rightPlanStack.planOpen #currentPlanBlock{order:1!important;animation:kggSectionSwapIn .20s cubic-bezier(.2,.85,.2,1) both}
       .rightPlanStack.scanOpen #currentPlanBlock{order:1!important}
@@ -900,7 +901,7 @@
 
     /* v327 Tablet Shell Full-Bleed Fix:
        Ziel: Tablet wirkt nicht mehr wie frei schwebende Mockup-Karte.
-       Nur Ã¤uÃŸere Tablet-Shell/Viewport, keine PDF/QR/Scan/Parser/Plan-State-Logik. */
+       Nur äußere Tablet-Shell/Viewport, keine PDF/QR/Scan/Parser/Plan-State-Logik. */
     @media (min-width:760px){
       html,body{
         width:100%;
@@ -936,7 +937,7 @@
         grid-template-rows:auto 64px minmax(104px,auto) minmax(0,1fr) 60px!important;
         gap:12px!important;
       }
-      /* Innenkarten behalten die App-Struktur, nur der AuÃŸen-Mockup-Rahmen verschwindet. */
+      /* Innenkarten behalten die App-Struktur, nur der Außen-Mockup-Rahmen verschwindet. */
       #inputWrap,
       #bankArea.bankOpen,
       #currentPlanBlock,
@@ -1019,19 +1020,19 @@
 
 
     /* v328 Tablet Header/Package Fix:
-       - ausgefahrene Ãœbungsdatenbank-Ãœberschrift auf Tablet ausblenden
-       - groÃŸen Titel "Aktueller Plan" im Tablet-Planmodus entfernen
-       - Stift-Symbol direkt an "Ãœbungen im Plan" hÃ¤ngen
-       - +ðŸ“¦ sauber in die Plan-Kopfzeile docken, ohne ZÃ¤hler/Text zu verdecken
-       - Plan-Historie und Ãœbungspakete unten gleich groÃŸ machen
+       - ausgefahrene Übungsdatenbank-Überschrift auf Tablet ausblenden
+       - großen Titel "Aktueller Plan" im Tablet-Planmodus entfernen
+       - Stift-Symbol direkt an "Übungen im Plan" hängen
+       - +📦 sauber in die Plan-Kopfzeile docken, ohne Zähler/Text zu verdecken
+       - Plan-Historie und Übungspakete unten gleich groß machen
        Keine PDF/QR/Patienten-App/Scan/Parser/Plan-State-Logik. */
     @media (min-width:760px){
-      /* Rechts und unten echte gleichmÃ¤ÃŸige Tablet-Arbeitszonen. */
+      /* Rechts und unten echte gleichmäßige Tablet-Arbeitszonen. */
       .app{
         grid-template-columns:minmax(360px,430px) minmax(0,1fr) minmax(0,1fr)!important;
       }
 
-      /* Ausgefahrene DB braucht keine zusÃ¤tzliche Kopfzeile oben links. */
+      /* Ausgefahrene DB braucht keine zusätzliche Kopfzeile oben links. */
       #dbTitle.fullBankOpen,
       #dbTitle.searchBankOpen{
         display:none!important;
@@ -1042,12 +1043,12 @@
         display:none!important;
       }
 
-      /* Stift gehÃ¶rt zum konkreten Abschnitt, nicht als groÃŸer Seitentitel. */
+      /* Stift gehört zum konkreten Abschnitt, nicht als großer Seitentitel. */
       #createPanel.planMode #currentPlanToggle > span::before{
-        content:"âœï¸ ";
+        content:"✏️ ";
       }
 
-      /* +Paket nicht als schwebender rechter GroÃŸbutton, sondern als Kopfzeilen-Aktion. */
+      /* +Paket nicht als schwebender rechter Großbutton, sondern als Kopfzeilen-Aktion. */
       #createPanel.planMode #savePackageBtn{
         grid-column:2 / 4!important;
         grid-row:3!important;
@@ -1073,7 +1074,7 @@
         pointer-events:none!important;
       }
 
-      /* Untere Aktionsbuttons: gleiche Breite, gleiche HÃ¶he, ruhige Zeile. */
+      /* Untere Aktionsbuttons: gleiche Breite, gleiche Höhe, ruhige Zeile. */
       #createPanel.planMode #recentToggle,
       #createPanel.planMode #packageToggle{
         grid-row:5!important;
@@ -1122,7 +1123,7 @@
 
 
     /* v329 Tablet Package Button Header Align:
-       Der +ðŸ“¦ Button war zwar im Planheader, klebte aber optisch am oberen Rand.
+       Der +📦 Button war zwar im Planheader, klebte aber optisch am oberen Rand.
        Nur Tablet-CSS: kleiner, flacher, vertikal in der Kopfzeile zentriert. Keine Logik. */
     @media (min-width:760px){
       #createPanel.planMode #currentPlanBlock{
@@ -1184,17 +1185,17 @@
 
     /* v330 Tablet Column/Package Balance:
        Linke Spalte bekommt mehr Raum Richtung Mitte; Mittelabstand kleiner.
-       +ðŸ“¦ Button wird innerhalb der Plan-Kopfzeile tiefer/zentrierter gefÃ¼hrt.
+       +📦 Button wird innerhalb der Plan-Kopfzeile tiefer/zentrierter geführt.
        Nur Tablet-CSS, keine PDF/QR/Patienten-App/Scan/Parser/Plan-State-Logik. */
     @media (min-width:760px){
-      /* Linke Arbeits-Spalte breiter, rechte Arbeitszone bleibt zwei gleich groÃŸe Aktionsspalten. */
+      /* Linke Arbeits-Spalte breiter, rechte Arbeitszone bleibt zwei gleich große Aktionsspalten. */
       .app{
         grid-template-columns:minmax(420px,500px) minmax(0,1fr) minmax(0,1fr)!important;
         gap:10px!important;
         column-gap:10px!important;
       }
 
-      /* Linke Spalte optisch etwas mehr in die Mitte holen, ohne die rechte Planliste zu beschÃ¤digen. */
+      /* Linke Spalte optisch etwas mehr in die Mitte holen, ohne die rechte Planliste zu beschädigen. */
       .scanHub,
       #inputWrap,
       #bankArea{
@@ -1202,13 +1203,13 @@
         width:100%!important;
       }
 
-      /* Planbereich bleibt bÃ¼ndig, bekommt aber weniger Ã¼bertriebene Leerweite. */
+      /* Planbereich bleibt bündig, bekommt aber weniger übertriebene Leerweite. */
       #rightPlanStack,
       #currentPlanBlock{
         min-width:0!important;
       }
 
-      /* +ðŸ“¦ nicht an der oberen Kante kleben lassen: Header wird minimal hÃ¶her, Button sitzt darin zentriert. */
+      /* +📦 nicht an der oberen Kante kleben lassen: Header wird minimal höher, Button sitzt darin zentriert. */
       #createPanel.planMode #currentPlanToggle{
         min-height:62px!important;
         padding-top:14px!important;
@@ -1232,7 +1233,7 @@
         z-index:72!important;
       }
 
-      /* Untere Buttons exakt gleich groÃŸ halten. */
+      /* Untere Buttons exakt gleich groß halten. */
       #createPanel.planMode #recentToggle,
       #createPanel.planMode #packageToggle{
         width:100%!important;
@@ -1289,8 +1290,8 @@
 
     /* v331 Tablet Left Column + Scale Up:
        - linke Spalte bekommt mehr Raum zur Mitte
-       - gesamtes Tablet-Layout wieder leicht grÃ¶ÃŸer
-       - keine LogikÃ¤nderung */
+       - gesamtes Tablet-Layout wieder leicht größer
+       - keine Logikänderung */
     @media (min-width:760px){
       .app{
         grid-template-columns:minmax(395px,475px) minmax(0,1fr) minmax(0,.92fr)!important;
@@ -1377,8 +1378,8 @@
 
     /* v332 Tablet Left Column More Width + Readability:
        - linke Spalte nochmals breiter
-       - Tablet-Gesamtlayout etwas grÃ¶ÃŸer fÃ¼r bessere Lesbarkeit
-       - keine LogikÃ¤nderung */
+       - Tablet-Gesamtlayout etwas größer für bessere Lesbarkeit
+       - keine Logikänderung */
     @media (min-width:760px){
       .app{
         grid-template-columns:minmax(430px,520px) minmax(0,1.08fr) minmax(0,.88fr)!important;
@@ -1499,7 +1500,7 @@
     /* v335 Tablet Proportional Columns:
        Linke und rechte Arbeitszone proportionaler verteilen.
        Linke Spalte deutlich breiter, rechter Planbereich bleibt stabil.
-       UI leicht grÃ¶ÃŸer fÃ¼r bessere Tablet-Lesbarkeit.
+       UI leicht größer für bessere Tablet-Lesbarkeit.
        Nur Tablet-CSS. Keine PDF/QR/Patienten-App/Scan/Parser/Plan-State-Logik. */
     @media (min-width:760px){
       .app{
@@ -2919,6 +2920,276 @@
       width:100%!important;
     }
   }
+
+/* v361: Tablet side menu, safe top spacing and clean bottom actions */
+.tabletMenuBtn,
+.tabletSideBackdrop,
+.tabletSideMenu{display:none;}
+
+@media (max-width:759px){
+  .app{
+    padding-top:max(24px,calc(env(safe-area-inset-top) + 20px))!important;
+    padding-left:14px!important;
+    padding-right:14px!important;
+  }
+  .scanHub{margin-top:6px!important;}
+  .tabletMenuBtn,
+  .tabletSideBackdrop,
+  .tabletSideMenu{display:none!important;}
+}
+
+@media (min-width:760px){
+  .scanHub{
+    grid-template-columns:58px minmax(148px,.78fr) minmax(148px,.78fr) minmax(140px,.82fr) minmax(170px,1fr)!important;
+    align-items:stretch!important;
+    column-gap:12px!important;
+  }
+  body.colleagueMode .scanHub{
+    grid-template-columns:58px minmax(150px,.82fr) minmax(150px,.82fr) minmax(170px,1fr)!important;
+  }
+  .tabletMenuBtn{
+    display:inline-grid!important;
+    place-items:center;
+    grid-column:1!important;
+    grid-row:1!important;
+    width:54px;
+    min-width:54px;
+    min-height:54px;
+    border:1.4px solid rgba(10,16,36,.14);
+    border-radius:18px;
+    background:#fff;
+    box-shadow:0 12px 26px rgba(10,16,36,.10), inset 0 1px 0 rgba(255,255,255,.78);
+    cursor:pointer;
+    touch-action:manipulation;
+  }
+  .tabletMenuBtn span{
+    display:block;
+    width:25px;
+    height:3px;
+    border-radius:999px;
+    background:#0a1024;
+    margin:3px 0;
+    transition:transform .18s ease, opacity .18s ease;
+  }
+  body.tabletMenuOpen .tabletMenuBtn span:nth-child(1){transform:translateY(9px) rotate(45deg);}
+  body.tabletMenuOpen .tabletMenuBtn span:nth-child(2){opacity:0;}
+  body.tabletMenuOpen .tabletMenuBtn span:nth-child(3){transform:translateY(-9px) rotate(-45deg);}
+  .tabletSideBackdrop{
+    position:fixed;
+    inset:0;
+    z-index:1090;
+    display:block;
+    opacity:0;
+    pointer-events:none;
+    background:rgba(10,16,36,.18);
+    backdrop-filter:blur(10px);
+    transition:opacity .22s ease;
+  }
+  body.tabletMenuOpen .tabletSideBackdrop{
+    opacity:1;
+    pointer-events:auto;
+  }
+  .tabletSideMenu{
+    position:fixed;
+    top:0;
+    bottom:0;
+    left:0;
+    z-index:1100;
+    display:flex;
+    width:min(380px,86vw);
+    flex-direction:column;
+    gap:18px;
+    padding:calc(env(safe-area-inset-top) + 22px) 18px calc(env(safe-area-inset-bottom) + 22px);
+    background:rgba(255,255,255,.96);
+    border-right:1.5px solid rgba(10,16,36,.10);
+    box-shadow:26px 0 70px rgba(10,16,36,.18);
+    transform:translateX(-106%);
+    transition:transform .24s cubic-bezier(.22,.8,.32,1);
+  }
+  body.tabletMenuOpen .tabletSideMenu{transform:translateX(0);}
+  .tabletSideMenuHead{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    font-size:1.25rem;
+    font-weight:900;
+  }
+  .tabletMenuClose{
+    width:42px;
+    height:42px;
+    border-radius:999px;
+    border:1px solid rgba(10,16,36,.12);
+    background:#fff;
+    font-size:1.35rem;
+    font-weight:900;
+    color:#0a1024;
+    cursor:pointer;
+  }
+  .tabletSideMenuGroup{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    padding:14px;
+    border:1px solid rgba(10,16,36,.10);
+    border-radius:22px;
+    background:#f8fafc;
+  }
+  .tabletSideMenuGroup h3{
+    margin:0;
+    font-size:1rem;
+    font-weight:900;
+    color:#0a1024;
+  }
+  .tabletSideHint{
+    margin:0;
+    font-size:.86rem;
+    line-height:1.35;
+    color:#667085;
+    font-weight:750;
+  }
+  .tabletSideMenu .tabletLayoutControls{
+    position:static!important;
+    display:grid!important;
+    grid-template-columns:1fr 1fr;
+    width:100%!important;
+    min-width:0!important;
+    height:auto!important;
+    padding:0!important;
+    gap:10px!important;
+    border:0!important;
+    box-shadow:none!important;
+    background:transparent!important;
+  }
+  .tabletSideMenu .tabletLockSwitch,
+  .tabletSideMenu .tabletSyncQrBtn{
+    min-height:54px!important;
+    width:100%!important;
+    border-radius:17px!important;
+    font-size:.92rem!important;
+  }
+  .tabletSideMenu .tabletLayoutFreeTools{
+    grid-column:1 / -1!important;
+    position:static!important;
+    display:grid!important;
+    grid-template-columns:58px 1fr 58px!important;
+    grid-template-areas:"plus value minus" "reset reset reset";
+    /* v361 side menu scale grid polish */
+    align-items:center!important;
+    width:100%!important;
+    min-width:0!important;
+    height:auto!important;
+    padding:10px!important;
+    border-radius:21px!important;
+  }
+  .tabletSideMenu #tabletScalePlus{grid-area:plus;}
+  .tabletSideMenu #tabletScaleValue{grid-area:value;text-align:center;}
+  .tabletSideMenu #tabletScaleMinus{grid-area:minus;}
+  .tabletSideMenu #tabletLayoutReset{grid-area:reset;min-height:44px!important;}
+  .tabletSideMenu .tabletLayoutFreeTools.hidden{display:none!important;}
+  .packageLayoutSlot{
+    grid-template-columns:1fr!important;
+    align-items:stretch!important;
+  }
+  .packageLayoutSlot .tabletLayoutControls{display:none!important;}
+  .packageLayoutSlot #packageToggle{width:100%!important;min-width:0!important;}
+}
+
+
+/* v362: keep the plan-card delete X in the top-right corner. */
+.planCard{position:relative;}
+.planCard .planDeleteBtn{
+  position:absolute!important;
+  top:6px!important;
+  right:8px!important;
+  z-index:5;
+  display:inline-grid!important;
+  place-items:center!important;
+  width:30px!important;
+  min-width:30px!important;
+  height:30px!important;
+  min-height:30px!important;
+  padding:0!important;
+  line-height:1!important;
+  border-radius:999px!important;
+}
+.planCardActions{padding-right:24px;}
+
+</style>
+<style>
+  /* v365: Finish modal output actions are balanced; PDF is no longer the dominant black action. */
+  #shareModal .finishOutputBtn{display:flex;align-items:center;justify-content:center;gap:9px;font-weight:1000}
+  #shareModal .finishPdfBtn{background:#fff;border:1px solid var(--line);color:var(--ink)}
+  #shareModal .finishAppBtn{background:#edf5ff;border:1px solid #9cccf4;color:#073254}
+  #shareModal .finishIcon{display:inline-flex;align-items:center;justify-content:center;font-size:20px;line-height:1}
+</style>
+<style>
+  /* v366: mobile history/packages open from a floating bottom anchor. */
+  @media (max-width:759px){
+    .kggPhoneDrawerBackdrop{
+      position:fixed;
+      inset:0;
+      z-index:88;
+      background:rgba(7,16,39,.24);
+      backdrop-filter:blur(8px);
+      -webkit-backdrop-filter:blur(8px);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .22s ease;
+    }
+    body.kggPhoneDrawerOpen .kggPhoneDrawerBackdrop{opacity:1;pointer-events:auto}
+    body.kggPhoneDrawerOpen #recentToggle.phoneButtonFloat,
+    body.kggPhoneDrawerOpen #packageToggle.phoneButtonFloat{
+      position:fixed!important;
+      left:16px!important;
+      right:16px!important;
+      bottom:calc(12px + env(safe-area-inset-bottom))!important;
+      z-index:92!important;
+      width:auto!important;
+      min-width:0!important;
+      height:58px!important;
+      min-height:58px!important;
+      border-radius:18px!important;
+      justify-content:center!important;
+      background:#fff!important;
+      color:var(--ink)!important;
+      border:1px solid rgba(220,227,235,.96)!important;
+      box-shadow:0 22px 54px rgba(7,16,39,.26),0 5px 14px rgba(7,16,39,.12)!important;
+      transform-origin:center bottom;
+      animation:kggPhoneButtonDock .28s cubic-bezier(.18,.84,.24,1) both!important;
+    }
+    body.kggPhoneDrawerOpen #recentList:not(.hidden),
+    body.kggPhoneDrawerOpen #packageList:not(.hidden){
+      position:fixed!important;
+      left:16px!important;
+      right:16px!important;
+      bottom:calc(86px + env(safe-area-inset-bottom))!important;
+      z-index:91!important;
+      max-height:min(56dvh,390px)!important;
+      overflow:auto!important;
+      background:rgba(255,255,255,.98)!important;
+      border:1px solid rgba(220,227,235,.96)!important;
+      border-radius:22px!important;
+      padding:10px!important;
+      box-shadow:0 22px 58px rgba(7,16,39,.24),0 4px 14px rgba(7,16,39,.10)!important;
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+      transform-origin:bottom center;
+      animation:kggPhoneDrawerFromDock .30s cubic-bezier(.18,.84,.24,1) both!important;
+    }
+    body.kggPhoneDrawerOpen #recentList:not(.hidden) .notice,
+    body.kggPhoneDrawerOpen #packageList:not(.hidden) .notice{margin-top:0}
+    @keyframes kggPhoneButtonDock{
+      0%{opacity:.92;transform:translateY(18px) scale(.96);filter:blur(1px)}
+      65%{opacity:1;transform:translateY(-3px) scale(1.015);filter:blur(0)}
+      100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+    }
+    @keyframes kggPhoneDrawerFromDock{
+      0%{opacity:0;transform:translateY(28px) scale(.965);filter:blur(2px)}
+      72%{opacity:1;transform:translateY(-4px) scale(1.01);filter:blur(0)}
+      100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+    }
+  }
 </style>
 
   <script>
@@ -2977,11 +3248,11 @@
 
   function sanitizeText(value){
     return String(value == null ? '' : value)
-      .replace(/Ã¤/g,'ae').replace(/Ã¶/g,'oe').replace(/Ã¼/g,'ue')
-      .replace(/Ã„/g,'Ae').replace(/Ã–/g,'Oe').replace(/Ãœ/g,'Ue')
-      .replace(/ÃŸ/g,'ss')
-      .replace(/[â€“â€”]/g,'-').replace(/â€¦/g,'...')
-      .replace(/[Â·â€¢]/g,' - ')
+      .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue')
+      .replace(/Ä/g,'Ae').replace(/Ö/g,'Oe').replace(/Ü/g,'Ue')
+      .replace(/ß/g,'ss')
+      .replace(/[–—]/g,'-').replace(/…/g,'...')
+      .replace(/[·•]/g,' - ')
       .replace(/[^\x09\x0A\x0D\x20-\x7E]/g,'');
   }
 
@@ -3240,75 +3511,30 @@
 </head>
 <body class="colleagueMode">
 <div class="app">
-  <div class="adminTestBanner hidden" aria-hidden="true">ADMIN-TESTDATEI Â· v335 Tablet-Spalten-Proportionen aktiv<small>Nicht fuer Patient:innen verwenden. Simuliert den Medienfluss lokal im Browser, ohne echten Cloud-Dienst und ohne fest eingebauten API-Key. Scan-Popup nutzt letzten Bildweg automatisch.</small></div>
-  <header class="topbar"><div class="topbarText"><h1>KGG Plan App <span class="stateBadge" id="stateBadge">Leerzustand</span></h1><small>Plain HTML/CSS/JS Â· offlinefÃ¤hig Â· mobile-first</small></div><button class="visionBtn" id="visionBtn" type="button" aria-pressed="false" aria-label="GroÃŸdruck-PDF umschalten">PDF A+</button></header>
+  <div class="adminTestBanner hidden" aria-hidden="true">ADMIN-TESTDATEI · v335 Tablet-Spalten-Proportionen aktiv<small>Nicht fuer Patient:innen verwenden. Simuliert den Medienfluss lokal im Browser, ohne echten Cloud-Dienst und ohne fest eingebauten API-Key. Scan-Popup nutzt letzten Bildweg automatisch.</small></div>
+  <header class="topbar"><div class="topbarText"><h1>KGG Plan App <span class="stateBadge" id="stateBadge">Leerzustand</span></h1><small>Plain HTML/CSS/JS · offlinefähig · mobile-first</small></div><button class="visionBtn" id="visionBtn" type="button" aria-pressed="false" aria-label="Großdruck-PDF umschalten">PDF A+</button></header>
 
   <section class="scanHub" id="scanHub">
-    <button class="scanBtn" id="scanBtn">ðŸ“· Plan scannen</button>
+    <button class="tabletMenuBtn" id="tabletMenuBtn" type="button" aria-label="Tablet-Menue oeffnen" aria-expanded="false"><span></span><span></span><span></span></button>
+    <button class="scanBtn" id="scanBtn">📷 Plan scannen</button>
     <button class="syncQrBtn" id="syncQrBtn" type="button" aria-label="Sync-QR erzeugen" title="Sync-QR">QR</button>
-    <input id="fileInput" class="nativeFileInput" type="file" accept="image/*" capture="environment" multiple>
+    <input id="fileInput" class="nativeFileInput" type="file" accept="image/*" capture="environment">
     <input id="filePickerInput" class="nativeFileInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif" multiple>
-    <div class="scanMeta filePickBtn" id="filePickBtn" role="button" tabindex="0" aria-label="Foto oder Datei auswÃ¤hlen">Foto / Datei <small id="scanStatus" class="hidden"></small></div>
+    <div class="scanMeta filePickBtn" id="filePickBtn" role="button" tabindex="0" aria-label="Foto oder Datei auswählen">Foto / Datei <small id="scanStatus" class="hidden"></small></div>
     <button class="mutedBtn adminConfigBtn hidden" id="adminConfigBtn" type="button" tabindex="-1" aria-hidden="true">Admin-Konfig</button>
-    <button class="mutedBtn sharedBankBtn hidden" id="sharedBankBtn" type="button" tabindex="-1" aria-hidden="true">Ãœbungsdatenbank teilen</button>
+    <button class="mutedBtn sharedBankBtn hidden" id="sharedBankBtn" type="button" tabindex="-1" aria-hidden="true">Übungsdatenbank teilen</button>
     <div id="scanPreview" class="notice hidden"></div>
   </section>
 
-  <div id="mobileScannedPlansDock" class="mobileScannedPlansDock hidden" aria-live="polite"></div>
-  <div class="tabletLayoutResizeHandle" id="tabletLayoutResizeHandle" role="separator" aria-orientation="vertical" aria-label="Tablet-Spaltenbreite ziehen"></div>
-
-  <main class="panel" id="createPanel">
-    <div class="planHeader">
-      <h2 class="panelTitle" id="panelTitle">âž• Neuen Plan erstellen</h2>
-      <button class="packageSaveBtn hidden" id="savePackageBtn" type="button" aria-label="Aktuellen Plan als Ãœbungspaket speichern"><span class="packagePlus">+</span><span class="packageBox">ðŸ“¦</span></button>
+  <div class="tabletSideBackdrop" id="tabletSideBackdrop" hidden></div>
+  <aside class="tabletSideMenu" id="tabletSideMenu" aria-hidden="true">
+    <div class="tabletSideMenuHead">
+      <strong>Menue</strong>
+      <button class="tabletMenuClose" id="tabletMenuClose" type="button" aria-label="Menue schliessen">&times;</button>
     </div>
-    <section class="inner">
-      <button class="baseCard" id="baseToggle"><span>â–¶ ðŸ‘¤ Basisdaten</span><span class="mini" id="patientMini"></span></button>
-      <div id="baseFields" class="hidden">
-        <div class="grid2"><div class="field"><label>Patient/in</label><input id="patientName" placeholder="V. Nachname"></div><div class="field"><label>Datum</label><input id="planDate" type="date"></div></div>
-        <div class="field"><label>Therapeut/in</label><input id="therapistName" placeholder="Name"></div>
-        <div class="field"><label>Zusatzinfo</label><textarea id="planNotes" placeholder="Optional" style="min-height:78px;font-size:16px"></textarea></div>
-      </div>
-
-      <div id="rightPlanStack" class="rightPlanStack hidden" aria-live="polite">
-        <div id="currentPlanBlock" class="planSection planSectionCurrent hidden">
-          <button class="planSectionHeader" id="currentPlanToggle" type="button" aria-expanded="true">
-            <span>âœï¸ Ãœbungen im Plan</span><small id="currentPlanCount"></small>
-          </button>
-          <div class="planSectionBody">
-            <div class="planList" id="planList"></div>
-          </div>
-        </div>
-        <div id="scannedPlansBlock" class="planSection scanInboxBlock hidden">
-          <button class="planSectionHeader" id="scannedPlansToggle" type="button" aria-expanded="false">
-            <span>Gescannte PlÃ¤ne</span><small id="scannedPlansCount"></small>
-          </button>
-          <div class="scanInboxList" id="scannedPlansList"></div>
-        </div>
-      </div>
-
-      <div class="label" id="inputLabel">Ãœbungen eingeben</div>
-      <div id="dbTitle" class="dbTitle hidden" role="button" tabindex="0" aria-expanded="true">â–¼ ðŸ‹ï¸ Ãœbungsdatenbank</div>
-      <div class="inputWrap" id="inputWrap">
-        <textarea id="exerciseInput" placeholder="Ãœbungen, mit Komma getrennt" autocomplete="off" autocapitalize="none"></textarea>
-        <button class="clearBtn" id="clearInput" aria-label="Text lÃ¶schen">Ã—</button>
-        <div class="suggestion hidden" id="suggestion"></div>
-      </div>
-
-      <div class="bankArea" id="bankArea">
-        <button class="drawerBtn" id="bankToggle"><span>â–¸ ðŸ‹ï¸ Ãœbungsdatenbank</span></button>
-        <div id="bankContent" class="hidden"></div>
-      </div>
-    </section>
-
-    <div class="tools">
-      <div class="planActions" id="planActions">
-        <button class="primary finishBtn hidden" id="finishBtn" type="button">Fertig</button>
-        <button class="drawerBtn" id="recentToggle"><span class="recentIcon">ðŸ•˜</span><span class="recentText">Plan-Historie</span><span class="mini recentMini">Ã¶ffnen</span></button>
-      </div>
-      <div id="recentList" class="hidden"></div>
-      <div class="packageLayoutSlot" id="packageLayoutSlot">
-        <button class="drawerBtn" id="packageToggle"><span>ðŸ“¦ Ãœbungspakete anzeigen</span></button>
+    <div class="tabletSideMenuGroup">
+      <h3>Tablet-Layout</h3>
+      <p class="tabletSideHint">Layout fixieren, Groesse anpassen und bei Bedarf die Sync-Verbindung per QR koppeln.</p>
         <div class="tabletLayoutControls" id="tabletLayoutControls" aria-label="Tablet-Layout">
           <button class="tabletLockSwitch" id="tabletLayoutLockBtn" type="button" aria-pressed="true" aria-label="Layout fixiert">
             <span class="tabletLockIcon" aria-hidden="true">&#128274;</span>
@@ -3323,6 +3549,64 @@
             <button id="tabletScaleMinus" type="button" aria-label="UI kleiner">-</button>
           </div>
         </div>
+    </div>
+  </aside>
+
+  <div id="mobileScannedPlansDock" class="mobileScannedPlansDock hidden" aria-live="polite"></div>
+  <div class="tabletLayoutResizeHandle" id="tabletLayoutResizeHandle" role="separator" aria-orientation="vertical" aria-label="Tablet-Spaltenbreite ziehen"></div>
+
+  <main class="panel" id="createPanel">
+    <div class="planHeader">
+      <h2 class="panelTitle" id="panelTitle">➕ Neuen Plan erstellen</h2>
+      <button class="packageSaveBtn hidden" id="savePackageBtn" type="button" aria-label="Aktuellen Plan als Übungspaket speichern"><span class="packagePlus">+</span><span class="packageBox">📦</span></button>
+    </div>
+    <section class="inner">
+      <button class="baseCard" id="baseToggle"><span>▶ 👤 Basisdaten</span><span class="mini" id="patientMini"></span></button>
+      <div id="baseFields" class="hidden">
+        <div class="grid2"><div class="field"><label>Patient/in</label><input id="patientName" placeholder="V. Nachname"></div><div class="field"><label>Datum</label><input id="planDate" type="date"></div></div>
+        <div class="field"><label>Therapeut/in</label><input id="therapistName" placeholder="Name"></div>
+        <div class="field"><label>Zusatzinfo</label><textarea id="planNotes" placeholder="Optional" style="min-height:78px;font-size:16px"></textarea></div>
+      </div>
+
+      <div id="rightPlanStack" class="rightPlanStack hidden" aria-live="polite">
+        <div id="currentPlanBlock" class="planSection planSectionCurrent hidden">
+          <button class="planSectionHeader" id="currentPlanToggle" type="button" aria-expanded="true">
+            <span>✏️ Übungen im Plan</span><small id="currentPlanCount"></small>
+          </button>
+          <div class="planSectionBody">
+            <div class="planList" id="planList"></div>
+          </div>
+        </div>
+        <div id="scannedPlansBlock" class="planSection scanInboxBlock hidden">
+          <button class="planSectionHeader" id="scannedPlansToggle" type="button" aria-expanded="false">
+            <span>Gescannte Pläne</span><small id="scannedPlansCount"></small>
+          </button>
+          <div class="scanInboxList" id="scannedPlansList"></div>
+        </div>
+      </div>
+
+      <div class="label" id="inputLabel">Übungen eingeben</div>
+      <div id="dbTitle" class="dbTitle hidden" role="button" tabindex="0" aria-expanded="true">▼ 🏋️ Übungsdatenbank</div>
+      <div class="inputWrap" id="inputWrap">
+        <textarea id="exerciseInput" placeholder="Übungen, mit Komma getrennt" autocomplete="off" autocapitalize="none"></textarea>
+        <button class="clearBtn" id="clearInput" aria-label="Text löschen">×</button>
+        <div class="suggestion hidden" id="suggestion"></div>
+      </div>
+
+      <div class="bankArea" id="bankArea">
+        <button class="drawerBtn" id="bankToggle"><span>▸ 🏋️ Übungsdatenbank</span></button>
+        <div id="bankContent" class="hidden"></div>
+      </div>
+    </section>
+
+    <div class="tools">
+      <div class="planActions" id="planActions">
+        <button class="primary finishBtn hidden" id="finishBtn" type="button">Fertig</button>
+        <button class="drawerBtn" id="recentToggle"><span class="recentIcon">🕘</span><span class="recentText">Plan-Historie</span><span class="mini recentMini">öffnen</span></button>
+      </div>
+      <div id="recentList" class="hidden"></div>
+      <div class="packageLayoutSlot" id="packageLayoutSlot">
+        <button class="drawerBtn" id="packageToggle"><span>📦 Übungspakete anzeigen</span></button>
       </div>
       <div id="packageList" class="hidden"></div>
     </div>
@@ -3338,18 +3622,18 @@
 </div>
 
 <div class="modal" id="editorModal"><div class="sheet editorSheet">
-  <div class="editorHeader"><h2>Ãœbung bearbeiten</h2><button class="iconBtn danger editorDeleteBtn" id="deleteExercise" type="button" aria-label="Ãœbung lÃ¶schen" title="Ãœbung lÃ¶schen">ðŸ—‘ï¸</button></div>
+  <div class="editorHeader"><h2>Übung bearbeiten</h2><button class="iconBtn danger editorDeleteBtn" id="deleteExercise" type="button" aria-label="Übung löschen" title="Übung löschen">🗑️</button></div>
   <div class="field"><label>Name</label><input id="editName"></div>
   <div class="grid2">
-    <div class="field"><label>SÃ¤tze</label><select id="editSets"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div>
-    <div class="field"><label>AusfÃ¼hrung</label><select id="editSide"><option value="BI">beidseitig</option><option value="LR">links/rechts getrennt</option></select></div>
+    <div class="field"><label>Sätze</label><select id="editSets"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div>
+    <div class="field"><label>Ausführung</label><select id="editSide"><option value="BI">beidseitig</option><option value="LR">links/rechts getrennt</option></select></div>
   </div>
   <div class="grid2">
     <div class="field"><label>Einheit</label><select id="editUnit"><option value="kg">kg</option><option value="BW">BW</option><option value="Hub">Hub</option><option value="Stufe">Stufe</option><option value="Watt">Watt</option><option value="Stufe/Watt">Stufe/Watt</option><option value="bar">bar</option><option value="keine">keine</option></select></div>
     <div class="field"><label>Messwert</label><select id="editMeasure"><option value="wdh">Wdh</option><option value="zeit">Zeit</option></select></div>
   </div>
   <div class="notice">
-    <b>Startvorschlag fÃ¼r Tag 1</b>
+    <b>Startvorschlag für Tag 1</b>
     <div class="grid2" style="margin-top:8px"><div class="field"><label>Startgewicht / Startstufe</label><input id="editLoad"></div><div class="field"><label>Start-Wdh / Startzeit</label><input id="editMetric"></div></div>
   </div>
   <div class="notice editorMediaBox">
@@ -3358,29 +3642,29 @@
     </div>
     <div id="editMediaPreview" class="editorMediaPreview hidden"></div>
     <div class="editorMediaActions">
-      <button class="mutedBtn" id="attachExerciseImage" type="button">Bild wÃ¤hlen</button>
+      <button class="mutedBtn" id="attachExerciseImage" type="button">Bild wählen</button>
       <button class="mutedBtn danger hidden" id="removeExerciseImage" type="button">Entfernen</button>
     </div>
     <input id="editMediaFile" class="hidden" type="file" accept="image/*">
   </div>
   <details class="notice editorAdvanced">
     <summary><b>Mehr</b></summary>
-    <div class="grid2 editorAdvancedGrid"><div class="field"><label>Video-Link fÃ¼r Zuhause</label><input id="editVideoUrl" placeholder="https://..."></div><div class="field"><label>Button-Text</label><input id="editVideoLabel" placeholder="Video Ã¶ffnen"></div></div>
+    <div class="grid2 editorAdvancedGrid"><div class="field"><label>Video-Link für Zuhause</label><input id="editVideoUrl" placeholder="https://..."></div><div class="field"><label>Button-Text</label><input id="editVideoLabel" placeholder="Video öffnen"></div></div>
   </details>
   <div class="editorActions"><button class="primary" id="saveExercise">Speichern</button></div>
   <button class="mutedBtn editorCancelBtn" id="closeEditor">Abbrechen</button>
 </div></div>
 
 <div class="modal" id="packageSaveModal"><div class="sheet">
-  <h2>Ãœbungspaket speichern</h2>
+  <h2>Übungspaket speichern</h2>
   <p class="notice">Aus aktuellem Plan.</p>
   <div class="field"><label>Paketname</label><input id="packageNameInput" placeholder="z. B. Knie Standard"></div>
   <div class="grid2"><button class="mutedBtn" id="cancelPackageSave" type="button">Abbrechen</button><button class="primary" id="confirmPackageSave" type="button">OK</button></div>
 </div></div>
 
 <div class="modal" id="bankDeleteModal"><div class="sheet">
-  <h2>Ãœbung lÃ¶schen?</h2>
-  <p class="notice"><b id="bankDeleteName"></b> endgÃ¼ltig lÃ¶schen?</p>
+  <h2>Übung löschen?</h2>
+  <p class="notice"><b id="bankDeleteName"></b> endgültig löschen?</p>
   <div class="grid2"><button class="mutedBtn" id="cancelBankDelete" type="button">Nein</button><button class="primary" id="confirmBankDelete" type="button">Ja</button></div>
 </div></div>
 
@@ -3388,46 +3672,46 @@
   <p class="notice" id="finishNotice"></p>
   <div class="finishChoices" id="finishChoices">
     <div class="finishPdfRow">
-      <button class="primary" id="finishPdfBtn" type="button">PDF erzeugen</button>
-      <button class="mutedBtn finishPdfLargeBtn" id="finishLargePdfBtn" type="button" aria-label="GroÃŸdruck-PDF fÃ¼r Menschen mit SehbeeintrÃ¤chtigung">ðŸ‘“</button>
+      <button class="mutedBtn finishOutputBtn finishPdfBtn" id="finishPdfBtn" type="button"><span class="finishIcon" aria-hidden="true">📄</span><span>PDF erzeugen</span></button>
+      <button class="mutedBtn finishPdfLargeBtn" id="finishLargePdfBtn" type="button" aria-label="Großdruck-PDF für Menschen mit Sehbeeinträchtigung">👓</button>
     </div>
-    <button class="mutedBtn" id="finishPatientBtn" type="button">Patienten-App / QR</button>
+    <button class="mutedBtn finishOutputBtn finishAppBtn" id="finishPatientBtn" type="button"><span class="finishIcon" aria-hidden="true">▦</span><span>App erzeugen</span></button>
     <button class="mutedBtn" id="finishCancelBtn" type="button">Abbrechen</button>
   </div>
   <div class="patientOutput hidden patientQrOutput" id="patientOutputBox">
     <b class="patientOutputTitle">Patient:innen</b>
     <p class="notice" id="patientShareNotice" style="margin-top:8px">Lokaler Test.</p>
-    <a class="patientLink" id="patientAppLink" href="#" target="_blank" rel="noopener">Patienten-App Ã¶ffnen</a>
+    <a class="patientLink" id="patientAppLink" href="#" target="_blank" rel="noopener">Patienten-App öffnen</a>
     <button class="mutedBtn" style="width:100%;margin-top:8px" id="copyPatientLink" type="button">Link kopieren</button>
     <textarea class="patientLinkCopyField hidden" id="patientLinkCopyField" readonly aria-label="Patienten-Link zum manuellen Kopieren"></textarea>
-    <div class="qrBox" id="patientQrBox"><span class="qrStatus">QR wird vorbereitet â€¦</span></div>
+    <div class="qrBox" id="patientQrBox"><span class="qrStatus">QR wird vorbereitet …</span></div>
     <div class="qrStatus" id="patientQrStatus"></div>
   </div>
   <details class="apiBox" id="debugPayloadBox">
-    <summary>âš™ï¸ Debug/Test: Roh-Payload intern anzeigen</summary>
-    <p><b>Nicht fÃ¼r Patient:innen.</b> Dieser Bereich ist nur intern/therapeutisch/entwicklerisch zum Testen.</p>
+    <summary>⚙️ Debug/Test: Roh-Payload intern anzeigen</summary>
+    <p><b>Nicht für Patient:innen.</b> Dieser Bereich ist nur intern/therapeutisch/entwicklerisch zum Testen.</p>
     <textarea id="shareText" style="min-height:150px;font-size:13px"></textarea>
     <button class="mutedBtn" style="width:100%;margin-top:8px" id="copyShare">Debug-Payload kopieren</button>
   </details>
-  <button class="mutedBtn hidden" style="width:100%;margin-top:8px" id="closeShare">SchlieÃŸen</button>
+  <button class="mutedBtn hidden" style="width:100%;margin-top:8px" id="closeShare">Schließen</button>
 </div></div>
 
 <div class="modal" id="largePdfModal"><div class="sheet">
-  <h2>GroÃŸdruck-PDF</h2>
-  <p class="notice">GroÃŸdruck-PDF erzeugen?</p>
+  <h2>Großdruck-PDF</h2>
+  <p class="notice">Großdruck-PDF erzeugen?</p>
   <div class="grid2"><button class="mutedBtn" id="cancelLargePdf" type="button">Abbrechen</button><button class="primary" id="confirmLargePdf" type="button">PDF erzeugen</button></div>
 </div></div>
 
 <div class="modal" id="longMediaConfirmModal"><div class="sheet">
   <h2>24-Stunden-Code?</h2>
-  <p class="notice">24h-Code erstellen? Bilddateien bleiben lÃ¤nger abrufbar.</p>
+  <p class="notice">24h-Code erstellen? Bilddateien bleiben länger abrufbar.</p>
   <div class="grid2"><button class="mutedBtn" id="cancelLongMediaShare" type="button">Abbrechen</button><button class="primary" id="confirmLongMediaShare" type="button">Ja, erstellen</button></div>
 </div></div>
 
 <div class="modal" id="installPromptModal"><div class="sheet">
   <h2 id="installPromptTitle">App installieren?</h2>
-  <p class="notice" id="installPromptText">Installieren und lokale Daten Ã¼ber Updates behalten.</p>
-  <div class="grid2"><button class="mutedBtn" id="dismissInstallPrompt" type="button">SpÃ¤ter</button><button class="primary" id="acceptInstallPrompt" type="button">Installieren</button></div>
+  <p class="notice" id="installPromptText">Installieren und lokale Daten über Updates behalten.</p>
+  <div class="grid2"><button class="mutedBtn" id="dismissInstallPrompt" type="button">Später</button><button class="primary" id="acceptInstallPrompt" type="button">Installieren</button></div>
 </div></div>
 
 <div class="modal" id="adminSecretsModal"><div class="sheet">
@@ -3444,20 +3728,20 @@
     <button class="mutedBtn" id="exportAdminCodePackage" type="button">Code-Paket kopieren</button>
     <button class="mutedBtn wide" id="downloadAdminSafeFile" type="button">Admin-Safe-Datei speichern</button>
   </div>
-  <input id="adminSafeFileInput" class="hidden" type="file" accept=".txt,.json,text/plain,application/json">
-  <div class="adminPackageHint">Admin-Code-Dateien bleiben lokal und gehoeren nicht in GitHub, Chat oder Patient:innen-Ausgabe.</div>
-  <div class="grid2" style="margin-top:12px"><button class="mutedBtn danger" id="clearAdminSecrets" type="button">LÃ¶schen</button><button class="primary" id="saveAdminSecrets" type="button">Lokal speichern</button></div>
-  <button class="mutedBtn" id="closeAdminSecrets" type="button" style="width:100%;margin-top:8px">SchlieÃŸen</button>
+  <input id="adminSafeFileInput" class="hidden" type="file" accept=".kggsafe,.txt,.json,text/plain,application/json">
+  <div class="adminPackageHint">Admin-Safe-Dateien bleiben lokal und gehoeren nicht in GitHub, Chat oder Patient:innen-Ausgabe.</div>
+  <div class="grid2" style="margin-top:12px"><button class="mutedBtn danger" id="clearAdminSecrets" type="button">Löschen</button><button class="primary" id="saveAdminSecrets" type="button">Lokal speichern</button></div>
+  <button class="mutedBtn" id="closeAdminSecrets" type="button" style="width:100%;margin-top:8px">Schließen</button>
 </div></div>
 
 <div class="modal" id="sharedBankModal"><div class="sheet">
-  <h2>Ãœbungsdatenbank teilen</h2>
-  <p class="notice">Nur Ãœbungsdaten. Keine Patientendaten, keine Codes. Import lÃ¶scht nichts.</p>
+  <h2>Übungsdatenbank teilen</h2>
+  <p class="notice">Nur Übungsdaten. Keine Patientendaten, keine Codes. Import löscht nichts.</p>
   <textarea class="sharedBankText" id="sharedBankText" spellcheck="false"></textarea>
   <input id="sharedBankFile" class="hidden" type="file" accept="application/json,.json">
   <span class="secretStatus" id="sharedBankStatus"></span>
   <div class="grid2" style="margin-top:12px"><button class="mutedBtn" id="copySharedBank" type="button">Export kopieren</button><button class="mutedBtn" id="pickSharedBankFile" type="button">Import-Datei</button></div>
-  <div class="grid2" style="margin-top:8px"><button class="mutedBtn" id="closeSharedBank" type="button">SchlieÃŸen</button><button class="primary" id="applySharedBank" type="button">Import Ã¼bernehmen</button></div>
+  <div class="grid2" style="margin-top:8px"><button class="mutedBtn" id="closeSharedBank" type="button">Schließen</button><button class="primary" id="applySharedBank" type="button">Import übernehmen</button></div>
 </div></div>
 
 <div class="modal" id="syncPairModal"><div class="sheet syncPairSheet">
@@ -3472,17 +3756,17 @@
   <h2>PDF fertig</h2>
   <p class="notice" id="pdfPreviewNotice">PDF erzeugt.</p>
   <div class="pdfPreviewMobileBridge hidden" id="pdfPreviewMobileBridge">
-    <button class="primary" id="openPdfPreviewMobileBridge" type="button">PDF Ã¶ffnen</button>
-    <small>Ã–ffnet im GerÃ¤te-PDF-Viewer.</small>
+    <button class="primary" id="openPdfPreviewMobileBridge" type="button">PDF öffnen</button>
+    <small>Öffnet im Geräte-PDF-Viewer.</small>
   </div>
   <div class="pdfPreviewFallback hidden" id="pdfPreviewFallback">
     <div>Vorschau leer?<small>PDF trotzdem erzeugt.</small></div>
-    <button class="mutedBtn" id="openPdfPreviewFallback" type="button">PDF Ã¶ffnen</button>
+    <button class="mutedBtn" id="openPdfPreviewFallback" type="button">PDF öffnen</button>
   </div>
   <iframe class="pdfPreviewFrame" id="pdfPreviewFrame" title="PDF-Vorschau"></iframe>
   <div class="grid2"><button class="primary" id="printPdfPreview" type="button">Drucken</button><button class="mutedBtn" id="downloadPdfPreview" type="button">Herunterladen</button></div>
   <button class="mutedBtn" id="openPdfPreviewTab" type="button">Neues Fenster</button>
-  <button class="mutedBtn" id="closePdfPreview" type="button">SchlieÃŸen</button>
+  <button class="mutedBtn" id="closePdfPreview" type="button">Schließen</button>
 </div></div>
 
 <script>
@@ -3536,12 +3820,12 @@
 
 <script>
 /*! qrcode-generator 1.5.2 | MIT License | Copyright (c) Kazuhiko Arase | https://kazuhikoarase.github.io/qrcode-generator/ */
-var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=new Array(t),e=0;e<t;e+=1){r[e]=new Array(t);for(var n=0;n<t;n+=1)r[e][n]=null}return r}(h=4*u+17),e(0,0),e(h-7,0),e(0,h-7),i(),o(),s(t,r),7<=u&&g(t),null==n&&(n=v(u,f,c)),d(n,r)}var u=t,f=p[r],l=null,h=0,n=null,c=[],x={},e=function(t,r){for(var e=-1;e<=7;e+=1)if(!(t+e<=-1||h<=t+e))for(var n=-1;n<=7;n+=1)r+n<=-1||h<=r+n||(l[t+e][r+n]=0<=e&&e<=6&&(0==n||6==n)||0<=n&&n<=6&&(0==e||6==e)||2<=e&&e<=4&&2<=n&&n<=4)},o=function(){for(var t=8;t<h-8;t+=1)null==l[t][6]&&(l[t][6]=t%2==0);for(var r=8;r<h-8;r+=1)null==l[6][r]&&(l[6][r]=r%2==0)},i=function(){for(var t=M.getPatternPosition(u),r=0;r<t.length;r+=1)for(var e=0;e<t.length;e+=1){var n=t[r],o=t[e];if(null==l[n][o])for(var i=-2;i<=2;i+=1)for(var a=-2;a<=2;a+=1)l[n+i][o+a]=-2==i||2==i||-2==a||2==a||0==i&&0==a}},g=function(t){for(var r=M.getBCHTypeNumber(u),e=0;e<18;e+=1){var n=!t&&1==(r>>e&1);l[Math.floor(e/3)][e%3+h-8-3]=n}for(e=0;e<18;e+=1){n=!t&&1==(r>>e&1);l[e%3+h-8-3][Math.floor(e/3)]=n}},s=function(t,r){for(var r=f<<3|r,e=M.getBCHTypeInfo(r),n=0;n<15;n+=1){var o=!t&&1==(e>>n&1);n<6?l[n][8]=o:n<8?l[n+1][8]=o:l[h-15+n][8]=o}for(n=0;n<15;n+=1){o=!t&&1==(e>>n&1);n<8?l[8][h-n-1]=o:n<9?l[8][15-n-1+1]=o:l[8][15-n-1]=o}l[h-8][8]=!t},d=function(t,r){for(var e=-1,n=h-1,o=7,i=0,a=M.getMaskFunction(r),u=h-1;0<u;u-=2)for(6==u&&--u;;){for(var f,c,g=0;g<2;g+=1)null==l[n][u-g]&&(f=!1,i<t.length&&(f=1==(t[i]>>>o&1)),c=a(n,u-g),l[n][u-g]=f=c?!f:f,-1==--o&&(i+=1,o=7));if((n+=e)<0||h<=n){n-=e,e=-e;break}}},v=function(t,r,e){for(var n=L.getRSBlocks(t,r),o=D(),i=0;i<e.length;i+=1){var a=e[i];o.put(a.getMode(),4),o.put(a.getLength(),M.getLengthInBits(a.getMode(),t)),a.write(o)}for(var u=0,i=0;i<n.length;i+=1)u+=n[i].dataCount;if(o.getLengthInBits()>8*u)throw"code length overflow. ("+o.getLengthInBits()+">"+8*u+")";for(o.getLengthInBits()+4<=8*u&&o.put(0,4);o.getLengthInBits()%8!=0;)o.putBit(!1);for(;;){if(o.getLengthInBits()>=8*u)break;if(o.put(236,8),o.getLengthInBits()>=8*u)break;o.put(17,8)}for(var f=o,c=n,g=0,l=0,h=0,s=new Array(c.length),d=new Array(c.length),v=0;v<c.length;v+=1){var w=c[v].dataCount,p=c[v].totalCount-w,l=Math.max(l,w),h=Math.max(h,p);s[v]=new Array(w);for(var y=0;y<s[v].length;y+=1)s[v][y]=255&f.getBuffer()[y+g];g+=w;var w=M.getErrorCorrectPolynomial(p),B=m(s[v],w.getLength()-1).mod(w);d[v]=new Array(w.getLength()-1);for(y=0;y<d[v].length;y+=1){var k=y+B.getLength()-d[v].length;d[v][y]=0<=k?B.getAt(k):0}}for(var C=0,y=0;y<c.length;y+=1)C+=c[y].totalCount;for(var A=new Array(C),b=0,y=0;y<l;y+=1)for(v=0;v<c.length;v+=1)y<s[v].length&&(A[b]=s[v][y],b+=1);for(y=0;y<h;y+=1)for(v=0;v<c.length;v+=1)y<d[v].length&&(A[b]=d[v][y],b+=1);return A},w=(x.addData=function(t,r){var e=null;switch(r=r||"Byte"){case"Numeric":e=C(t);break;case"Alphanumeric":e=A(t);break;case"Byte":e=b(t);break;case"Kanji":e=S(t);break;default:throw"mode:"+r}c.push(e),n=null},x.isDark=function(t,r){if(t<0||h<=t||r<0||h<=r)throw t+","+r;return l[t][r]},x.getModuleCount=function(){return h},x.make=function(){if(u<1){for(var t=1;t<40;t++){for(var r=L.getRSBlocks(t,f),e=D(),n=0;n<c.length;n++){var o=c[n];e.put(o.getMode(),4),e.put(o.getLength(),M.getLengthInBits(o.getMode(),t)),o.write(e)}for(var i=0,n=0;n<r.length;n++)i+=r[n].dataCount;if(e.getLengthInBits()<=8*i)break}u=t}a(!1,function(){for(var t=0,r=0,e=0;e<8;e+=1){a(!0,e);var n=M.getLostPoint(x);(0==e||n<t)&&(t=n,r=e)}return r}())},x.createTableTag=function(t,r){t=t||2;for(var e=(e=(e=(e="")+'<table style="'+" border-width: 0px; border-style: none;")+" border-collapse: collapse;"+(" padding: 0px; margin: "+(r=void 0===r?4*t:r)+"px;"))+'">'+"<tbody>",n=0;n<x.getModuleCount();n+=1){e+="<tr>";for(var o=0;o<x.getModuleCount();o+=1)e=(e=(e=(e+='<td style=" border-width: 0px; border-style: none; border-collapse: collapse;')+" padding: 0px; margin: 0px; width: "+t+"px;")+" height: "+t+"px; background-color: ")+(x.isDark(n,o)?"#000000":"#ffffff")+';"/>';e+="</tr>"}return e=e+"</tbody>"+"</table>"},x.createSvgTag=function(t,r,e,n){for(var o,i,a={},u=("object"==typeof arguments[0]&&(t=(a=arguments[0]).cellSize,r=a.margin,e=a.alt,n=a.title),t=t||2,r=void 0===r?4*t:r,(e="string"==typeof e?{text:e}:e||{}).text=e.text||null,e.id=e.text?e.id||"qrcode-description":null,(n="string"==typeof n?{text:n}:n||{}).text=n.text||null,n.id=n.text?n.id||"qrcode-title":null,x.getModuleCount()*t+2*r),f="l"+t+",0 0,"+t+" -"+t+",0 0,-"+t+"z ",c=(c=(c=(c=(c=(c=(c="")+'<svg version="1.1" xmlns="http://www.w3.org/2000/svg"'+(a.scalable?"":' width="'+u+'px" height="'+u+'px"'))+(' viewBox="0 0 '+u+" "+u+'" ')+' preserveAspectRatio="xMinYMin meet"')+(n.text||e.text?' role="img" aria-labelledby="'+w([n.id,e.id].join(" ").trim())+'"':"")+">")+(n.text?'<title id="'+w(n.id)+'">'+w(n.text)+"</title>":""))+(e.text?'<description id="'+w(e.id)+'">'+w(e.text)+"</description>":""))+'<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>'+'<path d="',g=0;g<x.getModuleCount();g+=1)for(i=g*t+r,o=0;o<x.getModuleCount();o+=1)x.isDark(g,o)&&(c+="M"+(o*t+r)+","+i+f);return c=c+'" stroke="transparent" fill="black"/>'+"</svg>"},x.createDataURL=function(e,t){e=e||2,t=void 0===t?4*e:t;var r=x.getModuleCount()*e+2*t,n=t,o=r-t;return T(r,r,function(t,r){return n<=t&&t<o&&n<=r&&r<o?(t=Math.floor((t-n)/e),r=Math.floor((r-n)/e),x.isDark(r,t)?0:1):1})},x.createImgTag=function(t,r,e){t=t||2,r=void 0===r?4*t:r;var n=x.getModuleCount()*t+2*r,o=(o=(o=(o=(o=(o="")+"<img"+' src="')+x.createDataURL(t,r)+'"')+' width="'+n)+'"'+' height="')+n+'"';return e&&(o=(o+=' alt="')+w(e)+'"'),o+="/>"},function(t){for(var r="",e=0;e<t.length;e+=1){var n=t.charAt(e);switch(n){case"<":r+="&lt;";break;case">":r+="&gt;";break;case"&":r+="&amp;";break;case'"':r+="&quot;";break;default:r+=n}}return r});return x.createASCII=function(t,r){if((t=t||1)<2){var e=r;e=void 0===e?2:e;for(var n,o,i,a,u=+x.getModuleCount()+2*e,f=e,c=u-e,g={"â–ˆâ–ˆ":"â–ˆ","â–ˆ ":"â–€"," â–ˆ":"â–„","  ":" "},l={"â–ˆâ–ˆ":"â–€","â–ˆ ":"â–€"," â–ˆ":" ","  ":" "},h="",s=0;s<u;s+=2){for(o=Math.floor(s-f),i=Math.floor(s+1-f),n=0;n<u;n+=1)a="â–ˆ",f<=n&&n<c&&f<=s&&s<c&&x.isDark(o,Math.floor(n-f))&&(a=" "),f<=n&&n<c&&f<=s+1&&s+1<c&&x.isDark(i,Math.floor(n-f))?a+=" ":a+="â–ˆ",h+=(e<1&&c<=s+1?l:g)[a];h+="\n"}return u%2&&0<e?h.substring(0,h.length-u-1)+Array(1+u).join("â–€"):h.substring(0,h.length-1)}--t,r=void 0===r?2*t:r;for(var d,v,w,p=x.getModuleCount()*t+2*r,y=r,B=p-r,k=Array(t+1).join("â–ˆâ–ˆ"),C=Array(t+1).join("  "),A="",b="",M=0;M<p;M+=1){for(v=Math.floor((M-y)/t),b="",d=0;d<p;d+=1)w=1,b+=(w=y<=d&&d<B&&y<=M&&M<B&&x.isDark(v,Math.floor((d-y)/t))?0:w)?k:C;for(v=0;v<t;v+=1)A+=b+"\n"}return A.substring(0,A.length-1)},x.renderTo2dContext=function(t,r){r=r||2;for(var e=x.getModuleCount(),n=0;n<e;n++)for(var o=0;o<e;o++)t.fillStyle=x.isDark(n,o)?"black":"white",t.fillRect(n*r,o*r,r,r)},x}i.stringToBytes=(i.stringToBytesFuncs={default:function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);r.push(255&n)}return r}}).default,i.createStringToBytes=function(f,c){var o=function(){function t(){var t=r.read();if(-1==t)throw"eof";return t}for(var r=I(f),e=0,n={};;){var o=r.read();if(-1==o)break;var i=t(),a=t(),u=t();n[String.fromCharCode(o<<8|i)]=a<<8|u,e+=1}if(e!=c)throw e+" != "+c;return n}(),i="?".charCodeAt(0);return function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);n<128?r.push(n):"number"==typeof(n=o[t.charAt(e)])?(255&n)==n?r.push(n):(r.push(n>>>8),r.push(255&n)):r.push(i)}return r}};var r,e=1,a=2,n=4,u=8,p={L:1,M:0,Q:3,H:2},o=0,f=1,c=2,g=3,l=4,h=5,s=6,d=7,M=(r=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],(t={}).getBCHTypeInfo=function(t){for(var r=t<<10;0<=v(r)-v(1335);)r^=1335<<v(r)-v(1335);return 21522^(t<<10|r)},t.getBCHTypeNumber=function(t){for(var r=t<<12;0<=v(r)-v(7973);)r^=7973<<v(r)-v(7973);return t<<12|r},t.getPatternPosition=function(t){return r[t-1]},t.getMaskFunction=function(t){switch(t){case o:return function(t,r){return(t+r)%2==0};case f:return function(t,r){return t%2==0};case c:return function(t,r){return r%3==0};case g:return function(t,r){return(t+r)%3==0};case l:return function(t,r){return(Math.floor(t/2)+Math.floor(r/3))%2==0};case h:return function(t,r){return t*r%2+t*r%3==0};case s:return function(t,r){return(t*r%2+t*r%3)%2==0};case d:return function(t,r){return(t*r%3+(t+r)%2)%2==0};default:throw"bad maskPattern:"+t}},t.getErrorCorrectPolynomial=function(t){for(var r=m([1],0),e=0;e<t;e+=1)r=r.multiply(m([1,w.gexp(e)],0));return r},t.getLengthInBits=function(t,r){if(1<=r&&r<10)switch(t){case e:return 10;case a:return 9;case n:case u:return 8;default:throw"mode:"+t}else if(r<27)switch(t){case e:return 12;case a:return 11;case n:return 16;case u:return 10;default:throw"mode:"+t}else{if(!(r<41))throw"type:"+r;switch(t){case e:return 14;case a:return 13;case n:return 16;case u:return 12;default:throw"mode:"+t}}},t.getLostPoint=function(t){for(var r=t.getModuleCount(),e=0,n=0;n<r;n+=1)for(var o=0;o<r;o+=1){for(var i=0,a=t.isDark(n,o),u=-1;u<=1;u+=1)if(!(n+u<0||r<=n+u))for(var f=-1;f<=1;f+=1)o+f<0||r<=o+f||0==u&&0==f||a==t.isDark(n+u,o+f)&&(i+=1);5<i&&(e+=3+i-5)}for(n=0;n<r-1;n+=1)for(o=0;o<r-1;o+=1){var c=0;t.isDark(n,o)&&(c+=1),t.isDark(n+1,o)&&(c+=1),t.isDark(n,o+1)&&(c+=1),t.isDark(n+1,o+1)&&(c+=1),0!=c&&4!=c||(e+=3)}for(n=0;n<r;n+=1)for(o=0;o<r-6;o+=1)t.isDark(n,o)&&!t.isDark(n,o+1)&&t.isDark(n,o+2)&&t.isDark(n,o+3)&&t.isDark(n,o+4)&&!t.isDark(n,o+5)&&t.isDark(n,o+6)&&(e+=40);for(o=0;o<r;o+=1)for(n=0;n<r-6;n+=1)t.isDark(n,o)&&!t.isDark(n+1,o)&&t.isDark(n+2,o)&&t.isDark(n+3,o)&&t.isDark(n+4,o)&&!t.isDark(n+5,o)&&t.isDark(n+6,o)&&(e+=40);for(var g=0,o=0;o<r;o+=1)for(n=0;n<r;n+=1)t.isDark(n,o)&&(g+=1);return e+=10*(Math.abs(100*g/r/r-50)/5)},t);function v(t){for(var r=0;0!=t;)r+=1,t>>>=1;return r}var w=function(){for(var r=new Array(256),e=new Array(256),t=0;t<8;t+=1)r[t]=1<<t;for(t=8;t<256;t+=1)r[t]=r[t-4]^r[t-5]^r[t-6]^r[t-8];for(t=0;t<255;t+=1)e[r[t]]=t;var n={glog:function(t){if(t<1)throw"glog("+t+")";return e[t]},gexp:function(t){for(;t<0;)t+=255;for(;256<=t;)t-=255;return r[t]}};return n}();function m(n,o){if(void 0===n.length)throw n.length+"/"+o;var r=function(){for(var t=0;t<n.length&&0==n[t];)t+=1;for(var r=new Array(n.length-t+o),e=0;e<n.length-t;e+=1)r[e]=n[e+t];return r}(),i={getAt:function(t){return r[t]},getLength:function(){return r.length},multiply:function(t){for(var r=new Array(i.getLength()+t.getLength()-1),e=0;e<i.getLength();e+=1)for(var n=0;n<t.getLength();n+=1)r[e+n]^=w.gexp(w.glog(i.getAt(e))+w.glog(t.getAt(n)));return m(r,0)},mod:function(t){if(i.getLength()-t.getLength()<0)return i;for(var r=w.glog(i.getAt(0))-w.glog(t.getAt(0)),e=new Array(i.getLength()),n=0;n<i.getLength();n+=1)e[n]=i.getAt(n);for(n=0;n<t.getLength();n+=1)e[n]^=w.gexp(w.glog(t.getAt(n))+r);return m(e,0).mod(t)}};return i}function y(){function e(t){a+=String.fromCharCode(function(t){if(t<0);else if(t<26)return 65+t;else if(t<52)return 97+(t-26);else if(t<62)return 48+(t-52);else if(t==62)return 43;else if(t==63)return 47;throw"n:"+t}(63&t))}var n=0,o=0,i=0,a="",t={writeByte:function(t){for(n=n<<8|255&t,o+=8,i+=1;6<=o;)e(n>>>o-6),o-=6},flush:function(){if(0<o&&(e(n<<6-o),o=n=0),i%3!=0)for(var t=3-i%3,r=0;r<t;r+=1)a+="="},toString:function(){return a}};return t}function B(t,r){var n=t,o=r,s=new Array(t*r),i=function(t){for(var r=1<<t,e=1+(1<<t),n=t+1,o=d(),i=0;i<r;i+=1)o.add(String.fromCharCode(i));o.add(String.fromCharCode(r)),o.add(String.fromCharCode(e));var a,u,f,t=x(),c=(a=t,f=u=0,{write:function(t,r){if(t>>>r!=0)throw"length over";for(;8<=u+r;)a.writeByte(255&(t<<u|f)),r-=8-u,t>>>=8-u,u=f=0;f|=t<<u,u+=r},flush:function(){0<u&&a.writeByte(f)}}),g=(c.write(r,n),0),l=String.fromCharCode(s[g]);for(g+=1;g<s.length;){var h=String.fromCharCode(s[g]);g+=1,o.contains(l+h)?l+=h:(c.write(o.indexOf(l),n),o.size()<4095&&(o.size()==1<<n&&(n+=1),o.add(l+h)),l=h)}return c.write(o.indexOf(l),n),c.write(e,n),c.flush(),t.toByteArray()},d=function(){var r={},e=0,n={add:function(t){if(n.contains(t))throw"dup key:"+t;r[t]=e,e+=1},size:function(){return e},indexOf:function(t){return r[t]},contains:function(t){return void 0!==r[t]}};return n};return t={setPixel:function(t,r,e){s[r*n+t]=e},write:function(t){t.writeString("GIF87a"),t.writeShort(n),t.writeShort(o),t.writeByte(128),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(255),t.writeByte(255),t.writeByte(255),t.writeString(","),t.writeShort(0),t.writeShort(0),t.writeShort(n),t.writeShort(o),t.writeByte(0);for(var r=i(2),e=(t.writeByte(2),0);255<r.length-e;)t.writeByte(255),t.writeBytes(r,e,255),e+=255;t.writeByte(r.length-e),t.writeBytes(r,e,r.length-e),t.writeByte(0),t.writeString(";")}}}k=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],(t={}).getRSBlocks=function(t,r){var e=function(t,r){switch(r){case p.L:return k[4*(t-1)+0];case p.M:return k[4*(t-1)+1];case p.Q:return k[4*(t-1)+2];case p.H:return k[4*(t-1)+3];default:return}}(t,r);if(void 0===e)throw"bad rs block @ typeNumber:"+t+"/errorCorrectionLevel:"+r;for(var n,o,i=e.length/3,a=[],u=0;u<i;u+=1)for(var f=e[3*u+0],c=e[3*u+1],g=e[3*u+2],l=0;l<f;l+=1)a.push((n=g,void 0,(o={}).totalCount=c,o.dataCount=n,o));return a};var k,t,L=t,D=function(){var e=[],n=0,o={getBuffer:function(){return e},getAt:function(t){var r=Math.floor(t/8);return 1==(e[r]>>>7-t%8&1)},put:function(t,r){for(var e=0;e<r;e+=1)o.putBit(1==(t>>>r-e-1&1))},getLengthInBits:function(){return n},putBit:function(t){var r=Math.floor(n/8);e.length<=r&&e.push(0),t&&(e[r]|=128>>>n%8),n+=1}};return o},C=function(t){var r=e,n=t,t={getMode:function(){return r},getLength:function(t){return n.length},write:function(t){for(var r=n,e=0;e+2<r.length;)t.put(o(r.substring(e,e+3)),10),e+=3;e<r.length&&(r.length-e==1?t.put(o(r.substring(e,e+1)),4):r.length-e==2&&t.put(o(r.substring(e,e+2)),7))}},o=function(t){for(var r=0,e=0;e<t.length;e+=1)r=10*r+i(t.charAt(e));return r},i=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);throw"illegal char :"+t};return t},A=function(t){var r=a,n=t,t={getMode:function(){return r},getLength:function(t){return n.length},write:function(t){for(var r=n,e=0;e+1<r.length;)t.put(45*o(r.charAt(e))+o(r.charAt(e+1)),11),e+=2;e<r.length&&t.put(o(r.charAt(e)),6)}},o=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);if("A"<=t&&t<="Z")return t.charCodeAt(0)-"A".charCodeAt(0)+10;switch(t){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw"illegal char :"+t}};return t},b=function(t){var r=n,e=i.stringToBytes(t),t={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=0;r<e.length;r+=1)t.put(e[r],8)}};return t},S=function(t){var r=u,e=i.stringToBytesFuncs.SJIS;if(!e)throw"sjis not supported.";var n=e("å‹");if(2!=n.length||38726!=(n[0]<<8|n[1]))throw"sjis not supported.";var o=e(t),n={getMode:function(){return r},getLength:function(t){return~~(o.length/2)},write:function(t){for(var r=o,e=0;e+1<r.length;){var n=(255&r[e])<<8|255&r[e+1];if(33088<=n&&n<=40956)n-=33088;else{if(!(57408<=n&&n<=60351))throw"illegal char at "+(e+1)+"/"+n;n-=49472}t.put(n=192*(n>>>8&255)+(255&n),13),e+=2}if(e<r.length)throw"illegal char at "+(e+1)}};return n},x=function(){var e=[],o={writeByte:function(t){e.push(255&t)},writeShort:function(t){o.writeByte(t),o.writeByte(t>>>8)},writeBytes:function(t,r,e){r=r||0,e=e||t.length;for(var n=0;n<e;n+=1)o.writeByte(t[n+r])},writeString:function(t){for(var r=0;r<t.length;r+=1)o.writeByte(t.charCodeAt(r))},toByteArray:function(){return e},toString:function(){var t="";t+="[";for(var r=0;r<e.length;r+=1)0<r&&(t+=","),t+=e[r];return t+="]"}};return o},I=function(t){var e=t,n=0,o=0,i=0,t={read:function(){for(;i<8;){if(n>=e.length){if(0==i)return-1;throw"unexpected end of file./"+i}var t=e.charAt(n);if(n+=1,"="==t)return i=0,-1;t.match(/^\s$/)||(o=o<<6|a(t.charCodeAt(0)),i+=6)}var r=o>>>i-8&255;return i-=8,r}},a=function(t){if(65<=t&&t<=90)return t-65;if(97<=t&&t<=122)return t-97+26;if(48<=t&&t<=57)return t-48+52;if(43==t)return 62;if(47==t)return 63;throw"c:"+t};return t},T=function(t,r,e){for(var n=B(t,r),o=0;o<r;o+=1)for(var i=0;i<t;i+=1)n.setPixel(i,o,e(i,o));for(var a=x(),u=(n.write(a),y()),f=a.toByteArray(),c=0;c<f.length;c+=1)u.writeByte(f[c]);return u.flush(),"data:image/gif;base64,"+u};return i}();qrcode.stringToBytesFuncs["UTF-8"]=function(t){for(var r=t,e=[],n=0;n<r.length;n++){var o=r.charCodeAt(n);o<128?e.push(o):o<2048?e.push(192|o>>6,128|63&o):o<55296||57344<=o?e.push(224|o>>12,128|o>>6&63,128|63&o):(n++,o=65536+((1023&o)<<10|1023&r.charCodeAt(n)),e.push(240|o>>18,128|o>>12&63,128|o>>6&63,128|63&o))}return e},function(t){"function"==typeof define&&define.amd?define([],t):"object"==typeof exports&&(module.exports=t())}(function(){return qrcode});
+var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=new Array(t),e=0;e<t;e+=1){r[e]=new Array(t);for(var n=0;n<t;n+=1)r[e][n]=null}return r}(h=4*u+17),e(0,0),e(h-7,0),e(0,h-7),i(),o(),s(t,r),7<=u&&g(t),null==n&&(n=v(u,f,c)),d(n,r)}var u=t,f=p[r],l=null,h=0,n=null,c=[],x={},e=function(t,r){for(var e=-1;e<=7;e+=1)if(!(t+e<=-1||h<=t+e))for(var n=-1;n<=7;n+=1)r+n<=-1||h<=r+n||(l[t+e][r+n]=0<=e&&e<=6&&(0==n||6==n)||0<=n&&n<=6&&(0==e||6==e)||2<=e&&e<=4&&2<=n&&n<=4)},o=function(){for(var t=8;t<h-8;t+=1)null==l[t][6]&&(l[t][6]=t%2==0);for(var r=8;r<h-8;r+=1)null==l[6][r]&&(l[6][r]=r%2==0)},i=function(){for(var t=M.getPatternPosition(u),r=0;r<t.length;r+=1)for(var e=0;e<t.length;e+=1){var n=t[r],o=t[e];if(null==l[n][o])for(var i=-2;i<=2;i+=1)for(var a=-2;a<=2;a+=1)l[n+i][o+a]=-2==i||2==i||-2==a||2==a||0==i&&0==a}},g=function(t){for(var r=M.getBCHTypeNumber(u),e=0;e<18;e+=1){var n=!t&&1==(r>>e&1);l[Math.floor(e/3)][e%3+h-8-3]=n}for(e=0;e<18;e+=1){n=!t&&1==(r>>e&1);l[e%3+h-8-3][Math.floor(e/3)]=n}},s=function(t,r){for(var r=f<<3|r,e=M.getBCHTypeInfo(r),n=0;n<15;n+=1){var o=!t&&1==(e>>n&1);n<6?l[n][8]=o:n<8?l[n+1][8]=o:l[h-15+n][8]=o}for(n=0;n<15;n+=1){o=!t&&1==(e>>n&1);n<8?l[8][h-n-1]=o:n<9?l[8][15-n-1+1]=o:l[8][15-n-1]=o}l[h-8][8]=!t},d=function(t,r){for(var e=-1,n=h-1,o=7,i=0,a=M.getMaskFunction(r),u=h-1;0<u;u-=2)for(6==u&&--u;;){for(var f,c,g=0;g<2;g+=1)null==l[n][u-g]&&(f=!1,i<t.length&&(f=1==(t[i]>>>o&1)),c=a(n,u-g),l[n][u-g]=f=c?!f:f,-1==--o&&(i+=1,o=7));if((n+=e)<0||h<=n){n-=e,e=-e;break}}},v=function(t,r,e){for(var n=L.getRSBlocks(t,r),o=D(),i=0;i<e.length;i+=1){var a=e[i];o.put(a.getMode(),4),o.put(a.getLength(),M.getLengthInBits(a.getMode(),t)),a.write(o)}for(var u=0,i=0;i<n.length;i+=1)u+=n[i].dataCount;if(o.getLengthInBits()>8*u)throw"code length overflow. ("+o.getLengthInBits()+">"+8*u+")";for(o.getLengthInBits()+4<=8*u&&o.put(0,4);o.getLengthInBits()%8!=0;)o.putBit(!1);for(;;){if(o.getLengthInBits()>=8*u)break;if(o.put(236,8),o.getLengthInBits()>=8*u)break;o.put(17,8)}for(var f=o,c=n,g=0,l=0,h=0,s=new Array(c.length),d=new Array(c.length),v=0;v<c.length;v+=1){var w=c[v].dataCount,p=c[v].totalCount-w,l=Math.max(l,w),h=Math.max(h,p);s[v]=new Array(w);for(var y=0;y<s[v].length;y+=1)s[v][y]=255&f.getBuffer()[y+g];g+=w;var w=M.getErrorCorrectPolynomial(p),B=m(s[v],w.getLength()-1).mod(w);d[v]=new Array(w.getLength()-1);for(y=0;y<d[v].length;y+=1){var k=y+B.getLength()-d[v].length;d[v][y]=0<=k?B.getAt(k):0}}for(var C=0,y=0;y<c.length;y+=1)C+=c[y].totalCount;for(var A=new Array(C),b=0,y=0;y<l;y+=1)for(v=0;v<c.length;v+=1)y<s[v].length&&(A[b]=s[v][y],b+=1);for(y=0;y<h;y+=1)for(v=0;v<c.length;v+=1)y<d[v].length&&(A[b]=d[v][y],b+=1);return A},w=(x.addData=function(t,r){var e=null;switch(r=r||"Byte"){case"Numeric":e=C(t);break;case"Alphanumeric":e=A(t);break;case"Byte":e=b(t);break;case"Kanji":e=S(t);break;default:throw"mode:"+r}c.push(e),n=null},x.isDark=function(t,r){if(t<0||h<=t||r<0||h<=r)throw t+","+r;return l[t][r]},x.getModuleCount=function(){return h},x.make=function(){if(u<1){for(var t=1;t<40;t++){for(var r=L.getRSBlocks(t,f),e=D(),n=0;n<c.length;n++){var o=c[n];e.put(o.getMode(),4),e.put(o.getLength(),M.getLengthInBits(o.getMode(),t)),o.write(e)}for(var i=0,n=0;n<r.length;n++)i+=r[n].dataCount;if(e.getLengthInBits()<=8*i)break}u=t}a(!1,function(){for(var t=0,r=0,e=0;e<8;e+=1){a(!0,e);var n=M.getLostPoint(x);(0==e||n<t)&&(t=n,r=e)}return r}())},x.createTableTag=function(t,r){t=t||2;for(var e=(e=(e=(e="")+'<table style="'+" border-width: 0px; border-style: none;")+" border-collapse: collapse;"+(" padding: 0px; margin: "+(r=void 0===r?4*t:r)+"px;"))+'">'+"<tbody>",n=0;n<x.getModuleCount();n+=1){e+="<tr>";for(var o=0;o<x.getModuleCount();o+=1)e=(e=(e=(e+='<td style=" border-width: 0px; border-style: none; border-collapse: collapse;')+" padding: 0px; margin: 0px; width: "+t+"px;")+" height: "+t+"px; background-color: ")+(x.isDark(n,o)?"#000000":"#ffffff")+';"/>';e+="</tr>"}return e=e+"</tbody>"+"</table>"},x.createSvgTag=function(t,r,e,n){for(var o,i,a={},u=("object"==typeof arguments[0]&&(t=(a=arguments[0]).cellSize,r=a.margin,e=a.alt,n=a.title),t=t||2,r=void 0===r?4*t:r,(e="string"==typeof e?{text:e}:e||{}).text=e.text||null,e.id=e.text?e.id||"qrcode-description":null,(n="string"==typeof n?{text:n}:n||{}).text=n.text||null,n.id=n.text?n.id||"qrcode-title":null,x.getModuleCount()*t+2*r),f="l"+t+",0 0,"+t+" -"+t+",0 0,-"+t+"z ",c=(c=(c=(c=(c=(c=(c="")+'<svg version="1.1" xmlns="http://www.w3.org/2000/svg"'+(a.scalable?"":' width="'+u+'px" height="'+u+'px"'))+(' viewBox="0 0 '+u+" "+u+'" ')+' preserveAspectRatio="xMinYMin meet"')+(n.text||e.text?' role="img" aria-labelledby="'+w([n.id,e.id].join(" ").trim())+'"':"")+">")+(n.text?'<title id="'+w(n.id)+'">'+w(n.text)+"</title>":""))+(e.text?'<description id="'+w(e.id)+'">'+w(e.text)+"</description>":""))+'<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>'+'<path d="',g=0;g<x.getModuleCount();g+=1)for(i=g*t+r,o=0;o<x.getModuleCount();o+=1)x.isDark(g,o)&&(c+="M"+(o*t+r)+","+i+f);return c=c+'" stroke="transparent" fill="black"/>'+"</svg>"},x.createDataURL=function(e,t){e=e||2,t=void 0===t?4*e:t;var r=x.getModuleCount()*e+2*t,n=t,o=r-t;return T(r,r,function(t,r){return n<=t&&t<o&&n<=r&&r<o?(t=Math.floor((t-n)/e),r=Math.floor((r-n)/e),x.isDark(r,t)?0:1):1})},x.createImgTag=function(t,r,e){t=t||2,r=void 0===r?4*t:r;var n=x.getModuleCount()*t+2*r,o=(o=(o=(o=(o=(o="")+"<img"+' src="')+x.createDataURL(t,r)+'"')+' width="'+n)+'"'+' height="')+n+'"';return e&&(o=(o+=' alt="')+w(e)+'"'),o+="/>"},function(t){for(var r="",e=0;e<t.length;e+=1){var n=t.charAt(e);switch(n){case"<":r+="&lt;";break;case">":r+="&gt;";break;case"&":r+="&amp;";break;case'"':r+="&quot;";break;default:r+=n}}return r});return x.createASCII=function(t,r){if((t=t||1)<2){var e=r;e=void 0===e?2:e;for(var n,o,i,a,u=+x.getModuleCount()+2*e,f=e,c=u-e,g={"██":"█","█ ":"▀"," █":"▄","  ":" "},l={"██":"▀","█ ":"▀"," █":" ","  ":" "},h="",s=0;s<u;s+=2){for(o=Math.floor(s-f),i=Math.floor(s+1-f),n=0;n<u;n+=1)a="█",f<=n&&n<c&&f<=s&&s<c&&x.isDark(o,Math.floor(n-f))&&(a=" "),f<=n&&n<c&&f<=s+1&&s+1<c&&x.isDark(i,Math.floor(n-f))?a+=" ":a+="█",h+=(e<1&&c<=s+1?l:g)[a];h+="\n"}return u%2&&0<e?h.substring(0,h.length-u-1)+Array(1+u).join("▀"):h.substring(0,h.length-1)}--t,r=void 0===r?2*t:r;for(var d,v,w,p=x.getModuleCount()*t+2*r,y=r,B=p-r,k=Array(t+1).join("██"),C=Array(t+1).join("  "),A="",b="",M=0;M<p;M+=1){for(v=Math.floor((M-y)/t),b="",d=0;d<p;d+=1)w=1,b+=(w=y<=d&&d<B&&y<=M&&M<B&&x.isDark(v,Math.floor((d-y)/t))?0:w)?k:C;for(v=0;v<t;v+=1)A+=b+"\n"}return A.substring(0,A.length-1)},x.renderTo2dContext=function(t,r){r=r||2;for(var e=x.getModuleCount(),n=0;n<e;n++)for(var o=0;o<e;o++)t.fillStyle=x.isDark(n,o)?"black":"white",t.fillRect(n*r,o*r,r,r)},x}i.stringToBytes=(i.stringToBytesFuncs={default:function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);r.push(255&n)}return r}}).default,i.createStringToBytes=function(f,c){var o=function(){function t(){var t=r.read();if(-1==t)throw"eof";return t}for(var r=I(f),e=0,n={};;){var o=r.read();if(-1==o)break;var i=t(),a=t(),u=t();n[String.fromCharCode(o<<8|i)]=a<<8|u,e+=1}if(e!=c)throw e+" != "+c;return n}(),i="?".charCodeAt(0);return function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);n<128?r.push(n):"number"==typeof(n=o[t.charAt(e)])?(255&n)==n?r.push(n):(r.push(n>>>8),r.push(255&n)):r.push(i)}return r}};var r,e=1,a=2,n=4,u=8,p={L:1,M:0,Q:3,H:2},o=0,f=1,c=2,g=3,l=4,h=5,s=6,d=7,M=(r=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],(t={}).getBCHTypeInfo=function(t){for(var r=t<<10;0<=v(r)-v(1335);)r^=1335<<v(r)-v(1335);return 21522^(t<<10|r)},t.getBCHTypeNumber=function(t){for(var r=t<<12;0<=v(r)-v(7973);)r^=7973<<v(r)-v(7973);return t<<12|r},t.getPatternPosition=function(t){return r[t-1]},t.getMaskFunction=function(t){switch(t){case o:return function(t,r){return(t+r)%2==0};case f:return function(t,r){return t%2==0};case c:return function(t,r){return r%3==0};case g:return function(t,r){return(t+r)%3==0};case l:return function(t,r){return(Math.floor(t/2)+Math.floor(r/3))%2==0};case h:return function(t,r){return t*r%2+t*r%3==0};case s:return function(t,r){return(t*r%2+t*r%3)%2==0};case d:return function(t,r){return(t*r%3+(t+r)%2)%2==0};default:throw"bad maskPattern:"+t}},t.getErrorCorrectPolynomial=function(t){for(var r=m([1],0),e=0;e<t;e+=1)r=r.multiply(m([1,w.gexp(e)],0));return r},t.getLengthInBits=function(t,r){if(1<=r&&r<10)switch(t){case e:return 10;case a:return 9;case n:case u:return 8;default:throw"mode:"+t}else if(r<27)switch(t){case e:return 12;case a:return 11;case n:return 16;case u:return 10;default:throw"mode:"+t}else{if(!(r<41))throw"type:"+r;switch(t){case e:return 14;case a:return 13;case n:return 16;case u:return 12;default:throw"mode:"+t}}},t.getLostPoint=function(t){for(var r=t.getModuleCount(),e=0,n=0;n<r;n+=1)for(var o=0;o<r;o+=1){for(var i=0,a=t.isDark(n,o),u=-1;u<=1;u+=1)if(!(n+u<0||r<=n+u))for(var f=-1;f<=1;f+=1)o+f<0||r<=o+f||0==u&&0==f||a==t.isDark(n+u,o+f)&&(i+=1);5<i&&(e+=3+i-5)}for(n=0;n<r-1;n+=1)for(o=0;o<r-1;o+=1){var c=0;t.isDark(n,o)&&(c+=1),t.isDark(n+1,o)&&(c+=1),t.isDark(n,o+1)&&(c+=1),t.isDark(n+1,o+1)&&(c+=1),0!=c&&4!=c||(e+=3)}for(n=0;n<r;n+=1)for(o=0;o<r-6;o+=1)t.isDark(n,o)&&!t.isDark(n,o+1)&&t.isDark(n,o+2)&&t.isDark(n,o+3)&&t.isDark(n,o+4)&&!t.isDark(n,o+5)&&t.isDark(n,o+6)&&(e+=40);for(o=0;o<r;o+=1)for(n=0;n<r-6;n+=1)t.isDark(n,o)&&!t.isDark(n+1,o)&&t.isDark(n+2,o)&&t.isDark(n+3,o)&&t.isDark(n+4,o)&&!t.isDark(n+5,o)&&t.isDark(n+6,o)&&(e+=40);for(var g=0,o=0;o<r;o+=1)for(n=0;n<r;n+=1)t.isDark(n,o)&&(g+=1);return e+=10*(Math.abs(100*g/r/r-50)/5)},t);function v(t){for(var r=0;0!=t;)r+=1,t>>>=1;return r}var w=function(){for(var r=new Array(256),e=new Array(256),t=0;t<8;t+=1)r[t]=1<<t;for(t=8;t<256;t+=1)r[t]=r[t-4]^r[t-5]^r[t-6]^r[t-8];for(t=0;t<255;t+=1)e[r[t]]=t;var n={glog:function(t){if(t<1)throw"glog("+t+")";return e[t]},gexp:function(t){for(;t<0;)t+=255;for(;256<=t;)t-=255;return r[t]}};return n}();function m(n,o){if(void 0===n.length)throw n.length+"/"+o;var r=function(){for(var t=0;t<n.length&&0==n[t];)t+=1;for(var r=new Array(n.length-t+o),e=0;e<n.length-t;e+=1)r[e]=n[e+t];return r}(),i={getAt:function(t){return r[t]},getLength:function(){return r.length},multiply:function(t){for(var r=new Array(i.getLength()+t.getLength()-1),e=0;e<i.getLength();e+=1)for(var n=0;n<t.getLength();n+=1)r[e+n]^=w.gexp(w.glog(i.getAt(e))+w.glog(t.getAt(n)));return m(r,0)},mod:function(t){if(i.getLength()-t.getLength()<0)return i;for(var r=w.glog(i.getAt(0))-w.glog(t.getAt(0)),e=new Array(i.getLength()),n=0;n<i.getLength();n+=1)e[n]=i.getAt(n);for(n=0;n<t.getLength();n+=1)e[n]^=w.gexp(w.glog(t.getAt(n))+r);return m(e,0).mod(t)}};return i}function y(){function e(t){a+=String.fromCharCode(function(t){if(t<0);else if(t<26)return 65+t;else if(t<52)return 97+(t-26);else if(t<62)return 48+(t-52);else if(t==62)return 43;else if(t==63)return 47;throw"n:"+t}(63&t))}var n=0,o=0,i=0,a="",t={writeByte:function(t){for(n=n<<8|255&t,o+=8,i+=1;6<=o;)e(n>>>o-6),o-=6},flush:function(){if(0<o&&(e(n<<6-o),o=n=0),i%3!=0)for(var t=3-i%3,r=0;r<t;r+=1)a+="="},toString:function(){return a}};return t}function B(t,r){var n=t,o=r,s=new Array(t*r),i=function(t){for(var r=1<<t,e=1+(1<<t),n=t+1,o=d(),i=0;i<r;i+=1)o.add(String.fromCharCode(i));o.add(String.fromCharCode(r)),o.add(String.fromCharCode(e));var a,u,f,t=x(),c=(a=t,f=u=0,{write:function(t,r){if(t>>>r!=0)throw"length over";for(;8<=u+r;)a.writeByte(255&(t<<u|f)),r-=8-u,t>>>=8-u,u=f=0;f|=t<<u,u+=r},flush:function(){0<u&&a.writeByte(f)}}),g=(c.write(r,n),0),l=String.fromCharCode(s[g]);for(g+=1;g<s.length;){var h=String.fromCharCode(s[g]);g+=1,o.contains(l+h)?l+=h:(c.write(o.indexOf(l),n),o.size()<4095&&(o.size()==1<<n&&(n+=1),o.add(l+h)),l=h)}return c.write(o.indexOf(l),n),c.write(e,n),c.flush(),t.toByteArray()},d=function(){var r={},e=0,n={add:function(t){if(n.contains(t))throw"dup key:"+t;r[t]=e,e+=1},size:function(){return e},indexOf:function(t){return r[t]},contains:function(t){return void 0!==r[t]}};return n};return t={setPixel:function(t,r,e){s[r*n+t]=e},write:function(t){t.writeString("GIF87a"),t.writeShort(n),t.writeShort(o),t.writeByte(128),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(255),t.writeByte(255),t.writeByte(255),t.writeString(","),t.writeShort(0),t.writeShort(0),t.writeShort(n),t.writeShort(o),t.writeByte(0);for(var r=i(2),e=(t.writeByte(2),0);255<r.length-e;)t.writeByte(255),t.writeBytes(r,e,255),e+=255;t.writeByte(r.length-e),t.writeBytes(r,e,r.length-e),t.writeByte(0),t.writeString(";")}}}k=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],(t={}).getRSBlocks=function(t,r){var e=function(t,r){switch(r){case p.L:return k[4*(t-1)+0];case p.M:return k[4*(t-1)+1];case p.Q:return k[4*(t-1)+2];case p.H:return k[4*(t-1)+3];default:return}}(t,r);if(void 0===e)throw"bad rs block @ typeNumber:"+t+"/errorCorrectionLevel:"+r;for(var n,o,i=e.length/3,a=[],u=0;u<i;u+=1)for(var f=e[3*u+0],c=e[3*u+1],g=e[3*u+2],l=0;l<f;l+=1)a.push((n=g,void 0,(o={}).totalCount=c,o.dataCount=n,o));return a};var k,t,L=t,D=function(){var e=[],n=0,o={getBuffer:function(){return e},getAt:function(t){var r=Math.floor(t/8);return 1==(e[r]>>>7-t%8&1)},put:function(t,r){for(var e=0;e<r;e+=1)o.putBit(1==(t>>>r-e-1&1))},getLengthInBits:function(){return n},putBit:function(t){var r=Math.floor(n/8);e.length<=r&&e.push(0),t&&(e[r]|=128>>>n%8),n+=1}};return o},C=function(t){var r=e,n=t,t={getMode:function(){return r},getLength:function(t){return n.length},write:function(t){for(var r=n,e=0;e+2<r.length;)t.put(o(r.substring(e,e+3)),10),e+=3;e<r.length&&(r.length-e==1?t.put(o(r.substring(e,e+1)),4):r.length-e==2&&t.put(o(r.substring(e,e+2)),7))}},o=function(t){for(var r=0,e=0;e<t.length;e+=1)r=10*r+i(t.charAt(e));return r},i=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);throw"illegal char :"+t};return t},A=function(t){var r=a,n=t,t={getMode:function(){return r},getLength:function(t){return n.length},write:function(t){for(var r=n,e=0;e+1<r.length;)t.put(45*o(r.charAt(e))+o(r.charAt(e+1)),11),e+=2;e<r.length&&t.put(o(r.charAt(e)),6)}},o=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);if("A"<=t&&t<="Z")return t.charCodeAt(0)-"A".charCodeAt(0)+10;switch(t){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw"illegal char :"+t}};return t},b=function(t){var r=n,e=i.stringToBytes(t),t={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=0;r<e.length;r+=1)t.put(e[r],8)}};return t},S=function(t){var r=u,e=i.stringToBytesFuncs.SJIS;if(!e)throw"sjis not supported.";var n=e("友");if(2!=n.length||38726!=(n[0]<<8|n[1]))throw"sjis not supported.";var o=e(t),n={getMode:function(){return r},getLength:function(t){return~~(o.length/2)},write:function(t){for(var r=o,e=0;e+1<r.length;){var n=(255&r[e])<<8|255&r[e+1];if(33088<=n&&n<=40956)n-=33088;else{if(!(57408<=n&&n<=60351))throw"illegal char at "+(e+1)+"/"+n;n-=49472}t.put(n=192*(n>>>8&255)+(255&n),13),e+=2}if(e<r.length)throw"illegal char at "+(e+1)}};return n},x=function(){var e=[],o={writeByte:function(t){e.push(255&t)},writeShort:function(t){o.writeByte(t),o.writeByte(t>>>8)},writeBytes:function(t,r,e){r=r||0,e=e||t.length;for(var n=0;n<e;n+=1)o.writeByte(t[n+r])},writeString:function(t){for(var r=0;r<t.length;r+=1)o.writeByte(t.charCodeAt(r))},toByteArray:function(){return e},toString:function(){var t="";t+="[";for(var r=0;r<e.length;r+=1)0<r&&(t+=","),t+=e[r];return t+="]"}};return o},I=function(t){var e=t,n=0,o=0,i=0,t={read:function(){for(;i<8;){if(n>=e.length){if(0==i)return-1;throw"unexpected end of file./"+i}var t=e.charAt(n);if(n+=1,"="==t)return i=0,-1;t.match(/^\s$/)||(o=o<<6|a(t.charCodeAt(0)),i+=6)}var r=o>>>i-8&255;return i-=8,r}},a=function(t){if(65<=t&&t<=90)return t-65;if(97<=t&&t<=122)return t-97+26;if(48<=t&&t<=57)return t-48+52;if(43==t)return 62;if(47==t)return 63;throw"c:"+t};return t},T=function(t,r,e){for(var n=B(t,r),o=0;o<r;o+=1)for(var i=0;i<t;i+=1)n.setPixel(i,o,e(i,o));for(var a=x(),u=(n.write(a),y()),f=a.toByteArray(),c=0;c<f.length;c+=1)u.writeByte(f[c]);return u.flush(),"data:image/gif;base64,"+u};return i}();qrcode.stringToBytesFuncs["UTF-8"]=function(t){for(var r=t,e=[],n=0;n<r.length;n++){var o=r.charCodeAt(n);o<128?e.push(o):o<2048?e.push(192|o>>6,128|63&o):o<55296||57344<=o?e.push(224|o>>12,128|o>>6&63,128|63&o):(n++,o=65536+((1023&o)<<10|1023&r.charCodeAt(n)),e.push(240|o>>18,128|o>>12&63,128|o>>6&63,128|63&o))}return e},function(t){"function"==typeof define&&define.amd?define([],t):"object"==typeof exports&&(module.exports=t())}(function(){return qrcode});
 </script>
 
 <script>
 (function(){'use strict';
-  const VERSION='KGG_APP_KOLLEGEN_v360_sync_bundle_qr';
+  const VERSION='KGG_APP_KOLLEGEN_v366_mobile_floating_history_packages';
   window.KGG_ROLLOUT_PROFILE='colleague';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
@@ -3554,15 +3838,17 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   const deletedBankKey='kgg_html_app_v2_deleted_exercise_bank_ids';
   const pwaInstallPromptSeenKey='kgg_pwa_install_prompt_seen_v1';
   const pwaServiceWorkerUrl='kgg_therapist_sw.js';
+
+  const kggUpdateManifestUrl='https://kayus24.github.io/kgg/therapist-app/kgg_update_manifest.json';
   const adminSecretsKey='kgg_admin_local_secrets_v1';
   let deferredInstallPrompt=null;
   let adminSecrets={geminiKeys:[],mediaDropzoneEndpoint:'',mediaDropzoneUploadToken:'',updatedAt:''};
-  const norm=s=>String(s||'').toLowerCase().replace(/[Ã¤]/g,'ae').replace(/[Ã¶]/g,'oe').replace(/[Ã¼]/g,'ue').replace(/[ÃŸ]/g,'ss').replace(/[^a-z0-9]+/g,' ').trim();
+  const norm=s=>String(s||'').toLowerCase().replace(/[ä]/g,'ae').replace(/[ö]/g,'oe').replace(/[ü]/g,'ue').replace(/[ß]/g,'ss').replace(/[^a-z0-9]+/g,' ').trim();
   const compact=s=>norm(s).replace(/\s+/g,'');
   const bank=[
-    ['abd','Abduktion Maschine','abd,abduktion,abductor,abduktor,hÃ¼ft abduktion',3,'Wdh','kg'],['add','Adduktion Maschine','add,adduktion,adduktor,adductor,hÃ¼ft adduktion',3,'Wdh','kg'],['legpress','Beinpresse','beinpresse,bein presse,leg press,presse',3,'Wdh','kg'],['bridge','Bridging','bridge,bridging,beckenheben,glute bridge',3,'Wdh','kg'],['copenhagen','Copenhagen Plank','copenhagen,adduktoren plank',3,'Zeit','keine'],['bike','Ergometer / Bike','fahrrad,bike,ergometer,warmup,cardio,rad',1,'Zeit','Stufe/Watt'],['fire','Fire Hydrants','fire hydrant,hydrants,vierfÃ¼ÃŸler abduktion',3,'Wdh','kg'],['hipthrust','Hip Thrust','hip thrust,glute thrust',3,'Wdh','kg'],['legcurl','Kniebeuger Maschine','kniebeuger,leg curl,hamstring curl,beinbeuger',3,'Wdh','kg'],['kneeext','Kniestrecker Maschine','kniestrecker,knieextension,beinstrecker,leg extension,knei ext',3,'Wdh','kg'],['row','Rudern','rudern,seated row,kabelrudern,ruderzug',3,'Wdh','kg'],['lat','Latziehen','latziehen,latzug,lat pulldown,pulldown,lat',3,'Wdh','kg'],['pallof','Pallof Press','pallof,pallof press,anti rotation',3,'Wdh','kg'],['plank','Plank','plank,blank,unterarmstÃ¼tz,stÃ¼tz',3,'Zeit','keine'],['squat','Squat','squat,kniebeuge,kniebeugen',3,'Wdh','kg'],['rdl','Romanian Deadlift','romanian deadlift,rdl,dead lift',3,'Wdh','kg'],['deadlift','Wadenheben','wadenheben,calf raise',3,'Wdh','kg'],['shoulder','Schulterpresse','schulter presse,shoulder press',3,'Wdh','kg']
+    ['abd','Abduktion Maschine','abd,abduktion,abductor,abduktor,hüft abduktion',3,'Wdh','kg'],['add','Adduktion Maschine','add,adduktion,adduktor,adductor,hüft adduktion',3,'Wdh','kg'],['legpress','Beinpresse','beinpresse,bein presse,leg press,presse',3,'Wdh','kg'],['bridge','Bridging','bridge,bridging,beckenheben,glute bridge',3,'Wdh','kg'],['copenhagen','Copenhagen Plank','copenhagen,adduktoren plank',3,'Zeit','keine'],['bike','Ergometer / Bike','fahrrad,bike,ergometer,warmup,cardio,rad',1,'Zeit','Stufe/Watt'],['fire','Fire Hydrants','fire hydrant,hydrants,vierfüßler abduktion',3,'Wdh','kg'],['hipthrust','Hip Thrust','hip thrust,glute thrust',3,'Wdh','kg'],['legcurl','Kniebeuger Maschine','kniebeuger,leg curl,hamstring curl,beinbeuger',3,'Wdh','kg'],['kneeext','Kniestrecker Maschine','kniestrecker,knieextension,beinstrecker,leg extension,knei ext',3,'Wdh','kg'],['row','Rudern','rudern,seated row,kabelrudern,ruderzug',3,'Wdh','kg'],['lat','Latziehen','latziehen,latzug,lat pulldown,pulldown,lat',3,'Wdh','kg'],['pallof','Pallof Press','pallof,pallof press,anti rotation',3,'Wdh','kg'],['plank','Plank','plank,blank,unterarmstütz,stütz',3,'Zeit','keine'],['squat','Squat','squat,kniebeuge,kniebeugen',3,'Wdh','kg'],['rdl','Romanian Deadlift','romanian deadlift,rdl,dead lift',3,'Wdh','kg'],['deadlift','Wadenheben','wadenheben,calf raise',3,'Wdh','kg'],['shoulder','Schulterpresse','schulter presse,shoulder press',3,'Wdh','kg']
   ].map(a=>({id:a[0],name:a[1],aliases:a[2],sets:a[3],unit:a[4],weightUnit:a[5]}));
-  let state={plan:[],recent:[],packages:[{id:'pkg1',name:'Knie Standard',exercises:['Beinpresse','Kniebeuger Maschine','Kniestrecker Maschine']},{id:'pkg2',name:'RÃ¼cken Standard',exercises:['Rudern','Latziehen','Pallof Press']}],patient:{},bankOpen:false,editId:null,sortMenuId:null,reorderSuppressClick:false,largePdfMode:false,textSyncing:false};
+  let state={plan:[],recent:[],packages:[{id:'pkg1',name:'Knie Standard',exercises:['Beinpresse','Kniebeuger Maschine','Kniestrecker Maschine']},{id:'pkg2',name:'Rücken Standard',exercises:['Rudern','Latziehen','Pallof Press']}],patient:{},bankOpen:false,editId:null,sortMenuId:null,reorderSuppressClick:false,largePdfMode:false,textSyncing:false};
   let bankSelectMode='replaceActive';
   let deletedBankIds=new Set();
   let pendingBankDeleteId=null;
@@ -3984,10 +4270,10 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     renderAdminSecretStatus();
   }
   function clearLocalAdminSecrets(){adminSecrets={geminiKeys:[],mediaDropzoneEndpoint:'',mediaDropzoneUploadToken:'',updatedAt:''}; localStorage.removeItem(adminSecretsKey); try{localStorage.removeItem('kggMediaDropzoneEndpoint');localStorage.removeItem('kggMediaDropzoneUploadToken');}catch(e){} renderAdminSecretStatus();}
-  function maskSecret(value){const text=cleanSecret(value); return text?('â€¢â€¢â€¢â€¢ '+text.slice(-4)):'';}
+  function maskSecret(value){const text=cleanSecret(value); return text?('•••• '+text.slice(-4)):'';}
   function renderAdminSecretStatus(){
     const status=$('adminSecretStatus');
-    if(status){const parts=[]; if(adminSecrets.geminiKeys.length)parts.push('Gemini: '+adminSecrets.geminiKeys.map(maskSecret).join(', ')); if(adminSecrets.mediaDropzoneEndpoint)parts.push('Medien: verbunden'+(adminSecrets.mediaDropzoneUploadToken?' '+maskSecret(adminSecrets.mediaDropzoneUploadToken):'')); status.textContent=parts.length?('Lokal gespeichert: '+parts.join(' Â· ')):'Keine lokalen Codes gespeichert.';}
+    if(status){const parts=[]; if(adminSecrets.geminiKeys.length)parts.push('Gemini: '+adminSecrets.geminiKeys.map(maskSecret).join(', ')); if(adminSecrets.mediaDropzoneEndpoint)parts.push('Medien: verbunden'+(adminSecrets.mediaDropzoneUploadToken?' '+maskSecret(adminSecrets.mediaDropzoneUploadToken):'')); status.textContent=parts.length?('Lokal gespeichert: '+parts.join(' · ')):'Keine lokalen Codes gespeichert.';}
   }
   function openAdminSecretsModal(){
     loadAdminSecrets();
@@ -4079,7 +4365,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
     a.href=url;
-    a.download='kgg_local_admin_config.txt';
+    a.download='KGG_PRIVATE_ADMIN_SAFE_DO_NOT_UPLOAD.kggsafe';
     a.click();
     setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
@@ -4098,25 +4384,69 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   function isStandalonePwa(){return window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;}
   async function initStoragePersistence(){
     if(!navigator.storage||!navigator.storage.persist)return;
-    try{await navigator.storage.persist();}catch(err){console.warn('Persistenter Speicher nicht bestÃ¤tigt:',err);}
+    try{await navigator.storage.persist();}catch(err){console.warn('Persistenter Speicher nicht bestätigt:',err);}
+  }
+
+  function kggVersionNumber(value){
+    const match=String(value||'').match(/v(\d+)/i);
+    return match?parseInt(match[1],10):0;
+  }
+  function currentRolloutProfile(){
+    return (window.KGG_ROLLOUT_PROFILE||'colleague').toLowerCase()==='admin'?'admin':'colleague';
+  }
+  function githubUpdateTargetFromManifest(manifest){
+    const profile=currentRolloutProfile();
+    const latestVersion=profile==='admin'?(manifest.latestAdminVersion||manifest.latestVersion):(manifest.latestColleagueVersion||manifest.latestVersion);
+    const latestUrl=profile==='admin'?(manifest.adminUrl||manifest.latestUrl):(manifest.colleagueUrl||manifest.latestUrl);
+    if(!latestVersion||!latestUrl)return null;
+    if(kggVersionNumber(latestVersion)<=kggVersionNumber(VERSION))return null;
+    return {version:latestVersion,url:latestUrl,notes:manifest.releaseNotes||''};
+  }
+  async function checkGithubAppUpdate(){
+    if(!window.fetch)return;
+    try{
+      const res=await fetch(kggUpdateManifestUrl,{cache:'no-store'});
+      if(!res.ok)return;
+      const manifest=await res.json();
+      if(!manifest||manifest.kind!=='kgg_app_update_manifest')return;
+      const target=githubUpdateTargetFromManifest(manifest);
+      if(!target)return;
+      window.KGGRemoteUpdateUrl=target.url;
+      window.KGGPendingRemoteUpdateVersion=target.version;
+      window.KGGPendingRemoteUpdateNotes=target.notes;
+      showInstallPrompt('remoteUpdate');
+    }catch(err){
+      console.warn('GitHub-Update-Pruefung nicht verfuegbar:',err);
+    }
   }
   function closeInstallPrompt(){const modal=$('installPromptModal'); if(modal)modal.classList.remove('open');}
   function showInstallPrompt(mode){
     if(mode!=='update'&&isStandalonePwa())return;
     if(localStorage.getItem(pwaInstallPromptSeenKey)&&mode!=='update')return;
     const title=$('installPromptTitle'), text=$('installPromptText'), accept=$('acceptInstallPrompt');
-    if(mode==='update'){
+    if(mode==='remoteUpdate'){
+      if(title)title.textContent='GitHub-Update verfuegbar';
+      if(text)text.textContent='Neue Version '+(window.KGGPendingRemoteUpdateVersion||'')+' ist online. Lokale Daten bleiben auf diesem Geraet erhalten.';
+      if(accept)accept.textContent='Update oeffnen';
+    }else if(mode==='update'){
       if(title)title.textContent='Update bereit';
       if(text)text.textContent='Update bereit. Lokale Daten bleiben erhalten.';
       if(accept)accept.textContent='Aktualisieren';
     }else{
       if(title)title.textContent='App installieren?';
-      if(text)text.textContent='Installieren und lokale Daten Ã¼ber Updates behalten.';
+      if(text)text.textContent='Installieren und lokale Daten über Updates behalten.';
       if(accept)accept.textContent='Installieren';
     }
     const modal=$('installPromptModal'); if(modal)modal.classList.add('open');
   }
   async function acceptInstallPrompt(){
+    if(window.KGGRemoteUpdateUrl){
+      const target=window.KGGRemoteUpdateUrl;
+      window.KGGRemoteUpdateUrl='';
+      closeInstallPrompt();
+      try{const opened=window.open(target,'_blank','noopener'); if(!opened)location.href=target;}catch(err){location.href=target;}
+      return;
+    }
     localStorage.setItem(pwaInstallPromptSeenKey,new Date().toISOString());
     const waiting=window.KGGWaitingServiceWorker;
     if(waiting){waiting.postMessage({type:'SKIP_WAITING'}); closeInstallPrompt(); return;}
@@ -4129,6 +4459,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   }
   function initPwaAndUpdates(){
     initStoragePersistence();
+    setTimeout(checkGithubAppUpdate,900);
     window.addEventListener('beforeinstallprompt',ev=>{
       ev.preventDefault();
       deferredInstallPrompt=ev;
@@ -4167,7 +4498,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   function applyLargePdfMode(){
     const enabled=!!state.largePdfMode;
     const btn=$('visionBtn');
-    if(btn){btn.textContent=enabled?'PDF A-':'PDF A+'; btn.setAttribute('aria-pressed',enabled?'true':'false'); btn.title=enabled?'Standard-PDF':'GroÃŸdruck-PDF';}
+    if(btn){btn.textContent=enabled?'PDF A-':'PDF A+'; btn.setAttribute('aria-pressed',enabled?'true':'false'); btn.title=enabled?'Standard-PDF':'Großdruck-PDF';}
   }
   function setLargePdfMode(enabled){state.largePdfMode=!!enabled; applyLargePdfMode(); save();}
   function initLargePdfMode(){if(/[?&](grosspdf|largepdf)=1\b/i.test(location.search))state.largePdfMode=true; applyLargePdfMode();}
@@ -4209,7 +4540,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
       startMetric:ex.startMetric||'',
       startLoad:ex.startLoad||'',
       videoUrl:ex.videoUrl||'',
-      videoLabel:ex.videoLabel||'Video Ã¶ffnen',
+      videoLabel:ex.videoLabel||'Video öffnen',
       media:ensureExerciseMediaList(ex)
     };
   }
@@ -4263,7 +4594,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   function parseLiveExercise(text,localId){
     const raw=String(text||'').trim();
     const parsedSide=parseSideModeFromText(raw);
-    const letters=raw.replace(/[^A-Za-zÃ„Ã–ÃœÃ¤Ã¶Ã¼ÃŸ]/g,'');
+    const letters=raw.replace(/[^A-Za-zÄÖÜäöüß]/g,'');
     if(letters.length<3)return null;
     const match=scoredSearch(raw,1)[0]||null;
     const hit=(match&&match.score>=20)?match.ex:null;
@@ -4310,7 +4641,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   function splitPlanText(text){
     const value=String(text||'').replace(/\r/g,'');
     const parts=[];
-    const re=/\n+|;|,(?=\s*(?:[A-Za-zÃ„Ã–ÃœÃ¤Ã¶Ã¼ÃŸ]|$))/g;
+    const re=/\n+|;|,(?=\s*(?:[A-Za-zÄÖÜäöüß]|$))/g;
     let start=0,match;
     while((match=re.exec(value))){
       parts.push({text:value.slice(start,match.index),start:start,end:match.index,separator:value.slice(match.index,re.lastIndex)});
@@ -4330,7 +4661,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   function exactBankExercise(name){const c=compact(name); return bank.find(ex=>compact(ex.name)===c)||null;}
   function parseTextExercise(text,existing){
     const raw=String(text||'').trim();
-    const letters=raw.replace(/[^A-Za-zÃ„Ã–ÃœÃ¤Ã¶Ã¼ÃŸ]/g,'');
+    const letters=raw.replace(/[^A-Za-zÄÖÜäöüß]/g,'');
     if(letters.length<3)return null;
     const parsedSide=parseSideModeFromText(raw);
     const nums=raw.match(/\d+(?:[,.]\d+)?/g)||[];
@@ -4532,7 +4863,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   function confirmExerciseInput(){syncPlanFromTextInput('ui_confirm_text_master');}
   function upsertLiveExerciseFromText(){syncPlanFromTextInput('ui_textfield_master_input');}
   function activeText(){return activeTextSegment();}
-  function hasSearchLetters(text){return /[A-Za-zÃ„Ã–ÃœÃ¤Ã¶Ã¼ÃŸ]/.test(String(text||''));}
+  function hasSearchLetters(text){return /[A-Za-zÄÖÜäöüß]/.test(String(text||''));}
   function activeBankQuerySegment(){
     const input=$('exerciseInput');
     if(!input)return'';
@@ -4620,7 +4951,10 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     btn.classList.remove('phoneButtonFloat');
     void btn.offsetWidth;
     btn.classList.add('phoneButtonFloat');
-    setTimeout(()=>btn.classList.remove('phoneButtonFloat'),430);
+    setTimeout(()=>{
+      if(document.body.classList.contains('kggPhoneDrawerOpen')&&(id==='recentToggle'||id==='packageToggle'))return;
+      btn.classList.remove('phoneButtonFloat');
+    },430);
   }
   function initPhoneKeyboardAndDrawers(){
     const input=$('exerciseInput');
@@ -4654,9 +4988,9 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     dbTitle.setAttribute('aria-expanded',isOpen?'true':'false');
     dbTitle.setAttribute('aria-label',isOpen?'\u00dcbungsdatenbank schlie\u00dfen':'\u00dcbungsdatenbank \u00f6ffnen');
   }
-  function render(){const rawText=activeText(); const text=activeBankQuerySegment(); const hasPlan=state.plan.length>0; const dbTitle=$('dbTitle'), inputLabel=$('inputLabel'); $('stateBadge').textContent=state.bankOpen?(text?'DB offen mit Text':'DB offen ohne Text'):(rawText?'Textfeld aktiv':(hasPlan?'Aktueller Plan':'Leerzustand')); $('createPanel').classList.toggle('planMode',hasPlan); $('planActions').classList.toggle('hasPlan',hasPlan); $('panelTitle').textContent=hasPlan?'âœï¸ Aktueller Plan':'âž• Neuen Plan erstellen'; inputLabel.textContent='Ãœbungen eingeben'; inputLabel.classList.toggle('hidden',state.bankOpen||hasPlan); $('finishBtn').classList.toggle('hidden',!hasPlan); $('savePackageBtn').classList.toggle('hidden',!hasPlan); renderDbTitle(dbTitle,text); renderSuggestion(text); renderBank(text); bindBankSwipeDelete($('bankContent')); renderPlan(); renderRecent(); renderPackages(); $('patientMini').textContent=state.patient.name||''; updateToggleCarets(); setTabletAnchorActiveClasses(); keepPhoneTextInputVisible();}
-  function renderSuggestion(text){const tabletBank=isTabletLayout(); bankSelectMode=(state.bankOpen||tabletBank)?(text?'replaceActive':'append'):'replaceActive'; const el=$('suggestion'); if(!text || state.bankOpen || tabletBank){el.classList.add('hidden'); el.onclick=null; el.innerHTML=''; return;} const hit=search(text,1)[0]; if(!hit){el.classList.add('hidden'); el.onclick=null; el.innerHTML=''; return;} el.innerHTML='<div class="row"><button class="iconBtn" type="button" data-open-top8 aria-label="Top-8-Treffer Ã¶ffnen">â–¸ ðŸ‹ï¸</button><button class="iconBtn" type="button" data-apply-hit aria-label="Treffer Ã¼bernehmen"><b>'+escapeHtml(hit.name)+'</b></button></div>'; el.classList.remove('hidden'); el.onclick=null; const open=el.querySelector('[data-open-top8]'); const apply=el.querySelector('[data-apply-hit]'); if(open)open.onclick=ev=>{ev.preventDefault();ev.stopPropagation();state.bankOpen=true;render();}; if(apply){preventButtonFocusSteal(apply); apply.onclick=ev=>{ev.preventDefault();ev.stopPropagation();applySelectedExerciseToText(hit,{keepFocus:true});};}}
-  function bankLetterForName(name){const first=String(name||'').trim().charAt(0).toUpperCase(); return /^[A-ZÃ„Ã–Ãœ]$/.test(first)?first:'#';}
+  function render(){const rawText=activeText(); const text=activeBankQuerySegment(); const hasPlan=state.plan.length>0; const dbTitle=$('dbTitle'), inputLabel=$('inputLabel'); $('stateBadge').textContent=state.bankOpen?(text?'DB offen mit Text':'DB offen ohne Text'):(rawText?'Textfeld aktiv':(hasPlan?'Aktueller Plan':'Leerzustand')); $('createPanel').classList.toggle('planMode',hasPlan); $('planActions').classList.toggle('hasPlan',hasPlan); $('panelTitle').textContent=hasPlan?'✏️ Aktueller Plan':'➕ Neuen Plan erstellen'; inputLabel.textContent='Übungen eingeben'; inputLabel.classList.toggle('hidden',state.bankOpen||hasPlan); $('finishBtn').classList.toggle('hidden',!hasPlan); $('savePackageBtn').classList.toggle('hidden',!hasPlan); renderDbTitle(dbTitle,text); renderSuggestion(text); renderBank(text); bindBankSwipeDelete($('bankContent')); renderPlan(); renderRecent(); renderPackages(); $('patientMini').textContent=state.patient.name||''; updateToggleCarets(); setTabletAnchorActiveClasses(); keepPhoneTextInputVisible();}
+  function renderSuggestion(text){const tabletBank=isTabletLayout(); bankSelectMode=(state.bankOpen||tabletBank)?(text?'replaceActive':'append'):'replaceActive'; const el=$('suggestion'); if(!text || state.bankOpen || tabletBank){el.classList.add('hidden'); el.onclick=null; el.innerHTML=''; return;} const hit=search(text,1)[0]; if(!hit){el.classList.add('hidden'); el.onclick=null; el.innerHTML=''; return;} el.innerHTML='<div class="row"><button class="iconBtn" type="button" data-open-top8 aria-label="Top-8-Treffer öffnen">▸ 🏋️</button><button class="iconBtn" type="button" data-apply-hit aria-label="Treffer übernehmen"><b>'+escapeHtml(hit.name)+'</b></button></div>'; el.classList.remove('hidden'); el.onclick=null; const open=el.querySelector('[data-open-top8]'); const apply=el.querySelector('[data-apply-hit]'); if(open)open.onclick=ev=>{ev.preventDefault();ev.stopPropagation();state.bankOpen=true;render();}; if(apply){preventButtonFocusSteal(apply); apply.onclick=ev=>{ev.preventDefault();ev.stopPropagation();applySelectedExerciseToText(hit,{keepFocus:true});};}}
+  function bankLetterForName(name){const first=String(name||'').trim().charAt(0).toUpperCase(); return /^[A-ZÄÖÜ]$/.test(first)?first:'#';}
   function renderSuggestion(text){
     const tabletBank=isTabletLayout();
     bankSelectMode=(state.bankOpen||tabletBank)?(text?'replaceActive':'append'):'replaceActive';
@@ -4664,7 +4998,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     if(!text || state.bankOpen || tabletBank){el.classList.add('hidden'); el.onclick=null; el.innerHTML=''; return;}
     const hit=search(text,1)[0];
     if(!hit){el.classList.add('hidden'); el.onclick=null; el.innerHTML=''; return;}
-    el.innerHTML='<div class="row"><button class="iconBtn" type="button" data-open-top8 aria-label="Top-8-Treffer Ã¶ffnen">â–¸ ðŸ‹ï¸</button><button class="iconBtn" type="button" data-apply-hit aria-label="Treffer Ã¼bernehmen"><b>'+escapeHtml(hit.name)+'</b></button></div>';
+    el.innerHTML='<div class="row"><button class="iconBtn" type="button" data-open-top8 aria-label="Top-8-Treffer öffnen">▸ 🏋️</button><button class="iconBtn" type="button" data-apply-hit aria-label="Treffer übernehmen"><b>'+escapeHtml(hit.name)+'</b></button></div>';
     el.classList.remove('hidden');
     el.onclick=null;
     const open=el.querySelector('[data-open-top8]');
@@ -4688,7 +5022,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   function jumpBankToLetter(container,letter,instant){const nav=container&&container.querySelector('.az'); const rowsWrap=container&&container.querySelector('.bankRows'); if(!container||!rowsWrap)return; const available=[...container.querySelectorAll('.bankRow[data-letter]')].map(row=>row.dataset.letter).filter((l,i,a)=>l&&a.indexOf(l)===i); const targetLetter=nextAvailableBankLetter(letter,available); if(!targetLetter)return; const target=container.querySelector('.bankRow[data-letter="'+targetLetter+'"]'); if(target){const rowRect=target.getBoundingClientRect(); const wrapRect=rowsWrap.getBoundingClientRect(); const nextTop=Math.max(0,rowsWrap.scrollTop+(rowRect.top-wrapRect.top)); rowsWrap.scrollTo({top:nextTop,behavior:instant?'auto':'smooth'}); setActiveAzLetter(nav,targetLetter);}}
   function azLetterFromPoint(nav,clientY){if(!nav)return''; const rect=nav.getBoundingClientRect(); const buttons=[...nav.querySelectorAll('[data-jump]')]; if(!buttons.length)return''; const ratio=Math.max(0,Math.min(1,(clientY-rect.top)/Math.max(1,rect.height))); return buttons[Math.min(buttons.length-1,Math.floor(ratio*buttons.length))].dataset.jump;}
   function bindAzScrollrad(container){const nav=container&&container.querySelector('.az'); if(!nav||nav.dataset.azBound==='1')return; nav.dataset.azBound='1'; let active=false,tapTimer=0; const setTouching=on=>{nav.classList.toggle('azTouching',!!on); if(!on)setAzTouchPreview(nav,'');}; const showTapWave=letter=>{clearTimeout(tapTimer); nav.classList.add('azTouching'); setAzTouchPreview(nav,letter); tapTimer=setTimeout(()=>setTouching(false),180);}; const jumpFromEvent=ev=>{const touch=ev.touches&&ev.touches[0]||ev.changedTouches&&ev.changedTouches[0]; const y=touch?touch.clientY:ev.clientY; const letter=azLetterFromPoint(nav,y); if(letter){setAzTouchPreview(nav,letter); jumpBankToLetter(container,letter,true);}}; nav.addEventListener('click',ev=>{const btn=ev.target&&ev.target.closest?ev.target.closest('[data-jump]'):null; if(!btn||!nav.contains(btn))return; ev.preventDefault(); showTapWave(btn.dataset.jump); jumpBankToLetter(container,btn.dataset.jump);}); nav.addEventListener('pointerdown',ev=>{clearTimeout(tapTimer); active=true; setTouching(true); nav.setPointerCapture&&nav.setPointerCapture(ev.pointerId); ev.preventDefault(); jumpFromEvent(ev);}); nav.addEventListener('pointermove',ev=>{if(!active)return; ev.preventDefault(); jumpFromEvent(ev);}); nav.addEventListener('pointerup',ev=>{active=false; setTouching(false); try{nav.releasePointerCapture&&nav.releasePointerCapture(ev.pointerId);}catch(e){}}); nav.addEventListener('pointercancel',()=>{active=false; setTouching(false);}); nav.addEventListener('touchstart',ev=>{clearTimeout(tapTimer); active=true; setTouching(true); jumpFromEvent(ev);},{passive:false}); nav.addEventListener('touchmove',ev=>{if(!active)return; ev.preventDefault(); jumpFromEvent(ev);},{passive:false}); nav.addEventListener('touchend',()=>{active=false; setTouching(false);},{passive:true});}
-  function renderBank(text){const c=$('bankContent'); const btn=$('bankToggle'); const area=$('bankArea'); const effectiveOpen=state.bankOpen||isTabletLayout(); const shouldHideToggle=!effectiveOpen&&!!text; btn.classList.toggle('hidden',shouldHideToggle); btn.classList.toggle('dbMascotDock',effectiveOpen); const caret=effectiveOpen?'â–¾':'â–¸'; btn.innerHTML='<span class="dbToggleMain"><span class="dbMascotBubble" aria-hidden="true"><span class="dbCaret">'+caret+'</span><span class="dbMascot">ðŸ‹ï¸</span></span><span class="dbToggleText">Ãœbungsdatenbank</span></span>'; btn.setAttribute('aria-label',effectiveOpen?'Ãœbungsdatenbank schlieÃŸen':'Ãœbungsdatenbank Ã¶ffnen'); c.classList.toggle('hidden',!effectiveOpen); area.classList.toggle('bankOpen',effectiveOpen); area.classList.toggle('alphaBankOpen',effectiveOpen&&!text); area.classList.toggle('searchBankOpen',effectiveOpen&&!!text); if(!effectiveOpen){c.innerHTML=''; return;} const matches=text?search(text,8):allAlpha(); const list=text?fillBankListWithFallback(matches,8):matches; const fallbackOnly=!!text&&matches.length===0; let rows=list.map((ex,i)=>{const letter=bankLetterForName(ex.name); return '<div class="bankRow" data-letter="'+letter+'" data-bank-index="'+i+'"><button class="iconBtn" data-add="'+ex.id+'" aria-label="Ãœbung Ã¼bernehmen"><b>'+escapeHtml(ex.name)+'</b><small>'+(ex.unit||'Wdh')+' Â· '+(ex.weightUnit||'kg')+'</small></button><button class="iconBtn" data-edit="'+ex.id+'" aria-label="Ãœbung bearbeiten">âš™ï¸</button></div>';}).join(''); if(text){const label=fallbackOnly?'Alternative Treffer':'Beste Treffer'; c.innerHTML='<div class="bankLabel">'+label+'</div><div class="bankRows">'+rows+'</div>';} else {const availableLetters=new Set(list.map(ex=>bankLetterForName(ex.name))); c.innerHTML='<div class="bankWithAz"><nav class="az" aria-label="A-Z Sprungleiste">'+'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(l=>'<button type="button" data-jump="'+l+'" class="'+(availableLetters.has(l)?'':'az-empty')+'">'+l+'</button>').join('')+'</nav><div class="bankRows">'+rows+'</div></div>'; bindAzScrollrad(c);} c.querySelectorAll('[data-add]').forEach(b=>b.onclick=ev=>{if(Date.now()<bankSwipeSuppressClickUntil){ev.preventDefault();ev.stopPropagation();return;} applySelectedExerciseToText(bank.find(x=>x.id===b.dataset.add));}); c.querySelectorAll('[data-edit]').forEach(b=>b.onclick=ev=>{if(Date.now()<bankSwipeSuppressClickUntil){ev.preventDefault();ev.stopPropagation();return;} openEditor(bank.find(x=>x.id===b.dataset.edit));});}
+  function renderBank(text){const c=$('bankContent'); const btn=$('bankToggle'); const area=$('bankArea'); const effectiveOpen=state.bankOpen||isTabletLayout(); const shouldHideToggle=!effectiveOpen&&!!text; btn.classList.toggle('hidden',shouldHideToggle); btn.classList.toggle('dbMascotDock',effectiveOpen); const caret=effectiveOpen?'▾':'▸'; btn.innerHTML='<span class="dbToggleMain"><span class="dbMascotBubble" aria-hidden="true"><span class="dbCaret">'+caret+'</span><span class="dbMascot">🏋️</span></span><span class="dbToggleText">Übungsdatenbank</span></span>'; btn.setAttribute('aria-label',effectiveOpen?'Übungsdatenbank schließen':'Übungsdatenbank öffnen'); c.classList.toggle('hidden',!effectiveOpen); area.classList.toggle('bankOpen',effectiveOpen); area.classList.toggle('alphaBankOpen',effectiveOpen&&!text); area.classList.toggle('searchBankOpen',effectiveOpen&&!!text); if(!effectiveOpen){c.innerHTML=''; return;} const matches=text?search(text,8):allAlpha(); const list=text?fillBankListWithFallback(matches,8):matches; const fallbackOnly=!!text&&matches.length===0; let rows=list.map((ex,i)=>{const letter=bankLetterForName(ex.name); return '<div class="bankRow" data-letter="'+letter+'" data-bank-index="'+i+'"><button class="iconBtn" data-add="'+ex.id+'" aria-label="Übung übernehmen"><b>'+escapeHtml(ex.name)+'</b><small>'+(ex.unit||'Wdh')+' · '+(ex.weightUnit||'kg')+'</small></button><button class="iconBtn" data-edit="'+ex.id+'" aria-label="Übung bearbeiten">⚙️</button></div>';}).join(''); if(text){const label=fallbackOnly?'Alternative Treffer':'Beste Treffer'; c.innerHTML='<div class="bankLabel">'+label+'</div><div class="bankRows">'+rows+'</div>';} else {const availableLetters=new Set(list.map(ex=>bankLetterForName(ex.name))); c.innerHTML='<div class="bankWithAz"><nav class="az" aria-label="A-Z Sprungleiste">'+'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(l=>'<button type="button" data-jump="'+l+'" class="'+(availableLetters.has(l)?'':'az-empty')+'">'+l+'</button>').join('')+'</nav><div class="bankRows">'+rows+'</div></div>'; bindAzScrollrad(c);} c.querySelectorAll('[data-add]').forEach(b=>b.onclick=ev=>{if(Date.now()<bankSwipeSuppressClickUntil){ev.preventDefault();ev.stopPropagation();return;} applySelectedExerciseToText(bank.find(x=>x.id===b.dataset.add));}); c.querySelectorAll('[data-edit]').forEach(b=>b.onclick=ev=>{if(Date.now()<bankSwipeSuppressClickUntil){ev.preventDefault();ev.stopPropagation();return;} openEditor(bank.find(x=>x.id===b.dataset.edit));});}
   function bindBankSwipeDelete(container){
     if(!container)return;
     container.querySelectorAll('.bankRow').forEach(row=>{
@@ -4768,26 +5102,26 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
         const li=set.li||{}, re=set.re||{};
         const liText=(li.metric?li.metric+' '+metricUnit:'')+(li.load?' @ '+li.load+' '+loadUnit:'');
         const reText=(re.metric?re.metric+' '+metricUnit:'')+(re.load?' @ '+re.load+' '+loadUnit:'');
-        return 'S'+(i+1)+': Li '+(liText||'-')+' / Re '+(reText||'-')+(set.pain?' Â· Schmerz '+set.pain+'/10':'');
+        return 'S'+(i+1)+': Li '+(liText||'-')+' / Re '+(reText||'-')+(set.pain?' · Schmerz '+set.pain+'/10':'');
       }
-      if(isTime)return 'S'+(i+1)+': '+(set&&set.metric||'-')+' '+metricUnit+(set&&set.pain?' Â· Schmerz '+set.pain+'/10':'');
-      return 'S'+(i+1)+': '+(set&&set.metric||'-')+' '+metricUnit+(set&&set.load?' @ '+set.load+' '+loadUnit:'')+(set&&set.pain?' Â· Schmerz '+set.pain+'/10':'');
-    }).join(' Â· ');
+      if(isTime)return 'S'+(i+1)+': '+(set&&set.metric||'-')+' '+metricUnit+(set&&set.pain?' · Schmerz '+set.pain+'/10':'');
+      return 'S'+(i+1)+': '+(set&&set.metric||'-')+' '+metricUnit+(set&&set.load?' @ '+set.load+' '+loadUnit:'')+(set&&set.pain?' · Schmerz '+set.pain+'/10':'');
+    }).join(' · ');
   }
   function exerciseMeta(ex){
     const scanSummary=scanSetSummaryForPlanCard(ex);
     if(scanSummary)return scanSummary;
     const parts=[];
-    parts.push(normalizeSetCount(ex&&ex.sets||3)+' SÃ¤tze');
+    parts.push(normalizeSetCount(ex&&ex.sets||3)+' Sätze');
     parts.push(sideModeLabel(ex&&ex.side));
     const loadUnit=normalizeLoadUnit(ex&&ex.weightUnit||ex&&ex.loadUnit||'kg');
     const metricUnit=ex&&ex.unit||ex&&ex.metricUnit||measureUnitLabel(ex&&ex.measure);
     parts.push(loadUnit);
     parts.push(metricUnit||'Wdh');
-    return parts.filter(Boolean).join(' Â· ');
+    return parts.filter(Boolean).join(' · ');
   }
   function planCardSourceText(ex){
-    if(ex&&ex.scanImported)return ex.scanSource||'Scan Ã¼bernommen';
+    if(ex&&ex.scanImported)return ex.scanSource||'Scan übernommen';
     const raw=String(ex&&ex.rawText||'').trim();
     const name=String(ex&&ex.name||'').trim();
     if(raw&&compact(raw)!==compact(name))return raw;
@@ -4796,9 +5130,9 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   function planCardBadgesHtml(ex){
     const mediaCount=ensureExerciseMediaList(ex).length;
     const bits=[];
-    if(mediaCount)bits.push('<span class="planBadge media">ðŸ–¼ Medien</span>');
+    if(mediaCount)bits.push('<span class="planBadge media">🖼 Medien</span>');
     if(ex&&ex.pendingNew)bits.push('<span class="planBadge new">neu</span>');
-    else if(ex&&ex.needsReview)bits.push('<span class="planBadge review">prÃ¼fen</span>');
+    else if(ex&&ex.needsReview)bits.push('<span class="planBadge review">prüfen</span>');
     if(ex&&ex.liveDraft)bits.push('<span class="planBadge live">live</span>');
     return bits.join('');
   }
@@ -4851,7 +5185,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     if(baseBtn){
       const open=!!(baseFields&&!baseFields.classList.contains('hidden'));
       const label=baseBtn.querySelector('span:first-child');
-      if(label)label.textContent=(open?'â–¼':'â–¶')+' ðŸ‘¤ Basisdaten';
+      if(label)label.textContent=(open?'▼':'▶')+' 👤 Basisdaten';
       baseBtn.setAttribute('aria-expanded',open?'true':'false');
     }
     const currentToggle=$('currentPlanToggle');
@@ -4900,12 +5234,12 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     const cls=job.result?(quality.ok===false?'warn':'good'):(warn.length?'warn':'');
     const typeLabel=job.type==='qr'?'QR-Plan':'Papierplan';
     const title=escapeHtml(job.short||job.label||('Plan '+(index+1)));
-    const meta=escapeHtml(typeLabel+' Â· '+(job.pages&&job.pages.length||0)+' Bild(er)');
+    const meta=escapeHtml(typeLabel+' · '+(job.pages&&job.pages.length||0)+' Bild(er)');
     return '<div class="scanInboxCard '+cls+'" data-scan-index="'+index+'">'+
-      '<button type="button" class="scanInboxRemoveTop" onclick="window.KGGScan.removeJob('+index+')" aria-label="Scan-Ergebnis entfernen">Ã—</button>'+
+      '<button type="button" class="scanInboxRemoveTop" onclick="window.KGGScan.removeJob('+index+')" aria-label="Scan-Ergebnis entfernen">×</button>'+
       '<div class="scanInboxHead"><div><b>'+title+'</b><small>'+meta+'</small></div></div>'+
       '<textarea id="kggScanInboxField'+index+'" class="scanInboxText" readonly>'+escapeHtml(resultText)+'</textarea>'+
-      (warn.length?'<div class="scanWarning">PrÃ¼fen: '+escapeHtml(warn.join(' Â· '))+'</div>':'')+
+      (warn.length?'<div class="scanWarning">Prüfen: '+escapeHtml(warn.join(' · '))+'</div>':'')+
       '<div class="scanInboxActions">'+
         '<button type="button" class="mutedBtn" onclick="window.KGGScan.copyResult('+index+')">kopieren</button>'+
         '<button type="button" class="primary" onclick="window.KGGScan.applyResult('+index+')">weiter bearbeiten</button>'+
@@ -4955,13 +5289,13 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     }
     const planCount=$('currentPlanCount');
     if(planCount){
-      const planInfo=hasPlan?(state.plan.length+' Ãœbung'+(state.plan.length===1?'':'en')):'';
+      const planInfo=hasPlan?(state.plan.length+' Übung'+(state.plan.length===1?'':'en')):'';
       planCount.textContent=planInfo;
     }
     const planToggle=$('currentPlanToggle');
     if(planToggle){
       const planToggleLabel=planToggle.querySelector('span');
-      if(planToggleLabel)planToggleLabel.textContent='Ãœbungen im Plan';
+      if(planToggleLabel)planToggleLabel.textContent='Übungen im Plan';
       planToggle.onclick=()=>setRightPlanPanel('plan','ui_open_current_plan');
       planToggle.setAttribute('aria-expanded',(hasPlan&&planOpen)?'true':'false');
     }
@@ -4977,7 +5311,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
         const thumbnailHtml=planCardThumbnailHtml(ex);
         return '<div class="'+classes.join(' ')+'" data-plan-id="'+id+'">'+
           '<div class="planMain">'+
-            '<button class="drag" data-sort-id="'+id+'" type="button" aria-label="Ãœbung verschieben">â ¿</button>'+ 
+            '<button class="drag" data-sort-id="'+id+'" type="button" aria-label="Übung verschieben">⠿</button>'+ 
             thumbnailHtml+
             '<span class="planText">'+
               '<b><span class="planIndex">'+(i+1)+'.</span> <span class="planName">'+escapeHtml(ex.name)+'</span> <span class="planBadges">'+planCardBadgesHtml(ex)+'</span></b>'+ 
@@ -4986,8 +5320,8 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
             '</span>'+ 
           '</div>'+ 
           '<div class="planCardActions">'+
-            '<button class="iconBtn" data-planedit="'+id+'" aria-label="Ãœbung bearbeiten">âš™ï¸</button>'+ 
-            '<button class="iconBtn danger planDeleteBtn" data-del="'+id+'" aria-label="Ãœbung lÃ¶schen">Ã—</button>'+ 
+            '<button class="iconBtn" data-planedit="'+id+'" aria-label="Übung bearbeiten">⚙️</button>'+ 
+            '<button class="iconBtn danger planDeleteBtn" data-del="'+id+'" aria-label="Übung löschen">×</button>'+ 
           '</div>'+ 
         '</div>';
       }).join('');
@@ -5262,7 +5596,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   function renderRecent(){
     const el=$('recentList');
     const items=(state.recent||[]).slice(0,5);
-    el.innerHTML=items.map((p,i)=>'<div class="notice"><b>'+escapeHtml(p.name||('Plan '+(i+1)))+'</b><br><small>'+((p.exercises||[]).length)+' Ãœbungen'+(p.date?' Â· '+escapeHtml(String(p.date).slice(0,10)):'')+'</small><br><button class="mutedBtn" data-recent-index="'+i+'" type="button" style="width:100%;margin-top:8px">Plan wieder Ã¶ffnen</button></div>').join('')||'<div class="notice">Keine PlÃ¤ne.</div>';
+    el.innerHTML=items.map((p,i)=>'<div class="notice"><b>'+escapeHtml(p.name||('Plan '+(i+1)))+'</b><br><small>'+((p.exercises||[]).length)+' Übungen'+(p.date?' · '+escapeHtml(String(p.date).slice(0,10)):'')+'</small><br><button class="mutedBtn" data-recent-index="'+i+'" type="button" style="width:100%;margin-top:8px">Plan wieder öffnen</button></div>').join('')||'<div class="notice">Keine Pläne.</div>';
     el.querySelectorAll('[data-recent-index]').forEach(btn=>btn.onclick=()=>restoreRecentPlan(Number(btn.dataset.recentIndex)));
   }
   function defaultPackageName(){const patient=String(state.patient&&state.patient.name||'').trim(); const stamp=new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}); return (patient?patient+' ':'')+'Paket '+stamp;}
@@ -5288,7 +5622,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     if($('packageList'))$('packageList').classList.remove('hidden');
     render();
   }
-  function renderPackages(){const el=$('packageList'); el.innerHTML=(state.packages||[]).map(p=>'<div class="notice"><b>'+escapeHtml(p.name)+'</b><br><small>'+(p.exercises||[]).map(escapeHtml).join(', ')+'</small><br><button class="mutedBtn" data-pkg="'+p.id+'">Paket in Plan Ã¼bernehmen</button></div>').join(''); el.querySelectorAll('[data-pkg]').forEach(b=>b.onclick=()=>{const p=state.packages.find(x=>x.id===b.dataset.pkg); (p.exercises||[]).forEach(n=>addExercise(search(n,1)[0]||{name:n,sets:3,unit:'Wdh',weightUnit:'kg'}));});}
+  function renderPackages(){const el=$('packageList'); el.innerHTML=(state.packages||[]).map(p=>'<div class="notice"><b>'+escapeHtml(p.name)+'</b><br><small>'+(p.exercises||[]).map(escapeHtml).join(', ')+'</small><br><button class="mutedBtn" data-pkg="'+p.id+'">Paket in Plan übernehmen</button></div>').join(''); el.querySelectorAll('[data-pkg]').forEach(b=>b.onclick=()=>{const p=state.packages.find(x=>x.id===b.dataset.pkg); (p.exercises||[]).forEach(n=>addExercise(search(n,1)[0]||{name:n,sets:3,unit:'Wdh',weightUnit:'kg'}));});}
   function sanitizeSharedBankExercise(ex){
     return {id:String(ex.id||('shared_'+compact(ex.name))).slice(0,80),name:String(ex.name||'').trim(),aliases:String(ex.aliases||ex.name||'').trim(),sets:normalizeSetCount(ex.sets||3),unit:String(ex.unit||'Wdh'),weightUnit:normalizeLoadUnit(ex.weightUnit||'kg'),shared:true,updatedAt:ex.updatedAt||new Date().toISOString()};
   }
@@ -5299,7 +5633,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   function parseSharedExerciseBankPayload(raw){
     const payload=typeof raw==='string'?JSON.parse(raw):raw;
     const exercises=Array.isArray(payload)?payload:(Array.isArray(payload&&payload.exercises)?payload.exercises:[]);
-    if(!exercises.length)throw new Error('Keine Ãœbungen im Import gefunden.');
+    if(!exercises.length)throw new Error('Keine Übungen im Import gefunden.');
     return exercises.map(sanitizeSharedBankExercise).filter(ex=>ex.name);
   }
   function mergeSharedExerciseBank(raw){
@@ -5341,8 +5675,8 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   }
   function applySharedBankFromText(){
     const status=$('sharedBankStatus');
-    try{const result=mergeSharedExerciseBank($('sharedBankText').value); if(status)status.textContent='Import Ã¼bernommen: '+result.added+' neu, '+result.updated+' aktualisiert.';}
-    catch(err){if(status)status.textContent='Import nicht Ã¼bernommen: '+(err&&err.message||'unbekannter Fehler');}
+    try{const result=mergeSharedExerciseBank($('sharedBankText').value); if(status)status.textContent='Import übernommen: '+result.added+' neu, '+result.updated+' aktualisiert.';}
+    catch(err){if(status)status.textContent='Import nicht übernommen: '+(err&&err.message||'unbekannter Fehler');}
   }
   function handleSharedBankFile(ev){
     const file=ev.target.files&&ev.target.files[0];
@@ -5627,7 +5961,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     removeBtn.classList.toggle('hidden',media.length===0);
     if(!media.length){status.textContent='Kein Bild.';clearEditorMediaPreview();return;}
     const first=media[0];
-    status.textContent='1 Bild Â· '+mediaSizeLabel(first.encryptedSize||first.compressedSize||first.originalSize);
+    status.textContent='1 Bild · '+mediaSizeLabel(first.encryptedSize||first.compressedSize||first.originalSize);
     renderEditorMediaPreview(first);
   }
   async function handleEditorMediaFileSelected(ev){
@@ -5689,7 +6023,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     $('editMeasure').value=normalizeMeasureMode(ex.measure||inferredMeasure);
     $('editSide').value=normalizeSideMode(ex.side||'BI');
     $('editVideoUrl').value=ex.videoUrl||'';
-    $('editVideoLabel').value=ex.videoLabel||'Video Ã¶ffnen';
+    $('editVideoLabel').value=ex.videoLabel||'Video öffnen';
     renderEditorMediaStatus(ex);
     const bankEdit=!ex.localId&&bank.some(item=>String(item.id)===String(ex.id));
     $('deleteExercise').dataset.scope=bankEdit?'bank':'plan';
@@ -5714,7 +6048,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
       planEx.metricUnit=measureUnitLabel(measure);
       planEx.side=normalizeSideMode($('editSide').value);
       planEx.videoUrl=String($('editVideoUrl').value||'').trim();
-      planEx.videoLabel=String($('editVideoLabel').value||'').trim()||'Video Ã¶ffnen';
+      planEx.videoLabel=String($('editVideoLabel').value||'').trim()||'Video öffnen';
       planEx.changedByLiveText=false;
       planEx.needsReview=false;
       const bankEx=upsertPlanExerciseToBank(planEx,'ui_save_exercise');
@@ -5744,7 +6078,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
         bankEx.metricUnit=measureUnitLabel(measure);
         bankEx.side=normalizeSideMode($('editSide').value);
         bankEx.videoUrl=String($('editVideoUrl').value||'').trim();
-        bankEx.videoLabel=String($('editVideoLabel').value||'').trim()||'Video Ã¶ffnen';
+        bankEx.videoLabel=String($('editVideoLabel').value||'').trim()||'Video öffnen';
         bankEx.custom=true;
         bankEx.updatedAt=new Date().toISOString();
         persistCustomBank();
@@ -5819,7 +6153,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     const metricUnit=safePdfString(source.unit||source.metricUnit,'Wdh')||'Wdh';
     const slotNo=slotIndex+1;
     const exNo='EX'+slotNo;
-    const name=safePdfString(source.name,'Ãœbung '+(index+1));
+    const name=safePdfString(source.name,'Übung '+(index+1));
     const side=safePdfString(source.side||source.sides||source.laterality,'');
     const normalized={
       sourceId:safePdfString(source.localId||source.id||''),
@@ -5829,7 +6163,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
       slotIndex:slotNo,
       slotNo,
       exNo,
-      displayLabel:exNo+' Â· '+name,
+      displayLabel:exNo+' · '+name,
       empty:false,
       isEmpty:false,
       name,
@@ -5952,7 +6286,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   }
   function pdfShort(text,max){
     const s=String(text==null?'':text).replace(/\s+/g,' ').trim();
-    return s.length>max?s.slice(0,Math.max(0,max-1))+'â€¦':s;
+    return s.length>max?s.slice(0,Math.max(0,max-1))+'…':s;
   }
   function pdfSpaceLabel(fullLabel,shortLabel,cellWidth,minWidth){
     return Number(cellWidth||0)>=Number(minWidth||0)?fullLabel:shortLabel;
@@ -5998,9 +6332,9 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     pdfSetFont(doc,5.2,'normal');
     const line1='Patient/in: '+pdfShort(patient.displayName||patient.name||patient.initials||patient.id||'Patient/in',46)+'   Start: '+pdfShort(patient.startDate||'-',20)+'   Anlass: '+pdfShort(patient.reason||'KGG',18);
     pdfText(doc,line1,x+3,y+10.0);
-    pdfText(doc,'T1-T6 = Trainingstage   S1-S3 = SÃ¤tze',x+3,y+14.1);
+    pdfText(doc,'T1-T6 = Trainingstage   S1-S3 = Sätze',x+3,y+14.1);
     pdfSetFont(doc,4.6,'normal');
-    pdfText(doc,template+' Â· Seite '+pageNo+'/'+pageCount,x+w-3,y+5.6,{align:'right'});
+    pdfText(doc,template+' · Seite '+pageNo+'/'+pageCount,x+w-3,y+5.6,{align:'right'});
     pdfSetFont(doc,3.8,'normal');
     pdfText(doc,PDF_RUNTIME_FINGERPRINT,x+w-3,y+13.9,{align:'right'});
     pdfResetInk(doc);
@@ -6085,12 +6419,12 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     pdfText(doc,String(ex.slotNo||ex.slotIndex||''),x+labelW/2,y+4.9,{align:'center'});
     try{doc.setTextColor(0);}catch(e){}
     pdfSetFont(doc,7.1,'bold');
-    pdfText(doc,pdfShort((ex.exNo||'EX')+' Â· '+(ex.name||'Ãœbung'),62),x+labelW+2.3,y+5.0);
+    pdfText(doc,pdfShort((ex.exNo||'EX')+' · '+(ex.name||'Übung'),62),x+labelW+2.3,y+5.0);
     const sideLabel=sideModeLabel(ex.side||'BI');
     const startParts=[];
     if(ex.startLoad)startParts.push('Startlast '+ex.startLoad+' '+(ex.loadUnit||'kg'));
     if(ex.startMetric)startParts.push('Startwert '+ex.startMetric+' '+(ex.metricUnit||'Wdh'));
-    const meta=[(ex.sets||3)+' SÃ¤tze',sideLabel].concat(startParts).concat([(ex.loadUnit||'kg'),(ex.metricUnit==='Wdh'?'Wiederholungen':(ex.metricUnit||'Wdh'))]).join(' Â· ');
+    const meta=[(ex.sets||3)+' Sätze',sideLabel].concat(startParts).concat([(ex.loadUnit||'kg'),(ex.metricUnit==='Wdh'?'Wiederholungen':(ex.metricUnit||'Wdh'))]).join(' · ');
     pdfSetFont(doc,4.55,'normal');
     pdfText(doc,pdfShort(meta,95),x+labelW+2.3,y+9.1);
     pdfSetFont(doc,3.35,'normal');
@@ -6276,7 +6610,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     setPdfMobileBridgeVisible(useMobileBridge);
     if(frame){frame.src=useMobileBridge?'about:blank':url;frame.onerror=()=>setPdfPreviewFallbackVisible(true);}
     const notice=$('pdfPreviewNotice');
-    if(notice)notice.textContent=useMobileBridge?'PDF bereit. Ã–ffnen oder herunterladen.':'PDF bereit. Drucken oder herunterladen.';
+    if(notice)notice.textContent=useMobileBridge?'PDF bereit. Öffnen oder herunterladen.':'PDF bereit. Drucken oder herunterladen.';
     $('pdfPreviewModal').classList.add('open');
     if(!useMobileBridge){
       pdfPreviewFallbackTimer=setTimeout(()=>{
@@ -6356,7 +6690,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     const pdfMode=state.largePdfMode?'grossdruck':'standard';
     const doc=new JsPdfCtor({orientation:state.largePdfMode?'portrait':'landscape',unit:'mm',format:state.largePdfMode?[420,594]:'a4'});
     const patientName=snapshot.patient&&snapshot.patient.displayName||snapshot.patient&&snapshot.patient.name||'patient';
-    const safeName=String(patientName).replace(/[^a-z0-9Ã¤Ã¶Ã¼ÃŸ_-]+/ig,'_').replace(/^_+|_+$/g,'')||'patient';
+    const safeName=String(patientName).replace(/[^a-z0-9äöüß_-]+/ig,'_').replace(/^_+|_+$/g,'')||'patient';
     const stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\..+$/,'').replace('T','_');
     try{doc.setProperties({title:'KGG Trainingsplan '+safeName,subject:PDF_RUNTIME_FINGERPRINT+' '+pdfMode,creator:VERSION});}catch(e){}
     if(state.largePdfMode)drawKggPdfLayoutV1(createScaledPdfDoc(doc,2,{orientation:'portrait',virtualW:210,virtualH:297}),snapshot); else drawKggPdfLayoutV1(doc,snapshot);
@@ -6440,7 +6774,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     const loadUnit=ex&&ex.weightUnit||ex&&ex.loadUnit||'kg';
     const metricUnit=ex&&ex.unit||ex&&ex.metricUnit||'Wdh';
     return [
-      ex&&ex.name||'Ãœbung',
+      ex&&ex.name||'Übung',
       normalizeSetCount(ex&&ex.sets),
       normalizeSideMode(ex&&ex.side||ex&&ex.laterality||'BI'),
       loadUnit,
@@ -6449,7 +6783,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
       ex&&ex.startMetric||ex&&ex.metric||ex&&ex.reps||'',
       media&&media.length?media:'',
       ex&&ex.videoUrl||'',
-      ex&&ex.videoLabel||'Video Ã¶ffnen'
+      ex&&ex.videoLabel||'Video öffnen'
     ];
   }
   function buildKggH2PayloadFromPlan(plan,exercises,patient,mediaMeta){
@@ -6492,7 +6826,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     const loadUnit=e[3]||'kg';
     const metricUnit=e[4]||'Wdh';
     return {
-      name:e[0]||'Ãœbung',
+      name:e[0]||'Übung',
       sets:Number(e[1])||3,
       side:normalizeSideMode(e[2]||'BI'),
       weightUnit:loadUnit,
@@ -6503,7 +6837,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
       startMetric:e[6]||'',
       media:media.map(entry=>typeof entry==='string'?{id:entry,type:'image',bundleRef:true}:ensureMediaShape(entry)),
       videoUrl:e[8]||'',
-      videoLabel:e[9]||'Video Ã¶ffnen'
+      videoLabel:e[9]||'Video öffnen'
     };
   }
   function convertKggH2PayloadToPatientPayload(raw){
@@ -6621,7 +6955,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     btn.addEventListener('pointerdown',()=>{
       if(!lastPatientSharePlanSnapshot)return;
       holding=true;
-      btn.textContent='5 Sek. halten fÃ¼r 24h';
+      btn.textContent='5 Sek. halten für 24h';
       timer=setTimeout(()=>{
         timer=null;
         holding=false;
@@ -6654,11 +6988,11 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     if(close)close.classList.remove('hidden');
     if(finishNotice)finishNotice.textContent='';
     const link=$('patientAppLink'), notice=$('patientShareNotice'), box=$('patientQrBox'), status=$('patientQrStatus'), copyBtn=$('copyPatientLink');
-    $('shareText').value='INTERNE DEBUG-TESTAUSGABE â€“ nicht an Patient:innen weitergeben\n\nLokaler Testlink:\n'+share.debugUrl+'\n\nPayload JSON:\n'+JSON.stringify(share.payload,null,2);
+    $('shareText').value='INTERNE DEBUG-TESTAUSGABE – nicht an Patient:innen weitergeben\n\nLokaler Testlink:\n'+share.debugUrl+'\n\nPayload JSON:\n'+JSON.stringify(share.payload,null,2);
     const dbg=$('debugPayloadBox'); if(dbg)dbg.open=false;
     if(!share.shareable){
       if(notice)notice.textContent='Lokaler Test.';
-      if(link){link.classList.remove('hidden'); link.href=share.debugUrl; link.textContent='Patienten-Test Ã¶ffnen';}
+      if(link){link.classList.remove('hidden'); link.href=share.debugUrl; link.textContent='Patienten-Test öffnen';}
       if(copyBtn){copyBtn.classList.remove('hidden'); setPatientCopyButtonLabel();}
       setManualPatientLinkField(share.debugUrl,false,false);
       setupPatientLinkCopyLongPress();
@@ -6865,18 +7199,18 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   }
 
   function patientExerciseLine(ex,index){
-    const name=escapeHtml(ex&&ex.name||'Ãœbung '+(index+1));
+    const name=escapeHtml(ex&&ex.name||'Übung '+(index+1));
     const sets=escapeHtml(ex&&ex.sets||3);
     const metric=escapeHtml(ex&&ex.startMetric||ex&&ex.metric||'');
     const metricUnit=escapeHtml(ex&&ex.unit||ex&&ex.metricUnit||'Wdh');
     const load=escapeHtml(ex&&ex.startLoad||ex&&ex.load||ex&&ex.weight||'');
     const loadUnit=escapeHtml(ex&&ex.weightUnit||ex&&ex.loadUnit||'kg');
     const side=sideModeLabel(ex&&ex.side||ex&&ex.laterality||'BI');
-    const details=[sets+' SÃ¤tze'];
+    const details=[sets+' Sätze'];
     if(metric)details.push(metric+' '+metricUnit);
     if(load)details.push(load+' '+loadUnit);
     details.push(side);
-    return '<article class="patientExercise"><b>'+(index+1)+'. '+name+'</b><small>'+details.map(escapeHtml).join(' Â· ')+'</small>'+patientMediaMarkup(ex)+'</article>';
+    return '<article class="patientExercise"><b>'+(index+1)+'. '+name+'</b><small>'+details.map(escapeHtml).join(' · ')+'</small>'+patientMediaMarkup(ex)+'</article>';
   }
 
   function renderPatientHashView(){
@@ -6888,12 +7222,12 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     const date=escapeHtml(patient.date||patient.startDate||'');
     const exercises=plan.filter(Boolean);
     document.body.innerHTML='<main class="patientAppView">'+
-      '<header><h1>KGG Trainingsplan</h1><p>'+displayName+(date?' Â· '+date:'')+'</p></header>'+
+      '<header><h1>KGG Trainingsplan</h1><p>'+displayName+(date?' · '+date:'')+'</p></header>'+
       (payload.error?'<section class="patientNotice">Dieser Patienten-Link konnte nicht gelesen werden.</section>':'')+
       '<section class="patientExercises">'+
-      (exercises.length?exercises.map(patientExerciseLine).join(''):'<p class="patientNotice">Keine Ãœbungen im Plan gefunden.</p>')+
+      (exercises.length?exercises.map(patientExerciseLine).join(''):'<p class="patientNotice">Keine Übungen im Plan gefunden.</p>')+
       '</section>'+
-      '<footer>Bitte trainiere nach RÃ¼cksprache mit deiner Praxis. Schmerzen und AuffÃ¤lligkeiten dort melden.</footer>'+
+      '<footer>Bitte trainiere nach Rücksprache mit deiner Praxis. Schmerzen und Auffälligkeiten dort melden.</footer>'+
       '</main>';
     const style=document.createElement('style');
     style.textContent='body{display:block;background:#e8eef6;color:#071027}.patientAppView{width:min(100%,520px);min-height:100vh;margin:0 auto;padding:18px 14px 34px;background:#e8eef6}.patientAppView header{background:#fff;border:2px solid #1b2230;border-radius:22px;padding:16px;box-shadow:0 4px 14px rgba(7,16,39,.08)}.patientAppView h1{font-size:28px;line-height:1.05;margin:0 0 8px}.patientAppView p{margin:0;color:#657386;font-weight:800}.patientExercises{display:grid;gap:10px;margin-top:14px}.patientExercise{background:#fff;border:1px solid #dce3eb;border-radius:16px;padding:14px;box-shadow:0 4px 14px rgba(7,16,39,.08)}.patientExercise b{display:block;font-size:20px}.patientExercise small{display:block;margin-top:7px;color:#38475b;font-size:15px;font-weight:850}.patientMediaList{display:grid;gap:8px;margin-top:12px}.patientMedia{border:1px solid #dce3eb;border-radius:14px;background:#f6f8fb;padding:10px;color:#38475b;font-weight:850}.patientMedia span{display:block}.patientMedia small{font-size:13px;color:#657386}.patientMedia img{display:block;width:100%;max-height:320px;object-fit:contain;border-radius:12px;background:#fff}.patientMedia_ready{background:#fff}.patientMedia_error{background:#fff8e8;border-color:#f2d38a}.patientNotice{background:#fff8e8;border:1px solid #f2d38a;border-radius:16px;padding:14px;margin-top:14px;font-weight:800}.patientAppView footer{margin-top:18px;color:#657386;font-size:13px;font-weight:800}';
@@ -6905,7 +7239,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   function renderRuntimeVersionInUi(){
     const el=document.querySelector('.topbar small');
     if(!el)return;
-    const marker=' Â· '+VERSION+' Â· TEMPLATE_MATCH_V1_RUNTIME_GUARD';
+    const marker=' · '+VERSION+' · TEMPLATE_MATCH_V1_RUNTIME_GUARD';
     if(!el.textContent.includes('TEMPLATE_MATCH_V1_RUNTIME_GUARD'))el.textContent=(el.textContent||'')+marker;
   }
   /* v295 SINGLE KGGScan REBUILD
@@ -7019,7 +7353,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     if('BarcodeDetector' in window){
       try{detector=new BarcodeDetector({formats:['qr_code']});}catch(err){detector=null;}
     }
-    if(!detector&&!window.jsQR)return {raw:'',reason:'QR-Erkennung ist in diesem Browser nicht verfÃ¼gbar.'};
+    if(!detector&&!window.jsQR)return {raw:'',reason:'QR-Erkennung ist in diesem Browser nicht verfügbar.'};
     const base=await scanImageCanvasFromFile(file,1800);
     const crops=[
       {id:'full',x:0,y:0,w:1,h:1},
@@ -7108,7 +7442,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     throw new Error('QR erkannt, aber Format nicht lesbar.');
   }
   function stripScanExerciseName(name){
-    return String(name||'').replace(/^\s*(?:EX|ÃœB|UE)\s*\d+\s*[:.)|\-â€“â€”]*\s*/i,'').replace(/\s+/g,' ').trim();
+    return String(name||'').replace(/^\s*(?:EX|ÜB|UE)\s*\d+\s*[:.)|\-–—]*\s*/i,'').replace(/\s+/g,' ').trim();
   }
   function scanPayloadExercises(payload){
     if(!payload)return [];
@@ -7147,7 +7481,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     if(Array.isArray(item)){
       try{return stripScanExerciseName(expandKggH2Exercise(item).name);}catch(err){return stripScanExerciseName(item[0]||'');}
     }
-    return stripScanExerciseName(item&&((item.name||item.title||item.exercise||item.uebung||item['Ã¼bung'])||''));
+    return stripScanExerciseName(item&&((item.name||item.title||item.exercise||item.uebung||item['übung'])||''));
   }
   function scanExerciseApplyLine(item){
     const name=scanExerciseName(item);
@@ -7234,7 +7568,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
         const idx=nums.length>=6?s*2+1:s;
         const metric=scanFormatNumber(nums[idx]);
         const pain=scanFormatPain(pains[s]||nums[(nums.length>=9?s*3+2:-1)]);
-        if(metric)lines.push('Satz '+(s+1)+': '+metric+' '+metricUnit+(pain?' Â· Schmerz: '+pain+'/10':''));
+        if(metric)lines.push('Satz '+(s+1)+': '+metric+' '+metricUnit+(pain?' · Schmerz: '+pain+'/10':''));
       }
       return lines;
     }
@@ -7242,21 +7576,21 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
       for(let s=0;s<3;s++){
         const base=s*3;
         const load=scanFormatNumber(nums[base]), metric=scanFormatNumber(nums[base+1]), pain=scanFormatPain(nums[base+2]||pains[s]);
-        if(load||metric)lines.push('Satz '+(s+1)+': '+(metric||'')+' '+metricUnit+(load?' @ '+load+' '+loadUnit:'')+(pain?' Â· Schmerz: '+pain+'/10':''));
+        if(load||metric)lines.push('Satz '+(s+1)+': '+(metric||'')+' '+metricUnit+(load?' @ '+load+' '+loadUnit:'')+(pain?' · Schmerz: '+pain+'/10':''));
       }
       return lines;
     }
     if(nums.length>=6){
       for(let s=0;s<3;s++){
         const load=scanFormatNumber(nums[s*2]), metric=scanFormatNumber(nums[s*2+1]), pain=scanFormatPain(pains[s]);
-        if(load||metric)lines.push('Satz '+(s+1)+': '+(metric||'')+' '+metricUnit+(load?' @ '+load+' '+loadUnit:'')+(pain?' Â· Schmerz: '+pain+'/10':''));
+        if(load||metric)lines.push('Satz '+(s+1)+': '+(metric||'')+' '+metricUnit+(load?' @ '+load+' '+loadUnit:'')+(pain?' · Schmerz: '+pain+'/10':''));
       }
       return lines;
     }
     const load=scanNonEmptyValue(source.startLoad||source.load||source.weight||source.lastLoad||'');
     const metric=scanNonEmptyValue(source.startMetric||source.metric||source.reps||source.time||source.lastMetric||'');
     const pain=scanFormatPain((pains||[])[0]||source.pain||source.schmerz);
-    if(metric||load)lines.push('Satz 1: '+(metric?scanFormatNumber(metric)+' '+metricUnit:'')+(load?' @ '+scanFormatNumber(load)+' '+loadUnit:'')+(pain?' Â· Schmerz: '+pain+'/10':''));
+    if(metric||load)lines.push('Satz 1: '+(metric?scanFormatNumber(metric)+' '+metricUnit:'')+(load?' @ '+scanFormatNumber(load)+' '+loadUnit:'')+(pain?' · Schmerz: '+pain+'/10':''));
     else if(pain)lines.push('Schmerz: '+pain+'/10');
     return lines;
   }
@@ -7300,23 +7634,23 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     const lines=[];
     if(short)lines.push(short);
     if(result.type)lines.push('Typ: '+result.type);
-    if(quality.warnings&&quality.warnings.length)lines.push('PrÃ¼fen: '+quality.warnings.join(', '));
+    if(quality.warnings&&quality.warnings.length)lines.push('Prüfen: '+quality.warnings.join(', '));
     if(text)lines.push('',text);
     return lines.join('\n').trim();
   }
   function scanPaperQuality(text,result){
     const raw=String(text||'').trim();
     const parts=raw.split(/[,\n]+/).map(part=>part.trim()).filter(Boolean);
-    const exerciseLike=parts.filter(part=>/[a-zÃ¤Ã¶Ã¼ÃŸ]{4,}/i.test(part)&&!/^unbekannte\s+Ã¼bung/i.test(part));
+    const exerciseLike=parts.filter(part=>/[a-zäöüß]{4,}/i.test(part)&&!/^unbekannte\s+übung/i.test(part));
     const numbers=(raw.match(/\d+(?:[,.]\d+)?/g)||[]).length;
-    const unknown=(raw.match(/unbekannte\s+Ã¼bung|\?{2,}/gi)||[]).length;
+    const unknown=(raw.match(/unbekannte\s+übung|\?{2,}/gi)||[]).length;
     const days=(raw.match(/\bT(?:ag)?\s*\d+\b/gi)||[]).map(x=>Number((x.match(/\d+/)||[0])[0])).filter(Boolean);
     const warnings=[];
-    if(exerciseLike.length<1)warnings.push('wenige Ãœbungsnamen erkannt');
+    if(exerciseLike.length<1)warnings.push('wenige Übungsnamen erkannt');
     if(unknown>1)warnings.push('zu viele unsichere Treffer');
-    if(numbers>90)warnings.push('zu viele Zahlen statt Ãœbungsstruktur');
-    if(days.length&&Math.max(...days)>8)warnings.push('mÃ¶glicherweise erfundene Tage');
-    if(/(?:unbekannte\s+Ã¼bung\s*,?\s*){2,}/i.test(raw))warnings.push('Unbekannte-Ãœbung-Kaskade');
+    if(numbers>90)warnings.push('zu viele Zahlen statt Übungsstruktur');
+    if(days.length&&Math.max(...days)>8)warnings.push('möglicherweise erfundene Tage');
+    if(/(?:unbekannte\s+übung\s*,?\s*){2,}/i.test(raw))warnings.push('Unbekannte-Übung-Kaskade');
     return {ok:!warnings.length,exerciseCount:exerciseLike.length,numberCount:numbers,warnings,rawResult:!!result};
   }
   function createScanReadingCanvas(src){
@@ -7362,7 +7696,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
       if(asText)return asText;
     }
     out=out.split(/\n+/).map(line=>line.replace(/^\s*(?:[-*]|\d+[.)])\s*/,'').trim()).filter(Boolean).join(', ');
-    out=out.replace(/\b(?:EX|ÃœB|UE)\s*\d+\s*[:.)|\-â€“â€”]*\s*/gi,'');
+    out=out.replace(/\b(?:EX|ÜB|UE)\s*\d+\s*[:.)|\-–—]*\s*/gi,'');
     out=out.replace(/\s*;\s*/g,', ').replace(/\s*,\s*/g,', ').replace(/(?:,\s*){2,}/g,', ').replace(/\s+/g,' ').trim();
     if(/^keine auslesbaren/i.test(out))return '';
     return out;
@@ -7379,12 +7713,12 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
       'Du liest einen deutschen KGG/Physio-Papierplan als Foto.',
       'QR-Codes werden lokal gelesen; du bist nur Papierplan-Fallback.',
       'Ignoriere Patientendaten, Kopfzeilen, Randnotizen und Datenschutzmasken.',
-      'Entferne EX1/EX2/UE1-Praefixe aus Ãœbungsnamen.',
-      'Gib nur Ã¼bungsbezogene Inhalte aus: Ãœbungsname, Seite links/rechts falls erkennbar, Last, Wdh oder Zeit.',
-      'Keine Tage erfinden. Keine leeren Tabellenzeilen als Ãœbungen ausgeben.',
+      'Entferne EX1/EX2/UE1-Praefixe aus Übungsnamen.',
+      'Gib nur übungsbezogene Inhalte aus: Übungsname, Seite links/rechts falls erkennbar, Last, Wdh oder Zeit.',
+      'Keine Tage erfinden. Keine leeren Tabellenzeilen als Übungen ausgeben.',
       'Bei unsicheren Werten lieber null/unsicher statt raten.',
       'Bevorzugtes JSON: {"exercises":[{"name":"...","side":"BI oder LR","load":"","reps":"","time":"","uncertain":false}],"warnings":[]}',
-      'Wenn JSON unsicher ist, gib zusÃ¤tzlich klaren Text mit einer Ãœbung pro Zeile aus.'
+      'Wenn JSON unsicher ist, gib zusätzlich klaren Text mit einer Übung pro Zeile aus.'
     ].join('\n');
   }
   function localGeminiKeys(){
@@ -7398,7 +7732,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
      KGG v308 QR STRUCTURED OUTPUT + CURRENT-LAYOUT CONTACT-SHEET SCAN START
      Integrationskandidat aus v306: TPL-BASIS-A-CLASSIC-L6-v2, EX1-EX6,
      T1-Zeilen-Crops -> Contact-Sheet -> ein Gemini-Call -> lokale Zuordnung.
-     SpÃ¤ter entfernbar/isolierbar, aber KEINE zweite KGGScan-Engine.
+     Später entfernbar/isolierbar, aber KEINE zweite KGGScan-Engine.
      ======================================================================== */
   const KGG_CURRENT_LAYOUT_ID='TPL-BASIS-A-CLASSIC-L6-v2';
   const KGG_CURRENT_LAYOUT_BOXES=[
@@ -7463,7 +7797,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     const x=c.getContext('2d',{willReadFrequently:true});
     x.fillStyle='#fff'; x.fillRect(0,0,c.width,c.height);
     x.fillStyle='#071027'; x.font='bold 24px Arial';
-    x.fillText('KGG T1 Contact-Sheet Â· aktuelles Layout EX1-EX6',20,28);
+    x.fillText('KGG T1 Contact-Sheet · aktuelles Layout EX1-EX6',20,28);
     list.forEach((s,i)=>{
       const y=46+i*rowH;
       x.fillStyle='#eef6ff'; x.fillRect(16,y-8,c.width-32,rowH-8);
@@ -7478,10 +7812,10 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   }
   function kggCurrentLayoutPrompt(){
     return [
-      'Lies das KGG Contact-Sheet. Es zeigt EX1 bis EX6, jeweils nur die handschriftlich ausgefÃ¼llte T1-Zeile aus dem Layout '+KGG_CURRENT_LAYOUT_ID+'.',
-      'Gib ausschlieÃŸlich gÃ¼ltiges JSON aus. Schema: {"groups":[[...EX1 Zahlen...],[...EX2 Zahlen...],[...EX3 Zahlen...],[...EX4 Zahlen...],[...EX5 Zahlen...],[...EX6 Zahlen...]],"warnings":[]}.',
-      'Jede Gruppe enthÃ¤lt nur die sichtbaren handschriftlichen Zahlen der jeweiligen EX-Zeile in Leserichtung von links nach rechts.',
-      'Keine Ãœbungsnamen raten. Keine leeren Tabellenwerte ergÃ¤nzen. Keine ErklÃ¤rungen. Keine Markdown-CodeblÃ¶cke.'
+      'Lies das KGG Contact-Sheet. Es zeigt EX1 bis EX6, jeweils nur die handschriftlich ausgefüllte T1-Zeile aus dem Layout '+KGG_CURRENT_LAYOUT_ID+'.',
+      'Gib ausschließlich gültiges JSON aus. Schema: {"groups":[[...EX1 Zahlen...],[...EX2 Zahlen...],[...EX3 Zahlen...],[...EX4 Zahlen...],[...EX5 Zahlen...],[...EX6 Zahlen...]],"warnings":[]}.',
+      'Jede Gruppe enthält nur die sichtbaren handschriftlichen Zahlen der jeweiligen EX-Zeile in Leserichtung von links nach rechts.',
+      'Keine Übungsnamen raten. Keine leeren Tabellenwerte ergänzen. Keine Erklärungen. Keine Markdown-Codeblöcke.'
     ].join('\n');
   }
   function kggNormalizeGroupsFromJson(json){
@@ -7616,7 +7950,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
           const planText=parsed.ok?scanResultToPlanText(parsed.json):cleanGeminiScanText(rawText);
           const quality=scanPaperQuality(planText,parsed.ok?parsed.json:null);
           if(planText)return {type:'paper',planText,rawText,model,quality,json:parsed.ok?parsed.json:null,jsonRepaired:!!parsed.repaired,redactedBeforeExternalOcr:true};
-          throw new Error('Gemini OCR hat keinen Ãœbungstext erkannt.');
+          throw new Error('Gemini OCR hat keinen Übungstext erkannt.');
         }catch(err){
           lastError=err;
         }finally{clearTimeout(timer);}
@@ -7632,7 +7966,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     const planText=scanResultToPlanText(payload);
     const applyText=exercises.length?exercises.map(scanExerciseToDocText).filter(Boolean).join('\n\n'):'';
     const warnings=[];
-    if(!planText)warnings.push('QR erkannt, aber kein strukturierter Ãœbungstext erzeugt.');
+    if(!planText)warnings.push('QR erkannt, aber kein strukturierter Übungstext erzeugt.');
     return {type:'qr',qrType:parsed&&parsed.type||'QR',planText,applyText,rawText:planText||'QR erkannt.',json:payload,quality:{ok:warnings.length===0,warnings}};
   }
   const scanState={next:'page',activeIndex:0,jobs:[],decision:false,busy:false,lastError:'',lastInputKind:'camera'};
@@ -7756,16 +8090,16 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
       const collapsed=!!job.collapsed;
       const typeLabel=job.type==='qr'?'QR-Plan':'Papierplan';
       const title=escapeHtml(job.short||job.label);
-      const meta=escapeHtml(typeLabel+' Â· '+job.pages.length+' Bild(er)');
-      const head='<div class="scanJobHead"><div class="scanJobHeadMain"><b>'+title+'</b><small>'+meta+'</small>'+(collapsed?'<span class="scanCollapsedHint">eingeklappt Â· antippen zum Ã–ffnen</span>':'')+'</div><div class="scanJobTopActions"><button type="button" class="scanMiniBtn" onclick="window.KGGScan.toggleCollapse('+index+')" aria-label="Scankarte '+(collapsed?'ausklappen':'einklappen')+'">'+(collapsed?'â–¾':'â–´')+'</button><button type="button" class="scanRemoveBtn" onclick="window.KGGScan.removeJob('+index+')" aria-label="Scankarte entfernen">Ã—</button></div></div>';
+      const meta=escapeHtml(typeLabel+' · '+job.pages.length+' Bild(er)');
+      const head='<div class="scanJobHead"><div class="scanJobHeadMain"><b>'+title+'</b><small>'+meta+'</small>'+(collapsed?'<span class="scanCollapsedHint">eingeklappt · antippen zum Öffnen</span>':'')+'</div><div class="scanJobTopActions"><button type="button" class="scanMiniBtn" onclick="window.KGGScan.toggleCollapse('+index+')" aria-label="Scankarte '+(collapsed?'ausklappen':'einklappen')+'">'+(collapsed?'▾':'▴')+'</button><button type="button" class="scanRemoveBtn" onclick="window.KGGScan.removeJob('+index+')" aria-label="Scankarte entfernen">×</button></div></div>';
       if(collapsed){
         return '<div class="scanJobCard '+cls+' collapsed">'+head+'</div>';
       }
       return '<div class="scanJobCard '+cls+'">'+
         head+
-        '<input class="scanShort" value="'+escapeHtml(job.short||'')+'" placeholder="lokales KÃ¼rzel, z. B. Max M." oninput="window.KGGScan.setShort('+index+',this.value)">'+
-        '<div class="scanFileList">'+escapeHtml(job.pages.map(p=>p.name).join(' Â· ')||'Noch kein Bild')+'</div>'+
-        (warn.length?'<div class="scanWarning">PrÃ¼fen: '+escapeHtml(warn.join(' Â· '))+'</div>':'')+
+        '<input class="scanShort" value="'+escapeHtml(job.short||'')+'" placeholder="lokales Kürzel, z. B. Max M." oninput="window.KGGScan.setShort('+index+',this.value)">'+
+        '<div class="scanFileList">'+escapeHtml(job.pages.map(p=>p.name).join(' · ')||'Noch kein Bild')+'</div>'+
+        (warn.length?'<div class="scanWarning">Prüfen: '+escapeHtml(warn.join(' · '))+'</div>':'')+
         '<textarea id="kggScanCopyField'+index+'" class="scanResultText" readonly>'+escapeHtml(resultText||'Noch nicht ausgelesen.')+'</textarea>'+
         '<div class="scanCardActions scanCardActionsCompact">'+
           '<button type="button" class="mutedBtn" onclick="window.KGGScan.copyResult('+index+')">kopieren</button>'+
@@ -7773,7 +8107,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
         '</div></div>';
     }).join('');
     const decisionHtml='';
-    preview.innerHTML='<div class="kggScanV295">'+decisionHtml+(scanState.busy?'<div class="notice"><b>Scan lÃ¤uft â€¦</b></div>':'')+(scanState.lastError?'<div class="notice danger">'+escapeHtml(scanState.lastError)+'</div>':'')+jobsHtml+'</div>';
+    preview.innerHTML='<div class="kggScanV295">'+decisionHtml+(scanState.busy?'<div class="notice"><b>Scan läuft …</b></div>':'')+(scanState.lastError?'<div class="notice danger">'+escapeHtml(scanState.lastError)+'</div>':'')+jobsHtml+'</div>';
   }
   function collapseScanCards(reason){
     let changed=false;
@@ -7835,7 +8169,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     for(let i=0;i<job.pages.length;i++){
       const page=job.pages[i];
       if(!page.file){warnings.push('Bilddatei nicht mehr im Speicher: '+page.name); continue;}
-      setScanStatus(job.label+': Seite '+(i+1)+' wird ausgelesen â€¦');
+      setScanStatus(job.label+': Seite '+(i+1)+' wird ausgelesen …');
       const result=await callGeminiPaperFallback(page.file);
       if(result.planText)texts.push(result.planText);
       raw.push(result.rawText||'');
@@ -7924,7 +8258,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
       sets:3,side,unit:isTime?'Zeit':'Wdh',metricUnit:isTime?'Sek.':'Wdh',weightUnit:isTime?'keine':loadUnit,loadUnit:isTime?'keine':loadUnit,measure:isTime?'zeit':'wdh',
       startLoad:(first&&first.load)||'',
       startMetric:(first&&first.metric)||'',
-      scanSets,scanImported:true,scanSource:'Scan: kg/Wdh Ã¼bernommen',
+      scanSets,scanImported:true,scanSource:'Scan: kg/Wdh übernommen',
       rawText:scanSets.length?kggScanPlanExerciseToText(cleanName,scanSets,{metricUnit:isTime?'Sek.':'Wdh',loadUnit:isTime?'keine':loadUnit,side}):(source&&source.rawText||cleanName),
       pendingNew:!exact,needsReview:!exact
     });
@@ -7942,9 +8276,9 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
         lines.push('  Re: '+(re.metric||'')+' '+metricUnit+(re.load?' @ '+re.load+' '+loadUnit:''));
         if(set.pain)lines.push('  Schmerz: '+set.pain+'/10');
       }else if(isTime){
-        lines.push('Satz '+(i+1)+': '+(set&&set.metric||'')+' '+metricUnit+(set&&set.pain?' Â· Schmerz: '+set.pain+'/10':''));
+        lines.push('Satz '+(i+1)+': '+(set&&set.metric||'')+' '+metricUnit+(set&&set.pain?' · Schmerz: '+set.pain+'/10':''));
       }else{
-        lines.push('Satz '+(i+1)+': '+(set&&set.metric||'')+' '+metricUnit+(set&&set.load?' @ '+set.load+' '+loadUnit:'')+(set&&set.pain?' Â· Schmerz: '+set.pain+'/10':''));
+        lines.push('Satz '+(i+1)+': '+(set&&set.metric||'')+' '+metricUnit+(set&&set.load?' @ '+set.load+' '+loadUnit:'')+(set&&set.pain?' · Schmerz: '+set.pain+'/10':''));
       }
     });
     return lines.join('\n');
@@ -7972,7 +8306,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
           current.scanSets=current.scanSets||[];
           current.scanSets[Number(m[1])-1]={metric,load};
         }
-      }else if(!/^Typ:|^PrÃ¼fen:/i.test(line)){
+      }else if(!/^Typ:|^Prüfen:/i.test(line)){
         if(current)out.push(current);
         current={name:stripScanExerciseName(line),scanSets:[],sets:3,side:'BI',metricUnit:'Wdh',weightUnit:'kg'};
       }
@@ -7996,7 +8330,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   }
   function appendScanExercisesToCurrentPlan(exercises,reason){
     const clean=(exercises||[]).filter(ex=>ex&&ex.name);
-    if(!clean.length){setScanStatus('Kein Ãœbungstext zum Ãœbernehmen.');return false;}
+    if(!clean.length){setScanStatus('Kein Übungstext zum Übernehmen.');return false;}
     const input=$('exerciseInput');
     if(input&&input.value.trim())syncPlanFromTextInput('scan_preserve_existing_text_before_apply');
     state.plan=[...(state.plan||[]),...clean.map(ensureUiExerciseShape)];
@@ -8007,7 +8341,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     syncTextInputFromPlan(reason||'scan_apply_structured_exercises_text');
     save();
     render();
-    setScanStatus('Scan-Ergebnis mit kg/Wdh Ã¼bernommen.');
+    setScanStatus('Scan-Ergebnis mit kg/Wdh übernommen.');
     return true;
   }
   function applyScanResultToCurrentPlan(result,reason){
@@ -8019,8 +8353,8 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     return applyScanTextToCurrentPlan(text,reason||'scan_apply_result_fallback');
   }
   function applyScanTextToCurrentPlan(text,reason){
-    const clean=String(text||'').replace(/^Typ:.*$/gm,'').replace(/^PrÃ¼fen:.*$/gm,'').replace(/\n+/g,', ').replace(/(?:,\s*){2,}/g,', ').trim();
-    if(!clean){setScanStatus('Kein Ãœbungstext zum Ãœbernehmen.');return false;}
+    const clean=String(text||'').replace(/^Typ:.*$/gm,'').replace(/^Prüfen:.*$/gm,'').replace(/\n+/g,', ').replace(/(?:,\s*){2,}/g,', ').trim();
+    if(!clean){setScanStatus('Kein Übungstext zum Übernehmen.');return false;}
     const input=$('exerciseInput');
     if(!input)return false;
     const existing=String(input.value||'').trim();
@@ -8030,7 +8364,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     state.scanPanelOpen='plan';
     save();
     render();
-    setScanStatus('Scan-Ergebnis Ã¼bernommen.');
+    setScanStatus('Scan-Ergebnis übernommen.');
     return true;
   }
   function updateScanQueueInfo(){renderScanPreview();}
@@ -8045,10 +8379,22 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   };
   window.KGGScan={
     pick(kind){
-      const normalized=rememberScanInputKind(kind||lastScanInputKind());
-      const input=normalized==='camera'?$('fileInput'):$('filePickerInput');
-      if(input)input.click();
-    },
+        const normalized=rememberScanInputKind(kind||lastScanInputKind());
+        const input=normalized==='camera'?$('fileInput'):$('filePickerInput');
+        if(input){
+          try{input.value='';}catch(_e){}
+          if(normalized==='camera'){
+            input.accept='image/*';
+            input.setAttribute('capture','environment');
+            input.removeAttribute('multiple');
+          }else{
+            input.accept='image/*,.jpg,.jpeg,.png,.webp,.heic,.heif';
+            input.removeAttribute('capture');
+            input.setAttribute('multiple','multiple');
+          }
+          input.click();
+        }
+      },
     async handleInput(input,kind){
       const normalizedKind=rememberScanInputKind(kind||lastScanInputKind());
       const files=Array.from(input&&input.files||[]).filter(Boolean);
@@ -8057,7 +8403,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
       scanState.busy=true;
       scanState.lastError='';
       scanState.decision=false;
-      setScanStatus(files.length===1?'PrÃ¼fe: '+(files[0].name||'Kamera-Foto'):files.length+' Bilder werden vorbereitet â€¦');
+      setScanStatus(files.length===1?'Prüfe: '+(files[0].name||'Kamera-Foto'):files.length+' Bilder werden vorbereitet …');
       renderScanPreview();
       try{
         let syncCodeCount=0;
@@ -8078,7 +8424,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
         state.scanPanelOpen='scanned';
         save();
         render();
-        setScanStatus('Foto hinzugefÃ¼gt. Bitte entscheiden.');
+        setScanStatus('Foto hinzugefügt. Bitte entscheiden.');
       }catch(err){
         scanState.lastError='Scan fehlgeschlagen: '+(err&&err.message||err);
         setScanStatus(scanState.lastError);
@@ -8095,14 +8441,14 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
       renderScanPreview();
       try{
         const jobs=scanState.jobs.filter(job=>job.pages.length||job.result);
-        if(!jobs.length)throw new Error('Bitte zuerst mindestens ein Foto hinzufÃ¼gen.');
+        if(!jobs.length)throw new Error('Bitte zuerst mindestens ein Foto hinzufügen.');
         for(const job of jobs){
           if(!job.result||job.type==='paper')await processPaperJob(job);
         }
         state.scanPanelOpen='scanned';
         save();
         render();
-        setScanStatus('Scan fertig: '+jobs.length+' Plan/PlÃ¤ne.');
+        setScanStatus('Scan fertig: '+jobs.length+' Plan/Pläne.');
       }catch(err){
         scanState.lastError='Scan fehlgeschlagen: '+(err&&err.message||err);
         setScanStatus(scanState.lastError);
@@ -8121,7 +8467,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
       scanState.next=mode==='plan'?'plan':'page';
       if(mode==='plan')scanState.activeIndex=scanState.jobs.length;
       scanState.decision=false;
-      setScanStatus(scanState.next==='plan'?'NÃ¤chstes Foto wird neuer Plan.':'NÃ¤chstes Foto wird weitere Seite.');
+      setScanStatus(scanState.next==='plan'?'Nächstes Foto wird neuer Plan.':'Nächstes Foto wird weitere Seite.');
       renderScanPreview();
       return scanStateSnapshot();
     },
@@ -8476,6 +8822,51 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     updateToggleCarets();
     setTabletAnchorActiveClasses();
   }
+  const phoneFloatingDrawerState={kind:null};
+  function ensurePhoneDrawerBackdrop(){
+    let backdrop=$('phoneDrawerBackdrop');
+    if(!backdrop){
+      backdrop=document.createElement('div');
+      backdrop.id='phoneDrawerBackdrop';
+      backdrop.className='kggPhoneDrawerBackdrop';
+      backdrop.setAttribute('aria-hidden','true');
+      backdrop.addEventListener('click',()=>closePhoneFloatingDrawer());
+      document.body.appendChild(backdrop);
+    }
+    return backdrop;
+  }
+  function closePhoneFloatingDrawer(){
+    const recent=$('recentList'), packages=$('packageList'), recentBtn=$('recentToggle'), packageBtn=$('packageToggle');
+    if(recent)recent.classList.add('hidden');
+    if(packages)packages.classList.add('hidden');
+    if(recentBtn)recentBtn.classList.remove('phoneButtonFloat');
+    if(packageBtn)packageBtn.classList.remove('phoneButtonFloat');
+    document.body.classList.remove('kggPhoneDrawerOpen');
+    phoneFloatingDrawerState.kind=null;
+    setTabletOverlayActiveFlag();
+  }
+  function openPhoneFloatingDrawer(kind){
+    if(!isPhoneLayout())return false;
+    const recent=$('recentList'), packages=$('packageList'), recentBtn=$('recentToggle'), packageBtn=$('packageToggle');
+    const target=kind==='recent'?recent:packages;
+    const targetBtn=kind==='recent'?recentBtn:packageBtn;
+    const other=kind==='recent'?packages:recent;
+    const otherBtn=kind==='recent'?packageBtn:recentBtn;
+    if(!target||!targetBtn)return false;
+    if(phoneFloatingDrawerState.kind===kind&&!target.classList.contains('hidden')){
+      closePhoneFloatingDrawer();
+      return true;
+    }
+    ensurePhoneDrawerBackdrop();
+    if(other)other.classList.add('hidden');
+    if(otherBtn)otherBtn.classList.remove('phoneButtonFloat');
+    target.classList.remove('hidden');
+    targetBtn.classList.add('phoneButtonFloat');
+    document.body.classList.add('kggPhoneDrawerOpen');
+    phoneFloatingDrawerState.kind=kind;
+    setTabletOverlayActiveFlag();
+    return true;
+  }
   function openTabletExclusivePanel(kind){
     if(!isTabletLayout())return false;
     if(['base','recent','package'].includes(kind))return openTabletAnchoredPanel(kind);
@@ -8487,7 +8878,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     if(!isTabletLayout())return;
     if(tabletOverlayState.kind)positionTabletAnchoredOverlay(tabletOverlayState.kind);
   }
-  window.addEventListener('resize',()=>{setTimeout(repositionTabletOverlay,30); setTimeout(syncScannedPlansMobileDock,30);});
+  window.addEventListener('resize',()=>{setTimeout(repositionTabletOverlay,30); setTimeout(syncScannedPlansMobileDock,30); setTimeout(()=>{if(!isTabletLayout())setTabletSideMenuOpen(false);},30);});
   window.addEventListener('orientationchange',()=>setTimeout(repositionTabletOverlay,120));
   if(window.visualViewport){
     window.visualViewport.addEventListener('resize',()=>{setTimeout(repositionTabletOverlay,30); setTimeout(syncScannedPlansMobileDock,30);});
@@ -8517,8 +8908,8 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   $('dbTitle').addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();const opening=!state.bankOpen; if(opening)openTabletExclusivePanel('bank'); state.bankOpen=!state.bankOpen; render(); setTabletOverlayActiveFlag();}});
   $('finishBtn').onclick=()=>{closeTabletFloatingPanelsExcept('modal'); openFinishModal();};
   $('baseToggle').onclick=()=>{const base=$('baseFields'); const opening=base.classList.contains('hidden'); if(isTabletLayout()){if(opening)openTabletAnchoredPanel('base'); else closeTabletAnchoredPanel('base');}else{base.classList.toggle('hidden',!opening); setTabletOverlayActiveFlag();}};
-  $('recentToggle').onclick=()=>{const recent=$('recentList'); const packages=$('packageList'); const opening=recent.classList.contains('hidden'); if(isTabletLayout()){if(opening)openTabletAnchoredPanel('recent'); else closeTabletAnchoredPanel('recent');}else{packages.classList.add('hidden'); recent.classList.toggle('hidden',!opening); setTabletOverlayActiveFlag();}};
-  $('packageToggle').onclick=()=>{const recent=$('recentList'); const packages=$('packageList'); const opening=packages.classList.contains('hidden'); if(isTabletLayout()){if(opening)openTabletAnchoredPanel('package'); else closeTabletAnchoredPanel('package');}else{recent.classList.add('hidden'); packages.classList.toggle('hidden',!opening); setTabletOverlayActiveFlag();}};
+  $('recentToggle').onclick=()=>{const recent=$('recentList'); const opening=recent.classList.contains('hidden'); if(isTabletLayout()){if(opening)openTabletAnchoredPanel('recent'); else closeTabletAnchoredPanel('recent');}else{openPhoneFloatingDrawer('recent');}};
+  $('packageToggle').onclick=()=>{const packages=$('packageList'); const opening=packages.classList.contains('hidden'); if(isTabletLayout()){if(opening)openTabletAnchoredPanel('package'); else closeTabletAnchoredPanel('package');}else{openPhoneFloatingDrawer('package');}};
   $('exportBtn').onclick=exportData; $('pdfBtn').onclick=finishWithPdf; $('patientBtn').onclick=finishWithPatientApp; $('closeShare').onclick=closeFinishModal; $('copyShare').onclick=()=>navigator.clipboard&&navigator.clipboard.writeText($('shareText').value); $('patientName').addEventListener('input',()=>{state.patient.name=$('patientName').value;save();render();}); $('planDate').addEventListener('input',()=>{state.patient.date=$('planDate').value;save();syncStatePlanToStore('ui_patient_date_input');}); $('therapistName').addEventListener('input',()=>{state.patient.therapist=$('therapistName').value;save();syncStatePlanToStore('ui_patient_therapist_input');}); $('planNotes').addEventListener('input',()=>{state.patient.notes=$('planNotes').value;save();syncStatePlanToStore('ui_patient_notes_input');}); $('scanBtn').onclick=()=>window.KGGScan.pick('camera'); $('filePickBtn').onclick=()=>window.KGGScan.pick('file'); $('filePickBtn').addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();window.KGGScan.pick('file');}}); $('fileInput').onchange=ev=>window.KGGScan.handleInput(ev.target,'camera'); $('filePickerInput').onchange=ev=>window.KGGScan.handleInput(ev.target,'file'); $('closeEditor').onclick=closeEditor; $('saveExercise').onclick=saveEditedExercise; $('deleteExercise').onclick=()=>{if(state.editId){if($('deleteExercise').dataset.scope==='bank')openBankDeleteModal(state.editId); else removeExercise(state.editId);} closeEditor();};
   $('attachExerciseImage').onclick=()=>$('editMediaFile').click();
   $('editMediaFile').onchange=handleEditorMediaFileSelected;
@@ -8551,6 +8942,10 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   $('applySharedBank').onclick=applySharedBankFromText;
   $('closeSharedBank').onclick=closeSharedBankModal;
   $('sharedBankModal').addEventListener('click',ev=>{if(ev.target===$('sharedBankModal'))closeSharedBankModal();});
+
+  if($('tabletMenuBtn'))$('tabletMenuBtn').onclick=()=>setTabletSideMenuOpen(!document.body.classList.contains('tabletMenuOpen'));
+  if($('tabletMenuClose'))$('tabletMenuClose').onclick=()=>setTabletSideMenuOpen(false);
+  if($('tabletSideBackdrop'))$('tabletSideBackdrop').onclick=()=>setTabletSideMenuOpen(false);
   if($('syncQrBtn'))$('syncQrBtn').onclick=openSyncPairModal;
   if($('tabletSyncQrBtn'))$('tabletSyncQrBtn').onclick=openSyncPairModal;
   if($('copySyncPairCode'))$('copySyncPairCode').onclick=copySyncPairCode;

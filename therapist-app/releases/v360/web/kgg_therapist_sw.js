@@ -1,8 +1,7 @@
-const KGG_SW_VERSION = 'kgg-therapist-v360-sync-bundle-qr';
+const KGG_SW_VERSION = 'kgg-therapist-v360-legacy-to-v366';
 const KGG_CACHE = KGG_SW_VERSION + '-app-shell';
 const KGG_SHELL = [
   './',
-  './KGG_APP_ADMIN_v360_sync_bundle_qr.html',
   './KGG_APP_KOLLEGEN_v360_sync_bundle_qr.html',
   './kgg_therapist_manifest.webmanifest',
   './kgg_therapist_icon.svg'
