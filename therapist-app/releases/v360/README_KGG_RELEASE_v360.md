@@ -3,7 +3,7 @@
 Dieses Paket enthaelt die sauberen Rollout-Artefakte fuer die KGG-App.
 
 Legacy-Hinweis: Diese v360-Pfade liefern inzwischen absichtlich den aktuellen
-v366-Stand aus. So bleiben alte gedruckte QR-Codes und Downloadlinks nutzbar.
+Stand aus. So bleiben alte gedruckte QR-Codes und Downloadlinks nutzbar.
 
 ## Dateien
 

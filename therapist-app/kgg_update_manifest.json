@@ -7,7 +7,8 @@
   "adminUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v366/web/KGG_APP_ADMIN_v366_mobile_floating_history_packages.html",
   "colleagueUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v366/web/KGG_APP_KOLLEGEN_v366_mobile_floating_history_packages.html",
   "latestUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v366/web/KGG_APP_KOLLEGEN_v366_mobile_floating_history_packages.html",
-  "latestAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v366/android/KGG_ANDROID_SYNC_MVP_v366_mobile_floating_history_packages_debug.apk",
-  "latestAndroidApkSha256": "113808432bbb3133d303d4edf92b710c6b9393cccbe1032052729c456b8897c8",
-  "releaseNotes": "v366: Handy-Historie und Uebungspakete oeffnen als schwebendes Bottom-Drawer mit Blur-Hintergrund. Keine API-Keys."
+  "latestAndroidShellVersion": "v367",
+  "latestAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v367/android/KGG_ANDROID_SYNC_MVP_v367_camera_capture_intent_debug.apk",
+  "latestAndroidApkSha256": "ba3d2cb372a0059fadaa4102e151a87095801d83c7db0886eae6ccbe4346532b",
+  "releaseNotes": "v367: Android-App startet Plan scannen jetzt per explizitem Kamera-Intent. Web-UI bleibt v366. Keine API-Keys."
 }

@@ -1,0 +1,29 @@
+{
+  "release": "v367",
+  "createdFor": "KGG Android camera capture fix",
+  "androidShellVersion": "0.1.4-v367-camera-capture-intent",
+  "webVersion": "v366",
+  "files": [
+    {
+      "path": "android/KGG_ANDROID_SYNC_MVP_v367_camera_capture_intent_debug.apk",
+      "bytes": 3071203,
+      "sha256": "BA3D2CB372A0059FADAA4102E151A87095801D83C7DB0886EAE6CCBE4346532B"
+    }
+  ],
+  "changes": [
+    "Plan scannen in der Android-App startet bei Kamera-Capture-Anforderung explizit MediaStore.ACTION_IMAGE_CAPTURE.",
+    "Foto / Datei bleibt beim normalen Medien-/Datei-Picker.",
+    "Kamera-Ausgabedatei wird ueber FileProvider an die WebView-Dateiauswahl zurueckgegeben."
+  ],
+  "securityNotes": [
+    "No API keys included.",
+    "No patient data included.",
+    "No private admin safe files included."
+  ],
+  "manualChecksStillNeeded": [
+    "Android APK auf einem echten Geraet installieren.",
+    "Plan scannen antippen und pruefen, dass die Kamera direkt oeffnet.",
+    "Foto / Datei antippen und pruefen, dass Galerie/Dateipicker oeffnet.",
+    "Aufgenommenes Bild uebernehmen und Scan-Flow pruefen."
+  ]
+}
