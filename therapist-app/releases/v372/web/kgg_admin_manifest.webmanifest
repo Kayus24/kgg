@@ -1,0 +1,19 @@
+{
+  "name": "KGG Admin App",
+  "short_name": "KGG Admin",
+  "description": "KGG Admin App fuer Therapeutinnen und Therapeuten",
+  "start_url": "./KGG_APP_ADMIN_v372_iframe_menu.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#e8eef6",
+  "theme_color": "#0a1024",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "https://kayus24.github.io/kgg/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
