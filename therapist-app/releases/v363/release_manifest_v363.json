@@ -1,0 +1,15 @@
+{
+  "version": "v363",
+  "kind": "kgg_therapist_release",
+  "createdAt": "2026-06-03T00:00:00+02:00",
+  "web": {
+    "admin": "web/KGG_APP_ADMIN_v363_github_update_check.html",
+    "colleague": "web/KGG_APP_KOLLEGEN_v363_github_update_check.html",
+    "updateManifest": "../../kgg_update_manifest.json"
+  },
+  "notes": [
+    "GitHub update check through therapist-app/kgg_update_manifest.json",
+    "Plan-card delete X stays in top-right corner",
+    "Tablet side menu, camera input split and KGG icon inherited from v361"
+  ]
+}

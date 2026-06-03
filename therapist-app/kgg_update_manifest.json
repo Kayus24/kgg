@@ -1,0 +1,11 @@
+{
+  "kind": "kgg_app_update_manifest",
+  "version": 1,
+  "latestVersion": "KGG_APP_KOLLEGEN_v363_github_update_check",
+  "latestAdminVersion": "KGG_APP_ADMIN_v363_github_update_check",
+  "latestColleagueVersion": "KGG_APP_KOLLEGEN_v363_github_update_check",
+  "adminUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v363/web/KGG_APP_ADMIN_v363_github_update_check.html",
+  "colleagueUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v363/web/KGG_APP_KOLLEGEN_v363_github_update_check.html",
+  "latestUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v363/web/KGG_APP_KOLLEGEN_v363_github_update_check.html",
+  "releaseNotes": "v363: GitHub-Update-Pruefung, v362 X-Position an Trainingskarten, v361 Tablet-Menue/Kamera/Icon. Keine API-Keys."
+}
