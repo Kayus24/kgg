@@ -1,0 +1,12 @@
+{
+  "kind": "kgg_android_web_update_manifest",
+  "version": 1,
+  "latestWebVersion": "v363",
+  "latestAndroidShellVersion": "v364",
+  "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v363/web/KGG_APP_KOLLEGEN_v363_github_update_check.html",
+  "colleagueSha256": "ab7338fb0ef7b7b664117cadec886e43d3405043a9e58ea478d185ddadd3fce4",
+  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v363/web/KGG_APP_ADMIN_v363_github_update_check.html",
+  "adminSha256": "49f3976d5080c53dd262e87d217bf60658f1b9e9ee610adee013d103398ce2f4",
+  "sha256": "ab7338fb0ef7b7b664117cadec886e43d3405043a9e58ea478d185ddadd3fce4",
+  "notes": "Android-Haupt-App kann die aktuelle Kolleg:innen-Webversion lokal nachladen. Keine API-Keys."
+}
