@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a1024">
+  <title>KGG Android-App Download</title>
+  <style>
+    :root{--bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--accent:#0a1024;--ok:#166534;--warn:#92400e;--r:22px;--shadow:0 10px 30px rgba(7,16,39,.12)}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;display:flex;justify-content:center;align-items:flex-start;padding:18px 12px}.card{width:min(100%,620px);background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}h1{margin:0 0 8px;font-size:26px;line-height:1.1}.muted{color:var(--muted);font-weight:750;line-height:1.35}.status{margin:14px 0;padding:12px;border:1px solid var(--line);border-radius:16px;background:#f8fafc;font-weight:900}.ok{background:#ecfdf5;border-color:#bbf7d0;color:var(--ok)}.warn{background:#fffbeb;border-color:#fde68a;color:var(--warn)}.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:12px;border-radius:18px;border:0;background:var(--accent);color:#fff;text-decoration:none;font-size:20px;font-weight:1000}.btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line);font-size:16px}.meta{display:grid;gap:8px;margin-top:14px}.meta div{background:#f8fafc;border:1px solid var(--line);border-radius:14px;padding:10px 12px}.meta b{display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;word-break:break-all;font-size:12px}.small{font-size:13px}.qrHint{margin-top:14px;padding:12px;border-radius:16px;background:#f7fbff;border:1px solid #cfe4ff;color:#24415f;font-weight:800}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>📲 KGG Android-App</h1>
+    <p class="muted">Diese Seite lädt automatisch die aktuellste Android-App-Version aus dem Update-Manifest. Der QR-Code zu dieser Seite bleibt deshalb auch für spätere Versionen gültig.</p>
+    <div id="status" class="status">Aktuelle Version wird geladen…</div>
+    <a id="download" class="btn" href="#" rel="noopener">Download wird vorbereitet…</a>
+    <a class="btn secondary" href="./kgg_update_manifest.json" rel="noopener">Update-Manifest öffnen</a>
+    <section class="meta">
+      <div><b>Version</b><span id="version">–</span></div>
+      <div><b>Hinweis</b><span id="notes">–</span></div>
+      <div><b>SHA-256</b><span id="sha" class="mono">–</span></div>
+      <div><b>APK-Link</b><span id="url" class="mono">–</span></div>
+    </section>
+    <div class="qrHint small">Falls Android vor der Installation warnt: APK-Installation aus dieser Quelle erlauben. Nur intern/vertrauenswürdig verwenden.</div>
+  </main>
+<script>
+(async function(){
+  const status=document.getElementById('status');
+  const btn=document.getElementById('download');
+  const version=document.getElementById('version');
+  const notes=document.getElementById('notes');
+  const sha=document.getElementById('sha');
+  const url=document.getElementById('url');
+  function fail(msg){status.className='status warn';status.textContent=msg;btn.textContent='Kein Download verfügbar';btn.removeAttribute('href');}
+  try{
+    const res=await fetch('./kgg_update_manifest.json?cacheBust='+Date.now(),{cache:'no-store'});
+    if(!res.ok) throw new Error('Manifest HTTP '+res.status);
+    const m=await res.json();
+    const apk=m.latestAndroidApkUrl;
+    if(!apk) return fail('Im Manifest ist aktuell kein Android-APK-Link eingetragen.');
+    version.textContent=m.latestAndroidShellVersion||m.latestVersion||'unbekannt';
+    notes.textContent=m.releaseNotes||'Keine Release Notes eingetragen.';
+    sha.textContent=m.latestAndroidApkSha256||'nicht eingetragen';
+    url.textContent=apk;
+    btn.href=apk;
+    btn.textContent='⬇️ Aktuellste Android-App herunterladen';
+    status.className='status ok';
+    status.textContent='Bereit: aktuelle Android-App-Version gefunden.';
+  }catch(e){fail('Manifest konnte nicht geladen werden: '+e.message);}
+})();
+</script>
+</body>
+</html>
