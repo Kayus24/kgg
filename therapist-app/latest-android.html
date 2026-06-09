@@ -55,25 +55,29 @@
 <body>
   <main>
     <h1>KGG Android-App</h1>
-    <p>Dieser Link fuehrt immer zur neuesten Android-Version der Therapeut:innen-App.</p>
+    <p>Dieser Link fuehrt immer zu den neuesten Android-Versionen der Therapeut:innen-App.</p>
     <div id="status" class="status">Suche neueste Version...</div>
-    <a id="download" class="button" href="android_update_manifest.json">Android-App herunterladen</a>
+    <a id="downloadKollegen" class="button" href="android_update_manifest.json">Kolleg:innen-App herunterladen</a>
+    <a id="downloadAdmin" class="button secondary" href="android_update_manifest.json">Admin-App herunterladen</a>
     <a class="button secondary" href="latest-html.html">HTML-Version oeffnen</a>
-    <small>Falls der Download nicht automatisch startet, tippe auf den Download-Button.</small>
+    <small>Waehle Admin nur fuer das Admin-Geraet. Kolleg:innen nutzen die Nicht-Admin-App.</small>
   </main>
   <script>
     (async function(){
       const status = document.getElementById('status');
-      const download = document.getElementById('download');
+      const downloadKollegen = document.getElementById('downloadKollegen');
+      const downloadAdmin = document.getElementById('downloadAdmin');
       try {
         const response = await fetch('android_update_manifest.json?ts=' + Date.now(), { cache: 'no-store' });
         const manifest = await response.json();
-        const url = manifest.androidApkUrl || manifest.latestAndroidApkUrl;
+        const kollegenUrl = manifest.colleagueAndroidApkUrl || manifest.androidApkUrl || manifest.latestAndroidApkUrl;
+        const adminUrl = manifest.adminAndroidApkUrl || manifest.latestAdminAndroidApkUrl;
         const version = manifest.latestAndroidShellVersion || manifest.latestWebVersion || manifest.latestVersion || 'neueste Version';
-        if (!url) throw new Error('Keine APK-URL im Manifest gefunden.');
-        download.href = url;
+        if (!kollegenUrl && !adminUrl) throw new Error('Keine APK-URL im Manifest gefunden.');
+        if (kollegenUrl) downloadKollegen.href = kollegenUrl;
+        if (adminUrl) downloadAdmin.href = adminUrl;
+        else downloadAdmin.style.display = 'none';
         status.textContent = 'Bereit: ' + version;
-        window.setTimeout(function(){ window.location.href = url; }, 700);
       } catch (error) {
         status.textContent = 'Automatik nicht moeglich. Bitte den Button nutzen.';
       }
