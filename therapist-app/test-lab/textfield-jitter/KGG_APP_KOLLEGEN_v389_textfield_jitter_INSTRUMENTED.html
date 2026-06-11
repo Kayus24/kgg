@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>KGG v389 Textfield Jitter Instrumented</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#071027;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}.bar{position:fixed;left:0;right:0;top:0;z-index:20;min-height:42px;padding:7px 10px;background:#071027;color:#fff;display:flex;gap:8px;align-items:center;font-size:12px;font-weight:900}.bar b{font-size:13px}.bar button{border:1px solid rgba(255,255,255,.28);background:#fff;color:#071027;border-radius:999px;padding:6px 10px;font-weight:1000}.stage{position:absolute;left:0;right:0;top:42px;bottom:0;background:#e8eef6}.stage iframe{width:100%;height:100%;border:0;background:#e8eef6}.overlay{position:fixed;z-index:30;left:8px;right:8px;bottom:8px;max-height:42vh;overflow:auto;background:rgba(7,16,39,.92);color:#fff;border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:10px;font:12px ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;box-shadow:0 14px 36px rgba(0,0,0,.28)}.warn{color:#ffeb99}.ok{color:#b8f7c5}@media(max-width:720px){.bar{font-size:11px}.bar b{font-size:12px}.stage{top:44px}.overlay{font-size:11px;max-height:36vh}}
+</style>
+</head>
+<body>
+<div class="bar"><b>TEXTFIELD JITTER DIAG</b><span>v389 im Test-Frame · Haupt-App unverändert</span><button id="resetBtn">Reset Messung</button><button id="hideBtn">Overlay</button></div>
+<div class="stage"><iframe id="appFrame" src="../../../releases/v389/web/KGG_APP_KOLLEGEN_v389_flow_stability.html"></iframe></div>
+<pre class="overlay" id="out">Lade v389…</pre>
+<script>
+(function(){
+const frame=document.getElementById('appFrame'),out=document.getElementById('out'),resetBtn=document.getElementById('resetBtn'),hideBtn=document.getElementById('hideBtn');
+let tick=0,inputEvents=0,renderEvents=0,maxJump=0,lastTop=null,lastInput='',focusActive=false,hidden=false,lastLog='';
+let samples=[];
+function q(doc,sel){try{return doc.querySelector(sel)}catch(e){return null}}
+function qa(doc,sel){try{return Array.from(doc.querySelectorAll(sel))}catch(e){return[]}}
+function rect(el){if(!el)return null;const r=el.getBoundingClientRect();return{top:Math.round(r.top),left:Math.round(r.left),width:Math.round(r.width),height:Math.round(r.height),bottom:Math.round(r.bottom)}}
+function pick(doc,names){for(const s of names){const el=q(doc,s);if(el)return el}return null}
+function shortRect(name,r){if(!r)return name+': -';return name+': top '+r.top+' h '+r.height+' bottom '+r.bottom}
+function reset(){tick=0;inputEvents=0;renderEvents=0;maxJump=0;lastTop=null;samples=[];lastInput='';focusActive=false;lastLog='';out.textContent='Reset. Tippe im Textfeld der App.'}
+resetBtn.onclick=reset;hideBtn.onclick=()=>{hidden=!hidden;out.style.display=hidden?'none':'block'};
+function installHooks(){
+  const win=frame.contentWindow,doc=frame.contentDocument;if(!win||!doc)return;
+  if(win.__kggJitterHooksInstalled)return;win.__kggJitterHooksInstalled=true;
+  doc.addEventListener('input',e=>{inputEvents++;lastInput=String(e.target&&e.target.value||'').slice(-80)},true);
+  doc.addEventListener('focusin',e=>{if(e.target&&/TEXTAREA|INPUT/.test(e.target.tagName))focusActive=true},true);
+  doc.addEventListener('focusout',e=>{if(e.target&&/TEXTAREA|INPUT/.test(e.target.tagName))focusActive=false},true);
+  const oldRAF=win.requestAnimationFrame.bind(win);win.requestAnimationFrame=function(fn){renderEvents++;return oldRAF(fn)};
+}
+function measure(){
+  tick++;
+  let doc,win;
+  try{doc=frame.contentDocument;win=frame.contentWindow;if(!doc||!win)throw new Error('frame not ready')}catch(e){out.textContent='Frame nicht lesbar: '+e.message;return}
+  installHooks();
+  const textEl=pick(doc,['#exerciseText','textarea','[contenteditable="true"]','input[type="text"]']);
+  const planEl=pick(doc,['#planList','.planList','[data-plan-list]']);
+  const currentPlan=pick(doc,['#currentPlan','.currentPlan','.planPanel','.tabletRight','.outputCard']);
+  const bottom=pick(doc,['.finishBar','.stickyActions','.bottomActions','.mobileBottomActions','[data-bottom-actions]']);
+  const suggestion=pick(doc,['#suggestions','.suggestions','.suggestion','.bankResults','#exerciseSuggestions']);
+  const viewport=win.visualViewport;
+  const tr=rect(textEl),pr=rect(planEl),cr=rect(currentPlan),br=rect(bottom),sr=rect(suggestion);
+  const anchor=tr?tr.top:(pr?pr.top:null);
+  let jump=0;if(anchor!=null&&lastTop!=null){jump=Math.abs(anchor-lastTop);if(jump>maxJump)maxJump=jump}if(anchor!=null)lastTop=anchor;
+  if(jump>0||tick%10===0){samples.push({tick,jump,anchor,inputEvents,renderEvents,vh:viewport?Math.round(viewport.height):innerHeight,vo:viewport?Math.round(viewport.offsetTop):0});if(samples.length>12)samples.shift()}
+  const appTitle=(doc.title||'v389').slice(0,60);
+  const lines=[];
+  lines.push('App: '+appTitle);
+  lines.push('focusActive: '+focusActive+' | inputEvents: '+inputEvents+' | requestAnimationFrame calls: '+renderEvents);
+  lines.push('last input tail: '+(lastInput||'-'));
+  lines.push(shortRect('TEXT',tr));
+  lines.push(shortRect('PLANLIST',pr));
+  lines.push(shortRect('CURRENT',cr));
+  lines.push(shortRect('SUGGEST',sr));
+  lines.push(shortRect('BOTTOM',br));
+  lines.push('visualViewport: h '+(viewport?Math.round(viewport.height):'n/a')+' offsetTop '+(viewport?Math.round(viewport.offsetTop):'n/a')+' pageTop '+(viewport?Math.round(viewport.pageTop):'n/a'));
+  lines.push('last jump: '+jump+' px | max jump: '+maxJump+' px');
+  lines.push('samples: '+samples.map(s=>'#'+s.tick+':j'+s.jump+'/a'+s.anchor+'/i'+s.inputEvents+'/r'+s.renderEvents+'/vh'+s.vh+'/vo'+s.vo).join('  '));
+  if(maxJump>=12)lines.push('WARN: messbarer Layout-Sprung >= 12px'); else lines.push('OK: bisher kein grosser Sprung gemessen');
+  const log=lines.join('\n');if(log!==lastLog&&!hidden){out.textContent=log;lastLog=log}
+}
+frame.addEventListener('load',()=>{setTimeout(()=>{try{installHooks()}catch(e){};out.textContent='v389 geladen. Tippe jetzt im Uebungs-Textfeld. Messung laeuft.'},500)});
+setInterval(measure,180);
+})();
+</script>
+</body>
+</html>
