@@ -45,6 +45,11 @@ H6: Full-App-Kontext statt isolierter Ursache
 - Isolierter Mock mit AutoResize, LiveDraft und Preview jittert nicht.
 - Der echte Fehler entsteht wahrscheinlich erst durch Zusammenspiel mit echter v389-Struktur: Sticky-Actions, Side-Sheets, Plan-Store-Sync, Scroll-Container, VisualViewport/Keyboard oder komplette render()-Kette.
 
+H7: Messanker war schlecht gewaehlt
+- Test 002 findet das Textfeld als hidden/0x0-Element und nutzt deshalb anchorTop 0.
+- Dadurch misst maxJumpPx 0, obwohl PageTop/Scrollposition stark springt.
+- Fuer den naechsten Test muss Planliste/PageTop/ScrollY als primaerer Anker genutzt werden, nicht das erste textarea/input.
+
 ## Test 001 - isolierter Textfield-Jitter-Test
 
 Testdatei:
@@ -76,7 +81,7 @@ Testdatei:
 - therapist-app/test-lab/textfield-jitter/KGG_APP_KOLLEGEN_v389_textfield_jitter_INSTRUMENTED.html
 
 Direkter Link:
-- https://kayus24.github.io/kgg/therapist-app/test-lab/textfield-jitter/KGG_APP_KOLLEGEN_v389_textfield_jitter_INSTRUMENTED.html
+- https://kayus24.github.io/kgg/therapist-app/test-lab/textfield-jitter/KGG_APP_KOLLEGEN_v389_textfield_jitter_INSTRUMENTED.html?v=abs4
 
 Wichtig:
 - Diese Datei veraendert die Haupt-App nicht.
@@ -106,13 +111,25 @@ Bedienung:
 - Button JSON anzeigen pruefen.
 - Button JSON kopieren nutzen und Ergebnis an Chat/Codex geben.
 
-Ergebnis:
-- Noch offen. Max muss im echten Android-Kontext testen und den JSON-Block liefern.
+Ergebnis vom 2026-06-11:
+- JSON: maxJumpPx 0, lastJumpPx 0, verdict no_large_jump_yet.
+- inputEvents 47, renderEvents 8.
+- visualViewport height stabil 730, offsetTop 0.
+- Aber pageTop/scrollY sprang sichtbar: pageTop ca. 228 -> 424 -> 444 -> 536 -> spaeter 292 -> 227.
+- Max beobachtet: Jitter nur leicht beim Scrollen ueber aktuelle Uebungen.
+- Max beobachtet weiter: Bewegungen der Uebungskarten waren wieder schlecht.
+- AppTitle meldet intern: KGG App Kollegen v383 UI Flow Stability, obwohl v389-Datei geladen wird. Build-Identity/Title ist verdaechtig, aber nicht direkt Ursache.
 
-Erfolgskriterium:
-- Jitter muss in v389 sichtbar oder im JSON messbar werden.
-- Wenn maxJumpPx deutlich steigt, naechsten Fix an genau diesem Bereich planen.
-- Wenn kein Jitter sichtbar/messbar wird, muss eine echte Kopie statt Frame gebaut werden.
+Bewertung:
+- Kein grosser Textfeld-Layout-Jump messbar.
+- Scroll/PageTop-Spruenge sind vorhanden und muessen im naechsten Test besser gemessen werden.
+- Die schlechte Kartenbewegung liegt sehr wahrscheinlich daran, dass Test 002 echte v389-Kartenlogik laedt, nicht CardLogic360.
+- Damit bestaetigt Test 002 indirekt: CardLogic360-Ansatz bleibt relevant fuer Kartenbewegung.
+
+Naechster Test 003:
+- Full-v389-Testkopie oder v389-Frame mit CardLogic360-Override im Test-Lab.
+- Ziel: echte v389-App + ruhige 360/366-Hold-Kartenlogik + bessere Scroll/PageTop-Messung.
+- Kein Haupt-App-Patch.
 
 ## Erfolgskriterium fuer spaeteren Fix
 
@@ -120,11 +137,13 @@ Gut:
 - Beim Tippen bleibt Textfeld/Planbereich ruhig.
 - Keine sichtbaren vertikalen Spruenge.
 - Vorschlag darf sich aendern, aber nicht die komplette Box bewegen.
+- Kartenbewegung im aktuellen Plan entspricht wieder dem positiven CardLogic360-Test.
 
 Schlecht:
 - Aktueller Plan springt weiter.
 - Textfeld rutscht bei jedem Buchstaben.
 - Untere Buttons/Fertig wandern sichtbar.
+- Kartenbewegung bleibt wie v389 schlecht/zu aggressiv.
 
 ## Nicht anfassen
 
