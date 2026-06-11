@@ -72,10 +72,10 @@ Bewertung:
 ## Test 003 - v389 Frame + CardLogic360 Capture-Override
 
 Datei:
-- therapist-app/test-lab/cardlogic360/KGG_V389_CARDLOGIC360_OVERRIDE_TEST.html
+- therapist-app/test-lab/cardlogic360/test-003.html
 
 Direkter Test-Link:
-- https://kayus24.github.io/kgg/therapist-app/test-lab/cardlogic360/KGG_V389_CARDLOGIC360_OVERRIDE_TEST.html
+- https://kayus24.github.io/kgg/therapist-app/test-lab/cardlogic360/test-003.html?v=003a
 
 Ziel:
 - Echte v389-App im Frame laden.
@@ -91,13 +91,36 @@ Soll-Verhalten:
 - Overlay zeigt pointerDown, blockedV389, holdActivated, cancelBeforeHold, finish.
 - JSON kann kopiert werden.
 
-Wichtig:
-- Der Override ist nur visuell/diagnostisch.
-- Er ist noch kein echter Plan-State-Reorder-Patch.
-- Erst wenn sich das Verhalten gut anfuehlt, soll Codex die Logik sauber in v389 implementieren.
+Ergebnis vom 2026-06-11:
+- JSON: pointerDown 4, blockedV389 4, holdActivated 4, finish 4, cancelBeforeHold 0.
+- verdict: override_active.
+- Max: Drag-Drop ging bei den Karten.
+- Max: Es gab lustigen Jitter um die Vorschlaege der Uebungsdatenbank; Vorschlaege poppen auf/zu.
+- Max: Swipe links/rechts hatte keine Karten-Translation/Animation, nur rote Verfaerbung.
+- Scroll maxJump sehr hoch, aber Test laeuft im Frame/Overlay und misst auch normale Spruenge durch Scrollen.
 
-Ergebnis:
-- Noch offen. Max soll Test 003 auf Android testen und JSON/Beobachtung melden.
+Bewertung:
+- CardLogic360-Hold-Ansatz ist in echter v389-Umgebung positiv fuer Drag/Drop.
+- Das Drag-Problem kann als eigener Mini-Patch vorbereitet werden.
+- Swipe-Animation ist ein getrenntes Problem und darf nicht mit Drag-Hold-Patch vermischt werden.
+- DB-Vorschlag-Jitter ist ebenfalls ein getrenntes UI-Flow-Problem: Vorschlagsbereich braucht vermutlich reservierte Hoehe/keine display-auf-zu-Spruenge.
+
+## Naechste sinnvolle Tickets
+
+Ticket A - Mini-Patch Drag/Hold:
+- In v389 startAnimatedReorderPress so aendern, dass Drag erst nach 100-140 ms Hold startet.
+- Bewegung vor Hold > 10-12 px bricht Drag ab.
+- Touch-Support behalten.
+- Kein Swipe, keine Vorschlaege, kein Layout anfassen.
+
+Ticket B - separater Swipe-Test:
+- Pruefen, warum Swipe nur rot wird, aber keine sichtbare Karten-Translation zeigt.
+- Nicht zusammen mit Drag-Hold patchen.
+
+Ticket C - separater DB-Vorschlag-Jitter-Test:
+- Vorschlagsbereich unter Textfeld/Bank stabilisieren.
+- Vermutlich Hoehe reservieren und nur Inhalt/Opacity wechseln.
+- Nicht zusammen mit Kartenlogik patchen.
 
 ## Schutzregeln
 
@@ -119,5 +142,5 @@ Nicht anfassen ohne ausdrueckliche Freigabe:
 - Test-Log angelegt: ja
 - Isolierte Gesture-Testdatei vorhanden: ja
 - v389 CardLogic360 Override-Test vorhanden: ja
-- Volle v389-Testkopie im Test-Lab: nein
 - Haupt-App veraendert: nein
+- Naechster Mini-Patch-Kandidat: nur Drag/Hold-Logik
