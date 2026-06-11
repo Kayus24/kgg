@@ -132,18 +132,44 @@ Bewertung:
 - Leichter Jitter in der aktuellen Uebungsbox bleibt als separates Full-Integration-Problem.
 - Naechster sinnvoller kombinierter Test: echte v389-Testkopie mit zwei klar getrennten Fixes: CardLogic360 Drag-Hold + direkte Swipe-Translation, aber ohne DB-Vorschlaege anzufassen.
 
+## Test AB - Drag + Swipe kombiniert im Frame
+
+Datei:
+- therapist-app/test-lab/cardlogic360/test-ab-combined.html
+
+Direkter Test-Link:
+- https://kayus24.github.io/kgg/therapist-app/test-lab/cardlogic360/test-ab-combined.html?v=ab1
+
+Ergebnis vom 2026-06-11:
+- JSON kind: kgg-cardlogic360-ab-combined.
+- dragPointer 7, dragHold 4, dragCancel 5, dragFinish 2.
+- swipePointer 11, swipeMove 239, swipeArmed 103, swipeFinish 10, swipeCancel 1.
+- verdict: drag_and_swipe_active.
+- Max: Links/rechts Swipe ging, loeschte aber nicht.
+- Max: Drag-Drop war ok, aber die Karte sprang direkt nach oben statt am Finger zu bleiben.
+- Max: graue Luecke/Placeholder war komisch sichtbar.
+
+Bewertung:
+- Frame-Override beweist nur, dass beide Bewegungen prinzipiell moeglich sind.
+- Swipe loescht nicht, weil der Test-Override bewusst kein removeExercise/state update macht.
+- Graue Luecke ist der Test-Placeholder; in echter Integration muss sie wie v389 reorder-placeholder aussehen und korrekt animieren.
+- Das Hochspringen zeigt: Der Frame-Override berechnet fixed positioning zu grob. Die echte v389-Logik hat bereits fixedContainingBlockOffset; diese muss beibehalten werden.
+- Naechster Schritt darf kein weiterer Frame-Override sein. Es braucht eine echte v389-Testkopie, die die vorhandenen v389-Funktionen sauber patcht.
+
 ## Naechste sinnvolle Tickets
 
 Ticket A - Mini-Patch Drag/Hold:
 - In v389 startAnimatedReorderPress so aendern, dass Drag erst nach 100-140 ms Hold startet.
 - Bewegung vor Hold > 10-12 px bricht Drag ab.
 - Touch-Support behalten.
+- Wichtig: activateAnimatedReorder und fixedContainingBlockOffset aus v389 behalten, damit Karte nicht nach oben springt.
 - Kein Swipe, keine Vorschlaege, kein Layout anfassen.
 
 Ticket B - Mini-Patch Swipe-Translation:
 - Swipe muss sichtbare translate3d/translateX-Bewegung bekommen.
 - Rote Verfaerbung allein reicht nicht.
-- Separat von Drag/Hold testen.
+- Delete/state remove muss in echter Integration ueber vorhandenes removeExercise laufen.
+- Separat von Drag/Hold testen oder in Testkopie klar getrennt implementieren.
 
 Ticket C - separater DB-Vorschlag-Jitter-Test:
 - Vorschlagsbereich unter Textfeld/Bank stabilisieren.
@@ -171,5 +197,6 @@ Nicht anfassen ohne ausdrueckliche Freigabe:
 - Isolierte Gesture-Testdatei vorhanden: ja
 - v389 CardLogic360 Override-Test vorhanden: ja
 - Swipe-Test B vorhanden: ja
+- Kombinierter Frame-Test AB vorhanden: ja
 - Haupt-App veraendert: nein
-- Naechster Mini-Patch-Kandidat: Drag/Hold + danach Swipe separat oder kombinierte Testkopie im Test-Lab
+- Naechster Mini-Patch-Kandidat: echte v389-Testkopie statt Frame-Override
