@@ -70,7 +70,7 @@ Ergebnis:
 - Bewertung: Test 001 reproduziert den Fehler nicht.
 - Schlussfolgerung: AutoResize + LiveDraft + Preview allein reichen nicht aus. Der Fehler muss im echten v389-App-Kontext gesucht werden.
 
-## Test 002 - v389 Frame-Instrumentierung mit Mess-Overlay
+## Test 002 - v389 Frame-Instrumentierung mit Mess-Overlay + JSON Export
 
 Testdatei:
 - therapist-app/test-lab/textfield-jitter/KGG_APP_KOLLEGEN_v389_textfield_jitter_INSTRUMENTED.html
@@ -82,9 +82,10 @@ Wichtig:
 - Diese Datei veraendert die Haupt-App nicht.
 - Sie laedt v389 in einem same-origin Test-Frame.
 - Sie misst echte v389-DOM-Positionen und visualViewport-Werte.
+- Sie gibt einen kopierbaren JSON-Diagnoseblock aus.
 - Es ist bewusst noch kein Fix enthalten.
 
-Messpunkte:
+Messpunkte im Overlay und JSON:
 - Textfeld top/height
 - Planliste top/height
 - Aktuelle Planbox top/height
@@ -95,13 +96,22 @@ Messpunkte:
 - requestAnimationFrame-Zaehler als Render-/Layout-Aktivitaetsindikator
 - letzter Layout-Sprung in px
 - maximaler Layout-Sprung in px
+- Samples und Jump-Historie
+- User-Agent und Test-URL
+- verdict: no_large_jump_yet oder layout_jump_detected
+
+Bedienung:
+- Testseite oeffnen.
+- In der v389-App tippen, bis Jitter sichtbar ist.
+- Button JSON anzeigen pruefen.
+- Button JSON kopieren nutzen und Ergebnis an Chat/Codex geben.
 
 Ergebnis:
-- Noch offen. Max muss im echten Android-Kontext testen.
+- Noch offen. Max muss im echten Android-Kontext testen und den JSON-Block liefern.
 
 Erfolgskriterium:
-- Jitter muss in v389 sichtbar oder im Overlay messbar werden.
-- Wenn max jump deutlich steigt, naechsten Fix an genau diesem Bereich planen.
+- Jitter muss in v389 sichtbar oder im JSON messbar werden.
+- Wenn maxJumpPx deutlich steigt, naechsten Fix an genau diesem Bereich planen.
 - Wenn kein Jitter sichtbar/messbar wird, muss eine echte Kopie statt Frame gebaut werden.
 
 ## Erfolgskriterium fuer spaeteren Fix
