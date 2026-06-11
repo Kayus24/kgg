@@ -10,12 +10,13 @@
 </head>
 <body>
 <div class="bar"><b>TEXTFIELD JITTER DIAG</b><span>v389 im Test-Frame · Haupt-App unverändert</span><button id="resetBtn">Reset</button><button id="hideBtn">Overlay</button><button id="jsonBtn">JSON anzeigen</button><button id="copyJsonBtn">JSON kopieren</button></div>
-<div class="stage"><iframe id="appFrame" src="../../../releases/v389/web/KGG_APP_KOLLEGEN_v389_flow_stability.html"></iframe></div>
+<div class="stage"><iframe id="appFrame" src="../../releases/v389/web/KGG_APP_KOLLEGEN_v389_flow_stability.html"></iframe></div>
 <pre class="overlay" id="out">Lade v389…</pre>
 <div class="jsonBox" id="jsonBox"><textarea id="jsonOut" readonly>{}</textarea></div>
 <script>
 (function(){
 const frame=document.getElementById('appFrame'),out=document.getElementById('out'),resetBtn=document.getElementById('resetBtn'),hideBtn=document.getElementById('hideBtn'),jsonBtn=document.getElementById('jsonBtn'),copyJsonBtn=document.getElementById('copyJsonBtn'),jsonBox=document.getElementById('jsonBox'),jsonOut=document.getElementById('jsonOut');
+const loadedAppPath='../../releases/v389/web/KGG_APP_KOLLEGEN_v389_flow_stability.html';
 let tick=0,inputEvents=0,renderEvents=0,maxJump=0,lastJump=0,lastTop=null,lastInput='',focusActive=false,hidden=false,jsonVisible=false,lastLog='',lastDiag={};
 let samples=[],jumps=[];
 function q(doc,sel){try{return doc.querySelector(sel)}catch(e){return null}}
@@ -25,7 +26,7 @@ function shortRect(name,r){if(!r)return name+': -';return name+': top '+r.top+' 
 function nowIso(){try{return new Date().toISOString()}catch(e){return String(Date.now())}}
 function buildJson(){return JSON.stringify(lastDiag||{},null,2)}
 function updateJsonBox(){jsonOut.value=buildJson()}
-function reset(){tick=0;inputEvents=0;renderEvents=0;maxJump=0;lastJump=0;lastTop=null;samples=[];jumps=[];lastInput='';focusActive=false;lastLog='';lastDiag={kind:'kgg-textfield-jitter-diagnostic',status:'reset',resetAt:nowIso()};out.textContent='Reset. Tippe im Textfeld der App.';updateJsonBox()}
+function reset(){tick=0;inputEvents=0;renderEvents=0;maxJump=0;lastJump=0;lastTop=null;samples=[];jumps=[];lastInput='';focusActive=false;lastLog='';lastDiag={kind:'kgg-textfield-jitter-diagnostic',status:'reset',resetAt:nowIso(),loadedApp:loadedAppPath};out.textContent='Reset. Tippe im Textfeld der App.';updateJsonBox()}
 resetBtn.onclick=reset;hideBtn.onclick=()=>{hidden=!hidden;out.style.display=hidden?'none':'block'};jsonBtn.onclick=()=>{jsonVisible=!jsonVisible;jsonBox.style.display=jsonVisible?'block':'none';jsonBtn.textContent=jsonVisible?'JSON verstecken':'JSON anzeigen';updateJsonBox()};copyJsonBtn.onclick=async()=>{updateJsonBox();jsonOut.focus();jsonOut.select();try{await navigator.clipboard.writeText(jsonOut.value);copyJsonBtn.textContent='Kopiert';setTimeout(()=>copyJsonBtn.textContent='JSON kopieren',900)}catch(e){document.execCommand('copy');copyJsonBtn.textContent='Markiert';setTimeout(()=>copyJsonBtn.textContent='JSON kopieren',900)}};
 function installHooks(){
   const win=frame.contentWindow,doc=frame.contentDocument;if(!win||!doc)return;
@@ -38,7 +39,7 @@ function installHooks(){
 function measure(){
   tick++;
   let doc,win;
-  try{doc=frame.contentDocument;win=frame.contentWindow;if(!doc||!win)throw new Error('frame not ready')}catch(e){out.textContent='Frame nicht lesbar: '+e.message;lastDiag={kind:'kgg-textfield-jitter-diagnostic',status:'frame_not_readable',error:String(e&&e.message||e),updatedAt:nowIso()};updateJsonBox();return}
+  try{doc=frame.contentDocument;win=frame.contentWindow;if(!doc||!win)throw new Error('frame not ready')}catch(e){out.textContent='Frame nicht lesbar: '+e.message;lastDiag={kind:'kgg-textfield-jitter-diagnostic',status:'frame_not_readable',error:String(e&&e.message||e),updatedAt:nowIso(),loadedApp:loadedAppPath};updateJsonBox();return}
   installHooks();
   const textEl=pick(doc,['#exerciseText','textarea','[contenteditable="true"]','input[type="text"]']);
   const planEl=pick(doc,['#planList','.planList','[data-plan-list]']);
@@ -55,10 +56,10 @@ function measure(){
   const appTitle=(doc.title||'v389').slice(0,80);
   lastDiag={
     kind:'kgg-textfield-jitter-diagnostic',
-    version:2,
+    version:3,
     updatedAt:nowIso(),
     testFile:'therapist-app/test-lab/textfield-jitter/KGG_APP_KOLLEGEN_v389_textfield_jitter_INSTRUMENTED.html',
-    loadedApp:'../../../releases/v389/web/KGG_APP_KOLLEGEN_v389_flow_stability.html',
+    loadedApp:loadedAppPath,
     appTitle,
     userAgent:navigator.userAgent,
     pageUrl:location.href,
@@ -88,7 +89,7 @@ function measure(){
   const log=lines.join('\n');if(log!==lastLog&&!hidden){out.textContent=log;lastLog=log}
   if(jsonVisible)updateJsonBox();
 }
-frame.addEventListener('load',()=>{setTimeout(()=>{try{installHooks()}catch(e){};out.textContent='v389 geladen. Tippe jetzt im Uebungs-Textfeld. Messung laeuft. Danach JSON kopieren.';lastDiag={kind:'kgg-textfield-jitter-diagnostic',status:'loaded',loadedAt:nowIso()};updateJsonBox()},500)});
+frame.addEventListener('load',()=>{setTimeout(()=>{try{installHooks()}catch(e){};out.textContent='v389 geladen. Tippe jetzt im Uebungs-Textfeld. Messung laeuft. Danach JSON kopieren.';lastDiag={kind:'kgg-textfield-jitter-diagnostic',status:'loaded',loadedAt:nowIso(),loadedApp:loadedAppPath};updateJsonBox()},500)});
 setInterval(measure,180);
 reset();
 })();
