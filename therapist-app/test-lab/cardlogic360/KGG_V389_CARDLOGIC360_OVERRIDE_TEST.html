@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>KGG v389 CardLogic360 Override Test</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#071027;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}.bar{position:fixed;left:0;right:0;top:0;z-index:20;min-height:48px;padding:7px 10px;background:#071027;color:#fff;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;font-weight:900}.bar b{font-size:13px}.bar button{border:1px solid rgba(255,255,255,.28);background:#fff;color:#071027;border-radius:999px;padding:6px 10px;font-weight:1000}.stage{position:absolute;left:0;right:0;top:76px;bottom:0;background:#e8eef6}.stage iframe{width:100%;height:100%;border:0;background:#e8eef6}.overlay{position:fixed;z-index:30;left:8px;right:8px;bottom:8px;max-height:34vh;overflow:auto;background:rgba(7,16,39,.92);color:#fff;border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:10px;font:12px ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;box-shadow:0 14px 36px rgba(0,0,0,.28)}.jsonBox{position:fixed;z-index:31;left:8px;right:8px;bottom:8px;height:42vh;display:none;background:#fff;border:2px solid #111827;border-radius:16px;overflow:hidden}.jsonBox textarea{width:100%;height:100%;border:0;outline:0;resize:none;padding:10px;font:12px ui-monospace,monospace;color:#071027;background:#fff}@media(max-width:720px){.bar{font-size:11px}.stage{top:82px}.overlay{font-size:11px;max-height:30vh}}
+</style>
+</head>
+<body>
+<div class="bar"><b>CARDLOGIC360 OVERRIDE TEST</b><span>v389 Frame + Hold-Override</span><button id="resetBtn">Reset</button><button id="jsonBtn">JSON</button><button id="copyBtn">Kopieren</button></div>
+<div class="stage"><iframe id="appFrame" src="/kgg/therapist-app/releases/v389/web/KGG_APP_KOLLEGEN_v389_flow_stability.html?v=card360test1"></iframe></div>
+<pre class="overlay" id="out">Lade v389…</pre>
+<div class="jsonBox" id="jsonBox"><textarea id="jsonOut" readonly>{}</textarea></div>
+<script>
+(function(){
+const frame=document.getElementById('appFrame'),out=document.getElementById('out'),jsonBox=document.getElementById('jsonBox'),jsonOut=document.getElementById('jsonOut');
+const loadedApp='/kgg/therapist-app/releases/v389/web/KGG_APP_KOLLEGEN_v389_flow_stability.html?v=card360test1';
+let data, jsonVisible=false, lastScrollY=null, maxScrollJump=0;
+function initData(){data={kind:'kgg-cardlogic360-override-test',version:1,loadedApp,updatedAt:new Date().toISOString(),appTitle:'',events:{pointerDown:0,blockedV389:0,holdActivated:0,cancelBeforeHold:0,finish:0},scroll:{lastY:null,maxJump:0,samples:[]},cards:{found:0},verdict:'running'}}
+initData();
+function updateJson(){jsonOut.value=JSON.stringify(data,null,2)}
+function log(){out.textContent='App: '+(data.appTitle||'-')+'\nCards found: '+data.cards.found+'\npointerDown: '+data.events.pointerDown+' | blockedV389: '+data.events.blockedV389+'\nholdActivated: '+data.events.holdActivated+' | cancelBeforeHold: '+data.events.cancelBeforeHold+' | finish: '+data.events.finish+'\nscroll maxJump: '+data.scroll.maxJump+'\nverdict: '+data.verdict+'\n\nTest: am Drag-Handle kurz halten. Karte sollte erst nach Hold abheben. Normales Scrollen darf keinen Drag starten.'; if(jsonVisible)updateJson()}
+document.getElementById('resetBtn').onclick=()=>{initData();log();updateJson()};
+document.getElementById('jsonBtn').onclick=()=>{jsonVisible=!jsonVisible;jsonBox.style.display=jsonVisible?'block':'none';updateJson()};
+document.getElementById('copyBtn').onclick=async()=>{updateJson();jsonOut.focus();jsonOut.select();try{await navigator.clipboard.writeText(jsonOut.value)}catch(e){document.execCommand('copy')}};
+function qs(doc,sel){try{return doc.querySelector(sel)}catch(e){return null}}
+function qsa(doc,sel){try{return Array.from(doc.querySelectorAll(sel))}catch(e){return[]}}
+function getCard(el){return el&&el.closest&&el.closest('.planCard,[data-plan-id],.card')}
+function getHandle(el){return el&&el.closest&&el.closest('.drag[data-sort-id],[data-sort-id],.dragHandle,.sortHandle,.planDrag')}
+function install(){
+  const win=frame.contentWindow,doc=frame.contentDocument;if(!win||!doc||win.__card360OverrideInstalled)return;
+  win.__card360OverrideInstalled=true;data.appTitle=doc.title||'';data.cards.found=qsa(doc,'.planCard,[data-plan-id]').length;log();
+  doc.addEventListener('pointerdown',function(ev){
+    const h=getHandle(ev.target); if(!h)return;
+    const card=getCard(h); if(!card)return;
+    data.events.pointerDown++;data.events.blockedV389++;data.updatedAt=new Date().toISOString();
+    ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation();
+    startHold(ev,win,doc,h,card);log();
+  },true);
+}
+function startHold(ev,win,doc,handle,card){
+  const sx=ev.clientX, sy=ev.clientY; let active=false, cancelled=false, ph=null; const startRect=card.getBoundingClientRect();
+  card.style.willChange='transform'; handle.style.background='#dcecff';
+  const timer=setTimeout(()=>activate(ev),120);
+  function cleanup(){clearTimeout(timer);doc.removeEventListener('pointermove',preMove,true);doc.removeEventListener('pointermove',move,true);doc.removeEventListener('pointerup',up,true);doc.removeEventListener('pointercancel',cancel,true);handle.style.background='';card.style.willChange='';}
+  function cancel(){if(!active){cancelled=true;data.events.cancelBeforeHold++;cleanup();log();return}finish()}
+  function preMove(e){const dx=Math.abs(e.clientX-sx),dy=Math.abs(e.clientY-sy);if(!active&&(dx>12||dy>12)){cancelled=true;data.events.cancelBeforeHold++;cleanup();log();}}
+  function activate(e){if(cancelled||active)return;active=true;data.events.holdActivated++;const r=card.getBoundingClientRect();ph=doc.createElement('div');ph.style.height=Math.max(48,r.height)+'px';ph.style.borderRadius='18px';ph.style.background='rgba(7,16,39,.08)';card.after(ph);card.style.position='fixed';card.style.zIndex='99999';card.style.left=r.left+'px';card.style.top=r.top+'px';card.style.width=r.width+'px';card.style.transform='translateY(0) scale(1.035)';card.style.boxShadow='0 22px 42px rgba(7,16,39,.22)';card.style.pointerEvents='none';doc.removeEventListener('pointermove',preMove,true);doc.addEventListener('pointermove',move,true);log();}
+  function move(e){if(!active)return;e.preventDefault();e.stopPropagation();const dy=e.clientY-sy;card.style.transform='translateY('+dy+'px) scale(1.035)'}
+  function finish(){data.events.finish++;if(ph)ph.remove();card.style.position='';card.style.zIndex='';card.style.left='';card.style.top='';card.style.width='';card.style.transform='';card.style.boxShadow='';card.style.pointerEvents='';cleanup();log()}
+  function up(e){if(active){e.preventDefault();e.stopPropagation();finish()}else{cleanup()}}
+  doc.addEventListener('pointermove',preMove,true);doc.addEventListener('pointerup',up,true,{once:true});doc.addEventListener('pointercancel',cancel,true,{once:true});
+}
+function measure(){
+  try{const win=frame.contentWindow,doc=frame.contentDocument;if(!win||!doc)return;install();const y=Math.round(win.scrollY||0);if(lastScrollY!=null){const j=Math.abs(y-lastScrollY);if(j>maxScrollJump)maxScrollJump=j;data.scroll.maxJump=maxScrollJump;if(j>0){data.scroll.samples.push({t:Date.now(),y,j});if(data.scroll.samples.length>20)data.scroll.samples.shift()}}lastScrollY=y;data.scroll.lastY=y;data.cards.found=qsa(doc,'.planCard,[data-plan-id]').length;data.verdict=data.events.holdActivated>0?'card360_override_active':'waiting_for_drag_handle';data.updatedAt=new Date().toISOString();}catch(e){data.verdict='frame_error';data.error=String(e&&e.message||e)}log();}
+frame.addEventListener('load',()=>setTimeout(()=>{install();measure()},800));setInterval(measure,500);log();updateJson();
+})();
+</script>
+</body>
+</html>
