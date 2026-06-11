@@ -105,6 +105,33 @@ Bewertung:
 - Swipe-Animation ist ein getrenntes Problem und darf nicht mit Drag-Hold-Patch vermischt werden.
 - DB-Vorschlag-Jitter ist ebenfalls ein getrenntes UI-Flow-Problem: Vorschlagsbereich braucht vermutlich reservierte Hoehe/keine display-auf-zu-Spruenge.
 
+## Test B - Swipe-Animation
+
+Datei:
+- therapist-app/test-lab/cardlogic360/test-b-swipe.html
+
+Direkter Test-Link:
+- https://kayus24.github.io/kgg/therapist-app/test-lab/cardlogic360/test-b-swipe.html?v=swipeb1
+
+Ziel:
+- Swipe links/rechts isoliert testen.
+- Pruefen, ob eine direkte translate3d-Swipe-Bewegung im echten v389-Frame sichtbar ist.
+- Nicht Drag/Hold testen.
+
+Ergebnis vom 2026-06-11:
+- JSON mode: override.
+- pointerDown 6, overrideActive 6, move 85, armed 17, finish 1, cancel 5.
+- verdict: override_translation_applied.
+- Max: Rechts/links Swipe hatte wieder Animation.
+- Max: Drag-Drop hoch/runter ging in diesem Test nicht.
+- Max: leichter Jitter in der ganzen aktuellen Uebungsbox.
+
+Bewertung:
+- Swipe-Translation ist grundsaetzlich moeglich. CSS/Container blockieren transform nicht generell.
+- Dass Drag-Drop in Test B nicht ging, ist erwartbar: Test B ist nur Swipe-Test und ueberschreibt keine Drag/Hold-Logik.
+- Leichter Jitter in der aktuellen Uebungsbox bleibt als separates Full-Integration-Problem.
+- Naechster sinnvoller kombinierter Test: echte v389-Testkopie mit zwei klar getrennten Fixes: CardLogic360 Drag-Hold + direkte Swipe-Translation, aber ohne DB-Vorschlaege anzufassen.
+
 ## Naechste sinnvolle Tickets
 
 Ticket A - Mini-Patch Drag/Hold:
@@ -113,9 +140,10 @@ Ticket A - Mini-Patch Drag/Hold:
 - Touch-Support behalten.
 - Kein Swipe, keine Vorschlaege, kein Layout anfassen.
 
-Ticket B - separater Swipe-Test:
-- Pruefen, warum Swipe nur rot wird, aber keine sichtbare Karten-Translation zeigt.
-- Nicht zusammen mit Drag-Hold patchen.
+Ticket B - Mini-Patch Swipe-Translation:
+- Swipe muss sichtbare translate3d/translateX-Bewegung bekommen.
+- Rote Verfaerbung allein reicht nicht.
+- Separat von Drag/Hold testen.
 
 Ticket C - separater DB-Vorschlag-Jitter-Test:
 - Vorschlagsbereich unter Textfeld/Bank stabilisieren.
@@ -142,5 +170,6 @@ Nicht anfassen ohne ausdrueckliche Freigabe:
 - Test-Log angelegt: ja
 - Isolierte Gesture-Testdatei vorhanden: ja
 - v389 CardLogic360 Override-Test vorhanden: ja
+- Swipe-Test B vorhanden: ja
 - Haupt-App veraendert: nein
-- Naechster Mini-Patch-Kandidat: nur Drag/Hold-Logik
+- Naechster Mini-Patch-Kandidat: Drag/Hold + danach Swipe separat oder kombinierte Testkopie im Test-Lab
