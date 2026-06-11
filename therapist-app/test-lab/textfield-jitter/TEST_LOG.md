@@ -17,7 +17,7 @@ Video:
   - Live-Vorschau/Live-Draft im aktuellen Plan
   - DB-Vorschlag/Top-Treffer unter dem Textfeld
   - ggf. Keyboard-/Sticky-/Scroll-Korrektur
-- Die Kartenbewegung selbst war in der separaten CardLogic360-Testdatei besser. Der neue Restfehler sitzt daher vermutlich im Textfeld-/Live-Render-Flow.
+- Die Kartenbewegung selbst war in der separaten CardLogic360-Testdatei besser. Der neue Restfehler sitzt daher vermutlich im Textfeld-/Full-App-Render-/Keyboard-Flow.
 
 ## Hypothesen
 
@@ -41,6 +41,10 @@ H5: Zu grober render()
 - Bei jedem Buchstaben wird zu viel neu gerendert: Plan, Bank, Suggestion, Keyboard-Inset.
 - Dadurch entstehen sichtbare Reflows.
 
+H6: Full-App-Kontext statt isolierter Ursache
+- Isolierter Mock mit AutoResize, LiveDraft und Preview jittert nicht.
+- Der echte Fehler entsteht wahrscheinlich erst durch Zusammenspiel mit echter v389-Struktur: Sticky-Actions, Side-Sheets, Plan-Store-Sync, Scroll-Container, VisualViewport/Keyboard oder komplette render()-Kette.
+
 ## Test 001 - isolierter Textfield-Jitter-Test
 
 Testdatei:
@@ -62,9 +66,35 @@ Testvarianten:
   - Planliste nicht komplett neu aufbauen bei jedem Zeichen
 
 Ergebnis:
-- Noch offen. Max soll beide Modi auf dem Android-Geraet testen und Rueckmeldung geben.
+- Rueckmeldung Max: Keines jittert.
+- Bewertung: Test 001 reproduziert den Fehler nicht.
+- Schlussfolgerung: AutoResize + LiveDraft + Preview allein reichen nicht aus. Der Fehler muss im echten v389-App-Kontext gesucht werden.
 
-## Erfolgskriterium
+## Naechster Test 002 - volle v389-Testkopie mit Mess-Overlay
+
+Ziel:
+- Nicht weiter mit Mock testen.
+- Volle v389-Kollegen-App in test-lab/textfield-jitter kopieren.
+- Nur Debug-/Mess-Overlay ergaenzen.
+- Haupt-App unveraendert lassen.
+
+Geplanter Dateiname:
+- therapist-app/test-lab/textfield-jitter/KGG_APP_KOLLEGEN_v389_textfield_jitter_INSTRUMENTED.html
+
+Messpunkte:
+- Textfeld top/height
+- Planliste top/height
+- Aktuelle Planbox top/height
+- Sticky-/Bottom-Actions top
+- visualViewport height/offsetTop, falls verfuegbar
+- Anzahl render()-Aufrufe pro Input
+- Anzahl syncStatePlanToStore/syncTextInputFromPlan pro Input, falls leicht messbar
+
+Erfolgskriterium:
+- Jitter muss in der v389-Testkopie reproduzierbar sichtbar oder messbar werden.
+- Erst danach Mini-Patch planen.
+
+## Erfolgskriterium fuer spaeteren Fix
 
 Gut:
 - Beim Tippen bleibt Textfeld/Planbereich ruhig.
