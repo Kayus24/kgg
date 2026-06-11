@@ -49,19 +49,55 @@ Nicht getestet in dieser Datei:
 - echte Plan-State-Synchronisierung
 
 Ergebnis:
-- Noch offen: Max muss im Browser/Tablet testen, ob sich Drag/Swipe besser anfuehlt.
+- Rueckmeldung Max: Kartenbewegung besser als in aktueller v389.
 
 Bewertung:
-- Wenn Test 001 gut ist, soll daraus eine volle v389-Testkopie im Test-Lab entstehen.
-- Wenn Test 001 schlecht ist, muss zuerst nur Gesture-Schwelle/Hold-Zeit angepasst werden.
+- CardLogic360-Hold-Ansatz ist positiv.
+- Muss in echter v389-Umgebung getestet werden.
 
-## Naechster geplanter Test
+## Test 002 - echte v389 ohne CardLogic360 im Textfield-Jitter-Test
 
-Test 002:
-- volle v389-Testkopie im Ordner therapist-app/test-lab/cardlogic360/
-- Dateiname: KGG_APP_KOLLEGEN_v389_cardlogic360_TEST.html
-- Nur startAnimatedReorderPress / Karten-Gesture-Logik anpassen
-- Haupt-App unveraendert lassen
+Datei:
+- therapist-app/test-lab/textfield-jitter/KGG_APP_KOLLEGEN_v389_textfield_jitter_INSTRUMENTED.html
+
+Ergebnis aus JSON:
+- Kein grosser Textfeld-Jump: maxJumpPx 0.
+- Leichte Scroll/PageTop-Spruenge.
+- Kartenbewegung wieder schlecht, weil echte v389-Kartenlogik aktiv war.
+
+Bewertung:
+- Textfeld ist nicht Hauptproblem.
+- Die Karten-Gesture-Logik bleibt der zentrale Kandidat.
+
+## Test 003 - v389 Frame + CardLogic360 Capture-Override
+
+Datei:
+- therapist-app/test-lab/cardlogic360/KGG_V389_CARDLOGIC360_OVERRIDE_TEST.html
+
+Direkter Test-Link:
+- https://kayus24.github.io/kgg/therapist-app/test-lab/cardlogic360/KGG_V389_CARDLOGIC360_OVERRIDE_TEST.html
+
+Ziel:
+- Echte v389-App im Frame laden.
+- Haupt-App nicht veraendern.
+- Drag-Handle-Events im Capture-Modus abfangen.
+- v389-aggressive Drag-Logik blockieren.
+- Testweise CardLogic360-Hold-Verhalten darueberlegen.
+
+Soll-Verhalten:
+- Kurzes Scrollen/Antippen am Drag-Handle startet keinen Drag.
+- Karte hebt erst nach ca. 120 ms Halten ab.
+- Bewegung vor Hold > ca. 12 px bricht Drag ab.
+- Overlay zeigt pointerDown, blockedV389, holdActivated, cancelBeforeHold, finish.
+- JSON kann kopiert werden.
+
+Wichtig:
+- Der Override ist nur visuell/diagnostisch.
+- Er ist noch kein echter Plan-State-Reorder-Patch.
+- Erst wenn sich das Verhalten gut anfuehlt, soll Codex die Logik sauber in v389 implementieren.
+
+Ergebnis:
+- Noch offen. Max soll Test 003 auf Android testen und JSON/Beobachtung melden.
 
 ## Schutzregeln
 
@@ -81,6 +117,7 @@ Nicht anfassen ohne ausdrueckliche Freigabe:
 - Test-Lab-Ordner angelegt: ja
 - CardLogic360-Unterordner angelegt: ja
 - Test-Log angelegt: ja
-- Isolierte Gesture-Testdatei vorhanden: ja, aber aktuell noch im v389 Release-Ordner
+- Isolierte Gesture-Testdatei vorhanden: ja
+- v389 CardLogic360 Override-Test vorhanden: ja
 - Volle v389-Testkopie im Test-Lab: nein
 - Haupt-App veraendert: nein
