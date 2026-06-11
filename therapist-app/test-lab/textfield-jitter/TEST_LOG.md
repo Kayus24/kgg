@@ -70,29 +70,39 @@ Ergebnis:
 - Bewertung: Test 001 reproduziert den Fehler nicht.
 - Schlussfolgerung: AutoResize + LiveDraft + Preview allein reichen nicht aus. Der Fehler muss im echten v389-App-Kontext gesucht werden.
 
-## Naechster Test 002 - volle v389-Testkopie mit Mess-Overlay
+## Test 002 - v389 Frame-Instrumentierung mit Mess-Overlay
 
-Ziel:
-- Nicht weiter mit Mock testen.
-- Volle v389-Kollegen-App in test-lab/textfield-jitter kopieren.
-- Nur Debug-/Mess-Overlay ergaenzen.
-- Haupt-App unveraendert lassen.
-
-Geplanter Dateiname:
+Testdatei:
 - therapist-app/test-lab/textfield-jitter/KGG_APP_KOLLEGEN_v389_textfield_jitter_INSTRUMENTED.html
+
+Direkter Link:
+- https://kayus24.github.io/kgg/therapist-app/test-lab/textfield-jitter/KGG_APP_KOLLEGEN_v389_textfield_jitter_INSTRUMENTED.html
+
+Wichtig:
+- Diese Datei veraendert die Haupt-App nicht.
+- Sie laedt v389 in einem same-origin Test-Frame.
+- Sie misst echte v389-DOM-Positionen und visualViewport-Werte.
+- Es ist bewusst noch kein Fix enthalten.
 
 Messpunkte:
 - Textfeld top/height
 - Planliste top/height
 - Aktuelle Planbox top/height
 - Sticky-/Bottom-Actions top
-- visualViewport height/offsetTop, falls verfuegbar
-- Anzahl render()-Aufrufe pro Input
-- Anzahl syncStatePlanToStore/syncTextInputFromPlan pro Input, falls leicht messbar
+- Vorschlagsbereich top/height
+- visualViewport height/offsetTop/pageTop
+- input-event-Zaehler
+- requestAnimationFrame-Zaehler als Render-/Layout-Aktivitaetsindikator
+- letzter Layout-Sprung in px
+- maximaler Layout-Sprung in px
+
+Ergebnis:
+- Noch offen. Max muss im echten Android-Kontext testen.
 
 Erfolgskriterium:
-- Jitter muss in der v389-Testkopie reproduzierbar sichtbar oder messbar werden.
-- Erst danach Mini-Patch planen.
+- Jitter muss in v389 sichtbar oder im Overlay messbar werden.
+- Wenn max jump deutlich steigt, naechsten Fix an genau diesem Bereich planen.
+- Wenn kein Jitter sichtbar/messbar wird, muss eine echte Kopie statt Frame gebaut werden.
 
 ## Erfolgskriterium fuer spaeteren Fix
 
