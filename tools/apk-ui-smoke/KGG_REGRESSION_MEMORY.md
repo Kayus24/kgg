@@ -51,6 +51,13 @@ Diese Datei speichert gefundene echte Fix-Regeln, damit dieselben Fehler nicht i
 - Testfall: `390x844`, mehrere Plan-Karten, zur Bank scrollen, `Uebungsdatenbank oeffnen` tippen; `#bankArea.bankOpen`, `.bankRows` und A-Z-Leiste erscheinen.
 - Tabu: Nicht den Scroll-Guard global deaktivieren; nur den sichtbaren Bank-Button gezielt nachfassen.
 
+## REG-PHONE-003 - Handy-Scroll und Karten-Gesten bleiben entkoppelt
+
+- Symptom: Handy-Seite kann nicht mehr scrollen; Swipe links/rechts und Reorder hoch/runter zeigen keine sichtbare Kartenbewegung.
+- Fix-Regel: Im Handy-Breakpoint duerfen Tablet-Menue-Zustaende, Sidebars/Backdrops und `contain:layout/paint` die Planliste nicht kapseln. Swipe nutzt direkte sichtbare `translateX(px)`-Bewegung wie die alte v360/v366-Linie; Reorder-Lift darf nicht in einem Phone-Contain-Wrapper gefangen werden.
+- Testfall: `390x844`, mindestens fuenf Plan-Karten; Seite bleibt scrollbar, horizontaler Swipe bewegt die ganze Karte sichtbar, Drag-Handle hebt die Karte sichtbar vertikal an.
+- Tabu: Keine Phone-Fixes, die `.planList`/`#currentPlanBlock` im Handy-Modus per `contain:layout paint` oder globalem `overflow:hidden` isolieren.
+
 ## REG-PARSER-001 - QR-/Satzblock-Schreibweisen bleiben eine saubere Planstruktur
 
 - Symptom: Mehrzeilige QR-/Scan-Texte wie `Rudern — Tag 2` mit `1. Satz: 45 kg @ 15 Wdh` oder `Typ: qr` mit mehreren Uebungen werden als falsche Einzelsegmente oder Namen mit Satzdaten importiert.
