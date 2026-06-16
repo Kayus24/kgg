@@ -58,6 +58,13 @@ Diese Datei speichert gefundene echte Fix-Regeln, damit dieselben Fehler nicht i
 - Testfall: `390x844`, mindestens fuenf Plan-Karten; Seite bleibt scrollbar, horizontaler Swipe bewegt die ganze Karte sichtbar, Drag-Handle hebt die Karte sichtbar vertikal an.
 - Tabu: Keine Phone-Fixes, die `.planList`/`#currentPlanBlock` im Handy-Modus per `contain:layout paint` oder globalem `overflow:hidden` isolieren.
 
+## REG-FLOW-001 - Phone und Tablet bleiben getrennte UI-Flows
+
+- Symptom: Tablet-Fixes reparieren die Sidebar, zerstoeren aber Handy-Scroll, Planbox-Stabilitaet oder Karten-Gesten; Phone-Fixes erzeugen neue Tablet-Overlays.
+- Fix-Regel: Eine HTML darf gemeinsame Datenlogik nutzen, aber Phone `<760px` und Tablet `>=760px` muessen getrennte Flow-Klassen haben. Phone darf keine Tablet-Sidebar/Backdrop- oder ScrollGuard-Zustaende erben.
+- Testfall: `window.KGG_FLOW_QA.runAll()` muss bei `390x844`, `800x1280`, `1280x800` und `900x700` gruen sein; Phone-Metrik verlangt `kggDualPhoneFlow`, Tablet-Metrik `kggDualTabletFlow`.
+- Tabu: Keine neuen globalen Body-/Touch-/Overflow-Regeln ohne Flow-Klasse.
+
 ## REG-PARSER-001 - QR-/Satzblock-Schreibweisen bleiben eine saubere Planstruktur
 
 - Symptom: Mehrzeilige QR-/Scan-Texte wie `Rudern — Tag 2` mit `1. Satz: 45 kg @ 15 Wdh` oder `Typ: qr` mit mehreren Uebungen werden als falsche Einzelsegmente oder Namen mit Satzdaten importiert.
