@@ -17,9 +17,10 @@ Aktiver Plan, Sidebar geschlossen:
 ## Golden-Regeln
 
 - Tablet gilt ab `760px`; darunter muss die vorhandene Handy-UI greifen.
-- Leerer Plan (`0 Uebungen`): Seitenleiste ist standardmaessig offen, Planbereich rechts bleibt sichtbar und zeigt einen Empty-State.
+- Leerer Plan (`0 Uebungen`): Seitenleiste ist standardmaessig offen, als feste Dock-Leiste links sichtbar und reserviert echten Platz; Planbereich rechts bleibt sichtbar und zeigt einen Empty-State.
 - Sobald der Plan von `0` auf `1+` Uebungen wechselt, schliesst die Seitenleiste genau einmal automatisch.
 - Danach respektiert die App manuelles Oeffnen/Schliessen per Hamburger, Close, Backdrop oder Escape.
+- Eine offene Tablet-Seitenleiste darf kein Blur-/Backdrop-Overlay ueber die Arbeitsflaeche legen.
 - Tablet soll zwischen `760px` und grossen Landscape-Breiten skalieren, ohne gequetschte Zwischenlayouts oder ueberlappende Actions.
 - Die A-Z-Leiste bleibt im Golden-Layout eine kompakte vertikale Schnellleiste wie in der Referenz.
 
@@ -36,8 +37,8 @@ Aktiver Plan, Sidebar geschlossen:
 
 ## Aktuelle Implementierung
 
-- Testdatei: `therapist-app/test-lab/modern-base/KGG_APP_ADMIN_v390_local_p06_parser_formats.html`
-- Basis: `KGG_APP_ADMIN_v390_local_p05_custom_units.html`
+- Testdatei: `therapist-app/test-lab/modern-base/KGG_APP_ADMIN_v390_local_p07_tablet_dock_source_truth.html`
+- Basis: `KGG_APP_ADMIN_v390_local_p06_parser_formats.html`
 - QA-Modus: `?qa=1`
 
 ## Aenderungsregel

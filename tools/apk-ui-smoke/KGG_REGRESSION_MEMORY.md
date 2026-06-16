@@ -16,6 +16,13 @@ Diese Datei speichert gefundene echte Fix-Regeln, damit dieselben Fehler nicht i
 - Testfall: `800x1280`, `1280x800` und `900x700`; links Datenbank/A-Z, rechts Planbereich, keine Ueberdeckung durch Historie/Pakete/Fertig.
 - Tabu: Tablet-Fixes duerfen nicht die Handy-UI als Ersatzlayout erzwingen.
 
+## REG-TABLET-002 - Tablet-Sidebar ist Dock, kein Blur-Overlay
+
+- Symptom: `Tablet QA: ok` erscheint, obwohl die Seitenleiste als fixed Overlay ueber der App liegt, der Backdrop die Arbeitsflaeche weichzeichnet und kein echter Platz fuer die Sidebar reserviert wird.
+- Fix-Regel: Bei offenem Tablet-Menue ab `760px` reserviert die App links echte Dock-Breite; `tabletSideBackdrop` bleibt unsichtbar und ohne Blur; die Sidebar liegt nicht halbtransparent ueber Datenbank/Plan.
+- Testfall: `1280x800`, `800x1280` und `900x700` mit leerem Plan und `?qa=1&parserClear=1`; Sidebar sichtbar, App beginnt rechts der Sidebar, Backdrop opacity/display/blur inaktiv, QA bleibt nur dann gruen.
+- Tabu: Keine Golden-QA, die nur Ueberlappungen prueft und ein Overlay-Menue als Sidebar akzeptiert.
+
 ## REG-PHONE-001 - Handy-UI darf nicht flackern oder abgeschnitten werden
 
 - Symptom: Scroll-Leiste/A-Z-Leiste wird abgeschnitten, Planbox flackert oder Bedienelemente verschwinden in Safe-Area/Keyboard.
