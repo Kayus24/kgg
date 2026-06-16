@@ -5,25 +5,61 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>KGG Test-Lab</title>
 <style>
-body{margin:0;padding:18px;background:#e8eef6;color:#071027;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}.wrap{max-width:760px;margin:auto}.box{background:#fff;border:2px solid #111827;border-radius:24px;padding:16px;margin:0 0 14px;box-shadow:0 4px 14px rgba(7,16,39,.08)}h1{margin:0 0 8px;font-size:28px}h2{margin:0 0 10px;font-size:19px}.muted{color:#657386;font-weight:800;line-height:1.35}.link{display:block;text-decoration:none;color:#071027;background:#f7f9fc;border:1px solid #dce3eb;border-radius:16px;padding:12px 14px;margin:8px 0;font-weight:1000}.link small{display:block;color:#657386;font-weight:800;margin-top:4px}.warn{background:#fff9df;border-color:#dfc265}.bad{background:#fff5f7;border-color:#f2b6c0}.ok{background:#effaf1;border-color:#bfe8c7}.blue{background:#edf5ff;border-color:#b7d4f4}.purple{background:#f5edff;border-color:#d7baf8}.orange{background:#fff2e8;border-color:#f1b77f}.visual{background:#f0fff8;border-color:#9de5c8}.audit{background:#fff7ed;border-color:#fb923c}code{background:#eef2f6;border-radius:8px;padding:2px 5px}</style>
+body{margin:0;padding:18px;background:#e8eef6;color:#071027;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}.wrap{max-width:760px;margin:auto}.box{background:#fff;border:2px solid #111827;border-radius:24px;padding:16px;margin:0 0 14px;box-shadow:0 4px 14px rgba(7,16,39,.08)}h1{margin:0 0 8px;font-size:28px}h2{margin:0 0 10px;font-size:19px}.muted{color:#657386;font-weight:800;line-height:1.35}.link{display:block;text-decoration:none;color:#071027;background:#f7f9fc;border:1px solid #dce3eb;border-radius:16px;padding:12px 14px;margin:8px 0;font-weight:1000}.link small{display:block;color:#657386;font-weight:800;margin-top:4px}.warn{background:#fff9df;border-color:#dfc265}.bad{background:#fff5f7;border-color:#f2b6c0}.ok{background:#effaf1;border-color:#bfe8c7}.blue{background:#edf5ff;border-color:#b7d4f4}.purple{background:#f5edff;border-color:#d7baf8}.orange{background:#fff2e8;border-color:#f1b77f}.visual{background:#f0fff8;border-color:#9de5c8}code{background:#eef2f6;border-radius:8px;padding:2px 5px}</style>
 </head>
 <body>
 <div class="wrap">
   <section class="box">
     <h1>KGG Test-Lab</h1>
-    <div class="muted">Zentrale Startseite fuer Tests. Haupt-App und v389 Release-Dateien bleiben unangetastet. Stand: start7.</div>
+    <div class="muted">Zentrale Startseite fuer Tests. Haupt-App und Release-Dateien bleiben unangetastet. Stand: start12.</div>
   </section>
   <section class="box">
-    <h2>Basis-Audit</h2>
-    <a class="link audit" href="basis-audit/V360_VS_V389_AUDIT_HANDOFF.md">V360/V366 vs v389 · Basis-Audit-Handoff <small>erst entscheiden, ob v389 repariert oder alte stabile HTML modernisiert wird</small></a>
+    <h2>Modern Base</h2>
+    <a class="link visual" href="tablet-golden/TABLET_GOLDEN_LAYOUT_SOURCE_OF_TRUTH.md">Tablet Golden Source of Truth <small>Verbindlicher Tablet-Standard mit Referenzbildern und Aenderungsregel</small></a>
+    <a class="link visual" href="../../tools/apk-ui-smoke/KGG_UI_FLOW_CONTRACT.md">UI Flow Contract <small>Schutzlinie fuer Layout-/UI-Patches</small></a>
+    <a class="link visual" href="../../tools/apk-ui-smoke/KGG_REGRESSION_MEMORY.md">Regression Memory <small>Gefundene echte Fix-Regeln gegen Wiederholungsfehler</small></a>
+    <a class="link visual" href="tablet-golden/assets/tablet-empty-sidebar-open.jpg">Referenzbild Tablet leer <small>Leerzustand mit offener Seitenleiste</small></a>
+    <a class="link visual" href="tablet-golden/assets/tablet-active-plan-sidebar-closed.jpg">Referenzbild Tablet mit Plan <small>Aktiver Plan mit geschlossener Seitenleiste</small></a>
+    <a class="link orange" href="modern-base/KGG_ADMIN_v390_local_patch_chain_p01_p06.zip">ADMIN Local ZIP P01-P06 <small>Alle lokalen HTML-Zwischenstaende plus Contract/Memory/Tablet-SoT</small></a>
+    <a class="link ok" href="modern-base/KGG_APP_ADMIN_v390_local_p06_parser_formats.html?qa=1&parserClear=1&v=p06local1">ADMIN Local P06 Parser Formats <small>QR-/Satzblock-Schreibweisen: Satz 1, 1. Satz, kg @ Wdh, Wdh @ kg</small></a>
+    <a class="link orange" href="modern-base/KGG_ADMIN_v390_local_patch_chain_p01_p05.zip">ADMIN Local ZIP P01-P05 <small>Vor Parser-Patch: Layout/Karten/freie Einheiten</small></a>
+    <a class="link ok" href="modern-base/KGG_APP_ADMIN_v390_local_p05_custom_units.html?qa=1&v=p05local1">ADMIN Local P05 Custom Units <small>Finale lokale Guard-Kette: Tablet/Phone/Karten/freie Einheiten</small></a>
+    <a class="link ok" href="modern-base/KGG_APP_ADMIN_v390_local_p04_plan_card_guard.html?qa=1&v=p04local1">ADMIN Local P04 Plan Card Guard <small>Karten-Zahnrad mit ID + Index-Fallback</small></a>
+    <a class="link ok" href="modern-base/KGG_APP_ADMIN_v390_local_p03_phone_stability.html?qa=1&v=p03local1">ADMIN Local P03 Phone Stability <small>Handy-Safe-Area, A-Z/Scroll und Bank-Tap-Guard</small></a>
+    <a class="link ok" href="modern-base/KGG_APP_ADMIN_v390_local_p02_tablet_source_truth.html?qa=1&v=p02local1">ADMIN Local P02 Tablet Source Truth <small>Tablet-Golden: leer Sidebar offen, aktiv Sidebar geschlossen</small></a>
+    <a class="link blue" href="modern-base/KGG_APP_ADMIN_v390_local_p01_qa_baseline.html?qa=1&v=p01local1">ADMIN Local P01 QA Baseline <small>Lokale Guard-Basis ohne Layout-Fix</small></a>
+    <a class="link ok" href="modern-base/KGG_APP_ADMIN_v390_v360_v366_p08_tablet_golden_layout.html?v=p08golden1&tabletQA=1">ADMIN P08 Tablet Golden Layout <small>Patch 8: Golden-Layout, Sidebar-Regel und Tablet-QA-Modus</small></a>
+    <a class="link orange" href="modern-base/KGG_ADMIN_v390_patch_chain_p01_p08.zip">ADMIN ZIP P01-P08 <small>Alle Admin-HTML-Zwischenstaende plus Tablet-Golden-Doku und Referenzbilder</small></a>
+    <a class="link orange" href="modern-base/KGG_ADMIN_v390_patch_chain_p01_p07.zip">ADMIN ZIP P01-P07 <small>Alle Admin-HTML-Zwischenstaende zum lokalen Testen und Zurueckspringen</small></a>
+    <a class="link ok" href="modern-base/KGG_APP_ADMIN_v390_v360_v366_p07_tablet_menu.html?v=p07menu1">ADMIN P07 Tablet Menu <small>Patch 7: Sandwich-Menue, Backdrop, Close und Escape im Tablet-Modus stabilisiert</small></a>
+    <a class="link ok" href="modern-base/KGG_APP_ADMIN_v390_v360_v366_p06_tablet_az.html?v=p06az1">ADMIN P06 Tablet A-Z <small>Patch 6: A-Z-Leiste im Tablet/Landscape horizontal, mit festen Touch-Zielen</small></a>
+    <a class="link ok" href="modern-base/KGG_APP_ADMIN_v390_v360_v366_p05_mobile_flicker_guard.html?v=p05flicker1">ADMIN P05 Mobile Flicker Guard <small>Patch 5: Handy-Scroll/Keyboard/Drag begrenzen Animationen gegen Flackern</small></a>
+    <a class="link ok" href="modern-base/KGG_APP_ADMIN_v390_v360_v366_p04_media_retention.html?v=p04media1">ADMIN P04 Media Retention <small>Patch 4: Bilder im Patient:innen-Link laenger halten und Medien im Plan-Snapshot stabil kopieren</small></a>
+    <a class="link ok" href="modern-base/KGG_APP_ADMIN_v390_v360_v366_p03_scan_parser.html?v=p03parser1">ADMIN P03 Scan Parser <small>Patch 3: Satz-Zeilen wie Rudern Tag 2 bleiben als eine Uebung mit Sets erhalten</small></a>
+    <a class="link ok" href="modern-base/KGG_APP_ADMIN_v390_v360_v366_p02_custom_units.html?v=p02units1">ADMIN P02 Custom Units <small>Patch 2: freie Last- und Messwert-Einheiten im Editor</small></a>
+    <a class="link ok" href="modern-base/KGG_APP_ADMIN_v390_v360_v366_p01_editor_binding.html?v=p01editor1">ADMIN P01 Editor Binding <small>Patch 1: Zahnrad soll bei 5+ Uebungen immer die richtige Plan-Uebung oeffnen</small></a>
+    <a class="link blue" href="modern-base/KGG_APP_ADMIN_v390_v360_v366_modern_base_candidate.html?v=adminv360v366r1">ADMIN Baseline v360/v366 <small>Ruecksprung: frische Admin-Altbasis ohne Patches</small></a>
+    <a class="link blue" href="modern-base/KGG_APP_KOLLEGEN_v390_v360_v366_modern_base_candidate.html?v=v360v366r1">Kolleg:innen v390 V360/V366 Modern Base Candidate <small>Vergleichsbasis; nicht mehr Haupt-App</small></a>
+    <a class="link blue" href="modern-base/KGG_APP_KOLLEGEN_v390_modern_base_candidate.html?v=modernbase1">v390 V383 Modern Base Candidate <small>zweite Vergleichsbasis; naeher an v389, aber mit ruhigerer CardLogic als v389</small></a>
+    <a class="link" href="modern-base/ADMIN_TEST_CHECKLIST.md">Admin TEST_CHECKLIST.md</a>
+    <a class="link" href="modern-base/TEST_CHECKLIST.md">Modern Base TEST_CHECKLIST.md</a>
+  </section>
+  <section class="box">
+    <h2>UI Flow Phone</h2>
+    <a class="link blue" href="ui-flow-phone/v389-admin-bank-layout-realpatch.html?v=banklayout1">Admin Bank/A-Z Layout Realpatch <small>echte Admin-v389-Testkopie; behebt Handy-Leerraum unter wenigen Bank-Treffern</small></a>
+  </section>
+  <section class="box">
+    <h2>Cloudflare Medien-Transfer</h2>
+    <a class="link orange" href="media-transfer/cloudflare-image-transfer-smoke.html?v=cfsmoke1">Cloudflare Image Transfer Smoke <small>isolierter Upload/Download/Delete-Test mit generierter Bilddatei; keine Secrets im Repo</small></a>
   </section>
   <section class="box">
     <h2>CardLogic360</h2>
     <a class="link visual" href="cardlogic360/ui-problems-visual.html?v=visual1">VISUAL · UI-Probleme fuer Codex <small>statische Bild-/Diagramm-Erklaerung statt Video</small></a>
     <a class="link ok" href="cardlogic360/KGG_CARDLOGIC360_GESTURE_TEST.html">Test 001 · isolierter Karten-Gesture-Test <small>ruhige Hold-Logik ohne volle App</small></a>
     <a class="link warn" href="cardlogic360/test-003.html?v=003a">Test 003 · v389 + CardLogic360 Override <small>stabiler lowercase-Link: cardlogic360/test-003.html</small></a>
-    <a class="link blue" href="cardlogic360/test-b-swipe.html?v=swipeb1">Test B · Swipe-Animation <small>prüft, ob Karte bei links/rechts wirklich translateX bekommt</small></a>
-    <a class="link purple" href="cardlogic360/test-ab-combined.html?v=ab1">Test AB · Drag + Swipe kombiniert <small>CardLogic360-Hold + sichtbarer Swipe, DB-Vorschläge nicht angefasst</small></a>
+    <a class="link blue" href="cardlogic360/test-b-swipe.html?v=swipeb1">Test B · Swipe-Animation <small>prueft, ob Karte bei links/rechts wirklich translateX bekommt</small></a>
+    <a class="link purple" href="cardlogic360/test-ab-combined.html?v=ab1">Test AB · Drag + Swipe kombiniert <small>CardLogic360-Hold + sichtbarer Swipe, DB-Vorschlaege nicht angefasst</small></a>
+    <a class="link blue" href="cardlogic360/v389-cardlogic360-realpatch.html?v=realpatch1">Realpatch 001 · v389 CardLogic360 <small>frische Kollegen-v389-Testkopie; nur Drag/Hold der Plan-Karten gepatcht</small></a>
     <a class="link orange" href="cardlogic360/NEXT_REALPATCH_CODEX_PROMPT.md">NEXT · Realpatch Codex Prompt <small>echte v389-Testkopie statt Frame-Override</small></a>
     <a class="link" href="cardlogic360/TEST_LOG.md">CardLogic360 TEST_LOG.md</a>
   </section>
