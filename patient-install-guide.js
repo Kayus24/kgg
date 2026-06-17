@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='install-guide-v4-query-update-daystart';
+  const VERSION='install-guide-v5-ios-start-page';
   if(window.__kggInstallGuide===VERSION)return;
   window.__kggInstallGuide=VERSION;
   const KEY='kggCurrentPlanV1';
@@ -17,11 +17,12 @@
   function storedWrap(){try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){return null}}
   function storedPlan(){const x=storedWrap();return x&&x.plan?x.plan:null}
   function savePlan(raw){localStorage.setItem(KEY,JSON.stringify({plan:raw,importedAt:new Date().toISOString(),source:'query-plan'}))}
-  function planLink(raw){const payload='KGGH2:'+b64enc(JSON.stringify(raw));return location.origin+location.pathname+'?plan='+encodeURIComponent(payload)}
+  function dir(){return location.pathname.replace(/[^\/]*$/,'')}
+  function planLink(raw){const payload='KGGH2:'+b64enc(JSON.stringify(raw));return location.origin+dir()+'ios-start.html?plan='+encodeURIComponent(payload)}
   function currentPlanLink(){const raw=storedPlan();return raw?planLink(raw):''}
-  function importQueryPlan(){const qp=qPlan();if(!qp)return false;try{const raw=JSON.parse(b64dec(qp));savePlan(raw);if(!location.hash.startsWith('#KGGH2:')){location.replace(location.origin+location.pathname+'#KGGH2:'+b64enc(JSON.stringify(raw)));return true}return true}catch(e){return false}}
+  function importQueryPlan(){const qp=qPlan();if(!qp)return false;try{const raw=JSON.parse(b64dec(qp));savePlan(raw);if(!location.hash.startsWith('#KGGH2:')){location.replace(location.origin+dir()+'#KGGH2:'+b64enc(JSON.stringify(raw)));return true}return true}catch(e){return false}}
   if(importQueryPlan())return;
-  function iosText(){const link=currentPlanLink();return '<b>iPhone/iPad:</b><br>1. Erst den Plan-Link unten oeffnen.<br>2. Dann in Safari auf <b>Teilen</b> tippen.<br>3. <b>Zum Home-Bildschirm</b> waehlen.<br>4. <b>Hinzufuegen</b> tippen.<br><br><b>Wichtig:</b> Nicht nur als Favorit speichern.'+(link?'<br><br><a class="btn" href="'+link+'">iPhone-Planlink oeffnen</a>':'')}
+  function iosText(){const link=currentPlanLink();return '<b>iPhone/iPad:</b><br>1. Unten den <b>iPhone-Planlink</b> oeffnen.<br>2. Auf dieser neuen Seite in Safari <b>Teilen</b> antippen.<br>3. <b>Zum Home-Bildschirm</b> waehlen.<br>4. <b>Hinzufuegen</b> tippen.<br><br><b>Wichtig:</b> Nicht als Favorit speichern.'+(link?'<br><br><a class="btn" href="'+link+'">iPhone-Planlink oeffnen</a>':'')}
   function text(){if(standalone())return '<b>App ist installiert.</b><br>Wenn kein Plan erscheint, den QR-Code oder iPhone-Planlink noch einmal in Safari oeffnen.';if(isIOS)return iosText();if(isSamsung)return '<b>Samsung Internet:</b><br>Menue <b>☰</b> oder <b>⋮</b> → <b>Seite hinzufuegen zu</b> → <b>Startbildschirm</b>.';if(isChrome||isEdge)return '<b>Chrome/Edge:</b><br>Wenn angeboten <b>Installieren</b> tippen. Sonst Menue <b>⋮</b> → <b>Zum Startbildschirm hinzufuegen</b>.';if(isFirefox)return '<b>Firefox:</b><br>Menue oeffnen → <b>Installieren</b> oder <b>Zum Startbildschirm hinzufuegen</b>. Falls das fehlt, Safari/Chrome verwenden.';return '<b>Installation:</b><br>Browser-Menue oeffnen und <b>Zum Startbildschirm hinzufuegen</b> waehlen.'}
   function recover(){if(!standalone())return;const st=$('status');if(st&&/Kein Plan gefunden/i.test(st.textContent||'')){st.innerHTML='Kein Plan gefunden. Bitte den iPhone-Planlink oder QR-Code erneut in Safari oeffnen.';st.className='status warn'}}
   function show(){const box=$('installBox'),hint=$('installHint');if(box)box.classList.remove('hide');if(hint){hint.classList.remove('hide');hint.innerHTML=text()}}
