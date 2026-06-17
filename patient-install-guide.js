@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='install-guide-v2-query-plan-ios';
+  const VERSION='install-guide-v3-query-plan-update-gate';
   if(window.__kggInstallGuide===VERSION)return;
   window.__kggInstallGuide=VERSION;
   const KEY='kggCurrentPlanV1';
@@ -31,7 +31,9 @@
   }
   function recover(){if(!standalone())return;const st=$('status');if(st&&/Kein Plan gefunden/i.test(st.textContent||'')){st.innerHTML='Kein Plan gefunden. Bitte den iPhone-Planlink oder QR-Code erneut in Safari oeffnen.';st.className='status warn'}}
   function show(){const box=$('installBox'),hint=$('installHint');if(box)box.classList.remove('hide');if(hint){hint.classList.remove('hide');hint.innerHTML=text();}}
-  function patch(){recover();if(typeof window.installApp==='function'&&!window.__kggInstallGuidePatched){const old=window.installApp;window.installApp=async function(){if(!isIOS&&window.installPrompt){return old.apply(this,arguments)}show()};window.__kggInstallGuidePatched=1}const b=$('installSmall');if(b)b.classList.remove('hide')}
+  function updateBanner(){if($('kggUpdateGate'))return;const d=document.createElement('div');d.id='kggUpdateGate';d.style.cssText='position:fixed;left:12px;right:12px;bottom:12px;z-index:10020;max-width:720px;margin:auto;background:#fff;border:1px solid #93c5fd;border-radius:18px;padding:14px;box-shadow:0 18px 46px #0f172a33;font-weight:850';d.innerHTML='<b>Neue Version verfuegbar.</b><br><span style="color:#64748b">Bitte aktualisieren, damit der Plan richtig funktioniert.</span><button id="kggUpdateNow" style="width:100%;min-height:48px;margin-top:10px;border-radius:14px;border:0;background:#111827;color:#fff;font-size:16px;font-weight:950">Jetzt aktualisieren</button>';document.body.appendChild(d);$('kggUpdateNow').onclick=()=>location.reload()}
+  function listenUpdates(){if(!('serviceWorker'in navigator)||window.__kggUpdateGateListen)return;window.__kggUpdateGateListen=1;navigator.serviceWorker.addEventListener('message',e=>{if(e&&e.data&&e.data.type==='APP_UPDATE_READY')updateBanner()})}
+  function patch(){recover();listenUpdates();if(typeof window.installApp==='function'&&!window.__kggInstallGuidePatched){const old=window.installApp;window.installApp=async function(){if(!isIOS&&window.installPrompt){return old.apply(this,arguments)}show()};window.__kggInstallGuidePatched=1}const b=$('installSmall');if(b)b.classList.remove('hide')}
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',patch):patch();
   setTimeout(patch,500);setTimeout(patch,1500);
 })();
