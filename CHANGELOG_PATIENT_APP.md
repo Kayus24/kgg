@@ -1,5 +1,22 @@
 # Patient App Changelog
 
+## 2026-06-18 – Light KGG web app icon
+
+### Changed
+- Web app icon updated to the light KGG logo style: cream rounded background, olive figure, yellow motion arc and dumbbell.
+- Manifest theme color adjusted to match the yellow KGG accent.
+
+### Files
+- `icon.svg`
+- `manifest.json`
+
+### Commits
+- `6968c653330f416dc34522a29072854d06baba96`
+- `7ca07e582dac9f4dc0a57b48e49847dc939e05ab`
+
+### Follow-up
+- Add a real binary `apple-touch-icon.png` from the provided PNG logo in a local Git/Codex commit, because the chat GitHub tool can safely write text/SVG but not binary PNG assets.
+
 ## 2026-06-18 – No-plan QR rescue scanner
 
 ### Changed
