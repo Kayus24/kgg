@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='start-scan-v2-empty-plan-rescue';
+  const VERSION='start-scan-v3-empty-plan-rescue-jsqr';
   if(window.__kggStartScanVersion===VERSION)return;
   window.__kggStartScanVersion=VERSION;
   const LANG_KEY='kggPatientLang';
@@ -7,8 +7,7 @@
   const $=id=>document.getElementById(id);
   const lang=()=>localStorage.getItem(LANG_KEY)==='en'?'en':'de';
   const tr=(de,en)=>lang()==='en'?en:de;
-  let filling=false;
-
+  let filling=false,jsQrPromise=null;
   function ready(){try{return p&&Array.isArray(p.ex)&&typeof v==='object'&&typeof k==='function'}catch(e){return false}}
   function b64dec(s){s=String(s||'').replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return decodeURIComponent(escape(atob(s)));}
   function normName(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9äöüß]+/g,' ').replace(/\s+/g,' ').trim();}
@@ -17,52 +16,20 @@
   function rawFromCurrent(){return {i:p&&p.id?p.id:'plan',t:p&&p.title?p.title:'KGG Trainingsplan',v:p&&p.version?p.version:1,d:p&&p.days?p.days:6,extendDays:p?p.extendDays!==false:true,stepDays:p&&p.stepDays?p.stepDays:6,e:p&&Array.isArray(p.ex)?p.ex.map(exRaw):[]};}
   function storeCurrentPlan(raw){localStorage.setItem(PLAN_KEY,JSON.stringify({plan:raw,importedAt:new Date().toISOString()}));}
   function parsePlanFromText(raw){const txt=String(raw||'');const m=txt.match(/KGGH2:([A-Za-z0-9_-]+)/);if(!m)return null;return JSON.parse(b64dec(m[1]));}
-  function mergePlanUpdate(nextRaw){
-    if(!ready()||!nextRaw||!Array.isArray(nextRaw.e))return false;
-    try{safeSave()}catch(e){}
-    const current=rawFromCurrent();
-    const merged=current.e.map(exObj);
-    const index=new Map();
-    merged.forEach((ex,i)=>index.set(normName(ex.n),i));
-    let added=0,updated=0;
-    nextRaw.e.map(exObj).forEach(next=>{const key=normName(next.n);if(key&&index.has(key)){const i=index.get(key);merged[i]={...merged[i],...next,n:next.n||merged[i].n};updated++;}else{merged.push(next);if(key)index.set(key,merged.length-1);added++;}});
-    p.id=current.i;p.title=nextRaw.t||current.t;p.version=Number(nextRaw.v)||current.v||1;p.days=Math.max(Number(current.d)||6,Number(nextRaw.d)||6);p.extendDays=nextRaw.extendDays!==false;p.stepDays=Number(nextRaw.stepDays)||Number(current.stepDays)||6;p.ex=merged;
-    const out=rawFromCurrent();storeCurrentPlan(out);
-    try{save()}catch(e){}try{render()}catch(e){}try{setStatus(tr('Plan aktualisiert. Werte behalten. Neue Übungen: ','Plan updated. Values kept. New exercises: ')+added,'ok')}catch(e){}
-    return true;
-  }
-  function autoFillStartValues(){
-    if(filling||!ready())return;let day=1;try{day=Number(d)||1}catch(e){}if(day!==1)return;let changed=false;
-    const setIfEmpty=(ei,s,side,key,value)=>{value=String(value||'').trim();if(!value)return;const kk=k(ei,s,side,key,1);if(!String(v[kk]||'').trim()){v[kk]=value;changed=true;}};
-    try{p.ex.forEach((ex,ei)=>{const load=String(ex.sl||'').trim();const reps=String(ex.sm||'').trim();if(!load&&!reps)return;const sets=Number(ex.sets)||3;const sides=ex.side==='LR'?['L','R']:['B'];for(let s=1;s<=sets;s++){sides.forEach(side=>{setIfEmpty(ei,s,side,'a',load);setIfEmpty(ei,s,side,'b',reps);});}});}catch(e){}
-    if(changed){filling=true;try{save()}catch(e){}try{setStatus(tr('Startwerte übernommen.','Start values loaded.'),'ok')}catch(e){}try{render()}catch(e){}filling=false;}
-  }
+  function mergePlanUpdate(nextRaw){if(!ready()||!nextRaw||!Array.isArray(nextRaw.e))return false;try{safeSave()}catch(e){}const current=rawFromCurrent();const merged=current.e.map(exObj);const index=new Map();merged.forEach((ex,i)=>index.set(normName(ex.n),i));let added=0;nextRaw.e.map(exObj).forEach(next=>{const key=normName(next.n);if(key&&index.has(key)){const i=index.get(key);merged[i]={...merged[i],...next,n:next.n||merged[i].n};}else{merged.push(next);if(key)index.set(key,merged.length-1);added++;}});p.id=current.i;p.title=nextRaw.t||current.t;p.version=Number(nextRaw.v)||current.v||1;p.days=Math.max(Number(current.d)||6,Number(nextRaw.d)||6);p.extendDays=nextRaw.extendDays!==false;p.stepDays=Number(nextRaw.stepDays)||Number(current.stepDays)||6;p.ex=merged;const out=rawFromCurrent();storeCurrentPlan(out);try{save()}catch(e){}try{render()}catch(e){}try{setStatus(tr('Plan aktualisiert. Werte behalten. Neue Übungen: ','Plan updated. Values kept. New exercises: ')+added,'ok')}catch(e){}return true;}
+  function autoFillStartValues(){if(filling||!ready())return;let day=1;try{day=Number(d)||1}catch(e){}if(day!==1)return;let changed=false;const setIfEmpty=(ei,s,side,key,value)=>{value=String(value||'').trim();if(!value)return;const kk=k(ei,s,side,key,1);if(!String(v[kk]||'').trim()){v[kk]=value;changed=true;}};try{p.ex.forEach((ex,ei)=>{const load=String(ex.sl||'').trim();const reps=String(ex.sm||'').trim();if(!load&&!reps)return;const sets=Number(ex.sets)||3;const sides=ex.side==='LR'?['L','R']:['B'];for(let s=1;s<=sets;s++)sides.forEach(side=>{setIfEmpty(ei,s,side,'a',load);setIfEmpty(ei,s,side,'b',reps);});});}catch(e){}if(changed){filling=true;try{save()}catch(e){}try{setStatus(tr('Startwerte übernommen.','Start values loaded.'),'ok')}catch(e){}try{render()}catch(e){}filling=false;}}
   function handlePlanText(raw){const nextRaw=parsePlanFromText(raw);if(!nextRaw){alert(tr('Kein Plan-QR erkannt.','No plan QR detected.'));return;}if(mergePlanUpdate(nextRaw))return;try{safeSave()}catch(e){}location.href=location.origin+location.pathname+'#KGGH2:'+String(raw).match(/KGGH2:([A-Za-z0-9_-]+)/)[1];setTimeout(()=>location.reload(),80);}
   function ensureScanInput(){let input=$('kggPlanScanInput');if(input)return input;input=document.createElement('input');input.id='kggPlanScanInput';input.type='file';input.accept='image/*';input.setAttribute('capture','environment');input.style.display='none';input.addEventListener('change',scanFile);document.body.appendChild(input);return input;}
   function promptFallback(){const raw=prompt(tr('Kamera-Scan nicht verfügbar. Plan-Link oder QR-Text einfügen:','Camera scan not available. Paste plan link or QR text:'));if(raw)handlePlanText(raw);}
-  async function scanFile(ev){
-    const input=ev.target;const file=input.files&&input.files[0];setTimeout(()=>{try{input.value=''}catch(e){}},100);if(!file)return;
-    if(!('BarcodeDetector' in window)){promptFallback();return;}
-    try{const bitmap=await createImageBitmap(file);const detector=new BarcodeDetector({formats:['qr_code']});const codes=await detector.detect(bitmap);const raw=codes&&codes[0]&&codes[0].rawValue;if(raw){handlePlanText(raw);}else{alert(tr('Kein QR erkannt. Bitte näher und scharf fotografieren.','No QR detected. Please take a closer, sharp photo.'));}}catch(e){promptFallback();}
-  }
-  function openCameraScan(){const input=ensureScanInput();input.click();}
+  function loadJsQR(){if(window.jsQR)return Promise.resolve(window.jsQR);if(jsQrPromise)return jsQrPromise;jsQrPromise=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';s.onload=()=>window.jsQR?resolve(window.jsQR):reject(new Error('jsQR fehlt'));s.onerror=()=>reject(new Error('jsQR konnte nicht geladen werden'));document.head.appendChild(s);});return jsQrPromise;}
+  function imageFromFile(file){return new Promise((resolve,reject)=>{const url=URL.createObjectURL(file);const img=new Image();img.onload=()=>{URL.revokeObjectURL(url);resolve(img)};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Bild konnte nicht gelesen werden'))};img.src=url;});}
+  async function decodeWithJsQR(file){const qr=await loadJsQR();const img=await imageFromFile(file);const max=1600;let w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;const scale=Math.min(1,max/Math.max(w,h));w=Math.max(1,Math.round(w*scale));h=Math.max(1,Math.round(h*scale));const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(img,0,0,w,h);const data=ctx.getImageData(0,0,w,h);const code=qr(data.data,w,h,{inversionAttempts:'attemptBoth'});return code&&code.data?code.data:'';}
+  async function scanFile(ev){const input=ev.target;const file=input.files&&input.files[0];setTimeout(()=>{try{input.value=''}catch(e){}},100);if(!file)return;try{let raw='';if('BarcodeDetector' in window){const bitmap=await createImageBitmap(file);const detector=new BarcodeDetector({formats:['qr_code']});const codes=await detector.detect(bitmap);raw=codes&&codes[0]&&codes[0].rawValue||'';}if(!raw)raw=await decodeWithJsQR(file);if(raw){handlePlanText(raw);}else{alert(tr('Kein QR erkannt. Bitte näher und scharf fotografieren.','No QR detected. Please take a closer, sharp photo.'));}}catch(e){promptFallback();}}
+  function openCameraScan(){ensureScanInput().click();}
   function ensureStyle(){if($('kggPlanScanRescueStyle'))return;const s=document.createElement('style');s.id='kggPlanScanRescueStyle';s.textContent='.kggQrRescue{margin-top:14px;border:1px solid #bfdbfe;border-radius:18px;background:#eff6ff;padding:14px;color:#111827}.kggQrRescue b{display:block;font-size:18px;margin-bottom:6px}.kggQrRescue p{margin:0 0 10px;color:#475569;font-weight:700;line-height:1.35}.kggQrRescue .scanBig{width:100%;min-height:56px;border:0;border-radius:16px;background:#111827;color:#fff;font-weight:950;font-size:18px}.kggQrRescue .pasteLink{margin-top:8px;width:100%;min-height:46px;border:1px solid #cbd5e1;border-radius:14px;background:white;color:#111827;font-weight:900}';document.head.appendChild(s);}
   function noPlanVisible(){const st=$('status');return !!(st&&/Kein Plan gefunden|No plan found/i.test(st.textContent||''));}
-  function ensureRescue(){
-    ensureStyle();ensureScanInput();
-    if(!noPlanVisible())return;
-    const st=$('status');if(!st||$('kggQrRescue'))return;
-    const box=document.createElement('div');box.id='kggQrRescue';box.className='kggQrRescue';
-    box.innerHTML='<b>'+tr('Plan erneut öffnen','Open plan again')+'</b><p>'+tr('Wenn diese Web-App ohne Plan startet, scanne den Plan-QR-Code hier noch einmal.','If this web app opens without a plan, scan the plan QR code here again.')+'</p><button type="button" class="scanBig">📷 '+tr('Plan-QR scannen','Scan plan QR')+'</button><button type="button" class="pasteLink">'+tr('Plan-Link einfügen','Paste plan link')+'</button>';
-    st.insertAdjacentElement('afterend',box);
-    box.querySelector('.scanBig').onclick=openCameraScan;
-    box.querySelector('.pasteLink').onclick=promptFallback;
-  }
-  function ensureScanButton(){
-    const row=$('installSmall');if(!row)return;row.classList.remove('hide');let btn=$('kggPlanScanBtn');
-    if(!btn){btn=document.createElement('button');btn.id='kggPlanScanBtn';btn.type='button';btn.style.minHeight='38px';btn.style.borderRadius='999px';btn.style.border='1px solid #bfdbfe';btn.style.background='#eff6ff';btn.style.color='#111827';btn.style.fontWeight='950';btn.style.padding='6px 10px';btn.onclick=e=>{e.preventDefault();e.stopPropagation();openCameraScan();};row.insertBefore(btn,row.children[1]||null);}
-    btn.textContent=tr('QR-Scan','QR scan');ensureScanInput();ensureRescue();
-  }
+  function ensureRescue(){ensureStyle();ensureScanInput();if(!noPlanVisible())return;const st=$('status');if(!st||$('kggQrRescue'))return;const box=document.createElement('div');box.id='kggQrRescue';box.className='kggQrRescue';box.innerHTML='<b>'+tr('Plan erneut öffnen','Open plan again')+'</b><p>'+tr('Wenn diese Web-App ohne Plan startet, scanne den Plan-QR-Code hier noch einmal.','If this web app opens without a plan, scan the plan QR code here again.')+'</p><button type="button" class="scanBig">📷 '+tr('Plan-QR scannen','Scan plan QR')+'</button><button type="button" class="pasteLink">'+tr('Plan-Link einfügen','Paste plan link')+'</button>';st.insertAdjacentElement('afterend',box);box.querySelector('.scanBig').onclick=openCameraScan;box.querySelector('.pasteLink').onclick=promptFallback;}
+  function ensureScanButton(){const row=$('installSmall');if(!row)return;row.classList.remove('hide');let btn=$('kggPlanScanBtn');if(!btn){btn=document.createElement('button');btn.id='kggPlanScanBtn';btn.type='button';btn.style.minHeight='38px';btn.style.borderRadius='999px';btn.style.border='1px solid #bfdbfe';btn.style.background='#eff6ff';btn.style.color='#111827';btn.style.fontWeight='950';btn.style.padding='6px 10px';btn.onclick=e=>{e.preventDefault();e.stopPropagation();openCameraScan();};row.insertBefore(btn,row.children[1]||null);}btn.textContent=tr('QR-Scan','QR scan');ensureScanInput();ensureRescue();}
   function patchRender(){if(window.__kggStartScanPatch)return;window.__kggStartScanPatch=true;if(typeof render==='function'){const old=render;window.render=function(){const r=old.apply(this,arguments);setTimeout(autoFillStartValues,0);setTimeout(ensureScanButton,0);setTimeout(ensureRescue,20);return r;};}}
   function init(){patchRender();ensureScanButton();ensureRescue();autoFillStartValues();setTimeout(autoFillStartValues,300);setTimeout(autoFillStartValues,1000);setTimeout(ensureScanButton,300);setTimeout(ensureRescue,500);setTimeout(ensureRescue,1500);}
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
