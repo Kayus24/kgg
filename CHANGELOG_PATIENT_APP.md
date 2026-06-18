@@ -5,7 +5,8 @@
 ### Changed
 - If the installed web app opens without a plan and shows `Kein Plan gefunden`, a large rescue panel is shown directly below the warning.
 - The rescue panel contains a big `Plan-QR scannen` button.
-- Patients can also paste a plan link if camera/BarcodeDetector is unavailable.
+- Patients can also paste a plan link if camera scanning is unavailable.
+- QR image decoding now has a jsQR fallback for browsers where `BarcodeDetector` is unavailable.
 - This lets patients recover a lost plan link from inside the installed web app.
 
 ### Files
@@ -15,6 +16,7 @@
 ### Commits
 - `a2f2be9b11be33c65e430c7759607d25dabcc90b`
 - `19cca01527f028cda5fa9065052227aa0c67aa49`
+- `3733bef2b86548bfab509b93f134c295310fd6a5`
 
 ### Safety
 - No changes to PDF.
