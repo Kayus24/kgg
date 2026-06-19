@@ -1,0 +1,96 @@
+name: Generate KGG v007 QR Photo Update
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: "Branch to update"
+        required: true
+        default: "main"
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.target_branch }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate v007 payload
+        run: |
+          python3 scripts/apply_v007_qr_photo_upload_decode.py
+
+      - name: Validate doctype and patch marker
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          import hashlib
+          import sys
+
+          html_path = Path("kgg-update/index.html")
+          version_path = Path("kgg-update/version.json")
+          data = html_path.read_bytes()
+          text = data.decode("utf-8", errors="replace")
+
+          if not data.lower().startswith(b"<!doctype html>"):
+              print("ERROR: index.html does not start with <!doctype html>")
+              sys.exit(1)
+
+          marker = "kgg-mini-patch-v400-09-qr-photo-upload-decode"
+          if marker not in text:
+              print("ERROR: v007 QR photo upload patch marker missing")
+              sys.exit(1)
+
+          manifest = json.loads(version_path.read_text(encoding="utf-8"))
+          sha = hashlib.sha256(data).hexdigest()
+          if manifest.get("sha256") != sha:
+              print("ERROR: version.json sha256 does not match index.html")
+              print("manifest:", manifest.get("sha256"))
+              print("actual:", sha)
+              sys.exit(1)
+
+          if int(manifest.get("versionCode", 0)) < 7:
+              print("ERROR: versionCode is below 7")
+              sys.exit(1)
+
+          print("versionCode:", manifest.get("versionCode"))
+          print("versionName:", manifest.get("versionName"))
+          print("sha256:", sha)
+          PY
+
+      - name: Guard allowed files
+        run: |
+          changed="$(git diff --name-only)"
+          echo "$changed"
+
+          for file in $changed; do
+            case "$file" in
+              kgg-update/index.html|kgg-update/version.json)
+                ;;
+              *)
+                echo "ERROR: unexpected changed file: $file"
+                exit 1
+                ;;
+            esac
+          done
+
+      - name: Commit generated payload
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add kgg-update/index.html kgg-update/version.json
+          git commit -m "Generate v007 QR photo upload update payload"
+          git push
