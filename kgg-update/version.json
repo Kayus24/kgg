@@ -1,0 +1,7 @@
+{
+  "versionCode": 3,
+  "versionName": "1.0.2-plan-ui-stability",
+  "indexUrl": "index.html",
+  "sha256": "41474ecfa202ce040b6de34de3bac33a5b9b0ab56d12f174bc75dbdf761abc6e",
+  "notes": "GitHub update: phone-only Plan UI stability; fixes card flicker, tap lift/reorder layout creep, and keeps movement inside Übungen im Plan. Identity-safe rebuild: title/VERSION/KGG_BUILD_INFO corrected so v003 does not revert the mini07 identity fix."
+}
