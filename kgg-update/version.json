@@ -1,7 +1,7 @@
 {
-  "versionCode": 3,
-  "versionName": "1.0.2-plan-ui-stability",
+  "versionCode": 5,
+  "versionName": "1.0.3-phone-admin-banner-clean",
   "indexUrl": "index.html",
-  "sha256": "41474ecfa202ce040b6de34de3bac33a5b9b0ab56d12f174bc75dbdf761abc6e",
-  "notes": "GitHub update: phone-only Plan UI stability; fixes card flicker, tap lift/reorder layout creep, and keeps movement inside Übungen im Plan. Identity-safe rebuild: title/VERSION/KGG_BUILD_INFO corrected so v003 does not revert the mini07 identity fix."
+  "sha256": "38a07b818c58195b23711e5882d4e669d6f30e0b6b86a2e2e247d941b0460282",
+  "notes": "GitHub update: phone-only cleanup; hides the yellow ADMIN-DATEI/Admin-Test banner in the handset layout without touching tablet layout or native Android wrapper."
 }
