@@ -1,7 +1,7 @@
 {
-  "versionCode": 5,
+  "versionCode": 6,
   "versionName": "1.0.3-phone-admin-banner-clean",
   "indexUrl": "index.html",
-  "sha256": "38a07b818c58195b23711e5882d4e669d6f30e0b6b86a2e2e247d941b0460282",
+  "sha256": "8ca194f073f9075d4ecc1df70dcfe89d800c574889472f528effb37eeb9522a2",
   "notes": "GitHub update: phone-only cleanup; hides the yellow ADMIN-DATEI/Admin-Test banner in the handset layout without touching tablet layout or native Android wrapper."
 }
