@@ -5148,6 +5148,16 @@
     }
   }
 </style>
+<style id="kgg-mini-patch-v400-08-phone-hide-admin-file-banner">
+  /* v400 mini08: Phone-only cleanup.
+     Entfernt die gelbe ADMIN-DATEI/Admin-Test-Box nur im Handy-Layout.
+     Tablet-Layout ab 760px bleibt unveraendert. */
+  @media (max-width:759px){
+    .adminTestBanner{
+      display:none!important;
+    }
+  }
+</style>
 
 </head>
 <body class="adminMode">
