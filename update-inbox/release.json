@@ -1,0 +1,24 @@
+{
+  "versionName": "1.0.5-qr-photo-source-truth",
+  "title": "QR-Foto-Upload + eingebettete Source Truth",
+  "summary": "Verbessert QR-Erkennung aus Bild-/Fotodatenbank-Upload und bettet Source Truth sowie Changelog direkt in die App-HTML ein.",
+  "notes": "Verbessert QR-Erkennung aus Bild-/Fotodatenbank-Upload und bettet Source Truth sowie Changelog direkt in die App-HTML ein.",
+  "type": "github-web-update",
+  "allowedAreas": [
+    "QR photo upload decode",
+    "HTML embedded metadata",
+    "Source Truth",
+    "Changelog"
+  ],
+  "notTouched": [
+    "PDF",
+    "QR-Erzeugung",
+    "Patienten-App",
+    "Scan-Kamera",
+    "Parser",
+    "Android-Wrapper",
+    "Tablet-Layout",
+    "Plan-State",
+    "Storage"
+  ]
+}
