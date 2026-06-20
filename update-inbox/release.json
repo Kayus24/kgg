@@ -1,13 +1,11 @@
 {
-  "versionName": "1.0.22-admin-debug-menu-feedback",
-  "title": "Admin Debug-/Feedback-Menü",
-  "summary": "Rebased v014 als neues v022-Update gegen aktuellen main/v021: ergänzt ein Admin-Debug-Menü. Tablet: Debug-Einstieg in der Seitenleiste/Scan-Hub. Handy: Admin-Konfig, QR/Sync und Übungsdatenbank teilen liegen hinter einem Admin-Menü.",
+  "versionName": "1.0.23-admin-debug-visible-hotfix",
+  "title": "Admin Debug sichtbar Hotfix",
+  "summary": "Hotfix nach v022: Debug-Einstieg wird als robuster sichtbarer Floating-Button eingebaut, unabhängig von .adminMode oder Scan-Hub-Position. Zusätzlich wird aktive Source-Truth repariert, falls der alte Block im HTML-Kommentar steckt.",
   "type": "github-web-update",
-  "patchId": "kgg-v022-admin-debug-menu-feedback",
+  "patchId": "kgg-v023-admin-debug-visible-hotfix",
   "allowedAreas": [
     "Admin debug UI",
-    "Tablet admin side-rail debug entry",
-    "Phone admin hub menu",
     "HTML embedded metadata",
     "Source Truth",
     "Changelog",
@@ -20,22 +18,21 @@
     "Scan-Kamera",
     "Parser",
     "Android-Wrapper",
-    "Tablet core layout/breakpoints",
     "Plan-State",
     "Storage"
   ],
   "testPlan": [
-    "Tablet width >=760px: Debug button appears in scan/admin rail; tablet core layout/breakpoints unchanged.",
-    "Phone width <760px: Admin-Menü button appears; Admin-Konfig, QR/Sync and Übungsdatenbank teilen are reachable through the menu.",
-    "Open Debug menu and press Diagnose aktualisieren.",
-    "Press Bericht kopieren and verify clipboard/report text contains version/features/layout/sourceTruth.",
-    "Verify QR / Sync, Admin-Konfig and Übungsdatenbank teilen actions still open their existing dialogs.",
-    "Verify normal scan camera, gallery QR decode, QR generation, parser, storage and plan state still behave as before."
+    "Tablet width >=760px: Debug-Button sichtbar, unabhängig vom AdminMode.",
+    "Phone width <760px: Debug-Button sichtbar und öffnet Debug-Panel.",
+    "Debug-Panel: Diagnose aktualisieren und Bericht kopieren testen.",
+    "version.json: indexUrl muss nach Pipeline index.html?v=23 sein.",
+    "QR-Galerie, Kamera-Scan und normale Planfunktionen kurz gegenprüfen."
   ],
+  "notes": "v023 Hotfix: Debug-Button sichtbar machen und indexUrl-Cache-Busting über Workflow reparieren. Keine PDF-/QR-Erzeugung-/Patienten-App-/Scan-Kamera-/Parser-/Plan-State-/Storage-Änderung.",
   "riskNotes": [
-    "Rebased from uploaded v014 package because main is already at v021.",
-    "Only update-inbox/patch.py and update-inbox/release.json are uploaded; __pycache__ and reports are excluded.",
-    "Phone CSS hides original admin action buttons behind the Admin-Menü but does not delete their existing handlers.",
-    "No API keys or secrets are embedded."
+    "Der Debug-Button ist absichtlich sichtbar als Hotfix, damit Max direkt Feedback ziehen kann.",
+    "Bestehende Admin-Aktionen werden nicht gelöscht; Debug-Panel versucht nur vorhandene Buttons auszulösen.",
+    "Source-Truth wird aktiv ergänzt, falls der ältere Source-Truth-Text nur in einem HTML-Kommentar steckt.",
+    "Keine API-Keys oder Secrets eingebettet."
   ]
 }

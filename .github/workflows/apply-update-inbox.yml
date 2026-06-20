@@ -90,11 +90,12 @@ jobs:
           if not isinstance(old_code, int):
               raise SystemExit('version.json field versionCode must be an integer')
 
+          new_code = old_code + 1
           sha256 = hashlib.sha256(index_path.read_bytes()).hexdigest()
 
-          version['versionCode'] = old_code + 1
+          version['versionCode'] = new_code
           version['versionName'] = version_name
-          version['indexUrl'] = version.get('indexUrl', 'index.html')
+          version['indexUrl'] = f'index.html?v={new_code}'
           version['sha256'] = sha256
           if isinstance(release.get('notes'), str) and release['notes'].strip():
               version['notes'] = release['notes'].strip()
@@ -105,8 +106,9 @@ jobs:
               newline='\n',
           )
 
-          print(f"Updated versionCode: {old_code} -> {old_code + 1}")
+          print(f"Updated versionCode: {old_code} -> {new_code}")
           print(f"Updated versionName: {version_name}")
+          print(f"Updated indexUrl: index.html?v={new_code}")
           print(f"Updated sha256: {sha256}")
           PY
 
