@@ -1,11 +1,11 @@
 {
-  "versionName": "1.0.5-qr-photo-source-truth",
-  "title": "QR-Foto-Upload + eingebettete Source Truth",
-  "summary": "Verbessert QR-Erkennung aus Bild-/Fotodatenbank-Upload und bettet Source Truth sowie Changelog direkt in die App-HTML ein.",
-  "notes": "Verbessert QR-Erkennung aus Bild-/Fotodatenbank-Upload und bettet Source Truth sowie Changelog direkt in die App-HTML ein.",
+  "versionName": "1.0.6-qr-gallery-bitmap-debug",
+  "title": "QR-Foto/Galerie-Import debuggen und robuster dekodieren",
+  "summary": "Fügt einen zusätzlichen BarcodeDetector-ImageBitmap-Fallback für Galerie-/Fotodatenbank-Bilder ein und zeigt sichtbare Warnungen, wenn ein QR-Bild nicht dekodiert werden kann.",
   "type": "github-web-update",
   "allowedAreas": [
     "QR photo upload decode",
+    "QR gallery import diagnostics",
     "HTML embedded metadata",
     "Source Truth",
     "Changelog"
@@ -20,5 +20,12 @@
     "Tablet-Layout",
     "Plan-State",
     "Storage"
+  ],
+  "testPlan": [
+    "App komplett schließen und neu öffnen.",
+    "Toast 'App-Inhalt aktualisiert' abwarten.",
+    "QR-Code aus Galerie/Fotodatenbank auswählen.",
+    "Wenn der QR nicht erkannt wird, Scan-Vorschau-Warnung inklusive Dateityp/Canvas/Decoder-Support notieren.",
+    "Kamera-Scan zur Regression prüfen."
   ]
 }
