@@ -1,0 +1,150 @@
+name: Apply Update Inbox
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'update-inbox/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-update-inbox-main
+  cancel-in-progress: false
+
+jobs:
+  apply-update-inbox:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Apply inbox patch and update version metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! -f update-inbox/patch.py && ! -f update-inbox/release.json ]]; then
+            echo "No update-inbox payload found. Nothing to apply."
+            exit 0
+          fi
+
+          if [[ ! -f update-inbox/patch.py || ! -f update-inbox/release.json ]]; then
+            echo "update-inbox requires both patch.py and release.json."
+            exit 1
+          fi
+
+          export KGG_INDEX_HTML="kgg-update/index.html"
+          export KGG_VERSION_JSON="kgg-update/version.json"
+          export KGG_RELEASE_JSON="update-inbox/release.json"
+
+          python update-inbox/patch.py
+
+          python - <<'PY'
+          import hashlib
+          import json
+          import re
+          from pathlib import Path
+
+          index_path = Path('kgg-update/index.html')
+          version_path = Path('kgg-update/version.json')
+          release_path = Path('update-inbox/release.json')
+
+          if not index_path.exists():
+              raise SystemExit('Missing kgg-update/index.html')
+          if not version_path.exists():
+              raise SystemExit('Missing kgg-update/version.json')
+          if not release_path.exists():
+              raise SystemExit('Missing update-inbox/release.json')
+
+          release = json.loads(release_path.read_text(encoding='utf-8'))
+          version_name = release.get('versionName')
+          if not isinstance(version_name, str) or not version_name.strip():
+              raise SystemExit('release.json must contain a non-empty string field: versionName')
+          version_name = version_name.strip()
+
+          text = index_path.read_text(encoding='utf-8')
+          text = text.lstrip('\ufeff\r\n\t ')
+          doctype_match = re.search(r'(?is)<!doctype\s+html\s*>', text[:200])
+          if doctype_match:
+              text = text[doctype_match.start():]
+              text = re.sub(r'(?is)^<!doctype\s+html\s*>', '<!doctype html>', text, count=1)
+          else:
+              text = '<!doctype html>\n' + text
+          if not text.startswith('<!doctype html>'):
+              raise SystemExit('Doctype normalization failed')
+          index_path.write_text(text, encoding='utf-8', newline='\n')
+
+          version = json.loads(version_path.read_text(encoding='utf-8'))
+          old_code = version.get('versionCode', 0)
+          if not isinstance(old_code, int):
+              raise SystemExit('version.json field versionCode must be an integer')
+
+          sha256 = hashlib.sha256(index_path.read_bytes()).hexdigest()
+
+          version['versionCode'] = old_code + 1
+          version['versionName'] = version_name
+          version['indexUrl'] = version.get('indexUrl', 'index.html')
+          version['sha256'] = sha256
+          if isinstance(release.get('notes'), str) and release['notes'].strip():
+              version['notes'] = release['notes'].strip()
+
+          version_path.write_text(
+              json.dumps(version, ensure_ascii=False, indent=2) + '\n',
+              encoding='utf-8',
+              newline='\n',
+          )
+
+          print(f"Updated versionCode: {old_code} -> {old_code + 1}")
+          print(f"Updated versionName: {version_name}")
+          print(f"Updated sha256: {sha256}")
+          PY
+
+      - name: Guard changed files
+        shell: bash
+        run: |
+          set -euo pipefail
+          changed_files="$(git diff --name-only)"
+          echo "$changed_files"
+
+          if [[ -z "$changed_files" ]]; then
+            echo "No generated changes. Nothing to commit."
+            exit 0
+          fi
+
+          while IFS= read -r file; do
+            case "$file" in
+              kgg-update/index.html|kgg-update/version.json|docs/APP_STATE.md)
+                ;;
+              *)
+                echo "Blocked unexpected generated change: $file"
+                exit 1
+                ;;
+            esac
+          done <<< "$changed_files"
+
+      - name: Commit generated update
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -z "$(git diff --name-only)" ]]; then
+            echo "No generated changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add kgg-update/index.html kgg-update/version.json docs/APP_STATE.md 2>/dev/null || true
+          git commit -m "chore: apply update inbox payload"
+          git push origin HEAD:main
