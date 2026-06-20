@@ -45,11 +45,16 @@ Kurz: Bei PWA/WebView-Updates darf ein Rollback nicht einfach einen niedrigeren 
    - `indexUrl`: `index.html?v=20`
    - `sha256`: `ff81621997d2007fdb776c71688c4dfc1b2d052439efeead796cf98cee888eb1`
 
+## Bestätigung durch Max
+- Fix wurde von Max bestätigt: `Hat geklappt`.
+- Wirksamer Fix war: alte gute `index.html` behalten, aber Manifest als neues Update ausliefern mit `versionCode 20` und Cache-Buster `index.html?v=20`.
+
 ## Test / Abnahmekriterien
 - [x] Tablet-App komplett schließen.
 - [x] App neu öffnen.
 - [x] App lädt nicht mehr den kaputten v011-Stand.
 - [x] Tablet-Layout funktioniert wieder laut Max-Screenshot/Rückmeldung.
+- [x] Max hat bestätigt: `Hat geklappt`.
 - [ ] Galerie-QR separat neu testen, wenn ein neuer QR-Fix vorbereitet wird.
 - [ ] Kamera-Scan separat neu testen, wenn ein neuer QR-Fix vorbereitet wird.
 
