@@ -1,7 +1,7 @@
 {
-  "versionCode": 20,
-  "versionName": "1.0.20-stable",
-  "indexUrl": "index.html?v=20",
-  "sha256": "ff81621997d2007fdb776c71688c4dfc1b2d052439efeead796cf98cee888eb1",
-  "notes": "Stabiler Stand."
+  "versionCode": 21,
+  "versionName": "1.0.21-embed-jsqr-gallery-decode",
+  "indexUrl": "index.html?v=21",
+  "sha256": "64d9a96fd0a5fefa8f26ef108a745db43a41ee5b4b615d915b3bb4f5426dbc36",
+  "notes": "Galerie-QR-Fix: jsQR wird beim Build eingebettet und als Fallback für Foto-/Galerie-QRs genutzt. QR-/Scan-naher Patch; nach Update Kamera-Scan, Galerie-Scan und Tablet-Layout testen."
 }
