@@ -1,10 +1,13 @@
 {
-  "versionName": "1.0.21-embed-jsqr-gallery-decode",
-  "title": "Galerie-QR mit eingebettetem jsQR-Fallback",
-  "summary": "Bettet jsQR beim Build in die App-HTML ein und nutzt es als Fallback, wenn Galerie-/Foto-QRs über die vorhandene Erkennung nicht gelesen werden.",
+  "versionName": "1.0.22-admin-debug-menu-feedback",
+  "title": "Admin Debug-/Feedback-Menü",
+  "summary": "Rebased v014 als neues v022-Update gegen aktuellen main/v021: ergänzt ein Admin-Debug-Menü. Tablet: Debug-Einstieg in der Seitenleiste/Scan-Hub. Handy: Admin-Konfig, QR/Sync und Übungsdatenbank teilen liegen hinter einem Admin-Menü.",
   "type": "github-web-update",
+  "patchId": "kgg-v022-admin-debug-menu-feedback",
   "allowedAreas": [
-    "QR photo upload decode",
+    "Admin debug UI",
+    "Tablet admin side-rail debug entry",
+    "Phone admin hub menu",
     "HTML embedded metadata",
     "Source Truth",
     "Changelog",
@@ -17,22 +20,22 @@
     "Scan-Kamera",
     "Parser",
     "Android-Wrapper",
-    "Tablet-Layout",
+    "Tablet core layout/breakpoints",
     "Plan-State",
     "Storage"
   ],
   "testPlan": [
-    "GitHub Pages laden und KGG_QR_GALLERY_DEBUG.check() prüfen.",
-    "App öffnen und Update-Banner abwarten.",
-    "Galerie-Foto mit QR-Code hochladen.",
-    "Kamera-QR-Scan kurz gegenprüfen.",
-    "Tablet-Layout prüfen."
+    "Tablet width >=760px: Debug button appears in scan/admin rail; tablet core layout/breakpoints unchanged.",
+    "Phone width <760px: Admin-Menü button appears; Admin-Konfig, QR/Sync and Übungsdatenbank teilen are reachable through the menu.",
+    "Open Debug menu and press Diagnose aktualisieren.",
+    "Press Bericht kopieren and verify clipboard/report text contains version/features/layout/sourceTruth.",
+    "Verify QR / Sync, Admin-Konfig and Übungsdatenbank teilen actions still open their existing dialogs.",
+    "Verify normal scan camera, gallery QR decode, QR generation, parser, storage and plan state still behave as before."
   ],
-  "notes": "Galerie-QR-Fix: jsQR wird beim Build eingebettet und als Fallback für Foto-/Galerie-QRs genutzt. QR-/Scan-naher Patch; nach Update Kamera-Scan, Galerie-Scan und Tablet-Layout testen.",
   "riskNotes": [
-    "QR-/Scan-naher Patch: detectQrOnCanvas wird global gewrappt.",
-    "Der Wrapper ruft vorhandene QR-Erkennung zuerst auf und nutzt jsQR nur als Fallback.",
-    "Patch lädt jsQR@1.4.0 beim GitHub-Action-Build von jsDelivr und bettet den Code danach inline ein.",
-    "Rollback-Basis vor Upload: backup/stable-v020-before-v021."
+    "Rebased from uploaded v014 package because main is already at v021.",
+    "Only update-inbox/patch.py and update-inbox/release.json are uploaded; __pycache__ and reports are excluded.",
+    "Phone CSS hides original admin action buttons behind the Admin-Menü but does not delete their existing handlers.",
+    "No API keys or secrets are embedded."
   ]
 }
