@@ -1,7 +1,7 @@
 {
-  "versionCode": 7,
-  "versionName": "1.0.5-qr-photo-source-truth",
+  "versionCode": 8,
+  "versionName": "1.0.6-qr-gallery-bitmap-debug",
   "indexUrl": "index.html",
-  "sha256": "4f5d34eea6b17b8b471ac60a0e057562fbf0bac033d74dc336fd736c01ec2737",
+  "sha256": "8e03744a7666bb9b499aeca11f1e7d5fb4dfdd23382ade7778f41fc7802c02a5",
   "notes": "Verbessert QR-Erkennung aus Bild-/Fotodatenbank-Upload und bettet Source Truth sowie Changelog direkt in die App-HTML ein."
 }

@@ -5160,24 +5160,29 @@
 </style>
 
   <!-- KGG kgg-source-truth: embedded Source Truth. Machine-readable; safe for local LLM/code review. -->
-  <script type="application/json" id="kgg-source-truth">
+<!-- KGG kgg-changelog: embedded Changelog. Machine-readable; safe for local LLM/code review. -->
+
+<!-- BEGIN kgg-source-truth: embedded Source Truth; read this before patching -->
+<script type="application/json" id="kgg-source-truth">
 {
   "schema": 1,
   "app": "KGG Plan",
   "purpose": "Machine-readable Source Truth for local LLMs, Codex agents and future patch automation.",
   "currentWebVersion": {
-    "versionCode": 7,
-    "versionName": "1.0.5-qr-photo-source-truth",
+    "versionCode": 8,
+    "versionName": "1.0.6-qr-gallery-bitmap-debug",
     "channel": "github-pages-main",
     "updateUrl": "https://kayus24.github.io/kgg/kgg-update/version.json",
     "sha256": "see kgg-update/version.json",
-    "releasedAt": "2026-06-20T00:00:00Z"
+    "releasedAt": "2026-06-20T16:46:48Z"
   },
   "activeFixes": [
     "phone-admin-banner-hidden",
     "qr-photo-upload-decode",
     "embedded-source-truth",
-    "embedded-changelog"
+    "embedded-changelog",
+    "qr-gallery-bitmap-detector-fallback",
+    "qr-photo-import-debug"
   ],
   "knownWorkingAndroidWrapper": {
     "name": "android-urlfix-debug-v3-or-newer",
@@ -5205,8 +5210,8 @@
     "The real SHA-256 of index.html belongs in kgg-update/version.json, not inside embedded Source Truth."
   ],
   "lastUpdateIntent": {
-    "id": "web-v008-qr-photo-source-truth",
-    "summary": "Combines QR photo upload decoding improvements with embedded Source Truth and Changelog.",
+    "id": "web-v008-qr-gallery-bitmap-debug",
+    "summary": "Adds QR gallery/photo import diagnostics and a stronger BarcodeDetector ImageBitmap fallback for uploaded images.",
     "notTouched": [
       "PDF",
       "QR-Erzeugung",
@@ -5220,13 +5225,44 @@
     ]
   }
 }
-  </script>
-  <!-- KGG kgg-changelog: embedded Changelog. Machine-readable; safe for local LLM/code review. -->
-  <script type="application/json" id="kgg-changelog">
+</script>
+<!-- END kgg-source-truth -->
+
+<!-- BEGIN kgg-changelog: embedded Changelog; read this before patching -->
+<script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 7,
+  "latestVersionCode": 8,
   "entries": [
+    {
+      "versionCode": 8,
+      "versionName": "1.0.6-qr-gallery-bitmap-debug",
+      "type": "github-web-update",
+      "title": "QR-Foto/Galerie-Import mit Debug und Bitmap-Fallback",
+      "summary": "Verbessert QR-Erkennung aus Galerie-/Fotodatenbank-Bildern durch zusätzlichen BarcodeDetector-ImageBitmap-Fallback und sichtbare Warnungen, wenn ein Bild nicht dekodiert werden kann.",
+      "changedAreas": [
+        "QR-Bildimport",
+        "HTML/JS",
+        "eingebettete Source Truth",
+        "eingebetteter Changelog"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Parser",
+        "Android-Wrapper",
+        "Tablet-Layout",
+        "Plan-State",
+        "Storage"
+      ],
+      "testStatus": {
+        "githubPages": "pending",
+        "androidApp": "pending",
+        "qrGalleryImport": "pending"
+      }
+    },
     {
       "versionCode": 7,
       "versionName": "1.0.5-qr-photo-source-truth",
@@ -5258,7 +5294,8 @@
     }
   ]
 }
-  </script>
+</script>
+<!-- END kgg-changelog -->
 </head>
 <body class="adminMode">
 <div class="tabletSideBackdrop" id="tabletSideBackdrop" hidden></div>
@@ -5307,7 +5344,7 @@
     <button class="scanBtn" id="scanBtn">📷 Plan scannen</button>
     <button class="syncQrBtn" id="syncQrBtn" type="button" aria-label="Sync-QR erzeugen" title="Sync-QR">QR</button>
     <input id="fileInput" class="nativeFileInput" type="file" accept="image/*" capture="environment">
-    <input id="filePickerInput" class="nativeFileInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif" multiple>
+    <input id="filePickerInput" class="nativeFileInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp" multiple>
     <div class="scanMeta filePickBtn" id="filePickBtn" role="button" tabindex="0" aria-label="Foto oder Datei auswählen">Foto / Datei <small id="scanStatus" class="hidden"></small></div>
     <button class="mutedBtn adminConfigBtn" id="adminConfigBtn" type="button">Admin-Konfig</button>
     <button class="mutedBtn sharedBankBtn" id="sharedBankBtn" type="button">Übungsdatenbank teilen</button>
@@ -9853,13 +9890,49 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     }
     return canvas;
   }
+  /* kgg-mini-patch-v400-10-qr-gallery-bitmap-debug
+     Galerie-/Fotodatenbank-QR-Fix:
+     Einige Android WebViews erkennen QR-Codes per BarcodeDetector auf Kamera-Bildern,
+     aber nicht zuverlässig auf Canvas-Crops aus Galerie-Dateien. Deshalb wird jeder
+     Canvas-Versuch zusätzlich als PNG-Blob -> ImageBitmap dekodiert und dann erneut
+     an BarcodeDetector gegeben. Außerdem bleiben Warnungen in der Scan-Vorschau sichtbar.
+  */
+  function scanCanvasToBlob(canvas,type,quality){
+    return new Promise(resolve=>{
+      try{
+        canvas.toBlob(blob=>resolve(blob),type||'image/png',quality||.92);
+      }catch(err){resolve(null);}
+    });
+  }
+  async function scanDetectQrViaBitmapFromCanvas(canvas,detector){
+    if(!detector||!window.createImageBitmap||!canvas||!canvas.toBlob)return '';
+    let blob=null,bitmap=null;
+    try{
+      blob=await scanCanvasToBlob(canvas,'image/png',.92);
+      if(!blob)return '';
+      bitmap=await createImageBitmap(blob);
+      const hits=await detector.detect(bitmap).catch(()=>[]);
+      if(hits&&hits.length){
+        return hits[0].rawValue||hits[0].rawData||'';
+      }
+    }catch(err){
+      return '';
+    }finally{
+      if(bitmap){try{bitmap.close();}catch(closeErr){}}
+    }
+    return '';
+  }
   async function detectQrOnCanvas(canvas,detector){
     if(detector){
-      const hits=await detector.detect(canvas).catch(()=>[]);
-      if(hits&&hits.length){
-        const raw=hits[0].rawValue||hits[0].rawData||'';
-        if(raw)return raw;
-      }
+      try{
+        const hits=await detector.detect(canvas).catch(()=>[]);
+        if(hits&&hits.length){
+          const raw=hits[0].rawValue||hits[0].rawData||'';
+          if(raw)return raw;
+        }
+      }catch(err){}
+      const bitmapRaw=await scanDetectQrViaBitmapFromCanvas(canvas,detector);
+      if(bitmapRaw)return bitmapRaw;
     }
     if(window.jsQR){
       try{
@@ -9886,63 +9959,95 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     return '';
   }
   async function scanQrFromImageFile(file){
+    const fileName=String(file&&file.name||'Bild');
+    const fileType=String(file&&file.type||'unbekannter Typ');
+    const fileSize=Number(file&&file.size||0);
+    const heicHint=/heic|heif/i.test(fileName+' '+fileType);
     let detector=null;
     if('BarcodeDetector' in window){
       try{detector=new BarcodeDetector({formats:['qr_code']});}catch(err){detector=null;}
     }
-    if(!detector&&!window.jsQR)return {raw:'',reason:'QR-Erkennung ist in diesem Browser nicht verfügbar.'};
+    if(!detector&&!window.jsQR){
+      return {
+        raw:'',
+        attempts:0,
+        reason:'QR-Erkennung ist in diesem WebView nicht verfügbar. BarcodeDetector/jsQR fehlt.',
+        debug:{fileName,fileType,fileSize,barcodeDetector:false,jsQR:false}
+      };
+    }
 
     const direct=await scanDetectQrDirectFromFile(file,detector);
-    if(direct)return {raw:direct,attempts:1,hit:{source:'direct-bitmap',mode:'native'}};
+    if(direct)return {raw:direct,attempts:1,hit:{source:'direct-bitmap',mode:'native'},debug:{fileName,fileType,fileSize}};
 
     const crops=[
       {id:'full',x:0,y:0,w:1,h:1},
-      {id:'center',x:.12,y:.12,w:.76,h:.76},
-      {id:'wide-center',x:.05,y:.18,w:.90,h:.64},
-      {id:'tall-center',x:.18,y:.05,w:.64,h:.90},
-      {id:'top-left',x:0,y:0,w:.58,h:.58},
-      {id:'top-right',x:.42,y:0,w:.58,h:.58},
-      {id:'bottom-left',x:0,y:.42,w:.58,h:.58},
-      {id:'bottom-right',x:.42,y:.42,w:.58,h:.58},
-      {id:'top-band',x:0,y:0,w:1,h:.42},
-      {id:'bottom-band',x:0,y:.58,w:1,h:.42},
-      {id:'left-band',x:0,y:0,w:.42,h:1},
-      {id:'right-band',x:.58,y:0,w:.42,h:1},
-      {id:'top-third-left',x:0,y:0,w:.50,h:.40},
-      {id:'top-third-right',x:.50,y:0,w:.50,h:.40},
-      {id:'mid-third-left',x:0,y:.30,w:.50,h:.40},
-      {id:'mid-third-right',x:.50,y:.30,w:.50,h:.40}
+      {id:'center',x:.08,y:.08,w:.84,h:.84},
+      {id:'center-tight',x:.20,y:.20,w:.60,h:.60},
+      {id:'wide-center',x:.03,y:.15,w:.94,h:.70},
+      {id:'tall-center',x:.15,y:.03,w:.70,h:.94},
+      {id:'top-left',x:0,y:0,w:.62,h:.62},
+      {id:'top-right',x:.38,y:0,w:.62,h:.62},
+      {id:'bottom-left',x:0,y:.38,w:.62,h:.62},
+      {id:'bottom-right',x:.38,y:.38,w:.62,h:.62},
+      {id:'top-band',x:0,y:0,w:1,h:.48},
+      {id:'bottom-band',x:0,y:.52,w:1,h:.48},
+      {id:'left-band',x:0,y:0,w:.48,h:1},
+      {id:'right-band',x:.52,y:0,w:.48,h:1},
+      {id:'top-third-left',x:0,y:0,w:.54,h:.44},
+      {id:'top-third-right',x:.46,y:0,w:.54,h:.44},
+      {id:'mid-third-left',x:0,y:.28,w:.54,h:.44},
+      {id:'mid-third-right',x:.46,y:.28,w:.54,h:.44},
+      {id:'bottom-third-left',x:0,y:.56,w:.54,h:.44},
+      {id:'bottom-third-right',x:.46,y:.56,w:.54,h:.44}
     ];
     const modes=['normal','softContrast','contrast','thresholdLow','threshold','thresholdHigh','invert'];
-    const maxSides=[2200,3200,1600];
+    const maxSides=[4096,3200,2600,1800,1200];
+    const rotations=[0,90,180,270];
     const seenBases=new Set();
     let attempts=1;
     let lastReason='';
+    let lastCanvas='';
     for(const maxSide of maxSides){
       let base=null;
-      try{base=await scanImageCanvasFromFile(file,maxSide);}
-      catch(err){
+      try{
+        base=await scanImageCanvasFromFile(file,maxSide);
+      }catch(err){
         lastReason=err&&err.message||String(err);
         continue;
       }
       const key=base.width+'x'+base.height;
+      lastCanvas=key;
       if(seenBases.has(key))continue;
       seenBases.add(key);
-      for(const rot of [0,90,180,270]){
+      for(const rot of rotations){
         const rotated=scanRotateCanvas(base,rot);
         for(const box of crops){
           const crop=box.id==='full'?rotated:scanCropCanvas(rotated,box);
-          const prepared=scanScaleCanvas(crop,640,2600);
+          const prepared=scanScaleCanvas(crop,860,3200);
           for(const mode of modes){
             attempts++;
             const target=scanFilteredCanvas(prepared,mode);
             const raw=await detectQrOnCanvas(target,detector);
-            if(raw)return {raw,attempts,hit:{rot,crop:box.id,mode,maxSide,canvas:key}};
+            if(raw){
+              return {
+                raw,
+                attempts,
+                hit:{rot,crop:box.id,mode,maxSide,canvas:key,detector:!!detector,jsQR:!!window.jsQR},
+                debug:{fileName,fileType,fileSize,lastCanvas:key}
+              };
+            }
           }
         }
       }
     }
-    return {raw:'',attempts,reason:lastReason||'Kein QR lokal gefunden.'};
+    const support='BarcodeDetector='+(!!detector)+', jsQR='+(!!window.jsQR);
+    const heicText=heicHint?' HEIC/HEIF wird von Android WebView oft nicht als Canvas-Bild dekodiert; bitte als Screenshot/PNG/JPG testen.':'';
+    return {
+      raw:'',
+      attempts,
+      reason:(lastReason?lastReason+'; ':'')+'Kein QR im hochgeladenen Bild gefunden. '+support+', Datei='+fileName+', Typ='+fileType+', Groesse='+fileSize+', Canvas='+lastCanvas+'.'+heicText,
+      debug:{fileName,fileType,fileSize,attempts,lastCanvas,barcodeDetector:!!detector,jsQR:!!window.jsQR,heicHint}
+    };
   }
   function safeBase64JsonDecode(value){
     const raw=String(value||'').trim();
@@ -10640,6 +10745,11 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     if(forceNew||job.type==='qr'||job.result){job=forceNew?job:scanNewJob('paper');}
     job.type='paper';
     job.pages.push(scanFileMeta(file));
+    if(kind==='file'&&qr&&!qr.raw){
+      const qrWarn='QR-Foto-Import: '+(qr.reason||'Kein QR im Bild erkannt.');
+      job.warnings.push(qrWarn);
+      try{console.warn(qrWarn,qr.debug||{});}catch(err){}
+    }
     job.status='queued';
     job.short=job.short||patientShortGuess();
     scanState.next='page';
@@ -11002,7 +11112,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
             input.setAttribute('capture','environment');
             input.removeAttribute('multiple');
           }else{
-            input.accept='image/*,.jpg,.jpeg,.png,.webp,.heic,.heif';
+            input.accept='image/*,.jpg,.jpeg,.png,.webp';
             input.removeAttribute('capture');
             input.setAttribute('multiple','multiple');
           }
