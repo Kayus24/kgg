@@ -1,155 +1,216 @@
 #!/usr/bin/env python3
 from pathlib import Path
+from datetime import datetime, timezone
 import json
 import re
 import sys
-from datetime import datetime, timezone
 
 HTML_PATH = Path("kgg-update/index.html")
 VERSION_PATH = Path("kgg-update/version.json")
 
-VERSION_NAME = "1.0.6-qr-gallery-bitmap-debug"
-UPDATE_ID = "web-v008-qr-gallery-bitmap-debug"
+VERSION_NAME = "1.0.7-patch-retention-changelog-guard"
+UPDATE_ID = "web-v009-patch-retention-changelog-guard"
+
 SOURCE_TRUTH_ID = "kgg-source-truth"
 CHANGELOG_ID = "kgg-changelog"
+PATCH_RULES_ID = "kgg-patch-rules"
+SIZE_GUARD_ID = "kgg-changelog-size-guard"
+
+PROTECTED_AREAS = [
+    "PDF",
+    "QR-Erzeugung",
+    "Patienten-App",
+    "Scan-Kamera",
+    "Parser",
+    "Android-Wrapper",
+    "Tablet-Layout",
+    "Plan-State",
+    "Storage",
+]
+
+CHANGELOG_WARN_AT_ENTRIES = 18
+CHANGELOG_MAX_EMBEDDED_ENTRIES = 30
+CHANGELOG_WARN_AT_BYTES = 35000
+CHANGELOG_MAX_EMBEDDED_BYTES = 55000
 
 def fail(message: str) -> None:
     print("ERROR:", message)
     sys.exit(1)
 
 def normalize_doctype(html: str) -> str:
-    if html.lower().startswith("<!doctype html>"):
+    low = html.lower()
+    if low.startswith("<!doctype html>"):
         return html
-    idx = html.lower().find("<!doctype html>")
+    idx = low.find("<!doctype html>")
     if idx < 0:
         fail("<!doctype html> not found")
-    print(f"Normalizing doctype: removed {idx} leading characters")
+    print(f"Normalizing doctype: removed {idx} leading characters before <!doctype html>")
     return html[idx:]
 
-def find_function_range(text: str, name: str):
-    pattern = re.compile(r"(^|\n)(\s*)(?:async\s+)?function\s+" + re.escape(name) + r"\s*\(", re.M)
-    m = pattern.search(text)
-    if not m:
-        fail(f"function {name} not found")
-    start = m.start(0) + (1 if text[m.start(0):m.start(0)+1] == "\n" else 0)
-    brace = text.find("{", m.end())
-    if brace < 0:
-        fail(f"opening brace for {name} not found")
-    depth = 0
-    i = brace
-    in_str = None
-    escape = False
-    in_line_comment = False
-    in_block_comment = False
-    while i < len(text):
-        ch = text[i]
-        nxt = text[i+1] if i + 1 < len(text) else ""
-        if in_line_comment:
-            if ch == "\n":
-                in_line_comment = False
-            i += 1
-            continue
-        if in_block_comment:
-            if ch == "*" and nxt == "/":
-                in_block_comment = False
-                i += 2
-            else:
-                i += 1
-            continue
-        if in_str:
-            if escape:
-                escape = False
-            elif ch == "\\":
-                escape = True
-            elif ch == in_str:
-                in_str = None
-            i += 1
-            continue
-        if ch in ("'", '"', "`"):
-            in_str = ch
-            i += 1
-            continue
-        if ch == "/" and nxt == "/":
-            in_line_comment = True
-            i += 2
-            continue
-        if ch == "/" and nxt == "*":
-            in_block_comment = True
-            i += 2
-            continue
-        if ch == "{":
-            depth += 1
-        elif ch == "}":
-            depth -= 1
-            if depth == 0:
-                return start, i + 1
-        i += 1
-    fail(f"closing brace for {name} not found")
+def load_next_version_code() -> int:
+    try:
+        manifest = json.loads(VERSION_PATH.read_text(encoding="utf-8"))
+        return int(manifest.get("versionCode", 0)) + 1
+    except Exception as err:
+        print(f"WARN: could not read {VERSION_PATH}: {err}; using versionCode 1")
+        return 1
 
-def replace_function(text: str, name: str, code: str) -> str:
-    start, end = find_function_range(text, name)
-    return text[:start] + code.strip("\n") + text[end:]
-
-def replace_once(text: str, old: str, new: str, label: str) -> str:
-    count = text.count(old)
-    if count < 1:
-        print(f"WARN: token not found for {label}; skipping")
-        return text
-    if count > 1:
-        print(f"WARN: token appears {count} times for {label}; replacing first only")
-    return text.replace(old, new, 1)
+def script_pattern(script_id: str) -> re.Pattern:
+    return re.compile(
+        r'\s*(?:<!--\s*BEGIN\s+' + re.escape(script_id) + r'.*?-->\s*)?'
+        r'<script\b(?=[^>]*\bid=["\']' + re.escape(script_id) + r'["\'])[^>]*>.*?</script>'
+        r'\s*(?:<!--\s*END\s+' + re.escape(script_id) + r'\s*-->\s*)?',
+        re.I | re.S
+    )
 
 def extract_json_script(html: str, script_id: str) -> dict:
-    pattern = re.compile(
-        r'<script\s+type=["\']application/json["\']\s+id=["\']' + re.escape(script_id) + r'["\']\s*>(.*?)</script>',
+    m = re.search(
+        r'<script\b(?=[^>]*\bid=["\']' + re.escape(script_id) + r'["\'])[^>]*>(.*?)</script>',
+        html,
         re.I | re.S
     )
-    m = pattern.search(html)
     if not m:
         return {}
+    raw = m.group(1).strip()
     try:
-        return json.loads(m.group(1).strip())
+        return json.loads(raw)
     except Exception as err:
-        print(f"WARN: could not parse {script_id}: {err}")
+        print(f"WARN: could not parse embedded {script_id}: {err}")
         return {}
 
-def remove_json_script(html: str, script_id: str) -> str:
-    pattern = re.compile(
-        r'\s*<!--\s*BEGIN\s+' + re.escape(script_id) + r'.*?END\s+' + re.escape(script_id) + r'\s*-->\s*',
-        re.I | re.S
+def remove_script(html: str, script_id: str) -> str:
+    return script_pattern(script_id).sub("\n", html)
+
+def remove_meta_markers(html: str) -> str:
+    for name in ["kgg-source-truth", "kgg-changelog", "kgg-patch-rules"]:
+        html = re.sub(
+            r'\s*<meta\b(?=[^>]*\bname=["\']' + re.escape(name) + r'["\'])[^>]*>\s*',
+            "\n",
+            html,
+            flags=re.I
+        )
+    return html
+
+def remove_read_first_header(html: str) -> str:
+    return re.sub(
+        r'\s*<!--\s*KGG INTERNAL SOURCE TRUTH — READ THIS FIRST\s*.*?END KGG INTERNAL SOURCE TRUTH READ FIRST\s*-->\s*',
+        "\n",
+        html,
+        flags=re.I | re.S
     )
-    html2 = pattern.sub("\n", html)
-    pattern2 = re.compile(
-        r'\s*<script\s+type=["\']application/json["\']\s+id=["\']' + re.escape(script_id) + r'["\']\s*>.*?</script>\s*',
-        re.I | re.S
-    )
-    return pattern2.sub("\n", html2)
 
 def json_script(script_id: str, data: dict, label: str) -> str:
     body = json.dumps(data, ensure_ascii=False, indent=2)
     return (
-        f'\n<!-- BEGIN {script_id}: {label}; read this before patching -->\n'
+        f'\n<!-- BEGIN {script_id}: {label}; READ THIS BEFORE PATCHING -->\n'
         f'<script type="application/json" id="{script_id}">\n'
         f'{body}\n'
         f'</script>\n'
         f'<!-- END {script_id} -->\n'
     )
 
-def update_embedded_metadata(html: str, version_code: int, version_name: str) -> str:
-    protected = [
-        "PDF",
-        "QR-Erzeugung",
-        "Patienten-App",
-        "Scan-Kamera",
-        "Parser",
-        "Android-Wrapper",
-        "Tablet-Layout",
-        "Plan-State",
-        "Storage",
-    ]
+def build_read_first_header() -> str:
+    return '''
+<!--
+KGG INTERNAL SOURCE TRUTH — READ THIS FIRST
+
+Machine-readable app state, patch rules, and changelog are embedded near the top of this HTML.
+Before editing this app, any LLM/agent/human should read these blocks:
+1. <script type="application/json" id="kgg-source-truth">
+2. <script type="application/json" id="kgg-changelog">
+3. <script type="application/json" id="kgg-patch-rules">
+
+Do not remove or rename these blocks.
+Do not silently delete the last patch for a feature/function.
+If a patch must be replaced, document supersedes/supersededBy/removalReason/rollbackNote in kgg-changelog.
+If the embedded changelog exceeds its warning size/entry threshold, warn Max before adding more history.
+
+END KGG INTERNAL SOURCE TRUTH READ FIRST
+-->
+'''
+
+def build_size_guard_script() -> str:
+    return f'''
+<!-- BEGIN {SIZE_GUARD_ID}: console/helper warning when embedded changelog grows too large -->
+<script id="{SIZE_GUARD_ID}">
+(function(){{
+  "use strict";
+  var FALLBACK_POLICY = {{
+    warnAtEntries: {CHANGELOG_WARN_AT_ENTRIES},
+    maxEmbeddedEntries: {CHANGELOG_MAX_EMBEDDED_ENTRIES},
+    warnAtBytes: {CHANGELOG_WARN_AT_BYTES},
+    maxEmbeddedBytes: {CHANGELOG_MAX_EMBEDDED_BYTES}
+  }};
+  function readJsonBlock(id){{
+    var el = document.getElementById(id);
+    if(!el) return null;
+    try{{ return JSON.parse((el.textContent||"").trim()); }}
+    catch(err){{ return {{__parseError:String(err)}}; }}
+  }}
+  function changelogSizeReport(){{
+    var el = document.getElementById("{CHANGELOG_ID}");
+    var rules = readJsonBlock("{PATCH_RULES_ID}") || {{}};
+    var policy = (rules && rules.changelogSizePolicy) || FALLBACK_POLICY;
+    var text = el ? (el.textContent || "") : "";
+    var entries = 0;
+    var parseError = "";
+    try{{
+      var data = text ? JSON.parse(text) : {{}};
+      entries = Array.isArray(data.entries) ? data.entries.length : 0;
+    }}catch(err){{
+      parseError = String(err);
+    }}
+    var bytes = 0;
+    try{{ bytes = new TextEncoder().encode(text).length; }}
+    catch(err){{ bytes = text.length; }}
+    var warnings = [];
+    if(!el) warnings.push("kgg-changelog block missing");
+    if(parseError) warnings.push("kgg-changelog parse error: " + parseError);
+    if(entries >= Number(policy.warnAtEntries || FALLBACK_POLICY.warnAtEntries)){{
+      warnings.push("embedded changelog entries approaching limit: " + entries + "/" + (policy.maxEmbeddedEntries || FALLBACK_POLICY.maxEmbeddedEntries));
+    }}
+    if(bytes >= Number(policy.warnAtBytes || FALLBACK_POLICY.warnAtBytes)){{
+      warnings.push("embedded changelog bytes approaching limit: " + bytes + "/" + (policy.maxEmbeddedBytes || FALLBACK_POLICY.maxEmbeddedBytes));
+    }}
+    return {{
+      entries: entries,
+      bytes: bytes,
+      policy: policy,
+      warnings: warnings,
+      shouldWarn: warnings.length > 0
+    }};
+  }}
+  window.KGG_PATCH_GUARD = window.KGG_PATCH_GUARD || {{}};
+  window.KGG_PATCH_GUARD.readSourceTruth = function(){{ return readJsonBlock("{SOURCE_TRUTH_ID}"); }};
+  window.KGG_PATCH_GUARD.readChangelog = function(){{ return readJsonBlock("{CHANGELOG_ID}"); }};
+  window.KGG_PATCH_GUARD.readPatchRules = function(){{ return readJsonBlock("{PATCH_RULES_ID}"); }};
+  window.KGG_PATCH_GUARD.checkChangelogSize = changelogSizeReport;
+  var report = changelogSizeReport();
+  window.KGG_PATCH_GUARD.lastChangelogSizeReport = report;
+  if(report.shouldWarn && console && console.warn){{
+    console.warn("KGG changelog/source-truth warning:", report);
+  }}
+}})();
+</script>
+<!-- END {SIZE_GUARD_ID} -->
+'''
+
+def ensure_head_insert(html: str, block: str) -> str:
+    m = re.search(r'<head\b[^>]*>', html, flags=re.I)
+    if not m:
+        fail("<head> not found")
+    return html[:m.end()] + block + html[m.end():]
+
+def unique_append(items, value):
+    if value not in items:
+        items.append(value)
+
+def update_metadata(html: str, version_code: int, version_name: str) -> str:
     released_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
     source_truth = extract_json_script(html, SOURCE_TRUTH_ID) or {}
     changelog = extract_json_script(html, CHANGELOG_ID) or {}
+    patch_rules = extract_json_script(html, PATCH_RULES_ID) or {}
 
     source_truth.update({
         "schema": int(source_truth.get("schema") or 1),
@@ -163,256 +224,217 @@ def update_embedded_metadata(html: str, version_code: int, version_name: str) ->
             "sha256": "see kgg-update/version.json",
             "releasedAt": released_at,
         },
-        "protectedAreas": protected,
+        "protectedAreas": PROTECTED_AREAS,
         "lastUpdateIntent": {
             "id": UPDATE_ID,
-            "summary": "Adds QR gallery/photo import diagnostics and a stronger BarcodeDetector ImageBitmap fallback for uploaded images.",
-            "notTouched": protected,
+            "summary": "Adds a patch-retention policy, LLM-readable patch rules, and changelog size warning thresholds directly inside the app HTML.",
+            "notTouched": PROTECTED_AREAS,
         },
+        "patchRetentionPolicy": {
+            "rule": "Never delete the latest patch for a function silently.",
+            "why": "The last patch for a feature is often what fixed or stabilized the bug; removing it without tracking can reintroduce old bugs.",
+            "defaultBehavior": "Preserve previous patch code and patch history unless Max explicitly approves removal.",
+            "whenReplacingPatch": [
+                "Mark old changelog entry as superseded, not deleted.",
+                "Add supersededBy on the old entry when practical.",
+                "Add supersedes on the new entry.",
+                "Record whySuperseded/removalReason/testEvidence/rollbackNote."
+            ],
+            "requiredWhenRemovingPatch": [
+                "supersededBy",
+                "removalReason",
+                "testEvidence",
+                "rollbackNote",
+                "explicitMaxApproval"
+            ],
+            "pipelineExpectation": "If patch markers or active fixes disappear without changelog documentation, stop and ask Max."
+        },
+        "changelogSizePolicy": {
+            "scope": "embedded kgg-changelog in index.html",
+            "warnAtEntries": CHANGELOG_WARN_AT_ENTRIES,
+            "maxEmbeddedEntries": CHANGELOG_MAX_EMBEDDED_ENTRIES,
+            "warnAtBytes": CHANGELOG_WARN_AT_BYTES,
+            "maxEmbeddedBytes": CHANGELOG_MAX_EMBEDDED_BYTES,
+            "actionWhenWarningThresholdReached": "Warn Max before adding more large entries; propose compact summaries or external archival.",
+            "actionWhenMaxExceeded": "Stop non-critical updates until Max approves compaction/archive strategy.",
+            "doNotAutoDeleteHistory": True
+        }
     })
+
     fixes = list(source_truth.get("activeFixes") or [])
-    for item in ["phone-admin-banner-hidden", "qr-photo-upload-decode", "embedded-source-truth", "embedded-changelog", "qr-gallery-bitmap-detector-fallback", "qr-photo-import-debug"]:
-        if item not in fixes:
-            fixes.append(item)
+    for item in [
+        "patch-retention-policy",
+        "changelog-size-warning",
+        "llm-readable-patch-rules",
+        "embedded-source-truth",
+        "embedded-changelog"
+    ]:
+        unique_append(fixes, item)
     source_truth["activeFixes"] = fixes
+
     rules = list(source_truth.get("rulesForFutureAgents") or [])
     for rule in [
-        "Read kgg-source-truth and kgg-changelog before changing the app.",
+        "READ kgg-source-truth, kgg-changelog and kgg-patch-rules before changing code.",
         "Do not touch protectedAreas without explicit Max approval.",
         "If a user request conflicts with Source Truth, stop and ask Max before changing code.",
         "Every update must add or update a changelog entry.",
-        "Do not put API keys, patient data, admin-safe codes, secrets or private links in this JSON.",
+        "Never silently remove the latest patch for a function; preserve or supersede it with documentation.",
+        "If the embedded changelog exceeds warning thresholds, warn Max before continuing.",
+        "Do not put API keys, patient data, admin-safe codes, secrets or private links in embedded JSON.",
         "The HTML file must start exactly with <!doctype html>.",
     ]:
-        if rule not in rules:
-            rules.append(rule)
+        unique_append(rules, rule)
     source_truth["rulesForFutureAgents"] = rules
 
+    patch_rules.update({
+        "schema": int(patch_rules.get("schema") or 1),
+        "id": "kgg-patch-rules",
+        "readFirst": [
+            "#kgg-source-truth",
+            "#kgg-changelog",
+            "#kgg-patch-rules"
+        ],
+        "mustUpdateOnEveryPatch": [
+            "kgg-source-truth.currentWebVersion",
+            "kgg-source-truth.lastUpdateIntent",
+            "kgg-changelog.entries",
+            "kgg-update/version.json.versionCode",
+            "kgg-update/version.json.versionName",
+            "kgg-update/version.json.sha256"
+        ],
+        "protectedAreas": PROTECTED_AREAS,
+        "patchRetentionPolicy": source_truth["patchRetentionPolicy"],
+        "changelogSizePolicy": source_truth["changelogSizePolicy"],
+        "blockPatchIfMissing": [
+            "kgg-source-truth",
+            "kgg-changelog",
+            "kgg-patch-rules"
+        ],
+        "requiredOnPatchRemoval": [
+            "supersededBy or replacementPatchId",
+            "removalReason",
+            "testEvidence",
+            "rollbackNote",
+            "explicitMaxApproval"
+        ],
+        "llmInstruction": "If changelog size exceeds policy thresholds or a patch-removal is not documented, warn Max and ask before changing code."
+    })
+
     entries = list(changelog.get("entries") or [])
-    entries = [e for e in entries if not (isinstance(e, dict) and e.get("versionName") == version_name)]
-    entries.insert(0, {
+    entries = [
+        e for e in entries
+        if not (isinstance(e, dict) and (e.get("patchId") == UPDATE_ID or e.get("versionName") == version_name))
+    ]
+    new_entry = {
         "versionCode": version_code,
         "versionName": version_name,
+        "patchId": UPDATE_ID,
+        "status": "active",
         "type": "github-web-update",
-        "title": "QR-Foto/Galerie-Import mit Debug und Bitmap-Fallback",
-        "summary": "Verbessert QR-Erkennung aus Galerie-/Fotodatenbank-Bildern durch zusätzlichen BarcodeDetector-ImageBitmap-Fallback und sichtbare Warnungen, wenn ein Bild nicht dekodiert werden kann.",
-        "changedAreas": [
-            "QR-Bildimport",
-            "HTML/JS",
-            "eingebettete Source Truth",
-            "eingebetteter Changelog"
+        "title": "Patch-Retention und Changelog-Größenwarnung",
+        "reason": "Max will verhindern, dass spätere LLMs den letzten funktionalen Patch einer Funktion versehentlich löschen, und möchte gewarnt werden, wenn der interne Changelog zu groß wird.",
+        "whatChanged": [
+            "Patch-Retention-Policy direkt in kgg-source-truth eingebettet.",
+            "kgg-patch-rules als eigener maschinenlesbarer JSON-Block ergänzt.",
+            "Changelog-Größenpolicy mit Entry- und Byte-Warnschwellen ergänzt.",
+            "Kleiner KGG_PATCH_GUARD im Browser ergänzt, der Source Truth/Changelog/Patch Rules auslesen und Changelog-Größe prüfen kann.",
+            "LLM-Regeln erweitert: Patches nicht still löschen; bei Konflikten oder Größenwarnungen Max fragen."
         ],
-        "notTouched": protected,
+        "touchedAreas": [
+            "HTML embedded metadata",
+            "Source Truth",
+            "Changelog",
+            "Patch rules",
+            "Non-UI helper script"
+        ],
+        "notTouched": PROTECTED_AREAS,
+        "supersedes": [],
+        "removalPolicy": {
+            "doNotDeleteReason": "Dieser Eintrag definiert die neue Regel, dass alte Fix-Patches nicht still entfernt werden dürfen.",
+            "requiresExplicitMaxApprovalToRemove": True
+        },
         "testStatus": {
             "githubPages": "pending",
             "androidApp": "pending",
-            "qrGalleryImport": "pending"
+            "llmReadability": "pending"
         }
-    })
-    changelog = {
+    }
+    entries.insert(0, new_entry)
+
+    changelog.update({
         "schema": int(changelog.get("schema") or 1),
         "latestVersionCode": version_code,
-        "entries": entries[:20],
-    }
+        "latestVersionName": version_name,
+        "entries": entries
+    })
 
-    html = remove_json_script(html, SOURCE_TRUTH_ID)
-    html = remove_json_script(html, CHANGELOG_ID)
-    blocks = json_script(SOURCE_TRUTH_ID, source_truth, "embedded Source Truth") + json_script(CHANGELOG_ID, changelog, "embedded Changelog")
-    head_idx = html.lower().find("</head>")
-    if head_idx < 0:
-        fail("</head> not found")
-    return html[:head_idx] + blocks + html[head_idx:]
+    serialized_changelog = json.dumps(changelog, ensure_ascii=False, indent=2)
+    changelog_size = len(serialized_changelog.encode("utf-8"))
+    if len(entries) >= CHANGELOG_WARN_AT_ENTRIES or changelog_size >= CHANGELOG_WARN_AT_BYTES:
+        changelog["sizeWarning"] = {
+            "triggeredAtVersionCode": version_code,
+            "entries": len(entries),
+            "bytes": changelog_size,
+            "message": "Embedded changelog is approaching policy threshold. Warn Max before adding much more history; do not auto-delete entries."
+        }
+        print("WARN: embedded changelog is approaching size policy threshold:", changelog["sizeWarning"])
+
+    html = remove_read_first_header(html)
+    html = remove_script(html, SOURCE_TRUTH_ID)
+    html = remove_script(html, CHANGELOG_ID)
+    html = remove_script(html, PATCH_RULES_ID)
+    html = remove_script(html, SIZE_GUARD_ID)
+    html = remove_meta_markers(html)
+
+    meta = '''
+<meta name="kgg-source-truth" content="#kgg-source-truth">
+<meta name="kgg-changelog" content="#kgg-changelog">
+<meta name="kgg-patch-rules" content="#kgg-patch-rules">
+'''
+    blocks = (
+        build_read_first_header()
+        + meta
+        + json_script(SOURCE_TRUTH_ID, source_truth, "embedded Source Truth")
+        + json_script(CHANGELOG_ID, changelog, "embedded Changelog")
+        + json_script(PATCH_RULES_ID, patch_rules, "embedded Patch Rules")
+        + build_size_guard_script()
+    )
+    html = ensure_head_insert(html, blocks)
+    return html
+
+def validate(html: str) -> None:
+    if not html.lower().startswith("<!doctype html>"):
+        fail("HTML does not start exactly with <!doctype html>")
+    for marker in [
+        'id="kgg-source-truth"',
+        'id="kgg-changelog"',
+        'id="kgg-patch-rules"',
+        'KGG INTERNAL SOURCE TRUTH — READ THIS FIRST',
+        'id="kgg-changelog-size-guard"',
+        'window.KGG_PATCH_GUARD',
+        'patchRetentionPolicy',
+        'changelogSizePolicy',
+        'Never delete the latest patch for a function silently'
+    ]:
+        if marker not in html:
+            fail(f"required marker missing after patch: {marker}")
 
 def main() -> None:
     if not HTML_PATH.exists():
         fail(f"{HTML_PATH} not found")
-    if not VERSION_PATH.exists():
-        fail(f"{VERSION_PATH} not found")
+    html = HTML_PATH.read_text(encoding="utf-8")
+    html = normalize_doctype(html)
 
-    html = normalize_doctype(HTML_PATH.read_text(encoding="utf-8"))
-    manifest = json.loads(VERSION_PATH.read_text(encoding="utf-8"))
-    current_code = int(manifest.get("versionCode") or 0)
-    next_code = max(8, current_code + 1)
+    next_code = load_next_version_code()
+    html = update_metadata(html, next_code, VERSION_NAME)
+    html = normalize_doctype(html)
+    validate(html)
 
-    detect_code = r"""
-  /* kgg-mini-patch-v400-10-qr-gallery-bitmap-debug
-     Galerie-/Fotodatenbank-QR-Fix:
-     Einige Android WebViews erkennen QR-Codes per BarcodeDetector auf Kamera-Bildern,
-     aber nicht zuverlässig auf Canvas-Crops aus Galerie-Dateien. Deshalb wird jeder
-     Canvas-Versuch zusätzlich als PNG-Blob -> ImageBitmap dekodiert und dann erneut
-     an BarcodeDetector gegeben. Außerdem bleiben Warnungen in der Scan-Vorschau sichtbar.
-  */
-  function scanCanvasToBlob(canvas,type,quality){
-    return new Promise(resolve=>{
-      try{
-        canvas.toBlob(blob=>resolve(blob),type||'image/png',quality||.92);
-      }catch(err){resolve(null);}
-    });
-  }
-  async function scanDetectQrViaBitmapFromCanvas(canvas,detector){
-    if(!detector||!window.createImageBitmap||!canvas||!canvas.toBlob)return '';
-    let blob=null,bitmap=null;
-    try{
-      blob=await scanCanvasToBlob(canvas,'image/png',.92);
-      if(!blob)return '';
-      bitmap=await createImageBitmap(blob);
-      const hits=await detector.detect(bitmap).catch(()=>[]);
-      if(hits&&hits.length){
-        return hits[0].rawValue||hits[0].rawData||'';
-      }
-    }catch(err){
-      return '';
-    }finally{
-      if(bitmap){try{bitmap.close();}catch(closeErr){}}
-    }
-    return '';
-  }
-  async function detectQrOnCanvas(canvas,detector){
-    if(detector){
-      try{
-        const hits=await detector.detect(canvas).catch(()=>[]);
-        if(hits&&hits.length){
-          const raw=hits[0].rawValue||hits[0].rawData||'';
-          if(raw)return raw;
-        }
-      }catch(err){}
-      const bitmapRaw=await scanDetectQrViaBitmapFromCanvas(canvas,detector);
-      if(bitmapRaw)return bitmapRaw;
-    }
-    if(window.jsQR){
-      try{
-        const ctx=canvas.getContext('2d',{willReadFrequently:true});
-        const img=ctx.getImageData(0,0,canvas.width,canvas.height);
-        const code=window.jsQR(img.data,canvas.width,canvas.height,{inversionAttempts:'attemptBoth'});
-        if(code&&code.data)return code.data;
-      }catch(err){}
-    }
-    return '';
-  }
-"""
-    html = replace_function(html, "detectQrOnCanvas", detect_code)
-
-    scan_qr_code = r"""
-  async function scanQrFromImageFile(file){
-    const fileName=String(file&&file.name||'Bild');
-    const fileType=String(file&&file.type||'unbekannter Typ');
-    const fileSize=Number(file&&file.size||0);
-    const heicHint=/heic|heif/i.test(fileName+' '+fileType);
-    let detector=null;
-    if('BarcodeDetector' in window){
-      try{detector=new BarcodeDetector({formats:['qr_code']});}catch(err){detector=null;}
-    }
-    if(!detector&&!window.jsQR){
-      return {
-        raw:'',
-        attempts:0,
-        reason:'QR-Erkennung ist in diesem WebView nicht verfügbar. BarcodeDetector/jsQR fehlt.',
-        debug:{fileName,fileType,fileSize,barcodeDetector:false,jsQR:false}
-      };
-    }
-
-    const direct=await scanDetectQrDirectFromFile(file,detector);
-    if(direct)return {raw:direct,attempts:1,hit:{source:'direct-bitmap',mode:'native'},debug:{fileName,fileType,fileSize}};
-
-    const crops=[
-      {id:'full',x:0,y:0,w:1,h:1},
-      {id:'center',x:.08,y:.08,w:.84,h:.84},
-      {id:'center-tight',x:.20,y:.20,w:.60,h:.60},
-      {id:'wide-center',x:.03,y:.15,w:.94,h:.70},
-      {id:'tall-center',x:.15,y:.03,w:.70,h:.94},
-      {id:'top-left',x:0,y:0,w:.62,h:.62},
-      {id:'top-right',x:.38,y:0,w:.62,h:.62},
-      {id:'bottom-left',x:0,y:.38,w:.62,h:.62},
-      {id:'bottom-right',x:.38,y:.38,w:.62,h:.62},
-      {id:'top-band',x:0,y:0,w:1,h:.48},
-      {id:'bottom-band',x:0,y:.52,w:1,h:.48},
-      {id:'left-band',x:0,y:0,w:.48,h:1},
-      {id:'right-band',x:.52,y:0,w:.48,h:1},
-      {id:'top-third-left',x:0,y:0,w:.54,h:.44},
-      {id:'top-third-right',x:.46,y:0,w:.54,h:.44},
-      {id:'mid-third-left',x:0,y:.28,w:.54,h:.44},
-      {id:'mid-third-right',x:.46,y:.28,w:.54,h:.44},
-      {id:'bottom-third-left',x:0,y:.56,w:.54,h:.44},
-      {id:'bottom-third-right',x:.46,y:.56,w:.54,h:.44}
-    ];
-    const modes=['normal','softContrast','contrast','thresholdLow','threshold','thresholdHigh','invert'];
-    const maxSides=[4096,3200,2600,1800,1200];
-    const rotations=[0,90,180,270];
-    const seenBases=new Set();
-    let attempts=1;
-    let lastReason='';
-    let lastCanvas='';
-    for(const maxSide of maxSides){
-      let base=null;
-      try{
-        base=await scanImageCanvasFromFile(file,maxSide);
-      }catch(err){
-        lastReason=err&&err.message||String(err);
-        continue;
-      }
-      const key=base.width+'x'+base.height;
-      lastCanvas=key;
-      if(seenBases.has(key))continue;
-      seenBases.add(key);
-      for(const rot of rotations){
-        const rotated=scanRotateCanvas(base,rot);
-        for(const box of crops){
-          const crop=box.id==='full'?rotated:scanCropCanvas(rotated,box);
-          const prepared=scanScaleCanvas(crop,860,3200);
-          for(const mode of modes){
-            attempts++;
-            const target=scanFilteredCanvas(prepared,mode);
-            const raw=await detectQrOnCanvas(target,detector);
-            if(raw){
-              return {
-                raw,
-                attempts,
-                hit:{rot,crop:box.id,mode,maxSide,canvas:key,detector:!!detector,jsQR:!!window.jsQR},
-                debug:{fileName,fileType,fileSize,lastCanvas:key}
-              };
-            }
-          }
-        }
-      }
-    }
-    const support='BarcodeDetector='+(!!detector)+', jsQR='+(!!window.jsQR);
-    const heicText=heicHint?' HEIC/HEIF wird von Android WebView oft nicht als Canvas-Bild dekodiert; bitte als Screenshot/PNG/JPG testen.':'';
-    return {
-      raw:'',
-      attempts,
-      reason:(lastReason?lastReason+'; ':'')+'Kein QR im hochgeladenen Bild gefunden. '+support+', Datei='+fileName+', Typ='+fileType+', Groesse='+fileSize+', Canvas='+lastCanvas+'.'+heicText,
-      debug:{fileName,fileType,fileSize,attempts,lastCanvas,barcodeDetector:!!detector,jsQR:!!window.jsQR,heicHint}
-    };
-  }
-"""
-    html = replace_function(html, "scanQrFromImageFile", scan_qr_code)
-
-    # Keep QR photo import failures visible as warnings in the scan card instead of silently treating them as paper only.
-    old = """    job.pages.push(scanFileMeta(file));
-    job.status='queued';"""
-    new = """    job.pages.push(scanFileMeta(file));
-    if(kind==='file'&&qr&&!qr.raw){
-      const qrWarn='QR-Foto-Import: '+(qr.reason||'Kein QR im Bild erkannt.');
-      job.warnings.push(qrWarn);
-      try{console.warn(qrWarn,qr.debug||{});}catch(err){}
-    }
-    job.status='queued';"""
-    html = replace_once(html, old, new, "scanAcceptFile QR gallery warning")
-
-    # Make the file picker prefer broadly decodable images while still allowing Android's image/* provider.
-    html = html.replace('accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif" multiple', 'accept="image/*,.jpg,.jpeg,.png,.webp" multiple')
-    html = html.replace("input.accept='image/*,.jpg,.jpeg,.png,.webp,.heic,.heif';", "input.accept='image/*,.jpg,.jpeg,.png,.webp';")
-
-    html = update_embedded_metadata(html, next_code, VERSION_NAME)
-
-    if "kgg-mini-patch-v400-10-qr-gallery-bitmap-debug" not in html:
-        fail("patch marker missing")
-    if not html.lower().startswith("<!doctype html>"):
-        fail("HTML does not start with <!doctype html> after patch")
     HTML_PATH.write_text(html, encoding="utf-8")
     print(f"Patched {HTML_PATH}")
     print(f"Expected next versionName: {VERSION_NAME}")
-    print(f"Embedded source truth versionCode: {next_code}")
+    print(f"Embedded metadata versionCode: {next_code}")
+    print("This patch is non-destructive: existing changelog entries are preserved, not truncated.")
 
 if __name__ == "__main__":
     main()
