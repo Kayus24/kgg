@@ -1,2 +1,2 @@
-s='window.detectQrOnCanvas = function(canvas,detector){ return window.jsQR ? true : false; }'
-print(s)
+b='<script id="x">window.detectQrOnCanvas=function(){return window.jsQR};</script>'
+print(b)
