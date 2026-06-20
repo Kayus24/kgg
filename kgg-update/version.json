@@ -1,7 +1,7 @@
 {
-  "versionCode": 22,
-  "versionName": "1.0.22-admin-debug-menu-feedback",
-  "indexUrl": "index.html?v=21",
-  "sha256": "cc9a14ee2dc31d3c366e00dc764a0b6aba9f5b63a56852276a85946cc1c568af",
-  "notes": "Galerie-QR-Fix: jsQR wird beim Build eingebettet und als Fallback für Foto-/Galerie-QRs genutzt. QR-/Scan-naher Patch; nach Update Kamera-Scan, Galerie-Scan und Tablet-Layout testen."
+  "versionCode": 23,
+  "versionName": "1.0.23-admin-debug-visible-hotfix",
+  "indexUrl": "index.html?v=23",
+  "sha256": "712c93f27af817f4e17793020d25b1af0e9c78b5337394799a730b72d7872409",
+  "notes": "v023 Hotfix: Debug-Button sichtbar machen und indexUrl-Cache-Busting über Workflow reparieren. Keine PDF-/QR-Erzeugung-/Patienten-App-/Scan-Kamera-/Parser-/Plan-State-/Storage-Änderung."
 }
