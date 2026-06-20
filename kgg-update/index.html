@@ -1,6 +1,381 @@
 <!doctype html>
 <html lang="de">
 <head>
+<!--
+KGG INTERNAL SOURCE TRUTH — READ THIS FIRST
+
+Machine-readable app state, patch rules, and changelog are embedded near the top of this HTML.
+Before editing this app, any LLM/agent/human should read these blocks:
+1. <script type="application/json" id="kgg-source-truth">
+2. <script type="application/json" id="kgg-changelog">
+3. <script type="application/json" id="kgg-patch-rules">
+
+Do not remove or rename these blocks.
+Do not silently delete the last patch for a feature/function.
+If a patch must be replaced, document supersedes/supersededBy/removalReason/rollbackNote in kgg-changelog.
+If the embedded changelog exceeds its warning size/entry threshold, warn Max before adding more history.
+
+END KGG INTERNAL SOURCE TRUTH READ FIRST
+-->
+
+<meta name="kgg-source-truth" content="#kgg-source-truth">
+<meta name="kgg-changelog" content="#kgg-changelog">
+<meta name="kgg-patch-rules" content="#kgg-patch-rules">
+
+<!-- BEGIN kgg-source-truth: embedded Source Truth; READ THIS BEFORE PATCHING -->
+<script type="application/json" id="kgg-source-truth">
+{
+  "schema": 1,
+  "app": "KGG Plan",
+  "purpose": "Machine-readable Source Truth for local LLMs, Codex agents and future patch automation.",
+  "currentWebVersion": {
+    "versionCode": 9,
+    "versionName": "1.0.7-patch-retention-changelog-guard",
+    "channel": "github-pages-main",
+    "updateUrl": "https://kayus24.github.io/kgg/kgg-update/version.json",
+    "sha256": "see kgg-update/version.json",
+    "releasedAt": "2026-06-20T18:36:55Z"
+  },
+  "activeFixes": [
+    "phone-admin-banner-hidden",
+    "qr-photo-upload-decode",
+    "embedded-source-truth",
+    "embedded-changelog",
+    "qr-gallery-bitmap-detector-fallback",
+    "qr-photo-import-debug",
+    "patch-retention-policy",
+    "changelog-size-warning",
+    "llm-readable-patch-rules"
+  ],
+  "knownWorkingAndroidWrapper": {
+    "name": "android-urlfix-debug-v3-or-newer",
+    "mustUseUpdateUrl": "https://kayus24.github.io/kgg/kgg-update/version.json",
+    "note": "Older APKs with placeholder update URLs do not receive GitHub web updates."
+  },
+  "protectedAreas": [
+    "PDF",
+    "QR-Erzeugung",
+    "Patienten-App",
+    "Scan-Kamera",
+    "Parser",
+    "Android-Wrapper",
+    "Tablet-Layout",
+    "Plan-State",
+    "Storage"
+  ],
+  "rulesForFutureAgents": [
+    "Read kgg-source-truth and kgg-changelog before changing the app.",
+    "Do not touch protectedAreas without explicit Max approval.",
+    "If a user request conflicts with Source Truth, stop and ask Max before changing code.",
+    "Every update must add or update a changelog entry.",
+    "Do not put API keys, patient data, admin-safe codes, secrets or private links in this JSON.",
+    "The HTML file must start exactly with <!doctype html>.",
+    "The real SHA-256 of index.html belongs in kgg-update/version.json, not inside embedded Source Truth.",
+    "READ kgg-source-truth, kgg-changelog and kgg-patch-rules before changing code.",
+    "Never silently remove the latest patch for a function; preserve or supersede it with documentation.",
+    "If the embedded changelog exceeds warning thresholds, warn Max before continuing.",
+    "Do not put API keys, patient data, admin-safe codes, secrets or private links in embedded JSON."
+  ],
+  "lastUpdateIntent": {
+    "id": "web-v009-patch-retention-changelog-guard",
+    "summary": "Adds a patch-retention policy, LLM-readable patch rules, and changelog size warning thresholds directly inside the app HTML.",
+    "notTouched": [
+      "PDF",
+      "QR-Erzeugung",
+      "Patienten-App",
+      "Scan-Kamera",
+      "Parser",
+      "Android-Wrapper",
+      "Tablet-Layout",
+      "Plan-State",
+      "Storage"
+    ]
+  },
+  "patchRetentionPolicy": {
+    "rule": "Never delete the latest patch for a function silently.",
+    "why": "The last patch for a feature is often what fixed or stabilized the bug; removing it without tracking can reintroduce old bugs.",
+    "defaultBehavior": "Preserve previous patch code and patch history unless Max explicitly approves removal.",
+    "whenReplacingPatch": [
+      "Mark old changelog entry as superseded, not deleted.",
+      "Add supersededBy on the old entry when practical.",
+      "Add supersedes on the new entry.",
+      "Record whySuperseded/removalReason/testEvidence/rollbackNote."
+    ],
+    "requiredWhenRemovingPatch": [
+      "supersededBy",
+      "removalReason",
+      "testEvidence",
+      "rollbackNote",
+      "explicitMaxApproval"
+    ],
+    "pipelineExpectation": "If patch markers or active fixes disappear without changelog documentation, stop and ask Max."
+  },
+  "changelogSizePolicy": {
+    "scope": "embedded kgg-changelog in index.html",
+    "warnAtEntries": 18,
+    "maxEmbeddedEntries": 30,
+    "warnAtBytes": 35000,
+    "maxEmbeddedBytes": 55000,
+    "actionWhenWarningThresholdReached": "Warn Max before adding more large entries; propose compact summaries or external archival.",
+    "actionWhenMaxExceeded": "Stop non-critical updates until Max approves compaction/archive strategy.",
+    "doNotAutoDeleteHistory": true
+  }
+}
+</script>
+<!-- END kgg-source-truth -->
+
+<!-- BEGIN kgg-changelog: embedded Changelog; READ THIS BEFORE PATCHING -->
+<script type="application/json" id="kgg-changelog">
+{
+  "schema": 1,
+  "latestVersionCode": 9,
+  "entries": [
+    {
+      "versionCode": 9,
+      "versionName": "1.0.7-patch-retention-changelog-guard",
+      "patchId": "web-v009-patch-retention-changelog-guard",
+      "status": "active",
+      "type": "github-web-update",
+      "title": "Patch-Retention und Changelog-Größenwarnung",
+      "reason": "Max will verhindern, dass spätere LLMs den letzten funktionalen Patch einer Funktion versehentlich löschen, und möchte gewarnt werden, wenn der interne Changelog zu groß wird.",
+      "whatChanged": [
+        "Patch-Retention-Policy direkt in kgg-source-truth eingebettet.",
+        "kgg-patch-rules als eigener maschinenlesbarer JSON-Block ergänzt.",
+        "Changelog-Größenpolicy mit Entry- und Byte-Warnschwellen ergänzt.",
+        "Kleiner KGG_PATCH_GUARD im Browser ergänzt, der Source Truth/Changelog/Patch Rules auslesen und Changelog-Größe prüfen kann.",
+        "LLM-Regeln erweitert: Patches nicht still löschen; bei Konflikten oder Größenwarnungen Max fragen."
+      ],
+      "touchedAreas": [
+        "HTML embedded metadata",
+        "Source Truth",
+        "Changelog",
+        "Patch rules",
+        "Non-UI helper script"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Parser",
+        "Android-Wrapper",
+        "Tablet-Layout",
+        "Plan-State",
+        "Storage"
+      ],
+      "supersedes": [],
+      "removalPolicy": {
+        "doNotDeleteReason": "Dieser Eintrag definiert die neue Regel, dass alte Fix-Patches nicht still entfernt werden dürfen.",
+        "requiresExplicitMaxApprovalToRemove": true
+      },
+      "testStatus": {
+        "githubPages": "pending",
+        "androidApp": "pending",
+        "llmReadability": "pending"
+      }
+    },
+    {
+      "versionCode": 8,
+      "versionName": "1.0.6-qr-gallery-bitmap-debug",
+      "type": "github-web-update",
+      "title": "QR-Foto/Galerie-Import mit Debug und Bitmap-Fallback",
+      "summary": "Verbessert QR-Erkennung aus Galerie-/Fotodatenbank-Bildern durch zusätzlichen BarcodeDetector-ImageBitmap-Fallback und sichtbare Warnungen, wenn ein Bild nicht dekodiert werden kann.",
+      "changedAreas": [
+        "QR-Bildimport",
+        "HTML/JS",
+        "eingebettete Source Truth",
+        "eingebetteter Changelog"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Parser",
+        "Android-Wrapper",
+        "Tablet-Layout",
+        "Plan-State",
+        "Storage"
+      ],
+      "testStatus": {
+        "githubPages": "pending",
+        "androidApp": "pending",
+        "qrGalleryImport": "pending"
+      }
+    },
+    {
+      "versionCode": 7,
+      "versionName": "1.0.5-qr-photo-source-truth",
+      "type": "github-web-update",
+      "title": "QR-Foto-Upload + eingebettete Source Truth",
+      "summary": "Verbessert QR-Erkennung aus Bild-/Fotodatenbank-Upload und bettet Source Truth sowie Changelog direkt in die App-HTML ein.",
+      "changedAreas": [
+        "QR photo upload decode",
+        "HTML embedded metadata",
+        "Source Truth",
+        "Changelog"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Parser",
+        "Android-Wrapper",
+        "Tablet-Layout",
+        "Plan-State",
+        "Storage"
+      ],
+      "testStatus": {
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "Lokale LLMs können index.html lesen und finden kgg-source-truth sowie kgg-changelog direkt im Code."
+    }
+  ],
+  "latestVersionName": "1.0.7-patch-retention-changelog-guard"
+}
+</script>
+<!-- END kgg-changelog -->
+
+<!-- BEGIN kgg-patch-rules: embedded Patch Rules; READ THIS BEFORE PATCHING -->
+<script type="application/json" id="kgg-patch-rules">
+{
+  "schema": 1,
+  "id": "kgg-patch-rules",
+  "readFirst": [
+    "#kgg-source-truth",
+    "#kgg-changelog",
+    "#kgg-patch-rules"
+  ],
+  "mustUpdateOnEveryPatch": [
+    "kgg-source-truth.currentWebVersion",
+    "kgg-source-truth.lastUpdateIntent",
+    "kgg-changelog.entries",
+    "kgg-update/version.json.versionCode",
+    "kgg-update/version.json.versionName",
+    "kgg-update/version.json.sha256"
+  ],
+  "protectedAreas": [
+    "PDF",
+    "QR-Erzeugung",
+    "Patienten-App",
+    "Scan-Kamera",
+    "Parser",
+    "Android-Wrapper",
+    "Tablet-Layout",
+    "Plan-State",
+    "Storage"
+  ],
+  "patchRetentionPolicy": {
+    "rule": "Never delete the latest patch for a function silently.",
+    "why": "The last patch for a feature is often what fixed or stabilized the bug; removing it without tracking can reintroduce old bugs.",
+    "defaultBehavior": "Preserve previous patch code and patch history unless Max explicitly approves removal.",
+    "whenReplacingPatch": [
+      "Mark old changelog entry as superseded, not deleted.",
+      "Add supersededBy on the old entry when practical.",
+      "Add supersedes on the new entry.",
+      "Record whySuperseded/removalReason/testEvidence/rollbackNote."
+    ],
+    "requiredWhenRemovingPatch": [
+      "supersededBy",
+      "removalReason",
+      "testEvidence",
+      "rollbackNote",
+      "explicitMaxApproval"
+    ],
+    "pipelineExpectation": "If patch markers or active fixes disappear without changelog documentation, stop and ask Max."
+  },
+  "changelogSizePolicy": {
+    "scope": "embedded kgg-changelog in index.html",
+    "warnAtEntries": 18,
+    "maxEmbeddedEntries": 30,
+    "warnAtBytes": 35000,
+    "maxEmbeddedBytes": 55000,
+    "actionWhenWarningThresholdReached": "Warn Max before adding more large entries; propose compact summaries or external archival.",
+    "actionWhenMaxExceeded": "Stop non-critical updates until Max approves compaction/archive strategy.",
+    "doNotAutoDeleteHistory": true
+  },
+  "blockPatchIfMissing": [
+    "kgg-source-truth",
+    "kgg-changelog",
+    "kgg-patch-rules"
+  ],
+  "requiredOnPatchRemoval": [
+    "supersededBy or replacementPatchId",
+    "removalReason",
+    "testEvidence",
+    "rollbackNote",
+    "explicitMaxApproval"
+  ],
+  "llmInstruction": "If changelog size exceeds policy thresholds or a patch-removal is not documented, warn Max and ask before changing code."
+}
+</script>
+<!-- END kgg-patch-rules -->
+
+<!-- BEGIN kgg-changelog-size-guard: console/helper warning when embedded changelog grows too large -->
+<script id="kgg-changelog-size-guard">
+(function(){
+  "use strict";
+  var FALLBACK_POLICY = {
+    warnAtEntries: 18,
+    maxEmbeddedEntries: 30,
+    warnAtBytes: 35000,
+    maxEmbeddedBytes: 55000
+  };
+  function readJsonBlock(id){
+    var el = document.getElementById(id);
+    if(!el) return null;
+    try{ return JSON.parse((el.textContent||"").trim()); }
+    catch(err){ return {__parseError:String(err)}; }
+  }
+  function changelogSizeReport(){
+    var el = document.getElementById("kgg-changelog");
+    var rules = readJsonBlock("kgg-patch-rules") || {};
+    var policy = (rules && rules.changelogSizePolicy) || FALLBACK_POLICY;
+    var text = el ? (el.textContent || "") : "";
+    var entries = 0;
+    var parseError = "";
+    try{
+      var data = text ? JSON.parse(text) : {};
+      entries = Array.isArray(data.entries) ? data.entries.length : 0;
+    }catch(err){
+      parseError = String(err);
+    }
+    var bytes = 0;
+    try{ bytes = new TextEncoder().encode(text).length; }
+    catch(err){ bytes = text.length; }
+    var warnings = [];
+    if(!el) warnings.push("kgg-changelog block missing");
+    if(parseError) warnings.push("kgg-changelog parse error: " + parseError);
+    if(entries >= Number(policy.warnAtEntries || FALLBACK_POLICY.warnAtEntries)){
+      warnings.push("embedded changelog entries approaching limit: " + entries + "/" + (policy.maxEmbeddedEntries || FALLBACK_POLICY.maxEmbeddedEntries));
+    }
+    if(bytes >= Number(policy.warnAtBytes || FALLBACK_POLICY.warnAtBytes)){
+      warnings.push("embedded changelog bytes approaching limit: " + bytes + "/" + (policy.maxEmbeddedBytes || FALLBACK_POLICY.maxEmbeddedBytes));
+    }
+    return {
+      entries: entries,
+      bytes: bytes,
+      policy: policy,
+      warnings: warnings,
+      shouldWarn: warnings.length > 0
+    };
+  }
+  window.KGG_PATCH_GUARD = window.KGG_PATCH_GUARD || {};
+  window.KGG_PATCH_GUARD.readSourceTruth = function(){ return readJsonBlock("kgg-source-truth"); };
+  window.KGG_PATCH_GUARD.readChangelog = function(){ return readJsonBlock("kgg-changelog"); };
+  window.KGG_PATCH_GUARD.readPatchRules = function(){ return readJsonBlock("kgg-patch-rules"); };
+  window.KGG_PATCH_GUARD.checkChangelogSize = changelogSizeReport;
+  var report = changelogSizeReport();
+  window.KGG_PATCH_GUARD.lastChangelogSizeReport = report;
+  if(report.shouldWarn && console && console.warn){
+    console.warn("KGG changelog/source-truth warning:", report);
+  }
+})();
+</script>
+<!-- END kgg-changelog-size-guard -->
+
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0a1024">
@@ -5161,141 +5536,6 @@
 
   <!-- KGG kgg-source-truth: embedded Source Truth. Machine-readable; safe for local LLM/code review. -->
 <!-- KGG kgg-changelog: embedded Changelog. Machine-readable; safe for local LLM/code review. -->
-
-<!-- BEGIN kgg-source-truth: embedded Source Truth; read this before patching -->
-<script type="application/json" id="kgg-source-truth">
-{
-  "schema": 1,
-  "app": "KGG Plan",
-  "purpose": "Machine-readable Source Truth for local LLMs, Codex agents and future patch automation.",
-  "currentWebVersion": {
-    "versionCode": 8,
-    "versionName": "1.0.6-qr-gallery-bitmap-debug",
-    "channel": "github-pages-main",
-    "updateUrl": "https://kayus24.github.io/kgg/kgg-update/version.json",
-    "sha256": "see kgg-update/version.json",
-    "releasedAt": "2026-06-20T16:46:48Z"
-  },
-  "activeFixes": [
-    "phone-admin-banner-hidden",
-    "qr-photo-upload-decode",
-    "embedded-source-truth",
-    "embedded-changelog",
-    "qr-gallery-bitmap-detector-fallback",
-    "qr-photo-import-debug"
-  ],
-  "knownWorkingAndroidWrapper": {
-    "name": "android-urlfix-debug-v3-or-newer",
-    "mustUseUpdateUrl": "https://kayus24.github.io/kgg/kgg-update/version.json",
-    "note": "Older APKs with placeholder update URLs do not receive GitHub web updates."
-  },
-  "protectedAreas": [
-    "PDF",
-    "QR-Erzeugung",
-    "Patienten-App",
-    "Scan-Kamera",
-    "Parser",
-    "Android-Wrapper",
-    "Tablet-Layout",
-    "Plan-State",
-    "Storage"
-  ],
-  "rulesForFutureAgents": [
-    "Read kgg-source-truth and kgg-changelog before changing the app.",
-    "Do not touch protectedAreas without explicit Max approval.",
-    "If a user request conflicts with Source Truth, stop and ask Max before changing code.",
-    "Every update must add or update a changelog entry.",
-    "Do not put API keys, patient data, admin-safe codes, secrets or private links in this JSON.",
-    "The HTML file must start exactly with <!doctype html>.",
-    "The real SHA-256 of index.html belongs in kgg-update/version.json, not inside embedded Source Truth."
-  ],
-  "lastUpdateIntent": {
-    "id": "web-v008-qr-gallery-bitmap-debug",
-    "summary": "Adds QR gallery/photo import diagnostics and a stronger BarcodeDetector ImageBitmap fallback for uploaded images.",
-    "notTouched": [
-      "PDF",
-      "QR-Erzeugung",
-      "Patienten-App",
-      "Scan-Kamera",
-      "Parser",
-      "Android-Wrapper",
-      "Tablet-Layout",
-      "Plan-State",
-      "Storage"
-    ]
-  }
-}
-</script>
-<!-- END kgg-source-truth -->
-
-<!-- BEGIN kgg-changelog: embedded Changelog; read this before patching -->
-<script type="application/json" id="kgg-changelog">
-{
-  "schema": 1,
-  "latestVersionCode": 8,
-  "entries": [
-    {
-      "versionCode": 8,
-      "versionName": "1.0.6-qr-gallery-bitmap-debug",
-      "type": "github-web-update",
-      "title": "QR-Foto/Galerie-Import mit Debug und Bitmap-Fallback",
-      "summary": "Verbessert QR-Erkennung aus Galerie-/Fotodatenbank-Bildern durch zusätzlichen BarcodeDetector-ImageBitmap-Fallback und sichtbare Warnungen, wenn ein Bild nicht dekodiert werden kann.",
-      "changedAreas": [
-        "QR-Bildimport",
-        "HTML/JS",
-        "eingebettete Source Truth",
-        "eingebetteter Changelog"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR-Erzeugung",
-        "Patienten-App",
-        "Scan-Kamera",
-        "Parser",
-        "Android-Wrapper",
-        "Tablet-Layout",
-        "Plan-State",
-        "Storage"
-      ],
-      "testStatus": {
-        "githubPages": "pending",
-        "androidApp": "pending",
-        "qrGalleryImport": "pending"
-      }
-    },
-    {
-      "versionCode": 7,
-      "versionName": "1.0.5-qr-photo-source-truth",
-      "type": "github-web-update",
-      "title": "QR-Foto-Upload + eingebettete Source Truth",
-      "summary": "Verbessert QR-Erkennung aus Bild-/Fotodatenbank-Upload und bettet Source Truth sowie Changelog direkt in die App-HTML ein.",
-      "changedAreas": [
-        "QR photo upload decode",
-        "HTML embedded metadata",
-        "Source Truth",
-        "Changelog"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR-Erzeugung",
-        "Patienten-App",
-        "Scan-Kamera",
-        "Parser",
-        "Android-Wrapper",
-        "Tablet-Layout",
-        "Plan-State",
-        "Storage"
-      ],
-      "testStatus": {
-        "githubPages": "pending",
-        "androidApp": "pending"
-      },
-      "handoffNote": "Lokale LLMs können index.html lesen und finden kgg-source-truth sowie kgg-changelog direkt im Code."
-    }
-  ]
-}
-</script>
-<!-- END kgg-changelog -->
 </head>
 <body class="adminMode">
 <div class="tabletSideBackdrop" id="tabletSideBackdrop" hidden></div>
