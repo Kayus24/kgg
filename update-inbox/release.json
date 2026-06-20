@@ -1,14 +1,14 @@
 {
-  "versionName": "1.0.7-patch-retention-changelog-guard",
-  "title": "Patch-Retention und Changelog-Größenwarnung",
-  "summary": "Bettet feste Regeln ein, damit spätere LLMs bestehende Funktionspatches nicht still löschen, und ergänzt Warnschwellen für die Größe des internen Changelogs.",
+  "versionName": "1.0.9-restore-lkg-qr-gallery-decode",
+  "title": "Restore last-known-good QR gallery decoder",
+  "summary": "Stellt die alte funktionierende Galerie-/Foto-QR-Erkennung aus der v360/v366-Iteration wieder her und dokumentiert die vorherigen QR-Galerie-Patches als superseded.",
   "type": "github-web-update",
   "allowedAreas": [
+    "QR photo/gallery upload decode",
     "HTML embedded metadata",
     "Source Truth",
     "Changelog",
-    "Patch rules",
-    "Non-UI helper script"
+    "Patch retention metadata"
   ],
   "notTouched": [
     "PDF",
@@ -21,17 +21,17 @@
     "Plan-State",
     "Storage"
   ],
-  "testPlan": [
-    "Update-Inbox-Pipeline ausführen lassen.",
-    "Prüfen, dass nur kgg-update/index.html und kgg-update/version.json geändert wurden.",
-    "Prüfen, dass index.html mit <!doctype html> beginnt.",
-    "In index.html nach kgg-source-truth, kgg-changelog und kgg-patch-rules suchen.",
-    "Prüfen, dass kgg-changelog einen Eintrag für patch-retention-changelog-guard enthält.",
-    "Optional im Browser console ausführen: window.KGG_PATCH_GUARD.checkChangelogSize()."
+  "patchId": "qr-gallery-restore-lkg-v011",
+  "supersedes": [
+    "qr-photo-upload-decode-v007",
+    "qr-gallery-bitmap-debug-v008",
+    "qr-gallery-crop-grid-decode-v010"
   ],
-  "notesForAgents": [
-    "Dieses Inbox-Paket erzeugt keine separaten app_state.json/changelog.json Dateien.",
-    "Der interne Changelog wird nicht automatisch gekürzt, sondern nur mit Warnpolicy versehen.",
-    "Wenn alte Patch-Blöcke entfernt werden, muss ein Changelog-Eintrag supersedes/supersededBy/removalReason/rollbackNote enthalten."
-  ]
+  "requiresManualTest": [
+    "Upload the real gallery photo QR that failed before.",
+    "Confirm camera scan still works.",
+    "Confirm QR generation still works."
+  ],
+  "notes": "Rollback-Notiz: Dieses Update stellt den Last-Known-Good QR-Galerie-Decoder wieder her. Wenn die App dadurch instabil wird oder QR/Scan beschädigt, kann schnell auf die vorherige Update-Inbox-Version zurückgekehrt werden, indem dieses v011-Paket revertet bzw. der vorherige funktionierende kgg-update/index.html + version.json Stand wiederhergestellt wird. Vor Rollback bitte realen Galerie-QR, Kamera-Scan und QR-Erzeugung testen.",
+  "rollbackNote": "Rollback-Notiz: Dieses Update stellt den Last-Known-Good QR-Galerie-Decoder wieder her. Wenn die App dadurch instabil wird oder QR/Scan beschädigt, kann schnell auf die vorherige Update-Inbox-Version zurückgekehrt werden, indem dieses v011-Paket revertet bzw. der vorherige funktionierende kgg-update/index.html + version.json Stand wiederhergestellt wird. Vor Rollback bitte realen Galerie-QR, Kamera-Scan und QR-Erzeugung testen."
 }
