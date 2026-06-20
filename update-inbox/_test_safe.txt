@@ -1,2 +1,0 @@
-b='<script id="x">window.detectQrOnCanvas=function(){return window.jsQR};</script>'
-print(b)
