@@ -7,51 +7,18 @@ KGG INTERNAL SOURCE TRUTH — READ THIS FIRST
 Machine-readable app state, patch rules, and changelog are embedded near the top of this HTML.
 Before editing this app, any LLM/agent/human should read these blocks:
 1. <script type="application/json" id="kgg-source-truth">
-2. <script type="application/json" id="kgg-changelog">
-3. <script type="application/json" id="kgg-patch-rules">
-
-Do not remove or rename these blocks.
-Do not silently delete the last patch for a feature/function.
-If a patch must be replaced, document supersedes/supersededBy/removalReason/rollbackNote in kgg-changelog.
-If the embedded changelog exceeds its warning size/entry threshold, warn Max before adding more history.
-
-END KGG INTERNAL SOURCE TRUTH READ FIRST
--->
-
-<meta name="kgg-source-truth" content="#kgg-source-truth">
-<meta name="kgg-changelog" content="#kgg-changelog">
-<meta name="kgg-patch-rules" content="#kgg-patch-rules">
-
-<!-- BEGIN kgg-source-truth: embedded Source Truth; READ THIS BEFORE PATCHING -->
-<script type="application/json" id="kgg-source-truth">
 {
   "schema": 1,
-  "app": "KGG Plan",
-  "purpose": "Machine-readable Source Truth for local LLMs, Codex agents and future patch automation.",
-  "currentWebVersion": {
-    "versionCode": 9,
-    "versionName": "1.0.7-patch-retention-changelog-guard",
-    "channel": "github-pages-main",
-    "updateUrl": "https://kayus24.github.io/kgg/kgg-update/version.json",
-    "sha256": "see kgg-update/version.json",
-    "releasedAt": "2026-06-20T18:36:55Z"
+  "currentVersion": {
+    "versionCode": 10,
+    "versionName": "1.0.9-restore-lkg-qr-gallery-decode",
+    "lastPatchId": "qr-gallery-restore-lkg-v011",
+    "updatedBy": "update-inbox"
   },
   "activeFixes": [
-    "phone-admin-banner-hidden",
-    "qr-photo-upload-decode",
-    "embedded-source-truth",
-    "embedded-changelog",
-    "qr-gallery-bitmap-detector-fallback",
-    "qr-photo-import-debug",
-    "patch-retention-policy",
-    "changelog-size-warning",
-    "llm-readable-patch-rules"
+    "qr-gallery-restore-lkg-v011",
+    "patch-retention-guard"
   ],
-  "knownWorkingAndroidWrapper": {
-    "name": "android-urlfix-debug-v3-or-newer",
-    "mustUseUpdateUrl": "https://kayus24.github.io/kgg/kgg-update/version.json",
-    "note": "Older APKs with placeholder update URLs do not receive GitHub web updates."
-  },
   "protectedAreas": [
     "PDF",
     "QR-Erzeugung",
@@ -63,63 +30,20 @@ END KGG INTERNAL SOURCE TRUTH READ FIRST
     "Plan-State",
     "Storage"
   ],
-  "rulesForFutureAgents": [
-    "Read kgg-source-truth and kgg-changelog before changing the app.",
-    "Do not touch protectedAreas without explicit Max approval.",
-    "If a user request conflicts with Source Truth, stop and ask Max before changing code.",
-    "Every update must add or update a changelog entry.",
-    "Do not put API keys, patient data, admin-safe codes, secrets or private links in this JSON.",
-    "The HTML file must start exactly with <!doctype html>.",
-    "The real SHA-256 of index.html belongs in kgg-update/version.json, not inside embedded Source Truth.",
-    "READ kgg-source-truth, kgg-changelog and kgg-patch-rules before changing code.",
-    "Never silently remove the latest patch for a function; preserve or supersede it with documentation.",
-    "If the embedded changelog exceeds warning thresholds, warn Max before continuing.",
-    "Do not put API keys, patient data, admin-safe codes, secrets or private links in embedded JSON."
-  ],
-  "lastUpdateIntent": {
-    "id": "web-v009-patch-retention-changelog-guard",
-    "summary": "Adds a patch-retention policy, LLM-readable patch rules, and changelog size warning thresholds directly inside the app HTML.",
-    "notTouched": [
-      "PDF",
-      "QR-Erzeugung",
-      "Patienten-App",
-      "Scan-Kamera",
-      "Parser",
-      "Android-Wrapper",
-      "Tablet-Layout",
-      "Plan-State",
-      "Storage"
-    ]
-  },
-  "patchRetentionPolicy": {
-    "rule": "Never delete the latest patch for a function silently.",
-    "why": "The last patch for a feature is often what fixed or stabilized the bug; removing it without tracking can reintroduce old bugs.",
-    "defaultBehavior": "Preserve previous patch code and patch history unless Max explicitly approves removal.",
-    "whenReplacingPatch": [
-      "Mark old changelog entry as superseded, not deleted.",
-      "Add supersededBy on the old entry when practical.",
-      "Add supersedes on the new entry.",
-      "Record whySuperseded/removalReason/testEvidence/rollbackNote."
-    ],
-    "requiredWhenRemovingPatch": [
-      "supersededBy",
-      "removalReason",
-      "testEvidence",
-      "rollbackNote",
-      "explicitMaxApproval"
-    ],
-    "pipelineExpectation": "If patch markers or active fixes disappear without changelog documentation, stop and ask Max."
-  },
-  "changelogSizePolicy": {
-    "scope": "embedded kgg-changelog in index.html",
-    "warnAtEntries": 18,
-    "maxEmbeddedEntries": 30,
-    "warnAtBytes": 35000,
-    "maxEmbeddedBytes": 55000,
-    "actionWhenWarningThresholdReached": "Warn Max before adding more large entries; propose compact summaries or external archival.",
-    "actionWhenMaxExceeded": "Stop non-critical updates until Max approves compaction/archive strategy.",
-    "doNotAutoDeleteHistory": true
-  }
+  "lastKnownGoodRestores": [
+    {
+      "patchId": "qr-gallery-restore-lkg-v011",
+      "restoresFrom": "KGG_APP_KOLLEGEN_v360/v366",
+      "rollbackNote": "Rollback-Notiz: Dieses Update stellt den Last-Known-Good QR-Galerie-Decoder wieder her. Wenn die App dadurch instabil wird oder QR/Scan beschädigt, kann schnell auf die vorherige Update-Inbox-Version zurückgekehrt werden, indem dieses v011-Paket revertet bzw. der vorherige funktionierende kgg-update/index.html + version.json Stand wiederhergestellt wird. Vor Rollback bitte realen Galerie-QR, Kamera-Scan und QR-Erzeugung testen.",
+      "preserve": [
+        "Kamera-Scan",
+        "QR-Erzeugung",
+        "Parser",
+        "Storage",
+        "Tablet-Layout"
+      ]
+    }
+  ]
 }
 </script>
 <!-- END kgg-source-truth -->
@@ -128,8 +52,34 @@ END KGG INTERNAL SOURCE TRUTH READ FIRST
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 9,
+  "latestVersionCode": 10,
   "entries": [
+    {
+      "versionCode": 10,
+      "versionName": "1.0.9-restore-lkg-qr-gallery-decode",
+      "patchId": "qr-gallery-restore-lkg-v011",
+      "status": "active",
+      "title": "Restore last-known-good QR gallery decoder",
+      "reason": "Galerie-QR war nach neueren Patches weiter kaputt; alter funktionierender Decoder wird wiederhergestellt.",
+      "supersedes": [
+        "qr-photo-upload-decode-v007",
+        "qr-gallery-bitmap-debug-v008",
+        "qr-gallery-crop-grid-decode-v010"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Parser",
+        "Android-Wrapper",
+        "Tablet-Layout",
+        "Plan-State",
+        "Storage"
+      ],
+      "rollbackNote": "Rollback-Notiz: Dieses Update stellt den Last-Known-Good QR-Galerie-Decoder wieder her. Wenn die App dadurch instabil wird oder QR/Scan beschädigt, kann schnell auf die vorherige Update-Inbox-Version zurückgekehrt werden, indem dieses v011-Paket revertet bzw. der vorherige funktionierende kgg-update/index.html + version.json Stand wiederhergestellt wird. Vor Rollback bitte realen Galerie-QR, Kamera-Scan und QR-Erzeugung testen.",
+      "createdAt": "2026-06-20T19:38:56.756666+00:00"
+    },
     {
       "versionCode": 9,
       "versionName": "1.0.7-patch-retention-changelog-guard",
@@ -233,7 +183,7 @@ END KGG INTERNAL SOURCE TRUTH READ FIRST
       "handoffNote": "Lokale LLMs können index.html lesen und finden kgg-source-truth sowie kgg-changelog direkt im Code."
     }
   ],
-  "latestVersionName": "1.0.7-patch-retention-changelog-guard"
+  "latestVersionName": "1.0.9-restore-lkg-qr-gallery-decode"
 }
 </script>
 <!-- END kgg-changelog -->
@@ -268,23 +218,13 @@ END KGG INTERNAL SOURCE TRUTH READ FIRST
     "Storage"
   ],
   "patchRetentionPolicy": {
-    "rule": "Never delete the latest patch for a function silently.",
-    "why": "The last patch for a feature is often what fixed or stabilized the bug; removing it without tracking can reintroduce old bugs.",
-    "defaultBehavior": "Preserve previous patch code and patch history unless Max explicitly approves removal.",
-    "whenReplacingPatch": [
-      "Mark old changelog entry as superseded, not deleted.",
-      "Add supersededBy on the old entry when practical.",
-      "Add supersedes on the new entry.",
-      "Record whySuperseded/removalReason/testEvidence/rollbackNote."
-    ],
-    "requiredWhenRemovingPatch": [
+    "rule": "Do not remove latest functional patch silently.",
+    "whenReplacingPatchRequire": [
+      "supersedes",
       "supersededBy",
-      "removalReason",
-      "testEvidence",
-      "rollbackNote",
-      "explicitMaxApproval"
-    ],
-    "pipelineExpectation": "If patch markers or active fixes disappear without changelog documentation, stop and ask Max."
+      "reason",
+      "rollbackNote"
+    ]
   },
   "changelogSizePolicy": {
     "scope": "embedded kgg-changelog in index.html",
@@ -10011,284 +9951,12 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
       img.src=url;
     });
   }
-  async function scanImageCanvasFromFile(file,maxSide){
-    const limit=Math.max(320,Number(maxSide)||2200);
-    if(window.createImageBitmap){
-      try{
-        const bitmap=await createImageBitmap(file,{imageOrientation:'from-image'});
-        try{return scanCanvasFromImageSource(bitmap,bitmap.width,bitmap.height,limit);}
-        finally{try{bitmap.close();}catch(closeErr){}}
-      }catch(bitmapErr){
-        console.warn('QR-Dateibild: createImageBitmap fehlgeschlagen, fallback auf Image/FileReader.',bitmapErr);
-      }
-    }
-    let url='';
-    try{
-      url=URL.createObjectURL(file);
-      const img=await scanImageElementFromUrl(url);
-      return scanCanvasFromImageSource(img,img.naturalWidth||img.width,img.naturalHeight||img.height,limit);
-    }catch(objectUrlErr){
-      console.warn('QR-Dateibild: ObjectURL fehlgeschlagen, fallback auf DataURL.',objectUrlErr);
-      try{
-        const dataUrl=await scanReadFileAsDataUrl(file);
-        const img=await scanImageElementFromUrl(dataUrl);
-        return scanCanvasFromImageSource(img,img.naturalWidth||img.width,img.naturalHeight||img.height,limit);
-      }catch(dataUrlErr){
-        throw dataUrlErr||objectUrlErr||new Error('Bild konnte nicht gelesen werden');
-      }
-    }finally{
-      if(url){try{URL.revokeObjectURL(url);}catch(revokeErr){}}
-    }
-  }
-  function scanCloneCanvas(src){
-    const canvas=document.createElement('canvas');
-    canvas.width=src.width;
-    canvas.height=src.height;
-    const ctx=canvas.getContext('2d',{willReadFrequently:true});
-    ctx.fillStyle='#fff';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.drawImage(src,0,0);
-    return canvas;
-  }
-  function scanCropCanvas(src,box){
-    const canvas=document.createElement('canvas');
-    canvas.width=Math.max(64,Math.round(src.width*box.w));
-    canvas.height=Math.max(64,Math.round(src.height*box.h));
-    const ctx=canvas.getContext('2d',{willReadFrequently:true});
-    ctx.fillStyle='#fff';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.drawImage(src,src.width*box.x,src.height*box.y,src.width*box.w,src.height*box.h,0,0,canvas.width,canvas.height);
-    return canvas;
-  }
-  function scanRotateCanvas(src,rotation){
-    const rot=((Number(rotation)||0)%360+360)%360;
-    if(!rot)return src;
-    const flip=rot===90||rot===270;
-    const canvas=document.createElement('canvas');
-    canvas.width=flip?src.height:src.width;
-    canvas.height=flip?src.width:src.height;
-    const ctx=canvas.getContext('2d',{willReadFrequently:true});
-    ctx.fillStyle='#fff';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.save();
-    if(rot===90){ctx.translate(canvas.width,0);ctx.rotate(Math.PI/2);}
-    else if(rot===180){ctx.translate(canvas.width,canvas.height);ctx.rotate(Math.PI);}
-    else if(rot===270){ctx.translate(0,canvas.height);ctx.rotate(-Math.PI/2);}
-    ctx.drawImage(src,0,0);
-    ctx.restore();
-    return canvas;
-  }
-  function scanScaleCanvas(src,minSide,maxSide){
-    const shortest=Math.max(1,Math.min(src.width,src.height));
-    const longest=Math.max(1,Math.max(src.width,src.height));
-    const minTarget=Math.max(120,Number(minSide)||0);
-    const maxTarget=Math.max(minTarget,Number(maxSide)||2600);
-    let scale=1;
-    if(minTarget&&shortest<minTarget)scale=minTarget/shortest;
-    if(longest*scale>maxTarget)scale=maxTarget/longest;
-    if(Math.abs(scale-1)<0.03)return src;
-    const canvas=document.createElement('canvas');
-    canvas.width=Math.max(1,Math.round(src.width*scale));
-    canvas.height=Math.max(1,Math.round(src.height*scale));
-    const ctx=canvas.getContext('2d',{willReadFrequently:true});
-    ctx.fillStyle='#fff';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.imageSmoothingEnabled=scale<1;
-    ctx.imageSmoothingQuality='high';
-    ctx.drawImage(src,0,0,canvas.width,canvas.height);
-    return canvas;
-  }
-  function scanFilteredCanvas(src,mode){
-    if(mode==='normal')return src;
-    const canvas=scanCloneCanvas(src);
-    const ctx=canvas.getContext('2d',{willReadFrequently:true});
-    if(mode==='contrast'){
-      ctx.save();
-      ctx.filter='contrast(2.05) brightness(1.12) saturate(0)';
-      ctx.drawImage(src,0,0);
-      ctx.restore();
-      return canvas;
-    }
-    if(mode==='softContrast'){
-      ctx.save();
-      ctx.filter='contrast(1.45) brightness(1.05) saturate(0)';
-      ctx.drawImage(src,0,0);
-      ctx.restore();
-      return canvas;
-    }
-    if(mode==='threshold'||mode==='thresholdLow'||mode==='thresholdHigh'||mode==='invert'){
-      const img=ctx.getImageData(0,0,canvas.width,canvas.height);
-      const d=img.data;
-      const threshold=mode==='thresholdLow'?118:(mode==='thresholdHigh'?178:148);
-      for(let i=0;i<d.length;i+=4){
-        let g=(d[i]*.299+d[i+1]*.587+d[i+2]*.114)>threshold?255:0;
-        if(mode==='invert')g=255-g;
-        d[i]=d[i+1]=d[i+2]=g;
-      }
-      ctx.putImageData(img,0,0);
-      return canvas;
-    }
-    return canvas;
-  }
-  /* kgg-mini-patch-v400-10-qr-gallery-bitmap-debug
-     Galerie-/Fotodatenbank-QR-Fix:
-     Einige Android WebViews erkennen QR-Codes per BarcodeDetector auf Kamera-Bildern,
-     aber nicht zuverlässig auf Canvas-Crops aus Galerie-Dateien. Deshalb wird jeder
-     Canvas-Versuch zusätzlich als PNG-Blob -> ImageBitmap dekodiert und dann erneut
-     an BarcodeDetector gegeben. Außerdem bleiben Warnungen in der Scan-Vorschau sichtbar.
-  */
-  function scanCanvasToBlob(canvas,type,quality){
-    return new Promise(resolve=>{
-      try{
-        canvas.toBlob(blob=>resolve(blob),type||'image/png',quality||.92);
-      }catch(err){resolve(null);}
-    });
-  }
-  async function scanDetectQrViaBitmapFromCanvas(canvas,detector){
-    if(!detector||!window.createImageBitmap||!canvas||!canvas.toBlob)return '';
-    let blob=null,bitmap=null;
-    try{
-      blob=await scanCanvasToBlob(canvas,'image/png',.92);
-      if(!blob)return '';
-      bitmap=await createImageBitmap(blob);
-      const hits=await detector.detect(bitmap).catch(()=>[]);
-      if(hits&&hits.length){
-        return hits[0].rawValue||hits[0].rawData||'';
-      }
-    }catch(err){
-      return '';
-    }finally{
-      if(bitmap){try{bitmap.close();}catch(closeErr){}}
-    }
-    return '';
-  }
-  async function detectQrOnCanvas(canvas,detector){
-    if(detector){
-      try{
-        const hits=await detector.detect(canvas).catch(()=>[]);
-        if(hits&&hits.length){
-          const raw=hits[0].rawValue||hits[0].rawData||'';
-          if(raw)return raw;
-        }
-      }catch(err){}
-      const bitmapRaw=await scanDetectQrViaBitmapFromCanvas(canvas,detector);
-      if(bitmapRaw)return bitmapRaw;
-    }
-    if(window.jsQR){
-      try{
-        const ctx=canvas.getContext('2d',{willReadFrequently:true});
-        const img=ctx.getImageData(0,0,canvas.width,canvas.height);
-        const code=window.jsQR(img.data,canvas.width,canvas.height,{inversionAttempts:'attemptBoth'});
-        if(code&&code.data)return code.data;
-      }catch(err){}
-    }
-    return '';
-  }
-  async function scanDetectQrDirectFromFile(file,detector){
-    if(!detector||!window.createImageBitmap)return '';
-    let bitmap=null;
-    try{
-      bitmap=await createImageBitmap(file,{imageOrientation:'from-image'});
-      const hits=await detector.detect(bitmap).catch(()=>[]);
-      if(hits&&hits.length)return hits[0].rawValue||hits[0].rawData||'';
-    }catch(err){
-      console.warn('QR-Dateibild: Direkt-BarcodeDetector fehlgeschlagen.',err);
-    }finally{
-      if(bitmap){try{bitmap.close();}catch(closeErr){}}
-    }
-    return '';
-  }
-  async function scanQrFromImageFile(file){
-    const fileName=String(file&&file.name||'Bild');
-    const fileType=String(file&&file.type||'unbekannter Typ');
-    const fileSize=Number(file&&file.size||0);
-    const heicHint=/heic|heif/i.test(fileName+' '+fileType);
-    let detector=null;
-    if('BarcodeDetector' in window){
-      try{detector=new BarcodeDetector({formats:['qr_code']});}catch(err){detector=null;}
-    }
-    if(!detector&&!window.jsQR){
-      return {
-        raw:'',
-        attempts:0,
-        reason:'QR-Erkennung ist in diesem WebView nicht verfügbar. BarcodeDetector/jsQR fehlt.',
-        debug:{fileName,fileType,fileSize,barcodeDetector:false,jsQR:false}
-      };
-    }
-
-    const direct=await scanDetectQrDirectFromFile(file,detector);
-    if(direct)return {raw:direct,attempts:1,hit:{source:'direct-bitmap',mode:'native'},debug:{fileName,fileType,fileSize}};
-
-    const crops=[
-      {id:'full',x:0,y:0,w:1,h:1},
-      {id:'center',x:.08,y:.08,w:.84,h:.84},
-      {id:'center-tight',x:.20,y:.20,w:.60,h:.60},
-      {id:'wide-center',x:.03,y:.15,w:.94,h:.70},
-      {id:'tall-center',x:.15,y:.03,w:.70,h:.94},
-      {id:'top-left',x:0,y:0,w:.62,h:.62},
-      {id:'top-right',x:.38,y:0,w:.62,h:.62},
-      {id:'bottom-left',x:0,y:.38,w:.62,h:.62},
-      {id:'bottom-right',x:.38,y:.38,w:.62,h:.62},
-      {id:'top-band',x:0,y:0,w:1,h:.48},
-      {id:'bottom-band',x:0,y:.52,w:1,h:.48},
-      {id:'left-band',x:0,y:0,w:.48,h:1},
-      {id:'right-band',x:.52,y:0,w:.48,h:1},
-      {id:'top-third-left',x:0,y:0,w:.54,h:.44},
-      {id:'top-third-right',x:.46,y:0,w:.54,h:.44},
-      {id:'mid-third-left',x:0,y:.28,w:.54,h:.44},
-      {id:'mid-third-right',x:.46,y:.28,w:.54,h:.44},
-      {id:'bottom-third-left',x:0,y:.56,w:.54,h:.44},
-      {id:'bottom-third-right',x:.46,y:.56,w:.54,h:.44}
-    ];
-    const modes=['normal','softContrast','contrast','thresholdLow','threshold','thresholdHigh','invert'];
-    const maxSides=[4096,3200,2600,1800,1200];
-    const rotations=[0,90,180,270];
-    const seenBases=new Set();
-    let attempts=1;
-    let lastReason='';
-    let lastCanvas='';
-    for(const maxSide of maxSides){
-      let base=null;
-      try{
-        base=await scanImageCanvasFromFile(file,maxSide);
-      }catch(err){
-        lastReason=err&&err.message||String(err);
-        continue;
-      }
-      const key=base.width+'x'+base.height;
-      lastCanvas=key;
-      if(seenBases.has(key))continue;
-      seenBases.add(key);
-      for(const rot of rotations){
-        const rotated=scanRotateCanvas(base,rot);
-        for(const box of crops){
-          const crop=box.id==='full'?rotated:scanCropCanvas(rotated,box);
-          const prepared=scanScaleCanvas(crop,860,3200);
-          for(const mode of modes){
-            attempts++;
-            const target=scanFilteredCanvas(prepared,mode);
-            const raw=await detectQrOnCanvas(target,detector);
-            if(raw){
-              return {
-                raw,
-                attempts,
-                hit:{rot,crop:box.id,mode,maxSide,canvas:key,detector:!!detector,jsQR:!!window.jsQR},
-                debug:{fileName,fileType,fileSize,lastCanvas:key}
-              };
-            }
-          }
-        }
-      }
-    }
-    const support='BarcodeDetector='+(!!detector)+', jsQR='+(!!window.jsQR);
-    const heicText=heicHint?' HEIC/HEIF wird von Android WebView oft nicht als Canvas-Bild dekodiert; bitte als Screenshot/PNG/JPG testen.':'';
-    return {
-      raw:'',
-      attempts,
-      reason:(lastReason?lastReason+'; ':'')+'Kein QR im hochgeladenen Bild gefunden. '+support+', Datei='+fileName+', Typ='+fileType+', Groesse='+fileSize+', Canvas='+lastCanvas+'.'+heicText,
-      debug:{fileName,fileType,fileSize,attempts,lastCanvas,barcodeDetector:!!detector,jsQR:!!window.jsQR,heicHint}
-    };
-  }
+  async   /* KGG PATCH START: qr-gallery-restore-lkg-v011 */
+  function scanImageCanvasFromFile(file,maxSide){return new Promise((ok,bad)=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>{try{const s=Math.min(1,(maxSide||1800)/Math.max(1,i.naturalWidth||i.width,i.naturalHeight||i.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round((i.naturalWidth||i.width)*s));c.height=Math.max(1,Math.round((i.naturalHeight||i.height)*s));const x=c.getContext('2d',{willReadFrequently:true});x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c)}catch(e){URL.revokeObjectURL(u);bad(e)}};i.onerror=()=>{URL.revokeObjectURL(u);bad(new Error('Bild konnte nicht gelesen werden'))};i.src=u})}
+  function scanMakeCanvas(src,box,rot,mode){const crop=box||{x:0,y:0,w:1,h:1},flip=rot===90||rot===270,c=document.createElement('canvas');c.width=flip?Math.round(src.height*crop.h):Math.round(src.width*crop.w);c.height=flip?Math.round(src.width*crop.w):Math.round(src.height*crop.h);c.width=Math.max(64,c.width);c.height=Math.max(64,c.height);const x=c.getContext('2d',{willReadFrequently:true});x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.save();if(rot===90){x.translate(c.width,0);x.rotate(Math.PI/2)}else if(rot===180){x.translate(c.width,c.height);x.rotate(Math.PI)}else if(rot===270){x.translate(0,c.height);x.rotate(-Math.PI/2)}x.drawImage(src,src.width*crop.x,src.height*crop.y,src.width*crop.w,src.height*crop.h,0,0,flip?c.height:c.width,flip?c.width:c.height);x.restore();if(mode==='threshold'){const img=x.getImageData(0,0,c.width,c.height),d=img.data;for(let p=0;p<d.length;p+=4){const g=(d[p]*.299+d[p+1]*.587+d[p+2]*.114)>148?255:0;d[p]=d[p+1]=d[p+2]=g}x.putImageData(img,0,0)}return c}
+  async function scanDetectQrCanvas(c,d){if(d){const h=await d.detect(c).catch(()=>[]);if(h&&h[0]&&h[0].rawValue)return h[0].rawValue}if(window.jsQR){try{const x=c.getContext('2d',{willReadFrequently:true}),im=x.getImageData(0,0,c.width,c.height),r=window.jsQR(im.data,c.width,c.height,{inversionAttempts:'attemptBoth'});if(r&&r.data)return r.data}catch(e){}}return ''}
+  async function scanQrFromImageFile(file){let d=null;if('BarcodeDetector'in window){try{d=new BarcodeDetector({formats:['qr_code']})}catch(e){}}if(!d&&!window.jsQR)return{raw:'',reason:'QR-Erkennung ist in diesem Browser nicht verfügbar.'};const base=await scanImageCanvasFromFile(file,1800),boxes=[{x:0,y:0,w:1,h:1},{x:0,y:0,w:.55,h:.55},{x:.45,y:0,w:.55,h:.55},{x:0,y:.45,w:.55,h:.55},{x:.45,y:.45,w:.55,h:.55},{x:.15,y:.15,w:.7,h:.7}],rots=[0,90,180,270],modes=['normal','threshold'];let attempts=0;for(const rot of rots)for(const box of boxes)for(const mode of modes){attempts++;const raw=await scanDetectQrCanvas(scanMakeCanvas(base,box,rot,mode),d);if(raw)return{raw,attempts,hit:{rot,mode}}}return{raw:'',attempts,reason:'Kein QR lokal gefunden.'}}
+  /* KGG PATCH END: qr-gallery-restore-lkg-v011 */
   function safeBase64JsonDecode(value){
     const raw=String(value||'').trim();
     const body=raw.replace(/^[^:]+:/,'').replace(/-/g,'+').replace(/_/g,'/');

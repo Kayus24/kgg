@@ -1,7 +1,7 @@
 {
-  "versionCode": 9,
-  "versionName": "1.0.7-patch-retention-changelog-guard",
+  "versionCode": 10,
+  "versionName": "1.0.9-restore-lkg-qr-gallery-decode",
   "indexUrl": "index.html",
-  "sha256": "ff81621997d2007fdb776c71688c4dfc1b2d052439efeead796cf98cee888eb1",
-  "notes": "Verbessert QR-Erkennung aus Bild-/Fotodatenbank-Upload und bettet Source Truth sowie Changelog direkt in die App-HTML ein."
+  "sha256": "e36a1f9501550335e26d2e1a6701feaaeaa5f2a4cc09592ab9ae76e74082c31a",
+  "notes": "Rollback-Notiz: Dieses Update stellt den Last-Known-Good QR-Galerie-Decoder wieder her. Wenn die App dadurch instabil wird oder QR/Scan beschädigt, kann schnell auf die vorherige Update-Inbox-Version zurückgekehrt werden, indem dieses v011-Paket revertet bzw. der vorherige funktionierende kgg-update/index.html + version.json Stand wiederhergestellt wird. Vor Rollback bitte realen Galerie-QR, Kamera-Scan und QR-Erzeugung testen."
 }
