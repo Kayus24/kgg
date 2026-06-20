@@ -1,14 +1,14 @@
 {
-  "versionName": "1.0.7-patch-retention-changelog-guard",
-  "title": "Patch-Retention und Changelog-Größenwarnung",
-  "summary": "Bettet feste Regeln ein, damit spätere LLMs bestehende Funktionspatches nicht still löschen, und ergänzt Warnschwellen für die Größe des internen Changelogs.",
+  "versionName": "1.0.21-embed-jsqr-gallery-decode",
+  "title": "Galerie-QR mit eingebettetem jsQR-Fallback",
+  "summary": "Bettet jsQR beim Build in die App-HTML ein und nutzt es als Fallback, wenn Galerie-/Foto-QRs über die vorhandene Erkennung nicht gelesen werden.",
   "type": "github-web-update",
   "allowedAreas": [
+    "QR photo upload decode",
     "HTML embedded metadata",
     "Source Truth",
     "Changelog",
-    "Patch rules",
-    "Non-UI helper script"
+    "Patch rules"
   ],
   "notTouched": [
     "PDF",
@@ -22,16 +22,17 @@
     "Storage"
   ],
   "testPlan": [
-    "Update-Inbox-Pipeline ausführen lassen.",
-    "Prüfen, dass nur kgg-update/index.html und kgg-update/version.json geändert wurden.",
-    "Prüfen, dass index.html mit <!doctype html> beginnt.",
-    "In index.html nach kgg-source-truth, kgg-changelog und kgg-patch-rules suchen.",
-    "Prüfen, dass kgg-changelog einen Eintrag für patch-retention-changelog-guard enthält.",
-    "Optional im Browser console ausführen: window.KGG_PATCH_GUARD.checkChangelogSize()."
+    "GitHub Pages laden und KGG_QR_GALLERY_DEBUG.check() prüfen.",
+    "App öffnen und Update-Banner abwarten.",
+    "Galerie-Foto mit QR-Code hochladen.",
+    "Kamera-QR-Scan kurz gegenprüfen.",
+    "Tablet-Layout prüfen."
   ],
-  "notesForAgents": [
-    "Dieses Inbox-Paket erzeugt keine separaten app_state.json/changelog.json Dateien.",
-    "Der interne Changelog wird nicht automatisch gekürzt, sondern nur mit Warnpolicy versehen.",
-    "Wenn alte Patch-Blöcke entfernt werden, muss ein Changelog-Eintrag supersedes/supersededBy/removalReason/rollbackNote enthalten."
+  "notes": "Galerie-QR-Fix: jsQR wird beim Build eingebettet und als Fallback für Foto-/Galerie-QRs genutzt. QR-/Scan-naher Patch; nach Update Kamera-Scan, Galerie-Scan und Tablet-Layout testen.",
+  "riskNotes": [
+    "QR-/Scan-naher Patch: detectQrOnCanvas wird global gewrappt.",
+    "Der Wrapper ruft vorhandene QR-Erkennung zuerst auf und nutzt jsQR nur als Fallback.",
+    "Patch lädt jsQR@1.4.0 beim GitHub-Action-Build von jsDelivr und bettet den Code danach inline ein.",
+    "Rollback-Basis vor Upload: backup/stable-v020-before-v021."
   ]
 }
