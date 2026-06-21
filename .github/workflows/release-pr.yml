@@ -1,0 +1,79 @@
+name: Validate and build KGG admin beta
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'release-inbox/**'
+      - 'release-pipeline/**'
+      - 'therapist-app/android_update_manifest.json'
+      - 'therapist-app/releases/web/**'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: kgg-release-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  validate-build:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build immutable profile artifacts when an inbox payload exists
+        id: prepare
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f release-inbox/admin.html || -f release-inbox/release.json ]]; then
+            test -f release-inbox/admin.html
+            test -f release-inbox/release.json
+            python release-pipeline/release_pipeline.py prepare \
+              --candidate release-inbox/admin.html \
+              --release-json release-inbox/release.json
+            rm release-inbox/admin.html release-inbox/release.json
+            echo "prepared=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prepared=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run release contract tests
+        run: python -m unittest release-pipeline/test_release_pipeline.py
+
+      - name: Reject secrets in release-controlled files
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git grep -nE '(sk-proj-|gh[pousr]_[A-Za-z0-9_]{20,}|AIza[0-9A-Za-z_-]{25,})' -- \
+            release-inbox release-pipeline therapist-app/android_update_manifest.json therapist-app/releases/web 2>/dev/null; then
+            echo 'Potential secret found in release-controlled files.' >&2
+            exit 1
+          fi
+
+      - name: Commit generated artifacts back to the PR branch
+        if: steps.prepare.outputs.prepared == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A release-inbox therapist-app/android_update_manifest.json therapist-app/releases/web
+          git commit -m 'chore: build immutable KGG beta artifacts'
+          git push origin "HEAD:${{ github.head_ref }}"
+
+      - name: Merge confirmed Admin beta PR after successful checks
+        if: steps.prepare.outputs.prepared == 'true' && startsWith(github.event.pull_request.title, '[admin-beta]')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr merge '${{ github.event.pull_request.number }}' --repo '${{ github.repository }}' --squash --admin

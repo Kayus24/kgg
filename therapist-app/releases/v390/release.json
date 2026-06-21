@@ -1,0 +1,11 @@
+{
+  "releaseId": "v390",
+  "versionCode": 22,
+  "versionName": "0.2.0-release-pipeline-v2",
+  "webBaseline": "r0389",
+  "adminApk": "android/KGG_ANDROID_ADMIN_v390_release_pipeline_v2_debug.apk",
+  "adminSha256": "938f2d06d422f9b225cb0395a826091cf5cd91408986b70519ca57002c4c2395",
+  "colleagueApk": "android/KGG_ANDROID_KOLLEGEN_v390_release_pipeline_v2_debug.apk",
+  "colleagueSha256": "cbd6757f16d32440625502c22f5140d7a725cd2fd4041590c66f9b316c550c9c",
+  "notes": "Android-Wrapper mit getrennten Admin-/Kolleg:innen-Profilen, automatischen Web-Updates, Health-Rollback und nativer Admin-Release-Steuerung."
+}

@@ -1,0 +1,39 @@
+name: Android wrapper check
+
+on:
+  pull_request:
+    paths:
+      - "android-wrapper/**"
+      - "therapist-app/android_update_manifest.json"
+      - ".github/workflows/android-wrapper-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-separate-profiles:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+      - name: Build both profiles
+        working-directory: android-wrapper
+        run: gradle clean assembleAdminDebug assembleKollegenDebug
+      - name: Verify colleague APK contains no admin release control
+        run: |
+          ADMIN_APK=android-wrapper/app/build/outputs/apk/admin/debug/app-admin-debug.apk
+          COLLEAGUE_APK=android-wrapper/app/build/outputs/apk/kollegen/debug/app-kollegen-debug.apk
+          unzip -l "$ADMIN_APK" | grep -q 'assets/android/kgg_release_control_bootstrap.js'
+          ! unzip -l "$COLLEAGUE_APK" | grep -q 'kgg_release_control_bootstrap.js'
+          unzip -p "$COLLEAGUE_APK" assets/colleague.html > /tmp/colleague.html
+          ! grep -Eq 'window\.KGGAdmin|id="adminConfigBtn"|id="adminSecretsModal"|kggReleaseCenter' /tmp/colleague.html
+          for dex in $(unzip -Z1 "$COLLEAGUE_APK" | grep -E '^classes[0-9]*\.dex$'); do
+            ! unzip -p "$COLLEAGUE_APK" "$dex" | strings | grep -Eq 'KggReleaseBridge|KGGReleaseControl|Update-Zentrale'
+          done

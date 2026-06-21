@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0389",
+  "versionName": "1.0.389-release-pipeline-baseline",
+  "notes": "v389 Last-Known-Good als unveraenderliche Pipeline-Basis; Kolleg:innen-Artefakt ohne privilegierte Admin-Oberflaeche und globale Admin-Bridge.",
+  "createdAt": "2026-06-21T13:19:18Z",
+  "source": "therapist-app/releases/v389/web/KGG_APP_ADMIN_v389_flow_stability.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0389",
+      "profile": "admin",
+      "versionName": "1.0.389-release-pipeline-baseline",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0389/admin.html",
+      "sha256": "aa8658cce4878757979b2754761f32726c51705a2e9d7395c7332c0673531984",
+      "notes": "v389 Last-Known-Good als unveraenderliche Pipeline-Basis; Kolleg:innen-Artefakt ohne privilegierte Admin-Oberflaeche und globale Admin-Bridge."
+    },
+    "colleague": {
+      "releaseId": "r0389",
+      "profile": "colleague",
+      "versionName": "1.0.389-release-pipeline-baseline",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0389/colleague.html",
+      "sha256": "b46c0da512fd1edd3891024d6e7535f6f3a341ac34a7ae833aec7b55684fc99f",
+      "notes": "v389 Last-Known-Good als unveraenderliche Pipeline-Basis; Kolleg:innen-Artefakt ohne privilegierte Admin-Oberflaeche und globale Admin-Bridge."
+    }
+  }
+}
