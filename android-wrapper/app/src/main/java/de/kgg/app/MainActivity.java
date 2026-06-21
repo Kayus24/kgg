@@ -97,7 +97,7 @@ public class MainActivity extends Activity {
     private WebChromeClient.FileChooserParams pendingFileChooserParams;
     private Uri cameraCaptureUri;
     private String nextFileChooserMode = "";
-    private Object releaseBridge;
+    private KggReleaseController releaseController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,23 +160,13 @@ public class MainActivity extends Activity {
         webView.addJavascriptInterface(new KggSyncBridge(this), "KGGAndroidSync");
         webView.addJavascriptInterface(new KggAppBridge(), "KGGAndroidApp");
         webView.addJavascriptInterface(new KggPdfBridge(), "KGGAndroidPdf");
-        if (isAdminProfile()) {
-            try {
-                Class<?> bridgeClass = Class.forName("de.kgg.app.KggReleaseBridge");
-                releaseBridge = bridgeClass.getConstructor(MainActivity.class).newInstance(this);
-                webView.addJavascriptInterface(releaseBridge, "KGGReleaseControl");
-            } catch (Exception err) {
-                releaseBridge = null;
-            }
-        }
+        releaseController = KggReleaseControllerFactory.attach(this, webView);
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 injectAssetScript("android/kgg_android_sync_bootstrap.js");
-                if (isAdminProfile()) {
-                    injectAssetScript("android/kgg_release_control_bootstrap.js");
-                }
+                KggReleaseControllerFactory.onPageFinished(MainActivity.this);
             }
         });
         webView.setWebChromeClient(new WebChromeClient() {
@@ -345,7 +335,7 @@ public class MainActivity extends Activity {
     }
 
     void openReleaseHtmlPicker() {
-        if (!isAdminProfile() || releaseBridge == null) {
+        if (releaseController == null) {
             return;
         }
         runOnUiThread(() -> {
@@ -415,7 +405,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void injectAssetScript(String assetPath) {
+    void injectAssetScript(String assetPath) {
         try {
             String js = readAssetText(assetPath);
             webView.evaluateJavascript(js, null);
@@ -1070,13 +1060,8 @@ public class MainActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RELEASE_HTML_REQUEST) {
             Uri selected = resultCode == RESULT_OK && data != null ? data.getData() : null;
-            if (releaseBridge != null) {
-                try {
-                    java.lang.reflect.Method selectedMethod = releaseBridge.getClass().getDeclaredMethod("onHtmlSelected", Uri.class);
-                    selectedMethod.setAccessible(true);
-                    selectedMethod.invoke(releaseBridge, selected);
-                } catch (Exception ignored) {
-                }
+            if (releaseController != null) {
+                releaseController.onHtmlSelected(selected);
             }
             return;
         }

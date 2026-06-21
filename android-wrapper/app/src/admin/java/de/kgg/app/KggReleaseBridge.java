@@ -29,7 +29,7 @@ import javax.crypto.spec.GCMParameterSpec;
 
 
 /** Admin-only bridge for the same GitHub workflows used by Codex/GPT. */
-public final class KggReleaseBridge {
+public final class KggReleaseBridge implements KggReleaseController {
     private static final String OWNER = "Kayus24";
     private static final String REPO = "kgg";
     private static final String REPO_ID = "1235504789";
@@ -114,7 +114,8 @@ public final class KggReleaseBridge {
         return confirmControl("rollback", channel, releaseId, "Kanal " + channel + " auf " + releaseId + " zuruecksetzen?");
     }
 
-    void onHtmlSelected(Uri uri) {
+    @Override
+    public void onHtmlSelected(Uri uri) {
         if (uri == null) {
             setState("idle", "Upload abgebrochen", null);
             return;
@@ -423,4 +424,3 @@ public final class KggReleaseBridge {
         return message == null || message.trim().isEmpty() ? err.getClass().getSimpleName() : message;
     }
 }
-

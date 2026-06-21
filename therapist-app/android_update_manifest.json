@@ -34,10 +34,10 @@
   "adminSha256": "aa8658cce4878757979b2754761f32726c51705a2e9d7395c7332c0673531984",
   "sha256": "b46c0da512fd1edd3891024d6e7535f6f3a341ac34a7ae833aec7b55684fc99f",
   "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v390/android/KGG_ANDROID_KOLLEGEN_v390_release_pipeline_v2_debug.apk",
-  "androidApkSha256": "cbd6757f16d32440625502c22f5140d7a725cd2fd4041590c66f9b316c550c9c",
+  "androidApkSha256": "c16453a05de285c2ad22741a8358f65e1767cf239c91afa8befe4d001f32eedc",
   "colleagueAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v390/android/KGG_ANDROID_KOLLEGEN_v390_release_pipeline_v2_debug.apk",
-  "colleagueAndroidApkSha256": "cbd6757f16d32440625502c22f5140d7a725cd2fd4041590c66f9b316c550c9c",
+  "colleagueAndroidApkSha256": "c16453a05de285c2ad22741a8358f65e1767cf239c91afa8befe4d001f32eedc",
   "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v390/android/KGG_ANDROID_ADMIN_v390_release_pipeline_v2_debug.apk",
-  "adminAndroidApkSha256": "938f2d06d422f9b225cb0395a826091cf5cd91408986b70519ca57002c4c2395",
+  "adminAndroidApkSha256": "013cdc2accf991b58ff43cd6442136fbc71da31dfc1a2f394a74052718d02879",
   "notes": "Stable promotion r0389: v389 Last-Known-Good als unveraenderliche Pipeline-Basis; Kolleg:innen-Artefakt ohne privilegierte Admin-Oberflaeche und globale Admin-Bridge."
 }
