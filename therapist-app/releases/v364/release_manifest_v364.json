@@ -1,9 +1,0 @@
-{
-  "kind": "kgg_release_manifest",
-  "version": "v364",
-  "androidApk": "android/KGG_ANDROID_SYNC_MVP_v364_android_web_update_debug.apk",
-  "androidApkSha256": "978f4b2dde2b479fe814c753ccd6a6569de043e8490e8d1ac271e88aa90cea29",
-  "androidWebUpdateManifest": "../../android_update_manifest.json",
-  "bundledWebVersion": "v363",
-  "notes": "Android-Haupt-App mit lokalem Web-Code-Update ueber GitHub-Manifest. HTML bleibt Fallback/Testschiene."
-}

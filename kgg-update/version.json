@@ -1,7 +1,0 @@
-{
-  "versionCode": 23,
-  "versionName": "1.0.23-admin-debug-visible-hotfix",
-  "indexUrl": "index.html?v=23",
-  "sha256": "712c93f27af817f4e17793020d25b1af0e9c78b5337394799a730b72d7872409",
-  "notes": "v023 Hotfix: Debug-Button sichtbar machen und indexUrl-Cache-Busting über Workflow reparieren. Keine PDF-/QR-Erzeugung-/Patienten-App-/Scan-Kamera-/Parser-/Plan-State-/Storage-Änderung."
-}

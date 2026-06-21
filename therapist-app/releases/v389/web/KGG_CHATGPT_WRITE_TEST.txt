@@ -1,3 +1,0 @@
-ChatGPT GitHub write test.
-Purpose: verify create_file works again.
-No app code changed.
