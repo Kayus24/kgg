@@ -1,11 +1,11 @@
 {
-  "versionName": "1.0.23-admin-debug-visible-hotfix",
-  "title": "Admin Debug sichtbar Hotfix",
-  "summary": "Hotfix nach v022: Debug-Einstieg wird als robuster sichtbarer Floating-Button eingebaut, unabhängig von .adminMode oder Scan-Hub-Position. Zusätzlich wird aktive Source-Truth repariert, falls der alte Block im HTML-Kommentar steckt.",
+  "versionName": "1.0.24-rollback-v023-debug-breakage",
+  "title": "Rollback v023 Debug-Layout-Bruch",
+  "summary": "Emergency Rollback: entfernt den v023-Debug-Floating-Button und alte v022/v023 Debug-Skripte, weil das Tablet-Layout erneut gebrochen wurde. Der Workflow-Fix fuer indexUrl bleibt erhalten.",
   "type": "github-web-update",
-  "patchId": "kgg-v023-admin-debug-visible-hotfix",
+  "patchId": "kgg-v024-rollback-v023-debug-breakage",
   "allowedAreas": [
-    "Admin debug UI",
+    "Admin debug UI rollback",
     "HTML embedded metadata",
     "Source Truth",
     "Changelog",
@@ -18,21 +18,21 @@
     "Scan-Kamera",
     "Parser",
     "Android-Wrapper",
+    "Tablet-Core-Layout",
     "Plan-State",
     "Storage"
   ],
   "testPlan": [
-    "Tablet width >=760px: Debug-Button sichtbar, unabhängig vom AdminMode.",
-    "Phone width <760px: Debug-Button sichtbar und öffnet Debug-Panel.",
-    "Debug-Panel: Diagnose aktualisieren und Bericht kopieren testen.",
-    "version.json: indexUrl muss nach Pipeline index.html?v=23 sein.",
-    "QR-Galerie, Kamera-Scan und normale Planfunktionen kurz gegenprüfen."
+    "Tablet width >=760px: kein Debug-Floating-Button sichtbar.",
+    "Tablet width >=760px: Layout wieder wie vor v023.",
+    "version.json: indexUrl muss nach Pipeline index.html?v=24 sein.",
+    "Handy kurz oeffnen: kein Debug-Floating-Button sichtbar.",
+    "Galerie-QR und Kamera-Scan kurz gegenpruefen."
   ],
-  "notes": "v023 Hotfix: Debug-Button sichtbar machen und indexUrl-Cache-Busting über Workflow reparieren. Keine PDF-/QR-Erzeugung-/Patienten-App-/Scan-Kamera-/Parser-/Plan-State-/Storage-Änderung.",
+  "notes": "v024 Emergency Rollback: v023/v022 Debug-UI entfernen, weil Tablet-Layout gebrochen wurde. Keine PDF-/QR-Erzeugung-/Patienten-App-/Scan-Kamera-/Parser-/Plan-State-/Storage-Aenderung.",
   "riskNotes": [
-    "Der Debug-Button ist absichtlich sichtbar als Hotfix, damit Max direkt Feedback ziehen kann.",
-    "Bestehende Admin-Aktionen werden nicht gelöscht; Debug-Panel versucht nur vorhandene Buttons auszulösen.",
-    "Source-Truth wird aktiv ergänzt, falls der ältere Source-Truth-Text nur in einem HTML-Kommentar steckt.",
-    "Keine API-Keys oder Secrets eingebettet."
+    "Debug-Feedback-Funktion ist nach Rollback absichtlich deaktiviert.",
+    "Workflow indexUrl Fix bleibt bestehen, damit Cache-Busting korrekt weiterlaeuft.",
+    "Neue Debug-UI erst wieder nach isoliertem Tablet- und Handy-Viewport-Test einbauen."
   ]
 }
