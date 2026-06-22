@@ -21,8 +21,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "therapist-app" / "android_update_manifest.json"
 RELEASES = ROOT / "therapist-app" / "releases" / "web"
-BASE_ADMIN = ROOT / "therapist-app" / "releases" / "v389" / "web" / "KGG_APP_ADMIN_v389_flow_stability.html"
-BASE_COLLEAGUE = ROOT / "therapist-app" / "releases" / "v389" / "web" / "KGG_APP_KOLLEGEN_v389_flow_stability.html"
+BASE_ADMIN = ROOT / "kgg-update" / "index.html"
+LEGACY_ADMIN = ROOT / "therapist-app" / "releases" / "v389" / "web" / "KGG_APP_ADMIN_v389_flow_stability.html"
+LEGACY_COLLEAGUE = ROOT / "therapist-app" / "releases" / "v389" / "web" / "KGG_APP_KOLLEGEN_v389_flow_stability.html"
 PAGES_BASE = "https://kayus24.github.io/kgg/therapist-app/releases/web"
 MAX_HTML_BYTES = 5_500_000
 ADMIN_START = "<!-- KGG_ADMIN_ONLY_START -->"
@@ -44,6 +45,10 @@ COLLEAGUE_FORBIDDEN = (
     'id="tabletMenuConfigTransferBtn"',
     'id="kggAdminMenuQrModal"',
     'class="adminTestBanner"',
+    'id="kggTherapistShareModal"',
+    "function exposeAdminSecretApi",
+    "function openKggAdminMenuQr",
+    "function openKggTherapistSetupQr",
     "window.KGGAdmin",
     "KGG_ROLLOUT_PROFILE='admin'",
     'KGG_ROLLOUT_PROFILE="admin"',
@@ -117,7 +122,7 @@ def strip_marked_admin_blocks(html: str) -> str:
 
 
 def remove_js_function(text: str, name: str) -> str:
-    match = re.search(r"(?:^|\n)([ \t]*function\s+" + re.escape(name) + r"\s*\([^)]*\)\s*\{)", text)
+    match = re.search(r"(?:^|\n)([ \t]*(?:async\s+)?function\s+" + re.escape(name) + r"\s*\([^)]*\)\s*\{)", text)
     if not match:
         fail(f"Colleague hardening could not find JavaScript function: {name}")
     start = match.start(1)
@@ -194,7 +199,118 @@ def harden_colleague(html: str) -> str:
     html = html.replace("  exposeAdminSecretApi();\n", "")
     html = re.sub(r"^.*\$\('adminConfigBtn'\).*?$", "", html, flags=re.M)
     html = re.sub(r"^.*\$\('adminSecretsModal'\)\.addEventListener.*?$", "", html, flags=re.M)
+    html = re.sub(
+        r"^.*\$\('(?:closeAdminSecrets|saveAdminSecrets|loadAdminSafeFile|adminSafeFileInput|importAdminCodePackage|exportAdminCodePackage|downloadAdminSafeFile|clearAdminSecrets)'\).*?$",
+        "",
+        html,
+        flags=re.M,
+    )
     html = re.sub(r"^.*window\.KGGAdmin.*?$", "", html, flags=re.M)
+    return html
+
+
+def remove_html_range(html: str, start_token: str, next_token: str, label: str) -> str:
+    start = html.find(start_token)
+    end = html.find(next_token, start + len(start_token)) if start >= 0 else -1
+    if start < 0 or end < 0:
+        fail(f"Colleague hardening could not isolate HTML block: {label}")
+    return html[:start] + html[end:]
+
+
+def derive_colleague(candidate: str) -> str:
+    """Create the colleague artifact directly from the confirmed current Admin source.
+
+    This intentionally removes privileged DOM and JavaScript by contract. It does
+    not reuse the historical v389 delta, so later UI fixes remain intact.
+    """
+    html = strip_marked_admin_blocks(candidate)
+    html, body_count = re.subn(r'<body class="adminMode">', '<body class="colleagueMode">', html, count=1)
+    if body_count != 1:
+        fail(f"Expected one adminMode body, changed {body_count}")
+    html, profile_count = re.subn(
+        r"window\.KGG_ROLLOUT_PROFILE\s*=\s*['\"]admin['\"]\s*;",
+        "window.KGG_ROLLOUT_PROFILE='colleague';",
+        html,
+        count=1,
+    )
+    if profile_count != 1:
+        fail(f"Expected one Admin rollout profile, changed {profile_count}")
+    html = re.sub(r"<title>.*?</title>", "<title>KGG App Kolleg:innen</title>", html, count=1, flags=re.S)
+    html, banner_count = re.subn(
+        r'<div class="adminTestBanner"[^>]*>.*?</div>\s*',
+        "",
+        html,
+        count=1,
+        flags=re.S,
+    )
+    if banner_count != 1:
+        fail(f"Expected one Admin banner, removed {banner_count}")
+
+    html = remove_html_range(
+        html,
+        '<div class="kggAdminMenuQrModal" id="kggAdminMenuQrModal"',
+        '<div class="kggTherapistShareModal" id="kggTherapistShareModal"',
+        "Admin QR modal",
+    )
+    html = remove_html_range(
+        html,
+        '<div class="kggTherapistShareModal" id="kggTherapistShareModal"',
+        '<div id="mobileScannedPlansDock"',
+        "therapist share modal",
+    )
+    html, share_button_count = re.subn(
+        r'<button\b[^>]*\bid="tabletMenuTherapistShareBtn"[^>]*>.*?</button>\s*',
+        "",
+        html,
+        count=1,
+        flags=re.I | re.S,
+    )
+    if share_button_count != 1:
+        fail(f"Expected one therapist share button, removed {share_button_count}")
+
+    for function_name in (
+        "closeKggTherapistShareModal",
+        "openKggTherapistShareModal",
+        "kggTherapistAppUrl",
+        "openKggTherapistAppOnlyQr",
+        "openKggTherapistSetupQr",
+        "openKggTherapistApiOnlyQr",
+        "closeKggAdminMenuQrModal",
+        "renderKggAdminMenuQr",
+        "openKggAdminMenuQr",
+    ):
+        html = remove_js_function(html, function_name)
+    html = re.sub(r"\n\s*const kggAdminMenuQrTargets=\{.*?\n\s*\};", "", html, count=1, flags=re.S)
+    html = re.sub(
+        r"\n\s*document\.querySelectorAll\('\[data-kgg-admin-menu-qr\]'\)\.forEach\(btn=>\{.*?\n\s*\}\);\s*\n\s*\}\);",
+        "",
+        html,
+        count=1,
+        flags=re.S,
+    )
+    html = re.sub(r"^.*(?:tabletMenuAdminConfigBtn|tabletMenuSharedBankBtn|tabletMenuSyncQrBtn|tabletMenuConfigTransferBtn|kggAdminMenuQrClose|kggAdminMenuQrCopy|kggAdminMenuQrOpen).*?$", "", html, flags=re.M)
+    html = re.sub(r"^.*tabletMenuTherapistShareBtn.*?$", "", html, flags=re.M)
+    html = harden_colleague(html)
+    html, guard_count = re.subn(
+        r"function initAdminModeAccess\(\)\{\s*",
+        "function initAdminModeAccess(){\n    if(window.KGG_ROLLOUT_PROFILE==='colleague'){document.body.classList.remove('adminMode');document.body.classList.add('colleagueMode');return;}\n    ",
+        html,
+        count=1,
+    )
+    if guard_count != 1:
+        fail(f"Expected one Admin-mode initializer, guarded {guard_count}")
+    colleague_boundary = """<style id=\"kgg-colleague-boundary\">
+  body.colleagueMode .adminConfigBtn,
+  body.colleagueMode .sharedBankBtn,
+  body.colleagueMode .adminTestBanner{display:none!important}
+</style>
+"""
+    html = html.replace("</head>", colleague_boundary + "</head>", 1)
+    for forbidden in COLLEAGUE_FORBIDDEN:
+        if forbidden in html:
+            fail(f"Colleague build still contains Admin-only token: {forbidden}")
+    if 'class="colleagueMode"' not in html or "KGG_ROLLOUT_PROFILE='colleague'" not in html:
+        fail("Colleague build is missing its profile identity")
     return html
 
 
@@ -219,8 +335,8 @@ def apply_baseline_profile_transform(candidate: str) -> str:
     Exact matching makes this intentionally conservative: an edit that overlaps a
     profile-specific block fails instead of leaking Admin code.
     """
-    admin_lines = read_text(BASE_ADMIN).splitlines(keepends=True)
-    colleague_lines = read_text(BASE_COLLEAGUE).splitlines(keepends=True)
+    admin_lines = read_text(LEGACY_ADMIN).splitlines(keepends=True)
+    colleague_lines = read_text(LEGACY_COLLEAGUE).splitlines(keepends=True)
     candidate_lines = strip_marked_admin_blocks(candidate).splitlines(keepends=True)
     matcher = difflib.SequenceMatcher(a=admin_lines, b=colleague_lines, autojunk=False)
     changes = [op for op in matcher.get_opcodes() if op[0] != "equal"]
@@ -299,7 +415,7 @@ def prepare(candidate_path: Path, release_json_path: Path) -> dict:
 
     admin_html = read_text(candidate_path)
     validate_html(admin_html, "Admin candidate")
-    colleague_html = apply_baseline_profile_transform(admin_html)
+    colleague_html = derive_colleague(admin_html)
     validate_html(colleague_html, "Colleague build")
     if sha256_text(admin_html) == sha256_text(colleague_html):
         fail("Admin and colleague builds must not be identical")
@@ -343,8 +459,8 @@ def prepare(candidate_path: Path, release_json_path: Path) -> dict:
 def load_release(release_id: str) -> dict:
     validate_release_id(release_id)
     if release_id == "v389":
-        admin_html = read_text(BASE_ADMIN)
-        colleague_html = read_text(BASE_COLLEAGUE)
+        admin_html = read_text(LEGACY_ADMIN)
+        colleague_html = read_text(LEGACY_COLLEAGUE)
         return {
             "schema": 1,
             "releaseId": "v389",

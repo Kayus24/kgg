@@ -15,7 +15,7 @@ Auf dem Release-Branch liegen temporaer:
 - `release-inbox/admin.html`
 - `release-inbox/release.json` mit `releaseId`, `versionName` und `notes`
 
-Der PR-Workflow validiert die Datei, erzeugt unveraenderliche Admin-/Kolleg:innen-Artefakte und entfernt die Inbox-Dateien vor dem Merge. Bestehende v389-Dateien bilden den konservativen Profil-Transformationsvertrag. Neue Admin-Bloecke muessen zwischen `KGG_ADMIN_ONLY_START` und `KGG_ADMIN_ONLY_END` liegen.
+Der PR-Workflow validiert die Datei, erzeugt unveraenderliche Admin-/Kolleg:innen-Artefakte und entfernt die Inbox-Dateien vor dem Merge. Verbindliche UI-Basis ist `kgg-update/index.html` ab v24. Privilegierte DOM-/JavaScript-Bloecke werden beim Kolleg:innen-Build fail-closed entfernt. Neue Admin-Bloecke muessen zwischen `KGG_ADMIN_ONLY_START` und `KGG_ADMIN_ONLY_END` liegen.
 
 ## Freigabe und Rollback
 

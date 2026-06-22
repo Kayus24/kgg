@@ -19,6 +19,7 @@ jobs:
         run: |
           set -euo pipefail
           python -m unittest release-pipeline/test_release_pipeline.py
+          node release-pipeline/check_html_scripts.js kgg-update/index.html therapist-app/releases/web/*/*.html
           {
             echo '## KGG Release Channels'
             echo '```json'

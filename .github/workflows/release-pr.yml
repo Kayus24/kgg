@@ -6,6 +6,7 @@ on:
     paths:
       - 'release-inbox/**'
       - 'release-pipeline/**'
+      - 'kgg-update/**'
       - 'therapist-app/android_update_manifest.json'
       - 'therapist-app/releases/web/**'
 
@@ -49,14 +50,17 @@ jobs:
           fi
 
       - name: Run release contract tests
-        run: python -m unittest release-pipeline/test_release_pipeline.py
+        shell: bash
+        run: |
+          python -m unittest release-pipeline/test_release_pipeline.py
+          node release-pipeline/check_html_scripts.js kgg-update/index.html therapist-app/releases/web/*/*.html
 
       - name: Reject secrets in release-controlled files
         shell: bash
         run: |
           set -euo pipefail
           if git grep -nE '(sk-proj-|gh[pousr]_[A-Za-z0-9_]{20,}|AIza[0-9A-Za-z_-]{25,})' -- \
-            release-inbox release-pipeline therapist-app/android_update_manifest.json therapist-app/releases/web 2>/dev/null; then
+            release-inbox release-pipeline kgg-update therapist-app/android_update_manifest.json therapist-app/releases/web 2>/dev/null; then
             echo 'Potential secret found in release-controlled files.' >&2
             exit 1
           fi
