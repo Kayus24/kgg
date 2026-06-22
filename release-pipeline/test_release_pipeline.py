@@ -43,7 +43,7 @@ class ReleasePipelineTests(unittest.TestCase):
 
     def test_source_truth_manifest_matches_html(self):
         version = pipeline.load_json(pipeline.ROOT / "kgg-update" / "version.json")
-        digest = hashlib.sha256(pipeline.BASE_ADMIN.read_bytes()).hexdigest()
+        digest = hashlib.sha256(pipeline.read_text(pipeline.BASE_ADMIN).encode("utf-8")).hexdigest()
         self.assertEqual(version["sha256"], digest)
 
     def test_release_center_is_explicit_admin_only_block(self):

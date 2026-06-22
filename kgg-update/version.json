@@ -2,6 +2,6 @@
   "versionCode": 25,
   "versionName": "1.0.25-ui-source-truth-release-center",
   "indexUrl": "index.html?v=25",
-  "sha256": "8d60db8a45da998fc54cf37a95f6372030e94b80abbaa2b687bb5ee9ca7703f8",
+  "sha256": "6e90e76d7c56dba46979142fed2dee8f1c87765462eac9289a4bf490a5807d2a",
   "notes": "v025: bestaetigte v24-UI als Source of Truth; Update-Zentrale im bestehenden KGG-Design und als markierter Admin-only-Block. Keine PDF-/QR-Erzeugung-/Patienten-App-/Scan-Kamera-/Parser-/Plan-State-/Storage-Aenderung."
 }
