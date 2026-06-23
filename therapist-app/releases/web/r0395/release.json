@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0395",
+  "versionName": "1.0.27-release-connection-test",
+  "notes": "Read-only GitHub-Verbindungstest in der Update-Zentrale: prueft Token und Repo-Zugriff ohne PR, Upload oder Schreibaktion.",
+  "createdAt": "2026-06-23T09:06:47Z",
+  "source": "kgg-update/index.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0395",
+      "profile": "admin",
+      "versionName": "1.0.27-release-connection-test",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0395/admin.html",
+      "sha256": "3756e4a9be79102f93a7fcccd2f26b0bfe8ea52c2b42eb9e6bf3b359ec48c4e4",
+      "notes": "Read-only GitHub-Verbindungstest in der Update-Zentrale: prueft Token und Repo-Zugriff ohne PR, Upload oder Schreibaktion."
+    },
+    "colleague": {
+      "releaseId": "r0395",
+      "profile": "colleague",
+      "versionName": "1.0.27-release-connection-test",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0395/colleague.html",
+      "sha256": "3b042c1fd7b556d6d5f1c33bc63993924fc0a443be65c4caab896f200e030c49",
+      "notes": "Read-only GitHub-Verbindungstest in der Update-Zentrale: prueft Token und Repo-Zugriff ohne PR, Upload oder Schreibaktion."
+    }
+  }
+}

@@ -10,8 +10,8 @@ android {
         applicationId "de.kgg.app"
         minSdk 26
         targetSdk 36
-        versionCode 23
-        versionName "0.2.1-release-login-code-fix"
+        versionCode 24
+        versionName "0.2.2-release-connection-test"
         manifestPlaceholders = [appLabel: "KGG Physio"]
         buildConfigField "String", "KGG_GITHUB_CLIENT_ID", "\"${project.findProperty('KGG_GITHUB_CLIENT_ID') ?: ''}\""
     }
@@ -39,12 +39,12 @@ android {
 }
 
 def stageAdminProfileAsset = tasks.register("stageAdminProfileAsset", Copy) {
-    from("../../therapist-app/releases/web/r0394/admin.html")
+    from("../../therapist-app/releases/web/r0395/admin.html")
     into(layout.buildDirectory.dir("generated/kggAssets/admin"))
 }
 
 def stageColleagueProfileAsset = tasks.register("stageColleagueProfileAsset", Copy) {
-    from("../../therapist-app/releases/web/r0394/colleague.html")
+    from("../../therapist-app/releases/web/r0395/colleague.html")
     into(layout.buildDirectory.dir("generated/kggAssets/kollegen"))
 }
 

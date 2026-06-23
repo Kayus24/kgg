@@ -1,7 +1,7 @@
 {
-  "versionCode": 26,
-  "versionName": "1.0.26-release-login-code-fix",
-  "indexUrl": "index.html?v=26",
-  "sha256": "744f9400a3df4d664dd91732c606fc4bfb724f34cc98c4d1ea1421e5d331beb7",
-  "notes": "v026: GitHub-Device-Code in der Update-Zentrale sichtbar anzeigen und in der Admin-APK vor dem Browserwechsel als kopierbaren Dialog zeigen. Keine PDF-/QR-Erzeugung-/Patienten-App-/Scan-Kamera-/Parser-/Plan-State-/Storage-Aenderung."
+  "versionCode": 27,
+  "versionName": "1.0.27-release-connection-test",
+  "indexUrl": "index.html?v=27",
+  "sha256": "3756e4a9be79102f93a7fcccd2f26b0bfe8ea52c2b42eb9e6bf3b359ec48c4e4",
+  "notes": "v027: Read-only GitHub-Verbindungstest in der Update-Zentrale. Keine GitHub-Schreibaktion, keine PDF-/QR-Erzeugung-/Patienten-App-/Scan-Kamera-/Parser-/Plan-State-/Storage-Aenderung."
 }
