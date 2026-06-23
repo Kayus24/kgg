@@ -1,6 +1,8 @@
 package de.kgg.app;
 
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,6 +10,7 @@ import android.net.Uri;
 import android.provider.Settings;
 import android.util.Base64;
 import android.webkit.JavascriptInterface;
+import android.widget.Toast;
 
 import org.json.JSONObject;
 
@@ -147,13 +150,15 @@ public final class KggReleaseBridge implements KggReleaseController {
             String deviceCode = device.getString("device_code");
             String userCode = device.getString("user_code");
             String verificationUri = device.getString("verification_uri");
+            String verificationUriComplete = device.optString("verification_uri_complete", verificationUri);
             int interval = Math.max(5, device.optInt("interval", 5));
             int expires = Math.max(60, device.optInt("expires_in", 900));
             JSONObject extra = new JSONObject();
             extra.put("userCode", userCode);
             extra.put("verificationUri", verificationUri);
-            setState("login_waiting", "Code " + userCode + " bei GitHub bestaetigen", extra);
-            activity.runOnUiThread(() -> activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(verificationUri))));
+            extra.put("verificationUriComplete", verificationUriComplete);
+            setState("login_waiting", "Code " + userCode + " bei GitHub bestaetigen. Danach hierher zurueckwechseln.", extra);
+            showDeviceLoginDialog(userCode, verificationUriComplete);
 
             long deadline = System.currentTimeMillis() + expires * 1000L;
             while (System.currentTimeMillis() < deadline) {
@@ -181,6 +186,41 @@ public final class KggReleaseBridge implements KggReleaseController {
             throw new IllegalStateException("device_code_expired");
         } catch (Exception err) {
             setState("error", "GitHub-Anmeldung fehlgeschlagen: " + safeMessage(err), null);
+        }
+    }
+
+    private void showDeviceLoginDialog(String userCode, String verificationUri) {
+        activity.runOnUiThread(() -> {
+            try {
+                new AlertDialog.Builder(activity)
+                        .setTitle("GitHub-Code")
+                        .setMessage("Diesen Code bei GitHub eingeben:\n\n" + userCode
+                                + "\n\nDer Code bleibt nur kurz gueltig. Nach der GitHub-Bestaetigung zur KGG-App zurueckwechseln.")
+                        .setNegativeButton("Schliessen", null)
+                        .setNeutralButton("Code kopieren", (dialog, which) -> copyDeviceLoginCode(userCode))
+                        .setPositiveButton("GitHub oeffnen", (dialog, which) -> openDeviceLoginPage(verificationUri))
+                        .show();
+            } catch (Exception ignored) {
+            }
+        });
+    }
+
+    private void copyDeviceLoginCode(String userCode) {
+        try {
+            ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
+            if (clipboard != null) {
+                clipboard.setPrimaryClip(ClipData.newPlainText("KGG GitHub Code", userCode));
+                Toast.makeText(activity, "GitHub-Code kopiert", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    private void openDeviceLoginPage(String verificationUri) {
+        try {
+            activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(verificationUri)));
+        } catch (Exception err) {
+            setState("error", "GitHub-Seite konnte nicht geoeffnet werden: " + safeMessage(err), null);
         }
     }
 

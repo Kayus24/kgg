@@ -1,7 +1,7 @@
 {
-  "versionCode": 25,
-  "versionName": "1.0.25-ui-source-truth-release-center",
-  "indexUrl": "index.html?v=25",
-  "sha256": "6e90e76d7c56dba46979142fed2dee8f1c87765462eac9289a4bf490a5807d2a",
-  "notes": "v025: bestaetigte v24-UI als Source of Truth; Update-Zentrale im bestehenden KGG-Design und als markierter Admin-only-Block. Keine PDF-/QR-Erzeugung-/Patienten-App-/Scan-Kamera-/Parser-/Plan-State-/Storage-Aenderung."
+  "versionCode": 26,
+  "versionName": "1.0.26-release-login-code-fix",
+  "indexUrl": "index.html?v=26",
+  "sha256": "744f9400a3df4d664dd91732c606fc4bfb724f34cc98c4d1ea1421e5d331beb7",
+  "notes": "v026: GitHub-Device-Code in der Update-Zentrale sichtbar anzeigen und in der Admin-APK vor dem Browserwechsel als kopierbaren Dialog zeigen. Keine PDF-/QR-Erzeugung-/Patienten-App-/Scan-Kamera-/Parser-/Plan-State-/Storage-Aenderung."
 }

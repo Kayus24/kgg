@@ -1,0 +1,17 @@
+{
+  "versionCode": 23,
+  "versionName": "0.2.1-release-login-code-fix",
+  "shellVersion": "v391",
+  "webRelease": "r0394",
+  "notes": "Admin-APK zeigt den GitHub-Device-Code vor dem Browserwechsel als kopierbaren Dialog. Beide APKs enthalten r0394 als Offline-Basis.",
+  "android": {
+    "admin": {
+      "file": "android/KGG_ANDROID_ADMIN_v391_release_login_code_fix_debug.apk",
+      "sha256": "48e362baaade5829fdea4188a65f5d3a1279d5c481b7e793d77b973228bd6937"
+    },
+    "colleague": {
+      "file": "android/KGG_ANDROID_KOLLEGEN_v391_release_login_code_fix_debug.apk",
+      "sha256": "1f619328f090c0337e567941d980f21af95db228afc0bc2d87812d79865abb0a"
+    }
+  }
+}

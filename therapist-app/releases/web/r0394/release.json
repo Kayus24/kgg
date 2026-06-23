@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0394",
+  "versionName": "1.0.26-release-login-code-fix",
+  "notes": "GitHub-Device-Code in der Update-Zentrale sichtbar anzeigen und in der Admin-APK vor dem Browserwechsel als kopierbaren Dialog zeigen.",
+  "createdAt": "2026-06-23T07:57:46Z",
+  "source": "kgg-update/index.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0394",
+      "profile": "admin",
+      "versionName": "1.0.26-release-login-code-fix",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0394/admin.html",
+      "sha256": "744f9400a3df4d664dd91732c606fc4bfb724f34cc98c4d1ea1421e5d331beb7",
+      "notes": "GitHub-Device-Code in der Update-Zentrale sichtbar anzeigen und in der Admin-APK vor dem Browserwechsel als kopierbaren Dialog zeigen."
+    },
+    "colleague": {
+      "releaseId": "r0394",
+      "profile": "colleague",
+      "versionName": "1.0.26-release-login-code-fix",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0394/colleague.html",
+      "sha256": "7c244193bebca71316b233d6c0b86ed2e335cf01f964ee1db32bf83aff920d6e",
+      "notes": "GitHub-Device-Code in der Update-Zentrale sichtbar anzeigen und in der Admin-APK vor dem Browserwechsel als kopierbaren Dialog zeigen."
+    }
+  }
+}
