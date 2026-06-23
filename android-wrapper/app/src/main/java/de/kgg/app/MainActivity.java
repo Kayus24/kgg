@@ -60,7 +60,7 @@ public class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST = 4201;
     private static final int CAMERA_PERMISSION_REQUEST = 4202;
     private static final int RELEASE_HTML_REQUEST = 4301;
-    private static final int BUNDLED_WEB_VERSION = 393;
+    private static final int BUNDLED_WEB_VERSION = 394;
     private static final String BUILD_TIME = "2026-06-23T11:05:00+02:00";
     private static final String BUILD_CODE = "html-download-camera-fix";
     private static final int MAX_HTML_UPDATE_BYTES = 5_500_000;

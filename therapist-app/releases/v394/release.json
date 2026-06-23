@@ -1,0 +1,17 @@
+{
+  "versionCode": 26,
+  "versionName": "0.2.4-camera-touch-parser-fix",
+  "shellVersion": "v394",
+  "webRelease": "r0397",
+  "notes": "Kamera-FileProvider fuer Android-Scan repariert. Beide APKs enthalten r0397 als Offline-Basis mit stabilerer Handy-Kartenbewegung und Parser-Fix fuer Satz-Bloecke.",
+  "apks": {
+    "admin": {
+      "file": "android/KGG_ANDROID_ADMIN_v394_camera_touch_parser_fix_debug.apk",
+      "sha256": "0e18f75a2ed2e51f2bf6dc9a29732a11ecc218071a9e24beebbca2d965b54fcd"
+    },
+    "colleague": {
+      "file": "android/KGG_ANDROID_KOLLEGEN_v394_camera_touch_parser_fix_debug.apk",
+      "sha256": "9be627ecc26d7ce4af2e547e7ed02b63bc34135e4b502b13557832955cc9eb7c"
+    }
+  }
+}

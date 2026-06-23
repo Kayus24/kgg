@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0397",
+  "versionName": "1.0.29-camera-touch-parser-fix",
+  "notes": "Kamera-Pfad fuer Android-v394, stabilere Handy-Kartenbewegung und strukturierter Parser fuer Satz-Bloecke ohne Satz-Muellkarten.",
+  "createdAt": "2026-06-23T17:12:21Z",
+  "source": "kgg-update/index.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0397",
+      "profile": "admin",
+      "versionName": "1.0.29-camera-touch-parser-fix",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0397/admin.html",
+      "sha256": "881e72eb25f58af70c5254dd159832075147f4b264743ad4a89a88c91705722b",
+      "notes": "Kamera-Pfad fuer Android-v394, stabilere Handy-Kartenbewegung und strukturierter Parser fuer Satz-Bloecke ohne Satz-Muellkarten."
+    },
+    "colleague": {
+      "releaseId": "r0397",
+      "profile": "colleague",
+      "versionName": "1.0.29-camera-touch-parser-fix",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0397/colleague.html",
+      "sha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
+      "notes": "Kamera-Pfad fuer Android-v394, stabilere Handy-Kartenbewegung und strukturierter Parser fuer Satz-Bloecke ohne Satz-Muellkarten."
+    }
+  }
+}
