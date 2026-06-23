@@ -1,0 +1,17 @@
+{
+  "versionCode": 25,
+  "versionName": "0.2.3-html-download-camera-fix",
+  "shellVersion": "v393",
+  "webRelease": "r0396",
+  "notes": "Admin-APK kann die aktuell laufende HTML speichern; Plan scannen nutzt den nativen Kamera-Intent ohne Galerie-Fallback. Beide APKs enthalten r0396 als Offline-Basis.",
+  "android": {
+    "admin": {
+      "file": "android/KGG_ANDROID_ADMIN_v393_html_download_camera_fix_debug.apk",
+      "sha256": "6567a697484072920862a32c9f6079c95b3ad4dad61aea08fb32564714093669"
+    },
+    "colleague": {
+      "file": "android/KGG_ANDROID_KOLLEGEN_v393_html_download_camera_fix_debug.apk",
+      "sha256": "9827d1f6515b20bc393deb0551abaf56caa0183da291fae51d6350ecf7dbfb39"
+    }
+  }
+}

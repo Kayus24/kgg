@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0396",
+  "versionName": "1.0.28-html-download-camera-fix",
+  "notes": "Admin-Update-Zentrale kann die aktuell laufende HTML speichern; Plan scannen erzwingt nativen Kamera-Intent ohne Galerie-Fallback.",
+  "createdAt": "2026-06-23T09:44:01Z",
+  "source": "kgg-update/index.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0396",
+      "profile": "admin",
+      "versionName": "1.0.28-html-download-camera-fix",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0396/admin.html",
+      "sha256": "a16fc12972e83152d4959b14c2d392018ee9cbeacd9b7da0eea4ca07c8a41151",
+      "notes": "Admin-Update-Zentrale kann die aktuell laufende HTML speichern; Plan scannen erzwingt nativen Kamera-Intent ohne Galerie-Fallback."
+    },
+    "colleague": {
+      "releaseId": "r0396",
+      "profile": "colleague",
+      "versionName": "1.0.28-html-download-camera-fix",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0396/colleague.html",
+      "sha256": "8f4a1c48ad29b2e3e89da53cee1e65a554df1d878cc8922d52ce8350087cb0f0",
+      "notes": "Admin-Update-Zentrale kann die aktuell laufende HTML speichern; Plan scannen erzwingt nativen Kamera-Intent ohne Galerie-Fallback."
+    }
+  }
+}

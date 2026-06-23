@@ -116,6 +116,17 @@ public final class KggReleaseBridge implements KggReleaseController {
     }
 
     @JavascriptInterface
+    public boolean downloadCurrentHtml() {
+        if (!activity.isAdminProfileForReleaseControl()) {
+            setState("blocked", "HTML-Download ist nur im Admin-Profil verfuegbar", null);
+            return false;
+        }
+        boolean ok = activity.downloadCurrentWebHtml("KGG_CURRENT_ADMIN_HTML.html");
+        setState(ok ? "ready" : "error", ok ? "Aktuelle Admin-HTML wurde gespeichert" : "HTML-Download fehlgeschlagen", null);
+        return ok;
+    }
+
+    @JavascriptInterface
     public boolean confirmPromotion(String releaseId) {
         return confirmControl("promote", "colleague", releaseId, "Beta fuer Kolleg:innen freigeben?");
     }

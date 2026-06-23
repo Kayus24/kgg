@@ -1,7 +1,7 @@
 {
-  "versionCode": 27,
-  "versionName": "1.0.27-release-connection-test",
-  "indexUrl": "index.html?v=27",
-  "sha256": "3756e4a9be79102f93a7fcccd2f26b0bfe8ea52c2b42eb9e6bf3b359ec48c4e4",
-  "notes": "v027: Read-only GitHub-Verbindungstest in der Update-Zentrale. Keine GitHub-Schreibaktion, keine PDF-/QR-Erzeugung-/Patienten-App-/Scan-Kamera-/Parser-/Plan-State-/Storage-Aenderung."
+  "versionCode": 28,
+  "versionName": "1.0.28-html-download-camera-fix",
+  "indexUrl": "index.html?v=28",
+  "sha256": "a16fc12972e83152d4959b14c2d392018ee9cbeacd9b7da0eea4ca07c8a41151",
+  "notes": "v028: Aktuelle Admin-HTML aus der Update-Zentrale speichern und nativen Kamera-Scan ohne Galerie-Fallback erzwingen. Keine PDF-/QR-Erzeugung-/Patienten-App-/Parser-/Plan-State-/Storage-Aenderung."
 }
