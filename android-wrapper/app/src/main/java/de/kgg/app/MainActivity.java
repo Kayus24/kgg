@@ -60,9 +60,9 @@ public class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST = 4201;
     private static final int CAMERA_PERMISSION_REQUEST = 4202;
     private static final int RELEASE_HTML_REQUEST = 4301;
-    private static final int BUNDLED_WEB_VERSION = 392;
-    private static final String BUILD_TIME = "2026-06-23T10:30:00+02:00";
-    private static final String BUILD_CODE = "release-connection-test";
+    private static final int BUNDLED_WEB_VERSION = 393;
+    private static final String BUILD_TIME = "2026-06-23T11:05:00+02:00";
+    private static final String BUILD_CODE = "html-download-camera-fix";
     private static final int MAX_HTML_UPDATE_BYTES = 5_500_000;
     private static final int MAX_APK_UPDATE_BYTES = 80_000_000;
     private static final long APK_UPDATE_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000L;
@@ -97,6 +97,7 @@ public class MainActivity extends Activity {
     private WebChromeClient.FileChooserParams pendingFileChooserParams;
     private Uri cameraCaptureUri;
     private String nextFileChooserMode = "";
+    private boolean pendingForceCamera;
     private KggReleaseController releaseController;
 
     @Override
@@ -185,19 +186,25 @@ public class MainActivity extends Activity {
                 boolean wantsCamera = forceCamera || isCameraCaptureRequest(fileChooserParams);
                 if (wantsCamera && !hasCameraPermission()) {
                     pendingFileChooserParams = fileChooserParams;
+                    pendingForceCamera = forceCamera;
                     requestPermissions(new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUEST);
                     return true;
                 }
                 Intent intent = wantsCamera ? createCameraCaptureIntent() : null;
                 pendingFileChooserParams = null;
-                if (intent == null) {
+                pendingForceCamera = false;
+                if (intent == null && !forceCamera) {
                     intent = fileChooserParams.createIntent();
+                } else if (intent == null) {
+                    MainActivity.this.filePathCallback = null;
+                    Toast.makeText(MainActivity.this, "Kamera konnte nicht geoeffnet werden", Toast.LENGTH_SHORT).show();
+                    return false;
                 }
                 try {
                     startActivityForResult(intent, FILE_CHOOSER_REQUEST);
                     return true;
                 } catch (Exception err) {
-                    if (wantsCamera) {
+                    if (wantsCamera && !forceCamera) {
                         try {
                             cameraCaptureUri = null;
                             startActivityForResult(fileChooserParams.createIntent(), FILE_CHOOSER_REQUEST);
@@ -226,7 +233,9 @@ public class MainActivity extends Activity {
             return;
         }
         WebChromeClient.FileChooserParams params = pendingFileChooserParams;
+        boolean forceCamera = pendingForceCamera;
         pendingFileChooserParams = null;
+        pendingForceCamera = false;
         if (filePathCallback == null || params == null) {
             return;
         }
@@ -238,8 +247,14 @@ public class MainActivity extends Activity {
             return;
         }
         Intent intent = createCameraCaptureIntent();
-        if (intent == null) {
+        if (intent == null && !forceCamera) {
             intent = params.createIntent();
+        } else if (intent == null) {
+            filePathCallback.onReceiveValue(null);
+            filePathCallback = null;
+            cameraCaptureUri = null;
+            Toast.makeText(this, "Kamera konnte nicht geoeffnet werden", Toast.LENGTH_SHORT).show();
+            return;
         }
         try {
             startActivityForResult(intent, FILE_CHOOSER_REQUEST);
@@ -348,6 +363,20 @@ public class MainActivity extends Activity {
                 Toast.makeText(this, "HTML-Dateiauswahl nicht verfuegbar", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    boolean downloadCurrentWebHtml(String filename) {
+        try {
+            String html = localWebAppFile().exists()
+                    ? new String(Files.readAllBytes(localWebAppFile().toPath()), StandardCharsets.UTF_8)
+                    : readAssetText(bundledAppAsset());
+            saveTextToDownloads(safeHtmlFilename(filename), html, "text/html");
+            runOnUiThread(() -> Toast.makeText(this, "Aktuelle HTML gespeichert", Toast.LENGTH_SHORT).show());
+            return true;
+        } catch (Exception err) {
+            runOnUiThread(() -> Toast.makeText(this, "HTML konnte nicht gespeichert werden", Toast.LENGTH_SHORT).show());
+            return false;
+        }
     }
 
     private Intent createCameraCaptureIntent() {
@@ -959,6 +988,50 @@ public class MainActivity extends Activity {
         File file = new File(pdfDirectory, safeName);
         Files.write(file.toPath(), bytes);
         return Uri.fromFile(file);
+    }
+
+    private Uri saveTextToDownloads(String filename, String text, String mimeType) throws Exception {
+        byte[] bytes = (text == null ? "" : text).getBytes(StandardCharsets.UTF_8);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.MediaColumns.DISPLAY_NAME, filename);
+            values.put(MediaStore.MediaColumns.MIME_TYPE, mimeType == null ? "text/plain" : mimeType);
+            values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+            values.put(MediaStore.MediaColumns.IS_PENDING, 1);
+            Uri uri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+            if (uri == null) {
+                throw new IllegalStateException("downloads_insert_failed");
+            }
+            try (OutputStream output = getContentResolver().openOutputStream(uri)) {
+                if (output == null) {
+                    throw new IllegalStateException("downloads_stream_failed");
+                }
+                output.write(bytes);
+            }
+            values.clear();
+            values.put(MediaStore.MediaColumns.IS_PENDING, 0);
+            getContentResolver().update(uri, values, null, null);
+            return uri;
+        }
+        File directory = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+        if (directory == null) {
+            directory = getFilesDir();
+        }
+        File file = new File(directory, filename);
+        Files.write(file.toPath(), bytes);
+        return Uri.fromFile(file);
+    }
+
+    private String safeHtmlFilename(String filename) {
+        String name = filename == null ? "" : filename.trim();
+        if (name.isEmpty()) {
+            name = "KGG_CURRENT_ADMIN_HTML.html";
+        }
+        name = name.replaceAll("[\\\\/:*?\"<>|]+", "_");
+        if (!name.toLowerCase(Locale.ROOT).endsWith(".html")) {
+            name += ".html";
+        }
+        return name;
     }
 
     private class KggPdfBridge {
