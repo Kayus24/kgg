@@ -1,0 +1,17 @@
+{
+  "versionCode": 24,
+  "versionName": "0.2.2-release-connection-test",
+  "shellVersion": "v392",
+  "webRelease": "r0395",
+  "notes": "Admin-APK kann die GitHub-Verbindung read-only testen. Beide APKs enthalten r0395 als Offline-Basis.",
+  "android": {
+    "admin": {
+      "file": "android/KGG_ANDROID_ADMIN_v392_release_connection_test_debug.apk",
+      "sha256": "6d69445305fa775a10c8684e505299cd9595356324369d5f91480290f7860d6a"
+    },
+    "colleague": {
+      "file": "android/KGG_ANDROID_KOLLEGEN_v392_release_connection_test_debug.apk",
+      "sha256": "d14f04dac9be38bd31af85321333d0483b07685058b8bdca82aa7859a12f6d03"
+    }
+  }
+}

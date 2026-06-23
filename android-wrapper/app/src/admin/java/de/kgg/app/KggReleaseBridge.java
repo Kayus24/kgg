@@ -105,6 +105,17 @@ public final class KggReleaseBridge implements KggReleaseController {
     }
 
     @JavascriptInterface
+    public boolean testConnection() {
+        if (!isAvailable()) {
+            setState("blocked", "GitHub App Client-ID fehlt im Admin-Build", null);
+            return false;
+        }
+        setState("testing", "GitHub-Verbindung wird getestet", null);
+        new Thread(this::runConnectionTest, "kgg-release-connection-test").start();
+        return true;
+    }
+
+    @JavascriptInterface
     public boolean confirmPromotion(String releaseId) {
         return confirmControl("promote", "colleague", releaseId, "Beta fuer Kolleg:innen freigeben?");
     }
@@ -262,6 +273,22 @@ public final class KggReleaseBridge implements KggReleaseController {
             setState("submitted", "Beta-PR erstellt; Tests und Auto-Merge laufen", extra);
         } catch (Exception err) {
             setState("error", "Beta-Upload fehlgeschlagen: " + safeMessage(err), null);
+        }
+    }
+
+    private void runConnectionTest() {
+        try {
+            String token = requireToken();
+            JSONObject ref = api("GET", "/git/ref/heads/main", null, token);
+            String sha = ref.optJSONObject("object") == null
+                    ? ""
+                    : ref.optJSONObject("object").optString("sha", "");
+            JSONObject extra = new JSONObject();
+            extra.put("repository", OWNER + "/" + REPO);
+            extra.put("mainSha", sha.length() > 12 ? sha.substring(0, 12) : sha);
+            setState("ready", "GitHub-Test erfolgreich: Repo erreichbar, Token gueltig", extra);
+        } catch (Exception err) {
+            setState("error", "GitHub-Test fehlgeschlagen: " + safeMessage(err), null);
         }
     }
 
