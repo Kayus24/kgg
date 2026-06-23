@@ -60,9 +60,9 @@ public class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST = 4201;
     private static final int CAMERA_PERMISSION_REQUEST = 4202;
     private static final int RELEASE_HTML_REQUEST = 4301;
-    private static final int BUNDLED_WEB_VERSION = 390;
-    private static final String BUILD_TIME = "2026-06-21T12:00:00+02:00";
-    private static final String BUILD_CODE = "release-pipeline-v2";
+    private static final int BUNDLED_WEB_VERSION = 391;
+    private static final String BUILD_TIME = "2026-06-23T10:00:00+02:00";
+    private static final String BUILD_CODE = "release-login-code-fix";
     private static final int MAX_HTML_UPDATE_BYTES = 5_500_000;
     private static final int MAX_APK_UPDATE_BYTES = 80_000_000;
     private static final long APK_UPDATE_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000L;
