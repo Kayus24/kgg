@@ -1,0 +1,67 @@
+name: Promote or rollback KGG release
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: 'Promotion or rollback'
+        required: true
+        type: choice
+        options: [promote, rollback]
+      release_id:
+        description: 'Immutable release ID, for example r0390 or v389'
+        required: true
+        type: string
+      channel:
+        description: 'Rollback channel; promotion always targets colleague'
+        required: true
+        default: colleague
+        type: choice
+        options: [admin, colleague]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: kgg-release-control
+  cancel-in-progress: false
+
+jobs:
+  control:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Create release-control change
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch="release/${{ inputs.operation }}-${{ inputs.channel }}-${{ inputs.release_id }}-${{ github.run_id }}"
+          git switch -c "$branch"
+          if [[ '${{ inputs.operation }}' == 'promote' ]]; then
+            python release-pipeline/release_pipeline.py promote --release-id '${{ inputs.release_id }}'
+          else
+            python release-pipeline/release_pipeline.py rollback \
+              --channel '${{ inputs.channel }}' \
+              --release-id '${{ inputs.release_id }}'
+          fi
+          python -m unittest release-pipeline/test_release_pipeline.py
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add therapist-app/android_update_manifest.json
+          git commit -m '${{ inputs.operation }} KGG ${{ inputs.release_id }} for ${{ inputs.channel }}'
+          git push -u origin "$branch"
+          url="$(gh pr create --base main --head "$branch" \
+            --title '[release] ${{ inputs.operation }} ${{ inputs.release_id }} (${{ inputs.channel }})' \
+            --body 'Automatisch erzeugter Release-Control-PR. Ausgeloest nach bestaetigter Aktion in Admin-App oder Codex/GPT. Keine direkte main-Aenderung.')"
+          gh pr merge "$url" --admin --squash
+          echo "PR: $url" >> "$GITHUB_STEP_SUMMARY"

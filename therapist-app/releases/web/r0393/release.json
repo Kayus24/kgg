@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0393",
+  "versionName": "1.0.25-ui-source-truth-release-center",
+  "notes": "Bestaetigte v24-UI als Source of Truth; gestaltete Admin-Update-Zentrale; fail-closed Kolleg:innen-Artefakt ohne privilegierte Admin-Bloecke.",
+  "createdAt": "2026-06-22T08:27:00Z",
+  "source": "kgg-update/index.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0393",
+      "profile": "admin",
+      "versionName": "1.0.25-ui-source-truth-release-center",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0393/admin.html",
+      "sha256": "6e90e76d7c56dba46979142fed2dee8f1c87765462eac9289a4bf490a5807d2a",
+      "notes": "Bestaetigte v24-UI als Source of Truth; gestaltete Admin-Update-Zentrale; fail-closed Kolleg:innen-Artefakt ohne privilegierte Admin-Bloecke."
+    },
+    "colleague": {
+      "releaseId": "r0393",
+      "profile": "colleague",
+      "versionName": "1.0.25-ui-source-truth-release-center",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0393/colleague.html",
+      "sha256": "9c17e12eda505e4dd1e083c29799268560b81c1894345312ac8cf787a22b8adc",
+      "notes": "Bestaetigte v24-UI als Source of Truth; gestaltete Admin-Update-Zentrale; fail-closed Kolleg:innen-Artefakt ohne privilegierte Admin-Bloecke."
+    }
+  }
+}

@@ -1,0 +1,58 @@
+plugins {
+    id "com.android.application"
+}
+
+android {
+    namespace "de.kgg.app"
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "de.kgg.app"
+        minSdk 26
+        targetSdk 36
+        versionCode 22
+        versionName "0.2.0-release-pipeline-v2"
+        manifestPlaceholders = [appLabel: "KGG Physio"]
+        buildConfigField "String", "KGG_GITHUB_CLIENT_ID", "\"${project.findProperty('KGG_GITHUB_CLIENT_ID') ?: ''}\""
+    }
+
+    buildFeatures { buildConfig true }
+
+    flavorDimensions "profile"
+    productFlavors {
+        kollegen {
+            dimension "profile"
+            applicationId "de.kgg.app"
+            manifestPlaceholders = [appLabel: "KGG Kolleg:innen"]
+        }
+        admin {
+            dimension "profile"
+            applicationId "de.kgg.admin"
+            manifestPlaceholders = [appLabel: "KGG Admin"]
+        }
+    }
+
+    sourceSets {
+        admin.assets.srcDir layout.buildDirectory.dir("generated/kggAssets/admin")
+        kollegen.assets.srcDir layout.buildDirectory.dir("generated/kggAssets/kollegen")
+    }
+}
+
+def stageAdminProfileAsset = tasks.register("stageAdminProfileAsset", Copy) {
+    from("../../therapist-app/releases/web/r0393/admin.html")
+    into(layout.buildDirectory.dir("generated/kggAssets/admin"))
+}
+
+def stageColleagueProfileAsset = tasks.register("stageColleagueProfileAsset", Copy) {
+    from("../../therapist-app/releases/web/r0393/colleague.html")
+    into(layout.buildDirectory.dir("generated/kggAssets/kollegen"))
+}
+
+afterEvaluate {
+    tasks.named("mergeAdminDebugAssets").configure { dependsOn(stageAdminProfileAsset) }
+    tasks.named("mergeKollegenDebugAssets").configure { dependsOn(stageColleagueProfileAsset) }
+}
+
+dependencies {
+    implementation "androidx.core:core:1.13.1"
+}

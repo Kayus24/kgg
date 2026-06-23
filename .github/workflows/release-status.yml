@@ -1,0 +1,28 @@
+name: Show KGG release status
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate and show channels
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest release-pipeline/test_release_pipeline.py
+          node release-pipeline/check_html_scripts.js kgg-update/index.html therapist-app/releases/web/*/*.html
+          {
+            echo '## KGG Release Channels'
+            echo '```json'
+            python release-pipeline/release_pipeline.py status
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
