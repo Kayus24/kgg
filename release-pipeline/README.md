@@ -15,6 +15,32 @@ Die Admin-App speichert die aktuelle HTML lokal. Danach wird die Datei auf dem B
 
 Die Kolleg:innen-Freigabe passiert bewusst getrennt ueber `Promote latest KGG Admin beta`, damit eine Admin-Beta erst getestet werden kann.
 
+## Mobile-Inbox Smoke automatisieren
+
+Schneller Check ohne GitHub-Schreibaktion:
+
+```powershell
+python release-pipeline/mobile_inbox_live_smoke.py --dry-run
+```
+
+Der Dry-run nimmt die aktuelle Admin-HTML aus `origin/main`, prueft sie lokal wie ein Mobile-Inbox-Upload und baut die Release-Artefakte in einem temporaeren Clone. Es wird nichts gepusht, kein PR erstellt und `main` bleibt unveraendert.
+
+Echter Live-Test:
+
+```powershell
+python release-pipeline/mobile_inbox_live_smoke.py
+```
+
+Der Live-Test braucht `gh auth login` mit Schreibrechten fuer `Kayus24/kgg`. Er schreibt absichtlich eine Smoke-HTML nach `mobile-inbox/KGG_MOBILE_INBOX_SMOKE.html`, wartet auf die Action `KGG Mobile Inbox Release` und prueft danach automatisch:
+
+- Workflow ist gruen.
+- ein neuer `[admin-beta] rNNNN ...` PR wurde erstellt und gemergt.
+- `origin/main` enthaelt `therapist-app/releases/web/rNNNN/admin.html`.
+- die GitHub-Pages-URL antwortet mit `200`.
+- das Manifest zeigt Admin auf die neue Release, Kolleg:innen bleibt unveraendert.
+
+Wichtig: Jeder Live-Test erzeugt bewusst eine neue Admin-Beta-Release. Er fuehrt keine Kolleg:innen-Freigabe aus.
+
 ## Admin-Beta per PR vorbereiten
 
 Auf dem Release-Branch liegen temporaer:
