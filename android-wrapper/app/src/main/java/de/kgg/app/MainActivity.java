@@ -60,9 +60,10 @@ public class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST = 4201;
     private static final int CAMERA_PERMISSION_REQUEST = 4202;
     private static final int RELEASE_HTML_REQUEST = 4301;
-    private static final int BUNDLED_WEB_VERSION = 394;
-    private static final String BUILD_TIME = "2026-06-23T11:05:00+02:00";
-    private static final String BUILD_CODE = "html-download-camera-fix";
+    private static final int ANDROID_SHELL_VERSION = 398;
+    private static final int BUNDLED_WEB_VERSION = 400;
+    private static final String BUILD_TIME = "2026-06-24T12:30:00+02:00";
+    private static final String BUILD_CODE = "r0400-no-boot-redirect-force-bundled-html";
     private static final int MAX_HTML_UPDATE_BYTES = 5_500_000;
     private static final int MAX_APK_UPDATE_BYTES = 80_000_000;
     private static final long APK_UPDATE_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000L;
@@ -622,7 +623,7 @@ public class MainActivity extends Activity {
                     return;
                 }
                 int latestShellVersion = parseVersionNumber(manifest.optString("latestAndroidShellVersion"));
-                if (latestShellVersion <= BUNDLED_WEB_VERSION) {
+                if (latestShellVersion <= ANDROID_SHELL_VERSION) {
                     return;
                 }
                 String apkUrl = manifestValue(manifest,
@@ -779,7 +780,7 @@ public class MainActivity extends Activity {
             SharedPreferences prefs = getSharedPreferences(UPDATE_PREFS, MODE_PRIVATE);
             status.put("available", true);
             status.put("platform", "android");
-            status.put("currentShellVersion", BUNDLED_WEB_VERSION);
+            status.put("currentShellVersion", ANDROID_SHELL_VERSION);
             status.put("buildTime", BUILD_TIME);
             status.put("buildCode", BUILD_CODE);
             status.put("packageName", getPackageName());
