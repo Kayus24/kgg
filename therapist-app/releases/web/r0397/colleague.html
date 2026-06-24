@@ -11,31 +11,26 @@ Before editing this app, any LLM/agent/human should read these blocks:
   "schema": 1,
   "app": "KGG Plan",
   "activeFixes": [
+    "admin-debug-menu-feedback",
     "embedded-source-truth",
-    "patch-retention-guard",
-    "rollback-v023-debug-breakage",
-    "phone-viewport-state-leak-guard",
-    "phone-plan-local-list-drag",
-    "local-content-no-auto-redirect",
-    "no-auto-release-navigation",
-    "release-center-local-fallback"
+    "patch-retention-guard"
   ],
   "currentVersion": {
-    "versionCode": 32,
-    "versionName": "1.0.32-no-boot-redirect",
-    "lastPatchId": "kgg-v032-no-boot-redirect",
-    "updatedBy": "local-html-patch"
+    "versionCode": 22,
+    "versionName": "1.0.22-admin-debug-menu-feedback",
+    "lastPatchId": "kgg-v022-admin-debug-menu-feedback",
+    "updatedBy": "update-inbox"
   },
-  "latestPatchId": "kgg-v032-no-boot-redirect",
+  "latestPatchId": "kgg-v022-admin-debug-menu-feedback",
   "lastUpdateIntent": {
-    "id": "kgg-v014-phone-viewport-state-release-guard",
-    "summary": "Hardens phone-only plan gesture state cleanup across resize/orientation, preserves local #planList absolute drag behavior, preserves local content/file no-auto-redirect behavior, and keeps the safe KGGReleaseControl fallback before the release center.",
+    "id": "kgg-v022-admin-debug-menu-feedback",
+    "summary": "Adds admin debug/feedback menu as v022. Tablet gets debug entry in scan/admin rail; phone gets consolidated Admin-Menue for admin actions.",
     "touched": [
-      "Phone viewport state cleanup",
-      "Phone drag/reorder CSS guard",
+      "Admin debug UI",
       "HTML embedded metadata",
       "Source Truth",
-      "Changelog"
+      "Changelog",
+      "Patch rules"
     ],
     "notTouched": [
       "PDF",
@@ -44,10 +39,9 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Scan-Kamera",
       "Parser",
       "Android-Wrapper",
-      "Tablet-Core-Layout",
+      "Tablet core layout/breakpoints",
       "Plan-State",
-      "Storage",
-      "Exercise database"
+      "Storage"
     ]
   }
 }
@@ -60,29 +54,24 @@ Before editing this app, any LLM/agent/human should read these blocks:
   "activeFixes": [
     "embedded-source-truth",
     "patch-retention-guard",
-    "rollback-v023-debug-breakage",
-    "phone-viewport-state-leak-guard",
-    "phone-plan-local-list-drag",
-    "local-content-no-auto-redirect",
-    "no-auto-release-navigation",
-    "release-center-local-fallback"
+    "rollback-v023-debug-breakage"
   ],
   "currentVersion": {
-    "versionCode": 32,
-    "versionName": "1.0.32-no-boot-redirect",
-    "lastPatchId": "kgg-v032-no-boot-redirect",
-    "updatedBy": "local-html-patch"
+    "versionCode": 24,
+    "versionName": "1.0.24-rollback-v023-debug-breakage",
+    "lastPatchId": "kgg-v024-rollback-v023-debug-breakage",
+    "updatedBy": "update-inbox"
   },
-  "latestPatchId": "kgg-v032-no-boot-redirect",
+  "latestPatchId": "kgg-v024-rollback-v023-debug-breakage",
   "lastUpdateIntent": {
-    "id": "kgg-v014-phone-viewport-state-release-guard",
-    "summary": "Hardens phone-only plan gesture state cleanup across resize/orientation, preserves local #planList absolute drag behavior, preserves local content/file no-auto-redirect behavior, and keeps the safe KGGReleaseControl fallback before the release center.",
+    "id": "kgg-v024-rollback-v023-debug-breakage",
+    "summary": "Emergency rollback: remove v023/v022 admin debug UI because it broke tablet layout.",
     "touched": [
-      "Phone viewport state cleanup",
-      "Phone drag/reorder CSS guard",
+      "Admin debug UI rollback",
       "HTML embedded metadata",
       "Source Truth",
-      "Changelog"
+      "Changelog",
+      "Patch rules"
     ],
     "notTouched": [
       "PDF",
@@ -93,8 +82,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Android-Wrapper",
       "Tablet-Core-Layout",
       "Plan-State",
-      "Storage",
-      "Exercise database"
+      "Storage"
     ]
   }
 }
@@ -104,80 +92,8 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 32,
+  "latestVersionCode": 24,
   "entries": [
-    {
-      "versionCode": 32,
-      "versionName": "1.0.32-no-boot-redirect",
-      "patchId": "kgg-v032-no-boot-redirect",
-      "status": "active",
-      "type": "local-html-patch",
-      "title": "Keine automatische Release-Navigation beim Start",
-      "reason": "ChatGPT-/Android-Datei-Viewer werden verlassen, wenn die HTML beim Booten per location.replace auf GitHub-Pages navigiert.",
-      "whatChanged": [
-        "Remote-Web-Updates werden nur noch als sichtbarer manueller Update-Hinweis angeboten.",
-        "Der alte Auto-Apply-Hook bleibt kompatibel vorhanden, navigiert aber nicht mehr automatisch.",
-        "Explizite Buttons in der Update-Zentrale duerfen externe Links weiterhin bewusst oeffnen."
-      ],
-      "touchedAreas": [
-        "GitHub/Web-Update-Pruefung",
-        "Boot-Navigation",
-        "HTML embedded metadata"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR-Erzeugung",
-        "Patienten-App",
-        "Scan-Kamera",
-        "Parser",
-        "Plan-State",
-        "Exercise database",
-        "Phone drag UI"
-      ]
-    },
-    {
-      "versionCode": 31,
-      "versionName": "1.0.31-phone-drag-mobile-inbox",
-      "patchId": "kgg-v014-phone-viewport-state-release-guard",
-      "status": "active",
-      "type": "local-html-patch",
-      "title": "Phone-Viewport-State-Leak-Guard und Update-Zentrale lokal stabilisiert",
-      "reason": "Phone-only Touch/Layout-State konnte nach Resize/Orientation in Tablet/Querformat weiterwirken; lokale content/file Tests sollten keinen GitHub-Auto-Redirect auslösen und die Update-Zentrale braucht ohne native Bridge einen Fallback.",
-      "whatChanged": [
-        "Adds a final phone viewport leak guard that removes stale kggPlanCardReordering, kggPlanCardSwiping, kggPlanSectionFrozen, is-scrolling, phoneTextFocus and kggPhoneDrawerOpen classes after gesture end and when leaving phone viewport.",
-        "Cleans leaked inline drag/swipe styles on plan cards and restores #planList position when a phone drag is cancelled by resize/orientation.",
-        "Keeps phone drag-reorder anchored to #planList local absolute coordinates instead of viewport fixed positioning.",
-        "Keeps existing local content/file no-auto-redirect logic while preserving the normal update prompt.",
-        "Keeps existing KGGReleaseControl local fallback before kgg-release-center-v28-script and does not overwrite a native bridge."
-      ],
-      "touchedAreas": [
-        "Phone viewport state cleanup",
-        "Plan-card drag/reorder UI guard",
-        "HTML embedded metadata",
-        "Source Truth",
-        "Changelog"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR-Erzeugung",
-        "Patienten-App",
-        "Scan-Kamera",
-        "Parser",
-        "Android-Wrapper",
-        "Tablet-Core-Layout",
-        "Plan-State",
-        "Storage",
-        "Exercise database"
-      ],
-      "testStatus": {
-        "phoneDragAnchoredToFinger": "code-inspected",
-        "phoneStateCleanupOnGestureEnd": "code-inspected",
-        "tabletLayoutNoGlobalContainerOverride": "code-inspected",
-        "localContentNoAutoRedirect": "code-inspected",
-        "releaseCenterFallbackBeforeV28": "code-inspected"
-      },
-      "createdAt": "2026-06-23T00:00:00+02:00"
-    },
     {
       "versionCode": 24,
       "versionName": "1.0.24-rollback-v023-debug-breakage",
@@ -401,7 +317,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "handoffNote": "Lokale LLMs können index.html lesen und finden kgg-source-truth sowie kgg-changelog direkt im Code."
     }
   ],
-  "latestVersionName": "1.0.25-phone-viewport-state-release-guard"
+  "latestVersionName": "1.0.24-rollback-v023-debug-breakage"
 }
 </script>
 <!-- END kgg-changelog -->
@@ -512,25 +428,6 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "no duplicate debug entry",
       "Max approval"
     ]
-  },
-  "lastUpdatedByPatchId": "kgg-v014-phone-viewport-state-release-guard",
-  "phoneViewportLeakGuardPolicy": {
-    "patchId": "kgg-v014-phone-viewport-state-release-guard",
-    "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
-    "requirements": [
-      "Gate phone behavior with matchMedia('(max-width:759px)').",
-      "When leaving phone viewport, remove kggPlanCardReordering, kggPlanCardSwiping, kggPlanSectionFrozen and stale inline drag/swipe styles.",
-      "Do not fix phone drag by changing global tablet containers such as #currentPlanBlock or .planSectionBody outside max-width:759px.",
-      "Phone drag-reorder must use #planList local absolute coordinates, not viewport fixed positioning.",
-      "Local content://, file:// and /media/external/file/ tests must not auto-redirect to GitHub; the normal update prompt may remain."
-    ],
-    "doNotRemoveWithout": [
-      "supersededBy",
-      "reason",
-      "phone portrait test",
-      "tablet/landscape test",
-      "Max approval"
-    ]
   }
 }
 </script>
@@ -608,7 +505,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v32 No Boot Redirect</title>
+  <title>KGG App Kolleg:innen</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -15884,8 +15781,13 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
 }
 /* KGG PATCH END: kgg-v024-rollback-v023-debug-breakage-guard-style */
 </style>
+<style id="kgg-colleague-boundary">
+  body.colleagueMode .adminConfigBtn,
+  body.colleagueMode .sharedBankBtn,
+  body.colleagueMode .adminTestBanner{display:none!important}
+</style>
 </head>
-<body class="adminMode">
+<body class="colleagueMode">
 <div class="tabletSideBackdrop" id="tabletSideBackdrop" hidden></div>
   <aside class="tabletSideMenu" id="tabletSideMenu" aria-hidden="true">
     <div class="tabletSideMenuHead">
@@ -15895,7 +15797,6 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     <nav class="tabletSideMenuGroup tabletSideMenuMain" aria-label="Tablet-Menue">
       <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuRecentBtn" type="button"><span class="tabletMenuActionIcon" aria-hidden="true">&#128337;</span><span>Letzte Pl&auml;ne</span></button>
       <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuPackagesBtn" type="button"><span class="tabletMenuActionIcon" aria-hidden="true">&#128230;</span><span>&Uuml;bungspakete</span></button>
-      <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuTherapistShareBtn" type="button"><span class="tabletMenuActionIcon" aria-hidden="true">&#128188;</span><span>Therapeuten-App weitergeben</span></button>
       <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuLayoutBtn" type="button" aria-expanded="false"><span class="tabletMenuActionIcon" aria-hidden="true">&#9881;</span><span>Layout anpassen</span></button>
       <div class="tabletSideMenuLayoutPanel" id="tabletMenuLayoutPanel" hidden>
         <div class="tabletLayoutControls" id="tabletLayoutControls" aria-label="Tablet-Layout">
@@ -15924,7 +15825,6 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   <div class="tabletPackageCards" id="tabletPackageCards"></div>
 </aside>
 <div class="app">
-  <div class="adminTestBanner">ADMIN-DATEI · v32 No Boot Redirect<small>Nur intern fuer Max/Admin. Nicht fuer Patient:innen verwenden. Keine API-Keys fest eingebaut.</small></div>
   <header class="topbar"><div class="topbarText"><h1>KGG Plan App <span class="stateBadge" id="stateBadge">Leerzustand</span></h1><small id="kggRuntimeVersion">Plain HTML/CSS/JS · offlinefähig · mobile-first</small><small class="kggBuildBadge" id="kggBuildBadge">Build wird geladen</small></div><button class="visionBtn" id="visionBtn" type="button" aria-pressed="false" aria-label="Großdruck-PDF umschalten">PDF A+</button></header>
 
   <section class="scanHub" id="scanHub">
@@ -15934,35 +15834,9 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     <input id="fileInput" class="nativeFileInput" type="file" accept="image/*" capture="environment">
     <input id="filePickerInput" class="nativeFileInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp" multiple>
     <div class="scanMeta filePickBtn" id="filePickBtn" role="button" tabindex="0" aria-label="Foto oder Datei auswählen">Foto / Datei <small id="scanStatus" class="hidden"></small></div>
-    <button class="mutedBtn adminConfigBtn" id="adminConfigBtn" type="button">Admin-Konfig</button>
     <button class="mutedBtn sharedBankBtn" id="sharedBankBtn" type="button">Übungsdatenbank teilen</button>
     <div id="scanPreview" class="notice hidden"></div>
   </section>
-  <div class="kggAdminMenuQrModal" id="kggAdminMenuQrModal" aria-hidden="true">
-    <div class="kggAdminMenuQrSheet" role="dialog" aria-modal="true" aria-labelledby="kggAdminMenuQrTitle">
-      <h2 id="kggAdminMenuQrTitle">QR</h2>
-      <p class="kggAdminMenuQrHint" id="kggAdminMenuQrHint"></p>
-      <div class="kggAdminMenuQrBox" id="kggAdminMenuQrBox"></div>
-      <textarea class="kggAdminMenuQrLink" id="kggAdminMenuQrLink" readonly></textarea>
-      <div class="kggAdminMenuQrButtons">
-        <button type="button" id="kggAdminMenuQrCopy">kopieren</button>
-        <button type="button" class="primary" id="kggAdminMenuQrOpen">oeffnen</button>
-        <button type="button" id="kggAdminMenuQrClose">schliessen</button>
-      </div>
-    </div>
-  </div>
-  <div class="kggTherapistShareModal" id="kggTherapistShareModal" aria-hidden="true">
-    <div class="kggTherapistShareSheet" role="dialog" aria-modal="true" aria-labelledby="kggTherapistShareTitle">
-      <h2 id="kggTherapistShareTitle">Therapeuten-App weitergeben</h2>
-      <p class="kggTherapistShareHint">Waehle, was der QR-Code enthalten soll.</p>
-      <div class="kggTherapistShareChoices">
-        <button type="button" id="therapistShareAppOnly"><b>Nur App</b><small>QR mit Therapeuten-App-Link.</small></button>
-        <button type="button" id="therapistShareSetup"><b>App + API-Key</b><small>Setup-Link plus verschluesselter Konfig-Transfer.</small></button>
-        <button type="button" id="therapistShareApiOnly"><b>Nur API-Key</b><small>Nur verschluesselter Konfig-Transfer.</small></button>
-      </div>
-      <button type="button" class="mutedBtn" id="therapistShareCancel">Abbrechen</button>
-    </div>
-  </div>
   <div id="mobileScannedPlansDock" class="mobileScannedPlansDock hidden" aria-live="polite"></div>
   <div class="tabletLayoutResizeHandle" id="tabletLayoutResizeHandle" role="separator" aria-orientation="vertical" aria-label="Tablet-Spaltenbreite ziehen"><div class="tabletSplitScaleControl" id="tabletSplitScaleControl" aria-hidden="true"><button id="tabletSplitScalePlus" type="button" aria-label="UI groesser">+</button><span class="tabletSplitScaleValue" id="tabletSplitScaleValue">100%</span><button id="tabletSplitScaleMinus" type="button" aria-label="UI kleiner">-</button></div></div>
 
@@ -16125,26 +15999,6 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   <div class="grid2"><button class="mutedBtn" id="dismissInstallPrompt" type="button">Später</button><button class="primary" id="acceptInstallPrompt" type="button">Installieren</button></div>
 </div></div>
 
-<div class="modal" id="adminSecretsModal"><div class="sheet">
-  <h2>Admin-Konfig</h2>
-  <p class="notice">Codes bleiben nur lokal auf diesem Geraet. In dieser Admin-Testdatei sind keine API-Keys fest eingebaut.</p>
-  <div class="field"><label>Gemini API-Key 1</label><input id="adminGeminiKey1" type="password" autocomplete="off" spellcheck="false"></div>
-  <div class="field"><label>Gemini API-Key 2</label><input id="adminGeminiKey2" type="password" autocomplete="off" spellcheck="false"></div>
-  <div class="field"><label>Medien-Dropzone URL</label><input id="adminMediaDropzoneEndpoint" type="url" autocomplete="off" spellcheck="false" placeholder="https://...workers.dev"></div>
-  <div class="field"><label>Medien Upload-Code</label><input id="adminMediaDropzoneUploadToken" type="password" autocomplete="off" spellcheck="false"></div>
-  <span class="secretStatus" id="adminSecretStatus">Keine lokalen Codes gespeichert.</span>
-  <div class="adminCodePackageTools">
-    <button class="mutedBtn wide" id="loadAdminSafeFile" type="button">Admin-Safe-Datei laden</button>
-    <button class="mutedBtn" id="importAdminCodePackage" type="button">Code-Paket einfuegen</button>
-    <button class="mutedBtn" id="exportAdminCodePackage" type="button">Code-Paket kopieren</button>
-    <button class="mutedBtn wide" id="downloadAdminSafeFile" type="button">Admin-Safe-Datei speichern</button>
-  </div>
-  <input id="adminSafeFileInput" class="hidden" type="file" accept=".kggsafe,.bin,.txt,.json,text/plain,application/json,application/octet-stream,*/*">
-  <div class="adminPackageHint">Admin-Safe-Dateien bleiben lokal und gehoeren nicht in GitHub, Chat oder Patient:innen-Ausgabe.</div>
-  <div class="grid2" style="margin-top:12px"><button class="mutedBtn danger" id="clearAdminSecrets" type="button">Löschen</button><button class="primary" id="saveAdminSecrets" type="button">Lokal speichern</button></div>
-  <button class="mutedBtn" id="closeAdminSecrets" type="button" style="width:100%;margin-top:8px">Schließen</button>
-</div></div>
-
 <div class="modal" id="sharedBankModal"><div class="sheet">
   <h2>Übungsdatenbank teilen</h2>
   <p class="notice">Nur Übungsdaten. Keine Patientendaten, keine Codes. Import löscht nichts.</p>
@@ -16237,8 +16091,8 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
 
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v032_no_boot_redirect';
-  window.KGG_ROLLOUT_PROFILE='admin';
+  const VERSION='KGG_GITHUB_UPDATE_v029_camera_touch_parser_fix';
+  window.KGG_ROLLOUT_PROFILE='colleague';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
   const KGG_BUILD_INFO={release:'v028',buildTime:'2026-06-23T11:05:00+02:00',buildCode:'github-update-v028-html-download-camera-fix',htmlFile:'kgg-update/index.html'};
@@ -16787,17 +16641,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     a.click();
     setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
-  function exposeAdminSecretApi(){
-    window.KGGAdmin=window.KGGAdmin||{};
-    window.KGGAdmin.openConfig=openAdminSecretsModal;
-    window.KGGAdmin.importCodePackage=text=>{applyAdminCodePackageData(decodeAdminCodePackage(text)); return window.KGGAdmin.getSecretStatus();};
-    window.KGGAdmin.exportCodePackage=()=>{loadAdminSecrets(); return encodeAdminCodePackage({geminiKeys:(adminSecrets.geminiKeys||[]).map(cleanSecret).filter(Boolean),mediaDropzoneEndpoint:cleanSecret(adminSecrets.mediaDropzoneEndpoint),mediaDropzoneUploadToken:cleanSecret(adminSecrets.mediaDropzoneUploadToken),exportedAt:new Date().toISOString()});};
-    window.KGGAdmin.getSecretStatus=()=>({geminiKeys:(adminSecrets.geminiKeys||[]).map(maskSecret),mediaDropzoneEndpoint:adminSecrets.mediaDropzoneEndpoint||'',mediaDropzoneUploadToken:maskSecret(adminSecrets.mediaDropzoneUploadToken),updatedAt:adminSecrets.updatedAt||''});
-    window.KGGAdmin.setGeminiKeys=keys=>{adminSecrets.geminiKeys=(Array.isArray(keys)?keys:[keys]).map(cleanSecret).filter(Boolean); persistAdminSecrets(); return window.KGGAdmin.getSecretStatus();};
-    window.KGGAdmin.setMediaDropzone=(endpoint,token)=>{adminSecrets.mediaDropzoneEndpoint=cleanSecret(endpoint); adminSecrets.mediaDropzoneUploadToken=cleanSecret(token); persistAdminSecrets(); return window.KGGAdmin.getSecretStatus();};
-    window.KGGAdmin.getGeminiKeyForLocalUse=()=>((adminSecrets.geminiKeys||[]).find(Boolean)||'');
-    window.KGGAdmin.getGeminiKeysForLocalUse=()=>((adminSecrets.geminiKeys||[]).map(cleanSecret).filter(Boolean));
-  }
+
   function canUsePwaRuntime(){return location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1';}
   function isLocalHtmlTestRuntime(){return location.protocol==='file:'||location.hostname==='localhost'||location.hostname==='127.0.0.1';}
   function isStandalonePwa(){return window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;}
@@ -16854,31 +16698,16 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     if(currentShell&&kggVersionNumber(latestVersion)<=currentShell)return null;
     return {version:latestVersion,url:latestUrl,sha256:latestSha||'',notes:manifest.releaseNotes||manifest.notes||''};
   }
-  function isKggLocalContentNoRedirectRuntime(){
-    const protocol=String(location.protocol||'').toLowerCase();
-    const href=String(location.href||'').toLowerCase();
-    return protocol==='content:'||
-      protocol==='capacitor:'||
-      protocol==='android-app:'||
-      href.indexOf('/media/external/file/')!==-1||
-      href.indexOf('content://')===0||
-      href.indexOf('file://')===0;
-  }
-  const kggNoAutoReleaseNavigationMarker='kgg-no-auto-release-navigation-v32';
-  function stageManualRemoteWebUpdate(target){
-    if(!target||!target.url)return false;
-    window.KGGRemoteUpdateUrl=target.url;
-    window.KGGPendingRemoteUpdateVersion=target.version;
-    window.KGGPendingRemoteUpdateNotes=target.notes;
-    showInstallPrompt('remoteUpdate');
-    return true;
-  }
   function autoApplyRemoteWebUpdate(target){
-    // v32: Beim Booten niemals automatisch auf GitHub-Pages/Release-HTML navigieren.
-    // ChatGPT-/Android-/Datei-Viewer fangen solche Redirects als externen Link ab.
-    // Updates duerfen nur noch nach bewusstem Tippen auf den sichtbaren Button oeffnen.
-    void target;
-    return false;
+    if(!target||!target.url||isNativeAndroidShell()||isLocalHtmlTestRuntime())return false;
+    try{
+      if(sessionStorage.getItem(kggAutoUpdateSessionKey)===target.version)return false;
+      sessionStorage.setItem(kggAutoUpdateSessionKey,target.version);
+    }catch(err){}
+    const current=String(location.href||'').split('#')[0];
+    if(current===target.url)return false;
+    location.replace(target.url);
+    return true;
   }
   async function checkGithubAppUpdate(){
     if(!window.fetch||isLocalHtmlTestRuntime())return;
@@ -16899,8 +16728,12 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
         }
         return;
       }
+      if(webTarget&&autoApplyRemoteWebUpdate(webTarget))return;
       if(!webTarget)return;
-      stageManualRemoteWebUpdate(webTarget);
+      window.KGGRemoteUpdateUrl=webTarget.url;
+      window.KGGPendingRemoteUpdateVersion=webTarget.version;
+      window.KGGPendingRemoteUpdateNotes=webTarget.notes;
+      showInstallPrompt('remoteUpdate');
     }catch(err){
       console.warn('GitHub-Update-Pruefung nicht verfuegbar:',err);
     }
@@ -16982,9 +16815,9 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!window.KGGPwaReloading){window.KGGPwaReloading=true; location.reload();}});
   }
   function initAdminModeAccess(){
+    if(window.KGG_ROLLOUT_PROFILE==='colleague'){document.body.classList.remove('adminMode');document.body.classList.add('colleagueMode');return;}
     loadAdminSecrets();
-    exposeAdminSecretApi();
-    document.body.classList.add('adminMode');
+      document.body.classList.add('adminMode');
     if(!(adminSecrets.geminiKeys&&adminSecrets.geminiKeys.length)){
       setTimeout(()=>{try{openAdminSecretsModal();}catch(e){}},700);
     }
@@ -17084,7 +16917,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     }
     return selected;
   }
-  function stripExerciseName(raw){return String(raw||'').replace(/\d+(?:[,.]\d+)?\s*(kg|kilo|wdh|wh|reps|min|sek|sec|s)/ig,' ').replace(/(a|x|mal)/ig,' ').replace(/\s+/g,' ').trim();}
+  function stripExerciseName(raw){return String(raw||'').replace(/\d+(?:[,.]\d+)?\s*(kg|kilo|bar|stufe|watt|hub|wdh|wh|reps|min|sek|sec|s)/ig,' ').replace(/(a|x|mal)/ig,' ').replace(/\s+/g,' ').trim();}
   function parseLiveExercise(text,localId){
     const raw=String(text||'').trim();
     const parsedSide=parseSideModeFromText(raw);
@@ -17094,16 +16927,17 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     const hit=(match&&match.score>=20)?match.ex:null;
     const nums=raw.match(/\d+(?:[,.]\d+)?/g)||[];
     let metric='',load='';
-    const kg=raw.match(/(\d+(?:[,.]\d+)?)\s*kg/i);
+    const loadMatch=raw.match(/(\d+(?:[,.]\d+)?)\s*(kg|bar|stufe|watt|hub)\b/i);
     const rep=raw.match(/(\d+)\s*(wdh|wh|reps)/i);
     const time=raw.match(/(\d+(?:[,.]\d+)?)\s*(min|sek|sec|s)/i);
     if(rep) metric=rep[1]; else if(time) metric=time[1].replace(',','.')+' '+time[2].toLowerCase();
-    if(kg) load=kg[1].replace(',','.'); else if(nums.length>1 && !time) load=nums[0].replace(',','.');
+    const loadUnit=loadMatch?loadMatch[2].toLowerCase():'kg';
+    if(loadMatch) load=loadMatch[1].replace(',','.'); else if(nums.length>1 && !time) load=nums[0].replace(',','.');
     const cleanName=stripExerciseName(raw)||raw;
     const pendingNew=!hit || (match&&match.score<35);
     const needsReview=pendingNew || (!!match && match.score>0 && match.score<70);
     const id=localId||makeLocalId();
-    return {...(hit||{id:'new_'+Date.now(),name:cleanName,sets:3,unit:(time?'Zeit':'Wdh'),weightUnit:(kg?'kg':'kg')}), id, localId:id, sourceId:hit?hit.id:'', bankId:hit?hit.id:'', name:hit?hit.name:cleanName, sets:(hit&&hit.sets)||3, startMetric:metric, startLoad:load, side:parsedSide, rawText:raw, liveDraft:true, changedByLiveText:true, pendingNew, needsReview, sourceFlags:[pendingNew?'pendingNew':'',needsReview?'needsReview':''].filter(Boolean)};
+    return {...(hit||{id:'new_'+Date.now(),name:cleanName,sets:3,unit:(time?'Zeit':'Wdh'),weightUnit:loadUnit}), id, localId:id, sourceId:hit?hit.id:'', bankId:hit?hit.id:'', name:hit?hit.name:cleanName, sets:(hit&&hit.sets)||3, startMetric:metric, startLoad:load, side:parsedSide, rawText:raw, liveDraft:true, changedByLiveText:true, pendingNew, needsReview, sourceFlags:[pendingNew?'pendingNew':'',needsReview?'needsReview':''].filter(Boolean), weightUnit:time?'keine':loadUnit, loadUnit:time?'keine':loadUnit};
   }
   function parseLine(text){return parseLiveExercise(text)||{id:makeLocalId(),localId:makeLocalId(),name:String(text||'').trim(),sets:3,unit:'Wdh',weightUnit:'kg',pendingNew:true,needsReview:true};}
   function addExercise(ex){const item=ensureUiExerciseShape(ex||{}); state.plan.push(item); syncStatePlanToStore('ui_add_exercise'); $('exerciseInput').value=''; state.bankOpen=false; state.liveDraftId=null; save(); render();}
@@ -17131,7 +16965,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   }
   function confirmExerciseInput(){const text=activeText(); if(!text)return; if(state.liveDraftId){finalizeLiveDraft('ui_enter_optional_finalize'); $('exerciseInput').value=''; state.bankOpen=false; render(); return;} addExercise(parseLine(text));}
   function activeText(){return $('exerciseInput').value.trim()}
-  function stripExerciseName(raw){return String(raw||'').replace(/\d+(?:[,.]\d+)?\s*(kg|kilo|wdh|wh|reps|min|sek|sec|s)\b/ig,' ').replace(/\b(li\/re|l\/r|lr|li|re|links|rechts)\b/ig,' ').replace(/\b(a|x|mal)\b/ig,' ').replace(/\s+/g,' ').trim();}
+  function stripExerciseName(raw){return String(raw||'').replace(/\d+(?:[,.]\d+)?\s*(kg|kilo|bar|stufe|watt|hub|wdh|wh|reps|min|sek|sec|s)\b/ig,' ').replace(/\b(li\/re|l\/r|lr|li|re|links|rechts)\b/ig,' ').replace(/\b(a|x|mal)\b/ig,' ').replace(/\s+/g,' ').trim();}
   function splitPlanText(text){
     const value=String(text||'').replace(/\r/g,'');
     const parts=[];
@@ -17160,17 +16994,18 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     const parsedSide=parseSideModeFromText(raw);
     const nums=raw.match(/\d+(?:[,.]\d+)?/g)||[];
     let metric='',load='';
-    const kg=raw.match(/(\d+(?:[,.]\d+)?)\s*kg/i);
+    const loadMatch=raw.match(/(\d+(?:[,.]\d+)?)\s*(kg|bar|stufe|watt|hub)\b/i);
     const rep=raw.match(/(\d+)\s*(wdh|wh|reps)/i);
     const time=raw.match(/(\d+(?:[,.]\d+)?)\s*(min|sek|sec|s)\b/i);
     if(rep) metric=rep[1]; else if(time) metric=time[1].replace(',','.')+' '+time[2].toLowerCase();
-    if(kg) load=kg[1].replace(',','.'); else if(nums.length>1&&!time) load=nums[0].replace(',','.');
+    const loadUnit=loadMatch?loadMatch[2].toLowerCase():'kg';
+    if(loadMatch) load=loadMatch[1].replace(',','.'); else if(nums.length>1&&!time) load=nums[0].replace(',','.');
     const cleanName=stripExerciseName(raw)||raw;
     const exact=exactBankExercise(cleanName);
     const id=existing&&(existing.localId||existing.id)||makeLocalId();
-    const base=exact||existing||{id:'new_'+Date.now(),name:cleanName,sets:3,unit:(time?'Zeit':'Wdh'),weightUnit:(kg?'kg':'kg')};
+    const base=exact||existing||{id:'new_'+Date.now(),name:cleanName,sets:3,unit:(time?'Zeit':'Wdh'),weightUnit:loadUnit};
     const pendingNew=!exact;
-    return {...base,id,localId:id,sourceId:exact?exact.id:'',bankId:exact?exact.id:'',name:exact?exact.name:cleanName,sets:(existing&&existing.sets)||base.sets||3,startMetric:metric||(existing&&existing.startMetric)||'',startLoad:load||(existing&&existing.startLoad)||'',side:parsedSide||normalizeSideMode(existing&&existing.side||'BI'),rawText:raw,liveDraft:false,changedByLiveText:false,textMaster:true,pendingNew,needsReview:pendingNew,sourceFlags:[pendingNew?'textMasterReview':''].filter(Boolean)};
+    return {...base,id,localId:id,sourceId:exact?exact.id:'',bankId:exact?exact.id:'',name:exact?exact.name:cleanName,sets:(existing&&existing.sets)||base.sets||3,startMetric:metric||(existing&&existing.startMetric)||'',startLoad:load||(existing&&existing.startLoad)||'',side:parsedSide||normalizeSideMode(existing&&existing.side||'BI'),rawText:raw,liveDraft:false,changedByLiveText:false,textMaster:true,pendingNew,needsReview:pendingNew,sourceFlags:[pendingNew?'textMasterReview':''].filter(Boolean),weightUnit:time?'keine':loadUnit,loadUnit:time?'keine':loadUnit};
   }
   function findExistingForTextSegment(segment,index){
     const current=(state.plan||[])[index];
@@ -17967,7 +17802,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
       card.classList.toggle('swipe-armed',Math.abs(swipe.dx)>=threshold());
       card.style.setProperty('--swipe-strength',String(strength));
       card.style.setProperty('--kgg-plan-swipe-x',swipe.dx+'px');
-      card.style.transform='translateX(var(--kgg-plan-swipe-x,0px))';
+      card.style.transform='translate3d('+swipe.dx+'px,0,0)';
       card.style.opacity=String(1-strength*0.16);
     };
     const up=e=>{
@@ -17982,18 +17817,18 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
         card.classList.add('swipe-removing');
         card.style.transition='transform .18s cubic-bezier(.2,.9,.2,1), opacity .18s ease';
         card.style.setProperty('--kgg-plan-swipe-x',(dir*(card.offsetWidth+96))+'px');
-        card.style.transform='translateX(var(--kgg-plan-swipe-x,0px))';
+        card.style.transform='translate3d('+(dir*(card.offsetWidth+96))+'px,0,0)';
         card.style.opacity='0';
         setTimeout(()=>{document.body.classList.remove('kggPlanCardSwiping');removeExercise(id);},190);
         return;
       }
       card.style.transition='transform .22s cubic-bezier(.2,.9,.2,1), opacity .18s ease, box-shadow .18s ease';
       card.style.setProperty('--kgg-plan-swipe-x','0px');
-      card.style.transform='translateX(var(--kgg-plan-swipe-x,0px))';
+      card.style.transform='translate3d(0,0,0)';
       card.style.opacity='1';
       setTimeout(()=>resetPlanCardSwipe(card),230);
     };
-    const cancel=()=>{cleanup(); if(swipe.active){clearPhoneScrollStateForPlanGesture(420);document.body.classList.remove('kggPlanCardSwiping');card.style.transition='transform .18s ease, opacity .18s ease';card.style.setProperty('--kgg-plan-swipe-x','0px');card.style.transform='translateX(var(--kgg-plan-swipe-x,0px))';card.style.opacity='1';setTimeout(()=>resetPlanCardSwipe(card),190);}else resetPlanCardSwipe(card);};
+    const cancel=()=>{cleanup(); if(swipe.active){clearPhoneScrollStateForPlanGesture(420);document.body.classList.remove('kggPlanCardSwiping');card.style.transition='transform .18s ease, opacity .18s ease';card.style.setProperty('--kgg-plan-swipe-x','0px');card.style.transform='translate3d(0,0,0)';card.style.opacity='1';setTimeout(()=>resetPlanCardSwipe(card),190);}else resetPlanCardSwipe(card);};
     document.addEventListener('pointermove',move,{passive:false});
     document.addEventListener('pointerup',up,{passive:false,once:true});
     document.addEventListener('pointercancel',cancel,{passive:true,once:true});
@@ -18022,33 +17857,16 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     const list=$('planList');
     if(!id||!card||!list||state.plan.length<2)return;
     let startX=ev.clientX,startY=ev.clientY;
-    const downRect=card.getBoundingClientRect();
-    const press={
-      id,handle,card,list,startX,startY,pointerId:ev.pointerId,timer:null,active:false,cancelled:false,
-      /*
-        v5 phone drag anchor:
-        keep the lifted card anchored to the exact finger offset captured before
-        the prelift CSS transform can change its rect.
-      */
-      downRect:{
-        left:downRect.left,
-        top:downRect.top,
-        width:downRect.width,
-        height:downRect.height
-      },
-      pointerOffsetX:ev.clientX-downRect.left,
-      pointerOffsetY:ev.clientY-downRect.top,
-      phoneAnchoredDrag:false,
-      fixedOffset:{left:0,top:0}
-    };
+    const press={id,handle,card,list,startX,startY,pointerId:ev.pointerId,timer:null,active:false,cancelled:false};
     animatedReorder=press;
+    if(ev.pointerType==='touch')clearPhoneScrollStateForPlanGesture(180);
     handle.classList.add('reorder-armed');
     card.classList.add('reorder-prelift');
-    press.timer=setTimeout(()=>activateAnimatedReorder(press,ev),100);
+    press.timer=setTimeout(()=>activateAnimatedReorder(press,ev),120);
     const moveBefore=e=>{
       if(animatedReorder!==press)return;
       const dx=Math.abs(e.clientX-startX),dy=Math.abs(e.clientY-startY);
-      if(!press.active && (dx>10 || dy>10)){
+        if(!press.active && (dx>12 || dy>12)){
         clearTimeout(press.timer);
         press.cancelled=true;
         cleanupAnimatedReorder(false);
@@ -18063,6 +17881,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     document.addEventListener('pointermove',moveBefore,{passive:true});
     document.addEventListener('pointerup',upBefore,{passive:true,once:true});
     document.addEventListener('pointercancel',upBefore,{passive:true,once:true});
+    press.preCancel=upBefore;
   }
   function fixedContainingBlockOffset(el){
     let node=el&&el.parentElement;
@@ -18090,34 +17909,11 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   function activateAnimatedReorder(press,initialEv){
     if(animatedReorder!==press||press.cancelled)return;
     const card=press.card,list=press.list;
-    const phoneDrag=isPhoneLayout();
-    /*
-      v5 phone drag anchor:
-      On phone, use the card rect captured at pointerdown, not the transformed
-      prelift rect after the 100ms hold. This prevents the lifted card from
-      jumping away from the finger at activation.
-    */
-    const liveRect=card.getBoundingClientRect();
-    const rect=(phoneDrag&&press.downRect)?press.downRect:liveRect;
+    const rect=card.getBoundingClientRect();
     const fixedOffset=fixedContainingBlockOffset(card);
-    press.fixedOffset=fixedOffset;
-    press.phoneAnchoredDrag=!!phoneDrag;
     const placeholder=document.createElement('div');
     placeholder.className='planCard reorder-placeholder';
-    const placeholderHeight=Math.max(48,rect.height);
-    placeholder.style.height=placeholderHeight+'px';
-    /*
-      v4b phone drag-position-only:
-      v401 still forces phone placeholders to 20px via !important.
-      Do not touch layout CSS. Override only this live placeholder inline,
-      only in phone layout, so the list keeps the same height reserve as tablet.
-    */
-    if(isPhoneLayout()){
-      placeholder.style.setProperty('height',placeholderHeight+'px','important');
-      placeholder.style.setProperty('min-height',placeholderHeight+'px','important');
-      placeholder.style.setProperty('padding','0','important');
-      placeholder.style.setProperty('box-sizing','border-box','important');
-    }
+    placeholder.style.height=Math.max(48,rect.height)+'px';
     placeholder.setAttribute('aria-hidden','true');
     card.after(placeholder);
     if(isPhoneLayout()){
@@ -18126,54 +17922,14 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     }
     card.classList.remove('reorder-prelift');
     card.classList.add('reorder-lifted');
-    if(phoneDrag){
-      /*
-        v7 phone drag local-list coordinates:
-        Do not use position:fixed on phone. Some mobile WebViews resolve fixed
-        against transformed/contained ancestors, which moves the lifted card far
-        away from the finger. Keep the card absolutely positioned inside #planList
-        and calculate left/top in that local coordinate system.
-      */
-      const anchorX=Number.isFinite(press.pointerOffsetX)?press.pointerOffsetX:(rect.width/2);
-      const anchorY=Number.isFinite(press.pointerOffsetY)?press.pointerOffsetY:(rect.height/2);
-      const initialX=initialEv&&Number.isFinite(initialEv.clientX)?initialEv.clientX:press.startX;
-      const initialY=initialEv&&Number.isFinite(initialEv.clientY)?initialEv.clientY:press.startY;
-      const listRect=list.getBoundingClientRect();
-      press.phoneListAbsoluteDrag=true;
-      press.dragAnchorX=anchorX;
-      press.dragAnchorY=anchorY;
-      /*
-        v8 tablet safety:
-        v7 left #planList with inline position:relative after a phone drag.
-        That can leak into tablet/orientation mode in the same session.
-        Store and restore the exact previous inline value.
-      */
-      press.listPrevPosition=list.style.getPropertyValue('position');
-      press.listPrevPositionPriority=list.style.getPropertyPriority('position');
-      list.style.setProperty('position','relative');
-      card.style.setProperty('position','absolute','important');
-      card.style.setProperty('left',(initialX-anchorX-listRect.left+list.scrollLeft)+'px','important');
-      card.style.setProperty('top',(initialY-anchorY-listRect.top+list.scrollTop)+'px','important');
-      card.style.setProperty('right','auto','important');
-      card.style.setProperty('bottom','auto','important');
-      card.style.setProperty('margin','0','important');
-      card.style.setProperty('width',rect.width+'px','important');
-      card.style.setProperty('transform','translate3d(0,0,0)','important');
-      card.style.setProperty('transform-origin',anchorX+'px '+anchorY+'px','important');
-      card.style.setProperty('--drag-left','0px');
-      card.style.setProperty('--drag-top','0px');
-      card.style.setProperty('--drag-y','0px');
-    }else{
-      card.style.setProperty('--drag-left',(rect.left-fixedOffset.left)+'px');
-      card.style.setProperty('--drag-top',(rect.top-fixedOffset.top)+'px');
-      card.style.setProperty('--drag-y','0px');
-      card.style.width=rect.width+'px';
-    }
+    card.style.setProperty('--drag-left',(rect.left-fixedOffset.left)+'px');
+    card.style.setProperty('--drag-top',(rect.top-fixedOffset.top)+'px');
+    card.style.setProperty('--drag-y','0px');
+    card.style.width=rect.width+'px';
     list.classList.add('reorder-active');
     press.active=true;
     press.placeholder=placeholder;
     press.startTop=rect.top;
-    press.cardHeight=rect.height;
     press.currentIndex=(state.plan||[]).findIndex(ex=>String(ex.localId||ex.id)===press.id);
     press.targetIndex=press.currentIndex;
     state.reorderSuppressClick=true;
@@ -18191,32 +17947,8 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     clearPhoneScrollStateForPlanGesture(520);
     ev.preventDefault();
     const dy=ev.clientY-press.startY;
-    let floatingMid;
-    if(press.phoneListAbsoluteDrag){
-      const anchorX=Number.isFinite(press.dragAnchorX)?press.dragAnchorX:(Number.isFinite(press.pointerOffsetX)?press.pointerOffsetX:0);
-      const anchorY=Number.isFinite(press.dragAnchorY)?press.dragAnchorY:(Number.isFinite(press.pointerOffsetY)?press.pointerOffsetY:0);
-      const listRect=press.list.getBoundingClientRect();
-      const nextLeft=ev.clientX-anchorX-listRect.left+press.list.scrollLeft;
-      const nextTop=ev.clientY-anchorY-listRect.top+press.list.scrollTop;
-      press.card.style.setProperty('left',nextLeft+'px','important');
-      press.card.style.setProperty('top',nextTop+'px','important');
-      press.card.style.setProperty('transform','translate3d(0,0,0)','important');
-      press.card.style.setProperty('--drag-y','0px');
-      floatingMid=ev.clientY-anchorY+(Number.isFinite(press.cardHeight)?press.cardHeight:press.card.getBoundingClientRect().height)/2;
-    }else if(press.phoneAnchoredDrag){
-      const anchorX=Number.isFinite(press.pointerOffsetX)?press.pointerOffsetX:0;
-      const anchorY=Number.isFinite(press.pointerOffsetY)?press.pointerOffsetY:0;
-      const fixedOffset=press.fixedOffset||{left:0,top:0};
-      const nextLeft=ev.clientX-anchorX-fixedOffset.left;
-      const nextTop=ev.clientY-anchorY-fixedOffset.top;
-      press.card.style.setProperty('--drag-left',nextLeft+'px');
-      press.card.style.setProperty('--drag-top',nextTop+'px');
-      press.card.style.setProperty('--drag-y','0px');
-      floatingMid=ev.clientY-anchorY+(Number.isFinite(press.cardHeight)?press.cardHeight:press.card.getBoundingClientRect().height)/2;
-    }else{
-      press.card.style.setProperty('--drag-y',dy+'px');
-      floatingMid=press.startTop+dy+(press.card.getBoundingClientRect().height/2);
-    }
+    press.card.style.setProperty('--drag-y',dy+'px');
+    const floatingMid=press.startTop+dy+(press.card.getBoundingClientRect().height/2);
     const cards=Array.from(press.list.querySelectorAll('.planCard[data-plan-id]:not(.reorder-lifted)'));
     let target=cards.length;
     for(let i=0;i<cards.length;i++){
@@ -18266,34 +17998,13 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     if(press.list)press.list.classList.remove('reorder-active');
     document.body.classList.remove('kggPlanCardReordering');
     clearPhoneScrollStateForPlanGesture(280);
-    if(press.card){
-      press.card.classList.remove('reorder-lifted','reorder-prelift');
-      press.card.style.removeProperty('--drag-left');
-      press.card.style.removeProperty('--drag-top');
-      press.card.style.removeProperty('--drag-y');
-      press.card.style.removeProperty('width');
-      press.card.style.removeProperty('position');
-      press.card.style.removeProperty('left');
-      press.card.style.removeProperty('top');
-      press.card.style.removeProperty('right');
-      press.card.style.removeProperty('bottom');
-      press.card.style.removeProperty('margin');
-      press.card.style.removeProperty('transform');
-      press.card.style.removeProperty('transform-origin');
-    }
+    try{press.handle&&press.handle.releasePointerCapture&&press.handle.releasePointerCapture(press.pointerId);}catch(err){}
+    if(press.card){press.card.classList.remove('reorder-lifted','reorder-prelift');press.card.style.removeProperty('--drag-left');press.card.style.removeProperty('--drag-top');press.card.style.removeProperty('--drag-y');press.card.style.removeProperty('width');}
     if(press.placeholder&&press.placeholder.parentNode)press.placeholder.parentNode.removeChild(press.placeholder);
-    if(press.list){
-      if(press.phoneListAbsoluteDrag){
-        if(press.listPrevPosition){
-          press.list.style.setProperty('position',press.listPrevPosition,press.listPrevPositionPriority||'');
-        }else{
-          press.list.style.removeProperty('position');
-        }
-      }
-      Array.from(press.list.querySelectorAll('.reorder-gap-before,.reorder-gap-after')).forEach(c=>c.classList.remove('reorder-gap-before','reorder-gap-after'));
-    }
+    if(press.list)Array.from(press.list.querySelectorAll('.reorder-gap-before,.reorder-gap-after')).forEach(c=>c.classList.remove('reorder-gap-before','reorder-gap-after'));
     if(press.preMove)document.removeEventListener('pointermove',press.preMove);
     if(press.preUp)document.removeEventListener('pointerup',press.preUp);
+    if(press.preCancel)document.removeEventListener('pointercancel',press.preCancel);
     document.removeEventListener('pointermove',onAnimatedReorderMove);
     animatedReorder=null;
     if(suppressClick){state.reorderSuppressClick=true;setTimeout(()=>{state.reorderSuppressClick=false;},350);}
@@ -21136,7 +20847,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   }
   function localGeminiKeys(){
     loadAdminSecrets();
-    if(window.KGGAdmin&&typeof window.KGGAdmin.getGeminiKeysForLocalUse==='function')return window.KGGAdmin.getGeminiKeysForLocalUse().map(cleanSecret).filter(Boolean);
+
     return (adminSecrets.geminiKeys||[]).map(cleanSecret).filter(Boolean);
   }
   function currentLocalGeminiKey(){return localGeminiKeys()[0]||'';}
@@ -21731,14 +21442,17 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     const out=[];
     let current=null;
     lines.forEach(line=>{
-      if(/^Satz\s+\d+\s*:/i.test(line)&&current){
-        const m=line.match(/^Satz\s+(\d+)\s*:\s*([\d,.]+)?\s*(wdh|wh|sek\.?|sec|s)?(?:\s*@\s*([\d,.]+)\s*(kg|hub|stufe|watt|bar)?)?/i);
+      if(/^Satz\s+\d+\s*:/i.test(line)){
+        if(!current)return;
+        const m=line.match(/^Satz\s+(\d+)\s*:\s*([\d,.]+)?\s*(wdh|wh|sek\.?|sec|s|min|minute[n]?)?(?:\s*@\s*([\d,.]+)\s*(kg|hub|stufe|watt|bar)?)?/i);
         if(m){
           const metric=scanValueToString(m[2]||'');
           const load=scanValueToString(m[4]||'');
-          const metricUnit=/sek|sec|\bs\b/i.test(m[3]||'')?'Sek.':'Wdh';
+          const metricUnit=/sek|sec|\bs\b|min|minute/i.test(m[3]||'')?'Sek.':'Wdh';
+          const loadUnit=String(m[5]||current.weightUnit||'kg').toLowerCase();
           current.metricUnit=metricUnit;
-          if(metricUnit==='Sek.')current.weightUnit='keine';
+          current.weightUnit=metricUnit==='Sek.'?'keine':loadUnit;
+          current.loadUnit=current.weightUnit;
           current.scanSets=current.scanSets||[];
           current.scanSets[Number(m[1])-1]={metric,load};
         }
@@ -21751,7 +21465,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     return out.filter(ex=>ex.name).map(ex=>{
       const isTime=/Sek\./i.test(ex.metricUnit)||ex.weightUnit==='keine';
       const first=(ex.scanSets||[])[0]||{};
-      return scanPlanExerciseFromNumbers(ex.name,(ex.scanSets||[]).flatMap(s=>isTime?[0,s&&s.metric||'']:[s&&s.load||'',s&&s.metric||'']),{unit:isTime?'Sek.':'Wdh',metricUnit:isTime?'Sek.':'Wdh',weightUnit:isTime?'keine':'kg',loadUnit:isTime?'keine':'kg'});
+      return scanPlanExerciseFromNumbers(ex.name,(ex.scanSets||[]).flatMap(s=>isTime?[0,s&&s.metric||'']:[s&&s.load||'',s&&s.metric||'']),{unit:isTime?'Sek.':'Wdh',metricUnit:isTime?'Sek.':'Wdh',weightUnit:isTime?'keine':(ex.weightUnit||'kg'),loadUnit:isTime?'keine':(ex.loadUnit||ex.weightUnit||'kg')});
     }).filter(Boolean);
   }
   function scanPlanExercisesFromResult(result){
@@ -21789,6 +21503,8 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     return applyScanTextToCurrentPlan(text,reason||'scan_apply_result_fallback');
   }
   function applyScanTextToCurrentPlan(text,reason){
+    const structured=scanPlanExercisesFromDocText(text);
+    if(structured.length)return appendScanExercisesToCurrentPlan(structured,reason||'scan_apply_text_structured');
     const clean=String(text||'').replace(/^Typ:.*$/gm,'').replace(/^Prüfen:.*$/gm,'').replace(/\n+/g,', ').replace(/(?:,\s*){2,}/g,', ').trim();
     if(!clean){setScanStatus('Kein Übungstext zum Übernehmen.');return false;}
     const input=$('exerciseInput');
@@ -22474,16 +22190,16 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   $('cancelLongMediaShare').onclick=closeLongMediaConfirmModal;
   $('confirmLongMediaShare').onclick=confirmLongMediaShare;
   $('longMediaConfirmModal').addEventListener('click',ev=>{if(ev.target===$('longMediaConfirmModal'))closeLongMediaConfirmModal();});
-  $('adminConfigBtn').onclick=openAdminSecretsModal;
-  $('closeAdminSecrets').onclick=closeAdminSecretsModal;
-  $('saveAdminSecrets').onclick=saveAdminSecretsFromModal;
-  if($('loadAdminSafeFile'))$('loadAdminSafeFile').onclick=()=>$('adminSafeFileInput').click();
-  if($('adminSafeFileInput'))$('adminSafeFileInput').onchange=ev=>importAdminSafeFile(ev.target.files&&ev.target.files[0]).catch(err=>alert('Admin-Safe-Datei konnte nicht gelesen werden: '+err.message)).finally(()=>{ev.target.value='';});
-  if($('importAdminCodePackage'))$('importAdminCodePackage').onclick=()=>importAdminCodePackageFromClipboard().catch(err=>alert('Code-Paket konnte nicht gelesen werden: '+err.message));
-  if($('exportAdminCodePackage'))$('exportAdminCodePackage').onclick=()=>exportAdminCodePackageToClipboard().catch(err=>alert('Code-Paket konnte nicht kopiert werden: '+err.message));
-  if($('downloadAdminSafeFile'))$('downloadAdminSafeFile').onclick=downloadAdminSafeFile;
-  $('clearAdminSecrets').onclick=()=>{clearLocalAdminSecrets(); if($('adminGeminiKey1'))$('adminGeminiKey1').value=''; if($('adminGeminiKey2'))$('adminGeminiKey2').value=''; if($('adminMediaDropzoneEndpoint'))$('adminMediaDropzoneEndpoint').value=''; if($('adminMediaDropzoneUploadToken'))$('adminMediaDropzoneUploadToken').value='';};
-  $('adminSecretsModal').addEventListener('click',ev=>{if(ev.target===$('adminSecretsModal'))closeAdminSecretsModal();});
+
+
+
+
+
+
+
+
+
+
   $('sharedBankBtn').onclick=openSharedBankModal;
   $('copySharedBank').onclick=copySharedBankPayload;
   $('pickSharedBankFile').onclick=()=>$('sharedBankFile').click();
@@ -22500,92 +22216,19 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   if($('copySyncPairCode'))$('copySyncPairCode').onclick=copySyncPairCode;
   if($('closeSyncPairModal'))$('closeSyncPairModal').onclick=closeSyncPairModal;
   if($('syncPairModal'))$('syncPairModal').addEventListener('click',ev=>{if(ev.target===$('syncPairModal'))closeSyncPairModal();});
-  const kggAdminMenuQrTargets={
-    colleague:{title:'Kolleg:innen-Web-App QR',hint:'Oeffnet die jeweils verlinkte Kolleg:innen-Web-App.',url:'https://kayus24.github.io/kgg/therapist-app/latest-html.html'},
-    admin:{title:'Admin-Web-App QR',hint:'Oeffnet diese Admin-Web-App-Version. Manifest/Latest wird separat freigegeben.',url:'https://kayus24.github.io/kgg/therapist-app/releases/v388/web/KGG_APP_ADMIN_v388_android_flow_fixes.html'},
-    android:{title:'Android-App Download-QR',hint:'Oeffnet den aktuellen Android-Download-Hinweis.',url:'https://kayus24.github.io/kgg/therapist-app/latest-android.html'}
-  };
-  function closeKggTherapistShareModal(){
-    const modal=$('kggTherapistShareModal');
-    if(!modal)return;
-    modal.classList.remove('isOpen');
-    modal.setAttribute('aria-hidden','true');
-  }
-  function openKggTherapistShareModal(){
-    const modal=$('kggTherapistShareModal');
-    if(!modal)return;
-    modal.classList.add('isOpen');
-    modal.setAttribute('aria-hidden','false');
-  }
-  function kggTherapistAppUrl(){
-    const target=kggAdminMenuQrTargets&&kggAdminMenuQrTargets.colleague;
-    return target&&target.url||'https://kayus24.github.io/kgg/therapist-app/latest-html.html';
-  }
-  function openKggTherapistAppOnlyQr(){
-    closeKggTherapistShareModal();
-    const url=kggTherapistAppUrl();
-    openKggAdminMenuQr({title:'Therapeuten-App QR',hint:'Oeffnet nur die Therapeuten-App. Keine API-Keys enthalten.',url});
-  }
-  async function openKggTherapistSetupQr(){
-    const transfer=await buildKggEncryptedConfigTransferForQr({requireEncrypted:true});
-    if(!transfer)return;
-    closeKggTherapistShareModal();
-    const url=buildKggTherapistSetupUrl(kggTherapistAppUrl(),transfer.payloadCode);
-    openKggAdminMenuQr({title:'Therapeuten-App + API-Key',hint:'Setup-Link plus verschluesselter API-Key-Transfer. Transfer-Code: '+transfer.passCode,url});
-  }
-  async function openKggTherapistApiOnlyQr(){
-    closeKggTherapistShareModal();
-    await openKggConfigTransferQr();
-  }
-  function closeKggAdminMenuQrModal(){
-    const modal=$('kggAdminMenuQrModal');
-    if(!modal)return;
-    modal.classList.remove('isOpen');
-    modal.setAttribute('aria-hidden','true');
-  }
-  function renderKggAdminMenuQr(value){
-    const box=$('kggAdminMenuQrBox');
-    if(!box)return;
-    box.innerHTML='';
-    try{
-      if(window.KGGQrCore&&typeof window.KGGQrCore.renderQrToImg==='function'){
-        const img=document.createElement('img');
-        img.alt='QR-Code';
-        img.src=window.KGGQrCore.renderQrToImg(value,{cellSize:8,margin:4});
-        box.appendChild(img);
-        return;
-      }
-      if(typeof window.qrcode==='function'){
-        const qr=window.qrcode(0,'M');
-        qr.addData(value);
-        qr.make();
-        const img=document.createElement('img');
-        img.alt='QR-Code';
-        img.src=qr.createDataURL(8,4);
-        box.appendChild(img);
-        return;
-      }
-    }catch(err){
-      console.warn('Admin-Menue-QR konnte nicht gerendert werden:',err);
-    }
-    box.textContent='QR konnte nicht erzeugt werden. Link nutzen.';
-  }
-  function openKggAdminMenuQr(target){
-    const modal=$('kggAdminMenuQrModal'), title=$('kggAdminMenuQrTitle'), hint=$('kggAdminMenuQrHint'), link=$('kggAdminMenuQrLink');
-    if(!modal||!title||!hint||!link)return;
-    title.textContent=target.title;
-    hint.textContent=target.hint;
-    const value=target.url||target.text||'';
-    link.value=value;
-    if(value)renderKggAdminMenuQr(value);
-    else if($('kggAdminMenuQrBox'))$('kggAdminMenuQrBox').textContent='';
-    modal.classList.add('isOpen');
-    modal.setAttribute('aria-hidden','false');
-  }
-  if($('tabletMenuAdminConfigBtn'))$('tabletMenuAdminConfigBtn').onclick=()=>{setTabletSideMenuOpen(false); const btn=$('adminConfigBtn'); if(btn)btn.click();};
-  if($('tabletMenuSharedBankBtn'))$('tabletMenuSharedBankBtn').onclick=()=>{setTabletSideMenuOpen(false); const btn=$('sharedBankBtn'); if(btn)btn.click();};
-  if($('tabletMenuSyncQrBtn'))$('tabletMenuSyncQrBtn').onclick=()=>{setTabletSideMenuOpen(false); openSyncPairModal();};
-  if($('tabletMenuConfigTransferBtn'))$('tabletMenuConfigTransferBtn').onclick=async()=>{setTabletSideMenuOpen(false); try{await openKggConfigTransferQr();}catch(err){console.warn('Konfig-Transfer QR fehlgeschlagen:',err); alert('Konfig-Transfer konnte nicht erstellt werden.');}};
+
+
+
+
+
+
+
+
+
+
+
+
+
   function toggleTabletSideMenuLayoutPanel(){
     const panel=$('tabletMenuLayoutPanel'), btn=$('tabletMenuLayoutBtn');
     if(!panel)return;
@@ -22602,7 +22245,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   }
   if($('tabletMenuRecentBtn'))$('tabletMenuRecentBtn').onclick=()=>{closeTabletPackageOverlay(false);setTabletLayoutEditMode(false);toggleTabletMenuAnchoredPanel('recent');};
   if($('tabletMenuPackagesBtn'))$('tabletMenuPackagesBtn').onclick=toggleTabletPackageOverlay;
-  if($('tabletMenuTherapistShareBtn'))$('tabletMenuTherapistShareBtn').onclick=()=>{closeTabletPackageOverlay(false);setTabletLayoutEditMode(false);setTabletSideMenuOpen(false); openKggTherapistShareModal();};
+
   if($('tabletMenuLayoutBtn'))$('tabletMenuLayoutBtn').onclick=toggleTabletLayoutEditMode;
   if($('tabletPackageClose'))$('tabletPackageClose').onclick=()=>closeTabletPackageOverlay(false);
   if($('tabletPackageShade'))$('tabletPackageShade').onclick=()=>closeTabletPackageOverlay(false);
@@ -22622,7 +22265,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   }
   bindV399TabletMenuAction('tabletMenuRecentBtn',()=>{closeTabletPackageOverlay(false);setTabletLayoutEditMode(false);toggleTabletMenuAnchoredPanel('recent');});
   bindV399TabletMenuAction('tabletMenuPackagesBtn',()=>toggleTabletPackageOverlay());
-  bindV399TabletMenuAction('tabletMenuTherapistShareBtn',()=>{closeTabletPackageOverlay(false);setTabletLayoutEditMode(false);setTabletSideMenuOpen(false);openKggTherapistShareModal();});
+
   bindV399TabletMenuAction('tabletMenuLayoutBtn',()=>toggleTabletLayoutEditMode());
   bindV399TabletMenuAction('tabletPackageClose',()=>closeTabletPackageOverlay(false),false);
   bindV399TabletMenuAction('tabletPackageShade',()=>closeTabletPackageOverlay(false),false);
@@ -22631,16 +22274,10 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   if($('therapistShareAppOnly'))$('therapistShareAppOnly').onclick=openKggTherapistAppOnlyQr;
   if($('therapistShareSetup'))$('therapistShareSetup').onclick=()=>openKggTherapistSetupQr().catch(err=>{console.warn('Therapeuten-Setup-QR fehlgeschlagen:',err); alert('Setup-QR konnte nicht erstellt werden.');});
   if($('therapistShareApiOnly'))$('therapistShareApiOnly').onclick=()=>openKggTherapistApiOnlyQr().catch(err=>{console.warn('API-Key-QR fehlgeschlagen:',err); alert('API-Key-QR konnte nicht erstellt werden.');});
-  document.querySelectorAll('[data-kgg-admin-menu-qr]').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const target=kggAdminMenuQrTargets[btn.getAttribute('data-kgg-admin-menu-qr')];
-      if(target){setTabletSideMenuOpen(false); openKggAdminMenuQr(target);}
-    });
-  });
-  if($('kggAdminMenuQrClose'))$('kggAdminMenuQrClose').onclick=closeKggAdminMenuQrModal;
+
   if($('kggAdminMenuQrModal'))$('kggAdminMenuQrModal').addEventListener('click',ev=>{if(ev.target===$('kggAdminMenuQrModal'))closeKggAdminMenuQrModal();});
-  if($('kggAdminMenuQrCopy'))$('kggAdminMenuQrCopy').onclick=async()=>{const link=$('kggAdminMenuQrLink'); if(!link)return; const ok=await copyTextValue(link.value); if(!ok){link.focus(); link.select();}};
-  if($('kggAdminMenuQrOpen'))$('kggAdminMenuQrOpen').onclick=()=>{const link=$('kggAdminMenuQrLink'); if(link&&link.value&&/^https?:\/\//.test(link.value))window.open(link.value,'_blank','noopener');};
+
+
   $('dismissInstallPrompt').onclick=()=>{localStorage.setItem(pwaInstallPromptSeenKey,new Date().toISOString()); closeInstallPrompt();};
   $('acceptInstallPrompt').onclick=acceptInstallPrompt;
   $('installPromptModal').addEventListener('click',ev=>{if(ev.target===$('installPromptModal')){$('dismissInstallPrompt').click();}});
@@ -23077,923 +22714,25 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
 </script>
 <!-- KGG PATCH END kgg-v021-embed-jsqr-gallery-decode wrapper -->
 
-<!-- KGG_ADMIN_ONLY_START -->
-<style id="kgg-release-center-v31-style">
-  .kggReleaseOverlay{position:fixed;inset:0;z-index:2147483000;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(7,16,39,.46);backdrop-filter:blur(10px)}
-  .kggReleaseOverlay.isOpen{display:flex}
-  .kggReleaseSheet{width:min(720px,96vw);max-height:92vh;overflow:auto;border:1px solid rgba(10,16,36,.12);border-radius:26px;background:#fff;color:#0a1024;padding:22px;box-shadow:0 30px 90px rgba(10,16,36,.28);font-family:inherit}
-  .kggReleaseHead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}
-  .kggReleaseHead h2{margin:0;font-size:1.45rem;font-weight:950}
-  .kggReleaseHead p{margin:5px 0 0;color:#667085;font-weight:700;line-height:1.35}
-  .kggReleaseClose{flex:0 0 auto;width:44px;height:44px;border:1px solid rgba(10,16,36,.12);border-radius:14px;background:#fff;color:#0a1024;font-size:24px;font-weight:900}
-  .kggReleaseStatus{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center;margin:0 0 16px;padding:13px 14px;border:1px solid #dce7f2;border-radius:18px;background:#f5f9fd}
-  .kggReleaseBadge{display:inline-flex;align-items:center;justify-content:center;min-height:30px;padding:0 10px;border-radius:999px;background:#e7eef7;color:#344054;font-size:.78rem;font-weight:950;text-transform:uppercase;letter-spacing:.04em}
-  .kggReleaseBadge.isReady{background:#dcfce7;color:#166534}
-  .kggReleaseBadge.isError{background:#fee2e2;color:#991b1b}
-  .kggReleaseMessage{min-width:0;font-weight:850;line-height:1.3}
-  .kggReleaseCodeBox{display:none;margin:-2px 0 14px;padding:14px;border-radius:18px;border:2px solid #b8d9f6;background:#edf6ff;box-shadow:0 10px 26px rgba(7,50,84,.08)}
-  .kggReleaseCodeBox.isOpen{display:grid;gap:10px}
-  .kggReleaseCodeLabel{color:#073254;font-size:.86rem;font-weight:950}
-  .kggReleaseCodeValue{font-size:clamp(2rem,9vw,3.6rem);line-height:1;letter-spacing:.08em;font-weight:1000;text-align:center;color:#071027;background:#fff;border:1px solid #cfe4f8;border-radius:16px;padding:14px 8px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-  .kggReleaseCodeHint{color:#475467;font-size:.85rem;font-weight:800;line-height:1.35}
-  .kggReleaseInboxHint{margin:12px 0 0;padding:13px 14px;border:1px solid #b8d9f6;border-radius:18px;background:#f7fbff;color:#073254;font-size:.88rem;font-weight:850;line-height:1.35}
-  .kggReleaseInboxHint strong{display:block;color:#071027;font-weight:1000;margin-bottom:3px}
-  .kggReleaseGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .kggReleaseField{display:grid;gap:6px}
-  .kggReleaseField.wide{grid-column:1/-1}
-  .kggReleaseField label{font-size:.82rem;color:#475467;font-weight:900}
-  .kggReleaseField input,.kggReleaseField textarea{width:100%;box-sizing:border-box;border:1px solid #cfd9e5;border-radius:15px;background:#fff;color:#0a1024;padding:12px 13px;font:inherit;font-weight:750;outline:none}
-  .kggReleaseField textarea{min-height:92px;resize:vertical}
-  .kggReleaseField input:focus,.kggReleaseField textarea:focus{border-color:#5ea7e8;box-shadow:0 0 0 4px rgba(94,167,232,.16)}
-  .kggReleaseActions{display:grid;gap:10px;margin-top:16px}
-  .kggReleaseActions.two{grid-template-columns:1fr 1fr}
-  .kggReleaseBtn{min-height:50px;border:1px solid rgba(10,16,36,.13);border-radius:16px;background:#fff;color:#0a1024;padding:10px 14px;font:inherit;font-weight:950;box-shadow:0 8px 20px rgba(10,16,36,.07)}
-  .kggReleaseBtn.primary{background:#0a1024;color:#fff}
-  .kggReleaseBtn.soft{background:#edf6ff;border-color:#b8d9f6;color:#073254}
-  .kggReleaseBtn.danger{background:#fff5f5;border-color:#fecaca;color:#991b1b}
-  .kggReleaseMenuGroup{margin-top:10px}
-  .kggReleaseMenuGroup h3{margin:0 0 8px}
-  @media(max-width:759px){.kggReleaseOverlay{padding:10px;align-items:flex-end}.kggReleaseSheet{width:100%;max-height:94vh;border-radius:24px 24px 16px 16px;padding:17px}.kggReleaseGrid,.kggReleaseActions.two{grid-template-columns:1fr}.kggReleaseField.wide{grid-column:1}.kggReleaseHead h2{font-size:1.25rem}}
-</style>
-<script id="kgg-release-center-v31-script">
-(function(){
-  'use strict';
-  var MOBILE_INBOX_URL='https://github.com/Kayus24/kgg/upload/mobile-inbox/mobile-inbox';
-  var MOBILE_PROMOTE_URL='https://github.com/Kayus24/kgg/actions/workflows/promote-latest-admin-beta.yml';
-  if(!window.KGGReleaseControl&&(location.hostname==='127.0.0.1'||location.hostname==='localhost')&&location.search.indexOf('kggReleaseUiTest=1')>=0){
-    window.KGGReleaseControl={status:function(){return JSON.stringify({phase:'idle',message:'Lokaler UI-Test',available:true,authenticated:false,repository:'Kayus24/kgg'});},beginLogin:function(){return false;},testConnection:function(){return false;},downloadCurrentHtml:function(){return false;},openMobileInbox:function(){window.open(MOBILE_INBOX_URL,'_blank');return true;},openPromoteLatest:function(){window.open(MOBILE_PROMOTE_URL,'_blank');return true;},chooseAndUploadBeta:function(){return false;},confirmPromotion:function(){return false;},confirmRollback:function(){return false;}};
-  }
-  if(!window.KGGReleaseControl||window.KGGReleaseCenter)return;
-  var refreshTimer=null;
-  function readStatus(){try{return JSON.parse(window.KGGReleaseControl.status()||'{}');}catch(err){return {phase:'error',message:'Status konnte nicht gelesen werden.'};}}
-  function readAndroidStatus(){try{if(window.KGGAndroidApp&&typeof window.KGGAndroidApp.updateStatus==='function')return JSON.parse(window.KGGAndroidApp.updateStatus()||'{}');}catch(err){}return null;}
-  function value(id){var el=document.getElementById(id);return el?(el.value||'').trim():'';}
-  function setText(id,text){var el=document.getElementById(id);if(el)el.textContent=text||'';}
-  function copyText(text){try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text);return true;}}catch(err){}try{var input=document.createElement('input');input.value=text;input.style.position='fixed';input.style.opacity='0';document.body.appendChild(input);input.select();document.execCommand('copy');input.remove();return true;}catch(err){return false;}}
-  function openExternal(url){try{window.open(url,'_blank');return true;}catch(err){try{location.href=url;return true;}catch(inner){return false;}}}
-  function closeTabletMenu(){document.body.classList.remove('tabletMenuOpen');var menu=document.getElementById('tabletSideMenu');if(menu)menu.setAttribute('aria-hidden','true');}
-  function ensureModal(){
-    var existing=document.getElementById('kggReleaseCenterModal');
-    if(existing)return existing;
-    var modal=document.createElement('div');
-    modal.id='kggReleaseCenterModal';modal.className='kggReleaseOverlay';modal.setAttribute('aria-hidden','true');
-    modal.innerHTML='<section class="kggReleaseSheet" role="dialog" aria-modal="true" aria-labelledby="kggReleaseTitle">'
-      +'<div class="kggReleaseHead"><div><h2 id="kggReleaseTitle">KGG Update-Zentrale</h2><p>Standard: HTML speichern und per GitHub-Mobile-Inbox hochladen. Direktupload bleibt Komfortweg.</p></div><button class="kggReleaseClose" id="kggReleaseClose" type="button" aria-label="Update-Zentrale schliessen">&times;</button></div>'
-      +'<div class="kggReleaseStatus"><span class="kggReleaseBadge" id="kggReleaseBadge">Status</span><span class="kggReleaseMessage" id="kggReleaseMessage">Wird geladen …</span></div>'
-      +'<div class="kggReleaseCodeBox" id="kggReleaseCodeBox" aria-live="polite"><div class="kggReleaseCodeLabel">GitHub-Code</div><div class="kggReleaseCodeValue" id="kggReleaseCodeValue"></div><button class="kggReleaseBtn soft" id="kggReleaseCopyCode" type="button">Code kopieren</button><div class="kggReleaseCodeHint">Diesen Code auf der GitHub-Seite eingeben. Wenn GitHub langsam laedt: Code kopieren, spaeter verbinden oder den Mobile-Inbox-Weg nutzen.</div></div>'
-      +'<button class="kggReleaseBtn soft" id="kggReleaseDownloadHtml" type="button" style="width:100%;margin-top:10px">Aktuelle HTML speichern</button>'
-      +'<button class="kggReleaseBtn primary" id="kggReleaseMobileInbox" type="button" style="width:100%;margin-top:10px">GitHub-Mobile-Inbox oeffnen</button>'
-      +'<div class="kggReleaseInboxHint"><strong>Handy-Workflow ohne Codex</strong>1. HTML speichern. 2. Diese Datei in GitHub hochladen. 3. GitHub Actions erzeugt Admin-Beta und PR automatisch.</div>'
-      +'<button class="kggReleaseBtn soft" id="kggReleasePromoteLatest" type="button" style="width:100%;margin-top:10px">Kolleg:innen-Freigabe in GitHub oeffnen</button>'
-      +'<button class="kggReleaseBtn soft" id="kggReleaseLogin" type="button" style="width:100%;margin-top:14px">Komfort: Mit GitHub verbinden</button>'
-      +'<button class="kggReleaseBtn soft" id="kggReleaseTest" type="button" style="width:100%;margin-top:10px">Komfort: Verbindung testen</button>'
-      +'<div class="kggReleaseGrid" style="margin-top:14px"><div class="kggReleaseField"><label for="kggReleaseId">Release-ID</label><input id="kggReleaseId" placeholder="z. B. r0391" autocomplete="off"></div><div class="kggReleaseField"><label for="kggReleaseVersion">Versionsname</label><input id="kggReleaseVersion" placeholder="Kurzer eindeutiger Name" autocomplete="off"></div><div class="kggReleaseField wide"><label for="kggReleaseNotes">Patch-Notiz</label><textarea id="kggReleaseNotes" placeholder="Was wurde geaendert? Keine Patientendaten oder Secrets."></textarea></div></div>'
-      +'<div class="kggReleaseActions"><button class="kggReleaseBtn soft" id="kggReleaseUpload" type="button">Komfort: HTML direkt aus App hochladen</button><button class="kggReleaseBtn soft" id="kggReleasePromote" type="button">Komfort: Release-ID fuer Kolleg:innen freigeben</button><div class="kggReleaseActions two"><button class="kggReleaseBtn danger" id="kggReleaseRollbackAdmin" type="button">Admin-Rollback</button><button class="kggReleaseBtn danger" id="kggReleaseRollbackColleague" type="button">Kolleg:innen-Rollback</button></div></div>'
-      +'</section>';
-    document.body.appendChild(modal);
-    document.getElementById('kggReleaseClose').onclick=close;
-    document.getElementById('kggReleaseLogin').onclick=function(){window.KGGReleaseControl.beginLogin();startRefreshLoop();setTimeout(refresh,250);setTimeout(refresh,900);setTimeout(refresh,1800);};
-    document.getElementById('kggReleaseCopyCode').onclick=function(){var code=(document.getElementById('kggReleaseCodeValue')||{}).textContent||'';if(code)copyText(code.trim());};
-    document.getElementById('kggReleaseTest').onclick=function(){if(typeof window.KGGReleaseControl.testConnection==='function'){window.KGGReleaseControl.testConnection();startRefreshLoop();setTimeout(refresh,250);setTimeout(refresh,1200);}else{var message=document.getElementById('kggReleaseMessage');if(message)message.textContent='Bitte Admin-APK v392 installieren, dann ist der Verbindungstest verfuegbar.';}};
-    document.getElementById('kggReleaseDownloadHtml').onclick=function(){if(typeof window.KGGReleaseControl.downloadCurrentHtml==='function'){window.KGGReleaseControl.downloadCurrentHtml();setTimeout(refresh,250);}else{var message=document.getElementById('kggReleaseMessage');if(message)message.textContent='Bitte Admin-APK v393 installieren, dann ist HTML speichern verfuegbar.';}};
-    document.getElementById('kggReleaseMobileInbox').onclick=function(){if(typeof window.KGGReleaseControl.openMobileInbox==='function'){window.KGGReleaseControl.openMobileInbox();setTimeout(refresh,250);}else{openExternal(MOBILE_INBOX_URL);}};
-    document.getElementById('kggReleasePromoteLatest').onclick=function(){if(typeof window.KGGReleaseControl.openPromoteLatest==='function'){window.KGGReleaseControl.openPromoteLatest();setTimeout(refresh,250);}else{openExternal(MOBILE_PROMOTE_URL);}};
-    document.getElementById('kggReleaseUpload').onclick=function(){window.KGGReleaseControl.chooseAndUploadBeta(value('kggReleaseId'),value('kggReleaseVersion'),value('kggReleaseNotes'));setTimeout(refresh,250);};
-    document.getElementById('kggReleasePromote').onclick=function(){window.KGGReleaseControl.confirmPromotion(value('kggReleaseId'));};
-    document.getElementById('kggReleaseRollbackAdmin').onclick=function(){window.KGGReleaseControl.confirmRollback('admin',value('kggReleaseId'));};
-    document.getElementById('kggReleaseRollbackColleague').onclick=function(){window.KGGReleaseControl.confirmRollback('colleague',value('kggReleaseId'));};
-    modal.addEventListener('click',function(ev){if(ev.target===modal)close();});
-    return modal;
-  }
-  function refresh(){var state=readStatus(),native=readAndroidStatus(),badge=document.getElementById('kggReleaseBadge'),message=document.getElementById('kggReleaseMessage'),codeBox=document.getElementById('kggReleaseCodeBox');if(!badge||!message)return;var phase=String(state.phase||'idle'),userCode=String(state.userCode||'').trim(),nativeText='';badge.textContent=state.authenticated?'Verbunden':(phase==='error'?'Fehler':(phase==='login_waiting'?'Code':'Bereit'));badge.className='kggReleaseBadge'+(state.authenticated?' isReady':(phase==='error'?' isError':''));if(native&&native.currentShellVersion)nativeText=' APK v'+native.currentShellVersion+(native.currentWebVersion?' · Web '+native.currentWebVersion:'');message.textContent=(state.message||'Release-Steuerung ist bereit.')+nativeText;if(codeBox){codeBox.classList.toggle('isOpen',!!userCode&&!state.authenticated);setText('kggReleaseCodeValue',userCode);}}
-  function startRefreshLoop(){if(refreshTimer)return;refreshTimer=setInterval(refresh,1000);}
-  function stopRefreshLoop(){if(refreshTimer){clearInterval(refreshTimer);refreshTimer=null;}}
-  function open(){var modal=ensureModal();closeTabletMenu();modal.classList.add('isOpen');modal.setAttribute('aria-hidden','false');refresh();startRefreshLoop();}
-  function close(){var modal=document.getElementById('kggReleaseCenterModal');if(!modal)return;modal.classList.remove('isOpen');modal.setAttribute('aria-hidden','true');stopRefreshLoop();}
-  function actionButton(id,text,handler){var button=document.createElement('button');button.id=id;button.type='button';button.className='tabletSideMenuAction';button.textContent=text;button.onclick=handler;return button;}
-  function installEntryPoints(){
-    var menu=document.querySelector('.tabletSideMenuMain');
-    if(menu&&!document.getElementById('kggReleaseMenuGroup')){
-      var group=document.createElement('div');group.id='kggReleaseMenuGroup';group.className='tabletSideMenuGroup kggReleaseMenuGroup';group.innerHTML='<h3>Admin</h3>';
-      group.appendChild(actionButton('kggReleaseAdminConfig','Admin-Konfig',function(){closeTabletMenu();var target=document.getElementById('adminConfigBtn');if(target)target.click();}));
-      group.appendChild(actionButton('kggReleaseCenterOpen','Update-Zentrale',open));menu.appendChild(group);
-    }
-    var tools=document.querySelector('.adminCodePackageTools');
-    if(tools&&!document.getElementById('kggReleaseCenterOpenPhone')){var phone=actionButton('kggReleaseCenterOpenPhone','Update-Zentrale',open);phone.className='mutedBtn wide';tools.appendChild(phone);}
-  }
-  window.KGGReleaseCenter={open:open,close:close,status:readStatus};
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installEntryPoints,{once:true});else installEntryPoints();
-})();
-</script>
-<!-- KGG_ADMIN_ONLY_END -->
 
-
-
-<!-- KGG CLEAN MERGE v11: phone touch fixes only; no local auto-redirect blocker -->
-<style id="kgg-phone-touch-tablet-parity-hard-v3-css">
-@media (max-width:759px){
-  /* Remove the phone-only v401 layout cage from the plan area. */
-  #rightPlanStack,
-  #currentPlanBlock.planSectionCurrent,
-  body.kggPlanSectionFrozen #currentPlanBlock.planSectionCurrent{
-    contain:none!important;
-    overflow:visible!important;
-    transform:none!important;
-    backface-visibility:visible!important;
-    -webkit-backface-visibility:visible!important;
-    height:auto!important;
-    min-height:0!important;
-    max-height:none!important;
-  }
-
-  #currentPlanBlock .planSectionBody,
-  body.kggPlanSectionFrozen #currentPlanBlock .planSectionBody,
-  body.kggPlanCardSwiping #currentPlanBlock .planSectionBody,
-  body.kggPlanCardReordering #currentPlanBlock .planSectionBody{
-    contain:none!important;
-    overflow:auto!important;
-    touch-action:pan-y!important;
-    overscroll-behavior:auto!important;
-    -webkit-overflow-scrolling:touch!important;
-    max-height:none!important;
-    transform:none!important;
-    backface-visibility:visible!important;
-    -webkit-backface-visibility:visible!important;
-  }
-
-  #currentPlanBlock #planList.planList,
-  body.kggPlanSectionFrozen #currentPlanBlock #planList.planList{
-    contain:none!important;
-    isolation:auto!important;
-    overflow:visible!important;
-    transform:none!important;
-    backface-visibility:visible!important;
-    -webkit-backface-visibility:visible!important;
-  }
-
-  /* Keep the rest of the phone UI tappable during plan gestures, like tablet. */
-  body.kggPlanCardReordering :is(
-    #bankArea,
-    #dbTitle,
-    .bankArea,
-    .bankRows,
-    .az,
-    #inputWrap,
-    #exerciseInput,
-    .suggestion
-  ){
-    pointer-events:auto!important;
-    transform:none!important;
-    filter:none!important;
-  }
-
-  /* Swipe animation: remove phone-only cage effects; keep the same simple transform path as tablet. */
-  body.kggPlanCardSwiping #currentPlanBlock .planCard.swipe-dragging,
-  body.is-scrolling.kggPlanCardSwiping #currentPlanBlock .planCard.swipe-dragging{
-    transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
-    transition:none!important;
-    will-change:transform,opacity!important;
-    z-index:8!important;
-  }
-
-  body.kggPlanCardSwiping #currentPlanBlock .planCard.swipe-armed{
-    transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
-  }
-
-  body.kggPlanCardSwiping #currentPlanBlock .planCard.swipe-removing,
-  body.is-scrolling.kggPlanCardSwiping #currentPlanBlock .planCard.swipe-removing{
-    transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
-    will-change:transform,opacity!important;
-    z-index:8!important;
-  }
-
-  /* Drag-reorder over the handle remains the tablet-style lifted card behavior. */
-  body.kggPlanCardReordering #currentPlanBlock .planCard.reorder-lifted,
-  body.is-scrolling.kggPlanCardReordering #currentPlanBlock .planCard.reorder-lifted{
-    transform:translateY(var(--drag-y,0px)) scale(1.035)!important;
-    transition:none!important;
-    will-change:transform!important;
-    pointer-events:none!important;
-    z-index:9999!important;
-  }
-}
-</style>
-
-<script id="kgg-phone-touch-tablet-parity-hard-v3-js">
-(function(){
-  'use strict';
-
-  var PATCH_ID='kgg-phone-touch-tablet-parity-hard-v3';
-  var PHONE_QUERY='(max-width:759px)';
-  var installed=false;
-  var originalClassListAdd=null;
-
-  function isPhone(){
-    return !!(window.matchMedia && window.matchMedia(PHONE_QUERY).matches);
-  }
-
-  function isBodyClassList(list){
-    return !!(document.body && list === document.body.classList);
-  }
-
-  function currentPlanBlock(){
-    return document.getElementById('currentPlanBlock');
-  }
-
-  function isInsidePlanCard(target){
-    return !!(target && target.closest && target.closest('#currentPlanBlock .planCard'));
-  }
-
-  function cleanFreeze(){
-    var body=document.body;
-    var block=currentPlanBlock();
-
-    if(body && body.classList.contains('kggPlanSectionFrozen')){
-      body.classList.remove('kggPlanSectionFrozen');
-    }
-
-    if(block){
-      block.style.removeProperty('--kgg-current-plan-freeze-h');
-      block.style.removeProperty('height');
-      block.style.removeProperty('min-height');
-      block.style.removeProperty('max-height');
-    }
-  }
-
-  function cleanScrollFlag(){
-    if(document.body){
-      document.body.classList.remove('is-scrolling');
-    }
-  }
-
-  function cleanStaleGestureClasses(){
-    if(!document.body || !isPhone()) return;
-
-    var liveSwipe=document.querySelector('#currentPlanBlock .planCard.swipe-dragging,#currentPlanBlock .planCard.swipe-removing');
-    var liveReorder=document.querySelector('#currentPlanBlock .planCard.reorder-lifted');
-
-    if(!liveSwipe){
-      document.body.classList.remove('kggPlanCardSwiping');
-    }
-
-    if(!liveReorder){
-      document.body.classList.remove('kggPlanCardReordering');
-    }
-
-    cleanFreeze();
-  }
-
-  function installClassListFreezeBlock(){
-    if(originalClassListAdd || !window.DOMTokenList || !DOMTokenList.prototype) return;
-
-    originalClassListAdd=DOMTokenList.prototype.add;
-
-    DOMTokenList.prototype.add=function(){
-      var args=Array.prototype.slice.call(arguments);
-
-      try{
-        if(isPhone() && isBodyClassList(this) && args.indexOf('kggPlanSectionFrozen') !== -1){
-          args=args.filter(function(token){ return token !== 'kggPlanSectionFrozen'; });
-          setTimeout(cleanFreeze,0);
-          if(!args.length) return undefined;
-        }
-      }catch(err){}
-
-      return originalClassListAdd.apply(this,args);
-    };
-  }
-
-  function disablePhoneScrollToggleForButtons(){
-    /*
-      These names are global in this single-file app. Assigning them here leaves
-      every other feature intact but prevents phone drawer/buttons from being
-      swallowed after a touch/scroll gesture.
-    */
-    try{
-      if(typeof guardPhoneScrollToggle === 'function'){
-        guardPhoneScrollToggle=function(){ return false; };
-      }
-    }catch(err){}
-
-    try{
-      if(typeof window.guardPhoneScrollToggle === 'function'){
-        window.guardPhoneScrollToggle=function(){ return false; };
-      }
-    }catch(err){}
-  }
-
-  function installListeners(){
-    if(installed || !document.body) return;
-    installed=true;
-
-    installClassListFreezeBlock();
-    disablePhoneScrollToggleForButtons();
-
-    /*
-      Capture before document-level phone freeze side effects become visible.
-      We do not stop propagation, so original swipe/delete/reorder handlers still run.
-    */
-    window.addEventListener('pointerdown',function(ev){
-      if(!isPhone()) return;
-      if(isInsidePlanCard(ev.target)){
-        cleanScrollFlag();
-        cleanFreeze();
-        requestAnimationFrame(cleanFreeze);
-      }
-    },{capture:true,passive:true});
-
-    window.addEventListener('pointermove',function(ev){
-      if(!isPhone()) return;
-      if(document.body && (
-        document.body.classList.contains('kggPlanCardSwiping') ||
-        document.body.classList.contains('kggPlanCardReordering')
-      )){
-        cleanScrollFlag();
-        cleanFreeze();
-      }
-    },{capture:true,passive:true});
-
-    ['pointerup','pointercancel','touchend','touchcancel'].forEach(function(type){
-      window.addEventListener(type,function(){
-        if(!isPhone()) return;
-        cleanFreeze();
-        setTimeout(cleanStaleGestureClasses,80);
-        setTimeout(cleanStaleGestureClasses,260);
-      },{capture:true,passive:true});
-    });
-
-    var observer=new MutationObserver(function(){
-      if(!isPhone()) return;
-      cleanFreeze();
-    });
-
-    observer.observe(document.body,{attributes:true,attributeFilter:['class']});
-
-    window.addEventListener('resize',function(){
-      setTimeout(cleanStaleGestureClasses,60);
-    },{passive:true});
-
-    window.addEventListener('orientationchange',function(){
-      setTimeout(cleanStaleGestureClasses,140);
-    },{passive:true});
-
-    if(window.visualViewport){
-      window.visualViewport.addEventListener('resize',function(){
-        setTimeout(cleanStaleGestureClasses,60);
-      },{passive:true});
-    }
-
-    cleanStaleGestureClasses();
-
-    window.KGG_PHONE_TOUCH_TABLET_PARITY_HARD_V3={
-      patchId:PATCH_ID,
-      scope:'phone-only max-width:759px',
-      check:function(){
-        return {
-          patchId:PATCH_ID,
-          phone:isPhone(),
-          freezeBlocked:!!originalClassListAdd,
-          bodyFrozen:!!(document.body && document.body.classList.contains('kggPlanSectionFrozen')),
-          planFreezeHeight:currentPlanBlock() ? currentPlanBlock().style.getPropertyValue('--kgg-current-plan-freeze-h') : ''
-        };
-      },
-      clean:cleanStaleGestureClasses
-    };
-  }
-
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',installListeners,{once:true});
-  }else{
-    installListeners();
-  }
-})();
-</script>
-<!-- END KGG CLEAN MERGE v11 -->
-
-<script id="kgg-v11-clean-merge-marker">
-(function(){
-  "use strict";
-  window.KGG_PHONE_TOUCH_CLEAN_MERGE_V11={
-    patchId:"kgg-v11-clean-merge-original-features-phone-drag-local-list",
-    base:"KGG_CURRENT_ADMIN_HTML.html",
-    keeps:"Original feature code, remote update prompt, QR/PDF/Scan/Parser/Storage/Plan-State/Admin",
-    changes:[
-      "Phone drag-reorder uses #planList local absolute coordinates",
-      "Phone plan freeze is neutralized only below 760px",
-      "Local Android/content test files do not auto-redirect to GitHub; manifest prompt remains allowed"
-    ]
-  };
-})();
-</script>
-
-<!-- KGG v12 FEATURE RESTORE: robust Update-Zentrale entrypoints; no touch/layout behavior changes -->
-<script id="kgg-v12-release-center-entry-restore">
-(function(){
-  "use strict";
-  var PATCH_ID = "kgg-v12-release-center-entry-restore";
-  var installed = false;
-  var observer = null;
-
-  function byId(id){ return document.getElementById(id); }
-  function q(sel){ try { return document.querySelector(sel); } catch(err){ return null; } }
-
-  function releaseOpen(){
-    try{
-      if(window.KGGReleaseCenter && typeof window.KGGReleaseCenter.open === "function"){
-        window.KGGReleaseCenter.open();
-        return;
-      }
-    }catch(err){}
-    try{
-      if(window.KGGReleaseControl && typeof window.KGGReleaseControl.open === "function"){
-        window.KGGReleaseControl.open();
-        return;
-      }
-    }catch(err){}
-    alert("Update-Zentrale ist im Code vorhanden, aber noch nicht initialisiert. Bitte App einmal neu laden.");
-  }
-
-  function makeButton(id, text, className){
-    var btn = document.createElement("button");
-    btn.id = id;
-    btn.type = "button";
-    btn.textContent = text;
-    btn.className = className || "tabletSideMenuAction";
-    btn.addEventListener("click", function(ev){
-      ev.preventDefault();
-      ev.stopPropagation();
-      try{
-        if(typeof closeTabletMenu === "function") closeTabletMenu();
-      }catch(err){}
-      releaseOpen();
-    }, true);
-    return btn;
-  }
-
-  function ensureTabletMenuEntry(){
-    var menu = q(".tabletSideMenuMain");
-    if(!menu) return false;
-
-    var group = byId("kggReleaseMenuGroup");
-    if(!group){
-      group = document.createElement("div");
-      group.id = "kggReleaseMenuGroup";
-      group.className = "tabletSideMenuGroup kggReleaseMenuGroup";
-      group.innerHTML = "<h3>Admin</h3>";
-      menu.appendChild(group);
-    }
-
-    if(!byId("kggReleaseAdminConfig")){
-      var admin = document.createElement("button");
-      admin.id = "kggReleaseAdminConfig";
-      admin.type = "button";
-      admin.className = "tabletSideMenuAction";
-      admin.textContent = "Admin-Konfig";
-      admin.addEventListener("click", function(ev){
-        ev.preventDefault();
-        ev.stopPropagation();
-        try{
-          if(typeof closeTabletMenu === "function") closeTabletMenu();
-        }catch(err){}
-        var target = byId("adminConfigBtn");
-        if(target) target.click();
-      }, true);
-      group.appendChild(admin);
-    }
-
-    if(!byId("kggReleaseCenterOpen")){
-      group.appendChild(makeButton("kggReleaseCenterOpen", "Update-Zentrale", "tabletSideMenuAction"));
-    }
-
-    return true;
-  }
-
-  function ensurePhoneAdminEntry(){
-    var tools = q(".adminCodePackageTools");
-    if(!tools) return false;
-    if(!byId("kggReleaseCenterOpenPhone")){
-      var phone = makeButton("kggReleaseCenterOpenPhone", "Update-Zentrale", "mutedBtn wide");
-      tools.appendChild(phone);
-    }
-    return true;
-  }
-
-  function ensureFallbackGlobal(){
-    window.KGG_UPDATE_ZENTRALE_RESTORE = window.KGG_UPDATE_ZENTRALE_RESTORE || {};
-    window.KGG_UPDATE_ZENTRALE_RESTORE.open = releaseOpen;
-    window.KGG_UPDATE_ZENTRALE_RESTORE.install = install;
-    window.KGG_UPDATE_ZENTRALE_RESTORE.status = function(){
-      return {
-        patchId: PATCH_ID,
-        hasReleaseCenter: !!(window.KGGReleaseCenter && typeof window.KGGReleaseCenter.open === "function"),
-        tabletButton: !!byId("kggReleaseCenterOpen"),
-        phoneButton: !!byId("kggReleaseCenterOpenPhone"),
-        tabletMenu: !!q(".tabletSideMenuMain"),
-        phoneTools: !!q(".adminCodePackageTools")
-      };
-    };
-  }
-
-  function install(){
-    ensureFallbackGlobal();
-    var okTablet = ensureTabletMenuEntry();
-    var okPhone = ensurePhoneAdminEntry();
-    return okTablet || okPhone;
-  }
-
-  function scheduleInstall(){
-    [0, 80, 180, 420, 900, 1600, 2800].forEach(function(ms){
-      setTimeout(install, ms);
-    });
-  }
-
-  function startObserver(){
-    if(observer || !document.body) return;
-    observer = new MutationObserver(function(){
-      install();
-    });
-    observer.observe(document.body, {childList:true, subtree:true});
-  }
-
-  function boot(){
-    if(installed) return;
-    installed = true;
-    install();
-    scheduleInstall();
-    startObserver();
-  }
-
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", boot, {once:true});
-  }else{
-    boot();
-  }
-
-  window.addEventListener("resize", function(){ setTimeout(install, 80); }, {passive:true});
-  window.addEventListener("orientationchange", function(){ setTimeout(install, 180); }, {passive:true});
-})();
-</script>
-<!-- END KGG v12 FEATURE RESTORE -->
-
-
-<!-- KGG PATCH START kgg-v014-phone-viewport-state-release-guard -->
-<style id="kgg-v014-phone-viewport-state-release-guard-css">
-  /*
-    v014: final phone-only gesture placement guard.
-    - Phone drag cards are absolute inside #planList, not viewport fixed.
-    - Scope is only max-width:759px so tablet layout containers are untouched.
-  */
-  @media (max-width:759px){
-    body.kggPlanCardReordering #currentPlanBlock #planList.planList > .planCard.reorder-lifted{
-      position:absolute!important;
-      right:auto!important;
-      bottom:auto!important;
-      margin:0!important;
-      transform:translate3d(0,0,0)!important;
-      transition:none!important;
-      will-change:left,top!important;
-      pointer-events:none!important;
-      z-index:9999!important;
-    }
-
-    body.kggPlanCardReordering #currentPlanBlock #planList.planList{
-      position:relative;
-    }
-
-    body.kggPlanCardReordering #currentPlanBlock .planSectionBody{
-      overflow:auto!important;
-      touch-action:pan-y!important;
-    }
-  }
-</style>
-
-<script id="kgg-v014-phone-viewport-state-release-guard-js">
-(function(){
-  "use strict";
-
-  var PATCH_ID = "kgg-v014-phone-viewport-state-release-guard";
-  var PHONE_QUERY = "(max-width:759px)";
-  var cleanupTimer = 0;
-
-  function isPhone(){
-    return !!(window.matchMedia && window.matchMedia(PHONE_QUERY).matches);
-  }
-
-  function body(){
-    return document.body || null;
-  }
-
-  function planList(){
-    return document.getElementById("planList");
-  }
-
-  function currentPlanBlock(){
-    return document.getElementById("currentPlanBlock");
-  }
-
-  function hasLivePlanGesture(){
-    return !!document.querySelector(
-      "#currentPlanBlock .planCard.reorder-lifted," +
-      "#currentPlanBlock .planCard.swipe-dragging," +
-      "#currentPlanBlock .planCard.swipe-removing," +
-      "#currentPlanBlock .planCard.reorder-prelift"
-    );
-  }
-
-  function removeStyleProps(el, props){
-    if(!el || !el.style) return;
-    props.forEach(function(prop){
-      try{ el.style.removeProperty(prop); }catch(err){}
-    });
-  }
-
-  function cleanPlanCardInlineState(){
-    var cards = document.querySelectorAll(
-      "#currentPlanBlock .planCard," +
-      "#planList .planCard," +
-      ".planCard.reorder-lifted," +
-      ".planCard.reorder-prelift," +
-      ".planCard.swipe-dragging," +
-      ".planCard.swipe-removing"
-    );
-
-    Array.prototype.forEach.call(cards, function(card){
-      card.classList.remove(
-        "reorder-lifted",
-        "reorder-prelift",
-        "reorder-gap-before",
-        "reorder-gap-after",
-        "swipe-dragging",
-        "swipe-armed",
-        "swipe-left",
-        "swipe-right",
-        "swipe-removing"
-      );
-
-      removeStyleProps(card, [
-        "--drag-left",
-        "--drag-top",
-        "--drag-y",
-        "--kgg-plan-swipe-x",
-        "--swipe-strength",
-        "position",
-        "left",
-        "top",
-        "right",
-        "bottom",
-        "margin",
-        "width",
-        "transform",
-        "transform-origin",
-        "opacity",
-        "transition",
-        "will-change",
-        "z-index",
-        "filter"
-      ]);
-    });
-
-    Array.prototype.forEach.call(document.querySelectorAll("#planList .reorder-placeholder"), function(ph){
-      try{ ph.remove(); }catch(err){
-        if(ph.parentNode) ph.parentNode.removeChild(ph);
-      }
-    });
-
-    Array.prototype.forEach.call(document.querySelectorAll(".drag.reorder-armed"), function(handle){
-      handle.classList.remove("reorder-armed");
-    });
-  }
-
-  function cleanPlanContainerInlineState(){
-    var block = currentPlanBlock();
-    var list = planList();
-
-    if(block){
-      removeStyleProps(block, [
-        "--kgg-current-plan-freeze-h",
-        "height",
-        "min-height",
-        "max-height",
-        "overflow",
-        "contain"
-      ]);
-    }
-
-    if(list){
-      list.classList.remove("reorder-active");
-      /*
-        The phone drag code temporarily sets #planList to position:relative.
-        If a resize/orientation interrupts cleanup, remove that inline value so
-        tablet layout uses stylesheet rules again.
-      */
-      removeStyleProps(list, [
-        "position",
-        "overflow",
-        "contain",
-        "transform",
-        "isolation"
-      ]);
-    }
-
-    Array.prototype.forEach.call(document.querySelectorAll("#currentPlanBlock .planSectionBody"), function(section){
-      removeStyleProps(section, [
-        "height",
-        "min-height",
-        "max-height",
-        "overflow",
-        "contain",
-        "transform",
-        "touch-action"
-      ]);
-    });
-  }
-
-  function cleanBodyState(){
-    var b = body();
-    if(!b) return;
-
-    b.classList.remove(
-      "kggPlanCardReordering",
-      "kggPlanCardSwiping",
-      "kggPlanSectionFrozen",
-      "is-scrolling",
-      "phoneTextFocus",
-      "kggPhoneDrawerOpen",
-      "kggPhoneDbBrowseMode"
-    );
-
-    Array.prototype.forEach.call(document.querySelectorAll(".phoneButtonFloat"), function(btn){
-      btn.classList.remove("phoneButtonFloat");
-    });
-  }
-
-  function hardClean(reason){
-    /*
-      If a resize/orientation interrupts an active original drag handler, ask the
-      original pointercancel listener to close first. Otherwise its later pointerup
-      could see a removed placeholder and reorder the plan unexpectedly.
-    */
-    if(hasLivePlanGesture()){
-      try{
-        document.dispatchEvent(new Event("pointercancel", {bubbles:true, cancelable:true}));
-      }catch(err){
-        try{
-          var ev = document.createEvent("Event");
-          ev.initEvent("pointercancel", true, true);
-          document.dispatchEvent(ev);
-        }catch(err2){}
-      }
-    }
-
-    cleanBodyState();
-    cleanPlanCardInlineState();
-    cleanPlanContainerInlineState();
-
-    window.KGG_PHONE_VIEWPORT_STATE_RELEASE_GUARD_V14.lastClean = {
-      reason: reason || "manual",
-      at: new Date().toISOString(),
-      phone: isPhone()
-    };
-  }
-
-  function cleanIfSafe(reason){
-    /*
-      In phone portrait during an active pointer gesture, the original handlers own
-      the live motion. Outside phone, or after pointer end/cancel, this guard is
-      allowed to clean leaked state.
-    */
-    if(isPhone() && hasLivePlanGesture()) return;
-    hardClean(reason);
-  }
-
-  function scheduleClean(reason, delay){
-    clearTimeout(cleanupTimer);
-    cleanupTimer = setTimeout(function(){
-      cleanIfSafe(reason);
-    }, Number.isFinite(delay) ? delay : 80);
-  }
-
-  function install(){
-    window.KGG_PHONE_VIEWPORT_STATE_RELEASE_GUARD_V14 = window.KGG_PHONE_VIEWPORT_STATE_RELEASE_GUARD_V14 || {};
-    window.KGG_PHONE_VIEWPORT_STATE_RELEASE_GUARD_V14.patchId = PATCH_ID;
-    window.KGG_PHONE_VIEWPORT_STATE_RELEASE_GUARD_V14.clean = hardClean;
-    window.KGG_PHONE_VIEWPORT_STATE_RELEASE_GUARD_V14.check = function(){
-      var b = body();
-      var block = currentPlanBlock();
-      var list = planList();
-      return {
-        patchId: PATCH_ID,
-        phone: isPhone(),
-        bodyClasses: b ? b.className : "",
-        hasLivePlanGesture: hasLivePlanGesture(),
-        planFreezeHeight: block ? block.style.getPropertyValue("--kgg-current-plan-freeze-h") : "",
-        planListInlinePosition: list ? list.style.getPropertyValue("position") : "",
-        releaseFallback: !!(window.KGGReleaseControl && window.KGGReleaseControl.fallback),
-        nativeReleaseBridge: !!(window.KGGReleaseControl && !window.KGGReleaseControl.fallback)
-      };
-    };
-
-    ["pointerup","pointercancel","touchend","touchcancel"].forEach(function(type){
-      window.addEventListener(type, function(){
-        scheduleClean(type, 140);
-        scheduleClean(type + ":late", 420);
-      }, {capture:true, passive:true});
-    });
-
-    window.addEventListener("resize", function(){
-      if(!isPhone()) hardClean("leave-phone-resize");
-      else scheduleClean("phone-resize", 160);
-    }, {passive:true});
-
-    window.addEventListener("orientationchange", function(){
-      setTimeout(function(){
-        if(!isPhone()) hardClean("leave-phone-orientation");
-        else scheduleClean("phone-orientation", 220);
-      }, 120);
-    }, {passive:true});
-
-    if(window.visualViewport){
-      window.visualViewport.addEventListener("resize", function(){
-        if(!isPhone()) hardClean("leave-phone-visualViewport");
-        else scheduleClean("phone-visualViewport", 160);
-      }, {passive:true});
-    }
-
-    if(window.matchMedia){
-      try{
-        var mq = window.matchMedia(PHONE_QUERY);
-        var onChange = function(ev){
-          if(!ev.matches) hardClean("matchMedia-leave-phone");
-          else scheduleClean("matchMedia-enter-phone", 120);
-        };
-        if(mq.addEventListener) mq.addEventListener("change", onChange);
-        else if(mq.addListener) mq.addListener(onChange);
-      }catch(err){}
-    }
-
-    var mo = new MutationObserver(function(){
-      if(!isPhone()){
-        var b = body();
-        if(b && (
-          b.classList.contains("kggPlanCardReordering") ||
-          b.classList.contains("kggPlanCardSwiping") ||
-          b.classList.contains("kggPlanSectionFrozen") ||
-          b.classList.contains("phoneTextFocus") ||
-          b.classList.contains("kggPhoneDrawerOpen")
-        )){
-          hardClean("mutation-leave-phone");
-        }
-      }
-    });
-
-    if(body()) mo.observe(body(), {attributes:true, attributeFilter:["class"]});
-
-    window.addEventListener("pagehide", function(){ hardClean("pagehide"); }, {passive:true});
-    scheduleClean("boot", 260);
-  }
-
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", install, {once:true});
-  }else{
-    install();
-  }
-})();
-</script>
-
-<script id="kgg-v014-local-update-release-marker">
-(function(){
-  "use strict";
-  window.KGG_V014_PHONE_VIEWPORT_STATE_RELEASE_GUARD = {
-    patchId: "kgg-v014-phone-viewport-state-release-guard",
-    confirms: [
-      "phone-only gesture code remains gated by matchMedia('(max-width:759px)')",
-      "stale phone classes and inline styles are cleaned when leaving phone viewport",
-      "phone drag reorder stays absolute inside #planList instead of position:fixed",
-      "global tablet layout containers are not overridden outside max-width:759px",
-      "content://, file:// and /media/external/file/ local tests do not auto-redirect to GitHub",
-      "KGGReleaseControl local fallback is kept and native bridge is not overwritten"
-    ]
-  };
-})();
-</script>
-<!-- KGG PATCH END kgg-v014-phone-viewport-state-release-guard -->
-
-<!-- KGG v13 marker: Update-Zentrale initialization fixed without changing phone/tablet touch behavior -->
-<script id="kgg-v13-update-zentrale-marker">
-(function(){
-  "use strict";
-  window.KGG_UPDATE_ZENTRALE_V13 = {
-    patchId: "kgg-v13-release-control-local-fallback",
-    base: "KGG_CURRENT_ADMIN_HTML_v12_features_restored_phone_fixed.html",
-    changes: [
-      "Defines a safe KGGReleaseControl fallback before kgg-release-center-v28-script runs",
-      "Allows KGGReleaseCenter to initialize in content://, file:// and normal browser test mode",
-      "Does not override the native Admin-APK/GitHub bridge when it exists",
-      "Does not change phone drag, tablet layout, QR, PDF, Scan, Parser, Storage or Plan-State"
-    ]
-  };
-})();
-</script>
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
     <files-path name="updates" path="updates/" />
+    <files-path name="scan_internal" path="scan/" />
+    <external-files-path name="scan_pictures" path="Pictures/scan/" />
 </paths>

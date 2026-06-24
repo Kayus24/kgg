@@ -42,6 +42,14 @@ public final class KggReleaseBridge implements KggReleaseController {
     private static final String ACCESS = "access_token";
     private static final String REFRESH = "refresh_token";
     private static final String EXPIRES = "expires_at";
+    private static final String DEVICE_CODE = "device_code";
+    private static final String DEVICE_USER_CODE = "device_user_code";
+    private static final String DEVICE_VERIFY_URI = "device_verify_uri";
+    private static final String DEVICE_VERIFY_URI_COMPLETE = "device_verify_uri_complete";
+    private static final String DEVICE_INTERVAL = "device_interval";
+    private static final String DEVICE_EXPIRES_AT = "device_expires_at";
+    private static final String MOBILE_INBOX_URL = "https://github.com/Kayus24/kgg/upload/mobile-inbox/mobile-inbox";
+    private static final String PROMOTE_LATEST_URL = "https://github.com/Kayus24/kgg/actions/workflows/promote-latest-admin-beta.yml";
     private static final int MAX_HTML_BYTES = 5_500_000;
 
     private final MainActivity activity;
@@ -50,11 +58,17 @@ public final class KggReleaseBridge implements KggReleaseController {
     private volatile String pendingReleaseId = "";
     private volatile String pendingVersionName = "";
     private volatile String pendingNotes = "";
+    private volatile boolean loginPolling = false;
 
     public KggReleaseBridge(MainActivity activity) {
         this.activity = activity;
         this.prefs = activity.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        setState("idle", "Bereit", null);
+        if (hasPendingDeviceLogin()) {
+            restorePendingLoginState("GitHub-Bestaetigung offen. Nach der Bestaetigung hierher zurueckwechseln.");
+            resumePendingLogin();
+        } else {
+            setState("idle", "Bereit", null);
+        }
     }
 
     @JavascriptInterface
@@ -64,6 +78,10 @@ public final class KggReleaseBridge implements KggReleaseController {
 
     @JavascriptInterface
     public String status() {
+        if (hasPendingDeviceLogin() && !hasUsableToken()) {
+            restorePendingLoginState("GitHub-Bestaetigung offen. Anmeldung wird weiter geprueft.");
+            resumePendingLogin();
+        }
         JSONObject snapshot;
         synchronized (this) {
             try {
@@ -75,6 +93,8 @@ public final class KggReleaseBridge implements KggReleaseController {
         try {
             snapshot.put("available", isAvailable());
             snapshot.put("authenticated", hasUsableToken());
+            snapshot.put("loginPending", hasPendingDeviceLogin());
+            snapshot.put("loginPolling", loginPolling);
             snapshot.put("repository", OWNER + "/" + REPO);
         } catch (Exception ignored) {
         }
@@ -87,8 +107,18 @@ public final class KggReleaseBridge implements KggReleaseController {
             setState("blocked", "GitHub App Client-ID fehlt im Admin-Build", null);
             return false;
         }
-        new Thread(this::runDeviceLogin, "kgg-github-device-login").start();
+        startDeviceLogin(true);
         return true;
+    }
+
+    @JavascriptInterface
+    public boolean openMobileInbox() {
+        return openExternalPage(MOBILE_INBOX_URL, "GitHub-Mobile-Inbox");
+    }
+
+    @JavascriptInterface
+    public boolean openPromoteLatest() {
+        return openExternalPage(PROMOTE_LATEST_URL, "GitHub-Freigabe");
     }
 
     @JavascriptInterface
@@ -164,51 +194,96 @@ public final class KggReleaseBridge implements KggReleaseController {
         return true;
     }
 
-    private void runDeviceLogin() {
-        try {
-            setState("login", "GitHub-Anmeldung wird vorbereitet", null);
-            String form = "client_id=" + enc(BuildConfig.KGG_GITHUB_CLIENT_ID) + "&repository_id=" + enc(REPO_ID);
-            JSONObject device = new JSONObject(requestForm("https://github.com/login/device/code", form));
-            String deviceCode = device.getString("device_code");
-            String userCode = device.getString("user_code");
-            String verificationUri = device.getString("verification_uri");
-            String verificationUriComplete = device.optString("verification_uri_complete", verificationUri);
-            int interval = Math.max(5, device.optInt("interval", 5));
-            int expires = Math.max(60, device.optInt("expires_in", 900));
-            JSONObject extra = new JSONObject();
-            extra.put("userCode", userCode);
-            extra.put("verificationUri", verificationUri);
-            extra.put("verificationUriComplete", verificationUriComplete);
-            setState("login_waiting", "Code " + userCode + " bei GitHub bestaetigen. Danach hierher zurueckwechseln.", extra);
-            showDeviceLoginDialog(userCode, verificationUriComplete);
-
-            long deadline = System.currentTimeMillis() + expires * 1000L;
-            while (System.currentTimeMillis() < deadline) {
-                Thread.sleep(interval * 1000L);
-                String tokenForm = "client_id=" + enc(BuildConfig.KGG_GITHUB_CLIENT_ID)
-                        + "&device_code=" + enc(deviceCode)
-                        + "&grant_type=" + enc("urn:ietf:params:oauth:grant-type:device_code")
-                        + "&repository_id=" + enc(REPO_ID);
-                JSONObject token = new JSONObject(requestForm("https://github.com/login/oauth/access_token", tokenForm));
-                String error = token.optString("error", "");
-                if ("authorization_pending".equals(error)) {
-                    continue;
-                }
-                if ("slow_down".equals(error)) {
-                    interval += 5;
-                    continue;
-                }
-                if (!error.isEmpty()) {
-                    throw new IllegalStateException(error);
-                }
-                storeTokens(token);
-                setState("ready", "GitHub verbunden", null);
+    private void startDeviceLogin(boolean forceNew) {
+        synchronized (this) {
+            if (loginPolling) {
+                restorePendingLoginState("GitHub-Anmeldung laeuft bereits. Nach der Bestaetigung hierher zurueckwechseln.");
                 return;
             }
-            throw new IllegalStateException("device_code_expired");
-        } catch (Exception err) {
-            setState("error", "GitHub-Anmeldung fehlgeschlagen: " + safeMessage(err), null);
+            loginPolling = true;
         }
+        new Thread(() -> runDeviceLogin(forceNew), "kgg-github-device-login").start();
+    }
+
+    private void resumePendingLogin() {
+        synchronized (this) {
+            if (loginPolling) return;
+            loginPolling = true;
+        }
+        new Thread(() -> runDeviceLogin(false), "kgg-github-device-login-resume").start();
+    }
+
+    private void runDeviceLogin(boolean forceNew) {
+        try {
+            if (forceNew || !hasPendingDeviceLogin()) {
+                requestDeviceLogin();
+            } else {
+                restorePendingLoginState("GitHub-Bestaetigung offen. Anmeldung wird weiter geprueft.");
+            }
+            pollPendingDeviceLogin();
+        } catch (Exception err) {
+            clearPendingDeviceLogin();
+            setState("error", "GitHub-Anmeldung fehlgeschlagen: " + safeMessage(err), null);
+        } finally {
+            loginPolling = false;
+        }
+    }
+
+    private void requestDeviceLogin() throws Exception {
+        setState("login", "GitHub-Anmeldung wird vorbereitet", null);
+        String form = "client_id=" + enc(BuildConfig.KGG_GITHUB_CLIENT_ID) + "&repository_id=" + enc(REPO_ID);
+        JSONObject device = new JSONObject(requestForm("https://github.com/login/device/code", form));
+        String deviceCode = device.getString("device_code");
+        String userCode = device.getString("user_code");
+        String verificationUri = device.getString("verification_uri");
+        String verificationUriComplete = device.optString("verification_uri_complete", verificationUri);
+        int interval = Math.max(5, device.optInt("interval", 5));
+        int expires = Math.max(60, device.optInt("expires_in", 900));
+        long expiresAt = System.currentTimeMillis() + expires * 1000L;
+        prefs.edit()
+                .putString(DEVICE_CODE, encrypt(deviceCode))
+                .putString(DEVICE_USER_CODE, userCode)
+                .putString(DEVICE_VERIFY_URI, verificationUri)
+                .putString(DEVICE_VERIFY_URI_COMPLETE, verificationUriComplete)
+                .putInt(DEVICE_INTERVAL, interval)
+                .putLong(DEVICE_EXPIRES_AT, expiresAt)
+                .apply();
+        restorePendingLoginState("Code " + userCode + " bei GitHub bestaetigen. Danach hierher zurueckwechseln.");
+        showDeviceLoginDialog(userCode, verificationUriComplete);
+    }
+
+    private void pollPendingDeviceLogin() throws Exception {
+        String deviceCode = decrypt(prefs.getString(DEVICE_CODE, ""));
+        int interval = Math.max(5, prefs.getInt(DEVICE_INTERVAL, 5));
+        long deadline = prefs.getLong(DEVICE_EXPIRES_AT, 0L);
+        if (deviceCode.isEmpty() || deadline <= System.currentTimeMillis()) {
+            throw new IllegalStateException("device_code_expired");
+        }
+        while (System.currentTimeMillis() < deadline) {
+            Thread.sleep(interval * 1000L);
+            String tokenForm = "client_id=" + enc(BuildConfig.KGG_GITHUB_CLIENT_ID)
+                    + "&device_code=" + enc(deviceCode)
+                    + "&grant_type=" + enc("urn:ietf:params:oauth:grant-type:device_code")
+                    + "&repository_id=" + enc(REPO_ID);
+            JSONObject token = new JSONObject(requestForm("https://github.com/login/oauth/access_token", tokenForm));
+            String error = token.optString("error", "");
+            if ("authorization_pending".equals(error)) {
+                continue;
+            }
+            if ("slow_down".equals(error)) {
+                interval += 5;
+                prefs.edit().putInt(DEVICE_INTERVAL, interval).apply();
+                continue;
+            }
+            if (!error.isEmpty()) {
+                throw new IllegalStateException(error);
+            }
+            storeTokens(token);
+            clearPendingDeviceLogin();
+            setState("ready", "GitHub verbunden", null);
+            return;
+        }
+        throw new IllegalStateException("device_code_expired");
     }
 
     private void showDeviceLoginDialog(String userCode, String verificationUri) {
@@ -220,11 +295,47 @@ public final class KggReleaseBridge implements KggReleaseController {
                                 + "\n\nDer Code bleibt nur kurz gueltig. Nach der GitHub-Bestaetigung zur KGG-App zurueckwechseln.")
                         .setNegativeButton("Schliessen", null)
                         .setNeutralButton("Code kopieren", (dialog, which) -> copyDeviceLoginCode(userCode))
-                        .setPositiveButton("GitHub oeffnen", (dialog, which) -> openDeviceLoginPage(verificationUri))
+                        .setPositiveButton("GitHub oeffnen", (dialog, which) -> openExternalPage(verificationUri, "GitHub-Seite"))
                         .show();
             } catch (Exception ignored) {
             }
         });
+    }
+
+    private boolean hasPendingDeviceLogin() {
+        try {
+            return prefs.getLong(DEVICE_EXPIRES_AT, 0L) > System.currentTimeMillis()
+                    && !decrypt(prefs.getString(DEVICE_CODE, "")).isEmpty();
+        } catch (Exception err) {
+            return false;
+        }
+    }
+
+    private void restorePendingLoginState(String message) {
+        try {
+            String userCode = prefs.getString(DEVICE_USER_CODE, "");
+            String verificationUri = prefs.getString(DEVICE_VERIFY_URI, "");
+            String verificationUriComplete = prefs.getString(DEVICE_VERIFY_URI_COMPLETE, verificationUri);
+            JSONObject extra = new JSONObject();
+            extra.put("userCode", userCode);
+            extra.put("verificationUri", verificationUri);
+            extra.put("verificationUriComplete", verificationUriComplete);
+            extra.put("expiresAt", prefs.getLong(DEVICE_EXPIRES_AT, 0L));
+            setState("login_waiting", message, extra);
+        } catch (Exception ignored) {
+            setState("login_waiting", message, null);
+        }
+    }
+
+    private void clearPendingDeviceLogin() {
+        prefs.edit()
+                .remove(DEVICE_CODE)
+                .remove(DEVICE_USER_CODE)
+                .remove(DEVICE_VERIFY_URI)
+                .remove(DEVICE_VERIFY_URI_COMPLETE)
+                .remove(DEVICE_INTERVAL)
+                .remove(DEVICE_EXPIRES_AT)
+                .apply();
     }
 
     private void copyDeviceLoginCode(String userCode) {
@@ -238,11 +349,16 @@ public final class KggReleaseBridge implements KggReleaseController {
         }
     }
 
-    private void openDeviceLoginPage(String verificationUri) {
+    private boolean openExternalPage(String url, String label) {
         try {
-            activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(verificationUri)));
+            activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+            if (!"GitHub-Seite".equals(label)) {
+                setState("ready", label + " geoeffnet", null);
+            }
+            return true;
         } catch (Exception err) {
-            setState("error", "GitHub-Seite konnte nicht geoeffnet werden: " + safeMessage(err), null);
+            setState("error", label + " konnte nicht geoeffnet werden: " + safeMessage(err), null);
+            return false;
         }
     }
 

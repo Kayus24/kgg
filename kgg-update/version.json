@@ -1,7 +1,7 @@
 {
-  "versionCode": 28,
-  "versionName": "1.0.28-html-download-camera-fix",
-  "indexUrl": "index.html?v=28",
-  "sha256": "a16fc12972e83152d4959b14c2d392018ee9cbeacd9b7da0eea4ca07c8a41151",
-  "notes": "v028: Aktuelle Admin-HTML aus der Update-Zentrale speichern und nativen Kamera-Scan ohne Galerie-Fallback erzwingen. Keine PDF-/QR-Erzeugung-/Patienten-App-/Parser-/Plan-State-/Storage-Aenderung."
+  "versionCode": 32,
+  "versionName": "1.0.32-no-boot-redirect",
+  "indexUrl": "index.html?v=32",
+  "sha256": "8db76416bcd2373c3e9ebbe62ee8812190922443754819bbf1d1cb0a3ca572c4",
+  "notes": "v032: Max' funktionierende Phone-Viewport-/Local-List-Drag-HTML bleibt Basis. Web-Update wird beim Start nicht mehr automatisch per location.replace geoeffnet; externe Release-Links nur noch nach bewusstem Button-Tippen."
 }

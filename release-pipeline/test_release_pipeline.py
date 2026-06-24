@@ -2,15 +2,22 @@ import importlib.util
 import hashlib
 import json
 import re
+import sys
 import unittest
 from pathlib import Path
 
 
 HERE = Path(__file__).resolve().parent
+if str(HERE) not in sys.path:
+    sys.path.insert(0, str(HERE))
 SPEC = importlib.util.spec_from_file_location("kgg_release_pipeline", HERE / "release_pipeline.py")
 pipeline = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader
 SPEC.loader.exec_module(pipeline)
+MOBILE_SPEC = importlib.util.spec_from_file_location("kgg_mobile_inbox", HERE / "mobile_inbox.py")
+mobile_inbox = importlib.util.module_from_spec(MOBILE_SPEC)
+assert MOBILE_SPEC.loader
+MOBILE_SPEC.loader.exec_module(mobile_inbox)
 
 
 class ReleasePipelineTests(unittest.TestCase):
@@ -50,8 +57,14 @@ class ReleasePipelineTests(unittest.TestCase):
         admin = pipeline.read_text(pipeline.BASE_ADMIN)
         self.assertEqual(1, admin.count(pipeline.ADMIN_START))
         self.assertEqual(1, admin.count(pipeline.ADMIN_END))
-        self.assertIn('id="kgg-release-center-v28-script"', admin)
-        self.assertNotIn("kgg-release-center-v28-script", pipeline.derive_colleague(admin))
+        self.assertIn('id="kgg-release-center-v31-script"', admin)
+        self.assertNotIn("kgg-release-center-v31-script", pipeline.derive_colleague(admin))
+
+    def test_remote_web_update_is_manual_only(self):
+        admin = pipeline.read_text(pipeline.BASE_ADMIN)
+        self.assertIn("kgg-no-auto-release-navigation-v32", admin)
+        self.assertIn("stageManualRemoteWebUpdate(webTarget)", admin)
+        self.assertNotIn("location.replace(target.url)", admin)
 
     def test_colleague_has_no_unconditional_admin_dom_bindings(self):
         colleague = pipeline.derive_colleague(pipeline.read_text(pipeline.BASE_ADMIN))
@@ -59,6 +72,20 @@ class ReleasePipelineTests(unittest.TestCase):
             r"\$\('(adminConfigBtn|adminSecretsModal|closeAdminSecrets|saveAdminSecrets|clearAdminSecrets)'\)\.(onclick|addEventListener)"
         )
         self.assertIsNone(forbidden_binding.search(colleague))
+
+    def test_mobile_inbox_rejects_older_base_marker(self):
+        current = pipeline.load_json(pipeline.ROOT / "kgg-update" / "version.json")["versionCode"]
+        old_html = pipeline.read_text(pipeline.BASE_ADMIN).replace(
+            f"KGG_GITHUB_UPDATE_v{current:03d}",
+            f"KGG_GITHUB_UPDATE_v{current - 1:03d}",
+            1,
+        )
+        self.assertLess(mobile_inbox.html_version_code(old_html), current)
+
+    def test_mobile_inbox_next_release_id_advances(self):
+        release_id = mobile_inbox.next_release_id(pipeline.ROOT)
+        self.assertRegex(release_id, r"^r[0-9]{4,}$")
+        self.assertGreater(int(release_id[1:]), 397)
 
 
 if __name__ == "__main__":

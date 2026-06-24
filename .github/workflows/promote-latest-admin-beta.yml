@@ -1,0 +1,66 @@
+name: Promote latest KGG Admin beta
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: kgg-promote-latest-admin-beta
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Promote current Admin beta to colleague channel
+        id: promote
+        shell: bash
+        run: |
+          set -euo pipefail
+          release_id="$(python - <<'PY'
+          import json
+          from pathlib import Path
+          manifest=json.loads(Path('therapist-app/android_update_manifest.json').read_text(encoding='utf-8'))
+          print(manifest['channels']['admin']['releaseId'])
+          PY
+          )"
+          current_colleague="$(python - <<'PY'
+          import json
+          from pathlib import Path
+          manifest=json.loads(Path('therapist-app/android_update_manifest.json').read_text(encoding='utf-8'))
+          print(manifest['channels']['colleague']['releaseId'])
+          PY
+          )"
+          echo "release_id=$release_id" >> "$GITHUB_OUTPUT"
+          if [[ "$release_id" == "$current_colleague" ]]; then
+            echo "already_current=true" >> "$GITHUB_OUTPUT"
+            echo "Kolleg:innen-Kanal ist bereits auf $release_id." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          branch="release/promote-latest-admin-${release_id}-${{ github.run_id }}"
+          git switch -c "$branch"
+          python release-pipeline/release_pipeline.py promote --release-id "$release_id"
+          python -m unittest release-pipeline/test_release_pipeline.py
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add therapist-app/android_update_manifest.json
+          git commit -m "promote latest admin beta $release_id"
+          git push -u origin "$branch"
+          url="$(gh pr create --base main --head "$branch" \
+            --title "[release] promote latest Admin beta $release_id (colleague)" \
+            --body 'Automatisch erzeugte Kolleg:innen-Freigabe fuer die aktuelle gepruefte Admin-Beta. Keine direkte main-Aenderung.')"
+          gh pr merge "$url" --admin --squash
+          echo "PR: $url" >> "$GITHUB_STEP_SUMMARY"

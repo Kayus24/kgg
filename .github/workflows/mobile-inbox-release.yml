@@ -1,0 +1,131 @@
+name: KGG Mobile Inbox Release
+
+on:
+  push:
+    branches:
+      - mobile-inbox
+    paths:
+      - 'mobile-inbox/*.html'
+      - 'mobile-inbox/**/*.html'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: kgg-mobile-inbox-release
+  cancel-in-progress: false
+
+jobs:
+  build-release-pr:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout uploaded inbox branch
+        uses: actions/checkout@v4
+        with:
+          path: upload
+          ref: ${{ github.ref }}
+          fetch-depth: 2
+
+      - name: Checkout main release source
+        uses: actions/checkout@v4
+        with:
+          path: base
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Select uploaded HTML
+        id: candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd upload
+          candidate="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" \
+            | grep -Ei '^mobile-inbox/.*\.html$' | head -n 1 || true)"
+          if [[ -z "$candidate" ]]; then
+            mapfile -t html_files < <(find mobile-inbox -type f -iname '*.html' | sort)
+            if [[ "${#html_files[@]}" -ne 1 ]]; then
+              echo "Expected exactly one changed HTML file below mobile-inbox/." >&2
+              printf '%s\n' "${html_files[@]}" >&2
+              exit 1
+            fi
+            candidate="${html_files[0]}"
+          fi
+          echo "candidate=$PWD/$candidate" >> "$GITHUB_OUTPUT"
+
+      - name: Validate mobile HTML and create release inbox
+        id: mobile
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          python release-pipeline/mobile_inbox.py \
+            --candidate '${{ steps.candidate.outputs.candidate }}' \
+            --release-json release-inbox/release.json \
+            --copy-to release-inbox/admin.html \
+            --github-output "$GITHUB_OUTPUT"
+
+      - name: Build immutable Admin and colleague artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          python release-pipeline/release_pipeline.py prepare \
+            --candidate release-inbox/admin.html \
+            --release-json release-inbox/release.json
+          rm -f release-inbox/admin.html release-inbox/release.json
+
+      - name: Run release contract tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          python -m unittest release-pipeline/test_release_pipeline.py
+          node release-pipeline/check_html_scripts.js kgg-update/index.html therapist-app/releases/web/*/*.html
+
+      - name: Reject secrets in release-controlled files
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          if git grep -nE '(sk-proj-|gh[pousr]_[A-Za-z0-9_]{20,}|AIza[0-9A-Za-z_-]{25,})' -- \
+            release-pipeline kgg-update therapist-app/android_update_manifest.json therapist-app/releases/web 2>/dev/null; then
+            echo 'Potential secret found in release-controlled files.' >&2
+            exit 1
+          fi
+
+      - name: Create checked release PR and merge it
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          branch="mobile/admin-${{ steps.mobile.outputs.release_id }}-${{ github.run_id }}"
+          git switch -c "$branch"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A release-inbox therapist-app/android_update_manifest.json therapist-app/releases/web
+          git commit -m "mobile inbox admin beta ${{ steps.mobile.outputs.release_id }}"
+          git push -u origin "$branch"
+          body="$(mktemp)"
+          cat > "$body" <<'BODY'
+          Automatisch aus der KGG Mobile-Inbox erzeugt.
+
+          - HTML wurde gegen den aktuellen KGG-Vertrag validiert.
+          - Admin- und Kolleg:innen-Artefakte wurden aus derselben geprueften Quelle erzeugt.
+          - Keine direkte Aenderung an main; Merge erfolgt ueber diesen PR nach Tests.
+          BODY
+          url="$(gh pr create --base main --head "$branch" \
+            --title "[admin-beta] ${{ steps.mobile.outputs.release_id }} ${{ steps.mobile.outputs.version_name }}" \
+            --body-file "$body")"
+          gh pr merge "$url" --admin --squash
+          echo "PR: $url" >> "$GITHUB_STEP_SUMMARY"

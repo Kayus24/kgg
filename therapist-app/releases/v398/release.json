@@ -1,0 +1,18 @@
+{
+  "releaseId": "v398",
+  "versionName": "0.2.8-force-r0400-html",
+  "versionCode": 30,
+  "webReleaseId": "r0400",
+  "createdAt": "2026-06-24T10:30:00Z",
+  "notes": "Android-Wrapper trennt Shell-Version und gebuendelte Web-Rollout-Version. Die APK schreibt r0400 beim Start wieder sicher in den lokalen HTML-Slot, damit alte gespeicherte HTML nicht weitergeladen wird.",
+  "profiles": {
+    "admin": {
+      "apk": "android/KGG_ANDROID_ADMIN_v398_force_r0400_html_debug.apk",
+      "sha256": "e64553647a10a5fa4286f319b6a4284052c0c030b93b5150f9ac8ef0a1708c34"
+    },
+    "colleague": {
+      "apk": "android/KGG_ANDROID_KOLLEGEN_v398_force_r0400_html_debug.apk",
+      "sha256": "c4a4e022a7bfa2511538f18bb80c025eb4a1057a186637ac12146ea55dd807ed"
+    }
+  }
+}
