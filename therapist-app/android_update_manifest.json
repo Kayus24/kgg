@@ -4,15 +4,15 @@
   "schema": 2,
   "channels": {
     "admin": {
-      "releaseId": "r0400",
+      "releaseId": "r0401",
       "profile": "admin",
-      "versionName": "1.0.32-no-boot-redirect",
-      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0400/admin.html",
-      "sha256": "8db76416bcd2373c3e9ebbe62ee8812190922443754819bbf1d1cb0a3ca572c4",
-      "notes": "Max' funktionierende Phone-Viewport-/Local-List-Drag-HTML bleibt Basis; Web-Updates werden beim Booten nicht mehr automatisch per location.replace geoeffnet.",
-      "rolloutCode": 399,
-      "previousReleaseId": "r0397",
-      "releasedAt": "2026-06-24T10:00:23Z"
+      "versionName": "1.0.33-mobile-inbox-r0401",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0401/admin.html",
+      "sha256": "025c437f216603dac532387f007c1e168c7b20c8478a15abdfda8a484bad7740",
+      "notes": "Mobile-Inbox r0401: KGG Update v32 No Boot Redirect (025c437f2166).",
+      "rolloutCode": 400,
+      "previousReleaseId": "r0400",
+      "releasedAt": "2026-06-24T20:07:13Z"
     },
     "colleague": {
       "releaseId": "r0397",
@@ -30,8 +30,8 @@
   "latestAndroidShellVersion": "v398",
   "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0397/colleague.html",
   "colleagueSha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
-  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0400/admin.html",
-  "adminSha256": "8db76416bcd2373c3e9ebbe62ee8812190922443754819bbf1d1cb0a3ca572c4",
+  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0401/admin.html",
+  "adminSha256": "025c437f216603dac532387f007c1e168c7b20c8478a15abdfda8a484bad7740",
   "sha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
   "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v398/android/KGG_ANDROID_KOLLEGEN_v398_force_r0400_html_debug.apk",
   "androidApkSha256": "c4a4e022a7bfa2511538f18bb80c025eb4a1057a186637ac12146ea55dd807ed",
@@ -39,5 +39,5 @@
   "colleagueAndroidApkSha256": "c4a4e022a7bfa2511538f18bb80c025eb4a1057a186637ac12146ea55dd807ed",
   "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v398/android/KGG_ANDROID_ADMIN_v398_force_r0400_html_debug.apk",
   "adminAndroidApkSha256": "e64553647a10a5fa4286f319b6a4284052c0c030b93b5150f9ac8ef0a1708c34",
-  "notes": "Admin beta r0400 + Android v398: APK schreibt r0400 sicher in den lokalen HTML-Slot, damit alte gespeicherte HTML nicht weitergeladen wird."
+  "notes": "Admin beta r0401: Mobile-Inbox r0401: KGG Update v32 No Boot Redirect (025c437f2166)."
 }
