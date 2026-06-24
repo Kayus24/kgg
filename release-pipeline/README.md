@@ -41,6 +41,30 @@ Der Live-Test braucht `gh auth login` mit Schreibrechten fuer `Kayus24/kgg`. Er 
 
 Wichtig: Jeder Live-Test erzeugt bewusst eine neue Admin-Beta-Release. Er fuehrt keine Kolleg:innen-Freigabe aus.
 
+## Lokale Test-Batterie
+
+Schneller Gesamttest ohne GitHub-Schreibaktion:
+
+```powershell
+python release-pipeline/kgg_test_battery.py
+```
+
+Einzelne Batterien:
+
+```powershell
+python release-pipeline/kgg_test_battery.py --suite mobile-inbox
+python release-pipeline/kgg_test_battery.py --suite sync
+python release-pipeline/kgg_test_battery.py --suite textblocks
+```
+
+`sync` und `textblocks` laden die echte Produktionslogik aus `kgg-update/index.html` in einem lokalen Node-Harness. Damit werden Sync-Safe-Export/Merge, Secret-Blockade und Terminheld-/Satz-Textbloecke ohne Emulator geprueft.
+
+Nur wenn wirklich eine neue Admin-Beta erzeugt werden soll:
+
+```powershell
+python release-pipeline/kgg_test_battery.py --suite mobile-inbox --live-mobile-inbox
+```
+
 ## Admin-Beta per PR vorbereiten
 
 Auf dem Release-Branch liegen temporaer:

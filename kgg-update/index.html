@@ -18,21 +18,22 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "phone-plan-local-list-drag",
     "local-content-no-auto-redirect",
     "no-auto-release-navigation",
-    "release-center-local-fallback"
+    "release-center-local-fallback",
+    "structured-textblock-parser"
   ],
   "currentVersion": {
-    "versionCode": 32,
-    "versionName": "1.0.32-no-boot-redirect",
-    "lastPatchId": "kgg-v032-no-boot-redirect",
+    "versionCode": 33,
+    "versionName": "1.0.33-test-battery-textblocks",
+    "lastPatchId": "kgg-v033-test-battery-textblocks",
     "updatedBy": "local-html-patch"
   },
-  "latestPatchId": "kgg-v032-no-boot-redirect",
+  "latestPatchId": "kgg-v033-test-battery-textblocks",
   "lastUpdateIntent": {
-    "id": "kgg-v014-phone-viewport-state-release-guard",
-    "summary": "Hardens phone-only plan gesture state cleanup across resize/orientation, preserves local #planList absolute drag behavior, preserves local content/file no-auto-redirect behavior, and keeps the safe KGGReleaseControl fallback before the release center.",
+    "id": "kgg-v033-test-battery-textblocks",
+    "summary": "Adds local/static Mobile-Inbox, Sync and Textblock test batteries and fixes raw Satz text blocks so Satz lines never become exercise cards.",
     "touched": [
-      "Phone viewport state cleanup",
-      "Phone drag/reorder CSS guard",
+      "Textblock parser",
+      "Local test batteries",
       "HTML embedded metadata",
       "Source Truth",
       "Changelog"
@@ -42,7 +43,6 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "QR-Erzeugung",
       "Patienten-App",
       "Scan-Kamera",
-      "Parser",
       "Android-Wrapper",
       "Tablet-Core-Layout",
       "Plan-State",
@@ -65,21 +65,22 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "phone-plan-local-list-drag",
     "local-content-no-auto-redirect",
     "no-auto-release-navigation",
-    "release-center-local-fallback"
+    "release-center-local-fallback",
+    "structured-textblock-parser"
   ],
   "currentVersion": {
-    "versionCode": 32,
-    "versionName": "1.0.32-no-boot-redirect",
-    "lastPatchId": "kgg-v032-no-boot-redirect",
+    "versionCode": 33,
+    "versionName": "1.0.33-test-battery-textblocks",
+    "lastPatchId": "kgg-v033-test-battery-textblocks",
     "updatedBy": "local-html-patch"
   },
-  "latestPatchId": "kgg-v032-no-boot-redirect",
+  "latestPatchId": "kgg-v033-test-battery-textblocks",
   "lastUpdateIntent": {
-    "id": "kgg-v014-phone-viewport-state-release-guard",
-    "summary": "Hardens phone-only plan gesture state cleanup across resize/orientation, preserves local #planList absolute drag behavior, preserves local content/file no-auto-redirect behavior, and keeps the safe KGGReleaseControl fallback before the release center.",
+    "id": "kgg-v033-test-battery-textblocks",
+    "summary": "Adds local/static Mobile-Inbox, Sync and Textblock test batteries and fixes raw Satz text blocks so Satz lines never become exercise cards.",
     "touched": [
-      "Phone viewport state cleanup",
-      "Phone drag/reorder CSS guard",
+      "Textblock parser",
+      "Local test batteries",
       "HTML embedded metadata",
       "Source Truth",
       "Changelog"
@@ -89,7 +90,6 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "QR-Erzeugung",
       "Patienten-App",
       "Scan-Kamera",
-      "Parser",
       "Android-Wrapper",
       "Tablet-Core-Layout",
       "Plan-State",
@@ -104,8 +104,38 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 32,
+  "latestVersionCode": 33,
   "entries": [
+    {
+      "versionCode": 33,
+      "versionName": "1.0.33-test-battery-textblocks",
+      "patchId": "kgg-v033-test-battery-textblocks",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Lokale Test-Batterien und Satz-Textblock-Erkennung",
+      "reason": "Mobile-Inbox, Sync und Terminheld-/Satz-Textbloecke brauchen wiederholbare lokale Checks; rohe Satzzeilen duerfen keine eigenen Uebungskarten erzeugen.",
+      "whatChanged": [
+        "Erkennt strukturierte Textbloecke aus Uebungsname plus Satz 1/2/3 vor dem normalen Komma-/Zeilen-Split.",
+        "Satz-Zeilen werden als Werte gelesen und nicht als eigene Uebungen angelegt.",
+        "Lokale Test-Batterien pruefen Mobile-Inbox-Dry-run, Sync-Safe-Logik und Textblock-Erkennung."
+      ],
+      "touchedAreas": [
+        "Textblock parser",
+        "Release pipeline tests",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Android-Wrapper",
+        "Tablet-Core-Layout",
+        "Plan-State",
+        "Storage",
+        "Exercise database"
+      ]
+    },
     {
       "versionCode": 32,
       "versionName": "1.0.32-no-boot-redirect",
@@ -401,7 +431,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "handoffNote": "Lokale LLMs können index.html lesen und finden kgg-source-truth sowie kgg-changelog direkt im Code."
     }
   ],
-  "latestVersionName": "1.0.25-phone-viewport-state-release-guard"
+  "latestVersionName": "1.0.33-test-battery-textblocks"
 }
 </script>
 <!-- END kgg-changelog -->
@@ -608,7 +638,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v32 No Boot Redirect</title>
+  <title>KGG Update v33 Test Battery Textblocks</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -16237,11 +16267,11 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
 
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v032_no_boot_redirect';
+  const VERSION='KGG_GITHUB_UPDATE_v033_test_battery_textblocks';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={release:'v028',buildTime:'2026-06-23T11:05:00+02:00',buildCode:'github-update-v028-html-download-camera-fix',htmlFile:'kgg-update/index.html'};
+  const KGG_BUILD_INFO={release:'v033',buildTime:'2026-06-24T22:42:20+02:00',buildCode:'github-update-v033-test-battery-textblocks',htmlFile:'kgg-update/index.html'};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||'https://kayus24.github.io/kgg/?v=media-inline-bundle-7').trim();
   const GEMINI_SCAN_MODEL='gemini-2.5-flash';
@@ -17144,6 +17174,68 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     parts.push({text:value.slice(start),start:start,end:value.length,separator:''});
     return parts;
   }
+  function isStructuredSetLine(text){return /^\s*Satz\s+\d+\s*:/i.test(String(text||''));}
+  function normalizeStructuredNumber(value){return String(value||'').replace(',','.').trim();}
+  function normalizeStructuredLoadUnit(value){
+    const raw=String(value||'kg').trim().toLowerCase();
+    if(raw==='bar')return 'bar';
+    if(raw==='stufe')return 'Stufe';
+    if(raw==='watt')return 'Watt';
+    return 'kg';
+  }
+  function parseStructuredSetLine(line){
+    const body=String(line||'').replace(/^\s*Satz\s+\d+\s*:\s*/i,'').trim();
+    const info={startMetric:'',unit:'',startLoad:'',weightUnit:''};
+    const rep=body.match(/(-?\d+(?:[,.]\d+)?)\s*(wdh|wh|reps)\b/i);
+    const time=body.match(/(-?\d+(?:[,.]\d+)?)\s*(min|sek\.?|sec|s)\b/i);
+    const load=body.match(/@\s*(-?\d+(?:[,.]\d+)?)(?:\s*(kg|bar|stufe|watt)\b)?/i)||body.match(/(-?\d+(?:[,.]\d+)?)\s*(kg|bar|stufe|watt)\b/i);
+    if(rep){info.startMetric=normalizeStructuredNumber(rep[1]);info.unit='Wdh';}
+    else if(time){
+      const unit=String(time[2]||'sek').toLowerCase().replace('.','');
+      info.startMetric=normalizeStructuredNumber(time[1])+' '+(unit==='min'?'min':'sek');
+      info.unit='Zeit';
+    }
+    if(load){
+      info.startLoad=normalizeStructuredNumber(load[1]);
+      info.weightUnit=normalizeStructuredLoadUnit(load[2]||'kg');
+    }
+    return info;
+  }
+  function structuredPlanBlocksFromText(text){
+    const lines=String(text||'').replace(/\r/g,'').split(/\n+/).map(line=>line.trim()).filter(Boolean);
+    let sawSetLine=false,current=null;
+    const blocks=[];
+    lines.forEach(line=>{
+      if(isStructuredSetLine(line)){
+        sawSetLine=true;
+        if(current)current.setLines.push(line);
+        return;
+      }
+      if(current)blocks.push(current);
+      current={name:line.replace(/\s+/g,' ').trim(),setLines:[]};
+    });
+    if(current)blocks.push(current);
+    if(!sawSetLine)return null;
+    return blocks.filter(block=>{
+      const letters=String(block.name||'').replace(/[^A-Za-zÄÖÜäöüß]/g,'');
+      return letters.length>=3;
+    });
+  }
+  function parseStructuredTextExerciseBlock(block,existing){
+    if(!block||!block.name)return null;
+    const ex=parseTextExercise(block.name,existing);
+    if(!ex)return null;
+    const firstInfo=(block.setLines||[]).map(parseStructuredSetLine).find(info=>info.startMetric||info.startLoad)||{};
+    const next={...ex,rawText:[block.name].concat(block.setLines||[]).join('\n'),textMaster:true,liveDraft:false,changedByLiveText:false};
+    if(firstInfo.startMetric){next.startMetric=firstInfo.startMetric;next.unit=firstInfo.unit||next.unit||'Wdh';}
+    if(firstInfo.startLoad){next.startLoad=firstInfo.startLoad;next.weightUnit=firstInfo.weightUnit||next.weightUnit||'kg';}
+    return next;
+  }
+  function structuredExercisesFromPlanText(text){
+    const blocks=structuredPlanBlocksFromText(text);
+    if(blocks===null)return null;
+    return blocks.map((block,index)=>parseStructuredTextExerciseBlock(block,findExistingForTextSegment(block.name,index))).filter(Boolean);
+  }
   function activeTextSegment(){
     const input=$('exerciseInput');
     if(!input)return'';
@@ -17219,8 +17311,13 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     if(state.textSyncing)return;
     const input=$('exerciseInput');
     resizeExerciseInputToContent();
-    const segments=splitPlanText(input&&input.value||'').map(p=>p.text.trim()).filter(Boolean);
-    state.plan=segments.map((segment,index)=>parseTextExercise(segment,findExistingForTextSegment(segment,index))).filter(Boolean).map(ensureUiExerciseShape);
+    const text=input&&input.value||'';
+    const structured=structuredExercisesFromPlanText(text);
+    if(structured!==null)state.plan=structured.map(ensureUiExerciseShape);
+    else{
+      const segments=splitPlanText(text).map(p=>p.text.trim()).filter(Boolean);
+      state.plan=segments.map((segment,index)=>parseTextExercise(segment,findExistingForTextSegment(segment,index))).filter(Boolean).map(ensureUiExerciseShape);
+    }
     state.liveDraftId=null;
     state.planText=input?input.value:'';
     syncStatePlanToStore(reason||'ui_textfield_master_sync');
