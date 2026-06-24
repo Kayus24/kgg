@@ -1,7 +1,7 @@
 {
-  "versionCode": 31,
-  "versionName": "1.0.31-phone-drag-mobile-inbox",
-  "indexUrl": "index.html?v=31",
-  "sha256": "aadf31d5dd2bb529dc969337e1c3ddbb19832cf629f8d60723227571fc9b4f6e",
-  "notes": "v031: Max' funktionierende Phone-Viewport-/Local-List-Drag-HTML als Basis, plus Hybrid-Mobile-Inbox-Update-Zentrale. Keine PDF-/QR-/Parser-/Plan-State-Grossumbauten."
+  "versionCode": 32,
+  "versionName": "1.0.32-no-boot-redirect",
+  "indexUrl": "index.html?v=32",
+  "sha256": "8db76416bcd2373c3e9ebbe62ee8812190922443754819bbf1d1cb0a3ca572c4",
+  "notes": "v032: Max' funktionierende Phone-Viewport-/Local-List-Drag-HTML bleibt Basis. Web-Update wird beim Start nicht mehr automatisch per location.replace geoeffnet; externe Release-Links nur noch nach bewusstem Button-Tippen."
 }

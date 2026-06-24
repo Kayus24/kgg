@@ -17,15 +17,16 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "phone-viewport-state-leak-guard",
     "phone-plan-local-list-drag",
     "local-content-no-auto-redirect",
+    "no-auto-release-navigation",
     "release-center-local-fallback"
   ],
   "currentVersion": {
-    "versionCode": 31,
-    "versionName": "1.0.31-phone-drag-mobile-inbox",
-    "lastPatchId": "kgg-v031-phone-drag-mobile-inbox",
+    "versionCode": 32,
+    "versionName": "1.0.32-no-boot-redirect",
+    "lastPatchId": "kgg-v032-no-boot-redirect",
     "updatedBy": "local-html-patch"
   },
-  "latestPatchId": "kgg-v031-phone-drag-mobile-inbox",
+  "latestPatchId": "kgg-v032-no-boot-redirect",
   "lastUpdateIntent": {
     "id": "kgg-v014-phone-viewport-state-release-guard",
     "summary": "Hardens phone-only plan gesture state cleanup across resize/orientation, preserves local #planList absolute drag behavior, preserves local content/file no-auto-redirect behavior, and keeps the safe KGGReleaseControl fallback before the release center.",
@@ -63,15 +64,16 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "phone-viewport-state-leak-guard",
     "phone-plan-local-list-drag",
     "local-content-no-auto-redirect",
+    "no-auto-release-navigation",
     "release-center-local-fallback"
   ],
   "currentVersion": {
-    "versionCode": 31,
-    "versionName": "1.0.31-phone-drag-mobile-inbox",
-    "lastPatchId": "kgg-v031-phone-drag-mobile-inbox",
+    "versionCode": 32,
+    "versionName": "1.0.32-no-boot-redirect",
+    "lastPatchId": "kgg-v032-no-boot-redirect",
     "updatedBy": "local-html-patch"
   },
-  "latestPatchId": "kgg-v031-phone-drag-mobile-inbox",
+  "latestPatchId": "kgg-v032-no-boot-redirect",
   "lastUpdateIntent": {
     "id": "kgg-v014-phone-viewport-state-release-guard",
     "summary": "Hardens phone-only plan gesture state cleanup across resize/orientation, preserves local #planList absolute drag behavior, preserves local content/file no-auto-redirect behavior, and keeps the safe KGGReleaseControl fallback before the release center.",
@@ -102,8 +104,37 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 31,
+  "latestVersionCode": 32,
   "entries": [
+    {
+      "versionCode": 32,
+      "versionName": "1.0.32-no-boot-redirect",
+      "patchId": "kgg-v032-no-boot-redirect",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Keine automatische Release-Navigation beim Start",
+      "reason": "ChatGPT-/Android-Datei-Viewer werden verlassen, wenn die HTML beim Booten per location.replace auf GitHub-Pages navigiert.",
+      "whatChanged": [
+        "Remote-Web-Updates werden nur noch als sichtbarer manueller Update-Hinweis angeboten.",
+        "Der alte Auto-Apply-Hook bleibt kompatibel vorhanden, navigiert aber nicht mehr automatisch.",
+        "Explizite Buttons in der Update-Zentrale duerfen externe Links weiterhin bewusst oeffnen."
+      ],
+      "touchedAreas": [
+        "GitHub/Web-Update-Pruefung",
+        "Boot-Navigation",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Parser",
+        "Plan-State",
+        "Exercise database",
+        "Phone drag UI"
+      ]
+    },
     {
       "versionCode": 31,
       "versionName": "1.0.31-phone-drag-mobile-inbox",
@@ -16163,7 +16194,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
 
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v031_phone_drag_mobile_inbox';
+  const VERSION='KGG_GITHUB_UPDATE_v032_no_boot_redirect';
   window.KGG_ROLLOUT_PROFILE='colleague';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
@@ -16780,16 +16811,21 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
       href.indexOf('content://')===0||
       href.indexOf('file://')===0;
   }
-  function autoApplyRemoteWebUpdate(target){
-    if(!target||!target.url||isNativeAndroidShell()||isLocalHtmlTestRuntime()||isKggLocalContentNoRedirectRuntime())return false;
-    try{
-      if(sessionStorage.getItem(kggAutoUpdateSessionKey)===target.version)return false;
-      sessionStorage.setItem(kggAutoUpdateSessionKey,target.version);
-    }catch(err){}
-    const current=String(location.href||'').split('#')[0];
-    if(current===target.url)return false;
-    location.replace(target.url);
+  const kggNoAutoReleaseNavigationMarker='kgg-no-auto-release-navigation-v32';
+  function stageManualRemoteWebUpdate(target){
+    if(!target||!target.url)return false;
+    window.KGGRemoteUpdateUrl=target.url;
+    window.KGGPendingRemoteUpdateVersion=target.version;
+    window.KGGPendingRemoteUpdateNotes=target.notes;
+    showInstallPrompt('remoteUpdate');
     return true;
+  }
+  function autoApplyRemoteWebUpdate(target){
+    // v32: Beim Booten niemals automatisch auf GitHub-Pages/Release-HTML navigieren.
+    // ChatGPT-/Android-/Datei-Viewer fangen solche Redirects als externen Link ab.
+    // Updates duerfen nur noch nach bewusstem Tippen auf den sichtbaren Button oeffnen.
+    void target;
+    return false;
   }
   async function checkGithubAppUpdate(){
     if(!window.fetch||isLocalHtmlTestRuntime())return;
@@ -16810,12 +16846,8 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
         }
         return;
       }
-      if(webTarget&&autoApplyRemoteWebUpdate(webTarget))return;
       if(!webTarget)return;
-      window.KGGRemoteUpdateUrl=webTarget.url;
-      window.KGGPendingRemoteUpdateVersion=webTarget.version;
-      window.KGGPendingRemoteUpdateNotes=webTarget.notes;
-      showInstallPrompt('remoteUpdate');
+      stageManualRemoteWebUpdate(webTarget);
     }catch(err){
       console.warn('GitHub-Update-Pruefung nicht verfuegbar:',err);
     }

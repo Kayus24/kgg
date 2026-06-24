@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0400",
+  "versionName": "1.0.32-no-boot-redirect",
+  "notes": "Max' funktionierende Phone-Viewport-/Local-List-Drag-HTML bleibt Basis; Web-Updates werden beim Booten nicht mehr automatisch per location.replace geoeffnet.",
+  "createdAt": "2026-06-24T10:00:23Z",
+  "source": "kgg-update/index.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0400",
+      "profile": "admin",
+      "versionName": "1.0.32-no-boot-redirect",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0400/admin.html",
+      "sha256": "8db76416bcd2373c3e9ebbe62ee8812190922443754819bbf1d1cb0a3ca572c4",
+      "notes": "Max' funktionierende Phone-Viewport-/Local-List-Drag-HTML bleibt Basis; Web-Updates werden beim Booten nicht mehr automatisch per location.replace geoeffnet."
+    },
+    "colleague": {
+      "releaseId": "r0400",
+      "profile": "colleague",
+      "versionName": "1.0.32-no-boot-redirect",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0400/colleague.html",
+      "sha256": "ed668b08a5f58c87abf4ad1ea85476477df810dba58dee01fb84e5b12ee2d84a",
+      "notes": "Max' funktionierende Phone-Viewport-/Local-List-Drag-HTML bleibt Basis; Web-Updates werden beim Booten nicht mehr automatisch per location.replace geoeffnet."
+    }
+  }
+}

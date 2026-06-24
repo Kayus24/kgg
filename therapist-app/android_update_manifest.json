@@ -4,15 +4,15 @@
   "schema": 2,
   "channels": {
     "admin": {
-      "releaseId": "r0399",
+      "releaseId": "r0400",
       "profile": "admin",
-      "versionName": "1.0.31-phone-drag-mobile-inbox",
-      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0399/admin.html",
-      "sha256": "aadf31d5dd2bb529dc969337e1c3ddbb19832cf629f8d60723227571fc9b4f6e",
-      "notes": "Max' funktionierende Phone-Viewport-/Local-List-Drag-HTML als Basis plus Hybrid-Mobile-Inbox-Update-Zentrale.",
-      "rolloutCode": 400,
-      "previousReleaseId": "r0398",
-      "releasedAt": "2026-06-24T09:12:52Z"
+      "versionName": "1.0.32-no-boot-redirect",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0400/admin.html",
+      "sha256": "8db76416bcd2373c3e9ebbe62ee8812190922443754819bbf1d1cb0a3ca572c4",
+      "notes": "Max' funktionierende Phone-Viewport-/Local-List-Drag-HTML bleibt Basis; Web-Updates werden beim Booten nicht mehr automatisch per location.replace geoeffnet.",
+      "rolloutCode": 399,
+      "previousReleaseId": "r0397",
+      "releasedAt": "2026-06-24T10:00:23Z"
     },
     "colleague": {
       "releaseId": "r0397",
@@ -27,17 +27,17 @@
     }
   },
   "latestWebVersion": "r0397",
-  "latestAndroidShellVersion": "v396",
+  "latestAndroidShellVersion": "v397",
   "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0397/colleague.html",
   "colleagueSha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
-  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0399/admin.html",
-  "adminSha256": "aadf31d5dd2bb529dc969337e1c3ddbb19832cf629f8d60723227571fc9b4f6e",
+  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0400/admin.html",
+  "adminSha256": "8db76416bcd2373c3e9ebbe62ee8812190922443754819bbf1d1cb0a3ca572c4",
   "sha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
-  "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v396/android/KGG_ANDROID_KOLLEGEN_v396_phone_drag_mobile_inbox_debug.apk",
-  "androidApkSha256": "8f8d5c5c4f684d1c7394c952e186284f5277c242fa6972bace899c9437e5fb91",
-  "colleagueAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v396/android/KGG_ANDROID_KOLLEGEN_v396_phone_drag_mobile_inbox_debug.apk",
-  "colleagueAndroidApkSha256": "8f8d5c5c4f684d1c7394c952e186284f5277c242fa6972bace899c9437e5fb91",
-  "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v396/android/KGG_ANDROID_ADMIN_v396_phone_drag_mobile_inbox_debug.apk",
-  "adminAndroidApkSha256": "acd10bce8ed30ec5b6b1404cc19e96b679b352dc7d2fec09c8efe7ac62614940",
-  "notes": "Admin beta r0399 + Android v396: Max' funktionierende Phone-Viewport-/Local-List-Drag-HTML als Basis plus Hybrid-Mobile-Inbox-Update-Zentrale."
+  "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v397/android/KGG_ANDROID_KOLLEGEN_v397_no_boot_redirect_debug.apk",
+  "androidApkSha256": "65363c8eb88cbe00627a912edf2a005f2c78a675257fd8091f766987b442f65f",
+  "colleagueAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v397/android/KGG_ANDROID_KOLLEGEN_v397_no_boot_redirect_debug.apk",
+  "colleagueAndroidApkSha256": "65363c8eb88cbe00627a912edf2a005f2c78a675257fd8091f766987b442f65f",
+  "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v397/android/KGG_ANDROID_ADMIN_v397_no_boot_redirect_debug.apk",
+  "adminAndroidApkSha256": "692d936e4c5ae8c322a56d616d7734671e303dd8c4e9de4d5f06a377157df4ab",
+  "notes": "Admin beta r0400 + Android v397: Max' funktionierende Phone-Viewport-/Local-List-Drag-HTML bleibt Basis; Web-Updates werden beim Booten nicht mehr automatisch per location.replace geoeffnet."
 }
