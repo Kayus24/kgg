@@ -2,13 +2,20 @@
 
 Eine Release-Logik fuer drei gleichberechtigte Bedienwege:
 
-- Admin-App per GitHub Device Flow
+- Mobile-Inbox per GitHub-Handy-Webseite
+- Admin-App per GitHub Device Flow als Komfortweg
 - Codex/GPT per GitHub-Connector oder `gh`
 - GitHub Actions im Browser
 
 Alle Schreibaktionen erzeugen einen Branch und Pull Request. `main` wird nicht direkt beschrieben.
 
-## Admin-Beta vorbereiten
+## Handy-Standardweg ohne Codex
+
+Die Admin-App speichert die aktuelle HTML lokal. Danach wird die Datei auf dem Branch `mobile-inbox` in den Ordner `mobile-inbox/` hochgeladen. Die Action `KGG Mobile Inbox Release` validiert die HTML gegen die aktuelle KGG-Basis, erzeugt automatisch `releaseId` und Release-Notiz, baut Admin-/Kolleg:innen-Artefakte und merged den geprueften PR.
+
+Die Kolleg:innen-Freigabe passiert bewusst getrennt ueber `Promote latest KGG Admin beta`, damit eine Admin-Beta erst getestet werden kann.
+
+## Admin-Beta per PR vorbereiten
 
 Auf dem Release-Branch liegen temporaer:
 

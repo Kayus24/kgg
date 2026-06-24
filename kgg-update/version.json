@@ -1,7 +1,7 @@
 {
-  "versionCode": 29,
-  "versionName": "1.0.29-camera-touch-parser-fix",
-  "indexUrl": "index.html?v=29",
-  "sha256": "881e72eb25f58af70c5254dd159832075147f4b264743ad4a89a88c91705722b",
-  "notes": "v029: Android-v394-Kamerapfad, stabilere Handy-Kartenbewegung und strukturierter Parser fuer Satz-Bloecke ohne Satz-Muellkarten. Keine PDF-/Patienten-App-/Plan-State-Grossumbauten."
+  "versionCode": 30,
+  "versionName": "1.0.30-hybrid-mobile-inbox",
+  "indexUrl": "index.html?v=30",
+  "sha256": "afa61eadb3334501704149bf6429756965767c3dae9352ee2451c882eca7bc1b",
+  "notes": "v030: Hybrid-Upload-Pipeline mit GitHub-Mobile-Inbox als Standardweg, HTML speichern ohne Login, GitHub-Freigabe-Link und Direktupload nur noch als Komfortweg. Keine PDF-/QR-/Parser-/Plan-State-Grossumbauten."
 }

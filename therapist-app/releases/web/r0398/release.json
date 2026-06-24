@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0398",
+  "versionName": "1.0.30-hybrid-mobile-inbox",
+  "notes": "Hybrid-Upload-Pipeline mit GitHub-Mobile-Inbox als Standardweg, HTML speichern ohne Login, GitHub-Freigabe-Link und Direktupload als Komfortweg.",
+  "createdAt": "2026-06-24T06:39:12Z",
+  "source": "kgg-update/index.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0398",
+      "profile": "admin",
+      "versionName": "1.0.30-hybrid-mobile-inbox",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0398/admin.html",
+      "sha256": "849ff6523d1b8ec5078d94f685a675e47bdaacf698b791f03cba6d736fc23799",
+      "notes": "Hybrid-Upload-Pipeline mit GitHub-Mobile-Inbox als Standardweg, HTML speichern ohne Login, GitHub-Freigabe-Link und Direktupload als Komfortweg."
+    },
+    "colleague": {
+      "releaseId": "r0398",
+      "profile": "colleague",
+      "versionName": "1.0.30-hybrid-mobile-inbox",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0398/colleague.html",
+      "sha256": "30609d34126225d1dab95a4773402400123d3f38dfb3bbd90ffb604f7a7d89c8",
+      "notes": "Hybrid-Upload-Pipeline mit GitHub-Mobile-Inbox als Standardweg, HTML speichern ohne Login, GitHub-Freigabe-Link und Direktupload als Komfortweg."
+    }
+  }
+}

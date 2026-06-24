@@ -1,11 +1,7 @@
-name: Apply Update Inbox
+name: Legacy Apply Update Inbox
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'update-inbox/**'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -19,7 +15,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Stop legacy direct-main inbox
+        run: |
+          echo "update-inbox is legacy and no longer writes to main automatically."
+          echo "Use the KGG Mobile Inbox workflow or release-inbox PR workflow instead."
+          exit 1
+
       - name: Checkout repository
+        if: ${{ false }}
         uses: actions/checkout@v4
         with:
           fetch-depth: 0

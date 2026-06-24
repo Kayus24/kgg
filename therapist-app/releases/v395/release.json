@@ -1,0 +1,17 @@
+{
+  "versionCode": 27,
+  "versionName": "0.2.5-hybrid-upload-pipeline",
+  "shellVersion": "v395",
+  "webRelease": "r0398",
+  "notes": "Admin-APK speichert GitHub-Device-Login kurzzeitig und kann nach Browser-Rueckkehr weiter pollen. Beide APKs enthalten r0398 als Offline-Basis mit Mobile-Inbox-Update-Zentrale.",
+  "apks": {
+    "admin": {
+      "file": "android/KGG_ANDROID_ADMIN_v395_hybrid_upload_pipeline_debug.apk",
+      "sha256": "8da0e387ddaa2f972b1a4e921c084f8b76eed83bcbe119a36f95098e84c8a553"
+    },
+    "colleague": {
+      "file": "android/KGG_ANDROID_KOLLEGEN_v395_hybrid_upload_pipeline_debug.apk",
+      "sha256": "e5796328cf2070a163f57092f8ad9d287320d04989e6d8c897ec81413b6ed873"
+    }
+  }
+}
