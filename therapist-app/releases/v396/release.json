@@ -1,0 +1,17 @@
+{
+  "versionCode": 28,
+  "versionName": "0.2.6-phone-drag-mobile-inbox",
+  "shellVersion": "v396",
+  "webRelease": "r0399",
+  "notes": "Beide APKs enthalten r0399 als Offline-Basis: Max' funktionierende Phone-Viewport-/Local-List-Drag-HTML plus Hybrid-Mobile-Inbox-Update-Zentrale.",
+  "apks": {
+    "admin": {
+      "file": "android/KGG_ANDROID_ADMIN_v396_phone_drag_mobile_inbox_debug.apk",
+      "sha256": "acd10bce8ed30ec5b6b1404cc19e96b679b352dc7d2fec09c8efe7ac62614940"
+    },
+    "colleague": {
+      "file": "android/KGG_ANDROID_KOLLEGEN_v396_phone_drag_mobile_inbox_debug.apk",
+      "sha256": "8f8d5c5c4f684d1c7394c952e186284f5277c242fa6972bace899c9437e5fb91"
+    }
+  }
+}

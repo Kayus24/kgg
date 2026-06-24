@@ -4,15 +4,15 @@
   "schema": 2,
   "channels": {
     "admin": {
-      "releaseId": "r0398",
+      "releaseId": "r0399",
       "profile": "admin",
-      "versionName": "1.0.30-hybrid-mobile-inbox",
-      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0398/admin.html",
-      "sha256": "849ff6523d1b8ec5078d94f685a675e47bdaacf698b791f03cba6d736fc23799",
-      "notes": "Hybrid-Upload-Pipeline mit GitHub-Mobile-Inbox als Standardweg, HTML speichern ohne Login, GitHub-Freigabe-Link und Direktupload als Komfortweg.",
-      "rolloutCode": 399,
-      "previousReleaseId": "r0397",
-      "releasedAt": "2026-06-24T06:39:12Z"
+      "versionName": "1.0.31-phone-drag-mobile-inbox",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0399/admin.html",
+      "sha256": "aadf31d5dd2bb529dc969337e1c3ddbb19832cf629f8d60723227571fc9b4f6e",
+      "notes": "Max' funktionierende Phone-Viewport-/Local-List-Drag-HTML als Basis plus Hybrid-Mobile-Inbox-Update-Zentrale.",
+      "rolloutCode": 400,
+      "previousReleaseId": "r0398",
+      "releasedAt": "2026-06-24T09:12:52Z"
     },
     "colleague": {
       "releaseId": "r0397",
@@ -27,17 +27,17 @@
     }
   },
   "latestWebVersion": "r0397",
-  "latestAndroidShellVersion": "v395",
+  "latestAndroidShellVersion": "v396",
   "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0397/colleague.html",
   "colleagueSha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
-  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0398/admin.html",
-  "adminSha256": "849ff6523d1b8ec5078d94f685a675e47bdaacf698b791f03cba6d736fc23799",
+  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0399/admin.html",
+  "adminSha256": "aadf31d5dd2bb529dc969337e1c3ddbb19832cf629f8d60723227571fc9b4f6e",
   "sha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
-  "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v395/android/KGG_ANDROID_KOLLEGEN_v395_hybrid_upload_pipeline_debug.apk",
-  "androidApkSha256": "e5796328cf2070a163f57092f8ad9d287320d04989e6d8c897ec81413b6ed873",
-  "colleagueAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v395/android/KGG_ANDROID_KOLLEGEN_v395_hybrid_upload_pipeline_debug.apk",
-  "colleagueAndroidApkSha256": "e5796328cf2070a163f57092f8ad9d287320d04989e6d8c897ec81413b6ed873",
-  "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v395/android/KGG_ANDROID_ADMIN_v395_hybrid_upload_pipeline_debug.apk",
-  "adminAndroidApkSha256": "8da0e387ddaa2f972b1a4e921c084f8b76eed83bcbe119a36f95098e84c8a553",
-  "notes": "Admin beta r0398 + Android v395: Mobile-Inbox als Standardweg, HTML speichern ohne Login, GitHub-Freigabe-Link und robusterer Device-Login als Komfortweg."
+  "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v396/android/KGG_ANDROID_KOLLEGEN_v396_phone_drag_mobile_inbox_debug.apk",
+  "androidApkSha256": "8f8d5c5c4f684d1c7394c952e186284f5277c242fa6972bace899c9437e5fb91",
+  "colleagueAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v396/android/KGG_ANDROID_KOLLEGEN_v396_phone_drag_mobile_inbox_debug.apk",
+  "colleagueAndroidApkSha256": "8f8d5c5c4f684d1c7394c952e186284f5277c242fa6972bace899c9437e5fb91",
+  "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v396/android/KGG_ANDROID_ADMIN_v396_phone_drag_mobile_inbox_debug.apk",
+  "adminAndroidApkSha256": "acd10bce8ed30ec5b6b1404cc19e96b679b352dc7d2fec09c8efe7ac62614940",
+  "notes": "Admin beta r0399 + Android v396: Max' funktionierende Phone-Viewport-/Local-List-Drag-HTML als Basis plus Hybrid-Mobile-Inbox-Update-Zentrale."
 }

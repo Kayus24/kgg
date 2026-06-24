@@ -1,7 +1,7 @@
 {
-  "versionCode": 30,
-  "versionName": "1.0.30-hybrid-mobile-inbox",
-  "indexUrl": "index.html?v=30",
-  "sha256": "afa61eadb3334501704149bf6429756965767c3dae9352ee2451c882eca7bc1b",
-  "notes": "v030: Hybrid-Upload-Pipeline mit GitHub-Mobile-Inbox als Standardweg, HTML speichern ohne Login, GitHub-Freigabe-Link und Direktupload nur noch als Komfortweg. Keine PDF-/QR-/Parser-/Plan-State-Grossumbauten."
+  "versionCode": 31,
+  "versionName": "1.0.31-phone-drag-mobile-inbox",
+  "indexUrl": "index.html?v=31",
+  "sha256": "aadf31d5dd2bb529dc969337e1c3ddbb19832cf629f8d60723227571fc9b4f6e",
+  "notes": "v031: Max' funktionierende Phone-Viewport-/Local-List-Drag-HTML als Basis, plus Hybrid-Mobile-Inbox-Update-Zentrale. Keine PDF-/QR-/Parser-/Plan-State-Grossumbauten."
 }

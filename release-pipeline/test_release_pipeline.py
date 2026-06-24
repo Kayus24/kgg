@@ -57,8 +57,8 @@ class ReleasePipelineTests(unittest.TestCase):
         admin = pipeline.read_text(pipeline.BASE_ADMIN)
         self.assertEqual(1, admin.count(pipeline.ADMIN_START))
         self.assertEqual(1, admin.count(pipeline.ADMIN_END))
-        self.assertIn('id="kgg-release-center-v30-script"', admin)
-        self.assertNotIn("kgg-release-center-v30-script", pipeline.derive_colleague(admin))
+        self.assertIn('id="kgg-release-center-v31-script"', admin)
+        self.assertNotIn("kgg-release-center-v31-script", pipeline.derive_colleague(admin))
 
     def test_colleague_has_no_unconditional_admin_dom_bindings(self):
         colleague = pipeline.derive_colleague(pipeline.read_text(pipeline.BASE_ADMIN))
