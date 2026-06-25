@@ -60,7 +60,7 @@ python release-pipeline/kgg_test_battery.py --level all
 ```
 
 - `critical`: blockiert PRs; App-Start/Syntax, Version-Hash, Secret-Scan, Mobile-Inbox-Dry-run, Sync-Safety und Satz-Karten-Schutz.
-- `regression`: critical plus groessere Sync-/Parser-Abdeckung fuer riskante Aenderungen.
+- `regression`: critical plus groessere Sync-/Parser-Abdeckung und echte Browser-Gestenpruefung fuer riskante Aenderungen.
 - `all`: alle nicht-live Tests plus optionale Comfort-Tests; mutierende Live-Tests bleiben extra geschuetzt.
 
 Einzelne Batterien bleiben moeglich. Ohne `--level` laufen sie aus Kompatibilitaet wie bisher vollstaendig, aber ohne Live-GitHub-Schreibaktion:
@@ -69,6 +69,7 @@ Einzelne Batterien bleiben moeglich. Ohne `--level` laufen sie aus Kompatibilita
 python release-pipeline/kgg_test_battery.py --suite mobile-inbox
 python release-pipeline/kgg_test_battery.py --suite sync
 python release-pipeline/kgg_test_battery.py --suite textblocks
+python release-pipeline/kgg_test_battery.py --suite ui-stability
 ```
 
 Registrierte Tests mit Kategorie und Begruendung anzeigen:
@@ -78,6 +79,22 @@ python release-pipeline/kgg_test_battery.py --level all --list
 ```
 
 `sync` und `textblocks` laden die echte Produktionslogik aus `kgg-update/index.html` in einem lokalen Node-Harness. Damit werden Sync-Safe-Export/Merge, Secret-Blockade und Terminheld-/Satz-Textbloecke ohne Emulator geprueft.
+
+`ui-stability` ist der Schutz gegen Layout-/Flicker-Rueckschritte:
+
+```powershell
+python release-pipeline/kgg_test_battery.py --suite ui-stability --level critical
+python release-pipeline/kgg_test_battery.py --suite ui-stability --level regression
+```
+
+- `critical` prueft schnell und CI-sicher, ob die aktuellen Phone-Swipe-/Drag-Guards noch in der HTML stehen.
+- `regression` startet die echte Admin-HTML im Phone-Viewport mit 30 Uebungskarten und testet danach per Browser-PointerEvents:
+  - keine Auto-Navigation / kein Popup beim Boot,
+  - Swipe bewegt eine Karte sichtbar und raeumt danach Klassen/Styles auf,
+  - Scrollen vor dem Drag-Hold startet keinen Drag,
+  - Drag/Drop ueber den Griff aendert die Karten-Reihenfolge und raeumt danach auf.
+
+Nach jedem UI-Flicker-, Handy-Layout- oder Kartenanimations-Patch ist `ui-stability --level regression` Pflicht. Wenn Web/HTML gruen ist, die APK aber trotzdem haengt, ist der naechste Befund APK/WebView-spezifisch und nicht mehr Parser/Layout allgemein.
 
 Nur wenn wirklich eine neue Admin-Beta erzeugt werden soll:
 
