@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0405",
+  "versionName": "1.0.36-native-sync-diagnostics",
+  "notes": "Admin-Beta r0405: Sync-Dialog zeigt Native-Sync-Status, sicheren Sync-Test sowie Sync-Datei speichern/importieren. Keine Patientendaten oder Secrets.",
+  "createdAt": "2026-06-25T17:47:27Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0405",
+      "profile": "admin",
+      "versionName": "1.0.36-native-sync-diagnostics",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0405/admin.html",
+      "sha256": "d8449038188b597e32d99213bd9c68dbb7bb29a050667b8348691800268d6fc8",
+      "notes": "Admin-Beta r0405: Sync-Dialog zeigt Native-Sync-Status, sicheren Sync-Test sowie Sync-Datei speichern/importieren. Keine Patientendaten oder Secrets."
+    },
+    "colleague": {
+      "releaseId": "r0405",
+      "profile": "colleague",
+      "versionName": "1.0.36-native-sync-diagnostics",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0405/colleague.html",
+      "sha256": "d167c945e5d5b77a70dab19f655ef235cc7d6dad5d11790a222670aee8423c6a",
+      "notes": "Admin-Beta r0405: Sync-Dialog zeigt Native-Sync-Status, sicheren Sync-Test sowie Sync-Datei speichern/importieren. Keine Patientendaten oder Secrets."
+    }
+  }
+}
