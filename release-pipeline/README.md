@@ -43,18 +43,38 @@ Wichtig: Jeder Live-Test erzeugt bewusst eine neue Admin-Beta-Release. Er fuehrt
 
 ## Lokale Test-Batterie
 
-Schneller Gesamttest ohne GitHub-Schreibaktion:
+Schneller kritischer Check ohne GitHub-Schreibaktion:
 
 ```powershell
 python release-pipeline/kgg_test_battery.py
+# gleichbedeutend mit:
+python release-pipeline/kgg_test_battery.py --level critical
 ```
 
-Einzelne Batterien:
+Test-Hierarchie:
+
+```powershell
+python release-pipeline/kgg_test_battery.py --level critical
+python release-pipeline/kgg_test_battery.py --level regression
+python release-pipeline/kgg_test_battery.py --level all
+```
+
+- `critical`: blockiert PRs; App-Start/Syntax, Version-Hash, Secret-Scan, Mobile-Inbox-Dry-run, Sync-Safety und Satz-Karten-Schutz.
+- `regression`: critical plus groessere Sync-/Parser-Abdeckung fuer riskante Aenderungen.
+- `all`: alle nicht-live Tests plus optionale Comfort-Tests; mutierende Live-Tests bleiben extra geschuetzt.
+
+Einzelne Batterien bleiben moeglich. Ohne `--level` laufen sie aus Kompatibilitaet wie bisher vollstaendig, aber ohne Live-GitHub-Schreibaktion:
 
 ```powershell
 python release-pipeline/kgg_test_battery.py --suite mobile-inbox
 python release-pipeline/kgg_test_battery.py --suite sync
 python release-pipeline/kgg_test_battery.py --suite textblocks
+```
+
+Registrierte Tests mit Kategorie und Begruendung anzeigen:
+
+```powershell
+python release-pipeline/kgg_test_battery.py --level all --list
 ```
 
 `sync` und `textblocks` laden die echte Produktionslogik aus `kgg-update/index.html` in einem lokalen Node-Harness. Damit werden Sync-Safe-Export/Merge, Secret-Blockade und Terminheld-/Satz-Textbloecke ohne Emulator geprueft.

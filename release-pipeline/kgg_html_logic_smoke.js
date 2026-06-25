@@ -24,6 +24,15 @@ function assert(condition, message) {
 
 function parseArgs(argv) {
   const out = { suite: "all" };
+  const validSuites = [
+    "all",
+    "sync",
+    "sync-critical",
+    "sync-regression",
+    "textblocks",
+    "textblocks-critical",
+    "textblocks-regression",
+  ];
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === "--suite") {
@@ -35,8 +44,8 @@ function parseArgs(argv) {
       fail(`Unknown argument: ${arg}`);
     }
   }
-  if (!["all", "sync", "textblocks"].includes(out.suite)) {
-    fail("--suite must be one of: all, sync, textblocks");
+  if (!validSuites.includes(out.suite)) {
+    fail(`--suite must be one of: ${validSuites.join(", ")}`);
   }
   return out;
 }
@@ -273,6 +282,55 @@ function syncSuite() {
   `);
 }
 
+function syncCriticalSuite() {
+  return runInsideApp(`
+    document.__nodes.therapistName.value='Thera A';
+    const beforeBankCount=bank.length;
+    const doc=buildNativeExerciseBankSyncDocument();
+    assert(doc.kind==='kgg_cross_data_safe_sync','sync export kind mismatch');
+    assert(doc.version===2,'sync export version mismatch');
+    assert(doc.privacy && doc.privacy.patients===false,'sync export must exclude patients');
+    assert(doc.privacy && doc.privacy.secrets===false,'sync export must exclude secrets');
+    assert(Array.isArray(doc.exerciseBank) && doc.exerciseBank.length>=beforeBankCount,'sync export missing exercise bank');
+    ['apiKey','patientName','rawPayload','access_token','refresh_token'].forEach(key=>{
+      let blocked=false;
+      try{assertCrossDataSafeSyncDocument({kind:'kgg_cross_data_safe_sync',[key]:'blocked'});}
+      catch(err){blocked=true;}
+      assert(blocked,'sync safe document allowed forbidden key '+key);
+    });
+    window.__results={suite:'sync-critical',exported:doc.exerciseBank.length};
+  `);
+}
+
+function textblockCriticalSuite() {
+  return runInsideApp(`
+    const input=document.__nodes.exerciseInput;
+    input.value=[
+      'Beinpresse',
+      'Satz 1: 12 Wdh @ 42 kg',
+      'Satz 2: 12 Wdh @ 42 kg',
+      '',
+      'Dips',
+      'Satz 1: 15 Wdh @ 30 kg'
+    ].join('\\n');
+    syncPlanFromTextInput('logic_smoke_textblocks_critical');
+    const names=state.plan.map(ex=>ex.name);
+    assert(state.plan.length===2,'critical text block should create 2 exercises, got '+state.plan.length+' '+names.join('|'));
+    assert(names.includes('Beinpresse') && names.includes('Dips'),'critical text block missed expected exercises: '+names.join('|'));
+    assert(!names.some(name=>/^(Satz\\s+\\d|S\\d|\\d+\\))/i.test(name)),'critical text block created Satz cards: '+names.join('|'));
+    const storePlan=window.KGGDataStore.getCurrentPlan();
+    assert(storePlan && Array.isArray(storePlan.exercises),'KGGDataStore.currentPlan missing exercises');
+    assert(storePlan.exercises.length===state.plan.length,'KGGDataStore.currentPlan not synced with state.plan');
+    const legpress=state.plan.find(ex=>ex.name==='Beinpresse');
+    const storeLegpress=storePlan.exercises.find(ex=>ex.name==='Beinpresse');
+    assert(legpress && storeLegpress,'Beinpresse missing in state or store');
+    assert(legpress.startMetric==='12','Beinpresse reps not preserved');
+    assert(legpress.startLoad==='42','Beinpresse load not preserved');
+    assert(legpress.weightUnit==='kg' && storeLegpress.weightUnit==='kg','Beinpresse kg unit not preserved');
+    window.__results={suite:'textblocks-critical',names};
+  `);
+}
+
 function textblockSuite() {
   return runInsideApp(`
     const input=document.__nodes.exerciseInput;
@@ -405,10 +463,14 @@ function textblockSuite() {
 function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) {
-    console.log("Usage: node release-pipeline/kgg_html_logic_smoke.js [--suite all|sync|textblocks]");
+    console.log("Usage: node release-pipeline/kgg_html_logic_smoke.js [--suite all|sync|sync-critical|sync-regression|textblocks|textblocks-critical|textblocks-regression]");
     return 0;
   }
   const results = {};
+  if (args.suite === "sync-critical") results.syncCritical = syncCriticalSuite();
+  if (args.suite === "textblocks-critical") results.textblocksCritical = textblockCriticalSuite();
+  if (args.suite === "sync-regression") results.sync = syncSuite();
+  if (args.suite === "textblocks-regression") results.textblocks = textblockSuite();
   if (args.suite === "all" || args.suite === "sync") results.sync = syncSuite();
   if (args.suite === "all" || args.suite === "textblocks") results.textblocks = textblockSuite();
   console.log(JSON.stringify({ ok: true, suite: args.suite, results }, null, 2));
