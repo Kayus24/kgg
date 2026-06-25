@@ -4,15 +4,15 @@
   "schema": 2,
   "channels": {
     "admin": {
-      "releaseId": "r0403",
+      "releaseId": "r0404",
       "profile": "admin",
-      "versionName": "1.0.33-mobile-inbox-r0403",
-      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0403/admin.html",
-      "sha256": "1cc0b679a69daff74de0e8c0dd7c7823ac4a483c545c5bbcf12f1e5865e5d27d",
-      "notes": "Mobile-Inbox r0403: KGG Update v32 No Boot Redirect (1cc0b679a69d).",
-      "rolloutCode": 402,
-      "previousReleaseId": "r0402",
-      "releasedAt": "2026-06-25T05:28:34Z"
+      "versionName": "1.0.35-parser-schmerz-tag-blocks",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0404/admin.html",
+      "sha256": "033580827c473feb51748ff1c62d443f8d9093255243030fc75988a12d6b69cb",
+      "notes": "Admin-Beta r0404: Parser erkennt echte Schmerz-/Tag-Textbloecke, Last-vor-Wdh-Satzzeilen und verhindert Satz-/Schmerz-Muellkarten. Keine Patientendaten oder Secrets.",
+      "rolloutCode": 403,
+      "previousReleaseId": "r0403",
+      "releasedAt": "2026-06-25T13:50:33Z"
     },
     "colleague": {
       "releaseId": "r0397",
@@ -30,8 +30,8 @@
   "latestAndroidShellVersion": "v398",
   "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0397/colleague.html",
   "colleagueSha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
-  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0403/admin.html",
-  "adminSha256": "1cc0b679a69daff74de0e8c0dd7c7823ac4a483c545c5bbcf12f1e5865e5d27d",
+  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0404/admin.html",
+  "adminSha256": "033580827c473feb51748ff1c62d443f8d9093255243030fc75988a12d6b69cb",
   "sha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
   "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v398/android/KGG_ANDROID_KOLLEGEN_v398_force_r0400_html_debug.apk",
   "androidApkSha256": "c4a4e022a7bfa2511538f18bb80c025eb4a1057a186637ac12146ea55dd807ed",
@@ -39,5 +39,5 @@
   "colleagueAndroidApkSha256": "c4a4e022a7bfa2511538f18bb80c025eb4a1057a186637ac12146ea55dd807ed",
   "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v398/android/KGG_ANDROID_ADMIN_v398_force_r0400_html_debug.apk",
   "adminAndroidApkSha256": "e64553647a10a5fa4286f319b6a4284052c0c030b93b5150f9ac8ef0a1708c34",
-  "notes": "Admin beta r0403: Mobile-Inbox r0403: KGG Update v32 No Boot Redirect (1cc0b679a69d)."
+  "notes": "Admin beta r0404: Admin-Beta r0404: Parser erkennt echte Schmerz-/Tag-Textbloecke, Last-vor-Wdh-Satzzeilen und verhindert Satz-/Schmerz-Muellkarten. Keine Patientendaten oder Secrets."
 }
