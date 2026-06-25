@@ -12,6 +12,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -143,6 +144,51 @@ def run_secret_scan() -> None:
     log("Secret scan OK")
 
 
+def html_version_marker(path: Path) -> int | None:
+    if not path.exists() or not path.is_file():
+        return None
+    text = path.read_text(encoding="utf-8", errors="replace")
+    match = re.search(r"KGG_GITHUB_UPDATE_v0*([0-9]+)", text, re.I)
+    if match:
+        return int(match.group(1))
+    match = re.search(r"<title>\s*KGG\s+Update\s+v0*([0-9]+)\b", text, re.I)
+    return int(match.group(1)) if match else None
+
+
+def run_release_drift_check() -> None:
+    log("== Admin release drift check ==")
+    if os.environ.get("KGG_ALLOW_RELEASE_DRIFT") == "1":
+        log("Release drift check skipped by KGG_ALLOW_RELEASE_DRIFT=1")
+        return
+    source = ROOT / "kgg-update" / "index.html"
+    source_code = html_version_marker(source)
+    if source_code is None:
+        raise BatteryError("Cannot read KGG source version marker from kgg-update/index.html.")
+
+    inbox = ROOT / "release-inbox" / "admin.html"
+    inbox_code = html_version_marker(inbox)
+    if inbox_code == source_code:
+        log(f"Release drift OK: release-inbox/admin.html carries v{source_code:03d}")
+        return
+
+    manifest = json.loads((ROOT / "therapist-app" / "android_update_manifest.json").read_text(encoding="utf-8"))
+    admin_url = str(manifest.get("adminHtmlUrl") or manifest.get("channels", {}).get("admin", {}).get("url") or "")
+    match = re.search(r"/therapist-app/releases/web/(r[0-9]{4,})/admin\.html$", admin_url)
+    if not match:
+        raise BatteryError(f"Cannot derive Admin release path from manifest admin URL: {admin_url}")
+    admin_path = ROOT / "therapist-app" / "releases" / "web" / match.group(1) / "admin.html"
+    admin_code = html_version_marker(admin_path)
+    if admin_code == source_code:
+        log(f"Release drift OK: manifest Admin {match.group(1)} carries v{source_code:03d}")
+        return
+
+    raise BatteryError(
+        "kgg-update source is newer than the prepared/live Admin release "
+        f"(source v{source_code:03d}, release-inbox v{inbox_code}, manifest admin v{admin_code}). "
+        "Add release-inbox/admin.html for this source or set KGG_ALLOW_RELEASE_DRIFT=1 for an explicit no-release PR."
+    )
+
+
 TEST_REGISTRY = [
     {
         "id": "release-contracts",
@@ -164,6 +210,13 @@ TEST_REGISTRY = [
         "suite": "syntax",
         "reason": "APK/Web update checks depend on version.json matching index.html.",
         "run": run_version_json_check,
+    },
+    {
+        "id": "admin-release-drift",
+        "level": "critical",
+        "suite": "release",
+        "reason": "Source updates must not land without a matching Admin beta release or explicit no-release override.",
+        "run": run_release_drift_check,
     },
     {
         "id": "secret-scan",

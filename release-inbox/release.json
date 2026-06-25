@@ -1,0 +1,5 @@
+{
+  "releaseId": "r0404",
+  "versionName": "1.0.35-parser-schmerz-tag-blocks",
+  "notes": "Admin-Beta r0404: Parser erkennt echte Schmerz-/Tag-Textbloecke, Last-vor-Wdh-Satzzeilen und verhindert Satz-/Schmerz-Muellkarten. Keine Patientendaten oder Secrets."
+}

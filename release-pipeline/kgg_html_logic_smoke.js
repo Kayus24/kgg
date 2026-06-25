@@ -312,13 +312,15 @@ function textblockCriticalSuite() {
       'Satz 2: 12 Wdh @ 42 kg',
       '',
       'Dips',
-      'Satz 1: 15 Wdh @ 30 kg'
+      'Satz 1: 15 Wdh @ 30 kg',
+      '',
+      'Kniebeuger Maschine - Tag 1 1. Satz: 35 kg @ 12 Wdh Schmerz: 1/10'
     ].join('\\n');
     syncPlanFromTextInput('logic_smoke_textblocks_critical');
     const names=state.plan.map(ex=>ex.name);
-    assert(state.plan.length===2,'critical text block should create 2 exercises, got '+state.plan.length+' '+names.join('|'));
-    assert(names.includes('Beinpresse') && names.includes('Dips'),'critical text block missed expected exercises: '+names.join('|'));
-    assert(!names.some(name=>/^(Satz\\s+\\d|S\\d|\\d+\\))/i.test(name)),'critical text block created Satz cards: '+names.join('|'));
+    assert(state.plan.length===3,'critical text block should create 3 exercises, got '+state.plan.length+' '+names.join('|'));
+    assert(names.includes('Beinpresse') && names.includes('Dips') && names.includes('Kniebeuger Maschine'),'critical text block missed expected exercises: '+names.join('|'));
+    assert(!names.some(name=>/^(Satz\\s+\\d|S\\d|\\d+\\)|Schmerz|Tag\\s*\\d+)/i.test(name)),'critical text block created Satz/Schmerz cards: '+names.join('|'));
     const storePlan=window.KGGDataStore.getCurrentPlan();
     assert(storePlan && Array.isArray(storePlan.exercises),'KGGDataStore.currentPlan missing exercises');
     assert(storePlan.exercises.length===state.plan.length,'KGGDataStore.currentPlan not synced with state.plan');
@@ -328,6 +330,8 @@ function textblockCriticalSuite() {
     assert(legpress.startMetric==='12','Beinpresse reps not preserved');
     assert(legpress.startLoad==='42','Beinpresse load not preserved');
     assert(legpress.weightUnit==='kg' && storeLegpress.weightUnit==='kg','Beinpresse kg unit not preserved');
+    const curl=state.plan.find(ex=>ex.name==='Kniebeuger Maschine');
+    assert(curl && curl.startMetric==='12' && curl.startLoad==='35' && curl.weightUnit==='kg','load-before-reps Satz format not preserved');
     window.__results={suite:'textblocks-critical',names};
   `);
 }
@@ -454,6 +458,43 @@ function textblockSuite() {
     assertPlanUnit('Latziehen',{metric:'12',load:'30',unit:'Wdh',weightUnit:'kg',review:false});
     assertPlanUnit('Laufband',{metric:'10 min',load:'6',unit:'Zeit',weightUnit:'km/h',review:true});
     assertPlanUnit('Plank',{metric:'60 sek',load:'',unit:'Zeit',weightUnit:'keine',review:false});
+
+    input.value=[
+      'Beinpresse - Tag 1',
+      '',
+      '1. Satz: 15 kg @ 12 Wdh',
+      '',
+      '2. Satz: 15 kg @ 7 Wdh',
+      '',
+      '3. Satz: 10 kg @ 10 Wdh',
+      '',
+      'Schmerz: 3/10',
+      '',
+      'Kniebeuger Maschine - Tag 1 1. Satz: 35 kg @ 12 Wdh 2. Satz: 35 kg @ 12 Wdh 3. Satz: 35 kg @ 12 Wdh Schmerz: 1/10',
+      '',
+      'Singel Leg to Stand - Tag 1 1. Satz: 61 HÃ¶he @ 12 Wdh 2. Satz: 61 HÃ¶he @ 12 Wdh 3. Satz: 61 HÃ¶he @ 10 Wdh Schmerz: 2/10',
+      '',
+      'Romanian Deadlift - Tag 1',
+      '',
+      '1. Satz: 8 kg @ 10 Wdh',
+      '',
+      '2. Satz: 8 kg @ 10 Wdh',
+      '',
+      '3. Satz: 8 kg @ 8 Wdh',
+      '',
+      'Schmerz: 2/10'
+    ].join('\\n');
+    syncPlanFromTextInput('logic_smoke_real_schmerz_tag_block');
+    const realNames=state.plan.map(ex=>ex.name);
+    assert(realNames.length===4,'real Schmerz/Tag block should create 4 exercises, got '+realNames.length+' '+realNames.join('|'));
+    ['Beinpresse','Kniebeuger Maschine','Singel Leg to Stand','Romanian Deadlift'].forEach(name=>{
+      assert(realNames.includes(name),'real Schmerz/Tag block missing '+name+' in '+realNames.join('|'));
+    });
+    assert(!realNames.some(name=>/^(?:\\d+\\.\\s*)?Satz|^Schmerz|^Tag\\s*\\d+/i.test(name)),'real Schmerz/Tag block created junk cards: '+realNames.join('|'));
+    assertPlanUnit('Beinpresse',{metric:'12',load:'15',unit:'Wdh',weightUnit:'kg'});
+    assertPlanUnit('Kniebeuger Maschine',{metric:'12',load:'35',unit:'Wdh',weightUnit:'kg'});
+    assertPlanUnit('Singel Leg to Stand',{metric:'12',load:'61',unit:'Wdh',weightUnit:'HÃ¶he',review:true});
+    assertPlanUnit('Romanian Deadlift',{metric:'10',load:'8',unit:'Wdh',weightUnit:'kg',review:true});
 
     const applyText=scanResultToApplyText({exercises:[{name:'Beinpresse',sets:[{reps:12,load:42},{reps:12,load:42},{reps:15,load:42}]},{name:'Dips',sets:[{reps:15,load:30}]}]});
     assert(applyText==='Beinpresse, Dips','structured scan apply text regressed: '+applyText);
