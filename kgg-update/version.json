@@ -1,7 +1,7 @@
 {
-  "versionCode": 33,
-  "versionName": "1.0.33-test-battery-textblocks",
-  "indexUrl": "index.html?v=33",
-  "sha256": "744b9dd5fe0e4387bbe93c1609fc31122b68a8166879a653631a073204060b92",
-  "notes": "v033: Lokale Test-Batterien fuer Mobile-Inbox, Sync und Textblock-Erkennung. Rohe Satz-Textbloecke werden vor dem normalen Split erkannt, Satz-Zeilen erzeugen keine eigenen Uebungskarten."
+  "versionCode": 34,
+  "versionName": "1.0.34-free-textfield-units",
+  "indexUrl": "index.html?v=34",
+  "sha256": "68d6a8f65679c413e91edfa7b5d4a4280fa63f31c988da7390ffdcfdc2c03246",
+  "notes": "v034: Textfeld-Parser erkennt bekannte und freie Einheiten, behaelt sie in state.plan und KGGDataStore.currentPlan und prueft Satz-/Kurzformen per lokaler Testbatterie."
 }

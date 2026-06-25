@@ -276,6 +276,31 @@ function syncSuite() {
 function textblockSuite() {
   return runInsideApp(`
     const input=document.__nodes.exerciseInput;
+    function byName(name){
+      return state.plan.find(ex=>ex.name===name);
+    }
+    function storeByName(name){
+      const plan=window.KGGDataStore.getCurrentPlan();
+      return (plan.exercises||[]).find(ex=>ex.name===name);
+    }
+    function assertPlanUnit(name, expected){
+      const ex=byName(name);
+      assert(!!ex,'missing exercise '+name+' in state.plan');
+      const storeEx=storeByName(name);
+      assert(!!storeEx,'missing exercise '+name+' in KGGDataStore.currentPlan');
+      if(expected.metric!==undefined)assert(ex.startMetric===expected.metric,name+' metric mismatch: '+ex.startMetric);
+      if(expected.load!==undefined)assert((ex.startLoad||'')===expected.load,name+' load mismatch: '+ex.startLoad);
+      if(expected.unit!==undefined)assert((ex.unit||ex.metricUnit||'')===expected.unit,name+' unit mismatch: '+(ex.unit||ex.metricUnit));
+      if(expected.weightUnit!==undefined){
+        assert(ex.weightUnit===expected.weightUnit,name+' weightUnit mismatch: '+ex.weightUnit);
+        assert(ex.loadUnit===expected.weightUnit,name+' loadUnit mismatch: '+ex.loadUnit);
+        assert(storeEx.weightUnit===expected.weightUnit,name+' store weightUnit mismatch: '+storeEx.weightUnit);
+        assert(storeEx.loadUnit===expected.weightUnit,name+' store loadUnit mismatch: '+storeEx.loadUnit);
+        assert(formatExerciseTextLine(ex).includes(expected.weightUnit),name+' formatted text lost unit: '+formatExerciseTextLine(ex));
+        assert(exerciseMeta(ex).includes(expected.weightUnit),name+' meta lost unit: '+exerciseMeta(ex));
+      }
+      if(expected.review!==undefined)assert(!!ex.needsReview===expected.review,name+' review mismatch: '+ex.needsReview);
+    }
     input.value=[
       'Beinpresse',
       'Satz 1: 12 Wdh @ 42 kg',
@@ -305,6 +330,30 @@ function textblockSuite() {
       'Ergometer / Bike',
       'Satz 1: 5 min @ 80 Watt',
       '',
+      'Rudern',
+      'Satz 1: 12 Wdh @ 8 Hub',
+      '',
+      'Plank',
+      'Satz 1: 60 sek @ keine',
+      '',
+      'Laufband',
+      'S1: 10 min @ 6 km/h',
+      '',
+      'Mobilität',
+      '1. Satz 30 sec @ 90 Grad',
+      '',
+      'Balance',
+      '1) 45 time @ Level 3',
+      '',
+      'Dehnung',
+      'Satz 1 - 60 Zeit @ RPE 4',
+      '',
+      'Sprungtest',
+      'Satz 1: 8 reps @ 35 cm',
+      '',
+      'Bike',
+      'Satz 1: 5 min @ 70 rpm',
+      '',
       'Kniebeuger Maschine',
       'Satz 1: 12 Wdh @ 25 kg',
       '',
@@ -313,25 +362,39 @@ function textblockSuite() {
     ].join('\\n');
     syncPlanFromTextInput('logic_smoke_textblocks');
     const names=state.plan.map(ex=>ex.name);
-    assert(state.plan.length===8,'structured text block should create 8 exercises, got '+state.plan.length+' '+names.join('|'));
-    assert(!names.some(name=>/^Satz\\s+\\d/i.test(name)),'structured text block created Satz cards: '+names.join('|'));
-    ['Beinpresse','Dips','Abduktion Maschine','Adduktion Maschine','Latziehen','Ergometer / Bike','Kniebeuger Maschine','Kniestrecker Maschine'].forEach(name=>{
+    assert(state.plan.length===16,'structured text block should create 16 exercises, got '+state.plan.length+' '+names.join('|'));
+    assert(!names.some(name=>/^(Satz\\s+\\d|S\\d|\\d+\\))/i.test(name)),'structured text block created Satz cards: '+names.join('|'));
+    ['Beinpresse','Dips','Abduktion Maschine','Adduktion Maschine','Latziehen','Ergometer / Bike','Rudern','Plank','Laufband','Mobilität','Balance','Dehnung','Sprungtest','Bike','Kniebeuger Maschine','Kniestrecker Maschine'].forEach(name=>{
       assert(names.includes(name),'missing structured exercise '+name+' in '+names.join('|'));
     });
-    const legpress=state.plan.find(ex=>ex.name==='Beinpresse');
+    const legpress=byName('Beinpresse');
     assert(legpress.startMetric==='12','Beinpresse reps not preserved');
     assert(legpress.startLoad==='42','Beinpresse load not preserved');
     assert(legpress.weightUnit==='kg','Beinpresse kg unit not preserved');
-    const add=state.plan.find(ex=>ex.name==='Adduktion Maschine');
+    const add=byName('Adduktion Maschine');
     assert(add.startLoad==='2' && add.weightUnit==='bar','bar unit not preserved');
-    const bike=state.plan.find(ex=>ex.name==='Ergometer / Bike');
+    const bike=byName('Ergometer / Bike');
     assert(bike.startMetric==='5 min' && bike.unit==='Zeit','time metric not preserved');
     assert(bike.startLoad==='80' && bike.weightUnit==='Watt','Watt unit not preserved');
+    assertPlanUnit('Rudern',{metric:'12',load:'8',unit:'Wdh',weightUnit:'Hub',review:false});
+    assertPlanUnit('Plank',{metric:'60 sek',load:'',unit:'Zeit',weightUnit:'keine',review:false});
+    assertPlanUnit('Laufband',{metric:'10 min',load:'6',unit:'Zeit',weightUnit:'km/h',review:true});
+    assertPlanUnit('Mobilität',{metric:'30 sec',load:'90',unit:'Zeit',weightUnit:'Grad',review:true});
+    assertPlanUnit('Balance',{metric:'45 time',load:'3',unit:'Zeit',weightUnit:'Level',review:true});
+    assertPlanUnit('Dehnung',{metric:'60 Zeit',load:'4',unit:'Zeit',weightUnit:'RPE',review:true});
+    assertPlanUnit('Sprungtest',{metric:'8',load:'35',unit:'Wdh',weightUnit:'cm',review:true});
+    assertPlanUnit('Bike',{metric:'5 min',load:'70',unit:'Zeit',weightUnit:'rpm',review:true});
 
     input.value='Beinpresse, Latziehen';
     syncPlanFromTextInput('logic_smoke_comma');
     const commaNames=state.plan.map(ex=>ex.name);
     assert(commaNames.length===2 && commaNames[0]==='Beinpresse' && commaNames[1]==='Latziehen','normal comma input regressed: '+commaNames.join('|'));
+
+    input.value='Latziehen 12x30kg, Laufband 10 min @ 6 km/h, Plank 60 sek @ keine';
+    syncPlanFromTextInput('logic_smoke_inline_units');
+    assertPlanUnit('Latziehen',{metric:'12',load:'30',unit:'Wdh',weightUnit:'kg',review:false});
+    assertPlanUnit('Laufband',{metric:'10 min',load:'6',unit:'Zeit',weightUnit:'km/h',review:true});
+    assertPlanUnit('Plank',{metric:'60 sek',load:'',unit:'Zeit',weightUnit:'keine',review:false});
 
     const applyText=scanResultToApplyText({exercises:[{name:'Beinpresse',sets:[{reps:12,load:42},{reps:12,load:42},{reps:15,load:42}]},{name:'Dips',sets:[{reps:15,load:30}]}]});
     assert(applyText==='Beinpresse, Dips','structured scan apply text regressed: '+applyText);

@@ -19,20 +19,21 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "local-content-no-auto-redirect",
     "no-auto-release-navigation",
     "release-center-local-fallback",
-    "structured-textblock-parser"
+    "structured-textblock-parser",
+    "free-textfield-units"
   ],
   "currentVersion": {
-    "versionCode": 33,
-    "versionName": "1.0.33-test-battery-textblocks",
-    "lastPatchId": "kgg-v033-test-battery-textblocks",
+    "versionCode": 34,
+    "versionName": "1.0.34-free-textfield-units",
+    "lastPatchId": "kgg-v034-free-textfield-units",
     "updatedBy": "local-html-patch"
   },
-  "latestPatchId": "kgg-v033-test-battery-textblocks",
+  "latestPatchId": "kgg-v034-free-textfield-units",
   "lastUpdateIntent": {
-    "id": "kgg-v033-test-battery-textblocks",
-    "summary": "Adds local/static Mobile-Inbox, Sync and Textblock test batteries and fixes raw Satz text blocks so Satz lines never become exercise cards.",
+    "id": "kgg-v034-free-textfield-units",
+    "summary": "Extends textfield parser tests and fixes free/custom units so they survive state.plan, KGGDataStore.currentPlan and formatted plan text.",
     "touched": [
-      "Textblock parser",
+      "Textfield parser",
       "Local test batteries",
       "HTML embedded metadata",
       "Source Truth",
@@ -66,20 +67,21 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "local-content-no-auto-redirect",
     "no-auto-release-navigation",
     "release-center-local-fallback",
-    "structured-textblock-parser"
+    "structured-textblock-parser",
+    "free-textfield-units"
   ],
   "currentVersion": {
-    "versionCode": 33,
-    "versionName": "1.0.33-test-battery-textblocks",
-    "lastPatchId": "kgg-v033-test-battery-textblocks",
+    "versionCode": 34,
+    "versionName": "1.0.34-free-textfield-units",
+    "lastPatchId": "kgg-v034-free-textfield-units",
     "updatedBy": "local-html-patch"
   },
-  "latestPatchId": "kgg-v033-test-battery-textblocks",
+  "latestPatchId": "kgg-v034-free-textfield-units",
   "lastUpdateIntent": {
-    "id": "kgg-v033-test-battery-textblocks",
-    "summary": "Adds local/static Mobile-Inbox, Sync and Textblock test batteries and fixes raw Satz text blocks so Satz lines never become exercise cards.",
+    "id": "kgg-v034-free-textfield-units",
+    "summary": "Extends textfield parser tests and fixes free/custom units so they survive state.plan, KGGDataStore.currentPlan and formatted plan text.",
     "touched": [
-      "Textblock parser",
+      "Textfield parser",
       "Local test batteries",
       "HTML embedded metadata",
       "Source Truth",
@@ -104,8 +106,36 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 33,
+  "latestVersionCode": 34,
   "entries": [
+    {
+      "versionCode": 34,
+      "versionName": "1.0.34-free-textfield-units",
+      "patchId": "kgg-v034-free-textfield-units",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Freie Einheiten im Textfeld weitergeben",
+      "reason": "Textfeld-Eingaben koennen Einheiten enthalten, die noch nicht als feste App-Einheit hinterlegt sind; diese duerfen nicht still zu kg werden und muessen im aktuellen Plan erhalten bleiben.",
+      "whatChanged": [
+        "Textfeld-Testbatterie deckt bekannte App-Einheiten, freie Einheiten, Kurzformen und Satzvarianten ab.",
+        "Freie Einheiten wie km/h, Grad, RPE, Level, cm und rpm bleiben in state.plan und KGGDataStore.currentPlan erhalten.",
+        "S1, 1. Satz, 1) und Satz 1 - werden als Satzdaten erkannt, nicht als eigene Uebungskarten."
+      ],
+      "touchedAreas": [
+        "Textfield parser",
+        "Local test batteries",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Android-Wrapper",
+        "Tablet-Core-Layout",
+        "Sync pipeline"
+      ]
+    },
     {
       "versionCode": 33,
       "versionName": "1.0.33-test-battery-textblocks",
@@ -431,7 +461,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "handoffNote": "Lokale LLMs können index.html lesen und finden kgg-source-truth sowie kgg-changelog direkt im Code."
     }
   ],
-  "latestVersionName": "1.0.33-test-battery-textblocks"
+  "latestVersionName": "1.0.34-free-textfield-units"
 }
 </script>
 <!-- END kgg-changelog -->
@@ -16267,11 +16297,11 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
 
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v033_test_battery_textblocks';
+  const VERSION='KGG_GITHUB_UPDATE_v034_free_textfield_units';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={release:'v033',buildTime:'2026-06-24T22:42:20+02:00',buildCode:'github-update-v033-test-battery-textblocks',htmlFile:'kgg-update/index.html'};
+  const KGG_BUILD_INFO={release:'v034',buildTime:'2026-06-25T09:01:32+02:00',buildCode:'github-update-v034-free-textfield-units',htmlFile:'kgg-update/index.html'};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||'https://kayus24.github.io/kgg/?v=media-inline-bundle-7').trim();
   const GEMINI_SCAN_MODEL='gemini-2.5-flash';
@@ -16643,10 +16673,98 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     return 'wdh';
   }
   function measureUnitLabel(measure){return normalizeMeasureMode(measure)==='zeit'?'Sek.':'Wdh';}
+  function cleanFreeUnitLabel(value){
+    return String(value||'').trim().replace(/\s*\/\s*/g,'/').replace(/\s+/g,' ').replace(/^[.@:;,\-\s]+|[.@:;,\-\s]+$/g,'');
+  }
+  function normalizeLoadUnitInfo(value,fallback){
+    const fallbackUnit=fallback||'kg';
+    const raw=cleanFreeUnitLabel(value);
+    if(!raw)return {unit:fallbackUnit,custom:false,explicit:false};
+    const lower=raw.toLowerCase().replace(/\./g,'').replace(/\s+/g,' ');
+    const compact=lower.replace(/\s+/g,'');
+    if(['kg','kgs','kilo','kilos','kilogramm','kilogram'].includes(lower))return {unit:'kg',custom:false,explicit:true};
+    if(['bw','bodyweight','body weight','koerpergewicht','körpergewicht','eigengewicht'].includes(lower)||compact==='bodyweight')return {unit:'BW',custom:false,explicit:true};
+    if(['hub','huebe','hübe'].includes(lower))return {unit:'Hub',custom:false,explicit:true};
+    if(['stufe'].includes(lower))return {unit:'Stufe',custom:false,explicit:true};
+    if(['watt','w'].includes(lower))return {unit:'Watt',custom:false,explicit:true};
+    if(['stufe/watt','stufe watt','stufe+watt','stufewatt'].includes(lower)||compact==='stufe/watt')return {unit:'Stufe/Watt',custom:false,explicit:true};
+    if(['bar'].includes(lower))return {unit:'bar',custom:false,explicit:true};
+    if(['keine','kein','none','ohne'].includes(lower))return {unit:'keine',custom:false,explicit:true};
+    return {unit:raw,custom:true,explicit:true};
+  }
   function normalizeLoadUnit(value){
-    const raw=String(value||'kg').trim();
-    const known=['kg','BW','Hub','Stufe','Watt','Stufe/Watt','bar','keine'];
-    return known.includes(raw)?raw:'kg';
+    return normalizeLoadUnitInfo(value,'kg').unit;
+  }
+  function structuredNumberPattern(){return '-?\\d+(?:[,.]\\d+)?';}
+  function structuredUnitPattern(){return '[A-Za-zÄÖÜäöüß%°/._-]+(?:\\s*/\\s*[A-Za-zÄÖÜäöüß%°/._-]+)?';}
+  function normalizeStructuredNumber(value){return String(value||'').replace(',','.').trim();}
+  function normalizeMetricToken(token){
+    const raw=String(token||'').trim().replace('.','');
+    const lower=raw.toLowerCase();
+    if(['wdh','wh','rep','reps'].includes(lower))return {unit:'Wdh',metricUnit:'Wdh',time:false,label:'Wdh'};
+    if(['min','minute','minutes','minuten','sek','sec','secs','s','zeit','time','dauer'].includes(lower))return {unit:'Zeit',metricUnit:'Zeit',time:true,label:raw||'Zeit'};
+    return {unit:raw||'Wdh',metricUnit:raw||'Wdh',time:false,label:raw||'Wdh',custom:true};
+  }
+  function parseExerciseQuantityText(text){
+    const body=String(text||'');
+    const n=structuredNumberPattern(), u=structuredUnitPattern();
+    const out={startMetric:'',unit:'',metricUnit:'',startLoad:'',weightUnit:'',loadUnit:'',customLoadUnit:false,needsReview:false};
+    const compact=body.match(new RegExp('('+n+')\\s*x\\s*('+n+')(?:\\s*('+u+'))?','i'));
+    const rep=body.match(new RegExp('('+n+')\\s*(wdh|wh|rep|reps)\\b','i'));
+    const time=body.match(new RegExp('('+n+')\\s*(min|minute|minutes|minuten|sek\\.?|sec|secs|s|zeit|time|dauer)\\b','i'));
+    if(rep){
+      out.startMetric=normalizeStructuredNumber(rep[1]);
+      out.unit='Wdh'; out.metricUnit='Wdh';
+    }else if(time){
+      const mt=normalizeMetricToken(time[2]);
+      out.startMetric=normalizeStructuredNumber(time[1])+' '+mt.label;
+      out.unit=mt.unit; out.metricUnit=mt.metricUnit;
+    }else if(compact){
+      out.startMetric=normalizeStructuredNumber(compact[1]);
+      out.unit='Wdh'; out.metricUnit='Wdh';
+    }
+    let loadUnitInfo=null, loadMatch=null;
+    loadMatch=body.match(new RegExp('@\\s*('+n+')\\s*('+u+')?','i'));
+    if(loadMatch){
+      out.startLoad=normalizeStructuredNumber(loadMatch[1]);
+      loadUnitInfo=normalizeLoadUnitInfo(loadMatch[2]||'kg','kg');
+    }else{
+      loadMatch=body.match(new RegExp('@\\s*('+u+')\\s*('+n+')','i'));
+      if(loadMatch){
+        out.startLoad=normalizeStructuredNumber(loadMatch[2]);
+        loadUnitInfo=normalizeLoadUnitInfo(loadMatch[1],'kg');
+      }else{
+        loadMatch=body.match(new RegExp('@\\s*('+u+')\\b','i'));
+        if(loadMatch)loadUnitInfo=normalizeLoadUnitInfo(loadMatch[1],'kg');
+      }
+    }
+    if(!loadUnitInfo&&compact){
+      out.startLoad=normalizeStructuredNumber(compact[2]);
+      loadUnitInfo=normalizeLoadUnitInfo(compact[3]||'kg','kg');
+    }
+    if(!loadUnitInfo){
+      let rest=body;
+      [compact,rep,time].forEach(m=>{if(m)rest=rest.replace(m[0],' ');});
+      rest=rest.replace(new RegExp('@\\s*(?:'+n+'\\s*'+u+'?|'+u+'\\s*'+n+'|'+u+')','ig'),' ');
+      loadMatch=rest.match(new RegExp('('+n+')\\s*('+u+')\\b','i'));
+      if(loadMatch){
+        out.startLoad=normalizeStructuredNumber(loadMatch[1]);
+        loadUnitInfo=normalizeLoadUnitInfo(loadMatch[2],'kg');
+      }else{
+        loadMatch=rest.match(new RegExp('('+u+')\\s*('+n+')\\b','i'));
+        if(loadMatch){
+          out.startLoad=normalizeStructuredNumber(loadMatch[2]);
+          loadUnitInfo=normalizeLoadUnitInfo(loadMatch[1],'kg');
+        }
+      }
+    }
+    if(loadUnitInfo&&loadUnitInfo.explicit){
+      out.weightUnit=loadUnitInfo.unit;
+      out.loadUnit=loadUnitInfo.unit;
+      out.customLoadUnit=!!loadUnitInfo.custom;
+      if(loadUnitInfo.custom)out.needsReview=true;
+    }
+    return out;
   }
   function parseSideModeFromText(text){
     const raw=' '+String(text||'').toLowerCase().replace(/[.,;:]+/g,' ')+' ';
@@ -17122,6 +17240,16 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     if(letters.length<3)return null;
     const match=scoredSearch(raw,1)[0]||null;
     const hit=(match&&match.score>=20)?match.ex:null;
+    {
+      const parsed=parseExerciseQuantityText(raw);
+      const cleanName=stripExerciseName(raw)||raw;
+      const pendingNew=!hit || (match&&match.score<35);
+      const needsReview=pendingNew || parsed.needsReview || (!!match && match.score>0 && match.score<70);
+      const id=localId||makeLocalId();
+      const base=hit||{id:'new_'+Date.now(),name:cleanName,sets:3,unit:parsed.unit||'Wdh',weightUnit:parsed.weightUnit||'kg',loadUnit:parsed.loadUnit||parsed.weightUnit||'kg'};
+      const loadUnit=parsed.weightUnit||parsed.loadUnit||base.weightUnit||base.loadUnit||'kg';
+      return {...base, id, localId:id, sourceId:hit?hit.id:'', bankId:hit?hit.id:'', name:hit?hit.name:cleanName, sets:(hit&&hit.sets)||3, unit:parsed.unit||base.unit||'Wdh', metricUnit:parsed.metricUnit||parsed.unit||base.metricUnit||base.unit||'Wdh', weightUnit:loadUnit, loadUnit, explicitLoadUnit:!!(parsed.weightUnit||parsed.loadUnit), startMetric:parsed.startMetric, startLoad:parsed.startLoad, side:parsedSide, rawText:raw, liveDraft:true, changedByLiveText:true, pendingNew, needsReview, customLoadUnit:parsed.customLoadUnit||undefined, sourceFlags:[pendingNew?'pendingNew':'',needsReview?'needsReview':'',parsed.customLoadUnit?'customUnit':''].filter(Boolean)};
+    }
     const nums=raw.match(/\d+(?:[,.]\d+)?/g)||[];
     let metric='',load='';
     const kg=raw.match(/(\d+(?:[,.]\d+)?)\s*kg/i);
@@ -17161,7 +17289,18 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   }
   function confirmExerciseInput(){const text=activeText(); if(!text)return; if(state.liveDraftId){finalizeLiveDraft('ui_enter_optional_finalize'); $('exerciseInput').value=''; state.bankOpen=false; render(); return;} addExercise(parseLine(text));}
   function activeText(){return $('exerciseInput').value.trim()}
-  function stripExerciseName(raw){return String(raw||'').replace(/\d+(?:[,.]\d+)?\s*(kg|kilo|wdh|wh|reps|min|sek|sec|s)\b/ig,' ').replace(/\b(li\/re|l\/r|lr|li|re|links|rechts)\b/ig,' ').replace(/\b(a|x|mal)\b/ig,' ').replace(/\s+/g,' ').trim();}
+  function stripExerciseName(raw){
+    const n=structuredNumberPattern(), u=structuredUnitPattern();
+    let text=String(raw||'');
+    text=text.replace(/\b(?:Satz\s*\d+|S\s*\d+)\s*[:.)_\-]?\s*/ig,' ');
+    text=text.replace(/\b\d+\.\s*Satz\s*[:.)_\-]?\s*/ig,' ');
+    text=text.replace(/\b\d+\)\s*/g,' ');
+    text=text.replace(new RegExp('@\\s*(?:'+n+'\\s*'+u+'?|'+u+'\\s*'+n+'|'+u+')','ig'),' ');
+    text=text.replace(new RegExp('\\b'+n+'\\s*x\\s*'+n+'\\s*'+u+'?\\b','ig'),' ');
+    text=text.replace(new RegExp('\\b'+n+'\\s*(?:kg|kilo|wdh|wh|rep|reps|min|minute|minutes|minuten|sek\\.?|sec|secs|s|zeit|time|dauer|'+u+')\\b','ig'),' ');
+    text=text.replace(new RegExp('\\b(?:'+u+')\\s*'+n+'\\b','ig'),' ');
+    return text.replace(/\b(li\/re|l\/r|lr|li|re|links|rechts)\b/ig,' ').replace(/\b(a|x|mal)\b/ig,' ').replace(/\s+/g,' ').trim();
+  }
   function splitPlanText(text){
     const value=String(text||'').replace(/\r/g,'');
     const parts=[];
@@ -17174,32 +17313,26 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     parts.push({text:value.slice(start),start:start,end:value.length,separator:''});
     return parts;
   }
-  function isStructuredSetLine(text){return /^\s*Satz\s+\d+\s*:/i.test(String(text||''));}
+  function stripStructuredSetPrefix(line){
+    return String(line||'').trim()
+      .replace(/^\s*Satz\s*\d+\s*[:.)_\-]?\s*/i,'')
+      .replace(/^\s*S\s*\d+\s*[:.)_\-]?\s*/i,'')
+      .replace(/^\s*\d+\.\s*Satz\s*[:.)_\-]?\s*/i,'')
+      .replace(/^\s*\d+\)\s*/i,'')
+      .replace(/^\s*\d+\.\s*/i,'');
+  }
+  function isStructuredSetLine(text){
+    const raw=String(text||'').trim();
+    if(!/^\s*(?:Satz\s*\d+|S\s*\d+|\d+\.\s*Satz|\d+\))/i.test(raw))return false;
+    const body=stripStructuredSetPrefix(raw);
+    return /-?\d+(?:[,.]\d+)?/.test(body);
+  }
   function normalizeStructuredNumber(value){return String(value||'').replace(',','.').trim();}
   function normalizeStructuredLoadUnit(value){
-    const raw=String(value||'kg').trim().toLowerCase();
-    if(raw==='bar')return 'bar';
-    if(raw==='stufe')return 'Stufe';
-    if(raw==='watt')return 'Watt';
-    return 'kg';
+    return normalizeLoadUnit(value||'kg');
   }
   function parseStructuredSetLine(line){
-    const body=String(line||'').replace(/^\s*Satz\s+\d+\s*:\s*/i,'').trim();
-    const info={startMetric:'',unit:'',startLoad:'',weightUnit:''};
-    const rep=body.match(/(-?\d+(?:[,.]\d+)?)\s*(wdh|wh|reps)\b/i);
-    const time=body.match(/(-?\d+(?:[,.]\d+)?)\s*(min|sek\.?|sec|s)\b/i);
-    const load=body.match(/@\s*(-?\d+(?:[,.]\d+)?)(?:\s*(kg|bar|stufe|watt)\b)?/i)||body.match(/(-?\d+(?:[,.]\d+)?)\s*(kg|bar|stufe|watt)\b/i);
-    if(rep){info.startMetric=normalizeStructuredNumber(rep[1]);info.unit='Wdh';}
-    else if(time){
-      const unit=String(time[2]||'sek').toLowerCase().replace('.','');
-      info.startMetric=normalizeStructuredNumber(time[1])+' '+(unit==='min'?'min':'sek');
-      info.unit='Zeit';
-    }
-    if(load){
-      info.startLoad=normalizeStructuredNumber(load[1]);
-      info.weightUnit=normalizeStructuredLoadUnit(load[2]||'kg');
-    }
-    return info;
+    return parseExerciseQuantityText(stripStructuredSetPrefix(line));
   }
   function structuredPlanBlocksFromText(text){
     const lines=String(text||'').replace(/\r/g,'').split(/\n+/).map(line=>line.trim()).filter(Boolean);
@@ -17227,8 +17360,10 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     if(!ex)return null;
     const firstInfo=(block.setLines||[]).map(parseStructuredSetLine).find(info=>info.startMetric||info.startLoad)||{};
     const next={...ex,rawText:[block.name].concat(block.setLines||[]).join('\n'),textMaster:true,liveDraft:false,changedByLiveText:false};
-    if(firstInfo.startMetric){next.startMetric=firstInfo.startMetric;next.unit=firstInfo.unit||next.unit||'Wdh';}
-    if(firstInfo.startLoad){next.startLoad=firstInfo.startLoad;next.weightUnit=firstInfo.weightUnit||next.weightUnit||'kg';}
+    if(firstInfo.startMetric){next.startMetric=firstInfo.startMetric;next.unit=firstInfo.unit||next.unit||'Wdh';next.metricUnit=firstInfo.metricUnit||next.unit||'Wdh';}
+    if(firstInfo.startLoad)next.startLoad=firstInfo.startLoad;
+    if(firstInfo.weightUnit||firstInfo.loadUnit){next.weightUnit=firstInfo.weightUnit||firstInfo.loadUnit;next.loadUnit=firstInfo.loadUnit||firstInfo.weightUnit;next.explicitLoadUnit=true;}
+    if(firstInfo.customLoadUnit){next.customLoadUnit=true;next.needsReview=true;next.sourceFlags=Array.from(new Set([...(next.sourceFlags||[]),'customUnit','needsReview']));}
     return next;
   }
   function structuredExercisesFromPlanText(text){
@@ -17246,6 +17381,21 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   }
   function exactBankExercise(name){const c=compact(name); return bank.find(ex=>compact(ex.name)===c)||null;}
   function parseTextExercise(text,existing){
+    {
+      const raw=String(text||'').trim();
+      const letters=raw.replace(/[^A-Za-zÄÖÜäöüß]/g,'');
+      if(letters.length<3)return null;
+      const parsed=parseExerciseQuantityText(raw);
+      const parsedSide=parseSideModeFromText(raw);
+      const cleanName=stripExerciseName(raw)||raw;
+      const exact=exactBankExercise(cleanName);
+      const id=existing&&(existing.localId||existing.id)||makeLocalId();
+      const base=exact||existing||{id:'new_'+Date.now(),name:cleanName,sets:3,unit:parsed.unit||'Wdh',weightUnit:parsed.weightUnit||'kg',loadUnit:parsed.loadUnit||parsed.weightUnit||'kg'};
+      const pendingNew=!exact;
+      const loadUnit=parsed.weightUnit||parsed.loadUnit||base.weightUnit||base.loadUnit||'kg';
+      const needsReview=pendingNew||parsed.needsReview;
+      return {...base,id,localId:id,sourceId:exact?exact.id:'',bankId:exact?exact.id:'',name:exact?exact.name:cleanName,sets:(existing&&existing.sets)||base.sets||3,unit:parsed.unit||base.unit||'Wdh',metricUnit:parsed.metricUnit||parsed.unit||base.metricUnit||base.unit||'Wdh',weightUnit:loadUnit,loadUnit,explicitLoadUnit:!!(parsed.weightUnit||parsed.loadUnit),startMetric:parsed.startMetric||(existing&&existing.startMetric)||'',startLoad:parsed.startLoad||(existing&&existing.startLoad)||'',side:parsedSide||normalizeSideMode(existing&&existing.side||'BI'),rawText:raw,liveDraft:false,changedByLiveText:false,textMaster:true,pendingNew,needsReview,customLoadUnit:parsed.customLoadUnit||undefined,sourceFlags:[pendingNew?'textMasterReview':'',needsReview?'needsReview':'',parsed.customLoadUnit?'customUnit':''].filter(Boolean)};
+    }
     const raw=String(text||'').trim();
     const letters=raw.replace(/[^A-Za-zÄÖÜäöüß]/g,'');
     if(letters.length<3)return null;
@@ -17273,7 +17423,9 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   function formatExerciseTextLine(ex){
     const parts=[String(ex&&ex.name||'').trim()].filter(Boolean);
     if(normalizeSideMode(ex&&ex.side)==='LR')parts.push('li/re');
-    if(ex&&ex.startLoad)parts.push(String(ex.startLoad)+' '+(ex.weightUnit||ex.loadUnit||'kg'));
+    const loadUnit=ex&&(ex.weightUnit||ex.loadUnit);
+    if(ex&&ex.startLoad)parts.push(String(ex.startLoad)+' '+(loadUnit||'kg'));
+    else if(ex&&(ex.explicitLoadUnit||ex.customLoadUnit)&&loadUnit)parts.push('@ '+loadUnit);
     if(ex&&ex.startMetric)parts.push(String(ex.startMetric)+' '+(ex.unit||ex.metricUnit||'Wdh'));
     return parts.join(' ').trim();
   }
