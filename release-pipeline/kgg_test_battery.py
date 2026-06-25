@@ -108,18 +108,22 @@ def run_version_json_check() -> None:
     version_path = ROOT / "kgg-update" / "version.json"
     index_path = ROOT / "kgg-update" / "index.html"
     data = json.loads(version_path.read_text(encoding="utf-8"))
-    digest = hashlib.sha256(index_path.read_bytes()).hexdigest()
-    if data.get("sha256") != digest:
+    index_bytes = index_path.read_bytes()
+    raw_digest = hashlib.sha256(index_bytes).hexdigest()
+    normalized_digest = hashlib.sha256(index_bytes.replace(b"\r\n", b"\n")).hexdigest()
+    valid_digests = {raw_digest, normalized_digest}
+    if data.get("sha256") not in valid_digests:
         raise BatteryError(
             "kgg-update/version.json sha256 does not match kgg-update/index.html "
-            f"({data.get('sha256')} != {digest})"
+            f"({data.get('sha256')} not in raw={raw_digest}, lf-normalized={normalized_digest})"
         )
+    digest_mode = "raw" if data.get("sha256") == raw_digest else "lf-normalized"
     version_code = data.get("versionCode")
     if not isinstance(version_code, int) or version_code <= 0:
         raise BatteryError("kgg-update/version.json versionCode must be a positive integer.")
     if data.get("indexUrl") != f"index.html?v={version_code}":
         raise BatteryError("kgg-update/version.json indexUrl must match versionCode.")
-    log(f"version.json OK: v{version_code} {data.get('versionName')}")
+    log(f"version.json OK: v{version_code} {data.get('versionName')} ({digest_mode} hash)")
 
 
 def run_secret_scan() -> None:

@@ -98,14 +98,32 @@ def admin_release_path(manifest: dict) -> Path:
 def current_admin_html_from_main() -> tuple[str, dict, Path]:
     fetch_refs()
     manifest = manifest_from_ref("origin/main")
-    path = admin_release_path(manifest)
+    path = Path("kgg-update/index.html")
     html = git_show(f"origin/main:{path.as_posix()}")
     return html, manifest, path
+
+
+def current_admin_html_from_checkout() -> tuple[str, Path]:
+    path = Path("kgg-update/index.html")
+    html = (ROOT / path).read_text(encoding="utf-8")
+    return html, path
 
 
 def smoke_html(html: str) -> str:
     stamp = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     return html.rstrip() + f"\n<!-- kgg-mobile-inbox-live-smoke {stamp} -->\n"
+
+
+def copy_current_checkout(target: Path) -> None:
+    target.mkdir(parents=True, exist_ok=True)
+    tracked = run(["git", "ls-files", "--cached", "--others", "--exclude-standard"], cwd=ROOT).stdout.splitlines()
+    for rel in tracked:
+        source = ROOT / rel
+        if not source.is_file():
+            continue
+        destination = target / rel
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, destination)
 
 
 def clone_branch(branch: str, target: Path, remote: str) -> None:
@@ -323,18 +341,19 @@ def main() -> int:
 
     temp_root = Path(tempfile.mkdtemp(prefix="kgg-mobile-inbox-smoke-"))
     try:
-        html, before_manifest, source_path = current_admin_html_from_main()
-        candidate = temp_root / "candidate-admin.html"
-        candidate.write_text(smoke_html(html), encoding="utf-8", newline="\n")
-        log(f"Source Admin HTML: origin/main:{source_path.as_posix()}")
-
         if args.dry_run:
+            html, source_path = current_admin_html_from_checkout()
+            candidate = temp_root / "candidate-admin.html"
+            candidate.write_text(smoke_html(html), encoding="utf-8", newline="\n")
             base = temp_root / "base"
-            clone_branch("main", base, args.remote)
+            copy_current_checkout(base)
+            log(f"Source Admin HTML: current checkout:{source_path.as_posix()}")
             metadata = run_dry_run(base, candidate)
             log(json.dumps({"mode": "dry-run", "releaseId": metadata["releaseId"], "versionName": metadata["versionName"]}, indent=2))
             return 0
 
+        html, before_manifest, source_path = current_admin_html_from_main()
+        log(f"Source Admin HTML: origin/main:{source_path.as_posix()}")
         require_gh_auth()
         require_workflow_permissions(args.repo)
         upload = temp_root / "upload"
