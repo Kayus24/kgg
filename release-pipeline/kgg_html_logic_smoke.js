@@ -55,9 +55,10 @@ function readMainAppScript() {
   const scripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map((match) => match[1]);
   const main = scripts.find((script) => script.includes("const VERSION='KGG_GITHUB_UPDATE"));
   if (!main) fail("KGG main app script not found in kgg-update/index.html");
-  const bootIndex = main.indexOf(BOOT_MARKER);
+  const normalizedMain = main.replace(/\r\n/g, "\n");
+  const bootIndex = normalizedMain.indexOf(BOOT_MARKER);
   if (bootIndex < 0) fail("KGG boot marker not found; update kgg_html_logic_smoke.js");
-  return main.slice(0, bootIndex);
+  return normalizedMain.slice(0, bootIndex);
 }
 
 function classList() {
