@@ -1,0 +1,5 @@
+{
+  "releaseId": "r0405",
+  "versionName": "1.0.36-native-sync-diagnostics",
+  "notes": "Admin-Beta r0405: Sync-Dialog zeigt Native-Sync-Status, sicheren Sync-Test sowie Sync-Datei speichern/importieren. Keine Patientendaten oder Secrets."
+}

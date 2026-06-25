@@ -29,6 +29,8 @@ function parseArgs(argv) {
     "sync",
     "sync-critical",
     "sync-regression",
+    "native-sync",
+    "native-sync-regression",
     "textblocks",
     "textblocks-critical",
     "textblocks-regression",
@@ -303,6 +305,90 @@ function syncCriticalSuite() {
   `);
 }
 
+function nativeSyncSuite() {
+  return runInsideApp(`
+    localStorage.setItem('kgg_sync_pair_device_id_v1','self_device');
+    localStorage.setItem('kgg_sync_pair_follow_config_v1',JSON.stringify({
+      therapistId:'self_device',
+      syncRoomId:'room_native_smoke',
+      followedTherapists:[{
+        therapistId:'peer_allowed',
+        deviceId:'peer_allowed',
+        displayName:'Peer Allowed',
+        roomId:'room_native_smoke',
+        autoDownload:true,
+        scopes:['exerciseBank','packages']
+      }]
+    }));
+    document.__nodes.therapistName.value='Self Device';
+    const exported=buildNativeExerciseBankSyncDocument();
+    assert(exported.kind==='kgg_cross_data_safe_sync','native export kind mismatch');
+    assert(exported.roomId==='room_native_smoke','native export room mismatch');
+    assert(exported.origin.deviceId==='self_device','native export self origin mismatch');
+    assert(exported.privacy.patients===false && exported.privacy.secrets===false,'native export privacy mismatch');
+
+    const now=new Date().toISOString();
+    function peerDoc(deviceId,name,loadUnit){
+      return {
+        kind:'kgg_cross_data_safe_sync',
+        version:2,
+        exportedAt:now,
+        roomId:'room_native_smoke',
+        schema:'exercise-bank-packages-v2',
+        scopes:['exerciseBank','packages'],
+        privacy:{patients:false,secrets:false,debugPayloads:false,rawData:false},
+        origin:{deviceId,therapistId:deviceId,displayName:name,roomId:'room_native_smoke'},
+        exerciseBank:[{id:'ex_'+deviceId,name:name+' Uebung',aliases:name,sets:3,unit:'Wdh',weightUnit:loadUnit,updatedAt:now}],
+        packages:[{id:'pkg_'+deviceId,name:name+' Paket',exercises:[name+' Uebung'],updatedAt:now}],
+        tombstones:{exerciseBank:[]}
+      };
+    }
+    const self=peerDoc('self_device','Self','kg');
+    const skipped=peerDoc('peer_skipped','Peer Skipped','kg');
+    const allowed=peerDoc('peer_allowed','Peer Allowed','bar');
+    const mesh={kind:'kgg_cross_data_safe_sync_mesh',version:1,roomId:'room_native_smoke',peers:[self,skipped,allowed]};
+    const result=mergeNativeExerciseBankSyncDocument(mesh);
+    assert(result.mesh.seen===3,'mesh seen mismatch');
+    assert(result.mesh.merged===1,'mesh should merge exactly one followed peer, got '+result.mesh.merged);
+    assert(result.mesh.skipped>=2,'mesh should skip self and unfollowed peer');
+    assert(!!bank.find(item=>item.name==='Peer Allowed Uebung'),'followed peer exercise not merged');
+    assert(!bank.find(item=>item.name==='Peer Skipped Uebung'),'unfollowed peer exercise should not merge');
+    assert(!!state.packages.find(item=>item.name==='Peer Allowed Paket'),'followed peer package not merged');
+
+    const allowAll=mergeNativeExerciseBankSyncDocument({kind:'kgg_cross_data_safe_sync_mesh',version:1,roomId:'room_native_smoke',peers:[skipped]},{allowUnfollowed:true});
+    assert(allowAll.mesh.merged===1,'allowUnfollowed mesh should merge skipped peer');
+    assert(!!bank.find(item=>item.name==='Peer Skipped Uebung'),'allowUnfollowed peer exercise not merged');
+
+    const tombstone={
+      kind:'kgg_cross_data_safe_sync',
+      version:2,
+      exportedAt:now,
+      roomId:'room_native_smoke',
+      schema:'exercise-bank-packages-v2',
+      scopes:['exerciseBank','packages'],
+      privacy:{patients:false,secrets:false,debugPayloads:false,rawData:false},
+      origin:{deviceId:'peer_allowed',therapistId:'peer_allowed',displayName:'Peer Allowed',roomId:'room_native_smoke'},
+      exerciseBank:[],
+      packages:[],
+      tombstones:{exerciseBank:[{id:'ex_peer_allowed',deleted:true,updatedAt:now}]}
+    };
+    const tombstoneResult=mergeNativeExerciseBankSyncDocument(tombstone);
+    assert(tombstoneResult.tombstones.removed>=1,'tombstone did not remove existing exercise');
+    assert(!bank.find(item=>item.id==='ex_peer_allowed'),'tombstoned exercise still exists');
+
+    ['apiKey','patientName','rawPayload','access_token','refresh_token','base64Payload'].forEach(key=>{
+      const bad=peerDoc('bad_'+key,'Bad '+key,'kg');
+      bad[key]='blocked';
+      let blocked=false;
+      try{mergeNativeExerciseBankSyncDocument(bad,{allowUnfollowed:true});}
+      catch(err){blocked=true;}
+      assert(blocked,'native sync accepted forbidden key '+key);
+    });
+
+    window.__results={suite:'native-sync',exported:exported.exerciseBank.length,mesh:result.mesh,tombstones:tombstoneResult.tombstones};
+  `);
+}
+
 function textblockCriticalSuite() {
   return runInsideApp(`
     const input=document.__nodes.exerciseInput;
@@ -505,15 +591,17 @@ function textblockSuite() {
 function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) {
-    console.log("Usage: node release-pipeline/kgg_html_logic_smoke.js [--suite all|sync|sync-critical|sync-regression|textblocks|textblocks-critical|textblocks-regression]");
+    console.log("Usage: node release-pipeline/kgg_html_logic_smoke.js [--suite all|sync|sync-critical|sync-regression|native-sync|native-sync-regression|textblocks|textblocks-critical|textblocks-regression]");
     return 0;
   }
   const results = {};
   if (args.suite === "sync-critical") results.syncCritical = syncCriticalSuite();
   if (args.suite === "textblocks-critical") results.textblocksCritical = textblockCriticalSuite();
   if (args.suite === "sync-regression") results.sync = syncSuite();
+  if (args.suite === "native-sync-regression") results.nativeSync = nativeSyncSuite();
   if (args.suite === "textblocks-regression") results.textblocks = textblockSuite();
   if (args.suite === "all" || args.suite === "sync") results.sync = syncSuite();
+  if (args.suite === "all" || args.suite === "native-sync") results.nativeSync = nativeSyncSuite();
   if (args.suite === "all" || args.suite === "textblocks") results.textblocks = textblockSuite();
   console.log(JSON.stringify({ ok: true, suite: args.suite, results }, null, 2));
   return 0;
