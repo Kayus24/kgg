@@ -115,6 +115,54 @@ def run_ui_stability(level: str) -> None:
     run([node_executable(), "release-pipeline/kgg_ui_stability_smoke.js", "--level", level])
 
 
+def run_native_sync_bridge_contract() -> None:
+    log("== Native Android sync bridge contract ==")
+    bridge = (ROOT / "android-wrapper" / "app" / "src" / "main" / "java" / "de" / "kgg" / "app" / "KggSyncBridge.java").read_text(
+        encoding="utf-8"
+    )
+    bootstrap = (ROOT / "android-wrapper" / "app" / "src" / "main" / "assets" / "android" / "kgg_android_sync_bootstrap.js").read_text(
+        encoding="utf-8"
+    )
+    required_bridge_tokens = [
+        "public String getStatus()",
+        "public String readSyncJson()",
+        "public String listPeerSyncJson()",
+        "public boolean writeSyncJson(String json)",
+        "public String readFollowConfig()",
+        "public boolean writeFollowConfig(String json)",
+        "kgg_cross_data_safe_sync_v2.json",
+        "PUBLIC_SYNC_DIR_NAME = \"KGG Sync\"",
+        "private boolean isSafeExerciseBankSyncPayload(String json)",
+        "access_token",
+        "refresh_token",
+        "rawpayload",
+        "base64payload",
+    ]
+    missing_bridge = [token for token in required_bridge_tokens if token not in bridge]
+    if missing_bridge:
+        raise BatteryError("Android native sync bridge contract missing: " + ", ".join(missing_bridge))
+    required_bootstrap_tokens = [
+        "window.KGGNativeSync",
+        "status: function()",
+        "read: function()",
+        "write: function(syncDocument)",
+        "listPeers: function()",
+        "getFollowConfig: function()",
+        "setFollowConfig: function(config)",
+        "kgg:native-sync-ready",
+    ]
+    missing_bootstrap = [token for token in required_bootstrap_tokens if token not in bootstrap]
+    if missing_bootstrap:
+        raise BatteryError("Android native sync JS bootstrap contract missing: " + ", ".join(missing_bootstrap))
+    log("Native Android sync bridge contract OK")
+
+
+def run_native_sync() -> None:
+    log("== Native sync battery ==")
+    run_html_logic("native-sync-regression")
+    run_native_sync_bridge_contract()
+
+
 def run_release_contracts() -> None:
     log("== Release contract tests ==")
     run([sys.executable, "-m", "unittest", "release-pipeline/test_release_pipeline.py"])
@@ -300,6 +348,13 @@ TEST_REGISTRY = [
         "run": lambda: run_ui_stability("regression"),
     },
     {
+        "id": "native-sync-regression",
+        "level": "regression",
+        "suite": "native-sync",
+        "reason": "Peer mesh, auto-download rules and Android sync bridge contract must stay compatible.",
+        "run": run_native_sync,
+    },
+    {
         "id": "mobile-inbox-live",
         "level": "comfort",
         "suite": "mobile-inbox",
@@ -349,7 +404,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--suite",
-        choices=["all", "mobile-inbox", "sync", "textblocks", "ui-stability", "syntax", "security", "release"],
+        choices=["all", "mobile-inbox", "sync", "native-sync", "textblocks", "ui-stability", "syntax", "security", "release"],
         default=None,
         help="Optionally limit to one suite. Without --level this keeps legacy behavior and runs all non-live tests in that suite.",
     )

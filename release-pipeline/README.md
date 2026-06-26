@@ -68,6 +68,7 @@ Einzelne Batterien bleiben moeglich. Ohne `--level` laufen sie aus Kompatibilita
 ```powershell
 python release-pipeline/kgg_test_battery.py --suite mobile-inbox
 python release-pipeline/kgg_test_battery.py --suite sync
+python release-pipeline/kgg_test_battery.py --suite native-sync
 python release-pipeline/kgg_test_battery.py --suite textblocks
 python release-pipeline/kgg_test_battery.py --suite ui-stability
 ```
@@ -78,7 +79,26 @@ Registrierte Tests mit Kategorie und Begruendung anzeigen:
 python release-pipeline/kgg_test_battery.py --level all --list
 ```
 
-`sync` und `textblocks` laden die echte Produktionslogik aus `kgg-update/index.html` in einem lokalen Node-Harness. Damit werden Sync-Safe-Export/Merge, Secret-Blockade und Terminheld-/Satz-Textbloecke ohne Emulator geprueft.
+`sync`, `native-sync` und `textblocks` laden die echte Produktionslogik aus `kgg-update/index.html` in einem lokalen Node-Harness. Damit werden Sync-Safe-Export/Merge, Secret-Blockade, Native-Peer-Mesh-Regeln und Terminheld-/Satz-Textbloecke ohne Emulator geprueft.
+
+## Native Sync Diagnose
+
+Die Update-/Sync-Dialoge sollen sichtbar machen, ob die App wirklich ueber die Android-Bridge in einen gemeinsamen Sync-Raum schreibt oder nur im privaten Browser-Fallback arbeitet. Fuer schnelle Rueckmeldung gibt es:
+
+```powershell
+python release-pipeline/kgg_test_battery.py --suite native-sync --level regression
+```
+
+Diese Batterie prueft:
+
+- Safe-Sync-Dokumente bleiben `kgg_cross_data_safe_sync` und markieren `patients:false`, `secrets:false`.
+- eigene Geraete werden beim Peer-Merge uebersprungen.
+- nicht abonnierte Peers werden standardmaessig ignoriert und nur mit explizitem Import uebernommen.
+- Tombstones loeschen entfernte Uebungen.
+- verbotene Felder wie Tokens, API-Keys, Rohdaten oder Base64-Payloads werden blockiert.
+- die vorhandene Android-Bridge bietet die erwarteten Methoden fuer Status, Lesen, Schreiben, Peer-Liste und Follow-Konfig.
+
+In der Admin-App bleibt die sichere manuelle Uebergabe als Fallback: `Sync-Datei speichern` auf Geraet A, Datei auf Geraet B auswaehlen, `Sync-Datei importieren`. Das ersetzt keine spaetere Komfort-Automatik, macht den Datenuebergang aber testbar und ohne Secrets.
 
 `ui-stability` ist der Schutz gegen Layout-/Flicker-Rueckschritte:
 

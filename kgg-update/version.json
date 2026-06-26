@@ -1,7 +1,7 @@
 {
-  "versionCode": 35,
-  "versionName": "1.0.35-parser-schmerz-tag-blocks",
-  "indexUrl": "index.html?v=35",
-  "sha256": "033580827c473feb51748ff1c62d443f8d9093255243030fc75988a12d6b69cb",
-  "notes": "v035: Textfeld-Parser erkennt echte Schmerz-/Tag-Bloecke mit Last-vor-Wdh-Satzzeilen, verhindert Satz-/Schmerz-Muellkarten und behaelt freie Einheiten wie Hoehe."
+  "versionCode": 36,
+  "versionName": "1.0.36-native-sync-diagnostics",
+  "indexUrl": "index.html?v=36",
+  "sha256": "d8449038188b597e32d99213bd9c68dbb7bb29a050667b8348691800268d6fc8",
+  "notes": "v036: Sync-Dialog zeigt Native-Sync-Status, sicheren Sync-Test sowie Sync-Datei speichern/importieren. Keine Patientendaten oder Secrets."
 }
