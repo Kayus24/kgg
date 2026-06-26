@@ -77,6 +77,19 @@ def node_executable() -> str:
     raise BatteryError("Node.js not found. Install node or set KGG_NODE to the node executable.")
 
 
+def npm_executable() -> str | None:
+    configured = os.environ.get("KGG_NPM") or os.environ.get("NPM")
+    if configured and Path(configured).exists():
+        return configured
+
+    names = ["npm.cmd", "npm"] if os.name == "nt" else ["npm"]
+    for name in names:
+        found = shutil.which(name)
+        if found:
+            return found
+    return None
+
+
 def run_mobile_inbox(live: bool) -> None:
     log("== Mobile-Inbox battery ==")
     args = [sys.executable, "release-pipeline/mobile_inbox_live_smoke.py"]
@@ -88,6 +101,18 @@ def run_mobile_inbox(live: bool) -> None:
 def run_html_logic(suite: str) -> None:
     log(f"== HTML logic battery: {suite} ==")
     run([node_executable(), "release-pipeline/kgg_html_logic_smoke.js", "--suite", suite])
+
+
+def run_ui_stability(level: str) -> None:
+    log(f"== UI stability battery: {level} ==")
+    if level in {"regression", "all"}:
+        npm = npm_executable()
+        if npm:
+            if os.environ.get("KGG_SKIP_PLAYWRIGHT_INSTALL") != "1":
+                run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "playwright", "install", "chromium"])
+            run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "node", "release-pipeline/kgg_ui_stability_smoke.js", "--level", level])
+            return
+    run([node_executable(), "release-pipeline/kgg_ui_stability_smoke.js", "--level", level])
 
 
 def run_native_sync_bridge_contract() -> None:
@@ -295,6 +320,13 @@ TEST_REGISTRY = [
         "run": lambda: run_html_logic("textblocks-critical"),
     },
     {
+        "id": "ui-stability-critical",
+        "level": "critical",
+        "suite": "ui-stability",
+        "reason": "Phone card swipe/drag guards must stay present before UI patches merge.",
+        "run": lambda: run_ui_stability("critical"),
+    },
+    {
         "id": "sync-regression",
         "level": "regression",
         "suite": "sync",
@@ -307,6 +339,13 @@ TEST_REGISTRY = [
         "suite": "textblocks",
         "reason": "Broad text formats and free units are likely to regress after parser changes.",
         "run": lambda: run_html_logic("textblocks-regression"),
+    },
+    {
+        "id": "ui-stability-regression",
+        "level": "regression",
+        "suite": "ui-stability",
+        "reason": "Flicker/layout patches must prove phone swipe and drag/drop still work in a real browser.",
+        "run": lambda: run_ui_stability("regression"),
     },
     {
         "id": "native-sync-regression",
@@ -365,7 +404,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--suite",
-        choices=["all", "mobile-inbox", "sync", "native-sync", "textblocks", "syntax", "security", "release"],
+        choices=["all", "mobile-inbox", "sync", "native-sync", "textblocks", "ui-stability", "syntax", "security", "release"],
         default=None,
         help="Optionally limit to one suite. Without --level this keeps legacy behavior and runs all non-live tests in that suite.",
     )
