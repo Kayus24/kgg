@@ -154,6 +154,28 @@ def run_native_sync_bridge_contract() -> None:
     missing_bootstrap = [token for token in required_bootstrap_tokens if token not in bootstrap]
     if missing_bootstrap:
         raise BatteryError("Android native sync JS bootstrap contract missing: " + ", ".join(missing_bootstrap))
+
+    forbidden_network_tokens = [
+        "HttpURLConnection",
+        "java.net.URL",
+        "new URL(",
+        "http://",
+        "https://",
+        "github",
+        "raw.githubusercontent",
+        "fetch(",
+        "XMLHttpRequest",
+        "WebSocket",
+    ]
+    bridge_network = [token for token in forbidden_network_tokens if token.lower() in bridge.lower()]
+    bootstrap_network = [token for token in forbidden_network_tokens if token.lower() in bootstrap.lower()]
+    if bridge_network or bootstrap_network:
+        details = []
+        if bridge_network:
+            details.append("KggSyncBridge.java: " + ", ".join(bridge_network))
+        if bootstrap_network:
+            details.append("kgg_android_sync_bootstrap.js: " + ", ".join(bootstrap_network))
+        raise BatteryError("Native sync bridge must stay local-only/no-network: " + " | ".join(details))
     log("Native Android sync bridge contract OK")
 
 
