@@ -1,0 +1,5 @@
+{
+  "releaseId": "r0406",
+  "versionName": "1.0.37-device-sync-menu",
+  "notes": "Admin-Beta r0406: Therapeuten-App weitergeben zeigt nur den Kolleg:innen-App/APK-QR; Geräte-Sync hat einen eigenen Admin-Menüpunkt für Sync-Test und Datei-Transfer. Keine Patientendaten oder Secrets."
+}

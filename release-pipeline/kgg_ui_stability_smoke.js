@@ -85,6 +85,12 @@ function staticGestureGuardSuite() {
   assertIncludes(html, "transform:translate3d(0,0,0)!important", "phone drag local-list transform override");
   assertIncludes(html, "kgg-v11-clean-merge-original-features-phone-drag-local-list", "latest phone drag merge marker");
 
+  assertIncludes(html, "kggDeviceSyncOpen", "separate device sync menu entry");
+  assertIncludes(html, "Geräte-Sync", "device sync menu label");
+  assertIncludes(html, "document.getElementById('syncQrBtn')", "device sync opens sync dialog through sync button");
+  assertRegex(html, /tabletMenuTherapistShareBtn[\s\S]{0,260}openKggTherapistAppOnlyQr\(\)/, "therapist share opens app QR directly");
+  assertIncludes(html, "Kolleg:innen-App APK QR", "colleague APK share QR label");
+
   console.log("Static UI stability guards OK");
 }
 
