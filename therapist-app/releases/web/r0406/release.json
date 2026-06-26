@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0406",
+  "versionName": "1.0.37-device-sync-menu",
+  "notes": "Admin-Beta r0406: Therapeuten-App weitergeben zeigt nur den Kolleg:innen-App/APK-QR; Geräte-Sync hat einen eigenen Admin-Menüpunkt für Sync-Test und Datei-Transfer. Keine Patientendaten oder Secrets.",
+  "createdAt": "2026-06-26T11:24:01Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0406",
+      "profile": "admin",
+      "versionName": "1.0.37-device-sync-menu",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0406/admin.html",
+      "sha256": "0283bd7caa5b74b92a5745b731d707c215f7ff5dcb6c16554dc9ab9a6c0f835d",
+      "notes": "Admin-Beta r0406: Therapeuten-App weitergeben zeigt nur den Kolleg:innen-App/APK-QR; Geräte-Sync hat einen eigenen Admin-Menüpunkt für Sync-Test und Datei-Transfer. Keine Patientendaten oder Secrets."
+    },
+    "colleague": {
+      "releaseId": "r0406",
+      "profile": "colleague",
+      "versionName": "1.0.37-device-sync-menu",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0406/colleague.html",
+      "sha256": "fd3827c747c1578081f0856eae787f00f9188d41a38e822cc6086667b15100ef",
+      "notes": "Admin-Beta r0406: Therapeuten-App weitergeben zeigt nur den Kolleg:innen-App/APK-QR; Geräte-Sync hat einen eigenen Admin-Menüpunkt für Sync-Test und Datei-Transfer. Keine Patientendaten oder Secrets."
+    }
+  }
+}
