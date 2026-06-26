@@ -4,15 +4,15 @@
   "schema": 2,
   "channels": {
     "admin": {
-      "releaseId": "r0405",
+      "releaseId": "r0406",
       "profile": "admin",
-      "versionName": "1.0.36-native-sync-diagnostics",
-      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0405/admin.html",
-      "sha256": "d8449038188b597e32d99213bd9c68dbb7bb29a050667b8348691800268d6fc8",
-      "notes": "Admin-Beta r0405: Sync-Dialog zeigt Native-Sync-Status, sicheren Sync-Test sowie Sync-Datei speichern/importieren. Keine Patientendaten oder Secrets.",
-      "rolloutCode": 404,
-      "previousReleaseId": "r0404",
-      "releasedAt": "2026-06-25T17:47:27Z"
+      "versionName": "1.0.37-device-sync-menu",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0406/admin.html",
+      "sha256": "0283bd7caa5b74b92a5745b731d707c215f7ff5dcb6c16554dc9ab9a6c0f835d",
+      "notes": "Admin-Beta r0406: Therapeuten-App weitergeben zeigt nur den Kolleg:innen-App/APK-QR; Geräte-Sync hat einen eigenen Admin-Menüpunkt für Sync-Test und Datei-Transfer. Keine Patientendaten oder Secrets.",
+      "rolloutCode": 405,
+      "previousReleaseId": "r0405",
+      "releasedAt": "2026-06-26T11:24:01Z"
     },
     "colleague": {
       "releaseId": "r0397",
@@ -30,8 +30,8 @@
   "latestAndroidShellVersion": "v398",
   "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0397/colleague.html",
   "colleagueSha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
-  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0405/admin.html",
-  "adminSha256": "d8449038188b597e32d99213bd9c68dbb7bb29a050667b8348691800268d6fc8",
+  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0406/admin.html",
+  "adminSha256": "0283bd7caa5b74b92a5745b731d707c215f7ff5dcb6c16554dc9ab9a6c0f835d",
   "sha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
   "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v398/android/KGG_ANDROID_KOLLEGEN_v398_force_r0400_html_debug.apk",
   "androidApkSha256": "c4a4e022a7bfa2511538f18bb80c025eb4a1057a186637ac12146ea55dd807ed",
@@ -39,5 +39,5 @@
   "colleagueAndroidApkSha256": "c4a4e022a7bfa2511538f18bb80c025eb4a1057a186637ac12146ea55dd807ed",
   "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v398/android/KGG_ANDROID_ADMIN_v398_force_r0400_html_debug.apk",
   "adminAndroidApkSha256": "e64553647a10a5fa4286f319b6a4284052c0c030b93b5150f9ac8ef0a1708c34",
-  "notes": "Admin beta r0405: Admin-Beta r0405: Sync-Dialog zeigt Native-Sync-Status, sicheren Sync-Test sowie Sync-Datei speichern/importieren. Keine Patientendaten oder Secrets."
+  "notes": "Admin beta r0406: Admin-Beta r0406: Therapeuten-App weitergeben zeigt nur den Kolleg:innen-App/APK-QR; Geräte-Sync hat einen eigenen Admin-Menüpunkt für Sync-Test und Datei-Transfer. Keine Patientendaten oder Secrets."
 }

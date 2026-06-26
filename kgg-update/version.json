@@ -1,7 +1,7 @@
 {
-  "versionCode": 36,
-  "versionName": "1.0.36-native-sync-diagnostics",
-  "indexUrl": "index.html?v=36",
-  "sha256": "d8449038188b597e32d99213bd9c68dbb7bb29a050667b8348691800268d6fc8",
-  "notes": "v036: Sync-Dialog zeigt Native-Sync-Status, sicheren Sync-Test sowie Sync-Datei speichern/importieren. Keine Patientendaten oder Secrets."
+  "versionCode": 37,
+  "versionName": "1.0.37-device-sync-menu",
+  "indexUrl": "index.html?v=37",
+  "sha256": "0283bd7caa5b74b92a5745b731d707c215f7ff5dcb6c16554dc9ab9a6c0f835d",
+  "notes": "v037: Therapeuten-App weitergeben zeigt nur den Kolleg:innen-App/APK-QR; Geräte-Sync hat einen eigenen Admin-Menüpunkt für Sync-Test und Datei-Transfer."
 }
