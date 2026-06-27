@@ -153,10 +153,16 @@ function staticUiMiniSeriesGuardSuite(caseName) {
   if (caseMatches(caseName, ["ui-mini-series", "phone-admin-menu"])) {
     assertIncludes(html, "kggPhoneAdminMenu", "phone admin submenu");
     assertIncludes(html, "kgg-v042-phone-dock-anchored-correction", "v042 anchored phone dock correction");
+    assertIncludes(html, "kgg-v044-phone-liquid-actions", "v044 phone liquid actions marker");
     assertIncludes(html, "header.appendChild(menu)", "phone admin menu anchored in plan header");
+    assertIncludes(html, "kggPhoneUpdateCenterMenu", "phone update center submenu entry");
+    assertIncludes(html, "kggPhoneDeviceSyncMenu", "phone device sync submenu entry");
+    assertIncludes(html, "kggPhoneTherapistShareMenu", "phone colleague app share submenu entry");
     assertIncludes(html, "kggPhoneAdminConfigMenu", "phone admin config submenu entry");
     assertIncludes(html, "kggPhoneBankShareMenu", "phone exercise-bank share submenu entry");
-    assertIncludes(html, "kggPhoneQrShareMenu", "phone QR submenu entry");
+    assertIncludes(html, "data-kgg-phone-menu-group=\"update\"", "phone admin menu update group");
+    assertIncludes(html, "data-kgg-phone-menu-group=\"sync-share\"", "phone admin menu sync/share group");
+    assertIncludes(html, "data-kgg-phone-menu-group=\"admin\"", "phone admin menu admin group");
     assertRegex(
       html,
       /#scanHub #syncQrBtn,[\s\S]{0,160}#scanHub #adminConfigBtn,[\s\S]{0,160}#scanHub #sharedBankBtn[\s\S]{0,120}display:none!important/,
@@ -167,11 +173,16 @@ function staticUiMiniSeriesGuardSuite(caseName) {
   if (caseMatches(caseName, ["ui-mini-series", "phone-scan-dock"])) {
     assertIncludes(html, "phonePhotoMenuToggle", "phone photo dropdown toggle");
     assertIncludes(html, "kggScanButtonWithMenu", "phone photo toggle integrated into scan button");
+    assertIncludes(html, "kggPhoneLiquidAction", "phone liquid action class");
+    assertIncludes(html, "kggPhoneLiquidChevron", "phone liquid chevron class");
+    assertIncludes(html, "phoneScanLabel", "phone scan label");
     assertIncludes(html, "body.kggPhoneDrawerOpen #scanHub", "phone dock stays behind drawer");
     assertIncludes(html, "kggPhonePhotoMenu", "phone photo menu");
     assertIncludes(html, "window.KGGScan.pick(\"file\")", "phone gallery picker route");
     assertIncludes(html, "kggPhoneHasPlan", "phone plan-state dock class");
-    assertIncludes(html, "backdrop-filter:blur(18px)", "liquid glass dock style");
+    assertIncludes(html, "backdrop-filter:blur(30px)", "strong liquid glass dock style");
+    assertIncludes(html, ".planActions.hasPlan #recentToggle", "phone recent toggle non-collapse override");
+    assertIncludes(html, "min-width:148px", "phone recent toggle stays readable");
     assertRegex(html, /#scanHub[\s\S]{0,420}position:fixed!important/, "phone scanHub fixed bottom dock");
     assertRegex(html, /#finishBtn:not\(\.hidden\)[\s\S]{0,300}position:fixed!important/, "phone finish button joins dock");
   }
@@ -547,6 +558,7 @@ async function browserUiMiniSeriesSuite(caseName) {
       await page.waitForSelector("#planList .planCard[data-plan-id]", { timeout: 15000 });
       await page.waitForFunction(() => window.KGG_UI_MINI_SERIES && window.KGG_UI_MINI_SERIES.check, null, { timeout: 15000 });
       await page.waitForFunction(() => window.KGG_UI_MINI_SERIES_V042 && window.KGG_UI_MINI_SERIES_V042.check, null, { timeout: 15000 });
+      await page.waitForFunction(() => window.KGG_UI_PHONE_LIQUID_ACTIONS_V044, null, { timeout: 15000 });
       await page.waitForTimeout(500);
 
       if (caseMatches(caseName, ["ui-mini-series", "bank-thumbnails"])) {
@@ -581,13 +593,30 @@ async function browserUiMiniSeriesSuite(caseName) {
         await page.locator("#kggPhoneAdminMenuBtn").click();
         const menu = await page.evaluate(() => ({
           panelOpen: !document.getElementById("kggPhoneAdminMenuPanel").hidden,
+          update: !!document.getElementById("kggPhoneUpdateCenterMenu"),
+          sync: !!document.getElementById("kggPhoneDeviceSyncMenu"),
+          therapist: !!document.getElementById("kggPhoneTherapistShareMenu"),
           admin: !!document.getElementById("kggPhoneAdminConfigMenu"),
           bank: !!document.getElementById("kggPhoneBankShareMenu"),
-          qr: !!document.getElementById("kggPhoneQrShareMenu"),
+          oldQr: !!document.getElementById("kggPhoneQrShareMenu"),
+          groups: Array.from(document.querySelectorAll("#kggPhoneAdminMenuPanel [data-kgg-phone-menu-group]")).map((node) => node.getAttribute("data-kgg-phone-menu-group")),
           anchored: !!document.querySelector("#createPanel .planHeader #kggPhoneAdminMenu"),
           position: getComputedStyle(document.getElementById("kggPhoneAdminMenu")).position,
         }));
-        if (!menu.panelOpen || !menu.admin || !menu.bank || !menu.qr || !menu.anchored || menu.position === "fixed") {
+        if (
+          !menu.panelOpen ||
+          !menu.update ||
+          !menu.sync ||
+          !menu.therapist ||
+          !menu.admin ||
+          !menu.bank ||
+          menu.oldQr ||
+          !menu.groups.includes("update") ||
+          !menu.groups.includes("sync-share") ||
+          !menu.groups.includes("admin") ||
+          !menu.anchored ||
+          menu.position === "fixed"
+        ) {
           fail(`Phone admin submenu failed: ${JSON.stringify(menu)}`);
         }
       }
@@ -599,18 +628,28 @@ async function browserUiMiniSeriesSuite(caseName) {
           const finish = document.getElementById("finishBtn");
           const scan = document.getElementById("scanBtn");
           const toggle = document.getElementById("phonePhotoMenuToggle");
+          const recent = document.getElementById("recentToggle");
+          const recentText = recent ? recent.querySelector(".recentText") : null;
           return {
             bodyHasPlan: document.body.classList.contains("kggPhoneHasPlan"),
             hubPosition: hub ? getComputedStyle(hub).position : "missing",
             hubZ: hub ? Number.parseInt(getComputedStyle(hub).zIndex, 10) : -1,
             scanHeight: scan ? Math.round(scan.getBoundingClientRect().height) : 0,
             scanBackdrop: scan ? (getComputedStyle(scan).backdropFilter || getComputedStyle(scan).webkitBackdropFilter || "none") : "missing",
+            scanLabel: scan ? (scan.querySelector(".phoneScanLabel") || {}).textContent || "" : "",
+            scanLiquid: !!(scan && scan.classList.contains("kggPhoneLiquidAction")),
+            toggleText: toggle ? toggle.textContent : "",
             toggleInsideScan: !!(toggle && scan && toggle.parentElement === scan),
+            toggleLiquid: !!(toggle && toggle.classList.contains("kggPhoneLiquidChevron")),
             finishPosition: finish ? getComputedStyle(finish).position : "missing",
             finishHidden: finish ? finish.classList.contains("hidden") : true,
             finishWidth: finish ? Math.round(finish.getBoundingClientRect().width) : 0,
             finishZ: finish ? Number.parseInt(getComputedStyle(finish).zIndex, 10) : -1,
             finishBackdrop: finish ? (getComputedStyle(finish).backdropFilter || getComputedStyle(finish).webkitBackdropFilter || "none") : "missing",
+            finishLiquid: !!(finish && finish.classList.contains("kggPhoneLiquidAction")),
+            recentWidth: recent ? Math.round(recent.getBoundingClientRect().width) : 0,
+            recentTextOpacity: recentText ? Number.parseFloat(getComputedStyle(recentText).opacity) : 0,
+            recentTextWidth: recentText ? Math.round(recentText.getBoundingClientRect().width) : 0,
           };
         });
         if (
@@ -618,13 +657,21 @@ async function browserUiMiniSeriesSuite(caseName) {
           dock.hubPosition !== "fixed" ||
           dock.hubZ >= 90 ||
           dock.scanHeight < 50 ||
+          !dock.scanLiquid ||
+          !dock.scanLabel.includes("Plan scannen") ||
           !dock.toggleInsideScan ||
+          !dock.toggleLiquid ||
+          dock.toggleText.trim() !== "⌃" ||
           String(dock.scanBackdrop).toLowerCase() === "none" ||
           dock.finishPosition !== "fixed" ||
           dock.finishHidden ||
           dock.finishWidth < 90 ||
           dock.finishZ >= 90 ||
-          String(dock.finishBackdrop).toLowerCase() === "none"
+          !dock.finishLiquid ||
+          String(dock.finishBackdrop).toLowerCase() === "none" ||
+          dock.recentWidth < 130 ||
+          dock.recentTextOpacity < 0.9 ||
+          dock.recentTextWidth < 60
         ) {
           fail(`Phone scan dock failed: ${JSON.stringify(dock)}`);
         }
