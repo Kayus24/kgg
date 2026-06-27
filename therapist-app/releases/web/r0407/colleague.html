@@ -898,7 +898,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v43 Tablet Card Reorder</title>
+  <title>KGG App Kolleg:innen</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -16189,8 +16189,13 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
 }
 /* KGG PATCH END: kgg-v024-rollback-v023-debug-breakage-guard-style */
 </style>
+<style id="kgg-colleague-boundary">
+  body.colleagueMode .adminConfigBtn,
+  body.colleagueMode .sharedBankBtn,
+  body.colleagueMode .adminTestBanner{display:none!important}
+</style>
 </head>
-<body class="adminMode">
+<body class="colleagueMode">
 <div class="tabletSideBackdrop" id="tabletSideBackdrop" hidden></div>
   <aside class="tabletSideMenu" id="tabletSideMenu" aria-hidden="true">
     <div class="tabletSideMenuHead">
@@ -16200,7 +16205,6 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     <nav class="tabletSideMenuGroup tabletSideMenuMain" aria-label="Tablet-Menue">
       <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuRecentBtn" type="button"><span class="tabletMenuActionIcon" aria-hidden="true">&#128337;</span><span>Letzte Pl&auml;ne</span></button>
       <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuPackagesBtn" type="button"><span class="tabletMenuActionIcon" aria-hidden="true">&#128230;</span><span>&Uuml;bungspakete</span></button>
-      <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuTherapistShareBtn" type="button"><span class="tabletMenuActionIcon" aria-hidden="true">&#128188;</span><span>Therapeuten-App weitergeben</span></button>
       <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuLayoutBtn" type="button" aria-expanded="false"><span class="tabletMenuActionIcon" aria-hidden="true">&#9881;</span><span>Layout anpassen</span></button>
       <div class="tabletSideMenuLayoutPanel" id="tabletMenuLayoutPanel" hidden>
         <div class="tabletLayoutControls" id="tabletLayoutControls" aria-label="Tablet-Layout">
@@ -16229,7 +16233,6 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   <div class="tabletPackageCards" id="tabletPackageCards"></div>
 </aside>
 <div class="app">
-  <div class="adminTestBanner">ADMIN-DATEI · v32 No Boot Redirect<small>Nur intern fuer Max/Admin. Nicht fuer Patient:innen verwenden. Keine API-Keys fest eingebaut.</small></div>
   <header class="topbar"><div class="topbarText"><h1>KGG Plan App <span class="stateBadge" id="stateBadge">Leerzustand</span></h1><small id="kggRuntimeVersion">Plain HTML/CSS/JS · offlinefähig · mobile-first</small><small class="kggBuildBadge" id="kggBuildBadge">Build wird geladen</small></div><button class="visionBtn" id="visionBtn" type="button" aria-pressed="false" aria-label="Großdruck-PDF umschalten">PDF A+</button></header>
 
   <section class="scanHub" id="scanHub">
@@ -16239,33 +16242,9 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     <input id="fileInput" class="nativeFileInput" type="file" accept="image/*" capture="environment">
     <input id="filePickerInput" class="nativeFileInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp" multiple>
     <div class="scanMeta filePickBtn" id="filePickBtn" role="button" tabindex="0" aria-label="Foto oder Datei auswählen">Foto / Datei <small id="scanStatus" class="hidden"></small></div>
-    <button class="mutedBtn adminConfigBtn" id="adminConfigBtn" type="button">Admin-Konfig</button>
     <button class="mutedBtn sharedBankBtn" id="sharedBankBtn" type="button">Übungsdatenbank teilen</button>
     <div id="scanPreview" class="notice hidden"></div>
   </section>
-  <div class="kggAdminMenuQrModal" id="kggAdminMenuQrModal" aria-hidden="true">
-    <div class="kggAdminMenuQrSheet" role="dialog" aria-modal="true" aria-labelledby="kggAdminMenuQrTitle">
-      <h2 id="kggAdminMenuQrTitle">QR</h2>
-      <p class="kggAdminMenuQrHint" id="kggAdminMenuQrHint"></p>
-      <div class="kggAdminMenuQrBox" id="kggAdminMenuQrBox"></div>
-      <textarea class="kggAdminMenuQrLink" id="kggAdminMenuQrLink" readonly></textarea>
-      <div class="kggAdminMenuQrButtons">
-        <button type="button" id="kggAdminMenuQrCopy">kopieren</button>
-        <button type="button" class="primary" id="kggAdminMenuQrOpen">oeffnen</button>
-        <button type="button" id="kggAdminMenuQrClose">schliessen</button>
-      </div>
-    </div>
-  </div>
-  <div class="kggTherapistShareModal" id="kggTherapistShareModal" aria-hidden="true">
-    <div class="kggTherapistShareSheet" role="dialog" aria-modal="true" aria-labelledby="kggTherapistShareTitle">
-      <h2 id="kggTherapistShareTitle">Therapeuten-App weitergeben</h2>
-      <p class="kggTherapistShareHint">QR fuer die Kolleg:innen-App/APK. Keine Sync-Daten, keine API-Keys.</p>
-      <div class="kggTherapistShareChoices">
-        <button type="button" id="therapistShareAppOnly"><b>Kolleg:innen-App APK</b><small>QR mit aktuellem Android-Download-Link fuer Kolleg:innen.</small></button>
-      </div>
-      <button type="button" class="mutedBtn" id="therapistShareCancel">Abbrechen</button>
-    </div>
-  </div>
   <div id="mobileScannedPlansDock" class="mobileScannedPlansDock hidden" aria-live="polite"></div>
   <div class="tabletLayoutResizeHandle" id="tabletLayoutResizeHandle" role="separator" aria-orientation="vertical" aria-label="Tablet-Spaltenbreite ziehen"><div class="tabletSplitScaleControl" id="tabletSplitScaleControl" aria-hidden="true"><button id="tabletSplitScalePlus" type="button" aria-label="UI groesser">+</button><span class="tabletSplitScaleValue" id="tabletSplitScaleValue">100%</span><button id="tabletSplitScaleMinus" type="button" aria-label="UI kleiner">-</button></div></div>
 
@@ -16428,26 +16407,6 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   <div class="grid2"><button class="mutedBtn" id="dismissInstallPrompt" type="button">Später</button><button class="primary" id="acceptInstallPrompt" type="button">Installieren</button></div>
 </div></div>
 
-<div class="modal" id="adminSecretsModal"><div class="sheet">
-  <h2>Admin-Konfig</h2>
-  <p class="notice">Codes bleiben nur lokal auf diesem Geraet. In dieser Admin-Testdatei sind keine API-Keys fest eingebaut.</p>
-  <div class="field"><label>Gemini API-Key 1</label><input id="adminGeminiKey1" type="password" autocomplete="off" spellcheck="false"></div>
-  <div class="field"><label>Gemini API-Key 2</label><input id="adminGeminiKey2" type="password" autocomplete="off" spellcheck="false"></div>
-  <div class="field"><label>Medien-Dropzone URL</label><input id="adminMediaDropzoneEndpoint" type="url" autocomplete="off" spellcheck="false" placeholder="https://...workers.dev"></div>
-  <div class="field"><label>Medien Upload-Code</label><input id="adminMediaDropzoneUploadToken" type="password" autocomplete="off" spellcheck="false"></div>
-  <span class="secretStatus" id="adminSecretStatus">Keine lokalen Codes gespeichert.</span>
-  <div class="adminCodePackageTools">
-    <button class="mutedBtn wide" id="loadAdminSafeFile" type="button">Admin-Safe-Datei laden</button>
-    <button class="mutedBtn" id="importAdminCodePackage" type="button">Code-Paket einfuegen</button>
-    <button class="mutedBtn" id="exportAdminCodePackage" type="button">Code-Paket kopieren</button>
-    <button class="mutedBtn wide" id="downloadAdminSafeFile" type="button">Admin-Safe-Datei speichern</button>
-  </div>
-  <input id="adminSafeFileInput" class="hidden" type="file" accept=".kggsafe,.bin,.txt,.json,text/plain,application/json,application/octet-stream,*/*">
-  <div class="adminPackageHint">Admin-Safe-Dateien bleiben lokal und gehoeren nicht in GitHub, Chat oder Patient:innen-Ausgabe.</div>
-  <div class="grid2" style="margin-top:12px"><button class="mutedBtn danger" id="clearAdminSecrets" type="button">Löschen</button><button class="primary" id="saveAdminSecrets" type="button">Lokal speichern</button></div>
-  <button class="mutedBtn" id="closeAdminSecrets" type="button" style="width:100%;margin-top:8px">Schließen</button>
-</div></div>
-
 <div class="modal" id="sharedBankModal"><div class="sheet">
   <h2>Übungsdatenbank teilen</h2>
   <p class="notice">Nur Übungsdaten. Keine Patientendaten, keine Codes. Import löscht nichts.</p>
@@ -16543,7 +16502,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
 <script>
 (function(){'use strict';
   const VERSION='KGG_GITHUB_UPDATE_v043_tablet_card_reorder';
-  window.KGG_ROLLOUT_PROFILE='admin';
+  window.KGG_ROLLOUT_PROFILE='colleague';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
   const KGG_BUILD_INFO={release:'v043',buildTime:'2026-06-26T19:20:00+02:00',buildCode:'github-update-v043-tablet-card-reorder',htmlFile:'kgg-update/index.html'};
@@ -17193,17 +17152,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     a.click();
     setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
-  function exposeAdminSecretApi(){
-    window.KGGAdmin=window.KGGAdmin||{};
-    window.KGGAdmin.openConfig=openAdminSecretsModal;
-    window.KGGAdmin.importCodePackage=text=>{applyAdminCodePackageData(decodeAdminCodePackage(text)); return window.KGGAdmin.getSecretStatus();};
-    window.KGGAdmin.exportCodePackage=()=>{loadAdminSecrets(); return encodeAdminCodePackage({geminiKeys:(adminSecrets.geminiKeys||[]).map(cleanSecret).filter(Boolean),mediaDropzoneEndpoint:cleanSecret(adminSecrets.mediaDropzoneEndpoint),mediaDropzoneUploadToken:cleanSecret(adminSecrets.mediaDropzoneUploadToken),exportedAt:new Date().toISOString()});};
-    window.KGGAdmin.getSecretStatus=()=>({geminiKeys:(adminSecrets.geminiKeys||[]).map(maskSecret),mediaDropzoneEndpoint:adminSecrets.mediaDropzoneEndpoint||'',mediaDropzoneUploadToken:maskSecret(adminSecrets.mediaDropzoneUploadToken),updatedAt:adminSecrets.updatedAt||''});
-    window.KGGAdmin.setGeminiKeys=keys=>{adminSecrets.geminiKeys=(Array.isArray(keys)?keys:[keys]).map(cleanSecret).filter(Boolean); persistAdminSecrets(); return window.KGGAdmin.getSecretStatus();};
-    window.KGGAdmin.setMediaDropzone=(endpoint,token)=>{adminSecrets.mediaDropzoneEndpoint=cleanSecret(endpoint); adminSecrets.mediaDropzoneUploadToken=cleanSecret(token); persistAdminSecrets(); return window.KGGAdmin.getSecretStatus();};
-    window.KGGAdmin.getGeminiKeyForLocalUse=()=>((adminSecrets.geminiKeys||[]).find(Boolean)||'');
-    window.KGGAdmin.getGeminiKeysForLocalUse=()=>((adminSecrets.geminiKeys||[]).map(cleanSecret).filter(Boolean));
-  }
+
   function canUsePwaRuntime(){return location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1';}
   function isLocalHtmlTestRuntime(){return location.protocol==='file:'||location.hostname==='localhost'||location.hostname==='127.0.0.1';}
   function isStandalonePwa(){return window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;}
@@ -17388,9 +17337,9 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!window.KGGPwaReloading){window.KGGPwaReloading=true; location.reload();}});
   }
   function initAdminModeAccess(){
+    if(window.KGG_ROLLOUT_PROFILE==='colleague'){document.body.classList.remove('adminMode');document.body.classList.add('colleagueMode');return;}
     loadAdminSecrets();
-    exposeAdminSecretApi();
-    document.body.classList.add('adminMode');
+      document.body.classList.add('adminMode');
     if(!(adminSecrets.geminiKeys&&adminSecrets.geminiKeys.length)){
       setTimeout(()=>{try{openAdminSecretsModal();}catch(e){}},700);
     }
@@ -21824,7 +21773,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   }
   function localGeminiKeys(){
     loadAdminSecrets();
-    if(window.KGGAdmin&&typeof window.KGGAdmin.getGeminiKeysForLocalUse==='function')return window.KGGAdmin.getGeminiKeysForLocalUse().map(cleanSecret).filter(Boolean);
+
     return (adminSecrets.geminiKeys||[]).map(cleanSecret).filter(Boolean);
   }
   function currentLocalGeminiKey(){return localGeminiKeys()[0]||'';}
@@ -23164,16 +23113,16 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   $('cancelLongMediaShare').onclick=closeLongMediaConfirmModal;
   $('confirmLongMediaShare').onclick=confirmLongMediaShare;
   $('longMediaConfirmModal').addEventListener('click',ev=>{if(ev.target===$('longMediaConfirmModal'))closeLongMediaConfirmModal();});
-  $('adminConfigBtn').onclick=openAdminSecretsModal;
-  $('closeAdminSecrets').onclick=closeAdminSecretsModal;
-  $('saveAdminSecrets').onclick=saveAdminSecretsFromModal;
-  if($('loadAdminSafeFile'))$('loadAdminSafeFile').onclick=()=>$('adminSafeFileInput').click();
-  if($('adminSafeFileInput'))$('adminSafeFileInput').onchange=ev=>importAdminSafeFile(ev.target.files&&ev.target.files[0]).catch(err=>alert('Admin-Safe-Datei konnte nicht gelesen werden: '+err.message)).finally(()=>{ev.target.value='';});
-  if($('importAdminCodePackage'))$('importAdminCodePackage').onclick=()=>importAdminCodePackageFromClipboard().catch(err=>alert('Code-Paket konnte nicht gelesen werden: '+err.message));
-  if($('exportAdminCodePackage'))$('exportAdminCodePackage').onclick=()=>exportAdminCodePackageToClipboard().catch(err=>alert('Code-Paket konnte nicht kopiert werden: '+err.message));
-  if($('downloadAdminSafeFile'))$('downloadAdminSafeFile').onclick=downloadAdminSafeFile;
-  $('clearAdminSecrets').onclick=()=>{clearLocalAdminSecrets(); if($('adminGeminiKey1'))$('adminGeminiKey1').value=''; if($('adminGeminiKey2'))$('adminGeminiKey2').value=''; if($('adminMediaDropzoneEndpoint'))$('adminMediaDropzoneEndpoint').value=''; if($('adminMediaDropzoneUploadToken'))$('adminMediaDropzoneUploadToken').value='';};
-  $('adminSecretsModal').addEventListener('click',ev=>{if(ev.target===$('adminSecretsModal'))closeAdminSecretsModal();});
+
+
+
+
+
+
+
+
+
+
   $('sharedBankBtn').onclick=openSharedBankModal;
   $('copySharedBank').onclick=copySharedBankPayload;
   $('pickSharedBankFile').onclick=()=>$('sharedBankFile').click();
@@ -23194,92 +23143,19 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   if($('syncImportInput'))$('syncImportInput').onchange=ev=>{const file=ev&&ev.target&&ev.target.files&&ev.target.files[0]; importNativeSyncFile(file).finally(()=>{if(ev&&ev.target)ev.target.value='';});};
   if($('closeSyncPairModal'))$('closeSyncPairModal').onclick=closeSyncPairModal;
   if($('syncPairModal'))$('syncPairModal').addEventListener('click',ev=>{if(ev.target===$('syncPairModal'))closeSyncPairModal();});
-  const kggAdminMenuQrTargets={
-    colleague:{title:'Kolleg:innen-Web-App QR',hint:'Oeffnet die jeweils verlinkte Kolleg:innen-Web-App.',url:'https://kayus24.github.io/kgg/therapist-app/latest-html.html'},
-    admin:{title:'Admin-Web-App QR',hint:'Oeffnet diese Admin-Web-App-Version. Manifest/Latest wird separat freigegeben.',url:'https://kayus24.github.io/kgg/therapist-app/releases/v388/web/KGG_APP_ADMIN_v388_android_flow_fixes.html'},
-    android:{title:'Kolleg:innen-App APK QR',hint:'Oeffnet die aktuelle Android-Download-Seite fuer Kolleg:innen. Keine API-Keys, keine Sync-Daten.',url:'https://kayus24.github.io/kgg/therapist-app/latest-android.html'}
-  };
-  function closeKggTherapistShareModal(){
-    const modal=$('kggTherapistShareModal');
-    if(!modal)return;
-    modal.classList.remove('isOpen');
-    modal.setAttribute('aria-hidden','true');
-  }
-  function openKggTherapistShareModal(){
-    const modal=$('kggTherapistShareModal');
-    if(!modal)return;
-    modal.classList.add('isOpen');
-    modal.setAttribute('aria-hidden','false');
-  }
-  function kggTherapistAppUrl(){
-    const target=kggAdminMenuQrTargets&&kggAdminMenuQrTargets.android;
-    return target&&target.url||'https://kayus24.github.io/kgg/therapist-app/latest-android.html';
-  }
-  function openKggTherapistAppOnlyQr(){
-    closeKggTherapistShareModal();
-    const url=kggTherapistAppUrl();
-    openKggAdminMenuQr({title:'Kolleg:innen-App APK QR',hint:'Oeffnet die aktuelle Android-Download-Seite fuer Kolleg:innen. Keine API-Keys, keine Sync-Daten.',url});
-  }
-  async function openKggTherapistSetupQr(){
-    const transfer=await buildKggEncryptedConfigTransferForQr({requireEncrypted:true});
-    if(!transfer)return;
-    closeKggTherapistShareModal();
-    const url=buildKggTherapistSetupUrl(kggTherapistAppUrl(),transfer.payloadCode);
-    openKggAdminMenuQr({title:'Therapeuten-App + API-Key',hint:'Setup-Link plus verschluesselter API-Key-Transfer. Transfer-Code: '+transfer.passCode,url});
-  }
-  async function openKggTherapistApiOnlyQr(){
-    closeKggTherapistShareModal();
-    await openKggConfigTransferQr();
-  }
-  function closeKggAdminMenuQrModal(){
-    const modal=$('kggAdminMenuQrModal');
-    if(!modal)return;
-    modal.classList.remove('isOpen');
-    modal.setAttribute('aria-hidden','true');
-  }
-  function renderKggAdminMenuQr(value){
-    const box=$('kggAdminMenuQrBox');
-    if(!box)return;
-    box.innerHTML='';
-    try{
-      if(window.KGGQrCore&&typeof window.KGGQrCore.renderQrToImg==='function'){
-        const img=document.createElement('img');
-        img.alt='QR-Code';
-        img.src=window.KGGQrCore.renderQrToImg(value,{cellSize:8,margin:4});
-        box.appendChild(img);
-        return;
-      }
-      if(typeof window.qrcode==='function'){
-        const qr=window.qrcode(0,'M');
-        qr.addData(value);
-        qr.make();
-        const img=document.createElement('img');
-        img.alt='QR-Code';
-        img.src=qr.createDataURL(8,4);
-        box.appendChild(img);
-        return;
-      }
-    }catch(err){
-      console.warn('Admin-Menue-QR konnte nicht gerendert werden:',err);
-    }
-    box.textContent='QR konnte nicht erzeugt werden. Link nutzen.';
-  }
-  function openKggAdminMenuQr(target){
-    const modal=$('kggAdminMenuQrModal'), title=$('kggAdminMenuQrTitle'), hint=$('kggAdminMenuQrHint'), link=$('kggAdminMenuQrLink');
-    if(!modal||!title||!hint||!link)return;
-    title.textContent=target.title;
-    hint.textContent=target.hint;
-    const value=target.url||target.text||'';
-    link.value=value;
-    if(value)renderKggAdminMenuQr(value);
-    else if($('kggAdminMenuQrBox'))$('kggAdminMenuQrBox').textContent='';
-    modal.classList.add('isOpen');
-    modal.setAttribute('aria-hidden','false');
-  }
-  if($('tabletMenuAdminConfigBtn'))$('tabletMenuAdminConfigBtn').onclick=()=>{setTabletSideMenuOpen(false); const btn=$('adminConfigBtn'); if(btn)btn.click();};
-  if($('tabletMenuSharedBankBtn'))$('tabletMenuSharedBankBtn').onclick=()=>{setTabletSideMenuOpen(false); const btn=$('sharedBankBtn'); if(btn)btn.click();};
-  if($('tabletMenuSyncQrBtn'))$('tabletMenuSyncQrBtn').onclick=()=>{setTabletSideMenuOpen(false); openSyncPairModal();};
-  if($('tabletMenuConfigTransferBtn'))$('tabletMenuConfigTransferBtn').onclick=async()=>{setTabletSideMenuOpen(false); try{await openKggConfigTransferQr();}catch(err){console.warn('Konfig-Transfer QR fehlgeschlagen:',err); alert('Konfig-Transfer konnte nicht erstellt werden.');}};
+
+
+
+
+
+
+
+
+
+
+
+
+
   function toggleTabletSideMenuLayoutPanel(){
     const panel=$('tabletMenuLayoutPanel'), btn=$('tabletMenuLayoutBtn');
     if(!panel)return;
@@ -23296,7 +23172,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   }
   if($('tabletMenuRecentBtn'))$('tabletMenuRecentBtn').onclick=()=>{closeTabletPackageOverlay(false);setTabletLayoutEditMode(false);toggleTabletMenuAnchoredPanel('recent');};
   if($('tabletMenuPackagesBtn'))$('tabletMenuPackagesBtn').onclick=toggleTabletPackageOverlay;
-  if($('tabletMenuTherapistShareBtn'))$('tabletMenuTherapistShareBtn').onclick=()=>{closeTabletPackageOverlay(false);setTabletLayoutEditMode(false);setTabletSideMenuOpen(false); openKggTherapistAppOnlyQr();};
+
   if($('tabletMenuLayoutBtn'))$('tabletMenuLayoutBtn').onclick=toggleTabletLayoutEditMode;
   if($('tabletPackageClose'))$('tabletPackageClose').onclick=()=>closeTabletPackageOverlay(false);
   if($('tabletPackageShade'))$('tabletPackageShade').onclick=()=>closeTabletPackageOverlay(false);
@@ -23316,7 +23192,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   }
   bindV399TabletMenuAction('tabletMenuRecentBtn',()=>{closeTabletPackageOverlay(false);setTabletLayoutEditMode(false);toggleTabletMenuAnchoredPanel('recent');});
   bindV399TabletMenuAction('tabletMenuPackagesBtn',()=>toggleTabletPackageOverlay());
-  bindV399TabletMenuAction('tabletMenuTherapistShareBtn',()=>{closeTabletPackageOverlay(false);setTabletLayoutEditMode(false);setTabletSideMenuOpen(false);openKggTherapistAppOnlyQr();});
+
   bindV399TabletMenuAction('tabletMenuLayoutBtn',()=>toggleTabletLayoutEditMode());
   bindV399TabletMenuAction('tabletPackageClose',()=>closeTabletPackageOverlay(false),false);
   bindV399TabletMenuAction('tabletPackageShade',()=>closeTabletPackageOverlay(false),false);
@@ -23325,16 +23201,10 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   if($('therapistShareAppOnly'))$('therapistShareAppOnly').onclick=openKggTherapistAppOnlyQr;
   if($('therapistShareSetup'))$('therapistShareSetup').onclick=()=>openKggTherapistSetupQr().catch(err=>{console.warn('Therapeuten-Setup-QR fehlgeschlagen:',err); alert('Setup-QR konnte nicht erstellt werden.');});
   if($('therapistShareApiOnly'))$('therapistShareApiOnly').onclick=()=>openKggTherapistApiOnlyQr().catch(err=>{console.warn('API-Key-QR fehlgeschlagen:',err); alert('API-Key-QR konnte nicht erstellt werden.');});
-  document.querySelectorAll('[data-kgg-admin-menu-qr]').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const target=kggAdminMenuQrTargets[btn.getAttribute('data-kgg-admin-menu-qr')];
-      if(target){setTabletSideMenuOpen(false); openKggAdminMenuQr(target);}
-    });
-  });
-  if($('kggAdminMenuQrClose'))$('kggAdminMenuQrClose').onclick=closeKggAdminMenuQrModal;
+
   if($('kggAdminMenuQrModal'))$('kggAdminMenuQrModal').addEventListener('click',ev=>{if(ev.target===$('kggAdminMenuQrModal'))closeKggAdminMenuQrModal();});
-  if($('kggAdminMenuQrCopy'))$('kggAdminMenuQrCopy').onclick=async()=>{const link=$('kggAdminMenuQrLink'); if(!link)return; const ok=await copyTextValue(link.value); if(!ok){link.focus(); link.select();}};
-  if($('kggAdminMenuQrOpen'))$('kggAdminMenuQrOpen').onclick=()=>{const link=$('kggAdminMenuQrLink'); if(link&&link.value&&/^https?:\/\//.test(link.value))window.open(link.value,'_blank','noopener');};
+
+
   $('dismissInstallPrompt').onclick=()=>{localStorage.setItem(pwaInstallPromptSeenKey,new Date().toISOString()); closeInstallPrompt();};
   $('acceptInstallPrompt').onclick=acceptInstallPrompt;
   $('installPromptModal').addEventListener('click',ev=>{if(ev.target===$('installPromptModal')){$('dismissInstallPrompt').click();}});
@@ -23771,116 +23641,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
 </script>
 <!-- KGG PATCH END kgg-v021-embed-jsqr-gallery-decode wrapper -->
 
-<!-- KGG_ADMIN_ONLY_START -->
-<style id="kgg-release-center-v31-style">
-  .kggReleaseOverlay{position:fixed;inset:0;z-index:2147483000;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(7,16,39,.46);backdrop-filter:blur(10px)}
-  .kggReleaseOverlay.isOpen{display:flex}
-  .kggReleaseSheet{width:min(720px,96vw);max-height:92vh;overflow:auto;border:1px solid rgba(10,16,36,.12);border-radius:26px;background:#fff;color:#0a1024;padding:22px;box-shadow:0 30px 90px rgba(10,16,36,.28);font-family:inherit}
-  .kggReleaseHead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}
-  .kggReleaseHead h2{margin:0;font-size:1.45rem;font-weight:950}
-  .kggReleaseHead p{margin:5px 0 0;color:#667085;font-weight:700;line-height:1.35}
-  .kggReleaseClose{flex:0 0 auto;width:44px;height:44px;border:1px solid rgba(10,16,36,.12);border-radius:14px;background:#fff;color:#0a1024;font-size:24px;font-weight:900}
-  .kggReleaseStatus{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center;margin:0 0 16px;padding:13px 14px;border:1px solid #dce7f2;border-radius:18px;background:#f5f9fd}
-  .kggReleaseBadge{display:inline-flex;align-items:center;justify-content:center;min-height:30px;padding:0 10px;border-radius:999px;background:#e7eef7;color:#344054;font-size:.78rem;font-weight:950;text-transform:uppercase;letter-spacing:.04em}
-  .kggReleaseBadge.isReady{background:#dcfce7;color:#166534}
-  .kggReleaseBadge.isError{background:#fee2e2;color:#991b1b}
-  .kggReleaseMessage{min-width:0;font-weight:850;line-height:1.3}
-  .kggReleaseCodeBox{display:none;margin:-2px 0 14px;padding:14px;border-radius:18px;border:2px solid #b8d9f6;background:#edf6ff;box-shadow:0 10px 26px rgba(7,50,84,.08)}
-  .kggReleaseCodeBox.isOpen{display:grid;gap:10px}
-  .kggReleaseCodeLabel{color:#073254;font-size:.86rem;font-weight:950}
-  .kggReleaseCodeValue{font-size:clamp(2rem,9vw,3.6rem);line-height:1;letter-spacing:.08em;font-weight:1000;text-align:center;color:#071027;background:#fff;border:1px solid #cfe4f8;border-radius:16px;padding:14px 8px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-  .kggReleaseCodeHint{color:#475467;font-size:.85rem;font-weight:800;line-height:1.35}
-  .kggReleaseInboxHint{margin:12px 0 0;padding:13px 14px;border:1px solid #b8d9f6;border-radius:18px;background:#f7fbff;color:#073254;font-size:.88rem;font-weight:850;line-height:1.35}
-  .kggReleaseInboxHint strong{display:block;color:#071027;font-weight:1000;margin-bottom:3px}
-  .kggReleaseGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .kggReleaseField{display:grid;gap:6px}
-  .kggReleaseField.wide{grid-column:1/-1}
-  .kggReleaseField label{font-size:.82rem;color:#475467;font-weight:900}
-  .kggReleaseField input,.kggReleaseField textarea{width:100%;box-sizing:border-box;border:1px solid #cfd9e5;border-radius:15px;background:#fff;color:#0a1024;padding:12px 13px;font:inherit;font-weight:750;outline:none}
-  .kggReleaseField textarea{min-height:92px;resize:vertical}
-  .kggReleaseField input:focus,.kggReleaseField textarea:focus{border-color:#5ea7e8;box-shadow:0 0 0 4px rgba(94,167,232,.16)}
-  .kggReleaseActions{display:grid;gap:10px;margin-top:16px}
-  .kggReleaseActions.two{grid-template-columns:1fr 1fr}
-  .kggReleaseBtn{min-height:50px;border:1px solid rgba(10,16,36,.13);border-radius:16px;background:#fff;color:#0a1024;padding:10px 14px;font:inherit;font-weight:950;box-shadow:0 8px 20px rgba(10,16,36,.07)}
-  .kggReleaseBtn.primary{background:#0a1024;color:#fff}
-  .kggReleaseBtn.soft{background:#edf6ff;border-color:#b8d9f6;color:#073254}
-  .kggReleaseBtn.danger{background:#fff5f5;border-color:#fecaca;color:#991b1b}
-  .kggReleaseMenuGroup{margin-top:10px}
-  .kggReleaseMenuGroup h3{margin:0 0 8px}
-  @media(max-width:759px){.kggReleaseOverlay{padding:10px;align-items:flex-end}.kggReleaseSheet{width:100%;max-height:94vh;border-radius:24px 24px 16px 16px;padding:17px}.kggReleaseGrid,.kggReleaseActions.two{grid-template-columns:1fr}.kggReleaseField.wide{grid-column:1}.kggReleaseHead h2{font-size:1.25rem}}
-</style>
-<script id="kgg-release-center-v31-script">
-(function(){
-  'use strict';
-  var MOBILE_INBOX_URL='https://github.com/Kayus24/kgg/upload/mobile-inbox/mobile-inbox';
-  var MOBILE_PROMOTE_URL='https://github.com/Kayus24/kgg/actions/workflows/promote-latest-admin-beta.yml';
-  if(!window.KGGReleaseControl&&(location.hostname==='127.0.0.1'||location.hostname==='localhost')&&location.search.indexOf('kggReleaseUiTest=1')>=0){
-    window.KGGReleaseControl={status:function(){return JSON.stringify({phase:'idle',message:'Lokaler UI-Test',available:true,authenticated:false,repository:'Kayus24/kgg'});},beginLogin:function(){return false;},testConnection:function(){return false;},downloadCurrentHtml:function(){return false;},openMobileInbox:function(){window.open(MOBILE_INBOX_URL,'_blank');return true;},openPromoteLatest:function(){window.open(MOBILE_PROMOTE_URL,'_blank');return true;},chooseAndUploadBeta:function(){return false;},confirmPromotion:function(){return false;},confirmRollback:function(){return false;}};
-  }
-  if(!window.KGGReleaseControl||window.KGGReleaseCenter)return;
-  var refreshTimer=null;
-  function readStatus(){try{return JSON.parse(window.KGGReleaseControl.status()||'{}');}catch(err){return {phase:'error',message:'Status konnte nicht gelesen werden.'};}}
-  function readAndroidStatus(){try{if(window.KGGAndroidApp&&typeof window.KGGAndroidApp.updateStatus==='function')return JSON.parse(window.KGGAndroidApp.updateStatus()||'{}');}catch(err){}return null;}
-  function value(id){var el=document.getElementById(id);return el?(el.value||'').trim():'';}
-  function setText(id,text){var el=document.getElementById(id);if(el)el.textContent=text||'';}
-  function copyText(text){try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text);return true;}}catch(err){}try{var input=document.createElement('input');input.value=text;input.style.position='fixed';input.style.opacity='0';document.body.appendChild(input);input.select();document.execCommand('copy');input.remove();return true;}catch(err){return false;}}
-  function openExternal(url){try{window.open(url,'_blank');return true;}catch(err){try{location.href=url;return true;}catch(inner){return false;}}}
-  function closeTabletMenu(){document.body.classList.remove('tabletMenuOpen');var menu=document.getElementById('tabletSideMenu');if(menu)menu.setAttribute('aria-hidden','true');}
-  function ensureModal(){
-    var existing=document.getElementById('kggReleaseCenterModal');
-    if(existing)return existing;
-    var modal=document.createElement('div');
-    modal.id='kggReleaseCenterModal';modal.className='kggReleaseOverlay';modal.setAttribute('aria-hidden','true');
-    modal.innerHTML='<section class="kggReleaseSheet" role="dialog" aria-modal="true" aria-labelledby="kggReleaseTitle">'
-      +'<div class="kggReleaseHead"><div><h2 id="kggReleaseTitle">KGG Update-Zentrale</h2><p>Standard: HTML speichern und per GitHub-Mobile-Inbox hochladen. Direktupload bleibt Komfortweg.</p></div><button class="kggReleaseClose" id="kggReleaseClose" type="button" aria-label="Update-Zentrale schliessen">&times;</button></div>'
-      +'<div class="kggReleaseStatus"><span class="kggReleaseBadge" id="kggReleaseBadge">Status</span><span class="kggReleaseMessage" id="kggReleaseMessage">Wird geladen …</span></div>'
-      +'<div class="kggReleaseCodeBox" id="kggReleaseCodeBox" aria-live="polite"><div class="kggReleaseCodeLabel">GitHub-Code</div><div class="kggReleaseCodeValue" id="kggReleaseCodeValue"></div><button class="kggReleaseBtn soft" id="kggReleaseCopyCode" type="button">Code kopieren</button><div class="kggReleaseCodeHint">Diesen Code auf der GitHub-Seite eingeben. Wenn GitHub langsam laedt: Code kopieren, spaeter verbinden oder den Mobile-Inbox-Weg nutzen.</div></div>'
-      +'<button class="kggReleaseBtn soft" id="kggReleaseDownloadHtml" type="button" style="width:100%;margin-top:10px">Aktuelle HTML speichern</button>'
-      +'<button class="kggReleaseBtn primary" id="kggReleaseMobileInbox" type="button" style="width:100%;margin-top:10px">GitHub-Mobile-Inbox oeffnen</button>'
-      +'<div class="kggReleaseInboxHint"><strong>Handy-Workflow ohne Codex</strong>1. HTML speichern. 2. Diese Datei in GitHub hochladen. 3. GitHub Actions erzeugt Admin-Beta und PR automatisch.</div>'
-      +'<button class="kggReleaseBtn soft" id="kggReleasePromoteLatest" type="button" style="width:100%;margin-top:10px">Kolleg:innen-Freigabe in GitHub oeffnen</button>'
-      +'<button class="kggReleaseBtn soft" id="kggReleaseLogin" type="button" style="width:100%;margin-top:14px">Komfort: Mit GitHub verbinden</button>'
-      +'<button class="kggReleaseBtn soft" id="kggReleaseTest" type="button" style="width:100%;margin-top:10px">Komfort: Verbindung testen</button>'
-      +'<div class="kggReleaseGrid" style="margin-top:14px"><div class="kggReleaseField"><label for="kggReleaseId">Release-ID</label><input id="kggReleaseId" placeholder="z. B. r0391" autocomplete="off"></div><div class="kggReleaseField"><label for="kggReleaseVersion">Versionsname</label><input id="kggReleaseVersion" placeholder="Kurzer eindeutiger Name" autocomplete="off"></div><div class="kggReleaseField wide"><label for="kggReleaseNotes">Patch-Notiz</label><textarea id="kggReleaseNotes" placeholder="Was wurde geaendert? Keine Patientendaten oder Secrets."></textarea></div></div>'
-      +'<div class="kggReleaseActions"><button class="kggReleaseBtn soft" id="kggReleaseUpload" type="button">Komfort: HTML direkt aus App hochladen</button><button class="kggReleaseBtn soft" id="kggReleasePromote" type="button">Komfort: Release-ID fuer Kolleg:innen freigeben</button><div class="kggReleaseActions two"><button class="kggReleaseBtn danger" id="kggReleaseRollbackAdmin" type="button">Admin-Rollback</button><button class="kggReleaseBtn danger" id="kggReleaseRollbackColleague" type="button">Kolleg:innen-Rollback</button></div></div>'
-      +'</section>';
-    document.body.appendChild(modal);
-    document.getElementById('kggReleaseClose').onclick=close;
-    document.getElementById('kggReleaseLogin').onclick=function(){window.KGGReleaseControl.beginLogin();startRefreshLoop();setTimeout(refresh,250);setTimeout(refresh,900);setTimeout(refresh,1800);};
-    document.getElementById('kggReleaseCopyCode').onclick=function(){var code=(document.getElementById('kggReleaseCodeValue')||{}).textContent||'';if(code)copyText(code.trim());};
-    document.getElementById('kggReleaseTest').onclick=function(){if(typeof window.KGGReleaseControl.testConnection==='function'){window.KGGReleaseControl.testConnection();startRefreshLoop();setTimeout(refresh,250);setTimeout(refresh,1200);}else{var message=document.getElementById('kggReleaseMessage');if(message)message.textContent='Bitte Admin-APK v392 installieren, dann ist der Verbindungstest verfuegbar.';}};
-    document.getElementById('kggReleaseDownloadHtml').onclick=function(){if(typeof window.KGGReleaseControl.downloadCurrentHtml==='function'){window.KGGReleaseControl.downloadCurrentHtml();setTimeout(refresh,250);}else{var message=document.getElementById('kggReleaseMessage');if(message)message.textContent='Bitte Admin-APK v393 installieren, dann ist HTML speichern verfuegbar.';}};
-    document.getElementById('kggReleaseMobileInbox').onclick=function(){if(typeof window.KGGReleaseControl.openMobileInbox==='function'){window.KGGReleaseControl.openMobileInbox();setTimeout(refresh,250);}else{openExternal(MOBILE_INBOX_URL);}};
-    document.getElementById('kggReleasePromoteLatest').onclick=function(){if(typeof window.KGGReleaseControl.openPromoteLatest==='function'){window.KGGReleaseControl.openPromoteLatest();setTimeout(refresh,250);}else{openExternal(MOBILE_PROMOTE_URL);}};
-    document.getElementById('kggReleaseUpload').onclick=function(){window.KGGReleaseControl.chooseAndUploadBeta(value('kggReleaseId'),value('kggReleaseVersion'),value('kggReleaseNotes'));setTimeout(refresh,250);};
-    document.getElementById('kggReleasePromote').onclick=function(){window.KGGReleaseControl.confirmPromotion(value('kggReleaseId'));};
-    document.getElementById('kggReleaseRollbackAdmin').onclick=function(){window.KGGReleaseControl.confirmRollback('admin',value('kggReleaseId'));};
-    document.getElementById('kggReleaseRollbackColleague').onclick=function(){window.KGGReleaseControl.confirmRollback('colleague',value('kggReleaseId'));};
-    modal.addEventListener('click',function(ev){if(ev.target===modal)close();});
-    return modal;
-  }
-  function refresh(){var state=readStatus(),native=readAndroidStatus(),badge=document.getElementById('kggReleaseBadge'),message=document.getElementById('kggReleaseMessage'),codeBox=document.getElementById('kggReleaseCodeBox');if(!badge||!message)return;var phase=String(state.phase||'idle'),userCode=String(state.userCode||'').trim(),nativeText='';badge.textContent=state.authenticated?'Verbunden':(phase==='error'?'Fehler':(phase==='login_waiting'?'Code':'Bereit'));badge.className='kggReleaseBadge'+(state.authenticated?' isReady':(phase==='error'?' isError':''));if(native&&native.currentShellVersion)nativeText=' APK v'+native.currentShellVersion+(native.currentWebVersion?' · Web '+native.currentWebVersion:'');message.textContent=(state.message||'Release-Steuerung ist bereit.')+nativeText;if(codeBox){codeBox.classList.toggle('isOpen',!!userCode&&!state.authenticated);setText('kggReleaseCodeValue',userCode);}}
-  function startRefreshLoop(){if(refreshTimer)return;refreshTimer=setInterval(refresh,1000);}
-  function stopRefreshLoop(){if(refreshTimer){clearInterval(refreshTimer);refreshTimer=null;}}
-  function open(){var modal=ensureModal();closeTabletMenu();modal.classList.add('isOpen');modal.setAttribute('aria-hidden','false');refresh();startRefreshLoop();}
-  function close(){var modal=document.getElementById('kggReleaseCenterModal');if(!modal)return;modal.classList.remove('isOpen');modal.setAttribute('aria-hidden','true');stopRefreshLoop();}
-  function actionButton(id,text,handler){var button=document.createElement('button');button.id=id;button.type='button';button.className='tabletSideMenuAction';button.textContent=text;button.onclick=handler;return button;}
-  function installEntryPoints(){
-    var menu=document.querySelector('.tabletSideMenuMain');
-    if(menu&&!document.getElementById('kggReleaseMenuGroup')){
-      var group=document.createElement('div');group.id='kggReleaseMenuGroup';group.className='tabletSideMenuGroup kggReleaseMenuGroup';group.innerHTML='<h3>Admin</h3>';
-      group.appendChild(actionButton('kggReleaseAdminConfig','Admin-Konfig',function(){closeTabletMenu();var target=document.getElementById('adminConfigBtn');if(target)target.click();}));
-      group.appendChild(actionButton('kggDeviceSyncOpen','Geräte-Sync',function(){closeTabletMenu();var target=document.getElementById('syncQrBtn');if(target)target.click();}));
-      group.appendChild(actionButton('kggReleaseCenterOpen','Update-Zentrale',open));menu.appendChild(group);
-    }
-    var tools=document.querySelector('.adminCodePackageTools');
-    if(tools&&!document.getElementById('kggReleaseCenterOpenPhone')){var phone=actionButton('kggReleaseCenterOpenPhone','Update-Zentrale',open);phone.className='mutedBtn wide';tools.appendChild(phone);}
-  }
-  window.KGGReleaseCenter={open:open,close:close,status:readStatus};
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installEntryPoints,{once:true});else installEntryPoints();
-})();
-</script>
-<!-- KGG_ADMIN_ONLY_END -->
+
 
 
 
@@ -24816,7 +24577,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
       this.setAttribute("aria-expanded",String(next));
       closePhonePhotoMenu();
     });
-    byId("kggPhoneAdminConfigMenu").addEventListener("click",function(){closePhoneAdminMenu(); if(window.KGGAdmin&&typeof window.KGGAdmin.openConfig==="function")window.KGGAdmin.openConfig(); else clickExisting("adminConfigBtn");});
+
     byId("kggPhoneBankShareMenu").addEventListener("click",function(){closePhoneAdminMenu(); if(window.KGGSharedBank&&typeof window.KGGSharedBank.open==="function")window.KGGSharedBank.open(); else clickExisting("sharedBankBtn");});
     byId("kggPhoneQrShareMenu").addEventListener("click",function(){closePhoneAdminMenu(); clickExisting("syncQrBtn");});
     document.addEventListener("click",function(ev){

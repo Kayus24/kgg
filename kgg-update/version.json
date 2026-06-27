@@ -1,7 +1,7 @@
 {
-  "versionCode": 37,
-  "versionName": "1.0.37-device-sync-menu",
-  "indexUrl": "index.html?v=37",
-  "sha256": "0283bd7caa5b74b92a5745b731d707c215f7ff5dcb6c16554dc9ab9a6c0f835d",
-  "notes": "v037: Therapeuten-App weitergeben zeigt nur den Kolleg:innen-App/APK-QR; Geräte-Sync hat einen eigenen Admin-Menüpunkt für Sync-Test und Datei-Transfer."
+  "versionCode": 43,
+  "versionName": "1.0.43-tablet-card-reorder",
+  "indexUrl": "index.html?v=43",
+  "sha256": "6b546b23a646a3898f2b631a568c0ae12821b6ed437391dccaf267606e7fa6cf",
+  "notes": "v043: Tablet-Uebungskarten koennen per Longpress auf der Kartenflaeche verschoben werden; interaktive Kartenbuttons bleiben ausgenommen."
 }

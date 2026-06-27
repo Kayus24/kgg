@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0407",
+  "versionName": "1.0.43-tablet-card-reorder",
+  "notes": "v043: Tablet-Uebungskarten koennen per Longpress auf der Kartenflaeche verschoben werden; interaktive Kartenbuttons bleiben ausgenommen.",
+  "createdAt": "2026-06-27T06:56:51Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0407",
+      "profile": "admin",
+      "versionName": "1.0.43-tablet-card-reorder",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0407/admin.html",
+      "sha256": "6b546b23a646a3898f2b631a568c0ae12821b6ed437391dccaf267606e7fa6cf",
+      "notes": "v043: Tablet-Uebungskarten koennen per Longpress auf der Kartenflaeche verschoben werden; interaktive Kartenbuttons bleiben ausgenommen."
+    },
+    "colleague": {
+      "releaseId": "r0407",
+      "profile": "colleague",
+      "versionName": "1.0.43-tablet-card-reorder",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0407/colleague.html",
+      "sha256": "6934d9fa85c33d4eb5ea922bada85d14e993b6ae6b846b0d2372a70a1563f68e",
+      "notes": "v043: Tablet-Uebungskarten koennen per Longpress auf der Kartenflaeche verschoben werden; interaktive Kartenbuttons bleiben ausgenommen."
+    }
+  }
+}
