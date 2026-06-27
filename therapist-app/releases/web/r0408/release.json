@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0408",
+  "versionName": "1.0.44-phone-liquid-actions",
+  "notes": "v044: Phone Plan-scannen und Fertig erhalten staerkere Liquid-Glass-Kapseln; Plan-Historie bleibt lesbar und das Admin-Untermenue ist nach Update, Sync/Weitergeben und Admin gruppiert.",
+  "createdAt": "2026-06-27T08:19:40Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0408",
+      "profile": "admin",
+      "versionName": "1.0.44-phone-liquid-actions",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0408/admin.html",
+      "sha256": "88efc1b1514a8fc6750aa7f43e16d3e07c9539529032e4d50ee57207a412f9ec",
+      "notes": "v044: Phone Plan-scannen und Fertig erhalten staerkere Liquid-Glass-Kapseln; Plan-Historie bleibt lesbar und das Admin-Untermenue ist nach Update, Sync/Weitergeben und Admin gruppiert."
+    },
+    "colleague": {
+      "releaseId": "r0408",
+      "profile": "colleague",
+      "versionName": "1.0.44-phone-liquid-actions",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0408/colleague.html",
+      "sha256": "3c1c84e94e39a5050dd345c878db8dcc4b7cc7410b852331435c10c794b6b992",
+      "notes": "v044: Phone Plan-scannen und Fertig erhalten staerkere Liquid-Glass-Kapseln; Plan-Historie bleibt lesbar und das Admin-Untermenue ist nach Update, Sync/Weitergeben und Admin gruppiert."
+    }
+  }
+}
