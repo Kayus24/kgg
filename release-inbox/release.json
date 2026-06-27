@@ -1,7 +1,5 @@
 {
-  "versionCode": 43,
+  "releaseId": "r0407",
   "versionName": "1.0.43-tablet-card-reorder",
-  "indexUrl": "index.html?v=43",
-  "sha256": "6b546b23a646a3898f2b631a568c0ae12821b6ed437391dccaf267606e7fa6cf",
   "notes": "v043: Tablet-Uebungskarten koennen per Longpress auf der Kartenflaeche verschoben werden; interaktive Kartenbuttons bleiben ausgenommen."
 }

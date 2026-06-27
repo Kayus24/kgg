@@ -103,16 +103,18 @@ def run_html_logic(suite: str) -> None:
     run([node_executable(), "release-pipeline/kgg_html_logic_smoke.js", "--suite", suite])
 
 
-def run_ui_stability(level: str) -> None:
-    log(f"== UI stability battery: {level} ==")
+def run_ui_stability(level: str, case_name: str | None = None) -> None:
+    label = f"{level} / {case_name}" if case_name else level
+    log(f"== UI stability battery: {label} ==")
+    case_args = ["--case", case_name] if case_name else []
     if level in {"regression", "all"}:
         npm = npm_executable()
         if npm:
             if os.environ.get("KGG_SKIP_PLAYWRIGHT_INSTALL") != "1":
                 run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "playwright", "install", "chromium"])
-            run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "node", "release-pipeline/kgg_ui_stability_smoke.js", "--level", level])
+            run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "node", "release-pipeline/kgg_ui_stability_smoke.js", "--level", level, *case_args])
             return
-    run([node_executable(), "release-pipeline/kgg_ui_stability_smoke.js", "--level", level])
+    run([node_executable(), "release-pipeline/kgg_ui_stability_smoke.js", "--level", level, *case_args])
 
 
 def run_native_sync_bridge_contract() -> None:
@@ -367,7 +369,42 @@ TEST_REGISTRY = [
         "level": "regression",
         "suite": "ui-stability",
         "reason": "Flicker/layout patches must prove phone swipe and drag/drop still work in a real browser.",
-        "run": lambda: run_ui_stability("regression"),
+        "run": lambda: run_ui_stability("regression", "gestures"),
+    },
+    {
+        "id": "ui-bank-thumbnails",
+        "level": "regression",
+        "suite": "ui-stability",
+        "reason": "Exercise-bank rows with image attachments must keep rendering visible thumbnail placeholders/previews.",
+        "run": lambda: run_ui_stability("regression", "bank-thumbnails"),
+    },
+    {
+        "id": "ui-phone-admin-menu",
+        "level": "regression",
+        "suite": "ui-stability",
+        "reason": "Phone admin, exercise-bank share and QR actions must stay in the compact top-right submenu.",
+        "run": lambda: run_ui_stability("regression", "phone-admin-menu"),
+    },
+    {
+        "id": "ui-phone-scan-dock",
+        "level": "regression",
+        "suite": "ui-stability",
+        "reason": "Phone scan button must stay fixed at the bottom and the finish button must join it once exercises exist.",
+        "run": lambda: run_ui_stability("regression", "phone-scan-dock"),
+    },
+    {
+        "id": "ui-tablet-layout-button",
+        "level": "regression",
+        "suite": "ui-stability",
+        "reason": "Tablet Layout anpassen must open and close the existing layout controls reliably.",
+        "run": lambda: run_ui_stability("regression", "tablet-layout-button"),
+    },
+    {
+        "id": "ui-tablet-card-reorder",
+        "level": "regression",
+        "suite": "ui-stability",
+        "reason": "Tablet exercise cards must start reorder by long-pressing the card surface, not only the drag handle.",
+        "run": lambda: run_ui_stability("regression", "tablet-card-reorder"),
     },
     {
         "id": "native-sync-regression",
