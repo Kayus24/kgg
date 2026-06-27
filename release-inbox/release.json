@@ -1,7 +1,5 @@
 {
-  "versionCode": 45,
+  "releaseId": "r0409",
   "versionName": "1.0.45-phone-drawer-bank-align",
-  "indexUrl": "index.html?v=45",
-  "sha256": "4674c8301d8f47c2b5ec00a7cfe0aa621c0eb6626d38c93ebef66c70839226d6",
   "notes": "v045: Phone Plan-Historie und Uebungspakete oeffnen stabil; die Uebungsdatenbank richtet sich beim Oeffnen sauber oberhalb des Plan-scannen-Docks aus."
 }

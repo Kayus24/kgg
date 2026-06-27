@@ -405,6 +405,20 @@ TEST_REGISTRY = [
         "run": lambda: run_ui_stability("regression", "phone-scan-dock"),
     },
     {
+        "id": "ui-phone-history-packages",
+        "level": "regression",
+        "suite": "ui-stability",
+        "reason": "Phone Plan-Historie and Uebungspakete buttons must open/close without hanging after dock/layout patches.",
+        "run": lambda: run_ui_stability("regression", "phone-history-packages"),
+    },
+    {
+        "id": "ui-phone-bank-align",
+        "level": "regression",
+        "suite": "ui-stability",
+        "reason": "Opening the phone exercise bank must align its bottom above the fixed scan dock.",
+        "run": lambda: run_ui_stability("regression", "phone-bank-align"),
+    },
+    {
         "id": "ui-tablet-layout-button",
         "level": "regression",
         "suite": "ui-stability",
