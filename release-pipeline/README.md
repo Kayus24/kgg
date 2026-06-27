@@ -79,6 +79,24 @@ Registrierte Tests mit Kategorie und Begruendung anzeigen:
 python release-pipeline/kgg_test_battery.py --level all --list
 ```
 
+## Patch-Hygiene
+
+Vor den Release-Contracts laeuft ein schneller Hygiene-Check:
+
+```powershell
+python release-pipeline/kgg_test_battery.py --suite hygiene --level critical
+```
+
+Er blockiert typische schmutzige Chat-Patches:
+
+- Branch basiert nicht auf aktuellem `origin/main` (`KGG_ALLOW_STALE_BRANCH=1` nur fuer bewusste Rettungsarbeiten).
+- `therapist-app/test-lab/**` landet in einem normalen App-/Release-PR.
+- `release-inbox/admin.html` und `release-inbox/release.json` sind nur halb vorhanden.
+- `kgg-update/index.html` wurde geaendert, aber `kgg-update/version.json` fehlt oder der LF-normalisierte Hash passt nicht.
+- Die Source-HTML ist neuer als die vorbereitete oder live Admin-Beta (`KGG_ALLOW_RELEASE_DRIFT=1` nur fuer explizite No-Release-PRs).
+
+Ideen-Chats duerfen weiterhin lokal in `test-lab` experimentieren. Vor einem Release-PR werden diese Experimente aber auf einen frischen Branch uebernommen; `test-lab` wird nicht mitveroeffentlicht.
+
 `sync`, `native-sync` und `textblocks` laden die echte Produktionslogik aus `kgg-update/index.html` in einem lokalen Node-Harness. Damit werden Sync-Safe-Export/Merge, Secret-Blockade, Native-Peer-Mesh-Regeln und Terminheld-/Satz-Textbloecke ohne Emulator geprueft.
 
 ## Native Sync Diagnose
