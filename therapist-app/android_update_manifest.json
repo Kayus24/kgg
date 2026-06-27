@@ -4,15 +4,15 @@
   "schema": 2,
   "channels": {
     "admin": {
-      "releaseId": "r0408",
+      "releaseId": "r0409",
       "profile": "admin",
-      "versionName": "1.0.44-phone-liquid-actions",
-      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0408/admin.html",
-      "sha256": "88efc1b1514a8fc6750aa7f43e16d3e07c9539529032e4d50ee57207a412f9ec",
-      "notes": "v044: Phone Plan-scannen und Fertig erhalten staerkere Liquid-Glass-Kapseln; Plan-Historie bleibt lesbar und das Admin-Untermenue ist nach Update, Sync/Weitergeben und Admin gruppiert.",
-      "rolloutCode": 407,
-      "previousReleaseId": "r0407",
-      "releasedAt": "2026-06-27T08:19:40Z"
+      "versionName": "1.0.45-phone-drawer-bank-align",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0409/admin.html",
+      "sha256": "4674c8301d8f47c2b5ec00a7cfe0aa621c0eb6626d38c93ebef66c70839226d6",
+      "notes": "v045: Phone Plan-Historie und Uebungspakete oeffnen stabil; die Uebungsdatenbank richtet sich beim Oeffnen sauber oberhalb des Plan-scannen-Docks aus.",
+      "rolloutCode": 408,
+      "previousReleaseId": "r0408",
+      "releasedAt": "2026-06-27T12:19:18Z"
     },
     "colleague": {
       "releaseId": "r0397",
@@ -30,8 +30,8 @@
   "latestAndroidShellVersion": "v398",
   "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0397/colleague.html",
   "colleagueSha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
-  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0408/admin.html",
-  "adminSha256": "88efc1b1514a8fc6750aa7f43e16d3e07c9539529032e4d50ee57207a412f9ec",
+  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0409/admin.html",
+  "adminSha256": "4674c8301d8f47c2b5ec00a7cfe0aa621c0eb6626d38c93ebef66c70839226d6",
   "sha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
   "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v398/android/KGG_ANDROID_KOLLEGEN_v398_force_r0400_html_debug.apk",
   "androidApkSha256": "c4a4e022a7bfa2511538f18bb80c025eb4a1057a186637ac12146ea55dd807ed",
@@ -39,5 +39,5 @@
   "colleagueAndroidApkSha256": "c4a4e022a7bfa2511538f18bb80c025eb4a1057a186637ac12146ea55dd807ed",
   "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v398/android/KGG_ANDROID_ADMIN_v398_force_r0400_html_debug.apk",
   "adminAndroidApkSha256": "e64553647a10a5fa4286f319b6a4284052c0c030b93b5150f9ac8ef0a1708c34",
-  "notes": "Admin beta r0408: v044: Phone Plan-scannen und Fertig erhalten staerkere Liquid-Glass-Kapseln; Plan-Historie bleibt lesbar und das Admin-Untermenue ist nach Update, Sync/Weitergeben und Admin gruppiert."
+  "notes": "Admin beta r0409: v045: Phone Plan-Historie und Uebungspakete oeffnen stabil; die Uebungsdatenbank richtet sich beim Oeffnen sauber oberhalb des Plan-scannen-Docks aus."
 }
