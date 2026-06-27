@@ -42,7 +42,7 @@ function parseArgs() {
 }
 
 function usage() {
-  console.log("Usage: node release-pipeline/kgg_ui_stability_smoke.js --level critical|regression [--case all|gestures|ui-mini-series|bank-thumbnails|phone-admin-menu|phone-scan-dock|tablet-layout-button|tablet-card-reorder] [--browser]");
+  console.log("Usage: node release-pipeline/kgg_ui_stability_smoke.js --level critical|regression [--case all|gestures|ui-mini-series|bank-thumbnails|phone-admin-menu|phone-scan-dock|phone-history-packages|phone-bank-align|tablet-layout-button|tablet-card-reorder] [--browser]");
 }
 
 function fail(message) {
@@ -185,6 +185,20 @@ function staticUiMiniSeriesGuardSuite(caseName) {
     assertIncludes(html, "min-width:148px", "phone recent toggle stays readable");
     assertRegex(html, /#scanHub[\s\S]{0,420}position:fixed!important/, "phone scanHub fixed bottom dock");
     assertRegex(html, /#finishBtn:not\(\.hidden\)[\s\S]{0,300}position:fixed!important/, "phone finish button joins dock");
+  }
+
+  if (caseMatches(caseName, ["ui-mini-series", "phone-history-packages", "phone-bank-align"])) {
+    assertIncludes(html, "kgg-v045-phone-drawer-bank-align", "v045 phone drawer/bank alignment marker");
+    assertIncludes(html, "KGG_UI_PHONE_DRAWER_BANK_ALIGN_V045", "v045 phone drawer/bank public probe");
+  }
+  if (caseMatches(caseName, ["ui-mini-series", "phone-history-packages"])) {
+    assertIncludes(html, "openPhoneDrawerSafe", "phone history/packages safe drawer handler");
+    assertIncludes(html, "bindDrawerButton(\"recentToggle\",\"recent\")", "phone recent safe drawer binding");
+    assertIncludes(html, "bindDrawerButton(\"packageToggle\",\"package\")", "phone package safe drawer binding");
+  }
+  if (caseMatches(caseName, ["ui-mini-series", "phone-bank-align"])) {
+    assertIncludes(html, "alignBankEndToScanDock", "phone exercise-bank scan-dock alignment");
+    assertIncludes(html, "margin-top:clamp(28px,5dvh,44px)", "phone create panel top breathing room");
   }
 
   console.log(`Static UI mini-series guards OK (${caseName || "all"})`);
@@ -498,7 +512,7 @@ async function runDragReorderGesture(page) {
 }
 
 function wantsPhoneMiniSeries(caseName) {
-  return caseMatches(caseName, ["ui-mini-series", "bank-thumbnails", "phone-admin-menu", "phone-scan-dock"]);
+  return caseMatches(caseName, ["ui-mini-series", "bank-thumbnails", "phone-admin-menu", "phone-scan-dock", "phone-history-packages", "phone-bank-align"]);
 }
 
 function wantsTabletMiniSeries(caseName) {
@@ -540,8 +554,22 @@ async function browserUiMiniSeriesSuite(caseName) {
             plan: exercises,
             patient: { name: "UI Mini", date: "2026-06-26", therapist: "Codex" },
             bankOpen: true,
-            recent: [],
-            packages: [],
+            recent: [
+              {
+                id: "ui_recent_probe",
+                name: "UI Probe Plan",
+                date: "2026-06-26",
+                exercises: exercises.slice(0, 2),
+              },
+            ],
+            packages: [
+              {
+                id: "ui_package_probe",
+                name: "UI Probe Paket",
+                exercises: ["Beinpresse UI 1", "Latziehen UI 3"],
+                source: "ui-smoke",
+              },
+            ],
           })
         );
         localStorage.setItem(customBankKey, JSON.stringify(customBank));
@@ -559,6 +587,7 @@ async function browserUiMiniSeriesSuite(caseName) {
       await page.waitForFunction(() => window.KGG_UI_MINI_SERIES && window.KGG_UI_MINI_SERIES.check, null, { timeout: 15000 });
       await page.waitForFunction(() => window.KGG_UI_MINI_SERIES_V042 && window.KGG_UI_MINI_SERIES_V042.check, null, { timeout: 15000 });
       await page.waitForFunction(() => window.KGG_UI_PHONE_LIQUID_ACTIONS_V044, null, { timeout: 15000 });
+      await page.waitForFunction(() => window.KGG_UI_PHONE_DRAWER_BANK_ALIGN_V045, null, { timeout: 15000 });
       await page.waitForTimeout(500);
 
       if (caseMatches(caseName, ["ui-mini-series", "bank-thumbnails"])) {
@@ -713,6 +742,89 @@ async function browserUiMiniSeriesSuite(caseName) {
         }
       }
 
+      if (caseMatches(caseName, ["ui-mini-series", "phone-history-packages"])) {
+        const beforeErrors = pageErrors.length;
+        await page.evaluate(() => {
+          document.querySelectorAll(".modal.open").forEach((modal) => modal.classList.remove("open"));
+          if (window.KGG_UI_PHONE_DRAWER_BANK_ALIGN_V045 && window.KGG_UI_PHONE_DRAWER_BANK_ALIGN_V045.closeDrawer) {
+            window.KGG_UI_PHONE_DRAWER_BANK_ALIGN_V045.closeDrawer();
+          }
+        });
+        await page.locator("#recentToggle").click({ timeout: 7000 });
+        await page.waitForFunction(() => !document.getElementById("recentList").classList.contains("hidden"), null, { timeout: 7000 });
+        const recentOpen = await page.evaluate(() => ({
+          bodyOpen: document.body.classList.contains("kggPhoneDrawerSafeOpen"),
+          text: document.getElementById("recentList").textContent,
+          buttonFloat: document.getElementById("recentToggle").classList.contains("phoneButtonFloat"),
+        }));
+        if (!recentOpen.bodyOpen || !recentOpen.buttonFloat || !recentOpen.text.includes("UI Probe Plan")) {
+          fail(`Phone recent drawer failed to open: ${JSON.stringify(recentOpen)}`);
+        }
+        await page.locator("#recentToggle").click({ timeout: 7000 });
+        await page.waitForFunction(() => document.getElementById("recentList").classList.contains("hidden"), null, { timeout: 7000 });
+        await page.locator("#packageToggle").click({ timeout: 7000 });
+        await page.waitForFunction(() => !document.getElementById("packageList").classList.contains("hidden"), null, { timeout: 7000 });
+        const packageOpen = await page.evaluate(() => ({
+          bodyOpen: document.body.classList.contains("kggPhoneDrawerSafeOpen"),
+          text: document.getElementById("packageList").textContent,
+          buttonFloat: document.getElementById("packageToggle").classList.contains("phoneButtonFloat"),
+        }));
+        if (!packageOpen.bodyOpen || !packageOpen.buttonFloat || !packageOpen.text.includes("UI Probe Paket")) {
+          fail(`Phone package drawer failed to open: ${JSON.stringify(packageOpen)}`);
+        }
+        await page.locator("#packageToggle").click({ timeout: 7000 });
+        await page.waitForFunction(() => document.getElementById("packageList").classList.contains("hidden"), null, { timeout: 7000 });
+        if (pageErrors.length !== beforeErrors) {
+          fail(`Phone history/packages drawer produced page errors: ${pageErrors.slice(beforeErrors).join(" | ")}`);
+        }
+      }
+
+      if (caseMatches(caseName, ["ui-mini-series", "phone-bank-align"])) {
+        const beforeErrors = pageErrors.length;
+        await page.evaluate(() => {
+          document.querySelectorAll(".modal.open").forEach((modal) => modal.classList.remove("open"));
+          if (window.KGG_UI_PHONE_DRAWER_BANK_ALIGN_V045 && window.KGG_UI_PHONE_DRAWER_BANK_ALIGN_V045.closeDrawer) {
+            window.KGG_UI_PHONE_DRAWER_BANK_ALIGN_V045.closeDrawer();
+          }
+          window.scrollTo(0, 0);
+        });
+        const initiallyOpen = await page.evaluate(() => document.getElementById("bankArea").classList.contains("bankOpen"));
+        if (initiallyOpen) {
+          await page.locator("#bankToggle").click({ timeout: 7000 });
+          await page.waitForFunction(() => !document.getElementById("bankArea").classList.contains("bankOpen"), null, { timeout: 7000 });
+        }
+        await page.locator("#bankToggle").click({ timeout: 7000 });
+        await page.waitForFunction(() => document.getElementById("bankArea").classList.contains("bankOpen"), null, { timeout: 7000 });
+        await page.waitForTimeout(900);
+        const align = await page.evaluate(() => {
+          const bank = document.getElementById("bankArea");
+          const hub = document.getElementById("scanHub");
+          const create = document.getElementById("createPanel");
+          const bankRect = bank.getBoundingClientRect();
+          const hubRect = hub.getBoundingClientRect();
+          return {
+            bankOpen: bank.classList.contains("bankOpen"),
+            bankBottom: Math.round(bankRect.bottom),
+            hubTop: Math.round(hubRect.top),
+            gap: Math.round(hubRect.top - bankRect.bottom),
+            createMarginTop: Math.round(Number.parseFloat(getComputedStyle(create).marginTop) || 0),
+            hubPosition: getComputedStyle(hub).position,
+          };
+        });
+        if (
+          !align.bankOpen ||
+          align.hubPosition !== "fixed" ||
+          align.createMarginTop < 28 ||
+          align.gap < 0 ||
+          align.gap > 22
+        ) {
+          fail(`Phone bank alignment failed: ${JSON.stringify(align)}`);
+        }
+        if (pageErrors.length !== beforeErrors) {
+          fail(`Phone bank alignment produced page errors: ${pageErrors.slice(beforeErrors).join(" | ")}`);
+        }
+      }
+
       await context.close();
     }
 
@@ -799,7 +911,7 @@ async function main() {
   if (!["critical", "regression", "all"].includes(args.level)) {
     fail(`Unknown level: ${args.level}`);
   }
-  const knownCases = ["all", "gestures", "ui-mini-series", "bank-thumbnails", "phone-admin-menu", "phone-scan-dock", "tablet-layout-button", "tablet-card-reorder"];
+  const knownCases = ["all", "gestures", "ui-mini-series", "bank-thumbnails", "phone-admin-menu", "phone-scan-dock", "phone-history-packages", "phone-bank-align", "tablet-layout-button", "tablet-card-reorder"];
   if (!knownCases.includes(args.caseName)) {
     fail(`Unknown case: ${args.caseName}`);
   }

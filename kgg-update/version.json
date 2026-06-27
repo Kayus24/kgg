@@ -1,7 +1,7 @@
 {
-  "versionCode": 44,
-  "versionName": "1.0.44-phone-liquid-actions",
-  "indexUrl": "index.html?v=44",
-  "sha256": "88efc1b1514a8fc6750aa7f43e16d3e07c9539529032e4d50ee57207a412f9ec",
-  "notes": "v044: Phone Plan-scannen und Fertig erhalten staerkere Liquid-Glass-Kapseln; Plan-Historie bleibt lesbar und das Admin-Untermenue ist nach Update, Sync/Weitergeben und Admin gruppiert."
+  "versionCode": 45,
+  "versionName": "1.0.45-phone-drawer-bank-align",
+  "indexUrl": "index.html?v=45",
+  "sha256": "4674c8301d8f47c2b5ec00a7cfe0aa621c0eb6626d38c93ebef66c70839226d6",
+  "notes": "v045: Phone Plan-Historie und Uebungspakete oeffnen stabil; die Uebungsdatenbank richtet sich beim Oeffnen sauber oberhalb des Plan-scannen-Docks aus."
 }
