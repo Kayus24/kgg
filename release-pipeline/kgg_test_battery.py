@@ -187,6 +187,11 @@ def run_native_sync() -> None:
     run_native_sync_bridge_contract()
 
 
+def run_patch_hygiene() -> None:
+    log("== Patch hygiene check ==")
+    run([sys.executable, "release-pipeline/kgg_patch_hygiene.py"])
+
+
 def run_release_contracts() -> None:
     log("== Release contract tests ==")
     run([sys.executable, "-m", "unittest", "release-pipeline/test_release_pipeline.py"])
@@ -287,6 +292,13 @@ def run_release_drift_check() -> None:
 
 
 TEST_REGISTRY = [
+    {
+        "id": "patch-hygiene",
+        "level": "critical",
+        "suite": "hygiene",
+        "reason": "Dirty branches, half release-inbox payloads and idea/test-lab files must be blocked early.",
+        "run": run_patch_hygiene,
+    },
     {
         "id": "release-contracts",
         "level": "critical",
@@ -463,7 +475,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--suite",
-        choices=["all", "mobile-inbox", "sync", "native-sync", "textblocks", "ui-stability", "syntax", "security", "release"],
+        choices=["all", "hygiene", "mobile-inbox", "sync", "native-sync", "textblocks", "ui-stability", "syntax", "security", "release"],
         default=None,
         help="Optionally limit to one suite. Without --level this keeps legacy behavior and runs all non-live tests in that suite.",
     )
