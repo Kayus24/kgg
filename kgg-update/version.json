@@ -1,7 +1,7 @@
 {
-  "versionCode": 45,
-  "versionName": "1.0.45-phone-drawer-bank-align",
-  "indexUrl": "index.html?v=45",
-  "sha256": "4674c8301d8f47c2b5ec00a7cfe0aa621c0eb6626d38c93ebef66c70839226d6",
-  "notes": "v045: Phone Plan-Historie und Uebungspakete oeffnen stabil; die Uebungsdatenbank richtet sich beim Oeffnen sauber oberhalb des Plan-scannen-Docks aus."
+  "versionCode": 47,
+  "versionName": "1.0.47-phone-landscape-tablet-menu",
+  "indexUrl": "index.html?v=47",
+  "sha256": "b71051d8e9aaf7d886b89c718f4de217aa540125c54bbd0c8421a140cce16f0d",
+  "notes": "v047: Handy-Portrait bleibt Phone-UI; Handy-Landscape erzwingt einen 760px-Viewport und zeigt Tablet-Arbeitsflaeche mit Tablet-Menue."
 }
