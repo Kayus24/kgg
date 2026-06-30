@@ -1,7 +1,7 @@
 {
-  "versionCode": 48,
-  "versionName": "1.0.48-encoding-guard-repair",
-  "indexUrl": "index.html?v=48",
-  "sha256": "565f8db6c2d4b6aa9e964f8469699a014e8dfedbe78c9997be9fdf24dc29aced",
-  "notes": "v048: repariert Mojibake/UTF-8-Charset-Fr?hposition und aktiviert einen Critical-Encoding-Guard gegen kaputte Releases."
+  "versionCode": 49,
+  "versionName": "1.0.49-symbol-encoding-hotfix",
+  "indexUrl": "index.html?v=49",
+  "sha256": "78a7622a56cd918848526c3ca5a9ef3f35109117587590577c47753fd8a18ef8",
+  "notes": "v049: repariert verbleibende Mojibake-Symbolreste und erweitert den Critical-Encoding-Guard gegen sichtbare Symbolkorruption."
 }
