@@ -18,7 +18,7 @@ const path = require("path");
 const { pathToFileURL } = require("url");
 
 const ROOT = path.resolve(__dirname, "..");
-const HTML_PATH = path.join(ROOT, "kgg-update", "index.html");
+const HTML_PATH = path.resolve(process.env.KGG_UI_SMOKE_HTML || path.join(ROOT, "kgg-update", "index.html"));
 const STORAGE_KEY = "kgg_html_app_v2_state";
 const CUSTOM_BANK_KEY = "kgg_html_app_v2_custom_exercise_bank";
 
@@ -42,7 +42,8 @@ function parseArgs() {
 }
 
 function usage() {
-  console.log("Usage: node release-pipeline/kgg_ui_stability_smoke.js --level critical|regression [--case all|gestures|ui-mini-series|bank-thumbnails|phone-admin-menu|phone-scan-dock|phone-history-packages|phone-bank-align|tablet-layout-button|tablet-card-reorder] [--browser]");
+  console.log("Usage: node release-pipeline/kgg_ui_stability_smoke.js --level critical|regression [--case all|gestures|ui-mini-series|bank-thumbnails|phone-admin-menu|phone-scan-dock|phone-history-packages|phone-bank-align|tablet-layout-button|tablet-card-reorder|tablet-layout-visual|tablet-split-phone-layout|phone-landscape-tablet-menu|tablet-app-boot] [--browser]");
+  console.log("Optional: set KGG_UI_SMOKE_HTML to test a release HTML instead of kgg-update/index.html.");
 }
 
 function fail(message) {
@@ -90,7 +91,7 @@ function staticGestureGuardSuite() {
   assertIncludes(html, "kgg-v11-clean-merge-original-features-phone-drag-local-list", "latest phone drag merge marker");
 
   assertIncludes(html, "kggDeviceSyncOpen", "separate device sync menu entry");
-  assertIncludes(html, "Geräte-Sync", "device sync menu label");
+  assertRegex(html, /Ger(?:\u00e4|\u00c3\u00a4|ae)te-Sync/, "device sync menu label");
   assertIncludes(html, "document.getElementById('syncQrBtn')", "device sync opens sync dialog through sync button");
   assertRegex(html, /tabletMenuTherapistShareBtn[\s\S]{0,260}openKggTherapistAppOnlyQr\(\)/, "therapist share opens app QR directly");
   assertIncludes(html, "Kolleg:innen-App APK QR", "colleague APK share QR label");
@@ -190,6 +191,18 @@ function staticUiMiniSeriesGuardSuite(caseName) {
   if (caseMatches(caseName, ["ui-mini-series", "phone-history-packages", "phone-bank-align"])) {
     assertIncludes(html, "kgg-v045-phone-drawer-bank-align", "v045 phone drawer/bank alignment marker");
     assertIncludes(html, "KGG_UI_PHONE_DRAWER_BANK_ALIGN_V045", "v045 phone drawer/bank public probe");
+  }
+  if (caseMatches(caseName, ["ui-mini-series", "tablet-layout-visual", "tablet-split-phone-layout", "tablet-app-boot"])) {
+    assertIncludes(html, "kgg-v046-tablet-runtime-viewport-guard", "v046 tablet runtime viewport guard marker");
+    assertIncludes(html, "KGG_TABLET_RUNTIME_VIEWPORT_GUARD_V046", "v046 tablet runtime viewport guard public probe");
+    assertIncludes(html, "restoreTabletScanButton", "v046 restores scan button when leaving phone viewport");
+    assertIncludes(html, "if(!isPhone()){", "v046 phone runtime patches are viewport-gated");
+  }
+  if (caseMatches(caseName, ["ui-mini-series", "phone-landscape-tablet-menu"])) {
+    assertIncludes(html, "kgg-v047-phone-landscape-tablet-menu", "v047 phone landscape tablet menu marker");
+    assertIncludes(html, "KGG_LANDSCAPE_TABLET_VIEWPORT_V047", "v047 phone landscape viewport public probe");
+    assertIncludes(html, "width=760, initial-scale=1, viewport-fit=cover", "v047 forced tablet viewport");
+    assertIncludes(html, "function isLandscapeTabletViewport", "v047 central landscape tablet mode helper");
   }
   if (caseMatches(caseName, ["ui-mini-series", "phone-history-packages"])) {
     assertIncludes(html, "openPhoneDrawerSafe", "phone history/packages safe drawer handler");
@@ -516,13 +529,19 @@ function wantsPhoneMiniSeries(caseName) {
 }
 
 function wantsTabletMiniSeries(caseName) {
-  // The full tablet app can render the complete exercise bank in headless Chromium.
-  // Keep this guard static so the release battery stays deterministic.
-  return false;
+  return caseMatches(caseName, ["tablet-layout-visual"]);
+}
+
+function wantsTabletSplitPhoneMiniSeries(caseName) {
+  return caseMatches(caseName, ["tablet-split-phone-layout"]);
+}
+
+function wantsPhoneLandscapeTabletMenu(caseName) {
+  return caseMatches(caseName, ["phone-landscape-tablet-menu"]);
 }
 
 async function browserUiMiniSeriesSuite(caseName) {
-  if (!wantsPhoneMiniSeries(caseName) && !wantsTabletMiniSeries(caseName)) {
+  if (!wantsPhoneMiniSeries(caseName) && !wantsTabletMiniSeries(caseName) && !wantsTabletSplitPhoneMiniSeries(caseName) && !wantsPhoneLandscapeTabletMenu(caseName)) {
     console.log(`Browser UI mini-series skipped (${caseName || "all"}; static guard only)`);
     return;
   }
@@ -653,7 +672,7 @@ async function browserUiMiniSeriesSuite(caseName) {
       if (caseMatches(caseName, ["ui-mini-series", "phone-scan-dock"])) {
         await page.waitForSelector("#phonePhotoMenuToggle", { timeout: 10000 });
         const dock = await page.evaluate(() => {
-          const hub = document.getElementById("scanHub");
+          const hub = document.querySelector(".scanHub");
           const finish = document.getElementById("finishBtn");
           const scan = document.getElementById("scanBtn");
           const toggle = document.getElementById("phonePhotoMenuToggle");
@@ -690,7 +709,7 @@ async function browserUiMiniSeriesSuite(caseName) {
           !dock.scanLabel.includes("Plan scannen") ||
           !dock.toggleInsideScan ||
           !dock.toggleLiquid ||
-          dock.toggleText.trim() !== "⌃" ||
+          !/^(?:\u2303|âŒƒ|\^)$/.test(dock.toggleText.trim()) ||
           String(dock.scanBackdrop).toLowerCase() === "none" ||
           dock.finishPosition !== "fixed" ||
           dock.finishHidden ||
@@ -719,7 +738,7 @@ async function browserUiMiniSeriesSuite(caseName) {
           fail(`Phone photo menu failed: ${JSON.stringify(photoMenu)}`);
         }
         const modalLayering = await page.evaluate(() => {
-          const hub = document.getElementById("scanHub");
+          const hub = document.querySelector(".scanHub");
           const finish = document.getElementById("finishBtn");
           const photoMenu = document.getElementById("kggPhonePhotoMenu");
           const modal = document.getElementById("syncPairModal");
@@ -798,7 +817,7 @@ async function browserUiMiniSeriesSuite(caseName) {
         await page.waitForTimeout(900);
         const align = await page.evaluate(() => {
           const bank = document.getElementById("bankArea");
-          const hub = document.getElementById("scanHub");
+          const hub = document.querySelector(".scanHub");
           const create = document.getElementById("createPanel");
           const bankRect = bank.getBoundingClientRect();
           const hubRect = hub.getBoundingClientRect();
@@ -828,13 +847,16 @@ async function browserUiMiniSeriesSuite(caseName) {
       await context.close();
     }
 
-    if (wantsTabletMiniSeries(caseName)) {
+    if (wantsPhoneLandscapeTabletMenu(caseName)) {
       const context = await browser.newContext({
-        viewport: { width: 390, height: 844 },
-        deviceScaleFactor: 1,
-        isMobile: false,
+        viewport: { width: 720, height: 390 },
+        deviceScaleFactor: 2,
+        isMobile: true,
         hasTouch: true,
         locale: "de-DE",
+        userAgent:
+          "Mozilla/5.0 (Linux; Android 14; Phone Landscape) AppleWebKit/537.36 " +
+          "(KHTML, like Gecko) Chrome/126 Mobile Safari/537.36",
       });
       await context.route(/^https?:\/\//, async (route) => {
         externalRequests.push(route.request().url());
@@ -845,58 +867,449 @@ async function browserUiMiniSeriesSuite(caseName) {
           storageKey,
           JSON.stringify({
             plan: exercises,
-            patient: { name: "Tablet UI", date: "2026-06-26", therapist: "Codex" },
+            patient: { name: "Phone Landscape", date: "2026-06-30", therapist: "Codex" },
             bankOpen: false,
-            recent: [],
-            packages: [],
           })
         );
-        localStorage.setItem("kgg_pwa_install_prompt_seen_v1", "2026-06-26T00:00:00.000Z");
-      }, { storageKey: STORAGE_KEY, exercises: seededExercises(1) });
-
+        localStorage.setItem("kgg_pwa_install_prompt_seen_v1", "2026-06-30T00:00:00.000Z");
+      }, { storageKey: STORAGE_KEY, exercises: seededExercises(4) });
       const page = await context.newPage();
       page.on("pageerror", (err) => pageErrors.push(err.message));
       await page.goto(htmlUrl, { waitUntil: "commit", timeout: 60000 });
-      await page.waitForSelector("#scanHub", { timeout: 15000 });
-      await page.setViewportSize({ width: 1024, height: 768 });
-      await page.evaluate(() => document.body.classList.add("tabletLayoutCustom"));
-      await page.waitForTimeout(300);
       await page.waitForSelector("#tabletMenuBtn", { timeout: 15000 });
-      await page.locator("#tabletMenuBtn").click();
-      await page.waitForFunction(() => document.body.classList.contains("tabletMenuOpen"), null, { timeout: 10000 });
-      await page.locator("#tabletMenuLayoutBtn").click();
-      await page.waitForFunction(() => document.body.classList.contains("tabletLayoutEditMode"), null, { timeout: 10000 });
-      const openState = await page.evaluate(() => {
-        const panel = document.getElementById("tabletMenuLayoutPanel");
-        const tools = document.getElementById("tabletLayoutFreeTools");
+      await page.waitForSelector("#planList .planCard[data-plan-id]", { timeout: 15000 });
+      await page.waitForFunction(() => window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047 && window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive(), null, { timeout: 15000 });
+      await page.waitForTimeout(500);
+      const landscape = await page.evaluate(() => {
+        const menu = document.getElementById("tabletMenuBtn");
+        const hub = document.querySelector(".scanHub");
+        const scan = document.getElementById("scanBtn");
+        const toggle = document.getElementById("phonePhotoMenuToggle");
+        const rect = (el) => {
+          if (!el) return null;
+          const r = el.getBoundingClientRect();
+          return { width: Math.round(r.width), height: Math.round(r.height), display: getComputedStyle(el).display, position: getComputedStyle(el).position };
+        };
         return {
-          editMode: document.body.classList.contains("tabletLayoutEditMode"),
-          panelHidden: panel ? panel.hidden : true,
-          expanded: document.getElementById("tabletMenuLayoutBtn").getAttribute("aria-expanded"),
-          toolsDisplay: tools ? getComputedStyle(tools).display : "missing",
+          width: window.innerWidth,
+          height: window.innerHeight,
+          phoneMedia: window.matchMedia("(max-width:759px)").matches,
+          tabletMedia: window.matchMedia("(min-width:760px)").matches,
+          landscapeActive: !!(window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047 && window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive()),
+          bodyTablet: document.body.classList.contains("tabletLayoutCustom"),
+          menu: rect(menu),
+          hub: rect(hub),
+          scanHydrated: !!(scan && scan.dataset.kggV042ScanHydrated === "1"),
+          phoneToggleInsideScan: !!(toggle && scan && toggle.parentElement === scan),
+          visual: window.visualViewport ? { width: Math.round(window.visualViewport.width), height: Math.round(window.visualViewport.height), scale: window.visualViewport.scale } : null,
         };
       });
-      if (!openState.editMode || openState.panelHidden || openState.expanded !== "true" || openState.toolsDisplay === "none") {
-        fail(`Tablet layout panel did not open: ${JSON.stringify(openState)}`);
+      if (
+        !landscape.landscapeActive ||
+        !landscape.tabletMedia ||
+        landscape.phoneMedia ||
+        !landscape.bodyTablet ||
+        !landscape.menu ||
+        landscape.menu.display === "none" ||
+        landscape.menu.width < 34 ||
+        !landscape.hub ||
+        landscape.hub.position === "fixed" ||
+        landscape.scanHydrated ||
+        landscape.phoneToggleInsideScan
+      ) {
+        fail(`Phone landscape tablet menu failed: ${JSON.stringify(landscape)}`);
       }
-      await page.locator("#tabletMenuLayoutBtn").click();
-      await page.waitForFunction(() => !document.body.classList.contains("tabletLayoutEditMode"), null, { timeout: 10000 });
-      const closedState = await page.evaluate(() => {
-        const panel = document.getElementById("tabletMenuLayoutPanel");
+      await context.close();
+    }
+
+    if (wantsTabletSplitPhoneMiniSeries(caseName)) {
+      const context = await browser.newContext({
+        viewport: { width: 650, height: 844 },
+        deviceScaleFactor: 1.5,
+        isMobile: false,
+        hasTouch: true,
+        locale: "de-DE",
+        userAgent:
+          "Mozilla/5.0 (Linux; Android 14; Tablet Split Screen) AppleWebKit/537.36 " +
+          "(KHTML, like Gecko) Chrome/126 Safari/537.36",
+      });
+      await context.route(/^https?:\/\//, async (route) => {
+        externalRequests.push(route.request().url());
+        await route.fulfill({ status: 204, contentType: "application/json", body: "{}" });
+      });
+      await context.addInitScript(({ storageKey, exercises }) => {
+        localStorage.setItem(
+          storageKey,
+          JSON.stringify({
+            plan: exercises,
+            patient: { name: "Tablet Split", date: "2026-06-29", therapist: "Codex" },
+            bankOpen: false,
+          })
+        );
+        localStorage.setItem("kgg_pwa_install_prompt_seen_v1", "2026-06-29T00:00:00.000Z");
+      }, { storageKey: STORAGE_KEY, exercises: seededExercises(3) });
+      const page = await context.newPage();
+      page.on("pageerror", (err) => pageErrors.push(err.message));
+      await page.goto(htmlUrl, { waitUntil: "commit", timeout: 60000 });
+      await page.waitForSelector("#planList .planCard[data-plan-id]", { timeout: 15000 });
+      await page.waitForFunction(() => window.KGG_UI_MINI_SERIES && window.KGG_UI_MINI_SERIES_V042 && window.KGG_TABLET_RUNTIME_VIEWPORT_GUARD_V046, null, { timeout: 15000 });
+      await page.waitForSelector("#phonePhotoMenuToggle", { timeout: 10000 });
+      const splitPhone = await page.evaluate(() => {
+        const hub = document.querySelector(".scanHub");
+        const scan = document.getElementById("scanBtn");
+        const toggle = document.getElementById("phonePhotoMenuToggle");
         return {
-          editMode: document.body.classList.contains("tabletLayoutEditMode"),
-          panelHidden: panel ? panel.hidden : false,
-          expanded: document.getElementById("tabletMenuLayoutBtn").getAttribute("aria-expanded"),
+          width: window.innerWidth,
+          phoneMedia: window.matchMedia("(max-width:759px)").matches,
+          hubPosition: hub ? getComputedStyle(hub).position : "missing",
+          phoneHasPlan: document.body.classList.contains("kggPhoneHasPlan"),
+          scanHydrated: !!(scan && scan.dataset.kggV042ScanHydrated === "1"),
+          toggleInsideScan: !!(toggle && scan && toggle.parentElement === scan),
+          scanLabel: scan ? (scan.querySelector(".phoneScanLabel") || {}).textContent || "" : "",
         };
       });
-      if (closedState.editMode || !closedState.panelHidden || closedState.expanded !== "false") {
-        fail(`Tablet layout panel did not close: ${JSON.stringify(closedState)}`);
+      if (
+        splitPhone.width >= 760 ||
+        !splitPhone.phoneMedia ||
+        splitPhone.hubPosition !== "fixed" ||
+        !splitPhone.phoneHasPlan ||
+        !splitPhone.scanHydrated ||
+        !splitPhone.toggleInsideScan ||
+        !splitPhone.scanLabel.includes("Plan scannen")
+      ) {
+        fail(`Tablet split-screen phone layout failed: ${JSON.stringify(splitPhone)}`);
+      }
+
+      await page.setViewportSize({ width: 1024, height: 768 });
+      await page.waitForTimeout(350);
+      const wideTablet = await page.evaluate(() => {
+        const hub = document.querySelector(".scanHub");
+        const scan = document.getElementById("scanBtn");
+        const toggle = document.getElementById("phonePhotoMenuToggle");
+        return {
+          width: window.innerWidth,
+          phoneMedia: window.matchMedia("(max-width:759px)").matches,
+          hubPosition: hub ? getComputedStyle(hub).position : "missing",
+          phoneClasses: ["kggPhoneHasPlan", "kggPhonePhotoMenuOpen"].filter((name) => document.body.classList.contains(name)),
+          scanHydrated: !!(scan && scan.dataset.kggV042ScanHydrated === "1"),
+          toggleInsideScan: !!(toggle && scan && toggle.parentElement === scan),
+          scanText: scan ? scan.textContent.trim() : "",
+        };
+      });
+      if (
+        wideTablet.width < 760 ||
+        wideTablet.phoneMedia ||
+        wideTablet.hubPosition === "fixed" ||
+        wideTablet.phoneClasses.length ||
+        wideTablet.scanHydrated ||
+        wideTablet.toggleInsideScan ||
+        !wideTablet.scanText.includes("Plan scannen")
+      ) {
+        fail(`Tablet split-screen cleanup failed after widening: ${JSON.stringify(wideTablet)}`);
+      }
+
+      await page.setViewportSize({ width: 650, height: 844 });
+      await page.waitForTimeout(450);
+      const backToSplit = await page.evaluate(() => {
+        const scan = document.getElementById("scanBtn");
+        const toggle = document.getElementById("phonePhotoMenuToggle");
+        return {
+          phoneMedia: window.matchMedia("(max-width:759px)").matches,
+          scanHydrated: !!(scan && scan.dataset.kggV042ScanHydrated === "1"),
+          toggleInsideScan: !!(toggle && scan && toggle.parentElement === scan),
+        };
+      });
+      if (!backToSplit.phoneMedia || !backToSplit.scanHydrated || !backToSplit.toggleInsideScan) {
+        fail(`Tablet split-screen phone layout did not rehydrate after narrowing: ${JSON.stringify(backToSplit)}`);
+      }
+      await context.close();
+    }
+
+    if (wantsTabletMiniSeries(caseName)) {
+      const context = await browser.newContext({
+        viewport: { width: 1180, height: 820 },
+        deviceScaleFactor: 1,
+        isMobile: false,
+        hasTouch: true,
+        locale: "de-DE",
+      });
+      await context.route(/^https?:\/\//, async (route) => {
+        externalRequests.push(route.request().url());
+        await route.fulfill({ status: 204, contentType: "application/json", body: "{}" });
+      });
+      const page = await context.newPage();
+      page.on("pageerror", (err) => pageErrors.push(err.message));
+      const tabletHtml = fs.readFileSync(HTML_PATH, "utf8").replace(/<script\b[\s\S]*?<\/script>/gi, "");
+      await page.setContent(tabletHtml, { waitUntil: "domcontentloaded", timeout: 30000 });
+      const injectedProbe = await page.evaluate(() => ({
+        readyState: document.readyState,
+        htmlLength: document.documentElement ? document.documentElement.outerHTML.length : 0,
+        bodyLength: document.body ? document.body.innerHTML.length : 0,
+        hasScanHub: !!document.querySelector(".scanHub"),
+        bodyStart: document.body ? document.body.innerHTML.slice(0, 160) : "",
+      }));
+      if (!injectedProbe.hasScanHub) {
+        fail(`Tablet HTML injection did not expose scanHub: ${JSON.stringify(injectedProbe)}`);
+      }
+      await page.waitForSelector(".scanHub", { state: "attached", timeout: 15000 });
+      await page.evaluate((exercises) => {
+        document.body.classList.add("adminMode", "tabletLayoutCustom");
+        const createPanel = document.getElementById("createPanel");
+        if (createPanel) createPanel.classList.add("planMode");
+        const planActions = document.getElementById("planActions");
+        if (planActions) planActions.classList.add("hasPlan");
+        const rightPlanStack = document.getElementById("rightPlanStack");
+        if (rightPlanStack) rightPlanStack.classList.remove("hidden");
+        const currentPlanBlock = document.getElementById("currentPlanBlock");
+        if (currentPlanBlock) currentPlanBlock.classList.remove("hidden");
+        const finish = document.getElementById("finishBtn");
+        if (finish) finish.classList.remove("hidden");
+        const panelTitle = document.getElementById("panelTitle");
+        if (panelTitle) panelTitle.textContent = "✏️ Aktueller Plan";
+        const currentPlanCount = document.getElementById("currentPlanCount");
+        if (currentPlanCount) currentPlanCount.textContent = `${exercises.length} Übungen`;
+        const planList = document.getElementById("planList");
+        if (planList) {
+          planList.innerHTML = exercises.map((ex, index) => `
+            <div class="planCard" data-plan-id="${ex.id}">
+              <div class="planMain">
+                <button class="drag" data-sort-id="${ex.id}" type="button">⋮⋮</button>
+                <span class="planText"><b class="planName">${index + 1}. ${ex.name}</b><small>3 Sätze · beidseitig · kg · Wdh</small></span>
+              </div>
+              <button class="iconBtn" type="button">⚙️</button>
+            </div>
+          `).join("");
+        }
+      }, seededExercises(8));
+      await page.waitForSelector("#planList .planCard[data-plan-id]", { timeout: 15000 });
+      await page.waitForTimeout(500);
+      const layoutProbe = await page.evaluate(() => {
+        const rect = (id) => {
+          const el = id.startsWith(".") || id.startsWith("#") ? document.querySelector(id) : document.getElementById(id);
+          if (!el) return null;
+          const r = el.getBoundingClientRect();
+          return {
+            left: Math.round(r.left),
+            top: Math.round(r.top),
+            right: Math.round(r.right),
+            bottom: Math.round(r.bottom),
+            width: Math.round(r.width),
+            height: Math.round(r.height),
+            display: getComputedStyle(el).display,
+            position: getComputedStyle(el).position,
+            visibility: getComputedStyle(el).visibility,
+            pointerEvents: getComputedStyle(el).pointerEvents,
+          };
+        };
+        const scan = rect(".scanHub");
+        const create = rect("createPanel");
+        const input = rect("inputWrap");
+        const current = rect("currentPlanBlock");
+        const planList = rect("planList");
+        const menuButton = rect("tabletMenuBtn");
+        const cards = Array.from(document.querySelectorAll("#planList .planCard[data-plan-id]")).map((card) => {
+          const r = card.getBoundingClientRect();
+          return { left: Math.round(r.left), top: Math.round(r.top), right: Math.round(r.right), bottom: Math.round(r.bottom), width: Math.round(r.width), height: Math.round(r.height) };
+        });
+        const modalOpen = !!document.querySelector(".modal.open");
+        const phoneClasses = ["kggPhoneHasPlan", "kggPhoneDrawerOpen", "kggPhoneDrawerSafeOpen", "kggPhonePhotoMenuOpen"].filter((name) => document.body.classList.contains(name));
+        const overlapInputPlan = input && current ? (input.left < current.right && input.right > current.left && input.top < current.bottom && input.bottom > current.top) : true;
+        return {
+          bodyClass: document.body.className,
+          viewport: { width: window.innerWidth, height: window.innerHeight },
+          scan,
+          create,
+          input,
+          current,
+          planList,
+          menuButton,
+          cards,
+          modalOpen,
+          phoneClasses,
+          overlapInputPlan,
+          cardCount: cards.length,
+          visibleCardCount: cards.filter((r) => r.width > 180 && r.height > 38 && r.bottom > 0 && r.top < window.innerHeight).length,
+        };
+      });
+      if (
+        layoutProbe.viewport.width < 760 ||
+        !layoutProbe.scan ||
+        layoutProbe.scan.position === "fixed" ||
+        !layoutProbe.current ||
+        layoutProbe.current.width < 300 ||
+        layoutProbe.current.height < 220 ||
+        !layoutProbe.planList ||
+        layoutProbe.cardCount < 6 ||
+        layoutProbe.visibleCardCount < 3 ||
+        !layoutProbe.menuButton ||
+        layoutProbe.menuButton.width < 30 ||
+        layoutProbe.modalOpen ||
+        layoutProbe.phoneClasses.length ||
+        layoutProbe.overlapInputPlan
+      ) {
+        fail(`Tablet visual layout probe failed: ${JSON.stringify(layoutProbe)}`);
+      }
+
+      await page.waitForSelector("#tabletMenuBtn", { timeout: 15000 });
+      if (caseMatches(caseName, ["ui-mini-series", "tablet-layout-visual"])) {
+        await page.evaluate(() => document.body.classList.add("tabletMenuOpen"));
+        const menuState = await page.evaluate(() => {
+          const ids = ["tabletMenuLayoutBtn", "tabletMenuTherapistShareBtn", "tabletMenuRecentBtn", "tabletMenuPackagesBtn"];
+          return Object.fromEntries(ids.map((id) => {
+            const el = id.startsWith(".") || id.startsWith("#") ? document.querySelector(id) : document.getElementById(id);
+            if (!el) return [id, { exists: false }];
+            const r = el.getBoundingClientRect();
+            return [id, {
+              exists: true,
+              display: getComputedStyle(el).display,
+              width: Math.round(r.width),
+              height: Math.round(r.height),
+              text: el.textContent.trim(),
+            }];
+          }));
+        });
+        for (const [id, state] of Object.entries(menuState)) {
+          if (!state.exists || state.display === "none" || state.width < 80 || state.height < 32) {
+            fail(`Tablet menu item not usable (${id}): ${JSON.stringify(menuState)}`);
+          }
+        }
+      }
+      if (!caseMatches(caseName, ["tablet-layout-visual"])) {
+        await page.locator("#tabletMenuBtn").click();
+        await page.waitForFunction(() => document.body.classList.contains("tabletMenuOpen"), null, { timeout: 10000 });
+        await page.locator("#tabletMenuLayoutBtn").click();
+        await page.waitForFunction(() => document.body.classList.contains("tabletLayoutEditMode"), null, { timeout: 10000 });
+        const openState = await page.evaluate(() => {
+          const panel = document.getElementById("tabletMenuLayoutPanel");
+          const tools = document.getElementById("tabletLayoutFreeTools");
+          return {
+            editMode: document.body.classList.contains("tabletLayoutEditMode"),
+            panelHidden: panel ? panel.hidden : true,
+            expanded: document.getElementById("tabletMenuLayoutBtn").getAttribute("aria-expanded"),
+            toolsDisplay: tools ? getComputedStyle(tools).display : "missing",
+          };
+        });
+        if (!openState.editMode || openState.panelHidden || openState.expanded !== "true" || openState.toolsDisplay === "none") {
+          fail(`Tablet layout panel did not open: ${JSON.stringify(openState)}`);
+        }
+        await page.locator("#tabletMenuLayoutBtn").click();
+        await page.waitForFunction(() => !document.body.classList.contains("tabletLayoutEditMode"), null, { timeout: 10000 });
+        const closedState = await page.evaluate(() => {
+          const panel = document.getElementById("tabletMenuLayoutPanel");
+          return {
+            editMode: document.body.classList.contains("tabletLayoutEditMode"),
+            panelHidden: panel ? panel.hidden : false,
+            expanded: document.getElementById("tabletMenuLayoutBtn").getAttribute("aria-expanded"),
+          };
+        });
+        if (closedState.editMode || !closedState.panelHidden || closedState.expanded !== "false") {
+          fail(`Tablet layout panel did not close: ${JSON.stringify(closedState)}`);
+        }
+        await page.locator("#tabletMenuBtn").click();
+        await page.waitForFunction(() => !document.body.classList.contains("tabletMenuOpen"), null, { timeout: 10000 });
+        const card = page.locator("#planList .planCard[data-plan-id]").first();
+        const center = await elementCenter(card);
+        await dispatchPointer(page, "#planList .planCard[data-plan-id]", "pointerdown", center.x, center.y, 77);
+        await page.waitForTimeout(180);
+        const armed = await page.evaluate(() => ({
+          reorderClass: document.body.classList.contains("kggPlanCardReordering"),
+          lifted: !!document.querySelector("#planList .planCard.reorder-lifted"),
+          placeholder: !!document.querySelector("#planList .reorder-placeholder"),
+        }));
+        if (!armed.reorderClass || !armed.lifted || !armed.placeholder) {
+          fail(`Tablet card surface reorder did not start: ${JSON.stringify(armed)}`);
+        }
+        await dispatchPointer(page, "document", "pointerup", center.x + 8, center.y + 8, 77);
+        await page.waitForTimeout(220);
+        const cleanup = await page.evaluate(() => ({
+          reorderClass: document.body.classList.contains("kggPlanCardReordering"),
+          lifted: !!document.querySelector("#planList .planCard.reorder-lifted"),
+          placeholder: !!document.querySelector("#planList .reorder-placeholder"),
+        }));
+        if (cleanup.reorderClass || cleanup.lifted || cleanup.placeholder) {
+          fail(`Tablet card reorder cleanup leaked state: ${JSON.stringify(cleanup)}`);
+        }
       }
       await context.close();
     }
 
     if (pageErrors.length) fail(`Page error during UI mini-series tests: ${pageErrors.join(" | ")}`);
     console.log(`Browser UI mini-series OK (${caseName || "all"}, ${externalRequests.length} external request(s) blocked)`);
+  } finally {
+    await browser.close();
+  }
+}
+
+async function browserTabletAppBootSuite() {
+  const { chromium } = requirePlaywright();
+  const htmlUrl = pathToFileURL(HTML_PATH).href;
+  const externalRequests = [];
+  const pageErrors = [];
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const context = await browser.newContext({
+      viewport: { width: 1180, height: 820 },
+      deviceScaleFactor: 1,
+      isMobile: false,
+      hasTouch: true,
+      locale: "de-DE",
+    });
+    await context.route(/^https?:\/\//, async (route) => {
+      externalRequests.push(route.request().url());
+      await route.fulfill({ status: 204, contentType: "application/json", body: "{}" });
+    });
+    await context.addInitScript(({ storageKey, exercises }) => {
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          plan: exercises,
+          patient: { name: "Tablet Runtime", date: "2026-06-29", therapist: "Codex" },
+          bankOpen: false,
+          recent: [],
+          packages: [],
+        })
+      );
+      localStorage.setItem("kgg_pwa_install_prompt_seen_v1", "2026-06-29T00:00:00.000Z");
+    }, { storageKey: STORAGE_KEY, exercises: seededExercises(8) });
+
+    const page = await context.newPage();
+    page.on("pageerror", (err) => pageErrors.push(err.message));
+    await page.goto(htmlUrl, { waitUntil: "commit", timeout: 15000 });
+    try {
+      await page.waitForSelector("#scanHub", { state: "attached", timeout: 12000 });
+    } catch (err) {
+      fail(`Tablet app boot did not expose #scanHub before timeout; likely early runtime freeze. ${err && err.message ? err.message : err} | pageErrors=${JSON.stringify(pageErrors)}`);
+    }
+    await page.waitForSelector("#planList .planCard[data-plan-id]", { timeout: 12000 });
+    await page.waitForTimeout(500);
+    const boot = await page.evaluate(() => {
+      const rect = (id) => {
+        const el = document.getElementById(id);
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        return {
+          width: Math.round(r.width),
+          height: Math.round(r.height),
+          display: getComputedStyle(el).display,
+          position: getComputedStyle(el).position,
+        };
+      };
+      return {
+        readyState: document.readyState,
+        bodyClass: document.body.className,
+        scan: rect("scanHub"),
+        current: rect("currentPlanBlock"),
+        cardCount: document.querySelectorAll("#planList .planCard[data-plan-id]").length,
+        modalOpen: !!document.querySelector(".modal.open"),
+        tabletMenuBtn: rect("tabletMenuBtn"),
+      };
+    });
+    if (!boot.scan || !boot.current || boot.current.width < 300 || boot.cardCount < 6 || !boot.tabletMenuBtn) {
+      fail(`Tablet app boot probe failed: ${JSON.stringify(boot)}`);
+    }
+    if (pageErrors.length) fail(`Page error during tablet app boot: ${pageErrors.join(" | ")}`);
+    await context.close();
+    console.log(`Browser tablet app boot OK (${externalRequests.length} external request(s) blocked)`);
   } finally {
     await browser.close();
   }
@@ -911,7 +1324,7 @@ async function main() {
   if (!["critical", "regression", "all"].includes(args.level)) {
     fail(`Unknown level: ${args.level}`);
   }
-  const knownCases = ["all", "gestures", "ui-mini-series", "bank-thumbnails", "phone-admin-menu", "phone-scan-dock", "phone-history-packages", "phone-bank-align", "tablet-layout-button", "tablet-card-reorder"];
+  const knownCases = ["all", "gestures", "ui-mini-series", "bank-thumbnails", "phone-admin-menu", "phone-scan-dock", "phone-history-packages", "phone-bank-align", "tablet-layout-button", "tablet-card-reorder", "tablet-layout-visual", "tablet-split-phone-layout", "phone-landscape-tablet-menu", "tablet-app-boot"];
   if (!knownCases.includes(args.caseName)) {
     fail(`Unknown case: ${args.caseName}`);
   }
@@ -927,6 +1340,9 @@ async function main() {
     }
     if (args.caseName !== "gestures") {
       await browserUiMiniSeriesSuite(args.caseName);
+    }
+    if (args.caseName === "tablet-app-boot") {
+      await browserTabletAppBootSuite();
     }
   }
   console.log(`KGG UI stability smoke OK (${args.level}, case=${args.caseName})`);
