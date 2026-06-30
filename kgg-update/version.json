@@ -1,7 +1,7 @@
 {
-  "versionCode": 47,
-  "versionName": "1.0.47-phone-landscape-tablet-menu",
-  "indexUrl": "index.html?v=47",
-  "sha256": "b71051d8e9aaf7d886b89c718f4de217aa540125c54bbd0c8421a140cce16f0d",
-  "notes": "v047: Handy-Portrait bleibt Phone-UI; Handy-Landscape erzwingt einen 760px-Viewport und zeigt Tablet-Arbeitsflaeche mit Tablet-Menue."
+  "versionCode": 48,
+  "versionName": "1.0.48-encoding-guard-repair",
+  "indexUrl": "index.html?v=48",
+  "sha256": "565f8db6c2d4b6aa9e964f8469699a014e8dfedbe78c9997be9fdf24dc29aced",
+  "notes": "v048: repariert Mojibake/UTF-8-Charset-Fr?hposition und aktiviert einen Critical-Encoding-Guard gegen kaputte Releases."
 }

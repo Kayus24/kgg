@@ -17,6 +17,8 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
+from kgg_encoding_guard import validate_html_encoding
+
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "therapist-app" / "android_update_manifest.json"
@@ -104,6 +106,9 @@ def validate_html(html: str, label: str) -> None:
     size = len(html.encode("utf-8"))
     if size > MAX_HTML_BYTES:
         fail(f"{label} is too large: {size} > {MAX_HTML_BYTES}")
+    encoding_findings = validate_html_encoding(html.encode("utf-8"), label)
+    if encoding_findings:
+        fail("; ".join(finding.message for finding in encoding_findings))
     if not html.lower().startswith("<!doctype html>"):
         fail(f"{label} must start exactly with <!doctype html>")
     for marker in CORE_MARKERS:
