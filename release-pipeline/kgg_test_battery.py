@@ -194,7 +194,12 @@ def run_patch_hygiene() -> None:
 
 def run_release_contracts() -> None:
     log("== Release contract tests ==")
-    run([sys.executable, "-m", "unittest", "release-pipeline/test_release_pipeline.py"])
+    run([sys.executable, "-m", "unittest", "release-pipeline/test_release_pipeline.py", "release-pipeline/test_encoding_guard.py"])
+
+
+def run_encoding_guard() -> None:
+    log("== Encoding guard ==")
+    run([sys.executable, "release-pipeline/kgg_encoding_guard.py"])
 
 
 def run_html_syntax() -> None:
@@ -305,6 +310,13 @@ TEST_REGISTRY = [
         "suite": "release",
         "reason": "Release artifacts and manifests must stay buildable before any merge.",
         "run": run_release_contracts,
+    },
+    {
+        "id": "encoding-guard",
+        "level": "critical",
+        "suite": "syntax",
+        "reason": "UTF-8 charset must be declared before visible non-ASCII text and mojibake must never ship.",
+        "run": run_encoding_guard,
     },
     {
         "id": "html-syntax",
