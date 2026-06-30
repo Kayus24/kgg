@@ -16,7 +16,19 @@ MANIFEST = ROOT / "therapist-app" / "android_update_manifest.json"
 SOURCE_HTML = ROOT / "kgg-update" / "index.html"
 RELEASE_INBOX_HTML = ROOT / "release-inbox" / "admin.html"
 MAX_CHARSET_BYTE_OFFSET = 512
-MOJIBAKE_MARKERS = ("Ã", "Â", "â€", "âœ", "âž", "ðŸ", "\ufffd")
+MOJIBAKE_MARKERS = (
+    "Ã",
+    "Â",
+    "â€",
+    "âœ",
+    "âž",
+    "â–",
+    "âš",
+    "âŒ",
+    "ðŸ",
+    "ï¸",
+    "\ufffd",
+)
 
 
 class EncodingGuardError(RuntimeError):

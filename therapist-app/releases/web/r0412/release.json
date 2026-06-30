@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0412",
+  "versionName": "1.0.49-symbol-encoding-r0412",
+  "notes": "v049: repairs remaining visible mojibake symbol strings and expands the critical encoding guard.",
+  "createdAt": "2026-06-30T19:43:12Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0412",
+      "profile": "admin",
+      "versionName": "1.0.49-symbol-encoding-r0412",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0412/admin.html",
+      "sha256": "78a7622a56cd918848526c3ca5a9ef3f35109117587590577c47753fd8a18ef8",
+      "notes": "v049: repairs remaining visible mojibake symbol strings and expands the critical encoding guard."
+    },
+    "colleague": {
+      "releaseId": "r0412",
+      "profile": "colleague",
+      "versionName": "1.0.49-symbol-encoding-r0412",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0412/colleague.html",
+      "sha256": "8bfb88f433207b67fa407a391ffd743183a6d11308801f36ef7c447f63df10a1",
+      "notes": "v049: repairs remaining visible mojibake symbol strings and expands the critical encoding guard."
+    }
+  }
+}

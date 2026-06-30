@@ -4,15 +4,15 @@
   "schema": 2,
   "channels": {
     "admin": {
-      "releaseId": "r0411",
+      "releaseId": "r0412",
       "profile": "admin",
-      "versionName": "1.0.48-encoding-guard-r0411",
-      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0411/admin.html",
-      "sha256": "565f8db6c2d4b6aa9e964f8469699a014e8dfedbe78c9997be9fdf24dc29aced",
-      "notes": "v048: repairs UTF-8 mojibake and moves charset before non-ASCII content; adds critical encoding guard.",
-      "rolloutCode": 410,
-      "previousReleaseId": "r0410",
-      "releasedAt": "2026-06-30T13:21:18Z"
+      "versionName": "1.0.49-symbol-encoding-r0412",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0412/admin.html",
+      "sha256": "78a7622a56cd918848526c3ca5a9ef3f35109117587590577c47753fd8a18ef8",
+      "notes": "v049: repairs remaining visible mojibake symbol strings and expands the critical encoding guard.",
+      "rolloutCode": 411,
+      "previousReleaseId": "r0411",
+      "releasedAt": "2026-06-30T19:43:12Z"
     },
     "colleague": {
       "releaseId": "r0397",
@@ -30,8 +30,8 @@
   "latestAndroidShellVersion": "v398",
   "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0397/colleague.html",
   "colleagueSha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
-  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0411/admin.html",
-  "adminSha256": "565f8db6c2d4b6aa9e964f8469699a014e8dfedbe78c9997be9fdf24dc29aced",
+  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0412/admin.html",
+  "adminSha256": "78a7622a56cd918848526c3ca5a9ef3f35109117587590577c47753fd8a18ef8",
   "sha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
   "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v398/android/KGG_ANDROID_KOLLEGEN_v398_force_r0400_html_debug.apk",
   "androidApkSha256": "c4a4e022a7bfa2511538f18bb80c025eb4a1057a186637ac12146ea55dd807ed",
@@ -39,5 +39,5 @@
   "colleagueAndroidApkSha256": "c4a4e022a7bfa2511538f18bb80c025eb4a1057a186637ac12146ea55dd807ed",
   "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v398/android/KGG_ANDROID_ADMIN_v398_force_r0400_html_debug.apk",
   "adminAndroidApkSha256": "e64553647a10a5fa4286f319b6a4284052c0c030b93b5150f9ac8ef0a1708c34",
-  "notes": "Admin beta r0411: v048: repairs UTF-8 mojibake and moves charset before non-ASCII content; adds critical encoding guard."
+  "notes": "Admin beta r0412: v049: repairs remaining visible mojibake symbol strings and expands the critical encoding guard."
 }
