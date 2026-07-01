@@ -100,6 +100,13 @@ function staticGestureGuardSuite() {
   assertIncludes(html, "function buildKggAdminMenuQrPrintPdf", "admin QR print PDF builder");
   assertIncludes(html, "function printKggAdminMenuQr", "admin QR print handler");
   assertIncludes(html, "window.KGG_ANDROID_QR_PDF_BRIDGE_V051", "v051 public probe");
+  assertIncludes(html, "kgg-v052-pdf-plan-thumbnails", "v052 PDF thumbnail marker");
+  assertIncludes(html, "function attachKggPdfExerciseThumbnails", "PDF thumbnail snapshot helper");
+  assertIncludes(html, "function createKggPdfThumbnailDataUrl", "PDF thumbnail data URL helper");
+  assertIncludes(html, "KGGOfflineJsPDF.prototype.addImage", "offline PDF image embedding");
+  assertIncludes(html, "doc.addImage(thumb.dataUrl,'JPEG'", "PDF card draws JPEG thumbnail");
+  assertIncludes(html, "target.grid==='1x3'", "large-print PDF thumbnail skip guard");
+  assertIncludes(html, "window.KGG_PDF_PLAN_THUMBNAILS_V052", "v052 public probe");
 
   console.log("Static UI stability guards OK");
 }

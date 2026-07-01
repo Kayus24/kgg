@@ -414,6 +414,13 @@ TEST_REGISTRY = [
         "run": lambda: run_html_logic("textblocks-critical"),
     },
     {
+        "id": "pdf-critical",
+        "level": "critical",
+        "suite": "pdf",
+        "reason": "PDF exercise thumbnails must stay optional, bounded inside cards and non-blocking.",
+        "run": lambda: run_html_logic("pdf-critical"),
+    },
+    {
         "id": "ui-stability-critical",
         "level": "critical",
         "suite": "ui-stability",
@@ -575,7 +582,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--suite",
-        choices=["all", "hygiene", "mobile-inbox", "sync", "native-sync", "textblocks", "ui-stability", "syntax", "security", "release", "android"],
+        choices=["all", "hygiene", "mobile-inbox", "sync", "native-sync", "textblocks", "pdf", "ui-stability", "syntax", "security", "release", "android"],
         default=None,
         help="Optionally limit to one suite. Without --level this keeps legacy behavior and runs all non-live tests in that suite.",
     )

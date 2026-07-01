@@ -31,6 +31,8 @@ function parseArgs(argv) {
     "sync-regression",
     "native-sync",
     "native-sync-regression",
+    "pdf",
+    "pdf-critical",
     "textblocks",
     "textblocks-critical",
     "textblocks-regression",
@@ -245,6 +247,40 @@ function runInsideApp(testCode) {
 })();`;
   vm.runInContext(source, context, { filename: "kgg-update/index.html#logic-smoke" });
   return context.window.__results || {};
+}
+
+function pdfCriticalSuite() {
+  return runInsideApp(`
+    assert(typeof attachKggPdfExerciseThumbnails==='function','PDF thumbnail attach helper missing');
+    assert(typeof createKggPdfThumbnailDataUrl==='function','PDF thumbnail data URL helper missing');
+    const snapshot=buildKggPdfSnapshot({exercises:[{id:'ex_plain',name:'Rudern',sets:3,unit:'Wdh',weightUnit:'kg'}],patient:{name:'Test'}}); 
+    assert(snapshot.pages[0].slots[0].name==='Rudern','PDF snapshot exercise missing');
+    assert(!snapshot.pages[0].slots[0].pdfThumbnail,'PDF snapshot should not invent thumbnails');
+    const slot=normalizePdfExercise({id:'ex_img',name:'Single leg Press',sets:3,unit:'Wdh',weightUnit:'kg'},0,0,0);
+    slot.pdfThumbnail={dataUrl:'data:image/jpeg;base64,/9j/2w==',mime:'image/jpeg',width:150,height:110};
+    const calls=[];
+    const doc={
+      setLineWidth(value){calls.push(['lineWidth',value]);},
+      setDrawColor(){},
+      setTextColor(){},
+      setFillColor(){},
+      setFont(){},
+      setFontSize(){},
+      rect(x,y,w,h,style){calls.push(['rect',x,y,w,h,style||'']);},
+      roundedRect(x,y,w,h){calls.push(['roundedRect',x,y,w,h]);},
+      line(x1,y1,x2,y2){calls.push(['line',x1,y1,x2,y2]);},
+      text(text,x,y,opts){calls.push(['text',String(text),x,y,opts&&opts.align||'']);},
+      addImage(data,format,x,y,w,h){calls.push(['addImage',data,format,x,y,w,h]);}
+    };
+    drawKggExerciseBox(doc,slot,10,20,130,48);
+    const imageCall=calls.find(call=>call[0]==='addImage');
+    assert(!!imageCall,'PDF thumbnail was not drawn');
+    assert(imageCall[2]==='JPEG','PDF thumbnail must be embedded as JPEG');
+    assert(imageCall[3]>=10 && imageCall[3]+imageCall[5]<=140,'PDF thumbnail x bounds escaped card');
+    assert(imageCall[4]>=20 && imageCall[4]+imageCall[6]<=68,'PDF thumbnail y bounds escaped card');
+    assert(calls.some(call=>call[0]==='rect' && call[4]>0),'PDF exercise box/table rects missing');
+    window.__results={suite:'pdf-critical',imageCall};
+  `);
 }
 
 function syncSuite() {
@@ -591,17 +627,19 @@ function textblockSuite() {
 function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) {
-    console.log("Usage: node release-pipeline/kgg_html_logic_smoke.js [--suite all|sync|sync-critical|sync-regression|native-sync|native-sync-regression|textblocks|textblocks-critical|textblocks-regression]");
+    console.log("Usage: node release-pipeline/kgg_html_logic_smoke.js [--suite all|sync|sync-critical|sync-regression|native-sync|native-sync-regression|pdf|pdf-critical|textblocks|textblocks-critical|textblocks-regression]");
     return 0;
   }
   const results = {};
   if (args.suite === "sync-critical") results.syncCritical = syncCriticalSuite();
   if (args.suite === "textblocks-critical") results.textblocksCritical = textblockCriticalSuite();
+  if (args.suite === "pdf-critical") results.pdfCritical = pdfCriticalSuite();
   if (args.suite === "sync-regression") results.sync = syncSuite();
   if (args.suite === "native-sync-regression") results.nativeSync = nativeSyncSuite();
   if (args.suite === "textblocks-regression") results.textblocks = textblockSuite();
   if (args.suite === "all" || args.suite === "sync") results.sync = syncSuite();
   if (args.suite === "all" || args.suite === "native-sync") results.nativeSync = nativeSyncSuite();
+  if (args.suite === "all" || args.suite === "pdf") results.pdf = pdfCriticalSuite();
   if (args.suite === "all" || args.suite === "textblocks") results.textblocks = textblockSuite();
   console.log(JSON.stringify({ ok: true, suite: args.suite, results }, null, 2));
   return 0;
