@@ -198,24 +198,30 @@ def run_android_wrapper_contract() -> None:
     )
     build_gradle = (ROOT / "android-wrapper" / "app" / "build.gradle").read_text(encoding="utf-8")
     android_manifest = (ROOT / "android-wrapper" / "app" / "src" / "main" / "AndroidManifest.xml").read_text(encoding="utf-8")
+    file_paths = (ROOT / "android-wrapper" / "app" / "src" / "main" / "res" / "xml" / "kgg_file_paths.xml").read_text(
+        encoding="utf-8"
+    )
     expected_shell = str(manifest.get("latestAndroidShellVersion", "")).lstrip("v")
     required = [
         (f"ANDROID_SHELL_VERSION = {expected_shell}", "MainActivity shell version must match android_update_manifest"),
-        ("BUNDLED_WEB_VERSION = 418", "Android bundled web version must point at r0418"),
-        ("BUILD_CODE = \"v400-r0418-icon-pdf-bridge\"", "Android v400 build code"),
+        ("BUNDLED_WEB_VERSION = 419", "Android bundled web version must point at r0419"),
+        ("BUILD_CODE = \"v401-r0419-share-apk-provider\"", "Android v401 build code"),
         ("PdfRenderer", "internal Android PDF renderer fallback"),
         ("openPdfFileInternally", "internal Android PDF preview method"),
         ("intent.resolveActivity(getPackageManager()) == null", "external PDF viewer absence check"),
         ("window.KGGNativePdf", "native PDF bootstrap bridge"),
         ("if (!window.KGGNativePdf && window.KGGAndroidPdf)", "native PDF bridge must register independently"),
         ("print: function(filename, base64)", "native PDF print wrapper"),
-        ("from(\"../../therapist-app/releases/web/r0418/admin.html\")", "Admin APK bundles r0418"),
-        ("from(\"../../therapist-app/releases/web/r0418/colleague.html\")", "Colleague APK bundles r0418"),
-        ("versionName \"0.2.10-v400-icon-pdf-bridge\"", "Android v400 gradle version name"),
+        ("from(\"../../therapist-app/releases/web/r0419/admin.html\")", "Admin APK bundles r0419"),
+        ("from(\"../../therapist-app/releases/web/r0419/colleague.html\")", "Colleague APK bundles r0419"),
+        ("versionName \"0.2.11-v401-share-apk-provider\"", "Android v401 gradle version name"),
         ("android:icon=\"@mipmap/ic_launcher\"", "launcher icon manifest entry"),
         ("android:roundIcon=\"@mipmap/ic_launcher_round\"", "round launcher icon manifest entry"),
+        ('<cache-path name="apk_cache" path="apk/" />', "FileProvider must expose APK cache files"),
+        ("rememberPendingApkFile(apkFile, versionLabel, false)", "background APK checks must not request installer"),
+        ("if (force) {\n                    runOnUiThread(() -> installApkFile(apkFile, versionLabel));", "explicit APK check may open installer"),
     ]
-    haystacks = "\n".join([main_activity, bootstrap, build_gradle, android_manifest])
+    haystacks = "\n".join([main_activity, bootstrap, build_gradle, android_manifest, file_paths])
     missing = [reason for token, reason in required if token not in haystacks]
     if missing:
         raise BatteryError("Android wrapper contract missing: " + ", ".join(missing))
