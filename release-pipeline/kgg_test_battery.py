@@ -201,16 +201,17 @@ def run_android_wrapper_contract() -> None:
     expected_shell = str(manifest.get("latestAndroidShellVersion", "")).lstrip("v")
     required = [
         (f"ANDROID_SHELL_VERSION = {expected_shell}", "MainActivity shell version must match android_update_manifest"),
-        ("BUNDLED_WEB_VERSION = 414", "Android bundled web version must point at r0414"),
-        ("BUILD_CODE = \"v399-r0414-qr-print-pdf-fallback-icon\"", "Android v399 build code"),
+        ("BUNDLED_WEB_VERSION = 418", "Android bundled web version must point at r0418"),
+        ("BUILD_CODE = \"v400-r0418-icon-pdf-bridge\"", "Android v400 build code"),
         ("PdfRenderer", "internal Android PDF renderer fallback"),
         ("openPdfFileInternally", "internal Android PDF preview method"),
         ("intent.resolveActivity(getPackageManager()) == null", "external PDF viewer absence check"),
         ("window.KGGNativePdf", "native PDF bootstrap bridge"),
+        ("if (!window.KGGNativePdf && window.KGGAndroidPdf)", "native PDF bridge must register independently"),
         ("print: function(filename, base64)", "native PDF print wrapper"),
-        ("from(\"../../therapist-app/releases/web/r0414/admin.html\")", "Admin APK bundles r0414"),
-        ("from(\"../../therapist-app/releases/web/r0414/colleague.html\")", "Colleague APK bundles r0414"),
-        ("versionName \"0.2.9-v399-qr-print-pdf-fallback\"", "Android v399 gradle version name"),
+        ("from(\"../../therapist-app/releases/web/r0418/admin.html\")", "Admin APK bundles r0418"),
+        ("from(\"../../therapist-app/releases/web/r0418/colleague.html\")", "Colleague APK bundles r0418"),
+        ("versionName \"0.2.10-v400-icon-pdf-bridge\"", "Android v400 gradle version name"),
         ("android:icon=\"@mipmap/ic_launcher\"", "launcher icon manifest entry"),
         ("android:roundIcon=\"@mipmap/ic_launcher_round\"", "round launcher icon manifest entry"),
     ]
@@ -218,11 +219,16 @@ def run_android_wrapper_contract() -> None:
     missing = [reason for token, reason in required if token not in haystacks]
     if missing:
         raise BatteryError("Android wrapper contract missing: " + ", ".join(missing))
+    if "if (window.KGGNativeSync || !window.KGGAndroidSync) return;" in bootstrap:
+        raise BatteryError("Android bootstrap must not let Sync availability block PDF/Camera/AppUpdate bridges.")
     for density in ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]:
         for name in ["ic_launcher.png", "ic_launcher_round.png"]:
             icon = ROOT / "android-wrapper" / "app" / "src" / "main" / "res" / f"mipmap-{density}" / name
             if not icon.exists() or icon.stat().st_size < 500:
                 raise BatteryError(f"Android launcher icon missing or too small: {icon}")
+            admin_icon = ROOT / "android-wrapper" / "app" / "src" / "admin" / "res" / f"mipmap-{density}" / name
+            if not admin_icon.exists() or admin_icon.stat().st_size < 500:
+                raise BatteryError(f"Android admin launcher icon override missing or too small: {admin_icon}")
     log("Android wrapper contract OK")
 
 
