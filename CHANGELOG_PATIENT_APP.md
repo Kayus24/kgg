@@ -1,5 +1,24 @@
 # Patient App Changelog
 
+## 2026-06-18 – Numpad input morph polish
+
+### Changed
+- The large numpad value field now starts visually from the tapped kg/Wdh input before expanding into the popup value field.
+- The tapped source input stays highlighted while the numpad is open.
+- The transition uses a short shared-element style morph so the popup feels more like an enlarged input field.
+- Service worker cache bumped to `kgg-handyplan-v38-input-morph-polish`.
+
+### Files
+- `patient-numpad-visibility-fix.js`
+- `service-worker.js`
+
+### Commits
+- `5f268f5326135cc46bdb171233a73f6f8e0b8715`
+- `ed121485ec11bfaa1e3def86c041ed930b443d91`
+
+### Safety
+- No changes to PDF, QR, parser, scan/OCR, media/image logic, storage, exercise database, card collapse behavior, or numpad value logic.
+
 ## 2026-06-18 – Numpad outside-tap card guard
 
 ### Changed
