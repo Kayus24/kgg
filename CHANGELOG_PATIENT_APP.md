@@ -1,5 +1,23 @@
 # Patient App Changelog
 
+## 2026-06-18 – Numpad outside-tap card guard
+
+### Changed
+- Closing the patient numpad by tapping outside should no longer collapse the opened exercise card.
+- Added a small guard module and injected it through the service worker.
+- Service worker cache bumped to `kgg-handyplan-v37-numpad-card-close-fix`.
+
+### Files
+- `patient-numpad-card-guard.js`
+- `service-worker.js`
+
+### Commits
+- `140601d8e26b114665682b1a93204aa9006cc6e9`
+- `39cbad37897ae2aa3949bd220fa68c765b527e1e`
+
+### Safety
+- No changes to PDF, QR, parser, scan/OCR, media/image logic, storage, exercise database, or main exercise layout.
+
 ## 2026-06-18 – QR fullscreen high-contrast display
 
 ### Changed
