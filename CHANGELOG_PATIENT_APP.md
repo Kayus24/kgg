@@ -1,5 +1,25 @@
 # Patient App Changelog
 
+## 2026-06-18 – QR fullscreen high-contrast display
+
+### Changed
+- Tapping a generated patient QR code now opens it in a fullscreen high-contrast view.
+- The fullscreen QR view uses a white background and scales the QR as large as possible for therapist camera scanning.
+- The fullscreen view can be closed with the close button, tapping the white backdrop, or Escape on desktop.
+- A screen wake lock is requested when supported, so the QR screen is less likely to dim while being scanned.
+
+### Files
+- `patient-qr-fullscreen.js`
+- `service-worker.js`
+
+### Commits
+- `452a3e6769626d4bae8ea099b83c37ef542f5be7`
+- `231c29717fe9433797338caed4f3baf0c86ad340`
+
+### Safety
+- QR payload/generation unchanged.
+- No changes to PDF, parser, scan/OCR, storage, Numpad, exercise database logic, or main exercise layout.
+
 ## 2026-06-18 – Open-card image lightbox
 
 ### Changed
