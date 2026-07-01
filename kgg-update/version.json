@@ -1,7 +1,7 @@
 {
-  "versionCode": 52,
-  "versionName": "1.0.52-pdf-plan-thumbnails",
-  "indexUrl": "index.html?v=52",
-  "sha256": "5cd5e487651ff71ef6ff2db4c00baef24fc65718faa2e07c15da1685e6117960",
-  "notes": "v052: PDF-Trainingskarten zeigen lokale Schwarzweiss-Uebungsbilder oben rechts, ohne Kartenhoehe zu vergroessern."
+  "versionCode": 53,
+  "versionName": "1.0.53-ui-tablet-stability",
+  "indexUrl": "index.html?v=53",
+  "sha256": "c8f2a095204b2adceca9d313ae78da9f9efaf95f7027bed18515cd04ae09971c",
+  "notes": "v053: Phone-Dock bleibt bei Tastatur stabil, Tablet-Swipe und Tablet-Editor werden repariert."
 }

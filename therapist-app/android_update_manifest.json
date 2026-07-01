@@ -4,15 +4,15 @@
   "schema": 2,
   "channels": {
     "admin": {
-      "releaseId": "r0415",
+      "releaseId": "r0417",
       "profile": "admin",
-      "versionName": "1.0.52-pdf-plan-thumbnails-r0415",
-      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0415/admin.html",
-      "sha256": "5cd5e487651ff71ef6ff2db4c00baef24fc65718faa2e07c15da1685e6117960",
-      "notes": "v052: PDF-Trainingskarten zeigen lokale Schwarzweiss-Uebungsbilder oben rechts, ohne Kartenhoehe zu vergroessern.",
-      "rolloutCode": 415,
-      "previousReleaseId": "r0414",
-      "releasedAt": "2026-07-01T08:35:07Z"
+      "versionName": "v053-ui-tablet-stability",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0417/admin.html",
+      "sha256": "c8f2a095204b2adceca9d313ae78da9f9efaf95f7027bed18515cd04ae09971c",
+      "notes": "v053: Phone-Dock bleibt bei Tastatur stabil, Tablet-Swipe zum Loeschen funktioniert wieder, Tablet-Editor nutzt eine zweispaltige Aufteilung.",
+      "rolloutCode": 417,
+      "previousReleaseId": "r0416",
+      "releasedAt": "2026-07-01T18:08:13Z"
     },
     "colleague": {
       "releaseId": "r0397",
@@ -30,8 +30,8 @@
   "latestAndroidShellVersion": "v399",
   "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0397/colleague.html",
   "colleagueSha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
-  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0415/admin.html",
-  "adminSha256": "5cd5e487651ff71ef6ff2db4c00baef24fc65718faa2e07c15da1685e6117960",
+  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0417/admin.html",
+  "adminSha256": "c8f2a095204b2adceca9d313ae78da9f9efaf95f7027bed18515cd04ae09971c",
   "sha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
   "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v399/android/KGG_ANDROID_KOLLEGEN_v399_qr_print_pdf_fallback_icon_debug.apk",
   "androidApkSha256": "83e4c41f9a993af391609f3b7416ead23507eeee981a61c1a96c6e1d553c1075",
@@ -39,7 +39,7 @@
   "colleagueAndroidApkSha256": "83e4c41f9a993af391609f3b7416ead23507eeee981a61c1a96c6e1d553c1075",
   "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v399/android/KGG_ANDROID_ADMIN_v399_qr_print_pdf_fallback_icon_debug.apk",
   "adminAndroidApkSha256": "bdf1cb58660c03ca00f27a97337561a04530ab1de33a99678f8d6c7b8ec60781",
-  "notes": "Admin beta r0415: v052: PDF-Trainingskarten zeigen lokale Schwarzweiss-Uebungsbilder oben rechts, ohne Kartenhoehe zu vergroessern.",
+  "notes": "Admin beta r0417: v053: Phone-Dock bleibt bei Tastatur stabil, Tablet-Swipe zum Loeschen funktioniert wieder, Tablet-Editor nutzt eine zweispaltige Aufteilung.",
   "latestAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v399/android/KGG_ANDROID_KOLLEGEN_v399_qr_print_pdf_fallback_icon_debug.apk",
   "latestAndroidApkSha256": "83e4c41f9a993af391609f3b7416ead23507eeee981a61c1a96c6e1d553c1075",
   "latestColleagueAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v399/android/KGG_ANDROID_KOLLEGEN_v399_qr_print_pdf_fallback_icon_debug.apk",

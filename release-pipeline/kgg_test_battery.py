@@ -505,6 +505,13 @@ TEST_REGISTRY = [
         "run": lambda: run_ui_stability("regression", "tablet-layout-visual"),
     },
     {
+        "id": "ui-tablet-editor-layout",
+        "level": "regression",
+        "suite": "ui-stability",
+        "reason": "Tablet exercise editing must stay split into usable columns without hiding the save/cancel actions.",
+        "run": lambda: run_ui_stability("regression", "tablet-editor-layout"),
+    },
+    {
         "id": "ui-tablet-app-boot",
         "level": "regression",
         "suite": "ui-stability",
