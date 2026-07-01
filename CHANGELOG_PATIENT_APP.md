@@ -1,5 +1,25 @@
 # Patient App Changelog
 
+## 2026-06-18 – Open-card image lightbox
+
+### Changed
+- Images inside opened exercise cards can now be tapped to open a larger full-screen view.
+- The lightbox closes with the close button, tapping the dark backdrop, or Escape on desktop.
+- Closed-card thumbnails stay preview-only and do not open the lightbox.
+
+### Files
+- `patient-media-retry-cache_v2.js`
+- `service-worker.js`
+
+### Commits
+- `4696df02e690e1df87d142d327a5a04f32962f2c`
+- `a19c536430c5aa48c5dd6c25ac39dc2931326d3e`
+
+### Safety
+- No changes to PDF.
+- No changes to QR generation.
+- No changes to parser, scan/OCR, storage, Numpad, or exercise database logic.
+
 ## 2026-06-18 – Light KGG web app icon
 
 ### Changed
