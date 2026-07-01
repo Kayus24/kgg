@@ -2,6 +2,7 @@ package de.kgg.app;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ContentValues;
@@ -9,7 +10,9 @@ import android.content.SharedPreferences;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -30,11 +33,16 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.JavascriptInterface;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.window.OnBackInvokedDispatcher;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.core.content.FileProvider;
@@ -53,6 +61,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -60,10 +69,10 @@ public class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST = 4201;
     private static final int CAMERA_PERMISSION_REQUEST = 4202;
     private static final int RELEASE_HTML_REQUEST = 4301;
-    private static final int ANDROID_SHELL_VERSION = 398;
-    private static final int BUNDLED_WEB_VERSION = 400;
-    private static final String BUILD_TIME = "2026-06-24T12:30:00+02:00";
-    private static final String BUILD_CODE = "r0400-no-boot-redirect-force-bundled-html";
+    private static final int ANDROID_SHELL_VERSION = 399;
+    private static final int BUNDLED_WEB_VERSION = 414;
+    private static final String BUILD_TIME = "2026-07-01T00:00:00+02:00";
+    private static final String BUILD_CODE = "v399-r0414-qr-print-pdf-fallback-icon";
     private static final int MAX_HTML_UPDATE_BYTES = 5_500_000;
     private static final int MAX_APK_UPDATE_BYTES = 80_000_000;
     private static final long APK_UPDATE_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000L;
@@ -947,10 +956,109 @@ public class MainActivity extends Activity {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setDataAndType(uri, "application/pdf");
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            if (intent.resolveActivity(getPackageManager()) == null) {
+                return openPdfFileInternally(file);
+            }
             startActivity(intent);
             return true;
+        } catch (ActivityNotFoundException err) {
+            return openPdfFileInternally(file);
         } catch (Exception err) {
-            Toast.makeText(this, "Kein PDF-Viewer gefunden", Toast.LENGTH_SHORT).show();
+            boolean openedInternally = openPdfFileInternally(file);
+            if (!openedInternally) {
+                Toast.makeText(this, "PDF konnte nicht geoeffnet werden", Toast.LENGTH_SHORT).show();
+            }
+            return openedInternally;
+        }
+    }
+
+    private boolean openPdfFileInternally(File file) {
+        ArrayList<Bitmap> bitmaps = new ArrayList<>();
+        try {
+            if (file == null || !file.exists() || file.length() <= 0) {
+                return false;
+            }
+            ParcelFileDescriptor descriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+            PdfRenderer renderer = new PdfRenderer(descriptor);
+            int pageCount = renderer.getPageCount();
+            int maxPages = Math.min(pageCount, 10);
+            LinearLayout content = new LinearLayout(this);
+            content.setOrientation(LinearLayout.VERTICAL);
+            content.setPadding(24, 24, 24, 24);
+            content.setBackgroundColor(Color.rgb(245, 248, 252));
+
+            TextView title = new TextView(this);
+            title.setText("KGG PDF-Vorschau");
+            title.setTextColor(Color.rgb(7, 16, 39));
+            title.setTextSize(20);
+            title.setGravity(Gravity.CENTER_VERTICAL);
+            title.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+            content.addView(title, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            ));
+
+            if (pageCount > maxPages) {
+                TextView note = new TextView(this);
+                note.setText("Vorschau zeigt die ersten " + maxPages + " von " + pageCount + " Seiten. Download/Druck bleiben vollstaendig.");
+                note.setTextColor(Color.rgb(102, 112, 133));
+                note.setTextSize(13);
+                note.setPadding(0, 8, 0, 12);
+                content.addView(note);
+            }
+
+            for (int index = 0; index < maxPages; index++) {
+                PdfRenderer.Page page = renderer.openPage(index);
+                int targetWidth = Math.min(1200, Math.max(720, getResources().getDisplayMetrics().widthPixels - 48));
+                int targetHeight = Math.max(1, Math.round(targetWidth * (page.getHeight() / (float) page.getWidth())));
+                Bitmap bitmap = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888);
+                bitmap.eraseColor(Color.WHITE);
+                page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+                page.close();
+                bitmaps.add(bitmap);
+
+                ImageView image = new ImageView(this);
+                image.setAdjustViewBounds(true);
+                image.setBackgroundColor(Color.WHITE);
+                image.setImageBitmap(bitmap);
+                LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+                imageParams.setMargins(0, 16, 0, 16);
+                content.addView(image, imageParams);
+            }
+            renderer.close();
+            descriptor.close();
+
+            ScrollView scroll = new ScrollView(this);
+            scroll.addView(content);
+
+            Dialog dialog = new Dialog(this);
+            dialog.setTitle("KGG PDF");
+            dialog.setContentView(scroll);
+            dialog.setOnDismissListener(ignored -> {
+                for (Bitmap bitmap : bitmaps) {
+                    if (bitmap != null && !bitmap.isRecycled()) {
+                        bitmap.recycle();
+                    }
+                }
+            });
+            dialog.setOnShowListener(ignored -> {
+                Window shown = dialog.getWindow();
+                if (shown != null) {
+                    shown.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
+                }
+            });
+            dialog.show();
+            Toast.makeText(this, "Interne PDF-Vorschau geoeffnet", Toast.LENGTH_SHORT).show();
+            return true;
+        } catch (Exception err) {
+            for (Bitmap bitmap : bitmaps) {
+                if (bitmap != null && !bitmap.isRecycled()) {
+                    bitmap.recycle();
+                }
+            }
             return false;
         }
     }

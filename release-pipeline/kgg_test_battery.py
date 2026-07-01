@@ -187,6 +187,45 @@ def run_native_sync() -> None:
     run_native_sync_bridge_contract()
 
 
+def run_android_wrapper_contract() -> None:
+    log("== Android wrapper contract ==")
+    manifest = json.loads((ROOT / "therapist-app" / "android_update_manifest.json").read_text(encoding="utf-8"))
+    main_activity = (ROOT / "android-wrapper" / "app" / "src" / "main" / "java" / "de" / "kgg" / "app" / "MainActivity.java").read_text(
+        encoding="utf-8"
+    )
+    bootstrap = (ROOT / "android-wrapper" / "app" / "src" / "main" / "assets" / "android" / "kgg_android_sync_bootstrap.js").read_text(
+        encoding="utf-8"
+    )
+    build_gradle = (ROOT / "android-wrapper" / "app" / "build.gradle").read_text(encoding="utf-8")
+    android_manifest = (ROOT / "android-wrapper" / "app" / "src" / "main" / "AndroidManifest.xml").read_text(encoding="utf-8")
+    expected_shell = str(manifest.get("latestAndroidShellVersion", "")).lstrip("v")
+    required = [
+        (f"ANDROID_SHELL_VERSION = {expected_shell}", "MainActivity shell version must match android_update_manifest"),
+        ("BUNDLED_WEB_VERSION = 414", "Android bundled web version must point at r0414"),
+        ("BUILD_CODE = \"v399-r0414-qr-print-pdf-fallback-icon\"", "Android v399 build code"),
+        ("PdfRenderer", "internal Android PDF renderer fallback"),
+        ("openPdfFileInternally", "internal Android PDF preview method"),
+        ("intent.resolveActivity(getPackageManager()) == null", "external PDF viewer absence check"),
+        ("window.KGGNativePdf", "native PDF bootstrap bridge"),
+        ("print: function(filename, base64)", "native PDF print wrapper"),
+        ("from(\"../../therapist-app/releases/web/r0414/admin.html\")", "Admin APK bundles r0414"),
+        ("from(\"../../therapist-app/releases/web/r0414/colleague.html\")", "Colleague APK bundles r0414"),
+        ("versionName \"0.2.9-v399-qr-print-pdf-fallback\"", "Android v399 gradle version name"),
+        ("android:icon=\"@mipmap/ic_launcher\"", "launcher icon manifest entry"),
+        ("android:roundIcon=\"@mipmap/ic_launcher_round\"", "round launcher icon manifest entry"),
+    ]
+    haystacks = "\n".join([main_activity, bootstrap, build_gradle, android_manifest])
+    missing = [reason for token, reason in required if token not in haystacks]
+    if missing:
+        raise BatteryError("Android wrapper contract missing: " + ", ".join(missing))
+    for density in ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]:
+        for name in ["ic_launcher.png", "ic_launcher_round.png"]:
+            icon = ROOT / "android-wrapper" / "app" / "src" / "main" / "res" / f"mipmap-{density}" / name
+            if not icon.exists() or icon.stat().st_size < 500:
+                raise BatteryError(f"Android launcher icon missing or too small: {icon}")
+    log("Android wrapper contract OK")
+
+
 def run_patch_hygiene() -> None:
     log("== Patch hygiene check ==")
     run([sys.executable, "release-pipeline/kgg_patch_hygiene.py"])
@@ -345,6 +384,13 @@ TEST_REGISTRY = [
         "suite": "security",
         "reason": "API keys or tokens must never enter release-controlled files.",
         "run": run_secret_scan,
+    },
+    {
+        "id": "android-wrapper-contract",
+        "level": "critical",
+        "suite": "android",
+        "reason": "Android shell metadata, bundled web assets, launcher icon and PDF fallback must stay wired before APK PRs merge.",
+        "run": run_android_wrapper_contract,
     },
     {
         "id": "mobile-inbox-dry-run",
@@ -529,7 +575,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--suite",
-        choices=["all", "hygiene", "mobile-inbox", "sync", "native-sync", "textblocks", "ui-stability", "syntax", "security", "release"],
+        choices=["all", "hygiene", "mobile-inbox", "sync", "native-sync", "textblocks", "ui-stability", "syntax", "security", "release", "android"],
         default=None,
         help="Optionally limit to one suite. Without --level this keeps legacy behavior and runs all non-live tests in that suite.",
     )

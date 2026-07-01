@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0414",
+  "versionName": "1.0.51-android-qr-pdf-r0414",
+  "notes": "v051: Kolleg:innen-App/APK-QR drucken, Android-v399-PDF-Fallback und KGG-Icon.",
+  "createdAt": "2026-07-01T08:12:54Z",
+  "source": "kgg-update/index.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0414",
+      "profile": "admin",
+      "versionName": "1.0.51-android-qr-pdf-r0414",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0414/admin.html",
+      "sha256": "f496813d5ce139f11a1b6da8615edfea56a8ea0864c183c6e603aba9c5220410",
+      "notes": "v051: Kolleg:innen-App/APK-QR drucken, Android-v399-PDF-Fallback und KGG-Icon."
+    },
+    "colleague": {
+      "releaseId": "r0414",
+      "profile": "colleague",
+      "versionName": "1.0.51-android-qr-pdf-r0414",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0414/colleague.html",
+      "sha256": "cc14f7ca8a3d3260b7dd8071ed37277930c845af4adc41786ae3f66aa5f3b8e5",
+      "notes": "v051: Kolleg:innen-App/APK-QR drucken, Android-v399-PDF-Fallback und KGG-Icon."
+    }
+  }
+}

@@ -95,6 +95,11 @@ function staticGestureGuardSuite() {
   assertIncludes(html, "document.getElementById('syncQrBtn')", "device sync opens sync dialog through sync button");
   assertRegex(html, /tabletMenuTherapistShareBtn[\s\S]{0,260}openKggTherapistAppOnlyQr\(\)/, "therapist share opens app QR directly");
   assertIncludes(html, "Kolleg:innen-App APK QR", "colleague APK share QR label");
+  assertIncludes(html, "kgg-v051-android-qr-pdf-bridge", "v051 Android QR/PDF bridge marker");
+  assertIncludes(html, 'id="kggAdminMenuQrPrint"', "admin QR print button");
+  assertIncludes(html, "function buildKggAdminMenuQrPrintPdf", "admin QR print PDF builder");
+  assertIncludes(html, "function printKggAdminMenuQr", "admin QR print handler");
+  assertIncludes(html, "window.KGG_ANDROID_QR_PDF_BRIDGE_V051", "v051 public probe");
 
   console.log("Static UI stability guards OK");
 }

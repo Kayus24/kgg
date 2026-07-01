@@ -4,15 +4,15 @@
   "schema": 2,
   "channels": {
     "admin": {
-      "releaseId": "r0413",
+      "releaseId": "r0414",
       "profile": "admin",
-      "versionName": "1.0.50-phone-ui-mini-r0413",
-      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0413/admin.html",
-      "sha256": "a3ae215a39a15d2ca84babec7984a63d58d2b09372861f230b3581a44c26af11",
-      "notes": "v050: Phone-UI-Mini-Fix fuer Plan-Menue, Plan-Historie und inline Scan-Fotooptionen.",
-      "rolloutCode": 412,
-      "previousReleaseId": "r0412",
-      "releasedAt": "2026-07-01T07:51:29Z"
+      "versionName": "1.0.51-android-qr-pdf-r0414",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0414/admin.html",
+      "sha256": "f496813d5ce139f11a1b6da8615edfea56a8ea0864c183c6e603aba9c5220410",
+      "notes": "v051: Kolleg:innen-App/APK-QR drucken, Android-v399-PDF-Fallback und KGG-Icon.",
+      "rolloutCode": 414,
+      "previousReleaseId": "r0414",
+      "releasedAt": "2026-07-01T08:12:54Z"
     },
     "colleague": {
       "releaseId": "r0397",
@@ -27,17 +27,23 @@
     }
   },
   "latestWebVersion": "r0397",
-  "latestAndroidShellVersion": "v398",
+  "latestAndroidShellVersion": "v399",
   "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0397/colleague.html",
   "colleagueSha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
-  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0413/admin.html",
-  "adminSha256": "a3ae215a39a15d2ca84babec7984a63d58d2b09372861f230b3581a44c26af11",
+  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0414/admin.html",
+  "adminSha256": "f496813d5ce139f11a1b6da8615edfea56a8ea0864c183c6e603aba9c5220410",
   "sha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
-  "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v398/android/KGG_ANDROID_KOLLEGEN_v398_force_r0400_html_debug.apk",
-  "androidApkSha256": "c4a4e022a7bfa2511538f18bb80c025eb4a1057a186637ac12146ea55dd807ed",
-  "colleagueAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v398/android/KGG_ANDROID_KOLLEGEN_v398_force_r0400_html_debug.apk",
-  "colleagueAndroidApkSha256": "c4a4e022a7bfa2511538f18bb80c025eb4a1057a186637ac12146ea55dd807ed",
-  "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v398/android/KGG_ANDROID_ADMIN_v398_force_r0400_html_debug.apk",
-  "adminAndroidApkSha256": "e64553647a10a5fa4286f319b6a4284052c0c030b93b5150f9ac8ef0a1708c34",
-  "notes": "Admin beta r0413: v050: Phone-UI-Mini-Fix fuer Plan-Menue, Plan-Historie und inline Scan-Fotooptionen."
+  "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v399/android/KGG_ANDROID_KOLLEGEN_v399_qr_print_pdf_fallback_icon_debug.apk",
+  "androidApkSha256": "83e4c41f9a993af391609f3b7416ead23507eeee981a61c1a96c6e1d553c1075",
+  "colleagueAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v399/android/KGG_ANDROID_KOLLEGEN_v399_qr_print_pdf_fallback_icon_debug.apk",
+  "colleagueAndroidApkSha256": "83e4c41f9a993af391609f3b7416ead23507eeee981a61c1a96c6e1d553c1075",
+  "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v399/android/KGG_ANDROID_ADMIN_v399_qr_print_pdf_fallback_icon_debug.apk",
+  "adminAndroidApkSha256": "bdf1cb58660c03ca00f27a97337561a04530ab1de33a99678f8d6c7b8ec60781",
+  "notes": "Admin beta r0414 + Android v399: QR-Druck fuer Kolleg:innen-App/APK, KGG-Icon und interner PDF-Fallback.",
+  "latestAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v399/android/KGG_ANDROID_KOLLEGEN_v399_qr_print_pdf_fallback_icon_debug.apk",
+  "latestAndroidApkSha256": "83e4c41f9a993af391609f3b7416ead23507eeee981a61c1a96c6e1d553c1075",
+  "latestColleagueAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v399/android/KGG_ANDROID_KOLLEGEN_v399_qr_print_pdf_fallback_icon_debug.apk",
+  "latestColleagueAndroidApkSha256": "83e4c41f9a993af391609f3b7416ead23507eeee981a61c1a96c6e1d553c1075",
+  "latestAdminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v399/android/KGG_ANDROID_ADMIN_v399_qr_print_pdf_fallback_icon_debug.apk",
+  "latestAdminAndroidApkSha256": "bdf1cb58660c03ca00f27a97337561a04530ab1de33a99678f8d6c7b8ec60781"
 }
