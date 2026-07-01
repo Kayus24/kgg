@@ -155,7 +155,11 @@ function staticUiMiniSeriesGuardSuite(caseName) {
     assertIncludes(html, "kggPhoneAdminMenu", "phone admin submenu");
     assertIncludes(html, "kgg-v042-phone-dock-anchored-correction", "v042 anchored phone dock correction");
     assertIncludes(html, "kgg-v044-phone-liquid-actions", "v044 phone liquid actions marker");
+    assertIncludes(html, "kgg-v050-phone-ui-mini-fix", "v050 phone mini-fix marker");
+    assertIncludes(html, "KGG_UI_PHONE_MINI_FIX_V050", "v050 phone mini-fix public probe");
     assertIncludes(html, "header.appendChild(menu)", "phone admin menu anchored in plan header");
+    assertIncludes(html, "top:8px!important", "phone plan admin menu top anchor");
+    assertIncludes(html, "right:88px!important", "phone plan admin menu right anchor");
     assertIncludes(html, "kggPhoneUpdateCenterMenu", "phone update center submenu entry");
     assertIncludes(html, "kggPhoneDeviceSyncMenu", "phone device sync submenu entry");
     assertIncludes(html, "kggPhoneTherapistShareMenu", "phone colleague app share submenu entry");
@@ -182,6 +186,10 @@ function staticUiMiniSeriesGuardSuite(caseName) {
     assertIncludes(html, "window.KGGScan.pick(\"file\")", "phone gallery picker route");
     assertIncludes(html, "kggPhoneHasPlan", "phone plan-state dock class");
     assertIncludes(html, "backdrop-filter:blur(30px)", "strong liquid glass dock style");
+    assertIncludes(html, "kggPhoneScanMenuInline", "v050 inline scan photo menu mode");
+    assertIncludes(html, "body.kggPhonePhotoMenuOpen #scanHub.kggPhoneScanMenuInline", "v050 scan button grows vertically when photo menu opens");
+    assertIncludes(html, "#scanHub.kggPhoneScanMenuInline #kggPhonePhotoMenu", "v050 photo menu lives inside scan hub");
+    assertIncludes(html, "content:none!important", "v050 scan chevron divider is removed");
     assertIncludes(html, ".planActions.hasPlan #recentToggle", "phone recent toggle non-collapse override");
     assertIncludes(html, "min-width:148px", "phone recent toggle stays readable");
     assertRegex(html, /#scanHub[\s\S]{0,420}position:fixed!important/, "phone scanHub fixed bottom dock");
@@ -650,7 +658,29 @@ async function browserUiMiniSeriesSuite(caseName) {
           groups: Array.from(document.querySelectorAll("#kggPhoneAdminMenuPanel [data-kgg-phone-menu-group]")).map((node) => node.getAttribute("data-kgg-phone-menu-group")),
           anchored: !!document.querySelector("#createPanel .planHeader #kggPhoneAdminMenu"),
           position: getComputedStyle(document.getElementById("kggPhoneAdminMenu")).position,
+          planHeader: (() => {
+            const header = document.querySelector("#createPanel .planHeader");
+            const menuNode = document.getElementById("kggPhoneAdminMenu");
+            const add = document.getElementById("planAddPackageBtn");
+            const rect = (node) => {
+              if (!node) return null;
+              const r = node.getBoundingClientRect();
+              return { left: Math.round(r.left), right: Math.round(r.right), top: Math.round(r.top), width: Math.round(r.width) };
+            };
+            return {
+              header: rect(header),
+              menu: rect(menuNode),
+              add: rect(add),
+              rightCss: menuNode ? getComputedStyle(menuNode).right : "",
+              transform: menuNode ? getComputedStyle(menuNode).transform : "",
+            };
+          })(),
         }));
+        const menuRect = menu.planHeader.menu || {};
+        const headerRect = menu.planHeader.header || {};
+        const addRect = menu.planHeader.add || {};
+        const menuRightAnchored = menuRect.left > (headerRect.left || 0) + ((headerRect.width || 0) * 0.45);
+        const menuBeforeAddButton = !addRect.left || menuRect.right <= addRect.left + 10;
         if (
           !menu.panelOpen ||
           !menu.update ||
@@ -663,7 +693,11 @@ async function browserUiMiniSeriesSuite(caseName) {
           !menu.groups.includes("sync-share") ||
           !menu.groups.includes("admin") ||
           !menu.anchored ||
-          menu.position === "fixed"
+          menu.position === "fixed" ||
+          menu.planHeader.rightCss !== "88px" ||
+          menu.planHeader.transform !== "none" ||
+          !menuRightAnchored ||
+          !menuBeforeAddButton
         ) {
           fail(`Phone admin submenu failed: ${JSON.stringify(menu)}`);
         }
@@ -698,6 +732,8 @@ async function browserUiMiniSeriesSuite(caseName) {
             recentWidth: recent ? Math.round(recent.getBoundingClientRect().width) : 0,
             recentTextOpacity: recentText ? Number.parseFloat(getComputedStyle(recentText).opacity) : 0,
             recentTextWidth: recentText ? Math.round(recentText.getBoundingClientRect().width) : 0,
+            recentText: recent ? recent.textContent : "",
+            packageWidth: document.getElementById("packageToggle") ? Math.round(document.getElementById("packageToggle").getBoundingClientRect().width) : 0,
           };
         });
         if (
@@ -717,12 +753,35 @@ async function browserUiMiniSeriesSuite(caseName) {
           dock.finishZ >= 90 ||
           !dock.finishLiquid ||
           String(dock.finishBackdrop).toLowerCase() === "none" ||
-          dock.recentWidth < 130 ||
+          dock.recentWidth < 250 ||
+          (dock.packageWidth && dock.recentWidth < dock.packageWidth * 0.88) ||
           dock.recentTextOpacity < 0.9 ||
-          dock.recentTextWidth < 60
+          dock.recentTextWidth < 60 ||
+          !dock.recentText.includes("Plan-His")
         ) {
           fail(`Phone scan dock failed: ${JSON.stringify(dock)}`);
         }
+        const closedScan = await page.evaluate(() => {
+          const hub = document.querySelector(".scanHub");
+          const scan = document.getElementById("scanBtn");
+          const menu = document.getElementById("kggPhonePhotoMenu");
+          const toggle = document.getElementById("phonePhotoMenuToggle");
+          const before = toggle ? getComputedStyle(toggle, "::before") : null;
+          const rect = (node) => {
+            if (!node) return null;
+            const r = node.getBoundingClientRect();
+            return { width: Math.round(r.width), height: Math.round(r.height), top: Math.round(r.top), bottom: Math.round(r.bottom) };
+          };
+          return {
+            hub: rect(hub),
+            scan: rect(scan),
+            menuParent: menu && menu.parentElement ? menu.parentElement.id : "",
+            menuPosition: menu ? getComputedStyle(menu).position : "missing",
+            menuDisplay: menu ? getComputedStyle(menu).display : "missing",
+            dividerDisplay: before ? before.display : "missing",
+            dividerContent: before ? before.content : "missing",
+          };
+        });
         await page.evaluate(() => {
           document.getElementById("phonePhotoMenuToggle").dispatchEvent(
             new MouseEvent("click", { bubbles: true, cancelable: true, composed: true })
@@ -733,9 +792,32 @@ async function browserUiMiniSeriesSuite(caseName) {
           gallery: !!document.getElementById("phonePhotoGallery"),
           camera: !!document.getElementById("phonePhotoCamera"),
           display: getComputedStyle(document.getElementById("kggPhonePhotoMenu")).display,
+          parent: document.getElementById("kggPhonePhotoMenu").parentElement.id,
+          position: getComputedStyle(document.getElementById("kggPhonePhotoMenu")).position,
+          hub: (() => {
+            const r = document.querySelector(".scanHub").getBoundingClientRect();
+            return { width: Math.round(r.width), height: Math.round(r.height), top: Math.round(r.top), bottom: Math.round(r.bottom) };
+          })(),
+          scan: (() => {
+            const r = document.getElementById("scanBtn").getBoundingClientRect();
+            return { width: Math.round(r.width), height: Math.round(r.height), top: Math.round(r.top), bottom: Math.round(r.bottom) };
+          })(),
         }));
-        if (!photoMenu.open || !photoMenu.gallery || !photoMenu.camera || photoMenu.display === "none") {
-          fail(`Phone photo menu failed: ${JSON.stringify(photoMenu)}`);
+        if (
+          !photoMenu.open ||
+          !photoMenu.gallery ||
+          !photoMenu.camera ||
+          photoMenu.display === "none" ||
+          photoMenu.parent !== "scanHub" ||
+          photoMenu.position === "fixed" ||
+          closedScan.menuParent !== "scanHub" ||
+          closedScan.menuPosition === "fixed" ||
+          closedScan.dividerDisplay !== "none" ||
+          Math.abs(photoMenu.hub.width - closedScan.hub.width) > 4 ||
+          photoMenu.hub.height < closedScan.hub.height + 55 ||
+          Math.abs(photoMenu.scan.width - closedScan.scan.width) > 4
+        ) {
+          fail(`Phone inline photo menu failed: ${JSON.stringify({ closedScan, photoMenu })}`);
         }
         const modalLayering = await page.evaluate(() => {
           const hub = document.querySelector(".scanHub");
@@ -752,12 +834,10 @@ async function browserUiMiniSeriesSuite(caseName) {
           };
         });
         if (
-          modalLayering.photoMenuZ <= modalLayering.hubZ ||
-          modalLayering.photoMenuZ <= modalLayering.finishZ ||
           modalLayering.modalZ <= modalLayering.hubZ ||
           modalLayering.modalZ <= modalLayering.finishZ
         ) {
-          fail(`Phone floating layer order failed: ${JSON.stringify(modalLayering)}`);
+          fail(`Phone modal layer order failed: ${JSON.stringify(modalLayering)}`);
         }
       }
 
