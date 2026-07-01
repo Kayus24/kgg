@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0418",
+  "versionName": "v054-patient-qr-latest",
+  "notes": "v054: Trainingsplan-QR nutzt die aktuelle kgg-update Patienten-App-Basis statt des alten Root-Bundles.",
+  "createdAt": "2026-07-01T18:23:42Z",
+  "source": "kgg-update/index.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0418",
+      "profile": "admin",
+      "versionName": "v054-patient-qr-latest",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0418/admin.html",
+      "sha256": "f57ae8db122b6d0d3309704087400e7d710e6d265418fc722c082a6198c6c78c",
+      "notes": "v054: Trainingsplan-QR nutzt die aktuelle kgg-update Patienten-App-Basis statt des alten Root-Bundles."
+    },
+    "colleague": {
+      "releaseId": "r0418",
+      "profile": "colleague",
+      "versionName": "v054-patient-qr-latest",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0418/colleague.html",
+      "sha256": "e6e6566962a0f29c64170e9c8a50d09315e648d69e989f64bae98cec792a5766",
+      "notes": "v054: Trainingsplan-QR nutzt die aktuelle kgg-update Patienten-App-Basis statt des alten Root-Bundles."
+    }
+  }
+}

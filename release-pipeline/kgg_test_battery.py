@@ -421,6 +421,13 @@ TEST_REGISTRY = [
         "run": lambda: run_html_logic("pdf-critical"),
     },
     {
+        "id": "patient-qr-critical",
+        "level": "critical",
+        "suite": "patient-qr",
+        "reason": "Training-plan QR links must open the latest patient hash renderer, not the old root bundle.",
+        "run": lambda: run_html_logic("patient-qr-critical"),
+    },
+    {
         "id": "ui-stability-critical",
         "level": "critical",
         "suite": "ui-stability",
