@@ -60,6 +60,11 @@ class ReleasePipelineTests(unittest.TestCase):
         self.assertIn('id="kgg-release-center-v31-script"', admin)
         self.assertNotIn("kgg-release-center-v31-script", pipeline.derive_colleague(admin))
 
+    def test_colleague_has_no_legacy_release_center_entrypoints(self):
+        colleague = pipeline.derive_colleague(pipeline.read_text(pipeline.BASE_ADMIN))
+        for token in ("kgg-v12-release-center-entry-restore", "kgg-v13-update-zentrale-marker", "kggReleaseCenterOpen", "kggPhoneUpdateCenterMenu", "window.KGGReleaseCenter"):
+            self.assertNotIn(token, colleague)
+
     def test_remote_web_update_is_manual_only(self):
         admin = pipeline.read_text(pipeline.BASE_ADMIN)
         self.assertIn("kgg-no-auto-release-navigation-v32", admin)

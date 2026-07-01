@@ -54,6 +54,9 @@ COLLEAGUE_FORBIDDEN = (
     "window.KGGAdmin",
     "KGG_ROLLOUT_PROFILE='admin'",
     'KGG_ROLLOUT_PROFILE="admin"',
+    "window.KGGReleaseCenter",
+    "kggReleaseCenterOpen",
+    "kggPhoneUpdateCenterMenu",
 )
 
 
@@ -222,6 +225,24 @@ def remove_html_range(html: str, start_token: str, next_token: str, label: str) 
     return html[:start] + html[end:]
 
 
+def remove_tag_by_id(html: str, tag: str, element_id: str, *, required: bool = True) -> str:
+    pattern = re.compile(
+        r"<" + re.escape(tag) + r"\b(?=[^>]*\bid=[\"']" + re.escape(element_id) + r"[\"'])[^>]*>.*?</" + re.escape(tag) + r">\s*",
+        re.I | re.S,
+    )
+    html, count = pattern.subn("", html, count=1)
+    if required and count != 1:
+        fail(f"Colleague hardening could not remove {tag}#{element_id}; removed {count}")
+    return html
+
+
+def remove_function_if_present(text: str, name: str) -> str:
+    try:
+        return remove_js_function(text, name)
+    except ReleaseError:
+        return text
+
+
 def derive_colleague(candidate: str) -> str:
     """Create the colleague artifact directly from the confirmed current Admin source.
 
@@ -263,6 +284,14 @@ def derive_colleague(candidate: str) -> str:
         '<div id="mobileScannedPlansDock"',
         "therapist share modal",
     )
+    html = remove_tag_by_id(html, "script", "kgg-v12-release-center-entry-restore", required=False)
+    html = remove_tag_by_id(html, "script", "kgg-v13-update-zentrale-marker", required=False)
+    html = remove_function_if_present(html, "openReleaseCenter")
+    html = html.replace(
+        "'<div class=\"kggPhoneMenuGroup\" data-kgg-phone-menu-group=\"update\"><div class=\"kggPhoneMenuGroupTitle\">Update</div><button id=\"kggPhoneUpdateCenterMenu\" type=\"button\">Update-Zentrale</button></div>'+",
+        "",
+    )
+    html = html.replace('    bind("kggPhoneUpdateCenterMenu",openReleaseCenter);\n', "")
     html, share_button_count = re.subn(
         r'<button\b[^>]*\bid="tabletMenuTherapistShareBtn"[^>]*>.*?</button>\s*',
         "",

@@ -1,7 +1,7 @@
 {
-  "versionCode": 50,
-  "versionName": "1.0.50-phone-ui-mini-fix",
-  "indexUrl": "index.html?v=50",
-  "sha256": "a3ae215a39a15d2ca84babec7984a63d58d2b09372861f230b3581a44c26af11",
-  "notes": "v050: Phone-UI-Mini-Fix fuer Plan-Menue, Plan-Historie und inline Scan-Fotooptionen."
+  "versionCode": 51,
+  "versionName": "1.0.51-android-qr-pdf-bridge",
+  "indexUrl": "index.html?v=51",
+  "sha256": "f496813d5ce139f11a1b6da8615edfea56a8ea0864c183c6e603aba9c5220410",
+  "notes": "v051: Kolleg:innen-App/APK-QR drucken, Android-v399-PDF-Fallback und KGG-Icon."
 }
