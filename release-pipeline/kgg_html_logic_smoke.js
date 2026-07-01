@@ -33,6 +33,8 @@ function parseArgs(argv) {
     "native-sync-regression",
     "pdf",
     "pdf-critical",
+    "patient-qr",
+    "patient-qr-critical",
     "textblocks",
     "textblocks-critical",
     "textblocks-regression",
@@ -225,9 +227,16 @@ function createContext() {
     clearTimeout,
     TextEncoder,
     TextDecoder,
+    URL,
     MutationObserver,
     location: { href: "file://kgg-html-logic-smoke", hash: "" },
     alert() {},
+    btoa(value) {
+      return Buffer.from(String(value), "binary").toString("base64");
+    },
+    atob(value) {
+      return Buffer.from(String(value), "base64").toString("binary");
+    },
   };
   context.globalThis = context;
   return context;
@@ -318,6 +327,31 @@ function syncSuite() {
     assert(!!bank.find(item=>item.name==='Probe Spezial'),'merged exercise not found in bank');
     assert(!!state.packages.find(item=>item.name==='Probe Paket'),'merged package not found');
     window.__results={suite:'sync',exported:doc.exerciseBank.length,merge:result};
+  `);
+}
+
+function patientQrCriticalSuite() {
+  return runInsideApp(`
+    assert(typeof buildPatientShareFromCurrentPlan==='function','patient share builder missing');
+    assert(typeof makeKggH2ShareUrl==='function','KGGH2 share URL helper missing');
+    assert(typeof KGG_PATIENT_LATEST_BASE_URL==='string','latest patient base constant missing');
+    assert(KGG_PATIENT_LATEST_BASE_URL==='https://kayus24.github.io/kgg/kgg-update/index.html','unexpected latest patient base URL: '+KGG_PATIENT_LATEST_BASE_URL);
+    assert(patientBaseUrl===KGG_PATIENT_LATEST_BASE_URL,'patientBaseUrl default does not use latest base');
+    assert(!patientBaseUrl.includes('media-inline-bundle-7'),'old patient root bundle leaked into default patient base URL');
+    const plan={
+      id:'patient_qr_smoke',
+      updatedAt:'2026-07-01T00:00:00.000Z',
+      patient:{name:'QR Test',date:'2026-07-01'},
+      exercises:[ensureUiExerciseShape({id:'ex_qr_1',localId:'ex_qr_1',name:'Rudern',sets:3,unit:'Wdh',weightUnit:'kg',startMetric:'12',startLoad:'30'})]
+    };
+    const share=buildPatientShareFromCurrentPlan(plan,{ttlSeconds:3600});
+    assert(share.shareable===true,'patient share should be shareable with latest public base');
+    assert(share.url.startsWith('https://kayus24.github.io/kgg/kgg-update/index.html#KGGH2:'),'patient URL points to wrong base: '+share.url);
+    assert(!share.url.includes('media-inline-bundle-7'),'patient URL still points to old root bundle: '+share.url);
+    const encoded=share.url.split('#KGGH2:')[1];
+    const decoded=convertKggH2PayloadToPatientPayload(decodeKggJsonBase64Url(encoded));
+    assert(decoded.plan.length===1 && decoded.plan[0].name==='Rudern','patient QR payload decode mismatch');
+    window.__results={suite:'patient-qr-critical',base:patientBaseUrl,urlPrefix:share.url.split('#')[0],exercise:decoded.plan[0].name};
   `);
 }
 
@@ -627,19 +661,21 @@ function textblockSuite() {
 function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) {
-    console.log("Usage: node release-pipeline/kgg_html_logic_smoke.js [--suite all|sync|sync-critical|sync-regression|native-sync|native-sync-regression|pdf|pdf-critical|textblocks|textblocks-critical|textblocks-regression]");
+    console.log("Usage: node release-pipeline/kgg_html_logic_smoke.js [--suite all|sync|sync-critical|sync-regression|native-sync|native-sync-regression|pdf|pdf-critical|patient-qr|patient-qr-critical|textblocks|textblocks-critical|textblocks-regression]");
     return 0;
   }
   const results = {};
   if (args.suite === "sync-critical") results.syncCritical = syncCriticalSuite();
   if (args.suite === "textblocks-critical") results.textblocksCritical = textblockCriticalSuite();
   if (args.suite === "pdf-critical") results.pdfCritical = pdfCriticalSuite();
+  if (args.suite === "patient-qr-critical") results.patientQrCritical = patientQrCriticalSuite();
   if (args.suite === "sync-regression") results.sync = syncSuite();
   if (args.suite === "native-sync-regression") results.nativeSync = nativeSyncSuite();
   if (args.suite === "textblocks-regression") results.textblocks = textblockSuite();
   if (args.suite === "all" || args.suite === "sync") results.sync = syncSuite();
   if (args.suite === "all" || args.suite === "native-sync") results.nativeSync = nativeSyncSuite();
   if (args.suite === "all" || args.suite === "pdf") results.pdf = pdfCriticalSuite();
+  if (args.suite === "all" || args.suite === "patient-qr") results.patientQr = patientQrCriticalSuite();
   if (args.suite === "all" || args.suite === "textblocks") results.textblocks = textblockSuite();
   console.log(JSON.stringify({ ok: true, suite: args.suite, results }, null, 2));
   return 0;
