@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0419",
+  "versionName": "1.0.55-colleague-share-apk-fix",
+  "notes": "v055: Kolleg:innen-App-Weitergabe oeffnet direkt den APK-QR; Android-Web-Check startet keine native APK-Installation automatisch.",
+  "createdAt": "2026-07-01T20:08:10Z",
+  "source": "kgg-update/index.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0419",
+      "profile": "admin",
+      "versionName": "1.0.55-colleague-share-apk-fix",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0419/admin.html",
+      "sha256": "7cdf55da04fecc64e5c09aadaeb17c28c1dd15804fa5f7d6bb46bf141ca0a2c3",
+      "notes": "v055: Kolleg:innen-App-Weitergabe oeffnet direkt den APK-QR; Android-Web-Check startet keine native APK-Installation automatisch."
+    },
+    "colleague": {
+      "releaseId": "r0419",
+      "profile": "colleague",
+      "versionName": "1.0.55-colleague-share-apk-fix",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0419/colleague.html",
+      "sha256": "bc923eac9cced84bebd0124d48e2cb1287dfc0cb48702cd6cdf8a26e5ecf26fc",
+      "notes": "v055: Kolleg:innen-App-Weitergabe oeffnet direkt den APK-QR; Android-Web-Check startet keine native APK-Installation automatisch."
+    }
+  }
+}

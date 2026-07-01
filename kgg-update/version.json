@@ -1,7 +1,7 @@
 {
-  "versionCode": 54,
-  "versionName": "1.0.54-patient-qr-latest",
-  "indexUrl": "index.html?v=54",
-  "sha256": "f57ae8db122b6d0d3309704087400e7d710e6d265418fc722c082a6198c6c78c",
-  "notes": "v054: Trainingsplan-QR nutzt die aktuelle kgg-update Patienten-App-Basis statt des alten Root-Bundles."
+  "versionCode": 55,
+  "versionName": "1.0.55-colleague-share-apk-fix",
+  "indexUrl": "index.html?v=55",
+  "sha256": "7cdf55da04fecc64e5c09aadaeb17c28c1dd15804fa5f7d6bb46bf141ca0a2c3",
+  "notes": "v055: Kolleg:innen-App-Weitergabe oeffnet direkt den APK-QR; Android-Web-Check startet keine native APK-Installation automatisch."
 }

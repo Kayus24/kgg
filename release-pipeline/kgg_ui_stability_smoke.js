@@ -94,6 +94,11 @@ function staticGestureGuardSuite() {
   assertRegex(html, /Ger(?:\u00e4|\u00c3\u00a4|ae)te-Sync/, "device sync menu label");
   assertIncludes(html, "document.getElementById('syncQrBtn')", "device sync opens sync dialog through sync button");
   assertRegex(html, /tabletMenuTherapistShareBtn[\s\S]{0,260}openKggTherapistAppOnlyQr\(\)/, "therapist share opens app QR directly");
+  assertIncludes(html, "window.openKggTherapistAppOnlyQr=openKggTherapistAppOnlyQr", "therapist APK QR handler exported for phone menu");
+  assertRegex(html, /function openTherapistShare\(\)\{[\s\S]{0,180}window\.openKggTherapistAppOnlyQr\(\);return;[\s\S]{0,420}Kolleg:innen-App APK QR/, "phone colleague app share opens QR directly");
+  if (/function openTherapistShare\(\)\{[\s\S]{0,420}clickExisting\("tabletMenuTherapistShareBtn"\)/.test(html)) {
+    fail("Phone colleague app share must not fall back to clicking tabletMenuTherapistShareBtn");
+  }
   assertIncludes(html, "Kolleg:innen-App APK QR", "colleague APK share QR label");
   assertIncludes(html, "kgg-v051-android-qr-pdf-bridge", "v051 Android QR/PDF bridge marker");
   assertIncludes(html, 'id="kggAdminMenuQrPrint"', "admin QR print button");

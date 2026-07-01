@@ -69,10 +69,10 @@ public class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST = 4201;
     private static final int CAMERA_PERMISSION_REQUEST = 4202;
     private static final int RELEASE_HTML_REQUEST = 4301;
-    private static final int ANDROID_SHELL_VERSION = 400;
-    private static final int BUNDLED_WEB_VERSION = 418;
+    private static final int ANDROID_SHELL_VERSION = 401;
+    private static final int BUNDLED_WEB_VERSION = 419;
     private static final String BUILD_TIME = "2026-07-01T00:00:00+02:00";
-    private static final String BUILD_CODE = "v400-r0418-icon-pdf-bridge";
+    private static final String BUILD_CODE = "v401-r0419-share-apk-provider";
     private static final int MAX_HTML_UPDATE_BYTES = 5_500_000;
     private static final int MAX_APK_UPDATE_BYTES = 80_000_000;
     private static final long APK_UPDATE_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000L;
@@ -98,6 +98,7 @@ public class MainActivity extends Activity {
     private static final String PREF_BUNDLED_ASSET = "bundled_asset";
     private static final String PREF_PENDING_APK_PATH = "pending_apk_path";
     private static final String PREF_PENDING_APK_VERSION = "pending_apk_version";
+    private static final String PREF_PENDING_APK_INSTALL_REQUESTED = "pending_apk_install_requested";
     private static final String LOCAL_WEB_FILE_NAME = "kgg_android_current.html";
     private static final String PREVIOUS_WEB_FILE_NAME = "kgg_android_previous.html";
     private static final String APK_MIME_TYPE = "application/vnd.android.package-archive";
@@ -653,7 +654,12 @@ public class MainActivity extends Activity {
                     return;
                 }
                 File apkFile = writeApkCacheFile(latestShellVersion, apkBytes);
-                runOnUiThread(() -> installApkFile(apkFile, "v" + latestShellVersion));
+                String versionLabel = "v" + latestShellVersion;
+                if (force) {
+                    runOnUiThread(() -> installApkFile(apkFile, versionLabel));
+                } else {
+                    rememberPendingApkFile(apkFile, versionLabel, false);
+                }
             } catch (Exception ignored) {
             }
         }, "kgg-apk-update").start();
@@ -734,16 +740,25 @@ public class MainActivity extends Activity {
                 || getPackageManager().canRequestPackageInstalls();
     }
 
+    private void rememberPendingApkFile(File file, String versionLabel, boolean installRequested) {
+        if (file == null) {
+            return;
+        }
+        getSharedPreferences(UPDATE_PREFS, MODE_PRIVATE)
+                .edit()
+                .putString(PREF_PENDING_APK_PATH, file.getAbsolutePath())
+                .putString(PREF_PENDING_APK_VERSION, versionLabel == null ? "" : versionLabel)
+                .putBoolean(PREF_PENDING_APK_INSTALL_REQUESTED, installRequested)
+                .apply();
+    }
+
     private boolean installApkFile(File file, String versionLabel) {
         try {
             if (file == null || !file.exists() || file.length() <= 0) {
                 return false;
             }
             SharedPreferences prefs = getSharedPreferences(UPDATE_PREFS, MODE_PRIVATE);
-            prefs.edit()
-                    .putString(PREF_PENDING_APK_PATH, file.getAbsolutePath())
-                    .putString(PREF_PENDING_APK_VERSION, versionLabel == null ? "" : versionLabel)
-                    .apply();
+            rememberPendingApkFile(file, versionLabel, true);
             if (!canRequestApkInstalls()) {
                 Toast.makeText(this, "Installation aus dieser App bitte erlauben", Toast.LENGTH_LONG).show();
                 Intent settingsIntent = new Intent(
@@ -761,6 +776,7 @@ public class MainActivity extends Activity {
             prefs.edit()
                     .remove(PREF_PENDING_APK_PATH)
                     .remove(PREF_PENDING_APK_VERSION)
+                    .remove(PREF_PENDING_APK_INSTALL_REQUESTED)
                     .apply();
             Toast.makeText(this, "KGG-Update wird installiert", Toast.LENGTH_SHORT).show();
             startActivity(intent);
@@ -775,7 +791,8 @@ public class MainActivity extends Activity {
         try {
             SharedPreferences prefs = getSharedPreferences(UPDATE_PREFS, MODE_PRIVATE);
             String path = prefs.getString(PREF_PENDING_APK_PATH, "");
-            if (path == null || path.trim().isEmpty() || !canRequestApkInstalls()) {
+            boolean installRequested = prefs.getBoolean(PREF_PENDING_APK_INSTALL_REQUESTED, false);
+            if (!installRequested || path == null || path.trim().isEmpty() || !canRequestApkInstalls()) {
                 return;
             }
             installApkFile(new File(path), prefs.getString(PREF_PENDING_APK_VERSION, ""));
@@ -811,6 +828,7 @@ public class MainActivity extends Activity {
             status.put("canRequestPackageInstalls", canRequestApkInstalls());
             status.put("lastApkCheckAt", prefs.getLong(PREF_LAST_APK_CHECK_AT, 0L));
             status.put("pendingApkVersion", prefs.getString(PREF_PENDING_APK_VERSION, ""));
+            status.put("pendingApkInstallRequested", prefs.getBoolean(PREF_PENDING_APK_INSTALL_REQUESTED, false));
         } catch (Exception ignored) {
         }
         return status.toString();
