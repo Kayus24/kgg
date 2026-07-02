@@ -1469,6 +1469,10 @@ async function browserUiMiniSeriesSuite(caseName) {
         }
       }
       if (caseMatches(caseName, ["tablet-editor-layout"])) {
+        await page.evaluate(() => {
+          document.querySelectorAll(".modal.open").forEach((node) => node.classList.remove("open"));
+          document.body.classList.remove("modalOpen", "kggModalOpen");
+        });
         await page.locator("#planList [data-planedit]").first().click({ timeout: 7000 });
         await page.waitForSelector("#editorModal.open .editorSheet", { timeout: 7000 });
         const editor = await page.evaluate(() => {

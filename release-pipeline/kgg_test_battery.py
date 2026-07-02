@@ -445,7 +445,7 @@ TEST_REGISTRY = [
         "id": "patient-qr-critical",
         "level": "critical",
         "suite": "patient-qr",
-        "reason": "Training-plan QR links must open the latest patient hash renderer, not the old root bundle.",
+        "reason": "Training-plan QR links must open the root patient app with ?plan=KGGH2 payload, not old renderers or stored plans.",
         "run": lambda: run_html_logic("patient-qr-critical"),
     },
     {

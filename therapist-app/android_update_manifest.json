@@ -4,15 +4,15 @@
   "schema": 2,
   "channels": {
     "admin": {
-      "releaseId": "r0419",
+      "releaseId": "r0420",
       "profile": "admin",
-      "versionName": "1.0.55-colleague-share-apk-fix",
-      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0419/admin.html",
-      "sha256": "7cdf55da04fecc64e5c09aadaeb17c28c1dd15804fa5f7d6bb46bf141ca0a2c3",
-      "notes": "v055: Kolleg:innen-App-Weitergabe oeffnet direkt den APK-QR; Android-Web-Check startet keine native APK-Installation automatisch.",
-      "rolloutCode": 419,
-      "previousReleaseId": "r0418",
-      "releasedAt": "2026-07-01T20:08:10Z"
+      "versionName": "1.0.56-patient-qr-root-query",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0420/admin.html",
+      "sha256": "a41714f372f97a2d84c1da356366d4089714dba9b1c2d6ab799fe26f615b3fd7",
+      "notes": "v056: Patienten-QRs nutzen die Root-Patienten-App mit ?plan=KGGH2-Payload; Root-App importiert Query-Plan direkt.",
+      "rolloutCode": 420,
+      "previousReleaseId": "r0419",
+      "releasedAt": "2026-07-02T13:01:14Z"
     },
     "colleague": {
       "releaseId": "r0397",
@@ -30,8 +30,8 @@
   "latestAndroidShellVersion": "v401",
   "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0397/colleague.html",
   "colleagueSha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
-  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0419/admin.html",
-  "adminSha256": "7cdf55da04fecc64e5c09aadaeb17c28c1dd15804fa5f7d6bb46bf141ca0a2c3",
+  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0420/admin.html",
+  "adminSha256": "a41714f372f97a2d84c1da356366d4089714dba9b1c2d6ab799fe26f615b3fd7",
   "sha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
   "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",
   "androidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
@@ -39,7 +39,7 @@
   "colleagueAndroidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
   "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_ADMIN_v401_share_apk_provider_debug.apk",
   "adminAndroidApkSha256": "366c63594eeb6bdb89a7ab9c44cf4b84b43004ddfb24e5019012de0766f21499",
-  "notes": "Admin beta r0419 + Android v401: Kolleg:innen-App-Weitergabe oeffnet direkt den APK-QR; APK-Cache ist im FileProvider erlaubt und Auto-Installer wird nicht mehr im Hintergrund gestartet.",
+  "notes": "Admin beta r0420: v056: Patienten-QRs nutzen die Root-Patienten-App mit ?plan=KGGH2-Payload; Root-App importiert Query-Plan direkt.",
   "latestAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",
   "latestAndroidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
   "latestColleagueAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",

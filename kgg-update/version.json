@@ -1,7 +1,7 @@
 {
-  "versionCode": 55,
-  "versionName": "1.0.55-colleague-share-apk-fix",
-  "indexUrl": "index.html?v=55",
-  "sha256": "7cdf55da04fecc64e5c09aadaeb17c28c1dd15804fa5f7d6bb46bf141ca0a2c3",
-  "notes": "v055: Kolleg:innen-App-Weitergabe oeffnet direkt den APK-QR; Android-Web-Check startet keine native APK-Installation automatisch."
+  "versionCode": 56,
+  "versionName": "1.0.56-patient-qr-root-query",
+  "indexUrl": "index.html?v=56",
+  "sha256": "a41714f372f97a2d84c1da356366d4089714dba9b1c2d6ab799fe26f615b3fd7",
+  "notes": "v056: Patienten-QRs nutzen die Root-Patienten-App mit ?plan=KGGH2-Payload; Root-App importiert Query-Plan direkt."
 }
