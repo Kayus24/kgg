@@ -68,6 +68,10 @@ jobs:
         shell: bash
         run: python release-pipeline/kgg_gpt_context.py --check
 
+      - name: Check Custom GPT bug knowledge freshness
+        shell: bash
+        run: python release-pipeline/kgg_bug_knowledge.py --check
+
       - name: Run UI stability regression for UI or HTML changes
         if: steps.scope.outputs.ui_or_html == 'true'
         shell: bash
