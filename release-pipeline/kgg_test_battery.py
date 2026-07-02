@@ -21,6 +21,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 LEVEL_RANK = {"critical": 0, "regression": 1, "comfort": 2}
+PLAYWRIGHT_PREPARED = False
 SECRET_PATTERN = (
     "("
     + "sk-" + "proj-"
@@ -90,6 +91,15 @@ def npm_executable() -> str | None:
     return None
 
 
+def ensure_playwright_prepared(npm: str) -> None:
+    global PLAYWRIGHT_PREPARED
+    if PLAYWRIGHT_PREPARED:
+        return
+    if os.environ.get("KGG_SKIP_PLAYWRIGHT_INSTALL") != "1":
+        run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "playwright", "install", "chromium"])
+    PLAYWRIGHT_PREPARED = True
+
+
 def run_mobile_inbox(live: bool) -> None:
     log("== Mobile-Inbox battery ==")
     args = [sys.executable, "release-pipeline/mobile_inbox_live_smoke.py"]
@@ -110,8 +120,7 @@ def run_ui_stability(level: str, case_name: str | None = None) -> None:
     if level in {"regression", "all"}:
         npm = npm_executable()
         if npm:
-            if os.environ.get("KGG_SKIP_PLAYWRIGHT_INSTALL") != "1":
-                run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "playwright", "install", "chromium"])
+            ensure_playwright_prepared(npm)
             run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "node", "release-pipeline/kgg_ui_stability_smoke.js", "--level", level, *case_args])
             return
     run([node_executable(), "release-pipeline/kgg_ui_stability_smoke.js", "--level", level, *case_args])

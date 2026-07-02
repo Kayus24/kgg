@@ -43,20 +43,20 @@ Wichtig: Jeder Live-Test erzeugt bewusst eine neue Admin-Beta-Release. Er fuehrt
 
 ## Lokale Test-Batterie
 
-Schneller kritischer Check ohne GitHub-Schreibaktion:
+Windows-PC-Standardweg ohne GitHub-Schreibaktion:
 
 ```powershell
-python release-pipeline/kgg_test_battery.py
-# gleichbedeutend mit:
-python release-pipeline/kgg_test_battery.py --level critical
+cmd /c release-pipeline\run-kgg-tests.cmd --level critical
 ```
+
+Der Wrapper sucht zuerst das Codex-Bundled-Python/Node und faellt danach auf System-Tools zurueck. Damit bleibt die Testbatterie auch dann startbar, wenn Windows `python` nur auf den Microsoft-Store-Alias zeigt.
 
 Test-Hierarchie:
 
 ```powershell
-python release-pipeline/kgg_test_battery.py --level critical
-python release-pipeline/kgg_test_battery.py --level regression
-python release-pipeline/kgg_test_battery.py --level all
+cmd /c release-pipeline\run-kgg-tests.cmd --level critical
+cmd /c release-pipeline\run-kgg-tests.cmd --level regression
+cmd /c release-pipeline\run-kgg-tests.cmd --level all
 ```
 
 - `critical`: blockiert PRs; App-Start/Syntax, Version-Hash, Secret-Scan, Mobile-Inbox-Dry-run, Sync-Safety und Satz-Karten-Schutz.
@@ -66,17 +66,23 @@ python release-pipeline/kgg_test_battery.py --level all
 Einzelne Batterien bleiben moeglich. Ohne `--level` laufen sie aus Kompatibilitaet wie bisher vollstaendig, aber ohne Live-GitHub-Schreibaktion:
 
 ```powershell
-python release-pipeline/kgg_test_battery.py --suite mobile-inbox
-python release-pipeline/kgg_test_battery.py --suite sync
-python release-pipeline/kgg_test_battery.py --suite native-sync
-python release-pipeline/kgg_test_battery.py --suite textblocks
-python release-pipeline/kgg_test_battery.py --suite ui-stability
+cmd /c release-pipeline\run-kgg-tests.cmd --suite mobile-inbox
+cmd /c release-pipeline\run-kgg-tests.cmd --suite sync
+cmd /c release-pipeline\run-kgg-tests.cmd --suite native-sync
+cmd /c release-pipeline\run-kgg-tests.cmd --suite textblocks
+cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability
 ```
 
 Registrierte Tests mit Kategorie und Begruendung anzeigen:
 
 ```powershell
-python release-pipeline/kgg_test_battery.py --level all --list
+cmd /c release-pipeline\run-kgg-tests.cmd --level all --list
+```
+
+CI/Linux kann die Batterie weiterhin direkt mit Python starten:
+
+```bash
+python release-pipeline/kgg_test_battery.py --level critical
 ```
 
 ## Patch-Hygiene
@@ -104,7 +110,7 @@ Ideen-Chats duerfen weiterhin lokal in `test-lab` experimentieren. Vor einem Rel
 Die Update-/Sync-Dialoge sollen sichtbar machen, ob die App wirklich ueber die Android-Bridge in einen gemeinsamen Sync-Raum schreibt oder nur im privaten Browser-Fallback arbeitet. Fuer schnelle Rueckmeldung gibt es:
 
 ```powershell
-python release-pipeline/kgg_test_battery.py --suite native-sync --level regression
+cmd /c release-pipeline\run-kgg-tests.cmd --suite native-sync --level regression
 ```
 
 Diese Batterie prueft:
@@ -121,8 +127,8 @@ In der Admin-App bleibt die sichere manuelle Uebergabe als Fallback: `Sync-Datei
 `ui-stability` ist der Schutz gegen Layout-/Flicker-Rueckschritte:
 
 ```powershell
-python release-pipeline/kgg_test_battery.py --suite ui-stability --level critical
-python release-pipeline/kgg_test_battery.py --suite ui-stability --level regression
+cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level critical
+cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression
 ```
 
 - `critical` prueft schnell und CI-sicher, ob die aktuellen Phone-Swipe-/Drag-Guards noch in der HTML stehen.
@@ -137,8 +143,18 @@ Nach jedem UI-Flicker-, Handy-Layout- oder Kartenanimations-Patch ist `ui-stabil
 Nur wenn wirklich eine neue Admin-Beta erzeugt werden soll:
 
 ```powershell
-python release-pipeline/kgg_test_battery.py --suite mobile-inbox --live-mobile-inbox
+cmd /c release-pipeline\run-kgg-tests.cmd --suite mobile-inbox --live-mobile-inbox
 ```
+
+Wenn ein PR nur Test-/Pipeline-Dateien veraendert und bewusst keinen neuen Admin-Release vorbereitet, darf der Release-Drift-Guard explizit uebersprungen werden:
+
+```powershell
+$env:KGG_ALLOW_RELEASE_DRIFT='1'
+cmd /c release-pipeline\run-kgg-tests.cmd --level critical --suite release
+Remove-Item Env:\KGG_ALLOW_RELEASE_DRIFT
+```
+
+Ohne diesen Override blockiert `admin-release-drift`, sobald `kgg-update/index.html` neuer ist als der vorbereitete oder live referenzierte Admin-Release. Das ist bei App-Aenderungen beabsichtigt.
 
 ## Admin-Beta per PR vorbereiten
 
