@@ -11,6 +11,9 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  issues: write
+  checks: read
+  statuses: read
 
 concurrency:
   group: kgg-mobile-inbox-release
@@ -127,5 +130,10 @@ jobs:
           url="$(gh pr create --base main --head "$branch" \
             --title "[admin-beta] ${{ steps.mobile.outputs.release_id }} ${{ steps.mobile.outputs.version_name }}" \
             --body-file "$body")"
-          gh pr merge "$url" --admin --squash
+          gh label create kgg-auto-merge \
+            --description 'Allows guarded KGG admin beta auto-merge after required checks' \
+            --color 0E8A16 || true
+          gh pr edit "$url" --add-label kgg-auto-merge
+          gh pr checks "$url" --required --watch --fail-fast
+          gh pr merge "$url" --squash
           echo "PR: $url" >> "$GITHUB_STEP_SUMMARY"

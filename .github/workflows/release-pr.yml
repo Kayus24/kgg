@@ -2,17 +2,21 @@ name: Validate and build KGG admin beta
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
     paths:
       - 'release-inbox/**'
       - 'release-pipeline/**'
       - 'kgg-update/**'
       - 'therapist-app/android_update_manifest.json'
       - 'therapist-app/releases/web/**'
+      - '.github/workflows/release-pr.yml'
+      - '.github/workflows/kgg-required-gate.yml'
 
 permissions:
   contents: write
   pull-requests: write
+  checks: read
+  statuses: read
 
 concurrency:
   group: kgg-release-pr-${{ github.event.pull_request.number }}
@@ -31,6 +35,22 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
+      - name: Classify pull request scope
+        id: scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          mapfile -t changed < <(git diff --name-only "origin/${{ github.base_ref }}"...HEAD)
+          pipeline_only=true
+          for path in "${changed[@]}"; do
+            case "$path" in
+              release-pipeline/*|.github/workflows/release-pr.yml|.github/workflows/kgg-required-gate.yml) ;;
+              *) pipeline_only=false ;;
+            esac
+          done
+          echo "pipeline_only=$pipeline_only" >> "$GITHUB_OUTPUT"
 
       - name: Build immutable profile artifacts when an inbox payload exists
         id: prepare
@@ -51,6 +71,8 @@ jobs:
 
       - name: Run critical KGG test battery
         shell: bash
+        env:
+          KGG_ALLOW_RELEASE_DRIFT: ${{ steps.scope.outputs.pipeline_only == 'true' && '1' || '' }}
         run: python release-pipeline/kgg_test_battery.py --level critical
 
       - name: Commit generated artifacts back to the PR branch
@@ -64,8 +86,38 @@ jobs:
           git commit -m 'chore: build immutable KGG beta artifacts'
           git push origin "HEAD:${{ github.head_ref }}"
 
-      - name: Merge confirmed Admin beta PR after successful checks
-        if: steps.prepare.outputs.prepared == 'true' && startsWith(github.event.pull_request.title, '[admin-beta]')
+      - name: Detect Admin beta merge candidate
+        id: admin_beta
+        shell: bash
+        run: |
+          set -euo pipefail
+          ready=false
+          if [[ '${{ steps.prepare.outputs.prepared }}' == 'true' ]]; then
+            ready=true
+          elif git diff --name-only "origin/${{ github.base_ref }}"...HEAD \
+            | grep -Eq '^(therapist-app/releases/web/[^/]+/(admin|kollegen)\.html|therapist-app/android_update_manifest\.json)$'; then
+            ready=true
+          fi
+          echo "ready=$ready" >> "$GITHUB_OUTPUT"
+
+      - name: Keep Admin beta PR open without explicit auto-merge label
+        if: steps.admin_beta.outputs.ready == 'true' && startsWith(github.event.pull_request.title, '[admin-beta]') && !contains(github.event.pull_request.labels.*.name, 'kgg-auto-merge')
+        shell: bash
+        run: |
+          {
+            echo 'Admin beta auto-merge skipped.'
+            echo ''
+            echo 'Add the `kgg-auto-merge` label after reviewing the PR if it should merge automatically.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Wait for required gate before guarded merge
+        if: steps.admin_beta.outputs.ready == 'true' && startsWith(github.event.pull_request.title, '[admin-beta]') && contains(github.event.pull_request.labels.*.name, 'kgg-auto-merge')
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh pr merge '${{ github.event.pull_request.number }}' --repo '${{ github.repository }}' --squash --admin
+        run: gh pr checks '${{ github.event.pull_request.number }}' --repo '${{ github.repository }}' --required --watch --fail-fast
+
+      - name: Merge confirmed Admin beta PR after successful checks
+        if: steps.admin_beta.outputs.ready == 'true' && startsWith(github.event.pull_request.title, '[admin-beta]') && contains(github.event.pull_request.labels.*.name, 'kgg-auto-merge')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr merge '${{ github.event.pull_request.number }}' --repo '${{ github.repository }}' --squash
