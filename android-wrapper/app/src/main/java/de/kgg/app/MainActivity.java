@@ -82,10 +82,16 @@ public class MainActivity extends Activity {
             "admin.html";
     private static final String BUNDLED_COLLEAGUE_APP_ASSET_V2 =
             "colleague.html";
+    private static final String BUNDLED_PREVIEW_APP_ASSET =
+            "preview.html";
     private static final String UPDATE_MANIFEST_URL =
             "https://kayus24.github.io/kgg/therapist-app/android_update_manifest.json";
+    private static final String PREVIEW_MANIFEST_URL =
+            "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/index.json";
     private static final String TRUSTED_UPDATE_PREFIX =
             "https://kayus24.github.io/kgg/therapist-app/";
+    private static final String TRUSTED_PREVIEW_PREFIX =
+            "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/";
     private static final String UPDATE_PREFS = "kgg_android_update_prefs";
     private static final String PREF_WEB_VERSION = "current_web_version";
     private static final String PREF_ROLLOUT_CODE = "current_rollout_code_v2";
@@ -123,7 +129,9 @@ public class MainActivity extends Activity {
         prepareLocalWebApp();
         webView.loadUrl(localWebAppUrl());
         checkForWebAppUpdate();
-        checkForAndroidAppUpdate(false);
+        if (!isPreviewProfile()) {
+            checkForAndroidAppUpdate(false);
+        }
     }
 
     private void configureBackHandling() {
@@ -157,7 +165,9 @@ public class MainActivity extends Activity {
         super.onResume();
         installPendingApkIfAllowed();
         checkForWebAppUpdate();
-        checkForAndroidAppUpdate(false);
+        if (!isPreviewProfile()) {
+            checkForAndroidAppUpdate(false);
+        }
     }
 
     private void configureWebView() {
@@ -513,15 +523,26 @@ public class MainActivity extends Activity {
         return getPackageName().toLowerCase(Locale.ROOT).contains(".admin");
     }
 
+    private boolean isPreviewProfile() {
+        return getPackageName().toLowerCase(Locale.ROOT).contains(".preview");
+    }
+
     boolean isAdminProfileForReleaseControl() {
-        return isAdminProfile();
+        return isAdminProfile() && !isPreviewProfile();
     }
 
     private String bundledAppAsset() {
+        if (isPreviewProfile()) {
+            return BUNDLED_PREVIEW_APP_ASSET;
+        }
         return isAdminProfile() ? BUNDLED_ADMIN_APP_ASSET : BUNDLED_COLLEAGUE_APP_ASSET_V2;
     }
 
     private void checkForWebAppUpdate() {
+        if (isPreviewProfile()) {
+            checkForPreviewWebAppUpdate();
+            return;
+        }
         new Thread(() -> {
             try {
                 JSONObject manifest = new JSONObject(downloadText(UPDATE_MANIFEST_URL, 512_000));
@@ -575,6 +596,55 @@ public class MainActivity extends Activity {
             } catch (Exception ignored) {
             }
         }, "kgg-web-update").start();
+    }
+
+    private void checkForPreviewWebAppUpdate() {
+        new Thread(() -> {
+            try {
+                JSONObject manifest = new JSONObject(downloadText(PREVIEW_MANIFEST_URL, 512_000));
+                if (!"kgg_gpt_preview_manifest".equals(manifest.optString("kind"))) {
+                    return;
+                }
+                JSONObject latest = manifest.optJSONObject("latest");
+                if (latest == null) {
+                    return;
+                }
+                int rolloutCode = latest.optInt("rolloutCode", 0);
+                SharedPreferences prefs = getSharedPreferences(UPDATE_PREFS, MODE_PRIVATE);
+                int currentVersion = prefs.getInt(PREF_ROLLOUT_CODE, BUNDLED_WEB_VERSION);
+                if (rolloutCode <= currentVersion) {
+                    return;
+                }
+                String htmlUrl = latest.optString("url");
+                if (!isTrustedHtmlUrl(htmlUrl)) {
+                    return;
+                }
+                byte[] bytes = downloadBytes(htmlUrl, MAX_HTML_UPDATE_BYTES);
+                String html = new String(bytes, StandardCharsets.UTF_8);
+                if (!isSafeHtmlUpdate(html)) {
+                    return;
+                }
+                String expectedSha256 = latest.optString("sha256", "").toLowerCase(Locale.ROOT);
+                if (!expectedSha256.isEmpty() && !expectedSha256.equals(sha256Hex(bytes))) {
+                    return;
+                }
+                backupCurrentWebApp();
+                writeTextAtomically(localWebAppFile(), html);
+                prefs.edit()
+                        .putInt(PREF_PREVIOUS_ROLLOUT, currentVersion)
+                        .putString(PREF_PREVIOUS_RELEASE, prefs.getString(PREF_RELEASE_ID, "preview-bundled"))
+                        .putInt(PREF_WEB_VERSION, rolloutCode)
+                        .putInt(PREF_ROLLOUT_CODE, rolloutCode)
+                        .putString(PREF_RELEASE_ID, latest.optString("requestId", "preview"))
+                        .putBoolean(PREF_PENDING_HEALTH, true)
+                        .apply();
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "KGG Preview geladen", Toast.LENGTH_SHORT).show();
+                    webView.loadUrl(localWebAppUrl());
+                });
+            } catch (Exception ignored) {
+            }
+        }, "kgg-preview-update").start();
     }
 
     private void backupCurrentWebApp() throws Exception {
@@ -810,7 +880,8 @@ public class MainActivity extends Activity {
             status.put("buildTime", BUILD_TIME);
             status.put("buildCode", BUILD_CODE);
             status.put("packageName", getPackageName());
-            status.put("profile", isAdminProfile() ? "admin" : "kollegen");
+            status.put("profile", isPreviewProfile() ? "preview" : (isAdminProfile() ? "admin" : "kollegen"));
+            status.put("previewChannel", isPreviewProfile());
             status.put("currentWebVersion", prefs.getInt(PREF_WEB_VERSION, BUNDLED_WEB_VERSION));
             status.put("rolloutCode", prefs.getInt(PREF_ROLLOUT_CODE, BUNDLED_WEB_VERSION));
             status.put("releaseId", prefs.getString(PREF_RELEASE_ID, "v389"));
@@ -835,9 +906,11 @@ public class MainActivity extends Activity {
     }
 
     private boolean isTrustedHtmlUrl(String url) {
-        return url != null
-                && url.startsWith(TRUSTED_UPDATE_PREFIX)
-                && url.endsWith(".html");
+        if (url == null || !url.endsWith(".html")) {
+            return false;
+        }
+        String trustedPrefix = isPreviewProfile() ? TRUSTED_PREVIEW_PREFIX : TRUSTED_UPDATE_PREFIX;
+        return url.startsWith(trustedPrefix);
     }
 
     private int parseVersionNumber(String value) {
