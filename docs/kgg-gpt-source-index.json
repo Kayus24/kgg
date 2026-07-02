@@ -1,0 +1,399 @@
+{
+  "chunks": [
+    {
+      "endLine": 420,
+      "name": "chunk-000.md",
+      "path": "docs/kgg-gpt-source/chunk-000.md",
+      "startLine": 1
+    },
+    {
+      "endLine": 840,
+      "name": "chunk-001.md",
+      "path": "docs/kgg-gpt-source/chunk-001.md",
+      "startLine": 421
+    },
+    {
+      "endLine": 1260,
+      "name": "chunk-002.md",
+      "path": "docs/kgg-gpt-source/chunk-002.md",
+      "startLine": 841
+    },
+    {
+      "endLine": 1680,
+      "name": "chunk-003.md",
+      "path": "docs/kgg-gpt-source/chunk-003.md",
+      "startLine": 1261
+    },
+    {
+      "endLine": 2100,
+      "name": "chunk-004.md",
+      "path": "docs/kgg-gpt-source/chunk-004.md",
+      "startLine": 1681
+    },
+    {
+      "endLine": 2520,
+      "name": "chunk-005.md",
+      "path": "docs/kgg-gpt-source/chunk-005.md",
+      "startLine": 2101
+    },
+    {
+      "endLine": 2940,
+      "name": "chunk-006.md",
+      "path": "docs/kgg-gpt-source/chunk-006.md",
+      "startLine": 2521
+    },
+    {
+      "endLine": 3360,
+      "name": "chunk-007.md",
+      "path": "docs/kgg-gpt-source/chunk-007.md",
+      "startLine": 2941
+    },
+    {
+      "endLine": 3780,
+      "name": "chunk-008.md",
+      "path": "docs/kgg-gpt-source/chunk-008.md",
+      "startLine": 3361
+    },
+    {
+      "endLine": 4200,
+      "name": "chunk-009.md",
+      "path": "docs/kgg-gpt-source/chunk-009.md",
+      "startLine": 3781
+    },
+    {
+      "endLine": 4620,
+      "name": "chunk-010.md",
+      "path": "docs/kgg-gpt-source/chunk-010.md",
+      "startLine": 4201
+    },
+    {
+      "endLine": 5040,
+      "name": "chunk-011.md",
+      "path": "docs/kgg-gpt-source/chunk-011.md",
+      "startLine": 4621
+    },
+    {
+      "endLine": 5460,
+      "name": "chunk-012.md",
+      "path": "docs/kgg-gpt-source/chunk-012.md",
+      "startLine": 5041
+    },
+    {
+      "endLine": 5880,
+      "name": "chunk-013.md",
+      "path": "docs/kgg-gpt-source/chunk-013.md",
+      "startLine": 5461
+    },
+    {
+      "endLine": 6300,
+      "name": "chunk-014.md",
+      "path": "docs/kgg-gpt-source/chunk-014.md",
+      "startLine": 5881
+    },
+    {
+      "endLine": 6720,
+      "name": "chunk-015.md",
+      "path": "docs/kgg-gpt-source/chunk-015.md",
+      "startLine": 6301
+    },
+    {
+      "endLine": 7140,
+      "name": "chunk-016.md",
+      "path": "docs/kgg-gpt-source/chunk-016.md",
+      "startLine": 6721
+    },
+    {
+      "endLine": 7560,
+      "name": "chunk-017.md",
+      "path": "docs/kgg-gpt-source/chunk-017.md",
+      "startLine": 7141
+    },
+    {
+      "endLine": 7980,
+      "name": "chunk-018.md",
+      "path": "docs/kgg-gpt-source/chunk-018.md",
+      "startLine": 7561
+    },
+    {
+      "endLine": 8400,
+      "name": "chunk-019.md",
+      "path": "docs/kgg-gpt-source/chunk-019.md",
+      "startLine": 7981
+    },
+    {
+      "endLine": 8820,
+      "name": "chunk-020.md",
+      "path": "docs/kgg-gpt-source/chunk-020.md",
+      "startLine": 8401
+    },
+    {
+      "endLine": 9240,
+      "name": "chunk-021.md",
+      "path": "docs/kgg-gpt-source/chunk-021.md",
+      "startLine": 8821
+    },
+    {
+      "endLine": 9660,
+      "name": "chunk-022.md",
+      "path": "docs/kgg-gpt-source/chunk-022.md",
+      "startLine": 9241
+    },
+    {
+      "endLine": 10080,
+      "name": "chunk-023.md",
+      "path": "docs/kgg-gpt-source/chunk-023.md",
+      "startLine": 9661
+    },
+    {
+      "endLine": 10500,
+      "name": "chunk-024.md",
+      "path": "docs/kgg-gpt-source/chunk-024.md",
+      "startLine": 10081
+    },
+    {
+      "endLine": 10920,
+      "name": "chunk-025.md",
+      "path": "docs/kgg-gpt-source/chunk-025.md",
+      "startLine": 10501
+    },
+    {
+      "endLine": 11340,
+      "name": "chunk-026.md",
+      "path": "docs/kgg-gpt-source/chunk-026.md",
+      "startLine": 10921
+    },
+    {
+      "endLine": 11760,
+      "name": "chunk-027.md",
+      "path": "docs/kgg-gpt-source/chunk-027.md",
+      "startLine": 11341
+    },
+    {
+      "endLine": 12180,
+      "name": "chunk-028.md",
+      "path": "docs/kgg-gpt-source/chunk-028.md",
+      "startLine": 11761
+    },
+    {
+      "endLine": 12600,
+      "name": "chunk-029.md",
+      "path": "docs/kgg-gpt-source/chunk-029.md",
+      "startLine": 12181
+    },
+    {
+      "endLine": 13020,
+      "name": "chunk-030.md",
+      "path": "docs/kgg-gpt-source/chunk-030.md",
+      "startLine": 12601
+    },
+    {
+      "endLine": 13440,
+      "name": "chunk-031.md",
+      "path": "docs/kgg-gpt-source/chunk-031.md",
+      "startLine": 13021
+    },
+    {
+      "endLine": 13860,
+      "name": "chunk-032.md",
+      "path": "docs/kgg-gpt-source/chunk-032.md",
+      "startLine": 13441
+    },
+    {
+      "endLine": 14280,
+      "name": "chunk-033.md",
+      "path": "docs/kgg-gpt-source/chunk-033.md",
+      "startLine": 13861
+    },
+    {
+      "endLine": 14700,
+      "name": "chunk-034.md",
+      "path": "docs/kgg-gpt-source/chunk-034.md",
+      "startLine": 14281
+    },
+    {
+      "endLine": 15120,
+      "name": "chunk-035.md",
+      "path": "docs/kgg-gpt-source/chunk-035.md",
+      "startLine": 14701
+    },
+    {
+      "endLine": 15540,
+      "name": "chunk-036.md",
+      "path": "docs/kgg-gpt-source/chunk-036.md",
+      "startLine": 15121
+    },
+    {
+      "endLine": 15960,
+      "name": "chunk-037.md",
+      "path": "docs/kgg-gpt-source/chunk-037.md",
+      "startLine": 15541
+    },
+    {
+      "endLine": 16380,
+      "name": "chunk-038.md",
+      "path": "docs/kgg-gpt-source/chunk-038.md",
+      "startLine": 15961
+    },
+    {
+      "endLine": 16800,
+      "name": "chunk-039.md",
+      "path": "docs/kgg-gpt-source/chunk-039.md",
+      "startLine": 16381
+    },
+    {
+      "endLine": 17220,
+      "name": "chunk-040.md",
+      "path": "docs/kgg-gpt-source/chunk-040.md",
+      "startLine": 16801
+    },
+    {
+      "endLine": 17640,
+      "name": "chunk-041.md",
+      "path": "docs/kgg-gpt-source/chunk-041.md",
+      "startLine": 17221
+    },
+    {
+      "endLine": 18060,
+      "name": "chunk-042.md",
+      "path": "docs/kgg-gpt-source/chunk-042.md",
+      "startLine": 17641
+    },
+    {
+      "endLine": 18480,
+      "name": "chunk-043.md",
+      "path": "docs/kgg-gpt-source/chunk-043.md",
+      "startLine": 18061
+    },
+    {
+      "endLine": 18900,
+      "name": "chunk-044.md",
+      "path": "docs/kgg-gpt-source/chunk-044.md",
+      "startLine": 18481
+    },
+    {
+      "endLine": 19320,
+      "name": "chunk-045.md",
+      "path": "docs/kgg-gpt-source/chunk-045.md",
+      "startLine": 18901
+    },
+    {
+      "endLine": 19740,
+      "name": "chunk-046.md",
+      "path": "docs/kgg-gpt-source/chunk-046.md",
+      "startLine": 19321
+    },
+    {
+      "endLine": 20160,
+      "name": "chunk-047.md",
+      "path": "docs/kgg-gpt-source/chunk-047.md",
+      "startLine": 19741
+    },
+    {
+      "endLine": 20580,
+      "name": "chunk-048.md",
+      "path": "docs/kgg-gpt-source/chunk-048.md",
+      "startLine": 20161
+    },
+    {
+      "endLine": 21000,
+      "name": "chunk-049.md",
+      "path": "docs/kgg-gpt-source/chunk-049.md",
+      "startLine": 20581
+    },
+    {
+      "endLine": 21420,
+      "name": "chunk-050.md",
+      "path": "docs/kgg-gpt-source/chunk-050.md",
+      "startLine": 21001
+    },
+    {
+      "endLine": 21840,
+      "name": "chunk-051.md",
+      "path": "docs/kgg-gpt-source/chunk-051.md",
+      "startLine": 21421
+    },
+    {
+      "endLine": 22260,
+      "name": "chunk-052.md",
+      "path": "docs/kgg-gpt-source/chunk-052.md",
+      "startLine": 21841
+    },
+    {
+      "endLine": 22680,
+      "name": "chunk-053.md",
+      "path": "docs/kgg-gpt-source/chunk-053.md",
+      "startLine": 22261
+    },
+    {
+      "endLine": 23100,
+      "name": "chunk-054.md",
+      "path": "docs/kgg-gpt-source/chunk-054.md",
+      "startLine": 22681
+    },
+    {
+      "endLine": 23520,
+      "name": "chunk-055.md",
+      "path": "docs/kgg-gpt-source/chunk-055.md",
+      "startLine": 23101
+    },
+    {
+      "endLine": 23940,
+      "name": "chunk-056.md",
+      "path": "docs/kgg-gpt-source/chunk-056.md",
+      "startLine": 23521
+    },
+    {
+      "endLine": 24360,
+      "name": "chunk-057.md",
+      "path": "docs/kgg-gpt-source/chunk-057.md",
+      "startLine": 23941
+    },
+    {
+      "endLine": 24780,
+      "name": "chunk-058.md",
+      "path": "docs/kgg-gpt-source/chunk-058.md",
+      "startLine": 24361
+    },
+    {
+      "endLine": 25200,
+      "name": "chunk-059.md",
+      "path": "docs/kgg-gpt-source/chunk-059.md",
+      "startLine": 24781
+    },
+    {
+      "endLine": 25620,
+      "name": "chunk-060.md",
+      "path": "docs/kgg-gpt-source/chunk-060.md",
+      "startLine": 25201
+    },
+    {
+      "endLine": 26040,
+      "name": "chunk-061.md",
+      "path": "docs/kgg-gpt-source/chunk-061.md",
+      "startLine": 25621
+    },
+    {
+      "endLine": 26460,
+      "name": "chunk-062.md",
+      "path": "docs/kgg-gpt-source/chunk-062.md",
+      "startLine": 26041
+    },
+    {
+      "endLine": 26880,
+      "name": "chunk-063.md",
+      "path": "docs/kgg-gpt-source/chunk-063.md",
+      "startLine": 26461
+    },
+    {
+      "endLine": 26895,
+      "name": "chunk-064.md",
+      "path": "docs/kgg-gpt-source/chunk-064.md",
+      "startLine": 26881
+    }
+  ],
+  "kind": "kgg_gpt_source_index",
+  "linesPerChunk": 420,
+  "sourcePath": "kgg-update/index.html",
+  "sourceSha256": "a41714f372f97a2d84c1da356366d4089714dba9b1c2d6ab799fe26f615b3fd7",
+  "version": 1
+}

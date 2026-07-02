@@ -30,11 +30,17 @@ android {
             applicationId "de.kgg.admin"
             manifestPlaceholders = [appLabel: "KGG Admin"]
         }
+        preview {
+            dimension "profile"
+            applicationId "de.kgg.preview"
+            manifestPlaceholders = [appLabel: "KGG Preview"]
+        }
     }
 
     sourceSets {
         admin.assets.srcDir layout.buildDirectory.dir("generated/kggAssets/admin")
         kollegen.assets.srcDir layout.buildDirectory.dir("generated/kggAssets/kollegen")
+        preview.assets.srcDir layout.buildDirectory.dir("generated/kggAssets/preview")
     }
 }
 
@@ -48,9 +54,16 @@ def stageColleagueProfileAsset = tasks.register("stageColleagueProfileAsset", Co
     into(layout.buildDirectory.dir("generated/kggAssets/kollegen"))
 }
 
+def stagePreviewProfileAsset = tasks.register("stagePreviewProfileAsset", Copy) {
+    from("../../kgg-update/index.html")
+    into(layout.buildDirectory.dir("generated/kggAssets/preview"))
+    rename { "preview.html" }
+}
+
 afterEvaluate {
     tasks.named("mergeAdminDebugAssets").configure { dependsOn(stageAdminProfileAsset) }
     tasks.named("mergeKollegenDebugAssets").configure { dependsOn(stageColleagueProfileAsset) }
+    tasks.named("mergePreviewDebugAssets").configure { dependsOn(stagePreviewProfileAsset) }
 }
 
 dependencies {

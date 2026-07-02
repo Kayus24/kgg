@@ -1,0 +1,427 @@
+# KGG Source Chunk 017
+
+- Source: `kgg-update/index.html`
+- Lines: 7141-7560
+
+```html
+        }
+    }
+    if (returnInverted) {
+        return { binarized: binarized, inverted: inverted };
+    }
+    return { binarized: binarized };
+}
+exports.binarize = binarize;
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var BitMatrix_1 = __webpack_require__(0);
+var decodeData_1 = __webpack_require__(6);
+var reedsolomon_1 = __webpack_require__(9);
+var version_1 = __webpack_require__(10);
+// tslint:disable:no-bitwise
+function numBitsDiffering(x, y) {
+    var z = x ^ y;
+    var bitCount = 0;
+    while (z) {
+        bitCount++;
+        z &= z - 1;
+    }
+    return bitCount;
+}
+function pushBit(bit, byte) {
+    return (byte << 1) | bit;
+}
+// tslint:enable:no-bitwise
+var FORMAT_INFO_TABLE = [
+    { bits: 0x5412, formatInfo: { errorCorrectionLevel: 1, dataMask: 0 } },
+    { bits: 0x5125, formatInfo: { errorCorrectionLevel: 1, dataMask: 1 } },
+    { bits: 0x5E7C, formatInfo: { errorCorrectionLevel: 1, dataMask: 2 } },
+    { bits: 0x5B4B, formatInfo: { errorCorrectionLevel: 1, dataMask: 3 } },
+    { bits: 0x45F9, formatInfo: { errorCorrectionLevel: 1, dataMask: 4 } },
+    { bits: 0x40CE, formatInfo: { errorCorrectionLevel: 1, dataMask: 5 } },
+    { bits: 0x4F97, formatInfo: { errorCorrectionLevel: 1, dataMask: 6 } },
+    { bits: 0x4AA0, formatInfo: { errorCorrectionLevel: 1, dataMask: 7 } },
+    { bits: 0x77C4, formatInfo: { errorCorrectionLevel: 0, dataMask: 0 } },
+    { bits: 0x72F3, formatInfo: { errorCorrectionLevel: 0, dataMask: 1 } },
+    { bits: 0x7DAA, formatInfo: { errorCorrectionLevel: 0, dataMask: 2 } },
+    { bits: 0x789D, formatInfo: { errorCorrectionLevel: 0, dataMask: 3 } },
+    { bits: 0x662F, formatInfo: { errorCorrectionLevel: 0, dataMask: 4 } },
+    { bits: 0x6318, formatInfo: { errorCorrectionLevel: 0, dataMask: 5 } },
+    { bits: 0x6C41, formatInfo: { errorCorrectionLevel: 0, dataMask: 6 } },
+    { bits: 0x6976, formatInfo: { errorCorrectionLevel: 0, dataMask: 7 } },
+    { bits: 0x1689, formatInfo: { errorCorrectionLevel: 3, dataMask: 0 } },
+    { bits: 0x13BE, formatInfo: { errorCorrectionLevel: 3, dataMask: 1 } },
+    { bits: 0x1CE7, formatInfo: { errorCorrectionLevel: 3, dataMask: 2 } },
+    { bits: 0x19D0, formatInfo: { errorCorrectionLevel: 3, dataMask: 3 } },
+    { bits: 0x0762, formatInfo: { errorCorrectionLevel: 3, dataMask: 4 } },
+    { bits: 0x0255, formatInfo: { errorCorrectionLevel: 3, dataMask: 5 } },
+    { bits: 0x0D0C, formatInfo: { errorCorrectionLevel: 3, dataMask: 6 } },
+    { bits: 0x083B, formatInfo: { errorCorrectionLevel: 3, dataMask: 7 } },
+    { bits: 0x355F, formatInfo: { errorCorrectionLevel: 2, dataMask: 0 } },
+    { bits: 0x3068, formatInfo: { errorCorrectionLevel: 2, dataMask: 1 } },
+    { bits: 0x3F31, formatInfo: { errorCorrectionLevel: 2, dataMask: 2 } },
+    { bits: 0x3A06, formatInfo: { errorCorrectionLevel: 2, dataMask: 3 } },
+    { bits: 0x24B4, formatInfo: { errorCorrectionLevel: 2, dataMask: 4 } },
+    { bits: 0x2183, formatInfo: { errorCorrectionLevel: 2, dataMask: 5 } },
+    { bits: 0x2EDA, formatInfo: { errorCorrectionLevel: 2, dataMask: 6 } },
+    { bits: 0x2BED, formatInfo: { errorCorrectionLevel: 2, dataMask: 7 } },
+];
+var DATA_MASKS = [
+    function (p) { return ((p.y + p.x) % 2) === 0; },
+    function (p) { return (p.y % 2) === 0; },
+    function (p) { return p.x % 3 === 0; },
+    function (p) { return (p.y + p.x) % 3 === 0; },
+    function (p) { return (Math.floor(p.y / 2) + Math.floor(p.x / 3)) % 2 === 0; },
+    function (p) { return ((p.x * p.y) % 2) + ((p.x * p.y) % 3) === 0; },
+    function (p) { return ((((p.y * p.x) % 2) + (p.y * p.x) % 3) % 2) === 0; },
+    function (p) { return ((((p.y + p.x) % 2) + (p.y * p.x) % 3) % 2) === 0; },
+];
+function buildFunctionPatternMask(version) {
+    var dimension = 17 + 4 * version.versionNumber;
+    var matrix = BitMatrix_1.BitMatrix.createEmpty(dimension, dimension);
+    matrix.setRegion(0, 0, 9, 9, true); // Top left finder pattern + separator + format
+    matrix.setRegion(dimension - 8, 0, 8, 9, true); // Top right finder pattern + separator + format
+    matrix.setRegion(0, dimension - 8, 9, 8, true); // Bottom left finder pattern + separator + format
+    // Alignment patterns
+    for (var _i = 0, _a = version.alignmentPatternCenters; _i < _a.length; _i++) {
+        var x = _a[_i];
+        for (var _b = 0, _c = version.alignmentPatternCenters; _b < _c.length; _b++) {
+            var y = _c[_b];
+            if (!(x === 6 && y === 6 || x === 6 && y === dimension - 7 || x === dimension - 7 && y === 6)) {
+                matrix.setRegion(x - 2, y - 2, 5, 5, true);
+            }
+        }
+    }
+    matrix.setRegion(6, 9, 1, dimension - 17, true); // Vertical timing pattern
+    matrix.setRegion(9, 6, dimension - 17, 1, true); // Horizontal timing pattern
+    if (version.versionNumber > 6) {
+        matrix.setRegion(dimension - 11, 0, 3, 6, true); // Version info, top right
+        matrix.setRegion(0, dimension - 11, 6, 3, true); // Version info, bottom left
+    }
+    return matrix;
+}
+function readCodewords(matrix, version, formatInfo) {
+    var dataMask = DATA_MASKS[formatInfo.dataMask];
+    var dimension = matrix.height;
+    var functionPatternMask = buildFunctionPatternMask(version);
+    var codewords = [];
+    var currentByte = 0;
+    var bitsRead = 0;
+    // Read columns in pairs, from right to left
+    var readingUp = true;
+    for (var columnIndex = dimension - 1; columnIndex > 0; columnIndex -= 2) {
+        if (columnIndex === 6) { // Skip whole column with vertical alignment pattern;
+            columnIndex--;
+        }
+        for (var i = 0; i < dimension; i++) {
+            var y = readingUp ? dimension - 1 - i : i;
+            for (var columnOffset = 0; columnOffset < 2; columnOffset++) {
+                var x = columnIndex - columnOffset;
+                if (!functionPatternMask.get(x, y)) {
+                    bitsRead++;
+                    var bit = matrix.get(x, y);
+                    if (dataMask({ y: y, x: x })) {
+                        bit = !bit;
+                    }
+                    currentByte = pushBit(bit, currentByte);
+                    if (bitsRead === 8) { // Whole bytes
+                        codewords.push(currentByte);
+                        bitsRead = 0;
+                        currentByte = 0;
+                    }
+                }
+            }
+        }
+        readingUp = !readingUp;
+    }
+    return codewords;
+}
+function readVersion(matrix) {
+    var dimension = matrix.height;
+    var provisionalVersion = Math.floor((dimension - 17) / 4);
+    if (provisionalVersion <= 6) { // 6 and under dont have version info in the QR code
+        return version_1.VERSIONS[provisionalVersion - 1];
+    }
+    var topRightVersionBits = 0;
+    for (var y = 5; y >= 0; y--) {
+        for (var x = dimension - 9; x >= dimension - 11; x--) {
+            topRightVersionBits = pushBit(matrix.get(x, y), topRightVersionBits);
+        }
+    }
+    var bottomLeftVersionBits = 0;
+    for (var x = 5; x >= 0; x--) {
+        for (var y = dimension - 9; y >= dimension - 11; y--) {
+            bottomLeftVersionBits = pushBit(matrix.get(x, y), bottomLeftVersionBits);
+        }
+    }
+    var bestDifference = Infinity;
+    var bestVersion;
+    for (var _i = 0, VERSIONS_1 = version_1.VERSIONS; _i < VERSIONS_1.length; _i++) {
+        var version = VERSIONS_1[_i];
+        if (version.infoBits === topRightVersionBits || version.infoBits === bottomLeftVersionBits) {
+            return version;
+        }
+        var difference = numBitsDiffering(topRightVersionBits, version.infoBits);
+        if (difference < bestDifference) {
+            bestVersion = version;
+            bestDifference = difference;
+        }
+        difference = numBitsDiffering(bottomLeftVersionBits, version.infoBits);
+        if (difference < bestDifference) {
+            bestVersion = version;
+            bestDifference = difference;
+        }
+    }
+    // We can tolerate up to 3 bits of error since no two version info codewords will
+    // differ in less than 8 bits.
+    if (bestDifference <= 3) {
+        return bestVersion;
+    }
+}
+function readFormatInformation(matrix) {
+    var topLeftFormatInfoBits = 0;
+    for (var x = 0; x <= 8; x++) {
+        if (x !== 6) { // Skip timing pattern bit
+            topLeftFormatInfoBits = pushBit(matrix.get(x, 8), topLeftFormatInfoBits);
+        }
+    }
+    for (var y = 7; y >= 0; y--) {
+        if (y !== 6) { // Skip timing pattern bit
+            topLeftFormatInfoBits = pushBit(matrix.get(8, y), topLeftFormatInfoBits);
+        }
+    }
+    var dimension = matrix.height;
+    var topRightBottomRightFormatInfoBits = 0;
+    for (var y = dimension - 1; y >= dimension - 7; y--) { // bottom left
+        topRightBottomRightFormatInfoBits = pushBit(matrix.get(8, y), topRightBottomRightFormatInfoBits);
+    }
+    for (var x = dimension - 8; x < dimension; x++) { // top right
+        topRightBottomRightFormatInfoBits = pushBit(matrix.get(x, 8), topRightBottomRightFormatInfoBits);
+    }
+    var bestDifference = Infinity;
+    var bestFormatInfo = null;
+    for (var _i = 0, FORMAT_INFO_TABLE_1 = FORMAT_INFO_TABLE; _i < FORMAT_INFO_TABLE_1.length; _i++) {
+        var _a = FORMAT_INFO_TABLE_1[_i], bits = _a.bits, formatInfo = _a.formatInfo;
+        if (bits === topLeftFormatInfoBits || bits === topRightBottomRightFormatInfoBits) {
+            return formatInfo;
+        }
+        var difference = numBitsDiffering(topLeftFormatInfoBits, bits);
+        if (difference < bestDifference) {
+            bestFormatInfo = formatInfo;
+            bestDifference = difference;
+        }
+        if (topLeftFormatInfoBits !== topRightBottomRightFormatInfoBits) { // also try the other option
+            difference = numBitsDiffering(topRightBottomRightFormatInfoBits, bits);
+            if (difference < bestDifference) {
+                bestFormatInfo = formatInfo;
+                bestDifference = difference;
+            }
+        }
+    }
+    // Hamming distance of the 32 masked codes is 7, by construction, so <= 3 bits differing means we found a match
+    if (bestDifference <= 3) {
+        return bestFormatInfo;
+    }
+    return null;
+}
+function getDataBlocks(codewords, version, ecLevel) {
+    var ecInfo = version.errorCorrectionLevels[ecLevel];
+    var dataBlocks = [];
+    var totalCodewords = 0;
+    ecInfo.ecBlocks.forEach(function (block) {
+        for (var i = 0; i < block.numBlocks; i++) {
+            dataBlocks.push({ numDataCodewords: block.dataCodewordsPerBlock, codewords: [] });
+            totalCodewords += block.dataCodewordsPerBlock + ecInfo.ecCodewordsPerBlock;
+        }
+    });
+    // In some cases the QR code will be malformed enough that we pull off more or less than we should.
+    // If we pull off less there's nothing we can do.
+    // If we pull off more we can safely truncate
+    if (codewords.length < totalCodewords) {
+        return null;
+    }
+    codewords = codewords.slice(0, totalCodewords);
+    var shortBlockSize = ecInfo.ecBlocks[0].dataCodewordsPerBlock;
+    // Pull codewords to fill the blocks up to the minimum size
+    for (var i = 0; i < shortBlockSize; i++) {
+        for (var _i = 0, dataBlocks_1 = dataBlocks; _i < dataBlocks_1.length; _i++) {
+            var dataBlock = dataBlocks_1[_i];
+            dataBlock.codewords.push(codewords.shift());
+        }
+    }
+    // If there are any large blocks, pull codewords to fill the last element of those
+    if (ecInfo.ecBlocks.length > 1) {
+        var smallBlockCount = ecInfo.ecBlocks[0].numBlocks;
+        var largeBlockCount = ecInfo.ecBlocks[1].numBlocks;
+        for (var i = 0; i < largeBlockCount; i++) {
+            dataBlocks[smallBlockCount + i].codewords.push(codewords.shift());
+        }
+    }
+    // Add the rest of the codewords to the blocks. These are the error correction codewords.
+    while (codewords.length > 0) {
+        for (var _a = 0, dataBlocks_2 = dataBlocks; _a < dataBlocks_2.length; _a++) {
+            var dataBlock = dataBlocks_2[_a];
+            dataBlock.codewords.push(codewords.shift());
+        }
+    }
+    return dataBlocks;
+}
+function decodeMatrix(matrix) {
+    var version = readVersion(matrix);
+    if (!version) {
+        return null;
+    }
+    var formatInfo = readFormatInformation(matrix);
+    if (!formatInfo) {
+        return null;
+    }
+    var codewords = readCodewords(matrix, version, formatInfo);
+    var dataBlocks = getDataBlocks(codewords, version, formatInfo.errorCorrectionLevel);
+    if (!dataBlocks) {
+        return null;
+    }
+    // Count total number of data bytes
+    var totalBytes = dataBlocks.reduce(function (a, b) { return a + b.numDataCodewords; }, 0);
+    var resultBytes = new Uint8ClampedArray(totalBytes);
+    var resultIndex = 0;
+    for (var _i = 0, dataBlocks_3 = dataBlocks; _i < dataBlocks_3.length; _i++) {
+        var dataBlock = dataBlocks_3[_i];
+        var correctedBytes = reedsolomon_1.decode(dataBlock.codewords, dataBlock.codewords.length - dataBlock.numDataCodewords);
+        if (!correctedBytes) {
+            return null;
+        }
+        for (var i = 0; i < dataBlock.numDataCodewords; i++) {
+            resultBytes[resultIndex++] = correctedBytes[i];
+        }
+    }
+    try {
+        return decodeData_1.decode(resultBytes, version.versionNumber);
+    }
+    catch (_a) {
+        return null;
+    }
+}
+function decode(matrix) {
+    if (matrix == null) {
+        return null;
+    }
+    var result = decodeMatrix(matrix);
+    if (result) {
+        return result;
+    }
+    // Decoding didn't work, try mirroring the QR across the topLeft -> bottomRight line.
+    for (var x = 0; x < matrix.width; x++) {
+        for (var y = x + 1; y < matrix.height; y++) {
+            if (matrix.get(x, y) !== matrix.get(y, x)) {
+                matrix.set(x, y, !matrix.get(x, y));
+                matrix.set(y, x, !matrix.get(y, x));
+            }
+        }
+    }
+    return decodeMatrix(matrix);
+}
+exports.decode = decode;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+// tslint:disable:no-bitwise
+var BitStream_1 = __webpack_require__(7);
+var shiftJISTable_1 = __webpack_require__(8);
+var Mode;
+(function (Mode) {
+    Mode["Numeric"] = "numeric";
+    Mode["Alphanumeric"] = "alphanumeric";
+    Mode["Byte"] = "byte";
+    Mode["Kanji"] = "kanji";
+    Mode["ECI"] = "eci";
+})(Mode = exports.Mode || (exports.Mode = {}));
+var ModeByte;
+(function (ModeByte) {
+    ModeByte[ModeByte["Terminator"] = 0] = "Terminator";
+    ModeByte[ModeByte["Numeric"] = 1] = "Numeric";
+    ModeByte[ModeByte["Alphanumeric"] = 2] = "Alphanumeric";
+    ModeByte[ModeByte["Byte"] = 4] = "Byte";
+    ModeByte[ModeByte["Kanji"] = 8] = "Kanji";
+    ModeByte[ModeByte["ECI"] = 7] = "ECI";
+    // StructuredAppend = 0x3,
+    // FNC1FirstPosition = 0x5,
+    // FNC1SecondPosition = 0x9,
+})(ModeByte || (ModeByte = {}));
+function decodeNumeric(stream, size) {
+    var bytes = [];
+    var text = "";
+    var characterCountSize = [10, 12, 14][size];
+    var length = stream.readBits(characterCountSize);
+    // Read digits in groups of 3
+    while (length >= 3) {
+        var num = stream.readBits(10);
+        if (num >= 1000) {
+            throw new Error("Invalid numeric value above 999");
+        }
+        var a = Math.floor(num / 100);
+        var b = Math.floor(num / 10) % 10;
+        var c = num % 10;
+        bytes.push(48 + a, 48 + b, 48 + c);
+        text += a.toString() + b.toString() + c.toString();
+        length -= 3;
+    }
+    // If the number of digits aren't a multiple of 3, the remaining digits are special cased.
+    if (length === 2) {
+        var num = stream.readBits(7);
+        if (num >= 100) {
+            throw new Error("Invalid numeric value above 99");
+        }
+        var a = Math.floor(num / 10);
+        var b = num % 10;
+        bytes.push(48 + a, 48 + b);
+        text += a.toString() + b.toString();
+    }
+    else if (length === 1) {
+        var num = stream.readBits(4);
+        if (num >= 10) {
+            throw new Error("Invalid numeric value above 9");
+        }
+        bytes.push(48 + num);
+        text += num.toString();
+    }
+    return { bytes: bytes, text: text };
+}
+var AlphanumericCharacterCodes = [
+    "0", "1", "2", "3", "4", "5", "6", "7", "8",
+    "9", "A", "B", "C", "D", "E", "F", "G", "H",
+    "I", "J", "K", "L", "M", "N", "O", "P", "Q",
+    "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+    " ", "$", "%", "*", "+", "-", ".", "/", ":",
+];
+function decodeAlphanumeric(stream, size) {
+    var bytes = [];
+    var text = "";
+    var characterCountSize = [9, 11, 13][size];
+    var length = stream.readBits(characterCountSize);
+    while (length >= 2) {
+        var v = stream.readBits(11);
+        var a = Math.floor(v / 45);
+        var b = v % 45;
+        bytes.push(AlphanumericCharacterCodes[a].charCodeAt(0), AlphanumericCharacterCodes[b].charCodeAt(0));
+        text += AlphanumericCharacterCodes[a] + AlphanumericCharacterCodes[b];
+        length -= 2;
+    }
+    if (length === 1) {
+        var a = stream.readBits(6);
+        bytes.push(AlphanumericCharacterCodes[a].charCodeAt(0));
+        text += AlphanumericCharacterCodes[a];
+    }
+```

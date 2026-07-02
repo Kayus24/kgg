@@ -1,0 +1,427 @@
+# KGG Source Chunk 000
+
+- Source: `kgg-update/index.html`
+- Lines: 1-420
+
+```html
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<!--
+KGG INTERNAL SOURCE TRUTH — READ THIS FIRST
+
+Machine-readable app state, patch rules, and changelog are embedded near the top of this HTML.
+Before editing this app, any LLM/agent/human should read these blocks:
+1. <script type="application/json" id="kgg-source-truth">
+{
+  "schema": 1,
+  "app": "KGG Plan",
+  "activeFixes": [
+    "embedded-source-truth",
+    "patch-retention-guard",
+    "rollback-v023-debug-breakage",
+    "phone-viewport-state-leak-guard",
+    "phone-plan-local-list-drag",
+    "local-content-no-auto-redirect",
+    "no-auto-release-navigation",
+    "release-center-local-fallback",
+    "structured-textblock-parser",
+    "free-textfield-units",
+    "schmerz-tag-textblocks",
+    "native-sync-diagnostics",
+    "device-sync-menu-separation",
+    "ui-mini-series",
+    "phone-dock-anchored-correction",
+    "tablet-card-reorder",
+    "phone-liquid-actions",
+    "phone-drawer-bank-align",
+    "tablet-runtime-viewport-guard",
+    "phone-landscape-tablet-menu",
+    "encoding-guard-repair",
+    "symbol-encoding-hotfix",
+    "phone-ui-mini-fix",
+    "android-qr-pdf-bridge",
+    "pdf-plan-thumbnails",
+    "ui-tablet-stability",
+    "patient-qr-latest-base",
+    "colleague-share-apk-update-fix",
+    "patient-qr-root-query"
+  ],
+  "currentVersion": {
+    "versionCode": 56,
+    "versionName": "1.0.56-patient-qr-root-query",
+    "lastPatchId": "kgg-v056-patient-qr-root-query",
+    "updatedBy": "local-html-patch"
+  },
+  "latestPatchId": "kgg-v056-patient-qr-root-query",
+  "lastUpdateIntent": {
+    "id": "kgg-v056-patient-qr-root-query",
+    "summary": "Patienten-QRs nutzen die stabile Root-Patienten-App mit plan=KGGH2 Query-Payload.",
+    "touched": [
+      "Patient QR base URL",
+      "Patient share query URL",
+      "Source Truth",
+      "version.json"
+    ],
+    "notTouched": [
+      "Parser",
+      "Scan/OCR parser",
+      "Plan-State",
+      "PDF generation",
+      "Android/APK",
+      "Sync data model",
+      "API-Key-Logik"
+    ]
+  }
+}
+</script>
+<!-- END kgg-source-truth -->
+<script type="application/json" id="kgg-source-truth">
+{
+  "schema": 1,
+  "app": "KGG Plan",
+  "activeFixes": [
+    "embedded-source-truth",
+    "patch-retention-guard",
+    "rollback-v023-debug-breakage",
+    "phone-viewport-state-leak-guard",
+    "phone-plan-local-list-drag",
+    "local-content-no-auto-redirect",
+    "no-auto-release-navigation",
+    "release-center-local-fallback",
+    "structured-textblock-parser",
+    "free-textfield-units",
+    "schmerz-tag-textblocks",
+    "native-sync-diagnostics",
+    "device-sync-menu-separation",
+    "ui-mini-series",
+    "phone-dock-anchored-correction",
+    "tablet-card-reorder",
+    "phone-liquid-actions",
+    "phone-drawer-bank-align",
+    "tablet-runtime-viewport-guard",
+    "phone-landscape-tablet-menu",
+    "encoding-guard-repair",
+    "symbol-encoding-hotfix",
+    "phone-ui-mini-fix",
+    "android-qr-pdf-bridge",
+    "pdf-plan-thumbnails",
+    "ui-tablet-stability",
+    "patient-qr-latest-base",
+    "colleague-share-apk-update-fix",
+    "patient-qr-root-query"
+  ],
+  "currentVersion": {
+    "versionCode": 56,
+    "versionName": "1.0.56-patient-qr-root-query",
+    "lastPatchId": "kgg-v056-patient-qr-root-query",
+    "updatedBy": "local-html-patch"
+  },
+  "latestPatchId": "kgg-v056-patient-qr-root-query",
+  "lastUpdateIntent": {
+    "id": "kgg-v056-patient-qr-root-query",
+    "summary": "Patienten-QRs nutzen die stabile Root-Patienten-App mit plan=KGGH2 Query-Payload.",
+    "touched": [
+      "Patient QR base URL",
+      "Patient share query URL",
+      "Source Truth",
+      "version.json"
+    ],
+    "notTouched": [
+      "Parser",
+      "Scan/OCR parser",
+      "Plan-State",
+      "PDF generation",
+      "Android/APK",
+      "Sync data model",
+      "API-Key-Logik"
+    ]
+  }
+}
+</script>
+
+<!-- BEGIN kgg-changelog: embedded Changelog; READ THIS BEFORE PATCHING -->
+<script type="application/json" id="kgg-changelog">
+{
+  "schema": 1,
+  "latestVersionCode": 56,
+  "entries": [
+    {
+      "versionCode": 56,
+      "versionName": "1.0.56-patient-qr-root-query",
+      "patchId": "kgg-v056-patient-qr-root-query",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Patienten-QR nutzt Root-App mit Query-Payload",
+      "reason": "Der Trainingsplan-QR soll die aktuelle Patienten-App oeffnen und den Plan direkt ueber ?plan=KGGH2:... uebergeben, statt auf den alten Renderer-Pfad oder gespeicherte Altplaene zu fallen.",
+      "whatChanged": [
+        "Default-Patienten-App-Basis zeigt auf https://kayus24.github.io/kgg/.",
+        "Neue Patienten-QRs verwenden ?plan=KGGH2:<payload>.",
+        "Tests blockieren kgg-update/index.html, releases und media-inline-bundle-7 als Standard-Patientenlink."
+      ],
+      "touchedAreas": [
+        "Patient QR base URL",
+        "Patient share URL tests",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Parser",
+        "Scan/OCR parser",
+        "Plan-State",
+        "PDF generation",
+        "Android/APK",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "notes": "Critical plus patient-qr logic smoke vor Release."
+      }
+    },
+    {
+      "versionCode": 55,
+      "versionName": "1.0.55-colleague-share-apk-fix",
+      "patchId": "kgg-v055-colleague-share-apk-fix",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Kolleg:innen-App-Weitergabe stabilisiert",
+      "reason": "Der Phone-Menuepunkt darf nicht in den APK-Update-Installer laufen, sondern muss direkt den Kolleg:innen-App/APK-QR anzeigen.",
+      "whatChanged": [
+        "Kolleg:innen-App weitergeben nutzt den direkten QR-Handler statt Fallback-Klicks.",
+        "Android-Web-Update-Check startet keine native APK-Installation mehr automatisch."
+      ],
+      "touchedAreas": [
+        "Phone Kolleg:innen-App Weitergabe",
+        "Android APK update handoff",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Parser",
+        "Scan/OCR parser",
+        "Plan-State",
+        "PDF generation",
+        "Sync data model",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "notes": "Critical plus UI-Stability Regression vor Release."
+      }
+    },
+    {
+      "versionCode": 54,
+      "versionName": "1.0.54-patient-qr-latest",
+      "patchId": "kgg-v054-patient-qr-latest",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Patienten-QR nutzt aktuelle Patient-App",
+      "reason": "Trainingsplan-QR-Codes duerfen nicht auf das alte Root-Bundle der ersten Patient-Web-App zeigen.",
+      "whatChanged": [
+        "Default-Patienten-App-Basis zeigt auf kgg-update/index.html als aktuellen Patient-Hash-Renderer.",
+        "Logic-Smoke prueft, dass der QR-Link nicht mehr media-inline-bundle-7 verwendet."
+      ],
+      "touchedAreas": [
+        "Patient QR base URL",
+        "Patient share URL tests",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Parser",
+        "Scan/OCR parser",
+        "Plan-State",
+        "PDF generation",
+        "Android/APK",
+        "Sync data model",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "notes": "Critical plus patient-qr logic smoke vor Release."
+      }
+    },
+    {
+      "versionCode": 53,
+      "versionName": "1.0.53-ui-tablet-stability",
+      "patchId": "kgg-v053-ui-tablet-stability",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Phone-Dock und Tablet-Gesten stabilisiert",
+      "reason": "Tastatur, Header-Menue, Tablet-Swipe und Tablet-Editor duerfen nach UI-Patches nicht wieder instabil werden.",
+      "whatChanged": [
+        "Phone-Scan-Dock und Fertig-Button werden bei Tastatur-Fokus nicht nach oben geschoben.",
+        "Das Phone-Admin-Menue bleibt im Plan-Header sauber rechts verankert und ueberlappt den Paket-Button nicht.",
+        "Tablet-Side-Swipe zum Loeschen kann wieder vor dem Tablet-Reorder greifen.",
+        "Das Tablet-Editor-Modal nutzt ab Tablet-Breite eine zweispaltige Aufteilung."
+      ],
+      "touchedAreas": [
+        "Phone UI dock",
+        "Phone plan header menu",
+        "Tablet plan-card gestures",
+        "Tablet editor layout",
+        "UI stability tests",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Parser",
+        "Scan/OCR parser",
+        "Plan-State",
+        "PDF generation",
+        "QR/Patienten-App",
+        "Android/APK",
+        "Sync data model",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "not-applicable"
+      },
+      "handoffNote": "v053 ist Web-UI-only: nach jedem Folgepatch phone-scan-dock, phone-admin-menu, tablet-card-reorder und tablet-editor-layout laufen lassen."
+    },
+    {
+      "versionCode": 52,
+      "versionName": "1.0.52-pdf-plan-thumbnails",
+      "patchId": "kgg-v052-pdf-plan-thumbnails",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "PDF-Planbilder in Trainingskarten",
+      "reason": "PDF-Trainingskarten sollen vorhandene lokale Uebungsbilder oben rechts als kleine Schwarzweiss-Thumbnails zeigen, ohne die Kartenhoehe zu veraendern.",
+      "whatChanged": [
+        "PDF-Snapshot sammelt lokale Uebungsbilder aus IndexedDB und laesst fehlende Bilder still aus.",
+        "Thumbnails werden lokal entschluesselt, verkleinert und in Schwarzweiss als JPEG-DataURL in den PDF-Snapshot gelegt.",
+        "drawKggExerciseBox zeichnet das Thumbnail oben rechts im vorhandenen freien Raum.",
+        "Die Offline-PDF-Runtime kann JPEG-XObjects einbetten."
+      ],
+      "touchedAreas": [
+        "PDF snapshot",
+        "PDF exercise card rendering",
+        "Offline PDF runtime",
+        "PDF test battery",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Parser",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Phone card gestures",
+        "Tablet layout content",
+        "QR/Patienten-App",
+        "Android/APK",
+        "Sync data model",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "not-applicable"
+      },
+      "handoffNote": "v052 ist nur PDF-Planbilder; Android v399 und QR-Druck bleiben aus v051."
+    },
+    {
+      "versionCode": 51,
+      "versionName": "1.0.51-android-qr-pdf-bridge",
+      "patchId": "kgg-v051-android-qr-pdf-bridge",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Kolleg:innen-QR drucken und Android-PDF/Icon-Bridge",
+      "reason": "Kolleg:innen-App/APK-QR soll direkt druckbar sein und die Android-APK braucht v399 mit App-Icon sowie internem PDF-Fallback, wenn kein externer PDF-Viewer vorhanden ist.",
+      "whatChanged": [
+        "Das Admin-QR-Modal bekommt den Button QR drucken.",
+        "QR-Druck erzeugt lokal eine kleine PDF-Seite mit Titel, QR-Code und Link.",
+        "Android v399 stellt die native PDF-Bridge kompatibel bereit und bekommt das KGG-Launcher-Icon.",
+        "Android oeffnet PDFs intern als Vorschau, wenn kein externer PDF-Viewer gefunden wird."
+      ],
+      "touchedAreas": [
+        "Admin QR modal",
+        "QR print PDF helper",
+        "Android wrapper PDF bridge",
+        "Android launcher resources",
+        "Android update manifest",
+        "Release artifacts",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Parser",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Phone card gestures",
+        "Tablet layout content",
+        "PDF plan exercise-image thumbnails",
+        "Sync data model",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "v051 ist QR/PDF/Android-Shell; PDF-Planbilder bleiben separat fuer v052."
+    },
+    {
+      "versionCode": 50,
+      "versionName": "1.0.50-phone-ui-mini-fix",
+      "patchId": "kgg-v050-phone-ui-mini-fix",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Phone-UI: Plan-Menue, Historie und Scan-Optionen",
+      "reason": "Im Phone-Planmodus sass das 3-Punkte-Menue zu mittig, Plan-Historie kollabierte und die Foto/Galerie-Auswahl wirkte wie ein separates Floating-Menue.",
+      "whatChanged": [
+        "Das 3-Punkte-Menue wird im Plan-Header oben rechts verankert.",
+        "Plan-Historie bleibt im Phone-Planmodus als voller lesbarer Button sichtbar.",
+        "Der Scanbutton zeigt Foto/Galerie-Optionen inline und waechst beim Oeffnen nur vertikal."
+      ],
+      "touchedAreas": [
+        "Phone plan header menu",
+        "Phone Plan-Historie button",
+        "Phone scan dock photo options",
+        "UI stability tests",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Android-Wrapper",
+        "Sync",
+        "API-Key-Logik",
+        "Kolleg:innen-Freigabe"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "not-applicable"
+      },
+      "handoffNote": "v050 ist UI-only fuer Phone; bei Problemen zuerst ui-stability phone-scan-dock und phone-history-packages laufen lassen."
+    },
+    {
+      "versionCode": 50,
+      "versionName": "1.0.50-phone-ui-mini-fix",
+      "patchId": "kgg-v049-symbol-encoding-hotfix",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Mojibake-Symbolreste repariert",
+      "reason": "Nach der grossen UTF-8-Reparatur waren noch kaputte Symbolsequenzen wie Pfeile, Zahnrad und QR-ASCII-Blockzeichen sichtbar bzw. im HTML enthalten.",
+      "whatChanged": [
+        "Kaputte Pfeil-, Zahnrad-, Caret- und QR-ASCII-Symbolstrings wurden durch echte Unicode-Zeichen ersetzt.",
+        "Der Encoding-Guard erkennt jetzt auch einfache sichtbare Mojibake-Symbolfamilien.",
+        "Die Encoding-Guard-Unit-Tests enthalten gute Unicode-Zeichen und rote Symbol-Mojibake-Faelle."
+      ],
+      "touchedAreas": [
+        "HTML symbol strings",
+        "QR helper embedded strings",
+        "Critical encoding guard",
+        "Local test batteries",
+        "Source Truth",
+```

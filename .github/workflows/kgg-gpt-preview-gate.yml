@@ -1,0 +1,208 @@
+name: KGG GPT Preview Gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: publish_preview or create_pr
+        required: true
+        type: choice
+        options:
+          - publish_preview
+          - create_pr
+      request_id:
+        description: Stable GPT request id
+        required: true
+        type: string
+      payload_json:
+        description: Guarded GPT patch payload JSON
+        required: true
+        type: string
+      ui_stability:
+        description: Run UI stability regression
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+  checks: read
+  statuses: read
+
+concurrency:
+  group: kgg-gpt-preview-${{ inputs.request_id }}
+  cancel-in-progress: false
+
+jobs:
+  preview-gate:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PAYLOAD_JSON: ${{ inputs.payload_json }}
+    steps:
+      - name: Checkout main source
+        uses: actions/checkout@v4
+        with:
+          path: base
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - uses: actions/setup-java@v4
+        if: inputs.mode == 'publish_preview'
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+        if: inputs.mode == 'publish_preview'
+
+      - uses: gradle/actions/setup-gradle@v4
+        if: inputs.mode == 'publish_preview'
+        with:
+          gradle-version: "8.11.1"
+
+      - name: Write dispatch payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          payload = os.environ["PAYLOAD_JSON"]
+          path = Path(os.environ["RUNNER_TEMP"]) / "kgg-gpt-payload.json"
+          path.write_text(payload, encoding="utf-8", newline="\n")
+          print(path)
+          PY
+
+      - name: Prepare preview branch checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code origin refs/heads/gpt-preview >/dev/null 2>&1; then
+            git clone --branch gpt-preview "https://github.com/${{ github.repository }}.git" preview
+            cd preview
+            git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+          else
+            mkdir preview
+            cd preview
+            git init
+            git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+            git checkout --orphan gpt-preview
+          fi
+
+      - name: Apply guarded GPT payload
+        id: gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          python release-pipeline/kgg_gpt_write_gate.py \
+            --mode '${{ inputs.mode }}' \
+            --payload-file "$RUNNER_TEMP/kgg-gpt-payload.json" \
+            --preview-root "$GITHUB_WORKSPACE/preview" \
+            --github-output "$GITHUB_OUTPUT"
+
+      - name: Refresh generated GPT context files for PR mode
+        if: inputs.mode == 'create_pr'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          python release-pipeline/kgg_gpt_context.py --write
+          python release-pipeline/kgg_bug_knowledge.py --write
+          python release-pipeline/kgg_gpt_source_context.py --write
+
+      - name: Run critical KGG test battery
+        shell: bash
+        env:
+          KGG_ALLOW_RELEASE_DRIFT: "1"
+        run: |
+          set -euo pipefail
+          cd base
+          python release-pipeline/kgg_test_battery.py --level critical
+
+      - name: Run UI stability regression when requested
+        if: inputs.ui_stability == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          python release-pipeline/kgg_test_battery.py --suite ui-stability --level regression
+
+      - name: Build fixed Preview APK
+        if: inputs.mode == 'publish_preview'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base/android-wrapper
+          gradle assemblePreviewDebug
+
+      - name: Upload Preview APK and HTML artifacts
+        if: inputs.mode == 'publish_preview'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgg-preview-${{ inputs.request_id }}
+          path: |
+            base/android-wrapper/app/build/outputs/apk/preview/debug/app-preview-debug.apk
+            preview/previews/${{ inputs.request_id }}/admin.html
+            preview/previews/${{ inputs.request_id }}/meta.json
+
+      - name: Publish preview channel
+        if: inputs.mode == 'publish_preview'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd preview
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add previews
+          if git diff --cached --quiet; then
+            echo "No preview changes to publish."
+            exit 0
+          fi
+          git commit -m "publish gpt preview ${{ inputs.request_id }}"
+          git push origin HEAD:gpt-preview
+          {
+            echo "Preview HTML: ${{ steps.gate.outputs.preview_url }}"
+            echo "Patch hash: ${{ steps.gate.outputs.patch_hash }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Create guarded PR from accepted preview
+        if: inputs.mode == 'create_pr'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          branch="gpt-write/${{ inputs.request_id }}-${{ github.run_id }}"
+          git switch -c "$branch"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add kgg-update/index.html kgg-update/version.json release-inbox docs/kgg-gpt-context.md docs/kgg-gpt-bug-index.json docs/kgg-gpt-bug-lessons.md docs/kgg-gpt-patch-patterns.md docs/kgg-gpt-source-index.json docs/kgg-gpt-source release-pipeline/kgg_gpt_source_context.py
+          git commit -m "gpt write gate ${{ inputs.request_id }}"
+          git push -u origin "$branch"
+          body="$(mktemp)"
+          cat > "$body" <<BODY
+          Guarded Custom GPT patch.
+
+          - Preview request: \`${{ inputs.request_id }}\`
+          - Patch hash: \`${{ steps.gate.outputs.patch_hash }}\`
+          - Version: \`${{ steps.gate.outputs.version_name }}\`
+          - Release inbox: \`${{ steps.gate.outputs.release_id }}\`
+
+          This PR was created only after a matching preview existed on the \`gpt-preview\` branch.
+          BODY
+          url="$(gh pr create --base main --head "$branch" --title "[gpt-patch] ${{ inputs.request_id }}" --body-file "$body")"
+          echo "PR: $url" >> "$GITHUB_STEP_SUMMARY"

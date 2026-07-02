@@ -210,6 +210,7 @@ def run_android_wrapper_contract() -> None:
     file_paths = (ROOT / "android-wrapper" / "app" / "src" / "main" / "res" / "xml" / "kgg_file_paths.xml").read_text(
         encoding="utf-8"
     )
+    android_workflow = (ROOT / ".github" / "workflows" / "android-wrapper-check.yml").read_text(encoding="utf-8")
     expected_shell = str(manifest.get("latestAndroidShellVersion", "")).lstrip("v")
     required = [
         (f"ANDROID_SHELL_VERSION = {expected_shell}", "MainActivity shell version must match android_update_manifest"),
@@ -223,6 +224,14 @@ def run_android_wrapper_contract() -> None:
         ("print: function(filename, base64)", "native PDF print wrapper"),
         ("from(\"../../therapist-app/releases/web/r0419/admin.html\")", "Admin APK bundles r0419"),
         ("from(\"../../therapist-app/releases/web/r0419/colleague.html\")", "Colleague APK bundles r0419"),
+        ("applicationId \"de.kgg.preview\"", "Preview APK uses a separate package id"),
+        ("manifestPlaceholders = [appLabel: \"KGG Preview\"]", "Preview APK has a distinct launcher label"),
+        ("from(\"../../kgg-update/index.html\")", "Preview APK bundles current source HTML"),
+        ("assemblePreviewDebug", "Android workflow builds the Preview profile"),
+        ("PREVIEW_MANIFEST_URL", "Preview APK loads the GPT preview channel"),
+        ("gpt-preview/previews/index.json", "Preview APK points at the isolated preview manifest"),
+        ("TRUSTED_PREVIEW_PREFIX", "Preview HTML trust boundary is separate from release HTML"),
+        ("return isAdminProfile() && !isPreviewProfile();", "Preview build must not expose Admin release control"),
         ("versionName \"0.2.11-v401-share-apk-provider\"", "Android v401 gradle version name"),
         ("android:icon=\"@mipmap/ic_launcher\"", "launcher icon manifest entry"),
         ("android:roundIcon=\"@mipmap/ic_launcher_round\"", "round launcher icon manifest entry"),
@@ -230,7 +239,7 @@ def run_android_wrapper_contract() -> None:
         ("rememberPendingApkFile(apkFile, versionLabel, false)", "background APK checks must not request installer"),
         ("if (force) {\n                    runOnUiThread(() -> installApkFile(apkFile, versionLabel));", "explicit APK check may open installer"),
     ]
-    haystacks = "\n".join([main_activity, bootstrap, build_gradle, android_manifest, file_paths])
+    haystacks = "\n".join([main_activity, bootstrap, build_gradle, android_manifest, file_paths, android_workflow])
     missing = [reason for token, reason in required if token not in haystacks]
     if missing:
         raise BatteryError("Android wrapper contract missing: " + ", ".join(missing))

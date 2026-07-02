@@ -1,0 +1,427 @@
+# KGG Source Chunk 048
+
+- Source: `kgg-update/index.html`
+- Lines: 20161-20580
+
+```html
+  }
+  function syncPeerDisplayEntries(){
+    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig&&nativeSyncFollowConfig()||{});
+    const map=new Map();
+    const add=(entry,source)=>{
+      if(!entry)return;
+      const deviceId=String(entry.deviceId||entry.therapistId||'').trim();
+      const therapistId=String(entry.therapistId||deviceId).trim();
+      if(!deviceId||deviceId===syncPairDeviceId())return;
+      const key=deviceId||therapistId;
+      const existing=map.get(key)||{};
+      const inferredAutoDownload=source==='follow';
+      map.set(key,{
+        ...existing,
+        ...entry,
+        deviceId,
+        therapistId,
+        displayName:String(entry.displayName||existing.displayName||'KGG Geraet'),
+        roomId:String(entry.roomId||existing.roomId||config.syncRoomId||syncPairRoomId()),
+        autoDownload:existing.autoDownload!==undefined?existing.autoDownload:(entry.autoDownload!==undefined?entry.autoDownload:inferredAutoDownload),
+        source:existing.source||source
+      });
+    };
+    (config.followedTherapists||[]).forEach(entry=>add(entry,'follow'));
+    const mesh=nativeSyncPeerMesh();
+    (Array.isArray(mesh.peers)?mesh.peers:[]).forEach(doc=>{
+      const origin=doc&&doc.origin||{};
+      if(!origin||syncOriginIsSelf(origin))return;
+      add({therapistId:origin.therapistId,deviceId:origin.deviceId,displayName:origin.displayName,roomId:origin.roomId||mesh.roomId,autoDownload:false,lastSeenAt:doc.exportedAt},'room');
+    });
+    return Array.from(map.values()).sort((a,b)=>String(a.displayName||'').localeCompare(String(b.displayName||'')));
+  }
+  function syncDiagnosticStatus(){
+    let status={available:false,platform:'web'};
+    try{
+      if(window.KGGNativeSync&&typeof window.KGGNativeSync.status==='function')status=window.KGGNativeSync.status()||status;
+    }catch(err){status={available:false,platform:'web',error:'status_failed'};}
+    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig&&nativeSyncFollowConfig()||{});
+    const roomId=String(status.syncRoomId||config.syncRoomId||syncPairRoomId());
+    const native=!!(window.KGGNativeSync&&window.KGGNativeSync.available);
+    const shared=status.writeUsesSharedFolder===true||status.usingSharedFolder===true;
+    const privateFallback=native&&status.sharedWritable===false&&!shared;
+    return {status,config,roomId,native,shared,privateFallback};
+  }
+  function renderSyncDiagnostics(){
+    const box=$('syncDiagnostics');
+    if(!box)return;
+    const info=syncDiagnosticStatus();
+    const status=info.status||{};
+    const peerCount=Number(status.peerCount)||syncPeerDisplayEntries().length||0;
+    const mode=!info.native?'Web-Modus / keine Android-Bridge':(info.shared?'Gemeinsamer Android-Sync-Ordner aktiv':'Privater Rueckfall-Speicher');
+    const warn=info.privateFallback?' <span class="warn">Privater Speicher synchronisiert nicht automatisch zwischen Geraeten.</span>':'';
+    const path=String(status.writePath||status.syncPath||status.sharedSyncPath||status.privateSyncPath||'').replace(/\\/g,'/');
+    const shortPath=path.length>88?'...'+path.slice(-85):path;
+    const parts=[
+      '<div><b>Modus:</b> '+escapeHtml(mode)+warn+'</div>',
+      '<div><b>Raum:</b> '+escapeHtml(syncPeerIdShort(info.roomId))+' · <b>Peers:</b> '+peerCount+'</div>',
+      nativeSyncLastStatus?'<div><b>Letzter Test:</b> '+escapeHtml(nativeSyncLastStatus)+'</div>':'',
+      shortPath?'<div><b>Pfad:</b> '+escapeHtml(shortPath)+'</div>':''
+    ].filter(Boolean);
+    box.innerHTML=parts.join('');
+    box.classList.remove('hidden');
+  }
+  function setSyncPeerAutoDownload(deviceId,enabled){
+    const entries=syncPeerDisplayEntries();
+    const selected=entries.find(entry=>String(entry.deviceId)===String(deviceId));
+    if(!selected)return;
+    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig()||{});
+    const list=Array.isArray(config.followedTherapists)?config.followedTherapists.slice():[];
+    const idx=list.findIndex(item=>String(item.deviceId||'')===String(selected.deviceId)||String(item.therapistId||'')===String(selected.therapistId));
+    const next={...selected,autoDownload:!!enabled,scopes:['exerciseBank','packages'],lastSeenAt:new Date().toISOString()};
+    if(idx>=0)list[idx]={...list[idx],...next};
+    else list.push(next);
+    config.followedTherapists=list;
+    if(next.roomId)config.syncRoomId=next.roomId;
+    if(!config.therapistId)config.therapistId=syncPairDeviceId();
+    writeNativeSyncFollowConfig(config);
+    const status=$('syncPairStatus');
+    if(status)status.textContent=(enabled?'Auto-Download aktiv fuer ':'Auto-Download pausiert fuer ')+next.displayName+'.'+nativeSyncTransportStatusText();
+    if(enabled)pullNativeExerciseBankSync('sync_peer_enabled').finally(()=>queueNativeExerciseBankSync('sync_peer_enabled'));
+    renderSyncPeerList();
+    renderSyncDiagnostics();
+  }
+  function renderSyncPeerList(){
+    const box=$('syncPeerList');
+    if(!box)return;
+    const roomId=syncPairRoomId();
+    const entries=syncPeerDisplayEntries();
+    box.classList.remove('hidden');
+    box.innerHTML='';
+    const head=document.createElement('div');
+    head.className='syncPeerHead';
+    const title=document.createElement('span');
+    title.textContent='Automatisch laden von';
+    const room=document.createElement('small');
+    room.textContent='Raum '+syncPeerIdShort(roomId);
+    head.appendChild(title);
+    head.appendChild(room);
+    box.appendChild(head);
+    if(!entries.length){
+      const empty=document.createElement('div');
+      empty.className='syncPeerEmpty';
+      empty.textContent='Noch keine anderen Geraete im Sync-Ordner gefunden.';
+      box.appendChild(empty);
+      return;
+    }
+    entries.forEach(entry=>{
+      const row=document.createElement('label');
+      row.className='syncPeerRow';
+      const checkbox=document.createElement('input');
+      checkbox.type='checkbox';
+      checkbox.checked=entry.autoDownload!==false;
+      checkbox.dataset.deviceId=entry.deviceId;
+      checkbox.addEventListener('change',()=>setSyncPeerAutoDownload(entry.deviceId,checkbox.checked));
+      const text=document.createElement('span');
+      const name=document.createElement('span');
+      name.className='syncPeerName';
+      name.textContent=entry.displayName||'KGG Geraet';
+      const meta=document.createElement('span');
+      meta.className='syncPeerMeta';
+      meta.textContent='Geraet '+syncPeerIdShort(entry.deviceId)+' · '+(entry.autoDownload!==false?'Auto':'pausiert');
+      text.appendChild(name);
+      text.appendChild(meta);
+      row.appendChild(checkbox);
+      row.appendChild(text);
+      box.appendChild(row);
+    });
+  }
+  function openSyncPairModal(){
+    try{queueNativeExerciseBankSync('sync_pair_modal_open');}catch(err){}
+    const payload=buildNativeSyncQrPayload();
+    lastSyncPairCode=payload.code;
+    const modal=$('syncPairModal');
+    renderQrIntoBox('syncPairQrBox',lastSyncPairCode,'Sync-QR fuer Uebungsdatenbank');
+    const status=$('syncPairStatus');
+    const transportStatus=nativeSyncTransportStatusText();
+    if(status)status.textContent=(payload.syncIncluded
+      ?'Kopplung plus aktuelle Uebungsdatenbank/Pakete im QR. Gueltig ca. 5 Minuten.'
+      :'Kopplung im QR. Datenbank/Pakete sind fuer einen QR zu gross; Android nutzt die lokale Cross-Data-Safe-Sync-Datei.')+transportStatus;
+    renderSyncPeerList();
+    renderSyncDiagnostics();
+    if(modal)modal.classList.add('open');
+  }
+  function closeSyncPairModal(){const modal=$('syncPairModal'); if(modal)modal.classList.remove('open');}
+  async function copySyncPairCode(){
+    const status=$('syncPairStatus');
+    const ok=await copyTextValue(lastSyncPairCode||'');
+    if(status)status.textContent=ok?'Sync-Code kopiert.':'Kopieren blockiert. Code bitte ueber QR einlesen.';
+  }
+  async function testNativeSyncRoundtrip(){
+    const status=$('syncPairStatus');
+    try{
+      const doc=buildNativeExerciseBankSyncDocument();
+      if(!nativeExerciseSyncAvailable()){
+        nativeSyncLastStatus='Datenformat OK, aber keine Android-Bridge aktiv.';
+        if(status)status.textContent=nativeSyncLastStatus;
+        renderSyncDiagnostics();
+        return {native:false,doc};
+      }
+      const writeOk=!!(await resolveNativeSyncValue(window.KGGNativeSync.write(doc)));
+      let mesh=null,result=null;
+      if(typeof window.KGGNativeSync.listPeers==='function')mesh=await resolveNativeSyncValue(window.KGGNativeSync.listPeers());
+      if(!mesh&&typeof window.KGGNativeSync.read==='function')mesh=await resolveNativeSyncValue(window.KGGNativeSync.read());
+      if(mesh)result=mergeNativeExerciseBankSyncDocument(mesh);
+      const peers=result&&result.mesh?result.mesh.seen:((mesh&&Array.isArray(mesh.peers))?mesh.peers.length:0);
+      nativeSyncLastStatus=(writeOk?'Schreiben OK':'Schreiben fehlgeschlagen')+' · Peers '+peers;
+      if(status)status.textContent='Sync-Test: '+nativeSyncLastStatus+'. '+nativeSyncTransportStatusText();
+      renderSyncPeerList();
+      renderSyncDiagnostics();
+      return {native:true,writeOk,mesh,result};
+    }catch(err){
+      nativeSyncLastStatus='Fehler: '+(err&&err.message?err.message:'Sync-Test fehlgeschlagen');
+      if(status)status.textContent=nativeSyncLastStatus;
+      renderSyncDiagnostics();
+      return null;
+    }
+  }
+  function downloadNativeSyncFile(){
+    const status=$('syncPairStatus');
+    try{
+      const doc=buildNativeExerciseBankSyncDocument();
+      const blob=new Blob([JSON.stringify(doc,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      const stamp=new Date().toISOString().slice(0,19).replace(/[-:T]/g,'');
+      a.href=url;
+      a.download='kgg_sync_'+syncPeerIdShort(doc.roomId||'room')+'_'+stamp+'.json';
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(url),1200);
+      nativeSyncLastStatus='Sync-Datei gespeichert.';
+      if(status)status.textContent=nativeSyncLastStatus;
+      renderSyncDiagnostics();
+      return true;
+    }catch(err){
+      nativeSyncLastStatus='Sync-Datei konnte nicht gespeichert werden.';
+      if(status)status.textContent=nativeSyncLastStatus;
+      renderSyncDiagnostics();
+      return false;
+    }
+  }
+  async function importNativeSyncFile(file){
+    const status=$('syncPairStatus');
+    try{
+      if(!file)throw new Error('Keine Datei ausgewaehlt.');
+      const text=await file.text();
+      const payload=JSON.parse(text);
+      const result=mergeNativeExerciseBankSyncDocument(payload,{allowUnfollowed:true});
+      try{await pushNativeExerciseBankSync('sync_file_import');}catch(err){}
+      const bankResult=result&&result.bank?result.bank:{added:0,updated:0,total:0};
+      const packageResult=result&&result.packages?result.packages:{added:0,updated:0,total:0};
+      nativeSyncLastStatus='Import OK · DB +'+bankResult.added+'/'+bankResult.updated+' · Pakete +'+packageResult.added+'/'+packageResult.updated;
+      if(status)status.textContent=nativeSyncLastStatus;
+      renderSyncPeerList();
+      renderSyncDiagnostics();
+      return result;
+    }catch(err){
+      nativeSyncLastStatus='Import fehlgeschlagen: '+(err&&err.message?err.message:'ungueltige Datei');
+      if(status)status.textContent=nativeSyncLastStatus;
+      renderSyncDiagnostics();
+      return null;
+    }
+  }
+  function isNativeSyncInvitePayload(payload){
+    return payload&&payload.kind==='kgg_sync_invite'&&(payload.version===1||payload.version===2)&&payload.deviceId;
+  }
+  function isNativeSyncBundlePayload(payload){
+    return payload&&payload.kind==='kgg_sync_bundle'&&(payload.version===1||payload.version===2)&&(payload.invite||payload.sync);
+  }
+  function applyNativeSyncInvite(invite){
+    if(!isNativeSyncInvitePayload(invite))throw new Error('Sync-QR ist nicht lesbar.');
+    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig()||{});
+    if(invite.roomId)config.syncRoomId=String(invite.roomId);
+    if(!config.therapistId)config.therapistId=syncPairDeviceId();
+    writeNativeSyncFollowConfig(config);
+    const entry=upsertSyncPeerFromOrigin({
+      therapistId:String(invite.therapistId||invite.deviceId),
+      deviceId:String(invite.deviceId),
+      displayName:String(invite.displayName||'KGG Geraet'),
+      roomId:String(invite.roomId||config.syncRoomId||syncPairRoomId())
+    },true);
+    setScanStatus('Sync gekoppelt: '+entry.displayName);
+    renderSyncPeerList();
+    try{queueNativeExerciseBankSync('sync_invite_scanned');}catch(err){}
+    return entry;
+  }
+  async function applyNativeSyncBundle(bundle){
+    if(!isNativeSyncBundlePayload(bundle))throw new Error('Sync-Daten-QR ist nicht lesbar.');
+    let entry=null;
+    if(bundle.invite)entry=applyNativeSyncInvite(bundle.invite);
+    let result=null;
+    if(bundle.sync){
+      result=mergeNativeExerciseBankSyncDocument(bundle.sync,{allowUnfollowed:true});
+      try{await pushNativeExerciseBankSync('sync_bundle_qr_import');}catch(err){}
+    }
+    const bank=result&&result.bank?result.bank:{added:0,updated:0,total:0};
+    const packages=result&&result.packages?result.packages:{added:0,updated:0,total:0};
+    const name=entry&&entry.displayName?entry.displayName:'Sync-Geraet';
+    setScanStatus('Sync-Daten uebernommen: '+name+' | DB +'+bank.added+'/'+bank.updated+' | Pakete +'+packages.added+'/'+packages.updated);
+    return {entry,result};
+  }
+  function currentEditedPlanExercise(){const id=state.editId; return state.plan.find(x=>(x.localId||x.id)===id);}
+  function currentEditedBankExercise(){const id=state.editId; return bank.find(x=>String(x.id)===String(id));}
+  function currentEditedExercise(){return currentEditedPlanExercise()||currentEditedBankExercise();}
+  function mediaSizeLabel(bytes){const n=Number(bytes)||0; if(n>=1048576)return (n/1048576).toFixed(1).replace('.',',')+' MB'; if(n>=1024)return Math.round(n/1024)+' KB'; return n+' B';}
+  function clearEditorMediaPreview(){
+    const preview=$('editMediaPreview');
+    if(!preview)return;
+    preview.innerHTML='';
+    preview.classList.add('hidden');
+  }
+  async function renderEditorMediaPreview(media){
+    const preview=$('editMediaPreview');
+    if(!preview||!media||!media.id){clearEditorMediaPreview();return;}
+    preview.textContent='Vorschau wird geladen ...';
+    preview.classList.remove('hidden');
+    try{
+      const record=await getEncryptedMediaBlob(media.id);
+      if(!record||!record.blob)throw new Error('Lokale Bilddatei fehlt.');
+      const imageBlob=await patientDecryptMedia(media,record.blob);
+      const url=URL.createObjectURL(imageBlob);
+      preview.innerHTML='<img src="'+url+'" alt="Uebungsbild Vorschau">';
+      setTimeout(()=>URL.revokeObjectURL(url),60000);
+    }catch(err){
+      preview.textContent='Vorschau lokal nicht verfuegbar.';
+    }
+  }
+  function renderEditorMediaStatus(ex){
+    const box=document.querySelector('.editorMediaBox'), status=$('editMediaStatus'), removeBtn=$('removeExerciseImage');
+    if(!box||!status||!removeBtn)return;
+    const isEditableExercise=!!ex;
+    box.classList.toggle('hidden',!isEditableExercise);
+    if(!isEditableExercise){clearEditorMediaPreview();return;}
+    const media=ensureExerciseMediaList(ex);
+    removeBtn.classList.toggle('hidden',media.length===0);
+    if(!media.length){status.textContent='Kein Bild.';clearEditorMediaPreview();return;}
+    const first=media[0];
+    status.textContent='1 Bild · '+mediaSizeLabel(first.encryptedSize||first.compressedSize||first.originalSize);
+    renderEditorMediaPreview(first);
+  }
+  async function handleEditorMediaFileSelected(ev){
+    const file=ev.target.files&&ev.target.files[0];
+    ev.target.value='';
+    if(!file)return;
+    const ex=currentEditedExercise();
+    if(!ex)return;
+    const status=$('editMediaStatus');
+    if(status)status.textContent='Bild wird vorbereitet ...';
+    const oldMedia=ensureExerciseMediaList(ex);
+    try{
+      const manifest=await prepareImageMediaFile(file);
+      ex.media=[manifest];
+      oldMedia.forEach(item=>deleteUnsharedMediaBlob(item,ex));
+      if(ex.localId){
+        syncStatePlanToStore('ui_attach_exercise_image');
+        save();
+      }else{
+        ex.custom=true;
+        ex.updatedAt=new Date().toISOString();
+        persistCustomBank();
+      }
+      renderEditorMediaStatus(ex);
+      render();
+      $('editorModal').classList.add('open');
+    }catch(err){
+      console.warn('Bild konnte nicht vorbereitet werden:',err);
+      if(status)status.textContent='Bild fehlgeschlagen.';
+    }
+  }
+  function removeEditorMedia(){
+    const ex=currentEditedExercise();
+    if(!ex)return;
+    const oldMedia=ensureExerciseMediaList(ex);
+    ex.media=[];
+    oldMedia.forEach(item=>deleteUnsharedMediaBlob(item,ex));
+    if(ex.localId){
+      syncStatePlanToStore('ui_remove_exercise_image');
+      save();
+    }else{
+      ex.custom=true;
+      ex.updatedAt=new Date().toISOString();
+      persistCustomBank();
+    }
+    renderEditorMediaStatus(ex);
+    render();
+    $('editorModal').classList.add('open');
+  }
+  function openEditor(ex){
+    if(!ex)return;
+    const inferredMeasure=(String(ex.unit||ex.metricUnit||'').toLowerCase().includes('zeit')||String(ex.unit||ex.metricUnit||'').toLowerCase().includes('sek'))?'zeit':'wdh';
+    state.editId=ex.localId||ex.id;
+    $('editName').value=ex.name||'';
+    $('editSets').value=String(normalizeSetCount(ex.sets));
+    $('editMetric').value=ex.startMetric||'';
+    $('editLoad').value=ex.startLoad||'';
+    $('editUnit').value=normalizeLoadUnit(ex.weightUnit||ex.loadUnit||'kg');
+    $('editMeasure').value=normalizeMeasureMode(ex.measure||inferredMeasure);
+    $('editSide').value=normalizeSideMode(ex.side||'BI');
+    $('editVideoUrl').value=ex.videoUrl||'';
+    $('editVideoLabel').value=ex.videoLabel||'Video öffnen';
+    renderEditorMediaStatus(ex);
+    const bankEdit=!ex.localId&&bank.some(item=>String(item.id)===String(ex.id));
+    $('deleteExercise').dataset.scope=bankEdit?'bank':'plan';
+    $('deleteExercise').style.visibility=(ex.localId||bankEdit)?'visible':'hidden';
+    $('editorModal').classList.add('open');
+  }
+  function closeEditor(){state.editId=null; $('editorModal').classList.remove('open')}
+  function saveEditedExercise(){
+    const id=state.editId;
+    const planEx=state.plan.find(x=>(x.localId||x.id)===id);
+    if(planEx){
+      const measure=normalizeMeasureMode($('editMeasure').value);
+      const loadUnit=normalizeLoadUnit($('editUnit').value);
+      planEx.name=$('editName').value;
+      planEx.sets=normalizeSetCount($('editSets').value);
+      planEx.startMetric=$('editMetric').value;
+      planEx.startLoad=$('editLoad').value;
+      planEx.weightUnit=loadUnit;
+      planEx.loadUnit=loadUnit;
+      planEx.measure=measure;
+      planEx.unit=measureUnitLabel(measure);
+      planEx.metricUnit=measureUnitLabel(measure);
+      planEx.side=normalizeSideMode($('editSide').value);
+      planEx.videoUrl=String($('editVideoUrl').value||'').trim();
+      planEx.videoLabel=String($('editVideoLabel').value||'').trim()||'Video öffnen';
+      planEx.changedByLiveText=false;
+      planEx.needsReview=false;
+      const bankEx=upsertPlanExerciseToBank(planEx,'ui_save_exercise');
+      if(bankEx){
+        planEx.sourceId=bankEx.id;
+        planEx.bankId=bankEx.id;
+      }
+      persistCustomBank();
+      syncStatePlanToStore('ui_save_exercise');
+      syncTextInputFromPlan('ui_save_exercise');
+      save();
+      render();
+    }else{
+      const bankEx=currentEditedBankExercise();
+      if(bankEx){
+        const measure=normalizeMeasureMode($('editMeasure').value);
+        const loadUnit=normalizeLoadUnit($('editUnit').value);
+        bankEx.name=$('editName').value;
+        bankEx.aliases=bankEx.aliases||bankEx.name;
+        bankEx.sets=normalizeSetCount($('editSets').value);
+        bankEx.startMetric=$('editMetric').value;
+        bankEx.startLoad=$('editLoad').value;
+        bankEx.weightUnit=loadUnit;
+        bankEx.loadUnit=loadUnit;
+        bankEx.measure=measure;
+        bankEx.unit=measureUnitLabel(measure);
+        bankEx.metricUnit=measureUnitLabel(measure);
+        bankEx.side=normalizeSideMode($('editSide').value);
+        bankEx.videoUrl=String($('editVideoUrl').value||'').trim();
+        bankEx.videoLabel=String($('editVideoLabel').value||'').trim()||'Video öffnen';
+        bankEx.custom=true;
+        bankEx.updatedAt=new Date().toISOString();
+        persistCustomBank();
+        render();
+      }
+    }
+```
