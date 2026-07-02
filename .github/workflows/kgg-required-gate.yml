@@ -64,6 +64,10 @@ jobs:
           KGG_ALLOW_RELEASE_DRIFT: ${{ steps.scope.outputs.pipeline_only == 'true' && '1' || '' }}
         run: python release-pipeline/kgg_test_battery.py --level critical
 
+      - name: Check Custom GPT live context freshness
+        shell: bash
+        run: python release-pipeline/kgg_gpt_context.py --check
+
       - name: Run UI stability regression for UI or HTML changes
         if: steps.scope.outputs.ui_or_html == 'true'
         shell: bash
