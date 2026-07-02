@@ -1,0 +1,32 @@
+{
+  "kind": "kgg_gpt_preview_manifest",
+  "version": 1,
+  "previews": [
+    {
+      "kind": "kgg_gpt_preview",
+      "requestId": "preview-bootstrap-apk",
+      "patchHash": "339b8786cbc9d7ae87b80bc9fff0acefd1c599c811e30cdfb200d35cb29e9c64",
+      "baseSha": "c26f99659a6dd1fa0f0c9179b492928c0c04b173",
+      "baseVersionCode": 57,
+      "rolloutCode": 1783028555,
+      "title": "Preview APK Bootstrap",
+      "summary": "Bootstrap preview build for installing the fixed KGG Preview APK",
+      "createdAt": "2026-07-02T21:42:35Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/preview-bootstrap-apk/admin.html",
+      "sha256": "26c5cb5caa3d950efd63f09e8eb6377611f401c54dd1f396a121f56188fbace8"
+    }
+  ],
+  "latest": {
+    "kind": "kgg_gpt_preview",
+    "requestId": "preview-bootstrap-apk",
+    "patchHash": "339b8786cbc9d7ae87b80bc9fff0acefd1c599c811e30cdfb200d35cb29e9c64",
+    "baseSha": "c26f99659a6dd1fa0f0c9179b492928c0c04b173",
+    "baseVersionCode": 57,
+    "rolloutCode": 1783028555,
+    "title": "Preview APK Bootstrap",
+    "summary": "Bootstrap preview build for installing the fixed KGG Preview APK",
+    "createdAt": "2026-07-02T21:42:35Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/preview-bootstrap-apk/admin.html",
+    "sha256": "26c5cb5caa3d950efd63f09e8eb6377611f401c54dd1f396a121f56188fbace8"
+  }
+}
