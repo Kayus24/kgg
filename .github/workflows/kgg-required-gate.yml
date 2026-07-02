@@ -1,0 +1,70 @@
+name: KGG Required Gate
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: kgg-required-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  required-gate:
+    name: required-gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Classify pull request scope
+        id: scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          changed_file="$RUNNER_TEMP/kgg-changed-files.txt"
+          git diff --name-only "origin/${{ github.base_ref }}"...HEAD | tee "$changed_file"
+
+          pipeline_only=true
+          ui_or_html=false
+
+          while IFS= read -r path; do
+            [[ -z "$path" ]] && continue
+            case "$path" in
+              .github/workflows/*|release-pipeline/*|release-pipeline/**) ;;
+              *) pipeline_only=false ;;
+            esac
+          done < "$changed_file"
+
+          if grep -Eq '(^|/)[^/]+\.(html|css)$|^kgg-update/|^therapist-app/test-lab/|^therapist-app/releases/web/|^release-pipeline/kgg_ui_stability_smoke\.js$' "$changed_file"; then
+            ui_or_html=true
+          fi
+
+          echo "pipeline_only=$pipeline_only" >> "$GITHUB_OUTPUT"
+          echo "ui_or_html=$ui_or_html" >> "$GITHUB_OUTPUT"
+
+      - name: Run critical KGG test battery
+        shell: bash
+        env:
+          KGG_ALLOW_RELEASE_DRIFT: ${{ steps.scope.outputs.pipeline_only == 'true' && '1' || '' }}
+        run: python release-pipeline/kgg_test_battery.py --level critical
+
+      - name: Run UI stability regression for UI or HTML changes
+        if: steps.scope.outputs.ui_or_html == 'true'
+        shell: bash
+        run: python release-pipeline/kgg_test_battery.py --suite ui-stability --level regression
