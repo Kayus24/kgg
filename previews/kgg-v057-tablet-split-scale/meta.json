@@ -1,0 +1,13 @@
+{
+  "kind": "kgg_gpt_preview",
+  "requestId": "kgg-v057-tablet-split-scale",
+  "patchHash": "c6808403694dcb5b63d86d24bed958f4539086ea31ad70ded23f933cb92d14a5",
+  "baseSha": "5e6dec513d96e7b2521ffb84891071d506c75674",
+  "baseVersionCode": 57,
+  "rolloutCode": 1783088527,
+  "title": "v057 Tablet Splitter und Skalierung trennen",
+  "summary": "Tablet-Layoutsteuerung: sichtbarer Griff liegt auf der Spaltengrenze, seitliches Ziehen aendert die linke Spalte; Plus/Minus bleibt reine Skalierung.",
+  "createdAt": "2026-07-03T14:22:07Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v057-tablet-split-scale/admin.html",
+  "sha256": "c0d86d5cc2e61698aeeceebe4f826d854f31bb12c125f22d59ca5f44645b08d5"
+}
