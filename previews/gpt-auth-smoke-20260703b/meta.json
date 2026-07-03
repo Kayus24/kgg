@@ -1,0 +1,13 @@
+{
+  "kind": "kgg_gpt_preview",
+  "requestId": "gpt-auth-smoke-20260703b",
+  "patchHash": "230ab65ae8caf6b1819e21f09c3cdf6c00bb48b7f974e6d81d6938cd8755a5e6",
+  "baseSha": "e4e421ba206318e7ef843a441ee20abf13991c02",
+  "baseVersionCode": 57,
+  "rolloutCode": 1783062084,
+  "title": "Auth Smoke 2",
+  "summary": "Auth smoke preview after publish fix",
+  "createdAt": "2026-07-03T07:01:24Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/gpt-auth-smoke-20260703b/admin.html",
+  "sha256": "d0a477a04a5d0be223a8614b92a305123337ee59dbb7f4d88a4e8e8e156d9abb"
+}
