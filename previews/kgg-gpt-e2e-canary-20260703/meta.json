@@ -1,0 +1,13 @@
+{
+  "kind": "kgg_gpt_preview",
+  "requestId": "kgg-gpt-e2e-canary-20260703",
+  "patchHash": "bf7aef6b364f6daada4a24e985598976f2c6f431ea08f1edb72b706154a9d59c",
+  "baseSha": "b54606b3b64093eb2bfa5c4374191b93b5f95c25",
+  "baseVersionCode": 57,
+  "rolloutCode": 1783112912,
+  "title": "GPT E2E Canary",
+  "summary": "Controlled preview canary proving validate-first Custom GPT flow through publish_preview.",
+  "createdAt": "2026-07-03T21:08:32Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-gpt-e2e-canary-20260703/admin.html",
+  "sha256": "824fc847f831e6788725e448ab2468a66a5c2f9329f5aa08ffad896659b29228"
+}

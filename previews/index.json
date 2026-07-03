@@ -4,6 +4,19 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "kgg-gpt-e2e-canary-20260703",
+      "patchHash": "bf7aef6b364f6daada4a24e985598976f2c6f431ea08f1edb72b706154a9d59c",
+      "baseSha": "b54606b3b64093eb2bfa5c4374191b93b5f95c25",
+      "baseVersionCode": 57,
+      "rolloutCode": 1783112912,
+      "title": "GPT E2E Canary",
+      "summary": "Controlled preview canary proving validate-first Custom GPT flow through publish_preview.",
+      "createdAt": "2026-07-03T21:08:32Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-gpt-e2e-canary-20260703/admin.html",
+      "sha256": "824fc847f831e6788725e448ab2468a66a5c2f9329f5aa08ffad896659b29228"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-v057-tablet-split-scale",
       "patchHash": "c6808403694dcb5b63d86d24bed958f4539086ea31ad70ded23f933cb92d14a5",
       "baseSha": "5e6dec513d96e7b2521ffb84891071d506c75674",
@@ -57,15 +70,15 @@
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-v057-tablet-split-scale",
-    "patchHash": "c6808403694dcb5b63d86d24bed958f4539086ea31ad70ded23f933cb92d14a5",
-    "baseSha": "5e6dec513d96e7b2521ffb84891071d506c75674",
+    "requestId": "kgg-gpt-e2e-canary-20260703",
+    "patchHash": "bf7aef6b364f6daada4a24e985598976f2c6f431ea08f1edb72b706154a9d59c",
+    "baseSha": "b54606b3b64093eb2bfa5c4374191b93b5f95c25",
     "baseVersionCode": 57,
-    "rolloutCode": 1783088527,
-    "title": "v057 Tablet Splitter und Skalierung trennen",
-    "summary": "Tablet-Layoutsteuerung: sichtbarer Griff liegt auf der Spaltengrenze, seitliches Ziehen aendert die linke Spalte; Plus/Minus bleibt reine Skalierung.",
-    "createdAt": "2026-07-03T14:22:07Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v057-tablet-split-scale/admin.html",
-    "sha256": "c0d86d5cc2e61698aeeceebe4f826d854f31bb12c125f22d59ca5f44645b08d5"
+    "rolloutCode": 1783112912,
+    "title": "GPT E2E Canary",
+    "summary": "Controlled preview canary proving validate-first Custom GPT flow through publish_preview.",
+    "createdAt": "2026-07-03T21:08:32Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-gpt-e2e-canary-20260703/admin.html",
+    "sha256": "824fc847f831e6788725e448ab2468a66a5c2f9329f5aa08ffad896659b29228"
   }
 }
