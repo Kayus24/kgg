@@ -256,6 +256,16 @@ def run_android_wrapper_contract() -> None:
     log("Android wrapper contract OK")
 
 
+def run_gpt_payload_preflight_self_test() -> None:
+    log("== Custom GPT payload preflight self-test ==")
+    run([sys.executable, "release-pipeline/kgg_gpt_payload_preflight.py", "--self-test"])
+
+
+def run_gpt_eval() -> None:
+    log("== Custom GPT deterministic eval ==")
+    run([sys.executable, "release-pipeline/kgg_gpt_eval.py"])
+
+
 def run_patch_hygiene() -> None:
     log("== Patch hygiene check ==")
     run([sys.executable, "release-pipeline/kgg_patch_hygiene.py"])
@@ -423,6 +433,20 @@ TEST_REGISTRY = [
         "run": run_android_wrapper_contract,
     },
     {
+        "id": "gpt-payload-preflight",
+        "level": "critical",
+        "suite": "gpt",
+        "reason": "Custom GPT payloads must fail locally on protected tokens, broad body-appends and missing UI test declarations.",
+        "run": run_gpt_payload_preflight_self_test,
+    },
+    {
+        "id": "gpt-eval",
+        "level": "critical",
+        "suite": "gpt",
+        "reason": "Custom GPT playbook, routing and expected-answer fixtures must stay complete and testable.",
+        "run": run_gpt_eval,
+    },
+    {
         "id": "mobile-inbox-dry-run",
         "level": "critical",
         "suite": "mobile-inbox",
@@ -570,6 +594,13 @@ TEST_REGISTRY = [
         "run": lambda: run_ui_stability("regression", "phone-landscape-tablet-menu"),
     },
     {
+        "id": "ui-tablet-splitter-scale-drag-probe",
+        "level": "comfort",
+        "suite": "ui-stability",
+        "reason": "Targeted probe for the known Tablet splitter/scale-control UX issue; promote after the app fix lands.",
+        "run": lambda: run_ui_stability("regression", "tablet-splitter-scale-drag"),
+    },
+    {
         "id": "native-sync-regression",
         "level": "regression",
         "suite": "native-sync",
@@ -626,7 +657,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--suite",
-        choices=["all", "hygiene", "mobile-inbox", "sync", "native-sync", "textblocks", "pdf", "ui-stability", "syntax", "security", "release", "android"],
+        choices=["all", "hygiene", "mobile-inbox", "sync", "native-sync", "textblocks", "pdf", "ui-stability", "syntax", "security", "release", "android", "gpt"],
         default=None,
         help="Optionally limit to one suite. Without --level this keeps legacy behavior and runs all non-live tests in that suite.",
     )

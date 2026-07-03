@@ -386,6 +386,18 @@ def run(payload: dict[str, Any], mode: str, preview_root: Path | None, github_ou
     source = SOURCE_PATH.read_text(encoding="utf-8")
     patched = apply_operations(source, payload)
     versioned, version_json = bump_version(patched, payload)
+    if mode == "validate_only":
+        write_github_output(
+            github_output,
+            {
+                "request_id": payload["request_id"],
+                "patch_hash": digest,
+                "version_name": str(version_json["versionName"]),
+                "validation": "ok",
+            },
+        )
+        return
+
     SOURCE_PATH.write_text(versioned, encoding="utf-8", newline="\n")
     write_json(VERSION_PATH, version_json)
 
@@ -438,7 +450,7 @@ def run(payload: dict[str, Any], mode: str, preview_root: Path | None, github_ou
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Apply a guarded GPT patch for preview or PR.")
-    parser.add_argument("--mode", required=True, choices=["publish_preview", "create_pr"])
+    parser.add_argument("--mode", required=True, choices=["validate_only", "publish_preview", "create_pr"])
     parser.add_argument("--payload-file", required=True, type=Path)
     parser.add_argument("--preview-root", type=Path)
     parser.add_argument("--github-output", default=os.environ.get("GITHUB_OUTPUT"))

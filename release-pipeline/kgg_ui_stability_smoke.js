@@ -42,7 +42,7 @@ function parseArgs() {
 }
 
 function usage() {
-  console.log("Usage: node release-pipeline/kgg_ui_stability_smoke.js --level critical|regression [--case all|gestures|ui-mini-series|bank-thumbnails|phone-admin-menu|phone-scan-dock|phone-history-packages|phone-bank-align|tablet-layout-button|tablet-card-reorder|tablet-layout-visual|tablet-editor-layout|tablet-split-phone-layout|phone-landscape-tablet-menu|tablet-app-boot] [--browser]");
+  console.log("Usage: node release-pipeline/kgg_ui_stability_smoke.js --level critical|regression [--case all|gestures|ui-mini-series|bank-thumbnails|phone-admin-menu|phone-scan-dock|phone-history-packages|phone-bank-align|tablet-layout-button|tablet-card-reorder|tablet-layout-visual|tablet-editor-layout|tablet-split-phone-layout|phone-landscape-tablet-menu|tablet-app-boot|tablet-splitter-scale-drag] [--browser]");
   console.log("Optional: set KGG_UI_SMOKE_HTML to test a release HTML instead of kgg-update/index.html.");
 }
 
@@ -258,6 +258,15 @@ function staticUiMiniSeriesGuardSuite(caseName) {
     assertIncludes(html, "grid-template-areas:", "tablet editor grid areas");
     assertIncludes(html, "grid-area:media", "tablet editor media column");
     assertIncludes(html, "minmax(300px,.92fr)", "tablet editor second column");
+  }
+  if (caseMatches(caseName, ["tablet-splitter-scale-drag"])) {
+    assertIncludes(html, "tabletLayoutFreeTools", "tablet scale-control element");
+    assertIncludes(html, "tabletLayoutResizeHandle", "tablet split handle element");
+    assertIncludes(html, "--kgg-tablet-left-col", "tablet left column width variable");
+    assertIncludes(html, "--kgg-tablet-ui-scale", "tablet UI scale variable");
+    assertIncludes(html, "function updateTabletLayoutHandle", "tablet split handle positioning function");
+    assertIncludes(html, "function initTabletLayoutControls", "tablet layout control binding function");
+    assertIncludes(html, "tabletSplitScaleValue", "splitter scale value control");
   }
 
   console.log(`Static UI mini-series guards OK (${caseName || "all"})`);
@@ -586,8 +595,12 @@ function wantsPhoneLandscapeTabletMenu(caseName) {
   return caseMatches(caseName, ["phone-landscape-tablet-menu"]);
 }
 
+function wantsTabletSplitterProbe(caseName) {
+  return caseMatches(caseName, ["tablet-splitter-scale-drag"]);
+}
+
 async function browserUiMiniSeriesSuite(caseName) {
-  if (!wantsPhoneMiniSeries(caseName) && !wantsTabletMiniSeries(caseName) && !wantsTabletSplitPhoneMiniSeries(caseName) && !wantsPhoneLandscapeTabletMenu(caseName)) {
+  if (!wantsPhoneMiniSeries(caseName) && !wantsTabletMiniSeries(caseName) && !wantsTabletSplitPhoneMiniSeries(caseName) && !wantsPhoneLandscapeTabletMenu(caseName) && !wantsTabletSplitterProbe(caseName)) {
     console.log(`Browser UI mini-series skipped (${caseName || "all"}; static guard only)`);
     return;
   }
@@ -1182,6 +1195,133 @@ async function browserUiMiniSeriesSuite(caseName) {
       await context.close();
     }
 
+    if (wantsTabletSplitterProbe(caseName)) {
+      const context = await browser.newContext({
+        viewport: { width: 1180, height: 820 },
+        deviceScaleFactor: 1,
+        isMobile: false,
+        hasTouch: true,
+        locale: "de-DE",
+      });
+      await context.route(/^https?:\/\//, async (route) => {
+        externalRequests.push(route.request().url());
+        await route.fulfill({ status: 204, contentType: "application/json", body: "{}" });
+      });
+      await context.addInitScript(({ storageKey, customBankKey, exercises, customBank }) => {
+        localStorage.setItem(
+          storageKey,
+          JSON.stringify({
+            plan: [],
+            patient: { name: "Tablet Splitter", date: "2026-07-03", therapist: "Codex" },
+            bankOpen: true,
+            recent: [],
+            packages: [],
+          })
+        );
+        localStorage.setItem(customBankKey, JSON.stringify(customBank));
+        localStorage.setItem("kgg_tablet_layout_locked", "false");
+        localStorage.removeItem("kgg_tablet_left_col_width");
+        localStorage.setItem("kgg_tablet_ui_scale", "1");
+        localStorage.setItem("kgg_pwa_install_prompt_seen_v1", "2026-07-03T00:00:00.000Z");
+      }, { storageKey: STORAGE_KEY, customBankKey: CUSTOM_BANK_KEY, exercises: seededExercises(8), customBank: seededCustomBank() });
+      const page = await context.newPage();
+      page.on("pageerror", (err) => pageErrors.push(err.message));
+      await page.goto(htmlUrl, { waitUntil: "commit", timeout: 60000 });
+      await page.waitForSelector(".scanHub", { state: "attached", timeout: 15000 });
+      await page.waitForSelector("#tabletMenuBtn", { timeout: 15000 });
+      await page.locator("#tabletMenuBtn").click();
+      await page.waitForFunction(() => document.body.classList.contains("tabletMenuOpen"), null, { timeout: 10000 });
+      await page.locator("#tabletMenuLayoutBtn").click();
+      await page.waitForFunction(() => document.body.classList.contains("tabletLayoutEditMode"), null, { timeout: 10000 });
+      await page.waitForTimeout(350);
+
+      const initial = await page.evaluate(() => {
+        const rect = (node) => {
+          if (!node) return null;
+          const r = node.getBoundingClientRect();
+          const style = getComputedStyle(node);
+          return {
+            left: Math.round(r.left),
+            top: Math.round(r.top),
+            right: Math.round(r.right),
+            bottom: Math.round(r.bottom),
+            width: Math.round(r.width),
+            height: Math.round(r.height),
+            display: style.display,
+            visibility: style.visibility,
+            pointerEvents: style.pointerEvents,
+          };
+        };
+        const visible = (box) => !!(box && box.display !== "none" && box.visibility !== "hidden" && box.width > 2 && box.height > 2);
+        const handle = document.getElementById("tabletLayoutResizeHandle");
+        const bank = document.getElementById("bankArea") || document.getElementById("inputWrap");
+        const plan = document.getElementById("currentPlanBlock");
+        const tools = document.getElementById("tabletLayoutFreeTools");
+        const splitValue = document.getElementById("tabletSplitScaleValue");
+        const handleBox = rect(handle);
+        const bankBox = rect(bank);
+        const planBox = rect(plan);
+        const toolsBox = rect(tools);
+        const boundary = bankBox && planBox ? Math.round((bankBox.right + planBox.left) / 2) : null;
+        const handleCenter = handleBox ? Math.round(handleBox.left + handleBox.width / 2) : null;
+        const splitValueBox = rect(splitValue);
+        return {
+          bodyClass: document.body.className,
+          handle: handleBox,
+          bank: bankBox,
+          plan: planBox,
+          tools: toolsBox,
+          splitValue: splitValueBox,
+          toolsVisible: visible(toolsBox),
+          boundary,
+          handleCenter,
+          handleBoundaryDelta: boundary !== null && handleCenter !== null ? Math.abs(handleCenter - boundary) : null,
+          scale: getComputedStyle(document.documentElement).getPropertyValue("--kgg-tablet-ui-scale").trim(),
+          leftCol: getComputedStyle(document.documentElement).getPropertyValue("--kgg-tablet-left-col").trim(),
+        };
+      });
+      if (
+        !initial.handle ||
+        !initial.bank ||
+        !initial.plan ||
+        initial.toolsVisible ||
+        initial.handleBoundaryDelta === null ||
+        initial.handleBoundaryDelta > 24 ||
+        !initial.splitValue ||
+        !initial.scale
+      ) {
+        fail(`Tablet splitter initial state failed: ${JSON.stringify(initial)}`);
+      }
+
+      await page.locator("#tabletSplitScalePlus").click();
+      await page.waitForTimeout(180);
+      const afterPlus = await page.evaluate(() => ({
+        scale: getComputedStyle(document.documentElement).getPropertyValue("--kgg-tablet-ui-scale").trim(),
+        leftCol: getComputedStyle(document.documentElement).getPropertyValue("--kgg-tablet-left-col").trim(),
+        label: document.getElementById("tabletSplitScaleValue") ? document.getElementById("tabletSplitScaleValue").textContent.trim() : "",
+      }));
+      if (afterPlus.scale === initial.scale || afterPlus.leftCol !== initial.leftCol || !afterPlus.label.includes("105")) {
+        fail(`Tablet split plus changed wrong state: ${JSON.stringify({ initial, afterPlus })}`);
+      }
+
+      const valueCenter = await elementCenter(page.locator("#tabletSplitScaleValue"));
+      await dispatchPointer(page, "#tabletSplitScaleValue", "pointerdown", valueCenter.x, valueCenter.y, 151);
+      await page.waitForTimeout(20);
+      await dispatchPointer(page, "document", "pointermove", valueCenter.x + 90, valueCenter.y, 151);
+      await page.waitForTimeout(80);
+      await dispatchPointer(page, "document", "pointerup", valueCenter.x + 90, valueCenter.y, 151);
+      await page.waitForTimeout(220);
+      const afterDrag = await page.evaluate(() => ({
+        scale: getComputedStyle(document.documentElement).getPropertyValue("--kgg-tablet-ui-scale").trim(),
+        leftCol: getComputedStyle(document.documentElement).getPropertyValue("--kgg-tablet-left-col").trim(),
+      }));
+      if (!afterDrag.leftCol || afterDrag.leftCol === afterPlus.leftCol || afterDrag.scale !== afterPlus.scale) {
+        fail(`Tablet split value drag changed wrong state: ${JSON.stringify({ afterPlus, afterDrag })}`);
+      }
+
+      await context.close();
+    }
+
     if (wantsTabletMiniSeries(caseName)) {
       const context = await browser.newContext({
         viewport: { width: 1180, height: 820 },
@@ -1606,7 +1746,7 @@ async function main() {
   if (!["critical", "regression", "all"].includes(args.level)) {
     fail(`Unknown level: ${args.level}`);
   }
-  const knownCases = ["all", "gestures", "ui-mini-series", "bank-thumbnails", "phone-admin-menu", "phone-scan-dock", "phone-history-packages", "phone-bank-align", "tablet-layout-button", "tablet-card-reorder", "tablet-layout-visual", "tablet-editor-layout", "tablet-split-phone-layout", "phone-landscape-tablet-menu", "tablet-app-boot"];
+  const knownCases = ["all", "gestures", "ui-mini-series", "bank-thumbnails", "phone-admin-menu", "phone-scan-dock", "phone-history-packages", "phone-bank-align", "tablet-layout-button", "tablet-card-reorder", "tablet-layout-visual", "tablet-editor-layout", "tablet-split-phone-layout", "phone-landscape-tablet-menu", "tablet-app-boot", "tablet-splitter-scale-drag"];
   if (!knownCases.includes(args.caseName)) {
     fail(`Unknown case: ${args.caseName}`);
   }
