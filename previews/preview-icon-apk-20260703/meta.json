@@ -1,0 +1,13 @@
+{
+  "kind": "kgg_gpt_preview",
+  "requestId": "preview-icon-apk-20260703",
+  "patchHash": "05eddcd8c8fa572e63ada99f6b42848b72384ceffce820b8758cbd1492727a84",
+  "baseSha": "5e6dec513d96e7b2521ffb84891071d506c75674",
+  "baseVersionCode": 57,
+  "rolloutCode": 1783077300,
+  "title": "Preview APK Icon Smoke",
+  "summary": "Preview APK build after scoped launcher icon update",
+  "createdAt": "2026-07-03T11:15:00Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/preview-icon-apk-20260703/admin.html",
+  "sha256": "0326b5ed4970d80be768f20189f5fdc8ae97967b810519907385194ba356afc2"
+}
