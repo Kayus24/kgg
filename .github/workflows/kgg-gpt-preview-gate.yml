@@ -4,10 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: publish_preview or create_pr
+        description: validate_only, publish_preview or create_pr
         required: true
         type: choice
         options:
+          - validate_only
           - publish_preview
           - create_pr
       request_id:
@@ -88,6 +89,7 @@ jobs:
           PY
 
       - name: Prepare preview branch checkout
+        if: inputs.mode != 'validate_only'
         shell: bash
         run: |
           set -euo pipefail
@@ -104,6 +106,14 @@ jobs:
             git remote add origin "$auth_repo_url"
             git checkout --orphan gpt-preview
           fi
+
+      - name: Preflight guarded GPT payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          python release-pipeline/kgg_gpt_payload_preflight.py \
+            --payload-file "$RUNNER_TEMP/kgg-gpt-payload.json"
 
       - name: Apply guarded GPT payload
         id: gate
@@ -128,6 +138,7 @@ jobs:
           python release-pipeline/kgg_gpt_source_context.py --write
 
       - name: Run critical KGG test battery
+        if: inputs.mode != 'validate_only'
         shell: bash
         env:
           KGG_ALLOW_RELEASE_DRIFT: "1"
@@ -137,7 +148,7 @@ jobs:
           python release-pipeline/kgg_test_battery.py --level critical
 
       - name: Run UI stability regression when requested
-        if: inputs.ui_stability == 'true'
+        if: inputs.mode != 'validate_only' && inputs.ui_stability == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -195,7 +206,7 @@ jobs:
           git switch -c "$branch"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add kgg-update/index.html kgg-update/version.json release-inbox docs/kgg-gpt-context.md docs/kgg-gpt-bug-index.json docs/kgg-gpt-bug-lessons.md docs/kgg-gpt-patch-patterns.md docs/kgg-gpt-source-index.json docs/kgg-gpt-source release-pipeline/kgg_gpt_source_context.py
+          git add kgg-update/index.html kgg-update/version.json release-inbox docs/kgg-gpt-context.md docs/kgg-gpt-bug-index.json docs/kgg-gpt-bug-lessons.md docs/kgg-gpt-patch-patterns.md docs/kgg-gpt-source-index.json docs/kgg-gpt-area-routes.md docs/kgg-gpt-area-routes.json docs/kgg-gpt-source docs/kgg-custom-gpt-playbook.md docs/kgg-custom-gpt-action-schema.md docs/kgg-custom-gpt-negative-examples.md docs/kgg-custom-gpt-preview-runbook.md docs/kgg-custom-gpt-preview-report-template.md docs/kgg-custom-gpt-test-prompts.md docs/kgg-custom-gpt-expected-results.md docs/kgg-custom-gpt-test-report.md release-pipeline/kgg_gpt_source_context.py release-pipeline/kgg_gpt_payload_preflight.py release-pipeline/kgg_gpt_eval.py
           git commit -m "gpt write gate ${{ inputs.request_id }}"
           git push -u origin "$branch"
           body="$(mktemp)"

@@ -1,4 +1,8 @@
 {
+  "areaRoutes": {
+    "json": "docs/kgg-gpt-area-routes.json",
+    "markdown": "docs/kgg-gpt-area-routes.md"
+  },
   "chunks": [
     {
       "endLine": 420,

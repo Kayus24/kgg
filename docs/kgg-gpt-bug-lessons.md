@@ -43,6 +43,22 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Caution: - PDF - QR-Erzeugung - Patienten-App - Scan-Kamera - Parser - Android-Wrapper - Tablet-Layout - Plan-State - Storage
 - Tests: - [x] Tablet-App komplett schliessen. - [x] App neu oeffnen. - [x] App laedt nicht mehr den kaputten v011-Stand. - [x] Tablet-Layout funktioniert wieder laut Max-Screenshot/Rueckmeldung. - [x] Max hat bestaetigt: `Hat geklappt`. - [ ] Galerie-QR separat neu testen, wenn ein neuer QR-Fix vorbereitet wird. - [ ] Kamera-Scan separat neu testen, wenn ein neuer Q
 
+### Custom GPT Payload Schema: path statt file
+
+- Source: `docs/bug-debug/2026-07-03-custom-gpt-payload-schema-path.md`
+- Areas: debug, parser-textblocks, pdf, phone-layout, qr-patient, scan-camera, tablet-layout
+- Lesson: Ein Custom-GPT-Preview-Dispatch kann formal plausibel aussehen, aber im Write-Gate scheitern, wenn eine Operation das Feld `file` statt `path` verwendet. Konkreter Run: `28665968004` scheiterte im Step `Apply guarded GPT payload` mit `ERROR: v1 only allows kgg-update/index.html`.
+- Caution: - App-Feature-Code - PDF - QR/Patienten-App - Scan/OCR - Parser - Plan-State - Medien/Upload - Android/APK - GitHub Manifest - Handy-Layout
+- Tests: - `release-pipeline/kgg_gpt_payload_preflight.py --self-test` blockt einen Payload mit `file`. - GPT-Eval `payload-schema-path` verlangt `path: "kgg-update/index.html"`. - Der GPT darf bei rotem Run nicht nur `meta.json 404` melden, sondern muss den fehlgeschlagenen Step und die Gate-Meldung nennen.
+
+### Custom GPT Preview-Gate Lessons
+
+- Source: `docs/bug-debug/2026-07-03-custom-gpt-preview-gate-lessons.md`
+- Areas: debug, drag-reorder, parser-textblocks, pdf, phone-layout, qr-patient, scan-camera, sync, tablet-layout
+- Lesson: Der Custom GPT kann bei Preview-/Beta-Anfragen plausibel antworten, obwohl der GitHub-Run bereits fehlgeschlagen ist. Ein konkreter Fehler war: Die Antwort deutete einen fehlenden Preview-Manifest-Eintrag als "noch nicht veroeffentlicht", obwohl `Apply guarded GPT payload` rot war. Beim Tablet-Layout vermischt der GPT leicht zwei Bedienkonzepte: das alte Sca
+- Caution: - App-Feature-Code - PDF - QR/Patienten-App - Scan/OCR - Parser - Plan-State - Medien/Upload - Android/APK, ausser Max fragt explizit danach - PDF - QR/Patienten-App - Scan/OCR - Parser - Plan-State - Medien/Upload - Android/APK - GitHub Manifest - Handy-Layout
+- Tests: - Payload mit geschuetztem Token im Patch-Kommentar wird im Preflight geblockt. - GPT-Eval `failed-preview-run` verlangt den echten roten Step. - GPT-Eval `protected-token-payload` verlangt Stop vor Dispatch. - UI-Stability-Probe `tablet-splitter-scale-drag` prueft die konkrete Bedienlogik. - GPT-Eval `tablet-splitter` muss die richtigen Klassen, Variablen u
+
 ### Debug JSON Seite
 
 - Source: `docs/bug-debug/README.md`

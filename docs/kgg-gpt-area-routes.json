@@ -1,0 +1,387 @@
+{
+  "kind": "kgg_gpt_area_routes",
+  "linesPerChunk": 420,
+  "routes": [
+    {
+      "id": "tablet-layout",
+      "markers": [
+        {
+          "chunk": "chunk-007.md",
+          "line": 3125,
+          "marker": "tabletLayoutFreeTools",
+          "path": "docs/kgg-gpt-source/chunk-007.md"
+        },
+        {
+          "chunk": "chunk-007.md",
+          "line": 3064,
+          "marker": "tabletLayoutResizeHandle",
+          "path": "docs/kgg-gpt-source/chunk-007.md"
+        },
+        {
+          "chunk": "chunk-007.md",
+          "line": 3163,
+          "marker": "--kgg-tablet-left-col",
+          "path": "docs/kgg-gpt-source/chunk-007.md"
+        },
+        {
+          "chunk": "chunk-004.md",
+          "line": 2094,
+          "marker": "--kgg-tablet-ui-scale",
+          "path": "docs/kgg-gpt-source/chunk-004.md"
+        },
+        {
+          "chunk": "chunk-055.md",
+          "line": 23409,
+          "marker": "updateTabletLayoutHandle",
+          "path": "docs/kgg-gpt-source/chunk-055.md"
+        },
+        {
+          "chunk": "chunk-056.md",
+          "line": 23544,
+          "marker": "initTabletLayoutControls",
+          "path": "docs/kgg-gpt-source/chunk-056.md"
+        }
+      ],
+      "notes": "Plus/Minus controls scale; horizontal drag controls the left column width.",
+      "sourceChunks": [
+        "docs/kgg-gpt-source/chunk-004.md",
+        "docs/kgg-gpt-source/chunk-005.md",
+        "docs/kgg-gpt-source/chunk-007.md",
+        "docs/kgg-gpt-source/chunk-008.md",
+        "docs/kgg-gpt-source/chunk-013.md",
+        "docs/kgg-gpt-source/chunk-055.md",
+        "docs/kgg-gpt-source/chunk-056.md",
+        "docs/kgg-gpt-source/chunk-058.md"
+      ],
+      "tests": [
+        "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
+        "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
+      ],
+      "triggers": [
+        "tablet",
+        "layout",
+        "splitter",
+        "spaltenbreite",
+        "uebungsdatenbank",
+        "planbereich"
+      ]
+    },
+    {
+      "id": "phone-layout",
+      "markers": [
+        {
+          "chunk": "chunk-060.md",
+          "line": 25521,
+          "marker": "kggPhoneAdminMenu",
+          "path": "docs/kgg-gpt-source/chunk-060.md"
+        },
+        {
+          "chunk": "chunk-060.md",
+          "line": 25521,
+          "marker": "phonePhotoMenuToggle",
+          "path": "docs/kgg-gpt-source/chunk-060.md"
+        },
+        {
+          "chunk": "chunk-060.md",
+          "line": 25555,
+          "marker": "kggPhoneHasPlan",
+          "path": "docs/kgg-gpt-source/chunk-060.md"
+        },
+        {
+          "chunk": "chunk-002.md",
+          "line": 904,
+          "marker": "phoneTextFocus",
+          "path": "docs/kgg-gpt-source/chunk-002.md"
+        },
+        {
+          "chunk": "chunk-003.md",
+          "line": 1278,
+          "marker": "max-width:759px",
+          "path": "docs/kgg-gpt-source/chunk-003.md"
+        }
+      ],
+      "notes": "Do not change the 759/760 px breakpoint incidentally.",
+      "sourceChunks": [
+        "docs/kgg-gpt-source/chunk-002.md",
+        "docs/kgg-gpt-source/chunk-003.md",
+        "docs/kgg-gpt-source/chunk-005.md",
+        "docs/kgg-gpt-source/chunk-009.md",
+        "docs/kgg-gpt-source/chunk-010.md",
+        "docs/kgg-gpt-source/chunk-011.md",
+        "docs/kgg-gpt-source/chunk-012.md",
+        "docs/kgg-gpt-source/chunk-060.md",
+        "docs/kgg-gpt-source/chunk-061.md"
+      ],
+      "tests": [
+        "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
+        "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
+      ],
+      "triggers": [
+        "phone",
+        "handy",
+        "dock",
+        "drawer",
+        "scan button",
+        "759"
+      ]
+    },
+    {
+      "id": "qr-patient",
+      "markers": [
+        {
+          "chunk": "chunk-051.md",
+          "line": 21682,
+          "marker": "finishWithPatientApp",
+          "path": "docs/kgg-gpt-source/chunk-051.md"
+        },
+        {
+          "chunk": "chunk-000.md",
+          "line": 54,
+          "marker": "KGGH2",
+          "path": "docs/kgg-gpt-source/chunk-000.md"
+        },
+        {
+          "chunk": "chunk-047.md",
+          "line": 20003,
+          "marker": "tryApplyKggSetupFromHash",
+          "path": "docs/kgg-gpt-source/chunk-047.md"
+        },
+        {
+          "chunk": "chunk-057.md",
+          "line": 23950,
+          "marker": "openKggTherapistAppOnlyQr",
+          "path": "docs/kgg-gpt-source/chunk-057.md"
+        }
+      ],
+      "notes": "Patient output must not expose raw JSON, Base64 or debug payloads.",
+      "sourceChunks": [
+        "docs/kgg-gpt-source/chunk-000.md",
+        "docs/kgg-gpt-source/chunk-047.md",
+        "docs/kgg-gpt-source/chunk-050.md",
+        "docs/kgg-gpt-source/chunk-051.md",
+        "docs/kgg-gpt-source/chunk-056.md",
+        "docs/kgg-gpt-source/chunk-057.md",
+        "docs/kgg-gpt-source/chunk-058.md",
+        "docs/kgg-gpt-source/chunk-062.md"
+      ],
+      "tests": [
+        "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical"
+      ],
+      "triggers": [
+        "qr",
+        "patient",
+        "patienten-app",
+        "plan qr"
+      ]
+    },
+    {
+      "id": "pdf",
+      "markers": [
+        {
+          "chunk": "chunk-051.md",
+          "line": 21664,
+          "marker": "finishWithPdf",
+          "path": "docs/kgg-gpt-source/chunk-051.md"
+        },
+        {
+          "chunk": "chunk-014.md",
+          "line": 5983,
+          "marker": "KGGOfflineJsPDF",
+          "path": "docs/kgg-gpt-source/chunk-014.md"
+        },
+        {
+          "chunk": "chunk-049.md",
+          "line": 20811,
+          "marker": "attachKggPdfExerciseThumbnails",
+          "path": "docs/kgg-gpt-source/chunk-049.md"
+        }
+      ],
+      "notes": "PDF changes need bounded thumbnail/card behavior.",
+      "sourceChunks": [
+        "docs/kgg-gpt-source/chunk-014.md",
+        "docs/kgg-gpt-source/chunk-049.md",
+        "docs/kgg-gpt-source/chunk-050.md",
+        "docs/kgg-gpt-source/chunk-051.md",
+        "docs/kgg-gpt-source/chunk-056.md",
+        "docs/kgg-gpt-source/chunk-063.md"
+      ],
+      "tests": [
+        "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical"
+      ],
+      "triggers": [
+        "pdf",
+        "druck",
+        "trainingsplan"
+      ]
+    },
+    {
+      "id": "android-apk",
+      "markers": [
+        {
+          "chunk": null,
+          "line": null,
+          "marker": "KGGAndroidPdf",
+          "path": null
+        },
+        {
+          "chunk": "chunk-042.md",
+          "line": 17812,
+          "marker": "KGGNativeSync",
+          "path": "docs/kgg-gpt-source/chunk-042.md"
+        },
+        {
+          "chunk": null,
+          "line": null,
+          "marker": "PREVIEW_MANIFEST_URL",
+          "path": null
+        }
+      ],
+      "notes": "Android/APK is protected unless Max explicitly asks for it.",
+      "sourceChunks": [
+        "docs/kgg-gpt-source/chunk-042.md",
+        "docs/kgg-gpt-source/chunk-046.md",
+        "docs/kgg-gpt-source/chunk-047.md"
+      ],
+      "tests": [
+        "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
+        "GitHub android-wrapper-check must build assemblePreviewDebug when APK output matters."
+      ],
+      "triggers": [
+        "apk",
+        "android",
+        "preview app",
+        "icon"
+      ]
+    },
+    {
+      "id": "sync",
+      "markers": [
+        {
+          "chunk": "chunk-001.md",
+          "line": 818,
+          "marker": "KGGDataStore",
+          "path": "docs/kgg-gpt-source/chunk-001.md"
+        },
+        {
+          "chunk": "chunk-047.md",
+          "line": 20105,
+          "marker": "kgg_sync_bundle",
+          "path": "docs/kgg-gpt-source/chunk-047.md"
+        },
+        {
+          "chunk": null,
+          "line": null,
+          "marker": "nativeExerciseBankSync",
+          "path": null
+        },
+        {
+          "chunk": "chunk-042.md",
+          "line": 17812,
+          "marker": "KGGNativeSync",
+          "path": "docs/kgg-gpt-source/chunk-042.md"
+        }
+      ],
+      "notes": "Sync export must exclude patients and secrets.",
+      "sourceChunks": [
+        "docs/kgg-gpt-source/chunk-001.md",
+        "docs/kgg-gpt-source/chunk-040.md",
+        "docs/kgg-gpt-source/chunk-041.md",
+        "docs/kgg-gpt-source/chunk-042.md",
+        "docs/kgg-gpt-source/chunk-046.md",
+        "docs/kgg-gpt-source/chunk-047.md",
+        "docs/kgg-gpt-source/chunk-048.md"
+      ],
+      "tests": [
+        "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
+        "cmd /c release-pipeline\\run-kgg-tests.cmd --suite sync --level regression"
+      ],
+      "triggers": [
+        "sync",
+        "paket",
+        "uebungsbank",
+        "peer",
+        "kollegen"
+      ]
+    },
+    {
+      "id": "parser-textblocks",
+      "markers": [
+        {
+          "chunk": null,
+          "line": null,
+          "marker": "parseExerciseText",
+          "path": null
+        },
+        {
+          "chunk": null,
+          "line": null,
+          "marker": "textBlocks",
+          "path": null
+        },
+        {
+          "chunk": "chunk-044.md",
+          "line": 18893,
+          "marker": "scanState",
+          "path": "docs/kgg-gpt-source/chunk-044.md"
+        }
+      ],
+      "notes": "Parser and text-block behavior must not create bogus Satz cards.",
+      "sourceChunks": [
+        "docs/kgg-gpt-source/chunk-044.md",
+        "docs/kgg-gpt-source/chunk-045.md",
+        "docs/kgg-gpt-source/chunk-054.md"
+      ],
+      "tests": [
+        "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
+        "cmd /c release-pipeline\\run-kgg-tests.cmd --suite textblocks --level regression"
+      ],
+      "triggers": [
+        "parser",
+        "textblock",
+        "satz",
+        "ocr"
+      ]
+    },
+    {
+      "id": "preview-gate",
+      "markers": [
+        {
+          "chunk": null,
+          "line": null,
+          "marker": "kgg-gpt-preview-banner",
+          "path": null
+        },
+        {
+          "chunk": "chunk-000.md",
+          "line": 10,
+          "marker": "kgg-source-truth",
+          "path": "docs/kgg-gpt-source/chunk-000.md"
+        },
+        {
+          "chunk": "chunk-000.md",
+          "line": 138,
+          "marker": "kgg-changelog",
+          "path": "docs/kgg-gpt-source/chunk-000.md"
+        }
+      ],
+      "notes": "A missing preview URL is not success; inspect the GitHub run first.",
+      "sourceChunks": [
+        "docs/kgg-gpt-source/chunk-000.md",
+        "docs/kgg-gpt-source/chunk-002.md"
+      ],
+      "tests": [
+        "python release-pipeline\\kgg_gpt_payload_preflight.py --self-test",
+        "python release-pipeline\\kgg_gpt_eval.py"
+      ],
+      "triggers": [
+        "preview",
+        "beta",
+        "test-html",
+        "custom gpt",
+        "write gate"
+      ]
+    }
+  ],
+  "sourcePath": "kgg-update/index.html",
+  "version": 1
+}
