@@ -91,15 +91,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if git ls-remote --exit-code origin refs/heads/gpt-preview >/dev/null 2>&1; then
-            git clone --branch gpt-preview "https://github.com/${{ github.repository }}.git" preview
+          repo_url="https://github.com/${{ github.repository }}.git"
+          auth_repo_url="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+          if git ls-remote --exit-code "$repo_url" refs/heads/gpt-preview >/dev/null 2>&1; then
+            git clone --branch gpt-preview "$repo_url" preview
             cd preview
-            git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+            git remote set-url origin "$auth_repo_url"
           else
             mkdir preview
             cd preview
             git init
-            git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+            git remote add origin "$auth_repo_url"
             git checkout --orphan gpt-preview
           fi
 
@@ -174,6 +176,9 @@ jobs:
             exit 0
           fi
           git commit -m "publish gpt preview ${{ inputs.request_id }}"
+          if git ls-remote --exit-code origin refs/heads/gpt-preview >/dev/null 2>&1; then
+            git pull --rebase origin gpt-preview
+          fi
           git push origin HEAD:gpt-preview
           {
             echo "Preview HTML: ${{ steps.gate.outputs.preview_url }}"
