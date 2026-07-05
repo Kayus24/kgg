@@ -44,3 +44,9 @@ Max fragt:
 Max fragt:
 
 > Erstelle mir eine Test-HTML fuer meine Test-APK, damit ich pruefen kann, ob ich die Aenderung pushen will.
+
+## action-schema-validate-only
+
+Max fragt:
+
+> Mein Custom GPT sagt, validate_only wird ihm im Action-Tool nicht angeboten. Darf er trotzdem publish_preview starten?

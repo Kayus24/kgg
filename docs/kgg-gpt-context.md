@@ -14,6 +14,8 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Release pipeline docs: `release-pipeline/README.md`.
 - Custom GPT playbook: `docs/kgg-custom-gpt-playbook.md`.
 - Custom GPT action schema: `docs/kgg-custom-gpt-action-schema.md`.
+- Custom GPT combined Action OpenAPI: `docs/kgg-custom-gpt-action-openapi.yaml`.
+- Custom GPT API-only Action OpenAPI for the current split editor setup: `docs/kgg-custom-gpt-action-api-openapi.yaml`.
 - Custom GPT negative examples: `docs/kgg-custom-gpt-negative-examples.md`.
 - Custom GPT preview runbook: `docs/kgg-custom-gpt-preview-runbook.md`.
 - Custom GPT preview report template: `docs/kgg-custom-gpt-preview-report-template.md`.
@@ -77,6 +79,8 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Required status check: `KGG Required Gate / required-gate`.
 - Admin beta auto-merge requires green checks plus the explicit `kgg-auto-merge` label.
 - Custom GPT write access is limited to workflow dispatch for `.github/workflows/kgg-gpt-preview-gate.yml`.
+- GPT Action schema must expose `validate_only`, `publish_preview`, `create_pr` and run/job/artifact status reads.
+- Current GPT editor setup uses split Actions; paste the API-only schema into `api.github.com` to avoid duplicate `raw.githubusercontent.com` domains.
 - Preview writes go only to branch `gpt-preview`; production writes are PR-only and never auto-merge.
 
 ## Update Mechanism

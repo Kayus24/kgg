@@ -11,11 +11,12 @@ Canonical order: `dispatch -> run status -> logs -> tests -> artifact -> meta ->
 3. Dispatch `validate_only` first.
 4. If `validate_only` fails, report the failed step and exact error. Do not publish.
 5. If validation succeeds, dispatch `publish_preview`.
-6. Watch the GitHub run.
-7. If the run fails, read failed logs and report the failed step and exact error.
-8. If the run succeeds, verify artifact, `meta.json` and HTML URL.
-9. Only then tell Max that the Preview is available.
-10. Use `create_pr` only after Max explicitly accepts the same Preview.
+6. Use `listKggPreviewGateRuns` and the workflow run name/request id to find the GitHub run.
+7. Use `getKggPreviewGateRun` until `status` is `completed`.
+8. If the run fails, use `getKggPreviewGateJobs` and report the failed job/step and exact visible error context.
+9. If the run succeeds, verify artifact, `meta.json` and HTML URL.
+10. Only then tell Max that the Preview is available.
+11. Use `create_pr` only after Max explicitly accepts the same Preview.
 
 ## Required verified fields
 

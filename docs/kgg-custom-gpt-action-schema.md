@@ -3,6 +3,11 @@
 This is the canonical payload shape for `KGG GPT Preview Gate`.
 The Custom GPT must follow this shape exactly.
 
+The combined GPT Action OpenAPI schema lives at `docs/kgg-custom-gpt-action-openapi.yaml`.
+For the current split GPT editor setup, update the existing `api.github.com` Action with `docs/kgg-custom-gpt-action-api-openapi.yaml` and keep the separate `raw.githubusercontent.com` Action for read-only repo context.
+Do not paste the combined schema into an editor that already has a separate `raw.githubusercontent.com` Action; ChatGPT rejects duplicate action domains.
+If the GPT editor does not offer `validate_only`, the Action schema is stale and must be updated before any Preview request.
+
 ## Modes
 
 - `validate_only`: validate JSON, exact patch matches and HTML syntax. Writes nothing.
@@ -54,3 +59,11 @@ The GPT may say a Preview is available only after it has verified:
 
 For complex payloads, use GitHub CLI JSON via STDIN instead of raw `-f payload_json=...`.
 This preserves quotes inside `payload_json` and prevents invalid JSON such as `{request_id:...}`.
+
+## Required GPT Action operations
+
+- `submitKggPreviewGate` must allow `mode` values `validate_only`, `publish_preview` and `create_pr`.
+- `listKggPreviewGateRuns` must be available so the GPT can find the run for a `request_id`.
+- `getKggPreviewGateRun` must be available so the GPT can verify `status` and `conclusion`.
+- `getKggPreviewGateJobs` must be available so the GPT can report failed job/step names.
+- `getKggPreviewGateArtifacts` must be available so the GPT can verify the Preview artifact exists and is not expired.

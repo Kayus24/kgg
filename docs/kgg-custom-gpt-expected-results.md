@@ -38,6 +38,15 @@
 
 - Muss `validate_only` vor `publish_preview` verwenden.
 - Muss `publish_preview` verwenden.
+- Muss stoppen, wenn `validate_only` im Action-Schema nicht angeboten wird.
 - Muss einen stabilen `request_id` nennen.
 - Muss Run-Status, Artefakt, `meta.json` und Preview-URL pruefen.
 - Muss erst nach Max' Freigabe `create_pr` verwenden.
+
+## action-schema-validate-only
+
+- Muss erkennen, dass ein Schema ohne `validate_only` stale/ungueltig ist.
+- Muss `submitKggPreviewGate.inputs.mode` mit `validate_only`, `publish_preview` und `create_pr` verlangen.
+- Muss Run-Status-Actions verlangen: `listKggPreviewGateRuns`, `getKggPreviewGateRun`, `getKggPreviewGateJobs`, `getKggPreviewGateArtifacts`.
+- Muss im bestehenden split GPT editor das API-only Schema fuer `api.github.com` verwenden und darf keine duplizierte `raw.githubusercontent.com` Action erzeugen.
+- Darf keinen `publish_preview` starten, solange `validate_only` fehlt.
