@@ -2,9 +2,9 @@
 
 Status: PASS
 
-Testdatum: 2026-07-03
+Testdatum: 2026-07-05
 Testziel: Custom GPT `KGG Update-Agent` im Browser-Editor `g-6a45fba0f3408191ac1fb2c987a2e960`
-Instruction-Laenge nach Härtung: 5958 Zeichen, unter dem 8000-Zeichen-Limit des GPT-Editors.
+Instruction-Laenge nach Haertung: 7908 Zeichen, unter dem 8000-Zeichen-Limit des GPT-Editors.
 
 Lokale deterministic Evals laufen ueber `python release-pipeline/kgg_gpt_eval.py`.
 
@@ -22,13 +22,18 @@ Lokale deterministic Evals laufen ueber `python release-pipeline/kgg_gpt_eval.py
 
 | Feld | Wert |
 | --- | --- |
-| request_id | `kgg-v057-tablet-split-scale` |
-| run_id | `28666459266` |
+| request_id | `kgg-gpt-canary-20260705-a` |
+| validate_run_id | `28733759626` |
+| publish_run_id | `28733770270` |
 | conclusion | `success` |
 | failed_step | `none` |
-| artifact_name | `kgg-preview-kgg-v057-tablet-split-scale` |
-| meta_url | `https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v057-tablet-split-scale/meta.json` |
-| html_url | `https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v057-tablet-split-scale/admin.html` |
+| artifact_name | `kgg-preview-kgg-gpt-canary-20260705-a` |
+| artifact_expired | `false` |
+| meta_url | `https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-gpt-canary-20260705-a/meta.json` |
+| html_url | `https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-gpt-canary-20260705-a/admin.html` |
+| html_check | `HTTP 200`, contains `data-kgg-gpt-canary="20260705"` and `kgg-gpt-preview-banner` |
+
+Canary note: The GPT dispatched `validate_only` first, then dispatched `publish_preview` only after the validate run succeeded. The preview publish succeeded with `critical`, `ui-stability regression`, APK build, artifact upload, `meta.json` and HTML. A follow-up prompt that asked the GPT to produce the final report from read-only GET actions stayed in the browser Preview `Denke nach...` state and did not produce a final text response; external GitHub/raw verification above is authoritative.
 
 ## Bewertung
 
