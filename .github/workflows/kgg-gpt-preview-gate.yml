@@ -1,4 +1,5 @@
 name: KGG GPT Preview Gate
+run-name: KGG GPT Preview Gate | ${{ inputs.mode }} | ${{ inputs.request_id }}
 
 on:
   workflow_dispatch:

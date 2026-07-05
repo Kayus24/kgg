@@ -1,0 +1,397 @@
+openapi: 3.1.0
+info:
+  title: KGG Repository Context
+  version: 1.1.0
+  description: Live KGG repository context plus guarded GPT preview workflow dispatch and run verification.
+servers:
+  - url: https://raw.githubusercontent.com
+paths:
+  /Kayus24/kgg/main/docs/kgg-gpt-context.md:
+    get:
+      operationId: getKggProjectContext
+      summary: Get generated KGG GPT live repository context.
+      responses:
+        "200":
+          description: Markdown context.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /Kayus24/kgg/main/docs/kgg-custom-gpt-playbook.md:
+    get:
+      operationId: getKggCustomGptPlaybook
+      summary: Get the KGG Custom GPT playbook.
+      responses:
+        "200":
+          description: Markdown playbook.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /Kayus24/kgg/main/docs/kgg-custom-gpt-action-schema.md:
+    get:
+      operationId: getKggCustomGptActionSchema
+      summary: Get the canonical guarded payload/action schema rules.
+      responses:
+        "200":
+          description: Markdown action schema.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /Kayus24/kgg/main/docs/kgg-custom-gpt-negative-examples.md:
+    get:
+      operationId: getKggCustomGptNegativeExamples
+      summary: Get negative examples the GPT must reject.
+      responses:
+        "200":
+          description: Markdown negative examples.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /Kayus24/kgg/main/docs/kgg-custom-gpt-preview-runbook.md:
+    get:
+      operationId: getKggCustomGptPreviewRunbook
+      summary: Get Preview Gate run order and verification rules.
+      responses:
+        "200":
+          description: Markdown runbook.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /Kayus24/kgg/main/docs/kgg-custom-gpt-preview-report-template.md:
+    get:
+      operationId: getKggCustomGptPreviewReportTemplate
+      summary: Get required Preview report fields.
+      responses:
+        "200":
+          description: Markdown report template.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /Kayus24/kgg/main/docs/kgg-gpt-bug-lessons.md:
+    get:
+      operationId: getKggBugLessons
+      summary: Get generated KGG bug-history lessons.
+      responses:
+        "200":
+          description: Markdown bug-history lessons.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /Kayus24/kgg/main/docs/kgg-gpt-bug-index.json:
+    get:
+      operationId: getKggBugIndex
+      summary: Get structured KGG bug-history records and forbidden patterns.
+      responses:
+        "200":
+          description: Structured KGG bug-history knowledge.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /Kayus24/kgg/main/docs/kgg-gpt-patch-patterns.md:
+    get:
+      operationId: getKggPatchPatterns
+      summary: Get forbidden patch patterns and area-specific test hints.
+      responses:
+        "200":
+          description: Markdown patch pattern guardrails.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /Kayus24/kgg/main/docs/kgg-gpt-area-routes.md:
+    get:
+      operationId: getKggAreaRoutes
+      summary: Get source routing guidance by app area.
+      responses:
+        "200":
+          description: Markdown area routes.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /Kayus24/kgg/main/docs/kgg-gpt-area-routes.json:
+    get:
+      operationId: getKggAreaRoutesJson
+      summary: Get structured source routing guidance by app area.
+      responses:
+        "200":
+          description: Structured area routes.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /Kayus24/kgg/main/docs/kgg-gpt-source-index.json:
+    get:
+      operationId: getKggSourceIndex
+      summary: Get generated source chunk index for kgg-update/index.html.
+      responses:
+        "200":
+          description: Structured source chunk index.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /Kayus24/kgg/main/docs/kgg-gpt-source/{chunk_name}:
+    get:
+      operationId: getKggSourceChunk
+      summary: Get one generated KGG source chunk by file name, for example chunk-012.md.
+      parameters:
+        - name: chunk_name
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^chunk-[0-9]{3}\\.md$"
+      responses:
+        "200":
+          description: Markdown source chunk.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /Kayus24/kgg/main/kgg-update/version.json:
+    get:
+      operationId: getKggVersion
+      summary: Get current KGG web update version metadata.
+      responses:
+        "200":
+          description: KGG web version metadata.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /Kayus24/kgg/main/therapist-app/android_update_manifest.json:
+    get:
+      operationId: getKggAndroidManifest
+      summary: Get current KGG Android/Web release manifest.
+      responses:
+        "200":
+          description: KGG Android/Web release manifest.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /Kayus24/kgg/gpt-preview/previews/index.json:
+    get:
+      operationId: getKggPreviewIndex
+      summary: Get latest GPT preview channel manifest.
+      responses:
+        "200":
+          description: GPT preview manifest.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /Kayus24/kgg/gpt-preview/previews/{request_id}/meta.json:
+    get:
+      operationId: getKggPreviewMeta
+      summary: Get metadata for one GPT preview request.
+      parameters:
+        - name: request_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
+      responses:
+        "200":
+          description: GPT preview metadata.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /repos/Kayus24/kgg/actions/workflows/kgg-gpt-preview-gate.yml/dispatches:
+    post:
+      servers:
+        - url: https://api.github.com
+      operationId: submitKggPreviewGate
+      summary: Dispatch the guarded KGG GPT Preview Gate workflow.
+      security:
+        - githubBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ref
+                - inputs
+              properties:
+                ref:
+                  type: string
+                  enum:
+                    - main
+                inputs:
+                  type: object
+                  required:
+                    - mode
+                    - request_id
+                    - payload_json
+                  properties:
+                    mode:
+                      type: string
+                      enum:
+                        - validate_only
+                        - publish_preview
+                        - create_pr
+                    request_id:
+                      type: string
+                      pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
+                    payload_json:
+                      type: string
+                      description: JSON string containing request_id and replace_exact operations.
+                    ui_stability:
+                      type: string
+                      enum:
+                        - "false"
+                        - "true"
+                      default: "false"
+      responses:
+        "204":
+          description: Workflow dispatch accepted.
+  /repos/Kayus24/kgg/actions/workflows/kgg-gpt-preview-gate.yml/runs:
+    get:
+      servers:
+        - url: https://api.github.com
+      operationId: listKggPreviewGateRuns
+      summary: List recent KGG Preview Gate runs to find the run for a request_id.
+      security:
+        - githubBearer: []
+      parameters:
+        - name: branch
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - main
+        - name: event
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - workflow_dispatch
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - queued
+              - in_progress
+              - completed
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 10
+      responses:
+        "200":
+          description: Recent workflow runs.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /repos/Kayus24/kgg/actions/runs/{run_id}:
+    get:
+      servers:
+        - url: https://api.github.com
+      operationId: getKggPreviewGateRun
+      summary: Get status and conclusion for one Preview Gate run.
+      security:
+        - githubBearer: []
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Workflow run status.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /repos/Kayus24/kgg/actions/runs/{run_id}/jobs:
+    get:
+      servers:
+        - url: https://api.github.com
+      operationId: getKggPreviewGateJobs
+      summary: Get jobs and steps for one Preview Gate run.
+      security:
+        - githubBearer: []
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Workflow jobs with step status.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /repos/Kayus24/kgg/actions/runs/{run_id}/artifacts:
+    get:
+      servers:
+        - url: https://api.github.com
+      operationId: getKggPreviewGateArtifacts
+      summary: Get uploaded artifacts for one Preview Gate run.
+      security:
+        - githubBearer: []
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Workflow artifacts.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+components:
+  schemas: {}
+  securitySchemes:
+    githubBearer:
+      type: http
+      scheme: bearer

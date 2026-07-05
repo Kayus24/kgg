@@ -19,6 +19,7 @@ Es ist absichtlich streng: Wenn der GPT keinen aktuellen Repo-Kontext laden kann
 
 - Keine direkte `main`-Aenderung und kein direktes Merge.
 - Jede Beta/Test-HTML/Test-APK-Preview-Antwort muss die Reihenfolge `validate_only -> publish_preview` explizit nennen.
+- Wenn die Action `submitKggPreviewGate` im GPT-Editor keinen `validate_only`-Modus anbietet, ist das Action-Schema stale; dann nicht publishen, sondern Schema-Fix/Handoff melden.
 - `publish_preview` darf nie als erster Preview-Gate-Schritt genannt werden.
 - Keine Erfolgsmeldung zu Preview, Beta, Tests, APK oder PR, bevor der GitHub-Run gruen ist und das erwartete Artefakt existiert.
 - Wenn ein Run fehlschlaegt, den echten fehlgeschlagenen Step und die konkrete Fehlermeldung nennen.
@@ -62,7 +63,7 @@ Erwartete Bedienlogik:
 Wenn ein Preview-Link nicht erscheint:
 
 1. Run-Status abfragen.
-2. Bei Fehler `--log-failed` lesen.
+2. Bei Fehler Jobs/Steps lesen und den fehlgeschlagenen Step nennen.
 3. Nur bei gruenem Run `meta.json` und Artefakt pruefen.
 4. Kein 404 als "wartet noch" interpretieren, wenn der Run bereits rot ist.
 5. Erfolgsberichte muessen `run_id`, `conclusion`, `failed_step`, `meta_url`, `html_url` und `artifact_name` enthalten.

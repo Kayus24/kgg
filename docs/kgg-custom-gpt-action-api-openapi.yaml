@@ -1,0 +1,258 @@
+openapi: 3.1.0
+info:
+  title: KGG GPT Preview Gate GitHub API
+  version: "1.1.0"
+  description: Dispatches and verifies only the guarded KGG GPT Preview Gate workflow in Kayus24/kgg.
+servers:
+  - url: https://api.github.com
+paths:
+  /repos/Kayus24/kgg/actions/workflows/kgg-gpt-preview-gate.yml/dispatches:
+    post:
+      operationId: submitKggPreviewGate
+      summary: Dispatch the guarded KGG GPT Preview Gate workflow.
+      description: Use validate_only before publish_preview. Use create_pr only after Max accepts the matching preview.
+      x-openai-isConsequential: true
+      security:
+        - githubBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ref
+                - inputs
+              properties:
+                ref:
+                  type: string
+                  enum:
+                    - main
+                inputs:
+                  type: object
+                  required:
+                    - mode
+                    - request_id
+                    - payload_json
+                  properties:
+                    mode:
+                      type: string
+                      enum:
+                        - validate_only
+                        - publish_preview
+                        - create_pr
+                    request_id:
+                      type: string
+                      pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
+                    payload_json:
+                      type: string
+                      description: JSON string containing request_id and replace_exact operations.
+                    ui_stability:
+                      type: string
+                      enum:
+                        - "false"
+                        - "true"
+                      default: "false"
+      responses:
+        "204":
+          description: Workflow dispatch accepted.
+  /repos/Kayus24/kgg/actions/workflows/kgg-gpt-preview-gate.yml/runs:
+    get:
+      operationId: listKggPreviewGateRuns
+      summary: List recent KGG Preview Gate runs to find the run for a request_id.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: branch
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - main
+        - name: event
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - workflow_dispatch
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - queued
+              - in_progress
+              - completed
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 10
+      responses:
+        "200":
+          description: Recent workflow runs.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  workflow_runs:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        display_title:
+                          type: string
+                        status:
+                          type: string
+                        conclusion:
+                          type:
+                            - string
+                            - "null"
+                        html_url:
+                          type: string
+                additionalProperties: true
+  /repos/Kayus24/kgg/actions/runs/{run_id}:
+    get:
+      operationId: getKggPreviewGateRun
+      summary: Get status and conclusion for one Preview Gate run.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Workflow run status.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  display_title:
+                    type: string
+                  status:
+                    type: string
+                  conclusion:
+                    type:
+                      - string
+                      - "null"
+                  html_url:
+                    type: string
+                additionalProperties: true
+  /repos/Kayus24/kgg/actions/runs/{run_id}/jobs:
+    get:
+      operationId: getKggPreviewGateJobs
+      summary: Get jobs and steps for one Preview Gate run.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Workflow jobs with step status.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  jobs:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        status:
+                          type: string
+                        conclusion:
+                          type:
+                            - string
+                            - "null"
+                        steps:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              status:
+                                type: string
+                              conclusion:
+                                type:
+                                  - string
+                                  - "null"
+                additionalProperties: true
+  /repos/Kayus24/kgg/actions/runs/{run_id}/artifacts:
+    get:
+      operationId: getKggPreviewGateArtifacts
+      summary: Get uploaded artifacts for one Preview Gate run.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Workflow artifacts.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  artifacts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        expired:
+                          type: boolean
+                        archive_download_url:
+                          type: string
+                additionalProperties: true
+components:
+  schemas: {}
+  securitySchemes:
+    githubBearer:
+      type: http
+      scheme: bearer

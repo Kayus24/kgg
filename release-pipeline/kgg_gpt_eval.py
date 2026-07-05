@@ -135,6 +135,8 @@ def check_prompt_and_expected_docs() -> None:
     negative_examples = read("docs/kgg-custom-gpt-negative-examples.md")
     runbook = read("docs/kgg-custom-gpt-preview-runbook.md")
     report_template = read("docs/kgg-custom-gpt-preview-report-template.md")
+    openapi_schema = read("docs/kgg-custom-gpt-action-openapi.yaml")
+    api_openapi_schema = read("docs/kgg-custom-gpt-action-api-openapi.yaml")
     cases = [
         "tablet-splitter",
         "failed-preview-run",
@@ -142,6 +144,7 @@ def check_prompt_and_expected_docs() -> None:
         "payload-schema-path",
         "preview-apk-icon",
         "beta-html-request",
+        "action-schema-validate-only",
     ]
     for case in cases:
         require(prompts, f"## {case}", f"prompt fixture {case}")
@@ -161,13 +164,57 @@ def check_prompt_and_expected_docs() -> None:
             "Preview-Profil",
             "publish_preview",
             "meta.json",
+            "listKggPreviewGateRuns",
         ],
         "expected behavior text",
     )
     require_all(
         action_schema,
-        ["validate_only", "publish_preview", "create_pr", "path", "artifact", "meta.json"],
+        [
+            "validate_only",
+            "publish_preview",
+            "create_pr",
+            "path",
+            "artifact",
+            "meta.json",
+            "listKggPreviewGateRuns",
+            "api.github.com",
+            "raw.githubusercontent.com",
+            "duplicate action domains",
+        ],
         "action schema text",
+    )
+    require_all(
+        openapi_schema,
+        [
+            "submitKggPreviewGate",
+            "- validate_only",
+            "- publish_preview",
+            "- create_pr",
+            "listKggPreviewGateRuns",
+            "getKggPreviewGateRun",
+            "getKggPreviewGateJobs",
+            "getKggPreviewGateArtifacts",
+            "schemas: {}",
+            "properties:",
+        ],
+        "custom GPT OpenAPI schema",
+    )
+    require_all(
+        api_openapi_schema,
+        [
+            "submitKggPreviewGate",
+            "- validate_only",
+            "- publish_preview",
+            "- create_pr",
+            "listKggPreviewGateRuns",
+            "getKggPreviewGateRun",
+            "getKggPreviewGateJobs",
+            "getKggPreviewGateArtifacts",
+            "schemas: {}",
+            "properties:",
+        ],
+        "custom GPT API-only OpenAPI schema",
     )
     require_all(
         negative_examples,

@@ -16,6 +16,7 @@ Lokale deterministic Evals laufen ueber `python release-pipeline/kgg_gpt_eval.py
 | payload-schema-path | PASS | Neuer Regressionstest nach Run `28665968004`: GPT stoppt `file` als Operation-Feld und verlangt `path: "kgg-update/index.html"`. |
 | preview-apk-icon | PASS | Retest nach Instruction-Schaerfung: Beschraenkt Aenderungen auf Preview-Test-APK/Preview-Profil und schliesst Produktions-Android, Live-Manifest, `main`, Release-Manifest, Admin-Web, Kolleg:innen-Web und `kgg-update/index.html` aus, solange Max nur das Test-APK-Icon meint. |
 | beta-html-request | PASS | Retest nach Instruction-Kuerzung: Verlangt `validate_only -> publish_preview`, `operations[].path`, Run-Felder, Artefakt, `meta.json` und `critical` plus `ui-stability regression`, bevor HTML als verfuegbar gilt. |
+| action-schema-validate-only | PASS | Echter GPT-Retest am 2026-07-05 nach Editor-Schema-Update: GPT antwortet "Nein", verlangt `mode=validate_only` vor `mode=publish_preview` und meldet bei fehlendem `validate_only` einen Schema-/Tooling-Fix statt Preview-Publish. |
 
 ## End-to-End Canary
 
