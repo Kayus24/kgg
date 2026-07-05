@@ -4,6 +4,19 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "kgg-gpt-canary-20260705-a",
+      "patchHash": "687dd75ff08a7c5c6dae927b6e3e7ba9c298f3891d9f8c6931ccc38d21c7ca13",
+      "baseSha": "780ce081b957ca5a60ae7c09f72d09208397f230",
+      "baseVersionCode": 57,
+      "rolloutCode": 1783237594,
+      "title": "GPT Preview Canary",
+      "summary": "Canary: prueft validate_only -> publish_preview ohne App-Funktionsaenderung.",
+      "createdAt": "2026-07-05T07:46:34Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-gpt-canary-20260705-a/admin.html",
+      "sha256": "b4ed7316e890edf6a0e8937fdc742d458e7301c3189e3b1a4c18bf1b6df0d9d9"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-gpt-e2e-canary-20260703",
       "patchHash": "bf7aef6b364f6daada4a24e985598976f2c6f431ea08f1edb72b706154a9d59c",
       "baseSha": "b54606b3b64093eb2bfa5c4374191b93b5f95c25",
@@ -70,15 +83,15 @@
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-gpt-e2e-canary-20260703",
-    "patchHash": "bf7aef6b364f6daada4a24e985598976f2c6f431ea08f1edb72b706154a9d59c",
-    "baseSha": "b54606b3b64093eb2bfa5c4374191b93b5f95c25",
+    "requestId": "kgg-gpt-canary-20260705-a",
+    "patchHash": "687dd75ff08a7c5c6dae927b6e3e7ba9c298f3891d9f8c6931ccc38d21c7ca13",
+    "baseSha": "780ce081b957ca5a60ae7c09f72d09208397f230",
     "baseVersionCode": 57,
-    "rolloutCode": 1783112912,
-    "title": "GPT E2E Canary",
-    "summary": "Controlled preview canary proving validate-first Custom GPT flow through publish_preview.",
-    "createdAt": "2026-07-03T21:08:32Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-gpt-e2e-canary-20260703/admin.html",
-    "sha256": "824fc847f831e6788725e448ab2468a66a5c2f9329f5aa08ffad896659b29228"
+    "rolloutCode": 1783237594,
+    "title": "GPT Preview Canary",
+    "summary": "Canary: prueft validate_only -> publish_preview ohne App-Funktionsaenderung.",
+    "createdAt": "2026-07-05T07:46:34Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-gpt-canary-20260705-a/admin.html",
+    "sha256": "b4ed7316e890edf6a0e8937fdc742d458e7301c3189e3b1a4c18bf1b6df0d9d9"
   }
 }
