@@ -4,6 +4,19 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "kgg-v403-alt-names-inline-arrow",
+      "patchHash": "62737dee3beaf1a0d41810f0640e23e7fedc37c1a8ab0de86b91d7fd3cc202b7",
+      "baseSha": "efad629fe8d8390ae06f9c98aa884cf91129b1ef",
+      "baseVersionCode": 57,
+      "rolloutCode": 1783338075,
+      "title": "v403 Alternative Uebungsnamen im Namensfeld",
+      "summary": "Name-Feld bekommt einen kleinen integrierten Pfeil; darunter klappen vereinfachter und englischer Uebungsname auf, mit planweiter Patienten-App-Anzeige.",
+      "createdAt": "2026-07-06T11:41:15Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v403-alt-names-inline-arrow/admin.html",
+      "sha256": "14926ed810b6f5f4a6afdcdb3c54aaf77644409c80162bf0d43dbb5710ca4a1d"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-gpt-canary-20260705-a",
       "patchHash": "687dd75ff08a7c5c6dae927b6e3e7ba9c298f3891d9f8c6931ccc38d21c7ca13",
       "baseSha": "780ce081b957ca5a60ae7c09f72d09208397f230",
@@ -83,15 +96,15 @@
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-gpt-canary-20260705-a",
-    "patchHash": "687dd75ff08a7c5c6dae927b6e3e7ba9c298f3891d9f8c6931ccc38d21c7ca13",
-    "baseSha": "780ce081b957ca5a60ae7c09f72d09208397f230",
+    "requestId": "kgg-v403-alt-names-inline-arrow",
+    "patchHash": "62737dee3beaf1a0d41810f0640e23e7fedc37c1a8ab0de86b91d7fd3cc202b7",
+    "baseSha": "efad629fe8d8390ae06f9c98aa884cf91129b1ef",
     "baseVersionCode": 57,
-    "rolloutCode": 1783237594,
-    "title": "GPT Preview Canary",
-    "summary": "Canary: prueft validate_only -> publish_preview ohne App-Funktionsaenderung.",
-    "createdAt": "2026-07-05T07:46:34Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-gpt-canary-20260705-a/admin.html",
-    "sha256": "b4ed7316e890edf6a0e8937fdc742d458e7301c3189e3b1a4c18bf1b6df0d9d9"
+    "rolloutCode": 1783338075,
+    "title": "v403 Alternative Uebungsnamen im Namensfeld",
+    "summary": "Name-Feld bekommt einen kleinen integrierten Pfeil; darunter klappen vereinfachter und englischer Uebungsname auf, mit planweiter Patienten-App-Anzeige.",
+    "createdAt": "2026-07-06T11:41:15Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v403-alt-names-inline-arrow/admin.html",
+    "sha256": "14926ed810b6f5f4a6afdcdb3c54aaf77644409c80162bf0d43dbb5710ca4a1d"
   }
 }
