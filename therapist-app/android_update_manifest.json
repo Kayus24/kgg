@@ -4,15 +4,15 @@
   "schema": 2,
   "channels": {
     "admin": {
-      "releaseId": "r0420",
+      "releaseId": "r0421",
       "profile": "admin",
-      "versionName": "1.0.56-patient-qr-root-query",
-      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0420/admin.html",
-      "sha256": "a41714f372f97a2d84c1da356366d4089714dba9b1c2d6ab799fe26f615b3fd7",
-      "notes": "v056: Patienten-QRs nutzen die Root-Patienten-App mit ?plan=KGGH2-Payload; Root-App importiert Query-Plan direkt.",
-      "rolloutCode": 420,
-      "previousReleaseId": "r0419",
-      "releasedAt": "2026-07-02T13:01:14Z"
+      "versionName": "1.0.58-grossdruck-readability-beta",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0421/admin.html",
+      "sha256": "e5c912447e4fe8a9b08003209a9de7507f37c3e3212052334be54c9ebb801514",
+      "notes": "v058: Grossdruck-PDF nutzt groessere kurzsichtigkeitsgepruefte Schrift und eine lokale PDF-Readability-Testengine. Keine Scan/OCR-, Parser-, QR-, Plan-State-, API-Key- oder APK-Aenderung.",
+      "rolloutCode": 421,
+      "previousReleaseId": "r0420",
+      "releasedAt": "2026-07-07T08:18:55Z"
     },
     "colleague": {
       "releaseId": "r0397",
@@ -30,8 +30,8 @@
   "latestAndroidShellVersion": "v401",
   "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0397/colleague.html",
   "colleagueSha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
-  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0420/admin.html",
-  "adminSha256": "a41714f372f97a2d84c1da356366d4089714dba9b1c2d6ab799fe26f615b3fd7",
+  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0421/admin.html",
+  "adminSha256": "e5c912447e4fe8a9b08003209a9de7507f37c3e3212052334be54c9ebb801514",
   "sha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
   "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",
   "androidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
@@ -39,7 +39,7 @@
   "colleagueAndroidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
   "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_ADMIN_v401_share_apk_provider_debug.apk",
   "adminAndroidApkSha256": "366c63594eeb6bdb89a7ab9c44cf4b84b43004ddfb24e5019012de0766f21499",
-  "notes": "Admin beta r0420: v056: Patienten-QRs nutzen die Root-Patienten-App mit ?plan=KGGH2-Payload; Root-App importiert Query-Plan direkt.",
+  "notes": "Admin beta r0421: v058: Grossdruck-PDF nutzt groessere kurzsichtigkeitsgepruefte Schrift und eine lokale PDF-Readability-Testengine. Keine Scan/OCR-, Parser-, QR-, Plan-State-, API-Key- oder APK-Aenderung.",
   "latestAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",
   "latestAndroidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
   "latestColleagueAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",
