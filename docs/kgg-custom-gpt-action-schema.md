@@ -43,6 +43,8 @@ If the GPT editor does not offer `validate_only`, the Action schema is stale and
 - `old_text` must be non-empty and match exactly once.
 - `new_text` must be a string.
 - Do not use `file`, `filename`, `target` or other aliases.
+- Do not patch `const VERSION`, `KGG_BUILD_INFO`, `kgg-source-truth` or `kgg-changelog`; the Preview Gate owns version/build metadata.
+- UI-like payloads must include `required_tests` with `critical` and `ui-stability regression` before any dispatch.
 
 ## Preview artifact response checklist
 
@@ -54,6 +56,8 @@ The GPT may say a Preview is available only after it has verified:
 - Artifact exists and is not expired.
 - `meta.json` returns HTTP 200.
 - Preview HTML returns HTTP 200.
+- Test-APK/Preview channel is updated when the request targets the Test-APK.
+- Max accepts the Test-APK result before `create_pr` is used.
 
 ## Dispatch note
 

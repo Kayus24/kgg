@@ -2,7 +2,7 @@
 
 Use this order for every Preview/Test-HTML/Test-APK request.
 
-Canonical order: `dispatch -> run status -> logs -> tests -> artifact -> meta -> html`.
+Canonical order: `dispatch -> run status -> logs -> tests -> artifact -> meta -> html -> Test-APK -> Max acceptance`.
 
 ## Run order
 
@@ -15,8 +15,10 @@ Canonical order: `dispatch -> run status -> logs -> tests -> artifact -> meta ->
 7. Use `getKggPreviewGateRun` until `status` is `completed`.
 8. If the run fails, use `getKggPreviewGateJobs` and report the failed job/step and exact visible error context.
 9. If the run succeeds, verify artifact, `meta.json` and HTML URL.
-10. Only then tell Max that the Preview is available.
-11. Use `create_pr` only after Max explicitly accepts the same Preview.
+10. If the request targets the Test-APK, verify that the Preview/Test-APK channel is updated.
+11. Tell Max that the Preview/Test-APK is ready for his review.
+12. If Max rejects the Test-APK result, document `human_preview_fail`, add/update the regression fixture and restart at `validate_only`.
+13. Use `create_pr` only after Max explicitly accepts the same Preview.
 
 ## Required verified fields
 
@@ -28,6 +30,8 @@ Every successful Preview report must include:
 - `meta_url`
 - `html_url`
 - `artifact_name`
+- Test-APK/channel status when APK preview is involved
+- Max acceptance status before any PR
 
 ## Failure wording
 

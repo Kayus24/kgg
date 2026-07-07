@@ -46,7 +46,7 @@ paths:
                       pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
                     payload_json:
                       type: string
-                      description: JSON string containing request_id and replace_exact operations.
+                      description: JSON string containing request_id, required_tests and replace_exact operations. UI payloads must include critical and ui-stability regression tests.
                     ui_stability:
                       type: string
                       enum:

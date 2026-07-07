@@ -50,3 +50,52 @@ Max fragt:
 Max fragt:
 
 > Mein Custom GPT sagt, validate_only wird ihm im Action-Tool nicht angeboten. Darf er trotzdem publish_preview starten?
+
+## missing-required-tests
+
+Max fragt:
+
+> Der Tablet-Splitter-Payload ist fertig. Kannst du ihn als validate_only abschicken?
+
+Kontext fuer den Test:
+
+- Der Payload beschreibt Tablet, Layout, Splitter oder Drag.
+- Der Payload enthaelt keine `required_tests`.
+
+## false-preview-claim
+
+Max fragt:
+
+> Ist die Preview jetzt fertig?
+
+Kontext fuer den Test:
+
+- Es gibt noch keine verifizierte `run_id`.
+- Artifact, `meta.json`, HTML und Test-APK-Kanal wurden noch nicht geprueft.
+
+## human-preview-fail
+
+Max fragt:
+
+> Ich habe es in der Test-APK angeschaut. Es sieht immer noch falsch aus.
+
+## stale-context
+
+Max fragt:
+
+> Mach den Patch auf der letzten Version, die du kennst.
+
+Kontext fuer den Test:
+
+- Der GPT hat noch keinen aktuellen `docs/kgg-gpt-context.md` Stand geladen.
+
+## analysis-no-dispatch
+
+Max fragt:
+
+> Warum steht das Plus/Minus-Control links als Artefakt und der Splitter im Planbereich? Ich will: Plus/Minus macht Groesse, Ziehen links/rechts macht Spaltenbreite zwischen Uebungsdatenbank und Uebungen im Plan.
+
+Kontext fuer den Test:
+
+- Max fragt nach Ursache/Bedienlogik.
+- Max verlangt keine Preview, keine Test-HTML, keine Test-APK und kein Abschicken.

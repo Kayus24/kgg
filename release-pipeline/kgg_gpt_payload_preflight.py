@@ -72,9 +72,15 @@ def require_ui_tests(payload: dict[str, Any]) -> None:
         return
     tests = declared_tests(payload)
     if "critical" not in tests:
-        fail("UI-like payloads must declare the critical test battery.")
+        fail(
+            "UI-like payloads must declare the critical test battery in required_tests: "
+            "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical"
+        )
     if "ui-stability" not in tests or "regression" not in tests:
-        fail("UI-like payloads must declare ui-stability regression.")
+        fail(
+            "UI-like payloads must declare ui-stability regression in required_tests: "
+            "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
+        )
 
 
 def reject_broad_body_append(payload: dict[str, Any]) -> None:
@@ -90,6 +96,23 @@ def reject_broad_body_append(payload: dict[str, Any]) -> None:
             )
 
 
+def reject_manual_version_bump(payload: dict[str, Any]) -> None:
+    version_tokens = (
+        "const VERSION='KGG_GITHUB_UPDATE_",
+        'const VERSION="KGG_GITHUB_UPDATE_',
+        "const KGG_BUILD_INFO=",
+        "id=\"kgg-source-truth\"",
+        "id=\"kgg-changelog\"",
+    )
+    for index, operation in enumerate(payload["operations"]):
+        combined = operation["old_text"] + "\n" + operation["new_text"]
+        if any(token in combined for token in version_tokens):
+            fail(
+                f"operation {index} tries to edit version/build metadata. "
+                "The GPT Preview Gate owns version bumps; patch only the requested app behavior."
+            )
+
+
 def check_source_matches(payload: dict[str, Any]) -> None:
     source = SOURCE_PATH.read_text(encoding="utf-8", errors="replace")
     for index, operation in enumerate(payload["operations"]):
@@ -101,6 +124,7 @@ def check_source_matches(payload: dict[str, Any]) -> None:
 def preflight_payload(payload: dict[str, Any], *, check_source: bool = True) -> dict[str, Any]:
     validated = write_gate.validate_payload(json.dumps(payload, ensure_ascii=False))
     reject_broad_body_append(validated)
+    reject_manual_version_bump(validated)
     require_ui_tests(validated)
     if check_source:
         check_source_matches(validated)
@@ -193,6 +217,20 @@ def self_test() -> None:
             ],
         },
         "critical",
+    )
+    expect_failure(
+        "manual-version-bump",
+        {
+            **base,
+            "operations": [
+                {
+                    "path": "kgg-update/index.html",
+                    "old_text": "const VERSION='KGG_GITHUB_UPDATE_v056_patient_qr_root_query';",
+                    "new_text": "const VERSION='KGG_GITHUB_UPDATE_v058_tablet_splitter_drag_ratio';",
+                }
+            ],
+        },
+        "Preview Gate owns version bumps",
     )
     expect_success(
         "good-ui-payload",

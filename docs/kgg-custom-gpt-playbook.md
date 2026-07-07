@@ -21,12 +21,15 @@ Es ist absichtlich streng: Wenn der GPT keinen aktuellen Repo-Kontext laden kann
 - Jede Beta/Test-HTML/Test-APK-Preview-Antwort muss die Reihenfolge `validate_only -> publish_preview` explizit nennen.
 - Wenn die Action `submitKggPreviewGate` im GPT-Editor keinen `validate_only`-Modus anbietet, ist das Action-Schema stale; dann nicht publishen, sondern Schema-Fix/Handoff melden.
 - `publish_preview` darf nie als erster Preview-Gate-Schritt genannt werden.
+- Analyse-, Warum- oder Ursachenfragen duerfen keinen Preview-Gate-Dispatch starten. Erst Diagnose/Handoff geben; dispatchen nur bei klarer Preview-, Test-HTML-, Test-APK- oder Abschicken-Anweisung von Max.
 - Keine Erfolgsmeldung zu Preview, Beta, Tests, APK oder PR, bevor der GitHub-Run gruen ist und das erwartete Artefakt existiert.
 - Wenn ein Run fehlschlaegt, den echten fehlgeschlagenen Step und die konkrete Fehlermeldung nennen.
 - Nie behaupten, Tests seien gruen, wenn nur ein Plan oder Handoff geschrieben wurde.
 - Keine grossen Append-Patches an `</body>` oder `</html>`, solange ein kleiner lokaler Patch an vorhandenen CSS/JS-Stellen moeglich ist.
 - Guard-Tokens duerfen in Patch-Payloads nicht in `old_text` oder `new_text` vorkommen, auch nicht in Kommentaren.
 - UI/Layout-Anfragen brauchen immer `critical` plus `ui-stability regression`.
+- Bei UI/Layout-Payloads ohne `required_tests` sofort stoppen, Payload reparieren und erst danach `validate_only` starten.
+- Versions- und Build-Metadaten nicht manuell patchen; das Preview Gate setzt Version, Build-Info und Preview-Metadaten.
 
 ## Payload-Regeln
 
@@ -76,6 +79,8 @@ Wenn Max eine Test-APK, Preview-APK, ein Preview-Icon oder einen Preview-App-Nam
 - Produktions-Android, Live-Manifest, Release-Manifest und `main` bleiben unveraendert.
 - Admin-Web und Kolleg:innen-Web bleiben bei reinem Test-APK-Icon/App-Namen unveraendert, ausser Max verlangt ausdruecklich eine HTML-Preview-Aenderung.
 - Erst Erfolg melden, wenn der CI-/Preview-Run gruen ist und das erwartete APK- oder HTML-Artefakt existiert.
+- Nach `publish_preview` ist Max' Test in der Test-APK ein Pflicht-Gate.
+- Wenn Max in der Test-APK "nicht gut" meldet, ist das `human_preview_fail`: dokumentieren, als Regression aufnehmen und wieder bei `validate_only` starten.
 
 ## Echte GPT-Testschleife
 
@@ -86,3 +91,20 @@ Nach jeder Aenderung an diesem Playbook, Bug-Wissen, Routing oder Payload-Regeln
 3. Antworten gegen `docs/kgg-custom-gpt-expected-results.md` pruefen.
 4. Ergebnis in `docs/kgg-custom-gpt-test-report.md` dokumentieren.
 5. Bei FAIL Playbook, Routing, Lessons oder Eval-Fixtures nachschaerfen und erneut testen.
+6. `python release-pipeline/kgg_gpt_stabilize.py --write-report` ausfuehren und `docs/kgg-custom-gpt-cycle-report.md` pruefen.
+7. Ende erst nach zwei kompletten gruenen Runden ohne neue Fehlerklasse.
+8. Nach echten Browser-/Test-APK-Ergebnissen `python release-pipeline/kgg_gpt_stabilize.py --manual-results <json> --write-report --strict` verwenden.
+
+## Stabilisierung und Fehlerklassen
+
+Jeder neue GPT- oder Preview-Fehler wird klassifiziert:
+
+- `payload_schema`: falsches JSON, `file` statt `path`, fehlende `required_tests`.
+- `preview_gate`: roter Run, fehlendes Artifact, falsche 404-Deutung.
+- `unsafe_patch`: Guard-Token, manuelle Versionierung, zu breite Appends.
+- `ui_logic`: Splitter/Scale vermischt, Artefakte, falsche Position.
+- `false_claim`: GPT behauptet Tests, Preview oder Test-APK ohne Beweis.
+- `stale_context`: alte Version, falsche Source-Datei oder nicht geladene Area-Routes.
+- `human_preview_fail`: Max lehnt die Test-APK/Preview fachlich oder optisch ab.
+
+Regel: Erst einen Test/Eval fuer die Fehlerklasse ergaenzen, dann Playbook, Routing, Lessons, Preflight oder Action-Schema nachschaerfen. Wenn derselbe Fehler zweimal auftaucht, muss er technisch im Gate oder in der Eval-Suite blockiert werden.

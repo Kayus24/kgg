@@ -50,6 +50,18 @@ def run_preflight_self_test() -> None:
         fail(f"payload preflight self-test failed: {output}")
 
 
+def run_stabilize_self_test() -> None:
+    proc = subprocess.run(
+        [sys.executable, "release-pipeline/kgg_gpt_stabilize.py", "--self-test"],
+        cwd=str(ROOT),
+        text=True,
+        capture_output=True,
+    )
+    if proc.returncode != 0:
+        output = (proc.stdout + "\n" + proc.stderr).strip()
+        fail(f"stabilize self-test failed: {output}")
+
+
 def run_validate_only_self_test() -> None:
     source_path = ROOT / "kgg-update" / "index.html"
     before = source_path.read_text(encoding="utf-8")
@@ -116,7 +128,12 @@ def check_playbook() -> None:
             "Keine Erfolgsmeldung",
             "Guard-Tokens",
             "validate_only",
+            "Analyse-",
             "ui_stability=true",
+            "kgg_gpt_stabilize.py",
+            "human_preview_fail",
+            "Test-APK",
+            "zwei kompletten gruenen Runden",
             "tabletLayoutFreeTools",
             "tabletLayoutResizeHandle",
             "--kgg-tablet-left-col",
@@ -145,6 +162,11 @@ def check_prompt_and_expected_docs() -> None:
         "preview-apk-icon",
         "beta-html-request",
         "action-schema-validate-only",
+        "missing-required-tests",
+        "false-preview-claim",
+        "human-preview-fail",
+        "stale-context",
+        "analysis-no-dispatch",
     ]
     for case in cases:
         require(prompts, f"## {case}", f"prompt fixture {case}")
@@ -163,6 +185,11 @@ def check_prompt_and_expected_docs() -> None:
             "validate_only",
             "Preview-Profil",
             "publish_preview",
+            "payload_schema",
+            "false_claim",
+            "human_preview_fail",
+            "stale_context",
+            "submitKggPreviewGate",
             "meta.json",
             "listKggPreviewGateRuns",
         ],
@@ -178,6 +205,8 @@ def check_prompt_and_expected_docs() -> None:
             "artifact",
             "meta.json",
             "listKggPreviewGateRuns",
+            "Test-APK",
+            "Max accepts the Test-APK",
             "api.github.com",
             "raw.githubusercontent.com",
             "duplicate action domains",
@@ -195,6 +224,7 @@ def check_prompt_and_expected_docs() -> None:
             "getKggPreviewGateRun",
             "getKggPreviewGateJobs",
             "getKggPreviewGateArtifacts",
+            "required_tests",
             "schemas: {}",
             "properties:",
         ],
@@ -211,6 +241,7 @@ def check_prompt_and_expected_docs() -> None:
             "getKggPreviewGateRun",
             "getKggPreviewGateJobs",
             "getKggPreviewGateArtifacts",
+            "required_tests",
             "schemas: {}",
             "properties:",
         ],
@@ -218,20 +249,26 @@ def check_prompt_and_expected_docs() -> None:
     )
     require_all(
         negative_examples,
-        ["file", "path", "protected words", "Broken JSON", "Red run plus missing meta"],
+        ["file", "path", "protected words", "Broken JSON", "Red run plus missing meta", "Manual version", "Test-APK", "Analysis prompt starts Preview dispatch"],
         "negative examples text",
     )
     require_all(
         runbook,
-        ["dispatch -> run status", "validate_only", "artifact", "meta.json", "html_url"],
+        ["dispatch -> run status", "validate_only", "artifact", "meta.json", "html_url", "Max acceptance"],
         "preview runbook text",
     )
     require_all(
         report_template,
-        ["run_id", "conclusion", "failed_step", "meta_url", "html_url", "artifact_name"],
+        ["run_id", "conclusion", "failed_step", "meta_url", "html_url", "artifact_name", "test_apk_channel", "max_acceptance"],
         "preview report template text",
     )
-    require_all(report, ["PASS", "FAIL", "PENDING", "run_id", "artifact_name", "html_url"], "report states")
+    cycle_report = read("docs/kgg-custom-gpt-cycle-report.md")
+    require_all(report, ["PASS", "FAIL", "PENDING", "run_id", "artifact_name", "html_url", "docs/kgg-custom-gpt-cycle-report.md"], "report states")
+    require_all(
+        cycle_report,
+        ["payload_schema", "preview_gate", "unsafe_patch", "ui_logic", "false_claim", "stale_context", "human_preview_fail", "Confirmed green rounds"],
+        "cycle report states",
+    )
 
 
 def check_area_routes() -> None:
@@ -265,6 +302,7 @@ def main() -> int:
         check_prompt_and_expected_docs()
         check_area_routes()
         run_preflight_self_test()
+        run_stabilize_self_test()
         run_validate_only_self_test()
         print("KGG Custom GPT eval OK")
         return 0
