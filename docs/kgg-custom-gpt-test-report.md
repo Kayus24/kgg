@@ -23,6 +23,8 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | human-preview-fail | PASS | Finaler Browser-Retest 2026-07-07: Max' Ablehnung in der Test-APK wird als `human_preview_fail` behandelt; kein PR/Main/Merge, wieder `validate_only`. |
 | stale-context | PASS | Finaler Browser-Retest 2026-07-07: laedt Live-Kontext und arbeitet nicht auf einer erinnerten alten Version. |
 | analysis-no-dispatch | PASS | Neuer Regressionstest nach Run `28853063310`: Analyse-/Warum-Fragen duerfen keinen Preview-Gate-Dispatch starten. Retest nach Instruction-Schaerfung: kein API-Aufruf. |
+| ci-tooling-pdftoppm | PENDING | Neuer Regressionstest: fehlendes `pdftoppm`/`poppler-utils` muss als `ci_tooling` gelten, nicht als UI-Patchfehler. |
+| admin-beta-push-gate | PENDING | Neuer End-to-End-Gate-Test: positiver Haupt-App-Push zaehlt erst nach `publish_admin_beta`, Admin-Beta-Merge nach `main`, Manifest und Admin-HTML HTTP 200. |
 
 ## End-to-End Canary
 

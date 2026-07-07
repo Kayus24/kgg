@@ -256,6 +256,7 @@ paths:
                         - validate_only
                         - publish_preview
                         - create_pr
+                        - publish_admin_beta
                     request_id:
                       type: string
                       pattern: "^[a-z0-9][a-z0-9-]{5,63}$"

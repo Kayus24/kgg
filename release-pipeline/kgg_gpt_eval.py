@@ -134,6 +134,8 @@ def check_playbook() -> None:
             "human_preview_fail",
             "Test-APK",
             "zwei kompletten gruenen Runden",
+            "ci_tooling",
+            "publish_admin_beta",
             "tabletLayoutFreeTools",
             "tabletLayoutResizeHandle",
             "--kgg-tablet-left-col",
@@ -152,6 +154,7 @@ def check_prompt_and_expected_docs() -> None:
     negative_examples = read("docs/kgg-custom-gpt-negative-examples.md")
     runbook = read("docs/kgg-custom-gpt-preview-runbook.md")
     report_template = read("docs/kgg-custom-gpt-preview-report-template.md")
+    knowledge_pack = read("docs/kgg-custom-gpt-knowledge-pack.md")
     openapi_schema = read("docs/kgg-custom-gpt-action-openapi.yaml")
     api_openapi_schema = read("docs/kgg-custom-gpt-action-api-openapi.yaml")
     cases = [
@@ -167,6 +170,8 @@ def check_prompt_and_expected_docs() -> None:
         "human-preview-fail",
         "stale-context",
         "analysis-no-dispatch",
+        "ci-tooling-pdftoppm",
+        "admin-beta-push-gate",
     ]
     for case in cases:
         require(prompts, f"## {case}", f"prompt fixture {case}")
@@ -185,10 +190,13 @@ def check_prompt_and_expected_docs() -> None:
             "validate_only",
             "Preview-Profil",
             "publish_preview",
+            "publish_admin_beta",
             "payload_schema",
+            "ci_tooling",
             "false_claim",
             "human_preview_fail",
             "stale_context",
+            "poppler-utils",
             "submitKggPreviewGate",
             "meta.json",
             "listKggPreviewGateRuns",
@@ -201,12 +209,14 @@ def check_prompt_and_expected_docs() -> None:
             "validate_only",
             "publish_preview",
             "create_pr",
+            "publish_admin_beta",
             "path",
             "artifact",
             "meta.json",
             "listKggPreviewGateRuns",
             "Test-APK",
             "Max accepts the Test-APK",
+            "Admin beta",
             "api.github.com",
             "raw.githubusercontent.com",
             "duplicate action domains",
@@ -220,6 +230,7 @@ def check_prompt_and_expected_docs() -> None:
             "- validate_only",
             "- publish_preview",
             "- create_pr",
+            "- publish_admin_beta",
             "listKggPreviewGateRuns",
             "getKggPreviewGateRun",
             "getKggPreviewGateJobs",
@@ -237,6 +248,7 @@ def check_prompt_and_expected_docs() -> None:
             "- validate_only",
             "- publish_preview",
             "- create_pr",
+            "- publish_admin_beta",
             "listKggPreviewGateRuns",
             "getKggPreviewGateRun",
             "getKggPreviewGateJobs",
@@ -254,20 +266,54 @@ def check_prompt_and_expected_docs() -> None:
     )
     require_all(
         runbook,
-        ["dispatch -> run status", "validate_only", "artifact", "meta.json", "html_url", "Max acceptance"],
+        ["dispatch -> run status", "validate_only", "artifact", "meta.json", "html_url", "Max acceptance", "Admin beta merge", "ci_tooling"],
         "preview runbook text",
     )
     require_all(
         report_template,
-        ["run_id", "conclusion", "failed_step", "meta_url", "html_url", "artifact_name", "test_apk_channel", "max_acceptance"],
+        [
+            "run_id",
+            "conclusion",
+            "failed_step",
+            "meta_url",
+            "html_url",
+            "artifact_name",
+            "test_apk_channel",
+            "max_acceptance",
+            "admin_beta_pr",
+            "admin_beta_merge",
+            "admin_html_url",
+            "visible_scaler_canary",
+        ],
         "preview report template text",
     )
     cycle_report = read("docs/kgg-custom-gpt-cycle-report.md")
     require_all(report, ["PASS", "FAIL", "PENDING", "run_id", "artifact_name", "html_url", "docs/kgg-custom-gpt-cycle-report.md"], "report states")
     require_all(
         cycle_report,
-        ["payload_schema", "preview_gate", "unsafe_patch", "ui_logic", "false_claim", "stale_context", "human_preview_fail", "Confirmed green rounds"],
+        [
+            "payload_schema",
+            "preview_gate",
+            "ci_tooling",
+            "unsafe_patch",
+            "ui_logic",
+            "false_claim",
+            "stale_context",
+            "human_preview_fail",
+            "Confirmed green rounds",
+        ],
         "cycle report states",
+    )
+    require_all(
+        knowledge_pack,
+        [
+            "KGG Custom GPT Knowledge Pack",
+            "docs/kgg-custom-gpt-playbook.md",
+            "docs/kgg-custom-gpt-preview-runbook.md",
+            "ci_tooling",
+            "publish_admin_beta",
+        ],
+        "knowledge pack text",
     )
 
 

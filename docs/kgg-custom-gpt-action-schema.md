@@ -13,6 +13,7 @@ If the GPT editor does not offer `validate_only`, the Action schema is stale and
 - `validate_only`: validate JSON, exact patch matches and HTML syntax. Writes nothing.
 - `publish_preview`: validate, run tests, build Preview APK, publish HTML/meta to `gpt-preview`.
 - `create_pr`: only after Max accepts the matching preview. Creates a PR, never merges.
+- `publish_admin_beta`: only after Max accepts the matching Preview/Test-APK. Creates an `[admin-beta]` PR, labels it `kgg-auto-merge`, waits for required checks and merges the Admin beta to `main`.
 
 ## Valid payload
 
@@ -57,7 +58,8 @@ The GPT may say a Preview is available only after it has verified:
 - `meta.json` returns HTTP 200.
 - Preview HTML returns HTTP 200.
 - Test-APK/Preview channel is updated when the request targets the Test-APK.
-- Max accepts the Test-APK result before `create_pr` is used.
+- Max accepts the Test-APK result before `create_pr` or `publish_admin_beta` is used.
+- A push-test counts positive only after both `publish_preview` and `publish_admin_beta` are verified.
 
 ## Dispatch note
 
@@ -66,7 +68,7 @@ This preserves quotes inside `payload_json` and prevents invalid JSON such as `{
 
 ## Required GPT Action operations
 
-- `submitKggPreviewGate` must allow `mode` values `validate_only`, `publish_preview` and `create_pr`.
+- `submitKggPreviewGate` must allow `mode` values `validate_only`, `publish_preview`, `create_pr` and `publish_admin_beta`.
 - `listKggPreviewGateRuns` must be available so the GPT can find the run for a `request_id`.
 - `getKggPreviewGateRun` must be available so the GPT can verify `status` and `conclusion`.
 - `getKggPreviewGateJobs` must be available so the GPT can report failed job/step names.

@@ -20,6 +20,7 @@ REPORT_PATH = ROOT / "docs" / "kgg-custom-gpt-cycle-report.md"
 ERROR_CLASSES: dict[str, str] = {
     "payload_schema": "Invalid payload shape, JSON, operation path or missing required_tests.",
     "preview_gate": "GitHub Preview Gate, run, artifact, meta.json or publish-preview failure.",
+    "ci_tooling": "Missing runner/browser/emulator tool or CI dependency such as poppler/pdftoppm.",
     "unsafe_patch": "Protected token, manual versioning, broad append or unsafe patch surface.",
     "ui_logic": "UI behavior mismatch such as splitter/scale overlap or visible artifacts.",
     "false_claim": "The GPT claimed success without verified run/test/artifact evidence.",
@@ -40,6 +41,8 @@ GPT_PROMPTS = [
     "human-preview-fail",
     "stale-context",
     "analysis-no-dispatch",
+    "ci-tooling-pdftoppm",
+    "admin-beta-push-gate",
 ]
 
 PREVIEW_CHECKS = [
@@ -50,6 +53,10 @@ PREVIEW_CHECKS = [
     "html_url",
     "test_apk_channel",
     "max_test_apk_acceptance",
+    "admin_beta_main_merge",
+    "admin_html_http_200",
+    "visible_scaler_canary",
+    "no_open_red_runs",
 ]
 
 
@@ -74,6 +81,8 @@ def normalize_status(value: str | None) -> str:
 
 def classify_failure(text: str) -> str:
     lower = text.lower()
+    if any(token in lower for token in ["pdftoppm", "pdfinfo", "poppler", "apt-get", "missing tool", "adb", "emulator"]):
+        return "ci_tooling"
     if any(token in lower for token in ["required_tests", "required tests", "payload", "json", "file", "path"]):
         return "payload_schema"
     if any(token in lower for token in ["protected", "guard", "api-key", "version", "body append", "</body>", "</html>"]):
@@ -144,6 +153,7 @@ def local_checks(include_ui_probe: bool) -> list[CheckResult]:
         ("context-check", [sys.executable, "release-pipeline/kgg_gpt_context.py", "--check"]),
         ("bug-knowledge-check", [sys.executable, "release-pipeline/kgg_bug_knowledge.py", "--check"]),
         ("source-context-check", [sys.executable, "release-pipeline/kgg_gpt_source_context.py", "--check"]),
+        ("knowledge-pack-check", [sys.executable, "release-pipeline/kgg_custom_gpt_knowledge_pack.py", "--check"]),
         ("payload-preflight-self-test", [sys.executable, "release-pipeline/kgg_gpt_payload_preflight.py", "--self-test"]),
         ("gpt-eval", [sys.executable, "release-pipeline/kgg_gpt_eval.py"]),
         ("gpt-suite-critical", gpt_suite_command()),
@@ -256,6 +266,7 @@ def self_test() -> None:
     required = {
         "payload_schema",
         "preview_gate",
+        "ci_tooling",
         "unsafe_patch",
         "ui_logic",
         "false_claim",
@@ -273,7 +284,7 @@ def self_test() -> None:
             raise RuntimeError(f"missing GPT prompt fixture: {prompt}")
         if f"## {prompt}" not in expected:
             raise RuntimeError(f"missing expected result fixture: {prompt}")
-    for token in ["kgg_gpt_stabilize.py", "human_preview_fail", "Test-APK", "zwei kompletten gruenen Runden"]:
+    for token in ["kgg_gpt_stabilize.py", "human_preview_fail", "ci_tooling", "publish_admin_beta", "Test-APK", "zwei kompletten gruenen Runden"]:
         if token not in playbook:
             raise RuntimeError(f"playbook missing stabilization token: {token}")
 

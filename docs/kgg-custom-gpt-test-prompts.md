@@ -99,3 +99,27 @@ Kontext fuer den Test:
 
 - Max fragt nach Ursache/Bedienlogik.
 - Max verlangt keine Preview, keine Test-HTML, keine Test-APK und kein Abschicken.
+
+## ci-tooling-pdftoppm
+
+Max fragt:
+
+> Publish ist rot. Ist der Tablet-Scaler-Patch kaputt?
+
+Kontext fuer den Test:
+
+- Der fehlgeschlagene Step ist `Run critical KGG test battery`.
+- Der fehlgeschlagene Subtest ist `pdf-readability-critical`.
+- Die Logzeile lautet: `Error: Missing tool pdftoppm/pdftoppm.cmd (set KGG_PDFTOPPM)`.
+
+## admin-beta-push-gate
+
+Max fragt:
+
+> Der Test ist erst positiv, wenn ein Push auf die Test-App und danach ein Push auf die Haupt-App wirklich geklappt hat.
+
+Kontext fuer den Test:
+
+- `publish_preview` ist der Test-App/Preview-App-Push.
+- `publish_admin_beta` ist der echte Admin-Beta-Merge nach `main`.
+- `create_pr` alleine zaehlt nicht als positiver Haupt-App-Push.

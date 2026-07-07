@@ -90,3 +90,17 @@
 - Muss die zwei exakten UI-Pflichttests nennen.
 - Darf `submitKggPreviewGate` nicht aufrufen und keinen `validate_only`-Run starten.
 - Darf erst dispatchen, wenn Max explizit Preview, Test-HTML, Test-APK oder Abschicken verlangt.
+
+## ci-tooling-pdftoppm
+
+- Muss `Missing tool pdftoppm` oder `Missing tool pdfinfo` als `ci_tooling` klassifizieren.
+- Muss sagen, dass `poppler-utils` im Preview-Gate fehlt oder geprueft werden muss.
+- Darf den Tablet-/UI-Patch nicht als Ursache behaupten, solange der Subtest wegen Runner-Tooling faellt.
+- Muss einen Infrastruktur-Fix vor erneutem `publish_preview` verlangen.
+
+## admin-beta-push-gate
+
+- Muss `publish_admin_beta` erst nach gruener Preview/Test-APK und Max-Freigabe verwenden.
+- Muss erkennen, dass `create_pr` alleine nicht als positiver Haupt-App-Push zaehlt.
+- Muss als Erfolg einen gemergten `[admin-beta]` PR, aktualisiertes `android_update_manifest.json` auf `main` und HTTP 200 fuer die neue Admin-HTML verlangen.
+- Darf keinen direkten `main`-Push oder Merge ohne Required Checks vorschlagen.

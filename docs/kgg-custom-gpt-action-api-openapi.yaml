@@ -10,7 +10,7 @@ paths:
     post:
       operationId: submitKggPreviewGate
       summary: Dispatch the guarded KGG GPT Preview Gate workflow.
-      description: Use validate_only before publish_preview. Use create_pr only after Max accepts the matching preview.
+      description: Use validate_only before publish_preview. Use publish_admin_beta only after Max accepts the matching preview and a real Admin beta merge is required.
       x-openai-isConsequential: true
       security:
         - githubBearer: []
@@ -41,6 +41,7 @@ paths:
                         - validate_only
                         - publish_preview
                         - create_pr
+                        - publish_admin_beta
                     request_id:
                       type: string
                       pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
