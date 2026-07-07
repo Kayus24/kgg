@@ -4,6 +4,19 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "ui-scaler-canary-20260707-a",
+      "patchHash": "babaf97a11eca70f95fd1c7dc03ea2b9f339a18cbc8ebba1a59e72725fd62a2a",
+      "baseSha": "69086b0ce16923f096c4e38122c5abc797f45258",
+      "baseVersionCode": 59,
+      "rolloutCode": 1783420142,
+      "title": "UI Scaler Push Canary",
+      "summary": "Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification.",
+      "createdAt": "2026-07-07T10:29:02Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/ui-scaler-canary-20260707-a/admin.html",
+      "sha256": "b0b691203e0001f32b49db3d7541e276e4dfde533dc4791260188a0407eef632"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-v404-name-arrow-unit-custom",
       "patchHash": "4ebf8e18014a35d28da9f787684b93f6d6c60728ccd3dfa09bd30b6a56d2717a",
       "baseSha": "efad629fe8d8390ae06f9c98aa884cf91129b1ef",
@@ -109,15 +122,15 @@
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-v404-name-arrow-unit-custom",
-    "patchHash": "4ebf8e18014a35d28da9f787684b93f6d6c60728ccd3dfa09bd30b6a56d2717a",
-    "baseSha": "efad629fe8d8390ae06f9c98aa884cf91129b1ef",
-    "baseVersionCode": 57,
-    "rolloutCode": 1783350915,
-    "title": "v404 Name Pfeil wie Select und freie Einheit",
-    "summary": "Name-Feld nutzt ein Select-artiges Pfeilchen ohne sichtbaren Button; Einheit erhaelt sec und Andere mit Freitext.",
-    "createdAt": "2026-07-06T15:15:15Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v404-name-arrow-unit-custom/admin.html",
-    "sha256": "594f0a992fd42e576235f2166613ee8179911bf08418548663a87d22cb8add1b"
+    "requestId": "ui-scaler-canary-20260707-a",
+    "patchHash": "babaf97a11eca70f95fd1c7dc03ea2b9f339a18cbc8ebba1a59e72725fd62a2a",
+    "baseSha": "69086b0ce16923f096c4e38122c5abc797f45258",
+    "baseVersionCode": 59,
+    "rolloutCode": 1783420142,
+    "title": "UI Scaler Push Canary",
+    "summary": "Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification.",
+    "createdAt": "2026-07-07T10:29:02Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/ui-scaler-canary-20260707-a/admin.html",
+    "sha256": "b0b691203e0001f32b49db3d7541e276e4dfde533dc4791260188a0407eef632"
   }
 }
