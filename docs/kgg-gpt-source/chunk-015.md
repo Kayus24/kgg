@@ -4,6 +4,85 @@
 - Lines: 6301-6720
 
 ```html
+      if((window.jspdf && window.jspdf.jsPDF) || window.jsPDF) return Promise.resolve((window.jspdf&&window.jspdf.jsPDF)||window.jsPDF);
+      const state = window.KGG_JSPDF_TEST_LOAD_STATE;
+      if(state.promise) return state.promise;
+      const sources = window.KGG_JSPDF_TEST_SOURCES || [];
+      state.status = 'loading';
+      state.promise = new Promise((resolve,reject)=>{
+        function trySource(i){
+          state.index = i;
+          if((window.jspdf && window.jspdf.jsPDF) || window.jsPDF){
+            state.status = 'loaded';
+            resolve((window.jspdf&&window.jspdf.jsPDF)||window.jsPDF);
+            return;
+          }
+          if(i >= sources.length){
+            state.status = 'failed';
+            state.error = 'jsPDF konnte aus keiner Testquelle geladen werden.';
+            reject(new Error(state.error));
+            return;
+          }
+          const script = document.createElement('script');
+          script.src = sources[i];
+          script.async = true;
+          script.onload = function(){
+            const ctor = (window.jspdf&&window.jspdf.jsPDF)||window.jsPDF||null;
+            if(ctor){
+              state.status = 'loaded';
+              resolve(ctor);
+            }else{
+              trySource(i+1);
+            }
+          };
+          script.onerror = function(){trySource(i+1);};
+          document.head.appendChild(script);
+        }
+        trySource(0);
+      });
+      return state.promise;
+    };
+    window.KGGLoadJsPdfForTest();
+  </script>
+
+<style id="kgg-mini-patch-v400-01-menu-icon-stays-hamburger">
+  /* v400 mini01: Tablet-Menü-Icon bleibt Hamburger.
+     Nur UI-CSS. Keine PDF/QR/Scan/Parser/Plan-State-Logik. */
+  @media (min-width:760px){
+    body.tabletMenuOpen .tabletMenuBtn span:nth-child(1),
+    body.tabletMenuOpen .tabletMenuBtn span:nth-child(2),
+    body.tabletMenuOpen .tabletMenuBtn span:nth-child(3){
+      transform:none!important;
+      opacity:1!important;
+    }
+  }
+</style>
+
+
+<style id="kgg-mini-patch-v400-03-menu-handle-layout-persists">
+  /* v400 mini03: Seitenmenü-Handle + Layout-Bearbeitung bleibt aktiv.
+     Nur Tablet-UI. Keine PDF/QR/Scan/Parser/Patient-App/Plan-State-Logik. */
+  @media (min-width:760px){
+    body.tabletLayoutCustom .tabletMenuBtn{
+      border:1px solid rgba(10,16,36,.18)!important;
+      background:#fff!important;
+      box-shadow:0 1px 3px rgba(10,16,36,.12),inset 0 1px 0 rgba(255,255,255,.9)!important;
+      backdrop-filter:none!important;
+      -webkit-backdrop-filter:none!important;
+      transform:none!important;
+      outline:none!important;
+    }
+    body.tabletLayoutCustom .tabletMenuBtn span{
+      transform:none!important;
+      opacity:1!important;
+      background:#0a1024!important;
+      box-shadow:none!important;
+    }
+    body.tabletLayoutCustom.tabletMenuOpen .tabletMenuBtn{
+      position:fixed!important;
+      left:calc(var(--kgg-tablet-sidebar-w) - 1px)!important;
+      top:calc(var(--kgg-tablet-safe-top) + 18px)!important;
+      right:auto!important;
       bottom:auto!important;
       width:42px!important;
       min-width:42px!important;
@@ -345,83 +424,4 @@
       display:none!important;
     }
   }
-</style>
-
-  <!-- KGG kgg-source-truth: embedded Source Truth. Machine-readable; safe for local LLM/code review. -->
-<!-- KGG kgg-changelog: embedded Changelog. Machine-readable; safe for local LLM/code review. -->
-
-<!-- KGG PATCH START kgg-v021-embed-jsqr-gallery-decode lib sha256=bc40c8a15196236b2314db0856f72ca0b49980cd5413b8c852a7349f5fee0859 -->
-<script id="kgg-v021-embed-jsqr-gallery-decode-lib">
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory();
-	else if(typeof define === 'function' && define.amd)
-		define([], factory);
-	else if(typeof exports === 'object')
-		exports["jsQR"] = factory();
-	else
-		root["jsQR"] = factory();
-})(typeof self !== 'undefined' ? self : this, function() {
-return /******/ (function(modules) { // webpackBootstrap
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
-/******/ 			return installedModules[moduleId].exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			i: moduleId,
-/******/ 			l: false,
-/******/ 			exports: {}
-/******/ 		};
-/******/
-/******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.l = true;
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/
-/******/
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
-/******/
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
-/******/
-/******/ 	// define getter function for harmony exports
-/******/ 	__webpack_require__.d = function(exports, name, getter) {
-/******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, {
-/******/ 				configurable: false,
-/******/ 				enumerable: true,
-/******/ 				get: getter
-/******/ 			});
-/******/ 		}
-/******/ 	};
-/******/
-/******/ 	// getDefaultExport function for compatibility with non-harmony modules
-/******/ 	__webpack_require__.n = function(module) {
-/******/ 		var getter = module && module.__esModule ?
-/******/ 			function getDefault() { return module['default']; } :
-/******/ 			function getModuleExports() { return module; };
-/******/ 		__webpack_require__.d(getter, 'a', getter);
-/******/ 		return getter;
-/******/ 	};
-/******/
-/******/ 	// Object.prototype.hasOwnProperty.call
-/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
-/******/
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
-/******/
-/******/ 	// Load entry module and return exports
 ```

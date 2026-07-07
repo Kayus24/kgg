@@ -4,6 +4,99 @@
 - Lines: 22261-22680
 
 ```html
+      seenBases.add(key);
+      for(const rot of rotations){
+        const rotated=scanRotateCanvas(base,rot);
+        for(const box of crops){
+          const crop=box.id==='full'?rotated:scanCropCanvas(rotated,box);
+          const prepared=scanScaleCanvas(crop,860,3200);
+          for(const mode of modes){
+            attempts++;
+            const target=scanFilteredCanvas(prepared,mode);
+            const raw=await detectQrOnCanvas(target,detector);
+            if(raw){
+              return {
+                raw,
+                attempts,
+                hit:{rot,crop:box.id,mode,maxSide,canvas:key,detector:!!detector,jsQR:!!window.jsQR},
+                debug:{fileName,fileType,fileSize,lastCanvas:key}
+              };
+            }
+          }
+        }
+      }
+    }
+    const support='BarcodeDetector='+(!!detector)+', jsQR='+(!!window.jsQR);
+    const heicText=heicHint?' HEIC/HEIF wird von Android WebView oft nicht als Canvas-Bild dekodiert; bitte als Screenshot/PNG/JPG testen.':'';
+    return {
+      raw:'',
+      attempts,
+      reason:(lastReason?lastReason+'; ':'')+'Kein QR im hochgeladenen Bild gefunden. '+support+', Datei='+fileName+', Typ='+fileType+', Groesse='+fileSize+', Canvas='+lastCanvas+'.'+heicText,
+      debug:{fileName,fileType,fileSize,attempts,lastCanvas,barcodeDetector:!!detector,jsQR:!!window.jsQR,heicHint}
+    };
+  }
+  function safeBase64JsonDecode(value){
+    const raw=String(value||'').trim();
+    const body=raw.replace(/^[^:]+:/,'').replace(/-/g,'+').replace(/_/g,'/');
+    const padded=body+'='.repeat((4-body.length%4)%4);
+    const decoded=decodeURIComponent(escape(atob(padded)));
+    return parseLooseJson(decoded).json;
+  }
+  function safeJsonRepair(text){
+    let s=String(text||'').trim();
+    s=s.replace(/```(?:json)?/gi,'').replace(/```/g,'').trim();
+    const firstObj=s.indexOf('{'), firstArr=s.indexOf('[');
+    let start=-1,end=-1;
+    if(firstArr>=0&&(firstObj<0||firstArr<firstObj)){start=firstArr;end=s.lastIndexOf(']');}
+    else {start=firstObj;end=s.lastIndexOf('}');}
+    if(start>=0&&end>start)s=s.slice(start,end+1);
+    s=s.replace(/,\s*([}\]])/g,'$1');
+    s=s.replace(/}\s*{/g,'},{').replace(/]\s*\[/g,'],[');
+    s=s.replace(/"\s*\n\s*"/g,'","');
+    s=s.replace(/\n/g,' ');
+    return s;
+  }
+  function parseLooseJson(text){
+    const original=String(text||'');
+    const tries=[original,safeJsonRepair(original)];
+    let last=null;
+    for(const candidate of tries){
+      if(!candidate||!candidate.trim())continue;
+      try{return {ok:true,json:JSON.parse(candidate),source:candidate,repaired:candidate!==original};}
+      catch(err){last=err;}
+    }
+    return {ok:false,json:null,source:original,error:last};
+  }
+  function decodeKggQueryPayload(value){
+    const encoded=decodeURIComponent(String(value||'')).trim();
+    try{return safeBase64JsonDecode(encoded);}catch(err){}
+    return parseLooseJson(encoded).json;
+  }
+  function parseScannedQrRaw(raw){
+    const text=String(raw||'').trim();
+    if(!text)throw new Error('QR leer.');
+    let payloadText=text;
+    try{
+      const url=new URL(text);
+      if(url.hash)payloadText=url.hash;
+      const q=url.searchParams.get('kgg')||url.searchParams.get('payload')||url.searchParams.get('p');
+      if(q)return {type:'query',json:decodeKggQueryPayload(q),raw:text};
+    }catch(err){}
+    const candidates=[payloadText,text];
+    try{candidates.push(decodeURIComponent(payloadText));}catch(err){}
+    try{candidates.push(decodeURIComponent(text));}catch(err){}
+    const findCode=prefix=>{
+      const re=new RegExp(prefix+':([A-Za-z0-9_-]+)','i');
+      for(const candidate of candidates){
+        const hit=String(candidate||'').match(re);
+        if(hit)return hit;
+      }
+      return null;
+    };
+    const cfg2=findCode('KGGCFG2');
+    if(cfg2)return {type:'KGGCFG2',json:safeBase64JsonDecode(cfg2[1]),raw:text};
+    const cfg1=findCode('KGGCFG1');
+    if(cfg1)return {type:'KGGCFG1',json:safeBase64JsonDecode(cfg1[1]),raw:text};
     const h2=findCode('KGGH2');
     if(h2)return {type:'KGGH2',json:safeBase64JsonDecode(h2[1]),raw:text};
     const sync2=findCode('KGGSYNC2');
@@ -331,97 +424,4 @@
   }
   function kggCropCanvas(src,rect){
     const r=kggClampRect(rect,src.width,src.height);
-    const c=document.createElement('canvas');
-    c.width=r.w; c.height=r.h;
-    const x=c.getContext('2d',{willReadFrequently:true});
-    x.fillStyle='#fff'; x.fillRect(0,0,c.width,c.height);
-    x.drawImage(src,r.x,r.y,r.w,r.h,0,0,r.w,r.h);
-    return c;
-  }
-  function kggCurrentLayoutRowStripRect(box,imgW,imgH,wide){
-    const bx=box.x*imgW, by=box.y*imgH, bw=box.w*imgW, bh=box.h*imgH;
-    const valueLeft=bx+bw*.110;
-    const valueRight=bx+bw*.858;
-    const cy=by+(box.ex<=4?bh*.595:bh*.485);
-    const stripH=wide?Math.max(54,bh*.19):Math.max(42,bh*.15);
-    return {x:valueLeft,y:cy-stripH*.55,w:valueRight-valueLeft,h:stripH};
-  }
-  function kggNormalizeCanvasForCurrentLayout(src){
-    const canvas=scanCloneCanvas(src);
-    const ctx=canvas.getContext('2d',{willReadFrequently:true});
-    ctx.save();
-    ctx.filter='contrast(1.18) brightness(1.03) saturate(.92)';
-    ctx.drawImage(src,0,0);
-    ctx.restore();
-    canvas.dataset.kggLayout=KGG_CURRENT_LAYOUT_ID;
-    return canvas;
-  }
-  function kggBuildCurrentLayoutT1Strips(srcCanvas){
-    const src=kggNormalizeCanvasForCurrentLayout(srcCanvas);
-    return KGG_CURRENT_LAYOUT_BOXES.map(box=>{
-      const rect=kggCurrentLayoutRowStripRect(box,src.width,src.height,true);
-      return {ex:box.ex,name:box.name,measure:box.measure,rect,canvas:kggCropCanvas(src,rect)};
-    });
-  }
-  function kggBuildCurrentLayoutContactSheet(strips){
-    const list=strips||[];
-    if(!list.length)throw new Error('Keine T1-Zeilen-Crops erzeugt.');
-    const scale=1.5;
-    const labelW=180;
-    const rowH=92;
-    const maxW=Math.max.apply(null,list.map(s=>s.canvas.width));
-    const c=document.createElement('canvas');
-    c.width=Math.round(labelW+maxW*scale+40);
-    c.height=36+list.length*rowH+24;
-    const x=c.getContext('2d',{willReadFrequently:true});
-    x.fillStyle='#fff'; x.fillRect(0,0,c.width,c.height);
-    x.fillStyle='#071027'; x.font='bold 24px Arial';
-    x.fillText('KGG T1 Contact-Sheet · aktuelles Layout EX1-EX6',20,28);
-    list.forEach((s,i)=>{
-      const y=46+i*rowH;
-      x.fillStyle='#eef6ff'; x.fillRect(16,y-8,c.width-32,rowH-8);
-      x.strokeStyle='#dce3eb'; x.strokeRect(16,y-8,c.width-32,rowH-8);
-      x.fillStyle='#071027'; x.font='bold 28px Arial'; x.fillText('EX'+s.ex,26,y+36);
-      x.font='bold 16px Arial'; x.fillText(s.name,78,y+26);
-      x.font='12px Arial'; x.fillStyle='#657386'; x.fillText(s.measure==='Sek.'?'Zeit/Sekunden':'kg/Wdh links nach rechts',78,y+46);
-      x.drawImage(s.canvas,labelW,y-2,s.canvas.width*scale,s.canvas.height*scale);
-    });
-    c.dataset.kggContactSheet='current-layout-t1-v307';
-    return c;
-  }
-  function kggCurrentLayoutPrompt(){
-    return [
-      'Lies das KGG Contact-Sheet. Es zeigt EX1 bis EX6, jeweils nur die handschriftlich ausgefüllte T1-Zeile aus dem Layout '+KGG_CURRENT_LAYOUT_ID+'.',
-      'Gib ausschließlich gültiges JSON aus. Schema: {"groups":[[...EX1 Zahlen...],[...EX2 Zahlen...],[...EX3 Zahlen...],[...EX4 Zahlen...],[...EX5 Zahlen...],[...EX6 Zahlen...]],"warnings":[]}.',
-      'Jede Gruppe enthält nur die sichtbaren handschriftlichen Zahlen der jeweiligen EX-Zeile in Leserichtung von links nach rechts.',
-      'Keine Übungsnamen raten. Keine leeren Tabellenwerte ergänzen. Keine Erklärungen. Keine Markdown-Codeblöcke.'
-    ].join('\n');
-  }
-  function kggNormalizeGroupsFromJson(json){
-    if(!json)return [];
-    if(Array.isArray(json.groups))return json.groups.map(g=>Array.isArray(g)?g.map(Number).filter(Number.isFinite):[]);
-    if(Array.isArray(json.exercises))return json.exercises.map(ex=>(ex.numbers||ex.values||[]).map(Number).filter(Number.isFinite));
-    if(Array.isArray(json))return json.map(g=>Array.isArray(g)?g.map(Number).filter(Number.isFinite):[]);
-    return [];
-  }
-  function kggCurrentLayoutGroupsQuality(groups){
-    const warnings=[];
-    const normalized=KGG_CURRENT_LAYOUT_BOXES.map((box,i)=>({ex:box.ex,name:box.name,measure:box.measure,numbers:Array.isArray(groups&&groups[i])?groups[i].map(Number).filter(Number.isFinite):[]}));
-    if(normalized.length!==6)warnings.push('6 EX-Gruppen erwartet');
-    normalized.forEach(item=>{
-      if(!item.numbers.length)warnings.push('EX'+item.ex+' leer');
-      if(item.numbers.length!==6)warnings.push('EX'+item.ex+' hat '+item.numbers.length+' statt 6 Werte');
-      if(item.numbers.length>10)warnings.push('EX'+item.ex+' zu viele Zahlen');
-    });
-    const totalFound=normalized.reduce((sum,item)=>sum+item.numbers.length,0);
-    const completeBoxes=normalized.filter(item=>item.numbers.length===6).length;
-    return {ok:!warnings.length,layout:KGG_CURRENT_LAYOUT_ID,exerciseCount:normalized.length,numberCount:totalFound,completeBoxes,warnings,normalized};
-  }
-  function kggCurrentLayoutGroupToText(box,values){
-    const nums=(values||[]).map(v=>String(v).trim()).filter(Boolean);
-    if(box.measure==='Sek.'){
-      const s1=nums.length>=6?nums[1]:(nums[0]||'');
-      const s2=nums.length>=6?nums[3]:(nums[1]||'');
-      const s3=nums.length>=6?nums[5]:(nums[2]||'');
-      return [box.name,'Satz 1: '+(s1||'')+' Sek.','Satz 2: '+(s2||'')+' Sek.','Satz 3: '+(s3||'')+' Sek.'].join('\n');
 ```

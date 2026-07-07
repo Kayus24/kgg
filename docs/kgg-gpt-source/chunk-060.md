@@ -6,6 +6,99 @@
 ```html
   }
 
+  function install(){
+    ensureFallbackGlobal();
+    var okTablet = ensureTabletMenuEntry();
+    var okPhone = ensurePhoneAdminEntry();
+    return okTablet || okPhone;
+  }
+
+  function scheduleInstall(){
+    [0, 80, 180, 420, 900, 1600, 2800].forEach(function(ms){
+      setTimeout(install, ms);
+    });
+  }
+
+  function startObserver(){
+    if(observer || !document.body) return;
+    observer = new MutationObserver(function(){
+      install();
+    });
+    observer.observe(document.body, {childList:true, subtree:true});
+  }
+
+  function boot(){
+    if(installed) return;
+    installed = true;
+    install();
+    scheduleInstall();
+    startObserver();
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", boot, {once:true});
+  }else{
+    boot();
+  }
+
+  window.addEventListener("resize", function(){ setTimeout(install, 80); }, {passive:true});
+  window.addEventListener("orientationchange", function(){ setTimeout(install, 180); }, {passive:true});
+})();
+</script>
+<!-- END KGG v12 FEATURE RESTORE -->
+
+
+<!-- KGG PATCH START kgg-v014-phone-viewport-state-release-guard -->
+<style id="kgg-v014-phone-viewport-state-release-guard-css">
+  /*
+    v014: final phone-only gesture placement guard.
+    - Phone drag cards are absolute inside #planList, not viewport fixed.
+    - Scope is only max-width:759px so tablet layout containers are untouched.
+  */
+  @media (max-width:759px){
+    body.kggPlanCardReordering #currentPlanBlock #planList.planList > .planCard.reorder-lifted{
+      position:absolute!important;
+      right:auto!important;
+      bottom:auto!important;
+      margin:0!important;
+      transform:translate3d(0,0,0)!important;
+      transition:none!important;
+      will-change:left,top!important;
+      pointer-events:none!important;
+      z-index:9999!important;
+    }
+
+    body.kggPlanCardReordering #currentPlanBlock #planList.planList{
+      position:relative;
+    }
+
+    body.kggPlanCardReordering #currentPlanBlock .planSectionBody{
+      overflow:auto!important;
+      touch-action:pan-y!important;
+    }
+  }
+</style>
+
+<script id="kgg-v014-phone-viewport-state-release-guard-js">
+(function(){
+  "use strict";
+
+  var PATCH_ID = "kgg-v014-phone-viewport-state-release-guard";
+  var PHONE_QUERY = "(max-width:759px)";
+  var cleanupTimer = 0;
+
+  function isPhone(){
+    return !!(window.matchMedia && window.matchMedia(PHONE_QUERY).matches);
+  }
+
+  function body(){
+    return document.body || null;
+  }
+
+  function planList(){
+    return document.getElementById("planList");
+  }
+
   function currentPlanBlock(){
     return document.getElementById("currentPlanBlock");
   }
@@ -331,97 +424,4 @@
     .kggPhoneAdminMenuBtn{width:44px;height:44px;min-width:44px;min-height:44px;border:1px solid rgba(7,16,39,.18);border-radius:14px;background:#fff;color:#071027;font-size:24px;font-weight:1000;line-height:1;box-shadow:0 10px 24px rgba(7,16,39,.16);display:grid;place-items:center}
     .kggPhoneAdminMenuPanel{position:absolute;right:0;top:52px;min-width:224px;background:#fff;border:1px solid rgba(7,16,39,.18);border-radius:14px;box-shadow:0 18px 38px rgba(7,16,39,.22);padding:8px;display:grid;gap:6px}
     .kggPhoneAdminMenuPanel[hidden]{display:none!important}
-    .kggPhoneAdminMenuPanel button{width:100%;min-height:44px;border:0;border-radius:10px;background:#f3f6fb;color:#071027;font-weight:950;text-align:left;padding:0 12px}
-    .kggPhoneAdminMenuPanel button:active{transform:translateY(1px)}
-
-    #scanHub #tabletMenuBtn,
-    #scanHub #syncQrBtn,
-    #scanHub #adminConfigBtn,
-    #scanHub #sharedBankBtn,
-    #scanHub #filePickBtn{display:none!important}
-    #scanHub{
-      position:fixed!important;
-      left:12px!important;
-      right:12px!important;
-      bottom:calc(12px + env(safe-area-inset-bottom))!important;
-      z-index:1190!important;
-      display:grid!important;
-      grid-template-columns:minmax(0,1fr) 44px!important;
-      gap:8px!important;
-      align-items:stretch!important;
-      margin:0!important;
-      padding:0!important;
-      border:0!important;
-      border-radius:0!important;
-      background:transparent!important;
-      box-shadow:none!important;
-      overflow:visible!important;
-      pointer-events:none!important;
-    }
-    body.kggPhoneHasPlan #scanHub{right:132px!important}
-    #scanHub #scanBtn,
-    #scanHub .phonePhotoMenuToggle{pointer-events:auto!important;grid-row:1!important;height:56px!important;min-height:56px!important;margin:0!important;border-radius:16px!important;box-sizing:border-box!important;box-shadow:0 10px 24px rgba(7,16,39,.22)!important}
-    #scanHub #scanBtn{display:flex!important;grid-column:1!important;align-items:center!important;justify-content:center!important;padding:0 14px!important;font-size:17px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-    #scanHub .phonePhotoMenuToggle{display:inline-flex!important;grid-column:2!important;width:44px!important;min-width:44px!important;align-items:center!important;justify-content:center!important;border:0!important;background:#fff!important;color:#071027!important;font-size:18px!important;font-weight:1000!important}
-    body.kggPhonePhotoMenuOpen #scanHub .phonePhotoMenuToggle{background:#071027!important;color:#fff!important}
-    .kggPhonePhotoMenu{position:fixed;right:12px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:1192;min-width:212px;background:#fff;border:1px solid rgba(7,16,39,.18);border-radius:14px;box-shadow:0 18px 38px rgba(7,16,39,.22);padding:8px;gap:6px}
-    body.kggPhonePhotoMenuOpen .kggPhonePhotoMenu{display:grid}
-    .kggPhonePhotoMenu button{min-height:46px;border:0;border-radius:10px;background:#f3f6fb;color:#071027;font-weight:950;text-align:left;padding:0 12px}
-    .kggPhonePhotoMenu button:active{transform:translateY(1px)}
-
-    body.kggPhoneHasPlan #createPanel.planMode #finishBtn:not(.hidden){
-      position:fixed!important;
-      right:12px!important;
-      bottom:calc(12px + env(safe-area-inset-bottom))!important;
-      z-index:1191!important;
-      width:112px!important;
-      height:56px!important;
-      min-height:56px!important;
-      margin:0!important;
-      padding:0 12px!important;
-      display:flex!important;
-      align-items:center!important;
-      justify-content:center!important;
-      border-radius:16px!important;
-      font-size:18px!important;
-      white-space:nowrap!important;
-      box-shadow:0 10px 24px rgba(7,16,39,.22)!important;
-      opacity:1!important;
-      scale:1 1!important;
-      visibility:visible!important;
-    }
-    #scanHub #scanPreview:not(.hidden){
-      position:fixed!important;
-      left:12px!important;
-      right:12px!important;
-      bottom:calc(78px + env(safe-area-inset-bottom))!important;
-      z-index:1188!important;
-      max-height:min(42vh,280px)!important;
-      overflow:auto!important;
-      pointer-events:auto!important;
-      margin:0!important;
-    }
-    .bottomPad{height:132px!important}
-  }
-</style>
-
-<script id="kgg-v041-ui-mini-series-script">
-(function(){
-  "use strict";
-  var PATCH_ID="kgg-v041-ui-mini-series";
-  var PHONE_QUERY="(max-width:759px)";
-  var observer=null;
-
-  function byId(id){return document.getElementById(id);}
-  function isPhone(){return !!(window.matchMedia&&window.matchMedia(PHONE_QUERY).matches&&!(window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive()));}
-  function clickExisting(id){
-    var target=byId(id);
-    if(target&&typeof target.click==="function"){target.click();return true;}
-    return false;
-  }
-  function closePhoneAdminMenu(){
-    var panel=byId("kggPhoneAdminMenuPanel");
-    var btn=byId("kggPhoneAdminMenuBtn");
-    if(panel)panel.hidden=true;
-    if(btn)btn.setAttribute("aria-expanded","false");
 ```

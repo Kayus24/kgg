@@ -4,6 +4,85 @@
 - Lines: 19741-20160
 
 ```html
+  async function copySharedBankPayload(){
+    const text=$('sharedBankText'), status=$('sharedBankStatus');
+    if(!text)return;
+    try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(text.value); if(status)status.textContent='Export kopiert.'; return;}}catch(err){console.warn('DB-Export konnte nicht kopiert werden:',err);}
+    text.focus(); text.select(); if(status)status.textContent='Export markiert.';
+  }
+  function applySharedBankFromText(){
+    const status=$('sharedBankStatus');
+    try{const result=mergeSharedExerciseBank($('sharedBankText').value); if(status)status.textContent='Import übernommen: '+result.added+' neu, '+result.updated+' aktualisiert.';}
+    catch(err){if(status)status.textContent='Import nicht übernommen: '+(err&&err.message||'unbekannter Fehler');}
+  }
+  function handleSharedBankFile(ev){
+    const file=ev.target.files&&ev.target.files[0];
+    ev.target.value='';
+    if(!file)return;
+    const reader=new FileReader();
+    reader.onload=()=>{if($('sharedBankText'))$('sharedBankText').value=String(reader.result||''); if($('sharedBankStatus'))$('sharedBankStatus').textContent='Import geladen.';};
+    reader.readAsText(file);
+  }
+  window.KGGSharedBank={exportPayload:buildSharedExerciseBankPayload,merge:mergeSharedExerciseBank,open:openSharedBankModal};
+  let nativeExerciseSyncTimer=null;
+  let nativeExerciseSyncApplying=false;
+  function nativeExerciseSyncAvailable(){
+    return !!(window.KGGNativeSync&&window.KGGNativeSync.available&&typeof window.KGGNativeSync.read==='function'&&typeof window.KGGNativeSync.write==='function');
+  }
+  function syncTimestamp(value){const t=Date.parse(value||''); return Number.isFinite(t)?t:0;}
+  function assertCrossDataSafeSyncDocument(doc){
+    const allowedPolicyKeys=new Set(['patients','secrets','debugPayloads','rawData']);
+    const blockedKeyPattern=new RegExp(['patient','gemini','api'+'key','api'+'_'+'key','secret','token','raw'+'payload','base64'+'payload','qrraw'].join('|'));
+    const blocked=[];
+    const visit=(value,path)=>{
+      if(!value||typeof value!=='object')return;
+      Object.keys(value).forEach(key=>{
+        const lower=String(key).toLowerCase();
+        const policyKey=(path==='sync.privacy'||path.endsWith('.privacy'))&&allowedPolicyKeys.has(key);
+        if(policyKey){
+          if(value[key]!==false)blocked.push(path+'.'+key);
+        }else if(blockedKeyPattern.test(lower)){
+          blocked.push(path+'.'+key);
+        }
+        visit(value[key],path+'.'+key);
+      });
+    };
+    visit(doc,'sync');
+    if(blocked.length)throw new Error('Sync-Safe blockiert geschuetzte Felder: '+blocked.slice(0,3).join(', '));
+    return doc;
+  }
+  function syncSafeOrigin(){
+    let deviceId='';
+    try{deviceId=syncPairDeviceId();}catch(err){deviceId='web_'+Date.now().toString(36);}
+    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig&&nativeSyncFollowConfig()||{});
+    const displayName=String(($('therapistName')&&$('therapistName').value)||state.patient.therapist||'KGG Geraet').trim();
+    return {deviceId,therapistId:String(config.therapistId||deviceId),displayName,roomId:syncPairRoomId()};
+  }
+  function syncSafeTombstones(exportedAt){
+    return [...deletedBankIds].map(id=>({id:String(id),deleted:true,updatedAt:exportedAt}));
+  }
+  function sanitizeNativeSyncPackage(pkg){
+    return {
+      id:String(pkg&&pkg.id||('pkg_'+compact(pkg&&pkg.name||''))).slice(0,96),
+      name:String(pkg&&pkg.name||'').trim(),
+      exercises:Array.isArray(pkg&&pkg.exercises)?pkg.exercises.map(name=>String(name||'').trim()).filter(Boolean):[],
+      createdAt:String(pkg&&pkg.createdAt||new Date().toISOString()),
+      updatedAt:String(pkg&&pkg.updatedAt||pkg&&pkg.createdAt||new Date().toISOString()),
+      source:String(pkg&&pkg.source||'exercise-package')
+    };
+  }
+  function buildNativeExerciseBankSyncDocument(){
+    const exportedAt=new Date().toISOString();
+    return assertCrossDataSafeSyncDocument({
+      kind:'kgg_cross_data_safe_sync',
+      version:2,
+      appVersion:VERSION,
+      exportedAt,
+      roomId:syncPairRoomId(),
+      schema:'exercise-bank-packages-v2',
+      scopes:['exerciseBank','packages'],
+      privacy:{patients:false,secrets:false,debugPayloads:false,rawData:false},
+      origin:syncSafeOrigin(),
       exerciseBank:buildSharedExerciseBankPayload().exercises,
       packages:(state.packages||[]).map(sanitizeNativeSyncPackage).filter(pkg=>pkg.name&&pkg.exercises.length),
       tombstones:{exerciseBank:syncSafeTombstones(exportedAt)}
@@ -345,83 +424,4 @@
     const deviceId=syncPairDeviceId();
     const therapistName=String(($('therapistName')&&$('therapistName').value)||state.patient.therapist||'').trim();
     const therapistId=String(config.therapistId||deviceId).trim()||deviceId;
-    const roomId=syncPairRoomId();
-    return {
-      kind:'kgg_sync_invite',
-      version:2,
-      appVersion:VERSION,
-      createdAt:new Date().toISOString(),
-      expiresAt:new Date(Date.now()+5*60*1000).toISOString(),
-      roomId,
-      deviceId,
-      therapistId,
-      displayName:therapistName||'KGG Geraet',
-      scopes:['exerciseBank','packages'],
-      transport:'android-native-sync-folder-mesh',
-      peerMode:'host-and-client',
-      autoDownload:true
-    };
-  }
-  function nativeSyncPayloadCode(prefix,value){return prefix+':'+safeBase64JsonEncode(value);}
-  function buildNativeSyncQrPayload(){
-    const invite=buildNativeSyncInvite();
-    let syncDoc=null;
-    try{syncDoc=buildNativeExerciseBankSyncDocument();}catch(err){syncDoc=null;}
-    if(syncDoc){
-      const bundle={kind:'kgg_sync_bundle',version:2,appVersion:VERSION,createdAt:invite.createdAt,expiresAt:invite.expiresAt,roomId:invite.roomId,peerMode:'host-and-client',invite,sync:syncDoc};
-      const bundleCode=nativeSyncPayloadCode('KGGSYNC2',bundle);
-      if(bundleCode.length<=nativeSyncQrMaxLength){
-        return {code:bundleCode,type:'bundle',syncIncluded:true,length:bundleCode.length,invite,sync:syncDoc};
-      }
-      return {code:nativeSyncPayloadCode('KGGSYNC1',invite),type:'invite',syncIncluded:false,length:bundleCode.length,invite,sync:syncDoc,tooLarge:true};
-    }
-    return {code:nativeSyncPayloadCode('KGGSYNC1',invite),type:'invite',syncIncluded:false,length:0,invite,sync:null};
-  }
-  function renderQrIntoBox(targetId,value,alt){
-    const box=$(targetId);
-    if(!box)return false;
-    box.innerHTML='';
-    try{
-      let imgData='';
-      if(window.KGGQrCore&&typeof window.KGGQrCore.renderQrToImg==='function'){
-        imgData=window.KGGQrCore.renderQrToImg(value,{cellSize:10,margin:4});
-      }else if(typeof window.qrcode==='function'){
-        const qr=window.qrcode(0,'L');
-        qr.addData(value);
-        qr.make();
-        imgData=qr.createDataURL(10,4);
-      }
-      if(imgData){
-        const img=document.createElement('img');
-        img.alt=alt||'QR-Code';
-        img.src=imgData;
-        box.appendChild(img);
-        return true;
-      }
-    }catch(err){console.warn('Sync-QR konnte nicht gerendert werden:',err);}
-    box.innerHTML='<span class="qrStatus">QR konnte nicht erzeugt werden. Code kopieren.</span>';
-    return false;
-  }
-  function nativeSyncTransportStatusText(){
-    try{
-      if(!window.KGGNativeSync||typeof window.KGGNativeSync.status!=='function')return '';
-      const status=window.KGGNativeSync.status()||{};
-      if(status.usingSharedFolder||status.writeUsesSharedFolder){
-        return ' Android-Sync-Raum: KGG Sync / '+syncPeerIdShort(status.syncRoomId||syncPairRoomId())+'.';
-      }
-      if(status.sharedWritable===false){
-        return ' Android nutzt privaten Rueckfall-Speicher; gemeinsamen KGG Sync-Ordner/Dateizugriff pruefen.';
-      }
-      return ' Android-Sync-Datei: '+(status.syncFile||'Cross-Data-Safe-Datei')+'.';
-    }catch(err){
-      return '';
-    }
-  }
-  function nativeSyncPeerMesh(){
-    try{
-      if(window.KGGNativeSync&&typeof window.KGGNativeSync.listPeers==='function'){
-        return window.KGGNativeSync.listPeers()||{peers:[]};
-      }
-    }catch(err){}
-    return {kind:'kgg_cross_data_safe_sync_mesh',peers:[]};
 ```

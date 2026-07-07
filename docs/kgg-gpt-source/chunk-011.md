@@ -4,6 +4,85 @@
 - Lines: 4621-5040
 
 ```html
+  .tabletSideMenu #tabletLayoutReset{grid-area:reset;min-height:44px!important;}
+  .tabletSideMenu .tabletLayoutFreeTools.hidden{display:none!important;}
+  /* v375: Admin tools live in the tablet side menu, not in the scan row. */
+  body.adminMode .scanHub{
+    grid-template-columns:58px minmax(148px,1fr) minmax(148px,1fr)!important;
+  }
+  body.adminMode .scanHub .adminConfigBtn,
+  body.adminMode .scanHub .sharedBankBtn,
+  body.adminMode .scanHub .syncQrBtn{
+    display:none!important;
+  }
+  body.adminMode .scanHub #scanPreview{
+    grid-column:1 / -1!important;
+  }
+  .tabletSideMenu{
+    overflow-y:auto;
+  }
+  .tabletSideMenuAction{
+    min-height:54px;
+    width:100%;
+    border:1px solid rgba(10,16,36,.12);
+    border-radius:17px;
+    background:#fff;
+    color:#0a1024;
+    font-size:.94rem;
+    font-weight:900;
+    text-align:left;
+    padding:0 14px;
+    box-shadow:0 10px 22px rgba(10,16,36,.07), inset 0 1px 0 rgba(255,255,255,.82);
+    cursor:pointer;
+  }
+  .tabletSideMenuAction:active{
+    transform:translateY(1px);
+  }
+  .tabletSideMenuQrActions{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+  .packageLayoutSlot{
+    grid-template-columns:1fr!important;
+    align-items:stretch!important;
+  }
+  .packageLayoutSlot .tabletLayoutControls{display:none!important;}
+  .packageLayoutSlot #packageToggle{width:100%!important;min-width:0!important;}
+}
+
+.kggAdminMenuQrModal{
+  position:fixed;
+  inset:0;
+  z-index:1300;
+  display:none;
+  place-items:center;
+  padding:22px;
+  background:rgba(10,16,36,.26);
+  backdrop-filter:blur(10px);
+}
+.kggAdminMenuQrModal.isOpen{display:grid;}
+.kggAdminMenuQrSheet{
+  width:min(520px,94vw);
+  border:1.5px solid rgba(10,16,36,.12);
+  border-radius:26px;
+  background:#fff;
+  box-shadow:0 30px 90px rgba(10,16,36,.22);
+  padding:22px;
+}
+.kggAdminMenuQrSheet h2{
+  margin:0 0 8px;
+  color:#0a1024;
+  font-size:1.35rem;
+  font-weight:950;
+}
+.kggAdminMenuQrHint{
+  margin:0 0 14px;
+  color:#667085;
+  font-size:.94rem;
+  line-height:1.35;
+  font-weight:750;
+}
 .kggAdminMenuQrBox{
   min-height:250px;
   display:grid;
@@ -345,83 +424,4 @@
       pointer-events:auto!important;
       touch-action:manipulation!important;
     }
-    #rightPlanStack .planSectionHeader,
-    #bankArea #bankToggle{
-      flex:0 0 auto!important;
-    }
-    #rightPlanStack .planSectionBody,
-    #rightPlanStack .scanInboxList,
-    #bankArea.bankOpen .bankRows{
-      min-height:0!important;
-      overscroll-behavior:contain;
-    }
-    #createPanel.planMode #recentToggle,
-    #createPanel.planMode #packageToggle{
-      justify-content:center!important;
-      min-width:0!important;
-      width:100%!important;
-    }
-  }
-  /* v385: actual UI-flow fixes layered after the v384 build-identity baseline. */
-  @media (max-width:759px){
-    body.is-scrolling :is(#currentPlanBlock,#planList,#rightPlanStack,.planSection,.planSectionBody){
-      transition:none!important;
-      animation:none!important;
-      scroll-behavior:auto!important;
-    }
-    body.is-scrolling .planSection.collapsed{
-      max-height:58px!important;
-    }
-    body.kggPlanCardSwiping .planCard.swipe-dragging,
-    body.is-scrolling .planCard.swipe-dragging{
-      transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
-      transition:none!important;
-      will-change:transform,opacity;
-    }
-    body.kggPlanCardSwiping .planCard.swipe-removing,
-    body.is-scrolling .planCard.swipe-removing{
-      transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
-    }
-  }
-  @media (min-width:760px){
-    :root{
-      --kgg-tablet-safe-top:max(46px,calc(env(safe-area-inset-top) + 34px));
-      --kgg-tablet-safe-bottom:max(8px,env(safe-area-inset-bottom));
-    }
-    body{
-      padding-top:var(--kgg-tablet-safe-top)!important;
-      padding-bottom:var(--kgg-tablet-safe-bottom)!important;
-    }
-    .app,
-    body.tabletLayoutCustom .app{
-      height:calc(var(--kgg-visual-vh,100dvh) - var(--kgg-tablet-safe-top) - var(--kgg-tablet-safe-bottom))!important;
-      max-height:calc(var(--kgg-visual-vh,100dvh) - var(--kgg-tablet-safe-top) - var(--kgg-tablet-safe-bottom))!important;
-    }
-    .scanHub{
-      position:relative!important;
-      z-index:80!important;
-    }
-    .tabletMenuBtn,
-    body.tabletLayoutCustom .tabletMenuBtn{
-      position:relative!important;
-      top:auto!important;
-      left:auto!important;
-      z-index:1300!important;
-      pointer-events:auto!important;
-      touch-action:manipulation!important;
-      align-self:center!important;
-      justify-self:center!important;
-    }
-    body.tabletMenuOpen .tabletMenuBtn{
-      position:fixed!important;
-      top:calc(var(--kgg-tablet-safe-top) + 2px)!important;
-      left:18px!important;
-    }
-    .tabletSideBackdrop{z-index:1200!important;}
-    .tabletSideMenu{z-index:1210!important;}
-    #createPanel.planMode .planActions{
-      grid-column:2/4!important;
-      grid-row:5!important;
-      display:grid!important;
-      grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
 ```

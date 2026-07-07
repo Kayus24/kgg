@@ -4,6 +4,85 @@
 - Lines: 5041-5460
 
 ```html
+    #rightPlanStack .planSectionHeader,
+    #bankArea #bankToggle{
+      flex:0 0 auto!important;
+    }
+    #rightPlanStack .planSectionBody,
+    #rightPlanStack .scanInboxList,
+    #bankArea.bankOpen .bankRows{
+      min-height:0!important;
+      overscroll-behavior:contain;
+    }
+    #createPanel.planMode #recentToggle,
+    #createPanel.planMode #packageToggle{
+      justify-content:center!important;
+      min-width:0!important;
+      width:100%!important;
+    }
+  }
+  /* v385: actual UI-flow fixes layered after the v384 build-identity baseline. */
+  @media (max-width:759px){
+    body.is-scrolling :is(#currentPlanBlock,#planList,#rightPlanStack,.planSection,.planSectionBody){
+      transition:none!important;
+      animation:none!important;
+      scroll-behavior:auto!important;
+    }
+    body.is-scrolling .planSection.collapsed{
+      max-height:58px!important;
+    }
+    body.kggPlanCardSwiping .planCard.swipe-dragging,
+    body.is-scrolling .planCard.swipe-dragging{
+      transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
+      transition:none!important;
+      will-change:transform,opacity;
+    }
+    body.kggPlanCardSwiping .planCard.swipe-removing,
+    body.is-scrolling .planCard.swipe-removing{
+      transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
+    }
+  }
+  @media (min-width:760px){
+    :root{
+      --kgg-tablet-safe-top:max(46px,calc(env(safe-area-inset-top) + 34px));
+      --kgg-tablet-safe-bottom:max(8px,env(safe-area-inset-bottom));
+    }
+    body{
+      padding-top:var(--kgg-tablet-safe-top)!important;
+      padding-bottom:var(--kgg-tablet-safe-bottom)!important;
+    }
+    .app,
+    body.tabletLayoutCustom .app{
+      height:calc(var(--kgg-visual-vh,100dvh) - var(--kgg-tablet-safe-top) - var(--kgg-tablet-safe-bottom))!important;
+      max-height:calc(var(--kgg-visual-vh,100dvh) - var(--kgg-tablet-safe-top) - var(--kgg-tablet-safe-bottom))!important;
+    }
+    .scanHub{
+      position:relative!important;
+      z-index:80!important;
+    }
+    .tabletMenuBtn,
+    body.tabletLayoutCustom .tabletMenuBtn{
+      position:relative!important;
+      top:auto!important;
+      left:auto!important;
+      z-index:1300!important;
+      pointer-events:auto!important;
+      touch-action:manipulation!important;
+      align-self:center!important;
+      justify-self:center!important;
+    }
+    body.tabletMenuOpen .tabletMenuBtn{
+      position:fixed!important;
+      top:calc(var(--kgg-tablet-safe-top) + 2px)!important;
+      left:18px!important;
+    }
+    .tabletSideBackdrop{z-index:1200!important;}
+    .tabletSideMenu{z-index:1210!important;}
+    #createPanel.planMode .planActions{
+      grid-column:2/4!important;
+      grid-row:5!important;
+      display:grid!important;
+      grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
       gap:12px!important;
       align-self:stretch!important;
       min-width:0!important;
@@ -345,83 +424,4 @@
       display:contents!important;
     }
     #createPanel.planMode #recentToggle{
-      grid-column:2/4!important;
-      grid-row:5!important;
-      width:calc(50% - 6px)!important;
-      justify-self:start!important;
-      align-self:stretch!important;
-    }
-    #createPanel.planMode .packageLayoutSlot{
-      grid-column:2/4!important;
-      grid-row:5!important;
-      width:calc(50% - 6px)!important;
-      justify-self:end!important;
-      align-self:stretch!important;
-      display:grid!important;
-      grid-template-columns:minmax(0,1fr)!important;
-    }
-    #createPanel.planMode .packageLayoutSlot #packageToggle{
-      width:100%!important;
-      min-width:0!important;
-      justify-content:center!important;
-    }
-    #createPanel.planMode .packageLayoutSlot .tabletLayoutControls{
-      display:none!important;
-    }
-    body.tabletLayoutCustom #createPanel .planActions{
-      grid-column:2/4!important;
-      grid-row:5!important;
-      display:grid!important;
-      grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
-      gap:12px!important;
-      width:100%!important;
-      min-width:0!important;
-      align-self:stretch!important;
-      z-index:1!important;
-    }
-    body.tabletLayoutCustom #createPanel .planActions #finishBtn.hidden{
-      display:none!important;
-    }
-    body.tabletLayoutCustom #createPanel .planActions #recentToggle{
-      grid-column:1!important;
-      grid-row:1!important;
-      width:100%!important;
-      min-width:0!important;
-      justify-self:stretch!important;
-    }
-    body.tabletLayoutCustom #createPanel .packageLayoutSlot{
-      grid-column:2/4!important;
-      grid-row:5!important;
-      width:calc((100% - 12px) / 2)!important;
-      min-width:0!important;
-      justify-self:end!important;
-      align-self:stretch!important;
-      z-index:2!important;
-    }
-  }
-  @media (max-width:759px){
-    body.phoneTextFocus #inputWrap{
-      position:relative!important;
-      bottom:auto!important;
-      transform:none!important;
-      animation:none!important;
-    }
-    body.phoneTextFocus #suggestion:not(.hidden),
-    body.phoneTextFocus #currentPlanBlock,
-    body.phoneTextFocus .planActions,
-    body.phoneTextFocus .finishBtn{
-      transform:none!important;
-      animation:none!important;
-      transition:none!important;
-    }
-    .planActions,
-    .planActions .finishBtn,
-    .planActions #recentToggle,
-    #packageToggle,
-    .phoneButtonFloat{
-      transform:none!important;
-      animation:none!important;
-      transition:none!important;
-    }
-  }
 ```

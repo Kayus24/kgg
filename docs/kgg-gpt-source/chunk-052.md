@@ -4,6 +4,99 @@
 - Lines: 21841-22260
 
 ```html
+    if(window.KGGPatientMediaFetchAdapter&&typeof window.KGGPatientMediaFetchAdapter.fetch==='function')return window.KGGPatientMediaFetchAdapter.fetch(media);
+    if(!media.downloadUrl)throw new Error('Bild ist noch nicht bereit');
+    const res=await fetch(media.downloadUrl,{cache:'no-store'});
+    if(!res.ok)throw new Error('Bild konnte nicht geladen werden');
+    return res.blob();
+  }
+  async function patientDecryptMedia(media,encryptedBlob){
+    if(!window.crypto||!crypto.subtle)throw new Error('Web Crypto nicht verfuegbar');
+    const info=media.crypto||{};
+    if(!info.key||!info.iv)throw new Error('Medienschluessel fehlt');
+    const key=await crypto.subtle.importKey('raw',base64UrlToBytes(info.key),{name:'AES-GCM'},false,['decrypt']);
+    const encrypted=await encryptedBlob.arrayBuffer();
+    const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:base64UrlToBytes(info.iv)},key,encrypted);
+    return new Blob([plain],{type:media.mime||'image/jpeg'});
+  }
+  function updatePatientMediaBox(id,html,kind){
+    const selector='[data-patient-media-id="'+String(id).replace(/"/g,'\\"')+'"]';
+    const box=document.querySelector(selector);
+    if(!box)return;
+    box.className='patientMedia patientMedia_'+(kind||'loading');
+    box.innerHTML=html;
+  }
+  async function loadPatientMediaItem(media){
+    const id=String(media&&media.id||'');
+    if(!id)return false;
+    const cached=await patientGetCachedMedia(id);
+    if(cached&&cached.blob){
+      const url=URL.createObjectURL(cached.blob);
+      updatePatientMediaBox(id,'<img src="'+url+'" alt="Uebungsbild"><small>Bild lokal gespeichert.</small>','ready');
+      return true;
+    }
+    const encrypted=await patientFetchEncryptedMedia(media);
+    const imageBlob=await patientDecryptMedia(media,encrypted);
+    await patientPutCachedMedia({id,blob:imageBlob,mime:media.mime||'image/jpeg',savedAt:new Date().toISOString()});
+    const url=URL.createObjectURL(imageBlob);
+    updatePatientMediaBox(id,'<img src="'+url+'" alt="Uebungsbild"><small>Bild lokal gespeichert.</small>','ready');
+    return true;
+  }
+  function retryPatientMediaItem(media){
+    const id=String(media&&media.id||'');
+    if(!id)return;
+    const retryMs=Math.max(10,Number(media.retrySeconds)||MEDIA_RETRY_SECONDS)*1000;
+    const until=Date.now()+retryMs;
+    const tick=async()=>{
+      try{
+        await loadPatientMediaItem(media);
+      }catch(err){
+        if(Date.now()<until){
+          updatePatientMediaBox(id,'<span>Bild wird geladen ...</span><small>Die App versucht es automatisch erneut.</small>','loading');
+          setTimeout(tick,4000);
+        }else{
+          updatePatientMediaBox(id,'<span>Bild konnte nicht geladen werden.</span><small>Der Plan bleibt ohne Bild nutzbar. Bitte bei Bedarf neuen QR-Code erstellen lassen.</small>','error');
+        }
+      }
+    };
+    tick();
+  }
+  function patientMediaMarkup(ex){
+    const media=ensureExerciseMediaList(ex).filter(item=>item.type==='image');
+    if(!media.length)return '';
+    return '<div class="patientMediaList">'+media.map(item=>'<div class="patientMedia patientMedia_loading" data-patient-media-id="'+escapeHtml(item.id)+'"><span>Bild wird geladen ...</span><small>Verschluesselte Datei wird geholt und lokal gespeichert.</small></div>').join('')+'</div>';
+  }
+  function initPatientMediaDownloads(exercises){
+    (exercises||[]).forEach(ex=>ensureExerciseMediaList(ex).filter(item=>item.type==='image').forEach(retryPatientMediaItem));
+  }
+
+  function patientExerciseLine(ex,index){
+    const name=escapeHtml(ex&&ex.name||'Übung '+(index+1));
+    const sets=escapeHtml(ex&&ex.sets||3);
+    const metric=escapeHtml(ex&&ex.startMetric||ex&&ex.metric||'');
+    const metricUnit=escapeHtml(ex&&ex.unit||ex&&ex.metricUnit||'Wdh');
+    const load=escapeHtml(ex&&ex.startLoad||ex&&ex.load||ex&&ex.weight||'');
+    const loadUnit=escapeHtml(ex&&ex.weightUnit||ex&&ex.loadUnit||'kg');
+    const side=sideModeLabel(ex&&ex.side||ex&&ex.laterality||'BI');
+    const details=[sets+' Sätze'];
+    if(metric)details.push(metric+' '+metricUnit);
+    if(load)details.push(load+' '+loadUnit);
+    details.push(side);
+    return '<article class="patientExercise"><b>'+(index+1)+'. '+name+'</b><small>'+details.map(escapeHtml).join(' · ')+'</small>'+patientMediaMarkup(ex)+'</article>';
+  }
+
+  function renderPatientHashView(){
+    const payload=decodePatientPayloadFromHash();
+    if(!payload)return false;
+    const plan=Array.isArray(payload.plan)?payload.plan:(Array.isArray(payload.exercises)?payload.exercises:[]);
+    const patient=payload.patient||{};
+    const displayName=escapeHtml(patient.name||patient.initials||patient.id||'Patient/in');
+    const date=escapeHtml(patient.date||patient.startDate||'');
+    const exercises=plan.filter(Boolean);
+    document.body.innerHTML='<main class="patientAppView">'+
+      '<header><h1>KGG Trainingsplan</h1><p>'+displayName+(date?' · '+date:'')+'</p></header>'+
+      (payload.error?'<section class="patientNotice">Dieser Patienten-Link konnte nicht gelesen werden.</section>':'')+
+      '<section class="patientExercises">'+
       (exercises.length?exercises.map(patientExerciseLine).join(''):'<p class="patientNotice">Keine Übungen im Plan gefunden.</p>')+
       '</section>'+
       '<footer>Bitte trainiere nach Rücksprache mit deiner Praxis. Schmerzen und Auffälligkeiten dort melden.</footer>'+
@@ -331,97 +424,4 @@
       const key=base.width+'x'+base.height;
       lastCanvas=key;
       if(seenBases.has(key))continue;
-      seenBases.add(key);
-      for(const rot of rotations){
-        const rotated=scanRotateCanvas(base,rot);
-        for(const box of crops){
-          const crop=box.id==='full'?rotated:scanCropCanvas(rotated,box);
-          const prepared=scanScaleCanvas(crop,860,3200);
-          for(const mode of modes){
-            attempts++;
-            const target=scanFilteredCanvas(prepared,mode);
-            const raw=await detectQrOnCanvas(target,detector);
-            if(raw){
-              return {
-                raw,
-                attempts,
-                hit:{rot,crop:box.id,mode,maxSide,canvas:key,detector:!!detector,jsQR:!!window.jsQR},
-                debug:{fileName,fileType,fileSize,lastCanvas:key}
-              };
-            }
-          }
-        }
-      }
-    }
-    const support='BarcodeDetector='+(!!detector)+', jsQR='+(!!window.jsQR);
-    const heicText=heicHint?' HEIC/HEIF wird von Android WebView oft nicht als Canvas-Bild dekodiert; bitte als Screenshot/PNG/JPG testen.':'';
-    return {
-      raw:'',
-      attempts,
-      reason:(lastReason?lastReason+'; ':'')+'Kein QR im hochgeladenen Bild gefunden. '+support+', Datei='+fileName+', Typ='+fileType+', Groesse='+fileSize+', Canvas='+lastCanvas+'.'+heicText,
-      debug:{fileName,fileType,fileSize,attempts,lastCanvas,barcodeDetector:!!detector,jsQR:!!window.jsQR,heicHint}
-    };
-  }
-  function safeBase64JsonDecode(value){
-    const raw=String(value||'').trim();
-    const body=raw.replace(/^[^:]+:/,'').replace(/-/g,'+').replace(/_/g,'/');
-    const padded=body+'='.repeat((4-body.length%4)%4);
-    const decoded=decodeURIComponent(escape(atob(padded)));
-    return parseLooseJson(decoded).json;
-  }
-  function safeJsonRepair(text){
-    let s=String(text||'').trim();
-    s=s.replace(/```(?:json)?/gi,'').replace(/```/g,'').trim();
-    const firstObj=s.indexOf('{'), firstArr=s.indexOf('[');
-    let start=-1,end=-1;
-    if(firstArr>=0&&(firstObj<0||firstArr<firstObj)){start=firstArr;end=s.lastIndexOf(']');}
-    else {start=firstObj;end=s.lastIndexOf('}');}
-    if(start>=0&&end>start)s=s.slice(start,end+1);
-    s=s.replace(/,\s*([}\]])/g,'$1');
-    s=s.replace(/}\s*{/g,'},{').replace(/]\s*\[/g,'],[');
-    s=s.replace(/"\s*\n\s*"/g,'","');
-    s=s.replace(/\n/g,' ');
-    return s;
-  }
-  function parseLooseJson(text){
-    const original=String(text||'');
-    const tries=[original,safeJsonRepair(original)];
-    let last=null;
-    for(const candidate of tries){
-      if(!candidate||!candidate.trim())continue;
-      try{return {ok:true,json:JSON.parse(candidate),source:candidate,repaired:candidate!==original};}
-      catch(err){last=err;}
-    }
-    return {ok:false,json:null,source:original,error:last};
-  }
-  function decodeKggQueryPayload(value){
-    const encoded=decodeURIComponent(String(value||'')).trim();
-    try{return safeBase64JsonDecode(encoded);}catch(err){}
-    return parseLooseJson(encoded).json;
-  }
-  function parseScannedQrRaw(raw){
-    const text=String(raw||'').trim();
-    if(!text)throw new Error('QR leer.');
-    let payloadText=text;
-    try{
-      const url=new URL(text);
-      if(url.hash)payloadText=url.hash;
-      const q=url.searchParams.get('kgg')||url.searchParams.get('payload')||url.searchParams.get('p');
-      if(q)return {type:'query',json:decodeKggQueryPayload(q),raw:text};
-    }catch(err){}
-    const candidates=[payloadText,text];
-    try{candidates.push(decodeURIComponent(payloadText));}catch(err){}
-    try{candidates.push(decodeURIComponent(text));}catch(err){}
-    const findCode=prefix=>{
-      const re=new RegExp(prefix+':([A-Za-z0-9_-]+)','i');
-      for(const candidate of candidates){
-        const hit=String(candidate||'').match(re);
-        if(hit)return hit;
-      }
-      return null;
-    };
-    const cfg2=findCode('KGGCFG2');
-    if(cfg2)return {type:'KGGCFG2',json:safeBase64JsonDecode(cfg2[1]),raw:text};
-    const cfg1=findCode('KGGCFG1');
-    if(cfg1)return {type:'KGGCFG1',json:safeBase64JsonDecode(cfg1[1]),raw:text};
 ```

@@ -4,6 +4,99 @@
 - Lines: 25621-26040
 
 ```html
+    .kggPhoneAdminMenuPanel button{width:100%;min-height:44px;border:0;border-radius:10px;background:#f3f6fb;color:#071027;font-weight:950;text-align:left;padding:0 12px}
+    .kggPhoneAdminMenuPanel button:active{transform:translateY(1px)}
+
+    #scanHub #tabletMenuBtn,
+    #scanHub #syncQrBtn,
+    #scanHub #adminConfigBtn,
+    #scanHub #sharedBankBtn,
+    #scanHub #filePickBtn{display:none!important}
+    #scanHub{
+      position:fixed!important;
+      left:12px!important;
+      right:12px!important;
+      bottom:calc(12px + env(safe-area-inset-bottom))!important;
+      z-index:1190!important;
+      display:grid!important;
+      grid-template-columns:minmax(0,1fr) 44px!important;
+      gap:8px!important;
+      align-items:stretch!important;
+      margin:0!important;
+      padding:0!important;
+      border:0!important;
+      border-radius:0!important;
+      background:transparent!important;
+      box-shadow:none!important;
+      overflow:visible!important;
+      pointer-events:none!important;
+    }
+    body.kggPhoneHasPlan #scanHub{right:132px!important}
+    #scanHub #scanBtn,
+    #scanHub .phonePhotoMenuToggle{pointer-events:auto!important;grid-row:1!important;height:56px!important;min-height:56px!important;margin:0!important;border-radius:16px!important;box-sizing:border-box!important;box-shadow:0 10px 24px rgba(7,16,39,.22)!important}
+    #scanHub #scanBtn{display:flex!important;grid-column:1!important;align-items:center!important;justify-content:center!important;padding:0 14px!important;font-size:17px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+    #scanHub .phonePhotoMenuToggle{display:inline-flex!important;grid-column:2!important;width:44px!important;min-width:44px!important;align-items:center!important;justify-content:center!important;border:0!important;background:#fff!important;color:#071027!important;font-size:18px!important;font-weight:1000!important}
+    body.kggPhonePhotoMenuOpen #scanHub .phonePhotoMenuToggle{background:#071027!important;color:#fff!important}
+    .kggPhonePhotoMenu{position:fixed;right:12px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:1192;min-width:212px;background:#fff;border:1px solid rgba(7,16,39,.18);border-radius:14px;box-shadow:0 18px 38px rgba(7,16,39,.22);padding:8px;gap:6px}
+    body.kggPhonePhotoMenuOpen .kggPhonePhotoMenu{display:grid}
+    .kggPhonePhotoMenu button{min-height:46px;border:0;border-radius:10px;background:#f3f6fb;color:#071027;font-weight:950;text-align:left;padding:0 12px}
+    .kggPhonePhotoMenu button:active{transform:translateY(1px)}
+
+    body.kggPhoneHasPlan #createPanel.planMode #finishBtn:not(.hidden){
+      position:fixed!important;
+      right:12px!important;
+      bottom:calc(12px + env(safe-area-inset-bottom))!important;
+      z-index:1191!important;
+      width:112px!important;
+      height:56px!important;
+      min-height:56px!important;
+      margin:0!important;
+      padding:0 12px!important;
+      display:flex!important;
+      align-items:center!important;
+      justify-content:center!important;
+      border-radius:16px!important;
+      font-size:18px!important;
+      white-space:nowrap!important;
+      box-shadow:0 10px 24px rgba(7,16,39,.22)!important;
+      opacity:1!important;
+      scale:1 1!important;
+      visibility:visible!important;
+    }
+    #scanHub #scanPreview:not(.hidden){
+      position:fixed!important;
+      left:12px!important;
+      right:12px!important;
+      bottom:calc(78px + env(safe-area-inset-bottom))!important;
+      z-index:1188!important;
+      max-height:min(42vh,280px)!important;
+      overflow:auto!important;
+      pointer-events:auto!important;
+      margin:0!important;
+    }
+    .bottomPad{height:132px!important}
+  }
+</style>
+
+<script id="kgg-v041-ui-mini-series-script">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v041-ui-mini-series";
+  var PHONE_QUERY="(max-width:759px)";
+  var observer=null;
+
+  function byId(id){return document.getElementById(id);}
+  function isPhone(){return !!(window.matchMedia&&window.matchMedia(PHONE_QUERY).matches&&!(window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive()));}
+  function clickExisting(id){
+    var target=byId(id);
+    if(target&&typeof target.click==="function"){target.click();return true;}
+    return false;
+  }
+  function closePhoneAdminMenu(){
+    var panel=byId("kggPhoneAdminMenuPanel");
+    var btn=byId("kggPhoneAdminMenuBtn");
+    if(panel)panel.hidden=true;
+    if(btn)btn.setAttribute("aria-expanded","false");
   }
   function ensurePhoneAdminMenu(){
     if(byId("kggPhoneAdminMenu"))return;
@@ -331,97 +424,4 @@
   function installObserver(){
     if(observer||!document.body||!isPhone())return;
     observer=new MutationObserver(function(){
-      if(isPhone())install();
-    });
-    observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:["class"]});
-  }
-  function install(){
-    if(!isPhone()){
-      closeViewportPhoneUi();
-      return;
-    }
-    anchorAdminMenu();
-    integratePhotoToggle();
-    installObserver();
-    syncLayerState();
-  }
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});
-  else install();
-  [80,220,600,1200].forEach(function(ms){setTimeout(install,ms);});
-  window.addEventListener("resize",function(){setTimeout(install,90);},{passive:true});
-  window.addEventListener("orientationchange",function(){setTimeout(install,180);},{passive:true});
-  window.KGG_UI_MINI_SERIES_V042={
-    patchId:PATCH_ID,
-    install:install,
-    check:function(){
-      var menu=byId("kggPhoneAdminMenu");
-      var toggle=byId("phonePhotoMenuToggle");
-      var scan=byId("scanBtn");
-      return {
-        patchId:PATCH_ID,
-        phone:isPhone(),
-        adminAnchored:!!(menu&&menu.closest("#createPanel .planHeader")),
-        photoToggleInsideScan:!!(toggle&&scan&&toggle.parentElement===scan),
-        dockZ:getComputedStyle(byId("scanHub")||document.body).zIndex,
-        finishZ:getComputedStyle(byId("finishBtn")||document.body).zIndex
-      };
-    }
-  };
-})();
-</script>
-<!-- KGG PATCH END kgg-v042-phone-dock-anchored-correction -->
-
-<!-- KGG PATCH START kgg-v044-phone-liquid-actions -->
-<style id="kgg-v044-phone-liquid-actions-style">
-  @media(max-width:759px){
-    #createPanel{
-      margin-top:16px!important;
-    }
-
-    #scanHub #scanBtn.kggScanButtonWithMenu,
-    body.kggPhoneHasPlan #createPanel.planMode #finishBtn:not(.hidden){
-      border:1px solid rgba(255,255,255,.9)!important;
-      background:
-        radial-gradient(circle at 18% 8%,rgba(255,255,255,.98),rgba(255,255,255,.58) 42%,rgba(232,241,252,.46) 100%),
-        linear-gradient(180deg,rgba(255,255,255,.94),rgba(236,244,253,.68))!important;
-      color:#071027!important;
-      box-shadow:
-        0 22px 48px rgba(7,16,39,.20),
-        0 5px 16px rgba(7,16,39,.10),
-        inset 0 1px 0 rgba(255,255,255,1),
-        inset 0 -1px 0 rgba(124,149,178,.16)!important;
-      backdrop-filter:blur(30px) saturate(1.72) contrast(1.04)!important;
-      -webkit-backdrop-filter:blur(30px) saturate(1.72) contrast(1.04)!important;
-    }
-
-    #scanHub #scanBtn.kggScanButtonWithMenu{
-      min-height:60px!important;
-      height:60px!important;
-      border-radius:22px!important;
-      padding:0 8px 0 18px!important;
-      gap:12px!important;
-      align-items:center!important;
-      justify-content:space-between!important;
-    }
-    #scanHub #scanBtn.kggScanButtonWithMenu .phoneScanLabel{
-      display:inline-flex!important;
-      align-items:center!important;
-      gap:8px!important;
-      min-width:0!important;
-      color:#071027!important;
-      font-size:17px!important;
-      font-weight:1000!important;
-      letter-spacing:-.2px!important;
-    }
-    #scanHub #scanBtn.kggScanButtonWithMenu #phonePhotoMenuToggle{
-      position:relative!important;
-      flex:0 0 50px!important;
-      width:50px!important;
-      min-width:50px!important;
-      height:50px!important;
-      min-height:50px!important;
-      border:0!important;
-      border-radius:18px!important;
-      background:rgba(255,255,255,.38)!important;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.96)!important;
 ```

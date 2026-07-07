@@ -4,6 +4,99 @@
 - Lines: 23941-24360
 
 ```html
+    setTimeout(()=>{updateTabletLayoutHandle();updateTabletLayoutCollisionGuard();},260);
+    return next;
+  }
+  window.addEventListener('resize',()=>{setTimeout(repositionTabletOverlay,30); setTimeout(syncScannedPlansMobileDock,30); setTimeout(()=>{if(!isTabletLayout())setTabletSideMenuOpen(false);},30);});
+  window.addEventListener('orientationchange',()=>setTimeout(repositionTabletOverlay,120));
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize',()=>{setTimeout(repositionTabletOverlay,30); setTimeout(syncScannedPlansMobileDock,30);});
+    window.visualViewport.addEventListener('scroll',()=>setTimeout(repositionTabletOverlay,30));
+  }
+  document.addEventListener('pointerdown',ev=>{
+    if(!isTabletLayout()||!tabletOverlayState.kind)return;
+    const cfg=tabletPanelConfig(tabletOverlayState.kind);
+    if(!cfg)return;
+    const panel=$(cfg.panelId), anchor=$(cfg.anchorId);
+    const target=ev.target;
+    if(panel&&panel.contains(target))return;
+    if(anchor&&anchor.contains(target))return;
+    closeTabletAnchoredPanel(tabletOverlayState.kind);
+  },true);
+  document.addEventListener('keydown',ev=>{
+    if(ev.key!=='Escape'||!isTabletLayout())return;
+    if(document.body.classList.contains('tabletPackageOverlayOpen')){closeTabletPackageOverlay(false);return;}
+    if(tabletOverlayState.kind)closeTabletAnchoredPanel(tabletOverlayState.kind);
+  });
+
+  initScanAutoCollapseOnUiOpen();
+  if(renderPatientHashView())return;
+  $('visionBtn').onclick=()=>setLargePdfMode(!state.largePdfMode);
+  $('exerciseInput').addEventListener('input',()=>upsertLiveExerciseFromText()); $('exerciseInput').addEventListener('focus',()=>render()); $('clearInput').onclick=()=>{clearInputAndRemoveLiveTextExercises();};
+  $('bankToggle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; const opening=!state.bankOpen; if(opening)openTabletExclusivePanel('bank'); toggleBankOpenFromUi(); setTabletOverlayActiveFlag();};
+  $('dbTitle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; const opening=!state.bankOpen; if(opening)openTabletExclusivePanel('bank'); state.bankOpen=!state.bankOpen; render(); setTabletOverlayActiveFlag();};
+  $('dbTitle').addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();if(guardPhoneScrollToggle(ev))return; const opening=!state.bankOpen; if(opening)openTabletExclusivePanel('bank'); state.bankOpen=!state.bankOpen; render(); setTabletOverlayActiveFlag();}});
+  $('finishBtn').onclick=()=>{closeTabletFloatingPanelsExcept('modal'); openFinishModal();};
+  $('baseToggle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; const base=$('baseFields'); const opening=base.classList.contains('hidden'); if(isTabletLayout()){if(opening)openTabletAnchoredPanel('base'); else closeTabletAnchoredPanel('base');}else{base.classList.toggle('hidden',!opening); setTabletOverlayActiveFlag();}};
+  $('recentToggle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; const recent=$('recentList'); const opening=recent.classList.contains('hidden'); if(isTabletLayout()){if(opening)openTabletAnchoredPanel('recent'); else closeTabletAnchoredPanel('recent');}else{openPhoneFloatingDrawer('recent');}};
+  $('packageToggle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; if(isTabletLayout())toggleTabletPackageOverlay(); else openPhoneFloatingDrawer('package');};
+  $('exportBtn').onclick=exportData; $('pdfBtn').onclick=finishWithPdf; $('patientBtn').onclick=finishWithPatientApp; $('closeShare').onclick=closeFinishModal; $('copyShare').onclick=()=>navigator.clipboard&&navigator.clipboard.writeText($('shareText').value); $('patientName').addEventListener('input',()=>{state.patient.name=$('patientName').value;syncStatePlanToStore('ui_patient_name_input');save();render();}); $('planDate').addEventListener('input',()=>{state.patient.date=$('planDate').value;save();syncStatePlanToStore('ui_patient_date_input');}); $('therapistName').addEventListener('input',()=>{state.patient.therapist=$('therapistName').value;save();syncStatePlanToStore('ui_patient_therapist_input');}); $('planNotes').addEventListener('input',()=>{state.patient.notes=$('planNotes').value;save();syncStatePlanToStore('ui_patient_notes_input');}); $('scanBtn').onclick=()=>window.KGGScan.pick('camera'); $('filePickBtn').onclick=()=>window.KGGScan.pick('file'); $('filePickBtn').addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();window.KGGScan.pick('file');}}); $('fileInput').onchange=ev=>window.KGGScan.handleInput(ev.target,'camera'); $('filePickerInput').onchange=ev=>window.KGGScan.handleInput(ev.target,'file'); $('closeEditor').onclick=closeEditor; $('saveExercise').onclick=saveEditedExercise; $('deleteExercise').onclick=()=>{if(state.editId){if($('deleteExercise').dataset.scope==='bank')openBankDeleteModal(state.editId); else removeExercise(state.editId);} closeEditor();};
+  $('attachExerciseImage').onclick=()=>$('editMediaFile').click();
+  $('editMediaFile').onchange=handleEditorMediaFileSelected;
+  $('removeExerciseImage').onclick=removeEditorMedia;
+  $('finishPdfBtn').onclick=()=>finishWithPdf({large:false});
+  $('finishLargePdfBtn').onclick=openLargePdfModal;
+  $('finishPatientBtn').onclick=finishWithPatientApp;
+  $('finishCancelBtn').onclick=closeFinishModal;
+  $('shareModal').addEventListener('click',ev=>{if(ev.target===$('shareModal'))closeFinishModal();});
+  $('cancelLargePdf').onclick=closeLargePdfModal;
+  $('confirmLargePdf').onclick=()=>{closeLargePdfModal();finishWithPdf({large:true});};
+  $('largePdfModal').addEventListener('click',ev=>{if(ev.target===$('largePdfModal'))closeLargePdfModal();});
+  $('cancelLongMediaShare').onclick=closeLongMediaConfirmModal;
+  $('confirmLongMediaShare').onclick=confirmLongMediaShare;
+  $('longMediaConfirmModal').addEventListener('click',ev=>{if(ev.target===$('longMediaConfirmModal'))closeLongMediaConfirmModal();});
+  $('adminConfigBtn').onclick=openAdminSecretsModal;
+  $('closeAdminSecrets').onclick=closeAdminSecretsModal;
+  $('saveAdminSecrets').onclick=saveAdminSecretsFromModal;
+  if($('loadAdminSafeFile'))$('loadAdminSafeFile').onclick=()=>$('adminSafeFileInput').click();
+  if($('adminSafeFileInput'))$('adminSafeFileInput').onchange=ev=>importAdminSafeFile(ev.target.files&&ev.target.files[0]).catch(err=>alert('Admin-Safe-Datei konnte nicht gelesen werden: '+err.message)).finally(()=>{ev.target.value='';});
+  if($('importAdminCodePackage'))$('importAdminCodePackage').onclick=()=>importAdminCodePackageFromClipboard().catch(err=>alert('Code-Paket konnte nicht gelesen werden: '+err.message));
+  if($('exportAdminCodePackage'))$('exportAdminCodePackage').onclick=()=>exportAdminCodePackageToClipboard().catch(err=>alert('Code-Paket konnte nicht kopiert werden: '+err.message));
+  if($('downloadAdminSafeFile'))$('downloadAdminSafeFile').onclick=downloadAdminSafeFile;
+  $('clearAdminSecrets').onclick=()=>{clearLocalAdminSecrets(); if($('adminGeminiKey1'))$('adminGeminiKey1').value=''; if($('adminGeminiKey2'))$('adminGeminiKey2').value=''; if($('adminMediaDropzoneEndpoint'))$('adminMediaDropzoneEndpoint').value=''; if($('adminMediaDropzoneUploadToken'))$('adminMediaDropzoneUploadToken').value='';};
+  $('adminSecretsModal').addEventListener('click',ev=>{if(ev.target===$('adminSecretsModal'))closeAdminSecretsModal();});
+  $('sharedBankBtn').onclick=openSharedBankModal;
+  $('copySharedBank').onclick=copySharedBankPayload;
+  $('pickSharedBankFile').onclick=()=>$('sharedBankFile').click();
+  $('sharedBankFile').onchange=handleSharedBankFile;
+  $('applySharedBank').onclick=applySharedBankFromText;
+  $('closeSharedBank').onclick=closeSharedBankModal;
+  $('sharedBankModal').addEventListener('click',ev=>{if(ev.target===$('sharedBankModal'))closeSharedBankModal();});
+
+  if($('tabletMenuBtn'))$('tabletMenuBtn').onclick=()=>setTabletSideMenuOpen(!document.body.classList.contains('tabletMenuOpen'));
+  if($('tabletMenuClose'))$('tabletMenuClose').onclick=()=>setTabletSideMenuOpen(false);
+  if($('tabletSideBackdrop'))$('tabletSideBackdrop').onclick=()=>setTabletSideMenuOpen(false);
+  if($('syncQrBtn'))$('syncQrBtn').onclick=openSyncPairModal;
+  if($('tabletSyncQrBtn'))$('tabletSyncQrBtn').onclick=openSyncPairModal;
+  if($('copySyncPairCode'))$('copySyncPairCode').onclick=copySyncPairCode;
+  if($('testNativeSyncBtn'))$('testNativeSyncBtn').onclick=()=>testNativeSyncRoundtrip();
+  if($('downloadSyncFileBtn'))$('downloadSyncFileBtn').onclick=downloadNativeSyncFile;
+  if($('importSyncFileBtn'))$('importSyncFileBtn').onclick=()=>{const input=$('syncImportInput'); if(input)input.click();};
+  if($('syncImportInput'))$('syncImportInput').onchange=ev=>{const file=ev&&ev.target&&ev.target.files&&ev.target.files[0]; importNativeSyncFile(file).finally(()=>{if(ev&&ev.target)ev.target.value='';});};
+  if($('closeSyncPairModal'))$('closeSyncPairModal').onclick=closeSyncPairModal;
+  if($('syncPairModal'))$('syncPairModal').addEventListener('click',ev=>{if(ev.target===$('syncPairModal'))closeSyncPairModal();});
+  const kggAdminMenuQrTargets={
+    colleague:{title:'Kolleg:innen-Web-App QR',hint:'Oeffnet die jeweils verlinkte Kolleg:innen-Web-App.',url:'https://kayus24.github.io/kgg/therapist-app/latest-html.html'},
+    admin:{title:'Admin-Web-App QR',hint:'Oeffnet diese Admin-Web-App-Version. Manifest/Latest wird separat freigegeben.',url:'https://kayus24.github.io/kgg/therapist-app/releases/v388/web/KGG_APP_ADMIN_v388_android_flow_fixes.html'},
+    android:{title:'Kolleg:innen-App APK QR',hint:'Oeffnet die aktuelle Android-Download-Seite fuer Kolleg:innen. Keine API-Keys, keine Sync-Daten.',url:'https://kayus24.github.io/kgg/therapist-app/latest-android.html'}
+  };
+  function closeKggTherapistShareModal(){
+    const modal=$('kggTherapistShareModal');
+    if(!modal)return;
+    modal.classList.remove('isOpen');
+    modal.setAttribute('aria-hidden','true');
+  }
+  function openKggTherapistShareModal(){
     const modal=$('kggTherapistShareModal');
     if(!modal)return;
     modal.classList.add('isOpen');
@@ -331,97 +424,4 @@
         if(ev.key==='Enter'||ev.key===' '){
           ev.preventDefault();
           ev.stopImmediatePropagation();
-          openOrCloseBankFromBrowseTap(ev);
-        }
-      },true);
-    }
-    if($('baseToggle'))$('baseToggle').onclick=ev=>{
-      if(guardPhoneScrollToggle(ev))return;
-      const base=$('baseFields');
-      const opening=base.classList.contains('hidden');
-      if(isTabletLayout()){
-        if(opening)openTabletAnchoredPanel('base'); else closeTabletAnchoredPanel('base');
-      }else{
-        base.classList.toggle('hidden',!opening);
-        setTabletOverlayActiveFlag();
-        updateToggleCarets();
-      }
-    };
-    if($('recentToggle'))$('recentToggle').onclick=ev=>{
-      if(guardPhoneScrollToggle(ev))return;
-      const recent=$('recentList');
-      const opening=recent.classList.contains('hidden');
-      if(isTabletLayout()){
-        if(opening)openTabletAnchoredPanel('recent'); else closeTabletAnchoredPanel('recent');
-      }else{
-        openPhoneFloatingDrawer('recent');
-      }
-    };
-    const packageToggleBtn=$('packageToggle');
-    if(packageToggleBtn)packageToggleBtn.onclick=ev=>{
-      if(guardPhoneScrollToggle(ev))return;
-      if(isTabletLayout())toggleTabletPackageOverlay();
-      else openPhoneFloatingDrawer('package');
-    };
-    const modalClosers={
-      editorModal:typeof closeEditor==='function'?closeEditor:null,
-      shareModal:typeof closeFinishModal==='function'?closeFinishModal:null,
-      largePdfModal:typeof closeLargePdfModal==='function'?closeLargePdfModal:null,
-      longMediaConfirmModal:typeof closeLongMediaConfirmModal==='function'?closeLongMediaConfirmModal:null,
-      adminSecretsModal:typeof closeAdminSecretsModal==='function'?closeAdminSecretsModal:null,
-      sharedBankModal:typeof closeSharedBankModal==='function'?closeSharedBankModal:null,
-      syncPairModal:typeof closeSyncPairModal==='function'?closeSyncPairModal:null
-    };
-    document.querySelectorAll('.modal').forEach(modal=>{
-      if(modal.dataset.kggV383BackdropBound==='1')return;
-      modal.dataset.kggV383BackdropBound='1';
-      modal.addEventListener('pointerup',ev=>{
-        if(ev.target!==modal)return;
-        ev.preventDefault();
-        ev.stopPropagation();
-        const close=modalClosers[modal.id];
-        if(typeof close==='function')close();
-        else modal.classList.remove('open');
-      });
-    });
-    const adminQrModal=$('kggAdminMenuQrModal');
-    if(adminQrModal&&!adminQrModal.dataset.kggV383BackdropBound){
-      adminQrModal.dataset.kggV383BackdropBound='1';
-      adminQrModal.addEventListener('pointerup',ev=>{
-        if(ev.target!==adminQrModal)return;
-        ev.preventDefault();
-        if(typeof closeKggAdminMenuQrModal==='function')closeKggAdminMenuQrModal();
-      });
-    }
-    const oldApplyNativeSyncInvite=applyNativeSyncInvite;
-    applyNativeSyncInvite=function(invite){
-      setScanStatus('QR erkannt: Sync-Kopplung wird gelesen ...');
-      try{
-        const entry=oldApplyNativeSyncInvite(invite);
-        const peers=syncPeerDisplayEntries().length;
-        setScanStatus('Sync-Kopplung gespeichert. Dieses Geraet liest und schreibt im Sync-Raum. '+(peers?'Anderes Geraet gefunden: Synchronisation aktiv.':'Warte auf weitere Geraete mit diesem QR.'));
-        return entry;
-      }catch(err){
-        setScanStatus('Fehler: ungueltige Sync-Daten.');
-        throw err;
-      }
-    };
-    const oldApplyNativeSyncBundle=applyNativeSyncBundle;
-    applyNativeSyncBundle=async function(bundle){
-      setScanStatus('QR erkannt: Sync-Datenpaket wird gelesen ...');
-      try{
-        const result=await oldApplyNativeSyncBundle(bundle);
-        const peers=syncPeerDisplayEntries().length;
-        setScanStatus('Sync-Datenpaket gespeichert. Verbindung und Daten wurden lokal uebernommen. '+(peers?'Synchronisation aktiv.':'Warte auf weitere Geraete mit diesem QR.'));
-        return result;
-      }catch(err){
-        setScanStatus('Fehler: Sync-Verbindung nicht moeglich.');
-        throw err;
-      }
-    };
-  }
-  function installKggV388AndroidFlowFixes(){
-    let lastTabletMenuToggleAt=0;
-    const menu=tabletMenuBtn;
-    const toggle=ev=>{
 ```

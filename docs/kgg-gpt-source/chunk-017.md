@@ -4,6 +4,85 @@
 - Lines: 7141-7560
 
 ```html
+    // Convert image to greyscale
+    var greyscalePixels = new Matrix(width, height);
+    for (var x = 0; x < width; x++) {
+        for (var y = 0; y < height; y++) {
+            var r = data[((y * width + x) * 4) + 0];
+            var g = data[((y * width + x) * 4) + 1];
+            var b = data[((y * width + x) * 4) + 2];
+            greyscalePixels.set(x, y, 0.2126 * r + 0.7152 * g + 0.0722 * b);
+        }
+    }
+    var horizontalRegionCount = Math.ceil(width / REGION_SIZE);
+    var verticalRegionCount = Math.ceil(height / REGION_SIZE);
+    var blackPoints = new Matrix(horizontalRegionCount, verticalRegionCount);
+    for (var verticalRegion = 0; verticalRegion < verticalRegionCount; verticalRegion++) {
+        for (var hortizontalRegion = 0; hortizontalRegion < horizontalRegionCount; hortizontalRegion++) {
+            var sum = 0;
+            var min = Infinity;
+            var max = 0;
+            for (var y = 0; y < REGION_SIZE; y++) {
+                for (var x = 0; x < REGION_SIZE; x++) {
+                    var pixelLumosity = greyscalePixels.get(hortizontalRegion * REGION_SIZE + x, verticalRegion * REGION_SIZE + y);
+                    sum += pixelLumosity;
+                    min = Math.min(min, pixelLumosity);
+                    max = Math.max(max, pixelLumosity);
+                }
+            }
+            var average = sum / (Math.pow(REGION_SIZE, 2));
+            if (max - min <= MIN_DYNAMIC_RANGE) {
+                // If variation within the block is low, assume this is a block with only light or only
+                // dark pixels. In that case we do not want to use the average, as it would divide this
+                // low contrast area into black and white pixels, essentially creating data out of noise.
+                //
+                // Default the blackpoint for these blocks to be half the min - effectively white them out
+                average = min / 2;
+                if (verticalRegion > 0 && hortizontalRegion > 0) {
+                    // Correct the "white background" assumption for blocks that have neighbors by comparing
+                    // the pixels in this block to the previously calculated black points. This is based on
+                    // the fact that dark barcode symbology is always surrounded by some amount of light
+                    // background for which reasonable black point estimates were made. The bp estimated at
+                    // the boundaries is used for the interior.
+                    // The (min < bp) is arbitrary but works better than other heuristics that were tried.
+                    var averageNeighborBlackPoint = (blackPoints.get(hortizontalRegion, verticalRegion - 1) +
+                        (2 * blackPoints.get(hortizontalRegion - 1, verticalRegion)) +
+                        blackPoints.get(hortizontalRegion - 1, verticalRegion - 1)) / 4;
+                    if (min < averageNeighborBlackPoint) {
+                        average = averageNeighborBlackPoint;
+                    }
+                }
+            }
+            blackPoints.set(hortizontalRegion, verticalRegion, average);
+        }
+    }
+    var binarized = BitMatrix_1.BitMatrix.createEmpty(width, height);
+    var inverted = null;
+    if (returnInverted) {
+        inverted = BitMatrix_1.BitMatrix.createEmpty(width, height);
+    }
+    for (var verticalRegion = 0; verticalRegion < verticalRegionCount; verticalRegion++) {
+        for (var hortizontalRegion = 0; hortizontalRegion < horizontalRegionCount; hortizontalRegion++) {
+            var left = numBetween(hortizontalRegion, 2, horizontalRegionCount - 3);
+            var top_1 = numBetween(verticalRegion, 2, verticalRegionCount - 3);
+            var sum = 0;
+            for (var xRegion = -2; xRegion <= 2; xRegion++) {
+                for (var yRegion = -2; yRegion <= 2; yRegion++) {
+                    sum += blackPoints.get(left + xRegion, top_1 + yRegion);
+                }
+            }
+            var threshold = sum / 25;
+            for (var xRegion = 0; xRegion < REGION_SIZE; xRegion++) {
+                for (var yRegion = 0; yRegion < REGION_SIZE; yRegion++) {
+                    var x = hortizontalRegion * REGION_SIZE + xRegion;
+                    var y = verticalRegion * REGION_SIZE + yRegion;
+                    var lum = greyscalePixels.get(x, y);
+                    binarized.set(x, y, lum <= threshold);
+                    if (returnInverted) {
+                        inverted.set(x, y, !(lum <= threshold));
+                    }
+                }
+            }
         }
     }
     if (returnInverted) {
@@ -345,83 +424,4 @@ var Mode;
     Mode["Numeric"] = "numeric";
     Mode["Alphanumeric"] = "alphanumeric";
     Mode["Byte"] = "byte";
-    Mode["Kanji"] = "kanji";
-    Mode["ECI"] = "eci";
-})(Mode = exports.Mode || (exports.Mode = {}));
-var ModeByte;
-(function (ModeByte) {
-    ModeByte[ModeByte["Terminator"] = 0] = "Terminator";
-    ModeByte[ModeByte["Numeric"] = 1] = "Numeric";
-    ModeByte[ModeByte["Alphanumeric"] = 2] = "Alphanumeric";
-    ModeByte[ModeByte["Byte"] = 4] = "Byte";
-    ModeByte[ModeByte["Kanji"] = 8] = "Kanji";
-    ModeByte[ModeByte["ECI"] = 7] = "ECI";
-    // StructuredAppend = 0x3,
-    // FNC1FirstPosition = 0x5,
-    // FNC1SecondPosition = 0x9,
-})(ModeByte || (ModeByte = {}));
-function decodeNumeric(stream, size) {
-    var bytes = [];
-    var text = "";
-    var characterCountSize = [10, 12, 14][size];
-    var length = stream.readBits(characterCountSize);
-    // Read digits in groups of 3
-    while (length >= 3) {
-        var num = stream.readBits(10);
-        if (num >= 1000) {
-            throw new Error("Invalid numeric value above 999");
-        }
-        var a = Math.floor(num / 100);
-        var b = Math.floor(num / 10) % 10;
-        var c = num % 10;
-        bytes.push(48 + a, 48 + b, 48 + c);
-        text += a.toString() + b.toString() + c.toString();
-        length -= 3;
-    }
-    // If the number of digits aren't a multiple of 3, the remaining digits are special cased.
-    if (length === 2) {
-        var num = stream.readBits(7);
-        if (num >= 100) {
-            throw new Error("Invalid numeric value above 99");
-        }
-        var a = Math.floor(num / 10);
-        var b = num % 10;
-        bytes.push(48 + a, 48 + b);
-        text += a.toString() + b.toString();
-    }
-    else if (length === 1) {
-        var num = stream.readBits(4);
-        if (num >= 10) {
-            throw new Error("Invalid numeric value above 9");
-        }
-        bytes.push(48 + num);
-        text += num.toString();
-    }
-    return { bytes: bytes, text: text };
-}
-var AlphanumericCharacterCodes = [
-    "0", "1", "2", "3", "4", "5", "6", "7", "8",
-    "9", "A", "B", "C", "D", "E", "F", "G", "H",
-    "I", "J", "K", "L", "M", "N", "O", "P", "Q",
-    "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
-    " ", "$", "%", "*", "+", "-", ".", "/", ":",
-];
-function decodeAlphanumeric(stream, size) {
-    var bytes = [];
-    var text = "";
-    var characterCountSize = [9, 11, 13][size];
-    var length = stream.readBits(characterCountSize);
-    while (length >= 2) {
-        var v = stream.readBits(11);
-        var a = Math.floor(v / 45);
-        var b = v % 45;
-        bytes.push(AlphanumericCharacterCodes[a].charCodeAt(0), AlphanumericCharacterCodes[b].charCodeAt(0));
-        text += AlphanumericCharacterCodes[a] + AlphanumericCharacterCodes[b];
-        length -= 2;
-    }
-    if (length === 1) {
-        var a = stream.readBits(6);
-        bytes.push(AlphanumericCharacterCodes[a].charCodeAt(0));
-        text += AlphanumericCharacterCodes[a];
-    }
 ```

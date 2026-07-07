@@ -4,6 +4,85 @@
 - Lines: 15541-15960
 
 ```html
+            {
+                ecCodewordsPerBlock: 28,
+                ecBlocks: [
+                    { numBlocks: 17, dataCodewordsPerBlock: 22 },
+                    { numBlocks: 1, dataCodewordsPerBlock: 23 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 28,
+                ecBlocks: [
+                    { numBlocks: 2, dataCodewordsPerBlock: 14 },
+                    { numBlocks: 19, dataCodewordsPerBlock: 15 },
+                ],
+            },
+        ],
+    },
+    {
+        infoBits: 0x13532,
+        versionNumber: 19,
+        alignmentPatternCenters: [6, 30, 58, 86],
+        errorCorrectionLevels: [
+            {
+                ecCodewordsPerBlock: 28,
+                ecBlocks: [
+                    { numBlocks: 3, dataCodewordsPerBlock: 113 },
+                    { numBlocks: 4, dataCodewordsPerBlock: 114 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 26,
+                ecBlocks: [
+                    { numBlocks: 3, dataCodewordsPerBlock: 44 },
+                    { numBlocks: 11, dataCodewordsPerBlock: 45 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 26,
+                ecBlocks: [
+                    { numBlocks: 17, dataCodewordsPerBlock: 21 },
+                    { numBlocks: 4, dataCodewordsPerBlock: 22 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 26,
+                ecBlocks: [
+                    { numBlocks: 9, dataCodewordsPerBlock: 13 },
+                    { numBlocks: 16, dataCodewordsPerBlock: 14 },
+                ],
+            },
+        ],
+    },
+    {
+        infoBits: 0x149A6,
+        versionNumber: 20,
+        alignmentPatternCenters: [6, 34, 62, 90],
+        errorCorrectionLevels: [
+            {
+                ecCodewordsPerBlock: 28,
+                ecBlocks: [
+                    { numBlocks: 3, dataCodewordsPerBlock: 107 },
+                    { numBlocks: 5, dataCodewordsPerBlock: 108 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 26,
+                ecBlocks: [
+                    { numBlocks: 3, dataCodewordsPerBlock: 41 },
+                    { numBlocks: 13, dataCodewordsPerBlock: 42 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 15, dataCodewordsPerBlock: 24 },
+                    { numBlocks: 5, dataCodewordsPerBlock: 25 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 28,
                 ecBlocks: [
                     { numBlocks: 15, dataCodewordsPerBlock: 15 },
                     { numBlocks: 10, dataCodewordsPerBlock: 16 },
@@ -345,83 +424,4 @@
             },
             {
                 ecCodewordsPerBlock: 30,
-                ecBlocks: [
-                    { numBlocks: 23, dataCodewordsPerBlock: 15 },
-                    { numBlocks: 25, dataCodewordsPerBlock: 16 },
-                ],
-            },
-        ],
-    },
-    {
-        infoBits: 0x1F250,
-        versionNumber: 31,
-        alignmentPatternCenters: [6, 30, 56, 82, 108, 134],
-        errorCorrectionLevels: [
-            {
-                ecCodewordsPerBlock: 30,
-                ecBlocks: [
-                    { numBlocks: 13, dataCodewordsPerBlock: 115 },
-                    { numBlocks: 3, dataCodewordsPerBlock: 116 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 28,
-                ecBlocks: [
-                    { numBlocks: 2, dataCodewordsPerBlock: 46 },
-                    { numBlocks: 29, dataCodewordsPerBlock: 47 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 30,
-                ecBlocks: [
-                    { numBlocks: 42, dataCodewordsPerBlock: 24 },
-                    { numBlocks: 1, dataCodewordsPerBlock: 25 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 30,
-                ecBlocks: [
-                    { numBlocks: 23, dataCodewordsPerBlock: 15 },
-                    { numBlocks: 28, dataCodewordsPerBlock: 16 },
-                ],
-            },
-        ],
-    },
-    {
-        infoBits: 0x209D5,
-        versionNumber: 32,
-        alignmentPatternCenters: [6, 34, 60, 86, 112, 138],
-        errorCorrectionLevels: [
-            {
-                ecCodewordsPerBlock: 30,
-                ecBlocks: [{ numBlocks: 17, dataCodewordsPerBlock: 115 }],
-            },
-            {
-                ecCodewordsPerBlock: 28,
-                ecBlocks: [
-                    { numBlocks: 10, dataCodewordsPerBlock: 46 },
-                    { numBlocks: 23, dataCodewordsPerBlock: 47 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 30,
-                ecBlocks: [
-                    { numBlocks: 10, dataCodewordsPerBlock: 24 },
-                    { numBlocks: 35, dataCodewordsPerBlock: 25 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 30,
-                ecBlocks: [
-                    { numBlocks: 19, dataCodewordsPerBlock: 15 },
-                    { numBlocks: 35, dataCodewordsPerBlock: 16 },
-                ],
-            },
-        ],
-    },
-    {
-        infoBits: 0x216F0,
-        versionNumber: 33,
-        alignmentPatternCenters: [6, 30, 58, 86, 114, 142],
-        errorCorrectionLevels: [
 ```
