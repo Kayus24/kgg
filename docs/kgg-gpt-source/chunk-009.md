@@ -4,6 +4,85 @@
 - Lines: 3781-4200
 
 ```html
+      body.tabletLayoutRightTiny #recentToggle .recentMini{
+        font-size:0!important;
+      }
+      body.tabletLayoutRightTiny #packageToggle > span::before{
+        content:"\1F4E6";
+        font-size:22px;
+      }
+      body.tabletLayoutRightTiny #finishBtn{
+        font-size:0!important;
+      }
+      body.tabletLayoutRightTiny #finishBtn::before{
+        content:"OK";
+        font-size:18px;
+      }
+      body.tabletLayoutRightTiny #baseToggle > span:first-child{
+        font-size:0!important;
+      }
+      body.tabletLayoutRightTiny #baseToggle > span:first-child::before{
+        content:"\25B6  \1F464";
+        font-size:20px;
+      }
+    }
+
+    /* v344 Tablet Scale/Fit:
+       Der freie Tablet-Modus skaliert jetzt die ganze Arbeits-UI breiter,
+       und Aktionsbuttons werden erst sehr spaet icon-only. */
+    @media (min-width:760px){
+      body.tabletLayoutCustom .app{
+        grid-template-columns:minmax(24px,var(--kgg-tablet-left-col,42vw)) minmax(84px,1fr) minmax(44px,.72fr)!important;
+      }
+      body.tabletLayoutCustom :is(.panelTitle,#currentPlanToggle){
+        font-size:clamp(10px,calc(30px * var(--kgg-tablet-ui-scale,1)),58px)!important;
+        line-height:1.04!important;
+      }
+      body.tabletLayoutCustom :is(.scanBtn,.scanMeta.filePickBtn,#baseToggle,#finishBtn,#recentToggle,#packageToggle,.drawerBtn,.baseCard,.primary,.mutedBtn,.tabletLockSwitch){
+        font-size:clamp(7px,calc(20px * var(--kgg-tablet-ui-scale,1)),40px)!important;
+        line-height:1.08!important;
+      }
+      body.tabletLayoutCustom :is(.label,#currentPlanBlock .label,.dbTitle,.bankLabel,.suggestion){
+        font-size:clamp(7px,calc(16px * var(--kgg-tablet-ui-scale,1)),34px)!important;
+        line-height:1.1!important;
+      }
+      body.tabletLayoutCustom :is(textarea,#exerciseInput,#inputWrap textarea){
+        font-size:clamp(8px,calc(23px * var(--kgg-tablet-ui-scale,1)),48px)!important;
+        line-height:1.28!important;
+        padding:clamp(6px,calc(16px * var(--kgg-tablet-ui-scale,1)),28px) clamp(28px,calc(46px * var(--kgg-tablet-ui-scale,1)),70px) clamp(6px,calc(16px * var(--kgg-tablet-ui-scale,1)),28px) clamp(6px,calc(14px * var(--kgg-tablet-ui-scale,1)),28px)!important;
+      }
+      body.tabletLayoutCustom .clearBtn{
+        font-size:clamp(14px,calc(24px * var(--kgg-tablet-ui-scale,1)),44px)!important;
+        padding:clamp(2px,calc(6px * var(--kgg-tablet-ui-scale,1)),12px)!important;
+      }
+      body.tabletLayoutCustom :is(.bankRow,.planCard){
+        padding:clamp(4px,calc(12px * var(--kgg-tablet-ui-scale,1)),26px) clamp(5px,calc(14px * var(--kgg-tablet-ui-scale,1)),30px)!important;
+        min-height:clamp(34px,calc(66px * var(--kgg-tablet-ui-scale,1)),132px)!important;
+        border-radius:clamp(9px,calc(18px * var(--kgg-tablet-ui-scale,1)),34px)!important;
+      }
+      body.tabletLayoutCustom .bankRow{
+        grid-template-columns:minmax(0,1fr) auto!important;
+      }
+      body.tabletLayoutCustom :is(.bankRow b,.planCard b){
+        font-size:clamp(8px,calc(20px * var(--kgg-tablet-ui-scale,1)),40px)!important;
+        line-height:1.08!important;
+      }
+      body.tabletLayoutCustom :is(.bankRow small,.planCard small,.recentMini,.drawerBtn .mini,.scanMeta small){
+        font-size:clamp(6px,calc(12px * var(--kgg-tablet-ui-scale,1)),24px)!important;
+        line-height:1.08!important;
+      }
+      body.tabletLayoutCustom :is(.iconBtn,.planCard .iconBtn){
+        font-size:clamp(10px,calc(22px * var(--kgg-tablet-ui-scale,1)),42px)!important;
+        padding:clamp(2px,calc(8px * var(--kgg-tablet-ui-scale,1)),16px)!important;
+      }
+      body.tabletLayoutCustom .planCard .drag{
+        width:clamp(18px,calc(38px * var(--kgg-tablet-ui-scale,1)),76px)!important;
+        height:clamp(18px,calc(38px * var(--kgg-tablet-ui-scale,1)),76px)!important;
+        font-size:clamp(9px,calc(18px * var(--kgg-tablet-ui-scale,1)),36px)!important;
+        margin-right:clamp(3px,calc(8px * var(--kgg-tablet-ui-scale,1)),16px)!important;
+      }
+      body.tabletLayoutCustom :is(.scanHub,.inner,#currentPlanBlock,#inputWrap,#bankArea.bankOpen,.baseCard,.drawerBtn){
+        border-radius:clamp(10px,calc(20px * var(--kgg-tablet-ui-scale,1)),36px)!important;
       }
       body.tabletLayoutCustom .scanHub{
         padding:clamp(6px,calc(14px * var(--kgg-tablet-ui-scale,1)),26px)!important;
@@ -345,83 +424,4 @@
       #bankArea.bankOpen.searchBankOpen #bankToggle{
         grid-column:1;
         grid-row:1;
-      }
-      #bankArea.bankOpen.searchBankOpen #bankContent{
-        grid-column:2;
-        grid-row:1;
-        flex:none;
-        height:auto;
-        min-height:0;
-        margin-top:0;
-        overflow:visible;
-      }
-      #bankArea.bankOpen.searchBankOpen .bankLabel{
-        margin:0 0 4px;
-        border-radius:10px;
-      }
-      #bankArea.bankOpen.searchBankOpen .bankRows{
-        max-height:min(46vh,440px);
-        height:auto;
-        overflow:auto;
-      }
-    }
-    .planCard.is-live-draft{
-      border-style:dashed;
-      background:#fffdf5;
-      box-shadow:0 0 0 2px rgba(242,211,138,.32) inset,0 6px 18px rgba(7,16,39,.05);
-    }
-    .planCard.is-live-draft .planIndex{
-      display:none;
-    }
-    .planCard.is-live-draft .drag,
-    .planCard.is-live-draft [data-planedit],
-    .planCard.is-live-draft [data-plandel]{
-      opacity:.55;
-    }
-    .planBadge.live{
-      background:#fff8e8;
-      color:#72490a;
-      border-color:#f2d38a;
-    }
-
-    /* Tablet plan action row cleanup:
-       With exercises in the plan, history/package/layout lock stay in one calm row. */
-    @media (min-width:760px){
-      #createPanel.planMode{
-        --kgg-plan-action-h:clamp(56px,calc(64px * var(--kgg-tablet-ui-scale,1)),128px);
-      }
-      #createPanel.planMode .planActions{
-        grid-column:2!important;
-        grid-row:5!important;
-        display:contents!important;
-      }
-      #createPanel.planMode #recentToggle{
-        grid-column:2!important;
-        grid-row:5!important;
-        align-self:start!important;
-        justify-self:stretch!important;
-        width:100%!important;
-        min-width:0!important;
-        height:var(--kgg-plan-action-h)!important;
-        min-height:var(--kgg-plan-action-h)!important;
-        max-height:var(--kgg-plan-action-h)!important;
-        padding:8px 14px!important;
-        border-radius:18px!important;
-        box-sizing:border-box!important;
-        overflow:hidden!important;
-      }
-      #createPanel.planMode .packageLayoutSlot{
-        grid-column:3!important;
-        grid-row:5!important;
-        align-self:start!important;
-        justify-self:stretch!important;
-        width:100%!important;
-        min-width:0!important;
-        height:var(--kgg-plan-action-h)!important;
-        min-height:var(--kgg-plan-action-h)!important;
-        max-height:var(--kgg-plan-action-h)!important;
-        display:grid!important;
-        grid-template-columns:minmax(0,1fr) minmax(72px,82px)!important;
-        gap:10px!important;
-        box-sizing:border-box!important;
 ```

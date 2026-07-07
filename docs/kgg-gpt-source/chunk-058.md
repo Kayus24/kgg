@@ -4,6 +4,99 @@
 - Lines: 24361-24780
 
 ```html
+          openOrCloseBankFromBrowseTap(ev);
+        }
+      },true);
+    }
+    if($('baseToggle'))$('baseToggle').onclick=ev=>{
+      if(guardPhoneScrollToggle(ev))return;
+      const base=$('baseFields');
+      const opening=base.classList.contains('hidden');
+      if(isTabletLayout()){
+        if(opening)openTabletAnchoredPanel('base'); else closeTabletAnchoredPanel('base');
+      }else{
+        base.classList.toggle('hidden',!opening);
+        setTabletOverlayActiveFlag();
+        updateToggleCarets();
+      }
+    };
+    if($('recentToggle'))$('recentToggle').onclick=ev=>{
+      if(guardPhoneScrollToggle(ev))return;
+      const recent=$('recentList');
+      const opening=recent.classList.contains('hidden');
+      if(isTabletLayout()){
+        if(opening)openTabletAnchoredPanel('recent'); else closeTabletAnchoredPanel('recent');
+      }else{
+        openPhoneFloatingDrawer('recent');
+      }
+    };
+    const packageToggleBtn=$('packageToggle');
+    if(packageToggleBtn)packageToggleBtn.onclick=ev=>{
+      if(guardPhoneScrollToggle(ev))return;
+      if(isTabletLayout())toggleTabletPackageOverlay();
+      else openPhoneFloatingDrawer('package');
+    };
+    const modalClosers={
+      editorModal:typeof closeEditor==='function'?closeEditor:null,
+      shareModal:typeof closeFinishModal==='function'?closeFinishModal:null,
+      largePdfModal:typeof closeLargePdfModal==='function'?closeLargePdfModal:null,
+      longMediaConfirmModal:typeof closeLongMediaConfirmModal==='function'?closeLongMediaConfirmModal:null,
+      adminSecretsModal:typeof closeAdminSecretsModal==='function'?closeAdminSecretsModal:null,
+      sharedBankModal:typeof closeSharedBankModal==='function'?closeSharedBankModal:null,
+      syncPairModal:typeof closeSyncPairModal==='function'?closeSyncPairModal:null
+    };
+    document.querySelectorAll('.modal').forEach(modal=>{
+      if(modal.dataset.kggV383BackdropBound==='1')return;
+      modal.dataset.kggV383BackdropBound='1';
+      modal.addEventListener('pointerup',ev=>{
+        if(ev.target!==modal)return;
+        ev.preventDefault();
+        ev.stopPropagation();
+        const close=modalClosers[modal.id];
+        if(typeof close==='function')close();
+        else modal.classList.remove('open');
+      });
+    });
+    const adminQrModal=$('kggAdminMenuQrModal');
+    if(adminQrModal&&!adminQrModal.dataset.kggV383BackdropBound){
+      adminQrModal.dataset.kggV383BackdropBound='1';
+      adminQrModal.addEventListener('pointerup',ev=>{
+        if(ev.target!==adminQrModal)return;
+        ev.preventDefault();
+        if(typeof closeKggAdminMenuQrModal==='function')closeKggAdminMenuQrModal();
+      });
+    }
+    const oldApplyNativeSyncInvite=applyNativeSyncInvite;
+    applyNativeSyncInvite=function(invite){
+      setScanStatus('QR erkannt: Sync-Kopplung wird gelesen ...');
+      try{
+        const entry=oldApplyNativeSyncInvite(invite);
+        const peers=syncPeerDisplayEntries().length;
+        setScanStatus('Sync-Kopplung gespeichert. Dieses Geraet liest und schreibt im Sync-Raum. '+(peers?'Anderes Geraet gefunden: Synchronisation aktiv.':'Warte auf weitere Geraete mit diesem QR.'));
+        return entry;
+      }catch(err){
+        setScanStatus('Fehler: ungueltige Sync-Daten.');
+        throw err;
+      }
+    };
+    const oldApplyNativeSyncBundle=applyNativeSyncBundle;
+    applyNativeSyncBundle=async function(bundle){
+      setScanStatus('QR erkannt: Sync-Datenpaket wird gelesen ...');
+      try{
+        const result=await oldApplyNativeSyncBundle(bundle);
+        const peers=syncPeerDisplayEntries().length;
+        setScanStatus('Sync-Datenpaket gespeichert. Verbindung und Daten wurden lokal uebernommen. '+(peers?'Synchronisation aktiv.':'Warte auf weitere Geraete mit diesem QR.'));
+        return result;
+      }catch(err){
+        setScanStatus('Fehler: Sync-Verbindung nicht moeglich.');
+        throw err;
+      }
+    };
+  }
+  function installKggV388AndroidFlowFixes(){
+    let lastTabletMenuToggleAt=0;
+    const menu=tabletMenuBtn;
+    const toggle=ev=>{
       if(!isTabletLayout())return;
       const now=Date.now();
       if(now-lastTabletMenuToggleAt<220){
@@ -331,97 +424,4 @@
   function actionButton(id,text,handler){var button=document.createElement('button');button.id=id;button.type='button';button.className='tabletSideMenuAction';button.textContent=text;button.onclick=handler;return button;}
   function installEntryPoints(){
     var menu=document.querySelector('.tabletSideMenuMain');
-    if(menu&&!document.getElementById('kggReleaseMenuGroup')){
-      var group=document.createElement('div');group.id='kggReleaseMenuGroup';group.className='tabletSideMenuGroup kggReleaseMenuGroup';group.innerHTML='<h3>Admin</h3>';
-      group.appendChild(actionButton('kggReleaseAdminConfig','Admin-Konfig',function(){closeTabletMenu();var target=document.getElementById('adminConfigBtn');if(target)target.click();}));
-      group.appendChild(actionButton('kggDeviceSyncOpen','Geräte-Sync',function(){closeTabletMenu();var target=document.getElementById('syncQrBtn');if(target)target.click();}));
-      group.appendChild(actionButton('kggReleaseCenterOpen','Update-Zentrale',open));menu.appendChild(group);
-    }
-    var tools=document.querySelector('.adminCodePackageTools');
-    if(tools&&!document.getElementById('kggReleaseCenterOpenPhone')){var phone=actionButton('kggReleaseCenterOpenPhone','Update-Zentrale',open);phone.className='mutedBtn wide';tools.appendChild(phone);}
-  }
-  window.KGGReleaseCenter={open:open,close:close,status:readStatus};
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installEntryPoints,{once:true});else installEntryPoints();
-})();
-</script>
-<!-- KGG_ADMIN_ONLY_END -->
-
-
-
-<!-- KGG CLEAN MERGE v11: phone touch fixes only; no local auto-redirect blocker -->
-<style id="kgg-phone-touch-tablet-parity-hard-v3-css">
-@media (max-width:759px){
-  /* Remove the phone-only v401 layout cage from the plan area. */
-  #rightPlanStack,
-  #currentPlanBlock.planSectionCurrent,
-  body.kggPlanSectionFrozen #currentPlanBlock.planSectionCurrent{
-    contain:none!important;
-    overflow:visible!important;
-    transform:none!important;
-    backface-visibility:visible!important;
-    -webkit-backface-visibility:visible!important;
-    height:auto!important;
-    min-height:0!important;
-    max-height:none!important;
-  }
-
-  #currentPlanBlock .planSectionBody,
-  body.kggPlanSectionFrozen #currentPlanBlock .planSectionBody,
-  body.kggPlanCardSwiping #currentPlanBlock .planSectionBody,
-  body.kggPlanCardReordering #currentPlanBlock .planSectionBody{
-    contain:none!important;
-    overflow:auto!important;
-    touch-action:pan-y!important;
-    overscroll-behavior:auto!important;
-    -webkit-overflow-scrolling:touch!important;
-    max-height:none!important;
-    transform:none!important;
-    backface-visibility:visible!important;
-    -webkit-backface-visibility:visible!important;
-  }
-
-  #currentPlanBlock #planList.planList,
-  body.kggPlanSectionFrozen #currentPlanBlock #planList.planList{
-    contain:none!important;
-    isolation:auto!important;
-    overflow:visible!important;
-    transform:none!important;
-    backface-visibility:visible!important;
-    -webkit-backface-visibility:visible!important;
-  }
-
-  /* Keep the rest of the phone UI tappable during plan gestures, like tablet. */
-  body.kggPlanCardReordering :is(
-    #bankArea,
-    #dbTitle,
-    .bankArea,
-    .bankRows,
-    .az,
-    #inputWrap,
-    #exerciseInput,
-    .suggestion
-  ){
-    pointer-events:auto!important;
-    transform:none!important;
-    filter:none!important;
-  }
-
-  /* Swipe animation: remove phone-only cage effects; keep the same simple transform path as tablet. */
-  body.kggPlanCardSwiping #currentPlanBlock .planCard.swipe-dragging,
-  body.is-scrolling.kggPlanCardSwiping #currentPlanBlock .planCard.swipe-dragging{
-    transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
-    transition:none!important;
-    will-change:transform,opacity!important;
-    z-index:8!important;
-  }
-
-  body.kggPlanCardSwiping #currentPlanBlock .planCard.swipe-armed{
-    transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
-  }
-
-  body.kggPlanCardSwiping #currentPlanBlock .planCard.swipe-removing,
-  body.is-scrolling.kggPlanCardSwiping #currentPlanBlock .planCard.swipe-removing{
-    transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
-    will-change:transform,opacity!important;
-    z-index:8!important;
 ```

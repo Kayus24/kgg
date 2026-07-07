@@ -4,6 +4,85 @@
 - Lines: 2521-2940
 
 ```html
+      #createPanel.planMode #currentPlanToggle > span::before{
+        content:"✏️ ";
+      }
+
+      /* +Paket nicht als schwebender rechter Großbutton, sondern als Kopfzeilen-Aktion. */
+      #createPanel.planMode #savePackageBtn{
+        grid-column:2 / 4!important;
+        grid-row:3!important;
+        justify-self:end!important;
+        align-self:start!important;
+        width:118px!important;
+        min-width:118px!important;
+        max-width:118px!important;
+        height:48px!important;
+        min-height:48px!important;
+        margin:0 14px 0 0!important;
+        border-radius:18px!important;
+        z-index:66!important;
+      }
+      #createPanel.planMode #currentPlanToggle{
+        padding-right:154px!important;
+      }
+      #createPanel.planMode #currentPlanToggle > small{
+        margin-right:6px;
+      }
+      #createPanel.planMode:has(#rightPlanStack.scanOpen) #savePackageBtn{
+        visibility:hidden!important;
+        pointer-events:none!important;
+      }
+
+      /* Untere Aktionsbuttons: gleiche Breite, gleiche Höhe, ruhige Zeile. */
+      #createPanel.planMode #recentToggle,
+      #createPanel.planMode #packageToggle{
+        grid-row:5!important;
+        width:100%!important;
+        min-width:0!important;
+        height:60px!important;
+        min-height:60px!important;
+        justify-self:stretch!important;
+        align-self:stretch!important;
+      }
+      #createPanel.planMode #recentToggle{grid-column:2!important;}
+      #createPanel.planMode #packageToggle{grid-column:3!important;}
+      .planActions.hasPlan #recentToggle{
+        width:100%!important;
+        min-width:0!important;
+        padding:10px 12px!important;
+      }
+      .planActions.hasPlan .recentText,
+      .planActions.hasPlan .recentMini{
+        max-width:none!important;
+        opacity:1!important;
+      }
+
+      @media (max-width:920px){
+        .app{
+          grid-template-columns:minmax(320px,390px) minmax(0,1fr) minmax(0,1fr)!important;
+        }
+        #createPanel.planMode #savePackageBtn{
+          width:104px!important;
+          min-width:104px!important;
+          max-width:104px!important;
+          height:46px!important;
+          min-height:46px!important;
+          margin-right:10px!important;
+        }
+        #createPanel.planMode #currentPlanToggle{
+          padding-right:132px!important;
+        }
+        #createPanel.planMode #recentToggle,
+        #createPanel.planMode #packageToggle{
+          height:56px!important;
+          min-height:56px!important;
+        }
+      }
+    }
+
+
+    /* v329 Tablet Package Button Header Align:
        Der +📦 Button war zwar im Planheader, klebte aber optisch am oberen Rand.
        Nur Tablet-CSS: kleiner, flacher, vertikal in der Kopfzeile zentriert. Keine Logik. */
     @media (min-width:760px){
@@ -345,83 +424,4 @@
       .planCard .iconBtn{
         font-size:19px!important;
       }
-
-      #createPanel.planMode #recentToggle,
-      #createPanel.planMode #packageToggle{
-        height:66px!important;
-        min-height:66px!important;
-        font-size:19px!important;
-      }
-    }
-
-    @media (min-width:760px) and (max-width:980px){
-      .app{
-        grid-template-columns:minmax(380px,450px) minmax(0,1.02fr) minmax(0,.9fr)!important;
-        gap:16px!important;
-      }
-      #inputWrap textarea,
-      #exerciseInput{
-        font-size:21px!important;
-      }
-      .bankRow b{
-        font-size:17px!important;
-      }
-      .planCard b{
-        font-size:18px!important;
-      }
-      #createPanel.planMode #recentToggle,
-      #createPanel.planMode #packageToggle{
-        height:62px!important;
-        min-height:62px!important;
-      }
-    }
-
-
-
-    /* v335 Tablet Proportional Columns:
-       Linke und rechte Arbeitszone proportionaler verteilen.
-       Linke Spalte deutlich breiter, rechter Planbereich bleibt stabil.
-       UI leicht größer für bessere Tablet-Lesbarkeit.
-       Nur Tablet-CSS. Keine PDF/QR/Patienten-App/Scan/Parser/Plan-State-Logik. */
-    @media (min-width:760px){
-      .app{
-        grid-template-columns:clamp(540px,42vw,660px) minmax(0,1fr) minmax(0,.72fr)!important;
-        column-gap:14px!important;
-        gap:14px!important;
-        padding:16px!important;
-      }
-
-      .scanHub,
-      #inputWrap,
-      #bankArea{
-        width:100%!important;
-        max-width:none!important;
-        justify-self:stretch!important;
-      }
-
-      #rightPlanStack,
-      #currentPlanBlock,
-      #scannedPlansBlock{
-        min-width:0!important;
-        width:100%!important;
-      }
-
-      .scanHub .scanBtn,
-      .scanHub .scanMeta,
-      #baseToggle,
-      #finishBtn,
-      #recentToggle,
-      #packageToggle{
-        font-size:20px!important;
-      }
-      #baseToggle,
-      #finishBtn{
-        min-height:64px!important;
-        height:64px!important;
-      }
-
-      #exerciseInput,
-      #inputWrap textarea{
-        font-size:23px!important;
-        line-height:1.36!important;
 ```

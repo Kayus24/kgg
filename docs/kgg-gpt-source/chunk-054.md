@@ -4,6 +4,99 @@
 - Lines: 22681-23100
 
 ```html
+    const c=document.createElement('canvas');
+    c.width=r.w; c.height=r.h;
+    const x=c.getContext('2d',{willReadFrequently:true});
+    x.fillStyle='#fff'; x.fillRect(0,0,c.width,c.height);
+    x.drawImage(src,r.x,r.y,r.w,r.h,0,0,r.w,r.h);
+    return c;
+  }
+  function kggCurrentLayoutRowStripRect(box,imgW,imgH,wide){
+    const bx=box.x*imgW, by=box.y*imgH, bw=box.w*imgW, bh=box.h*imgH;
+    const valueLeft=bx+bw*.110;
+    const valueRight=bx+bw*.858;
+    const cy=by+(box.ex<=4?bh*.595:bh*.485);
+    const stripH=wide?Math.max(54,bh*.19):Math.max(42,bh*.15);
+    return {x:valueLeft,y:cy-stripH*.55,w:valueRight-valueLeft,h:stripH};
+  }
+  function kggNormalizeCanvasForCurrentLayout(src){
+    const canvas=scanCloneCanvas(src);
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    ctx.save();
+    ctx.filter='contrast(1.18) brightness(1.03) saturate(.92)';
+    ctx.drawImage(src,0,0);
+    ctx.restore();
+    canvas.dataset.kggLayout=KGG_CURRENT_LAYOUT_ID;
+    return canvas;
+  }
+  function kggBuildCurrentLayoutT1Strips(srcCanvas){
+    const src=kggNormalizeCanvasForCurrentLayout(srcCanvas);
+    return KGG_CURRENT_LAYOUT_BOXES.map(box=>{
+      const rect=kggCurrentLayoutRowStripRect(box,src.width,src.height,true);
+      return {ex:box.ex,name:box.name,measure:box.measure,rect,canvas:kggCropCanvas(src,rect)};
+    });
+  }
+  function kggBuildCurrentLayoutContactSheet(strips){
+    const list=strips||[];
+    if(!list.length)throw new Error('Keine T1-Zeilen-Crops erzeugt.');
+    const scale=1.5;
+    const labelW=180;
+    const rowH=92;
+    const maxW=Math.max.apply(null,list.map(s=>s.canvas.width));
+    const c=document.createElement('canvas');
+    c.width=Math.round(labelW+maxW*scale+40);
+    c.height=36+list.length*rowH+24;
+    const x=c.getContext('2d',{willReadFrequently:true});
+    x.fillStyle='#fff'; x.fillRect(0,0,c.width,c.height);
+    x.fillStyle='#071027'; x.font='bold 24px Arial';
+    x.fillText('KGG T1 Contact-Sheet · aktuelles Layout EX1-EX6',20,28);
+    list.forEach((s,i)=>{
+      const y=46+i*rowH;
+      x.fillStyle='#eef6ff'; x.fillRect(16,y-8,c.width-32,rowH-8);
+      x.strokeStyle='#dce3eb'; x.strokeRect(16,y-8,c.width-32,rowH-8);
+      x.fillStyle='#071027'; x.font='bold 28px Arial'; x.fillText('EX'+s.ex,26,y+36);
+      x.font='bold 16px Arial'; x.fillText(s.name,78,y+26);
+      x.font='12px Arial'; x.fillStyle='#657386'; x.fillText(s.measure==='Sek.'?'Zeit/Sekunden':'kg/Wdh links nach rechts',78,y+46);
+      x.drawImage(s.canvas,labelW,y-2,s.canvas.width*scale,s.canvas.height*scale);
+    });
+    c.dataset.kggContactSheet='current-layout-t1-v307';
+    return c;
+  }
+  function kggCurrentLayoutPrompt(){
+    return [
+      'Lies das KGG Contact-Sheet. Es zeigt EX1 bis EX6, jeweils nur die handschriftlich ausgefüllte T1-Zeile aus dem Layout '+KGG_CURRENT_LAYOUT_ID+'.',
+      'Gib ausschließlich gültiges JSON aus. Schema: {"groups":[[...EX1 Zahlen...],[...EX2 Zahlen...],[...EX3 Zahlen...],[...EX4 Zahlen...],[...EX5 Zahlen...],[...EX6 Zahlen...]],"warnings":[]}.',
+      'Jede Gruppe enthält nur die sichtbaren handschriftlichen Zahlen der jeweiligen EX-Zeile in Leserichtung von links nach rechts.',
+      'Keine Übungsnamen raten. Keine leeren Tabellenwerte ergänzen. Keine Erklärungen. Keine Markdown-Codeblöcke.'
+    ].join('\n');
+  }
+  function kggNormalizeGroupsFromJson(json){
+    if(!json)return [];
+    if(Array.isArray(json.groups))return json.groups.map(g=>Array.isArray(g)?g.map(Number).filter(Number.isFinite):[]);
+    if(Array.isArray(json.exercises))return json.exercises.map(ex=>(ex.numbers||ex.values||[]).map(Number).filter(Number.isFinite));
+    if(Array.isArray(json))return json.map(g=>Array.isArray(g)?g.map(Number).filter(Number.isFinite):[]);
+    return [];
+  }
+  function kggCurrentLayoutGroupsQuality(groups){
+    const warnings=[];
+    const normalized=KGG_CURRENT_LAYOUT_BOXES.map((box,i)=>({ex:box.ex,name:box.name,measure:box.measure,numbers:Array.isArray(groups&&groups[i])?groups[i].map(Number).filter(Number.isFinite):[]}));
+    if(normalized.length!==6)warnings.push('6 EX-Gruppen erwartet');
+    normalized.forEach(item=>{
+      if(!item.numbers.length)warnings.push('EX'+item.ex+' leer');
+      if(item.numbers.length!==6)warnings.push('EX'+item.ex+' hat '+item.numbers.length+' statt 6 Werte');
+      if(item.numbers.length>10)warnings.push('EX'+item.ex+' zu viele Zahlen');
+    });
+    const totalFound=normalized.reduce((sum,item)=>sum+item.numbers.length,0);
+    const completeBoxes=normalized.filter(item=>item.numbers.length===6).length;
+    return {ok:!warnings.length,layout:KGG_CURRENT_LAYOUT_ID,exerciseCount:normalized.length,numberCount:totalFound,completeBoxes,warnings,normalized};
+  }
+  function kggCurrentLayoutGroupToText(box,values){
+    const nums=(values||[]).map(v=>String(v).trim()).filter(Boolean);
+    if(box.measure==='Sek.'){
+      const s1=nums.length>=6?nums[1]:(nums[0]||'');
+      const s2=nums.length>=6?nums[3]:(nums[1]||'');
+      const s3=nums.length>=6?nums[5]:(nums[2]||'');
+      return [box.name,'Satz 1: '+(s1||'')+' Sek.','Satz 2: '+(s2||'')+' Sek.','Satz 3: '+(s3||'')+' Sek.'].join('\n');
     }
     const kg1=nums[0]||'', w1=nums[1]||'';
     const kg2=nums[2]||'', w2=nums[3]||'';
@@ -331,97 +424,4 @@
     const observer=new MutationObserver(records=>{
       records.forEach(record=>{const el=record.target; if(el&&el.id)check(el.id,el);});
     });
-    watchedIds.forEach(id=>{
-      const el=$(id);
-      if(el)observer.observe(el,{attributes:true,attributeFilter:['class','style','open']});
-    });
-    document.addEventListener('click',ev=>{
-      if(shouldIgnorePhoneScrollToggle())return;
-      const target=ev.target&&ev.target.closest?ev.target.closest('button,.drawerBtn,.baseCard,.dbTitle,.modal,.sheet'):null;
-      if(!target)return;
-      if(target.closest&&target.closest('#scanPreview'))return;
-      const opensOtherUi=target.id==='baseToggle'||target.id==='recentToggle'||target.id==='packageToggle'||target.id==='bankToggle'||target.id==='dbTitle'||target.id==='finishBtn'||target.closest('.modal');
-      if(opensOtherUi)setTimeout(()=>collapseScanCards('click_'+(target.id||'ui')),0);
-    },true);
-  }
-  async function processPaperJob(job){
-    if(job.result&&job.type==='qr')return job.result;
-    if(!job.pages.length)throw new Error(job.label+': keine Bilder.');
-    const texts=[]; const raw=[]; const warnings=[];
-    for(let i=0;i<job.pages.length;i++){
-      const page=job.pages[i];
-      if(!page.file){warnings.push('Bilddatei nicht mehr im Speicher: '+page.name); continue;}
-      setScanStatus(job.label+': Seite '+(i+1)+' wird ausgelesen …');
-      const result=await callGeminiPaperFallback(page.file);
-      if(result.planText)texts.push(result.planText);
-      raw.push(result.rawText||'');
-      if(result.quality&&result.quality.warnings)warnings.push(...result.quality.warnings);
-    }
-    const planText=texts.join(', ').replace(/(?:,\s*){2,}/g,', ').trim();
-    const quality=scanPaperQuality(planText,{raw});
-    quality.warnings=[...new Set([...(quality.warnings||[]),...warnings])];
-    quality.ok=!quality.warnings.length;
-    job.result={type:'paper',planText,rawText:raw.join('\n---\n'),quality};
-    job.status='ready';
-    return job.result;
-  }
-  async function copyTextWithFallback(text,fieldId){
-    const field=$(fieldId);
-    let ok=false;
-    try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(text);ok=true;}}catch(err){}
-    if(!ok&&field){
-      try{field.focus({preventScroll:true});field.select();field.setSelectionRange(0,field.value.length);ok=document.execCommand('copy');}catch(err){}
-    }
-    return ok;
-  }
-  function scanValueToString(value){
-    if(value==null||value==='')return '';
-    const n=Number(value);
-    if(Number.isFinite(n))return String(Math.round(n*100)/100).replace('.',',');
-    return String(value).trim();
-  }
-  function scanSetsFromNumberSequence(nums,source){
-    const values=(nums||[]).map(Number).filter(Number.isFinite);
-    const side=normalizeSideMode(source&&source.side||source&&source.side_mode||source&&source.laterality||source&&source.seite||'BI');
-    const metricUnit=scanUnitLabel(source&&source.unit||source&&source.metricUnit||source&&source.metric_unit,(source&&source.measure)==='Sek.'?'Sek.':'Wdh');
-    const loadUnit=scanUnitLabel(source&&source.weightUnit||source&&source.loadUnit||source&&source.weight_unit,/sek|zeit|time/i.test(metricUnit)?'keine':'kg');
-    const isTime=/zeit|sek|sec|min|time/i.test(metricUnit)||/keine/i.test(loadUnit);
-    const pains=scanFindPainValues(source||{});
-    const sets=[];
-    if(side==='LR'&&values.length>=12){
-      for(let i=0;i<3;i++){
-        const b=i*4;
-        sets.push({
-          li:{load:scanValueToString(values[b]),metric:scanValueToString(values[b+1])},
-          re:{load:scanValueToString(values[b+2]),metric:scanValueToString(values[b+3])},
-          pain:scanValueToString(pains[i]||values[12+i]||'')
-        });
-      }
-      return sets;
-    }
-    if(isTime){
-      for(let i=0;i<3;i++){
-        const idx=values.length>=6?i*2+1:i;
-        const metric=scanValueToString(values[idx]);
-        if(metric)sets.push({metric,pain:scanValueToString(pains[i]||'')});
-      }
-      return sets;
-    }
-    if(values.length>=9){
-      for(let i=0;i<3;i++){
-        const b=i*3;
-        sets.push({load:scanValueToString(values[b]),metric:scanValueToString(values[b+1]),pain:scanValueToString(values[b+2]||pains[i]||'')});
-      }
-      return sets;
-    }
-    if(values.length>=6){
-      for(let i=0;i<3;i++){
-        sets.push({load:scanValueToString(values[i*2]),metric:scanValueToString(values[i*2+1]),pain:scanValueToString(pains[i]||'')});
-      }
-      return sets;
-    }
-    return [];
-  }
-  function scanPlanExerciseFromNumbers(name,numbers,source){
-    const cleanName=stripScanExerciseName(name||scanExerciseName(source));
 ```

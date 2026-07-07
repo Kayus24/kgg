@@ -4,6 +4,85 @@
 - Lines: 4201-4620
 
 ```html
+      }
+      #bankArea.bankOpen.searchBankOpen #bankContent{
+        grid-column:2;
+        grid-row:1;
+        flex:none;
+        height:auto;
+        min-height:0;
+        margin-top:0;
+        overflow:visible;
+      }
+      #bankArea.bankOpen.searchBankOpen .bankLabel{
+        margin:0 0 4px;
+        border-radius:10px;
+      }
+      #bankArea.bankOpen.searchBankOpen .bankRows{
+        max-height:min(46vh,440px);
+        height:auto;
+        overflow:auto;
+      }
+    }
+    .planCard.is-live-draft{
+      border-style:dashed;
+      background:#fffdf5;
+      box-shadow:0 0 0 2px rgba(242,211,138,.32) inset,0 6px 18px rgba(7,16,39,.05);
+    }
+    .planCard.is-live-draft .planIndex{
+      display:none;
+    }
+    .planCard.is-live-draft .drag,
+    .planCard.is-live-draft [data-planedit],
+    .planCard.is-live-draft [data-plandel]{
+      opacity:.55;
+    }
+    .planBadge.live{
+      background:#fff8e8;
+      color:#72490a;
+      border-color:#f2d38a;
+    }
+
+    /* Tablet plan action row cleanup:
+       With exercises in the plan, history/package/layout lock stay in one calm row. */
+    @media (min-width:760px){
+      #createPanel.planMode{
+        --kgg-plan-action-h:clamp(56px,calc(64px * var(--kgg-tablet-ui-scale,1)),128px);
+      }
+      #createPanel.planMode .planActions{
+        grid-column:2!important;
+        grid-row:5!important;
+        display:contents!important;
+      }
+      #createPanel.planMode #recentToggle{
+        grid-column:2!important;
+        grid-row:5!important;
+        align-self:start!important;
+        justify-self:stretch!important;
+        width:100%!important;
+        min-width:0!important;
+        height:var(--kgg-plan-action-h)!important;
+        min-height:var(--kgg-plan-action-h)!important;
+        max-height:var(--kgg-plan-action-h)!important;
+        padding:8px 14px!important;
+        border-radius:18px!important;
+        box-sizing:border-box!important;
+        overflow:hidden!important;
+      }
+      #createPanel.planMode .packageLayoutSlot{
+        grid-column:3!important;
+        grid-row:5!important;
+        align-self:start!important;
+        justify-self:stretch!important;
+        width:100%!important;
+        min-width:0!important;
+        height:var(--kgg-plan-action-h)!important;
+        min-height:var(--kgg-plan-action-h)!important;
+        max-height:var(--kgg-plan-action-h)!important;
+        display:grid!important;
+        grid-template-columns:minmax(0,1fr) minmax(72px,82px)!important;
+        gap:10px!important;
+        box-sizing:border-box!important;
         overflow:visible!important;
       }
       #createPanel.planMode .packageLayoutSlot #packageToggle{
@@ -345,83 +424,4 @@
   .tabletSideMenu #tabletScalePlus{grid-area:plus;}
   .tabletSideMenu #tabletScaleValue{grid-area:value;text-align:center;}
   .tabletSideMenu #tabletScaleMinus{grid-area:minus;}
-  .tabletSideMenu #tabletLayoutReset{grid-area:reset;min-height:44px!important;}
-  .tabletSideMenu .tabletLayoutFreeTools.hidden{display:none!important;}
-  /* v375: Admin tools live in the tablet side menu, not in the scan row. */
-  body.adminMode .scanHub{
-    grid-template-columns:58px minmax(148px,1fr) minmax(148px,1fr)!important;
-  }
-  body.adminMode .scanHub .adminConfigBtn,
-  body.adminMode .scanHub .sharedBankBtn,
-  body.adminMode .scanHub .syncQrBtn{
-    display:none!important;
-  }
-  body.adminMode .scanHub #scanPreview{
-    grid-column:1 / -1!important;
-  }
-  .tabletSideMenu{
-    overflow-y:auto;
-  }
-  .tabletSideMenuAction{
-    min-height:54px;
-    width:100%;
-    border:1px solid rgba(10,16,36,.12);
-    border-radius:17px;
-    background:#fff;
-    color:#0a1024;
-    font-size:.94rem;
-    font-weight:900;
-    text-align:left;
-    padding:0 14px;
-    box-shadow:0 10px 22px rgba(10,16,36,.07), inset 0 1px 0 rgba(255,255,255,.82);
-    cursor:pointer;
-  }
-  .tabletSideMenuAction:active{
-    transform:translateY(1px);
-  }
-  .tabletSideMenuQrActions{
-    display:grid;
-    grid-template-columns:1fr;
-    gap:10px;
-  }
-  .packageLayoutSlot{
-    grid-template-columns:1fr!important;
-    align-items:stretch!important;
-  }
-  .packageLayoutSlot .tabletLayoutControls{display:none!important;}
-  .packageLayoutSlot #packageToggle{width:100%!important;min-width:0!important;}
-}
-
-.kggAdminMenuQrModal{
-  position:fixed;
-  inset:0;
-  z-index:1300;
-  display:none;
-  place-items:center;
-  padding:22px;
-  background:rgba(10,16,36,.26);
-  backdrop-filter:blur(10px);
-}
-.kggAdminMenuQrModal.isOpen{display:grid;}
-.kggAdminMenuQrSheet{
-  width:min(520px,94vw);
-  border:1.5px solid rgba(10,16,36,.12);
-  border-radius:26px;
-  background:#fff;
-  box-shadow:0 30px 90px rgba(10,16,36,.22);
-  padding:22px;
-}
-.kggAdminMenuQrSheet h2{
-  margin:0 0 8px;
-  color:#0a1024;
-  font-size:1.35rem;
-  font-weight:950;
-}
-.kggAdminMenuQrHint{
-  margin:0 0 14px;
-  color:#667085;
-  font-size:.94rem;
-  line-height:1.35;
-  font-weight:750;
-}
 ```

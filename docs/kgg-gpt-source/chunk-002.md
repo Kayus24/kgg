@@ -4,6 +4,85 @@
 - Lines: 841-1260
 
 ```html
+        "Scan-Kamera",
+        "Android-Wrapper",
+        "Tablet-Core-Layout",
+        "Parser"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "Wenn der Sync-Dialog privaten Rueckfall-Speicher meldet, findet kein automatischer Geraete-Transfer statt; dann Sync-Datei exportieren/importieren oder Android-Dateizugriff pruefen."
+    },
+    {
+      "versionCode": 35,
+      "versionName": "1.0.35-parser-schmerz-tag-blocks",
+      "patchId": "kgg-v035-parser-schmerz-tag-blocks",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Schmerz-/Tag-Textbloecke stabil erkennen",
+      "reason": "Echte Trainingsblock-Texte enthalten Tag-Labels, Schmerzwerte und Satzzeilen wie 15 kg @ 12 Wdh; diese duerfen keine Satz-, Tag- oder Schmerz-Muellkarten erzeugen.",
+      "whatChanged": [
+        "Textfeld-Testbatterie enthaelt den echten Beinpresse/Kniebeuger/Singel-Leg/Romanian-Deadlift-Block.",
+        "Satzzeilen mit Last vor Wiederholungen wie 15 kg @ 12 Wdh werden korrekt gelesen.",
+        "Schmerz: n/10 und Tag 1 werden nicht mehr als Uebungskarten uebernommen."
+      ],
+      "touchedAreas": [
+        "Textfield parser",
+        "Local test batteries",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Android-Wrapper",
+        "Tablet-Core-Layout",
+        "Storage"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "Regressionstest deckt den echten Schmerz-/Tag-Block ab und verhindert Satz-/Schmerz-Muellkarten."
+    },
+    {
+      "versionCode": 34,
+      "versionName": "1.0.34-free-textfield-units",
+      "patchId": "kgg-v034-free-textfield-units",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Freie Einheiten im Textfeld weitergeben",
+      "reason": "Textfeld-Eingaben koennen Einheiten enthalten, die noch nicht als feste App-Einheit hinterlegt sind; diese duerfen nicht still zu kg werden und muessen im aktuellen Plan erhalten bleiben.",
+      "whatChanged": [
+        "Textfeld-Testbatterie deckt bekannte App-Einheiten, freie Einheiten, Kurzformen und Satzvarianten ab.",
+        "Freie Einheiten wie km/h, Grad, RPE, Level, cm und rpm bleiben in state.plan und KGGDataStore.currentPlan erhalten.",
+        "S1, 1. Satz, 1) und Satz 1 - werden als Satzdaten erkannt, nicht als eigene Uebungskarten."
+      ],
+      "touchedAreas": [
+        "Textfield parser",
+        "Local test batteries",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Android-Wrapper",
+        "Tablet-Core-Layout",
+        "Sync pipeline"
+      ]
+    },
+    {
+      "versionCode": 33,
+      "versionName": "1.0.33-test-battery-textblocks",
+      "patchId": "kgg-v033-test-battery-textblocks",
+      "status": "active",
       "type": "local-html-patch",
       "title": "Lokale Test-Batterien und Satz-Textblock-Erkennung",
       "reason": "Mobile-Inbox, Sync und Terminheld-/Satz-Textbloecke brauchen wiederholbare lokale Checks; rohe Satzzeilen duerfen keine eigenen Uebungskarten erzeugen.",
@@ -345,83 +424,4 @@
     "kgg-changelog.entries",
     "kgg-update/version.json.versionCode",
     "kgg-update/version.json.versionName",
-    "kgg-update/version.json.sha256",
-    "kgg-source-truth.currentVersion",
-    "kgg-patch-rules",
-    "kgg-update/version.json.indexUrl"
-  ],
-  "protectedAreas": [
-    "PDF",
-    "QR-Erzeugung",
-    "Patienten-App",
-    "Scan-Kamera",
-    "Parser",
-    "Android-Wrapper",
-    "Tablet-Layout",
-    "Plan-State",
-    "Storage"
-  ],
-  "patchRetentionPolicy": {
-    "rule": "Never delete the latest patch for a function silently.",
-    "why": "The last patch for a feature is often what fixed or stabilized the bug; removing it without tracking can reintroduce old bugs.",
-    "defaultBehavior": "Preserve previous patch code and patch history unless Max explicitly approves removal.",
-    "whenReplacingPatch": [
-      "Mark old changelog entry as superseded, not deleted.",
-      "Add supersededBy on the old entry when practical.",
-      "Add supersedes on the new entry.",
-      "Record whySuperseded/removalReason/testEvidence/rollbackNote."
-    ],
-    "requiredWhenRemovingPatch": [
-      "supersededBy",
-      "removalReason",
-      "testEvidence",
-      "rollbackNote",
-      "explicitMaxApproval"
-    ],
-    "pipelineExpectation": "If patch markers or active fixes disappear without changelog documentation, stop and ask Max."
-  },
-  "changelogSizePolicy": {
-    "scope": "embedded kgg-changelog in index.html",
-    "warnAtEntries": 18,
-    "maxEmbeddedEntries": 30,
-    "warnAtBytes": 35000,
-    "maxEmbeddedBytes": 55000,
-    "actionWhenWarningThresholdReached": "Warn Max before adding more large entries; propose compact summaries or external archival.",
-    "actionWhenMaxExceeded": "Stop non-critical updates until Max approves compaction/archive strategy.",
-    "doNotAutoDeleteHistory": true
-  },
-  "blockPatchIfMissing": [
-    "kgg-source-truth",
-    "kgg-changelog",
-    "kgg-patch-rules"
-  ],
-  "requiredOnPatchRemoval": [
-    "supersededBy or replacementPatchId",
-    "removalReason",
-    "testEvidence",
-    "rollbackNote",
-    "explicitMaxApproval"
-  ],
-  "llmInstruction": "If changelog size exceeds policy thresholds or a patch-removal is not documented, warn Max and ask before changing code.",
-  "adminDebugMenuPolicy": {
-    "patchId": "kgg-v022-admin-debug-menu-feedback",
-    "purpose": "Keep an in-app admin feedback/debug path available for future QR/layout/update/storage issues.",
-    "doNotRemoveWithout": [
-      "supersededBy",
-      "reason",
-      "testEvidence",
-      "Max approval"
-    ],
-    "expectedGlobal": "KGG_ADMIN_DEBUG_MENU.report()"
-  },
-  "adminDebugVisibleHotfix": {
-    "patchId": "kgg-v023-admin-debug-visible-hotfix",
-    "purpose": "Debug entry must be visible in admin/therapist app even when adminMode class is missing.",
-    "expectedGlobal": "KGG_ADMIN_DEBUG_MENU.report()",
-    "expectedButton": "#kggAdminDebugFab",
-    "doNotRemoveWithout": [
-      "supersededBy",
-      "reason",
-      "testEvidence",
-      "Max approval"
 ```

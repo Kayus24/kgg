@@ -4,6 +4,85 @@
 - Lines: 17221-17640
 
 ```html
+  const kggAutoUpdateCheckMs=30*60*1000;
+  const kggAutoUpdateSessionKey='kgg_auto_update_target_v1';
+  const adminSecretsKey='kgg_admin_local_secrets_v1';
+  let deferredInstallPrompt=null;
+  let adminSecrets={geminiKeys:[],mediaDropzoneEndpoint:'',mediaDropzoneUploadToken:'',updatedAt:''};
+  const norm=s=>String(s||'').toLowerCase().replace(/[ä]/g,'ae').replace(/[ö]/g,'oe').replace(/[ü]/g,'ue').replace(/[ß]/g,'ss').replace(/[^a-z0-9]+/g,' ').trim();
+  const compact=s=>norm(s).replace(/\s+/g,'');
+  const bank=[
+    ['abd','Abduktion Maschine','abd,abduktion,abductor,abduktor,hüft abduktion',3,'Wdh','kg'],['add','Adduktion Maschine','add,adduktion,adduktor,adductor,hüft adduktion',3,'Wdh','kg'],['legpress','Beinpresse','beinpresse,bein presse,leg press,presse',3,'Wdh','kg'],['bridge','Bridging','bridge,bridging,beckenheben,glute bridge',3,'Wdh','kg'],['copenhagen','Copenhagen Plank','copenhagen,adduktoren plank',3,'Zeit','keine'],['bike','Ergometer / Bike','fahrrad,bike,ergometer,warmup,cardio,rad',1,'Zeit','Stufe/Watt'],['fire','Fire Hydrants','fire hydrant,hydrants,vierfüßler abduktion',3,'Wdh','kg'],['hipthrust','Hip Thrust','hip thrust,glute thrust',3,'Wdh','kg'],['legcurl','Kniebeuger Maschine','kniebeuger,leg curl,hamstring curl,beinbeuger',3,'Wdh','kg'],['kneeext','Kniestrecker Maschine','kniestrecker,knieextension,beinstrecker,leg extension,knei ext',3,'Wdh','kg'],['row','Rudern','rudern,seated row,kabelrudern,ruderzug',3,'Wdh','kg'],['lat','Latziehen','latziehen,latzug,lat pulldown,pulldown,lat',3,'Wdh','kg'],['pallof','Pallof Press','pallof,pallof press,anti rotation',3,'Wdh','kg'],['plank','Plank','plank,blank,unterarmstütz,stütz',3,'Zeit','keine'],['squat','Squat','squat,kniebeuge,kniebeugen',3,'Wdh','kg'],['rdl','Romanian Deadlift','romanian deadlift,rdl,dead lift',3,'Wdh','kg'],['deadlift','Wadenheben','wadenheben,calf raise',3,'Wdh','kg'],['shoulder','Schulterpresse','schulter presse,shoulder press',3,'Wdh','kg']
+  ].map(a=>({id:a[0],name:a[1],aliases:a[2],sets:a[3],unit:a[4],weightUnit:a[5]}));
+  let state={plan:[],recent:[],packages:[{id:'pkg1',name:'Knie Standard',exercises:['Beinpresse','Kniebeuger Maschine','Kniestrecker Maschine']},{id:'pkg2',name:'Rücken Standard',exercises:['Rudern','Latziehen','Pallof Press']}],patient:{},bankOpen:false,editId:null,sortMenuId:null,reorderSuppressClick:false,largePdfMode:false,textSyncing:false};
+  let bankSelectMode='replaceActive';
+  let deletedBankIds=new Set();
+  let pendingBankDeleteId=null;
+  let bankSwipeSuppressClickUntil=0;
+  const MEDIA_UPLOAD_TTL_SECONDS=300;
+  const MEDIA_UPLOAD_LONG_TTL_SECONDS=86400;
+  const MEDIA_LONG_PRESS_MS=5000;
+  const MEDIA_RETRY_SECONDS=240;
+  const MEDIA_IMAGE_MAX_DIM=1280;
+  const MEDIA_IMAGE_QUALITY=.78;
+  const mediaDbName='kgg_media_v1';
+  const mediaStoreName='encryptedBlobs';
+  let mediaDbPromise=null;
+  let patientShareTtlSeconds=MEDIA_UPLOAD_TTL_SECONDS;
+  let lastPatientSharePlanSnapshot=null;
+  let lastPatientMediaBundleManifest=null;
+  let copyPatientLinkSuppressClickUntil=0;
+  const mediaDropzoneRuntimeTokens={};
+
+  // v2 Plan-State-Adapter: KGGDataStore.currentPlan ist die zentrale Planquelle.
+  // state.plan bleibt als bestehender UI-/Legacy-Spiegel erhalten.
+  function makeLocalId(){return 'p_'+Date.now()+'_'+Math.random().toString(36).slice(2,8)}
+  function makeMediaId(){return 'media_'+Date.now()+'_'+Math.random().toString(36).slice(2,10)}
+  function getMediaDropzoneSetting(key){
+    try{return String(window[key]||localStorage.getItem(key)||'').trim();}catch(e){return String(window[key]||'').trim();}
+  }
+  function cleanMediaDropzoneEndpoint(value){return String(value||'').trim().replace(/\/+$/,'');}
+  function cleanMediaDropzoneId(value){return String(value||'').replace(/[^a-zA-Z0-9._-]/g,'').slice(0,96);}
+  function initMediaDropzoneUploadAdapter(){
+    const endpoint=cleanMediaDropzoneEndpoint(getMediaDropzoneSetting('KGG_MEDIA_DROPZONE_ENDPOINT')||getMediaDropzoneSetting('kggMediaDropzoneEndpoint'));
+    window.KGGMediaDropzone={
+      setEndpoint(url){try{localStorage.setItem('kggMediaDropzoneEndpoint',cleanMediaDropzoneEndpoint(url));}catch(e){}},
+      setUploadToken(token){try{localStorage.setItem('kggMediaDropzoneUploadToken',String(token||'').trim());}catch(e){}},
+      clear(){try{localStorage.removeItem('kggMediaDropzoneEndpoint');localStorage.removeItem('kggMediaDropzoneUploadToken');}catch(e){}}
+    };
+    if(!endpoint)return;
+    if(window.KGGMediaUploadAdapter&&!window.KGGMediaUploadAdapter.isMock)return;
+    window.KGGMediaUploadAdapter={
+      name:'kgg-media-dropzone-kv-v1',
+      isMock:false,
+      async upload(blob,context){
+        const manifest=context&&context.manifest||{};
+        const id=cleanMediaDropzoneId(manifest.id)||makeMediaId();
+        const ttlSeconds=Math.max(60,Math.min(MEDIA_UPLOAD_LONG_TTL_SECONDS,Number(context&&context.ttlSeconds)||MEDIA_UPLOAD_TTL_SECONDS));
+        const token=getMediaDropzoneSetting('KGG_MEDIA_DROPZONE_UPLOAD_TOKEN')||getMediaDropzoneSetting('kggMediaDropzoneUploadToken');
+        const headers={'Content-Type':'application/octet-stream','X-KGG-Media-Id':id,'X-KGG-Media-Mime':manifest.mime||'application/octet-stream','X-KGG-Media-Bytes':String(blob&&blob.size||0)};
+        if(token)headers['X-KGG-Upload-Token']=token;
+        const res=await fetch(endpoint+'/upload?ttl='+encodeURIComponent(ttlSeconds),{method:'POST',headers,body:blob,cache:'no-store'});
+        if(!res.ok)throw new Error('Medien-Upload fehlgeschlagen ('+res.status+').');
+        const data=await res.json();
+        if(data&&data.id&&data.deleteToken)mediaDropzoneRuntimeTokens[data.id]=data.deleteToken;
+        return data;
+      },
+      scheduleDelete(media,options){
+        const delay=Math.max(1000,Number(options&&options.delayMs)||((Number(media&&media.ttlSeconds)||MEDIA_UPLOAD_TTL_SECONDS)*1000));
+        setTimeout(()=>{this.delete(media);},delay);
+      },
+      async delete(media){
+        const id=cleanMediaDropzoneId(media&&media.id);
+        if(!id)return false;
+        const deleteToken=(media&&media.deleteToken)||mediaDropzoneRuntimeTokens[id]||'';
+        const deleteUrl=(media&&media.deleteUrl)||endpoint+'/media/'+encodeURIComponent(id);
+        try{
+          const res=await fetch(deleteUrl,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({deleteToken}),cache:'no-store'});
+          return res.ok||res.status===404||res.status===410;
+        }catch(err){console.warn('Media delete fehlgeschlagen:',err);return false;}
+      }
+    };
   }
   initMediaDropzoneUploadAdapter();
   function bytesToBase64Url(input){
@@ -345,83 +424,4 @@
       out.startMetric=normalizeStructuredNumber(time[1])+' '+mt.label;
       out.unit=mt.unit; out.metricUnit=mt.metricUnit;
     }else if(compact){
-      out.startMetric=normalizeStructuredNumber(compact[1]);
-      out.unit='Wdh'; out.metricUnit='Wdh';
-    }
-    let loadUnitInfo=null, loadMatch=null;
-    loadMatch=body.match(new RegExp('@\\s*('+n+')\\s*('+u+')?','i'));
-    if(loadMatch){
-      out.startLoad=normalizeStructuredNumber(loadMatch[1]);
-      loadUnitInfo=normalizeLoadUnitInfo(loadMatch[2]||'kg','kg');
-    }else{
-      loadMatch=body.match(new RegExp('@\\s*('+u+')\\s*('+n+')','i'));
-      if(loadMatch){
-        out.startLoad=normalizeStructuredNumber(loadMatch[2]);
-        loadUnitInfo=normalizeLoadUnitInfo(loadMatch[1],'kg');
-      }else{
-        loadMatch=body.match(new RegExp('@\\s*('+u+')\\b','i'));
-        if(loadMatch)loadUnitInfo=normalizeLoadUnitInfo(loadMatch[1],'kg');
-      }
-    }
-    if(!loadUnitInfo&&compact){
-      out.startLoad=normalizeStructuredNumber(compact[2]);
-      loadUnitInfo=normalizeLoadUnitInfo(compact[3]||'kg','kg');
-    }
-    if(!loadUnitInfo){
-      let rest=body;
-      [compact,rep,time].forEach(m=>{if(m)rest=rest.replace(m[0],' ');});
-      rest=rest.replace(new RegExp('@\\s*(?:'+n+'\\s*'+u+'?|'+u+'\\s*'+n+'|'+u+')','ig'),' ');
-      loadMatch=rest.match(new RegExp('('+n+')\\s*('+u+')\\b','i'));
-      if(loadMatch){
-        out.startLoad=normalizeStructuredNumber(loadMatch[1]);
-        loadUnitInfo=normalizeLoadUnitInfo(loadMatch[2],'kg');
-      }else{
-        loadMatch=rest.match(new RegExp('('+u+')\\s*('+n+')\\b','i'));
-        if(loadMatch){
-          out.startLoad=normalizeStructuredNumber(loadMatch[2]);
-          loadUnitInfo=normalizeLoadUnitInfo(loadMatch[1],'kg');
-        }
-      }
-    }
-    if(loadUnitInfo&&loadUnitInfo.explicit){
-      out.weightUnit=loadUnitInfo.unit;
-      out.loadUnit=loadUnitInfo.unit;
-      out.customLoadUnit=!!loadUnitInfo.custom;
-      if(loadUnitInfo.custom)out.needsReview=true;
-    }
-    return out;
-  }
-  function parseSideModeFromText(text){
-    const raw=' '+String(text||'').toLowerCase().replace(/[.,;:]+/g,' ')+' ';
-    if(/\b(lr|l\/r|li\/re|links\/rechts|li|re|links|rechts)\b/.test(raw))return 'LR';
-    return 'BI';
-  }
-  function ensureKGGDataStore(){
-    if(window.KGGDataStore && typeof window.KGGDataStore.getCurrentPlan==='function')return window.KGGDataStore;
-    const store={currentPlan:{id:'plan_'+Date.now(),title:'KGG Plan',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),patient:{},exercises:[],source:'ui'}};
-    window.KGGDataStore={
-      init(meta){store.meta={...(store.meta||{}),...(meta||{})};return this;},
-      setCurrentPlan(plan,reason){store.currentPlan={...(store.currentPlan||{}),...(plan||{}),updatedAt:new Date().toISOString(),lastReason:reason||''};return store.currentPlan;},
-      getCurrentPlan(){return JSON.parse(JSON.stringify(store.currentPlan||{exercises:[]}));},
-      getState(){return JSON.parse(JSON.stringify(store));}
-    };
-    return window.KGGDataStore;
-  }
-  function ensureUiExerciseShape(ex){
-    const localId=ex.localId||ex.uiLocalId||(String(ex.id||'').startsWith('p_')?ex.id:makeLocalId());
-    return {...ex, id:localId, localId, side:normalizeSideMode(ex.side||ex.sides||ex.laterality||'BI'), media:ensureExerciseMediaList(ex), sourceId:ex.sourceId||ex.bankId||(!String(ex.id||'').startsWith('p_')?ex.id:''), bankId:ex.bankId||(!String(ex.id||'').startsWith('p_')?ex.id:'')};
-  }
-  function currentPatientData(){return {name:state.patient&&state.patient.name||'',date:$('planDate')&&$('planDate').value||'',therapist:state.patient&&state.patient.therapist||'',notes:state.patient&&state.patient.notes||''};}
-  function syncStatePlanToStore(reason){
-    const ds=ensureKGGDataStore();
-    state.plan=Array.isArray(state.plan)?state.plan.map(ensureUiExerciseShape):[];
-    ds.setCurrentPlan({
-      id:state.planId||'plan_'+(state.createdAt||Date.now()),
-      title:state.planTitle||'KGG Plan',
-      patient:{...(state.patient||{}),...currentPatientData()},
-      exercises:state.plan.map(ex=>({...ex})),
-      source:'ui-shell'
-    },reason||'sync_state_to_store');
-    return ds.getCurrentPlan();
-  }
 ```

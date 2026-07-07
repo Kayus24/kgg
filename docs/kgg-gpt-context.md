@@ -28,11 +28,11 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 ## Current Versions
 
-- Source web version: v56 / `1.0.56-patient-qr-root-query`.
-- Source index URL: `index.html?v=56`.
-- Source notes: v056: Patienten-QRs nutzen die Root-Patienten-App mit ?plan=KGGH2-Payload; Root-App importiert Query-Plan direkt.
-- Live Admin release: `r0420` / `1.0.56-patient-qr-root-query`.
-- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0420/admin.html`.
+- Source web version: v58 / `1.0.58-grossdruck-readability-beta`.
+- Source index URL: `index.html?v=58`.
+- Source notes: v058: Grossdruck-PDF nutzt groessere kurzsichtigkeitsgepruefte Schrift und eine lokale PDF-Readability-Testengine.
+- Live Admin release: `r0421` / `1.0.58-grossdruck-readability-beta`.
+- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0421/admin.html`.
 - Live colleague release: `r0397` / `1.0.29-camera-touch-parser-fix`.
 - Live colleague URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0397/colleague.html`.
 - Latest Android shell: `v401`.

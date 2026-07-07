@@ -4,6 +4,85 @@
 - Lines: 16381-16800
 
 ```html
+        a12: a.a12 * b.a11 + a.a22 * b.a12 + a.a32 * b.a13,
+        a13: a.a13 * b.a11 + a.a23 * b.a12 + a.a33 * b.a13,
+        a21: a.a11 * b.a21 + a.a21 * b.a22 + a.a31 * b.a23,
+        a22: a.a12 * b.a21 + a.a22 * b.a22 + a.a32 * b.a23,
+        a23: a.a13 * b.a21 + a.a23 * b.a22 + a.a33 * b.a23,
+        a31: a.a11 * b.a31 + a.a21 * b.a32 + a.a31 * b.a33,
+        a32: a.a12 * b.a31 + a.a22 * b.a32 + a.a32 * b.a33,
+        a33: a.a13 * b.a31 + a.a23 * b.a32 + a.a33 * b.a33,
+    };
+}
+function extract(image, location) {
+    var qToS = quadrilateralToSquare({ x: 3.5, y: 3.5 }, { x: location.dimension - 3.5, y: 3.5 }, { x: location.dimension - 6.5, y: location.dimension - 6.5 }, { x: 3.5, y: location.dimension - 3.5 });
+    var sToQ = squareToQuadrilateral(location.topLeft, location.topRight, location.alignmentPattern, location.bottomLeft);
+    var transform = times(sToQ, qToS);
+    var matrix = BitMatrix_1.BitMatrix.createEmpty(location.dimension, location.dimension);
+    var mappingFunction = function (x, y) {
+        var denominator = transform.a13 * x + transform.a23 * y + transform.a33;
+        return {
+            x: (transform.a11 * x + transform.a21 * y + transform.a31) / denominator,
+            y: (transform.a12 * x + transform.a22 * y + transform.a32) / denominator,
+        };
+    };
+    for (var y = 0; y < location.dimension; y++) {
+        for (var x = 0; x < location.dimension; x++) {
+            var xValue = x + 0.5;
+            var yValue = y + 0.5;
+            var sourcePixel = mappingFunction(xValue, yValue);
+            matrix.set(x, y, image.get(Math.floor(sourcePixel.x), Math.floor(sourcePixel.y)));
+        }
+    }
+    return {
+        matrix: matrix,
+        mappingFunction: mappingFunction,
+    };
+}
+exports.extract = extract;
+
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var MAX_FINDERPATTERNS_TO_SEARCH = 4;
+var MIN_QUAD_RATIO = 0.5;
+var MAX_QUAD_RATIO = 1.5;
+var distance = function (a, b) { return Math.sqrt(Math.pow((b.x - a.x), 2) + Math.pow((b.y - a.y), 2)); };
+function sum(values) {
+    return values.reduce(function (a, b) { return a + b; });
+}
+// Takes three finder patterns and organizes them into topLeft, topRight, etc
+function reorderFinderPatterns(pattern1, pattern2, pattern3) {
+    var _a, _b, _c, _d;
+    // Find distances between pattern centers
+    var oneTwoDistance = distance(pattern1, pattern2);
+    var twoThreeDistance = distance(pattern2, pattern3);
+    var oneThreeDistance = distance(pattern1, pattern3);
+    var bottomLeft;
+    var topLeft;
+    var topRight;
+    // Assume one closest to other two is B; A and C will just be guesses at first
+    if (twoThreeDistance >= oneTwoDistance && twoThreeDistance >= oneThreeDistance) {
+        _a = [pattern2, pattern1, pattern3], bottomLeft = _a[0], topLeft = _a[1], topRight = _a[2];
+    }
+    else if (oneThreeDistance >= twoThreeDistance && oneThreeDistance >= oneTwoDistance) {
+        _b = [pattern1, pattern2, pattern3], bottomLeft = _b[0], topLeft = _b[1], topRight = _b[2];
+    }
+    else {
+        _c = [pattern1, pattern3, pattern2], bottomLeft = _c[0], topLeft = _c[1], topRight = _c[2];
+    }
+    // Use cross product to figure out whether bottomLeft (A) and topRight (C) are correct or flipped in relation to topLeft (B)
+    // This asks whether BC x BA has a positive z component, which is the arrangement we want. If it's negative, then
+    // we've got it flipped around and should swap topRight and bottomLeft.
+    if (((topRight.x - topLeft.x) * (bottomLeft.y - topLeft.y)) - ((topRight.y - topLeft.y) * (bottomLeft.x - topLeft.x)) < 0) {
+        _d = [topRight, bottomLeft], bottomLeft = _d[0], topRight = _d[1];
+    }
+    return { bottomLeft: bottomLeft, topLeft: topLeft, topRight: topRight };
 }
 // Computes the dimension (number of modules on a side) of the QR Code based on the position of the finder patterns
 function computeDimension(topLeft, topRight, bottomLeft, matrix) {
@@ -345,83 +424,4 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     };
     var modulesBetweenFinderPatterns = ((distance(topLeft, bottomLeft) + distance(topLeft, topRight)) / 2 / moduleSize);
     var correctionToTopLeft = 1 - (3 / modulesBetweenFinderPatterns);
-    var expectedAlignmentPattern = {
-        x: topLeft.x + correctionToTopLeft * (bottomRightFinderPattern.x - topLeft.x),
-        y: topLeft.y + correctionToTopLeft * (bottomRightFinderPattern.y - topLeft.y),
-    };
-    var alignmentPatterns = alignmentPatternQuads
-        .map(function (q) {
-        var x = (q.top.startX + q.top.endX + q.bottom.startX + q.bottom.endX) / 4;
-        var y = (q.top.y + q.bottom.y + 1) / 2;
-        if (!matrix.get(Math.floor(x), Math.floor(y))) {
-            return;
-        }
-        var lengths = [q.top.endX - q.top.startX, q.bottom.endX - q.bottom.startX, (q.bottom.y - q.top.y + 1)];
-        var size = sum(lengths) / lengths.length;
-        var sizeScore = scorePattern({ x: Math.floor(x), y: Math.floor(y) }, [1, 1, 1], matrix);
-        var score = sizeScore + distance({ x: x, y: y }, expectedAlignmentPattern);
-        return { x: x, y: y, score: score };
-    })
-        .filter(function (v) { return !!v; })
-        .sort(function (a, b) { return a.score - b.score; });
-    // If there are less than 15 modules between finder patterns it's a version 1 QR code and as such has no alignmemnt pattern
-    // so we can only use our best guess.
-    var alignmentPattern = modulesBetweenFinderPatterns >= 15 && alignmentPatterns.length ? alignmentPatterns[0] : expectedAlignmentPattern;
-    return { alignmentPattern: alignmentPattern, dimension: dimension };
-}
-
-
-/***/ })
-/******/ ])["default"];
-});
-</script>
-<!-- KGG PATCH END kgg-v021-embed-jsqr-gallery-decode lib -->
-
-<style id="kgg-v024-rollback-v023-debug-breakage-guard-style">
-/* KGG PATCH START: kgg-v024-rollback-v023-debug-breakage-guard-style */
-#kggAdminDebugFab,
-#kggAdminDebugBtn,
-#kggAdminHubBtn,
-.kggAdminDebugBtn,
-.kggAdminHubBtn,
-#kggDebugPanelOverlay,
-.kggDebugPanelOverlay,
-.kggDebugToast{
-  display:none!important;
-  visibility:hidden!important;
-  opacity:0!important;
-  pointer-events:none!important;
-}
-/* KGG PATCH END: kgg-v024-rollback-v023-debug-breakage-guard-style */
-</style>
-</head>
-<body class="adminMode">
-<div class="tabletSideBackdrop" id="tabletSideBackdrop" hidden></div>
-  <aside class="tabletSideMenu" id="tabletSideMenu" aria-hidden="true">
-    <div class="tabletSideMenuHead">
-      <strong>Menue</strong>
-      <button class="tabletMenuClose" id="tabletMenuClose" type="button" aria-label="Menue schliessen">&times;</button>
-    </div>
-    <nav class="tabletSideMenuGroup tabletSideMenuMain" aria-label="Tablet-Menue">
-      <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuRecentBtn" type="button"><span class="tabletMenuActionIcon" aria-hidden="true">&#128337;</span><span>Letzte Pl&auml;ne</span></button>
-      <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuPackagesBtn" type="button"><span class="tabletMenuActionIcon" aria-hidden="true">&#128230;</span><span>&Uuml;bungspakete</span></button>
-      <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuTherapistShareBtn" type="button"><span class="tabletMenuActionIcon" aria-hidden="true">&#128188;</span><span>Therapeuten-App weitergeben</span></button>
-      <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuLayoutBtn" type="button" aria-expanded="false"><span class="tabletMenuActionIcon" aria-hidden="true">&#9881;</span><span>Layout anpassen</span></button>
-      <div class="tabletSideMenuLayoutPanel" id="tabletMenuLayoutPanel" hidden>
-        <div class="tabletLayoutControls" id="tabletLayoutControls" aria-label="Tablet-Layout">
-          <button class="tabletLockSwitch" id="tabletLayoutLockBtn" type="button" aria-pressed="true" aria-label="Layout fixiert">
-            <span class="tabletLockIcon" aria-hidden="true">&#128274;</span>
-            <span class="tabletSwitchTrack" aria-hidden="true"><span class="tabletSwitchKnob"></span></span>
-            <span class="tabletLockText">Fix</span>
-          </button>
-          <div class="tabletLayoutFreeTools" id="tabletLayoutFreeTools" aria-label="Freies Tablet-Layout">
-            <button id="tabletScalePlus" type="button" aria-label="UI groesser">+</button>
-            <span class="tabletScaleValue" id="tabletScaleValue">100%</span>
-            <button id="tabletLayoutReset" type="button" aria-label="Tablet-Layout zuruecksetzen">&#8634;</button>
-            <button id="tabletScaleMinus" type="button" aria-label="UI kleiner">-</button>
-          </div>
-        </div>
-      </div>
-    </nav>
-  </aside>
 ```

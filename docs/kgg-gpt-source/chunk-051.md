@@ -4,6 +4,99 @@
 - Lines: 21421-21840
 
 ```html
+  }
+  function buildExerciseMediaManifestForPatient(ex){
+    return ensureExerciseMediaList(ex).filter(item=>item.type==='image').map(item=>({
+      id:item.id,
+      type:'image',
+      mime:item.mime,
+      name:item.name,
+      width:item.width,
+      height:item.height,
+      bytes:item.encryptedSize||0,
+      encrypted:true,
+      status:item.downloadUrl?'ready':'upload-pending',
+      downloadUrl:item.downloadUrl||'',
+      expiresInSeconds:item.ttlSeconds||MEDIA_UPLOAD_TTL_SECONDS,
+      retrySeconds:item.retrySeconds||MEDIA_RETRY_SECONDS,
+      crypto:item.crypto||null
+    }));
+  }
+  function buildExerciseMediaRefsForPatient(ex){
+    const ids=ensureExerciseMediaList(ex).filter(item=>item.type==='image'&&item.id).map(item=>item.id);
+    return ids.length?ids:'';
+  }
+  function compactMediaBundleForQr(bundle){
+    if(!bundle||!bundle.downloadUrl||!bundle.crypto)return null;
+    return {
+      u:bundle.downloadUrl,
+      k:bundle.crypto.key,
+      i:bundle.crypto.iv,
+      c:Number(bundle.count)||0,
+      t:Number(bundle.expiresInSeconds)||MEDIA_UPLOAD_TTL_SECONDS,
+      r:Number(bundle.retrySeconds)||MEDIA_RETRY_SECONDS
+    };
+  }
+  function buildPatientExercisePayload(ex){
+    const copy={...ex};
+    const media=buildExerciseMediaManifestForPatient(ex);
+    if(media.length)copy.media=media; else delete copy.media;
+    return copy;
+  }
+  function buildPlanMediaMeta(rawExercises,ttlSeconds){
+    const items=(rawExercises||[]).flatMap(ensureExerciseMediaList);
+    const count=items.length;
+    const bundle=compactMediaBundleForQr(lastPatientMediaBundleManifest);
+    const ready=bundle?count:items.filter(item=>item.downloadUrl&&item.status==='ready').length;
+    const meta={expected:count>0,count,ready,ttlSeconds:Number(ttlSeconds)||currentMediaShareTtlSeconds(),retrySeconds:MEDIA_RETRY_SECONDS,status:count?(ready===count?'ready':'upload-pending'):'none'};
+    if(bundle)meta.b=bundle;
+    return meta;
+  }
+  function encodeKggJsonBase64Url(value){
+    return btoa(unescape(encodeURIComponent(JSON.stringify(value||{})))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+  function decodeKggJsonBase64Url(value){
+    const encoded=String(value||'').replace(/-/g,'+').replace(/_/g,'/');
+    const padded=encoded+'='.repeat((4-encoded.length%4)%4);
+    return JSON.parse(decodeURIComponent(escape(atob(padded))));
+  }
+  function compactKggH2Exercise(ex){
+    const media=lastPatientMediaBundleManifest?buildExerciseMediaRefsForPatient(ex):buildExerciseMediaManifestForPatient(ex);
+    const loadUnit=ex&&ex.weightUnit||ex&&ex.loadUnit||'kg';
+    const metricUnit=ex&&ex.unit||ex&&ex.metricUnit||'Wdh';
+    return [
+      ex&&ex.name||'Übung',
+      normalizeSetCount(ex&&ex.sets),
+      normalizeSideMode(ex&&ex.side||ex&&ex.laterality||'BI'),
+      loadUnit,
+      metricUnit,
+      ex&&ex.startLoad||ex&&ex.load||ex&&ex.weight||'',
+      ex&&ex.startMetric||ex&&ex.metric||ex&&ex.reps||'',
+      media&&media.length?media:'',
+      ex&&ex.videoUrl||'',
+      ex&&ex.videoLabel||'Video öffnen'
+    ];
+  }
+  function buildKggH2PayloadFromPlan(plan,exercises,patient,mediaMeta){
+    const sourcePlan=plan||{};
+    const sourcePatient=patient||{};
+    return {
+      v:2,
+      i:String(sourcePlan.id||sourcePlan.planId||'plan_'+Date.now()),
+      t:String(sourcePlan.title||'KGG Trainingsplan'),
+      d:Number(sourcePlan.days)||6,
+      extendDays:true,
+      stepDays:6,
+      e:(exercises||[]).map(compactKggH2Exercise),
+      patient:{
+        name:sourcePatient.name||sourcePatient.displayName||'',
+        date:sourcePatient.date||sourcePatient.startDate||'',
+        therapist:sourcePatient.therapist||'',
+        notes:sourcePatient.notes||''
+      },
+      m:{
+        source:'kgg-therapist-app',
+        schema:'KGGH2',
         createdAt:new Date().toISOString(),
         media:mediaMeta||{expected:false,count:0,ready:0,status:'none'}
       }
@@ -331,97 +424,4 @@
     });
   }
   async function patientFetchEncryptedMedia(media){
-    if(window.KGGPatientMediaFetchAdapter&&typeof window.KGGPatientMediaFetchAdapter.fetch==='function')return window.KGGPatientMediaFetchAdapter.fetch(media);
-    if(!media.downloadUrl)throw new Error('Bild ist noch nicht bereit');
-    const res=await fetch(media.downloadUrl,{cache:'no-store'});
-    if(!res.ok)throw new Error('Bild konnte nicht geladen werden');
-    return res.blob();
-  }
-  async function patientDecryptMedia(media,encryptedBlob){
-    if(!window.crypto||!crypto.subtle)throw new Error('Web Crypto nicht verfuegbar');
-    const info=media.crypto||{};
-    if(!info.key||!info.iv)throw new Error('Medienschluessel fehlt');
-    const key=await crypto.subtle.importKey('raw',base64UrlToBytes(info.key),{name:'AES-GCM'},false,['decrypt']);
-    const encrypted=await encryptedBlob.arrayBuffer();
-    const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:base64UrlToBytes(info.iv)},key,encrypted);
-    return new Blob([plain],{type:media.mime||'image/jpeg'});
-  }
-  function updatePatientMediaBox(id,html,kind){
-    const selector='[data-patient-media-id="'+String(id).replace(/"/g,'\\"')+'"]';
-    const box=document.querySelector(selector);
-    if(!box)return;
-    box.className='patientMedia patientMedia_'+(kind||'loading');
-    box.innerHTML=html;
-  }
-  async function loadPatientMediaItem(media){
-    const id=String(media&&media.id||'');
-    if(!id)return false;
-    const cached=await patientGetCachedMedia(id);
-    if(cached&&cached.blob){
-      const url=URL.createObjectURL(cached.blob);
-      updatePatientMediaBox(id,'<img src="'+url+'" alt="Uebungsbild"><small>Bild lokal gespeichert.</small>','ready');
-      return true;
-    }
-    const encrypted=await patientFetchEncryptedMedia(media);
-    const imageBlob=await patientDecryptMedia(media,encrypted);
-    await patientPutCachedMedia({id,blob:imageBlob,mime:media.mime||'image/jpeg',savedAt:new Date().toISOString()});
-    const url=URL.createObjectURL(imageBlob);
-    updatePatientMediaBox(id,'<img src="'+url+'" alt="Uebungsbild"><small>Bild lokal gespeichert.</small>','ready');
-    return true;
-  }
-  function retryPatientMediaItem(media){
-    const id=String(media&&media.id||'');
-    if(!id)return;
-    const retryMs=Math.max(10,Number(media.retrySeconds)||MEDIA_RETRY_SECONDS)*1000;
-    const until=Date.now()+retryMs;
-    const tick=async()=>{
-      try{
-        await loadPatientMediaItem(media);
-      }catch(err){
-        if(Date.now()<until){
-          updatePatientMediaBox(id,'<span>Bild wird geladen ...</span><small>Die App versucht es automatisch erneut.</small>','loading');
-          setTimeout(tick,4000);
-        }else{
-          updatePatientMediaBox(id,'<span>Bild konnte nicht geladen werden.</span><small>Der Plan bleibt ohne Bild nutzbar. Bitte bei Bedarf neuen QR-Code erstellen lassen.</small>','error');
-        }
-      }
-    };
-    tick();
-  }
-  function patientMediaMarkup(ex){
-    const media=ensureExerciseMediaList(ex).filter(item=>item.type==='image');
-    if(!media.length)return '';
-    return '<div class="patientMediaList">'+media.map(item=>'<div class="patientMedia patientMedia_loading" data-patient-media-id="'+escapeHtml(item.id)+'"><span>Bild wird geladen ...</span><small>Verschluesselte Datei wird geholt und lokal gespeichert.</small></div>').join('')+'</div>';
-  }
-  function initPatientMediaDownloads(exercises){
-    (exercises||[]).forEach(ex=>ensureExerciseMediaList(ex).filter(item=>item.type==='image').forEach(retryPatientMediaItem));
-  }
-
-  function patientExerciseLine(ex,index){
-    const name=escapeHtml(ex&&ex.name||'Übung '+(index+1));
-    const sets=escapeHtml(ex&&ex.sets||3);
-    const metric=escapeHtml(ex&&ex.startMetric||ex&&ex.metric||'');
-    const metricUnit=escapeHtml(ex&&ex.unit||ex&&ex.metricUnit||'Wdh');
-    const load=escapeHtml(ex&&ex.startLoad||ex&&ex.load||ex&&ex.weight||'');
-    const loadUnit=escapeHtml(ex&&ex.weightUnit||ex&&ex.loadUnit||'kg');
-    const side=sideModeLabel(ex&&ex.side||ex&&ex.laterality||'BI');
-    const details=[sets+' Sätze'];
-    if(metric)details.push(metric+' '+metricUnit);
-    if(load)details.push(load+' '+loadUnit);
-    details.push(side);
-    return '<article class="patientExercise"><b>'+(index+1)+'. '+name+'</b><small>'+details.map(escapeHtml).join(' · ')+'</small>'+patientMediaMarkup(ex)+'</article>';
-  }
-
-  function renderPatientHashView(){
-    const payload=decodePatientPayloadFromHash();
-    if(!payload)return false;
-    const plan=Array.isArray(payload.plan)?payload.plan:(Array.isArray(payload.exercises)?payload.exercises:[]);
-    const patient=payload.patient||{};
-    const displayName=escapeHtml(patient.name||patient.initials||patient.id||'Patient/in');
-    const date=escapeHtml(patient.date||patient.startDate||'');
-    const exercises=plan.filter(Boolean);
-    document.body.innerHTML='<main class="patientAppView">'+
-      '<header><h1>KGG Trainingsplan</h1><p>'+displayName+(date?' · '+date:'')+'</p></header>'+
-      (payload.error?'<section class="patientNotice">Dieser Patienten-Link konnte nicht gelesen werden.</section>':'')+
-      '<section class="patientExercises">'+
 ```

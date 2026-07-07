@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0421",
+  "versionName": "1.0.58-grossdruck-readability-beta",
+  "notes": "v058: Grossdruck-PDF nutzt groessere kurzsichtigkeitsgepruefte Schrift und eine lokale PDF-Readability-Testengine. Keine Scan/OCR-, Parser-, QR-, Plan-State-, API-Key- oder APK-Aenderung.",
+  "createdAt": "2026-07-07T08:18:55Z",
+  "source": "kgg-update/index.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0421",
+      "profile": "admin",
+      "versionName": "1.0.58-grossdruck-readability-beta",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0421/admin.html",
+      "sha256": "e5c912447e4fe8a9b08003209a9de7507f37c3e3212052334be54c9ebb801514",
+      "notes": "v058: Grossdruck-PDF nutzt groessere kurzsichtigkeitsgepruefte Schrift und eine lokale PDF-Readability-Testengine. Keine Scan/OCR-, Parser-, QR-, Plan-State-, API-Key- oder APK-Aenderung."
+    },
+    "colleague": {
+      "releaseId": "r0421",
+      "profile": "colleague",
+      "versionName": "1.0.58-grossdruck-readability-beta",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0421/colleague.html",
+      "sha256": "84d15852fd97d9e13d986e70897ca1525909eecd3c510ab8e6da631e53431e95",
+      "notes": "v058: Grossdruck-PDF nutzt groessere kurzsichtigkeitsgepruefte Schrift und eine lokale PDF-Readability-Testengine. Keine Scan/OCR-, Parser-, QR-, Plan-State-, API-Key- oder APK-Aenderung."
+    }
+  }
+}

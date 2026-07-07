@@ -4,6 +4,85 @@
 - Lines: 17641-18060
 
 ```html
+      out.startMetric=normalizeStructuredNumber(compact[1]);
+      out.unit='Wdh'; out.metricUnit='Wdh';
+    }
+    let loadUnitInfo=null, loadMatch=null;
+    loadMatch=body.match(new RegExp('@\\s*('+n+')\\s*('+u+')?','i'));
+    if(loadMatch){
+      out.startLoad=normalizeStructuredNumber(loadMatch[1]);
+      loadUnitInfo=normalizeLoadUnitInfo(loadMatch[2]||'kg','kg');
+    }else{
+      loadMatch=body.match(new RegExp('@\\s*('+u+')\\s*('+n+')','i'));
+      if(loadMatch){
+        out.startLoad=normalizeStructuredNumber(loadMatch[2]);
+        loadUnitInfo=normalizeLoadUnitInfo(loadMatch[1],'kg');
+      }else{
+        loadMatch=body.match(new RegExp('@\\s*('+u+')\\b','i'));
+        if(loadMatch)loadUnitInfo=normalizeLoadUnitInfo(loadMatch[1],'kg');
+      }
+    }
+    if(!loadUnitInfo&&compact){
+      out.startLoad=normalizeStructuredNumber(compact[2]);
+      loadUnitInfo=normalizeLoadUnitInfo(compact[3]||'kg','kg');
+    }
+    if(!loadUnitInfo){
+      let rest=body;
+      [compact,rep,time].forEach(m=>{if(m)rest=rest.replace(m[0],' ');});
+      rest=rest.replace(new RegExp('@\\s*(?:'+n+'\\s*'+u+'?|'+u+'\\s*'+n+'|'+u+')','ig'),' ');
+      loadMatch=rest.match(new RegExp('('+n+')\\s*('+u+')\\b','i'));
+      if(loadMatch){
+        out.startLoad=normalizeStructuredNumber(loadMatch[1]);
+        loadUnitInfo=normalizeLoadUnitInfo(loadMatch[2],'kg');
+      }else{
+        loadMatch=rest.match(new RegExp('('+u+')\\s*('+n+')\\b','i'));
+        if(loadMatch){
+          out.startLoad=normalizeStructuredNumber(loadMatch[2]);
+          loadUnitInfo=normalizeLoadUnitInfo(loadMatch[1],'kg');
+        }
+      }
+    }
+    if(loadUnitInfo&&loadUnitInfo.explicit){
+      out.weightUnit=loadUnitInfo.unit;
+      out.loadUnit=loadUnitInfo.unit;
+      out.customLoadUnit=!!loadUnitInfo.custom;
+      if(loadUnitInfo.custom)out.needsReview=true;
+    }
+    return out;
+  }
+  function parseSideModeFromText(text){
+    const raw=' '+String(text||'').toLowerCase().replace(/[.,;:]+/g,' ')+' ';
+    if(/\b(lr|l\/r|li\/re|links\/rechts|li|re|links|rechts)\b/.test(raw))return 'LR';
+    return 'BI';
+  }
+  function ensureKGGDataStore(){
+    if(window.KGGDataStore && typeof window.KGGDataStore.getCurrentPlan==='function')return window.KGGDataStore;
+    const store={currentPlan:{id:'plan_'+Date.now(),title:'KGG Plan',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),patient:{},exercises:[],source:'ui'}};
+    window.KGGDataStore={
+      init(meta){store.meta={...(store.meta||{}),...(meta||{})};return this;},
+      setCurrentPlan(plan,reason){store.currentPlan={...(store.currentPlan||{}),...(plan||{}),updatedAt:new Date().toISOString(),lastReason:reason||''};return store.currentPlan;},
+      getCurrentPlan(){return JSON.parse(JSON.stringify(store.currentPlan||{exercises:[]}));},
+      getState(){return JSON.parse(JSON.stringify(store));}
+    };
+    return window.KGGDataStore;
+  }
+  function ensureUiExerciseShape(ex){
+    const localId=ex.localId||ex.uiLocalId||(String(ex.id||'').startsWith('p_')?ex.id:makeLocalId());
+    return {...ex, id:localId, localId, side:normalizeSideMode(ex.side||ex.sides||ex.laterality||'BI'), media:ensureExerciseMediaList(ex), sourceId:ex.sourceId||ex.bankId||(!String(ex.id||'').startsWith('p_')?ex.id:''), bankId:ex.bankId||(!String(ex.id||'').startsWith('p_')?ex.id:'')};
+  }
+  function currentPatientData(){return {name:state.patient&&state.patient.name||'',date:$('planDate')&&$('planDate').value||'',therapist:state.patient&&state.patient.therapist||'',notes:state.patient&&state.patient.notes||''};}
+  function syncStatePlanToStore(reason){
+    const ds=ensureKGGDataStore();
+    state.plan=Array.isArray(state.plan)?state.plan.map(ensureUiExerciseShape):[];
+    ds.setCurrentPlan({
+      id:state.planId||'plan_'+(state.createdAt||Date.now()),
+      title:state.planTitle||'KGG Plan',
+      patient:{...(state.patient||{}),...currentPatientData()},
+      exercises:state.plan.map(ex=>({...ex})),
+      source:'ui-shell'
+    },reason||'sync_state_to_store');
+    return ds.getCurrentPlan();
+  }
   function syncStoreToStatePlan(reason){
     const ds=ensureKGGDataStore();
     const plan=ds.getCurrentPlan()||{};
@@ -345,83 +424,4 @@
     const btn=$('visionBtn');
     if(btn){btn.textContent=enabled?'PDF A-':'PDF A+'; btn.setAttribute('aria-pressed',enabled?'true':'false'); btn.title=enabled?'Standard-PDF':'Großdruck-PDF';}
   }
-  function setLargePdfMode(enabled){state.largePdfMode=!!enabled; applyLargePdfMode(); save();}
-  function initLargePdfMode(){if(/[?&](grosspdf|largepdf)=1\b/i.test(location.search))state.largePdfMode=true; applyLargePdfMode();}
-  function loadDeletedBankIds(){try{const raw=localStorage.getItem(deletedBankKey); const ids=raw?JSON.parse(raw):[]; deletedBankIds=new Set(Array.isArray(ids)?ids.map(String):[]);}catch(e){console.warn(e); deletedBankIds=new Set();}}
-  function persistDeletedBankIds(){try{localStorage.setItem(deletedBankKey,JSON.stringify([...deletedBankIds]));}catch(e){console.warn(e)}}
-  function loadCustomBank(){loadDeletedBankIds(); try{const raw=localStorage.getItem(customBankKey); const items=raw?JSON.parse(raw):[]; if(Array.isArray(items))items.forEach(ex=>{if(ex&&ex.name){const existing=bank.find(b=>compact(b.name)===compact(ex.name)); if(existing)Object.assign(existing,{...ex,id:existing.id||ex.id,custom:true}); else bank.push({...ex,custom:true});}});}catch(e){console.warn(e)} for(let i=bank.length-1;i>=0;i--){if(deletedBankIds.has(String(bank[i]&&bank[i].id)))bank.splice(i,1);}}
-  function persistCustomBank(){try{localStorage.setItem(customBankKey,JSON.stringify(bank.filter(ex=>ex.custom||ex.createdFromPlan)));}catch(e){console.warn(e)} queueNativeExerciseBankSync('exercise_bank_changed');}
-  function openBankDeleteModal(id){
-    const ex=bank.find(item=>String(item.id)===String(id));
-    if(!ex)return;
-    pendingBankDeleteId=String(id);
-    const name=$('bankDeleteName');
-    if(name)name.textContent=ex.name||'';
-    $('bankDeleteModal').classList.add('open');
-  }
-  function closeBankDeleteModal(){pendingBankDeleteId=null; $('bankDeleteModal').classList.remove('open');}
-  function deleteBankExercise(id){
-    const sid=String(id||'');
-    const idx=bank.findIndex(ex=>String(ex&&ex.id)===sid);
-    if(idx<0)return;
-    deletedBankIds.add(sid);
-    bank.splice(idx,1);
-    persistDeletedBankIds();
-    persistCustomBank();
-    render();
-  }
-  function confirmBankDelete(){if(pendingBankDeleteId)deleteBankExercise(pendingBankDeleteId); closeBankDeleteModal();}
-  function exerciseBankFieldsFromPlan(ex,name){
-    return {
-      name:name||ex.name||stripExerciseName(ex.rawText)||'',
-      aliases:ex.aliases||name||ex.name||'',
-      sets:normalizeSetCount(ex.sets),
-      unit:ex.unit||ex.metricUnit||'Wdh',
-      weightUnit:ex.weightUnit||ex.loadUnit||'kg',
-      loadUnit:ex.weightUnit||ex.loadUnit||'kg',
-      metricUnit:ex.unit||ex.metricUnit||'Wdh',
-      measure:normalizeMeasureMode(ex.measure||(String(ex.unit||'').toLowerCase().includes('zeit')?'zeit':'wdh')),
-      side:normalizeSideMode(ex.side||'BI'),
-      startMetric:ex.startMetric||'',
-      startLoad:ex.startLoad||'',
-      videoUrl:ex.videoUrl||'',
-      videoLabel:ex.videoLabel||'Video öffnen',
-      media:ensureExerciseMediaList(ex)
-    };
-  }
-  function upsertPlanExerciseToBank(ex,reason){
-    const name=ex&&ex.name||stripExerciseName(ex&&ex.rawText)||'';
-    if(!name)return null;
-    let existing=bank.find(b=>compact(b.name)===compact(name));
-    const fields=exerciseBankFieldsFromPlan(ex,name);
-    if(existing){
-      Object.assign(existing,fields,{custom:true,updatedFromPlan:true,updatedAt:new Date().toISOString(),dbSyncReason:reason||'plan_save'});
-    }else{
-      existing={id:'custom_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),...fields,custom:true,createdFromPlan:true,createdAt:new Date().toISOString(),dbSyncReason:reason||'plan_save'};
-      bank.push(existing);
-    }
-    return existing;
-  }
-  function savePendingToBank(reason){
-    state.plan=(state.plan||[]).map(ex=>{
-      const copy={...ex};
-      if(copy.pendingNew||copy.changedByLiveText||copy.needsReview){
-        const saved=upsertPlanExerciseToBank(copy,reason||'before_output');
-        if(saved){
-          copy.pendingNew=false;
-          copy.dbSynced=true;
-          copy.dbSyncedAt=new Date().toISOString();
-          copy.dbSyncReason=reason||'before_output';
-          copy.sourceId=saved.id;
-          copy.bankId=saved.id;
-        }
-      }
-      return copy;
-    });
-    persistCustomBank();
-    syncStatePlanToStore(reason||'save_pending_to_bank');
-    save();
-  }
-  function score(q,ex){const cq=compact(q), cn=compact(ex.name), al=String(ex.aliases||'').split(/[,;]/).map(compact); if(!cq)return 0; if(cq===cn)return 120; if(al.indexOf(cq)>-1)return 115; if(cn.includes(cq)||cq.includes(cn))return 94; if(al.some(a=>a.length>2&&(a.includes(cq)||cq.includes(a))))return 90; return norm(q).split(' ').reduce((r,t)=>r+(t.length>2&&norm(ex.name+' '+ex.aliases).includes(t)?10:0),0)}
-  function scoredSearch(q,limit){return bank.map(ex=>({ex,score:score(q,ex)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,limit||8)}
 ```

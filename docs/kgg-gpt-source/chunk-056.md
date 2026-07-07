@@ -4,6 +4,99 @@
 - Lines: 23521-23940
 
 ```html
+      .map(visibleRect)
+      .filter(Boolean)
+      .filter(r=>r.left>=rect.left-4&&r.right<=rect.right+4);
+    const measuredLeftEdge=leftRects.length?Math.max(...leftRects.map(r=>r.right)):null;
+    const cssLeft=gridFirstCol();
+    const storedLeft=parseFloat(String(tabletLayoutState.leftCol||'').replace('px',''));
+    const fallbackLeft=Number.isFinite(cssLeft)?cssLeft:(Number.isFinite(storedLeft)?storedLeft:Math.min(Math.max(rect.width*.42,360),660));
+    const leftEdge=Number.isFinite(measuredLeftEdge)?measuredLeftEdge:rect.left+fallbackLeft;
+    const rightRects=[$('rightPlanStack'),$('currentPlanBlock'),$('baseToggle'),$('recentToggle'),$('packageLayoutSlot')]
+      .map(visibleRect)
+      .filter(Boolean)
+      .filter(r=>r.left>=leftEdge-12&&r.left<=rect.right+4);
+    const rightEdge=rightRects.length?Math.min(...rightRects.map(r=>r.left)):Math.min(rect.right,rect.left+fallbackLeft+gap);
+    const handleWidth=handle.getBoundingClientRect().width||58;
+    const center=(rightEdge>leftEdge+2)?((leftEdge+rightEdge)/2):leftEdge+Math.max(0,gap/2);
+    handle.style.left=Math.round(center-(handleWidth/2))+'px';
+    handle.style.top=Math.round(rect.top+8)+'px';
+    handle.style.height=Math.max(160,Math.round(rect.height-16))+'px';
+  }
+  function updateTabletLayoutAdaptiveClasses(){
+    const app=document.querySelector('.app');
+    const active=isTabletLayout()&&app&&document.body.classList.contains('tabletLayoutCustom');
+    let left=0, rightSlot=0, recentW=0, planW=0;
+    if(active){
+      const rect=app.getBoundingClientRect();
+      const fallback=Math.min(Math.max(rect.width*.42,360),660);
+      const leftEl=$('bankArea')||$('inputWrap')||document.querySelector('.scanHub');
+      left=leftEl?leftEl.getBoundingClientRect().width:(parseFloat(String(tabletLayoutState.leftCol||'').replace('px',''))||fallback);
+      const slot=$('packageLayoutSlot')||$('packageToggle');
+      rightSlot=slot?slot.getBoundingClientRect().width:0;
+      recentW=$('recentToggle')?$('recentToggle').getBoundingClientRect().width:0;
+      planW=$('currentPlanBlock')?$('currentPlanBlock').getBoundingClientRect().width:0;
+    }
+    document.body.classList.toggle('tabletLayoutLeftSlim',!!active&&left<320);
+    document.body.classList.toggle('tabletLayoutLeftTiny',!!active&&left<190);
+    document.body.classList.toggle('tabletLayoutRightSlim',!!active&&((rightSlot>0&&rightSlot<270)||(recentW>0&&recentW<250)||(planW>0&&planW<360)));
+    document.body.classList.toggle('tabletLayoutRightTiny',!!active&&((rightSlot>0&&rightSlot<150)||(recentW>0&&recentW<135)));
+    document.body.classList.toggle('tabletLayoutScaleHuge',!!active&&tabletLayoutState.scale>1.35);
+  }
+  function getTabletLayoutRect(el){
+    if(!el)return null;
+    const style=getComputedStyle(el);
+    if(style.display==='none'||style.visibility==='hidden'||style.opacity==='0')return null;
+    const rect=el.getBoundingClientRect();
+    if(rect.width<2||rect.height<2)return null;
+    return rect;
+  }
+  function tabletRectsCollide(a,b,gap){
+    return !(a.right+gap<=b.left||b.right+gap<=a.left||a.bottom+gap<=b.top||b.bottom+gap<=a.top);
+  }
+  function updateTabletLayoutCollisionGuard(){
+    const active=isTabletLayout()&&document.body.classList.contains('tabletLayoutCustom');
+    if(!active){
+      document.body.classList.remove('tabletLayoutCollisionTight');
+      document.documentElement.style.setProperty('--kgg-tablet-collision-gap','14px');
+      return;
+    }
+    const scale=Number(tabletLayoutState.scale)||1;
+    const safetyGap=Math.max(10,Math.min(28,Math.round(12+(scale-1)*18)));
+    document.documentElement.style.setProperty('--kgg-tablet-collision-gap',safetyGap+'px');
+    const selectors=['.scanHub .scanBtn','.scanHub .scanMeta','.scanHub .adminConfigBtn','.scanHub .sharedBankBtn','#baseToggle','#inputWrap','#bankArea','#rightPlanStack','#recentToggle','#packageLayoutSlot'];
+    const rects=selectors.flatMap(sel=>[...document.querySelectorAll(sel)]).map(getTabletLayoutRect).filter(Boolean);
+    let collision=false;
+    for(let i=0;i<rects.length&&!collision;i++){
+      for(let j=i+1;j<rects.length;j++){
+        if(tabletRectsCollide(rects[i],rects[j],safetyGap)){collision=true;break;}
+      }
+    }
+    document.body.classList.toggle('tabletLayoutCollisionTight',collision);
+  }
+  function applyTabletLayoutSettings(){
+    const tabletActive=isTabletLayout();
+    document.body.classList.toggle('tabletLayoutUnlocked',!tabletLayoutState.locked);
+    document.body.classList.toggle('tabletLayoutCustom',tabletActive);
+    document.documentElement.style.setProperty('--kgg-tablet-ui-scale',String(tabletLayoutState.scale));
+    if(tabletLayoutState.leftCol)document.documentElement.style.setProperty('--kgg-tablet-left-col',tabletLayoutState.leftCol);
+    else document.documentElement.style.removeProperty('--kgg-tablet-left-col');
+    const btn=$('tabletLayoutLockBtn'), value=$('tabletScaleValue'), splitValue=$('tabletSplitScaleValue');
+    if(btn){
+      btn.setAttribute('aria-pressed',tabletLayoutState.locked?'true':'false');
+      btn.setAttribute('aria-label',tabletLayoutState.locked?'Layout fixiert':'Layout frei verschiebbar');
+      const icon=btn.querySelector('.tabletLockIcon');
+      const text=btn.querySelector('.tabletLockText');
+      if(icon)icon.textContent=String.fromCodePoint(tabletLayoutState.locked?128274:128275);
+      if(text)text.textContent=tabletLayoutState.locked?'Fix':'Frei';
+    }
+    const scaleLabel=Math.round(tabletLayoutState.scale*100)+'%';
+    if(value)value.textContent=scaleLabel;
+    if(splitValue)splitValue.textContent=scaleLabel;
+    updateTabletLayoutAdaptiveClasses();
+    requestAnimationFrame(()=>{updateTabletLayoutHandle();updateTabletLayoutCollisionGuard();});
+  }
+  function setTabletLayoutLocked(locked){
     tabletLayoutState.locked=!!locked;
     saveTabletLayoutSettings();
     applyTabletLayoutSettings();
@@ -331,97 +424,4 @@
     if(next)closeTabletFloatingPanelsExcept('menu');
     else{closeTabletPackageOverlay(false); if(document.body.classList.contains('tabletLayoutEditMode'))setTabletLayoutEditMode(false);}
     requestAnimationFrame(()=>{updateTabletLayoutHandle();updateTabletLayoutCollisionGuard();});
-    setTimeout(()=>{updateTabletLayoutHandle();updateTabletLayoutCollisionGuard();},260);
-    return next;
-  }
-  window.addEventListener('resize',()=>{setTimeout(repositionTabletOverlay,30); setTimeout(syncScannedPlansMobileDock,30); setTimeout(()=>{if(!isTabletLayout())setTabletSideMenuOpen(false);},30);});
-  window.addEventListener('orientationchange',()=>setTimeout(repositionTabletOverlay,120));
-  if(window.visualViewport){
-    window.visualViewport.addEventListener('resize',()=>{setTimeout(repositionTabletOverlay,30); setTimeout(syncScannedPlansMobileDock,30);});
-    window.visualViewport.addEventListener('scroll',()=>setTimeout(repositionTabletOverlay,30));
-  }
-  document.addEventListener('pointerdown',ev=>{
-    if(!isTabletLayout()||!tabletOverlayState.kind)return;
-    const cfg=tabletPanelConfig(tabletOverlayState.kind);
-    if(!cfg)return;
-    const panel=$(cfg.panelId), anchor=$(cfg.anchorId);
-    const target=ev.target;
-    if(panel&&panel.contains(target))return;
-    if(anchor&&anchor.contains(target))return;
-    closeTabletAnchoredPanel(tabletOverlayState.kind);
-  },true);
-  document.addEventListener('keydown',ev=>{
-    if(ev.key!=='Escape'||!isTabletLayout())return;
-    if(document.body.classList.contains('tabletPackageOverlayOpen')){closeTabletPackageOverlay(false);return;}
-    if(tabletOverlayState.kind)closeTabletAnchoredPanel(tabletOverlayState.kind);
-  });
-
-  initScanAutoCollapseOnUiOpen();
-  if(renderPatientHashView())return;
-  $('visionBtn').onclick=()=>setLargePdfMode(!state.largePdfMode);
-  $('exerciseInput').addEventListener('input',()=>upsertLiveExerciseFromText()); $('exerciseInput').addEventListener('focus',()=>render()); $('clearInput').onclick=()=>{clearInputAndRemoveLiveTextExercises();};
-  $('bankToggle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; const opening=!state.bankOpen; if(opening)openTabletExclusivePanel('bank'); toggleBankOpenFromUi(); setTabletOverlayActiveFlag();};
-  $('dbTitle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; const opening=!state.bankOpen; if(opening)openTabletExclusivePanel('bank'); state.bankOpen=!state.bankOpen; render(); setTabletOverlayActiveFlag();};
-  $('dbTitle').addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();if(guardPhoneScrollToggle(ev))return; const opening=!state.bankOpen; if(opening)openTabletExclusivePanel('bank'); state.bankOpen=!state.bankOpen; render(); setTabletOverlayActiveFlag();}});
-  $('finishBtn').onclick=()=>{closeTabletFloatingPanelsExcept('modal'); openFinishModal();};
-  $('baseToggle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; const base=$('baseFields'); const opening=base.classList.contains('hidden'); if(isTabletLayout()){if(opening)openTabletAnchoredPanel('base'); else closeTabletAnchoredPanel('base');}else{base.classList.toggle('hidden',!opening); setTabletOverlayActiveFlag();}};
-  $('recentToggle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; const recent=$('recentList'); const opening=recent.classList.contains('hidden'); if(isTabletLayout()){if(opening)openTabletAnchoredPanel('recent'); else closeTabletAnchoredPanel('recent');}else{openPhoneFloatingDrawer('recent');}};
-  $('packageToggle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; if(isTabletLayout())toggleTabletPackageOverlay(); else openPhoneFloatingDrawer('package');};
-  $('exportBtn').onclick=exportData; $('pdfBtn').onclick=finishWithPdf; $('patientBtn').onclick=finishWithPatientApp; $('closeShare').onclick=closeFinishModal; $('copyShare').onclick=()=>navigator.clipboard&&navigator.clipboard.writeText($('shareText').value); $('patientName').addEventListener('input',()=>{state.patient.name=$('patientName').value;syncStatePlanToStore('ui_patient_name_input');save();render();}); $('planDate').addEventListener('input',()=>{state.patient.date=$('planDate').value;save();syncStatePlanToStore('ui_patient_date_input');}); $('therapistName').addEventListener('input',()=>{state.patient.therapist=$('therapistName').value;save();syncStatePlanToStore('ui_patient_therapist_input');}); $('planNotes').addEventListener('input',()=>{state.patient.notes=$('planNotes').value;save();syncStatePlanToStore('ui_patient_notes_input');}); $('scanBtn').onclick=()=>window.KGGScan.pick('camera'); $('filePickBtn').onclick=()=>window.KGGScan.pick('file'); $('filePickBtn').addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();window.KGGScan.pick('file');}}); $('fileInput').onchange=ev=>window.KGGScan.handleInput(ev.target,'camera'); $('filePickerInput').onchange=ev=>window.KGGScan.handleInput(ev.target,'file'); $('closeEditor').onclick=closeEditor; $('saveExercise').onclick=saveEditedExercise; $('deleteExercise').onclick=()=>{if(state.editId){if($('deleteExercise').dataset.scope==='bank')openBankDeleteModal(state.editId); else removeExercise(state.editId);} closeEditor();};
-  $('attachExerciseImage').onclick=()=>$('editMediaFile').click();
-  $('editMediaFile').onchange=handleEditorMediaFileSelected;
-  $('removeExerciseImage').onclick=removeEditorMedia;
-  $('finishPdfBtn').onclick=()=>finishWithPdf({large:false});
-  $('finishLargePdfBtn').onclick=openLargePdfModal;
-  $('finishPatientBtn').onclick=finishWithPatientApp;
-  $('finishCancelBtn').onclick=closeFinishModal;
-  $('shareModal').addEventListener('click',ev=>{if(ev.target===$('shareModal'))closeFinishModal();});
-  $('cancelLargePdf').onclick=closeLargePdfModal;
-  $('confirmLargePdf').onclick=()=>{closeLargePdfModal();finishWithPdf({large:true});};
-  $('largePdfModal').addEventListener('click',ev=>{if(ev.target===$('largePdfModal'))closeLargePdfModal();});
-  $('cancelLongMediaShare').onclick=closeLongMediaConfirmModal;
-  $('confirmLongMediaShare').onclick=confirmLongMediaShare;
-  $('longMediaConfirmModal').addEventListener('click',ev=>{if(ev.target===$('longMediaConfirmModal'))closeLongMediaConfirmModal();});
-  $('adminConfigBtn').onclick=openAdminSecretsModal;
-  $('closeAdminSecrets').onclick=closeAdminSecretsModal;
-  $('saveAdminSecrets').onclick=saveAdminSecretsFromModal;
-  if($('loadAdminSafeFile'))$('loadAdminSafeFile').onclick=()=>$('adminSafeFileInput').click();
-  if($('adminSafeFileInput'))$('adminSafeFileInput').onchange=ev=>importAdminSafeFile(ev.target.files&&ev.target.files[0]).catch(err=>alert('Admin-Safe-Datei konnte nicht gelesen werden: '+err.message)).finally(()=>{ev.target.value='';});
-  if($('importAdminCodePackage'))$('importAdminCodePackage').onclick=()=>importAdminCodePackageFromClipboard().catch(err=>alert('Code-Paket konnte nicht gelesen werden: '+err.message));
-  if($('exportAdminCodePackage'))$('exportAdminCodePackage').onclick=()=>exportAdminCodePackageToClipboard().catch(err=>alert('Code-Paket konnte nicht kopiert werden: '+err.message));
-  if($('downloadAdminSafeFile'))$('downloadAdminSafeFile').onclick=downloadAdminSafeFile;
-  $('clearAdminSecrets').onclick=()=>{clearLocalAdminSecrets(); if($('adminGeminiKey1'))$('adminGeminiKey1').value=''; if($('adminGeminiKey2'))$('adminGeminiKey2').value=''; if($('adminMediaDropzoneEndpoint'))$('adminMediaDropzoneEndpoint').value=''; if($('adminMediaDropzoneUploadToken'))$('adminMediaDropzoneUploadToken').value='';};
-  $('adminSecretsModal').addEventListener('click',ev=>{if(ev.target===$('adminSecretsModal'))closeAdminSecretsModal();});
-  $('sharedBankBtn').onclick=openSharedBankModal;
-  $('copySharedBank').onclick=copySharedBankPayload;
-  $('pickSharedBankFile').onclick=()=>$('sharedBankFile').click();
-  $('sharedBankFile').onchange=handleSharedBankFile;
-  $('applySharedBank').onclick=applySharedBankFromText;
-  $('closeSharedBank').onclick=closeSharedBankModal;
-  $('sharedBankModal').addEventListener('click',ev=>{if(ev.target===$('sharedBankModal'))closeSharedBankModal();});
-
-  if($('tabletMenuBtn'))$('tabletMenuBtn').onclick=()=>setTabletSideMenuOpen(!document.body.classList.contains('tabletMenuOpen'));
-  if($('tabletMenuClose'))$('tabletMenuClose').onclick=()=>setTabletSideMenuOpen(false);
-  if($('tabletSideBackdrop'))$('tabletSideBackdrop').onclick=()=>setTabletSideMenuOpen(false);
-  if($('syncQrBtn'))$('syncQrBtn').onclick=openSyncPairModal;
-  if($('tabletSyncQrBtn'))$('tabletSyncQrBtn').onclick=openSyncPairModal;
-  if($('copySyncPairCode'))$('copySyncPairCode').onclick=copySyncPairCode;
-  if($('testNativeSyncBtn'))$('testNativeSyncBtn').onclick=()=>testNativeSyncRoundtrip();
-  if($('downloadSyncFileBtn'))$('downloadSyncFileBtn').onclick=downloadNativeSyncFile;
-  if($('importSyncFileBtn'))$('importSyncFileBtn').onclick=()=>{const input=$('syncImportInput'); if(input)input.click();};
-  if($('syncImportInput'))$('syncImportInput').onchange=ev=>{const file=ev&&ev.target&&ev.target.files&&ev.target.files[0]; importNativeSyncFile(file).finally(()=>{if(ev&&ev.target)ev.target.value='';});};
-  if($('closeSyncPairModal'))$('closeSyncPairModal').onclick=closeSyncPairModal;
-  if($('syncPairModal'))$('syncPairModal').addEventListener('click',ev=>{if(ev.target===$('syncPairModal'))closeSyncPairModal();});
-  const kggAdminMenuQrTargets={
-    colleague:{title:'Kolleg:innen-Web-App QR',hint:'Oeffnet die jeweils verlinkte Kolleg:innen-Web-App.',url:'https://kayus24.github.io/kgg/therapist-app/latest-html.html'},
-    admin:{title:'Admin-Web-App QR',hint:'Oeffnet diese Admin-Web-App-Version. Manifest/Latest wird separat freigegeben.',url:'https://kayus24.github.io/kgg/therapist-app/releases/v388/web/KGG_APP_ADMIN_v388_android_flow_fixes.html'},
-    android:{title:'Kolleg:innen-App APK QR',hint:'Oeffnet die aktuelle Android-Download-Seite fuer Kolleg:innen. Keine API-Keys, keine Sync-Daten.',url:'https://kayus24.github.io/kgg/therapist-app/latest-android.html'}
-  };
-  function closeKggTherapistShareModal(){
-    const modal=$('kggTherapistShareModal');
-    if(!modal)return;
-    modal.classList.remove('isOpen');
-    modal.setAttribute('aria-hidden','true');
-  }
-  function openKggTherapistShareModal(){
 ```

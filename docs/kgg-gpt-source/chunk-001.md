@@ -4,6 +4,85 @@
 - Lines: 421-840
 
 ```html
+        "Release artifacts",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Parser",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Phone card gestures",
+        "Tablet layout content",
+        "PDF plan exercise-image thumbnails",
+        "Sync data model",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "v051 ist QR/PDF/Android-Shell; PDF-Planbilder bleiben separat fuer v052."
+    },
+    {
+      "versionCode": 50,
+      "versionName": "1.0.50-phone-ui-mini-fix",
+      "patchId": "kgg-v050-phone-ui-mini-fix",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Phone-UI: Plan-Menue, Historie und Scan-Optionen",
+      "reason": "Im Phone-Planmodus sass das 3-Punkte-Menue zu mittig, Plan-Historie kollabierte und die Foto/Galerie-Auswahl wirkte wie ein separates Floating-Menue.",
+      "whatChanged": [
+        "Das 3-Punkte-Menue wird im Plan-Header oben rechts verankert.",
+        "Plan-Historie bleibt im Phone-Planmodus als voller lesbarer Button sichtbar.",
+        "Der Scanbutton zeigt Foto/Galerie-Optionen inline und waechst beim Oeffnen nur vertikal."
+      ],
+      "touchedAreas": [
+        "Phone plan header menu",
+        "Phone Plan-Historie button",
+        "Phone scan dock photo options",
+        "UI stability tests",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Android-Wrapper",
+        "Sync",
+        "API-Key-Logik",
+        "Kolleg:innen-Freigabe"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "not-applicable"
+      },
+      "handoffNote": "v050 ist UI-only fuer Phone; bei Problemen zuerst ui-stability phone-scan-dock und phone-history-packages laufen lassen."
+    },
+    {
+      "versionCode": 50,
+      "versionName": "1.0.50-phone-ui-mini-fix",
+      "patchId": "kgg-v049-symbol-encoding-hotfix",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Mojibake-Symbolreste repariert",
+      "reason": "Nach der grossen UTF-8-Reparatur waren noch kaputte Symbolsequenzen wie Pfeile, Zahnrad und QR-ASCII-Blockzeichen sichtbar bzw. im HTML enthalten.",
+      "whatChanged": [
+        "Kaputte Pfeil-, Zahnrad-, Caret- und QR-ASCII-Symbolstrings wurden durch echte Unicode-Zeichen ersetzt.",
+        "Der Encoding-Guard erkennt jetzt auch einfache sichtbare Mojibake-Symbolfamilien.",
+        "Die Encoding-Guard-Unit-Tests enthalten gute Unicode-Zeichen und rote Symbol-Mojibake-Faelle."
+      ],
+      "touchedAreas": [
+        "HTML symbol strings",
+        "QR helper embedded strings",
+        "Critical encoding guard",
+        "Local test batteries",
+        "Source Truth",
         "version.json"
       ],
       "notTouched": [
@@ -345,83 +424,4 @@
         "PDF",
         "QR-Erzeugung",
         "Patienten-App",
-        "Scan-Kamera",
-        "Android-Wrapper",
-        "Tablet-Core-Layout",
-        "Parser"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "githubPages": "pending",
-        "androidApp": "pending"
-      },
-      "handoffNote": "Wenn der Sync-Dialog privaten Rueckfall-Speicher meldet, findet kein automatischer Geraete-Transfer statt; dann Sync-Datei exportieren/importieren oder Android-Dateizugriff pruefen."
-    },
-    {
-      "versionCode": 35,
-      "versionName": "1.0.35-parser-schmerz-tag-blocks",
-      "patchId": "kgg-v035-parser-schmerz-tag-blocks",
-      "status": "active",
-      "type": "local-html-patch",
-      "title": "Schmerz-/Tag-Textbloecke stabil erkennen",
-      "reason": "Echte Trainingsblock-Texte enthalten Tag-Labels, Schmerzwerte und Satzzeilen wie 15 kg @ 12 Wdh; diese duerfen keine Satz-, Tag- oder Schmerz-Muellkarten erzeugen.",
-      "whatChanged": [
-        "Textfeld-Testbatterie enthaelt den echten Beinpresse/Kniebeuger/Singel-Leg/Romanian-Deadlift-Block.",
-        "Satzzeilen mit Last vor Wiederholungen wie 15 kg @ 12 Wdh werden korrekt gelesen.",
-        "Schmerz: n/10 und Tag 1 werden nicht mehr als Uebungskarten uebernommen."
-      ],
-      "touchedAreas": [
-        "Textfield parser",
-        "Local test batteries",
-        "HTML embedded metadata"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR-Erzeugung",
-        "Patienten-App",
-        "Scan-Kamera",
-        "Android-Wrapper",
-        "Tablet-Core-Layout",
-        "Storage"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "githubPages": "pending",
-        "androidApp": "pending"
-      },
-      "handoffNote": "Regressionstest deckt den echten Schmerz-/Tag-Block ab und verhindert Satz-/Schmerz-Muellkarten."
-    },
-    {
-      "versionCode": 34,
-      "versionName": "1.0.34-free-textfield-units",
-      "patchId": "kgg-v034-free-textfield-units",
-      "status": "active",
-      "type": "local-html-patch",
-      "title": "Freie Einheiten im Textfeld weitergeben",
-      "reason": "Textfeld-Eingaben koennen Einheiten enthalten, die noch nicht als feste App-Einheit hinterlegt sind; diese duerfen nicht still zu kg werden und muessen im aktuellen Plan erhalten bleiben.",
-      "whatChanged": [
-        "Textfeld-Testbatterie deckt bekannte App-Einheiten, freie Einheiten, Kurzformen und Satzvarianten ab.",
-        "Freie Einheiten wie km/h, Grad, RPE, Level, cm und rpm bleiben in state.plan und KGGDataStore.currentPlan erhalten.",
-        "S1, 1. Satz, 1) und Satz 1 - werden als Satzdaten erkannt, nicht als eigene Uebungskarten."
-      ],
-      "touchedAreas": [
-        "Textfield parser",
-        "Local test batteries",
-        "HTML embedded metadata"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR-Erzeugung",
-        "Patienten-App",
-        "Scan-Kamera",
-        "Android-Wrapper",
-        "Tablet-Core-Layout",
-        "Sync pipeline"
-      ]
-    },
-    {
-      "versionCode": 33,
-      "versionName": "1.0.33-test-battery-textblocks",
-      "patchId": "kgg-v033-test-battery-textblocks",
-      "status": "active",
 ```

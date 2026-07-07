@@ -4,6 +4,85 @@
 - Lines: 6721-7140
 
 ```html
+</style>
+
+  <!-- KGG kgg-source-truth: embedded Source Truth. Machine-readable; safe for local LLM/code review. -->
+<!-- KGG kgg-changelog: embedded Changelog. Machine-readable; safe for local LLM/code review. -->
+
+<!-- KGG PATCH START kgg-v021-embed-jsqr-gallery-decode lib sha256=bc40c8a15196236b2314db0856f72ca0b49980cd5413b8c852a7349f5fee0859 -->
+<script id="kgg-v021-embed-jsqr-gallery-decode-lib">
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["jsQR"] = factory();
+	else
+		root["jsQR"] = factory();
+})(typeof self !== 'undefined' ? self : this, function() {
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, {
+/******/ 				configurable: false,
+/******/ 				enumerable: true,
+/******/ 				get: getter
+/******/ 			});
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(__webpack_require__.s = 3);
 /******/ })
 /************************************************************************/
@@ -345,83 +424,4 @@ function binarize(data, width, height, returnInverted) {
     if (data.length !== width * height * 4) {
         throw new Error("Malformed data passed to binarizer.");
     }
-    // Convert image to greyscale
-    var greyscalePixels = new Matrix(width, height);
-    for (var x = 0; x < width; x++) {
-        for (var y = 0; y < height; y++) {
-            var r = data[((y * width + x) * 4) + 0];
-            var g = data[((y * width + x) * 4) + 1];
-            var b = data[((y * width + x) * 4) + 2];
-            greyscalePixels.set(x, y, 0.2126 * r + 0.7152 * g + 0.0722 * b);
-        }
-    }
-    var horizontalRegionCount = Math.ceil(width / REGION_SIZE);
-    var verticalRegionCount = Math.ceil(height / REGION_SIZE);
-    var blackPoints = new Matrix(horizontalRegionCount, verticalRegionCount);
-    for (var verticalRegion = 0; verticalRegion < verticalRegionCount; verticalRegion++) {
-        for (var hortizontalRegion = 0; hortizontalRegion < horizontalRegionCount; hortizontalRegion++) {
-            var sum = 0;
-            var min = Infinity;
-            var max = 0;
-            for (var y = 0; y < REGION_SIZE; y++) {
-                for (var x = 0; x < REGION_SIZE; x++) {
-                    var pixelLumosity = greyscalePixels.get(hortizontalRegion * REGION_SIZE + x, verticalRegion * REGION_SIZE + y);
-                    sum += pixelLumosity;
-                    min = Math.min(min, pixelLumosity);
-                    max = Math.max(max, pixelLumosity);
-                }
-            }
-            var average = sum / (Math.pow(REGION_SIZE, 2));
-            if (max - min <= MIN_DYNAMIC_RANGE) {
-                // If variation within the block is low, assume this is a block with only light or only
-                // dark pixels. In that case we do not want to use the average, as it would divide this
-                // low contrast area into black and white pixels, essentially creating data out of noise.
-                //
-                // Default the blackpoint for these blocks to be half the min - effectively white them out
-                average = min / 2;
-                if (verticalRegion > 0 && hortizontalRegion > 0) {
-                    // Correct the "white background" assumption for blocks that have neighbors by comparing
-                    // the pixels in this block to the previously calculated black points. This is based on
-                    // the fact that dark barcode symbology is always surrounded by some amount of light
-                    // background for which reasonable black point estimates were made. The bp estimated at
-                    // the boundaries is used for the interior.
-                    // The (min < bp) is arbitrary but works better than other heuristics that were tried.
-                    var averageNeighborBlackPoint = (blackPoints.get(hortizontalRegion, verticalRegion - 1) +
-                        (2 * blackPoints.get(hortizontalRegion - 1, verticalRegion)) +
-                        blackPoints.get(hortizontalRegion - 1, verticalRegion - 1)) / 4;
-                    if (min < averageNeighborBlackPoint) {
-                        average = averageNeighborBlackPoint;
-                    }
-                }
-            }
-            blackPoints.set(hortizontalRegion, verticalRegion, average);
-        }
-    }
-    var binarized = BitMatrix_1.BitMatrix.createEmpty(width, height);
-    var inverted = null;
-    if (returnInverted) {
-        inverted = BitMatrix_1.BitMatrix.createEmpty(width, height);
-    }
-    for (var verticalRegion = 0; verticalRegion < verticalRegionCount; verticalRegion++) {
-        for (var hortizontalRegion = 0; hortizontalRegion < horizontalRegionCount; hortizontalRegion++) {
-            var left = numBetween(hortizontalRegion, 2, horizontalRegionCount - 3);
-            var top_1 = numBetween(verticalRegion, 2, verticalRegionCount - 3);
-            var sum = 0;
-            for (var xRegion = -2; xRegion <= 2; xRegion++) {
-                for (var yRegion = -2; yRegion <= 2; yRegion++) {
-                    sum += blackPoints.get(left + xRegion, top_1 + yRegion);
-                }
-            }
-            var threshold = sum / 25;
-            for (var xRegion = 0; xRegion < REGION_SIZE; xRegion++) {
-                for (var yRegion = 0; yRegion < REGION_SIZE; yRegion++) {
-                    var x = hortizontalRegion * REGION_SIZE + xRegion;
-                    var y = verticalRegion * REGION_SIZE + yRegion;
-                    var lum = greyscalePixels.get(x, y);
-                    binarized.set(x, y, lum <= threshold);
-                    if (returnInverted) {
-                        inverted.set(x, y, !(lum <= threshold));
-                    }
-                }
-            }
 ```

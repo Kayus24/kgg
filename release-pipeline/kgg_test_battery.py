@@ -113,6 +113,11 @@ def run_html_logic(suite: str) -> None:
     run([node_executable(), "release-pipeline/kgg_html_logic_smoke.js", "--suite", suite])
 
 
+def run_pdf_readability() -> None:
+    log("== PDF readability battery ==")
+    run([node_executable(), "release-pipeline/kgg_pdf_readability_smoke.js"])
+
+
 def run_ui_stability(level: str, case_name: str | None = None) -> None:
     label = f"{level} / {case_name}" if case_name else level
     log(f"== UI stability battery: {label} ==")
@@ -473,6 +478,13 @@ TEST_REGISTRY = [
         "suite": "pdf",
         "reason": "PDF exercise thumbnails must stay optional, bounded inside cards and non-blocking.",
         "run": lambda: run_html_logic("pdf-critical"),
+    },
+    {
+        "id": "pdf-readability-critical",
+        "level": "critical",
+        "suite": "pdf",
+        "reason": "Grossdruck PDFs must render readable exercise names, kg/Wdh/Satz labels and pain scales under myopia simulation.",
+        "run": run_pdf_readability,
     },
     {
         "id": "patient-qr-critical",

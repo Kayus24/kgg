@@ -4,6 +4,85 @@
 - Lines: 18901-19320
 
 ```html
+  }
+  function exerciseMeta(ex){
+    const scanSummary=scanSetSummaryForPlanCard(ex);
+    if(scanSummary)return scanSummary;
+    const parts=[];
+    parts.push(normalizeSetCount(ex&&ex.sets||3)+' Sätze');
+    parts.push(sideModeLabel(ex&&ex.side));
+    const loadUnit=normalizeLoadUnit(ex&&ex.weightUnit||ex&&ex.loadUnit||'kg');
+    const metricUnit=ex&&ex.unit||ex&&ex.metricUnit||measureUnitLabel(ex&&ex.measure);
+    parts.push(loadUnit);
+    parts.push(metricUnit||'Wdh');
+    return parts.filter(Boolean).join(' · ');
+  }
+  function planCardSourceText(ex){
+    if(ex&&ex.scanImported)return ex.scanSource||'Scan übernommen';
+    const raw=String(ex&&ex.rawText||'').trim();
+    const name=String(ex&&ex.name||'').trim();
+    if(raw&&compact(raw)!==compact(name))return raw;
+    return name||String(ex&&ex.source||ex&&ex.sourceId||ex&&ex.bankId||'').trim();
+  }
+  function planCardBadgesHtml(ex){
+    const mediaCount=ensureExerciseMediaList(ex).length;
+    const bits=[];
+    if(mediaCount)bits.push('<span class="planBadge media">🖼 Medien</span>');
+    if(ex&&ex.pendingNew)bits.push('<span class="planBadge new">neu</span>');
+    else if(ex&&ex.needsReview)bits.push('<span class="planBadge review">prüfen</span>');
+    if(ex&&ex.liveDraft)bits.push('<span class="planBadge live">live</span>');
+    return bits.join('');
+  }
+  function planCardThumbnailHtml(ex){
+    const media=ensureExerciseMediaList(ex).find(item=>item&&item.type==='image'&&item.id);
+    if(!media)return '';
+    return '<span class="planThumb planThumbFallback" data-plan-thumb-id="'+escapeHtml(media.id)+'" title="Bild vorhanden" aria-hidden="true"></span>';
+  }
+  function planCardSourceText(ex){
+    return '';
+  }
+  function planCardBadgesHtml(ex){
+    const mediaCount=ensureExerciseMediaList(ex).length;
+    const bits=[];
+    if(mediaCount)bits.push('<span class="planBadge media">Bild</span>');
+    if(ex&&ex.liveDraft)bits.push('<span class="planBadge live">Vorschau</span>');
+    else if(ex&&ex.pendingNew)bits.push('<span class="planBadge new">neu</span>');
+    else if(ex&&ex.needsReview)bits.push('<span class="planBadge review">pruefen</span>');
+    return bits.join('');
+  }
+  async function hydratePlanThumbnails(root){
+    if(!root)return;
+    Array.from(root.querySelectorAll('[data-plan-thumb-id]')).forEach(async node=>{
+      const id=String(node.getAttribute('data-plan-thumb-id')||'');
+      if(!id)return;
+      try{
+        const owner=(state.plan||[]).find(ex=>ensureExerciseMediaList(ex).some(item=>String(item&&item.id)===id));
+        const media=owner&&ensureExerciseMediaList(owner).find(item=>String(item&&item.id)===id);
+        if(!media)throw new Error('Kein Bildmanifest');
+        const record=await getEncryptedMediaBlob(id);
+        if(!node.isConnected)return;
+        if(!record||!record.blob)throw new Error('Lokales Bild fehlt');
+        const imageBlob=await patientDecryptMedia(media,record.blob);
+        if(!node.isConnected)return;
+        if(node._kggThumbUrl)URL.revokeObjectURL(node._kggThumbUrl);
+        const url=URL.createObjectURL(imageBlob);
+        node._kggThumbUrl=url;
+        node.classList.remove('planThumbFallback');
+        node.innerHTML='<img src="'+url+'" alt="">';
+        setTimeout(()=>{try{if(node._kggThumbUrl===url){URL.revokeObjectURL(url);node._kggThumbUrl='';}}catch(e){}},60000);
+      }catch(err){
+        if(node.isConnected){node.classList.add('planThumbFallback');node.innerHTML='';}
+      }
+    });
+  }
+  function scanInboxJobs(){try{return (typeof scanState!=='undefined'&&Array.isArray(scanState.jobs))?scanState.jobs:[];}catch(err){return [];}}
+  function updateToggleCarets(){
+    const baseBtn=$('baseToggle');
+    const baseFields=$('baseFields');
+    if(baseBtn){
+      const open=!!(baseFields&&!baseFields.classList.contains('hidden'));
+      const label=baseBtn.querySelector('span:first-child');
+      if(label)label.textContent=(open?'▼':'▶')+' 👤 Basisdaten';
       baseBtn.setAttribute('aria-expanded',open?'true':'false');
     }
     const currentToggle=$('currentPlanToggle');
@@ -345,83 +424,4 @@
     const downRect=card.getBoundingClientRect();
     const press={
       id,handle,card,list,startX,startY,pointerId:ev.pointerId,timer:null,active:false,cancelled:false,
-      /*
-        v5 phone drag anchor:
-        keep the lifted card anchored to the exact finger offset captured before
-        the prelift CSS transform can change its rect.
-      */
-      downRect:{
-        left:downRect.left,
-        top:downRect.top,
-        width:downRect.width,
-        height:downRect.height
-      },
-      pointerOffsetX:ev.clientX-downRect.left,
-      pointerOffsetY:ev.clientY-downRect.top,
-      phoneAnchoredDrag:false,
-      fixedOffset:{left:0,top:0}
-    };
-    animatedReorder=press;
-    handle.classList.add('reorder-armed');
-    card.classList.add('reorder-prelift');
-    press.timer=setTimeout(()=>activateAnimatedReorder(press,ev),100);
-    const moveBefore=e=>{
-      if(animatedReorder!==press)return;
-      const dx=Math.abs(e.clientX-startX),dy=Math.abs(e.clientY-startY);
-      if(!press.active && (dx>10 || dy>10)){
-        clearTimeout(press.timer);
-        press.cancelled=true;
-        cleanupAnimatedReorder(false);
-      }
-    };
-    const upBefore=e=>{
-      if(animatedReorder!==press)return;
-      if(!press.active){clearTimeout(press.timer);cleanupAnimatedReorder(false);}
-    };
-    press.preMove=moveBefore;
-    press.preUp=upBefore;
-    document.addEventListener('pointermove',moveBefore,{passive:true});
-    document.addEventListener('pointerup',upBefore,{passive:true,once:true});
-    document.addEventListener('pointercancel',upBefore,{passive:true,once:true});
-  }
-  function fixedContainingBlockOffset(el){
-    let node=el&&el.parentElement;
-    while(node&&node!==document.documentElement){
-      const cs=getComputedStyle(node);
-      const backdrop=cs.backdropFilter||cs.webkitBackdropFilter||'none';
-      const contain=cs.contain||'';
-      const willChange=cs.willChange||'';
-      const createsFixedBlock=
-        cs.transform!=='none'||
-        cs.perspective!=='none'||
-        cs.filter!=='none'||
-        backdrop!=='none'||
-        contain.includes('paint')||
-        contain.includes('layout')||
-        willChange.includes('transform');
-      if(createsFixedBlock){
-        const r=node.getBoundingClientRect();
-        return {left:r.left,top:r.top};
-      }
-      node=node.parentElement;
-    }
-    return {left:0,top:0};
-  }
-  function activateAnimatedReorder(press,initialEv){
-    if(animatedReorder!==press||press.cancelled)return;
-    const card=press.card,list=press.list;
-    const phoneDrag=isPhoneLayout();
-    /*
-      v5 phone drag anchor:
-      On phone, use the card rect captured at pointerdown, not the transformed
-      prelift rect after the 100ms hold. This prevents the lifted card from
-      jumping away from the finger at activation.
-    */
-    const liveRect=card.getBoundingClientRect();
-    const rect=(phoneDrag&&press.downRect)?press.downRect:liveRect;
-    const fixedOffset=fixedContainingBlockOffset(card);
-    press.fixedOffset=fixedOffset;
-    press.phoneAnchoredDrag=!!phoneDrag;
-    const placeholder=document.createElement('div');
-    placeholder.className='planCard reorder-placeholder';
 ```

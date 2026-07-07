@@ -4,6 +4,85 @@
 - Lines: 15121-15540
 
 ```html
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 22,
+                ecBlocks: [
+                    { numBlocks: 2, dataCodewordsPerBlock: 11 },
+                    { numBlocks: 2, dataCodewordsPerBlock: 12 },
+                ],
+            },
+        ],
+    },
+    {
+        infoBits: null,
+        versionNumber: 6,
+        alignmentPatternCenters: [6, 34],
+        errorCorrectionLevels: [
+            {
+                ecCodewordsPerBlock: 18,
+                ecBlocks: [{ numBlocks: 2, dataCodewordsPerBlock: 68 }],
+            },
+            {
+                ecCodewordsPerBlock: 16,
+                ecBlocks: [{ numBlocks: 4, dataCodewordsPerBlock: 27 }],
+            },
+            {
+                ecCodewordsPerBlock: 24,
+                ecBlocks: [{ numBlocks: 4, dataCodewordsPerBlock: 19 }],
+            },
+            {
+                ecCodewordsPerBlock: 28,
+                ecBlocks: [{ numBlocks: 4, dataCodewordsPerBlock: 15 }],
+            },
+        ],
+    },
+    {
+        infoBits: 0x07C94,
+        versionNumber: 7,
+        alignmentPatternCenters: [6, 22, 38],
+        errorCorrectionLevels: [
+            {
+                ecCodewordsPerBlock: 20,
+                ecBlocks: [{ numBlocks: 2, dataCodewordsPerBlock: 78 }],
+            },
+            {
+                ecCodewordsPerBlock: 18,
+                ecBlocks: [{ numBlocks: 4, dataCodewordsPerBlock: 31 }],
+            },
+            {
+                ecCodewordsPerBlock: 18,
+                ecBlocks: [
+                    { numBlocks: 2, dataCodewordsPerBlock: 14 },
+                    { numBlocks: 4, dataCodewordsPerBlock: 15 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 26,
+                ecBlocks: [
+                    { numBlocks: 4, dataCodewordsPerBlock: 13 },
+                    { numBlocks: 1, dataCodewordsPerBlock: 14 },
+                ],
+            },
+        ],
+    },
+    {
+        infoBits: 0x085BC,
+        versionNumber: 8,
+        alignmentPatternCenters: [6, 24, 42],
+        errorCorrectionLevels: [
+            {
+                ecCodewordsPerBlock: 24,
+                ecBlocks: [{ numBlocks: 2, dataCodewordsPerBlock: 97 }],
+            },
+            {
+                ecCodewordsPerBlock: 22,
+                ecBlocks: [
+                    { numBlocks: 2, dataCodewordsPerBlock: 38 },
+                    { numBlocks: 2, dataCodewordsPerBlock: 39 },
+                ],
+            },
             {
                 ecCodewordsPerBlock: 22,
                 ecBlocks: [
@@ -345,83 +424,4 @@
                     { numBlocks: 4, dataCodewordsPerBlock: 44 },
                 ],
             },
-            {
-                ecCodewordsPerBlock: 28,
-                ecBlocks: [
-                    { numBlocks: 17, dataCodewordsPerBlock: 22 },
-                    { numBlocks: 1, dataCodewordsPerBlock: 23 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 28,
-                ecBlocks: [
-                    { numBlocks: 2, dataCodewordsPerBlock: 14 },
-                    { numBlocks: 19, dataCodewordsPerBlock: 15 },
-                ],
-            },
-        ],
-    },
-    {
-        infoBits: 0x13532,
-        versionNumber: 19,
-        alignmentPatternCenters: [6, 30, 58, 86],
-        errorCorrectionLevels: [
-            {
-                ecCodewordsPerBlock: 28,
-                ecBlocks: [
-                    { numBlocks: 3, dataCodewordsPerBlock: 113 },
-                    { numBlocks: 4, dataCodewordsPerBlock: 114 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 26,
-                ecBlocks: [
-                    { numBlocks: 3, dataCodewordsPerBlock: 44 },
-                    { numBlocks: 11, dataCodewordsPerBlock: 45 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 26,
-                ecBlocks: [
-                    { numBlocks: 17, dataCodewordsPerBlock: 21 },
-                    { numBlocks: 4, dataCodewordsPerBlock: 22 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 26,
-                ecBlocks: [
-                    { numBlocks: 9, dataCodewordsPerBlock: 13 },
-                    { numBlocks: 16, dataCodewordsPerBlock: 14 },
-                ],
-            },
-        ],
-    },
-    {
-        infoBits: 0x149A6,
-        versionNumber: 20,
-        alignmentPatternCenters: [6, 34, 62, 90],
-        errorCorrectionLevels: [
-            {
-                ecCodewordsPerBlock: 28,
-                ecBlocks: [
-                    { numBlocks: 3, dataCodewordsPerBlock: 107 },
-                    { numBlocks: 5, dataCodewordsPerBlock: 108 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 26,
-                ecBlocks: [
-                    { numBlocks: 3, dataCodewordsPerBlock: 41 },
-                    { numBlocks: 13, dataCodewordsPerBlock: 42 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 30,
-                ecBlocks: [
-                    { numBlocks: 15, dataCodewordsPerBlock: 24 },
-                    { numBlocks: 5, dataCodewordsPerBlock: 25 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 28,
 ```
