@@ -4,6 +4,85 @@
 - Lines: 7561-7980
 
 ```html
+    Mode["Kanji"] = "kanji";
+    Mode["ECI"] = "eci";
+})(Mode = exports.Mode || (exports.Mode = {}));
+var ModeByte;
+(function (ModeByte) {
+    ModeByte[ModeByte["Terminator"] = 0] = "Terminator";
+    ModeByte[ModeByte["Numeric"] = 1] = "Numeric";
+    ModeByte[ModeByte["Alphanumeric"] = 2] = "Alphanumeric";
+    ModeByte[ModeByte["Byte"] = 4] = "Byte";
+    ModeByte[ModeByte["Kanji"] = 8] = "Kanji";
+    ModeByte[ModeByte["ECI"] = 7] = "ECI";
+    // StructuredAppend = 0x3,
+    // FNC1FirstPosition = 0x5,
+    // FNC1SecondPosition = 0x9,
+})(ModeByte || (ModeByte = {}));
+function decodeNumeric(stream, size) {
+    var bytes = [];
+    var text = "";
+    var characterCountSize = [10, 12, 14][size];
+    var length = stream.readBits(characterCountSize);
+    // Read digits in groups of 3
+    while (length >= 3) {
+        var num = stream.readBits(10);
+        if (num >= 1000) {
+            throw new Error("Invalid numeric value above 999");
+        }
+        var a = Math.floor(num / 100);
+        var b = Math.floor(num / 10) % 10;
+        var c = num % 10;
+        bytes.push(48 + a, 48 + b, 48 + c);
+        text += a.toString() + b.toString() + c.toString();
+        length -= 3;
+    }
+    // If the number of digits aren't a multiple of 3, the remaining digits are special cased.
+    if (length === 2) {
+        var num = stream.readBits(7);
+        if (num >= 100) {
+            throw new Error("Invalid numeric value above 99");
+        }
+        var a = Math.floor(num / 10);
+        var b = num % 10;
+        bytes.push(48 + a, 48 + b);
+        text += a.toString() + b.toString();
+    }
+    else if (length === 1) {
+        var num = stream.readBits(4);
+        if (num >= 10) {
+            throw new Error("Invalid numeric value above 9");
+        }
+        bytes.push(48 + num);
+        text += num.toString();
+    }
+    return { bytes: bytes, text: text };
+}
+var AlphanumericCharacterCodes = [
+    "0", "1", "2", "3", "4", "5", "6", "7", "8",
+    "9", "A", "B", "C", "D", "E", "F", "G", "H",
+    "I", "J", "K", "L", "M", "N", "O", "P", "Q",
+    "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+    " ", "$", "%", "*", "+", "-", ".", "/", ":",
+];
+function decodeAlphanumeric(stream, size) {
+    var bytes = [];
+    var text = "";
+    var characterCountSize = [9, 11, 13][size];
+    var length = stream.readBits(characterCountSize);
+    while (length >= 2) {
+        var v = stream.readBits(11);
+        var a = Math.floor(v / 45);
+        var b = v % 45;
+        bytes.push(AlphanumericCharacterCodes[a].charCodeAt(0), AlphanumericCharacterCodes[b].charCodeAt(0));
+        text += AlphanumericCharacterCodes[a] + AlphanumericCharacterCodes[b];
+        length -= 2;
+    }
+    if (length === 1) {
+        var a = stream.readBits(6);
+        bytes.push(AlphanumericCharacterCodes[a].charCodeAt(0));
+        text += AlphanumericCharacterCodes[a];
+    }
     return { bytes: bytes, text: text };
 }
 function decodeByte(stream, size) {
@@ -345,83 +424,4 @@ exports.shiftJISTable = {
     0x8171: 0x3008,
     0x8172: 0x3009,
     0x8173: 0x300A,
-    0x8174: 0x300B,
-    0x8175: 0x300C,
-    0x8176: 0x300D,
-    0x8177: 0x300E,
-    0x8178: 0x300F,
-    0x8179: 0x3010,
-    0x817A: 0x3011,
-    0x817B: 0xFF0B,
-    0x817C: 0x2212,
-    0x817D: 0x00B1,
-    0x817E: 0x00D7,
-    0x8180: 0x00F7,
-    0x8181: 0xFF1D,
-    0x8182: 0x2260,
-    0x8183: 0xFF1C,
-    0x8184: 0xFF1E,
-    0x8185: 0x2266,
-    0x8186: 0x2267,
-    0x8187: 0x221E,
-    0x8188: 0x2234,
-    0x8189: 0x2642,
-    0x818A: 0x2640,
-    0x818B: 0x00B0,
-    0x818C: 0x2032,
-    0x818D: 0x2033,
-    0x818E: 0x2103,
-    0x818F: 0xFFE5,
-    0x8190: 0xFF04,
-    0x8191: 0x00A2,
-    0x8192: 0x00A3,
-    0x8193: 0xFF05,
-    0x8194: 0xFF03,
-    0x8195: 0xFF06,
-    0x8196: 0xFF0A,
-    0x8197: 0xFF20,
-    0x8198: 0x00A7,
-    0x8199: 0x2606,
-    0x819A: 0x2605,
-    0x819B: 0x25CB,
-    0x819C: 0x25CF,
-    0x819D: 0x25CE,
-    0x819E: 0x25C7,
-    0x819F: 0x25C6,
-    0x81A0: 0x25A1,
-    0x81A1: 0x25A0,
-    0x81A2: 0x25B3,
-    0x81A3: 0x25B2,
-    0x81A4: 0x25BD,
-    0x81A5: 0x25BC,
-    0x81A6: 0x203B,
-    0x81A7: 0x3012,
-    0x81A8: 0x2192,
-    0x81A9: 0x2190,
-    0x81AA: 0x2191,
-    0x81AB: 0x2193,
-    0x81AC: 0x3013,
-    0x81B8: 0x2208,
-    0x81B9: 0x220B,
-    0x81BA: 0x2286,
-    0x81BB: 0x2287,
-    0x81BC: 0x2282,
-    0x81BD: 0x2283,
-    0x81BE: 0x222A,
-    0x81BF: 0x2229,
-    0x81C8: 0x2227,
-    0x81C9: 0x2228,
-    0x81CA: 0x00AC,
-    0x81CB: 0x21D2,
-    0x81CC: 0x21D4,
-    0x81CD: 0x2200,
-    0x81CE: 0x2203,
-    0x81DA: 0x2220,
-    0x81DB: 0x22A5,
-    0x81DC: 0x2312,
-    0x81DD: 0x2202,
-    0x81DE: 0x2207,
-    0x81DF: 0x2261,
-    0x81E0: 0x2252,
-    0x81E1: 0x226A,
 ```

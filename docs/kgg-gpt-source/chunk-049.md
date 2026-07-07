@@ -4,6 +4,85 @@
 - Lines: 20581-21000
 
 ```html
+    }
+    renderEditorMediaStatus(ex);
+    render();
+    $('editorModal').classList.add('open');
+  }
+  function openEditor(ex){
+    if(!ex)return;
+    const inferredMeasure=(String(ex.unit||ex.metricUnit||'').toLowerCase().includes('zeit')||String(ex.unit||ex.metricUnit||'').toLowerCase().includes('sek'))?'zeit':'wdh';
+    state.editId=ex.localId||ex.id;
+    $('editName').value=ex.name||'';
+    $('editSets').value=String(normalizeSetCount(ex.sets));
+    $('editMetric').value=ex.startMetric||'';
+    $('editLoad').value=ex.startLoad||'';
+    $('editUnit').value=normalizeLoadUnit(ex.weightUnit||ex.loadUnit||'kg');
+    $('editMeasure').value=normalizeMeasureMode(ex.measure||inferredMeasure);
+    $('editSide').value=normalizeSideMode(ex.side||'BI');
+    $('editVideoUrl').value=ex.videoUrl||'';
+    $('editVideoLabel').value=ex.videoLabel||'Video öffnen';
+    renderEditorMediaStatus(ex);
+    const bankEdit=!ex.localId&&bank.some(item=>String(item.id)===String(ex.id));
+    $('deleteExercise').dataset.scope=bankEdit?'bank':'plan';
+    $('deleteExercise').style.visibility=(ex.localId||bankEdit)?'visible':'hidden';
+    $('editorModal').classList.add('open');
+  }
+  function closeEditor(){state.editId=null; $('editorModal').classList.remove('open')}
+  function saveEditedExercise(){
+    const id=state.editId;
+    const planEx=state.plan.find(x=>(x.localId||x.id)===id);
+    if(planEx){
+      const measure=normalizeMeasureMode($('editMeasure').value);
+      const loadUnit=normalizeLoadUnit($('editUnit').value);
+      planEx.name=$('editName').value;
+      planEx.sets=normalizeSetCount($('editSets').value);
+      planEx.startMetric=$('editMetric').value;
+      planEx.startLoad=$('editLoad').value;
+      planEx.weightUnit=loadUnit;
+      planEx.loadUnit=loadUnit;
+      planEx.measure=measure;
+      planEx.unit=measureUnitLabel(measure);
+      planEx.metricUnit=measureUnitLabel(measure);
+      planEx.side=normalizeSideMode($('editSide').value);
+      planEx.videoUrl=String($('editVideoUrl').value||'').trim();
+      planEx.videoLabel=String($('editVideoLabel').value||'').trim()||'Video öffnen';
+      planEx.changedByLiveText=false;
+      planEx.needsReview=false;
+      const bankEx=upsertPlanExerciseToBank(planEx,'ui_save_exercise');
+      if(bankEx){
+        planEx.sourceId=bankEx.id;
+        planEx.bankId=bankEx.id;
+      }
+      persistCustomBank();
+      syncStatePlanToStore('ui_save_exercise');
+      syncTextInputFromPlan('ui_save_exercise');
+      save();
+      render();
+    }else{
+      const bankEx=currentEditedBankExercise();
+      if(bankEx){
+        const measure=normalizeMeasureMode($('editMeasure').value);
+        const loadUnit=normalizeLoadUnit($('editUnit').value);
+        bankEx.name=$('editName').value;
+        bankEx.aliases=bankEx.aliases||bankEx.name;
+        bankEx.sets=normalizeSetCount($('editSets').value);
+        bankEx.startMetric=$('editMetric').value;
+        bankEx.startLoad=$('editLoad').value;
+        bankEx.weightUnit=loadUnit;
+        bankEx.loadUnit=loadUnit;
+        bankEx.measure=measure;
+        bankEx.unit=measureUnitLabel(measure);
+        bankEx.metricUnit=measureUnitLabel(measure);
+        bankEx.side=normalizeSideMode($('editSide').value);
+        bankEx.videoUrl=String($('editVideoUrl').value||'').trim();
+        bankEx.videoLabel=String($('editVideoLabel').value||'').trim()||'Video öffnen';
+        bankEx.custom=true;
+        bankEx.updatedAt=new Date().toISOString();
+        persistCustomBank();
+        render();
+      }
+    }
     closeEditor();
   }
   function escapeHtml(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
@@ -150,8 +229,8 @@
         displayName:safePdfString(patient.name||patient.initials||patient.id||'Patient/in','Patient/in')
       },
       layoutTarget:{
-        templateId:largeSingleRow?'TPL-BASIS-A-GROSSDRUCK-L3-v1':'TPL-BASIS-A-CLASSIC-L6-v2',
-        paper:largeSingleRow?'A2 gross portrait, A4-Layout 2x skaliert':'A4',
+        templateId:largeSingleRow?'TPL-BASIS-A-GROSSDRUCK-L3-v3':'TPL-BASIS-A-CLASSIC-L6-v2',
+        paper:largeSingleRow?'A4 gross portrait':'A4',
         orientation:largeSingleRow?'portrait':'landscape',
         grid:gridCols+'x'+gridRows,
         exercisesPerPage:slotsPerPage,
@@ -237,12 +316,6 @@
   async function attachKggPdfExerciseThumbnails(snapshot,plan){
     const sourceExercises=Array.isArray(plan&&plan.exercises)?plan.exercises:[];
     if(!snapshot||!sourceExercises.length)return snapshot;
-    const target=snapshot.layoutTarget||{};
-    if(target.grid==='1x3'){
-      snapshot.thumbnailCount=0;
-      snapshot.thumbnailMode='large-print-skipped';
-      return snapshot;
-    }
     let count=0;
     const slots=(snapshot.pages||[]).flatMap(page=>page.slots||page.exercises||[]);
     await Promise.all(slots.map(async slot=>{
@@ -283,6 +356,16 @@
     const s=String(text==null?'':text).replace(/\s+/g,' ').trim();
     return s.length>max?s.slice(0,Math.max(0,max-1))+'…':s;
   }
+  function pdfSplitTwoLines(text,firstMax,secondMax){
+    const raw=String(text==null?'':text).replace(/\s+/g,' ').trim();
+    if(raw.length<=firstMax)return [raw];
+    const limit=Math.max(1,Number(firstMax)||1);
+    let cut=raw.lastIndexOf(' ',limit);
+    if(cut<Math.max(12,limit*.55))cut=limit;
+    const first=raw.slice(0,cut).trim();
+    const rest=raw.slice(cut).trim();
+    return [first,pdfShort(rest,secondMax)];
+  }
   function pdfSpaceLabel(fullLabel,shortLabel,cellWidth,minWidth){
     return Number(cellWidth||0)>=Number(minWidth||0)?fullLabel:shortLabel;
   }
@@ -316,112 +399,29 @@
   function drawKggPdfHeader(doc,snapshot,page,layout){
     const patient=snapshot.patient||{};
     const template=((snapshot.layoutTarget&&snapshot.layoutTarget.templateId)||'TPL-BASIS-A-CLASSIC-L6-v2');
+    const largePrint=((snapshot.layoutTarget&&snapshot.layoutTarget.grid)==='1x3');
     const pageNo=page&&page.pageNo||1;
     const pageCount=snapshot.pageCount||page&&page.pageCount||1;
     const x=layout.margin,y=layout.margin,w=layout.pageW-(layout.margin*2),h=layout.headerH;
     pdfResetInk(doc);
-    doc.setLineWidth(.32);
+    doc.setLineWidth(largePrint?0.38:0.32);
     try{doc.roundedRect(x,y,w,h,1.5,1.5);}catch(e){doc.rect(x,y,w,h);}
-    pdfSetFont(doc,10.4,'bold');
-    pdfText(doc,'KGG Trainingsplan',x+3,y+5.7);
-    pdfSetFont(doc,5.2,'normal');
-    const line1='Patient/in: '+pdfShort(patient.displayName||patient.name||patient.initials||patient.id||'Patient/in',46)+'   Start: '+pdfShort(patient.startDate||'-',20)+'   Anlass: '+pdfShort(patient.reason||'KGG',18);
-    pdfText(doc,line1,x+3,y+10.0);
-    pdfText(doc,'T1-T6 = Trainingstage   S1-S3 = Sätze',x+3,y+14.1);
-    pdfSetFont(doc,4.6,'normal');
-    pdfText(doc,template+' · Seite '+pageNo+'/'+pageCount,x+w-3,y+5.6,{align:'right'});
-    pdfSetFont(doc,3.8,'normal');
-    pdfText(doc,PDF_RUNTIME_FINGERPRINT,x+w-3,y+13.9,{align:'right'});
+    pdfSetFont(doc,largePrint?14.2:10.4,'bold');
+    pdfText(doc,'KGG Trainingsplan',x+3,y+(largePrint?7.6:5.7));
+    pdfSetFont(doc,largePrint?7.4:5.2,'normal');
+    const line1='Patient/in: '+pdfShort(patient.displayName||patient.name||patient.initials||patient.id||'Patient/in',largePrint?38:46)+'   Start: '+pdfShort(patient.startDate||'-',18)+'   Anlass: '+pdfShort(patient.reason||'KGG',16);
+    pdfText(doc,line1,x+3,y+(largePrint?13.6:10.0));
+    pdfText(doc,'T1-T6 = Trainingstage   S1-S3 = Sätze',x+3,y+(largePrint?19.2:14.1));
+    pdfSetFont(doc,largePrint?5.9:4.6,'normal');
+    pdfText(doc,template+' · Seite '+pageNo+'/'+pageCount,x+w-3,y+(largePrint?7.4:5.6),{align:'right'});
+    pdfSetFont(doc,largePrint?4.3:3.8,'normal');
+    pdfText(doc,PDF_RUNTIME_FINGERPRINT,x+w-3,y+(largePrint?19.0:13.9),{align:'right'});
     pdfResetInk(doc);
   }
 
 
-  function drawKggTableScaffold(doc,ex,x,y,w,h){
+  function drawKggTableScaffold(doc,ex,x,y,w,h,options){
+    const largePrint=!!(options&&options.largePrint);
     const side=normalizeSideMode(ex&&ex.side||'BI');
     const loadUnit=String(ex&&ex.loadUnit||'kg')||'kg';
-    const metricUnit=String(ex&&ex.metricUnit||'Wdh')||'Wdh';
-    const isLR=side==='LR';
-    const tagW=10.8;
-    const painW=22.5;
-    const headH=Math.max(8.6,Math.min(10.2,h*.18));
-    const rowH=(h-headH)/6;
-    const setW=w-tagW-painW;
-    const groupW=setW/3;
-    pdfResetInk(doc);
-    doc.setLineWidth(.18);
-    doc.rect(x,y,w,h);
-    doc.rect(x,y,tagW,headH);
-    pdfSetFont(doc,4.7,'bold');
-    pdfText(doc,'Tag',x+tagW/2,y+headH*.62,{align:'center'});
-    for(let s=0;s<3;s++){
-      const gx=x+tagW+s*groupW;
-      doc.rect(gx,y,groupW,headH);
-      pdfSetFont(doc,4.8,'bold');
-      pdfText(doc,pdfSpaceLabel('Satz '+(s+1),'S'+(s+1),groupW,isLR?18:16),gx+groupW/2,y+3.1,{align:'center'});
-      const subCount=isLR?4:2;
-      const subW=groupW/subCount;
-      for(let c=1;c<subCount;c++)doc.line(gx+c*subW,y+4.2,gx+c*subW,y+headH);
-      pdfSetFont(doc,3.55,'bold');
-      const labels=isLR?['li '+loadUnit,'li '+metricUnit,'re '+loadUnit,'re '+metricUnit]:[loadUnit,metricUnit];
-      labels.forEach((label,idx)=>pdfText(doc,pdfShort(label,9),gx+subW*(idx+.5),y+headH-1.7,{align:'center'}));
-    }
-    const painX=x+tagW+setW;
-    doc.rect(painX,y,painW,headH);
-    pdfSetFont(doc,4.2,'bold');
-    pdfText(doc,'Schmerz',painX+painW/2,y+3.2,{align:'center'});
-    pdfSetFont(doc,3.4,'bold');
-    pdfText(doc,'1-10',painX+painW/2,y+headH-1.7,{align:'center'});
-    for(let t=0;t<6;t++){
-      const ry=y+headH+t*rowH;
-      doc.rect(x,ry,tagW,rowH);
-      pdfSetFont(doc,4.8,'bold');
-      pdfText(doc,pdfSpaceLabel('Tag '+(t+1),'T'+(t+1),tagW,13),x+tagW/2,ry+rowH*.62,{align:'center'});
-      for(let s=0;s<3;s++){
-        const gx=x+tagW+s*groupW;
-        doc.rect(gx,ry,groupW,rowH);
-        const subCount=isLR?4:2;
-        const subW=groupW/subCount;
-        for(let c=1;c<subCount;c++)doc.line(gx+c*subW,ry,gx+c*subW,ry+rowH);
-      }
-      doc.rect(painX,ry,painW,rowH);
-      const pad=.9,gap=.32;
-      const boxW=(painW-pad*2-gap*9)/10;
-      const boxH=Math.min(rowH-1.2,boxW*1.05);
-      const by=ry+(rowH-boxH)/2;
-      for(let n=0;n<10;n++)doc.rect(painX+pad+n*(boxW+gap),by,boxW,boxH);
-    }
-    pdfResetInk(doc);
-  }
-
-
-  function drawKggExerciseBox(doc,slot,x,y,w,h){
-    const ex=slot||{};
-    pdfResetInk(doc);
-    if(ex.empty){
-      try{doc.setDrawColor(115);}catch(e){}
-      doc.setLineWidth(.14);
-      try{doc.roundedRect(x,y,w,h,1.4,1.4);}catch(e){doc.rect(x,y,w,h);}
-      pdfResetInk(doc);
-      return;
-    }
-    doc.setLineWidth(.28);
-    try{doc.roundedRect(x,y,w,h,1.6,1.6);}catch(e){doc.rect(x,y,w,h);}
-    const labelW=7.4,labelH=6.8;
-    const thumb=ex.pdfThumbnail&&ex.pdfThumbnail.dataUrl?ex.pdfThumbnail:null;
-    const canDrawThumb=!!(thumb&&typeof doc.addImage==='function');
-    const thumbW=canDrawThumb?Math.min(23.5,Math.max(18,w*.18)):0;
-    const thumbH=canDrawThumb?Math.min(17.2,Math.max(12,h*.20)):0;
-    const thumbX=x+w-thumbW-2.2;
-    const thumbY=y+2.1;
-    const textMax=canDrawThumb?46:62;
-    try{doc.setFillColor(0);}catch(e){}
-    doc.rect(x,y,labelW,labelH,'F');
-    try{doc.setTextColor(255);}catch(e){}
-    pdfSetFont(doc,5.9,'bold');
-    pdfText(doc,String(ex.slotNo||ex.slotIndex||''),x+labelW/2,y+4.9,{align:'center'});
-    try{doc.setTextColor(0);}catch(e){}
-    if(canDrawThumb){
-      try{
-        doc.setLineWidth(.12);
-        try{doc.setDrawColor(185);}catch(e){}
 ```

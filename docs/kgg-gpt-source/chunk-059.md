@@ -4,6 +4,99 @@
 - Lines: 24781-25200
 
 ```html
+    if(menu&&!document.getElementById('kggReleaseMenuGroup')){
+      var group=document.createElement('div');group.id='kggReleaseMenuGroup';group.className='tabletSideMenuGroup kggReleaseMenuGroup';group.innerHTML='<h3>Admin</h3>';
+      group.appendChild(actionButton('kggReleaseAdminConfig','Admin-Konfig',function(){closeTabletMenu();var target=document.getElementById('adminConfigBtn');if(target)target.click();}));
+      group.appendChild(actionButton('kggDeviceSyncOpen','Geräte-Sync',function(){closeTabletMenu();var target=document.getElementById('syncQrBtn');if(target)target.click();}));
+      group.appendChild(actionButton('kggReleaseCenterOpen','Update-Zentrale',open));menu.appendChild(group);
+    }
+    var tools=document.querySelector('.adminCodePackageTools');
+    if(tools&&!document.getElementById('kggReleaseCenterOpenPhone')){var phone=actionButton('kggReleaseCenterOpenPhone','Update-Zentrale',open);phone.className='mutedBtn wide';tools.appendChild(phone);}
+  }
+  window.KGGReleaseCenter={open:open,close:close,status:readStatus};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installEntryPoints,{once:true});else installEntryPoints();
+})();
+</script>
+<!-- KGG_ADMIN_ONLY_END -->
+
+
+
+<!-- KGG CLEAN MERGE v11: phone touch fixes only; no local auto-redirect blocker -->
+<style id="kgg-phone-touch-tablet-parity-hard-v3-css">
+@media (max-width:759px){
+  /* Remove the phone-only v401 layout cage from the plan area. */
+  #rightPlanStack,
+  #currentPlanBlock.planSectionCurrent,
+  body.kggPlanSectionFrozen #currentPlanBlock.planSectionCurrent{
+    contain:none!important;
+    overflow:visible!important;
+    transform:none!important;
+    backface-visibility:visible!important;
+    -webkit-backface-visibility:visible!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+  }
+
+  #currentPlanBlock .planSectionBody,
+  body.kggPlanSectionFrozen #currentPlanBlock .planSectionBody,
+  body.kggPlanCardSwiping #currentPlanBlock .planSectionBody,
+  body.kggPlanCardReordering #currentPlanBlock .planSectionBody{
+    contain:none!important;
+    overflow:auto!important;
+    touch-action:pan-y!important;
+    overscroll-behavior:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+    max-height:none!important;
+    transform:none!important;
+    backface-visibility:visible!important;
+    -webkit-backface-visibility:visible!important;
+  }
+
+  #currentPlanBlock #planList.planList,
+  body.kggPlanSectionFrozen #currentPlanBlock #planList.planList{
+    contain:none!important;
+    isolation:auto!important;
+    overflow:visible!important;
+    transform:none!important;
+    backface-visibility:visible!important;
+    -webkit-backface-visibility:visible!important;
+  }
+
+  /* Keep the rest of the phone UI tappable during plan gestures, like tablet. */
+  body.kggPlanCardReordering :is(
+    #bankArea,
+    #dbTitle,
+    .bankArea,
+    .bankRows,
+    .az,
+    #inputWrap,
+    #exerciseInput,
+    .suggestion
+  ){
+    pointer-events:auto!important;
+    transform:none!important;
+    filter:none!important;
+  }
+
+  /* Swipe animation: remove phone-only cage effects; keep the same simple transform path as tablet. */
+  body.kggPlanCardSwiping #currentPlanBlock .planCard.swipe-dragging,
+  body.is-scrolling.kggPlanCardSwiping #currentPlanBlock .planCard.swipe-dragging{
+    transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
+    transition:none!important;
+    will-change:transform,opacity!important;
+    z-index:8!important;
+  }
+
+  body.kggPlanCardSwiping #currentPlanBlock .planCard.swipe-armed{
+    transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
+  }
+
+  body.kggPlanCardSwiping #currentPlanBlock .planCard.swipe-removing,
+  body.is-scrolling.kggPlanCardSwiping #currentPlanBlock .planCard.swipe-removing{
+    transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
+    will-change:transform,opacity!important;
+    z-index:8!important;
   }
 
   /* Drag-reorder over the handle remains the tablet-style lifted card behavior. */
@@ -331,97 +424,4 @@
         phoneTools: !!q(".adminCodePackageTools")
       };
     };
-  }
-
-  function install(){
-    ensureFallbackGlobal();
-    var okTablet = ensureTabletMenuEntry();
-    var okPhone = ensurePhoneAdminEntry();
-    return okTablet || okPhone;
-  }
-
-  function scheduleInstall(){
-    [0, 80, 180, 420, 900, 1600, 2800].forEach(function(ms){
-      setTimeout(install, ms);
-    });
-  }
-
-  function startObserver(){
-    if(observer || !document.body) return;
-    observer = new MutationObserver(function(){
-      install();
-    });
-    observer.observe(document.body, {childList:true, subtree:true});
-  }
-
-  function boot(){
-    if(installed) return;
-    installed = true;
-    install();
-    scheduleInstall();
-    startObserver();
-  }
-
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", boot, {once:true});
-  }else{
-    boot();
-  }
-
-  window.addEventListener("resize", function(){ setTimeout(install, 80); }, {passive:true});
-  window.addEventListener("orientationchange", function(){ setTimeout(install, 180); }, {passive:true});
-})();
-</script>
-<!-- END KGG v12 FEATURE RESTORE -->
-
-
-<!-- KGG PATCH START kgg-v014-phone-viewport-state-release-guard -->
-<style id="kgg-v014-phone-viewport-state-release-guard-css">
-  /*
-    v014: final phone-only gesture placement guard.
-    - Phone drag cards are absolute inside #planList, not viewport fixed.
-    - Scope is only max-width:759px so tablet layout containers are untouched.
-  */
-  @media (max-width:759px){
-    body.kggPlanCardReordering #currentPlanBlock #planList.planList > .planCard.reorder-lifted{
-      position:absolute!important;
-      right:auto!important;
-      bottom:auto!important;
-      margin:0!important;
-      transform:translate3d(0,0,0)!important;
-      transition:none!important;
-      will-change:left,top!important;
-      pointer-events:none!important;
-      z-index:9999!important;
-    }
-
-    body.kggPlanCardReordering #currentPlanBlock #planList.planList{
-      position:relative;
-    }
-
-    body.kggPlanCardReordering #currentPlanBlock .planSectionBody{
-      overflow:auto!important;
-      touch-action:pan-y!important;
-    }
-  }
-</style>
-
-<script id="kgg-v014-phone-viewport-state-release-guard-js">
-(function(){
-  "use strict";
-
-  var PATCH_ID = "kgg-v014-phone-viewport-state-release-guard";
-  var PHONE_QUERY = "(max-width:759px)";
-  var cleanupTimer = 0;
-
-  function isPhone(){
-    return !!(window.matchMedia && window.matchMedia(PHONE_QUERY).matches);
-  }
-
-  function body(){
-    return document.body || null;
-  }
-
-  function planList(){
-    return document.getElementById("planList");
 ```

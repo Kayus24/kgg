@@ -4,6 +4,85 @@
 - Lines: 2941-3360
 
 ```html
+
+      #createPanel.planMode #recentToggle,
+      #createPanel.planMode #packageToggle{
+        height:66px!important;
+        min-height:66px!important;
+        font-size:19px!important;
+      }
+    }
+
+    @media (min-width:760px) and (max-width:980px){
+      .app{
+        grid-template-columns:minmax(380px,450px) minmax(0,1.02fr) minmax(0,.9fr)!important;
+        gap:16px!important;
+      }
+      #inputWrap textarea,
+      #exerciseInput{
+        font-size:21px!important;
+      }
+      .bankRow b{
+        font-size:17px!important;
+      }
+      .planCard b{
+        font-size:18px!important;
+      }
+      #createPanel.planMode #recentToggle,
+      #createPanel.planMode #packageToggle{
+        height:62px!important;
+        min-height:62px!important;
+      }
+    }
+
+
+
+    /* v335 Tablet Proportional Columns:
+       Linke und rechte Arbeitszone proportionaler verteilen.
+       Linke Spalte deutlich breiter, rechter Planbereich bleibt stabil.
+       UI leicht größer für bessere Tablet-Lesbarkeit.
+       Nur Tablet-CSS. Keine PDF/QR/Patienten-App/Scan/Parser/Plan-State-Logik. */
+    @media (min-width:760px){
+      .app{
+        grid-template-columns:clamp(540px,42vw,660px) minmax(0,1fr) minmax(0,.72fr)!important;
+        column-gap:14px!important;
+        gap:14px!important;
+        padding:16px!important;
+      }
+
+      .scanHub,
+      #inputWrap,
+      #bankArea{
+        width:100%!important;
+        max-width:none!important;
+        justify-self:stretch!important;
+      }
+
+      #rightPlanStack,
+      #currentPlanBlock,
+      #scannedPlansBlock{
+        min-width:0!important;
+        width:100%!important;
+      }
+
+      .scanHub .scanBtn,
+      .scanHub .scanMeta,
+      #baseToggle,
+      #finishBtn,
+      #recentToggle,
+      #packageToggle{
+        font-size:20px!important;
+      }
+      #baseToggle,
+      #finishBtn{
+        min-height:64px!important;
+        height:64px!important;
+      }
+
+      #exerciseInput,
+      #inputWrap textarea{
+        font-size:23px!important;
+        line-height:1.36!important;
       }
       #exerciseInput{
         min-height:120px!important;
@@ -345,83 +424,4 @@
         padding-right:92px!important;
       }
       .tabletLayoutFreeTools{
-        position:fixed!important;
-        right:12px!important;
-        top:50%!important;
-        transform:translateY(-50%)!important;
-        display:none!important;
-        flex-direction:column!important;
-        align-items:center!important;
-        gap:8px!important;
-        width:54px!important;
-        padding:8px 6px!important;
-        border:1px solid rgba(220,227,235,.95)!important;
-        border-radius:999px!important;
-        background:rgba(255,255,255,.96)!important;
-        box-shadow:0 14px 36px rgba(7,16,39,.16)!important;
-        z-index:98!important;
-        pointer-events:auto;
-        touch-action:none;
-      }
-      body.tabletLayoutUnlocked .tabletLayoutFreeTools{
-        display:flex!important;
-      }
-      .tabletLayoutFreeTools button{
-        width:42px!important;
-        height:42px!important;
-        min-height:42px!important;
-        padding:0!important;
-        border-radius:999px!important;
-        font-size:24px!important;
-        line-height:1!important;
-      }
-      .tabletScaleValue{
-        min-width:0!important;
-        min-height:54px!important;
-        writing-mode:vertical-rl;
-        transform:rotate(180deg);
-        font-size:11px!important;
-        line-height:1!important;
-      }
-      .tabletLayoutResizeHandle{
-        width:34px!important;
-      }
-      .tabletLayoutResizeHandle::before{
-        left:15px!important;
-        width:3px!important;
-        box-shadow:0 0 0 12px rgba(94,167,232,.08)!important;
-      }
-      .planCard,
-      .bankRow,
-      .baseCard,
-      .drawerBtn,
-      .primary,
-      .mutedBtn,
-      .tabletLockSwitch,
-      #currentPlanBlock,
-      #rightPlanStack{
-        min-width:0!important;
-      }
-      .planCard b,
-      .bankRow b,
-      .planCard small,
-      .bankRow small{
-        overflow-wrap:anywhere;
-      }
-      .app.softKeyboard .tabletLayoutControls,
-      .app.softKeyboard .tabletLayoutFreeTools{
-        display:none!important;
-      }
-    }
-
-    @media (min-width:760px) and (max-width:920px){
-      .tabletLayoutControls{
-        width:68px!important;
-        min-width:68px!important;
-        max-width:68px!important;
-        height:58px!important;
-      }
-      #createPanel:not(.planMode) #packageToggle,
-      #createPanel.planMode #packageToggle{
-        padding-right:80px!important;
 ```

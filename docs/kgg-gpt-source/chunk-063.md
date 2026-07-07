@@ -4,6 +4,99 @@
 - Lines: 26461-26880
 
 ```html
+      setTimeout(run,80);
+      setTimeout(run,320);
+    }
+  }
+  function bindBankOpenAlign(id){
+    var el=byId(id);
+    if(!el||el.dataset.kggV045BankAlignBound==="1")return;
+    el.dataset.kggV045BankAlignBound="1";
+    el.addEventListener("click",function(){
+      if(!isPhone())return;
+      var bank=byId("bankArea");
+      var opening=!(bank&&bank.classList.contains("bankOpen"));
+      if(opening)scheduleBankAlign();
+    },true);
+    el.addEventListener("keydown",function(ev){
+      if(!isPhone()||!(ev.key==="Enter"||ev.key===" "))return;
+      var bank=byId("bankArea");
+      var opening=!(bank&&bank.classList.contains("bankOpen"));
+      if(opening)scheduleBankAlign();
+    },true);
+  }
+  function install(){
+    bindDrawerButton("recentToggle","recent");
+    bindDrawerButton("packageToggle","package");
+    bindBankOpenAlign("bankToggle");
+    bindBankOpenAlign("dbTitle");
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});
+  else install();
+  [80,220,600,1200].forEach(function(ms){setTimeout(install,ms);});
+  if(document.body){
+    new MutationObserver(function(){install();}).observe(document.body,{childList:true,subtree:true});
+  }
+  window.KGG_UI_PHONE_DRAWER_BANK_ALIGN_V045={
+    patchId:PATCH_ID,
+    install:install,
+    closeDrawer:closePhoneDrawerSafe,
+    openDrawer:openPhoneDrawerSafe,
+    alignBank:alignBankEndToScanDock
+  };
+})();
+</script>
+<!-- KGG PATCH END kgg-v045-phone-drawer-bank-align -->
+
+<!-- KGG PATCH START kgg-v046-tablet-runtime-viewport-guard -->
+<script id="kgg-v046-tablet-runtime-viewport-guard-script">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v046-tablet-runtime-viewport-guard";
+  var PHONE_QUERY="(max-width:759px)";
+  function isPhoneViewport(){return !!(window.matchMedia&&window.matchMedia(PHONE_QUERY).matches);}
+  window.KGG_TABLET_RUNTIME_VIEWPORT_GUARD_V046={
+    patchId:PATCH_ID,
+    phoneQuery:PHONE_QUERY,
+    check:function(){
+      return {
+        patchId:PATCH_ID,
+        phoneViewport:isPhoneViewport(),
+        phoneHasPlanClass:!!(document.body&&document.body.classList.contains("kggPhoneHasPlan")),
+        phonePhotoOpen:!!(document.body&&document.body.classList.contains("kggPhonePhotoMenuOpen")),
+        scanHydrated:!!(document.getElementById("scanBtn")&&document.getElementById("scanBtn").dataset.kggV042ScanHydrated==="1")
+      };
+    }
+  };
+})();
+</script>
+<!-- KGG PATCH END kgg-v046-tablet-runtime-viewport-guard -->
+
+<!-- KGG PATCH START kgg-v050-phone-ui-mini-fix -->
+<style id="kgg-v050-phone-ui-mini-fix-style">
+  @media(max-width:759px){
+    body.adminMode #createPanel.planMode .planHeader{
+      position:relative!important;
+      grid-template-columns:minmax(0,1fr) auto!important;
+    }
+    body.adminMode #createPanel.planMode .planHeader #kggPhoneAdminMenu{
+      position:absolute!important;
+      top:8px!important;
+      right:88px!important;
+      left:auto!important;
+      transform:none!important;
+      z-index:74!important;
+      margin:0!important;
+      align-self:auto!important;
+      justify-self:auto!important;
+    }
+    body.adminMode #createPanel.planMode .planHeader #kggPhoneAdminMenuPanel{
+      top:calc(100% + 8px)!important;
+      right:0!important;
+    }
+    body.kggPhoneHasPlan #createPanel.planMode .planActions.hasPlan{
+      grid-template-columns:1fr!important;
+      gap:10px!important;
     }
     body.kggPhoneHasPlan #createPanel.planMode .planActions.hasPlan #recentToggle,
     body.kggPhoneHasPlan #createPanel.planMode .planActions.hasPlan #packageToggle{
@@ -331,97 +424,4 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
         if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)*1.2){cleanup();return;}
         if(Math.abs(dx)<12||Math.abs(dx)<Math.abs(dy)*1.25)return;
         active=true;
-        document.body.classList.add("kggPlanCardSwiping");
-        live.classList.add("swipe-dragging");
-        try{live.setPointerCapture&&live.setPointerCapture(pointerId);}catch(err){}
-      }
-      e.preventDefault();
-      if(e.stopImmediatePropagation)e.stopImmediatePropagation();
-      dx=Math.max(-live.offsetWidth*.86,Math.min(live.offsetWidth*.86,dx));
-      var strength=Math.min(1,Math.abs(dx)/threshold());
-      live.classList.toggle("swipe-left",dx<0);
-      live.classList.toggle("swipe-right",dx>0);
-      live.classList.toggle("swipe-armed",Math.abs(dx)>=threshold());
-      live.style.setProperty("--swipe-strength",String(strength));
-      live.style.setProperty("--kgg-plan-swipe-x",dx+"px");
-      live.style.transform="translateX(var(--kgg-plan-swipe-x,0px))";
-      live.style.opacity=String(1-strength*.16);
-    }
-    function up(e){
-      var live=currentCard();
-      cleanup();
-      if(!active){resetTabletSwipe(live);return;}
-      e.preventDefault();
-      document.body.classList.remove("kggPlanCardSwiping");
-      if(Math.abs(dx)>=threshold()){
-        live.classList.add("swipe-removing");
-        live.style.transition="transform .18s cubic-bezier(.2,.9,.2,1), opacity .18s ease";
-        live.style.setProperty("--kgg-plan-swipe-x",((dx<0?-1:1)*(live.offsetWidth+96))+"px");
-        live.style.opacity="0";
-        setTimeout(function(){
-          var del=live.querySelector(".planDeleteBtn,[data-del]");
-          if(del&&typeof del.click==="function")del.click();
-        },160);
-        return;
-      }
-      live.style.transition="transform .22s cubic-bezier(.2,.9,.2,1), opacity .18s ease";
-      live.style.setProperty("--kgg-plan-swipe-x","0px");
-      live.style.opacity="1";
-      setTimeout(function(){resetTabletSwipe(live);},230);
-    }
-    function cancel(){
-      var live=currentCard();
-      if(active){
-        clearTimeout(cancelTimer);
-        cancelTimer=setTimeout(function(){cleanup();resetTabletSwipe(currentCard());},900);
-        return;
-      }
-      cleanup();
-      resetTabletSwipe(live);
-    }
-    document.addEventListener("pointermove",move,true);
-    document.addEventListener("pointerup",up,true);
-    document.addEventListener("pointercancel",cancel,true);
-  }
-  function startTabletSwipe(ev){
-    startTabletSwipeForCard(ev,ev.currentTarget);
-  }
-  function bindTabletSwipeGuard(){
-    if(!document.body)return;
-    if(document.documentElement&&!document.documentElement.dataset.kggV053TabletSwipeDocumentGuard){
-      document.documentElement.dataset.kggV053TabletSwipeDocumentGuard="1";
-      document.addEventListener("pointerdown",function(ev){
-        if(!isTablet())return;
-        var target=ev.target;
-        var card=target&&target.closest&&target.closest("#planList .planCard[data-plan-id]");
-        if(card)startTabletSwipeForCard(ev,card);
-      },true);
-    }
-    document.querySelectorAll("#planList .planCard[data-plan-id]").forEach(function(card){
-      if(card.dataset.kggV053TabletSwipeGuard==="1")return;
-      card.dataset.kggV053TabletSwipeGuard="1";
-      card.addEventListener("pointerdown",startTabletSwipe,true);
-      card.onpointerdown=card.onpointerdown||startTabletSwipe;
-    });
-  }
-  function install(){
-    var menu=byId("kggPhoneAdminMenu");
-    var header=document.querySelector("#createPanel.planMode .planHeader")||document.querySelector("#createPanel .planHeader");
-    if(menu&&header&&!header.contains(menu))header.appendChild(menu);
-    anchorTabletMenuButton();
-    bindTabletSwipeGuard();
-  }
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});
-  else install();
-  [80,240,700].forEach(function(ms){setTimeout(install,ms);});
-  window.addEventListener("resize",function(){setTimeout(install,80);},{passive:true});
-  window.addEventListener("orientationchange",function(){setTimeout(install,160);},{passive:true});
-  if(document.body){
-    new MutationObserver(function(){install();}).observe(document.body,{attributes:true,attributeFilter:["class"],childList:true,subtree:true});
-  }
-  window.KGG_UI_TABLET_STABILITY_V053={
-    patchId:PATCH_ID,
-    install:install,
-    check:function(){
-      var menu=byId("kggPhoneAdminMenu");
 ```

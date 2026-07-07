@@ -4,6 +4,85 @@
 - Lines: 20161-20580
 
 ```html
+    const roomId=syncPairRoomId();
+    return {
+      kind:'kgg_sync_invite',
+      version:2,
+      appVersion:VERSION,
+      createdAt:new Date().toISOString(),
+      expiresAt:new Date(Date.now()+5*60*1000).toISOString(),
+      roomId,
+      deviceId,
+      therapistId,
+      displayName:therapistName||'KGG Geraet',
+      scopes:['exerciseBank','packages'],
+      transport:'android-native-sync-folder-mesh',
+      peerMode:'host-and-client',
+      autoDownload:true
+    };
+  }
+  function nativeSyncPayloadCode(prefix,value){return prefix+':'+safeBase64JsonEncode(value);}
+  function buildNativeSyncQrPayload(){
+    const invite=buildNativeSyncInvite();
+    let syncDoc=null;
+    try{syncDoc=buildNativeExerciseBankSyncDocument();}catch(err){syncDoc=null;}
+    if(syncDoc){
+      const bundle={kind:'kgg_sync_bundle',version:2,appVersion:VERSION,createdAt:invite.createdAt,expiresAt:invite.expiresAt,roomId:invite.roomId,peerMode:'host-and-client',invite,sync:syncDoc};
+      const bundleCode=nativeSyncPayloadCode('KGGSYNC2',bundle);
+      if(bundleCode.length<=nativeSyncQrMaxLength){
+        return {code:bundleCode,type:'bundle',syncIncluded:true,length:bundleCode.length,invite,sync:syncDoc};
+      }
+      return {code:nativeSyncPayloadCode('KGGSYNC1',invite),type:'invite',syncIncluded:false,length:bundleCode.length,invite,sync:syncDoc,tooLarge:true};
+    }
+    return {code:nativeSyncPayloadCode('KGGSYNC1',invite),type:'invite',syncIncluded:false,length:0,invite,sync:null};
+  }
+  function renderQrIntoBox(targetId,value,alt){
+    const box=$(targetId);
+    if(!box)return false;
+    box.innerHTML='';
+    try{
+      let imgData='';
+      if(window.KGGQrCore&&typeof window.KGGQrCore.renderQrToImg==='function'){
+        imgData=window.KGGQrCore.renderQrToImg(value,{cellSize:10,margin:4});
+      }else if(typeof window.qrcode==='function'){
+        const qr=window.qrcode(0,'L');
+        qr.addData(value);
+        qr.make();
+        imgData=qr.createDataURL(10,4);
+      }
+      if(imgData){
+        const img=document.createElement('img');
+        img.alt=alt||'QR-Code';
+        img.src=imgData;
+        box.appendChild(img);
+        return true;
+      }
+    }catch(err){console.warn('Sync-QR konnte nicht gerendert werden:',err);}
+    box.innerHTML='<span class="qrStatus">QR konnte nicht erzeugt werden. Code kopieren.</span>';
+    return false;
+  }
+  function nativeSyncTransportStatusText(){
+    try{
+      if(!window.KGGNativeSync||typeof window.KGGNativeSync.status!=='function')return '';
+      const status=window.KGGNativeSync.status()||{};
+      if(status.usingSharedFolder||status.writeUsesSharedFolder){
+        return ' Android-Sync-Raum: KGG Sync / '+syncPeerIdShort(status.syncRoomId||syncPairRoomId())+'.';
+      }
+      if(status.sharedWritable===false){
+        return ' Android nutzt privaten Rueckfall-Speicher; gemeinsamen KGG Sync-Ordner/Dateizugriff pruefen.';
+      }
+      return ' Android-Sync-Datei: '+(status.syncFile||'Cross-Data-Safe-Datei')+'.';
+    }catch(err){
+      return '';
+    }
+  }
+  function nativeSyncPeerMesh(){
+    try{
+      if(window.KGGNativeSync&&typeof window.KGGNativeSync.listPeers==='function'){
+        return window.KGGNativeSync.listPeers()||{peers:[]};
+      }
+    }catch(err){}
+    return {kind:'kgg_cross_data_safe_sync_mesh',peers:[]};
   }
   function syncPeerDisplayEntries(){
     const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig&&nativeSyncFollowConfig()||{});
@@ -345,83 +424,4 @@
       ex.custom=true;
       ex.updatedAt=new Date().toISOString();
       persistCustomBank();
-    }
-    renderEditorMediaStatus(ex);
-    render();
-    $('editorModal').classList.add('open');
-  }
-  function openEditor(ex){
-    if(!ex)return;
-    const inferredMeasure=(String(ex.unit||ex.metricUnit||'').toLowerCase().includes('zeit')||String(ex.unit||ex.metricUnit||'').toLowerCase().includes('sek'))?'zeit':'wdh';
-    state.editId=ex.localId||ex.id;
-    $('editName').value=ex.name||'';
-    $('editSets').value=String(normalizeSetCount(ex.sets));
-    $('editMetric').value=ex.startMetric||'';
-    $('editLoad').value=ex.startLoad||'';
-    $('editUnit').value=normalizeLoadUnit(ex.weightUnit||ex.loadUnit||'kg');
-    $('editMeasure').value=normalizeMeasureMode(ex.measure||inferredMeasure);
-    $('editSide').value=normalizeSideMode(ex.side||'BI');
-    $('editVideoUrl').value=ex.videoUrl||'';
-    $('editVideoLabel').value=ex.videoLabel||'Video öffnen';
-    renderEditorMediaStatus(ex);
-    const bankEdit=!ex.localId&&bank.some(item=>String(item.id)===String(ex.id));
-    $('deleteExercise').dataset.scope=bankEdit?'bank':'plan';
-    $('deleteExercise').style.visibility=(ex.localId||bankEdit)?'visible':'hidden';
-    $('editorModal').classList.add('open');
-  }
-  function closeEditor(){state.editId=null; $('editorModal').classList.remove('open')}
-  function saveEditedExercise(){
-    const id=state.editId;
-    const planEx=state.plan.find(x=>(x.localId||x.id)===id);
-    if(planEx){
-      const measure=normalizeMeasureMode($('editMeasure').value);
-      const loadUnit=normalizeLoadUnit($('editUnit').value);
-      planEx.name=$('editName').value;
-      planEx.sets=normalizeSetCount($('editSets').value);
-      planEx.startMetric=$('editMetric').value;
-      planEx.startLoad=$('editLoad').value;
-      planEx.weightUnit=loadUnit;
-      planEx.loadUnit=loadUnit;
-      planEx.measure=measure;
-      planEx.unit=measureUnitLabel(measure);
-      planEx.metricUnit=measureUnitLabel(measure);
-      planEx.side=normalizeSideMode($('editSide').value);
-      planEx.videoUrl=String($('editVideoUrl').value||'').trim();
-      planEx.videoLabel=String($('editVideoLabel').value||'').trim()||'Video öffnen';
-      planEx.changedByLiveText=false;
-      planEx.needsReview=false;
-      const bankEx=upsertPlanExerciseToBank(planEx,'ui_save_exercise');
-      if(bankEx){
-        planEx.sourceId=bankEx.id;
-        planEx.bankId=bankEx.id;
-      }
-      persistCustomBank();
-      syncStatePlanToStore('ui_save_exercise');
-      syncTextInputFromPlan('ui_save_exercise');
-      save();
-      render();
-    }else{
-      const bankEx=currentEditedBankExercise();
-      if(bankEx){
-        const measure=normalizeMeasureMode($('editMeasure').value);
-        const loadUnit=normalizeLoadUnit($('editUnit').value);
-        bankEx.name=$('editName').value;
-        bankEx.aliases=bankEx.aliases||bankEx.name;
-        bankEx.sets=normalizeSetCount($('editSets').value);
-        bankEx.startMetric=$('editMetric').value;
-        bankEx.startLoad=$('editLoad').value;
-        bankEx.weightUnit=loadUnit;
-        bankEx.loadUnit=loadUnit;
-        bankEx.measure=measure;
-        bankEx.unit=measureUnitLabel(measure);
-        bankEx.metricUnit=measureUnitLabel(measure);
-        bankEx.side=normalizeSideMode($('editSide').value);
-        bankEx.videoUrl=String($('editVideoUrl').value||'').trim();
-        bankEx.videoLabel=String($('editVideoLabel').value||'').trim()||'Video öffnen';
-        bankEx.custom=true;
-        bankEx.updatedAt=new Date().toISOString();
-        persistCustomBank();
-        render();
-      }
-    }
 ```

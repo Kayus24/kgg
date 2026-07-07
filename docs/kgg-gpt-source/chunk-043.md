@@ -4,6 +4,85 @@
 - Lines: 18061-18480
 
 ```html
+  function setLargePdfMode(enabled){state.largePdfMode=!!enabled; applyLargePdfMode(); save();}
+  function initLargePdfMode(){if(/[?&](grosspdf|largepdf)=1\b/i.test(location.search))state.largePdfMode=true; applyLargePdfMode();}
+  function loadDeletedBankIds(){try{const raw=localStorage.getItem(deletedBankKey); const ids=raw?JSON.parse(raw):[]; deletedBankIds=new Set(Array.isArray(ids)?ids.map(String):[]);}catch(e){console.warn(e); deletedBankIds=new Set();}}
+  function persistDeletedBankIds(){try{localStorage.setItem(deletedBankKey,JSON.stringify([...deletedBankIds]));}catch(e){console.warn(e)}}
+  function loadCustomBank(){loadDeletedBankIds(); try{const raw=localStorage.getItem(customBankKey); const items=raw?JSON.parse(raw):[]; if(Array.isArray(items))items.forEach(ex=>{if(ex&&ex.name){const existing=bank.find(b=>compact(b.name)===compact(ex.name)); if(existing)Object.assign(existing,{...ex,id:existing.id||ex.id,custom:true}); else bank.push({...ex,custom:true});}});}catch(e){console.warn(e)} for(let i=bank.length-1;i>=0;i--){if(deletedBankIds.has(String(bank[i]&&bank[i].id)))bank.splice(i,1);}}
+  function persistCustomBank(){try{localStorage.setItem(customBankKey,JSON.stringify(bank.filter(ex=>ex.custom||ex.createdFromPlan)));}catch(e){console.warn(e)} queueNativeExerciseBankSync('exercise_bank_changed');}
+  function openBankDeleteModal(id){
+    const ex=bank.find(item=>String(item.id)===String(id));
+    if(!ex)return;
+    pendingBankDeleteId=String(id);
+    const name=$('bankDeleteName');
+    if(name)name.textContent=ex.name||'';
+    $('bankDeleteModal').classList.add('open');
+  }
+  function closeBankDeleteModal(){pendingBankDeleteId=null; $('bankDeleteModal').classList.remove('open');}
+  function deleteBankExercise(id){
+    const sid=String(id||'');
+    const idx=bank.findIndex(ex=>String(ex&&ex.id)===sid);
+    if(idx<0)return;
+    deletedBankIds.add(sid);
+    bank.splice(idx,1);
+    persistDeletedBankIds();
+    persistCustomBank();
+    render();
+  }
+  function confirmBankDelete(){if(pendingBankDeleteId)deleteBankExercise(pendingBankDeleteId); closeBankDeleteModal();}
+  function exerciseBankFieldsFromPlan(ex,name){
+    return {
+      name:name||ex.name||stripExerciseName(ex.rawText)||'',
+      aliases:ex.aliases||name||ex.name||'',
+      sets:normalizeSetCount(ex.sets),
+      unit:ex.unit||ex.metricUnit||'Wdh',
+      weightUnit:ex.weightUnit||ex.loadUnit||'kg',
+      loadUnit:ex.weightUnit||ex.loadUnit||'kg',
+      metricUnit:ex.unit||ex.metricUnit||'Wdh',
+      measure:normalizeMeasureMode(ex.measure||(String(ex.unit||'').toLowerCase().includes('zeit')?'zeit':'wdh')),
+      side:normalizeSideMode(ex.side||'BI'),
+      startMetric:ex.startMetric||'',
+      startLoad:ex.startLoad||'',
+      videoUrl:ex.videoUrl||'',
+      videoLabel:ex.videoLabel||'Video öffnen',
+      media:ensureExerciseMediaList(ex)
+    };
+  }
+  function upsertPlanExerciseToBank(ex,reason){
+    const name=ex&&ex.name||stripExerciseName(ex&&ex.rawText)||'';
+    if(!name)return null;
+    let existing=bank.find(b=>compact(b.name)===compact(name));
+    const fields=exerciseBankFieldsFromPlan(ex,name);
+    if(existing){
+      Object.assign(existing,fields,{custom:true,updatedFromPlan:true,updatedAt:new Date().toISOString(),dbSyncReason:reason||'plan_save'});
+    }else{
+      existing={id:'custom_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),...fields,custom:true,createdFromPlan:true,createdAt:new Date().toISOString(),dbSyncReason:reason||'plan_save'};
+      bank.push(existing);
+    }
+    return existing;
+  }
+  function savePendingToBank(reason){
+    state.plan=(state.plan||[]).map(ex=>{
+      const copy={...ex};
+      if(copy.pendingNew||copy.changedByLiveText||copy.needsReview){
+        const saved=upsertPlanExerciseToBank(copy,reason||'before_output');
+        if(saved){
+          copy.pendingNew=false;
+          copy.dbSynced=true;
+          copy.dbSyncedAt=new Date().toISOString();
+          copy.dbSyncReason=reason||'before_output';
+          copy.sourceId=saved.id;
+          copy.bankId=saved.id;
+        }
+      }
+      return copy;
+    });
+    persistCustomBank();
+    syncStatePlanToStore(reason||'save_pending_to_bank');
+    save();
+  }
+  function score(q,ex){const cq=compact(q), cn=compact(ex.name), al=String(ex.aliases||'').split(/[,;]/).map(compact); if(!cq)return 0; if(cq===cn)return 120; if(al.indexOf(cq)>-1)return 115; if(cn.includes(cq)||cq.includes(cn))return 94; if(al.some(a=>a.length>2&&(a.includes(cq)||cq.includes(a))))return 90; return norm(q).split(' ').reduce((r,t)=>r+(t.length>2&&norm(ex.name+' '+ex.aliases).includes(t)?10:0),0)}
+  function scoredSearch(q,limit){return bank.map(ex=>({ex,score:score(q,ex)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,limit||8)}
   function search(q,limit){return scoredSearch(q,limit).map(x=>x.ex)}
   function allAlpha(){return bank.slice().sort((a,b)=>a.name.localeCompare(b.name,'de'))}
   function fillBankListWithFallback(matches,limit){
@@ -345,83 +424,4 @@
     };
     apply();
     if(typeof requestAnimationFrame==='function')requestAnimationFrame(apply);
-  }
-  function preventButtonFocusSteal(btn){
-    if(!btn)return;
-    const keep=ev=>ev.preventDefault();
-    btn.addEventListener('pointerdown',keep);
-    btn.addEventListener('mousedown',keep);
-    if(typeof window!=='undefined'&&!window.PointerEvent)btn.addEventListener('touchstart',keep,{passive:false});
-  }
-  function applySelectedExerciseToText(ex,options){
-    if(!ex)return;
-    const keepBankOpen=state.bankOpen;
-    const bankArea=$('bankArea');
-    const defaultMode=bankSelectMode||(state.bankOpen&&bankArea&&bankArea.classList.contains('alphaBankOpen')?'append':'replaceActive');
-    const mode=options&&options.mode||defaultMode;
-    const keepFocus=!!(options&&options.keepFocus);
-    const input=$('exerciseInput');
-    const scrollAnchor=state.bankOpen?captureDbScrollAnchor():null;
-    const line=formatExerciseTextLine({...ex,side:normalizeSideMode(ex.side||'BI')})||ex.name;
-    if(!input){addExercise(ex);return;}
-    if(mode==='append'){
-      const caret=appendExerciseLineToInput(input,line);
-      input.setSelectionRange&&input.setSelectionRange(caret,caret);
-      state.bankOpen=keepBankOpen;
-      bankSelectMode='append';
-      syncPlanFromTextInput('ui_select_db_exercise_append_to_text');
-      restoreDbScrollAnchor(scrollAnchor);
-      if(keepFocus)keepExerciseInputFocus(caret);
-      bankSelectMode='append';
-      return;
-    }
-    const parts=splitPlanText(input.value);
-    const pos=typeof input.selectionStart==='number'?input.selectionStart:input.value.length;
-    let index=parts.findIndex(p=>pos>=p.start&&pos<=p.end);
-    if(index<0)index=Math.max(0,parts.length-1);
-    const target=parts[index];
-    let caret=pos;
-    if(target&&target.text.trim()){
-      const parsed=parseTextExercise(target.text,state.plan[index]||null)||{};
-      const replacement=formatExerciseTextLine({...ex,localId:parsed.localId||parsed.id,id:parsed.localId||parsed.id,side:parsed.side||ex.side,startLoad:parsed.startLoad,startMetric:parsed.startMetric,weightUnit:ex.weightUnit||parsed.weightUnit,unit:ex.unit||parsed.unit});
-      input.value=input.value.slice(0,target.start)+replacement+input.value.slice(target.end);
-      caret=target.start+replacement.length;
-      const tail=input.value.slice(caret);
-      const existingSep=tail.match(/^(\s*(?:,|;|\n+)\s*)/);
-      if(existingSep)caret+=existingSep[1].length;
-    }else{
-      const start=target?target.start:input.value.length;
-      const end=target?target.end:input.value.length;
-      const before=input.value.slice(0,start);
-      const after=input.value.slice(end);
-      const needsSeparator=before.trim()&&!/[,\n;]\s*$/.test(before);
-      const insert=(needsSeparator?', ':'')+line;
-      input.value=before+insert+after;
-      caret=before.length+insert.length;
-    }
-    if(!input.value.slice(caret).trim()){
-      const before=input.value.slice(0,caret).replace(/\s+$/,'');
-      input.value=withTrailingExerciseComma(before);
-      caret=input.value.length;
-    }
-    input.setSelectionRange&&input.setSelectionRange(caret,caret);
-    state.bankOpen=keepBankOpen;
-    syncPlanFromTextInput('ui_select_db_exercise_into_text');
-    restoreDbScrollAnchor(scrollAnchor);
-    if(keepFocus)keepExerciseInputFocus(caret);
-    bankSelectMode=keepBankOpen?'append':'replaceActive';
-  }
-  function addExercise(ex){const item=ensureUiExerciseShape(ex||{}); state.plan.push(item); syncStatePlanToStore('ui_add_exercise'); syncTextInputFromPlan('ui_add_exercise'); state.bankOpen=false; state.liveDraftId=null; save(); render();}
-  function removeExercise(localId){const input=$('exerciseInput'); const keepTrailingComma=!!(input&&/,\s*$/.test(input.value)); state.plan=state.plan.filter(x=>(x.localId||x.id)!==localId); if(state.liveDraftId===localId)state.liveDraftId=null; if(state.sortMenuId===localId)state.sortMenuId=null; syncStatePlanToStore('ui_remove_exercise'); syncTextInputFromPlan('ui_remove_exercise'); restoreTrailingCommaAfterPlanSync(keepTrailingComma); save(); render();}
-  function clearInputAndRemoveLiveTextExercises(){state.plan=[]; state.liveDraftId=null; $('exerciseInput').value=''; resizeExerciseInputToContent(); state.bankOpen=false; syncStatePlanToStore('ui_clear_text_master_plan'); save(); render();}
-  function confirmExerciseInput(){syncPlanFromTextInput('ui_confirm_text_master');}
-  function upsertLiveExerciseFromText(){const input=$('exerciseInput'); const value=String(input&&input.value||''); const parts=splitPlanText(value).map(p=>String(p.text||'').trim()).filter(Boolean); const committed=/[,;\\n]\\s*$/.test(value)||parts.length>1; if(!committed){const hadDraft=!!state.liveDraftId||(state.plan||[]).some(ex=>ex&&ex.liveDraft); if(hadDraft){state.plan=(state.plan||[]).filter(ex=>!(ex&&ex.liveDraft)); state.liveDraftId=null; syncStatePlanToStore('ui_textfield_unconfirmed_not_plan'); save();} render(); return;} syncPlanFromTextInput('ui_textfield_master_input');}
-  function activeText(){return activeTextSegment();}
-  function hasSearchLetters(text){return /[A-Za-zÄÖÜäöüß]/.test(String(text||''));}
-  function activeBankQuerySegment(){
-    const input=$('exerciseInput');
-    if(!input)return'';
-    const value=String(input.value||'');
-    const pos=typeof input.selectionStart==='number'?input.selectionStart:value.length;
-    const before=value.slice(0,pos);
 ```

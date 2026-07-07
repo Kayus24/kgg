@@ -4,6 +4,85 @@
 - Lines: 19321-19740
 
 ```html
+      /*
+        v5 phone drag anchor:
+        keep the lifted card anchored to the exact finger offset captured before
+        the prelift CSS transform can change its rect.
+      */
+      downRect:{
+        left:downRect.left,
+        top:downRect.top,
+        width:downRect.width,
+        height:downRect.height
+      },
+      pointerOffsetX:ev.clientX-downRect.left,
+      pointerOffsetY:ev.clientY-downRect.top,
+      phoneAnchoredDrag:false,
+      fixedOffset:{left:0,top:0}
+    };
+    animatedReorder=press;
+    handle.classList.add('reorder-armed');
+    card.classList.add('reorder-prelift');
+    press.timer=setTimeout(()=>activateAnimatedReorder(press,ev),100);
+    const moveBefore=e=>{
+      if(animatedReorder!==press)return;
+      const dx=Math.abs(e.clientX-startX),dy=Math.abs(e.clientY-startY);
+      if(!press.active && (dx>10 || dy>10)){
+        clearTimeout(press.timer);
+        press.cancelled=true;
+        cleanupAnimatedReorder(false);
+      }
+    };
+    const upBefore=e=>{
+      if(animatedReorder!==press)return;
+      if(!press.active){clearTimeout(press.timer);cleanupAnimatedReorder(false);}
+    };
+    press.preMove=moveBefore;
+    press.preUp=upBefore;
+    document.addEventListener('pointermove',moveBefore,{passive:true});
+    document.addEventListener('pointerup',upBefore,{passive:true,once:true});
+    document.addEventListener('pointercancel',upBefore,{passive:true,once:true});
+  }
+  function fixedContainingBlockOffset(el){
+    let node=el&&el.parentElement;
+    while(node&&node!==document.documentElement){
+      const cs=getComputedStyle(node);
+      const backdrop=cs.backdropFilter||cs.webkitBackdropFilter||'none';
+      const contain=cs.contain||'';
+      const willChange=cs.willChange||'';
+      const createsFixedBlock=
+        cs.transform!=='none'||
+        cs.perspective!=='none'||
+        cs.filter!=='none'||
+        backdrop!=='none'||
+        contain.includes('paint')||
+        contain.includes('layout')||
+        willChange.includes('transform');
+      if(createsFixedBlock){
+        const r=node.getBoundingClientRect();
+        return {left:r.left,top:r.top};
+      }
+      node=node.parentElement;
+    }
+    return {left:0,top:0};
+  }
+  function activateAnimatedReorder(press,initialEv){
+    if(animatedReorder!==press||press.cancelled)return;
+    const card=press.card,list=press.list;
+    const phoneDrag=isPhoneLayout();
+    /*
+      v5 phone drag anchor:
+      On phone, use the card rect captured at pointerdown, not the transformed
+      prelift rect after the 100ms hold. This prevents the lifted card from
+      jumping away from the finger at activation.
+    */
+    const liveRect=card.getBoundingClientRect();
+    const rect=(phoneDrag&&press.downRect)?press.downRect:liveRect;
+    const fixedOffset=fixedContainingBlockOffset(card);
+    press.fixedOffset=fixedOffset;
+    press.phoneAnchoredDrag=!!phoneDrag;
+    const placeholder=document.createElement('div');
+    placeholder.className='planCard reorder-placeholder';
     const placeholderHeight=Math.max(48,rect.height);
     placeholder.style.height=placeholderHeight+'px';
     /*
@@ -345,83 +424,4 @@
     $('sharedBankModal').classList.add('open');
   }
   function closeSharedBankModal(){$('sharedBankModal').classList.remove('open');}
-  async function copySharedBankPayload(){
-    const text=$('sharedBankText'), status=$('sharedBankStatus');
-    if(!text)return;
-    try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(text.value); if(status)status.textContent='Export kopiert.'; return;}}catch(err){console.warn('DB-Export konnte nicht kopiert werden:',err);}
-    text.focus(); text.select(); if(status)status.textContent='Export markiert.';
-  }
-  function applySharedBankFromText(){
-    const status=$('sharedBankStatus');
-    try{const result=mergeSharedExerciseBank($('sharedBankText').value); if(status)status.textContent='Import übernommen: '+result.added+' neu, '+result.updated+' aktualisiert.';}
-    catch(err){if(status)status.textContent='Import nicht übernommen: '+(err&&err.message||'unbekannter Fehler');}
-  }
-  function handleSharedBankFile(ev){
-    const file=ev.target.files&&ev.target.files[0];
-    ev.target.value='';
-    if(!file)return;
-    const reader=new FileReader();
-    reader.onload=()=>{if($('sharedBankText'))$('sharedBankText').value=String(reader.result||''); if($('sharedBankStatus'))$('sharedBankStatus').textContent='Import geladen.';};
-    reader.readAsText(file);
-  }
-  window.KGGSharedBank={exportPayload:buildSharedExerciseBankPayload,merge:mergeSharedExerciseBank,open:openSharedBankModal};
-  let nativeExerciseSyncTimer=null;
-  let nativeExerciseSyncApplying=false;
-  function nativeExerciseSyncAvailable(){
-    return !!(window.KGGNativeSync&&window.KGGNativeSync.available&&typeof window.KGGNativeSync.read==='function'&&typeof window.KGGNativeSync.write==='function');
-  }
-  function syncTimestamp(value){const t=Date.parse(value||''); return Number.isFinite(t)?t:0;}
-  function assertCrossDataSafeSyncDocument(doc){
-    const allowedPolicyKeys=new Set(['patients','secrets','debugPayloads','rawData']);
-    const blockedKeyPattern=new RegExp(['patient','gemini','api'+'key','api'+'_'+'key','secret','token','raw'+'payload','base64'+'payload','qrraw'].join('|'));
-    const blocked=[];
-    const visit=(value,path)=>{
-      if(!value||typeof value!=='object')return;
-      Object.keys(value).forEach(key=>{
-        const lower=String(key).toLowerCase();
-        const policyKey=(path==='sync.privacy'||path.endsWith('.privacy'))&&allowedPolicyKeys.has(key);
-        if(policyKey){
-          if(value[key]!==false)blocked.push(path+'.'+key);
-        }else if(blockedKeyPattern.test(lower)){
-          blocked.push(path+'.'+key);
-        }
-        visit(value[key],path+'.'+key);
-      });
-    };
-    visit(doc,'sync');
-    if(blocked.length)throw new Error('Sync-Safe blockiert geschuetzte Felder: '+blocked.slice(0,3).join(', '));
-    return doc;
-  }
-  function syncSafeOrigin(){
-    let deviceId='';
-    try{deviceId=syncPairDeviceId();}catch(err){deviceId='web_'+Date.now().toString(36);}
-    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig&&nativeSyncFollowConfig()||{});
-    const displayName=String(($('therapistName')&&$('therapistName').value)||state.patient.therapist||'KGG Geraet').trim();
-    return {deviceId,therapistId:String(config.therapistId||deviceId),displayName,roomId:syncPairRoomId()};
-  }
-  function syncSafeTombstones(exportedAt){
-    return [...deletedBankIds].map(id=>({id:String(id),deleted:true,updatedAt:exportedAt}));
-  }
-  function sanitizeNativeSyncPackage(pkg){
-    return {
-      id:String(pkg&&pkg.id||('pkg_'+compact(pkg&&pkg.name||''))).slice(0,96),
-      name:String(pkg&&pkg.name||'').trim(),
-      exercises:Array.isArray(pkg&&pkg.exercises)?pkg.exercises.map(name=>String(name||'').trim()).filter(Boolean):[],
-      createdAt:String(pkg&&pkg.createdAt||new Date().toISOString()),
-      updatedAt:String(pkg&&pkg.updatedAt||pkg&&pkg.createdAt||new Date().toISOString()),
-      source:String(pkg&&pkg.source||'exercise-package')
-    };
-  }
-  function buildNativeExerciseBankSyncDocument(){
-    const exportedAt=new Date().toISOString();
-    return assertCrossDataSafeSyncDocument({
-      kind:'kgg_cross_data_safe_sync',
-      version:2,
-      appVersion:VERSION,
-      exportedAt,
-      roomId:syncPairRoomId(),
-      schema:'exercise-bank-packages-v2',
-      scopes:['exerciseBank','packages'],
-      privacy:{patients:false,secrets:false,debugPayloads:false,rawData:false},
-      origin:syncSafeOrigin(),
 ```

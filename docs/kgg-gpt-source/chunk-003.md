@@ -4,6 +4,85 @@
 - Lines: 1261-1680
 
 ```html
+    "kgg-update/version.json.sha256",
+    "kgg-source-truth.currentVersion",
+    "kgg-patch-rules",
+    "kgg-update/version.json.indexUrl"
+  ],
+  "protectedAreas": [
+    "PDF",
+    "QR-Erzeugung",
+    "Patienten-App",
+    "Scan-Kamera",
+    "Parser",
+    "Android-Wrapper",
+    "Tablet-Layout",
+    "Plan-State",
+    "Storage"
+  ],
+  "patchRetentionPolicy": {
+    "rule": "Never delete the latest patch for a function silently.",
+    "why": "The last patch for a feature is often what fixed or stabilized the bug; removing it without tracking can reintroduce old bugs.",
+    "defaultBehavior": "Preserve previous patch code and patch history unless Max explicitly approves removal.",
+    "whenReplacingPatch": [
+      "Mark old changelog entry as superseded, not deleted.",
+      "Add supersededBy on the old entry when practical.",
+      "Add supersedes on the new entry.",
+      "Record whySuperseded/removalReason/testEvidence/rollbackNote."
+    ],
+    "requiredWhenRemovingPatch": [
+      "supersededBy",
+      "removalReason",
+      "testEvidence",
+      "rollbackNote",
+      "explicitMaxApproval"
+    ],
+    "pipelineExpectation": "If patch markers or active fixes disappear without changelog documentation, stop and ask Max."
+  },
+  "changelogSizePolicy": {
+    "scope": "embedded kgg-changelog in index.html",
+    "warnAtEntries": 18,
+    "maxEmbeddedEntries": 30,
+    "warnAtBytes": 35000,
+    "maxEmbeddedBytes": 55000,
+    "actionWhenWarningThresholdReached": "Warn Max before adding more large entries; propose compact summaries or external archival.",
+    "actionWhenMaxExceeded": "Stop non-critical updates until Max approves compaction/archive strategy.",
+    "doNotAutoDeleteHistory": true
+  },
+  "blockPatchIfMissing": [
+    "kgg-source-truth",
+    "kgg-changelog",
+    "kgg-patch-rules"
+  ],
+  "requiredOnPatchRemoval": [
+    "supersededBy or replacementPatchId",
+    "removalReason",
+    "testEvidence",
+    "rollbackNote",
+    "explicitMaxApproval"
+  ],
+  "llmInstruction": "If changelog size exceeds policy thresholds or a patch-removal is not documented, warn Max and ask before changing code.",
+  "adminDebugMenuPolicy": {
+    "patchId": "kgg-v022-admin-debug-menu-feedback",
+    "purpose": "Keep an in-app admin feedback/debug path available for future QR/layout/update/storage issues.",
+    "doNotRemoveWithout": [
+      "supersededBy",
+      "reason",
+      "testEvidence",
+      "Max approval"
+    ],
+    "expectedGlobal": "KGG_ADMIN_DEBUG_MENU.report()"
+  },
+  "adminDebugVisibleHotfix": {
+    "patchId": "kgg-v023-admin-debug-visible-hotfix",
+    "purpose": "Debug entry must be visible in admin/therapist app even when adminMode class is missing.",
+    "expectedGlobal": "KGG_ADMIN_DEBUG_MENU.report()",
+    "expectedButton": "#kggAdminDebugFab",
+    "doNotRemoveWithout": [
+      "supersededBy",
+      "reason",
+      "testEvidence",
+      "Max approval"
     ]
   },
   "adminDebugRollbackPolicy": {
@@ -345,83 +424,4 @@
       .app.softKeyboard .bankRow b{font-size:14px}
       .app.softKeyboard .bankRow small{font-size:10px}
       .app.softKeyboard #currentPlanBlock{padding:10px;border-radius:20px}
-      .app.softKeyboard #currentPlanBlock .label{font-size:17px;margin-bottom:8px}
-      .app.softKeyboard .planCard{padding:8px 10px;border-radius:15px}
-      .app.softKeyboard .planCard b{font-size:17px}
-      .app.softKeyboard .planCard small{font-size:12px}
-      .app.softKeyboard #finishBtn,.app.softKeyboard #recentToggle,.app.softKeyboard #packageToggle{display:none!important}
-      .app.softKeyboard #recentList,.app.softKeyboard #packageList{max-height:min(34vh,260px)}
-    }
-    #finishNotice:empty{display:none}
-    .patientQrOutput{padding:8px;margin-top:4px;display:flex;flex-direction:column}
-    .patientQrOutput .patientOutputTitle,
-    .patientQrOutput #patientShareNotice,
-    .patientQrOutput #patientQrStatus{display:none!important}
-    .patientQrOutput .qrBox{margin-top:0;min-height:clamp(360px,84vw,520px);padding:6px;border-radius:18px}
-    .patientQrOutput .qrBox img{width:100%;max-width:min(88vw,500px);height:auto}
-    .patientQrOutput #patientQrBox{order:1}
-    .patientQrOutput #patientAppLink{order:2}
-    .patientQrOutput #copyPatientLink{order:3;width:100%;margin-top:8px}
-    .patientQrOutput #patientLinkCopyField{order:4}
-    .patientShareActions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:8px}
-    .patientShareActions .patientLink,
-    .patientShareActions .mutedBtn{margin-top:0;min-height:48px;display:grid;place-items:center}
-    @media (max-width:390px){.patientQrOutput .qrBox{min-height:clamp(330px,82vw,470px)}.patientShareActions{grid-template-columns:1fr}.patientShareActions .patientLink,.patientShareActions .mutedBtn{min-height:44px}}
-
-
-    /* v309 Tablet Layout Fix: nur Tablet-CSS, keine PDF/QR/Scan/Parser-Logik. */
-    @media (min-width:760px){
-      .app{position:relative;isolation:isolate}
-
-      /* Admin-Hinweis darf nicht mehr als ungeplantes Grid-Item unten ins Layout rutschen. */
-      .adminTestBanner{position:absolute;left:18px;right:18px;bottom:8px;z-index:3;margin:0;padding:8px 10px;font-size:13px;line-height:1.15;pointer-events:none;opacity:.92}
-      .adminTestBanner small{font-size:11px;line-height:1.15}
-
-      /* Sichtbares Tablet-Raster stabilisieren. */
-      .app{grid-template-columns:minmax(360px,430px) minmax(0,1fr) minmax(150px,190px);grid-template-rows:auto 68px minmax(126px,auto) minmax(0,1fr) 64px;gap:14px;align-items:stretch}
-      .scanHub{grid-column:1;grid-row:2;align-self:stretch;min-width:0}
-      .planHeader .panelTitle{grid-column:2/4;grid-row:1;align-self:end;min-width:0}
-      #inputLabel,#dbTitle{grid-column:1;grid-row:1;align-self:end;min-width:0}
-      #inputWrap{grid-column:1;grid-row:3;min-width:0;align-self:stretch}
-      #bankArea{grid-column:1;grid-row:4;min-width:0;align-self:stretch}
-      #currentPlanBlock{grid-column:2/4;grid-row:3/5;min-width:0;align-self:stretch}
-      #baseToggle{grid-column:2;grid-row:2;min-width:0;align-self:stretch}
-      #savePackageBtn{grid-column:3;grid-row:2;align-self:stretch;justify-self:stretch}
-      #baseFields{grid-column:1/4;grid-row:2;align-self:start}
-
-      /* Wenn kein Paket-Speichern-Button sichtbar ist, darf Basisdaten nicht schmal/frei schweben. */
-      #createPanel:not(.planMode) #baseToggle,
-      #savePackageBtn.hidden + #baseToggle{grid-column:2/4}
-      #createPanel:not(.planMode) #savePackageBtn.hidden{display:none!important}
-
-      /* Versteckte Planfläche soll im Leerzustand keine unsichtbare große Box erzwingen. */
-      #createPanel:not(.planMode) #currentPlanBlock.hidden{display:none!important}
-
-      /* Untere Tablet-Aktionen bündig halten. */
-      #createPanel:not(.planMode) .planActions{grid-column:2;grid-row:5;display:grid;grid-template-columns:1fr;gap:14px;min-width:0}
-      #createPanel:not(.planMode) #recentToggle{grid-column:1;grid-row:1;width:100%;height:64px;min-height:64px;justify-content:center}
-      #createPanel:not(.planMode) #packageToggle{grid-column:3;grid-row:5;width:100%;justify-self:stretch;height:64px;min-height:64px}
-      #createPanel.planMode #recentToggle,
-      #createPanel.planMode #packageToggle{height:64px;min-height:64px;align-self:stretch}
-
-      /* Eingabe/DB links als eine ruhige Spalte; rechts Planfläche voll ausnutzen. */
-      #exerciseInput{width:100%;min-height:126px;max-height:190px}
-      #bankArea:not(.bankOpen) .drawerBtn{width:100%;height:64px;min-height:64px}
-      #currentPlanBlock .label{white-space:nowrap}
-      #planList{max-height:100%;overflow:auto}
-
-      /* Schmaler Tablet-Splitscreen: feste rechte Icon-Spalte etwas entspannen. */
-      @media (max-width:920px){
-        .app{grid-template-columns:minmax(320px,390px) minmax(0,1fr) minmax(126px,150px);gap:12px;padding:14px}
-        #baseToggle{font-size:19px}
-        #packageToggle,#recentToggle,#finishBtn{font-size:18px}
-        .adminTestBanner{left:14px;right:14px;bottom:6px}
-      }
-    }
-
-    /* v310 Tablet Layout Overlap Fix: Scan-Vorschau aus dem linken Eingabe-Raster nehmen, Bottom-Zeile sichtbar halten. */
-    @media (min-width:760px){
-      body{padding:8px;background:#e8eef6;overflow:hidden}
-      .app{
-        height:calc(100vh - 16px);
 ```

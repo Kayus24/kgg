@@ -1,7 +1,7 @@
 {
-  "versionCode": 56,
-  "versionName": "1.0.56-patient-qr-root-query",
-  "indexUrl": "index.html?v=56",
-  "sha256": "a41714f372f97a2d84c1da356366d4089714dba9b1c2d6ab799fe26f615b3fd7",
-  "notes": "v056: Patienten-QRs nutzen die Root-Patienten-App mit ?plan=KGGH2-Payload; Root-App importiert Query-Plan direkt."
+  "versionCode": 58,
+  "versionName": "1.0.58-grossdruck-readability-beta",
+  "indexUrl": "index.html?v=58",
+  "sha256": "e5c912447e4fe8a9b08003209a9de7507f37c3e3212052334be54c9ebb801514",
+  "notes": "v058: Grossdruck-PDF nutzt groessere kurzsichtigkeitsgepruefte Schrift und eine lokale PDF-Readability-Testengine."
 }

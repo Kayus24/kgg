@@ -4,6 +4,85 @@
 - Lines: 16801-17220
 
 ```html
+    var expectedAlignmentPattern = {
+        x: topLeft.x + correctionToTopLeft * (bottomRightFinderPattern.x - topLeft.x),
+        y: topLeft.y + correctionToTopLeft * (bottomRightFinderPattern.y - topLeft.y),
+    };
+    var alignmentPatterns = alignmentPatternQuads
+        .map(function (q) {
+        var x = (q.top.startX + q.top.endX + q.bottom.startX + q.bottom.endX) / 4;
+        var y = (q.top.y + q.bottom.y + 1) / 2;
+        if (!matrix.get(Math.floor(x), Math.floor(y))) {
+            return;
+        }
+        var lengths = [q.top.endX - q.top.startX, q.bottom.endX - q.bottom.startX, (q.bottom.y - q.top.y + 1)];
+        var size = sum(lengths) / lengths.length;
+        var sizeScore = scorePattern({ x: Math.floor(x), y: Math.floor(y) }, [1, 1, 1], matrix);
+        var score = sizeScore + distance({ x: x, y: y }, expectedAlignmentPattern);
+        return { x: x, y: y, score: score };
+    })
+        .filter(function (v) { return !!v; })
+        .sort(function (a, b) { return a.score - b.score; });
+    // If there are less than 15 modules between finder patterns it's a version 1 QR code and as such has no alignmemnt pattern
+    // so we can only use our best guess.
+    var alignmentPattern = modulesBetweenFinderPatterns >= 15 && alignmentPatterns.length ? alignmentPatterns[0] : expectedAlignmentPattern;
+    return { alignmentPattern: alignmentPattern, dimension: dimension };
+}
+
+
+/***/ })
+/******/ ])["default"];
+});
+</script>
+<!-- KGG PATCH END kgg-v021-embed-jsqr-gallery-decode lib -->
+
+<style id="kgg-v024-rollback-v023-debug-breakage-guard-style">
+/* KGG PATCH START: kgg-v024-rollback-v023-debug-breakage-guard-style */
+#kggAdminDebugFab,
+#kggAdminDebugBtn,
+#kggAdminHubBtn,
+.kggAdminDebugBtn,
+.kggAdminHubBtn,
+#kggDebugPanelOverlay,
+.kggDebugPanelOverlay,
+.kggDebugToast{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+/* KGG PATCH END: kgg-v024-rollback-v023-debug-breakage-guard-style */
+</style>
+</head>
+<body class="adminMode">
+<div class="tabletSideBackdrop" id="tabletSideBackdrop" hidden></div>
+  <aside class="tabletSideMenu" id="tabletSideMenu" aria-hidden="true">
+    <div class="tabletSideMenuHead">
+      <strong>Menue</strong>
+      <button class="tabletMenuClose" id="tabletMenuClose" type="button" aria-label="Menue schliessen">&times;</button>
+    </div>
+    <nav class="tabletSideMenuGroup tabletSideMenuMain" aria-label="Tablet-Menue">
+      <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuRecentBtn" type="button"><span class="tabletMenuActionIcon" aria-hidden="true">&#128337;</span><span>Letzte Pl&auml;ne</span></button>
+      <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuPackagesBtn" type="button"><span class="tabletMenuActionIcon" aria-hidden="true">&#128230;</span><span>&Uuml;bungspakete</span></button>
+      <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuTherapistShareBtn" type="button"><span class="tabletMenuActionIcon" aria-hidden="true">&#128188;</span><span>Therapeuten-App weitergeben</span></button>
+      <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuLayoutBtn" type="button" aria-expanded="false"><span class="tabletMenuActionIcon" aria-hidden="true">&#9881;</span><span>Layout anpassen</span></button>
+      <div class="tabletSideMenuLayoutPanel" id="tabletMenuLayoutPanel" hidden>
+        <div class="tabletLayoutControls" id="tabletLayoutControls" aria-label="Tablet-Layout">
+          <button class="tabletLockSwitch" id="tabletLayoutLockBtn" type="button" aria-pressed="true" aria-label="Layout fixiert">
+            <span class="tabletLockIcon" aria-hidden="true">&#128274;</span>
+            <span class="tabletSwitchTrack" aria-hidden="true"><span class="tabletSwitchKnob"></span></span>
+            <span class="tabletLockText">Fix</span>
+          </button>
+          <div class="tabletLayoutFreeTools" id="tabletLayoutFreeTools" aria-label="Freies Tablet-Layout">
+            <button id="tabletScalePlus" type="button" aria-label="UI groesser">+</button>
+            <span class="tabletScaleValue" id="tabletScaleValue">100%</span>
+            <button id="tabletLayoutReset" type="button" aria-label="Tablet-Layout zuruecksetzen">&#8634;</button>
+            <button id="tabletScaleMinus" type="button" aria-label="UI kleiner">-</button>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </aside>
 <div class="tabletPackageShade" id="tabletPackageShade" hidden></div>
 <aside class="tabletPackageOverlay" id="tabletPackageOverlay" aria-hidden="true" aria-label="Uebungspakete">
   <div class="tabletPackageHead">
@@ -328,11 +407,11 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
 
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v056_patient_qr_root_query';
+  const VERSION='KGG_GITHUB_UPDATE_v058_grossdruck_readability_beta';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={release:'v056',buildTime:'2026-07-02T00:00:00+02:00',buildCode:'github-update-v056-patient-qr-root-query',htmlFile:'kgg-update/index.html'};
+  const KGG_BUILD_INFO={release:'v058',buildTime:'2026-07-07T00:00:00+02:00',buildCode:'github-update-v058-grossdruck-readability-beta',htmlFile:'kgg-update/index.html'};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -345,83 +424,4 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   const pwaServiceWorkerUrl='kgg_therapist_sw.js';
 
   const kggUpdateManifestUrl='https://kayus24.github.io/kgg/therapist-app/kgg_update_manifest.json';
-  const kggAutoUpdateCheckMs=30*60*1000;
-  const kggAutoUpdateSessionKey='kgg_auto_update_target_v1';
-  const adminSecretsKey='kgg_admin_local_secrets_v1';
-  let deferredInstallPrompt=null;
-  let adminSecrets={geminiKeys:[],mediaDropzoneEndpoint:'',mediaDropzoneUploadToken:'',updatedAt:''};
-  const norm=s=>String(s||'').toLowerCase().replace(/[ä]/g,'ae').replace(/[ö]/g,'oe').replace(/[ü]/g,'ue').replace(/[ß]/g,'ss').replace(/[^a-z0-9]+/g,' ').trim();
-  const compact=s=>norm(s).replace(/\s+/g,'');
-  const bank=[
-    ['abd','Abduktion Maschine','abd,abduktion,abductor,abduktor,hüft abduktion',3,'Wdh','kg'],['add','Adduktion Maschine','add,adduktion,adduktor,adductor,hüft adduktion',3,'Wdh','kg'],['legpress','Beinpresse','beinpresse,bein presse,leg press,presse',3,'Wdh','kg'],['bridge','Bridging','bridge,bridging,beckenheben,glute bridge',3,'Wdh','kg'],['copenhagen','Copenhagen Plank','copenhagen,adduktoren plank',3,'Zeit','keine'],['bike','Ergometer / Bike','fahrrad,bike,ergometer,warmup,cardio,rad',1,'Zeit','Stufe/Watt'],['fire','Fire Hydrants','fire hydrant,hydrants,vierfüßler abduktion',3,'Wdh','kg'],['hipthrust','Hip Thrust','hip thrust,glute thrust',3,'Wdh','kg'],['legcurl','Kniebeuger Maschine','kniebeuger,leg curl,hamstring curl,beinbeuger',3,'Wdh','kg'],['kneeext','Kniestrecker Maschine','kniestrecker,knieextension,beinstrecker,leg extension,knei ext',3,'Wdh','kg'],['row','Rudern','rudern,seated row,kabelrudern,ruderzug',3,'Wdh','kg'],['lat','Latziehen','latziehen,latzug,lat pulldown,pulldown,lat',3,'Wdh','kg'],['pallof','Pallof Press','pallof,pallof press,anti rotation',3,'Wdh','kg'],['plank','Plank','plank,blank,unterarmstütz,stütz',3,'Zeit','keine'],['squat','Squat','squat,kniebeuge,kniebeugen',3,'Wdh','kg'],['rdl','Romanian Deadlift','romanian deadlift,rdl,dead lift',3,'Wdh','kg'],['deadlift','Wadenheben','wadenheben,calf raise',3,'Wdh','kg'],['shoulder','Schulterpresse','schulter presse,shoulder press',3,'Wdh','kg']
-  ].map(a=>({id:a[0],name:a[1],aliases:a[2],sets:a[3],unit:a[4],weightUnit:a[5]}));
-  let state={plan:[],recent:[],packages:[{id:'pkg1',name:'Knie Standard',exercises:['Beinpresse','Kniebeuger Maschine','Kniestrecker Maschine']},{id:'pkg2',name:'Rücken Standard',exercises:['Rudern','Latziehen','Pallof Press']}],patient:{},bankOpen:false,editId:null,sortMenuId:null,reorderSuppressClick:false,largePdfMode:false,textSyncing:false};
-  let bankSelectMode='replaceActive';
-  let deletedBankIds=new Set();
-  let pendingBankDeleteId=null;
-  let bankSwipeSuppressClickUntil=0;
-  const MEDIA_UPLOAD_TTL_SECONDS=300;
-  const MEDIA_UPLOAD_LONG_TTL_SECONDS=86400;
-  const MEDIA_LONG_PRESS_MS=5000;
-  const MEDIA_RETRY_SECONDS=240;
-  const MEDIA_IMAGE_MAX_DIM=1280;
-  const MEDIA_IMAGE_QUALITY=.78;
-  const mediaDbName='kgg_media_v1';
-  const mediaStoreName='encryptedBlobs';
-  let mediaDbPromise=null;
-  let patientShareTtlSeconds=MEDIA_UPLOAD_TTL_SECONDS;
-  let lastPatientSharePlanSnapshot=null;
-  let lastPatientMediaBundleManifest=null;
-  let copyPatientLinkSuppressClickUntil=0;
-  const mediaDropzoneRuntimeTokens={};
-
-  // v2 Plan-State-Adapter: KGGDataStore.currentPlan ist die zentrale Planquelle.
-  // state.plan bleibt als bestehender UI-/Legacy-Spiegel erhalten.
-  function makeLocalId(){return 'p_'+Date.now()+'_'+Math.random().toString(36).slice(2,8)}
-  function makeMediaId(){return 'media_'+Date.now()+'_'+Math.random().toString(36).slice(2,10)}
-  function getMediaDropzoneSetting(key){
-    try{return String(window[key]||localStorage.getItem(key)||'').trim();}catch(e){return String(window[key]||'').trim();}
-  }
-  function cleanMediaDropzoneEndpoint(value){return String(value||'').trim().replace(/\/+$/,'');}
-  function cleanMediaDropzoneId(value){return String(value||'').replace(/[^a-zA-Z0-9._-]/g,'').slice(0,96);}
-  function initMediaDropzoneUploadAdapter(){
-    const endpoint=cleanMediaDropzoneEndpoint(getMediaDropzoneSetting('KGG_MEDIA_DROPZONE_ENDPOINT')||getMediaDropzoneSetting('kggMediaDropzoneEndpoint'));
-    window.KGGMediaDropzone={
-      setEndpoint(url){try{localStorage.setItem('kggMediaDropzoneEndpoint',cleanMediaDropzoneEndpoint(url));}catch(e){}},
-      setUploadToken(token){try{localStorage.setItem('kggMediaDropzoneUploadToken',String(token||'').trim());}catch(e){}},
-      clear(){try{localStorage.removeItem('kggMediaDropzoneEndpoint');localStorage.removeItem('kggMediaDropzoneUploadToken');}catch(e){}}
-    };
-    if(!endpoint)return;
-    if(window.KGGMediaUploadAdapter&&!window.KGGMediaUploadAdapter.isMock)return;
-    window.KGGMediaUploadAdapter={
-      name:'kgg-media-dropzone-kv-v1',
-      isMock:false,
-      async upload(blob,context){
-        const manifest=context&&context.manifest||{};
-        const id=cleanMediaDropzoneId(manifest.id)||makeMediaId();
-        const ttlSeconds=Math.max(60,Math.min(MEDIA_UPLOAD_LONG_TTL_SECONDS,Number(context&&context.ttlSeconds)||MEDIA_UPLOAD_TTL_SECONDS));
-        const token=getMediaDropzoneSetting('KGG_MEDIA_DROPZONE_UPLOAD_TOKEN')||getMediaDropzoneSetting('kggMediaDropzoneUploadToken');
-        const headers={'Content-Type':'application/octet-stream','X-KGG-Media-Id':id,'X-KGG-Media-Mime':manifest.mime||'application/octet-stream','X-KGG-Media-Bytes':String(blob&&blob.size||0)};
-        if(token)headers['X-KGG-Upload-Token']=token;
-        const res=await fetch(endpoint+'/upload?ttl='+encodeURIComponent(ttlSeconds),{method:'POST',headers,body:blob,cache:'no-store'});
-        if(!res.ok)throw new Error('Medien-Upload fehlgeschlagen ('+res.status+').');
-        const data=await res.json();
-        if(data&&data.id&&data.deleteToken)mediaDropzoneRuntimeTokens[data.id]=data.deleteToken;
-        return data;
-      },
-      scheduleDelete(media,options){
-        const delay=Math.max(1000,Number(options&&options.delayMs)||((Number(media&&media.ttlSeconds)||MEDIA_UPLOAD_TTL_SECONDS)*1000));
-        setTimeout(()=>{this.delete(media);},delay);
-      },
-      async delete(media){
-        const id=cleanMediaDropzoneId(media&&media.id);
-        if(!id)return false;
-        const deleteToken=(media&&media.deleteToken)||mediaDropzoneRuntimeTokens[id]||'';
-        const deleteUrl=(media&&media.deleteUrl)||endpoint+'/media/'+encodeURIComponent(id);
-        try{
-          const res=await fetch(deleteUrl,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({deleteToken}),cache:'no-store'});
-          return res.ok||res.status===404||res.status===410;
-        }catch(err){console.warn('Media delete fehlgeschlagen:',err);return false;}
-      }
-    };
 ```

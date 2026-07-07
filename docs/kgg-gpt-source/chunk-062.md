@@ -4,6 +4,99 @@
 - Lines: 26041-26460
 
 ```html
+      if(isPhone())install();
+    });
+    observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:["class"]});
+  }
+  function install(){
+    if(!isPhone()){
+      closeViewportPhoneUi();
+      return;
+    }
+    anchorAdminMenu();
+    integratePhotoToggle();
+    installObserver();
+    syncLayerState();
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});
+  else install();
+  [80,220,600,1200].forEach(function(ms){setTimeout(install,ms);});
+  window.addEventListener("resize",function(){setTimeout(install,90);},{passive:true});
+  window.addEventListener("orientationchange",function(){setTimeout(install,180);},{passive:true});
+  window.KGG_UI_MINI_SERIES_V042={
+    patchId:PATCH_ID,
+    install:install,
+    check:function(){
+      var menu=byId("kggPhoneAdminMenu");
+      var toggle=byId("phonePhotoMenuToggle");
+      var scan=byId("scanBtn");
+      return {
+        patchId:PATCH_ID,
+        phone:isPhone(),
+        adminAnchored:!!(menu&&menu.closest("#createPanel .planHeader")),
+        photoToggleInsideScan:!!(toggle&&scan&&toggle.parentElement===scan),
+        dockZ:getComputedStyle(byId("scanHub")||document.body).zIndex,
+        finishZ:getComputedStyle(byId("finishBtn")||document.body).zIndex
+      };
+    }
+  };
+})();
+</script>
+<!-- KGG PATCH END kgg-v042-phone-dock-anchored-correction -->
+
+<!-- KGG PATCH START kgg-v044-phone-liquid-actions -->
+<style id="kgg-v044-phone-liquid-actions-style">
+  @media(max-width:759px){
+    #createPanel{
+      margin-top:16px!important;
+    }
+
+    #scanHub #scanBtn.kggScanButtonWithMenu,
+    body.kggPhoneHasPlan #createPanel.planMode #finishBtn:not(.hidden){
+      border:1px solid rgba(255,255,255,.9)!important;
+      background:
+        radial-gradient(circle at 18% 8%,rgba(255,255,255,.98),rgba(255,255,255,.58) 42%,rgba(232,241,252,.46) 100%),
+        linear-gradient(180deg,rgba(255,255,255,.94),rgba(236,244,253,.68))!important;
+      color:#071027!important;
+      box-shadow:
+        0 22px 48px rgba(7,16,39,.20),
+        0 5px 16px rgba(7,16,39,.10),
+        inset 0 1px 0 rgba(255,255,255,1),
+        inset 0 -1px 0 rgba(124,149,178,.16)!important;
+      backdrop-filter:blur(30px) saturate(1.72) contrast(1.04)!important;
+      -webkit-backdrop-filter:blur(30px) saturate(1.72) contrast(1.04)!important;
+    }
+
+    #scanHub #scanBtn.kggScanButtonWithMenu{
+      min-height:60px!important;
+      height:60px!important;
+      border-radius:22px!important;
+      padding:0 8px 0 18px!important;
+      gap:12px!important;
+      align-items:center!important;
+      justify-content:space-between!important;
+    }
+    #scanHub #scanBtn.kggScanButtonWithMenu .phoneScanLabel{
+      display:inline-flex!important;
+      align-items:center!important;
+      gap:8px!important;
+      min-width:0!important;
+      color:#071027!important;
+      font-size:17px!important;
+      font-weight:1000!important;
+      letter-spacing:-.2px!important;
+    }
+    #scanHub #scanBtn.kggScanButtonWithMenu #phonePhotoMenuToggle{
+      position:relative!important;
+      flex:0 0 50px!important;
+      width:50px!important;
+      min-width:50px!important;
+      height:50px!important;
+      min-height:50px!important;
+      border:0!important;
+      border-radius:18px!important;
+      background:rgba(255,255,255,.38)!important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.96)!important;
       font-size:24px!important;
     }
     #scanHub #scanBtn.kggScanButtonWithMenu #phonePhotoMenuToggle::before{
@@ -331,97 +424,4 @@
       setTimeout(run,260);
       setTimeout(run,520);
     }else{
-      setTimeout(run,80);
-      setTimeout(run,320);
-    }
-  }
-  function bindBankOpenAlign(id){
-    var el=byId(id);
-    if(!el||el.dataset.kggV045BankAlignBound==="1")return;
-    el.dataset.kggV045BankAlignBound="1";
-    el.addEventListener("click",function(){
-      if(!isPhone())return;
-      var bank=byId("bankArea");
-      var opening=!(bank&&bank.classList.contains("bankOpen"));
-      if(opening)scheduleBankAlign();
-    },true);
-    el.addEventListener("keydown",function(ev){
-      if(!isPhone()||!(ev.key==="Enter"||ev.key===" "))return;
-      var bank=byId("bankArea");
-      var opening=!(bank&&bank.classList.contains("bankOpen"));
-      if(opening)scheduleBankAlign();
-    },true);
-  }
-  function install(){
-    bindDrawerButton("recentToggle","recent");
-    bindDrawerButton("packageToggle","package");
-    bindBankOpenAlign("bankToggle");
-    bindBankOpenAlign("dbTitle");
-  }
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});
-  else install();
-  [80,220,600,1200].forEach(function(ms){setTimeout(install,ms);});
-  if(document.body){
-    new MutationObserver(function(){install();}).observe(document.body,{childList:true,subtree:true});
-  }
-  window.KGG_UI_PHONE_DRAWER_BANK_ALIGN_V045={
-    patchId:PATCH_ID,
-    install:install,
-    closeDrawer:closePhoneDrawerSafe,
-    openDrawer:openPhoneDrawerSafe,
-    alignBank:alignBankEndToScanDock
-  };
-})();
-</script>
-<!-- KGG PATCH END kgg-v045-phone-drawer-bank-align -->
-
-<!-- KGG PATCH START kgg-v046-tablet-runtime-viewport-guard -->
-<script id="kgg-v046-tablet-runtime-viewport-guard-script">
-(function(){
-  "use strict";
-  var PATCH_ID="kgg-v046-tablet-runtime-viewport-guard";
-  var PHONE_QUERY="(max-width:759px)";
-  function isPhoneViewport(){return !!(window.matchMedia&&window.matchMedia(PHONE_QUERY).matches);}
-  window.KGG_TABLET_RUNTIME_VIEWPORT_GUARD_V046={
-    patchId:PATCH_ID,
-    phoneQuery:PHONE_QUERY,
-    check:function(){
-      return {
-        patchId:PATCH_ID,
-        phoneViewport:isPhoneViewport(),
-        phoneHasPlanClass:!!(document.body&&document.body.classList.contains("kggPhoneHasPlan")),
-        phonePhotoOpen:!!(document.body&&document.body.classList.contains("kggPhonePhotoMenuOpen")),
-        scanHydrated:!!(document.getElementById("scanBtn")&&document.getElementById("scanBtn").dataset.kggV042ScanHydrated==="1")
-      };
-    }
-  };
-})();
-</script>
-<!-- KGG PATCH END kgg-v046-tablet-runtime-viewport-guard -->
-
-<!-- KGG PATCH START kgg-v050-phone-ui-mini-fix -->
-<style id="kgg-v050-phone-ui-mini-fix-style">
-  @media(max-width:759px){
-    body.adminMode #createPanel.planMode .planHeader{
-      position:relative!important;
-      grid-template-columns:minmax(0,1fr) auto!important;
-    }
-    body.adminMode #createPanel.planMode .planHeader #kggPhoneAdminMenu{
-      position:absolute!important;
-      top:8px!important;
-      right:88px!important;
-      left:auto!important;
-      transform:none!important;
-      z-index:74!important;
-      margin:0!important;
-      align-self:auto!important;
-      justify-self:auto!important;
-    }
-    body.adminMode #createPanel.planMode .planHeader #kggPhoneAdminMenuPanel{
-      top:calc(100% + 8px)!important;
-      right:0!important;
-    }
-    body.kggPhoneHasPlan #createPanel.planMode .planActions.hasPlan{
-      grid-template-columns:1fr!important;
-      gap:10px!important;
 ```

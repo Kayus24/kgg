@@ -4,6 +4,85 @@
 - Lines: 15961-16380
 
 ```html
+                ecBlocks: [
+                    { numBlocks: 23, dataCodewordsPerBlock: 15 },
+                    { numBlocks: 25, dataCodewordsPerBlock: 16 },
+                ],
+            },
+        ],
+    },
+    {
+        infoBits: 0x1F250,
+        versionNumber: 31,
+        alignmentPatternCenters: [6, 30, 56, 82, 108, 134],
+        errorCorrectionLevels: [
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 13, dataCodewordsPerBlock: 115 },
+                    { numBlocks: 3, dataCodewordsPerBlock: 116 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 28,
+                ecBlocks: [
+                    { numBlocks: 2, dataCodewordsPerBlock: 46 },
+                    { numBlocks: 29, dataCodewordsPerBlock: 47 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 42, dataCodewordsPerBlock: 24 },
+                    { numBlocks: 1, dataCodewordsPerBlock: 25 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 23, dataCodewordsPerBlock: 15 },
+                    { numBlocks: 28, dataCodewordsPerBlock: 16 },
+                ],
+            },
+        ],
+    },
+    {
+        infoBits: 0x209D5,
+        versionNumber: 32,
+        alignmentPatternCenters: [6, 34, 60, 86, 112, 138],
+        errorCorrectionLevels: [
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [{ numBlocks: 17, dataCodewordsPerBlock: 115 }],
+            },
+            {
+                ecCodewordsPerBlock: 28,
+                ecBlocks: [
+                    { numBlocks: 10, dataCodewordsPerBlock: 46 },
+                    { numBlocks: 23, dataCodewordsPerBlock: 47 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 10, dataCodewordsPerBlock: 24 },
+                    { numBlocks: 35, dataCodewordsPerBlock: 25 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 19, dataCodewordsPerBlock: 15 },
+                    { numBlocks: 35, dataCodewordsPerBlock: 16 },
+                ],
+            },
+        ],
+    },
+    {
+        infoBits: 0x216F0,
+        versionNumber: 33,
+        alignmentPatternCenters: [6, 30, 58, 86, 114, 142],
+        errorCorrectionLevels: [
             {
                 ecCodewordsPerBlock: 30,
                 ecBlocks: [
@@ -345,83 +424,4 @@ function quadrilateralToSquare(p1, p2, p3, p4) {
 function times(a, b) {
     return {
         a11: a.a11 * b.a11 + a.a21 * b.a12 + a.a31 * b.a13,
-        a12: a.a12 * b.a11 + a.a22 * b.a12 + a.a32 * b.a13,
-        a13: a.a13 * b.a11 + a.a23 * b.a12 + a.a33 * b.a13,
-        a21: a.a11 * b.a21 + a.a21 * b.a22 + a.a31 * b.a23,
-        a22: a.a12 * b.a21 + a.a22 * b.a22 + a.a32 * b.a23,
-        a23: a.a13 * b.a21 + a.a23 * b.a22 + a.a33 * b.a23,
-        a31: a.a11 * b.a31 + a.a21 * b.a32 + a.a31 * b.a33,
-        a32: a.a12 * b.a31 + a.a22 * b.a32 + a.a32 * b.a33,
-        a33: a.a13 * b.a31 + a.a23 * b.a32 + a.a33 * b.a33,
-    };
-}
-function extract(image, location) {
-    var qToS = quadrilateralToSquare({ x: 3.5, y: 3.5 }, { x: location.dimension - 3.5, y: 3.5 }, { x: location.dimension - 6.5, y: location.dimension - 6.5 }, { x: 3.5, y: location.dimension - 3.5 });
-    var sToQ = squareToQuadrilateral(location.topLeft, location.topRight, location.alignmentPattern, location.bottomLeft);
-    var transform = times(sToQ, qToS);
-    var matrix = BitMatrix_1.BitMatrix.createEmpty(location.dimension, location.dimension);
-    var mappingFunction = function (x, y) {
-        var denominator = transform.a13 * x + transform.a23 * y + transform.a33;
-        return {
-            x: (transform.a11 * x + transform.a21 * y + transform.a31) / denominator,
-            y: (transform.a12 * x + transform.a22 * y + transform.a32) / denominator,
-        };
-    };
-    for (var y = 0; y < location.dimension; y++) {
-        for (var x = 0; x < location.dimension; x++) {
-            var xValue = x + 0.5;
-            var yValue = y + 0.5;
-            var sourcePixel = mappingFunction(xValue, yValue);
-            matrix.set(x, y, image.get(Math.floor(sourcePixel.x), Math.floor(sourcePixel.y)));
-        }
-    }
-    return {
-        matrix: matrix,
-        mappingFunction: mappingFunction,
-    };
-}
-exports.extract = extract;
-
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var MAX_FINDERPATTERNS_TO_SEARCH = 4;
-var MIN_QUAD_RATIO = 0.5;
-var MAX_QUAD_RATIO = 1.5;
-var distance = function (a, b) { return Math.sqrt(Math.pow((b.x - a.x), 2) + Math.pow((b.y - a.y), 2)); };
-function sum(values) {
-    return values.reduce(function (a, b) { return a + b; });
-}
-// Takes three finder patterns and organizes them into topLeft, topRight, etc
-function reorderFinderPatterns(pattern1, pattern2, pattern3) {
-    var _a, _b, _c, _d;
-    // Find distances between pattern centers
-    var oneTwoDistance = distance(pattern1, pattern2);
-    var twoThreeDistance = distance(pattern2, pattern3);
-    var oneThreeDistance = distance(pattern1, pattern3);
-    var bottomLeft;
-    var topLeft;
-    var topRight;
-    // Assume one closest to other two is B; A and C will just be guesses at first
-    if (twoThreeDistance >= oneTwoDistance && twoThreeDistance >= oneThreeDistance) {
-        _a = [pattern2, pattern1, pattern3], bottomLeft = _a[0], topLeft = _a[1], topRight = _a[2];
-    }
-    else if (oneThreeDistance >= twoThreeDistance && oneThreeDistance >= oneTwoDistance) {
-        _b = [pattern1, pattern2, pattern3], bottomLeft = _b[0], topLeft = _b[1], topRight = _b[2];
-    }
-    else {
-        _c = [pattern1, pattern3, pattern2], bottomLeft = _c[0], topLeft = _c[1], topRight = _c[2];
-    }
-    // Use cross product to figure out whether bottomLeft (A) and topRight (C) are correct or flipped in relation to topLeft (B)
-    // This asks whether BC x BA has a positive z component, which is the arrangement we want. If it's negative, then
-    // we've got it flipped around and should swap topRight and bottomLeft.
-    if (((topRight.x - topLeft.x) * (bottomLeft.y - topLeft.y)) - ((topRight.y - topLeft.y) * (bottomLeft.x - topLeft.x)) < 0) {
-        _d = [topRight, bottomLeft], bottomLeft = _d[0], topRight = _d[1];
-    }
-    return { bottomLeft: bottomLeft, topLeft: topLeft, topRight: topRight };
 ```

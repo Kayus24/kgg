@@ -4,6 +4,85 @@
 - Lines: 2101-2520
 
 ```html
+      background:#f8fafc;
+      border:1px solid rgba(220,227,235,.95);
+      box-shadow:0 2px 8px rgba(7,16,39,.06);
+      font-size:20px;
+    }
+    .planDeleteBtn{
+      width:28px;
+      min-width:28px;
+      height:28px;
+      opacity:.75;
+    }
+    @media (min-width:760px){
+      #currentPlanBlock .planCard{
+        min-height:70px;
+        padding:12px 14px;
+      }
+      #currentPlanBlock .planCard b{
+        font-size:19px;
+      }
+      #currentPlanBlock .planMetaLine{
+        font-size:12px;
+      }
+      #currentPlanBlock .planSourceLine{
+        font-size:11px;
+      }
+    }
+    .app.softKeyboard #currentPlanBlock .planCard{
+      min-height:58px;
+    }
+    .app.softKeyboard #currentPlanBlock .planCard b{
+      font-size:16px;
+    }
+    .app.softKeyboard #currentPlanBlock .planSourceLine{
+      display:none;
+    }
+
+
+
+    /* v319 Gescannte-Pläne-Inbox: Scan-Ergebnisse getrennt vom Textfeld, Toggle gegen Übungen im Plan. */
+    .rightPlanStack{display:flex;flex-direction:column;gap:10px;min-width:0;min-height:0;transition:gap .18s ease}
+    .rightPlanStack.hidden{display:none!important}
+    .planSection{background:#fff;border:2px solid #111827;border-radius:24px;box-shadow:var(--shadow);overflow:hidden;min-width:0;transition:transform .20s cubic-bezier(.2,.85,.2,1),max-height .20s cubic-bezier(.2,.85,.2,1),opacity .16s ease,background .16s ease}
+    .planSectionHeader{width:100%;min-height:50px;border:0;background:#fff;color:#071027;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;text-align:left;font-weight:1000;font-size:20px;cursor:pointer}
+    .planSectionHeader small{color:var(--muted);font-size:12px;font-weight:900;white-space:nowrap}
+    .planSectionBody,.scanInboxList{padding:0 12px 12px;min-height:0;overflow:auto}
+    .planSection.collapsed{max-height:58px;background:#f8fafc;opacity:.96}
+    .planSection.collapsed .planSectionBody,.planSection.collapsed .scanInboxList{display:none!important}
+    .rightPlanStack.scanOpen #scannedPlansBlock{order:1;animation:kggSectionSwapIn .20s cubic-bezier(.2,.85,.2,1) both}
+    .rightPlanStack.scanOpen #currentPlanBlock{order:2}
+    .rightPlanStack.planOpen #currentPlanBlock{order:1;animation:kggSectionSwapIn .20s cubic-bezier(.2,.85,.2,1) both}
+    .rightPlanStack.planOpen #scannedPlansBlock{order:2}
+    @keyframes kggSectionSwapIn{0%{transform:translateY(8px);opacity:.86}100%{transform:translateY(0);opacity:1}}
+    .scanInboxBlock{border-color:#93d8a0;background:#f4fff6}
+    .scanInboxCard{position:relative;background:#fff;border:1px solid #dce3eb;border-radius:18px;padding:12px;margin:0 0 10px;box-shadow:0 2px 10px rgba(7,16,39,.055)}
+    .scanInboxCard.good{border-color:#93d8a0;background:#fbfffc}.scanInboxCard.warn{border-color:#f2d38a;background:#fff8e8}
+    .scanInboxHead{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding-right:38px}.scanInboxHead b{font-size:17px}.scanInboxHead small{display:block;color:var(--muted);font-weight:850;font-size:12px;margin-top:2px}
+    .scanInboxText{width:100%;min-height:110px;border:1px solid var(--line);border-radius:14px;padding:10px;font-size:13px;line-height:1.35;margin-top:8px;background:#fff;resize:vertical}
+    .scanInboxActions{display:grid;grid-template-columns:1fr 1.2fr;gap:8px;margin-top:8px}.scanInboxActions button{min-height:44px}.scanInboxRemoveTop{position:absolute;right:10px;top:10px;width:34px;height:34px;border:1px solid rgba(226,59,84,.32);background:#fff5f7;color:#e23b54;border-radius:12px;font-weight:1000;font-size:20px;padding:0;line-height:1}
+    #rightPlanStack #currentPlanBlock.hidden,#rightPlanStack #scannedPlansBlock.hidden{display:none!important;visibility:visible!important;pointer-events:auto!important}
+    .app:has(#createPanel.planMode) .scanHub #scanPreview:not(.hidden){display:block!important}
+    @media (max-width:520px){.scanInboxActions{grid-template-columns:1fr}.planSectionHeader{font-size:18px}}
+    /* v356 Scan-Inbox: overview text compact; remove action returns to card top right. */
+    .scanInboxDecision{background:#fff;border:1px solid var(--line);border-radius:18px;padding:10px;margin:0 0 10px;box-shadow:0 2px 10px rgba(7,16,39,.055)}
+    .scanInboxDecision h3{font-size:16px;margin:0 0 4px;font-weight:1000}
+    .scanInboxDecision .notice{margin:0 0 8px;padding:8px 10px;font-size:12px;line-height:1.25}
+    .scanInboxDecision .scanDecisionBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .scanInboxDecision .scanRepeatBtn,.scanInboxDecision .scanFinishBtn{min-height:42px;border-radius:14px;font-size:14px;font-weight:1000}
+    .scanInboxDecision .scanRepeatBtn{border:1px solid #1b2230;background:#fff;color:#071027}
+    .scanInboxDecision .scanFinishBtn{grid-column:1/-1}
+    .scanInboxText{font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;font-size:12.5px!important;line-height:1.3!important;min-height:74px!important;max-height:150px!important;padding:8px 10px!important}
+    @media (min-width:760px){
+      body.tabletLayoutCustom #scannedPlansBlock textarea.scanInboxText{
+        font-size:clamp(10px,calc(12.5px * var(--kgg-tablet-ui-scale,1)),18px)!important;
+        line-height:1.3!important;
+        min-height:clamp(64px,calc(76px * var(--kgg-tablet-ui-scale,1)),128px)!important;
+        max-height:clamp(120px,calc(150px * var(--kgg-tablet-ui-scale,1)),220px)!important;
+        padding:clamp(6px,calc(8px * var(--kgg-tablet-ui-scale,1)),14px) clamp(8px,calc(10px * var(--kgg-tablet-ui-scale,1)),18px)!important;
+      }
+      body.tabletLayoutCustom #scannedPlansBlock .scanInboxDecision :is(button,.notice){
         font-size:clamp(10px,calc(14px * var(--kgg-tablet-ui-scale,1)),22px)!important;
       }
     }
@@ -345,83 +424,4 @@
       }
 
       /* Stift gehört zum konkreten Abschnitt, nicht als großer Seitentitel. */
-      #createPanel.planMode #currentPlanToggle > span::before{
-        content:"✏️ ";
-      }
-
-      /* +Paket nicht als schwebender rechter Großbutton, sondern als Kopfzeilen-Aktion. */
-      #createPanel.planMode #savePackageBtn{
-        grid-column:2 / 4!important;
-        grid-row:3!important;
-        justify-self:end!important;
-        align-self:start!important;
-        width:118px!important;
-        min-width:118px!important;
-        max-width:118px!important;
-        height:48px!important;
-        min-height:48px!important;
-        margin:0 14px 0 0!important;
-        border-radius:18px!important;
-        z-index:66!important;
-      }
-      #createPanel.planMode #currentPlanToggle{
-        padding-right:154px!important;
-      }
-      #createPanel.planMode #currentPlanToggle > small{
-        margin-right:6px;
-      }
-      #createPanel.planMode:has(#rightPlanStack.scanOpen) #savePackageBtn{
-        visibility:hidden!important;
-        pointer-events:none!important;
-      }
-
-      /* Untere Aktionsbuttons: gleiche Breite, gleiche Höhe, ruhige Zeile. */
-      #createPanel.planMode #recentToggle,
-      #createPanel.planMode #packageToggle{
-        grid-row:5!important;
-        width:100%!important;
-        min-width:0!important;
-        height:60px!important;
-        min-height:60px!important;
-        justify-self:stretch!important;
-        align-self:stretch!important;
-      }
-      #createPanel.planMode #recentToggle{grid-column:2!important;}
-      #createPanel.planMode #packageToggle{grid-column:3!important;}
-      .planActions.hasPlan #recentToggle{
-        width:100%!important;
-        min-width:0!important;
-        padding:10px 12px!important;
-      }
-      .planActions.hasPlan .recentText,
-      .planActions.hasPlan .recentMini{
-        max-width:none!important;
-        opacity:1!important;
-      }
-
-      @media (max-width:920px){
-        .app{
-          grid-template-columns:minmax(320px,390px) minmax(0,1fr) minmax(0,1fr)!important;
-        }
-        #createPanel.planMode #savePackageBtn{
-          width:104px!important;
-          min-width:104px!important;
-          max-width:104px!important;
-          height:46px!important;
-          min-height:46px!important;
-          margin-right:10px!important;
-        }
-        #createPanel.planMode #currentPlanToggle{
-          padding-right:132px!important;
-        }
-        #createPanel.planMode #recentToggle,
-        #createPanel.planMode #packageToggle{
-          height:56px!important;
-          min-height:56px!important;
-        }
-      }
-    }
-
-
-    /* v329 Tablet Package Button Header Align:
 ```

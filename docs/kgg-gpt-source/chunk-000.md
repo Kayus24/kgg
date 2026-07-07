@@ -46,21 +46,26 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "ui-tablet-stability",
     "patient-qr-latest-base",
     "colleague-share-apk-update-fix",
-    "patient-qr-root-query"
+    "patient-qr-root-query",
+    "grossdruck-pdf-readable-images",
+    "grossdruck-readability-beta"
   ],
   "currentVersion": {
-    "versionCode": 56,
-    "versionName": "1.0.56-patient-qr-root-query",
-    "lastPatchId": "kgg-v056-patient-qr-root-query",
+    "versionCode": 58,
+    "versionName": "1.0.58-grossdruck-readability-beta",
+    "lastPatchId": "kgg-v058-grossdruck-readability-beta",
     "updatedBy": "local-html-patch"
   },
-  "latestPatchId": "kgg-v056-patient-qr-root-query",
+  "latestPatchId": "kgg-v058-grossdruck-readability-beta",
   "lastUpdateIntent": {
-    "id": "kgg-v056-patient-qr-root-query",
-    "summary": "Patienten-QRs nutzen die stabile Root-Patienten-App mit plan=KGGH2 Query-Payload.",
+    "id": "kgg-v058-grossdruck-readability-beta",
+    "summary": "Grossdruck-PDF nutzt groessere kurzsichtigkeitsgepruefte Schrift und eine lokale PDF-Readability-Testengine.",
     "touched": [
-      "Patient QR base URL",
-      "Patient share query URL",
+      "PDF generation",
+      "Grossdruck PDF layout",
+      "PDF exercise thumbnails",
+      "PDF readability test engine",
+      "Release test battery",
       "Source Truth",
       "version.json"
     ],
@@ -68,7 +73,6 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Parser",
       "Scan/OCR parser",
       "Plan-State",
-      "PDF generation",
       "Android/APK",
       "Sync data model",
       "API-Key-Logik"
@@ -110,21 +114,26 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "ui-tablet-stability",
     "patient-qr-latest-base",
     "colleague-share-apk-update-fix",
-    "patient-qr-root-query"
+    "patient-qr-root-query",
+    "grossdruck-pdf-readable-images",
+    "grossdruck-readability-beta"
   ],
   "currentVersion": {
-    "versionCode": 56,
-    "versionName": "1.0.56-patient-qr-root-query",
-    "lastPatchId": "kgg-v056-patient-qr-root-query",
+    "versionCode": 58,
+    "versionName": "1.0.58-grossdruck-readability-beta",
+    "lastPatchId": "kgg-v058-grossdruck-readability-beta",
     "updatedBy": "local-html-patch"
   },
-  "latestPatchId": "kgg-v056-patient-qr-root-query",
+  "latestPatchId": "kgg-v058-grossdruck-readability-beta",
   "lastUpdateIntent": {
-    "id": "kgg-v056-patient-qr-root-query",
-    "summary": "Patienten-QRs nutzen die stabile Root-Patienten-App mit plan=KGGH2 Query-Payload.",
+    "id": "kgg-v058-grossdruck-readability-beta",
+    "summary": "Grossdruck-PDF nutzt groessere kurzsichtigkeitsgepruefte Schrift und eine lokale PDF-Readability-Testengine.",
     "touched": [
-      "Patient QR base URL",
-      "Patient share query URL",
+      "PDF generation",
+      "Grossdruck PDF layout",
+      "PDF exercise thumbnails",
+      "PDF readability test engine",
+      "Release test battery",
       "Source Truth",
       "version.json"
     ],
@@ -132,7 +141,6 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Parser",
       "Scan/OCR parser",
       "Plan-State",
-      "PDF generation",
       "Android/APK",
       "Sync data model",
       "API-Key-Logik"
@@ -145,8 +153,79 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 56,
+  "latestVersionCode": 58,
   "entries": [
+    {
+      "versionCode": 58,
+      "versionName": "1.0.58-grossdruck-readability-beta",
+      "patchId": "kgg-v058-grossdruck-readability-beta",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Grossdruck-PDF mit Kurzsichtigkeits-Test",
+      "reason": "Die Grossdruck-PDF soll fuer kurzsichtige Leser:innen bei Uebungsname, Satz, Wdh, kg/Gewicht und Schmerzskala messbar lesbarer sein, bevor eine Admin-Beta gebaut wird.",
+      "whatChanged": [
+        "Grossdruck-Titel, Meta-Zeilen und Tabellenlabels werden auf 14pt, 8.6pt und 7pt Mindestgroessen angehoben.",
+        "Die Grossdruck-Vorlage bleibt bei 3 Uebungen pro A4-Seite, nutzt aber groessere Abstaende und ein L3-v3 Template.",
+        "Eine lokale PDF-Readability-Testengine erzeugt Test-PDFs, Poppler-Renderings und Kurzsichtigkeits-Simulationen."
+      ],
+      "touchedAreas": [
+        "PDF generation",
+        "Grossdruck PDF layout",
+        "PDF readability test engine",
+        "Release test battery",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "QR/Patienten-App",
+        "Scan/OCR parser",
+        "Gemini API pipeline",
+        "Parser",
+        "Plan-State",
+        "Android/APK",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "notes": "node release-pipeline/kgg_pdf_readability_smoke.js plus PDF critical und critical suite vor Admin-Beta."
+      }
+    },
+    {
+      "versionCode": 57,
+      "versionName": "1.0.57-grossdruck-pdf-readable-images",
+      "patchId": "kgg-v057-grossdruck-pdf-readable-images",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Grossdruck-PDF mit Bildern und groesserer Schrift",
+      "reason": "Die vergroesserte PDF-Version soll vorhandene Uebungsbilder zeigen und auf A4 lesbarer sein, ohne Scan/OCR, QR oder Plan-State zu aendern.",
+      "whatChanged": [
+        "Grossdruck-PDF wird als echtes A4-Portrait mit 3 Uebungen pro Seite erzeugt.",
+        "Lokale PDF-Uebungsbilder werden auch im Grossdruck-Snapshot geladen.",
+        "Grossdruck-Tabellen, Kopfzeilen und Karten nutzen groessere Fontgroessen und Abstaende."
+      ],
+      "touchedAreas": [
+        "PDF generation",
+        "Grossdruck PDF layout",
+        "PDF exercise thumbnails",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "QR/Patienten-App",
+        "Scan/OCR parser",
+        "Gemini API pipeline",
+        "Parser",
+        "Plan-State",
+        "Android/APK",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "notes": "Critical plus PDF render smoke; Gemini-Live-Smoke nur mit lokal vorhandener Admin-Konfig/API-Key."
+      }
+    },
     {
       "versionCode": 56,
       "versionName": "1.0.56-patient-qr-root-query",
@@ -345,83 +424,4 @@ Before editing this app, any LLM/agent/human should read these blocks:
         "Android wrapper PDF bridge",
         "Android launcher resources",
         "Android update manifest",
-        "Release artifacts",
-        "Source Truth",
-        "version.json"
-      ],
-      "notTouched": [
-        "Parser",
-        "Scan/OCR parser",
-        "Plan-State",
-        "Phone card gestures",
-        "Tablet layout content",
-        "PDF plan exercise-image thumbnails",
-        "Sync data model",
-        "API-Key-Logik"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "githubPages": "pending",
-        "androidApp": "pending"
-      },
-      "handoffNote": "v051 ist QR/PDF/Android-Shell; PDF-Planbilder bleiben separat fuer v052."
-    },
-    {
-      "versionCode": 50,
-      "versionName": "1.0.50-phone-ui-mini-fix",
-      "patchId": "kgg-v050-phone-ui-mini-fix",
-      "status": "active",
-      "type": "local-html-patch",
-      "title": "Phone-UI: Plan-Menue, Historie und Scan-Optionen",
-      "reason": "Im Phone-Planmodus sass das 3-Punkte-Menue zu mittig, Plan-Historie kollabierte und die Foto/Galerie-Auswahl wirkte wie ein separates Floating-Menue.",
-      "whatChanged": [
-        "Das 3-Punkte-Menue wird im Plan-Header oben rechts verankert.",
-        "Plan-Historie bleibt im Phone-Planmodus als voller lesbarer Button sichtbar.",
-        "Der Scanbutton zeigt Foto/Galerie-Optionen inline und waechst beim Oeffnen nur vertikal."
-      ],
-      "touchedAreas": [
-        "Phone plan header menu",
-        "Phone Plan-Historie button",
-        "Phone scan dock photo options",
-        "UI stability tests",
-        "Source Truth",
-        "version.json"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR-Erzeugung",
-        "Patienten-App",
-        "Scan/OCR parser",
-        "Plan-State",
-        "Android-Wrapper",
-        "Sync",
-        "API-Key-Logik",
-        "Kolleg:innen-Freigabe"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "githubPages": "pending",
-        "androidApp": "not-applicable"
-      },
-      "handoffNote": "v050 ist UI-only fuer Phone; bei Problemen zuerst ui-stability phone-scan-dock und phone-history-packages laufen lassen."
-    },
-    {
-      "versionCode": 50,
-      "versionName": "1.0.50-phone-ui-mini-fix",
-      "patchId": "kgg-v049-symbol-encoding-hotfix",
-      "status": "active",
-      "type": "local-html-patch",
-      "title": "Mojibake-Symbolreste repariert",
-      "reason": "Nach der grossen UTF-8-Reparatur waren noch kaputte Symbolsequenzen wie Pfeile, Zahnrad und QR-ASCII-Blockzeichen sichtbar bzw. im HTML enthalten.",
-      "whatChanged": [
-        "Kaputte Pfeil-, Zahnrad-, Caret- und QR-ASCII-Symbolstrings wurden durch echte Unicode-Zeichen ersetzt.",
-        "Der Encoding-Guard erkennt jetzt auch einfache sichtbare Mojibake-Symbolfamilien.",
-        "Die Encoding-Guard-Unit-Tests enthalten gute Unicode-Zeichen und rote Symbol-Mojibake-Faelle."
-      ],
-      "touchedAreas": [
-        "HTML symbol strings",
-        "QR helper embedded strings",
-        "Critical encoding guard",
-        "Local test batteries",
-        "Source Truth",
 ```

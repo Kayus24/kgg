@@ -4,36 +4,129 @@
 - Lines: 21001-21420
 
 ```html
+    const metricUnit=String(ex&&ex.metricUnit||'Wdh')||'Wdh';
+    const isLR=side==='LR';
+    const tagW=largePrint?15.0:10.8;
+    const painW=largePrint?32.0:22.5;
+    const headH=largePrint?Math.max(14.6,Math.min(16.0,h*.32)):Math.max(8.6,Math.min(10.2,h*.18));
+    const rowH=(h-headH)/6;
+    const setW=w-tagW-painW;
+    const groupW=setW/3;
+    pdfResetInk(doc);
+    doc.setLineWidth(largePrint?0.28:0.18);
+    doc.rect(x,y,w,h);
+    doc.rect(x,y,tagW,headH);
+    pdfSetFont(doc,largePrint?7.4:4.7,'bold');
+    pdfText(doc,'Tag',x+tagW/2,y+headH*.62,{align:'center'});
+    for(let s=0;s<3;s++){
+      const gx=x+tagW+s*groupW;
+      doc.rect(gx,y,groupW,headH);
+      pdfSetFont(doc,largePrint?7.5:4.8,'bold');
+      pdfText(doc,pdfSpaceLabel('Satz '+(s+1),'S'+(s+1),groupW,isLR?18:16),gx+groupW/2,y+(largePrint?5.5:3.1),{align:'center'});
+      const subCount=isLR?4:2;
+      const subW=groupW/subCount;
+      for(let c=1;c<subCount;c++)doc.line(gx+c*subW,y+(largePrint?7.4:4.2),gx+c*subW,y+headH);
+      pdfSetFont(doc,largePrint?7.0:3.55,'bold');
+      const labels=isLR?['li '+loadUnit,'li '+metricUnit,'re '+loadUnit,'re '+metricUnit]:[loadUnit,metricUnit];
+      labels.forEach((label,idx)=>pdfText(doc,pdfShort(label,9),gx+subW*(idx+.5),y+headH-(largePrint?2.4:1.7),{align:'center'}));
+    }
+    const painX=x+tagW+setW;
+    doc.rect(painX,y,painW,headH);
+    pdfSetFont(doc,largePrint?7.2:4.2,'bold');
+    pdfText(doc,'Schmerz',painX+painW/2,y+(largePrint?5.3:3.2),{align:'center'});
+    pdfSetFont(doc,largePrint?7.0:3.4,'bold');
+    pdfText(doc,'1-10',painX+painW/2,y+headH-(largePrint?2.4:1.7),{align:'center'});
+    for(let t=0;t<6;t++){
+      const ry=y+headH+t*rowH;
+      doc.rect(x,ry,tagW,rowH);
+      pdfSetFont(doc,largePrint?7.0:4.8,'bold');
+      pdfText(doc,pdfSpaceLabel('Tag '+(t+1),'T'+(t+1),tagW,13),x+tagW/2,ry+rowH*.62,{align:'center'});
+      for(let s=0;s<3;s++){
+        const gx=x+tagW+s*groupW;
+        doc.rect(gx,ry,groupW,rowH);
+        const subCount=isLR?4:2;
+        const subW=groupW/subCount;
+        for(let c=1;c<subCount;c++)doc.line(gx+c*subW,ry,gx+c*subW,ry+rowH);
+      }
+      doc.rect(painX,ry,painW,rowH);
+      const pad=largePrint?1.4:0.9,gap=largePrint?0.38:0.32;
+      const boxW=(painW-pad*2-gap*9)/10;
+      const boxH=Math.min(rowH-(largePrint?1.6:1.2),boxW*1.05);
+      const by=ry+(rowH-boxH)/2;
+      for(let n=0;n<10;n++)doc.rect(painX+pad+n*(boxW+gap),by,boxW,boxH);
+    }
+    pdfResetInk(doc);
+  }
+
+
+  function drawKggExerciseBox(doc,slot,x,y,w,h,options){
+    const largePrint=!!(options&&options.largePrint);
+    const ex=slot||{};
+    pdfResetInk(doc);
+    if(ex.empty){
+      try{doc.setDrawColor(115);}catch(e){}
+      doc.setLineWidth(largePrint?0.18:0.14);
+      try{doc.roundedRect(x,y,w,h,1.4,1.4);}catch(e){doc.rect(x,y,w,h);}
+      pdfResetInk(doc);
+      return;
+    }
+    doc.setLineWidth(largePrint?0.34:0.28);
+    try{doc.roundedRect(x,y,w,h,1.6,1.6);}catch(e){doc.rect(x,y,w,h);}
+    const labelW=largePrint?11.4:7.4,labelH=largePrint?10.0:6.8;
+    const thumb=ex.pdfThumbnail&&ex.pdfThumbnail.dataUrl?ex.pdfThumbnail:null;
+    const canDrawThumb=!!(thumb&&typeof doc.addImage==='function');
+    const thumbW=canDrawThumb?(largePrint?Math.min(38,Math.max(32,w*.19)):Math.min(23.5,Math.max(18,w*.18))):0;
+    const thumbH=canDrawThumb?(largePrint?Math.min(27.5,Math.max(22,h*.30)):Math.min(17.2,Math.max(12,h*.20))):0;
+    const thumbX=x+w-thumbW-(largePrint?3.0:2.2);
+    const thumbY=y+(largePrint?2.7:2.1);
+    const textMax=largePrint?(canDrawThumb?58:82):(canDrawThumb?46:62);
+    try{doc.setFillColor(0);}catch(e){}
+    doc.rect(x,y,labelW,labelH,'F');
+    try{doc.setTextColor(255);}catch(e){}
+    pdfSetFont(doc,largePrint?9.0:5.9,'bold');
+    pdfText(doc,String(ex.slotNo||ex.slotIndex||''),x+labelW/2,y+(largePrint?7.2:4.9),{align:'center'});
+    try{doc.setTextColor(0);}catch(e){}
+    if(canDrawThumb){
+      try{
+        doc.setLineWidth(largePrint?0.16:0.12);
+        try{doc.setDrawColor(185);}catch(e){}
         doc.rect(thumbX-.45,thumbY-.45,thumbW+.9,thumbH+.9);
         doc.addImage(thumb.dataUrl,'JPEG',thumbX,thumbY,thumbW,thumbH);
       }catch(err){console.warn('PDF-Thumbnail konnte nicht gezeichnet werden:',err);}
       pdfResetInk(doc);
     }
-    pdfSetFont(doc,7.1,'bold');
-    pdfText(doc,pdfShort((ex.exNo||'EX')+' · '+(ex.name||'Übung'),textMax),x+labelW+2.3,y+5.0);
+    pdfSetFont(doc,largePrint?14.0:7.1,'bold');
+    const titleText=(ex.exNo||'EX')+' · '+(ex.name||'Übung');
+    if(largePrint){
+      const titleLines=pdfSplitTwoLines(titleText,textMax,canDrawThumb?52:70);
+      pdfText(doc,titleLines[0],x+labelW+3.2,y+8.9);
+      if(titleLines[1])pdfText(doc,titleLines[1],x+labelW+3.2,y+15.6);
+    }else{
+      pdfText(doc,pdfShort(titleText,textMax),x+labelW+2.3,y+5.0);
+    }
     const sideLabel=sideModeLabel(ex.side||'BI');
     const startParts=[];
     if(ex.startLoad)startParts.push('Startlast '+ex.startLoad+' '+(ex.loadUnit||'kg'));
     if(ex.startMetric)startParts.push('Startwert '+ex.startMetric+' '+(ex.metricUnit||'Wdh'));
     const meta=[(ex.sets||3)+' Sätze',sideLabel].concat(startParts).concat([(ex.loadUnit||'kg'),(ex.metricUnit==='Wdh'?'Wiederholungen':(ex.metricUnit||'Wdh'))]).join(' · ');
-    pdfSetFont(doc,4.55,'normal');
-    pdfText(doc,pdfShort(meta,canDrawThumb?64:95),x+labelW+2.3,y+9.1);
-    pdfSetFont(doc,3.35,'normal');
-    pdfText(doc,pdfShort(ex.machineLine||'',canDrawThumb?82:128),x+labelW+2.3,y+12.5);
-    const tableY=y+15.2;
-    drawKggTableScaffold(doc,ex,x+1.6,tableY,w-3.2,h-(tableY-y)-1.5);
+    pdfSetFont(doc,largePrint?8.6:4.55,'normal');
+    pdfText(doc,pdfShort(meta,largePrint?(canDrawThumb?92:118):(canDrawThumb?64:95)),x+labelW+(largePrint?3.2:2.3),y+(largePrint?23.2:9.1));
+    pdfSetFont(doc,largePrint?6.2:3.35,'normal');
+    pdfText(doc,pdfShort(ex.machineLine||'',largePrint?(canDrawThumb?112:146):(canDrawThumb?82:128)),x+labelW+(largePrint?3.2:2.3),y+(largePrint?29.0:12.5));
+    const tableY=y+(largePrint?36.0:15.2);
+    drawKggTableScaffold(doc,ex,x+(largePrint?2.0:1.6),tableY,w-(largePrint?4.0:3.2),h-(tableY-y)-(largePrint?2.0:1.5),{largePrint});
     pdfResetInk(doc);
   }
 
 
   function drawKggPdfLayoutV1(doc,snapshot){
     const size=getPdfPageSize(doc);
-    const layout={pageW:size.w,pageH:size.h,margin:5.4,headerH:17.5,gap:2.6};
-    const gridTop=layout.margin+layout.headerH+3.1;
-    const footerH=3.8;
-    const gridH=layout.pageH-gridTop-layout.margin-footerH;
     const target=snapshot.layoutTarget||{};
     const largeSingleRow=target.grid==='1x3';
+    const layout={pageW:size.w,pageH:size.h,margin:largeSingleRow?6.0:5.4,headerH:largeSingleRow?23.0:17.5,gap:largeSingleRow?2.8:2.6};
+    const gridTop=layout.margin+layout.headerH+(largeSingleRow?3.2:3.1);
+    const footerH=largeSingleRow?4.6:3.8;
+    const gridH=layout.pageH-gridTop-layout.margin-footerH;
     const cols=largeSingleRow?1:2,rows=3;
     const slotLimit=cols*rows;
     const boxW=(layout.pageW-(layout.margin*2)-(layout.gap*(cols-1)))/cols;
@@ -52,13 +145,13 @@
         const row=Math.floor(slotIdx/cols);
         const x=layout.margin+col*(boxW+layout.gap);
         const y=gridTop+row*(boxH+layout.gap);
-        drawKggExerciseBox(doc,slot,x,y,boxW,boxH);
+        drawKggExerciseBox(doc,slot,x,y,boxW,boxH,{largePrint:largeSingleRow});
       });
       pdfResetInk(doc);
-      pdfSetFont(doc,3.75,'normal');
+      pdfSetFont(doc,largeSingleRow?4.4:3.75,'normal');
       const template=(snapshot.layoutTarget&&snapshot.layoutTarget.templateId)||'TPL-BASIS-A-CLASSIC-L6-v2';
       pdfText(doc,'KGG|'+template+'|'+(page.pageNo||pageIdx+1)+'/'+(snapshot.pageCount||pages.length)+'|#EX-Layout|'+(snapshot.createdAt||'').slice(0,10),layout.pageW-layout.margin,layout.pageH-2.2,{align:'right'});
-      pdfSetFont(doc,3.3,'normal');
+      pdfSetFont(doc,largeSingleRow?3.9:3.3,'normal');
       pdfText(doc,PDF_RUNTIME_FINGERPRINT,layout.margin,layout.pageH-2.2);
     });
   }
@@ -306,12 +399,12 @@
       return snapshot;
     }
     const pdfMode=state.largePdfMode?'grossdruck':'standard';
-    const doc=new JsPdfCtor({orientation:state.largePdfMode?'portrait':'landscape',unit:'mm',format:state.largePdfMode?[420,594]:'a4'});
+    const doc=new JsPdfCtor({orientation:state.largePdfMode?'portrait':'landscape',unit:'mm',format:'a4'});
     const patientName=snapshot.patient&&snapshot.patient.displayName||snapshot.patient&&snapshot.patient.name||'patient';
     const safeName=String(patientName).replace(/[^a-z0-9äöüß_-]+/ig,'_').replace(/^_+|_+$/g,'')||'patient';
     const stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\..+$/,'').replace('T','_');
     try{doc.setProperties({title:'KGG Trainingsplan '+safeName,subject:PDF_RUNTIME_FINGERPRINT+' '+pdfMode,creator:VERSION});}catch(e){}
-    if(state.largePdfMode)drawKggPdfLayoutV1(createScaledPdfDoc(doc,2,{orientation:'portrait',virtualW:210,virtualH:297}),snapshot); else drawKggPdfLayoutV1(doc,snapshot);
+    drawKggPdfLayoutV1(doc,snapshot);
     const filename='kgg_trainingsplan_'+safeName+'_'+VERSION+'_'+pdfMode+'_'+stamp+'.pdf';
     const blob=pdfBlobFromDoc(doc);
     if(!blob)doc.save(filename);
@@ -331,97 +424,4 @@
     const base=String(baseUrl||'').split('#')[0].split('?')[0];
     const publicPayload=payload&&Array.isArray(payload.e)?payload:buildKggH2PayloadFromInternalPayload(payload);
     return base+'?plan='+encodeURIComponent('KGGH2:'+encodeKggJsonBase64Url(publicPayload));
-  }
-  function buildExerciseMediaManifestForPatient(ex){
-    return ensureExerciseMediaList(ex).filter(item=>item.type==='image').map(item=>({
-      id:item.id,
-      type:'image',
-      mime:item.mime,
-      name:item.name,
-      width:item.width,
-      height:item.height,
-      bytes:item.encryptedSize||0,
-      encrypted:true,
-      status:item.downloadUrl?'ready':'upload-pending',
-      downloadUrl:item.downloadUrl||'',
-      expiresInSeconds:item.ttlSeconds||MEDIA_UPLOAD_TTL_SECONDS,
-      retrySeconds:item.retrySeconds||MEDIA_RETRY_SECONDS,
-      crypto:item.crypto||null
-    }));
-  }
-  function buildExerciseMediaRefsForPatient(ex){
-    const ids=ensureExerciseMediaList(ex).filter(item=>item.type==='image'&&item.id).map(item=>item.id);
-    return ids.length?ids:'';
-  }
-  function compactMediaBundleForQr(bundle){
-    if(!bundle||!bundle.downloadUrl||!bundle.crypto)return null;
-    return {
-      u:bundle.downloadUrl,
-      k:bundle.crypto.key,
-      i:bundle.crypto.iv,
-      c:Number(bundle.count)||0,
-      t:Number(bundle.expiresInSeconds)||MEDIA_UPLOAD_TTL_SECONDS,
-      r:Number(bundle.retrySeconds)||MEDIA_RETRY_SECONDS
-    };
-  }
-  function buildPatientExercisePayload(ex){
-    const copy={...ex};
-    const media=buildExerciseMediaManifestForPatient(ex);
-    if(media.length)copy.media=media; else delete copy.media;
-    return copy;
-  }
-  function buildPlanMediaMeta(rawExercises,ttlSeconds){
-    const items=(rawExercises||[]).flatMap(ensureExerciseMediaList);
-    const count=items.length;
-    const bundle=compactMediaBundleForQr(lastPatientMediaBundleManifest);
-    const ready=bundle?count:items.filter(item=>item.downloadUrl&&item.status==='ready').length;
-    const meta={expected:count>0,count,ready,ttlSeconds:Number(ttlSeconds)||currentMediaShareTtlSeconds(),retrySeconds:MEDIA_RETRY_SECONDS,status:count?(ready===count?'ready':'upload-pending'):'none'};
-    if(bundle)meta.b=bundle;
-    return meta;
-  }
-  function encodeKggJsonBase64Url(value){
-    return btoa(unescape(encodeURIComponent(JSON.stringify(value||{})))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-  }
-  function decodeKggJsonBase64Url(value){
-    const encoded=String(value||'').replace(/-/g,'+').replace(/_/g,'/');
-    const padded=encoded+'='.repeat((4-encoded.length%4)%4);
-    return JSON.parse(decodeURIComponent(escape(atob(padded))));
-  }
-  function compactKggH2Exercise(ex){
-    const media=lastPatientMediaBundleManifest?buildExerciseMediaRefsForPatient(ex):buildExerciseMediaManifestForPatient(ex);
-    const loadUnit=ex&&ex.weightUnit||ex&&ex.loadUnit||'kg';
-    const metricUnit=ex&&ex.unit||ex&&ex.metricUnit||'Wdh';
-    return [
-      ex&&ex.name||'Übung',
-      normalizeSetCount(ex&&ex.sets),
-      normalizeSideMode(ex&&ex.side||ex&&ex.laterality||'BI'),
-      loadUnit,
-      metricUnit,
-      ex&&ex.startLoad||ex&&ex.load||ex&&ex.weight||'',
-      ex&&ex.startMetric||ex&&ex.metric||ex&&ex.reps||'',
-      media&&media.length?media:'',
-      ex&&ex.videoUrl||'',
-      ex&&ex.videoLabel||'Video öffnen'
-    ];
-  }
-  function buildKggH2PayloadFromPlan(plan,exercises,patient,mediaMeta){
-    const sourcePlan=plan||{};
-    const sourcePatient=patient||{};
-    return {
-      v:2,
-      i:String(sourcePlan.id||sourcePlan.planId||'plan_'+Date.now()),
-      t:String(sourcePlan.title||'KGG Trainingsplan'),
-      d:Number(sourcePlan.days)||6,
-      extendDays:true,
-      stepDays:6,
-      e:(exercises||[]).map(compactKggH2Exercise),
-      patient:{
-        name:sourcePatient.name||sourcePatient.displayName||'',
-        date:sourcePatient.date||sourcePatient.startDate||'',
-        therapist:sourcePatient.therapist||'',
-        notes:sourcePatient.notes||''
-      },
-      m:{
-        source:'kgg-therapist-app',
-        schema:'KGGH2',
 ```
