@@ -14,6 +14,12 @@ failed_step: none
 artifact_name: <artifact_name>
 meta_url: <meta_url>
 html_url: <html_url>
+test_apk_channel: <updated|not involved>
+max_acceptance: <accepted|pending>
+admin_beta_pr: <url|not requested>
+admin_beta_merge: <merged|not requested|pending>
+admin_html_url: <url|not requested>
+visible_scaler_canary: <verified|not involved|pending>
 
 changes:
 - <short behavior summary>
@@ -23,6 +29,9 @@ smoke test:
 - ui-stability regression: green
 - Preview APK build: green
 - artifact/meta/html: verified
+- Test-APK review: pending Max acceptance, unless Max already accepted
+- Admin beta merge: verified when `publish_admin_beta` was requested
+- Admin HTML: HTTP 200 when `publish_admin_beta` was requested
 
 risks:
 - <specific risk>
@@ -41,6 +50,12 @@ failed_step: <failed step>
 artifact_name: none
 meta_url: not available
 html_url: not available
+test_apk_channel: not updated
+max_acceptance: not requested
+admin_beta_pr: not created
+admin_beta_merge: not attempted
+admin_html_url: not available
+visible_scaler_canary: not verified
 
 smoke test:
 - not green; stopped at <failed step>

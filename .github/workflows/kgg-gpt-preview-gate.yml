@@ -5,13 +5,14 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: validate_only, publish_preview or create_pr
+        description: validate_only, publish_preview, create_pr or publish_admin_beta
         required: true
         type: choice
         options:
           - validate_only
           - publish_preview
           - create_pr
+          - publish_admin_beta
       request_id:
         description: Stable GPT request id
         required: true
@@ -32,6 +33,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  issues: write
   actions: read
   checks: read
   statuses: read
@@ -75,6 +77,16 @@ jobs:
         if: inputs.mode == 'publish_preview'
         with:
           gradle-version: "8.11.1"
+
+      - name: Install Poppler for PDF readability smoke
+        if: inputs.mode != 'validate_only'
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
+          pdftoppm -v
+          pdfinfo -v
 
       - name: Write dispatch payload
         shell: bash
@@ -129,7 +141,7 @@ jobs:
             --github-output "$GITHUB_OUTPUT"
 
       - name: Refresh generated GPT context files for PR mode
-        if: inputs.mode == 'create_pr'
+        if: inputs.mode == 'create_pr' || inputs.mode == 'publish_admin_beta'
         shell: bash
         run: |
           set -euo pipefail
@@ -137,6 +149,7 @@ jobs:
           python release-pipeline/kgg_gpt_context.py --write
           python release-pipeline/kgg_bug_knowledge.py --write
           python release-pipeline/kgg_gpt_source_context.py --write
+          python release-pipeline/kgg_custom_gpt_knowledge_pack.py --write
 
       - name: Run critical KGG test battery
         if: inputs.mode != 'validate_only'
@@ -207,7 +220,7 @@ jobs:
           git switch -c "$branch"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add kgg-update/index.html kgg-update/version.json release-inbox docs/kgg-gpt-context.md docs/kgg-gpt-bug-index.json docs/kgg-gpt-bug-lessons.md docs/kgg-gpt-patch-patterns.md docs/kgg-gpt-source-index.json docs/kgg-gpt-area-routes.md docs/kgg-gpt-area-routes.json docs/kgg-gpt-source docs/kgg-custom-gpt-playbook.md docs/kgg-custom-gpt-action-schema.md docs/kgg-custom-gpt-negative-examples.md docs/kgg-custom-gpt-preview-runbook.md docs/kgg-custom-gpt-preview-report-template.md docs/kgg-custom-gpt-test-prompts.md docs/kgg-custom-gpt-expected-results.md docs/kgg-custom-gpt-test-report.md release-pipeline/kgg_gpt_source_context.py release-pipeline/kgg_gpt_payload_preflight.py release-pipeline/kgg_gpt_eval.py
+          git add kgg-update/index.html kgg-update/version.json release-inbox docs/kgg-gpt-context.md docs/kgg-gpt-bug-index.json docs/kgg-gpt-bug-lessons.md docs/kgg-gpt-patch-patterns.md docs/kgg-gpt-source-index.json docs/kgg-gpt-area-routes.md docs/kgg-gpt-area-routes.json docs/kgg-gpt-source docs/kgg-custom-gpt-playbook.md docs/kgg-custom-gpt-action-schema.md docs/kgg-custom-gpt-negative-examples.md docs/kgg-custom-gpt-preview-runbook.md docs/kgg-custom-gpt-preview-report-template.md docs/kgg-custom-gpt-test-prompts.md docs/kgg-custom-gpt-expected-results.md docs/kgg-custom-gpt-test-report.md docs/kgg-custom-gpt-cycle-report.md docs/kgg-custom-gpt-knowledge-pack.md release-pipeline/kgg_gpt_source_context.py release-pipeline/kgg_gpt_payload_preflight.py release-pipeline/kgg_gpt_eval.py release-pipeline/kgg_gpt_stabilize.py release-pipeline/kgg_custom_gpt_knowledge_pack.py release-pipeline/kgg_android_preview_probe.py
           git commit -m "gpt write gate ${{ inputs.request_id }}"
           git push -u origin "$branch"
           body="$(mktemp)"
@@ -222,4 +235,37 @@ jobs:
           This PR was created only after a matching preview existed on the \`gpt-preview\` branch.
           BODY
           url="$(gh pr create --base main --head "$branch" --title "[gpt-patch] ${{ inputs.request_id }}" --body-file "$body")"
+          echo "PR: $url" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish guarded Admin beta from accepted preview
+        if: inputs.mode == 'publish_admin_beta'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          branch="gpt-admin-beta/${{ inputs.request_id }}-${{ github.run_id }}"
+          git switch -c "$branch"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add kgg-update/index.html kgg-update/version.json release-inbox docs/kgg-gpt-context.md docs/kgg-gpt-bug-index.json docs/kgg-gpt-bug-lessons.md docs/kgg-gpt-patch-patterns.md docs/kgg-gpt-source-index.json docs/kgg-gpt-area-routes.md docs/kgg-gpt-area-routes.json docs/kgg-gpt-source docs/kgg-custom-gpt-knowledge-pack.md
+          git commit -m "admin beta ${{ inputs.request_id }}"
+          git push -u origin "$branch"
+          body="$(mktemp)"
+          cat > "$body" <<BODY
+          Guarded Custom GPT Admin beta.
+
+          - Preview request: \`${{ inputs.request_id }}\`
+          - Patch hash: \`${{ steps.gate.outputs.patch_hash }}\`
+          - Version: \`${{ steps.gate.outputs.version_name }}\`
+          - Release inbox: \`${{ steps.gate.outputs.release_id }}\`
+
+          This Admin beta is allowed only after the matching Preview/Test-APK result was accepted.
+          BODY
+          url="$(gh pr create --base main --head "$branch" --title "[admin-beta] ${{ steps.gate.outputs.release_id }} ${{ steps.gate.outputs.version_name }}" --body-file "$body")"
+          gh label create kgg-auto-merge \
+            --description 'Allows guarded KGG admin beta auto-merge after required checks' \
+            --color 0E8A16 || true
+          gh pr edit "$url" --add-label kgg-auto-merge
+          gh pr checks "$url" --required --watch --fail-fast
+          gh pr merge "$url" --squash
           echo "PR: $url" >> "$GITHUB_STEP_SUMMARY"

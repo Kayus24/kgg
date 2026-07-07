@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Guarded Custom GPT preview and PR payload handling for KGG."""
+"""Guarded Custom GPT preview, PR and Admin-beta payload handling for KGG."""
 
 from __future__ import annotations
 
@@ -418,9 +418,9 @@ def run(payload: dict[str, Any], mode: str, preview_root: Path | None, github_ou
         )
         return
 
-    if mode == "create_pr":
+    if mode in {"create_pr", "publish_admin_beta"}:
         if preview_root is None:
-            fail("--preview-root is required for create_pr")
+            fail(f"--preview-root is required for {mode}")
         meta = load_preview_meta(preview_root, payload["request_id"])
         if meta.get("patchHash") != digest:
             fail("patch_hash does not match the accepted preview")
@@ -449,8 +449,8 @@ def run(payload: dict[str, Any], mode: str, preview_root: Path | None, github_ou
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Apply a guarded GPT patch for preview or PR.")
-    parser.add_argument("--mode", required=True, choices=["validate_only", "publish_preview", "create_pr"])
+    parser = argparse.ArgumentParser(description="Apply a guarded GPT patch for preview, PR or Admin beta.")
+    parser.add_argument("--mode", required=True, choices=["validate_only", "publish_preview", "create_pr", "publish_admin_beta"])
     parser.add_argument("--payload-file", required=True, type=Path)
     parser.add_argument("--preview-root", type=Path)
     parser.add_argument("--github-output", default=os.environ.get("GITHUB_OUTPUT"))

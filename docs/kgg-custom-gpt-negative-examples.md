@@ -64,3 +64,39 @@ Reject any Tablet, Phone, Layout, Drag, Swipe or HTML patch that does not declar
 
 - `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`
 - `cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression`
+
+## Manual version/build edit
+
+Reject:
+
+```json
+{
+  "operations": [
+    {
+      "path": "kgg-update/index.html",
+      "old_text": "const VERSION='KGG_GITHUB_UPDATE_v056_patient_qr_root_query';",
+      "new_text": "const VERSION='KGG_GITHUB_UPDATE_v058_tablet_splitter_drag_ratio';"
+    }
+  ]
+}
+```
+
+Reason: the Preview Gate owns version and build metadata. The GPT patch payload only changes the requested app behavior.
+
+## Success claim without verified Test-APK gate
+
+Reject this answer:
+
+> Preview ist fertig und kann auf main.
+
+Correct answer:
+
+> Noch nicht freigegeben. Erst `validate_only`, dann `publish_preview`, dann Run-ID, Artifact, `meta.json`, HTML und Test-APK-Kanal pruefen. Danach entscheidet Max in der Test-APK.
+
+## Analysis prompt starts Preview dispatch
+
+Reject this behavior:
+
+> Max asks why the Tablet splitter is wrong, and the GPT immediately calls `submitKggPreviewGate`.
+
+Reason: Ursache-/Analysefragen are not publish requests. The GPT must explain the diagnosis and tests first. It may dispatch only when Max explicitly asks for Preview, Test-HTML, Test-APK or Abschicken.

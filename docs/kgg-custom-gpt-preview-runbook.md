@@ -2,7 +2,7 @@
 
 Use this order for every Preview/Test-HTML/Test-APK request.
 
-Canonical order: `dispatch -> run status -> logs -> tests -> artifact -> meta -> html`.
+Canonical order: `dispatch -> run status -> logs -> tests -> artifact -> meta -> html -> Test-APK -> Max acceptance -> Admin beta merge`.
 
 ## Run order
 
@@ -15,8 +15,11 @@ Canonical order: `dispatch -> run status -> logs -> tests -> artifact -> meta ->
 7. Use `getKggPreviewGateRun` until `status` is `completed`.
 8. If the run fails, use `getKggPreviewGateJobs` and report the failed job/step and exact visible error context.
 9. If the run succeeds, verify artifact, `meta.json` and HTML URL.
-10. Only then tell Max that the Preview is available.
-11. Use `create_pr` only after Max explicitly accepts the same Preview.
+10. If the request targets the Test-APK, verify that the Preview/Test-APK channel is updated.
+11. Tell Max that the Preview/Test-APK is ready for his review.
+12. If Max rejects the Test-APK result, document `human_preview_fail`, add/update the regression fixture and restart at `validate_only`.
+13. Use `create_pr` only after Max explicitly accepts the same Preview and only a PR is requested.
+14. Use `publish_admin_beta` only when Max explicitly wants a real Haupt-App/Admin-Beta push. Success requires a merged `[admin-beta]` PR, updated `android_update_manifest.json` on `main`, and HTTP 200 for the new Admin HTML.
 
 ## Required verified fields
 
@@ -28,6 +31,9 @@ Every successful Preview report must include:
 - `meta_url`
 - `html_url`
 - `artifact_name`
+- Test-APK/channel status when APK preview is involved
+- Max acceptance status before any PR
+- Admin beta merge status when Haupt-App push is involved
 
 ## Failure wording
 
@@ -36,6 +42,7 @@ Use direct wording:
 - `Keine Preview verfuegbar: Run rot.`
 - `Failed step: <step name>.`
 - `Fehler: <exact error>.`
+- `CI-Tooling fehlt: <tool>.`
 
 Do not use vague wording:
 
@@ -44,3 +51,5 @@ Do not use vague wording:
 - `wahrscheinlich noch nicht sichtbar`
 
 These are allowed only when the run is still actually in progress.
+
+If `critical` fails with `Missing tool pdftoppm`, `Missing tool pdfinfo`, `poppler-utils` or another runner dependency, classify it as `ci_tooling`. Do not blame the UI patch until the failed subtest log proves an app assertion failed.
