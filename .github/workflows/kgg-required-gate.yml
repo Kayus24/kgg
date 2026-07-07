@@ -31,6 +31,10 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install Poppler for PDF readability smoke
+        shell: bash
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+
       - name: Classify pull request scope
         id: scope
         shell: bash
