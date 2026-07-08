@@ -1,11 +1,12 @@
 (()=>{
-  const VERSION='numpad-card-guard-v1';
+  const VERSION='numpad-card-guard-v2-input-switch';
   if(window.__kggNumpadCardGuard===VERSION)return;
   window.__kggNumpadCardGuard=VERSION;
   let closedAt=0;
   const $=id=>document.getElementById(id);
   const pad=()=>$('pad');
   const open=()=>{const p=pad();return !!(p&&!p.classList.contains('hide'))};
+  const isNumInput=t=>!!(t&&t.closest&&t.closest('input.num'));
   function mark(){document.body.classList.toggle('kggPadOpen',open())}
   function closePadOnly(){
     closedAt=Date.now();
@@ -18,6 +19,7 @@
     const p=pad();
     const t=e.target;
     if(!p||!t)return;
+    if(isNumInput(t))return;
     if(t===p&&open()){
       e.preventDefault();
       e.stopPropagation();
