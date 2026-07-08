@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='v1_always_collapsed_settings_pain_scale';
+  const VERSION='v2_empty_unit_hides_field';
   const STYLE='kggPatientCardSettingsStyle';
   const LANG='kggPatientLang';
   const PLAN_KEY='kggCurrentPlanV1';
@@ -9,12 +9,15 @@
   const en=()=>localStorage.getItem(LANG)==='en';
   const T=(de,enText)=>en()?enText:de;
   const safe=f=>{try{return f()}catch(e){return null}};
+  const has=(o,k)=>Object.prototype.hasOwnProperty.call(o||{},k);
 
   function readSettings(){try{return JSON.parse(localStorage.getItem(SET_KEY)||'{}')||{}}catch(e){return{}}}
   function writeSettings(s){localStorage.setItem(SET_KEY,JSON.stringify(s||{}))}
   function exKey(e){return String((safe(()=>p.id)||'plan')+'|'+(e&&e.n||'exercise')).toLowerCase()}
   function getPainMode(e){const s=readSettings();return s[exKey(e)]&&s[exKey(e)].painMode||e.painMode||'exercise'}
   function setPainMode(e,mode){const s=readSettings(),key=exKey(e);s[key]=s[key]||{};s[key].painMode=mode;writeSettings(s);e.painMode=mode}
+  function setExerciseSettings(e,unitA,unitB,mode){const s=readSettings(),key=exKey(e);s[key]=s[key]||{};s[key].unitA=String(unitA??'').trim();s[key].unitB=String(unitB??'').trim();s[key].painMode=mode;writeSettings(s);e.u=s[key].unitA;e.m=s[key].unitB;e.painMode=mode}
+  function applySavedSettings(){safe(()=>{const s=readSettings();(p.ex||[]).forEach(e=>{const x=s[exKey(e)]||{};if(has(x,'unitA'))e.u=String(x.unitA??'');if(has(x,'unitB'))e.m=String(x.unitB??'');if(x.painMode)e.painMode=x.painMode})})}
   function rawPlan(){return{ i:p.id||'plan', t:p.title||'KGG Trainingsplan', v:p.version||1, d:p.days||6, extendDays:p.extendDays!==false, stepDays:p.stepDays||6, e:(p.ex||[]).map(e=>[e.n,e.sets,e.side,e.u,e.m,e.sl||'',e.sm||'',e.media||'',e.videoUrl||'',e.videoLabel||'Video öffnen',e.painMode||getPainMode(e)])}}
   function storePlan(){safe(()=>localStorage.setItem(PLAN_KEY,JSON.stringify({plan:rawPlan(),importedAt:new Date().toISOString()})))}
   function unit(x){x=String(x||'');const m={Wdh:['Wdh','reps'],wdh:['Wdh','reps'],Reps:['Wdh','reps'],reps:['Wdh','reps'],'Sek.':['Sek.','sec'],Sek:['Sek.','sec'],sec:['Sek.','sec'],'Min.':['Min.','min'],Min:['Min.','min'],min:['Min.','min'],Stufe:['Stufe','level'],level:['Stufe','level'],Level:['Stufe','level']};return m[x]?T(m[x][0],m[x][1]):x}
@@ -74,6 +77,8 @@
     b.hidden=openIndex!==i;b.title=T('Übung anpassen','Edit exercise')
   }
 
+  function applyUnitVisibility(){cards().forEach((card,ei)=>{const e=safe(()=>p.ex[ei]);if(!e)return;const hideA=String(e.u??'').trim()==='',hideB=String(e.m??'').trim()==='';card.querySelectorAll('.bi,.lr').forEach(row=>{const inputs=[...row.querySelectorAll('input')].filter(x=>!x.closest('.painRow'));if(inputs.length<2)return;inputs[0].style.display=hideA?'none':'';inputs[1].style.display=hideB?'none':'';const both=hideA&&hideB;if(row.classList.contains('bi')){row.style.display=both?'none':'grid';row.style.gridTemplateColumns=(hideA||hideB)?'1fr':'1fr 1fr'}else{row.style.display=both?'none':'grid';row.style.gridTemplateColumns=(hideA||hideB)?'34px 1fr':'34px 1fr 1fr'}})})}
+
   function valKey(ei,s){return safe(()=>k(ei,s,'P','pain'))||(`${d}|${ei}|${s}|P|pain`)}
   function painVal(ei,s){return String((safe(()=>v[valKey(ei,s)])||'0')||'0')}
   function setPainVal(ei,s,x){safe(()=>{v[valKey(ei,s)]=String(x);save()});st(T('Automatisch gespeichert.','Automatically saved.'));updatePainScales()}
@@ -109,14 +114,14 @@
   function openSettings(i){
     const e=safe(()=>p.ex[i]);if(!e)return;ensureSettingsDom();const sh=$('kggSettingsSheet'),bd=$('kggSettingsBackdrop');
     sh.innerHTML=`<h3>${T('Übung anpassen','Edit exercise')}</h3><div class="kggSetGrid">
-      <label>${T('Gewicht / Gerät','Weight / machine')}<input id="kggSetUnitA" value="${esc(e.u||'kg')}"></label>
-      <label>${T('Wdh / Zeit','Reps / time')}<input id="kggSetUnitB" value="${esc(e.m||'Wdh')}"></label>
+      <label>${T('Gewicht / Gerät','Weight / machine')}<input id="kggSetUnitA" value="${esc(e.u==null?'kg':e.u)}"></label>
+      <label>${T('Wdh / Zeit','Reps / time')}<input id="kggSetUnitB" value="${esc(e.m==null?'Wdh':e.m)}"></label>
       <label>${T('Seite','Side')}<select id="kggSetSide"><option value="BI">${T('beidseitig','bilateral')}</option><option value="LR">${T('links/rechts getrennt','left/right separate')}</option></select></label>
       <label>${T('Schmerz','Pain')}<select id="kggSetPainMode"><option value="exercise">${T('einmal pro Übung','once per exercise')}</option><option value="set">${T('pro Satz','per set')}</option></select></label>
     </div><div class="kggSetActions"><button class="kggSetCancel" id="kggSetCancel">${T('Abbrechen','Cancel')}</button><button class="kggSetSave" id="kggSetSave">${T('Speichern','Save')}</button></div>`;
     $('kggSetSide').value=e.side==='LR'?'LR':'BI';$('kggSetPainMode').value=getPainMode(e);
     $('kggSetCancel').onclick=closeSettings;
-    $('kggSetSave').onclick=()=>{const old=e.side; e.u=$('kggSetUnitA').value.trim()||e.u||'kg'; e.m=$('kggSetUnitB').value.trim()||e.m||'Wdh'; e.side=$('kggSetSide').value; setPainMode(e,$('kggSetPainMode').value); copySideValues(i,old,e.side); saveAll(); closeSettings(); openIndex=i; safe(()=>render()); setTimeout(apply,0); st(T('Übung angepasst.','Exercise updated.'))};
+    $('kggSetSave').onclick=()=>{const old=e.side,unitA=$('kggSetUnitA').value.trim(),unitB=$('kggSetUnitB').value.trim(),mode=$('kggSetPainMode').value; e.u=unitA; e.m=unitB; e.side=$('kggSetSide').value; setExerciseSettings(e,unitA,unitB,mode); copySideValues(i,old,e.side); saveAll(); closeSettings(); openIndex=i; safe(()=>render()); setTimeout(apply,0); st(T('Übung angepasst.','Exercise updated.'))};
     bd.hidden=false;sh.hidden=false;
   }
   function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
@@ -133,12 +138,12 @@
     const scan=$('kggActionScan');if(scan)scan.textContent='📷 '+T('Plan scannen / aktualisieren','Scan / update plan');
     const add=$('kggActionAddPlan');if(add)add.textContent='➕ '+T('2. Plan hinzufügen','Add 2nd plan');
     document.querySelectorAll('button').forEach(b=>{const x=b.textContent.trim();const map={'Aktuelle Werte als QR zeigen':'Show current values as QR','Show current values as QR':'Show current values as QR','Training beenden & QR anzeigen':'Finish training & show QR','Finish training & show QR':'Finish training & show QR','Zurück zum Plan':'Back to plan','Back to plan':'Back to plan','Abbrechen':'Cancel','Cancel':'Cancel','OK':'OK'}; if(map[x])b.textContent=en()?map[x]:Object.keys(map).find(k=>map[k]===map[x]&&k!==map[x])||x});
-    cards().forEach((card,ei)=>{const e=safe(()=>p.ex[ei]);if(!e)return;let m=card.querySelector(':scope > .muted');if(m)m.textContent=(e.sets||3)+' '+T('Sätze','sets')+' · '+sideText(e.side)+' · '+unit(e.u)+' · '+unit(e.m);card.querySelectorAll('.set > b').forEach((b,i)=>b.textContent=T('Satz ','Set ')+(i+1));card.querySelectorAll('.lr span').forEach(sp=>{if(sp.textContent.trim()==='Li'||sp.textContent.trim()==='L')sp.textContent=T('Li','L');else sp.textContent=T('Re','R')})});
+    cards().forEach((card,ei)=>{const e=safe(()=>p.ex[ei]);if(!e)return;let m=card.querySelector(':scope > .muted');if(m){const parts=[(e.sets||3)+' '+T('Sätze','sets'),sideText(e.side)];[unit(e.u),unit(e.m)].filter(Boolean).forEach(x=>parts.push(x));m.textContent=parts.join(' · ')}card.querySelectorAll('.set > b').forEach((b,i)=>b.textContent=T('Satz ','Set ')+(i+1));card.querySelectorAll('.lr span').forEach(sp=>{if(sp.textContent.trim()==='Li'||sp.textContent.trim()==='L')sp.textContent=T('Li','L');else sp.textContent=T('Re','R')})});
   }
 
   function patchRows(){if(window.__kggPainRowsPatch||typeof rows!=='function')return;window.__kggPainRowsPatch=1;const old=rows;rows=function(day){const out=old(day);safe(()=>out.forEach((r,ei)=>{const e=p.ex[ei];if(getPainMode(e)==='set'){let a=[];for(let s=1;s<=e.sets;s++){let x=v[k(ei,s,'P','pain',day)]||'0';a.push('S'+s+':'+x)}r[6]=a.join(' ')}}));return out}}
   function patchRender(){if(window.__kggAlwaysCardsRenderPatch||typeof render!=='function')return;window.__kggAlwaysCardsRenderPatch=1;const old=render;render=function(){const r=old.apply(this,arguments);setTimeout(apply,0);return r}}
-  function apply(){ensureStyle();ensureSettingsDom();forceCards();renderPain();i18n();patchRows()}
+  function apply(){ensureStyle();ensureSettingsDom();applySavedSettings();forceCards();renderPain();i18n();applyUnitVisibility();patchRows()}
   function init(){window.__kggPatientCardSettings=VERSION;patchRender();apply();setTimeout(apply,300);setTimeout(apply,1000)}
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
 })();
