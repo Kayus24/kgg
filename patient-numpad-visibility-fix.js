@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='numpad-visibility-v6-input-morph-polish';
+  const VERSION='numpad-visibility-v7-last-closes-pad';
   if(window.__kggNumpadVisibility===VERSION)return;
   window.__kggNumpadVisibility=VERSION;
   const $=id=>document.getElementById(id);
@@ -21,9 +21,10 @@
   function ensure(){[20,90,180,360,650].forEach(t=>setTimeout(move,t))}
   function clearSoon(){setTimeout(()=>{const main=document.querySelector('main');if(main)main.style.paddingBottom='';document.body.classList.remove('kggPadOpen');const p=pad();if(p){p.classList.remove('kggPadPass');p.classList.remove('kggPadLargeUi')}removeZoom();activeInput=null;activeMeta=null},120)}
   function closeByOutsideTap(){if(!open()||typeof window.closePad!=='function')return;try{window.closePad(true)}catch(e){try{window.closePad(false)}catch(_){}}}
+  function closeAfterLast(){if(!open()||typeof window.closePad!=='function')return;setTimeout(()=>{try{window.closePad(true)}catch(e){}},0)}
   function isInputTarget(t){return !!(t&&t.matches&&t.matches('input.num'))}
   function isPadTarget(t){return !!(t&&t.closest&&t.closest('#pad .padBox'))}
-  function patch(){if(window.__kggNumpadVisibilityPatchedV6)return;window.__kggNumpadVisibilityPatchedV6=1;if(typeof window.openPad==='function'){const oldOpen=window.openPad;window.openPad=function(input,meta){if(open()&&input&&input!==activeInput&&typeof window.closePad==='function'){try{window.closePad(true)}catch(e){}}activeInput=input||document.activeElement;activeMeta=meta||activeMeta;const r=oldOpen.apply(this,arguments);space();if(largeUi())placeZoom(activeInput,true);ensure();return r}}if(typeof window.closePad==='function'){const oldClose=window.closePad;window.closePad=function(){const r=oldClose.apply(this,arguments);clearSoon();return r}}}
+  function patch(){if(window.__kggNumpadVisibilityPatchedV7)return;window.__kggNumpadVisibilityPatchedV7=1;if(typeof window.openPad==='function'){const oldOpen=window.openPad;window.openPad=function(input,meta){if(open()&&input&&input!==activeInput&&typeof window.closePad==='function'){try{window.closePad(true)}catch(e){}}activeInput=input||document.activeElement;activeMeta=meta||activeMeta;const r=oldOpen.apply(this,arguments);space();if(largeUi())placeZoom(activeInput,true);ensure();return r}}if(typeof window.closePad==='function'){const oldClose=window.closePad;window.closePad=function(){const r=oldClose.apply(this,arguments);clearSoon();return r}}if(typeof window.padUseLast==='function'){const oldLast=window.padUseLast;window.padUseLast=function(){const r=oldLast.apply(this,arguments);closeAfterLast();return r}}}
   document.addEventListener('focusin',e=>{if(isInputTarget(e.target)){activeInput=e.target;if(open())ensure()}},true);
   document.addEventListener('click',e=>{if(isInputTarget(e.target)){activeInput=e.target;if(open())ensure()}},true);
   document.addEventListener('pointerdown',e=>{if(!open())return;const t=e.target;if(isPadTarget(t)||isInputTarget(t))return;closeByOutsideTap()},true);
