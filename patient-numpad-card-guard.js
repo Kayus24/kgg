@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='numpad-card-guard-v1';
+  const VERSION='numpad-card-guard-v2-input-switch';
   if(window.__kggNumpadCardGuard===VERSION)return;
   window.__kggNumpadCardGuard=VERSION;
   let closedAt=0;
@@ -14,10 +14,12 @@
     setTimeout(mark,0);
   }
   function recent(){return Date.now()-(window.__kggPadClosedAt||closedAt||0)<450}
+  function isNumInput(t){return !!(t&&t.closest&&t.closest('input.num'))}
   function guard(e){
     const p=pad();
     const t=e.target;
     if(!p||!t)return;
+    if(isNumInput(t))return;
     if(t===p&&open()){
       e.preventDefault();
       e.stopPropagation();
