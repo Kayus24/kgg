@@ -4,6 +4,33 @@
 - Lines: 19741-20160
 
 ```html
+        if(syncTimestamp(ex.updatedAt)>=syncTimestamp(existing.updatedAt||existing.createdAt)){
+          existing.aliases=ex.aliases||existing.aliases;
+          existing.sets=ex.sets||existing.sets;
+          existing.unit=ex.unit||existing.unit;
+          existing.weightUnit=ex.weightUnit||existing.weightUnit;
+          existing.shared=true;
+          existing.updatedAt=ex.updatedAt||new Date().toISOString();
+          updated+=1;
+        }
+      }else{
+        bank.push({...ex,id:ex.id||('shared_'+Date.now()+'_'+added),custom:true,shared:true});
+        added+=1;
+      }
+      deletedBankIds.delete(String(ex.id||''));
+    });
+    persistDeletedBankIds();
+    persistCustomBank();
+    render();
+    return {added,updated,total:incoming.length};
+  }
+  function openSharedBankModal(){
+    const text=$('sharedBankText'), status=$('sharedBankStatus');
+    if(text)text.value=JSON.stringify(buildSharedExerciseBankPayload(),null,2);
+    if(status)status.textContent='Bereit.';
+    $('sharedBankModal').classList.add('open');
+  }
+  function closeSharedBankModal(){$('sharedBankModal').classList.remove('open');}
   async function copySharedBankPayload(){
     const text=$('sharedBankText'), status=$('sharedBankStatus');
     if(!text)return;
@@ -397,31 +424,4 @@
     return {therapistId:'',syncRoomId:'',followedTherapists:[]};
   }
   function writeNativeSyncFollowConfig(config){
-    try{
-      if(window.KGGNativeSync&&typeof window.KGGNativeSync.setFollowConfig==='function'){
-        return !!window.KGGNativeSync.setFollowConfig(config||{});
-      }
-    }catch(err){}
-    try{localStorage.setItem(syncPairFallbackConfigKey,JSON.stringify(config||{}));return true;}catch(err){return false;}
-  }
-  function syncPairRoomId(){
-    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig&&nativeSyncFollowConfig()||{});
-    if(config.syncRoomId)return config.syncRoomId;
-    let roomId='';
-    try{roomId=localStorage.getItem(syncPairRoomIdKey)||'';}catch(err){}
-    if(!roomId){
-      const rand=(crypto&&crypto.getRandomValues)?Array.from(crypto.getRandomValues(new Uint32Array(2))).map(v=>v.toString(36)).join(''):Math.random().toString(36).slice(2);
-      roomId='room_'+Date.now().toString(36)+'_'+rand;
-      try{localStorage.setItem(syncPairRoomIdKey,roomId);}catch(err){}
-    }
-    config.syncRoomId=roomId;
-    if(!config.therapistId)config.therapistId=syncPairDeviceId();
-    writeNativeSyncFollowConfig(config);
-    return roomId;
-  }
-  function buildNativeSyncInvite(){
-    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig()||{});
-    const deviceId=syncPairDeviceId();
-    const therapistName=String(($('therapistName')&&$('therapistName').value)||state.patient.therapist||'').trim();
-    const therapistId=String(config.therapistId||deviceId).trim()||deviceId;
 ```

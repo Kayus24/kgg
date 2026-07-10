@@ -48,34 +48,32 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "colleague-share-apk-update-fix",
     "patient-qr-root-query",
     "grossdruck-pdf-readable-images",
-    "grossdruck-readability-beta"
+    "grossdruck-readability-beta",
+    "059-ui-scaler-push-canary"
   ],
   "currentVersion": {
-    "versionCode": 58,
-    "versionName": "1.0.58-grossdruck-readability-beta",
-    "lastPatchId": "kgg-v058-grossdruck-readability-beta",
-    "updatedBy": "local-html-patch"
+    "versionCode": 59,
+    "versionName": "1.0.59-ui-scaler-push-canary",
+    "lastPatchId": "kgg-v059-ui-scaler-push-canary",
+    "updatedBy": "kgg-gpt-write-gate"
   },
-  "latestPatchId": "kgg-v058-grossdruck-readability-beta",
+  "latestPatchId": "kgg-v059-ui-scaler-push-canary",
   "lastUpdateIntent": {
-    "id": "kgg-v058-grossdruck-readability-beta",
-    "summary": "Grossdruck-PDF nutzt groessere kurzsichtigkeitsgepruefte Schrift und eine lokale PDF-Readability-Testengine.",
+    "id": "kgg-v059-ui-scaler-push-canary",
+    "summary": "Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification.",
     "touched": [
-      "PDF generation",
-      "Grossdruck PDF layout",
-      "PDF exercise thumbnails",
-      "PDF readability test engine",
-      "Release test battery",
-      "Source Truth",
-      "version.json"
+      "kgg-update/index.html"
     ],
     "notTouched": [
+      "PDF",
+      "QR/Patienten-App",
+      "Scan/OCR",
       "Parser",
-      "Scan/OCR parser",
       "Plan-State",
+      "Medien/Upload",
+      "API-Key-Logik",
       "Android/APK",
-      "Sync data model",
-      "API-Key-Logik"
+      "Manifest"
     ]
   }
 }
@@ -116,34 +114,32 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "colleague-share-apk-update-fix",
     "patient-qr-root-query",
     "grossdruck-pdf-readable-images",
-    "grossdruck-readability-beta"
+    "grossdruck-readability-beta",
+    "059-ui-scaler-push-canary"
   ],
   "currentVersion": {
-    "versionCode": 58,
-    "versionName": "1.0.58-grossdruck-readability-beta",
-    "lastPatchId": "kgg-v058-grossdruck-readability-beta",
-    "updatedBy": "local-html-patch"
+    "versionCode": 59,
+    "versionName": "1.0.59-ui-scaler-push-canary",
+    "lastPatchId": "kgg-v059-ui-scaler-push-canary",
+    "updatedBy": "kgg-gpt-write-gate"
   },
-  "latestPatchId": "kgg-v058-grossdruck-readability-beta",
+  "latestPatchId": "kgg-v059-ui-scaler-push-canary",
   "lastUpdateIntent": {
-    "id": "kgg-v058-grossdruck-readability-beta",
-    "summary": "Grossdruck-PDF nutzt groessere kurzsichtigkeitsgepruefte Schrift und eine lokale PDF-Readability-Testengine.",
+    "id": "kgg-v059-ui-scaler-push-canary",
+    "summary": "Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification.",
     "touched": [
-      "PDF generation",
-      "Grossdruck PDF layout",
-      "PDF exercise thumbnails",
-      "PDF readability test engine",
-      "Release test battery",
-      "Source Truth",
-      "version.json"
+      "kgg-update/index.html"
     ],
     "notTouched": [
+      "PDF",
+      "QR/Patienten-App",
+      "Scan/OCR",
       "Parser",
-      "Scan/OCR parser",
       "Plan-State",
+      "Medien/Upload",
+      "API-Key-Logik",
       "Android/APK",
-      "Sync data model",
-      "API-Key-Logik"
+      "Manifest"
     ]
   }
 }
@@ -153,8 +149,39 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 58,
+  "latestVersionCode": 59,
   "entries": [
+    {
+      "versionCode": 59,
+      "versionName": "1.0.59-ui-scaler-push-canary",
+      "patchId": "kgg-v059-ui-scaler-push-canary",
+      "status": "active",
+      "type": "kgg-gpt-write-gate",
+      "title": "Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification.",
+      "reason": "Custom GPT preview was accepted by Max and routed through the guarded write gate.",
+      "whatChanged": [
+        "Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification."
+      ],
+      "touchedAreas": [
+        "kgg-update/index.html"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "github": "pending",
+        "notes": "Required Gate and release-pr validate-build must pass before merge."
+      }
+    },
     {
       "versionCode": 58,
       "versionName": "1.0.58-grossdruck-readability-beta",
@@ -397,31 +424,4 @@ Before editing this app, any LLM/agent/human should read these blocks:
         "Sync data model",
         "API-Key-Logik"
       ],
-      "testStatus": {
-        "local": "pending",
-        "githubPages": "pending",
-        "androidApp": "not-applicable"
-      },
-      "handoffNote": "v052 ist nur PDF-Planbilder; Android v399 und QR-Druck bleiben aus v051."
-    },
-    {
-      "versionCode": 51,
-      "versionName": "1.0.51-android-qr-pdf-bridge",
-      "patchId": "kgg-v051-android-qr-pdf-bridge",
-      "status": "active",
-      "type": "local-html-patch",
-      "title": "Kolleg:innen-QR drucken und Android-PDF/Icon-Bridge",
-      "reason": "Kolleg:innen-App/APK-QR soll direkt druckbar sein und die Android-APK braucht v399 mit App-Icon sowie internem PDF-Fallback, wenn kein externer PDF-Viewer vorhanden ist.",
-      "whatChanged": [
-        "Das Admin-QR-Modal bekommt den Button QR drucken.",
-        "QR-Druck erzeugt lokal eine kleine PDF-Seite mit Titel, QR-Code und Link.",
-        "Android v399 stellt die native PDF-Bridge kompatibel bereit und bekommt das KGG-Launcher-Icon.",
-        "Android oeffnet PDFs intern als Vorschau, wenn kein externer PDF-Viewer gefunden wird."
-      ],
-      "touchedAreas": [
-        "Admin QR modal",
-        "QR print PDF helper",
-        "Android wrapper PDF bridge",
-        "Android launcher resources",
-        "Android update manifest",
 ```

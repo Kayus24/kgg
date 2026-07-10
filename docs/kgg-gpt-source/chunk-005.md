@@ -4,6 +4,33 @@
 - Lines: 2101-2520
 
 ```html
+    .planBadge.media{
+      background:#eef6ff;
+      color:#214969;
+      border-color:#cfe3f8;
+    }
+    .planBadge.new,
+    .planBadge.review{
+      background:#ffe69b;
+      color:#6b4300;
+      border-color:#d9b13a;
+    }
+    .planBadge.live{
+      background:#ecfdf3;
+      color:#14532d;
+      border-color:#bbf7d0;
+    }
+    .planCardActions{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:4px;
+      flex:0 0 auto;
+    }
+    .planCardActions .iconBtn[data-planedit]{
+      width:42px;
+      height:42px;
+      border-radius:999px;
       background:#f8fafc;
       border:1px solid rgba(220,227,235,.95);
       box-shadow:0 2px 8px rgba(7,16,39,.06);
@@ -397,31 +424,4 @@
         }
       }
     }
-
-
-    /* v328 Tablet Header/Package Fix:
-       - ausgefahrene Übungsdatenbank-Überschrift auf Tablet ausblenden
-       - großen Titel "Aktueller Plan" im Tablet-Planmodus entfernen
-       - Stift-Symbol direkt an "Übungen im Plan" hängen
-       - +📦 sauber in die Plan-Kopfzeile docken, ohne Zähler/Text zu verdecken
-       - Plan-Historie und Übungspakete unten gleich groß machen
-       Keine PDF/QR/Patienten-App/Scan/Parser/Plan-State-Logik. */
-    @media (min-width:760px){
-      /* Rechts und unten echte gleichmäßige Tablet-Arbeitszonen. */
-      .app{
-        grid-template-columns:minmax(360px,430px) minmax(0,1fr) minmax(0,1fr)!important;
-      }
-
-      /* Ausgefahrene DB braucht keine zusätzliche Kopfzeile oben links. */
-      #dbTitle.fullBankOpen,
-      #dbTitle.searchBankOpen{
-        display:none!important;
-      }
-
-      /* Der globale Titel konkurriert mit der eigentlichen Plan-Kopfzeile. */
-      #createPanel.planMode .planHeader .panelTitle{
-        display:none!important;
-      }
-
-      /* Stift gehört zum konkreten Abschnitt, nicht als großer Seitentitel. */
 ```

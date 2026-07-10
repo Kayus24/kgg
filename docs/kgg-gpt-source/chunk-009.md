@@ -4,6 +4,33 @@
 - Lines: 3781-4200
 
 ```html
+      body.tabletLayoutRightSlim #baseToggle,
+      body.tabletLayoutRightSlim #recentToggle,
+      body.tabletLayoutRightSlim #packageToggle,
+      body.tabletLayoutRightSlim .tabletLockSwitch{
+        padding-left:6px!important;
+        padding-right:6px!important;
+        border-radius:14px!important;
+        font-size:clamp(10px,calc(14px * var(--kgg-tablet-ui-scale,1)),20px)!important;
+      }
+      body.tabletLayoutRightTiny .packageLayoutSlot{
+        grid-template-columns:minmax(0,1fr) 52px!important;
+        gap:4px!important;
+      }
+      body.tabletLayoutRightTiny .packageLayoutSlot .tabletLayoutControls{
+        width:52px!important;
+        min-width:52px!important;
+        max-width:52px!important;
+      }
+      body.tabletLayoutRightTiny .tabletLockText,
+      body.tabletLayoutRightTiny .tabletSwitchTrack{
+        display:none!important;
+      }
+      body.tabletLayoutRightTiny .tabletLockIcon{
+        font-size:22px!important;
+      }
+      body.tabletLayoutRightTiny #packageToggle > span,
+      body.tabletLayoutRightTiny #recentToggle .recentText,
       body.tabletLayoutRightTiny #recentToggle .recentMini{
         font-size:0!important;
       }
@@ -397,31 +424,4 @@
         align-items:start;
       }
       .bankArea.bankOpen.searchBankOpen #bankToggle{
-        grid-column:1;
-        grid-row:1;
-      }
-      .bankArea.bankOpen.searchBankOpen #bankContent{
-        grid-column:2;
-        grid-row:1;
-        margin-top:0;
-      }
-      .bankArea.bankOpen.searchBankOpen .bankLabel{
-        margin:0 0 4px;
-        border-radius:10px;
-      }
-    }
-    /* Tablet DB search: Top-Treffer beginnen neben dem Uebungsdatenbank-Maennchen. */
-    @media (min-width:760px){
-      #bankArea.bankOpen.searchBankOpen{
-        display:grid;
-        grid-template-columns:56px minmax(0,1fr);
-        column-gap:8px;
-        align-items:start;
-        align-content:start;
-        height:auto;
-        min-height:0;
-      }
-      #bankArea.bankOpen.searchBankOpen #bankToggle{
-        grid-column:1;
-        grid-row:1;
 ```

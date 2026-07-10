@@ -4,6 +4,33 @@
 - Lines: 5461-5880
 
 ```html
+      width:54px!important;
+      min-width:54px!important;
+      height:54px!important;
+      min-height:54px!important;
+      align-self:stretch!important;
+      justify-self:stretch!important;
+      z-index:1400!important;
+    }
+    .scanHub .scanBtn{
+      grid-column:2!important;
+      grid-row:1!important;
+      width:100%!important;
+    }
+    .scanHub .scanMeta{
+      grid-column:3!important;
+      grid-row:1!important;
+      width:100%!important;
+    }
+    .scanHub .syncQrBtn,
+    .scanHub .adminConfigBtn,
+    .scanHub .sharedBankBtn{
+      display:none!important;
+    }
+    #createPanel.planMode .planActions{
+      display:contents!important;
+    }
+    #createPanel.planMode #recentToggle{
       grid-column:2/4!important;
       grid-row:5!important;
       width:calc(50% - 6px)!important;
@@ -397,31 +424,4 @@
     }
     body.tabletLayoutCustom #createPanel.planMode #finishBtn{
       grid-column:3!important;
-      grid-row:1!important;
-      display:flex!important;
-      visibility:visible!important;
-      opacity:1!important;
-      pointer-events:auto!important;
-      scale:1 1!important;
-      width:126px!important;
-      min-width:126px!important;
-      height:44px!important;
-      min-height:44px!important;
-      margin:0!important;
-      justify-content:center!important;
-      align-items:center!important;
-      padding:0 16px!important;
-      border-width:0!important;
-      border-radius:14px!important;
-      font-size:16px!important;
-    }
-  }
-
-  /* v398: Confirmed Tablet Sidebar + Tab S9 layout only.
-     No PDF, patient app, Scan/OCR core, parser, plan-state or media/upload changes. */
-  @media (min-width:760px){
-    :root{--kgg-tablet-sidebar-w:230px;--kgg-tablet-safe-top:calc(env(safe-area-inset-top) + 32px);--kgg-tablet-gap:8px;--kgg-tablet-left-default:clamp(460px,42vw,540px);--kgg-tablet-left-menu:clamp(360px,40vw,440px);}
-    html,body{width:100%!important;min-height:100%!important;margin:0!important;overflow:hidden!important;background:#e8eef6!important;}
-    body.tabletLayoutCustom{padding:var(--kgg-tablet-safe-top) 0 0!important;box-sizing:border-box!important;}
-    body.tabletLayoutCustom .app{width:100vw!important;max-width:none!important;height:calc(100dvh - var(--kgg-tablet-safe-top))!important;max-height:calc(100dvh - var(--kgg-tablet-safe-top))!important;margin:0!important;padding:0 10px 8px!important;box-sizing:border-box!important;display:grid!important;grid-template-columns:var(--kgg-tablet-left-col,var(--kgg-tablet-left-default)) minmax(0,1fr) 126px!important;grid-template-rows:44px 92px minmax(0,1fr)!important;gap:var(--kgg-tablet-gap)!important;transform:translateX(0)!important;transition:width .2s ease,transform .2s ease,grid-template-columns .2s ease!important;overflow:hidden!important;}
 ```

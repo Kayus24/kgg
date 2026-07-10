@@ -4,6 +4,34 @@
 - Lines: 24361-24780
 
 ```html
+    const openOrCloseBankFromBrowseTap=ev=>{
+      if(guardPhoneScrollToggle(ev))return;
+      if(isPhoneLayout())blurPhoneComposerForBrowse();
+      const opening=!state.bankOpen;
+      if(opening&&isTabletLayout())openTabletExclusivePanel('bank');
+      state.bankOpen=opening;
+      render();
+      setTabletOverlayActiveFlag();
+    };
+    const input=$('exerciseInput');
+    if(input){
+      input.addEventListener('focus',()=>{phoneBankBrowseMode=false;document.body.classList.remove('kggPhoneDbBrowseMode');});
+      input.addEventListener('input',()=>{phoneBankBrowseMode=false;document.body.classList.remove('kggPhoneDbBrowseMode');});
+    }
+    const oldApplySelectedExerciseToText=applySelectedExerciseToText;
+    applySelectedExerciseToText=function(ex,options){
+      const next={...(options||{})};
+      if(isPhoneLayout()&&phoneBankBrowseMode)next.keepFocus=false;
+      return oldApplySelectedExerciseToText(ex,next);
+    };
+    if($('bankToggle'))$('bankToggle').onclick=openOrCloseBankFromBrowseTap;
+    if($('dbTitle')){
+      $('dbTitle').onclick=openOrCloseBankFromBrowseTap;
+      $('dbTitle').onkeydown=null;
+      $('dbTitle').addEventListener('keydown',ev=>{
+        if(ev.key==='Enter'||ev.key===' '){
+          ev.preventDefault();
+          ev.stopImmediatePropagation();
           openOrCloseBankFromBrowseTap(ev);
         }
       },true);
@@ -396,32 +424,4 @@
       +'<button class="kggReleaseBtn primary" id="kggReleaseMobileInbox" type="button" style="width:100%;margin-top:10px">GitHub-Mobile-Inbox oeffnen</button>'
       +'<div class="kggReleaseInboxHint"><strong>Handy-Workflow ohne Codex</strong>1. HTML speichern. 2. Diese Datei in GitHub hochladen. 3. GitHub Actions erzeugt Admin-Beta und PR automatisch.</div>'
       +'<button class="kggReleaseBtn soft" id="kggReleasePromoteLatest" type="button" style="width:100%;margin-top:10px">Kolleg:innen-Freigabe in GitHub oeffnen</button>'
-      +'<button class="kggReleaseBtn soft" id="kggReleaseLogin" type="button" style="width:100%;margin-top:14px">Komfort: Mit GitHub verbinden</button>'
-      +'<button class="kggReleaseBtn soft" id="kggReleaseTest" type="button" style="width:100%;margin-top:10px">Komfort: Verbindung testen</button>'
-      +'<div class="kggReleaseGrid" style="margin-top:14px"><div class="kggReleaseField"><label for="kggReleaseId">Release-ID</label><input id="kggReleaseId" placeholder="z. B. r0391" autocomplete="off"></div><div class="kggReleaseField"><label for="kggReleaseVersion">Versionsname</label><input id="kggReleaseVersion" placeholder="Kurzer eindeutiger Name" autocomplete="off"></div><div class="kggReleaseField wide"><label for="kggReleaseNotes">Patch-Notiz</label><textarea id="kggReleaseNotes" placeholder="Was wurde geaendert? Keine Patientendaten oder Secrets."></textarea></div></div>'
-      +'<div class="kggReleaseActions"><button class="kggReleaseBtn soft" id="kggReleaseUpload" type="button">Komfort: HTML direkt aus App hochladen</button><button class="kggReleaseBtn soft" id="kggReleasePromote" type="button">Komfort: Release-ID fuer Kolleg:innen freigeben</button><div class="kggReleaseActions two"><button class="kggReleaseBtn danger" id="kggReleaseRollbackAdmin" type="button">Admin-Rollback</button><button class="kggReleaseBtn danger" id="kggReleaseRollbackColleague" type="button">Kolleg:innen-Rollback</button></div></div>'
-      +'</section>';
-    document.body.appendChild(modal);
-    document.getElementById('kggReleaseClose').onclick=close;
-    document.getElementById('kggReleaseLogin').onclick=function(){window.KGGReleaseControl.beginLogin();startRefreshLoop();setTimeout(refresh,250);setTimeout(refresh,900);setTimeout(refresh,1800);};
-    document.getElementById('kggReleaseCopyCode').onclick=function(){var code=(document.getElementById('kggReleaseCodeValue')||{}).textContent||'';if(code)copyText(code.trim());};
-    document.getElementById('kggReleaseTest').onclick=function(){if(typeof window.KGGReleaseControl.testConnection==='function'){window.KGGReleaseControl.testConnection();startRefreshLoop();setTimeout(refresh,250);setTimeout(refresh,1200);}else{var message=document.getElementById('kggReleaseMessage');if(message)message.textContent='Bitte Admin-APK v392 installieren, dann ist der Verbindungstest verfuegbar.';}};
-    document.getElementById('kggReleaseDownloadHtml').onclick=function(){if(typeof window.KGGReleaseControl.downloadCurrentHtml==='function'){window.KGGReleaseControl.downloadCurrentHtml();setTimeout(refresh,250);}else{var message=document.getElementById('kggReleaseMessage');if(message)message.textContent='Bitte Admin-APK v393 installieren, dann ist HTML speichern verfuegbar.';}};
-    document.getElementById('kggReleaseMobileInbox').onclick=function(){if(typeof window.KGGReleaseControl.openMobileInbox==='function'){window.KGGReleaseControl.openMobileInbox();setTimeout(refresh,250);}else{openExternal(MOBILE_INBOX_URL);}};
-    document.getElementById('kggReleasePromoteLatest').onclick=function(){if(typeof window.KGGReleaseControl.openPromoteLatest==='function'){window.KGGReleaseControl.openPromoteLatest();setTimeout(refresh,250);}else{openExternal(MOBILE_PROMOTE_URL);}};
-    document.getElementById('kggReleaseUpload').onclick=function(){window.KGGReleaseControl.chooseAndUploadBeta(value('kggReleaseId'),value('kggReleaseVersion'),value('kggReleaseNotes'));setTimeout(refresh,250);};
-    document.getElementById('kggReleasePromote').onclick=function(){window.KGGReleaseControl.confirmPromotion(value('kggReleaseId'));};
-    document.getElementById('kggReleaseRollbackAdmin').onclick=function(){window.KGGReleaseControl.confirmRollback('admin',value('kggReleaseId'));};
-    document.getElementById('kggReleaseRollbackColleague').onclick=function(){window.KGGReleaseControl.confirmRollback('colleague',value('kggReleaseId'));};
-    modal.addEventListener('click',function(ev){if(ev.target===modal)close();});
-    return modal;
-  }
-  function refresh(){var state=readStatus(),native=readAndroidStatus(),badge=document.getElementById('kggReleaseBadge'),message=document.getElementById('kggReleaseMessage'),codeBox=document.getElementById('kggReleaseCodeBox');if(!badge||!message)return;var phase=String(state.phase||'idle'),userCode=String(state.userCode||'').trim(),nativeText='';badge.textContent=state.authenticated?'Verbunden':(phase==='error'?'Fehler':(phase==='login_waiting'?'Code':'Bereit'));badge.className='kggReleaseBadge'+(state.authenticated?' isReady':(phase==='error'?' isError':''));if(native&&native.currentShellVersion)nativeText=' APK v'+native.currentShellVersion+(native.currentWebVersion?' · Web '+native.currentWebVersion:'');message.textContent=(state.message||'Release-Steuerung ist bereit.')+nativeText;if(codeBox){codeBox.classList.toggle('isOpen',!!userCode&&!state.authenticated);setText('kggReleaseCodeValue',userCode);}}
-  function startRefreshLoop(){if(refreshTimer)return;refreshTimer=setInterval(refresh,1000);}
-  function stopRefreshLoop(){if(refreshTimer){clearInterval(refreshTimer);refreshTimer=null;}}
-  function open(){var modal=ensureModal();closeTabletMenu();modal.classList.add('isOpen');modal.setAttribute('aria-hidden','false');refresh();startRefreshLoop();}
-  function close(){var modal=document.getElementById('kggReleaseCenterModal');if(!modal)return;modal.classList.remove('isOpen');modal.setAttribute('aria-hidden','true');stopRefreshLoop();}
-  function actionButton(id,text,handler){var button=document.createElement('button');button.id=id;button.type='button';button.className='tabletSideMenuAction';button.textContent=text;button.onclick=handler;return button;}
-  function installEntryPoints(){
-    var menu=document.querySelector('.tabletSideMenuMain');
 ```

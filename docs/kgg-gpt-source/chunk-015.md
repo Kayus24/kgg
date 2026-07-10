@@ -4,6 +4,33 @@
 - Lines: 6301-6720
 
 ```html
+    var pdf = this._buildPdf();
+    var bytes = new Uint8Array(pdf.length);
+    for(var i=0;i<pdf.length;i++) bytes[i] = pdf.charCodeAt(i) & 255;
+    var blob = new Blob([bytes], {type:'application/pdf'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename || 'kgg_trainingsplan.pdf';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 1000);
+    return this;
+  };
+
+  global.jspdf = global.jspdf || {};
+  global.jspdf.jsPDF = KGGOfflineJsPDF;
+  global.jsPDF = global.jsPDF || KGGOfflineJsPDF;
+})(window);
+
+  </script>
+
+  <script>
+    // PDF-Testversion: jsPDF wird local-first geladen, damit PDF weiter lokal im Browser erzeugt wird.
+    // GitHub Pages bleibt nur fuer die Patienten-App-Shell, nicht fuer PDF-Erzeugung.
+    window.KGG_JSPDF_TEST_SOURCES = window.KGG_JSPDF_TEST_SOURCES || [];
+    window.KGG_JSPDF_TEST_LOAD_STATE = window.KGG_JSPDF_TEST_LOAD_STATE || {status:'idle', index:0, error:null, promise:null};
+    window.KGGLoadJsPdfForTest = function KGGLoadJsPdfForTest(){
       if((window.jspdf && window.jspdf.jsPDF) || window.jsPDF) return Promise.resolve((window.jspdf&&window.jspdf.jsPDF)||window.jsPDF);
       const state = window.KGG_JSPDF_TEST_LOAD_STATE;
       if(state.promise) return state.promise;
@@ -397,31 +424,4 @@
       transform:translateY(-50%);
       border-radius:999px;
       background:radial-gradient(ellipse at center,rgba(7,16,39,.20) 0%,rgba(7,16,39,.10) 45%,rgba(7,16,39,0) 78%);
-      filter:blur(7px);
-    }
-
-    body.kggPlanCardReordering #currentPlanBlock .planCard.reorder-gap-before,
-    body.kggPlanCardReordering #currentPlanBlock .planCard.reorder-gap-after{
-      margin-top:0!important;
-      margin-bottom:0!important;
-    }
-
-    body.kggPlanCardReordering :is(#bankArea,#dbTitle,.bankArea,.bankRows,.az,#inputWrap,#exerciseInput,.suggestion){
-      transition:none!important;
-      animation:none!important;
-      transform:none!important;
-      filter:none!important;
-      pointer-events:none!important;
-    }
-  }
-</style>
-<style id="kgg-mini-patch-v400-08-phone-hide-admin-file-banner">
-  /* v400 mini08: Phone-only cleanup.
-     Entfernt die gelbe ADMIN-DATEI/Admin-Test-Box nur im Handy-Layout.
-     Tablet-Layout ab 760px bleibt unveraendert. */
-  @media (max-width:759px){
-    .adminTestBanner{
-      display:none!important;
-    }
-  }
 ```

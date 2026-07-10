@@ -1,9 +1,37 @@
 # KGG Source Chunk 064
 
 - Source: `kgg-update/index.html`
-- Lines: 26881-26988
+- Lines: 26881-27016
 
 ```html
+    var planId=card.dataset&&card.dataset.planId?String(card.dataset.planId):"";
+    function currentCard(){
+      if(card&&card.isConnected)return card;
+      if(planId){
+        var cards=Array.from(document.querySelectorAll("#planList .planCard[data-plan-id]"));
+        var live=cards.find(function(node){return node.dataset&&String(node.dataset.planId)===planId;});
+        if(live)return live;
+      }
+      return card;
+    }
+    var startX=ev.clientX,startY=ev.clientY,pointerId=ev.pointerId,active=false,dx=0,cancelTimer=null;
+    function threshold(){var live=currentCard();return Math.min(132,Math.max(78,(live?live.offsetWidth:0)*0.34));}
+    function cleanup(){
+      clearTimeout(cancelTimer);
+      delete card.dataset.kggV053SwipePointer;
+      document.removeEventListener("pointermove",move,true);
+      document.removeEventListener("pointerup",up,true);
+      document.removeEventListener("pointercancel",cancel,true);
+    }
+    function move(e){
+      var live=currentCard();
+      if(!live){cleanup();return;}
+      dx=e.clientX-startX;
+      var dy=e.clientY-startY;
+      if(!active){
+        if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)*1.2){cleanup();return;}
+        if(Math.abs(dx)<12||Math.abs(dx)<Math.abs(dy)*1.25)return;
+        active=true;
         document.body.classList.add("kggPlanCardSwiping");
         live.classList.add("swipe-dragging");
         try{live.setPointerCapture&&live.setPointerCapture(pointerId);}catch(err){}

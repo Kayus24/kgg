@@ -4,6 +4,33 @@
 - Lines: 22681-23100
 
 ```html
+  }
+  function currentLocalGeminiKey(){return localGeminiKeys()[0]||'';}
+
+  /* ========================================================================
+     KGG v308 QR STRUCTURED OUTPUT + CURRENT-LAYOUT CONTACT-SHEET SCAN START
+     Integrationskandidat aus v306: TPL-BASIS-A-CLASSIC-L6-v2, EX1-EX6,
+     T1-Zeilen-Crops -> Contact-Sheet -> ein Gemini-Call -> lokale Zuordnung.
+     Später entfernbar/isolierbar, aber KEINE zweite KGGScan-Engine.
+     ======================================================================== */
+  const KGG_CURRENT_LAYOUT_ID='TPL-BASIS-A-CLASSIC-L6-v2';
+  const KGG_CURRENT_LAYOUT_BOXES=[
+    {ex:1,name:'Adduktion Maschine',x:.027,y:.134,w:.470,h:.225,measure:'Wdh'},
+    {ex:2,name:'Ein-Beinpresse',x:.503,y:.134,w:.470,h:.225,measure:'Wdh'},
+    {ex:3,name:'Ein-Beinpresse',x:.027,y:.385,w:.470,h:.225,measure:'Wdh'},
+    {ex:4,name:'Ein-Beinpresse',x:.503,y:.385,w:.470,h:.225,measure:'Wdh'},
+    {ex:5,name:'Copenhagen Plank',x:.027,y:.637,w:.470,h:.318,measure:'Sek.'},
+    {ex:6,name:'Beinpresse',x:.503,y:.637,w:.470,h:.318,measure:'Wdh'}
+  ];
+  function kggClampRect(rect,w,h){
+    const x=Math.max(0,Math.min(w-1,Math.round(rect.x)));
+    const y=Math.max(0,Math.min(h-1,Math.round(rect.y)));
+    const rw=Math.max(1,Math.min(w-x,Math.round(rect.w)));
+    const rh=Math.max(1,Math.min(h-y,Math.round(rect.h)));
+    return {x,y,w:rw,h:rh};
+  }
+  function kggCropCanvas(src,rect){
+    const r=kggClampRect(rect,src.width,src.height);
     const c=document.createElement('canvas');
     c.width=r.w; c.height=r.h;
     const x=c.getContext('2d',{willReadFrequently:true});
@@ -397,31 +424,4 @@
     return scanStateSnapshot();
   }
   function toggleScanJobCollapse(index){
-    if(shouldIgnorePhoneScrollToggle())return scanStateSnapshot();
-    const job=scanState.jobs[Number(index)||0];
-    if(job){job.collapsed=!job.collapsed; renderScanPreview();}
-    return scanStateSnapshot();
-  }
-  function initScanAutoCollapseOnUiOpen(){
-    if(window.__kggScanAutoCollapseBound)return;
-    window.__kggScanAutoCollapseBound=true;
-    const watchedIds=['editorModal','packageSaveModal','bankDeleteModal','shareModal','largePdfModal','longMediaConfirmModal','installPromptModal','adminSecretsModal','sharedBankModal','pdfPreviewModal','recentList','packageList','baseFields','bankContent'];
-    const visible=function(el){
-      if(!el)return false;
-      if(el.classList.contains('open'))return true;
-      if(el.id==='recentList'||el.id==='packageList'||el.id==='baseFields'||el.id==='bankContent')return !el.classList.contains('hidden');
-      return false;
-    };
-    const previous=new Map();
-    watchedIds.forEach(id=>{const el=$(id); if(el)previous.set(id,visible(el));});
-    const check=function(id,el){
-      if(shouldIgnorePhoneScrollToggle())return;
-      const now=visible(el);
-      const before=previous.get(id)||false;
-      previous.set(id,now);
-      if(now&&!before)collapseScanCards('auto_'+id);
-    };
-    const observer=new MutationObserver(records=>{
-      records.forEach(record=>{const el=record.target; if(el&&el.id)check(el.id,el);});
-    });
 ```

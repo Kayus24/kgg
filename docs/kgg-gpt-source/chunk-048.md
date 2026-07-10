@@ -4,6 +4,33 @@
 - Lines: 20161-20580
 
 ```html
+    try{
+      if(window.KGGNativeSync&&typeof window.KGGNativeSync.setFollowConfig==='function'){
+        return !!window.KGGNativeSync.setFollowConfig(config||{});
+      }
+    }catch(err){}
+    try{localStorage.setItem(syncPairFallbackConfigKey,JSON.stringify(config||{}));return true;}catch(err){return false;}
+  }
+  function syncPairRoomId(){
+    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig&&nativeSyncFollowConfig()||{});
+    if(config.syncRoomId)return config.syncRoomId;
+    let roomId='';
+    try{roomId=localStorage.getItem(syncPairRoomIdKey)||'';}catch(err){}
+    if(!roomId){
+      const rand=(crypto&&crypto.getRandomValues)?Array.from(crypto.getRandomValues(new Uint32Array(2))).map(v=>v.toString(36)).join(''):Math.random().toString(36).slice(2);
+      roomId='room_'+Date.now().toString(36)+'_'+rand;
+      try{localStorage.setItem(syncPairRoomIdKey,roomId);}catch(err){}
+    }
+    config.syncRoomId=roomId;
+    if(!config.therapistId)config.therapistId=syncPairDeviceId();
+    writeNativeSyncFollowConfig(config);
+    return roomId;
+  }
+  function buildNativeSyncInvite(){
+    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig()||{});
+    const deviceId=syncPairDeviceId();
+    const therapistName=String(($('therapistName')&&$('therapistName').value)||state.patient.therapist||'').trim();
+    const therapistId=String(config.therapistId||deviceId).trim()||deviceId;
     const roomId=syncPairRoomId();
     return {
       kind:'kgg_sync_invite',
@@ -397,31 +424,4 @@
       oldMedia.forEach(item=>deleteUnsharedMediaBlob(item,ex));
       if(ex.localId){
         syncStatePlanToStore('ui_attach_exercise_image');
-        save();
-      }else{
-        ex.custom=true;
-        ex.updatedAt=new Date().toISOString();
-        persistCustomBank();
-      }
-      renderEditorMediaStatus(ex);
-      render();
-      $('editorModal').classList.add('open');
-    }catch(err){
-      console.warn('Bild konnte nicht vorbereitet werden:',err);
-      if(status)status.textContent='Bild fehlgeschlagen.';
-    }
-  }
-  function removeEditorMedia(){
-    const ex=currentEditedExercise();
-    if(!ex)return;
-    const oldMedia=ensureExerciseMediaList(ex);
-    ex.media=[];
-    oldMedia.forEach(item=>deleteUnsharedMediaBlob(item,ex));
-    if(ex.localId){
-      syncStatePlanToStore('ui_remove_exercise_image');
-      save();
-    }else{
-      ex.custom=true;
-      ex.updatedAt=new Date().toISOString();
-      persistCustomBank();
 ```

@@ -4,6 +4,33 @@
 - Lines: 18481-18900
 
 ```html
+    }else{
+      setTimeout(apply,0);
+    }
+  }
+  function toggleBankOpenFromUi(){
+    const opening=!state.bankOpen;
+    const fullBankMode=opening&&!activeBankQuerySegment();
+    state.bankOpen=opening;
+    render();
+    if(fullBankMode)alignFullBankInputToViewportTop();
+  }
+  function appendExerciseLineToInput(input,line){
+    let base=String(input.value||'').replace(/\s+$/,'');
+    const prefix=base.trim()?(/[,\n;]$/.test(base)?' ':', '):'';
+    input.value=base+prefix+line;
+    input.value=withTrailingExerciseComma(input.value);
+    return input.value.length;
+  }
+  function keepExerciseInputFocus(caret){
+    const input=$('exerciseInput');
+    if(!input||!input.focus)return;
+    const apply=()=>{
+      try{input.focus({preventScroll:true});}catch(e){input.focus();}
+      if(typeof caret==='number'&&input.setSelectionRange)input.setSelectionRange(caret,caret);
+    };
+    apply();
+    if(typeof requestAnimationFrame==='function')requestAnimationFrame(apply);
   }
   function preventButtonFocusSteal(btn){
     if(!btn)return;
@@ -397,31 +424,4 @@
       if(!swipe.active){resetBankRowSwipe(row);return;}
       e.preventDefault();
       bankSwipeSuppressClickUntil=Date.now()+380;
-      const shouldAsk=Math.abs(swipe.dx)>=threshold();
-      row.style.transition='transform .2s cubic-bezier(.2,.9,.2,1), opacity .16s ease, box-shadow .16s ease';
-      row.style.transform='translateX(0)';
-      row.style.opacity='1';
-      setTimeout(()=>{resetBankRowSwipe(row); if(shouldAsk)openBankDeleteModal(id);},210);
-    };
-    const cancel=()=>{cleanup(); if(swipe.active){row.style.transition='transform .18s ease, opacity .18s ease';row.style.transform='translateX(0)';row.style.opacity='1';setTimeout(()=>resetBankRowSwipe(row),190);}else resetBankRowSwipe(row);};
-    document.addEventListener('pointermove',move,{passive:false});
-    document.addEventListener('pointerup',up,{passive:false,once:true});
-    document.addEventListener('pointercancel',cancel,{passive:true,once:true});
-  }
-  function scanSetSummaryForPlanCard(ex){
-    const sets=Array.isArray(ex&&ex.scanSets)?ex.scanSets:[];
-    if(!sets.length)return '';
-    const metricUnit=ex&&ex.metricUnit||ex&&ex.unit||measureUnitLabel(ex&&ex.measure);
-    const loadUnit=normalizeLoadUnit(ex&&ex.weightUnit||ex&&ex.loadUnit||'kg');
-    const isTime=/zeit|sek|sec|min|time/i.test(metricUnit)||/keine/i.test(loadUnit);
-    return sets.slice(0,3).map((set,i)=>{
-      if(set&&set.li||set&&set.re){
-        const li=set.li||{}, re=set.re||{};
-        const liText=(li.metric?li.metric+' '+metricUnit:'')+(li.load?' @ '+li.load+' '+loadUnit:'');
-        const reText=(re.metric?re.metric+' '+metricUnit:'')+(re.load?' @ '+re.load+' '+loadUnit:'');
-        return 'S'+(i+1)+': Li '+(liText||'-')+' / Re '+(reText||'-')+(set.pain?' · Schmerz '+set.pain+'/10':'');
-      }
-      if(isTime)return 'S'+(i+1)+': '+(set&&set.metric||'-')+' '+metricUnit+(set&&set.pain?' · Schmerz '+set.pain+'/10':'');
-      return 'S'+(i+1)+': '+(set&&set.metric||'-')+' '+metricUnit+(set&&set.load?' @ '+set.load+' '+loadUnit:'')+(set&&set.pain?' · Schmerz '+set.pain+'/10':'');
-    }).join(' · ');
 ```

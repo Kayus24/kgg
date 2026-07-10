@@ -4,6 +4,34 @@
 - Lines: 23941-24360
 
 ```html
+  }
+  function openTabletExclusivePanel(kind){
+    if(!isTabletLayout())return false;
+    if(kind==='package')return openTabletPackageOverlay();
+    if(['base','recent'].includes(kind))return openTabletAnchoredPanel(kind);
+    const needsRender=closeTabletFloatingPanelsExcept(kind);
+    if(needsRender)render();
+    return true;
+  }
+  function repositionTabletOverlay(){
+    if(!isTabletLayout())return;
+    if(tabletOverlayState.kind)positionTabletAnchoredOverlay(tabletOverlayState.kind);
+  }
+  function setTabletSideMenuOpen(open){
+    const next=!!open&&isTabletLayout();
+    document.body.classList.toggle('tabletMenuOpen',next);
+    const btn=$('tabletMenuBtn');
+    if(btn){
+      btn.setAttribute('aria-expanded',String(next));
+      btn.setAttribute('aria-label',next?'Tablet-Menue schliessen':'Tablet-Menue oeffnen');
+    }
+    const menu=$('tabletSideMenu');
+    if(menu)menu.setAttribute('aria-hidden',String(!next));
+    const backdrop=$('tabletSideBackdrop');
+    if(backdrop)backdrop.setAttribute('aria-hidden',String(!next));
+    if(next)closeTabletFloatingPanelsExcept('menu');
+    else{closeTabletPackageOverlay(false); if(document.body.classList.contains('tabletLayoutEditMode'))setTabletLayoutEditMode(false);}
+    requestAnimationFrame(()=>{updateTabletLayoutHandle();updateTabletLayoutCollisionGuard();});
     setTimeout(()=>{updateTabletLayoutHandle();updateTabletLayoutCollisionGuard();},260);
     return next;
   }
@@ -396,32 +424,4 @@
       document.body.classList.remove('phoneTextFocus');
       updatePhoneKeyboardInset();
     };
-    const openOrCloseBankFromBrowseTap=ev=>{
-      if(guardPhoneScrollToggle(ev))return;
-      if(isPhoneLayout())blurPhoneComposerForBrowse();
-      const opening=!state.bankOpen;
-      if(opening&&isTabletLayout())openTabletExclusivePanel('bank');
-      state.bankOpen=opening;
-      render();
-      setTabletOverlayActiveFlag();
-    };
-    const input=$('exerciseInput');
-    if(input){
-      input.addEventListener('focus',()=>{phoneBankBrowseMode=false;document.body.classList.remove('kggPhoneDbBrowseMode');});
-      input.addEventListener('input',()=>{phoneBankBrowseMode=false;document.body.classList.remove('kggPhoneDbBrowseMode');});
-    }
-    const oldApplySelectedExerciseToText=applySelectedExerciseToText;
-    applySelectedExerciseToText=function(ex,options){
-      const next={...(options||{})};
-      if(isPhoneLayout()&&phoneBankBrowseMode)next.keepFocus=false;
-      return oldApplySelectedExerciseToText(ex,next);
-    };
-    if($('bankToggle'))$('bankToggle').onclick=openOrCloseBankFromBrowseTap;
-    if($('dbTitle')){
-      $('dbTitle').onclick=openOrCloseBankFromBrowseTap;
-      $('dbTitle').onkeydown=null;
-      $('dbTitle').addEventListener('keydown',ev=>{
-        if(ev.key==='Enter'||ev.key===' '){
-          ev.preventDefault();
-          ev.stopImmediatePropagation();
 ```

@@ -1,7 +1,7 @@
 {
-  "versionCode": 58,
-  "versionName": "1.0.58-grossdruck-readability-beta",
-  "indexUrl": "index.html?v=58",
-  "sha256": "e5c912447e4fe8a9b08003209a9de7507f37c3e3212052334be54c9ebb801514",
-  "notes": "v058: Grossdruck-PDF nutzt groessere kurzsichtigkeitsgepruefte Schrift und eine lokale PDF-Readability-Testengine."
+  "versionCode": 59,
+  "versionName": "1.0.59-ui-scaler-push-canary",
+  "indexUrl": "index.html?v=59",
+  "sha256": "74974ab424eac0cbe1a7c178e188ddff9a0d28d393b49a3c71d8e7a7bc20b509",
+  "notes": "v059: Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification."
 }

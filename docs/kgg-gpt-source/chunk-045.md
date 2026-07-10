@@ -4,6 +4,33 @@
 - Lines: 18901-19320
 
 ```html
+      const shouldAsk=Math.abs(swipe.dx)>=threshold();
+      row.style.transition='transform .2s cubic-bezier(.2,.9,.2,1), opacity .16s ease, box-shadow .16s ease';
+      row.style.transform='translateX(0)';
+      row.style.opacity='1';
+      setTimeout(()=>{resetBankRowSwipe(row); if(shouldAsk)openBankDeleteModal(id);},210);
+    };
+    const cancel=()=>{cleanup(); if(swipe.active){row.style.transition='transform .18s ease, opacity .18s ease';row.style.transform='translateX(0)';row.style.opacity='1';setTimeout(()=>resetBankRowSwipe(row),190);}else resetBankRowSwipe(row);};
+    document.addEventListener('pointermove',move,{passive:false});
+    document.addEventListener('pointerup',up,{passive:false,once:true});
+    document.addEventListener('pointercancel',cancel,{passive:true,once:true});
+  }
+  function scanSetSummaryForPlanCard(ex){
+    const sets=Array.isArray(ex&&ex.scanSets)?ex.scanSets:[];
+    if(!sets.length)return '';
+    const metricUnit=ex&&ex.metricUnit||ex&&ex.unit||measureUnitLabel(ex&&ex.measure);
+    const loadUnit=normalizeLoadUnit(ex&&ex.weightUnit||ex&&ex.loadUnit||'kg');
+    const isTime=/zeit|sek|sec|min|time/i.test(metricUnit)||/keine/i.test(loadUnit);
+    return sets.slice(0,3).map((set,i)=>{
+      if(set&&set.li||set&&set.re){
+        const li=set.li||{}, re=set.re||{};
+        const liText=(li.metric?li.metric+' '+metricUnit:'')+(li.load?' @ '+li.load+' '+loadUnit:'');
+        const reText=(re.metric?re.metric+' '+metricUnit:'')+(re.load?' @ '+re.load+' '+loadUnit:'');
+        return 'S'+(i+1)+': Li '+(liText||'-')+' / Re '+(reText||'-')+(set.pain?' · Schmerz '+set.pain+'/10':'');
+      }
+      if(isTime)return 'S'+(i+1)+': '+(set&&set.metric||'-')+' '+metricUnit+(set&&set.pain?' · Schmerz '+set.pain+'/10':'');
+      return 'S'+(i+1)+': '+(set&&set.metric||'-')+' '+metricUnit+(set&&set.load?' @ '+set.load+' '+loadUnit:'')+(set&&set.pain?' · Schmerz '+set.pain+'/10':'');
+    }).join(' · ');
   }
   function exerciseMeta(ex){
     const scanSummary=scanSetSummaryForPlanCard(ex);
@@ -397,31 +424,4 @@
   }
   function movePlanExerciseByButton(localId,delta){
     const idx=(state.plan||[]).findIndex(ex=>String(ex.localId||ex.id)===String(localId));
-    if(idx<0)return;
-    const target=idx+delta;
-    if(target<0||target>=state.plan.length)return;
-    const next=state.plan.slice();
-    const item=next.splice(idx,1)[0];
-    next.splice(target,0,item);
-    state.plan=next;
-    state.sortMenuId=String(item.localId||item.id);
-    syncStatePlanToStore('ui_reorder_plan_buttons');
-    syncTextInputFromPlan('ui_reorder_plan_buttons');
-    save();
-    renderPlan();
-  }
-  let animatedReorder=null;
-  function startAnimatedReorderPress(ev){
-    if(ev.button!=null && ev.button!==0)return;
-    const eventTarget=ev.currentTarget;
-    const cardFromTarget=eventTarget&&eventTarget.closest?eventTarget.closest('.planCard'):null;
-    const handle=(eventTarget&&eventTarget.matches&&eventTarget.matches('.drag[data-sort-id]'))?eventTarget:(cardFromTarget?cardFromTarget.querySelector('.drag[data-sort-id]'):null);
-    const id=String((handle&&handle.dataset&&handle.dataset.sortId)||'');
-    const card=(handle&&handle.closest?handle.closest('.planCard'):null)||cardFromTarget;
-    const list=$('planList');
-    if(!id||!card||!list||state.plan.length<2)return;
-    let startX=ev.clientX,startY=ev.clientY;
-    const downRect=card.getBoundingClientRect();
-    const press={
-      id,handle,card,list,startX,startY,pointerId:ev.pointerId,timer:null,active:false,cancelled:false,
 ```

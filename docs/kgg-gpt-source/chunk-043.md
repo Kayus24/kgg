@@ -4,6 +4,33 @@
 - Lines: 18061-18480
 
 ```html
+      reg.update().catch(()=>{});
+      reg.addEventListener('updatefound',()=>{
+        const worker=reg.installing;
+        if(!worker)return;
+        worker.addEventListener('statechange',()=>{
+          if(worker.state==='installed'&&navigator.serviceWorker.controller){
+            window.KGGWaitingServiceWorker=worker;
+            worker.postMessage({type:'SKIP_WAITING'});
+          }
+        });
+      });
+    }).catch(err=>console.warn('Service Worker konnte nicht registriert werden:',err));
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!window.KGGPwaReloading){window.KGGPwaReloading=true; location.reload();}});
+  }
+  function initAdminModeAccess(){
+    loadAdminSecrets();
+    exposeAdminSecretApi();
+    document.body.classList.add('adminMode');
+    if(!(adminSecrets.geminiKeys&&adminSecrets.geminiKeys.length)){
+      setTimeout(()=>{try{openAdminSecretsModal();}catch(e){}},700);
+    }
+  }
+  function applyLargePdfMode(){
+    const enabled=!!state.largePdfMode;
+    const btn=$('visionBtn');
+    if(btn){btn.textContent=enabled?'PDF A-':'PDF A+'; btn.setAttribute('aria-pressed',enabled?'true':'false'); btn.title=enabled?'Standard-PDF':'Großdruck-PDF';}
+  }
   function setLargePdfMode(enabled){state.largePdfMode=!!enabled; applyLargePdfMode(); save();}
   function initLargePdfMode(){if(/[?&](grosspdf|largepdf)=1\b/i.test(location.search))state.largePdfMode=true; applyLargePdfMode();}
   function loadDeletedBankIds(){try{const raw=localStorage.getItem(deletedBankKey); const ids=raw?JSON.parse(raw):[]; deletedBankIds=new Set(Array.isArray(ids)?ids.map(String):[]);}catch(e){console.warn(e); deletedBankIds=new Set();}}
@@ -397,31 +424,4 @@
     };
     if(typeof requestAnimationFrame==='function'){
       requestAnimationFrame(()=>requestAnimationFrame(apply));
-    }else{
-      setTimeout(apply,0);
-    }
-  }
-  function toggleBankOpenFromUi(){
-    const opening=!state.bankOpen;
-    const fullBankMode=opening&&!activeBankQuerySegment();
-    state.bankOpen=opening;
-    render();
-    if(fullBankMode)alignFullBankInputToViewportTop();
-  }
-  function appendExerciseLineToInput(input,line){
-    let base=String(input.value||'').replace(/\s+$/,'');
-    const prefix=base.trim()?(/[,\n;]$/.test(base)?' ':', '):'';
-    input.value=base+prefix+line;
-    input.value=withTrailingExerciseComma(input.value);
-    return input.value.length;
-  }
-  function keepExerciseInputFocus(caret){
-    const input=$('exerciseInput');
-    if(!input||!input.focus)return;
-    const apply=()=>{
-      try{input.focus({preventScroll:true});}catch(e){input.focus();}
-      if(typeof caret==='number'&&input.setSelectionRange)input.setSelectionRange(caret,caret);
-    };
-    apply();
-    if(typeof requestAnimationFrame==='function')requestAnimationFrame(apply);
 ```

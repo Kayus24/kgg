@@ -5,6 +5,33 @@
 
 ```html
 
+      #createPanel.planMode #currentPlanToggle{
+        min-height:58px!important;
+        font-size:22px!important;
+        padding-left:14px!important;
+      }
+      #createPanel.planMode #currentPlanToggle > small{
+        font-size:13px!important;
+      }
+
+      .planCard{
+        padding:15px 17px!important;
+        border-radius:18px!important;
+      }
+      .planCard b{
+        font-size:19px!important;
+      }
+      .planCard small{
+        font-size:12.5px!important;
+      }
+      .planCard .drag{
+        width:36px!important;
+        height:36px!important;
+      }
+      .planCard .iconBtn{
+        font-size:19px!important;
+      }
+
       #createPanel.planMode #recentToggle,
       #createPanel.planMode #packageToggle{
         height:66px!important;
@@ -397,31 +424,4 @@
       .tabletSwitchKnob{
         width:12px!important;
         height:12px!important;
-      }
-      body.tabletLayoutUnlocked .tabletSwitchKnob{
-        transform:translateX(16px)!important;
-      }
-      .tabletLockText{
-        min-width:0!important;
-        font-size:10px!important;
-        line-height:1!important;
-      }
-      #packageToggle{
-        min-width:0!important;
-        overflow:hidden!important;
-      }
-      #packageToggle > span,
-      #recentToggle > span,
-      .drawerBtn > span,
-      .baseCard > span{
-        min-width:0;
-        overflow:hidden;
-        text-overflow:ellipsis;
-        white-space:nowrap;
-      }
-      #createPanel:not(.planMode) #packageToggle,
-      #createPanel.planMode #packageToggle{
-        padding-right:92px!important;
-      }
-      .tabletLayoutFreeTools{
 ```

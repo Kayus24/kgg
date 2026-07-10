@@ -4,6 +4,33 @@
 - Lines: 2521-2940
 
 ```html
+
+
+    /* v328 Tablet Header/Package Fix:
+       - ausgefahrene Übungsdatenbank-Überschrift auf Tablet ausblenden
+       - großen Titel "Aktueller Plan" im Tablet-Planmodus entfernen
+       - Stift-Symbol direkt an "Übungen im Plan" hängen
+       - +📦 sauber in die Plan-Kopfzeile docken, ohne Zähler/Text zu verdecken
+       - Plan-Historie und Übungspakete unten gleich groß machen
+       Keine PDF/QR/Patienten-App/Scan/Parser/Plan-State-Logik. */
+    @media (min-width:760px){
+      /* Rechts und unten echte gleichmäßige Tablet-Arbeitszonen. */
+      .app{
+        grid-template-columns:minmax(360px,430px) minmax(0,1fr) minmax(0,1fr)!important;
+      }
+
+      /* Ausgefahrene DB braucht keine zusätzliche Kopfzeile oben links. */
+      #dbTitle.fullBankOpen,
+      #dbTitle.searchBankOpen{
+        display:none!important;
+      }
+
+      /* Der globale Titel konkurriert mit der eigentlichen Plan-Kopfzeile. */
+      #createPanel.planMode .planHeader .panelTitle{
+        display:none!important;
+      }
+
+      /* Stift gehört zum konkreten Abschnitt, nicht als großer Seitentitel. */
       #createPanel.planMode #currentPlanToggle > span::before{
         content:"✏️ ";
       }
@@ -396,32 +423,5 @@
       }
       .bankRow small{
         font-size:12px!important;
-      }
-
-      #createPanel.planMode #currentPlanToggle{
-        min-height:58px!important;
-        font-size:22px!important;
-        padding-left:14px!important;
-      }
-      #createPanel.planMode #currentPlanToggle > small{
-        font-size:13px!important;
-      }
-
-      .planCard{
-        padding:15px 17px!important;
-        border-radius:18px!important;
-      }
-      .planCard b{
-        font-size:19px!important;
-      }
-      .planCard small{
-        font-size:12.5px!important;
-      }
-      .planCard .drag{
-        width:36px!important;
-        height:36px!important;
-      }
-      .planCard .iconBtn{
-        font-size:19px!important;
       }
 ```

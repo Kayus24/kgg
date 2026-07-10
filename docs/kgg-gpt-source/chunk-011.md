@@ -4,6 +4,33 @@
 - Lines: 4621-5040
 
 ```html
+    box-shadow:none!important;
+    background:transparent!important;
+  }
+  .tabletSideMenu .tabletLockSwitch,
+  .tabletSideMenu .tabletSyncQrBtn{
+    min-height:54px!important;
+    width:100%!important;
+    border-radius:17px!important;
+    font-size:.92rem!important;
+  }
+  .tabletSideMenu .tabletLayoutFreeTools{
+    grid-column:1 / -1!important;
+    position:static!important;
+    display:grid!important;
+    grid-template-columns:58px 1fr 58px!important;
+    grid-template-areas:"plus value minus" "reset reset reset";
+    /* v361 side menu scale grid polish */
+    align-items:center!important;
+    width:100%!important;
+    min-width:0!important;
+    height:auto!important;
+    padding:10px!important;
+    border-radius:21px!important;
+  }
+  .tabletSideMenu #tabletScalePlus{grid-area:plus;}
+  .tabletSideMenu #tabletScaleValue{grid-area:value;text-align:center;}
+  .tabletSideMenu #tabletScaleMinus{grid-area:minus;}
   .tabletSideMenu #tabletLayoutReset{grid-area:reset;min-height:44px!important;}
   .tabletSideMenu .tabletLayoutFreeTools.hidden{display:none!important;}
   /* v375: Admin tools live in the tablet side menu, not in the scan row. */
@@ -397,31 +424,4 @@
       box-shadow:0 24px 70px rgba(7,16,39,.28)!important;
     }
     #editorModal .editorMediaPreview img,
-    #currentPlanBlock .planThumb img,
-    .kggAdminMenuQrBox img,
-    .qrBox img{
-      object-fit:contain!important;
-    }
-    #editorModal .editorCancelBtn{
-      display:grid!important;
-      place-items:center!important;
-      color:#38475b!important;
-    }
-  }
-  @media (min-width:760px){
-    body{
-      padding-top:max(18px,calc(env(safe-area-inset-top) + 14px))!important;
-    }
-    .app,
-    body.tabletLayoutCustom .app{
-      height:calc(var(--kgg-visual-vh,100dvh) - 36px - env(safe-area-inset-top))!important;
-      max-height:calc(var(--kgg-visual-vh,100dvh) - 36px - env(safe-area-inset-top))!important;
-    }
-    .tabletMenuBtn,
-    body.tabletLayoutCustom .tabletMenuBtn{
-      top:max(14px,calc(env(safe-area-inset-top) + 12px))!important;
-      z-index:1200!important;
-      pointer-events:auto!important;
-      touch-action:manipulation!important;
-    }
 ```

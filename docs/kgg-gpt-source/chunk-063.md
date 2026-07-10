@@ -4,6 +4,34 @@
 - Lines: 26461-26880
 
 ```html
+    btn.addEventListener("click",function(ev){
+      if(!isPhone())return;
+      ev.preventDefault();
+      ev.stopImmediatePropagation();
+      openPhoneDrawerSafe(kind);
+    },true);
+  }
+  function alignBankEndToScanDock(){
+    if(!isPhone())return false;
+    var bank=byId("bankArea");
+    var hub=byId("scanHub");
+    if(!bank||!hub||!bank.classList.contains("bankOpen"))return false;
+    var bankRect=bank.getBoundingClientRect();
+    var hubRect=hub.getBoundingClientRect();
+    if(!bankRect.height||!hubRect.height)return false;
+    var targetBottom=hubRect.top-10;
+    var delta=bankRect.bottom-targetBottom;
+    if(Math.abs(delta)>2)window.scrollBy({top:delta,behavior:"auto"});
+    return true;
+  }
+  function scheduleBankAlign(){
+    if(!isPhone())return;
+    var run=function(){alignBankEndToScanDock();};
+    if(typeof requestAnimationFrame==="function"){
+      requestAnimationFrame(function(){requestAnimationFrame(run);});
+      setTimeout(run,260);
+      setTimeout(run,520);
+    }else{
       setTimeout(run,80);
       setTimeout(run,320);
     }
@@ -396,32 +424,4 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     if(card.dataset.kggV053SwipePointer===pointerKey)return;
     card.dataset.kggV053SwipePointer=pointerKey;
     card.dataset.kggV053SwipeStarted="1";
-    var planId=card.dataset&&card.dataset.planId?String(card.dataset.planId):"";
-    function currentCard(){
-      if(card&&card.isConnected)return card;
-      if(planId){
-        var cards=Array.from(document.querySelectorAll("#planList .planCard[data-plan-id]"));
-        var live=cards.find(function(node){return node.dataset&&String(node.dataset.planId)===planId;});
-        if(live)return live;
-      }
-      return card;
-    }
-    var startX=ev.clientX,startY=ev.clientY,pointerId=ev.pointerId,active=false,dx=0,cancelTimer=null;
-    function threshold(){var live=currentCard();return Math.min(132,Math.max(78,(live?live.offsetWidth:0)*0.34));}
-    function cleanup(){
-      clearTimeout(cancelTimer);
-      delete card.dataset.kggV053SwipePointer;
-      document.removeEventListener("pointermove",move,true);
-      document.removeEventListener("pointerup",up,true);
-      document.removeEventListener("pointercancel",cancel,true);
-    }
-    function move(e){
-      var live=currentCard();
-      if(!live){cleanup();return;}
-      dx=e.clientX-startX;
-      var dy=e.clientY-startY;
-      if(!active){
-        if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)*1.2){cleanup();return;}
-        if(Math.abs(dx)<12||Math.abs(dx)<Math.abs(dy)*1.25)return;
-        active=true;
 ```
