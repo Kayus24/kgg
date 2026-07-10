@@ -4,6 +4,33 @@
 - Lines: 421-840
 
 ```html
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "not-applicable"
+      },
+      "handoffNote": "v052 ist nur PDF-Planbilder; Android v399 und QR-Druck bleiben aus v051."
+    },
+    {
+      "versionCode": 51,
+      "versionName": "1.0.51-android-qr-pdf-bridge",
+      "patchId": "kgg-v051-android-qr-pdf-bridge",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Kolleg:innen-QR drucken und Android-PDF/Icon-Bridge",
+      "reason": "Kolleg:innen-App/APK-QR soll direkt druckbar sein und die Android-APK braucht v399 mit App-Icon sowie internem PDF-Fallback, wenn kein externer PDF-Viewer vorhanden ist.",
+      "whatChanged": [
+        "Das Admin-QR-Modal bekommt den Button QR drucken.",
+        "QR-Druck erzeugt lokal eine kleine PDF-Seite mit Titel, QR-Code und Link.",
+        "Android v399 stellt die native PDF-Bridge kompatibel bereit und bekommt das KGG-Launcher-Icon.",
+        "Android oeffnet PDFs intern als Vorschau, wenn kein externer PDF-Viewer gefunden wird."
+      ],
+      "touchedAreas": [
+        "Admin QR modal",
+        "QR print PDF helper",
+        "Android wrapper PDF bridge",
+        "Android launcher resources",
+        "Android update manifest",
         "Release artifacts",
         "Source Truth",
         "version.json"
@@ -397,31 +424,4 @@
         "local": "pending",
         "githubPages": "pending",
         "androidApp": "pending"
-      },
-      "handoffNote": "Im Tablet-Menü: Therapeuten-App weitergeben = Kolleg:innen-App/APK-QR; Admin > Geräte-Sync = Sync-Diagnose und Datei-Transfer."
-    },
-    {
-      "versionCode": 36,
-      "versionName": "1.0.36-native-sync-diagnostics",
-      "patchId": "kgg-v036-native-sync-diagnostics",
-      "status": "active",
-      "type": "local-html-patch",
-      "title": "Native Sync Diagnose und sichere Datei-Uebergabe",
-      "reason": "Peer-to-Peer-Sync muss sichtbar machen, ob Android wirklich einen gemeinsamen Sync-Raum nutzt oder nur im privaten Rueckfall-Speicher schreibt.",
-      "whatChanged": [
-        "Sync-Dialog zeigt Modus, Raum, Peer-Anzahl, letzten Test und Sync-Pfad.",
-        "Sync-Test schreibt/liest ueber die vorhandene Android-Bridge und meldet klare Ergebnisse.",
-        "Sync-Datei speichern/importieren erlaubt einen sicheren manuellen Transfer fuer groessere Daten.",
-        "Native-Sync-Testbatterie prueft Peer-Mesh, Auto-Download-Regeln, Self-Skip, Tombstones und Secret-Blockade."
-      ],
-      "touchedAreas": [
-        "Sync diagnostics UI",
-        "Safe sync file transfer",
-        "Local test batteries",
-        "HTML embedded metadata"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR-Erzeugung",
-        "Patienten-App",
 ```

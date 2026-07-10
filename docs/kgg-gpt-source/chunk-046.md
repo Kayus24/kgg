@@ -4,6 +4,33 @@
 - Lines: 19321-19740
 
 ```html
+    if(idx<0)return;
+    const target=idx+delta;
+    if(target<0||target>=state.plan.length)return;
+    const next=state.plan.slice();
+    const item=next.splice(idx,1)[0];
+    next.splice(target,0,item);
+    state.plan=next;
+    state.sortMenuId=String(item.localId||item.id);
+    syncStatePlanToStore('ui_reorder_plan_buttons');
+    syncTextInputFromPlan('ui_reorder_plan_buttons');
+    save();
+    renderPlan();
+  }
+  let animatedReorder=null;
+  function startAnimatedReorderPress(ev){
+    if(ev.button!=null && ev.button!==0)return;
+    const eventTarget=ev.currentTarget;
+    const cardFromTarget=eventTarget&&eventTarget.closest?eventTarget.closest('.planCard'):null;
+    const handle=(eventTarget&&eventTarget.matches&&eventTarget.matches('.drag[data-sort-id]'))?eventTarget:(cardFromTarget?cardFromTarget.querySelector('.drag[data-sort-id]'):null);
+    const id=String((handle&&handle.dataset&&handle.dataset.sortId)||'');
+    const card=(handle&&handle.closest?handle.closest('.planCard'):null)||cardFromTarget;
+    const list=$('planList');
+    if(!id||!card||!list||state.plan.length<2)return;
+    let startX=ev.clientX,startY=ev.clientY;
+    const downRect=card.getBoundingClientRect();
+    const press={
+      id,handle,card,list,startX,startY,pointerId:ev.pointerId,timer:null,active:false,cancelled:false,
       /*
         v5 phone drag anchor:
         keep the lifted card anchored to the exact finger offset captured before
@@ -397,31 +424,4 @@
     incoming.forEach(ex=>{
       const existing=bank.find(item=>compact(item.name)===compact(ex.name));
       if(existing){
-        if(syncTimestamp(ex.updatedAt)>=syncTimestamp(existing.updatedAt||existing.createdAt)){
-          existing.aliases=ex.aliases||existing.aliases;
-          existing.sets=ex.sets||existing.sets;
-          existing.unit=ex.unit||existing.unit;
-          existing.weightUnit=ex.weightUnit||existing.weightUnit;
-          existing.shared=true;
-          existing.updatedAt=ex.updatedAt||new Date().toISOString();
-          updated+=1;
-        }
-      }else{
-        bank.push({...ex,id:ex.id||('shared_'+Date.now()+'_'+added),custom:true,shared:true});
-        added+=1;
-      }
-      deletedBankIds.delete(String(ex.id||''));
-    });
-    persistDeletedBankIds();
-    persistCustomBank();
-    render();
-    return {added,updated,total:incoming.length};
-  }
-  function openSharedBankModal(){
-    const text=$('sharedBankText'), status=$('sharedBankStatus');
-    if(text)text.value=JSON.stringify(buildSharedExerciseBankPayload(),null,2);
-    if(status)status.textContent='Bereit.';
-    $('sharedBankModal').classList.add('open');
-  }
-  function closeSharedBankModal(){$('sharedBankModal').classList.remove('open');}
 ```

@@ -7,37 +7,37 @@
       "markers": [
         {
           "chunk": "chunk-007.md",
-          "line": 3204,
+          "line": 3231,
           "marker": "tabletLayoutFreeTools",
           "path": "docs/kgg-gpt-source/chunk-007.md"
         },
         {
           "chunk": "chunk-007.md",
-          "line": 3143,
+          "line": 3170,
           "marker": "tabletLayoutResizeHandle",
           "path": "docs/kgg-gpt-source/chunk-007.md"
         },
         {
           "chunk": "chunk-007.md",
-          "line": 3242,
+          "line": 3269,
           "marker": "--kgg-tablet-left-col",
           "path": "docs/kgg-gpt-source/chunk-007.md"
         },
         {
           "chunk": "chunk-005.md",
-          "line": 2173,
+          "line": 2200,
           "marker": "--kgg-tablet-ui-scale",
           "path": "docs/kgg-gpt-source/chunk-005.md"
         },
         {
-          "chunk": "chunk-055.md",
-          "line": 23502,
+          "chunk": "chunk-056.md",
+          "line": 23529,
           "marker": "updateTabletLayoutHandle",
-          "path": "docs/kgg-gpt-source/chunk-055.md"
+          "path": "docs/kgg-gpt-source/chunk-056.md"
         },
         {
           "chunk": "chunk-056.md",
-          "line": 23637,
+          "line": 23665,
           "marker": "initTabletLayoutControls",
           "path": "docs/kgg-gpt-source/chunk-056.md"
         }
@@ -48,9 +48,7 @@
         "docs/kgg-gpt-source/chunk-007.md",
         "docs/kgg-gpt-source/chunk-008.md",
         "docs/kgg-gpt-source/chunk-009.md",
-        "docs/kgg-gpt-source/chunk-013.md",
         "docs/kgg-gpt-source/chunk-014.md",
-        "docs/kgg-gpt-source/chunk-055.md",
         "docs/kgg-gpt-source/chunk-056.md",
         "docs/kgg-gpt-source/chunk-057.md",
         "docs/kgg-gpt-source/chunk-058.md"
@@ -72,32 +70,32 @@
       "id": "phone-layout",
       "markers": [
         {
-          "chunk": "chunk-060.md",
-          "line": 25614,
+          "chunk": "chunk-061.md",
+          "line": 25642,
           "marker": "kggPhoneAdminMenu",
-          "path": "docs/kgg-gpt-source/chunk-060.md"
-        },
-        {
-          "chunk": "chunk-060.md",
-          "line": 25614,
-          "marker": "phonePhotoMenuToggle",
-          "path": "docs/kgg-gpt-source/chunk-060.md"
+          "path": "docs/kgg-gpt-source/chunk-061.md"
         },
         {
           "chunk": "chunk-061.md",
-          "line": 25648,
+          "line": 25642,
+          "marker": "phonePhotoMenuToggle",
+          "path": "docs/kgg-gpt-source/chunk-061.md"
+        },
+        {
+          "chunk": "chunk-061.md",
+          "line": 25676,
           "marker": "kggPhoneHasPlan",
           "path": "docs/kgg-gpt-source/chunk-061.md"
         },
         {
           "chunk": "chunk-002.md",
-          "line": 983,
+          "line": 1010,
           "marker": "phoneTextFocus",
           "path": "docs/kgg-gpt-source/chunk-002.md"
         },
         {
           "chunk": "chunk-003.md",
-          "line": 1357,
+          "line": 1384,
           "marker": "max-width:759px",
           "path": "docs/kgg-gpt-source/chunk-003.md"
         }
@@ -111,7 +109,6 @@
         "docs/kgg-gpt-source/chunk-010.md",
         "docs/kgg-gpt-source/chunk-011.md",
         "docs/kgg-gpt-source/chunk-013.md",
-        "docs/kgg-gpt-source/chunk-060.md",
         "docs/kgg-gpt-source/chunk-061.md",
         "docs/kgg-gpt-source/chunk-062.md"
       ],
@@ -133,25 +130,25 @@
       "markers": [
         {
           "chunk": "chunk-051.md",
-          "line": 21775,
+          "line": 21802,
           "marker": "finishWithPatientApp",
           "path": "docs/kgg-gpt-source/chunk-051.md"
         },
         {
           "chunk": "chunk-000.md",
-          "line": 230,
+          "line": 257,
           "marker": "KGGH2",
           "path": "docs/kgg-gpt-source/chunk-000.md"
         },
         {
           "chunk": "chunk-047.md",
-          "line": 20082,
+          "line": 20109,
           "marker": "tryApplyKggSetupFromHash",
           "path": "docs/kgg-gpt-source/chunk-047.md"
         },
         {
           "chunk": "chunk-057.md",
-          "line": 24043,
+          "line": 24071,
           "marker": "openKggTherapistAppOnlyQr",
           "path": "docs/kgg-gpt-source/chunk-057.md"
         }
@@ -160,7 +157,6 @@
       "sourceChunks": [
         "docs/kgg-gpt-source/chunk-000.md",
         "docs/kgg-gpt-source/chunk-047.md",
-        "docs/kgg-gpt-source/chunk-050.md",
         "docs/kgg-gpt-source/chunk-051.md",
         "docs/kgg-gpt-source/chunk-057.md",
         "docs/kgg-gpt-source/chunk-058.md",
@@ -181,19 +177,19 @@
       "markers": [
         {
           "chunk": "chunk-051.md",
-          "line": 21757,
+          "line": 21784,
           "marker": "finishWithPdf",
           "path": "docs/kgg-gpt-source/chunk-051.md"
         },
         {
           "chunk": "chunk-014.md",
-          "line": 6062,
+          "line": 6089,
           "marker": "KGGOfflineJsPDF",
           "path": "docs/kgg-gpt-source/chunk-014.md"
         },
         {
           "chunk": "chunk-049.md",
-          "line": 20890,
+          "line": 20917,
           "marker": "attachKggPdfExerciseThumbnails",
           "path": "docs/kgg-gpt-source/chunk-049.md"
         }
@@ -227,7 +223,7 @@
         },
         {
           "chunk": "chunk-042.md",
-          "line": 17891,
+          "line": 17918,
           "marker": "KGGNativeSync",
           "path": "docs/kgg-gpt-source/chunk-042.md"
         },
@@ -241,7 +237,8 @@
       "notes": "Android/APK is protected unless Max explicitly asks for it.",
       "sourceChunks": [
         "docs/kgg-gpt-source/chunk-042.md",
-        "docs/kgg-gpt-source/chunk-047.md"
+        "docs/kgg-gpt-source/chunk-047.md",
+        "docs/kgg-gpt-source/chunk-048.md"
       ],
       "tests": [
         "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
@@ -259,13 +256,13 @@
       "markers": [
         {
           "chunk": "chunk-002.md",
-          "line": 897,
+          "line": 924,
           "marker": "KGGDataStore",
           "path": "docs/kgg-gpt-source/chunk-002.md"
         },
         {
           "chunk": "chunk-048.md",
-          "line": 20184,
+          "line": 20211,
           "marker": "kgg_sync_bundle",
           "path": "docs/kgg-gpt-source/chunk-048.md"
         },
@@ -277,7 +274,7 @@
         },
         {
           "chunk": "chunk-042.md",
-          "line": 17891,
+          "line": 17918,
           "marker": "KGGNativeSync",
           "path": "docs/kgg-gpt-source/chunk-042.md"
         }
@@ -319,7 +316,7 @@
         },
         {
           "chunk": "chunk-045.md",
-          "line": 18972,
+          "line": 18999,
           "marker": "scanState",
           "path": "docs/kgg-gpt-source/chunk-045.md"
         }
@@ -357,7 +354,7 @@
         },
         {
           "chunk": "chunk-000.md",
-          "line": 146,
+          "line": 142,
           "marker": "kgg-changelog",
           "path": "docs/kgg-gpt-source/chunk-000.md"
         }

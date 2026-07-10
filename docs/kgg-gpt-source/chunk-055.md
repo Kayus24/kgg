@@ -4,6 +4,33 @@
 - Lines: 23101-23520
 
 ```html
+    if(shouldIgnorePhoneScrollToggle())return scanStateSnapshot();
+    const job=scanState.jobs[Number(index)||0];
+    if(job){job.collapsed=!job.collapsed; renderScanPreview();}
+    return scanStateSnapshot();
+  }
+  function initScanAutoCollapseOnUiOpen(){
+    if(window.__kggScanAutoCollapseBound)return;
+    window.__kggScanAutoCollapseBound=true;
+    const watchedIds=['editorModal','packageSaveModal','bankDeleteModal','shareModal','largePdfModal','longMediaConfirmModal','installPromptModal','adminSecretsModal','sharedBankModal','pdfPreviewModal','recentList','packageList','baseFields','bankContent'];
+    const visible=function(el){
+      if(!el)return false;
+      if(el.classList.contains('open'))return true;
+      if(el.id==='recentList'||el.id==='packageList'||el.id==='baseFields'||el.id==='bankContent')return !el.classList.contains('hidden');
+      return false;
+    };
+    const previous=new Map();
+    watchedIds.forEach(id=>{const el=$(id); if(el)previous.set(id,visible(el));});
+    const check=function(id,el){
+      if(shouldIgnorePhoneScrollToggle())return;
+      const now=visible(el);
+      const before=previous.get(id)||false;
+      previous.set(id,now);
+      if(now&&!before)collapseScanCards('auto_'+id);
+    };
+    const observer=new MutationObserver(records=>{
+      records.forEach(record=>{const el=record.target; if(el&&el.id)check(el.id,el);});
+    });
     watchedIds.forEach(id=>{
       const el=$(id);
       if(el)observer.observe(el,{attributes:true,attributeFilter:['class','style','open']});
@@ -397,31 +424,4 @@
       tabletLayoutState.leftCol=localStorage.getItem(tabletLayoutKeys.left)||'';
       tabletLayoutState.scale=clampTabletScale(localStorage.getItem(tabletLayoutKeys.scale)||1);
     }catch(err){tabletLayoutState.locked=true;tabletLayoutState.leftCol='';tabletLayoutState.scale=1;}
-  }
-  function saveTabletLayoutSettings(){
-    try{
-      localStorage.setItem(tabletLayoutKeys.locked,tabletLayoutState.locked?'true':'false');
-      if(tabletLayoutState.leftCol)localStorage.setItem(tabletLayoutKeys.left,tabletLayoutState.leftCol); else localStorage.removeItem(tabletLayoutKeys.left);
-      localStorage.setItem(tabletLayoutKeys.scale,String(tabletLayoutState.scale));
-    }catch(err){}
-  }
-  function updateTabletLayoutHandle(){
-    const handle=$('tabletLayoutResizeHandle'), app=document.querySelector('.app');
-    if(!handle||!app||!isTabletLayout()){return;}
-    const rect=app.getBoundingClientRect();
-    const appStyle=getComputedStyle(app);
-    const gap=parseFloat(appStyle.columnGap)||0;
-    const visibleRect=el=>{
-      if(!el)return null;
-      const style=getComputedStyle(el);
-      if(style.display==='none'||style.visibility==='hidden'||style.opacity==='0')return null;
-      const r=el.getBoundingClientRect();
-      return (r.width>2&&r.height>2)?r:null;
-    };
-    const gridFirstCol=()=>{
-      const first=String(appStyle.gridTemplateColumns||'').trim().split(/\s+/)[0]||'';
-      const px=parseFloat(first);
-      return Number.isFinite(px)&&px>2?px:null;
-    };
-    const leftRects=[$('bankArea'),$('inputWrap'),$('scanHub'),document.querySelector('.scanHub')]
 ```

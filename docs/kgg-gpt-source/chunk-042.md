@@ -4,6 +4,33 @@
 - Lines: 17641-18060
 
 ```html
+    const body=String(text||'');
+    const n=structuredNumberPattern(), u=structuredUnitPattern();
+    const freeU='([^\\s\\d@,:;]+(?:\\s*/\\s*[^\\s\\d@,:;]+)?)';
+    const out={startMetric:'',unit:'',metricUnit:'',startLoad:'',weightUnit:'',loadUnit:'',customLoadUnit:false,needsReview:false};
+    const loadBeforeMetric=body.match(new RegExp('('+n+')\\s*'+freeU+'\\s*@\\s*('+n+')\\s*(wdh|wh|rep|reps)\\b','i'));
+    if(loadBeforeMetric){
+      const loadUnitInfo=normalizeLoadUnitInfo(loadBeforeMetric[2]||'kg','kg');
+      out.startLoad=normalizeStructuredNumber(loadBeforeMetric[1]);
+      out.weightUnit=loadUnitInfo.unit;
+      out.loadUnit=loadUnitInfo.unit;
+      out.customLoadUnit=!!loadUnitInfo.custom;
+      out.startMetric=normalizeStructuredNumber(loadBeforeMetric[3]);
+      out.unit='Wdh'; out.metricUnit='Wdh';
+      if(loadUnitInfo.custom)out.needsReview=true;
+      return out;
+    }
+    const compact=body.match(new RegExp('('+n+')\\s*x\\s*('+n+')(?:\\s*('+u+'))?','i'));
+    const rep=body.match(new RegExp('('+n+')\\s*(wdh|wh|rep|reps)\\b','i'));
+    const time=body.match(new RegExp('('+n+')\\s*(min|minute|minutes|minuten|sek\\.?|sec|secs|s|zeit|time|dauer)\\b','i'));
+    if(rep){
+      out.startMetric=normalizeStructuredNumber(rep[1]);
+      out.unit='Wdh'; out.metricUnit='Wdh';
+    }else if(time){
+      const mt=normalizeMetricToken(time[2]);
+      out.startMetric=normalizeStructuredNumber(time[1])+' '+mt.label;
+      out.unit=mt.unit; out.metricUnit=mt.metricUnit;
+    }else if(compact){
       out.startMetric=normalizeStructuredNumber(compact[1]);
       out.unit='Wdh'; out.metricUnit='Wdh';
     }
@@ -397,31 +424,4 @@
     window.addEventListener('appinstalled',()=>localStorage.setItem(pwaInstallPromptSeenKey,new Date().toISOString()));
     if(!canUsePwaRuntime()||isLocalHtmlTestRuntime()||!('serviceWorker' in navigator))return;
     navigator.serviceWorker.register(pwaServiceWorkerUrl).then(reg=>{
-      reg.update().catch(()=>{});
-      reg.addEventListener('updatefound',()=>{
-        const worker=reg.installing;
-        if(!worker)return;
-        worker.addEventListener('statechange',()=>{
-          if(worker.state==='installed'&&navigator.serviceWorker.controller){
-            window.KGGWaitingServiceWorker=worker;
-            worker.postMessage({type:'SKIP_WAITING'});
-          }
-        });
-      });
-    }).catch(err=>console.warn('Service Worker konnte nicht registriert werden:',err));
-    navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!window.KGGPwaReloading){window.KGGPwaReloading=true; location.reload();}});
-  }
-  function initAdminModeAccess(){
-    loadAdminSecrets();
-    exposeAdminSecretApi();
-    document.body.classList.add('adminMode');
-    if(!(adminSecrets.geminiKeys&&adminSecrets.geminiKeys.length)){
-      setTimeout(()=>{try{openAdminSecretsModal();}catch(e){}},700);
-    }
-  }
-  function applyLargePdfMode(){
-    const enabled=!!state.largePdfMode;
-    const btn=$('visionBtn');
-    if(btn){btn.textContent=enabled?'PDF A-':'PDF A+'; btn.setAttribute('aria-pressed',enabled?'true':'false'); btn.title=enabled?'Standard-PDF':'Großdruck-PDF';}
-  }
 ```

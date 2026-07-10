@@ -1,7 +1,5 @@
 {
-  "versionCode": 59,
+  "releaseId": "r0422",
   "versionName": "1.0.59-ui-scaler-push-canary",
-  "indexUrl": "index.html?v=59",
-  "sha256": "74974ab424eac0cbe1a7c178e188ddff9a0d28d393b49a3c71d8e7a7bc20b509",
   "notes": "v059: Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification."
 }

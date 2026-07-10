@@ -4,6 +4,33 @@
 - Lines: 7561-7980
 
 ```html
+        for (var y = x + 1; y < matrix.height; y++) {
+            if (matrix.get(x, y) !== matrix.get(y, x)) {
+                matrix.set(x, y, !matrix.get(x, y));
+                matrix.set(y, x, !matrix.get(y, x));
+            }
+        }
+    }
+    return decodeMatrix(matrix);
+}
+exports.decode = decode;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+// tslint:disable:no-bitwise
+var BitStream_1 = __webpack_require__(7);
+var shiftJISTable_1 = __webpack_require__(8);
+var Mode;
+(function (Mode) {
+    Mode["Numeric"] = "numeric";
+    Mode["Alphanumeric"] = "alphanumeric";
+    Mode["Byte"] = "byte";
     Mode["Kanji"] = "kanji";
     Mode["ECI"] = "eci";
 })(Mode = exports.Mode || (exports.Mode = {}));
@@ -397,31 +424,4 @@ exports.shiftJISTable = {
     0x8156: 0x3003,
     0x8157: 0x4EDD,
     0x8158: 0x3005,
-    0x8159: 0x3006,
-    0x815A: 0x3007,
-    0x815B: 0x30FC,
-    0x815C: 0x2015,
-    0x815D: 0x2010,
-    0x815E: 0xFF0F,
-    0x815F: 0x005C,
-    0x8160: 0x301C,
-    0x8161: 0x2016,
-    0x8162: 0xFF5C,
-    0x8163: 0x2026,
-    0x8164: 0x2025,
-    0x8165: 0x2018,
-    0x8166: 0x2019,
-    0x8167: 0x201C,
-    0x8168: 0x201D,
-    0x8169: 0xFF08,
-    0x816A: 0xFF09,
-    0x816B: 0x3014,
-    0x816C: 0x3015,
-    0x816D: 0xFF3B,
-    0x816E: 0xFF3D,
-    0x816F: 0xFF5B,
-    0x8170: 0xFF5D,
-    0x8171: 0x3008,
-    0x8172: 0x3009,
-    0x8173: 0x300A,
 ```

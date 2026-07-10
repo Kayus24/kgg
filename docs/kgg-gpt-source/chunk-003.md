@@ -4,6 +4,33 @@
 - Lines: 1261-1680
 
 ```html
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "Lokale LLMs können index.html lesen und finden kgg-source-truth sowie kgg-changelog direkt im Code."
+    }
+  ],
+  "latestVersionName": "1.0.45-phone-drawer-bank-align"
+}
+</script>
+<!-- END kgg-changelog -->
+
+<!-- BEGIN kgg-patch-rules: embedded Patch Rules; READ THIS BEFORE PATCHING -->
+<script type="application/json" id="kgg-patch-rules">
+{
+  "schema": 1,
+  "id": "kgg-patch-rules",
+  "readFirst": [
+    "#kgg-source-truth",
+    "#kgg-changelog",
+    "#kgg-patch-rules"
+  ],
+  "mustUpdateOnEveryPatch": [
+    "kgg-source-truth.currentWebVersion",
+    "kgg-source-truth.lastUpdateIntent",
+    "kgg-changelog.entries",
+    "kgg-update/version.json.versionCode",
+    "kgg-update/version.json.versionName",
     "kgg-update/version.json.sha256",
     "kgg-source-truth.currentVersion",
     "kgg-patch-rules",
@@ -230,7 +257,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v55 Kolleg:innen Share APK Fix</title>
+  <title>KGG Update v059 UI Scaler Push Canary</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -397,31 +424,4 @@
       .planActions.hasPlan #recentToggle{width:auto;min-width:0;padding:10px 12px}
       #createPanel.planMode #recentToggle{width:100%;justify-self:stretch}
       .planActions.hasPlan .recentText,.planActions.hasPlan .recentMini{max-width:none;opacity:1}
-      #recentList,#packageList{grid-row:4/5;align-self:end;z-index:28;max-height:min(42vh,360px);overflow:auto;background:rgba(255,255,255,.96);border:1px solid rgba(220,227,235,.92);border-radius:22px;padding:10px;box-shadow:0 18px 48px rgba(7,16,39,.18),0 4px 14px rgba(7,16,39,.08);backdrop-filter:blur(10px);transform-origin:bottom center;animation:tabletDrawerRise .28s cubic-bezier(.18,.84,.24,1) both}
-      #recentList{grid-column:2}
-      #packageList{grid-column:2/4}
-      #recentList.hidden,#packageList.hidden{display:none!important}
-      #recentList .notice,#packageList .notice{margin-top:0}
-      @keyframes tabletDrawerRise{0%{opacity:0;transform:translateY(22px) scale(.96);filter:blur(2px)}70%{opacity:1;transform:translateY(-4px) scale(1.01);filter:blur(0)}100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
-      .bottomPad{display:none}
-      .footerActions{display:none!important}
-      .modal{align-items:center}
-      .sheet{width:min(92vw,620px);border-radius:24px}
-      .app.softKeyboard{height:calc(var(--kgg-visual-vh,100vh) - 20px);min-height:0;padding:12px;gap:10px;grid-template-rows:auto 56px minmax(82px,auto) minmax(0,1fr)}
-      .app.softKeyboard .scanHub{gap:8px}
-      .app.softKeyboard .scanHub .scanBtn,.app.softKeyboard .scanHub .scanMeta{font-size:15px;border-radius:14px}
-      .app.softKeyboard .planHeader .panelTitle{font-size:26px}
-      .app.softKeyboard #baseToggle,.app.softKeyboard #savePackageBtn{height:56px;min-height:56px;border-radius:15px}
-      .app.softKeyboard #inputLabel,.app.softKeyboard #dbTitle{font-size:18px}
-      .app.softKeyboard #inputWrap{border-radius:16px}
-      .app.softKeyboard #exerciseInput{min-height:82px;max-height:120px;font-size:20px;line-height:1.25;padding-top:12px;padding-bottom:12px}
-      .app.softKeyboard #bankArea{grid-row:4;min-height:0}
-      .app.softKeyboard #bankArea.bankOpen{padding:8px;height:100%;min-height:0}
-      .app.softKeyboard #bankArea.bankOpen #bankContent,.app.softKeyboard #bankArea.bankOpen .bankWithAz{height:100%;min-height:0}
-      .app.softKeyboard #bankArea.bankOpen.alphaBankOpen .az{display:flex;flex-direction:column;height:calc(100% - 58px);margin-top:58px;padding:2px 0}
-      .app.softKeyboard #bankArea.bankOpen.alphaBankOpen .az button{flex:1 1 0;min-height:0;font-size:10px;line-height:1}
-      .app.softKeyboard .bankRow{padding:8px 10px}
-      .app.softKeyboard .bankRow b{font-size:14px}
-      .app.softKeyboard .bankRow small{font-size:10px}
-      .app.softKeyboard #currentPlanBlock{padding:10px;border-radius:20px}
 ```

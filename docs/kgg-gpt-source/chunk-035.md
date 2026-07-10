@@ -4,6 +4,33 @@
 - Lines: 14701-15120
 
 ```html
+    0xE99C: 0x9AF4,
+    0xE99D: 0x9AF1,
+    0xE99E: 0x9AF7,
+    0xE99F: 0x9AFB,
+    0xE9A0: 0x9B06,
+    0xE9A1: 0x9B18,
+    0xE9A2: 0x9B1A,
+    0xE9A3: 0x9B1F,
+    0xE9A4: 0x9B22,
+    0xE9A5: 0x9B23,
+    0xE9A6: 0x9B25,
+    0xE9A7: 0x9B27,
+    0xE9A8: 0x9B28,
+    0xE9A9: 0x9B29,
+    0xE9AA: 0x9B2A,
+    0xE9AB: 0x9B2E,
+    0xE9AC: 0x9B2F,
+    0xE9AD: 0x9B32,
+    0xE9AE: 0x9B44,
+    0xE9AF: 0x9B43,
+    0xE9B0: 0x9B4F,
+    0xE9B1: 0x9B4D,
+    0xE9B2: 0x9B4E,
+    0xE9B3: 0x9B51,
+    0xE9B4: 0x9B58,
+    0xE9B5: 0x9B74,
+    0xE9B6: 0x9B93,
     0xE9B7: 0x9B83,
     0xE9B8: 0x9B91,
     0xE9B9: 0x9B96,
@@ -397,31 +424,4 @@ exports.VERSIONS = [
                 ecBlocks: [{ numBlocks: 2, dataCodewordsPerBlock: 32 }],
             },
             {
-                ecCodewordsPerBlock: 26,
-                ecBlocks: [{ numBlocks: 2, dataCodewordsPerBlock: 24 }],
-            },
-            {
-                ecCodewordsPerBlock: 16,
-                ecBlocks: [{ numBlocks: 4, dataCodewordsPerBlock: 9 }],
-            },
-        ],
-    },
-    {
-        infoBits: null,
-        versionNumber: 5,
-        alignmentPatternCenters: [6, 30],
-        errorCorrectionLevels: [
-            {
-                ecCodewordsPerBlock: 26,
-                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 108 }],
-            },
-            {
-                ecCodewordsPerBlock: 24,
-                ecBlocks: [{ numBlocks: 2, dataCodewordsPerBlock: 43 }],
-            },
-            {
-                ecCodewordsPerBlock: 18,
-                ecBlocks: [
-                    { numBlocks: 2, dataCodewordsPerBlock: 15 },
-                    { numBlocks: 2, dataCodewordsPerBlock: 16 },
 ```

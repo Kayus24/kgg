@@ -4,6 +4,33 @@
 - Lines: 6721-7140
 
 ```html
+      filter:blur(7px);
+    }
+
+    body.kggPlanCardReordering #currentPlanBlock .planCard.reorder-gap-before,
+    body.kggPlanCardReordering #currentPlanBlock .planCard.reorder-gap-after{
+      margin-top:0!important;
+      margin-bottom:0!important;
+    }
+
+    body.kggPlanCardReordering :is(#bankArea,#dbTitle,.bankArea,.bankRows,.az,#inputWrap,#exerciseInput,.suggestion){
+      transition:none!important;
+      animation:none!important;
+      transform:none!important;
+      filter:none!important;
+      pointer-events:none!important;
+    }
+  }
+</style>
+<style id="kgg-mini-patch-v400-08-phone-hide-admin-file-banner">
+  /* v400 mini08: Phone-only cleanup.
+     Entfernt die gelbe ADMIN-DATEI/Admin-Test-Box nur im Handy-Layout.
+     Tablet-Layout ab 760px bleibt unveraendert. */
+  @media (max-width:759px){
+    .adminTestBanner{
+      display:none!important;
+    }
+  }
 </style>
 
   <!-- KGG kgg-source-truth: embedded Source Truth. Machine-readable; safe for local LLM/code review. -->
@@ -397,31 +424,4 @@ exports.default = jsQR;
 /* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var BitMatrix_1 = __webpack_require__(0);
-var REGION_SIZE = 8;
-var MIN_DYNAMIC_RANGE = 24;
-function numBetween(value, min, max) {
-    return value < min ? min : value > max ? max : value;
-}
-// Like BitMatrix but accepts arbitry Uint8 values
-var Matrix = /** @class */ (function () {
-    function Matrix(width, height) {
-        this.width = width;
-        this.data = new Uint8ClampedArray(width * height);
-    }
-    Matrix.prototype.get = function (x, y) {
-        return this.data[y * this.width + x];
-    };
-    Matrix.prototype.set = function (x, y, value) {
-        this.data[y * this.width + x] = value;
-    };
-    return Matrix;
-}());
-function binarize(data, width, height, returnInverted) {
-    if (data.length !== width * height * 4) {
-        throw new Error("Malformed data passed to binarizer.");
-    }
 ```

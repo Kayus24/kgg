@@ -4,6 +4,33 @@
 - Lines: 7141-7560
 
 ```html
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var BitMatrix_1 = __webpack_require__(0);
+var REGION_SIZE = 8;
+var MIN_DYNAMIC_RANGE = 24;
+function numBetween(value, min, max) {
+    return value < min ? min : value > max ? max : value;
+}
+// Like BitMatrix but accepts arbitry Uint8 values
+var Matrix = /** @class */ (function () {
+    function Matrix(width, height) {
+        this.width = width;
+        this.data = new Uint8ClampedArray(width * height);
+    }
+    Matrix.prototype.get = function (x, y) {
+        return this.data[y * this.width + x];
+    };
+    Matrix.prototype.set = function (x, y, value) {
+        this.data[y * this.width + x] = value;
+    };
+    return Matrix;
+}());
+function binarize(data, width, height, returnInverted) {
+    if (data.length !== width * height * 4) {
+        throw new Error("Malformed data passed to binarizer.");
+    }
     // Convert image to greyscale
     var greyscalePixels = new Matrix(width, height);
     for (var x = 0; x < width; x++) {
@@ -397,31 +424,4 @@ function decode(matrix) {
     }
     // Decoding didn't work, try mirroring the QR across the topLeft -> bottomRight line.
     for (var x = 0; x < matrix.width; x++) {
-        for (var y = x + 1; y < matrix.height; y++) {
-            if (matrix.get(x, y) !== matrix.get(y, x)) {
-                matrix.set(x, y, !matrix.get(x, y));
-                matrix.set(y, x, !matrix.get(y, x));
-            }
-        }
-    }
-    return decodeMatrix(matrix);
-}
-exports.decode = decode;
-
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-// tslint:disable:no-bitwise
-var BitStream_1 = __webpack_require__(7);
-var shiftJISTable_1 = __webpack_require__(8);
-var Mode;
-(function (Mode) {
-    Mode["Numeric"] = "numeric";
-    Mode["Alphanumeric"] = "alphanumeric";
-    Mode["Byte"] = "byte";
 ```

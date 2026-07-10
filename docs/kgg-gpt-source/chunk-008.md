@@ -4,6 +4,33 @@
 - Lines: 3361-3780
 
 ```html
+      }
+      body.tabletLayoutUnlocked .tabletSwitchKnob{
+        transform:translateX(16px)!important;
+      }
+      .tabletLockText{
+        min-width:0!important;
+        font-size:10px!important;
+        line-height:1!important;
+      }
+      #packageToggle{
+        min-width:0!important;
+        overflow:hidden!important;
+      }
+      #packageToggle > span,
+      #recentToggle > span,
+      .drawerBtn > span,
+      .baseCard > span{
+        min-width:0;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+      }
+      #createPanel:not(.planMode) #packageToggle,
+      #createPanel.planMode #packageToggle{
+        padding-right:92px!important;
+      }
+      .tabletLayoutFreeTools{
         position:fixed!important;
         right:12px!important;
         top:50%!important;
@@ -397,31 +424,4 @@
         border-radius:14px!important;
       }
       body.tabletLayoutRightSlim #finishBtn,
-      body.tabletLayoutRightSlim #baseToggle,
-      body.tabletLayoutRightSlim #recentToggle,
-      body.tabletLayoutRightSlim #packageToggle,
-      body.tabletLayoutRightSlim .tabletLockSwitch{
-        padding-left:6px!important;
-        padding-right:6px!important;
-        border-radius:14px!important;
-        font-size:clamp(10px,calc(14px * var(--kgg-tablet-ui-scale,1)),20px)!important;
-      }
-      body.tabletLayoutRightTiny .packageLayoutSlot{
-        grid-template-columns:minmax(0,1fr) 52px!important;
-        gap:4px!important;
-      }
-      body.tabletLayoutRightTiny .packageLayoutSlot .tabletLayoutControls{
-        width:52px!important;
-        min-width:52px!important;
-        max-width:52px!important;
-      }
-      body.tabletLayoutRightTiny .tabletLockText,
-      body.tabletLayoutRightTiny .tabletSwitchTrack{
-        display:none!important;
-      }
-      body.tabletLayoutRightTiny .tabletLockIcon{
-        font-size:22px!important;
-      }
-      body.tabletLayoutRightTiny #packageToggle > span,
-      body.tabletLayoutRightTiny #recentToggle .recentText,
 ```

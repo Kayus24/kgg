@@ -4,6 +4,34 @@
 - Lines: 25621-26040
 
 ```html
+    patchId: "kgg-v13-release-control-local-fallback",
+    base: "KGG_CURRENT_ADMIN_HTML_v12_features_restored_phone_fixed.html",
+    changes: [
+      "Defines a safe KGGReleaseControl fallback before kgg-release-center-v28-script runs",
+      "Allows KGGReleaseCenter to initialize in content://, file:// and normal browser test mode",
+      "Does not override the native Admin-APK/GitHub bridge when it exists",
+      "Does not change phone drag, tablet layout, QR, PDF, Scan, Parser, Storage or Plan-State"
+    ]
+  };
+})();
+</script>
+
+<!-- KGG PATCH START kgg-v041-ui-mini-series -->
+<style id="kgg-v041-ui-mini-series-style">
+  .bankAddBtn{display:flex!important;align-items:center;gap:10px;text-align:left;width:100%;min-width:0}
+  .bankText{display:grid;min-width:0}
+  .bankText b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bankThumb{position:relative;display:inline-block;flex:0 0 42px;width:42px;height:42px;border:1px solid rgba(7,16,39,.24);border-radius:7px;background:#f6f7f9;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.7)}
+  .bankThumb img{width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1) contrast(1.05)}
+  .bankThumbFallback::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,#fff 0 48%,#111 49% 51%,#fff 52% 100%);opacity:.72}
+  .bankThumbFallback::after{content:"";position:absolute;inset:9px;border:2px solid rgba(17,24,39,.42);border-radius:5px}
+  .kggPhoneAdminMenu,.phonePhotoMenuToggle,.kggPhonePhotoMenu{display:none}
+
+  @media(max-width:759px){
+    body.adminMode .kggPhoneAdminMenu{display:block;position:fixed;right:12px;top:max(10px,calc(env(safe-area-inset-top) + 8px));z-index:1450}
+    .kggPhoneAdminMenuBtn{width:44px;height:44px;min-width:44px;min-height:44px;border:1px solid rgba(7,16,39,.18);border-radius:14px;background:#fff;color:#071027;font-size:24px;font-weight:1000;line-height:1;box-shadow:0 10px 24px rgba(7,16,39,.16);display:grid;place-items:center}
+    .kggPhoneAdminMenuPanel{position:absolute;right:0;top:52px;min-width:224px;background:#fff;border:1px solid rgba(7,16,39,.18);border-radius:14px;box-shadow:0 18px 38px rgba(7,16,39,.22);padding:8px;display:grid;gap:6px}
+    .kggPhoneAdminMenuPanel[hidden]{display:none!important}
     .kggPhoneAdminMenuPanel button{width:100%;min-height:44px;border:0;border-radius:10px;background:#f3f6fb;color:#071027;font-weight:950;text-align:left;padding:0 12px}
     .kggPhoneAdminMenuPanel button:active{transform:translateY(1px)}
 
@@ -396,32 +424,4 @@
     if(old&&old.parentElement!==scan)old.remove();
     if(scan.dataset.kggV042ScanHydrated==="1")return;
     scan.dataset.kggV042ScanHydrated="1";
-    scan.classList.add("kggScanButtonWithMenu");
-    scan.textContent="";
-    var label=document.createElement("span");
-    label.className="phoneScanLabel";
-    label.textContent="📷 Plan scannen";
-    var toggle=document.createElement("span");
-    toggle.id="phonePhotoMenuToggle";
-    toggle.className="phonePhotoMenuToggle";
-    toggle.setAttribute("role","button");
-    toggle.setAttribute("tabindex","0");
-    toggle.setAttribute("aria-label","Foto-Optionen");
-    toggle.setAttribute("aria-expanded","false");
-    toggle.textContent="⌃";
-    toggle.addEventListener("click",togglePhotoMenu,true);
-    toggle.addEventListener("pointerdown",function(ev){ev.stopPropagation();},true);
-    toggle.addEventListener("keydown",function(ev){
-      if(ev.key==="Enter"||ev.key===" "){togglePhotoMenu(ev);}
-    },true);
-    scan.appendChild(label);
-    scan.appendChild(toggle);
-  }
-  function syncLayerState(){
-    if(!isPhone())closePhotoMenu();
-    if(document.body&&document.body.classList.contains("kggPhoneDrawerOpen"))closePhotoMenu();
-  }
-  function installObserver(){
-    if(observer||!document.body||!isPhone())return;
-    observer=new MutationObserver(function(){
 ```

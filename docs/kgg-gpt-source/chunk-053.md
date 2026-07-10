@@ -4,6 +4,33 @@
 - Lines: 22261-22680
 
 ```html
+      {id:'left-band',x:0,y:0,w:.48,h:1},
+      {id:'right-band',x:.52,y:0,w:.48,h:1},
+      {id:'top-third-left',x:0,y:0,w:.54,h:.44},
+      {id:'top-third-right',x:.46,y:0,w:.54,h:.44},
+      {id:'mid-third-left',x:0,y:.28,w:.54,h:.44},
+      {id:'mid-third-right',x:.46,y:.28,w:.54,h:.44},
+      {id:'bottom-third-left',x:0,y:.56,w:.54,h:.44},
+      {id:'bottom-third-right',x:.46,y:.56,w:.54,h:.44}
+    ];
+    const modes=['normal','softContrast','contrast','thresholdLow','threshold','thresholdHigh','invert'];
+    const maxSides=[4096,3200,2600,1800,1200];
+    const rotations=[0,90,180,270];
+    const seenBases=new Set();
+    let attempts=1;
+    let lastReason='';
+    let lastCanvas='';
+    for(const maxSide of maxSides){
+      let base=null;
+      try{
+        base=await scanImageCanvasFromFile(file,maxSide);
+      }catch(err){
+        lastReason=err&&err.message||String(err);
+        continue;
+      }
+      const key=base.width+'x'+base.height;
+      lastCanvas=key;
+      if(seenBases.has(key))continue;
       seenBases.add(key);
       for(const rot of rotations){
         const rotated=scanRotateCanvas(base,rot);
@@ -397,31 +424,4 @@
     loadAdminSecrets();
     if(window.KGGAdmin&&typeof window.KGGAdmin.getGeminiKeysForLocalUse==='function')return window.KGGAdmin.getGeminiKeysForLocalUse().map(cleanSecret).filter(Boolean);
     return (adminSecrets.geminiKeys||[]).map(cleanSecret).filter(Boolean);
-  }
-  function currentLocalGeminiKey(){return localGeminiKeys()[0]||'';}
-
-  /* ========================================================================
-     KGG v308 QR STRUCTURED OUTPUT + CURRENT-LAYOUT CONTACT-SHEET SCAN START
-     Integrationskandidat aus v306: TPL-BASIS-A-CLASSIC-L6-v2, EX1-EX6,
-     T1-Zeilen-Crops -> Contact-Sheet -> ein Gemini-Call -> lokale Zuordnung.
-     Später entfernbar/isolierbar, aber KEINE zweite KGGScan-Engine.
-     ======================================================================== */
-  const KGG_CURRENT_LAYOUT_ID='TPL-BASIS-A-CLASSIC-L6-v2';
-  const KGG_CURRENT_LAYOUT_BOXES=[
-    {ex:1,name:'Adduktion Maschine',x:.027,y:.134,w:.470,h:.225,measure:'Wdh'},
-    {ex:2,name:'Ein-Beinpresse',x:.503,y:.134,w:.470,h:.225,measure:'Wdh'},
-    {ex:3,name:'Ein-Beinpresse',x:.027,y:.385,w:.470,h:.225,measure:'Wdh'},
-    {ex:4,name:'Ein-Beinpresse',x:.503,y:.385,w:.470,h:.225,measure:'Wdh'},
-    {ex:5,name:'Copenhagen Plank',x:.027,y:.637,w:.470,h:.318,measure:'Sek.'},
-    {ex:6,name:'Beinpresse',x:.503,y:.637,w:.470,h:.318,measure:'Wdh'}
-  ];
-  function kggClampRect(rect,w,h){
-    const x=Math.max(0,Math.min(w-1,Math.round(rect.x)));
-    const y=Math.max(0,Math.min(h-1,Math.round(rect.y)));
-    const rw=Math.max(1,Math.min(w-x,Math.round(rect.w)));
-    const rh=Math.max(1,Math.min(h-y,Math.round(rect.h)));
-    return {x,y,w:rw,h:rh};
-  }
-  function kggCropCanvas(src,rect){
-    const r=kggClampRect(rect,src.width,src.height);
 ```

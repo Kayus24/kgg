@@ -4,6 +4,33 @@
 - Lines: 5041-5460
 
 ```html
+    #currentPlanBlock .planThumb img,
+    .kggAdminMenuQrBox img,
+    .qrBox img{
+      object-fit:contain!important;
+    }
+    #editorModal .editorCancelBtn{
+      display:grid!important;
+      place-items:center!important;
+      color:#38475b!important;
+    }
+  }
+  @media (min-width:760px){
+    body{
+      padding-top:max(18px,calc(env(safe-area-inset-top) + 14px))!important;
+    }
+    .app,
+    body.tabletLayoutCustom .app{
+      height:calc(var(--kgg-visual-vh,100dvh) - 36px - env(safe-area-inset-top))!important;
+      max-height:calc(var(--kgg-visual-vh,100dvh) - 36px - env(safe-area-inset-top))!important;
+    }
+    .tabletMenuBtn,
+    body.tabletLayoutCustom .tabletMenuBtn{
+      top:max(14px,calc(env(safe-area-inset-top) + 12px))!important;
+      z-index:1200!important;
+      pointer-events:auto!important;
+      touch-action:manipulation!important;
+    }
     #rightPlanStack .planSectionHeader,
     #bankArea #bankToggle{
       flex:0 0 auto!important;
@@ -397,31 +424,4 @@
       right:auto!important;
       bottom:auto!important;
       left:auto!important;
-      width:54px!important;
-      min-width:54px!important;
-      height:54px!important;
-      min-height:54px!important;
-      align-self:stretch!important;
-      justify-self:stretch!important;
-      z-index:1400!important;
-    }
-    .scanHub .scanBtn{
-      grid-column:2!important;
-      grid-row:1!important;
-      width:100%!important;
-    }
-    .scanHub .scanMeta{
-      grid-column:3!important;
-      grid-row:1!important;
-      width:100%!important;
-    }
-    .scanHub .syncQrBtn,
-    .scanHub .adminConfigBtn,
-    .scanHub .sharedBankBtn{
-      display:none!important;
-    }
-    #createPanel.planMode .planActions{
-      display:contents!important;
-    }
-    #createPanel.planMode #recentToggle{
 ```

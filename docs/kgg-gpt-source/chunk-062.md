@@ -4,6 +4,34 @@
 - Lines: 26041-26460
 
 ```html
+    scan.classList.add("kggScanButtonWithMenu");
+    scan.textContent="";
+    var label=document.createElement("span");
+    label.className="phoneScanLabel";
+    label.textContent="📷 Plan scannen";
+    var toggle=document.createElement("span");
+    toggle.id="phonePhotoMenuToggle";
+    toggle.className="phonePhotoMenuToggle";
+    toggle.setAttribute("role","button");
+    toggle.setAttribute("tabindex","0");
+    toggle.setAttribute("aria-label","Foto-Optionen");
+    toggle.setAttribute("aria-expanded","false");
+    toggle.textContent="⌃";
+    toggle.addEventListener("click",togglePhotoMenu,true);
+    toggle.addEventListener("pointerdown",function(ev){ev.stopPropagation();},true);
+    toggle.addEventListener("keydown",function(ev){
+      if(ev.key==="Enter"||ev.key===" "){togglePhotoMenu(ev);}
+    },true);
+    scan.appendChild(label);
+    scan.appendChild(toggle);
+  }
+  function syncLayerState(){
+    if(!isPhone())closePhotoMenu();
+    if(document.body&&document.body.classList.contains("kggPhoneDrawerOpen"))closePhotoMenu();
+  }
+  function installObserver(){
+    if(observer||!document.body||!isPhone())return;
+    observer=new MutationObserver(function(){
       if(isPhone())install();
     });
     observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:["class"]});
@@ -396,32 +424,4 @@
     var btn=byId(id);
     if(!btn||btn.dataset.kggV045DrawerBound==="1")return;
     btn.dataset.kggV045DrawerBound="1";
-    btn.addEventListener("click",function(ev){
-      if(!isPhone())return;
-      ev.preventDefault();
-      ev.stopImmediatePropagation();
-      openPhoneDrawerSafe(kind);
-    },true);
-  }
-  function alignBankEndToScanDock(){
-    if(!isPhone())return false;
-    var bank=byId("bankArea");
-    var hub=byId("scanHub");
-    if(!bank||!hub||!bank.classList.contains("bankOpen"))return false;
-    var bankRect=bank.getBoundingClientRect();
-    var hubRect=hub.getBoundingClientRect();
-    if(!bankRect.height||!hubRect.height)return false;
-    var targetBottom=hubRect.top-10;
-    var delta=bankRect.bottom-targetBottom;
-    if(Math.abs(delta)>2)window.scrollBy({top:delta,behavior:"auto"});
-    return true;
-  }
-  function scheduleBankAlign(){
-    if(!isPhone())return;
-    var run=function(){alignBankEndToScanDock();};
-    if(typeof requestAnimationFrame==="function"){
-      requestAnimationFrame(function(){requestAnimationFrame(run);});
-      setTimeout(run,260);
-      setTimeout(run,520);
-    }else{
 ```

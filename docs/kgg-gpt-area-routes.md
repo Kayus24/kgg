@@ -5,41 +5,41 @@ Generated from `kgg-update/index.html`. Use this before loading source chunks.
 ## tablet-layout
 
 - Triggers: `tablet`, `layout`, `splitter`, `spaltenbreite`, `uebungsdatenbank`, `planbereich`
-- Source chunks: `docs/kgg-gpt-source/chunk-005.md`, `docs/kgg-gpt-source/chunk-007.md`, `docs/kgg-gpt-source/chunk-008.md`, `docs/kgg-gpt-source/chunk-009.md`, `docs/kgg-gpt-source/chunk-013.md`, `docs/kgg-gpt-source/chunk-014.md`, `docs/kgg-gpt-source/chunk-055.md`, `docs/kgg-gpt-source/chunk-056.md`, `docs/kgg-gpt-source/chunk-057.md`, `docs/kgg-gpt-source/chunk-058.md`
+- Source chunks: `docs/kgg-gpt-source/chunk-005.md`, `docs/kgg-gpt-source/chunk-007.md`, `docs/kgg-gpt-source/chunk-008.md`, `docs/kgg-gpt-source/chunk-009.md`, `docs/kgg-gpt-source/chunk-014.md`, `docs/kgg-gpt-source/chunk-056.md`, `docs/kgg-gpt-source/chunk-057.md`, `docs/kgg-gpt-source/chunk-058.md`
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression`
 - Notes: Plus/Minus controls scale; horizontal drag controls the left column width.
 - Markers:
-  - `tabletLayoutFreeTools`: `docs/kgg-gpt-source/chunk-007.md` line 3204
-  - `tabletLayoutResizeHandle`: `docs/kgg-gpt-source/chunk-007.md` line 3143
-  - `--kgg-tablet-left-col`: `docs/kgg-gpt-source/chunk-007.md` line 3242
-  - `--kgg-tablet-ui-scale`: `docs/kgg-gpt-source/chunk-005.md` line 2173
-  - `updateTabletLayoutHandle`: `docs/kgg-gpt-source/chunk-055.md` line 23502
-  - `initTabletLayoutControls`: `docs/kgg-gpt-source/chunk-056.md` line 23637
+  - `tabletLayoutFreeTools`: `docs/kgg-gpt-source/chunk-007.md` line 3231
+  - `tabletLayoutResizeHandle`: `docs/kgg-gpt-source/chunk-007.md` line 3170
+  - `--kgg-tablet-left-col`: `docs/kgg-gpt-source/chunk-007.md` line 3269
+  - `--kgg-tablet-ui-scale`: `docs/kgg-gpt-source/chunk-005.md` line 2200
+  - `updateTabletLayoutHandle`: `docs/kgg-gpt-source/chunk-056.md` line 23529
+  - `initTabletLayoutControls`: `docs/kgg-gpt-source/chunk-056.md` line 23665
 
 ## phone-layout
 
 - Triggers: `phone`, `handy`, `dock`, `drawer`, `scan button`, `759`
-- Source chunks: `docs/kgg-gpt-source/chunk-002.md`, `docs/kgg-gpt-source/chunk-003.md`, `docs/kgg-gpt-source/chunk-005.md`, `docs/kgg-gpt-source/chunk-009.md`, `docs/kgg-gpt-source/chunk-010.md`, `docs/kgg-gpt-source/chunk-011.md`, `docs/kgg-gpt-source/chunk-013.md`, `docs/kgg-gpt-source/chunk-060.md`, `docs/kgg-gpt-source/chunk-061.md`, `docs/kgg-gpt-source/chunk-062.md`
+- Source chunks: `docs/kgg-gpt-source/chunk-002.md`, `docs/kgg-gpt-source/chunk-003.md`, `docs/kgg-gpt-source/chunk-005.md`, `docs/kgg-gpt-source/chunk-009.md`, `docs/kgg-gpt-source/chunk-010.md`, `docs/kgg-gpt-source/chunk-011.md`, `docs/kgg-gpt-source/chunk-013.md`, `docs/kgg-gpt-source/chunk-061.md`, `docs/kgg-gpt-source/chunk-062.md`
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression`
 - Notes: Do not change the 759/760 px breakpoint incidentally.
 - Markers:
-  - `kggPhoneAdminMenu`: `docs/kgg-gpt-source/chunk-060.md` line 25614
-  - `phonePhotoMenuToggle`: `docs/kgg-gpt-source/chunk-060.md` line 25614
-  - `kggPhoneHasPlan`: `docs/kgg-gpt-source/chunk-061.md` line 25648
-  - `phoneTextFocus`: `docs/kgg-gpt-source/chunk-002.md` line 983
-  - `max-width:759px`: `docs/kgg-gpt-source/chunk-003.md` line 1357
+  - `kggPhoneAdminMenu`: `docs/kgg-gpt-source/chunk-061.md` line 25642
+  - `phonePhotoMenuToggle`: `docs/kgg-gpt-source/chunk-061.md` line 25642
+  - `kggPhoneHasPlan`: `docs/kgg-gpt-source/chunk-061.md` line 25676
+  - `phoneTextFocus`: `docs/kgg-gpt-source/chunk-002.md` line 1010
+  - `max-width:759px`: `docs/kgg-gpt-source/chunk-003.md` line 1384
 
 ## qr-patient
 
 - Triggers: `qr`, `patient`, `patienten-app`, `plan qr`
-- Source chunks: `docs/kgg-gpt-source/chunk-000.md`, `docs/kgg-gpt-source/chunk-047.md`, `docs/kgg-gpt-source/chunk-050.md`, `docs/kgg-gpt-source/chunk-051.md`, `docs/kgg-gpt-source/chunk-057.md`, `docs/kgg-gpt-source/chunk-058.md`, `docs/kgg-gpt-source/chunk-062.md`
+- Source chunks: `docs/kgg-gpt-source/chunk-000.md`, `docs/kgg-gpt-source/chunk-047.md`, `docs/kgg-gpt-source/chunk-051.md`, `docs/kgg-gpt-source/chunk-057.md`, `docs/kgg-gpt-source/chunk-058.md`, `docs/kgg-gpt-source/chunk-062.md`
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`
 - Notes: Patient output must not expose raw JSON, Base64 or debug payloads.
 - Markers:
-  - `finishWithPatientApp`: `docs/kgg-gpt-source/chunk-051.md` line 21775
-  - `KGGH2`: `docs/kgg-gpt-source/chunk-000.md` line 230
-  - `tryApplyKggSetupFromHash`: `docs/kgg-gpt-source/chunk-047.md` line 20082
-  - `openKggTherapistAppOnlyQr`: `docs/kgg-gpt-source/chunk-057.md` line 24043
+  - `finishWithPatientApp`: `docs/kgg-gpt-source/chunk-051.md` line 21802
+  - `KGGH2`: `docs/kgg-gpt-source/chunk-000.md` line 257
+  - `tryApplyKggSetupFromHash`: `docs/kgg-gpt-source/chunk-047.md` line 20109
+  - `openKggTherapistAppOnlyQr`: `docs/kgg-gpt-source/chunk-057.md` line 24071
 
 ## pdf
 
@@ -48,19 +48,19 @@ Generated from `kgg-update/index.html`. Use this before loading source chunks.
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`
 - Notes: PDF changes need bounded thumbnail/card behavior.
 - Markers:
-  - `finishWithPdf`: `docs/kgg-gpt-source/chunk-051.md` line 21757
-  - `KGGOfflineJsPDF`: `docs/kgg-gpt-source/chunk-014.md` line 6062
-  - `attachKggPdfExerciseThumbnails`: `docs/kgg-gpt-source/chunk-049.md` line 20890
+  - `finishWithPdf`: `docs/kgg-gpt-source/chunk-051.md` line 21784
+  - `KGGOfflineJsPDF`: `docs/kgg-gpt-source/chunk-014.md` line 6089
+  - `attachKggPdfExerciseThumbnails`: `docs/kgg-gpt-source/chunk-049.md` line 20917
 
 ## android-apk
 
 - Triggers: `apk`, `android`, `preview app`, `icon`
-- Source chunks: `docs/kgg-gpt-source/chunk-042.md`, `docs/kgg-gpt-source/chunk-047.md`
+- Source chunks: `docs/kgg-gpt-source/chunk-042.md`, `docs/kgg-gpt-source/chunk-047.md`, `docs/kgg-gpt-source/chunk-048.md`
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `GitHub android-wrapper-check must build assemblePreviewDebug when APK output matters.`
 - Notes: Android/APK is protected unless Max explicitly asks for it.
 - Markers:
   - `KGGAndroidPdf`: not found
-  - `KGGNativeSync`: `docs/kgg-gpt-source/chunk-042.md` line 17891
+  - `KGGNativeSync`: `docs/kgg-gpt-source/chunk-042.md` line 17918
   - `PREVIEW_MANIFEST_URL`: not found
 
 ## sync
@@ -70,10 +70,10 @@ Generated from `kgg-update/index.html`. Use this before loading source chunks.
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite sync --level regression`
 - Notes: Sync export must exclude patients and secrets.
 - Markers:
-  - `KGGDataStore`: `docs/kgg-gpt-source/chunk-002.md` line 897
-  - `kgg_sync_bundle`: `docs/kgg-gpt-source/chunk-048.md` line 20184
+  - `KGGDataStore`: `docs/kgg-gpt-source/chunk-002.md` line 924
+  - `kgg_sync_bundle`: `docs/kgg-gpt-source/chunk-048.md` line 20211
   - `nativeExerciseBankSync`: not found
-  - `KGGNativeSync`: `docs/kgg-gpt-source/chunk-042.md` line 17891
+  - `KGGNativeSync`: `docs/kgg-gpt-source/chunk-042.md` line 17918
 
 ## parser-textblocks
 
@@ -84,7 +84,7 @@ Generated from `kgg-update/index.html`. Use this before loading source chunks.
 - Markers:
   - `parseExerciseText`: not found
   - `textBlocks`: not found
-  - `scanState`: `docs/kgg-gpt-source/chunk-045.md` line 18972
+  - `scanState`: `docs/kgg-gpt-source/chunk-045.md` line 18999
 
 ## preview-gate
 
@@ -95,4 +95,4 @@ Generated from `kgg-update/index.html`. Use this before loading source chunks.
 - Markers:
   - `kgg-gpt-preview-banner`: not found
   - `kgg-source-truth`: `docs/kgg-gpt-source/chunk-000.md` line 10
-  - `kgg-changelog`: `docs/kgg-gpt-source/chunk-000.md` line 146
+  - `kgg-changelog`: `docs/kgg-gpt-source/chunk-000.md` line 142

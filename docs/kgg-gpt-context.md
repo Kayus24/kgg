@@ -31,9 +31,9 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 ## Current Versions
 
-- Source web version: v58 / `1.0.58-grossdruck-readability-beta`.
-- Source index URL: `index.html?v=58`.
-- Source notes: v058: Grossdruck-PDF nutzt groessere kurzsichtigkeitsgepruefte Schrift und eine lokale PDF-Readability-Testengine.
+- Source web version: v59 / `1.0.59-ui-scaler-push-canary`.
+- Source index URL: `index.html?v=59`.
+- Source notes: v059: Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification.
 - Live Admin release: `r0421` / `1.0.58-grossdruck-readability-beta`.
 - Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0421/admin.html`.
 - Live colleague release: `r0397` / `1.0.29-camera-touch-parser-fix`.

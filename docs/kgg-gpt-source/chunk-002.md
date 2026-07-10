@@ -4,6 +4,33 @@
 - Lines: 841-1260
 
 ```html
+      },
+      "handoffNote": "Im Tablet-Menü: Therapeuten-App weitergeben = Kolleg:innen-App/APK-QR; Admin > Geräte-Sync = Sync-Diagnose und Datei-Transfer."
+    },
+    {
+      "versionCode": 36,
+      "versionName": "1.0.36-native-sync-diagnostics",
+      "patchId": "kgg-v036-native-sync-diagnostics",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Native Sync Diagnose und sichere Datei-Uebergabe",
+      "reason": "Peer-to-Peer-Sync muss sichtbar machen, ob Android wirklich einen gemeinsamen Sync-Raum nutzt oder nur im privaten Rueckfall-Speicher schreibt.",
+      "whatChanged": [
+        "Sync-Dialog zeigt Modus, Raum, Peer-Anzahl, letzten Test und Sync-Pfad.",
+        "Sync-Test schreibt/liest ueber die vorhandene Android-Bridge und meldet klare Ergebnisse.",
+        "Sync-Datei speichern/importieren erlaubt einen sicheren manuellen Transfer fuer groessere Daten.",
+        "Native-Sync-Testbatterie prueft Peer-Mesh, Auto-Download-Regeln, Self-Skip, Tombstones und Secret-Blockade."
+      ],
+      "touchedAreas": [
+        "Sync diagnostics UI",
+        "Safe sync file transfer",
+        "Local test batteries",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
         "Scan-Kamera",
         "Android-Wrapper",
         "Tablet-Core-Layout",
@@ -397,31 +424,4 @@
         "Storage"
       ],
       "testStatus": {
-        "githubPages": "pending",
-        "androidApp": "pending"
-      },
-      "handoffNote": "Lokale LLMs können index.html lesen und finden kgg-source-truth sowie kgg-changelog direkt im Code."
-    }
-  ],
-  "latestVersionName": "1.0.45-phone-drawer-bank-align"
-}
-</script>
-<!-- END kgg-changelog -->
-
-<!-- BEGIN kgg-patch-rules: embedded Patch Rules; READ THIS BEFORE PATCHING -->
-<script type="application/json" id="kgg-patch-rules">
-{
-  "schema": 1,
-  "id": "kgg-patch-rules",
-  "readFirst": [
-    "#kgg-source-truth",
-    "#kgg-changelog",
-    "#kgg-patch-rules"
-  ],
-  "mustUpdateOnEveryPatch": [
-    "kgg-source-truth.currentWebVersion",
-    "kgg-source-truth.lastUpdateIntent",
-    "kgg-changelog.entries",
-    "kgg-update/version.json.versionCode",
-    "kgg-update/version.json.versionName",
 ```

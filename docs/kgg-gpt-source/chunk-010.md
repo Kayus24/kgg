@@ -4,6 +4,33 @@
 - Lines: 4201-4620
 
 ```html
+        grid-column:1;
+        grid-row:1;
+      }
+      .bankArea.bankOpen.searchBankOpen #bankContent{
+        grid-column:2;
+        grid-row:1;
+        margin-top:0;
+      }
+      .bankArea.bankOpen.searchBankOpen .bankLabel{
+        margin:0 0 4px;
+        border-radius:10px;
+      }
+    }
+    /* Tablet DB search: Top-Treffer beginnen neben dem Uebungsdatenbank-Maennchen. */
+    @media (min-width:760px){
+      #bankArea.bankOpen.searchBankOpen{
+        display:grid;
+        grid-template-columns:56px minmax(0,1fr);
+        column-gap:8px;
+        align-items:start;
+        align-content:start;
+        height:auto;
+        min-height:0;
+      }
+      #bankArea.bankOpen.searchBankOpen #bankToggle{
+        grid-column:1;
+        grid-row:1;
       }
       #bankArea.bankOpen.searchBankOpen #bankContent{
         grid-column:2;
@@ -397,31 +424,4 @@
     padding:0!important;
     gap:10px!important;
     border:0!important;
-    box-shadow:none!important;
-    background:transparent!important;
-  }
-  .tabletSideMenu .tabletLockSwitch,
-  .tabletSideMenu .tabletSyncQrBtn{
-    min-height:54px!important;
-    width:100%!important;
-    border-radius:17px!important;
-    font-size:.92rem!important;
-  }
-  .tabletSideMenu .tabletLayoutFreeTools{
-    grid-column:1 / -1!important;
-    position:static!important;
-    display:grid!important;
-    grid-template-columns:58px 1fr 58px!important;
-    grid-template-areas:"plus value minus" "reset reset reset";
-    /* v361 side menu scale grid polish */
-    align-items:center!important;
-    width:100%!important;
-    min-width:0!important;
-    height:auto!important;
-    padding:10px!important;
-    border-radius:21px!important;
-  }
-  .tabletSideMenu #tabletScalePlus{grid-area:plus;}
-  .tabletSideMenu #tabletScaleValue{grid-area:value;text-align:center;}
-  .tabletSideMenu #tabletScaleMinus{grid-area:minus;}
 ```

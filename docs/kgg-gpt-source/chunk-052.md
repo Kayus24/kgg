@@ -4,6 +4,33 @@
 - Lines: 21841-22260
 
 ```html
+    return new Promise((resolve,reject)=>{
+      if(!('indexedDB' in window)){reject(new Error('IndexedDB nicht verfuegbar'));return;}
+      const req=indexedDB.open('kgg_patient_media_v1',1);
+      req.onupgradeneeded=()=>{const db=req.result; if(!db.objectStoreNames.contains('images'))db.createObjectStore('images',{keyPath:'id'});};
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error||new Error('Patienten-Medien-Speicher nicht verfuegbar'));
+    });
+  }
+  async function patientGetCachedMedia(id){
+    const db=await patientMediaDb();
+    return new Promise(resolve=>{
+      const tx=db.transaction('images','readonly');
+      const req=tx.objectStore('images').get(id);
+      req.onsuccess=()=>resolve(req.result||null);
+      req.onerror=()=>resolve(null);
+    });
+  }
+  async function patientPutCachedMedia(record){
+    const db=await patientMediaDb();
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction('images','readwrite');
+      tx.objectStore('images').put(record);
+      tx.oncomplete=()=>resolve(record);
+      tx.onerror=()=>reject(tx.error||new Error('Bild konnte nicht lokal gespeichert werden'));
+    });
+  }
+  async function patientFetchEncryptedMedia(media){
     if(window.KGGPatientMediaFetchAdapter&&typeof window.KGGPatientMediaFetchAdapter.fetch==='function')return window.KGGPatientMediaFetchAdapter.fetch(media);
     if(!media.downloadUrl)throw new Error('Bild ist noch nicht bereit');
     const res=await fetch(media.downloadUrl,{cache:'no-store'});
@@ -397,31 +424,4 @@
       {id:'bottom-right',x:.38,y:.38,w:.62,h:.62},
       {id:'top-band',x:0,y:0,w:1,h:.48},
       {id:'bottom-band',x:0,y:.52,w:1,h:.48},
-      {id:'left-band',x:0,y:0,w:.48,h:1},
-      {id:'right-band',x:.52,y:0,w:.48,h:1},
-      {id:'top-third-left',x:0,y:0,w:.54,h:.44},
-      {id:'top-third-right',x:.46,y:0,w:.54,h:.44},
-      {id:'mid-third-left',x:0,y:.28,w:.54,h:.44},
-      {id:'mid-third-right',x:.46,y:.28,w:.54,h:.44},
-      {id:'bottom-third-left',x:0,y:.56,w:.54,h:.44},
-      {id:'bottom-third-right',x:.46,y:.56,w:.54,h:.44}
-    ];
-    const modes=['normal','softContrast','contrast','thresholdLow','threshold','thresholdHigh','invert'];
-    const maxSides=[4096,3200,2600,1800,1200];
-    const rotations=[0,90,180,270];
-    const seenBases=new Set();
-    let attempts=1;
-    let lastReason='';
-    let lastCanvas='';
-    for(const maxSide of maxSides){
-      let base=null;
-      try{
-        base=await scanImageCanvasFromFile(file,maxSide);
-      }catch(err){
-        lastReason=err&&err.message||String(err);
-        continue;
-      }
-      const key=base.width+'x'+base.height;
-      lastCanvas=key;
-      if(seenBases.has(key))continue;
 ```

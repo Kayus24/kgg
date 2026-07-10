@@ -4,6 +4,33 @@
 - Lines: 21001-21420
 
 ```html
+    const patient=snapshot.patient||{};
+    const template=((snapshot.layoutTarget&&snapshot.layoutTarget.templateId)||'TPL-BASIS-A-CLASSIC-L6-v2');
+    const largePrint=((snapshot.layoutTarget&&snapshot.layoutTarget.grid)==='1x3');
+    const pageNo=page&&page.pageNo||1;
+    const pageCount=snapshot.pageCount||page&&page.pageCount||1;
+    const x=layout.margin,y=layout.margin,w=layout.pageW-(layout.margin*2),h=layout.headerH;
+    pdfResetInk(doc);
+    doc.setLineWidth(largePrint?0.38:0.32);
+    try{doc.roundedRect(x,y,w,h,1.5,1.5);}catch(e){doc.rect(x,y,w,h);}
+    pdfSetFont(doc,largePrint?14.2:10.4,'bold');
+    pdfText(doc,'KGG Trainingsplan',x+3,y+(largePrint?7.6:5.7));
+    pdfSetFont(doc,largePrint?7.4:5.2,'normal');
+    const line1='Patient/in: '+pdfShort(patient.displayName||patient.name||patient.initials||patient.id||'Patient/in',largePrint?38:46)+'   Start: '+pdfShort(patient.startDate||'-',18)+'   Anlass: '+pdfShort(patient.reason||'KGG',16);
+    pdfText(doc,line1,x+3,y+(largePrint?13.6:10.0));
+    pdfText(doc,'T1-T6 = Trainingstage   S1-S3 = Sätze',x+3,y+(largePrint?19.2:14.1));
+    pdfSetFont(doc,largePrint?5.9:4.6,'normal');
+    pdfText(doc,template+' · Seite '+pageNo+'/'+pageCount,x+w-3,y+(largePrint?7.4:5.6),{align:'right'});
+    pdfSetFont(doc,largePrint?4.3:3.8,'normal');
+    pdfText(doc,PDF_RUNTIME_FINGERPRINT,x+w-3,y+(largePrint?19.0:13.9),{align:'right'});
+    pdfResetInk(doc);
+  }
+
+
+  function drawKggTableScaffold(doc,ex,x,y,w,h,options){
+    const largePrint=!!(options&&options.largePrint);
+    const side=normalizeSideMode(ex&&ex.side||'BI');
+    const loadUnit=String(ex&&ex.loadUnit||'kg')||'kg';
     const metricUnit=String(ex&&ex.metricUnit||'Wdh')||'Wdh';
     const isLR=side==='LR';
     const tagW=largePrint?15.0:10.8;
@@ -397,31 +424,4 @@
       alert('jsPDF-Testeinbindung konnte nicht geladen werden. PDF wird lokal im Browser erzeugt, sobald jsPDF verfuegbar ist. Der aktuelle Plan-Snapshot wurde nur intern vorbereitet.');
       console.info('KGG PDF Snapshot Adapter:',snapshot);
       return snapshot;
-    }
-    const pdfMode=state.largePdfMode?'grossdruck':'standard';
-    const doc=new JsPdfCtor({orientation:state.largePdfMode?'portrait':'landscape',unit:'mm',format:'a4'});
-    const patientName=snapshot.patient&&snapshot.patient.displayName||snapshot.patient&&snapshot.patient.name||'patient';
-    const safeName=String(patientName).replace(/[^a-z0-9äöüß_-]+/ig,'_').replace(/^_+|_+$/g,'')||'patient';
-    const stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\..+$/,'').replace('T','_');
-    try{doc.setProperties({title:'KGG Trainingsplan '+safeName,subject:PDF_RUNTIME_FINGERPRINT+' '+pdfMode,creator:VERSION});}catch(e){}
-    drawKggPdfLayoutV1(doc,snapshot);
-    const filename='kgg_trainingsplan_'+safeName+'_'+VERSION+'_'+pdfMode+'_'+stamp+'.pdf';
-    const blob=pdfBlobFromDoc(doc);
-    if(!blob)doc.save(filename);
-    return {snapshot,blob,filename,pdfMode};
-  }
-
-  function encodePatientPayload(payload){return (window.KGGQrCore&&typeof window.KGGQrCore.encodePayload==='function')?window.KGGQrCore.encodePayload(payload):btoa(unescape(encodeURIComponent(JSON.stringify(payload))));}
-  function isShareablePatientBaseUrl(url){
-    const raw=String(url||'').trim();
-    if(!raw)return false;
-    if(/^(content|file|blob|data|about):/i.test(raw))return false;
-    if(!/^https?:\/\//i.test(raw))return false;
-    try{const parsed=new URL(raw); const host=parsed.hostname.toLowerCase(); if(host==='localhost'||host==='127.0.0.1'||host==='0.0.0.0'||host.endsWith('.local'))return false;}catch(e){return false;}
-    return true;
-  }
-  function makeUrlWithPayload(baseUrl,payload){
-    const base=String(baseUrl||'').split('#')[0].split('?')[0];
-    const publicPayload=payload&&Array.isArray(payload.e)?payload:buildKggH2PayloadFromInternalPayload(payload);
-    return base+'?plan='+encodeURIComponent('KGGH2:'+encodeKggJsonBase64Url(publicPayload));
 ```

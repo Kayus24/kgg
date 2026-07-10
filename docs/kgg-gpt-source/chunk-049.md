@@ -4,6 +4,33 @@
 - Lines: 20581-21000
 
 ```html
+        save();
+      }else{
+        ex.custom=true;
+        ex.updatedAt=new Date().toISOString();
+        persistCustomBank();
+      }
+      renderEditorMediaStatus(ex);
+      render();
+      $('editorModal').classList.add('open');
+    }catch(err){
+      console.warn('Bild konnte nicht vorbereitet werden:',err);
+      if(status)status.textContent='Bild fehlgeschlagen.';
+    }
+  }
+  function removeEditorMedia(){
+    const ex=currentEditedExercise();
+    if(!ex)return;
+    const oldMedia=ensureExerciseMediaList(ex);
+    ex.media=[];
+    oldMedia.forEach(item=>deleteUnsharedMediaBlob(item,ex));
+    if(ex.localId){
+      syncStatePlanToStore('ui_remove_exercise_image');
+      save();
+    }else{
+      ex.custom=true;
+      ex.updatedAt=new Date().toISOString();
+      persistCustomBank();
     }
     renderEditorMediaStatus(ex);
     render();
@@ -397,31 +424,4 @@
   }
 
   function drawKggPdfHeader(doc,snapshot,page,layout){
-    const patient=snapshot.patient||{};
-    const template=((snapshot.layoutTarget&&snapshot.layoutTarget.templateId)||'TPL-BASIS-A-CLASSIC-L6-v2');
-    const largePrint=((snapshot.layoutTarget&&snapshot.layoutTarget.grid)==='1x3');
-    const pageNo=page&&page.pageNo||1;
-    const pageCount=snapshot.pageCount||page&&page.pageCount||1;
-    const x=layout.margin,y=layout.margin,w=layout.pageW-(layout.margin*2),h=layout.headerH;
-    pdfResetInk(doc);
-    doc.setLineWidth(largePrint?0.38:0.32);
-    try{doc.roundedRect(x,y,w,h,1.5,1.5);}catch(e){doc.rect(x,y,w,h);}
-    pdfSetFont(doc,largePrint?14.2:10.4,'bold');
-    pdfText(doc,'KGG Trainingsplan',x+3,y+(largePrint?7.6:5.7));
-    pdfSetFont(doc,largePrint?7.4:5.2,'normal');
-    const line1='Patient/in: '+pdfShort(patient.displayName||patient.name||patient.initials||patient.id||'Patient/in',largePrint?38:46)+'   Start: '+pdfShort(patient.startDate||'-',18)+'   Anlass: '+pdfShort(patient.reason||'KGG',16);
-    pdfText(doc,line1,x+3,y+(largePrint?13.6:10.0));
-    pdfText(doc,'T1-T6 = Trainingstage   S1-S3 = Sätze',x+3,y+(largePrint?19.2:14.1));
-    pdfSetFont(doc,largePrint?5.9:4.6,'normal');
-    pdfText(doc,template+' · Seite '+pageNo+'/'+pageCount,x+w-3,y+(largePrint?7.4:5.6),{align:'right'});
-    pdfSetFont(doc,largePrint?4.3:3.8,'normal');
-    pdfText(doc,PDF_RUNTIME_FINGERPRINT,x+w-3,y+(largePrint?19.0:13.9),{align:'right'});
-    pdfResetInk(doc);
-  }
-
-
-  function drawKggTableScaffold(doc,ex,x,y,w,h,options){
-    const largePrint=!!(options&&options.largePrint);
-    const side=normalizeSideMode(ex&&ex.side||'BI');
-    const loadUnit=String(ex&&ex.loadUnit||'kg')||'kg';
 ```

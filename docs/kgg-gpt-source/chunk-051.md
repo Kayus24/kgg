@@ -4,6 +4,33 @@
 - Lines: 21421-21840
 
 ```html
+    }
+    const pdfMode=state.largePdfMode?'grossdruck':'standard';
+    const doc=new JsPdfCtor({orientation:state.largePdfMode?'portrait':'landscape',unit:'mm',format:'a4'});
+    const patientName=snapshot.patient&&snapshot.patient.displayName||snapshot.patient&&snapshot.patient.name||'patient';
+    const safeName=String(patientName).replace(/[^a-z0-9äöüß_-]+/ig,'_').replace(/^_+|_+$/g,'')||'patient';
+    const stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\..+$/,'').replace('T','_');
+    try{doc.setProperties({title:'KGG Trainingsplan '+safeName,subject:PDF_RUNTIME_FINGERPRINT+' '+pdfMode,creator:VERSION});}catch(e){}
+    drawKggPdfLayoutV1(doc,snapshot);
+    const filename='kgg_trainingsplan_'+safeName+'_'+VERSION+'_'+pdfMode+'_'+stamp+'.pdf';
+    const blob=pdfBlobFromDoc(doc);
+    if(!blob)doc.save(filename);
+    return {snapshot,blob,filename,pdfMode};
+  }
+
+  function encodePatientPayload(payload){return (window.KGGQrCore&&typeof window.KGGQrCore.encodePayload==='function')?window.KGGQrCore.encodePayload(payload):btoa(unescape(encodeURIComponent(JSON.stringify(payload))));}
+  function isShareablePatientBaseUrl(url){
+    const raw=String(url||'').trim();
+    if(!raw)return false;
+    if(/^(content|file|blob|data|about):/i.test(raw))return false;
+    if(!/^https?:\/\//i.test(raw))return false;
+    try{const parsed=new URL(raw); const host=parsed.hostname.toLowerCase(); if(host==='localhost'||host==='127.0.0.1'||host==='0.0.0.0'||host.endsWith('.local'))return false;}catch(e){return false;}
+    return true;
+  }
+  function makeUrlWithPayload(baseUrl,payload){
+    const base=String(baseUrl||'').split('#')[0].split('?')[0];
+    const publicPayload=payload&&Array.isArray(payload.e)?payload:buildKggH2PayloadFromInternalPayload(payload);
+    return base+'?plan='+encodeURIComponent('KGGH2:'+encodeKggJsonBase64Url(publicPayload));
   }
   function buildExerciseMediaManifestForPatient(ex){
     return ensureExerciseMediaList(ex).filter(item=>item.type==='image').map(item=>({
@@ -397,31 +424,4 @@
     return bytes;
   }
   function patientMediaDb(){
-    return new Promise((resolve,reject)=>{
-      if(!('indexedDB' in window)){reject(new Error('IndexedDB nicht verfuegbar'));return;}
-      const req=indexedDB.open('kgg_patient_media_v1',1);
-      req.onupgradeneeded=()=>{const db=req.result; if(!db.objectStoreNames.contains('images'))db.createObjectStore('images',{keyPath:'id'});};
-      req.onsuccess=()=>resolve(req.result);
-      req.onerror=()=>reject(req.error||new Error('Patienten-Medien-Speicher nicht verfuegbar'));
-    });
-  }
-  async function patientGetCachedMedia(id){
-    const db=await patientMediaDb();
-    return new Promise(resolve=>{
-      const tx=db.transaction('images','readonly');
-      const req=tx.objectStore('images').get(id);
-      req.onsuccess=()=>resolve(req.result||null);
-      req.onerror=()=>resolve(null);
-    });
-  }
-  async function patientPutCachedMedia(record){
-    const db=await patientMediaDb();
-    return new Promise((resolve,reject)=>{
-      const tx=db.transaction('images','readwrite');
-      tx.objectStore('images').put(record);
-      tx.oncomplete=()=>resolve(record);
-      tx.onerror=()=>reject(tx.error||new Error('Bild konnte nicht lokal gespeichert werden'));
-    });
-  }
-  async function patientFetchEncryptedMedia(media){
 ```
