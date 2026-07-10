@@ -6,14 +6,14 @@
       "kind": "kgg_gpt_preview",
       "requestId": "ui-scaler-canary-20260707-a",
       "patchHash": "babaf97a11eca70f95fd1c7dc03ea2b9f339a18cbc8ebba1a59e72725fd62a2a",
-      "baseSha": "69086b0ce16923f096c4e38122c5abc797f45258",
+      "baseSha": "08978d899ca5c81502f3a18a41b398228617cbef",
       "baseVersionCode": 59,
-      "rolloutCode": 1783420142,
+      "rolloutCode": 1783677126,
       "title": "UI Scaler Push Canary",
       "summary": "Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification.",
-      "createdAt": "2026-07-07T10:29:02Z",
+      "createdAt": "2026-07-10T09:52:06Z",
       "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/ui-scaler-canary-20260707-a/admin.html",
-      "sha256": "b0b691203e0001f32b49db3d7541e276e4dfde533dc4791260188a0407eef632"
+      "sha256": "7990a4cb162c2e1e1053f4a09f4af3c834a00d1510a70e756d50e4ca6d0b198f"
     },
     {
       "kind": "kgg_gpt_preview",
@@ -124,13 +124,13 @@
     "kind": "kgg_gpt_preview",
     "requestId": "ui-scaler-canary-20260707-a",
     "patchHash": "babaf97a11eca70f95fd1c7dc03ea2b9f339a18cbc8ebba1a59e72725fd62a2a",
-    "baseSha": "69086b0ce16923f096c4e38122c5abc797f45258",
+    "baseSha": "08978d899ca5c81502f3a18a41b398228617cbef",
     "baseVersionCode": 59,
-    "rolloutCode": 1783420142,
+    "rolloutCode": 1783677126,
     "title": "UI Scaler Push Canary",
     "summary": "Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification.",
-    "createdAt": "2026-07-07T10:29:02Z",
+    "createdAt": "2026-07-10T09:52:06Z",
     "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/ui-scaler-canary-20260707-a/admin.html",
-    "sha256": "b0b691203e0001f32b49db3d7541e276e4dfde533dc4791260188a0407eef632"
+    "sha256": "7990a4cb162c2e1e1053f4a09f4af3c834a00d1510a70e756d50e4ca6d0b198f"
   }
 }
