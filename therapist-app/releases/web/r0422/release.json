@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0422",
+  "versionName": "1.0.59-ui-scaler-push-canary",
+  "notes": "v059: Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification.",
+  "createdAt": "2026-07-10T10:01:17Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0422",
+      "profile": "admin",
+      "versionName": "1.0.59-ui-scaler-push-canary",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0422/admin.html",
+      "sha256": "74974ab424eac0cbe1a7c178e188ddff9a0d28d393b49a3c71d8e7a7bc20b509",
+      "notes": "v059: Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification."
+    },
+    "colleague": {
+      "releaseId": "r0422",
+      "profile": "colleague",
+      "versionName": "1.0.59-ui-scaler-push-canary",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0422/colleague.html",
+      "sha256": "7a061546a046d4cb0196080ab972bebc141771967a4adf6025cbfd577fd0c5c6",
+      "notes": "v059: Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification."
+    }
+  }
+}
