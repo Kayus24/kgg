@@ -1,0 +1,13 @@
+{
+  "kind": "kgg_gpt_preview",
+  "requestId": "kgg-tablet-splitter-measured-drag-20260713-b",
+  "patchHash": "a4c9f226c9e07e1385fdd64bb192b43f2668698ed4ddd455c1b6918bd449fda8",
+  "baseSha": "e96b259812a44053e48d70c1f198ead01920e8c0",
+  "baseVersionCode": 60,
+  "rolloutCode": 1783937986,
+  "title": "Tablet Splitter an sichtbarer Panelgrenze messen und ziehen",
+  "summary": "Der Splitter wird zwischen den sichtbaren Kanten von Uebungsdatenbank und Plan positioniert. Layout anpassen entsperrt automatisch; Plus/Minus skaliert, der Pfeilgriff aendert nur die Spaltenbreite.",
+  "createdAt": "2026-07-13T10:19:46Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-tablet-splitter-measured-drag-20260713-b/admin.html",
+  "sha256": "67661a306941c9efed100d11e0ccfa66ed189bd1a021ebe22d6c174d5be7d6aa"
+}
