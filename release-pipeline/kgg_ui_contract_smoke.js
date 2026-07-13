@@ -267,7 +267,9 @@ async function runViewport(browser, contract, viewport) {
     const url = pathToFileURL(HTML_PATH).href;
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
     await page.waitForSelector("#planList .planCard[data-plan-id]", { timeout: 15000 });
-    await page.waitForTimeout(600);
+    // initAdminModeAccess intentionally schedules its missing-config modal at 700 ms.
+    // Wait past that baseline timer before dismissing allowed boot modals for UI hit tests.
+    await page.waitForTimeout(1100);
     if (page.url() !== url) fail(`${viewport.id}: app navigated away during boot`);
     if (pageErrors.length) fail(`${viewport.id}: page errors: ${pageErrors.join(" | ")}`);
     if (consoleErrors.length) fail(`${viewport.id}: console errors: ${consoleErrors.join(" | ")}`);
@@ -276,6 +278,12 @@ async function runViewport(browser, contract, viewport) {
     await page.evaluate((allowed) => {
       for (const id of allowed) document.getElementById(id)?.classList.remove("open");
     }, contract.allowedBootOpenModals || []);
+    await page.waitForTimeout(50);
+    const allowedStillOpen = await page.evaluate((allowed) => allowed.filter((id) => {
+      const node = document.getElementById(id);
+      return !!(node && node.classList.contains("open"));
+    }), contract.allowedBootOpenModals || []);
+    if (allowedStillOpen.length) fail(`${viewport.id}: allowed boot modal could not be dismissed: ${allowedStillOpen.join(", ")}`);
     await assertVisibleAndClickable(page, viewport.visible || [], viewport.id);
     await exerciseCoreFlows(page, viewport.id);
     await page.evaluate(() => document.querySelectorAll(".modal.open").forEach((node) => node.classList.remove("open")));
