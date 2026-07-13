@@ -1,0 +1,154 @@
+{
+  "version": "patient-scan-camera-v3-live-lossless",
+  "seed": 24061986,
+  "referencePayloads": [
+    {
+      "id": "compact-kgg-h2",
+      "format": "raw-kgg-h2",
+      "fixture": "canonical-compact.png"
+    },
+    {
+      "id": "realistic-urlencoded-plan-link",
+      "format": "urlencoded-plan-link",
+      "fixture": "canonical-realistic.png"
+    }
+  ],
+  "staticCases": [
+    { "id": "clear-640x480", "payload": "compact", "width": 640, "height": 480, "qrFraction": 0.75, "gate": true },
+    { "id": "clear-1280x720", "payload": "compact", "width": 1280, "height": 720, "qrFraction": 0.42, "gate": true },
+    { "id": "clear-1920x1080", "payload": "compact", "width": 1920, "height": 1080, "qrFraction": 0.32, "gate": true },
+    { "id": "portrait-720x1280", "payload": "compact", "width": 720, "height": 1280, "qrFraction": 0.45, "gate": true },
+    { "id": "rotate-90", "payload": "compact", "width": 1280, "height": 720, "qrFraction": 0.42, "rotation": 90, "gate": true },
+    { "id": "rotate-180", "payload": "compact", "width": 1280, "height": 720, "qrFraction": 0.42, "rotation": 180, "gate": true },
+    { "id": "rotate-270", "payload": "compact", "width": 1280, "height": 720, "qrFraction": 0.42, "rotation": 270, "gate": true },
+    { "id": "moderate-angle-noise", "payload": "compact", "width": 1280, "height": 720, "qrFraction": 0.48, "rotation": 12, "noise": 5, "contrast": 0.85, "gate": true },
+    { "id": "realistic-close-1280", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.78, "gate": true },
+    { "id": "realistic-moderate-distance", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.40, "gate": false },
+    { "id": "extreme-small-dark", "payload": "realistic", "width": 1920, "height": 1080, "qrFraction": 0.10, "brightness": 0.35, "noise": 12, "gate": false }
+  ],
+  "perspectiveCases": [
+    { "id": "yaw-neg10-720-q55", "label": "Horizontal -10°, QR 55 %", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.55, "yaw": -10, "gate": true },
+    { "id": "yaw-pos10-720-q55", "label": "Horizontal +10°, QR 55 %", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.55, "yaw": 10, "gate": true },
+    { "id": "pitch-neg10-720-q55", "label": "Vertikal -10°, QR 55 %", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.55, "pitch": -10, "gate": true },
+    { "id": "pitch-pos10-720-q55", "label": "Vertikal +10°, QR 55 %", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.55, "pitch": 10, "gate": true },
+    { "id": "combined-pos10-neg10-720-q55", "label": "Horizontal +10° / vertikal -10°", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.55, "yaw": 10, "pitch": -10, "gate": true },
+    { "id": "combined-neg10-pos10-720-q55", "label": "Horizontal -10° / vertikal +10°", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.55, "yaw": -10, "pitch": 10, "gate": true },
+    { "id": "yaw-pos10-1080-q40", "label": "Horizontal +10°, 1080p, QR 40 %", "payload": "realistic", "width": 1920, "height": 1080, "qrFraction": 0.40, "yaw": 10, "gate": true },
+    { "id": "trapezoid-10-720-q55", "label": "Trapez 10 %, QR 55 % (bekannte Grenze)", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.55, "cornerWarp": [[0.05, 0], [-0.05, 0], [0, 0], [0, 0]], "gate": false },
+    { "id": "asymmetric-08-720-q55", "label": "Asymmetrische Eckverzerrung 8 % (bekannte Grenze)", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.55, "cornerWarp": [[0.04, 0.03], [-0.02, -0.01], [0.01, -0.04], [-0.03, 0.02]], "gate": false },
+
+    { "id": "yaw-neg20-720-q40", "label": "Horizontal -20°, QR 40 %", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.40, "yaw": -20, "gate": false },
+    { "id": "yaw-pos20-720-q40", "label": "Horizontal +20°, QR 40 %", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.40, "yaw": 20, "gate": false },
+    { "id": "yaw-neg30-720-q55", "label": "Horizontal -30°, QR 55 %", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.55, "yaw": -30, "gate": false },
+    { "id": "yaw-pos30-720-q55", "label": "Horizontal +30°, QR 55 %", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.55, "yaw": 30, "gate": false },
+    { "id": "yaw-neg40-720-q70", "label": "Horizontal -40°, QR 70 %", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.70, "yaw": -40, "gate": false },
+    { "id": "yaw-pos40-720-q70", "label": "Horizontal +40°, QR 70 %", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.70, "yaw": 40, "gate": false },
+    { "id": "pitch-neg20-720-q40", "label": "Vertikal -20°, QR 40 %", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.40, "pitch": -20, "gate": false },
+    { "id": "pitch-pos20-720-q40", "label": "Vertikal +20°, QR 40 %", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.40, "pitch": 20, "gate": false },
+    { "id": "pitch-neg30-720-q55", "label": "Vertikal -30°, QR 55 %", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.55, "pitch": -30, "gate": false },
+    { "id": "pitch-pos30-720-q55", "label": "Vertikal +30°, QR 55 %", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.55, "pitch": 30, "gate": false },
+    { "id": "combined-pos20-pos20-720-q55", "label": "Horizontal +20° / vertikal +20°", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.55, "yaw": 20, "pitch": 20, "gate": false },
+    { "id": "combined-neg20-pos20-720-q55", "label": "Horizontal -20° / vertikal +20°", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.55, "yaw": -20, "pitch": 20, "gate": false },
+    { "id": "combined-pos30-neg20-720-q70", "label": "Horizontal +30° / vertikal -20°", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.70, "yaw": 30, "pitch": -20, "gate": false },
+
+    { "id": "distance-yaw20-q25", "label": "Horizontal +20°, QR 25 %", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.25, "yaw": 20, "gate": false },
+    { "id": "distance-yaw20-q55", "label": "Horizontal +20°, QR 55 %", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.55, "yaw": 20, "gate": false },
+    { "id": "distance-yaw20-q70", "label": "Horizontal +20°, QR 70 %", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.70, "yaw": 20, "gate": false },
+    { "id": "yaw-pos30-1080-q40", "label": "Horizontal +30°, 1080p, QR 40 %", "payload": "realistic", "width": 1920, "height": 1080, "qrFraction": 0.40, "yaw": 30, "gate": false },
+    { "id": "yaw-pos30-1080-q70", "label": "Horizontal +30°, 1080p, QR 70 %", "payload": "realistic", "width": 1920, "height": 1080, "qrFraction": 0.70, "yaw": 30, "gate": false },
+    { "id": "trapezoid-20-720-q55", "label": "Trapez 20 %, QR 55 %", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.55, "cornerWarp": [[0.10, 0], [-0.10, 0], [0, 0], [0, 0]], "gate": false },
+    { "id": "trapezoid-30-720-q70", "label": "Trapez 30 %, QR 70 %", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.70, "cornerWarp": [[0.15, 0], [-0.15, 0], [0, 0], [0, 0]], "gate": false },
+    { "id": "trapezoid-40-720-q70", "label": "Trapez 40 %, QR 70 %", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.70, "cornerWarp": [[0.20, 0], [-0.20, 0], [0, 0], [0, 0]], "gate": false },
+    { "id": "asymmetric-20-720-q70", "label": "Asymmetrische Eckverzerrung 20 %", "payload": "realistic", "width": 1280, "height": 720, "qrFraction": 0.70, "cornerWarp": [[0.10, 0.08], [-0.05, -0.04], [0.04, -0.10], [-0.08, 0.05]], "gate": false }
+  ],
+  "streamCases": [
+    {
+      "id": "small-to-close",
+      "width": 1280,
+      "height": 720,
+      "frames": [
+        { "qrFraction": 0.10, "blur": 3 },
+        { "qrFraction": 0.18, "blur": 2 },
+        { "qrFraction": 0.48, "blur": 1 },
+        { "qrFraction": 0.78, "blur": 0 }
+      ]
+    },
+    {
+      "id": "blur-to-sharp",
+      "width": 1280,
+      "height": 720,
+      "frames": [
+        { "qrFraction": 0.78, "blur": 6 },
+        { "qrFraction": 0.78, "blur": 4 },
+        { "qrFraction": 0.78, "blur": 2 },
+        { "qrFraction": 0.78, "blur": 0 }
+      ]
+    },
+    {
+      "id": "motion-to-stable",
+      "width": 1280,
+      "height": 720,
+      "frames": [
+        { "qrFraction": 0.35, "rotation": -18, "offsetX": -120, "motion": 18, "blur": 2 },
+        { "qrFraction": 0.35, "rotation": 14, "offsetX": 90, "motion": 12, "blur": 1 },
+        { "qrFraction": 0.65, "rotation": -6, "offsetX": -30, "motion": 5 },
+        { "qrFraction": 0.78, "rotation": 0 }
+      ]
+    },
+    {
+      "id": "dark-to-normal",
+      "width": 1280,
+      "height": 720,
+      "frames": [
+        { "qrFraction": 0.35, "brightness": 0.25, "noise": 10 },
+        { "qrFraction": 0.35, "brightness": 0.45, "noise": 7 },
+        { "qrFraction": 0.65, "brightness": 0.70, "noise": 3 },
+        { "qrFraction": 0.78, "brightness": 1.00 }
+      ]
+    },
+    {
+      "id": "overexposed-to-normal",
+      "width": 1280,
+      "height": 720,
+      "frames": [
+        { "qrFraction": 0.35, "brightness": 2.40, "contrast": 0.45 },
+        { "qrFraction": 0.35, "brightness": 1.90, "contrast": 0.60 },
+        { "qrFraction": 0.65, "brightness": 1.35, "contrast": 0.80 },
+        { "qrFraction": 0.78, "brightness": 1.00, "contrast": 1.00 }
+      ]
+    },
+    {
+      "id": "perspective-to-front",
+      "width": 1280,
+      "height": 720,
+      "frames": [
+        { "qrFraction": 0.35, "yaw": 35, "pitch": 20, "rotation": 18 },
+        { "qrFraction": 0.35, "yaw": 25, "pitch": 12, "rotation": 12 },
+        { "qrFraction": 0.68, "yaw": 12, "pitch": 6, "rotation": 6 },
+        { "qrFraction": 0.78, "yaw": 0, "pitch": 0, "rotation": 0 }
+      ]
+    },
+    {
+      "id": "contrast-noise-to-clean",
+      "width": 640,
+      "height": 480,
+      "frames": [
+        { "qrFraction": 0.32, "contrast": 0.30, "noise": 18 },
+        { "qrFraction": 0.34, "contrast": 0.50, "noise": 12 },
+        { "qrFraction": 0.70, "contrast": 0.72, "noise": 6 },
+        { "qrFraction": 0.88, "contrast": 1.00, "noise": 0 }
+      ]
+    },
+    {
+      "id": "barcode-throws-to-jsqr-live",
+      "width": 1280,
+      "height": 720,
+      "detectorMode": "throw",
+      "frames": [
+        { "qrFraction": 0.78, "brightness": 1.00, "contrast": 1.00 },
+        { "qrFraction": 0.78, "brightness": 1.00, "contrast": 1.00 },
+        { "qrFraction": 0.78, "brightness": 1.00, "contrast": 1.00 }
+      ]
+    }
+  ]
+}

@@ -70,6 +70,7 @@ cmd /c release-pipeline\run-kgg-tests.cmd --suite mobile-inbox
 cmd /c release-pipeline\run-kgg-tests.cmd --suite sync
 cmd /c release-pipeline\run-kgg-tests.cmd --suite native-sync
 cmd /c release-pipeline\run-kgg-tests.cmd --suite textblocks
+cmd /c release-pipeline\run-kgg-tests.cmd --suite patient-scan --level regression
 cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability
 ```
 
@@ -139,6 +140,18 @@ cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regressio
   - Drag/Drop ueber den Griff aendert die Karten-Reihenfolge und raeumt danach auf.
 
 Nach jedem UI-Flicker-, Handy-Layout- oder Kartenanimations-Patch ist `ui-stability --level regression` Pflicht. Wenn Web/HTML gruen ist, die APK aber trotzdem haengt, ist der naechste Befund APK/WebView-spezifisch und nicht mehr Parser/Layout allgemein.
+
+`patient-scan` prueft den Patienten-Scanner mit echten PNG-Dateien und einem test-only Canvas-`MediaStream`:
+
+```powershell
+cmd /c release-pipeline\run-kgg-tests.cmd --suite patient-scan --level regression
+```
+
+Die Batterie deckt mehrere Aufloesungen, Entfernung, Rotation, Perspektive, Unschaerfe, Bewegung, Licht, Kontrast und Rauschen ab. Sie protokolliert `BarcodeDetector` beziehungsweise jsQR, die exakte Parser-Uebergabe sowie Werte-/Medienerhalt. 31 Vierpunkt-/3D-Perspektivbilder pruefen horizontale und vertikale Winkel, kombinierte Neigung, Trapeze und asymmetrische Eckverzerrungen einzeln. Dadurch kann ein spaeteres frontales Bild einen vorherigen Fehlschlag nicht verdecken. Die reproduzierbaren Aufnahmen stehen in `patient-scan-fixtures/perspective/`; `patient-scan-fixtures/perspective-gallery.html` zeigt sie mit Aufloesung, QR-Groesse und Gate-Status.
+
+Der Live-Test ersetzt `getUserMedia()` durch den Canvas-Stream und prueft dadurch die automatische Frame-Schleife, Kamera-Cleanup, Berechtigungs-Fallback, `BarcodeDetector` und jsQR. Der Fotomodus prueft Vollbild, Mittelausschnitte und Kontrastvarianten. Medien, Video-Metadaten, zusaetzliche Uebungsfelder, Werte, Tage und weitere Plan-Slots muessen beim Update erhalten bleiben; explizite neue Medienwerte muessen die alten ersetzen.
+
+Extreme Erkennungsgrenzen und reproduzierte starke Eckverzerrungs-Grenzen werden weiterhin als Messwerte dokumentiert. Klare Referenzbilder, milde reine 3D-Neigungen und die abschliessenden klaren Frames jeder Sequenz bleiben verbindlich. Der simulierte Stream ersetzt keinen Test mit einer echten Android-Rueckkamera. Der Nutzerbericht vom 13.07.2026, dass die reale Aktualisieren-/Kamerafunktion den Plan-QR nicht erkannt hat, bleibt deshalb bis zum erneuten Handtest offen.
 
 Nur wenn wirklich eine neue Admin-Beta erzeugt werden soll:
 
