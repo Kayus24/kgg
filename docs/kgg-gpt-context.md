@@ -34,8 +34,8 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Source web version: v60 / `1.0.60-tablet-html-release-label`.
 - Source index URL: `index.html?v=60`.
 - Source notes: v060: Zeigt Release, HTML-Build und geladenen Dateinamen unten rechts im ausgefahrenen Tablet-Menue.
-- Live Admin release: `r0423` / `1.0.59-ui-scaler-push-canary`.
-- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0423/admin.html`.
+- Live Admin release: `r0424` / `1.0.60-tablet-html-release-label`.
+- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0424/admin.html`.
 - Live colleague release: `r0397` / `1.0.29-camera-touch-parser-fix`.
 - Live colleague URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0397/colleague.html`.
 - Latest Android shell: `v401`.
