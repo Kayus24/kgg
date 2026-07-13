@@ -100,21 +100,45 @@ async function assertVisibleAndClickable(page, selectors, viewportId) {
     await locator.waitFor({ state: "visible", timeout: 15000 });
     const probe = await locator.evaluate((element) => {
       const rect = element.getBoundingClientRect();
-      const x = Math.max(0, Math.min(innerWidth - 1, rect.left + rect.width / 2));
-      const y = Math.max(0, Math.min(innerHeight - 1, rect.top + rect.height / 2));
-      const top = document.elementFromPoint(x, y);
+      const visible = {
+        left: Math.max(0, rect.left),
+        top: Math.max(0, rect.top),
+        right: Math.min(innerWidth, rect.right),
+        bottom: Math.min(innerHeight, rect.bottom),
+      };
+      visible.width = Math.max(0, visible.right - visible.left);
+      visible.height = Math.max(0, visible.bottom - visible.top);
+      const fractions = [0.25, 0.5, 0.75];
+      const hits = [];
+      for (const xFraction of fractions) {
+        for (const yFraction of fractions) {
+          const x = Math.max(0, Math.min(innerWidth - 1, visible.left + visible.width * xFraction));
+          const y = Math.max(0, Math.min(innerHeight - 1, visible.top + visible.height * yFraction));
+          const top = document.elementFromPoint(x, y);
+          hits.push({
+            x: Math.round(x),
+            y: Math.round(y),
+            target: top ? `${top.tagName.toLowerCase()}#${top.id || ""}.${String(top.className || "").trim()}` : "",
+            matches: !!(top && (top === element || element.contains(top) || top.contains(element))),
+          });
+        }
+      }
       return {
         rect: { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height },
+        visible,
         viewport: { width: innerWidth, height: innerHeight },
         display: getComputedStyle(element).display,
         visibility: getComputedStyle(element).visibility,
         pointerEvents: getComputedStyle(element).pointerEvents,
-        topMatches: !!(top && (top === element || element.contains(top) || top.contains(element))),
+        hits,
+        topMatches: hits.some((hit) => hit.matches),
       };
     });
     if (
       probe.rect.width < 20 ||
       probe.rect.height < 20 ||
+      probe.visible.width < 20 ||
+      probe.visible.height < 20 ||
       probe.rect.right < 0 ||
       probe.rect.left > probe.viewport.width ||
       probe.rect.bottom < 0 ||
