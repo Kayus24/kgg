@@ -1,0 +1,5 @@
+{
+  "releaseId": "r0423",
+  "versionName": "1.0.59-ui-scaler-push-canary",
+  "notes": "Byte-identische modulare Quelluebernahme; Laufzeit unveraendert gegenueber r0422."
+}
