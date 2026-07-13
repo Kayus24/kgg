@@ -4,6 +4,43 @@
 - Lines: 2521-2940
 
 ```html
+        grid-template-rows:auto 54px minmax(78px,auto) minmax(0,1fr) 0!important;
+      }
+      .app.softKeyboard .scanHub .scanBtn,
+      .app.softKeyboard .scanHub .scanMeta,
+      .app.softKeyboard #baseToggle,
+      .app.softKeyboard #finishBtn,
+      .app.softKeyboard #recentToggle,
+      .app.softKeyboard #packageToggle{
+        min-height:54px!important;
+        height:54px!important;
+      }
+      .app.softKeyboard #exerciseInput{
+        min-height:78px;
+        max-height:116px;
+      }
+      @media (max-width:920px){
+        .app{
+          padding:8px 10px 8px!important;
+          gap:10px!important;
+          grid-template-columns:minmax(320px,390px) minmax(0,1fr) minmax(126px,150px)!important;
+          grid-template-rows:auto 58px minmax(92px,auto) minmax(0,1fr) 56px!important;
+        }
+        .scanHub .scanBtn,
+        .scanHub .scanMeta,
+        #baseToggle,
+        #finishBtn,
+        #recentToggle,
+        #packageToggle{
+          min-height:56px!important;
+          height:56px!important;
+        }
+        #exerciseInput{
+          min-height:92px;
+          max-height:132px;
+        }
+      }
+    }
 
 
     /* v328 Tablet Header/Package Fix:
@@ -387,41 +424,4 @@
       }
       #baseToggle,
       #finishBtn{
-        min-height:62px!important;
-      }
-
-      #inputWrap textarea,
-      #exerciseInput{
-        font-size:22px!important;
-        line-height:1.36!important;
-      }
-      #inputWrap textarea{
-        min-height:118px!important;
-        padding:18px 48px 18px 16px!important;
-      }
-
-      .bankArea.bankOpen.alphaBankOpen .bankWithAz{
-        grid-template-columns:64px minmax(0,1fr)!important;
-        column-gap:12px!important;
-      }
-      .bankArea.bankOpen.alphaBankOpen .az{
-        width:52px!important;
-        margin-top:68px!important;
-      }
-      .az button{
-        font-size:12.5px!important;
-        min-height:20px!important;
-      }
-      .bankRows{
-        max-height:none!important;
-      }
-      .bankRow{
-        padding:13px 15px!important;
-      }
-      .bankRow b{
-        font-size:18px!important;
-      }
-      .bankRow small{
-        font-size:12px!important;
-      }
 ```

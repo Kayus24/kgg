@@ -4,6 +4,43 @@
 - Lines: 17641-18060
 
 ```html
+    if(['zeit','time','dauer','sek','sek.','sec','s'].includes(raw))return 'zeit';
+    return 'wdh';
+  }
+  function measureUnitLabel(measure){return normalizeMeasureMode(measure)==='zeit'?'Sek.':'Wdh';}
+  function cleanFreeUnitLabel(value){
+    return String(value||'').trim().replace(/\s*\/\s*/g,'/').replace(/\s+/g,' ').replace(/^[.@:;,\-\s]+|[.@:;,\-\s]+$/g,'');
+  }
+  function normalizeLoadUnitInfo(value,fallback){
+    const fallbackUnit=fallback||'kg';
+    const raw=cleanFreeUnitLabel(value);
+    if(!raw)return {unit:fallbackUnit,custom:false,explicit:false};
+    const lower=raw.toLowerCase().replace(/\./g,'').replace(/\s+/g,' ');
+    const compact=lower.replace(/\s+/g,'');
+    if(['kg','kgs','kilo','kilos','kilogramm','kilogram'].includes(lower))return {unit:'kg',custom:false,explicit:true};
+    if(['bw','bodyweight','body weight','koerpergewicht','körpergewicht','eigengewicht'].includes(lower)||compact==='bodyweight')return {unit:'BW',custom:false,explicit:true};
+    if(['hub','huebe','hübe'].includes(lower))return {unit:'Hub',custom:false,explicit:true};
+    if(['stufe'].includes(lower))return {unit:'Stufe',custom:false,explicit:true};
+    if(['watt','w'].includes(lower))return {unit:'Watt',custom:false,explicit:true};
+    if(['stufe/watt','stufe watt','stufe+watt','stufewatt'].includes(lower)||compact==='stufe/watt')return {unit:'Stufe/Watt',custom:false,explicit:true};
+    if(['bar'].includes(lower))return {unit:'bar',custom:false,explicit:true};
+    if(['keine','kein','none','ohne'].includes(lower))return {unit:'keine',custom:false,explicit:true};
+    return {unit:raw,custom:true,explicit:true};
+  }
+  function normalizeLoadUnit(value){
+    return normalizeLoadUnitInfo(value,'kg').unit;
+  }
+  function structuredNumberPattern(){return '-?\\d+(?:[,.]\\d+)?';}
+  function structuredUnitPattern(){return '[A-Za-zÄÖÜäöüß%°/._-]+(?:\\s*/\\s*[A-Za-zÄÖÜäöüß%°/._-]+)?';}
+  function normalizeStructuredNumber(value){return String(value||'').replace(',','.').trim();}
+  function normalizeMetricToken(token){
+    const raw=String(token||'').trim().replace('.','');
+    const lower=raw.toLowerCase();
+    if(['wdh','wh','rep','reps'].includes(lower))return {unit:'Wdh',metricUnit:'Wdh',time:false,label:'Wdh'};
+    if(['min','minute','minutes','minuten','sek','sec','secs','s','zeit','time','dauer'].includes(lower))return {unit:'Zeit',metricUnit:'Zeit',time:true,label:raw||'Zeit'};
+    return {unit:raw||'Wdh',metricUnit:raw||'Wdh',time:false,label:raw||'Wdh',custom:true};
+  }
+  function parseExerciseQuantityText(text){
     const body=String(text||'');
     const n=structuredNumberPattern(), u=structuredUnitPattern();
     const freeU='([^\\s\\d@,:;]+(?:\\s*/\\s*[^\\s\\d@,:;]+)?)';
@@ -387,41 +424,4 @@
     const modal=$('installPromptModal'); if(modal)modal.classList.add('open');
   }
   async function acceptInstallPrompt(){
-    if(window.KGGAndroidApkUpdateUrl){
-      const target=window.KGGAndroidApkUpdateUrl;
-      window.KGGAndroidApkUpdateUrl='';
-      closeInstallPrompt();
-      try{const opened=window.open(target,'_blank','noopener'); if(!opened)location.href=target;}catch(err){location.href=target;}
-      return;
-    }
-    if(window.KGGRemoteUpdateUrl){
-      const target=window.KGGRemoteUpdateUrl;
-      window.KGGRemoteUpdateUrl='';
-      closeInstallPrompt();
-      try{const opened=window.open(target,'_blank','noopener'); if(!opened)location.href=target;}catch(err){location.href=target;}
-      return;
-    }
-    localStorage.setItem(pwaInstallPromptSeenKey,new Date().toISOString());
-    const waiting=window.KGGWaitingServiceWorker;
-    if(waiting){waiting.postMessage({type:'SKIP_WAITING'}); closeInstallPrompt(); return;}
-    if(deferredInstallPrompt){
-      const prompt=deferredInstallPrompt;
-      deferredInstallPrompt=null;
-      try{prompt.prompt(); await prompt.userChoice;}catch(err){console.warn('Install-Prompt blockiert:',err);}
-    }
-    closeInstallPrompt();
-  }
-  function initPwaAndUpdates(){
-    initStoragePersistence();
-    setTimeout(checkGithubAppUpdate,900);
-    setInterval(checkGithubAppUpdate,kggAutoUpdateCheckMs);
-    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkGithubAppUpdate();});
-    window.addEventListener('beforeinstallprompt',ev=>{
-      ev.preventDefault();
-      deferredInstallPrompt=ev;
-      showInstallPrompt('install');
-    });
-    window.addEventListener('appinstalled',()=>localStorage.setItem(pwaInstallPromptSeenKey,new Date().toISOString()));
-    if(!canUsePwaRuntime()||isLocalHtmlTestRuntime()||!('serviceWorker' in navigator))return;
-    navigator.serviceWorker.register(pwaServiceWorkerUrl).then(reg=>{
 ```

@@ -4,6 +4,43 @@
 - Lines: 18061-18480
 
 ```html
+    if(window.KGGAndroidApkUpdateUrl){
+      const target=window.KGGAndroidApkUpdateUrl;
+      window.KGGAndroidApkUpdateUrl='';
+      closeInstallPrompt();
+      try{const opened=window.open(target,'_blank','noopener'); if(!opened)location.href=target;}catch(err){location.href=target;}
+      return;
+    }
+    if(window.KGGRemoteUpdateUrl){
+      const target=window.KGGRemoteUpdateUrl;
+      window.KGGRemoteUpdateUrl='';
+      closeInstallPrompt();
+      try{const opened=window.open(target,'_blank','noopener'); if(!opened)location.href=target;}catch(err){location.href=target;}
+      return;
+    }
+    localStorage.setItem(pwaInstallPromptSeenKey,new Date().toISOString());
+    const waiting=window.KGGWaitingServiceWorker;
+    if(waiting){waiting.postMessage({type:'SKIP_WAITING'}); closeInstallPrompt(); return;}
+    if(deferredInstallPrompt){
+      const prompt=deferredInstallPrompt;
+      deferredInstallPrompt=null;
+      try{prompt.prompt(); await prompt.userChoice;}catch(err){console.warn('Install-Prompt blockiert:',err);}
+    }
+    closeInstallPrompt();
+  }
+  function initPwaAndUpdates(){
+    initStoragePersistence();
+    setTimeout(checkGithubAppUpdate,900);
+    setInterval(checkGithubAppUpdate,kggAutoUpdateCheckMs);
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkGithubAppUpdate();});
+    window.addEventListener('beforeinstallprompt',ev=>{
+      ev.preventDefault();
+      deferredInstallPrompt=ev;
+      showInstallPrompt('install');
+    });
+    window.addEventListener('appinstalled',()=>localStorage.setItem(pwaInstallPromptSeenKey,new Date().toISOString()));
+    if(!canUsePwaRuntime()||isLocalHtmlTestRuntime()||!('serviceWorker' in navigator))return;
+    navigator.serviceWorker.register(pwaServiceWorkerUrl).then(reg=>{
       reg.update().catch(()=>{});
       reg.addEventListener('updatefound',()=>{
         const worker=reg.installing;
@@ -387,41 +424,4 @@
       const segments=splitPlanText(text).map(p=>p.text.trim()).filter(Boolean);
       state.plan=segments.map((segment,index)=>parseTextExercise(segment,findExistingForTextSegment(segment,index))).filter(Boolean).map(ensureUiExerciseShape);
     }
-    state.liveDraftId=null;
-    state.planText=input?input.value:'';
-    syncStatePlanToStore(reason||'ui_textfield_master_sync');
-    save();
-    render();
-  }
-  function captureDbScrollAnchor(){
-    const anchor=$('bankArea')||$('inputWrap');
-    if(!anchor)return null;
-    const rows=document.querySelector('#bankContent .bankRows');
-    return {top:anchor.getBoundingClientRect().top,rowsTop:rows?rows.scrollTop:0};
-  }
-  function restoreDbScrollAnchor(anchor){
-    if(!anchor||!state.bankOpen)return;
-    const rows=document.querySelector('#bankContent .bankRows');
-    if(rows)rows.scrollTop=anchor.rowsTop||0;
-    const el=$('bankArea')||$('inputWrap');
-    if(!el)return;
-    const apply=()=>{
-      const delta=el.getBoundingClientRect().top-anchor.top;
-      if(Math.abs(delta)>1)window.scrollBy(0,delta);
-      const nextRows=document.querySelector('#bankContent .bankRows');
-      if(nextRows)nextRows.scrollTop=anchor.rowsTop||0;
-    };
-    apply();
-    if(typeof requestAnimationFrame==='function')requestAnimationFrame(apply);
-  }
-  function alignFullBankInputToViewportTop(){
-    const inputWrap=$('inputWrap');
-    if(!inputWrap)return;
-    const apply=()=>{
-      const top=inputWrap.getBoundingClientRect().top;
-      const targetOffset=6;
-      if(Math.abs(top-targetOffset)>1)window.scrollBy({top:top-targetOffset,behavior:'smooth'});
-    };
-    if(typeof requestAnimationFrame==='function'){
-      requestAnimationFrame(()=>requestAnimationFrame(apply));
 ```

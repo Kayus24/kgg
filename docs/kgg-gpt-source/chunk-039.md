@@ -4,6 +4,43 @@
 - Lines: 16381-16800
 
 ```html
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var BitMatrix_1 = __webpack_require__(0);
+function squareToQuadrilateral(p1, p2, p3, p4) {
+    var dx3 = p1.x - p2.x + p3.x - p4.x;
+    var dy3 = p1.y - p2.y + p3.y - p4.y;
+    if (dx3 === 0 && dy3 === 0) { // Affine
+        return {
+            a11: p2.x - p1.x,
+            a12: p2.y - p1.y,
+            a13: 0,
+            a21: p3.x - p2.x,
+            a22: p3.y - p2.y,
+            a23: 0,
+            a31: p1.x,
+            a32: p1.y,
+            a33: 1,
+        };
+    }
+    else {
+        var dx1 = p2.x - p3.x;
+        var dx2 = p4.x - p3.x;
+        var dy1 = p2.y - p3.y;
+        var dy2 = p4.y - p3.y;
+        var denominator = dx1 * dy2 - dx2 * dy1;
+        var a13 = (dx3 * dy2 - dx2 * dy3) / denominator;
+        var a23 = (dx1 * dy3 - dx3 * dy1) / denominator;
+        return {
+            a11: p2.x - p1.x + a13 * p2.x,
+            a12: p2.y - p1.y + a13 * p2.y,
+            a13: a13,
             a21: p4.x - p1.x + a23 * p4.x,
             a22: p4.y - p1.y + a23 * p4.y,
             a23: a23,
@@ -387,41 +424,4 @@ function locate(matrix) {
             .sort(function (a, b) { return a.score - b.score; });
         if (otherPoints.length < 2) {
             return null;
-        }
-        var score = point.score + otherPoints[0].score + otherPoints[1].score;
-        return { points: [point].concat(otherPoints.slice(0, 2)), score: score };
-    })
-        .filter(function (q) { return !!q; }) // Filter out any rejected finder patterns from above
-        .sort(function (a, b) { return a.score - b.score; });
-    if (finderPatternGroups.length === 0) {
-        return null;
-    }
-    var _a = reorderFinderPatterns(finderPatternGroups[0].points[0], finderPatternGroups[0].points[1], finderPatternGroups[0].points[2]), topRight = _a.topRight, topLeft = _a.topLeft, bottomLeft = _a.bottomLeft;
-    var alignment = findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, bottomLeft);
-    var result = [];
-    if (alignment) {
-        result.push({
-            alignmentPattern: { x: alignment.alignmentPattern.x, y: alignment.alignmentPattern.y },
-            bottomLeft: { x: bottomLeft.x, y: bottomLeft.y },
-            dimension: alignment.dimension,
-            topLeft: { x: topLeft.x, y: topLeft.y },
-            topRight: { x: topRight.x, y: topRight.y },
-        });
-    }
-    // We normally use the center of the quads as the location of the tracking points, which is optimal for most cases and will account
-    // for a skew in the image. However, In some cases, a slight skew might not be real and instead be caused by image compression
-    // errors and/or low resolution. For those cases, we'd be better off centering the point exactly in the middle of the black area. We
-    // compute and return the location data for the naively centered points as it is little additional work and allows for multiple
-    // attempts at decoding harder images.
-    var midTopRight = recenterLocation(matrix, topRight);
-    var midTopLeft = recenterLocation(matrix, topLeft);
-    var midBottomLeft = recenterLocation(matrix, bottomLeft);
-    var centeredAlignment = findAlignmentPattern(matrix, alignmentPatternQuads, midTopRight, midTopLeft, midBottomLeft);
-    if (centeredAlignment) {
-        result.push({
-            alignmentPattern: { x: centeredAlignment.alignmentPattern.x, y: centeredAlignment.alignmentPattern.y },
-            bottomLeft: { x: midBottomLeft.x, y: midBottomLeft.y },
-            topLeft: { x: midTopLeft.x, y: midTopLeft.y },
-            topRight: { x: midTopRight.x, y: midTopRight.y },
-            dimension: centeredAlignment.dimension,
 ```

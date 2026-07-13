@@ -4,6 +4,43 @@
 - Lines: 23101-23520
 
 ```html
+      const title=escapeHtml(job.short||job.label);
+      const meta=escapeHtml(typeLabel+' · '+job.pages.length+' Bild(er)');
+      const head='<div class="scanJobHead"><div class="scanJobHeadMain"><b>'+title+'</b><small>'+meta+'</small>'+(collapsed?'<span class="scanCollapsedHint">eingeklappt · antippen zum Öffnen</span>':'')+'</div><div class="scanJobTopActions"><button type="button" class="scanMiniBtn" onclick="window.KGGScan.toggleCollapse('+index+')" aria-label="Scankarte '+(collapsed?'ausklappen':'einklappen')+'">'+(collapsed?'▾':'▴')+'</button><button type="button" class="scanRemoveBtn" onclick="window.KGGScan.removeJob('+index+')" aria-label="Scankarte entfernen">×</button></div></div>';
+      if(collapsed){
+        return '<div class="scanJobCard '+cls+' collapsed">'+head+'</div>';
+      }
+      return '<div class="scanJobCard '+cls+'">'+
+        head+
+        '<input class="scanShort" value="'+escapeHtml(job.short||'')+'" placeholder="lokales Kürzel, z. B. Max M." oninput="window.KGGScan.setShort('+index+',this.value)">'+
+        '<div class="scanFileList">'+escapeHtml(job.pages.map(p=>p.name).join(' · ')||'Noch kein Bild')+'</div>'+
+        (warn.length?'<div class="scanWarning">Prüfen: '+escapeHtml(warn.join(' · '))+'</div>':'')+
+        '<textarea id="kggScanCopyField'+index+'" class="scanResultText" readonly>'+escapeHtml(resultText||'Noch nicht ausgelesen.')+'</textarea>'+
+        '<div class="scanCardActions scanCardActionsCompact">'+
+          '<button type="button" class="mutedBtn" onclick="window.KGGScan.copyResult('+index+')">kopieren</button>'+
+          '<button type="button" class="primary" onclick="window.KGGScan.applyResult('+index+')">weiter bearbeiten</button>'+
+        '</div></div>';
+    }).join('');
+    const decisionHtml='';
+    preview.innerHTML='<div class="kggScanV295">'+decisionHtml+(scanState.busy?'<div class="notice"><b>Scan läuft …</b></div>':'')+(scanState.lastError?'<div class="notice danger">'+escapeHtml(scanState.lastError)+'</div>':'')+jobsHtml+'</div>';
+  }
+  function collapseScanCards(reason){
+    if(shouldIgnorePhoneScrollToggle())return scanStateSnapshot();
+    let changed=false;
+    (scanState.jobs||[]).forEach(job=>{if(job&&!job.collapsed){job.collapsed=true; changed=true;}});
+    if(changed){scanState.lastCollapseReason=reason||'ui'; renderScanPreview();}
+    return scanStateSnapshot();
+  }
+  function removeScanJob(index){
+    const i=Number(index)||0;
+    if(i>=0&&i<scanState.jobs.length){scanState.jobs.splice(i,1);}
+    if(scanState.activeIndex>=scanState.jobs.length)scanState.activeIndex=Math.max(0,scanState.jobs.length-1);
+    if(!scanState.jobs.length){scanState.decision=false; state.scanPanelOpen='plan';}
+    renderScanPreview();
+    render();
+    return scanStateSnapshot();
+  }
+  function toggleScanJobCollapse(index){
     if(shouldIgnorePhoneScrollToggle())return scanStateSnapshot();
     const job=scanState.jobs[Number(index)||0];
     if(job){job.collapsed=!job.collapsed; renderScanPreview();}
@@ -387,41 +424,4 @@
       if(job)job.short=String(value||'').trim();
       const field=$('kggScanCopyField'+index);
       if(field&&job)field.value=scanResultToCopyText(job)||field.value;
-      return scanStateSnapshot();
-    },
-    toggleCollapse(index){return toggleScanJobCollapse(index);},
-    removeJob(index){return removeScanJob(index);},
-    collapseAll(reason){return collapseScanCards(reason);},
-    closeDecision(){scanState.decision=false;renderScanPreview();return scanStateSnapshot();},
-    async copyResult(index){
-      const job=scanState.jobs[Number(index)||0];
-      if(!job)return false;
-      const text=scanResultToCopyText(job);
-      const fieldId=$('kggScanCopyField'+index)?'kggScanCopyField'+index:'kggScanInboxField'+index;
-      const ok=await copyTextWithFallback(text,fieldId);
-      setScanStatus(ok?'Kopiert.':'Text markiert - bitte manuell kopieren.');
-      return ok;
-    },
-    applyResult(index){
-      const job=scanState.jobs[Number(index)||0];
-      if(!job)return false;
-      const ok=applyScanResultToCurrentPlan(job.result,'scan_v319_continue_edit_job_'+index); if(ok){state.scanPanelOpen='plan'; save(); render();} return ok;
-    },
-    getState:scanStateSnapshot
-  };
-
-  /* v316 Tablet Anchor Overlay Manager: ein Nebenfenster aktiv, aber am jeweiligen Button verankert. */
-  const tabletLayoutKeys={
-    locked:'kgg_tablet_layout_locked',
-    left:'kgg_tablet_left_col_width',
-    scale:'kgg_tablet_ui_scale'
-  };
-  const tabletLayoutState={locked:true,leftCol:'',scale:1,dragging:false};
-  function clampTabletScale(value){const n=Number(value)||1; return Math.max(.01,Math.min(2,n));}
-  function loadTabletLayoutSettings(){
-    try{
-      tabletLayoutState.locked=localStorage.getItem(tabletLayoutKeys.locked)!=='false';
-      tabletLayoutState.leftCol=localStorage.getItem(tabletLayoutKeys.left)||'';
-      tabletLayoutState.scale=clampTabletScale(localStorage.getItem(tabletLayoutKeys.scale)||1);
-    }catch(err){tabletLayoutState.locked=true;tabletLayoutState.leftCol='';tabletLayoutState.scale=1;}
 ```

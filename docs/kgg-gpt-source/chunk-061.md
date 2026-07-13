@@ -4,6 +4,43 @@
 - Lines: 25621-26040
 
 ```html
+    if(body()) mo.observe(body(), {attributes:true, attributeFilter:["class"]});
+
+    window.addEventListener("pagehide", function(){ hardClean("pagehide"); }, {passive:true});
+    scheduleClean("boot", 260);
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", install, {once:true});
+  }else{
+    install();
+  }
+})();
+</script>
+
+<script id="kgg-v014-local-update-release-marker">
+(function(){
+  "use strict";
+  window.KGG_V014_PHONE_VIEWPORT_STATE_RELEASE_GUARD = {
+    patchId: "kgg-v014-phone-viewport-state-release-guard",
+    confirms: [
+      "phone-only gesture code remains gated by matchMedia('(max-width:759px)')",
+      "stale phone classes and inline styles are cleaned when leaving phone viewport",
+      "phone drag reorder stays absolute inside #planList instead of position:fixed",
+      "global tablet layout containers are not overridden outside max-width:759px",
+      "content://, file:// and /media/external/file/ local tests do not auto-redirect to GitHub",
+      "KGGReleaseControl local fallback is kept and native bridge is not overwritten"
+    ]
+  };
+})();
+</script>
+<!-- KGG PATCH END kgg-v014-phone-viewport-state-release-guard -->
+
+<!-- KGG v13 marker: Update-Zentrale initialization fixed without changing phone/tablet touch behavior -->
+<script id="kgg-v13-update-zentrale-marker">
+(function(){
+  "use strict";
+  window.KGG_UPDATE_ZENTRALE_V13 = {
     patchId: "kgg-v13-release-control-local-fallback",
     base: "KGG_CURRENT_ADMIN_HTML_v12_features_restored_phone_fixed.html",
     changes: [
@@ -387,41 +424,4 @@
       ev.stopPropagation();
       if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();
     }
-    var next=!(document.body&&document.body.classList.contains("kggPhonePhotoMenuOpen"));
-    if(document.body)document.body.classList.toggle("kggPhonePhotoMenuOpen",next);
-    var toggle=byId("phonePhotoMenuToggle");
-    if(toggle)toggle.setAttribute("aria-expanded",String(next));
-    closeAdminMenu();
-  }
-  function anchorAdminMenu(){
-    var menu=byId("kggPhoneAdminMenu");
-    var header=document.querySelector("#createPanel .planHeader");
-    if(menu&&header&&!header.contains(menu))header.appendChild(menu);
-  }
-  function restoreTabletScanButton(){
-    var scan=byId("scanBtn");
-    var toggle=byId("phonePhotoMenuToggle");
-    if(toggle&&scan&&toggle.parentElement===scan)toggle.remove();
-    if(scan&&scan.dataset.kggV042ScanHydrated==="1"){
-      scan.classList.remove("kggScanButtonWithMenu");
-      delete scan.dataset.kggV042ScanHydrated;
-      scan.textContent="\uD83D\uDCF7 Plan scannen";
-    }
-  }
-  function closeViewportPhoneUi(){
-    closePhotoMenu();
-    closeAdminMenu();
-    restoreTabletScanButton();
-    if(observer){
-      observer.disconnect();
-      observer=null;
-    }
-  }
-  function integratePhotoToggle(){
-    var scan=byId("scanBtn");
-    if(!scan)return;
-    var old=byId("phonePhotoMenuToggle");
-    if(old&&old.parentElement!==scan)old.remove();
-    if(scan.dataset.kggV042ScanHydrated==="1")return;
-    scan.dataset.kggV042ScanHydrated="1";
 ```

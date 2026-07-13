@@ -4,6 +4,43 @@
 - Lines: 4201-4620
 
 ```html
+      @keyframes phoneInputLift{
+        0%{transform:translateY(10px) scale(.992);opacity:.98}
+        100%{transform:translateY(0) scale(1);opacity:1}
+      }
+      @keyframes phoneSuggestionIn{
+        0%{opacity:0;transform:translateY(-8px) scale(.985);filter:blur(1px)}
+        100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+      }
+      @keyframes phoneBankShellIn{
+        0%{opacity:.92;transform:translateY(-6px) scale(.992)}
+        100%{opacity:1;transform:translateY(0) scale(1)}
+      }
+      @keyframes phoneBankContentIn{
+        0%{opacity:0;transform:translateY(-10px) scale(.985);clip-path:inset(0 0 100% 0 round 16px)}
+        100%{opacity:1;transform:translateY(0) scale(1);clip-path:inset(0 0 0 0 round 16px)}
+      }
+      @keyframes phoneButtonDockFloat{
+        0%{transform:translateY(0) scale(1)}
+        55%{transform:translateY(10px) scale(1.035)}
+        100%{transform:translateY(16px) scale(1.02)}
+      }
+      @keyframes phoneDrawerFromButton{
+        0%{opacity:0;transform:translateY(34px) scale(.94);filter:blur(2px)}
+        65%{opacity:1;transform:translateY(-3px) scale(1.01);filter:blur(0)}
+        100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+      }
+    }
+
+    /* Composer state clarity */
+    @media (max-width:759px){
+      .bankArea.bankOpen.searchBankOpen{
+        display:grid;
+        grid-template-columns:56px minmax(0,1fr);
+        column-gap:8px;
+        align-items:start;
+      }
+      .bankArea.bankOpen.searchBankOpen #bankToggle{
         grid-column:1;
         grid-row:1;
       }
@@ -387,41 +424,4 @@
     border-radius:999px;
     border:1px solid rgba(10,16,36,.12);
     background:#fff;
-    font-size:1.35rem;
-    font-weight:900;
-    color:#0a1024;
-    cursor:pointer;
-  }
-  .tabletSideMenuGroup{
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    padding:14px;
-    border:1px solid rgba(10,16,36,.10);
-    border-radius:22px;
-    background:#f8fafc;
-  }
-  .tabletSideMenuGroup h3{
-    margin:0;
-    font-size:1rem;
-    font-weight:900;
-    color:#0a1024;
-  }
-  .tabletSideHint{
-    margin:0;
-    font-size:.86rem;
-    line-height:1.35;
-    color:#667085;
-    font-weight:750;
-  }
-  .tabletSideMenu .tabletLayoutControls{
-    position:static!important;
-    display:grid!important;
-    grid-template-columns:1fr 1fr;
-    width:100%!important;
-    min-width:0!important;
-    height:auto!important;
-    padding:0!important;
-    gap:10px!important;
-    border:0!important;
 ```

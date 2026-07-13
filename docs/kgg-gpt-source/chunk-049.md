@@ -4,6 +4,43 @@
 - Lines: 20581-21000
 
 ```html
+      if(!record||!record.blob)throw new Error('Lokale Bilddatei fehlt.');
+      const imageBlob=await patientDecryptMedia(media,record.blob);
+      const url=URL.createObjectURL(imageBlob);
+      preview.innerHTML='<img src="'+url+'" alt="Uebungsbild Vorschau">';
+      setTimeout(()=>URL.revokeObjectURL(url),60000);
+    }catch(err){
+      preview.textContent='Vorschau lokal nicht verfuegbar.';
+    }
+  }
+  function renderEditorMediaStatus(ex){
+    const box=document.querySelector('.editorMediaBox'), status=$('editMediaStatus'), removeBtn=$('removeExerciseImage');
+    if(!box||!status||!removeBtn)return;
+    const isEditableExercise=!!ex;
+    box.classList.toggle('hidden',!isEditableExercise);
+    if(!isEditableExercise){clearEditorMediaPreview();return;}
+    const media=ensureExerciseMediaList(ex);
+    removeBtn.classList.toggle('hidden',media.length===0);
+    if(!media.length){status.textContent='Kein Bild.';clearEditorMediaPreview();return;}
+    const first=media[0];
+    status.textContent='1 Bild · '+mediaSizeLabel(first.encryptedSize||first.compressedSize||first.originalSize);
+    renderEditorMediaPreview(first);
+  }
+  async function handleEditorMediaFileSelected(ev){
+    const file=ev.target.files&&ev.target.files[0];
+    ev.target.value='';
+    if(!file)return;
+    const ex=currentEditedExercise();
+    if(!ex)return;
+    const status=$('editMediaStatus');
+    if(status)status.textContent='Bild wird vorbereitet ...';
+    const oldMedia=ensureExerciseMediaList(ex);
+    try{
+      const manifest=await prepareImageMediaFile(file);
+      ex.media=[manifest];
+      oldMedia.forEach(item=>deleteUnsharedMediaBlob(item,ex));
+      if(ex.localId){
+        syncStatePlanToStore('ui_attach_exercise_image');
         save();
       }else{
         ex.custom=true;
@@ -387,41 +424,4 @@
     const raw=String(text==null?'':text).replace(/\s+/g,' ').trim();
     if(raw.length<=firstMax)return [raw];
     const limit=Math.max(1,Number(firstMax)||1);
-    let cut=raw.lastIndexOf(' ',limit);
-    if(cut<Math.max(12,limit*.55))cut=limit;
-    const first=raw.slice(0,cut).trim();
-    const rest=raw.slice(cut).trim();
-    return [first,pdfShort(rest,secondMax)];
-  }
-  function pdfSpaceLabel(fullLabel,shortLabel,cellWidth,minWidth){
-    return Number(cellWidth||0)>=Number(minWidth||0)?fullLabel:shortLabel;
-  }
-  function pdfResetInk(doc){
-    try{doc.setDrawColor(0);doc.setTextColor(0);doc.setFillColor(0);}catch(e){}
-  }
-  function pdfLightInk(doc){
-    try{doc.setDrawColor(155);doc.setTextColor(80);doc.setFillColor(255);}catch(e){}
-  }
-
-  function drawKggCornerMarkers(doc,layout){
-    const edge=2.6,len=9.4,th=1.9,w=layout.pageW,h=layout.pageH;
-    try{doc.setFillColor(0);doc.setDrawColor(0);}catch(e){}
-    doc.rect(edge,edge,len,th,'F'); doc.rect(edge,edge,th,len,'F');
-    doc.rect(w-edge-len,edge,len,th,'F'); doc.rect(w-edge-th,edge,th,len,'F');
-    doc.rect(edge,h-edge-th,len,th,'F'); doc.rect(edge,h-edge-len,th,len,'F');
-    doc.rect(w-edge-len,h-edge-th,len,th,'F'); doc.rect(w-edge-th,h-edge-len,th,len,'F');
-    pdfResetInk(doc);
-  }
-
-  function drawHeaderField(doc,label,value,x,y,w,h){
-    pdfResetInk(doc);
-    doc.setLineWidth(.16);
-    doc.rect(x,y,w,h);
-    pdfSetFont(doc,4.7,'bold');
-    pdfText(doc,label,x+1.5,y+3.2);
-    pdfSetFont(doc,6.2,'normal');
-    pdfText(doc,pdfShort(value||'-',34),x+1.5,y+h-2.1);
-  }
-
-  function drawKggPdfHeader(doc,snapshot,page,layout){
 ```

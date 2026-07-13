@@ -4,6 +4,43 @@
 - Lines: 6301-6720
 
 ```html
+        var seen = {};
+        var refs = page.images.filter(function(name){ if(seen[name]) return false; seen[name] = true; return true; })
+          .map(function(name){ return '/' + name + ' ' + imageIds[name] + ' 0 R'; }).join(' ');
+        xObjects = ' /XObject << ' + refs + ' >>';
+      }
+      objects.push(objectString(pageIds[index],
+        '<< /Type /Page /Parent ' + pagesRootId + ' 0 R /MediaBox [0 0 ' +
+        num(page.w * MM_TO_PT) + ' ' + num(page.h * MM_TO_PT) + '] /Resources << /Font << /F1 ' +
+        fontRegularId + ' 0 R /F2 ' + fontBoldId + ' 0 R >>' + xObjects + ' >> /Contents ' + contentIds[index] + ' 0 R >>'));
+      objects.push(streamObject(contentIds[index], content));
+    });
+
+    this._images.forEach(function(image){
+      objects.push(objectString(imageIds[image.name],
+        '<< /Type /XObject /Subtype /Image /Width ' + Math.max(1, Number(image.width) || 1) +
+        ' /Height ' + Math.max(1, Number(image.height) || 1) +
+        ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + image.data.length +
+        ' >>\nstream\n' + image.data + '\nendstream'));
+    });
+
+    objects.sort(function(a,b){ return Number(a.match(/^(\d+)/)[1]) - Number(b.match(/^(\d+)/)[1]); });
+    var pdf = '%PDF-1.4\n%\xE2\xE3\xCF\xD3\n';
+    var offsets = [0];
+    objects.forEach(function(obj){
+      offsets.push(pdf.length);
+      pdf += obj;
+    });
+    var xrefStart = pdf.length;
+    pdf += 'xref\n0 ' + offsets.length + '\n0000000000 65535 f \n';
+    for(var i=1;i<offsets.length;i++){
+      pdf += String(offsets[i]).padStart(10,'0') + ' 00000 n \n';
+    }
+    pdf += 'trailer\n<< /Size ' + offsets.length + ' /Root 1 0 R /Info ' + infoId + ' 0 R >>\nstartxref\n' + xrefStart + '\n%%EOF';
+    return pdf;
+  };
+
+  KGGOfflineJsPDF.prototype.save = function(filename){
     var pdf = this._buildPdf();
     var bytes = new Uint8Array(pdf.length);
     for(var i=0;i<pdf.length;i++) bytes[i] = pdf.charCodeAt(i) & 255;
@@ -387,41 +424,4 @@
 
     body.kggPlanCardReordering #currentPlanBlock .planSectionBody{
       overflow:hidden!important;
-      touch-action:none!important;
-    }
-
-    body.kggPlanCardReordering #currentPlanBlock .planCard.reorder-lifted,
-    body.is-scrolling.kggPlanCardReordering #currentPlanBlock .planCard.reorder-lifted{
-      transform:translate3d(0,var(--drag-y,0px),0) scale(1.035)!important;
-      z-index:9999!important;
-      opacity:.985!important;
-      transition:none!important;
-      pointer-events:none!important;
-      will-change:transform!important;
-    }
-
-    body.kggPlanCardReordering #currentPlanBlock .planCard.reorder-placeholder{
-      height:20px!important;
-      min-height:20px!important;
-      padding:0!important;
-      margin:2px 0!important;
-      border:0!important;
-      border-radius:999px!important;
-      background:transparent!important;
-      box-shadow:none!important;
-      overflow:visible!important;
-      opacity:1!important;
-      transform:none!important;
-    }
-
-    body.kggPlanCardReordering #currentPlanBlock .planCard.reorder-placeholder::before{
-      content:"";
-      position:absolute;
-      left:16%;
-      right:16%;
-      top:50%;
-      height:12px;
-      transform:translateY(-50%);
-      border-radius:999px;
-      background:radial-gradient(ellipse at center,rgba(7,16,39,.20) 0%,rgba(7,16,39,.10) 45%,rgba(7,16,39,0) 78%);
 ```

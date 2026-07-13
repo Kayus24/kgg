@@ -4,6 +4,43 @@
 - Lines: 15961-16380
 
 ```html
+    },
+    {
+        infoBits: 0x1D33F,
+        versionNumber: 29,
+        alignmentPatternCenters: [6, 30, 54, 78, 102, 126],
+        errorCorrectionLevels: [
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 7, dataCodewordsPerBlock: 116 },
+                    { numBlocks: 7, dataCodewordsPerBlock: 117 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 28,
+                ecBlocks: [
+                    { numBlocks: 21, dataCodewordsPerBlock: 45 },
+                    { numBlocks: 7, dataCodewordsPerBlock: 46 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 1, dataCodewordsPerBlock: 23 },
+                    { numBlocks: 37, dataCodewordsPerBlock: 24 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 19, dataCodewordsPerBlock: 15 },
+                    { numBlocks: 26, dataCodewordsPerBlock: 16 },
+                ],
+            },
+        ],
+    },
+    {
         infoBits: 0x1ED75,
         versionNumber: 30,
         alignmentPatternCenters: [6, 26, 52, 78, 104, 130],
@@ -387,41 +424,4 @@
     },
 ];
 
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var BitMatrix_1 = __webpack_require__(0);
-function squareToQuadrilateral(p1, p2, p3, p4) {
-    var dx3 = p1.x - p2.x + p3.x - p4.x;
-    var dy3 = p1.y - p2.y + p3.y - p4.y;
-    if (dx3 === 0 && dy3 === 0) { // Affine
-        return {
-            a11: p2.x - p1.x,
-            a12: p2.y - p1.y,
-            a13: 0,
-            a21: p3.x - p2.x,
-            a22: p3.y - p2.y,
-            a23: 0,
-            a31: p1.x,
-            a32: p1.y,
-            a33: 1,
-        };
-    }
-    else {
-        var dx1 = p2.x - p3.x;
-        var dx2 = p4.x - p3.x;
-        var dy1 = p2.y - p3.y;
-        var dy2 = p4.y - p3.y;
-        var denominator = dx1 * dy2 - dx2 * dy1;
-        var a13 = (dx3 * dy2 - dx2 * dy3) / denominator;
-        var a23 = (dx1 * dy3 - dx3 * dy1) / denominator;
-        return {
-            a11: p2.x - p1.x + a13 * p2.x,
-            a12: p2.y - p1.y + a13 * p2.y,
-            a13: a13,
 ```

@@ -4,6 +4,43 @@
 - Lines: 1681-2100
 
 ```html
+      #baseFields{grid-column:1/4;grid-row:2;background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:var(--shadow);z-index:4}
+      #baseFields.hidden{display:none!important}
+      #inputLabel{grid-column:1;grid-row:1;margin:0;align-self:end;font-size:20px;line-height:1;font-weight:1000}
+      #dbTitle{grid-column:1;grid-row:1;margin:0;align-self:end}
+      #inputWrap{grid-column:1;grid-row:3;align-self:stretch;border-radius:20px}
+      #exerciseInput{min-height:126px;max-height:190px;font-size:22px}
+      #bankArea{grid-column:1;grid-row:4;align-self:stretch;min-height:0;overflow:hidden;background:#fff;border-radius:20px}
+      #bankArea.bankOpen{display:flex;flex-direction:column;overflow:hidden;border:2px solid #111827;box-shadow:var(--shadow);padding:10px;height:100%;min-height:0}
+      #bankArea.bankOpen #bankContent{flex:1;min-height:0;margin-top:8px}
+      #bankArea.bankOpen .bankRows{max-height:none;height:100%}
+      #bankArea:not(.bankOpen) .drawerBtn{height:64px;min-height:64px;border:2px solid #111827;border-radius:20px;font-size:20px}
+      #currentPlanBlock{grid-column:2/4;grid-row:3/5;align-self:start;min-height:38vh;min-width:0;background:#fff;border:2px solid #111827;border-radius:24px;box-shadow:var(--shadow);padding:14px;overflow:hidden}
+      #currentPlanBlock.hidden{display:block!important;visibility:hidden;pointer-events:none}
+      #currentPlanBlock .label{margin:0 0 12px;font-size:20px;line-height:1;font-weight:1000}
+      #planList{max-height:calc(100dvh - 310px);overflow:auto;padding-right:2px}
+      .planCard{border-radius:18px;padding:12px 14px;grid-template-columns:minmax(0,1fr) auto}
+      .planCard b{font-size:20px}
+      .planCard small{font-size:14px}
+      .planActions{grid-column:2;grid-row:5;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:14px;align-self:stretch}
+      .planActions:not(.hasPlan){grid-template-columns:1fr}
+      .planActions:not(.hasPlan) #finishBtn.hidden{display:none!important}
+      #createPanel:not(.planMode) #recentToggle,#createPanel:not(.planMode) #packageToggle{height:64px;min-height:64px;width:100%;box-sizing:border-box;align-self:stretch}
+      #finishBtn{grid-column:auto;grid-row:auto;height:64px;min-height:64px;margin:0;border-radius:18px;font-size:22px}
+      #finishBtn.hidden{display:block!important;visibility:hidden;pointer-events:none;padding-left:0;padding-right:0;border-width:0}
+      #recentToggle{grid-column:auto;grid-row:auto;height:64px;min-height:64px;border-radius:18px;justify-content:center}
+      #packageToggle{grid-column:3;grid-row:5;height:64px;min-height:64px;border-radius:18px;justify-content:center}
+      #createPanel:not(.planMode) .planActions{grid-column:2/4;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+      #createPanel:not(.planMode) #recentToggle{grid-column:1;width:100%}
+      #createPanel:not(.planMode) #packageToggle{grid-column:2/4;grid-row:5;justify-self:end;width:calc(50% - 7px)}
+      #createPanel.planMode .planHeader .panelTitle{grid-column:2;grid-row:1}
+      #createPanel.planMode .planActions{display:contents}
+      #createPanel.planMode #finishBtn{grid-column:3;grid-row:1;align-self:end;justify-self:stretch;width:100%;height:54px;min-height:54px;border-radius:18px;font-size:20px;opacity:1;scale:1 1;animation:none}
+      #createPanel.planMode #recentToggle{grid-column:2;grid-row:5;width:100%;min-width:0}
+      #createPanel.planMode #packageToggle{grid-column:3;grid-row:5;width:100%}
+      .planActions.hasPlan #recentToggle{width:auto;min-width:0;padding:10px 12px}
+      #createPanel.planMode #recentToggle{width:100%;justify-self:stretch}
+      .planActions.hasPlan .recentText,.planActions.hasPlan .recentMini{max-width:none;opacity:1}
       #recentList,#packageList{grid-row:4/5;align-self:end;z-index:28;max-height:min(42vh,360px);overflow:auto;background:rgba(255,255,255,.96);border:1px solid rgba(220,227,235,.92);border-radius:22px;padding:10px;box-shadow:0 18px 48px rgba(7,16,39,.18),0 4px 14px rgba(7,16,39,.08);backdrop-filter:blur(10px);transform-origin:bottom center;animation:tabletDrawerRise .28s cubic-bezier(.18,.84,.24,1) both}
       #recentList{grid-column:2}
       #packageList{grid-column:2/4}
@@ -386,42 +423,5 @@
     .planCard .planName{
       min-width:0;
       overflow-wrap:anywhere;
-    }
-    .planCard.is-new .planName,
-    .planCard.is-review .planName{
-      color:#72490a;
-    }
-    .planMetaLine,
-    .planSourceLine{
-      display:block;
-      color:var(--muted);
-      font-weight:850;
-      line-height:1.25;
-    }
-    .planSourceLine{
-      font-size:12px;
-      opacity:.9;
-    }
-    .planBadges{
-      display:inline-flex;
-      align-items:center;
-      gap:4px;
-      flex-wrap:wrap;
-      vertical-align:middle;
-    }
-    .planBadge{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-height:18px;
-      padding:2px 6px;
-      border-radius:999px;
-      font-size:11px;
-      line-height:1;
-      font-weight:1000;
-      border:1px solid rgba(220,227,235,.95);
-      background:#f6f8fb;
-      color:#38475b;
-      white-space:nowrap;
     }
 ```

@@ -4,6 +4,43 @@
 - Lines: 6721-7140
 
 ```html
+      touch-action:none!important;
+    }
+
+    body.kggPlanCardReordering #currentPlanBlock .planCard.reorder-lifted,
+    body.is-scrolling.kggPlanCardReordering #currentPlanBlock .planCard.reorder-lifted{
+      transform:translate3d(0,var(--drag-y,0px),0) scale(1.035)!important;
+      z-index:9999!important;
+      opacity:.985!important;
+      transition:none!important;
+      pointer-events:none!important;
+      will-change:transform!important;
+    }
+
+    body.kggPlanCardReordering #currentPlanBlock .planCard.reorder-placeholder{
+      height:20px!important;
+      min-height:20px!important;
+      padding:0!important;
+      margin:2px 0!important;
+      border:0!important;
+      border-radius:999px!important;
+      background:transparent!important;
+      box-shadow:none!important;
+      overflow:visible!important;
+      opacity:1!important;
+      transform:none!important;
+    }
+
+    body.kggPlanCardReordering #currentPlanBlock .planCard.reorder-placeholder::before{
+      content:"";
+      position:absolute;
+      left:16%;
+      right:16%;
+      top:50%;
+      height:12px;
+      transform:translateY(-50%);
+      border-radius:999px;
+      background:radial-gradient(ellipse at center,rgba(7,16,39,.20) 0%,rgba(7,16,39,.10) 45%,rgba(7,16,39,0) 78%);
       filter:blur(7px);
     }
 
@@ -387,41 +424,4 @@ function scan(matrix) {
                     topRightCorner: extracted.mappingFunction(location_1.dimension, 0),
                     topLeftCorner: extracted.mappingFunction(0, 0),
                     bottomRightCorner: extracted.mappingFunction(location_1.dimension, location_1.dimension),
-                    bottomLeftCorner: extracted.mappingFunction(0, location_1.dimension),
-                    topRightFinderPattern: location_1.topRight,
-                    topLeftFinderPattern: location_1.topLeft,
-                    bottomLeftFinderPattern: location_1.bottomLeft,
-                    bottomRightAlignmentPattern: location_1.alignmentPattern,
-                },
-            };
-        }
-    }
-    return null;
-}
-var defaultOptions = {
-    inversionAttempts: "attemptBoth",
-};
-function jsQR(data, width, height, providedOptions) {
-    if (providedOptions === void 0) { providedOptions = {}; }
-    var options = defaultOptions;
-    Object.keys(options || {}).forEach(function (opt) {
-        options[opt] = providedOptions[opt] || options[opt];
-    });
-    var shouldInvert = options.inversionAttempts === "attemptBoth" || options.inversionAttempts === "invertFirst";
-    var tryInvertedFirst = options.inversionAttempts === "onlyInvert" || options.inversionAttempts === "invertFirst";
-    var _a = binarizer_1.binarize(data, width, height, shouldInvert), binarized = _a.binarized, inverted = _a.inverted;
-    var result = scan(tryInvertedFirst ? inverted : binarized);
-    if (!result && (options.inversionAttempts === "attemptBoth" || options.inversionAttempts === "invertFirst")) {
-        result = scan(tryInvertedFirst ? binarized : inverted);
-    }
-    return result;
-}
-jsQR.default = jsQR;
-exports.default = jsQR;
-
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
 ```

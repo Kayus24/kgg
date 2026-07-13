@@ -4,6 +4,43 @@
 - Lines: 16801-17220
 
 ```html
+        }
+        var score = point.score + otherPoints[0].score + otherPoints[1].score;
+        return { points: [point].concat(otherPoints.slice(0, 2)), score: score };
+    })
+        .filter(function (q) { return !!q; }) // Filter out any rejected finder patterns from above
+        .sort(function (a, b) { return a.score - b.score; });
+    if (finderPatternGroups.length === 0) {
+        return null;
+    }
+    var _a = reorderFinderPatterns(finderPatternGroups[0].points[0], finderPatternGroups[0].points[1], finderPatternGroups[0].points[2]), topRight = _a.topRight, topLeft = _a.topLeft, bottomLeft = _a.bottomLeft;
+    var alignment = findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, bottomLeft);
+    var result = [];
+    if (alignment) {
+        result.push({
+            alignmentPattern: { x: alignment.alignmentPattern.x, y: alignment.alignmentPattern.y },
+            bottomLeft: { x: bottomLeft.x, y: bottomLeft.y },
+            dimension: alignment.dimension,
+            topLeft: { x: topLeft.x, y: topLeft.y },
+            topRight: { x: topRight.x, y: topRight.y },
+        });
+    }
+    // We normally use the center of the quads as the location of the tracking points, which is optimal for most cases and will account
+    // for a skew in the image. However, In some cases, a slight skew might not be real and instead be caused by image compression
+    // errors and/or low resolution. For those cases, we'd be better off centering the point exactly in the middle of the black area. We
+    // compute and return the location data for the naively centered points as it is little additional work and allows for multiple
+    // attempts at decoding harder images.
+    var midTopRight = recenterLocation(matrix, topRight);
+    var midTopLeft = recenterLocation(matrix, topLeft);
+    var midBottomLeft = recenterLocation(matrix, bottomLeft);
+    var centeredAlignment = findAlignmentPattern(matrix, alignmentPatternQuads, midTopRight, midTopLeft, midBottomLeft);
+    if (centeredAlignment) {
+        result.push({
+            alignmentPattern: { x: centeredAlignment.alignmentPattern.x, y: centeredAlignment.alignmentPattern.y },
+            bottomLeft: { x: midBottomLeft.x, y: midBottomLeft.y },
+            topLeft: { x: midTopLeft.x, y: midTopLeft.y },
+            topRight: { x: midTopRight.x, y: midTopRight.y },
+            dimension: centeredAlignment.dimension,
         });
     }
     if (result.length === 0) {
@@ -387,41 +424,4 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       req.onupgradeneeded=()=>{const db=req.result; if(!db.objectStoreNames.contains('encryptedBlobs'))db.createObjectStore('encryptedBlobs',{keyPath:'id'});};
       req.onsuccess=()=>resolve(req.result);
       req.onerror=()=>reject(req.error||new Error('Admin-Test-Medien-Speicher nicht verfuegbar'));
-    });
-  }
-  async function getSourceMediaBlob(id){
-    const db=await openSourceMediaDb();
-    return new Promise((resolve,reject)=>{
-      const tx=db.transaction('encryptedBlobs','readonly');
-      const req=tx.objectStore('encryptedBlobs').get(id);
-      req.onsuccess=()=>resolve(req.result&&req.result.blob||null);
-      req.onerror=()=>reject(req.error||new Error('Admin-Test-Bild nicht gefunden'));
-    });
-  }
-  window.KGGMediaUploadAdapter={
-    name:'admin-test-mock-upload-adapter',
-    isMock:true,
-    async upload(blob,context){
-      const manifest=context&&context.manifest||{};
-      const id=manifest.id||('test_'+Date.now());
-      const ttlSeconds=Number(context&&context.ttlSeconds)||300;
-      return {
-        downloadUrl:'https://admin-test.invalid/kgg-media/'+encodeURIComponent(id)+'.bin',
-        storage:'admin-test-indexeddb',
-        expiresAt:new Date(Date.now()+ttlSeconds*1000).toISOString()
-      };
-    },
-    scheduleDelete(media,options){
-      const delayMs=Number(options&&options.delayMs)||300000;
-      setTimeout(()=>{console.info('ADMIN TEST media expired',media&&media.id);},delayMs);
-    },
-    delete(media){console.info('ADMIN TEST media deleted',media&&media.id);}
-  };
-  window.KGGPatientMediaFetchAdapter={
-    async fetch(media){
-      const blob=await getSourceMediaBlob(media&&media.id);
-      if(!blob)throw new Error('Admin-Test-Bild nicht im lokalen Speicher gefunden');
-      return blob;
-    }
-  };
 ```

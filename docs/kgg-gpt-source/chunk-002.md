@@ -4,6 +4,43 @@
 - Lines: 841-1260
 
 ```html
+        "androidApp": "pending"
+      },
+      "handoffNote": "UI-only patch auf kgg-update/index.html; bestehende Scan-, QR-, Medien- und Plan-State-Handler werden nur ueber vorhandene Buttons/Funktionen ausgeloest."
+    },
+    {
+      "versionCode": 37,
+      "versionName": "1.0.37-device-sync-menu",
+      "patchId": "kgg-v037-device-sync-menu",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Geräte-Sync und App-Weitergabe trennen",
+      "reason": "Therapeuten-App weitergeben soll nur die Kolleg:innen-App/APK teilen; Geräte-Daten-Sync braucht einen eigenen klaren Einstieg.",
+      "whatChanged": [
+        "Admin-Menü bekommt einen eigenen Button Geräte-Sync für Sync-Test, Sync-Datei speichern/importieren und Pairing.",
+        "Therapeuten-App weitergeben öffnet direkt den Kolleg:innen-App/APK-QR statt Sync- oder API-Key-Optionen.",
+        "Update-Zentrale bleibt Release/HTML/GitHub und wird nicht mit Geräte-Sync vermischt."
+      ],
+      "touchedAreas": [
+        "Tablet admin menu",
+        "Therapist app share QR",
+        "Local test batteries",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Android-Wrapper",
+        "Tablet-Core-Layout",
+        "Parser",
+        "Plan-State"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
       },
       "handoffNote": "Im Tablet-Menü: Therapeuten-App weitergeben = Kolleg:innen-App/APK-QR; Admin > Geräte-Sync = Sync-Diagnose und Datei-Transfer."
     },
@@ -387,41 +424,4 @@
         "PDF",
         "QR-Erzeugung",
         "Patienten-App",
-        "Scan-Kamera",
-        "Parser",
-        "Android-Wrapper",
-        "Tablet-Layout",
-        "Plan-State",
-        "Storage"
-      ],
-      "testStatus": {
-        "githubPages": "pending",
-        "androidApp": "pending",
-        "qrGalleryImport": "pending"
-      }
-    },
-    {
-      "versionCode": 7,
-      "versionName": "1.0.5-qr-photo-source-truth",
-      "type": "github-web-update",
-      "title": "QR-Foto-Upload + eingebettete Source Truth",
-      "summary": "Verbessert QR-Erkennung aus Bild-/Fotodatenbank-Upload und bettet Source Truth sowie Changelog direkt in die App-HTML ein.",
-      "changedAreas": [
-        "QR photo upload decode",
-        "HTML embedded metadata",
-        "Source Truth",
-        "Changelog"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR-Erzeugung",
-        "Patienten-App",
-        "Scan-Kamera",
-        "Parser",
-        "Android-Wrapper",
-        "Tablet-Layout",
-        "Plan-State",
-        "Storage"
-      ],
-      "testStatus": {
 ```

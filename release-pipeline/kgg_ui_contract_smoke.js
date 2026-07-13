@@ -190,6 +190,83 @@ async function assertBaseContract(page, contract, viewportId) {
   return result;
 }
 
+async function assertTabletHtmlReleaseLabel(page, viewport) {
+  const initial = await page.evaluate(() => {
+    const patch = window.KGG_PATCHES && window.KGG_PATCHES["kgg-v060-tablet-html-release-label"];
+    const label = document.getElementById("kggTabletHtmlReleaseLabel");
+    return {
+      installed: !!(patch && typeof patch.render === "function" && typeof patch.currentIdentity === "function"),
+      labelCount: document.querySelectorAll("#kggTabletHtmlReleaseLabel").length,
+      display: label ? getComputedStyle(label).display : "missing",
+      webIdentity: patch && typeof patch.currentIdentity === "function" ? patch.currentIdentity() : "",
+    };
+  });
+  if (!initial.installed || initial.labelCount !== 1) {
+    fail(`${viewport.id}: tablet HTML release label patch is not installed exactly once: ${JSON.stringify(initial)}`);
+  }
+  if (!initial.webIdentity.includes("v060") || !initial.webIdentity.includes("index.html")) {
+    fail(`${viewport.id}: web HTML identity is incomplete: ${initial.webIdentity}`);
+  }
+  if (viewport.width < 760) {
+    if (initial.display !== "none") fail(`${viewport.id}: tablet HTML release label is visible below tablet width`);
+    return { mode: "phone-hidden", webIdentity: initial.webIdentity };
+  }
+
+  await page.evaluate(() => {
+    window.KGGAndroidApp = {
+      updateStatus() {
+        return JSON.stringify({
+          releaseId: "r9999",
+          currentWebVersion: 9999,
+          loadedHtmlSource: "kgg_android_current.html",
+        });
+      },
+    };
+    window.KGG_PATCHES["kgg-v060-tablet-html-release-label"].render();
+  });
+  await page.locator("#tabletMenuBtn").click();
+  await page.waitForFunction(() => document.body.classList.contains("tabletMenuOpen"));
+  await page.waitForTimeout(100);
+  const probe = await page.evaluate(() => {
+    const label = document.getElementById("kggTabletHtmlReleaseLabel");
+    const menu = document.getElementById("tabletSideMenu");
+    const labelRect = label.getBoundingClientRect();
+    const menuRect = menu.getBoundingClientRect();
+    const style = getComputedStyle(label);
+    return {
+      text: label.textContent,
+      title: label.title,
+      display: style.display,
+      visibility: style.visibility,
+      labelRect: { left: labelRect.left, top: labelRect.top, right: labelRect.right, bottom: labelRect.bottom, width: labelRect.width, height: labelRect.height },
+      menuRect: { left: menuRect.left, top: menuRect.top, right: menuRect.right, bottom: menuRect.bottom, width: menuRect.width, height: menuRect.height },
+      rightGap: menuRect.right - labelRect.right,
+      bottomGap: menuRect.bottom - labelRect.bottom,
+    };
+  });
+  const expected = "HTML r9999 · v060 · kgg_android_current.html";
+  if (
+    probe.text !== expected ||
+    probe.title !== expected ||
+    probe.display === "none" ||
+    probe.visibility === "hidden" ||
+    probe.labelRect.width < 40 ||
+    probe.labelRect.height < 10 ||
+    probe.rightGap < 0 ||
+    probe.rightGap > 24 ||
+    probe.bottomGap < 0 ||
+    probe.bottomGap > 28
+  ) {
+    fail(`${viewport.id}: tablet HTML release label is incorrect or not bottom-right: ${JSON.stringify(probe)}`);
+  }
+  await page.locator("#tabletMenuClose").click();
+  await page.evaluate(() => {
+    delete window.KGGAndroidApp;
+    window.KGG_PATCHES["kgg-v060-tablet-html-release-label"].render();
+  });
+  return { mode: "tablet", webIdentity: initial.webIdentity, nativeIdentity: probe.text, rightGap: probe.rightGap, bottomGap: probe.bottomGap };
+}
+
 async function exerciseCoreFlows(page, viewportId) {
   await page.locator("#baseToggle").click();
   await page.locator("#baseFields").waitFor({ state: "visible", timeout: 5000 });
@@ -285,6 +362,7 @@ async function runViewport(browser, contract, viewport) {
     }), contract.allowedBootOpenModals || []);
     if (allowedStillOpen.length) fail(`${viewport.id}: allowed boot modal could not be dismissed: ${allowedStillOpen.join(", ")}`);
     await assertVisibleAndClickable(page, viewport.visible || [], viewport.id);
+    const htmlReleaseLabel = await assertTabletHtmlReleaseLabel(page, viewport);
     await exerciseCoreFlows(page, viewport.id);
     await page.evaluate(() => document.querySelectorAll(".modal.open").forEach((node) => node.classList.remove("open")));
     fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
@@ -296,6 +374,7 @@ async function runViewport(browser, contract, viewport) {
       externalRequests: externalRequests.length,
       screenshot,
       bodyClass: base.bodyClass,
+      htmlReleaseLabel,
     };
   } finally {
     await context.close();

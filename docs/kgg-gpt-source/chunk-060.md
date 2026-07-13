@@ -4,6 +4,43 @@
 - Lines: 25201-25620
 
 ```html
+    return btn;
+  }
+
+  function ensureTabletMenuEntry(){
+    var menu = q(".tabletSideMenuMain");
+    if(!menu) return false;
+
+    var group = byId("kggReleaseMenuGroup");
+    if(!group){
+      group = document.createElement("div");
+      group.id = "kggReleaseMenuGroup";
+      group.className = "tabletSideMenuGroup kggReleaseMenuGroup";
+      group.innerHTML = "<h3>Admin</h3>";
+      menu.appendChild(group);
+    }
+
+    if(!byId("kggReleaseAdminConfig")){
+      var admin = document.createElement("button");
+      admin.id = "kggReleaseAdminConfig";
+      admin.type = "button";
+      admin.className = "tabletSideMenuAction";
+      admin.textContent = "Admin-Konfig";
+      admin.addEventListener("click", function(ev){
+        ev.preventDefault();
+        ev.stopPropagation();
+        try{
+          if(typeof closeTabletMenu === "function") closeTabletMenu();
+        }catch(err){}
+        var target = byId("adminConfigBtn");
+        if(target) target.click();
+      }, true);
+      group.appendChild(admin);
+    }
+
+    if(!byId("kggReleaseCenterOpen")){
+      group.appendChild(makeButton("kggReleaseCenterOpen", "Update-Zentrale", "tabletSideMenuAction"));
+    }
 
     return true;
   }
@@ -387,41 +424,4 @@
       }
     });
 
-    if(body()) mo.observe(body(), {attributes:true, attributeFilter:["class"]});
-
-    window.addEventListener("pagehide", function(){ hardClean("pagehide"); }, {passive:true});
-    scheduleClean("boot", 260);
-  }
-
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", install, {once:true});
-  }else{
-    install();
-  }
-})();
-</script>
-
-<script id="kgg-v014-local-update-release-marker">
-(function(){
-  "use strict";
-  window.KGG_V014_PHONE_VIEWPORT_STATE_RELEASE_GUARD = {
-    patchId: "kgg-v014-phone-viewport-state-release-guard",
-    confirms: [
-      "phone-only gesture code remains gated by matchMedia('(max-width:759px)')",
-      "stale phone classes and inline styles are cleaned when leaving phone viewport",
-      "phone drag reorder stays absolute inside #planList instead of position:fixed",
-      "global tablet layout containers are not overridden outside max-width:759px",
-      "content://, file:// and /media/external/file/ local tests do not auto-redirect to GitHub",
-      "KGGReleaseControl local fallback is kept and native bridge is not overwritten"
-    ]
-  };
-})();
-</script>
-<!-- KGG PATCH END kgg-v014-phone-viewport-state-release-guard -->
-
-<!-- KGG v13 marker: Update-Zentrale initialization fixed without changing phone/tablet touch behavior -->
-<script id="kgg-v13-update-zentrale-marker">
-(function(){
-  "use strict";
-  window.KGG_UPDATE_ZENTRALE_V13 = {
 ```

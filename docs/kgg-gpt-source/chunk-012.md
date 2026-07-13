@@ -4,6 +4,43 @@
 - Lines: 5041-5460
 
 ```html
+      align-items:start!important;
+    }
+    #bankArea.bankOpen.searchBankOpen #bankToggle{
+      grid-column:1!important;
+      grid-row:1!important;
+    }
+    #bankArea.bankOpen.searchBankOpen #bankContent{
+      grid-column:2!important;
+      grid-row:1!important;
+      min-width:0!important;
+      margin-top:0!important;
+    }
+    #bankArea.bankOpen.searchBankOpen .bankRows{
+      max-height:min(52dvh,420px)!important;
+    }
+    body.kggPhoneDrawerOpen #recentToggle.phoneButtonFloat,
+    body.kggPhoneDrawerOpen #packageToggle.phoneButtonFloat,
+    body.kggPhoneDrawerOpen #recentList:not(.hidden),
+    body.kggPhoneDrawerOpen #packageList:not(.hidden){
+      animation:none!important;
+      transform:none!important;
+      filter:none!important;
+    }
+    #editorModal{
+      align-items:center!important;
+      padding:14px!important;
+      background:rgba(7,16,39,.52)!important;
+    }
+    #editorModal .editorSheet{
+      width:min(100% - 28px,520px)!important;
+      max-height:calc(100dvh - 28px)!important;
+      border-radius:22px!important;
+      overflow:auto!important;
+      overscroll-behavior:contain;
+      box-shadow:0 24px 70px rgba(7,16,39,.28)!important;
+    }
+    #editorModal .editorMediaPreview img,
     #currentPlanBlock .planThumb img,
     .kggAdminMenuQrBox img,
     .qrBox img{
@@ -387,41 +424,4 @@
       font-size:15px!important;
     }
   }
-  /* v386 source patch: visible tablet/phone flow corrections on the v385 base. */
-  @media (min-width:760px) and (orientation:landscape){
-    :root{
-      --kgg-tablet-safe-top:max(66px,calc(env(safe-area-inset-top) + 54px));
-      --kgg-tablet-safe-bottom:max(10px,env(safe-area-inset-bottom));
-    }
-    body{
-      background:#eef4fb!important;
-      padding-top:var(--kgg-tablet-safe-top)!important;
-      padding-bottom:var(--kgg-tablet-safe-bottom)!important;
-    }
-    .app,
-    body.tabletLayoutCustom .app{
-      height:calc(var(--kgg-visual-vh,100dvh) - var(--kgg-tablet-safe-top) - var(--kgg-tablet-safe-bottom))!important;
-      max-height:calc(var(--kgg-visual-vh,100dvh) - var(--kgg-tablet-safe-top) - var(--kgg-tablet-safe-bottom))!important;
-      overflow:hidden!important;
-    }
-    .scanHub,
-    body.tabletLayoutCustom .scanHub,
-    body.adminMode .scanHub{
-      grid-template-columns:54px minmax(132px,1fr) minmax(132px,1fr)!important;
-      grid-auto-rows:54px!important;
-      gap:10px!important;
-      padding:0!important;
-      margin:0!important;
-      align-items:stretch!important;
-      overflow:visible!important;
-    }
-    .tabletMenuBtn,
-    body.tabletLayoutCustom .tabletMenuBtn{
-      position:relative!important;
-      grid-column:1!important;
-      grid-row:1!important;
-      top:auto!important;
-      right:auto!important;
-      bottom:auto!important;
-      left:auto!important;
 ```

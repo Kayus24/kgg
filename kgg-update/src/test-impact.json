@@ -58,6 +58,16 @@
       ]
     },
     {
+      "glob": "patches/v060-*",
+      "testIds": [
+        "ui-contract",
+        "ui-tablet-layout-visual",
+        "ui-tablet-app-boot",
+        "ui-phone-landscape-tablet-menu",
+        "android-wrapper-contract"
+      ]
+    },
+    {
       "glob": "metadata/*",
       "testIds": []
     }

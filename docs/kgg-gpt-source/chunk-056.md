@@ -4,6 +4,43 @@
 - Lines: 23521-23940
 
 ```html
+      return scanStateSnapshot();
+    },
+    toggleCollapse(index){return toggleScanJobCollapse(index);},
+    removeJob(index){return removeScanJob(index);},
+    collapseAll(reason){return collapseScanCards(reason);},
+    closeDecision(){scanState.decision=false;renderScanPreview();return scanStateSnapshot();},
+    async copyResult(index){
+      const job=scanState.jobs[Number(index)||0];
+      if(!job)return false;
+      const text=scanResultToCopyText(job);
+      const fieldId=$('kggScanCopyField'+index)?'kggScanCopyField'+index:'kggScanInboxField'+index;
+      const ok=await copyTextWithFallback(text,fieldId);
+      setScanStatus(ok?'Kopiert.':'Text markiert - bitte manuell kopieren.');
+      return ok;
+    },
+    applyResult(index){
+      const job=scanState.jobs[Number(index)||0];
+      if(!job)return false;
+      const ok=applyScanResultToCurrentPlan(job.result,'scan_v319_continue_edit_job_'+index); if(ok){state.scanPanelOpen='plan'; save(); render();} return ok;
+    },
+    getState:scanStateSnapshot
+  };
+
+  /* v316 Tablet Anchor Overlay Manager: ein Nebenfenster aktiv, aber am jeweiligen Button verankert. */
+  const tabletLayoutKeys={
+    locked:'kgg_tablet_layout_locked',
+    left:'kgg_tablet_left_col_width',
+    scale:'kgg_tablet_ui_scale'
+  };
+  const tabletLayoutState={locked:true,leftCol:'',scale:1,dragging:false};
+  function clampTabletScale(value){const n=Number(value)||1; return Math.max(.01,Math.min(2,n));}
+  function loadTabletLayoutSettings(){
+    try{
+      tabletLayoutState.locked=localStorage.getItem(tabletLayoutKeys.locked)!=='false';
+      tabletLayoutState.leftCol=localStorage.getItem(tabletLayoutKeys.left)||'';
+      tabletLayoutState.scale=clampTabletScale(localStorage.getItem(tabletLayoutKeys.scale)||1);
+    }catch(err){tabletLayoutState.locked=true;tabletLayoutState.leftCol='';tabletLayoutState.scale=1;}
   }
   function saveTabletLayoutSettings(){
     try{
@@ -387,41 +424,4 @@
       backdrop.id='phoneDrawerBackdrop';
       backdrop.className='kggPhoneDrawerBackdrop';
       backdrop.setAttribute('aria-hidden','true');
-      backdrop.addEventListener('click',()=>closePhoneFloatingDrawer());
-      document.body.appendChild(backdrop);
-    }
-    return backdrop;
-  }
-  function closePhoneFloatingDrawer(){
-    const recent=$('recentList'), packages=$('packageList'), recentBtn=$('recentToggle'), packageBtn=$('packageToggle');
-    if(recent)recent.classList.add('hidden');
-    if(packages)packages.classList.add('hidden');
-    if(recentBtn)recentBtn.classList.remove('phoneButtonFloat');
-    if(packageBtn)packageBtn.classList.remove('phoneButtonFloat');
-    document.body.classList.remove('kggPhoneDrawerOpen');
-    phoneFloatingDrawerState.kind=null;
-    setTabletOverlayActiveFlag();
-  }
-  function openPhoneFloatingDrawer(kind){
-    if(!isPhoneLayout())return false;
-    if(shouldIgnorePhoneScrollToggle())return false;
-    const recent=$('recentList'), packages=$('packageList'), recentBtn=$('recentToggle'), packageBtn=$('packageToggle');
-    const target=kind==='recent'?recent:packages;
-    const targetBtn=kind==='recent'?recentBtn:packageBtn;
-    const other=kind==='recent'?packages:recent;
-    const otherBtn=kind==='recent'?packageBtn:recentBtn;
-    if(!target||!targetBtn)return false;
-    if(phoneFloatingDrawerState.kind===kind&&!target.classList.contains('hidden')){
-      closePhoneFloatingDrawer();
-      return true;
-    }
-    ensurePhoneDrawerBackdrop();
-    if(other)other.classList.add('hidden');
-    if(otherBtn)otherBtn.classList.remove('phoneButtonFloat');
-    target.classList.remove('hidden');
-    targetBtn.classList.add('phoneButtonFloat');
-    document.body.classList.add('kggPhoneDrawerOpen');
-    phoneFloatingDrawerState.kind=kind;
-    setTabletOverlayActiveFlag();
-    return true;
 ```

@@ -143,11 +143,12 @@ class GateTests(unittest.TestCase):
             dry_run=True,
         )
         before = (ROOT / "kgg-update" / "index.html").read_bytes()
+        current_version = json.loads((ROOT / "kgg-update" / "version.json").read_text(encoding="utf-8"))["versionCode"]
         with self.assertRaisesRegex(scaffolder.ScaffoldError, "changelog"):
             scaffolder.prepare(SimpleNamespace(**base_args))
         base_args.update(allow_changelog_overflow=True, approval_note="Automatischer lokaler Unit-Dry-run.")
         planned, report = scaffolder.prepare(SimpleNamespace(**base_args))
-        self.assertEqual(60, report["versionCode"])
+        self.assertEqual(current_version + 1, report["versionCode"])
         self.assertIn(ROOT / "kgg-update" / "index.html", planned)
         self.assertFalse((ROOT / "kgg-update" / "src" / report["patchFile"]).exists())
         self.assertEqual(before, (ROOT / "kgg-update" / "index.html").read_bytes())

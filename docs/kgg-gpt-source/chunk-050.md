@@ -4,6 +4,43 @@
 - Lines: 21001-21420
 
 ```html
+    let cut=raw.lastIndexOf(' ',limit);
+    if(cut<Math.max(12,limit*.55))cut=limit;
+    const first=raw.slice(0,cut).trim();
+    const rest=raw.slice(cut).trim();
+    return [first,pdfShort(rest,secondMax)];
+  }
+  function pdfSpaceLabel(fullLabel,shortLabel,cellWidth,minWidth){
+    return Number(cellWidth||0)>=Number(minWidth||0)?fullLabel:shortLabel;
+  }
+  function pdfResetInk(doc){
+    try{doc.setDrawColor(0);doc.setTextColor(0);doc.setFillColor(0);}catch(e){}
+  }
+  function pdfLightInk(doc){
+    try{doc.setDrawColor(155);doc.setTextColor(80);doc.setFillColor(255);}catch(e){}
+  }
+
+  function drawKggCornerMarkers(doc,layout){
+    const edge=2.6,len=9.4,th=1.9,w=layout.pageW,h=layout.pageH;
+    try{doc.setFillColor(0);doc.setDrawColor(0);}catch(e){}
+    doc.rect(edge,edge,len,th,'F'); doc.rect(edge,edge,th,len,'F');
+    doc.rect(w-edge-len,edge,len,th,'F'); doc.rect(w-edge-th,edge,th,len,'F');
+    doc.rect(edge,h-edge-th,len,th,'F'); doc.rect(edge,h-edge-len,th,len,'F');
+    doc.rect(w-edge-len,h-edge-th,len,th,'F'); doc.rect(w-edge-th,h-edge-len,th,len,'F');
+    pdfResetInk(doc);
+  }
+
+  function drawHeaderField(doc,label,value,x,y,w,h){
+    pdfResetInk(doc);
+    doc.setLineWidth(.16);
+    doc.rect(x,y,w,h);
+    pdfSetFont(doc,4.7,'bold');
+    pdfText(doc,label,x+1.5,y+3.2);
+    pdfSetFont(doc,6.2,'normal');
+    pdfText(doc,pdfShort(value||'-',34),x+1.5,y+h-2.1);
+  }
+
+  function drawKggPdfHeader(doc,snapshot,page,layout){
     const patient=snapshot.patient||{};
     const template=((snapshot.layoutTarget&&snapshot.layoutTarget.templateId)||'TPL-BASIS-A-CLASSIC-L6-v2');
     const largePrint=((snapshot.layoutTarget&&snapshot.layoutTarget.grid)==='1x3');
@@ -387,41 +424,4 @@
     try{
       const win=window.open('','_blank');
       if(win){
-        try{win.opener=null;}catch(e){}
-        win.location.href=url;
-        return true;
-      }
-    }catch(e){}
-    try{
-      const a=document.createElement('a');
-      a.href=url;
-      a.target='_blank';
-      a.rel='noopener';
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(()=>a.remove(),1000);
-      return true;
-    }catch(e){}
-    return false;
-  }
-  async function openCurrentPdfPreviewTab(){
-    if(!currentPdfPreview||!currentPdfPreview.url)return;
-    if(await sendPdfToNative('open'))return;
-    if(!openPdfUrlCrossBrowser(currentPdfPreview.url)){
-      downloadPdfBlob(currentPdfPreview.blob,currentPdfPreview.filename);
-    }
-  }
-
-  async function buildPdfFromCurrentPlan(){
-    savePendingToBank('ui_make_pdf');
-    const plan=getCurrentPlanForOutput('ui_make_pdf');
-    const snapshot=buildKggPdfSnapshot(plan,state.largePdfMode?{layout:'large-single-row'}:null);
-    await attachKggPdfExerciseThumbnails(snapshot,plan);
-    window.KGGLatestPdfSnapshot=snapshot;
-    let JsPdfCtor=null;
-    try{JsPdfCtor=await ensureJsPdfForPdfTest();}catch(e){console.warn('KGG jsPDF Testloader:',e);}
-    if(!JsPdfCtor){
-      alert('jsPDF-Testeinbindung konnte nicht geladen werden. PDF wird lokal im Browser erzeugt, sobald jsPDF verfuegbar ist. Der aktuelle Plan-Snapshot wurde nur intern vorbereitet.');
-      console.info('KGG PDF Snapshot Adapter:',snapshot);
-      return snapshot;
 ```

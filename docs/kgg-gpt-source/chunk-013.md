@@ -4,6 +4,43 @@
 - Lines: 5461-5880
 
 ```html
+  /* v386 source patch: visible tablet/phone flow corrections on the v385 base. */
+  @media (min-width:760px) and (orientation:landscape){
+    :root{
+      --kgg-tablet-safe-top:max(66px,calc(env(safe-area-inset-top) + 54px));
+      --kgg-tablet-safe-bottom:max(10px,env(safe-area-inset-bottom));
+    }
+    body{
+      background:#eef4fb!important;
+      padding-top:var(--kgg-tablet-safe-top)!important;
+      padding-bottom:var(--kgg-tablet-safe-bottom)!important;
+    }
+    .app,
+    body.tabletLayoutCustom .app{
+      height:calc(var(--kgg-visual-vh,100dvh) - var(--kgg-tablet-safe-top) - var(--kgg-tablet-safe-bottom))!important;
+      max-height:calc(var(--kgg-visual-vh,100dvh) - var(--kgg-tablet-safe-top) - var(--kgg-tablet-safe-bottom))!important;
+      overflow:hidden!important;
+    }
+    .scanHub,
+    body.tabletLayoutCustom .scanHub,
+    body.adminMode .scanHub{
+      grid-template-columns:54px minmax(132px,1fr) minmax(132px,1fr)!important;
+      grid-auto-rows:54px!important;
+      gap:10px!important;
+      padding:0!important;
+      margin:0!important;
+      align-items:stretch!important;
+      overflow:visible!important;
+    }
+    .tabletMenuBtn,
+    body.tabletLayoutCustom .tabletMenuBtn{
+      position:relative!important;
+      grid-column:1!important;
+      grid-row:1!important;
+      top:auto!important;
+      right:auto!important;
+      bottom:auto!important;
+      left:auto!important;
       width:54px!important;
       min-width:54px!important;
       height:54px!important;
@@ -387,41 +424,4 @@
       border:0!important;
       overflow:hidden!important;
     }
-    body.tabletLayoutCustom #createPanel #rightPlanStack,
-    body.tabletLayoutCustom #createPanel #rightPlanStack.hidden,
-    body.tabletLayoutCustom #createPanel:not(.planMode) #rightPlanStack,
-    body.tabletLayoutCustom #createPanel:not(.planMode) #rightPlanStack.hidden,
-    body.tabletLayoutCustom #createPanel.planMode #rightPlanStack,
-    body.tabletLayoutCustom #createPanel.planMode #rightPlanStack.hidden{
-      grid-column:2/4!important;
-      grid-row:2/4!important;
-      display:flex!important;
-      flex-direction:column!important;
-      width:100%!important;
-      height:100%!important;
-      min-height:0!important;
-      margin:0!important;
-      gap:0!important;
-      align-self:stretch!important;
-      justify-self:stretch!important;
-      visibility:visible!important;
-      pointer-events:auto!important;
-      overflow:hidden!important;
-    }
-    body.tabletLayoutCustom #createPanel #rightPlanStack #currentPlanBlock,
-    body.tabletLayoutCustom #createPanel #rightPlanStack #currentPlanBlock.hidden,
-    body.tabletLayoutCustom #createPanel:not(.planMode) #rightPlanStack #currentPlanBlock.hidden,
-    body.tabletLayoutCustom #createPanel.planMode #rightPlanStack #currentPlanBlock.hidden{
-      display:flex!important;
-      flex-direction:column!important;
-      flex:1 1 auto!important;
-      width:100%!important;
-      height:100%!important;
-      min-height:0!important;
-      margin:0!important;
-      visibility:visible!important;
-      pointer-events:auto!important;
-    }
-    body.tabletLayoutCustom #createPanel.planMode #finishBtn{
-      grid-column:3!important;
 ```

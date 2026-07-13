@@ -49,20 +49,21 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "patient-qr-root-query",
     "grossdruck-pdf-readable-images",
     "grossdruck-readability-beta",
-    "059-ui-scaler-push-canary"
+    "059-ui-scaler-push-canary",
+    "tablet-html-release-label"
   ],
   "currentVersion": {
-    "versionCode": 59,
-    "versionName": "1.0.59-ui-scaler-push-canary",
-    "lastPatchId": "kgg-v059-ui-scaler-push-canary",
-    "updatedBy": "kgg-gpt-write-gate"
+    "versionCode": 60,
+    "versionName": "1.0.60-tablet-html-release-label",
+    "lastPatchId": "kgg-v060-tablet-html-release-label",
+    "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v059-ui-scaler-push-canary",
+  "latestPatchId": "kgg-v060-tablet-html-release-label",
   "lastUpdateIntent": {
-    "id": "kgg-v059-ui-scaler-push-canary",
-    "summary": "Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification.",
+    "id": "kgg-v060-tablet-html-release-label",
+    "summary": "Zeigt den Namen der aktuell geladenen HTML-Version unten rechts im ausgefahrenen Tablet-Menue.",
     "touched": [
-      "kgg-update/index.html"
+      "Tablet-Menue"
     ],
     "notTouched": [
       "PDF",
@@ -73,7 +74,8 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
-      "Manifest"
+      "GitHub Manifest",
+      "Handy-Layout"
     ]
   }
 }
@@ -115,20 +117,21 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "patient-qr-root-query",
     "grossdruck-pdf-readable-images",
     "grossdruck-readability-beta",
-    "059-ui-scaler-push-canary"
+    "059-ui-scaler-push-canary",
+    "tablet-html-release-label"
   ],
   "currentVersion": {
-    "versionCode": 59,
-    "versionName": "1.0.59-ui-scaler-push-canary",
-    "lastPatchId": "kgg-v059-ui-scaler-push-canary",
-    "updatedBy": "kgg-gpt-write-gate"
+    "versionCode": 60,
+    "versionName": "1.0.60-tablet-html-release-label",
+    "lastPatchId": "kgg-v060-tablet-html-release-label",
+    "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v059-ui-scaler-push-canary",
+  "latestPatchId": "kgg-v060-tablet-html-release-label",
   "lastUpdateIntent": {
-    "id": "kgg-v059-ui-scaler-push-canary",
-    "summary": "Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification.",
+    "id": "kgg-v060-tablet-html-release-label",
+    "summary": "Zeigt den Namen der aktuell geladenen HTML-Version unten rechts im ausgefahrenen Tablet-Menue.",
     "touched": [
-      "kgg-update/index.html"
+      "Tablet-Menue"
     ],
     "notTouched": [
       "PDF",
@@ -139,7 +142,8 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
-      "Manifest"
+      "GitHub Manifest",
+      "Handy-Layout"
     ]
   }
 }
@@ -149,8 +153,41 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 59,
+  "latestVersionCode": 60,
   "entries": [
+    {
+      "versionCode": 60,
+      "versionName": "1.0.60-tablet-html-release-label",
+      "patchId": "kgg-v060-tablet-html-release-label",
+      "status": "certified",
+      "type": "module-patch",
+      "title": "Tablet HTML Release Label",
+      "reason": "Zeigt den Namen der aktuell geladenen HTML-Version unten rechts im ausgefahrenen Tablet-Menue.",
+      "whatChanged": [
+        "Zeigt den Namen der aktuell geladenen HTML-Version unten rechts im ausgefahrenen Tablet-Menue."
+      ],
+      "touchedAreas": [
+        "Tablet-Menue"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "passed",
+        "certification": "passed",
+        "notes": "Vollstaendige Regression plus dynamischer APK-/Web-Identitaets- und Bottom-Right-Positionstest."
+      },
+      "approvalNote": "Max hat den sichtbaren Tablet-Menue-Patch ausdruecklich beauftragt; die Changelog-Archivierung bleibt ein separater Folgepatch."
+    },
     {
       "versionCode": 59,
       "versionName": "1.0.59-ui-scaler-push-canary",
@@ -387,41 +424,4 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "testStatus": {
         "local": "pending",
         "githubPages": "pending",
-        "androidApp": "not-applicable"
-      },
-      "handoffNote": "v053 ist Web-UI-only: nach jedem Folgepatch phone-scan-dock, phone-admin-menu, tablet-card-reorder und tablet-editor-layout laufen lassen."
-    },
-    {
-      "versionCode": 52,
-      "versionName": "1.0.52-pdf-plan-thumbnails",
-      "patchId": "kgg-v052-pdf-plan-thumbnails",
-      "status": "active",
-      "type": "local-html-patch",
-      "title": "PDF-Planbilder in Trainingskarten",
-      "reason": "PDF-Trainingskarten sollen vorhandene lokale Uebungsbilder oben rechts als kleine Schwarzweiss-Thumbnails zeigen, ohne die Kartenhoehe zu veraendern.",
-      "whatChanged": [
-        "PDF-Snapshot sammelt lokale Uebungsbilder aus IndexedDB und laesst fehlende Bilder still aus.",
-        "Thumbnails werden lokal entschluesselt, verkleinert und in Schwarzweiss als JPEG-DataURL in den PDF-Snapshot gelegt.",
-        "drawKggExerciseBox zeichnet das Thumbnail oben rechts im vorhandenen freien Raum.",
-        "Die Offline-PDF-Runtime kann JPEG-XObjects einbetten."
-      ],
-      "touchedAreas": [
-        "PDF snapshot",
-        "PDF exercise card rendering",
-        "Offline PDF runtime",
-        "PDF test battery",
-        "Source Truth",
-        "version.json"
-      ],
-      "notTouched": [
-        "Parser",
-        "Scan/OCR parser",
-        "Plan-State",
-        "Phone card gestures",
-        "Tablet layout content",
-        "QR/Patienten-App",
-        "Android/APK",
-        "Sync data model",
-        "API-Key-Logik"
-      ],
 ```

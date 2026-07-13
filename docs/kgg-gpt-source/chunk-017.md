@@ -4,6 +4,43 @@
 - Lines: 7141-7560
 
 ```html
+                    bottomLeftCorner: extracted.mappingFunction(0, location_1.dimension),
+                    topRightFinderPattern: location_1.topRight,
+                    topLeftFinderPattern: location_1.topLeft,
+                    bottomLeftFinderPattern: location_1.bottomLeft,
+                    bottomRightAlignmentPattern: location_1.alignmentPattern,
+                },
+            };
+        }
+    }
+    return null;
+}
+var defaultOptions = {
+    inversionAttempts: "attemptBoth",
+};
+function jsQR(data, width, height, providedOptions) {
+    if (providedOptions === void 0) { providedOptions = {}; }
+    var options = defaultOptions;
+    Object.keys(options || {}).forEach(function (opt) {
+        options[opt] = providedOptions[opt] || options[opt];
+    });
+    var shouldInvert = options.inversionAttempts === "attemptBoth" || options.inversionAttempts === "invertFirst";
+    var tryInvertedFirst = options.inversionAttempts === "onlyInvert" || options.inversionAttempts === "invertFirst";
+    var _a = binarizer_1.binarize(data, width, height, shouldInvert), binarized = _a.binarized, inverted = _a.inverted;
+    var result = scan(tryInvertedFirst ? inverted : binarized);
+    if (!result && (options.inversionAttempts === "attemptBoth" || options.inversionAttempts === "invertFirst")) {
+        result = scan(tryInvertedFirst ? binarized : inverted);
+    }
+    return result;
+}
+jsQR.default = jsQR;
+exports.default = jsQR;
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -387,41 +424,4 @@ function decodeMatrix(matrix) {
     var formatInfo = readFormatInformation(matrix);
     if (!formatInfo) {
         return null;
-    }
-    var codewords = readCodewords(matrix, version, formatInfo);
-    var dataBlocks = getDataBlocks(codewords, version, formatInfo.errorCorrectionLevel);
-    if (!dataBlocks) {
-        return null;
-    }
-    // Count total number of data bytes
-    var totalBytes = dataBlocks.reduce(function (a, b) { return a + b.numDataCodewords; }, 0);
-    var resultBytes = new Uint8ClampedArray(totalBytes);
-    var resultIndex = 0;
-    for (var _i = 0, dataBlocks_3 = dataBlocks; _i < dataBlocks_3.length; _i++) {
-        var dataBlock = dataBlocks_3[_i];
-        var correctedBytes = reedsolomon_1.decode(dataBlock.codewords, dataBlock.codewords.length - dataBlock.numDataCodewords);
-        if (!correctedBytes) {
-            return null;
-        }
-        for (var i = 0; i < dataBlock.numDataCodewords; i++) {
-            resultBytes[resultIndex++] = correctedBytes[i];
-        }
-    }
-    try {
-        return decodeData_1.decode(resultBytes, version.versionNumber);
-    }
-    catch (_a) {
-        return null;
-    }
-}
-function decode(matrix) {
-    if (matrix == null) {
-        return null;
-    }
-    var result = decodeMatrix(matrix);
-    if (result) {
-        return result;
-    }
-    // Decoding didn't work, try mirroring the QR across the topLeft -> bottomRight line.
-    for (var x = 0; x < matrix.width; x++) {
 ```
