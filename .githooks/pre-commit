@@ -2,7 +2,7 @@
 set -eu
 
 changed="$(git diff --cached --name-only --diff-filter=ACMR)"
-if ! printf '%s\n' "$changed" | grep -Eq '^(kgg-update/src/|kgg-update/version\.json$|release-pipeline/(build_therapist_source|kgg_selftest_build|kgg_test_battery|kgg_ui_contract|kgg_new_patch|kgg_export_handoff|test_kgg_selftest_build)\.)'; then
+if ! printf '%s\n' "$changed" | grep -Eq '^(\.githooks/pre-commit$|kgg-update/src/|kgg-update/version\.json$|release-pipeline/(build_therapist_source|kgg_selftest_build|kgg_test_battery|kgg_ui_contract[^/]*|kgg_new_patch|kgg_export_handoff|test_kgg_selftest_build)\.)'; then
   exit 0
 fi
 
