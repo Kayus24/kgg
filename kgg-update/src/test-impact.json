@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "unknownChangesRequireFullRegression": true,
+  "rules": [
+    {
+      "glob": "base-*.html",
+      "fullRegression": true
+    },
+    {
+      "glob": "footer.html",
+      "fullRegression": true
+    },
+    {
+      "glob": "parts.json",
+      "fullRegression": true
+    },
+    {
+      "glob": "patches/v041-*",
+      "testIds": ["ui-contract", "ui-bank-thumbnails", "ui-tablet-layout-button", "ui-tablet-card-reorder"]
+    },
+    {
+      "glob": "patches/v042-*",
+      "testIds": ["ui-contract", "ui-phone-admin-menu", "ui-phone-scan-dock"]
+    },
+    {
+      "glob": "patches/v044-*",
+      "testIds": ["ui-contract", "ui-phone-admin-menu", "ui-phone-scan-dock"]
+    },
+    {
+      "glob": "patches/v045-*",
+      "testIds": ["ui-contract", "ui-phone-history-packages", "ui-phone-bank-align"]
+    },
+    {
+      "glob": "patches/v046-*",
+      "testIds": ["ui-contract", "ui-tablet-layout-visual", "ui-tablet-app-boot", "ui-tablet-split-phone-layout"]
+    },
+    {
+      "glob": "patches/v050-*",
+      "testIds": ["ui-contract", "ui-phone-admin-menu", "ui-phone-scan-dock"]
+    },
+    {
+      "glob": "patches/v051-*",
+      "testIds": ["android-wrapper-contract", "pdf-critical", "patient-qr-critical"]
+    },
+    {
+      "glob": "patches/v052-*",
+      "testIds": ["ui-contract", "pdf-critical", "pdf-readability-critical", "ui-bank-thumbnails"]
+    },
+    {
+      "glob": "patches/v053-*",
+      "testIds": [
+        "ui-contract",
+        "ui-phone-scan-dock",
+        "ui-tablet-card-reorder",
+        "ui-tablet-layout-visual",
+        "ui-tablet-editor-layout",
+        "ui-tablet-app-boot"
+      ]
+    },
+    {
+      "glob": "metadata/*",
+      "testIds": []
+    }
+  ]
+}
