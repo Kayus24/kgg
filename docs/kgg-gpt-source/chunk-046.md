@@ -4,6 +4,43 @@
 - Lines: 19321-19740
 
 ```html
+      cleanup();
+      if(!swipe.active){resetPlanCardSwipe(card);return;}
+      e.preventDefault(); if(e.stopPropagation)e.stopPropagation(); card.dataset.swipeSuppressClickUntil=String(Date.now()+360);
+      clearPhoneScrollStateForPlanGesture(520);
+      document.body.classList.remove('kggPlanCardSwiping');
+      const shouldDelete=Math.abs(swipe.dx)>=threshold();
+      if(shouldDelete){
+        const dir=swipe.dx<0?-1:1;
+        card.classList.add('swipe-removing');
+        card.style.transition='transform .18s cubic-bezier(.2,.9,.2,1), opacity .18s ease';
+        card.style.setProperty('--kgg-plan-swipe-x',(dir*(card.offsetWidth+96))+'px');
+        card.style.transform='translateX(var(--kgg-plan-swipe-x,0px))';
+        card.style.opacity='0';
+        setTimeout(()=>{document.body.classList.remove('kggPlanCardSwiping');removeExercise(id);},190);
+        return;
+      }
+      card.style.transition='transform .22s cubic-bezier(.2,.9,.2,1), opacity .18s ease, box-shadow .18s ease';
+      card.style.setProperty('--kgg-plan-swipe-x','0px');
+      card.style.transform='translateX(var(--kgg-plan-swipe-x,0px))';
+      card.style.opacity='1';
+      setTimeout(()=>resetPlanCardSwipe(card),230);
+    };
+    const cancel=()=>{
+      if(swipe.active){
+        clearTimeout(swipe.cancelTimer);
+        swipe.cancelTimer=setTimeout(()=>{cleanup();resetPlanCardSwipe(card);},900);
+        return;
+      }
+      cleanup();
+      resetPlanCardSwipe(card);
+    };
+    document.addEventListener('pointermove',move,{passive:false});
+    document.addEventListener('pointerup',up,{passive:false,once:true});
+    document.addEventListener('pointercancel',cancel,{passive:true,once:true});
+  }
+  function movePlanExerciseByButton(localId,delta){
+    const idx=(state.plan||[]).findIndex(ex=>String(ex.localId||ex.id)===String(localId));
     if(idx<0)return;
     const target=idx+delta;
     if(target<0||target>=state.plan.length)return;
@@ -387,41 +424,4 @@
     }).join('');
     cards.querySelectorAll('[data-tablet-pkg]').forEach(btn=>btn.onclick=()=>applyPackageToPlan(btn.dataset.tabletPkg));
   }
-  function renderPackages(){
-    const el=$('packageList');
-    if(el){
-      el.innerHTML=(state.packages||[]).map(p=>'<div class="notice"><b>'+escapeHtml(p.name)+'</b><br><small>'+(p.exercises||[]).map(escapeHtml).join(', ')+'</small><br><button class="mutedBtn" data-pkg="'+p.id+'">Paket in Plan uebernehmen</button></div>').join('');
-      el.querySelectorAll('[data-pkg]').forEach(b=>b.onclick=()=>applyPackageToPlan(b.dataset.pkg));
-    }
-    renderTabletPackageOverlay();
-  }
-  function sanitizeSharedBankExercise(ex){
-    return {
-      id:String(ex.id||ex.sourceId||('shared_'+compact(ex.name))).slice(0,80),
-      name:String(ex.name||'').trim(),
-      aliases:String(ex.aliases||ex.name||'').trim(),
-      sets:normalizeSetCount(ex.sets||3),
-      unit:String(ex.unit||'Wdh'),
-      weightUnit:normalizeLoadUnit(ex.weightUnit||'kg'),
-      shared:true,
-      createdAt:String(ex.createdAt||ex.updatedAt||new Date().toISOString()),
-      updatedAt:String(ex.updatedAt||new Date().toISOString())
-    };
-  }
-  function buildSharedExerciseBankPayload(){
-    const exercises=bank.map(sanitizeSharedBankExercise).filter(ex=>ex.name);
-    return {kind:'kgg-shared-exercise-bank',version:1,appVersion:VERSION,exportedAt:new Date().toISOString(),exercises};
-  }
-  function parseSharedExerciseBankPayload(raw){
-    const payload=typeof raw==='string'?JSON.parse(raw):raw;
-    const exercises=Array.isArray(payload)?payload:(Array.isArray(payload&&payload.exercises)?payload.exercises:(Array.isArray(payload&&payload.exerciseBank)?payload.exerciseBank:[]));
-    if(!exercises.length)throw new Error('Keine Übungen im Import gefunden.');
-    return exercises.map(sanitizeSharedBankExercise).filter(ex=>ex.name);
-  }
-  function mergeSharedExerciseBank(raw){
-    const incoming=parseSharedExerciseBankPayload(raw);
-    let added=0,updated=0;
-    incoming.forEach(ex=>{
-      const existing=bank.find(item=>compact(item.name)===compact(ex.name));
-      if(existing){
 ```

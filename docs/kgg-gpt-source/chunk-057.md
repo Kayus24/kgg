@@ -4,6 +4,43 @@
 - Lines: 23941-24360
 
 ```html
+      backdrop.addEventListener('click',()=>closePhoneFloatingDrawer());
+      document.body.appendChild(backdrop);
+    }
+    return backdrop;
+  }
+  function closePhoneFloatingDrawer(){
+    const recent=$('recentList'), packages=$('packageList'), recentBtn=$('recentToggle'), packageBtn=$('packageToggle');
+    if(recent)recent.classList.add('hidden');
+    if(packages)packages.classList.add('hidden');
+    if(recentBtn)recentBtn.classList.remove('phoneButtonFloat');
+    if(packageBtn)packageBtn.classList.remove('phoneButtonFloat');
+    document.body.classList.remove('kggPhoneDrawerOpen');
+    phoneFloatingDrawerState.kind=null;
+    setTabletOverlayActiveFlag();
+  }
+  function openPhoneFloatingDrawer(kind){
+    if(!isPhoneLayout())return false;
+    if(shouldIgnorePhoneScrollToggle())return false;
+    const recent=$('recentList'), packages=$('packageList'), recentBtn=$('recentToggle'), packageBtn=$('packageToggle');
+    const target=kind==='recent'?recent:packages;
+    const targetBtn=kind==='recent'?recentBtn:packageBtn;
+    const other=kind==='recent'?packages:recent;
+    const otherBtn=kind==='recent'?packageBtn:recentBtn;
+    if(!target||!targetBtn)return false;
+    if(phoneFloatingDrawerState.kind===kind&&!target.classList.contains('hidden')){
+      closePhoneFloatingDrawer();
+      return true;
+    }
+    ensurePhoneDrawerBackdrop();
+    if(other)other.classList.add('hidden');
+    if(otherBtn)otherBtn.classList.remove('phoneButtonFloat');
+    target.classList.remove('hidden');
+    targetBtn.classList.add('phoneButtonFloat');
+    document.body.classList.add('kggPhoneDrawerOpen');
+    phoneFloatingDrawerState.kind=kind;
+    setTabletOverlayActiveFlag();
+    return true;
   }
   function openTabletExclusivePanel(kind){
     if(!isTabletLayout())return false;
@@ -387,41 +424,4 @@
         markPhoneUserScrolling();
       }
       kggPhoneTouchStart=null;
-    };
-    shouldIgnorePhoneScrollToggle=function(){
-      return isPhoneLayout()&&Date.now()<phoneTapSuppressUntil;
-    };
-    guardPhoneScrollToggle=function(ev){
-      if(!shouldIgnorePhoneScrollToggle())return false;
-      if(ev){ev.preventDefault();ev.stopPropagation();}
-      return true;
-    };
-    initPhoneScrollGuard=function(){
-      if(window.__kggPhoneScrollGuardBound)return;
-      window.__kggPhoneScrollGuardBound=true;
-      window.addEventListener('scroll',markPhoneUserScrolling,{passive:true});
-      if(window.PointerEvent){
-        document.addEventListener('pointerdown',ev=>{if(ev.pointerType==='touch')trackPhoneTouchStart(ev);},{passive:true});
-        document.addEventListener('pointermove',ev=>{if(ev.pointerType==='touch')trackPhoneTouchMove(ev);},{passive:true});
-        document.addEventListener('pointerup',ev=>{if(ev.pointerType==='touch')trackPhoneTouchEnd(ev);},{passive:true});
-        document.addEventListener('pointercancel',ev=>{if(ev.pointerType==='touch')trackPhoneTouchEnd(ev);},{passive:true});
-      }else{
-        document.addEventListener('touchstart',trackPhoneTouchStart,{passive:true});
-        document.addEventListener('touchmove',trackPhoneTouchMove,{passive:true});
-        document.addEventListener('touchend',trackPhoneTouchEnd,{passive:true});
-        document.addEventListener('touchcancel',trackPhoneTouchEnd,{passive:true});
-      }
-    };
-    markPhoneButtonFloat=function(){};
-    const blurPhoneComposerForBrowse=()=>{
-      if(!isPhoneLayout())return;
-      phoneBankBrowseMode=true;
-      document.body.classList.add('kggPhoneDbBrowseMode');
-      const input=$('exerciseInput');
-      if(input&&document.activeElement===input){
-        try{input.blur();}catch(err){}
-      }
-      document.body.classList.remove('phoneTextFocus');
-      updatePhoneKeyboardInset();
-    };
 ```

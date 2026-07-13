@@ -4,6 +4,43 @@
 - Lines: 20161-20580
 
 ```html
+      const passCode=(prompt('Transfer-Code eingeben')||'').trim();
+      if(!passCode)return false;
+      plain=await decryptKggConfigTransferEnvelope(parsed.json,passCode);
+    }
+    applyKggConfigTransferPlain(plain);
+    setScanStatus('API-Key / Konfig lokal gespeichert. Scan/OCR kann die lokalen Daten nutzen.');
+    alert('API-Key / Konfig lokal gespeichert.');
+    return true;
+  }
+  function syncPairDeviceId(){
+    try{
+      let id=localStorage.getItem(syncPairDeviceIdKey);
+      if(!id){
+        const rand=(crypto&&crypto.getRandomValues)?Array.from(crypto.getRandomValues(new Uint32Array(2))).map(v=>v.toString(36)).join(''):Math.random().toString(36).slice(2);
+        id='kgg_'+Date.now().toString(36)+'_'+rand;
+        localStorage.setItem(syncPairDeviceIdKey,id);
+      }
+      return id;
+    }catch(err){return 'kgg_'+Date.now().toString(36);}
+  }
+  function normalizeNativeSyncFollowConfig(config){
+    const normalized=config&&typeof config==='object'?{...config}:{};
+    normalized.therapistId=String(normalized.therapistId||'').trim();
+    normalized.syncRoomId=String(normalized.syncRoomId||'').trim();
+    normalized.followedTherapists=Array.isArray(normalized.followedTherapists)?normalized.followedTherapists:[];
+    return normalized;
+  }
+  function nativeSyncFollowConfig(){
+    try{
+      if(window.KGGNativeSync&&typeof window.KGGNativeSync.getFollowConfig==='function'){
+        return normalizeNativeSyncFollowConfig(window.KGGNativeSync.getFollowConfig()||{therapistId:'',followedTherapists:[]});
+      }
+    }catch(err){}
+    try{return normalizeNativeSyncFollowConfig(JSON.parse(localStorage.getItem(syncPairFallbackConfigKey)||'{"therapistId":"","syncRoomId":"","followedTherapists":[]}'));}catch(err){}
+    return {therapistId:'',syncRoomId:'',followedTherapists:[]};
+  }
+  function writeNativeSyncFollowConfig(config){
     try{
       if(window.KGGNativeSync&&typeof window.KGGNativeSync.setFollowConfig==='function'){
         return !!window.KGGNativeSync.setFollowConfig(config||{});
@@ -387,41 +424,4 @@
     preview.classList.remove('hidden');
     try{
       const record=await getEncryptedMediaBlob(media.id);
-      if(!record||!record.blob)throw new Error('Lokale Bilddatei fehlt.');
-      const imageBlob=await patientDecryptMedia(media,record.blob);
-      const url=URL.createObjectURL(imageBlob);
-      preview.innerHTML='<img src="'+url+'" alt="Uebungsbild Vorschau">';
-      setTimeout(()=>URL.revokeObjectURL(url),60000);
-    }catch(err){
-      preview.textContent='Vorschau lokal nicht verfuegbar.';
-    }
-  }
-  function renderEditorMediaStatus(ex){
-    const box=document.querySelector('.editorMediaBox'), status=$('editMediaStatus'), removeBtn=$('removeExerciseImage');
-    if(!box||!status||!removeBtn)return;
-    const isEditableExercise=!!ex;
-    box.classList.toggle('hidden',!isEditableExercise);
-    if(!isEditableExercise){clearEditorMediaPreview();return;}
-    const media=ensureExerciseMediaList(ex);
-    removeBtn.classList.toggle('hidden',media.length===0);
-    if(!media.length){status.textContent='Kein Bild.';clearEditorMediaPreview();return;}
-    const first=media[0];
-    status.textContent='1 Bild · '+mediaSizeLabel(first.encryptedSize||first.compressedSize||first.originalSize);
-    renderEditorMediaPreview(first);
-  }
-  async function handleEditorMediaFileSelected(ev){
-    const file=ev.target.files&&ev.target.files[0];
-    ev.target.value='';
-    if(!file)return;
-    const ex=currentEditedExercise();
-    if(!ex)return;
-    const status=$('editMediaStatus');
-    if(status)status.textContent='Bild wird vorbereitet ...';
-    const oldMedia=ensureExerciseMediaList(ex);
-    try{
-      const manifest=await prepareImageMediaFile(file);
-      ex.media=[manifest];
-      oldMedia.forEach(item=>deleteUnsharedMediaBlob(item,ex));
-      if(ex.localId){
-        syncStatePlanToStore('ui_attach_exercise_image');
 ```

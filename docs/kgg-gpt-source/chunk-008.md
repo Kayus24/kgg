@@ -4,6 +4,43 @@
 - Lines: 3361-3780
 
 ```html
+        gap:0!important;
+        border:0!important;
+        border-radius:18px!important;
+        background:transparent!important;
+        box-shadow:none!important;
+        z-index:36!important;
+        pointer-events:none;
+      }
+      .tabletLayoutControls .tabletLockSwitch{
+        pointer-events:auto;
+        width:100%!important;
+        height:100%!important;
+        min-width:0!important;
+        min-height:0!important;
+        display:flex!important;
+        flex-direction:column!important;
+        align-items:center!important;
+        justify-content:center!important;
+        gap:2px!important;
+        padding:5px 4px!important;
+        border-radius:18px!important;
+        background:#fff!important;
+        box-shadow:0 2px 10px rgba(7,16,39,.075)!important;
+      }
+      .tabletLockIcon{
+        width:auto!important;
+        min-width:0!important;
+        font-size:18px!important;
+        line-height:1!important;
+      }
+      .tabletSwitchTrack{
+        width:34px!important;
+        height:18px!important;
+      }
+      .tabletSwitchKnob{
+        width:12px!important;
+        height:12px!important;
       }
       body.tabletLayoutUnlocked .tabletSwitchKnob{
         transform:translateX(16px)!important;
@@ -387,41 +424,4 @@
       }
       .tabletLayoutFreeTools::before{
         top:76px!important;
-        bottom:76px!important;
-      }
-      .tabletLayoutResizeHandle{
-        border:0!important;
-        width:58px!important;
-        border-radius:0!important;
-        background:
-          radial-gradient(circle at 50% 18px,rgba(7,16,39,.32) 0 7px,rgba(255,255,255,.96) 8px 14px,transparent 15px),
-          radial-gradient(circle at 50% calc(100% - 18px),rgba(7,16,39,.32) 0 7px,rgba(255,255,255,.96) 8px 14px,transparent 15px),
-          linear-gradient(180deg,rgba(7,16,39,.18),rgba(94,167,232,.42),rgba(7,16,39,.18)) center/5px calc(100% - 28px) no-repeat!important;
-        box-shadow:none!important;
-        backdrop-filter:none!important;
-      }
-      .tabletLayoutResizeHandle::before{
-        left:50%!important;
-        top:50%!important;
-        width:30px!important;
-        height:92px!important;
-        transform:translate(-50%,-50%)!important;
-        border-radius:999px!important;
-        background:linear-gradient(180deg,rgba(255,255,255,.97),rgba(245,248,252,.92))!important;
-        box-shadow:0 14px 34px rgba(7,16,39,.16),0 0 0 1px rgba(220,227,235,.9) inset!important;
-      }
-      .tabletLayoutResizeHandle::after{
-        width:16px!important;
-        height:58px!important;
-        background:
-          radial-gradient(circle at 50% 16%,rgba(7,16,39,.34) 0 2px,transparent 3px),
-          radial-gradient(circle at 50% 50%,rgba(7,16,39,.28) 0 2px,transparent 3px),
-          radial-gradient(circle at 50% 84%,rgba(7,16,39,.34) 0 2px,transparent 3px)!important;
-      }
-      body.tabletLayoutLeftSlim #bankToggle,
-      body.tabletLayoutLeftSlim .scanHub .scanBtn,
-      body.tabletLayoutLeftSlim .scanHub .scanMeta{
-        border-radius:14px!important;
-      }
-      body.tabletLayoutRightSlim #finishBtn,
 ```

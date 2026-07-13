@@ -4,6 +4,43 @@
 - Lines: 14701-15120
 
 ```html
+    0xE976: 0x9A05,
+    0xE977: 0x99E2,
+    0xE978: 0x9A19,
+    0xE979: 0x9A2B,
+    0xE97A: 0x9A37,
+    0xE97B: 0x9A45,
+    0xE97C: 0x9A42,
+    0xE97D: 0x9A40,
+    0xE97E: 0x9A43,
+    0xE980: 0x9A3E,
+    0xE981: 0x9A55,
+    0xE982: 0x9A4D,
+    0xE983: 0x9A5B,
+    0xE984: 0x9A57,
+    0xE985: 0x9A5F,
+    0xE986: 0x9A62,
+    0xE987: 0x9A65,
+    0xE988: 0x9A64,
+    0xE989: 0x9A69,
+    0xE98A: 0x9A6B,
+    0xE98B: 0x9A6A,
+    0xE98C: 0x9AAD,
+    0xE98D: 0x9AB0,
+    0xE98E: 0x9ABC,
+    0xE98F: 0x9AC0,
+    0xE990: 0x9ACF,
+    0xE991: 0x9AD1,
+    0xE992: 0x9AD3,
+    0xE993: 0x9AD4,
+    0xE994: 0x9ADE,
+    0xE995: 0x9ADF,
+    0xE996: 0x9AE2,
+    0xE997: 0x9AE3,
+    0xE998: 0x9AE6,
+    0xE999: 0x9AEF,
+    0xE99A: 0x9AEB,
+    0xE99B: 0x9AEE,
     0xE99C: 0x9AF4,
     0xE99D: 0x9AF1,
     0xE99E: 0x9AF7,
@@ -387,41 +424,4 @@ exports.VERSIONS = [
             },
         ],
     },
-    {
-        infoBits: null,
-        versionNumber: 3,
-        alignmentPatternCenters: [6, 22],
-        errorCorrectionLevels: [
-            {
-                ecCodewordsPerBlock: 15,
-                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 55 }],
-            },
-            {
-                ecCodewordsPerBlock: 26,
-                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 44 }],
-            },
-            {
-                ecCodewordsPerBlock: 18,
-                ecBlocks: [{ numBlocks: 2, dataCodewordsPerBlock: 17 }],
-            },
-            {
-                ecCodewordsPerBlock: 22,
-                ecBlocks: [{ numBlocks: 2, dataCodewordsPerBlock: 13 }],
-            },
-        ],
-    },
-    {
-        infoBits: null,
-        versionNumber: 4,
-        alignmentPatternCenters: [6, 26],
-        errorCorrectionLevels: [
-            {
-                ecCodewordsPerBlock: 20,
-                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 80 }],
-            },
-            {
-                ecCodewordsPerBlock: 18,
-                ecBlocks: [{ numBlocks: 2, dataCodewordsPerBlock: 32 }],
-            },
-            {
 ```

@@ -4,6 +4,43 @@
 - Lines: 22261-22680
 
 ```html
+      if(bitmap){try{bitmap.close();}catch(closeErr){}}
+    }
+    return '';
+  }
+  async function scanQrFromImageFile(file){
+    const fileName=String(file&&file.name||'Bild');
+    const fileType=String(file&&file.type||'unbekannter Typ');
+    const fileSize=Number(file&&file.size||0);
+    const heicHint=/heic|heif/i.test(fileName+' '+fileType);
+    let detector=null;
+    if('BarcodeDetector' in window){
+      try{detector=new BarcodeDetector({formats:['qr_code']});}catch(err){detector=null;}
+    }
+    if(!detector&&!window.jsQR){
+      return {
+        raw:'',
+        attempts:0,
+        reason:'QR-Erkennung ist in diesem WebView nicht verfügbar. BarcodeDetector/jsQR fehlt.',
+        debug:{fileName,fileType,fileSize,barcodeDetector:false,jsQR:false}
+      };
+    }
+
+    const direct=await scanDetectQrDirectFromFile(file,detector);
+    if(direct)return {raw:direct,attempts:1,hit:{source:'direct-bitmap',mode:'native'},debug:{fileName,fileType,fileSize}};
+
+    const crops=[
+      {id:'full',x:0,y:0,w:1,h:1},
+      {id:'center',x:.08,y:.08,w:.84,h:.84},
+      {id:'center-tight',x:.20,y:.20,w:.60,h:.60},
+      {id:'wide-center',x:.03,y:.15,w:.94,h:.70},
+      {id:'tall-center',x:.15,y:.03,w:.70,h:.94},
+      {id:'top-left',x:0,y:0,w:.62,h:.62},
+      {id:'top-right',x:.38,y:0,w:.62,h:.62},
+      {id:'bottom-left',x:0,y:.38,w:.62,h:.62},
+      {id:'bottom-right',x:.38,y:.38,w:.62,h:.62},
+      {id:'top-band',x:0,y:0,w:1,h:.48},
+      {id:'bottom-band',x:0,y:.52,w:1,h:.48},
       {id:'left-band',x:0,y:0,w:.48,h:1},
       {id:'right-band',x:.52,y:0,w:.48,h:1},
       {id:'top-third-left',x:0,y:0,w:.54,h:.44},
@@ -387,41 +424,4 @@
     return {mime_type:'image/jpeg',data:dataUrl.split(',')[1]||''};
   }
   function cleanGeminiScanText(text){
-    let out=String(text||'').replace(/```(?:json|[a-z]+)?/gi,'').replace(/```/g,'').trim();
-    if(!out)return '';
-    const json=parseLooseJson(out);
-    if(json.ok){
-      const asText=scanResultToPlanText(json.json);
-      if(asText)return asText;
-    }
-    out=out.split(/\n+/).map(line=>line.replace(/^\s*(?:[-*]|\d+[.)])\s*/,'').trim()).filter(Boolean).join(', ');
-    out=out.replace(/\b(?:EX|ÜB|UE)\s*\d+\s*[:.)|\-–—]*\s*/gi,'');
-    out=out.replace(/\s*;\s*/g,', ').replace(/\s*,\s*/g,', ').replace(/(?:,\s*){2,}/g,', ').replace(/\s+/g,' ').trim();
-    if(/^keine auslesbaren/i.test(out))return '';
-    return out;
-  }
-  function geminiScanResponseText(json){
-    const candidates=Array.isArray(json&&json.candidates)?json.candidates:[];
-    return candidates.map(candidate=>{
-      const parts=candidate&&candidate.content&&Array.isArray(candidate.content.parts)?candidate.content.parts:[];
-      return parts.map(part=>part&&part.text||'').join('\n');
-    }).filter(Boolean).join('\n').trim();
-  }
-  function geminiScanPrompt(){
-    return [
-      'Du liest einen deutschen KGG/Physio-Papierplan als Foto.',
-      'QR-Codes werden lokal gelesen; du bist nur Papierplan-Fallback.',
-      'Ignoriere Patientendaten, Kopfzeilen, Randnotizen und Datenschutzmasken.',
-      'Entferne EX1/EX2/UE1-Praefixe aus Übungsnamen.',
-      'Gib nur übungsbezogene Inhalte aus: Übungsname, Seite links/rechts falls erkennbar, Last, Wdh oder Zeit.',
-      'Keine Tage erfinden. Keine leeren Tabellenzeilen als Übungen ausgeben.',
-      'Bei unsicheren Werten lieber null/unsicher statt raten.',
-      'Bevorzugtes JSON: {"exercises":[{"name":"...","side":"BI oder LR","load":"","reps":"","time":"","uncertain":false}],"warnings":[]}',
-      'Wenn JSON unsicher ist, gib zusätzlich klaren Text mit einer Übung pro Zeile aus.'
-    ].join('\n');
-  }
-  function localGeminiKeys(){
-    loadAdminSecrets();
-    if(window.KGGAdmin&&typeof window.KGGAdmin.getGeminiKeysForLocalUse==='function')return window.KGGAdmin.getGeminiKeysForLocalUse().map(cleanSecret).filter(Boolean);
-    return (adminSecrets.geminiKeys||[]).map(cleanSecret).filter(Boolean);
 ```

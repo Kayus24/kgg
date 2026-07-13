@@ -4,6 +4,43 @@
 - Lines: 24361-24780
 
 ```html
+    };
+    shouldIgnorePhoneScrollToggle=function(){
+      return isPhoneLayout()&&Date.now()<phoneTapSuppressUntil;
+    };
+    guardPhoneScrollToggle=function(ev){
+      if(!shouldIgnorePhoneScrollToggle())return false;
+      if(ev){ev.preventDefault();ev.stopPropagation();}
+      return true;
+    };
+    initPhoneScrollGuard=function(){
+      if(window.__kggPhoneScrollGuardBound)return;
+      window.__kggPhoneScrollGuardBound=true;
+      window.addEventListener('scroll',markPhoneUserScrolling,{passive:true});
+      if(window.PointerEvent){
+        document.addEventListener('pointerdown',ev=>{if(ev.pointerType==='touch')trackPhoneTouchStart(ev);},{passive:true});
+        document.addEventListener('pointermove',ev=>{if(ev.pointerType==='touch')trackPhoneTouchMove(ev);},{passive:true});
+        document.addEventListener('pointerup',ev=>{if(ev.pointerType==='touch')trackPhoneTouchEnd(ev);},{passive:true});
+        document.addEventListener('pointercancel',ev=>{if(ev.pointerType==='touch')trackPhoneTouchEnd(ev);},{passive:true});
+      }else{
+        document.addEventListener('touchstart',trackPhoneTouchStart,{passive:true});
+        document.addEventListener('touchmove',trackPhoneTouchMove,{passive:true});
+        document.addEventListener('touchend',trackPhoneTouchEnd,{passive:true});
+        document.addEventListener('touchcancel',trackPhoneTouchEnd,{passive:true});
+      }
+    };
+    markPhoneButtonFloat=function(){};
+    const blurPhoneComposerForBrowse=()=>{
+      if(!isPhoneLayout())return;
+      phoneBankBrowseMode=true;
+      document.body.classList.add('kggPhoneDbBrowseMode');
+      const input=$('exerciseInput');
+      if(input&&document.activeElement===input){
+        try{input.blur();}catch(err){}
+      }
+      document.body.classList.remove('phoneTextFocus');
+      updatePhoneKeyboardInset();
+    };
     const openOrCloseBankFromBrowseTap=ev=>{
       if(guardPhoneScrollToggle(ev))return;
       if(isPhoneLayout())blurPhoneComposerForBrowse();
@@ -387,41 +424,4 @@
   .kggReleaseActions{display:grid;gap:10px;margin-top:16px}
   .kggReleaseActions.two{grid-template-columns:1fr 1fr}
   .kggReleaseBtn{min-height:50px;border:1px solid rgba(10,16,36,.13);border-radius:16px;background:#fff;color:#0a1024;padding:10px 14px;font:inherit;font-weight:950;box-shadow:0 8px 20px rgba(10,16,36,.07)}
-  .kggReleaseBtn.primary{background:#0a1024;color:#fff}
-  .kggReleaseBtn.soft{background:#edf6ff;border-color:#b8d9f6;color:#073254}
-  .kggReleaseBtn.danger{background:#fff5f5;border-color:#fecaca;color:#991b1b}
-  .kggReleaseMenuGroup{margin-top:10px}
-  .kggReleaseMenuGroup h3{margin:0 0 8px}
-  @media(max-width:759px){.kggReleaseOverlay{padding:10px;align-items:flex-end}.kggReleaseSheet{width:100%;max-height:94vh;border-radius:24px 24px 16px 16px;padding:17px}.kggReleaseGrid,.kggReleaseActions.two{grid-template-columns:1fr}.kggReleaseField.wide{grid-column:1}.kggReleaseHead h2{font-size:1.25rem}}
-</style>
-<script id="kgg-release-center-v31-script">
-(function(){
-  'use strict';
-  var MOBILE_INBOX_URL='https://github.com/Kayus24/kgg/upload/mobile-inbox/mobile-inbox';
-  var MOBILE_PROMOTE_URL='https://github.com/Kayus24/kgg/actions/workflows/promote-latest-admin-beta.yml';
-  if(!window.KGGReleaseControl&&(location.hostname==='127.0.0.1'||location.hostname==='localhost')&&location.search.indexOf('kggReleaseUiTest=1')>=0){
-    window.KGGReleaseControl={status:function(){return JSON.stringify({phase:'idle',message:'Lokaler UI-Test',available:true,authenticated:false,repository:'Kayus24/kgg'});},beginLogin:function(){return false;},testConnection:function(){return false;},downloadCurrentHtml:function(){return false;},openMobileInbox:function(){window.open(MOBILE_INBOX_URL,'_blank');return true;},openPromoteLatest:function(){window.open(MOBILE_PROMOTE_URL,'_blank');return true;},chooseAndUploadBeta:function(){return false;},confirmPromotion:function(){return false;},confirmRollback:function(){return false;}};
-  }
-  if(!window.KGGReleaseControl||window.KGGReleaseCenter)return;
-  var refreshTimer=null;
-  function readStatus(){try{return JSON.parse(window.KGGReleaseControl.status()||'{}');}catch(err){return {phase:'error',message:'Status konnte nicht gelesen werden.'};}}
-  function readAndroidStatus(){try{if(window.KGGAndroidApp&&typeof window.KGGAndroidApp.updateStatus==='function')return JSON.parse(window.KGGAndroidApp.updateStatus()||'{}');}catch(err){}return null;}
-  function value(id){var el=document.getElementById(id);return el?(el.value||'').trim():'';}
-  function setText(id,text){var el=document.getElementById(id);if(el)el.textContent=text||'';}
-  function copyText(text){try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text);return true;}}catch(err){}try{var input=document.createElement('input');input.value=text;input.style.position='fixed';input.style.opacity='0';document.body.appendChild(input);input.select();document.execCommand('copy');input.remove();return true;}catch(err){return false;}}
-  function openExternal(url){try{window.open(url,'_blank');return true;}catch(err){try{location.href=url;return true;}catch(inner){return false;}}}
-  function closeTabletMenu(){document.body.classList.remove('tabletMenuOpen');var menu=document.getElementById('tabletSideMenu');if(menu)menu.setAttribute('aria-hidden','true');}
-  function ensureModal(){
-    var existing=document.getElementById('kggReleaseCenterModal');
-    if(existing)return existing;
-    var modal=document.createElement('div');
-    modal.id='kggReleaseCenterModal';modal.className='kggReleaseOverlay';modal.setAttribute('aria-hidden','true');
-    modal.innerHTML='<section class="kggReleaseSheet" role="dialog" aria-modal="true" aria-labelledby="kggReleaseTitle">'
-      +'<div class="kggReleaseHead"><div><h2 id="kggReleaseTitle">KGG Update-Zentrale</h2><p>Standard: HTML speichern und per GitHub-Mobile-Inbox hochladen. Direktupload bleibt Komfortweg.</p></div><button class="kggReleaseClose" id="kggReleaseClose" type="button" aria-label="Update-Zentrale schliessen">&times;</button></div>'
-      +'<div class="kggReleaseStatus"><span class="kggReleaseBadge" id="kggReleaseBadge">Status</span><span class="kggReleaseMessage" id="kggReleaseMessage">Wird geladen …</span></div>'
-      +'<div class="kggReleaseCodeBox" id="kggReleaseCodeBox" aria-live="polite"><div class="kggReleaseCodeLabel">GitHub-Code</div><div class="kggReleaseCodeValue" id="kggReleaseCodeValue"></div><button class="kggReleaseBtn soft" id="kggReleaseCopyCode" type="button">Code kopieren</button><div class="kggReleaseCodeHint">Diesen Code auf der GitHub-Seite eingeben. Wenn GitHub langsam laedt: Code kopieren, spaeter verbinden oder den Mobile-Inbox-Weg nutzen.</div></div>'
-      +'<button class="kggReleaseBtn soft" id="kggReleaseDownloadHtml" type="button" style="width:100%;margin-top:10px">Aktuelle HTML speichern</button>'
-      +'<button class="kggReleaseBtn primary" id="kggReleaseMobileInbox" type="button" style="width:100%;margin-top:10px">GitHub-Mobile-Inbox oeffnen</button>'
-      +'<div class="kggReleaseInboxHint"><strong>Handy-Workflow ohne Codex</strong>1. HTML speichern. 2. Diese Datei in GitHub hochladen. 3. GitHub Actions erzeugt Admin-Beta und PR automatisch.</div>'
-      +'<button class="kggReleaseBtn soft" id="kggReleasePromoteLatest" type="button" style="width:100%;margin-top:10px">Kolleg:innen-Freigabe in GitHub oeffnen</button>'
 ```

@@ -11,7 +11,8 @@
     "kgg-v050-phone-ui-mini-fix",
     "kgg-v051-android-qr-pdf-bridge",
     "kgg-v052-pdf-plan-thumbnails",
-    "kgg-v053-ui-tablet-stability"
+    "kgg-v053-ui-tablet-stability",
+    "kgg-v060-tablet-html-release-label"
   ],
   "parts": [
     "base-head.html",
@@ -29,6 +30,7 @@
     "patches/v051-android-qr-pdf-bridge.html",
     "patches/v052-pdf-plan-thumbnails.html",
     "patches/v053-ui-tablet-stability.html",
+    "patches/v060-tablet-html-release-label.html",
     "footer.html"
   ]
 }

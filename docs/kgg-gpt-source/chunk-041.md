@@ -4,6 +4,43 @@
 - Lines: 17221-17640
 
 ```html
+    });
+  }
+  async function getSourceMediaBlob(id){
+    const db=await openSourceMediaDb();
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction('encryptedBlobs','readonly');
+      const req=tx.objectStore('encryptedBlobs').get(id);
+      req.onsuccess=()=>resolve(req.result&&req.result.blob||null);
+      req.onerror=()=>reject(req.error||new Error('Admin-Test-Bild nicht gefunden'));
+    });
+  }
+  window.KGGMediaUploadAdapter={
+    name:'admin-test-mock-upload-adapter',
+    isMock:true,
+    async upload(blob,context){
+      const manifest=context&&context.manifest||{};
+      const id=manifest.id||('test_'+Date.now());
+      const ttlSeconds=Number(context&&context.ttlSeconds)||300;
+      return {
+        downloadUrl:'https://admin-test.invalid/kgg-media/'+encodeURIComponent(id)+'.bin',
+        storage:'admin-test-indexeddb',
+        expiresAt:new Date(Date.now()+ttlSeconds*1000).toISOString()
+      };
+    },
+    scheduleDelete(media,options){
+      const delayMs=Number(options&&options.delayMs)||300000;
+      setTimeout(()=>{console.info('ADMIN TEST media expired',media&&media.id);},delayMs);
+    },
+    delete(media){console.info('ADMIN TEST media deleted',media&&media.id);}
+  };
+  window.KGGPatientMediaFetchAdapter={
+    async fetch(media){
+      const blob=await getSourceMediaBlob(media&&media.id);
+      if(!blob)throw new Error('Admin-Test-Bild nicht im lokalen Speicher gefunden');
+      return blob;
+    }
+  };
 })();
 </script>
 
@@ -14,11 +51,11 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
 
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v059_ui_scaler_push_canary';
+  const VERSION='KGG_GITHUB_UPDATE_v060_tablet_html_release_label';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={release:'v059',buildTime:'2026-07-10T09:57:49Z',buildCode:'github-update-v059-ui-scaler-push-canary',htmlFile:'kgg-update/index.html'};
+  const KGG_BUILD_INFO={"release":"v060","buildTime":"2026-07-13T12:04:29Z","buildCode":"module-v060-tablet-html-release-label","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -387,41 +424,4 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   function normalizeSetCount(value){const n=Number(value)||3; return Math.max(1,Math.min(5,n));}
   function normalizeMeasureMode(value){
     const raw=String(value||'').trim().toLowerCase();
-    if(['zeit','time','dauer','sek','sek.','sec','s'].includes(raw))return 'zeit';
-    return 'wdh';
-  }
-  function measureUnitLabel(measure){return normalizeMeasureMode(measure)==='zeit'?'Sek.':'Wdh';}
-  function cleanFreeUnitLabel(value){
-    return String(value||'').trim().replace(/\s*\/\s*/g,'/').replace(/\s+/g,' ').replace(/^[.@:;,\-\s]+|[.@:;,\-\s]+$/g,'');
-  }
-  function normalizeLoadUnitInfo(value,fallback){
-    const fallbackUnit=fallback||'kg';
-    const raw=cleanFreeUnitLabel(value);
-    if(!raw)return {unit:fallbackUnit,custom:false,explicit:false};
-    const lower=raw.toLowerCase().replace(/\./g,'').replace(/\s+/g,' ');
-    const compact=lower.replace(/\s+/g,'');
-    if(['kg','kgs','kilo','kilos','kilogramm','kilogram'].includes(lower))return {unit:'kg',custom:false,explicit:true};
-    if(['bw','bodyweight','body weight','koerpergewicht','körpergewicht','eigengewicht'].includes(lower)||compact==='bodyweight')return {unit:'BW',custom:false,explicit:true};
-    if(['hub','huebe','hübe'].includes(lower))return {unit:'Hub',custom:false,explicit:true};
-    if(['stufe'].includes(lower))return {unit:'Stufe',custom:false,explicit:true};
-    if(['watt','w'].includes(lower))return {unit:'Watt',custom:false,explicit:true};
-    if(['stufe/watt','stufe watt','stufe+watt','stufewatt'].includes(lower)||compact==='stufe/watt')return {unit:'Stufe/Watt',custom:false,explicit:true};
-    if(['bar'].includes(lower))return {unit:'bar',custom:false,explicit:true};
-    if(['keine','kein','none','ohne'].includes(lower))return {unit:'keine',custom:false,explicit:true};
-    return {unit:raw,custom:true,explicit:true};
-  }
-  function normalizeLoadUnit(value){
-    return normalizeLoadUnitInfo(value,'kg').unit;
-  }
-  function structuredNumberPattern(){return '-?\\d+(?:[,.]\\d+)?';}
-  function structuredUnitPattern(){return '[A-Za-zÄÖÜäöüß%°/._-]+(?:\\s*/\\s*[A-Za-zÄÖÜäöüß%°/._-]+)?';}
-  function normalizeStructuredNumber(value){return String(value||'').replace(',','.').trim();}
-  function normalizeMetricToken(token){
-    const raw=String(token||'').trim().replace('.','');
-    const lower=raw.toLowerCase();
-    if(['wdh','wh','rep','reps'].includes(lower))return {unit:'Wdh',metricUnit:'Wdh',time:false,label:'Wdh'};
-    if(['min','minute','minutes','minuten','sek','sec','secs','s','zeit','time','dauer'].includes(lower))return {unit:'Zeit',metricUnit:'Zeit',time:true,label:raw||'Zeit'};
-    return {unit:raw||'Wdh',metricUnit:raw||'Wdh',time:false,label:raw||'Wdh',custom:true};
-  }
-  function parseExerciseQuantityText(text){
 ```

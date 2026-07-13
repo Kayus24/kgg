@@ -4,6 +4,43 @@
 - Lines: 4621-5040
 
 ```html
+    font-size:1.35rem;
+    font-weight:900;
+    color:#0a1024;
+    cursor:pointer;
+  }
+  .tabletSideMenuGroup{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    padding:14px;
+    border:1px solid rgba(10,16,36,.10);
+    border-radius:22px;
+    background:#f8fafc;
+  }
+  .tabletSideMenuGroup h3{
+    margin:0;
+    font-size:1rem;
+    font-weight:900;
+    color:#0a1024;
+  }
+  .tabletSideHint{
+    margin:0;
+    font-size:.86rem;
+    line-height:1.35;
+    color:#667085;
+    font-weight:750;
+  }
+  .tabletSideMenu .tabletLayoutControls{
+    position:static!important;
+    display:grid!important;
+    grid-template-columns:1fr 1fr;
+    width:100%!important;
+    min-width:0!important;
+    height:auto!important;
+    padding:0!important;
+    gap:10px!important;
+    border:0!important;
     box-shadow:none!important;
     background:transparent!important;
   }
@@ -387,41 +424,4 @@
     }
     #bankArea.bankOpen.searchBankOpen{
       grid-template-columns:56px minmax(0,1fr)!important;
-      align-items:start!important;
-    }
-    #bankArea.bankOpen.searchBankOpen #bankToggle{
-      grid-column:1!important;
-      grid-row:1!important;
-    }
-    #bankArea.bankOpen.searchBankOpen #bankContent{
-      grid-column:2!important;
-      grid-row:1!important;
-      min-width:0!important;
-      margin-top:0!important;
-    }
-    #bankArea.bankOpen.searchBankOpen .bankRows{
-      max-height:min(52dvh,420px)!important;
-    }
-    body.kggPhoneDrawerOpen #recentToggle.phoneButtonFloat,
-    body.kggPhoneDrawerOpen #packageToggle.phoneButtonFloat,
-    body.kggPhoneDrawerOpen #recentList:not(.hidden),
-    body.kggPhoneDrawerOpen #packageList:not(.hidden){
-      animation:none!important;
-      transform:none!important;
-      filter:none!important;
-    }
-    #editorModal{
-      align-items:center!important;
-      padding:14px!important;
-      background:rgba(7,16,39,.52)!important;
-    }
-    #editorModal .editorSheet{
-      width:min(100% - 28px,520px)!important;
-      max-height:calc(100dvh - 28px)!important;
-      border-radius:22px!important;
-      overflow:auto!important;
-      overscroll-behavior:contain;
-      box-shadow:0 24px 70px rgba(7,16,39,.28)!important;
-    }
-    #editorModal .editorMediaPreview img,
 ```

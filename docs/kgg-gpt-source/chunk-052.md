@@ -4,6 +4,43 @@
 - Lines: 21841-22260
 
 ```html
+    try{
+      const url=await renderPatientShareOutput();
+      if(!url)return;
+      archiveAndCloseCurrentPlan('ui_finish_patient_app');
+    }catch(err){
+      console.warn('Patienten-Ausgabe konnte nicht erzeugt werden:',err);
+      if(notice)notice.textContent='Ausgabe fehlgeschlagen. Plan bleibt offen.';
+    }
+  }
+
+  function decodePatientPayloadFromHash(){
+    const hash=String(location.hash||'');
+    const publicMatch=hash.match(/^#KGGH2:(.+)$/i);
+    if(publicMatch){
+      try{return convertKggH2PayloadToPatientPayload(decodeKggJsonBase64Url(publicMatch[1]));}
+      catch(err){console.warn('KGGH2 Patienten-Link konnte nicht gelesen werden:',err); return {error:true};}
+    }
+    const match=hash.match(/^#kgg=(.+)$/);
+    if(!match)return null;
+    try{
+      const encoded=decodeURIComponent(match[1]).replace(/-/g,'+').replace(/_/g,'/');
+      const padded=encoded+'='.repeat((4-encoded.length%4)%4);
+      return JSON.parse(decodeURIComponent(escape(atob(padded))));
+    }catch(err){
+      console.warn('Patienten-Link konnte nicht gelesen werden:',err);
+      return {error:true};
+    }
+  }
+  function base64UrlToBytes(value){
+    const text=String(value||'').replace(/-/g,'+').replace(/_/g,'/');
+    const padded=text+'='.repeat((4-text.length%4)%4);
+    const binary=atob(padded);
+    const bytes=new Uint8Array(binary.length);
+    for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+    return bytes;
+  }
+  function patientMediaDb(){
     return new Promise((resolve,reject)=>{
       if(!('indexedDB' in window)){reject(new Error('IndexedDB nicht verfuegbar'));return;}
       const req=indexedDB.open('kgg_patient_media_v1',1);
@@ -387,41 +424,4 @@
     }catch(err){
       console.warn('QR-Dateibild: Direkt-BarcodeDetector fehlgeschlagen.',err);
     }finally{
-      if(bitmap){try{bitmap.close();}catch(closeErr){}}
-    }
-    return '';
-  }
-  async function scanQrFromImageFile(file){
-    const fileName=String(file&&file.name||'Bild');
-    const fileType=String(file&&file.type||'unbekannter Typ');
-    const fileSize=Number(file&&file.size||0);
-    const heicHint=/heic|heif/i.test(fileName+' '+fileType);
-    let detector=null;
-    if('BarcodeDetector' in window){
-      try{detector=new BarcodeDetector({formats:['qr_code']});}catch(err){detector=null;}
-    }
-    if(!detector&&!window.jsQR){
-      return {
-        raw:'',
-        attempts:0,
-        reason:'QR-Erkennung ist in diesem WebView nicht verfügbar. BarcodeDetector/jsQR fehlt.',
-        debug:{fileName,fileType,fileSize,barcodeDetector:false,jsQR:false}
-      };
-    }
-
-    const direct=await scanDetectQrDirectFromFile(file,detector);
-    if(direct)return {raw:direct,attempts:1,hit:{source:'direct-bitmap',mode:'native'},debug:{fileName,fileType,fileSize}};
-
-    const crops=[
-      {id:'full',x:0,y:0,w:1,h:1},
-      {id:'center',x:.08,y:.08,w:.84,h:.84},
-      {id:'center-tight',x:.20,y:.20,w:.60,h:.60},
-      {id:'wide-center',x:.03,y:.15,w:.94,h:.70},
-      {id:'tall-center',x:.15,y:.03,w:.70,h:.94},
-      {id:'top-left',x:0,y:0,w:.62,h:.62},
-      {id:'top-right',x:.38,y:0,w:.62,h:.62},
-      {id:'bottom-left',x:0,y:.38,w:.62,h:.62},
-      {id:'bottom-right',x:.38,y:.38,w:.62,h:.62},
-      {id:'top-band',x:0,y:0,w:1,h:.48},
-      {id:'bottom-band',x:0,y:.52,w:1,h:.48},
 ```

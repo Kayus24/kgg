@@ -4,6 +4,43 @@
 - Lines: 22681-23100
 
 ```html
+    let out=String(text||'').replace(/```(?:json|[a-z]+)?/gi,'').replace(/```/g,'').trim();
+    if(!out)return '';
+    const json=parseLooseJson(out);
+    if(json.ok){
+      const asText=scanResultToPlanText(json.json);
+      if(asText)return asText;
+    }
+    out=out.split(/\n+/).map(line=>line.replace(/^\s*(?:[-*]|\d+[.)])\s*/,'').trim()).filter(Boolean).join(', ');
+    out=out.replace(/\b(?:EX|ÜB|UE)\s*\d+\s*[:.)|\-–—]*\s*/gi,'');
+    out=out.replace(/\s*;\s*/g,', ').replace(/\s*,\s*/g,', ').replace(/(?:,\s*){2,}/g,', ').replace(/\s+/g,' ').trim();
+    if(/^keine auslesbaren/i.test(out))return '';
+    return out;
+  }
+  function geminiScanResponseText(json){
+    const candidates=Array.isArray(json&&json.candidates)?json.candidates:[];
+    return candidates.map(candidate=>{
+      const parts=candidate&&candidate.content&&Array.isArray(candidate.content.parts)?candidate.content.parts:[];
+      return parts.map(part=>part&&part.text||'').join('\n');
+    }).filter(Boolean).join('\n').trim();
+  }
+  function geminiScanPrompt(){
+    return [
+      'Du liest einen deutschen KGG/Physio-Papierplan als Foto.',
+      'QR-Codes werden lokal gelesen; du bist nur Papierplan-Fallback.',
+      'Ignoriere Patientendaten, Kopfzeilen, Randnotizen und Datenschutzmasken.',
+      'Entferne EX1/EX2/UE1-Praefixe aus Übungsnamen.',
+      'Gib nur übungsbezogene Inhalte aus: Übungsname, Seite links/rechts falls erkennbar, Last, Wdh oder Zeit.',
+      'Keine Tage erfinden. Keine leeren Tabellenzeilen als Übungen ausgeben.',
+      'Bei unsicheren Werten lieber null/unsicher statt raten.',
+      'Bevorzugtes JSON: {"exercises":[{"name":"...","side":"BI oder LR","load":"","reps":"","time":"","uncertain":false}],"warnings":[]}',
+      'Wenn JSON unsicher ist, gib zusätzlich klaren Text mit einer Übung pro Zeile aus.'
+    ].join('\n');
+  }
+  function localGeminiKeys(){
+    loadAdminSecrets();
+    if(window.KGGAdmin&&typeof window.KGGAdmin.getGeminiKeysForLocalUse==='function')return window.KGGAdmin.getGeminiKeysForLocalUse().map(cleanSecret).filter(Boolean);
+    return (adminSecrets.geminiKeys||[]).map(cleanSecret).filter(Boolean);
   }
   function currentLocalGeminiKey(){return localGeminiKeys()[0]||'';}
 
@@ -387,41 +424,4 @@
       const cls=job.result?(quality.ok===false?'warn':'good'):(warn.length?'warn':'');
       const collapsed=!!job.collapsed;
       const typeLabel=job.type==='qr'?'QR-Plan':'Papierplan';
-      const title=escapeHtml(job.short||job.label);
-      const meta=escapeHtml(typeLabel+' · '+job.pages.length+' Bild(er)');
-      const head='<div class="scanJobHead"><div class="scanJobHeadMain"><b>'+title+'</b><small>'+meta+'</small>'+(collapsed?'<span class="scanCollapsedHint">eingeklappt · antippen zum Öffnen</span>':'')+'</div><div class="scanJobTopActions"><button type="button" class="scanMiniBtn" onclick="window.KGGScan.toggleCollapse('+index+')" aria-label="Scankarte '+(collapsed?'ausklappen':'einklappen')+'">'+(collapsed?'▾':'▴')+'</button><button type="button" class="scanRemoveBtn" onclick="window.KGGScan.removeJob('+index+')" aria-label="Scankarte entfernen">×</button></div></div>';
-      if(collapsed){
-        return '<div class="scanJobCard '+cls+' collapsed">'+head+'</div>';
-      }
-      return '<div class="scanJobCard '+cls+'">'+
-        head+
-        '<input class="scanShort" value="'+escapeHtml(job.short||'')+'" placeholder="lokales Kürzel, z. B. Max M." oninput="window.KGGScan.setShort('+index+',this.value)">'+
-        '<div class="scanFileList">'+escapeHtml(job.pages.map(p=>p.name).join(' · ')||'Noch kein Bild')+'</div>'+
-        (warn.length?'<div class="scanWarning">Prüfen: '+escapeHtml(warn.join(' · '))+'</div>':'')+
-        '<textarea id="kggScanCopyField'+index+'" class="scanResultText" readonly>'+escapeHtml(resultText||'Noch nicht ausgelesen.')+'</textarea>'+
-        '<div class="scanCardActions scanCardActionsCompact">'+
-          '<button type="button" class="mutedBtn" onclick="window.KGGScan.copyResult('+index+')">kopieren</button>'+
-          '<button type="button" class="primary" onclick="window.KGGScan.applyResult('+index+')">weiter bearbeiten</button>'+
-        '</div></div>';
-    }).join('');
-    const decisionHtml='';
-    preview.innerHTML='<div class="kggScanV295">'+decisionHtml+(scanState.busy?'<div class="notice"><b>Scan läuft …</b></div>':'')+(scanState.lastError?'<div class="notice danger">'+escapeHtml(scanState.lastError)+'</div>':'')+jobsHtml+'</div>';
-  }
-  function collapseScanCards(reason){
-    if(shouldIgnorePhoneScrollToggle())return scanStateSnapshot();
-    let changed=false;
-    (scanState.jobs||[]).forEach(job=>{if(job&&!job.collapsed){job.collapsed=true; changed=true;}});
-    if(changed){scanState.lastCollapseReason=reason||'ui'; renderScanPreview();}
-    return scanStateSnapshot();
-  }
-  function removeScanJob(index){
-    const i=Number(index)||0;
-    if(i>=0&&i<scanState.jobs.length){scanState.jobs.splice(i,1);}
-    if(scanState.activeIndex>=scanState.jobs.length)scanState.activeIndex=Math.max(0,scanState.jobs.length-1);
-    if(!scanState.jobs.length){scanState.decision=false; state.scanPanelOpen='plan';}
-    renderScanPreview();
-    render();
-    return scanStateSnapshot();
-  }
-  function toggleScanJobCollapse(index){
 ```

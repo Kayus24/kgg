@@ -4,6 +4,43 @@
 - Lines: 18901-19320
 
 ```html
+  }
+  function startBankRowSwipeDelete(ev){
+    if(ev.button!=null&&ev.button!==0)return;
+    if(ev.target&&ev.target.closest&&ev.target.closest('[data-edit],input,textarea,select,a'))return;
+    const row=ev.currentTarget;
+    const id=row&&row.dataset&&row.dataset.bankId;
+    if(!row||!id)return;
+    const startX=ev.clientX,startY=ev.clientY;
+    const swipe={row,id,startX,startY,active:false,dx:0,pointerId:ev.pointerId};
+    const threshold=()=>Math.min(128,Math.max(74,row.offsetWidth*0.34));
+    const cleanup=()=>{document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);document.removeEventListener('pointercancel',cancel);};
+    const move=e=>{
+      const dx=e.clientX-startX,dy=e.clientY-startY;
+      if(!swipe.active){
+        if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)*1.2){cleanup();return;}
+        if(Math.abs(dx)<12||Math.abs(dx)<Math.abs(dy)*1.25)return;
+        swipe.active=true;
+        row.classList.add('bank-swipe-dragging');
+        try{row.setPointerCapture&&row.setPointerCapture(swipe.pointerId);}catch(err){}
+      }
+      if(!swipe.active)return;
+      e.preventDefault();
+      const max=row.offsetWidth*0.86;
+      swipe.dx=Math.max(-max,Math.min(max,dx));
+      const strength=Math.min(1,Math.abs(swipe.dx)/threshold());
+      row.classList.toggle('bank-swipe-left',swipe.dx<0);
+      row.classList.toggle('bank-swipe-right',swipe.dx>0);
+      row.classList.toggle('bank-swipe-armed',Math.abs(swipe.dx)>=threshold());
+      row.style.setProperty('--bank-swipe-strength',String(strength));
+      row.style.transform='translateX('+swipe.dx+'px)';
+      row.style.opacity=String(1-strength*0.12);
+    };
+    const up=e=>{
+      cleanup();
+      if(!swipe.active){resetBankRowSwipe(row);return;}
+      e.preventDefault();
+      bankSwipeSuppressClickUntil=Date.now()+380;
       const shouldAsk=Math.abs(swipe.dx)>=threshold();
       row.style.transition='transform .2s cubic-bezier(.2,.9,.2,1), opacity .16s ease, box-shadow .16s ease';
       row.style.transform='translateX(0)';
@@ -387,41 +424,4 @@
       card.style.opacity=String(1-strength*0.16);
     };
     const up=e=>{
-      cleanup();
-      if(!swipe.active){resetPlanCardSwipe(card);return;}
-      e.preventDefault(); if(e.stopPropagation)e.stopPropagation(); card.dataset.swipeSuppressClickUntil=String(Date.now()+360);
-      clearPhoneScrollStateForPlanGesture(520);
-      document.body.classList.remove('kggPlanCardSwiping');
-      const shouldDelete=Math.abs(swipe.dx)>=threshold();
-      if(shouldDelete){
-        const dir=swipe.dx<0?-1:1;
-        card.classList.add('swipe-removing');
-        card.style.transition='transform .18s cubic-bezier(.2,.9,.2,1), opacity .18s ease';
-        card.style.setProperty('--kgg-plan-swipe-x',(dir*(card.offsetWidth+96))+'px');
-        card.style.transform='translateX(var(--kgg-plan-swipe-x,0px))';
-        card.style.opacity='0';
-        setTimeout(()=>{document.body.classList.remove('kggPlanCardSwiping');removeExercise(id);},190);
-        return;
-      }
-      card.style.transition='transform .22s cubic-bezier(.2,.9,.2,1), opacity .18s ease, box-shadow .18s ease';
-      card.style.setProperty('--kgg-plan-swipe-x','0px');
-      card.style.transform='translateX(var(--kgg-plan-swipe-x,0px))';
-      card.style.opacity='1';
-      setTimeout(()=>resetPlanCardSwipe(card),230);
-    };
-    const cancel=()=>{
-      if(swipe.active){
-        clearTimeout(swipe.cancelTimer);
-        swipe.cancelTimer=setTimeout(()=>{cleanup();resetPlanCardSwipe(card);},900);
-        return;
-      }
-      cleanup();
-      resetPlanCardSwipe(card);
-    };
-    document.addEventListener('pointermove',move,{passive:false});
-    document.addEventListener('pointerup',up,{passive:false,once:true});
-    document.addEventListener('pointercancel',cancel,{passive:true,once:true});
-  }
-  function movePlanExerciseByButton(localId,delta){
-    const idx=(state.plan||[]).findIndex(ex=>String(ex.localId||ex.id)===String(localId));
 ```

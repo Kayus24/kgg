@@ -4,6 +4,43 @@
 - Lines: 2941-3360
 
 ```html
+        min-height:62px!important;
+      }
+
+      #inputWrap textarea,
+      #exerciseInput{
+        font-size:22px!important;
+        line-height:1.36!important;
+      }
+      #inputWrap textarea{
+        min-height:118px!important;
+        padding:18px 48px 18px 16px!important;
+      }
+
+      .bankArea.bankOpen.alphaBankOpen .bankWithAz{
+        grid-template-columns:64px minmax(0,1fr)!important;
+        column-gap:12px!important;
+      }
+      .bankArea.bankOpen.alphaBankOpen .az{
+        width:52px!important;
+        margin-top:68px!important;
+      }
+      .az button{
+        font-size:12.5px!important;
+        min-height:20px!important;
+      }
+      .bankRows{
+        max-height:none!important;
+      }
+      .bankRow{
+        padding:13px 15px!important;
+      }
+      .bankRow b{
+        font-size:18px!important;
+      }
+      .bankRow small{
+        font-size:12px!important;
+      }
 
       #createPanel.planMode #currentPlanToggle{
         min-height:58px!important;
@@ -387,41 +424,4 @@
         height:66px!important;
         min-height:0!important;
         padding:0!important;
-        gap:0!important;
-        border:0!important;
-        border-radius:18px!important;
-        background:transparent!important;
-        box-shadow:none!important;
-        z-index:36!important;
-        pointer-events:none;
-      }
-      .tabletLayoutControls .tabletLockSwitch{
-        pointer-events:auto;
-        width:100%!important;
-        height:100%!important;
-        min-width:0!important;
-        min-height:0!important;
-        display:flex!important;
-        flex-direction:column!important;
-        align-items:center!important;
-        justify-content:center!important;
-        gap:2px!important;
-        padding:5px 4px!important;
-        border-radius:18px!important;
-        background:#fff!important;
-        box-shadow:0 2px 10px rgba(7,16,39,.075)!important;
-      }
-      .tabletLockIcon{
-        width:auto!important;
-        min-width:0!important;
-        font-size:18px!important;
-        line-height:1!important;
-      }
-      .tabletSwitchTrack{
-        width:34px!important;
-        height:18px!important;
-      }
-      .tabletSwitchKnob{
-        width:12px!important;
-        height:12px!important;
 ```

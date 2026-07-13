@@ -4,6 +4,43 @@
 - Lines: 26461-26880
 
 ```html
+    if(recent)recent.classList.add("hidden");
+    if(packages)packages.classList.add("hidden");
+    if(recentBtn){recentBtn.classList.remove("phoneButtonFloat");recentBtn.setAttribute("aria-expanded","false");}
+    if(packageBtn){packageBtn.classList.remove("phoneButtonFloat");packageBtn.setAttribute("aria-expanded","false");}
+    if(document.body)document.body.classList.remove("kggPhoneDrawerSafeOpen","kggPhoneDrawerOpen");
+  }
+  function openPhoneDrawerSafe(kind){
+    if(!isPhone())return false;
+    var recent=byId("recentList");
+    var packages=byId("packageList");
+    var recentBtn=byId("recentToggle");
+    var packageBtn=byId("packageToggle");
+    var target=kind==="recent"?recent:packages;
+    var targetBtn=kind==="recent"?recentBtn:packageBtn;
+    var other=kind==="recent"?packages:recent;
+    var otherBtn=kind==="recent"?packageBtn:recentBtn;
+    if(!target||!targetBtn)return false;
+    if(!target.classList.contains("hidden")&&targetBtn.classList.contains("phoneButtonFloat")){
+      closePhoneDrawerSafe();
+      return true;
+    }
+    ensureBackdrop();
+    if(other)other.classList.add("hidden");
+    if(otherBtn){otherBtn.classList.remove("phoneButtonFloat");otherBtn.setAttribute("aria-expanded","false");}
+    target.classList.remove("hidden");
+    targetBtn.classList.add("phoneButtonFloat");
+    targetBtn.setAttribute("aria-expanded","true");
+    if(document.body){
+      document.body.classList.add("kggPhoneDrawerSafeOpen");
+      document.body.classList.remove("kggPhonePhotoMenuOpen");
+    }
+    return true;
+  }
+  function bindDrawerButton(id,kind){
+    var btn=byId(id);
+    if(!btn||btn.dataset.kggV045DrawerBound==="1")return;
+    btn.dataset.kggV045DrawerBound="1";
     btn.addEventListener("click",function(ev){
       if(!isPhone())return;
       ev.preventDefault();
@@ -387,41 +424,4 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     }
   }
 </style>
-<script id="kgg-v053-ui-tablet-stability-script">
-(function(){
-  "use strict";
-  var PATCH_ID="kgg-v053-ui-tablet-stability";
-  function byId(id){return document.getElementById(id);}
-  function isTablet(){
-    return !!(window.matchMedia&&window.matchMedia("(min-width:760px)").matches&&document.body&&document.body.classList.contains("tabletLayoutCustom"));
-  }
-  function anchorTabletMenuButton(){
-    var btn=byId("tabletMenuBtn");
-    var hub=byId("scanHub");
-    if(!btn||!hub||!document.body)return;
-    if(isTablet()){
-      if(btn.parentElement!==document.body)document.body.appendChild(btn);
-      return;
-    }
-    if(btn.parentElement!==hub)hub.insertBefore(btn,hub.firstChild);
-  }
-  function resetTabletSwipe(card){
-    if(!card)return;
-    card.classList.remove("swipe-dragging","swipe-armed","swipe-left","swipe-right","swipe-removing");
-    document.body.classList.remove("kggPlanCardSwiping");
-    card.style.removeProperty("transform");
-    card.style.removeProperty("opacity");
-    card.style.removeProperty("transition");
-    card.style.removeProperty("--swipe-strength");
-    card.style.removeProperty("--kgg-plan-swipe-x");
-  }
-  function startTabletSwipeForCard(ev,card){
-    if(!isTablet())return;
-    if(!card)return;
-    if(ev.button!=null&&ev.button!==0)return;
-    if(ev.target&&ev.target.closest&&ev.target.closest("button,input,textarea,select,a,.planCardActions,.drag"))return;
-    var pointerKey=String(ev.pointerId||"mouse");
-    if(card.dataset.kggV053SwipePointer===pointerKey)return;
-    card.dataset.kggV053SwipePointer=pointerKey;
-    card.dataset.kggV053SwipeStarted="1";
 ```

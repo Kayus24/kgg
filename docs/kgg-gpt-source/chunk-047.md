@@ -4,6 +4,43 @@
 - Lines: 19741-20160
 
 ```html
+  function renderPackages(){
+    const el=$('packageList');
+    if(el){
+      el.innerHTML=(state.packages||[]).map(p=>'<div class="notice"><b>'+escapeHtml(p.name)+'</b><br><small>'+(p.exercises||[]).map(escapeHtml).join(', ')+'</small><br><button class="mutedBtn" data-pkg="'+p.id+'">Paket in Plan uebernehmen</button></div>').join('');
+      el.querySelectorAll('[data-pkg]').forEach(b=>b.onclick=()=>applyPackageToPlan(b.dataset.pkg));
+    }
+    renderTabletPackageOverlay();
+  }
+  function sanitizeSharedBankExercise(ex){
+    return {
+      id:String(ex.id||ex.sourceId||('shared_'+compact(ex.name))).slice(0,80),
+      name:String(ex.name||'').trim(),
+      aliases:String(ex.aliases||ex.name||'').trim(),
+      sets:normalizeSetCount(ex.sets||3),
+      unit:String(ex.unit||'Wdh'),
+      weightUnit:normalizeLoadUnit(ex.weightUnit||'kg'),
+      shared:true,
+      createdAt:String(ex.createdAt||ex.updatedAt||new Date().toISOString()),
+      updatedAt:String(ex.updatedAt||new Date().toISOString())
+    };
+  }
+  function buildSharedExerciseBankPayload(){
+    const exercises=bank.map(sanitizeSharedBankExercise).filter(ex=>ex.name);
+    return {kind:'kgg-shared-exercise-bank',version:1,appVersion:VERSION,exportedAt:new Date().toISOString(),exercises};
+  }
+  function parseSharedExerciseBankPayload(raw){
+    const payload=typeof raw==='string'?JSON.parse(raw):raw;
+    const exercises=Array.isArray(payload)?payload:(Array.isArray(payload&&payload.exercises)?payload.exercises:(Array.isArray(payload&&payload.exerciseBank)?payload.exerciseBank:[]));
+    if(!exercises.length)throw new Error('Keine Übungen im Import gefunden.');
+    return exercises.map(sanitizeSharedBankExercise).filter(ex=>ex.name);
+  }
+  function mergeSharedExerciseBank(raw){
+    const incoming=parseSharedExerciseBankPayload(raw);
+    let added=0,updated=0;
+    incoming.forEach(ex=>{
+      const existing=bank.find(item=>compact(item.name)===compact(ex.name));
+      if(existing){
         if(syncTimestamp(ex.updatedAt)>=syncTimestamp(existing.updatedAt||existing.createdAt)){
           existing.aliases=ex.aliases||existing.aliases;
           existing.sets=ex.sets||existing.sets;
@@ -387,41 +424,4 @@
     if(!parsed||!(parsed.type==='KGGCFG2'||parsed.type==='KGGCFG1'))return false;
     let plain=parsed.json;
     if(parsed.type==='KGGCFG2'){
-      const passCode=(prompt('Transfer-Code eingeben')||'').trim();
-      if(!passCode)return false;
-      plain=await decryptKggConfigTransferEnvelope(parsed.json,passCode);
-    }
-    applyKggConfigTransferPlain(plain);
-    setScanStatus('API-Key / Konfig lokal gespeichert. Scan/OCR kann die lokalen Daten nutzen.');
-    alert('API-Key / Konfig lokal gespeichert.');
-    return true;
-  }
-  function syncPairDeviceId(){
-    try{
-      let id=localStorage.getItem(syncPairDeviceIdKey);
-      if(!id){
-        const rand=(crypto&&crypto.getRandomValues)?Array.from(crypto.getRandomValues(new Uint32Array(2))).map(v=>v.toString(36)).join(''):Math.random().toString(36).slice(2);
-        id='kgg_'+Date.now().toString(36)+'_'+rand;
-        localStorage.setItem(syncPairDeviceIdKey,id);
-      }
-      return id;
-    }catch(err){return 'kgg_'+Date.now().toString(36);}
-  }
-  function normalizeNativeSyncFollowConfig(config){
-    const normalized=config&&typeof config==='object'?{...config}:{};
-    normalized.therapistId=String(normalized.therapistId||'').trim();
-    normalized.syncRoomId=String(normalized.syncRoomId||'').trim();
-    normalized.followedTherapists=Array.isArray(normalized.followedTherapists)?normalized.followedTherapists:[];
-    return normalized;
-  }
-  function nativeSyncFollowConfig(){
-    try{
-      if(window.KGGNativeSync&&typeof window.KGGNativeSync.getFollowConfig==='function'){
-        return normalizeNativeSyncFollowConfig(window.KGGNativeSync.getFollowConfig()||{therapistId:'',followedTherapists:[]});
-      }
-    }catch(err){}
-    try{return normalizeNativeSyncFollowConfig(JSON.parse(localStorage.getItem(syncPairFallbackConfigKey)||'{"therapistId":"","syncRoomId":"","followedTherapists":[]}'));}catch(err){}
-    return {therapistId:'',syncRoomId:'',followedTherapists:[]};
-  }
-  function writeNativeSyncFollowConfig(config){
 ```

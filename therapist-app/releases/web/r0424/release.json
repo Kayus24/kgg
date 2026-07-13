@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0424",
+  "versionName": "1.0.60-tablet-html-release-label",
+  "notes": "v060: Zeigt Release, HTML-Build und geladenen Dateinamen unten rechts im ausgefahrenen Tablet-Menue.",
+  "createdAt": "2026-07-13T12:18:37Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0424",
+      "profile": "admin",
+      "versionName": "1.0.60-tablet-html-release-label",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0424/admin.html",
+      "sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
+      "notes": "v060: Zeigt Release, HTML-Build und geladenen Dateinamen unten rechts im ausgefahrenen Tablet-Menue."
+    },
+    "colleague": {
+      "releaseId": "r0424",
+      "profile": "colleague",
+      "versionName": "1.0.60-tablet-html-release-label",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0424/colleague.html",
+      "sha256": "ad643b88b7004a0869d5f02ba1b37eb0395480914e30f3e50536d3bea7140928",
+      "notes": "v060: Zeigt Release, HTML-Build und geladenen Dateinamen unten rechts im ausgefahrenen Tablet-Menue."
+    }
+  }
+}

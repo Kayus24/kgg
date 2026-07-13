@@ -4,6 +4,43 @@
 - Lines: 2101-2520
 
 ```html
+    .planCard.is-new .planName,
+    .planCard.is-review .planName{
+      color:#72490a;
+    }
+    .planMetaLine,
+    .planSourceLine{
+      display:block;
+      color:var(--muted);
+      font-weight:850;
+      line-height:1.25;
+    }
+    .planSourceLine{
+      font-size:12px;
+      opacity:.9;
+    }
+    .planBadges{
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      flex-wrap:wrap;
+      vertical-align:middle;
+    }
+    .planBadge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:18px;
+      padding:2px 6px;
+      border-radius:999px;
+      font-size:11px;
+      line-height:1;
+      font-weight:1000;
+      border:1px solid rgba(220,227,235,.95);
+      background:#f6f8fb;
+      color:#38475b;
+      white-space:nowrap;
+    }
     .planBadge.media{
       background:#eef6ff;
       color:#214969;
@@ -387,41 +424,4 @@
         max-height:var(--kgg-visual-vh,100dvh)!important;
         padding:8px 10px!important;
         gap:8px!important;
-        grid-template-rows:auto 54px minmax(78px,auto) minmax(0,1fr) 0!important;
-      }
-      .app.softKeyboard .scanHub .scanBtn,
-      .app.softKeyboard .scanHub .scanMeta,
-      .app.softKeyboard #baseToggle,
-      .app.softKeyboard #finishBtn,
-      .app.softKeyboard #recentToggle,
-      .app.softKeyboard #packageToggle{
-        min-height:54px!important;
-        height:54px!important;
-      }
-      .app.softKeyboard #exerciseInput{
-        min-height:78px;
-        max-height:116px;
-      }
-      @media (max-width:920px){
-        .app{
-          padding:8px 10px 8px!important;
-          gap:10px!important;
-          grid-template-columns:minmax(320px,390px) minmax(0,1fr) minmax(126px,150px)!important;
-          grid-template-rows:auto 58px minmax(92px,auto) minmax(0,1fr) 56px!important;
-        }
-        .scanHub .scanBtn,
-        .scanHub .scanMeta,
-        #baseToggle,
-        #finishBtn,
-        #recentToggle,
-        #packageToggle{
-          min-height:56px!important;
-          height:56px!important;
-        }
-        #exerciseInput{
-          min-height:92px;
-          max-height:132px;
-        }
-      }
-    }
 ```

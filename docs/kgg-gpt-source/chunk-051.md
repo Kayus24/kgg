@@ -4,6 +4,43 @@
 - Lines: 21421-21840
 
 ```html
+        try{win.opener=null;}catch(e){}
+        win.location.href=url;
+        return true;
+      }
+    }catch(e){}
+    try{
+      const a=document.createElement('a');
+      a.href=url;
+      a.target='_blank';
+      a.rel='noopener';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(()=>a.remove(),1000);
+      return true;
+    }catch(e){}
+    return false;
+  }
+  async function openCurrentPdfPreviewTab(){
+    if(!currentPdfPreview||!currentPdfPreview.url)return;
+    if(await sendPdfToNative('open'))return;
+    if(!openPdfUrlCrossBrowser(currentPdfPreview.url)){
+      downloadPdfBlob(currentPdfPreview.blob,currentPdfPreview.filename);
+    }
+  }
+
+  async function buildPdfFromCurrentPlan(){
+    savePendingToBank('ui_make_pdf');
+    const plan=getCurrentPlanForOutput('ui_make_pdf');
+    const snapshot=buildKggPdfSnapshot(plan,state.largePdfMode?{layout:'large-single-row'}:null);
+    await attachKggPdfExerciseThumbnails(snapshot,plan);
+    window.KGGLatestPdfSnapshot=snapshot;
+    let JsPdfCtor=null;
+    try{JsPdfCtor=await ensureJsPdfForPdfTest();}catch(e){console.warn('KGG jsPDF Testloader:',e);}
+    if(!JsPdfCtor){
+      alert('jsPDF-Testeinbindung konnte nicht geladen werden. PDF wird lokal im Browser erzeugt, sobald jsPDF verfuegbar ist. Der aktuelle Plan-Snapshot wurde nur intern vorbereitet.');
+      console.info('KGG PDF Snapshot Adapter:',snapshot);
+      return snapshot;
     }
     const pdfMode=state.largePdfMode?'grossdruck':'standard';
     const doc=new JsPdfCtor({orientation:state.largePdfMode?'portrait':'landscape',unit:'mm',format:'a4'});
@@ -387,41 +424,4 @@
   }
   async function finishWithPatientApp(){
     const notice=$('finishNotice');
-    try{
-      const url=await renderPatientShareOutput();
-      if(!url)return;
-      archiveAndCloseCurrentPlan('ui_finish_patient_app');
-    }catch(err){
-      console.warn('Patienten-Ausgabe konnte nicht erzeugt werden:',err);
-      if(notice)notice.textContent='Ausgabe fehlgeschlagen. Plan bleibt offen.';
-    }
-  }
-
-  function decodePatientPayloadFromHash(){
-    const hash=String(location.hash||'');
-    const publicMatch=hash.match(/^#KGGH2:(.+)$/i);
-    if(publicMatch){
-      try{return convertKggH2PayloadToPatientPayload(decodeKggJsonBase64Url(publicMatch[1]));}
-      catch(err){console.warn('KGGH2 Patienten-Link konnte nicht gelesen werden:',err); return {error:true};}
-    }
-    const match=hash.match(/^#kgg=(.+)$/);
-    if(!match)return null;
-    try{
-      const encoded=decodeURIComponent(match[1]).replace(/-/g,'+').replace(/_/g,'/');
-      const padded=encoded+'='.repeat((4-encoded.length%4)%4);
-      return JSON.parse(decodeURIComponent(escape(atob(padded))));
-    }catch(err){
-      console.warn('Patienten-Link konnte nicht gelesen werden:',err);
-      return {error:true};
-    }
-  }
-  function base64UrlToBytes(value){
-    const text=String(value||'').replace(/-/g,'+').replace(/_/g,'/');
-    const padded=text+'='.repeat((4-text.length%4)%4);
-    const binary=atob(padded);
-    const bytes=new Uint8Array(binary.length);
-    for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
-    return bytes;
-  }
-  function patientMediaDb(){
 ```

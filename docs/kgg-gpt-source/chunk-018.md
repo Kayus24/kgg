@@ -4,6 +4,43 @@
 - Lines: 7561-7980
 
 ```html
+    }
+    var codewords = readCodewords(matrix, version, formatInfo);
+    var dataBlocks = getDataBlocks(codewords, version, formatInfo.errorCorrectionLevel);
+    if (!dataBlocks) {
+        return null;
+    }
+    // Count total number of data bytes
+    var totalBytes = dataBlocks.reduce(function (a, b) { return a + b.numDataCodewords; }, 0);
+    var resultBytes = new Uint8ClampedArray(totalBytes);
+    var resultIndex = 0;
+    for (var _i = 0, dataBlocks_3 = dataBlocks; _i < dataBlocks_3.length; _i++) {
+        var dataBlock = dataBlocks_3[_i];
+        var correctedBytes = reedsolomon_1.decode(dataBlock.codewords, dataBlock.codewords.length - dataBlock.numDataCodewords);
+        if (!correctedBytes) {
+            return null;
+        }
+        for (var i = 0; i < dataBlock.numDataCodewords; i++) {
+            resultBytes[resultIndex++] = correctedBytes[i];
+        }
+    }
+    try {
+        return decodeData_1.decode(resultBytes, version.versionNumber);
+    }
+    catch (_a) {
+        return null;
+    }
+}
+function decode(matrix) {
+    if (matrix == null) {
+        return null;
+    }
+    var result = decodeMatrix(matrix);
+    if (result) {
+        return result;
+    }
+    // Decoding didn't work, try mirroring the QR across the topLeft -> bottomRight line.
+    for (var x = 0; x < matrix.width; x++) {
         for (var y = x + 1; y < matrix.height; y++) {
             if (matrix.get(x, y) !== matrix.get(y, x)) {
                 matrix.set(x, y, !matrix.get(x, y));
@@ -387,41 +424,4 @@ exports.shiftJISTable = {
     0x70: 0x0070,
     0x71: 0x0071,
     0x72: 0x0072,
-    0x73: 0x0073,
-    0x74: 0x0074,
-    0x75: 0x0075,
-    0x76: 0x0076,
-    0x77: 0x0077,
-    0x78: 0x0078,
-    0x79: 0x0079,
-    0x7A: 0x007A,
-    0x7B: 0x007B,
-    0x7C: 0x007C,
-    0x7D: 0x007D,
-    0x7E: 0x203E,
-    0x8140: 0x3000,
-    0x8141: 0x3001,
-    0x8142: 0x3002,
-    0x8143: 0xFF0C,
-    0x8144: 0xFF0E,
-    0x8145: 0x30FB,
-    0x8146: 0xFF1A,
-    0x8147: 0xFF1B,
-    0x8148: 0xFF1F,
-    0x8149: 0xFF01,
-    0x814A: 0x309B,
-    0x814B: 0x309C,
-    0x814C: 0x00B4,
-    0x814D: 0xFF40,
-    0x814E: 0x00A8,
-    0x814F: 0xFF3E,
-    0x8150: 0xFFE3,
-    0x8151: 0xFF3F,
-    0x8152: 0x30FD,
-    0x8153: 0x30FE,
-    0x8154: 0x309D,
-    0x8155: 0x309E,
-    0x8156: 0x3003,
-    0x8157: 0x4EDD,
-    0x8158: 0x3005,
 ```

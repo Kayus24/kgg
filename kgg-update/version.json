@@ -1,7 +1,7 @@
 {
-  "versionCode": 59,
-  "versionName": "1.0.59-ui-scaler-push-canary",
-  "indexUrl": "index.html?v=59",
-  "sha256": "74974ab424eac0cbe1a7c178e188ddff9a0d28d393b49a3c71d8e7a7bc20b509",
-  "notes": "v059: Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification."
+  "versionCode": 60,
+  "versionName": "1.0.60-tablet-html-release-label",
+  "indexUrl": "index.html?v=60",
+  "sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
+  "notes": "v060: Zeigt Release, HTML-Build und geladenen Dateinamen unten rechts im ausgefahrenen Tablet-Menue."
 }

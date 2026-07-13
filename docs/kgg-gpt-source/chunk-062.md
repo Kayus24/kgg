@@ -4,6 +4,43 @@
 - Lines: 26041-26460
 
 ```html
+    var next=!(document.body&&document.body.classList.contains("kggPhonePhotoMenuOpen"));
+    if(document.body)document.body.classList.toggle("kggPhonePhotoMenuOpen",next);
+    var toggle=byId("phonePhotoMenuToggle");
+    if(toggle)toggle.setAttribute("aria-expanded",String(next));
+    closeAdminMenu();
+  }
+  function anchorAdminMenu(){
+    var menu=byId("kggPhoneAdminMenu");
+    var header=document.querySelector("#createPanel .planHeader");
+    if(menu&&header&&!header.contains(menu))header.appendChild(menu);
+  }
+  function restoreTabletScanButton(){
+    var scan=byId("scanBtn");
+    var toggle=byId("phonePhotoMenuToggle");
+    if(toggle&&scan&&toggle.parentElement===scan)toggle.remove();
+    if(scan&&scan.dataset.kggV042ScanHydrated==="1"){
+      scan.classList.remove("kggScanButtonWithMenu");
+      delete scan.dataset.kggV042ScanHydrated;
+      scan.textContent="\uD83D\uDCF7 Plan scannen";
+    }
+  }
+  function closeViewportPhoneUi(){
+    closePhotoMenu();
+    closeAdminMenu();
+    restoreTabletScanButton();
+    if(observer){
+      observer.disconnect();
+      observer=null;
+    }
+  }
+  function integratePhotoToggle(){
+    var scan=byId("scanBtn");
+    if(!scan)return;
+    var old=byId("phonePhotoMenuToggle");
+    if(old&&old.parentElement!==scan)old.remove();
+    if(scan.dataset.kggV042ScanHydrated==="1")return;
+    scan.dataset.kggV042ScanHydrated="1";
     scan.classList.add("kggScanButtonWithMenu");
     scan.textContent="";
     var label=document.createElement("span");
@@ -387,41 +424,4 @@
     var packages=byId("packageList");
     var recentBtn=byId("recentToggle");
     var packageBtn=byId("packageToggle");
-    if(recent)recent.classList.add("hidden");
-    if(packages)packages.classList.add("hidden");
-    if(recentBtn){recentBtn.classList.remove("phoneButtonFloat");recentBtn.setAttribute("aria-expanded","false");}
-    if(packageBtn){packageBtn.classList.remove("phoneButtonFloat");packageBtn.setAttribute("aria-expanded","false");}
-    if(document.body)document.body.classList.remove("kggPhoneDrawerSafeOpen","kggPhoneDrawerOpen");
-  }
-  function openPhoneDrawerSafe(kind){
-    if(!isPhone())return false;
-    var recent=byId("recentList");
-    var packages=byId("packageList");
-    var recentBtn=byId("recentToggle");
-    var packageBtn=byId("packageToggle");
-    var target=kind==="recent"?recent:packages;
-    var targetBtn=kind==="recent"?recentBtn:packageBtn;
-    var other=kind==="recent"?packages:recent;
-    var otherBtn=kind==="recent"?packageBtn:recentBtn;
-    if(!target||!targetBtn)return false;
-    if(!target.classList.contains("hidden")&&targetBtn.classList.contains("phoneButtonFloat")){
-      closePhoneDrawerSafe();
-      return true;
-    }
-    ensureBackdrop();
-    if(other)other.classList.add("hidden");
-    if(otherBtn){otherBtn.classList.remove("phoneButtonFloat");otherBtn.setAttribute("aria-expanded","false");}
-    target.classList.remove("hidden");
-    targetBtn.classList.add("phoneButtonFloat");
-    targetBtn.setAttribute("aria-expanded","true");
-    if(document.body){
-      document.body.classList.add("kggPhoneDrawerSafeOpen");
-      document.body.classList.remove("kggPhonePhotoMenuOpen");
-    }
-    return true;
-  }
-  function bindDrawerButton(id,kind){
-    var btn=byId(id);
-    if(!btn||btn.dataset.kggV045DrawerBound==="1")return;
-    btn.dataset.kggV045DrawerBound="1";
 ```

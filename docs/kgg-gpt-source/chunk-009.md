@@ -4,6 +4,43 @@
 - Lines: 3781-4200
 
 ```html
+        bottom:76px!important;
+      }
+      .tabletLayoutResizeHandle{
+        border:0!important;
+        width:58px!important;
+        border-radius:0!important;
+        background:
+          radial-gradient(circle at 50% 18px,rgba(7,16,39,.32) 0 7px,rgba(255,255,255,.96) 8px 14px,transparent 15px),
+          radial-gradient(circle at 50% calc(100% - 18px),rgba(7,16,39,.32) 0 7px,rgba(255,255,255,.96) 8px 14px,transparent 15px),
+          linear-gradient(180deg,rgba(7,16,39,.18),rgba(94,167,232,.42),rgba(7,16,39,.18)) center/5px calc(100% - 28px) no-repeat!important;
+        box-shadow:none!important;
+        backdrop-filter:none!important;
+      }
+      .tabletLayoutResizeHandle::before{
+        left:50%!important;
+        top:50%!important;
+        width:30px!important;
+        height:92px!important;
+        transform:translate(-50%,-50%)!important;
+        border-radius:999px!important;
+        background:linear-gradient(180deg,rgba(255,255,255,.97),rgba(245,248,252,.92))!important;
+        box-shadow:0 14px 34px rgba(7,16,39,.16),0 0 0 1px rgba(220,227,235,.9) inset!important;
+      }
+      .tabletLayoutResizeHandle::after{
+        width:16px!important;
+        height:58px!important;
+        background:
+          radial-gradient(circle at 50% 16%,rgba(7,16,39,.34) 0 2px,transparent 3px),
+          radial-gradient(circle at 50% 50%,rgba(7,16,39,.28) 0 2px,transparent 3px),
+          radial-gradient(circle at 50% 84%,rgba(7,16,39,.34) 0 2px,transparent 3px)!important;
+      }
+      body.tabletLayoutLeftSlim #bankToggle,
+      body.tabletLayoutLeftSlim .scanHub .scanBtn,
+      body.tabletLayoutLeftSlim .scanHub .scanMeta{
+        border-radius:14px!important;
+      }
+      body.tabletLayoutRightSlim #finishBtn,
       body.tabletLayoutRightSlim #baseToggle,
       body.tabletLayoutRightSlim #recentToggle,
       body.tabletLayoutRightSlim #packageToggle,
@@ -387,41 +424,4 @@
         transform-origin:bottom center;
         animation:phoneDrawerFromButton .34s cubic-bezier(.18,.84,.24,1) both!important;
       }
-      @keyframes phoneInputLift{
-        0%{transform:translateY(10px) scale(.992);opacity:.98}
-        100%{transform:translateY(0) scale(1);opacity:1}
-      }
-      @keyframes phoneSuggestionIn{
-        0%{opacity:0;transform:translateY(-8px) scale(.985);filter:blur(1px)}
-        100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
-      }
-      @keyframes phoneBankShellIn{
-        0%{opacity:.92;transform:translateY(-6px) scale(.992)}
-        100%{opacity:1;transform:translateY(0) scale(1)}
-      }
-      @keyframes phoneBankContentIn{
-        0%{opacity:0;transform:translateY(-10px) scale(.985);clip-path:inset(0 0 100% 0 round 16px)}
-        100%{opacity:1;transform:translateY(0) scale(1);clip-path:inset(0 0 0 0 round 16px)}
-      }
-      @keyframes phoneButtonDockFloat{
-        0%{transform:translateY(0) scale(1)}
-        55%{transform:translateY(10px) scale(1.035)}
-        100%{transform:translateY(16px) scale(1.02)}
-      }
-      @keyframes phoneDrawerFromButton{
-        0%{opacity:0;transform:translateY(34px) scale(.94);filter:blur(2px)}
-        65%{opacity:1;transform:translateY(-3px) scale(1.01);filter:blur(0)}
-        100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
-      }
-    }
-
-    /* Composer state clarity */
-    @media (max-width:759px){
-      .bankArea.bankOpen.searchBankOpen{
-        display:grid;
-        grid-template-columns:56px minmax(0,1fr);
-        column-gap:8px;
-        align-items:start;
-      }
-      .bankArea.bankOpen.searchBankOpen #bankToggle{
 ```

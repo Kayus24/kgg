@@ -4,6 +4,43 @@
 - Lines: 15121-15540
 
 ```html
+    {
+        infoBits: null,
+        versionNumber: 3,
+        alignmentPatternCenters: [6, 22],
+        errorCorrectionLevels: [
+            {
+                ecCodewordsPerBlock: 15,
+                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 55 }],
+            },
+            {
+                ecCodewordsPerBlock: 26,
+                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 44 }],
+            },
+            {
+                ecCodewordsPerBlock: 18,
+                ecBlocks: [{ numBlocks: 2, dataCodewordsPerBlock: 17 }],
+            },
+            {
+                ecCodewordsPerBlock: 22,
+                ecBlocks: [{ numBlocks: 2, dataCodewordsPerBlock: 13 }],
+            },
+        ],
+    },
+    {
+        infoBits: null,
+        versionNumber: 4,
+        alignmentPatternCenters: [6, 26],
+        errorCorrectionLevels: [
+            {
+                ecCodewordsPerBlock: 20,
+                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 80 }],
+            },
+            {
+                ecCodewordsPerBlock: 18,
+                ecBlocks: [{ numBlocks: 2, dataCodewordsPerBlock: 32 }],
+            },
+            {
                 ecCodewordsPerBlock: 26,
                 ecBlocks: [{ numBlocks: 2, dataCodewordsPerBlock: 24 }],
             },
@@ -387,41 +424,4 @@
                     { numBlocks: 15, dataCodewordsPerBlock: 19 },
                     { numBlocks: 2, dataCodewordsPerBlock: 20 },
                 ],
-            },
-            {
-                ecCodewordsPerBlock: 30,
-                ecBlocks: [
-                    { numBlocks: 3, dataCodewordsPerBlock: 15 },
-                    { numBlocks: 13, dataCodewordsPerBlock: 16 },
-                ],
-            },
-        ],
-    },
-    {
-        infoBits: 0x1145D,
-        versionNumber: 17,
-        alignmentPatternCenters: [6, 30, 54, 78],
-        errorCorrectionLevels: [
-            {
-                ecCodewordsPerBlock: 28,
-                ecBlocks: [
-                    { numBlocks: 1, dataCodewordsPerBlock: 107 },
-                    { numBlocks: 5, dataCodewordsPerBlock: 108 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 28,
-                ecBlocks: [
-                    { numBlocks: 10, dataCodewordsPerBlock: 46 },
-                    { numBlocks: 1, dataCodewordsPerBlock: 47 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 28,
-                ecBlocks: [
-                    { numBlocks: 1, dataCodewordsPerBlock: 22 },
-                    { numBlocks: 15, dataCodewordsPerBlock: 23 },
-                ],
-            },
-            {
 ```

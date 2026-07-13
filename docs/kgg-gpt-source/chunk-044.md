@@ -4,6 +4,43 @@
 - Lines: 18481-18900
 
 ```html
+    state.liveDraftId=null;
+    state.planText=input?input.value:'';
+    syncStatePlanToStore(reason||'ui_textfield_master_sync');
+    save();
+    render();
+  }
+  function captureDbScrollAnchor(){
+    const anchor=$('bankArea')||$('inputWrap');
+    if(!anchor)return null;
+    const rows=document.querySelector('#bankContent .bankRows');
+    return {top:anchor.getBoundingClientRect().top,rowsTop:rows?rows.scrollTop:0};
+  }
+  function restoreDbScrollAnchor(anchor){
+    if(!anchor||!state.bankOpen)return;
+    const rows=document.querySelector('#bankContent .bankRows');
+    if(rows)rows.scrollTop=anchor.rowsTop||0;
+    const el=$('bankArea')||$('inputWrap');
+    if(!el)return;
+    const apply=()=>{
+      const delta=el.getBoundingClientRect().top-anchor.top;
+      if(Math.abs(delta)>1)window.scrollBy(0,delta);
+      const nextRows=document.querySelector('#bankContent .bankRows');
+      if(nextRows)nextRows.scrollTop=anchor.rowsTop||0;
+    };
+    apply();
+    if(typeof requestAnimationFrame==='function')requestAnimationFrame(apply);
+  }
+  function alignFullBankInputToViewportTop(){
+    const inputWrap=$('inputWrap');
+    if(!inputWrap)return;
+    const apply=()=>{
+      const top=inputWrap.getBoundingClientRect().top;
+      const targetOffset=6;
+      if(Math.abs(top-targetOffset)>1)window.scrollBy({top:top-targetOffset,behavior:'smooth'});
+    };
+    if(typeof requestAnimationFrame==='function'){
+      requestAnimationFrame(()=>requestAnimationFrame(apply));
     }else{
       setTimeout(apply,0);
     }
@@ -387,41 +424,4 @@
     row.style.removeProperty('opacity');
     row.style.removeProperty('transition');
     row.style.removeProperty('--bank-swipe-strength');
-  }
-  function startBankRowSwipeDelete(ev){
-    if(ev.button!=null&&ev.button!==0)return;
-    if(ev.target&&ev.target.closest&&ev.target.closest('[data-edit],input,textarea,select,a'))return;
-    const row=ev.currentTarget;
-    const id=row&&row.dataset&&row.dataset.bankId;
-    if(!row||!id)return;
-    const startX=ev.clientX,startY=ev.clientY;
-    const swipe={row,id,startX,startY,active:false,dx:0,pointerId:ev.pointerId};
-    const threshold=()=>Math.min(128,Math.max(74,row.offsetWidth*0.34));
-    const cleanup=()=>{document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);document.removeEventListener('pointercancel',cancel);};
-    const move=e=>{
-      const dx=e.clientX-startX,dy=e.clientY-startY;
-      if(!swipe.active){
-        if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)*1.2){cleanup();return;}
-        if(Math.abs(dx)<12||Math.abs(dx)<Math.abs(dy)*1.25)return;
-        swipe.active=true;
-        row.classList.add('bank-swipe-dragging');
-        try{row.setPointerCapture&&row.setPointerCapture(swipe.pointerId);}catch(err){}
-      }
-      if(!swipe.active)return;
-      e.preventDefault();
-      const max=row.offsetWidth*0.86;
-      swipe.dx=Math.max(-max,Math.min(max,dx));
-      const strength=Math.min(1,Math.abs(swipe.dx)/threshold());
-      row.classList.toggle('bank-swipe-left',swipe.dx<0);
-      row.classList.toggle('bank-swipe-right',swipe.dx>0);
-      row.classList.toggle('bank-swipe-armed',Math.abs(swipe.dx)>=threshold());
-      row.style.setProperty('--bank-swipe-strength',String(strength));
-      row.style.transform='translateX('+swipe.dx+'px)';
-      row.style.opacity=String(1-strength*0.12);
-    };
-    const up=e=>{
-      cleanup();
-      if(!swipe.active){resetBankRowSwipe(row);return;}
-      e.preventDefault();
-      bankSwipeSuppressClickUntil=Date.now()+380;
 ```

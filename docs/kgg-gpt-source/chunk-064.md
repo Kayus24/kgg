@@ -1,9 +1,46 @@
 # KGG Source Chunk 064
 
 - Source: `kgg-update/index.html`
-- Lines: 26881-27016
+- Lines: 26881-27183
 
 ```html
+<script id="kgg-v053-ui-tablet-stability-script">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v053-ui-tablet-stability";
+  function byId(id){return document.getElementById(id);}
+  function isTablet(){
+    return !!(window.matchMedia&&window.matchMedia("(min-width:760px)").matches&&document.body&&document.body.classList.contains("tabletLayoutCustom"));
+  }
+  function anchorTabletMenuButton(){
+    var btn=byId("tabletMenuBtn");
+    var hub=byId("scanHub");
+    if(!btn||!hub||!document.body)return;
+    if(isTablet()){
+      if(btn.parentElement!==document.body)document.body.appendChild(btn);
+      return;
+    }
+    if(btn.parentElement!==hub)hub.insertBefore(btn,hub.firstChild);
+  }
+  function resetTabletSwipe(card){
+    if(!card)return;
+    card.classList.remove("swipe-dragging","swipe-armed","swipe-left","swipe-right","swipe-removing");
+    document.body.classList.remove("kggPlanCardSwiping");
+    card.style.removeProperty("transform");
+    card.style.removeProperty("opacity");
+    card.style.removeProperty("transition");
+    card.style.removeProperty("--swipe-strength");
+    card.style.removeProperty("--kgg-plan-swipe-x");
+  }
+  function startTabletSwipeForCard(ev,card){
+    if(!isTablet())return;
+    if(!card)return;
+    if(ev.button!=null&&ev.button!==0)return;
+    if(ev.target&&ev.target.closest&&ev.target.closest("button,input,textarea,select,a,.planCardActions,.drag"))return;
+    var pointerKey=String(ev.pointerId||"mouse");
+    if(card.dataset.kggV053SwipePointer===pointerKey)return;
+    card.dataset.kggV053SwipePointer=pointerKey;
+    card.dataset.kggV053SwipeStarted="1";
     var planId=card.dataset&&card.dataset.planId?String(card.dataset.planId):"";
     function currentCard(){
       if(card&&card.isConnected)return card;
@@ -137,6 +174,136 @@
 })();
 </script>
 <!-- KGG PATCH END kgg-v053-ui-tablet-stability -->
+<!-- KGG PATCH START kgg-v060-tablet-html-release-label -->
+<!-- Tablet HTML Release Label -->
+<style id="kgg-v060-tablet-html-release-label-style">
+#kggTabletHtmlReleaseLabel{display:none}
+@media (min-width:760px){
+  #tabletSideMenu{
+    overflow-y:hidden!important;
+  }
+  #tabletSideMenu .tabletSideMenuMain{
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto!important;
+    align-content:start;
+  }
+  #tabletSideMenu #kggTabletHtmlReleaseLabel{
+    display:block;
+    flex:0 0 auto;
+    align-self:flex-end;
+    max-width:100%;
+    margin:0;
+    padding:5px 7px;
+    border:1px solid rgba(10,16,36,.10);
+    border-radius:9px;
+    background:rgba(255,255,255,.94);
+    color:#667085;
+    font-size:10px;
+    font-weight:850;
+    line-height:1.2;
+    overflow-wrap:anywhere;
+    text-align:right;
+    pointer-events:none;
+  }
+}
+</style>
+<script id="kgg-v060-tablet-html-release-label">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v060-tablet-html-release-label";
+
+  function parseStatus(value){
+    if(value&&typeof value==="object")return value;
+    if(typeof value!=="string"||!value.trim())return {};
+    try{return JSON.parse(value);}catch(err){return {};}
+  }
+
+  function nativeStatus(){
+    try{
+      if(window.KGGAndroidApp&&typeof window.KGGAndroidApp.updateStatus==="function"){
+        return parseStatus(window.KGGAndroidApp.updateStatus());
+      }
+      if(window.KGGNativeAppUpdate&&typeof window.KGGNativeAppUpdate.status==="function"){
+        return parseStatus(window.KGGNativeAppUpdate.status());
+      }
+    }catch(err){}
+    return {};
+  }
+
+  function fileName(value){
+    var clean=String(value||"").split(/[?#]/)[0].replace(/\\/g,"/");
+    var parts=clean.split("/").filter(Boolean);
+    var last=parts.pop()||"";
+    try{return decodeURIComponent(last);}catch(err){return last;}
+  }
+
+  function buildInfo(){
+    try{if(typeof KGG_BUILD_INFO!=="undefined"&&KGG_BUILD_INFO)return KGG_BUILD_INFO;}catch(err){}
+    if(window.KGG_BUILD_INFO)return window.KGG_BUILD_INFO;
+    try{
+      var source=document.getElementById("kgg-source-truth");
+      var data=source?JSON.parse(source.textContent||"{}"):{};
+      var current=data.currentVersion||{};
+      var code=Number(current.versionCode);
+      if(Number.isFinite(code))return {release:"v"+String(code).padStart(3,"0"),versionName:current.versionName||"",htmlFile:"kgg-update/index.html"};
+    }catch(err){}
+    return {};
+  }
+
+  function currentIdentity(){
+    var native=nativeStatus();
+    var info=buildInfo();
+    var path=String((window.location&&window.location.pathname)||"");
+    var release=String(native.releaseId||"").trim();
+    var pathRelease=path.match(/\/releases\/web\/(r[0-9]+)\//i);
+    if(!release&&pathRelease)release=pathRelease[1].toLowerCase();
+    var build=info.release||"";
+    var source=fileName(native.loadedHtmlSource)||fileName(path)||fileName(info.htmlFile)||"index.html";
+    var parts=[];
+    if(release)parts.push(release);
+    if(build&&build!==release)parts.push(build);
+    parts.push(source);
+    return "HTML "+parts.join(" · ");
+  }
+
+  function render(){
+    var label=document.getElementById("kggTabletHtmlReleaseLabel");
+    if(!label)return;
+    var text=currentIdentity();
+    label.textContent=text;
+    label.title=text;
+  }
+
+  function install(){
+    var menu=document.getElementById("tabletSideMenu");
+    if(!menu)return false;
+    var label=document.getElementById("kggTabletHtmlReleaseLabel");
+    if(!label){
+      label=document.createElement("small");
+      label.id="kggTabletHtmlReleaseLabel";
+      label.setAttribute("aria-label","Aktuell geladene HTML-Version");
+      menu.appendChild(label);
+    }
+    render();
+    var button=document.getElementById("tabletMenuBtn");
+    if(button&&!button.dataset.kggHtmlReleaseLabelBound){
+      button.dataset.kggHtmlReleaseLabelBound="1";
+      button.addEventListener("click",function(){window.setTimeout(render,0);});
+    }
+    return true;
+  }
+
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});
+  else install();
+  window.addEventListener("pageshow",render);
+  document.addEventListener("visibilitychange",function(){if(!document.hidden)render();});
+
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES[PATCH_ID]={installed:true,render:render,currentIdentity:currentIdentity};
+})();
+</script>
+<!-- KGG PATCH END kgg-v060-tablet-html-release-label -->
 
 </body>
 </html>

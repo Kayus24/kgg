@@ -4,6 +4,43 @@
 - Lines: 24781-25200
 
 ```html
+  .kggReleaseBtn.primary{background:#0a1024;color:#fff}
+  .kggReleaseBtn.soft{background:#edf6ff;border-color:#b8d9f6;color:#073254}
+  .kggReleaseBtn.danger{background:#fff5f5;border-color:#fecaca;color:#991b1b}
+  .kggReleaseMenuGroup{margin-top:10px}
+  .kggReleaseMenuGroup h3{margin:0 0 8px}
+  @media(max-width:759px){.kggReleaseOverlay{padding:10px;align-items:flex-end}.kggReleaseSheet{width:100%;max-height:94vh;border-radius:24px 24px 16px 16px;padding:17px}.kggReleaseGrid,.kggReleaseActions.two{grid-template-columns:1fr}.kggReleaseField.wide{grid-column:1}.kggReleaseHead h2{font-size:1.25rem}}
+</style>
+<script id="kgg-release-center-v31-script">
+(function(){
+  'use strict';
+  var MOBILE_INBOX_URL='https://github.com/Kayus24/kgg/upload/mobile-inbox/mobile-inbox';
+  var MOBILE_PROMOTE_URL='https://github.com/Kayus24/kgg/actions/workflows/promote-latest-admin-beta.yml';
+  if(!window.KGGReleaseControl&&(location.hostname==='127.0.0.1'||location.hostname==='localhost')&&location.search.indexOf('kggReleaseUiTest=1')>=0){
+    window.KGGReleaseControl={status:function(){return JSON.stringify({phase:'idle',message:'Lokaler UI-Test',available:true,authenticated:false,repository:'Kayus24/kgg'});},beginLogin:function(){return false;},testConnection:function(){return false;},downloadCurrentHtml:function(){return false;},openMobileInbox:function(){window.open(MOBILE_INBOX_URL,'_blank');return true;},openPromoteLatest:function(){window.open(MOBILE_PROMOTE_URL,'_blank');return true;},chooseAndUploadBeta:function(){return false;},confirmPromotion:function(){return false;},confirmRollback:function(){return false;}};
+  }
+  if(!window.KGGReleaseControl||window.KGGReleaseCenter)return;
+  var refreshTimer=null;
+  function readStatus(){try{return JSON.parse(window.KGGReleaseControl.status()||'{}');}catch(err){return {phase:'error',message:'Status konnte nicht gelesen werden.'};}}
+  function readAndroidStatus(){try{if(window.KGGAndroidApp&&typeof window.KGGAndroidApp.updateStatus==='function')return JSON.parse(window.KGGAndroidApp.updateStatus()||'{}');}catch(err){}return null;}
+  function value(id){var el=document.getElementById(id);return el?(el.value||'').trim():'';}
+  function setText(id,text){var el=document.getElementById(id);if(el)el.textContent=text||'';}
+  function copyText(text){try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text);return true;}}catch(err){}try{var input=document.createElement('input');input.value=text;input.style.position='fixed';input.style.opacity='0';document.body.appendChild(input);input.select();document.execCommand('copy');input.remove();return true;}catch(err){return false;}}
+  function openExternal(url){try{window.open(url,'_blank');return true;}catch(err){try{location.href=url;return true;}catch(inner){return false;}}}
+  function closeTabletMenu(){document.body.classList.remove('tabletMenuOpen');var menu=document.getElementById('tabletSideMenu');if(menu)menu.setAttribute('aria-hidden','true');}
+  function ensureModal(){
+    var existing=document.getElementById('kggReleaseCenterModal');
+    if(existing)return existing;
+    var modal=document.createElement('div');
+    modal.id='kggReleaseCenterModal';modal.className='kggReleaseOverlay';modal.setAttribute('aria-hidden','true');
+    modal.innerHTML='<section class="kggReleaseSheet" role="dialog" aria-modal="true" aria-labelledby="kggReleaseTitle">'
+      +'<div class="kggReleaseHead"><div><h2 id="kggReleaseTitle">KGG Update-Zentrale</h2><p>Standard: HTML speichern und per GitHub-Mobile-Inbox hochladen. Direktupload bleibt Komfortweg.</p></div><button class="kggReleaseClose" id="kggReleaseClose" type="button" aria-label="Update-Zentrale schliessen">&times;</button></div>'
+      +'<div class="kggReleaseStatus"><span class="kggReleaseBadge" id="kggReleaseBadge">Status</span><span class="kggReleaseMessage" id="kggReleaseMessage">Wird geladen …</span></div>'
+      +'<div class="kggReleaseCodeBox" id="kggReleaseCodeBox" aria-live="polite"><div class="kggReleaseCodeLabel">GitHub-Code</div><div class="kggReleaseCodeValue" id="kggReleaseCodeValue"></div><button class="kggReleaseBtn soft" id="kggReleaseCopyCode" type="button">Code kopieren</button><div class="kggReleaseCodeHint">Diesen Code auf der GitHub-Seite eingeben. Wenn GitHub langsam laedt: Code kopieren, spaeter verbinden oder den Mobile-Inbox-Weg nutzen.</div></div>'
+      +'<button class="kggReleaseBtn soft" id="kggReleaseDownloadHtml" type="button" style="width:100%;margin-top:10px">Aktuelle HTML speichern</button>'
+      +'<button class="kggReleaseBtn primary" id="kggReleaseMobileInbox" type="button" style="width:100%;margin-top:10px">GitHub-Mobile-Inbox oeffnen</button>'
+      +'<div class="kggReleaseInboxHint"><strong>Handy-Workflow ohne Codex</strong>1. HTML speichern. 2. Diese Datei in GitHub hochladen. 3. GitHub Actions erzeugt Admin-Beta und PR automatisch.</div>'
+      +'<button class="kggReleaseBtn soft" id="kggReleasePromoteLatest" type="button" style="width:100%;margin-top:10px">Kolleg:innen-Freigabe in GitHub oeffnen</button>'
       +'<button class="kggReleaseBtn soft" id="kggReleaseLogin" type="button" style="width:100%;margin-top:14px">Komfort: Mit GitHub verbinden</button>'
       +'<button class="kggReleaseBtn soft" id="kggReleaseTest" type="button" style="width:100%;margin-top:10px">Komfort: Verbindung testen</button>'
       +'<div class="kggReleaseGrid" style="margin-top:14px"><div class="kggReleaseField"><label for="kggReleaseId">Release-ID</label><input id="kggReleaseId" placeholder="z. B. r0391" autocomplete="off"></div><div class="kggReleaseField"><label for="kggReleaseVersion">Versionsname</label><input id="kggReleaseVersion" placeholder="Kurzer eindeutiger Name" autocomplete="off"></div><div class="kggReleaseField wide"><label for="kggReleaseNotes">Patch-Notiz</label><textarea id="kggReleaseNotes" placeholder="Was wurde geaendert? Keine Patientendaten oder Secrets."></textarea></div></div>'
@@ -387,41 +424,4 @@
       }catch(err){}
       releaseOpen();
     }, true);
-    return btn;
-  }
-
-  function ensureTabletMenuEntry(){
-    var menu = q(".tabletSideMenuMain");
-    if(!menu) return false;
-
-    var group = byId("kggReleaseMenuGroup");
-    if(!group){
-      group = document.createElement("div");
-      group.id = "kggReleaseMenuGroup";
-      group.className = "tabletSideMenuGroup kggReleaseMenuGroup";
-      group.innerHTML = "<h3>Admin</h3>";
-      menu.appendChild(group);
-    }
-
-    if(!byId("kggReleaseAdminConfig")){
-      var admin = document.createElement("button");
-      admin.id = "kggReleaseAdminConfig";
-      admin.type = "button";
-      admin.className = "tabletSideMenuAction";
-      admin.textContent = "Admin-Konfig";
-      admin.addEventListener("click", function(ev){
-        ev.preventDefault();
-        ev.stopPropagation();
-        try{
-          if(typeof closeTabletMenu === "function") closeTabletMenu();
-        }catch(err){}
-        var target = byId("adminConfigBtn");
-        if(target) target.click();
-      }, true);
-      group.appendChild(admin);
-    }
-
-    if(!byId("kggReleaseCenterOpen")){
-      group.appendChild(makeButton("kggReleaseCenterOpen", "Update-Zentrale", "tabletSideMenuAction"));
-    }
 ```
