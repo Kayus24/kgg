@@ -462,7 +462,8 @@ async function createPatientPage(browser, baseUrl, options = {}) {
     })();`
   });
   await page.addScriptTag({ path: SCANNER_PATH });
-  await page.waitForFunction(() => window.__kggStartScanVersion === "start-scan-v7-live-lossless-update");
+  await page.waitForFunction(() => window.__kggStartScanVersion === "start-scan-v8-html-version-label");
+  await page.waitForFunction(() => document.getElementById("kggPatientHtmlVersion")?.textContent === "PAT HTML v52");
   await page.waitForFunction(() => document.getElementById("kggPlanScanInput"));
   const before = await page.evaluate(() => window.__kggPatientTestSnapshot());
   return { context, page, dialogs, before };
@@ -884,11 +885,11 @@ async function main() {
   const manifest = JSON.parse(fs.readFileSync(FIXTURE_MANIFEST, "utf8"));
   assert(manifest.version === VERSION, "fixture manifest version mismatch");
   assert(fs.existsSync(SCANNER_PATH), "patient-start-scan.js missing");
-  assert(fs.readFileSync(SCANNER_PATH, "utf8").includes("start-scan-v7-live-lossless-update"), "patient scanner target version mismatch");
+  assert(fs.readFileSync(SCANNER_PATH, "utf8").includes("start-scan-v8-html-version-label"), "patient scanner target version mismatch");
   assert(fs.existsSync(VENDORED_JSQR_PATH), "vendored jsQR runtime missing");
   assert(sha256(fs.readFileSync(VENDORED_JSQR_PATH)) === "bc40c8a15196236b2314db0856f72ca0b49980cd5413b8c852a7349f5fee0859", "vendored jsQR runtime hash mismatch");
   const serviceWorkerText = fs.readFileSync(SERVICE_WORKER_PATH, "utf8");
-  assert(serviceWorkerText.includes("kgg-handyplan-v51-live-lossless-update"), "service worker target version mismatch");
+  assert(serviceWorkerText.includes("kgg-handyplan-v52-html-version-label"), "service worker target version mismatch");
   assert(serviceWorkerText.includes("./vendor/jsqr-1.4.0.js"), "service worker does not precache jsQR");
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
