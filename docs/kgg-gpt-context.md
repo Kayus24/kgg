@@ -34,8 +34,8 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Source web version: v59 / `1.0.59-ui-scaler-push-canary`.
 - Source index URL: `index.html?v=59`.
 - Source notes: v059: Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification.
-- Live Admin release: `r0422` / `1.0.59-ui-scaler-push-canary`.
-- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0422/admin.html`.
+- Live Admin release: `r0423` / `1.0.59-ui-scaler-push-canary`.
+- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0423/admin.html`.
 - Live colleague release: `r0397` / `1.0.29-camera-touch-parser-fix`.
 - Live colleague URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0397/colleague.html`.
 - Latest Android shell: `v401`.
