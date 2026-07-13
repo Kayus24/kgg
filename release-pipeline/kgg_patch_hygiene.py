@@ -144,6 +144,20 @@ def assert_version_json_for_index(root: Path, touched: set[str]) -> None:
         raise HygieneError("kgg-update/version.json indexUrl must match versionCode.")
 
 
+def assert_modular_source_edit_path(root: Path, touched: set[str]) -> None:
+    manifest = root / "kgg-update" / "src" / "parts.json"
+    if not manifest.exists():
+        return
+    index_touched = "kgg-update/index.html" in touched
+    module_touched = any(path.startswith("kgg-update/src/") for path in touched)
+    if index_touched and not module_touched:
+        raise HygieneError(
+            "kgg-update/index.html is generated and must not be edited directly. "
+            "Edit kgg-update/src, then run "
+            "`python release-pipeline/build_therapist_source.py --write`."
+        )
+
+
 def assert_source_release_alignment(root: Path) -> None:
     source_code = html_version_marker(root / "kgg-update" / "index.html")
     if source_code is None:
@@ -186,6 +200,7 @@ def run(root: Path) -> None:
 
     assert_no_test_lab(touched)
     assert_release_inbox_pair(root)
+    assert_modular_source_edit_path(root, touched)
     assert_version_json_for_index(root, touched)
     assert_source_release_alignment(root)
     log("Patch hygiene OK")

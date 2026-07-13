@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "output": "../index.html",
+  "versionManifest": "../version.json",
+  "requiredPatchIds": [
+    "kgg-v041-ui-mini-series",
+    "kgg-v042-phone-dock-anchored-correction",
+    "kgg-v044-phone-liquid-actions",
+    "kgg-v045-phone-drawer-bank-align",
+    "kgg-v046-tablet-runtime-viewport-guard",
+    "kgg-v050-phone-ui-mini-fix",
+    "kgg-v051-android-qr-pdf-bridge",
+    "kgg-v052-pdf-plan-thumbnails",
+    "kgg-v053-ui-tablet-stability"
+  ],
+  "parts": [
+    "base-head.html",
+    "metadata/source-truth.html",
+    "metadata/changelog.html",
+    "metadata/patch-rules.html",
+    "metadata/changelog-guard.html",
+    "base-app.html",
+    "patches/v041-ui-mini-series.html",
+    "patches/v042-phone-dock-anchored-correction.html",
+    "patches/v044-phone-liquid-actions.html",
+    "patches/v045-phone-drawer-bank-align.html",
+    "patches/v046-tablet-runtime-viewport-guard.html",
+    "patches/v050-phone-ui-mini-fix.html",
+    "patches/v051-android-qr-pdf-bridge.html",
+    "patches/v052-pdf-plan-thumbnails.html",
+    "patches/v053-ui-tablet-stability.html",
+    "footer.html"
+  ]
+}

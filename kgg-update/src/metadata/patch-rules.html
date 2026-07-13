@@ -1,0 +1,130 @@
+
+<!-- BEGIN kgg-patch-rules: embedded Patch Rules; READ THIS BEFORE PATCHING -->
+<script type="application/json" id="kgg-patch-rules">
+{
+  "schema": 1,
+  "id": "kgg-patch-rules",
+  "readFirst": [
+    "#kgg-source-truth",
+    "#kgg-changelog",
+    "#kgg-patch-rules"
+  ],
+  "mustUpdateOnEveryPatch": [
+    "kgg-source-truth.currentWebVersion",
+    "kgg-source-truth.lastUpdateIntent",
+    "kgg-changelog.entries",
+    "kgg-update/version.json.versionCode",
+    "kgg-update/version.json.versionName",
+    "kgg-update/version.json.sha256",
+    "kgg-source-truth.currentVersion",
+    "kgg-patch-rules",
+    "kgg-update/version.json.indexUrl"
+  ],
+  "protectedAreas": [
+    "PDF",
+    "QR-Erzeugung",
+    "Patienten-App",
+    "Scan-Kamera",
+    "Parser",
+    "Android-Wrapper",
+    "Tablet-Layout",
+    "Plan-State",
+    "Storage"
+  ],
+  "patchRetentionPolicy": {
+    "rule": "Never delete the latest patch for a function silently.",
+    "why": "The last patch for a feature is often what fixed or stabilized the bug; removing it without tracking can reintroduce old bugs.",
+    "defaultBehavior": "Preserve previous patch code and patch history unless Max explicitly approves removal.",
+    "whenReplacingPatch": [
+      "Mark old changelog entry as superseded, not deleted.",
+      "Add supersededBy on the old entry when practical.",
+      "Add supersedes on the new entry.",
+      "Record whySuperseded/removalReason/testEvidence/rollbackNote."
+    ],
+    "requiredWhenRemovingPatch": [
+      "supersededBy",
+      "removalReason",
+      "testEvidence",
+      "rollbackNote",
+      "explicitMaxApproval"
+    ],
+    "pipelineExpectation": "If patch markers or active fixes disappear without changelog documentation, stop and ask Max."
+  },
+  "changelogSizePolicy": {
+    "scope": "embedded kgg-changelog in index.html",
+    "warnAtEntries": 18,
+    "maxEmbeddedEntries": 30,
+    "warnAtBytes": 35000,
+    "maxEmbeddedBytes": 55000,
+    "actionWhenWarningThresholdReached": "Warn Max before adding more large entries; propose compact summaries or external archival.",
+    "actionWhenMaxExceeded": "Stop non-critical updates until Max approves compaction/archive strategy.",
+    "doNotAutoDeleteHistory": true
+  },
+  "blockPatchIfMissing": [
+    "kgg-source-truth",
+    "kgg-changelog",
+    "kgg-patch-rules"
+  ],
+  "requiredOnPatchRemoval": [
+    "supersededBy or replacementPatchId",
+    "removalReason",
+    "testEvidence",
+    "rollbackNote",
+    "explicitMaxApproval"
+  ],
+  "llmInstruction": "If changelog size exceeds policy thresholds or a patch-removal is not documented, warn Max and ask before changing code.",
+  "adminDebugMenuPolicy": {
+    "patchId": "kgg-v022-admin-debug-menu-feedback",
+    "purpose": "Keep an in-app admin feedback/debug path available for future QR/layout/update/storage issues.",
+    "doNotRemoveWithout": [
+      "supersededBy",
+      "reason",
+      "testEvidence",
+      "Max approval"
+    ],
+    "expectedGlobal": "KGG_ADMIN_DEBUG_MENU.report()"
+  },
+  "adminDebugVisibleHotfix": {
+    "patchId": "kgg-v023-admin-debug-visible-hotfix",
+    "purpose": "Debug entry must be visible in admin/therapist app even when adminMode class is missing.",
+    "expectedGlobal": "KGG_ADMIN_DEBUG_MENU.report()",
+    "expectedButton": "#kggAdminDebugFab",
+    "doNotRemoveWithout": [
+      "supersededBy",
+      "reason",
+      "testEvidence",
+      "Max approval"
+    ]
+  },
+  "adminDebugRollbackPolicy": {
+    "patchId": "kgg-v024-rollback-v023-debug-breakage",
+    "reason": "v023 broke tablet layout; debug UI must not be reintroduced without isolated viewport tests.",
+    "blockedUntil": [
+      "tablet screenshot proof",
+      "phone screenshot proof",
+      "no duplicate debug entry",
+      "Max approval"
+    ]
+  },
+  "lastUpdatedByPatchId": "kgg-v014-phone-viewport-state-release-guard",
+  "phoneViewportLeakGuardPolicy": {
+    "patchId": "kgg-v014-phone-viewport-state-release-guard",
+    "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
+    "requirements": [
+      "Gate phone behavior with matchMedia('(max-width:759px)').",
+      "When leaving phone viewport, remove kggPlanCardReordering, kggPlanCardSwiping, kggPlanSectionFrozen and stale inline drag/swipe styles.",
+      "Do not fix phone drag by changing global tablet containers such as #currentPlanBlock or .planSectionBody outside max-width:759px.",
+      "Phone drag-reorder must use #planList local absolute coordinates, not viewport fixed positioning.",
+      "Local content://, file:// and /media/external/file/ tests must not auto-redirect to GitHub; the normal update prompt may remain."
+    ],
+    "doNotRemoveWithout": [
+      "supersededBy",
+      "reason",
+      "phone portrait test",
+      "tablet/landscape test",
+      "Max approval"
+    ]
+  }
+}
+</script>
+<!-- END kgg-patch-rules -->

@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "requiredIds": [
+    "createPanel",
+    "scanHub",
+    "scanBtn",
+    "fileInput",
+    "filePickerInput",
+    "tabletMenuBtn",
+    "baseToggle",
+    "baseFields",
+    "patientName",
+    "planDate",
+    "therapistName",
+    "exerciseInput",
+    "inputWrap",
+    "bankArea",
+    "bankToggle",
+    "bankContent",
+    "currentPlanBlock",
+    "currentPlanToggle",
+    "planList",
+    "finishBtn",
+    "recentToggle",
+    "recentList",
+    "packageToggle",
+    "packageList",
+    "editorModal",
+    "saveExercise",
+    "closeEditor",
+    "shareModal",
+    "finishPdfBtn",
+    "finishPatientBtn",
+    "patientOutputBox",
+    "pdfPreviewModal",
+    "adminSecretsModal",
+    "sharedBankModal",
+    "syncPairModal"
+  ],
+  "requiredSourceFunctions": [
+    "save",
+    "render",
+    "renderPlan",
+    "openEditor",
+    "buildPdfFromCurrentPlan",
+    "buildPatientShareFromCurrentPlan",
+    "buildNativeSyncQrPayload"
+  ],
+  "requiredGlobals": [
+    "KGGDataStore"
+  ],
+  "allowedDuplicateIds": [
+    "kgg-github-patch-v401-phone-plan-ui-isolation"
+  ],
+  "allowedBootOpenModals": [
+    "adminSecretsModal"
+  ],
+  "viewports": [
+    {
+      "id": "phone-portrait",
+      "width": 390,
+      "height": 844,
+      "mobile": true,
+      "touch": true,
+      "visible": ["#scanBtn", "#exerciseInput", "#planList .planCard", "#finishBtn"]
+    },
+    {
+      "id": "phone-landscape",
+      "width": 844,
+      "height": 390,
+      "mobile": true,
+      "touch": true,
+      "visible": ["#tabletMenuBtn", "#exerciseInput", "#planList .planCard"]
+    },
+    {
+      "id": "tablet-portrait",
+      "width": 800,
+      "height": 1100,
+      "mobile": false,
+      "touch": true,
+      "visible": ["#tabletMenuBtn", "#exerciseInput", "#planList .planCard", "#finishBtn"]
+    },
+    {
+      "id": "tablet-landscape",
+      "width": 1180,
+      "height": 820,
+      "mobile": false,
+      "touch": true,
+      "visible": ["#tabletMenuBtn", "#exerciseInput", "#planList .planCard", "#finishBtn"]
+    },
+    {
+      "id": "tablet-split-phone",
+      "width": 700,
+      "height": 900,
+      "mobile": false,
+      "touch": true,
+      "visible": ["#scanBtn", "#exerciseInput", "#planList .planCard", "#finishBtn"]
+    }
+  ]
+}

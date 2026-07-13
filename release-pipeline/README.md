@@ -87,6 +87,65 @@ python release-pipeline/kgg_test_battery.py --level critical
 
 ## Patch-Hygiene
 
+### Modulare Therapeuten-Quelle
+
+In der isolierten Modul-Sandbox wird `kgg-update/index.html` deterministisch aus
+`kgg-update/src/parts.json` gebaut. Vor jedem Test oder Patch:
+
+```powershell
+python release-pipeline/build_therapist_source.py --check
+```
+
+Nach einer beabsichtigten Änderung an einem Fragment:
+
+```powershell
+python release-pipeline/build_therapist_source.py --write
+```
+
+Die Critical-Batterie führt `--check` automatisch aus. Die Patch-Hygiene
+blockiert direkte Änderungen an der erzeugten `index.html`, wenn kein passendes
+Quellfragment geändert wurde. Browser und Android laden weiterhin nur die eine
+zusammengebaute HTML-Datei.
+
+### Transaktionaler Self-Test-Build (nur Modul-Sandbox)
+
+```powershell
+cmd /c release-pipeline\run-kgg-selftest.cmd --smart
+cmd /c release-pipeline\run-kgg-selftest.cmd --certify
+cmd /c release-pipeline\run-kgg-selftest.cmd --watch
+```
+
+- `--smart`: Critical-Tests plus anhand `kgg-update/src/test-impact.json`
+  ausgewaehlte Regressionstests.
+- `--certify`: komplette lokale Critical-/Regression-Batterie inklusive echtem
+  UI-/Funktionsvertrag auf Phone, Phone Landscape, Tablet Portrait, Tablet
+  Landscape und Tablet Split-Screen.
+- `--watch`: beobachtet die Quellfragmente und startet nach dem Speichern den
+  Smart-Build.
+
+Der Kandidat wird nur transaktional eingesetzt. Bei einem Testfehler stellt die
+Pipeline die vorherige `index.html` und `version.json` wieder her. JSON-,
+Markdown- und HTML-Berichte sowie Screenshots liegen unter
+`tmp/kgg-selftest/`; dieser Ordner ist nicht versioniert.
+
+Der lokale Hook unter `.githooks/pre-commit` blockiert Commits an Modulen und
+Buildwerkzeugen, bis `--certify` gruen ist. Aktivierung in dieser Sandbox:
+
+```powershell
+git config core.hooksPath .githooks
+```
+
+Ein neuer Patch wird mit `release-pipeline/kgg_new_patch.py` vorbereitet. Das
+Tool erhoeht die Zielversion, aktualisiert Metadaten und Manifest, baut die
+HTML und berechnet den Hash. Geschuetzte Bereiche und das bereits erreichte
+Changelog-Limit sind fail-closed und brauchen eine explizite Approval-Notiz.
+
+Nach einem sauberen, zertifizierten Sandbox-Commit erzeugt
+`release-pipeline/kgg_export_handoff.py` ein Review-Buendel unter
+`tmp/kgg-selftest/handoff/`. Der Export blockiert Release-/Android-/Manifest-
+Aenderungen, verlangt ein Repo ohne Remote und fuehrt weder Push noch
+Produktionsfreigabe aus.
+
 Vor den Release-Contracts laeuft ein schneller Hygiene-Check:
 
 ```powershell

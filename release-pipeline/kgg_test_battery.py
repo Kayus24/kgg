@@ -131,6 +131,20 @@ def run_ui_stability(level: str, case_name: str | None = None) -> None:
     run([node_executable(), "release-pipeline/kgg_ui_stability_smoke.js", "--level", level, *case_args])
 
 
+def run_ui_contract() -> None:
+    log("== KGG UI/function contract ==")
+    npm = npm_executable()
+    if not npm:
+        raise BatteryError("npm is required for the browser UI contract.")
+    ensure_playwright_prepared(npm)
+    run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "node", "release-pipeline/kgg_ui_contract_smoke.js"])
+
+
+def run_selftest_gate_tests() -> None:
+    log("== KGG transactional build-gate tests ==")
+    run([sys.executable, "release-pipeline/test_kgg_selftest_build.py"])
+
+
 def run_native_sync_bridge_contract() -> None:
     log("== Native Android sync bridge contract ==")
     bridge = (ROOT / "android-wrapper" / "app" / "src" / "main" / "java" / "de" / "kgg" / "app" / "KggSyncBridge.java").read_text(
@@ -276,6 +290,11 @@ def run_patch_hygiene() -> None:
     run([sys.executable, "release-pipeline/kgg_patch_hygiene.py"])
 
 
+def run_module_source_check() -> None:
+    log("== Therapist module source drift check ==")
+    run([sys.executable, "release-pipeline/build_therapist_source.py", "--check"])
+
+
 def run_release_contracts() -> None:
     log("== Release contract tests ==")
     run([sys.executable, "-m", "unittest", "release-pipeline/test_release_pipeline.py", "release-pipeline/test_encoding_guard.py"])
@@ -381,6 +400,13 @@ def run_release_drift_check() -> None:
 
 
 TEST_REGISTRY = [
+    {
+        "id": "module-source",
+        "level": "critical",
+        "suite": "hygiene",
+        "reason": "The tracked standalone therapist HTML must exactly match its ordered modular source.",
+        "run": run_module_source_check,
+    },
     {
         "id": "patch-hygiene",
         "level": "critical",
@@ -494,6 +520,13 @@ TEST_REGISTRY = [
         "run": lambda: run_html_logic("patient-qr-critical"),
     },
     {
+        "id": "selftest-gate-critical",
+        "level": "critical",
+        "suite": "hygiene",
+        "reason": "Malformed module manifests, direct output drift and failed test transactions must be rejected and rolled back.",
+        "run": run_selftest_gate_tests,
+    },
+    {
         "id": "ui-stability-critical",
         "level": "critical",
         "suite": "ui-stability",
@@ -520,6 +553,13 @@ TEST_REGISTRY = [
         "suite": "ui-stability",
         "reason": "Flicker/layout patches must prove phone swipe and drag/drop still work in a real browser.",
         "run": lambda: run_ui_stability("regression", "gestures"),
+    },
+    {
+        "id": "ui-contract",
+        "level": "regression",
+        "suite": "ui-stability",
+        "reason": "Required functions and UI controls must remain present, usable and inside phone/tablet viewports.",
+        "run": run_ui_contract,
     },
     {
         "id": "ui-bank-thumbnails",
@@ -648,7 +688,14 @@ def validate_registry() -> None:
             raise BatteryError(f"Test {test_id} needs a category reason.")
 
 
-def selected_tests(level: str, suite: str | None) -> list[dict[str, object]]:
+def selected_tests(level: str, suite: str | None, test_ids: list[str] | None = None) -> list[dict[str, object]]:
+    requested = set(test_ids or [])
+    if requested:
+        known = {str(test["id"]) for test in TEST_REGISTRY}
+        missing = sorted(requested - known)
+        if missing:
+            raise BatteryError("Unknown test id(s): " + ", ".join(missing))
+        return [test for test in TEST_REGISTRY if str(test["id"]) in requested]
     max_rank = max(LEVEL_RANK.values()) if level == "all" else LEVEL_RANK[level]
     chosen = []
     for test in TEST_REGISTRY:
@@ -675,6 +722,12 @@ def main() -> int:
     )
     parser.add_argument("--list", action="store_true", help="List registered tests with level, suite and reason.")
     parser.add_argument(
+        "--test-id",
+        action="append",
+        default=[],
+        help="Run one exact registered test id; repeat to select multiple impact tests.",
+    )
+    parser.add_argument(
         "--live-mobile-inbox",
         action="store_true",
         help="Run the real Mobile-Inbox live smoke; this intentionally creates a new Admin beta release.",
@@ -684,7 +737,7 @@ def main() -> int:
 
     try:
         validate_registry()
-        tests = selected_tests(level, args.suite)
+        tests = selected_tests(level, args.suite, args.test_id)
         if args.list:
             for test in tests:
                 live_note = " [requires --live-mobile-inbox]" if test.get("requires_live_mobile_inbox") else ""
