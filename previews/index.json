@@ -4,6 +4,19 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "kgg-tablet-splitter-polish-20260713-a",
+      "patchHash": "994510922722cb625fad7b6e7b670ea7cfa483b364abc5510c2fbc914ed0bc68",
+      "baseSha": "e96b259812a44053e48d70c1f198ead01920e8c0",
+      "baseVersionCode": 60,
+      "rolloutCode": 1783935793,
+      "title": "Tablet Splitter elegant an Zielbild anpassen",
+      "summary": "Kompakte Layoutsteuerung im Seitenmenue; Plus/Minus skaliert, der mittlere Pfeilgriff zieht die Spaltengrenze exakt zwischen Uebungsdatenbank und Plan.",
+      "createdAt": "2026-07-13T09:43:13Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-tablet-splitter-polish-20260713-a/admin.html",
+      "sha256": "ad492719b9efd207b880ab5f587f576e313cada40a91662aeb9cef03fe3d6fba"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-tablet-splitter-columns-20260710-a",
       "patchHash": "a73f0257249eda3ab7c070cf1bcf4a1640cf968704614c68508ab11b698dbcb5",
       "baseSha": "e96b259812a44053e48d70c1f198ead01920e8c0",
@@ -135,15 +148,15 @@
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-tablet-splitter-columns-20260710-a",
-    "patchHash": "a73f0257249eda3ab7c070cf1bcf4a1640cf968704614c68508ab11b698dbcb5",
+    "requestId": "kgg-tablet-splitter-polish-20260713-a",
+    "patchHash": "994510922722cb625fad7b6e7b670ea7cfa483b364abc5510c2fbc914ed0bc68",
     "baseSha": "e96b259812a44053e48d70c1f198ead01920e8c0",
     "baseVersionCode": 60,
-    "rolloutCode": 1783711072,
-    "title": "Tablet Splitter: Skalierung und Spaltenbreite trennen",
-    "summary": "Entfernt das alte Skalierungs-Artefakt im Seitenmenue, positioniert den Splitter an der echten Grid-Grenze und macht die mittlere Kapsel horizontal ziehbar; Plus/Minus bleibt reine Skalierung.",
-    "createdAt": "2026-07-10T19:17:52Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-tablet-splitter-columns-20260710-a/admin.html",
-    "sha256": "badfd0bffb6ab6f38906cb5154d92195e3cd7f4fc4df4aa1475cc3fec7a6e16c"
+    "rolloutCode": 1783935793,
+    "title": "Tablet Splitter elegant an Zielbild anpassen",
+    "summary": "Kompakte Layoutsteuerung im Seitenmenue; Plus/Minus skaliert, der mittlere Pfeilgriff zieht die Spaltengrenze exakt zwischen Uebungsdatenbank und Plan.",
+    "createdAt": "2026-07-13T09:43:13Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-tablet-splitter-polish-20260713-a/admin.html",
+    "sha256": "ad492719b9efd207b880ab5f587f576e313cada40a91662aeb9cef03fe3d6fba"
   }
 }
