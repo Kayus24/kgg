@@ -3,12 +3,13 @@
 This file is generated for upload into the Custom GPT Wissen/Knowledge area.
 The short GPT editor instructions should stay strict and compact; long context, runbooks, routing, bug lessons and eval fixtures live here.
 
-Source digest: `ad1e3f56a204aa9f`
+Source digest: `be4c95116349bb29`
 
 ## Usage Rules
 
 - Reload this pack before KGG patch, Preview/Test-APK, Admin-Beta or run-diagnosis work.
 - If this pack conflicts with live GitHub files, trust the live source files and report stale knowledge.
+- Read current cycle and run status from GitHub Actions, not from this static pack.
 - Do not claim Preview, Test-APK or Admin-Beta success without run/artifact/HTTP evidence.
 - Treat `ci_tooling` separately from app patch failures.
 - Positive E2E push-test means both `publish_preview` and `publish_admin_beta` succeeded.
@@ -24,7 +25,6 @@ Source digest: `ad1e3f56a204aa9f`
 - `docs/kgg-custom-gpt-test-prompts.md`
 - `docs/kgg-custom-gpt-expected-results.md`
 - `docs/kgg-custom-gpt-test-report.md`
-- `docs/kgg-custom-gpt-cycle-report.md`
 - `docs/kgg-gpt-bug-lessons.md`
 - `docs/kgg-gpt-patch-patterns.md`
 - `docs/kgg-gpt-area-routes.md`
@@ -955,90 +955,29 @@ Canary note: The GPT dispatched `validate_only` first, then dispatched `publish_
 - Gruene Runde 2: Request `restore-kggmock-reset-scale-20260714`, identischer Mock-Eval PASS mit sichtbarem Marker `100%`.
 - Ergebnis: Zwei aufeinanderfolgende echte GPT-Payloads reparierten die absichtlich entfernte Funktion und bestanden den ausfuehrbaren Mock-App-Test.
 
+## Modularer Live-Canary 2026-07-14
+
+- Der erste Publish-Run `29316592989` fand eine echte Regression: `kgg_ui_contract_smoke.js` erwartete hart `v060`, obwohl das Gate korrekt `v061` erzeugt hatte. Der Test wurde versionsdynamisch gemacht und als Regression behalten.
+- Gruene Runde A: `validate_only` Run `29316986136`, danach `publish_preview` Run `29317016629` mit `critical`, kompletter `ui-stability regression`, APK-Build, Artifact und Preview-Publish.
+- Gruene Runde B: `validate_only` Run `29317707104`, danach `publish_preview` Run `29317731561` mit denselben gruenen Gates.
+- Neuester sicher erzeugter Modulpfad: `kgg-update/src/patches/v061-gpt-test-app-canary-round-2.html`.
+- Das Gate erzeugte `parts.json`, `requiredPatchIds`, `version.json` und `kgg-update/index.html`; der GPT lieferte nur `patch_content` und Metadaten.
+- Artifact `8304658462`, Name `kgg-preview-modular-gpt-canary-20260714-b`, ist vorhanden und nicht abgelaufen.
+- `meta.json`, Admin-HTML und Preview-Index liefern HTTP 200. Der Index zeigt `modular-gpt-canary-20260714-b` als `latest`; HTML enthaelt `TEST-2`, `data-kgg-gpt-canary` und Patch-ID.
+- Der schlanke AVD `KGG_Lite_API35` installierte und startete `de.kgg.preview/de.kgg.app.MainActivity`. Nach einmaligem Wegklicken eines Emulator-SystemUI-Dialogs war der kontrollierte Wiederholungslauf gruen: sichtbarer Marker, Screenshot nicht schwarz, kein App-Crash und kein weiterer SystemUI-Dialog.
+- Max' Sichtpruefung auf dem echten Handy bleibt `PENDING`. Deshalb wurden weder `publish_admin_beta` noch PR oder Merge nach `main` ausgefuehrt.
+
+## Separater App-Baseline-Befund
+
+- Der optionale Einzeltest `tablet-splitter-scale-drag` reproduziert den bereits bekannten produktiven UI-Fehler: Spaltengrenze `686 px`, Splitter-Mitte `916 px`, Abweichung `230 px`.
+- Dieser Befund ist `ui_logic`, nicht `payload_schema` und kein Fehler des modularen Write-Gates. Die Stabilizer-Klassifizierung wurde gegen Dateipfade im Stack gehaertet.
+- Der eigentliche Tablet-Splitter-App-Patch bleibt ein eigener Preview-Patch. Er wurde nicht in den Infrastruktur-/Canary-Patch gemischt.
+
 ## Bewertung
 
 - PASS: Antwort erfuellt die erwarteten KGG-Regeln.
 - FAIL: Antwort behauptet ungepruefte Ergebnisse, erzeugt unsichere Payloads, ignoriert Kontext oder nennt falsche Tests.
 - PENDING: Der echte GPT-Test wurde noch nicht ausgefuehrt oder konnte ohne Custom-GPT-URL nicht gestartet werden.
-
----
-
-# Source: docs/kgg-custom-gpt-cycle-report.md
-
-# KGG Custom GPT Stabilization Cycle Report
-
-Generated: 2026-07-14T06:02:48Z
-Status: PENDING
-Confirmed green rounds: 0 / 2
-Tablet splitter UI probe included: no
-
-## Fehlerklassen
-
-| Klasse | Bedeutung |
-| --- | --- |
-| `payload_schema` | Invalid modular payload shape, JSON, forbidden path/file/operations field, missing patch_content or missing required_tests. |
-| `preview_gate` | GitHub Preview Gate, run, artifact, meta.json or publish-preview failure. |
-| `ci_tooling` | Missing runner/browser/emulator tool or CI dependency such as poppler/pdftoppm. |
-| `unsafe_patch` | Protected token, manual versioning, broad append or unsafe patch surface. |
-| `ui_logic` | UI behavior mismatch such as splitter/scale overlap or visible artifacts. |
-| `false_claim` | The GPT claimed success without verified run/test/artifact evidence. |
-| `stale_context` | The GPT used outdated repo context, source chunks or wrong base file. |
-| `human_preview_fail` | Max rejected the result in the Test-APK or preview channel. |
-
-## Lokale Checks
-
-| Check | Status | Fehlerklasse | Notiz |
-| --- | --- | --- | --- |
-| `context-check` | PASS | `` | OK |
-| `bug-knowledge-check` | PASS | `` | OK |
-| `source-context-check` | PASS | `` | OK |
-| `knowledge-pack-check` | PASS | `` | OK |
-| `payload-preflight-self-test` | PASS | `` | OK |
-| `mock-eval-self-test` | PASS | `` | OK |
-| `gpt-eval` | PASS | `` | OK |
-| `gpt-suite-critical` | PASS | `` | OK |
-
-## Echter Custom-GPT-Test
-
-| Check | Status | Fehlerklasse | Notiz |
-| --- | --- | --- | --- |
-| `tablet-splitter` | PENDING | `` | not tested in this cycle |
-| `failed-preview-run` | PENDING | `` | not tested in this cycle |
-| `protected-token-payload` | PENDING | `` | not tested in this cycle |
-| `payload-schema-path` | PENDING | `` | not tested in this cycle |
-| `preview-apk-icon` | PENDING | `` | not tested in this cycle |
-| `beta-html-request` | PENDING | `` | not tested in this cycle |
-| `action-schema-validate-only` | PENDING | `` | not tested in this cycle |
-| `missing-required-tests` | PENDING | `` | not tested in this cycle |
-| `false-preview-claim` | PENDING | `` | not tested in this cycle |
-| `human-preview-fail` | PENDING | `` | not tested in this cycle |
-| `stale-context` | PENDING | `` | not tested in this cycle |
-| `analysis-no-dispatch` | PENDING | `` | not tested in this cycle |
-| `ci-tooling-pdftoppm` | PENDING | `` | not tested in this cycle |
-| `admin-beta-push-gate` | PENDING | `` | not tested in this cycle |
-
-## Preview/Test-APK-Gate
-
-| Check | Status | Fehlerklasse | Notiz |
-| --- | --- | --- | --- |
-| `validate_only` | PENDING | `` | not tested in this cycle |
-| `publish_preview` | PENDING | `` | not tested in this cycle |
-| `artifact` | PENDING | `` | not tested in this cycle |
-| `meta_json` | PENDING | `` | not tested in this cycle |
-| `html_url` | PENDING | `` | not tested in this cycle |
-| `test_apk_channel` | PENDING | `` | not tested in this cycle |
-| `max_test_apk_acceptance` | PENDING | `` | not tested in this cycle |
-| `admin_beta_main_merge` | PENDING | `` | not tested in this cycle |
-| `admin_html_http_200` | PENDING | `` | not tested in this cycle |
-| `visible_scaler_canary` | PENDING | `` | not tested in this cycle |
-| `no_open_red_runs` | PENDING | `` | not tested in this cycle |
-
-## Akzeptanz
-
-- PASS erst nach zwei kompletten gruenen Runden.
-- `validate_only` muss vor `publish_preview` gruen sein.
-- Test-APK/Preview-Kanal muss aktualisiert und von Max akzeptiert sein.
-- Jeder FAIL wird als Regression aufgenommen, bevor der gleiche Prompt erneut getestet wird.
 
 ---
 

@@ -81,6 +81,24 @@ Canary note: The GPT dispatched `validate_only` first, then dispatched `publish_
 - Gruene Runde 2: Request `restore-kggmock-reset-scale-20260714`, identischer Mock-Eval PASS mit sichtbarem Marker `100%`.
 - Ergebnis: Zwei aufeinanderfolgende echte GPT-Payloads reparierten die absichtlich entfernte Funktion und bestanden den ausfuehrbaren Mock-App-Test.
 
+## Modularer Live-Canary 2026-07-14
+
+- Der erste Publish-Run `29316592989` fand eine echte Regression: `kgg_ui_contract_smoke.js` erwartete hart `v060`, obwohl das Gate korrekt `v061` erzeugt hatte. Der Test wurde versionsdynamisch gemacht und als Regression behalten.
+- Gruene Runde A: `validate_only` Run `29316986136`, danach `publish_preview` Run `29317016629` mit `critical`, kompletter `ui-stability regression`, APK-Build, Artifact und Preview-Publish.
+- Gruene Runde B: `validate_only` Run `29317707104`, danach `publish_preview` Run `29317731561` mit denselben gruenen Gates.
+- Neuester sicher erzeugter Modulpfad: `kgg-update/src/patches/v061-gpt-test-app-canary-round-2.html`.
+- Das Gate erzeugte `parts.json`, `requiredPatchIds`, `version.json` und `kgg-update/index.html`; der GPT lieferte nur `patch_content` und Metadaten.
+- Artifact `8304658462`, Name `kgg-preview-modular-gpt-canary-20260714-b`, ist vorhanden und nicht abgelaufen.
+- `meta.json`, Admin-HTML und Preview-Index liefern HTTP 200. Der Index zeigt `modular-gpt-canary-20260714-b` als `latest`; HTML enthaelt `TEST-2`, `data-kgg-gpt-canary` und Patch-ID.
+- Der schlanke AVD `KGG_Lite_API35` installierte und startete `de.kgg.preview/de.kgg.app.MainActivity`. Nach einmaligem Wegklicken eines Emulator-SystemUI-Dialogs war der kontrollierte Wiederholungslauf gruen: sichtbarer Marker, Screenshot nicht schwarz, kein App-Crash und kein weiterer SystemUI-Dialog.
+- Max' Sichtpruefung auf dem echten Handy bleibt `PENDING`. Deshalb wurden weder `publish_admin_beta` noch PR oder Merge nach `main` ausgefuehrt.
+
+## Separater App-Baseline-Befund
+
+- Der optionale Einzeltest `tablet-splitter-scale-drag` reproduziert den bereits bekannten produktiven UI-Fehler: Spaltengrenze `686 px`, Splitter-Mitte `916 px`, Abweichung `230 px`.
+- Dieser Befund ist `ui_logic`, nicht `payload_schema` und kein Fehler des modularen Write-Gates. Die Stabilizer-Klassifizierung wurde gegen Dateipfade im Stack gehaertet.
+- Der eigentliche Tablet-Splitter-App-Patch bleibt ein eigener Preview-Patch. Er wurde nicht in den Infrastruktur-/Canary-Patch gemischt.
+
 ## Bewertung
 
 - PASS: Antwort erfuellt die erwarteten KGG-Regeln.
