@@ -4,6 +4,22 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "modular-gpt-canary-20260714-b",
+      "patchHash": "3ccfa52cecc6e90b2905ae904a132dfec669fc8b909fa449e796eb1fcc8eb1d7",
+      "baseSha": "e1576b6b98a9b3a5a51bfec4ace35acdbfcf2dc4",
+      "baseVersionCode": 61,
+      "rolloutCode": 1784017343,
+      "title": "Modularer GPT Test-App Canary Runde 2",
+      "summary": "Zeigt am Tablet-UI-Scaler eine harmlose TEST-2-Markierung, damit die zweite modular erzeugte Preview in HTML und Test-App eindeutig erkennbar ist.",
+      "patchId": "kgg-v061-gpt-test-app-canary-round-2",
+      "patchFile": "patches/v061-gpt-test-app-canary-round-2.html",
+      "versionName": "1.0.61-gpt-test-app-canary-round-2",
+      "createdAt": "2026-07-14T08:22:23Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/modular-gpt-canary-20260714-b/admin.html",
+      "sha256": "8667af3df4e315fdd4a8c6e800908545f5a2a2e0d58180f413c4965f1ee73562"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "modular-gpt-canary-20260714-a",
       "patchHash": "0d046aabda77a38b74107c092dc3c3b4d136bd82a1e1ff77b9211c6f4e6c49be",
       "baseSha": "e1576b6b98a9b3a5a51bfec4ace35acdbfcf2dc4",
@@ -177,18 +193,18 @@
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "modular-gpt-canary-20260714-a",
-    "patchHash": "0d046aabda77a38b74107c092dc3c3b4d136bd82a1e1ff77b9211c6f4e6c49be",
+    "requestId": "modular-gpt-canary-20260714-b",
+    "patchHash": "3ccfa52cecc6e90b2905ae904a132dfec669fc8b909fa449e796eb1fcc8eb1d7",
     "baseSha": "e1576b6b98a9b3a5a51bfec4ace35acdbfcf2dc4",
     "baseVersionCode": 61,
-    "rolloutCode": 1784016616,
-    "title": "Modularer GPT Test-App Canary",
-    "summary": "Zeigt am Tablet-UI-Scaler eine harmlose TEST-Markierung, damit die modular erzeugte Preview in HTML und Test-App eindeutig erkennbar ist.",
-    "patchId": "kgg-v061-gpt-test-app-canary",
-    "patchFile": "patches/v061-gpt-test-app-canary.html",
-    "versionName": "1.0.61-gpt-test-app-canary",
-    "createdAt": "2026-07-14T08:10:16Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/modular-gpt-canary-20260714-a/admin.html",
-    "sha256": "eae7128682cacfbf4f0394c250dfa65c6ee5851c03eb04b18d89c1b002ff519a"
+    "rolloutCode": 1784017343,
+    "title": "Modularer GPT Test-App Canary Runde 2",
+    "summary": "Zeigt am Tablet-UI-Scaler eine harmlose TEST-2-Markierung, damit die zweite modular erzeugte Preview in HTML und Test-App eindeutig erkennbar ist.",
+    "patchId": "kgg-v061-gpt-test-app-canary-round-2",
+    "patchFile": "patches/v061-gpt-test-app-canary-round-2.html",
+    "versionName": "1.0.61-gpt-test-app-canary-round-2",
+    "createdAt": "2026-07-14T08:22:23Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/modular-gpt-canary-20260714-b/admin.html",
+    "sha256": "8667af3df4e315fdd4a8c6e800908545f5a2a2e0d58180f413c4965f1ee73562"
   }
 }
