@@ -1,9 +1,58 @@
 # KGG Source Chunk 040
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 16801-17220
 
 ```html
+                    });
+                    if (matchingQuads.length > 0) {
+                        matchingQuads[0].bottom = line;
+                    }
+                    else {
+                        activeAlignmentPatternQuads.push({ top: line, bottom: line });
+                    }
+                }
+            }
+        };
+        for (var x = -1; x <= matrix.width; x++) {
+            _loop_2(x);
+        }
+        finderPatternQuads.push.apply(finderPatternQuads, activeFinderPatternQuads.filter(function (q) { return q.bottom.y !== y && q.bottom.y - q.top.y >= 2; }));
+        activeFinderPatternQuads = activeFinderPatternQuads.filter(function (q) { return q.bottom.y === y; });
+        alignmentPatternQuads.push.apply(alignmentPatternQuads, activeAlignmentPatternQuads.filter(function (q) { return q.bottom.y !== y; }));
+        activeAlignmentPatternQuads = activeAlignmentPatternQuads.filter(function (q) { return q.bottom.y === y; });
+    };
+    for (var y = 0; y <= matrix.height; y++) {
+        _loop_1(y);
+    }
+    finderPatternQuads.push.apply(finderPatternQuads, activeFinderPatternQuads.filter(function (q) { return q.bottom.y - q.top.y >= 2; }));
+    alignmentPatternQuads.push.apply(alignmentPatternQuads, activeAlignmentPatternQuads);
+    var finderPatternGroups = finderPatternQuads
+        .filter(function (q) { return q.bottom.y - q.top.y >= 2; }) // All quads must be at least 2px tall since the center square is larger than a block
+        .map(function (q) {
+        var x = (q.top.startX + q.top.endX + q.bottom.startX + q.bottom.endX) / 4;
+        var y = (q.top.y + q.bottom.y + 1) / 2;
+        if (!matrix.get(Math.round(x), Math.round(y))) {
+            return;
+        }
+        var lengths = [q.top.endX - q.top.startX, q.bottom.endX - q.bottom.startX, q.bottom.y - q.top.y + 1];
+        var size = sum(lengths) / lengths.length;
+        var score = scorePattern({ x: Math.round(x), y: Math.round(y) }, [1, 1, 3, 1, 1], matrix);
+        return { score: score, x: x, y: y, size: size };
+    })
+        .filter(function (q) { return !!q; }) // Filter out any rejected quads from above
+        .sort(function (a, b) { return a.score - b.score; })
+        // Now take the top finder pattern options and try to find 2 other options with a similar size.
+        .map(function (point, i, finderPatterns) {
+        if (i > MAX_FINDERPATTERNS_TO_SEARCH) {
+            return null;
+        }
+        var otherPoints = finderPatterns
+            .filter(function (p, ii) { return i !== ii; })
+            .map(function (p) { return ({ x: p.x, y: p.y, score: p.score + (Math.pow((p.size - point.size), 2)) / point.size, size: p.size }); })
+            .sort(function (a, b) { return a.score - b.score; });
+        if (otherPoints.length < 2) {
+            return null;
         }
         var score = point.score + otherPoints[0].score + otherPoints[1].score;
         return { points: [point].concat(otherPoints.slice(0, 2)), score: score };
@@ -375,53 +424,4 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   <div class="adminPackageHint">Admin-Safe-Dateien bleiben lokal und gehoeren nicht in GitHub, Chat oder Patient:innen-Ausgabe.</div>
   <div class="grid2" style="margin-top:12px"><button class="mutedBtn danger" id="clearAdminSecrets" type="button">Löschen</button><button class="primary" id="saveAdminSecrets" type="button">Lokal speichern</button></div>
   <button class="mutedBtn" id="closeAdminSecrets" type="button" style="width:100%;margin-top:8px">Schließen</button>
-</div></div>
-
-<div class="modal" id="sharedBankModal"><div class="sheet">
-  <h2>Übungsdatenbank teilen</h2>
-  <p class="notice">Nur Übungsdaten. Keine Patientendaten, keine Codes. Import löscht nichts.</p>
-  <textarea class="sharedBankText" id="sharedBankText" spellcheck="false"></textarea>
-  <input id="sharedBankFile" class="hidden" type="file" accept="application/json,.json">
-  <span class="secretStatus" id="sharedBankStatus"></span>
-  <div class="grid2" style="margin-top:12px"><button class="mutedBtn" id="copySharedBank" type="button">Export kopieren</button><button class="mutedBtn" id="pickSharedBankFile" type="button">Import-Datei</button></div>
-  <div class="grid2" style="margin-top:8px"><button class="mutedBtn" id="closeSharedBank" type="button">Schließen</button><button class="primary" id="applySharedBank" type="button">Import übernehmen</button></div>
-</div></div>
-
-<div class="modal" id="syncPairModal"><div class="sheet syncPairSheet">
-  <h2>Sync koppeln</h2>
-  <p class="notice">Diesen QR auf weiteren Android-Geraeten mit <b>Plan scannen</b> einlesen. Alle Geraete im selben Sync-Raum schreiben eigene Dateien und koennen ausgewaehlte Therapeut:innen automatisch lesen. Keine Patientendaten, keine API-Keys.</p>
-  <div class="qrBox syncPairQrBox" id="syncPairQrBox"><span class="qrStatus">QR wird vorbereitet ...</span></div>
-  <span class="syncPairStatus" id="syncPairStatus"></span>
-  <div class="syncPeerList hidden" id="syncPeerList"></div>
-  <div class="syncDiagnostics hidden" id="syncDiagnostics"></div>
-  <input class="hidden" id="syncImportInput" type="file" accept="application/json,.json">
-  <div class="syncPairActions"><button class="mutedBtn" id="copySyncPairCode" type="button">Code kopieren</button><button class="mutedBtn" id="testNativeSyncBtn" type="button">Sync testen</button><button class="mutedBtn" id="downloadSyncFileBtn" type="button">Sync-Datei speichern</button><button class="mutedBtn" id="importSyncFileBtn" type="button">Sync-Datei importieren</button><button class="primary" id="closeSyncPairModal" type="button">Schliessen</button></div>
-</div></div>
-
-<div class="modal" id="pdfPreviewModal"><div class="sheet pdfPreviewSheet">
-  <h2>PDF fertig</h2>
-  <p class="notice" id="pdfPreviewNotice">PDF erzeugt.</p>
-  <div class="pdfPreviewMobileBridge hidden" id="pdfPreviewMobileBridge">
-    <button class="primary" id="openPdfPreviewMobileBridge" type="button">PDF öffnen</button>
-    <small>Öffnet im Geräte-PDF-Viewer.</small>
-  </div>
-  <div class="pdfPreviewFallback hidden" id="pdfPreviewFallback">
-    <div>Vorschau leer?<small>PDF trotzdem erzeugt.</small></div>
-    <button class="mutedBtn" id="openPdfPreviewFallback" type="button">PDF öffnen</button>
-  </div>
-  <iframe class="pdfPreviewFrame" id="pdfPreviewFrame" title="PDF-Vorschau"></iframe>
-  <div class="grid2"><button class="primary" id="printPdfPreview" type="button">Drucken</button><button class="mutedBtn" id="downloadPdfPreview" type="button">Herunterladen</button></div>
-  <button class="mutedBtn" id="openPdfPreviewTab" type="button">Neues Fenster</button>
-  <button class="mutedBtn" id="closePdfPreview" type="button">Schließen</button>
-</div></div>
-
-<script>
-(function(){
-  'use strict';
-  function openSourceMediaDb(){
-    return new Promise((resolve,reject)=>{
-      const req=indexedDB.open('kgg_media_v1',1);
-      req.onupgradeneeded=()=>{const db=req.result; if(!db.objectStoreNames.contains('encryptedBlobs'))db.createObjectStore('encryptedBlobs',{keyPath:'id'});};
-      req.onsuccess=()=>resolve(req.result);
-      req.onerror=()=>reject(req.error||new Error('Admin-Test-Medien-Speicher nicht verfuegbar'));
 ```

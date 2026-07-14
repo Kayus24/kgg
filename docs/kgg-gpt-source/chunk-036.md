@@ -1,9 +1,58 @@
 # KGG Source Chunk 036
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 15121-15540
 
 ```html
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.VERSIONS = [
+    {
+        infoBits: null,
+        versionNumber: 1,
+        alignmentPatternCenters: [],
+        errorCorrectionLevels: [
+            {
+                ecCodewordsPerBlock: 7,
+                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 19 }],
+            },
+            {
+                ecCodewordsPerBlock: 10,
+                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 16 }],
+            },
+            {
+                ecCodewordsPerBlock: 13,
+                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 13 }],
+            },
+            {
+                ecCodewordsPerBlock: 17,
+                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 9 }],
+            },
+        ],
+    },
+    {
+        infoBits: null,
+        versionNumber: 2,
+        alignmentPatternCenters: [6, 18],
+        errorCorrectionLevels: [
+            {
+                ecCodewordsPerBlock: 10,
+                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 34 }],
+            },
+            {
+                ecCodewordsPerBlock: 16,
+                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 28 }],
+            },
+            {
+                ecCodewordsPerBlock: 22,
+                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 22 }],
+            },
+            {
+                ecCodewordsPerBlock: 28,
+                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 16 }],
+            },
+        ],
+    },
     {
         infoBits: null,
         versionNumber: 3,
@@ -374,54 +423,5 @@
                 ecBlocks: [
                     { numBlocks: 5, dataCodewordsPerBlock: 87 },
                     { numBlocks: 1, dataCodewordsPerBlock: 88 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 24,
-                ecBlocks: [
-                    { numBlocks: 5, dataCodewordsPerBlock: 41 },
-                    { numBlocks: 5, dataCodewordsPerBlock: 42 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 30,
-                ecBlocks: [
-                    { numBlocks: 5, dataCodewordsPerBlock: 24 },
-                    { numBlocks: 7, dataCodewordsPerBlock: 25 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 24,
-                ecBlocks: [
-                    { numBlocks: 11, dataCodewordsPerBlock: 12 },
-                    { numBlocks: 7, dataCodewordsPerBlock: 13 },
-                ],
-            },
-        ],
-    },
-    {
-        infoBits: 0x10B78,
-        versionNumber: 16,
-        alignmentPatternCenters: [6, 26, 50, 74],
-        errorCorrectionLevels: [
-            {
-                ecCodewordsPerBlock: 24,
-                ecBlocks: [
-                    { numBlocks: 5, dataCodewordsPerBlock: 98 },
-                    { numBlocks: 1, dataCodewordsPerBlock: 99 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 28,
-                ecBlocks: [
-                    { numBlocks: 7, dataCodewordsPerBlock: 45 },
-                    { numBlocks: 3, dataCodewordsPerBlock: 46 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 24,
-                ecBlocks: [
-                    { numBlocks: 15, dataCodewordsPerBlock: 19 },
-                    { numBlocks: 2, dataCodewordsPerBlock: 20 },
                 ],
 ```

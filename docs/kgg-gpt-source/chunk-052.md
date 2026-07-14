@@ -1,9 +1,58 @@
 # KGG Source Chunk 052
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 21841-22260
 
 ```html
+    if(notice)notice.textContent='';
+    if(dbg)dbg.open=false;
+    patientShareTtlSeconds=MEDIA_UPLOAD_TTL_SECONDS;
+    lastPatientSharePlanSnapshot=null;
+    if(copyBtn)copyBtn.textContent='Link kopieren';
+    setManualPatientLinkField('',false,false);
+  }
+  function openFinishModal(){resetFinishModal(); $('shareModal').classList.add('open');}
+  function closeFinishModal(){$('shareModal').classList.remove('open');}
+  function openLargePdfModal(){$('largePdfModal').classList.add('open');}
+  function closeLargePdfModal(){$('largePdfModal').classList.remove('open');}
+  function archiveAndCloseCurrentPlan(reason){
+    const plan=getCurrentPlanForOutput(reason||'ui_finish_archive');
+    const exercises=Array.isArray(plan.exercises)?plan.exercises:[];
+    if(exercises.length){
+      const patient=plan.patient||{};
+      const title=patient.name||plan.title||'KGG Plan';
+      const entry={id:plan.id||makeLocalId(),name:title,date:new Date().toISOString(),patient:{...patient},exercises:exercises.map(ex=>({...ex})),source:reason||'finished'};
+      state.recent=[entry].concat(state.recent||[]).slice(0,20);
+    }
+    state.plan=[];
+    state.liveDraftId=null;
+    state.bankOpen=false;
+    state.planText='';
+    if($('exerciseInput'))$('exerciseInput').value='';
+    syncStatePlanToStore(reason||'ui_finish_close_current_plan');
+    save();
+    render();
+  }
+  async function finishWithPdf(options){
+    const notice=$('finishNotice');
+    const hasModeOverride=!!(options&&Object.prototype.hasOwnProperty.call(options,'large'));
+    const previousLargeMode=state.largePdfMode;
+    if(hasModeOverride){state.largePdfMode=!!options.large; applyLargePdfMode();}
+    if(notice)notice.textContent='PDF wird erstellt ...';
+    try{
+      const pdfResult=await buildPdfFromCurrentPlan();
+      if(hasModeOverride){state.largePdfMode=previousLargeMode; applyLargePdfMode();}
+      archiveAndCloseCurrentPlan('ui_finish_pdf');
+      closeFinishModal();
+      openPdfPreview(pdfResult);
+    }catch(err){
+      if(hasModeOverride){state.largePdfMode=previousLargeMode; applyLargePdfMode(); save();}
+      console.warn('PDF konnte nicht erzeugt werden:',err);
+      if(notice)notice.textContent='PDF fehlgeschlagen. Plan bleibt offen.';
+    }
+  }
+  async function finishWithPatientApp(){
+    const notice=$('finishNotice');
     try{
       const url=await renderPatientShareOutput();
       if(!url)return;
@@ -375,53 +424,4 @@
     });
   }
   async function scanDetectQrViaBitmapFromCanvas(canvas,detector){
-    if(!detector||!window.createImageBitmap||!canvas||!canvas.toBlob)return '';
-    let blob=null,bitmap=null;
-    try{
-      blob=await scanCanvasToBlob(canvas,'image/png',.92);
-      if(!blob)return '';
-      bitmap=await createImageBitmap(blob);
-      const hits=await detector.detect(bitmap).catch(()=>[]);
-      if(hits&&hits.length){
-        return hits[0].rawValue||hits[0].rawData||'';
-      }
-    }catch(err){
-      return '';
-    }finally{
-      if(bitmap){try{bitmap.close();}catch(closeErr){}}
-    }
-    return '';
-  }
-  async function detectQrOnCanvas(canvas,detector){
-    if(detector){
-      try{
-        const hits=await detector.detect(canvas).catch(()=>[]);
-        if(hits&&hits.length){
-          const raw=hits[0].rawValue||hits[0].rawData||'';
-          if(raw)return raw;
-        }
-      }catch(err){}
-      const bitmapRaw=await scanDetectQrViaBitmapFromCanvas(canvas,detector);
-      if(bitmapRaw)return bitmapRaw;
-    }
-    if(window.jsQR){
-      try{
-        const ctx=canvas.getContext('2d',{willReadFrequently:true});
-        const img=ctx.getImageData(0,0,canvas.width,canvas.height);
-        const code=window.jsQR(img.data,canvas.width,canvas.height,{inversionAttempts:'attemptBoth'});
-        if(code&&code.data)return code.data;
-      }catch(err){}
-    }
-    return '';
-  }
-  async function scanDetectQrDirectFromFile(file,detector){
-    if(!detector||!window.createImageBitmap)return '';
-    let bitmap=null;
-    try{
-      bitmap=await createImageBitmap(file,{imageOrientation:'from-image'});
-      const hits=await detector.detect(bitmap).catch(()=>[]);
-      if(hits&&hits.length)return hits[0].rawValue||hits[0].rawData||'';
-    }catch(err){
-      console.warn('QR-Dateibild: Direkt-BarcodeDetector fehlgeschlagen.',err);
-    }finally{
 ```

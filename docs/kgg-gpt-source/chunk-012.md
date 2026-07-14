@@ -1,9 +1,58 @@
 # KGG Source Chunk 012
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 5041-5460
 
 ```html
+    }
+    body.is-scrolling :is(#recentList,#packageList,#baseFields,#bankContent,.bankArea,.dbTitle,.dbTitleTrain,.planActions,.finishBtn,#recentToggle,#packageToggle,#bankToggle,#baseToggle,.phoneButtonFloat,.scanJobCard,#inputWrap,.suggestion,#currentPlanBlock,.planSection,.planCard){
+      transition:none!important;
+      animation:none!important;
+      scroll-behavior:auto!important;
+    }
+    body.is-scrolling :is(.dbTitle .dbTitleTrain,.bankArea.bankOpen #bankContent,#recentList,#packageList,#inputWrap,.suggestion,.phoneButtonFloat,.finishBtn,.planCard){
+      transform:none!important;
+      filter:none!important;
+      scale:1 1!important;
+    }
+    .planActions,
+    .planActions .finishBtn,
+    .planActions #recentToggle,
+    .recentText,
+    .recentMini{
+      transition:none!important;
+    }
+    .planActions.hasPlan .finishBtn{
+      animation:none!important;
+      transform:none!important;
+      scale:1 1!important;
+    }
+    :is(.finishBtn,#recentToggle,#packageToggle,#bankToggle,#baseToggle,.planSectionHeader,.iconBtn):active{
+      transform:none!important;
+      scale:1 1!important;
+    }
+    .dbTitle.fullBankOpen .dbTitleTrain,
+    .bankArea.bankOpen #bankContent,
+    #bankArea.bankOpen{
+      animation:none!important;
+      transform:none!important;
+      filter:none!important;
+      clip-path:none!important;
+    }
+    #bankArea.bankOpen{
+      overflow:hidden!important;
+    }
+    #bankArea.bankOpen #bankContent{
+      min-height:0!important;
+      overflow:hidden!important;
+    }
+    #bankArea.bankOpen .bankRows{
+      overflow:auto!important;
+      overscroll-behavior:contain;
+      scroll-behavior:auto!important;
+    }
+    #bankArea.bankOpen.searchBankOpen{
+      grid-template-columns:56px minmax(0,1fr)!important;
       align-items:start!important;
     }
     #bankArea.bankOpen.searchBankOpen #bankToggle{
@@ -375,53 +424,4 @@
     #editorModal .editorAdvanced{
       margin-top:8px!important;
       padding:0!important;
-      border-radius:14px!important;
-      overflow:hidden!important;
-    }
-    #editorModal .editorAdvanced summary{
-      min-height:44px!important;
-      padding:0 12px!important;
-      align-items:center!important;
-      justify-content:space-between!important;
-      list-style:none!important;
-      cursor:pointer!important;
-    }
-    #editorModal .editorAdvanced summary::-webkit-details-marker{
-      display:none!important;
-    }
-    #editorModal .editorAdvanced summary::after{
-      content:"▾";
-      color:#071027;
-      font-size:18px;
-      line-height:1;
-    }
-    #editorModal .editorAdvanced[open]{
-      padding-bottom:10px!important;
-    }
-    #editorModal .editorAdvanced[open] summary::after{
-      transform:rotate(180deg);
-    }
-    #editorModal .editorAdvancedGrid{
-      grid-template-columns:1fr!important;
-      gap:6px!important;
-      margin:0 10px!important;
-    }
-    #editorModal .editorActions{
-      gap:6px!important;
-      margin-top:10px!important;
-    }
-    #editorModal .editorActions button{
-      min-height:46px!important;
-      border-radius:13px!important;
-      font-size:16px!important;
-    }
-    #editorModal .editorCancelBtn{
-      min-height:42px!important;
-      margin-top:6px!important;
-      border:0!important;
-      background:transparent!important;
-      box-shadow:none!important;
-      font-size:15px!important;
-    }
-  }
 ```

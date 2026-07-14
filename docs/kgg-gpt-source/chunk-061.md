@@ -1,9 +1,58 @@
 # KGG Source Chunk 061
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 25621-26040
 
 ```html
+    });
+
+    window.addEventListener("resize", function(){
+      if(!isPhone()) hardClean("leave-phone-resize");
+      else scheduleClean("phone-resize", 160);
+    }, {passive:true});
+
+    window.addEventListener("orientationchange", function(){
+      setTimeout(function(){
+        if(!isPhone()) hardClean("leave-phone-orientation");
+        else scheduleClean("phone-orientation", 220);
+      }, 120);
+    }, {passive:true});
+
+    if(window.visualViewport){
+      window.visualViewport.addEventListener("resize", function(){
+        if(!isPhone()) hardClean("leave-phone-visualViewport");
+        else scheduleClean("phone-visualViewport", 160);
+      }, {passive:true});
+    }
+
+    if(window.matchMedia){
+      try{
+        var mq = window.matchMedia(PHONE_QUERY);
+        var onChange = function(ev){
+          if(!ev.matches) hardClean("matchMedia-leave-phone");
+          else scheduleClean("matchMedia-enter-phone", 120);
+        };
+        if(mq.addEventListener) mq.addEventListener("change", onChange);
+        else if(mq.addListener) mq.addListener(onChange);
+      }catch(err){}
+    }
+
+    var mo = new MutationObserver(function(){
+      if(!isPhone()){
+        if(hasLivePlanGesture()) return;
+        var b = body();
+        if(b && (
+          b.classList.contains("kggPlanCardReordering") ||
+          b.classList.contains("kggPlanCardSwiping") ||
+          b.classList.contains("kggPlanSectionFrozen") ||
+          b.classList.contains("phoneTextFocus") ||
+          b.classList.contains("kggPhoneDrawerOpen")
+        )){
+          hardClean("mutation-leave-phone");
+        }
+      }
+    });
+
     if(body()) mo.observe(body(), {attributes:true, attributeFilter:["class"]});
 
     window.addEventListener("pagehide", function(){ hardClean("pagehide"); }, {passive:true});
@@ -52,6 +101,8 @@
   };
 })();
 </script>
+
+<!-- SOURCE FILE: kgg-update/src/patches/v041-ui-mini-series.html -->
 
 <!-- KGG PATCH START kgg-v041-ui-mini-series -->
 <style id="kgg-v041-ui-mini-series-style">
@@ -287,6 +338,8 @@
 </script>
 <!-- KGG PATCH END kgg-v041-ui-mini-series -->
 
+<!-- SOURCE FILE: kgg-update/src/patches/v042-phone-dock-anchored-correction.html -->
+
 <!-- KGG PATCH START kgg-v042-phone-dock-anchored-correction -->
 <style id="kgg-v042-phone-dock-anchored-correction-style">
   @media(max-width:759px){
@@ -371,57 +424,4 @@
       border:1px solid rgba(255,255,255,.82)!important;
       background:rgba(255,255,255,.74)!important;
       color:#071027!important;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.96),0 4px 12px rgba(7,16,39,.12)!important;
-      font-size:24px!important;
-      font-weight:1000!important;
-      line-height:1!important;
-      pointer-events:auto!important;
-    }
-    body.kggPhonePhotoMenuOpen #scanHub #scanBtn #phonePhotoMenuToggle{
-      background:rgba(7,16,39,.88)!important;
-      color:#fff!important;
-    }
-    body.kggPhoneHasPlan #createPanel.planMode #finishBtn:not(.hidden){
-      z-index:41!important;
-    }
-    .kggPhonePhotoMenu{
-      z-index:94!important;
-      background:rgba(255,255,255,.92)!important;
-      backdrop-filter:blur(18px) saturate(1.28);
-      -webkit-backdrop-filter:blur(18px) saturate(1.28);
-    }
-    #scanHub #scanPreview:not(.hidden){z-index:70!important}
-    body.kggPhoneDrawerOpen #scanHub,
-    body.kggPhoneDrawerOpen #createPanel.planMode #finishBtn:not(.hidden){
-      z-index:40!important;
-    }
-    body.kggPhoneDrawerOpen .kggPhonePhotoMenu{display:none!important}
-  }
-</style>
-
-<script id="kgg-v042-phone-dock-anchored-correction-script">
-(function(){
-  "use strict";
-  var PATCH_ID="kgg-v042-phone-dock-anchored-correction";
-  var PHONE_QUERY="(max-width:759px)";
-  var observer=null;
-  function byId(id){return document.getElementById(id);}
-  function isPhone(){return !!(window.matchMedia&&window.matchMedia(PHONE_QUERY).matches&&!(window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive()));}
-  function closePhotoMenu(){
-    if(document.body)document.body.classList.remove("kggPhonePhotoMenuOpen");
-    var toggle=byId("phonePhotoMenuToggle");
-    if(toggle)toggle.setAttribute("aria-expanded","false");
-  }
-  function closeAdminMenu(){
-    var panel=byId("kggPhoneAdminMenuPanel");
-    var btn=byId("kggPhoneAdminMenuBtn");
-    if(panel)panel.hidden=true;
-    if(btn)btn.setAttribute("aria-expanded","false");
-  }
-  function togglePhotoMenu(ev){
-    if(ev){
-      ev.preventDefault();
-      ev.stopPropagation();
-      if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();
-    }
 ```

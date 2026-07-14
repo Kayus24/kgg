@@ -1,9 +1,58 @@
 # KGG Source Chunk 009
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 3781-4200
 
 ```html
+      #createPanel:not(.planMode) .packageLayoutSlot,
+      #createPanel.planMode .packageLayoutSlot{
+        grid-column:3!important;
+        grid-row:5!important;
+      }
+      .packageLayoutSlot #packageToggle{
+        grid-column:1!important;
+        grid-row:1!important;
+        width:100%!important;
+        min-width:0!important;
+        height:66px!important;
+        min-height:66px!important;
+        padding:8px 12px!important;
+        justify-content:center!important;
+      }
+      .packageLayoutSlot .tabletLayoutControls{
+        grid-column:2!important;
+        grid-row:1!important;
+        width:82px!important;
+        min-width:82px!important;
+        max-width:82px!important;
+        height:66px!important;
+        justify-self:stretch!important;
+      }
+      .packageLayoutSlot .tabletLockSwitch{
+        border:1px solid rgba(220,227,235,.95)!important;
+        background:linear-gradient(180deg,#fff,#f6f8fb)!important;
+        box-shadow:0 8px 22px rgba(7,16,39,.12),0 1px 0 rgba(255,255,255,.9) inset!important;
+      }
+      body.tabletLayoutUnlocked .tabletLockSwitch{
+        border-color:rgba(94,167,232,.7)!important;
+        box-shadow:0 10px 26px rgba(94,167,232,.18),0 1px 0 rgba(255,255,255,.9) inset!important;
+      }
+      .tabletLayoutFreeTools{
+        width:78px!important;
+        padding:10px 8px!important;
+      }
+      .tabletLayoutFreeTools button{
+        width:62px!important;
+        height:62px!important;
+        min-height:62px!important;
+        font-size:34px!important;
+      }
+      .tabletScaleValue{
+        min-height:74px!important;
+        font-size:14px!important;
+      }
+      .tabletLayoutFreeTools::before{
+        top:76px!important;
         bottom:76px!important;
       }
       .tabletLayoutResizeHandle{
@@ -375,53 +424,4 @@
         bottom:154px!important;
       }
       .tabletLayoutControls,
-      .packageLayoutSlot .tabletLayoutControls{
-        min-width:82px!important;
-      }
-      body.tabletLayoutRightTiny .tabletLayoutControls,
-      body.tabletLayoutRightTiny .packageLayoutSlot .tabletLayoutControls{
-        min-width:52px!important;
-      }
-    }
-
-    /* v346 phone keyboard and drawer polish */
-    @media (max-width:759px){
-      body.phoneTextFocus{
-        scroll-padding-bottom:calc(var(--kgg-phone-keyboard-inset,0px) + 170px);
-      }
-      body.phoneTextFocus #inputWrap{
-        position:sticky;
-        bottom:calc(var(--kgg-phone-keyboard-inset,0px) + 12px);
-        z-index:74;
-        transform:translateZ(0);
-        box-shadow:0 14px 34px rgba(7,16,39,.16),0 0 0 1px rgba(220,227,235,.92);
-        animation:phoneInputLift .18s cubic-bezier(.2,.75,.22,1) both;
-      }
-      body.phoneTextFocus #suggestion:not(.hidden),
-      .suggestion:not(.hidden){
-        transform-origin:top center;
-        animation:phoneSuggestionIn .22s cubic-bezier(.2,.75,.22,1) both;
-      }
-      #bankArea.bankOpen{
-        transform-origin:top center;
-        animation:phoneBankShellIn .26s cubic-bezier(.18,.84,.24,1) both;
-      }
-      #bankArea.bankOpen #bankContent{
-        transform-origin:top center;
-        animation:phoneBankContentIn .28s cubic-bezier(.18,.84,.24,1) both!important;
-      }
-      #bankToggle.phoneButtonFloat,
-      #recentToggle.phoneButtonFloat,
-      #packageToggle.phoneButtonFloat{
-        position:relative;
-        z-index:90;
-        transform-origin:center bottom;
-        box-shadow:0 18px 38px rgba(7,16,39,.22),0 1px 0 rgba(255,255,255,.9) inset;
-        animation:phoneButtonDockFloat .32s cubic-bezier(.2,.85,.22,1) both;
-      }
-      #recentList:not(.hidden),
-      #packageList:not(.hidden){
-        transform-origin:bottom center;
-        animation:phoneDrawerFromButton .34s cubic-bezier(.18,.84,.24,1) both!important;
-      }
 ```

@@ -1,9 +1,58 @@
 # KGG Source Chunk 018
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 7561-7980
 
 ```html
+    var ecInfo = version.errorCorrectionLevels[ecLevel];
+    var dataBlocks = [];
+    var totalCodewords = 0;
+    ecInfo.ecBlocks.forEach(function (block) {
+        for (var i = 0; i < block.numBlocks; i++) {
+            dataBlocks.push({ numDataCodewords: block.dataCodewordsPerBlock, codewords: [] });
+            totalCodewords += block.dataCodewordsPerBlock + ecInfo.ecCodewordsPerBlock;
+        }
+    });
+    // In some cases the QR code will be malformed enough that we pull off more or less than we should.
+    // If we pull off less there's nothing we can do.
+    // If we pull off more we can safely truncate
+    if (codewords.length < totalCodewords) {
+        return null;
+    }
+    codewords = codewords.slice(0, totalCodewords);
+    var shortBlockSize = ecInfo.ecBlocks[0].dataCodewordsPerBlock;
+    // Pull codewords to fill the blocks up to the minimum size
+    for (var i = 0; i < shortBlockSize; i++) {
+        for (var _i = 0, dataBlocks_1 = dataBlocks; _i < dataBlocks_1.length; _i++) {
+            var dataBlock = dataBlocks_1[_i];
+            dataBlock.codewords.push(codewords.shift());
+        }
+    }
+    // If there are any large blocks, pull codewords to fill the last element of those
+    if (ecInfo.ecBlocks.length > 1) {
+        var smallBlockCount = ecInfo.ecBlocks[0].numBlocks;
+        var largeBlockCount = ecInfo.ecBlocks[1].numBlocks;
+        for (var i = 0; i < largeBlockCount; i++) {
+            dataBlocks[smallBlockCount + i].codewords.push(codewords.shift());
+        }
+    }
+    // Add the rest of the codewords to the blocks. These are the error correction codewords.
+    while (codewords.length > 0) {
+        for (var _a = 0, dataBlocks_2 = dataBlocks; _a < dataBlocks_2.length; _a++) {
+            var dataBlock = dataBlocks_2[_a];
+            dataBlock.codewords.push(codewords.shift());
+        }
+    }
+    return dataBlocks;
+}
+function decodeMatrix(matrix) {
+    var version = readVersion(matrix);
+    if (!version) {
+        return null;
+    }
+    var formatInfo = readFormatInformation(matrix);
+    if (!formatInfo) {
+        return null;
     }
     var codewords = readCodewords(matrix, version, formatInfo);
     var dataBlocks = getDataBlocks(codewords, version, formatInfo.errorCorrectionLevel);
@@ -375,53 +424,4 @@ exports.shiftJISTable = {
     0x3F: 0x003F,
     0x40: 0x0040,
     0x41: 0x0041,
-    0x42: 0x0042,
-    0x43: 0x0043,
-    0x44: 0x0044,
-    0x45: 0x0045,
-    0x46: 0x0046,
-    0x47: 0x0047,
-    0x48: 0x0048,
-    0x49: 0x0049,
-    0x4A: 0x004A,
-    0x4B: 0x004B,
-    0x4C: 0x004C,
-    0x4D: 0x004D,
-    0x4E: 0x004E,
-    0x4F: 0x004F,
-    0x50: 0x0050,
-    0x51: 0x0051,
-    0x52: 0x0052,
-    0x53: 0x0053,
-    0x54: 0x0054,
-    0x55: 0x0055,
-    0x56: 0x0056,
-    0x57: 0x0057,
-    0x58: 0x0058,
-    0x59: 0x0059,
-    0x5A: 0x005A,
-    0x5B: 0x005B,
-    0x5C: 0x00A5,
-    0x5D: 0x005D,
-    0x5E: 0x005E,
-    0x5F: 0x005F,
-    0x60: 0x0060,
-    0x61: 0x0061,
-    0x62: 0x0062,
-    0x63: 0x0063,
-    0x64: 0x0064,
-    0x65: 0x0065,
-    0x66: 0x0066,
-    0x67: 0x0067,
-    0x68: 0x0068,
-    0x69: 0x0069,
-    0x6A: 0x006A,
-    0x6B: 0x006B,
-    0x6C: 0x006C,
-    0x6D: 0x006D,
-    0x6E: 0x006E,
-    0x6F: 0x006F,
-    0x70: 0x0070,
-    0x71: 0x0071,
-    0x72: 0x0072,
 ```

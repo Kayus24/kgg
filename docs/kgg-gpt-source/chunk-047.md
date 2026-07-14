@@ -1,9 +1,58 @@
 # KGG Source Chunk 047
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 19741-20160
 
 ```html
+  function closePackageSaveModal(){$('packageSaveModal').classList.remove('open');}
+  function confirmPackageSave(){
+    const input=$('packageNameInput');
+    const name=String(input&&input.value||'').trim();
+    const exercises=(state.plan||[]).map(ex=>String(ex&&ex.name||'').trim()).filter(Boolean);
+    if(!name||!exercises.length){if(input)input.focus(); return;}
+    state.packages=Array.isArray(state.packages)?state.packages:[];
+    state.packages.unshift({id:'pkg_'+Date.now(),name,exercises,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),source:'current-plan'});
+    save();
+    queueNativeExerciseBankSync('package_saved');
+    closePackageSaveModal();
+    if($('packageList'))$('packageList').classList.remove('hidden');
+    render();
+  }
+  function applyPackageToPlan(packageId){
+    const p=(state.packages||[]).find(x=>String(x.id)===String(packageId));
+    if(!p)return;
+    (p.exercises||[]).forEach(n=>addExercise(search(n,1)[0]||{name:n,sets:3,unit:'Wdh',weightUnit:'kg'}));
+  }
+  function packageOverlayDescription(pkg){
+    const exercises=(pkg&&pkg.exercises||[]).map(x=>String(x||'').trim()).filter(Boolean);
+    if(!exercises.length)return 'Noch keine Uebungen in diesem Paket.';
+    const listed=exercises.slice(0,4).join(', ');
+    return 'Enthaelt '+listed+(exercises.length>4?' und weitere Uebungen.':'.');
+  }
+  function packageOverlayTags(pkg){
+    const exercises=(pkg&&pkg.exercises||[]).filter(Boolean);
+    const tags=[exercises.length+' Uebungen'];
+    if(pkg&&pkg.source==='current-plan')tags.push('Eigener Plan');
+    else tags.push('Paket');
+    return tags;
+  }
+  function renderTabletPackageOverlay(){
+    const cards=$('tabletPackageCards');
+    if(!cards)return;
+    const input=$('tabletPackageSearch');
+    const query=compact(input&&input.value||'');
+    const packages=(state.packages||[]).filter(pkg=>{
+      if(!query)return true;
+      const hay=compact([pkg.name,(pkg.exercises||[]).join(' ')].join(' '));
+      return hay.includes(query);
+    });
+    if(!packages.length){cards.innerHTML='<div class="tabletPackageEmpty">Keine passenden Uebungspakete gefunden.</div>';return;}
+    cards.innerHTML=packages.map(pkg=>{
+      const tags=packageOverlayTags(pkg).map(tag=>'<span>'+escapeHtml(tag)+'</span>').join('');
+      return '<button class="tabletPackageCard" type="button" data-tablet-pkg="'+escapeHtml(pkg.id)+'"><span class="tabletPackageIcon" aria-hidden="true">&#128230;</span><span class="tabletPackageBody"><b>'+escapeHtml(pkg.name||'Uebungspaket')+'</b><p>'+escapeHtml(packageOverlayDescription(pkg))+'</p><span class="tabletPackageMeta">'+tags+'</span></span><span class="tabletPackageArrow" aria-hidden="true">›</span></button>';
+    }).join('');
+    cards.querySelectorAll('[data-tablet-pkg]').forEach(btn=>btn.onclick=()=>applyPackageToPlan(btn.dataset.tabletPkg));
+  }
   function renderPackages(){
     const el=$('packageList');
     if(el){
@@ -375,53 +424,4 @@
     });
     return true;
   }
-  async function buildKggEncryptedConfigTransferForQr(options){
-    const plain=buildKggConfigTransferPlain();
-    if(!kggConfigTransferHasCodes(plain)){
-      openAdminSecretsModal();
-      return null;
-    }
-    const passCode=kggConfigTransferPassCode();
-    const encrypted=await encryptKggConfigTransferPlain(plain,passCode);
-    if((options&&options.requireEncrypted)!==false&&!encrypted.encrypted){
-      alert('API-Key-QR kann auf diesem Geraet nur verschluesselt erstellt werden.');
-      return null;
-    }
-    return {payloadCode:encrypted.payloadCode,passCode,encrypted:encrypted.encrypted,plain};
-  }
-  async function openKggConfigTransferQr(){
-    const transfer=await buildKggEncryptedConfigTransferForQr({requireEncrypted:true});
-    if(!transfer)return;
-    openKggAdminMenuQr({
-      title:'Konfig-Transfer QR',
-      hint:'Verschluesselt, 10 Minuten gueltig. Transfer-Code: '+transfer.passCode,
-      text:transfer.payloadCode
-    });
-  }
-  function parseKggConfigTransferCode(code){
-    const raw=String(code||'').trim();
-    if(raw.indexOf('KGGCFG2:')===0)return {type:'KGGCFG2',json:safeBase64JsonDecode(raw.slice(8)),raw};
-    if(raw.indexOf('KGGCFG1:')===0)return {type:'KGGCFG1',json:safeBase64JsonDecode(raw.slice(8)),raw};
-    return null;
-  }
-  function buildKggTherapistSetupUrl(appUrl,configTransferCode){
-    const payload={kind:'kgg_therapist_setup_v1',version:1,appUrl:String(appUrl||''),configTransfer:String(configTransferCode||''),createdAt:new Date().toISOString()};
-    const sep=String(appUrl||'').includes('#')?'&':'#';
-    return String(appUrl||'')+sep+'kggsetup='+safeBase64JsonEncode(payload);
-  }
-  async function tryApplyKggSetupFromHash(){
-    const hash=String(location.hash||'');
-    const match=hash.match(/[#!&]kggsetup=([^&]+)/);
-    if(!match)return false;
-    const setup=safeBase64JsonDecode(match[1]);
-    if(!setup||setup.kind!=='kgg_therapist_setup_v1')return false;
-    const parsed=parseKggConfigTransferCode(setup.configTransfer);
-    if(parsed)await applyKggConfigTransferParsed(parsed);
-    try{history.replaceState(null,'',location.pathname+location.search);}catch(err){}
-    return true;
-  }
-  async function applyKggConfigTransferParsed(parsed){
-    if(!parsed||!(parsed.type==='KGGCFG2'||parsed.type==='KGGCFG1'))return false;
-    let plain=parsed.json;
-    if(parsed.type==='KGGCFG2'){
 ```

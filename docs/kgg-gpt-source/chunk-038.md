@@ -1,9 +1,58 @@
 # KGG Source Chunk 038
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 15961-16380
 
 ```html
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 8, dataCodewordsPerBlock: 23 },
+                    { numBlocks: 26, dataCodewordsPerBlock: 24 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 12, dataCodewordsPerBlock: 15 },
+                    { numBlocks: 28, dataCodewordsPerBlock: 16 },
+                ],
+            },
+        ],
+    },
+    {
+        infoBits: 0x1CC1A,
+        versionNumber: 28,
+        alignmentPatternCenters: [6, 26, 50, 74, 98, 122],
+        errorCorrectionLevels: [
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 3, dataCodewordsPerBlock: 117 },
+                    { numBlocks: 10, dataCodewordsPerBlock: 118 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 28,
+                ecBlocks: [
+                    { numBlocks: 3, dataCodewordsPerBlock: 45 },
+                    { numBlocks: 23, dataCodewordsPerBlock: 46 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 4, dataCodewordsPerBlock: 24 },
+                    { numBlocks: 31, dataCodewordsPerBlock: 25 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 11, dataCodewordsPerBlock: 15 },
+                    { numBlocks: 31, dataCodewordsPerBlock: 16 },
+                ],
+            },
+        ],
     },
     {
         infoBits: 0x1D33F,
@@ -375,53 +424,4 @@
                 ecCodewordsPerBlock: 30,
                 ecBlocks: [
                     { numBlocks: 43, dataCodewordsPerBlock: 24 },
-                    { numBlocks: 22, dataCodewordsPerBlock: 25 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 30,
-                ecBlocks: [
-                    { numBlocks: 10, dataCodewordsPerBlock: 15 },
-                    { numBlocks: 67, dataCodewordsPerBlock: 16 },
-                ],
-            },
-        ],
-    },
-    {
-        infoBits: 0x28C69,
-        versionNumber: 40,
-        alignmentPatternCenters: [6, 30, 58, 86, 114, 142, 170],
-        errorCorrectionLevels: [
-            {
-                ecCodewordsPerBlock: 30,
-                ecBlocks: [
-                    { numBlocks: 19, dataCodewordsPerBlock: 118 },
-                    { numBlocks: 6, dataCodewordsPerBlock: 119 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 28,
-                ecBlocks: [
-                    { numBlocks: 18, dataCodewordsPerBlock: 47 },
-                    { numBlocks: 31, dataCodewordsPerBlock: 48 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 30,
-                ecBlocks: [
-                    { numBlocks: 34, dataCodewordsPerBlock: 24 },
-                    { numBlocks: 34, dataCodewordsPerBlock: 25 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 30,
-                ecBlocks: [
-                    { numBlocks: 20, dataCodewordsPerBlock: 15 },
-                    { numBlocks: 61, dataCodewordsPerBlock: 16 },
-                ],
-            },
-        ],
-    },
-];
-
 ```

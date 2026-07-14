@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate chunked KGG source context for the private GPT."""
+"""Generate chunked modular KGG source context for the private GPT."""
 
 from __future__ import annotations
 
@@ -12,7 +12,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE_PATH = ROOT / "kgg-update" / "index.html"
+SRC_ROOT = ROOT / "kgg-update" / "src"
+PARTS_PATH = SRC_ROOT / "parts.json"
 INDEX_PATH = ROOT / "docs" / "kgg-gpt-source-index.json"
 CHUNK_DIR = ROOT / "docs" / "kgg-gpt-source"
 ROUTES_JSON_PATH = ROOT / "docs" / "kgg-gpt-area-routes.json"
@@ -115,7 +116,31 @@ def normalize(text: str) -> str:
 
 
 def read_source() -> str:
-    return normalize(SOURCE_PATH.read_text(encoding="utf-8", errors="replace"))
+    manifest = json.loads(PARTS_PATH.read_text(encoding="utf-8"))
+    parts = manifest.get("parts")
+    if not isinstance(parts, list):
+        raise RuntimeError("kgg-update/src/parts.json must contain parts")
+    sections = [
+        "<!-- SOURCE FILE: kgg-update/src/parts.json -->",
+        json.dumps(manifest, ensure_ascii=False, indent=2),
+        "",
+    ]
+    for relative in parts:
+        if not isinstance(relative, str):
+            continue
+        path = (SRC_ROOT / relative).resolve()
+        try:
+            label = path.relative_to(ROOT).as_posix()
+        except ValueError:
+            label = str(path)
+        sections.extend(
+            [
+                f"<!-- SOURCE FILE: {label} -->",
+                path.read_text(encoding="utf-8", errors="replace").rstrip(),
+                "",
+            ]
+        )
+    return normalize("\n".join(sections))
 
 
 def chunk_text(source: str) -> dict[Path, str]:
@@ -128,7 +153,7 @@ def chunk_text(source: str) -> dict[Path, str]:
         body = [
             f"# KGG Source Chunk {index:03d}",
             "",
-            f"- Source: `kgg-update/index.html`",
+            "- Source: `kgg-update/src` modular source",
             f"- Lines: {start + 1}-{end}",
             "",
             "```html",
@@ -182,14 +207,14 @@ def render_area_routes(source: str) -> tuple[str, str]:
     route_json = {
         "kind": "kgg_gpt_area_routes",
         "version": 1,
-        "sourcePath": "kgg-update/index.html",
+        "sourcePath": "kgg-update/src",
         "linesPerChunk": LINES_PER_CHUNK,
         "routes": routes,
     }
     md_lines = [
         "# KGG GPT Area Routes",
         "",
-        "Generated from `kgg-update/index.html`. Use this before loading source chunks.",
+        "Generated from `kgg-update/src` modular source. Use this before loading source chunks.",
         "",
     ]
     for route in routes:
@@ -223,7 +248,7 @@ def render_outputs() -> dict[Path, str]:
     index = {
         "kind": "kgg_gpt_source_index",
         "version": 1,
-        "sourcePath": "kgg-update/index.html",
+        "sourcePath": "kgg-update/src",
         "sourceSha256": hashlib.sha256(source.encode("utf-8")).hexdigest(),
         "linesPerChunk": LINES_PER_CHUNK,
         "areaRoutes": {

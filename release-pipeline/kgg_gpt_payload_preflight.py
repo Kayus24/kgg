@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Preflight Custom GPT payloads before dispatching the KGG write gate."""
+"""Preflight modular Custom GPT payloads before dispatching the KGG write gate."""
 
 from __future__ import annotations
 
@@ -11,7 +11,6 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE_PATH = ROOT / "kgg-update" / "index.html"
 
 sys.path.insert(0, str(ROOT / "release-pipeline"))
 import kgg_gpt_write_gate as write_gate  # noqa: E402
@@ -34,6 +33,9 @@ UI_KEYWORDS = (
     "menu",
     "html",
 )
+
+CRITICAL_TEST = "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical"
+UI_REGRESSION_TEST = "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
 
 
 def fail(message: str) -> None:
@@ -70,64 +72,38 @@ def looks_like_ui_payload(payload: dict[str, Any]) -> bool:
 def require_ui_tests(payload: dict[str, Any]) -> None:
     if not looks_like_ui_payload(payload):
         return
-    tests = declared_tests(payload)
-    if "critical" not in tests:
+    tests = {str(item).strip().lower() for item in payload.get("required_tests", [])}
+    if CRITICAL_TEST.lower() not in tests:
         fail(
-            "UI-like payloads must declare the critical test battery in required_tests: "
-            "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical"
+            "UI-like modular payloads must declare the critical test battery in required_tests: "
+            f"{CRITICAL_TEST}"
         )
-    if "ui-stability" not in tests or "regression" not in tests:
+    if UI_REGRESSION_TEST.lower() not in tests:
         fail(
-            "UI-like payloads must declare ui-stability regression in required_tests: "
-            "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
+            "UI-like modular payloads must declare ui-stability regression in required_tests: "
+            f"{UI_REGRESSION_TEST}"
         )
-
-
-def reject_broad_body_append(payload: dict[str, Any]) -> None:
-    if payload.get("allow_body_append") is True or payload.get("allowBodyAppend") is True:
-        return
-    for index, operation in enumerate(payload["operations"]):
-        old = operation["old_text"].strip().lower()
-        new = operation["new_text"].strip().lower()
-        if old in {"</body>", "</body>\n</html>", "</html>"} and ("<script" in new or "<style" in new):
-            fail(
-                f"operation {index} appends script/style at the document end. "
-                "Patch the existing local CSS/JS block unless this is explicitly reviewed."
-            )
 
 
 def reject_manual_version_bump(payload: dict[str, Any]) -> None:
+    patch_content = str(payload.get("patch_content") or payload.get("patchContent") or "")
     version_tokens = (
-        "const VERSION='KGG_GITHUB_UPDATE_",
-        'const VERSION="KGG_GITHUB_UPDATE_',
+        "const VERSION=",
         "const KGG_BUILD_INFO=",
         "id=\"kgg-source-truth\"",
         "id=\"kgg-changelog\"",
+        "kgg-update/version.json",
     )
-    for index, operation in enumerate(payload["operations"]):
-        combined = operation["old_text"] + "\n" + operation["new_text"]
-        if any(token in combined for token in version_tokens):
-            fail(
-                f"operation {index} tries to edit version/build metadata. "
-                "The GPT Preview Gate owns version bumps; patch only the requested app behavior."
-            )
-
-
-def check_source_matches(payload: dict[str, Any]) -> None:
-    source = SOURCE_PATH.read_text(encoding="utf-8", errors="replace")
-    for index, operation in enumerate(payload["operations"]):
-        count = source.count(operation["old_text"])
-        if count != 1:
-            fail(f"operation {index} old_text must match kgg-update/index.html exactly once, found {count}.")
+    if any(token in patch_content for token in version_tokens):
+        fail("patch_content tries to edit version/build metadata. The modular Preview Gate owns version bumps.")
 
 
 def preflight_payload(payload: dict[str, Any], *, check_source: bool = True) -> dict[str, Any]:
+    reject_manual_version_bump(payload)
     validated = write_gate.validate_payload(json.dumps(payload, ensure_ascii=False))
-    reject_broad_body_append(validated)
-    reject_manual_version_bump(validated)
     require_ui_tests(validated)
     if check_source:
-        check_source_matches(validated)
+        write_gate.plan_modular_patch(validated)
     return validated
 
 
@@ -148,108 +124,102 @@ def expect_success(name: str, payload: dict[str, Any]) -> None:
         fail(f"self-test {name} unexpectedly failed: {exc}")
 
 
+def good_patch_content() -> str:
+    return """<style id="__KGG_PATCH_ID__-style">
+.kgg-gpt-self-test-marker{display:none}
+</style>
+<script id="__KGG_PATCH_ID__">
+(function(){
+  "use strict";
+  const PATCH_ID="__KGG_PATCH_ID__";
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES[PATCH_ID]={installed:true};
+})();
+</script>
+"""
+
+
 def self_test() -> None:
     base = {
         "request_id": "gpt-preflight-self-test",
         "title": "Tablet Splitter",
         "summary": "Tablet layout probe",
         "version_slug": "tablet-splitter",
+        "touched_areas": ["Tablet-Layout"],
         "required_tests": [
             "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
             "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression",
         ],
+        "patch_content": good_patch_content(),
     }
     expect_failure(
         "protected-token-comment",
         {
             **base,
-            "operations": [
-                {
-                    "path": "kgg-update/index.html",
-                    "old_text": ".tabletLayoutResizeHandle{display:none}",
-                    "new_text": ".tabletLayoutResizeHandle{display:block} /* keine API-Key Aenderung */",
-                }
-            ],
+            "patch_content": good_patch_content() + "\n<!-- keine API-Key Aenderung -->\n",
         },
         "protected area tokens",
     )
     expect_failure(
-        "broad-body-append",
+        "legacy-operations-index-path",
         {
-            **base,
+            **{key: value for key, value in base.items() if key != "patch_content"},
             "operations": [
                 {
                     "path": "kgg-update/index.html",
-                    "old_text": "</body>\n</html>",
-                    "new_text": "<script>window.KGG_TEST=true;</script>\n</body>\n</html>",
-                }
-            ],
-        },
-        "appends script/style",
-    )
-    expect_failure(
-        "operation-file-key",
-        {
-            **base,
-            "operations": [
-                {
-                    "file": "kgg-update/index.html",
                     "old_text": ".tabletLayoutResizeHandle{display:none}",
                     "new_text": ".tabletLayoutResizeHandle{display:block}",
                 }
             ],
         },
-        "v1 only allows kgg-update/index.html",
+        "payload v2 rejects operations",
+    )
+    expect_failure(
+        "legacy-file-key",
+        {
+            **base,
+            "file": "kgg-update/index.html",
+        },
+        "legacy direct-file fields",
     )
     expect_failure(
         "ui-tests-missing",
         {
-            "request_id": "gpt-preflight-no-tests",
-            "title": "Tablet Splitter",
-            "summary": "Tablet layout probe",
-            "version_slug": "tablet-splitter",
-            "operations": [
-                {
-                    "path": "kgg-update/index.html",
-                    "old_text": ".tabletLayoutResizeHandle{display:none}",
-                    "new_text": ".tabletLayoutResizeHandle{display:block}",
-                }
-            ],
+            **base,
+            "required_tests": ["cmd /c echo placeholder"],
         },
         "critical",
+    )
+    expect_failure(
+        "ui-tests-shorthand",
+        {
+            **base,
+            "required_tests": ["critical", "ui-stability regression"],
+        },
+        CRITICAL_TEST,
     )
     expect_failure(
         "manual-version-bump",
         {
             **base,
-            "operations": [
-                {
-                    "path": "kgg-update/index.html",
-                    "old_text": "const VERSION='KGG_GITHUB_UPDATE_v056_patient_qr_root_query';",
-                    "new_text": "const VERSION='KGG_GITHUB_UPDATE_v058_tablet_splitter_drag_ratio';",
-                }
-            ],
+            "patch_content": good_patch_content() + "\n<script>const VERSION='KGG_GITHUB_UPDATE_v999_bad';</script>\n",
         },
         "Preview Gate owns version bumps",
     )
-    expect_success(
-        "good-ui-payload",
+    expect_failure(
+        "missing-patch-id-placeholder",
         {
             **base,
-            "operations": [
-                {
-                    "path": "kgg-update/index.html",
-                    "old_text": ".tabletLayoutResizeHandle{display:none}",
-                    "new_text": ".tabletLayoutResizeHandle{display:block}",
-                }
-            ],
+            "patch_content": good_patch_content().replace("__KGG_PATCH_ID__", "static-id"),
         },
+        "__KGG_PATCH_ID__",
     )
+    expect_success("good-modular-payload", base)
     print("KGG GPT payload preflight self-test OK")
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Preflight KGG Custom GPT payload JSON.")
+    parser = argparse.ArgumentParser(description="Preflight KGG Custom GPT modular payload JSON.")
     parser.add_argument("--payload-file", type=Path, help="Payload JSON file to validate.")
     parser.add_argument("--self-test", action="store_true", help="Run built-in preflight fixtures.")
     args = parser.parse_args()

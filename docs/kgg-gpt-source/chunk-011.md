@@ -1,9 +1,58 @@
 # KGG Source Chunk 011
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 4621-5040
 
 ```html
+  body.tabletMenuOpen .tabletMenuBtn span:nth-child(2){opacity:0;}
+  body.tabletMenuOpen .tabletMenuBtn span:nth-child(3){transform:translateY(-9px) rotate(-45deg);}
+  .tabletSideBackdrop{
+    position:fixed;
+    inset:0;
+    z-index:1090;
+    display:block;
+    opacity:0;
+    pointer-events:none;
+    background:rgba(10,16,36,.18);
+    backdrop-filter:blur(10px);
+    transition:opacity .22s ease;
+  }
+  body.tabletMenuOpen .tabletSideBackdrop{
+    opacity:1;
+    pointer-events:auto;
+  }
+  .tabletSideMenu{
+    position:fixed;
+    top:0;
+    bottom:0;
+    left:0;
+    z-index:1100;
+    display:flex;
+    width:min(380px,86vw);
+    flex-direction:column;
+    gap:18px;
+    padding:calc(env(safe-area-inset-top) + 22px) 18px calc(env(safe-area-inset-bottom) + 22px);
+    background:rgba(255,255,255,.96);
+    border-right:1.5px solid rgba(10,16,36,.10);
+    box-shadow:26px 0 70px rgba(10,16,36,.18);
+    transform:translateX(-106%);
+    transition:transform .24s cubic-bezier(.22,.8,.32,1);
+  }
+  body.tabletMenuOpen .tabletSideMenu{transform:translateX(0);}
+  .tabletSideMenuHead{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    font-size:1.25rem;
+    font-weight:900;
+  }
+  .tabletMenuClose{
+    width:42px;
+    height:42px;
+    border-radius:999px;
+    border:1px solid rgba(10,16,36,.12);
+    background:#fff;
     font-size:1.35rem;
     font-weight:900;
     color:#0a1024;
@@ -375,53 +424,4 @@
       transform:none!important;
       animation:none!important;
       box-shadow:var(--shadow)!important;
-    }
-    body.is-scrolling :is(#recentList,#packageList,#baseFields,#bankContent,.bankArea,.dbTitle,.dbTitleTrain,.planActions,.finishBtn,#recentToggle,#packageToggle,#bankToggle,#baseToggle,.phoneButtonFloat,.scanJobCard,#inputWrap,.suggestion,#currentPlanBlock,.planSection,.planCard){
-      transition:none!important;
-      animation:none!important;
-      scroll-behavior:auto!important;
-    }
-    body.is-scrolling :is(.dbTitle .dbTitleTrain,.bankArea.bankOpen #bankContent,#recentList,#packageList,#inputWrap,.suggestion,.phoneButtonFloat,.finishBtn,.planCard){
-      transform:none!important;
-      filter:none!important;
-      scale:1 1!important;
-    }
-    .planActions,
-    .planActions .finishBtn,
-    .planActions #recentToggle,
-    .recentText,
-    .recentMini{
-      transition:none!important;
-    }
-    .planActions.hasPlan .finishBtn{
-      animation:none!important;
-      transform:none!important;
-      scale:1 1!important;
-    }
-    :is(.finishBtn,#recentToggle,#packageToggle,#bankToggle,#baseToggle,.planSectionHeader,.iconBtn):active{
-      transform:none!important;
-      scale:1 1!important;
-    }
-    .dbTitle.fullBankOpen .dbTitleTrain,
-    .bankArea.bankOpen #bankContent,
-    #bankArea.bankOpen{
-      animation:none!important;
-      transform:none!important;
-      filter:none!important;
-      clip-path:none!important;
-    }
-    #bankArea.bankOpen{
-      overflow:hidden!important;
-    }
-    #bankArea.bankOpen #bankContent{
-      min-height:0!important;
-      overflow:hidden!important;
-    }
-    #bankArea.bankOpen .bankRows{
-      overflow:auto!important;
-      overscroll-behavior:contain;
-      scroll-behavior:auto!important;
-    }
-    #bankArea.bankOpen.searchBankOpen{
-      grid-template-columns:56px minmax(0,1fr)!important;
 ```

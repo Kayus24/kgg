@@ -1,9 +1,66 @@
 # KGG Source Chunk 063
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 26461-26880
 
 ```html
+      left:16px!important;
+      right:16px!important;
+      bottom:calc(86px + env(safe-area-inset-bottom))!important;
+      z-index:91!important;
+      overscroll-behavior:contain!important;
+      touch-action:pan-y!important;
+      overflow:auto!important;
+      background:rgba(255,255,255,.98)!important;
+      border:1px solid rgba(220,227,235,.96)!important;
+      border-radius:22px!important;
+      padding:10px!important;
+      box-shadow:0 22px 58px rgba(7,16,39,.24),0 4px 14px rgba(7,16,39,.10)!important;
+      backdrop-filter:blur(10px)!important;
+      -webkit-backdrop-filter:blur(10px)!important;
+      max-height:min(54dvh,390px)!important;
+    }
+    body.kggPhoneDrawerSafeOpen #recentList:not(.hidden) .notice,
+    body.kggPhoneDrawerSafeOpen #packageList:not(.hidden) .notice{margin-top:0!important}
+    body.kggPhoneDrawerSafeOpen #scanHub,
+    body.kggPhoneDrawerSafeOpen #createPanel.planMode #finishBtn:not(.hidden){
+      z-index:40!important;
+    }
+    body.kggPhoneDrawerSafeOpen .kggPhonePhotoMenu{display:none!important}
+  }
+</style>
+
+<script id="kgg-v045-phone-drawer-bank-align-script">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v045-phone-drawer-bank-align";
+  var PHONE_QUERY="(max-width:759px)";
+  function byId(id){return document.getElementById(id);}
+  function isPhone(){return !!(window.matchMedia&&window.matchMedia(PHONE_QUERY).matches&&!(window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive()));}
+  function ensureBackdrop(){
+    var backdrop=byId("phoneDrawerBackdrop");
+    if(!backdrop){
+      backdrop=document.createElement("div");
+      backdrop.id="phoneDrawerBackdrop";
+      backdrop.className="kggPhoneDrawerBackdrop";
+      backdrop.setAttribute("aria-hidden","true");
+      document.body.appendChild(backdrop);
+    }
+    if(backdrop.dataset.kggV045Bound!=="1"){
+      backdrop.dataset.kggV045Bound="1";
+      backdrop.addEventListener("click",function(ev){
+        ev.preventDefault();
+        ev.stopImmediatePropagation();
+        closePhoneDrawerSafe();
+      },true);
+    }
+    return backdrop;
+  }
+  function closePhoneDrawerSafe(){
+    var recent=byId("recentList");
+    var packages=byId("packageList");
+    var recentBtn=byId("recentToggle");
+    var packageBtn=byId("packageToggle");
     if(recent)recent.classList.add("hidden");
     if(packages)packages.classList.add("hidden");
     if(recentBtn){recentBtn.classList.remove("phoneButtonFloat");recentBtn.setAttribute("aria-expanded","false");}
@@ -113,6 +170,8 @@
 </script>
 <!-- KGG PATCH END kgg-v045-phone-drawer-bank-align -->
 
+<!-- SOURCE FILE: kgg-update/src/patches/v046-tablet-runtime-viewport-guard.html -->
+
 <!-- KGG PATCH START kgg-v046-tablet-runtime-viewport-guard -->
 <script id="kgg-v046-tablet-runtime-viewport-guard-script">
 (function(){
@@ -136,6 +195,8 @@
 })();
 </script>
 <!-- KGG PATCH END kgg-v046-tablet-runtime-viewport-guard -->
+
+<!-- SOURCE FILE: kgg-update/src/patches/v050-phone-ui-mini-fix.html -->
 
 <!-- KGG PATCH START kgg-v050-phone-ui-mini-fix -->
 <style id="kgg-v050-phone-ui-mini-fix-style">
@@ -304,6 +365,8 @@
 </script>
 <!-- KGG PATCH END kgg-v050-phone-ui-mini-fix -->
 
+<!-- SOURCE FILE: kgg-update/src/patches/v051-android-qr-pdf-bridge.html -->
+
 <!-- KGG PATCH START kgg-v051-android-qr-pdf-bridge -->
 <script id="kgg-v051-android-qr-pdf-bridge-probe">
 window.KGG_ANDROID_QR_PDF_BRIDGE_V051={
@@ -314,6 +377,8 @@ window.KGG_ANDROID_QR_PDF_BRIDGE_V051={
 </script>
 <!-- KGG PATCH END kgg-v051-android-qr-pdf-bridge -->
 
+<!-- SOURCE FILE: kgg-update/src/patches/v052-pdf-plan-thumbnails.html -->
+
 <!-- KGG PATCH START kgg-v052-pdf-plan-thumbnails -->
 <script id="kgg-v052-pdf-plan-thumbnails-probe">
 window.KGG_PDF_PLAN_THUMBNAILS_V052={
@@ -323,6 +388,8 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
 };
 </script>
 <!-- KGG PATCH END kgg-v052-pdf-plan-thumbnails -->
+
+<!-- SOURCE FILE: kgg-update/src/patches/v053-ui-tablet-stability.html -->
 
 <!-- KGG PATCH START kgg-v053-ui-tablet-stability -->
 <style id="kgg-v053-ui-tablet-stability-style">
@@ -357,71 +424,4 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   @media(min-width:760px){
     body.tabletLayoutCustom #scanHub{
       position:relative!important;
-      z-index:82!important;
-    }
-    body.tabletLayoutCustom #tabletMenuBtn{
-      position:fixed!important;
-      left:10px!important;
-      top:var(--kgg-tablet-safe-top)!important;
-      z-index:1505!important;
-      pointer-events:auto!important;
-    }
-    #editorModal .editorSheet{
-      width:min(94vw,920px)!important;
-      max-height:min(90vh,760px)!important;
-      overflow:hidden!important;
-      display:grid!important;
-      grid-template-columns:minmax(0,1fr) minmax(300px,.92fr)!important;
-      grid-template-areas:
-        "header header"
-        "name media"
-        "sets media"
-        "units media"
-        "start media"
-        "advanced media"
-        "actions actions"
-        "cancel cancel"!important;
-      column-gap:14px!important;
-      row-gap:9px!important;
-      padding:16px!important;
-    }
-    #editorModal .editorHeader{grid-area:header!important;margin-bottom:0!important}
-    #editorModal .editorSheet > .field:first-of-type{grid-area:name!important;margin:0!important}
-    #editorModal .editorSheet > .grid2:nth-of-type(1){grid-area:sets!important}
-    #editorModal .editorSheet > .grid2:nth-of-type(2){grid-area:units!important}
-    #editorModal .editorStartHint{grid-area:start!important;margin:0!important}
-    #editorModal .editorMediaBox{
-      grid-area:media!important;
-      margin:0!important;
-      min-height:0!important;
-      display:grid!important;
-      grid-template-rows:auto minmax(190px,1fr) auto!important;
-      align-self:stretch!important;
-    }
-    #editorModal .editorMediaPreview{
-      min-height:190px!important;
-      max-height:min(42vh,330px)!important;
-      overflow:hidden!important;
-    }
-    #editorModal .editorMediaPreview img{
-      width:100%!important;
-      height:100%!important;
-      object-fit:contain!important;
-    }
-    #editorModal .editorAdvanced{
-      grid-area:advanced!important;
-      margin:0!important;
-      max-height:112px!important;
-      overflow:auto!important;
-    }
-    #editorModal .editorActions{
-      grid-area:actions!important;
-      margin:0!important;
-    }
-    #editorModal .editorCancelBtn{
-      grid-area:cancel!important;
-      margin:0!important;
-    }
-  }
-</style>
 ```

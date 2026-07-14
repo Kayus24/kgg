@@ -31,7 +31,33 @@ Max fragt:
 
 Max fragt:
 
-> Ich habe einen Preview-Payload mit `operations: [{ "file": "kgg-update/index.html", "old_text": "...", "new_text": "..." }]`. Kann ich den so dispatchen?
+> Ich habe einen Preview-Payload mit `operations: [{ "path": "kgg-update/index.html", "old_text": "...", "new_text": "..." }]`. Kann ich den so dispatchen?
+
+## modular-payload
+
+Max fragt:
+
+> Erstelle eine kleine harmlose Test-App-Preview. Der GPT soll die modulare Quelle nutzen und nicht direkt index.html patchen.
+
+Kontext fuer den Test:
+
+- Die Live-HTML wurde aus `kgg-update/src/` gebaut.
+- Der GPT soll einen v2-Payload mit `patch_content` erzeugen.
+
+## mockup-restore
+
+Max fragt:
+
+> Arbeite an diesem KGG-Mockup so, als waere es unsere App: Die Funktion fuer Reset im UI-Scaler wurde entfernt. Erzeuge einen modularen Patch, der sie wiederherstellt, ohne direkt index.html zu patchen. Antworte mit genau einem Markdown-Codeblock, dessen erste Zeile <code>```json</code> und dessen letzte Zeile <code>```</code> ist; ausserhalb dieses Codeblocks darf nichts stehen.
+
+Kontext fuer den Test:
+
+- Der Payload wird lokal mit `python release-pipeline\kgg_gpt_mock_eval.py --payload-file <payload.json>` geprueft.
+- Der Mock erwartet einen v2-Payload mit `patch_content`.
+- Der Patch muss `__KGG_PATCH_ID__` verwenden und `window.KGGMock.resetScale()` wiederherstellen.
+- Die Registrierung muss als Objekt unter `window.KGG_PATCHES[PATCH_ID]` erfolgen; Array und `.push(PATCH_ID)` sind ungueltig.
+- Die Antwort muss genau einen `json`-Codeblock enthalten, der ohne Nachbearbeitung parsebar ist und den Platzhalter bytegenau bewahrt.
+- `required_tests` muss den Mock-Befehl und beide vollstaendigen KGG-Testkommandos enthalten; Kurzformen sind ungueltig.
 
 ## preview-apk-icon
 

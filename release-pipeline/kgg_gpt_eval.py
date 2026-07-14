@@ -11,6 +11,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "release-pipeline"))
+import kgg_gpt_write_gate as write_gate  # noqa: E402
 
 
 class EvalError(RuntimeError):
@@ -62,29 +64,46 @@ def run_stabilize_self_test() -> None:
         fail(f"stabilize self-test failed: {output}")
 
 
+def run_mock_eval_self_test() -> None:
+    proc = subprocess.run(
+        [sys.executable, "release-pipeline/kgg_gpt_mock_eval.py", "--self-test"],
+        cwd=str(ROOT),
+        text=True,
+        capture_output=True,
+    )
+    if proc.returncode != 0:
+        output = (proc.stdout + "\n" + proc.stderr).strip()
+        fail(f"mock eval self-test failed: {output}")
+
+
 def run_validate_only_self_test() -> None:
-    source_path = ROOT / "kgg-update" / "index.html"
-    before = source_path.read_text(encoding="utf-8")
-    old_text = "<html"
-    if before.count(old_text) != 1:
-        fail("validate_only self-test needs exactly one <html marker")
+    tracked = subprocess.run(
+        ["git", "ls-files", "kgg-update", "docs", "release-pipeline"],
+        cwd=str(ROOT),
+        text=True,
+        capture_output=True,
+        check=True,
+    ).stdout.splitlines()
+    before = {path: (ROOT / path).read_bytes() for path in tracked if (ROOT / path).exists()}
     payload = {
         "request_id": "gpt-validate-only-self-test",
         "title": "Validate only self-test",
         "summary": "Validate-only must not write source files.",
         "version_slug": "validate-only-self-test",
+        "touched_areas": ["Admin-Web UI"],
         "required_tests": [
             "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
             "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression",
         ],
-        "operations": [
-            {
-                "type": "replace_exact",
-                "path": "kgg-update/index.html",
-                "old_text": old_text,
-                "new_text": '<html data-kgg-gpt-validate="1"',
-            }
-        ],
+        "patch_content": (
+            "<style id=\"__KGG_PATCH_ID__-style\">\n"
+            ".kgg-validate-only-self-test{display:none}\n"
+            "</style>\n"
+            "<script id=\"__KGG_PATCH_ID__\">\n"
+            "(function(){\"use strict\";const PATCH_ID=\"__KGG_PATCH_ID__\";"
+            "window.KGG_PATCHES=window.KGG_PATCHES||{};window.KGG_PATCHES[PATCH_ID]={installed:true};})();\n"
+            "</script>\n"
+        ),
     }
     with tempfile.NamedTemporaryFile("w", encoding="utf-8", suffix=".json", delete=False) as handle:
         json.dump(payload, handle, ensure_ascii=False)
@@ -105,12 +124,51 @@ def run_validate_only_self_test() -> None:
         )
     finally:
         payload_path.unlink(missing_ok=True)
-    after = source_path.read_text(encoding="utf-8")
+    after = {path: (ROOT / path).read_bytes() for path in tracked if (ROOT / path).exists()}
     if after != before:
-        fail("validate_only self-test modified kgg-update/index.html")
+        fail("validate_only self-test modified tracked files")
     if proc.returncode != 0:
         output = (proc.stdout + "\n" + proc.stderr).strip()
         fail(f"validate_only self-test failed: {output}")
+
+
+def run_modular_rollback_self_test() -> None:
+    payload = {
+        "request_id": "gpt-rollback-self-test",
+        "title": "Rollback self-test",
+        "summary": "Rollback must restore modular files if apply fails.",
+        "version_slug": "rollback-self-test",
+        "touched_areas": ["Admin-Web UI"],
+        "required_tests": [
+            "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
+            "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression",
+        ],
+        "patch_content": (
+            "<style id=\"__KGG_PATCH_ID__-style\">\n"
+            ".kgg-rollback-self-test{display:none}\n"
+            "</style>\n"
+            "<script id=\"__KGG_PATCH_ID__\">\n"
+            "(function(){\"use strict\";const PATCH_ID=\"__KGG_PATCH_ID__\";"
+            "window.KGG_PATCHES=window.KGG_PATCHES||{};window.KGG_PATCHES[PATCH_ID]={installed:true};})();\n"
+            "</script>\n"
+        ),
+    }
+    validated = write_gate.validate_payload(json.dumps(payload, ensure_ascii=False))
+    planned, _report = write_gate.plan_modular_patch(validated)
+    originals = {path: path.read_bytes() if path.exists() else None for path in planned}
+    planned[ROOT / "kgg-update" / "index.html"] = b"broken generated html\n"
+    try:
+        write_gate.apply_planned(planned)
+    except Exception:
+        pass
+    else:
+        fail("rollback self-test unexpectedly applied a broken modular patch")
+    for path, raw in originals.items():
+        if raw is None:
+            if path.exists():
+                fail(f"rollback self-test left new file behind: {path.relative_to(ROOT)}")
+        elif not path.exists() or path.read_bytes() != raw:
+            fail(f"rollback self-test did not restore {path.relative_to(ROOT)}")
 
 
 def check_playbook() -> None:
@@ -120,20 +178,17 @@ def check_playbook() -> None:
         [
             "docs/kgg-gpt-context.md",
             "docs/kgg-custom-gpt-action-schema.md",
-            "docs/kgg-custom-gpt-negative-examples.md",
-            "docs/kgg-custom-gpt-preview-runbook.md",
-            "docs/kgg-custom-gpt-preview-report-template.md",
             "docs/kgg-gpt-bug-lessons.md",
             "docs/kgg-gpt-area-routes.md",
             "Keine Erfolgsmeldung",
             "Guard-Tokens",
             "validate_only",
-            "Analyse-",
-            "ui_stability=true",
-            "kgg_gpt_stabilize.py",
+            "patch_content",
+            "kgg-update/src/patches",
+            "kgg-update/index.html",
+            "generated output",
             "human_preview_fail",
             "Test-APK",
-            "zwei kompletten gruenen Runden",
             "ci_tooling",
             "publish_admin_beta",
             "tabletLayoutFreeTools",
@@ -162,6 +217,8 @@ def check_prompt_and_expected_docs() -> None:
         "failed-preview-run",
         "protected-token-payload",
         "payload-schema-path",
+        "modular-payload",
+        "mockup-restore",
         "preview-apk-icon",
         "beta-html-request",
         "action-schema-validate-only",
@@ -185,8 +242,13 @@ def check_prompt_and_expected_docs() -> None:
             "--kgg-tablet-left-col",
             "Preflight guarded GPT payload",
             "Patch-Kommentaren verboten",
-            "path: \"kgg-update/index.html\"",
-            "v1 only allows kgg-update/index.html",
+            "patch_content",
+            "kgg-update/src/patches/vNNN-<slug>.html",
+            "__KGG_PATCH_ID__",
+            "kgg_gpt_mock_eval.py",
+            "mockup-restore",
+            "`json`-Codeblock",
+            "vollstaendigen `critical`- und `ui-stability regression`-Kommandos",
             "validate_only",
             "Preview-Profil",
             "publish_preview",
@@ -210,7 +272,9 @@ def check_prompt_and_expected_docs() -> None:
             "publish_preview",
             "create_pr",
             "publish_admin_beta",
-            "path",
+            "patch_content",
+            "touched_areas",
+            "__KGG_PATCH_ID__",
             "artifact",
             "meta.json",
             "listKggPreviewGateRuns",
@@ -236,6 +300,7 @@ def check_prompt_and_expected_docs() -> None:
             "getKggPreviewGateJobs",
             "getKggPreviewGateArtifacts",
             "required_tests",
+            "patch_content",
             "schemas: {}",
             "properties:",
         ],
@@ -254,6 +319,7 @@ def check_prompt_and_expected_docs() -> None:
             "getKggPreviewGateJobs",
             "getKggPreviewGateArtifacts",
             "required_tests",
+            "patch_content",
             "schemas: {}",
             "properties:",
         ],
@@ -261,7 +327,7 @@ def check_prompt_and_expected_docs() -> None:
     )
     require_all(
         negative_examples,
-        ["file", "path", "protected words", "Broken JSON", "Red run plus missing meta", "Manual version", "Test-APK", "Analysis prompt starts Preview dispatch"],
+        ["operations", "path", "patch_content", "API-Key", "Roter Run", "Manuelle Versionierung", "Test-App"],
         "negative examples text",
     )
     require_all(
@@ -277,6 +343,7 @@ def check_prompt_and_expected_docs() -> None:
             "failed_step",
             "meta_url",
             "html_url",
+            "patch_file",
             "artifact_name",
             "test_apk_channel",
             "max_acceptance",
@@ -338,6 +405,8 @@ def check_area_routes() -> None:
     missing = sorted(required - markers)
     if missing:
         fail("tablet-layout route missing markers: " + ", ".join(missing))
+    if data.get("sourcePath") != "kgg-update/src":
+        fail("area routes must be generated from modular source kgg-update/src")
     if not tablet.get("sourceChunks"):
         fail("tablet-layout route must resolve source chunks")
 
@@ -349,7 +418,9 @@ def main() -> int:
         check_area_routes()
         run_preflight_self_test()
         run_stabilize_self_test()
+        run_mock_eval_self_test()
         run_validate_only_self_test()
+        run_modular_rollback_self_test()
         print("KGG Custom GPT eval OK")
         return 0
     except Exception as exc:  # noqa: BLE001 - CLI boundary

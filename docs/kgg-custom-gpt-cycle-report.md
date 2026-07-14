@@ -1,6 +1,6 @@
 # KGG Custom GPT Stabilization Cycle Report
 
-Generated: 2026-07-07T10:17:00Z
+Generated: 2026-07-14T06:02:48Z
 Status: PENDING
 Confirmed green rounds: 0 / 2
 Tablet splitter UI probe included: no
@@ -9,7 +9,7 @@ Tablet splitter UI probe included: no
 
 | Klasse | Bedeutung |
 | --- | --- |
-| `payload_schema` | Invalid payload shape, JSON, operation path or missing required_tests. |
+| `payload_schema` | Invalid modular payload shape, JSON, forbidden path/file/operations field, missing patch_content or missing required_tests. |
 | `preview_gate` | GitHub Preview Gate, run, artifact, meta.json or publish-preview failure. |
 | `ci_tooling` | Missing runner/browser/emulator tool or CI dependency such as poppler/pdftoppm. |
 | `unsafe_patch` | Protected token, manual versioning, broad append or unsafe patch surface. |
@@ -27,6 +27,7 @@ Tablet splitter UI probe included: no
 | `source-context-check` | PASS | `` | OK |
 | `knowledge-pack-check` | PASS | `` | OK |
 | `payload-preflight-self-test` | PASS | `` | OK |
+| `mock-eval-self-test` | PASS | `` | OK |
 | `gpt-eval` | PASS | `` | OK |
 | `gpt-suite-critical` | PASS | `` | OK |
 

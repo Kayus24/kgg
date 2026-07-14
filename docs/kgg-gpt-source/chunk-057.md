@@ -1,9 +1,58 @@
 # KGG Source Chunk 057
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 23941-24360
 
 ```html
+    if(next){closeTabletPackageOverlay(false);closeTabletFloatingPanelsExcept('layout');}
+    requestAnimationFrame(()=>{updateTabletLayoutHandle();updateTabletLayoutCollisionGuard();});
+  }
+  function toggleTabletLayoutEditMode(){setTabletLayoutEditMode(!document.body.classList.contains('tabletLayoutEditMode'));}
+  function closeTabletPackageOverlay(closeMenu){
+    document.body.classList.remove('tabletPackageOverlayOpen');
+    const overlay=$('tabletPackageOverlay'), shade=$('tabletPackageShade');
+    if(overlay){
+      overlay.setAttribute('aria-hidden','true');
+      overlay.style.removeProperty('transform');
+      overlay.style.removeProperty('visibility');
+      overlay.style.removeProperty('transition');
+    }
+    if(shade){shade.hidden=true;shade.setAttribute('aria-hidden','true');}
+    const btn=$('tabletMenuPackagesBtn');
+    if(btn)btn.setAttribute('aria-expanded','false');
+    if(closeMenu)setTabletSideMenuOpen(false);
+  }
+  function openTabletPackageOverlay(){
+    if(!isTabletLayout())return false;
+    setTabletLayoutEditMode(false);
+    closeTabletFloatingPanelsExcept('packageOverlay');
+    document.body.classList.add('tabletPackageOverlayOpen');
+    const overlay=$('tabletPackageOverlay'), shade=$('tabletPackageShade'), btn=$('tabletMenuPackagesBtn');
+    if(shade){shade.hidden=false;shade.setAttribute('aria-hidden','false');}
+    if(overlay){
+      overlay.setAttribute('aria-hidden','false');
+      overlay.style.setProperty('transition','none','important');
+      overlay.style.setProperty('transform','translate3d(0,0,0)','important');
+      overlay.style.setProperty('visibility','visible','important');
+    }
+    if(btn)btn.setAttribute('aria-expanded','true');
+    setTabletSideMenuOpen(true);
+    renderTabletPackageOverlay();
+    setTimeout(()=>{const input=$('tabletPackageSearch'); if(input)input.focus();},40);
+    return true;
+  }
+  function toggleTabletPackageOverlay(){
+    if(document.body.classList.contains('tabletPackageOverlayOpen')){closeTabletPackageOverlay(false);return true;}
+    return openTabletPackageOverlay();
+  }
+  const phoneFloatingDrawerState={kind:null};
+  function ensurePhoneDrawerBackdrop(){
+    let backdrop=$('phoneDrawerBackdrop');
+    if(!backdrop){
+      backdrop=document.createElement('div');
+      backdrop.id='phoneDrawerBackdrop';
+      backdrop.className='kggPhoneDrawerBackdrop';
+      backdrop.setAttribute('aria-hidden','true');
       backdrop.addEventListener('click',()=>closePhoneFloatingDrawer());
       document.body.appendChild(backdrop);
     }
@@ -375,53 +424,4 @@
   if($('kggAdminMenuQrClose'))$('kggAdminMenuQrClose').onclick=closeKggAdminMenuQrModal;
   if($('kggAdminMenuQrModal'))$('kggAdminMenuQrModal').addEventListener('click',ev=>{if(ev.target===$('kggAdminMenuQrModal'))closeKggAdminMenuQrModal();});
   if($('kggAdminMenuQrCopy'))$('kggAdminMenuQrCopy').onclick=async()=>{const link=$('kggAdminMenuQrLink'); if(!link)return; const ok=await copyTextValue(link.value); if(!ok){link.focus(); link.select();}};
-  if($('kggAdminMenuQrOpen'))$('kggAdminMenuQrOpen').onclick=()=>{const link=$('kggAdminMenuQrLink'); if(link&&link.value&&/^https?:\/\//.test(link.value))window.open(link.value,'_blank','noopener');};
-  if($('kggAdminMenuQrPrint'))$('kggAdminMenuQrPrint').onclick=()=>printKggAdminMenuQr();
-  $('dismissInstallPrompt').onclick=()=>{localStorage.setItem(pwaInstallPromptSeenKey,new Date().toISOString()); closeInstallPrompt();};
-  $('acceptInstallPrompt').onclick=acceptInstallPrompt;
-  $('installPromptModal').addEventListener('click',ev=>{if(ev.target===$('installPromptModal')){$('dismissInstallPrompt').click();}});
-  $('printPdfPreview').onclick=printCurrentPdfPreview;
-  $('downloadPdfPreview').onclick=downloadCurrentPdfPreview;
-  $('openPdfPreviewTab').onclick=openCurrentPdfPreviewTab;
-  $('openPdfPreviewFallback').onclick=openCurrentPdfPreviewTab;
-  $('openPdfPreviewMobileBridge').onclick=openCurrentPdfPreviewTab;
-  $('closePdfPreview').onclick=closePdfPreview;
-  $('pdfPreviewModal').addEventListener('click',ev=>{if(ev.target===$('pdfPreviewModal'))closePdfPreview();});
-  $('savePackageBtn').onclick=openPackageSaveModal;
-  $('cancelPackageSave').onclick=closePackageSaveModal;
-  $('confirmPackageSave').onclick=confirmPackageSave;
-  $('packageSaveModal').addEventListener('click',ev=>{if(ev.target===$('packageSaveModal'))closePackageSaveModal();});
-  $('packageNameInput').addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();confirmPackageSave();} if(ev.key==='Escape'){ev.preventDefault();closePackageSaveModal();}});
-  $('cancelBankDelete').onclick=closeBankDeleteModal;
-  $('confirmBankDelete').onclick=confirmBankDelete;
-  $('bankDeleteModal').addEventListener('click',ev=>{if(ev.target===$('bankDeleteModal'))closeBankDeleteModal();});
-  function installKggV383UiFlowStability(){
-    let phoneTapSuppressUntil=0;
-    let phoneBankBrowseMode=false;
-    const pointFromEvent=ev=>{
-      const point=ev&&ev.touches&&ev.touches[0]||ev&&ev.changedTouches&&ev.changedTouches[0]||ev||{};
-      return {x:Number(point.clientX)||0,y:Number(point.clientY)||0};
-    };
-    trackPhoneTouchStart=function(ev){
-      if(!isPhoneLayout())return;
-      const point=pointFromEvent(ev);
-      phoneTapSuppressUntil=0;
-      kggPhoneTouchStart={x:point.x,y:point.y,moved:false};
-    };
-    trackPhoneTouchMove=function(ev){
-      if(!isPhoneLayout())return;
-      const point=pointFromEvent(ev);
-      if(kggPhoneTouchStart){
-        const dx=Math.abs(point.x-kggPhoneTouchStart.x);
-        const dy=Math.abs(point.y-kggPhoneTouchStart.y);
-        if(dx>7||dy>7)kggPhoneTouchStart.moved=true;
-      }
-      if(kggPhoneTouchStart&&kggPhoneTouchStart.moved)markPhoneUserScrolling();
-    };
-    trackPhoneTouchEnd=function(){
-      if(kggPhoneTouchStart&&kggPhoneTouchStart.moved){
-        phoneTapSuppressUntil=Date.now()+170;
-        markPhoneUserScrolling();
-      }
-      kggPhoneTouchStart=null;
 ```

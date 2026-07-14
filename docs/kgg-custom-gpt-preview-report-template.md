@@ -5,8 +5,9 @@ Use this exact report shape after Preview-Gate runs.
 ## Success
 
 ```text
-base file used: main/kgg-update/index.html, version <version>
-changed file: kgg-update/index.html
+base source used: main/kgg-update/src, version <version>
+generated module: kgg-update/src/patches/vNNN-<slug>.html
+generated output: kgg-update/index.html
 request_id: <request_id>
 run_id: <run_id>
 conclusion: success
@@ -14,6 +15,8 @@ failed_step: none
 artifact_name: <artifact_name>
 meta_url: <meta_url>
 html_url: <html_url>
+patch_id: <kgg-vNNN-slug>
+patch_file: <patches/vNNN-slug.html>
 test_apk_channel: <updated|not involved>
 max_acceptance: <accepted|pending>
 admin_beta_pr: <url|not requested>
@@ -41,8 +44,9 @@ risks:
 ## Failure
 
 ```text
-base file used: main/kgg-update/index.html, version <version>
-changed file: none published
+base source used: main/kgg-update/src, version <version>
+generated module: none published
+generated output: none published
 request_id: <request_id>
 run_id: <run_id>
 conclusion: failure
@@ -50,6 +54,8 @@ failed_step: <failed step>
 artifact_name: none
 meta_url: not available
 html_url: not available
+patch_id: not available
+patch_file: not available
 test_apk_channel: not updated
 max_acceptance: not requested
 admin_beta_pr: not created

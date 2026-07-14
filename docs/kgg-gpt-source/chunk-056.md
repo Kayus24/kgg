@@ -1,9 +1,58 @@
 # KGG Source Chunk 056
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 23521-23940
 
 ```html
+        if(!jobs.length)throw new Error('Bitte zuerst mindestens ein Foto hinzufügen.');
+        for(const job of jobs){
+          if(!job.result||job.type==='paper')await processPaperJob(job);
+        }
+        state.scanPanelOpen='scanned';
+        save();
+        render();
+        setScanStatus('Scan fertig: '+jobs.length+' Plan/Pläne.');
+      }catch(err){
+        scanState.lastError='Scan fehlgeschlagen: '+(err&&err.message||err);
+        setScanStatus(scanState.lastError);
+      }finally{
+        scanState.busy=false;
+        renderScanPreview();
+      }
+      return scanStateSnapshot();
+    },
+    repeatSource(mode){
+      const nextMode=mode==='plan'?'plan':'page';
+      this.setNext(nextMode);
+      return this.pick(lastScanInputKind());
+    },
+    setNext(mode){
+      scanState.next=mode==='plan'?'plan':'page';
+      if(mode==='plan')scanState.activeIndex=scanState.jobs.length;
+      scanState.decision=false;
+      setScanStatus(scanState.next==='plan'?'Nächstes Foto wird neuer Plan.':'Nächstes Foto wird weitere Seite.');
+      renderScanPreview();
+      return scanStateSnapshot();
+    },
+    removePage(jobIndex,pageIndex){
+      const job=scanState.jobs[Number(jobIndex)||0];
+      if(job&&job.pages){job.pages.splice(Number(pageIndex)||0,1); if(job.type==='paper')job.result=null; if(!job.pages.length&&!job.result)scanState.jobs.splice(Number(jobIndex)||0,1);}
+      if(scanState.activeIndex>=scanState.jobs.length)scanState.activeIndex=Math.max(0,scanState.jobs.length-1);
+      renderScanPreview();
+      return scanStateSnapshot();
+    },
+    setActive(index){
+      scanState.activeIndex=Math.max(0,Math.min(Number(index)||0,scanState.jobs.length-1));
+      scanState.next='page';
+      setScanStatus((scanState.jobs[scanState.activeIndex]&&scanState.jobs[scanState.activeIndex].label||'Plan')+' aktiv.');
+      renderScanPreview();
+      return scanStateSnapshot();
+    },
+    setShort(index,value){
+      const job=scanState.jobs[Number(index)||0];
+      if(job)job.short=String(value||'').trim();
+      const field=$('kggScanCopyField'+index);
+      if(field&&job)field.value=scanResultToCopyText(job)||field.value;
       return scanStateSnapshot();
     },
     toggleCollapse(index){return toggleScanJobCollapse(index);},
@@ -375,53 +424,4 @@
     const panel=$('tabletMenuLayoutPanel');
     if(btn)btn.setAttribute('aria-expanded',String(next));
     if(panel)panel.hidden=!next;
-    if(next){closeTabletPackageOverlay(false);closeTabletFloatingPanelsExcept('layout');}
-    requestAnimationFrame(()=>{updateTabletLayoutHandle();updateTabletLayoutCollisionGuard();});
-  }
-  function toggleTabletLayoutEditMode(){setTabletLayoutEditMode(!document.body.classList.contains('tabletLayoutEditMode'));}
-  function closeTabletPackageOverlay(closeMenu){
-    document.body.classList.remove('tabletPackageOverlayOpen');
-    const overlay=$('tabletPackageOverlay'), shade=$('tabletPackageShade');
-    if(overlay){
-      overlay.setAttribute('aria-hidden','true');
-      overlay.style.removeProperty('transform');
-      overlay.style.removeProperty('visibility');
-      overlay.style.removeProperty('transition');
-    }
-    if(shade){shade.hidden=true;shade.setAttribute('aria-hidden','true');}
-    const btn=$('tabletMenuPackagesBtn');
-    if(btn)btn.setAttribute('aria-expanded','false');
-    if(closeMenu)setTabletSideMenuOpen(false);
-  }
-  function openTabletPackageOverlay(){
-    if(!isTabletLayout())return false;
-    setTabletLayoutEditMode(false);
-    closeTabletFloatingPanelsExcept('packageOverlay');
-    document.body.classList.add('tabletPackageOverlayOpen');
-    const overlay=$('tabletPackageOverlay'), shade=$('tabletPackageShade'), btn=$('tabletMenuPackagesBtn');
-    if(shade){shade.hidden=false;shade.setAttribute('aria-hidden','false');}
-    if(overlay){
-      overlay.setAttribute('aria-hidden','false');
-      overlay.style.setProperty('transition','none','important');
-      overlay.style.setProperty('transform','translate3d(0,0,0)','important');
-      overlay.style.setProperty('visibility','visible','important');
-    }
-    if(btn)btn.setAttribute('aria-expanded','true');
-    setTabletSideMenuOpen(true);
-    renderTabletPackageOverlay();
-    setTimeout(()=>{const input=$('tabletPackageSearch'); if(input)input.focus();},40);
-    return true;
-  }
-  function toggleTabletPackageOverlay(){
-    if(document.body.classList.contains('tabletPackageOverlayOpen')){closeTabletPackageOverlay(false);return true;}
-    return openTabletPackageOverlay();
-  }
-  const phoneFloatingDrawerState={kind:null};
-  function ensurePhoneDrawerBackdrop(){
-    let backdrop=$('phoneDrawerBackdrop');
-    if(!backdrop){
-      backdrop=document.createElement('div');
-      backdrop.id='phoneDrawerBackdrop';
-      backdrop.className='kggPhoneDrawerBackdrop';
-      backdrop.setAttribute('aria-hidden','true');
 ```

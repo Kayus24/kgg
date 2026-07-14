@@ -1,9 +1,48 @@
 # KGG Source Chunk 000
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 1-420
 
 ```html
+<!-- SOURCE FILE: kgg-update/src/parts.json -->
+{
+  "schema": 1,
+  "output": "../index.html",
+  "versionManifest": "../version.json",
+  "requiredPatchIds": [
+    "kgg-v041-ui-mini-series",
+    "kgg-v042-phone-dock-anchored-correction",
+    "kgg-v044-phone-liquid-actions",
+    "kgg-v045-phone-drawer-bank-align",
+    "kgg-v046-tablet-runtime-viewport-guard",
+    "kgg-v050-phone-ui-mini-fix",
+    "kgg-v051-android-qr-pdf-bridge",
+    "kgg-v052-pdf-plan-thumbnails",
+    "kgg-v053-ui-tablet-stability",
+    "kgg-v060-tablet-html-release-label"
+  ],
+  "parts": [
+    "base-head.html",
+    "metadata/source-truth.html",
+    "metadata/changelog.html",
+    "metadata/patch-rules.html",
+    "metadata/changelog-guard.html",
+    "base-app.html",
+    "patches/v041-ui-mini-series.html",
+    "patches/v042-phone-dock-anchored-correction.html",
+    "patches/v044-phone-liquid-actions.html",
+    "patches/v045-phone-drawer-bank-align.html",
+    "patches/v046-tablet-runtime-viewport-guard.html",
+    "patches/v050-phone-ui-mini-fix.html",
+    "patches/v051-android-qr-pdf-bridge.html",
+    "patches/v052-pdf-plan-thumbnails.html",
+    "patches/v053-ui-tablet-stability.html",
+    "patches/v060-tablet-html-release-label.html",
+    "footer.html"
+  ]
+}
+
+<!-- SOURCE FILE: kgg-update/src/base-head.html -->
 <!doctype html>
 <html lang="de">
 <head>
@@ -81,6 +120,8 @@ Before editing this app, any LLM/agent/human should read these blocks:
 }
 </script>
 <!-- END kgg-source-truth -->
+
+<!-- SOURCE FILE: kgg-update/src/metadata/source-truth.html -->
 <script type="application/json" id="kgg-source-truth">
 {
   "schema": 1,
@@ -148,6 +189,8 @@ Before editing this app, any LLM/agent/human should read these blocks:
   }
 }
 </script>
+
+<!-- SOURCE FILE: kgg-update/src/metadata/changelog.html -->
 
 <!-- BEGIN kgg-changelog: embedded Changelog; READ THIS BEFORE PATCHING -->
 <script type="application/json" id="kgg-changelog">
@@ -381,47 +424,4 @@ Before editing this app, any LLM/agent/human should read these blocks:
         "Android/APK",
         "Sync data model",
         "API-Key-Logik"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "githubPages": "pending",
-        "notes": "Critical plus patient-qr logic smoke vor Release."
-      }
-    },
-    {
-      "versionCode": 53,
-      "versionName": "1.0.53-ui-tablet-stability",
-      "patchId": "kgg-v053-ui-tablet-stability",
-      "status": "active",
-      "type": "local-html-patch",
-      "title": "Phone-Dock und Tablet-Gesten stabilisiert",
-      "reason": "Tastatur, Header-Menue, Tablet-Swipe und Tablet-Editor duerfen nach UI-Patches nicht wieder instabil werden.",
-      "whatChanged": [
-        "Phone-Scan-Dock und Fertig-Button werden bei Tastatur-Fokus nicht nach oben geschoben.",
-        "Das Phone-Admin-Menue bleibt im Plan-Header sauber rechts verankert und ueberlappt den Paket-Button nicht.",
-        "Tablet-Side-Swipe zum Loeschen kann wieder vor dem Tablet-Reorder greifen.",
-        "Das Tablet-Editor-Modal nutzt ab Tablet-Breite eine zweispaltige Aufteilung."
-      ],
-      "touchedAreas": [
-        "Phone UI dock",
-        "Phone plan header menu",
-        "Tablet plan-card gestures",
-        "Tablet editor layout",
-        "UI stability tests",
-        "Source Truth",
-        "version.json"
-      ],
-      "notTouched": [
-        "Parser",
-        "Scan/OCR parser",
-        "Plan-State",
-        "PDF generation",
-        "QR/Patienten-App",
-        "Android/APK",
-        "Sync data model",
-        "API-Key-Logik"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "githubPages": "pending",
 ```

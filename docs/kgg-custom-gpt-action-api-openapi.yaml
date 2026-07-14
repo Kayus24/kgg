@@ -10,7 +10,7 @@ paths:
     post:
       operationId: submitKggPreviewGate
       summary: Dispatch the guarded KGG GPT Preview Gate workflow.
-      description: Use validate_only before publish_preview. Use publish_admin_beta only after Max accepts the matching preview and a real Admin beta merge is required.
+      description: Use validate_only before publish_preview. payload_json must be the modular v2 payload with patch_content, not operations/path. Use publish_admin_beta only after Max accepts the matching Test-App/Test-APK/Preview-APK and a real Admin beta merge is required.
       x-openai-isConsequential: true
       security:
         - githubBearer: []
@@ -47,7 +47,7 @@ paths:
                       pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
                     payload_json:
                       type: string
-                      description: JSON string containing request_id, required_tests and replace_exact operations. UI payloads must include critical and ui-stability regression tests.
+                      description: JSON string containing request_id, title, summary, version_slug, touched_areas, required_tests and patch_content. Do not send operations, old_text, new_text or path. UI payloads must include critical and ui-stability regression tests.
                     ui_stability:
                       type: string
                       enum:

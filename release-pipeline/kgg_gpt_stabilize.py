@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REPORT_PATH = ROOT / "docs" / "kgg-custom-gpt-cycle-report.md"
 
 ERROR_CLASSES: dict[str, str] = {
-    "payload_schema": "Invalid payload shape, JSON, operation path or missing required_tests.",
+    "payload_schema": "Invalid modular payload shape, JSON, forbidden path/file/operations field, missing patch_content or missing required_tests.",
     "preview_gate": "GitHub Preview Gate, run, artifact, meta.json or publish-preview failure.",
     "ci_tooling": "Missing runner/browser/emulator tool or CI dependency such as poppler/pdftoppm.",
     "unsafe_patch": "Protected token, manual versioning, broad append or unsafe patch surface.",
@@ -33,6 +33,8 @@ GPT_PROMPTS = [
     "failed-preview-run",
     "protected-token-payload",
     "payload-schema-path",
+    "modular-payload",
+    "mockup-restore",
     "preview-apk-icon",
     "beta-html-request",
     "action-schema-validate-only",
@@ -155,6 +157,7 @@ def local_checks(include_ui_probe: bool) -> list[CheckResult]:
         ("source-context-check", [sys.executable, "release-pipeline/kgg_gpt_source_context.py", "--check"]),
         ("knowledge-pack-check", [sys.executable, "release-pipeline/kgg_custom_gpt_knowledge_pack.py", "--check"]),
         ("payload-preflight-self-test", [sys.executable, "release-pipeline/kgg_gpt_payload_preflight.py", "--self-test"]),
+        ("mock-eval-self-test", [sys.executable, "release-pipeline/kgg_gpt_mock_eval.py", "--self-test"]),
         ("gpt-eval", [sys.executable, "release-pipeline/kgg_gpt_eval.py"]),
         ("gpt-suite-critical", gpt_suite_command()),
     ]

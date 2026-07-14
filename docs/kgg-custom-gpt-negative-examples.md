@@ -1,16 +1,36 @@
 # KGG Custom GPT Negative Examples
 
-These are examples the GPT must reject before dispatch.
+## JSON als normaler Markdown-Text
 
-## Wrong operation key
+Falsch:
 
-Reject:
+```text
+{ "patch_content": "<script>var id=\"__KGG_PATCH_ID__\";</script>" }
+```
+
+Ausserhalb eines `json`-Codeblocks kann Markdown `__KGG_PATCH_ID__` als Hervorhebung interpretieren und die Unterstriche verlieren. Ein sichtbarer JSON-aehnlicher Text ist zudem kein Nachweis fuer parsebares JSON.
+
+Richtig ist genau ein `json`-Codeblock mit gueltigem JSON, dem bytegenauen Platzhalter und vollstaendigen Testkommandos.
+
+## Patch-ID als Array registriert
+
+Falsch:
+
+```js
+window.KGG_PATCHES = window.KGG_PATCHES || [];
+window.KGG_PATCHES.push(PATCH_ID);
+```
+
+Das verletzt den KGG-Patchvertrag. Richtig ist ein Objekt-Eintrag unter `window.KGG_PATCHES[PATCH_ID]`, damit Gate und Verhaltenstests die Installation eindeutig nachweisen koennen.
+
+## Alter index.html-Payload
 
 ```json
 {
+  "request_id": "tablet-splitter",
   "operations": [
     {
-      "file": "kgg-update/index.html",
+      "path": "kgg-update/index.html",
       "old_text": "...",
       "new_text": "..."
     }
@@ -18,85 +38,72 @@ Reject:
 }
 ```
 
-Reason: operations must use `path: "kgg-update/index.html"`.
+Reject: `operations`, `old_text`, `new_text` und `path` sind v1. `kgg-update/index.html` ist generated output. Nutze `patch_content`.
 
-## Protected token in patch comment
-
-Reject:
+## Alias-Feld file
 
 ```json
 {
-  "operations": [
-    {
-      "path": "kgg-update/index.html",
-      "old_text": ".tabletLayoutResizeHandle{display:none}",
-      "new_text": ".tabletLayoutResizeHandle{display:block} /* keine API-Key Aenderung */"
-    }
-  ]
+  "request_id": "tablet-splitter",
+  "file": "kgg-update/index.html",
+  "patch_content": "..."
 }
 ```
 
-Reason: protected words are forbidden in `old_text` and `new_text`, even inside comments. Put do-not-touch notes in the answer, not in the payload.
+Reject: Der GPT darf keinen Datei- oder Repository-Pfad bestimmen. Das Gate erzeugt `kgg-update/src/patches/vNNN-<slug>.html`.
 
-## Broken JSON from shell quoting
-
-Reject:
-
-```text
-{request_id:kgg-v057-tablet-split-scale,operations:[{path:kgg-update/index.html}]}
-```
-
-Reason: JSON keys and string values must be quoted. Use the GitHub CLI JSON-stdin form when dispatching complex payloads.
-
-## Red run plus missing meta
-
-Reject this answer:
-
-> meta.json is 404, so the manifest probably just has not updated yet.
-
-Correct answer:
-
-> The run is already red. The Preview is not available. Report the failed step and concrete error first.
-
-## UI patch without UI tests
-
-Reject any Tablet, Phone, Layout, Drag, Swipe or HTML patch that does not declare:
-
-- `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`
-- `cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression`
-
-## Manual version/build edit
-
-Reject:
+## Geschuetztes Wort im Kommentar
 
 ```json
 {
-  "operations": [
-    {
-      "path": "kgg-update/index.html",
-      "old_text": "const VERSION='KGG_GITHUB_UPDATE_v056_patient_qr_root_query';",
-      "new_text": "const VERSION='KGG_GITHUB_UPDATE_v058_tablet_splitter_drag_ratio';"
-    }
-  ]
+  "patch_content": "<script id=\"__KGG_PATCH_ID__\">/* keine API-Key Aenderung */</script>"
 }
 ```
 
-Reason: the Preview Gate owns version and build metadata. The GPT patch payload only changes the requested app behavior.
+Reject: Guard-Tokens sind auch in Kommentaren verboten. Schutzbereiche in der Antwort beschreiben, nicht im Patch.
 
-## Success claim without verified Test-APK gate
+## Komplette HTML statt Fragment
 
-Reject this answer:
+```json
+{
+  "patch_content": "<!doctype html><html><body>...</body></html>"
+}
+```
 
-> Preview ist fertig und kann auf main.
+Reject: `patch_content` ist nur ein Modulfragment. Das Gate baut die End-HTML.
 
-Correct answer:
+## Manuelle Versionierung
 
-> Noch nicht freigegeben. Erst `validate_only`, dann `publish_preview`, dann Run-ID, Artifact, `meta.json`, HTML und Test-APK-Kanal pruefen. Danach entscheidet Max in der Test-APK.
+```json
+{
+  "patch_content": "<script>const VERSION='KGG_GITHUB_UPDATE_v999_bad';</script>"
+}
+```
 
-## Analysis prompt starts Preview dispatch
+Reject: Version, Build-Info, Changelog und Source-Truth gehoeren dem Gate.
 
-Reject this behavior:
+## Fehlende Tests
 
-> Max asks why the Tablet splitter is wrong, and the GPT immediately calls `submitKggPreviewGate`.
+```json
+{
+  "request_id": "tablet-splitter",
+  "title": "Tablet Splitter",
+  "summary": "Layout",
+  "version_slug": "tablet-splitter",
+  "touched_areas": ["Tablet-Layout"],
+  "required_tests": [],
+  "patch_content": "<script id=\"__KGG_PATCH_ID__\"></script>"
+}
+```
 
-Reason: Ursache-/Analysefragen are not publish requests. The GPT must explain the diagnosis and tests first. It may dispatch only when Max explicitly asks for Preview, Test-HTML, Test-APK or Abschicken.
+Reject: UI-Payload braucht `critical` plus `ui-stability regression`.
+
+## Roter Run plus meta 404
+
+Wenn der GitHub-Run rot ist und `meta.json` 404 liefert, ist das kein “wartet noch”.
+Erst failed step und Log melden, dann keinen Preview-Erfolg behaupten.
+
+## Test-App-Fail
+
+Wenn Max in der Test-App sagt “sieht falsch aus”, ist das `human_preview_fail`.
+Kein PR, kein Admin-Beta, kein Main. Lesson/Regression ergaenzen und wieder `validate_only`.

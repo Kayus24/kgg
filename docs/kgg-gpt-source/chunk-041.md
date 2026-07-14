@@ -1,9 +1,58 @@
 # KGG Source Chunk 041
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 17221-17640
 
 ```html
+</div></div>
+
+<div class="modal" id="sharedBankModal"><div class="sheet">
+  <h2>Übungsdatenbank teilen</h2>
+  <p class="notice">Nur Übungsdaten. Keine Patientendaten, keine Codes. Import löscht nichts.</p>
+  <textarea class="sharedBankText" id="sharedBankText" spellcheck="false"></textarea>
+  <input id="sharedBankFile" class="hidden" type="file" accept="application/json,.json">
+  <span class="secretStatus" id="sharedBankStatus"></span>
+  <div class="grid2" style="margin-top:12px"><button class="mutedBtn" id="copySharedBank" type="button">Export kopieren</button><button class="mutedBtn" id="pickSharedBankFile" type="button">Import-Datei</button></div>
+  <div class="grid2" style="margin-top:8px"><button class="mutedBtn" id="closeSharedBank" type="button">Schließen</button><button class="primary" id="applySharedBank" type="button">Import übernehmen</button></div>
+</div></div>
+
+<div class="modal" id="syncPairModal"><div class="sheet syncPairSheet">
+  <h2>Sync koppeln</h2>
+  <p class="notice">Diesen QR auf weiteren Android-Geraeten mit <b>Plan scannen</b> einlesen. Alle Geraete im selben Sync-Raum schreiben eigene Dateien und koennen ausgewaehlte Therapeut:innen automatisch lesen. Keine Patientendaten, keine API-Keys.</p>
+  <div class="qrBox syncPairQrBox" id="syncPairQrBox"><span class="qrStatus">QR wird vorbereitet ...</span></div>
+  <span class="syncPairStatus" id="syncPairStatus"></span>
+  <div class="syncPeerList hidden" id="syncPeerList"></div>
+  <div class="syncDiagnostics hidden" id="syncDiagnostics"></div>
+  <input class="hidden" id="syncImportInput" type="file" accept="application/json,.json">
+  <div class="syncPairActions"><button class="mutedBtn" id="copySyncPairCode" type="button">Code kopieren</button><button class="mutedBtn" id="testNativeSyncBtn" type="button">Sync testen</button><button class="mutedBtn" id="downloadSyncFileBtn" type="button">Sync-Datei speichern</button><button class="mutedBtn" id="importSyncFileBtn" type="button">Sync-Datei importieren</button><button class="primary" id="closeSyncPairModal" type="button">Schliessen</button></div>
+</div></div>
+
+<div class="modal" id="pdfPreviewModal"><div class="sheet pdfPreviewSheet">
+  <h2>PDF fertig</h2>
+  <p class="notice" id="pdfPreviewNotice">PDF erzeugt.</p>
+  <div class="pdfPreviewMobileBridge hidden" id="pdfPreviewMobileBridge">
+    <button class="primary" id="openPdfPreviewMobileBridge" type="button">PDF öffnen</button>
+    <small>Öffnet im Geräte-PDF-Viewer.</small>
+  </div>
+  <div class="pdfPreviewFallback hidden" id="pdfPreviewFallback">
+    <div>Vorschau leer?<small>PDF trotzdem erzeugt.</small></div>
+    <button class="mutedBtn" id="openPdfPreviewFallback" type="button">PDF öffnen</button>
+  </div>
+  <iframe class="pdfPreviewFrame" id="pdfPreviewFrame" title="PDF-Vorschau"></iframe>
+  <div class="grid2"><button class="primary" id="printPdfPreview" type="button">Drucken</button><button class="mutedBtn" id="downloadPdfPreview" type="button">Herunterladen</button></div>
+  <button class="mutedBtn" id="openPdfPreviewTab" type="button">Neues Fenster</button>
+  <button class="mutedBtn" id="closePdfPreview" type="button">Schließen</button>
+</div></div>
+
+<script>
+(function(){
+  'use strict';
+  function openSourceMediaDb(){
+    return new Promise((resolve,reject)=>{
+      const req=indexedDB.open('kgg_media_v1',1);
+      req.onupgradeneeded=()=>{const db=req.result; if(!db.objectStoreNames.contains('encryptedBlobs'))db.createObjectStore('encryptedBlobs',{keyPath:'id'});};
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error||new Error('Admin-Test-Medien-Speicher nicht verfuegbar'));
     });
   }
   async function getSourceMediaBlob(id){
@@ -375,53 +424,4 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     const result=await adapter.upload(encrypted.blob,{manifest:{id:bundleId,type:'bundle',mime:'application/octet-stream'},ttlSeconds});
     if(!result||!result.downloadUrl)throw new Error('Medien-Bundle lieferte keinen Download-Link.');
     const bundle={
-      id:result.id||bundleId,
-      schema:'kgg-media-bundle-v1',
-      count:bundleItems.length,
-      downloadUrl:result.downloadUrl,
-      deleteUrl:result.deleteUrl||'',
-      deleteToken:result.deleteToken||'',
-      expiresInSeconds:ttlSeconds,
-      retrySeconds:MEDIA_RETRY_SECONDS,
-      encrypted:true,
-      crypto:{alg:'AES-GCM',iv:encrypted.iv,key:encrypted.key}
-    };
-    scheduleTemporaryMediaDelete(adapter,{id:bundle.id,deleteUrl:bundle.deleteUrl,deleteToken:bundle.deleteToken,ttlSeconds});
-    lastPatientMediaBundleManifest=bundle;
-    return bundle;
-  }
-  async function prepareMediaUploadsForPatientShare(options){
-    lastPatientMediaBundleManifest=null;
-    const sourcePlan=options&&options.plan;
-    const exercises=sourcePlan&&Array.isArray(sourcePlan.exercises)?sourcePlan.exercises:state.plan;
-    const items=allPlanMediaItems(exercises);
-    if(!items.length)return {ok:true,count:0};
-    const adapter=mediaUploadAdapter();
-    if(!adapter)return {ok:false,count:items.length,message:'Medien-Upload fehlt. Plan bleibt offen.'};
-    const ttlSeconds=Number(options&&options.ttlSeconds)||currentMediaShareTtlSeconds();
-    let bundle=null;
-    try{
-      bundle=await uploadMediaBundle(adapter,exercises,ttlSeconds);
-    }catch(err){
-      console.warn('Medien-Bundle konnte nicht erstellt werden:',err);
-      return {ok:false,count:items.length,message:err&&err.message?err.message:'Medien-Bundle fehlgeschlagen. Plan bleibt offen.'};
-    }
-    if(!sourcePlan){
-      syncStatePlanToStore('ui_prepare_media_uploads_for_patient_share');
-      save();
-    }
-    return {ok:true,count:items.length,uploaded:items.length,bundle};
-  }
-  function normalizeSideMode(value){
-    const raw=String(value||'BI').trim().toUpperCase().replace(/\s+/g,'');
-    if(['L','LI','LINKS','LEFT','R','RE','RECHTS','RIGHT'].includes(raw))return 'LR';
-    if(['LR','L/R','LI/RE','LINKS/RECHTS','LINKSRECHTS','LEFT/RIGHT','BEIDSEITIGGETRENNT'].includes(raw))return 'LR';
-    if((raw.includes('LINKS')&&raw.includes('RECHTS'))||(raw.includes('LI')&&raw.includes('RE')))return 'LR';
-    if(['BI','BID','BEIDE','BEIDSEITIG','BILATERAL'].includes(raw))return 'BI';
-    return 'BI';
-  }
-  function sideModeLabel(value){return ({BI:'beidseitig',LR:'links/rechts getrennt'})[normalizeSideMode(value)]||'beidseitig';}
-  function normalizeSetCount(value){const n=Number(value)||3; return Math.max(1,Math.min(5,n));}
-  function normalizeMeasureMode(value){
-    const raw=String(value||'').trim().toLowerCase();
 ```
