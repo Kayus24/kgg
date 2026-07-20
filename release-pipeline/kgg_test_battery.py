@@ -22,6 +22,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 LEVEL_RANK = {"critical": 0, "regression": 1, "comfort": 2}
 PLAYWRIGHT_PREPARED = False
+PATIENT_SCAN_PREPARED = False
 SECRET_PATTERN = (
     "("
     + "sk-" + "proj-"
@@ -129,6 +130,27 @@ def run_ui_stability(level: str, case_name: str | None = None) -> None:
             run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "node", "release-pipeline/kgg_ui_stability_smoke.js", "--level", level, *case_args])
             return
     run([node_executable(), "release-pipeline/kgg_ui_stability_smoke.js", "--level", level, *case_args])
+
+
+def run_patient_scan_camera() -> None:
+    global PATIENT_SCAN_PREPARED
+    npm = npm_executable()
+    if not npm:
+        raise BatteryError("npm not found. Install npm or set KGG_NPM for the patient scan camera battery.")
+    if not PATIENT_SCAN_PREPARED:
+        run([npm, "--prefix", "release-pipeline", "ci", "--ignore-scripts"])
+        if os.environ.get("KGG_SKIP_PLAYWRIGHT_INSTALL") != "1":
+            run(
+                [
+                    node_executable(),
+                    "release-pipeline/node_modules/playwright/cli.js",
+                    "install",
+                    "chromium",
+                ]
+            )
+        PATIENT_SCAN_PREPARED = True
+    log("== Patient QR camera battery ==")
+    run([node_executable(), "release-pipeline/kgg_patient_scan_camera_smoke.js"])
 
 
 def run_ui_contract() -> None:
@@ -548,6 +570,13 @@ TEST_REGISTRY = [
         "run": lambda: run_html_logic("textblocks-regression"),
     },
     {
+        "id": "patient-scan-camera-regression",
+        "level": "regression",
+        "suite": "patient-scan",
+        "reason": "Patient plan QR photos and synthetic camera streams must reach the parser and preserve existing plan data.",
+        "run": run_patient_scan_camera,
+    },
+    {
         "id": "ui-stability-regression",
         "level": "regression",
         "suite": "ui-stability",
@@ -716,7 +745,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--suite",
-        choices=["all", "hygiene", "mobile-inbox", "sync", "native-sync", "textblocks", "pdf", "ui-stability", "syntax", "security", "release", "android", "gpt"],
+        choices=["all", "hygiene", "mobile-inbox", "sync", "native-sync", "textblocks", "pdf", "patient-scan", "ui-stability", "syntax", "security", "release", "android", "gpt"],
         default=None,
         help="Optionally limit to one suite. Without --level this keeps legacy behavior and runs all non-live tests in that suite.",
     )
