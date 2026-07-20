@@ -2,7 +2,7 @@
 
 Generated production knowledge for modular payloads, Actions, Preview/Test-App and Admin-Beta operations.
 
-Source digest: `d4686961f56e87d5`
+Source digest: `3fa8057316c9f9b5`
 
 ## Usage Rules
 
@@ -29,14 +29,31 @@ Source digest: `d4686961f56e87d5`
 ## Arbeitsreihenfolge
 
 1. Lade `docs/kgg-gpt-context.md`.
-2. Lade `docs/kgg-custom-gpt-action-schema.md`.
-3. Lade bei Patchfragen `docs/kgg-gpt-area-routes.md` und die passenden Source-Chunks.
-4. Lade `docs/kgg-gpt-bug-lessons.md` und `docs/kgg-gpt-patch-patterns.md`.
-5. Wenn Kontext oder Schema nicht geladen werden kann: stoppen, keinen Payload raten.
-6. Bei Analysefragen nur Diagnose/Handoff schreiben; kein `submitKggPreviewGate`.
-7. Bei Preview/Test-App-Wunsch immer `validate_only -> publish_preview`.
-8. Nach `publish_preview` wartet der Prozess auf Max' Test-App/Test-APK/Preview-APK-Freigabe.
-9. Erst nach Max-Freigabe `create_pr` oder, wenn Max Haupt-App verlangt, `publish_admin_beta`.
+2. Lade mit `getKggMemoryIndex` den kleinen Router des privaten Projektgedaechtnisses.
+3. Lade nur das kleinste passende Memory-Themenpaket mit `getKggMemoryPack`; normalerweise hoechstens zwei Packs. Einzelne Records nur fuer Begruendung, Historie oder Konflikte laden.
+4. Lade `docs/kgg-custom-gpt-action-schema.md`.
+5. Lade bei Patchfragen `docs/kgg-gpt-area-routes.md` und die passenden Source-Chunks.
+6. Lade `docs/kgg-gpt-bug-lessons.md` und `docs/kgg-gpt-patch-patterns.md`.
+7. Wenn Kontext, Schema oder benoetigtes Memory nicht geladen werden kann: stoppen und keinen Payload raten.
+8. Bei Analysefragen nur Diagnose/Handoff schreiben; kein `submitKggPreviewGate`.
+9. Bei Preview/Test-App-Wunsch immer `validate_only -> publish_preview`.
+10. Nach `publish_preview` wartet der Prozess auf Max' Test-App/Test-APK/Preview-APK-Freigabe.
+11. Erst nach Max-Freigabe `create_pr` oder, wenn Max Haupt-App verlangt, `publish_admin_beta`.
+
+## Privates Projektgedaechtnis
+
+- `Kayus24/kgg-project-memory` ist die Quelle der Wahrheit fuer Max' kuratierte Entscheidungen, Regeln, offene Punkte und bestaetigte Fehlerlektionen.
+- Code und Manifeste in `Kayus24/kgg` bleiben die Quelle der Wahrheit fuer den tatsaechlichen ausgelieferten Stand.
+- Lade immer erst den kleinen Index und danach nur passende Packs. Lade niemals alle Records oder die gesamte Historie pauschal.
+- Ergaenze eine bestaetigte, dauerhaft relevante Erkenntnis automatisch mit `submitKggMemoryUpdate`: zuerst `mode=validate_only`, bei `would_apply` danach `mode=apply` mit identischem `request_id` und Payload.
+- `no_change` bedeutet: nichts weiter schreiben. `rejected` bedeutet: Grund nennen und keine Umgehung versuchen.
+- Bei `needs_approval` stoppt der Schreibfluss. Zeige Max den aktiven alten Wert und den vorgeschlagenen neuen Wert und frage nach seiner Entscheidung.
+- Erst nach Max' ausdruecklicher Zustimmung darf ein neuer Record mit `supersedes`, `approved_by: "Max"` und dem kurzen Freigabezitat gesendet werden. Der alte Record bleibt unveraendert.
+- Vor jedem automatischen Update das passende aktive Themenpaket semantisch auf Widersprueche pruefen; das technische Gate prueft zusaetzlich gleiche stabile Schluessel.
+- Keine Chats, Sitzungsprotokolle, Patientendaten, API-Keys, Tokens, privaten Schluessel oder Base64-Rohdaten speichern.
+- Versionsnummern und Release-URLs nicht als Memory-Snapshot pflegen; dafuer weiterhin Live-Manifest und Live-Kontext laden.
+- Wenn das private Memory nicht erreichbar ist, fehlenden Kontext klar melden und nicht raten.
+- Die einzige automatische `main`-Ausnahme ausserhalb des App-Repos ist das append-only Memory-Gate: Es darf neue Records und daraus erzeugte Ansichten schreiben, niemals App-Code oder bestehende Records ersetzen.
 
 ## Modulare Quelle
 
@@ -128,7 +145,7 @@ Plus/Minus ist Skalierung. Ziehen links/rechts ist Spaltenbreite.
 
 # KGG Custom GPT Action Schema
 
-This is the canonical payload shape for `KGG GPT Preview Gate`.
+This is the canonical payload shape for `KGG GPT Preview Gate` and `KGG Project Memory Gate`.
 The Custom GPT must follow this shape exactly.
 
 The public app still loads `kgg-update/index.html`, but that file is generated output.
@@ -214,6 +231,54 @@ The GPT may say a Preview is available only after it has verified:
 - Use the API-only Action schema for `api.github.com`.
 - Do not create duplicate action domains for `raw.githubusercontent.com`; raw URLs are verified through the GitHub run/artifact/meta checks.
 - If the editor reports duplicate action domains, stop and fix the Action schema before dispatching.
+
+## KGG Project Memory Gate
+
+The private repository `Kayus24/kgg-project-memory` stores curated durable decisions. It does not store app code, patient data, secrets or full chat transcripts.
+
+Read in this order:
+
+1. `getKggMemoryIndex`.
+2. Only the smallest matching file via `getKggMemoryPack` (normally one or two packs).
+3. `getKggMemoryRecord` or `getKggMemoryHistory` only for rationale, history or conflicts.
+
+Valid memory payload:
+
+```json
+{
+  "request_id": "memory-example-001",
+  "record": {
+    "kind": "decision",
+    "key": "example.stable-key",
+    "topic": "project",
+    "title": "Short title",
+    "summary": "Compact routing summary.",
+    "value": "The durable instruction or fact.",
+    "source_refs": ["user:2026-07-20"],
+    "supersedes": []
+  }
+}
+```
+
+- Use `submitKggMemoryUpdate` with `mode=validate_only` first.
+- Continue with `mode=apply` only for `would_apply`, using the identical `request_id` and payload.
+- `no_change` is terminal and must not create another request.
+- `needs_approval` means the active old value and candidate value must be shown to Max; write nothing until he explicitly approves.
+- After approval, append a new record with `supersedes`, `approved_by: "Max"` and `approval_quote`. Never edit or delete the old record.
+- `rejected` must be reported and never bypassed.
+- The GPT must semantically compare the candidate with the matching active pack before dispatch. The workflow also blocks same-key value changes mechanically.
+
+Required memory operations:
+
+- `getKggMemoryIndex`
+- `getKggMemoryPack`
+- `getKggMemoryRecord`
+- `getKggMemoryHistory`
+- `submitKggMemoryUpdate`
+- `listKggMemoryUpdateRuns`
+- `getKggMemoryUpdateRun`
+- `getKggMemoryUpdateStatus`
+- `getKggMemoryUpdateArtifacts`
 
 ---
 

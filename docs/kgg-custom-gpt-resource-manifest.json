@@ -21,11 +21,11 @@
     "knowledge": [
       {
         "path": "docs/kgg-custom-gpt-knowledge-architecture.md",
-        "sha256": "c063de6fd1ad6313fa71be0f563fe23735b502081468b4b14805d0817f308a20"
+        "sha256": "5edb004357c8e4971ca36a66c688ceec6db43fe3080baf1c4941bac0fdd19ac1"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-operations.md",
-        "sha256": "f7703a80aa81bef012c67e4eb35edbf7cbead176dd26fcf7101c41a452303287"
+        "sha256": "524963fdff82e5dd2940b849a8564725f27d0d63f959fbd417c32df6f368c225"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-safety.md",
@@ -33,17 +33,17 @@
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-testing.md",
-        "sha256": "7d4cab33cc1d419aaf9b15846235c613992e707dbd39f2a4aacfa20ce1cadff3"
+        "sha256": "ea06ad76f150e446cee31a522ea6435a50d923e9b5f39589f7222ace5da993da"
       }
     ],
     "actions": [
       {
         "path": "docs/kgg-custom-gpt-action-openapi.yaml",
-        "sha256": "91cbaa49b4024b9d080de4f8e246a5b35b7b2e92ec493a3b5a21daaace40fd64"
+        "sha256": "0a3ff910d60e8c341e45875f60934d23304dd4d9b23249f0b026a2996ca58f20"
       },
       {
         "path": "docs/kgg-custom-gpt-action-api-openapi.yaml",
-        "sha256": "5019e2a489984a9d7f34b4c2e599db437fcb13a51d5ae92720932e6698790de5"
+        "sha256": "13354ca545255e8e0b82e7012805801ec54aa6dc08b238c29c6157352ddbe61a"
       }
     ],
     "freshness": "GitHub live context and source chunks are authoritative; generated Knowledge is a retrieval accelerator and must pass --check."
@@ -68,11 +68,11 @@
     "actions": [
       {
         "path": "docs/kgg-custom-gpt-repair-lab-raw-openapi.yaml",
-        "sha256": "9be2dea3fd1643923959d93e10b6a4f664845a701fb654b91682ad69ee27bb8a"
+        "sha256": "e869a9e421a300aa8ba15b72b6a1a85d4ab8525cd2acc8d452f1807f1c6e263c"
       },
       {
         "path": "docs/kgg-custom-gpt-repair-lab-api-openapi.yaml",
-        "sha256": "c2b9d62444121574d11cba29005e95e2a572548d75a56cdd52f294e9a79765e1"
+        "sha256": "0b252e32b2a9165dd86e013541027b5afdf6cb0e84119628ec128498d688e685"
       }
     ],
     "forbiddenResources": [
