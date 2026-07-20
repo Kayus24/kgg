@@ -72,7 +72,7 @@
       },
       {
         "path": "docs/kgg-custom-gpt-repair-lab-api-openapi.yaml",
-        "sha256": "f4bc09eb3939700089ef8f1b6f91aa38e88baabf165eaea31d033f794630b44f"
+        "sha256": "c2b9d62444121574d11cba29005e95e2a572548d75a56cdd52f294e9a79765e1"
       }
     ],
     "forbiddenResources": [

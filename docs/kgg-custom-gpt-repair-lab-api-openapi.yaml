@@ -23,7 +23,7 @@ paths:
               properties:
                 ref:
                   type: string
-                  enum: [codex/modular-gpt-write-gate]
+                  enum: [main]
                 inputs:
                   type: object
                   required: [mode, round_id, challenge_id, payload_json]
@@ -56,7 +56,7 @@ paths:
           required: false
           schema:
             type: string
-            enum: [codex/modular-gpt-write-gate]
+            enum: [main]
         - name: event
           in: query
           required: false
