@@ -1,9 +1,76 @@
 # KGG Source Chunk 064
 
-- Source: `kgg-update/index.html`
-- Lines: 26881-27183
+- Source: `kgg-update/src` modular source
+- Lines: 26881-27254
 
 ```html
+      z-index:82!important;
+    }
+    body.tabletLayoutCustom #tabletMenuBtn{
+      position:fixed!important;
+      left:10px!important;
+      top:var(--kgg-tablet-safe-top)!important;
+      z-index:1505!important;
+      pointer-events:auto!important;
+    }
+    #editorModal .editorSheet{
+      width:min(94vw,920px)!important;
+      max-height:min(90vh,760px)!important;
+      overflow:hidden!important;
+      display:grid!important;
+      grid-template-columns:minmax(0,1fr) minmax(300px,.92fr)!important;
+      grid-template-areas:
+        "header header"
+        "name media"
+        "sets media"
+        "units media"
+        "start media"
+        "advanced media"
+        "actions actions"
+        "cancel cancel"!important;
+      column-gap:14px!important;
+      row-gap:9px!important;
+      padding:16px!important;
+    }
+    #editorModal .editorHeader{grid-area:header!important;margin-bottom:0!important}
+    #editorModal .editorSheet > .field:first-of-type{grid-area:name!important;margin:0!important}
+    #editorModal .editorSheet > .grid2:nth-of-type(1){grid-area:sets!important}
+    #editorModal .editorSheet > .grid2:nth-of-type(2){grid-area:units!important}
+    #editorModal .editorStartHint{grid-area:start!important;margin:0!important}
+    #editorModal .editorMediaBox{
+      grid-area:media!important;
+      margin:0!important;
+      min-height:0!important;
+      display:grid!important;
+      grid-template-rows:auto minmax(190px,1fr) auto!important;
+      align-self:stretch!important;
+    }
+    #editorModal .editorMediaPreview{
+      min-height:190px!important;
+      max-height:min(42vh,330px)!important;
+      overflow:hidden!important;
+    }
+    #editorModal .editorMediaPreview img{
+      width:100%!important;
+      height:100%!important;
+      object-fit:contain!important;
+    }
+    #editorModal .editorAdvanced{
+      grid-area:advanced!important;
+      margin:0!important;
+      max-height:112px!important;
+      overflow:auto!important;
+    }
+    #editorModal .editorActions{
+      grid-area:actions!important;
+      margin:0!important;
+    }
+    #editorModal .editorCancelBtn{
+      grid-area:cancel!important;
+      margin:0!important;
+    }
+  }
+</style>
 <script id="kgg-v053-ui-tablet-stability-script">
 (function(){
   "use strict";
@@ -174,6 +241,8 @@
 })();
 </script>
 <!-- KGG PATCH END kgg-v053-ui-tablet-stability -->
+
+<!-- SOURCE FILE: kgg-update/src/patches/v060-tablet-html-release-label.html -->
 <!-- KGG PATCH START kgg-v060-tablet-html-release-label -->
 <!-- Tablet HTML Release Label -->
 <style id="kgg-v060-tablet-html-release-label-style">
@@ -304,6 +373,8 @@
 })();
 </script>
 <!-- KGG PATCH END kgg-v060-tablet-html-release-label -->
+
+<!-- SOURCE FILE: kgg-update/src/footer.html -->
 
 </body>
 </html>

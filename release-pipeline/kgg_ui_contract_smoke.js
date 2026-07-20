@@ -8,12 +8,15 @@ const { pathToFileURL } = require("url");
 
 const ROOT = path.resolve(__dirname, "..");
 const HTML_PATH = path.resolve(process.env.KGG_UI_CONTRACT_HTML || path.join(ROOT, "kgg-update", "index.html"));
+const VERSION_PATH = path.resolve(process.env.KGG_UI_CONTRACT_VERSION || path.join(ROOT, "kgg-update", "version.json"));
 const CONTRACT_PATH = path.join(__dirname, "kgg_ui_contract.json");
 const SCREENSHOT_DIR = path.resolve(
   process.env.KGG_SELFTEST_SCREENSHOT_DIR || path.join(ROOT, "tmp", "kgg-selftest", "ui-contract")
 );
 const STORAGE_KEY = "kgg_html_app_v2_state";
 const CUSTOM_BANK_KEY = "kgg_html_app_v2_custom_exercise_bank";
+const VERSION_INFO = JSON.parse(fs.readFileSync(VERSION_PATH, "utf8"));
+const EXPECTED_WEB_RELEASE = `v${String(VERSION_INFO.versionCode).padStart(3, "0")}`;
 
 function fail(message) {
   console.error(`ERROR: ${message}`);
@@ -204,7 +207,7 @@ async function assertTabletHtmlReleaseLabel(page, viewport) {
   if (!initial.installed || initial.labelCount !== 1) {
     fail(`${viewport.id}: tablet HTML release label patch is not installed exactly once: ${JSON.stringify(initial)}`);
   }
-  if (!initial.webIdentity.includes("v060") || !initial.webIdentity.includes("index.html")) {
+  if (!initial.webIdentity.includes(EXPECTED_WEB_RELEASE) || !initial.webIdentity.includes("index.html")) {
     fail(`${viewport.id}: web HTML identity is incomplete: ${initial.webIdentity}`);
   }
   if (viewport.width < 760) {
@@ -244,7 +247,7 @@ async function assertTabletHtmlReleaseLabel(page, viewport) {
       bottomGap: menuRect.bottom - labelRect.bottom,
     };
   });
-  const expected = "HTML r9999 · v060 · kgg_android_current.html";
+  const expected = `HTML r9999 · ${EXPECTED_WEB_RELEASE} · kgg_android_current.html`;
   if (
     probe.text !== expected ||
     probe.title !== expected ||

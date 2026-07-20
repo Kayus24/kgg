@@ -8,7 +8,8 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 - GitHub repo: `https://github.com/Kayus24/kgg`.
 - Source branch: `main`.
-- Primary Admin source: `kgg-update/index.html`.
+- Modular Admin source: `kgg-update/src`.
+- Generated public Admin HTML: `kgg-update/index.html`.
 - Web update metadata: `kgg-update/version.json`.
 - Android/Web release manifest: `therapist-app/android_update_manifest.json`.
 - Release pipeline docs: `release-pipeline/README.md`.
@@ -20,12 +21,17 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Custom GPT preview runbook: `docs/kgg-custom-gpt-preview-runbook.md`.
 - Custom GPT preview report template: `docs/kgg-custom-gpt-preview-report-template.md`.
 - Custom GPT Wissen/Knowledge pack: `docs/kgg-custom-gpt-knowledge-pack.md`.
+- Curated production Knowledge: `docs/kgg-custom-gpt-knowledge-{architecture,operations,safety,testing}.md`.
+- Custom GPT model/capability/resource contract: `docs/kgg-custom-gpt-resource-manifest.json`.
+- Blind full-app Repair-Lab: `docs/kgg-custom-gpt-repair-lab.md`, workflow `.github/workflows/kgg-gpt-repair-lab.yml`.
+- Isolated Eval-GPT Knowledge: `docs/kgg-custom-gpt-eval-knowledge.md`; never upload production fixtures to this GPT.
 - Custom GPT stabilization cycle report: `docs/kgg-custom-gpt-cycle-report.md`.
 - Bug-history lessons: `docs/kgg-gpt-bug-lessons.md`, `docs/kgg-gpt-bug-index.json`, `docs/kgg-gpt-patch-patterns.md`.
 - Source routing: `docs/kgg-gpt-area-routes.md`, `docs/kgg-gpt-area-routes.json`.
 - Source chunks for GPT patch planning: `docs/kgg-gpt-source-index.json` and `docs/kgg-gpt-source/chunk-*.md`.
 - GPT eval fixtures: `docs/kgg-custom-gpt-test-prompts.md`, `docs/kgg-custom-gpt-expected-results.md`, `docs/kgg-custom-gpt-test-report.md`.
 - GPT stabilization runner: `release-pipeline/kgg_gpt_stabilize.py`.
+- Blind Repair-Lab runner: `release-pipeline/kgg_gpt_repair_lab.py`; acceptance tracker: `release-pipeline/kgg_gpt_repair_stabilize.py`.
 - GPT preview channel branch: `gpt-preview`, files below `previews/`.
 - The Custom GPT may only write through `KGG GPT Preview Gate`; direct repo writes, direct main writes and direct merges stay forbidden.
 
@@ -60,14 +66,18 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Before producing a patch payload, load `docs/kgg-gpt-area-routes.md` and then only the source chunks needed for the requested area.
 - If a known bug-history lesson matches, reuse its caution, do-not-touch rules and tests.
 - Run payload JSON through `python release-pipeline/kgg_gpt_payload_preflight.py --payload-file <file>` before dispatching.
+- New GPT patches use payload v2 with `patch_content`; direct operations against `kgg-update/index.html` are forbidden because `index.html` is generated output.
 - Do not assume the newest local HTML is live.
-- If Max asks for a beta, use `KGG GPT Preview Gate` in `validate_only` mode first, then `publish_preview` after green validation; do not create a PR until Max explicitly accepts the preview.
+- If Max asks for a beta, use `KGG GPT Preview Gate` in `validate_only` mode first, then `publish_preview` after green validation; do not create a PR until Max explicitly accepts the Test-App/Preview-APK result.
 - If Max asks for Test-APK review, publish only through the Preview/Test-APK channel and wait for Max' Test-APK acceptance before PR/main steps.
 - If Max says the preview is good, use `create_pr` only with the same `request_id` and patch hash unless Max explicitly requests the real Admin-Beta/Haupt-App push.
 - A positive end-to-end push test requires both `publish_preview` for Test-App/Preview-App and `publish_admin_beta` for Admin-Beta merge to `main`.
 - If critical fails with `Missing tool pdftoppm`, `Missing tool pdfinfo`, `poppler-utils`, `adb` or emulator tooling, classify it as `ci_tooling`, not as an app/UI patch failure.
 - If a Preview run fails, report the failed step and the actual error before checking `meta.json` or manifest URLs.
 - If the Custom GPT cannot load this context, it must say that repo context is unavailable instead of guessing or asking Max for old basis filenames.
+- Before each real GPT test cycle verify the highest Actions-compatible model and capability/Knowledge hashes against `docs/kgg-custom-gpt-resource-manifest.json`.
+- The isolated Eval GPT must not receive Web Search, production Actions, production Knowledge, intact main HTML, golden source, sample repairs or hidden assertions.
+- A Repair-Lab PASS is evaluation evidence only and never authorizes Preview/Test-App, PR, Admin-Beta or main.
 
 ## Required Tests
 
@@ -75,6 +85,7 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - UI, HTML, flicker, phone, tablet, card drag or layout changes: also `cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression`.
 - GPT playbook, routing, payload or bug-knowledge changes: also `python release-pipeline\kgg_gpt_payload_preflight.py --self-test` and `python release-pipeline\kgg_gpt_eval.py`.
 - Custom GPT stabilization changes: also `python release-pipeline\kgg_gpt_stabilize.py --self-test`, `python release-pipeline\kgg_custom_gpt_knowledge_pack.py --check` and update `docs/kgg-custom-gpt-cycle-report.md`.
+- Repair-Lab changes: also `python release-pipeline\kgg_gpt_repair_lab.py --self-test`, `python release-pipeline\kgg_gpt_repair_stabilize.py --self-test` and `python release-pipeline\kgg_custom_gpt_resource_audit.py --check`.
 - Parser or text-block changes: also `cmd /c release-pipeline\run-kgg-tests.cmd --suite textblocks --level regression`.
 - Sync, bank, package or peer changes: also `cmd /c release-pipeline\run-kgg-tests.cmd --suite sync --level regression`.
 - Android sync bridge changes: also `cmd /c release-pipeline\run-kgg-tests.cmd --suite native-sync --level regression`.
@@ -86,6 +97,7 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Required status check: `KGG Required Gate / required-gate`.
 - Admin beta auto-merge requires green checks plus the explicit `kgg-auto-merge` label.
 - Custom GPT write access is limited to workflow dispatch for `.github/workflows/kgg-gpt-preview-gate.yml`.
+- The isolated Eval GPT may dispatch only `.github/workflows/kgg-gpt-repair-lab.yml`; that workflow cannot create Preview, PR, Admin-Beta or main changes.
 - GPT Action schema must expose `validate_only`, `publish_preview`, `create_pr`, `publish_admin_beta` and run/job/artifact status reads.
 - Current GPT editor setup uses split Actions; paste the API-only schema into `api.github.com` to avoid duplicate `raw.githubusercontent.com` domains.
 - Preview writes go only to branch `gpt-preview`; production writes are PR-only and never auto-merge.
@@ -96,9 +108,10 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Bug-history knowledge is generated by `release-pipeline/kgg_bug_knowledge.py`.
 - Source chunk and area-route context is generated by `release-pipeline/kgg_gpt_source_context.py`.
 - Custom GPT knowledge pack is generated by `release-pipeline/kgg_custom_gpt_knowledge_pack.py`.
+- Custom GPT resource hashes are generated by `release-pipeline/kgg_custom_gpt_resource_audit.py`.
 - Run `python release-pipeline/kgg_gpt_context.py --write` after changing version, release, workflow, test or durable project-rule context.
 - Run `python release-pipeline/kgg_bug_knowledge.py --write` after changing bug/debug docs, patch lessons or known failure rules.
-- Run `python release-pipeline/kgg_gpt_source_context.py --write` after changing `kgg-update/index.html` or source routing rules.
+- Run `python release-pipeline/kgg_gpt_source_context.py --write` after changing `kgg-update/src`, generated source routing rules or modular patch behavior.
 - Run `python release-pipeline/kgg_gpt_eval.py` after changing Custom GPT playbook, prompts, expected results, routing or preflight behavior.
 - Run `python release-pipeline/kgg_custom_gpt_knowledge_pack.py --write` after changing Custom GPT docs that should be uploaded to GPT Wissen.
 - Run `python release-pipeline/kgg_gpt_stabilize.py --write-report` after running a GPT stabilization cycle.

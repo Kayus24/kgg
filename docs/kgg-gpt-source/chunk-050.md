@@ -1,9 +1,58 @@
 # KGG Source Chunk 050
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 21001-21420
 
 ```html
+    }
+  }
+  async function attachKggPdfExerciseThumbnails(snapshot,plan){
+    const sourceExercises=Array.isArray(plan&&plan.exercises)?plan.exercises:[];
+    if(!snapshot||!sourceExercises.length)return snapshot;
+    let count=0;
+    const slots=(snapshot.pages||[]).flatMap(page=>page.slots||page.exercises||[]);
+    await Promise.all(slots.map(async slot=>{
+      if(!slot||slot.empty)return;
+      const source=sourceExercises[Math.max(0,Number(slot.globalIndex||0)-1)];
+      if(!source)return;
+      const thumb=await loadKggPdfExerciseThumbnail(source);
+      if(!thumb)return;
+      slot.pdfThumbnail=thumb;
+      slot.hasPdfThumbnail=true;
+      count++;
+    }));
+    snapshot.thumbnailCount=count;
+    snapshot.thumbnailMode='local-indexeddb-grayscale';
+    return snapshot;
+  }
+  function findJsPdfConstructor(){return (window.jspdf&&window.jspdf.jsPDF)||window.jsPDF||null;}
+  function ensureJsPdfForPdfTest(){
+    const existing=findJsPdfConstructor();
+    if(existing)return Promise.resolve(existing);
+    if(typeof window.KGGLoadJsPdfForTest==='function')return window.KGGLoadJsPdfForTest().then(()=>findJsPdfConstructor());
+    return Promise.resolve(null);
+  }
+  function getPdfPageSize(doc){
+    const ps=doc&&doc.internal&&doc.internal.pageSize||{};
+    const w=typeof ps.getWidth==='function'?ps.getWidth():ps.width||297;
+    const h=typeof ps.getHeight==='function'?ps.getHeight():ps.height||210;
+    return {w,h};
+  }
+  function pdfSetFont(doc,size,style){
+    try{doc.setFont('helvetica',style||'normal');}catch(e){}
+    doc.setFontSize(size);
+  }
+  function pdfText(doc,text,x,y,opts){
+    doc.text(String(text==null?'':text),x,y,opts||{});
+  }
+  function pdfShort(text,max){
+    const s=String(text==null?'':text).replace(/\s+/g,' ').trim();
+    return s.length>max?s.slice(0,Math.max(0,max-1))+'…':s;
+  }
+  function pdfSplitTwoLines(text,firstMax,secondMax){
+    const raw=String(text==null?'':text).replace(/\s+/g,' ').trim();
+    if(raw.length<=firstMax)return [raw];
+    const limit=Math.max(1,Number(firstMax)||1);
     let cut=raw.lastIndexOf(' ',limit);
     if(cut<Math.max(12,limit*.55))cut=limit;
     const first=raw.slice(0,cut).trim();
@@ -375,53 +424,4 @@
     if(pdfPreviewFallbackTimer)clearTimeout(pdfPreviewFallbackTimer);
     const url=URL.createObjectURL(result.blob);
     currentPdfPreview={url,blob:result.blob,filename:result.filename||'kgg_trainingsplan.pdf'};
-    const frame=$('pdfPreviewFrame');
-    const useMobileBridge=shouldUsePdfMobileBridge();
-    setPdfPreviewFallbackVisible(false);
-    setPdfMobileBridgeVisible(useMobileBridge);
-    if(frame){frame.src=useMobileBridge?'about:blank':url;frame.onerror=()=>setPdfPreviewFallbackVisible(true);}
-    const notice=$('pdfPreviewNotice');
-    if(notice)notice.textContent=useMobileBridge?'PDF bereit. Öffnen oder herunterladen.':'PDF bereit. Drucken oder herunterladen.';
-    $('pdfPreviewModal').classList.add('open');
-    if(!useMobileBridge){
-      pdfPreviewFallbackTimer=setTimeout(()=>{
-        if(currentPdfPreview)setPdfPreviewFallbackVisible(true);
-      },1200);
-    }
-  }
-  function closePdfPreview(){
-    if(pdfPreviewFallbackTimer)clearTimeout(pdfPreviewFallbackTimer);
-    pdfPreviewFallbackTimer=null;
-    $('pdfPreviewModal').classList.remove('open');
-    const frame=$('pdfPreviewFrame');
-    if(frame)frame.src='about:blank';
-    setPdfPreviewFallbackVisible(false);
-    setPdfMobileBridgeVisible(false);
-    if(currentPdfPreview&&currentPdfPreview.url)URL.revokeObjectURL(currentPdfPreview.url);
-    currentPdfPreview=null;
-  }
-  async function printCurrentPdfPreview(){
-    if(await sendPdfToNative('print'))return;
-    if(shouldUsePdfMobileBridge()){
-      openCurrentPdfPreviewTab();
-      return;
-    }
-    const frame=$('pdfPreviewFrame');
-    try{
-      if(frame&&frame.contentWindow){frame.contentWindow.focus();frame.contentWindow.print();return;}
-    }catch(e){}
-    if(currentPdfPreview&&currentPdfPreview.url){
-      const win=window.open(currentPdfPreview.url,'_blank');
-      if(win)setTimeout(()=>{try{win.focus();win.print();}catch(e){}},600);
-    }
-  }
-  async function downloadCurrentPdfPreview(){
-    if(await sendPdfToNative('download'))return;
-    if(currentPdfPreview)downloadPdfBlob(currentPdfPreview.blob,currentPdfPreview.filename);
-  }
-  function openPdfUrlCrossBrowser(url){
-    if(!url)return false;
-    try{
-      const win=window.open('','_blank');
-      if(win){
 ```

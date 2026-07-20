@@ -7,7 +7,7 @@ Canonical order: `dispatch -> run status -> logs -> tests -> artifact -> meta ->
 ## Run order
 
 1. Load live context, bug lessons, action schema, negative examples and area routes.
-2. Build the smallest `replace_exact` payload.
+2. Build the smallest modular v2 payload with `patch_content`; do not send `replace_exact`, `operations` or direct `kgg-update/index.html` paths.
 3. Dispatch `validate_only` first.
 4. If `validate_only` fails, report the failed step and exact error. Do not publish.
 5. If validation succeeds, dispatch `publish_preview`.

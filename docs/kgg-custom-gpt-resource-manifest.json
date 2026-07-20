@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "modelPolicy": {
+    "rule": "Use the highest model currently offered by the GPT editor that still supports Custom Actions.",
+    "verifiedEditorModel": "GPT-5.6 Thinking",
+    "verifyBeforeEveryBlindRound": true,
+    "disallowedModes": [
+      "Pro mode when Actions are unavailable"
+    ]
+  },
+  "production": {
+    "name": "KGG Update-Agent",
+    "capabilities": {
+      "webSearch": true,
+      "codeInterpreter": true,
+      "imageGeneration": true,
+      "canvas": false,
+      "apps": false,
+      "actions": true
+    },
+    "knowledge": [
+      {
+        "path": "docs/kgg-custom-gpt-knowledge-architecture.md",
+        "sha256": "c063de6fd1ad6313fa71be0f563fe23735b502081468b4b14805d0817f308a20"
+      },
+      {
+        "path": "docs/kgg-custom-gpt-knowledge-operations.md",
+        "sha256": "f7703a80aa81bef012c67e4eb35edbf7cbead176dd26fcf7101c41a452303287"
+      },
+      {
+        "path": "docs/kgg-custom-gpt-knowledge-safety.md",
+        "sha256": "bed0ae7a5454a586a56ef78c3fe3edebed91477a55c12965d0040969a5145c32"
+      },
+      {
+        "path": "docs/kgg-custom-gpt-knowledge-testing.md",
+        "sha256": "7d4cab33cc1d419aaf9b15846235c613992e707dbd39f2a4aacfa20ce1cadff3"
+      }
+    ],
+    "actions": [
+      {
+        "path": "docs/kgg-custom-gpt-action-openapi.yaml",
+        "sha256": "91cbaa49b4024b9d080de4f8e246a5b35b7b2e92ec493a3b5a21daaace40fd64"
+      },
+      {
+        "path": "docs/kgg-custom-gpt-action-api-openapi.yaml",
+        "sha256": "5019e2a489984a9d7f34b4c2e599db437fcb13a51d5ae92720932e6698790de5"
+      }
+    ],
+    "freshness": "GitHub live context and source chunks are authoritative; generated Knowledge is a retrieval accelerator and must pass --check."
+  },
+  "eval": {
+    "name": "KGG Repair-Lab Eval",
+    "sameModelAsProduction": true,
+    "capabilities": {
+      "webSearch": false,
+      "codeInterpreter": true,
+      "imageGeneration": false,
+      "canvas": false,
+      "apps": false,
+      "actions": true
+    },
+    "knowledge": [
+      {
+        "path": "docs/kgg-custom-gpt-eval-knowledge.md",
+        "sha256": "3437f5e5b796c56e6822daebde7c95394e330482c58b4267a8c37e0a64a2da1d"
+      }
+    ],
+    "actions": [
+      {
+        "path": "docs/kgg-custom-gpt-repair-lab-raw-openapi.yaml",
+        "sha256": "9be2dea3fd1643923959d93e10b6a4f664845a701fb654b91682ad69ee27bb8a"
+      },
+      {
+        "path": "docs/kgg-custom-gpt-repair-lab-api-openapi.yaml",
+        "sha256": "c2b9d62444121574d11cba29005e95e2a572548d75a56cdd52f294e9a79765e1"
+      }
+    ],
+    "forbiddenResources": [
+      "production source Actions",
+      "intact main HTML",
+      "Web Search",
+      "golden source",
+      "internal challenge manifest",
+      "sample repair payloads",
+      "hidden evaluator assertions"
+    ]
+  },
+  "officialReferences": [
+    "https://help.openai.com/en/articles/8554397-creating-a-gpt",
+    "https://help.openai.com/en/articles/8843948-knowledge-in-gpts",
+    "https://help.openai.com/en/articles/20001049-apps-in-custom-gpts-beta",
+    "https://help.openai.com/en/articles/8770868-gpt-actions"
+  ]
+}

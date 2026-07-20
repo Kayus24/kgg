@@ -134,7 +134,7 @@ paths:
   /Kayus24/kgg/main/docs/kgg-gpt-source-index.json:
     get:
       operationId: getKggSourceIndex
-      summary: Get generated source chunk index for kgg-update/index.html.
+      summary: Get generated source chunk index for the modular kgg-update/src source.
       responses:
         "200":
           description: Structured source chunk index.
@@ -262,7 +262,7 @@ paths:
                       pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
                     payload_json:
                       type: string
-                      description: JSON string containing request_id, required_tests and replace_exact operations. UI payloads must include critical and ui-stability regression tests.
+                      description: JSON string containing request_id, title, summary, version_slug, touched_areas, required_tests and patch_content. Do not send operations, old_text, new_text or path. UI payloads must include critical and ui-stability regression tests.
                     ui_stability:
                       type: string
                       enum:

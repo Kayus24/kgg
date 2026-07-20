@@ -1,0 +1,130 @@
+openapi: 3.1.0
+info:
+  title: KGG Blind Repair Lab Evaluator
+  version: "1.0.0"
+  description: Submit modular v2 repair attempts and verify only KGG GPT Repair Lab workflow runs.
+servers:
+  - url: https://api.github.com
+paths:
+  /repos/Kayus24/kgg/actions/workflows/kgg-gpt-repair-lab.yml/dispatches:
+    post:
+      operationId: submitKggRepairAttempt
+      summary: Submit one blind repair payload for an opaque challenge id.
+      x-openai-isConsequential: true
+      security:
+        - githubBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ref, inputs]
+              properties:
+                ref:
+                  type: string
+                  enum: [main]
+                inputs:
+                  type: object
+                  required: [mode, round_id, challenge_id, payload_json]
+                  properties:
+                    mode:
+                      type: string
+                      enum: [evaluate_attempt]
+                    round_id:
+                      type: string
+                      pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
+                    challenge_id:
+                      type: string
+                      pattern: "^repair-[a-f0-9]{16}$"
+                    payload_json:
+                      type: string
+                      description: Complete modular v2 payload. Do not include path, operations, old_text or new_text.
+      responses:
+        "204":
+          description: Evaluation dispatch accepted.
+  /repos/Kayus24/kgg/actions/workflows/kgg-gpt-repair-lab.yml/runs:
+    get:
+      operationId: listKggRepairLabRuns
+      summary: List recent Repair-Lab workflow runs.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: branch
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [main]
+        - name: event
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [workflow_dispatch]
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 30
+            default: 20
+      responses:
+        "200":
+          description: Recent Repair-Lab runs.
+  /repos/Kayus24/kgg/actions/runs/{run_id}:
+    get:
+      operationId: getKggRepairLabRun
+      summary: Get one Repair-Lab run status and conclusion.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Workflow run.
+  /repos/Kayus24/kgg/actions/runs/{run_id}/jobs:
+    get:
+      operationId: getKggRepairLabJobs
+      summary: Get step-level evidence for one Repair-Lab run.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Workflow jobs and steps.
+  /repos/Kayus24/kgg/actions/runs/{run_id}/artifacts:
+    get:
+      operationId: getKggRepairLabArtifacts
+      summary: Get compact report and screenshot artifacts for one Repair-Lab run.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Evaluation artifacts.
+components:
+  schemas: {}
+  securitySchemes:
+    githubBearer:
+      type: http
+      scheme: bearer

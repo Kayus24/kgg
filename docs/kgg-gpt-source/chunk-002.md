@@ -1,9 +1,52 @@
 # KGG Source Chunk 002
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 841-1260
 
 ```html
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "v042 korrigiert nur die v041-Handy-Dock-UI; bestehende Kamera/Galerie- und Fertig-Handler bleiben angebunden."
+    },
+    {
+      "versionCode": 41,
+      "versionName": "1.0.41-ui-mini-series",
+      "patchId": "kgg-v041-ui-mini-series",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Kleine UI-Serie fuer Datenbank, Tablet und Handy",
+      "reason": "Max sammelt kleine UI-Patches: Bildhinweise in der Uebungsdatenbank, reparierter Tablet-Layoutbutton und kompaktere Handy-Bedienung.",
+      "whatChanged": [
+        "Uebungsdatenbank-Zeilen zeigen bei vorhandenen Bildanhaengen eine kleine schwarz-weisse Vorschau oder einen neutralen Platzhalter.",
+        "Layout anpassen auf Tablet oeffnet und schliesst das vorhandene Layout-Panel wieder sauber.",
+        "Handy-Layout verschiebt Admin-Konfig, Uebungsdatenbank teilen und QR-Code teilen in ein kleines Menue oben rechts.",
+        "Plan scannen schwebt auf Handy unten; Fertig kommt daneben dazu, sobald ein Plan Uebungen enthaelt.",
+        "Der Foto-Dock bekommt ein kleines Dreieck mit Kamera- und Galerie-Auswahl."
+      ],
+      "touchedAreas": [
+        "Exercise database cards",
+        "Tablet layout menu",
+        "Phone scan dock",
+        "Phone admin submenu",
+        "Local test batteries",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Android-Wrapper",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
         "androidApp": "pending"
       },
       "handoffNote": "UI-only patch auf kgg-update/index.html; bestehende Scan-, QR-, Medien- und Plan-State-Handler werden nur ueber vorhandene Buttons/Funktionen ausgeloest."
@@ -381,47 +424,4 @@
       ],
       "touchedAreas": [
         "HTML embedded metadata",
-        "Source Truth",
-        "Changelog",
-        "Patch rules",
-        "Non-UI helper script"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR-Erzeugung",
-        "Patienten-App",
-        "Scan-Kamera",
-        "Parser",
-        "Android-Wrapper",
-        "Tablet-Layout",
-        "Plan-State",
-        "Storage"
-      ],
-      "supersedes": [],
-      "removalPolicy": {
-        "doNotDeleteReason": "Dieser Eintrag definiert die neue Regel, dass alte Fix-Patches nicht still entfernt werden dürfen.",
-        "requiresExplicitMaxApprovalToRemove": true
-      },
-      "testStatus": {
-        "githubPages": "pending",
-        "androidApp": "pending",
-        "llmReadability": "pending"
-      }
-    },
-    {
-      "versionCode": 8,
-      "versionName": "1.0.6-qr-gallery-bitmap-debug",
-      "type": "github-web-update",
-      "title": "QR-Foto/Galerie-Import mit Debug und Bitmap-Fallback",
-      "summary": "Verbessert QR-Erkennung aus Galerie-/Fotodatenbank-Bildern durch zusätzlichen BarcodeDetector-ImageBitmap-Fallback und sichtbare Warnungen, wenn ein Bild nicht dekodiert werden kann.",
-      "changedAreas": [
-        "QR-Bildimport",
-        "HTML/JS",
-        "eingebettete Source Truth",
-        "eingebetteter Changelog"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR-Erzeugung",
-        "Patienten-App",
 ```

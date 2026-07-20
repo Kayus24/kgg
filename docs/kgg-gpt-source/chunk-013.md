@@ -1,9 +1,58 @@
 # KGG Source Chunk 013
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 5461-5880
 
 ```html
+      border-radius:14px!important;
+      overflow:hidden!important;
+    }
+    #editorModal .editorAdvanced summary{
+      min-height:44px!important;
+      padding:0 12px!important;
+      align-items:center!important;
+      justify-content:space-between!important;
+      list-style:none!important;
+      cursor:pointer!important;
+    }
+    #editorModal .editorAdvanced summary::-webkit-details-marker{
+      display:none!important;
+    }
+    #editorModal .editorAdvanced summary::after{
+      content:"▾";
+      color:#071027;
+      font-size:18px;
+      line-height:1;
+    }
+    #editorModal .editorAdvanced[open]{
+      padding-bottom:10px!important;
+    }
+    #editorModal .editorAdvanced[open] summary::after{
+      transform:rotate(180deg);
+    }
+    #editorModal .editorAdvancedGrid{
+      grid-template-columns:1fr!important;
+      gap:6px!important;
+      margin:0 10px!important;
+    }
+    #editorModal .editorActions{
+      gap:6px!important;
+      margin-top:10px!important;
+    }
+    #editorModal .editorActions button{
+      min-height:46px!important;
+      border-radius:13px!important;
+      font-size:16px!important;
+    }
+    #editorModal .editorCancelBtn{
+      min-height:42px!important;
+      margin-top:6px!important;
+      border:0!important;
+      background:transparent!important;
+      box-shadow:none!important;
+      font-size:15px!important;
+    }
+  }
   /* v386 source patch: visible tablet/phone flow corrections on the v385 base. */
   @media (min-width:760px) and (orientation:landscape){
     :root{
@@ -375,53 +424,4 @@
       white-space:pre;
       min-height:220px;
       display:grid;
-      place-items:center;
-      text-align:center;
-      color:#5f6875;
-      font-weight:800;
-      font-size:13px;
-    }
-    body.tabletLayoutCustom #recentToggle,
-    body.tabletLayoutCustom #packageToggle,
-    body.tabletLayoutCustom #recentList,
-    body.tabletLayoutCustom #packageList,
-    body.tabletLayoutCustom #packageLayoutSlot{
-      display:none!important;
-    }
-    body.tabletLayoutCustom #finishBtn,
-    body.tabletLayoutCustom #finishBtn.hidden,
-    body.tabletLayoutCustom #createPanel:not(.planMode) #finishBtn,
-    body.tabletLayoutCustom #createPanel:not(.planMode) #finishBtn.hidden{
-      display:none!important;
-    }
-    body.tabletLayoutCustom #createPanel .tools,
-    body.tabletLayoutCustom #createPanel .tools #planActions,
-    body.tabletLayoutCustom #createPanel:not(.planMode) .tools #planActions,
-    body.tabletLayoutCustom #createPanel.planMode .tools #planActions{
-      display:contents!important;
-      width:auto!important;
-      height:auto!important;
-      min-height:0!important;
-      margin:0!important;
-      padding:0!important;
-      border:0!important;
-      box-shadow:none!important;
-      background:transparent!important;
-    }
-    body.tabletLayoutCustom #createPanel .tools #packageLayoutSlot,
-    body.tabletLayoutCustom #createPanel:not(.planMode) .tools #packageLayoutSlot,
-    body.tabletLayoutCustom #createPanel.planMode .tools #packageLayoutSlot,
-    body.tabletLayoutCustom #createPanel .tools #packageToggle,
-    body.tabletLayoutCustom #createPanel.planMode .tools #packageToggle,
-    body.tabletLayoutCustom #createPanel .tools #recentToggle,
-    body.tabletLayoutCustom #createPanel.planMode .tools #recentToggle{
-      display:none!important;
-      width:0!important;
-      height:0!important;
-      min-height:0!important;
-      margin:0!important;
-      padding:0!important;
-      border:0!important;
-      overflow:hidden!important;
-    }
 ```

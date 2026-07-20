@@ -1,9 +1,58 @@
 # KGG Source Chunk 045
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 18901-19320
 
 ```html
+    if(!media)return '';
+    return '<span class="bankThumb bankThumbFallback" data-bank-thumb-id="'+escapeHtml(media.id)+'" title="Bild vorhanden" aria-hidden="true"></span>';
+  }
+  async function hydrateBankThumbnails(root){
+    if(!root)return;
+    Array.from(root.querySelectorAll('[data-bank-thumb-id]')).forEach(async node=>{
+      const id=String(node.getAttribute('data-bank-thumb-id')||'');
+      if(!id)return;
+      try{
+        const owner=bank.find(ex=>ensureExerciseMediaList(ex).some(item=>String(item&&item.id)===id));
+        const media=owner&&ensureExerciseMediaList(owner).find(item=>String(item&&item.id)===id);
+        if(!media)throw new Error('Kein Bildmanifest');
+        const record=await getEncryptedMediaBlob(id);
+        if(!node.isConnected)return;
+        if(!record||!record.blob)throw new Error('Lokales Bild fehlt');
+        const imageBlob=await patientDecryptMedia(media,record.blob);
+        if(!node.isConnected)return;
+        if(node._kggThumbUrl)URL.revokeObjectURL(node._kggThumbUrl);
+        const url=URL.createObjectURL(imageBlob);
+        node._kggThumbUrl=url;
+        node.classList.remove('bankThumbFallback');
+        node.innerHTML='<img src="'+url+'" alt="">';
+        setTimeout(()=>{try{if(node._kggThumbUrl===url){URL.revokeObjectURL(url);node._kggThumbUrl='';}}catch(e){}},60000);
+      }catch(err){
+        if(node.isConnected){node.classList.add('bankThumbFallback');node.innerHTML='';}
+      }
+    });
+  }
+  function renderBank(text){const c=$('bankContent'); const btn=$('bankToggle'); const area=$('bankArea'); const effectiveOpen=state.bankOpen||isTabletLayout(); const shouldHideToggle=!effectiveOpen&&!!text; btn.classList.toggle('hidden',shouldHideToggle); btn.classList.toggle('dbMascotDock',effectiveOpen); const caret=effectiveOpen?'▾':'▸'; btn.innerHTML='<span class="dbToggleMain"><span class="dbMascotBubble" aria-hidden="true"><span class="dbCaret">'+caret+'</span><span class="dbMascot">🏋️</span></span><span class="dbToggleText">Übungsdatenbank</span></span>'; btn.setAttribute('aria-label',effectiveOpen?'Übungsdatenbank schließen':'Übungsdatenbank öffnen'); c.classList.toggle('hidden',!effectiveOpen); area.classList.toggle('bankOpen',effectiveOpen); area.classList.toggle('alphaBankOpen',effectiveOpen&&!text); area.classList.toggle('searchBankOpen',effectiveOpen&&!!text); if(!effectiveOpen){c.innerHTML=''; return;} const matches=text?search(text,8):allAlpha(); const list=text?fillBankListWithFallback(matches,8):matches; const fallbackOnly=!!text&&matches.length===0; let rows=list.map((ex,i)=>{const letter=bankLetterForName(ex.name); return '<div class="bankRow" data-letter="'+letter+'" data-bank-index="'+i+'"><button class="iconBtn bankAddBtn" data-add="'+ex.id+'" aria-label="Übung übernehmen">'+bankCardThumbnailHtml(ex)+'<span class="bankText"><b>'+escapeHtml(ex.name)+'</b><small>'+(ex.unit||'Wdh')+' · '+(ex.weightUnit||'kg')+'</small></span></button><button class="iconBtn" data-edit="'+ex.id+'" aria-label="Übung bearbeiten">⚙️</button></div>';}).join(''); if(text){const label=fallbackOnly?'Alternative Treffer':'Beste Treffer'; c.innerHTML='<div class="bankLabel">'+label+'</div><div class="bankRows">'+rows+'</div>';} else {const availableLetters=new Set(list.map(ex=>bankLetterForName(ex.name))); c.innerHTML='<div class="bankWithAz"><nav class="az" aria-label="A-Z Sprungleiste">'+'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(l=>'<button type="button" data-jump="'+l+'" class="'+(availableLetters.has(l)?'':'az-empty')+'">'+l+'</button>').join('')+'</nav><div class="bankRows">'+rows+'</div></div>'; bindAzScrollrad(c);} hydrateBankThumbnails(c); c.querySelectorAll('[data-add]').forEach(b=>{preventButtonFocusSteal(b); b.onclick=ev=>{ev.preventDefault();ev.stopPropagation();if(Date.now()<bankSwipeSuppressClickUntil)return; applySelectedExerciseToText(bank.find(x=>x.id===b.dataset.add),{keepFocus:!isPhoneLayout()||!document.body.classList.contains('kggPhoneDbBrowseMode')});};}); c.querySelectorAll('[data-edit]').forEach(b=>b.onclick=ev=>{if(Date.now()<bankSwipeSuppressClickUntil){ev.preventDefault();ev.stopPropagation();return;} openEditor(bank.find(x=>x.id===b.dataset.edit));});}
+  function bindBankSwipeDelete(container){
+    if(!container)return;
+    container.querySelectorAll('.bankRow').forEach(row=>{
+      if(row.dataset.bankSwipeBound==='1')return;
+      const btn=row.querySelector('[data-add],[data-edit]');
+      const id=btn&&(btn.dataset.add||btn.dataset.edit);
+      if(!id)return;
+      row.dataset.bankId=id;
+      row.dataset.bankSwipeBound='1';
+      row.addEventListener('click',ev=>{if(Date.now()<bankSwipeSuppressClickUntil){ev.preventDefault();ev.stopPropagation();}},true);
+      row.addEventListener('pointerdown',startBankRowSwipeDelete,{passive:true});
+    });
+  }
+  function resetBankRowSwipe(row){
+    if(!row)return;
+    row.classList.remove('bank-swipe-dragging','bank-swipe-armed','bank-swipe-left','bank-swipe-right');
+    row.style.removeProperty('transform');
+    row.style.removeProperty('opacity');
+    row.style.removeProperty('transition');
+    row.style.removeProperty('--bank-swipe-strength');
   }
   function startBankRowSwipeDelete(ev){
     if(ev.button!=null&&ev.button!==0)return;
@@ -375,53 +424,4 @@
     card.classList.remove('swipe-dragging','swipe-armed','swipe-left','swipe-right','swipe-removing');
     document.body.classList.remove('kggPlanCardSwiping');
     card.style.removeProperty('transform');
-    card.style.removeProperty('opacity');
-    card.style.removeProperty('transition');
-    card.style.removeProperty('--swipe-strength');
-    card.style.removeProperty('--kgg-plan-swipe-x');
-  }
-  function startPlanCardSwipeDelete(ev){
-    if(ev.button!=null&&ev.button!==0)return;
-    const pendingTabletReorder=(animatedReorder&&isTabletLayout()&&animatedReorder.card===ev.currentTarget&&!animatedReorder.active)?animatedReorder:null;
-    if(animatedReorder&&!pendingTabletReorder)return;
-    const interactiveTarget=ev.target&&ev.target.closest?ev.target.closest('button,input,textarea,select,a'):null;
-    const actionSwipeTarget=interactiveTarget&&interactiveTarget.closest&&interactiveTarget.closest('.planCardActions');
-    if(interactiveTarget&&!actionSwipeTarget)return;
-    const card=ev.currentTarget;
-    const id=card&&card.dataset&&card.dataset.planId;
-    if(!card||!id)return;
-    const startX=ev.clientX,startY=ev.clientY;
-    const swipe={card,id,startX,startY,active:false,dx:0,pointerId:ev.pointerId,cancelTimer:null};
-    const threshold=()=>Math.min(132,Math.max(78,card.offsetWidth*0.34));
-    const cleanup=()=>{clearTimeout(swipe.cancelTimer);document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);document.removeEventListener('pointercancel',cancel);};
-    const move=e=>{
-      const dx=e.clientX-startX,dy=e.clientY-startY;
-      if(!swipe.active){
-        if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)*1.2){cleanup();return;}
-        if(Math.abs(dx)<12||Math.abs(dx)<Math.abs(dy)*1.25)return;
-        if(pendingTabletReorder&&animatedReorder===pendingTabletReorder){
-          clearTimeout(pendingTabletReorder.timer);
-          cleanupAnimatedReorder(false);
-        }
-        swipe.active=true;
-        document.body.classList.add('kggPlanCardSwiping');
-        clearPhoneScrollStateForPlanGesture(420);
-        card.classList.add('swipe-dragging');
-        try{card.setPointerCapture&&card.setPointerCapture(swipe.pointerId);}catch(err){}
-      }
-      if(!swipe.active)return;
-      clearPhoneScrollStateForPlanGesture(420);
-      e.preventDefault(); if(e.stopPropagation)e.stopPropagation();
-      const max=card.offsetWidth*0.86;
-      swipe.dx=Math.max(-max,Math.min(max,dx));
-      const strength=Math.min(1,Math.abs(swipe.dx)/threshold());
-      card.classList.toggle('swipe-left',swipe.dx<0);
-      card.classList.toggle('swipe-right',swipe.dx>0);
-      card.classList.toggle('swipe-armed',Math.abs(swipe.dx)>=threshold());
-      card.style.setProperty('--swipe-strength',String(strength));
-      card.style.setProperty('--kgg-plan-swipe-x',swipe.dx+'px');
-      card.style.transform='translateX(var(--kgg-plan-swipe-x,0px))';
-      card.style.opacity=String(1-strength*0.16);
-    };
-    const up=e=>{
 ```

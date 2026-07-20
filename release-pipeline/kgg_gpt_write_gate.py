@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Guarded Custom GPT preview, PR and Admin-beta payload handling for KGG."""
+"""Guarded modular Custom GPT preview, PR and Admin-beta payload handling for KGG."""
 
 from __future__ import annotations
 
@@ -13,8 +13,11 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
+import build_therapist_source as builder
+import kgg_new_patch as module_patch
 import release_pipeline as pipeline
 
 
@@ -23,9 +26,8 @@ SOURCE_PATH = ROOT / "kgg-update" / "index.html"
 VERSION_PATH = ROOT / "kgg-update" / "version.json"
 PREVIEW_BASE_URL = "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews"
 PREVIEW_INDEX = "previews/index.json"
-MAX_PAYLOAD_BYTES = 90_000
-MAX_OPS = 10
-MAX_TEXT_BYTES = 60_000
+MAX_PAYLOAD_BYTES = 120_000
+MAX_CONTENT_BYTES = 80_000
 
 SECRET_PATTERN = re.compile(
     "("
@@ -35,7 +37,7 @@ SECRET_PATTERN = re.compile(
     + ")"
 )
 REQUEST_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{5,63}$")
-SLUG_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{2,48}$")
+SLUG_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 PROTECTED_TOKENS = (
     "KGGDataStore.currentPlan",
     "finishWithPdf",
@@ -49,6 +51,21 @@ PROTECTED_TOKENS = (
     "KGG_ADMIN_ONLY_START",
     "KGG_ADMIN_ONLY_END",
 )
+FORBIDDEN_CONTENT_TOKENS = (
+    "<!doctype",
+    "<html",
+    "</html",
+    "<body",
+    "</body",
+    "<script src=",
+    "<script type=\"application/json\" id=\"kgg-source-truth\"",
+    "<script type=\"application/json\" id=\"kgg-changelog\"",
+    "const VERSION=",
+    "const KGG_BUILD_INFO=",
+    "<!-- KGG PATCH START",
+    "<!-- KGG PATCH END",
+)
+LEGACY_PAYLOAD_FIELDS = ("operations", "old_text", "oldText", "new_text", "newText", "path", "file", "filename", "target")
 
 
 class GateError(RuntimeError):
@@ -76,8 +93,16 @@ def write_json(path: Path, value: dict[str, Any]) -> None:
 
 
 def canonical_payload(payload: dict[str, Any]) -> str:
-    operations = payload.get("operations")
-    return json.dumps({"operations": operations}, sort_keys=True, ensure_ascii=True, separators=(",", ":"))
+    value = {
+        "patch_content": payload["patch_content"],
+        "request_id": payload["request_id"],
+        "required_tests": payload["required_tests"],
+        "summary": payload["summary"],
+        "title": payload["title"],
+        "touched_areas": payload["touched_areas"],
+        "version_slug": payload["version_slug"],
+    }
+    return json.dumps(value, sort_keys=True, ensure_ascii=True, separators=(",", ":"))
 
 
 def patch_hash(payload: dict[str, Any]) -> str:
@@ -98,12 +123,61 @@ def clean_ascii(value: str, fallback: str, limit: int) -> str:
     return (value or fallback)[:limit].rstrip()
 
 
-def slugify(value: str, fallback: str) -> str:
-    value = clean_ascii(value, fallback, 80).lower()
-    value = re.sub(r"[^a-z0-9]+", "-", value).strip("-")
-    if not SLUG_PATTERN.fullmatch(value or ""):
-        value = fallback
-    return value[:48].rstrip("-")
+def normalize_area(value: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", value.casefold().replace("ä", "ae").replace("ö", "oe").replace("ü", "ue").replace("ß", "ss"))
+
+
+def normalized_string_list(payload: dict[str, Any], *keys: str) -> list[str]:
+    raw = None
+    for key in keys:
+        if key in payload:
+            raw = payload[key]
+            break
+    if not isinstance(raw, list):
+        fail(f"{keys[0]} must be a non-empty list of strings")
+    values = [str(item).strip() for item in raw if isinstance(item, str) and item.strip()]
+    if not values or len(values) != len(raw):
+        fail(f"{keys[0]} must be a non-empty list of non-empty strings")
+    return list(dict.fromkeys(values))
+
+
+def reject_legacy_payload(payload: dict[str, Any]) -> None:
+    if "operations" in payload:
+        fail(
+            "payload v2 rejects operations/replace_exact. kgg-update/index.html is generated output; "
+            "provide patch_content and let the gate create kgg-update/src/patches/vNNN-<slug>.html."
+        )
+    present = [field for field in LEGACY_PAYLOAD_FIELDS if field in payload]
+    if present:
+        fail(
+            "payload v2 rejects legacy direct-file fields: "
+            + ", ".join(sorted(present))
+            + ". Provide patch_content only; the gate owns the module path."
+        )
+
+
+def validate_patch_content(content: str) -> str:
+    if not isinstance(content, str) or not content.strip():
+        fail("patch_content must be a non-empty HTML fragment")
+    if len(content.encode("utf-8")) > MAX_CONTENT_BYTES:
+        fail("patch_content is too large")
+    normalized = content.replace("\r\n", "\n").replace("\r", "\n").strip() + "\n"
+    if "__KGG_PATCH_ID__" not in normalized:
+        fail("patch_content must contain the __KGG_PATCH_ID__ placeholder")
+    lower = normalized.lower()
+    for token in FORBIDDEN_CONTENT_TOKENS:
+        if token.lower() in lower:
+            fail(f"patch_content contains forbidden generated-output token: {token}")
+    if SECRET_PATTERN.search(normalized):
+        fail("patch_content contains a token-shaped secret")
+    touched = [token for token in PROTECTED_TOKENS if token in normalized]
+    if touched:
+        fail("patch_content touches protected area tokens: " + ", ".join(touched))
+    try:
+        module_patch.render_patch_module("kgg-v999-self-test", "GPT content validation", normalized).decode("utf-8", errors="strict")
+    except UnicodeError as exc:
+        fail(f"patch_content must be valid UTF-8 text: {exc}")
+    return normalized
 
 
 def validate_payload(raw: str) -> dict[str, Any]:
@@ -115,174 +189,79 @@ def validate_payload(raw: str) -> dict[str, Any]:
         fail(f"payload_json is invalid JSON: {exc}")
     if not isinstance(payload, dict):
         fail("payload_json must be an object")
+    reject_legacy_payload(payload)
+
     request_id = str(payload.get("request_id") or payload.get("requestId") or "").strip().lower()
     if not REQUEST_ID_PATTERN.fullmatch(request_id):
         fail("request_id must match [a-z0-9][a-z0-9-]{5,63}")
-    payload["request_id"] = request_id
-    operations = payload.get("operations")
-    if not isinstance(operations, list) or not operations or len(operations) > MAX_OPS:
-        fail(f"operations must contain 1..{MAX_OPS} items")
-    for index, operation in enumerate(operations):
-        if not isinstance(operation, dict):
-            fail(f"operation {index} must be an object")
-        path = operation.get("path")
-        old = operation.get("old_text", operation.get("oldText"))
-        new = operation.get("new_text", operation.get("newText"))
-        if path != "kgg-update/index.html":
-            fail("v1 only allows kgg-update/index.html")
-        if not isinstance(old, str) or not old:
-            fail(f"operation {index} requires non-empty old_text")
-        if not isinstance(new, str):
-            fail(f"operation {index} requires new_text")
-        if len(old.encode("utf-8")) > MAX_TEXT_BYTES or len(new.encode("utf-8")) > MAX_TEXT_BYTES:
-            fail(f"operation {index} is too large")
-        combined = old + "\n" + new
-        if SECRET_PATTERN.search(combined):
-            fail(f"operation {index} contains a token-shaped secret")
-        touched = [token for token in PROTECTED_TOKENS if token in combined]
-        if touched:
-            fail(f"operation {index} touches protected area tokens: {', '.join(touched)}")
-        operation["old_text"] = old
-        operation["new_text"] = new
-    return payload
+    title = str(payload.get("title") or "").strip()
+    summary = str(payload.get("summary") or "").strip()
+    if not title or not summary:
+        fail("title and summary are required")
+    version_slug = str(payload.get("version_slug") or payload.get("versionSlug") or "").strip().lower()
+    if not SLUG_PATTERN.fullmatch(version_slug):
+        fail("version_slug must contain lowercase letters/numbers separated by single hyphens")
+    touched_areas = normalized_string_list(payload, "touched_areas", "touchedAreas")
+    required_tests = normalized_string_list(payload, "required_tests", "requiredTests")
+    patch_content = validate_patch_content(payload.get("patch_content") or payload.get("patchContent"))
 
+    protected_norm = {normalize_area(area): area for area in module_patch.PROTECTED_AREAS}
+    selected_protected = [protected_norm[normalize_area(area)] for area in touched_areas if normalize_area(area) in protected_norm]
+    if selected_protected:
+        fail("protected touched_areas require explicit Max approval outside the GPT gate: " + ", ".join(selected_protected))
 
-def apply_operations(source: str, payload: dict[str, Any]) -> str:
-    result = source
-    for index, operation in enumerate(payload["operations"]):
-        old = operation["old_text"]
-        count = result.count(old)
-        if count != 1:
-            fail(f"operation {index} old_text must match exactly once, found {count}")
-        result = result.replace(old, operation["new_text"], 1)
-    if result == source:
-        fail("patch produced no changes")
-    if SECRET_PATTERN.search(result):
-        fail("patched HTML contains a token-shaped secret")
-    pipeline.validate_html(result, "GPT patched Admin HTML")
-    return result
-
-
-def replace_json_scripts(html: str, version_code: int, version_name: str, patch_id: str, summary: str) -> str:
-    def update_source_truth(match: re.Match[str]) -> str:
-        data = json.loads(match.group(2))
-        fixes = data.setdefault("activeFixes", [])
-        slug = patch_id.removeprefix("kgg-v")
-        if slug not in fixes:
-            fixes.append(slug)
-        data["currentVersion"] = {
-            "versionCode": version_code,
-            "versionName": version_name,
-            "lastPatchId": patch_id,
-            "updatedBy": "kgg-gpt-write-gate",
-        }
-        data["latestPatchId"] = patch_id
-        data["lastUpdateIntent"] = {
-            "id": patch_id,
-            "summary": summary,
-            "touched": ["kgg-update/index.html"],
-            "notTouched": [
-                "PDF",
-                "QR/Patienten-App",
-                "Scan/OCR",
-                "Parser",
-                "Plan-State",
-                "Medien/Upload",
-                "API-Key-Logik",
-                "Android/APK",
-                "Manifest",
-            ],
-        }
-        return match.group(1) + json.dumps(data, ensure_ascii=False, indent=2) + match.group(3)
-
-    html = re.sub(
-        r'(<script type="application/json" id="kgg-source-truth">\s*)(.*?)(\s*</script>)',
-        update_source_truth,
-        html,
-        flags=re.S,
-    )
-
-    def update_changelog(match: re.Match[str]) -> str:
-        data = json.loads(match.group(2))
-        data["latestVersionCode"] = version_code
-        entries = data.setdefault("entries", [])
-        entries.insert(
-            0,
-            {
-                "versionCode": version_code,
-                "versionName": version_name,
-                "patchId": patch_id,
-                "status": "active",
-                "type": "kgg-gpt-write-gate",
-                "title": summary,
-                "reason": "Custom GPT preview was accepted by Max and routed through the guarded write gate.",
-                "whatChanged": [summary],
-                "touchedAreas": ["kgg-update/index.html"],
-                "notTouched": [
-                    "PDF",
-                    "QR/Patienten-App",
-                    "Scan/OCR",
-                    "Parser",
-                    "Plan-State",
-                    "Medien/Upload",
-                    "API-Key-Logik",
-                    "Android/APK",
-                    "Manifest",
-                ],
-                "testStatus": {
-                    "local": "pending",
-                    "github": "pending",
-                    "notes": "Required Gate and release-pr validate-build must pass before merge.",
-                },
-            },
-        )
-        return match.group(1) + json.dumps(data, ensure_ascii=False, indent=2) + match.group(3)
-
-    return re.sub(
-        r'(<script type="application/json" id="kgg-changelog">\s*)(.*?)(\s*</script>)',
-        update_changelog,
-        html,
-        count=1,
-        flags=re.S,
-    )
-
-
-def bump_version(html: str, payload: dict[str, Any]) -> tuple[str, dict[str, Any]]:
-    current = read_json(VERSION_PATH)
-    old_code = current.get("versionCode")
-    if not isinstance(old_code, int):
-        fail("version.json versionCode must be an integer")
-    version_code = old_code + 1
-    request_id = payload["request_id"]
-    title = clean_ascii(str(payload.get("title") or payload.get("summary") or request_id), request_id, 72)
-    slug = slugify(str(payload.get("version_slug") or payload.get("versionSlug") or title), f"gpt-{request_id[:12]}")
-    version_name = f"1.0.{version_code}-{slug}"
-    patch_id = f"kgg-v{version_code:03d}-{slug}"
-    summary = clean_ascii(str(payload.get("summary") or title), title, 220)
-    marker = f"KGG_GITHUB_UPDATE_v{version_code:03d}_{slug.replace('-', '_')}"
-    build_time = utc_now()
-
-    html = replace_json_scripts(html, version_code, version_name, patch_id, summary)
-    html = re.sub(r"<title>.*?</title>", f"<title>KGG Update v{version_code:03d} {title}</title>", html, count=1, flags=re.S | re.I)
-    html = re.sub(r"const VERSION='KGG_GITHUB_UPDATE_v[0-9]+_[^']+';", f"const VERSION='{marker}';", html, count=1)
-    html = re.sub(
-        r"const KGG_BUILD_INFO=\{[^}]+\};",
-        f"const KGG_BUILD_INFO={{release:'v{version_code:03d}',buildTime:'{build_time}',buildCode:'github-update-v{version_code:03d}-{slug}',htmlFile:'kgg-update/index.html'}};",
-        html,
-        count=1,
-    )
-    pipeline.validate_html(html, "Versioned GPT patched Admin HTML")
-    version = dict(current)
-    version.update(
+    combined_text = json.dumps(
         {
-            "versionCode": version_code,
-            "versionName": version_name,
-            "indexUrl": f"index.html?v={version_code}",
-            "sha256": hashlib.sha256(html.encode("utf-8")).hexdigest(),
-            "notes": f"v{version_code:03d}: {summary}",
-        }
+            "title": title,
+            "summary": summary,
+            "version_slug": version_slug,
+            "touched_areas": touched_areas,
+            "required_tests": required_tests,
+            "patch_content": patch_content,
+        },
+        ensure_ascii=False,
     )
-    return html, version
+    if SECRET_PATTERN.search(combined_text):
+        fail("payload contains a token-shaped secret")
+
+    return {
+        "request_id": request_id,
+        "title": title,
+        "summary": summary,
+        "version_slug": version_slug,
+        "touched_areas": touched_areas,
+        "required_tests": required_tests,
+        "patch_content": patch_content,
+    }
+
+
+def plan_modular_patch(payload: dict[str, Any]) -> tuple[dict[Path, bytes], dict[str, Any]]:
+    args = SimpleNamespace(
+        slug=payload["version_slug"],
+        title=payload["title"],
+        summary=payload["summary"],
+        area=payload["touched_areas"],
+        version_name=None,
+        allow_protected=False,
+        allow_changelog_overflow=True,
+        approval_note="Gate-managed Custom GPT module patch; Max approved modular GPT migration with existing embedded changelog overflow.",
+        patch_content=payload["patch_content"],
+    )
+    planned, report = module_patch.prepare(args)
+    patch_file = str(report.get("patchFile", ""))
+    if not re.fullmatch(r"patches/v[0-9]{3}-[a-z0-9]+(?:-[a-z0-9]+)*\.html", patch_file):
+        fail(f"unsafe generated patch file: {patch_file}")
+    patch_path = (ROOT / "kgg-update" / "src" / patch_file).resolve()
+    try:
+        patch_path.relative_to(ROOT / "kgg-update" / "src" / "patches")
+    except ValueError as exc:
+        raise GateError(f"generated patch file escapes patches directory: {patch_file}") from exc
+    return planned, report
+
+
+def apply_planned(planned: dict[Path, bytes]) -> None:
+    module_patch.apply(planned)
+    builder.check(builder.DEFAULT_MANIFEST)
 
 
 def inject_preview_banner(html: str, payload: dict[str, Any], digest: str) -> str:
@@ -300,7 +279,7 @@ def inject_preview_banner(html: str, payload: dict[str, Any], digest: str) -> st
     return re.sub(r"(<body[^>]*>)", r"\1\n" + banner, html, count=1, flags=re.I)
 
 
-def write_preview(preview_root: Path, html: str, payload: dict[str, Any], digest: str) -> dict[str, Any]:
+def write_preview(preview_root: Path, html: str, payload: dict[str, Any], digest: str, report: dict[str, Any]) -> dict[str, Any]:
     request_id = payload["request_id"]
     rollout_code = int(os.environ.get("GITHUB_RUN_NUMBER") or int(time.time()))
     if rollout_code < 1_000_000_000:
@@ -319,6 +298,9 @@ def write_preview(preview_root: Path, html: str, payload: dict[str, Any], digest
         "rolloutCode": rollout_code,
         "title": clean_ascii(str(payload.get("title") or request_id), request_id, 120),
         "summary": clean_ascii(str(payload.get("summary") or request_id), request_id, 220),
+        "patchId": str(report["patchId"]),
+        "patchFile": str(report["patchFile"]),
+        "versionName": str(report["versionName"]),
         "createdAt": utc_now(),
         "url": f"{PREVIEW_BASE_URL}/{request_id}/admin.html",
         "sha256": hashlib.sha256(html.encode("utf-8")).hexdigest(),
@@ -381,36 +363,54 @@ def write_github_output(path: str | None, values: dict[str, str]) -> None:
                 output.write(f"{key}={value}\n")
 
 
+def verify_preview_acceptance(preview_root: Path, payload: dict[str, Any], digest: str) -> dict[str, Any]:
+    meta = load_preview_meta(preview_root, payload["request_id"])
+    if meta.get("patchHash") != digest:
+        fail("patch_hash does not match the accepted preview")
+    if meta.get("baseSha") != git_sha():
+        fail("main has changed since preview; create a fresh preview before PR")
+    return meta
+
+
 def run(payload: dict[str, Any], mode: str, preview_root: Path | None, github_output: str | None) -> None:
     digest = patch_hash(payload)
-    source = SOURCE_PATH.read_text(encoding="utf-8")
-    patched = apply_operations(source, payload)
-    versioned, version_json = bump_version(patched, payload)
+    planned, report = plan_modular_patch(payload)
+
     if mode == "validate_only":
         write_github_output(
             github_output,
             {
                 "request_id": payload["request_id"],
                 "patch_hash": digest,
-                "version_name": str(version_json["versionName"]),
+                "patch_id": str(report["patchId"]),
+                "patch_file": str(report["patchFile"]),
+                "version_name": str(report["versionName"]),
                 "validation": "ok",
             },
         )
         return
 
-    SOURCE_PATH.write_text(versioned, encoding="utf-8", newline="\n")
-    write_json(VERSION_PATH, version_json)
+    if mode in {"create_pr", "publish_admin_beta"}:
+        if preview_root is None:
+            fail(f"--preview-root is required for {mode}")
+        verify_preview_acceptance(preview_root, payload, digest)
+
+    apply_planned(planned)
+    versioned = SOURCE_PATH.read_text(encoding="utf-8")
+    pipeline.validate_html(versioned, "Versioned modular GPT Admin HTML")
 
     if mode == "publish_preview":
         if preview_root is None:
             fail("--preview-root is required for publish_preview")
         preview_html = inject_preview_banner(versioned, payload, digest)
-        meta = write_preview(preview_root, preview_html, payload, digest)
+        meta = write_preview(preview_root, preview_html, payload, digest, report)
         write_github_output(
             github_output,
             {
                 "request_id": payload["request_id"],
                 "patch_hash": digest,
+                "patch_id": str(report["patchId"]),
+                "patch_file": str(report["patchFile"]),
                 "preview_url": str(meta["url"]),
                 "preview_sha256": str(meta["sha256"]),
                 "rollout_code": str(meta["rolloutCode"]),
@@ -419,17 +419,10 @@ def run(payload: dict[str, Any], mode: str, preview_root: Path | None, github_ou
         return
 
     if mode in {"create_pr", "publish_admin_beta"}:
-        if preview_root is None:
-            fail(f"--preview-root is required for {mode}")
-        meta = load_preview_meta(preview_root, payload["request_id"])
-        if meta.get("patchHash") != digest:
-            fail("patch_hash does not match the accepted preview")
-        if meta.get("baseSha") != git_sha():
-            fail("main has changed since preview; create a fresh preview before PR")
         release = {
             "releaseId": next_release_id(),
-            "versionName": version_json["versionName"],
-            "notes": version_json["notes"],
+            "versionName": str(report["versionName"]),
+            "notes": f"v{str(report['versionCode']).zfill(3)}: {payload['summary']}",
         }
         (ROOT / "release-inbox").mkdir(exist_ok=True)
         (ROOT / "release-inbox" / "admin.html").write_text(versioned, encoding="utf-8", newline="\n")
@@ -439,7 +432,9 @@ def run(payload: dict[str, Any], mode: str, preview_root: Path | None, github_ou
             {
                 "request_id": payload["request_id"],
                 "patch_hash": digest,
-                "version_name": str(version_json["versionName"]),
+                "patch_id": str(report["patchId"]),
+                "patch_file": str(report["patchFile"]),
+                "version_name": str(report["versionName"]),
                 "release_id": str(release["releaseId"]),
             },
         )
@@ -449,7 +444,7 @@ def run(payload: dict[str, Any], mode: str, preview_root: Path | None, github_ou
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Apply a guarded GPT patch for preview, PR or Admin beta.")
+    parser = argparse.ArgumentParser(description="Apply a guarded modular GPT patch for preview, PR or Admin beta.")
     parser.add_argument("--mode", required=True, choices=["validate_only", "publish_preview", "create_pr", "publish_admin_beta"])
     parser.add_argument("--payload-file", required=True, type=Path)
     parser.add_argument("--preview-root", type=Path)
@@ -457,12 +452,12 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        payload = validate_payload(args.payload_file.read_text(encoding="utf-8"))
+        payload = validate_payload(args.payload_file.read_text(encoding="utf-8-sig"))
         preview_root = args.preview_root.resolve() if args.preview_root else None
         run(payload, args.mode, preview_root, args.github_output)
         print(f"KGG GPT write gate OK: {args.mode} {payload['request_id']} {patch_hash(payload)[:12]}")
         return 0
-    except (GateError, pipeline.ReleaseError) as exc:
+    except (GateError, pipeline.ReleaseError, module_patch.ScaffoldError, builder.BuildError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 

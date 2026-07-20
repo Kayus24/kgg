@@ -1,9 +1,58 @@
 # KGG Source Chunk 015
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 6301-6720
 
 ```html
+  };
+
+  function objectString(id, body){
+    return id + ' 0 obj\n' + body + '\nendobj\n';
+  }
+
+  function streamObject(id, stream){
+    return objectString(id, '<< /Length ' + stream.length + ' >>\nstream\n' + stream + '\nendstream');
+  }
+
+  function infoString(props){
+    props = props || {};
+    return '<< /Title ' + pdfString(props.title || 'KGG Trainingsplan') +
+      ' /Subject ' + pdfString(props.subject || '') +
+      ' /Creator ' + pdfString(props.creator || 'KGG offline PDF runtime') + ' >>';
+  }
+
+  KGGOfflineJsPDF.prototype._buildPdf = function(){
+    var objects = [];
+    var pagesRootId = 2;
+    var fontRegularId = 3;
+    var fontBoldId = 4;
+    var infoId = 5;
+    var nextId = 6;
+    var pageIds = [];
+    var contentIds = [];
+    var imageIds = {};
+    var self = this;
+
+    this._pages.forEach(function(page){
+      pageIds.push(nextId++);
+      contentIds.push(nextId++);
+    });
+    this._images.forEach(function(image){
+      imageIds[image.name] = nextId++;
+    });
+
+    objects.push(objectString(1, '<< /Type /Catalog /Pages ' + pagesRootId + ' 0 R >>'));
+    objects.push(objectString(fontRegularId, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'));
+    objects.push(objectString(fontBoldId, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>'));
+    objects.push(objectString(infoId, infoString(this._properties)));
+
+    var kids = pageIds.map(function(id){ return id + ' 0 R'; }).join(' ');
+    objects.push(objectString(pagesRootId, '<< /Type /Pages /Kids [' + kids + '] /Count ' + pageIds.length + ' >>'));
+
+    this._pages.forEach(function(page, index){
+      var content = page.ops.join('\n') + '\n';
+      var xObjects = '';
+      if(page.images && page.images.length){
         var seen = {};
         var refs = page.images.filter(function(name){ if(seen[name]) return false; seen[name] = true; return true; })
           .map(function(name){ return '/' + name + ' ' + imageIds[name] + ' 0 R'; }).join(' ');
@@ -375,53 +424,4 @@
     }
 
     body.kggPlanSectionFrozen #currentPlanBlock.planSectionCurrent{
-      height:var(--kgg-current-plan-freeze-h,auto)!important;
-      min-height:var(--kgg-current-plan-freeze-h,auto)!important;
-      max-height:var(--kgg-current-plan-freeze-h,none)!important;
-    }
-
-    #currentPlanBlock .planSectionBody{
-      contain:layout paint!important;
-      overflow:auto!important;
-      overscroll-behavior:contain!important;
-      -webkit-overflow-scrolling:touch;
-      max-height:min(46dvh,380px);
-      transform:translateZ(0);
-      backface-visibility:hidden;
-      -webkit-backface-visibility:hidden;
-    }
-
-    #currentPlanBlock #planList.planList{
-      contain:layout paint!important;
-      isolation:isolate;
-      transform:translateZ(0);
-      backface-visibility:hidden;
-      -webkit-backface-visibility:hidden;
-    }
-
-    #currentPlanBlock .planCard{
-      backface-visibility:hidden;
-      -webkit-backface-visibility:hidden;
-      transform:translate3d(0,0,0);
-      will-change:auto;
-    }
-
-    body.is-scrolling #currentPlanBlock .planCard:not(.swipe-dragging):not(.swipe-removing):not(.reorder-lifted):not(.reorder-prelift){
-      transform:translate3d(0,0,0)!important;
-      transition:none!important;
-      animation:none!important;
-      filter:none!important;
-    }
-
-    #currentPlanBlock .planCard.reorder-prelift,
-    body.kggPlanSectionFrozen #currentPlanBlock .planCard.reorder-prelift{
-      position:relative;
-      z-index:8;
-      transform:translate3d(0,-3px,0) scale(1.018)!important;
-      box-shadow:0 10px 26px rgba(7,16,39,.16),0 2px 8px rgba(7,16,39,.10)!important;
-      transition:transform .11s cubic-bezier(.2,.85,.2,1),box-shadow .11s ease!important;
-    }
-
-    body.kggPlanCardReordering #currentPlanBlock .planSectionBody{
-      overflow:hidden!important;
 ```

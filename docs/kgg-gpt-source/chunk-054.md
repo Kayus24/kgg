@@ -1,9 +1,58 @@
 # KGG Source Chunk 054
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 22681-23100
 
 ```html
+    const raw=String(text||'').trim();
+    const parts=raw.split(/[,\n]+/).map(part=>part.trim()).filter(Boolean);
+    const exerciseLike=parts.filter(part=>/[a-zäöüß]{4,}/i.test(part)&&!/^unbekannte\s+übung/i.test(part));
+    const numbers=(raw.match(/\d+(?:[,.]\d+)?/g)||[]).length;
+    const unknown=(raw.match(/unbekannte\s+übung|\?{2,}/gi)||[]).length;
+    const days=(raw.match(/\bT(?:ag)?\s*\d+\b/gi)||[]).map(x=>Number((x.match(/\d+/)||[0])[0])).filter(Boolean);
+    const warnings=[];
+    if(exerciseLike.length<1)warnings.push('wenige Übungsnamen erkannt');
+    if(unknown>1)warnings.push('zu viele unsichere Treffer');
+    if(numbers>90)warnings.push('zu viele Zahlen statt Übungsstruktur');
+    if(days.length&&Math.max(...days)>8)warnings.push('möglicherweise erfundene Tage');
+    if(/(?:unbekannte\s+übung\s*,?\s*){2,}/i.test(raw))warnings.push('Unbekannte-Übung-Kaskade');
+    return {ok:!warnings.length,exerciseCount:exerciseLike.length,numberCount:numbers,warnings,rawResult:!!result};
+  }
+  function createScanReadingCanvas(src){
+    const canvas=scanCloneCanvas(src);
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    ctx.save();
+    ctx.filter='contrast(1.12) brightness(1.04) saturate(.96)';
+    ctx.drawImage(src,0,0);
+    ctx.restore();
+    return canvas;
+  }
+  function fillRedactionRects(ctx,rects){
+    ctx.save();
+    ctx.fillStyle='#fff';
+    rects.forEach(r=>ctx.fillRect(Math.max(0,r[0]),Math.max(0,r[1]),Math.max(0,r[2]),Math.max(0,r[3])));
+    ctx.restore();
+  }
+  function redactScanCanvasForExternalOcr(src){
+    const canvas=scanCloneCanvas(src);
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    const w=canvas.width,h=canvas.height;
+    const top=Math.round(h*.145);
+    const bottom=Math.round(h*.065);
+    const side=Math.round(w*.075);
+    const wideSide=Math.round(w*.115);
+    const rects=[[0,0,w,top],[0,h-bottom,w,bottom],[0,0,side,h],[w-side,0,side,h]];
+    if(w>h)rects.push([w-wideSide,0,wideSide,h],[0,0,Math.round(w*.095),h]);
+    fillRedactionRects(ctx,rects);
+    canvas.dataset.redacted='true';
+    canvas.dataset.redaction='white-randmask-v295';
+    return canvas;
+  }
+  function canvasToGeminiInlineData(canvas){
+    const dataUrl=canvas.toDataURL('image/jpeg',.72);
+    return {mime_type:'image/jpeg',data:dataUrl.split(',')[1]||''};
+  }
+  function cleanGeminiScanText(text){
     let out=String(text||'').replace(/```(?:json|[a-z]+)?/gi,'').replace(/```/g,'').trim();
     if(!out)return '';
     const json=parseLooseJson(out);
@@ -375,53 +424,4 @@
     if(forceNew||job.type==='qr'||job.result){job=forceNew?job:scanNewJob('paper');}
     job.type='paper';
     job.pages.push(scanFileMeta(file));
-    if(kind==='file'&&qr&&!qr.raw){
-      const qrWarn='QR-Foto-Import: '+(qr.reason||'Kein QR im Bild erkannt.');
-      job.warnings.push(qrWarn);
-      try{console.warn(qrWarn,qr.debug||{});}catch(err){}
-    }
-    job.status='queued';
-    job.short=job.short||patientShortGuess();
-    scanState.next='page';
-    return job;
-  }
-  function scanStateSnapshot(){
-    return {next:scanState.next,activeIndex:scanState.activeIndex,busy:scanState.busy,jobs:scanState.jobs.map(job=>({id:job.id,label:job.label,short:job.short,type:job.type,status:job.status,pages:job.pages.map(page=>({name:page.name,size:page.size,type:page.type})),hasResult:!!job.result,warnings:job.warnings||[]}))};
-  }
-  function setScanStatus(text){const el=$('scanStatus'); if(el){el.classList.remove('hidden'); el.textContent=text||'Bereit.';}}
-  function ensureScanV295Styles(){
-    if(document.getElementById('kggV295ScanCss'))return;
-    const style=document.createElement('style');
-    style.id='kggV295ScanCss';
-    style.textContent='.kggScanV295{display:grid;gap:10px}.kggScanV295 .scanDecisionBackdrop{position:fixed;inset:0;z-index:99980;background:rgba(7,16,39,.34);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}.kggScanV295 .scanDecision{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:99990;width:min(92vw,500px);background:#fff;border:2px solid #1b2230;border-radius:22px;padding:14px;box-shadow:0 18px 55px rgba(7,16,39,.22)}.kggScanV295 .scanDecision h3{font-size:22px;margin:0 0 6px}.kggScanV295 .scanDecisionBtns{display:grid;gap:10px;margin-top:10px}.kggScanV295 .scanDecisionBtns.scanDecisionRepeatSource{grid-template-columns:1fr 1fr}.kggScanV295 .scanDecisionBtns.scanDecisionRepeatSource .scanRepeatBtn{min-height:58px;border:2px solid #1b2230;background:#fff;color:#071027;border-radius:16px;font-weight:1000;box-shadow:0 3px 10px rgba(7,16,39,.08)}.kggScanV295 .scanDecisionBtns.scanDecisionRepeatSource .scanFinishBtn{grid-column:1/-1;min-height:64px;border-radius:18px;font-size:20px;box-shadow:0 8px 22px rgba(7,16,39,.22)}.kggScanV295 .scanJobCard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:var(--shadow)}.kggScanV295 .scanJobCard.warn{border-color:#f2d38a;background:#fff8e8}.kggScanV295 .scanJobCard.good{border-color:#93d8a0;background:#f4fff6}.kggScanV295 .scanJobHead{display:flex;justify-content:space-between;gap:8px;align-items:center}.kggScanV295 .scanFileList{font-size:12px;color:var(--muted);font-weight:850;margin-top:6px}.kggScanV295 .scanResultText{width:100%;min-height:118px;border:1px solid var(--line);border-radius:14px;padding:10px;font-size:13px;line-height:1.35;margin-top:8px}.kggScanV295 .scanCardActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.kggScanV295 .scanCardActionsCompact{grid-template-columns:1fr 1.15fr}.kggScanV295 input.scanShort{width:100%;border:1px solid var(--line);border-radius:12px;padding:9px;font-size:14px;margin-top:8px}.kggScanV295 .scanWarning{font-size:12px;color:#8a5a00;font-weight:850;margin-top:6px}.kggScanV295 .scanJobCard.collapsed{padding:9px 12px;background:#f7fff8;border-color:#93d8a0}.kggScanV295 .scanJobCard.collapsed .scanCollapsedHint{display:block;font-size:12px;color:#54715a;font-weight:900;margin-top:2px}.kggScanV295 .scanJobTopActions{display:flex;align-items:center;gap:6px;flex:0 0 auto}.kggScanV295 .scanMiniBtn{border:1px solid var(--line);background:#fff;border-radius:999px;min-width:32px;height:32px;padding:0 8px;font-weight:1000;line-height:1;color:#071027}.kggScanV295 .scanRemoveBtn{border:1px solid rgba(226,59,84,.32);background:#fff5f7;color:#e23b54;border-radius:999px;width:34px;height:34px;padding:0;font-size:20px;font-weight:1000;line-height:1}.kggScanV295 .scanJobHeadMain{min-width:0;display:grid;gap:2px}.kggScanV295 .scanJobHeadMain b,.kggScanV295 .scanJobHeadMain small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}@media(max-width:520px){.kggScanV295 .scanCardActions{grid-template-columns:1fr}.kggScanV295 .scanDecisionBtns{grid-template-columns:1fr}.kggScanV295 .scanDecisionBtns.scanDecisionRepeatSource{grid-template-columns:1fr}}';
-    document.head.appendChild(style);
-  }
-  function renderScanDecisionOverlay(){
-    const id='kggScanDecisionOverlay';
-    let layer=document.getElementById(id);
-    if(!scanState.decision){if(layer)layer.remove();return;}
-    if(!layer){
-      layer=document.createElement('div');
-      layer.id=id;
-      layer.className='kggScanV295';
-      document.body.appendChild(layer);
-    }
-    layer.innerHTML='<div class="scanDecisionBackdrop" aria-hidden="true"></div><div class="scanDecision" role="dialog" aria-modal="true"><h3>Foto hinzugef&uuml;gt</h3><p class="notice">Was kommt als N&auml;chstes?</p><div class="scanDecisionBtns scanDecisionRepeatSource"><button type="button" class="scanRepeatBtn" onclick="window.KGGScan.repeatSource(\'page\')">+ weitere Seite zu diesem Plan</button><button type="button" class="scanRepeatBtn" onclick="window.KGGScan.repeatSource(\'plan\')">+ weiterer Plan / Patient</button><button type="button" class="primary scanFinishBtn" onclick="window.KGGScan.start()">Fertig</button></div></div>';
-  }
-  function renderScanPreview(){
-    ensureScanV295Styles();
-    renderScanDecisionOverlay();
-    const preview=$('scanPreview');
-    if(!preview)return;
-    const useInbox=!!$('scannedPlansBlock');
-    const hasContent=(useInbox?(scanState.busy||scanState.lastError):(scanState.jobs.length||scanState.busy||scanState.lastError));
-    preview.classList.toggle('hidden',!hasContent);
-    if(!hasContent){preview.innerHTML='';return;}
-    const jobsHtml=useInbox?'':scanState.jobs.map((job,index)=>{
-      const resultText=scanResultToCopyText(job);
-      const quality=job.result&&job.result.quality||{};
-      const warn=[...(job.warnings||[]),...((quality.warnings)||[])];
-      const cls=job.result?(quality.ok===false?'warn':'good'):(warn.length?'warn':'');
-      const collapsed=!!job.collapsed;
-      const typeLabel=job.type==='qr'?'QR-Plan':'Papierplan';
 ```

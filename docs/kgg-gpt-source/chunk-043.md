@@ -1,9 +1,58 @@
 # KGG Source Chunk 043
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 18061-18480
 
 ```html
+  }
+  async function checkGithubAppUpdate(){
+    if(!window.fetch||isLocalHtmlTestRuntime())return;
+    try{
+      const res=await fetch(kggUpdateManifestUrl,{cache:'no-store'});
+      if(!res.ok)return;
+      const manifest=await res.json();
+      if(!manifest||manifest.kind!=='kgg_app_update_manifest')return;
+      const webTarget=githubUpdateTargetFromManifest(manifest);
+      const apkTarget=androidApkUpdateTargetFromManifest(manifest);
+      if(isNativeAndroidShell()){
+        if(apkTarget){
+          window.KGGAndroidApkUpdateUrl=apkTarget.url;
+          window.KGGAndroidApkUpdateVersion=apkTarget.version;
+          window.KGGAndroidApkUpdateSha256=apkTarget.sha256;
+        }
+        return;
+      }
+      if(!webTarget)return;
+      stageManualRemoteWebUpdate(webTarget);
+    }catch(err){
+      console.warn('GitHub-Update-Pruefung nicht verfuegbar:',err);
+    }
+  }
+  function closeInstallPrompt(){const modal=$('installPromptModal'); if(modal)modal.classList.remove('open');}
+  function showInstallPrompt(mode){
+    if(mode!=='update'&&mode!=='remoteUpdate'&&mode!=='androidApkUpdate'&&isStandalonePwa())return;
+    if(localStorage.getItem(pwaInstallPromptSeenKey)&&mode!=='update'&&mode!=='remoteUpdate'&&mode!=='androidApkUpdate')return;
+    const title=$('installPromptTitle'), text=$('installPromptText'), accept=$('acceptInstallPrompt');
+    if(mode==='androidApkUpdate'){
+      if(title)title.textContent='Android-App-Update verfuegbar';
+      if(text)text.textContent='Neue Android-Version '+(window.KGGAndroidApkUpdateVersion||'')+' ist bereit. Android fragt vor der Installation noch einmal nach.';
+      if(accept)accept.textContent='APK installieren';
+    }else if(mode==='remoteUpdate'){
+      if(title)title.textContent='GitHub-Update verfuegbar';
+      if(text)text.textContent='Neue Version '+(window.KGGPendingRemoteUpdateVersion||'')+' ist online. Lokale Daten bleiben auf diesem Geraet erhalten.';
+      if(accept)accept.textContent='Update oeffnen';
+    }else if(mode==='update'){
+      if(title)title.textContent='Update bereit';
+      if(text)text.textContent='Update bereit. Lokale Daten bleiben erhalten.';
+      if(accept)accept.textContent='Aktualisieren';
+    }else{
+      if(title)title.textContent='App installieren?';
+      if(text)text.textContent='Installieren und lokale Daten über Updates behalten.';
+      if(accept)accept.textContent='Installieren';
+    }
+    const modal=$('installPromptModal'); if(modal)modal.classList.add('open');
+  }
+  async function acceptInstallPrompt(){
     if(window.KGGAndroidApkUpdateUrl){
       const target=window.KGGAndroidApkUpdateUrl;
       window.KGGAndroidApkUpdateUrl='';
@@ -375,53 +424,4 @@
     return (state.plan||[]).find(ex=>compact(ex.rawText||ex.name)===c)||null;
   }
   function formatExerciseTextLine(ex){
-    const parts=[String(ex&&ex.name||'').trim()].filter(Boolean);
-    if(normalizeSideMode(ex&&ex.side)==='LR')parts.push('li/re');
-    const loadUnit=ex&&(ex.weightUnit||ex.loadUnit);
-    if(ex&&ex.startLoad)parts.push(String(ex.startLoad)+' '+(loadUnit||'kg'));
-    else if(ex&&(ex.explicitLoadUnit||ex.customLoadUnit)&&loadUnit)parts.push('@ '+loadUnit);
-    if(ex&&ex.startMetric)parts.push(String(ex.startMetric)+' '+(ex.unit||ex.metricUnit||'Wdh'));
-    return parts.join(' ').trim();
-  }
-  function withTrailingExerciseComma(text){
-    const next=String(text||'').replace(/\s+$/,'');
-    return next.trim()?next.replace(/,+$/,'')+', ':'';
-  }
-  function resizeExerciseInputToContent(){
-    const input=$('exerciseInput');
-    if(!input)return;
-    const hasText=!!input.value.trim();
-    input.classList.toggle('hasText',hasText);
-    input.style.height='auto';
-    input.style.height=hasText?Math.ceil(input.scrollHeight)+'px':'';
-    const title=$('dbTitle'), wrap=$('inputWrap');
-    if(title&&wrap)title.style.setProperty('--db-title-start-y',Math.ceil(wrap.offsetHeight+12)+'px');
-  }
-  function syncTextInputFromPlan(reason){
-    const input=$('exerciseInput');
-    if(!input)return;
-    const next=withTrailingExerciseComma((state.plan||[]).map(formatExerciseTextLine).filter(Boolean).join(', '));
-    if(input.value!==next){state.textSyncing=true; input.value=next; state.textSyncing=false;}
-    state.planText=next;
-    resizeExerciseInputToContent();
-  }
-  function restoreTrailingCommaAfterPlanSync(shouldRestore){
-    const input=$('exerciseInput');
-    if(!shouldRestore||!input||(state.plan||[]).length===0)return;
-    const next=withTrailingExerciseComma(input.value);
-    if(input.value!==next){state.textSyncing=true; input.value=next; state.textSyncing=false;}
-    state.planText=input.value;
-    resizeExerciseInputToContent();
-  }
-  function syncPlanFromTextInput(reason){
-    if(state.textSyncing)return;
-    const input=$('exerciseInput');
-    resizeExerciseInputToContent();
-    const text=input&&input.value||'';
-    const structured=structuredExercisesFromPlanText(text);
-    if(structured!==null)state.plan=structured.map(ensureUiExerciseShape);
-    else{
-      const segments=splitPlanText(text).map(p=>p.text.trim()).filter(Boolean);
-      state.plan=segments.map((segment,index)=>parseTextExercise(segment,findExistingForTextSegment(segment,index))).filter(Boolean).map(ensureUiExerciseShape);
-    }
 ```

@@ -1,9 +1,58 @@
 # KGG Source Chunk 049
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 20581-21000
 
 ```html
+  function applyNativeSyncInvite(invite){
+    if(!isNativeSyncInvitePayload(invite))throw new Error('Sync-QR ist nicht lesbar.');
+    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig()||{});
+    if(invite.roomId)config.syncRoomId=String(invite.roomId);
+    if(!config.therapistId)config.therapistId=syncPairDeviceId();
+    writeNativeSyncFollowConfig(config);
+    const entry=upsertSyncPeerFromOrigin({
+      therapistId:String(invite.therapistId||invite.deviceId),
+      deviceId:String(invite.deviceId),
+      displayName:String(invite.displayName||'KGG Geraet'),
+      roomId:String(invite.roomId||config.syncRoomId||syncPairRoomId())
+    },true);
+    setScanStatus('Sync gekoppelt: '+entry.displayName);
+    renderSyncPeerList();
+    try{queueNativeExerciseBankSync('sync_invite_scanned');}catch(err){}
+    return entry;
+  }
+  async function applyNativeSyncBundle(bundle){
+    if(!isNativeSyncBundlePayload(bundle))throw new Error('Sync-Daten-QR ist nicht lesbar.');
+    let entry=null;
+    if(bundle.invite)entry=applyNativeSyncInvite(bundle.invite);
+    let result=null;
+    if(bundle.sync){
+      result=mergeNativeExerciseBankSyncDocument(bundle.sync,{allowUnfollowed:true});
+      try{await pushNativeExerciseBankSync('sync_bundle_qr_import');}catch(err){}
+    }
+    const bank=result&&result.bank?result.bank:{added:0,updated:0,total:0};
+    const packages=result&&result.packages?result.packages:{added:0,updated:0,total:0};
+    const name=entry&&entry.displayName?entry.displayName:'Sync-Geraet';
+    setScanStatus('Sync-Daten uebernommen: '+name+' | DB +'+bank.added+'/'+bank.updated+' | Pakete +'+packages.added+'/'+packages.updated);
+    return {entry,result};
+  }
+  function currentEditedPlanExercise(){const id=state.editId; return state.plan.find(x=>(x.localId||x.id)===id);}
+  function currentEditedBankExercise(){const id=state.editId; return bank.find(x=>String(x.id)===String(id));}
+  function currentEditedExercise(){return currentEditedPlanExercise()||currentEditedBankExercise();}
+  function mediaSizeLabel(bytes){const n=Number(bytes)||0; if(n>=1048576)return (n/1048576).toFixed(1).replace('.',',')+' MB'; if(n>=1024)return Math.round(n/1024)+' KB'; return n+' B';}
+  function clearEditorMediaPreview(){
+    const preview=$('editMediaPreview');
+    if(!preview)return;
+    preview.innerHTML='';
+    preview.classList.add('hidden');
+  }
+  async function renderEditorMediaPreview(media){
+    const preview=$('editMediaPreview');
+    if(!preview||!media||!media.id){clearEditorMediaPreview();return;}
+    preview.textContent='Vorschau wird geladen ...';
+    preview.classList.remove('hidden');
+    try{
+      const record=await getEncryptedMediaBlob(media.id);
       if(!record||!record.blob)throw new Error('Lokale Bilddatei fehlt.');
       const imageBlob=await patientDecryptMedia(media,record.blob);
       const url=URL.createObjectURL(imageBlob);
@@ -375,53 +424,4 @@
     }catch(err){
       console.warn('PDF-Uebungsbild wird ausgelassen:',err);
       return null;
-    }
-  }
-  async function attachKggPdfExerciseThumbnails(snapshot,plan){
-    const sourceExercises=Array.isArray(plan&&plan.exercises)?plan.exercises:[];
-    if(!snapshot||!sourceExercises.length)return snapshot;
-    let count=0;
-    const slots=(snapshot.pages||[]).flatMap(page=>page.slots||page.exercises||[]);
-    await Promise.all(slots.map(async slot=>{
-      if(!slot||slot.empty)return;
-      const source=sourceExercises[Math.max(0,Number(slot.globalIndex||0)-1)];
-      if(!source)return;
-      const thumb=await loadKggPdfExerciseThumbnail(source);
-      if(!thumb)return;
-      slot.pdfThumbnail=thumb;
-      slot.hasPdfThumbnail=true;
-      count++;
-    }));
-    snapshot.thumbnailCount=count;
-    snapshot.thumbnailMode='local-indexeddb-grayscale';
-    return snapshot;
-  }
-  function findJsPdfConstructor(){return (window.jspdf&&window.jspdf.jsPDF)||window.jsPDF||null;}
-  function ensureJsPdfForPdfTest(){
-    const existing=findJsPdfConstructor();
-    if(existing)return Promise.resolve(existing);
-    if(typeof window.KGGLoadJsPdfForTest==='function')return window.KGGLoadJsPdfForTest().then(()=>findJsPdfConstructor());
-    return Promise.resolve(null);
-  }
-  function getPdfPageSize(doc){
-    const ps=doc&&doc.internal&&doc.internal.pageSize||{};
-    const w=typeof ps.getWidth==='function'?ps.getWidth():ps.width||297;
-    const h=typeof ps.getHeight==='function'?ps.getHeight():ps.height||210;
-    return {w,h};
-  }
-  function pdfSetFont(doc,size,style){
-    try{doc.setFont('helvetica',style||'normal');}catch(e){}
-    doc.setFontSize(size);
-  }
-  function pdfText(doc,text,x,y,opts){
-    doc.text(String(text==null?'':text),x,y,opts||{});
-  }
-  function pdfShort(text,max){
-    const s=String(text==null?'':text).replace(/\s+/g,' ').trim();
-    return s.length>max?s.slice(0,Math.max(0,max-1))+'…':s;
-  }
-  function pdfSplitTwoLines(text,firstMax,secondMax){
-    const raw=String(text==null?'':text).replace(/\s+/g,' ').trim();
-    if(raw.length<=firstMax)return [raw];
-    const limit=Math.max(1,Number(firstMax)||1);
 ```

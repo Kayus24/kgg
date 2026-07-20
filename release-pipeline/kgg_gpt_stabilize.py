@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REPORT_PATH = ROOT / "docs" / "kgg-custom-gpt-cycle-report.md"
 
 ERROR_CLASSES: dict[str, str] = {
-    "payload_schema": "Invalid payload shape, JSON, operation path or missing required_tests.",
+    "payload_schema": "Invalid modular payload shape, JSON, forbidden path/file/operations field, missing patch_content or missing required_tests.",
     "preview_gate": "GitHub Preview Gate, run, artifact, meta.json or publish-preview failure.",
     "ci_tooling": "Missing runner/browser/emulator tool or CI dependency such as poppler/pdftoppm.",
     "unsafe_patch": "Protected token, manual versioning, broad append or unsafe patch surface.",
@@ -33,6 +33,8 @@ GPT_PROMPTS = [
     "failed-preview-run",
     "protected-token-payload",
     "payload-schema-path",
+    "modular-payload",
+    "mockup-restore",
     "preview-apk-icon",
     "beta-html-request",
     "action-schema-validate-only",
@@ -83,14 +85,26 @@ def classify_failure(text: str) -> str:
     lower = text.lower()
     if any(token in lower for token in ["pdftoppm", "pdfinfo", "poppler", "apt-get", "missing tool", "adb", "emulator"]):
         return "ci_tooling"
-    if any(token in lower for token in ["required_tests", "required tests", "payload", "json", "file", "path"]):
+    if any(token in lower for token in ["tablet", "splitter", "scale", "ui-stability", "layout", "artifacte", "artefakt"]):
+        return "ui_logic"
+    if any(
+        token in lower
+        for token in [
+            "required_tests",
+            "required tests",
+            "payload",
+            "invalid json",
+            "patch_content",
+            "forbidden path",
+            "direct index.html",
+            "operations field",
+        ]
+    ):
         return "payload_schema"
     if any(token in lower for token in ["protected", "guard", "api-key", "version", "body append", "</body>", "</html>"]):
         return "unsafe_patch"
     if any(token in lower for token in ["preview", "artifact", "meta.json", "publish", "validate_only", "github run"]):
         return "preview_gate"
-    if any(token in lower for token in ["tablet", "splitter", "scale", "ui-stability", "layout", "artifacte", "artefakt"]):
-        return "ui_logic"
     if any(token in lower for token in ["claimed", "behauptet", "success", "green", "gruen", "run_id"]):
         return "false_claim"
     if any(token in lower for token in ["stale", "context", "source chunk", "base file", "version"]):
@@ -155,6 +169,7 @@ def local_checks(include_ui_probe: bool) -> list[CheckResult]:
         ("source-context-check", [sys.executable, "release-pipeline/kgg_gpt_source_context.py", "--check"]),
         ("knowledge-pack-check", [sys.executable, "release-pipeline/kgg_custom_gpt_knowledge_pack.py", "--check"]),
         ("payload-preflight-self-test", [sys.executable, "release-pipeline/kgg_gpt_payload_preflight.py", "--self-test"]),
+        ("mock-eval-self-test", [sys.executable, "release-pipeline/kgg_gpt_mock_eval.py", "--self-test"]),
         ("gpt-eval", [sys.executable, "release-pipeline/kgg_gpt_eval.py"]),
         ("gpt-suite-critical", gpt_suite_command()),
     ]
@@ -287,6 +302,10 @@ def self_test() -> None:
     for token in ["kgg_gpt_stabilize.py", "human_preview_fail", "ci_tooling", "publish_admin_beta", "Test-APK", "zwei kompletten gruenen Runden"]:
         if token not in playbook:
             raise RuntimeError(f"playbook missing stabilization token: {token}")
+    if classify_failure("Tablet splitter initial state failed at C:\\repo\\release-pipeline\\probe.js") != "ui_logic":
+        raise RuntimeError("tablet splitter failure must be classified as ui_logic")
+    if classify_failure("invalid payload: forbidden path kgg-update/index.html") != "payload_schema":
+        raise RuntimeError("invalid modular payload must be classified as payload_schema")
 
 
 def main() -> int:

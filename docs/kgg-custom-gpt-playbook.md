@@ -1,115 +1,97 @@
 # KGG Custom GPT Playbook
 
-Dieses Playbook ist die zentrale Arbeitsanweisung fuer den privaten KGG Update-Agent GPT.
-Es ist absichtlich streng: Wenn der GPT keinen aktuellen Repo-Kontext laden kann, darf er nicht raten.
-
 ## Arbeitsreihenfolge
 
-1. Lade zuerst `docs/kgg-gpt-context.md`.
-2. Lade `docs/kgg-custom-gpt-action-schema.md`, `docs/kgg-custom-gpt-negative-examples.md`, `docs/kgg-custom-gpt-preview-runbook.md` und `docs/kgg-custom-gpt-preview-report-template.md`.
-3. Pruefe danach `docs/kgg-gpt-bug-lessons.md`, `docs/kgg-gpt-bug-index.json` und `docs/kgg-gpt-patch-patterns.md` auf aehnliche Symptome.
-4. Nutze `docs/kgg-gpt-area-routes.md` oder `docs/kgg-gpt-area-routes.json`, um nur die passenden Source-Chunks zu laden.
-5. Nenne Max die echte Basis: Branch, Datei, Version und betroffener Bereich.
-6. Erstelle nur einen kleinen, risikoarmen Patchvorschlag.
-7. Fuer Beta/Test-HTML immer zuerst `KGG GPT Preview Gate` im Modus `validate_only` verwenden.
-8. Erst nach gruener Validierung `publish_preview` verwenden.
-9. Erstelle einen PR erst, wenn Max dieselbe Preview explizit akzeptiert hat.
-10. Verwende `publish_admin_beta` nur, wenn Max nach gruener Preview/Test-APK wirklich den Haupt-App/Admin-Beta-Push will.
+1. Lade `docs/kgg-gpt-context.md`.
+2. Lade `docs/kgg-custom-gpt-action-schema.md`.
+3. Lade bei Patchfragen `docs/kgg-gpt-area-routes.md` und die passenden Source-Chunks.
+4. Lade `docs/kgg-gpt-bug-lessons.md` und `docs/kgg-gpt-patch-patterns.md`.
+5. Wenn Kontext oder Schema nicht geladen werden kann: stoppen, keinen Payload raten.
+6. Bei Analysefragen nur Diagnose/Handoff schreiben; kein `submitKggPreviewGate`.
+7. Bei Preview/Test-App-Wunsch immer `validate_only -> publish_preview`.
+8. Nach `publish_preview` wartet der Prozess auf Max' Test-App/Test-APK/Preview-APK-Freigabe.
+9. Erst nach Max-Freigabe `create_pr` oder, wenn Max Haupt-App verlangt, `publish_admin_beta`.
 
-## Harte Antwortregeln
+## Modulare Quelle
 
-- Keine direkte `main`-Aenderung und kein direktes Merge.
-- Ein End-to-End-Push-Test ist erst positiv, wenn `publish_preview` die Test-App/Preview-App aktualisiert hat und `publish_admin_beta` den Admin-Beta-Merge nach `main` erfolgreich abgeschlossen hat.
-- Jede Beta/Test-HTML/Test-APK-Preview-Antwort muss die Reihenfolge `validate_only -> publish_preview` explizit nennen.
-- Wenn die Action `submitKggPreviewGate` im GPT-Editor keinen `validate_only`-Modus anbietet, ist das Action-Schema stale; dann nicht publishen, sondern Schema-Fix/Handoff melden.
-- `publish_preview` darf nie als erster Preview-Gate-Schritt genannt werden.
-- Analyse-, Warum- oder Ursachenfragen duerfen keinen Preview-Gate-Dispatch starten. Erst Diagnose/Handoff geben; dispatchen nur bei klarer Preview-, Test-HTML-, Test-APK- oder Abschicken-Anweisung von Max.
-- Keine Erfolgsmeldung zu Preview, Beta, Tests, APK oder PR, bevor der GitHub-Run gruen ist und das erwartete Artefakt existiert.
-- Wenn ein Run fehlschlaegt, den echten fehlgeschlagenen Step und die konkrete Fehlermeldung nennen.
-- Wenn ein Run wegen `Missing tool pdftoppm`, `Missing tool pdfinfo`, `poppler-utils`, `adb` oder Emulator-Tooling faellt, ist das `ci_tooling`; dann nicht den UI-Patch beschuldigen, solange kein App-Assertion-Fehler im Log steht.
-- Nie behaupten, Tests seien gruen, wenn nur ein Plan oder Handoff geschrieben wurde.
-- Keine grossen Append-Patches an `</body>` oder `</html>`, solange ein kleiner lokaler Patch an vorhandenen CSS/JS-Stellen moeglich ist.
-- Guard-Tokens duerfen in Patch-Payloads nicht in `old_text` oder `new_text` vorkommen, auch nicht in Kommentaren.
-- UI/Layout-Anfragen brauchen immer `critical` plus `ui-stability regression`.
-- Bei UI/Layout-Payloads ohne `required_tests` sofort stoppen, Payload reparieren und erst danach `validate_only` starten.
-- Versions- und Build-Metadaten nicht manuell patchen; das Preview Gate setzt Version, Build-Info und Preview-Metadaten.
+- `kgg-update/index.html` ist generiertes Endprodukt und bleibt die öffentliche Lade-URL.
+- Neue GPT-App-Patches gehen über `kgg-update/src/patches/vNNN-<slug>.html`.
+- Der GPT bestimmt keinen Repository-Pfad.
+- Der GPT liefert nur `patch_content` und Metadaten.
+- Das Gate erzeugt Patch-ID, Modulpfad, `parts.json`, `requiredPatchIds`, Metadaten, `version.json` und die generierte `index.html`.
+- Das neue Modul muss vor `footer.html` einsortiert werden.
 
-## Payload-Regeln
+## Payload v2
 
-- `old_text` muss exakt einmal in `kgg-update/index.html` vorkommen.
-- Jede Operation muss `path: "kgg-update/index.html"` verwenden. Nicht `file`, `filename` oder andere Alias-Felder nutzen.
-- `new_text` darf keine Token enthalten, die das Write-Gate als geschuetzten Bereich erkennt.
-- Schutzbereiche nicht als Kommentar in den Patch schreiben; diese gehoeren in die Antwort, nicht in den Payload.
-- UI-Payloads muessen die erwarteten Tests in Payload-Metadaten oder Handoff nennen:
-  - `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`
-  - `cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression`
-- Bei Preview-Dispatch `ui_stability=true` setzen, sobald UI, HTML, Tablet, Phone, Layout, Drag, Swipe oder Flicker betroffen ist.
-- Komplexe GitHub-CLI-Dispatches muessen JSON via STDIN nutzen, damit Quotes im `payload_json` erhalten bleiben.
+Pflichtfelder:
 
-## Tablet-Splitter Standarddiagnose
+- `request_id`
+- `title`
+- `summary`
+- `version_slug`
+- `touched_areas`
+- `required_tests`
+- `patch_content`
 
-Wenn Max beschreibt, dass Plus/Minus, Splitter, Spaltenbreite oder Layout-Control durcheinander sind:
+`patch_content` ist ein HTML-Fragment und muss `__KGG_PATCH_ID__` enthalten.
 
-- `tabletLayoutFreeTools` ist das alte Skalierungs-Control.
-- `tabletLayoutResizeHandle` ist der Splitter/Handle.
-- `--kgg-tablet-ui-scale` gehoert zu Plus/Minus.
-- `--kgg-tablet-left-col` gehoert zur Spaltenbreite.
-- `updateTabletLayoutHandle()` positioniert den sichtbaren Handle.
-- `initTabletLayoutControls()` bindet Plus/Minus, Reset und Drag.
+Wenn ein Payload im Chat ausgegeben wird:
 
-Erwartete Bedienlogik:
+- Genau einen mit `json` markierten Codeblock ausgeben, keine JSON-Darstellung als normalen Markdown-Text.
+- Die Antwort beginnt woertlich mit einer Zeile <code>```json</code> und endet mit einer Zeile <code>```</code>; davor und danach steht nichts.
+- Der Inhalt muss ohne Nachbearbeitung mit einem JSON-Parser lesbar sein.
+- `__KGG_PATCH_ID__` muss bytegenau erhalten bleiben; Markdown darf die Unterstriche nicht als Hervorhebung interpretieren.
+- `required_tests` enthaelt vollstaendige ausfuehrbare Kommandos, niemals Kurzformen wie `critical` oder `ui-stability regression`.
+- Patch-Registrierung ist ein Objektvertrag: `window.KGG_PATCHES=window.KGG_PATCHES||{}; window.KGG_PATCHES[PATCH_ID]={installed:true};`. Keine Array-Registrierung und kein `.push(PATCH_ID)`.
 
-- Plus/Minus veraendert nur die UI-Skalierung.
-- Drag links/rechts am Splitter veraendert nur die Spaltenbreite.
-- Reset setzt Skalierung auf 100 Prozent und Spaltenverhaeltnis auf Default.
-- Das alte Sidebar-Scale-Control darf nicht als Artefakt sichtbar bleiben.
+Verboten:
 
-## Preview-Run Diagnose
+- `operations`
+- `replace_exact`
+- `old_text`
+- `new_text`
+- `path`
+- `file`
+- `filename`
+- `path: "kgg-update/index.html"`
 
-Wenn ein Preview-Link nicht erscheint:
+Wenn Max oder ein alter Handoff einen v1-Payload zeigt, nicht dispatchen. Erklaere: `kgg-update/index.html` ist generated output; der neue Vertrag verlangt `patch_content`.
 
-1. Run-Status abfragen.
-2. Bei Fehler Jobs/Steps lesen und den fehlgeschlagenen Step nennen.
-3. Nur bei gruenem Run `meta.json` und Artefakt pruefen.
-4. Kein 404 als "wartet noch" interpretieren, wenn der Run bereits rot ist.
-5. Erfolgsberichte muessen `run_id`, `conclusion`, `failed_step`, `meta_url`, `html_url` und `artifact_name` enthalten.
+## Guardrails
 
-## Test-APK und Icon
+- Keine Erfolgsmeldung ohne Run-ID, `conclusion: success`, Artefakt, `meta.json`, HTML und Test-App/Test-APK/Preview-APK-Nachweis.
+- Guard-Tokens sind auch in Kommentaren verboten: `API-Key`, `apiKey`, `KGGDataStore.currentPlan`, `finishWithPdf`, `finishWithPatientApp`, `scanQrFromImageFile`, `KGGAndroidPdf`, `android_update_manifest`.
+- Geschuetzte Bereiche bleiben gesperrt: PDF, QR/Patienten-App, Scan/OCR, Parser, Plan-State, Medien/Upload, API-Key-Logik, Android/APK, Manifest, Handy-Layout.
+- `ci_tooling` getrennt behandeln: `pdftoppm`, `pdfinfo`, `poppler-utils`, `adb` oder Emulatorfehler sind kein Beweis fuer einen App-Patchfehler.
+- `human_preview_fail`: Wenn Max in der Test-App ablehnt, als Regression/Lesson dokumentieren und wieder bei `validate_only` starten.
 
-Wenn Max eine Test-APK, Preview-APK, ein Preview-Icon oder einen Preview-App-Namen meint:
+## Tests
 
-- Nur Preview-Profil, Preview-App-Name oder Preview-Icon/Assets anfassen.
-- Produktions-Android, Live-Manifest, Release-Manifest und `main` bleiben unveraendert.
-- Admin-Web und Kolleg:innen-Web bleiben bei reinem Test-APK-Icon/App-Namen unveraendert, ausser Max verlangt ausdruecklich eine HTML-Preview-Aenderung.
-- Erst Erfolg melden, wenn der CI-/Preview-Run gruen ist und das erwartete APK- oder HTML-Artefakt existiert.
-- Nach `publish_preview` ist Max' Test in der Test-APK ein Pflicht-Gate.
-- Nach Max' Freigabe darf fuer den Haupt-App-Push nur `publish_admin_beta` zaehlen: Erfolg braucht gemergten `[admin-beta]` PR, aktualisiertes `android_update_manifest.json` auf `main` und HTTP 200 der neuen Admin-HTML.
-- Wenn Max in der Test-APK "nicht gut" meldet, ist das `human_preview_fail`: dokumentieren, als Regression aufnehmen und wieder bei `validate_only` starten.
+- Jeder Patch: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`.
+- UI/Layout/Tablet/Phone/Drag/Button/HTML: zusaetzlich `cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression`.
+- GPT/Payload/Schema-Aenderungen: `python release-pipeline\kgg_gpt_payload_preflight.py --self-test`, `python release-pipeline\kgg_gpt_mock_eval.py --self-test`, `python release-pipeline\kgg_gpt_eval.py`, `python release-pipeline\kgg_gpt_stabilize.py --self-test`, `python release-pipeline\kgg_custom_gpt_knowledge_pack.py --check`.
+- Modulare Quelle: `python release-pipeline\build_therapist_source.py --check`.
 
-## Echte GPT-Testschleife
+Der Stabilisierungslauf ist erst nach zwei kompletten gruenen Runden ohne neue Fehlerklasse abgeschlossen.
 
-Nach jeder Aenderung an diesem Playbook, Bug-Wissen, Routing oder Payload-Regeln:
+## Repair-Lab und Modellregel
 
-1. Lokale GPT-Evals ausfuehren.
-2. Custom GPT mit den Prompts aus `docs/kgg-custom-gpt-test-prompts.md` testen.
-3. Antworten gegen `docs/kgg-custom-gpt-expected-results.md` pruefen.
-4. Ergebnis in `docs/kgg-custom-gpt-test-report.md` dokumentieren.
-5. Bei FAIL Playbook, Routing, Lessons oder Eval-Fixtures nachschaerfen und erneut testen.
-6. `python release-pipeline/kgg_gpt_stabilize.py --write-report` ausfuehren und `docs/kgg-custom-gpt-cycle-report.md` pruefen.
-7. Ende erst nach zwei kompletten gruenen Runden ohne neue Fehlerklasse.
-8. Nach echten Browser-/Test-APK-Ergebnissen `python release-pipeline/kgg_gpt_stabilize.py --manual-results <json> --write-report --strict` verwenden.
+- Vor jedem echten GPT-Zyklus im Editor pruefen: hoechstes aktuell angebotenes Modell, das Custom Actions unterstuetzt. Der derzeit verifizierte Stand ist `GPT-5.6 Thinking`.
+- Produktions-GPT: vier kuratierte Knowledge-Packs, Web Search, Code Interpreter, Image Generation und nur die produktiven GitHub Actions. Apps bleiben aus, weil Apps und Custom Actions nicht gemeinsam aktiv sind; Canvas bleibt fuer das aktuelle Modell aus.
+- Eval-GPT: gleiches Modell, aber nur `docs/kgg-custom-gpt-eval-knowledge.md`, Code Interpreter und die beiden Repair-Lab Actions. Web Search, Production Actions, Production Knowledge, Golden Source und versteckte Assertions sind verboten.
+- Der Repair-Lab prueft acht Kernfaelle plus zwei verdeckte Holdouts an beschaedigten Vollversionen der aktuellen Admin-App.
+- Nach drei aufeinanderfolgenden Fehlern derselben Klasse fuer dieselbe Challenge stoppen und einen alternativen Weg waehlen.
+- Ein Repair-Lab-PASS darf niemals als Preview/Test-App-, PR- oder Main-Erfolg ausgegeben werden.
 
-## Stabilisierung und Fehlerklassen
+## Tablet-Splitter-Kontext
 
-Jeder neue GPT- oder Preview-Fehler wird klassifiziert:
+Relevante Marker fuer Diagnose/Handoff:
 
-- `payload_schema`: falsches JSON, `file` statt `path`, fehlende `required_tests`.
-- `preview_gate`: roter Run, fehlendes Artifact, falsche 404-Deutung.
-- `ci_tooling`: fehlendes Runner-, PDF-, Browser-, Android- oder Emulator-Tooling.
-- `unsafe_patch`: Guard-Token, manuelle Versionierung, zu breite Appends.
-- `ui_logic`: Splitter/Scale vermischt, Artefakte, falsche Position.
-- `false_claim`: GPT behauptet Tests, Preview oder Test-APK ohne Beweis.
-- `stale_context`: alte Version, falsche Source-Datei oder nicht geladene Area-Routes.
-- `human_preview_fail`: Max lehnt die Test-APK/Preview fachlich oder optisch ab.
+- `tabletLayoutFreeTools`
+- `tabletLayoutResizeHandle`
+- `--kgg-tablet-left-col`
+- `--kgg-tablet-ui-scale`
+- `updateTabletLayoutHandle()`
+- `initTabletLayoutControls()`
 
-Regel: Erst einen Test/Eval fuer die Fehlerklasse ergaenzen, dann Playbook, Routing, Lessons, Preflight oder Action-Schema nachschaerfen. Wenn derselbe Fehler zweimal auftaucht, muss er technisch im Gate oder in der Eval-Suite blockiert werden.
+Plus/Minus ist Skalierung. Ziehen links/rechts ist Spaltenbreite.

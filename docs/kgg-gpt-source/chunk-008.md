@@ -1,9 +1,58 @@
 # KGG Source Chunk 008
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 3361-3780
 
 ```html
+      body.tabletLayoutCustom .bankRow b,
+      body.tabletLayoutCustom .planCard b{
+        font-size:calc(19px * var(--kgg-tablet-ui-scale,1))!important;
+      }
+      body.tabletLayoutCustom .bankRow small,
+      body.tabletLayoutCustom .planCard small{
+        font-size:calc(13px * var(--kgg-tablet-ui-scale,1))!important;
+      }
+      body.tabletLayoutCustom .drawerBtn,
+      body.tabletLayoutCustom .baseCard,
+      body.tabletLayoutCustom .primary,
+      body.tabletLayoutCustom .mutedBtn{
+        font-size:calc(18px * var(--kgg-tablet-ui-scale,1))!important;
+      }
+      body.adminMode .adminTestBanner{display:none!important}
+      body.adminMode .scanHub .adminConfigBtn,
+      body.adminMode .scanHub .sharedBankBtn{
+        display:flex!important;
+        margin:0;
+        min-height:58px;
+        align-items:center;
+        justify-content:center;
+      }
+      body.adminMode .scanHub{
+        grid-template-columns:minmax(150px,1fr) minmax(150px,1fr) minmax(140px,.8fr) minmax(170px,1fr)!important;
+      }
+    }
+
+    /* v341 Tablet Layout Controls:
+       Schloss teilt sich den Paketbereich, freie Tools liegen als rechte Vertikalleiste. */
+    @media (min-width:760px){
+      body.tabletLayoutCustom .app{
+        grid-template-columns:minmax(140px,var(--kgg-tablet-left-col,42vw)) minmax(180px,1fr) minmax(84px,.72fr)!important;
+      }
+      .tabletLayoutControls{
+        position:relative!important;
+        top:auto!important;
+        right:auto!important;
+        grid-column:3!important;
+        grid-row:5!important;
+        align-self:stretch!important;
+        justify-self:end!important;
+        display:flex!important;
+        width:78px!important;
+        min-width:78px!important;
+        max-width:78px!important;
+        height:66px!important;
+        min-height:0!important;
+        padding:0!important;
         gap:0!important;
         border:0!important;
         border-radius:18px!important;
@@ -375,53 +424,4 @@
         grid-template-columns:minmax(0,1fr) 82px!important;
         gap:10px!important;
       }
-      #createPanel:not(.planMode) .packageLayoutSlot,
-      #createPanel.planMode .packageLayoutSlot{
-        grid-column:3!important;
-        grid-row:5!important;
-      }
-      .packageLayoutSlot #packageToggle{
-        grid-column:1!important;
-        grid-row:1!important;
-        width:100%!important;
-        min-width:0!important;
-        height:66px!important;
-        min-height:66px!important;
-        padding:8px 12px!important;
-        justify-content:center!important;
-      }
-      .packageLayoutSlot .tabletLayoutControls{
-        grid-column:2!important;
-        grid-row:1!important;
-        width:82px!important;
-        min-width:82px!important;
-        max-width:82px!important;
-        height:66px!important;
-        justify-self:stretch!important;
-      }
-      .packageLayoutSlot .tabletLockSwitch{
-        border:1px solid rgba(220,227,235,.95)!important;
-        background:linear-gradient(180deg,#fff,#f6f8fb)!important;
-        box-shadow:0 8px 22px rgba(7,16,39,.12),0 1px 0 rgba(255,255,255,.9) inset!important;
-      }
-      body.tabletLayoutUnlocked .tabletLockSwitch{
-        border-color:rgba(94,167,232,.7)!important;
-        box-shadow:0 10px 26px rgba(94,167,232,.18),0 1px 0 rgba(255,255,255,.9) inset!important;
-      }
-      .tabletLayoutFreeTools{
-        width:78px!important;
-        padding:10px 8px!important;
-      }
-      .tabletLayoutFreeTools button{
-        width:62px!important;
-        height:62px!important;
-        min-height:62px!important;
-        font-size:34px!important;
-      }
-      .tabletScaleValue{
-        min-height:74px!important;
-        font-size:14px!important;
-      }
-      .tabletLayoutFreeTools::before{
-        top:76px!important;
 ```

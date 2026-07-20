@@ -1,9 +1,62 @@
 # KGG Source Chunk 062
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 26041-26460
 
 ```html
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.96),0 4px 12px rgba(7,16,39,.12)!important;
+      font-size:24px!important;
+      font-weight:1000!important;
+      line-height:1!important;
+      pointer-events:auto!important;
+    }
+    body.kggPhonePhotoMenuOpen #scanHub #scanBtn #phonePhotoMenuToggle{
+      background:rgba(7,16,39,.88)!important;
+      color:#fff!important;
+    }
+    body.kggPhoneHasPlan #createPanel.planMode #finishBtn:not(.hidden){
+      z-index:41!important;
+    }
+    .kggPhonePhotoMenu{
+      z-index:94!important;
+      background:rgba(255,255,255,.92)!important;
+      backdrop-filter:blur(18px) saturate(1.28);
+      -webkit-backdrop-filter:blur(18px) saturate(1.28);
+    }
+    #scanHub #scanPreview:not(.hidden){z-index:70!important}
+    body.kggPhoneDrawerOpen #scanHub,
+    body.kggPhoneDrawerOpen #createPanel.planMode #finishBtn:not(.hidden){
+      z-index:40!important;
+    }
+    body.kggPhoneDrawerOpen .kggPhonePhotoMenu{display:none!important}
+  }
+</style>
+
+<script id="kgg-v042-phone-dock-anchored-correction-script">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v042-phone-dock-anchored-correction";
+  var PHONE_QUERY="(max-width:759px)";
+  var observer=null;
+  function byId(id){return document.getElementById(id);}
+  function isPhone(){return !!(window.matchMedia&&window.matchMedia(PHONE_QUERY).matches&&!(window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive()));}
+  function closePhotoMenu(){
+    if(document.body)document.body.classList.remove("kggPhonePhotoMenuOpen");
+    var toggle=byId("phonePhotoMenuToggle");
+    if(toggle)toggle.setAttribute("aria-expanded","false");
+  }
+  function closeAdminMenu(){
+    var panel=byId("kggPhoneAdminMenuPanel");
+    var btn=byId("kggPhoneAdminMenuBtn");
+    if(panel)panel.hidden=true;
+    if(btn)btn.setAttribute("aria-expanded","false");
+  }
+  function togglePhotoMenu(ev){
+    if(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();
+    }
     var next=!(document.body&&document.body.classList.contains("kggPhonePhotoMenuOpen"));
     if(document.body)document.body.classList.toggle("kggPhonePhotoMenuOpen",next);
     var toggle=byId("phonePhotoMenuToggle");
@@ -108,6 +161,8 @@
 })();
 </script>
 <!-- KGG PATCH END kgg-v042-phone-dock-anchored-correction -->
+
+<!-- SOURCE FILE: kgg-update/src/patches/v044-phone-liquid-actions.html -->
 
 <!-- KGG PATCH START kgg-v044-phone-liquid-actions -->
 <style id="kgg-v044-phone-liquid-actions-style">
@@ -336,6 +391,8 @@
 </script>
 <!-- KGG PATCH END kgg-v044-phone-liquid-actions -->
 
+<!-- SOURCE FILE: kgg-update/src/patches/v045-phone-drawer-bank-align.html -->
+
 <!-- KGG PATCH START kgg-v045-phone-drawer-bank-align -->
 <style id="kgg-v045-phone-drawer-bank-align-style">
   @media(max-width:759px){
@@ -367,61 +424,4 @@
     body.kggPhoneDrawerSafeOpen #recentList:not(.hidden),
     body.kggPhoneDrawerSafeOpen #packageList:not(.hidden){
       position:fixed!important;
-      left:16px!important;
-      right:16px!important;
-      bottom:calc(86px + env(safe-area-inset-bottom))!important;
-      z-index:91!important;
-      overscroll-behavior:contain!important;
-      touch-action:pan-y!important;
-      overflow:auto!important;
-      background:rgba(255,255,255,.98)!important;
-      border:1px solid rgba(220,227,235,.96)!important;
-      border-radius:22px!important;
-      padding:10px!important;
-      box-shadow:0 22px 58px rgba(7,16,39,.24),0 4px 14px rgba(7,16,39,.10)!important;
-      backdrop-filter:blur(10px)!important;
-      -webkit-backdrop-filter:blur(10px)!important;
-      max-height:min(54dvh,390px)!important;
-    }
-    body.kggPhoneDrawerSafeOpen #recentList:not(.hidden) .notice,
-    body.kggPhoneDrawerSafeOpen #packageList:not(.hidden) .notice{margin-top:0!important}
-    body.kggPhoneDrawerSafeOpen #scanHub,
-    body.kggPhoneDrawerSafeOpen #createPanel.planMode #finishBtn:not(.hidden){
-      z-index:40!important;
-    }
-    body.kggPhoneDrawerSafeOpen .kggPhonePhotoMenu{display:none!important}
-  }
-</style>
-
-<script id="kgg-v045-phone-drawer-bank-align-script">
-(function(){
-  "use strict";
-  var PATCH_ID="kgg-v045-phone-drawer-bank-align";
-  var PHONE_QUERY="(max-width:759px)";
-  function byId(id){return document.getElementById(id);}
-  function isPhone(){return !!(window.matchMedia&&window.matchMedia(PHONE_QUERY).matches&&!(window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive()));}
-  function ensureBackdrop(){
-    var backdrop=byId("phoneDrawerBackdrop");
-    if(!backdrop){
-      backdrop=document.createElement("div");
-      backdrop.id="phoneDrawerBackdrop";
-      backdrop.className="kggPhoneDrawerBackdrop";
-      backdrop.setAttribute("aria-hidden","true");
-      document.body.appendChild(backdrop);
-    }
-    if(backdrop.dataset.kggV045Bound!=="1"){
-      backdrop.dataset.kggV045Bound="1";
-      backdrop.addEventListener("click",function(ev){
-        ev.preventDefault();
-        ev.stopImmediatePropagation();
-        closePhoneDrawerSafe();
-      },true);
-    }
-    return backdrop;
-  }
-  function closePhoneDrawerSafe(){
-    var recent=byId("recentList");
-    var packages=byId("packageList");
-    var recentBtn=byId("recentToggle");
-    var packageBtn=byId("packageToggle");
 ```

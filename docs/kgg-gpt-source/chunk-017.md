@@ -1,9 +1,58 @@
 # KGG Source Chunk 017
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 7141-7560
 
 ```html
+        var size = this.coefficients.length;
+        if (a === 1) {
+            // Just the sum of the coefficients
+            this.coefficients.forEach(function (coefficient) {
+                result = GenericGF_1.addOrSubtractGF(result, coefficient);
+            });
+            return result;
+        }
+        result = this.coefficients[0];
+        for (var i = 1; i < size; i++) {
+            result = GenericGF_1.addOrSubtractGF(this.field.multiply(a, result), this.coefficients[i]);
+        }
+        return result;
+    };
+    return GenericGFPoly;
+}());
+exports.default = GenericGFPoly;
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var binarizer_1 = __webpack_require__(4);
+var decoder_1 = __webpack_require__(5);
+var extractor_1 = __webpack_require__(11);
+var locator_1 = __webpack_require__(12);
+function scan(matrix) {
+    var locations = locator_1.locate(matrix);
+    if (!locations) {
+        return null;
+    }
+    for (var _i = 0, locations_1 = locations; _i < locations_1.length; _i++) {
+        var location_1 = locations_1[_i];
+        var extracted = extractor_1.extract(matrix, location_1);
+        var decoded = decoder_1.decode(extracted.matrix);
+        if (decoded) {
+            return {
+                binaryData: decoded.bytes,
+                data: decoded.text,
+                chunks: decoded.chunks,
+                version: decoded.version,
+                location: {
+                    topRightCorner: extracted.mappingFunction(location_1.dimension, 0),
+                    topLeftCorner: extracted.mappingFunction(0, 0),
+                    bottomRightCorner: extracted.mappingFunction(location_1.dimension, location_1.dimension),
                     bottomLeftCorner: extracted.mappingFunction(0, location_1.dimension),
                     topRightFinderPattern: location_1.topRight,
                     topLeftFinderPattern: location_1.topLeft,
@@ -375,53 +424,4 @@ function readFormatInformation(matrix) {
     return null;
 }
 function getDataBlocks(codewords, version, ecLevel) {
-    var ecInfo = version.errorCorrectionLevels[ecLevel];
-    var dataBlocks = [];
-    var totalCodewords = 0;
-    ecInfo.ecBlocks.forEach(function (block) {
-        for (var i = 0; i < block.numBlocks; i++) {
-            dataBlocks.push({ numDataCodewords: block.dataCodewordsPerBlock, codewords: [] });
-            totalCodewords += block.dataCodewordsPerBlock + ecInfo.ecCodewordsPerBlock;
-        }
-    });
-    // In some cases the QR code will be malformed enough that we pull off more or less than we should.
-    // If we pull off less there's nothing we can do.
-    // If we pull off more we can safely truncate
-    if (codewords.length < totalCodewords) {
-        return null;
-    }
-    codewords = codewords.slice(0, totalCodewords);
-    var shortBlockSize = ecInfo.ecBlocks[0].dataCodewordsPerBlock;
-    // Pull codewords to fill the blocks up to the minimum size
-    for (var i = 0; i < shortBlockSize; i++) {
-        for (var _i = 0, dataBlocks_1 = dataBlocks; _i < dataBlocks_1.length; _i++) {
-            var dataBlock = dataBlocks_1[_i];
-            dataBlock.codewords.push(codewords.shift());
-        }
-    }
-    // If there are any large blocks, pull codewords to fill the last element of those
-    if (ecInfo.ecBlocks.length > 1) {
-        var smallBlockCount = ecInfo.ecBlocks[0].numBlocks;
-        var largeBlockCount = ecInfo.ecBlocks[1].numBlocks;
-        for (var i = 0; i < largeBlockCount; i++) {
-            dataBlocks[smallBlockCount + i].codewords.push(codewords.shift());
-        }
-    }
-    // Add the rest of the codewords to the blocks. These are the error correction codewords.
-    while (codewords.length > 0) {
-        for (var _a = 0, dataBlocks_2 = dataBlocks; _a < dataBlocks_2.length; _a++) {
-            var dataBlock = dataBlocks_2[_a];
-            dataBlock.codewords.push(codewords.shift());
-        }
-    }
-    return dataBlocks;
-}
-function decodeMatrix(matrix) {
-    var version = readVersion(matrix);
-    if (!version) {
-        return null;
-    }
-    var formatInfo = readFormatInformation(matrix);
-    if (!formatInfo) {
-        return null;
 ```

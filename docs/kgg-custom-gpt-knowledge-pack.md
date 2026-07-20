@@ -1,14 +1,14 @@
 # KGG Custom GPT Knowledge Pack
 
-This file is generated for upload into the Custom GPT Wissen/Knowledge area.
-The short GPT editor instructions should stay strict and compact; long context, runbooks, routing, bug lessons and eval fixtures live here.
+This generated compatibility pack contains the complete production knowledge set. Prefer the four smaller curated packs in the GPT editor so retrieval stays focused.
 
-Source digest: `d34ed9a15cfdf8a7`
+Source digest: `2b54568e6f684355`
 
 ## Usage Rules
 
 - Reload this pack before KGG patch, Preview/Test-APK, Admin-Beta or run-diagnosis work.
 - If this pack conflicts with live GitHub files, trust the live source files and report stale knowledge.
+- Read current cycle and run status from GitHub Actions, not from this static pack.
 - Do not claim Preview, Test-APK or Admin-Beta success without run/artifact/HTTP evidence.
 - Treat `ci_tooling` separately from app patch failures.
 - Positive E2E push-test means both `publish_preview` and `publish_admin_beta` succeeded.
@@ -24,7 +24,6 @@ Source digest: `d34ed9a15cfdf8a7`
 - `docs/kgg-custom-gpt-test-prompts.md`
 - `docs/kgg-custom-gpt-expected-results.md`
 - `docs/kgg-custom-gpt-test-report.md`
-- `docs/kgg-custom-gpt-cycle-report.md`
 - `docs/kgg-gpt-bug-lessons.md`
 - `docs/kgg-gpt-patch-patterns.md`
 - `docs/kgg-gpt-area-routes.md`
@@ -43,7 +42,8 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 - GitHub repo: `https://github.com/Kayus24/kgg`.
 - Source branch: `main`.
-- Primary Admin source: `kgg-update/index.html`.
+- Modular Admin source: `kgg-update/src`.
+- Generated public Admin HTML: `kgg-update/index.html`.
 - Web update metadata: `kgg-update/version.json`.
 - Android/Web release manifest: `therapist-app/android_update_manifest.json`.
 - Release pipeline docs: `release-pipeline/README.md`.
@@ -55,22 +55,27 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Custom GPT preview runbook: `docs/kgg-custom-gpt-preview-runbook.md`.
 - Custom GPT preview report template: `docs/kgg-custom-gpt-preview-report-template.md`.
 - Custom GPT Wissen/Knowledge pack: `docs/kgg-custom-gpt-knowledge-pack.md`.
+- Curated production Knowledge: `docs/kgg-custom-gpt-knowledge-{architecture,operations,safety,testing}.md`.
+- Custom GPT model/capability/resource contract: `docs/kgg-custom-gpt-resource-manifest.json`.
+- Blind full-app Repair-Lab: `docs/kgg-custom-gpt-repair-lab.md`, workflow `.github/workflows/kgg-gpt-repair-lab.yml`.
+- Isolated Eval-GPT Knowledge: `docs/kgg-custom-gpt-eval-knowledge.md`; never upload production fixtures to this GPT.
 - Custom GPT stabilization cycle report: `docs/kgg-custom-gpt-cycle-report.md`.
 - Bug-history lessons: `docs/kgg-gpt-bug-lessons.md`, `docs/kgg-gpt-bug-index.json`, `docs/kgg-gpt-patch-patterns.md`.
 - Source routing: `docs/kgg-gpt-area-routes.md`, `docs/kgg-gpt-area-routes.json`.
 - Source chunks for GPT patch planning: `docs/kgg-gpt-source-index.json` and `docs/kgg-gpt-source/chunk-*.md`.
 - GPT eval fixtures: `docs/kgg-custom-gpt-test-prompts.md`, `docs/kgg-custom-gpt-expected-results.md`, `docs/kgg-custom-gpt-test-report.md`.
 - GPT stabilization runner: `release-pipeline/kgg_gpt_stabilize.py`.
+- Blind Repair-Lab runner: `release-pipeline/kgg_gpt_repair_lab.py`; acceptance tracker: `release-pipeline/kgg_gpt_repair_stabilize.py`.
 - GPT preview channel branch: `gpt-preview`, files below `previews/`.
 - The Custom GPT may only write through `KGG GPT Preview Gate`; direct repo writes, direct main writes and direct merges stay forbidden.
 
 ## Current Versions
 
-- Source web version: v59 / `1.0.59-ui-scaler-push-canary`.
-- Source index URL: `index.html?v=59`.
-- Source notes: v059: Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification.
-- Live Admin release: `r0421` / `1.0.58-grossdruck-readability-beta`.
-- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0421/admin.html`.
+- Source web version: v60 / `1.0.60-tablet-html-release-label`.
+- Source index URL: `index.html?v=60`.
+- Source notes: v060: Zeigt Release, HTML-Build und geladenen Dateinamen unten rechts im ausgefahrenen Tablet-Menue.
+- Live Admin release: `r0424` / `1.0.60-tablet-html-release-label`.
+- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0424/admin.html`.
 - Live colleague release: `r0397` / `1.0.29-camera-touch-parser-fix`.
 - Live colleague URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0397/colleague.html`.
 - Latest Android shell: `v401`.
@@ -95,14 +100,18 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Before producing a patch payload, load `docs/kgg-gpt-area-routes.md` and then only the source chunks needed for the requested area.
 - If a known bug-history lesson matches, reuse its caution, do-not-touch rules and tests.
 - Run payload JSON through `python release-pipeline/kgg_gpt_payload_preflight.py --payload-file <file>` before dispatching.
+- New GPT patches use payload v2 with `patch_content`; direct operations against `kgg-update/index.html` are forbidden because `index.html` is generated output.
 - Do not assume the newest local HTML is live.
-- If Max asks for a beta, use `KGG GPT Preview Gate` in `validate_only` mode first, then `publish_preview` after green validation; do not create a PR until Max explicitly accepts the preview.
+- If Max asks for a beta, use `KGG GPT Preview Gate` in `validate_only` mode first, then `publish_preview` after green validation; do not create a PR until Max explicitly accepts the Test-App/Preview-APK result.
 - If Max asks for Test-APK review, publish only through the Preview/Test-APK channel and wait for Max' Test-APK acceptance before PR/main steps.
 - If Max says the preview is good, use `create_pr` only with the same `request_id` and patch hash unless Max explicitly requests the real Admin-Beta/Haupt-App push.
 - A positive end-to-end push test requires both `publish_preview` for Test-App/Preview-App and `publish_admin_beta` for Admin-Beta merge to `main`.
 - If critical fails with `Missing tool pdftoppm`, `Missing tool pdfinfo`, `poppler-utils`, `adb` or emulator tooling, classify it as `ci_tooling`, not as an app/UI patch failure.
 - If a Preview run fails, report the failed step and the actual error before checking `meta.json` or manifest URLs.
 - If the Custom GPT cannot load this context, it must say that repo context is unavailable instead of guessing or asking Max for old basis filenames.
+- Before each real GPT test cycle verify the highest Actions-compatible model and capability/Knowledge hashes against `docs/kgg-custom-gpt-resource-manifest.json`.
+- The isolated Eval GPT must not receive Web Search, production Actions, production Knowledge, intact main HTML, golden source, sample repairs or hidden assertions.
+- A Repair-Lab PASS is evaluation evidence only and never authorizes Preview/Test-App, PR, Admin-Beta or main.
 
 ## Required Tests
 
@@ -110,6 +119,7 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - UI, HTML, flicker, phone, tablet, card drag or layout changes: also `cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression`.
 - GPT playbook, routing, payload or bug-knowledge changes: also `python release-pipeline\kgg_gpt_payload_preflight.py --self-test` and `python release-pipeline\kgg_gpt_eval.py`.
 - Custom GPT stabilization changes: also `python release-pipeline\kgg_gpt_stabilize.py --self-test`, `python release-pipeline\kgg_custom_gpt_knowledge_pack.py --check` and update `docs/kgg-custom-gpt-cycle-report.md`.
+- Repair-Lab changes: also `python release-pipeline\kgg_gpt_repair_lab.py --self-test`, `python release-pipeline\kgg_gpt_repair_stabilize.py --self-test` and `python release-pipeline\kgg_custom_gpt_resource_audit.py --check`.
 - Parser or text-block changes: also `cmd /c release-pipeline\run-kgg-tests.cmd --suite textblocks --level regression`.
 - Sync, bank, package or peer changes: also `cmd /c release-pipeline\run-kgg-tests.cmd --suite sync --level regression`.
 - Android sync bridge changes: also `cmd /c release-pipeline\run-kgg-tests.cmd --suite native-sync --level regression`.
@@ -121,6 +131,7 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Required status check: `KGG Required Gate / required-gate`.
 - Admin beta auto-merge requires green checks plus the explicit `kgg-auto-merge` label.
 - Custom GPT write access is limited to workflow dispatch for `.github/workflows/kgg-gpt-preview-gate.yml`.
+- The isolated Eval GPT may dispatch only `.github/workflows/kgg-gpt-repair-lab.yml`; that workflow cannot create Preview, PR, Admin-Beta or main changes.
 - GPT Action schema must expose `validate_only`, `publish_preview`, `create_pr`, `publish_admin_beta` and run/job/artifact status reads.
 - Current GPT editor setup uses split Actions; paste the API-only schema into `api.github.com` to avoid duplicate `raw.githubusercontent.com` domains.
 - Preview writes go only to branch `gpt-preview`; production writes are PR-only and never auto-merge.
@@ -131,9 +142,10 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Bug-history knowledge is generated by `release-pipeline/kgg_bug_knowledge.py`.
 - Source chunk and area-route context is generated by `release-pipeline/kgg_gpt_source_context.py`.
 - Custom GPT knowledge pack is generated by `release-pipeline/kgg_custom_gpt_knowledge_pack.py`.
+- Custom GPT resource hashes are generated by `release-pipeline/kgg_custom_gpt_resource_audit.py`.
 - Run `python release-pipeline/kgg_gpt_context.py --write` after changing version, release, workflow, test or durable project-rule context.
 - Run `python release-pipeline/kgg_bug_knowledge.py --write` after changing bug/debug docs, patch lessons or known failure rules.
-- Run `python release-pipeline/kgg_gpt_source_context.py --write` after changing `kgg-update/index.html` or source routing rules.
+- Run `python release-pipeline/kgg_gpt_source_context.py --write` after changing `kgg-update/src`, generated source routing rules or modular patch behavior.
 - Run `python release-pipeline/kgg_gpt_eval.py` after changing Custom GPT playbook, prompts, expected results, routing or preflight behavior.
 - Run `python release-pipeline/kgg_custom_gpt_knowledge_pack.py --write` after changing Custom GPT docs that should be uploaded to GPT Wissen.
 - Run `python release-pipeline/kgg_gpt_stabilize.py --write-report` after running a GPT stabilization cycle.
@@ -145,119 +157,101 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 # KGG Custom GPT Playbook
 
-Dieses Playbook ist die zentrale Arbeitsanweisung fuer den privaten KGG Update-Agent GPT.
-Es ist absichtlich streng: Wenn der GPT keinen aktuellen Repo-Kontext laden kann, darf er nicht raten.
-
 ## Arbeitsreihenfolge
 
-1. Lade zuerst `docs/kgg-gpt-context.md`.
-2. Lade `docs/kgg-custom-gpt-action-schema.md`, `docs/kgg-custom-gpt-negative-examples.md`, `docs/kgg-custom-gpt-preview-runbook.md` und `docs/kgg-custom-gpt-preview-report-template.md`.
-3. Pruefe danach `docs/kgg-gpt-bug-lessons.md`, `docs/kgg-gpt-bug-index.json` und `docs/kgg-gpt-patch-patterns.md` auf aehnliche Symptome.
-4. Nutze `docs/kgg-gpt-area-routes.md` oder `docs/kgg-gpt-area-routes.json`, um nur die passenden Source-Chunks zu laden.
-5. Nenne Max die echte Basis: Branch, Datei, Version und betroffener Bereich.
-6. Erstelle nur einen kleinen, risikoarmen Patchvorschlag.
-7. Fuer Beta/Test-HTML immer zuerst `KGG GPT Preview Gate` im Modus `validate_only` verwenden.
-8. Erst nach gruener Validierung `publish_preview` verwenden.
-9. Erstelle einen PR erst, wenn Max dieselbe Preview explizit akzeptiert hat.
-10. Verwende `publish_admin_beta` nur, wenn Max nach gruener Preview/Test-APK wirklich den Haupt-App/Admin-Beta-Push will.
+1. Lade `docs/kgg-gpt-context.md`.
+2. Lade `docs/kgg-custom-gpt-action-schema.md`.
+3. Lade bei Patchfragen `docs/kgg-gpt-area-routes.md` und die passenden Source-Chunks.
+4. Lade `docs/kgg-gpt-bug-lessons.md` und `docs/kgg-gpt-patch-patterns.md`.
+5. Wenn Kontext oder Schema nicht geladen werden kann: stoppen, keinen Payload raten.
+6. Bei Analysefragen nur Diagnose/Handoff schreiben; kein `submitKggPreviewGate`.
+7. Bei Preview/Test-App-Wunsch immer `validate_only -> publish_preview`.
+8. Nach `publish_preview` wartet der Prozess auf Max' Test-App/Test-APK/Preview-APK-Freigabe.
+9. Erst nach Max-Freigabe `create_pr` oder, wenn Max Haupt-App verlangt, `publish_admin_beta`.
 
-## Harte Antwortregeln
+## Modulare Quelle
 
-- Keine direkte `main`-Aenderung und kein direktes Merge.
-- Ein End-to-End-Push-Test ist erst positiv, wenn `publish_preview` die Test-App/Preview-App aktualisiert hat und `publish_admin_beta` den Admin-Beta-Merge nach `main` erfolgreich abgeschlossen hat.
-- Jede Beta/Test-HTML/Test-APK-Preview-Antwort muss die Reihenfolge `validate_only -> publish_preview` explizit nennen.
-- Wenn die Action `submitKggPreviewGate` im GPT-Editor keinen `validate_only`-Modus anbietet, ist das Action-Schema stale; dann nicht publishen, sondern Schema-Fix/Handoff melden.
-- `publish_preview` darf nie als erster Preview-Gate-Schritt genannt werden.
-- Analyse-, Warum- oder Ursachenfragen duerfen keinen Preview-Gate-Dispatch starten. Erst Diagnose/Handoff geben; dispatchen nur bei klarer Preview-, Test-HTML-, Test-APK- oder Abschicken-Anweisung von Max.
-- Keine Erfolgsmeldung zu Preview, Beta, Tests, APK oder PR, bevor der GitHub-Run gruen ist und das erwartete Artefakt existiert.
-- Wenn ein Run fehlschlaegt, den echten fehlgeschlagenen Step und die konkrete Fehlermeldung nennen.
-- Wenn ein Run wegen `Missing tool pdftoppm`, `Missing tool pdfinfo`, `poppler-utils`, `adb` oder Emulator-Tooling faellt, ist das `ci_tooling`; dann nicht den UI-Patch beschuldigen, solange kein App-Assertion-Fehler im Log steht.
-- Nie behaupten, Tests seien gruen, wenn nur ein Plan oder Handoff geschrieben wurde.
-- Keine grossen Append-Patches an `</body>` oder `</html>`, solange ein kleiner lokaler Patch an vorhandenen CSS/JS-Stellen moeglich ist.
-- Guard-Tokens duerfen in Patch-Payloads nicht in `old_text` oder `new_text` vorkommen, auch nicht in Kommentaren.
-- UI/Layout-Anfragen brauchen immer `critical` plus `ui-stability regression`.
-- Bei UI/Layout-Payloads ohne `required_tests` sofort stoppen, Payload reparieren und erst danach `validate_only` starten.
-- Versions- und Build-Metadaten nicht manuell patchen; das Preview Gate setzt Version, Build-Info und Preview-Metadaten.
+- `kgg-update/index.html` ist generiertes Endprodukt und bleibt die öffentliche Lade-URL.
+- Neue GPT-App-Patches gehen über `kgg-update/src/patches/vNNN-<slug>.html`.
+- Der GPT bestimmt keinen Repository-Pfad.
+- Der GPT liefert nur `patch_content` und Metadaten.
+- Das Gate erzeugt Patch-ID, Modulpfad, `parts.json`, `requiredPatchIds`, Metadaten, `version.json` und die generierte `index.html`.
+- Das neue Modul muss vor `footer.html` einsortiert werden.
 
-## Payload-Regeln
+## Payload v2
 
-- `old_text` muss exakt einmal in `kgg-update/index.html` vorkommen.
-- Jede Operation muss `path: "kgg-update/index.html"` verwenden. Nicht `file`, `filename` oder andere Alias-Felder nutzen.
-- `new_text` darf keine Token enthalten, die das Write-Gate als geschuetzten Bereich erkennt.
-- Schutzbereiche nicht als Kommentar in den Patch schreiben; diese gehoeren in die Antwort, nicht in den Payload.
-- UI-Payloads muessen die erwarteten Tests in Payload-Metadaten oder Handoff nennen:
-  - `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`
-  - `cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression`
-- Bei Preview-Dispatch `ui_stability=true` setzen, sobald UI, HTML, Tablet, Phone, Layout, Drag, Swipe oder Flicker betroffen ist.
-- Komplexe GitHub-CLI-Dispatches muessen JSON via STDIN nutzen, damit Quotes im `payload_json` erhalten bleiben.
+Pflichtfelder:
 
-## Tablet-Splitter Standarddiagnose
+- `request_id`
+- `title`
+- `summary`
+- `version_slug`
+- `touched_areas`
+- `required_tests`
+- `patch_content`
 
-Wenn Max beschreibt, dass Plus/Minus, Splitter, Spaltenbreite oder Layout-Control durcheinander sind:
+`patch_content` ist ein HTML-Fragment und muss `__KGG_PATCH_ID__` enthalten.
 
-- `tabletLayoutFreeTools` ist das alte Skalierungs-Control.
-- `tabletLayoutResizeHandle` ist der Splitter/Handle.
-- `--kgg-tablet-ui-scale` gehoert zu Plus/Minus.
-- `--kgg-tablet-left-col` gehoert zur Spaltenbreite.
-- `updateTabletLayoutHandle()` positioniert den sichtbaren Handle.
-- `initTabletLayoutControls()` bindet Plus/Minus, Reset und Drag.
+Wenn ein Payload im Chat ausgegeben wird:
 
-Erwartete Bedienlogik:
+- Genau einen mit `json` markierten Codeblock ausgeben, keine JSON-Darstellung als normalen Markdown-Text.
+- Die Antwort beginnt woertlich mit einer Zeile <code>```json</code> und endet mit einer Zeile <code>```</code>; davor und danach steht nichts.
+- Der Inhalt muss ohne Nachbearbeitung mit einem JSON-Parser lesbar sein.
+- `__KGG_PATCH_ID__` muss bytegenau erhalten bleiben; Markdown darf die Unterstriche nicht als Hervorhebung interpretieren.
+- `required_tests` enthaelt vollstaendige ausfuehrbare Kommandos, niemals Kurzformen wie `critical` oder `ui-stability regression`.
+- Patch-Registrierung ist ein Objektvertrag: `window.KGG_PATCHES=window.KGG_PATCHES||{}; window.KGG_PATCHES[PATCH_ID]={installed:true};`. Keine Array-Registrierung und kein `.push(PATCH_ID)`.
 
-- Plus/Minus veraendert nur die UI-Skalierung.
-- Drag links/rechts am Splitter veraendert nur die Spaltenbreite.
-- Reset setzt Skalierung auf 100 Prozent und Spaltenverhaeltnis auf Default.
-- Das alte Sidebar-Scale-Control darf nicht als Artefakt sichtbar bleiben.
+Verboten:
 
-## Preview-Run Diagnose
+- `operations`
+- `replace_exact`
+- `old_text`
+- `new_text`
+- `path`
+- `file`
+- `filename`
+- `path: "kgg-update/index.html"`
 
-Wenn ein Preview-Link nicht erscheint:
+Wenn Max oder ein alter Handoff einen v1-Payload zeigt, nicht dispatchen. Erklaere: `kgg-update/index.html` ist generated output; der neue Vertrag verlangt `patch_content`.
 
-1. Run-Status abfragen.
-2. Bei Fehler Jobs/Steps lesen und den fehlgeschlagenen Step nennen.
-3. Nur bei gruenem Run `meta.json` und Artefakt pruefen.
-4. Kein 404 als "wartet noch" interpretieren, wenn der Run bereits rot ist.
-5. Erfolgsberichte muessen `run_id`, `conclusion`, `failed_step`, `meta_url`, `html_url` und `artifact_name` enthalten.
+## Guardrails
 
-## Test-APK und Icon
+- Keine Erfolgsmeldung ohne Run-ID, `conclusion: success`, Artefakt, `meta.json`, HTML und Test-App/Test-APK/Preview-APK-Nachweis.
+- Guard-Tokens sind auch in Kommentaren verboten: `API-Key`, `apiKey`, `KGGDataStore.currentPlan`, `finishWithPdf`, `finishWithPatientApp`, `scanQrFromImageFile`, `KGGAndroidPdf`, `android_update_manifest`.
+- Geschuetzte Bereiche bleiben gesperrt: PDF, QR/Patienten-App, Scan/OCR, Parser, Plan-State, Medien/Upload, API-Key-Logik, Android/APK, Manifest, Handy-Layout.
+- `ci_tooling` getrennt behandeln: `pdftoppm`, `pdfinfo`, `poppler-utils`, `adb` oder Emulatorfehler sind kein Beweis fuer einen App-Patchfehler.
+- `human_preview_fail`: Wenn Max in der Test-App ablehnt, als Regression/Lesson dokumentieren und wieder bei `validate_only` starten.
 
-Wenn Max eine Test-APK, Preview-APK, ein Preview-Icon oder einen Preview-App-Namen meint:
+## Tests
 
-- Nur Preview-Profil, Preview-App-Name oder Preview-Icon/Assets anfassen.
-- Produktions-Android, Live-Manifest, Release-Manifest und `main` bleiben unveraendert.
-- Admin-Web und Kolleg:innen-Web bleiben bei reinem Test-APK-Icon/App-Namen unveraendert, ausser Max verlangt ausdruecklich eine HTML-Preview-Aenderung.
-- Erst Erfolg melden, wenn der CI-/Preview-Run gruen ist und das erwartete APK- oder HTML-Artefakt existiert.
-- Nach `publish_preview` ist Max' Test in der Test-APK ein Pflicht-Gate.
-- Nach Max' Freigabe darf fuer den Haupt-App-Push nur `publish_admin_beta` zaehlen: Erfolg braucht gemergten `[admin-beta]` PR, aktualisiertes `android_update_manifest.json` auf `main` und HTTP 200 der neuen Admin-HTML.
-- Wenn Max in der Test-APK "nicht gut" meldet, ist das `human_preview_fail`: dokumentieren, als Regression aufnehmen und wieder bei `validate_only` starten.
+- Jeder Patch: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`.
+- UI/Layout/Tablet/Phone/Drag/Button/HTML: zusaetzlich `cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression`.
+- GPT/Payload/Schema-Aenderungen: `python release-pipeline\kgg_gpt_payload_preflight.py --self-test`, `python release-pipeline\kgg_gpt_mock_eval.py --self-test`, `python release-pipeline\kgg_gpt_eval.py`, `python release-pipeline\kgg_gpt_stabilize.py --self-test`, `python release-pipeline\kgg_custom_gpt_knowledge_pack.py --check`.
+- Modulare Quelle: `python release-pipeline\build_therapist_source.py --check`.
 
-## Echte GPT-Testschleife
+Der Stabilisierungslauf ist erst nach zwei kompletten gruenen Runden ohne neue Fehlerklasse abgeschlossen.
 
-Nach jeder Aenderung an diesem Playbook, Bug-Wissen, Routing oder Payload-Regeln:
+## Repair-Lab und Modellregel
 
-1. Lokale GPT-Evals ausfuehren.
-2. Custom GPT mit den Prompts aus `docs/kgg-custom-gpt-test-prompts.md` testen.
-3. Antworten gegen `docs/kgg-custom-gpt-expected-results.md` pruefen.
-4. Ergebnis in `docs/kgg-custom-gpt-test-report.md` dokumentieren.
-5. Bei FAIL Playbook, Routing, Lessons oder Eval-Fixtures nachschaerfen und erneut testen.
-6. `python release-pipeline/kgg_gpt_stabilize.py --write-report` ausfuehren und `docs/kgg-custom-gpt-cycle-report.md` pruefen.
-7. Ende erst nach zwei kompletten gruenen Runden ohne neue Fehlerklasse.
-8. Nach echten Browser-/Test-APK-Ergebnissen `python release-pipeline/kgg_gpt_stabilize.py --manual-results <json> --write-report --strict` verwenden.
+- Vor jedem echten GPT-Zyklus im Editor pruefen: hoechstes aktuell angebotenes Modell, das Custom Actions unterstuetzt. Der derzeit verifizierte Stand ist `GPT-5.6 Thinking`.
+- Produktions-GPT: vier kuratierte Knowledge-Packs, Web Search, Code Interpreter, Image Generation und nur die produktiven GitHub Actions. Apps bleiben aus, weil Apps und Custom Actions nicht gemeinsam aktiv sind; Canvas bleibt fuer das aktuelle Modell aus.
+- Eval-GPT: gleiches Modell, aber nur `docs/kgg-custom-gpt-eval-knowledge.md`, Code Interpreter und die beiden Repair-Lab Actions. Web Search, Production Actions, Production Knowledge, Golden Source und versteckte Assertions sind verboten.
+- Der Repair-Lab prueft acht Kernfaelle plus zwei verdeckte Holdouts an beschaedigten Vollversionen der aktuellen Admin-App.
+- Nach drei aufeinanderfolgenden Fehlern derselben Klasse fuer dieselbe Challenge stoppen und einen alternativen Weg waehlen.
+- Ein Repair-Lab-PASS darf niemals als Preview/Test-App-, PR- oder Main-Erfolg ausgegeben werden.
 
-## Stabilisierung und Fehlerklassen
+## Tablet-Splitter-Kontext
 
-Jeder neue GPT- oder Preview-Fehler wird klassifiziert:
+Relevante Marker fuer Diagnose/Handoff:
 
-- `payload_schema`: falsches JSON, `file` statt `path`, fehlende `required_tests`.
-- `preview_gate`: roter Run, fehlendes Artifact, falsche 404-Deutung.
-- `ci_tooling`: fehlendes Runner-, PDF-, Browser-, Android- oder Emulator-Tooling.
-- `unsafe_patch`: Guard-Token, manuelle Versionierung, zu breite Appends.
-- `ui_logic`: Splitter/Scale vermischt, Artefakte, falsche Position.
-- `false_claim`: GPT behauptet Tests, Preview oder Test-APK ohne Beweis.
-- `stale_context`: alte Version, falsche Source-Datei oder nicht geladene Area-Routes.
-- `human_preview_fail`: Max lehnt die Test-APK/Preview fachlich oder optisch ab.
+- `tabletLayoutFreeTools`
+- `tabletLayoutResizeHandle`
+- `--kgg-tablet-left-col`
+- `--kgg-tablet-ui-scale`
+- `updateTabletLayoutHandle()`
+- `initTabletLayoutControls()`
 
-Regel: Erst einen Test/Eval fuer die Fehlerklasse ergaenzen, dann Playbook, Routing, Lessons, Preflight oder Action-Schema nachschaerfen. Wenn derselbe Fehler zweimal auftaucht, muss er technisch im Gate oder in der Eval-Suite blockiert werden.
+Plus/Minus ist Skalierung. Ziehen links/rechts ist Spaltenbreite.
 
 ---
 
@@ -268,49 +262,60 @@ Regel: Erst einen Test/Eval fuer die Fehlerklasse ergaenzen, dann Playbook, Rout
 This is the canonical payload shape for `KGG GPT Preview Gate`.
 The Custom GPT must follow this shape exactly.
 
-The combined GPT Action OpenAPI schema lives at `docs/kgg-custom-gpt-action-openapi.yaml`.
-For the current split GPT editor setup, update the existing `api.github.com` Action with `docs/kgg-custom-gpt-action-api-openapi.yaml` and keep the separate `raw.githubusercontent.com` Action for read-only repo context.
-Do not paste the combined schema into an editor that already has a separate `raw.githubusercontent.com` Action; ChatGPT rejects duplicate action domains.
-If the GPT editor does not offer `validate_only`, the Action schema is stale and must be updated before any Preview request.
+The public app still loads `kgg-update/index.html`, but that file is generated output.
+The GPT must patch the modular source through the gate; it must not request direct edits to `kgg-update/index.html`.
 
 ## Modes
 
-- `validate_only`: validate JSON, exact patch matches and HTML syntax. Writes nothing.
-- `publish_preview`: validate, run tests, build Preview APK, publish HTML/meta to `gpt-preview`.
-- `create_pr`: only after Max accepts the matching preview. Creates a PR, never merges.
-- `publish_admin_beta`: only after Max accepts the matching Preview/Test-APK. Creates an `[admin-beta]` PR, labels it `kgg-auto-merge`, waits for required checks and merges the Admin beta to `main`.
+- `validate_only`: validate JSON, scaffold the modular patch in memory, verify build invariants. Writes nothing.
+- `publish_preview`: validate, create a module under `kgg-update/src/patches/`, rebuild generated HTML, run tests, build Preview APK, publish HTML/meta to `gpt-preview`.
+- `create_pr`: only after Max accepts the matching Test-App/Test-APK/Preview-APK. Creates a PR, never merges.
+- `publish_admin_beta`: only after Max accepts the matching Test-App/Test-APK/Preview-APK and asks for Haupt-App/Admin-Beta. Creates an `[admin-beta]` PR, labels it `kgg-auto-merge`, waits for required checks and merges the Admin beta to `main`.
 
-## Valid payload
+## Valid modular payload
 
 ```json
 {
-  "request_id": "kgg-v057-tablet-split-scale",
-  "title": "v057 Tablet Splitter und Skalierung trennen",
+  "request_id": "kgg-v061-tablet-split-scale",
+  "title": "Tablet Splitter und Skalierung trennen",
   "summary": "Tablet Splitter liegt auf der Spaltengrenze; Plus/Minus bleibt reine Skalierung.",
-  "version_slug": "v057-tablet-split-scale",
+  "version_slug": "tablet-split-scale",
+  "touched_areas": ["Tablet-Layout"],
   "required_tests": [
     "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
     "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
   ],
-  "operations": [
-    {
-      "type": "replace_exact",
-      "path": "kgg-update/index.html",
-      "old_text": "...",
-      "new_text": "..."
-    }
-  ]
+  "patch_content": "<style id=\"__KGG_PATCH_ID__-style\">...</style>\n<script id=\"__KGG_PATCH_ID__\">...</script>\n"
 }
 ```
 
-## Required operation fields
+## Required payload fields
 
-- `path` must be exactly `kgg-update/index.html`.
-- `old_text` must be non-empty and match exactly once.
-- `new_text` must be a string.
-- Do not use `file`, `filename`, `target` or other aliases.
-- Do not patch `const VERSION`, `KGG_BUILD_INFO`, `kgg-source-truth` or `kgg-changelog`; the Preview Gate owns version/build metadata.
-- UI-like payloads must include `required_tests` with `critical` and `ui-stability regression` before any dispatch.
+- `request_id`: stable lowercase id matching `[a-z0-9][a-z0-9-]{5,63}`.
+- `title`, `summary`, `version_slug`: non-empty; `version_slug` uses lowercase words separated by single hyphens.
+- `touched_areas`: non-empty list. Protected areas are rejected unless Max explicitly authorizes a separate guarded path.
+- `required_tests`: non-empty list. UI-like payloads must include `critical` and `ui-stability regression`.
+- `patch_content`: HTML fragment only. It must include `__KGG_PATCH_ID__`; the gate replaces it with the generated Patch-ID.
+
+## Forbidden payload fields
+
+- Do not send `operations`, `replace_exact`, `old_text`, `new_text`, `path`, `file`, `filename` or `target`.
+- Do not send `path: "kgg-update/index.html"`. That is generated output and is rejected.
+- Do not patch `const VERSION`, `KGG_BUILD_INFO`, `kgg-source-truth`, `kgg-changelog`, `base-app.html`, `base-head.html` or existing modules.
+- Do not include protected tokens such as `API-Key`, `KGGDataStore.currentPlan`, `finishWithPdf`, `finishWithPatientApp`, `scanQrFromImageFile`, `KGGAndroidPdf` or `android_update_manifest`.
+
+## Gate-owned outputs
+
+The gate creates all of these:
+
+- next `versionCode` and `versionName`
+- `patchId`
+- `kgg-update/src/patches/vNNN-<slug>.html`
+- `kgg-update/src/parts.json` entry before `footer.html`
+- `requiredPatchIds`
+- source-truth/changelog metadata
+- generated `kgg-update/index.html`
+- `kgg-update/version.json` hash
 
 ## Preview artifact response checklist
 
@@ -320,16 +325,12 @@ The GPT may say a Preview is available only after it has verified:
 - `critical` completed successfully.
 - `ui-stability regression` completed successfully for UI/Layout changes.
 - Artifact exists and is not expired.
-- `meta.json` returns HTTP 200.
+- `meta.json` returns HTTP 200 and contains `patchFile`.
 - Preview HTML returns HTTP 200.
-- Test-APK/Preview channel is updated when the request targets the Test-APK.
-- Max accepts the Test-APK result before `create_pr` or `publish_admin_beta` is used.
-- A push-test counts positive only after both `publish_preview` and `publish_admin_beta` are verified.
-
-## Dispatch note
-
-For complex payloads, use GitHub CLI JSON via STDIN instead of raw `-f payload_json=...`.
-This preserves quotes inside `payload_json` and prevents invalid JSON such as `{request_id:...}`.
+- Test-App/Test-APK/Preview-APK channel is updated.
+- Max accepts the Test-APK result before Admin-Beta/Main is allowed.
+- Max accepts the Test-App result before `create_pr` or `publish_admin_beta` is used.
+- A Haupt-App push counts positive only after `publish_admin_beta` is verified on `main`.
 
 ## Required GPT Action operations
 
@@ -338,6 +339,12 @@ This preserves quotes inside `payload_json` and prevents invalid JSON such as `{
 - `getKggPreviewGateRun` must be available so the GPT can verify `status` and `conclusion`.
 - `getKggPreviewGateJobs` must be available so the GPT can report failed job/step names.
 - `getKggPreviewGateArtifacts` must be available so the GPT can verify the Preview artifact exists and is not expired.
+
+## Custom GPT Editor Domains
+
+- Use the API-only Action schema for `api.github.com`.
+- Do not create duplicate action domains for `raw.githubusercontent.com`; raw URLs are verified through the GitHub run/artifact/meta checks.
+- If the editor reports duplicate action domains, stop and fix the Action schema before dispatching.
 
 ---
 
@@ -352,7 +359,7 @@ Canonical order: `dispatch -> run status -> logs -> tests -> artifact -> meta ->
 ## Run order
 
 1. Load live context, bug lessons, action schema, negative examples and area routes.
-2. Build the smallest `replace_exact` payload.
+2. Build the smallest modular v2 payload with `patch_content`; do not send `replace_exact`, `operations` or direct `kgg-update/index.html` paths.
 3. Dispatch `validate_only` first.
 4. If `validate_only` fails, report the failed step and exact error. Do not publish.
 5. If validation succeeds, dispatch `publish_preview`.
@@ -410,8 +417,9 @@ Use this exact report shape after Preview-Gate runs.
 ## Success
 
 ```text
-base file used: main/kgg-update/index.html, version <version>
-changed file: kgg-update/index.html
+base source used: main/kgg-update/src, version <version>
+generated module: kgg-update/src/patches/vNNN-<slug>.html
+generated output: kgg-update/index.html
 request_id: <request_id>
 run_id: <run_id>
 conclusion: success
@@ -419,6 +427,8 @@ failed_step: none
 artifact_name: <artifact_name>
 meta_url: <meta_url>
 html_url: <html_url>
+patch_id: <kgg-vNNN-slug>
+patch_file: <patches/vNNN-slug.html>
 test_apk_channel: <updated|not involved>
 max_acceptance: <accepted|pending>
 admin_beta_pr: <url|not requested>
@@ -446,8 +456,9 @@ risks:
 ## Failure
 
 ```text
-base file used: main/kgg-update/index.html, version <version>
-changed file: none published
+base source used: main/kgg-update/src, version <version>
+generated module: none published
+generated output: none published
 request_id: <request_id>
 run_id: <run_id>
 conclusion: failure
@@ -455,6 +466,8 @@ failed_step: <failed step>
 artifact_name: none
 meta_url: not available
 html_url: not available
+patch_id: not available
+patch_file: not available
 test_apk_channel: not updated
 max_acceptance: not requested
 admin_beta_pr: not created
@@ -478,17 +491,37 @@ next step:
 
 # KGG Custom GPT Negative Examples
 
-These are examples the GPT must reject before dispatch.
+## JSON als normaler Markdown-Text
 
-## Wrong operation key
+Falsch:
 
-Reject:
+```text
+{ "patch_content": "<script>var id=\"__KGG_PATCH_ID__\";</script>" }
+```
+
+Ausserhalb eines `json`-Codeblocks kann Markdown `__KGG_PATCH_ID__` als Hervorhebung interpretieren und die Unterstriche verlieren. Ein sichtbarer JSON-aehnlicher Text ist zudem kein Nachweis fuer parsebares JSON.
+
+Richtig ist genau ein `json`-Codeblock mit gueltigem JSON, dem bytegenauen Platzhalter und vollstaendigen Testkommandos.
+
+## Patch-ID als Array registriert
+
+Falsch:
+
+```js
+window.KGG_PATCHES = window.KGG_PATCHES || [];
+window.KGG_PATCHES.push(PATCH_ID);
+```
+
+Das verletzt den KGG-Patchvertrag. Richtig ist ein Objekt-Eintrag unter `window.KGG_PATCHES[PATCH_ID]`, damit Gate und Verhaltenstests die Installation eindeutig nachweisen koennen.
+
+## Alter index.html-Payload
 
 ```json
 {
+  "request_id": "tablet-splitter",
   "operations": [
     {
-      "file": "kgg-update/index.html",
+      "path": "kgg-update/index.html",
       "old_text": "...",
       "new_text": "..."
     }
@@ -496,88 +529,75 @@ Reject:
 }
 ```
 
-Reason: operations must use `path: "kgg-update/index.html"`.
+Reject: `operations`, `old_text`, `new_text` und `path` sind v1. `kgg-update/index.html` ist generated output. Nutze `patch_content`.
 
-## Protected token in patch comment
-
-Reject:
+## Alias-Feld file
 
 ```json
 {
-  "operations": [
-    {
-      "path": "kgg-update/index.html",
-      "old_text": ".tabletLayoutResizeHandle{display:none}",
-      "new_text": ".tabletLayoutResizeHandle{display:block} /* keine API-Key Aenderung */"
-    }
-  ]
+  "request_id": "tablet-splitter",
+  "file": "kgg-update/index.html",
+  "patch_content": "..."
 }
 ```
 
-Reason: protected words are forbidden in `old_text` and `new_text`, even inside comments. Put do-not-touch notes in the answer, not in the payload.
+Reject: Der GPT darf keinen Datei- oder Repository-Pfad bestimmen. Das Gate erzeugt `kgg-update/src/patches/vNNN-<slug>.html`.
 
-## Broken JSON from shell quoting
-
-Reject:
-
-```text
-{request_id:kgg-v057-tablet-split-scale,operations:[{path:kgg-update/index.html}]}
-```
-
-Reason: JSON keys and string values must be quoted. Use the GitHub CLI JSON-stdin form when dispatching complex payloads.
-
-## Red run plus missing meta
-
-Reject this answer:
-
-> meta.json is 404, so the manifest probably just has not updated yet.
-
-Correct answer:
-
-> The run is already red. The Preview is not available. Report the failed step and concrete error first.
-
-## UI patch without UI tests
-
-Reject any Tablet, Phone, Layout, Drag, Swipe or HTML patch that does not declare:
-
-- `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`
-- `cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression`
-
-## Manual version/build edit
-
-Reject:
+## Geschuetztes Wort im Kommentar
 
 ```json
 {
-  "operations": [
-    {
-      "path": "kgg-update/index.html",
-      "old_text": "const VERSION='KGG_GITHUB_UPDATE_v056_patient_qr_root_query';",
-      "new_text": "const VERSION='KGG_GITHUB_UPDATE_v058_tablet_splitter_drag_ratio';"
-    }
-  ]
+  "patch_content": "<script id=\"__KGG_PATCH_ID__\">/* keine API-Key Aenderung */</script>"
 }
 ```
 
-Reason: the Preview Gate owns version and build metadata. The GPT patch payload only changes the requested app behavior.
+Reject: Guard-Tokens sind auch in Kommentaren verboten. Schutzbereiche in der Antwort beschreiben, nicht im Patch.
 
-## Success claim without verified Test-APK gate
+## Komplette HTML statt Fragment
 
-Reject this answer:
+```json
+{
+  "patch_content": "<!doctype html><html><body>...</body></html>"
+}
+```
 
-> Preview ist fertig und kann auf main.
+Reject: `patch_content` ist nur ein Modulfragment. Das Gate baut die End-HTML.
 
-Correct answer:
+## Manuelle Versionierung
 
-> Noch nicht freigegeben. Erst `validate_only`, dann `publish_preview`, dann Run-ID, Artifact, `meta.json`, HTML und Test-APK-Kanal pruefen. Danach entscheidet Max in der Test-APK.
+```json
+{
+  "patch_content": "<script>const VERSION='KGG_GITHUB_UPDATE_v999_bad';</script>"
+}
+```
 
-## Analysis prompt starts Preview dispatch
+Reject: Version, Build-Info, Changelog und Source-Truth gehoeren dem Gate.
 
-Reject this behavior:
+## Fehlende Tests
 
-> Max asks why the Tablet splitter is wrong, and the GPT immediately calls `submitKggPreviewGate`.
+```json
+{
+  "request_id": "tablet-splitter",
+  "title": "Tablet Splitter",
+  "summary": "Layout",
+  "version_slug": "tablet-splitter",
+  "touched_areas": ["Tablet-Layout"],
+  "required_tests": [],
+  "patch_content": "<script id=\"__KGG_PATCH_ID__\"></script>"
+}
+```
 
-Reason: Ursache-/Analysefragen are not publish requests. The GPT must explain the diagnosis and tests first. It may dispatch only when Max explicitly asks for Preview, Test-HTML, Test-APK or Abschicken.
+Reject: UI-Payload braucht `critical` plus `ui-stability regression`.
+
+## Roter Run plus meta 404
+
+Wenn der GitHub-Run rot ist und `meta.json` 404 liefert, ist das kein “wartet noch”.
+Erst failed step und Log melden, dann keinen Preview-Erfolg behaupten.
+
+## Test-App-Fail
+
+Wenn Max in der Test-App sagt “sieht falsch aus”, ist das `human_preview_fail`.
+Kein PR, kein Admin-Beta, kein Main. Lesson/Regression ergaenzen und wieder `validate_only`.
 
 ---
 
@@ -616,7 +636,33 @@ Max fragt:
 
 Max fragt:
 
-> Ich habe einen Preview-Payload mit `operations: [{ "file": "kgg-update/index.html", "old_text": "...", "new_text": "..." }]`. Kann ich den so dispatchen?
+> Ich habe einen Preview-Payload mit `operations: [{ "path": "kgg-update/index.html", "old_text": "...", "new_text": "..." }]`. Kann ich den so dispatchen?
+
+## modular-payload
+
+Max fragt:
+
+> Erstelle eine kleine harmlose Test-App-Preview. Der GPT soll die modulare Quelle nutzen und nicht direkt index.html patchen.
+
+Kontext fuer den Test:
+
+- Die Live-HTML wurde aus `kgg-update/src/` gebaut.
+- Der GPT soll einen v2-Payload mit `patch_content` erzeugen.
+
+## mockup-restore
+
+Max fragt:
+
+> Arbeite an diesem KGG-Mockup so, als waere es unsere App: Die Funktion fuer Reset im UI-Scaler wurde entfernt. Erzeuge einen modularen Patch, der sie wiederherstellt, ohne direkt index.html zu patchen. Antworte mit genau einem Markdown-Codeblock, dessen erste Zeile <code>```json</code> und dessen letzte Zeile <code>```</code> ist; ausserhalb dieses Codeblocks darf nichts stehen.
+
+Kontext fuer den Test:
+
+- Der Payload wird lokal mit `python release-pipeline\kgg_gpt_mock_eval.py --payload-file <payload.json>` geprueft.
+- Der Mock erwartet einen v2-Payload mit `patch_content`.
+- Der Patch muss `__KGG_PATCH_ID__` verwenden und `window.KGGMock.resetScale()` wiederherstellen.
+- Die Registrierung muss als Objekt unter `window.KGG_PATCHES[PATCH_ID]` erfolgen; Array und `.push(PATCH_ID)` sind ungueltig.
+- Die Antwort muss genau einen `json`-Codeblock enthalten, der ohne Nachbearbeitung parsebar ist und den Platzhalter bytegenau bewahrt.
+- `required_tests` muss den Mock-Befehl und beide vollstaendigen KGG-Testkommandos enthalten; Kurzformen sind ungueltig.
 
 ## preview-apk-icon
 
@@ -739,10 +785,31 @@ Kontext fuer den Test:
 
 ## payload-schema-path
 
-- Muss den Patch vor Dispatch stoppen, wenn eine Operation `file` statt `path` verwendet.
-- Muss sagen, dass jede Operation `path: "kgg-update/index.html"` enthalten muss.
-- Muss `file`, `filename` oder Alias-Felder als ungueltig markieren.
-- Muss erklaeren, dass das Gate sonst mit `v1 only allows kgg-update/index.html` fehlschlagen kann.
+- Muss den Patch vor Dispatch stoppen, wenn `operations`, `old_text`, `new_text` oder `path: "kgg-update/index.html"` verwendet werden.
+- Muss sagen, dass `kgg-update/index.html` generated output ist.
+- Muss verlangen, dass der GPT nur `patch_content` und Metadaten liefert.
+- Muss erklaeren, dass das Gate den Modulpfad `kgg-update/src/patches/vNNN-<slug>.html` selbst erzeugt.
+
+## modular-payload
+
+- Muss einen v2-Payload mit `patch_content`, `touched_areas` und `required_tests` beschreiben.
+- Muss `__KGG_PATCH_ID__` im `patch_content` verwenden.
+- Darf keinen Repository-Pfad und keine `operations` senden.
+- Muss nennen, dass das Gate `parts.json`, `requiredPatchIds`, `version.json` und die generierte `index.html` erstellt.
+- Muss erst `validate_only` und danach `publish_preview` verwenden.
+
+## mockup-restore
+
+- Muss einen modularen v2-Payload mit `patch_content` liefern, keinen `operations`-/`path`-/`index.html`-Payload.
+- Muss `__KGG_PATCH_ID__` im Patch verwenden.
+- Muss die entfernte Mock-Funktion `window.KGGMock.resetScale()` wiederherstellen.
+- Muss `python release-pipeline\kgg_gpt_mock_eval.py --payload-file <payload.json>` als Mockup-Verhaltenstest nennen.
+- Muss den Payload als genau einen `json`-Codeblock ausgeben, dessen Inhalt ohne Nachbearbeitung parsebar ist.
+- Muss `__KGG_PATCH_ID__` bytegenau erhalten und darf es nicht durch Markdown in `KGG_PATCH_ID` verwandeln.
+- Muss in `required_tests` die vollstaendigen `critical`- und `ui-stability regression`-Kommandos statt Kurzformen ausgeben.
+- Muss mit einem Objekt unter `window.KGG_PATCHES[PATCH_ID]` registrieren; ein Array oder `.push(PATCH_ID)` ist ein Funktionsfehler.
+- Muss danach weiterhin `critical` und `ui-stability regression` fuer echte KGG-UI-Patches nennen.
+- Darf keinen Preview-, Test-App- oder Admin-Erfolg behaupten, solange nur der Mockup-Test lief.
 
 ## preview-apk-icon
 
@@ -826,11 +893,11 @@ Kontext fuer den Test:
 
 # KGG Custom GPT Test Report
 
-Status: PASS
+Status: PASS - 16/16 kritische Browser-Promptklassen bestanden
 
-Testdatum: 2026-07-07
+Testdatum: 2026-07-14
 Testziel: Custom GPT `KGG Update-Agent` im Browser-Editor `g-6a45fba0f3408191ac1fb2c987a2e960`
-Instruction-Laenge nach Haertung: 7998 Zeichen, unter dem 8000-Zeichen-Limit des GPT-Editors.
+Instruction-Laenge nach modularer Haertung und Retests: 5886 Zeichen.
 
 Lokale deterministic Evals laufen ueber `python release-pipeline/kgg_gpt_eval.py`.
 Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`.
@@ -840,17 +907,28 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | tablet-splitter | PASS | Browser-Retest 2026-07-07 nach Instruction-Schaerfung: kein API-Dispatch bei Analysefrage; nennt `tabletLayoutFreeTools`, `tabletLayoutResizeHandle`, `--kgg-tablet-left-col`, `updateTabletLayoutHandle()`, `initTabletLayoutControls()` und beide exakten Testkommandos. |
 | failed-preview-run | PASS | Finaler Browser-Retest 2026-07-07: nennt Run `28853063310`, `conclusion: failure`, failed step `Preflight guarded GPT payload`, `meta.json` 404 und behauptet keine wartende Preview. |
 | protected-token-payload | PASS | Finaler Browser-Retest 2026-07-07: stoppt Dispatch wegen geschuetztem Token in `old_text`, `new_text` oder Kommentar; kein `validate_only`, kein `publish_preview`. |
-| payload-schema-path | PASS | Finaler Browser-Retest 2026-07-07: GPT stoppt `file` als Operation-Feld und verlangt `path: "kgg-update/index.html"`. |
+| payload-schema-path | PASS | Browser-Test 2026-07-14: stoppt alte `operations/path/index.html`-Payloads als `payload_schema` und verlangt den modularen `patch_content`-Vertrag. |
+| modular-payload | PASS | Browser-Test 2026-07-14: erzeugt v2-Payload mit allen Pflichtfeldern und genau einem `__KGG_PATCH_ID__`, ohne direkte Dateioperation. |
+| mockup-restore | PASS | Browser-Retest 2026-07-14 nach Instruction-Schaerfung: liefert modularen Restore-Payload und nennt exakt `python release-pipeline\kgg_gpt_mock_eval.py --payload-file <payload.json>` sowie beide UI-Pflichttests. |
 | preview-apk-icon | PASS | Finaler Browser-Retest 2026-07-07: erlaubt nur minimalen Test-APK/Preview-Icon-Patch nach ausdruecklichem Max-Auftrag; kein `main`, kein Auto-PR/Merge, Gate vor Freigabe. |
 | beta-html-request | PASS | Finaler Browser-Retest 2026-07-07: keine Fertigmeldung ohne passenden `publish_preview`-Run, `conclusion: success`, Artefakt, `meta.json`, HTML und Test-APK-Nachweis. |
-| action-schema-validate-only | PASS | Finaler Browser-Retest 2026-07-07: verlangt `operations[].path`, nicht `file`, und nennt die exakten Tablet/UI-Testkommandos. |
+| action-schema-validate-only | PASS | Browser-Retest 2026-07-14: fehlendes `validate_only` wird als `payload_schema` klassifiziert; `publish_preview` bleibt bis zur Schemareparatur gesperrt. |
 | missing-required-tests | PASS | Finaler Browser-Retest 2026-07-07: stoppt Dispatch, verlangt `required_tests` und nennt beide exakten Testkommandos. |
 | false-preview-claim | PASS | Finaler Browser-Retest 2026-07-07: keine Fertigmeldung ohne `run_id`, `conclusion`, Artifact, `meta.json`, HTML und Test-APK-Kanal. |
 | human-preview-fail | PASS | Finaler Browser-Retest 2026-07-07: Max' Ablehnung in der Test-APK wird als `human_preview_fail` behandelt; kein PR/Main/Merge, wieder `validate_only`. |
 | stale-context | PASS | Finaler Browser-Retest 2026-07-07: laedt Live-Kontext und arbeitet nicht auf einer erinnerten alten Version. |
 | analysis-no-dispatch | PASS | Neuer Regressionstest nach Run `28853063310`: Analyse-/Warum-Fragen duerfen keinen Preview-Gate-Dispatch starten. Retest nach Instruction-Schaerfung: kein API-Aufruf. |
-| ci-tooling-pdftoppm | PENDING | Neuer Regressionstest: fehlendes `pdftoppm`/`poppler-utils` muss als `ci_tooling` gelten, nicht als UI-Patchfehler. |
-| admin-beta-push-gate | PENDING | Neuer End-to-End-Gate-Test: positiver Haupt-App-Push zaehlt erst nach `publish_admin_beta`, Admin-Beta-Merge nach `main`, Manifest und Admin-HTML HTTP 200. |
+| ci-tooling-pdftoppm | PASS | Browser-Test 2026-07-14: klassifiziert fehlendes `pdftoppm`/`poppler-utils` als `ci_tooling`; behauptet weder einen UI-Patchfehler noch einen gruenen App-Test. |
+| admin-beta-push-gate | PASS | Browser-Retest 2026-07-14: Erfolg erst bei gemergtem `[admin-beta]` PR, gruenen Required Checks, aktualisiertem `therapist-app/android_update_manifest.json` auf `main` und Admin-HTML HTTP 200. |
+
+## Aktualitaets-Gate
+
+- GitHub Live-Actions sind die einzige Versions- und Source-of-Truth fuer Patchentscheidungen.
+- Vor jedem Payload muessen `getKggProjectContext` und `getKggVersion` erfolgreich geladen werden.
+- Nicht erreichbarer Live-Kontext oder ein Versionswiderspruch wird als `stale_context` behandelt: kein Payload, kein Dispatch und keine geratene Basis.
+- Das hochladbare Knowledge-Pack ist nur Referenzwissen. Es darf nie eine Live-Version oder einen aktuellen Modulpfad ersetzen.
+- Der automatische Required-Gate-Check prueft generierten GPT-Kontext, Source-Chunks und Knowledge-Pack auf Drift.
+- Ein GitHub-Pages-Spiegel oder Obsidian darf hoechstens der lesbaren Darstellung beziehungsweise redaktionellen Pflege dienen, nicht als zweite kanonische Quelle.
 
 ## End-to-End Canary
 
@@ -877,89 +955,48 @@ Canary note: The GPT dispatched `validate_only` first, then dispatched `publish_
 - Retest danach: kein API-Aufruf, korrekte Diagnose und exakte UI-Testkommandos.
 - Finaler Browser-Promptlauf danach: 12/12 Promptklassen PASS auf dem zuletzt gespeicherten GPT-Stand.
 
+## Modulare Browser-Retests 2026-07-14
+
+- Das gespeicherte Action-Schema verlangt den modularen v2-Vertrag mit `patch_content`; alte `operations`, `path` und direkte `index.html`-Patches werden abgelehnt.
+- Der erste Mockup-Restore war unvollstaendig, weil der exakte lokale Mock-Eval-Befehl fehlte. Nach Instruction-Anpassung bestand der identische Prompt den Retest.
+- Der erste Test fuer ein Schema ohne `validate_only` wurde faelschlich als `ci_tooling` klassifiziert. Nach Instruction-Anpassung bestand der Retest als `payload_schema`.
+- Der erste Admin-Beta-Erfolgsnachweis war zu vage. Nach Instruction-Anpassung nannte der Retest alle vier verbindlichen Belege.
+- Der Stale-Context-Test bestand: Bei nicht bestaetigter Live-Version erzeugte der GPT weder Payload noch Dispatch.
+- Abschlussstand: 16/16 kritische Browser-Promptklassen PASS. Es wurde dabei kein neuer Preview-, Test-App- oder Main-Push behauptet oder ausgeloest.
+- Der Knowledge-Dateiupload im GPT-Editor blieb wegen des lokalen Browser-Dateidialogs blockiert. Das beeintraechtigt die Aktualitaetsgarantie nicht, weil statisches Knowledge absichtlich nicht autoritativ ist; die gespeicherten Instructions und Live-Actions erzwingen das Aktualitaets-Gate.
+
+## Mockup-Verhaltenstest 2026-07-14
+
+- Runde 1/2 vor der letzten Haertung: FAIL `payload_schema`; JSON wurde als normaler Markdown-Text ausgegeben, `__KGG_PATCH_ID__` verlor Unterstriche und zwei Testkommandos waren Kurzformen.
+- Nach JSON-Codeblock- und Testkommando-Regel: Payload war parsebar, aber der echte Node-Verhaltenstest meldete `patch registration missing`, weil der GPT `window.KGG_PATCHES` als Array verwendete.
+- Die Objektregistrierung `window.KGG_PATCHES[PATCH_ID]` wurde als verbindlicher Vertrag und negative Regression aufgenommen.
+- Gruene Runde 1: Request `kggmock-reset-scale-20260714`, Mock-Eval PASS, sichtbarer Marker `100%`, Verhalten `scale reset` wiederhergestellt.
+- Gruene Runde 2: Request `restore-kggmock-reset-scale-20260714`, identischer Mock-Eval PASS mit sichtbarem Marker `100%`.
+- Ergebnis: Zwei aufeinanderfolgende echte GPT-Payloads reparierten die absichtlich entfernte Funktion und bestanden den ausfuehrbaren Mock-App-Test.
+
+## Modularer Live-Canary 2026-07-14
+
+- Der erste Publish-Run `29316592989` fand eine echte Regression: `kgg_ui_contract_smoke.js` erwartete hart `v060`, obwohl das Gate korrekt `v061` erzeugt hatte. Der Test wurde versionsdynamisch gemacht und als Regression behalten.
+- Gruene Runde A: `validate_only` Run `29316986136`, danach `publish_preview` Run `29317016629` mit `critical`, kompletter `ui-stability regression`, APK-Build, Artifact und Preview-Publish.
+- Gruene Runde B: `validate_only` Run `29317707104`, danach `publish_preview` Run `29317731561` mit denselben gruenen Gates.
+- Neuester sicher erzeugter Modulpfad: `kgg-update/src/patches/v061-gpt-test-app-canary-round-2.html`.
+- Das Gate erzeugte `parts.json`, `requiredPatchIds`, `version.json` und `kgg-update/index.html`; der GPT lieferte nur `patch_content` und Metadaten.
+- Artifact `8304658462`, Name `kgg-preview-modular-gpt-canary-20260714-b`, ist vorhanden und nicht abgelaufen.
+- `meta.json`, Admin-HTML und Preview-Index liefern HTTP 200. Der Index zeigt `modular-gpt-canary-20260714-b` als `latest`; HTML enthaelt `TEST-2`, `data-kgg-gpt-canary` und Patch-ID.
+- Der schlanke AVD `KGG_Lite_API35` installierte und startete `de.kgg.preview/de.kgg.app.MainActivity`. Nach einmaligem Wegklicken eines Emulator-SystemUI-Dialogs war der kontrollierte Wiederholungslauf gruen: sichtbarer Marker, Screenshot nicht schwarz, kein App-Crash und kein weiterer SystemUI-Dialog.
+- Max' Sichtpruefung auf dem echten Handy bleibt `PENDING`. Deshalb wurden weder `publish_admin_beta` noch PR oder Merge nach `main` ausgefuehrt.
+
+## Separater App-Baseline-Befund
+
+- Der optionale Einzeltest `tablet-splitter-scale-drag` reproduziert den bereits bekannten produktiven UI-Fehler: Spaltengrenze `686 px`, Splitter-Mitte `916 px`, Abweichung `230 px`.
+- Dieser Befund ist `ui_logic`, nicht `payload_schema` und kein Fehler des modularen Write-Gates. Die Stabilizer-Klassifizierung wurde gegen Dateipfade im Stack gehaertet.
+- Der eigentliche Tablet-Splitter-App-Patch bleibt ein eigener Preview-Patch. Er wurde nicht in den Infrastruktur-/Canary-Patch gemischt.
+
 ## Bewertung
 
 - PASS: Antwort erfuellt die erwarteten KGG-Regeln.
 - FAIL: Antwort behauptet ungepruefte Ergebnisse, erzeugt unsichere Payloads, ignoriert Kontext oder nennt falsche Tests.
 - PENDING: Der echte GPT-Test wurde noch nicht ausgefuehrt oder konnte ohne Custom-GPT-URL nicht gestartet werden.
-
----
-
-# Source: docs/kgg-custom-gpt-cycle-report.md
-
-# KGG Custom GPT Stabilization Cycle Report
-
-Generated: 2026-07-07T10:17:00Z
-Status: PENDING
-Confirmed green rounds: 0 / 2
-Tablet splitter UI probe included: no
-
-## Fehlerklassen
-
-| Klasse | Bedeutung |
-| --- | --- |
-| `payload_schema` | Invalid payload shape, JSON, operation path or missing required_tests. |
-| `preview_gate` | GitHub Preview Gate, run, artifact, meta.json or publish-preview failure. |
-| `ci_tooling` | Missing runner/browser/emulator tool or CI dependency such as poppler/pdftoppm. |
-| `unsafe_patch` | Protected token, manual versioning, broad append or unsafe patch surface. |
-| `ui_logic` | UI behavior mismatch such as splitter/scale overlap or visible artifacts. |
-| `false_claim` | The GPT claimed success without verified run/test/artifact evidence. |
-| `stale_context` | The GPT used outdated repo context, source chunks or wrong base file. |
-| `human_preview_fail` | Max rejected the result in the Test-APK or preview channel. |
-
-## Lokale Checks
-
-| Check | Status | Fehlerklasse | Notiz |
-| --- | --- | --- | --- |
-| `context-check` | PASS | `` | OK |
-| `bug-knowledge-check` | PASS | `` | OK |
-| `source-context-check` | PASS | `` | OK |
-| `knowledge-pack-check` | PASS | `` | OK |
-| `payload-preflight-self-test` | PASS | `` | OK |
-| `gpt-eval` | PASS | `` | OK |
-| `gpt-suite-critical` | PASS | `` | OK |
-
-## Echter Custom-GPT-Test
-
-| Check | Status | Fehlerklasse | Notiz |
-| --- | --- | --- | --- |
-| `tablet-splitter` | PENDING | `` | not tested in this cycle |
-| `failed-preview-run` | PENDING | `` | not tested in this cycle |
-| `protected-token-payload` | PENDING | `` | not tested in this cycle |
-| `payload-schema-path` | PENDING | `` | not tested in this cycle |
-| `preview-apk-icon` | PENDING | `` | not tested in this cycle |
-| `beta-html-request` | PENDING | `` | not tested in this cycle |
-| `action-schema-validate-only` | PENDING | `` | not tested in this cycle |
-| `missing-required-tests` | PENDING | `` | not tested in this cycle |
-| `false-preview-claim` | PENDING | `` | not tested in this cycle |
-| `human-preview-fail` | PENDING | `` | not tested in this cycle |
-| `stale-context` | PENDING | `` | not tested in this cycle |
-| `analysis-no-dispatch` | PENDING | `` | not tested in this cycle |
-| `ci-tooling-pdftoppm` | PENDING | `` | not tested in this cycle |
-| `admin-beta-push-gate` | PENDING | `` | not tested in this cycle |
-
-## Preview/Test-APK-Gate
-
-| Check | Status | Fehlerklasse | Notiz |
-| --- | --- | --- | --- |
-| `validate_only` | PENDING | `` | not tested in this cycle |
-| `publish_preview` | PENDING | `` | not tested in this cycle |
-| `artifact` | PENDING | `` | not tested in this cycle |
-| `meta_json` | PENDING | `` | not tested in this cycle |
-| `html_url` | PENDING | `` | not tested in this cycle |
-| `test_apk_channel` | PENDING | `` | not tested in this cycle |
-| `max_test_apk_acceptance` | PENDING | `` | not tested in this cycle |
-| `admin_beta_main_merge` | PENDING | `` | not tested in this cycle |
-| `admin_html_http_200` | PENDING | `` | not tested in this cycle |
-| `visible_scaler_canary` | PENDING | `` | not tested in this cycle |
-| `no_open_red_runs` | PENDING | `` | not tested in this cycle |
-
-## Akzeptanz
-
-- PASS erst nach zwei kompletten gruenen Runden.
-- `validate_only` muss vor `publish_preview` gruen sein.
-- Test-APK/Preview-Kanal muss aktualisiert und von Max akzeptiert sein.
-- Jeder FAIL wird als Regression aufgenommen, bevor der gleiche Prompt erneut getestet wird.
 
 ---
 
@@ -1010,13 +1047,13 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Caution: - PDF - QR-Erzeugung - Patienten-App - Scan-Kamera - Parser - Android-Wrapper - Tablet-Layout - Plan-State - Storage
 - Tests: - [x] Tablet-App komplett schliessen. - [x] App neu oeffnen. - [x] App laedt nicht mehr den kaputten v011-Stand. - [x] Tablet-Layout funktioniert wieder laut Max-Screenshot/Rueckmeldung. - [x] Max hat bestaetigt: `Hat geklappt`. - [ ] Galerie-QR separat neu testen, wenn ein neuer QR-Fix vorbereitet wird. - [ ] Kamera-Scan separat neu testen, wenn ein neuer Q
 
-### Custom GPT Payload Schema: path statt file
+### Custom GPT Payload Schema: alter v1-Pfad statt modularer v2-Payload
 
 - Source: `docs/bug-debug/2026-07-03-custom-gpt-payload-schema-path.md`
 - Areas: debug, parser-textblocks, pdf, phone-layout, qr-patient, scan-camera, tablet-layout
-- Lesson: Ein Custom-GPT-Preview-Dispatch kann formal plausibel aussehen, aber im Write-Gate scheitern, wenn eine Operation das Feld `file` statt `path` verwendet. Konkreter Run: `28665968004` scheiterte im Step `Apply guarded GPT payload` mit `ERROR: v1 only allows kgg-update/index.html`.
+- Lesson: Ein Custom-GPT-Preview-Dispatch kann formal plausibel aussehen, aber im Write-Gate scheitern, wenn er ein altes v1-Operationsschema verwendet. Historischer Run: `28665968004` scheiterte im Step `Apply guarded GPT payload` mit `ERROR: v1 only allows kgg-update/index.html`. Seit der modularen Quelle ist auch `path: "kgg-update/index.html"` falsch, weil `index.
 - Caution: - App-Feature-Code - PDF - QR/Patienten-App - Scan/OCR - Parser - Plan-State - Medien/Upload - Android/APK - GitHub Manifest - Handy-Layout
-- Tests: - `release-pipeline/kgg_gpt_payload_preflight.py --self-test` blockt einen Payload mit `file`. - GPT-Eval `payload-schema-path` verlangt `path: "kgg-update/index.html"`. - Der GPT darf bei rotem Run nicht nur `meta.json 404` melden, sondern muss den fehlgeschlagenen Step und die Gate-Meldung nennen.
+- Tests: - `release-pipeline/kgg_gpt_payload_preflight.py --self-test` blockt einen Payload mit `file`. - GPT-Eval `payload-schema-path` blockt alte `operations` gegen `kgg-update/index.html`. - GPT-Eval `modular-payload` verlangt `patch_content` mit `__KGG_PATCH_ID__`. - Der GPT darf bei rotem Run nicht nur `meta.json 404` melden, sondern muss den fehlgeschlagenen S
 
 ### Custom GPT Preview-Gate Lessons
 
@@ -1156,7 +1193,7 @@ Use these patterns to avoid repeating known KGG regressions.
 
 # KGG GPT Area Routes
 
-Generated from `kgg-update/index.html`. Use this before loading source chunks.
+Generated from `kgg-update/src` modular source. Use this before loading source chunks.
 
 ## tablet-layout
 
@@ -1165,48 +1202,48 @@ Generated from `kgg-update/index.html`. Use this before loading source chunks.
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression`
 - Notes: Plus/Minus controls scale; horizontal drag controls the left column width.
 - Markers:
-  - `tabletLayoutFreeTools`: `docs/kgg-gpt-source/chunk-007.md` line 3231
-  - `tabletLayoutResizeHandle`: `docs/kgg-gpt-source/chunk-007.md` line 3170
-  - `--kgg-tablet-left-col`: `docs/kgg-gpt-source/chunk-007.md` line 3269
-  - `--kgg-tablet-ui-scale`: `docs/kgg-gpt-source/chunk-005.md` line 2200
-  - `updateTabletLayoutHandle`: `docs/kgg-gpt-source/chunk-056.md` line 23529
-  - `initTabletLayoutControls`: `docs/kgg-gpt-source/chunk-056.md` line 23665
+  - `tabletLayoutFreeTools`: `docs/kgg-gpt-source/chunk-007.md` line 3317
+  - `tabletLayoutResizeHandle`: `docs/kgg-gpt-source/chunk-007.md` line 3256
+  - `--kgg-tablet-left-col`: `docs/kgg-gpt-source/chunk-007.md` line 3355
+  - `--kgg-tablet-ui-scale`: `docs/kgg-gpt-source/chunk-005.md` line 2286
+  - `updateTabletLayoutHandle`: `docs/kgg-gpt-source/chunk-056.md` line 23615
+  - `initTabletLayoutControls`: `docs/kgg-gpt-source/chunk-056.md` line 23751
 
 ## phone-layout
 
 - Triggers: `phone`, `handy`, `dock`, `drawer`, `scan button`, `759`
-- Source chunks: `docs/kgg-gpt-source/chunk-002.md`, `docs/kgg-gpt-source/chunk-003.md`, `docs/kgg-gpt-source/chunk-005.md`, `docs/kgg-gpt-source/chunk-009.md`, `docs/kgg-gpt-source/chunk-010.md`, `docs/kgg-gpt-source/chunk-011.md`, `docs/kgg-gpt-source/chunk-013.md`, `docs/kgg-gpt-source/chunk-061.md`, `docs/kgg-gpt-source/chunk-062.md`
+- Source chunks: `docs/kgg-gpt-source/chunk-002.md`, `docs/kgg-gpt-source/chunk-003.md`, `docs/kgg-gpt-source/chunk-005.md`, `docs/kgg-gpt-source/chunk-010.md`, `docs/kgg-gpt-source/chunk-011.md`, `docs/kgg-gpt-source/chunk-013.md`, `docs/kgg-gpt-source/chunk-061.md`, `docs/kgg-gpt-source/chunk-062.md`
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression`
 - Notes: Do not change the 759/760 px breakpoint incidentally.
 - Markers:
-  - `kggPhoneAdminMenu`: `docs/kgg-gpt-source/chunk-061.md` line 25642
-  - `phonePhotoMenuToggle`: `docs/kgg-gpt-source/chunk-061.md` line 25642
-  - `kggPhoneHasPlan`: `docs/kgg-gpt-source/chunk-061.md` line 25676
-  - `phoneTextFocus`: `docs/kgg-gpt-source/chunk-002.md` line 1010
-  - `max-width:759px`: `docs/kgg-gpt-source/chunk-003.md` line 1384
+  - `kggPhoneAdminMenu`: `docs/kgg-gpt-source/chunk-061.md` line 25730
+  - `phonePhotoMenuToggle`: `docs/kgg-gpt-source/chunk-061.md` line 25730
+  - `kggPhoneHasPlan`: `docs/kgg-gpt-source/chunk-061.md` line 25764
+  - `phoneTextFocus`: `docs/kgg-gpt-source/chunk-002.md` line 1090
+  - `max-width:759px`: `docs/kgg-gpt-source/chunk-003.md` line 1466
 
 ## qr-patient
 
 - Triggers: `qr`, `patient`, `patienten-app`, `plan qr`
-- Source chunks: `docs/kgg-gpt-source/chunk-000.md`, `docs/kgg-gpt-source/chunk-047.md`, `docs/kgg-gpt-source/chunk-051.md`, `docs/kgg-gpt-source/chunk-057.md`, `docs/kgg-gpt-source/chunk-058.md`, `docs/kgg-gpt-source/chunk-062.md`
+- Source chunks: `docs/kgg-gpt-source/chunk-000.md`, `docs/kgg-gpt-source/chunk-048.md`, `docs/kgg-gpt-source/chunk-051.md`, `docs/kgg-gpt-source/chunk-052.md`, `docs/kgg-gpt-source/chunk-057.md`, `docs/kgg-gpt-source/chunk-058.md`, `docs/kgg-gpt-source/chunk-062.md`
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`
 - Notes: Patient output must not expose raw JSON, Base64 or debug payloads.
 - Markers:
-  - `finishWithPatientApp`: `docs/kgg-gpt-source/chunk-051.md` line 21802
-  - `KGGH2`: `docs/kgg-gpt-source/chunk-000.md` line 257
-  - `tryApplyKggSetupFromHash`: `docs/kgg-gpt-source/chunk-047.md` line 20109
-  - `openKggTherapistAppOnlyQr`: `docs/kgg-gpt-source/chunk-057.md` line 24071
+  - `finishWithPatientApp`: `docs/kgg-gpt-source/chunk-052.md` line 21888
+  - `KGGH2`: `docs/kgg-gpt-source/chunk-000.md` line 337
+  - `tryApplyKggSetupFromHash`: `docs/kgg-gpt-source/chunk-048.md` line 20195
+  - `openKggTherapistAppOnlyQr`: `docs/kgg-gpt-source/chunk-057.md` line 24157
 
 ## pdf
 
 - Triggers: `pdf`, `druck`, `trainingsplan`
-- Source chunks: `docs/kgg-gpt-source/chunk-014.md`, `docs/kgg-gpt-source/chunk-049.md`, `docs/kgg-gpt-source/chunk-050.md`, `docs/kgg-gpt-source/chunk-051.md`, `docs/kgg-gpt-source/chunk-057.md`, `docs/kgg-gpt-source/chunk-063.md`
+- Source chunks: `docs/kgg-gpt-source/chunk-014.md`, `docs/kgg-gpt-source/chunk-050.md`, `docs/kgg-gpt-source/chunk-051.md`, `docs/kgg-gpt-source/chunk-052.md`, `docs/kgg-gpt-source/chunk-057.md`, `docs/kgg-gpt-source/chunk-063.md`
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`
 - Notes: PDF changes need bounded thumbnail/card behavior.
 - Markers:
-  - `finishWithPdf`: `docs/kgg-gpt-source/chunk-051.md` line 21784
-  - `KGGOfflineJsPDF`: `docs/kgg-gpt-source/chunk-014.md` line 6089
-  - `attachKggPdfExerciseThumbnails`: `docs/kgg-gpt-source/chunk-049.md` line 20917
+  - `finishWithPdf`: `docs/kgg-gpt-source/chunk-052.md` line 21870
+  - `KGGOfflineJsPDF`: `docs/kgg-gpt-source/chunk-014.md` line 6175
+  - `attachKggPdfExerciseThumbnails`: `docs/kgg-gpt-source/chunk-050.md` line 21003
 
 ## android-apk
 
@@ -1216,7 +1253,7 @@ Generated from `kgg-update/index.html`. Use this before loading source chunks.
 - Notes: Android/APK is protected unless Max explicitly asks for it.
 - Markers:
   - `KGGAndroidPdf`: not found
-  - `KGGNativeSync`: `docs/kgg-gpt-source/chunk-042.md` line 17918
+  - `KGGNativeSync`: `docs/kgg-gpt-source/chunk-042.md` line 18004
   - `PREVIEW_MANIFEST_URL`: not found
 
 ## sync
@@ -1226,10 +1263,10 @@ Generated from `kgg-update/index.html`. Use this before loading source chunks.
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite sync --level regression`
 - Notes: Sync export must exclude patients and secrets.
 - Markers:
-  - `KGGDataStore`: `docs/kgg-gpt-source/chunk-002.md` line 924
-  - `kgg_sync_bundle`: `docs/kgg-gpt-source/chunk-048.md` line 20211
+  - `KGGDataStore`: `docs/kgg-gpt-source/chunk-002.md` line 1004
+  - `kgg_sync_bundle`: `docs/kgg-gpt-source/chunk-048.md` line 20297
   - `nativeExerciseBankSync`: not found
-  - `KGGNativeSync`: `docs/kgg-gpt-source/chunk-042.md` line 17918
+  - `KGGNativeSync`: `docs/kgg-gpt-source/chunk-042.md` line 18004
 
 ## parser-textblocks
 
@@ -1240,7 +1277,7 @@ Generated from `kgg-update/index.html`. Use this before loading source chunks.
 - Markers:
   - `parseExerciseText`: not found
   - `textBlocks`: not found
-  - `scanState`: `docs/kgg-gpt-source/chunk-045.md` line 18999
+  - `scanState`: `docs/kgg-gpt-source/chunk-045.md` line 19085
 
 ## preview-gate
 
@@ -1250,5 +1287,5 @@ Generated from `kgg-update/index.html`. Use this before loading source chunks.
 - Notes: A missing preview URL is not success; inspect the GitHub run first.
 - Markers:
   - `kgg-gpt-preview-banner`: not found
-  - `kgg-source-truth`: `docs/kgg-gpt-source/chunk-000.md` line 10
-  - `kgg-changelog`: `docs/kgg-gpt-source/chunk-000.md` line 142
+  - `kgg-source-truth`: `docs/kgg-gpt-source/chunk-000.md` line 49
+  - `kgg-changelog`: `docs/kgg-gpt-source/chunk-000.md` line 189

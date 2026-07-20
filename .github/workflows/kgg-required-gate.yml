@@ -86,6 +86,20 @@ jobs:
         shell: bash
         run: python release-pipeline/kgg_gpt_source_context.py --check
 
+      - name: Check Custom GPT knowledge pack freshness
+        shell: bash
+        run: python release-pipeline/kgg_custom_gpt_knowledge_pack.py --check
+
+      - name: Check Custom GPT resource contract freshness
+        shell: bash
+        run: python release-pipeline/kgg_custom_gpt_resource_audit.py --check
+
+      - name: Check blind Repair-Lab contracts
+        shell: bash
+        run: |
+          python release-pipeline/kgg_gpt_repair_lab.py --self-test
+          python release-pipeline/kgg_gpt_repair_stabilize.py --self-test
+
       - name: Run UI stability regression for UI or HTML changes
         if: steps.scope.outputs.ui_or_html == 'true'
         shell: bash

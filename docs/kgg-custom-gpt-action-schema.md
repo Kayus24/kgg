@@ -3,49 +3,60 @@
 This is the canonical payload shape for `KGG GPT Preview Gate`.
 The Custom GPT must follow this shape exactly.
 
-The combined GPT Action OpenAPI schema lives at `docs/kgg-custom-gpt-action-openapi.yaml`.
-For the current split GPT editor setup, update the existing `api.github.com` Action with `docs/kgg-custom-gpt-action-api-openapi.yaml` and keep the separate `raw.githubusercontent.com` Action for read-only repo context.
-Do not paste the combined schema into an editor that already has a separate `raw.githubusercontent.com` Action; ChatGPT rejects duplicate action domains.
-If the GPT editor does not offer `validate_only`, the Action schema is stale and must be updated before any Preview request.
+The public app still loads `kgg-update/index.html`, but that file is generated output.
+The GPT must patch the modular source through the gate; it must not request direct edits to `kgg-update/index.html`.
 
 ## Modes
 
-- `validate_only`: validate JSON, exact patch matches and HTML syntax. Writes nothing.
-- `publish_preview`: validate, run tests, build Preview APK, publish HTML/meta to `gpt-preview`.
-- `create_pr`: only after Max accepts the matching preview. Creates a PR, never merges.
-- `publish_admin_beta`: only after Max accepts the matching Preview/Test-APK. Creates an `[admin-beta]` PR, labels it `kgg-auto-merge`, waits for required checks and merges the Admin beta to `main`.
+- `validate_only`: validate JSON, scaffold the modular patch in memory, verify build invariants. Writes nothing.
+- `publish_preview`: validate, create a module under `kgg-update/src/patches/`, rebuild generated HTML, run tests, build Preview APK, publish HTML/meta to `gpt-preview`.
+- `create_pr`: only after Max accepts the matching Test-App/Test-APK/Preview-APK. Creates a PR, never merges.
+- `publish_admin_beta`: only after Max accepts the matching Test-App/Test-APK/Preview-APK and asks for Haupt-App/Admin-Beta. Creates an `[admin-beta]` PR, labels it `kgg-auto-merge`, waits for required checks and merges the Admin beta to `main`.
 
-## Valid payload
+## Valid modular payload
 
 ```json
 {
-  "request_id": "kgg-v057-tablet-split-scale",
-  "title": "v057 Tablet Splitter und Skalierung trennen",
+  "request_id": "kgg-v061-tablet-split-scale",
+  "title": "Tablet Splitter und Skalierung trennen",
   "summary": "Tablet Splitter liegt auf der Spaltengrenze; Plus/Minus bleibt reine Skalierung.",
-  "version_slug": "v057-tablet-split-scale",
+  "version_slug": "tablet-split-scale",
+  "touched_areas": ["Tablet-Layout"],
   "required_tests": [
     "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
     "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
   ],
-  "operations": [
-    {
-      "type": "replace_exact",
-      "path": "kgg-update/index.html",
-      "old_text": "...",
-      "new_text": "..."
-    }
-  ]
+  "patch_content": "<style id=\"__KGG_PATCH_ID__-style\">...</style>\n<script id=\"__KGG_PATCH_ID__\">...</script>\n"
 }
 ```
 
-## Required operation fields
+## Required payload fields
 
-- `path` must be exactly `kgg-update/index.html`.
-- `old_text` must be non-empty and match exactly once.
-- `new_text` must be a string.
-- Do not use `file`, `filename`, `target` or other aliases.
-- Do not patch `const VERSION`, `KGG_BUILD_INFO`, `kgg-source-truth` or `kgg-changelog`; the Preview Gate owns version/build metadata.
-- UI-like payloads must include `required_tests` with `critical` and `ui-stability regression` before any dispatch.
+- `request_id`: stable lowercase id matching `[a-z0-9][a-z0-9-]{5,63}`.
+- `title`, `summary`, `version_slug`: non-empty; `version_slug` uses lowercase words separated by single hyphens.
+- `touched_areas`: non-empty list. Protected areas are rejected unless Max explicitly authorizes a separate guarded path.
+- `required_tests`: non-empty list. UI-like payloads must include `critical` and `ui-stability regression`.
+- `patch_content`: HTML fragment only. It must include `__KGG_PATCH_ID__`; the gate replaces it with the generated Patch-ID.
+
+## Forbidden payload fields
+
+- Do not send `operations`, `replace_exact`, `old_text`, `new_text`, `path`, `file`, `filename` or `target`.
+- Do not send `path: "kgg-update/index.html"`. That is generated output and is rejected.
+- Do not patch `const VERSION`, `KGG_BUILD_INFO`, `kgg-source-truth`, `kgg-changelog`, `base-app.html`, `base-head.html` or existing modules.
+- Do not include protected tokens such as `API-Key`, `KGGDataStore.currentPlan`, `finishWithPdf`, `finishWithPatientApp`, `scanQrFromImageFile`, `KGGAndroidPdf` or `android_update_manifest`.
+
+## Gate-owned outputs
+
+The gate creates all of these:
+
+- next `versionCode` and `versionName`
+- `patchId`
+- `kgg-update/src/patches/vNNN-<slug>.html`
+- `kgg-update/src/parts.json` entry before `footer.html`
+- `requiredPatchIds`
+- source-truth/changelog metadata
+- generated `kgg-update/index.html`
+- `kgg-update/version.json` hash
 
 ## Preview artifact response checklist
 
@@ -55,16 +66,12 @@ The GPT may say a Preview is available only after it has verified:
 - `critical` completed successfully.
 - `ui-stability regression` completed successfully for UI/Layout changes.
 - Artifact exists and is not expired.
-- `meta.json` returns HTTP 200.
+- `meta.json` returns HTTP 200 and contains `patchFile`.
 - Preview HTML returns HTTP 200.
-- Test-APK/Preview channel is updated when the request targets the Test-APK.
-- Max accepts the Test-APK result before `create_pr` or `publish_admin_beta` is used.
-- A push-test counts positive only after both `publish_preview` and `publish_admin_beta` are verified.
-
-## Dispatch note
-
-For complex payloads, use GitHub CLI JSON via STDIN instead of raw `-f payload_json=...`.
-This preserves quotes inside `payload_json` and prevents invalid JSON such as `{request_id:...}`.
+- Test-App/Test-APK/Preview-APK channel is updated.
+- Max accepts the Test-APK result before Admin-Beta/Main is allowed.
+- Max accepts the Test-App result before `create_pr` or `publish_admin_beta` is used.
+- A Haupt-App push counts positive only after `publish_admin_beta` is verified on `main`.
 
 ## Required GPT Action operations
 
@@ -73,3 +80,9 @@ This preserves quotes inside `payload_json` and prevents invalid JSON such as `{
 - `getKggPreviewGateRun` must be available so the GPT can verify `status` and `conclusion`.
 - `getKggPreviewGateJobs` must be available so the GPT can report failed job/step names.
 - `getKggPreviewGateArtifacts` must be available so the GPT can verify the Preview artifact exists and is not expired.
+
+## Custom GPT Editor Domains
+
+- Use the API-only Action schema for `api.github.com`.
+- Do not create duplicate action domains for `raw.githubusercontent.com`; raw URLs are verified through the GitHub run/artifact/meta checks.
+- If the editor reports duplicate action domains, stop and fix the Action schema before dispatching.

@@ -1,9 +1,58 @@
 # KGG Source Chunk 060
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 25201-25620
 
 ```html
+      "Phone drag-reorder uses #planList local absolute coordinates",
+      "Phone plan freeze is neutralized only below 760px",
+      "Local Android/content test files do not auto-redirect to GitHub; manifest prompt remains allowed"
+    ]
+  };
+})();
+</script>
+
+<!-- KGG v12 FEATURE RESTORE: robust Update-Zentrale entrypoints; no touch/layout behavior changes -->
+<script id="kgg-v12-release-center-entry-restore">
+(function(){
+  "use strict";
+  var PATCH_ID = "kgg-v12-release-center-entry-restore";
+  var installed = false;
+  var observer = null;
+
+  function byId(id){ return document.getElementById(id); }
+  function q(sel){ try { return document.querySelector(sel); } catch(err){ return null; } }
+
+  function releaseOpen(){
+    try{
+      if(window.KGGReleaseCenter && typeof window.KGGReleaseCenter.open === "function"){
+        window.KGGReleaseCenter.open();
+        return;
+      }
+    }catch(err){}
+    try{
+      if(window.KGGReleaseControl && typeof window.KGGReleaseControl.open === "function"){
+        window.KGGReleaseControl.open();
+        return;
+      }
+    }catch(err){}
+    alert("Update-Zentrale ist im Code vorhanden, aber noch nicht initialisiert. Bitte App einmal neu laden.");
+  }
+
+  function makeButton(id, text, className){
+    var btn = document.createElement("button");
+    btn.id = id;
+    btn.type = "button";
+    btn.textContent = text;
+    btn.className = className || "tabletSideMenuAction";
+    btn.addEventListener("click", function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      try{
+        if(typeof closeTabletMenu === "function") closeTabletMenu();
+      }catch(err){}
+      releaseOpen();
+    }, true);
     return btn;
   }
 
@@ -375,53 +424,4 @@
         scheduleClean(type, 140);
         scheduleClean(type + ":late", 420);
       }, {capture:true, passive:true});
-    });
-
-    window.addEventListener("resize", function(){
-      if(!isPhone()) hardClean("leave-phone-resize");
-      else scheduleClean("phone-resize", 160);
-    }, {passive:true});
-
-    window.addEventListener("orientationchange", function(){
-      setTimeout(function(){
-        if(!isPhone()) hardClean("leave-phone-orientation");
-        else scheduleClean("phone-orientation", 220);
-      }, 120);
-    }, {passive:true});
-
-    if(window.visualViewport){
-      window.visualViewport.addEventListener("resize", function(){
-        if(!isPhone()) hardClean("leave-phone-visualViewport");
-        else scheduleClean("phone-visualViewport", 160);
-      }, {passive:true});
-    }
-
-    if(window.matchMedia){
-      try{
-        var mq = window.matchMedia(PHONE_QUERY);
-        var onChange = function(ev){
-          if(!ev.matches) hardClean("matchMedia-leave-phone");
-          else scheduleClean("matchMedia-enter-phone", 120);
-        };
-        if(mq.addEventListener) mq.addEventListener("change", onChange);
-        else if(mq.addListener) mq.addListener(onChange);
-      }catch(err){}
-    }
-
-    var mo = new MutationObserver(function(){
-      if(!isPhone()){
-        if(hasLivePlanGesture()) return;
-        var b = body();
-        if(b && (
-          b.classList.contains("kggPlanCardReordering") ||
-          b.classList.contains("kggPlanCardSwiping") ||
-          b.classList.contains("kggPlanSectionFrozen") ||
-          b.classList.contains("phoneTextFocus") ||
-          b.classList.contains("kggPhoneDrawerOpen")
-        )){
-          hardClean("mutation-leave-phone");
-        }
-      }
-    });
-
 ```

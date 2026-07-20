@@ -1,9 +1,58 @@
 # KGG Source Chunk 014
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 5881-6300
 
 ```html
+      place-items:center;
+      text-align:center;
+      color:#5f6875;
+      font-weight:800;
+      font-size:13px;
+    }
+    body.tabletLayoutCustom #recentToggle,
+    body.tabletLayoutCustom #packageToggle,
+    body.tabletLayoutCustom #recentList,
+    body.tabletLayoutCustom #packageList,
+    body.tabletLayoutCustom #packageLayoutSlot{
+      display:none!important;
+    }
+    body.tabletLayoutCustom #finishBtn,
+    body.tabletLayoutCustom #finishBtn.hidden,
+    body.tabletLayoutCustom #createPanel:not(.planMode) #finishBtn,
+    body.tabletLayoutCustom #createPanel:not(.planMode) #finishBtn.hidden{
+      display:none!important;
+    }
+    body.tabletLayoutCustom #createPanel .tools,
+    body.tabletLayoutCustom #createPanel .tools #planActions,
+    body.tabletLayoutCustom #createPanel:not(.planMode) .tools #planActions,
+    body.tabletLayoutCustom #createPanel.planMode .tools #planActions{
+      display:contents!important;
+      width:auto!important;
+      height:auto!important;
+      min-height:0!important;
+      margin:0!important;
+      padding:0!important;
+      border:0!important;
+      box-shadow:none!important;
+      background:transparent!important;
+    }
+    body.tabletLayoutCustom #createPanel .tools #packageLayoutSlot,
+    body.tabletLayoutCustom #createPanel:not(.planMode) .tools #packageLayoutSlot,
+    body.tabletLayoutCustom #createPanel.planMode .tools #packageLayoutSlot,
+    body.tabletLayoutCustom #createPanel .tools #packageToggle,
+    body.tabletLayoutCustom #createPanel.planMode .tools #packageToggle,
+    body.tabletLayoutCustom #createPanel .tools #recentToggle,
+    body.tabletLayoutCustom #createPanel.planMode .tools #recentToggle{
+      display:none!important;
+      width:0!important;
+      height:0!important;
+      min-height:0!important;
+      margin:0!important;
+      padding:0!important;
+      border:0!important;
+      overflow:hidden!important;
+    }
     body.tabletLayoutCustom #createPanel #rightPlanStack,
     body.tabletLayoutCustom #createPanel #rightPlanStack.hidden,
     body.tabletLayoutCustom #createPanel:not(.planMode) #rightPlanStack,
@@ -375,53 +424,4 @@
       num((Number(w) || 1) * MM_TO_PT) + ' 0 0 ' + num((Number(h) || 1) * MM_TO_PT) + ' ' +
       num(this._x(x)) + ' ' + num(this._y((Number(y) || 0) + (Number(h) || 1))) + ' cm\n/' + name + ' Do\nQ');
     return this;
-  };
-
-  function objectString(id, body){
-    return id + ' 0 obj\n' + body + '\nendobj\n';
-  }
-
-  function streamObject(id, stream){
-    return objectString(id, '<< /Length ' + stream.length + ' >>\nstream\n' + stream + '\nendstream');
-  }
-
-  function infoString(props){
-    props = props || {};
-    return '<< /Title ' + pdfString(props.title || 'KGG Trainingsplan') +
-      ' /Subject ' + pdfString(props.subject || '') +
-      ' /Creator ' + pdfString(props.creator || 'KGG offline PDF runtime') + ' >>';
-  }
-
-  KGGOfflineJsPDF.prototype._buildPdf = function(){
-    var objects = [];
-    var pagesRootId = 2;
-    var fontRegularId = 3;
-    var fontBoldId = 4;
-    var infoId = 5;
-    var nextId = 6;
-    var pageIds = [];
-    var contentIds = [];
-    var imageIds = {};
-    var self = this;
-
-    this._pages.forEach(function(page){
-      pageIds.push(nextId++);
-      contentIds.push(nextId++);
-    });
-    this._images.forEach(function(image){
-      imageIds[image.name] = nextId++;
-    });
-
-    objects.push(objectString(1, '<< /Type /Catalog /Pages ' + pagesRootId + ' 0 R >>'));
-    objects.push(objectString(fontRegularId, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'));
-    objects.push(objectString(fontBoldId, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>'));
-    objects.push(objectString(infoId, infoString(this._properties)));
-
-    var kids = pageIds.map(function(id){ return id + ' 0 R'; }).join(' ');
-    objects.push(objectString(pagesRootId, '<< /Type /Pages /Kids [' + kids + '] /Count ' + pageIds.length + ' >>'));
-
-    this._pages.forEach(function(page, index){
-      var content = page.ops.join('\n') + '\n';
-      var xObjects = '';
-      if(page.images && page.images.length){
 ```

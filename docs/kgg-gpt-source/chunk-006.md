@@ -1,9 +1,58 @@
 # KGG Source Chunk 006
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 2521-2940
 
 ```html
+        padding:12px 14px 10px!important;
+        overflow:hidden!important;
+        grid-template-columns:minmax(360px,430px) minmax(0,1fr) minmax(150px,190px)!important;
+        grid-template-rows:auto 64px minmax(104px,auto) minmax(0,1fr) 60px!important;
+        gap:12px!important;
+      }
+      /* Innenkarten behalten die App-Struktur, nur der Außen-Mockup-Rahmen verschwindet. */
+      #inputWrap,
+      #bankArea.bankOpen,
+      #currentPlanBlock,
+      #scannedPlansBlock,
+      .planSection,
+      .baseCard,
+      .drawerBtn,
+      .scanHub .scanBtn,
+      .scanHub .scanMeta{
+        box-shadow:0 2px 10px rgba(7,16,39,.055);
+      }
+      .scanHub .scanBtn,
+      .scanHub .scanMeta,
+      #baseToggle,
+      #finishBtn,
+      #recentToggle,
+      #packageToggle{
+        min-height:60px!important;
+        height:60px!important;
+      }
+      #savePackageBtn{
+        min-height:48px!important;
+        height:48px!important;
+      }
+      #exerciseInput{
+        min-height:104px;
+        max-height:160px;
+      }
+      #bankArea.bankOpen.alphaBankOpen .az{
+        height:calc(100% - 58px);
+        margin-top:58px;
+      }
+      #recentList:not(.hidden),
+      #packageList:not(.hidden),
+      #baseFields:not(.hidden){
+        max-height:calc(var(--kgg-visual-vh,100dvh) - 104px)!important;
+      }
+      .app.softKeyboard{
+        height:var(--kgg-visual-vh,100dvh)!important;
+        max-height:var(--kgg-visual-vh,100dvh)!important;
+        padding:8px 10px!important;
+        gap:8px!important;
         grid-template-rows:auto 54px minmax(78px,auto) minmax(0,1fr) 0!important;
       }
       .app.softKeyboard .scanHub .scanBtn,
@@ -375,53 +424,4 @@
 
       #createPanel.planMode #recentToggle,
       #createPanel.planMode #packageToggle{
-        height:64px!important;
-        min-height:64px!important;
-        font-size:18px!important;
-      }
-    }
-
-    @media (min-width:760px) and (max-width:920px){
-      .app{
-        grid-template-columns:minmax(350px,420px) minmax(0,1fr) minmax(0,.92fr)!important;
-        gap:14px!important;
-      }
-      #inputWrap textarea,
-      #exerciseInput{
-        font-size:20px!important;
-      }
-      .bankRow b{
-        font-size:16px!important;
-      }
-      .planCard b{
-        font-size:17px!important;
-      }
-    }
-
-
-
-    /* v332 Tablet Left Column More Width + Readability:
-       - linke Spalte nochmals breiter
-       - Tablet-Gesamtlayout etwas größer für bessere Lesbarkeit
-       - keine Logikänderung */
-    @media (min-width:760px){
-      .app{
-        grid-template-columns:minmax(430px,520px) minmax(0,1.08fr) minmax(0,.88fr)!important;
-        gap:18px!important;
-        padding:18px!important;
-      }
-
-      .scanHub{
-        gap:12px!important;
-      }
-      .scanBtn,
-      .scanMeta.filePickBtn,
-      #baseToggle,
-      #finishBtn,
-      #recentToggle,
-      #packageToggle{
-        font-size:20px!important;
-      }
-      #baseToggle,
-      #finishBtn{
 ```

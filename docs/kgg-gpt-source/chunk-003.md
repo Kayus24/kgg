@@ -1,9 +1,52 @@
 # KGG Source Chunk 003
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 1261-1680
 
 ```html
+        "Source Truth",
+        "Changelog",
+        "Patch rules",
+        "Non-UI helper script"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Parser",
+        "Android-Wrapper",
+        "Tablet-Layout",
+        "Plan-State",
+        "Storage"
+      ],
+      "supersedes": [],
+      "removalPolicy": {
+        "doNotDeleteReason": "Dieser Eintrag definiert die neue Regel, dass alte Fix-Patches nicht still entfernt werden dürfen.",
+        "requiresExplicitMaxApprovalToRemove": true
+      },
+      "testStatus": {
+        "githubPages": "pending",
+        "androidApp": "pending",
+        "llmReadability": "pending"
+      }
+    },
+    {
+      "versionCode": 8,
+      "versionName": "1.0.6-qr-gallery-bitmap-debug",
+      "type": "github-web-update",
+      "title": "QR-Foto/Galerie-Import mit Debug und Bitmap-Fallback",
+      "summary": "Verbessert QR-Erkennung aus Galerie-/Fotodatenbank-Bildern durch zusätzlichen BarcodeDetector-ImageBitmap-Fallback und sichtbare Warnungen, wenn ein Bild nicht dekodiert werden kann.",
+      "changedAreas": [
+        "QR-Bildimport",
+        "HTML/JS",
+        "eingebettete Source Truth",
+        "eingebetteter Changelog"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
         "Scan-Kamera",
         "Parser",
         "Android-Wrapper",
@@ -51,6 +94,8 @@
 }
 </script>
 <!-- END kgg-changelog -->
+
+<!-- SOURCE FILE: kgg-update/src/metadata/patch-rules.html -->
 
 <!-- BEGIN kgg-patch-rules: embedded Patch Rules; READ THIS BEFORE PATCHING -->
 <script type="application/json" id="kgg-patch-rules">
@@ -182,6 +227,8 @@
 </script>
 <!-- END kgg-patch-rules -->
 
+<!-- SOURCE FILE: kgg-update/src/metadata/changelog-guard.html -->
+
 <!-- BEGIN kgg-changelog-size-guard: console/helper warning when embedded changelog grows too large -->
 <script id="kgg-changelog-size-guard">
 (function(){
@@ -244,6 +291,8 @@
 })();
 </script>
 <!-- END kgg-changelog-size-guard -->
+
+<!-- SOURCE FILE: kgg-update/src/base-app.html -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <script id="kgg-v047-phone-landscape-tablet-viewport-early">
   (function(){
@@ -375,53 +424,4 @@
       #exerciseInput{min-height:112px;max-height:190px}
       #bankArea{align-self:stretch;overflow:hidden}
       #bankArea.bankOpen{max-height:100%;display:flex;flex-direction:column}
-      #bankArea.bankOpen #bankContent{flex:1;min-height:0}
-      .bankRows{max-height:360px}
-      #bankArea.bankOpen .bankRows{max-height:none;flex:1;min-height:0;overflow:auto}
-      #currentPlanBlock{display:block!important;min-height:0;overflow:hidden}
-      #currentPlanBlock.hidden{visibility:hidden;pointer-events:none}
-      #planList{max-height:calc(100dvh - 300px);overflow:auto}
-      .planCard{padding:12px 14px}
-      .planCard b{font-size:18px}
-      .planActions.hasPlan{grid-template-columns:minmax(220px,1fr) 66px}
-      .planActions.hasPlan #recentToggle{width:66px;min-width:66px}
-      #packageToggle{justify-content:center}
-      #recentList,#packageList{max-height:220px;overflow:auto}
-    }
-    .planCard[data-plan-id]{touch-action:pan-y;overflow:hidden}
-    .planCard.swipe-dragging{transition:none;will-change:transform,opacity,box-shadow;box-shadow:0 8px 22px rgba(7,16,39,.14)}
-    .planCard.swipe-armed{background:#fffafa;box-shadow:0 0 0 2px rgba(226,59,84,.18),0 14px 34px rgba(7,16,39,.2)}
-    .planCard.swipe-removing{pointer-events:none}
-    .planCard.swipe-dragging::after{content:"Löschen";position:absolute;top:50%;transform:translateY(-50%);padding:6px 10px;border-radius:999px;background:rgba(226,59,84,.1);color:#b01830;font-size:12px;font-weight:1000;opacity:var(--swipe-strength,0)}
-    .planCard.swipe-left::after{right:14px}.planCard.swipe-right::after{left:14px}
-    .bankRow[data-bank-id]{touch-action:pan-y;overflow:hidden;position:relative}
-    .bankRow.bank-swipe-dragging{transition:none;will-change:transform,opacity,box-shadow;box-shadow:0 8px 20px rgba(7,16,39,.12);z-index:1}
-    .bankRow.bank-swipe-armed{background:#fffafa;box-shadow:0 0 0 2px rgba(226,59,84,.18),0 10px 26px rgba(7,16,39,.16)}
-    .bankRow.bank-swipe-dragging::after{content:"Löschen";position:absolute;top:50%;transform:translateY(-50%);padding:5px 9px;border-radius:999px;background:rgba(226,59,84,.1);color:#b01830;font-size:11px;font-weight:1000;opacity:var(--bank-swipe-strength,0)}
-    .bankRow.bank-swipe-left::after{right:12px}.bankRow.bank-swipe-right::after{left:12px}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px}.topbarText{min-width:0}.visionBtn{flex:0 0 auto;border:2px solid #071027;background:#fff;color:#071027;border-radius:14px;padding:9px 12px;font-weight:1000;font-size:17px;line-height:1;min-width:48px}
-    body.a11y{--bg:#fff;--paper:#fff;--ink:#000;--muted:#172033;--line:#111;--blue:#e9f4ff;--blue2:#f6fbff;--accent:#000;--danger:#b00020;--shadow:none}
-    body.a11y .app{width:min(100%,640px);padding-bottom:18px}body.a11y .topbar{background:#fff;border-bottom:2px solid #111}body.a11y .topbar h1{font-size:23px;line-height:1.12}body.a11y .topbar small{font-size:15px;color:#111}body.a11y .stateBadge{font-size:15px;border-radius:10px}
-    body.a11y .scanBtn,body.a11y .primary,body.a11y .mutedBtn,body.a11y .drawerBtn,body.a11y .baseCard{font-size:20px;min-height:52px;border-width:2px}body.a11y .panelTitle{font-size:34px;line-height:1.08;letter-spacing:0}body.a11y .label{font-size:18px}body.a11y textarea{font-size:24px;line-height:1.45;min-height:92px}body.a11y .suggestion{font-size:22px}body.a11y .suggestion small{font-size:15px}
-    body.a11y .planCard{border:2px solid #111;padding:14px;grid-template-columns:1fr}body.a11y .planCard b{font-size:23px}body.a11y .planCard small{font-size:19px;color:#111;line-height:1.35}body.a11y .planCard .drag{width:44px;height:44px;font-size:24px}body.a11y .iconBtn{font-size:25px;min-width:44px;min-height:44px}
-    body.a11y .field label{font-size:17px;color:#111}body.a11y .field input,body.a11y .field select{font-size:21px;min-height:52px;border:2px solid #111}body.a11y .notice,body.a11y .apiBox{font-size:18px;line-height:1.35;border:2px solid #111;color:#111}body.a11y .footerActions{position:static;left:auto;bottom:auto;transform:none;width:100%;grid-template-columns:1fr;margin-top:10px;background:#fff;border-top:2px solid #111}body.a11y .bottomPad{height:12px}
-    .adminTestBanner{grid-column:1/-1;background:#fff8e8;border:2px solid #b88700;border-radius:16px;padding:10px 12px;margin:0 0 10px;color:#3d2a00;font-weight:900;box-shadow:var(--shadow)}.adminTestBanner small{display:block;margin-top:3px;color:#6a4c00;font-weight:800}
-    .kggBuildBadge{display:block;margin-top:4px;color:#536273;font-size:10px;line-height:1.25;font-weight:850;word-break:break-word}
-    @media (min-width:760px){
-      body{align-items:flex-start;padding:18px;background:#e8eef6}
-      .app{width:min(100%,1180px);height:calc(100vh - 36px);min-height:640px;background:#f7f9fc;border:3px solid #111827;border-radius:34px;box-shadow:0 20px 60px rgba(7,16,39,.18);padding:18px;display:grid;grid-template-columns:minmax(360px,430px) minmax(0,1fr) 160px;grid-template-rows:auto 68px minmax(126px,auto) minmax(0,1fr) 64px;gap:14px;align-items:stretch;overflow:hidden}
-      .scanHub{grid-column:1;grid-row:2;margin:0;padding:0;background:transparent;border:0;box-shadow:none;display:grid;grid-template-columns:1fr 1fr;gap:10px;min-width:0}
-      .scanHub .scanBtn,.scanHub .scanMeta{height:100%;min-height:0;margin:0;display:flex;align-items:center;justify-content:center;border-radius:16px;font-size:17px}
-      .scanHub .scanMeta{border:1px solid var(--line);padding:0 12px;background:#fff;box-shadow:var(--shadow);color:var(--ink);border-top:1px solid var(--line)}
-      .scanHub .scanMeta small{display:none}
-      .scanHub input.hidden{display:none!important}
-      .scanHub #scanPreview{grid-column:1/-1;margin:0}
-      .adminMode .scanHub{grid-template-columns:1fr 1fr;grid-auto-rows:68px}
-      .adminMode .scanHub .adminConfigBtn,.adminMode .scanHub .sharedBankBtn{display:flex;margin:0;height:68px;align-items:center;justify-content:center;border-radius:16px}
-      .panel,.panel .inner,.tools{display:contents}
-      .planHeader{display:contents}
-      .planHeader .panelTitle{grid-column:2/4;grid-row:1;font-size:30px;margin:0;line-height:1.05;align-self:end}
-      #savePackageBtn{grid-column:3;grid-row:2;align-self:stretch;width:100%;height:68px;min-height:68px;border-radius:18px}
-      #savePackageBtn.hidden{display:block!important;visibility:hidden;pointer-events:none}
-      #baseToggle{grid-column:2;grid-row:2;height:68px;min-height:68px;border-radius:18px;font-size:21px;box-shadow:var(--shadow)}
 ```

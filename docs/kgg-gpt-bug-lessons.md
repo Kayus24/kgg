@@ -43,13 +43,13 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Caution: - PDF - QR-Erzeugung - Patienten-App - Scan-Kamera - Parser - Android-Wrapper - Tablet-Layout - Plan-State - Storage
 - Tests: - [x] Tablet-App komplett schliessen. - [x] App neu oeffnen. - [x] App laedt nicht mehr den kaputten v011-Stand. - [x] Tablet-Layout funktioniert wieder laut Max-Screenshot/Rueckmeldung. - [x] Max hat bestaetigt: `Hat geklappt`. - [ ] Galerie-QR separat neu testen, wenn ein neuer QR-Fix vorbereitet wird. - [ ] Kamera-Scan separat neu testen, wenn ein neuer Q
 
-### Custom GPT Payload Schema: path statt file
+### Custom GPT Payload Schema: alter v1-Pfad statt modularer v2-Payload
 
 - Source: `docs/bug-debug/2026-07-03-custom-gpt-payload-schema-path.md`
 - Areas: debug, parser-textblocks, pdf, phone-layout, qr-patient, scan-camera, tablet-layout
-- Lesson: Ein Custom-GPT-Preview-Dispatch kann formal plausibel aussehen, aber im Write-Gate scheitern, wenn eine Operation das Feld `file` statt `path` verwendet. Konkreter Run: `28665968004` scheiterte im Step `Apply guarded GPT payload` mit `ERROR: v1 only allows kgg-update/index.html`.
+- Lesson: Ein Custom-GPT-Preview-Dispatch kann formal plausibel aussehen, aber im Write-Gate scheitern, wenn er ein altes v1-Operationsschema verwendet. Historischer Run: `28665968004` scheiterte im Step `Apply guarded GPT payload` mit `ERROR: v1 only allows kgg-update/index.html`. Seit der modularen Quelle ist auch `path: "kgg-update/index.html"` falsch, weil `index.
 - Caution: - App-Feature-Code - PDF - QR/Patienten-App - Scan/OCR - Parser - Plan-State - Medien/Upload - Android/APK - GitHub Manifest - Handy-Layout
-- Tests: - `release-pipeline/kgg_gpt_payload_preflight.py --self-test` blockt einen Payload mit `file`. - GPT-Eval `payload-schema-path` verlangt `path: "kgg-update/index.html"`. - Der GPT darf bei rotem Run nicht nur `meta.json 404` melden, sondern muss den fehlgeschlagenen Step und die Gate-Meldung nennen.
+- Tests: - `release-pipeline/kgg_gpt_payload_preflight.py --self-test` blockt einen Payload mit `file`. - GPT-Eval `payload-schema-path` blockt alte `operations` gegen `kgg-update/index.html`. - GPT-Eval `modular-payload` verlangt `patch_content` mit `__KGG_PATCH_ID__`. - Der GPT darf bei rotem Run nicht nur `meta.json 404` melden, sondern muss den fehlgeschlagenen S
 
 ### Custom GPT Preview-Gate Lessons
 

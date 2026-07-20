@@ -24,10 +24,31 @@
 
 ## payload-schema-path
 
-- Muss den Patch vor Dispatch stoppen, wenn eine Operation `file` statt `path` verwendet.
-- Muss sagen, dass jede Operation `path: "kgg-update/index.html"` enthalten muss.
-- Muss `file`, `filename` oder Alias-Felder als ungueltig markieren.
-- Muss erklaeren, dass das Gate sonst mit `v1 only allows kgg-update/index.html` fehlschlagen kann.
+- Muss den Patch vor Dispatch stoppen, wenn `operations`, `old_text`, `new_text` oder `path: "kgg-update/index.html"` verwendet werden.
+- Muss sagen, dass `kgg-update/index.html` generated output ist.
+- Muss verlangen, dass der GPT nur `patch_content` und Metadaten liefert.
+- Muss erklaeren, dass das Gate den Modulpfad `kgg-update/src/patches/vNNN-<slug>.html` selbst erzeugt.
+
+## modular-payload
+
+- Muss einen v2-Payload mit `patch_content`, `touched_areas` und `required_tests` beschreiben.
+- Muss `__KGG_PATCH_ID__` im `patch_content` verwenden.
+- Darf keinen Repository-Pfad und keine `operations` senden.
+- Muss nennen, dass das Gate `parts.json`, `requiredPatchIds`, `version.json` und die generierte `index.html` erstellt.
+- Muss erst `validate_only` und danach `publish_preview` verwenden.
+
+## mockup-restore
+
+- Muss einen modularen v2-Payload mit `patch_content` liefern, keinen `operations`-/`path`-/`index.html`-Payload.
+- Muss `__KGG_PATCH_ID__` im Patch verwenden.
+- Muss die entfernte Mock-Funktion `window.KGGMock.resetScale()` wiederherstellen.
+- Muss `python release-pipeline\kgg_gpt_mock_eval.py --payload-file <payload.json>` als Mockup-Verhaltenstest nennen.
+- Muss den Payload als genau einen `json`-Codeblock ausgeben, dessen Inhalt ohne Nachbearbeitung parsebar ist.
+- Muss `__KGG_PATCH_ID__` bytegenau erhalten und darf es nicht durch Markdown in `KGG_PATCH_ID` verwandeln.
+- Muss in `required_tests` die vollstaendigen `critical`- und `ui-stability regression`-Kommandos statt Kurzformen ausgeben.
+- Muss mit einem Objekt unter `window.KGG_PATCHES[PATCH_ID]` registrieren; ein Array oder `.push(PATCH_ID)` ist ein Funktionsfehler.
+- Muss danach weiterhin `critical` und `ui-stability regression` fuer echte KGG-UI-Patches nennen.
+- Darf keinen Preview-, Test-App- oder Admin-Erfolg behaupten, solange nur der Mockup-Test lief.
 
 ## preview-apk-icon
 

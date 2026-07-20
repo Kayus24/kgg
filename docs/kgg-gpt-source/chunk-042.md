@@ -1,9 +1,58 @@
 # KGG Source Chunk 042
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 17641-18060
 
 ```html
+      id:result.id||bundleId,
+      schema:'kgg-media-bundle-v1',
+      count:bundleItems.length,
+      downloadUrl:result.downloadUrl,
+      deleteUrl:result.deleteUrl||'',
+      deleteToken:result.deleteToken||'',
+      expiresInSeconds:ttlSeconds,
+      retrySeconds:MEDIA_RETRY_SECONDS,
+      encrypted:true,
+      crypto:{alg:'AES-GCM',iv:encrypted.iv,key:encrypted.key}
+    };
+    scheduleTemporaryMediaDelete(adapter,{id:bundle.id,deleteUrl:bundle.deleteUrl,deleteToken:bundle.deleteToken,ttlSeconds});
+    lastPatientMediaBundleManifest=bundle;
+    return bundle;
+  }
+  async function prepareMediaUploadsForPatientShare(options){
+    lastPatientMediaBundleManifest=null;
+    const sourcePlan=options&&options.plan;
+    const exercises=sourcePlan&&Array.isArray(sourcePlan.exercises)?sourcePlan.exercises:state.plan;
+    const items=allPlanMediaItems(exercises);
+    if(!items.length)return {ok:true,count:0};
+    const adapter=mediaUploadAdapter();
+    if(!adapter)return {ok:false,count:items.length,message:'Medien-Upload fehlt. Plan bleibt offen.'};
+    const ttlSeconds=Number(options&&options.ttlSeconds)||currentMediaShareTtlSeconds();
+    let bundle=null;
+    try{
+      bundle=await uploadMediaBundle(adapter,exercises,ttlSeconds);
+    }catch(err){
+      console.warn('Medien-Bundle konnte nicht erstellt werden:',err);
+      return {ok:false,count:items.length,message:err&&err.message?err.message:'Medien-Bundle fehlgeschlagen. Plan bleibt offen.'};
+    }
+    if(!sourcePlan){
+      syncStatePlanToStore('ui_prepare_media_uploads_for_patient_share');
+      save();
+    }
+    return {ok:true,count:items.length,uploaded:items.length,bundle};
+  }
+  function normalizeSideMode(value){
+    const raw=String(value||'BI').trim().toUpperCase().replace(/\s+/g,'');
+    if(['L','LI','LINKS','LEFT','R','RE','RECHTS','RIGHT'].includes(raw))return 'LR';
+    if(['LR','L/R','LI/RE','LINKS/RECHTS','LINKSRECHTS','LEFT/RIGHT','BEIDSEITIGGETRENNT'].includes(raw))return 'LR';
+    if((raw.includes('LINKS')&&raw.includes('RECHTS'))||(raw.includes('LI')&&raw.includes('RE')))return 'LR';
+    if(['BI','BID','BEIDE','BEIDSEITIG','BILATERAL'].includes(raw))return 'BI';
+    return 'BI';
+  }
+  function sideModeLabel(value){return ({BI:'beidseitig',LR:'links/rechts getrennt'})[normalizeSideMode(value)]||'beidseitig';}
+  function normalizeSetCount(value){const n=Number(value)||3; return Math.max(1,Math.min(5,n));}
+  function normalizeMeasureMode(value){
+    const raw=String(value||'').trim().toLowerCase();
     if(['zeit','time','dauer','sek','sek.','sec','s'].includes(raw))return 'zeit';
     return 'wdh';
   }
@@ -375,53 +424,4 @@
     // Updates duerfen nur noch nach bewusstem Tippen auf den sichtbaren Button oeffnen.
     void target;
     return false;
-  }
-  async function checkGithubAppUpdate(){
-    if(!window.fetch||isLocalHtmlTestRuntime())return;
-    try{
-      const res=await fetch(kggUpdateManifestUrl,{cache:'no-store'});
-      if(!res.ok)return;
-      const manifest=await res.json();
-      if(!manifest||manifest.kind!=='kgg_app_update_manifest')return;
-      const webTarget=githubUpdateTargetFromManifest(manifest);
-      const apkTarget=androidApkUpdateTargetFromManifest(manifest);
-      if(isNativeAndroidShell()){
-        if(apkTarget){
-          window.KGGAndroidApkUpdateUrl=apkTarget.url;
-          window.KGGAndroidApkUpdateVersion=apkTarget.version;
-          window.KGGAndroidApkUpdateSha256=apkTarget.sha256;
-        }
-        return;
-      }
-      if(!webTarget)return;
-      stageManualRemoteWebUpdate(webTarget);
-    }catch(err){
-      console.warn('GitHub-Update-Pruefung nicht verfuegbar:',err);
-    }
-  }
-  function closeInstallPrompt(){const modal=$('installPromptModal'); if(modal)modal.classList.remove('open');}
-  function showInstallPrompt(mode){
-    if(mode!=='update'&&mode!=='remoteUpdate'&&mode!=='androidApkUpdate'&&isStandalonePwa())return;
-    if(localStorage.getItem(pwaInstallPromptSeenKey)&&mode!=='update'&&mode!=='remoteUpdate'&&mode!=='androidApkUpdate')return;
-    const title=$('installPromptTitle'), text=$('installPromptText'), accept=$('acceptInstallPrompt');
-    if(mode==='androidApkUpdate'){
-      if(title)title.textContent='Android-App-Update verfuegbar';
-      if(text)text.textContent='Neue Android-Version '+(window.KGGAndroidApkUpdateVersion||'')+' ist bereit. Android fragt vor der Installation noch einmal nach.';
-      if(accept)accept.textContent='APK installieren';
-    }else if(mode==='remoteUpdate'){
-      if(title)title.textContent='GitHub-Update verfuegbar';
-      if(text)text.textContent='Neue Version '+(window.KGGPendingRemoteUpdateVersion||'')+' ist online. Lokale Daten bleiben auf diesem Geraet erhalten.';
-      if(accept)accept.textContent='Update oeffnen';
-    }else if(mode==='update'){
-      if(title)title.textContent='Update bereit';
-      if(text)text.textContent='Update bereit. Lokale Daten bleiben erhalten.';
-      if(accept)accept.textContent='Aktualisieren';
-    }else{
-      if(title)title.textContent='App installieren?';
-      if(text)text.textContent='Installieren und lokale Daten über Updates behalten.';
-      if(accept)accept.textContent='Installieren';
-    }
-    const modal=$('installPromptModal'); if(modal)modal.classList.add('open');
-  }
-  async function acceptInstallPrompt(){
 ```

@@ -1,9 +1,58 @@
 # KGG Source Chunk 048
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 20161-20580
 
 ```html
+  async function buildKggEncryptedConfigTransferForQr(options){
+    const plain=buildKggConfigTransferPlain();
+    if(!kggConfigTransferHasCodes(plain)){
+      openAdminSecretsModal();
+      return null;
+    }
+    const passCode=kggConfigTransferPassCode();
+    const encrypted=await encryptKggConfigTransferPlain(plain,passCode);
+    if((options&&options.requireEncrypted)!==false&&!encrypted.encrypted){
+      alert('API-Key-QR kann auf diesem Geraet nur verschluesselt erstellt werden.');
+      return null;
+    }
+    return {payloadCode:encrypted.payloadCode,passCode,encrypted:encrypted.encrypted,plain};
+  }
+  async function openKggConfigTransferQr(){
+    const transfer=await buildKggEncryptedConfigTransferForQr({requireEncrypted:true});
+    if(!transfer)return;
+    openKggAdminMenuQr({
+      title:'Konfig-Transfer QR',
+      hint:'Verschluesselt, 10 Minuten gueltig. Transfer-Code: '+transfer.passCode,
+      text:transfer.payloadCode
+    });
+  }
+  function parseKggConfigTransferCode(code){
+    const raw=String(code||'').trim();
+    if(raw.indexOf('KGGCFG2:')===0)return {type:'KGGCFG2',json:safeBase64JsonDecode(raw.slice(8)),raw};
+    if(raw.indexOf('KGGCFG1:')===0)return {type:'KGGCFG1',json:safeBase64JsonDecode(raw.slice(8)),raw};
+    return null;
+  }
+  function buildKggTherapistSetupUrl(appUrl,configTransferCode){
+    const payload={kind:'kgg_therapist_setup_v1',version:1,appUrl:String(appUrl||''),configTransfer:String(configTransferCode||''),createdAt:new Date().toISOString()};
+    const sep=String(appUrl||'').includes('#')?'&':'#';
+    return String(appUrl||'')+sep+'kggsetup='+safeBase64JsonEncode(payload);
+  }
+  async function tryApplyKggSetupFromHash(){
+    const hash=String(location.hash||'');
+    const match=hash.match(/[#!&]kggsetup=([^&]+)/);
+    if(!match)return false;
+    const setup=safeBase64JsonDecode(match[1]);
+    if(!setup||setup.kind!=='kgg_therapist_setup_v1')return false;
+    const parsed=parseKggConfigTransferCode(setup.configTransfer);
+    if(parsed)await applyKggConfigTransferParsed(parsed);
+    try{history.replaceState(null,'',location.pathname+location.search);}catch(err){}
+    return true;
+  }
+  async function applyKggConfigTransferParsed(parsed){
+    if(!parsed||!(parsed.type==='KGGCFG2'||parsed.type==='KGGCFG1'))return false;
+    let plain=parsed.json;
+    if(parsed.type==='KGGCFG2'){
       const passCode=(prompt('Transfer-Code eingeben')||'').trim();
       if(!passCode)return false;
       plain=await decryptKggConfigTransferEnvelope(parsed.json,passCode);
@@ -375,53 +424,4 @@
   function isNativeSyncBundlePayload(payload){
     return payload&&payload.kind==='kgg_sync_bundle'&&(payload.version===1||payload.version===2)&&(payload.invite||payload.sync);
   }
-  function applyNativeSyncInvite(invite){
-    if(!isNativeSyncInvitePayload(invite))throw new Error('Sync-QR ist nicht lesbar.');
-    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig()||{});
-    if(invite.roomId)config.syncRoomId=String(invite.roomId);
-    if(!config.therapistId)config.therapistId=syncPairDeviceId();
-    writeNativeSyncFollowConfig(config);
-    const entry=upsertSyncPeerFromOrigin({
-      therapistId:String(invite.therapistId||invite.deviceId),
-      deviceId:String(invite.deviceId),
-      displayName:String(invite.displayName||'KGG Geraet'),
-      roomId:String(invite.roomId||config.syncRoomId||syncPairRoomId())
-    },true);
-    setScanStatus('Sync gekoppelt: '+entry.displayName);
-    renderSyncPeerList();
-    try{queueNativeExerciseBankSync('sync_invite_scanned');}catch(err){}
-    return entry;
-  }
-  async function applyNativeSyncBundle(bundle){
-    if(!isNativeSyncBundlePayload(bundle))throw new Error('Sync-Daten-QR ist nicht lesbar.');
-    let entry=null;
-    if(bundle.invite)entry=applyNativeSyncInvite(bundle.invite);
-    let result=null;
-    if(bundle.sync){
-      result=mergeNativeExerciseBankSyncDocument(bundle.sync,{allowUnfollowed:true});
-      try{await pushNativeExerciseBankSync('sync_bundle_qr_import');}catch(err){}
-    }
-    const bank=result&&result.bank?result.bank:{added:0,updated:0,total:0};
-    const packages=result&&result.packages?result.packages:{added:0,updated:0,total:0};
-    const name=entry&&entry.displayName?entry.displayName:'Sync-Geraet';
-    setScanStatus('Sync-Daten uebernommen: '+name+' | DB +'+bank.added+'/'+bank.updated+' | Pakete +'+packages.added+'/'+packages.updated);
-    return {entry,result};
-  }
-  function currentEditedPlanExercise(){const id=state.editId; return state.plan.find(x=>(x.localId||x.id)===id);}
-  function currentEditedBankExercise(){const id=state.editId; return bank.find(x=>String(x.id)===String(id));}
-  function currentEditedExercise(){return currentEditedPlanExercise()||currentEditedBankExercise();}
-  function mediaSizeLabel(bytes){const n=Number(bytes)||0; if(n>=1048576)return (n/1048576).toFixed(1).replace('.',',')+' MB'; if(n>=1024)return Math.round(n/1024)+' KB'; return n+' B';}
-  function clearEditorMediaPreview(){
-    const preview=$('editMediaPreview');
-    if(!preview)return;
-    preview.innerHTML='';
-    preview.classList.add('hidden');
-  }
-  async function renderEditorMediaPreview(media){
-    const preview=$('editMediaPreview');
-    if(!preview||!media||!media.id){clearEditorMediaPreview();return;}
-    preview.textContent='Vorschau wird geladen ...';
-    preview.classList.remove('hidden');
-    try{
-      const record=await getEncryptedMediaBlob(media.id);
 ```

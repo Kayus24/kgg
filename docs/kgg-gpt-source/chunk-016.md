@@ -1,9 +1,58 @@
 # KGG Source Chunk 016
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 6721-7140
 
 ```html
+      height:var(--kgg-current-plan-freeze-h,auto)!important;
+      min-height:var(--kgg-current-plan-freeze-h,auto)!important;
+      max-height:var(--kgg-current-plan-freeze-h,none)!important;
+    }
+
+    #currentPlanBlock .planSectionBody{
+      contain:layout paint!important;
+      overflow:auto!important;
+      overscroll-behavior:contain!important;
+      -webkit-overflow-scrolling:touch;
+      max-height:min(46dvh,380px);
+      transform:translateZ(0);
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+    }
+
+    #currentPlanBlock #planList.planList{
+      contain:layout paint!important;
+      isolation:isolate;
+      transform:translateZ(0);
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+    }
+
+    #currentPlanBlock .planCard{
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+      transform:translate3d(0,0,0);
+      will-change:auto;
+    }
+
+    body.is-scrolling #currentPlanBlock .planCard:not(.swipe-dragging):not(.swipe-removing):not(.reorder-lifted):not(.reorder-prelift){
+      transform:translate3d(0,0,0)!important;
+      transition:none!important;
+      animation:none!important;
+      filter:none!important;
+    }
+
+    #currentPlanBlock .planCard.reorder-prelift,
+    body.kggPlanSectionFrozen #currentPlanBlock .planCard.reorder-prelift{
+      position:relative;
+      z-index:8;
+      transform:translate3d(0,-3px,0) scale(1.018)!important;
+      box-shadow:0 10px 26px rgba(7,16,39,.16),0 2px 8px rgba(7,16,39,.10)!important;
+      transition:transform .11s cubic-bezier(.2,.85,.2,1),box-shadow .11s ease!important;
+    }
+
+    body.kggPlanCardReordering #currentPlanBlock .planSectionBody{
+      overflow:hidden!important;
       touch-action:none!important;
     }
 
@@ -375,53 +424,4 @@ var GenericGFPoly = /** @class */ (function () {
             // Just return the x^0 coefficient
             return this.getCoefficient(0);
         }
-        var size = this.coefficients.length;
-        if (a === 1) {
-            // Just the sum of the coefficients
-            this.coefficients.forEach(function (coefficient) {
-                result = GenericGF_1.addOrSubtractGF(result, coefficient);
-            });
-            return result;
-        }
-        result = this.coefficients[0];
-        for (var i = 1; i < size; i++) {
-            result = GenericGF_1.addOrSubtractGF(this.field.multiply(a, result), this.coefficients[i]);
-        }
-        return result;
-    };
-    return GenericGFPoly;
-}());
-exports.default = GenericGFPoly;
-
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var binarizer_1 = __webpack_require__(4);
-var decoder_1 = __webpack_require__(5);
-var extractor_1 = __webpack_require__(11);
-var locator_1 = __webpack_require__(12);
-function scan(matrix) {
-    var locations = locator_1.locate(matrix);
-    if (!locations) {
-        return null;
-    }
-    for (var _i = 0, locations_1 = locations; _i < locations_1.length; _i++) {
-        var location_1 = locations_1[_i];
-        var extracted = extractor_1.extract(matrix, location_1);
-        var decoded = decoder_1.decode(extracted.matrix);
-        if (decoded) {
-            return {
-                binaryData: decoded.bytes,
-                data: decoded.text,
-                chunks: decoded.chunks,
-                version: decoded.version,
-                location: {
-                    topRightCorner: extracted.mappingFunction(location_1.dimension, 0),
-                    topLeftCorner: extracted.mappingFunction(0, 0),
-                    bottomRightCorner: extracted.mappingFunction(location_1.dimension, location_1.dimension),
 ```

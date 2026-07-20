@@ -1,9 +1,58 @@
 # KGG Source Chunk 035
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 14701-15120
 
 ```html
+    0xE945: 0x98B1,
+    0xE946: 0x98B6,
+    0xE947: 0x98C4,
+    0xE948: 0x98C3,
+    0xE949: 0x98C6,
+    0xE94A: 0x98E9,
+    0xE94B: 0x98EB,
+    0xE94C: 0x9903,
+    0xE94D: 0x9909,
+    0xE94E: 0x9912,
+    0xE94F: 0x9914,
+    0xE950: 0x9918,
+    0xE951: 0x9921,
+    0xE952: 0x991D,
+    0xE953: 0x991E,
+    0xE954: 0x9924,
+    0xE955: 0x9920,
+    0xE956: 0x992C,
+    0xE957: 0x992E,
+    0xE958: 0x993D,
+    0xE959: 0x993E,
+    0xE95A: 0x9942,
+    0xE95B: 0x9949,
+    0xE95C: 0x9945,
+    0xE95D: 0x9950,
+    0xE95E: 0x994B,
+    0xE95F: 0x9951,
+    0xE960: 0x9952,
+    0xE961: 0x994C,
+    0xE962: 0x9955,
+    0xE963: 0x9997,
+    0xE964: 0x9998,
+    0xE965: 0x99A5,
+    0xE966: 0x99AD,
+    0xE967: 0x99AE,
+    0xE968: 0x99BC,
+    0xE969: 0x99DF,
+    0xE96A: 0x99DB,
+    0xE96B: 0x99DD,
+    0xE96C: 0x99D8,
+    0xE96D: 0x99D1,
+    0xE96E: 0x99ED,
+    0xE96F: 0x99EE,
+    0xE970: 0x99F1,
+    0xE971: 0x99F2,
+    0xE972: 0x99FB,
+    0xE973: 0x99F8,
+    0xE974: 0x9A01,
+    0xE975: 0x9A0F,
     0xE976: 0x9A05,
     0xE977: 0x99E2,
     0xE978: 0x9A19,
@@ -375,53 +424,4 @@ exports.decode = decode;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.VERSIONS = [
-    {
-        infoBits: null,
-        versionNumber: 1,
-        alignmentPatternCenters: [],
-        errorCorrectionLevels: [
-            {
-                ecCodewordsPerBlock: 7,
-                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 19 }],
-            },
-            {
-                ecCodewordsPerBlock: 10,
-                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 16 }],
-            },
-            {
-                ecCodewordsPerBlock: 13,
-                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 13 }],
-            },
-            {
-                ecCodewordsPerBlock: 17,
-                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 9 }],
-            },
-        ],
-    },
-    {
-        infoBits: null,
-        versionNumber: 2,
-        alignmentPatternCenters: [6, 18],
-        errorCorrectionLevels: [
-            {
-                ecCodewordsPerBlock: 10,
-                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 34 }],
-            },
-            {
-                ecCodewordsPerBlock: 16,
-                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 28 }],
-            },
-            {
-                ecCodewordsPerBlock: 22,
-                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 22 }],
-            },
-            {
-                ecCodewordsPerBlock: 28,
-                ecBlocks: [{ numBlocks: 1, dataCodewordsPerBlock: 16 }],
-            },
-        ],
-    },
 ```

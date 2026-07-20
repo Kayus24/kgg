@@ -1,9 +1,58 @@
 # KGG Source Chunk 005
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 2101-2520
 
 ```html
+      height:42px;
+      min-width:42px;
+      border:1px solid rgba(220,227,235,.95);
+      border-radius:12px;
+      background:#f6f8fb;
+      display:inline-grid;
+      place-items:center;
+      overflow:hidden;
+      color:#637083;
+      font-size:18px;
+      box-shadow:0 2px 8px rgba(7,16,39,.045);
+    }
+    .planThumb img{
+      width:100%;
+      height:100%;
+      display:block;
+      object-fit:cover;
+    }
+    .planThumbFallback{
+      background:#eef3f8;
+    }
+    .planCard .drag{
+      width:34px;
+      height:34px;
+      min-width:34px;
+      border:1px solid rgba(220,227,235,.95);
+      background:#fff;
+      color:#2d3a4e;
+      font-size:18px;
+      line-height:1;
+      border-radius:999px;
+      margin-right:0;
+    }
+    .planCard .planText{
+      min-width:0;
+      gap:2px;
+    }
+    .planCard .planText b{
+      display:flex;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:4px;
+      min-width:0;
+      line-height:1.15;
+    }
+    .planCard .planName{
+      min-width:0;
+      overflow-wrap:anywhere;
+    }
     .planCard.is-new .planName,
     .planCard.is-review .planName{
       color:#72490a;
@@ -375,53 +424,4 @@
         border-radius:0!important;
         box-shadow:none!important;
         background:#f7f9fc!important;
-        padding:12px 14px 10px!important;
-        overflow:hidden!important;
-        grid-template-columns:minmax(360px,430px) minmax(0,1fr) minmax(150px,190px)!important;
-        grid-template-rows:auto 64px minmax(104px,auto) minmax(0,1fr) 60px!important;
-        gap:12px!important;
-      }
-      /* Innenkarten behalten die App-Struktur, nur der Außen-Mockup-Rahmen verschwindet. */
-      #inputWrap,
-      #bankArea.bankOpen,
-      #currentPlanBlock,
-      #scannedPlansBlock,
-      .planSection,
-      .baseCard,
-      .drawerBtn,
-      .scanHub .scanBtn,
-      .scanHub .scanMeta{
-        box-shadow:0 2px 10px rgba(7,16,39,.055);
-      }
-      .scanHub .scanBtn,
-      .scanHub .scanMeta,
-      #baseToggle,
-      #finishBtn,
-      #recentToggle,
-      #packageToggle{
-        min-height:60px!important;
-        height:60px!important;
-      }
-      #savePackageBtn{
-        min-height:48px!important;
-        height:48px!important;
-      }
-      #exerciseInput{
-        min-height:104px;
-        max-height:160px;
-      }
-      #bankArea.bankOpen.alphaBankOpen .az{
-        height:calc(100% - 58px);
-        margin-top:58px;
-      }
-      #recentList:not(.hidden),
-      #packageList:not(.hidden),
-      #baseFields:not(.hidden){
-        max-height:calc(var(--kgg-visual-vh,100dvh) - 104px)!important;
-      }
-      .app.softKeyboard{
-        height:var(--kgg-visual-vh,100dvh)!important;
-        max-height:var(--kgg-visual-vh,100dvh)!important;
-        padding:8px 10px!important;
-        gap:8px!important;
 ```

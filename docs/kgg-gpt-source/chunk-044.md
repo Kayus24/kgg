@@ -1,9 +1,58 @@
 # KGG Source Chunk 044
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 18481-18900
 
 ```html
+    const parts=[String(ex&&ex.name||'').trim()].filter(Boolean);
+    if(normalizeSideMode(ex&&ex.side)==='LR')parts.push('li/re');
+    const loadUnit=ex&&(ex.weightUnit||ex.loadUnit);
+    if(ex&&ex.startLoad)parts.push(String(ex.startLoad)+' '+(loadUnit||'kg'));
+    else if(ex&&(ex.explicitLoadUnit||ex.customLoadUnit)&&loadUnit)parts.push('@ '+loadUnit);
+    if(ex&&ex.startMetric)parts.push(String(ex.startMetric)+' '+(ex.unit||ex.metricUnit||'Wdh'));
+    return parts.join(' ').trim();
+  }
+  function withTrailingExerciseComma(text){
+    const next=String(text||'').replace(/\s+$/,'');
+    return next.trim()?next.replace(/,+$/,'')+', ':'';
+  }
+  function resizeExerciseInputToContent(){
+    const input=$('exerciseInput');
+    if(!input)return;
+    const hasText=!!input.value.trim();
+    input.classList.toggle('hasText',hasText);
+    input.style.height='auto';
+    input.style.height=hasText?Math.ceil(input.scrollHeight)+'px':'';
+    const title=$('dbTitle'), wrap=$('inputWrap');
+    if(title&&wrap)title.style.setProperty('--db-title-start-y',Math.ceil(wrap.offsetHeight+12)+'px');
+  }
+  function syncTextInputFromPlan(reason){
+    const input=$('exerciseInput');
+    if(!input)return;
+    const next=withTrailingExerciseComma((state.plan||[]).map(formatExerciseTextLine).filter(Boolean).join(', '));
+    if(input.value!==next){state.textSyncing=true; input.value=next; state.textSyncing=false;}
+    state.planText=next;
+    resizeExerciseInputToContent();
+  }
+  function restoreTrailingCommaAfterPlanSync(shouldRestore){
+    const input=$('exerciseInput');
+    if(!shouldRestore||!input||(state.plan||[]).length===0)return;
+    const next=withTrailingExerciseComma(input.value);
+    if(input.value!==next){state.textSyncing=true; input.value=next; state.textSyncing=false;}
+    state.planText=input.value;
+    resizeExerciseInputToContent();
+  }
+  function syncPlanFromTextInput(reason){
+    if(state.textSyncing)return;
+    const input=$('exerciseInput');
+    resizeExerciseInputToContent();
+    const text=input&&input.value||'';
+    const structured=structuredExercisesFromPlanText(text);
+    if(structured!==null)state.plan=structured.map(ensureUiExerciseShape);
+    else{
+      const segments=splitPlanText(text).map(p=>p.text.trim()).filter(Boolean);
+      state.plan=segments.map((segment,index)=>parseTextExercise(segment,findExistingForTextSegment(segment,index))).filter(Boolean).map(ensureUiExerciseShape);
+    }
     state.liveDraftId=null;
     state.planText=input?input.value:'';
     syncStatePlanToStore(reason||'ui_textfield_master_sync');
@@ -375,53 +424,4 @@
   function bindAzScrollrad(container){const nav=container&&container.querySelector('.az'); if(!nav||nav.dataset.azBound==='1')return; nav.dataset.azBound='1'; let active=false,tapTimer=0; const setTouching=on=>{nav.classList.toggle('azTouching',!!on); if(!on)setAzTouchPreview(nav,'');}; const showTapWave=letter=>{clearTimeout(tapTimer); nav.classList.add('azTouching'); setAzTouchPreview(nav,letter); tapTimer=setTimeout(()=>setTouching(false),180);}; const jumpFromEvent=ev=>{const touch=ev.touches&&ev.touches[0]||ev.changedTouches&&ev.changedTouches[0]; const y=touch?touch.clientY:ev.clientY; const letter=azLetterFromPoint(nav,y); if(letter){setAzTouchPreview(nav,letter); jumpBankToLetter(container,letter,true);}}; nav.addEventListener('click',ev=>{const btn=ev.target&&ev.target.closest?ev.target.closest('[data-jump]'):null; if(!btn||!nav.contains(btn))return; ev.preventDefault(); showTapWave(btn.dataset.jump); jumpBankToLetter(container,btn.dataset.jump);}); nav.addEventListener('pointerdown',ev=>{clearTimeout(tapTimer); active=true; setTouching(true); nav.setPointerCapture&&nav.setPointerCapture(ev.pointerId); ev.preventDefault(); jumpFromEvent(ev);}); nav.addEventListener('pointermove',ev=>{if(!active)return; ev.preventDefault(); jumpFromEvent(ev);}); nav.addEventListener('pointerup',ev=>{active=false; setTouching(false); try{nav.releasePointerCapture&&nav.releasePointerCapture(ev.pointerId);}catch(e){}}); nav.addEventListener('pointercancel',()=>{active=false; setTouching(false);}); nav.addEventListener('touchstart',ev=>{clearTimeout(tapTimer); active=true; setTouching(true); jumpFromEvent(ev);},{passive:false}); nav.addEventListener('touchmove',ev=>{if(!active)return; ev.preventDefault(); jumpFromEvent(ev);},{passive:false}); nav.addEventListener('touchend',()=>{active=false; setTouching(false);},{passive:true});}
   function bankCardThumbnailHtml(ex){
     const media=ensureExerciseMediaList(ex).find(item=>item&&item.type==='image'&&item.id);
-    if(!media)return '';
-    return '<span class="bankThumb bankThumbFallback" data-bank-thumb-id="'+escapeHtml(media.id)+'" title="Bild vorhanden" aria-hidden="true"></span>';
-  }
-  async function hydrateBankThumbnails(root){
-    if(!root)return;
-    Array.from(root.querySelectorAll('[data-bank-thumb-id]')).forEach(async node=>{
-      const id=String(node.getAttribute('data-bank-thumb-id')||'');
-      if(!id)return;
-      try{
-        const owner=bank.find(ex=>ensureExerciseMediaList(ex).some(item=>String(item&&item.id)===id));
-        const media=owner&&ensureExerciseMediaList(owner).find(item=>String(item&&item.id)===id);
-        if(!media)throw new Error('Kein Bildmanifest');
-        const record=await getEncryptedMediaBlob(id);
-        if(!node.isConnected)return;
-        if(!record||!record.blob)throw new Error('Lokales Bild fehlt');
-        const imageBlob=await patientDecryptMedia(media,record.blob);
-        if(!node.isConnected)return;
-        if(node._kggThumbUrl)URL.revokeObjectURL(node._kggThumbUrl);
-        const url=URL.createObjectURL(imageBlob);
-        node._kggThumbUrl=url;
-        node.classList.remove('bankThumbFallback');
-        node.innerHTML='<img src="'+url+'" alt="">';
-        setTimeout(()=>{try{if(node._kggThumbUrl===url){URL.revokeObjectURL(url);node._kggThumbUrl='';}}catch(e){}},60000);
-      }catch(err){
-        if(node.isConnected){node.classList.add('bankThumbFallback');node.innerHTML='';}
-      }
-    });
-  }
-  function renderBank(text){const c=$('bankContent'); const btn=$('bankToggle'); const area=$('bankArea'); const effectiveOpen=state.bankOpen||isTabletLayout(); const shouldHideToggle=!effectiveOpen&&!!text; btn.classList.toggle('hidden',shouldHideToggle); btn.classList.toggle('dbMascotDock',effectiveOpen); const caret=effectiveOpen?'▾':'▸'; btn.innerHTML='<span class="dbToggleMain"><span class="dbMascotBubble" aria-hidden="true"><span class="dbCaret">'+caret+'</span><span class="dbMascot">🏋️</span></span><span class="dbToggleText">Übungsdatenbank</span></span>'; btn.setAttribute('aria-label',effectiveOpen?'Übungsdatenbank schließen':'Übungsdatenbank öffnen'); c.classList.toggle('hidden',!effectiveOpen); area.classList.toggle('bankOpen',effectiveOpen); area.classList.toggle('alphaBankOpen',effectiveOpen&&!text); area.classList.toggle('searchBankOpen',effectiveOpen&&!!text); if(!effectiveOpen){c.innerHTML=''; return;} const matches=text?search(text,8):allAlpha(); const list=text?fillBankListWithFallback(matches,8):matches; const fallbackOnly=!!text&&matches.length===0; let rows=list.map((ex,i)=>{const letter=bankLetterForName(ex.name); return '<div class="bankRow" data-letter="'+letter+'" data-bank-index="'+i+'"><button class="iconBtn bankAddBtn" data-add="'+ex.id+'" aria-label="Übung übernehmen">'+bankCardThumbnailHtml(ex)+'<span class="bankText"><b>'+escapeHtml(ex.name)+'</b><small>'+(ex.unit||'Wdh')+' · '+(ex.weightUnit||'kg')+'</small></span></button><button class="iconBtn" data-edit="'+ex.id+'" aria-label="Übung bearbeiten">⚙️</button></div>';}).join(''); if(text){const label=fallbackOnly?'Alternative Treffer':'Beste Treffer'; c.innerHTML='<div class="bankLabel">'+label+'</div><div class="bankRows">'+rows+'</div>';} else {const availableLetters=new Set(list.map(ex=>bankLetterForName(ex.name))); c.innerHTML='<div class="bankWithAz"><nav class="az" aria-label="A-Z Sprungleiste">'+'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(l=>'<button type="button" data-jump="'+l+'" class="'+(availableLetters.has(l)?'':'az-empty')+'">'+l+'</button>').join('')+'</nav><div class="bankRows">'+rows+'</div></div>'; bindAzScrollrad(c);} hydrateBankThumbnails(c); c.querySelectorAll('[data-add]').forEach(b=>{preventButtonFocusSteal(b); b.onclick=ev=>{ev.preventDefault();ev.stopPropagation();if(Date.now()<bankSwipeSuppressClickUntil)return; applySelectedExerciseToText(bank.find(x=>x.id===b.dataset.add),{keepFocus:!isPhoneLayout()||!document.body.classList.contains('kggPhoneDbBrowseMode')});};}); c.querySelectorAll('[data-edit]').forEach(b=>b.onclick=ev=>{if(Date.now()<bankSwipeSuppressClickUntil){ev.preventDefault();ev.stopPropagation();return;} openEditor(bank.find(x=>x.id===b.dataset.edit));});}
-  function bindBankSwipeDelete(container){
-    if(!container)return;
-    container.querySelectorAll('.bankRow').forEach(row=>{
-      if(row.dataset.bankSwipeBound==='1')return;
-      const btn=row.querySelector('[data-add],[data-edit]');
-      const id=btn&&(btn.dataset.add||btn.dataset.edit);
-      if(!id)return;
-      row.dataset.bankId=id;
-      row.dataset.bankSwipeBound='1';
-      row.addEventListener('click',ev=>{if(Date.now()<bankSwipeSuppressClickUntil){ev.preventDefault();ev.stopPropagation();}},true);
-      row.addEventListener('pointerdown',startBankRowSwipeDelete,{passive:true});
-    });
-  }
-  function resetBankRowSwipe(row){
-    if(!row)return;
-    row.classList.remove('bank-swipe-dragging','bank-swipe-armed','bank-swipe-left','bank-swipe-right');
-    row.style.removeProperty('transform');
-    row.style.removeProperty('opacity');
-    row.style.removeProperty('transition');
-    row.style.removeProperty('--bank-swipe-strength');
 ```

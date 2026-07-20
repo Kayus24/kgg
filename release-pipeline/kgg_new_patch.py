@@ -75,19 +75,26 @@ def replace_once(text: str, pattern: str, replacement: str, label: str) -> str:
     return updated
 
 
-def patch_template(patch_id: str, title: str) -> bytes:
+def render_patch_module(patch_id: str, title: str, patch_content: str | None = None) -> bytes:
+    if patch_content is None:
+        body = (
+            f"<script id=\"{patch_id}\">\n"
+            "(function(){\n"
+            "  \"use strict\";\n"
+            f"  const PATCH_ID=\"{patch_id}\";\n"
+            "  // Den kleinstmoeglichen Patch hier implementieren. Bestehende Hooks beibehalten.\n"
+            "  window.KGG_PATCHES=window.KGG_PATCHES||{};\n"
+            "  window.KGG_PATCHES[PATCH_ID]={installed:true};\n"
+            "})();\n"
+            "</script>\n"
+        )
+    else:
+        body = patch_content.replace("__KGG_PATCH_ID__", patch_id)
+        body = body.replace("\r\n", "\n").replace("\r", "\n").strip() + "\n"
     return (
         f"<!-- KGG PATCH START {patch_id} -->\n"
         f"<!-- {title} -->\n"
-        f"<script id=\"{patch_id}\">\n"
-        "(function(){\n"
-        "  \"use strict\";\n"
-        f"  const PATCH_ID=\"{patch_id}\";\n"
-        "  // Den kleinstmoeglichen Patch hier implementieren. Bestehende Hooks beibehalten.\n"
-        "  window.KGG_PATCHES=window.KGG_PATCHES||{};\n"
-        "  window.KGG_PATCHES[PATCH_ID]={installed:true};\n"
-        "})();\n"
-        "</script>\n"
+        f"{body}"
         f"<!-- KGG PATCH END {patch_id} -->\n"
     ).encode("utf-8")
 
@@ -216,7 +223,7 @@ def prepare(args: argparse.Namespace) -> tuple[dict[Path, bytes], dict]:
         PATCH_RULES: replace_json_script(rules_text, "kgg-patch-rules", rules).encode("utf-8"),
         BASE_HEAD: head_text.encode("utf-8"),
         BASE_APP: app_text.encode("utf-8"),
-        patch_path: patch_template(patch_id, args.title.strip()),
+        patch_path: render_patch_module(patch_id, args.title.strip(), getattr(args, "patch_content", None)),
         MANIFEST: (json.dumps(manifest, ensure_ascii=False, indent=2) + "\n").encode("utf-8"),
     }
     assembled_parts = []
@@ -267,11 +274,16 @@ def main() -> int:
     parser.add_argument("--summary", required=True, help="one-sentence reason and intended change")
     parser.add_argument("--area", action="append", required=True, help="touched functional area; repeat as needed")
     parser.add_argument("--version-name", help="optional exact 1.0.<next>-<slug> version name")
+    parser.add_argument("--patch-content-file", type=Path, help="optional UTF-8 HTML fragment used as the new patch module body")
     parser.add_argument("--allow-protected", action="store_true", help="allow an explicitly selected protected area")
     parser.add_argument("--allow-changelog-overflow", action="store_true", help="allow adding above the embedded changelog limit")
     parser.add_argument("--approval-note", default="", help="required rationale/approval for either override")
     parser.add_argument("--dry-run", action="store_true", help="validate and show the planned patch without writing")
     args = parser.parse_args()
+    if args.patch_content_file:
+        args.patch_content = args.patch_content_file.read_text(encoding="utf-8")
+    else:
+        args.patch_content = None
     try:
         planned, report = prepare(args)
         if not args.dry_run:

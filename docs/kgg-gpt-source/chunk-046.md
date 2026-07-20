@@ -1,9 +1,58 @@
 # KGG Source Chunk 046
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 19321-19740
 
 ```html
+    card.style.removeProperty('opacity');
+    card.style.removeProperty('transition');
+    card.style.removeProperty('--swipe-strength');
+    card.style.removeProperty('--kgg-plan-swipe-x');
+  }
+  function startPlanCardSwipeDelete(ev){
+    if(ev.button!=null&&ev.button!==0)return;
+    const pendingTabletReorder=(animatedReorder&&isTabletLayout()&&animatedReorder.card===ev.currentTarget&&!animatedReorder.active)?animatedReorder:null;
+    if(animatedReorder&&!pendingTabletReorder)return;
+    const interactiveTarget=ev.target&&ev.target.closest?ev.target.closest('button,input,textarea,select,a'):null;
+    const actionSwipeTarget=interactiveTarget&&interactiveTarget.closest&&interactiveTarget.closest('.planCardActions');
+    if(interactiveTarget&&!actionSwipeTarget)return;
+    const card=ev.currentTarget;
+    const id=card&&card.dataset&&card.dataset.planId;
+    if(!card||!id)return;
+    const startX=ev.clientX,startY=ev.clientY;
+    const swipe={card,id,startX,startY,active:false,dx:0,pointerId:ev.pointerId,cancelTimer:null};
+    const threshold=()=>Math.min(132,Math.max(78,card.offsetWidth*0.34));
+    const cleanup=()=>{clearTimeout(swipe.cancelTimer);document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);document.removeEventListener('pointercancel',cancel);};
+    const move=e=>{
+      const dx=e.clientX-startX,dy=e.clientY-startY;
+      if(!swipe.active){
+        if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)*1.2){cleanup();return;}
+        if(Math.abs(dx)<12||Math.abs(dx)<Math.abs(dy)*1.25)return;
+        if(pendingTabletReorder&&animatedReorder===pendingTabletReorder){
+          clearTimeout(pendingTabletReorder.timer);
+          cleanupAnimatedReorder(false);
+        }
+        swipe.active=true;
+        document.body.classList.add('kggPlanCardSwiping');
+        clearPhoneScrollStateForPlanGesture(420);
+        card.classList.add('swipe-dragging');
+        try{card.setPointerCapture&&card.setPointerCapture(swipe.pointerId);}catch(err){}
+      }
+      if(!swipe.active)return;
+      clearPhoneScrollStateForPlanGesture(420);
+      e.preventDefault(); if(e.stopPropagation)e.stopPropagation();
+      const max=card.offsetWidth*0.86;
+      swipe.dx=Math.max(-max,Math.min(max,dx));
+      const strength=Math.min(1,Math.abs(swipe.dx)/threshold());
+      card.classList.toggle('swipe-left',swipe.dx<0);
+      card.classList.toggle('swipe-right',swipe.dx>0);
+      card.classList.toggle('swipe-armed',Math.abs(swipe.dx)>=threshold());
+      card.style.setProperty('--swipe-strength',String(strength));
+      card.style.setProperty('--kgg-plan-swipe-x',swipe.dx+'px');
+      card.style.transform='translateX(var(--kgg-plan-swipe-x,0px))';
+      card.style.opacity=String(1-strength*0.16);
+    };
+    const up=e=>{
       cleanup();
       if(!swipe.active){resetPlanCardSwipe(card);return;}
       e.preventDefault(); if(e.stopPropagation)e.stopPropagation(); card.dataset.swipeSuppressClickUntil=String(Date.now()+360);
@@ -374,54 +423,5 @@
     if(input)input.value=defaultPackageName();
     $('packageSaveModal').classList.add('open');
     setTimeout(()=>input&&input.focus&&input.focus(),30);
-  }
-  function closePackageSaveModal(){$('packageSaveModal').classList.remove('open');}
-  function confirmPackageSave(){
-    const input=$('packageNameInput');
-    const name=String(input&&input.value||'').trim();
-    const exercises=(state.plan||[]).map(ex=>String(ex&&ex.name||'').trim()).filter(Boolean);
-    if(!name||!exercises.length){if(input)input.focus(); return;}
-    state.packages=Array.isArray(state.packages)?state.packages:[];
-    state.packages.unshift({id:'pkg_'+Date.now(),name,exercises,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),source:'current-plan'});
-    save();
-    queueNativeExerciseBankSync('package_saved');
-    closePackageSaveModal();
-    if($('packageList'))$('packageList').classList.remove('hidden');
-    render();
-  }
-  function applyPackageToPlan(packageId){
-    const p=(state.packages||[]).find(x=>String(x.id)===String(packageId));
-    if(!p)return;
-    (p.exercises||[]).forEach(n=>addExercise(search(n,1)[0]||{name:n,sets:3,unit:'Wdh',weightUnit:'kg'}));
-  }
-  function packageOverlayDescription(pkg){
-    const exercises=(pkg&&pkg.exercises||[]).map(x=>String(x||'').trim()).filter(Boolean);
-    if(!exercises.length)return 'Noch keine Uebungen in diesem Paket.';
-    const listed=exercises.slice(0,4).join(', ');
-    return 'Enthaelt '+listed+(exercises.length>4?' und weitere Uebungen.':'.');
-  }
-  function packageOverlayTags(pkg){
-    const exercises=(pkg&&pkg.exercises||[]).filter(Boolean);
-    const tags=[exercises.length+' Uebungen'];
-    if(pkg&&pkg.source==='current-plan')tags.push('Eigener Plan');
-    else tags.push('Paket');
-    return tags;
-  }
-  function renderTabletPackageOverlay(){
-    const cards=$('tabletPackageCards');
-    if(!cards)return;
-    const input=$('tabletPackageSearch');
-    const query=compact(input&&input.value||'');
-    const packages=(state.packages||[]).filter(pkg=>{
-      if(!query)return true;
-      const hay=compact([pkg.name,(pkg.exercises||[]).join(' ')].join(' '));
-      return hay.includes(query);
-    });
-    if(!packages.length){cards.innerHTML='<div class="tabletPackageEmpty">Keine passenden Uebungspakete gefunden.</div>';return;}
-    cards.innerHTML=packages.map(pkg=>{
-      const tags=packageOverlayTags(pkg).map(tag=>'<span>'+escapeHtml(tag)+'</span>').join('');
-      return '<button class="tabletPackageCard" type="button" data-tablet-pkg="'+escapeHtml(pkg.id)+'"><span class="tabletPackageIcon" aria-hidden="true">&#128230;</span><span class="tabletPackageBody"><b>'+escapeHtml(pkg.name||'Uebungspaket')+'</b><p>'+escapeHtml(packageOverlayDescription(pkg))+'</p><span class="tabletPackageMeta">'+tags+'</span></span><span class="tabletPackageArrow" aria-hidden="true">›</span></button>';
-    }).join('');
-    cards.querySelectorAll('[data-tablet-pkg]').forEach(btn=>btn.onclick=()=>applyPackageToPlan(btn.dataset.tabletPkg));
   }
 ```

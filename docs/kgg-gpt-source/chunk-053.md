@@ -1,9 +1,58 @@
 # KGG Source Chunk 053
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 22261-22680
 
 ```html
+    if(!detector||!window.createImageBitmap||!canvas||!canvas.toBlob)return '';
+    let blob=null,bitmap=null;
+    try{
+      blob=await scanCanvasToBlob(canvas,'image/png',.92);
+      if(!blob)return '';
+      bitmap=await createImageBitmap(blob);
+      const hits=await detector.detect(bitmap).catch(()=>[]);
+      if(hits&&hits.length){
+        return hits[0].rawValue||hits[0].rawData||'';
+      }
+    }catch(err){
+      return '';
+    }finally{
+      if(bitmap){try{bitmap.close();}catch(closeErr){}}
+    }
+    return '';
+  }
+  async function detectQrOnCanvas(canvas,detector){
+    if(detector){
+      try{
+        const hits=await detector.detect(canvas).catch(()=>[]);
+        if(hits&&hits.length){
+          const raw=hits[0].rawValue||hits[0].rawData||'';
+          if(raw)return raw;
+        }
+      }catch(err){}
+      const bitmapRaw=await scanDetectQrViaBitmapFromCanvas(canvas,detector);
+      if(bitmapRaw)return bitmapRaw;
+    }
+    if(window.jsQR){
+      try{
+        const ctx=canvas.getContext('2d',{willReadFrequently:true});
+        const img=ctx.getImageData(0,0,canvas.width,canvas.height);
+        const code=window.jsQR(img.data,canvas.width,canvas.height,{inversionAttempts:'attemptBoth'});
+        if(code&&code.data)return code.data;
+      }catch(err){}
+    }
+    return '';
+  }
+  async function scanDetectQrDirectFromFile(file,detector){
+    if(!detector||!window.createImageBitmap)return '';
+    let bitmap=null;
+    try{
+      bitmap=await createImageBitmap(file,{imageOrientation:'from-image'});
+      const hits=await detector.detect(bitmap).catch(()=>[]);
+      if(hits&&hits.length)return hits[0].rawValue||hits[0].rawData||'';
+    }catch(err){
+      console.warn('QR-Dateibild: Direkt-BarcodeDetector fehlgeschlagen.',err);
+    }finally{
       if(bitmap){try{bitmap.close();}catch(closeErr){}}
     }
     return '';
@@ -375,53 +424,4 @@
     return lines.join('\n').trim();
   }
   function scanPaperQuality(text,result){
-    const raw=String(text||'').trim();
-    const parts=raw.split(/[,\n]+/).map(part=>part.trim()).filter(Boolean);
-    const exerciseLike=parts.filter(part=>/[a-zäöüß]{4,}/i.test(part)&&!/^unbekannte\s+übung/i.test(part));
-    const numbers=(raw.match(/\d+(?:[,.]\d+)?/g)||[]).length;
-    const unknown=(raw.match(/unbekannte\s+übung|\?{2,}/gi)||[]).length;
-    const days=(raw.match(/\bT(?:ag)?\s*\d+\b/gi)||[]).map(x=>Number((x.match(/\d+/)||[0])[0])).filter(Boolean);
-    const warnings=[];
-    if(exerciseLike.length<1)warnings.push('wenige Übungsnamen erkannt');
-    if(unknown>1)warnings.push('zu viele unsichere Treffer');
-    if(numbers>90)warnings.push('zu viele Zahlen statt Übungsstruktur');
-    if(days.length&&Math.max(...days)>8)warnings.push('möglicherweise erfundene Tage');
-    if(/(?:unbekannte\s+übung\s*,?\s*){2,}/i.test(raw))warnings.push('Unbekannte-Übung-Kaskade');
-    return {ok:!warnings.length,exerciseCount:exerciseLike.length,numberCount:numbers,warnings,rawResult:!!result};
-  }
-  function createScanReadingCanvas(src){
-    const canvas=scanCloneCanvas(src);
-    const ctx=canvas.getContext('2d',{willReadFrequently:true});
-    ctx.save();
-    ctx.filter='contrast(1.12) brightness(1.04) saturate(.96)';
-    ctx.drawImage(src,0,0);
-    ctx.restore();
-    return canvas;
-  }
-  function fillRedactionRects(ctx,rects){
-    ctx.save();
-    ctx.fillStyle='#fff';
-    rects.forEach(r=>ctx.fillRect(Math.max(0,r[0]),Math.max(0,r[1]),Math.max(0,r[2]),Math.max(0,r[3])));
-    ctx.restore();
-  }
-  function redactScanCanvasForExternalOcr(src){
-    const canvas=scanCloneCanvas(src);
-    const ctx=canvas.getContext('2d',{willReadFrequently:true});
-    const w=canvas.width,h=canvas.height;
-    const top=Math.round(h*.145);
-    const bottom=Math.round(h*.065);
-    const side=Math.round(w*.075);
-    const wideSide=Math.round(w*.115);
-    const rects=[[0,0,w,top],[0,h-bottom,w,bottom],[0,0,side,h],[w-side,0,side,h]];
-    if(w>h)rects.push([w-wideSide,0,wideSide,h],[0,0,Math.round(w*.095),h]);
-    fillRedactionRects(ctx,rects);
-    canvas.dataset.redacted='true';
-    canvas.dataset.redaction='white-randmask-v295';
-    return canvas;
-  }
-  function canvasToGeminiInlineData(canvas){
-    const dataUrl=canvas.toDataURL('image/jpeg',.72);
-    return {mime_type:'image/jpeg',data:dataUrl.split(',')[1]||''};
-  }
-  function cleanGeminiScanText(text){
 ```

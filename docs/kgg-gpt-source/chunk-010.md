@@ -1,9 +1,58 @@
 # KGG Source Chunk 010
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 4201-4620
 
 ```html
+      .packageLayoutSlot .tabletLayoutControls{
+        min-width:82px!important;
+      }
+      body.tabletLayoutRightTiny .tabletLayoutControls,
+      body.tabletLayoutRightTiny .packageLayoutSlot .tabletLayoutControls{
+        min-width:52px!important;
+      }
+    }
+
+    /* v346 phone keyboard and drawer polish */
+    @media (max-width:759px){
+      body.phoneTextFocus{
+        scroll-padding-bottom:calc(var(--kgg-phone-keyboard-inset,0px) + 170px);
+      }
+      body.phoneTextFocus #inputWrap{
+        position:sticky;
+        bottom:calc(var(--kgg-phone-keyboard-inset,0px) + 12px);
+        z-index:74;
+        transform:translateZ(0);
+        box-shadow:0 14px 34px rgba(7,16,39,.16),0 0 0 1px rgba(220,227,235,.92);
+        animation:phoneInputLift .18s cubic-bezier(.2,.75,.22,1) both;
+      }
+      body.phoneTextFocus #suggestion:not(.hidden),
+      .suggestion:not(.hidden){
+        transform-origin:top center;
+        animation:phoneSuggestionIn .22s cubic-bezier(.2,.75,.22,1) both;
+      }
+      #bankArea.bankOpen{
+        transform-origin:top center;
+        animation:phoneBankShellIn .26s cubic-bezier(.18,.84,.24,1) both;
+      }
+      #bankArea.bankOpen #bankContent{
+        transform-origin:top center;
+        animation:phoneBankContentIn .28s cubic-bezier(.18,.84,.24,1) both!important;
+      }
+      #bankToggle.phoneButtonFloat,
+      #recentToggle.phoneButtonFloat,
+      #packageToggle.phoneButtonFloat{
+        position:relative;
+        z-index:90;
+        transform-origin:center bottom;
+        box-shadow:0 18px 38px rgba(7,16,39,.22),0 1px 0 rgba(255,255,255,.9) inset;
+        animation:phoneButtonDockFloat .32s cubic-bezier(.2,.85,.22,1) both;
+      }
+      #recentList:not(.hidden),
+      #packageList:not(.hidden){
+        transform-origin:bottom center;
+        animation:phoneDrawerFromButton .34s cubic-bezier(.18,.84,.24,1) both!important;
+      }
       @keyframes phoneInputLift{
         0%{transform:translateY(10px) scale(.992);opacity:.98}
         100%{transform:translateY(0) scale(1);opacity:1}
@@ -375,53 +424,4 @@
     transition:transform .18s ease, opacity .18s ease;
   }
   body.tabletMenuOpen .tabletMenuBtn span:nth-child(1){transform:translateY(9px) rotate(45deg);}
-  body.tabletMenuOpen .tabletMenuBtn span:nth-child(2){opacity:0;}
-  body.tabletMenuOpen .tabletMenuBtn span:nth-child(3){transform:translateY(-9px) rotate(-45deg);}
-  .tabletSideBackdrop{
-    position:fixed;
-    inset:0;
-    z-index:1090;
-    display:block;
-    opacity:0;
-    pointer-events:none;
-    background:rgba(10,16,36,.18);
-    backdrop-filter:blur(10px);
-    transition:opacity .22s ease;
-  }
-  body.tabletMenuOpen .tabletSideBackdrop{
-    opacity:1;
-    pointer-events:auto;
-  }
-  .tabletSideMenu{
-    position:fixed;
-    top:0;
-    bottom:0;
-    left:0;
-    z-index:1100;
-    display:flex;
-    width:min(380px,86vw);
-    flex-direction:column;
-    gap:18px;
-    padding:calc(env(safe-area-inset-top) + 22px) 18px calc(env(safe-area-inset-bottom) + 22px);
-    background:rgba(255,255,255,.96);
-    border-right:1.5px solid rgba(10,16,36,.10);
-    box-shadow:26px 0 70px rgba(10,16,36,.18);
-    transform:translateX(-106%);
-    transition:transform .24s cubic-bezier(.22,.8,.32,1);
-  }
-  body.tabletMenuOpen .tabletSideMenu{transform:translateX(0);}
-  .tabletSideMenuHead{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-    font-size:1.25rem;
-    font-weight:900;
-  }
-  .tabletMenuClose{
-    width:42px;
-    height:42px;
-    border-radius:999px;
-    border:1px solid rgba(10,16,36,.12);
-    background:#fff;
 ```

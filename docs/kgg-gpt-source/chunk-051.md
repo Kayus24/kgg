@@ -1,9 +1,58 @@
 # KGG Source Chunk 051
 
-- Source: `kgg-update/index.html`
+- Source: `kgg-update/src` modular source
 - Lines: 21421-21840
 
 ```html
+    const frame=$('pdfPreviewFrame');
+    const useMobileBridge=shouldUsePdfMobileBridge();
+    setPdfPreviewFallbackVisible(false);
+    setPdfMobileBridgeVisible(useMobileBridge);
+    if(frame){frame.src=useMobileBridge?'about:blank':url;frame.onerror=()=>setPdfPreviewFallbackVisible(true);}
+    const notice=$('pdfPreviewNotice');
+    if(notice)notice.textContent=useMobileBridge?'PDF bereit. Öffnen oder herunterladen.':'PDF bereit. Drucken oder herunterladen.';
+    $('pdfPreviewModal').classList.add('open');
+    if(!useMobileBridge){
+      pdfPreviewFallbackTimer=setTimeout(()=>{
+        if(currentPdfPreview)setPdfPreviewFallbackVisible(true);
+      },1200);
+    }
+  }
+  function closePdfPreview(){
+    if(pdfPreviewFallbackTimer)clearTimeout(pdfPreviewFallbackTimer);
+    pdfPreviewFallbackTimer=null;
+    $('pdfPreviewModal').classList.remove('open');
+    const frame=$('pdfPreviewFrame');
+    if(frame)frame.src='about:blank';
+    setPdfPreviewFallbackVisible(false);
+    setPdfMobileBridgeVisible(false);
+    if(currentPdfPreview&&currentPdfPreview.url)URL.revokeObjectURL(currentPdfPreview.url);
+    currentPdfPreview=null;
+  }
+  async function printCurrentPdfPreview(){
+    if(await sendPdfToNative('print'))return;
+    if(shouldUsePdfMobileBridge()){
+      openCurrentPdfPreviewTab();
+      return;
+    }
+    const frame=$('pdfPreviewFrame');
+    try{
+      if(frame&&frame.contentWindow){frame.contentWindow.focus();frame.contentWindow.print();return;}
+    }catch(e){}
+    if(currentPdfPreview&&currentPdfPreview.url){
+      const win=window.open(currentPdfPreview.url,'_blank');
+      if(win)setTimeout(()=>{try{win.focus();win.print();}catch(e){}},600);
+    }
+  }
+  async function downloadCurrentPdfPreview(){
+    if(await sendPdfToNative('download'))return;
+    if(currentPdfPreview)downloadPdfBlob(currentPdfPreview.blob,currentPdfPreview.filename);
+  }
+  function openPdfUrlCrossBrowser(url){
+    if(!url)return false;
+    try{
+      const win=window.open('','_blank');
+      if(win){
         try{win.opener=null;}catch(e){}
         win.location.href=url;
         return true;
@@ -375,53 +424,4 @@
     if(choices)choices.classList.remove('hidden');
     if(output)output.classList.add('hidden');
     if(close)close.classList.add('hidden');
-    if(notice)notice.textContent='';
-    if(dbg)dbg.open=false;
-    patientShareTtlSeconds=MEDIA_UPLOAD_TTL_SECONDS;
-    lastPatientSharePlanSnapshot=null;
-    if(copyBtn)copyBtn.textContent='Link kopieren';
-    setManualPatientLinkField('',false,false);
-  }
-  function openFinishModal(){resetFinishModal(); $('shareModal').classList.add('open');}
-  function closeFinishModal(){$('shareModal').classList.remove('open');}
-  function openLargePdfModal(){$('largePdfModal').classList.add('open');}
-  function closeLargePdfModal(){$('largePdfModal').classList.remove('open');}
-  function archiveAndCloseCurrentPlan(reason){
-    const plan=getCurrentPlanForOutput(reason||'ui_finish_archive');
-    const exercises=Array.isArray(plan.exercises)?plan.exercises:[];
-    if(exercises.length){
-      const patient=plan.patient||{};
-      const title=patient.name||plan.title||'KGG Plan';
-      const entry={id:plan.id||makeLocalId(),name:title,date:new Date().toISOString(),patient:{...patient},exercises:exercises.map(ex=>({...ex})),source:reason||'finished'};
-      state.recent=[entry].concat(state.recent||[]).slice(0,20);
-    }
-    state.plan=[];
-    state.liveDraftId=null;
-    state.bankOpen=false;
-    state.planText='';
-    if($('exerciseInput'))$('exerciseInput').value='';
-    syncStatePlanToStore(reason||'ui_finish_close_current_plan');
-    save();
-    render();
-  }
-  async function finishWithPdf(options){
-    const notice=$('finishNotice');
-    const hasModeOverride=!!(options&&Object.prototype.hasOwnProperty.call(options,'large'));
-    const previousLargeMode=state.largePdfMode;
-    if(hasModeOverride){state.largePdfMode=!!options.large; applyLargePdfMode();}
-    if(notice)notice.textContent='PDF wird erstellt ...';
-    try{
-      const pdfResult=await buildPdfFromCurrentPlan();
-      if(hasModeOverride){state.largePdfMode=previousLargeMode; applyLargePdfMode();}
-      archiveAndCloseCurrentPlan('ui_finish_pdf');
-      closeFinishModal();
-      openPdfPreview(pdfResult);
-    }catch(err){
-      if(hasModeOverride){state.largePdfMode=previousLargeMode; applyLargePdfMode(); save();}
-      console.warn('PDF konnte nicht erzeugt werden:',err);
-      if(notice)notice.textContent='PDF fehlgeschlagen. Plan bleibt offen.';
-    }
-  }
-  async function finishWithPatientApp(){
-    const notice=$('finishNotice');
 ```
