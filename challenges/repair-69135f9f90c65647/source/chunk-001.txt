@@ -1,0 +1,1568 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<!--
+KGG INTERNAL SOURCE TRUTH — READ THIS FIRST
+
+Machine-readable app state, patch rules, and changelog are embedded near the top of this HTML.
+Before editing this app, any LLM/agent/human should read these blocks:
+1. <script type="application/json" id="kgg-source-truth">
+{
+  "schema": 1,
+  "app": "KGG Plan",
+  "activeFixes": [
+    "embedded-source-truth",
+    "patch-retention-guard",
+    "rollback-v023-debug-breakage",
+    "phone-viewport-state-leak-guard",
+    "phone-plan-local-list-drag",
+    "local-content-no-auto-redirect",
+    "no-auto-release-navigation",
+    "release-center-local-fallback",
+    "structured-textblock-parser",
+    "free-textfield-units",
+    "schmerz-tag-textblocks",
+    "native-sync-diagnostics",
+    "device-sync-menu-separation",
+    "ui-mini-series",
+    "phone-dock-anchored-correction",
+    "tablet-card-reorder",
+    "phone-liquid-actions",
+    "phone-drawer-bank-align",
+    "tablet-runtime-viewport-guard",
+    "phone-landscape-tablet-menu",
+    "encoding-guard-repair",
+    "symbol-encoding-hotfix",
+    "phone-ui-mini-fix",
+    "android-qr-pdf-bridge",
+    "pdf-plan-thumbnails",
+    "ui-tablet-stability",
+    "patient-qr-latest-base",
+    "colleague-share-apk-update-fix",
+    "patient-qr-root-query",
+    "grossdruck-pdf-readable-images",
+    "grossdruck-readability-beta",
+    "059-ui-scaler-push-canary",
+    "tablet-html-release-label"
+  ],
+  "currentVersion": {
+    "versionCode": 60,
+    "versionName": "1.0.60-tablet-html-release-label",
+    "lastPatchId": "kgg-v060-tablet-html-release-label",
+    "updatedBy": "kgg-module-scaffolder"
+  },
+  "latestPatchId": "kgg-v060-tablet-html-release-label",
+  "lastUpdateIntent": {
+    "id": "kgg-v060-tablet-html-release-label",
+    "summary": "Zeigt den Namen der aktuell geladenen HTML-Version unten rechts im ausgefahrenen Tablet-Menue.",
+    "touched": [
+      "Tablet-Menue"
+    ],
+    "notTouched": [
+      "PDF",
+      "QR/Patienten-App",
+      "Scan/OCR",
+      "Parser",
+      "Plan-State",
+      "Medien/Upload",
+      "API-Key-Logik",
+      "Android/APK",
+      "GitHub Manifest",
+      "Handy-Layout"
+    ]
+  }
+}
+</script>
+<!-- END kgg-source-truth -->
+<script type="application/json" id="kgg-source-truth">
+{
+  "schema": 1,
+  "app": "KGG Plan",
+  "activeFixes": [
+    "embedded-source-truth",
+    "patch-retention-guard",
+    "rollback-v023-debug-breakage",
+    "phone-viewport-state-leak-guard",
+    "phone-plan-local-list-drag",
+    "local-content-no-auto-redirect",
+    "no-auto-release-navigation",
+    "release-center-local-fallback",
+    "structured-textblock-parser",
+    "free-textfield-units",
+    "schmerz-tag-textblocks",
+    "native-sync-diagnostics",
+    "device-sync-menu-separation",
+    "ui-mini-series",
+    "phone-dock-anchored-correction",
+    "tablet-card-reorder",
+    "phone-liquid-actions",
+    "phone-drawer-bank-align",
+    "tablet-runtime-viewport-guard",
+    "phone-landscape-tablet-menu",
+    "encoding-guard-repair",
+    "symbol-encoding-hotfix",
+    "phone-ui-mini-fix",
+    "android-qr-pdf-bridge",
+    "pdf-plan-thumbnails",
+    "ui-tablet-stability",
+    "patient-qr-latest-base",
+    "colleague-share-apk-update-fix",
+    "patient-qr-root-query",
+    "grossdruck-pdf-readable-images",
+    "grossdruck-readability-beta",
+    "059-ui-scaler-push-canary",
+    "tablet-html-release-label"
+  ],
+  "currentVersion": {
+    "versionCode": 60,
+    "versionName": "1.0.60-tablet-html-release-label",
+    "lastPatchId": "kgg-v060-tablet-html-release-label",
+    "updatedBy": "kgg-module-scaffolder"
+  },
+  "latestPatchId": "kgg-v060-tablet-html-release-label",
+  "lastUpdateIntent": {
+    "id": "kgg-v060-tablet-html-release-label",
+    "summary": "Zeigt den Namen der aktuell geladenen HTML-Version unten rechts im ausgefahrenen Tablet-Menue.",
+    "touched": [
+      "Tablet-Menue"
+    ],
+    "notTouched": [
+      "PDF",
+      "QR/Patienten-App",
+      "Scan/OCR",
+      "Parser",
+      "Plan-State",
+      "Medien/Upload",
+      "API-Key-Logik",
+      "Android/APK",
+      "GitHub Manifest",
+      "Handy-Layout"
+    ]
+  }
+}
+</script>
+
+<!-- BEGIN kgg-changelog: embedded Changelog; READ THIS BEFORE PATCHING -->
+<script type="application/json" id="kgg-changelog">
+{
+  "schema": 1,
+  "latestVersionCode": 60,
+  "entries": [
+    {
+      "versionCode": 60,
+      "versionName": "1.0.60-tablet-html-release-label",
+      "patchId": "kgg-v060-tablet-html-release-label",
+      "status": "certified",
+      "type": "module-patch",
+      "title": "Tablet HTML Release Label",
+      "reason": "Zeigt den Namen der aktuell geladenen HTML-Version unten rechts im ausgefahrenen Tablet-Menue.",
+      "whatChanged": [
+        "Zeigt den Namen der aktuell geladenen HTML-Version unten rechts im ausgefahrenen Tablet-Menue."
+      ],
+      "touchedAreas": [
+        "Tablet-Menue"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "passed",
+        "certification": "passed",
+        "notes": "Vollstaendige Regression plus dynamischer APK-/Web-Identitaets- und Bottom-Right-Positionstest."
+      },
+      "approvalNote": "Max hat den sichtbaren Tablet-Menue-Patch ausdruecklich beauftragt; die Changelog-Archivierung bleibt ein separater Folgepatch."
+    },
+    {
+      "versionCode": 59,
+      "versionName": "1.0.59-ui-scaler-push-canary",
+      "patchId": "kgg-v059-ui-scaler-push-canary",
+      "status": "active",
+      "type": "kgg-gpt-write-gate",
+      "title": "Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification.",
+      "reason": "Custom GPT preview was accepted by Max and routed through the guarded write gate.",
+      "whatChanged": [
+        "Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification."
+      ],
+      "touchedAreas": [
+        "kgg-update/index.html"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "github": "pending",
+        "notes": "Required Gate and release-pr validate-build must pass before merge."
+      }
+    },
+    {
+      "versionCode": 58,
+      "versionName": "1.0.58-grossdruck-readability-beta",
+      "patchId": "kgg-v058-grossdruck-readability-beta",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Grossdruck-PDF mit Kurzsichtigkeits-Test",
+      "reason": "Die Grossdruck-PDF soll fuer kurzsichtige Leser:innen bei Uebungsname, Satz, Wdh, kg/Gewicht und Schmerzskala messbar lesbarer sein, bevor eine Admin-Beta gebaut wird.",
+      "whatChanged": [
+        "Grossdruck-Titel, Meta-Zeilen und Tabellenlabels werden auf 14pt, 8.6pt und 7pt Mindestgroessen angehoben.",
+        "Die Grossdruck-Vorlage bleibt bei 3 Uebungen pro A4-Seite, nutzt aber groessere Abstaende und ein L3-v3 Template.",
+        "Eine lokale PDF-Readability-Testengine erzeugt Test-PDFs, Poppler-Renderings und Kurzsichtigkeits-Simulationen."
+      ],
+      "touchedAreas": [
+        "PDF generation",
+        "Grossdruck PDF layout",
+        "PDF readability test engine",
+        "Release test battery",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "QR/Patienten-App",
+        "Scan/OCR parser",
+        "Gemini API pipeline",
+        "Parser",
+        "Plan-State",
+        "Android/APK",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "notes": "node release-pipeline/kgg_pdf_readability_smoke.js plus PDF critical und critical suite vor Admin-Beta."
+      }
+    },
+    {
+      "versionCode": 57,
+      "versionName": "1.0.57-grossdruck-pdf-readable-images",
+      "patchId": "kgg-v057-grossdruck-pdf-readable-images",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Grossdruck-PDF mit Bildern und groesserer Schrift",
+      "reason": "Die vergroesserte PDF-Version soll vorhandene Uebungsbilder zeigen und auf A4 lesbarer sein, ohne Scan/OCR, QR oder Plan-State zu aendern.",
+      "whatChanged": [
+        "Grossdruck-PDF wird als echtes A4-Portrait mit 3 Uebungen pro Seite erzeugt.",
+        "Lokale PDF-Uebungsbilder werden auch im Grossdruck-Snapshot geladen.",
+        "Grossdruck-Tabellen, Kopfzeilen und Karten nutzen groessere Fontgroessen und Abstaende."
+      ],
+      "touchedAreas": [
+        "PDF generation",
+        "Grossdruck PDF layout",
+        "PDF exercise thumbnails",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "QR/Patienten-App",
+        "Scan/OCR parser",
+        "Gemini API pipeline",
+        "Parser",
+        "Plan-State",
+        "Android/APK",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "notes": "Critical plus PDF render smoke; Gemini-Live-Smoke nur mit lokal vorhandener Admin-Konfig/API-Key."
+      }
+    },
+    {
+      "versionCode": 56,
+      "versionName": "1.0.56-patient-qr-root-query",
+      "patchId": "kgg-v056-patient-qr-root-query",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Patienten-QR nutzt Root-App mit Query-Payload",
+      "reason": "Der Trainingsplan-QR soll die aktuelle Patienten-App oeffnen und den Plan direkt ueber ?plan=KGGH2:... uebergeben, statt auf den alten Renderer-Pfad oder gespeicherte Altplaene zu fallen.",
+      "whatChanged": [
+        "Default-Patienten-App-Basis zeigt auf https://kayus24.github.io/kgg/.",
+        "Neue Patienten-QRs verwenden ?plan=KGGH2:<payload>.",
+        "Tests blockieren kgg-update/index.html, releases und media-inline-bundle-7 als Standard-Patientenlink."
+      ],
+      "touchedAreas": [
+        "Patient QR base URL",
+        "Patient share URL tests",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Parser",
+        "Scan/OCR parser",
+        "Plan-State",
+        "PDF generation",
+        "Android/APK",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "notes": "Critical plus patient-qr logic smoke vor Release."
+      }
+    },
+    {
+      "versionCode": 55,
+      "versionName": "1.0.55-colleague-share-apk-fix",
+      "patchId": "kgg-v055-colleague-share-apk-fix",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Kolleg:innen-App-Weitergabe stabilisiert",
+      "reason": "Der Phone-Menuepunkt darf nicht in den APK-Update-Installer laufen, sondern muss direkt den Kolleg:innen-App/APK-QR anzeigen.",
+      "whatChanged": [
+        "Kolleg:innen-App weitergeben nutzt den direkten QR-Handler statt Fallback-Klicks.",
+        "Android-Web-Update-Check startet keine native APK-Installation mehr automatisch."
+      ],
+      "touchedAreas": [
+        "Phone Kolleg:innen-App Weitergabe",
+        "Android APK update handoff",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Parser",
+        "Scan/OCR parser",
+        "Plan-State",
+        "PDF generation",
+        "Sync data model",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "notes": "Critical plus UI-Stability Regression vor Release."
+      }
+    },
+    {
+      "versionCode": 54,
+      "versionName": "1.0.54-patient-qr-latest",
+      "patchId": "kgg-v054-patient-qr-latest",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Patienten-QR nutzt aktuelle Patient-App",
+      "reason": "Trainingsplan-QR-Codes duerfen nicht auf das alte Root-Bundle der ersten Patient-Web-App zeigen.",
+      "whatChanged": [
+        "Default-Patienten-App-Basis zeigt auf kgg-update/index.html als aktuellen Patient-Hash-Renderer.",
+        "Logic-Smoke prueft, dass der QR-Link nicht mehr media-inline-bundle-7 verwendet."
+      ],
+      "touchedAreas": [
+        "Patient QR base URL",
+        "Patient share URL tests",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Parser",
+        "Scan/OCR parser",
+        "Plan-State",
+        "PDF generation",
+        "Android/APK",
+        "Sync data model",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "notes": "Critical plus patient-qr logic smoke vor Release."
+      }
+    },
+    {
+      "versionCode": 53,
+      "versionName": "1.0.53-ui-tablet-stability",
+      "patchId": "kgg-v053-ui-tablet-stability",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Phone-Dock und Tablet-Gesten stabilisiert",
+      "reason": "Tastatur, Header-Menue, Tablet-Swipe und Tablet-Editor duerfen nach UI-Patches nicht wieder instabil werden.",
+      "whatChanged": [
+        "Phone-Scan-Dock und Fertig-Button werden bei Tastatur-Fokus nicht nach oben geschoben.",
+        "Das Phone-Admin-Menue bleibt im Plan-Header sauber rechts verankert und ueberlappt den Paket-Button nicht.",
+        "Tablet-Side-Swipe zum Loeschen kann wieder vor dem Tablet-Reorder greifen.",
+        "Das Tablet-Editor-Modal nutzt ab Tablet-Breite eine zweispaltige Aufteilung."
+      ],
+      "touchedAreas": [
+        "Phone UI dock",
+        "Phone plan header menu",
+        "Tablet plan-card gestures",
+        "Tablet editor layout",
+        "UI stability tests",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Parser",
+        "Scan/OCR parser",
+        "Plan-State",
+        "PDF generation",
+        "QR/Patienten-App",
+        "Android/APK",
+        "Sync data model",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "not-applicable"
+      },
+      "handoffNote": "v053 ist Web-UI-only: nach jedem Folgepatch phone-scan-dock, phone-admin-menu, tablet-card-reorder und tablet-editor-layout laufen lassen."
+    },
+    {
+      "versionCode": 52,
+      "versionName": "1.0.52-pdf-plan-thumbnails",
+      "patchId": "kgg-v052-pdf-plan-thumbnails",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "PDF-Planbilder in Trainingskarten",
+      "reason": "PDF-Trainingskarten sollen vorhandene lokale Uebungsbilder oben rechts als kleine Schwarzweiss-Thumbnails zeigen, ohne die Kartenhoehe zu veraendern.",
+      "whatChanged": [
+        "PDF-Snapshot sammelt lokale Uebungsbilder aus IndexedDB und laesst fehlende Bilder still aus.",
+        "Thumbnails werden lokal entschluesselt, verkleinert und in Schwarzweiss als JPEG-DataURL in den PDF-Snapshot gelegt.",
+        "drawKggExerciseBox zeichnet das Thumbnail oben rechts im vorhandenen freien Raum.",
+        "Die Offline-PDF-Runtime kann JPEG-XObjects einbetten."
+      ],
+      "touchedAreas": [
+        "PDF snapshot",
+        "PDF exercise card rendering",
+        "Offline PDF runtime",
+        "PDF test battery",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Parser",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Phone card gestures",
+        "Tablet layout content",
+        "QR/Patienten-App",
+        "Android/APK",
+        "Sync data model",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "not-applicable"
+      },
+      "handoffNote": "v052 ist nur PDF-Planbilder; Android v399 und QR-Druck bleiben aus v051."
+    },
+    {
+      "versionCode": 51,
+      "versionName": "1.0.51-android-qr-pdf-bridge",
+      "patchId": "kgg-v051-android-qr-pdf-bridge",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Kolleg:innen-QR drucken und Android-PDF/Icon-Bridge",
+      "reason": "Kolleg:innen-App/APK-QR soll direkt druckbar sein und die Android-APK braucht v399 mit App-Icon sowie internem PDF-Fallback, wenn kein externer PDF-Viewer vorhanden ist.",
+      "whatChanged": [
+        "Das Admin-QR-Modal bekommt den Button QR drucken.",
+        "QR-Druck erzeugt lokal eine kleine PDF-Seite mit Titel, QR-Code und Link.",
+        "Android v399 stellt die native PDF-Bridge kompatibel bereit und bekommt das KGG-Launcher-Icon.",
+        "Android oeffnet PDFs intern als Vorschau, wenn kein externer PDF-Viewer gefunden wird."
+      ],
+      "touchedAreas": [
+        "Admin QR modal",
+        "QR print PDF helper",
+        "Android wrapper PDF bridge",
+        "Android launcher resources",
+        "Android update manifest",
+        "Release artifacts",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Parser",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Phone card gestures",
+        "Tablet layout content",
+        "PDF plan exercise-image thumbnails",
+        "Sync data model",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "v051 ist QR/PDF/Android-Shell; PDF-Planbilder bleiben separat fuer v052."
+    },
+    {
+      "versionCode": 50,
+      "versionName": "1.0.50-phone-ui-mini-fix",
+      "patchId": "kgg-v050-phone-ui-mini-fix",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Phone-UI: Plan-Menue, Historie und Scan-Optionen",
+      "reason": "Im Phone-Planmodus sass das 3-Punkte-Menue zu mittig, Plan-Historie kollabierte und die Foto/Galerie-Auswahl wirkte wie ein separates Floating-Menue.",
+      "whatChanged": [
+        "Das 3-Punkte-Menue wird im Plan-Header oben rechts verankert.",
+        "Plan-Historie bleibt im Phone-Planmodus als voller lesbarer Button sichtbar.",
+        "Der Scanbutton zeigt Foto/Galerie-Optionen inline und waechst beim Oeffnen nur vertikal."
+      ],
+      "touchedAreas": [
+        "Phone plan header menu",
+        "Phone Plan-Historie button",
+        "Phone scan dock photo options",
+        "UI stability tests",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Android-Wrapper",
+        "Sync",
+        "API-Key-Logik",
+        "Kolleg:innen-Freigabe"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "not-applicable"
+      },
+      "handoffNote": "v050 ist UI-only fuer Phone; bei Problemen zuerst ui-stability phone-scan-dock und phone-history-packages laufen lassen."
+    },
+    {
+      "versionCode": 50,
+      "versionName": "1.0.50-phone-ui-mini-fix",
+      "patchId": "kgg-v049-symbol-encoding-hotfix",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Mojibake-Symbolreste repariert",
+      "reason": "Nach der grossen UTF-8-Reparatur waren noch kaputte Symbolsequenzen wie Pfeile, Zahnrad und QR-ASCII-Blockzeichen sichtbar bzw. im HTML enthalten.",
+      "whatChanged": [
+        "Kaputte Pfeil-, Zahnrad-, Caret- und QR-ASCII-Symbolstrings wurden durch echte Unicode-Zeichen ersetzt.",
+        "Der Encoding-Guard erkennt jetzt auch einfache sichtbare Mojibake-Symbolfamilien.",
+        "Die Encoding-Guard-Unit-Tests enthalten gute Unicode-Zeichen und rote Symbol-Mojibake-Faelle."
+      ],
+      "touchedAreas": [
+        "HTML symbol strings",
+        "QR helper embedded strings",
+        "Critical encoding guard",
+        "Local test batteries",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Layout",
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Android-Wrapper",
+        "Sync",
+        "API-Key-Logik",
+        "Kolleg:innen-Freigabe"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
+    },
+    {
+      "versionCode": 47,
+      "versionName": "1.0.47-phone-landscape-tablet-menu",
+      "patchId": "kgg-v047-phone-landscape-tablet-menu",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Handy-Landscape nutzt Tablet-Menue",
+      "reason": "Wenn das Handy quer gehalten wird, soll die App als kleine Tablet-Arbeitsflaeche mit Tablet-Menue nutzbar sein; Portrait bleibt Handy-UI.",
+      "whatChanged": [
+        "Ein frueher Viewport-Schalter setzt nur in flacher Landscape-Ansicht virtuell width=760.",
+        "Die zentrale Layout-Erkennung behandelt diesen Landscape-Modus als Tablet-Layout.",
+        "Aktive Phone-Dock-/Drawer-Patches werden in diesem Landscape-Tablet-Modus nicht installiert."
+      ],
+      "touchedAreas": [
+        "Early viewport switching",
+        "Phone landscape tablet menu",
+        "Layout mode detection",
+        "Local test batteries",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Android-Wrapper",
+        "Sync",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "v047 ist ein Landscape-Viewport-Hotfix: Handy-Portrait bleibt Phone-UI, Handy-Landscape soll Tablet-Menue und Tablet-Arbeitsflaeche zeigen."
+    },
+    {
+      "versionCode": 46,
+      "versionName": "1.0.46-tablet-runtime-viewport-guard",
+      "patchId": "kgg-v046-tablet-runtime-viewport-guard",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Tablet-Boot und Split-Screen-Phone-UI getrennt",
+      "reason": "Phone-only Runtime-Patches duerfen den breiten Tablet-Boot nicht blockieren, muessen aber im schmalen Tablet-Split-Screen weiter aktiv bleiben.",
+      "whatChanged": [
+        "v041/v042 installieren Phone-Menues, Scan-Dock-Umbauten und Observer nur noch bei Viewports unter 760px.",
+        "Beim Wechsel zur breiten Tablet-Ansicht werden Phone-Klassen, Phone-Menues und der umgebaute Scanbutton sauber zurueckgesetzt.",
+        "Die UI-Testbatterie prueft echten Tablet-App-Boot und einen Tablet-Split-Screen-Phone-Layout-Fall."
+      ],
+      "touchedAreas": [
+        "Phone viewport runtime gates",
+        "Tablet boot runtime safety",
+        "Tablet split-screen phone layout",
+        "Local test batteries",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Android-Wrapper",
+        "Tablet layout CSS",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "v046 ist ein Runtime-Gate-Hotfix: breite Tablets bleiben Tablet-UI, schmale Split-Screen-Viewports bekommen weiter die Phone-UI."
+    },
+    {
+      "versionCode": 45,
+      "versionName": "1.0.45-phone-drawer-bank-align",
+      "patchId": "kgg-v045-phone-drawer-bank-align",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Handy-Drawer und Datenbank-Ausrichtung stabilisiert",
+      "reason": "Plan-Historie und Uebungspakete duerfen beim Antippen nicht haengen; die geoeffnete Uebungsdatenbank soll sauber oberhalb des festen Plan-scannen-Docks enden.",
+      "whatChanged": [
+        "Plan-Historie und Uebungspakete nutzen im Phone-Modus einen finalen Safe-Click-Handler ohne Render- oder Tablet-Overlay-Nebenwirkung.",
+        "Das neue Planfenster bekommt im Phone-Modus mehr oberen Abstand.",
+        "Beim Oeffnen der Uebungsdatenbank wird die Ansicht nach dem Rendern so ausgerichtet, dass das Bank-Ende knapp oberhalb des Scan-Docks liegt.",
+        "Die UI-Testbatterie prueft jetzt echte Klicks auf Plan-Historie/Uebungspakete und die Datenbank-Ausrichtung."
+      ],
+      "touchedAreas": [
+        "Phone Plan-Historie drawer",
+        "Phone Uebungspakete drawer",
+        "Phone exercise-bank scroll alignment",
+        "Local test batteries",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Android-Wrapper",
+        "Tablet layout",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "v045 ist ein Phone-only Safety-Patch nach v044; er ersetzt keine Tablet-, Parser-, Sync- oder APK-Logik."
+    },
+    {
+      "versionCode": 44,
+      "versionName": "1.0.44-phone-liquid-actions",
+      "patchId": "kgg-v044-phone-liquid-actions",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Handy-Aktionen als staerkere Glass-Kapseln",
+      "reason": "Plan scannen und Fertig sollen optisch konsistent als staerkere Liquid-Glass-Aktionen erscheinen; das Phone-Admin-Menue soll ohne verschachtelte Umwege zur Update-Zentrale fuehren.",
+      "whatChanged": [
+        "Plan scannen bekommt eine helle Glass-Kapsel mit Label, Trennlinie und Chevron.",
+        "Fertig nutzt im Phone-Planmodus denselben Glass-Stil.",
+        "Plan-Historie bleibt im Phone-Planmodus lesbar und kollabiert nicht auf Icon-Breite.",
+        "Das Phone-Admin-Menue wird in Update, Sync & Weitergeben und Admin gegliedert."
+      ],
+      "touchedAreas": [
+        "Phone scan dock",
+        "Phone finish action",
+        "Phone admin submenu",
+        "Local test batteries",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Android-Wrapper",
+        "Tablet layout",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "v044 ist ein Phone-only UI-Aufraeumpatch auf Basis von v041/v042; Kamera-/Galerie-, Sync- und Update-Handler werden wiederverwendet."
+    },
+    {
+      "versionCode": 43,
+      "versionName": "1.0.43-tablet-card-reorder",
+      "patchId": "kgg-v043-tablet-card-reorder",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Tablet-Karten direkt verschieben",
+      "reason": "Im Tablet-Modus sollen Uebungskarten per Longpress auf der Karte verschiebbar sein, nicht nur ueber den linken Verschiebegriff.",
+      "whatChanged": [
+        "Tablet-Karten erhalten einen eigenen Longpress-Einstieg in die bestehende Reorder-Geste.",
+        "Buttons, Eingabefelder, Links, Karten-Actions und der linke Verschiebegriff bleiben von der Kartenflaechen-Geste ausgenommen.",
+        "Der vorhandene animierte Reorder-Pfad erkennt nun Griff- und Karten-Starts sauber ueber dieselbe Funktion.",
+        "Static-Smokes pruefen die Tablet-only-Bindung und die interaktiven Zielausnahmen."
+      ],
+      "touchedAreas": [
+        "Tablet plan-card reorder gesture",
+        "Local test batteries",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Android-Wrapper",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "v043 nutzt weiterhin den bestehenden animated reorder; nur Tablet-Kartenflaechen werden als zusaetzlicher Startbereich gebunden."
+    },
+    {
+      "versionCode": 42,
+      "versionName": "1.0.42-phone-dock-anchored-correction",
+      "patchId": "kgg-v042-phone-dock-anchored-correction",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Handy-Dock korrigieren",
+      "reason": "Der Foto-Pfeil gehoert in den Kamera-Button, das Admin-Menue soll in der UI verankert sein und Scan/Fertig duerfen Floating-Fenster nicht ueberdecken.",
+      "whatChanged": [
+        "Foto-Optionen werden als Pfeilbereich direkt im Plan-scannen-Button geoeffnet.",
+        "Das Handy-Admin-Menue sitzt im Plan-Header statt fixed oben rechts.",
+        "Plan scannen und Fertig erhalten eine dezente Glasoptik und bleiben z-index-seitig unter Drawern und Modals.",
+        "Browser-Smokes pruefen Admin-Verankerung, integrierten Foto-Pfeil, Glasstil und Floating-Layer-Reihenfolge."
+      ],
+      "touchedAreas": [
+        "Phone scan dock",
+        "Phone admin submenu",
+        "Local test batteries",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Android-Wrapper",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "v042 korrigiert nur die v041-Handy-Dock-UI; bestehende Kamera/Galerie- und Fertig-Handler bleiben angebunden."
+    },
+    {
+      "versionCode": 41,
+      "versionName": "1.0.41-ui-mini-series",
+      "patchId": "kgg-v041-ui-mini-series",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Kleine UI-Serie fuer Datenbank, Tablet und Handy",
+      "reason": "Max sammelt kleine UI-Patches: Bildhinweise in der Uebungsdatenbank, reparierter Tablet-Layoutbutton und kompaktere Handy-Bedienung.",
+      "whatChanged": [
+        "Uebungsdatenbank-Zeilen zeigen bei vorhandenen Bildanhaengen eine kleine schwarz-weisse Vorschau oder einen neutralen Platzhalter.",
+        "Layout anpassen auf Tablet oeffnet und schliesst das vorhandene Layout-Panel wieder sauber.",
+        "Handy-Layout verschiebt Admin-Konfig, Uebungsdatenbank teilen und QR-Code teilen in ein kleines Menue oben rechts.",
+        "Plan scannen schwebt auf Handy unten; Fertig kommt daneben dazu, sobald ein Plan Uebungen enthaelt.",
+        "Der Foto-Dock bekommt ein kleines Dreieck mit Kamera- und Galerie-Auswahl."
+      ],
+      "touchedAreas": [
+        "Exercise database cards",
+        "Tablet layout menu",
+        "Phone scan dock",
+        "Phone admin submenu",
+        "Local test batteries",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Android-Wrapper",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "UI-only patch auf kgg-update/index.html; bestehende Scan-, QR-, Medien- und Plan-State-Handler werden nur ueber vorhandene Buttons/Funktionen ausgeloest."
+    },
+    {
+      "versionCode": 37,
+      "versionName": "1.0.37-device-sync-menu",
+      "patchId": "kgg-v037-device-sync-menu",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Geräte-Sync und App-Weitergabe trennen",
+      "reason": "Therapeuten-App weitergeben soll nur die Kolleg:innen-App/APK teilen; Geräte-Daten-Sync braucht einen eigenen klaren Einstieg.",
+      "whatChanged": [
+        "Admin-Menü bekommt einen eigenen Button Geräte-Sync für Sync-Test, Sync-Datei speichern/importieren und Pairing.",
+        "Therapeuten-App weitergeben öffnet direkt den Kolleg:innen-App/APK-QR statt Sync- oder API-Key-Optionen.",
+        "Update-Zentrale bleibt Release/HTML/GitHub und wird nicht mit Geräte-Sync vermischt."
+      ],
+      "touchedAreas": [
+        "Tablet admin menu",
+        "Therapist app share QR",
+        "Local test batteries",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Android-Wrapper",
+        "Tablet-Core-Layout",
+        "Parser",
+        "Plan-State"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "Im Tablet-Menü: Therapeuten-App weitergeben = Kolleg:innen-App/APK-QR; Admin > Geräte-Sync = Sync-Diagnose und Datei-Transfer."
+    },
+    {
+      "versionCode": 36,
+      "versionName": "1.0.36-native-sync-diagnostics",
+      "patchId": "kgg-v036-native-sync-diagnostics",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Native Sync Diagnose und sichere Datei-Uebergabe",
+      "reason": "Peer-to-Peer-Sync muss sichtbar machen, ob Android wirklich einen gemeinsamen Sync-Raum nutzt oder nur im privaten Rueckfall-Speicher schreibt.",
+      "whatChanged": [
+        "Sync-Dialog zeigt Modus, Raum, Peer-Anzahl, letzten Test und Sync-Pfad.",
+        "Sync-Test schreibt/liest ueber die vorhandene Android-Bridge und meldet klare Ergebnisse.",
+        "Sync-Datei speichern/importieren erlaubt einen sicheren manuellen Transfer fuer groessere Daten.",
+        "Native-Sync-Testbatterie prueft Peer-Mesh, Auto-Download-Regeln, Self-Skip, Tombstones und Secret-Blockade."
+      ],
+      "touchedAreas": [
+        "Sync diagnostics UI",
+        "Safe sync file transfer",
+        "Local test batteries",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Android-Wrapper",
+        "Tablet-Core-Layout",
+        "Parser"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "Wenn der Sync-Dialog privaten Rueckfall-Speicher meldet, findet kein automatischer Geraete-Transfer statt; dann Sync-Datei exportieren/importieren oder Android-Dateizugriff pruefen."
+    },
+    {
+      "versionCode": 35,
+      "versionName": "1.0.35-parser-schmerz-tag-blocks",
+      "patchId": "kgg-v035-parser-schmerz-tag-blocks",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Schmerz-/Tag-Textbloecke stabil erkennen",
+      "reason": "Echte Trainingsblock-Texte enthalten Tag-Labels, Schmerzwerte und Satzzeilen wie 15 kg @ 12 Wdh; diese duerfen keine Satz-, Tag- oder Schmerz-Muellkarten erzeugen.",
+      "whatChanged": [
+        "Textfeld-Testbatterie enthaelt den echten Beinpresse/Kniebeuger/Singel-Leg/Romanian-Deadlift-Block.",
+        "Satzzeilen mit Last vor Wiederholungen wie 15 kg @ 12 Wdh werden korrekt gelesen.",
+        "Schmerz: n/10 und Tag 1 werden nicht mehr als Uebungskarten uebernommen."
+      ],
+      "touchedAreas": [
+        "Textfield parser",
+        "Local test batteries",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Android-Wrapper",
+        "Tablet-Core-Layout",
+        "Storage"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "Regressionstest deckt den echten Schmerz-/Tag-Block ab und verhindert Satz-/Schmerz-Muellkarten."
+    },
+    {
+      "versionCode": 34,
+      "versionName": "1.0.34-free-textfield-units",
+      "patchId": "kgg-v034-free-textfield-units",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Freie Einheiten im Textfeld weitergeben",
+      "reason": "Textfeld-Eingaben koennen Einheiten enthalten, die noch nicht als feste App-Einheit hinterlegt sind; diese duerfen nicht still zu kg werden und muessen im aktuellen Plan erhalten bleiben.",
+      "whatChanged": [
+        "Textfeld-Testbatterie deckt bekannte App-Einheiten, freie Einheiten, Kurzformen und Satzvarianten ab.",
+        "Freie Einheiten wie km/h, Grad, RPE, Level, cm und rpm bleiben in state.plan und KGGDataStore.currentPlan erhalten.",
+        "S1, 1. Satz, 1) und Satz 1 - werden als Satzdaten erkannt, nicht als eigene Uebungskarten."
+      ],
+      "touchedAreas": [
+        "Textfield parser",
+        "Local test batteries",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Android-Wrapper",
+        "Tablet-Core-Layout",
+        "Sync pipeline"
+      ]
+    },
+    {
+      "versionCode": 33,
+      "versionName": "1.0.33-test-battery-textblocks",
+      "patchId": "kgg-v033-test-battery-textblocks",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Lokale Test-Batterien und Satz-Textblock-Erkennung",
+      "reason": "Mobile-Inbox, Sync und Terminheld-/Satz-Textbloecke brauchen wiederholbare lokale Checks; rohe Satzzeilen duerfen keine eigenen Uebungskarten erzeugen.",
+      "whatChanged": [
+        "Erkennt strukturierte Textbloecke aus Uebungsname plus Satz 1/2/3 vor dem normalen Komma-/Zeilen-Split.",
+        "Satz-Zeilen werden als Werte gelesen und nicht als eigene Uebungen angelegt.",
+        "Lokale Test-Batterien pruefen Mobile-Inbox-Dry-run, Sync-Safe-Logik und Textblock-Erkennung."
+      ],
+      "touchedAreas": [
+        "Textblock parser",
+        "Release pipeline tests",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Android-Wrapper",
+        "Tablet-Core-Layout",
+        "Plan-State",
+        "Storage",
+        "Exercise database"
+      ]
+    },
+    {
+      "versionCode": 32,
+      "versionName": "1.0.32-no-boot-redirect",
+      "patchId": "kgg-v032-no-boot-redirect",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Keine automatische Release-Navigation beim Start",
+      "reason": "ChatGPT-/Android-Datei-Viewer werden verlassen, wenn die HTML beim Booten per location.replace auf GitHub-Pages navigiert.",
+      "whatChanged": [
+        "Remote-Web-Updates werden nur noch als sichtbarer manueller Update-Hinweis angeboten.",
+        "Der alte Auto-Apply-Hook bleibt kompatibel vorhanden, navigiert aber nicht mehr automatisch.",
+        "Explizite Buttons in der Update-Zentrale duerfen externe Links weiterhin bewusst oeffnen."
+      ],
+      "touchedAreas": [
+        "GitHub/Web-Update-Pruefung",
+        "Boot-Navigation",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Parser",
+        "Plan-State",
+        "Exercise database",
+        "Phone drag UI"
+      ]
+    },
+    {
+      "versionCode": 31,
+      "versionName": "1.0.31-phone-drag-mobile-inbox",
+      "patchId": "kgg-v014-phone-viewport-state-release-guard",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Phone-Viewport-State-Leak-Guard und Update-Zentrale lokal stabilisiert",
+      "reason": "Phone-only Touch/Layout-State konnte nach Resize/Orientation in Tablet/Querformat weiterwirken; lokale content/file Tests sollten keinen GitHub-Auto-Redirect auslösen und die Update-Zentrale braucht ohne native Bridge einen Fallback.",
+      "whatChanged": [
+        "Adds a final phone viewport leak guard that removes stale kggPlanCardReordering, kggPlanCardSwiping, kggPlanSectionFrozen, is-scrolling, phoneTextFocus and kggPhoneDrawerOpen classes after gesture end and when leaving phone viewport.",
+        "Cleans leaked inline drag/swipe styles on plan cards and restores #planList position when a phone drag is cancelled by resize/orientation.",
+        "Keeps phone drag-reorder anchored to #planList local absolute coordinates instead of viewport fixed positioning.",
+        "Keeps existing local content/file no-auto-redirect logic while preserving the normal update prompt.",
+        "Keeps existing KGGReleaseControl local fallback before kgg-release-center-v28-script and does not overwrite a native bridge."
+      ],
+      "touchedAreas": [
+        "Phone viewport state cleanup",
+        "Plan-card drag/reorder UI guard",
+        "HTML embedded metadata",
+        "Source Truth",
+        "Changelog"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Parser",
+        "Android-Wrapper",
+        "Tablet-Core-Layout",
+        "Plan-State",
+        "Storage",
+        "Exercise database"
+      ],
+      "testStatus": {
+        "phoneDragAnchoredToFinger": "code-inspected",
+        "phoneStateCleanupOnGestureEnd": "code-inspected",
+        "tabletLayoutNoGlobalContainerOverride": "code-inspected",
+        "localContentNoAutoRedirect": "code-inspected",
+        "releaseCenterFallbackBeforeV28": "code-inspected"
+      },
+      "createdAt": "2026-06-23T00:00:00+02:00"
+    },
+    {
+      "versionCode": 24,
+      "versionName": "1.0.24-rollback-v023-debug-breakage",
+      "patchId": "kgg-v024-rollback-v023-debug-breakage",
+      "status": "active",
+      "type": "github-web-update",
+      "title": "Rollback v023 Debug-Layout-Bruch",
+      "reason": "v023 machte den Debug-Floating-Button sichtbar, brach aber erneut das Tablet-Layout und zeigte doppelte Debug-Einstiege.",
+      "whatChanged": [
+        "Removes active v023 debug style/script block.",
+        "Removes active v022 debug style/script block if still present.",
+        "Adds a small rollback guard that hides leftover debug buttons/overlays.",
+        "Leaves the workflow indexUrl fix in place.",
+        "Does not change PDF, QR generation, patient app, scan camera, parser, plan state or storage."
+      ],
+      "touchedAreas": [
+        "Admin debug UI rollback",
+        "HTML embedded metadata",
+        "Source Truth",
+        "Changelog",
+        "Patch rules"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Parser",
+        "Android-Wrapper",
+        "Tablet-Core-Layout",
+        "Plan-State",
+        "Storage"
+      ],
+      "testStatus": {
+        "tabletLayoutRestored": "pending",
+        "debugButtonsHidden": "pending",
+        "versionIndexUrl": "pending"
+      },
+      "createdAt": "2026-06-21T00:56:01.513302+00:00"
+    },
+    {
+      "versionCode": 23,
+      "versionName": "1.0.23-admin-debug-visible-hotfix",
+      "patchId": "kgg-v023-admin-debug-visible-hotfix",
+      "status": "active",
+      "type": "github-web-update",
+      "title": "Admin Debug sichtbar Hotfix",
+      "reason": "v022 aktualisierte Version/Metadaten, aber der sichtbare Debug-Einstieg erschien in der Tablet-UI nicht zuverlässig.",
+      "whatChanged": [
+        "Adds always-visible Admin Debug floating button independent of .adminMode.",
+        "Keeps KGG_ADMIN_DEBUG_MENU.report() available for future agents.",
+        "Repairs active kgg-source-truth insertion when older source-truth text is trapped inside an HTML comment.",
+        "Does not change PDF, QR generation, patient app, scan camera, parser, plan state or storage."
+      ],
+      "touchedAreas": [
+        "Admin debug UI",
+        "HTML embedded metadata",
+        "Source Truth",
+        "Changelog",
+        "Patch rules"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Parser",
+        "Android-Wrapper",
+        "Plan-State",
+        "Storage"
+      ],
+      "testStatus": {
+        "debugFabVisible": "pending",
+        "debugReportCopy": "pending",
+        "workflowIndexUrl": "pending"
+      },
+      "createdAt": "2026-06-20T22:59:57.580956+00:00"
+    },
+    {
+      "versionCode": 22,
+      "versionName": "1.0.22-admin-debug-menu-feedback",
+      "patchId": "kgg-v022-admin-debug-menu-feedback",
+      "status": "active",
+      "type": "github-web-update",
+      "title": "Admin Debug-/Feedback-Menue",
+      "reason": "Max braucht eine Admin-Oberfläche, die bei QR-, Layout-, Update-, Speicher- und anderen Problemen direkt verwertbares Feedback liefert.",
+      "whatChanged": [
+        "Adds Admin Debug / Feedback menu as v022.",
+        "Tablet: Debug entry is inserted into the scan/admin side rail.",
+        "Phone: Admin-Konfig, QR/Sync and Übungsdatenbank teilen are hidden from the scan hub and exposed through one Admin-Menue button.",
+        "Debug report includes version, feature availability, QR debug, layout rectangles, source truth/changelog summary, localStorage key summary and last runtime errors.",
+        "Adds global KGG_ADMIN_DEBUG_MENU.report() for future agents."
+      ],
+      "touchedAreas": [
+        "Admin debug UI",
+        "HTML embedded metadata",
+        "Source Truth",
+        "Changelog",
+        "Patch rules"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Parser",
+        "Android-Wrapper",
+        "Tablet core layout/breakpoints",
+        "Plan-State",
+        "Storage"
+      ],
+      "testStatus": {
+        "tabletMenu": "pending",
+        "phoneMenu": "pending",
+        "debugReportCopy": "pending",
+        "adminActions": "pending"
+      },
+      "rollbackNote": "Remove or supersede only with explicit new admin debug menu patch; do not silently delete feedback tooling.",
+      "createdAt": "2026-06-20T22:34:33.470984+00:00"
+    },
+    {
+      "versionCode": 9,
+      "versionName": "1.0.7-patch-retention-changelog-guard",
+      "patchId": "web-v009-patch-retention-changelog-guard",
+      "status": "active",
+      "type": "github-web-update",
+      "title": "Patch-Retention und Changelog-Größenwarnung",
+      "reason": "Max will verhindern, dass spätere LLMs den letzten funktionalen Patch einer Funktion versehentlich löschen, und möchte gewarnt werden, wenn der interne Changelog zu groß wird.",
+      "whatChanged": [
+        "Patch-Retention-Policy direkt in kgg-source-truth eingebettet.",
+        "kgg-patch-rules als eigener maschinenlesbarer JSON-Block ergänzt.",
+        "Changelog-Größenpolicy mit Entry- und Byte-Warnschwellen ergänzt.",
+        "Kleiner KGG_PATCH_GUARD im Browser ergänzt, der Source Truth/Changelog/Patch Rules auslesen und Changelog-Größe prüfen kann.",
+        "LLM-Regeln erweitert: Patches nicht still löschen; bei Konflikten oder Größenwarnungen Max fragen."
+      ],
+      "touchedAreas": [
+        "HTML embedded metadata",
+        "Source Truth",
+        "Changelog",
+        "Patch rules",
+        "Non-UI helper script"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Parser",
+        "Android-Wrapper",
+        "Tablet-Layout",
+        "Plan-State",
+        "Storage"
+      ],
+      "supersedes": [],
+      "removalPolicy": {
+        "doNotDeleteReason": "Dieser Eintrag definiert die neue Regel, dass alte Fix-Patches nicht still entfernt werden dürfen.",
+        "requiresExplicitMaxApprovalToRemove": true
+      },
+      "testStatus": {
+        "githubPages": "pending",
+        "androidApp": "pending",
+        "llmReadability": "pending"
+      }
+    },
+    {
+      "versionCode": 8,
+      "versionName": "1.0.6-qr-gallery-bitmap-debug",
+      "type": "github-web-update",
+      "title": "QR-Foto/Galerie-Import mit Debug und Bitmap-Fallback",
+      "summary": "Verbessert QR-Erkennung aus Galerie-/Fotodatenbank-Bildern durch zusätzlichen BarcodeDetector-ImageBitmap-Fallback und sichtbare Warnungen, wenn ein Bild nicht dekodiert werden kann.",
+      "changedAreas": [
+        "QR-Bildimport",
+        "HTML/JS",
+        "eingebettete Source Truth",
+        "eingebetteter Changelog"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Parser",
+        "Android-Wrapper",
+        "Tablet-Layout",
+        "Plan-State",
+        "Storage"
+      ],
+      "testStatus": {
+        "githubPages": "pending",
+        "androidApp": "pending",
+        "qrGalleryImport": "pending"
+      }
+    },
+    {
+      "versionCode": 7,
+      "versionName": "1.0.5-qr-photo-source-truth",
+      "type": "github-web-update",
+      "title": "QR-Foto-Upload + eingebettete Source Truth",
+      "summary": "Verbessert QR-Erkennung aus Bild-/Fotodatenbank-Upload und bettet Source Truth sowie Changelog direkt in die App-HTML ein.",
+      "changedAreas": [
+        "QR photo upload decode",
+        "HTML embedded metadata",
+        "Source Truth",
+        "Changelog"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan-Kamera",
+        "Parser",
+        "Android-Wrapper",
+        "Tablet-Layout",
+        "Plan-State",
+        "Storage"
+      ],
+      "testStatus": {
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "Lokale LLMs können index.html lesen und finden kgg-source-truth sowie kgg-changelog direkt im Code."
+    }
+  ],
+  "latestVersionName": "1.0.60-tablet-html-release-label"
+}
+</script>
+<!-- END kgg-changelog -->
+
+<!-- BEGIN kgg-patch-rules: embedded Patch Rules; READ THIS BEFORE PATCHING -->
+<script type="application/json" id="kgg-patch-rules">
+{
+  "schema": 1,
+  "id": "kgg-patch-rules",
+  "readFirst": [
+    "#kgg-source-truth",
+    "#kgg-changelog",
+    "#kgg-patch-rules"
+  ],
+  "mustUpdateOnEveryPatch": [
+    "kgg-source-truth.currentWebVersion",
+    "kgg-source-truth.lastUpdateIntent",
+    "kgg-changelog.entries",
+    "kgg-update/version.json.versionCode",
+    "kgg-update/version.json.versionName",
+    "kgg-update/version.json.sha256",
+    "kgg-source-truth.currentVersion",
+    "kgg-patch-rules",
+    "kgg-update/version.json.indexUrl"
+  ],
+  "protectedAreas": [
+    "PDF",
+    "QR-Erzeugung",
+    "Patienten-App",
+    "Scan-Kamera",
+    "Parser",
+    "Android-Wrapper",
+    "Tablet-Layout",
+    "Plan-State",
+    "Storage"
+  ],
+  "patchRetentionPolicy": {
+    "rule": "Never delete the latest patch for a function silently.",
+    "why": "The last patch for a feature is often what fixed or stabilized the bug; removing it without tracking can reintroduce old bugs.",
+    "defaultBehavior": "Preserve previous patch code and patch history unless Max explicitly approves removal.",
+    "whenReplacingPatch": [
+      "Mark old changelog entry as superseded, not deleted.",
+      "Add supersededBy on the old entry when practical.",
+      "Add supersedes on the new entry.",
+      "Record whySuperseded/removalReason/testEvidence/rollbackNote."
+    ],
+    "requiredWhenRemovingPatch": [
+      "supersededBy",
+      "removalReason",
+      "testEvidence",
+      "rollbackNote",
+      "explicitMaxApproval"
+    ],
+    "pipelineExpectation": "If patch markers or active fixes disappear without changelog documentation, stop and ask Max."
+  },
+  "changelogSizePolicy": {
+    "scope": "embedded kgg-changelog in index.html",
+    "warnAtEntries": 18,
+    "maxEmbeddedEntries": 30,
+    "warnAtBytes": 35000,
+    "maxEmbeddedBytes": 55000,
+    "actionWhenWarningThresholdReached": "Warn Max before adding more large entries; propose compact summaries or external archival.",
+    "actionWhenMaxExceeded": "Stop non-critical updates until Max approves compaction/archive strategy.",
+    "doNotAutoDeleteHistory": true
+  },
+  "blockPatchIfMissing": [
+    "kgg-source-truth",
+    "kgg-changelog",
+    "kgg-patch-rules"
+  ],
+  "requiredOnPatchRemoval": [
+    "supersededBy or replacementPatchId",
+    "removalReason",
+    "testEvidence",
+    "rollbackNote",
+    "explicitMaxApproval"
+  ],
+  "llmInstruction": "If changelog size exceeds policy thresholds or a patch-removal is not documented, warn Max and ask before changing code.",
+  "adminDebugMenuPolicy": {
+    "patchId": "kgg-v022-admin-debug-menu-feedback",
+    "purpose": "Keep an in-app admin feedback/debug path available for future QR/layout/update/storage issues.",
+    "doNotRemoveWithout": [
+      "supersededBy",
+      "reason",
+      "testEvidence",
+      "Max approval"
+    ],
+    "expectedGlobal": "KGG_ADMIN_DEBUG_MENU.report()"
+  },
+  "adminDebugVisibleHotfix": {
+    "patchId": "kgg-v023-admin-debug-visible-hotfix",
+    "purpose": "Debug entry must be visible in admin/therapist app even when adminMode class is missing.",
+    "expectedGlobal": "KGG_ADMIN_DEBUG_MENU.report()",
+    "expectedButton": "#kggAdminDebugFab",
+    "doNotRemoveWithout": [
+      "supersededBy",
+      "reason",
+      "testEvidence",
+      "Max approval"
+    ]
+  },
+  "adminDebugRollbackPolicy": {
+    "patchId": "kgg-v024-rollback-v023-debug-breakage",
+    "reason": "v023 broke tablet layout; debug UI must not be reintroduced without isolated viewport tests.",
+    "blockedUntil": [
+      "tablet screenshot proof",
+      "phone screenshot proof",
+      "no duplicate debug entry",
+      "Max approval"
+    ]
+  },
+  "lastUpdatedByPatchId": "kgg-v060-tablet-html-release-label",
+  "phoneViewportLeakGuardPolicy": {
+    "patchId": "kgg-v014-phone-viewport-state-release-guard",
+    "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
+    "requirements": [
+      "Gate phone behavior with matchMedia('(max-width:759px)').",
+      "When leaving phone viewport, remove kggPlanCardReordering, kggPlanCardSwiping, kggPlanSectionFrozen and stale inline drag/swipe styles.",
+      "Do not fix phone drag by changing global tablet containers such as #currentPlanBlock or .planSectionBody outside max-width:759px.",
+      "Phone drag-reorder must use #planList local absolute coordinates, not viewport fixed positioning.",
+      "Local content://, file:// and /media/external/file/ tests must not auto-redirect to GitHub; the normal update prompt may remain."
+    ],
+    "doNotRemoveWithout": [
+      "supersededBy",
+      "reason",
+      "phone portrait test",
+      "tablet/landscape test",
+      "Max approval"
+    ]
+  }
+}
+</script>
+<!-- END kgg-patch-rules -->
+
+<!-- BEGIN kgg-changelog-size-guard: console/helper warning when embedded changelog grows too large -->
+<script id="kgg-changelog-size-guard">
+(function(){
+  "use strict";
+  var FALLBACK_POLICY = {
+    warnAtEntries: 18,
+    maxEmbeddedEntries: 30,
+    warnAtBytes: 35000,
+    maxEmbeddedBytes: 55000
+  };
+  function readJsonBlock(id){
+    var el = document.getElementById(id);
+    if(!el) return null;
+    try{ return JSON.parse((el.textContent||"").trim()); }
+    catch(err){ return {__parseError:String(err)}; }
+  }
+  function changelogSizeReport(){
+    var el = document.getElementById("kgg-changelog");
+    var rules = readJsonBlock("kgg-patch-rules") || {};
+    var policy = (rules && rules.changelogSizePolicy) || FALLBACK_POLICY;
+    var text = el ? (el.textContent || "") : "";
+    var entries = 0;
+    var parseError = "";
+    try{
+      var data = text ? JSON.parse(text) : {};
+      entries = Array.isArray(data.entries) ? data.entries.length : 0;
+    }catch(err){
+      parseError = String(err);
+    }
+    var bytes = 0;
+    try{ bytes = new TextEncoder().encode(text).length; }
+    catch(err){ bytes = text.length; }
+    var warnings = [];
+    if(!el) warnings.push("kgg-changelog block missing");
+    if(parseError) warnings.push("kgg-changelog parse error: " + parseError);
+    if(entries >= Number(policy.warnAtEntries || FALLBACK_POLICY.warnAtEntries)){
+      warnings.push("embedded changelog entries approaching limit: " + entries + "/" + (policy.maxEmbeddedEntries || FALLBACK_POLICY.maxEmbeddedEntries));
+    }
+    if(bytes >= Number(policy.warnAtBytes || FALLBACK_POLICY.warnAtBytes)){
+      warnings.push("embedded changelog bytes approaching limit: " + bytes + "/" + (policy.maxEmbeddedBytes || FALLBACK_POLICY.maxEmbeddedBytes));
+    }
+    return {
+      entries: entries,
+      bytes: bytes,
+      policy: policy,
+      warnings: warnings,
+      shouldWarn: warnings.length > 0
+    };
+  }
+  window.KGG_PATCH_GUARD = window.KGG_PATCH_GUARD || {};
+  window.KGG_PATCH_GUARD.readSourceTruth = function(){ return readJsonBlock("kgg-source-truth"); };
+  window.KGG_PATCH_GUARD.readChangelog = function(){ return readJsonBlock("kgg-changelog"); };
+  window.KGG_PATCH_GUARD.readPatchRules = function(){ return readJsonBlock("kgg-patch-rules"); };
+  window.KGG_PATCH_GUARD.checkChangelogSize = changelogSizeReport;
+  var report = changelogSizeReport();
+  window.KGG_PATCH_GUARD.lastChangelogSizeReport = report;
+  if(report.shouldWarn && console && console.warn){
+    console.warn("KGG changelog/source-truth warning:", report);
+  }
+})();
+</script>
+<!-- END kgg-changelog-size-guard -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <script id="kgg-v047-phone-landscape-tablet-viewport-early">
+  (function(){
+    "use strict";
+    var PATCH_ID="kgg-v047-phone-landscape-tablet-menu";
+    var FORCED_VIEWPORT="width=760, initial-scale=1, viewport-fit=cover";
+    var meta=document.querySelector('meta[name="viewport"]');
+    var defaultViewport=meta?meta.getAttribute("content")||"width=device-width, initial-scale=1, viewport-fit=cover":"width=device-width, initial-scale=1, viewport-fit=cover";
+    var active=false;
+    function metrics(){
+      var vv=window.visualViewport||null;
+      var w=Math.round((vv&&vv.width)||window.innerWidth||0);
+      var h=Math.round((vv&&vv.height)||window.innerHeight||0);
+      var orientation=screen&&screen.orientation&&screen.orientation.type?String(screen.orientation.type):"";
+      return {width:w,height:h,shortSide:Math.min(w||0,h||0),longSide:Math.max(w||0,h||0),screenOrientation:orientation};
+    }
+    function shouldForceTabletViewport(){
+      var m=metrics();
+      var landscapeByViewport=!!(m.width&&m.height&&m.width>m.height);
+      var landscapeByScreen=/landscape/i.test(m.screenOrientation||"");
+      var landscape=landscapeByViewport||landscapeByScreen;
+      return !!(landscape&&m.longSide>=560&&m.shortSide>0&&m.shortSide<=560);
+    }
+    function apply(){
+      var next=shouldForceTabletViewport();
+      if(meta)meta.setAttribute("content",next?FORCED_VIEWPORT:defaultViewport);
+      active=next;
+      document.documentElement.classList.toggle("kggLandscapeTabletViewport",next);
+      return active;
+    }
+    window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047={
+      patchId:PATCH_ID,
+      apply:apply,
+      isActive:function(){return active||shouldForceTabletViewport();},
+      metrics:metrics,
+      forcedViewport:FORCED_VIEWPORT
+    };
+    apply();
+    window.addEventListener("resize",function(){setTimeout(apply,40);},{passive:true});
+    window.addEventListener("orientationchange",function(){setTimeout(apply,80);setTimeout(apply,220);},{passive:true});
+    if(window.visualViewport)window.visualViewport.addEventListener("resize",function(){setTimeout(apply,40);},{passive:true});
+  })();
+  </script>
+  <meta name="theme-color" content="#0a1024">
+  <meta name="application-name" content="KGG Plan App">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="KGG Plan">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
+  <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
+  <title>KGG Update v060 Tablet HTML Release Label</title>
+  <style>
+    :root{
+      --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent} html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+    body{display:flex;justify-content:center}.app{width:min(100%,520px);min-height:100vh;background:var(--bg);padding:14px 12px 64px}.topbar{position:sticky;top:0;z-index:10;margin:-14px -12px 12px;padding:10px 12px;background:rgba(232,238,246,.92);backdrop-filter:blur(8px);border-bottom:1px solid rgba(220,227,235,.7)}
+    .topbar h1{font-size:18px;margin:0}.topbar small{color:var(--muted);font-weight:700}.scanHub{background:var(--blue2);border:2px solid #5ea7e8;border-radius:20px;padding:14px;margin:8px 0 12px;box-shadow:var(--shadow)}.scanBtn,.primary{background:var(--accent);color:white;border:0;border-radius:14px;padding:12px 18px;font-weight:900;font-size:16px;box-shadow:0 4px 10px rgba(7,16,39,.18)}button{font:inherit;cursor:pointer}.mutedBtn{background:white;border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-weight:800}.scanMeta{border-top:1px solid var(--line);margin-top:14px;padding-top:12px;color:var(--muted);font-weight:900;font-size:20px}.scanMeta.filePickBtn{cursor:pointer;user-select:none}.scanMeta.filePickBtn:focus-visible{outline:3px solid rgba(94,167,232,.45);outline-offset:4px;border-radius:10px}.scanMeta small{display:block;font-size:14px;margin-top:6px}.panel{background:var(--paper);border:2px solid #1b2230;border-radius:26px;padding:12px;margin:0 0 12px;box-shadow:var(--shadow)}.panelTitle{font-size:30px;line-height:1;font-weight:1000;margin:0 0 12px;letter-spacing:-1px}.inner{border:2px solid #1b2230;border-radius:22px;padding:10px;background:white}.row{display:flex;align-items:center;gap:8px}.baseCard,.drawerBtn{width:100%;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:18px;font-weight:900;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:center}.label{font-size:14px;font-weight:900;margin:12px 0 6px}.inputWrap{position:relative;border:1px solid var(--line);border-radius:16px;background:white;box-shadow:var(--shadow);overflow:hidden}textarea{width:100%;min-height:72px;resize:vertical;border:0;outline:0;padding:16px 46px 16px 14px;font-size:20px;line-height:1.35;color:var(--ink);background:white}textarea::placeholder{color:#8c98a9}.clearBtn{position:absolute;right:10px;top:10px;border:0;background:transparent;color:var(--danger);font-size:24px;font-weight:1000;padding:6px}.suggestion{background:#edf5ff;border-top:1px solid var(--line);padding:10px 12px;font-weight:1000;font-size:18px}.suggestion small{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}.tools{display:grid;gap:10px;margin-top:10px}.drawerBtn{font-size:18px}.drawerBtn .mini{font-size:12px;color:var(--muted)}.planList{display:grid;gap:8px;margin:10px 0}.planCard{border:1px solid var(--line);border-radius:16px;padding:10px 12px;background:#fbfdff;box-shadow:var(--shadow);display:grid;grid-template-columns:1fr auto;gap:8px}.planCard b{font-size:17px}.planCard small{color:var(--muted);font-weight:800}.iconBtn{border:0;background:transparent;font-size:18px;padding:8px}.dbHead{display:flex;align-items:center;justify-content:space-between}.dbTitle{font-size:24px;font-weight:1000;margin:8px 0;display:flex;align-items:center;justify-content:flex-start;gap:10px;cursor:pointer;user-select:none}.finishBtn{width:100%;margin-top:14px;border-radius:18px;padding:16px;font-size:22px}.planMode .panelTitle{font-size:28px}.planCard{position:relative}.planCard .drag{display:inline-grid;place-items:center;width:34px;height:34px;border:0;border-radius:999px;background:#edf5ff;margin-right:8px;color:#31536f;font-weight:1000;touch-action:none;user-select:none;cursor:pointer}.planCard.reorder-placeholder{opacity:.55;transform:scaleY(.5);transform-origin:center;min-height:34px;border:2px dashed #9bb7d8;background:#edf5ff;box-shadow:none}.planCard.reorder-gap-before{margin-top:18px}.planCard.reorder-gap-after{margin-bottom:18px}.planCard.reorder-lifted{position:fixed!important;z-index:80;width:calc(min(100vw,520px) - 48px);left:var(--drag-left,12px);top:var(--drag-top,0px);transform:translateY(var(--drag-y,0px)) scale(1.035);opacity:.94;box-shadow:0 2px 3px rgba(7,16,39,.10),0 10px 24px rgba(7,16,39,.18),0 28px 60px rgba(7,16,39,.22);filter:drop-shadow(0 1px 0 rgba(255,255,255,.65));pointer-events:none}.planList.reorder-active .planCard:not(.reorder-lifted){transition:transform .14s ease,margin .14s ease,opacity .14s ease}.drag.reorder-armed{background:#dcecff;box-shadow:0 0 0 3px rgba(94,167,232,.25);color:#123a5c}.planCard.reorder-prelift{box-shadow:0 8px 20px rgba(7,16,39,.15);transform:scale(1.006);transition:box-shadow .12s ease,transform .12s ease}.planCard .planMain{display:flex;align-items:center}.planCard .planText{display:grid}.bankArea{margin-top:0;border-radius:16px;overflow:hidden;background:white}.bankOpen{border:1px solid var(--line);box-shadow:var(--shadow)}.bankRows{max-height:440px;overflow:auto;scroll-behavior:smooth;background:white}.bankRow{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px 12px;border-bottom:1px solid #eef2f6;background:white}.bankRow b{font-size:15px}.bankRow small{display:block;color:var(--muted);font-weight:800;margin-top:3px;font-size:11px}.bankLabel{background:#edf5ff;color:#4d6685;font-size:11px;font-weight:1000;padding:5px 10px}.bankWithAz{display:grid;grid-template-columns:42px 1fr}.az{background:#f5f8fc;border-right:1px solid var(--line);padding:7px 0;text-align:center;font-size:11px;font-weight:1000;color:#425267;line-height:1.28;user-select:none;touch-action:none;overscroll-behavior:contain;overflow:visible}.az button{display:block;position:relative;width:100%;min-height:16px;border:0;background:transparent;font-size:11px;font-weight:1000;color:#425267;padding:0;border-radius:999px;transform-origin:center;transition:transform .1s ease,background .1s ease,color .1s ease,box-shadow .1s ease}.az button.active,.az button:active{background:#071027;color:#fff;transform:scale(1.08)}.az.azTouching button.active,.az button:active{z-index:3;transform:translateY(-6px) scale(1.45);box-shadow:0 5px 12px rgba(7,16,39,.2)}.bottomPad{height:220px}.stateBadge{display:inline-block;background:#071027;color:#fff;border-radius:999px;padding:6px 10px;font-weight:900;font-size:12px}.hidden{display:none!important}.modal{position:fixed;inset:0;background:rgba(7,16,39,.45);z-index:50;display:none;align-items:flex-end;justify-content:center}.modal.open{display:flex}.sheet{width:min(100%,520px);background:white;border-radius:24px 24px 0 0;padding:16px;box-shadow:0 -8px 30px rgba(0,0,0,.18)}.sheet h2{margin:0 0 10px}.field{display:grid;gap:5px;margin:8px 0}.field label{font-size:12px;color:var(--muted);font-weight:900}.field input,.field select{border:1px solid var(--line);border-radius:12px;padding:11px;font-size:16px;background:white;color:var(--ink);width:100%}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.notice{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;color:#38475b;font-weight:750;margin-top:10px}.danger{color:var(--danger)}.apiBox{background:#fff8e8;border:1px solid #f2d38a;border-radius:16px;padding:12px;margin-top:10px;color:#6a4c00;font-weight:750}.patientOutput{background:#f7fbff;border:2px solid #5ea7e8;border-radius:18px;padding:12px;margin-top:10px}.patientLink{display:block;text-align:center;background:#071027;color:#fff;text-decoration:none;border-radius:14px;padding:13px 12px;font-weight:1000;margin-top:10px}.qrBox{display:grid;place-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;min-height:clamp(220px,64vw,340px);padding:14px;margin-top:10px}.qrBox img{width:92%;max-width:380px;height:auto;image-rendering:pixelated}.qrStatus{font-size:12px;color:var(--muted);font-weight:900;text-align:center;margin-top:8px}.footerActions{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,520px);display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;background:rgba(232,238,246,.94);padding:10px 12px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line);backdrop-filter:blur(8px)}
+    @media (max-width:390px){.panelTitle{font-size:25px}.dbTitle{font-size:24px}textarea{font-size:18px}.bankRows{max-height:380px}}
+    @media (max-width:759px){
+      .tools{position:relative}
+      #recentList:not(.hidden),#packageList:not(.hidden){position:absolute;left:0;right:0;bottom:calc(100% + 10px);z-index:42;max-height:min(54vh,360px);overflow:auto;background:rgba(255,255,255,.97);border:1px solid rgba(220,227,235,.94);border-radius:22px;padding:10px;box-shadow:0 18px 48px rgba(7,16,39,.2),0 4px 14px rgba(7,16,39,.1);backdrop-filter:blur(10px);transform-origin:bottom center;animation:mobileDrawerRise .26s cubic-bezier(.18,.84,.24,1) both}
+      #recentList:not(.hidden) .notice,#packageList:not(.hidden) .notice{margin-top:0}
+      @keyframes mobileDrawerRise{0%{opacity:0;transform:translateY(18px) scale(.97);filter:blur(2px)}70%{opacity:1;transform:translateY(-3px) scale(1.01);filter:blur(0)}100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+    }
+    .topbar,.footerActions,body>.app>.apiBox,#debugPayloadBox{display:none!important}.nativeFileInput{position:fixed;left:-100vw;top:0;width:1px;height:1px;opacity:.01}.app{padding-top:12px;padding-bottom:24px}.bottomPad{height:24px}.finishChoices{display:grid;gap:10px;margin-top:12px}.finishChoices button{width:100%;min-height:52px}.finishPdfRow{display:grid;grid-template-columns:minmax(0,1fr) 58px;gap:8px}.finishPdfLargeBtn{font-size:24px;line-height:1;padding:0;min-height:52px;border-radius:16px}.pdfPreviewSheet{width:min(96vw,860px);height:min(92vh,780px);display:grid;grid-template-rows:auto auto auto minmax(220px,1fr) auto auto;gap:8px}.pdfPreviewFrame{width:100%;height:100%;border:1px solid var(--line);border-radius:16px;background:#fff}.pdfPreviewFallback{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;background:#f6f8fb;border:1px solid var(--line);border-radius:16px;padding:10px 12px;color:#38475b;font-weight:800}.pdfPreviewFallback.hidden{display:none!important}.pdfPreviewFallback small{display:block;color:var(--muted);font-weight:800;margin-top:2px}.pdfPreviewFallback .mutedBtn{white-space:nowrap}.patientOutput.hidden{display:none!important}.modal{align-items:center}.sheet{border-radius:24px;max-height:92vh;overflow:auto}
+    .pdfPreviewMobileBridge{display:grid;gap:8px;background:#f6f8fb;border:1px solid var(--line);border-radius:16px;padding:10px 12px}.pdfPreviewMobileBridge.hidden{display:none!important}.pdfPreviewMobileBridge .primary{width:100%;min-height:56px;border-radius:16px}.pdfPreviewMobileBridge small{display:block;color:var(--muted);font-weight:800;line-height:1.25}.pdfPreviewModalMobile .pdfPreviewSheet{height:auto;grid-template-rows:auto auto auto auto auto}.pdfPreviewModalMobile .pdfPreviewFrame{display:none}.pdfPreviewModalMobile .pdfPreviewFallback{display:none!important}
+    .dbTitle{position:relative;min-height:32px;overflow:visible;gap:0;margin:6px 0 6px;font-size:22px;line-height:1.15}.dbTitle .dbTitleTrain{display:inline-block;white-space:nowrap;transform-origin:left center}.dbTitle.fullBankOpen,.dbTitle.searchBankOpen{margin:6px 0 6px}.dbTitle.fullBankOpen .dbTitleTrain{animation:dbTitleSlideUp .48s cubic-bezier(.2,.9,.2,1) both}.dbTitle.searchBankOpen .dbTitleTrain{animation:none}.bankArea.bankOpen{display:block;padding:8px}.bankArea.bankOpen #bankContent{min-width:0;margin-top:8px}.drawerBtn.dbMascotDock{width:56px;height:56px;min-height:56px;margin:0;padding:0;border:0;background:transparent;box-shadow:none;justify-content:center}.dbToggleMain{display:flex;align-items:center;gap:10px;min-width:0}.dbToggleText{white-space:nowrap}.dbMascotBubble{display:inline-flex;align-items:center;justify-content:center;gap:2px;width:48px;height:48px;border:2px solid #1b2230;border-radius:999px;background:#fff;box-shadow:var(--shadow);line-height:1;flex:0 0 auto}.dbMascotBubble .dbCar

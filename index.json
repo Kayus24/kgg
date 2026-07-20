@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "round_id": "blind-round-20260720-a",
+  "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
+  "challenge_count": 10,
+  "challenges": [
+    {
+      "challenge_id": "repair-878c5fdec891ec77",
+      "title": "Phone admin menu restore",
+      "manifest": "challenges/repair-878c5fdec891ec77/challenge.json"
+    },
+    {
+      "challenge_id": "repair-57a8f56d155d5ff9",
+      "title": "Phone photo menu restore",
+      "manifest": "challenges/repair-57a8f56d155d5ff9/challenge.json"
+    },
+    {
+      "challenge_id": "repair-8b6e5837b9b7aa13",
+      "title": "Exercise bank thumbnails restore",
+      "manifest": "challenges/repair-8b6e5837b9b7aa13/challenge.json"
+    },
+    {
+      "challenge_id": "repair-c586627424303e44",
+      "title": "Live exercise clear restore",
+      "manifest": "challenges/repair-c586627424303e44/challenge.json"
+    },
+    {
+      "challenge_id": "repair-7ac4b2a3288b412f",
+      "title": "Phone history drawers restore",
+      "manifest": "challenges/repair-7ac4b2a3288b412f/challenge.json"
+    },
+    {
+      "challenge_id": "repair-fc8f7f76c704b4b3",
+      "title": "Tablet editor layout restore",
+      "manifest": "challenges/repair-fc8f7f76c704b4b3/challenge.json"
+    },
+    {
+      "challenge_id": "repair-2ec1ee76064885a7",
+      "title": "Tablet card reorder restore",
+      "manifest": "challenges/repair-2ec1ee76064885a7/challenge.json"
+    },
+    {
+      "challenge_id": "repair-69135f9f90c65647",
+      "title": "Tablet scale persistence restore",
+      "manifest": "challenges/repair-69135f9f90c65647/challenge.json"
+    },
+    {
+      "challenge_id": "repair-e256284f6df50ef4",
+      "title": "Tablet layout panel restore",
+      "manifest": "challenges/repair-e256284f6df50ef4/challenge.json"
+    },
+    {
+      "challenge_id": "repair-23dac5fe9608dd15",
+      "title": "Phone menu anchor restore",
+      "manifest": "challenges/repair-23dac5fe9608dd15/challenge.json"
+    }
+  ]
+}

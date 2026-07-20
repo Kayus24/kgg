@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "challenge_id": "repair-8b6e5837b9b7aa13",
+  "chunks": [
+    {
+      "number": 1,
+      "file": "chunk-001.txt",
+      "sha256": "cc73e9182a941488fa083d8ac106e2cd0c1fe2259f2330f05d8c6b2671f98930"
+    },
+    {
+      "number": 2,
+      "file": "chunk-002.txt",
+      "sha256": "5160eb7543db3485c8c015fee293393a996dd2a1be81dc7c0e40a7b97c6db024"
+    },
+    {
+      "number": 3,
+      "file": "chunk-003.txt",
+      "sha256": "e98db7f9b2e0cf92729c9a38f3fdc26d8294978a657e4bbc1d76b39e37455565"
+    },
+    {
+      "number": 4,
+      "file": "chunk-004.txt",
+      "sha256": "54932becc02bb1acecbbb99c3abdc86db13aa7b7573e16aadabbcf69590a29bf"
+    },
+    {
+      "number": 5,
+      "file": "chunk-005.txt",
+      "sha256": "0e6237f66e668f192f3d95a863072ada87f5a49a0bfd4e85747cf39108fde22e"
+    },
+    {
+      "number": 6,
+      "file": "chunk-006.txt",
+      "sha256": "cadd317ed9d6a844845d473a1b22df97bd8a69ee02dcf78d4aba2bdfea55c34d"
+    },
+    {
+      "number": 7,
+      "file": "chunk-007.txt",
+      "sha256": "347bdfd985a2ec4a98531e940ba44c5f5f7c4c349f1d8ae9af950bf966776360"
+    },
+    {
+      "number": 8,
+      "file": "chunk-008.txt",
+      "sha256": "59222aa8066992abd23c0cd3d829bb52b80c3b53aa7b9a70d41144ae9d6bd8d6"
+    },
+    {
+      "number": 9,
+      "file": "chunk-009.txt",
+      "sha256": "9e33cf6a68218a7cb81a4045b2545d49a8656acc9cc69b548b066e2b14f65eca"
+    },
+    {
+      "number": 10,
+      "file": "chunk-010.txt",
+      "sha256": "96778c381ef3251815e31b512bee64170b1129944ed4ddf6852a2fa2b090d09d"
+    },
+    {
+      "number": 11,
+      "file": "chunk-011.txt",
+      "sha256": "9520651d89a2664d787765b417a7f35d25426d522846bd0aa3c1fab843e74747"
+    },
+    {
+      "number": 12,
+      "file": "chunk-012.txt",
+      "sha256": "268748393248dd220b0c37ad629bb4300f7eae74dbd9cb94aa78307022402aa3"
+    },
+    {
+      "number": 13,
+      "file": "chunk-013.txt",
+      "sha256": "e2c94bcc34dafa7e09da248b8f985c8be89a5148d05e3311ed25af7782319450"
+    },
+    {
+      "number": 14,
+      "file": "chunk-014.txt",
+      "sha256": "d908b8484a3590d8a90f39d8e62167e0c98abb65d010d186a2e7c79037b76dc9"
+    },
+    {
+      "number": 15,
+      "file": "chunk-015.txt",
+      "sha256": "29a984ddd12215287e9a98fc8c12e157df8863bed76059d7cfd678d394555827"
+    },
+    {
+      "number": 16,
+      "file": "chunk-016.txt",
+      "sha256": "62e370fb70f97e7f3724a801b3a7df03ae636e4cc4c3fce27a4b703566cf1b03"
+    }
+  ]
+}

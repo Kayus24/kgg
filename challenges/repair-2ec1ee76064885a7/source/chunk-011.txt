@@ -1,0 +1,1434 @@
+etProperty('right','auto','important');
+      card.style.setProperty('bottom','auto','important');
+      card.style.setProperty('margin','0','important');
+      card.style.setProperty('width',rect.width+'px','important');
+      card.style.setProperty('transform','translate3d(0,0,0)','important');
+      card.style.setProperty('transform-origin',anchorX+'px '+anchorY+'px','important');
+      card.style.setProperty('--drag-left','0px');
+      card.style.setProperty('--drag-top','0px');
+      card.style.setProperty('--drag-y','0px');
+    }else{
+      card.style.setProperty('--drag-left',(rect.left-fixedOffset.left)+'px');
+      card.style.setProperty('--drag-top',(rect.top-fixedOffset.top)+'px');
+      card.style.setProperty('--drag-y','0px');
+      card.style.width=rect.width+'px';
+    }
+    list.classList.add('reorder-active');
+    press.active=true;
+    press.placeholder=placeholder;
+    press.startTop=rect.top;
+    press.cardHeight=rect.height;
+    press.currentIndex=(state.plan||[]).findIndex(ex=>String(ex.localId||ex.id)===press.id);
+    press.targetIndex=press.currentIndex;
+    state.reorderSuppressClick=true;
+    try{press.handle.setPointerCapture&&press.handle.setPointerCapture(press.pointerId);}catch(e){}
+    document.removeEventListener('pointermove',press.preMove);
+    document.removeEventListener('pointerup',press.preUp);
+    document.addEventListener('pointermove',onAnimatedReorderMove,{passive:false});
+    document.addEventListener('pointerup',finishAnimatedReorder,{passive:false,once:true});
+    document.addEventListener('pointercancel',cancelAnimatedReorder,{passive:false,once:true});
+    if(initialEv)onAnimatedReorderMove(initialEv);
+  }
+  function onAnimatedReorderMove(ev){
+    const press=animatedReorder;
+    if(!press||!press.active)return;
+    clearPhoneScrollStateForPlanGesture(520);
+    ev.preventDefault();
+    const dy=ev.clientY-press.startY;
+    let floatingMid;
+    if(press.phoneListAbsoluteDrag){
+      const anchorX=Number.isFinite(press.dragAnchorX)?press.dragAnchorX:(Number.isFinite(press.pointerOffsetX)?press.pointerOffsetX:0);
+      const anchorY=Number.isFinite(press.dragAnchorY)?press.dragAnchorY:(Number.isFinite(press.pointerOffsetY)?press.pointerOffsetY:0);
+      const listRect=press.list.getBoundingClientRect();
+      const nextLeft=ev.clientX-anchorX-listRect.left+press.list.scrollLeft;
+      const nextTop=ev.clientY-anchorY-listRect.top+press.list.scrollTop;
+      press.card.style.setProperty('left',nextLeft+'px','important');
+      press.card.style.setProperty('top',nextTop+'px','important');
+      press.card.style.setProperty('transform','translate3d(0,0,0)','important');
+      press.card.style.setProperty('--drag-y','0px');
+      floatingMid=ev.clientY-anchorY+(Number.isFinite(press.cardHeight)?press.cardHeight:press.card.getBoundingClientRect().height)/2;
+    }else if(press.phoneAnchoredDrag){
+      const anchorX=Number.isFinite(press.pointerOffsetX)?press.pointerOffsetX:0;
+      const anchorY=Number.isFinite(press.pointerOffsetY)?press.pointerOffsetY:0;
+      const fixedOffset=press.fixedOffset||{left:0,top:0};
+      const nextLeft=ev.clientX-anchorX-fixedOffset.left;
+      const nextTop=ev.clientY-anchorY-fixedOffset.top;
+      press.card.style.setProperty('--drag-left',nextLeft+'px');
+      press.card.style.setProperty('--drag-top',nextTop+'px');
+      press.card.style.setProperty('--drag-y','0px');
+      floatingMid=ev.clientY-anchorY+(Number.isFinite(press.cardHeight)?press.cardHeight:press.card.getBoundingClientRect().height)/2;
+    }else{
+      press.card.style.setProperty('--drag-y',dy+'px');
+      floatingMid=press.startTop+dy+(press.card.getBoundingClientRect().height/2);
+    }
+    const cards=Array.from(press.list.querySelectorAll('.planCard[data-plan-id]:not(.reorder-lifted)'));
+    let target=cards.length;
+    for(let i=0;i<cards.length;i++){
+      const r=cards[i].getBoundingClientRect();
+      if(floatingMid<r.top+r.height/2){target=i;break;}
+    }
+    press.targetIndex=target;
+    const ref=cards[target]||null;
+    if(ref)press.list.insertBefore(press.placeholder,ref); else press.list.appendChild(press.placeholder);
+    cards.forEach(c=>c.classList.remove('reorder-gap-before','reorder-gap-after'));
+    if(ref)ref.classList.add('reorder-gap-before');
+    else if(cards.length)cards[cards.length-1].classList.add('reorder-gap-after');
+  }
+  function finishAnimatedReorder(ev){
+    const press=animatedReorder;
+    if(!press||!press.active){cleanupAnimatedReorder(false);return;}
+    ev.preventDefault();
+    const dbAnchor=state.bankOpen&&typeof captureDbScrollAnchor==='function'?captureDbScrollAnchor():null;
+    const from=(state.plan||[]).findIndex(ex=>String(ex.localId||ex.id)===press.id);
+    let to=Array.from(press.list.children).indexOf(press.placeholder);
+    if(from<0){cleanupAnimatedReorder(false);return;}
+    if(to>from)to-=1;
+    to=Math.max(0,Math.min(state.plan.length-1,to));
+    const moved=to!==from;
+    if(moved){
+      const next=state.plan.slice();
+      const item=next.splice(from,1)[0];
+      next.splice(to,0,item);
+      state.plan=next;
+      syncStatePlanToStore('ui_reorder_plan_animated');
+      syncTextInputFromPlan('ui_reorder_plan_animated');
+      save();
+    }
+    cleanupAnimatedReorder(true);
+    renderPlan();
+    if(dbAnchor&&typeof restoreDbScrollAnchor==='function'){
+      restoreDbScrollAnchor(dbAnchor);
+      setTimeout(()=>restoreDbScrollAnchor(dbAnchor),40);
+    }
+  }
+  function cancelAnimatedReorder(ev){cleanupAnimatedReorder(true);renderPlan();}
+  function cleanupAnimatedReorder(suppressClick){
+    const press=animatedReorder;
+    if(!press)return;
+    clearTimeout(press.timer);
+    if(press.handle)press.handle.classList.remove('reorder-armed');
+    if(press.list)press.list.classList.remove('reorder-active');
+    document.body.classList.remove('kggPlanCardReordering');
+    clearPhoneScrollStateForPlanGesture(280);
+    if(press.card){
+      const keepSwipeStyles=press.card.classList.contains('swipe-dragging')||document.body.classList.contains('kggPlanCardSwiping');
+      press.card.classList.remove('reorder-lifted','reorder-prelift');
+      if(!keepSwipeStyles){
+        press.card.style.removeProperty('--drag-left');
+        press.card.style.removeProperty('--drag-top');
+        press.card.style.removeProperty('--drag-y');
+        press.card.style.removeProperty('width');
+        press.card.style.removeProperty('position');
+        press.card.style.removeProperty('left');
+        press.card.style.removeProperty('top');
+        press.card.style.removeProperty('right');
+        press.card.style.removeProperty('bottom');
+        press.card.style.removeProperty('margin');
+        press.card.style.removeProperty('transform');
+        press.card.style.removeProperty('transform-origin');
+      }
+    }
+    if(press.placeholder&&press.placeholder.parentNode)press.placeholder.parentNode.removeChild(press.placeholder);
+    if(press.list){
+      if(press.phoneListAbsoluteDrag){
+        if(press.listPrevPosition){
+          press.list.style.setProperty('position',press.listPrevPosition,press.listPrevPositionPriority||'');
+        }else{
+          press.list.style.removeProperty('position');
+        }
+      }
+      Array.from(press.list.querySelectorAll('.reorder-gap-before,.reorder-gap-after')).forEach(c=>c.classList.remove('reorder-gap-before','reorder-gap-after'));
+    }
+    if(press.preMove)document.removeEventListener('pointermove',press.preMove);
+    if(press.preUp)document.removeEventListener('pointerup',press.preUp);
+    document.removeEventListener('pointermove',onAnimatedReorderMove);
+    animatedReorder=null;
+    if(suppressClick){state.reorderSuppressClick=true;setTimeout(()=>{state.reorderSuppressClick=false;},350);}
+  }
+
+  function restoreRecentPlan(index){
+    const item=(state.recent||[])[index];
+    if(!item)return;
+    state.patient={...(state.patient||{}),...(item.patient||{})};
+    state.plan=Array.isArray(item.exercises)?item.exercises.map(ensureUiExerciseShape):[];
+    if($('patientName'))$('patientName').value=state.patient.name||'';
+    if($('planDate'))$('planDate').value=state.patient.date||new Date().toISOString().slice(0,10);
+    if($('therapistName'))$('therapistName').value=state.patient.therapist||'';
+    if($('planNotes'))$('planNotes').value=state.patient.notes||'';
+    syncStatePlanToStore('ui_restore_recent_plan');
+    syncTextInputFromPlan('ui_restore_recent_plan');
+    if($('recentList'))$('recentList').classList.add('hidden');
+    save();
+    render();
+  }
+  function renderRecent(){
+    const el=$('recentList');
+    const items=(state.recent||[]).slice(0,5);
+    el.innerHTML=items.map((p,i)=>'<div class="notice"><b>'+escapeHtml(p.name||('Plan '+(i+1)))+'</b><br><small>'+((p.exercises||[]).length)+' Übungen'+(p.date?' · '+escapeHtml(String(p.date).slice(0,10)):'')+'</small><br><button class="mutedBtn" data-recent-index="'+i+'" type="button" style="width:100%;margin-top:8px">Plan wieder öffnen</button></div>').join('')||'<div class="notice">Keine Pläne.</div>';
+    el.querySelectorAll('[data-recent-index]').forEach(btn=>btn.onclick=()=>restoreRecentPlan(Number(btn.dataset.recentIndex)));
+  }
+  function defaultPackageName(){const patient=String(state.patient&&state.patient.name||'').trim(); const stamp=new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}); return (patient?patient+' ':'')+'Paket '+stamp;}
+  function openPackageSaveModal(){
+    if(!(state.plan||[]).length)return;
+    const btn=$('savePackageBtn'), input=$('packageNameInput');
+    if(btn){btn.classList.remove('packagePulse'); void btn.offsetWidth; btn.classList.add('packagePulse'); setTimeout(()=>btn.classList.remove('packagePulse'),560);}
+    if(input)input.value=defaultPackageName();
+    $('packageSaveModal').classList.add('open');
+    setTimeout(()=>input&&input.focus&&input.focus(),30);
+  }
+  function closePackageSaveModal(){$('packageSaveModal').classList.remove('open');}
+  function confirmPackageSave(){
+    const input=$('packageNameInput');
+    const name=String(input&&input.value||'').trim();
+    const exercises=(state.plan||[]).map(ex=>String(ex&&ex.name||'').trim()).filter(Boolean);
+    if(!name||!exercises.length){if(input)input.focus(); return;}
+    state.packages=Array.isArray(state.packages)?state.packages:[];
+    state.packages.unshift({id:'pkg_'+Date.now(),name,exercises,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),source:'current-plan'});
+    save();
+    queueNativeExerciseBankSync('package_saved');
+    closePackageSaveModal();
+    if($('packageList'))$('packageList').classList.remove('hidden');
+    render();
+  }
+  function applyPackageToPlan(packageId){
+    const p=(state.packages||[]).find(x=>String(x.id)===String(packageId));
+    if(!p)return;
+    (p.exercises||[]).forEach(n=>addExercise(search(n,1)[0]||{name:n,sets:3,unit:'Wdh',weightUnit:'kg'}));
+  }
+  function packageOverlayDescription(pkg){
+    const exercises=(pkg&&pkg.exercises||[]).map(x=>String(x||'').trim()).filter(Boolean);
+    if(!exercises.length)return 'Noch keine Uebungen in diesem Paket.';
+    const listed=exercises.slice(0,4).join(', ');
+    return 'Enthaelt '+listed+(exercises.length>4?' und weitere Uebungen.':'.');
+  }
+  function packageOverlayTags(pkg){
+    const exercises=(pkg&&pkg.exercises||[]).filter(Boolean);
+    const tags=[exercises.length+' Uebungen'];
+    if(pkg&&pkg.source==='current-plan')tags.push('Eigener Plan');
+    else tags.push('Paket');
+    return tags;
+  }
+  function renderTabletPackageOverlay(){
+    const cards=$('tabletPackageCards');
+    if(!cards)return;
+    const input=$('tabletPackageSearch');
+    const query=compact(input&&input.value||'');
+    const packages=(state.packages||[]).filter(pkg=>{
+      if(!query)return true;
+      const hay=compact([pkg.name,(pkg.exercises||[]).join(' ')].join(' '));
+      return hay.includes(query);
+    });
+    if(!packages.length){cards.innerHTML='<div class="tabletPackageEmpty">Keine passenden Uebungspakete gefunden.</div>';return;}
+    cards.innerHTML=packages.map(pkg=>{
+      const tags=packageOverlayTags(pkg).map(tag=>'<span>'+escapeHtml(tag)+'</span>').join('');
+      return '<button class="tabletPackageCard" type="button" data-tablet-pkg="'+escapeHtml(pkg.id)+'"><span class="tabletPackageIcon" aria-hidden="true">&#128230;</span><span class="tabletPackageBody"><b>'+escapeHtml(pkg.name||'Uebungspaket')+'</b><p>'+escapeHtml(packageOverlayDescription(pkg))+'</p><span class="tabletPackageMeta">'+tags+'</span></span><span class="tabletPackageArrow" aria-hidden="true">›</span></button>';
+    }).join('');
+    cards.querySelectorAll('[data-tablet-pkg]').forEach(btn=>btn.onclick=()=>applyPackageToPlan(btn.dataset.tabletPkg));
+  }
+  function renderPackages(){
+    const el=$('packageList');
+    if(el){
+      el.innerHTML=(state.packages||[]).map(p=>'<div class="notice"><b>'+escapeHtml(p.name)+'</b><br><small>'+(p.exercises||[]).map(escapeHtml).join(', ')+'</small><br><button class="mutedBtn" data-pkg="'+p.id+'">Paket in Plan uebernehmen</button></div>').join('');
+      el.querySelectorAll('[data-pkg]').forEach(b=>b.onclick=()=>applyPackageToPlan(b.dataset.pkg));
+    }
+    renderTabletPackageOverlay();
+  }
+  function sanitizeSharedBankExercise(ex){
+    return {
+      id:String(ex.id||ex.sourceId||('shared_'+compact(ex.name))).slice(0,80),
+      name:String(ex.name||'').trim(),
+      aliases:String(ex.aliases||ex.name||'').trim(),
+      sets:normalizeSetCount(ex.sets||3),
+      unit:String(ex.unit||'Wdh'),
+      weightUnit:normalizeLoadUnit(ex.weightUnit||'kg'),
+      shared:true,
+      createdAt:String(ex.createdAt||ex.updatedAt||new Date().toISOString()),
+      updatedAt:String(ex.updatedAt||new Date().toISOString())
+    };
+  }
+  function buildSharedExerciseBankPayload(){
+    const exercises=bank.map(sanitizeSharedBankExercise).filter(ex=>ex.name);
+    return {kind:'kgg-shared-exercise-bank',version:1,appVersion:VERSION,exportedAt:new Date().toISOString(),exercises};
+  }
+  function parseSharedExerciseBankPayload(raw){
+    const payload=typeof raw==='string'?JSON.parse(raw):raw;
+    const exercises=Array.isArray(payload)?payload:(Array.isArray(payload&&payload.exercises)?payload.exercises:(Array.isArray(payload&&payload.exerciseBank)?payload.exerciseBank:[]));
+    if(!exercises.length)throw new Error('Keine Übungen im Import gefunden.');
+    return exercises.map(sanitizeSharedBankExercise).filter(ex=>ex.name);
+  }
+  function mergeSharedExerciseBank(raw){
+    const incoming=parseSharedExerciseBankPayload(raw);
+    let added=0,updated=0;
+    incoming.forEach(ex=>{
+      const existing=bank.find(item=>compact(item.name)===compact(ex.name));
+      if(existing){
+        if(syncTimestamp(ex.updatedAt)>=syncTimestamp(existing.updatedAt||existing.createdAt)){
+          existing.aliases=ex.aliases||existing.aliases;
+          existing.sets=ex.sets||existing.sets;
+          existing.unit=ex.unit||existing.unit;
+          existing.weightUnit=ex.weightUnit||existing.weightUnit;
+          existing.shared=true;
+          existing.updatedAt=ex.updatedAt||new Date().toISOString();
+          updated+=1;
+        }
+      }else{
+        bank.push({...ex,id:ex.id||('shared_'+Date.now()+'_'+added),custom:true,shared:true});
+        added+=1;
+      }
+      deletedBankIds.delete(String(ex.id||''));
+    });
+    persistDeletedBankIds();
+    persistCustomBank();
+    render();
+    return {added,updated,total:incoming.length};
+  }
+  function openSharedBankModal(){
+    const text=$('sharedBankText'), status=$('sharedBankStatus');
+    if(text)text.value=JSON.stringify(buildSharedExerciseBankPayload(),null,2);
+    if(status)status.textContent='Bereit.';
+    $('sharedBankModal').classList.add('open');
+  }
+  function closeSharedBankModal(){$('sharedBankModal').classList.remove('open');}
+  async function copySharedBankPayload(){
+    const text=$('sharedBankText'), status=$('sharedBankStatus');
+    if(!text)return;
+    try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(text.value); if(status)status.textContent='Export kopiert.'; return;}}catch(err){console.warn('DB-Export konnte nicht kopiert werden:',err);}
+    text.focus(); text.select(); if(status)status.textContent='Export markiert.';
+  }
+  function applySharedBankFromText(){
+    const status=$('sharedBankStatus');
+    try{const result=mergeSharedExerciseBank($('sharedBankText').value); if(status)status.textContent='Import übernommen: '+result.added+' neu, '+result.updated+' aktualisiert.';}
+    catch(err){if(status)status.textContent='Import nicht übernommen: '+(err&&err.message||'unbekannter Fehler');}
+  }
+  function handleSharedBankFile(ev){
+    const file=ev.target.files&&ev.target.files[0];
+    ev.target.value='';
+    if(!file)return;
+    const reader=new FileReader();
+    reader.onload=()=>{if($('sharedBankText'))$('sharedBankText').value=String(reader.result||''); if($('sharedBankStatus'))$('sharedBankStatus').textContent='Import geladen.';};
+    reader.readAsText(file);
+  }
+  window.KGGSharedBank={exportPayload:buildSharedExerciseBankPayload,merge:mergeSharedExerciseBank,open:openSharedBankModal};
+  let nativeExerciseSyncTimer=null;
+  let nativeExerciseSyncApplying=false;
+  function nativeExerciseSyncAvailable(){
+    return !!(window.KGGNativeSync&&window.KGGNativeSync.available&&typeof window.KGGNativeSync.read==='function'&&typeof window.KGGNativeSync.write==='function');
+  }
+  function syncTimestamp(value){const t=Date.parse(value||''); return Number.isFinite(t)?t:0;}
+  function assertCrossDataSafeSyncDocument(doc){
+    const allowedPolicyKeys=new Set(['patients','secrets','debugPayloads','rawData']);
+    const blockedKeyPattern=new RegExp(['patient','gemini','api'+'key','api'+'_'+'key','secret','token','raw'+'payload','base64'+'payload','qrraw'].join('|'));
+    const blocked=[];
+    const visit=(value,path)=>{
+      if(!value||typeof value!=='object')return;
+      Object.keys(value).forEach(key=>{
+        const lower=String(key).toLowerCase();
+        const policyKey=(path==='sync.privacy'||path.endsWith('.privacy'))&&allowedPolicyKeys.has(key);
+        if(policyKey){
+          if(value[key]!==false)blocked.push(path+'.'+key);
+        }else if(blockedKeyPattern.test(lower)){
+          blocked.push(path+'.'+key);
+        }
+        visit(value[key],path+'.'+key);
+      });
+    };
+    visit(doc,'sync');
+    if(blocked.length)throw new Error('Sync-Safe blockiert geschuetzte Felder: '+blocked.slice(0,3).join(', '));
+    return doc;
+  }
+  function syncSafeOrigin(){
+    let deviceId='';
+    try{deviceId=syncPairDeviceId();}catch(err){deviceId='web_'+Date.now().toString(36);}
+    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig&&nativeSyncFollowConfig()||{});
+    const displayName=String(($('therapistName')&&$('therapistName').value)||state.patient.therapist||'KGG Geraet').trim();
+    return {deviceId,therapistId:String(config.therapistId||deviceId),displayName,roomId:syncPairRoomId()};
+  }
+  function syncSafeTombstones(exportedAt){
+    return [...deletedBankIds].map(id=>({id:String(id),deleted:true,updatedAt:exportedAt}));
+  }
+  function sanitizeNativeSyncPackage(pkg){
+    return {
+      id:String(pkg&&pkg.id||('pkg_'+compact(pkg&&pkg.name||''))).slice(0,96),
+      name:String(pkg&&pkg.name||'').trim(),
+      exercises:Array.isArray(pkg&&pkg.exercises)?pkg.exercises.map(name=>String(name||'').trim()).filter(Boolean):[],
+      createdAt:String(pkg&&pkg.createdAt||new Date().toISOString()),
+      updatedAt:String(pkg&&pkg.updatedAt||pkg&&pkg.createdAt||new Date().toISOString()),
+      source:String(pkg&&pkg.source||'exercise-package')
+    };
+  }
+  function buildNativeExerciseBankSyncDocument(){
+    const exportedAt=new Date().toISOString();
+    return assertCrossDataSafeSyncDocument({
+      kind:'kgg_cross_data_safe_sync',
+      version:2,
+      appVersion:VERSION,
+      exportedAt,
+      roomId:syncPairRoomId(),
+      schema:'exercise-bank-packages-v2',
+      scopes:['exerciseBank','packages'],
+      privacy:{patients:false,secrets:false,debugPayloads:false,rawData:false},
+      origin:syncSafeOrigin(),
+      exerciseBank:buildSharedExerciseBankPayload().exercises,
+      packages:(state.packages||[]).map(sanitizeNativeSyncPackage).filter(pkg=>pkg.name&&pkg.exercises.length),
+      tombstones:{exerciseBank:syncSafeTombstones(exportedAt)}
+    });
+  }
+  function applyNativeSyncExerciseTombstones(rawTombstones){
+    const incoming=Array.isArray(rawTombstones)?rawTombstones:[];
+    let removed=0;
+    incoming.forEach(item=>{
+      const id=String(item&&item.id||'').trim();
+      if(!id)return;
+      const idx=bank.findIndex(ex=>String(ex&&ex.id)===id);
+      if(idx>=0){bank.splice(idx,1);removed+=1;}
+      deletedBankIds.add(id);
+    });
+    if(incoming.length){persistDeletedBankIds();persistCustomBank();render();}
+    return {removed,total:incoming.length,ids:new Set(incoming.map(item=>String(item&&item.id||'')).filter(Boolean))};
+  }
+  function mergeNativeSyncPackages(rawPackages){
+    const incoming=(Array.isArray(rawPackages)?rawPackages:[]).map(sanitizeNativeSyncPackage).filter(pkg=>pkg.name&&pkg.exercises.length);
+    if(!incoming.length)return {added:0,updated:0,total:0};
+    state.packages=Array.isArray(state.packages)?state.packages:[];
+    let added=0,updated=0;
+    incoming.forEach(pkg=>{
+      const existing=state.packages.find(item=>String(item&&item.id)===pkg.id||compact(item&&item.name)===compact(pkg.name));
+      if(existing){
+        if(syncTimestamp(pkg.updatedAt)>=syncTimestamp(existing.updatedAt||existing.createdAt)){
+          Object.assign(existing,pkg);
+          updated+=1;
+        }
+      }else{
+        state.packages.push(pkg);
+        added+=1;
+      }
+    });
+    return {added,updated,total:incoming.length};
+  }
+  function syncPeerIdShort(value){const text=String(value||''); return text.length>8?text.slice(-8):text;}
+  function syncOriginIsSelf(origin){
+    if(!origin)return false;
+    const selfId=syncPairDeviceId();
+    return String(origin.deviceId||'')===selfId;
+  }
+  function syncFollowEntryForOrigin(origin){
+    if(!origin)return null;
+    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig&&nativeSyncFollowConfig()||{});
+    const list=Array.isArray(config.followedTherapists)?config.followedTherapists:[];
+    return list.find(item=>String(item.deviceId||'')===String(origin.deviceId||'')||String(item.therapistId||'')===String(origin.therapistId||''));
+  }
+  function upsertSyncPeerFromOrigin(origin,autoDownloadDefault){
+    if(!origin||syncOriginIsSelf(origin))return null;
+    const now=new Date().toISOString();
+    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig&&nativeSyncFollowConfig()||{});
+    const list=Array.isArray(config.followedTherapists)?config.followedTherapists.slice():[];
+    const entry={
+      therapistId:String(origin.therapistId||origin.deviceId||''),
+      deviceId:String(origin.deviceId||origin.therapistId||''),
+      displayName:String(origin.displayName||'KGG Geraet'),
+      roomId:String(origin.roomId||config.syncRoomId||syncPairRoomId()),
+      scopes:['exerciseBank','packages'],
+      autoDownload:!!autoDownloadDefault,
+      pairedAt:now,
+      lastSeenAt:now
+    };
+    const idx=list.findIndex(item=>String(item.deviceId||'')===entry.deviceId||String(item.therapistId||'')===entry.therapistId);
+    if(idx>=0){
+      list[idx]={...list[idx],...entry,autoDownload:autoDownloadDefault?true:list[idx].autoDownload!==false,pairedAt:list[idx].pairedAt||now,lastSeenAt:now};
+    }else{
+      list.push(entry);
+    }
+    config.followedTherapists=list;
+    if(entry.roomId&&!config.syncRoomId)config.syncRoomId=entry.roomId;
+    if(!config.therapistId)config.therapistId=syncPairDeviceId();
+    writeNativeSyncFollowConfig(config);
+    return idx>=0?list[idx]:entry;
+  }
+  function syncAutoDownloadAllowed(origin,options){
+    if(options&&options.allowUnfollowed)return true;
+    if(!origin)return true;
+    if(syncOriginIsSelf(origin))return false;
+    const entry=syncFollowEntryForOrigin(origin);
+    return !!entry&&entry.autoDownload!==false;
+  }
+  function mergeNativeSyncMeshDocument(doc,options){
+    const peers=Array.isArray(doc.peers)?doc.peers:[];
+    const total={bank:{added:0,updated:0,total:0},packages:{added:0,updated:0,total:0},tombstones:{removed:0,total:0},mesh:{seen:peers.length,merged:0,skipped:0}};
+    peers.forEach(peer=>{
+      if(!peer||peer.kind!=='kgg_cross_data_safe_sync'){total.mesh.skipped+=1;return;}
+      upsertSyncPeerFromOrigin(peer.origin,false);
+      if(!syncAutoDownloadAllowed(peer.origin,options)){total.mesh.skipped+=1;return;}
+      const result=mergeNativeExerciseBankSyncDocument(peer,{...(options||{}),fromMesh:true});
+      if(result&&result.bank){total.bank.added+=result.bank.added||0;total.bank.updated+=result.bank.updated||0;total.bank.total+=result.bank.total||0;}
+      if(result&&result.packages){total.packages.added+=result.packages.added||0;total.packages.updated+=result.packages.updated||0;total.packages.total+=result.packages.total||0;}
+      if(result&&result.tombstones){total.tombstones.removed+=result.tombstones.removed||0;total.tombstones.total+=result.tombstones.total||0;}
+      total.mesh.merged+=1;
+    });
+    renderSyncPeerList();
+    return total;
+  }
+  function mergeNativeExerciseBankSyncDocument(raw,options){
+    const doc=assertCrossDataSafeSyncDocument(typeof raw==='string'?JSON.parse(raw):(raw||{}));
+    if(doc.kind==='kgg_cross_data_safe_sync_mesh')return mergeNativeSyncMeshDocument(doc,options||{});
+    if(!syncAutoDownloadAllowed(doc.origin,options||{}))return {bank:{added:0,updated:0,total:0},packages:{added:0,updated:0,total:0},tombstones:{removed:0,total:0},skipped:true};
+    upsertSyncPeerFromOrigin(doc.origin,!!(options&&options.allowUnfollowed));
+    const tombstoneResult=applyNativeSyncExerciseTombstones(doc.tombstones&&doc.tombstones.exerciseBank);
+    const exercises=Array.isArray(doc.exerciseBank)?doc.exerciseBank:(Array.isArray(doc.exercises)?doc.exercises:[]);
+    const filteredExercises=exercises.filter(ex=>!tombstoneResult.ids.has(String(ex&&ex.id||'')));
+    let bankResult={added:0,updated:0,total:0};
+    if(filteredExercises.length)bankResult=mergeSharedExerciseBank({exercises:filteredExercises});
+    const packageResult=mergeNativeSyncPackages(doc.packages);
+    if(packageResult.added||packageResult.updated){save(); render();}
+    return {bank:bankResult,packages:packageResult,tombstones:tombstoneResult};
+  }
+  async function resolveNativeSyncValue(value){return value&&typeof value.then==='function'?await value:value;}
+  async function pullNativeExerciseBankSync(reason){
+    if(!nativeExerciseSyncAvailable())return null;
+    nativeExerciseSyncApplying=true;
+    try{return mergeNativeExerciseBankSyncDocument(await resolveNativeSyncValue(window.KGGNativeSync.read()));}
+    catch(err){console.warn('Native Sync konnte nicht gelesen werden:',err);return null;}
+    finally{nativeExerciseSyncApplying=false;}
+  }
+  async function pushNativeExerciseBankSync(reason){
+    if(!nativeExerciseSyncAvailable())return false;
+    try{return !!(await resolveNativeSyncValue(window.KGGNativeSync.write(buildNativeExerciseBankSyncDocument())));}
+    catch(err){console.warn('Native Sync konnte nicht geschrieben werden:',err);return false;}
+  }
+  function queueNativeExerciseBankSync(reason){
+    if(nativeExerciseSyncApplying||!nativeExerciseSyncAvailable())return;
+    clearTimeout(nativeExerciseSyncTimer);
+    nativeExerciseSyncTimer=setTimeout(()=>pushNativeExerciseBankSync(reason),350);
+  }
+  function initNativeExerciseBankSync(){
+    const activate=()=>{pullNativeExerciseBankSync('native_ready').finally(()=>queueNativeExerciseBankSync('native_ready'));};
+    if(nativeExerciseSyncAvailable())activate();
+    window.addEventListener('kgg:native-sync-ready',activate,{once:true});
+  }
+  window.KGGNativeExerciseSync={build:buildNativeExerciseBankSyncDocument,merge:mergeNativeExerciseBankSyncDocument,pull:pullNativeExerciseBankSync,push:pushNativeExerciseBankSync};
+  const syncPairDeviceIdKey='kgg_sync_pair_device_id_v1';
+  const syncPairFallbackConfigKey='kgg_sync_pair_follow_config_v1';
+  const syncPairRoomIdKey='kgg_sync_room_id_v1';
+  const nativeSyncQrMaxLength=2400;
+  let lastSyncPairCode='';
+  let nativeSyncLastStatus='';
+  function safeBase64JsonEncode(value){
+    const json=JSON.stringify(value||{});
+    const bytes=new TextEncoder().encode(json);
+    let binary='';
+    for(let i=0;i<bytes.length;i+=0x8000){
+      binary+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));
+    }
+    return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+  function kggConfigTransferBytesToBase64Url(bytes){
+    let binary='';
+    for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));
+    return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+  function kggConfigTransferBase64UrlToBytes(value){
+    const body=String(value||'').replace(/-/g,'+').replace(/_/g,'/');
+    const padded=body+'='.repeat((4-body.length%4)%4);
+    const binary=atob(padded);
+    const bytes=new Uint8Array(binary.length);
+    for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+    return bytes;
+  }
+  function kggConfigTransferRandomBytes(length){
+    const bytes=new Uint8Array(length);
+    if(window.crypto&&crypto.getRandomValues)crypto.getRandomValues(bytes);
+    else for(let i=0;i<bytes.length;i++)bytes[i]=Math.floor(Math.random()*256);
+    return bytes;
+  }
+  function kggConfigTransferPassCode(){
+    const bytes=kggConfigTransferRandomBytes(4);
+    const value=((bytes[0]<<24)>>>0)+(bytes[1]<<16)+(bytes[2]<<8)+bytes[3];
+    return String(100000+(value%900000));
+  }
+  function buildKggConfigTransferPlain(){
+    loadAdminSecrets();
+    return {
+      kind:'kgg_config_transfer_v2',
+      version:2,
+      appVersion:VERSION,
+      createdAt:new Date().toISOString(),
+      expiresAt:new Date(Date.now()+10*60*1000).toISOString(),
+      secrets:{
+        geminiKeys:(adminSecrets.geminiKeys||[]).map(cleanSecret).filter(Boolean).slice(0,4),
+        mediaDropzoneEndpoint:cleanSecret(adminSecrets.mediaDropzoneEndpoint),
+        mediaDropzoneUploadToken:cleanSecret(adminSecrets.mediaDropzoneUploadToken)
+      }
+    };
+  }
+  function kggConfigTransferHasCodes(plain){
+    const secrets=plain&&plain.secrets||{};
+    return !!((Array.isArray(secrets.geminiKeys)&&secrets.geminiKeys.length)||secrets.mediaDropzoneEndpoint||secrets.mediaDropzoneUploadToken);
+  }
+  async function kggConfigTransferKey(passCode,saltBytes){
+    const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(String(passCode||'')),{name:'PBKDF2'},false,['deriveKey']);
+    return crypto.subtle.deriveKey({name:'PBKDF2',salt:saltBytes,iterations:140000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+  }
+  async function encryptKggConfigTransferPlain(plain,passCode){
+    if(!(window.crypto&&crypto.subtle&&window.TextEncoder))return {payloadCode:'KGGCFG1:'+safeBase64JsonEncode(plain),encrypted:false};
+    const salt=kggConfigTransferRandomBytes(16);
+    const iv=kggConfigTransferRandomBytes(12);
+    const key=await kggConfigTransferKey(passCode,salt);
+    const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(plain)));
+    const envelope={kind:'kgg_config_transfer_encrypted_v2',version:2,alg:'PBKDF2-SHA256-AES-GCM',salt:kggConfigTransferBytesToBase64Url(salt),iv:kggConfigTransferBytesToBase64Url(iv),ciphertext:kggConfigTransferBytesToBase64Url(new Uint8Array(cipher)),createdAt:plain.createdAt,expiresAt:plain.expiresAt};
+    return {payloadCode:'KGGCFG2:'+safeBase64JsonEncode(envelope),encrypted:true};
+  }
+  async function decryptKggConfigTransferEnvelope(envelope,passCode){
+    if(!(window.crypto&&crypto.subtle&&window.TextDecoder))throw new Error('Dieses Geraet kann den verschluesselten Transfer nicht lesen.');
+    const salt=kggConfigTransferBase64UrlToBytes(envelope.salt);
+    const iv=kggConfigTransferBase64UrlToBytes(envelope.iv);
+    const cipher=kggConfigTransferBase64UrlToBytes(envelope.ciphertext);
+    const key=await kggConfigTransferKey(passCode,salt);
+    const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,cipher);
+    return JSON.parse(new TextDecoder().decode(plain));
+  }
+  function applyKggConfigTransferPlain(plain){
+    if(!plain||plain.kind!=='kgg_config_transfer_v2')throw new Error('Kein KGG-Konfig-Transfer.');
+    if(plain.expiresAt&&Date.parse(plain.expiresAt)<Date.now())throw new Error('Konfig-Transfer ist abgelaufen.');
+    const secrets=plain.secrets||{};
+    applyAdminCodePackageData({
+      geminiKeys:Array.isArray(secrets.geminiKeys)?secrets.geminiKeys:[],
+      mediaDropzoneEndpoint:secrets.mediaDropzoneEndpoint||'',
+      mediaDropzoneUploadToken:secrets.mediaDropzoneUploadToken||''
+    });
+    return true;
+  }
+  async function buildKggEncryptedConfigTransferForQr(options){
+    const plain=buildKggConfigTransferPlain();
+    if(!kggConfigTransferHasCodes(plain)){
+      openAdminSecretsModal();
+      return null;
+    }
+    const passCode=kggConfigTransferPassCode();
+    const encrypted=await encryptKggConfigTransferPlain(plain,passCode);
+    if((options&&options.requireEncrypted)!==false&&!encrypted.encrypted){
+      alert('API-Key-QR kann auf diesem Geraet nur verschluesselt erstellt werden.');
+      return null;
+    }
+    return {payloadCode:encrypted.payloadCode,passCode,encrypted:encrypted.encrypted,plain};
+  }
+  async function openKggConfigTransferQr(){
+    const transfer=await buildKggEncryptedConfigTransferForQr({requireEncrypted:true});
+    if(!transfer)return;
+    openKggAdminMenuQr({
+      title:'Konfig-Transfer QR',
+      hint:'Verschluesselt, 10 Minuten gueltig. Transfer-Code: '+transfer.passCode,
+      text:transfer.payloadCode
+    });
+  }
+  function parseKggConfigTransferCode(code){
+    const raw=String(code||'').trim();
+    if(raw.indexOf('KGGCFG2:')===0)return {type:'KGGCFG2',json:safeBase64JsonDecode(raw.slice(8)),raw};
+    if(raw.indexOf('KGGCFG1:')===0)return {type:'KGGCFG1',json:safeBase64JsonDecode(raw.slice(8)),raw};
+    return null;
+  }
+  function buildKggTherapistSetupUrl(appUrl,configTransferCode){
+    const payload={kind:'kgg_therapist_setup_v1',version:1,appUrl:String(appUrl||''),configTransfer:String(configTransferCode||''),createdAt:new Date().toISOString()};
+    const sep=String(appUrl||'').includes('#')?'&':'#';
+    return String(appUrl||'')+sep+'kggsetup='+safeBase64JsonEncode(payload);
+  }
+  async function tryApplyKggSetupFromHash(){
+    const hash=String(location.hash||'');
+    const match=hash.match(/[#!&]kggsetup=([^&]+)/);
+    if(!match)return false;
+    const setup=safeBase64JsonDecode(match[1]);
+    if(!setup||setup.kind!=='kgg_therapist_setup_v1')return false;
+    const parsed=parseKggConfigTransferCode(setup.configTransfer);
+    if(parsed)await applyKggConfigTransferParsed(parsed);
+    try{history.replaceState(null,'',location.pathname+location.search);}catch(err){}
+    return true;
+  }
+  async function applyKggConfigTransferParsed(parsed){
+    if(!parsed||!(parsed.type==='KGGCFG2'||parsed.type==='KGGCFG1'))return false;
+    let plain=parsed.json;
+    if(parsed.type==='KGGCFG2'){
+      const passCode=(prompt('Transfer-Code eingeben')||'').trim();
+      if(!passCode)return false;
+      plain=await decryptKggConfigTransferEnvelope(parsed.json,passCode);
+    }
+    applyKggConfigTransferPlain(plain);
+    setScanStatus('API-Key / Konfig lokal gespeichert. Scan/OCR kann die lokalen Daten nutzen.');
+    alert('API-Key / Konfig lokal gespeichert.');
+    return true;
+  }
+  function syncPairDeviceId(){
+    try{
+      let id=localStorage.getItem(syncPairDeviceIdKey);
+      if(!id){
+        const rand=(crypto&&crypto.getRandomValues)?Array.from(crypto.getRandomValues(new Uint32Array(2))).map(v=>v.toString(36)).join(''):Math.random().toString(36).slice(2);
+        id='kgg_'+Date.now().toString(36)+'_'+rand;
+        localStorage.setItem(syncPairDeviceIdKey,id);
+      }
+      return id;
+    }catch(err){return 'kgg_'+Date.now().toString(36);}
+  }
+  function normalizeNativeSyncFollowConfig(config){
+    const normalized=config&&typeof config==='object'?{...config}:{};
+    normalized.therapistId=String(normalized.therapistId||'').trim();
+    normalized.syncRoomId=String(normalized.syncRoomId||'').trim();
+    normalized.followedTherapists=Array.isArray(normalized.followedTherapists)?normalized.followedTherapists:[];
+    return normalized;
+  }
+  function nativeSyncFollowConfig(){
+    try{
+      if(window.KGGNativeSync&&typeof window.KGGNativeSync.getFollowConfig==='function'){
+        return normalizeNativeSyncFollowConfig(window.KGGNativeSync.getFollowConfig()||{therapistId:'',followedTherapists:[]});
+      }
+    }catch(err){}
+    try{return normalizeNativeSyncFollowConfig(JSON.parse(localStorage.getItem(syncPairFallbackConfigKey)||'{"therapistId":"","syncRoomId":"","followedTherapists":[]}'));}catch(err){}
+    return {therapistId:'',syncRoomId:'',followedTherapists:[]};
+  }
+  function writeNativeSyncFollowConfig(config){
+    try{
+      if(window.KGGNativeSync&&typeof window.KGGNativeSync.setFollowConfig==='function'){
+        return !!window.KGGNativeSync.setFollowConfig(config||{});
+      }
+    }catch(err){}
+    try{localStorage.setItem(syncPairFallbackConfigKey,JSON.stringify(config||{}));return true;}catch(err){return false;}
+  }
+  function syncPairRoomId(){
+    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig&&nativeSyncFollowConfig()||{});
+    if(config.syncRoomId)return config.syncRoomId;
+    let roomId='';
+    try{roomId=localStorage.getItem(syncPairRoomIdKey)||'';}catch(err){}
+    if(!roomId){
+      const rand=(crypto&&crypto.getRandomValues)?Array.from(crypto.getRandomValues(new Uint32Array(2))).map(v=>v.toString(36)).join(''):Math.random().toString(36).slice(2);
+      roomId='room_'+Date.now().toString(36)+'_'+rand;
+      try{localStorage.setItem(syncPairRoomIdKey,roomId);}catch(err){}
+    }
+    config.syncRoomId=roomId;
+    if(!config.therapistId)config.therapistId=syncPairDeviceId();
+    writeNativeSyncFollowConfig(config);
+    return roomId;
+  }
+  function buildNativeSyncInvite(){
+    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig()||{});
+    const deviceId=syncPairDeviceId();
+    const therapistName=String(($('therapistName')&&$('therapistName').value)||state.patient.therapist||'').trim();
+    const therapistId=String(config.therapistId||deviceId).trim()||deviceId;
+    const roomId=syncPairRoomId();
+    return {
+      kind:'kgg_sync_invite',
+      version:2,
+      appVersion:VERSION,
+      createdAt:new Date().toISOString(),
+      expiresAt:new Date(Date.now()+5*60*1000).toISOString(),
+      roomId,
+      deviceId,
+      therapistId,
+      displayName:therapistName||'KGG Geraet',
+      scopes:['exerciseBank','packages'],
+      transport:'android-native-sync-folder-mesh',
+      peerMode:'host-and-client',
+      autoDownload:true
+    };
+  }
+  function nativeSyncPayloadCode(prefix,value){return prefix+':'+safeBase64JsonEncode(value);}
+  function buildNativeSyncQrPayload(){
+    const invite=buildNativeSyncInvite();
+    let syncDoc=null;
+    try{syncDoc=buildNativeExerciseBankSyncDocument();}catch(err){syncDoc=null;}
+    if(syncDoc){
+      const bundle={kind:'kgg_sync_bundle',version:2,appVersion:VERSION,createdAt:invite.createdAt,expiresAt:invite.expiresAt,roomId:invite.roomId,peerMode:'host-and-client',invite,sync:syncDoc};
+      const bundleCode=nativeSyncPayloadCode('KGGSYNC2',bundle);
+      if(bundleCode.length<=nativeSyncQrMaxLength){
+        return {code:bundleCode,type:'bundle',syncIncluded:true,length:bundleCode.length,invite,sync:syncDoc};
+      }
+      return {code:nativeSyncPayloadCode('KGGSYNC1',invite),type:'invite',syncIncluded:false,length:bundleCode.length,invite,sync:syncDoc,tooLarge:true};
+    }
+    return {code:nativeSyncPayloadCode('KGGSYNC1',invite),type:'invite',syncIncluded:false,length:0,invite,sync:null};
+  }
+  function renderQrIntoBox(targetId,value,alt){
+    const box=$(targetId);
+    if(!box)return false;
+    box.innerHTML='';
+    try{
+      let imgData='';
+      if(window.KGGQrCore&&typeof window.KGGQrCore.renderQrToImg==='function'){
+        imgData=window.KGGQrCore.renderQrToImg(value,{cellSize:10,margin:4});
+      }else if(typeof window.qrcode==='function'){
+        const qr=window.qrcode(0,'L');
+        qr.addData(value);
+        qr.make();
+        imgData=qr.createDataURL(10,4);
+      }
+      if(imgData){
+        const img=document.createElement('img');
+        img.alt=alt||'QR-Code';
+        img.src=imgData;
+        box.appendChild(img);
+        return true;
+      }
+    }catch(err){console.warn('Sync-QR konnte nicht gerendert werden:',err);}
+    box.innerHTML='<span class="qrStatus">QR konnte nicht erzeugt werden. Code kopieren.</span>';
+    return false;
+  }
+  function nativeSyncTransportStatusText(){
+    try{
+      if(!window.KGGNativeSync||typeof window.KGGNativeSync.status!=='function')return '';
+      const status=window.KGGNativeSync.status()||{};
+      if(status.usingSharedFolder||status.writeUsesSharedFolder){
+        return ' Android-Sync-Raum: KGG Sync / '+syncPeerIdShort(status.syncRoomId||syncPairRoomId())+'.';
+      }
+      if(status.sharedWritable===false){
+        return ' Android nutzt privaten Rueckfall-Speicher; gemeinsamen KGG Sync-Ordner/Dateizugriff pruefen.';
+      }
+      return ' Android-Sync-Datei: '+(status.syncFile||'Cross-Data-Safe-Datei')+'.';
+    }catch(err){
+      return '';
+    }
+  }
+  function nativeSyncPeerMesh(){
+    try{
+      if(window.KGGNativeSync&&typeof window.KGGNativeSync.listPeers==='function'){
+        return window.KGGNativeSync.listPeers()||{peers:[]};
+      }
+    }catch(err){}
+    return {kind:'kgg_cross_data_safe_sync_mesh',peers:[]};
+  }
+  function syncPeerDisplayEntries(){
+    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig&&nativeSyncFollowConfig()||{});
+    const map=new Map();
+    const add=(entry,source)=>{
+      if(!entry)return;
+      const deviceId=String(entry.deviceId||entry.therapistId||'').trim();
+      const therapistId=String(entry.therapistId||deviceId).trim();
+      if(!deviceId||deviceId===syncPairDeviceId())return;
+      const key=deviceId||therapistId;
+      const existing=map.get(key)||{};
+      const inferredAutoDownload=source==='follow';
+      map.set(key,{
+        ...existing,
+        ...entry,
+        deviceId,
+        therapistId,
+        displayName:String(entry.displayName||existing.displayName||'KGG Geraet'),
+        roomId:String(entry.roomId||existing.roomId||config.syncRoomId||syncPairRoomId()),
+        autoDownload:existing.autoDownload!==undefined?existing.autoDownload:(entry.autoDownload!==undefined?entry.autoDownload:inferredAutoDownload),
+        source:existing.source||source
+      });
+    };
+    (config.followedTherapists||[]).forEach(entry=>add(entry,'follow'));
+    const mesh=nativeSyncPeerMesh();
+    (Array.isArray(mesh.peers)?mesh.peers:[]).forEach(doc=>{
+      const origin=doc&&doc.origin||{};
+      if(!origin||syncOriginIsSelf(origin))return;
+      add({therapistId:origin.therapistId,deviceId:origin.deviceId,displayName:origin.displayName,roomId:origin.roomId||mesh.roomId,autoDownload:false,lastSeenAt:doc.exportedAt},'room');
+    });
+    return Array.from(map.values()).sort((a,b)=>String(a.displayName||'').localeCompare(String(b.displayName||'')));
+  }
+  function syncDiagnosticStatus(){
+    let status={available:false,platform:'web'};
+    try{
+      if(window.KGGNativeSync&&typeof window.KGGNativeSync.status==='function')status=window.KGGNativeSync.status()||status;
+    }catch(err){status={available:false,platform:'web',error:'status_failed'};}
+    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig&&nativeSyncFollowConfig()||{});
+    const roomId=String(status.syncRoomId||config.syncRoomId||syncPairRoomId());
+    const native=!!(window.KGGNativeSync&&window.KGGNativeSync.available);
+    const shared=status.writeUsesSharedFolder===true||status.usingSharedFolder===true;
+    const privateFallback=native&&status.sharedWritable===false&&!shared;
+    return {status,config,roomId,native,shared,privateFallback};
+  }
+  function renderSyncDiagnostics(){
+    const box=$('syncDiagnostics');
+    if(!box)return;
+    const info=syncDiagnosticStatus();
+    const status=info.status||{};
+    const peerCount=Number(status.peerCount)||syncPeerDisplayEntries().length||0;
+    const mode=!info.native?'Web-Modus / keine Android-Bridge':(info.shared?'Gemeinsamer Android-Sync-Ordner aktiv':'Privater Rueckfall-Speicher');
+    const warn=info.privateFallback?' <span class="warn">Privater Speicher synchronisiert nicht automatisch zwischen Geraeten.</span>':'';
+    const path=String(status.writePath||status.syncPath||status.sharedSyncPath||status.privateSyncPath||'').replace(/\\/g,'/');
+    const shortPath=path.length>88?'...'+path.slice(-85):path;
+    const parts=[
+      '<div><b>Modus:</b> '+escapeHtml(mode)+warn+'</div>',
+      '<div><b>Raum:</b> '+escapeHtml(syncPeerIdShort(info.roomId))+' · <b>Peers:</b> '+peerCount+'</div>',
+      nativeSyncLastStatus?'<div><b>Letzter Test:</b> '+escapeHtml(nativeSyncLastStatus)+'</div>':'',
+      shortPath?'<div><b>Pfad:</b> '+escapeHtml(shortPath)+'</div>':''
+    ].filter(Boolean);
+    box.innerHTML=parts.join('');
+    box.classList.remove('hidden');
+  }
+  function setSyncPeerAutoDownload(deviceId,enabled){
+    const entries=syncPeerDisplayEntries();
+    const selected=entries.find(entry=>String(entry.deviceId)===String(deviceId));
+    if(!selected)return;
+    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig()||{});
+    const list=Array.isArray(config.followedTherapists)?config.followedTherapists.slice():[];
+    const idx=list.findIndex(item=>String(item.deviceId||'')===String(selected.deviceId)||String(item.therapistId||'')===String(selected.therapistId));
+    const next={...selected,autoDownload:!!enabled,scopes:['exerciseBank','packages'],lastSeenAt:new Date().toISOString()};
+    if(idx>=0)list[idx]={...list[idx],...next};
+    else list.push(next);
+    config.followedTherapists=list;
+    if(next.roomId)config.syncRoomId=next.roomId;
+    if(!config.therapistId)config.therapistId=syncPairDeviceId();
+    writeNativeSyncFollowConfig(config);
+    const status=$('syncPairStatus');
+    if(status)status.textContent=(enabled?'Auto-Download aktiv fuer ':'Auto-Download pausiert fuer ')+next.displayName+'.'+nativeSyncTransportStatusText();
+    if(enabled)pullNativeExerciseBankSync('sync_peer_enabled').finally(()=>queueNativeExerciseBankSync('sync_peer_enabled'));
+    renderSyncPeerList();
+    renderSyncDiagnostics();
+  }
+  function renderSyncPeerList(){
+    const box=$('syncPeerList');
+    if(!box)return;
+    const roomId=syncPairRoomId();
+    const entries=syncPeerDisplayEntries();
+    box.classList.remove('hidden');
+    box.innerHTML='';
+    const head=document.createElement('div');
+    head.className='syncPeerHead';
+    const title=document.createElement('span');
+    title.textContent='Automatisch laden von';
+    const room=document.createElement('small');
+    room.textContent='Raum '+syncPeerIdShort(roomId);
+    head.appendChild(title);
+    head.appendChild(room);
+    box.appendChild(head);
+    if(!entries.length){
+      const empty=document.createElement('div');
+      empty.className='syncPeerEmpty';
+      empty.textContent='Noch keine anderen Geraete im Sync-Ordner gefunden.';
+      box.appendChild(empty);
+      return;
+    }
+    entries.forEach(entry=>{
+      const row=document.createElement('label');
+      row.className='syncPeerRow';
+      const checkbox=document.createElement('input');
+      checkbox.type='checkbox';
+      checkbox.checked=entry.autoDownload!==false;
+      checkbox.dataset.deviceId=entry.deviceId;
+      checkbox.addEventListener('change',()=>setSyncPeerAutoDownload(entry.deviceId,checkbox.checked));
+      const text=document.createElement('span');
+      const name=document.createElement('span');
+      name.className='syncPeerName';
+      name.textContent=entry.displayName||'KGG Geraet';
+      const meta=document.createElement('span');
+      meta.className='syncPeerMeta';
+      meta.textContent='Geraet '+syncPeerIdShort(entry.deviceId)+' · '+(entry.autoDownload!==false?'Auto':'pausiert');
+      text.appendChild(name);
+      text.appendChild(meta);
+      row.appendChild(checkbox);
+      row.appendChild(text);
+      box.appendChild(row);
+    });
+  }
+  function openSyncPairModal(){
+    try{queueNativeExerciseBankSync('sync_pair_modal_open');}catch(err){}
+    const payload=buildNativeSyncQrPayload();
+    lastSyncPairCode=payload.code;
+    const modal=$('syncPairModal');
+    renderQrIntoBox('syncPairQrBox',lastSyncPairCode,'Sync-QR fuer Uebungsdatenbank');
+    const status=$('syncPairStatus');
+    const transportStatus=nativeSyncTransportStatusText();
+    if(status)status.textContent=(payload.syncIncluded
+      ?'Kopplung plus aktuelle Uebungsdatenbank/Pakete im QR. Gueltig ca. 5 Minuten.'
+      :'Kopplung im QR. Datenbank/Pakete sind fuer einen QR zu gross; Android nutzt die lokale Cross-Data-Safe-Sync-Datei.')+transportStatus;
+    renderSyncPeerList();
+    renderSyncDiagnostics();
+    if(modal)modal.classList.add('open');
+  }
+  function closeSyncPairModal(){const modal=$('syncPairModal'); if(modal)modal.classList.remove('open');}
+  async function copySyncPairCode(){
+    const status=$('syncPairStatus');
+    const ok=await copyTextValue(lastSyncPairCode||'');
+    if(status)status.textContent=ok?'Sync-Code kopiert.':'Kopieren blockiert. Code bitte ueber QR einlesen.';
+  }
+  async function testNativeSyncRoundtrip(){
+    const status=$('syncPairStatus');
+    try{
+      const doc=buildNativeExerciseBankSyncDocument();
+      if(!nativeExerciseSyncAvailable()){
+        nativeSyncLastStatus='Datenformat OK, aber keine Android-Bridge aktiv.';
+        if(status)status.textContent=nativeSyncLastStatus;
+        renderSyncDiagnostics();
+        return {native:false,doc};
+      }
+      const writeOk=!!(await resolveNativeSyncValue(window.KGGNativeSync.write(doc)));
+      let mesh=null,result=null;
+      if(typeof window.KGGNativeSync.listPeers==='function')mesh=await resolveNativeSyncValue(window.KGGNativeSync.listPeers());
+      if(!mesh&&typeof window.KGGNativeSync.read==='function')mesh=await resolveNativeSyncValue(window.KGGNativeSync.read());
+      if(mesh)result=mergeNativeExerciseBankSyncDocument(mesh);
+      const peers=result&&result.mesh?result.mesh.seen:((mesh&&Array.isArray(mesh.peers))?mesh.peers.length:0);
+      nativeSyncLastStatus=(writeOk?'Schreiben OK':'Schreiben fehlgeschlagen')+' · Peers '+peers;
+      if(status)status.textContent='Sync-Test: '+nativeSyncLastStatus+'. '+nativeSyncTransportStatusText();
+      renderSyncPeerList();
+      renderSyncDiagnostics();
+      return {native:true,writeOk,mesh,result};
+    }catch(err){
+      nativeSyncLastStatus='Fehler: '+(err&&err.message?err.message:'Sync-Test fehlgeschlagen');
+      if(status)status.textContent=nativeSyncLastStatus;
+      renderSyncDiagnostics();
+      return null;
+    }
+  }
+  function downloadNativeSyncFile(){
+    const status=$('syncPairStatus');
+    try{
+      const doc=buildNativeExerciseBankSyncDocument();
+      const blob=new Blob([JSON.stringify(doc,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      const stamp=new Date().toISOString().slice(0,19).replace(/[-:T]/g,'');
+      a.href=url;
+      a.download='kgg_sync_'+syncPeerIdShort(doc.roomId||'room')+'_'+stamp+'.json';
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(url),1200);
+      nativeSyncLastStatus='Sync-Datei gespeichert.';
+      if(status)status.textContent=nativeSyncLastStatus;
+      renderSyncDiagnostics();
+      return true;
+    }catch(err){
+      nativeSyncLastStatus='Sync-Datei konnte nicht gespeichert werden.';
+      if(status)status.textContent=nativeSyncLastStatus;
+      renderSyncDiagnostics();
+      return false;
+    }
+  }
+  async function importNativeSyncFile(file){
+    const status=$('syncPairStatus');
+    try{
+      if(!file)throw new Error('Keine Datei ausgewaehlt.');
+      const text=await file.text();
+      const payload=JSON.parse(text);
+      const result=mergeNativeExerciseBankSyncDocument(payload,{allowUnfollowed:true});
+      try{await pushNativeExerciseBankSync('sync_file_import');}catch(err){}
+      const bankResult=result&&result.bank?result.bank:{added:0,updated:0,total:0};
+      const packageResult=result&&result.packages?result.packages:{added:0,updated:0,total:0};
+      nativeSyncLastStatus='Import OK · DB +'+bankResult.added+'/'+bankResult.updated+' · Pakete +'+packageResult.added+'/'+packageResult.updated;
+      if(status)status.textContent=nativeSyncLastStatus;
+      renderSyncPeerList();
+      renderSyncDiagnostics();
+      return result;
+    }catch(err){
+      nativeSyncLastStatus='Import fehlgeschlagen: '+(err&&err.message?err.message:'ungueltige Datei');
+      if(status)status.textContent=nativeSyncLastStatus;
+      renderSyncDiagnostics();
+      return null;
+    }
+  }
+  function isNativeSyncInvitePayload(payload){
+    return payload&&payload.kind==='kgg_sync_invite'&&(payload.version===1||payload.version===2)&&payload.deviceId;
+  }
+  function isNativeSyncBundlePayload(payload){
+    return payload&&payload.kind==='kgg_sync_bundle'&&(payload.version===1||payload.version===2)&&(payload.invite||payload.sync);
+  }
+  function applyNativeSyncInvite(invite){
+    if(!isNativeSyncInvitePayload(invite))throw new Error('Sync-QR ist nicht lesbar.');
+    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig()||{});
+    if(invite.roomId)config.syncRoomId=String(invite.roomId);
+    if(!config.therapistId)config.therapistId=syncPairDeviceId();
+    writeNativeSyncFollowConfig(config);
+    const entry=upsertSyncPeerFromOrigin({
+      therapistId:String(invite.therapistId||invite.deviceId),
+      deviceId:String(invite.deviceId),
+      displayName:String(invite.displayName||'KGG Geraet'),
+      roomId:String(invite.roomId||config.syncRoomId||syncPairRoomId())
+    },true);
+    setScanStatus('Sync gekoppelt: '+entry.displayName);
+    renderSyncPeerList();
+    try{queueNativeExerciseBankSync('sync_invite_scanned');}catch(err){}
+    return entry;
+  }
+  async function applyNativeSyncBundle(bundle){
+    if(!isNativeSyncBundlePayload(bundle))throw new Error('Sync-Daten-QR ist nicht lesbar.');
+    let entry=null;
+    if(bundle.invite)entry=applyNativeSyncInvite(bundle.invite);
+    let result=null;
+    if(bundle.sync){
+      result=mergeNativeExerciseBankSyncDocument(bundle.sync,{allowUnfollowed:true});
+      try{await pushNativeExerciseBankSync('sync_bundle_qr_import');}catch(err){}
+    }
+    const bank=result&&result.bank?result.bank:{added:0,updated:0,total:0};
+    const packages=result&&result.packages?result.packages:{added:0,updated:0,total:0};
+    const name=entry&&entry.displayName?entry.displayName:'Sync-Geraet';
+    setScanStatus('Sync-Daten uebernommen: '+name+' | DB +'+bank.added+'/'+bank.updated+' | Pakete +'+packages.added+'/'+packages.updated);
+    return {entry,result};
+  }
+  function currentEditedPlanExercise(){const id=state.editId; return state.plan.find(x=>(x.localId||x.id)===id);}
+  function currentEditedBankExercise(){const id=state.editId; return bank.find(x=>String(x.id)===String(id));}
+  function currentEditedExercise(){return currentEditedPlanExercise()||currentEditedBankExercise();}
+  function mediaSizeLabel(bytes){const n=Number(bytes)||0; if(n>=1048576)return (n/1048576).toFixed(1).replace('.',',')+' MB'; if(n>=1024)return Math.round(n/1024)+' KB'; return n+' B';}
+  function clearEditorMediaPreview(){
+    const preview=$('editMediaPreview');
+    if(!preview)return;
+    preview.innerHTML='';
+    preview.classList.add('hidden');
+  }
+  async function renderEditorMediaPreview(media){
+    const preview=$('editMediaPreview');
+    if(!preview||!media||!media.id){clearEditorMediaPreview();return;}
+    preview.textContent='Vorschau wird geladen ...';
+    preview.classList.remove('hidden');
+    try{
+      const record=await getEncryptedMediaBlob(media.id);
+      if(!record||!record.blob)throw new Error('Lokale Bilddatei fehlt.');
+      const imageBlob=await patientDecryptMedia(media,record.blob);
+      const url=URL.createObjectURL(imageBlob);
+      preview.innerHTML='<img src="'+url+'" alt="Uebungsbild Vorschau">';
+      setTimeout(()=>URL.revokeObjectURL(url),60000);
+    }catch(err){
+      preview.textContent='Vorschau lokal nicht verfuegbar.';
+    }
+  }
+  function renderEditorMediaStatus(ex){
+    const box=document.querySelector('.editorMediaBox'), status=$('editMediaStatus'), removeBtn=$('removeExerciseImage');
+    if(!box||!status||!removeBtn)return;
+    const isEditableExercise=!!ex;
+    box.classList.toggle('hidden',!isEditableExercise);
+    if(!isEditableExercise){clearEditorMediaPreview();return;}
+    const media=ensureExerciseMediaList(ex);
+    removeBtn.classList.toggle('hidden',media.length===0);
+    if(!media.length){status.textContent='Kein Bild.';clearEditorMediaPreview();return;}
+    const first=media[0];
+    status.textContent='1 Bild · '+mediaSizeLabel(first.encryptedSize||first.compressedSize||first.originalSize);
+    renderEditorMediaPreview(first);
+  }
+  async function handleEditorMediaFileSelected(ev){
+    const file=ev.target.files&&ev.target.files[0];
+    ev.target.value='';
+    if(!file)return;
+    const ex=currentEditedExercise();
+    if(!ex)return;
+    const status=$('editMediaStatus');
+    if(status)status.textContent='Bild wird vorbereitet ...';
+    const oldMedia=ensureExerciseMediaList(ex);
+    try{
+      const manifest=await prepareImageMediaFile(file);
+      ex.media=[manifest];
+      oldMedia.forEach(item=>deleteUnsharedMediaBlob(item,ex));
+      if(ex.localId){
+        syncStatePlanToStore('ui_attach_exercise_image');
+        save();
+      }else{
+        ex.custom=true;
+        ex.updatedAt=new Date().toISOString();
+        persistCustomBank();
+      }
+      renderEditorMediaStatus(ex);
+      render();
+      $('editorModal').classList.add('open');
+    }catch(err){
+      console.warn('Bild konnte nicht vorbereitet werden:',err);
+      if(status)status.textContent='Bild fehlgeschlagen.';
+    }
+  }
+  function removeEditorMedia(){
+    const ex=currentEditedExercise();
+    if(!ex)return;
+    const oldMedia=ensureExerciseMediaList(ex);
+    ex.media=[];
+    oldMedia.forEach(item=>deleteUnsharedMediaBlob(item,ex));
+    if(ex.localId){
+      syncStatePlanToStore('ui_remove_exercise_image');
+      save();
+    }else{
+      ex.custom=true;
+      ex.updatedAt=new Date().toISOString();
+      persistCustomBank();
+    }
+    renderEditorMediaStatus(ex);
+    render();
+    $('editorModal').classList.add('open');
+  }
+  function openEditor(ex){
+    if(!ex)return;
+    const inferredMeasure=(String(ex.unit||ex.metricUnit||'').toLowerCase().includes('zeit')||String(ex.unit||ex.metricUnit||'').toLowerCase().includes('sek'))?'zeit':'wdh';
+    state.editId=ex.localId||ex.id;
+    $('editName').value=ex.name||'';
+    $('editSets').value=String(normalizeSetCount(ex.sets));
+    $('editMetric').value=ex.startMetric||'';
+    $('editLoad').value=ex.startLoad||'';
+    $('editUnit').value=normalizeLoadUnit(ex.weightUnit||ex.loadUnit||'kg');
+    $('editMeasure').value=normalizeMeasureMode(ex.measure||inferredMeasure);
+    $('editSide').value=normalizeSideMode(ex.side||'BI');
+    $('editVideoUrl').value=ex.videoUrl||'';
+    $('editVideoLabel').value=ex.videoLabel||'Video öffnen';
+    renderEditorMediaStatus(ex);
+    const bankEdit=!ex.localId&&bank.some(item=>String(item.id)===String(ex.id));
+    $('deleteExercise').dataset.scope=bankEdit?'bank':'plan';
+    $('deleteExercise').style.visibility=(ex.localId||bankEdit)?'visible':'hidden';
+    $('editorModal').classList.add('open');
+  }
+  function closeEditor(){state.editId=null; $('editorModal').classList.remove('open')}
+  function saveEditedExercise(){
+    const id=state.editId;
+    const planEx=state.plan.find(x=>(x.localId||x.id)===id);
+    if(planEx){
+      const measure=normalizeMeasureMode($('editMeasure').value);
+      const loadUnit=normalizeLoadUnit($('editUnit').value);
+      planEx.name=$('editName').value;
+      planEx.sets=normalizeSetCount($('editSets').value);
+      planEx.startMetric=$('editMetric').value;
+      planEx.startLoad=$('editLoad').value;
+      planEx.weightUnit=loadUnit;
+      planEx.loadUnit=loadUnit;
+      planEx.measure=measure;
+      planEx.unit=measureUnitLabel(measure);
+      planEx.metricUnit=measureUnitLabel(measure);
+      planEx.side=normalizeSideMode($('editSide').value);
+      planEx.videoUrl=String($('editVideoUrl').value||'').trim();
+      planEx.videoLabel=String($('editVideoLabel').value||'').trim()||'Video öffnen';
+      planEx.changedByLiveText=false;
+      planEx.needsReview=false;
+      const bankEx=upsertPlanExerciseToBank(planEx,'ui_save_exercise');
+      if(bankEx){
+        planEx.sourceId=bankEx.id;
+        planEx.bankId=bankEx.id;
+      }
+      persistCustomBank();
+      syncStatePlanToStore('ui_save_exercise');
+      syncTextInputFromPlan('ui_save_exercise');
+      save();
+      render();
+    }else{
+      const bankEx=currentEditedBankExercise();
+      if(bankEx){
+        const measure=normalizeMeasureMode($('editMeasure').value);
+        const loadUnit=normalizeLoadUnit($('editUnit').value);
+        bankEx.name=$('editName').value;
+        bankEx.aliases=bankEx.aliases||bankEx.name;
+        bankEx.sets=normalizeSetCount($('editSets').value);
+        bankEx.startMetric=$('editMetric').value;
+        bankEx.startLoad=$('editLoad').value;
+        bankEx.weightUnit=loadUnit;
+        bankEx.loadUnit=loadUnit;
+        bankEx.measure=measure;
+        bankEx.unit=measureUnitLabel(measure);
+        bankEx.metricUnit=measureUnitLabel(measure);
+        bankEx.side=normalizeSideMode($('editSide').value);
+        bankEx.videoUrl=String($('editVideoUrl').value||'').trim();
+        bankEx.videoLabel=String($('editVideoLabel').value||'').trim()||'Video öffnen';
+        bankEx.custom=true;
+        bankEx.updatedAt=new Date().toISOString();
+        persistCustomBank();
+        render();
+      }
+    }
+    closeEditor();
+  }
+  function escapeHtml(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+  function exportData(){savePendingToBank('ui_internal_export'); const plan=getCurrentPlanForOutput('ui_internal_export'); const data={kind:'kgg-html-app-internal-export',audience:'therapist-internal-only',version:VERSION,exportedAt:new Date().toISOString(),state:{...state,plan:plan.exercises},currentPlan:plan,store:ensureKGGDataStore().getState()}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='kgg_plan_internal_export.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);}
+
+  function chunkArray(items,size){const pages=[]; for(let i=0;i<items.length;i+=size)pages.push(items.slice(i,i+size)); return pages.length?pages:[[]];}
+  function safePdfString(value,fallback){return String(value==null||value===''?(fallback||''):value).replace(/[|\n\r]+/g,' ').replace(/\s+/g,' ').trim();}
+  function buildPainScale(){return Array.from({length:10},(_,i)=>({value:i+1,label:String(i+1),marked:false}));}
+  function buildPdfDayRows(ex){
+    const rows=[];
+    const sets=Math.max(0,Math.min(3,Number(ex&&ex.sets||3)||3));
+    for(let i=1;i<=3;i++){
+      rows.push({
+        setNo:i,
+        setLabel:'S'+i,
+        active:i<=sets,
+        columns:{
+          kg:{label:'kg',unit:ex&&ex.loadUnit||'kg',value:'',suggested:ex&&ex.startLoad||''},
+          wdh:{label:'Wdh',unit:ex&&ex.metricUnit||'Wdh',value:'',suggested:ex&&ex.startMetric||''},
+          pain:{label:'Schmerz 1-10',value:'',scale:buildPainScale()}
+        }
+      });
+    }
+    return rows;
+  }
+  function buildPdfTables(ex){
+    return Array.from({length:6},(_,i)=>({
+      tableNo:i+1,
+      tableLabel:'T'+(i+1),
+      meaning:'Trainingstag '+(i+1),
+      rows:buildPdfDayRows(ex)
+    }));
+  }
+  function buildEmptyPdfSlot(pageIndex,slotIndex){
+    const slotNo=slotIndex+1;
+    const exNo='EX'+slotNo;
+    const empty={
+      sourceId:'',
+      globalIndex:null,
+      pageIndex:pageIndex+1,
+      pageNo:pageIndex+1,
+      slotIndex:slotNo,
+      slotNo,
+      exNo,
+      displayLabel:exNo,
+      empty:true,
+      isEmpty:true,
+      name:'',
+      side:'',
+      sets:0,
+      startLoad:'',
+      loadUnit:'kg',
+      startMetric:'',
+      metricUnit:'Wdh',
+      machineLine:'#EX|'+slotNo+'|EMPTY|0||kg|Wdh',
+      tables:[],
+      columns:['kg','Wdh','Schmerz 1-10']
+    };
+    empty.tables=buildPdfTables(empty);
+    return empty;
+  }
+  function normalizePdfExercise(ex,index,pageIndex,slotIndex){
+    const source=ex||{};
+    const sets=Math.max(1,Math.min(3,Number(source.sets||3)||3));
+    const loadUnit=safePdfString(source.weightUnit||source.loadUnit,'kg')||'kg';
+    const metricUnit=safePdfString(source.unit||source.metricUnit,'Wdh')||'Wdh';
+    const slotNo=slotIndex+1;
+    const exNo='EX'+slotNo;
+    const name=safePdfString(source.name,'Übung '+(index+1));
+    const side=safePdfString(source.side||source.sides||source.laterality,'');
+    const normalized={
+      sourceId:safePdfString(source.localId||source.id||''),
+      globalIndex:index+1,
+      pageIndex:pageIndex+1,
+      pageNo:pageIndex+1,
+      slotIndex:slotNo,
+      slotNo,
+      exNo,
+      displayLabel:exNo+' · '+name,
+      empty:false,
+      isEmpty:false,
+      name,
+      side,
+      sets,
+      startLoad:safePdfString(source.startLoad||source.load||source.weight||''),
+      loadUnit,
+      startMetric:safePdfString(source.startMetric||source.metric||source.reps||''),
+      metricUnit,
+      rawText:safePdfString(source.rawText||''),
+      source:safePdfString(source.source||source.sourceId||source.bankId||''),
+      flags:Array.isArray(source.sourceFlags)?source.sourceFlags.slice():[],
+      machineLine:'#EX|'+slotNo+'|'+name+'|'+sets+'|'+side+'|'+loadUnit+'|'+metricUnit,
+      columns:['kg','Wdh','Schmerz 1-10'],
+      tables:[]
+    };
+    normalized.tables=buildPdfTables(normalized);
+    return normalized;
+  }
+  function buildKggPdfSnapshot(plan,options){
+    const sourcePlan=plan||{};
+    const exercises=Array.isArray(sourcePlan.exercises)?sourcePlan.exercises:[];
+    const patient=sourcePlan.patient||{};
+    const opts=options||{};
+    const largeSingleRow=opts.layout==='large-single-row';
+    const slotsPerPage=largeSingleRow?3:6;
+    const gridCols=largeSingleRow?1:2;
+    const gridRows=3;
+    const exerciseLabels=Array.from({length:slotsPerPage},(_,i)=>'EX'+(i+1));
+    const pages=chunkArray(exercises,slotsPerPage).map((items,pageIndex)=>{
+      const slots=[];
+      for(let slotIndex=0;slotIndex<slotsPerPage;slotIndex++){
+        const ex=items[slotIndex];
+        slots.push(ex?normalizePdfExercise(ex,(pageIndex*slotsPerPage)+slotIndex,pageIndex,slotIndex):buildEmptyPdfSlot(pageIndex,slotIndex));
+      }
+      return {
+        pageNo:pageIndex+1,
+        pageIndex:pageIndex+1,
+        pageCount:null,
+        exRange:'EX1-EX'+slotsPerPage,
+        layoutSlots:slotsPerPage,
+        slotCount:slotsPerPage,
+        slots,
+        exercises:slots,
+        emptySlotCount:slots.filter(s=>s.empty).length
+      };
+    });
+    pages.forEach(p=>p.pageCount=pages.length);
+    const snapshot={
+      kind:'kgg-pdf-snapshot',
+      version:2,
+      createdAt:new Date().toISOString(),
+      source:'KGGDataStore.currentPlan via getCurrentPlanForOutput(ui_make_pdf)',
+      planId:safePdfString(sourcePlan.id||''),
+      planTitle:safePdfString(sourcePlan.title||'KGG Plan','KGG Plan'),
+      updatedAt:safePdfString(sourcePlan.updatedAt||''),
+      patient:{
+        name:safePdfString(patient.name||''),
+        id:safePdfString(patient.id||patient.patientId||''),
+        initials:safePdfString(patient.initials||''),
+        startDate:safePdfString(patient.date||patient.startDate||sourcePlan.startDate||''),
+        therapist:safePdfString(patient.therapist||patient.therapistName||''),
+        notes:safePdfString(patient.notes||patient.info||sourcePlan.notes||''),
+        reason:safePdfString(patient.reason||sourcePlan.reason||'KGG','KGG')||'KGG',
+        displayName:safePdfString(patient.name||patient.initials||patient.id||'Patient/in','Patient/in')
+      },
+      layoutTarget:{
+        templateId:largeSingleRow?'TPL-BASIS-A-GROSSDRUCK-L3-v3':'TPL-BASIS-A-CLASSIC-L6-v2',
+        paper:largeSingleRow?'A4 gross portrait':'A4',
+        orientation:largeSingleRow?'portrait':'landscape',
+        grid:gridCols+'x'+gridRows,
+        exercisesPerPage:slotsPerPage,
+        cornerMarkers:'black',
+        exerciseLabels,
+        machineLineFormat:'#EX|slot|name|sets|side|loadUnit|metricUnit',
+        tables:['T1','T2','T3','T4','T5','T6'],
+        sets:['S1','S2','S3'],
+        columns:['kg','Wdh','Schmerz 1-10'],
+        renderedInThisPatch:false
+      },
+      tableContract:{
+        days:['T1','T2','T3','T4','T5','T6'],
+        setRows:['S1','S2','S3'],
+        columns:[
+          {key:'kg',label:'kg',type:'number',patientWritable:true},
+          {key:'wdh',label:'Wdh',type:'numberOrTime',patientWritable:true},
+          {key:'pain',label:'Schmerz 1-10',type:'scale',min:1,max:10,patientWritable:true}
+        ]
+      },
+      pages,
+      exerciseCount:exercises.length,
+      pageCount:pages.length,
+      emptySlotCount:pages.reduce((sum,p)=>sum+p.emptySlotCount,0),
+      audience:'pdf-output-not-json-patient-file',
+      jsonPolicy:'JSON bleibt intern; Patient:innen bekommen PDF oder Patienten-App/QR, keine JSON-Datei.',
+      pdfRuntimeFingerprint:PDF_RUNTIME_FINGERPRINT
+    };
+    window.KGGLatestPdfSnapshot=snapshot;
+    return snapshot;
+  }
+  function firstPdfExerciseImageMedia(ex){
+    return ensureExerciseMediaList(ex).find(item=>item&&item.type==='image'&&item.id) || null;
+  }
+  async function createKggPdfThumbnailDataUrl(imageBlob){
+    const img=await loadImageFromBlob(imageBlob);
+    const targetW=150,targetH=110;
+    const canvas=document.createElement('canvas');
+    canvas.width=targetW; canvas.height=targetH;
+    const ctx=canvas.getContext('2d',{alpha:false});
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,targetW,targetH);
+    const iw=img.naturalWidth||img.width||1,ih=img.naturalHeight||img.height||1;
+    const scale=Math.min(targetW/iw,targetH/ih);
+    const dw=Math.max(1,Math.round(iw*scale));
+    const dh=Math.max(1,Math.round(ih*scale));
+    const dx=Math.round((targetW-dw)/2),dy=Math.round((targetH-dh)/2);
+    ctx.imageSmoothingEnabled=true;
+    ctx.imageSmoothingQuality='high';
+    try{ctx.filter='grayscale(1) contrast(1.08)';}catch(e){}
+    ctx.drawImage(img,dx,dy,dw,dh);
+    try{
+      const data=ctx.getImageData(0,0,targetW,targetH);
+      for(let i=0;i<data.data.length;i+=4){
+        const grey=Math.round((data.data[i]*0.299)+(data.data[i+1]*0.587)+(data.data[i+2]*0.114));
+        data.data[i]=grey; data.data[i+1]=grey; data.data[i+2]=grey; data.data[i+3]=255;
+      }
+      ctx.putImageData(data,0,0);
+    }catch(e){}
+    return canvas.toDataURL('image/jpeg',.68);
+  }
+  async function loadKggPdfExerciseThumbnail(sourceExercise){
+    const media=firstPdfExerciseImageMedia(sourceExercise);
+    if(!media)return null;
+    try{
+      const record=await getEncryptedMediaBlob(media.id);
+      if(!record||!record.blob)return null;
+      const imageBlob=await patientDecryptMedia(media,record.blob);
+      const dataUrl=await createKggPdfThumbnailDataUrl(imageBlob);
+      if(!/^data:image\/jpeg;base64,/i.test(dataUrl))return null;
+      return {
+        kind:'kgg-pdf-exercise-thumbnail',
+        sourceId:String(media.id||''),
+        mime:'image/jpeg',
+        width:150,
+        height:110,
+   
