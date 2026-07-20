@@ -46,6 +46,7 @@ jobs:
 
           pipeline_only=true
           ui_or_html=false
+          patient_scan=false
 
           while IFS= read -r path; do
             [[ -z "$path" ]] && continue
@@ -59,8 +60,13 @@ jobs:
             ui_or_html=true
           fi
 
+          if grep -Eq '^patient-start-scan\.js$|^index\.html$|^service-worker\.js$|^patient-(media-retry-cache_v2|multiplan-db)\.js$|^release-pipeline/kgg_patient_scan_camera_smoke\.js$|^release-pipeline/patient-scan-fixtures/|^release-pipeline/package(-lock)?\.json$' "$changed_file"; then
+            patient_scan=true
+          fi
+
           echo "pipeline_only=$pipeline_only" >> "$GITHUB_OUTPUT"
           echo "ui_or_html=$ui_or_html" >> "$GITHUB_OUTPUT"
+          echo "patient_scan=$patient_scan" >> "$GITHUB_OUTPUT"
 
       - name: Run critical KGG test battery
         shell: bash
@@ -98,3 +104,8 @@ jobs:
         if: steps.scope.outputs.ui_or_html == 'true'
         shell: bash
         run: python release-pipeline/kgg_test_battery.py --suite ui-stability --level regression
+
+      - name: Run patient QR camera regression
+        if: steps.scope.outputs.patient_scan == 'true'
+        shell: bash
+        run: python release-pipeline/kgg_test_battery.py --suite patient-scan --level regression
