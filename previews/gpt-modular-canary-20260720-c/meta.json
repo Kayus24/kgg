@@ -1,0 +1,16 @@
+{
+  "kind": "kgg_gpt_preview",
+  "requestId": "gpt-modular-canary-20260720-c",
+  "patchHash": "71c4740c36ed5c3830c8f2c5af1c3640bf38f5e1a8adeb583a7c54f9d5ae734d",
+  "baseSha": "5d5030140301e8c4083b7081cfad371d4e590d7f",
+  "baseVersionCode": 61,
+  "rolloutCode": 1784559753,
+  "title": "Tablet-Skalierungswert mit Preview-Badge",
+  "summary": "Zeigt im Tablet-Layout-Control direkt nach dem Skalierungswert ein kleines blaues PREVIEW-Badge, ohne Bedienlogik oder gespeicherten Layout-State zu verndern.",
+  "patchId": "kgg-v061-tablet-scale-preview-badge",
+  "patchFile": "patches/v061-tablet-scale-preview-badge.html",
+  "versionName": "1.0.61-tablet-scale-preview-badge",
+  "createdAt": "2026-07-20T15:02:33Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/gpt-modular-canary-20260720-c/admin.html",
+  "sha256": "052f8af17c0ef3f9d3dc0e046d6b21c88b172a6e342aebb7d36e2af8e781296b"
+}

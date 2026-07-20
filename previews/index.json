@@ -4,6 +4,22 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "gpt-modular-canary-20260720-c",
+      "patchHash": "71c4740c36ed5c3830c8f2c5af1c3640bf38f5e1a8adeb583a7c54f9d5ae734d",
+      "baseSha": "5d5030140301e8c4083b7081cfad371d4e590d7f",
+      "baseVersionCode": 61,
+      "rolloutCode": 1784559753,
+      "title": "Tablet-Skalierungswert mit Preview-Badge",
+      "summary": "Zeigt im Tablet-Layout-Control direkt nach dem Skalierungswert ein kleines blaues PREVIEW-Badge, ohne Bedienlogik oder gespeicherten Layout-State zu verndern.",
+      "patchId": "kgg-v061-tablet-scale-preview-badge",
+      "patchFile": "patches/v061-tablet-scale-preview-badge.html",
+      "versionName": "1.0.61-tablet-scale-preview-badge",
+      "createdAt": "2026-07-20T15:02:33Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/gpt-modular-canary-20260720-c/admin.html",
+      "sha256": "052f8af17c0ef3f9d3dc0e046d6b21c88b172a6e342aebb7d36e2af8e781296b"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "modular-gpt-canary-20260714-b",
       "patchHash": "3ccfa52cecc6e90b2905ae904a132dfec669fc8b909fa449e796eb1fcc8eb1d7",
       "baseSha": "e1576b6b98a9b3a5a51bfec4ace35acdbfcf2dc4",
@@ -193,18 +209,18 @@
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "modular-gpt-canary-20260714-b",
-    "patchHash": "3ccfa52cecc6e90b2905ae904a132dfec669fc8b909fa449e796eb1fcc8eb1d7",
-    "baseSha": "e1576b6b98a9b3a5a51bfec4ace35acdbfcf2dc4",
+    "requestId": "gpt-modular-canary-20260720-c",
+    "patchHash": "71c4740c36ed5c3830c8f2c5af1c3640bf38f5e1a8adeb583a7c54f9d5ae734d",
+    "baseSha": "5d5030140301e8c4083b7081cfad371d4e590d7f",
     "baseVersionCode": 61,
-    "rolloutCode": 1784017343,
-    "title": "Modularer GPT Test-App Canary Runde 2",
-    "summary": "Zeigt am Tablet-UI-Scaler eine harmlose TEST-2-Markierung, damit die zweite modular erzeugte Preview in HTML und Test-App eindeutig erkennbar ist.",
-    "patchId": "kgg-v061-gpt-test-app-canary-round-2",
-    "patchFile": "patches/v061-gpt-test-app-canary-round-2.html",
-    "versionName": "1.0.61-gpt-test-app-canary-round-2",
-    "createdAt": "2026-07-14T08:22:23Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/modular-gpt-canary-20260714-b/admin.html",
-    "sha256": "8667af3df4e315fdd4a8c6e800908545f5a2a2e0d58180f413c4965f1ee73562"
+    "rolloutCode": 1784559753,
+    "title": "Tablet-Skalierungswert mit Preview-Badge",
+    "summary": "Zeigt im Tablet-Layout-Control direkt nach dem Skalierungswert ein kleines blaues PREVIEW-Badge, ohne Bedienlogik oder gespeicherten Layout-State zu verndern.",
+    "patchId": "kgg-v061-tablet-scale-preview-badge",
+    "patchFile": "patches/v061-tablet-scale-preview-badge.html",
+    "versionName": "1.0.61-tablet-scale-preview-badge",
+    "createdAt": "2026-07-20T15:02:33Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/gpt-modular-canary-20260720-c/admin.html",
+    "sha256": "052f8af17c0ef3f9d3dc0e046d6b21c88b172a6e342aebb7d36e2af8e781296b"
   }
 }
