@@ -39,11 +39,11 @@
     "actions": [
       {
         "path": "docs/kgg-custom-gpt-action-openapi.yaml",
-        "sha256": "0a3ff910d60e8c341e45875f60934d23304dd4d9b23249f0b026a2996ca58f20"
+        "sha256": "82704938aeec112c5f15681661cf0f28bea60928711ba7b57a5459ae64a02212"
       },
       {
         "path": "docs/kgg-custom-gpt-action-api-openapi.yaml",
-        "sha256": "13354ca545255e8e0b82e7012805801ec54aa6dc08b238c29c6157352ddbe61a"
+        "sha256": "fad8eb40d827713ac7b28ee3be8e34046a7d6b6c2fc486cf324d628b09be8053"
       }
     ],
     "freshness": "GitHub live context and source chunks are authoritative; generated Knowledge is a retrieval accelerator and must pass --check."
@@ -68,11 +68,11 @@
     "actions": [
       {
         "path": "docs/kgg-custom-gpt-repair-lab-raw-openapi.yaml",
-        "sha256": "e869a9e421a300aa8ba15b72b6a1a85d4ab8525cd2acc8d452f1807f1c6e263c"
+        "sha256": "9be2dea3fd1643923959d93e10b6a4f664845a701fb654b91682ad69ee27bb8a"
       },
       {
         "path": "docs/kgg-custom-gpt-repair-lab-api-openapi.yaml",
-        "sha256": "0b252e32b2a9165dd86e013541027b5afdf6cb0e84119628ec128498d688e685"
+        "sha256": "c2b9d62444121574d11cba29005e95e2a572548d75a56cdd52f294e9a79765e1"
       }
     ],
     "forbiddenResources": [
