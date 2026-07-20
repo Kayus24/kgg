@@ -70,6 +70,7 @@ cmd /c release-pipeline\run-kgg-tests.cmd --suite mobile-inbox
 cmd /c release-pipeline\run-kgg-tests.cmd --suite sync
 cmd /c release-pipeline\run-kgg-tests.cmd --suite native-sync
 cmd /c release-pipeline\run-kgg-tests.cmd --suite textblocks
+cmd /c release-pipeline\run-kgg-tests.cmd --suite patient-scan --level regression
 cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability
 ```
 
@@ -198,6 +199,8 @@ cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regressio
   - Drag/Drop ueber den Griff aendert die Karten-Reihenfolge und raeumt danach auf.
 
 Nach jedem UI-Flicker-, Handy-Layout- oder Kartenanimations-Patch ist `ui-stability --level regression` Pflicht. Wenn Web/HTML gruen ist, die APK aber trotzdem haengt, ist der naechste Befund APK/WebView-spezifisch und nicht mehr Parser/Layout allgemein.
+
+`patient-scan` prüft Foto-Uploads und vorbereitete Canvas-`MediaStream`-Sequenzen bei verschiedenen Auflösungen, Entfernungen, Rotationen, Perspektiven, Lichtverhältnissen, Kontrasten und Rauschstufen. Der Bericht protokolliert Decoder, Parser-Übergabe und den Erhalt bestehender Werte und Medien. Noch nicht vorhandene Produktfunktionen werden in der `main`-Baseline als bekannte Lücke ausgewiesen; unerwartete Regressionen bleiben fehlschlagend. Der simulierte Stream ersetzt keinen abschließenden Test mit einer echten Android-Rückkamera.
 
 Nur wenn wirklich eine neue Admin-Beta erzeugt werden soll:
 
