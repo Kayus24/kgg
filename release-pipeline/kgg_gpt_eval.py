@@ -76,6 +76,19 @@ def run_mock_eval_self_test() -> None:
         fail(f"mock eval self-test failed: {output}")
 
 
+def run_repair_lab_self_tests() -> None:
+    commands = [
+        [sys.executable, "release-pipeline/kgg_gpt_repair_lab.py", "--self-test"],
+        [sys.executable, "release-pipeline/kgg_gpt_repair_stabilize.py", "--self-test"],
+        [sys.executable, "release-pipeline/kgg_custom_gpt_resource_audit.py", "--self-test"],
+    ]
+    for command in commands:
+        proc = subprocess.run(command, cwd=str(ROOT), text=True, capture_output=True)
+        if proc.returncode != 0:
+            output = (proc.stdout + "\n" + proc.stderr).strip()
+            fail(f"Repair-Lab self-test failed ({' '.join(command)}): {output}")
+
+
 def run_validate_only_self_test() -> None:
     tracked = subprocess.run(
         ["git", "ls-files", "kgg-update", "docs", "release-pipeline"],
@@ -411,14 +424,43 @@ def check_area_routes() -> None:
         fail("tablet-layout route must resolve source chunks")
 
 
+def check_repair_lab_contract() -> None:
+    lab_doc = read("docs/kgg-custom-gpt-repair-lab.md")
+    report = read("docs/kgg-custom-gpt-repair-lab-report.md")
+    eval_knowledge = read("docs/kgg-custom-gpt-eval-knowledge.md")
+    raw_schema = read("docs/kgg-custom-gpt-repair-lab-raw-openapi.yaml")
+    api_schema = read("docs/kgg-custom-gpt-repair-lab-api-openapi.yaml")
+    workflow = read(".github/workflows/kgg-gpt-repair-lab.yml")
+    require_all(
+        lab_doc,
+        ["Acht Kernbereiche", "zwei verdeckten Holdouts", "Golden `PASS`", "beschaedigt `FAIL`", "Kontrollreparatur `PASS`", "drei gleichen Fehlerklassen"],
+        "Repair-Lab runbook",
+    )
+    require_all(report, ["8/8", "2/2", "GPT-5.6 Thinking", "Echte Blindrunden"], "Repair-Lab report")
+    require_all(
+        eval_knowledge,
+        ["solution-free", "Do not use Web Search", "__KGG_PATCH_ID__", "three consecutive failures", "Never claim PASS"],
+        "isolated Eval Knowledge",
+    )
+    require_all(raw_schema, ["gpt-repair-lab", "getKggRepairLabIndex", "getKggRepairChallenge", "getKggRepairSourceChunk"], "Repair-Lab raw schema")
+    require_all(api_schema, ["submitKggRepairAttempt", "evaluate_attempt", "listKggRepairLabRuns", "getKggRepairLabArtifacts"], "Repair-Lab API schema")
+    require_all(
+        workflow,
+        ["publish_challenges", "evaluate_attempt", "--include-holdouts", "kgg-repair-lab/public", "kgg-repair-result/report.json"],
+        "Repair-Lab workflow",
+    )
+
+
 def main() -> int:
     try:
         check_playbook()
         check_prompt_and_expected_docs()
         check_area_routes()
+        check_repair_lab_contract()
         run_preflight_self_test()
         run_stabilize_self_test()
         run_mock_eval_self_test()
+        run_repair_lab_self_tests()
         run_validate_only_self_test()
         run_modular_rollback_self_test()
         print("KGG Custom GPT eval OK")
