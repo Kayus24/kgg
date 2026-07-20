@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "challenge_id": "repair-7566c6d433b05d14",
+  "round_id": "blind-round-20260720-b",
+  "title": "Tablet layout panel restore",
+  "symptom": "Der Menuepunkt Layout anpassen markiert den Bearbeitungsmodus, aber das zugehoerige Bedienpanel bleibt verborgen.",
+  "expected_behavior": [
+    "Layout anpassen aktiviert den Bearbeitungsmodus.",
+    "Das Bedienpanel wird sichtbar und aria-expanded ist korrekt."
+  ],
+  "source": {
+    "full_html": "admin-broken.html",
+    "chunks_index": "source/index.json",
+    "chunk_count": 16,
+    "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
+    "broken_sha256": "eb7ad312a4a36fae9f93bff2a2d26555119ce03eda6eab0d7ddcb3dca8eb035e"
+  },
+  "payload_contract": {
+    "schema": "KGG modular payload v2",
+    "fields": [
+      "request_id",
+      "title",
+      "summary",
+      "version_slug",
+      "touched_areas",
+      "required_tests",
+      "patch_content"
+    ],
+    "forbidden_fields": [
+      "operations",
+      "path",
+      "file",
+      "old_text",
+      "new_text"
+    ],
+    "patch_placeholder": "__KGG_PATCH_ID__",
+    "required_tests": [
+      "python release-pipeline/kgg_gpt_repair_lab.py --evaluate --challenge-id repair-7566c6d433b05d14 --payload-file <payload.json>",
+      "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
+      "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
+    ]
+  },
+  "submission": "Dispatch evaluate_attempt with this challenge_id and payload_json. Do not request or infer hidden assertions."
+}

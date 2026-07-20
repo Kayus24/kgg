@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "challenge_id": "repair-fb9eccfccc336b96",
+  "round_id": "blind-round-20260720-b",
+  "title": "Exercise bank thumbnails restore",
+  "symptom": "Uebungen mit lokalem Bild zeigen in der Uebungsdatenbank keinen Bildplatzhalter und kein Vorschaubild mehr.",
+  "expected_behavior": [
+    "Bilduebung rendert einen Thumbnail-Knoten.",
+    "Fehlender Blob bleibt als sichtbarer Fallback erkennbar."
+  ],
+  "source": {
+    "full_html": "admin-broken.html",
+    "chunks_index": "source/index.json",
+    "chunk_count": 16,
+    "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
+    "broken_sha256": "428bfca3458c3524eeda18a6877c394b4dc84d317eda7f625f640904c04b1514"
+  },
+  "payload_contract": {
+    "schema": "KGG modular payload v2",
+    "fields": [
+      "request_id",
+      "title",
+      "summary",
+      "version_slug",
+      "touched_areas",
+      "required_tests",
+      "patch_content"
+    ],
+    "forbidden_fields": [
+      "operations",
+      "path",
+      "file",
+      "old_text",
+      "new_text"
+    ],
+    "patch_placeholder": "__KGG_PATCH_ID__",
+    "required_tests": [
+      "python release-pipeline/kgg_gpt_repair_lab.py --evaluate --challenge-id repair-fb9eccfccc336b96 --payload-file <payload.json>",
+      "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
+      "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
+    ]
+  },
+  "submission": "Dispatch evaluate_attempt with this challenge_id and payload_json. Do not request or infer hidden assertions."
+}

@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "challenge_id": "repair-3be9a952dd85c0ea",
+  "round_id": "blind-round-20260720-b",
+  "title": "Phone admin menu restore",
+  "symptom": "Im Handy-Adminmodus fehlt das Drei-Punkte-Menue im Plan-Kopf; die enthaltenen Adminaktionen sind nicht erreichbar.",
+  "expected_behavior": [
+    "Menue ist im Plan-Kopf sichtbar.",
+    "Ein Tap oeffnet das vorhandene Untermenue."
+  ],
+  "source": {
+    "full_html": "admin-broken.html",
+    "chunks_index": "source/index.json",
+    "chunk_count": 16,
+    "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
+    "broken_sha256": "23b6111ac112d3ce8121ff6e420bc9aa7d6da9a5943b7c300c2f8d6751fd2d3a"
+  },
+  "payload_contract": {
+    "schema": "KGG modular payload v2",
+    "fields": [
+      "request_id",
+      "title",
+      "summary",
+      "version_slug",
+      "touched_areas",
+      "required_tests",
+      "patch_content"
+    ],
+    "forbidden_fields": [
+      "operations",
+      "path",
+      "file",
+      "old_text",
+      "new_text"
+    ],
+    "patch_placeholder": "__KGG_PATCH_ID__",
+    "required_tests": [
+      "python release-pipeline/kgg_gpt_repair_lab.py --evaluate --challenge-id repair-3be9a952dd85c0ea --payload-file <payload.json>",
+      "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
+      "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
+    ]
+  },
+  "submission": "Dispatch evaluate_attempt with this challenge_id and payload_json. Do not request or infer hidden assertions."
+}
