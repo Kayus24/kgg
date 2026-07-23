@@ -1,5 +1,7 @@
 (()=>{
   const ID='kggAppVersion';
+  const RELEASE='61';
+  const RELOAD_KEY='kgg-sw-controller-v'+RELEASE;
 
   function fallbackVersion(){
     try{
@@ -9,6 +11,32 @@
     }catch(e){
       return 'v?';
     }
+  }
+
+  function refreshManifestLink(){
+    try{
+      const link=document.querySelector('link[rel~="manifest"]');
+      if(!link)return;
+      const url=new URL(link.getAttribute('href')||'./manifest.json',location.href);
+      url.searchParams.set('v',RELEASE);
+      link.href=url.href;
+    }catch(e){}
+  }
+
+  async function refreshServiceWorker(){
+    if(!('serviceWorker' in navigator))return;
+    try{
+      let reloading=false;
+      navigator.serviceWorker.addEventListener('controllerchange',()=>{
+        if(reloading||sessionStorage.getItem(RELOAD_KEY)==='1')return;
+        reloading=true;
+        sessionStorage.setItem(RELOAD_KEY,'1');
+        location.reload();
+      });
+      await navigator.serviceWorker.register('./service-worker.js?v='+RELEASE,{scope:'./',updateViaCache:'none'});
+      const registration=await navigator.serviceWorker.getRegistration('./');
+      if(registration)await registration.update();
+    }catch(e){}
   }
 
   async function resolveVersion(){
@@ -44,6 +72,8 @@
   }
 
   async function init(){
+    refreshManifestLink();
+    await refreshServiceWorker();
     mount(await resolveVersion());
   }
 
