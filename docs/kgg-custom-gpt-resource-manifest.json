@@ -21,11 +21,11 @@
     "knowledge": [
       {
         "path": "docs/kgg-custom-gpt-knowledge-architecture.md",
-        "sha256": "c063de6fd1ad6313fa71be0f563fe23735b502081468b4b14805d0817f308a20"
+        "sha256": "5edb004357c8e4971ca36a66c688ceec6db43fe3080baf1c4941bac0fdd19ac1"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-operations.md",
-        "sha256": "f7703a80aa81bef012c67e4eb35edbf7cbead176dd26fcf7101c41a452303287"
+        "sha256": "524963fdff82e5dd2940b849a8564725f27d0d63f959fbd417c32df6f368c225"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-safety.md",
@@ -33,17 +33,17 @@
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-testing.md",
-        "sha256": "7d4cab33cc1d419aaf9b15846235c613992e707dbd39f2a4aacfa20ce1cadff3"
+        "sha256": "ea06ad76f150e446cee31a522ea6435a50d923e9b5f39589f7222ace5da993da"
       }
     ],
     "actions": [
       {
         "path": "docs/kgg-custom-gpt-action-openapi.yaml",
-        "sha256": "91cbaa49b4024b9d080de4f8e246a5b35b7b2e92ec493a3b5a21daaace40fd64"
+        "sha256": "82704938aeec112c5f15681661cf0f28bea60928711ba7b57a5459ae64a02212"
       },
       {
         "path": "docs/kgg-custom-gpt-action-api-openapi.yaml",
-        "sha256": "5019e2a489984a9d7f34b4c2e599db437fcb13a51d5ae92720932e6698790de5"
+        "sha256": "fad8eb40d827713ac7b28ee3be8e34046a7d6b6c2fc486cf324d628b09be8053"
       }
     ],
     "freshness": "GitHub live context and source chunks are authoritative; generated Knowledge is a retrieval accelerator and must pass --check."

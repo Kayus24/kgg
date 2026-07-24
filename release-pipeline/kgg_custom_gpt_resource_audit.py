@@ -28,11 +28,16 @@ class AuditError(RuntimeError):
     pass
 
 
+def normalized_text_digest(content: bytes) -> str:
+    normalized = content.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+
+
 def digest(path: str) -> str:
     full = ROOT / path
     if not full.exists():
         raise AuditError(f"missing GPT resource: {path}")
-    return hashlib.sha256(full.read_bytes()).hexdigest()
+    return normalized_text_digest(full.read_bytes())
 
 
 def resource(path: str) -> dict[str, str]:
@@ -122,6 +127,8 @@ def validate_snapshot(path: Path, profile: str) -> None:
 
 
 def self_test() -> None:
+    if normalized_text_digest(b"first\r\nsecond\r\n") != normalized_text_digest(b"first\nsecond\n"):
+        raise AuditError("resource digests must be independent of CRLF or LF line endings")
     manifest = expected_manifest()
     if manifest["production"]["capabilities"]["apps"]:
         raise AuditError("production Apps must stay disabled because Custom Actions are required")
