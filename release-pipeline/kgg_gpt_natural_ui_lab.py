@@ -112,7 +112,16 @@ NATURAL_CASES: tuple[NaturalCase, ...] = (
   repair();new MutationObserver(repair).observe(document.documentElement,{childList:true,subtree:true});"""
         ),
         intent_groups=(
-            ("doppelt", "zwei", "2 mal", "beide", "uebereinander", "überlag"),
+            (
+                "doppelt",
+                "zwei",
+                "2 mal",
+                "beide",
+                "uebereinander",
+                "überlag",
+                "klon",
+                "legacy",
+            ),
             ("drei punkte", "admin men", "menueknopf", "menuknopf"),
             ("weg", "entfern", "artefakt", "nur das echte", "nicht erneut"),
         ),
@@ -1006,6 +1015,15 @@ def self_test(browser: bool) -> dict[str, Any]:
     if punctuation["percent"] != 100:
         raise NaturalUiLabError(
             "semantic normalization rejects valid umlaut and hyphen wording"
+        )
+    duplicate_clone_wording = semantic_score(
+        "Das echte Admin-Menü und der geklonte Legacy-Einstieg werden angezeigt. "
+        "Der Klon wird entfernt, das echte Menü bleibt funktionsfähig.",
+        duplicate_case.intent_groups,
+    )
+    if duplicate_clone_wording["percent"] != 100:
+        raise NaturalUiLabError(
+            "semantic aliases reject valid clone-based duplicate wording"
         )
     panel_case = case_by_key("blocked-layout-panel")
     hidden_panel = semantic_score(
