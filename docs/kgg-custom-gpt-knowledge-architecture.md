@@ -2,7 +2,7 @@
 
 Generated production knowledge for live app structure, source routing and current release context.
 
-Source digest: `c0c943e16e775c99`
+Source digest: `5446ed2cb34b4730`
 
 ## Usage Rules
 
@@ -38,9 +38,10 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Android/Web release manifest: `therapist-app/android_update_manifest.json`.
 - Release pipeline docs: `release-pipeline/README.md`.
 - Custom GPT playbook: `docs/kgg-custom-gpt-playbook.md`.
+- Custom GPT editor bootstrap: `docs/kgg-custom-gpt-editor-bootstrap.md`.
 - Custom GPT action schema: `docs/kgg-custom-gpt-action-schema.md`.
-- Custom GPT combined Action OpenAPI: `docs/kgg-custom-gpt-action-openapi.yaml`.
-- Custom GPT API-only Action OpenAPI for the current split editor setup: `docs/kgg-custom-gpt-action-api-openapi.yaml`.
+- Custom GPT read-only Raw Action OpenAPI: `docs/kgg-custom-gpt-action-openapi.yaml`.
+- Custom GPT authenticated Preview/Memory API Action OpenAPI: `docs/kgg-custom-gpt-action-api-openapi.yaml`.
 - Custom GPT negative examples: `docs/kgg-custom-gpt-negative-examples.md`.
 - Custom GPT preview runbook: `docs/kgg-custom-gpt-preview-runbook.md`.
 - Custom GPT preview report template: `docs/kgg-custom-gpt-preview-report-template.md`.
@@ -58,6 +59,7 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Blind Repair-Lab runner: `release-pipeline/kgg_gpt_repair_lab.py`; acceptance tracker: `release-pipeline/kgg_gpt_repair_stabilize.py`.
 - GPT preview channel branch: `gpt-preview`, files below `previews/`.
 - Private project memory: `Kayus24/kgg-project-memory`; load `memory/index.json` first and then only the smallest matching pack.
+- GitHub Pages is not a project-memory source or fallback; private memory access uses authenticated GitHub API Actions.
 - The Custom GPT may write app changes only through `KGG GPT Preview Gate` and durable knowledge only through `KGG Project Memory Gate`; other direct writes and direct merges stay forbidden.
 
 ## Current Versions
@@ -89,6 +91,7 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 ## Patch Routing
 
 - Before planning a patch, load `docs/kgg-custom-gpt-playbook.md` and determine the real basis from `main`, the manifest and the target profile.
+- Before KGG work, load `docs/kgg-custom-gpt-resource-manifest.json`; a bootstrap-version mismatch blocks writes until the GPT editor is synced.
 - Before proposing or dispatching a patch, load the bug-history lessons and look for similar symptoms.
 - Before producing a patch payload, load `docs/kgg-gpt-area-routes.md` and then only the source chunks needed for the requested area.
 - If a known bug-history lesson matches, reuse its caution, do-not-touch rules and tests.

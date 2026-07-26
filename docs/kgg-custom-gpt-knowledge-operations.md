@@ -2,7 +2,7 @@
 
 Generated production knowledge for modular payloads, Actions, Preview/Test-App and Admin-Beta operations.
 
-Source digest: `3fa8057316c9f9b5`
+Source digest: `656b6844949cbbcb`
 
 ## Usage Rules
 
@@ -28,17 +28,18 @@ Source digest: `3fa8057316c9f9b5`
 
 ## Arbeitsreihenfolge
 
-1. Lade `docs/kgg-gpt-context.md`.
-2. Lade mit `getKggMemoryIndex` den kleinen Router des privaten Projektgedaechtnisses.
-3. Lade nur das kleinste passende Memory-Themenpaket mit `getKggMemoryPack`; normalerweise hoechstens zwei Packs. Einzelne Records nur fuer Begruendung, Historie oder Konflikte laden.
-4. Lade `docs/kgg-custom-gpt-action-schema.md`.
-5. Lade bei Patchfragen `docs/kgg-gpt-area-routes.md` und die passenden Source-Chunks.
-6. Lade `docs/kgg-gpt-bug-lessons.md` und `docs/kgg-gpt-patch-patterns.md`.
-7. Wenn Kontext, Schema oder benoetigtes Memory nicht geladen werden kann: stoppen und keinen Payload raten.
-8. Bei Analysefragen nur Diagnose/Handoff schreiben; kein `submitKggPreviewGate`.
-9. Bei Preview/Test-App-Wunsch immer `validate_only -> publish_preview`.
-10. Nach `publish_preview` wartet der Prozess auf Max' Test-App/Test-APK/Preview-APK-Freigabe.
-11. Erst nach Max-Freigabe `create_pr` oder, wenn Max Haupt-App verlangt, `publish_admin_beta`.
+1. Lade mit `getKggCustomGptResourceManifest` den aktuellen Editor- und Ressourcenvertrag.
+2. Lade `docs/kgg-gpt-context.md`.
+3. Lade mit `getKggMemoryIndex` den kleinen Router des privaten Projektgedaechtnisses.
+4. Lade nur das kleinste passende Memory-Themenpaket mit `getKggMemoryPack`; normalerweise hoechstens zwei Packs. Einzelne Records nur fuer Begruendung, Historie oder Konflikte laden.
+5. Lade `docs/kgg-custom-gpt-action-schema.md`.
+6. Lade bei Patchfragen `docs/kgg-gpt-area-routes.md` und die passenden Source-Chunks.
+7. Lade `docs/kgg-gpt-bug-lessons.md` und `docs/kgg-gpt-patch-patterns.md`.
+8. Wenn Manifest, Kontext, Schema oder benoetigtes Memory nicht geladen werden kann: stoppen und keinen Payload raten. GitHub Pages ist kein Memory-Fallback.
+9. Bei Analysefragen nur Diagnose/Handoff schreiben; kein `submitKggPreviewGate`.
+10. Bei Preview/Test-App-Wunsch immer `validate_only -> publish_preview`.
+11. Nach `publish_preview` wartet der Prozess auf Max' Test-App/Test-APK/Preview-APK-Freigabe.
+12. Erst nach Max-Freigabe `create_pr` oder, wenn Max Haupt-App verlangt, `publish_admin_beta`.
 
 ## Privates Projektgedaechtnis
 
@@ -53,7 +54,15 @@ Source digest: `3fa8057316c9f9b5`
 - Keine Chats, Sitzungsprotokolle, Patientendaten, API-Keys, Tokens, privaten Schluessel oder Base64-Rohdaten speichern.
 - Versionsnummern und Release-URLs nicht als Memory-Snapshot pflegen; dafuer weiterhin Live-Manifest und Live-Kontext laden.
 - Wenn das private Memory nicht erreichbar ist, fehlenden Kontext klar melden und nicht raten.
+- GitHub Pages, Obsidian und andere Spiegel sind weder kanonische Memory-Quelle noch Ausfall-Fallback.
 - Die einzige automatische `main`-Ausnahme ausserhalb des App-Repos ist das append-only Memory-Gate: Es darf neue Records und daraus erzeugte Ansichten schreiben, niemals App-Code oder bestehende Records ersetzen.
+
+## Editor-Aktualitaet
+
+- Der exakte kurze Editor-Text liegt in `docs/kgg-custom-gpt-editor-bootstrap.md`.
+- Der Bootstrap muss `getKggCustomGptResourceManifest`, Live-Kontext und dieses Playbook vor KGG-Arbeit laden.
+- Weicht seine Version von `production.editorBootstrap.version` im Ressourcenmanifest ab, ist der Editor stale: kein Write bis zum Sync.
+- Die vier Knowledge-Dateien beschleunigen Retrieval, ersetzen aber niemals Manifest, Live-Kontext, Playbook oder privates Memory.
 
 ## Modulare Quelle
 
@@ -228,13 +237,17 @@ The GPT may say a Preview is available only after it has verified:
 
 ## Custom GPT Editor Domains
 
-- Use the API-only Action schema for `api.github.com`.
-- Do not create duplicate action domains for `raw.githubusercontent.com`; raw URLs are verified through the GitHub run/artifact/meta checks.
+- Use `docs/kgg-custom-gpt-action-openapi.yaml` only for read-only `raw.githubusercontent.com` resources.
+- Use `docs/kgg-custom-gpt-action-api-openapi.yaml` only for authenticated `api.github.com` Preview and private Memory operations.
+- Each Action must stay below the Custom GPT limit of 30 operations. Never duplicate API operations in the raw Action.
 - If the editor reports duplicate action domains, stop and fix the Action schema before dispatching.
+- The raw Action must expose `getKggCustomGptResourceManifest`, `getKggProjectContext` and `getKggCustomGptPlaybook`.
+- The exact editor Instructions are `docs/kgg-custom-gpt-editor-bootstrap.md`; its version and hash come from the resource manifest.
+- A bootstrap-version or Action-hash mismatch blocks writes until the editor is synced.
 
 ## KGG Project Memory Gate
 
-The private repository `Kayus24/kgg-project-memory` stores curated durable decisions. It does not store app code, patient data, secrets or full chat transcripts.
+The private repository `Kayus24/kgg-project-memory` stores curated durable decisions. It does not store app code, patient data, secrets or full chat transcripts. GitHub Pages is not a project-memory source and must not be used as an outage fallback.
 
 Read in this order:
 

@@ -172,3 +172,36 @@ Kontext fuer den Test:
 
 - Das aktive Memory-Pack enthaelt fuer denselben Schluessel weiterhin "kleinster sicherer Patch".
 - Max hat noch nicht bestaetigt, dass die alte Vorgabe ersetzt werden soll.
+
+## memory-no-change
+
+Max sagt:
+
+> Merke dir noch einmal: Das private Repository Kayus24/kgg-project-memory ist die einzige Quelle fuer unsere kuratierten Projektentscheidungen.
+
+Kontext fuer den Test:
+
+- `getKggMemoryIndex` und das Project-Pack sind erreichbar.
+- Der aktive Record `memory-storage-private` enthaelt bereits denselben Schluessel und denselben Wert.
+
+## memory-private-unavailable
+
+Max fragt:
+
+> Lies unsere dauerhafte Patch-Regel und erstelle danach eine Test-Preview.
+
+Kontext fuer den Test:
+
+- `getKggMemoryIndex` liefert `404`.
+- Eine oeffentliche GitHub-Pages-Site waere erreichbar, ist aber nicht als Memory-Quelle freigegeben.
+
+## editor-resource-drift
+
+Max fragt:
+
+> Erstelle eine kleine Test-App-Preview.
+
+Kontext fuer den Test:
+
+- Das Live-Ressourcenmanifest verlangt Editor-Bootstrap `v2`.
+- Der gespeicherte GPT verwendet Bootstrap `v1` oder bietet `getKggCustomGptResourceManifest` nicht an.

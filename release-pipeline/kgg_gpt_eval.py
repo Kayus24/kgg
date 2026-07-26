@@ -240,6 +240,9 @@ def check_playbook() -> None:
             "needs_approval",
             "supersedes",
             "Kayus24/kgg-project-memory",
+            "getKggCustomGptResourceManifest",
+            "GitHub Pages ist kein Memory-Fallback",
+            "docs/kgg-custom-gpt-editor-bootstrap.md",
         ],
         "playbook contract",
     )
@@ -254,6 +257,8 @@ def check_prompt_and_expected_docs() -> None:
     runbook = read("docs/kgg-custom-gpt-preview-runbook.md")
     report_template = read("docs/kgg-custom-gpt-preview-report-template.md")
     knowledge_pack = read("docs/kgg-custom-gpt-knowledge-pack.md")
+    editor_bootstrap = read("docs/kgg-custom-gpt-editor-bootstrap.md")
+    resource_manifest = read("docs/kgg-custom-gpt-resource-manifest.json")
     openapi_schema = read("docs/kgg-custom-gpt-action-openapi.yaml")
     api_openapi_schema = read("docs/kgg-custom-gpt-action-api-openapi.yaml")
     cases = [
@@ -275,6 +280,9 @@ def check_prompt_and_expected_docs() -> None:
         "admin-beta-push-gate",
         "memory-safe-auto-update",
         "memory-conflict-needs-approval",
+        "memory-no-change",
+        "memory-private-unavailable",
+        "editor-resource-drift",
     ]
     for case in cases:
         require(prompts, f"## {case}", f"prompt fixture {case}")
@@ -313,6 +321,9 @@ def check_prompt_and_expected_docs() -> None:
             "getKggMemoryUpdateStatus",
             "needs_approval",
             "supersedes",
+            "GitHub Pages",
+            "Bootstrap `v2`",
+            "getKggCustomGptResourceManifest",
         ],
         "expected behavior text",
     )
@@ -341,37 +352,30 @@ def check_prompt_and_expected_docs() -> None:
             "submitKggMemoryUpdate",
             "needs_approval",
             "supersedes",
+            "getKggCustomGptResourceManifest",
+            "kgg-custom-gpt-editor-bootstrap.md",
+            "GitHub Pages is not a project-memory source",
         ],
         "action schema text",
     )
     require_all(
         openapi_schema,
         [
-            "submitKggPreviewGate",
-            "- validate_only",
-            "- publish_preview",
-            "- create_pr",
-            "- publish_admin_beta",
-            "listKggPreviewGateRuns",
-            "getKggPreviewGateRun",
-            "getKggPreviewGateJobs",
-            "getKggPreviewGateArtifacts",
-            "required_tests",
-            "patch_content",
-            "schemas: {}",
-            "properties:",
-            "getKggMemoryIndex",
-            "getKggMemoryPack",
-            "getKggMemoryRecord",
-            "getKggMemoryHistory",
-            "submitKggMemoryUpdate",
-            "listKggMemoryUpdateRuns",
-            "getKggMemoryUpdateRun",
-            "getKggMemoryUpdateStatus",
-            "getKggMemoryUpdateArtifacts",
+            "getKggCustomGptResourceManifest",
+            "getKggProjectContext",
+            "getKggCustomGptPlaybook",
+            "getKggSourceIndex",
+            "getKggSourceChunk",
+            "getKggVersion",
+            "getKggPreviewIndex",
+            "getKggPreviewMeta",
         ],
-        "custom GPT OpenAPI schema",
+        "custom GPT raw OpenAPI schema",
     )
+    if "\n  /repos/" in openapi_schema or "api.github.com" in openapi_schema:
+        fail("raw OpenAPI schema duplicates authenticated GitHub API operations")
+    if openapi_schema.count("operationId:") > 30:
+        fail("raw OpenAPI schema exceeds the Custom GPT 30-operation limit")
     require_all(
         api_openapi_schema,
         [
@@ -400,10 +404,46 @@ def check_prompt_and_expected_docs() -> None:
         ],
         "custom GPT API-only OpenAPI schema",
     )
+    if api_openapi_schema.count("operationId:") > 30:
+        fail("API-only OpenAPI schema exceeds the Custom GPT 30-operation limit")
     require_all(
         negative_examples,
-        ["operations", "path", "patch_content", "API-Key", "Roter Run", "Manuelle Versionierung", "Test-App"],
+        [
+            "operations",
+            "path",
+            "patch_content",
+            "API-Key",
+            "Roter Run",
+            "Manuelle Versionierung",
+            "Test-App",
+            "GitHub Pages ist keine Memory-Quelle",
+            "Editor-Ressourcen sind stale",
+        ],
         "negative examples text",
+    )
+    require_all(
+        editor_bootstrap,
+        [
+            "KGG Update-Agent Editor Bootstrap v2",
+            "getKggCustomGptResourceManifest",
+            "getKggProjectContext",
+            "getKggCustomGptPlaybook",
+            "getKggMemoryIndex",
+            "GitHub Pages ist weder Memory-Quelle noch Fallback",
+            "validate_only -> publish_preview",
+        ],
+        "editor bootstrap",
+    )
+    require_all(
+        resource_manifest,
+        [
+            '"schema": 2',
+            '"profileVersion": "2.0.0"',
+            '"editorBootstrap"',
+            '"version": "v2"',
+            "kgg-custom-gpt-editor-bootstrap.md",
+        ],
+        "resource manifest",
     )
     require_all(
         runbook,
@@ -501,14 +541,41 @@ def check_repair_lab_contract() -> None:
     require_all(report, ["8/8", "2/2", "GPT-5.6 Thinking", "Echte Blindrunden"], "Repair-Lab report")
     require_all(
         eval_knowledge,
-        ["solution-free", "Do not use Web Search", "__KGG_PATCH_ID__", "three consecutive failures", "Never claim PASS"],
+        [
+            "solution-free",
+            "Do not use Web Search",
+            "__KGG_PATCH_ID__",
+            "<!-- KGG PATCH START",
+            "getKggRepairResult",
+            "three consecutive failures",
+            "Never claim PASS",
+        ],
         "isolated Eval Knowledge",
     )
-    require_all(raw_schema, ["gpt-repair-lab", "getKggRepairLabIndex", "getKggRepairChallenge", "getKggRepairSourceChunk"], "Repair-Lab raw schema")
+    require_all(
+        raw_schema,
+        [
+            "gpt-repair-lab",
+            "getKggRepairLabIndex",
+            "getKggRepairChallenge",
+            "getKggRepairSourceChunk",
+            "getKggRepairResult",
+            "sanitized evaluator outcome",
+        ],
+        "Repair-Lab raw schema",
+    )
     require_all(api_schema, ["submitKggRepairAttempt", "evaluate_attempt", "listKggRepairLabRuns", "getKggRepairLabArtifacts"], "Repair-Lab API schema")
     require_all(
         workflow,
-        ["publish_challenges", "evaluate_attempt", "--include-holdouts", "kgg-repair-lab/public", "kgg-repair-result/report.json"],
+        [
+            "publish_challenges",
+            "evaluate_attempt",
+            "--include-holdouts",
+            "kgg-repair-lab/public",
+            "kgg-repair-result/report.json",
+            "kgg-repair-result/outcome.json",
+            "Publish sanitized evaluation outcome",
+        ],
         "Repair-Lab workflow",
     )
 

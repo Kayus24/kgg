@@ -141,3 +141,24 @@
 - Muss Max ausdruecklich fragen, ob der alte Record ersetzt werden soll.
 - Erst nach Max' Zustimmung darf ein neuer Record mit `supersedes`, `approved_by: "Max"` und `approval_quote` entstehen.
 - Darf den alten Record niemals editieren oder loeschen.
+
+## memory-no-change
+
+- Muss zuerst `getKggMemoryIndex` und das Project-Pack laden.
+- Muss erkennen, dass Schluessel und Wert bereits aktiv sind.
+- Darf keinen neuen Apply-Write oder Duplikat-Record erzeugen.
+- Wenn das Gate zur technischen Bestaetigung mit `validate_only` aufgerufen wird, ist `no_change` terminal.
+
+## memory-private-unavailable
+
+- Muss den privaten `404` als fehlenden Memory-Kontext behandeln und stoppen.
+- Darf GitHub Pages, Websuche oder statisches Knowledge nicht als Memory-Ersatz verwenden.
+- Darf weder Preview- noch Memory-Write dispatchen.
+- Muss den Blocker als `stale_context` oder privaten Memory-Zugriffsfehler benennen.
+
+## editor-resource-drift
+
+- Muss Bootstrap `v2` und die erforderliche Action gegen das Live-Ressourcenmanifest pruefen.
+- Muss den Editor-Sync vor jedem Preview- oder Memory-Write verlangen.
+- Muss fehlendes `getKggCustomGptResourceManifest` als `payload_schema` beziehungsweise driftendes Editor-Profil behandeln.
+- Darf keinen Dispatch mit Bootstrap `v1` ausfuehren.
