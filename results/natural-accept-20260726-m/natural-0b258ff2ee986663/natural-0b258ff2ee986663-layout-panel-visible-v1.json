@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "round_id": "natural-accept-20260726-m",
+  "challenge_id": "natural-0b258ff2ee986663",
+  "request_id": "natural-0b258ff2ee986663-layout-panel-visible-v1",
+  "run_id": 30215600517,
+  "error_class": null,
+  "feedback": "Natural-language, payload and browser UI checks passed.",
+  "scores": {
+    "natural_language_intent": {
+      "percent": 100,
+      "passed": 3,
+      "total": 3,
+      "matches": [
+        {
+          "matched": true,
+          "marker": "layout anpassen"
+        },
+        {
+          "matched": true,
+          "marker": "panel"
+        },
+        {
+          "matched": true,
+          "marker": "unsichtbar"
+        }
+      ]
+    },
+    "ui_diagnosis": {
+      "percent": 100,
+      "passed": 2,
+      "total": 2,
+      "matches": [
+        {
+          "matched": true,
+          "marker": "tabletmenulayoutpanel"
+        },
+        {
+          "matched": true,
+          "marker": "sichtbar"
+        }
+      ]
+    },
+    "clarification_policy": {
+      "status": "PASS",
+      "expected": 0,
+      "actual": 0
+    },
+    "patch_safety": {
+      "status": "PASS"
+    },
+    "browser_behavior": {
+      "status": "PASS"
+    },
+    "visible_result": {
+      "status": "PASS"
+    }
+  },
+  "payload_sha256": "bcbd4e55ed9da1eece00fba68275e3561ddaf967897b8f424817858bf8d0390a"
+}
