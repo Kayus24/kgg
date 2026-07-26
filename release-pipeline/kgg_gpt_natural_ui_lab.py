@@ -224,7 +224,14 @@ NATURAL_CASES: tuple[NaturalCase, ...] = (
                 "groessensteuerung",
                 "skalier",
             ),
-            ("--kgg-tablet-left-col", "left col", "spaltenbreite"),
+            (
+                "--kgg-tablet-left-col",
+                "left col",
+                "spaltenbreite",
+                "breitenverteilung",
+                "breitenverhaeltnis",
+                "datenbankspalte",
+            ),
         ),
         input_mode="combined",
     ),
@@ -1049,6 +1056,15 @@ def self_test(browser: bool) -> dict[str, Any]:
     if scale_wording["percent"] != 100:
         raise NaturalUiLabError(
             "semantic aliases reject valid German UI-size wording"
+        )
+    scale_distribution_wording = semantic_score(
+        "Skalierung bleibt getrennt von der Breitenverteilung; das "
+        "Breitenverhältnis der Datenbankspalte ändert nur der Drag-Handler.",
+        scale_case.diagnosis_groups,
+    )
+    if scale_distribution_wording["percent"] != 100:
+        raise NaturalUiLabError(
+            "semantic aliases reject valid German column-ratio wording"
         )
     history_case = case_by_key("ambiguous-history-button")
     history_wording = semantic_score(
