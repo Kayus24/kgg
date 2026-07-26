@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "challenge_id": "natural-78b1626e24673183",
+  "round_id": "natural-live-20260726-r1",
+  "natural_request": "das eine mit den gespeicherten sachen öffnet nix mehr siehe beide kreise mach erst test app",
+  "input_mode": "screenshot",
+  "screenshot": {
+    "path": "marked-problem.png",
+    "sha256": "b8f93d78c60b73595c901ffef2a663dd6fc3b4f1263f66081f3dedfe5624209d",
+    "attachment_required": true
+  },
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "source": {
+    "full_html": "admin-broken.html",
+    "chunks_index": "source/index.json",
+    "chunk_count": 16,
+    "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
+    "broken_sha256": "c752aa629d3d4e4a1b163a5b412cfe421da877d6ba743f0a0d768da740cc6f22"
+  },
+  "submission_contract": {
+    "fields": [
+      "challenge_id",
+      "interpretation",
+      "payload"
+    ],
+    "interpretation_fields": [
+      "observed_behavior",
+      "desired_behavior",
+      "target_elements",
+      "interaction_boundary",
+      "confidence",
+      "clarification_count",
+      "clarification_question"
+    ],
+    "payload_schema": "KGG modular payload v2",
+    "payload_fields": [
+      "request_id",
+      "title",
+      "summary",
+      "version_slug",
+      "touched_areas",
+      "required_tests",
+      "patch_content"
+    ],
+    "forbidden_payload_fields": [
+      "operations",
+      "path",
+      "file",
+      "old_text",
+      "new_text"
+    ],
+    "patch_placeholder": "__KGG_PATCH_ID__",
+    "required_tests": [
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-78b1626e24673183 --submission-file <submission.json>",
+      "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
+      "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
+    ]
+  },
+  "submission": "Send one interpretation plus modular payload through evaluate_natural_attempt. Do not request or infer hidden intent, assertions or clean source."
+}

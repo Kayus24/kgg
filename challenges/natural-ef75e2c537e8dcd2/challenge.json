@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "challenge_id": "natural-ef75e2c537e8dcd2",
+  "round_id": "natural-live-20260726-r1",
+  "natural_request": "wider das problem das edit ding aufm tab ist kaput 1 spalte statt 2 und speichern soll unten sichtbar bleiben mach erst test app",
+  "input_mode": "combined",
+  "screenshot": {
+    "path": "marked-problem.png",
+    "sha256": "c689fb65b98eaeff33a1d7ae96a5e86a12e6e84c7218d26a0f8ca704cbd1ca2c",
+    "attachment_required": true
+  },
+  "viewport": {
+    "width": 1180,
+    "height": 820
+  },
+  "source": {
+    "full_html": "admin-broken.html",
+    "chunks_index": "source/index.json",
+    "chunk_count": 16,
+    "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
+    "broken_sha256": "d898d787ff83d186e864e5ea225a7452183f202179568a5c295f3849cbc35e66"
+  },
+  "submission_contract": {
+    "fields": [
+      "challenge_id",
+      "interpretation",
+      "payload"
+    ],
+    "interpretation_fields": [
+      "observed_behavior",
+      "desired_behavior",
+      "target_elements",
+      "interaction_boundary",
+      "confidence",
+      "clarification_count",
+      "clarification_question"
+    ],
+    "payload_schema": "KGG modular payload v2",
+    "payload_fields": [
+      "request_id",
+      "title",
+      "summary",
+      "version_slug",
+      "touched_areas",
+      "required_tests",
+      "patch_content"
+    ],
+    "forbidden_payload_fields": [
+      "operations",
+      "path",
+      "file",
+      "old_text",
+      "new_text"
+    ],
+    "patch_placeholder": "__KGG_PATCH_ID__",
+    "required_tests": [
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-ef75e2c537e8dcd2 --submission-file <submission.json>",
+      "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
+      "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
+    ]
+  },
+  "submission": "Send one interpretation plus modular payload through evaluate_natural_attempt. Do not request or infer hidden intent, assertions or clean source."
+}
