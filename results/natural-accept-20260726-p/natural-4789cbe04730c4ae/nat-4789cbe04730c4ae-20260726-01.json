@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "status": "FAIL",
+  "round_id": "natural-accept-20260726-p",
+  "challenge_id": "natural-4789cbe04730c4ae",
+  "request_id": "nat-4789cbe04730c4ae-20260726-01",
+  "run_id": 30217859263,
+  "error_class": "payload_schema",
+  "feedback": "payload missing exact required_tests: ['cmd /c release-pipeline\\\\run-kgg-tests.cmd --level critical', 'cmd /c release-pipeline\\\\run-kgg-tests.cmd --suite ui-stability --level regression', 'python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-4789cbe04730c4ae --submission-file <submission.json>']"
+}
