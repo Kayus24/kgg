@@ -1,58 +1,58 @@
 {
   "schema": 1,
-  "round_id": "blind-round-20260720-b",
+  "round_id": "blind-round-20260726-c",
   "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
   "challenge_count": 10,
   "challenges": [
     {
-      "challenge_id": "repair-3be9a952dd85c0ea",
+      "challenge_id": "repair-c64b326165ab2436",
       "title": "Phone admin menu restore",
-      "manifest": "challenges/repair-3be9a952dd85c0ea/challenge.json"
+      "manifest": "challenges/repair-c64b326165ab2436/challenge.json"
     },
     {
-      "challenge_id": "repair-66cebf6d1e0c08e2",
+      "challenge_id": "repair-4de278afc95b931d",
       "title": "Phone photo menu restore",
-      "manifest": "challenges/repair-66cebf6d1e0c08e2/challenge.json"
+      "manifest": "challenges/repair-4de278afc95b931d/challenge.json"
     },
     {
-      "challenge_id": "repair-fb9eccfccc336b96",
+      "challenge_id": "repair-d24008010100ac3c",
       "title": "Exercise bank thumbnails restore",
-      "manifest": "challenges/repair-fb9eccfccc336b96/challenge.json"
+      "manifest": "challenges/repair-d24008010100ac3c/challenge.json"
     },
     {
-      "challenge_id": "repair-ae333e0dc7462d4b",
+      "challenge_id": "repair-dd95bd5a28f8955d",
       "title": "Live exercise clear restore",
-      "manifest": "challenges/repair-ae333e0dc7462d4b/challenge.json"
+      "manifest": "challenges/repair-dd95bd5a28f8955d/challenge.json"
     },
     {
-      "challenge_id": "repair-76471cef9b00fa48",
+      "challenge_id": "repair-9fd471540cdda82d",
       "title": "Phone history drawers restore",
-      "manifest": "challenges/repair-76471cef9b00fa48/challenge.json"
+      "manifest": "challenges/repair-9fd471540cdda82d/challenge.json"
     },
     {
-      "challenge_id": "repair-be57614d07142071",
+      "challenge_id": "repair-861b86d3ea53d0b0",
       "title": "Tablet editor layout restore",
-      "manifest": "challenges/repair-be57614d07142071/challenge.json"
+      "manifest": "challenges/repair-861b86d3ea53d0b0/challenge.json"
     },
     {
-      "challenge_id": "repair-ab2e1de363294b6e",
+      "challenge_id": "repair-38f384f22023b338",
       "title": "Tablet card reorder restore",
-      "manifest": "challenges/repair-ab2e1de363294b6e/challenge.json"
+      "manifest": "challenges/repair-38f384f22023b338/challenge.json"
     },
     {
-      "challenge_id": "repair-16bc1e1949e65ec7",
+      "challenge_id": "repair-c401c86c2284b425",
       "title": "Tablet scale persistence restore",
-      "manifest": "challenges/repair-16bc1e1949e65ec7/challenge.json"
+      "manifest": "challenges/repair-c401c86c2284b425/challenge.json"
     },
     {
-      "challenge_id": "repair-7566c6d433b05d14",
+      "challenge_id": "repair-e11838e51f78bacc",
       "title": "Tablet layout panel restore",
-      "manifest": "challenges/repair-7566c6d433b05d14/challenge.json"
+      "manifest": "challenges/repair-e11838e51f78bacc/challenge.json"
     },
     {
-      "challenge_id": "repair-d3498cb9daa13614",
+      "challenge_id": "repair-db7cc3fb83a1903d",
       "title": "Phone menu anchor restore",
-      "manifest": "challenges/repair-d3498cb9daa13614/challenge.json"
+      "manifest": "challenges/repair-db7cc3fb83a1903d/challenge.json"
     }
   ]
 }
