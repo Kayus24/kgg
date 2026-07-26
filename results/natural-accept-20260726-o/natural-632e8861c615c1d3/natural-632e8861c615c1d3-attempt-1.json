@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "round_id": "natural-accept-20260726-o",
+  "challenge_id": "natural-632e8861c615c1d3",
+  "request_id": "natural-632e8861c615c1d3-attempt-1",
+  "run_id": 30217112683,
+  "error_class": null,
+  "feedback": "Natural-language, payload and browser UI checks passed.",
+  "scores": {
+    "natural_language_intent": {
+      "percent": 100,
+      "passed": 3,
+      "total": 3,
+      "matches": [
+        {
+          "matched": true,
+          "marker": "phone"
+        },
+        {
+          "matched": true,
+          "marker": "menü"
+        },
+        {
+          "matched": true,
+          "marker": "plan-header"
+        }
+      ]
+    },
+    "ui_diagnosis": {
+      "percent": 100,
+      "passed": 2,
+      "total": 2,
+      "matches": [
+        {
+          "matched": true,
+          "marker": "veranker"
+        },
+        {
+          "matched": true,
+          "marker": "planheader"
+        }
+      ]
+    },
+    "clarification_policy": {
+      "status": "PASS",
+      "expected": 0,
+      "actual": 0
+    },
+    "patch_safety": {
+      "status": "PASS"
+    },
+    "browser_behavior": {
+      "status": "PASS"
+    },
+    "visible_result": {
+      "status": "PASS"
+    }
+  },
+  "payload_sha256": "71fedfe0fed42f3ea6da94e8147a90f7d6538990bac02d56838ca7c091c72926"
+}
