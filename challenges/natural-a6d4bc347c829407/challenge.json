@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "challenge_id": "natural-3e28370a810ca9fb",
-  "round_id": "natural-accept-20260726-k",
-  "natural_request": "wider das problem bei dem regler in der mitte macht plus zwar alles grösser aber verschiebt dabei auch die spalten das darf nciht, ziehen ist breite plus minus nur größe",
+  "challenge_id": "natural-a6d4bc347c829407",
+  "round_id": "natural-accept-20260726-l",
+  "natural_request": "wenn ich + drücke wandert die trennlinie mit. die soll stehen bleiben und nur der inhalt soll größer werden, drag weiter nur spalten mach erst test app",
   "input_mode": "combined",
   "screenshot": {
     "path": "marked-problem.png",
@@ -65,7 +65,7 @@
     "patch_content_format": "Complete executable HTML fragment. Wrap CSS in <style> and JavaScript in <script>; bare CSS or JavaScript is invalid.",
     "ambiguity_policy": "If one of multiple marked controls is requested and at least two matching source defects remain possible, ask exactly one target question before dispatch. Never repair both.",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-3e28370a810ca9fb --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-a6d4bc347c829407 --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]

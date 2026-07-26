@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "challenge_id": "natural-5f9d43b321235266",
-  "round_id": "natural-accept-20260726-k",
-  "natural_request": "schau mal der menü punkt layout tut so als wäre er an aber die plus minus box bleibt weg",
+  "challenge_id": "natural-68d769a2f429906a",
+  "round_id": "natural-accept-20260726-l",
+  "natural_request": "ok also auf tablet öffnet layout anpassen das bedienfeld nicht mehr der button ist aktiv aber panel unsichtbar und sag nicht fertig ohne test",
   "input_mode": "combined",
   "screenshot": {
     "path": "marked-problem.png",
@@ -65,7 +65,7 @@
     "patch_content_format": "Complete executable HTML fragment. Wrap CSS in <style> and JavaScript in <script>; bare CSS or JavaScript is invalid.",
     "ambiguity_policy": "If one of multiple marked controls is requested and at least two matching source defects remain possible, ask exactly one target question before dispatch. Never repair both.",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-5f9d43b321235266 --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-68d769a2f429906a --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]
