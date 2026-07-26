@@ -76,7 +76,11 @@ NATURAL_CASES: tuple[NaturalCase, ...] = (
         ),
         mutation=EDITOR_CASE.mutation,
         sample_content=EDITOR_CASE.sample_content,
-        intent_groups=(("tablet", "tab "), ("editor", "zahnrad", "edit ding"), ("spalte", "untereinander", "schmal")),
+        intent_groups=(
+            ("tablet", "tab ", "grossen editor"),
+            ("editor", "zahnrad", "edit ding", "editorfenster"),
+            ("spalte", "einspalt", "zweispalt", "untereinander", "schmal", "breit"),
+        ),
         diagnosis_groups=(("editormodal", "editorsheet", "editor"), ("grid", "spalte", "layout")),
         input_mode="combined",
     ),
@@ -107,8 +111,15 @@ NATURAL_CASES: tuple[NaturalCase, ...] = (
   }
   repair();new MutationObserver(repair).observe(document.documentElement,{childList:true,subtree:true});"""
         ),
-        intent_groups=(("doppelt", "zwei", "2 mal"), ("drei punkte", "admin men"), ("weg", "entfern", "artefakt")),
-        diagnosis_groups=(("duplicate", "doppelt", "legacy", "alt"), ("kggphoneadminmenu", "admin men")),
+        intent_groups=(
+            ("doppelt", "zwei", "2 mal", "beide", "uebereinander", "überlag"),
+            ("drei punkte", "admin men", "menueknopf", "menuknopf"),
+            ("weg", "entfern", "artefakt", "nur das echte", "nicht erneut"),
+        ),
+        diagnosis_groups=(
+            ("duplicate", "doppelt", "legacy", "alt", "klon"),
+            ("kggphoneadminmenu", "admin men", "phone men"),
+        ),
         input_mode="screenshot",
     ),
     NaturalCase(
@@ -141,8 +152,8 @@ NATURAL_CASES: tuple[NaturalCase, ...] = (
             + patch_script("  // Scoped CSS restores the phone menu visual anchor.")
         ),
         intent_groups=(
-            ("handy", "phone"),
-            ("menü", "menu", "3 punkte"),
+            ("handy", "phone", "mobil"),
+            ("menü", "menu", "menue", "3 punkte", "admin ding"),
             (
                 "plan kopf",
                 "im kopf",
@@ -151,9 +162,14 @@ NATURAL_CASES: tuple[NaturalCase, ...] = (
                 "plan-header",
                 "planheader",
                 "da rein",
+                "innerhalb",
+                "im plan",
             ),
         ),
-        diagnosis_groups=(("anchor", "veranker", "layer", "position"), ("planheader", "plan kopf", "header")),
+        diagnosis_groups=(
+            ("anchor", "veranker", "layer", "position", "ausserhalb"),
+            ("planheader", "plan kopf", "header", "kopfbereich"),
+        ),
         input_mode="combined",
     ),
     NaturalCase(
@@ -186,7 +202,11 @@ NATURAL_CASES: tuple[NaturalCase, ...] = (
     ["tabletScaleValue","tabletSplitScaleValue"].forEach(id=>{const node=document.getElementById(id);if(node)node.textContent=label;});
   };"""
         ),
-        intent_groups=(("plus", "+", "minus"), ("skalier", "größer", "grösser"), ("spalte", "trennlinie", "breite")),
+        intent_groups=(
+            ("plus", "+", "minus", "tasten"),
+            ("skalier", "größer", "grösser", "groesse", "inhalt"),
+            ("spalte", "trennlinie", "breite", "verhaeltnis", "verschieb"),
+        ),
         diagnosis_groups=(("--kgg-tablet-ui-scale", "ui scale", "skalier"), ("--kgg-tablet-left-col", "left col", "spaltenbreite")),
         input_mode="combined",
     ),
@@ -201,7 +221,11 @@ NATURAL_CASES: tuple[NaturalCase, ...] = (
         ),
         mutation=PANEL_CASE.mutation,
         sample_content=PANEL_CASE.sample_content,
-        intent_groups=(("layout anpassen", "layout"), ("panel", "box", "bedienfeld", "darunter"), ("unsichtbar", "bleibt weg", "kommt nix")),
+        intent_groups=(
+            ("layout anpassen", "layout"),
+            ("panel", "box", "bedienfeld", "darunter", "plus minus"),
+            ("unsichtbar", "bleibt weg", "kommt nix", "nicht sichtbar", "erscheint nicht"),
+        ),
         diagnosis_groups=(("tabletmenulayoutpanel", "layout panel", "bedienfeld"), ("hidden", "sichtbar", "aria-expanded")),
         input_mode="combined",
     ),
@@ -938,7 +962,9 @@ def self_test(browser: bool) -> dict[str, Any]:
         )
     duplicate_case = case_by_key("duplicate-admin-control")
     punctuation = semantic_score(
-        "Das zusätzliche alte Phone-Admin-Menü liegt am echten Menü und erzeugt einen doppelten Menüknopf; es soll entfernt werden.",
+        "Im Phone-Viewport wird zusätzlich zum echten Admin-Menü ein geklonter "
+        "Legacy-Menüknoten eingefügt; beide Menüs liegen übereinander. Nur das "
+        "echte Menü bleibt sichtbar, der Klon wird entfernt und darf nicht erneut erscheinen.",
         duplicate_case.intent_groups,
     )
     if punctuation["percent"] != 100:
