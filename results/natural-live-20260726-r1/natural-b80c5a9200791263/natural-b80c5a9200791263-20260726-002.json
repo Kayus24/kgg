@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "status": "FAIL",
+  "round_id": "natural-live-20260726-r1",
+  "challenge_id": "natural-b80c5a9200791263",
+  "request_id": "natural-b80c5a9200791263-20260726-002",
+  "run_id": 30208301247,
+  "error_class": "natural_language",
+  "feedback": "interpretation intent score below 100: {'percent': 67, 'passed': 2, 'total': 3, 'matches': [{'matched': True, 'marker': 'handy'}, {'matched': True, 'marker': 'menü'}, {'matched': False, 'marker': ''}]}"
+}
