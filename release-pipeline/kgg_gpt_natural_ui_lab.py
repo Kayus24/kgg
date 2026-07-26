@@ -224,7 +224,15 @@ NATURAL_CASES: tuple[NaturalCase, ...] = (
         intent_groups=(
             ("layout anpassen", "layout"),
             ("panel", "box", "bedienfeld", "darunter", "plus minus"),
-            ("unsichtbar", "bleibt weg", "kommt nix", "nicht sichtbar", "erscheint nicht"),
+            (
+                "unsichtbar",
+                "bleibt weg",
+                "kommt nix",
+                "nicht sichtbar",
+                "erscheint nicht",
+                "verborg",
+                "hidden",
+            ),
         ),
         diagnosis_groups=(("tabletmenulayoutpanel", "layout panel", "bedienfeld"), ("hidden", "sichtbar", "aria-expanded")),
         input_mode="combined",
@@ -982,6 +990,16 @@ def self_test(browser: bool) -> dict[str, Any]:
     if punctuation["percent"] != 100:
         raise NaturalUiLabError(
             "semantic normalization rejects valid umlaut and hyphen wording"
+        )
+    panel_case = case_by_key("blocked-layout-panel")
+    hidden_panel = semantic_score(
+        "Der Menüpunkt Layout ist aktiv, aber das zugehörige Panel mit der "
+        "Plus/Minus-Steuerung bleibt verborgen.",
+        panel_case.intent_groups,
+    )
+    if hidden_panel["percent"] != 100:
+        raise NaturalUiLabError(
+            "semantic aliases reject valid hidden layout-panel wording"
         )
     try:
         validate_patch_fragment(
