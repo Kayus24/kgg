@@ -1,24 +1,24 @@
 {
   "schema": 1,
-  "challenge_id": "natural-38bf27a50c205401",
-  "round_id": "natural-live-20260726-r1",
-  "natural_request": "wider das problem auf tablet öffnet layout anpassen das bedienfeld nicht mehr der button ist aktiv aber panel unsichtbar und sag nicht fertig ohne test",
-  "input_mode": "combined",
+  "challenge_id": "natural-9253d0321333dd6b",
+  "round_id": "natural-accept-20260726-a",
+  "natural_request": "ok also aufm handy ist oben rechts das drei punkte ding doppelt siehe gelb 1 soll weg aber das richtige muss noch auf gehen und sag nicht fertig ohne test",
+  "input_mode": "screenshot",
   "screenshot": {
     "path": "marked-problem.png",
-    "sha256": "32b1edf13fb0043ac72d0b45df71761b0a138c58a45c15f89d568e473ab3c861",
+    "sha256": "b08467f2e7b5fbe4b43d76d1141051e9c18869600bb0923e0808fe9f7cd9a078",
     "attachment_required": true
   },
   "viewport": {
-    "width": 1180,
-    "height": 820
+    "width": 390,
+    "height": 844
   },
   "source": {
     "full_html": "admin-broken.html",
     "chunks_index": "source/index.json",
     "chunk_count": 16,
     "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
-    "broken_sha256": "eb7ad312a4a36fae9f93bff2a2d26555119ce03eda6eab0d7ddcb3dca8eb035e"
+    "broken_sha256": "29839aa5350d306e536e300c6aefe0a9c7a0b78c6321f1b58d6df50417ef94fe"
   },
   "submission_contract": {
     "fields": [
@@ -54,7 +54,7 @@
     ],
     "patch_placeholder": "__KGG_PATCH_ID__",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-38bf27a50c205401 --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-9253d0321333dd6b --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]

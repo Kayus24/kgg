@@ -1,24 +1,24 @@
 {
   "schema": 1,
-  "challenge_id": "natural-ef75e2c537e8dcd2",
-  "round_id": "natural-live-20260726-r1",
-  "natural_request": "wider das problem das edit ding aufm tab ist kaput 1 spalte statt 2 und speichern soll unten sichtbar bleiben mach erst test app",
-  "input_mode": "combined",
+  "challenge_id": "natural-6434974da44b27ed",
+  "round_id": "natural-accept-20260726-a",
+  "natural_request": "ok also bei 1 oder 2 im menü reagiert das falsche nicht mehr ich weiss grad nicht wie das heisst und sag nicht fertig ohne test",
+  "input_mode": "screenshot",
   "screenshot": {
     "path": "marked-problem.png",
-    "sha256": "c689fb65b98eaeff33a1d7ae96a5e86a12e6e84c7218d26a0f8ca704cbd1ca2c",
+    "sha256": "b8f93d78c60b73595c901ffef2a663dd6fc3b4f1263f66081f3dedfe5624209d",
     "attachment_required": true
   },
   "viewport": {
-    "width": 1180,
-    "height": 820
+    "width": 390,
+    "height": 844
   },
   "source": {
     "full_html": "admin-broken.html",
     "chunks_index": "source/index.json",
     "chunk_count": 16,
     "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
-    "broken_sha256": "d898d787ff83d186e864e5ea225a7452183f202179568a5c295f3849cbc35e66"
+    "broken_sha256": "c752aa629d3d4e4a1b163a5b412cfe421da877d6ba743f0a0d768da740cc6f22"
   },
   "submission_contract": {
     "fields": [
@@ -54,7 +54,7 @@
     ],
     "patch_placeholder": "__KGG_PATCH_ID__",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-ef75e2c537e8dcd2 --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-6434974da44b27ed --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]
