@@ -62,9 +62,9 @@
     "profileVersion": "2.1.0",
     "editorBootstrap": {
       "path": "docs/kgg-custom-gpt-eval-editor-bootstrap.md",
-      "version": "v7",
-      "characters": 3584,
-      "sha256": "d03802da5ead5972a9aeffc17b0dab4afb42dd259f93c365c7cf51838dd0f24a"
+      "version": "v8",
+      "characters": 3854,
+      "sha256": "ba5aa67217cd190ad5964addb89a7469145c2906732b15d97d8dfb5be2d404fd"
     },
     "sameModelAsProduction": true,
     "capabilities": {
@@ -78,7 +78,7 @@
     "knowledge": [
       {
         "path": "docs/kgg-custom-gpt-eval-knowledge.md",
-        "sha256": "0695f2fe2d6b5b5e99007668d94e546bbfaaa5934c8e2095c785af11d88820c6"
+        "sha256": "a1f17cdf61c270e5c775b9cea7bd58e6c7baee2d7ff315454e5d88599a64f229"
       }
     ],
     "actions": [

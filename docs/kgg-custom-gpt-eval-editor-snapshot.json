@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "capturedAt": "2026-07-26T18:08:16.3264039Z",
+  "capturedAt": "2026-07-26T18:59:47.8655978Z",
   "gptId": "g-6a5e3483c98c81919e6f8a7939d5c072",
   "profileVersion": "2.1.0",
   "model": "GPT-5.6 Thinking",
@@ -12,12 +12,12 @@
     "apps": false,
     "actions": true
   },
-  "instructionsSha256": "d03802da5ead5972a9aeffc17b0dab4afb42dd259f93c365c7cf51838dd0f24a",
+  "instructionsSha256": "ba5aa67217cd190ad5964addb89a7469145c2906732b15d97d8dfb5be2d404fd",
   "knowledgeNames": [
     "kgg-custom-gpt-eval-knowledge.md"
   ],
   "knowledgeSha256": [
-    "0695f2fe2d6b5b5e99007668d94e546bbfaaa5934c8e2095c785af11d88820c6"
+    "a1f17cdf61c270e5c775b9cea7bd58e6c7baee2d7ff315454e5d88599a64f229"
   ],
   "actionSha256": [
     "ce658e18771f321f42ef176fba4fdb7e472bff2d7fe570aab285b2781db45a53",

@@ -287,7 +287,10 @@ NATURAL_CASES: tuple[NaturalCase, ...] = (
             ("öff", "auf", "reagiert"),
             ("menü", "markiert", "ding"),
         ),
-        diagnosis_groups=(("recenttoggle", "recent", "letzte pläne"), ("drawer", "open")),
+        diagnosis_groups=(
+            ("recenttoggle", "recent", "letzte pläne"),
+            ("drawer", "open", "oeff", "liste"),
+        ),
         clarification_count=1,
         clarification_reply="das obere mit den alten plänen, nicht die übungs pakete",
         input_mode="screenshot",
@@ -511,6 +514,8 @@ def build_public_manifest(
             "computed display, columns or geometry is wrong. Correct every wrong computed "
             "property on that exact element; changing its width and nearby child grids is "
             "insufficient when its own display or columns remain wrong. Do not guess child containers. "
+            "For interaction repairs, call an existing canonical handler or public UI API when "
+            "one is present; do not recreate only part of its classes, ARIA or state transitions. "
             "Do not request or infer hidden intent, assertions or clean source."
         ),
     }
@@ -1044,6 +1049,16 @@ def self_test(browser: bool) -> dict[str, Any]:
     if scale_wording["percent"] != 100:
         raise NaturalUiLabError(
             "semantic aliases reject valid German UI-size wording"
+        )
+    history_case = case_by_key("ambiguous-history-button")
+    history_wording = semantic_score(
+        "Der recentToggle für letzte Pläne soll die Historienliste wieder öffnen "
+        "und schließen.",
+        history_case.diagnosis_groups,
+    )
+    if history_wording["percent"] != 100:
+        raise NaturalUiLabError(
+            "semantic aliases reject valid German drawer wording"
         )
     try:
         validate_patch_fragment(
