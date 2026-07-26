@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "status": "FAIL",
+  "round_id": "natural-accept-20260726-k",
+  "challenge_id": "natural-3e28370a810ca9fb",
+  "request_id": "natural-3e28370a810ca9fb-20260726-01",
+  "run_id": 30214577267,
+  "error_class": "natural_language",
+  "feedback": "interpretation diagnosis score below 100: {'percent': 50, 'passed': 1, 'total': 2, 'matches': [{'matched': False, 'marker': ''}, {'matched': True, 'marker': 'spaltenbreite'}]}"
+}
