@@ -1,12 +1,12 @@
 {
   "schema": 1,
-  "challenge_id": "natural-88839014e9c809e0",
-  "round_id": "natural-accept-20260726-m",
-  "natural_request": "ok also auf handy sitzt das admin ding im falschen layer rechts aussen, es soll bei übungen im plan im kopf bleiben mach erst test app",
-  "input_mode": "combined",
+  "challenge_id": "natural-faa4b568601ca296",
+  "round_id": "natural-accept-20260726-n",
+  "natural_request": "ok also bei 1 oder 2 im menü reagiert das falsche nicht mehr ich weiss grad nicht wie das heisst bitte kleinster patch",
+  "input_mode": "screenshot",
   "screenshot": {
     "path": "marked-problem.png",
-    "sha256": "ff5c75cc6013f6f96f696ddae2c7a1eb70b260375a3c981231097b9b95b5917d",
+    "sha256": "b8f93d78c60b73595c901ffef2a663dd6fc3b4f1263f66081f3dedfe5624209d",
     "attachment_required": true
   },
   "viewport": {
@@ -18,7 +18,7 @@
     "chunks_index": "source/index.json",
     "chunk_count": 16,
     "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
-    "broken_sha256": "d1559edf4b480cbd223e3616c6831d30c6f48a53165492534f23556795d195e5"
+    "broken_sha256": "8bcdc09ab8495c8fe689a811b7506ff0e955df02f417f808e6dd4cabb683f4e6"
   },
   "submission_contract": {
     "fields": [
@@ -65,10 +65,10 @@
     "patch_content_format": "Complete executable HTML fragment. Wrap CSS in <style> and JavaScript in <script>; bare CSS or JavaScript is invalid.",
     "ambiguity_policy": "If one of multiple marked controls is requested and at least two matching source defects remain possible, ask exactly one target question before dispatch. Never repair both.",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-88839014e9c809e0 --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-faa4b568601ca296 --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]
   },
-  "submission": "Send one interpretation plus modular payload metadata through submission_json and raw patch_content through its dedicated evaluate_natural_attempt input. Omit payload.patch_content from submission_json and never double-escape patch code. For layout repairs, inspect the final cascade and patch the same container whose computed display, columns or geometry is wrong. Correct every wrong computed property on that exact element; changing its width and nearby child grids is insufficient when its own display or columns remain wrong. Do not guess child containers. Do not request or infer hidden intent, assertions or clean source."
+  "submission": "Send one interpretation plus modular payload metadata through submission_json and raw patch_content through its dedicated evaluate_natural_attempt input. Omit payload.patch_content from submission_json and never double-escape patch code. For layout repairs, inspect the final cascade and patch the same container whose computed display, columns or geometry is wrong. Correct every wrong computed property on that exact element; changing its width and nearby child grids is insufficient when its own display or columns remain wrong. Do not guess child containers. For interaction repairs, call an existing canonical handler or public UI API when one is present; do not recreate only part of its classes, ARIA or state transitions. Do not request or infer hidden intent, assertions or clean source."
 }

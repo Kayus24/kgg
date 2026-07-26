@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "challenge_id": "natural-6efed78a858ee780",
-  "round_id": "natural-accept-20260726-m",
-  "natural_request": "wider das problem wenn ich + drücke wandert die trennlinie mit. die soll stehen bleiben und nur der inhalt soll größer werden, drag weiter nur spalten",
+  "challenge_id": "natural-255c7d8ff73a6a06",
+  "round_id": "natural-accept-20260726-n",
+  "natural_request": "bei dem regler in der mitte macht plus zwar alles grösser aber verschiebt dabei auch die spalten das darf nciht, ziehen ist breite plus minus nur größe",
   "input_mode": "combined",
   "screenshot": {
     "path": "marked-problem.png",
@@ -65,10 +65,10 @@
     "patch_content_format": "Complete executable HTML fragment. Wrap CSS in <style> and JavaScript in <script>; bare CSS or JavaScript is invalid.",
     "ambiguity_policy": "If one of multiple marked controls is requested and at least two matching source defects remain possible, ask exactly one target question before dispatch. Never repair both.",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-6efed78a858ee780 --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-255c7d8ff73a6a06 --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]
   },
-  "submission": "Send one interpretation plus modular payload metadata through submission_json and raw patch_content through its dedicated evaluate_natural_attempt input. Omit payload.patch_content from submission_json and never double-escape patch code. For layout repairs, inspect the final cascade and patch the same container whose computed display, columns or geometry is wrong. Correct every wrong computed property on that exact element; changing its width and nearby child grids is insufficient when its own display or columns remain wrong. Do not guess child containers. Do not request or infer hidden intent, assertions or clean source."
+  "submission": "Send one interpretation plus modular payload metadata through submission_json and raw patch_content through its dedicated evaluate_natural_attempt input. Omit payload.patch_content from submission_json and never double-escape patch code. For layout repairs, inspect the final cascade and patch the same container whose computed display, columns or geometry is wrong. Correct every wrong computed property on that exact element; changing its width and nearby child grids is insufficient when its own display or columns remain wrong. Do not guess child containers. For interaction repairs, call an existing canonical handler or public UI API when one is present; do not recreate only part of its classes, ARIA or state transitions. Do not request or infer hidden intent, assertions or clean source."
 }
