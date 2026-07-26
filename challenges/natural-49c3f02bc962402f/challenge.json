@@ -1,24 +1,24 @@
 {
   "schema": 1,
-  "challenge_id": "natural-e4cef2ed70b533f4",
-  "round_id": "natural-accept-20260726-e",
-  "natural_request": "wider das problem bei dem regler in der mitte macht plus zwar alles grösser aber verschiebt dabei auch die spalten das darf nciht, ziehen ist breite plus minus nur größe und sag nicht fertig ohne test",
-  "input_mode": "combined",
+  "challenge_id": "natural-49c3f02bc962402f",
+  "round_id": "natural-accept-20260726-f",
+  "natural_request": "wider das problem bei 1 oder 2 im menü reagiert das falsche nicht mehr ich weiss grad nicht wie das heisst bitte kleinster patch",
+  "input_mode": "screenshot",
   "screenshot": {
     "path": "marked-problem.png",
-    "sha256": "58d1c1cfebf3667ff09fb7ba7064b675a945093f6c7307331c280ad8fe942b5b",
+    "sha256": "b8f93d78c60b73595c901ffef2a663dd6fc3b4f1263f66081f3dedfe5624209d",
     "attachment_required": true
   },
   "viewport": {
-    "width": 1180,
-    "height": 820
+    "width": 390,
+    "height": 844
   },
   "source": {
     "full_html": "admin-broken.html",
     "chunks_index": "source/index.json",
     "chunk_count": 16,
     "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
-    "broken_sha256": "5415ac63432fc25da9f63b255c70fba8837ef35550dd4446605dea4bf54cfe7c"
+    "broken_sha256": "c752aa629d3d4e4a1b163a5b412cfe421da877d6ba743f0a0d768da740cc6f22"
   },
   "submission_contract": {
     "fields": [
@@ -62,8 +62,9 @@
       "new_text"
     ],
     "patch_placeholder": "__KGG_PATCH_ID__",
+    "patch_content_format": "Complete executable HTML fragment. Wrap CSS in <style> and JavaScript in <script>; bare CSS or JavaScript is invalid.",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-e4cef2ed70b533f4 --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-49c3f02bc962402f --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]

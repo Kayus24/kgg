@@ -1,12 +1,12 @@
 {
   "schema": 1,
-  "challenge_id": "natural-cffb24e300eb20ca",
-  "round_id": "natural-accept-20260726-e",
-  "natural_request": "ok also eins von den zwei markierten dingern links geht nicht mehr auf mach das wider bitte kleinster patch",
-  "input_mode": "screenshot",
+  "challenge_id": "natural-3704c74c30884de5",
+  "round_id": "natural-accept-20260726-f",
+  "natural_request": "ok also auf handy sitzt das admin ding im falschen layer rechts aussen, es soll bei übungen im plan im kopf bleiben und sag nicht fertig ohne test",
+  "input_mode": "combined",
   "screenshot": {
     "path": "marked-problem.png",
-    "sha256": "b8f93d78c60b73595c901ffef2a663dd6fc3b4f1263f66081f3dedfe5624209d",
+    "sha256": "ff5c75cc6013f6f96f696ddae2c7a1eb70b260375a3c981231097b9b95b5917d",
     "attachment_required": true
   },
   "viewport": {
@@ -18,7 +18,7 @@
     "chunks_index": "source/index.json",
     "chunk_count": 16,
     "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
-    "broken_sha256": "c752aa629d3d4e4a1b163a5b412cfe421da877d6ba743f0a0d768da740cc6f22"
+    "broken_sha256": "d1559edf4b480cbd223e3616c6831d30c6f48a53165492534f23556795d195e5"
   },
   "submission_contract": {
     "fields": [
@@ -62,8 +62,9 @@
       "new_text"
     ],
     "patch_placeholder": "__KGG_PATCH_ID__",
+    "patch_content_format": "Complete executable HTML fragment. Wrap CSS in <style> and JavaScript in <script>; bare CSS or JavaScript is invalid.",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-cffb24e300eb20ca --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-3704c74c30884de5 --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]
