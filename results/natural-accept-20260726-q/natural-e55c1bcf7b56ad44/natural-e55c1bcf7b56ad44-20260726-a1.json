@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "round_id": "natural-accept-20260726-q",
+  "challenge_id": "natural-e55c1bcf7b56ad44",
+  "request_id": "natural-e55c1bcf7b56ad44-20260726-a1",
+  "run_id": 30218455483,
+  "error_class": null,
+  "feedback": "Natural-language, payload and browser UI checks passed.",
+  "scores": {
+    "natural_language_intent": {
+      "percent": 100,
+      "passed": 3,
+      "total": 3,
+      "matches": [
+        {
+          "matched": true,
+          "marker": "zwei"
+        },
+        {
+          "matched": true,
+          "marker": "admin men"
+        },
+        {
+          "matched": true,
+          "marker": "entfern"
+        }
+      ]
+    },
+    "ui_diagnosis": {
+      "percent": 100,
+      "passed": 2,
+      "total": 2,
+      "matches": [
+        {
+          "matched": true,
+          "marker": "legacy"
+        },
+        {
+          "matched": true,
+          "marker": "kggphoneadminmenu"
+        }
+      ]
+    },
+    "clarification_policy": {
+      "status": "PASS",
+      "expected": 0,
+      "actual": 0
+    },
+    "patch_safety": {
+      "status": "PASS"
+    },
+    "browser_behavior": {
+      "status": "PASS"
+    },
+    "visible_result": {
+      "status": "PASS"
+    }
+  },
+  "payload_sha256": "36c351be0fbf5f60b95bde3d8fb68bb261d8bc187292156efe7efaa8abab32fd"
+}
