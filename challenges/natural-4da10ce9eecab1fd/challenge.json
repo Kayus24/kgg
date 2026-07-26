@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "challenge_id": "natural-6c1e32ceeaa4f7be",
-  "round_id": "natural-accept-20260726-i",
-  "natural_request": "ok also 1 plus minus = skalieren 2 links rechts ziehen = datenbank gegen plan breite, im moment mischt er beides",
+  "challenge_id": "natural-4da10ce9eecab1fd",
+  "round_id": "natural-accept-20260726-j",
+  "natural_request": "wenn ich + drücke wandert die trennlinie mit. die soll stehen bleiben und nur der inhalt soll größer werden, drag weiter nur spalten",
   "input_mode": "combined",
   "screenshot": {
     "path": "marked-problem.png",
@@ -63,8 +63,9 @@
     ],
     "patch_placeholder": "__KGG_PATCH_ID__",
     "patch_content_format": "Complete executable HTML fragment. Wrap CSS in <style> and JavaScript in <script>; bare CSS or JavaScript is invalid.",
+    "ambiguity_policy": "If one of multiple marked controls is requested and at least two matching source defects remain possible, ask exactly one target question before dispatch. Never repair both.",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-6c1e32ceeaa4f7be --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-4da10ce9eecab1fd --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]
