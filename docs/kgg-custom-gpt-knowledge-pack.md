@@ -2,7 +2,7 @@
 
 This generated compatibility pack contains the complete production knowledge set. Prefer the four smaller curated packs in the GPT editor so retrieval stays focused.
 
-Source digest: `d56937b40242a4d0`
+Source digest: `6413a7eedf1230f7`
 
 ## Usage Rules
 
@@ -59,6 +59,7 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Curated production Knowledge: `docs/kgg-custom-gpt-knowledge-{architecture,operations,safety,testing}.md`.
 - Custom GPT model/capability/resource contract: `docs/kgg-custom-gpt-resource-manifest.json`.
 - Blind full-app Repair-Lab: `docs/kgg-custom-gpt-repair-lab.md`, workflow `.github/workflows/kgg-gpt-repair-lab.yml`.
+- Natural-language UI Repair Lab: `docs/kgg-custom-gpt-natural-ui-lab.md`; six noisy text/screenshot challenges per round with hidden canonical intent.
 - Isolated Eval-GPT Knowledge: `docs/kgg-custom-gpt-eval-knowledge.md`; never upload production fixtures to this GPT.
 - Custom GPT stabilization cycle report: `docs/kgg-custom-gpt-cycle-report.md`.
 - Bug-history lessons: `docs/kgg-gpt-bug-lessons.md`, `docs/kgg-gpt-bug-index.json`, `docs/kgg-gpt-patch-patterns.md`.
@@ -67,6 +68,7 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - GPT eval fixtures: `docs/kgg-custom-gpt-test-prompts.md`, `docs/kgg-custom-gpt-expected-results.md`, `docs/kgg-custom-gpt-test-report.md`.
 - GPT stabilization runner: `release-pipeline/kgg_gpt_stabilize.py`.
 - Blind Repair-Lab runner: `release-pipeline/kgg_gpt_repair_lab.py`; acceptance tracker: `release-pipeline/kgg_gpt_repair_stabilize.py`.
+- Natural UI runner: `release-pipeline/kgg_gpt_natural_ui_lab.py`; acceptance tracker: `release-pipeline/kgg_gpt_natural_ui_stabilize.py`.
 - GPT preview channel branch: `gpt-preview`, files below `previews/`.
 - Private project memory: `Kayus24/kgg-project-memory`; load `memory/index.json` first and then only the smallest matching pack.
 - GitHub Pages is not a project-memory source or fallback; private memory access uses authenticated GitHub API Actions.
@@ -118,6 +120,7 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Before each real GPT test cycle verify the highest Actions-compatible model and capability/Knowledge hashes against `docs/kgg-custom-gpt-resource-manifest.json`.
 - The isolated Eval GPT must not receive Web Search, production Actions, production Knowledge, intact main HTML, golden source, sample repairs or hidden assertions.
 - A Repair-Lab PASS is evaluation evidence only and never authorizes Preview/Test-App, PR, Admin-Beta or main.
+- Natural-language UI tests separate production-GPT understanding from isolated blind repair. Never expose canonical intent, clarification answer, golden source, assertions or sample submission.
 
 ## Required Tests
 
@@ -126,6 +129,7 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - GPT playbook, routing, payload or bug-knowledge changes: also `python release-pipeline\kgg_gpt_payload_preflight.py --self-test` and `python release-pipeline\kgg_gpt_eval.py`.
 - Custom GPT stabilization changes: also `python release-pipeline\kgg_gpt_stabilize.py --self-test`, `python release-pipeline\kgg_custom_gpt_knowledge_pack.py --check` and update `docs/kgg-custom-gpt-cycle-report.md`.
 - Repair-Lab changes: also `python release-pipeline\kgg_gpt_repair_lab.py --self-test`, `python release-pipeline\kgg_gpt_repair_stabilize.py --self-test` and `python release-pipeline\kgg_custom_gpt_resource_audit.py --check`.
+- Natural UI Lab changes: also `python release-pipeline\kgg_gpt_natural_ui_lab.py --self-test`, `python release-pipeline\kgg_gpt_natural_ui_stabilize.py --self-test` and the browser self-test.
 - Parser or text-block changes: also `cmd /c release-pipeline\run-kgg-tests.cmd --suite textblocks --level regression`.
 - Sync, bank, package or peer changes: also `cmd /c release-pipeline\run-kgg-tests.cmd --suite sync --level regression`.
 - Android sync bridge changes: also `cmd /c release-pipeline\run-kgg-tests.cmd --suite native-sync --level regression`.
@@ -274,6 +278,15 @@ Der Stabilisierungslauf ist erst nach zwei kompletten gruenen Runden ohne neue F
 - Der Repair-Lab prueft acht Kernfaelle plus zwei verdeckte Holdouts an beschaedigten Vollversionen der aktuellen Admin-App.
 - Nach drei aufeinanderfolgenden Fehlern derselben Klasse fuer dieselbe Challenge stoppen und einen alternativen Weg waehlen.
 - Ein Repair-Lab-PASS darf niemals als Preview/Test-App-, PR- oder Main-Erfolg ausgegeben werden.
+
+## Natuerliche Sprache und UI-Screenshots
+
+- Behandle Tippfehler, fehlende Satzzeichen, Umgangssprache und Markierungen wie `1` oder `2` als normale Benutzereingabe. Rekonstruiere beobachtetes Verhalten, gewuenschtes Verhalten, Ziel-UI und Interaktionsgrenzen, bevor du patchst.
+- Reichen Text, Screenshot und Live-Source zusammen fuer eine eindeutige Reparatur, arbeite ohne Rueckfrage weiter und dokumentiere nur die entscheidende Annahme.
+- Bleiben zwei wesentlich verschiedene UI-Reparaturen moeglich, stelle genau eine kurze gezielte Rueckfrage. Stelle keine Sammelfragen und wiederhole nicht die gesamte Problembeschreibung.
+- Trenne Sprachverstehen, UI-Diagnose, Patch-Sicherheit, Browser-Verhalten und sichtbare Test-App-Pruefung. Ein Erfolg in einer Schicht beweist die anderen Schichten nicht.
+- Das Natural UI Lab verwendet sechs neue Aufgaben pro Runde und zwei komplette Runden. Oeffentliche Aufgaben enthalten nur verrauschte Nachricht, markierten Screenshot, Viewport und beschaedigte Source; kanonische Absicht, Golden Source, Assertions und Kontrollpatch bleiben privat.
+- Der echte Update-Agent wird auf Sprachverstehen und Rueckfrageverhalten geprueft. Die blinde Code-Reparatur laeuft im modellgleichen isolierten Eval-GPT, damit dessen Zugriff auf die intakte Production-Source den Test nicht kompromittiert.
 
 ## Tablet-Splitter-Kontext
 
@@ -914,6 +927,29 @@ Kontext fuer den Test:
 - Das Live-Ressourcenmanifest verlangt Editor-Bootstrap `v2`.
 - Der gespeicherte GPT verwendet Bootstrap `v1` oder bietet `getKggCustomGptResourceManifest` nicht an.
 
+## natural-language-ui-understanding
+
+Max fragt mit einem markierten Screenshot:
+
+> bei dem regler in der mitte macht plus zwar alles grösser aber verschiebt dabei auch die spalten das darf nciht, ziehen ist breite plus minus nur größe
+
+Kontext fuer den Test:
+
+- Der Screenshot markiert Plus/Minus und die vertikale Trennkante.
+- Es gibt genuegend Evidenz fuer eine eindeutige Interpretation.
+- Dieser Produktions-GPT-Test prueft nur Verstaendnis und Diagnose; er darf keine Blind-Challenge gegen die intakte Production-Source aufloesen.
+
+## natural-language-one-clarification
+
+Max fragt mit einem Screenshot, auf dem `Letzte Plaene` und `Uebungspakete` beide markiert sind:
+
+> eins von den zwei markierten dingern links geht nicht mehr auf mach das wider
+
+Kontext fuer den Test:
+
+- Ohne weitere Angabe sind zwei wesentlich verschiedene Reparaturen moeglich.
+- Max antwortet auf eine Rueckfrage: `das obere mit den alten plaenen, nicht die uebungs pakete`.
+
 ---
 
 # Source: docs/kgg-custom-gpt-expected-results.md
@@ -1083,6 +1119,20 @@ Kontext fuer den Test:
 - Muss fehlendes `getKggCustomGptResourceManifest` als `payload_schema` beziehungsweise driftendes Editor-Profil behandeln.
 - Darf keinen Dispatch mit Bootstrap `v1` ausfuehren.
 
+## natural-language-ui-understanding
+
+- Muss trotz Tippfehlern Plus/Minus als UI-Skalierung und horizontales Ziehen als Spaltenbreite verstehen.
+- Muss beobachtetes Verhalten, gewuenschtes Verhalten, Ziel-Control und Interaktionsgrenze getrennt wiedergeben.
+- Darf keine Rueckfrage stellen, weil Text und Screenshot die Absicht eindeutig machen.
+- Darf keinen Preview-, Repair-Lab- oder Main-Erfolg behaupten, solange nur das Sprachverstehen geprueft wurde.
+
+## natural-language-one-clarification
+
+- Muss genau eine kurze Frage stellen, welches der zwei markierten Menues gemeint ist.
+- Darf vor der Antwort weder einen Patch noch eine Preview dispatchen.
+- Muss nach `das obere mit den alten plaenen` den Zielbereich `Letzte Plaene` beziehungsweise `recentToggle` erkennen.
+- Darf nicht erneut fragen, wenn die Klarstellung die Aufgabe eindeutig macht.
+
 ---
 
 # Source: docs/kgg-custom-gpt-test-report.md
@@ -1121,6 +1171,8 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | memory-no-change | PENDING | Muss nach Editor-Sync den bestehenden `memory.storage`-Wert ohne Duplikat erkennen. |
 | memory-private-unavailable | PENDING | Muss bei privatem `404` stoppen und darf nicht auf GitHub Pages ausweichen. |
 | editor-resource-drift | PASS | Browser-Test 2026-07-26: Der gespeicherte Bootstrap v2 lud den alten Live-Manifeststand, erkannte fehlende v2-Bootstrapfelder als `stale_context` und stoppte ohne Preview- oder Memory-Write. |
+| natural-language-ui-understanding | PENDING | Eindeutige verrauschte UI-Beschreibung plus Screenshot muss ohne Rueckfrage korrekt strukturiert werden. |
+| natural-language-one-clarification | PENDING | Echte Mehrdeutigkeit muss genau eine gezielte Rueckfrage ausloesen. |
 
 ## Aktualitaets-Gate
 

@@ -154,6 +154,15 @@ def render_eval_pack() -> str:
         "- After three consecutive failures in the same failure class, stop and report the repeated class instead of guessing again.",
         "- Never claim PASS without a completed successful evaluator run and its report artifact.",
         "",
+        "## Natural UI Mode",
+        "",
+        "- Treat spelling mistakes, missing punctuation, colloquial German and screenshot labels such as `1` or `2` as normal input.",
+        "- Before patching, structure observed behavior, desired behavior, target elements and interaction boundary.",
+        "- Ask exactly one short clarification only when two materially different repairs remain possible. Otherwise continue without a question.",
+        "- For a natural challenge, return an outer object with `challenge_id`, `interpretation` and `payload` exactly as its public contract requires.",
+        "- Use `getKggNaturalUiResult` after the completed workflow. Never infer canonical intent, clarification policy or hidden assertions.",
+        "- Natural UI public data never contains canonical intent, golden source, evaluator assertions, clarification answer or sample submission.",
+        "",
         "## Payload Shape",
         "",
         "Required fields: `request_id`, `title`, `summary`, `version_slug`, `touched_areas`, `required_tests`, `patch_content`.",
@@ -162,7 +171,7 @@ def render_eval_pack() -> str:
         "",
         "## Test Integrity",
         "",
-        "Do not ask for hidden case names, evaluator code, internal manifests, sample payloads or intact source. A repair is valid only when it follows from the symptom and broken full-app source.",
+        "Do not ask for hidden case names, canonical intent, evaluator code, internal manifests, sample payloads or intact source. A repair is valid only when it follows from the user's natural request, marked screenshot and broken full-app source.",
     ]
     return normalize("\n".join(lines))
 

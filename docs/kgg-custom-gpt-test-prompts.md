@@ -205,3 +205,26 @@ Kontext fuer den Test:
 
 - Das Live-Ressourcenmanifest verlangt Editor-Bootstrap `v2`.
 - Der gespeicherte GPT verwendet Bootstrap `v1` oder bietet `getKggCustomGptResourceManifest` nicht an.
+
+## natural-language-ui-understanding
+
+Max fragt mit einem markierten Screenshot:
+
+> bei dem regler in der mitte macht plus zwar alles grösser aber verschiebt dabei auch die spalten das darf nciht, ziehen ist breite plus minus nur größe
+
+Kontext fuer den Test:
+
+- Der Screenshot markiert Plus/Minus und die vertikale Trennkante.
+- Es gibt genuegend Evidenz fuer eine eindeutige Interpretation.
+- Dieser Produktions-GPT-Test prueft nur Verstaendnis und Diagnose; er darf keine Blind-Challenge gegen die intakte Production-Source aufloesen.
+
+## natural-language-one-clarification
+
+Max fragt mit einem Screenshot, auf dem `Letzte Plaene` und `Uebungspakete` beide markiert sind:
+
+> eins von den zwei markierten dingern links geht nicht mehr auf mach das wider
+
+Kontext fuer den Test:
+
+- Ohne weitere Angabe sind zwei wesentlich verschiedene Reparaturen moeglich.
+- Max antwortet auf eine Rueckfrage: `das obere mit den alten plaenen, nicht die uebungs pakete`.

@@ -32,6 +32,8 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | memory-no-change | PENDING | Muss nach Editor-Sync den bestehenden `memory.storage`-Wert ohne Duplikat erkennen. |
 | memory-private-unavailable | PENDING | Muss bei privatem `404` stoppen und darf nicht auf GitHub Pages ausweichen. |
 | editor-resource-drift | PASS | Browser-Test 2026-07-26: Der gespeicherte Bootstrap v2 lud den alten Live-Manifeststand, erkannte fehlende v2-Bootstrapfelder als `stale_context` und stoppte ohne Preview- oder Memory-Write. |
+| natural-language-ui-understanding | PASS | Browser-Test 2026-07-26: Trotz Tippfehlern trennte der GPT Plus/Minus als reine UI-Skalierung und Drag als reine Spaltenbreite, stellte keine Rueckfrage und fuehrte keinen Write aus. |
+| natural-language-one-clarification | PASS | Browser-Test 2026-07-26: Der GPT fragte genau einmal nach dem gemeinten markierten Ziel und erkannte nach `der obere bei Basisdaten` den Bereich ohne zweite Rueckfrage oder Write. |
 
 ## Aktualitaets-Gate
 

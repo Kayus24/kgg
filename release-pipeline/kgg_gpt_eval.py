@@ -80,6 +80,8 @@ def run_repair_lab_self_tests() -> None:
     commands = [
         [sys.executable, "release-pipeline/kgg_gpt_repair_lab.py", "--self-test"],
         [sys.executable, "release-pipeline/kgg_gpt_repair_stabilize.py", "--self-test"],
+        [sys.executable, "release-pipeline/kgg_gpt_natural_ui_lab.py", "--self-test"],
+        [sys.executable, "release-pipeline/kgg_gpt_natural_ui_stabilize.py", "--self-test"],
         [sys.executable, "release-pipeline/kgg_custom_gpt_resource_audit.py", "--self-test"],
     ]
     for command in commands:
@@ -283,6 +285,8 @@ def check_prompt_and_expected_docs() -> None:
         "memory-no-change",
         "memory-private-unavailable",
         "editor-resource-drift",
+        "natural-language-ui-understanding",
+        "natural-language-one-clarification",
     ]
     for case in cases:
         require(prompts, f"## {case}", f"prompt fixture {case}")
@@ -438,7 +442,7 @@ def check_prompt_and_expected_docs() -> None:
         resource_manifest,
         [
             '"schema": 2',
-            '"profileVersion": "2.0.0"',
+            '"profileVersion": "2.1.0"',
             '"editorBootstrap"',
             '"version": "v2"',
             "kgg-custom-gpt-editor-bootstrap.md",
@@ -580,12 +584,107 @@ def check_repair_lab_contract() -> None:
     )
 
 
+def check_natural_ui_lab_contract() -> None:
+    lab_doc = read("docs/kgg-custom-gpt-natural-ui-lab.md")
+    report = read("docs/kgg-custom-gpt-natural-ui-lab-report.md")
+    eval_knowledge = read("docs/kgg-custom-gpt-eval-knowledge.md")
+    raw_schema = read("docs/kgg-custom-gpt-repair-lab-raw-openapi.yaml")
+    api_schema = read("docs/kgg-custom-gpt-repair-lab-api-openapi.yaml")
+    workflow = read(".github/workflows/kgg-gpt-repair-lab.yml")
+    runner = read("release-pipeline/kgg_gpt_natural_ui_lab.py")
+    stabilize = read("release-pipeline/kgg_gpt_natural_ui_stabilize.py")
+    require_all(
+        lab_doc,
+        [
+            "Sechs Klassen",
+            "genau einer notwendigen Rueckfrage",
+            "Kanonische Absicht",
+            "gpt-natural-ui-lab",
+            "validate_only -> publish_preview",
+        ],
+        "Natural UI Lab runbook",
+    )
+    require_all(
+        report,
+        [
+            "HARNESS GREEN",
+            "Eindeutige verrauschte UI-Anfrage",
+            "Echte Mehrdeutigkeit",
+            "Runde 1",
+            "Runde 2",
+            "Max Test-App-Freigabe",
+        ],
+        "Natural UI Lab report",
+    )
+    require_all(
+        eval_knowledge,
+        [
+            "Natural UI Mode",
+            "clarification",
+            "getKggNaturalUiResult",
+            "canonical intent",
+        ],
+        "Natural UI Eval Knowledge",
+    )
+    require_all(
+        raw_schema,
+        [
+            "gpt-natural-ui-lab",
+            "getKggNaturalUiLabIndex",
+            "getKggNaturalUiChallenge",
+            "getKggNaturalUiScreenshot",
+            "getKggNaturalUiSourceChunk",
+            "getKggNaturalUiResult",
+        ],
+        "Natural UI raw schema",
+    )
+    require_all(
+        api_schema,
+        ["evaluate_natural_attempt", "submission_json", "natural"],
+        "Natural UI API schema",
+    )
+    require_all(
+        workflow,
+        [
+            "publish_natural_challenges",
+            "evaluate_natural_attempt",
+            "kgg-natural-ui-lab/public",
+            "kgg-natural-ui-result/report.json",
+            "Publish sanitized natural-language evaluation outcome",
+        ],
+        "Natural UI workflow",
+    )
+    require_all(
+        runner,
+        [
+            "canonical_intent_groups",
+            "canonical_diagnosis_groups",
+            "assert_public_is_blind",
+            "marked-problem.png",
+            "interpretation",
+        ],
+        "Natural UI runner",
+    )
+    require_all(
+        stabilize,
+        [
+            "REQUIRED_PER_ROUND = 6",
+            "REQUIRED_GREEN_ROUNDS = 2",
+            "MIN_FIRST_ATTEMPT_PASSES = 10",
+            "MAX_ATTEMPTS_TO_PASS = 2",
+            "STOP_ALTERNATIVE_REQUIRED",
+        ],
+        "Natural UI stabilizer",
+    )
+
+
 def main() -> int:
     try:
         check_playbook()
         check_prompt_and_expected_docs()
         check_area_routes()
         check_repair_lab_contract()
+        check_natural_ui_lab_contract()
         run_preflight_self_test()
         run_stabilize_self_test()
         run_mock_eval_self_test()

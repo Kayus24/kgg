@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: KGG Blind Repair Lab Source
-  version: "1.1.0"
-  description: Read-only access to sanitized broken full-app challenges. Golden source, assertions and sample repairs are intentionally unavailable.
+  version: "1.2.0"
+  description: Read-only access to sanitized broken full-app and natural-language UI challenges. Golden source, canonical intent, assertions and sample repairs are intentionally unavailable.
 servers:
   - url: https://raw.githubusercontent.com
 paths:
@@ -93,6 +93,119 @@ paths:
       responses:
         "200":
           description: Sanitized evaluation outcome.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /Kayus24/kgg/gpt-natural-ui-lab/index.json:
+    get:
+      operationId: getKggNaturalUiLabIndex
+      summary: Get the current blind natural-language UI round and opaque challenge ids.
+      x-openai-isConsequential: false
+      responses:
+        "200":
+          description: Sanitized natural-language challenge index.
+  /Kayus24/kgg/gpt-natural-ui-lab/challenges/{natural_challenge_id}/challenge.json:
+    get:
+      operationId: getKggNaturalUiChallenge
+      summary: Get one noisy user request, screenshot metadata and submission contract.
+      x-openai-isConsequential: false
+      parameters:
+        - name: natural_challenge_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^natural-[a-f0-9]{16}$"
+      responses:
+        "200":
+          description: Solution-free natural-language challenge manifest.
+  /Kayus24/kgg/gpt-natural-ui-lab/challenges/{natural_challenge_id}/marked-problem.png:
+    get:
+      operationId: getKggNaturalUiScreenshot
+      summary: Get the marked screenshot for one natural-language UI challenge.
+      x-openai-isConsequential: false
+      parameters:
+        - name: natural_challenge_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^natural-[a-f0-9]{16}$"
+      responses:
+        "200":
+          description: Marked problem screenshot.
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+  /Kayus24/kgg/gpt-natural-ui-lab/challenges/{natural_challenge_id}/source/index.json:
+    get:
+      operationId: getKggNaturalUiSourceIndex
+      summary: List exact chunks of the damaged full Admin HTML.
+      x-openai-isConsequential: false
+      parameters:
+        - name: natural_challenge_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^natural-[a-f0-9]{16}$"
+      responses:
+        "200":
+          description: Damaged-source chunk index.
+  /Kayus24/kgg/gpt-natural-ui-lab/challenges/{natural_challenge_id}/source/{natural_chunk_file}:
+    get:
+      operationId: getKggNaturalUiSourceChunk
+      summary: Read one exact damaged-source chunk.
+      x-openai-isConsequential: false
+      parameters:
+        - name: natural_challenge_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^natural-[a-f0-9]{16}$"
+        - name: natural_chunk_file
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^chunk-[0-9]{3}\\.txt$"
+      responses:
+        "200":
+          description: Exact damaged-source text chunk.
+  /Kayus24/kgg/gpt-natural-ui-lab/results/{natural_round_id}/{natural_challenge_id}/{natural_request_id}.json:
+    get:
+      operationId: getKggNaturalUiResult
+      summary: Read one sanitized natural-language evaluator outcome.
+      description: Contains scores, safe error class and compact feedback, never canonical intent, clean source, assertions or sample repairs.
+      x-openai-isConsequential: false
+      parameters:
+        - name: natural_round_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
+        - name: natural_challenge_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^natural-[a-f0-9]{16}$"
+        - name: natural_request_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
+      responses:
+        "200":
+          description: Sanitized natural-language evaluation outcome.
           content:
             application/json:
               schema:

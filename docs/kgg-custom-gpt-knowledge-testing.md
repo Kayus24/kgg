@@ -2,7 +2,7 @@
 
 Generated production regression fixtures and expected operational responses. Never upload this file to the isolated Eval GPT.
 
-Source digest: `826c4839ff7e6f73`
+Source digest: `5f1aa7e44833dbef`
 
 ## Usage Rules
 
@@ -232,6 +232,29 @@ Kontext fuer den Test:
 - Das Live-Ressourcenmanifest verlangt Editor-Bootstrap `v2`.
 - Der gespeicherte GPT verwendet Bootstrap `v1` oder bietet `getKggCustomGptResourceManifest` nicht an.
 
+## natural-language-ui-understanding
+
+Max fragt mit einem markierten Screenshot:
+
+> bei dem regler in der mitte macht plus zwar alles grösser aber verschiebt dabei auch die spalten das darf nciht, ziehen ist breite plus minus nur größe
+
+Kontext fuer den Test:
+
+- Der Screenshot markiert Plus/Minus und die vertikale Trennkante.
+- Es gibt genuegend Evidenz fuer eine eindeutige Interpretation.
+- Dieser Produktions-GPT-Test prueft nur Verstaendnis und Diagnose; er darf keine Blind-Challenge gegen die intakte Production-Source aufloesen.
+
+## natural-language-one-clarification
+
+Max fragt mit einem Screenshot, auf dem `Letzte Plaene` und `Uebungspakete` beide markiert sind:
+
+> eins von den zwei markierten dingern links geht nicht mehr auf mach das wider
+
+Kontext fuer den Test:
+
+- Ohne weitere Angabe sind zwei wesentlich verschiedene Reparaturen moeglich.
+- Max antwortet auf eine Rueckfrage: `das obere mit den alten plaenen, nicht die uebungs pakete`.
+
 ---
 
 # Source: docs/kgg-custom-gpt-expected-results.md
@@ -401,6 +424,20 @@ Kontext fuer den Test:
 - Muss fehlendes `getKggCustomGptResourceManifest` als `payload_schema` beziehungsweise driftendes Editor-Profil behandeln.
 - Darf keinen Dispatch mit Bootstrap `v1` ausfuehren.
 
+## natural-language-ui-understanding
+
+- Muss trotz Tippfehlern Plus/Minus als UI-Skalierung und horizontales Ziehen als Spaltenbreite verstehen.
+- Muss beobachtetes Verhalten, gewuenschtes Verhalten, Ziel-Control und Interaktionsgrenze getrennt wiedergeben.
+- Darf keine Rueckfrage stellen, weil Text und Screenshot die Absicht eindeutig machen.
+- Darf keinen Preview-, Repair-Lab- oder Main-Erfolg behaupten, solange nur das Sprachverstehen geprueft wurde.
+
+## natural-language-one-clarification
+
+- Muss genau eine kurze Frage stellen, welches der zwei markierten Menues gemeint ist.
+- Darf vor der Antwort weder einen Patch noch eine Preview dispatchen.
+- Muss nach `das obere mit den alten plaenen` den Zielbereich `Letzte Plaene` beziehungsweise `recentToggle` erkennen.
+- Darf nicht erneut fragen, wenn die Klarstellung die Aufgabe eindeutig macht.
+
 ---
 
 # Source: docs/kgg-custom-gpt-test-report.md
@@ -439,6 +476,8 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | memory-no-change | PENDING | Muss nach Editor-Sync den bestehenden `memory.storage`-Wert ohne Duplikat erkennen. |
 | memory-private-unavailable | PENDING | Muss bei privatem `404` stoppen und darf nicht auf GitHub Pages ausweichen. |
 | editor-resource-drift | PASS | Browser-Test 2026-07-26: Der gespeicherte Bootstrap v2 lud den alten Live-Manifeststand, erkannte fehlende v2-Bootstrapfelder als `stale_context` und stoppte ohne Preview- oder Memory-Write. |
+| natural-language-ui-understanding | PENDING | Eindeutige verrauschte UI-Beschreibung plus Screenshot muss ohne Rueckfrage korrekt strukturiert werden. |
+| natural-language-one-clarification | PENDING | Echte Mehrdeutigkeit muss genau eine gezielte Rueckfrage ausloesen. |
 
 ## Aktualitaets-Gate
 
@@ -592,6 +631,8 @@ Tablet splitter UI probe included: no
 | `analysis-no-dispatch` | PASS | `` | Real browser retest did not dispatch for an analysis-only request. |
 | `ci-tooling-pdftoppm` | PASS | `` | Real browser retest classified missing pdftoppm as ci_tooling. |
 | `admin-beta-push-gate` | PASS | `` | Real browser retest required Max approval, green checks, merged PR, manifest and Admin HTML evidence. |
+| `natural-language-ui-understanding` | PENDING | `` | Awaiting production GPT browser test with noisy text and marked screenshot. |
+| `natural-language-one-clarification` | PENDING | `` | Awaiting production GPT browser test with exactly one clarification. |
 
 ## Preview/Test-APK-Gate
 

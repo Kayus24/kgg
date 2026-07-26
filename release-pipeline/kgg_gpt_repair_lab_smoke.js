@@ -13,6 +13,7 @@ function parseArgs() {
     if (args[index] === "--html" && args[index + 1]) out.html = path.resolve(args[++index]);
     else if (args[index] === "--case" && args[index + 1]) out.caseName = String(args[++index]);
     else if (args[index] === "--screenshot" && args[index + 1]) out.screenshot = path.resolve(args[++index]);
+    else if (args[index] === "--capture-only") out.captureOnly = true;
   }
   return out;
 }
@@ -79,13 +80,14 @@ async function seedContext(context, caseName) {
     localStorage.setItem("kgg_admin_local_secrets_v1", JSON.stringify({ version: 2, updatedAt: "2026-07-20T00:00:00Z", geminiKeys: ["test-only"] }));
     localStorage.setItem("kgg_pwa_install_prompt_seen_v1", "2026-07-20T00:00:00Z");
     localStorage.setItem("kgg_tablet_layout_locked", "false");
-    localStorage.removeItem("kgg_tablet_left_col_width");
+    if (selectedCase === "tablet-scale-boundary") localStorage.setItem("kgg_tablet_left_col_width", "480px");
+    else localStorage.removeItem("kgg_tablet_left_col_width");
     localStorage.setItem("kgg_tablet_ui_scale", selectedCase === "tablet-scale-persistence" ? "1.25" : "1");
   }, { plan: exercises(), bank: customBank(), selectedCase: caseName });
 }
 
 async function openApp(browser, htmlPath, caseName, pageErrors, requests) {
-  const phoneCases = new Set(["phone-admin-menu", "phone-photo-menu", "bank-thumbnails", "clear-live-input", "phone-history-drawers", "phone-menu-anchor"]);
+  const phoneCases = new Set(["phone-admin-menu", "phone-admin-duplicate", "phone-photo-menu", "bank-thumbnails", "clear-live-input", "phone-history-drawers", "phone-recent-drawer", "phone-menu-anchor", "phone-menu-visual-position"]);
   const phone = phoneCases.has(caseName);
   const context = await browser.newContext({
     viewport: phone ? { width: 390, height: 844 } : { width: 1180, height: 820 },
@@ -127,6 +129,25 @@ async function pointer(page, selector, type, x, y, pointerId) {
 }
 
 async function probe(page, caseName) {
+  if (caseName === "phone-admin-duplicate") {
+    await page.waitForSelector("#kggPhoneAdminMenu", { state: "visible", timeout: 7000 });
+    const state = await page.evaluate(() => {
+      const visible = Array.from(document.querySelectorAll(".kggPhoneAdminMenu")).filter((node) => {
+        const style = getComputedStyle(node);
+        const rect = node.getBoundingClientRect();
+        return style.display !== "none" && style.visibility !== "hidden" && rect.width > 2 && rect.height > 2;
+      });
+      return {
+        visibleMenus: visible.length,
+        anchoredMenus: document.querySelectorAll("#createPanel .planHeader .kggPhoneAdminMenu").length,
+      };
+    });
+    if (state.visibleMenus !== 1 || state.anchoredMenus !== 1) {
+      throw new Error(`duplicate phone admin control remains: ${JSON.stringify(state)}`);
+    }
+    return state;
+  }
+
   if (caseName === "phone-admin-menu" || caseName === "phone-menu-anchor") {
     await page.waitForSelector("#kggPhoneAdminMenu", { state: "visible", timeout: 7000 });
     const anchored = await page.locator("#createPanel .planHeader #kggPhoneAdminMenu").count();
@@ -138,6 +159,24 @@ async function probe(page, caseName) {
     });
     if (!open) throw new Error("phone admin menu did not open");
     return { anchored: true, opened: true };
+  }
+
+  if (caseName === "phone-menu-visual-position") {
+    await page.waitForSelector("#kggPhoneAdminMenu", { state: "visible", timeout: 7000 });
+    const state = await page.evaluate(() => {
+      const menu = document.getElementById("kggPhoneAdminMenu");
+      const header = document.querySelector("#createPanel.planMode .planHeader") || document.querySelector("#createPanel .planHeader");
+      if (!menu || !header) return null;
+      const m = menu.getBoundingClientRect();
+      const h = header.getBoundingClientRect();
+      return {
+        menu: { left: m.left, right: m.right, top: m.top, bottom: m.bottom },
+        header: { left: h.left, right: h.right, top: h.top, bottom: h.bottom },
+        inside: m.left >= h.left - 4 && m.right <= h.right + 4 && m.top >= h.top - 4 && m.bottom <= h.bottom + 4,
+      };
+    });
+    if (!state || !state.inside) throw new Error(`phone admin menu is visually outside the plan header: ${JSON.stringify(state)}`);
+    return state;
   }
 
   if (caseName === "phone-photo-menu") {
@@ -186,6 +225,20 @@ async function probe(page, caseName) {
     state = await page.evaluate(() => ({ safe: document.body.classList.contains("kggPhoneDrawerSafeOpen"), text: document.getElementById("packageList").textContent }));
     if (!state.safe || !state.text.includes("Repair Paket")) throw new Error(`package drawer failed: ${JSON.stringify(state)}`);
     return { recent: true, package: true };
+  }
+
+  if (caseName === "phone-recent-drawer") {
+    await page.locator("#recentToggle").click();
+    await page.waitForFunction(() => !document.getElementById("recentList").classList.contains("hidden"), null, { timeout: 7000 });
+    const state = await page.evaluate(() => ({
+      safe: document.body.classList.contains("kggPhoneDrawerSafeOpen"),
+      text: document.getElementById("recentList").textContent,
+      packageHidden: document.getElementById("packageList").classList.contains("hidden"),
+    }));
+    if (!state.safe || !state.text.includes("Repair Verlauf") || !state.packageHidden) {
+      throw new Error(`recent drawer failed: ${JSON.stringify(state)}`);
+    }
+    return state;
   }
 
   if (caseName === "tablet-editor-layout") {
@@ -241,6 +294,28 @@ async function probe(page, caseName) {
     return { initial, stored };
   }
 
+  if (caseName === "tablet-scale-boundary") {
+    await page.locator("#tabletMenuBtn").click();
+    await page.waitForFunction(() => document.body.classList.contains("tabletMenuOpen"), null, { timeout: 7000 });
+    await page.locator("#tabletMenuLayoutBtn").click();
+    await page.waitForFunction(() => document.body.classList.contains("tabletLayoutEditMode"), null, { timeout: 7000 });
+    const before = await page.evaluate(() => ({
+      left: getComputedStyle(document.documentElement).getPropertyValue("--kgg-tablet-left-col").trim(),
+      scale: Number(getComputedStyle(document.documentElement).getPropertyValue("--kgg-tablet-ui-scale").trim()),
+    }));
+    await page.locator("#tabletSplitScalePlus").click();
+    await page.waitForTimeout(250);
+    const after = await page.evaluate(() => ({
+      left: getComputedStyle(document.documentElement).getPropertyValue("--kgg-tablet-left-col").trim(),
+      scale: Number(getComputedStyle(document.documentElement).getPropertyValue("--kgg-tablet-ui-scale").trim()),
+      storedScale: Number(localStorage.getItem("kgg_tablet_ui_scale")),
+    }));
+    if (!(after.scale > before.scale) || after.left !== before.left || Math.abs(after.scale - after.storedScale) > 0.001) {
+      throw new Error(`tablet scale changed column boundary: ${JSON.stringify({ before, after })}`);
+    }
+    return { before, after };
+  }
+
   if (caseName === "tablet-layout-panel") {
     await page.locator("#tabletMenuBtn").click();
     await page.waitForFunction(() => document.body.classList.contains("tabletMenuOpen"), null, { timeout: 7000 });
@@ -257,7 +332,71 @@ async function probe(page, caseName) {
   throw new Error(`unknown Repair-Lab browser case: ${caseName}`);
 }
 
+async function prepareVisualState(page, caseName) {
+  if (caseName === "tablet-editor-layout") {
+    await page.locator("#planList [data-planedit]").first().click();
+    await page.waitForSelector("#editorModal.open .editorSheet", { timeout: 7000 });
+  } else if (caseName === "tablet-scale-boundary" || caseName === "tablet-layout-panel") {
+    await page.locator("#tabletMenuBtn").click();
+    await page.waitForFunction(() => document.body.classList.contains("tabletMenuOpen"), null, { timeout: 7000 });
+    await page.locator("#tabletMenuLayoutBtn").click();
+    await page.waitForTimeout(300);
+  }
+}
+
+async function addProblemAnnotations(page, caseName) {
+  const selectors = {
+    "tablet-editor-layout": ["#editorModal .editorSheet"],
+    "phone-admin-duplicate": [".kggNaturalDuplicate"],
+    "phone-menu-anchor": ["#kggPhoneAdminMenu"],
+    "phone-menu-visual-position": ["#kggPhoneAdminMenu"],
+    "tablet-scale-boundary": ["#tabletSplitScaleControl"],
+    "tablet-layout-panel": ["#tabletMenuLayoutBtn"],
+    "phone-recent-drawer": ["#recentToggle", "#packageToggle"],
+  }[caseName] || [];
+  await page.evaluate(({ selected }) => {
+    document.querySelectorAll("[data-natural-ui-annotation]").forEach((node) => node.remove());
+    selected.forEach((selector, index) => {
+      const node = document.querySelector(selector);
+      if (!node) return;
+      const rect = node.getBoundingClientRect();
+      const ring = document.createElement("div");
+      ring.dataset.naturalUiAnnotation = "1";
+      ring.style.cssText = [
+        "position:fixed",
+        `left:${Math.max(2, rect.left - 10)}px`,
+        `top:${Math.max(2, rect.top - 10)}px`,
+        `width:${Math.max(36, rect.width + 20)}px`,
+        `height:${Math.max(36, rect.height + 20)}px`,
+        "border:6px solid #f4c400",
+        "border-radius:48%",
+        `transform:rotate(${index % 2 ? -4 : 3}deg)`,
+        "box-sizing:border-box",
+        "pointer-events:none",
+        "z-index:2147483646",
+        "filter:drop-shadow(0 1px 1px rgba(0,0,0,.18))",
+      ].join(";");
+      const label = document.createElement("span");
+      label.textContent = String(index + 1);
+      label.style.cssText = [
+        "position:absolute",
+        "left:-18px",
+        "top:-28px",
+        "font:900 28px/1 Arial,sans-serif",
+        "color:#f4c400",
+        "text-shadow:0 1px 1px rgba(0,0,0,.22)",
+      ].join(";");
+      ring.appendChild(label);
+      document.body.appendChild(ring);
+    });
+  }, { selected: selectors });
+}
+
 async function main() {
+  const watchdog = setTimeout(() => {
+    console.error(JSON.stringify({ status: "FAIL", error: "browser probe watchdog exceeded 110 seconds" }));
+    process.exit(124);
+  }, 110000);
   const args = parseArgs();
   if (!args.html || !args.caseName) throw new Error("--html and --case are required");
   if (!fs.existsSync(args.html)) throw new Error(`HTML missing: ${args.html}`);
@@ -269,6 +408,15 @@ async function main() {
   try {
     const opened = await openApp(browser, args.html, args.caseName, pageErrors, requests);
     context = opened.context;
+    if (args.captureOnly) {
+      await prepareVisualState(opened.page, args.caseName);
+      await addProblemAnnotations(opened.page, args.caseName);
+      if (!args.screenshot) throw new Error("--capture-only requires --screenshot");
+      fs.mkdirSync(path.dirname(args.screenshot), { recursive: true });
+      await opened.page.screenshot({ path: args.screenshot, fullPage: false });
+      console.log(JSON.stringify({ status: "PASS", case: args.caseName, captureOnly: true, blockedExternalRequests: requests.length }));
+      return;
+    }
     const result = await probe(opened.page, args.caseName);
     if (pageErrors.length) throw new Error(`page errors: ${pageErrors.join(" | ")}`);
     if (args.screenshot) {
@@ -279,6 +427,7 @@ async function main() {
   } finally {
     if (context) await context.close();
     await browser.close();
+    clearTimeout(watchdog);
   }
 }
 

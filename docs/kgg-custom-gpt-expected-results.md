@@ -162,3 +162,17 @@
 - Muss den Editor-Sync vor jedem Preview- oder Memory-Write verlangen.
 - Muss fehlendes `getKggCustomGptResourceManifest` als `payload_schema` beziehungsweise driftendes Editor-Profil behandeln.
 - Darf keinen Dispatch mit Bootstrap `v1` ausfuehren.
+
+## natural-language-ui-understanding
+
+- Muss trotz Tippfehlern Plus/Minus als UI-Skalierung und horizontales Ziehen als Spaltenbreite verstehen.
+- Muss beobachtetes Verhalten, gewuenschtes Verhalten, Ziel-Control und Interaktionsgrenze getrennt wiedergeben.
+- Darf keine Rueckfrage stellen, weil Text und Screenshot die Absicht eindeutig machen.
+- Darf keinen Preview-, Repair-Lab- oder Main-Erfolg behaupten, solange nur das Sprachverstehen geprueft wurde.
+
+## natural-language-one-clarification
+
+- Muss genau eine kurze Frage stellen, welches der zwei markierten Menues gemeint ist.
+- Darf vor der Antwort weder einen Patch noch eine Preview dispatchen.
+- Muss nach `das obere mit den alten plaenen` den Zielbereich `Letzte Plaene` beziehungsweise `recentToggle` erkennen.
+- Darf nicht erneut fragen, wenn die Klarstellung die Aufgabe eindeutig macht.

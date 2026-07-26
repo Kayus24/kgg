@@ -11,6 +11,8 @@ on:
         options:
           - publish_challenges
           - evaluate_attempt
+          - publish_natural_challenges
+          - evaluate_natural_attempt
       round_id:
         description: Stable round id used to reproduce opaque challenge ids
         required: true
@@ -22,6 +24,11 @@ on:
         type: string
       payload_json:
         description: Modular v2 payload JSON; required for evaluate_attempt
+        required: false
+        default: ""
+        type: string
+      submission_json:
+        description: Natural-language interpretation plus modular v2 payload; required for evaluate_natural_attempt
         required: false
         default: ""
         type: string
@@ -39,7 +46,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PAYLOAD_JSON: ${{ inputs.payload_json }}
+      SUBMISSION_JSON: ${{ inputs.submission_json }}
       KGG_REPAIR_ROUND_ID: ${{ inputs.round_id }}
+      KGG_NATURAL_UI_ROUND_ID: ${{ inputs.round_id }}
     steps:
       - name: Checkout dispatched source
         uses: actions/checkout@v4
@@ -62,6 +71,7 @@ jobs:
           npm exec --yes --package=playwright@1.61.1 -- playwright install --with-deps chromium
 
       - name: Generate isolated full-app challenges
+        if: inputs.mode == 'publish_challenges' || inputs.mode == 'evaluate_attempt'
         shell: bash
         run: |
           set -euo pipefail
@@ -70,6 +80,21 @@ jobs:
             --round-id '${{ inputs.round_id }}' \
             --output "$RUNNER_TEMP/kgg-repair-lab" \
             --include-holdouts
+
+      - name: Generate isolated natural-language UI challenges
+        if: inputs.mode == 'publish_natural_challenges' || inputs.mode == 'evaluate_natural_attempt'
+        shell: bash
+        run: |
+          set -euo pipefail
+          screenshot_arg=""
+          if [[ '${{ inputs.mode }}' == 'publish_natural_challenges' ]]; then
+            screenshot_arg="--screenshots"
+          fi
+          python release-pipeline/kgg_gpt_natural_ui_lab.py \
+            --generate \
+            --round-id '${{ inputs.round_id }}' \
+            --output "$RUNNER_TEMP/kgg-natural-ui-lab" \
+            $screenshot_arg
 
       - name: Publish sanitized challenge branch
         if: inputs.mode == 'publish_challenges'
@@ -120,6 +145,55 @@ jobs:
           fi
           echo "Challenge index: https://raw.githubusercontent.com/${{ github.repository }}/gpt-repair-lab/index.json" >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Publish sanitized natural-language challenge branch
+        if: inputs.mode == 'publish_natural_challenges'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          repo_url="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+          target="$RUNNER_TEMP/kgg-natural-ui-public"
+          if git ls-remote --exit-code "$repo_url" refs/heads/gpt-natural-ui-lab >/dev/null 2>&1; then
+            git clone --depth=1 --branch gpt-natural-ui-lab "$repo_url" "$target"
+          else
+            mkdir -p "$target"
+            git -C "$target" init
+            git -C "$target" remote add origin "$repo_url"
+            git -C "$target" checkout --orphan gpt-natural-ui-lab
+          fi
+          python - "$target" "$RUNNER_TEMP/kgg-natural-ui-lab/public" <<'PY'
+          import shutil
+          import sys
+          from pathlib import Path
+
+          target = Path(sys.argv[1])
+          source = Path(sys.argv[2])
+          for child in target.iterdir():
+              if child.name == ".git":
+                  continue
+              if child.is_dir():
+                  shutil.rmtree(child)
+              else:
+                  child.unlink()
+          for child in source.iterdir():
+              destination = target / child.name
+              if child.is_dir():
+                  shutil.copytree(child, destination)
+              else:
+                  shutil.copy2(child, destination)
+          PY
+          git -C "$target" config user.name 'github-actions[bot]'
+          git -C "$target" config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C "$target" add --all
+          if git -C "$target" diff --cached --quiet; then
+            echo "Natural-language challenge branch already matches this round."
+          else
+            git -C "$target" commit -m "publish blind natural UI lab ${{ inputs.round_id }}"
+            git -C "$target" push origin HEAD:gpt-natural-ui-lab
+          fi
+          echo "Natural challenge index: https://raw.githubusercontent.com/${{ github.repository }}/gpt-natural-ui-lab/index.json" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Validate evaluate inputs
         if: inputs.mode == 'evaluate_attempt'
         shell: bash
@@ -140,6 +214,26 @@ jobs:
           )
           PY
 
+      - name: Validate natural evaluate inputs
+        if: inputs.mode == 'evaluate_natural_attempt'
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ '${{ inputs.challenge_id }}' =~ ^natural-[a-f0-9]{16}$ ]] || { echo "Invalid natural challenge_id" >&2; exit 1; }
+          [[ -n "$SUBMISSION_JSON" ]] || { echo "submission_json is required" >&2; exit 1; }
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          submission = json.loads(os.environ["SUBMISSION_JSON"])
+          Path(os.environ["RUNNER_TEMP"], "kgg-natural-ui-submission.json").write_text(
+              json.dumps(submission, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+              newline="\n",
+          )
+          PY
+
       - name: Evaluate blind repair attempt
         if: inputs.mode == 'evaluate_attempt'
         shell: bash
@@ -154,6 +248,20 @@ jobs:
             --payload-file "$RUNNER_TEMP/kgg-repair-attempt.json" \
             --artifacts-dir "$RUNNER_TEMP/kgg-repair-result"
 
+      - name: Evaluate blind natural-language UI attempt
+        if: inputs.mode == 'evaluate_natural_attempt'
+        shell: bash
+        run: |
+          set -euo pipefail
+          challenge="$RUNNER_TEMP/kgg-natural-ui-lab/public/challenges/${{ inputs.challenge_id }}"
+          NODE_PATH="$(npm root -g):${NODE_PATH:-}" python release-pipeline/kgg_gpt_natural_ui_lab.py \
+            --evaluate \
+            --challenge-id '${{ inputs.challenge_id }}' \
+            --challenge-dir "$challenge" \
+            --internal-manifest "$RUNNER_TEMP/kgg-natural-ui-lab/internal/index.json" \
+            --submission-file "$RUNNER_TEMP/kgg-natural-ui-submission.json" \
+            --artifacts-dir "$RUNNER_TEMP/kgg-natural-ui-result"
+
       - name: Upload compact evaluation evidence
         if: always() && inputs.mode == 'evaluate_attempt'
         uses: actions/upload-artifact@v4
@@ -165,6 +273,18 @@ jobs:
             ${{ runner.temp }}/kgg-repair-result/report.json
             ${{ runner.temp }}/kgg-repair-result/repaired.png
             ${{ runner.temp }}/kgg-repair-result/outcome.json
+
+      - name: Upload compact natural-language evaluation evidence
+        if: always() && inputs.mode == 'evaluate_natural_attempt'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgg-natural-ui-${{ inputs.round_id }}-${{ inputs.challenge_id }}-${{ github.run_attempt }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            ${{ runner.temp }}/kgg-natural-ui-result/report.json
+            ${{ runner.temp }}/kgg-natural-ui-result/repaired.png
+            ${{ runner.temp }}/kgg-natural-ui-result/outcome.json
 
       - name: Publish sanitized evaluation outcome
         if: always() && inputs.mode == 'evaluate_attempt'
@@ -200,4 +320,40 @@ jobs:
           else
             git -C "$target" commit -m "publish repair outcome ${{ inputs.challenge_id }} $request_id"
             git -C "$target" push origin HEAD:gpt-repair-lab
+          fi
+
+      - name: Publish sanitized natural-language evaluation outcome
+        if: always() && inputs.mode == 'evaluate_natural_attempt'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          outcome="$RUNNER_TEMP/kgg-natural-ui-result/outcome.json"
+          test -f "$outcome"
+          request_id="$(python - "$outcome" <<'PY'
+          import json
+          import re
+          import sys
+
+          value = str(json.load(open(sys.argv[1], encoding="utf-8"))["request_id"])
+          if not re.fullmatch(r"[a-z0-9][a-z0-9-]{5,63}", value):
+              raise SystemExit("invalid outcome request_id")
+          print(value)
+          PY
+          )"
+          repo_url="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+          target="$RUNNER_TEMP/kgg-natural-ui-outcome"
+          git clone --depth=1 --branch gpt-natural-ui-lab "$repo_url" "$target"
+          result_dir="$target/results/${{ inputs.round_id }}/${{ inputs.challenge_id }}"
+          mkdir -p "$result_dir"
+          cp "$outcome" "$result_dir/$request_id.json"
+          git -C "$target" config user.name 'github-actions[bot]'
+          git -C "$target" config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C "$target" add --all
+          if git -C "$target" diff --cached --quiet; then
+            echo "Natural outcome already published."
+          else
+            git -C "$target" commit -m "publish natural UI outcome ${{ inputs.challenge_id }} $request_id"
+            git -C "$target" push origin HEAD:gpt-natural-ui-lab
           fi

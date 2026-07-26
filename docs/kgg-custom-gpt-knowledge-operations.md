@@ -2,7 +2,7 @@
 
 Generated production knowledge for modular payloads, Actions, Preview/Test-App and Admin-Beta operations.
 
-Source digest: `656b6844949cbbcb`
+Source digest: `8e6cbe00721e18ef`
 
 ## Usage Rules
 
@@ -134,6 +134,15 @@ Der Stabilisierungslauf ist erst nach zwei kompletten gruenen Runden ohne neue F
 - Der Repair-Lab prueft acht Kernfaelle plus zwei verdeckte Holdouts an beschaedigten Vollversionen der aktuellen Admin-App.
 - Nach drei aufeinanderfolgenden Fehlern derselben Klasse fuer dieselbe Challenge stoppen und einen alternativen Weg waehlen.
 - Ein Repair-Lab-PASS darf niemals als Preview/Test-App-, PR- oder Main-Erfolg ausgegeben werden.
+
+## Natuerliche Sprache und UI-Screenshots
+
+- Behandle Tippfehler, fehlende Satzzeichen, Umgangssprache und Markierungen wie `1` oder `2` als normale Benutzereingabe. Rekonstruiere beobachtetes Verhalten, gewuenschtes Verhalten, Ziel-UI und Interaktionsgrenzen, bevor du patchst.
+- Reichen Text, Screenshot und Live-Source zusammen fuer eine eindeutige Reparatur, arbeite ohne Rueckfrage weiter und dokumentiere nur die entscheidende Annahme.
+- Bleiben zwei wesentlich verschiedene UI-Reparaturen moeglich, stelle genau eine kurze gezielte Rueckfrage. Stelle keine Sammelfragen und wiederhole nicht die gesamte Problembeschreibung.
+- Trenne Sprachverstehen, UI-Diagnose, Patch-Sicherheit, Browser-Verhalten und sichtbare Test-App-Pruefung. Ein Erfolg in einer Schicht beweist die anderen Schichten nicht.
+- Das Natural UI Lab verwendet sechs neue Aufgaben pro Runde und zwei komplette Runden. Oeffentliche Aufgaben enthalten nur verrauschte Nachricht, markierten Screenshot, Viewport und beschaedigte Source; kanonische Absicht, Golden Source, Assertions und Kontrollpatch bleiben privat.
+- Der echte Update-Agent wird auf Sprachverstehen und Rueckfrageverhalten geprueft. Die blinde Code-Reparatur laeuft im modellgleichen isolierten Eval-GPT, damit dessen Zugriff auf die intakte Production-Source den Test nicht kompromittiert.
 
 ## Tablet-Splitter-Kontext
 

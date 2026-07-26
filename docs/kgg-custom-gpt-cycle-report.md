@@ -51,6 +51,8 @@ Tablet splitter UI probe included: no
 | `analysis-no-dispatch` | PASS | `` | Real browser retest did not dispatch for an analysis-only request. |
 | `ci-tooling-pdftoppm` | PASS | `` | Real browser retest classified missing pdftoppm as ci_tooling. |
 | `admin-beta-push-gate` | PASS | `` | Real browser retest required Max approval, green checks, merged PR, manifest and Admin HTML evidence. |
+| `natural-language-ui-understanding` | PASS | `` | Browser-Test 2026-07-26: noisy text plus marked screenshot was structured into observed behavior, scale-only plus/minus and column-only drag without a question or write. |
+| `natural-language-one-clarification` | PASS | `` | Browser-Test 2026-07-26: two visible targets caused exactly one focused question; the clarification selected `Basisdaten` without a second question or write. |
 
 ## Preview/Test-APK-Gate
 

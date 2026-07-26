@@ -11,7 +11,7 @@
   "production": {
     "name": "KGG Update-Agent",
     "gptId": "g-6a45fba0f3408191ac1fb2c987a2e960",
-    "profileVersion": "2.0.0",
+    "profileVersion": "2.1.0",
     "editorBootstrap": {
       "path": "docs/kgg-custom-gpt-editor-bootstrap.md",
       "version": "v2",
@@ -29,11 +29,11 @@
     "knowledge": [
       {
         "path": "docs/kgg-custom-gpt-knowledge-architecture.md",
-        "sha256": "db1158a19946ced83980d095e033ff5bc288f42f9feb53bf3f1a4e20a7e46df5"
+        "sha256": "1423c6485e0b4ab3f15fea2f99c2ac6e5defde702a3bbb6e5f4015ee4d3c6a8c"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-operations.md",
-        "sha256": "bcafe50fb85689995807252bc0f179c6302120ec2e8c1e43579e2a4d6da45de7"
+        "sha256": "bd9aaeecc64e5cb94f271236583fd967dfc176ca9a463788f773ca931bd6250c"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-safety.md",
@@ -41,7 +41,7 @@
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-testing.md",
-        "sha256": "b61124586b0d3a0886dd1c880020e731916437440bfc50d5e545d49341872246"
+        "sha256": "e08e1cb16fcd9b37cd9d0f76f3e3328c67ed42ceebcdb080d998657fb95e32ff"
       }
     ],
     "actions": [
@@ -59,12 +59,12 @@
   "eval": {
     "name": "KGG Repair-Lab Eval",
     "gptId": "g-6a5e3483c98c81919e6f8a7939d5c072",
-    "profileVersion": "2.0.0",
+    "profileVersion": "2.1.0",
     "editorBootstrap": {
       "path": "docs/kgg-custom-gpt-eval-editor-bootstrap.md",
-      "version": "v2",
-      "characters": 1703,
-      "sha256": "868d5ae1745425bed1c5633607a27cd69eadefbef7929e351c43a16b8b07f730"
+      "version": "v3",
+      "characters": 2304,
+      "sha256": "2a70e505e6ca2a51adf736d017e0b4c9532f5a9ba542a993a14697b63a49467d"
     },
     "sameModelAsProduction": true,
     "capabilities": {
@@ -78,17 +78,17 @@
     "knowledge": [
       {
         "path": "docs/kgg-custom-gpt-eval-knowledge.md",
-        "sha256": "b2b50a541ccb7b1f3e3d8427c44b720af49c65dab061d10f2b8e0bb71f0c59e1"
+        "sha256": "94549d2453a401edc3a14a60ea760abffbfbd390dff7e4db17305068dbc5a33a"
       }
     ],
     "actions": [
       {
         "path": "docs/kgg-custom-gpt-repair-lab-raw-openapi.yaml",
-        "sha256": "4bee2ff71e18ff6c8b061bd3fd6393a3ce135b86b487bb80ad422ebb83e2a802"
+        "sha256": "ce658e18771f321f42ef176fba4fdb7e472bff2d7fe570aab285b2781db45a53"
       },
       {
         "path": "docs/kgg-custom-gpt-repair-lab-api-openapi.yaml",
-        "sha256": "c2b9d62444121574d11cba29005e95e2a572548d75a56cdd52f294e9a79765e1"
+        "sha256": "17e5526d20c77e8484a517751aaa5dc6a4ac8ad4bf01f43b81176e7e6987f4d9"
       }
     ],
     "forbiddenResources": [
@@ -98,7 +98,9 @@
       "golden source",
       "internal challenge manifest",
       "sample repair payloads",
-      "hidden evaluator assertions"
+      "hidden evaluator assertions",
+      "canonical natural-language intent",
+      "private clarification answer"
     ]
   },
   "officialReferences": [
