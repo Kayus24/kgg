@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import random
+import re
 import subprocess
 import sys
 import tempfile
@@ -620,11 +621,33 @@ def validate_interpretation(value: Any) -> dict[str, Any]:
     return value
 
 
+def semantic_marker_matches(normalized: str, tokens: list[str], marker: str) -> bool:
+    wanted = marker.lower()
+    if wanted in normalized:
+        return True
+    if " " in wanted or len(wanted) < 5:
+        return False
+    root = wanted
+    for suffix in ("ern", "en", "er", "es", "em", "e", "n", "s"):
+        if len(root) - len(suffix) >= 5 and root.endswith(suffix):
+            root = root[: -len(suffix)]
+            break
+    return len(root) >= 5 and any(root in token for token in tokens)
+
+
 def semantic_score(text: str, groups: list[list[str]] | tuple[tuple[str, ...], ...]) -> dict[str, Any]:
     normalized = text.lower()
+    tokens = re.findall(r"[a-z0-9äöüß-]+", normalized)
     matches = []
     for group in groups:
-        hit = next((marker for marker in group if marker.lower() in normalized), "")
+        hit = next(
+            (
+                marker
+                for marker in group
+                if semantic_marker_matches(normalized, tokens, marker)
+            ),
+            "",
+        )
         matches.append({"matched": bool(hit), "marker": hit})
     passed = sum(1 for item in matches if item["matched"])
     total = len(matches)
@@ -875,6 +898,15 @@ def self_test(browser: bool) -> dict[str, Any]:
     if inflected["percent"] != 100:
         raise NaturalUiLabError(
             "semantic aliases reject valid inflected phone-menu intent"
+        )
+    editor_case = case_by_key("noisy-editor-layout")
+    compound = semantic_score(
+        "Der Tablet-Editor braucht wieder ein zweispaltiges Raster.",
+        editor_case.intent_groups,
+    )
+    if compound["percent"] != 100:
+        raise NaturalUiLabError(
+            "semantic stem matching rejects valid German compound wording"
         )
     with tempfile.TemporaryDirectory(prefix="kgg-natural-ui-self-") as temp_name:
         temp = Path(temp_name)

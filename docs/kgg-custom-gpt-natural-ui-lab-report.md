@@ -50,6 +50,13 @@ Der Contract, Eval-Bootstrap und das isolierte Knowledge nennen die Typen nun
 explizit; ungueltige Interpretationsformen werden als `payload_schema`
 klassifiziert. Auch diese Runde zaehlt nicht zur Akzeptanz.
 
+Run `30209320029` in der verworfenen Runde `natural-accept-20260726-b`
+erreichte trotz korrektem `zweispaltig` nur 67 Prozent, weil der Scorer exakt
+`Spalte` suchte. Nach drei Wiederholungen der morphologischen Fehlerklasse
+wurde der Ansatz gewechselt: Der Scorer erkennt jetzt begrenzt deutsche
+Wortstaemme in Komposita. Regressionstests decken `zweispaltig` und
+`innerhalb des Kopfs` ab. Runde B zaehlt nicht zur Akzeptanz.
+
 | Runde | Challenges | First-attempt PASS | Final PASS | Neue Fehlerklasse |
 | --- | ---: | ---: | ---: | --- |
 | Runde 1 | 0/6 | 0/6 | 0/6 | PENDING |
