@@ -1,6 +1,6 @@
 # KGG Custom GPT Action Schema
 
-This is the canonical payload shape for `KGG GPT Preview Gate`.
+This is the canonical payload shape for `KGG GPT Preview Gate` and `KGG Project Memory Gate`.
 The Custom GPT must follow this shape exactly.
 
 The public app still loads `kgg-update/index.html`, but that file is generated output.
@@ -86,3 +86,51 @@ The GPT may say a Preview is available only after it has verified:
 - Use the API-only Action schema for `api.github.com`.
 - Do not create duplicate action domains for `raw.githubusercontent.com`; raw URLs are verified through the GitHub run/artifact/meta checks.
 - If the editor reports duplicate action domains, stop and fix the Action schema before dispatching.
+
+## KGG Project Memory Gate
+
+The private repository `Kayus24/kgg-project-memory` stores curated durable decisions. It does not store app code, patient data, secrets or full chat transcripts.
+
+Read in this order:
+
+1. `getKggMemoryIndex`.
+2. Only the smallest matching file via `getKggMemoryPack` (normally one or two packs).
+3. `getKggMemoryRecord` or `getKggMemoryHistory` only for rationale, history or conflicts.
+
+Valid memory payload:
+
+```json
+{
+  "request_id": "memory-example-001",
+  "record": {
+    "kind": "decision",
+    "key": "example.stable-key",
+    "topic": "project",
+    "title": "Short title",
+    "summary": "Compact routing summary.",
+    "value": "The durable instruction or fact.",
+    "source_refs": ["user:2026-07-20"],
+    "supersedes": []
+  }
+}
+```
+
+- Use `submitKggMemoryUpdate` with `mode=validate_only` first.
+- Continue with `mode=apply` only for `would_apply`, using the identical `request_id` and payload.
+- `no_change` is terminal and must not create another request.
+- `needs_approval` means the active old value and candidate value must be shown to Max; write nothing until he explicitly approves.
+- After approval, append a new record with `supersedes`, `approved_by: "Max"` and `approval_quote`. Never edit or delete the old record.
+- `rejected` must be reported and never bypassed.
+- The GPT must semantically compare the candidate with the matching active pack before dispatch. The workflow also blocks same-key value changes mechanically.
+
+Required memory operations:
+
+- `getKggMemoryIndex`
+- `getKggMemoryPack`
+- `getKggMemoryRecord`
+- `getKggMemoryHistory`
+- `submitKggMemoryUpdate`
+- `listKggMemoryUpdateRuns`
+- `getKggMemoryUpdateRun`
+- `getKggMemoryUpdateStatus`
+- `getKggMemoryUpdateArtifacts`

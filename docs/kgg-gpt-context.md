@@ -33,7 +33,8 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - GPT stabilization runner: `release-pipeline/kgg_gpt_stabilize.py`.
 - Blind Repair-Lab runner: `release-pipeline/kgg_gpt_repair_lab.py`; acceptance tracker: `release-pipeline/kgg_gpt_repair_stabilize.py`.
 - GPT preview channel branch: `gpt-preview`, files below `previews/`.
-- The Custom GPT may only write through `KGG GPT Preview Gate`; direct repo writes, direct main writes and direct merges stay forbidden.
+- Private project memory: `Kayus24/kgg-project-memory`; load `memory/index.json` first and then only the smallest matching pack.
+- The Custom GPT may write app changes only through `KGG GPT Preview Gate` and durable knowledge only through `KGG Project Memory Gate`; other direct writes and direct merges stay forbidden.
 
 ## Current Versions
 
@@ -58,6 +59,8 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Treat `KGGDataStore.currentPlan` as the central plan-state source.
 - Do not touch PDF, QR/patient app, scan/OCR, parser, plan-state, media/upload, API-key logic, Android/APK, GitHub manifest or phone layout unless Max explicitly asks.
 - Existing uncommitted local changes belong to Max or another run. Do not reset them.
+- Automatically add confirmed durable decisions and lessons to the private project memory, but never overwrite an active instruction without Max' explicit approval.
+- Do not store chats, patient data, secrets or transient debug output in the project memory.
 
 ## Patch Routing
 
@@ -98,6 +101,9 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Admin beta auto-merge requires green checks plus the explicit `kgg-auto-merge` label.
 - Custom GPT write access is limited to workflow dispatch for `.github/workflows/kgg-gpt-preview-gate.yml`.
 - The isolated Eval GPT may dispatch only `.github/workflows/kgg-gpt-repair-lab.yml`; that workflow cannot create Preview, PR, Admin-Beta or main changes.
+- Project-memory write access is limited to workflow dispatch for `Kayus24/kgg-project-memory/.github/workflows/kgg-memory-gate.yml`.
+- Memory reads must start with `getKggMemoryIndex`, then use only matching packs; history and records are on-demand only.
+- A memory update uses `validate_only` before `apply`; `needs_approval` must stop until Max explicitly approves the superseding record.
 - GPT Action schema must expose `validate_only`, `publish_preview`, `create_pr`, `publish_admin_beta` and run/job/artifact status reads.
 - Current GPT editor setup uses split Actions; paste the API-only schema into `api.github.com` to avoid duplicate `raw.githubusercontent.com` domains.
 - Preview writes go only to branch `gpt-preview`; production writes are PR-only and never auto-merge.
