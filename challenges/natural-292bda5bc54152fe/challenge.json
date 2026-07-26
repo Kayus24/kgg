@@ -1,24 +1,24 @@
 {
   "schema": 1,
-  "challenge_id": "natural-04b24d487a3ab477",
-  "round_id": "natural-accept-20260726-a",
-  "natural_request": "wider das problem das edit ding aufm tab ist kaput 1 spalte statt 2 und speichern soll unten sichtbar bleiben mach erst test app",
+  "challenge_id": "natural-292bda5bc54152fe",
+  "round_id": "natural-accept-20260726-b",
+  "natural_request": "das 3 punkte menu schwimmt wider irgendwo oben und gehört in den plan kopf bei 1 mach nur die position mach erst test app",
   "input_mode": "combined",
   "screenshot": {
     "path": "marked-problem.png",
-    "sha256": "c689fb65b98eaeff33a1d7ae96a5e86a12e6e84c7218d26a0f8ca704cbd1ca2c",
+    "sha256": "ff5c75cc6013f6f96f696ddae2c7a1eb70b260375a3c981231097b9b95b5917d",
     "attachment_required": true
   },
   "viewport": {
-    "width": 1180,
-    "height": 820
+    "width": 390,
+    "height": 844
   },
   "source": {
     "full_html": "admin-broken.html",
     "chunks_index": "source/index.json",
     "chunk_count": 16,
     "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
-    "broken_sha256": "d898d787ff83d186e864e5ea225a7452183f202179568a5c295f3849cbc35e66"
+    "broken_sha256": "d1559edf4b480cbd223e3616c6831d30c6f48a53165492534f23556795d195e5"
   },
   "submission_contract": {
     "fields": [
@@ -35,6 +35,15 @@
       "clarification_count",
       "clarification_question"
     ],
+    "interpretation_types": {
+      "observed_behavior": "string",
+      "desired_behavior": "string",
+      "target_elements": "non-empty string array",
+      "interaction_boundary": "string",
+      "confidence": "one of: low, medium, high",
+      "clarification_count": "integer 0 or 1",
+      "clarification_question": "string; empty when count is 0"
+    },
     "payload_schema": "KGG modular payload v2",
     "payload_fields": [
       "request_id",
@@ -54,7 +63,7 @@
     ],
     "patch_placeholder": "__KGG_PATCH_ID__",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-04b24d487a3ab477 --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-292bda5bc54152fe --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]
