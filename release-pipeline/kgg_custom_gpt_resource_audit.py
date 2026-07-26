@@ -259,7 +259,12 @@ def self_test() -> None:
     ]:
         if marker not in eval_raw_action:
             raise AuditError(f"Eval raw Action is missing {marker}")
-    if "evaluate_natural_attempt" not in eval_api_action or "submission_json" not in eval_api_action:
+    if (
+        "evaluate_natural_attempt" not in eval_api_action
+        or "submission_json" not in eval_api_action
+        or "patch_content" not in eval_api_action
+        or "never JSON-encode" not in eval_api_action
+    ):
         raise AuditError("Eval API Action is missing natural UI submission support")
     production = {item["sha256"] for item in manifest["production"]["knowledge"]}
     evaluation = {item["sha256"] for item in manifest["eval"]["knowledge"]}

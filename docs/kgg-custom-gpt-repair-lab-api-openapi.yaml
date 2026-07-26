@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: KGG Blind Repair Lab Evaluator
-  version: "1.1.0"
+  version: "1.2.0"
   description: Submit modular v2 Repair-Lab attempts or natural-language interpretation plus repair attempts and verify only KGG GPT Repair Lab workflow runs.
 servers:
   - url: https://api.github.com
@@ -43,7 +43,10 @@ paths:
                       description: Complete modular v2 payload. Do not include path, operations, old_text or new_text.
                     submission_json:
                       type: string
-                      description: For evaluate_natural_attempt, the complete interpretation object plus modular v2 payload. Never include hidden evaluator data.
+                      description: For evaluate_natural_attempt, the interpretation object plus modular v2 payload metadata. Omit payload.patch_content. Never include hidden evaluator data.
+                    patch_content:
+                      type: string
+                      description: For evaluate_natural_attempt, raw modular patch content. Send it directly here, never JSON-encode or escape it into submission_json.
       responses:
         "204":
           description: Evaluation dispatch accepted.

@@ -644,7 +644,14 @@ def check_natural_ui_lab_contract() -> None:
     )
     require_all(
         api_schema,
-        ["evaluate_natural_attempt", "submission_json", "natural"],
+        [
+            "evaluate_natural_attempt",
+            "submission_json",
+            "patch_content",
+            "Omit payload.patch_content",
+            "never JSON-encode",
+            "natural",
+        ],
         "Natural UI API schema",
     )
     require_all(
@@ -655,6 +662,9 @@ def check_natural_ui_lab_contract() -> None:
             "kgg-natural-ui-lab/public",
             "kgg-natural-ui-result/report.json",
             "Publish sanitized natural-language evaluation outcome",
+            '[[ -n "$PATCH_CONTENT" ]]',
+            '"patch_content" in payload',
+            'payload["patch_content"] = os.environ["PATCH_CONTENT"]',
             'npm install --prefix "$runtime" --no-package-lock --no-save playwright@1.61.1',
             'echo "NODE_PATH=$runtime/node_modules" >> "$GITHUB_ENV"',
         ],

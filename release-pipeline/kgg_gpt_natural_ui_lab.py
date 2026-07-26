@@ -434,7 +434,9 @@ def build_public_manifest(
             "required_tests": required_tests(identifier),
         },
         "submission": (
-            "Send one interpretation plus modular payload through evaluate_natural_attempt. "
+            "Send one interpretation plus modular payload metadata through submission_json "
+            "and raw patch_content through its dedicated evaluate_natural_attempt input. "
+            "Omit payload.patch_content from submission_json and never double-escape patch code. "
             "Do not request or infer hidden intent, assertions or clean source."
         ),
     }
