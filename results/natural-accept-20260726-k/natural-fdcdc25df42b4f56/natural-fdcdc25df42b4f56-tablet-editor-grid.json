@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "round_id": "natural-accept-20260726-k",
+  "challenge_id": "natural-fdcdc25df42b4f56",
+  "request_id": "natural-fdcdc25df42b4f56-tablet-editor-grid",
+  "run_id": 30214272613,
+  "error_class": null,
+  "feedback": "Natural-language, payload and browser UI checks passed.",
+  "scores": {
+    "natural_language_intent": {
+      "percent": 100,
+      "passed": 3,
+      "total": 3,
+      "matches": [
+        {
+          "matched": true,
+          "marker": "tablet"
+        },
+        {
+          "matched": true,
+          "marker": "editor"
+        },
+        {
+          "matched": true,
+          "marker": "spalte"
+        }
+      ]
+    },
+    "ui_diagnosis": {
+      "percent": 100,
+      "passed": 2,
+      "total": 2,
+      "matches": [
+        {
+          "matched": true,
+          "marker": "editormodal"
+        },
+        {
+          "matched": true,
+          "marker": "grid"
+        }
+      ]
+    },
+    "clarification_policy": {
+      "status": "PASS",
+      "expected": 0,
+      "actual": 0
+    },
+    "patch_safety": {
+      "status": "PASS"
+    },
+    "browser_behavior": {
+      "status": "PASS"
+    },
+    "visible_result": {
+      "status": "PASS"
+    }
+  },
+  "payload_sha256": "2ca55c0f1bdd812772eda7d71448b345422da291e0a32aaaf2cae288fc1e1d34"
+}
