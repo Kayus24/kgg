@@ -158,7 +158,7 @@ def render_eval_pack() -> str:
         "",
         "- Treat spelling mistakes, missing punctuation, colloquial German and screenshot labels such as `1` or `2` as normal input.",
         "- Before patching, structure observed behavior, desired behavior, target elements and interaction boundary.",
-        "- For CSS layout repairs, inspect the final cascade and patch the same container whose computed display, grid columns or geometry is wrong. Do not move parent layout properties onto guessed child containers.",
+        "- For CSS layout repairs, inspect the final cascade and patch the same container whose computed display, grid columns or geometry is wrong. Every reported wrong computed property must be corrected on that exact element: changing its width plus nearby child grids is insufficient when its own `display` or `grid-template-columns` is still wrong. Do not move parent layout properties onto guessed child containers.",
         "- After a UI-logic FAIL, use the reported computed element state to change the responsible selector/property pair materially; changing only nearby descendants is not a valid retry.",
         "- Ask exactly one short clarification only when two materially different repairs remain possible. Otherwise continue without a question.",
         "- If the user says one of two marked controls is broken and two matching source defects remain possible, ask which single control is meant before any Action. Never broaden the patch to both controls.",
