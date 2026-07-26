@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "status": "FAIL",
+  "round_id": "natural-accept-20260726-j",
+  "challenge_id": "natural-9666c5651aa706dd",
+  "request_id": "natural-9666c5651aa706dd-tablet-editor-layout",
+  "run_id": 30213845528,
+  "error_class": "ui_logic",
+  "feedback": "{\"status\":\"FAIL\",\"error\":\"tablet editor layout failed: {\\\"display\\\":\\\"block\\\",\\\"columns\\\":\\\"none\\\",\\\"width\\\":920}\"}"
+}
