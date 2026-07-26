@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "challenge_id": "natural-3704c74c30884de5",
-  "round_id": "natural-accept-20260726-f",
-  "natural_request": "ok also auf handy sitzt das admin ding im falschen layer rechts aussen, es soll bei übungen im plan im kopf bleiben und sag nicht fertig ohne test",
+  "challenge_id": "natural-5087fa3aa2673de7",
+  "round_id": "natural-accept-20260726-g",
+  "natural_request": "das 3 punkte menu schwimmt wider irgendwo oben und gehört in den plan kopf bei 1 mach nur die position mach erst test app",
   "input_mode": "combined",
   "screenshot": {
     "path": "marked-problem.png",
@@ -64,7 +64,7 @@
     "patch_placeholder": "__KGG_PATCH_ID__",
     "patch_content_format": "Complete executable HTML fragment. Wrap CSS in <style> and JavaScript in <script>; bare CSS or JavaScript is invalid.",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-3704c74c30884de5 --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-5087fa3aa2673de7 --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]

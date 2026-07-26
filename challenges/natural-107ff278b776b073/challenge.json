@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "challenge_id": "natural-49c3f02bc962402f",
-  "round_id": "natural-accept-20260726-f",
-  "natural_request": "wider das problem bei 1 oder 2 im menü reagiert das falsche nicht mehr ich weiss grad nicht wie das heisst bitte kleinster patch",
+  "challenge_id": "natural-107ff278b776b073",
+  "round_id": "natural-accept-20260726-g",
+  "natural_request": "wider das problem eins von den zwei markierten dingern links geht nicht mehr auf mach das wider",
   "input_mode": "screenshot",
   "screenshot": {
     "path": "marked-problem.png",
@@ -64,7 +64,7 @@
     "patch_placeholder": "__KGG_PATCH_ID__",
     "patch_content_format": "Complete executable HTML fragment. Wrap CSS in <style> and JavaScript in <script>; bare CSS or JavaScript is invalid.",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-49c3f02bc962402f --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-107ff278b776b073 --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]

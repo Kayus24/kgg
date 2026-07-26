@@ -1,24 +1,24 @@
 {
   "schema": 1,
-  "challenge_id": "natural-784c7c277238db15",
-  "round_id": "natural-accept-20260726-f",
-  "natural_request": "ok also wenn ich + drücke wandert die trennlinie mit. die soll stehen bleiben und nur der inhalt soll größer werden, drag weiter nur spalten",
-  "input_mode": "combined",
+  "challenge_id": "natural-a6c28044b37b0fcb",
+  "round_id": "natural-accept-20260726-g",
+  "natural_request": "schau mal warum hab ich da 2 mal die drei punkte? das zweite alte ding weg ohne die knoepfe im richtigen menu zu killen mach erst test app",
+  "input_mode": "screenshot",
   "screenshot": {
     "path": "marked-problem.png",
-    "sha256": "58d1c1cfebf3667ff09fb7ba7064b675a945093f6c7307331c280ad8fe942b5b",
+    "sha256": "b08467f2e7b5fbe4b43d76d1141051e9c18869600bb0923e0808fe9f7cd9a078",
     "attachment_required": true
   },
   "viewport": {
-    "width": 1180,
-    "height": 820
+    "width": 390,
+    "height": 844
   },
   "source": {
     "full_html": "admin-broken.html",
     "chunks_index": "source/index.json",
     "chunk_count": 16,
     "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
-    "broken_sha256": "5415ac63432fc25da9f63b255c70fba8837ef35550dd4446605dea4bf54cfe7c"
+    "broken_sha256": "29839aa5350d306e536e300c6aefe0a9c7a0b78c6321f1b58d6df50417ef94fe"
   },
   "submission_contract": {
     "fields": [
@@ -64,7 +64,7 @@
     "patch_placeholder": "__KGG_PATCH_ID__",
     "patch_content_format": "Complete executable HTML fragment. Wrap CSS in <style> and JavaScript in <script>; bare CSS or JavaScript is invalid.",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-784c7c277238db15 --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-a6c28044b37b0fcb --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]
