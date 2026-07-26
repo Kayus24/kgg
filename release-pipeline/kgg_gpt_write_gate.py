@@ -268,9 +268,11 @@ def inject_preview_banner(html: str, payload: dict[str, Any], digest: str) -> st
     request_id = payload["request_id"]
     summary = clean_ascii(str(payload.get("summary") or payload.get("title") or request_id), request_id, 180)
     banner = (
-        '<div id="kgg-gpt-preview-banner" style="position:sticky;top:0;z-index:999999;'
-        'background:#111827;color:#fff;padding:8px 12px;font:13px system-ui;'
-        'box-shadow:0 2px 10px rgba(0,0,0,.22)">'
+        '<div id="kgg-gpt-preview-banner" aria-label="KGG Preview-Kennung" '
+        'style="position:fixed;top:8px;right:8px;z-index:999999;pointer-events:none;'
+        'max-width:min(420px,calc(100vw - 16px));overflow:hidden;text-overflow:ellipsis;'
+        'white-space:nowrap;background:#111827;color:#fff;padding:6px 9px;border-radius:6px;'
+        'font:11px/1.2 system-ui;box-shadow:0 2px 10px rgba(0,0,0,.22);opacity:.92">'
         f'KGG PREVIEW | {request_id} | {digest[:12]} | {summary}'
         "</div>"
     )

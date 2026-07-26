@@ -145,6 +145,31 @@ def run_validate_only_self_test() -> None:
         fail(f"validate_only self-test failed: {output}")
 
 
+def run_preview_banner_self_test() -> None:
+    payload = {
+        "request_id": "preview-banner-self-test",
+        "title": "Preview banner self-test",
+        "summary": "The marker must not enter the app flex layout or block its controls.",
+    }
+    source = '<!doctype html><html><body style="display:flex"><button id="menu">Menu</button></body></html>'
+    rendered = write_gate.inject_preview_banner(source, payload, "a" * 64)
+    require_all(
+        rendered,
+        [
+            'id="kgg-gpt-preview-banner"',
+            "position:fixed",
+            "pointer-events:none",
+            "white-space:nowrap",
+            "text-overflow:ellipsis",
+        ],
+        "non-blocking preview banner",
+    )
+    if "position:sticky" in rendered:
+        fail("preview banner must not participate in the app flex layout")
+    if rendered.count('id="kgg-gpt-preview-banner"') != 1:
+        fail("preview banner must be injected exactly once")
+
+
 def run_modular_rollback_self_test() -> None:
     payload = {
         "request_id": "gpt-rollback-self-test",
@@ -499,6 +524,7 @@ def main() -> int:
         run_mock_eval_self_test()
         run_repair_lab_self_tests()
         run_validate_only_self_test()
+        run_preview_banner_self_test()
         run_modular_rollback_self_test()
         print("KGG Custom GPT eval OK")
         return 0

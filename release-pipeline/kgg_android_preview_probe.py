@@ -16,7 +16,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_AVD = "Medium_Phone_API_36.1"
+DEFAULT_AVD = "KGG_Lite_API35"
 DEFAULT_PACKAGE = "de.kgg.preview"
 DEFAULT_MARKER = "Groesse 100%"
 
@@ -70,7 +70,20 @@ def list_devices(adb_path: str) -> list[str]:
 
 def start_emulator(emulator_path: str, avd: str) -> None:
     subprocess.Popen(
-        [emulator_path, "-avd", avd, "-no-snapshot-save"],
+        [
+            emulator_path,
+            "-avd",
+            avd,
+            "-no-window",
+            "-no-audio",
+            "-no-boot-anim",
+            "-no-snapshot-load",
+            "-no-snapshot-save",
+            "-gpu",
+            "swiftshader_indirect",
+            "-memory",
+            "2048",
+        ],
         cwd=str(ROOT),
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
@@ -83,19 +96,37 @@ def wait_for_device(adb_path: str, timeout_s: int) -> str | None:
     while time.time() < deadline:
         devices = list_devices(adb_path)
         if devices:
-            return devices[0]
+            serial = devices[0]
+            boot = adb(adb_path, serial, ["shell", "getprop", "sys.boot_completed"], timeout=15)
+            packages = adb(adb_path, serial, ["shell", "cmd", "package", "list", "packages"], timeout=30)
+            if boot.returncode == 0 and boot.stdout.strip() == "1" and packages.returncode == 0 and "package:" in packages.stdout:
+                return serial
         time.sleep(3)
     return None
 
 
-def install_apk(adb_path: str, serial: str, apk: Path | None) -> dict[str, Any]:
+def install_apk(adb_path: str, serial: str, apk: Path | None, package: str) -> dict[str, Any]:
     if apk is None:
         return {"attempted": False, "ok": None, "notes": "no apk supplied"}
     if not apk.exists():
         return {"attempted": True, "ok": False, "notes": f"apk missing: {apk}"}
     proc = adb(adb_path, serial, ["install", "-r", str(apk)], timeout=180)
     output = (proc.stdout + "\n" + proc.stderr).strip()
-    return {"attempted": True, "ok": proc.returncode == 0, "notes": output[-600:]}
+    replaced_incompatible = False
+    if proc.returncode != 0 and "INSTALL_FAILED_UPDATE_INCOMPATIBLE" in output:
+        uninstall = adb(adb_path, serial, ["uninstall", package], timeout=60)
+        uninstall_output = (uninstall.stdout + "\n" + uninstall.stderr).strip()
+        if uninstall.returncode == 0:
+            proc = adb(adb_path, serial, ["install", str(apk)], timeout=180)
+            retry_output = (proc.stdout + "\n" + proc.stderr).strip()
+            output = f"signature reset: {uninstall_output}\n{retry_output}"
+            replaced_incompatible = proc.returncode == 0
+    return {
+        "attempted": True,
+        "ok": proc.returncode == 0,
+        "replaced_incompatible": replaced_incompatible,
+        "notes": output[-600:],
+    }
 
 
 def resolve_activity(adb_path: str, serial: str, package: str) -> tuple[str | None, str]:
@@ -220,10 +251,13 @@ def main() -> int:
         "log_summary": [],
     }
 
+    serial: str | None = None
+    started_emulator = False
     try:
         devices = list_devices(adb_path)
         if not devices and args.start_emulator:
             start_emulator(emulator_path, args.avd)
+            started_emulator = True
             serial = wait_for_device(adb_path, args.timeout)
         else:
             serial = devices[0] if devices else None
@@ -233,7 +267,7 @@ def main() -> int:
             print(json.dumps(result, ensure_ascii=False, indent=2))
             return 2
 
-        install = install_apk(adb_path, serial, args.apk)
+        install = install_apk(adb_path, serial, args.apk, args.package)
         result["install"] = install
         installed = package_installed(adb_path, serial, args.package)
         result["installed"] = installed
@@ -253,7 +287,9 @@ def main() -> int:
         started = start_activity(adb_path, serial, activity)
         result["activity_started"] = started["ok"]
         result["activity_start"] = started["notes"]
-        time.sleep(5)
+        # The Preview wrapper resolves the remote channel after the Android splash.
+        # Five seconds regularly captured only the splash on a cold API-35 boot.
+        time.sleep(18)
 
         shot = screenshot(adb_path, serial, out_dir)
         result["screenshot_path"] = shot.get("path")
@@ -269,13 +305,20 @@ def main() -> int:
         result["crash_log_path"] = logs.get("path")
         result["log_summary"] = logs.get("summary")
 
-        result["ok"] = bool(started["ok"] and not result["crash_detected"])
+        install_ok = install.get("ok") is not False
+        result["ok"] = bool(install_ok and installed and started["ok"] and not result["crash_detected"])
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0 if result["ok"] else 5
     except Exception as exc:  # noqa: BLE001 - CLI boundary
         result["error"] = str(exc)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 1
+    finally:
+        if started_emulator and serial:
+            try:
+                adb(adb_path, serial, ["emu", "kill"], timeout=20)
+            except Exception:
+                pass
 
 
 if __name__ == "__main__":
