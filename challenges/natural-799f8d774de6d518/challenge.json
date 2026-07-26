@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "challenge_id": "natural-c71c28e35042d278",
-  "round_id": "natural-accept-20260726-c",
-  "natural_request": "schau mal 1 plus minus = skalieren 2 links rechts ziehen = datenbank gegen plan breite, im moment mischt er beides mach erst test app",
+  "challenge_id": "natural-799f8d774de6d518",
+  "round_id": "natural-accept-20260726-d",
+  "natural_request": "wider das problem wenn ich + drücke wandert die trennlinie mit. die soll stehen bleiben und nur der inhalt soll größer werden, drag weiter nur spalten und sag nicht fertig ohne test",
   "input_mode": "combined",
   "screenshot": {
     "path": "marked-problem.png",
@@ -63,10 +63,10 @@
     ],
     "patch_placeholder": "__KGG_PATCH_ID__",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-c71c28e35042d278 --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-799f8d774de6d518 --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]
   },
-  "submission": "Send one interpretation plus modular payload through evaluate_natural_attempt. Do not request or infer hidden intent, assertions or clean source."
+  "submission": "Send one interpretation plus modular payload metadata through submission_json and raw patch_content through its dedicated evaluate_natural_attempt input. Omit payload.patch_content from submission_json and never double-escape patch code. Do not request or infer hidden intent, assertions or clean source."
 }

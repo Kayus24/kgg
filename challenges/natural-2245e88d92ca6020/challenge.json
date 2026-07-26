@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "challenge_id": "natural-2bc6db6250235f59",
-  "round_id": "natural-accept-20260726-c",
-  "natural_request": "schau mal warum hab ich da 2 mal die drei punkte? das zweite alte ding weg ohne die knoepfe im richtigen menu zu killen und sag nicht fertig ohne test",
+  "challenge_id": "natural-2245e88d92ca6020",
+  "round_id": "natural-accept-20260726-d",
+  "natural_request": "ok also da sind zwei admin menues uebereinander eins ist wohl alt räum nur das artefakt weg und lass das echte funktionieren und sag nicht fertig ohne test",
   "input_mode": "screenshot",
   "screenshot": {
     "path": "marked-problem.png",
@@ -63,10 +63,10 @@
     ],
     "patch_placeholder": "__KGG_PATCH_ID__",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-2bc6db6250235f59 --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-2245e88d92ca6020 --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]
   },
-  "submission": "Send one interpretation plus modular payload through evaluate_natural_attempt. Do not request or infer hidden intent, assertions or clean source."
+  "submission": "Send one interpretation plus modular payload metadata through submission_json and raw patch_content through its dedicated evaluate_natural_attempt input. Omit payload.patch_content from submission_json and never double-escape patch code. Do not request or infer hidden intent, assertions or clean source."
 }
