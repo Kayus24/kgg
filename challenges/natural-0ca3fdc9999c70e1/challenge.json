@@ -1,24 +1,24 @@
 {
   "schema": 1,
-  "challenge_id": "natural-632e8861c615c1d3",
-  "round_id": "natural-accept-20260726-o",
-  "natural_request": "schau mal das 3 punkte menu schwimmt wider irgendwo oben und gehört in den plan kopf bei 1 mach nur die position mach erst test app",
+  "challenge_id": "natural-0ca3fdc9999c70e1",
+  "round_id": "natural-accept-20260726-p",
+  "natural_request": "schau mal der menü punkt layout tut so als wäre er an aber die plus minus box bleibt weg bitte kleinster patch",
   "input_mode": "combined",
   "screenshot": {
     "path": "marked-problem.png",
-    "sha256": "ff5c75cc6013f6f96f696ddae2c7a1eb70b260375a3c981231097b9b95b5917d",
+    "sha256": "32b1edf13fb0043ac72d0b45df71761b0a138c58a45c15f89d568e473ab3c861",
     "attachment_required": true
   },
   "viewport": {
-    "width": 390,
-    "height": 844
+    "width": 1180,
+    "height": 820
   },
   "source": {
     "full_html": "admin-broken.html",
     "chunks_index": "source/index.json",
     "chunk_count": 16,
     "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
-    "broken_sha256": "d1559edf4b480cbd223e3616c6831d30c6f48a53165492534f23556795d195e5"
+    "broken_sha256": "eb7ad312a4a36fae9f93bff2a2d26555119ce03eda6eab0d7ddcb3dca8eb035e"
   },
   "submission_contract": {
     "fields": [
@@ -65,7 +65,7 @@
     "patch_content_format": "Complete executable HTML fragment. Wrap CSS in <style> and JavaScript in <script>; bare CSS or JavaScript is invalid.",
     "ambiguity_policy": "If one of multiple marked controls is requested and at least two matching source defects remain possible, ask exactly one target question before dispatch. Never repair both.",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-632e8861c615c1d3 --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-0ca3fdc9999c70e1 --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]

@@ -1,24 +1,24 @@
 {
   "schema": 1,
-  "challenge_id": "natural-917762b629ca1af9",
-  "round_id": "natural-accept-20260726-o",
-  "natural_request": "wider das problem 1 plus minus = skalieren 2 links rechts ziehen = datenbank gegen plan breite, im moment mischt er beides mach erst test app",
-  "input_mode": "combined",
+  "challenge_id": "natural-6373d4066bafd375",
+  "round_id": "natural-accept-20260726-p",
+  "natural_request": "eins von den zwei markierten dingern links geht nicht mehr auf mach das wider bitte kleinster patch",
+  "input_mode": "screenshot",
   "screenshot": {
     "path": "marked-problem.png",
-    "sha256": "58d1c1cfebf3667ff09fb7ba7064b675a945093f6c7307331c280ad8fe942b5b",
+    "sha256": "b8f93d78c60b73595c901ffef2a663dd6fc3b4f1263f66081f3dedfe5624209d",
     "attachment_required": true
   },
   "viewport": {
-    "width": 1180,
-    "height": 820
+    "width": 390,
+    "height": 844
   },
   "source": {
     "full_html": "admin-broken.html",
     "chunks_index": "source/index.json",
     "chunk_count": 16,
     "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
-    "broken_sha256": "5415ac63432fc25da9f63b255c70fba8837ef35550dd4446605dea4bf54cfe7c"
+    "broken_sha256": "8bcdc09ab8495c8fe689a811b7506ff0e955df02f417f808e6dd4cabb683f4e6"
   },
   "submission_contract": {
     "fields": [
@@ -65,7 +65,7 @@
     "patch_content_format": "Complete executable HTML fragment. Wrap CSS in <style> and JavaScript in <script>; bare CSS or JavaScript is invalid.",
     "ambiguity_policy": "If one of multiple marked controls is requested and at least two matching source defects remain possible, ask exactly one target question before dispatch. Never repair both.",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-917762b629ca1af9 --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-6373d4066bafd375 --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]

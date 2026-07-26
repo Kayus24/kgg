@@ -1,24 +1,24 @@
 {
   "schema": 1,
-  "challenge_id": "natural-d8b3104080f6da1b",
-  "round_id": "natural-accept-20260726-o",
-  "natural_request": "wider das problem das edit ding aufm tab ist kaput 1 spalte statt 2 und speichern soll unten sichtbar bleiben",
-  "input_mode": "combined",
+  "challenge_id": "natural-06fd4635f7f79a2d",
+  "round_id": "natural-accept-20260726-p",
+  "natural_request": "wider das problem da sind zwei admin menues uebereinander eins ist wohl alt räum nur das artefakt weg und lass das echte funktionieren",
+  "input_mode": "screenshot",
   "screenshot": {
     "path": "marked-problem.png",
-    "sha256": "c689fb65b98eaeff33a1d7ae96a5e86a12e6e84c7218d26a0f8ca704cbd1ca2c",
+    "sha256": "b08467f2e7b5fbe4b43d76d1141051e9c18869600bb0923e0808fe9f7cd9a078",
     "attachment_required": true
   },
   "viewport": {
-    "width": 1180,
-    "height": 820
+    "width": 390,
+    "height": 844
   },
   "source": {
     "full_html": "admin-broken.html",
     "chunks_index": "source/index.json",
     "chunk_count": 16,
     "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
-    "broken_sha256": "d898d787ff83d186e864e5ea225a7452183f202179568a5c295f3849cbc35e66"
+    "broken_sha256": "29839aa5350d306e536e300c6aefe0a9c7a0b78c6321f1b58d6df50417ef94fe"
   },
   "submission_contract": {
     "fields": [
@@ -65,7 +65,7 @@
     "patch_content_format": "Complete executable HTML fragment. Wrap CSS in <style> and JavaScript in <script>; bare CSS or JavaScript is invalid.",
     "ambiguity_policy": "If one of multiple marked controls is requested and at least two matching source defects remain possible, ask exactly one target question before dispatch. Never repair both.",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-d8b3104080f6da1b --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-06fd4635f7f79a2d --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]
