@@ -12,6 +12,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -623,8 +624,21 @@ def validate_interpretation(value: Any) -> dict[str, Any]:
     return value
 
 
+def normalize_semantic_text(value: str) -> str:
+    expanded = (
+        value.lower()
+        .replace("ä", "ae")
+        .replace("ö", "oe")
+        .replace("ü", "ue")
+        .replace("ß", "ss")
+    )
+    decomposed = unicodedata.normalize("NFKD", expanded)
+    ascii_text = "".join(char for char in decomposed if not unicodedata.combining(char))
+    return " ".join(re.findall(r"[a-z0-9]+", ascii_text))
+
+
 def semantic_marker_matches(normalized: str, tokens: list[str], marker: str) -> bool:
-    wanted = marker.lower()
+    wanted = normalize_semantic_text(marker)
     if wanted in normalized:
         return True
     if " " in wanted or len(wanted) < 5:
@@ -638,8 +652,8 @@ def semantic_marker_matches(normalized: str, tokens: list[str], marker: str) -> 
 
 
 def semantic_score(text: str, groups: list[list[str]] | tuple[tuple[str, ...], ...]) -> dict[str, Any]:
-    normalized = text.lower()
-    tokens = re.findall(r"[a-z0-9äöüß-]+", normalized)
+    normalized = normalize_semantic_text(text)
+    tokens = normalized.split()
     matches = []
     for group in groups:
         hit = next(
@@ -909,6 +923,15 @@ def self_test(browser: bool) -> dict[str, Any]:
     if compound["percent"] != 100:
         raise NaturalUiLabError(
             "semantic stem matching rejects valid German compound wording"
+        )
+    duplicate_case = case_by_key("duplicate-admin-control")
+    punctuation = semantic_score(
+        "Das zusätzliche alte Phone-Admin-Menü liegt am echten Menü und erzeugt einen doppelten Menüknopf; es soll entfernt werden.",
+        duplicate_case.intent_groups,
+    )
+    if punctuation["percent"] != 100:
+        raise NaturalUiLabError(
+            "semantic normalization rejects valid umlaut and hyphen wording"
         )
     with tempfile.TemporaryDirectory(prefix="kgg-natural-ui-self-") as temp_name:
         temp = Path(temp_name)
