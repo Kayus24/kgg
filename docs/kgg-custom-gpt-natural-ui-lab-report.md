@@ -1,6 +1,6 @@
 # KGG Natural-Language UI Repair Lab Report
 
-Status: HARNESS GREEN / PRODUCTION LANGUAGE GREEN / LIVE ROUNDS PENDING / TEST-APP PENDING
+Status: HARNESS GREEN / PRODUCTION LANGUAGE GREEN / LIVE ROUNDS GREEN / TEST-APP PENDING
 
 ## Konfiguration
 
@@ -57,10 +57,33 @@ wurde der Ansatz gewechselt: Der Scorer erkennt jetzt begrenzt deutsche
 Wortstaemme in Komposita. Regressionstests decken `zweispaltig` und
 `innerhalb des Kopfs` ab. Runde B zaehlt nicht zur Akzeptanz.
 
+Die spaeteren Diagnose-Runden J bis O wurden ebenfalls nicht gezaehlt. Sie
+fanden vier voneinander getrennte Haertungen: jede falsche berechnete
+Layout-Eigenschaft muss am exakt betroffenen Container korrigiert werden;
+deutsche Begriffe wie `UI-Groesse`, `Klon`, `Breitenverhaeltnis` und
+`Historienliste oeffnen` werden semantisch bewertet; Interaktions-Patches
+verwenden vorhandene kanonische Handler statt paralleler Teilzustaende.
+Nach jeder Aenderung wurden neue Seeds erzeugt und die Runde neu begonnen.
+
 | Runde | Challenges | First-attempt PASS | Final PASS | Neue Fehlerklasse |
 | --- | ---: | ---: | ---: | --- |
-| Runde 1 | 0/6 | 0/6 | 0/6 | PENDING |
-| Runde 2 | 0/6 | 0/6 | 0/6 | PENDING |
+| `natural-accept-20260726-p` | 6/6 | 5/6 | 6/6 | keine neue Klasse; ein bekannter `payload_schema`-Fehler im ersten P4-Versuch |
+| `natural-accept-20260726-q` | 6/6 | 6/6 | 6/6 | keine |
+
+Gesamt: 11/12 Challenges im ersten Patchversuch, 12/12 spaetestens im
+zweiten Versuch. Beide Mehrdeutigkeitsfaelle stellten genau eine gezielte
+Rueckfrage und reparierten danach ausschliesslich die Plan-Historie.
+
+### Run-Nachweise
+
+- Runde P Publish: `30217365240`
+- Runde P PASS: `30217482128`, `30217590137`, `30217696595`,
+  `30217934725`, `30218071317`, `30218199559`
+- P4 Erstversuch: `30217859263` (`payload_schema`, fehlende exakte
+  `required_tests`); zweiter Versuch `30217934725` PASS
+- Runde Q Publish: `30218243210`
+- Runde Q PASS: `30218358083`, `30218455483`, `30218577294`,
+  `30218723089`, `30218898188`, `30219071820`
 
 ## Preview/Test-App
 

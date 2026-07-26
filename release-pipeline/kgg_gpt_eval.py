@@ -608,10 +608,13 @@ def check_natural_ui_lab_contract() -> None:
         report,
         [
             "HARNESS GREEN",
+            "LIVE ROUNDS GREEN",
             "Eindeutige verrauschte UI-Anfrage",
             "Echte Mehrdeutigkeit",
-            "Runde 1",
-            "Runde 2",
+            "natural-accept-20260726-p",
+            "natural-accept-20260726-q",
+            "11/12",
+            "12/12",
             "Max Test-App-Freigabe",
         ],
         "Natural UI Lab report",
@@ -706,6 +709,18 @@ def check_natural_ui_lab_contract() -> None:
     )
 
 
+def check_release_pr_main_baseline() -> None:
+    workflow = read(".github/workflows/release-pr.yml")
+    require_all(
+        workflow,
+        [
+            "git fetch origin main:refs/remotes/origin/main --force",
+            "python release-pipeline/kgg_test_battery.py --level critical",
+        ],
+        "Release PR main baseline",
+    )
+
+
 def main() -> int:
     try:
         check_playbook()
@@ -713,6 +728,7 @@ def main() -> int:
         check_area_routes()
         check_repair_lab_contract()
         check_natural_ui_lab_contract()
+        check_release_pr_main_baseline()
         run_preflight_self_test()
         run_stabilize_self_test()
         run_mock_eval_self_test()
