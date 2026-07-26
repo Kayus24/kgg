@@ -1,24 +1,24 @@
 {
   "schema": 1,
-  "challenge_id": "natural-8ca1a3019fe7e098",
-  "round_id": "natural-accept-20260726-g",
-  "natural_request": "ok also wen ich bei ner uebung auf das zahnrad geh ist das fenster aufm tablet auf ein mal so schmal alles untereinander mach das bitte wider richtig aber nciht handy aendern",
-  "input_mode": "combined",
+  "challenge_id": "natural-1282e7a046d1c74c",
+  "round_id": "natural-accept-20260726-h",
+  "natural_request": "bei 1 oder 2 im menü reagiert das falsche nicht mehr ich weiss grad nicht wie das heisst und sag nicht fertig ohne test",
+  "input_mode": "screenshot",
   "screenshot": {
     "path": "marked-problem.png",
-    "sha256": "c689fb65b98eaeff33a1d7ae96a5e86a12e6e84c7218d26a0f8ca704cbd1ca2c",
+    "sha256": "b8f93d78c60b73595c901ffef2a663dd6fc3b4f1263f66081f3dedfe5624209d",
     "attachment_required": true
   },
   "viewport": {
-    "width": 1180,
-    "height": 820
+    "width": 390,
+    "height": 844
   },
   "source": {
     "full_html": "admin-broken.html",
     "chunks_index": "source/index.json",
     "chunk_count": 16,
     "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
-    "broken_sha256": "d898d787ff83d186e864e5ea225a7452183f202179568a5c295f3849cbc35e66"
+    "broken_sha256": "c752aa629d3d4e4a1b163a5b412cfe421da877d6ba743f0a0d768da740cc6f22"
   },
   "submission_contract": {
     "fields": [
@@ -64,10 +64,10 @@
     "patch_placeholder": "__KGG_PATCH_ID__",
     "patch_content_format": "Complete executable HTML fragment. Wrap CSS in <style> and JavaScript in <script>; bare CSS or JavaScript is invalid.",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-8ca1a3019fe7e098 --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-1282e7a046d1c74c --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]
   },
-  "submission": "Send one interpretation plus modular payload metadata through submission_json and raw patch_content through its dedicated evaluate_natural_attempt input. Omit payload.patch_content from submission_json and never double-escape patch code. Do not request or infer hidden intent, assertions or clean source."
+  "submission": "Send one interpretation plus modular payload metadata through submission_json and raw patch_content through its dedicated evaluate_natural_attempt input. Omit payload.patch_content from submission_json and never double-escape patch code. For layout repairs, inspect the final cascade and patch the same container whose computed display, columns or geometry is wrong; do not guess child containers. Do not request or infer hidden intent, assertions or clean source."
 }
