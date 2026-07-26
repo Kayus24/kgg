@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "round_id": "natural-accept-20260726-m",
+  "challenge_id": "natural-88839014e9c809e0",
+  "request_id": "natural-88839014e9c809e0-phone-admin-header-anchor",
+  "run_id": 30215311467,
+  "error_class": null,
+  "feedback": "Natural-language, payload and browser UI checks passed.",
+  "scores": {
+    "natural_language_intent": {
+      "percent": 100,
+      "passed": 3,
+      "total": 3,
+      "matches": [
+        {
+          "matched": true,
+          "marker": "phone"
+        },
+        {
+          "matched": true,
+          "marker": "menü"
+        },
+        {
+          "matched": true,
+          "marker": "im kopf"
+        }
+      ]
+    },
+    "ui_diagnosis": {
+      "percent": 100,
+      "passed": 2,
+      "total": 2,
+      "matches": [
+        {
+          "matched": true,
+          "marker": "veranker"
+        },
+        {
+          "matched": true,
+          "marker": "planheader"
+        }
+      ]
+    },
+    "clarification_policy": {
+      "status": "PASS",
+      "expected": 0,
+      "actual": 0
+    },
+    "patch_safety": {
+      "status": "PASS"
+    },
+    "browser_behavior": {
+      "status": "PASS"
+    },
+    "visible_result": {
+      "status": "PASS"
+    }
+  },
+  "payload_sha256": "b8258f35230d7c6beef01f6b7a5e8d54843829f77ea3e57d3b33c9242c980f90"
+}
