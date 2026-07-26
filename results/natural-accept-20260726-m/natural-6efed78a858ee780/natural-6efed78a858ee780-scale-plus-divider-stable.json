@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "round_id": "natural-accept-20260726-m",
+  "challenge_id": "natural-6efed78a858ee780",
+  "request_id": "natural-6efed78a858ee780-scale-plus-divider-stable",
+  "run_id": 30215426722,
+  "error_class": null,
+  "feedback": "Natural-language, payload and browser UI checks passed.",
+  "scores": {
+    "natural_language_intent": {
+      "percent": 100,
+      "passed": 3,
+      "total": 3,
+      "matches": [
+        {
+          "matched": true,
+          "marker": "plus"
+        },
+        {
+          "matched": true,
+          "marker": "skalier"
+        },
+        {
+          "matched": true,
+          "marker": "spalte"
+        }
+      ]
+    },
+    "ui_diagnosis": {
+      "percent": 100,
+      "passed": 2,
+      "total": 2,
+      "matches": [
+        {
+          "matched": true,
+          "marker": "skalier"
+        },
+        {
+          "matched": true,
+          "marker": "spaltenbreite"
+        }
+      ]
+    },
+    "clarification_policy": {
+      "status": "PASS",
+      "expected": 0,
+      "actual": 0
+    },
+    "patch_safety": {
+      "status": "PASS"
+    },
+    "browser_behavior": {
+      "status": "PASS"
+    },
+    "visible_result": {
+      "status": "PASS"
+    }
+  },
+  "payload_sha256": "bbdeb65a3805d31a423e6ddb140f7fd530825cdcdb24b08a1504c7cbb1ec0d5a"
+}
