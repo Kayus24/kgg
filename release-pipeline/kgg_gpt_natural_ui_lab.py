@@ -239,8 +239,14 @@ NATURAL_CASES: tuple[NaturalCase, ...] = (
             "das eine mit den gespeicherten sachen öffnet nix mehr siehe beide kreise",
         ),
         mutation=repair_lab.Mutation(
-            '    bindDrawerButton("recentToggle","recent");',
-            '    void "natural-ui-recent-binding-disabled";',
+            (
+                '    bindDrawerButton("recentToggle","recent");\n'
+                '    bindDrawerButton("packageToggle","package");'
+            ),
+            (
+                '    void "natural-ui-recent-binding-disabled";\n'
+                '    void "natural-ui-package-binding-disabled";'
+            ),
         ),
         sample_content=patch_script(
             """  const button=document.getElementById("recentToggle");
@@ -250,7 +256,11 @@ NATURAL_CASES: tuple[NaturalCase, ...] = (
     ev.preventDefault();ev.stopImmediatePropagation();api.openDrawer("recent");
   },true);"""
         ),
-        intent_groups=(("letzte pläne", "alten plänen", "obere"), ("öff", "auf", "reagiert"), ("menü", "markiert", "ding")),
+        intent_groups=(
+            ("letzte pläne", "alten plänen", "obere", "plan historie", "historie"),
+            ("öff", "auf", "reagiert"),
+            ("menü", "markiert", "ding"),
+        ),
         diagnosis_groups=(("recenttoggle", "recent", "letzte pläne"), ("drawer", "open")),
         clarification_count=1,
         clarification_reply="das obere mit den alten plänen, nicht die übungs pakete",
