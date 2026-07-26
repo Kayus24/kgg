@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "status": "FAIL",
+  "round_id": "natural-accept-20260726-f",
+  "challenge_id": "natural-69985050516a68db",
+  "request_id": "natural-69985050516a68db-remove-legacy-admin-menu",
+  "run_id": 30211367121,
+  "error_class": "natural_language",
+  "feedback": "interpretation intent score below 100: {'percent': 67, 'passed': 2, 'total': 3, 'matches': [{'matched': False, 'marker': ''}, {'matched': True, 'marker': 'admin men'}, {'matched': True, 'marker': 'entfern'}]}"
+}
