@@ -207,7 +207,16 @@ NATURAL_CASES: tuple[NaturalCase, ...] = (
             ("skalier", "größer", "grösser", "groesse", "inhalt"),
             ("spalte", "trennlinie", "breite", "verhaeltnis", "verschieb"),
         ),
-        diagnosis_groups=(("--kgg-tablet-ui-scale", "ui scale", "skalier"), ("--kgg-tablet-left-col", "left col", "spaltenbreite")),
+        diagnosis_groups=(
+            (
+                "--kgg-tablet-ui-scale",
+                "ui scale",
+                "ui groesse",
+                "groessensteuerung",
+                "skalier",
+            ),
+            ("--kgg-tablet-left-col", "left col", "spaltenbreite"),
+        ),
         input_mode="combined",
     ),
     NaturalCase(
@@ -1007,6 +1016,16 @@ def self_test(browser: bool) -> dict[str, Any]:
     if hidden_panel["percent"] != 100:
         raise NaturalUiLabError(
             "semantic aliases reject valid hidden layout-panel wording"
+        )
+    scale_case = case_by_key("mixed-scale-and-column")
+    scale_wording = semantic_score(
+        "Der Split-Plus-Klick muss nur die UI-Größe ändern; die Spaltenbreite "
+        "darf ausschließlich beim Ziehen wechseln.",
+        scale_case.diagnosis_groups,
+    )
+    if scale_wording["percent"] != 100:
+        raise NaturalUiLabError(
+            "semantic aliases reject valid German UI-size wording"
         )
     try:
         validate_patch_fragment(
