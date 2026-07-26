@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "status": "FAIL",
+  "round_id": "natural-accept-20260726-a",
+  "challenge_id": "natural-04b24d487a3ab477",
+  "request_id": "natural-04b24d487a3ab477-v1",
+  "run_id": 30208592767,
+  "error_class": "natural_language",
+  "feedback": "interpretation confidence must be low, medium or high"
+}
