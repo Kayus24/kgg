@@ -1,24 +1,24 @@
 {
   "schema": 1,
-  "challenge_id": "natural-0ca3fdc9999c70e1",
-  "round_id": "natural-accept-20260726-p",
-  "natural_request": "schau mal der menü punkt layout tut so als wäre er an aber die plus minus box bleibt weg bitte kleinster patch",
-  "input_mode": "combined",
+  "challenge_id": "natural-32959f5a3d00ecc1",
+  "round_id": "natural-accept-20260726-q",
+  "natural_request": "schau mal das eine mit den gespeicherten sachen öffnet nix mehr siehe beide kreise bitte kleinster patch",
+  "input_mode": "screenshot",
   "screenshot": {
     "path": "marked-problem.png",
-    "sha256": "32b1edf13fb0043ac72d0b45df71761b0a138c58a45c15f89d568e473ab3c861",
+    "sha256": "b8f93d78c60b73595c901ffef2a663dd6fc3b4f1263f66081f3dedfe5624209d",
     "attachment_required": true
   },
   "viewport": {
-    "width": 1180,
-    "height": 820
+    "width": 390,
+    "height": 844
   },
   "source": {
     "full_html": "admin-broken.html",
     "chunks_index": "source/index.json",
     "chunk_count": 16,
     "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
-    "broken_sha256": "eb7ad312a4a36fae9f93bff2a2d26555119ce03eda6eab0d7ddcb3dca8eb035e"
+    "broken_sha256": "8bcdc09ab8495c8fe689a811b7506ff0e955df02f417f808e6dd4cabb683f4e6"
   },
   "submission_contract": {
     "fields": [
@@ -65,7 +65,7 @@
     "patch_content_format": "Complete executable HTML fragment. Wrap CSS in <style> and JavaScript in <script>; bare CSS or JavaScript is invalid.",
     "ambiguity_policy": "If one of multiple marked controls is requested and at least two matching source defects remain possible, ask exactly one target question before dispatch. Never repair both.",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-0ca3fdc9999c70e1 --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-32959f5a3d00ecc1 --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]

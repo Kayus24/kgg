@@ -1,12 +1,12 @@
 {
   "schema": 1,
-  "challenge_id": "natural-6373d4066bafd375",
-  "round_id": "natural-accept-20260726-p",
-  "natural_request": "eins von den zwei markierten dingern links geht nicht mehr auf mach das wider bitte kleinster patch",
+  "challenge_id": "natural-e55c1bcf7b56ad44",
+  "round_id": "natural-accept-20260726-q",
+  "natural_request": "wider das problem da sind zwei admin menues uebereinander eins ist wohl alt räum nur das artefakt weg und lass das echte funktionieren und sag nicht fertig ohne test",
   "input_mode": "screenshot",
   "screenshot": {
     "path": "marked-problem.png",
-    "sha256": "b8f93d78c60b73595c901ffef2a663dd6fc3b4f1263f66081f3dedfe5624209d",
+    "sha256": "b08467f2e7b5fbe4b43d76d1141051e9c18869600bb0923e0808fe9f7cd9a078",
     "attachment_required": true
   },
   "viewport": {
@@ -18,7 +18,7 @@
     "chunks_index": "source/index.json",
     "chunk_count": 16,
     "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
-    "broken_sha256": "8bcdc09ab8495c8fe689a811b7506ff0e955df02f417f808e6dd4cabb683f4e6"
+    "broken_sha256": "29839aa5350d306e536e300c6aefe0a9c7a0b78c6321f1b58d6df50417ef94fe"
   },
   "submission_contract": {
     "fields": [
@@ -65,7 +65,7 @@
     "patch_content_format": "Complete executable HTML fragment. Wrap CSS in <style> and JavaScript in <script>; bare CSS or JavaScript is invalid.",
     "ambiguity_policy": "If one of multiple marked controls is requested and at least two matching source defects remain possible, ask exactly one target question before dispatch. Never repair both.",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-6373d4066bafd375 --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-e55c1bcf7b56ad44 --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]
