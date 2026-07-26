@@ -651,6 +651,8 @@ def check_natural_ui_lab_contract() -> None:
             "kgg-natural-ui-lab/public",
             "kgg-natural-ui-result/report.json",
             "Publish sanitized natural-language evaluation outcome",
+            'npm install --prefix "$runtime" --no-package-lock --no-save playwright@1.61.1',
+            'echo "NODE_PATH=$runtime/node_modules" >> "$GITHUB_ENV"',
         ],
         "Natural UI workflow",
     )

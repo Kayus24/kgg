@@ -68,7 +68,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm exec --yes --package=playwright@1.61.1 -- playwright install --with-deps chromium
+          runtime="$RUNNER_TEMP/kgg-playwright"
+          npm install --prefix "$runtime" --no-package-lock --no-save playwright@1.61.1
+          "$runtime/node_modules/.bin/playwright" install --with-deps chromium
+          echo "NODE_PATH=$runtime/node_modules" >> "$GITHUB_ENV"
 
       - name: Generate isolated full-app challenges
         if: inputs.mode == 'publish_challenges' || inputs.mode == 'evaluate_attempt'

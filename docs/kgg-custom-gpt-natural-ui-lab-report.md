@@ -30,6 +30,12 @@ Beide Kontrollrunden liefen gegen die bytegenau gebaute Source
 
 ## Blinde Eval-Runden
 
+Erster Live-Infrastruktur-Canary `30207660270` scheiterte vor der Challenge-
+Veroeffentlichung mit `ci_tooling`: Chromium war installiert, aber `playwright`
+fehlte im `NODE_PATH` des Python-gestarteten Browserprozesses. Der Workflow
+installiert die Laufzeit deshalb dauerhaft unter `$RUNNER_TEMP/kgg-playwright`
+und exportiert den Modulpfad jobweit; ein Vertragstest deckt diesen Fehler ab.
+
 | Runde | Challenges | First-attempt PASS | Final PASS | Neue Fehlerklasse |
 | --- | ---: | ---: | ---: | --- |
 | Runde 1 | 0/6 | 0/6 | 0/6 | PENDING |
