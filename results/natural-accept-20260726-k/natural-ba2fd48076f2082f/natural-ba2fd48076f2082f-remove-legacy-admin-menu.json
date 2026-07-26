@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "round_id": "natural-accept-20260726-k",
+  "challenge_id": "natural-ba2fd48076f2082f",
+  "request_id": "natural-ba2fd48076f2082f-remove-legacy-admin-menu",
+  "run_id": 30214373070,
+  "error_class": null,
+  "feedback": "Natural-language, payload and browser UI checks passed.",
+  "scores": {
+    "natural_language_intent": {
+      "percent": 100,
+      "passed": 3,
+      "total": 3,
+      "matches": [
+        {
+          "matched": true,
+          "marker": "zwei"
+        },
+        {
+          "matched": true,
+          "marker": "admin men"
+        },
+        {
+          "matched": true,
+          "marker": "entfern"
+        }
+      ]
+    },
+    "ui_diagnosis": {
+      "percent": 100,
+      "passed": 2,
+      "total": 2,
+      "matches": [
+        {
+          "matched": true,
+          "marker": "legacy"
+        },
+        {
+          "matched": true,
+          "marker": "kggphoneadminmenu"
+        }
+      ]
+    },
+    "clarification_policy": {
+      "status": "PASS",
+      "expected": 0,
+      "actual": 0
+    },
+    "patch_safety": {
+      "status": "PASS"
+    },
+    "browser_behavior": {
+      "status": "PASS"
+    },
+    "visible_result": {
+      "status": "PASS"
+    }
+  },
+  "payload_sha256": "ab982a01bacaf1f27700d86a383d9863fcfc2a4528b1dafa4dca748063843324"
+}
