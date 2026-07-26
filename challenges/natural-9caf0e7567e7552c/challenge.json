@@ -1,12 +1,12 @@
 {
   "schema": 1,
-  "challenge_id": "natural-d2d261e160c8d3b6",
-  "round_id": "natural-accept-20260726-b",
-  "natural_request": "schau mal da sind zwei admin menues uebereinander eins ist wohl alt räum nur das artefakt weg und lass das echte funktionieren mach erst test app",
-  "input_mode": "screenshot",
+  "challenge_id": "natural-9caf0e7567e7552c",
+  "round_id": "natural-accept-20260726-c",
+  "natural_request": "ok also menü geht zwar auf aber steht komisch ausserhalb vom plan siehe kreis bitte da rein setzen und sag nicht fertig ohne test",
+  "input_mode": "combined",
   "screenshot": {
     "path": "marked-problem.png",
-    "sha256": "b08467f2e7b5fbe4b43d76d1141051e9c18869600bb0923e0808fe9f7cd9a078",
+    "sha256": "ff5c75cc6013f6f96f696ddae2c7a1eb70b260375a3c981231097b9b95b5917d",
     "attachment_required": true
   },
   "viewport": {
@@ -18,7 +18,7 @@
     "chunks_index": "source/index.json",
     "chunk_count": 16,
     "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
-    "broken_sha256": "29839aa5350d306e536e300c6aefe0a9c7a0b78c6321f1b58d6df50417ef94fe"
+    "broken_sha256": "d1559edf4b480cbd223e3616c6831d30c6f48a53165492534f23556795d195e5"
   },
   "submission_contract": {
     "fields": [
@@ -63,7 +63,7 @@
     ],
     "patch_placeholder": "__KGG_PATCH_ID__",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-d2d261e160c8d3b6 --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-9caf0e7567e7552c --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]

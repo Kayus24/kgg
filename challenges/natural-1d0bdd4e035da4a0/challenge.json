@@ -1,12 +1,12 @@
 {
   "schema": 1,
-  "challenge_id": "natural-0230885c588f68ea",
-  "round_id": "natural-accept-20260726-b",
-  "natural_request": "ok also auf tablet öffnet layout anpassen das bedienfeld nicht mehr der button ist aktiv aber panel unsichtbar und sag nicht fertig ohne test",
+  "challenge_id": "natural-1d0bdd4e035da4a0",
+  "round_id": "natural-accept-20260726-c",
+  "natural_request": "schau mal wen ich bei ner uebung auf das zahnrad geh ist das fenster aufm tablet auf ein mal so schmal alles untereinander mach das bitte wider richtig aber nciht handy aendern",
   "input_mode": "combined",
   "screenshot": {
     "path": "marked-problem.png",
-    "sha256": "32b1edf13fb0043ac72d0b45df71761b0a138c58a45c15f89d568e473ab3c861",
+    "sha256": "c689fb65b98eaeff33a1d7ae96a5e86a12e6e84c7218d26a0f8ca704cbd1ca2c",
     "attachment_required": true
   },
   "viewport": {
@@ -18,7 +18,7 @@
     "chunks_index": "source/index.json",
     "chunk_count": 16,
     "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
-    "broken_sha256": "eb7ad312a4a36fae9f93bff2a2d26555119ce03eda6eab0d7ddcb3dca8eb035e"
+    "broken_sha256": "d898d787ff83d186e864e5ea225a7452183f202179568a5c295f3849cbc35e66"
   },
   "submission_contract": {
     "fields": [
@@ -63,7 +63,7 @@
     ],
     "patch_placeholder": "__KGG_PATCH_ID__",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-0230885c588f68ea --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-1d0bdd4e035da4a0 --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]
