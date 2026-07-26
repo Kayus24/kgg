@@ -21,7 +21,7 @@ PRODUCTION_PROFILE_VERSION = "2.1.0"
 EVAL_PROFILE_VERSION = "2.1.0"
 EDITOR_BOOTSTRAP_VERSION = "v2"
 EDITOR_BOOTSTRAP_PATH = "docs/kgg-custom-gpt-editor-bootstrap.md"
-EVAL_EDITOR_BOOTSTRAP_VERSION = "v5"
+EVAL_EDITOR_BOOTSTRAP_VERSION = "v6"
 EVAL_EDITOR_BOOTSTRAP_PATH = "docs/kgg-custom-gpt-eval-editor-bootstrap.md"
 EDITOR_BOOTSTRAP_MAX_CHARS = 4000
 CUSTOM_GPT_ACTION_LIMIT = 30
@@ -212,6 +212,8 @@ def self_test() -> None:
         "interpretation.confidence",
         "ausfuehrbares HTML-Fragment",
         "Nacktes CSS oder JavaScript",
+        "finale Kaskade",
+        "Selektor-/Eigenschaftspaar",
         "<!-- KGG PATCH START",
         "Nach drei aufeinanderfolgenden FAILs",
         "Fuehre niemals Preview-",

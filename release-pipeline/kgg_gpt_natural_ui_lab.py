@@ -466,6 +466,8 @@ def build_public_manifest(
             "Send one interpretation plus modular payload metadata through submission_json "
             "and raw patch_content through its dedicated evaluate_natural_attempt input. "
             "Omit payload.patch_content from submission_json and never double-escape patch code. "
+            "For layout repairs, inspect the final cascade and patch the same container whose "
+            "computed display, columns or geometry is wrong; do not guess child containers. "
             "Do not request or infer hidden intent, assertions or clean source."
         ),
     }

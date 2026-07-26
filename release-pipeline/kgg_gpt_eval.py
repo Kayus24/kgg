@@ -629,6 +629,8 @@ def check_natural_ui_lab_contract() -> None:
             "canonical intent",
             "executable HTML fragment",
             "Bare CSS or JavaScript",
+            "final cascade",
+            "guessed child containers",
         ],
         "Natural UI Eval Knowledge",
     )
@@ -683,6 +685,7 @@ def check_natural_ui_lab_contract() -> None:
             "interpretation_types",
             "patch_content_format",
             "validate_patch_fragment",
+            "computed display, columns or geometry",
         ],
         "Natural UI runner",
     )

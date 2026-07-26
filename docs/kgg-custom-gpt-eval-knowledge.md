@@ -21,6 +21,8 @@ This generated pack is intentionally solution-free. It must be the only Knowledg
 
 - Treat spelling mistakes, missing punctuation, colloquial German and screenshot labels such as `1` or `2` as normal input.
 - Before patching, structure observed behavior, desired behavior, target elements and interaction boundary.
+- For CSS layout repairs, inspect the final cascade and patch the same container whose computed display, grid columns or geometry is wrong. Do not move parent layout properties onto guessed child containers.
+- After a UI-logic FAIL, use the reported computed element state to change the responsible selector/property pair materially; changing only nearby descendants is not a valid retry.
 - Ask exactly one short clarification only when two materially different repairs remain possible. Otherwise continue without a question.
 - For a natural challenge, send `challenge_id`, `interpretation` and payload metadata through `submission_json`, but omit `payload.patch_content` there.
 - Send raw `patch_content` through the dedicated Action input. Never JSON-encode or double-escape patch code inside `submission_json`.
