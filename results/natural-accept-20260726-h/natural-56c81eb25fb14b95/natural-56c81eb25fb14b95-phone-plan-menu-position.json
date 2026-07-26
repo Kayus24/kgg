@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "round_id": "natural-accept-20260726-h",
+  "challenge_id": "natural-56c81eb25fb14b95",
+  "request_id": "natural-56c81eb25fb14b95-phone-plan-menu-position",
+  "run_id": 30212200992,
+  "error_class": null,
+  "feedback": "Natural-language, payload and browser UI checks passed.",
+  "scores": {
+    "natural_language_intent": {
+      "percent": 100,
+      "passed": 3,
+      "total": 3,
+      "matches": [
+        {
+          "matched": true,
+          "marker": "phone"
+        },
+        {
+          "matched": true,
+          "marker": "menü"
+        },
+        {
+          "matched": true,
+          "marker": "plan-header"
+        }
+      ]
+    },
+    "ui_diagnosis": {
+      "percent": 100,
+      "passed": 2,
+      "total": 2,
+      "matches": [
+        {
+          "matched": true,
+          "marker": "position"
+        },
+        {
+          "matched": true,
+          "marker": "planheader"
+        }
+      ]
+    },
+    "clarification_policy": {
+      "status": "PASS",
+      "expected": 0,
+      "actual": 0
+    },
+    "patch_safety": {
+      "status": "PASS"
+    },
+    "browser_behavior": {
+      "status": "PASS"
+    },
+    "visible_result": {
+      "status": "PASS"
+    }
+  },
+  "payload_sha256": "71c204c239e9c97112e2ead51f57e55ee2cd4bbe2c662e6a2f6504c63530ee9c"
+}
