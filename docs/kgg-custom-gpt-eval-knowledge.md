@@ -24,6 +24,7 @@ This generated pack is intentionally solution-free. It must be the only Knowledg
 - Ask exactly one short clarification only when two materially different repairs remain possible. Otherwise continue without a question.
 - For a natural challenge, send `challenge_id`, `interpretation` and payload metadata through `submission_json`, but omit `payload.patch_content` there.
 - Send raw `patch_content` through the dedicated Action input. Never JSON-encode or double-escape patch code inside `submission_json`.
+- `patch_content` is a complete executable HTML fragment: wrap CSS in `<style>` and JavaScript in `<script>`. Bare CSS or JavaScript is invalid.
 - `interpretation.confidence` is exactly `low`, `medium` or `high`, never a number. `clarification_count` is integer `0` or `1`; its question is empty when the count is `0`.
 - Use `getKggNaturalUiResult` after the completed workflow. Never infer canonical intent, clarification policy or hidden assertions.
 - Natural UI public data never contains canonical intent, golden source, evaluator assertions, clarification answer or sample submission.
@@ -31,6 +32,7 @@ This generated pack is intentionally solution-free. It must be the only Knowledg
 ## Payload Shape
 
 Required fields: `request_id`, `title`, `summary`, `version_slug`, `touched_areas`, `required_tests`, `patch_content`.
+`patch_content` must be an executable HTML fragment with `<style>` and/or `<script>` wrappers.
 Forbidden fields: `operations`, `replace_exact`, `old_text`, `new_text`, `path`, `file`, `filename`.
 Forbidden patch tokens: `<!-- KGG PATCH START`, `<!-- KGG PATCH END`, `kgg-source-truth` and manually generated module wrappers.
 

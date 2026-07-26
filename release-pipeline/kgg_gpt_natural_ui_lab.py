@@ -432,6 +432,10 @@ def build_public_manifest(
                 "new_text",
             ],
             "patch_placeholder": "__KGG_PATCH_ID__",
+            "patch_content_format": (
+                "Complete executable HTML fragment. Wrap CSS in <style> and "
+                "JavaScript in <script>; bare CSS or JavaScript is invalid."
+            ),
             "required_tests": required_tests(identifier),
         },
         "submission": (
@@ -687,6 +691,13 @@ def submission_text(interpretation: dict[str, Any]) -> str:
     )
 
 
+def validate_patch_fragment(patch_content: str) -> None:
+    if not re.search(r"<(?:style|script)\b", patch_content, re.IGNORECASE):
+        raise NaturalUiLabError(
+            "patch_content must be an executable HTML fragment wrapped in <style> or <script>"
+        )
+
+
 def classify_evaluation_error(message: str) -> str:
     lowered = message.lower()
     if any(
@@ -793,6 +804,7 @@ def evaluate_attempt(
     if not isinstance(payload_value, dict):
         raise NaturalUiLabError("submission payload must be an object")
     payload = write_gate.validate_payload(json.dumps(payload_value, ensure_ascii=False))
+    validate_patch_fragment(payload["patch_content"])
     required = set(required_tests(identifier))
     missing = sorted(required.difference(payload["required_tests"]))
     if missing:
@@ -933,6 +945,14 @@ def self_test(browser: bool) -> dict[str, Any]:
         raise NaturalUiLabError(
             "semantic normalization rejects valid umlaut and hyphen wording"
         )
+    try:
+        validate_patch_fragment(
+            '(function(){document.body.dataset.kggPatch="__KGG_PATCH_ID__";})();'
+        )
+    except NaturalUiLabError:
+        pass
+    else:
+        raise NaturalUiLabError("bare JavaScript patch_content must be rejected")
     with tempfile.TemporaryDirectory(prefix="kgg-natural-ui-self-") as temp_name:
         temp = Path(temp_name)
         generated = generate_round(

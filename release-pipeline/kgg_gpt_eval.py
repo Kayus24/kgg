@@ -627,6 +627,8 @@ def check_natural_ui_lab_contract() -> None:
             "high",
             "getKggNaturalUiResult",
             "canonical intent",
+            "executable HTML fragment",
+            "Bare CSS or JavaScript",
         ],
         "Natural UI Eval Knowledge",
     )
@@ -679,6 +681,8 @@ def check_natural_ui_lab_contract() -> None:
             "marked-problem.png",
             "interpretation",
             "interpretation_types",
+            "patch_content_format",
+            "validate_patch_fragment",
         ],
         "Natural UI runner",
     )
