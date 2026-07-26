@@ -250,7 +250,7 @@ async function probe(page, caseName) {
       return { display: style.display, columns: style.gridTemplateColumns, width: rect.width };
     });
     if (layout.display !== "grid" || layout.columns.trim().split(/\s+/).length < 2 || layout.width < 760) {
-      throw new Error(`tablet editor layout failed: ${JSON.stringify(layout)}`);
+      throw new Error(`#editorModal .editorSheet computed layout failed: ${JSON.stringify(layout)}`);
     }
     return layout;
   }
