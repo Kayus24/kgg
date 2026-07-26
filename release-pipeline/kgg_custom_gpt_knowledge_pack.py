@@ -161,6 +161,8 @@ def render_eval_pack() -> str:
         "- For CSS layout repairs, inspect the final cascade and patch the same container whose computed display, grid columns or geometry is wrong. Do not move parent layout properties onto guessed child containers.",
         "- After a UI-logic FAIL, use the reported computed element state to change the responsible selector/property pair materially; changing only nearby descendants is not a valid retry.",
         "- Ask exactly one short clarification only when two materially different repairs remain possible. Otherwise continue without a question.",
+        "- If the user says one of two marked controls is broken and two matching source defects remain possible, ask which single control is meant before any Action. Never broaden the patch to both controls.",
+        "- After that one answer, patch only the selected target and record clarification_count=1 plus the exact question. Do not ask a second question.",
         "- For a natural challenge, send `challenge_id`, `interpretation` and payload metadata through `submission_json`, but omit `payload.patch_content` there.",
         "- Send raw `patch_content` through the dedicated Action input. Never JSON-encode or double-escape patch code inside `submission_json`.",
         "- `patch_content` is a complete executable HTML fragment: wrap CSS in `<style>` and JavaScript in `<script>`. Bare CSS or JavaScript is invalid.",

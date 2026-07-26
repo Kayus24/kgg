@@ -631,6 +631,8 @@ def check_natural_ui_lab_contract() -> None:
             "Bare CSS or JavaScript",
             "final cascade",
             "guessed child containers",
+            "Never broaden the patch to both controls",
+            "clarification_count=1",
         ],
         "Natural UI Eval Knowledge",
     )
@@ -684,6 +686,8 @@ def check_natural_ui_lab_contract() -> None:
             "interpretation",
             "interpretation_types",
             "patch_content_format",
+            "ambiguity_policy",
+            "Never repair both",
             "validate_patch_fragment",
             "computed display, columns or geometry",
         ],

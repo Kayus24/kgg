@@ -478,6 +478,11 @@ def build_public_manifest(
                 "Complete executable HTML fragment. Wrap CSS in <style> and "
                 "JavaScript in <script>; bare CSS or JavaScript is invalid."
             ),
+            "ambiguity_policy": (
+                "If one of multiple marked controls is requested and at least two "
+                "matching source defects remain possible, ask exactly one target "
+                "question before dispatch. Never repair both."
+            ),
             "required_tests": required_tests(identifier),
         },
         "submission": (
