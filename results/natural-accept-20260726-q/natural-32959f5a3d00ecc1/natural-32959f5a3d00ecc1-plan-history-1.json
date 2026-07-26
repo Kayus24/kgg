@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "round_id": "natural-accept-20260726-q",
+  "challenge_id": "natural-32959f5a3d00ecc1",
+  "request_id": "natural-32959f5a3d00ecc1-plan-history-1",
+  "run_id": 30219071820,
+  "error_class": null,
+  "feedback": "Natural-language, payload and browser UI checks passed.",
+  "scores": {
+    "natural_language_intent": {
+      "percent": 100,
+      "passed": 3,
+      "total": 3,
+      "matches": [
+        {
+          "matched": true,
+          "marker": "obere"
+        },
+        {
+          "matched": true,
+          "marker": "öff"
+        },
+        {
+          "matched": true,
+          "marker": "markiert"
+        }
+      ]
+    },
+    "ui_diagnosis": {
+      "percent": 100,
+      "passed": 2,
+      "total": 2,
+      "matches": [
+        {
+          "matched": true,
+          "marker": "recenttoggle"
+        },
+        {
+          "matched": true,
+          "marker": "drawer"
+        }
+      ]
+    },
+    "clarification_policy": {
+      "status": "PASS",
+      "expected": 1,
+      "actual": 1
+    },
+    "patch_safety": {
+      "status": "PASS"
+    },
+    "browser_behavior": {
+      "status": "PASS"
+    },
+    "visible_result": {
+      "status": "PASS"
+    }
+  },
+  "payload_sha256": "346591ca68058e246cafd13566314185d65811e45de8952d10ba421cb8ca49a8"
+}
