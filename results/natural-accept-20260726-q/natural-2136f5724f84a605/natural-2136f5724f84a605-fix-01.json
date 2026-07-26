@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "round_id": "natural-accept-20260726-q",
+  "challenge_id": "natural-2136f5724f84a605",
+  "request_id": "natural-2136f5724f84a605-fix-01",
+  "run_id": 30218577294,
+  "error_class": null,
+  "feedback": "Natural-language, payload and browser UI checks passed.",
+  "scores": {
+    "natural_language_intent": {
+      "percent": 100,
+      "passed": 3,
+      "total": 3,
+      "matches": [
+        {
+          "matched": true,
+          "marker": "phone"
+        },
+        {
+          "matched": true,
+          "marker": "menü"
+        },
+        {
+          "matched": true,
+          "marker": "plan-header"
+        }
+      ]
+    },
+    "ui_diagnosis": {
+      "percent": 100,
+      "passed": 2,
+      "total": 2,
+      "matches": [
+        {
+          "matched": true,
+          "marker": "veranker"
+        },
+        {
+          "matched": true,
+          "marker": "planheader"
+        }
+      ]
+    },
+    "clarification_policy": {
+      "status": "PASS",
+      "expected": 0,
+      "actual": 0
+    },
+    "patch_safety": {
+      "status": "PASS"
+    },
+    "browser_behavior": {
+      "status": "PASS"
+    },
+    "visible_result": {
+      "status": "PASS"
+    }
+  },
+  "payload_sha256": "87f4922682ee77a2296878ebc2ace40654b21dc1b9acc76b8724dab00858823f"
+}
