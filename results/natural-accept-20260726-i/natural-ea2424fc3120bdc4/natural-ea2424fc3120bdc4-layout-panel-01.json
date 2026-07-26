@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "status": "FAIL",
+  "round_id": "natural-accept-20260726-i",
+  "challenge_id": "natural-ea2424fc3120bdc4",
+  "request_id": "natural-ea2424fc3120bdc4-layout-panel-01",
+  "run_id": 30213392335,
+  "error_class": "natural_language",
+  "feedback": "interpretation intent score below 100: {'percent': 67, 'passed': 2, 'total': 3, 'matches': [{'matched': True, 'marker': 'layout'}, {'matched': True, 'marker': 'panel'}, {'matched': False, 'marker': ''}]}"
+}
