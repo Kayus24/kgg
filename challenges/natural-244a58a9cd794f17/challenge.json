@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "challenge_id": "natural-67b05589eb1d7a73",
-  "round_id": "natural-accept-20260726-l",
-  "natural_request": "ok also da sind zwei admin menues uebereinander eins ist wohl alt räum nur das artefakt weg und lass das echte funktionieren und sag nicht fertig ohne test",
+  "challenge_id": "natural-244a58a9cd794f17",
+  "round_id": "natural-accept-20260726-m",
+  "natural_request": "wider das problem warum hab ich da 2 mal die drei punkte? das zweite alte ding weg ohne die knoepfe im richtigen menu zu killen bitte kleinster patch",
   "input_mode": "screenshot",
   "screenshot": {
     "path": "marked-problem.png",
@@ -65,7 +65,7 @@
     "patch_content_format": "Complete executable HTML fragment. Wrap CSS in <style> and JavaScript in <script>; bare CSS or JavaScript is invalid.",
     "ambiguity_policy": "If one of multiple marked controls is requested and at least two matching source defects remain possible, ask exactly one target question before dispatch. Never repair both.",
     "required_tests": [
-      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-67b05589eb1d7a73 --submission-file <submission.json>",
+      "python release-pipeline/kgg_gpt_natural_ui_lab.py --evaluate --challenge-id natural-244a58a9cd794f17 --submission-file <submission.json>",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
       "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ]

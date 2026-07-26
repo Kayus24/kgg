@@ -1,37 +1,37 @@
 {
   "schema": 1,
-  "round_id": "natural-accept-20260726-l",
+  "round_id": "natural-accept-20260726-m",
   "source_sha256": "6a7ec5ced5709040321bf6b6503067a331bfa8492c8cb7a636a9367b8afbf4cd",
   "challenge_count": 6,
   "challenges": [
     {
-      "challenge_id": "natural-15c4627ee6f33635",
-      "manifest": "challenges/natural-15c4627ee6f33635/challenge.json",
+      "challenge_id": "natural-0b906509369a488c",
+      "manifest": "challenges/natural-0b906509369a488c/challenge.json",
       "input_mode": "combined"
     },
     {
-      "challenge_id": "natural-67b05589eb1d7a73",
-      "manifest": "challenges/natural-67b05589eb1d7a73/challenge.json",
+      "challenge_id": "natural-244a58a9cd794f17",
+      "manifest": "challenges/natural-244a58a9cd794f17/challenge.json",
       "input_mode": "screenshot"
     },
     {
-      "challenge_id": "natural-1163f4d12e57ab6b",
-      "manifest": "challenges/natural-1163f4d12e57ab6b/challenge.json",
+      "challenge_id": "natural-88839014e9c809e0",
+      "manifest": "challenges/natural-88839014e9c809e0/challenge.json",
       "input_mode": "combined"
     },
     {
-      "challenge_id": "natural-a6d4bc347c829407",
-      "manifest": "challenges/natural-a6d4bc347c829407/challenge.json",
+      "challenge_id": "natural-6efed78a858ee780",
+      "manifest": "challenges/natural-6efed78a858ee780/challenge.json",
       "input_mode": "combined"
     },
     {
-      "challenge_id": "natural-68d769a2f429906a",
-      "manifest": "challenges/natural-68d769a2f429906a/challenge.json",
+      "challenge_id": "natural-0b258ff2ee986663",
+      "manifest": "challenges/natural-0b258ff2ee986663/challenge.json",
       "input_mode": "combined"
     },
     {
-      "challenge_id": "natural-ecd5f66e672dd436",
-      "manifest": "challenges/natural-ecd5f66e672dd436/challenge.json",
+      "challenge_id": "natural-60d4fc6ade774cda",
+      "manifest": "challenges/natural-60d4fc6ade774cda/challenge.json",
       "input_mode": "screenshot"
     }
   ]
