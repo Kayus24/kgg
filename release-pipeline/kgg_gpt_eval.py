@@ -715,6 +715,7 @@ def check_release_pr_main_baseline() -> None:
         workflow,
         [
             "git fetch origin main:refs/remotes/origin/main --force",
+            'git fetch origin "${BASE_REF}:refs/remotes/origin/${BASE_REF}" --force',
             "python release-pipeline/kgg_test_battery.py --level critical",
         ],
         "Release PR main baseline",
