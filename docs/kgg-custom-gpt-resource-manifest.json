@@ -41,7 +41,7 @@
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-testing.md",
-        "sha256": "e08e1cb16fcd9b37cd9d0f76f3e3328c67ed42ceebcdb080d998657fb95e32ff"
+        "sha256": "242c252d6e590db30cf5f8a4208f56477726750025f347ae82bfd8bda1eb8582"
       }
     ],
     "actions": [
@@ -63,8 +63,8 @@
     "editorBootstrap": {
       "path": "docs/kgg-custom-gpt-eval-editor-bootstrap.md",
       "version": "v3",
-      "characters": 2304,
-      "sha256": "2a70e505e6ca2a51adf736d017e0b4c9532f5a9ba542a993a14697b63a49467d"
+      "characters": 2485,
+      "sha256": "ea8fb34ebdc9373ae407f3c477e3e379285464d2eb1acfca8e31f566f607d0bf"
     },
     "sameModelAsProduction": true,
     "capabilities": {
@@ -78,7 +78,7 @@
     "knowledge": [
       {
         "path": "docs/kgg-custom-gpt-eval-knowledge.md",
-        "sha256": "94549d2453a401edc3a14a60ea760abffbfbd390dff7e4db17305068dbc5a33a"
+        "sha256": "0f687c76c250d99cb02c7254a10f67a079a6c3455a2ee0c3b9e458fa955abe58"
       }
     ],
     "actions": [

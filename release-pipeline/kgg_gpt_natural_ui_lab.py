@@ -403,6 +403,15 @@ def build_public_manifest(
                 "clarification_count",
                 "clarification_question",
             ],
+            "interpretation_types": {
+                "observed_behavior": "string",
+                "desired_behavior": "string",
+                "target_elements": "non-empty string array",
+                "interaction_boundary": "string",
+                "confidence": "one of: low, medium, high",
+                "clarification_count": "integer 0 or 1",
+                "clarification_question": "string; empty when count is 0",
+            },
             "payload_schema": "KGG modular payload v2",
             "payload_fields": [
                 "request_id",
@@ -641,6 +650,20 @@ def submission_text(interpretation: dict[str, Any]) -> str:
 
 def classify_evaluation_error(message: str) -> str:
     lowered = message.lower()
+    if any(
+        marker in lowered
+        for marker in [
+            "interpretation missing fields",
+            "interpretation target_elements",
+            "interpretation confidence must",
+            "interpretation clarification_count must",
+            "interpretation observed_behavior must",
+            "interpretation desired_behavior must",
+            "interpretation interaction_boundary must",
+            "interpretation clarification_question must",
+        ]
+    ):
+        return "payload_schema"
     if "interpretation" in lowered or "clarification" in lowered:
         return "natural_language"
     if any(
@@ -937,6 +960,15 @@ def self_test(browser: bool) -> dict[str, Any]:
         )
         if failed["error_class"] != "natural_language":
             raise NaturalUiLabError("natural outcome classification failed")
+        invalid_shape = write_evaluation_outcome(
+            outcome_dir / "invalid-shape",
+            str(first["challenge_id"]),
+            submission_path,
+            "FAIL",
+            error="interpretation confidence must be low, medium or high",
+        )
+        if invalid_shape["error_class"] != "payload_schema":
+            raise NaturalUiLabError("interpretation shape must classify as payload_schema")
     after = tracked_hashes()
     if before != after:
         raise NaturalUiLabError("natural UI self-test modified tracked repository files")

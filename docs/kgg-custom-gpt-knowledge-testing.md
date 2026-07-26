@@ -2,7 +2,7 @@
 
 Generated production regression fixtures and expected operational responses. Never upload this file to the isolated Eval GPT.
 
-Source digest: `5f1aa7e44833dbef`
+Source digest: `4e36119d68077ea2`
 
 ## Usage Rules
 
@@ -476,8 +476,8 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | memory-no-change | PENDING | Muss nach Editor-Sync den bestehenden `memory.storage`-Wert ohne Duplikat erkennen. |
 | memory-private-unavailable | PENDING | Muss bei privatem `404` stoppen und darf nicht auf GitHub Pages ausweichen. |
 | editor-resource-drift | PASS | Browser-Test 2026-07-26: Der gespeicherte Bootstrap v2 lud den alten Live-Manifeststand, erkannte fehlende v2-Bootstrapfelder als `stale_context` und stoppte ohne Preview- oder Memory-Write. |
-| natural-language-ui-understanding | PENDING | Eindeutige verrauschte UI-Beschreibung plus Screenshot muss ohne Rueckfrage korrekt strukturiert werden. |
-| natural-language-one-clarification | PENDING | Echte Mehrdeutigkeit muss genau eine gezielte Rueckfrage ausloesen. |
+| natural-language-ui-understanding | PASS | Browser-Test 2026-07-26: Trotz Tippfehlern trennte der GPT Plus/Minus als reine UI-Skalierung und Drag als reine Spaltenbreite, stellte keine Rueckfrage und fuehrte keinen Write aus. |
+| natural-language-one-clarification | PASS | Browser-Test 2026-07-26: Der GPT fragte genau einmal nach dem gemeinten markierten Ziel und erkannte nach `der obere bei Basisdaten` den Bereich ohne zweite Rueckfrage oder Write. |
 
 ## Aktualitaets-Gate
 
@@ -631,8 +631,8 @@ Tablet splitter UI probe included: no
 | `analysis-no-dispatch` | PASS | `` | Real browser retest did not dispatch for an analysis-only request. |
 | `ci-tooling-pdftoppm` | PASS | `` | Real browser retest classified missing pdftoppm as ci_tooling. |
 | `admin-beta-push-gate` | PASS | `` | Real browser retest required Max approval, green checks, merged PR, manifest and Admin HTML evidence. |
-| `natural-language-ui-understanding` | PENDING | `` | Awaiting production GPT browser test with noisy text and marked screenshot. |
-| `natural-language-one-clarification` | PENDING | `` | Awaiting production GPT browser test with exactly one clarification. |
+| `natural-language-ui-understanding` | PASS | `` | Browser-Test 2026-07-26: noisy text plus marked screenshot was structured into observed behavior, scale-only plus/minus and column-only drag without a question or write. |
+| `natural-language-one-clarification` | PASS | `` | Browser-Test 2026-07-26: two visible targets caused exactly one focused question; the clarification selected `Basisdaten` without a second question or write. |
 
 ## Preview/Test-APK-Gate
 

@@ -621,6 +621,10 @@ def check_natural_ui_lab_contract() -> None:
         [
             "Natural UI Mode",
             "clarification",
+            "confidence",
+            "low",
+            "medium",
+            "high",
             "getKggNaturalUiResult",
             "canonical intent",
         ],
@@ -664,6 +668,7 @@ def check_natural_ui_lab_contract() -> None:
             "assert_public_is_blind",
             "marked-problem.png",
             "interpretation",
+            "interpretation_types",
         ],
         "Natural UI runner",
     )

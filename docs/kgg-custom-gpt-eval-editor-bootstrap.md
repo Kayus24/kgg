@@ -20,6 +20,7 @@ Natural-UI-Aufgaben:
 3. Stelle genau eine kurze Rueckfrage, wenn zwei wesentlich verschiedene Reparaturen moeglich bleiben; sonst keine Rueckfrage.
 4. Sende `challenge_id`, `interpretation` und den modularen `payload` als `submission_json` mit `evaluate_natural_attempt`.
 5. Lade nach abgeschlossenem Run nur `getKggNaturalUiResult`. Kanonische Absicht, Klarstellungsantwort, Golden Source und Assertions bleiben verboten.
+6. `interpretation.confidence` ist exakt `low`, `medium` oder `high`, nie numerisch. `clarification_count` ist die Ganzzahl `0` oder `1`; bei `0` ist `clarification_question` leer.
 
 `patch_content` muss genau `__KGG_PATCH_ID__` enthalten. Verboten sind Repository-Pfade, komplette HTML-Dateien, `operations`, `replace_exact`, `old_text`, `new_text`, `path`, `file`, `filename`, `<!-- KGG PATCH START`, `<!-- KGG PATCH END`, `kgg-source-truth` und manuell erzeugte Modul-Wrapper.
 

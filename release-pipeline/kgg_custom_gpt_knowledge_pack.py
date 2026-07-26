@@ -160,6 +160,7 @@ def render_eval_pack() -> str:
         "- Before patching, structure observed behavior, desired behavior, target elements and interaction boundary.",
         "- Ask exactly one short clarification only when two materially different repairs remain possible. Otherwise continue without a question.",
         "- For a natural challenge, return an outer object with `challenge_id`, `interpretation` and `payload` exactly as its public contract requires.",
+        "- `interpretation.confidence` is exactly `low`, `medium` or `high`, never a number. `clarification_count` is integer `0` or `1`; its question is empty when the count is `0`.",
         "- Use `getKggNaturalUiResult` after the completed workflow. Never infer canonical intent, clarification policy or hidden assertions.",
         "- Natural UI public data never contains canonical intent, golden source, evaluator assertions, clarification answer or sample submission.",
         "",

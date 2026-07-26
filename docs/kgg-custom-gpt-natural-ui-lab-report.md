@@ -43,6 +43,13 @@ aber nicht als `im Kopf`. Die semantischen Aliasse und ein Regressionstest
 wurden erweitert. Diese Runde zaehlt nicht zur Akzeptanz; die zwei Pflicht-
 Runden beginnen mit neuen Seeds.
 
+Die ebenfalls verworfene Runde `natural-accept-20260726-a` fand mit Run
+`30208592767` eine Luecke im oeffentlichen Interpretationsvertrag:
+`confidence` war als Feld genannt, aber nicht auf `low|medium|high` typisiert.
+Der Contract, Eval-Bootstrap und das isolierte Knowledge nennen die Typen nun
+explizit; ungueltige Interpretationsformen werden als `payload_schema`
+klassifiziert. Auch diese Runde zaehlt nicht zur Akzeptanz.
+
 | Runde | Challenges | First-attempt PASS | Final PASS | Neue Fehlerklasse |
 | --- | ---: | ---: | ---: | --- |
 | Runde 1 | 0/6 | 0/6 | 0/6 | PENDING |

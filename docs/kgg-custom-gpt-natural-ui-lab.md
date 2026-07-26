@@ -26,6 +26,10 @@ Die konkrete Formulierung wird pro Runde aus anonymisierten Sprachmustern und ne
 
 Jede Abgabe enthaelt `interpretation` und einen modularen v2-`payload`. Der private Evaluator bewertet getrennt:
 
+Der oeffentliche Vertrag typisiert alle Interpretationsfelder. Insbesondere ist
+`confidence` einer der Strings `low`, `medium` oder `high`; `clarification_count`
+ist die Ganzzahl `0` oder `1`.
+
 - rekonstruierte Benutzerabsicht,
 - UI-Diagnose,
 - Rueckfragepolitik,

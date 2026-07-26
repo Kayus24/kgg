@@ -209,6 +209,7 @@ def self_test() -> None:
         "getKggRepairResult",
         "getKggNaturalUiResult",
         "evaluate_natural_attempt",
+        "interpretation.confidence",
         "<!-- KGG PATCH START",
         "Nach drei aufeinanderfolgenden FAILs",
         "Fuehre niemals Preview-",
