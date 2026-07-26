@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "round_id": "natural-accept-20260726-n",
+  "challenge_id": "natural-faa4b568601ca296",
+  "request_id": "natural-faa4b568601ca296-recent-toggle-1",
+  "run_id": 30216729571,
+  "error_class": null,
+  "feedback": "Natural-language, payload and browser UI checks passed.",
+  "scores": {
+    "natural_language_intent": {
+      "percent": 100,
+      "passed": 3,
+      "total": 3,
+      "matches": [
+        {
+          "matched": true,
+          "marker": "obere"
+        },
+        {
+          "matched": true,
+          "marker": "öff"
+        },
+        {
+          "matched": true,
+          "marker": "menü"
+        }
+      ]
+    },
+    "ui_diagnosis": {
+      "percent": 100,
+      "passed": 2,
+      "total": 2,
+      "matches": [
+        {
+          "matched": true,
+          "marker": "recenttoggle"
+        },
+        {
+          "matched": true,
+          "marker": "drawer"
+        }
+      ]
+    },
+    "clarification_policy": {
+      "status": "PASS",
+      "expected": 1,
+      "actual": 1
+    },
+    "patch_safety": {
+      "status": "PASS"
+    },
+    "browser_behavior": {
+      "status": "PASS"
+    },
+    "visible_result": {
+      "status": "PASS"
+    }
+  },
+  "payload_sha256": "3a35c5405b01d5a3b88c14ee20af09b7c2526a5767772448c6c33f1d7a2e7740"
+}
