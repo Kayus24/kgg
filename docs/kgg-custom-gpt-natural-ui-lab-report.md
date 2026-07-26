@@ -36,6 +36,13 @@ fehlte im `NODE_PATH` des Python-gestarteten Browserprozesses. Der Workflow
 installiert die Laufzeit deshalb dauerhaft unter `$RUNNER_TEMP/kgg-playwright`
 und exportiert den Modulpfad jobweit; ein Vertragstest deckt diesen Fehler ab.
 
+Die verworfene Live-Runde `natural-live-20260726-r1` fand danach einen
+Evaluatorfehler: Runs `30208200265` und `30208301247` erkannten `handy` und
+`menue`, werteten die korrekte Formulierung `innerhalb des Kopfs`/`Plan-Header`
+aber nicht als `im Kopf`. Die semantischen Aliasse und ein Regressionstest
+wurden erweitert. Diese Runde zaehlt nicht zur Akzeptanz; die zwei Pflicht-
+Runden beginnen mit neuen Seeds.
+
 | Runde | Challenges | First-attempt PASS | Final PASS | Neue Fehlerklasse |
 | --- | ---: | ---: | ---: | --- |
 | Runde 1 | 0/6 | 0/6 | 0/6 | PENDING |

@@ -138,7 +138,19 @@ NATURAL_CASES: tuple[NaturalCase, ...] = (
             '</style>\n'
             + patch_script("  // Scoped CSS restores the phone menu visual anchor.")
         ),
-        intent_groups=(("handy", "phone"), ("menü", "menu", "3 punkte"), ("plan kopf", "im kopf", "da rein")),
+        intent_groups=(
+            ("handy", "phone"),
+            ("menü", "menu", "3 punkte"),
+            (
+                "plan kopf",
+                "im kopf",
+                "innerhalb des kopfs",
+                "kopfbereich",
+                "plan-header",
+                "planheader",
+                "da rein",
+            ),
+        ),
         diagnosis_groups=(("anchor", "veranker", "layer", "position"), ("planheader", "plan kopf", "header")),
         input_mode="combined",
     ),
@@ -832,6 +844,15 @@ def assert_public_is_blind(public_root: Path, internal_root: Path) -> None:
 
 def self_test(browser: bool) -> dict[str, Any]:
     before = tracked_hashes()
+    phone_anchor = case_by_key("wrong-phone-menu-anchor")
+    inflected = semantic_score(
+        "Auf dem Handy soll das Menu rechts innerhalb des Kopfs von Uebungen im Plan-Header verankert bleiben.",
+        phone_anchor.intent_groups,
+    )
+    if inflected["percent"] != 100:
+        raise NaturalUiLabError(
+            "semantic aliases reject valid inflected phone-menu intent"
+        )
     with tempfile.TemporaryDirectory(prefix="kgg-natural-ui-self-") as temp_name:
         temp = Path(temp_name)
         generated = generate_round(
