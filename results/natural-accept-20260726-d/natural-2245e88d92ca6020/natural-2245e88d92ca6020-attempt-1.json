@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "status": "FAIL",
+  "round_id": "natural-accept-20260726-d",
+  "challenge_id": "natural-2245e88d92ca6020",
+  "request_id": "natural-2245e88d92ca6020-attempt-1",
+  "run_id": 30210280908,
+  "error_class": "natural_language",
+  "feedback": "interpretation intent score below 100: {'percent': 67, 'passed': 2, 'total': 3, 'matches': [{'matched': True, 'marker': 'zwei'}, {'matched': False, 'marker': ''}, {'matched': True, 'marker': 'entfern'}]}"
+}
