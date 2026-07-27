@@ -4,6 +4,22 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "kgg-tablet-editor-two-column-footer-20260727-a",
+      "patchHash": "9fe0918f0ebaf4e7c7d82272f723ac665cc9a07a731397629d1bca63e044077b",
+      "baseSha": "c7c3f2f10bba679d8393af05bd7cf63dcb334026",
+      "baseVersionCode": 61,
+      "rolloutCode": 1785111337,
+      "title": "Tablet bungseditor mit zwei Spalten und sichtbarer Speicherleiste",
+      "summary": "Stellt den bungseditor ab 760 px auf zwei Spalten und reserviert eine feste untere Aktionszeile, damit Speichern im Tablet-Dialog sichtbar bleibt.",
+      "patchId": "kgg-v061-tablet-editor-two-column-save-footer",
+      "patchFile": "patches/v061-tablet-editor-two-column-save-footer.html",
+      "versionName": "1.0.61-tablet-editor-two-column-save-footer",
+      "createdAt": "2026-07-27T00:15:37Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-tablet-editor-two-column-footer-20260727-a/admin.html",
+      "sha256": "4311bb2973da0d92f4f2e490ad82cae19eda987730f3fdf6f98e3c1e8d343df6"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "gpt-modular-canary-20260720-c",
       "patchHash": "71c4740c36ed5c3830c8f2c5af1c3640bf38f5e1a8adeb583a7c54f9d5ae734d",
       "baseSha": "5d5030140301e8c4083b7081cfad371d4e590d7f",
@@ -209,18 +225,18 @@
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "gpt-modular-canary-20260720-c",
-    "patchHash": "71c4740c36ed5c3830c8f2c5af1c3640bf38f5e1a8adeb583a7c54f9d5ae734d",
-    "baseSha": "5d5030140301e8c4083b7081cfad371d4e590d7f",
+    "requestId": "kgg-tablet-editor-two-column-footer-20260727-a",
+    "patchHash": "9fe0918f0ebaf4e7c7d82272f723ac665cc9a07a731397629d1bca63e044077b",
+    "baseSha": "c7c3f2f10bba679d8393af05bd7cf63dcb334026",
     "baseVersionCode": 61,
-    "rolloutCode": 1784559753,
-    "title": "Tablet-Skalierungswert mit Preview-Badge",
-    "summary": "Zeigt im Tablet-Layout-Control direkt nach dem Skalierungswert ein kleines blaues PREVIEW-Badge, ohne Bedienlogik oder gespeicherten Layout-State zu verndern.",
-    "patchId": "kgg-v061-tablet-scale-preview-badge",
-    "patchFile": "patches/v061-tablet-scale-preview-badge.html",
-    "versionName": "1.0.61-tablet-scale-preview-badge",
-    "createdAt": "2026-07-20T15:02:33Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/gpt-modular-canary-20260720-c/admin.html",
-    "sha256": "052f8af17c0ef3f9d3dc0e046d6b21c88b172a6e342aebb7d36e2af8e781296b"
+    "rolloutCode": 1785111337,
+    "title": "Tablet bungseditor mit zwei Spalten und sichtbarer Speicherleiste",
+    "summary": "Stellt den bungseditor ab 760 px auf zwei Spalten und reserviert eine feste untere Aktionszeile, damit Speichern im Tablet-Dialog sichtbar bleibt.",
+    "patchId": "kgg-v061-tablet-editor-two-column-save-footer",
+    "patchFile": "patches/v061-tablet-editor-two-column-save-footer.html",
+    "versionName": "1.0.61-tablet-editor-two-column-save-footer",
+    "createdAt": "2026-07-27T00:15:37Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-tablet-editor-two-column-footer-20260727-a/admin.html",
+    "sha256": "4311bb2973da0d92f4f2e490ad82cae19eda987730f3fdf6f98e3c1e8d343df6"
   }
 }
