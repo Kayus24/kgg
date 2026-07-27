@@ -47,6 +47,7 @@ jobs:
           pipeline_only=true
           ui_or_html=false
           patient_scan=false
+          pwa_contract=false
 
           while IFS= read -r path; do
             [[ -z "$path" ]] && continue
@@ -64,15 +65,25 @@ jobs:
             patient_scan=true
           fi
 
+          if grep -Eq '^index\.html$|^manifest\.json$|^manifest-v[0-9]+\.webmanifest$|^service-worker\.js$|^patient-version-label\.js$|^kgg-icon-.*\.png$|^release-pipeline/kgg_pwa_contract_smoke\.py$' "$changed_file"; then
+            pwa_contract=true
+          fi
+
           echo "pipeline_only=$pipeline_only" >> "$GITHUB_OUTPUT"
           echo "ui_or_html=$ui_or_html" >> "$GITHUB_OUTPUT"
           echo "patient_scan=$patient_scan" >> "$GITHUB_OUTPUT"
+          echo "pwa_contract=$pwa_contract" >> "$GITHUB_OUTPUT"
 
       - name: Run critical KGG test battery
         shell: bash
         env:
           KGG_ALLOW_RELEASE_DRIFT: ${{ steps.scope.outputs.pipeline_only == 'true' && '1' || '' }}
         run: python release-pipeline/kgg_test_battery.py --level critical
+
+      - name: Run patient PWA contract smoke
+        if: steps.scope.outputs.pwa_contract == 'true'
+        shell: bash
+        run: python release-pipeline/kgg_pwa_contract_smoke.py
 
       - name: Check Custom GPT live context freshness
         shell: bash
