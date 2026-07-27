@@ -70,6 +70,19 @@ Tablet splitter UI probe included: no
 | `visible_scaler_canary` | PASS | `` | Emulator screenshot shows the Preview canary panel and the app; retry probe found the visible marker without app crash or SystemUI dialog. |
 | `no_open_red_runs` | PASS | `` | The latest validate and publish runs for both accepted rounds are green; historical run 29316592989 remains documented as the regression trigger. |
 
+## Produktions-GPT E2E 2026-07-27
+
+| Check | Status | Fehlerklasse | Notiz |
+| --- | --- | --- | --- |
+| `private_memory_pack_read` | PASS | `` | Nach Basename-Haertung lud der GPT Index und `workflow.md`; kein 404 und kein Pages-Fallback. |
+| `validate_only` | PASS | `` | Run `30226964578`, gleicher modularer Payload wie beim Publish. |
+| `publish_preview` | PASS | `` | Run `30226994526`; Critical und UI-Stability Regression gruen. |
+| `artifact_meta_html_apk` | PASS | `` | Artifact nicht abgelaufen, HTTP 200 fuer Meta und HTML, Preview-Index `latest`, APK vorhanden. |
+| `browser_ui_repair` | PASS | `` | Zwei Spalten, sichtbarer Speichern-Bereich und funktionierender Save-Handler bei `1280x720`. |
+| `api35_emulator` | FAIL | `ci_tooling` | Preview sichtbar, aber reproduzierbare SystemUI-ANR; Emulator als lokales Pflicht-Gate verworfen. |
+| `max_physical_test_app` | PENDING | `` | Physische Test-App bleibt das verbindliche visuelle Freigabe-Gate. |
+| `admin_beta_main_merge` | SKIP | `` | Korrekt bis Max' ausdruecklicher Test-App-Freigabe gesperrt. |
+
 ## Akzeptanz
 
 - PASS erst nach zwei kompletten gruenen Runden.

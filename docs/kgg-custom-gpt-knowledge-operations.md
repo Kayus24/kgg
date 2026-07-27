@@ -2,7 +2,7 @@
 
 Generated production knowledge for modular payloads, Actions, Preview/Test-App and Admin-Beta operations.
 
-Source digest: `8e6cbe00721e18ef`
+Source digest: `15b216181f205e06`
 
 ## Usage Rules
 
@@ -31,7 +31,7 @@ Source digest: `8e6cbe00721e18ef`
 1. Lade mit `getKggCustomGptResourceManifest` den aktuellen Editor- und Ressourcenvertrag.
 2. Lade `docs/kgg-gpt-context.md`.
 3. Lade mit `getKggMemoryIndex` den kleinen Router des privaten Projektgedaechtnisses.
-4. Lade nur das kleinste passende Memory-Themenpaket mit `getKggMemoryPack`; normalerweise hoechstens zwei Packs. Einzelne Records nur fuer Begruendung, Historie oder Konflikte laden.
+4. Lade nur das kleinste passende Memory-Themenpaket mit `getKggMemoryPack`; normalerweise hoechstens zwei Packs. Der Index liefert Pfade wie `memory/packs/workflow.md`, aber `pack_name` erhaelt ausschliesslich den letzten Dateinamen `workflow.md`. Einzelne Records nur fuer Begruendung, Historie oder Konflikte laden.
 5. Lade `docs/kgg-custom-gpt-action-schema.md`.
 6. Lade bei Patchfragen `docs/kgg-gpt-area-routes.md` und die passenden Source-Chunks.
 7. Lade `docs/kgg-gpt-bug-lessons.md` und `docs/kgg-gpt-patch-patterns.md`.
@@ -261,7 +261,7 @@ The private repository `Kayus24/kgg-project-memory` stores curated durable decis
 Read in this order:
 
 1. `getKggMemoryIndex`.
-2. Only the smallest matching file via `getKggMemoryPack` (normally one or two packs).
+2. Only the smallest matching file via `getKggMemoryPack` (normally one or two packs). The index contains paths such as `memory/packs/workflow.md`; pass only the basename `workflow.md` as `pack_name`.
 3. `getKggMemoryRecord` or `getKggMemoryHistory` only for rationale, history or conflicts.
 
 Valid memory payload:

@@ -98,7 +98,7 @@ The private repository `Kayus24/kgg-project-memory` stores curated durable decis
 Read in this order:
 
 1. `getKggMemoryIndex`.
-2. Only the smallest matching file via `getKggMemoryPack` (normally one or two packs).
+2. Only the smallest matching file via `getKggMemoryPack` (normally one or two packs). The index contains paths such as `memory/packs/workflow.md`; pass only the basename `workflow.md` as `pack_name`.
 3. `getKggMemoryRecord` or `getKggMemoryHistory` only for rationale, history or conflicts.
 
 Valid memory payload:

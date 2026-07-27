@@ -129,6 +129,7 @@
 ## memory-safe-auto-update
 
 - Muss zuerst `getKggMemoryIndex` und nur das passende Themenpaket mit `getKggMemoryPack` laden.
+- Muss aus einem Indexpfad wie `memory/packs/workflow.md` nur den Basename uebergeben: pass only the basename `workflow.md` as `pack_name`.
 - Muss den Kandidaten semantisch mit den aktiven Eintraegen vergleichen.
 - Muss `submitKggMemoryUpdate` zuerst mit `mode=validate_only` verwenden.
 - Darf bei `would_apply` automatisch mit identischem `request_id` und Payload `mode=apply` ausfuehren.

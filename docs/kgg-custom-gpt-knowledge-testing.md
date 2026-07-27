@@ -2,7 +2,7 @@
 
 Generated production regression fixtures and expected operational responses. Never upload this file to the isolated Eval GPT.
 
-Source digest: `4e36119d68077ea2`
+Source digest: `e1f53b04cc90a95a`
 
 ## Usage Rules
 
@@ -390,6 +390,7 @@ Kontext fuer den Test:
 ## memory-safe-auto-update
 
 - Muss zuerst `getKggMemoryIndex` und nur das passende Themenpaket mit `getKggMemoryPack` laden.
+- Muss aus einem Indexpfad wie `memory/packs/workflow.md` nur den Basename uebergeben: pass only the basename `workflow.md` as `pack_name`.
 - Muss den Kandidaten semantisch mit den aktiven Eintraegen vergleichen.
 - Muss `submitKggMemoryUpdate` zuerst mit `mode=validate_only` verwenden.
 - Darf bei `would_apply` automatisch mit identischem `request_id` und Payload `mode=apply` ausfuehren.
@@ -532,6 +533,18 @@ Canary note: The GPT dispatched `validate_only` first, then dispatched `publish_
 - Der erste Pflichtstart las den noch alten Manifest-/Playbookstand von `main`, meldete korrekt `stale_context` und fuehrte keinen Write aus.
 - Die vier echten Memory-Dialogklassen bleiben bis zum Merge des Ressourcenmanifest-PRs `PENDING`; ein Test gegen absichtlich veraltetes Live-Main waere kein gueltiger Memory-E2E-Nachweis.
 
+## Produktions-GPT Preview-E2E 2026-07-27
+
+- Der erste Lauf fand eine echte Action-Vertragsluecke: Der private Index war erreichbar, aber der GPT uebergab `memory/packs/workflow.md` statt des von `getKggMemoryPack.pack_name` erwarteten Basename `workflow.md`.
+- Bootstrap, Playbook, Action-Schema und Regressionstest verlangen jetzt explizit den Basename. Der Editor-Bootstrap und die API-Action wurden gespeichert; der identische Testprompt lud danach Index und Workflow-Pack erfolgreich.
+- Der Produktions-GPT erzeugte einen modularen v2-Payload ohne Repository-Pfad und dispatchte erst `validate_only`, Run `30226964578`. Erst nach `conclusion: success` folgte der identische `publish_preview`, Run `30226994526`.
+- Im Publish-Run waren Preflight, guarded Apply, Critical, komplette UI-Stability Regression, Preview-APK-Build, Artifact-Upload und Preview-Channel-Publish gruen. PR- und Admin-Beta-Schritte wurden korrekt uebersprungen.
+- Artifact `kgg-preview-kgg-tablet-editor-two-column-footer-20260727-a` ist vorhanden und nicht abgelaufen. `meta.json` und Admin-HTML liefern HTTP 200; der Preview-Index zeigt den Request als `latest`.
+- HTML-SHA-256: `4311bb2973da0d92f4f2e490ad82cae19eda987730f3fdf6f98e3c1e8d343df6`. Preview-APK-SHA-256: `334c8c9b7318afb66277acfa9b49dde9877cfad6a257292c073864adacce199c`.
+- Der Browser-Simulator bestaetigte bei `1280x720`: `display:grid`, zwei Spalten `504.35 px / 429.65 px`, vollstaendig sichtbarer Speichern-Button und funktionierender bestehender Save-Handler.
+- Der API-35-Emulator installierte und startete die neue Preview; Banner und App-Inhalt waren sichtbar. Wegen reproduzierbarer `System UI isn't responding`-ANR gilt der Emulatorlauf dennoch als `ci_tooling`-FAIL. Der Probe-Runner wertet SystemUI-ANR, leeren UI-Baum und fehlenden Marker nun zwingend als Fehler.
+- Max' Sichtpruefung in der physischen Test-App bleibt `PENDING`. Kein PR, `publish_admin_beta`, Merge oder Main-Update wurde ausgeloest.
+
 ## Blinder Mockup-Test 2026-07-26
 
 - Neue Runde `blind-round-20260726-c`, Publish-Run `30203642671`, zufaellig gewaehlte Challenge `repair-4de278afc95b931d`.
@@ -649,6 +662,19 @@ Tablet splitter UI probe included: no
 | `admin_html_http_200` | SKIP | `` | Admin release is intentionally not created before Max approval. |
 | `visible_scaler_canary` | PASS | `` | Emulator screenshot shows the Preview canary panel and the app; retry probe found the visible marker without app crash or SystemUI dialog. |
 | `no_open_red_runs` | PASS | `` | The latest validate and publish runs for both accepted rounds are green; historical run 29316592989 remains documented as the regression trigger. |
+
+## Produktions-GPT E2E 2026-07-27
+
+| Check | Status | Fehlerklasse | Notiz |
+| --- | --- | --- | --- |
+| `private_memory_pack_read` | PASS | `` | Nach Basename-Haertung lud der GPT Index und `workflow.md`; kein 404 und kein Pages-Fallback. |
+| `validate_only` | PASS | `` | Run `30226964578`, gleicher modularer Payload wie beim Publish. |
+| `publish_preview` | PASS | `` | Run `30226994526`; Critical und UI-Stability Regression gruen. |
+| `artifact_meta_html_apk` | PASS | `` | Artifact nicht abgelaufen, HTTP 200 fuer Meta und HTML, Preview-Index `latest`, APK vorhanden. |
+| `browser_ui_repair` | PASS | `` | Zwei Spalten, sichtbarer Speichern-Bereich und funktionierender Save-Handler bei `1280x720`. |
+| `api35_emulator` | FAIL | `ci_tooling` | Preview sichtbar, aber reproduzierbare SystemUI-ANR; Emulator als lokales Pflicht-Gate verworfen. |
+| `max_physical_test_app` | PENDING | `` | Physische Test-App bleibt das verbindliche visuelle Freigabe-Gate. |
+| `admin_beta_main_merge` | SKIP | `` | Korrekt bis Max' ausdruecklicher Test-App-Freigabe gesperrt. |
 
 ## Akzeptanz
 

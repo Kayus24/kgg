@@ -88,6 +88,18 @@ Canary note: The GPT dispatched `validate_only` first, then dispatched `publish_
 - Der erste Pflichtstart las den noch alten Manifest-/Playbookstand von `main`, meldete korrekt `stale_context` und fuehrte keinen Write aus.
 - Die vier echten Memory-Dialogklassen bleiben bis zum Merge des Ressourcenmanifest-PRs `PENDING`; ein Test gegen absichtlich veraltetes Live-Main waere kein gueltiger Memory-E2E-Nachweis.
 
+## Produktions-GPT Preview-E2E 2026-07-27
+
+- Der erste Lauf fand eine echte Action-Vertragsluecke: Der private Index war erreichbar, aber der GPT uebergab `memory/packs/workflow.md` statt des von `getKggMemoryPack.pack_name` erwarteten Basename `workflow.md`.
+- Bootstrap, Playbook, Action-Schema und Regressionstest verlangen jetzt explizit den Basename. Der Editor-Bootstrap und die API-Action wurden gespeichert; der identische Testprompt lud danach Index und Workflow-Pack erfolgreich.
+- Der Produktions-GPT erzeugte einen modularen v2-Payload ohne Repository-Pfad und dispatchte erst `validate_only`, Run `30226964578`. Erst nach `conclusion: success` folgte der identische `publish_preview`, Run `30226994526`.
+- Im Publish-Run waren Preflight, guarded Apply, Critical, komplette UI-Stability Regression, Preview-APK-Build, Artifact-Upload und Preview-Channel-Publish gruen. PR- und Admin-Beta-Schritte wurden korrekt uebersprungen.
+- Artifact `kgg-preview-kgg-tablet-editor-two-column-footer-20260727-a` ist vorhanden und nicht abgelaufen. `meta.json` und Admin-HTML liefern HTTP 200; der Preview-Index zeigt den Request als `latest`.
+- HTML-SHA-256: `4311bb2973da0d92f4f2e490ad82cae19eda987730f3fdf6f98e3c1e8d343df6`. Preview-APK-SHA-256: `334c8c9b7318afb66277acfa9b49dde9877cfad6a257292c073864adacce199c`.
+- Der Browser-Simulator bestaetigte bei `1280x720`: `display:grid`, zwei Spalten `504.35 px / 429.65 px`, vollstaendig sichtbarer Speichern-Button und funktionierender bestehender Save-Handler.
+- Der API-35-Emulator installierte und startete die neue Preview; Banner und App-Inhalt waren sichtbar. Wegen reproduzierbarer `System UI isn't responding`-ANR gilt der Emulatorlauf dennoch als `ci_tooling`-FAIL. Der Probe-Runner wertet SystemUI-ANR, leeren UI-Baum und fehlenden Marker nun zwingend als Fehler.
+- Max' Sichtpruefung in der physischen Test-App bleibt `PENDING`. Kein PR, `publish_admin_beta`, Merge oder Main-Update wurde ausgeloest.
+
 ## Blinder Mockup-Test 2026-07-26
 
 - Neue Runde `blind-round-20260726-c`, Publish-Run `30203642671`, zufaellig gewaehlte Challenge `repair-4de278afc95b931d`.

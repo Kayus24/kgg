@@ -238,6 +238,7 @@ def check_playbook() -> None:
             "initTabletLayoutControls()",
             "getKggMemoryIndex",
             "getKggMemoryPack",
+            "workflow.md",
             "submitKggMemoryUpdate",
             "needs_approval",
             "supersedes",
@@ -322,6 +323,7 @@ def check_prompt_and_expected_docs() -> None:
             "listKggPreviewGateRuns",
             "getKggMemoryIndex",
             "getKggMemoryPack",
+            "pass only the basename `workflow.md` as `pack_name`",
             "getKggMemoryUpdateStatus",
             "needs_approval",
             "supersedes",
@@ -352,6 +354,9 @@ def check_prompt_and_expected_docs() -> None:
             "duplicate action domains",
             "KGG Project Memory Gate",
             "getKggMemoryIndex",
+            "pack_name",
+            "workflow.md",
+            "pass only the basename `workflow.md` as `pack_name`",
             "getKggMemoryPack",
             "submitKggMemoryUpdate",
             "needs_approval",
@@ -397,6 +402,9 @@ def check_prompt_and_expected_docs() -> None:
             "schemas: {}",
             "properties:",
             "getKggMemoryIndex",
+            "pack_name",
+            "workflow.md",
+            "Never pass the index path memory/packs/workflow.md",
             "getKggMemoryPack",
             "getKggMemoryRecord",
             "getKggMemoryHistory",
@@ -433,6 +441,9 @@ def check_prompt_and_expected_docs() -> None:
             "getKggProjectContext",
             "getKggCustomGptPlaybook",
             "getKggMemoryIndex",
+            "pack_name",
+            "workflow.md",
+            "niemals `memory/packs/workflow.md`",
             "GitHub Pages ist weder Memory-Quelle noch Fallback",
             "validate_only -> publish_preview",
         ],
@@ -722,6 +733,27 @@ def check_release_pr_main_baseline() -> None:
     )
 
 
+def check_android_preview_probe_contract() -> None:
+    probe = read("release-pipeline/kgg_android_preview_probe.py")
+    require_all(
+        probe,
+        [
+            "SYSTEM_UI_ANR_PATTERNS",
+            "System UI isn't responding",
+            "ANR in com\\.android\\.systemui",
+            "contains_system_ui_anr",
+            "--self-test",
+            "--wipe-data",
+            "--settle-seconds",
+            "ui_dump_ok",
+            "visible_marker_found",
+            "system_ui_anr",
+            'and ui.get("marker_found")',
+        ],
+        "Android Preview probe contract",
+    )
+
+
 def main() -> int:
     try:
         check_playbook()
@@ -730,6 +762,7 @@ def main() -> int:
         check_repair_lab_contract()
         check_natural_ui_lab_contract()
         check_release_pr_main_baseline()
+        check_android_preview_probe_contract()
         run_preflight_self_test()
         run_stabilize_self_test()
         run_mock_eval_self_test()

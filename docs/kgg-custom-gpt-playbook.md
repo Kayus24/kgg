@@ -5,7 +5,7 @@
 1. Lade mit `getKggCustomGptResourceManifest` den aktuellen Editor- und Ressourcenvertrag.
 2. Lade `docs/kgg-gpt-context.md`.
 3. Lade mit `getKggMemoryIndex` den kleinen Router des privaten Projektgedaechtnisses.
-4. Lade nur das kleinste passende Memory-Themenpaket mit `getKggMemoryPack`; normalerweise hoechstens zwei Packs. Einzelne Records nur fuer Begruendung, Historie oder Konflikte laden.
+4. Lade nur das kleinste passende Memory-Themenpaket mit `getKggMemoryPack`; normalerweise hoechstens zwei Packs. Der Index liefert Pfade wie `memory/packs/workflow.md`, aber `pack_name` erhaelt ausschliesslich den letzten Dateinamen `workflow.md`. Einzelne Records nur fuer Begruendung, Historie oder Konflikte laden.
 5. Lade `docs/kgg-custom-gpt-action-schema.md`.
 6. Lade bei Patchfragen `docs/kgg-gpt-area-routes.md` und die passenden Source-Chunks.
 7. Lade `docs/kgg-gpt-bug-lessons.md` und `docs/kgg-gpt-patch-patterns.md`.

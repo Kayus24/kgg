@@ -1,6 +1,6 @@
 # KGG Natural-Language UI Repair Lab Report
 
-Status: HARNESS GREEN / PRODUCTION LANGUAGE GREEN / LIVE ROUNDS GREEN / TEST-APP PENDING
+Status: HARNESS GREEN / PRODUCTION LANGUAGE GREEN / LIVE ROUNDS GREEN / TEST-APP PUBLISHED / MAX ACCEPTANCE PENDING
 
 ## Konfiguration
 
@@ -89,10 +89,11 @@ Rueckfrage und reparierten danach ausschliesslich die Plan-Historie.
 
 | Gate | Ergebnis | Nachweis |
 | --- | --- | --- |
-| `validate_only` | PENDING | |
-| `publish_preview` | PENDING | |
-| Artifact/HTML/APK/meta HTTP 200 | PENDING | |
-| API-35 Emulator | PENDING | |
+| `validate_only` | PASS | Produktions-GPT Run `30226964578`, `conclusion: success`. |
+| `publish_preview` | PASS | Produktions-GPT Run `30226994526`; Critical, UI-Stability, APK-Build, Artifact-Upload und Preview-Publish gruen. |
+| Artifact/HTML/APK/meta HTTP 200 | PASS | Artifact `kgg-preview-kgg-tablet-editor-two-column-footer-20260727-a`, nicht abgelaufen; HTML und `meta.json` HTTP 200; Preview-Index zeigt den Request als `latest`. |
+| Browser-Simulator 1280x720 | PASS | Zwei Spalten `504.35 px / 429.65 px`; Speichern-Button vollstaendig sichtbar und bestehender Save-Handler schliesst den Dialog. |
+| API-35 Emulator | REJECTED | APK installiert und Preview-Banner/App wurden sichtbar, aber `System UI isn't responding` trat reproduzierbar auf. Der lokale Emulator ist kein Freigabe-Gate. |
 | Max Test-App-Freigabe | PENDING | |
 
 `publish_admin_beta` und Main bleiben gesperrt, bis Max die Test-App ausdruecklich freigibt.
