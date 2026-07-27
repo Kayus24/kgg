@@ -23,7 +23,7 @@
     return [...card.querySelectorAll('.set input.num')]
   }
   function filledCount(card){
-    return normalValueInputs(card).filter(input=>String(input&&input.value??'').trim()!=='').length
+    return normalValueInputs(card).filter(input=>String(input&&input.value!=null?input.value:'').trim()!=='').length
   }
   function ensureStyle(){
     if(document.getElementById(STYLE_ID))return;
