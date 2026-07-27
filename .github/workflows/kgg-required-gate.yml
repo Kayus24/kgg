@@ -79,6 +79,9 @@ jobs:
       - name: Run patient install prompt smoke
         shell: bash
         run: node release-pipeline/kgg_patient_install_prompt_smoke.js
+      - name: Run patient plan delete smoke
+        shell: bash
+        run: node release-pipeline/kgg_patient_plan_delete_smoke.js
       - name: Check Custom GPT live context freshness
         shell: bash
         run: python release-pipeline/kgg_gpt_context.py --check
