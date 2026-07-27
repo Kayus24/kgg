@@ -4,6 +4,22 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "kgg-v061-combo-camera-scanner",
+      "patchHash": "349bf2cfb917925968bd383b9aafeeb6227def9ba7a71925b5a7b9e9bfdef78d",
+      "baseSha": "8a3882c9f66ca9b89b3ce06a7380cc2367cb08e9",
+      "baseVersionCode": 61,
+      "rolloutCode": 1785151739,
+      "title": "Kombi-Kamera fr QR und Papierplan",
+      "summary": "Von Max beauftragter Kamera-Scan: QR wird automatisch gesucht, der manuelle Auslser bleibt jederzeit verfgbar; beide Wege nutzen dieselbe bestehende Scan-Verarbeitung ohne Hinweistext im Kamerabild.",
+      "patchId": "kgg-v061-combo-camera-scanner",
+      "patchFile": "patches/v061-combo-camera-scanner.html",
+      "versionName": "1.0.61-combo-camera-scanner",
+      "createdAt": "2026-07-27T11:28:59Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v061-combo-camera-scanner/admin.html",
+      "sha256": "1b0a87880608f3a29f15f1dc9dc0031cf8e9df65287b4bb0d8d4ced3048842c8"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-tablet-editor-two-column-footer-20260727-a",
       "patchHash": "9fe0918f0ebaf4e7c7d82272f723ac665cc9a07a731397629d1bca63e044077b",
       "baseSha": "c7c3f2f10bba679d8393af05bd7cf63dcb334026",
@@ -225,18 +241,18 @@
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-tablet-editor-two-column-footer-20260727-a",
-    "patchHash": "9fe0918f0ebaf4e7c7d82272f723ac665cc9a07a731397629d1bca63e044077b",
-    "baseSha": "c7c3f2f10bba679d8393af05bd7cf63dcb334026",
+    "requestId": "kgg-v061-combo-camera-scanner",
+    "patchHash": "349bf2cfb917925968bd383b9aafeeb6227def9ba7a71925b5a7b9e9bfdef78d",
+    "baseSha": "8a3882c9f66ca9b89b3ce06a7380cc2367cb08e9",
     "baseVersionCode": 61,
-    "rolloutCode": 1785111337,
-    "title": "Tablet bungseditor mit zwei Spalten und sichtbarer Speicherleiste",
-    "summary": "Stellt den bungseditor ab 760 px auf zwei Spalten und reserviert eine feste untere Aktionszeile, damit Speichern im Tablet-Dialog sichtbar bleibt.",
-    "patchId": "kgg-v061-tablet-editor-two-column-save-footer",
-    "patchFile": "patches/v061-tablet-editor-two-column-save-footer.html",
-    "versionName": "1.0.61-tablet-editor-two-column-save-footer",
-    "createdAt": "2026-07-27T00:15:37Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-tablet-editor-two-column-footer-20260727-a/admin.html",
-    "sha256": "4311bb2973da0d92f4f2e490ad82cae19eda987730f3fdf6f98e3c1e8d343df6"
+    "rolloutCode": 1785151739,
+    "title": "Kombi-Kamera fr QR und Papierplan",
+    "summary": "Von Max beauftragter Kamera-Scan: QR wird automatisch gesucht, der manuelle Auslser bleibt jederzeit verfgbar; beide Wege nutzen dieselbe bestehende Scan-Verarbeitung ohne Hinweistext im Kamerabild.",
+    "patchId": "kgg-v061-combo-camera-scanner",
+    "patchFile": "patches/v061-combo-camera-scanner.html",
+    "versionName": "1.0.61-combo-camera-scanner",
+    "createdAt": "2026-07-27T11:28:59Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v061-combo-camera-scanner/admin.html",
+    "sha256": "1b0a87880608f3a29f15f1dc9dc0031cf8e9df65287b4bb0d8d4ced3048842c8"
   }
 }
