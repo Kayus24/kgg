@@ -96,6 +96,10 @@ jobs:
         shell: bash
         run: node release-pipeline/kgg_patient_summary_smoke.js
 
+      - name: Run patient card progress smoke
+        shell: bash
+        run: node release-pipeline/kgg_patient_card_progress_smoke.js
+
       - name: Check Custom GPT live context freshness
         shell: bash
         run: python release-pipeline/kgg_gpt_context.py --check
