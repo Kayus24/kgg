@@ -10,7 +10,7 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "65"
+VERSION = "66"
 MANIFEST_PATHS = (ROOT / "manifest.json", ROOT / "manifest-v64.webmanifest")
 ICON_CONTRACT = {
     "kgg-icon-192-v63.png": (192, 192, "any"),
@@ -77,14 +77,15 @@ def validate_worker() -> None:
     worker = worker_path.read_text(encoding="utf-8")
 
     required_fragments = (
-        "kgg-handyplan-v65-set-summary-range",
-        "const APP_VERSION = '65';",
+        "kgg-handyplan-v66-card-progress",
+        "const APP_VERSION = '66';",
         "./manifest-v64.webmanifest",
         "./kgg-icon-192-v63.png",
         "./kgg-icon-512-v63.png",
         "./kgg-icon-maskable-512-v63.png",
-        "./patient-version-label.js?v=65",
+        "./patient-version-label.js?v=66",
         "./patient-set-summary-groups.js?v=set-summary-groups-2-range-label",
+        "./patient-card-progress.js?v=card-progress-1-two-fields",
         'rel="manifest" href="./manifest-v64.webmanifest"',
         'rel="icon" type="image/png" sizes="192x192" href="./kgg-icon-192-v63.png"',
         'rel="apple-touch-icon" sizes="192x192" href="./kgg-icon-192-v63.png"',
@@ -111,8 +112,8 @@ def validate_worker() -> None:
 
 def validate_update_lifecycle() -> None:
     label = (ROOT / "patient-version-label.js").read_text(encoding="utf-8")
-    if "const RELEASE='65';" not in label:
-        fail("patient-version-label.js is not aligned with release 65")
+    if "const RELEASE='66';" not in label:
+        fail("patient-version-label.js is not aligned with release 66")
 
 
 def validate_static_compatibility(manifest: dict) -> None:
