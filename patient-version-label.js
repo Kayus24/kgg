@@ -1,6 +1,6 @@
 (()=>{
   const ID='kggAppVersion';
-  const RELEASE='65';
+  const RELEASE='66';
   const BANNER_ID='kggUpdateGate';
   const RELOAD_KEY='kgg-sw-reload-v'+RELEASE;
   const UPDATE_TIMEOUT_MS=8000;
