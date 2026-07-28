@@ -4,7 +4,7 @@ from __future__ import annotations
 import json,shutil,struct,subprocess
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-VERSION="68"
+VERSION="69"
 MANIFEST_PATHS=(ROOT/"manifest.json",ROOT/"manifest-v64.webmanifest")
 ICON_CONTRACT={"kgg-icon-192-v63.png":(192,192,"any"),"kgg-icon-512-v63.png":(512,512,"any"),"kgg-icon-maskable-512-v63.png":(512,512,"maskable")}
 def fail(message:str)->None:raise SystemExit(f"PWA contract failed: {message}")
@@ -32,7 +32,7 @@ def validate_manifest(manifest:dict,path:Path)->None:
   if read_png_size(ROOT/src)!=(width,height):fail(f"{src} has the wrong actual size")
 def validate_worker()->None:
  worker_path=ROOT/"service-worker.js";worker=worker_path.read_text(encoding="utf-8")
- required=("kgg-handyplan-v68-plan-delete","const APP_VERSION = '68';","./manifest-v64.webmanifest","./kgg-icon-192-v63.png","./kgg-icon-512-v63.png","./kgg-icon-maskable-512-v63.png","./patient-version-label.js?v=68","./patient-set-summary-groups.js?v=set-summary-groups-2-range-label","./patient-card-progress.js?v=card-progress-1-two-fields","./patient-install-prompt.js?v=install-prompt-1-shared-reference","./patient-plan-delete.js?v=plan-delete-1-safe",'rel="manifest" href="./manifest-v64.webmanifest"','rel="icon" type="image/png" sizes="192x192" href="./kgg-icon-192-v63.png"','rel="apple-touch-icon" sizes="192x192" href="./kgg-icon-192-v63.png"')
+ required=("kgg-handyplan-v69-update-recovery","const APP_VERSION = '69';","const RECOVERY_PATH = './update-recovery.html';","./manifest-v64.webmanifest","./kgg-icon-192-v63.png","./kgg-icon-512-v63.png","./kgg-icon-maskable-512-v63.png","./patient-version-label.js?v=69","./patient-set-summary-groups.js?v=set-summary-groups-2-range-label","./patient-card-progress.js?v=card-progress-1-two-fields","./patient-install-prompt.js?v=install-prompt-1-shared-reference","./patient-plan-delete.js?v=plan-delete-1-safe","GET_UPDATE_DIAGNOSTICS","isRecoveryRequest(event.request)",'rel="manifest" href="./manifest-v64.webmanifest"','rel="icon" type="image/png" sizes="192x192" href="./kgg-icon-192-v63.png"','rel="apple-touch-icon" sizes="192x192" href="./kgg-icon-192-v63.png"')
  for fragment in required:
   if fragment not in worker:fail(f"service-worker.js is missing {fragment!r}")
  if "v59.png" in worker or "v59'" in worker or 'v59"' in worker:fail("service-worker.js still contains a v59 icon reference")
@@ -42,11 +42,12 @@ def validate_worker()->None:
   if result.returncode!=0:fail(f"service-worker.js is invalid JavaScript: {result.stderr.strip()}")
 def validate_update_lifecycle()->None:
  label=(ROOT/"patient-version-label.js").read_text(encoding="utf-8")
- if "const RELEASE='68';" not in label:fail("patient-version-label.js is not aligned with release 68")
+ if "const RELEASE='69';" not in label:fail("patient-version-label.js is not aligned with release 69")
 def validate_static_compatibility(manifest:dict)->None:
  html=(ROOT/"index.html").read_text(encoding="utf-8-sig")
  if '<link rel="manifest" href="manifest.json">' not in html:fail("index.html no longer exposes the first-load compatibility manifest")
  if load_manifest(ROOT/"manifest.json")!=manifest:fail("manifest.json and manifest-v64.webmanifest must remain identical")
+ if not (ROOT/"update-recovery.html").is_file():fail("update-recovery.html is missing")
 def main()->int:
  manifests=[load_manifest(path) for path in MANIFEST_PATHS]
  for manifest,path in zip(manifests,MANIFEST_PATHS):validate_manifest(manifest,path)
