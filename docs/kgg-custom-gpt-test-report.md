@@ -154,6 +154,32 @@ keine App-Preview und keinen unbeabsichtigten Memory-Write.
 - Dieser Befund ist `ui_logic`, nicht `payload_schema` und kein Fehler des modularen Write-Gates. Die Stabilizer-Klassifizierung wurde gegen Dateipfade im Stack gehaertet.
 - Der eigentliche Tablet-Splitter-App-Patch bleibt ein eigener Preview-Patch. Er wurde nicht in den Infrastruktur-/Canary-Patch gemischt.
 
+## Arbeitsweisen-Baseline 2026-07-28
+
+- Reine Tablet-Ursachenanalyse: fachlich korrekt und ohne Dispatch, aber Observer-FAIL.
+- Sichtbarer Aufwand: `233s`, sieben Reasoning-Schritte, davon drei inhaltlich ueberlappend.
+- Im Browser war nur `kgg-custom-gpt-knowledge-safety.md` als gelesene Datei sichtbar; Manifest-, Live-Kontext- und Playbook-Actions waren nicht nachweisbar.
+- Observer-Klassen: `stale_context`, `inefficient_workflow` und `retry_loop`.
+- Echte Mehrdeutigkeit: Observer-PASS in `30s`, zwei Reasoning-Schritte, genau eine gezielte Rueckfrage und kein Write.
+- Konsequenz: Eine echte Mehrdeutigkeit wird vor allen Actions mit genau einer Frage geklaert. Reine Diagnose nutzt hoechstens ein synchronisiertes Knowledge-Paket; Patch- und Preview-Aufgaben muessen danach den Live-Bootstrap ausfuehren.
+- Bootstrap-v3-Entwurf reduzierte denselben Analysefall auf `81s` und vier getrennte Schritte. Der Editor-Preview zeigte jedoch keine beweisbaren Read-only-Action-Aufrufe; dieser Zwischenstand wurde deshalb nicht als PASS gewertet.
+- Produktions-A/B-Test am 28.07.2026: Mit Knowledge antwortete der GPT fachlich korrekt in `1m 26s`; ohne Knowledge dauerte derselbe Lauf `2m 4s` und lieferte keine besser sichtbaren Action-Belege. Daher bleibt Knowledge fuer reine Diagnose aktiv, waehrend Live-Reads vor jedem Patch-/Preview-Schritt maschinell erzwungen werden.
+- Fuer den Produktions-Sync bleibt der kompatible Bootstrap-Vertrag `v2`; die Verhaltensrevision wird als Profil `2.5.0` gefuehrt. Reine Diagnose und writefreie Planung duerfen ein synchronisiertes Knowledge-Paket verwenden; Live-Status und jeder Submit bleiben durch Live-Reads plus Gate gesperrt.
+- Gespeicherter Produktions-Retest mit Profil `2.5.0`: statische Tablet-Diagnose PASS in `18s`, Mehrdeutigkeitsfall PASS mit genau einer Rueckfrage in `25s`, writefreie modulare Tablet-Planung PASS in `115s`. Alle drei Antworten blieben ohne Write, Preview oder unbelegten Live-Status.
+- Baseline-Transkripte und maschinelle Reports:
+  - `docs/kgg-custom-gpt-workflow-baseline-analysis-2026-07-28.json`
+  - `docs/kgg-custom-gpt-workflow-baseline-analysis-2026-07-28.md`
+  - `docs/kgg-custom-gpt-workflow-baseline-clarification-2026-07-28.json`
+  - `docs/kgg-custom-gpt-workflow-baseline-clarification-2026-07-28.md`
+  - `docs/kgg-custom-gpt-workflow-draft-v3-analysis-2026-07-28.json`
+  - `docs/kgg-custom-gpt-workflow-draft-v3-analysis-2026-07-28.md`
+  - `docs/kgg-custom-gpt-workflow-production-v25-analysis-2026-07-28.json`
+  - `docs/kgg-custom-gpt-workflow-production-v25-analysis-2026-07-28.md`
+  - `docs/kgg-custom-gpt-workflow-production-v25-clarification-2026-07-28.json`
+  - `docs/kgg-custom-gpt-workflow-production-v25-clarification-2026-07-28.md`
+  - `docs/kgg-custom-gpt-workflow-production-v25-writefree-plan-2026-07-28.json`
+  - `docs/kgg-custom-gpt-workflow-production-v25-writefree-plan-2026-07-28.md`
+
 ## Bewertung
 
 - PASS: Antwort erfuellt die erwarteten KGG-Regeln.

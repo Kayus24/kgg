@@ -65,6 +65,18 @@ def run_stabilize_self_test() -> None:
         fail(f"stabilize self-test failed: {output}")
 
 
+def run_workflow_observer_self_test() -> None:
+    proc = subprocess.run(
+        [sys.executable, "release-pipeline/kgg_gpt_workflow_observer.py", "--self-test"],
+        cwd=str(ROOT),
+        text=True,
+        capture_output=True,
+    )
+    if proc.returncode != 0:
+        output = (proc.stdout + "\n" + proc.stderr).strip()
+        fail(f"workflow observer self-test failed: {output}")
+
+
 def run_mock_eval_self_test() -> None:
     proc = subprocess.run(
         [sys.executable, "release-pipeline/kgg_gpt_mock_eval.py", "--self-test"],
@@ -451,7 +463,7 @@ def check_prompt_and_expected_docs() -> None:
             "getKggMemoryIndex",
             "pack_name",
             "workflow.md",
-            "niemals `memory/packs/workflow.md`",
+            "nie `memory/packs/workflow.md`",
             "GitHub Pages ist weder Memory-Quelle noch Fallback",
             "validate_only -> publish_preview",
         ],
@@ -461,7 +473,7 @@ def check_prompt_and_expected_docs() -> None:
         resource_manifest,
         [
             '"schema": 2',
-            '"profileVersion": "2.1.0"',
+            '"profileVersion": "2.5.0"',
             '"editorBootstrap"',
             '"version": "v2"',
             "kgg-custom-gpt-editor-bootstrap.md",
@@ -773,6 +785,7 @@ def main() -> int:
         check_android_preview_probe_contract()
         run_preflight_self_test()
         run_stabilize_self_test()
+        run_workflow_observer_self_test()
         run_mock_eval_self_test()
         run_repair_lab_self_tests()
         run_validate_only_self_test()

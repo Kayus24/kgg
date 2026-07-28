@@ -11,12 +11,12 @@
   "production": {
     "name": "KGG Update-Agent",
     "gptId": "g-6a45fba0f3408191ac1fb2c987a2e960",
-    "profileVersion": "2.1.0",
+    "profileVersion": "2.5.0",
     "editorBootstrap": {
       "path": "docs/kgg-custom-gpt-editor-bootstrap.md",
       "version": "v2",
-      "characters": 3950,
-      "sha256": "5f9ae71217efb0ffbae40771f47eedf7aafb6bc920b53c17116db85beff35627"
+      "characters": 3960,
+      "sha256": "8bb3068dcf419c5f907bbc21e1d51e063d4028c80b1cde3adc79ea668e83f3e3"
     },
     "capabilities": {
       "webSearch": true,
@@ -29,11 +29,11 @@
     "knowledge": [
       {
         "path": "docs/kgg-custom-gpt-knowledge-architecture.md",
-        "sha256": "1423c6485e0b4ab3f15fea2f99c2ac6e5defde702a3bbb6e5f4015ee4d3c6a8c"
+        "sha256": "d050a2fea3ea8a9b76d53a3ff754b104581930f04b8b3a57924105c095933059"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-operations.md",
-        "sha256": "477fa10d792361c91ba0a115127331428e518365557fa4a63f517319e90b34cf"
+        "sha256": "b3e3cac3cfe580073f95022cc0ecd647ad815e2fd200904e3f6b645ac6f3e56c"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-safety.md",
@@ -41,13 +41,13 @@
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-testing.md",
-        "sha256": "73d599ce2d140f2849c23e1a5167caf04b7153c692e60c2186ada390b69d0ac8"
+        "sha256": "b0473e15abd68eab4a4047687f8dfd4d39df5c5f54113bdc2e0719d42001a642"
       }
     ],
     "actions": [
       {
         "path": "docs/kgg-custom-gpt-action-openapi.yaml",
-        "sha256": "16be8a38aff0612fa7d36894a3674e606d19ea65d4d33a101167fa6e067cd3d4"
+        "sha256": "29b76c8b7b77def636eb2616b242b24bd692340027d5167cc003681a40bad045"
       },
       {
         "path": "docs/kgg-custom-gpt-action-api-openapi.yaml",

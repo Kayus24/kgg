@@ -1,0 +1,45 @@
+{
+  "kind": "kgg_gpt_workflow_observation",
+  "prompt_id": "production-v25-writefree-tablet-plan-2026-07-28",
+  "task_mode": "analysis",
+  "expected_area": "tablet-layout",
+  "elapsed_seconds": 115,
+  "observation_basis": "browser-visible activity only",
+  "limits": {
+    "max_read_actions": 0,
+    "max_source_chunks": 0,
+    "max_memory_packs": 0,
+    "max_clarifications": 0,
+    "max_reasoning_steps": 5,
+    "max_elapsed_seconds": 120,
+    "allow_web_search": false
+  },
+  "actions": [],
+  "knowledge_files": [],
+  "events": [
+    {
+      "type": "reasoning_step",
+      "label": "Bewertete das Layout"
+    },
+    {
+      "type": "reasoning_step",
+      "label": "Strukturierte die Dokumentation"
+    },
+    {
+      "type": "reasoning_step",
+      "label": "Regressionen vermieden"
+    }
+  ],
+  "browser_evidence": {
+    "modular_patch_plan": true,
+    "critical_test_named": true,
+    "ui_stability_test_named": true,
+    "protected_areas_preserved": true,
+    "dispatch_started": false,
+    "write_started": false
+  },
+  "final": {
+    "claimed_success": false,
+    "evidence": {}
+  }
+}

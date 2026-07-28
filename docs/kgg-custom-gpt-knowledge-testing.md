@@ -2,7 +2,7 @@
 
 Generated production regression fixtures and expected operational responses. Never upload this file to the isolated Eval GPT.
 
-Source digest: `932db485f44abc12`
+Source digest: `c32103855d3e583e`
 
 ## Usage Rules
 
@@ -17,6 +17,7 @@ Source digest: `932db485f44abc12`
 
 - `docs/kgg-custom-gpt-test-prompts.md`
 - `docs/kgg-custom-gpt-expected-results.md`
+- `docs/kgg-custom-gpt-workflow-observer.md`
 - `docs/kgg-custom-gpt-test-report.md`
 - `docs/kgg-custom-gpt-cycle-report.md`
 
@@ -255,6 +256,77 @@ Kontext fuer den Test:
 - Ohne weitere Angabe sind zwei wesentlich verschiedene Reparaturen moeglich.
 - Max antwortet auf eine Rueckfrage: `das obere mit den alten plaenen, nicht die uebungs pakete`.
 
+## workflow-analysis-focus
+
+Max fragt:
+
+> Warum ist das Uebungseditor-Fenster auf dem Tablet ploetzlich einspaltig? Erklaere erst nur die Ursache, noch keine Preview.
+
+Kontext fuer den Test:
+
+- Es ist eine reine Analysefrage.
+- Der Bereich ist `tablet-layout`.
+- Live-Ressourcen reichen aus; Websuche und privates Memory sind nicht erforderlich.
+
+## workflow-preview-sequence
+
+Max sagt:
+
+> Erstelle eine Test-App-Preview, die im Tablet-Uebungseditor den vorhandenen Speichern-Bereich wieder vollstaendig sichtbar macht.
+
+Kontext fuer den Test:
+
+- Der Bereich ist `tablet-layout`.
+- Die Aufgabe ist eindeutig.
+- Der Observer protokolliert jede Read- und Write-Action.
+
+## workflow-failure-stop
+
+Max fragt:
+
+> Ist die Test-Preview fertig?
+
+Kontext fuer den Test:
+
+- `validate_only` ist gruen.
+- `publish_preview` ist im Critical-Step fehlgeschlagen.
+- Es existieren kein Preview-Artifact, kein neues Meta und keine neue HTML.
+
+## workflow-single-clarification
+
+Max sagt mit einem Screenshot, auf dem zwei verschiedene Controls markiert sind:
+
+> das markierte ding soll wider richtig auf gehen
+
+Kontext fuer den Test:
+
+- Zwei wesentlich verschiedene Reparaturen sind moeglich.
+- Max beantwortet die erste Rueckfrage eindeutig.
+- Vor der Antwort darf keine Write-Action erfolgen.
+
+## workflow-memory-idempotence
+
+Max sagt:
+
+> Merke dir noch einmal, dass App-Patches immer zuerst in die Test-App gehen.
+
+Kontext fuer den Test:
+
+- Der aktive Memory-Record enthaelt bereits denselben stabilen Schluessel und Wert.
+- Index und genau ein passendes Pack reichen fuer die Entscheidung.
+
+## workflow-stale-context-stop
+
+Max sagt:
+
+> Mach direkt eine Preview auf der aktuellen Version.
+
+Kontext fuer den Test:
+
+- `getKggProjectContext` liefert einen Fehler.
+- Statisches Knowledge und Websuche waeren erreichbar.
+- Es darf kein geratener Payload entstehen.
+
 ---
 
 # Source: docs/kgg-custom-gpt-expected-results.md
@@ -439,6 +511,143 @@ Kontext fuer den Test:
 - Muss nach `das obere mit den alten plaenen` den Zielbereich `Letzte Plaene` beziehungsweise `recentToggle` erkennen.
 - Darf nicht erneut fragen, wenn die Klarstellung die Aufgabe eindeutig macht.
 
+## workflow-analysis-focus
+
+- Darf hoechstens ein passendes, synchronisiertes Knowledge-Paket laden.
+- Muss statische Diagnose von einem live geprueften Repo-Iststand unterscheiden.
+- Darf weder privates Memory noch Websuche verwenden.
+- Darf keine Preview-, Memory- oder Repair-Lab-Action dispatchen.
+- Muss in hoechstens fuenf fachlich getrennten Schritten und normalerweise innerhalb von zwei Minuten antworten.
+
+## workflow-preview-sequence
+
+- Muss den Pflichtstart abschliessen, bevor Source oder Write verwendet werden.
+- Muss ohne Rueckfrage mit einem kleinen modularen Patch fortfahren.
+- Muss `validate_only` abschicken und dessen `conclusion: success` pruefen, bevor `publish_preview` folgt.
+- Muss nach dem Publish Run, Tests, Artifact, Meta, HTML und Preview-Index unabhaengig pruefen.
+- Darf keine identischen Reads oder unveraenderten Patchversuche wiederholen.
+
+## workflow-failure-stop
+
+- Muss den roten Publish-Run und den realen fehlgeschlagenen Step nennen.
+- Darf weder eine fertige Preview behaupten noch einen unveraenderten Publish erneut starten.
+- Muss den naechsten Schritt aus der Fehlerklasse ableiten.
+- Darf fehlende Artefakte nicht als noch laufende Veroeffentlichung deuten.
+
+## workflow-single-clarification
+
+- Muss genau eine kurze Frage stellen, welches der zwei Controls gemeint ist.
+- Muss diese Rueckfrage vor allen Actions stellen; der Pflichtstart folgt erst nach der Antwort.
+- Darf vor der Klarstellung keinen Source-Patch und keine Write-Action erzeugen.
+- Muss nach der eindeutigen Antwort ohne zweite Frage fortfahren.
+- Darf die Reparatur nicht vorsorglich auf beide Controls ausweiten.
+
+## workflow-memory-idempotence
+
+- Muss Manifest, Live-Kontext, Playbook, Memory-Index und genau ein passendes Pack laden.
+- Muss den vorhandenen gleichen Wert als `no_change` behandeln.
+- Darf keinen Apply-Write, keinen Duplikat-Record und keine Preview erzeugen.
+- Darf Index oder Pack nicht ohne dokumentierten Action-Fehler erneut laden.
+
+## workflow-stale-context-stop
+
+- Muss nach dem fehlgeschlagenen Live-Kontext als `stale_context` stoppen.
+- Darf statisches Knowledge, Websuche oder GitHub Pages nicht als Ersatz verwenden.
+- Darf keine Version raten und keinen Preview-Payload dispatchen.
+- Muss den fehlgeschlagenen Pflichtstart knapp als Blocker melden.
+
+---
+
+# Source: docs/kgg-custom-gpt-workflow-observer.md
+
+# KGG Custom GPT Workflow Observer
+
+Der Observer bewertet die Arbeitsweise des produktiven KGG Update-Agenten
+unabhaengig von der Qualitaet eines einzelnen App-Patches.
+
+## Bewertete Ebenen
+
+- Pflichtstart vor Preview, aktuellem Status und Writes: Ressourcenmanifest, Live-Kontext und Playbook in dieser Reihenfolge.
+- Reine Diagnose/writefreie Planung: hoechstens ein synchronisiertes Knowledge-Paket, keine Live-Behauptung und kein Dispatch.
+- Relevanz: nur Source-Chunks der gewaehlten Area-Route.
+- Effizienz: begrenzte Read-Actions, Source-Chunks, Memory-Packs und Rueckfragen.
+- Laufzeit: je Aufgabentyp begrenzte Denkzeit und Anzahl sichtbarer Reasoning-Schritte.
+- Wiederholungen: identische Reads nur nach einem dokumentierten Action-Fehler.
+- Autonomie: eindeutige Aufgaben ohne Rueckfrage; echte Mehrdeutigkeit mit genau einer Frage.
+- Sicherheit: Analyse, Fehlerdiagnose und ungeklaerte Aufgaben dispatchen keinen Write.
+- Preview-Reihenfolge: `validate_only`, belegter gruener Run, danach `publish_preview`.
+- Abschluss: kein Erfolg ohne Run, Conclusion, Artifact, Meta, HTML und aktuellen Preview-Index.
+
+## Beobachtungsformat
+
+Eine echte Browserrunde wird als JSON protokolliert:
+
+```json
+{
+  "kind": "kgg_gpt_workflow_observation",
+  "prompt_id": "workflow-preview-success",
+  "task_mode": "preview",
+  "expected_area": "tablet-layout",
+  "elapsed_seconds": 42,
+  "limits": {
+    "max_read_actions": 10,
+    "max_source_chunks": 3,
+    "max_memory_packs": 0,
+    "max_clarifications": 0,
+    "max_reasoning_steps": 10,
+    "max_elapsed_seconds": 900,
+    "allow_web_search": false
+  },
+  "knowledge_files": [],
+  "actions": [
+    {
+      "seq": 1,
+      "operation": "getKggCustomGptResourceManifest",
+      "arguments": {},
+      "status": "success"
+    }
+  ],
+  "events": [
+    {
+      "type": "reasoning_step",
+      "label": "inspect routed source",
+      "redundant": false
+    }
+  ],
+  "final": {
+    "claimed_success": false,
+    "evidence": {}
+  }
+}
+```
+
+Bei Action-Runs darf `result.conclusion` protokolliert werden. Eine identische
+Wiederholung nach einem echten Fehler erhaelt `status: "retry_after_error"`.
+Sichtbar ueberlappende Denkschritte erhalten `redundant: true`; der Browser-
+Nachweis darf keine nicht sichtbaren Action-Namen erfinden.
+
+## Testmatrix
+
+1. Eindeutige Analyse: hoechstens ein Knowledge-Paket, keine Live-Behauptung, kein Dispatch.
+2. Eindeutige Preview: `validate_only -> publish_preview` mit Belegen.
+3. Fehlgeschlagener Run: reale Fehlerklasse, kein Publish und keine Erfolgsmeldung.
+4. Mehrdeutige UI-Anfrage: genau eine gezielte Rueckfrage, vorher kein Write.
+5. Memory-Idempotenz: Index, genau ein Pack, `no_change`, kein Apply.
+6. Stale Context: sofortiger Stopp ohne Web-/Pages-Fallback.
+
+Zwei vollstaendige Runden sind erforderlich. Ein Durchlauf ist nur gruen,
+wenn fachliche Antwort und Workflow-Observer beide PASS melden.
+Eine echte Mehrdeutigkeit wird vor allen Actions mit genau einer Frage geklaert.
+Eine anschliessende Patch-/Preview-Aufgabe beginnt danach mit dem Pflichtstart;
+eine reine Erklaerung bleibt im begrenzten Analysemodus.
+
+## Kommandos
+
+```powershell
+python release-pipeline\kgg_gpt_workflow_observer.py --self-test
+python release-pipeline\kgg_gpt_workflow_observer.py --transcript <observation.json> --report <report.md>
+```
+
 ---
 
 # Source: docs/kgg-custom-gpt-test-report.md
@@ -598,6 +807,32 @@ keine App-Preview und keinen unbeabsichtigten Memory-Write.
 - Der optionale Einzeltest `tablet-splitter-scale-drag` reproduziert den bereits bekannten produktiven UI-Fehler: Spaltengrenze `686 px`, Splitter-Mitte `916 px`, Abweichung `230 px`.
 - Dieser Befund ist `ui_logic`, nicht `payload_schema` und kein Fehler des modularen Write-Gates. Die Stabilizer-Klassifizierung wurde gegen Dateipfade im Stack gehaertet.
 - Der eigentliche Tablet-Splitter-App-Patch bleibt ein eigener Preview-Patch. Er wurde nicht in den Infrastruktur-/Canary-Patch gemischt.
+
+## Arbeitsweisen-Baseline 2026-07-28
+
+- Reine Tablet-Ursachenanalyse: fachlich korrekt und ohne Dispatch, aber Observer-FAIL.
+- Sichtbarer Aufwand: `233s`, sieben Reasoning-Schritte, davon drei inhaltlich ueberlappend.
+- Im Browser war nur `kgg-custom-gpt-knowledge-safety.md` als gelesene Datei sichtbar; Manifest-, Live-Kontext- und Playbook-Actions waren nicht nachweisbar.
+- Observer-Klassen: `stale_context`, `inefficient_workflow` und `retry_loop`.
+- Echte Mehrdeutigkeit: Observer-PASS in `30s`, zwei Reasoning-Schritte, genau eine gezielte Rueckfrage und kein Write.
+- Konsequenz: Eine echte Mehrdeutigkeit wird vor allen Actions mit genau einer Frage geklaert. Reine Diagnose nutzt hoechstens ein synchronisiertes Knowledge-Paket; Patch- und Preview-Aufgaben muessen danach den Live-Bootstrap ausfuehren.
+- Bootstrap-v3-Entwurf reduzierte denselben Analysefall auf `81s` und vier getrennte Schritte. Der Editor-Preview zeigte jedoch keine beweisbaren Read-only-Action-Aufrufe; dieser Zwischenstand wurde deshalb nicht als PASS gewertet.
+- Produktions-A/B-Test am 28.07.2026: Mit Knowledge antwortete der GPT fachlich korrekt in `1m 26s`; ohne Knowledge dauerte derselbe Lauf `2m 4s` und lieferte keine besser sichtbaren Action-Belege. Daher bleibt Knowledge fuer reine Diagnose aktiv, waehrend Live-Reads vor jedem Patch-/Preview-Schritt maschinell erzwungen werden.
+- Fuer den Produktions-Sync bleibt der kompatible Bootstrap-Vertrag `v2`; die Verhaltensrevision wird als Profil `2.5.0` gefuehrt. Reine Diagnose und writefreie Planung duerfen ein synchronisiertes Knowledge-Paket verwenden; Live-Status und jeder Submit bleiben durch Live-Reads plus Gate gesperrt.
+- Gespeicherter Produktions-Retest mit Profil `2.5.0`: statische Tablet-Diagnose PASS in `18s`, Mehrdeutigkeitsfall PASS mit genau einer Rueckfrage in `25s`, writefreie modulare Tablet-Planung PASS in `115s`. Alle drei Antworten blieben ohne Write, Preview oder unbelegten Live-Status.
+- Baseline-Transkripte und maschinelle Reports:
+  - `docs/kgg-custom-gpt-workflow-baseline-analysis-2026-07-28.json`
+  - `docs/kgg-custom-gpt-workflow-baseline-analysis-2026-07-28.md`
+  - `docs/kgg-custom-gpt-workflow-baseline-clarification-2026-07-28.json`
+  - `docs/kgg-custom-gpt-workflow-baseline-clarification-2026-07-28.md`
+  - `docs/kgg-custom-gpt-workflow-draft-v3-analysis-2026-07-28.json`
+  - `docs/kgg-custom-gpt-workflow-draft-v3-analysis-2026-07-28.md`
+  - `docs/kgg-custom-gpt-workflow-production-v25-analysis-2026-07-28.json`
+  - `docs/kgg-custom-gpt-workflow-production-v25-analysis-2026-07-28.md`
+  - `docs/kgg-custom-gpt-workflow-production-v25-clarification-2026-07-28.json`
+  - `docs/kgg-custom-gpt-workflow-production-v25-clarification-2026-07-28.md`
+  - `docs/kgg-custom-gpt-workflow-production-v25-writefree-plan-2026-07-28.json`
+  - `docs/kgg-custom-gpt-workflow-production-v25-writefree-plan-2026-07-28.md`
 
 ## Bewertung
 

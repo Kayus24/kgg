@@ -228,3 +228,74 @@ Kontext fuer den Test:
 
 - Ohne weitere Angabe sind zwei wesentlich verschiedene Reparaturen moeglich.
 - Max antwortet auf eine Rueckfrage: `das obere mit den alten plaenen, nicht die uebungs pakete`.
+
+## workflow-analysis-focus
+
+Max fragt:
+
+> Warum ist das Uebungseditor-Fenster auf dem Tablet ploetzlich einspaltig? Erklaere erst nur die Ursache, noch keine Preview.
+
+Kontext fuer den Test:
+
+- Es ist eine reine Analysefrage.
+- Der Bereich ist `tablet-layout`.
+- Live-Ressourcen reichen aus; Websuche und privates Memory sind nicht erforderlich.
+
+## workflow-preview-sequence
+
+Max sagt:
+
+> Erstelle eine Test-App-Preview, die im Tablet-Uebungseditor den vorhandenen Speichern-Bereich wieder vollstaendig sichtbar macht.
+
+Kontext fuer den Test:
+
+- Der Bereich ist `tablet-layout`.
+- Die Aufgabe ist eindeutig.
+- Der Observer protokolliert jede Read- und Write-Action.
+
+## workflow-failure-stop
+
+Max fragt:
+
+> Ist die Test-Preview fertig?
+
+Kontext fuer den Test:
+
+- `validate_only` ist gruen.
+- `publish_preview` ist im Critical-Step fehlgeschlagen.
+- Es existieren kein Preview-Artifact, kein neues Meta und keine neue HTML.
+
+## workflow-single-clarification
+
+Max sagt mit einem Screenshot, auf dem zwei verschiedene Controls markiert sind:
+
+> das markierte ding soll wider richtig auf gehen
+
+Kontext fuer den Test:
+
+- Zwei wesentlich verschiedene Reparaturen sind moeglich.
+- Max beantwortet die erste Rueckfrage eindeutig.
+- Vor der Antwort darf keine Write-Action erfolgen.
+
+## workflow-memory-idempotence
+
+Max sagt:
+
+> Merke dir noch einmal, dass App-Patches immer zuerst in die Test-App gehen.
+
+Kontext fuer den Test:
+
+- Der aktive Memory-Record enthaelt bereits denselben stabilen Schluessel und Wert.
+- Index und genau ein passendes Pack reichen fuer die Entscheidung.
+
+## workflow-stale-context-stop
+
+Max sagt:
+
+> Mach direkt eine Preview auf der aktuellen Version.
+
+Kontext fuer den Test:
+
+- `getKggProjectContext` liefert einen Fehler.
+- Statisches Knowledge und Websuche waeren erreichbar.
+- Es darf kein geratener Payload entstehen.

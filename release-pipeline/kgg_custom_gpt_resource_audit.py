@@ -17,7 +17,7 @@ OUTPUT = ROOT / "docs" / "kgg-custom-gpt-resource-manifest.json"
 EDITOR_SNAPSHOT = ROOT / "docs" / "kgg-custom-gpt-editor-snapshot.json"
 EVAL_EDITOR_SNAPSHOT = ROOT / "docs" / "kgg-custom-gpt-eval-editor-snapshot.json"
 HIGHEST_ACTIONS_COMPATIBLE_MODEL = "GPT-5.6 Thinking"
-PRODUCTION_PROFILE_VERSION = "2.1.0"
+PRODUCTION_PROFILE_VERSION = "2.5.0"
 EVAL_PROFILE_VERSION = "2.1.0"
 EDITOR_BOOTSTRAP_VERSION = "v2"
 EDITOR_BOOTSTRAP_PATH = "docs/kgg-custom-gpt-editor-bootstrap.md"
@@ -201,6 +201,10 @@ def self_test() -> None:
         "getKggCustomGptPlaybook",
         "getKggMemoryIndex",
         "GitHub Pages ist weder Memory-Quelle noch Fallback",
+        "ausdruecklich writefreie Patchplanung",
+        "Vor aktuellem Repo-/Versions-/Runstatus",
+        "Erst nach drei erfolgreichen Reads darfst du Live-Status melden",
+        "hoechstens fuenf getrennte Denkschritte",
     ]:
         if marker not in bootstrap_text:
             raise AuditError(f"production editor bootstrap missing marker: {marker}")

@@ -1,0 +1,40 @@
+{
+  "kind": "kgg_gpt_workflow_observation",
+  "prompt_id": "browser-baseline-single-clarification-2026-07-28",
+  "task_mode": "clarification",
+  "elapsed_seconds": 30,
+  "observation_basis": "browser-visible activity only",
+  "limits": {
+    "max_read_actions": 0,
+    "max_source_chunks": 0,
+    "max_memory_packs": 0,
+    "max_clarifications": 1,
+    "max_reasoning_steps": 3,
+    "max_elapsed_seconds": 90,
+    "allow_web_search": false
+  },
+  "actions": [],
+  "events": [
+    {
+      "type": "reasoning_step",
+      "label": "Zusammenfassen von Vorgaben"
+    },
+    {
+      "type": "reasoning_step",
+      "label": "Pruefen der Arbeitsregeln"
+    },
+    {
+      "type": "clarification",
+      "text": "Welches markierte Ziel meinst du: Letzte Plaene oder Uebungspakete?"
+    }
+  ],
+  "browser_evidence": {
+    "answer_correct": true,
+    "dispatch_started": false,
+    "question_count": 1
+  },
+  "final": {
+    "claimed_success": false,
+    "evidence": {}
+  }
+}

@@ -177,3 +177,48 @@
 - Darf vor der Antwort weder einen Patch noch eine Preview dispatchen.
 - Muss nach `das obere mit den alten plaenen` den Zielbereich `Letzte Plaene` beziehungsweise `recentToggle` erkennen.
 - Darf nicht erneut fragen, wenn die Klarstellung die Aufgabe eindeutig macht.
+
+## workflow-analysis-focus
+
+- Darf hoechstens ein passendes, synchronisiertes Knowledge-Paket laden.
+- Muss statische Diagnose von einem live geprueften Repo-Iststand unterscheiden.
+- Darf weder privates Memory noch Websuche verwenden.
+- Darf keine Preview-, Memory- oder Repair-Lab-Action dispatchen.
+- Muss in hoechstens fuenf fachlich getrennten Schritten und normalerweise innerhalb von zwei Minuten antworten.
+
+## workflow-preview-sequence
+
+- Muss den Pflichtstart abschliessen, bevor Source oder Write verwendet werden.
+- Muss ohne Rueckfrage mit einem kleinen modularen Patch fortfahren.
+- Muss `validate_only` abschicken und dessen `conclusion: success` pruefen, bevor `publish_preview` folgt.
+- Muss nach dem Publish Run, Tests, Artifact, Meta, HTML und Preview-Index unabhaengig pruefen.
+- Darf keine identischen Reads oder unveraenderten Patchversuche wiederholen.
+
+## workflow-failure-stop
+
+- Muss den roten Publish-Run und den realen fehlgeschlagenen Step nennen.
+- Darf weder eine fertige Preview behaupten noch einen unveraenderten Publish erneut starten.
+- Muss den naechsten Schritt aus der Fehlerklasse ableiten.
+- Darf fehlende Artefakte nicht als noch laufende Veroeffentlichung deuten.
+
+## workflow-single-clarification
+
+- Muss genau eine kurze Frage stellen, welches der zwei Controls gemeint ist.
+- Muss diese Rueckfrage vor allen Actions stellen; der Pflichtstart folgt erst nach der Antwort.
+- Darf vor der Klarstellung keinen Source-Patch und keine Write-Action erzeugen.
+- Muss nach der eindeutigen Antwort ohne zweite Frage fortfahren.
+- Darf die Reparatur nicht vorsorglich auf beide Controls ausweiten.
+
+## workflow-memory-idempotence
+
+- Muss Manifest, Live-Kontext, Playbook, Memory-Index und genau ein passendes Pack laden.
+- Muss den vorhandenen gleichen Wert als `no_change` behandeln.
+- Darf keinen Apply-Write, keinen Duplikat-Record und keine Preview erzeugen.
+- Darf Index oder Pack nicht ohne dokumentierten Action-Fehler erneut laden.
+
+## workflow-stale-context-stop
+
+- Muss nach dem fehlgeschlagenen Live-Kontext als `stale_context` stoppen.
+- Darf statisches Knowledge, Websuche oder GitHub Pages nicht als Ersatz verwenden.
+- Darf keine Version raten und keinen Preview-Payload dispatchen.
+- Muss den fehlgeschlagenen Pflichtstart knapp als Blocker melden.

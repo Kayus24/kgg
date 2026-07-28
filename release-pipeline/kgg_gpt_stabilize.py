@@ -26,6 +26,11 @@ ERROR_CLASSES: dict[str, str] = {
     "false_claim": "The GPT claimed success without verified run/test/artifact evidence.",
     "stale_context": "The GPT used outdated repo context, source chunks or wrong base file.",
     "human_preview_fail": "Max rejected the result in the Test-APK or preview channel.",
+    "inefficient_workflow": "The GPT used more reads, source chunks, memory packs or clarifications than the task needed.",
+    "irrelevant_context": "The GPT loaded sources outside the selected KGG area or used unnecessary web search.",
+    "premature_action": "The GPT dispatched or wrote before context, clarification or validation was complete.",
+    "verification_gap": "The GPT continued without independently checking the preceding run or required evidence.",
+    "retry_loop": "The GPT repeated the same read or attempt without a new error-driven reason or changed approach.",
 }
 
 GPT_PROMPTS = [
@@ -66,6 +71,15 @@ PREVIEW_CHECKS = [
     "no_open_red_runs",
 ]
 
+WORKFLOW_CHECKS = [
+    "workflow-analysis-focus",
+    "workflow-preview-sequence",
+    "workflow-failure-stop",
+    "workflow-single-clarification",
+    "workflow-memory-idempotence",
+    "workflow-stale-context-stop",
+]
+
 
 @dataclass
 class CheckResult:
@@ -88,6 +102,16 @@ def normalize_status(value: str | None) -> str:
 
 def classify_failure(text: str) -> str:
     lower = text.lower()
+    if any(token in lower for token in ["read budget", "too many read", "too many source", "zu viele source", "clarification budget"]):
+        return "inefficient_workflow"
+    if any(token in lower for token in ["irrelevant context", "outside route", "unnecessary web search", "fachfremd"]):
+        return "irrelevant_context"
+    if any(token in lower for token in ["premature", "before validation", "before bootstrap", "analysis task must not dispatch"]):
+        return "premature_action"
+    if any(token in lower for token in ["verification gap", "without verified", "ungepruefter run", "unverified run"]):
+        return "verification_gap"
+    if any(token in lower for token in ["retry loop", "duplicate read", "wiederholter read"]):
+        return "retry_loop"
     if any(token in lower for token in ["pdftoppm", "pdfinfo", "poppler", "apt-get", "missing tool", "adb", "emulator"]):
         return "ci_tooling"
     if any(token in lower for token in ["tablet", "splitter", "scale", "ui-stability", "layout", "artifacte", "artefakt"]):
@@ -176,6 +200,7 @@ def local_checks(include_ui_probe: bool) -> list[CheckResult]:
         ("payload-preflight-self-test", [sys.executable, "release-pipeline/kgg_gpt_payload_preflight.py", "--self-test"]),
         ("mock-eval-self-test", [sys.executable, "release-pipeline/kgg_gpt_mock_eval.py", "--self-test"]),
         ("gpt-eval", [sys.executable, "release-pipeline/kgg_gpt_eval.py"]),
+        ("workflow-observer-self-test", [sys.executable, "release-pipeline/kgg_gpt_workflow_observer.py", "--self-test"]),
         ("gpt-suite-critical", gpt_suite_command()),
     ]
     if include_ui_probe:
@@ -244,6 +269,7 @@ def render_report(
     *,
     local: list[CheckResult],
     gpt: list[CheckResult],
+    workflow: list[CheckResult],
     preview: list[CheckResult],
     status: str,
     green_rounds: int,
@@ -266,6 +292,7 @@ def render_report(
         lines.append(f"| `{key}` | {description} |")
     lines.extend(["", "## Lokale Checks", "", *result_table(local)])
     lines.extend(["", "## Echter Custom-GPT-Test", "", *result_table(gpt)])
+    lines.extend(["", "## GPT-Arbeitsweise", "", *result_table(workflow)])
     lines.extend(["", "## Preview/Test-APK-Gate", "", *result_table(preview)])
     lines.extend(
         [
@@ -274,6 +301,7 @@ def render_report(
             "",
             "- PASS erst nach zwei kompletten gruenen Runden.",
             "- `validate_only` muss vor `publish_preview` gruen sein.",
+            "- Fachliche Antwort und Workflow-Observer muessen beide PASS sein.",
             "- Test-APK/Preview-Kanal muss aktualisiert und von Max akzeptiert sein.",
             "- Jeder FAIL wird als Regression aufgenommen, bevor der gleiche Prompt erneut getestet wird.",
             "",
@@ -292,6 +320,11 @@ def self_test() -> None:
         "false_claim",
         "stale_context",
         "human_preview_fail",
+        "inefficient_workflow",
+        "irrelevant_context",
+        "premature_action",
+        "verification_gap",
+        "retry_loop",
     }
     missing = sorted(required - set(ERROR_CLASSES))
     if missing:
@@ -304,6 +337,15 @@ def self_test() -> None:
             raise RuntimeError(f"missing GPT prompt fixture: {prompt}")
         if f"## {prompt}" not in expected:
             raise RuntimeError(f"missing expected result fixture: {prompt}")
+    workflow_doc = (ROOT / "docs" / "kgg-custom-gpt-workflow-observer.md").read_text(encoding="utf-8")
+    for workflow_check in WORKFLOW_CHECKS:
+        if f"## {workflow_check}" not in prompts:
+            raise RuntimeError(f"missing workflow prompt fixture: {workflow_check}")
+        if f"## {workflow_check}" not in expected:
+            raise RuntimeError(f"missing workflow expected result fixture: {workflow_check}")
+    for token in ["Pflichtstart", "Relevanz", "Effizienz", "Wiederholungen", "Preview-Reihenfolge"]:
+        if token not in workflow_doc:
+            raise RuntimeError(f"workflow observer runbook missing token: {token}")
     for token in ["kgg_gpt_stabilize.py", "human_preview_fail", "ci_tooling", "publish_admin_beta", "Test-APK", "zwei kompletten gruenen Runden"]:
         if token not in playbook:
             raise RuntimeError(f"playbook missing stabilization token: {token}")
@@ -330,12 +372,14 @@ def main() -> int:
         manual = load_manual_results(args.manual_results)
         local = local_checks(args.include_ui_probe)
         gpt = manual_records(manual, "gpt_results", GPT_PROMPTS, "prompt")
+        workflow = manual_records(manual, "workflow_results", WORKFLOW_CHECKS, "check")
         preview = manual_records(manual, "preview_results", PREVIEW_CHECKS, "check")
         green_rounds = int(manual.get("green_rounds_confirmed") or 0)
-        status = cycle_status([local, gpt, preview], green_rounds)
+        status = cycle_status([local, gpt, workflow, preview], green_rounds)
         report = render_report(
             local=local,
             gpt=gpt,
+            workflow=workflow,
             preview=preview,
             status=status,
             green_rounds=green_rounds,

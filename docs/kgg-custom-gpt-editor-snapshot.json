@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "capturedAt": "2026-07-28T11:57:38.9174676Z",
+  "capturedAt": "2026-07-28T19:41:48.2990431Z",
   "gptId": "g-6a45fba0f3408191ac1fb2c987a2e960",
-  "profileVersion": "2.1.0",
+  "profileVersion": "2.5.0",
   "model": "GPT-5.6 Thinking",
   "capabilities": {
     "webSearch": true,
@@ -12,7 +12,7 @@
     "apps": false,
     "actions": true
   },
-  "instructionsSha256": "5f9ae71217efb0ffbae40771f47eedf7aafb6bc920b53c17116db85beff35627",
+  "instructionsSha256": "8bb3068dcf419c5f907bbc21e1d51e063d4028c80b1cde3adc79ea668e83f3e3",
   "knowledgeNames": [
     "kgg-custom-gpt-knowledge-architecture.md",
     "kgg-custom-gpt-knowledge-operations.md",
@@ -20,13 +20,13 @@
     "kgg-custom-gpt-knowledge-testing.md"
   ],
   "knowledgeSha256": [
-    "1423c6485e0b4ab3f15fea2f99c2ac6e5defde702a3bbb6e5f4015ee4d3c6a8c",
-    "477fa10d792361c91ba0a115127331428e518365557fa4a63f517319e90b34cf",
+    "d050a2fea3ea8a9b76d53a3ff754b104581930f04b8b3a57924105c095933059",
+    "b3e3cac3cfe580073f95022cc0ecd647ad815e2fd200904e3f6b645ac6f3e56c",
     "cd9d649f141f33f0c1a2592ab72fc0f9292fc9d1778c587f80822ef38794e64b",
-    "73d599ce2d140f2849c23e1a5167caf04b7153c692e60c2186ada390b69d0ac8"
+    "b0473e15abd68eab4a4047687f8dfd4d39df5c5f54113bdc2e0719d42001a642"
   ],
   "actionSha256": [
-    "16be8a38aff0612fa7d36894a3674e606d19ea65d4d33a101167fa6e067cd3d4",
+    "29b76c8b7b77def636eb2616b242b24bd692340027d5167cc003681a40bad045",
     "e7eeba3f3ddde0ae298f24c1b17212d15ed3eef241dd92bdb9703a080752dd65"
   ]
 }

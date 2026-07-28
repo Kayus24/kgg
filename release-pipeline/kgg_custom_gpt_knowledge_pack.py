@@ -22,6 +22,7 @@ SOURCES = [
     "docs/kgg-custom-gpt-test-prompts.md",
     "docs/kgg-custom-gpt-expected-results.md",
     "docs/kgg-custom-gpt-test-report.md",
+    "docs/kgg-custom-gpt-workflow-observer.md",
     "docs/kgg-gpt-bug-lessons.md",
     "docs/kgg-gpt-patch-patterns.md",
     "docs/kgg-gpt-area-routes.md",
@@ -46,6 +47,7 @@ CURATED_PACKS = {
     "docs/kgg-custom-gpt-knowledge-testing.md": [
         "docs/kgg-custom-gpt-test-prompts.md",
         "docs/kgg-custom-gpt-expected-results.md",
+        "docs/kgg-custom-gpt-workflow-observer.md",
         "docs/kgg-custom-gpt-test-report.md",
         "docs/kgg-custom-gpt-cycle-report.md",
     ],

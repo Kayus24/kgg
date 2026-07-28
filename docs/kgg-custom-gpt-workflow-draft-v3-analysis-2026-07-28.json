@@ -1,0 +1,47 @@
+{
+  "kind": "kgg_gpt_workflow_observation",
+  "prompt_id": "editor-draft-v3-tablet-analysis-2026-07-28",
+  "task_mode": "analysis",
+  "expected_area": "tablet-layout",
+  "elapsed_seconds": 81,
+  "observation_basis": "browser-visible GPT editor preview activity only",
+  "limits": {
+    "max_read_actions": 10,
+    "max_source_chunks": 3,
+    "max_memory_packs": 0,
+    "max_clarifications": 0,
+    "max_reasoning_steps": 5,
+    "max_elapsed_seconds": 120,
+    "allow_web_search": false
+  },
+  "actions": [],
+  "events": [
+    {
+      "type": "reasoning_step",
+      "label": "Pruefte die Vorgaben"
+    },
+    {
+      "type": "reasoning_step",
+      "label": "Ordnete den Inhalt ein"
+    },
+    {
+      "type": "reasoning_step",
+      "label": "Einordnung der Designaenderung"
+    },
+    {
+      "type": "reasoning_step",
+      "label": "Bewertete die Tablet-Steuerung"
+    }
+  ],
+  "browser_evidence": {
+    "editor_draft": true,
+    "answer_correct": true,
+    "dispatch_started": false,
+    "live_action_calls_visible": [],
+    "note": "Efficiency improved, but editor preview did not expose verifiable read-only Action calls."
+  },
+  "final": {
+    "claimed_success": false,
+    "evidence": {}
+  }
+}
