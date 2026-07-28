@@ -5,18 +5,18 @@
     {
       "kind": "kgg_gpt_preview",
       "requestId": "kgg-v061-combo-camera-scanner",
-      "patchHash": "349bf2cfb917925968bd383b9aafeeb6227def9ba7a71925b5a7b9e9bfdef78d",
-      "baseSha": "8a3882c9f66ca9b89b3ce06a7380cc2367cb08e9",
+      "patchHash": "66f125783ca13239e8eadb8381f24a26dae15051d77d51244ac960e3e599e42f",
+      "baseSha": "6c5674602edbcfd1b33e5851ce41aa093bb30f33",
       "baseVersionCode": 61,
-      "rolloutCode": 1785151739,
-      "title": "Kombi-Kamera fr QR und Papierplan",
-      "summary": "Von Max beauftragter Kamera-Scan: QR wird automatisch gesucht, der manuelle Auslser bleibt jederzeit verfgbar; beide Wege nutzen dieselbe bestehende Scan-Verarbeitung ohne Hinweistext im Kamerabild.",
+      "rolloutCode": 1785244862,
+      "title": "Kombi-Kamera f?r QR und Papierplan",
+      "summary": "Von Max beauftragter Kamera-Scan: QR wird automatisch gesucht, der manuelle Ausl?ser bleibt jederzeit verf?gbar; beide Wege nutzen dieselbe bestehende Scan-Verarbeitung ohne Hinweistext im Kamerabild.",
       "patchId": "kgg-v061-combo-camera-scanner",
       "patchFile": "patches/v061-combo-camera-scanner.html",
       "versionName": "1.0.61-combo-camera-scanner",
-      "createdAt": "2026-07-27T11:28:59Z",
+      "createdAt": "2026-07-28T13:21:02Z",
       "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v061-combo-camera-scanner/admin.html",
-      "sha256": "1b0a87880608f3a29f15f1dc9dc0031cf8e9df65287b4bb0d8d4ced3048842c8"
+      "sha256": "2c8fe94a88f136182da55df197da836f6af7ff979bbcf56cd12c5aa0a64b9629"
     },
     {
       "kind": "kgg_gpt_preview",
@@ -242,17 +242,17 @@
   "latest": {
     "kind": "kgg_gpt_preview",
     "requestId": "kgg-v061-combo-camera-scanner",
-    "patchHash": "349bf2cfb917925968bd383b9aafeeb6227def9ba7a71925b5a7b9e9bfdef78d",
-    "baseSha": "8a3882c9f66ca9b89b3ce06a7380cc2367cb08e9",
+    "patchHash": "66f125783ca13239e8eadb8381f24a26dae15051d77d51244ac960e3e599e42f",
+    "baseSha": "6c5674602edbcfd1b33e5851ce41aa093bb30f33",
     "baseVersionCode": 61,
-    "rolloutCode": 1785151739,
-    "title": "Kombi-Kamera fr QR und Papierplan",
-    "summary": "Von Max beauftragter Kamera-Scan: QR wird automatisch gesucht, der manuelle Auslser bleibt jederzeit verfgbar; beide Wege nutzen dieselbe bestehende Scan-Verarbeitung ohne Hinweistext im Kamerabild.",
+    "rolloutCode": 1785244862,
+    "title": "Kombi-Kamera f?r QR und Papierplan",
+    "summary": "Von Max beauftragter Kamera-Scan: QR wird automatisch gesucht, der manuelle Ausl?ser bleibt jederzeit verf?gbar; beide Wege nutzen dieselbe bestehende Scan-Verarbeitung ohne Hinweistext im Kamerabild.",
     "patchId": "kgg-v061-combo-camera-scanner",
     "patchFile": "patches/v061-combo-camera-scanner.html",
     "versionName": "1.0.61-combo-camera-scanner",
-    "createdAt": "2026-07-27T11:28:59Z",
+    "createdAt": "2026-07-28T13:21:02Z",
     "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v061-combo-camera-scanner/admin.html",
-    "sha256": "1b0a87880608f3a29f15f1dc9dc0031cf8e9df65287b4bb0d8d4ced3048842c8"
+    "sha256": "2c8fe94a88f136182da55df197da836f6af7ff979bbcf56cd12c5aa0a64b9629"
   }
 }
