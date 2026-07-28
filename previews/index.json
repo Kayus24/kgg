@@ -4,6 +4,22 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "kgg-ocr-camera-wide-preview",
+      "patchHash": "ea0d7503acbd70e94e44308f0bee8c12cc15f77d097552557e6a04e3ed9ee68f",
+      "baseSha": "15e39b2e23a7acf65588939fecacfaae971ab514",
+      "baseVersionCode": 61,
+      "rolloutCode": 1785271639,
+      "title": "OCR-Kamera ohne starken nativen Zoom",
+      "summary": "Der OCR-Kamerastart nutzt den normalen rueckseitigen Kamera-Dateipfad ohne die spezielle native Picker-Umschaltung; Galerie und Scan-Auswertung bleiben unveraendert.",
+      "patchId": "kgg-v061-ocr-camera-wide-preview",
+      "patchFile": "patches/v061-ocr-camera-wide-preview.html",
+      "versionName": "1.0.61-ocr-camera-wide-preview",
+      "createdAt": "2026-07-28T20:47:19Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-ocr-camera-wide-preview/admin.html",
+      "sha256": "342b51041e3c14fff8af006959ee52012abe4e16fa90e2d10ee655ede75a2e17"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-v061-combo-camera-normal-1x-compact-banner",
       "patchHash": "b9b89d5f7a4663ca6c40d1a98b0b43e62f4ad422243ff59b587bf015aae0051e",
       "baseSha": "6c5674602edbcfd1b33e5851ce41aa093bb30f33",
@@ -273,18 +289,18 @@
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-v061-combo-camera-normal-1x-compact-banner",
-    "patchHash": "b9b89d5f7a4663ca6c40d1a98b0b43e62f4ad422243ff59b587bf015aae0051e",
-    "baseSha": "6c5674602edbcfd1b33e5851ce41aa093bb30f33",
+    "requestId": "kgg-ocr-camera-wide-preview",
+    "patchHash": "ea0d7503acbd70e94e44308f0bee8c12cc15f77d097552557e6a04e3ed9ee68f",
+    "baseSha": "15e39b2e23a7acf65588939fecacfaae971ab514",
     "baseVersionCode": 61,
-    "rolloutCode": 1785270709,
-    "title": "Kombi-Kamera startet normal bei 1x",
-    "summary": "Behebt den optisch starken Startzoom der Test-App-Kamera: Das vollst?ndige Kamerabild bleibt sichtbar und ein unterst?tzter Kamera-Track wird auf 1x gesetzt; QR-Automatik und manueller Ausl?ser bleiben erhalten.",
-    "patchId": "kgg-v061-combo-camera-normal-1x",
-    "patchFile": "patches/v061-combo-camera-normal-1x.html",
-    "versionName": "1.0.61-combo-camera-normal-1x",
-    "createdAt": "2026-07-28T20:31:49Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v061-combo-camera-normal-1x-compact-banner/admin.html",
-    "sha256": "fd6c217e6ca2331819e94cea7f425272f11a7ba869ae3a4a71fef78bb83a60af"
+    "rolloutCode": 1785271639,
+    "title": "OCR-Kamera ohne starken nativen Zoom",
+    "summary": "Der OCR-Kamerastart nutzt den normalen rueckseitigen Kamera-Dateipfad ohne die spezielle native Picker-Umschaltung; Galerie und Scan-Auswertung bleiben unveraendert.",
+    "patchId": "kgg-v061-ocr-camera-wide-preview",
+    "patchFile": "patches/v061-ocr-camera-wide-preview.html",
+    "versionName": "1.0.61-ocr-camera-wide-preview",
+    "createdAt": "2026-07-28T20:47:19Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-ocr-camera-wide-preview/admin.html",
+    "sha256": "342b51041e3c14fff8af006959ee52012abe4e16fa90e2d10ee655ede75a2e17"
   }
 }
