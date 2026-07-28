@@ -17,11 +17,11 @@ OUTPUT = ROOT / "docs" / "kgg-custom-gpt-resource-manifest.json"
 EDITOR_SNAPSHOT = ROOT / "docs" / "kgg-custom-gpt-editor-snapshot.json"
 EVAL_EDITOR_SNAPSHOT = ROOT / "docs" / "kgg-custom-gpt-eval-editor-snapshot.json"
 HIGHEST_ACTIONS_COMPATIBLE_MODEL = "GPT-5.6 Thinking"
-PRODUCTION_PROFILE_VERSION = "2.0.0"
-EVAL_PROFILE_VERSION = "2.0.0"
+PRODUCTION_PROFILE_VERSION = "2.5.0"
+EVAL_PROFILE_VERSION = "2.1.0"
 EDITOR_BOOTSTRAP_VERSION = "v2"
 EDITOR_BOOTSTRAP_PATH = "docs/kgg-custom-gpt-editor-bootstrap.md"
-EVAL_EDITOR_BOOTSTRAP_VERSION = "v2"
+EVAL_EDITOR_BOOTSTRAP_VERSION = "v8"
 EVAL_EDITOR_BOOTSTRAP_PATH = "docs/kgg-custom-gpt-eval-editor-bootstrap.md"
 EDITOR_BOOTSTRAP_MAX_CHARS = 4000
 CUSTOM_GPT_ACTION_LIMIT = 30
@@ -135,6 +135,8 @@ def expected_manifest() -> dict[str, Any]:
                 "internal challenge manifest",
                 "sample repair payloads",
                 "hidden evaluator assertions",
+                "canonical natural-language intent",
+                "private clarification answer",
             ],
         },
         "officialReferences": [
@@ -199,12 +201,25 @@ def self_test() -> None:
         "getKggCustomGptPlaybook",
         "getKggMemoryIndex",
         "GitHub Pages ist weder Memory-Quelle noch Fallback",
+        "ausdruecklich writefreie Patchplanung",
+        "Vor aktuellem Repo-/Versions-/Runstatus",
+        "Erst nach drei erfolgreichen Reads darfst du Live-Status melden",
+        "hoechstens fuenf getrennte Denkschritte",
     ]:
         if marker not in bootstrap_text:
             raise AuditError(f"production editor bootstrap missing marker: {marker}")
     eval_bootstrap_text = (ROOT / EVAL_EDITOR_BOOTSTRAP_PATH).read_text(encoding="utf-8")
     for marker in [
         "getKggRepairResult",
+        "getKggNaturalUiResult",
+        "evaluate_natural_attempt",
+        "interpretation.confidence",
+        "ausfuehrbares HTML-Fragment",
+        "Nacktes CSS oder JavaScript",
+        "finale Kaskade",
+        "Selektor-/Eigenschaftspaar",
+        "Repariere niemals eigenmaechtig beide",
+        "clarification_count=1",
         "<!-- KGG PATCH START",
         "Nach drei aufeinanderfolgenden FAILs",
         "Fuehre niemals Preview-",
@@ -223,7 +238,18 @@ def self_test() -> None:
     api_action = (ROOT / "docs/kgg-custom-gpt-action-api-openapi.yaml").read_text(
         encoding="utf-8"
     )
-    for label, schema in [("raw", raw_action), ("api", api_action)]:
+    eval_raw_action = (
+        ROOT / "docs/kgg-custom-gpt-repair-lab-raw-openapi.yaml"
+    ).read_text(encoding="utf-8")
+    eval_api_action = (
+        ROOT / "docs/kgg-custom-gpt-repair-lab-api-openapi.yaml"
+    ).read_text(encoding="utf-8")
+    for label, schema in [
+        ("raw", raw_action),
+        ("api", api_action),
+        ("eval-raw", eval_raw_action),
+        ("eval-api", eval_api_action),
+    ]:
         operation_count = len(re.findall(r"^\s+operationId:\s+\S+\s*$", schema, re.MULTILINE))
         if operation_count > CUSTOM_GPT_ACTION_LIMIT:
             raise AuditError(
@@ -236,6 +262,20 @@ def self_test() -> None:
         raise AuditError("raw Action is missing the resource-manifest operation")
     if "submitKggPreviewGate" not in api_action or "getKggMemoryIndex" not in api_action:
         raise AuditError("API Action must provide Preview and private Memory operations")
+    for marker in [
+        "getKggNaturalUiLabIndex",
+        "getKggNaturalUiScreenshot",
+        "getKggNaturalUiResult",
+    ]:
+        if marker not in eval_raw_action:
+            raise AuditError(f"Eval raw Action is missing {marker}")
+    if (
+        "evaluate_natural_attempt" not in eval_api_action
+        or "submission_json" not in eval_api_action
+        or "patch_content" not in eval_api_action
+        or "never JSON-encode" not in eval_api_action
+    ):
+        raise AuditError("Eval API Action is missing natural UI submission support")
     production = {item["sha256"] for item in manifest["production"]["knowledge"]}
     evaluation = {item["sha256"] for item in manifest["eval"]["knowledge"]}
     if production.intersection(evaluation):

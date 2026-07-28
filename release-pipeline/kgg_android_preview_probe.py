@@ -19,6 +19,12 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_AVD = "KGG_Lite_API35"
 DEFAULT_PACKAGE = "de.kgg.preview"
 DEFAULT_MARKER = "Groesse 100%"
+SYSTEM_UI_ANR_PATTERNS = (
+    re.compile(r"System UI isn't responding", re.IGNORECASE),
+    re.compile(r"ANR in com\.android\.systemui", re.IGNORECASE),
+    re.compile(r"am_anr.*com\.android\.systemui", re.IGNORECASE),
+    re.compile(r"com\.android\.systemui.*(?:not responding|ANR)", re.IGNORECASE),
+)
 
 
 def sdk_path(*parts: str) -> Path:
@@ -38,14 +44,17 @@ def resolve_tool(explicit: str | None, env_name: str, default_path: Path, fallba
 
 
 def run(args: list[str], *, timeout: int = 30, binary: bool = False) -> subprocess.CompletedProcess[Any]:
-    return subprocess.run(
-        args,
-        cwd=str(ROOT),
-        input=None,
-        text=not binary,
-        capture_output=True,
-        timeout=timeout,
-    )
+    options: dict[str, Any] = {
+        "cwd": str(ROOT),
+        "input": None,
+        "capture_output": True,
+        "timeout": timeout,
+    }
+    if binary:
+        options["text"] = False
+    else:
+        options.update({"text": True, "encoding": "utf-8", "errors": "replace"})
+    return subprocess.run(args, **options)
 
 
 def adb(adb_path: str, serial: str | None, args: list[str], *, timeout: int = 30, binary: bool = False) -> subprocess.CompletedProcess[Any]:
@@ -68,22 +77,25 @@ def list_devices(adb_path: str) -> list[str]:
     return devices
 
 
-def start_emulator(emulator_path: str, avd: str) -> None:
+def start_emulator(emulator_path: str, avd: str, *, wipe_data: bool = False) -> None:
+    command = [
+        emulator_path,
+        "-avd",
+        avd,
+        "-no-window",
+        "-no-audio",
+        "-no-boot-anim",
+        "-no-snapshot-load",
+        "-no-snapshot-save",
+        "-gpu",
+        "swiftshader_indirect",
+        "-memory",
+        "2048",
+    ]
+    if wipe_data:
+        command.append("-wipe-data")
     subprocess.Popen(
-        [
-            emulator_path,
-            "-avd",
-            avd,
-            "-no-window",
-            "-no-audio",
-            "-no-boot-anim",
-            "-no-snapshot-load",
-            "-no-snapshot-save",
-            "-gpu",
-            "swiftshader_indirect",
-            "-memory",
-            "2048",
-        ],
+        command,
         cwd=str(ROOT),
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
@@ -211,6 +223,43 @@ def crash_log(adb_path: str, serial: str, out_dir: Path, package: str) -> dict[s
     }
 
 
+def contains_system_ui_anr(text: str) -> bool:
+    return any(pattern.search(text) for pattern in SYSTEM_UI_ANR_PATTERNS)
+
+
+def self_test() -> None:
+    positive = [
+        "ActivityManager: ANR in com.android.systemui",
+        "am_anr : [0,123,com.android.systemui]",
+        "System UI isn't responding",
+    ]
+    for sample in positive:
+        if not contains_system_ui_anr(sample):
+            raise RuntimeError(f"SystemUI ANR sample was not detected: {sample}")
+    if contains_system_ui_anr("de.kgg.preview started without crashes"):
+        raise RuntimeError("clean Preview log was misclassified as SystemUI ANR")
+    decoded = run(
+        [sys.executable, "-c", "import os; os.write(1, bytes([0x9d]))"],
+        timeout=10,
+    )
+    if decoded.returncode != 0 or not isinstance(decoded.stdout, str):
+        raise RuntimeError("Windows-safe log decoding self-test failed")
+
+
+def system_log(adb_path: str, serial: str, out_dir: Path) -> dict[str, Any]:
+    proc = adb(adb_path, serial, ["logcat", "-d", "-v", "brief"], timeout=30)
+    text = (proc.stdout + "\n" + proc.stderr).strip()
+    path = out_dir / "logcat.txt"
+    path.write_text(text, encoding="utf-8", newline="\n")
+    anr_lines = [line for line in text.splitlines() if contains_system_ui_anr(line)]
+    return {
+        "ok": proc.returncode == 0,
+        "path": str(path),
+        "system_ui_anr": bool(anr_lines),
+        "summary": anr_lines[-10:],
+    }
+
+
 def package_installed(adb_path: str, serial: str, package: str) -> bool:
     proc = adb(adb_path, serial, ["shell", "pm", "path", package], timeout=20)
     return proc.returncode == 0 and "package:" in proc.stdout
@@ -226,8 +275,16 @@ def main() -> int:
     parser.add_argument("--adb", help="Path to adb.exe.")
     parser.add_argument("--emulator", help="Path to emulator.exe.")
     parser.add_argument("--start-emulator", action="store_true", help="Start the configured AVD when no adb device is connected.")
+    parser.add_argument("--wipe-data", action="store_true", help="Reset only the selected AVD data before a controlled emulator start.")
     parser.add_argument("--timeout", type=int, default=180, help="Seconds to wait for emulator boot/device.")
+    parser.add_argument("--settle-seconds", type=int, default=35, help="Seconds to wait for the Preview WebView after launch.")
+    parser.add_argument("--self-test", action="store_true", help="Run deterministic SystemUI detection tests and exit.")
     args = parser.parse_args()
+
+    if args.self_test:
+        self_test()
+        print(json.dumps({"status": "PASS", "test": "android_preview_probe"}, ensure_ascii=False))
+        return 0
 
     adb_path = resolve_tool(args.adb, "KGG_ADB", sdk_path("platform-tools", "adb.exe"), "adb")
     emulator_path = resolve_tool(args.emulator, "KGG_EMULATOR", sdk_path("emulator", "emulator.exe"), "emulator")
@@ -245,6 +302,8 @@ def main() -> int:
         "activity": None,
         "activity_started": False,
         "visible_marker_found": False,
+        "ui_dump_ok": False,
+        "system_ui_anr": None,
         "screenshot_path": None,
         "ui_summary": [],
         "crash_detected": None,
@@ -256,7 +315,7 @@ def main() -> int:
     try:
         devices = list_devices(adb_path)
         if not devices and args.start_emulator:
-            start_emulator(emulator_path, args.avd)
+            start_emulator(emulator_path, args.avd, wipe_data=args.wipe_data)
             started_emulator = True
             serial = wait_for_device(adb_path, args.timeout)
         else:
@@ -284,12 +343,13 @@ def main() -> int:
             print(json.dumps(result, ensure_ascii=False, indent=2))
             return 4
 
+        adb(adb_path, serial, ["logcat", "-c"], timeout=20)
         started = start_activity(adb_path, serial, activity)
         result["activity_started"] = started["ok"]
         result["activity_start"] = started["notes"]
         # The Preview wrapper resolves the remote channel after the Android splash.
-        # Five seconds regularly captured only the splash on a cold API-35 boot.
-        time.sleep(18)
+        # Cold API-35 boots also initialize WebView and networking after boot_completed.
+        time.sleep(max(1, args.settle_seconds))
 
         shot = screenshot(adb_path, serial, out_dir)
         result["screenshot_path"] = shot.get("path")
@@ -297,6 +357,7 @@ def main() -> int:
 
         ui = dump_ui(adb_path, serial, out_dir, args.marker)
         result["ui_path"] = ui.get("path")
+        result["ui_dump_ok"] = ui.get("ok")
         result["visible_marker_found"] = ui.get("marker_found")
         result["ui_summary"] = ui.get("summary")
 
@@ -305,8 +366,22 @@ def main() -> int:
         result["crash_log_path"] = logs.get("path")
         result["log_summary"] = logs.get("summary")
 
+        system = system_log(adb_path, serial, out_dir)
+        result["system_log_path"] = system.get("path")
+        result["system_ui_anr"] = system.get("system_ui_anr")
+        result["system_log_summary"] = system.get("summary")
+
         install_ok = install.get("ok") is not False
-        result["ok"] = bool(install_ok and installed and started["ok"] and not result["crash_detected"])
+        result["ok"] = bool(
+            install_ok
+            and installed
+            and started["ok"]
+            and shot.get("ok")
+            and ui.get("ok")
+            and ui.get("marker_found")
+            and not result["crash_detected"]
+            and not result["system_ui_anr"]
+        )
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0 if result["ok"] else 5
     except Exception as exc:  # noqa: BLE001 - CLI boundary

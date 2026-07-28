@@ -205,3 +205,97 @@ Kontext fuer den Test:
 
 - Das Live-Ressourcenmanifest verlangt Editor-Bootstrap `v2`.
 - Der gespeicherte GPT verwendet Bootstrap `v1` oder bietet `getKggCustomGptResourceManifest` nicht an.
+
+## natural-language-ui-understanding
+
+Max fragt mit einem markierten Screenshot:
+
+> bei dem regler in der mitte macht plus zwar alles grösser aber verschiebt dabei auch die spalten das darf nciht, ziehen ist breite plus minus nur größe
+
+Kontext fuer den Test:
+
+- Der Screenshot markiert Plus/Minus und die vertikale Trennkante.
+- Es gibt genuegend Evidenz fuer eine eindeutige Interpretation.
+- Dieser Produktions-GPT-Test prueft nur Verstaendnis und Diagnose; er darf keine Blind-Challenge gegen die intakte Production-Source aufloesen.
+
+## natural-language-one-clarification
+
+Max fragt mit einem Screenshot, auf dem `Letzte Plaene` und `Uebungspakete` beide markiert sind:
+
+> eins von den zwei markierten dingern links geht nicht mehr auf mach das wider
+
+Kontext fuer den Test:
+
+- Ohne weitere Angabe sind zwei wesentlich verschiedene Reparaturen moeglich.
+- Max antwortet auf eine Rueckfrage: `das obere mit den alten plaenen, nicht die uebungs pakete`.
+
+## workflow-analysis-focus
+
+Max fragt:
+
+> Warum ist das Uebungseditor-Fenster auf dem Tablet ploetzlich einspaltig? Erklaere erst nur die Ursache, noch keine Preview.
+
+Kontext fuer den Test:
+
+- Es ist eine reine Analysefrage.
+- Der Bereich ist `tablet-layout`.
+- Live-Ressourcen reichen aus; Websuche und privates Memory sind nicht erforderlich.
+
+## workflow-preview-sequence
+
+Max sagt:
+
+> Erstelle eine Test-App-Preview, die im Tablet-Uebungseditor den vorhandenen Speichern-Bereich wieder vollstaendig sichtbar macht.
+
+Kontext fuer den Test:
+
+- Der Bereich ist `tablet-layout`.
+- Die Aufgabe ist eindeutig.
+- Der Observer protokolliert jede Read- und Write-Action.
+
+## workflow-failure-stop
+
+Max fragt:
+
+> Ist die Test-Preview fertig?
+
+Kontext fuer den Test:
+
+- `validate_only` ist gruen.
+- `publish_preview` ist im Critical-Step fehlgeschlagen.
+- Es existieren kein Preview-Artifact, kein neues Meta und keine neue HTML.
+
+## workflow-single-clarification
+
+Max sagt mit einem Screenshot, auf dem zwei verschiedene Controls markiert sind:
+
+> das markierte ding soll wider richtig auf gehen
+
+Kontext fuer den Test:
+
+- Zwei wesentlich verschiedene Reparaturen sind moeglich.
+- Max beantwortet die erste Rueckfrage eindeutig.
+- Vor der Antwort darf keine Write-Action erfolgen.
+
+## workflow-memory-idempotence
+
+Max sagt:
+
+> Merke dir noch einmal, dass App-Patches immer zuerst in die Test-App gehen.
+
+Kontext fuer den Test:
+
+- Der aktive Memory-Record enthaelt bereits denselben stabilen Schluessel und Wert.
+- Index und genau ein passendes Pack reichen fuer die Entscheidung.
+
+## workflow-stale-context-stop
+
+Max sagt:
+
+> Mach direkt eine Preview auf der aktuellen Version.
+
+Kontext fuer den Test:
+
+- `getKggProjectContext` liefert einen Fehler.
+- Statisches Knowledge und Websuche waeren erreichbar.
+- Es darf kein geratener Payload entstehen.

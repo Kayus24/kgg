@@ -311,6 +311,11 @@ def run_gpt_eval() -> None:
     run([sys.executable, "release-pipeline/kgg_gpt_eval.py"])
 
 
+def run_gpt_workflow_observer_self_test() -> None:
+    log("== Custom GPT workflow observer self-test ==")
+    run([sys.executable, "release-pipeline/kgg_gpt_workflow_observer.py", "--self-test"])
+
+
 def run_patch_hygiene() -> None:
     log("== Patch hygiene check ==")
     run([sys.executable, "release-pipeline/kgg_patch_hygiene.py"])
@@ -502,6 +507,13 @@ TEST_REGISTRY = [
         "suite": "gpt",
         "reason": "Custom GPT playbook, routing and expected-answer fixtures must stay complete and testable.",
         "run": run_gpt_eval,
+    },
+    {
+        "id": "gpt-workflow-observer",
+        "level": "critical",
+        "suite": "gpt",
+        "reason": "Plausible answers must still fail when the GPT reads irrelevant sources, loops, dispatches early or claims unverified success.",
+        "run": run_gpt_workflow_observer_self_test,
     },
     {
         "id": "mobile-inbox-dry-run",

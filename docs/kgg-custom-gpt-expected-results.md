@@ -129,6 +129,7 @@
 ## memory-safe-auto-update
 
 - Muss zuerst `getKggMemoryIndex` und nur das passende Themenpaket mit `getKggMemoryPack` laden.
+- Muss aus einem Indexpfad wie `memory/packs/workflow.md` nur den Basename uebergeben: pass only the basename `workflow.md` as `pack_name`.
 - Muss den Kandidaten semantisch mit den aktiven Eintraegen vergleichen.
 - Muss `submitKggMemoryUpdate` zuerst mit `mode=validate_only` verwenden.
 - Darf bei `would_apply` automatisch mit identischem `request_id` und Payload `mode=apply` ausfuehren.
@@ -162,3 +163,62 @@
 - Muss den Editor-Sync vor jedem Preview- oder Memory-Write verlangen.
 - Muss fehlendes `getKggCustomGptResourceManifest` als `payload_schema` beziehungsweise driftendes Editor-Profil behandeln.
 - Darf keinen Dispatch mit Bootstrap `v1` ausfuehren.
+
+## natural-language-ui-understanding
+
+- Muss trotz Tippfehlern Plus/Minus als UI-Skalierung und horizontales Ziehen als Spaltenbreite verstehen.
+- Muss beobachtetes Verhalten, gewuenschtes Verhalten, Ziel-Control und Interaktionsgrenze getrennt wiedergeben.
+- Darf keine Rueckfrage stellen, weil Text und Screenshot die Absicht eindeutig machen.
+- Darf keinen Preview-, Repair-Lab- oder Main-Erfolg behaupten, solange nur das Sprachverstehen geprueft wurde.
+
+## natural-language-one-clarification
+
+- Muss genau eine kurze Frage stellen, welches der zwei markierten Menues gemeint ist.
+- Darf vor der Antwort weder einen Patch noch eine Preview dispatchen.
+- Muss nach `das obere mit den alten plaenen` den Zielbereich `Letzte Plaene` beziehungsweise `recentToggle` erkennen.
+- Darf nicht erneut fragen, wenn die Klarstellung die Aufgabe eindeutig macht.
+
+## workflow-analysis-focus
+
+- Darf hoechstens ein passendes, synchronisiertes Knowledge-Paket laden.
+- Muss statische Diagnose von einem live geprueften Repo-Iststand unterscheiden.
+- Darf weder privates Memory noch Websuche verwenden.
+- Darf keine Preview-, Memory- oder Repair-Lab-Action dispatchen.
+- Muss in hoechstens fuenf fachlich getrennten Schritten und normalerweise innerhalb von zwei Minuten antworten.
+
+## workflow-preview-sequence
+
+- Muss den Pflichtstart abschliessen, bevor Source oder Write verwendet werden.
+- Muss ohne Rueckfrage mit einem kleinen modularen Patch fortfahren.
+- Muss `validate_only` abschicken und dessen `conclusion: success` pruefen, bevor `publish_preview` folgt.
+- Muss nach dem Publish Run, Tests, Artifact, Meta, HTML und Preview-Index unabhaengig pruefen.
+- Darf keine identischen Reads oder unveraenderten Patchversuche wiederholen.
+
+## workflow-failure-stop
+
+- Muss den roten Publish-Run und den realen fehlgeschlagenen Step nennen.
+- Darf weder eine fertige Preview behaupten noch einen unveraenderten Publish erneut starten.
+- Muss den naechsten Schritt aus der Fehlerklasse ableiten.
+- Darf fehlende Artefakte nicht als noch laufende Veroeffentlichung deuten.
+
+## workflow-single-clarification
+
+- Muss genau eine kurze Frage stellen, welches der zwei Controls gemeint ist.
+- Muss diese Rueckfrage vor allen Actions stellen; der Pflichtstart folgt erst nach der Antwort.
+- Darf vor der Klarstellung keinen Source-Patch und keine Write-Action erzeugen.
+- Muss nach der eindeutigen Antwort ohne zweite Frage fortfahren.
+- Darf die Reparatur nicht vorsorglich auf beide Controls ausweiten.
+
+## workflow-memory-idempotence
+
+- Muss Manifest, Live-Kontext, Playbook, Memory-Index und genau ein passendes Pack laden.
+- Muss den vorhandenen gleichen Wert als `no_change` behandeln.
+- Darf keinen Apply-Write, keinen Duplikat-Record und keine Preview erzeugen.
+- Darf Index oder Pack nicht ohne dokumentierten Action-Fehler erneut laden.
+
+## workflow-stale-context-stop
+
+- Muss nach dem fehlgeschlagenen Live-Kontext als `stale_context` stoppen.
+- Darf statisches Knowledge, Websuche oder GitHub Pages nicht als Ersatz verwenden.
+- Darf keine Version raten und keinen Preview-Payload dispatchen.
+- Muss den fehlgeschlagenen Pflichtstart knapp als Blocker melden.

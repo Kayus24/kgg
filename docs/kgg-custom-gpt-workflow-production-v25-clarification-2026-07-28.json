@@ -1,0 +1,33 @@
+{
+  "kind": "kgg_gpt_workflow_observation",
+  "prompt_id": "production-v25-single-clarification-2026-07-28",
+  "task_mode": "clarification",
+  "elapsed_seconds": 25,
+  "observation_basis": "browser-visible activity only",
+  "limits": {
+    "max_read_actions": 0,
+    "max_source_chunks": 0,
+    "max_memory_packs": 0,
+    "max_clarifications": 1,
+    "max_reasoning_steps": 3,
+    "max_elapsed_seconds": 90,
+    "allow_web_search": false
+  },
+  "actions": [],
+  "knowledge_files": [],
+  "events": [
+    {
+      "type": "clarification",
+      "text": "Meinst du oben Letzte Plaene oder unten Uebungspakete?"
+    }
+  ],
+  "browser_evidence": {
+    "question_count": 1,
+    "dispatch_started": false,
+    "write_started": false
+  },
+  "final": {
+    "claimed_success": false,
+    "evidence": {}
+  }
+}

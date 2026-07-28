@@ -296,6 +296,7 @@ paths:
         - name: pack_name
           in: path
           required: true
+          description: Basename only, for example workflow.md. Never pass the index path memory/packs/workflow.md.
           schema:
             type: string
             pattern: "^[a-z0-9][a-z0-9-]{1,63}\\.md$"

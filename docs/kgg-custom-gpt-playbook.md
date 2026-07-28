@@ -2,18 +2,28 @@
 
 ## Arbeitsreihenfolge
 
-1. Lade mit `getKggCustomGptResourceManifest` den aktuellen Editor- und Ressourcenvertrag.
-2. Lade `docs/kgg-gpt-context.md`.
-3. Lade mit `getKggMemoryIndex` den kleinen Router des privaten Projektgedaechtnisses.
-4. Lade nur das kleinste passende Memory-Themenpaket mit `getKggMemoryPack`; normalerweise hoechstens zwei Packs. Einzelne Records nur fuer Begruendung, Historie oder Konflikte laden.
-5. Lade `docs/kgg-custom-gpt-action-schema.md`.
-6. Lade bei Patchfragen `docs/kgg-gpt-area-routes.md` und die passenden Source-Chunks.
-7. Lade `docs/kgg-gpt-bug-lessons.md` und `docs/kgg-gpt-patch-patterns.md`.
-8. Wenn Manifest, Kontext, Schema oder benoetigtes Memory nicht geladen werden kann: stoppen und keinen Payload raten. GitHub Pages ist kein Memory-Fallback.
-9. Bei Analysefragen nur Diagnose/Handoff schreiben; kein `submitKggPreviewGate`.
-10. Bei Preview/Test-App-Wunsch immer `validate_only -> publish_preview`.
-11. Nach `publish_preview` wartet der Prozess auf Max' Test-App/Test-APK/Preview-APK-Freigabe.
-12. Erst nach Max-Freigabe `create_pr` oder, wenn Max Haupt-App verlangt, `publish_admin_beta`.
+0. Ist die Anfrage wirklich mehrdeutig und fuehren mindestens zwei unterschiedliche Zielinterpretationen zu verschiedenen Patches, stelle vor allen Actions genau eine gezielte Rueckfrage.
+1. Reine Ursache-/Verstaendnisfragen und ausdruecklich writefreie Patchplaene duerfen hoechstens ein passendes, synchronisiertes Knowledge-Paket nutzen. Kein Memory, Web oder Write; Basis als synchronisiert statt live geprueft kennzeichnen.
+2. Vor aktuellem Repo-, Versions- oder Runstatus sowie vor Submit, Preview, Test-App, Admin-Beta oder Projektwissen-Write: `getKggCustomGptResourceManifest`, `getKggProjectContext` (`docs/kgg-gpt-context.md`) und `getKggCustomGptPlaybook` in dieser Reihenfolge.
+3. Nur bei dauerhaften Entscheidungen: `getKggMemoryIndex`, danach hoechstens zwei passende Packs mit `getKggMemoryPack`. `pack_name` erhaelt nur den Dateinamen wie `workflow.md`.
+4. Lade `docs/kgg-custom-gpt-action-schema.md`.
+5. Lade bei Patchfragen `docs/kgg-gpt-area-routes.md`, hoechstens drei passende Source-Chunks, `docs/kgg-gpt-bug-lessons.md` und `docs/kgg-gpt-patch-patterns.md`.
+6. Scheitert eine benoetigte Live-Quelle: `stale_context`, Stopp, keinen Payload raten. GitHub Pages ist kein Memory-Fallback.
+7. Bei Preview/Test-App-Wunsch immer `validate_only -> publish_preview`.
+8. Nach `publish_preview` wartet der Prozess auf Max' Test-App/Test-APK/Preview-APK-Freigabe.
+9. Erst nach Max-Freigabe `create_pr` oder, wenn Max Haupt-App verlangt, `publish_admin_beta`.
+
+## Arbeitsbudget und Selbstpruefung
+
+- Bestimme zuerst genau eine passende Area-Route. Lade nicht vorsorglich mehrere App-Bereiche.
+- Lade fuer eine Patch-/Preview-Aufgabe nach dem Pflichtstart hoechstens drei passende Source-Chunks. Erweitere um genau eine Quelle, wenn eine konkrete offene Evidenz benannt werden kann.
+- Privates Memory nur fuer dauerhafte Entscheidungen laden. Reine UI-, Fehler- und Preview-Aufgaben brauchen normalerweise kein Memory-Pack.
+- Nutze keine Websuche fuer Repository-Code, Versionen, Preview-Status oder KGG-Regeln, solange die Live-Actions erreichbar sind.
+- Wiederhole denselben Read oder denselben unveraenderten Patchversuch nur nach einem dokumentierten Action-Fehler. Drei gleiche Fehler derselben Klasse erzwingen einen anderen Ansatz.
+- Reine Ursachenanalysen sollen in hoechstens fuenf fachlich getrennten Denkschritten und normalerweise innerhalb von zwei Minuten abgeschlossen sein. Wiederhole denselben Layout- oder Funktionsbereich nicht unter neuen Ueberschriften.
+- Vor einem Write intern pruefen: Zielverhalten eindeutig, richtige Area, kleinster Patch, Schutzbereiche, exakte Tests und aktuelle Basis.
+- Vor `publish_preview` muss der erfolgreiche Validate-Run gelesen sein. Vor einer Erfolgsmeldung muessen Publish-Run, Tests, Artifact, Meta, HTML und Preview-Index gelesen sein.
+- Der Workflow-Observer in `release-pipeline/kgg_gpt_workflow_observer.py` bewertet diese Reihenfolge, Relevanz, Budgets, Wiederholungen und Belege unabhaengig von der fachlichen Antwort.
 
 ## Privates Projektgedaechtnis
 
@@ -96,6 +106,7 @@ Wenn Max oder ein alter Handoff einen v1-Payload zeigt, nicht dispatchen. Erklae
 - Jeder Patch: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`.
 - UI/Layout/Tablet/Phone/Drag/Button/HTML: zusaetzlich `cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression`.
 - GPT/Payload/Schema-Aenderungen: `python release-pipeline\kgg_gpt_payload_preflight.py --self-test`, `python release-pipeline\kgg_gpt_mock_eval.py --self-test`, `python release-pipeline\kgg_gpt_eval.py`, `python release-pipeline\kgg_gpt_stabilize.py --self-test`, `python release-pipeline\kgg_custom_gpt_knowledge_pack.py --check`.
+- GPT-Arbeitsweise: `python release-pipeline\kgg_gpt_workflow_observer.py --self-test`; echte Browserrunden muessen zusaetzlich als Observation-JSON bewertet werden.
 - Modulare Quelle: `python release-pipeline\build_therapist_source.py --check`.
 
 Der Stabilisierungslauf ist erst nach zwei kompletten gruenen Runden ohne neue Fehlerklasse abgeschlossen.
@@ -108,6 +119,15 @@ Der Stabilisierungslauf ist erst nach zwei kompletten gruenen Runden ohne neue F
 - Der Repair-Lab prueft acht Kernfaelle plus zwei verdeckte Holdouts an beschaedigten Vollversionen der aktuellen Admin-App.
 - Nach drei aufeinanderfolgenden Fehlern derselben Klasse fuer dieselbe Challenge stoppen und einen alternativen Weg waehlen.
 - Ein Repair-Lab-PASS darf niemals als Preview/Test-App-, PR- oder Main-Erfolg ausgegeben werden.
+
+## Natuerliche Sprache und UI-Screenshots
+
+- Behandle Tippfehler, fehlende Satzzeichen, Umgangssprache und Markierungen wie `1` oder `2` als normale Benutzereingabe. Rekonstruiere beobachtetes Verhalten, gewuenschtes Verhalten, Ziel-UI und Interaktionsgrenzen, bevor du patchst.
+- Reichen Text, Screenshot und Live-Source zusammen fuer eine eindeutige Reparatur, arbeite ohne Rueckfrage weiter und dokumentiere nur die entscheidende Annahme.
+- Bleiben zwei wesentlich verschiedene UI-Reparaturen moeglich, stelle genau eine kurze gezielte Rueckfrage. Stelle keine Sammelfragen und wiederhole nicht die gesamte Problembeschreibung.
+- Trenne Sprachverstehen, UI-Diagnose, Patch-Sicherheit, Browser-Verhalten und sichtbare Test-App-Pruefung. Ein Erfolg in einer Schicht beweist die anderen Schichten nicht.
+- Das Natural UI Lab verwendet sechs neue Aufgaben pro Runde und zwei komplette Runden. Oeffentliche Aufgaben enthalten nur verrauschte Nachricht, markierten Screenshot, Viewport und beschaedigte Source; kanonische Absicht, Golden Source, Assertions und Kontrollpatch bleiben privat.
+- Der echte Update-Agent wird auf Sprachverstehen und Rueckfrageverhalten geprueft. Die blinde Code-Reparatur laeuft im modellgleichen isolierten Eval-GPT, damit dessen Zugriff auf die intakte Production-Source den Test nicht kompromittiert.
 
 ## Tablet-Splitter-Kontext
 

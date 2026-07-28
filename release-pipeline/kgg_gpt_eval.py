@@ -65,6 +65,18 @@ def run_stabilize_self_test() -> None:
         fail(f"stabilize self-test failed: {output}")
 
 
+def run_workflow_observer_self_test() -> None:
+    proc = subprocess.run(
+        [sys.executable, "release-pipeline/kgg_gpt_workflow_observer.py", "--self-test"],
+        cwd=str(ROOT),
+        text=True,
+        capture_output=True,
+    )
+    if proc.returncode != 0:
+        output = (proc.stdout + "\n" + proc.stderr).strip()
+        fail(f"workflow observer self-test failed: {output}")
+
+
 def run_mock_eval_self_test() -> None:
     proc = subprocess.run(
         [sys.executable, "release-pipeline/kgg_gpt_mock_eval.py", "--self-test"],
@@ -81,6 +93,8 @@ def run_repair_lab_self_tests() -> None:
     commands = [
         [sys.executable, "release-pipeline/kgg_gpt_repair_lab.py", "--self-test"],
         [sys.executable, "release-pipeline/kgg_gpt_repair_stabilize.py", "--self-test"],
+        [sys.executable, "release-pipeline/kgg_gpt_natural_ui_lab.py", "--self-test"],
+        [sys.executable, "release-pipeline/kgg_gpt_natural_ui_stabilize.py", "--self-test"],
         [sys.executable, "release-pipeline/kgg_custom_gpt_resource_audit.py", "--self-test"],
     ]
     for command in commands:
@@ -244,6 +258,7 @@ def check_playbook() -> None:
             "initTabletLayoutControls()",
             "getKggMemoryIndex",
             "getKggMemoryPack",
+            "workflow.md",
             "submitKggMemoryUpdate",
             "needs_approval",
             "supersedes",
@@ -291,6 +306,8 @@ def check_prompt_and_expected_docs() -> None:
         "memory-no-change",
         "memory-private-unavailable",
         "editor-resource-drift",
+        "natural-language-ui-understanding",
+        "natural-language-one-clarification",
     ]
     for case in cases:
         require(prompts, f"## {case}", f"prompt fixture {case}")
@@ -326,6 +343,7 @@ def check_prompt_and_expected_docs() -> None:
             "listKggPreviewGateRuns",
             "getKggMemoryIndex",
             "getKggMemoryPack",
+            "pass only the basename `workflow.md` as `pack_name`",
             "getKggMemoryUpdateStatus",
             "needs_approval",
             "supersedes",
@@ -356,6 +374,9 @@ def check_prompt_and_expected_docs() -> None:
             "duplicate action domains",
             "KGG Project Memory Gate",
             "getKggMemoryIndex",
+            "pack_name",
+            "workflow.md",
+            "pass only the basename `workflow.md` as `pack_name`",
             "getKggMemoryPack",
             "submitKggMemoryUpdate",
             "needs_approval",
@@ -401,6 +422,9 @@ def check_prompt_and_expected_docs() -> None:
             "schemas: {}",
             "properties:",
             "getKggMemoryIndex",
+            "pack_name",
+            "workflow.md",
+            "Never pass the index path memory/packs/workflow.md",
             "getKggMemoryPack",
             "getKggMemoryRecord",
             "getKggMemoryHistory",
@@ -437,6 +461,9 @@ def check_prompt_and_expected_docs() -> None:
             "getKggProjectContext",
             "getKggCustomGptPlaybook",
             "getKggMemoryIndex",
+            "pack_name",
+            "workflow.md",
+            "nie `memory/packs/workflow.md`",
             "GitHub Pages ist weder Memory-Quelle noch Fallback",
             "validate_only -> publish_preview",
         ],
@@ -446,7 +473,7 @@ def check_prompt_and_expected_docs() -> None:
         resource_manifest,
         [
             '"schema": 2',
-            '"profileVersion": "2.0.0"',
+            '"profileVersion": "2.5.0"',
             '"editorBootstrap"',
             '"version": "v2"',
             "kgg-custom-gpt-editor-bootstrap.md",
@@ -588,14 +615,177 @@ def check_repair_lab_contract() -> None:
     )
 
 
+def check_natural_ui_lab_contract() -> None:
+    lab_doc = read("docs/kgg-custom-gpt-natural-ui-lab.md")
+    report = read("docs/kgg-custom-gpt-natural-ui-lab-report.md")
+    eval_knowledge = read("docs/kgg-custom-gpt-eval-knowledge.md")
+    raw_schema = read("docs/kgg-custom-gpt-repair-lab-raw-openapi.yaml")
+    api_schema = read("docs/kgg-custom-gpt-repair-lab-api-openapi.yaml")
+    workflow = read(".github/workflows/kgg-gpt-repair-lab.yml")
+    runner = read("release-pipeline/kgg_gpt_natural_ui_lab.py")
+    stabilize = read("release-pipeline/kgg_gpt_natural_ui_stabilize.py")
+    require_all(
+        lab_doc,
+        [
+            "Sechs Klassen",
+            "genau einer notwendigen Rueckfrage",
+            "Kanonische Absicht",
+            "gpt-natural-ui-lab",
+            "validate_only -> publish_preview",
+        ],
+        "Natural UI Lab runbook",
+    )
+    require_all(
+        report,
+        [
+            "HARNESS GREEN",
+            "LIVE ROUNDS GREEN",
+            "Eindeutige verrauschte UI-Anfrage",
+            "Echte Mehrdeutigkeit",
+            "natural-accept-20260726-p",
+            "natural-accept-20260726-q",
+            "11/12",
+            "12/12",
+            "Max Test-App-Freigabe",
+        ],
+        "Natural UI Lab report",
+    )
+    require_all(
+        eval_knowledge,
+        [
+            "Natural UI Mode",
+            "clarification",
+            "confidence",
+            "low",
+            "medium",
+            "high",
+            "getKggNaturalUiResult",
+            "canonical intent",
+            "executable HTML fragment",
+            "Bare CSS or JavaScript",
+            "final cascade",
+            "guessed child containers",
+            "Never broaden the patch to both controls",
+            "clarification_count=1",
+        ],
+        "Natural UI Eval Knowledge",
+    )
+    require_all(
+        raw_schema,
+        [
+            "gpt-natural-ui-lab",
+            "getKggNaturalUiLabIndex",
+            "getKggNaturalUiChallenge",
+            "getKggNaturalUiScreenshot",
+            "getKggNaturalUiSourceChunk",
+            "getKggNaturalUiResult",
+        ],
+        "Natural UI raw schema",
+    )
+    require_all(
+        api_schema,
+        [
+            "evaluate_natural_attempt",
+            "submission_json",
+            "patch_content",
+            "Omit payload.patch_content",
+            "never JSON-encode",
+            "natural",
+        ],
+        "Natural UI API schema",
+    )
+    require_all(
+        workflow,
+        [
+            "publish_natural_challenges",
+            "evaluate_natural_attempt",
+            "kgg-natural-ui-lab/public",
+            "kgg-natural-ui-result/report.json",
+            "Publish sanitized natural-language evaluation outcome",
+            '[[ -n "$PATCH_CONTENT" ]]',
+            '"patch_content" in payload',
+            'payload["patch_content"] = os.environ["PATCH_CONTENT"]',
+            'npm install --prefix "$runtime" --no-package-lock --no-save playwright@1.61.1',
+            'echo "NODE_PATH=$runtime/node_modules" >> "$GITHUB_ENV"',
+        ],
+        "Natural UI workflow",
+    )
+    require_all(
+        runner,
+        [
+            "canonical_intent_groups",
+            "canonical_diagnosis_groups",
+            "assert_public_is_blind",
+            "marked-problem.png",
+            "interpretation",
+            "interpretation_types",
+            "patch_content_format",
+            "ambiguity_policy",
+            "Never repair both",
+            "validate_patch_fragment",
+            "computed display, columns or geometry",
+        ],
+        "Natural UI runner",
+    )
+    require_all(
+        stabilize,
+        [
+            "REQUIRED_PER_ROUND = 6",
+            "REQUIRED_GREEN_ROUNDS = 2",
+            "MIN_FIRST_ATTEMPT_PASSES = 10",
+            "MAX_ATTEMPTS_TO_PASS = 2",
+            "STOP_ALTERNATIVE_REQUIRED",
+        ],
+        "Natural UI stabilizer",
+    )
+
+
+def check_release_pr_main_baseline() -> None:
+    workflow = read(".github/workflows/release-pr.yml")
+    require_all(
+        workflow,
+        [
+            "git fetch origin main:refs/remotes/origin/main --force",
+            'git fetch origin "${BASE_REF}:refs/remotes/origin/${BASE_REF}" --force',
+            "python release-pipeline/kgg_test_battery.py --level critical",
+        ],
+        "Release PR main baseline",
+    )
+
+
+def check_android_preview_probe_contract() -> None:
+    probe = read("release-pipeline/kgg_android_preview_probe.py")
+    require_all(
+        probe,
+        [
+            "SYSTEM_UI_ANR_PATTERNS",
+            "System UI isn't responding",
+            "ANR in com\\.android\\.systemui",
+            "contains_system_ui_anr",
+            "--self-test",
+            "--wipe-data",
+            "--settle-seconds",
+            "ui_dump_ok",
+            "visible_marker_found",
+            "system_ui_anr",
+            'and ui.get("marker_found")',
+        ],
+        "Android Preview probe contract",
+    )
+
+
 def main() -> int:
     try:
         check_playbook()
         check_prompt_and_expected_docs()
         check_area_routes()
         check_repair_lab_contract()
+        check_natural_ui_lab_contract()
+        check_release_pr_main_baseline()
+        check_android_preview_probe_contract()
         run_preflight_self_test()
         run_stabilize_self_test()
+        run_workflow_observer_self_test()
         run_mock_eval_self_test()
         run_repair_lab_self_tests()
         run_validate_only_self_test()

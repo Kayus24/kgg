@@ -1,0 +1,64 @@
+{
+  "kind": "kgg_gpt_workflow_observation",
+  "prompt_id": "browser-baseline-tablet-analysis-2026-07-28",
+  "task_mode": "analysis",
+  "expected_area": "tablet-layout",
+  "elapsed_seconds": 233,
+  "observation_basis": "browser-visible activity only",
+  "limits": {
+    "max_read_actions": 10,
+    "max_source_chunks": 3,
+    "max_memory_packs": 0,
+    "max_clarifications": 0,
+    "max_reasoning_steps": 5,
+    "max_elapsed_seconds": 120,
+    "allow_web_search": false
+  },
+  "actions": [],
+  "events": [
+    {
+      "type": "reasoning_step",
+      "label": "Pruefen der Layoutdaten"
+    },
+    {
+      "type": "reasoning_step",
+      "label": "Analysiere Tablet-Layout"
+    },
+    {
+      "type": "reasoning_step",
+      "label": "Bewerten der Tablet-Steuerung"
+    },
+    {
+      "type": "reasoning_step",
+      "label": "Gestalten der Tablet-Anpassung",
+      "redundant": true
+    },
+    {
+      "type": "reasoning_step",
+      "label": "Ordnen der Planbereiche"
+    },
+    {
+      "type": "reasoning_step",
+      "label": "Ueberblick gewinnend",
+      "redundant": true
+    },
+    {
+      "type": "reasoning_step",
+      "label": "Gestaltend der Tablet-Oberflaeche",
+      "redundant": true
+    }
+  ],
+  "browser_evidence": {
+    "chat_url": "https://chatgpt.com/g/g-6a45fba0f3408191ac1fb2c987a2e960-kgg-update-agent/c/6a68e423-75ac-83eb-9223-4d1d6b506534",
+    "knowledge_files_visible": [
+      "kgg-custom-gpt-knowledge-safety.md"
+    ],
+    "live_action_calls_visible": [],
+    "answer_correct": true,
+    "dispatch_started": false
+  },
+  "final": {
+    "claimed_success": false,
+    "evidence": {}
+  }
+}

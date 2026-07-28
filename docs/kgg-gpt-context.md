@@ -25,6 +25,7 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Curated production Knowledge: `docs/kgg-custom-gpt-knowledge-{architecture,operations,safety,testing}.md`.
 - Custom GPT model/capability/resource contract: `docs/kgg-custom-gpt-resource-manifest.json`.
 - Blind full-app Repair-Lab: `docs/kgg-custom-gpt-repair-lab.md`, workflow `.github/workflows/kgg-gpt-repair-lab.yml`.
+- Natural-language UI Repair Lab: `docs/kgg-custom-gpt-natural-ui-lab.md`; six noisy text/screenshot challenges per round with hidden canonical intent.
 - Isolated Eval-GPT Knowledge: `docs/kgg-custom-gpt-eval-knowledge.md`; never upload production fixtures to this GPT.
 - Custom GPT stabilization cycle report: `docs/kgg-custom-gpt-cycle-report.md`.
 - Bug-history lessons: `docs/kgg-gpt-bug-lessons.md`, `docs/kgg-gpt-bug-index.json`, `docs/kgg-gpt-patch-patterns.md`.
@@ -32,7 +33,9 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Source chunks for GPT patch planning: `docs/kgg-gpt-source-index.json` and `docs/kgg-gpt-source/chunk-*.md`.
 - GPT eval fixtures: `docs/kgg-custom-gpt-test-prompts.md`, `docs/kgg-custom-gpt-expected-results.md`, `docs/kgg-custom-gpt-test-report.md`.
 - GPT stabilization runner: `release-pipeline/kgg_gpt_stabilize.py`.
+- GPT workflow observer: `release-pipeline/kgg_gpt_workflow_observer.py`; scores action order, relevance, efficiency, retries and proof.
 - Blind Repair-Lab runner: `release-pipeline/kgg_gpt_repair_lab.py`; acceptance tracker: `release-pipeline/kgg_gpt_repair_stabilize.py`.
+- Natural UI runner: `release-pipeline/kgg_gpt_natural_ui_lab.py`; acceptance tracker: `release-pipeline/kgg_gpt_natural_ui_stabilize.py`.
 - GPT preview channel branch: `gpt-preview`, files below `previews/`.
 - Private project memory: `Kayus24/kgg-project-memory`; load `memory/index.json` first and then only the smallest matching pack.
 - GitHub Pages is not a project-memory source or fallback; private memory access uses authenticated GitHub API Actions.
@@ -70,6 +73,8 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Before KGG work, load `docs/kgg-custom-gpt-resource-manifest.json`; a bootstrap-version mismatch blocks writes until the GPT editor is synced.
 - Before proposing or dispatching a patch, load the bug-history lessons and look for similar symptoms.
 - Before producing a patch payload, load `docs/kgg-gpt-area-routes.md` and then only the source chunks needed for the requested area.
+- Normal tasks use one area route and at most three initial source chunks; repeated reads need a documented Action error.
+- Do not use Web Search for repo code, versions, Preview status or KGG rules while the live GitHub Actions are available.
 - If a known bug-history lesson matches, reuse its caution, do-not-touch rules and tests.
 - Run payload JSON through `python release-pipeline/kgg_gpt_payload_preflight.py --payload-file <file>` before dispatching.
 - New GPT patches use payload v2 with `patch_content`; direct operations against `kgg-update/index.html` are forbidden because `index.html` is generated output.
@@ -84,6 +89,7 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Before each real GPT test cycle verify the highest Actions-compatible model and capability/Knowledge hashes against `docs/kgg-custom-gpt-resource-manifest.json`.
 - The isolated Eval GPT must not receive Web Search, production Actions, production Knowledge, intact main HTML, golden source, sample repairs or hidden assertions.
 - A Repair-Lab PASS is evaluation evidence only and never authorizes Preview/Test-App, PR, Admin-Beta or main.
+- Natural-language UI tests separate production-GPT understanding from isolated blind repair. Never expose canonical intent, clarification answer, golden source, assertions or sample submission.
 
 ## Required Tests
 
@@ -91,7 +97,9 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - UI, HTML, flicker, phone, tablet, card drag or layout changes: also `cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression`.
 - GPT playbook, routing, payload or bug-knowledge changes: also `python release-pipeline\kgg_gpt_payload_preflight.py --self-test` and `python release-pipeline\kgg_gpt_eval.py`.
 - Custom GPT stabilization changes: also `python release-pipeline\kgg_gpt_stabilize.py --self-test`, `python release-pipeline\kgg_custom_gpt_knowledge_pack.py --check` and update `docs/kgg-custom-gpt-cycle-report.md`.
+- GPT workflow changes: also `python release-pipeline\kgg_gpt_workflow_observer.py --self-test` and evaluate real browser Observation JSON.
 - Repair-Lab changes: also `python release-pipeline\kgg_gpt_repair_lab.py --self-test`, `python release-pipeline\kgg_gpt_repair_stabilize.py --self-test` and `python release-pipeline\kgg_custom_gpt_resource_audit.py --check`.
+- Natural UI Lab changes: also `python release-pipeline\kgg_gpt_natural_ui_lab.py --self-test`, `python release-pipeline\kgg_gpt_natural_ui_stabilize.py --self-test` and the browser self-test.
 - Parser or text-block changes: also `cmd /c release-pipeline\run-kgg-tests.cmd --suite textblocks --level regression`.
 - Sync, bank, package or peer changes: also `cmd /c release-pipeline\run-kgg-tests.cmd --suite sync --level regression`.
 - Android sync bridge changes: also `cmd /c release-pipeline\run-kgg-tests.cmd --suite native-sync --level regression`.

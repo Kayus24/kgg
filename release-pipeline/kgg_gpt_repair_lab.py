@@ -494,15 +494,27 @@ def inject_patch(html: str, payload: dict[str, Any], identifier: str) -> str:
 
 
 def run_browser(html_path: Path, case_key: str, screenshot: Path | None = None) -> dict[str, Any]:
-    npm = shutil.which("npm.cmd" if os.name == "nt" else "npm") or shutil.which("npm")
-    if npm:
-        command = [npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "node", str(SMOKE_SCRIPT)]
-    else:
-        command = ["node", str(SMOKE_SCRIPT)]
+    node = shutil.which("node")
+    if not node:
+        return {"returncode": 1, "output": "node runtime is required for browser repair probe"}
+    command = [node, str(SMOKE_SCRIPT)]
     command.extend(["--html", str(html_path), "--case", case_key])
     if screenshot:
         command.extend(["--screenshot", str(screenshot)])
-    proc = subprocess.run(command, cwd=str(ROOT), text=True, capture_output=True, env=os.environ.copy())
+    try:
+        proc = subprocess.run(
+            command,
+            cwd=str(ROOT),
+            text=True,
+            capture_output=True,
+            env=os.environ.copy(),
+            timeout=120,
+        )
+    except subprocess.TimeoutExpired:
+        return {
+            "returncode": 124,
+            "output": f"browser repair probe timed out after 120 seconds: {case_key}",
+        }
     output = (proc.stdout + "\n" + proc.stderr).strip()
     result: dict[str, Any] = {"returncode": proc.returncode, "output": output[-5000:]}
     for line in reversed((proc.stdout + "\n" + proc.stderr).splitlines()):

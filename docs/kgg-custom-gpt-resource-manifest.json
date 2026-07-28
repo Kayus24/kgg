@@ -11,12 +11,12 @@
   "production": {
     "name": "KGG Update-Agent",
     "gptId": "g-6a45fba0f3408191ac1fb2c987a2e960",
-    "profileVersion": "2.0.0",
+    "profileVersion": "2.5.0",
     "editorBootstrap": {
       "path": "docs/kgg-custom-gpt-editor-bootstrap.md",
       "version": "v2",
-      "characters": 3964,
-      "sha256": "348330729eb3cbdb070e49997e4e92c75cc105f2246d701f701dd99ee586076c"
+      "characters": 3960,
+      "sha256": "8bb3068dcf419c5f907bbc21e1d51e063d4028c80b1cde3adc79ea668e83f3e3"
     },
     "capabilities": {
       "webSearch": true,
@@ -29,11 +29,11 @@
     "knowledge": [
       {
         "path": "docs/kgg-custom-gpt-knowledge-architecture.md",
-        "sha256": "db1158a19946ced83980d095e033ff5bc288f42f9feb53bf3f1a4e20a7e46df5"
+        "sha256": "d050a2fea3ea8a9b76d53a3ff754b104581930f04b8b3a57924105c095933059"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-operations.md",
-        "sha256": "bcafe50fb85689995807252bc0f179c6302120ec2e8c1e43579e2a4d6da45de7"
+        "sha256": "b3e3cac3cfe580073f95022cc0ecd647ad815e2fd200904e3f6b645ac6f3e56c"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-safety.md",
@@ -41,17 +41,17 @@
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-testing.md",
-        "sha256": "b61124586b0d3a0886dd1c880020e731916437440bfc50d5e545d49341872246"
+        "sha256": "b0473e15abd68eab4a4047687f8dfd4d39df5c5f54113bdc2e0719d42001a642"
       }
     ],
     "actions": [
       {
         "path": "docs/kgg-custom-gpt-action-openapi.yaml",
-        "sha256": "16be8a38aff0612fa7d36894a3674e606d19ea65d4d33a101167fa6e067cd3d4"
+        "sha256": "29b76c8b7b77def636eb2616b242b24bd692340027d5167cc003681a40bad045"
       },
       {
         "path": "docs/kgg-custom-gpt-action-api-openapi.yaml",
-        "sha256": "fad8eb40d827713ac7b28ee3be8e34046a7d6b6c2fc486cf324d628b09be8053"
+        "sha256": "e7eeba3f3ddde0ae298f24c1b17212d15ed3eef241dd92bdb9703a080752dd65"
       }
     ],
     "freshness": "GitHub live context and source chunks are authoritative; generated Knowledge is a retrieval accelerator and must pass --check."
@@ -59,12 +59,12 @@
   "eval": {
     "name": "KGG Repair-Lab Eval",
     "gptId": "g-6a5e3483c98c81919e6f8a7939d5c072",
-    "profileVersion": "2.0.0",
+    "profileVersion": "2.1.0",
     "editorBootstrap": {
       "path": "docs/kgg-custom-gpt-eval-editor-bootstrap.md",
-      "version": "v2",
-      "characters": 1703,
-      "sha256": "868d5ae1745425bed1c5633607a27cd69eadefbef7929e351c43a16b8b07f730"
+      "version": "v8",
+      "characters": 3854,
+      "sha256": "ba5aa67217cd190ad5964addb89a7469145c2906732b15d97d8dfb5be2d404fd"
     },
     "sameModelAsProduction": true,
     "capabilities": {
@@ -78,17 +78,17 @@
     "knowledge": [
       {
         "path": "docs/kgg-custom-gpt-eval-knowledge.md",
-        "sha256": "b2b50a541ccb7b1f3e3d8427c44b720af49c65dab061d10f2b8e0bb71f0c59e1"
+        "sha256": "a1f17cdf61c270e5c775b9cea7bd58e6c7baee2d7ff315454e5d88599a64f229"
       }
     ],
     "actions": [
       {
         "path": "docs/kgg-custom-gpt-repair-lab-raw-openapi.yaml",
-        "sha256": "4bee2ff71e18ff6c8b061bd3fd6393a3ce135b86b487bb80ad422ebb83e2a802"
+        "sha256": "ce658e18771f321f42ef176fba4fdb7e472bff2d7fe570aab285b2781db45a53"
       },
       {
         "path": "docs/kgg-custom-gpt-repair-lab-api-openapi.yaml",
-        "sha256": "c2b9d62444121574d11cba29005e95e2a572548d75a56cdd52f294e9a79765e1"
+        "sha256": "9732d6ffde20efbaeb4cde1d7c8380df7d36ddee108539f495327e5a9cfde874"
       }
     ],
     "forbiddenResources": [
@@ -98,7 +98,9 @@
       "golden source",
       "internal challenge manifest",
       "sample repair payloads",
-      "hidden evaluator assertions"
+      "hidden evaluator assertions",
+      "canonical natural-language intent",
+      "private clarification answer"
     ]
   },
   "officialReferences": [
