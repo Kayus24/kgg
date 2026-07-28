@@ -2,6 +2,15 @@ plugins {
     id "com.android.application"
 }
 
+def kggConfigValue = { String name ->
+    def value = project.findProperty(name) ?: System.getenv(name) ?: ""
+    return value.toString()
+}
+
+def kggBuildConfigString = { String value ->
+    return "\"${value.replace("\\", "\\\\").replace("\"", "\\\"")}\""
+}
+
 android {
     namespace "de.kgg.app"
     compileSdk 36
@@ -24,16 +33,27 @@ android {
             dimension "profile"
             applicationId "de.kgg.app"
             manifestPlaceholders = [appLabel: "KGG Kolleg:innen"]
+            buildConfigField "boolean", "KGG_PREVIEW_NOTIFICATIONS", "false"
         }
         admin {
             dimension "profile"
             applicationId "de.kgg.admin"
             manifestPlaceholders = [appLabel: "KGG Admin"]
+            buildConfigField "boolean", "KGG_PREVIEW_NOTIFICATIONS", "false"
         }
         preview {
             dimension "profile"
             applicationId "de.kgg.preview"
             manifestPlaceholders = [appLabel: "KGG Preview"]
+            buildConfigField "boolean", "KGG_PREVIEW_NOTIFICATIONS", "true"
+            buildConfigField "String", "KGG_FIREBASE_PROJECT_ID",
+                    kggBuildConfigString(kggConfigValue("KGG_PREVIEW_FIREBASE_PROJECT_ID"))
+            buildConfigField "String", "KGG_FIREBASE_APPLICATION_ID",
+                    kggBuildConfigString(kggConfigValue("KGG_PREVIEW_FIREBASE_APPLICATION_ID"))
+            buildConfigField "String", "KGG_FIREBASE_API_KEY",
+                    kggBuildConfigString(kggConfigValue("KGG_PREVIEW_FIREBASE_API_KEY"))
+            buildConfigField "String", "KGG_FIREBASE_SENDER_ID",
+                    kggBuildConfigString(kggConfigValue("KGG_PREVIEW_FIREBASE_SENDER_ID"))
         }
     }
 
@@ -68,4 +88,6 @@ afterEvaluate {
 
 dependencies {
     implementation "androidx.core:core:1.13.1"
+    previewImplementation platform("com.google.firebase:firebase-bom:34.1.0")
+    previewImplementation "com.google.firebase:firebase-messaging"
 }

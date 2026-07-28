@@ -1,0 +1,77 @@
+name: KGG Preview Notification
+
+on:
+  workflow_run:
+    workflows:
+      - KGG GPT Preview Gate
+    types:
+      - completed
+
+permissions:
+  actions: read
+  contents: read
+  id-token: write
+
+concurrency:
+  group: kgg-preview-notification
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'workflow_dispatch' &&
+      startsWith(github.event.workflow_run.display_title, 'KGG GPT Preview Gate | publish_preview | ')
+    runs-on: ubuntu-latest
+    environment: kgg-preview-notifications
+    steps:
+      - name: Checkout trusted notifier
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate notifier contract
+        run: python release-pipeline/kgg_preview_notification.py --self-test
+
+      - name: Verify Firebase federation configuration
+        env:
+          WIF_PROVIDER: ${{ vars.KGG_GCP_WIF_PROVIDER }}
+          SERVICE_ACCOUNT: ${{ vars.KGG_GCP_SERVICE_ACCOUNT }}
+          FIREBASE_PROJECT_ID: ${{ vars.KGG_FIREBASE_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          test -n "$WIF_PROVIDER"
+          test -n "$SERVICE_ACCOUNT"
+          test -n "$FIREBASE_PROJECT_ID"
+
+      - id: google-auth
+        name: Obtain short-lived Firebase access token
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.KGG_GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.KGG_GCP_SERVICE_ACCOUNT }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/firebase.messaging
+          create_credentials_file: false
+
+      - name: Verify published preview and send notification
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          KGG_SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+          KGG_FIREBASE_PROJECT_ID: ${{ vars.KGG_FIREBASE_PROJECT_ID }}
+          KGG_FIREBASE_ACCESS_TOKEN: ${{ steps.google-auth.outputs.access_token }}
+        run: |
+          set -euo pipefail
+          python release-pipeline/kgg_preview_notification.py | tee "$RUNNER_TEMP/kgg-preview-notification.json"
+          {
+            echo "### KGG Preview notification"
+            echo
+            echo '```json'
+            cat "$RUNNER_TEMP/kgg-preview-notification.json"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

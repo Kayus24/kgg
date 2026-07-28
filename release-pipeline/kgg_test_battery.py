@@ -252,6 +252,15 @@ def run_android_wrapper_contract() -> None:
         encoding="utf-8"
     )
     android_workflow = (ROOT / ".github" / "workflows" / "android-wrapper-check.yml").read_text(encoding="utf-8")
+    preview_manifest = (ROOT / "android-wrapper" / "app" / "src" / "preview" / "AndroidManifest.xml").read_text(
+        encoding="utf-8"
+    )
+    preview_application = (
+        ROOT / "android-wrapper" / "app" / "src" / "preview" / "java" / "de" / "kgg" / "app" / "KggPreviewApplication.java"
+    ).read_text(encoding="utf-8")
+    preview_service = (
+        ROOT / "android-wrapper" / "app" / "src" / "preview" / "java" / "de" / "kgg" / "app" / "KggPreviewMessagingService.java"
+    ).read_text(encoding="utf-8")
     expected_shell = str(manifest.get("latestAndroidShellVersion", "")).lstrip("v")
     required = [
         (f"ANDROID_SHELL_VERSION = {expected_shell}", "MainActivity shell version must match android_update_manifest"),
@@ -278,18 +287,43 @@ def run_android_wrapper_contract() -> None:
         ("currentUrl.startsWith(\"file://\")", "Web camera permission is limited to the locally stored trusted KGG HTML"),
         ("return isAdminProfile() && !isPreviewProfile();", "Preview build must not expose Admin release control"),
         ("versionName \"0.2.11-v401-share-apk-provider\"", "Android v401 gradle version name"),
+        ("previewImplementation \"com.google.firebase:firebase-messaging\"", "FCM dependency must stay Preview-only"),
+        ("KGG_PREVIEW_NOTIFICATIONS\", \"false\"", "Admin and colleague flavors disable Preview notifications"),
+        ("KGG_PREVIEW_NOTIFICATIONS\", \"true\"", "Preview flavor enables notifications"),
+        ("android.permission.POST_NOTIFICATIONS", "Preview manifest declares Android notification permission"),
+        ("KggPreviewMessagingService", "Preview manifest registers the Firebase messaging service"),
+        ("android:launchMode=\"singleTop\"", "Notification taps reuse the running Preview activity"),
+        ("TOPIC = \"kgg-preview\"", "Preview app subscribes only to the Preview topic"),
+        ("CHANNEL_ID = \"kgg_preview_updates\"", "Preview notification channel id is stable"),
+        ("KGG Test-Previews", "Preview notification channel has a user-facing name"),
+        ("NOTIFICATION_TAG = \"kgg-preview-latest\"", "Newest Preview notification replaces the prior one"),
+        ("checkForPreviewWebAppUpdate();", "Notification tap reuses the verified Preview updater"),
         ("android:icon=\"@mipmap/ic_launcher\"", "launcher icon manifest entry"),
         ("android:roundIcon=\"@mipmap/ic_launcher_round\"", "round launcher icon manifest entry"),
         ('<cache-path name="apk_cache" path="apk/" />', "FileProvider must expose APK cache files"),
         ("rememberPendingApkFile(apkFile, versionLabel, false)", "background APK checks must not request installer"),
         ("if (force) {\n                    runOnUiThread(() -> installApkFile(apkFile, versionLabel));", "explicit APK check may open installer"),
     ]
-    haystacks = "\n".join([main_activity, bootstrap, build_gradle, android_manifest, file_paths, android_workflow])
+    haystacks = "\n".join([
+        main_activity,
+        bootstrap,
+        build_gradle,
+        android_manifest,
+        preview_manifest,
+        preview_application,
+        preview_service,
+        file_paths,
+        android_workflow,
+    ])
     missing = [reason for token, reason in required if token not in haystacks]
     if missing:
         raise BatteryError("Android wrapper contract missing: " + ", ".join(missing))
     if "if (window.KGGNativeSync || !window.KGGAndroidSync) return;" in bootstrap:
         raise BatteryError("Android bootstrap must not let Sync availability block PDF/Camera/AppUpdate bridges.")
+    if "POST_NOTIFICATIONS" in android_manifest:
+        raise BatteryError("Notification permission must remain outside the shared Android manifest.")
+    if "firebase" in android_manifest.lower():
+        raise BatteryError("Firebase components must remain outside the shared Android manifest.")
     for density in ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]:
         for name in ["ic_launcher.png", "ic_launcher_round.png"]:
             icon = ROOT / "android-wrapper" / "app" / "src" / "main" / "res" / f"mipmap-{density}" / name
@@ -299,6 +333,33 @@ def run_android_wrapper_contract() -> None:
             if not admin_icon.exists() or admin_icon.stat().st_size < 500:
                 raise BatteryError(f"Android admin launcher icon override missing or too small: {admin_icon}")
     log("Android wrapper contract OK")
+
+
+def run_preview_notification_contract() -> None:
+    log("== Preview notification contract ==")
+    notify_workflow = (ROOT / ".github" / "workflows" / "kgg-preview-notify.yml").read_text(encoding="utf-8")
+    preview_workflow = (ROOT / ".github" / "workflows" / "kgg-gpt-preview-gate.yml").read_text(encoding="utf-8")
+    required = [
+        ("workflow_run:", "Notification must be triggered by a completed trusted workflow"),
+        ("github.event.repository.default_branch", "Notifier code must be checked out from the default branch"),
+        ("id-token: write", "Notifier must use GitHub OIDC"),
+        ("google-github-actions/auth@v2", "Notifier must obtain a short-lived Google token"),
+        ("firebase.messaging", "OIDC token scope must be limited to Firebase Messaging"),
+        ("kgg_preview_notification.py --self-test", "Notifier self-test must run before authentication"),
+        ("KGG_SOURCE_RUN_ID", "Notifier must verify the exact source run"),
+        ("KGG_FIREBASE_ACCESS_TOKEN", "Sender receives only a short-lived access token"),
+    ]
+    missing = [reason for token, reason in required if token not in notify_workflow]
+    if missing:
+        raise BatteryError("Preview notification workflow missing: " + ", ".join(missing))
+    forbidden = ["service-account.json", "credentials_json", "client_secret"]
+    found = [token for token in forbidden if token in notify_workflow.lower()]
+    if found:
+        raise BatteryError("Preview notifier must not use long-lived Google credentials: " + ", ".join(found))
+    if "kgg_preview_notification.py" in preview_workflow:
+        raise BatteryError("Branch-dispatched Preview workflow must not send FCM notifications directly.")
+    run([sys.executable, "release-pipeline/kgg_preview_notification.py", "--self-test"])
+    log("Preview notification contract OK")
 
 
 def run_gpt_payload_preflight_self_test() -> None:
@@ -488,6 +549,13 @@ TEST_REGISTRY = [
         "suite": "android",
         "reason": "Android shell metadata, bundled web assets, launcher icon and PDF fallback must stay wired before APK PRs merge.",
         "run": run_android_wrapper_contract,
+    },
+    {
+        "id": "preview-notification-contract",
+        "level": "critical",
+        "suite": "android",
+        "reason": "Only verified successful Preview publishes may notify the isolated Test-App through short-lived OIDC credentials.",
+        "run": run_preview_notification_contract,
     },
     {
         "id": "gpt-payload-preflight",

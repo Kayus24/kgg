@@ -172,6 +172,11 @@ jobs:
       - name: Build fixed Preview APK
         if: inputs.mode == 'publish_preview'
         shell: bash
+        env:
+          KGG_PREVIEW_FIREBASE_PROJECT_ID: ${{ vars.KGG_FIREBASE_PROJECT_ID }}
+          KGG_PREVIEW_FIREBASE_APPLICATION_ID: ${{ vars.KGG_PREVIEW_FIREBASE_APPLICATION_ID }}
+          KGG_PREVIEW_FIREBASE_SENDER_ID: ${{ vars.KGG_PREVIEW_FIREBASE_SENDER_ID }}
+          KGG_PREVIEW_FIREBASE_API_KEY: ${{ secrets.KGG_PREVIEW_FIREBASE_API_KEY }}
         run: |
           set -euo pipefail
           cd base/android-wrapper
