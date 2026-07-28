@@ -1,8 +1,9 @@
 # KGG Custom GPT Stabilization Cycle Report
 
-Generated: 2026-07-14T08:27:46Z
-Status: PENDING
+Generated: 2026-07-27T08:06:00Z
+Status: PENDING - technical GPT acceptance PASS; Max physical Test-App acceptance pending
 Confirmed green rounds: 2 / 2
+Second-Brain dialog rounds: 2 / 2 PASS
 Tablet splitter UI probe included: no
 
 ## Fehlerklassen
@@ -63,7 +64,7 @@ Tablet splitter UI probe included: no
 | `artifact` | PASS | `` | Artifacts 8304391163 and 8304658462 exist and are not expired. |
 | `meta_json` | PASS | `` | Both modular canary meta.json URLs returned HTTP 200 with patchFile and patchHash. |
 | `html_url` | PASS | `` | Both generated Admin preview HTML URLs returned HTTP 200 and contained their canary markers. |
-| `test_apk_channel` | PASS | `` | gpt-preview index latest points to modular-gpt-canary-20260714-b; APK artifact exists. |
+| `test_apk_channel` | PASS | `` | Der modulare Canary wurde erfolgreich in den Test-App-Kanal publiziert und sein APK-Artifact existiert. Der Kanal zeigt inzwischen bewusst die neuere Scanner-Preview `kgg-v061-combo-camera-scanner` als `latest`. |
 | `max_test_apk_acceptance` | PENDING | `` | Technical emulator smoke passed; Max must still accept the preview on the physical Test-App. |
 | `admin_beta_main_merge` | SKIP | `` | Correctly not attempted before Max Test-App approval. |
 | `admin_html_http_200` | SKIP | `` | Admin release is intentionally not created before Max approval. |
@@ -77,11 +78,24 @@ Tablet splitter UI probe included: no
 | `private_memory_pack_read` | PASS | `` | Nach Basename-Haertung lud der GPT Index und `workflow.md`; kein 404 und kein Pages-Fallback. |
 | `validate_only` | PASS | `` | Run `30226964578`, gleicher modularer Payload wie beim Publish. |
 | `publish_preview` | PASS | `` | Run `30226994526`; Critical und UI-Stability Regression gruen. |
-| `artifact_meta_html_apk` | PASS | `` | Artifact nicht abgelaufen, HTTP 200 fuer Meta und HTML, Preview-Index `latest`, APK vorhanden. |
+| `artifact_meta_html_apk` | PASS | `` | Artifact `8638851416` ist nicht abgelaufen, Meta und HTML liefern HTTP 200, APK ist vorhanden und der Preview-Index enthaelt den Request weiterhin. `latest` ist inzwischen bewusst die neuere Scanner-Preview. |
 | `browser_ui_repair` | PASS | `` | Zwei Spalten, sichtbarer Speichern-Bereich und funktionierender Save-Handler bei `1280x720`. |
 | `api35_emulator` | FAIL | `ci_tooling` | Preview sichtbar, aber reproduzierbare SystemUI-ANR; Emulator als lokales Pflicht-Gate verworfen. |
-| `max_physical_test_app` | PENDING | `` | Physische Test-App bleibt das verbindliche visuelle Freigabe-Gate. |
+| `max_physical_test_app` | PENDING | `` | Physische Sichtpruefung bleibt das verbindliche visuelle Freigabe-Gate. Der gemeinsame Test-App-Kanal bleibt fuer die neuere Scanner-Preview reserviert; die Editor-Preview wird nicht erneut als `latest` publiziert. |
 | `admin_beta_main_merge` | SKIP | `` | Korrekt bis Max' ausdruecklicher Test-App-Freigabe gesperrt. |
+
+## Second-Brain Abschluss-E2E 2026-07-27
+
+| Check | Status | Fehlerklasse | Notiz |
+| --- | --- | --- | --- |
+| `memory-safe-auto-update` | PASS | `` | Validate Run `30228048653` (`would_apply`) und identischer Apply Run `30228070276`; Artifacts `8639140050` und `8639146345`. |
+| `memory-no-change-round-1` | PASS | `` | Run `30248021261`, Artifact `8645791710`, `no_change`; kein Apply oder Commit. |
+| `memory-conflict-round-1` | PASS | `` | Run `30248186183`, Artifact `8645859711`, `needs_approval`; alter und neuer Wert gezeigt, kein Write. |
+| `memory-private-unavailable-round-1` | PASS | `` | Kontrollierter HTTP-404-Fall stoppte als `stale_context`, ohne Action oder Pages-Fallback. |
+| `memory-no-change-round-2` | PASS | `` | Run `30248398075`, Artifact `8645940746`, `no_change`; kein Apply oder Commit. |
+| `memory-conflict-round-2` | PASS | `` | Run `30248548662`, Artifact `8645999614`, `needs_approval`; alter und neuer Wert gezeigt, kein Write. |
+| `memory-private-unavailable-round-2` | PASS | `` | Frischer GPT-Chat stoppte erneut als `stale_context`, ohne Action oder Fallback. |
+| `new_failure_class` | PASS | `` | Keine neue Fehlerklasse in der zweiten vollstaendigen Runde. |
 
 ## Akzeptanz
 

@@ -1,8 +1,8 @@
 # KGG Custom GPT Test Report
 
-Status: PENDING - 16 bestehende Browser-Promptklassen und Editor-Drift gruen; 4 echte Memory-Klassen warten auf den Manifest-PR
+Status: PASS - bestehende Browser-Promptklassen, Editor-Drift und alle 4 echten Memory-Klassen gruen; physische Test-App-Freigabe bleibt separates Release-Gate
 
-Testdatum: 2026-07-26
+Testdatum: 2026-07-27
 Testziel: Custom GPT `KGG Update-Agent` im Browser-Editor `g-6a45fba0f3408191ac1fb2c987a2e960`
 Geplanter kanonischer Editor-Bootstrap v2: maximal 4000 Zeichen.
 
@@ -27,10 +27,10 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | analysis-no-dispatch | PASS | Neuer Regressionstest nach Run `28853063310`: Analyse-/Warum-Fragen duerfen keinen Preview-Gate-Dispatch starten. Retest nach Instruction-Schaerfung: kein API-Aufruf. |
 | ci-tooling-pdftoppm | PASS | Browser-Test 2026-07-14: klassifiziert fehlendes `pdftoppm`/`poppler-utils` als `ci_tooling`; behauptet weder einen UI-Patchfehler noch einen gruenen App-Test. |
 | admin-beta-push-gate | PASS | Browser-Retest 2026-07-14: Erfolg erst bei gemergtem `[admin-beta]` PR, gruenen Required Checks, aktualisiertem `therapist-app/android_update_manifest.json` auf `main` und Admin-HTML HTTP 200. |
-| memory-safe-auto-update | PENDING | Deterministischer Vertragstest und echter Remote-Gate-Test sind gruen; der Custom-GPT-Dialogtest folgt nach Einspielen des API-Schemas und der privaten Repo-Berechtigung. |
-| memory-conflict-needs-approval | PENDING | Das Remote-Memory-Gate lieferte `needs_approval` und schrieb nichts; der Custom-GPT-Dialogtest folgt nach Einspielen des API-Schemas. |
-| memory-no-change | PENDING | Muss nach Editor-Sync den bestehenden `memory.storage`-Wert ohne Duplikat erkennen. |
-| memory-private-unavailable | PENDING | Muss bei privatem `404` stoppen und darf nicht auf GitHub Pages ausweichen. |
+| memory-safe-auto-update | PASS | Produktions-GPT: `validate_only` Run `30228048653` mit `would_apply`, danach identischer `apply` Run `30228070276`; append-only Record erstellt, Artifacts `8639140050` und `8639146345`. |
+| memory-conflict-needs-approval | PASS | Zwei frische Browserrunden: Runs `30248186183` und `30248548662` lieferten `needs_approval`, zeigten alten und neuen Wert und uebersprangen Apply/Commit; Artifacts `8645859711` und `8645999614`. |
+| memory-no-change | PASS | Zwei frische Browserrunden: Runs `30248021261` und `30248398075` lieferten `no_change`; kein Apply, Commit oder neuer Record; Artifacts `8645791710` und `8645940746`. |
+| memory-private-unavailable | PASS | Zwei kontrollierte Browser-404-Faelle stoppten als `stale_context`, ohne Action, Pages-/Knowledge-Fallback, geratenen Wert oder Write. |
 | editor-resource-drift | PASS | Browser-Test 2026-07-26: Der gespeicherte Bootstrap v2 lud den alten Live-Manifeststand, erkannte fehlende v2-Bootstrapfelder als `stale_context` und stoppte ohne Preview- oder Memory-Write. |
 | natural-language-ui-understanding | PASS | Browser-Test 2026-07-26: Trotz Tippfehlern trennte der GPT Plus/Minus als reine UI-Skalierung und Drag als reine Spaltenbreite, stellte keine Rueckfrage und fuehrte keinen Write aus. |
 | natural-language-one-clarification | PASS | Browser-Test 2026-07-26: Der GPT fragte genau einmal nach dem gemeinten markierten Ziel und erkannte nach `der obere bei Basisdaten` den Bereich ohne zweite Rueckfrage oder Write. |
@@ -86,7 +86,7 @@ Canary note: The GPT dispatched `validate_only` first, then dispatched `publish_
 - Beide gespeicherten Action-Texte stimmen nach Reload bytegenau mit ihren Repo-Dateien ueberein.
 - Die bestehende API-Key-Authentifizierung blieb erhalten; es wurde kein Token ersetzt oder im Chat offengelegt.
 - Der erste Pflichtstart las den noch alten Manifest-/Playbookstand von `main`, meldete korrekt `stale_context` und fuehrte keinen Write aus.
-- Die vier echten Memory-Dialogklassen bleiben bis zum Merge des Ressourcenmanifest-PRs `PENDING`; ein Test gegen absichtlich veraltetes Live-Main waere kein gueltiger Memory-E2E-Nachweis.
+- Nach dem Live-Manifest-Sync bestanden alle vier echten Memory-Dialogklassen in zwei frischen GPT-Runden. Die Run- und Artifact-Nachweise stehen im Abschnitt `Second-Brain Abschluss-E2E`.
 
 ## Produktions-GPT Preview-E2E 2026-07-27
 
@@ -94,11 +94,29 @@ Canary note: The GPT dispatched `validate_only` first, then dispatched `publish_
 - Bootstrap, Playbook, Action-Schema und Regressionstest verlangen jetzt explizit den Basename. Der Editor-Bootstrap und die API-Action wurden gespeichert; der identische Testprompt lud danach Index und Workflow-Pack erfolgreich.
 - Der Produktions-GPT erzeugte einen modularen v2-Payload ohne Repository-Pfad und dispatchte erst `validate_only`, Run `30226964578`. Erst nach `conclusion: success` folgte der identische `publish_preview`, Run `30226994526`.
 - Im Publish-Run waren Preflight, guarded Apply, Critical, komplette UI-Stability Regression, Preview-APK-Build, Artifact-Upload und Preview-Channel-Publish gruen. PR- und Admin-Beta-Schritte wurden korrekt uebersprungen.
-- Artifact `kgg-preview-kgg-tablet-editor-two-column-footer-20260727-a` ist vorhanden und nicht abgelaufen. `meta.json` und Admin-HTML liefern HTTP 200; der Preview-Index zeigt den Request als `latest`.
+- Artifact `kgg-preview-kgg-tablet-editor-two-column-footer-20260727-a` (`8638851416`) ist vorhanden und nicht abgelaufen. `meta.json` und Admin-HTML liefern HTTP 200; der Preview-Index enthaelt den Request weiterhin. `latest` ist inzwischen bewusst die neuere Scanner-Preview `kgg-v061-combo-camera-scanner`.
 - HTML-SHA-256: `4311bb2973da0d92f4f2e490ad82cae19eda987730f3fdf6f98e3c1e8d343df6`. Preview-APK-SHA-256: `334c8c9b7318afb66277acfa9b49dde9877cfad6a257292c073864adacce199c`.
 - Der Browser-Simulator bestaetigte bei `1280x720`: `display:grid`, zwei Spalten `504.35 px / 429.65 px`, vollstaendig sichtbarer Speichern-Button und funktionierender bestehender Save-Handler.
 - Der API-35-Emulator installierte und startete die neue Preview; Banner und App-Inhalt waren sichtbar. Wegen reproduzierbarer `System UI isn't responding`-ANR gilt der Emulatorlauf dennoch als `ci_tooling`-FAIL. Der Probe-Runner wertet SystemUI-ANR, leeren UI-Baum und fehlenden Marker nun zwingend als Fehler.
-- Max' Sichtpruefung in der physischen Test-App bleibt `PENDING`. Kein PR, `publish_admin_beta`, Merge oder Main-Update wurde ausgeloest.
+- Max' physische Sichtpruefung der Editor-Preview bleibt `PENDING`. Der gemeinsame Test-App-Kanal bleibt fuer die neuere Scanner-Preview reserviert und wird nicht ueberschrieben. Kein `publish_admin_beta`, Merge oder Main-Update wurde ausgeloest.
+
+## Second-Brain Abschluss-E2E 2026-07-27
+
+| Runde | Test | Run | Ergebnis | Artifact | Write |
+| --- | --- | ---: | --- | ---: | --- |
+| Vorlauf | bestaetigte neue Regel validieren | `30228048653` | `would_apply` | `8639140050` | Nein |
+| Vorlauf | identischen Payload anwenden | `30228070276` | `applied` | `8639146345` | Ein append-only Record |
+| 1 | Idempotenz | `30248021261` | `no_change` | `8645791710` | Nein |
+| 1 | Konflikt | `30248186183` | `needs_approval` | `8645859711` | Nein |
+| 1 | kontrollierter Memory-404 | - | `stale_context` | - | Keine Action |
+| 2 | Idempotenz | `30248398075` | `no_change` | `8645940746` | Nein |
+| 2 | Konflikt | `30248548662` | `needs_approval` | `8645999614` | Nein |
+| 2 | kontrollierter Memory-404 | - | `stale_context` | - | Keine Action |
+
+Beide Abschlussrunden liefen in frischen GPT-Chats mit `GPT-5.6 Thinking`.
+Jede Runde lud Ressourcenmanifest, Live-Kontext, Playbook, Memory-Index und
+genau `workflow.md`. Es gab keine neue Fehlerklasse, keinen Pages-Fallback,
+keine App-Preview und keinen unbeabsichtigten Memory-Write.
 
 ## Blinder Mockup-Test 2026-07-26
 
@@ -126,7 +144,7 @@ Canary note: The GPT dispatched `validate_only` first, then dispatched `publish_
 - Neuester sicher erzeugter Modulpfad: `kgg-update/src/patches/v061-gpt-test-app-canary-round-2.html`.
 - Das Gate erzeugte `parts.json`, `requiredPatchIds`, `version.json` und `kgg-update/index.html`; der GPT lieferte nur `patch_content` und Metadaten.
 - Artifact `8304658462`, Name `kgg-preview-modular-gpt-canary-20260714-b`, ist vorhanden und nicht abgelaufen.
-- `meta.json`, Admin-HTML und Preview-Index liefern HTTP 200. Der Index zeigt `modular-gpt-canary-20260714-b` als `latest`; HTML enthaelt `TEST-2`, `data-kgg-gpt-canary` und Patch-ID.
+- `meta.json`, Admin-HTML und Preview-Index liefern HTTP 200. Beim Abschluss dieser Canary-Runde zeigte der Index `modular-gpt-canary-20260714-b` als `latest`; inzwischen ist `kgg-v061-combo-camera-scanner` der aktuelle Test-App-Stand. Das Canary-HTML enthaelt weiterhin `TEST-2`, `data-kgg-gpt-canary` und Patch-ID.
 - Der schlanke AVD `KGG_Lite_API35` installierte und startete `de.kgg.preview/de.kgg.app.MainActivity`. Nach einmaligem Wegklicken eines Emulator-SystemUI-Dialogs war der kontrollierte Wiederholungslauf gruen: sichtbarer Marker, Screenshot nicht schwarz, kein App-Crash und kein weiterer SystemUI-Dialog.
 - Max' Sichtpruefung auf dem echten Handy bleibt `PENDING`. Deshalb wurden weder `publish_admin_beta` noch PR oder Merge nach `main` ausgefuehrt.
 
