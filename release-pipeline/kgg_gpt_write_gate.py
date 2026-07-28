@@ -12,6 +12,7 @@ import subprocess
 import sys
 import time
 from datetime import datetime, timezone
+from html import escape as escape_html
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -267,13 +268,20 @@ def apply_planned(planned: dict[Path, bytes]) -> None:
 def inject_preview_banner(html: str, payload: dict[str, Any], digest: str) -> str:
     request_id = payload["request_id"]
     summary = clean_ascii(str(payload.get("summary") or payload.get("title") or request_id), request_id, 180)
+    identity = escape_html(f"KGG Preview | {request_id} | {digest[:12]} | {summary}", quote=True)
     banner = (
-        '<div id="kgg-gpt-preview-banner" aria-label="KGG Preview-Kennung" '
-        'style="position:fixed;top:8px;right:8px;z-index:999999;pointer-events:none;'
-        'max-width:min(420px,calc(100vw - 16px));overflow:hidden;text-overflow:ellipsis;'
-        'white-space:nowrap;background:#111827;color:#fff;padding:6px 9px;border-radius:6px;'
-        'font:11px/1.2 system-ui;box-shadow:0 2px 10px rgba(0,0,0,.22);opacity:.92">'
-        f'KGG PREVIEW | {request_id} | {digest[:12]} | {summary}'
+        f'<div id="kgg-gpt-preview-banner" aria-label="{identity}" title="{identity}" '
+        'style="position:fixed!important;top:4px!important;right:4px!important;bottom:auto!important;'
+        'left:auto!important;z-index:999999!important;pointer-events:none!important;'
+        'display:block!important;box-sizing:border-box!important;width:64px!important;'
+        'min-width:64px!important;max-width:64px!important;height:18px!important;'
+        'min-height:18px!important;max-height:18px!important;overflow:hidden!important;'
+        'white-space:nowrap!important;text-align:center!important;writing-mode:horizontal-tb!important;'
+        'background:#111827!important;color:#fff!important;padding:3px 4px!important;'
+        'border:0!important;border-radius:4px!important;font:700 9px/12px system-ui!important;'
+        'letter-spacing:0!important;text-transform:none!important;-webkit-text-size-adjust:none!important;'
+        'text-size-adjust:none!important;box-shadow:0 1px 4px rgba(0,0,0,.22)!important;'
+        'opacity:.88!important;contain:layout paint style!important">KGG TEST'
         "</div>"
     )
     if 'id="kgg-gpt-preview-banner"' in html:
