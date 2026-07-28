@@ -1,0 +1,16 @@
+{
+  "kind": "kgg_gpt_preview",
+  "requestId": "kgg-v061-combo-camera-scanner-normal-1x",
+  "patchHash": "0e899fd2c1137f36eeb45545d02a509e6c08f18106c7375f806fd7e99098021b",
+  "baseSha": "15e39b2e23a7acf65588939fecacfaae971ab514",
+  "baseVersionCode": 61,
+  "rolloutCode": 1785252355,
+  "title": "Kombi-Kamera startet normal bei 1x",
+  "summary": "Behebt den optisch starken Startzoom der Test-App-Kamera: Das vollstndige Kamerabild bleibt sichtbar und ein untersttzter Kamera-Track wird auf 1x gesetzt; QR-Automatik und manueller Auslser bleiben erhalten.",
+  "patchId": "kgg-v061-combo-camera-normal-1x",
+  "patchFile": "patches/v061-combo-camera-normal-1x.html",
+  "versionName": "1.0.61-combo-camera-normal-1x",
+  "createdAt": "2026-07-28T15:25:55Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v061-combo-camera-scanner-normal-1x/admin.html",
+  "sha256": "43bb3eef14e16dcc719097df2d9fba78b8a87c8891b0ddac22e111f43963bfc7"
+}
