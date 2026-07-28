@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -157,15 +158,22 @@ def run_preview_banner_self_test() -> None:
         rendered,
         [
             'id="kgg-gpt-preview-banner"',
-            "position:fixed",
-            "pointer-events:none",
-            "white-space:nowrap",
-            "text-overflow:ellipsis",
+            'aria-label="KGG Preview | preview-banner-self-test | aaaaaaaaaaaa |',
+            "position:fixed!important",
+            "pointer-events:none!important",
+            "width:64px!important",
+            "height:18px!important",
+            "white-space:nowrap!important",
+            "-webkit-text-size-adjust:none!important",
+            ">KGG TEST</div>",
         ],
-        "non-blocking preview banner",
+        "compact non-blocking preview badge",
     )
     if "position:sticky" in rendered:
         fail("preview banner must not participate in the app flex layout")
+    visible = re.search(r'id="kgg-gpt-preview-banner"[^>]*>([^<]*)</div>', rendered)
+    if visible is None or visible.group(1) != "KGG TEST":
+        fail("preview badge must not render request metadata in the mobile viewport")
     if rendered.count('id="kgg-gpt-preview-banner"') != 1:
         fail("preview banner must be injected exactly once")
 
