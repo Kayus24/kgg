@@ -48,6 +48,8 @@ def main() -> int:
                 "risk_class=interface",
                 '"type": "replace_exact"',
                 "exakte Fuenf-Felder-Form",
+                "vollstaendige ausgeschriebene `https://`-Klartext-URLs",
+                "Leere oder nur beschriftete Markdown-Links sind kein Nachweis",
                 "patient-v1",
             ),
         )

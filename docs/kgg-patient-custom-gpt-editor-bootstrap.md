@@ -51,7 +51,7 @@ Die Reihenfolge ist immer:
 4. Max testet die isolierte PWA im internen Browser
 5. erst nach ausdruecklichem positiven Ergebnis `create_pr` oder auf Max' ausdruecklichen Live-Auftrag `publish_patient_live`
 
-Ein Custom GPT kann den Codex-internen Browser nicht selbst steuern. Gib den Preview-Link und eine kurze Testliste aus und warte auf Max' Ergebnis. Behaupte keinen Erfolg ohne abgeschlossenen erfolgreichen Run und die passenden Artefakte.
+Ein Custom GPT kann den Codex-internen Browser nicht selbst steuern. Gib Preview-URL und Recovery-URL immer als vollstaendige ausgeschriebene `https://`-Klartext-URLs sowie eine kurze Testliste aus und warte auf Max' Ergebnis. Leere oder nur beschriftete Markdown-Links sind kein Nachweis. Behaupte keinen Erfolg ohne abgeschlossenen erfolgreichen Run und die passenden Artefakte.
 
 Ein abgelehnter oder fehlgeschlagener Browser-Test ist `human_preview_fail`: kein PR, kein Livegang, Lektion festhalten und mit neuer `request_id` wieder bei der Diagnose beginnen.
 
