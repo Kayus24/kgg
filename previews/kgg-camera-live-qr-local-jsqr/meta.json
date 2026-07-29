@@ -1,0 +1,16 @@
+{
+  "kind": "kgg_gpt_preview",
+  "requestId": "kgg-camera-live-qr-local-jsqr",
+  "patchHash": "2b0a08897b6babeefab60f3b10f07260314d22fb2dc1bf69b7b39234a0a330b4",
+  "baseSha": "a367c001c1c3db4a87652e36811a08a0b74ea870",
+  "baseVersionCode": 61,
+  "rolloutCode": 1785348854,
+  "title": "Kamera mit lokalem Live-QR wie Patienten-App",
+  "summary": "Die normale Kameravorschau behaelt den manuellen Ausloeser. Parallel prueft ein 200-ms-Live-Loop das sichtbare Videobild zuerst nativ und danach mit den bereits lokal vorhandenen jsQR-Funktionen und sechs rotierenden Can",
+  "patchId": "kgg-v061-camera-live-qr-local-jsqr",
+  "patchFile": "patches/v061-camera-live-qr-local-jsqr.html",
+  "versionName": "1.0.61-camera-live-qr-local-jsqr",
+  "createdAt": "2026-07-29T18:14:14Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-camera-live-qr-local-jsqr/admin.html",
+  "sha256": "31d13122858199cd2a58fbcdf3d220e9d7d164337a78983031df310d1bf02aeb"
+}
