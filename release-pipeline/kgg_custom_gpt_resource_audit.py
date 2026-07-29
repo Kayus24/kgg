@@ -112,7 +112,7 @@ def expected_manifest() -> dict[str, Any]:
         },
         "patientProduction": {
             "name": "KGG Patienten-App Update-Agent",
-            "profileVersion": "1.0.1",
+            "profileVersion": "1.0.2",
             "editorBootstrap": resource(PATIENT_BOOTSTRAP),
             "capabilities": {
                 "webSearch": True,

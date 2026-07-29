@@ -87,10 +87,10 @@
   },
   "patientProduction": {
     "name": "KGG Patienten-App Update-Agent",
-    "profileVersion": "1.0.1",
+    "profileVersion": "1.0.2",
     "editorBootstrap": {
       "path": "docs/kgg-patient-custom-gpt-editor-bootstrap.md",
-      "sha256": "046fd4f53c7563411b07f45cbff0035d1b0e622136733b38b6cd5946a049be2e"
+      "sha256": "80ed018603c5c2350a89fb1bd1c4f6eb8708cd87331f8b07270adecd859c4a2f"
     },
     "capabilities": {
       "webSearch": true,
