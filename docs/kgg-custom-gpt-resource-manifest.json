@@ -21,7 +21,7 @@
     "knowledge": [
       {
         "path": "docs/kgg-custom-gpt-knowledge-architecture.md",
-        "sha256": "5edb004357c8e4971ca36a66c688ceec6db43fe3080baf1c4941bac0fdd19ac1"
+        "sha256": "96ecb6c4837c721d4bf2ff24947f204ec6c200be104401a76278441e5c1e8ee8"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-operations.md",
@@ -29,7 +29,7 @@
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-safety.md",
-        "sha256": "0f4f93d1f0f258b136f2a7868913216c1eda0d3888967542030dc1fa2a4eb006"
+        "sha256": "6520de5a1372054a5095dd02579546f3938a9e7ed583b041286cbd5cc81948c6"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-testing.md",
