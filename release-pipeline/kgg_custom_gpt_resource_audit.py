@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -22,6 +23,19 @@ PRODUCTION_KNOWLEDGE = [
     "docs/kgg-custom-gpt-knowledge-testing.md",
 ]
 EVAL_KNOWLEDGE = ["docs/kgg-custom-gpt-eval-knowledge.md"]
+PATIENT_KNOWLEDGE = [
+    "docs/kgg-patient-custom-gpt-knowledge-architecture.md",
+    "docs/kgg-patient-custom-gpt-knowledge-operations.md",
+    "docs/kgg-patient-custom-gpt-knowledge-safety.md",
+    "docs/kgg-patient-custom-gpt-knowledge-testing.md",
+]
+PATIENT_ACTIONS = [
+    "docs/kgg-patient-custom-gpt-action-openapi.yaml",
+    "docs/kgg-patient-custom-gpt-action-api-openapi.yaml",
+]
+PATIENT_BOOTSTRAP = "docs/kgg-patient-custom-gpt-editor-bootstrap.md"
+PATIENT_EDITOR_SNAPSHOT = ROOT / "docs" / "kgg-patient-custom-gpt-editor-snapshot.json"
+CUSTOM_GPT_ACTION_LIMIT = 30
 
 
 class AuditError(RuntimeError):
@@ -46,7 +60,7 @@ def resource(path: str) -> dict[str, str]:
 
 def expected_manifest() -> dict[str, Any]:
     return {
-        "schema": 1,
+        "schema": 2,
         "modelPolicy": {
             "rule": "Use the highest model currently offered by the GPT editor that still supports Custom Actions.",
             "verifiedEditorModel": HIGHEST_ACTIONS_COMPATIBLE_MODEL,
@@ -96,6 +110,23 @@ def expected_manifest() -> dict[str, Any]:
                 "hidden evaluator assertions",
             ],
         },
+        "patientProduction": {
+            "name": "KGG Patienten-App Update-Agent",
+            "profileVersion": "1.0.0",
+            "editorBootstrap": resource(PATIENT_BOOTSTRAP),
+            "capabilities": {
+                "webSearch": True,
+                "codeInterpreter": True,
+                "imageGeneration": False,
+                "canvas": False,
+                "apps": False,
+                "actions": True,
+            },
+            "knowledge": [resource(path) for path in PATIENT_KNOWLEDGE],
+            "actions": [resource(path) for path in PATIENT_ACTIONS],
+            "freshness": "Live patient context, current source chunks and Preview evidence override static Knowledge.",
+            "visibility": "private",
+        },
         "officialReferences": [
             "https://help.openai.com/en/articles/8554397-creating-a-gpt",
             "https://help.openai.com/en/articles/8843948-knowledge-in-gpts",
@@ -115,6 +146,14 @@ def validate_snapshot(path: Path, profile: str) -> None:
     except Exception as exc:  # noqa: BLE001
         raise AuditError(f"cannot read editor snapshot: {exc}") from exc
     expected = expected_manifest()[profile]
+    if snapshot.get("profileVersion") != expected.get("profileVersion", snapshot.get("profileVersion")):
+        raise AuditError(f"{profile} profileVersion mismatch")
+    if expected.get("visibility") and snapshot.get("visibility") != expected["visibility"]:
+        raise AuditError(f"{profile} visibility mismatch")
+    if profile == "patientProduction" and not re.fullmatch(
+        r"g-[a-z0-9]{16,64}", str(snapshot.get("gptId") or "")
+    ):
+        raise AuditError("patientProduction GPT id is missing or invalid")
     if snapshot.get("model") != HIGHEST_ACTIONS_COMPATIBLE_MODEL:
         raise AuditError(f"{profile} GPT model is not {HIGHEST_ACTIONS_COMPATIBLE_MODEL}")
     for key, wanted in expected["capabilities"].items():
@@ -124,6 +163,13 @@ def validate_snapshot(path: Path, profile: str) -> None:
     actual_hashes = set(snapshot.get("knowledgeSha256", []))
     if expected_hashes != actual_hashes:
         raise AuditError(f"{profile} Knowledge digest mismatch")
+    expected_action_hashes = {item["sha256"] for item in expected["actions"]}
+    actual_action_hashes = set(snapshot.get("actionSha256", []))
+    if expected_action_hashes != actual_action_hashes:
+        raise AuditError(f"{profile} Action digest mismatch")
+    if expected.get("editorBootstrap"):
+        if snapshot.get("instructionsSha256") != expected["editorBootstrap"]["sha256"]:
+            raise AuditError(f"{profile} editor Instructions digest mismatch")
 
 
 def self_test() -> None:
@@ -136,10 +182,29 @@ def self_test() -> None:
         raise AuditError("Canvas must stay disabled for the selected GPT model")
     if manifest["eval"]["capabilities"]["webSearch"]:
         raise AuditError("Eval GPT Web Search would compromise blind testing")
+    if manifest["patientProduction"]["capabilities"]["apps"]:
+        raise AuditError("patientProduction Apps must stay disabled because Custom Actions are required")
+    if manifest["patientProduction"]["capabilities"]["imageGeneration"]:
+        raise AuditError("patientProduction does not need Image Generation")
+    if manifest["patientProduction"]["visibility"] != "private":
+        raise AuditError("patientProduction must remain private")
+    for label, path in [
+        ("patient raw", PATIENT_ACTIONS[0]),
+        ("patient api", PATIENT_ACTIONS[1]),
+    ]:
+        schema = (ROOT / path).read_text(encoding="utf-8")
+        operations = len(re.findall(r"^\s+operationId:\s+\S+\s*$", schema, re.MULTILINE))
+        if operations > CUSTOM_GPT_ACTION_LIMIT:
+            raise AuditError(
+                f"{label} Action exposes {operations} operations; limit is {CUSTOM_GPT_ACTION_LIMIT}"
+            )
     production = {item["sha256"] for item in manifest["production"]["knowledge"]}
     evaluation = {item["sha256"] for item in manifest["eval"]["knowledge"]}
     if production.intersection(evaluation):
         raise AuditError("Eval and production Knowledge must be separated")
+    patient = {item["sha256"] for item in manifest["patientProduction"]["knowledge"]}
+    if patient.intersection(evaluation):
+        raise AuditError("Patient and Eval Knowledge must be separated")
 
 
 def main() -> int:
@@ -149,7 +214,7 @@ def main() -> int:
     mode.add_argument("--check", action="store_true")
     mode.add_argument("--self-test", action="store_true")
     parser.add_argument("--editor-snapshot", type=Path)
-    parser.add_argument("--profile", choices=["production", "eval"])
+    parser.add_argument("--profile", choices=["production", "eval", "patientProduction"])
     args = parser.parse_args()
     try:
         self_test()
@@ -166,6 +231,8 @@ def main() -> int:
             if not args.profile:
                 raise AuditError("--profile is required with --editor-snapshot")
             validate_snapshot(args.editor_snapshot, args.profile)
+        elif PATIENT_EDITOR_SNAPSHOT.exists():
+            validate_snapshot(PATIENT_EDITOR_SNAPSHOT, "patientProduction")
         print(json.dumps({"status": "PASS", "manifest": str(OUTPUT.relative_to(ROOT))}))
         return 0
     except Exception as exc:  # noqa: BLE001

@@ -33,9 +33,14 @@ def forbid(text: str, *fragments: str) -> None:
 
 def validate_html() -> None:
     html = HTML_PATH.read_text(encoding="utf-8")
+    worker = WORKER_PATH.read_text(encoding="utf-8")
+    version_match = re.search(r"const APP_VERSION = '([0-9]+)';", worker)
+    if not version_match:
+        fail("service-worker.js has no numeric APP_VERSION")
+    version = version_match.group(1)
     require(
         html,
-        "const RELEASE='69';",
+        f"const RELEASE='{version}';",
         "const CACHE_PREFIX='kgg-handyplan-';",
         "navigator.serviceWorker.getRegistrations()",
         "registration.unregister()",
@@ -80,10 +85,14 @@ def validate_html() -> None:
 
 def validate_worker() -> None:
     worker = WORKER_PATH.read_text(encoding="utf-8")
+    version_match = re.search(r"const APP_VERSION = '([0-9]+)';", worker)
+    if not version_match:
+        fail("service-worker.js has no numeric APP_VERSION")
+    version = version_match.group(1)
     require(
         worker,
-        "kgg-handyplan-v69-update-recovery",
-        "const APP_VERSION = '69';",
+        f"kgg-handyplan-v{version}-",
+        f"const APP_VERSION = '{version}';",
         "const RECOVERY_PATH = './update-recovery.html';",
         "GET_UPDATE_DIAGNOSTICS",
         "recoveryPath:RECOVERY_PATH",
