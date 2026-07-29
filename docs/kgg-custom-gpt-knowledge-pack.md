@@ -2,7 +2,7 @@
 
 This generated compatibility pack contains the complete production knowledge set. Prefer the four smaller curated packs in the GPT editor so retrieval stays focused.
 
-Source digest: `d56937b40242a4d0`
+Source digest: `9483b882ff55288f`
 
 ## Usage Rules
 
@@ -252,6 +252,7 @@ Wenn Max oder ein alter Handoff einen v1-Payload zeigt, nicht dispatchen. Erklae
 ## Guardrails
 
 - Keine Erfolgsmeldung ohne Run-ID, `conclusion: success`, Artefakt, `meta.json`, HTML und Test-App/Test-APK/Preview-APK-Nachweis.
+- Ein Fix in einem offenen PR oder Arbeitsbranch ist nicht produktiv. Vor jeder Preview-Erfolgsmeldung muessen Workflow-`headSha` und Preview-`baseSha` den tatsaechlich verwendeten Default-Branch-Stand belegen.
 - Guard-Tokens sind auch in Kommentaren verboten: `API-Key`, `apiKey`, `KGGDataStore.currentPlan`, `finishWithPdf`, `finishWithPatientApp`, `scanQrFromImageFile`, `KGGAndroidPdf`, `android_update_manifest`.
 - Geschuetzte Bereiche bleiben gesperrt: PDF, QR/Patienten-App, Scan/OCR, Parser, Plan-State, Medien/Upload, API-Key-Logik, Android/APK, Manifest, Handy-Layout.
 - `ci_tooling` getrennt behandeln: `pdftoppm`, `pdfinfo`, `poppler-utils`, `adb` oder Emulatorfehler sind kein Beweis fuer einen App-Patchfehler.
@@ -452,13 +453,14 @@ Canonical order: `dispatch -> run status -> logs -> tests -> artifact -> meta ->
 5. If validation succeeds, dispatch `publish_preview`.
 6. Use `listKggPreviewGateRuns` and the workflow run name/request id to find the GitHub run.
 7. Use `getKggPreviewGateRun` until `status` is `completed`.
-8. If the run fails, use `getKggPreviewGateJobs` and report the failed job/step and exact visible error context.
-9. If the run succeeds, verify artifact, `meta.json` and HTML URL.
-10. If the request targets the Test-APK, verify that the Preview/Test-APK channel is updated.
-11. Tell Max that the Preview/Test-APK is ready for his review.
-12. If Max rejects the Test-APK result, document `human_preview_fail`, add/update the regression fixture and restart at `validate_only`.
-13. Use `create_pr` only after Max explicitly accepts the same Preview and only a PR is requested.
-14. Use `publish_admin_beta` only when Max explicitly wants a real Haupt-App/Admin-Beta push. Success requires a merged `[admin-beta]` PR, updated `android_update_manifest.json` on `main`, and HTTP 200 for the new Admin HTML.
+8. Verify that run `headSha` and Preview `baseSha` contain the expected Default-Branch fix. An open PR is not production evidence.
+9. If the run fails, use `getKggPreviewGateJobs` and report the failed job/step and exact visible error context.
+10. If the run succeeds, verify artifact, `meta.json` and HTML URL.
+11. If the request targets the Test-APK, verify that the Preview/Test-APK channel is updated.
+12. Tell Max that the Preview/Test-APK is ready for his review.
+13. If Max rejects the Test-APK result, document `human_preview_fail`, add/update the regression fixture and restart at `validate_only`.
+14. Use `create_pr` only after Max explicitly accepts the same Preview and only a PR is requested.
+15. Use `publish_admin_beta` only when Max explicitly wants a real Haupt-App/Admin-Beta push. Success requires a merged `[admin-beta]` PR, updated `android_update_manifest.json` on `main`, and HTTP 200 for the new Admin HTML.
 
 ## Required verified fields
 
@@ -1281,6 +1283,14 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Lesson: Der Custom GPT kann bei Preview-/Beta-Anfragen plausibel antworten, obwohl der GitHub-Run bereits fehlgeschlagen ist. Ein konkreter Fehler war: Die Antwort deutete einen fehlenden Preview-Manifest-Eintrag als "noch nicht veroeffentlicht", obwohl `Apply guarded GPT payload` rot war. Beim Tablet-Layout vermischt der GPT leicht zwei Bedienkonzepte: das alte Sca
 - Caution: - App-Feature-Code - PDF - QR/Patienten-App - Scan/OCR - Parser - Plan-State - Medien/Upload - Android/APK, ausser Max fragt explizit danach - PDF - QR/Patienten-App - Scan/OCR - Parser - Plan-State - Medien/Upload - Android/APK - GitHub Manifest - Handy-Layout
 - Tests: - Payload mit geschuetztem Token im Patch-Kommentar wird im Preflight geblockt. - GPT-Eval `failed-preview-run` verlangt den echten roten Step. - GPT-Eval `protected-token-payload` verlangt Stop vor Dispatch. - UI-Stability-Probe `tablet-splitter-scale-drag` prueft die konkrete Bedienlogik. - GPT-Eval `tablet-splitter` muss die richtigen Klassen, Variablen u
+
+### 2026-07-29 - Preview-Marker und Default-Branch-Drift
+
+- Source: `docs/bug-debug/2026-07-29-preview-marker-default-branch-drift.md`
+- Areas: debug, modal, parser-textblocks, pdf, phone-layout, qr-patient, scan-camera, tablet-layout
+- Lesson: Die KGG Test-App zeigte erneut einen schwarzen, vollhohen Balken mit kompletter Preview-Beschreibung. Der Balken verschob die eigentliche App und schnitt Bedienelemente am linken Rand an, obwohl ein kompakter Marker bereits auf einem offenen Arbeitsbranch implementiert und getestet war.
+- Caution: - Admin- und Kolleg:innen-HTML - PDF - QR/Patienten-App - Scan/OCR - Parser - Plan-State - Medien/Upload - Android- und Admin-Manifest
+- Tests: - Ein altes Sticky-Banner wird ersetzt und nicht dupliziert. - Der eingeklappte Marker ist hoechstens 92 x 24 CSS-Pixel gross. - App-Geometrie und horizontaler Overflow bleiben mit und ohne Marker identisch. - Menue, Scanner und Dock bleiben bei geschlossenem Marker anklickbar. - Details oeffnen und schliessen per Toggle, Aussenklick und Escape. - Viewports:
 
 ### Debug JSON Seite
 

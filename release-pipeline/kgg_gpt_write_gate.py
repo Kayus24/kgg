@@ -27,6 +27,8 @@ SOURCE_PATH = ROOT / "kgg-update" / "index.html"
 VERSION_PATH = ROOT / "kgg-update" / "version.json"
 PREVIEW_BASE_URL = "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews"
 PREVIEW_INDEX = "previews/index.json"
+PREVIEW_MARKER_START = "<!-- KGG_PREVIEW_MARKER_START -->"
+PREVIEW_MARKER_END = "<!-- KGG_PREVIEW_MARKER_END -->"
 MAX_PAYLOAD_BYTES = 120_000
 MAX_CONTENT_BYTES = 80_000
 
@@ -265,28 +267,90 @@ def apply_planned(planned: dict[Path, bytes]) -> None:
     builder.check(builder.DEFAULT_MANIFEST)
 
 
+def strip_preview_banner(html: str) -> str:
+    html = re.sub(
+        re.escape(PREVIEW_MARKER_START) + r".*?" + re.escape(PREVIEW_MARKER_END),
+        "",
+        html,
+        flags=re.I | re.S,
+    )
+    return re.sub(
+        r'\s*<div\b[^>]*\bid=(["\'])kgg-gpt-preview-banner\1[^>]*>.*?</div>',
+        "",
+        html,
+        flags=re.I | re.S,
+    )
+
+
 def inject_preview_banner(html: str, payload: dict[str, Any], digest: str) -> str:
     request_id = payload["request_id"]
-    summary = clean_ascii(str(payload.get("summary") or payload.get("title") or request_id), request_id, 180)
-    identity = escape_html(f"KGG Preview | {request_id} | {digest[:12]} | {summary}", quote=True)
+    title = clean_ascii(str(payload.get("title") or request_id), request_id, 120)
+    escaped_request = escape_html(request_id, quote=True)
+    escaped_title = escape_html(title, quote=True)
+    escaped_digest = escape_html(digest, quote=True)
+    short_digest = escaped_digest[:4]
     banner = (
-        f'<div id="kgg-gpt-preview-banner" aria-label="{identity}" title="{identity}" '
-        'style="position:fixed!important;top:4px!important;right:4px!important;bottom:auto!important;'
-        'left:auto!important;z-index:999999!important;pointer-events:none!important;'
-        'display:block!important;box-sizing:border-box!important;width:64px!important;'
-        'min-width:64px!important;max-width:64px!important;height:18px!important;'
-        'min-height:18px!important;max-height:18px!important;overflow:hidden!important;'
-        'white-space:nowrap!important;text-align:center!important;writing-mode:horizontal-tb!important;'
-        'background:#111827!important;color:#fff!important;padding:3px 4px!important;'
-        'border:0!important;border-radius:4px!important;font:700 9px/12px system-ui!important;'
-        'letter-spacing:0!important;text-transform:none!important;-webkit-text-size-adjust:none!important;'
-        'text-size-adjust:none!important;box-shadow:0 1px 4px rgba(0,0,0,.22)!important;'
-        'opacity:.88!important;contain:layout paint style!important">KGG TEST'
-        "</div>"
+        PREVIEW_MARKER_START
+        + "\n"
+        + '<div id="kgg-gpt-preview-banner" data-kgg-preview-marker="compact-v2" '
+        + 'style="all:initial!important;position:fixed!important;'
+        + 'top:max(6px,env(safe-area-inset-top,0px))!important;right:6px!important;'
+        + 'bottom:auto!important;left:auto!important;z-index:2147483000!important;'
+        + 'display:block!important;box-sizing:border-box!important;width:92px!important;'
+        + 'min-width:92px!important;max-width:92px!important;height:24px!important;'
+        + 'min-height:24px!important;max-height:24px!important;overflow:visible!important;'
+        + 'pointer-events:none!important;contain:layout style!important">'
+        + '<button id="kgg-gpt-preview-toggle" type="button" '
+        + 'aria-controls="kgg-gpt-preview-details" aria-expanded="false" '
+        + f'aria-label="KGG Test-Preview {short_digest}; Details anzeigen" '
+        + 'style="all:initial!important;display:flex!important;box-sizing:border-box!important;'
+        + 'width:92px!important;min-width:92px!important;max-width:92px!important;'
+        + 'height:24px!important;min-height:24px!important;max-height:24px!important;'
+        + 'align-items:center!important;justify-content:center!important;overflow:hidden!important;'
+        + 'white-space:nowrap!important;background:#111827!important;color:#fff!important;'
+        + 'padding:0 6px!important;border:0!important;border-radius:5px!important;'
+        + 'font:700 10px/1 system-ui,sans-serif!important;letter-spacing:0!important;'
+        + 'text-transform:none!important;-webkit-text-size-adjust:none!important;'
+        + 'text-size-adjust:none!important;box-shadow:0 1px 4px rgba(0,0,0,.22)!important;'
+        + 'opacity:.9!important;cursor:pointer!important;pointer-events:auto!important">'
+        + f"TEST &middot; {short_digest}</button>"
+        + '<div id="kgg-gpt-preview-details" role="status" aria-live="polite" '
+        + 'style="all:initial!important;position:absolute!important;top:28px!important;right:0!important;'
+        + 'display:none!important;box-sizing:border-box!important;width:320px!important;'
+        + 'max-width:calc(100vw - 12px)!important;max-height:40vh!important;overflow:auto!important;'
+        + 'background:#111827!important;color:#fff!important;padding:10px!important;'
+        + 'border:1px solid rgba(255,255,255,.24)!important;border-radius:7px!important;'
+        + 'font:12px/1.35 system-ui,sans-serif!important;letter-spacing:0!important;'
+        + 'white-space:normal!important;overflow-wrap:anywhere!important;'
+        + 'box-shadow:0 4px 16px rgba(0,0,0,.28)!important;pointer-events:auto!important">'
+        + f'<strong style="all:initial!important;display:block!important;color:#fff!important;'
+        + f'font:700 12px/1.35 system-ui,sans-serif!important">{escaped_title}</strong>'
+        + f'<span style="all:initial!important;display:block!important;color:#dbeafe!important;'
+        + f'font:11px/1.35 ui-monospace,monospace!important;margin-top:6px!important">{escaped_request}</span>'
+        + f'<span style="all:initial!important;display:block!important;color:#cbd5e1!important;'
+        + f'font:10px/1.35 ui-monospace,monospace!important;margin-top:4px!important">{escaped_digest}</span>'
+        + "</div></div>"
+        + '<script id="kgg-gpt-preview-banner-script">(function(){"use strict";'
+        + 'var marker=document.getElementById("kgg-gpt-preview-banner");'
+        + 'var toggle=document.getElementById("kgg-gpt-preview-toggle");'
+        + 'var details=document.getElementById("kgg-gpt-preview-details");'
+        + 'if(!marker||!toggle||!details)return;'
+        + 'function setOpen(open){marker.dataset.open=open?"1":"0";'
+        + 'toggle.setAttribute("aria-expanded",open?"true":"false");'
+        + 'details.style.setProperty("display",open?"block":"none","important");}'
+        + 'toggle.addEventListener("click",function(){setOpen(marker.dataset.open!=="1");});'
+        + 'document.addEventListener("pointerdown",function(event){'
+        + 'if(marker.dataset.open==="1"&&!marker.contains(event.target))setOpen(false);},true);'
+        + 'document.addEventListener("keydown",function(event){'
+        + 'if(event.key==="Escape"&&marker.dataset.open==="1"){setOpen(false);toggle.focus();}});'
+        + "setOpen(false);})();</script>\n"
+        + PREVIEW_MARKER_END
     )
-    if 'id="kgg-gpt-preview-banner"' in html:
-        return html
-    return re.sub(r"(<body[^>]*>)", r"\1\n" + banner, html, count=1, flags=re.I)
+    clean_html = strip_preview_banner(html)
+    rendered, count = re.subn(r"(<body[^>]*>)", r"\1\n" + banner, clean_html, count=1, flags=re.I)
+    if count != 1:
+        fail("Preview HTML is missing a body element for the marker.")
+    return rendered
 
 
 def write_preview(preview_root: Path, html: str, payload: dict[str, Any], digest: str, report: dict[str, Any]) -> dict[str, Any]:

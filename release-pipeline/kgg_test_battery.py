@@ -162,6 +162,55 @@ def run_ui_contract() -> None:
     run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "node", "release-pipeline/kgg_ui_contract_smoke.js"])
 
 
+def run_preview_marker_browser() -> None:
+    log("== KGG Preview marker browser contract ==")
+    npm = npm_executable()
+    if not npm:
+        raise BatteryError("npm is required for the Preview marker browser contract.")
+    ensure_playwright_prepared(npm)
+    sys.path.insert(0, str(ROOT / "release-pipeline"))
+    import kgg_gpt_write_gate as write_gate  # noqa: PLC0415
+
+    source = """<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+html,body{margin:0;width:100%;min-height:100%;overflow-x:hidden}
+#fixture-app{box-sizing:border-box;width:100vw;min-height:100vh;display:flex;flex-direction:column;padding:64px 16px 80px;background:#eef4fb}
+#menu{align-self:flex-start}#scanner{position:fixed;left:16px;bottom:16px}#dock{position:fixed;right:16px;bottom:16px}
+</style></head><body>
+<div id="kgg-gpt-preview-banner" style="position:sticky;top:0;width:156px">KGG PREVIEW | stale full banner</div>
+<main id="fixture-app"><button id="menu">Menu</button><button id="scanner">Scannen</button><button id="dock">Dock</button></main>
+<script>
+for(const id of ["menu","scanner","dock"]){
+  const node=document.getElementById(id);
+  node.dataset.clicks="0";
+  node.addEventListener("click",()=>{node.dataset.clicks=String(Number(node.dataset.clicks||0)+1);});
+}
+</script></body></html>"""
+    payload = {
+        "request_id": "preview-marker-browser-fixture",
+        "title": "Preview marker browser fixture",
+        "summary": "Geometry and interaction fixture.",
+    }
+    rendered = write_gate.inject_preview_banner(source, payload, "a" * 64)
+    fixture_dir = ROOT / "tmp" / "kgg-preview-marker"
+    fixture_dir.mkdir(parents=True, exist_ok=True)
+    fixture_path = fixture_dir / "fixture.html"
+    fixture_path.write_text(rendered, encoding="utf-8", newline="\n")
+    run(
+        [
+            npm,
+            "exec",
+            "--yes",
+            "--package=playwright@1.61.1",
+            "--",
+            "node",
+            "release-pipeline/kgg_preview_marker_smoke.js",
+            str(fixture_path),
+        ]
+    )
+
+
 def run_selftest_gate_tests() -> None:
     log("== KGG transactional build-gate tests ==")
     run([sys.executable, "release-pipeline/test_kgg_selftest_build.py"])
@@ -593,6 +642,13 @@ TEST_REGISTRY = [
         "suite": "ui-stability",
         "reason": "Required functions and UI controls must remain present, usable and inside phone/tablet viewports.",
         "run": run_ui_contract,
+    },
+    {
+        "id": "ui-preview-marker",
+        "level": "regression",
+        "suite": "ui-stability",
+        "reason": "The Preview identity marker must stay compact, identifiable and outside the app layout at phone and tablet sizes.",
+        "run": run_preview_marker_browser,
     },
     {
         "id": "ui-bank-thumbnails",

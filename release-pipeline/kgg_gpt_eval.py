@@ -149,33 +149,56 @@ def run_validate_only_self_test() -> None:
 def run_preview_banner_self_test() -> None:
     payload = {
         "request_id": "preview-banner-self-test",
-        "title": "Preview banner self-test",
-        "summary": "The marker must not enter the app flex layout or block its controls.",
+        "title": "Preview marker self-test",
+        "summary": "The marker must identify the loaded Preview without entering the app layout.",
     }
-    source = '<!doctype html><html><body style="display:flex"><button id="menu">Menu</button></body></html>'
-    rendered = write_gate.inject_preview_banner(source, payload, "a" * 64)
+    legacy = (
+        '<!doctype html><html><body style="display:flex">'
+        '<div id="kgg-gpt-preview-banner" style="position:sticky">KGG PREVIEW | old full-width banner</div>'
+        '<button id="menu">Menu</button></body></html>'
+    )
+    digest = "a" * 64
+    rendered = write_gate.inject_preview_banner(legacy, payload, digest)
     require_all(
         rendered,
         [
+            write_gate.PREVIEW_MARKER_START,
+            write_gate.PREVIEW_MARKER_END,
             'id="kgg-gpt-preview-banner"',
-            'aria-label="KGG Preview | preview-banner-self-test | aaaaaaaaaaaa |',
+            'data-kgg-preview-marker="compact-v2"',
             "position:fixed!important",
             "pointer-events:none!important",
-            "width:64px!important",
-            "height:18px!important",
-            "white-space:nowrap!important",
-            "-webkit-text-size-adjust:none!important",
-            ">KGG TEST</div>",
+            "width:92px!important",
+            "height:24px!important",
+            'id="kgg-gpt-preview-toggle"',
+            "TEST &middot; aaaa",
+            'id="kgg-gpt-preview-details"',
+            "preview-banner-self-test",
+            digest,
         ],
-        "compact non-blocking preview badge",
+        "compact identifiable Preview marker",
     )
-    if "position:sticky" in rendered:
-        fail("preview banner must not participate in the app flex layout")
-    visible = re.search(r'id="kgg-gpt-preview-banner"[^>]*>([^<]*)</div>', rendered)
-    if visible is None or visible.group(1) != "KGG TEST":
-        fail("preview badge must not render request metadata in the mobile viewport")
+    if "position:sticky" in rendered or "old full-width banner" in rendered:
+        fail("legacy Preview banner must be replaced, not preserved")
     if rendered.count('id="kgg-gpt-preview-banner"') != 1:
-        fail("preview banner must be injected exactly once")
+        fail("Preview marker must be injected exactly once")
+    visible = re.search(r'id="kgg-gpt-preview-toggle"[^>]*>([^<]*)</button>', rendered)
+    if visible is None or visible.group(1) != "TEST &middot; aaaa":
+        fail("collapsed Preview marker must contain only the compact identifier")
+
+    replaced = write_gate.inject_preview_banner(rendered, payload, "b" * 64)
+    if replaced.count('id="kgg-gpt-preview-banner"') != 1:
+        fail("reinjection must replace the owned Preview marker without duplication")
+    if digest in replaced or "TEST &middot; aaaa" in replaced or "position:sticky" in replaced:
+        fail("reinjection left stale Preview identity or legacy layout CSS")
+    require_all(replaced, ["TEST &middot; bbbb", "b" * 64], "refreshed Preview identity")
+
+    try:
+        write_gate.inject_preview_banner("<html><div>missing body</div></html>", payload, digest)
+    except write_gate.GateError:
+        pass
+    else:
+        fail("Preview marker injection must reject HTML without a body")
 
 
 def run_modular_rollback_self_test() -> None:
