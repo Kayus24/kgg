@@ -20,6 +20,7 @@
 - Ein zunächst erwogener großer Kompatibilitätslayer direkt in `index.html` hätte zu hohe Kopplung und eine schwer prüfbare Initialisierungsreihenfolge erzeugt.
 - Ein reiner `ph()`-Hotfix wäre unvollständig: keine verlässliche Legacy-Migration, kein Exercise-Remapping und keine sichere Mehrplan-/Löschisolation.
 - Im ersten lokalen Regressionstest war Fall 9 fälschlich rot, weil der Test nach der Migration den automatisch geöffneten Tag T4 statt explizit T1 las. Die gespeicherten T1-Werte waren korrekt vorhanden. Der Test wurde präzisiert; der Runtime-Ansatz musste nicht geändert werden.
+- Der erste `validate_only`-Dispatch (`patient-storage-v7-hotfix-20260729-r1`) verwendete eine auf der lokalen PowerShell/.NET-Version nicht verfügbare statische SHA-256-Methode. Dadurch wurde ein leerer `old_sha256` gesendet und das Gate lehnte den Payload erwartungsgemäß ab. Der Wiederholungslauf erzeugt den Hash kompatibel und validiert den Payload vor dem Dispatch lokal.
 
 ## Übernommener technischer Ansatz
 
