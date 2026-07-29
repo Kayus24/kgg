@@ -260,6 +260,67 @@ def canonical_json(value: Any) -> str:
     return json.dumps(value, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
 
 
+def classify_evaluation_error(message: str) -> str:
+    lowered = message.lower()
+    if any(
+        marker in lowered
+        for marker in [
+            "forbidden generated-output token",
+            "payload missing exact required_tests",
+            "payload json",
+            "patch_content",
+            "unresolved patch placeholder",
+        ]
+    ):
+        return "payload_schema"
+    if any(marker in lowered for marker in ["browser repair probe failed", '"status":"fail"', "pageerror"]):
+        return "ui_logic"
+    if any(marker in lowered for marker in ["playwright", "chromium", "missing tool", "npm"]):
+        return "ci_tooling"
+    if any(marker in lowered for marker in ["challenge manifest", "broken challenge hash", "unknown challenge_id"]):
+        return "challenge_integrity"
+    return "evaluator_failure"
+
+
+def write_evaluation_outcome(
+    artifacts_dir: Path,
+    identifier: str,
+    payload_file: Path,
+    status: str,
+    *,
+    error: str = "",
+    report: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    artifacts_dir.mkdir(parents=True, exist_ok=True)
+    request_id = "unknown-request"
+    try:
+        request_id = str(load_json(payload_file).get("request_id") or request_id)
+    except Exception:  # noqa: BLE001 - outcome must survive malformed attempts
+        pass
+    feedback = error.strip().replace(str(ROOT), "<repo>")
+    if len(feedback) > 1600:
+        feedback = feedback[-1600:]
+    outcome: dict[str, Any] = {
+        "schema": 1,
+        "status": status,
+        "round_id": os.environ.get("KGG_REPAIR_ROUND_ID", ""),
+        "challenge_id": identifier,
+        "request_id": request_id,
+        "run_id": int(os.environ["GITHUB_RUN_ID"]) if os.environ.get("GITHUB_RUN_ID", "").isdigit() else None,
+        "error_class": None if status == "PASS" else classify_evaluation_error(feedback),
+        "feedback": "Evaluator and browser repair probe passed." if status == "PASS" else feedback,
+    }
+    if report:
+        outcome["case_fingerprint"] = report.get("case_fingerprint")
+        outcome["payload_sha256"] = report.get("payload_sha256")
+    (artifacts_dir / "outcome.json").write_text(
+        json.dumps(outcome, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    return outcome
+
+
 def challenge_id(round_id: str, source_hash: str, case_key: str) -> str:
     digest = hashlib.sha256(f"{round_id}\0{source_hash}\0{case_key}".encode("utf-8")).hexdigest()[:16]
     return f"repair-{digest}"
@@ -548,6 +609,24 @@ def self_test(browser: bool) -> dict[str, Any]:
                 check["broken_browser"] = "EXPECTED_FAIL"
                 check["sample_browser"] = "PASS"
             checks.append(check)
+        outcome_payload = temp / "outcome-payload.json"
+        outcome_payload.write_text(
+            json.dumps(sample_payload(CASES[0], challenge_id("self-test-a", source_hash, CASES[0].key))),
+            encoding="utf-8",
+            newline="\n",
+        )
+        outcome_dir = temp / "outcome"
+        failed_outcome = write_evaluation_outcome(
+            outcome_dir,
+            challenge_id("self-test-a", source_hash, CASES[0].key),
+            outcome_payload,
+            "FAIL",
+            error="patch_content contains forbidden generated-output token: <!-- KGG PATCH START",
+        )
+        if failed_outcome["error_class"] != "payload_schema":
+            raise RepairLabError("sanitized outcome did not classify payload_schema")
+        if "sample_payload" in json.dumps(failed_outcome):
+            raise RepairLabError("sanitized outcome exposed internal repair data")
     after = tracked_hashes()
     if before != after:
         raise RepairLabError("Repair-Lab self-test modified tracked repository files")
@@ -622,9 +701,27 @@ def main() -> int:
                 args.payload_file.resolve(),
                 args.artifacts_dir.resolve(),
             )
+            write_evaluation_outcome(
+                args.artifacts_dir.resolve(),
+                str(args.challenge_id),
+                args.payload_file.resolve(),
+                "PASS",
+                report=result,
+            )
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
     except Exception as exc:  # noqa: BLE001 - CLI boundary
+        if args.evaluate and args.artifacts_dir and args.challenge_id and args.payload_file:
+            try:
+                write_evaluation_outcome(
+                    args.artifacts_dir.resolve(),
+                    str(args.challenge_id),
+                    args.payload_file.resolve(),
+                    "FAIL",
+                    error=str(exc),
+                )
+            except Exception:  # noqa: BLE001 - preserve the original evaluator failure
+                pass
         print(json.dumps({"status": "FAIL", "error": str(exc)}, ensure_ascii=False), file=sys.stderr)
         return 1
 

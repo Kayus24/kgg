@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -13,7 +14,17 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "docs" / "kgg-custom-gpt-resource-manifest.json"
+EDITOR_SNAPSHOT = ROOT / "docs" / "kgg-custom-gpt-editor-snapshot.json"
+EVAL_EDITOR_SNAPSHOT = ROOT / "docs" / "kgg-custom-gpt-eval-editor-snapshot.json"
 HIGHEST_ACTIONS_COMPATIBLE_MODEL = "GPT-5.6 Thinking"
+PRODUCTION_PROFILE_VERSION = "2.0.0"
+EVAL_PROFILE_VERSION = "2.0.0"
+EDITOR_BOOTSTRAP_VERSION = "v2"
+EDITOR_BOOTSTRAP_PATH = "docs/kgg-custom-gpt-editor-bootstrap.md"
+EVAL_EDITOR_BOOTSTRAP_VERSION = "v2"
+EVAL_EDITOR_BOOTSTRAP_PATH = "docs/kgg-custom-gpt-eval-editor-bootstrap.md"
+EDITOR_BOOTSTRAP_MAX_CHARS = 4000
+CUSTOM_GPT_ACTION_LIMIT = 30
 
 PRODUCTION_KNOWLEDGE = [
     "docs/kgg-custom-gpt-knowledge-architecture.md",
@@ -44,9 +55,25 @@ def resource(path: str) -> dict[str, str]:
     return {"path": path, "sha256": digest(path)}
 
 
+def editor_bootstrap_resource(
+    path_name: str, version: str, *, strip_final_newline: bool
+) -> dict[str, Any]:
+    path = ROOT / path_name
+    # The GPT editor preserves the content but removes a final textarea newline.
+    text = path.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n")
+    if strip_final_newline:
+        text = text.rstrip("\n")
+    return {
+        "path": path_name,
+        "version": version,
+        "characters": len(text),
+        "sha256": normalized_text_digest(text.encode("utf-8")),
+    }
+
+
 def expected_manifest() -> dict[str, Any]:
     return {
-        "schema": 1,
+        "schema": 2,
         "modelPolicy": {
             "rule": "Use the highest model currently offered by the GPT editor that still supports Custom Actions.",
             "verifiedEditorModel": HIGHEST_ACTIONS_COMPATIBLE_MODEL,
@@ -55,6 +82,13 @@ def expected_manifest() -> dict[str, Any]:
         },
         "production": {
             "name": "KGG Update-Agent",
+            "gptId": "g-6a45fba0f3408191ac1fb2c987a2e960",
+            "profileVersion": PRODUCTION_PROFILE_VERSION,
+            "editorBootstrap": editor_bootstrap_resource(
+                EDITOR_BOOTSTRAP_PATH,
+                EDITOR_BOOTSTRAP_VERSION,
+                strip_final_newline=True,
+            ),
             "capabilities": {
                 "webSearch": True,
                 "codeInterpreter": True,
@@ -72,6 +106,13 @@ def expected_manifest() -> dict[str, Any]:
         },
         "eval": {
             "name": "KGG Repair-Lab Eval",
+            "gptId": "g-6a5e3483c98c81919e6f8a7939d5c072",
+            "profileVersion": EVAL_PROFILE_VERSION,
+            "editorBootstrap": editor_bootstrap_resource(
+                EVAL_EDITOR_BOOTSTRAP_PATH,
+                EVAL_EDITOR_BOOTSTRAP_VERSION,
+                strip_final_newline=False,
+            ),
             "sameModelAsProduction": True,
             "capabilities": {
                 "webSearch": False,
@@ -115,6 +156,8 @@ def validate_snapshot(path: Path, profile: str) -> None:
     except Exception as exc:  # noqa: BLE001
         raise AuditError(f"cannot read editor snapshot: {exc}") from exc
     expected = expected_manifest()[profile]
+    if snapshot.get("profileVersion") != expected.get("profileVersion", snapshot.get("profileVersion")):
+        raise AuditError(f"{profile} GPT profile version mismatch")
     if snapshot.get("model") != HIGHEST_ACTIONS_COMPATIBLE_MODEL:
         raise AuditError(f"{profile} GPT model is not {HIGHEST_ACTIONS_COMPATIBLE_MODEL}")
     for key, wanted in expected["capabilities"].items():
@@ -124,18 +167,75 @@ def validate_snapshot(path: Path, profile: str) -> None:
     actual_hashes = set(snapshot.get("knowledgeSha256", []))
     if expected_hashes != actual_hashes:
         raise AuditError(f"{profile} Knowledge digest mismatch")
+    expected_names = {Path(item["path"]).name for item in expected["knowledge"]}
+    actual_names = set(snapshot.get("knowledgeNames", []))
+    if expected_names != actual_names:
+        raise AuditError(f"{profile} Knowledge filename mismatch")
+    expected_action_hashes = {item["sha256"] for item in expected["actions"]}
+    actual_action_hashes = set(snapshot.get("actionSha256", []))
+    if expected_action_hashes != actual_action_hashes:
+        raise AuditError(f"{profile} Action schema digest mismatch")
+    bootstrap = expected.get("editorBootstrap")
+    if bootstrap and snapshot.get("instructionsSha256") != bootstrap["sha256"]:
+        raise AuditError(f"{profile} editor Instructions digest mismatch")
+    if snapshot.get("gptId") and expected.get("gptId") and snapshot["gptId"] != expected["gptId"]:
+        raise AuditError(f"{profile} GPT id mismatch")
 
 
 def self_test() -> None:
     if normalized_text_digest(b"first\r\nsecond\r\n") != normalized_text_digest(b"first\nsecond\n"):
         raise AuditError("resource digests must be independent of CRLF or LF line endings")
     manifest = expected_manifest()
+    for profile in ["production", "eval"]:
+        bootstrap = manifest[profile]["editorBootstrap"]
+        if bootstrap["characters"] > EDITOR_BOOTSTRAP_MAX_CHARS:
+            raise AuditError(
+                f"{profile} editor bootstrap exceeds {EDITOR_BOOTSTRAP_MAX_CHARS} characters"
+            )
+    bootstrap_text = (ROOT / EDITOR_BOOTSTRAP_PATH).read_text(encoding="utf-8")
+    for marker in [
+        "getKggCustomGptResourceManifest",
+        "getKggProjectContext",
+        "getKggCustomGptPlaybook",
+        "getKggMemoryIndex",
+        "GitHub Pages ist weder Memory-Quelle noch Fallback",
+    ]:
+        if marker not in bootstrap_text:
+            raise AuditError(f"production editor bootstrap missing marker: {marker}")
+    eval_bootstrap_text = (ROOT / EVAL_EDITOR_BOOTSTRAP_PATH).read_text(encoding="utf-8")
+    for marker in [
+        "getKggRepairResult",
+        "<!-- KGG PATCH START",
+        "Nach drei aufeinanderfolgenden FAILs",
+        "Fuehre niemals Preview-",
+    ]:
+        if marker not in eval_bootstrap_text:
+            raise AuditError(f"eval editor bootstrap missing marker: {marker}")
     if manifest["production"]["capabilities"]["apps"]:
         raise AuditError("production Apps must stay disabled because Custom Actions are required")
     if manifest["production"]["capabilities"]["canvas"]:
         raise AuditError("Canvas must stay disabled for the selected GPT model")
     if manifest["eval"]["capabilities"]["webSearch"]:
         raise AuditError("Eval GPT Web Search would compromise blind testing")
+    raw_action = (ROOT / "docs/kgg-custom-gpt-action-openapi.yaml").read_text(
+        encoding="utf-8"
+    )
+    api_action = (ROOT / "docs/kgg-custom-gpt-action-api-openapi.yaml").read_text(
+        encoding="utf-8"
+    )
+    for label, schema in [("raw", raw_action), ("api", api_action)]:
+        operation_count = len(re.findall(r"^\s+operationId:\s+\S+\s*$", schema, re.MULTILINE))
+        if operation_count > CUSTOM_GPT_ACTION_LIMIT:
+            raise AuditError(
+                f"{label} Action exposes {operation_count} operations; "
+                f"Custom GPT limit is {CUSTOM_GPT_ACTION_LIMIT}"
+            )
+    if "\n  /repos/" in raw_action or "api.github.com" in raw_action:
+        raise AuditError("raw Action must not duplicate authenticated GitHub API operations")
+    if "getKggCustomGptResourceManifest" not in raw_action:
+        raise AuditError("raw Action is missing the resource-manifest operation")
+    if "submitKggPreviewGate" not in api_action or "getKggMemoryIndex" not in api_action:
+        raise AuditError("API Action must provide Preview and private Memory operations")
     production = {item["sha256"] for item in manifest["production"]["knowledge"]}
     evaluation = {item["sha256"] for item in manifest["eval"]["knowledge"]}
     if production.intersection(evaluation):
@@ -162,10 +262,17 @@ def main() -> int:
         else:
             if not OUTPUT.exists() or OUTPUT.read_text(encoding="utf-8") != expected:
                 raise AuditError("resource manifest is missing or stale; run --write")
-        if args.editor_snapshot:
-            if not args.profile:
+        snapshot_path = args.editor_snapshot
+        snapshot_profile = args.profile
+        if snapshot_path:
+            if not snapshot_profile:
                 raise AuditError("--profile is required with --editor-snapshot")
-            validate_snapshot(args.editor_snapshot, args.profile)
+            validate_snapshot(snapshot_path, snapshot_profile)
+        elif args.check:
+            if EDITOR_SNAPSHOT.exists():
+                validate_snapshot(EDITOR_SNAPSHOT, "production")
+            if EVAL_EDITOR_SNAPSHOT.exists():
+                validate_snapshot(EVAL_EDITOR_SNAPSHOT, "eval")
         print(json.dumps({"status": "PASS", "manifest": str(OUTPUT.relative_to(ROOT))}))
         return 0
     except Exception as exc:  # noqa: BLE001

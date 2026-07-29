@@ -83,13 +83,17 @@ The GPT may say a Preview is available only after it has verified:
 
 ## Custom GPT Editor Domains
 
-- Use the API-only Action schema for `api.github.com`.
-- Do not create duplicate action domains for `raw.githubusercontent.com`; raw URLs are verified through the GitHub run/artifact/meta checks.
+- Use `docs/kgg-custom-gpt-action-openapi.yaml` only for read-only `raw.githubusercontent.com` resources.
+- Use `docs/kgg-custom-gpt-action-api-openapi.yaml` only for authenticated `api.github.com` Preview and private Memory operations.
+- Each Action must stay below the Custom GPT limit of 30 operations. Never duplicate API operations in the raw Action.
 - If the editor reports duplicate action domains, stop and fix the Action schema before dispatching.
+- The raw Action must expose `getKggCustomGptResourceManifest`, `getKggProjectContext` and `getKggCustomGptPlaybook`.
+- The exact editor Instructions are `docs/kgg-custom-gpt-editor-bootstrap.md`; its version and hash come from the resource manifest.
+- A bootstrap-version or Action-hash mismatch blocks writes until the editor is synced.
 
 ## KGG Project Memory Gate
 
-The private repository `Kayus24/kgg-project-memory` stores curated durable decisions. It does not store app code, patient data, secrets or full chat transcripts.
+The private repository `Kayus24/kgg-project-memory` stores curated durable decisions. It does not store app code, patient data, secrets or full chat transcripts. GitHub Pages is not a project-memory source and must not be used as an outage fallback.
 
 Read in this order:
 

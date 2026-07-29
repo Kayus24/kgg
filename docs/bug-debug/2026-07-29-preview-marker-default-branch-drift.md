@@ -68,4 +68,3 @@ Fix bereits fuer produktive GPT-Actions aktiv ist.
 - debug
 - phone-layout
 - tablet-layout
-

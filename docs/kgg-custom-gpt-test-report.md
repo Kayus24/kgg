@@ -1,10 +1,10 @@
 # KGG Custom GPT Test Report
 
-Status: PASS - 16/16 kritische Browser-Promptklassen bestanden
+Status: PENDING - 16 bestehende Browser-Promptklassen und Editor-Drift gruen; 4 echte Memory-Klassen warten auf den Manifest-PR
 
-Testdatum: 2026-07-14
+Testdatum: 2026-07-26
 Testziel: Custom GPT `KGG Update-Agent` im Browser-Editor `g-6a45fba0f3408191ac1fb2c987a2e960`
-Instruction-Laenge nach modularer Haertung und Retests: 5886 Zeichen.
+Geplanter kanonischer Editor-Bootstrap v2: maximal 4000 Zeichen.
 
 Lokale deterministic Evals laufen ueber `python release-pipeline/kgg_gpt_eval.py`.
 Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`.
@@ -29,15 +29,18 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | admin-beta-push-gate | PASS | Browser-Retest 2026-07-14: Erfolg erst bei gemergtem `[admin-beta]` PR, gruenen Required Checks, aktualisiertem `therapist-app/android_update_manifest.json` auf `main` und Admin-HTML HTTP 200. |
 | memory-safe-auto-update | PENDING | Deterministischer Vertragstest und echter Remote-Gate-Test sind gruen; der Custom-GPT-Dialogtest folgt nach Einspielen des API-Schemas und der privaten Repo-Berechtigung. |
 | memory-conflict-needs-approval | PENDING | Das Remote-Memory-Gate lieferte `needs_approval` und schrieb nichts; der Custom-GPT-Dialogtest folgt nach Einspielen des API-Schemas. |
+| memory-no-change | PENDING | Muss nach Editor-Sync den bestehenden `memory.storage`-Wert ohne Duplikat erkennen. |
+| memory-private-unavailable | PENDING | Muss bei privatem `404` stoppen und darf nicht auf GitHub Pages ausweichen. |
+| editor-resource-drift | PASS | Browser-Test 2026-07-26: Der gespeicherte Bootstrap v2 lud den alten Live-Manifeststand, erkannte fehlende v2-Bootstrapfelder als `stale_context` und stoppte ohne Preview- oder Memory-Write. |
 
 ## Aktualitaets-Gate
 
 - GitHub Live-Actions sind die einzige Versions- und Source-of-Truth fuer Patchentscheidungen.
-- Vor jedem Payload muessen `getKggProjectContext` und `getKggVersion` erfolgreich geladen werden.
+- Vor jedem Payload muessen `getKggCustomGptResourceManifest`, `getKggProjectContext` und `getKggVersion` erfolgreich geladen werden.
 - Nicht erreichbarer Live-Kontext oder ein Versionswiderspruch wird als `stale_context` behandelt: kein Payload, kein Dispatch und keine geratene Basis.
 - Das hochladbare Knowledge-Pack ist nur Referenzwissen. Es darf nie eine Live-Version oder einen aktuellen Modulpfad ersetzen.
 - Der automatische Required-Gate-Check prueft generierten GPT-Kontext, Source-Chunks und Knowledge-Pack auf Drift.
-- Ein GitHub-Pages-Spiegel oder Obsidian darf hoechstens der lesbaren Darstellung beziehungsweise redaktionellen Pflege dienen, nicht als zweite kanonische Quelle.
+- GitHub Pages und Obsidian sind weder kanonische Memory-Quelle noch Ausfall-Fallback.
 
 ## End-to-End Canary
 
@@ -72,7 +75,25 @@ Canary note: The GPT dispatched `validate_only` first, then dispatched `publish_
 - Der erste Admin-Beta-Erfolgsnachweis war zu vage. Nach Instruction-Anpassung nannte der Retest alle vier verbindlichen Belege.
 - Der Stale-Context-Test bestand: Bei nicht bestaetigter Live-Version erzeugte der GPT weder Payload noch Dispatch.
 - Abschlussstand: 16/16 kritische Browser-Promptklassen PASS. Es wurde dabei kein neuer Preview-, Test-App- oder Main-Push behauptet oder ausgeloest.
-- Der Knowledge-Dateiupload im GPT-Editor blieb wegen des lokalen Browser-Dateidialogs blockiert. Das beeintraechtigt die Aktualitaetsgarantie nicht, weil statisches Knowledge absichtlich nicht autoritativ ist; die gespeicherten Instructions und Live-Actions erzwingen das Aktualitaets-Gate.
+- Die vier kuratierten Knowledge-Dateien wurden am 2026-07-26 im echten GPT-Editor ersetzt und nach Reload anhand der Dateinamen verifiziert.
+
+## Second-Brain Editor-Sync 2026-07-26
+
+- Produktions-GPT `g-6a45fba0f3408191ac1fb2c987a2e960` verwendet den kanonischen Bootstrap v2, `GPT-5.6 Thinking`, Websuche, Code Interpreter, Bildgenerierung und Custom Actions.
+- Raw-Action und API-Action wurden getrennt: 18 read-only Operationen auf `raw.githubusercontent.com`, 14 authentifizierte Preview-/Memory-Operationen auf `api.github.com`.
+- Beide gespeicherten Action-Texte stimmen nach Reload bytegenau mit ihren Repo-Dateien ueberein.
+- Die bestehende API-Key-Authentifizierung blieb erhalten; es wurde kein Token ersetzt oder im Chat offengelegt.
+- Der erste Pflichtstart las den noch alten Manifest-/Playbookstand von `main`, meldete korrekt `stale_context` und fuehrte keinen Write aus.
+- Die vier echten Memory-Dialogklassen bleiben bis zum Merge des Ressourcenmanifest-PRs `PENDING`; ein Test gegen absichtlich veraltetes Live-Main waere kein gueltiger Memory-E2E-Nachweis.
+
+## Blinder Mockup-Test 2026-07-26
+
+- Neue Runde `blind-round-20260726-c`, Publish-Run `30203642671`, zufaellig gewaehlte Challenge `repair-4de278afc95b931d`.
+- Der Eval-GPT erhielt nur Challenge-Manifest und defekte Source-Chunks. Golden Source, interne Assertions und Sample-Payload blieben verborgen.
+- Drei erste Versuche wurden korrekt als `payload_schema` blockiert, weil der GPT generierte `KGG PATCH START/END`-Marker mitsendete. Diese Fehlerklasse wurde in Eval-Knowledge, Selftests und den neuen solution-freien Outcome-Kanal aufgenommen.
+- Gruener Reparaturlauf `30203948574`, Artifact `8632496258`, nicht abgelaufen.
+- Report: `status=PASS`, `insideScan=true`, `opened=true`, `blockedExternalRequests=0`.
+- Der Eval-GPT pruefte den finalen Run erneut und meldete erst danach PASS mit Run-, Job-, Step- und Artifact-Nachweis.
 
 ## Mockup-Verhaltenstest 2026-07-14
 

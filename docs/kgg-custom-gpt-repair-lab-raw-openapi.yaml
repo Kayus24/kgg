@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: KGG Blind Repair Lab Source
-  version: "1.0.0"
+  version: "1.1.0"
   description: Read-only access to sanitized broken full-app challenges. Golden source, assertions and sample repairs are intentionally unavailable.
 servers:
   - url: https://raw.githubusercontent.com
@@ -65,5 +65,39 @@ paths:
       responses:
         "200":
           description: Exact broken-source text chunk.
+  /Kayus24/kgg/gpt-repair-lab/results/{round_id}/{challenge_id}/{request_id}.json:
+    get:
+      operationId: getKggRepairResult
+      summary: Read one sanitized evaluator outcome after its workflow run completed.
+      description: Contains only status, safe error class and feedback. It never exposes golden source, hidden assertions or sample repairs.
+      x-openai-isConsequential: false
+      parameters:
+        - name: round_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
+        - name: challenge_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^repair-[a-f0-9]{16}$"
+        - name: request_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
+      responses:
+        "200":
+          description: Sanitized evaluation outcome.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
 components:
   schemas: {}

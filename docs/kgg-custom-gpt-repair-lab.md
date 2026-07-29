@@ -31,8 +31,9 @@ Zwei zusaetzliche Holdouts pruefen Layout-Panel und Phone-Menue-Verankerung. Die
 3. Der Eval-GPT liest eine undurchsichtige Challenge und erzeugt ein v2-Payload ohne Pfadangabe.
 4. `evaluate_attempt` regeneriert intern dieselbe Runde, prueft Payload und Hash und setzt das Patchmodul nur in einer temporaeren Kopie ein.
 5. Chromium prueft sichtbares Verhalten, Interaktionen, Seitenfehler und blockierte externe Requests.
-6. Nach drei gleichen Fehlerklassen fuer dieselbe Challenge wird gestoppt und ein alternativer Ansatz verlangt.
-7. Erfolg erst nach zwei vollstaendigen Runden mit 8/8 Kernfaellen und 2/2 Holdouts unter identischem Modell- und Ressourcenhash.
+6. Nach dem abgeschlossenen Run liest der Eval-GPT das solution-freie Ergebnis ueber `getKggRepairResult`; es enthaelt nur Status, sichere Fehlerklasse und kompaktes Feedback.
+7. Ein Folgeversuch ist erst nach diesem Ergebnis erlaubt. Nach drei gleichen Fehlerklassen fuer dieselbe Challenge wird gestoppt und ein alternativer Ansatz verlangt.
+8. Erfolg erst nach zwei vollstaendigen Runden mit 8/8 Kernfaellen und 2/2 Holdouts unter identischem Modell- und Ressourcenhash.
 
 ## Lokale Kontrollen
 

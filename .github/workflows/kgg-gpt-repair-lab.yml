@@ -39,6 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PAYLOAD_JSON: ${{ inputs.payload_json }}
+      KGG_REPAIR_ROUND_ID: ${{ inputs.round_id }}
     steps:
       - name: Checkout dispatched source
         uses: actions/checkout@v4
@@ -163,3 +164,40 @@ jobs:
           path: |
             ${{ runner.temp }}/kgg-repair-result/report.json
             ${{ runner.temp }}/kgg-repair-result/repaired.png
+            ${{ runner.temp }}/kgg-repair-result/outcome.json
+
+      - name: Publish sanitized evaluation outcome
+        if: always() && inputs.mode == 'evaluate_attempt'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          outcome="$RUNNER_TEMP/kgg-repair-result/outcome.json"
+          test -f "$outcome"
+          request_id="$(python - "$outcome" <<'PY'
+          import json
+          import re
+          import sys
+
+          value = str(json.load(open(sys.argv[1], encoding="utf-8"))["request_id"])
+          if not re.fullmatch(r"[a-z0-9][a-z0-9-]{5,63}", value):
+              raise SystemExit("invalid outcome request_id")
+          print(value)
+          PY
+          )"
+          repo_url="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+          target="$RUNNER_TEMP/kgg-repair-outcome"
+          git clone --depth=1 --branch gpt-repair-lab "$repo_url" "$target"
+          result_dir="$target/results/${{ inputs.round_id }}/${{ inputs.challenge_id }}"
+          mkdir -p "$result_dir"
+          cp "$outcome" "$result_dir/$request_id.json"
+          git -C "$target" config user.name 'github-actions[bot]'
+          git -C "$target" config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C "$target" add --all
+          if git -C "$target" diff --cached --quiet; then
+            echo "Outcome already published."
+          else
+            git -C "$target" commit -m "publish repair outcome ${{ inputs.challenge_id }} $request_id"
+            git -C "$target" push origin HEAD:gpt-repair-lab
+          fi

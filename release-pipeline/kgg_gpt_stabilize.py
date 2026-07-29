@@ -45,6 +45,11 @@ GPT_PROMPTS = [
     "analysis-no-dispatch",
     "ci-tooling-pdftoppm",
     "admin-beta-push-gate",
+    "memory-safe-auto-update",
+    "memory-conflict-needs-approval",
+    "memory-no-change",
+    "memory-private-unavailable",
+    "editor-resource-drift",
 ]
 
 PREVIEW_CHECKS = [

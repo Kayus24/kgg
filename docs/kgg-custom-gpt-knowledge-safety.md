@@ -2,7 +2,7 @@
 
 Generated production knowledge for protected areas, regression history and safe patch patterns.
 
-Source digest: `c6364447902e9a49`
+Source digest: `f6755336631cd4eb`
 
 ## Usage Rules
 
@@ -132,6 +132,22 @@ Erst failed step und Log melden, dann keinen Preview-Erfolg behaupten.
 
 Wenn Max in der Test-App sagt “sieht falsch aus”, ist das `human_preview_fail`.
 Kein PR, kein Admin-Beta, kein Main. Lesson/Regression ergaenzen und wieder `validate_only`.
+
+## Privates Memory durch Pages ersetzen
+
+Falsch:
+
+> `getKggMemoryIndex` liefert 404. Ich nehme stattdessen einen GitHub-Pages-Spiegel und arbeite weiter.
+
+Stop: Das private Memory ist nicht belegt erreichbar. GitHub Pages ist keine Memory-Quelle und kein Fallback. Fehlenden privaten Kontext melden, keinen Memory-Write und keinen darauf gestuetzten Patch dispatchen.
+
+## Editor-Ressourcen sind stale
+
+Falsch:
+
+> Das Manifest verlangt Bootstrap v2, mein Editor hat v1 und kein `getKggCustomGptResourceManifest`, aber der Preview-Payload ist klein genug.
+
+Stop: Editor und Action-Schema muessen zuerst synchronisiert werden. Kein Preview- oder Memory-Write mit einem driftenden Editor-Profil.
 
 ---
 

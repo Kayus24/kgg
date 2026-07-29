@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "modelPolicy": {
     "rule": "Use the highest model currently offered by the GPT editor that still supports Custom Actions.",
     "verifiedEditorModel": "GPT-5.6 Thinking",
@@ -10,6 +10,14 @@
   },
   "production": {
     "name": "KGG Update-Agent",
+    "gptId": "g-6a45fba0f3408191ac1fb2c987a2e960",
+    "profileVersion": "2.0.0",
+    "editorBootstrap": {
+      "path": "docs/kgg-custom-gpt-editor-bootstrap.md",
+      "version": "v2",
+      "characters": 3964,
+      "sha256": "348330729eb3cbdb070e49997e4e92c75cc105f2246d701f701dd99ee586076c"
+    },
     "capabilities": {
       "webSearch": true,
       "codeInterpreter": true,
@@ -21,25 +29,25 @@
     "knowledge": [
       {
         "path": "docs/kgg-custom-gpt-knowledge-architecture.md",
-        "sha256": "5edb004357c8e4971ca36a66c688ceec6db43fe3080baf1c4941bac0fdd19ac1"
+        "sha256": "db1158a19946ced83980d095e033ff5bc288f42f9feb53bf3f1a4e20a7e46df5"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-operations.md",
-        "sha256": "d4ce7c61d0881fe3efb8d3fa6109f7cfa48d00cd94dd759f758d598403cd9499"
+        "sha256": "5881dd54b8b966dfa167162b8ec1780be604665487e6cc8c6ea21fffcfd0f88d"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-safety.md",
-        "sha256": "0f4f93d1f0f258b136f2a7868913216c1eda0d3888967542030dc1fa2a4eb006"
+        "sha256": "9713aea3fa35c8f5e028f5f6b7bc12d6e1b2d5227dfbe46d50bc9564bd8a2d7b"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-testing.md",
-        "sha256": "ea06ad76f150e446cee31a522ea6435a50d923e9b5f39589f7222ace5da993da"
+        "sha256": "b61124586b0d3a0886dd1c880020e731916437440bfc50d5e545d49341872246"
       }
     ],
     "actions": [
       {
         "path": "docs/kgg-custom-gpt-action-openapi.yaml",
-        "sha256": "82704938aeec112c5f15681661cf0f28bea60928711ba7b57a5459ae64a02212"
+        "sha256": "16be8a38aff0612fa7d36894a3674e606d19ea65d4d33a101167fa6e067cd3d4"
       },
       {
         "path": "docs/kgg-custom-gpt-action-api-openapi.yaml",
@@ -50,6 +58,14 @@
   },
   "eval": {
     "name": "KGG Repair-Lab Eval",
+    "gptId": "g-6a5e3483c98c81919e6f8a7939d5c072",
+    "profileVersion": "2.0.0",
+    "editorBootstrap": {
+      "path": "docs/kgg-custom-gpt-eval-editor-bootstrap.md",
+      "version": "v2",
+      "characters": 1703,
+      "sha256": "868d5ae1745425bed1c5633607a27cd69eadefbef7929e351c43a16b8b07f730"
+    },
     "sameModelAsProduction": true,
     "capabilities": {
       "webSearch": false,
@@ -62,13 +78,13 @@
     "knowledge": [
       {
         "path": "docs/kgg-custom-gpt-eval-knowledge.md",
-        "sha256": "3437f5e5b796c56e6822daebde7c95394e330482c58b4267a8c37e0a64a2da1d"
+        "sha256": "b2b50a541ccb7b1f3e3d8427c44b720af49c65dab061d10f2b8e0bb71f0c59e1"
       }
     ],
     "actions": [
       {
         "path": "docs/kgg-custom-gpt-repair-lab-raw-openapi.yaml",
-        "sha256": "9be2dea3fd1643923959d93e10b6a4f664845a701fb654b91682ad69ee27bb8a"
+        "sha256": "4bee2ff71e18ff6c8b061bd3fd6393a3ce135b86b487bb80ad422ebb83e2a802"
       },
       {
         "path": "docs/kgg-custom-gpt-repair-lab-api-openapi.yaml",
