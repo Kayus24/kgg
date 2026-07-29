@@ -406,6 +406,51 @@
     {
       "areas": [
         "debug",
+        "modal",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "tablet-layout"
+      ],
+      "cause": "Der kompakte Marker war nur in PR #110 vorhanden. Der produktive `workflow_dispatch` lief weiterhin aus dem Default-Branch `main`, dessen `inject_preview_banner()` noch ein `position:sticky`-Element mit der kompletten Request-Beschreibung erzeugte. Ein gruener Branch-Test beweist nicht, dass ein Fix bereits fuer produktive GPT-Actions aktiv ist.",
+      "do_not_touch": "- Admin- und Kolleg:innen-HTML - PDF - QR/Patienten-App - Scan/OCR - Parser - Plan-State - Medien/Upload - Android- und Admin-Manifest",
+      "fix_pattern": "- Der produktive Marker ist ein kleines, fixed positioniertes Overlay und nimmt nicht am App-Layout teil. - Die eingeklappte Kennung zeigt nur `TEST` plus Hash-Kurzform. - Details mit Titel, Request-ID und vollem Hash werden nur auf Anforderung eingeblendet. - Das Gate entfernt eigene alte Marker vor jeder Injektion, statt vorhandene Marker ungeprueft zu ueb",
+      "id": "docs-bug-debug-2026-07-29-preview-marker-default-branch-drift-md-2026-07-29-preview-marker-und-default-branch-drift",
+      "keywords": [
+        "2026-07-29-preview-marker-und-default-branch-drift",
+        "debug",
+        "modal",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "tablet-layout"
+      ],
+      "markers": [
+        "15e39b2e23a7acf65588939fecacfaae971ab514",
+        "30397801575",
+        "TEST",
+        "baseSha",
+        "headSha",
+        "inject_preview_banner()",
+        "kgg-ocr-camera-wide-preview",
+        "main",
+        "position:sticky",
+        "release-pipeline/kgg_gpt_write_gate.py",
+        "workflow_dispatch"
+      ],
+      "risks": "- Ein offener PR darf nie als produktiver Stand beschrieben werden. - Eine erneute Preview aus einem alten Workflow-Ref kann alte Gate-Logik wiederverwenden. - Sichtbare Request-Beschreibungen duerfen nicht erneut in einen permanenten Marker gepackt werden.",
+      "source_path": "docs/bug-debug/2026-07-29-preview-marker-default-branch-drift.md",
+      "symptom": "Die KGG Test-App zeigte erneut einen schwarzen, vollhohen Balken mit kompletter Preview-Beschreibung. Der Balken verschob die eigentliche App und schnitt Bedienelemente am linken Rand an, obwohl ein kompakter Marker bereits auf einem offenen Arbeitsbranch implementiert und getestet war.",
+      "tests": "- Ein altes Sticky-Banner wird ersetzt und nicht dupliziert. - Der eingeklappte Marker ist hoechstens 92 x 24 CSS-Pixel gross. - App-Geometrie und horizontaler Overflow bleiben mit und ohne Marker identisch. - Menue, Scanner und Dock bleiben bei geschlossenem Marker anklickbar. - Details oeffnen und schliessen per Toggle, Aussenklick und Escape. - Viewports:",
+      "title": "2026-07-29 - Preview-Marker und Default-Branch-Drift"
+    },
+    {
+      "areas": [
+        "debug",
         "qr-patient"
       ],
       "cause": "",
@@ -679,6 +724,7 @@
     "docs/bug-debug/2026-06-20-v011-tablet-layout-cache-rollback.md",
     "docs/bug-debug/2026-07-03-custom-gpt-payload-schema-path.md",
     "docs/bug-debug/2026-07-03-custom-gpt-preview-gate-lessons.md",
+    "docs/bug-debug/2026-07-29-preview-marker-default-branch-drift.md",
     "docs/bug-debug/README.md",
     "docs/bugfixes/mobile-share-modal-css-regression.md",
     "docs/release-handoffs/2026-06-18-v003a-plan-ui-stability.md",

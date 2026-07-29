@@ -2,7 +2,7 @@
 
 Generated production knowledge for modular payloads, Actions, Preview/Test-App and Admin-Beta operations.
 
-Source digest: `656b6844949cbbcb`
+Source digest: `ef3d3181a0daf862`
 
 ## Usage Rules
 
@@ -112,6 +112,7 @@ Wenn Max oder ein alter Handoff einen v1-Payload zeigt, nicht dispatchen. Erklae
 ## Guardrails
 
 - Keine Erfolgsmeldung ohne Run-ID, `conclusion: success`, Artefakt, `meta.json`, HTML und Test-App/Test-APK/Preview-APK-Nachweis.
+- Ein Fix in einem offenen PR oder Arbeitsbranch ist nicht produktiv. Vor jeder Preview-Erfolgsmeldung muessen Workflow-`headSha` und Preview-`baseSha` den tatsaechlich verwendeten Default-Branch-Stand belegen.
 - Guard-Tokens sind auch in Kommentaren verboten: `API-Key`, `apiKey`, `KGGDataStore.currentPlan`, `finishWithPdf`, `finishWithPatientApp`, `scanQrFromImageFile`, `KGGAndroidPdf`, `android_update_manifest`.
 - Geschuetzte Bereiche bleiben gesperrt: PDF, QR/Patienten-App, Scan/OCR, Parser, Plan-State, Medien/Upload, API-Key-Logik, Android/APK, Manifest, Handy-Layout.
 - `ci_tooling` getrennt behandeln: `pdftoppm`, `pdfinfo`, `poppler-utils`, `adb` oder Emulatorfehler sind kein Beweis fuer einen App-Patchfehler.
@@ -312,13 +313,14 @@ Canonical order: `dispatch -> run status -> logs -> tests -> artifact -> meta ->
 5. If validation succeeds, dispatch `publish_preview`.
 6. Use `listKggPreviewGateRuns` and the workflow run name/request id to find the GitHub run.
 7. Use `getKggPreviewGateRun` until `status` is `completed`.
-8. If the run fails, use `getKggPreviewGateJobs` and report the failed job/step and exact visible error context.
-9. If the run succeeds, verify artifact, `meta.json` and HTML URL.
-10. If the request targets the Test-APK, verify that the Preview/Test-APK channel is updated.
-11. Tell Max that the Preview/Test-APK is ready for his review.
-12. If Max rejects the Test-APK result, document `human_preview_fail`, add/update the regression fixture and restart at `validate_only`.
-13. Use `create_pr` only after Max explicitly accepts the same Preview and only a PR is requested.
-14. Use `publish_admin_beta` only when Max explicitly wants a real Haupt-App/Admin-Beta push. Success requires a merged `[admin-beta]` PR, updated `android_update_manifest.json` on `main`, and HTTP 200 for the new Admin HTML.
+8. Verify that run `headSha` and Preview `baseSha` contain the expected Default-Branch fix. An open PR is not production evidence.
+9. If the run fails, use `getKggPreviewGateJobs` and report the failed job/step and exact visible error context.
+10. If the run succeeds, verify artifact, `meta.json` and HTML URL.
+11. If the request targets the Test-APK, verify that the Preview/Test-APK channel is updated.
+12. Tell Max that the Preview/Test-APK is ready for his review.
+13. If Max rejects the Test-APK result, document `human_preview_fail`, add/update the regression fixture and restart at `validate_only`.
+14. Use `create_pr` only after Max explicitly accepts the same Preview and only a PR is requested.
+15. Use `publish_admin_beta` only when Max explicitly wants a real Haupt-App/Admin-Beta push. Success requires a merged `[admin-beta]` PR, updated `android_update_manifest.json` on `main`, and HTTP 200 for the new Admin HTML.
 
 ## Required verified fields
 
