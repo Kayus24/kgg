@@ -70,6 +70,7 @@ public class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST = 4201;
     private static final int CAMERA_PERMISSION_REQUEST = 4202;
     private static final int WEB_CAMERA_PERMISSION_REQUEST = 4203;
+    private static final int NOTIFICATION_PERMISSION_REQUEST = 4204;
     private static final int RELEASE_HTML_REQUEST = 4301;
     private static final int ANDROID_SHELL_VERSION = 401;
     private static final int BUNDLED_WEB_VERSION = 419;
@@ -132,6 +133,7 @@ public class MainActivity extends Activity {
         prepareLocalWebApp();
         webView.loadUrl(localWebAppUrl());
         checkForWebAppUpdate();
+        requestPreviewNotificationPermission();
         if (!isPreviewProfile()) {
             checkForAndroidAppUpdate(false);
         }
@@ -171,6 +173,28 @@ public class MainActivity extends Activity {
         if (!isPreviewProfile()) {
             checkForAndroidAppUpdate(false);
         }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        if (BuildConfig.KGG_PREVIEW_NOTIFICATIONS && isPreviewProfile()) {
+            checkForPreviewWebAppUpdate();
+        }
+    }
+
+    private void requestPreviewNotificationPermission() {
+        if (!BuildConfig.KGG_PREVIEW_NOTIFICATIONS
+                || !isPreviewProfile()
+                || Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+                || checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        requestPermissions(
+                new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                NOTIFICATION_PERMISSION_REQUEST
+        );
     }
 
     private void configureWebView() {
@@ -299,6 +323,9 @@ public class MainActivity extends Activity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == NOTIFICATION_PERMISSION_REQUEST) {
+            return;
+        }
         if (requestCode == WEB_CAMERA_PERMISSION_REQUEST) {
             PermissionRequest request = pendingWebCameraPermissionRequest;
             pendingWebCameraPermissionRequest = null;

@@ -31,6 +31,8 @@ jobs:
           ADMIN_APK=android-wrapper/app/build/outputs/apk/admin/debug/app-admin-debug.apk
           COLLEAGUE_APK=android-wrapper/app/build/outputs/apk/kollegen/debug/app-kollegen-debug.apk
           PREVIEW_APK=android-wrapper/app/build/outputs/apk/preview/debug/app-preview-debug.apk
+          AAPT="$(find "$ANDROID_HOME/build-tools" -type f -name aapt | sort -V | tail -n 1)"
+          test -x "$AAPT"
           unzip -l "$ADMIN_APK" | grep -q 'assets/android/kgg_release_control_bootstrap.js'
           ! unzip -l "$COLLEAGUE_APK" | grep -q 'kgg_release_control_bootstrap.js'
           ! unzip -l "$PREVIEW_APK" | grep -q 'kgg_release_control_bootstrap.js'
@@ -43,3 +45,18 @@ jobs:
               ! unzip -p "$apk" "$dex" | strings | grep -Eq 'KggReleaseBridge|KGGReleaseControl|Update-Zentrale'
             done
           done
+          "$AAPT" dump permissions "$PREVIEW_APK" | grep -q 'android.permission.POST_NOTIFICATIONS'
+          ! "$AAPT" dump permissions "$ADMIN_APK" | grep -q 'android.permission.POST_NOTIFICATIONS'
+          ! "$AAPT" dump permissions "$COLLEAGUE_APK" | grep -q 'android.permission.POST_NOTIFICATIONS'
+          for apk in "$ADMIN_APK" "$COLLEAGUE_APK"; do
+            for dex in $(unzip -Z1 "$apk" | grep -E '^classes[0-9]*\.dex$'); do
+              ! unzip -p "$apk" "$dex" | strings | grep -Eq 'KggPreviewMessagingService|kgg_preview_updates'
+            done
+          done
+          preview_has_push=false
+          for dex in $(unzip -Z1 "$PREVIEW_APK" | grep -E '^classes[0-9]*\.dex$'); do
+            if unzip -p "$PREVIEW_APK" "$dex" | strings | grep -q 'KggPreviewMessagingService'; then
+              preview_has_push=true
+            fi
+          done
+          test "$preview_has_push" = true
