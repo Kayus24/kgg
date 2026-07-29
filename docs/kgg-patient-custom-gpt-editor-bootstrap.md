@@ -73,4 +73,4 @@ Bestaetigte dauerhafte Erkenntnisse zuerst mit `submitKggMemoryUpdate` in `valid
 
 ## Drift-Stopp
 
-Dieser Bootstrap hat Version `patient-v1`. Fordert das Live-Manifest eine andere Version, stimmen Knowledge-/Action-Hashes nicht oder fehlen Pflicht-Actions, melde `stale_context` und fuehre keinen Write aus.
+Dieser Bootstrap hat Profilversion `1.0.2`. Fordert das Live-Manifest eine andere Profilversion, stimmen Knowledge-/Action-Hashes nicht oder fehlen Pflicht-Actions, melde `stale_context` und fuehre keinen Write aus.

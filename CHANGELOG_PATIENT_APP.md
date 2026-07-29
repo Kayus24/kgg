@@ -1,5 +1,11 @@
 # Patient App Changelog
 
+## v70 - 2026-07-29
+
+- Stabilisiert Patiententrainingsdaten nach Planaktualisierungen mit ID-basiertem v7-Speicher und verlustfreier Legacy-Migration.
+- Guarded request: `patient-storage-v7-hotfix-20260729`.
+
+
 ## 2026-06-18 – Numpad input morph polish
 
 ### Changed

@@ -1,5 +1,5 @@
 (()=>{
-  const ADDON_VERSION='v9_lossless_media_plans';
+  const ADDON_VERSION='v10_stable_plan_id_storage';
   const LANG_KEY='kggPatientLang';
   const MULTI_KEY='kggPatientMultiPlansV1';
   const CURRENT_KEY='kggCurrentPlanV1';
@@ -36,6 +36,7 @@
   }
 
   function clone(v){try{return JSON.parse(JSON.stringify(v||{}))}catch(e){return v&&typeof v==='object'?{...v}:{}}}
+  function prepareRaw(raw){return window.KGGPatientStorageV7?window.KGGPatientStorageV7.prepareRaw(raw):clone(raw)}
   function storedCurrentPlan(){const saved=safe(()=>JSON.parse(localStorage.getItem(CURRENT_KEY)||'null'));return saved&&saved.plan&&typeof saved.plan==='object'?saved.plan:null}
   function hasMediaValue(value){if(Array.isArray(value))return value.length>0;if(value&&typeof value==='object')return true;return String(value||'').trim()!==''}
   function exObj(e){if(!Array.isArray(e))e=[];return{n:e[0]||'Übung',sets:Number(e[1])||3,side:e[2]||'LR',u:e[3]||'kg',m:e[4]||'Wdh',sl:e[5]||'',sm:e[6]||'',media:e[7]||'',videoUrl:e[8]||'',videoLabel:e[9]||'Video öffnen',painMode:e[10]||'exercise'}}
@@ -44,13 +45,14 @@
   function runtimeFromRaw(raw){return{id:raw.i||'plan',title:raw.t||'KGG Trainingsplan',version:+raw.v||1,days:+raw.d||6,extendDays:raw.extendDays!==false,stepDays:+raw.stepDays||6,ex:(raw.e||[]).map(exObj)}}
   function readState(){try{return JSON.parse(localStorage.getItem(MULTI_KEY)||'null')}catch(e){return null}}
   function writeState(s){s.updatedAt=new Date().toISOString();localStorage.setItem(MULTI_KEY,JSON.stringify(s))}
-  function persistCurrent(raw){localStorage.setItem(CURRENT_KEY,JSON.stringify({plan:raw,importedAt:new Date().toISOString()}))}
+  function persistCurrent(raw){raw=prepareRaw(raw);safe(()=>window.KGGPatientStorageV7&&window.KGGPatientStorageV7.rememberPrevious(storedCurrentPlan(),raw));localStorage.setItem(CURRENT_KEY,JSON.stringify({plan:raw,importedAt:new Date().toISOString()}));return raw}
   function currentBasePlan(s,i){return (s&&Array.isArray(s.plans)&&s.plans[i])||storedCurrentPlan()||null}
+  function activeIndex(s){const byId=String(s&&s.activePlanId||'');const found=byId&&Array.isArray(s&&s.plans)?s.plans.findIndex(raw=>String(raw&&raw.i||'')===byId):-1;return found>=0?found:Math.max(0,Math.min(Number(s&&s.active)||0,Math.max(0,(s&&s.plans||[]).length-1)))}
   function pokeMedia(){[80,300,900].forEach(delay=>setTimeout(()=>{safe(()=>window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.prefetch&&window.KGGPatientMediaRetryCache.prefetch());safe(()=>window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.render&&window.KGGPatientMediaRetryCache.render())},delay))}
-  function ensureState(){let s=readState();if(!s||!Array.isArray(s.plans))s={version:1,plans:[],active:0,day:{}};if(!s.plans.length&&safe(()=>p))s.plans.push(rawFromRuntime(storedCurrentPlan()));s.day=s.day||{};if(typeof s.active!=='number'||s.active<0||s.active>=s.plans.length)s.active=0;writeState(s);return s}
-  function saveCurrentSlot(){const s=ensureState();const i=Math.max(0,Math.min(Number(s.active)||0,s.plans.length-1));safe(()=>safeSave());s.plans[i]=rawFromRuntime(currentBasePlan(s,i));writeState(s);persistCurrent(s.plans[i])}
-  function loadValuesForPlan(){safe(()=>{v=read(sk(),'{}')});safe(()=>{done=read(dk(),'[]').map(Number).filter(n=>n>=1&&n<=p.days)})}
-  function switchTo(idx){let s=ensureState();if(!s.plans[idx])return false;if(Number(s.active)===idx)return true;saveCurrentSlot();s=ensureState();if(!s.plans[idx])return false;s.active=idx;const raw=s.plans[idx];writeState(s);p=runtimeFromRaw(raw);persistCurrent(raw);loadValuesForPlan();safe(()=>save());safe(()=>render());pokeMedia();safe(()=>setStatus(t('Plan gewechselt. Werte bleiben erhalten.','Plan switched. Values kept.'),'ok'));return true}
+  function ensureState(){let s=readState();if(!s||!Array.isArray(s.plans))s={version:2,plans:[],active:0,activePlanId:'',day:{}};if(!s.plans.length&&safe(()=>p))s.plans.push(prepareRaw(rawFromRuntime(storedCurrentPlan())));s.plans=s.plans.map(prepareRaw);s.day=s.day||{};s.version=2;s.active=activeIndex(s);s.activePlanId=String(s.plans[s.active]&&s.plans[s.active].i||'');writeState(s);return s}
+  function saveCurrentSlot(){const s=ensureState();const i=activeIndex(s);safe(()=>safeSave());s.plans[i]=prepareRaw(rawFromRuntime(currentBasePlan(s,i)));s.active=i;s.activePlanId=String(s.plans[i].i);writeState(s);persistCurrent(s.plans[i])}
+  function loadValuesForPlan(raw){const state=safe(()=>window.KGGPatientStorageV7&&window.KGGPatientStorageV7.load(raw,p));if(state){v=state.values;done=state.done.map(Number).filter(n=>n>=1&&n<=p.days);return}safe(()=>{v=read(sk(),'{}')});safe(()=>{done=read(dk(),'[]').map(Number).filter(n=>n>=1&&n<=p.days)})}
+  function switchTo(idx){let s=ensureState();if(!s.plans[idx])return false;if(String(s.activePlanId)===String(s.plans[idx].i))return true;saveCurrentSlot();s=ensureState();if(!s.plans[idx])return false;s.active=idx;s.activePlanId=String(s.plans[idx].i);const raw=s.plans[idx];writeState(s);p=runtimeFromRaw(raw);persistCurrent(raw);loadValuesForPlan(raw);safe(()=>save());safe(()=>render());pokeMedia();safe(()=>setStatus(t('Plan gewechselt. Werte bleiben erhalten.','Plan switched. Values kept.'),'ok'));return true}
 
   function currentHas(name){const key=norm(name);return Array.isArray(p?.ex)&&p.ex.some(ex=>norm(ex.n)===key)}
   function collectDb(){
@@ -82,8 +84,8 @@
     if(!ex||currentHas(ex.n)){closeDb();return}
     saveCurrentSlot();
     p.ex=p.ex||[];p.ex.push({...ex});
-    const s=ensureState();const i=Math.max(0,Math.min(Number(s.active)||0,s.plans.length-1));
-    s.plans[i]=rawFromRuntime(currentBasePlan(s,i));writeState(s);persistCurrent(s.plans[i]);
+    const s=ensureState();const i=activeIndex(s);
+    s.plans[i]=prepareRaw(rawFromRuntime(currentBasePlan(s,i)));s.active=i;s.activePlanId=String(s.plans[i].i);writeState(s);persistCurrent(s.plans[i]);
     safe(()=>save());safe(()=>render());pokeMedia();safe(()=>setStatus(t('Übung aus Datenbank hinzugefügt.','Exercise added from database.'),'ok'));
     closeDb();
   }

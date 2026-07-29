@@ -141,6 +141,8 @@ jobs:
           node release-pipeline/kgg_patient_plan_delete_smoke.js
           node release-pipeline/kgg_patient_summary_smoke.js
           node release-pipeline/kgg_patient_gpt_browser_smoke.js
+          node release-pipeline/kgg_patient_storage_v7_regression.js --round=1 --iterations=5
+          node release-pipeline/kgg_patient_storage_v7_regression.js --round=2 --iterations=5
 
       - name: Run patient interface regression
         if: inputs.mode != 'validate_only' && steps.gate.outputs.run_patient_scan == 'true'
@@ -158,6 +160,8 @@ jobs:
           path: |
             preview/previews/${{ inputs.request_id }}/
             base/CHANGELOG_PATIENT_APP.md
+            base/tmp/patient-storage-v7/
+            base/docs/patient-storage-v7-supervision.md
 
       - name: Publish isolated patient preview
         if: inputs.mode == 'publish_preview'

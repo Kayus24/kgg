@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Architecture
 
-Generated retrieval pack. Source digest: `15d22e38e75f87b7`.
+Generated retrieval pack. Source digest: `05f0bb131aad9392`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -17,7 +17,7 @@ Reload before every diagnosis involving current code and before every Preview, P
 
 - Repository: `https://github.com/Kayus24/kgg`, branch `main`.
 - Live patient app: `https://kayus24.github.io/kgg/`.
-- Current patient PWA version from `service-worker.js`: `v69`.
+- Current patient PWA version from `service-worker.js`: `v70`.
 - Recovery: `https://kayus24.github.io/kgg/update-recovery.html`.
 - Isolated preview host: `https://kayus24.github.io/kgg-patient-preview/`.
 - Patient Preview workflow: `.github/workflows/kgg-patient-gpt-preview-gate.yml`.
@@ -51,6 +51,7 @@ Reload before every diagnosis involving current code and before every Preview, P
 - `patient-set-summary-groups.js`
 - `patient-start-scan.js`
 - `patient-start-values-day1.js`
+- `patient-storage-v7.js`
 - `patient-ui-micro-polish.js`
 - `patient-version-label.js`
 

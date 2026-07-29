@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='plan-delete-v1-safe';
+  const VERSION='plan-delete-v2-stable-plan-id';
   const MULTI_KEY='kggPatientMultiPlansV1';
   const CURRENT_KEY='kggCurrentPlanV1';
   const MEDIA_DB='kgg_patient_media_v1';
@@ -25,7 +25,8 @@
     const text=JSON.stringify({i:raw.i||'plan',t:raw.t||'KGG Trainingsplan',e:ex});
     let h=2166136261;for(let i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)
   }
-  function planStoragePrefix(raw){return 'kgg-'+String(raw&&raw.i||'plan')+'-'+planHash(raw||{})}
+  function stableHash(value){let h=2166136261,text=String(value||'');for(let i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)}
+  function planStoragePrefix(raw){return window.KGGPatientStorageV7?window.KGGPatientStorageV7.stableBase(raw):'kgg-v7-'+stableHash(String(raw&&raw.i||''))}
   function planStorageKeys(raw){const base=planStoragePrefix(raw);return[base+'-values',base+'-done',base+'-meta']}
   function mediaIds(raw){
     const ids=new Set();
@@ -39,15 +40,18 @@
     const state=clone(source||{});state.plans=Array.isArray(state.plans)?state.plans:[];
     const idx=Number(index);
     if(state.plans.length<=1||!Number.isInteger(idx)||idx<0||idx>=state.plans.length)return{ok:false,state,removed:null,newActive:Number(state.active)||0,activeRemoved:false};
-    const oldActive=Math.max(0,Math.min(Number(state.active)||0,state.plans.length-1));
+    const byId=String(state.activePlanId||''),byIdIndex=byId?state.plans.findIndex(raw=>String(raw&&raw.i||'')===byId):-1;
+    const oldActive=byIdIndex>=0?byIdIndex:Math.max(0,Math.min(Number(state.active)||0,state.plans.length-1));
     const removed=state.plans[idx];state.plans.splice(idx,1);
     let newActive=oldActive;
     if(idx===oldActive)newActive=Math.min(idx,state.plans.length-1);
     else if(idx<oldActive)newActive=oldActive-1;
     state.active=Math.max(0,newActive);
+    state.activePlanId=String(state.plans[state.active]&&state.plans[state.active].i||'');
+    state.version=Math.max(2,Number(state.version)||0);
     return{ok:true,state,removed,newActive:state.active,activeRemoved:idx===oldActive}
   }
-  function removeLocalPlanKeys(raw){planStorageKeys(raw).forEach(key=>localStorage.removeItem(key))}
+  function removeLocalPlanKeys(raw){if(window.KGGPatientStorageV7){window.KGGPatientStorageV7.removePlan(raw);return}planStorageKeys(raw).forEach(key=>localStorage.removeItem(key))}
   function deleteMediaRecords(removed,remaining){
     if(!('indexedDB'in window))return Promise.resolve();
     const keep=new Set();(remaining||[]).forEach(raw=>mediaIds(raw).forEach(id=>keep.add(id)));
@@ -55,8 +59,10 @@
     return new Promise(resolve=>{const req=indexedDB.open(MEDIA_DB,1);req.onerror=()=>resolve();req.onupgradeneeded=()=>resolve();req.onsuccess=()=>{const db=req.result;try{const tx=db.transaction(MEDIA_STORE,'readwrite');ids.forEach(id=>tx.objectStore(MEDIA_STORE).delete(id));tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();resolve()}}catch(e){db.close();resolve()}}})
   }
   function loadActive(raw){
-    window.p=runtimeFromRaw(raw);persistCurrent(raw);
-    safe(()=>{window.v=read(sk(),'{}')});safe(()=>{window.done=read(dk(),'[]').map(Number).filter(n=>n>=1&&n<=p.days)});
+    p=runtimeFromRaw(raw);persistCurrent(raw);
+    const state=safe(()=>window.KGGPatientStorageV7&&window.KGGPatientStorageV7.load(raw,p));
+    if(state){v=state.values;done=state.done.map(Number).filter(n=>n>=1&&n<=p.days)}
+    else{safe(()=>{v=read(sk(),'{}')});safe(()=>{done=read(dk(),'[]').map(Number).filter(n=>n>=1&&n<=p.days)})}
     safe(()=>save());safe(()=>render());
     [80,300,900].forEach(delay=>setTimeout(()=>{safe(()=>window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.prefetch&&window.KGGPatientMediaRetryCache.prefetch());safe(()=>window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.render&&window.KGGPatientMediaRetryCache.render())},delay))
   }
@@ -88,6 +94,6 @@
     const button=document.createElement('button');button.type='button';button.id='kggBubblePlans';button.className='kggBubble';button.textContent='🗂 '+t('Pläne','Plans');button.onclick=e=>{e.preventDefault();e.stopPropagation();const fab=$('kggActionFab');box.hidden=true;if(fab)fab.classList.remove('open');openPanel()};box.appendChild(button)
   }
   function init(){ensureDom();ensureButton();setInterval(ensureButton,500)}
-  if(window.__KGG_TEST__)window.__kggPlanDeleteTest={removePlanState,planStoragePrefix,planStorageKeys,mediaIds};
+  if(window.__KGG_TEST__)window.__kggPlanDeleteTest={removePlanState,removeLocalPlanKeys,planStoragePrefix,planStorageKeys,mediaIds};
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init,{once:true}):init()
 })();

@@ -45,6 +45,7 @@ jobs:
           pwa_contract=false
           patient_summary=false
           patient_gpt=false
+          patient_storage=false
           while IFS= read -r path; do
             [[ -z "$path" ]] && continue
             case "$path" in
@@ -57,12 +58,14 @@ jobs:
           if grep -Eq '^index\.html$|^update-recovery\.html$|^manifest\.json$|^manifest-v[0-9]+\.webmanifest$|^service-worker\.js$|^patient-version-label\.js$|^kgg-icon-.*\.png$|^release-pipeline/kgg_(pwa_contract|update_recovery)_smoke\.py$' "$changed_file"; then pwa_contract=true; fi
           if grep -Eq '^patient-set-summary-groups\.js$|^release-pipeline/kgg_patient_summary_smoke\.js$' "$changed_file"; then patient_summary=true; fi
           if grep -Eq '^docs/kgg-patient-|^release-pipeline/kgg_patient_gpt_|^\.github/workflows/kgg-patient-gpt-preview-gate\.yml$|^release-pipeline/kgg_custom_gpt_resource_audit\.py$' "$changed_file"; then patient_gpt=true; fi
+          if grep -Eq '^index\.html$|^service-worker\.js$|^patient-(storage-v7|multiplan-db|plan-delete|start-scan)\.js$|^release-pipeline/kgg_patient_storage_v7_regression\.js$' "$changed_file"; then patient_storage=true; fi
           echo "pipeline_only=$pipeline_only" >> "$GITHUB_OUTPUT"
           echo "ui_or_html=$ui_or_html" >> "$GITHUB_OUTPUT"
           echo "patient_scan=$patient_scan" >> "$GITHUB_OUTPUT"
           echo "pwa_contract=$pwa_contract" >> "$GITHUB_OUTPUT"
           echo "patient_summary=$patient_summary" >> "$GITHUB_OUTPUT"
           echo "patient_gpt=$patient_gpt" >> "$GITHUB_OUTPUT"
+          echo "patient_storage=$patient_storage" >> "$GITHUB_OUTPUT"
       - name: Run critical KGG test battery
         shell: bash
         env:
@@ -96,7 +99,7 @@ jobs:
           python release-pipeline/kgg_patient_gpt_write_gate.py --self-test
           python release-pipeline/kgg_patient_gpt_eval.py
       - name: Install Patient GPT browser dependencies
-        if: steps.scope.outputs.patient_gpt == 'true'
+        if: steps.scope.outputs.patient_gpt == 'true' || steps.scope.outputs.patient_storage == 'true'
         shell: bash
         run: |
           cd release-pipeline
@@ -106,6 +109,12 @@ jobs:
         if: steps.scope.outputs.patient_gpt == 'true'
         shell: bash
         run: node release-pipeline/kgg_patient_gpt_browser_smoke.js
+      - name: Run patient storage v7 regression twice
+        if: steps.scope.outputs.patient_storage == 'true'
+        shell: bash
+        run: |
+          node release-pipeline/kgg_patient_storage_v7_regression.js --round=1 --iterations=5
+          node release-pipeline/kgg_patient_storage_v7_regression.js --round=2 --iterations=5
       - name: Check Custom GPT live context freshness
         shell: bash
         run: python release-pipeline/kgg_gpt_context.py --check

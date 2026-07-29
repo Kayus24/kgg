@@ -50,7 +50,7 @@ def main() -> int:
                 "exakte Fuenf-Felder-Form",
                 "vollstaendige ausgeschriebene `https://`-Klartext-URLs",
                 "Leere oder nur beschriftete Markdown-Links sind kein Nachweis",
-                "patient-v1",
+                "Profilversion `1.0.2`",
             ),
         )
         require(

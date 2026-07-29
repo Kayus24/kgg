@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='start-scan-v8-plan-replace';
+  const VERSION='start-scan-v9-stable-plan-id';
   if(window.__kggStartScanVersion===VERSION)return;
   window.__kggStartScanVersion=VERSION;
   const LANG_KEY='kggPatientLang';
@@ -13,6 +13,7 @@
   function b64dec(s){s=String(s||'').replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return decodeURIComponent(escape(atob(s)));}
   function normName(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9äöüß]+/g,' ').replace(/\s+/g,' ').trim();}
   function clone(x){try{return JSON.parse(JSON.stringify(x||{}))}catch(e){return x&&typeof x==='object'?{...x}:{}}}
+  function prepareRaw(raw){return window.KGGPatientStorageV7?window.KGGPatientStorageV7.prepareRaw(raw):clone(raw)}
   function storedCurrentPlan(){try{const saved=JSON.parse(localStorage.getItem(PLAN_KEY)||'null');return saved&&saved.plan&&typeof saved.plan==='object'?saved.plan:null}catch(e){return null}}
   function mergeRawBase(current,next){return {...clone(current),...clone(next)}}
   function hasMediaValue(value){if(Array.isArray(value))return value.length>0;if(value&&typeof value==='object')return true;return String(value||'').trim()!==''}
@@ -22,12 +23,40 @@
   function takeExerciseRaw(pools,key){const pool=pools.get(key);return pool&&pool.length?pool.shift():null;}
   function rawFromCurrent(baseRaw){const raw=clone(baseRaw);raw.i=p&&p.id?p.id:raw.i||'plan';raw.t=p&&p.title?p.title:raw.t||'KGG Trainingsplan';raw.v=p&&p.version?p.version:raw.v||1;raw.d=p&&p.days?p.days:raw.d||6;raw.extendDays=p?p.extendDays!==false:raw.extendDays!==false;raw.stepDays=p&&p.stepDays?p.stepDays:raw.stepDays||6;const old=Array.isArray(raw.e)?raw.e:[];const pools=exerciseRawPools(old);raw.e=p&&Array.isArray(p.ex)?p.ex.map((ex,i)=>exRaw(ex,takeExerciseRaw(pools,normName(ex.n))||old[i])):old;return raw;}
   function mergeExerciseRaw(currentRaw,nextRaw){const current=Array.isArray(currentRaw)?currentRaw:[];const incoming=Array.isArray(nextRaw)?nextRaw:[];const next=exObj(incoming);const out=current.slice();out[0]=next.n;out[1]=next.sets;out[2]=next.side;out[3]=next.u;out[4]=next.m;out[5]=next.sl;out[6]=next.sm;[7,8,9,10].forEach(index=>{if(hasMediaValue(incoming[index]))out[index]=clone(incoming[index]);else if(out.length<=index)out[index]=index===9?'Video öffnen':index===10?'exercise':''});for(let index=11;index<incoming.length;index++)if(index in incoming)out[index]=clone(incoming[index]);return out;}
-  function syncMultiPlan(raw){try{let s=JSON.parse(localStorage.getItem(MULTI_KEY)||'null');if(!s||!Array.isArray(s.plans))s={version:1,plans:[],active:0,day:{}};if(typeof s.active!=='number'||s.active<0)s.active=0;if(!s.plans.length)s.plans.push(raw);else s.plans[Math.min(s.active,s.plans.length-1)]=raw;s.updatedAt=new Date().toISOString();localStorage.setItem(MULTI_KEY,JSON.stringify(s));}catch(e){}}
-  function storeCurrentPlan(raw){localStorage.setItem(PLAN_KEY,JSON.stringify({plan:raw,importedAt:new Date().toISOString()}));syncMultiPlan(raw);}
+  function syncMultiPlan(raw){try{raw=prepareRaw(raw);let s=JSON.parse(localStorage.getItem(MULTI_KEY)||'null');if(!s||!Array.isArray(s.plans))s={version:2,plans:[],active:0,activePlanId:'',day:{}};const wanted=String(s.activePlanId||raw.i||''),byId=wanted?s.plans.findIndex(plan=>String(plan&&plan.i||'')===wanted):-1;let index=byId>=0?byId:Math.max(0,Math.min(Number(s.active)||0,Math.max(0,s.plans.length-1)));if(!s.plans.length){s.plans.push(raw);index=0}else s.plans[index]=raw;s.version=2;s.active=index;s.activePlanId=String(raw.i);s.updatedAt=new Date().toISOString();localStorage.setItem(MULTI_KEY,JSON.stringify(s));}catch(e){}}
+  function storeCurrentPlan(raw){raw=prepareRaw(raw);const previous=storedCurrentPlan();try{window.KGGPatientStorageV7&&window.KGGPatientStorageV7.rememberPrevious(previous,raw)}catch(e){}localStorage.setItem(PLAN_KEY,JSON.stringify({plan:raw,importedAt:new Date().toISOString()}));syncMultiPlan(raw);return raw;}
   function planPayloadFromText(raw){const first=String(raw||'');const variants=[first];try{variants.push(decodeURIComponent(first))}catch(e){}try{const url=new URL(first,location.href);['plan','kgg'].forEach(key=>{const value=url.searchParams.get(key);if(value){variants.push(value);try{variants.push(decodeURIComponent(value))}catch(e){}}});if(url.hash)variants.push(url.hash)}catch(e){}for(const value of variants){const m=String(value||'').match(/KGGH2(?::|%3A)([A-Za-z0-9_-]+)/i);if(m&&m[1])return m[1]}return ''}
   function parsePlanFromText(raw){const payload=planPayloadFromText(raw);if(!payload)return null;try{return JSON.parse(b64dec(payload))}catch(e){return null}}
   function pokeMedia(){[80,300,900].forEach(delay=>setTimeout(()=>{try{window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.prefetch&&window.KGGPatientMediaRetryCache.prefetch()}catch(e){}try{window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.render&&window.KGGPatientMediaRetryCache.render()}catch(e){}},delay));}
-  function mergePlanUpdate(nextRaw){if(!ready()||!nextRaw||!Array.isArray(nextRaw.e))return false;try{safeSave()}catch(e){}const current=rawFromCurrent(storedCurrentPlan()||{});const mergedRaw=(Array.isArray(current.e)?current.e:[]).map(clone);const index=new Map();mergedRaw.forEach((raw,i)=>{const key=normName(Array.isArray(raw)?raw[0]:'');if(key&&!index.has(key))index.set(key,i)});let added=0;nextRaw.e.forEach(incoming=>{const key=normName(Array.isArray(incoming)?incoming[0]:'');if(key&&index.has(key)){const i=index.get(key);mergedRaw[i]=mergeExerciseRaw(mergedRaw[i],incoming);}else{const next=clone(incoming);mergedRaw.push(next);if(key)index.set(key,mergedRaw.length-1);added++;}});const baseRaw={...clone(current),...clone(nextRaw),e:mergedRaw};p.id=current.i||nextRaw.i||'plan';p.title=nextRaw.t||current.t;p.version=Number(nextRaw.v)||current.v||1;p.days=Math.max(Number(current.d)||6,Number(nextRaw.d)||6);p.extendDays=nextRaw.extendDays!==false;p.stepDays=Number(nextRaw.stepDays)||Number(current.stepDays)||6;p.ex=mergedRaw.map(exObj);const out=rawFromCurrent(baseRaw);storeCurrentPlan(out);try{save()}catch(e){}try{render()}catch(e){}pokeMedia();try{setStatus(tr('Plan aktualisiert. Werte behalten. Neue Übungen: ','Plan updated. Values kept. New exercises: ')+added,'ok')}catch(e){}return true;}
+  function mergePlanUpdate(nextRaw){
+    if(!ready()||!nextRaw||!Array.isArray(nextRaw.e))return false;
+    try{safeSave()}catch(e){}
+    const current=prepareRaw(rawFromCurrent(storedCurrentPlan()||{}));
+    const mergedRaw=(Array.isArray(current.e)?current.e:[]).map(clone),pools=new Map();
+    mergedRaw.forEach((raw,index)=>{
+      const key=normName(Array.isArray(raw)?raw[0]:'');
+      if(!key)return;
+      const pool=pools.get(key)||[];pool.push(index);pools.set(key,pool);
+    });
+    let added=0;
+    nextRaw.e.forEach(incoming=>{
+      const key=normName(Array.isArray(incoming)?incoming[0]:'');
+      const pool=key?pools.get(key):null;
+      if(pool&&pool.length){
+        const index=pool.shift();mergedRaw[index]=mergeExerciseRaw(mergedRaw[index],incoming);
+      }else{
+        mergedRaw.push(clone(incoming));added++;
+      }
+    });
+    const baseRaw={...clone(current),...clone(nextRaw),i:current.i,e:mergedRaw};
+    p.id=current.i;p.title=nextRaw.t||current.t;p.version=Number(nextRaw.v)||current.v||1;
+    p.days=Math.max(Number(current.d)||6,Number(nextRaw.d)||6);p.extendDays=nextRaw.extendDays!==false;
+    p.stepDays=Number(nextRaw.stepDays)||Number(current.stepDays)||6;p.ex=mergedRaw.map(exObj);
+    const out=storeCurrentPlan(rawFromCurrent(baseRaw));p.id=out.i;
+    try{save()}catch(e){}try{render()}catch(e){}pokeMedia();
+    try{setStatus(tr('Plan aktualisiert. Werte behalten. Neue Übungen: ','Plan updated. Values kept. New exercises: ')+added,'ok')}catch(e){}
+    return true;
+  }
   function normSide(side){const x=normName(side);return side==='LR'||x==='lr'||x.includes('links rechts')||x.includes('left right')?'LR':'B';}
   function normUnit(unit){const x=normName(unit).replace(/\s+/g,'');if(!x||x==='keine'||x==='none'||x==='-')return'';if(['wdh','wiederholung','wiederholungen','rep','reps'].includes(x))return'reps';if(['s','sek','sekunde','sekunden','sec','secs','second','seconds'].includes(x))return'sec';if(['min','minute','minuten','mins','minutes'].includes(x))return'min';if(['kg','kilogramm','kilogram','kilograms'].includes(x))return'kg';if(['stufe','level'].includes(x))return'level';if(['w','watt'].includes(x))return'watt';return x;}
   function sameUnit(a,b){const x=normUnit(a),y=normUnit(b);return !!x&&x===y;}

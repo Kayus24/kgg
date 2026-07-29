@@ -1,10 +1,3 @@
-# KGG Patient Source Chunk 026
-
-- Source file: `patient-storage-v7.js`
-- Characters: 1-13571
-- Full source SHA-256: `d084e249c1eb17b396edf1f1bbedd356ccb1d56d4aef831432b5ab191b4895a6`
-
-```
 (()=>{
   'use strict';
   const VERSION='patient-storage-v7-stable-plan-id';
@@ -254,4 +247,3 @@
     legacyBase,legacyKeys,hash:hashText,exerciseRefs,remapValues,normName,normSide,normUnit,rawFromRuntime
   };
 })();
-```
