@@ -43,3 +43,10 @@ jobs:
               ! unzip -p "$apk" "$dex" | strings | grep -Eq 'KggReleaseBridge|KGGReleaseControl|Update-Zentrale'
             done
           done
+      - name: Upload Preview scanner APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgg-preview-ocr-scanner-${{ github.event.pull_request.number }}
+          path: android-wrapper/app/build/outputs/apk/preview/debug/app-preview-debug.apk
+          if-no-files-found: error
+          retention-days: 14

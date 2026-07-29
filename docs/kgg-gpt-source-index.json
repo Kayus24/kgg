@@ -389,15 +389,45 @@
       "startLine": 26461
     },
     {
-      "endLine": 27254,
+      "endLine": 27300,
       "name": "chunk-064.md",
       "path": "docs/kgg-gpt-source/chunk-064.md",
       "startLine": 26881
+    },
+    {
+      "endLine": 27720,
+      "name": "chunk-065.md",
+      "path": "docs/kgg-gpt-source/chunk-065.md",
+      "startLine": 27301
+    },
+    {
+      "endLine": 28140,
+      "name": "chunk-066.md",
+      "path": "docs/kgg-gpt-source/chunk-066.md",
+      "startLine": 27721
+    },
+    {
+      "endLine": 28560,
+      "name": "chunk-067.md",
+      "path": "docs/kgg-gpt-source/chunk-067.md",
+      "startLine": 28141
+    },
+    {
+      "endLine": 28980,
+      "name": "chunk-068.md",
+      "path": "docs/kgg-gpt-source/chunk-068.md",
+      "startLine": 28561
+    },
+    {
+      "endLine": 29034,
+      "name": "chunk-069.md",
+      "path": "docs/kgg-gpt-source/chunk-069.md",
+      "startLine": 28981
     }
   ],
   "kind": "kgg_gpt_source_index",
   "linesPerChunk": 420,
   "sourcePath": "kgg-update/src",
-  "sourceSha256": "83e1aebd31f956f1976085fc65671f5075b2c3e2d55c150bfac0cdbfa5e53cfb",
+  "sourceSha256": "abc8c89d98d4bc54a97fa5ef1ea3d34d2f3e861d1c1b3412f4aa4fe591578824",
   "version": 1
 }

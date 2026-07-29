@@ -1,7 +1,7 @@
 # KGG Source Chunk 064
 
 - Source: `kgg-update/src` modular source
-- Lines: 26881-27254
+- Lines: 26881-27300
 
 ```html
       z-index:82!important;
@@ -378,4 +378,50 @@
 
 </body>
 </html>
+
+<!-- SOURCE FILE: android-wrapper/app/build.gradle -->
+plugins {
+    id "com.android.application"
+}
+
+android {
+    namespace "de.kgg.app"
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "de.kgg.app"
+        minSdk 26
+        targetSdk 36
+        versionCode 33
+        versionName "0.2.11-v401-share-apk-provider"
+        manifestPlaceholders = [appLabel: "KGG Physio"]
+        buildConfigField "String", "KGG_GITHUB_CLIENT_ID", "\"${project.findProperty('KGG_GITHUB_CLIENT_ID') ?: ''}\""
+    }
+
+    buildFeatures { buildConfig true }
+
+    flavorDimensions "profile"
+    productFlavors {
+        kollegen {
+            dimension "profile"
+            applicationId "de.kgg.app"
+            manifestPlaceholders = [appLabel: "KGG Kolleg:innen"]
+        }
+        admin {
+            dimension "profile"
+            applicationId "de.kgg.admin"
+            manifestPlaceholders = [appLabel: "KGG Admin"]
+        }
+        preview {
+            dimension "profile"
+            applicationId "de.kgg.preview"
+            manifestPlaceholders = [appLabel: "KGG Preview"]
+        }
+    }
+
+    sourceSets {
+        admin.assets.srcDir layout.buildDirectory.dir("generated/kggAssets/admin")
+        kollegen.assets.srcDir layout.buildDirectory.dir("generated/kggAssets/kollegen")
+        preview.assets.srcDir layout.buildDirectory.dir("generated/kggAssets/preview")
+    }
 ```

@@ -2,7 +2,7 @@
 
 This generated compatibility pack contains the complete production knowledge set. Prefer the four smaller curated packs in the GPT editor so retrieval stays focused.
 
-Source digest: `8a83b0ee0d17e99e`
+Source digest: `7b7affbbb82b958e`
 
 ## Usage Rules
 
@@ -1177,6 +1177,14 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Caution: - App-Feature-Code - PDF - QR/Patienten-App - Scan/OCR - Parser - Plan-State - Medien/Upload - Android/APK, ausser Max fragt explizit danach - PDF - QR/Patienten-App - Scan/OCR - Parser - Plan-State - Medien/Upload - Android/APK - GitHub Manifest - Handy-Layout
 - Tests: - Payload mit geschuetztem Token im Patch-Kommentar wird im Preflight geblockt. - GPT-Eval `failed-preview-run` verlangt den echten roten Step. - GPT-Eval `protected-token-payload` verlangt Stop vor Dispatch. - UI-Stability-Probe `tablet-splitter-scale-drag` prueft die konkrete Bedienlogik. - GPT-Eval `tablet-splitter` muss die richtigen Klassen, Variablen u
 
+### 2026-07-29 - OCR-Kamera und nativer Scanner
+
+- Source: `docs/bug-debug/2026-07-29-ocr-camera-native-scanner.md`
+- Areas: debug, phone-layout, scan-camera
+- Lesson: Die Test-App startete die rueckseitige Systemkamera mit einem optisch starken Zoom. Ein vorheriger HTML-Preview-Patch versuchte das ueber den Datei-Input zu beheben, umging dabei aber die native Picker-Modus-Meldung und beschaedigte den automatischen Scan-Ablauf.
+- Caution: Keep patch scoped to the requested area.
+- Tests: - Android-Vertrag gruen. - Preview-Debug-APK baut lokal gruen. - Vollstaendige Critical-Batterie gruen. - UI-Stability Regression isoliert gruen. - API-35-Emulator: APK installiert und gestartet, kein App-Crash. - ML-Kit-Modul war im Emulator nicht ladbar; der neue technische Fallback erreichte nachweisbar die bestehende Kamera-Berechtigungsabfrage.
+
 ### 2026-07-29 - Preview-Marker und Default-Branch-Drift
 
 - Source: `docs/bug-debug/2026-07-29-preview-marker-default-branch-drift.md`
@@ -1315,7 +1323,7 @@ Use these patterns to avoid repeating known KGG regressions.
 
 # KGG GPT Area Routes
 
-Generated from `kgg-update/src` modular source. Use this before loading source chunks.
+Generated from the modular web source and fixed read-only Android context. Use this before loading source chunks.
 
 ## tablet-layout
 
@@ -1369,14 +1377,18 @@ Generated from `kgg-update/src` modular source. Use this before loading source c
 
 ## android-apk
 
-- Triggers: `apk`, `android`, `preview app`, `icon`
-- Source chunks: `docs/kgg-gpt-source/chunk-042.md`, `docs/kgg-gpt-source/chunk-047.md`, `docs/kgg-gpt-source/chunk-048.md`
-- Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `GitHub android-wrapper-check must build assemblePreviewDebug when APK output matters.`
-- Notes: Android/APK is protected unless Max explicitly asks for it.
+- Triggers: `apk`, `android`, `preview app`, `icon`, `kamera`, `camera`, `zoom`, `scanner`
+- Source chunks: `docs/kgg-gpt-source/chunk-042.md`, `docs/kgg-gpt-source/chunk-047.md`, `docs/kgg-gpt-source/chunk-048.md`, `docs/kgg-gpt-source/chunk-055.md`, `docs/kgg-gpt-source/chunk-065.md`, `docs/kgg-gpt-source/chunk-066.md`, `docs/kgg-gpt-source/chunk-068.md`, `docs/kgg-gpt-source/chunk-069.md`
+- Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite android --level critical`; `GitHub android-wrapper-check must build assemblePreviewDebug when APK output matters.`
+- Notes: Android/APK is protected unless Max explicitly asks for it. Camera behavior must be traced from the HTML picker through the native bridge and MainActivity before proposing a patch.
 - Markers:
-  - `KGGAndroidPdf`: not found
+  - `KGGAndroidPdf`: `docs/kgg-gpt-source/chunk-065.md` line 27567
   - `KGGNativeSync`: `docs/kgg-gpt-source/chunk-042.md` line 18004
-  - `PREVIEW_MANIFEST_URL`: not found
+  - `PREVIEW_MANIFEST_URL`: `docs/kgg-gpt-source/chunk-065.md` line 27466
+  - `onShowFileChooser`: `docs/kgg-gpt-source/chunk-065.md` line 27579
+  - `ACTION_IMAGE_CAPTURE`: `docs/kgg-gpt-source/chunk-066.md` line 27930
+  - `setNextFileChooserMode`: `docs/kgg-gpt-source/chunk-055.md` line 23449
+  - `GmsDocumentScanner`: `docs/kgg-gpt-source/chunk-065.md` line 27421
 
 ## sync
 

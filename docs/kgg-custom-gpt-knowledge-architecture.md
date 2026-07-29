@@ -2,7 +2,7 @@
 
 Generated production knowledge for live app structure, source routing and current release context.
 
-Source digest: `c0c943e16e775c99`
+Source digest: `66b2925dc87bff24`
 
 ## Usage Rules
 
@@ -153,7 +153,7 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 # KGG GPT Area Routes
 
-Generated from `kgg-update/src` modular source. Use this before loading source chunks.
+Generated from the modular web source and fixed read-only Android context. Use this before loading source chunks.
 
 ## tablet-layout
 
@@ -207,14 +207,18 @@ Generated from `kgg-update/src` modular source. Use this before loading source c
 
 ## android-apk
 
-- Triggers: `apk`, `android`, `preview app`, `icon`
-- Source chunks: `docs/kgg-gpt-source/chunk-042.md`, `docs/kgg-gpt-source/chunk-047.md`, `docs/kgg-gpt-source/chunk-048.md`
-- Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `GitHub android-wrapper-check must build assemblePreviewDebug when APK output matters.`
-- Notes: Android/APK is protected unless Max explicitly asks for it.
+- Triggers: `apk`, `android`, `preview app`, `icon`, `kamera`, `camera`, `zoom`, `scanner`
+- Source chunks: `docs/kgg-gpt-source/chunk-042.md`, `docs/kgg-gpt-source/chunk-047.md`, `docs/kgg-gpt-source/chunk-048.md`, `docs/kgg-gpt-source/chunk-055.md`, `docs/kgg-gpt-source/chunk-065.md`, `docs/kgg-gpt-source/chunk-066.md`, `docs/kgg-gpt-source/chunk-068.md`, `docs/kgg-gpt-source/chunk-069.md`
+- Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite android --level critical`; `GitHub android-wrapper-check must build assemblePreviewDebug when APK output matters.`
+- Notes: Android/APK is protected unless Max explicitly asks for it. Camera behavior must be traced from the HTML picker through the native bridge and MainActivity before proposing a patch.
 - Markers:
-  - `KGGAndroidPdf`: not found
+  - `KGGAndroidPdf`: `docs/kgg-gpt-source/chunk-065.md` line 27567
   - `KGGNativeSync`: `docs/kgg-gpt-source/chunk-042.md` line 18004
-  - `PREVIEW_MANIFEST_URL`: not found
+  - `PREVIEW_MANIFEST_URL`: `docs/kgg-gpt-source/chunk-065.md` line 27466
+  - `onShowFileChooser`: `docs/kgg-gpt-source/chunk-065.md` line 27579
+  - `ACTION_IMAGE_CAPTURE`: `docs/kgg-gpt-source/chunk-066.md` line 27930
+  - `setNextFileChooserMode`: `docs/kgg-gpt-source/chunk-055.md` line 23449
+  - `GmsDocumentScanner`: `docs/kgg-gpt-source/chunk-065.md` line 27421
 
 ## sync
 

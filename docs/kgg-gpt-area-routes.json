@@ -1,4 +1,10 @@
 {
+  "contextPaths": [
+    "android-wrapper/app/build.gradle",
+    "android-wrapper/app/src/main/AndroidManifest.xml",
+    "android-wrapper/app/src/main/java/de/kgg/app/MainActivity.java",
+    "android-wrapper/app/src/main/assets/android/kgg_android_sync_bootstrap.js"
+  ],
   "kind": "kgg_gpt_area_routes",
   "linesPerChunk": 420,
   "routes": [
@@ -216,10 +222,10 @@
       "id": "android-apk",
       "markers": [
         {
-          "chunk": null,
-          "line": null,
+          "chunk": "chunk-065.md",
+          "line": 27567,
           "marker": "KGGAndroidPdf",
-          "path": null
+          "path": "docs/kgg-gpt-source/chunk-065.md"
         },
         {
           "chunk": "chunk-042.md",
@@ -228,27 +234,61 @@
           "path": "docs/kgg-gpt-source/chunk-042.md"
         },
         {
-          "chunk": null,
-          "line": null,
+          "chunk": "chunk-065.md",
+          "line": 27466,
           "marker": "PREVIEW_MANIFEST_URL",
-          "path": null
+          "path": "docs/kgg-gpt-source/chunk-065.md"
+        },
+        {
+          "chunk": "chunk-065.md",
+          "line": 27579,
+          "marker": "onShowFileChooser",
+          "path": "docs/kgg-gpt-source/chunk-065.md"
+        },
+        {
+          "chunk": "chunk-066.md",
+          "line": 27930,
+          "marker": "ACTION_IMAGE_CAPTURE",
+          "path": "docs/kgg-gpt-source/chunk-066.md"
+        },
+        {
+          "chunk": "chunk-055.md",
+          "line": 23449,
+          "marker": "setNextFileChooserMode",
+          "path": "docs/kgg-gpt-source/chunk-055.md"
+        },
+        {
+          "chunk": "chunk-065.md",
+          "line": 27421,
+          "marker": "GmsDocumentScanner",
+          "path": "docs/kgg-gpt-source/chunk-065.md"
         }
       ],
-      "notes": "Android/APK is protected unless Max explicitly asks for it.",
+      "notes": "Android/APK is protected unless Max explicitly asks for it. Camera behavior must be traced from the HTML picker through the native bridge and MainActivity before proposing a patch.",
       "sourceChunks": [
         "docs/kgg-gpt-source/chunk-042.md",
         "docs/kgg-gpt-source/chunk-047.md",
-        "docs/kgg-gpt-source/chunk-048.md"
+        "docs/kgg-gpt-source/chunk-048.md",
+        "docs/kgg-gpt-source/chunk-055.md",
+        "docs/kgg-gpt-source/chunk-065.md",
+        "docs/kgg-gpt-source/chunk-066.md",
+        "docs/kgg-gpt-source/chunk-068.md",
+        "docs/kgg-gpt-source/chunk-069.md"
       ],
       "tests": [
         "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
+        "cmd /c release-pipeline\\run-kgg-tests.cmd --suite android --level critical",
         "GitHub android-wrapper-check must build assemblePreviewDebug when APK output matters."
       ],
       "triggers": [
         "apk",
         "android",
         "preview app",
-        "icon"
+        "icon",
+        "kamera",
+        "camera",
+        "zoom",
+        "scanner"
       ]
     },
     {

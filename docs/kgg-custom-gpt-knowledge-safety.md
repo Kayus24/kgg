@@ -2,7 +2,7 @@
 
 Generated production knowledge for protected areas, regression history and safe patch patterns.
 
-Source digest: `c6364447902e9a49`
+Source digest: `a5d00e3c9cd93bd3`
 
 ## Usage Rules
 
@@ -197,6 +197,14 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Lesson: Der Custom GPT kann bei Preview-/Beta-Anfragen plausibel antworten, obwohl der GitHub-Run bereits fehlgeschlagen ist. Ein konkreter Fehler war: Die Antwort deutete einen fehlenden Preview-Manifest-Eintrag als "noch nicht veroeffentlicht", obwohl `Apply guarded GPT payload` rot war. Beim Tablet-Layout vermischt der GPT leicht zwei Bedienkonzepte: das alte Sca
 - Caution: - App-Feature-Code - PDF - QR/Patienten-App - Scan/OCR - Parser - Plan-State - Medien/Upload - Android/APK, ausser Max fragt explizit danach - PDF - QR/Patienten-App - Scan/OCR - Parser - Plan-State - Medien/Upload - Android/APK - GitHub Manifest - Handy-Layout
 - Tests: - Payload mit geschuetztem Token im Patch-Kommentar wird im Preflight geblockt. - GPT-Eval `failed-preview-run` verlangt den echten roten Step. - GPT-Eval `protected-token-payload` verlangt Stop vor Dispatch. - UI-Stability-Probe `tablet-splitter-scale-drag` prueft die konkrete Bedienlogik. - GPT-Eval `tablet-splitter` muss die richtigen Klassen, Variablen u
+
+### 2026-07-29 - OCR-Kamera und nativer Scanner
+
+- Source: `docs/bug-debug/2026-07-29-ocr-camera-native-scanner.md`
+- Areas: debug, phone-layout, scan-camera
+- Lesson: Die Test-App startete die rueckseitige Systemkamera mit einem optisch starken Zoom. Ein vorheriger HTML-Preview-Patch versuchte das ueber den Datei-Input zu beheben, umging dabei aber die native Picker-Modus-Meldung und beschaedigte den automatischen Scan-Ablauf.
+- Caution: Keep patch scoped to the requested area.
+- Tests: - Android-Vertrag gruen. - Preview-Debug-APK baut lokal gruen. - Vollstaendige Critical-Batterie gruen. - UI-Stability Regression isoliert gruen. - API-35-Emulator: APK installiert und gestartet, kein App-Crash. - ML-Kit-Modul war im Emulator nicht ladbar; der neue technische Fallback erreichte nachweisbar die bestehende Kamera-Berechtigungsabfrage.
 
 ### 2026-07-29 - Preview-Marker und Default-Branch-Drift
 

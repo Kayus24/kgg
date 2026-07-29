@@ -317,6 +317,26 @@ def run_android_wrapper_contract() -> None:
         ("applicationId \"de.kgg.preview\"", "Preview APK uses a separate package id"),
         ("manifestPlaceholders = [appLabel: \"KGG Preview\"]", "Preview APK has a distinct launcher label"),
         ("from(\"../../kgg-update/index.html\")", "Preview APK bundles current source HTML"),
+        (
+            "play-services-mlkit-document-scanner:16.0.0",
+            "Preview scanner must use the pinned ML Kit document scanner dependency",
+        ),
+        ('exclude group: "org.jetbrains.kotlin", module: "kotlin-stdlib-jdk7"', "ML Kit must not duplicate Kotlin JDK 7 classes"),
+        ('exclude group: "org.jetbrains.kotlin", module: "kotlin-stdlib-jdk8"', "ML Kit must not duplicate Kotlin JDK 8 classes"),
+        ("DOCUMENT_SCANNER_REQUEST = 4203", "Document scanner request code must stay separate"),
+        ("isPreviewProfile() && wantsCamera", "Document scanner canary must stay Preview-only"),
+        ("setGalleryImportAllowed(false)", "Document scanner must not replace the existing gallery flow"),
+        ("setPageLimit(1)", "Document scanner must preserve the single-image camera contract"),
+        ("RESULT_FORMAT_JPEG", "Document scanner must return an image to the existing OCR flow"),
+        ("SCANNER_MODE_FULL", "Document scanner must retain document detection and guided capture"),
+        ("startDocumentScannerOrCameraFallback", "Preview camera path must start the document scanner"),
+        ("areModulesAvailable(scanner)", "Document scanner module availability must be checked before launch"),
+        ("installDocumentScannerModule", "Missing document scanner module must be installed explicitly"),
+        ("ModuleInstallStatusUpdate.InstallState.STATE_COMPLETED", "Document scanner must wait for module installation"),
+        ("ModuleInstallStatusUpdate.InstallState.STATE_FAILED", "Module installation failure must be handled"),
+        ("startLegacyScannerFallback", "Document scanner must retain the existing camera fallback"),
+        ("GmsDocumentScanningResult.fromActivityResultIntent", "Document scanner result must be parsed"),
+        ("completeFileChooserResult", "Scanner and fallback must share one callback completion path"),
         ("assemblePreviewDebug", "Android workflow builds the Preview profile"),
         ("PREVIEW_MANIFEST_URL", "Preview APK loads the GPT preview channel"),
         ("gpt-preview/previews/index.json", "Preview APK points at the isolated preview manifest"),
@@ -333,6 +353,28 @@ def run_android_wrapper_contract() -> None:
     missing = [reason for token, reason in required if token not in haystacks]
     if missing:
         raise BatteryError("Android wrapper contract missing: " + ", ".join(missing))
+    if main_activity.count("onReceiveValue(result);") != 1:
+        raise BatteryError("File chooser results must have exactly one centralized callback completion.")
+    scanner_result_block = re.search(
+        r"if \(requestCode == DOCUMENT_SCANNER_REQUEST\) \{(?P<body>.*?)"
+        r"\n        if \(requestCode != FILE_CHOOSER_REQUEST",
+        main_activity,
+        re.DOTALL,
+    )
+    if not scanner_result_block:
+        raise BatteryError("Document scanner activity result handler is missing.")
+    scanner_body = scanner_result_block.group("body")
+    cancel_block = re.search(
+        r"if \(resultCode == RESULT_CANCELED\) \{(?P<body>.*?)\n            \}",
+        scanner_body,
+        re.DOTALL,
+    )
+    if not cancel_block or "completeFileChooserResult(null);" not in cancel_block.group("body"):
+        raise BatteryError("Document scanner cancellation must complete the chooser without a fallback.")
+    if "startLegacyScannerFallback" in cancel_block.group("body"):
+        raise BatteryError("User cancellation must not unexpectedly open the legacy camera.")
+    if ".addOnFailureListener(err -> startLegacyScannerFallback())" not in main_activity:
+        raise BatteryError("Document scanner technical failures must retain the legacy camera fallback.")
     if "if (window.KGGNativeSync || !window.KGGAndroidSync) return;" in bootstrap:
         raise BatteryError("Android bootstrap must not let Sync availability block PDF/Camera/AppUpdate bridges.")
     for density in ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]:
