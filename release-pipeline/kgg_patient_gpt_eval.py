@@ -46,6 +46,8 @@ def main() -> int:
                 "stale_base",
                 "human_preview_fail",
                 "risk_class=interface",
+                '"type": "replace_exact"',
+                "exakte Fuenf-Felder-Form",
                 "patient-v1",
             ),
         )
