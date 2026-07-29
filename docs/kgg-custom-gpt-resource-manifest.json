@@ -90,7 +90,7 @@
     "profileVersion": "1.0.0",
     "editorBootstrap": {
       "path": "docs/kgg-patient-custom-gpt-editor-bootstrap.md",
-      "sha256": "6655efcf02af8fd3ef16f1d604443d3bee04ab6c39c37d626dfb0f109fc0e188"
+      "sha256": "ca16c78043f575867a2bc52743cae622d5a69c9d288f57806dd6a2115eac6d9f"
     },
     "capabilities": {
       "webSearch": true,
@@ -125,7 +125,7 @@
       },
       {
         "path": "docs/kgg-patient-custom-gpt-action-api-openapi.yaml",
-        "sha256": "21e000f31c8a0f257760ed7e986e51361cac5fb0fdb0143fe19894634e305c7a"
+        "sha256": "456a1a9864d13edaa19cd8167d9d56bcc2a00184ad4fa4727d1b8919822cb3a4"
       }
     ],
     "freshness": "Live patient context, current source chunks and Preview evidence override static Knowledge.",

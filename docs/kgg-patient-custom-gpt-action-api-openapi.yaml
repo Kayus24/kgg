@@ -6,16 +6,16 @@ info:
 servers:
   - url: https://api.github.com
 paths:
-  /repos/Kayus24/kgg/commits/main:
+  /repos/Kayus24/kgg/git/ref/heads/main:
     get:
       operationId: getKggPatientMainCommit
-      summary: Get the exact current main commit SHA before building a patient payload.
+      summary: Get the compact main Git ref and exact object SHA before building a patient payload.
       x-openai-isConsequential: false
       security:
         - githubBearer: []
       responses:
         "200":
-          description: Current main commit metadata.
+          description: Current main Git ref. Use object.sha as the payload base_sha.
           content:
             application/json:
               schema:

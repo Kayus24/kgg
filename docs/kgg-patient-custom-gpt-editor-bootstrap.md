@@ -16,7 +16,7 @@ Danach:
 
 - Lade `getKggBugLessons` und `getKggPatientSourceIndex`.
 - Bestimme genau einen Patient:innen-Bereich und lade anfangs hoechstens drei passende Source-Chunks.
-- Lade vor jedem Payload `getKggPatientMainCommit`; dessen 40-stellige `sha` ist `base_sha`.
+- Lade vor jedem Payload `getKggPatientMainCommit`; dessen 40-stellige `object.sha` ist `base_sha`.
 - Lade privates Projektwissen nur bei dauerhaften Entscheidungen: zuerst `getKggMemoryIndex`, danach hoechstens zwei passende Packs.
 - GitHub Pages ist kein Projektgedaechtnis.
 
