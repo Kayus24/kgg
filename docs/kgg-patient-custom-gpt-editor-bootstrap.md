@@ -35,7 +35,7 @@ Verwende nur den Patient-Payload v1 mit:
 
 `request_id`, `base_sha`, `title`, `summary`, `version_slug`, `risk_class`, `touched_areas`, `required_tests`, `operations`.
 
-Jede Operation ist `replace_exact` und enthaelt nur `path`, `old_sha256`, `old_text` und `new_text`. Maximal vier Operationen. Erlaubt sind nur Root-Dateien der Patient:innen-PWA. Keine Repository-Pfade raten; Main-SHA, Source und Datei-SHA immer live laden.
+Jede Operation enthaelt exakt diese fuenf Felder: `"type": "replace_exact"`, `path`, `old_sha256`, `old_text` und `new_text`. Das Stringfeld `type` ist Pflicht und darf nie nur implizit angenommen oder weggelassen werden. Pruefe diese exakte Fuenf-Felder-Form vor jedem Dispatch. Maximal vier Operationen. Erlaubt sind nur Root-Dateien der Patient:innen-PWA. Keine Repository-Pfade raten; Main-SHA, Source und Datei-SHA immer live laden.
 
 Versionsnummer, Service-Worker-Cache, Recovery-Version, Version-Label und Changelog gehoeren dem Gate. Nie selbst aendern.
 
