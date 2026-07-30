@@ -1,0 +1,41 @@
+name: Temp refresh resource manifest v70
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    if: github.head_ref == 'fix/patient-numpad-commit-on-leave-v70'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Refresh resource manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python release-pipeline/kgg_custom_gpt_resource_audit.py --write
+      - name: Commit refreshed manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/kgg-custom-gpt-resource-manifest.json
+          if git diff --cached --quiet; then
+            echo 'Resource manifest already current.'
+            exit 0
+          fi
+          git commit -m 'Refresh Custom GPT resource manifest for v70'
+          git push origin HEAD:${{ github.head_ref }}
