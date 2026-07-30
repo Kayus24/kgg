@@ -51,16 +51,6 @@ jobs:
           replace_once('patient-version-label.js',"const RELEASE='70';","const RELEASE='71';")
           replace_once('update-recovery.html',"const RELEASE='70';","const RELEASE='71';")
 
-          replace_once('release-pipeline/kgg_pwa_contract_smoke.py','VERSION="70"','VERSION="71"')
-          replace_once('release-pipeline/kgg_pwa_contract_smoke.py','kgg-handyplan-v70-numpad-commit-on-leave','kgg-handyplan-v71-numpad-stay-open')
-          replace_once('release-pipeline/kgg_pwa_contract_smoke.py',"const APP_VERSION = '70';","const APP_VERSION = '71';")
-          replace_once('release-pipeline/kgg_pwa_contract_smoke.py','./patient-version-label.js?v=70','./patient-version-label.js?v=71')
-          replace_once('release-pipeline/kgg_pwa_contract_smoke.py','./patient-numpad-visibility-fix.js?v=commit-on-leave-1','./patient-numpad-visibility-fix.js?v=stay-open-switch-1')
-          replace_once('release-pipeline/kgg_pwa_contract_smoke.py',"const RELEASE='70';","const RELEASE='71';")
-          replace_once('release-pipeline/kgg_update_recovery_smoke.py',"const RELEASE='70';","const RELEASE='71';")
-          replace_once('release-pipeline/kgg_update_recovery_smoke.py','kgg-handyplan-v70-numpad-commit-on-leave','kgg-handyplan-v71-numpad-stay-open')
-          replace_once('release-pipeline/kgg_update_recovery_smoke.py',"const APP_VERSION = '70';","const APP_VERSION = '71';")
-
           test=r'''#!/usr/bin/env node
           'use strict';
 
