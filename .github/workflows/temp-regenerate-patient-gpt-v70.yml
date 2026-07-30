@@ -1,20 +1,22 @@
 name: Temp regenerate patient GPT v70
 
 on:
-  push:
+  pull_request:
     branches:
-      - fix/patient-numpad-commit-on-leave-v70
+      - main
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: write
 
 jobs:
   regenerate:
+    if: github.head_ref == 'fix/patient-numpad-commit-on-leave-v70'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: fix/patient-numpad-commit-on-leave-v70
+          ref: ${{ github.head_ref }}
           fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
@@ -37,4 +39,4 @@ jobs:
             exit 0
           fi
           git commit -m 'Regenerate patient GPT resources for v70'
-          git push origin HEAD:fix/patient-numpad-commit-on-leave-v70
+          git push origin HEAD:${{ github.head_ref }}
