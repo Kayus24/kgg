@@ -4,6 +4,22 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "kgg-camera-shutter-live-qr",
+      "patchHash": "ad7ad1c1b11d0dcb6440bf9fad67716100ffec3057af9b0bed71dc21ebeab1bb",
+      "baseSha": "a367c001c1c3db4a87652e36811a08a0b74ea870",
+      "baseVersionCode": 61,
+      "rolloutCode": 1785405702,
+      "title": "Normale Kamera mit Ausloeser und Live-QR",
+      "summary": "Der Kamera-Scan oeffnet eine normale 1x-Vorschau mit manuellem Ausloeser. Parallel wird lokal im sichtbaren Bild nach QR-Codes gesucht; bei einem Treffer wird derselbe Kameraframe an die bestehende Scan-Verarbeitung uebe",
+      "patchId": "kgg-v061-camera-shutter-live-qr",
+      "patchFile": "patches/v061-camera-shutter-live-qr.html",
+      "versionName": "1.0.61-camera-shutter-live-qr",
+      "createdAt": "2026-07-30T10:01:42Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-camera-shutter-live-qr/admin.html",
+      "sha256": "dffed418c9eb9490eb897cbb3f43978ec8d29ee820487aa313f779426283965f"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-live-qr-direct-no-auto-photo",
       "patchHash": "5b13242f5a11b8b480beffb609b747d6b3d9ee310483d05b7948072dd42e822d",
       "baseSha": "a367c001c1c3db4a87652e36811a08a0b74ea870",
@@ -33,22 +49,6 @@
       "createdAt": "2026-07-29T18:14:14Z",
       "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-camera-live-qr-local-jsqr/admin.html",
       "sha256": "31d13122858199cd2a58fbcdf3d220e9d7d164337a78983031df310d1bf02aeb"
-    },
-    {
-      "kind": "kgg_gpt_preview",
-      "requestId": "kgg-camera-shutter-live-qr",
-      "patchHash": "ad7ad1c1b11d0dcb6440bf9fad67716100ffec3057af9b0bed71dc21ebeab1bb",
-      "baseSha": "a367c001c1c3db4a87652e36811a08a0b74ea870",
-      "baseVersionCode": 61,
-      "rolloutCode": 1785341294,
-      "title": "Normale Kamera mit Ausloeser und Live-QR",
-      "summary": "Der Kamera-Scan oeffnet eine normale 1x-Vorschau mit manuellem Ausloeser. Parallel wird lokal im sichtbaren Bild nach QR-Codes gesucht; bei einem Treffer wird derselbe Kameraframe an die bestehende Scan-Verarbeitung uebe",
-      "patchId": "kgg-v061-camera-shutter-live-qr",
-      "patchFile": "patches/v061-camera-shutter-live-qr.html",
-      "versionName": "1.0.61-camera-shutter-live-qr",
-      "createdAt": "2026-07-29T16:08:14Z",
-      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-camera-shutter-live-qr/admin.html",
-      "sha256": "43c9a3f6e986f59fbf30b678b3b435bb57883726dcb2040d35a942816a3680e4"
     },
     {
       "kind": "kgg_gpt_preview",
@@ -298,18 +298,18 @@
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-live-qr-direct-no-auto-photo",
-    "patchHash": "5b13242f5a11b8b480beffb609b747d6b3d9ee310483d05b7948072dd42e822d",
+    "requestId": "kgg-camera-shutter-live-qr",
+    "patchHash": "ad7ad1c1b11d0dcb6440bf9fad67716100ffec3057af9b0bed71dc21ebeab1bb",
     "baseSha": "a367c001c1c3db4a87652e36811a08a0b74ea870",
     "baseVersionCode": 61,
-    "rolloutCode": 1785404931,
-    "title": "Live-QR direkt ohne automatisches Foto",
-    "summary": "Die Kamera bleibt eine normale Vorschau mit manuellem Ausloeser. Der 200-ms-Live-QR-Loop verarbeitet den erkannten QR-Rohtext direkt ueber den vorhandenen QR-Parser und uebernimmt den Plan ohne Canvas-Foto, Datei-Scan od",
-    "patchId": "kgg-v061-live-qr-direct-no-auto-photo",
-    "patchFile": "patches/v061-live-qr-direct-no-auto-photo.html",
-    "versionName": "1.0.61-live-qr-direct-no-auto-photo",
-    "createdAt": "2026-07-30T09:48:51Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-live-qr-direct-no-auto-photo/admin.html",
-    "sha256": "f7426f9de40db29783f21bba6bf0e4ef05e23000117b2d3bce172dacf2343a42"
+    "rolloutCode": 1785405702,
+    "title": "Normale Kamera mit Ausloeser und Live-QR",
+    "summary": "Der Kamera-Scan oeffnet eine normale 1x-Vorschau mit manuellem Ausloeser. Parallel wird lokal im sichtbaren Bild nach QR-Codes gesucht; bei einem Treffer wird derselbe Kameraframe an die bestehende Scan-Verarbeitung uebe",
+    "patchId": "kgg-v061-camera-shutter-live-qr",
+    "patchFile": "patches/v061-camera-shutter-live-qr.html",
+    "versionName": "1.0.61-camera-shutter-live-qr",
+    "createdAt": "2026-07-30T10:01:42Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-camera-shutter-live-qr/admin.html",
+    "sha256": "dffed418c9eb9490eb897cbb3f43978ec8d29ee820487aa313f779426283965f"
   }
 }
