@@ -21,21 +21,32 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Refresh resource manifest
+      - name: Refresh manifest and repository editor contract
         shell: bash
         run: |
           set -euo pipefail
+          python release-pipeline/kgg_custom_gpt_resource_audit.py --write || true
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          manifest_path=Path('docs/kgg-custom-gpt-resource-manifest.json')
+          snapshot_path=Path('docs/kgg-patient-custom-gpt-editor-snapshot.json')
+          manifest=json.loads(manifest_path.read_text(encoding='utf-8'))
+          snapshot=json.loads(snapshot_path.read_text(encoding='utf-8'))
+          snapshot['knowledgeSha256']=[item['sha256'] for item in manifest['patientProduction']['knowledge']]
+          snapshot_path.write_text(json.dumps(snapshot,ensure_ascii=False,indent=2)+'\n',encoding='utf-8',newline='\n')
+          PY
           python release-pipeline/kgg_custom_gpt_resource_audit.py --write
-      - name: Commit refreshed manifest
+      - name: Commit refreshed contract
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/kgg-custom-gpt-resource-manifest.json
+          git add docs/kgg-custom-gpt-resource-manifest.json docs/kgg-patient-custom-gpt-editor-snapshot.json
           if git diff --cached --quiet; then
-            echo 'Resource manifest already current.'
+            echo 'Resource contract already current.'
             exit 0
           fi
-          git commit -m 'Refresh Custom GPT resource manifest for v70'
+          git commit -m 'Refresh Patient GPT resource contract for v70'
           git push origin HEAD:${{ github.head_ref }}
