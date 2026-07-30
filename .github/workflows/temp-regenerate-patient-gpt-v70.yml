@@ -1,0 +1,40 @@
+name: Temp regenerate patient GPT v70
+
+on:
+  push:
+    branches:
+      - fix/patient-numpad-commit-on-leave-v70
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/patient-numpad-commit-on-leave-v70
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Regenerate derived patient resources
+        shell: bash
+        run: |
+          set -euo pipefail
+          python release-pipeline/kgg_patient_gpt_resources.py --write
+          python release-pipeline/kgg_custom_gpt_resource_audit.py --write
+      - name: Commit generated resources
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/kgg-patient-* docs/kgg-custom-gpt-resource-manifest.json
+          if git diff --cached --quiet; then
+            echo 'Generated resources already current.'
+            exit 0
+          fi
+          git commit -m 'Regenerate patient GPT resources for v70'
+          git push origin HEAD:fix/patient-numpad-commit-on-leave-v70
