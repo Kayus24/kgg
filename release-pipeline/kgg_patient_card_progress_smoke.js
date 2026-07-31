@@ -58,4 +58,9 @@ assert(api.filledCount(card)===0,'pain value must not affect card progress');
 
 lang='en';
 assert(api.labelForState('done')==='✓ Done','stored patient language was not respected');
+const collapseSource=fs.readFileSync(path.join(ROOT,'collapse-cards.js'),'utf8');
+assert(collapseSource.includes('function progress(c)'),'collapse fallback progress renderer missing');
+assert(collapseSource.includes('function patchProgressPut()'),'collapse fallback does not refresh after canonical put/save');
+assert(collapseSource.includes("tr('✓ Bearbeitet','✓ Done')"),'visible done label missing from collapse fallback');
+assert(collapseSource.includes('display:inline-flex!important'),'closed-card badge visibility is not enforced');
 console.log('Patient card progress smoke: OK');
