@@ -362,6 +362,7 @@ def run_android_wrapper_contract() -> None:
         ('BuildConfig.DEBUG && protocol.equals("http") && host.equals("10.0.2.2")', "HTTP status access is limited to the debug emulator host"),
         ("PREVIEW_STATUS_FOREGROUND_INTERVAL_MS = 30_000L", "open Preview app polls status every 30 seconds"),
         ("status-validating", "automatic Preview workflow publishes validating status"),
+        ("pull-requests: write", "automatic Preview caller grants every permission required by the reusable gate"),
         ("mode: validate_only", "automatic Preview workflow validates before publishing"),
         ("mode: publish_preview", "automatic Preview workflow publishes after validation"),
         ("status-final", "automatic Preview workflow publishes a terminal status"),
