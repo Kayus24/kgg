@@ -9,18 +9,18 @@
 5. Lade bei Patchfragen `docs/kgg-gpt-area-routes.md` und die passenden Source-Chunks.
 6. Lade `docs/kgg-gpt-bug-lessons.md` und `docs/kgg-gpt-patch-patterns.md`.
 7. Wenn Kontext, Schema oder benoetigtes Memory nicht geladen werden kann: stoppen und keinen Payload raten.
-8. Bei Analysefragen nur Diagnose/Handoff schreiben; kein `submitKggPreviewGate`.
-9. Bei Preview/Test-App-Wunsch immer `validate_only -> publish_preview`.
+8. Bei Analysefragen nur Diagnose/Handoff schreiben; kein `submitKggPreviewAuto`.
+9. Bei Preview/Test-App-Wunsch genau einmal `submitKggPreviewAuto` aufrufen. Der Workflow erzwingt intern `validate_only -> publish_preview` mit identischem Payload.
 10. Nach `publish_preview` wartet der Prozess auf Max' Test-App/Test-APK/Preview-APK-Freigabe.
-11. Nach gruenem `validate_only` ohne Zwischenfrage den identischen Payload als `publish_preview` ausfuehren und alle Belege pruefen.
+11. Keinen zweiten Preview-Dispatch und keine Zwischenfrage senden. Der Auto-Workflow setzt die Kette selbst fort; Run und Belege pruefen.
 12. `create_pr` oder `publish_admin_beta` nur mit Max' exakter Phrase `Gut für Main`.
 
 ## Autonomie ohne Bestaetigungsschleife
 
-- Vorab freigegeben: Reads, Diagnose, Tests, `validate_only`, `publish_preview`, Run-/Artifact-Pruefung, konfliktfreie neue Memory-Eintraege und private Koordinations-Events.
+- Vorab freigegeben: Reads, Diagnose, Tests, ein `submitKggPreviewAuto`-Dispatch, Run-/Artifact-Pruefung, konfliktfreie neue Memory-Eintraege und private Koordinations-Events.
 - Frage nur bei echter Mehrdeutigkeit, Memory-Konflikt, Breaking Interface oder finalem Main-/Live-Gate.
 - Ein fehlgeschlagener Test wird analysiert und mit kleinstem Patch erneut durchlaufen; nicht nach jedem technischen Schritt um Erlaubnis bitten.
-- Nach einem Dispatch bei `queued` oder `in_progress` nicht antworten und auf Max' "Und?" warten. Im selben Antwortzug die `run_id` ermitteln und die Read-Actions fuer Run, Jobs und Artifacts bis `completed` weiter aufrufen. Nur wenn das technische Action-Zeitfenster vorher endet, den belegten Zwischenstand nennen und auf die automatische Test-App-Benachrichtigung verweisen; niemals Fertigstellung behaupten.
+- Nach einem Dispatch bei `queued` oder `in_progress` nicht auf Max' "Und?" warten. Der GitHub-Workflow laeuft ohne weiteren GPT-Aufruf automatisch durch Validierung und Publish. Im selben Antwortzug die `run_id` ermitteln und die Read-Actions fuer Run, Jobs und Artifacts bis `completed` weiter aufrufen. Endet das technische Action-Zeitfenster vorher, den belegten Zwischenstand nennen und auf die automatische Test-App-/GitHub-Benachrichtigung verweisen; niemals Fertigstellung behaupten.
 - ChatGPTs eigener Sicherheitsdialog fuer externe Actions ist keine Gespraechsrueckfrage des GPT und darf nicht durch erfundene Freigaben umgangen werden. Das Action-Schema markiert alle Preview-/Read-Schritte als nicht konsequenziell; Main-/Live-Writes bleiben konsequenziell.
 - Nach drei gleichen Fehlerklassen kurz innehalten und einen anderen technischen Ansatz waehlen.
 

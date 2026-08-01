@@ -10,10 +10,10 @@
   },
   "production": {
     "name": "KGG Update-Agent",
-    "profileVersion": "3.0.0",
+    "profileVersion": "4.0.0",
     "editorBootstrap": {
       "path": "docs/kgg-custom-gpt-editor-bootstrap.md",
-      "sha256": "137d78d6c185c82472931509a0f6a77a5b4710d4fc4fb4ffa0199d7fdf5d4cb0"
+      "sha256": "93c5da5730287043f9563c0a024057a5f8933014b4eefa9cc9632ecc111d0734"
     },
     "capabilities": {
       "webSearch": true,
@@ -26,11 +26,11 @@
     "knowledge": [
       {
         "path": "docs/kgg-custom-gpt-knowledge-architecture.md",
-        "sha256": "d4b3c1f427cba920f80cf5bf4576363d376c993c6ff5beb2521796f73d570b9f"
+        "sha256": "71b125b6f1a0e39343c7ed4d373cffe0c8e96e5c4b25e38a8deab096c5b7ea0a"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-operations.md",
-        "sha256": "32f389c2083a4d27f34f0e5f5725786505120851c1cfac3a0400b55f1488ecf4"
+        "sha256": "f44e01ad365402e22a53ba9f994d4aa811253873af505769308cc246a07adcc3"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-safety.md",
@@ -38,17 +38,17 @@
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-testing.md",
-        "sha256": "d3e4bad207c550144555ad3775d77dc885ba9e2832cd60d1d1726bea77be9f6d"
+        "sha256": "a6aa7b5d68674c36fd38cccc51d4dd9ec8c253e73753d9ac32e77b09cd801e42"
       }
     ],
     "actions": [
       {
         "path": "docs/kgg-custom-gpt-action-openapi.yaml",
-        "sha256": "730d2fe9c1acb7ecb073f3d3e22cec6d73c5780157ed918d2c2e4ff8d163ad73"
+        "sha256": "0a27548e49b62ac2a5668541183b49b3c41de1b2fa9cffcf854ba67f8dc5b1cf"
       },
       {
         "path": "docs/kgg-custom-gpt-action-api-openapi.yaml",
-        "sha256": "bf3ea67417a1a172e0e44a9e7b5baf0b2f46217db7d0690d4d8ba44ba87c2994"
+        "sha256": "697f9093abf44ab26f4acdd1ddf538e0c67965c880b186155eb1b1c44936a78c"
       }
     ],
     "freshness": "GitHub live context and source chunks are authoritative; generated Knowledge is a retrieval accelerator and must pass --check.",

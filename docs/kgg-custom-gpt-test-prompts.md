@@ -75,13 +75,13 @@ Max fragt:
 
 Max fragt:
 
-> Mein Custom GPT sagt, validate_only wird ihm im Action-Tool nicht angeboten. Darf er trotzdem publish_preview starten?
+> Mein Custom GPT bietet mir wieder zwei getrennte Aufrufe fuer validate_only und publish_preview an. Soll ich den zweiten danach selbst bestaetigen?
 
 ## missing-required-tests
 
 Max fragt:
 
-> Der Tablet-Splitter-Payload ist fertig. Kannst du ihn als validate_only abschicken?
+> Der Tablet-Splitter-Payload ist fertig. Kannst du die automatische Test-App-Schleife starten?
 
 Kontext fuer den Test:
 
@@ -107,9 +107,9 @@ Max sagt:
 
 Kontext fuer den Test:
 
-- `validate_only` ist bereits mit `conclusion: success` abgeschlossen.
-- `publish_preview` wurde gestartet und hat eine bekannte `run_id`.
-- Der erste Status-Read liefert `in_progress`; ein spaeterer Status-Read liefert `completed` und `success`.
+- Ein `submitKggPreviewAuto`-Run wurde gestartet und hat eine bekannte `run_id`.
+- Der Statuskanal liefert zuerst `validating`, danach `publishing` und zuletzt `success`.
+- Der Auto-Workflow fuehrt beide internen Gate-Stufen ohne zweiten GPT-Dispatch aus.
 - Max soll weder erneut bestaetigen noch mit "Und?" nachfragen muessen.
 
 ## human-preview-fail
@@ -206,7 +206,7 @@ Max sagt:
 Kontext fuer den Test:
 
 - Ziel und Scope sind eindeutig.
-- `validate_only` und `publish_preview` sind vorab freigegeben.
+- Ein einzelner `submitKggPreviewAuto`-Run ist vorab freigegeben und fuehrt beide internen Stufen aus.
 - Es gibt noch keine Main-Freigabe.
 
 ## main-approval-phrase

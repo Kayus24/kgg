@@ -311,10 +311,14 @@ def run_android_wrapper_contract() -> None:
     )
     build_gradle = (ROOT / "android-wrapper" / "app" / "build.gradle").read_text(encoding="utf-8")
     android_manifest = (ROOT / "android-wrapper" / "app" / "src" / "main" / "AndroidManifest.xml").read_text(encoding="utf-8")
+    debug_android_manifest = (ROOT / "android-wrapper" / "app" / "src" / "debug" / "AndroidManifest.xml").read_text(
+        encoding="utf-8"
+    )
     file_paths = (ROOT / "android-wrapper" / "app" / "src" / "main" / "res" / "xml" / "kgg_file_paths.xml").read_text(
         encoding="utf-8"
     )
     android_workflow = (ROOT / ".github" / "workflows" / "android-wrapper-check.yml").read_text(encoding="utf-8")
+    preview_auto_workflow = (ROOT / ".github" / "workflows" / "kgg-gpt-preview-auto.yml").read_text(encoding="utf-8")
     expected_shell = str(manifest.get("latestAndroidShellVersion", "")).lstrip("v")
     required = [
         (f"ANDROID_SHELL_VERSION = {expected_shell}", "MainActivity shell version must match android_update_manifest"),
@@ -350,8 +354,23 @@ def run_android_wrapper_contract() -> None:
         ("getCameraCapabilities()", "Android bridge must publish its live-camera capability contract"),
         ("webVideoCaptureVersion", "Android and JavaScript must negotiate a versioned live-camera contract"),
         ("getCapabilities: function()", "JavaScript bootstrap must expose native camera capabilities"),
+        ("android.permission.POST_NOTIFICATIONS", "Preview APK requests Android notification permission"),
+        ("KGG_PREVIEW_STATUS_URL", "Preview APK has an isolated workflow status endpoint"),
+        ("versionName \"0.2.12-v402-preview-status\"", "Preview flavor has an updateable v402 package version"),
+        ("androidx.work:work-runtime:2.11.2", "Preview status background checks use stable WorkManager"),
+        ("KggPreviewStatusWorker", "Preview status has a background worker"),
+        ('BuildConfig.DEBUG && protocol.equals("http") && host.equals("10.0.2.2")', "HTTP status access is limited to the debug emulator host"),
+        ("PREVIEW_STATUS_FOREGROUND_INTERVAL_MS = 30_000L", "open Preview app polls status every 30 seconds"),
+        ("status-validating", "automatic Preview workflow publishes validating status"),
+        ("mode: validate_only", "automatic Preview workflow validates before publishing"),
+        ("mode: publish_preview", "automatic Preview workflow publishes after validation"),
+        ("status-final", "automatic Preview workflow publishes a terminal status"),
     ]
-    haystacks = "\n".join([main_activity, bootstrap, build_gradle, android_manifest, file_paths, android_workflow])
+    preview_status_sources = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in (ROOT / "android-wrapper" / "app" / "src" / "main" / "java" / "de" / "kgg" / "app").glob("KggPreviewStatus*.java")
+    )
+    haystacks = "\n".join([main_activity, bootstrap, build_gradle, android_manifest, debug_android_manifest, file_paths, android_workflow, preview_auto_workflow, preview_status_sources])
     missing = [reason for token, reason in required if token not in haystacks]
     if missing:
         raise BatteryError("Android wrapper contract missing: " + ", ".join(missing))
@@ -359,6 +378,10 @@ def run_android_wrapper_contract() -> None:
         raise BatteryError("Android bootstrap must not let Sync availability block PDF/Camera/AppUpdate bridges.")
     if "PermissionRequest.RESOURCE_AUDIO_CAPTURE" in main_activity:
         raise BatteryError("Android WebView camera bridge must never grant microphone capture.")
+    if 'android:usesCleartextTraffic="true"' in android_manifest:
+        raise BatteryError("Production Android builds must not allow cleartext traffic.")
+    if 'android:usesCleartextTraffic="true"' not in debug_android_manifest:
+        raise BatteryError("Debug Android builds must explicitly allow the isolated emulator status server.")
     for density in ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]:
         for name in ["ic_launcher.png", "ic_launcher_round.png"]:
             icon = ROOT / "android-wrapper" / "app" / "src" / "main" / "res" / f"mipmap-{density}" / name
@@ -368,6 +391,7 @@ def run_android_wrapper_contract() -> None:
             if not admin_icon.exists() or admin_icon.stat().st_size < 500:
                 raise BatteryError(f"Android admin launcher icon override missing or too small: {admin_icon}")
     run([sys.executable, "release-pipeline/kgg_android_preview_probe.py", "--self-test"])
+    run([sys.executable, "release-pipeline/kgg_preview_status.py", "--self-test"])
     log("Android wrapper contract OK")
 
 

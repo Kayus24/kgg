@@ -269,7 +269,7 @@ def render_report(
             "## Akzeptanz",
             "",
             "- PASS erst nach zwei kompletten gruenen Runden.",
-            "- `validate_only` muss vor `publish_preview` gruen sein.",
+            "- Der einzelne Auto-Run muss intern `validate_only` vor `publish_preview` gruen abschliessen.",
             "- Test-APK/Preview-Kanal muss aktualisiert und von Max akzeptiert sein.",
             "- Jeder FAIL wird als Regression aufgenommen, bevor der gleiche Prompt erneut getestet wird.",
             "",

@@ -75,7 +75,7 @@ def expected_manifest() -> dict[str, Any]:
         },
         "production": {
             "name": "KGG Update-Agent",
-            "profileVersion": "3.0.0",
+            "profileVersion": "4.0.0",
             "editorBootstrap": resource(PRODUCTION_BOOTSTRAP),
             "capabilities": {
                 "webSearch": True,

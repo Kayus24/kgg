@@ -65,6 +65,18 @@ def run_stabilize_self_test() -> None:
         fail(f"stabilize self-test failed: {output}")
 
 
+def run_preview_status_self_test() -> None:
+    proc = subprocess.run(
+        [sys.executable, "release-pipeline/kgg_preview_status.py", "--self-test"],
+        cwd=str(ROOT),
+        text=True,
+        capture_output=True,
+    )
+    if proc.returncode != 0:
+        output = (proc.stdout + "\n" + proc.stderr).strip()
+        fail(f"Preview status self-test failed: {output}")
+
+
 def run_mock_eval_self_test() -> None:
     proc = subprocess.run(
         [sys.executable, "release-pipeline/kgg_gpt_mock_eval.py", "--self-test"],
@@ -284,6 +296,7 @@ def check_playbook() -> None:
             "kgg-update/index.html",
             "generated output",
             "human_preview_fail",
+            "submitKggPreviewAuto",
             "Test-APK",
             "ci_tooling",
             "publish_admin_beta",
@@ -368,9 +381,9 @@ def check_prompt_and_expected_docs() -> None:
             "human_preview_fail",
             "stale_context",
             "poppler-utils",
-            "submitKggPreviewGate",
+            "submitKggPreviewAuto",
             "meta.json",
-            "listKggPreviewGateRuns",
+            "listKggPreviewAutoRuns",
             "getKggMemoryIndex",
             "getKggMemoryPack",
             "getKggMemoryUpdateStatus",
@@ -396,7 +409,8 @@ def check_prompt_and_expected_docs() -> None:
             "__KGG_PATCH_ID__",
             "artifact",
             "meta.json",
-            "listKggPreviewGateRuns",
+            "listKggPreviewAutoRuns",
+            "gpt-preview/status/latest.json",
             "Test-APK",
             "Max accepts the Test-APK",
             "Admin beta",
@@ -434,13 +448,13 @@ def check_prompt_and_expected_docs() -> None:
     require_all(
         api_openapi_schema,
         [
-            "submitKggPreviewGate",
+            "submitKggPreviewAuto",
             "submitKggMainGate",
             "validate_only",
             "publish_preview",
             "create_pr",
             "publish_admin_beta",
-            "listKggPreviewGateRuns",
+            "listKggPreviewAutoRuns",
             "getKggPreviewGateRun",
             "getKggPreviewGateJobs",
             "getKggPreviewGateArtifacts",
@@ -473,8 +487,22 @@ def check_prompt_and_expected_docs() -> None:
     )
     require_all(
         runbook,
-        ["dispatch -> run status", "validate_only", "artifact", "meta.json", "html_url", "Max acceptance", "Admin beta merge", "ci_tooling"],
+        ["single auto dispatch", "validate_only", "status/latest.json", "artifact", "meta.json", "html_url", "Max acceptance", "Admin beta merge", "ci_tooling"],
         "preview runbook text",
+    )
+    preview_workflow = read(".github/workflows/kgg-gpt-preview-auto.yml")
+    require_all(
+        preview_workflow,
+        [
+            "status-validating",
+            "mode: validate_only",
+            "status-publishing",
+            "mode: publish_preview",
+            "status-final",
+            "kgg_preview_status.py",
+            "KGG Preview Status",
+        ],
+        "automatic Preview workflow",
     )
     require_all(
         report_template,
@@ -586,6 +614,7 @@ def main() -> int:
         check_area_routes()
         check_repair_lab_contract()
         run_preflight_self_test()
+        run_preview_status_self_test()
         run_stabilize_self_test()
         run_mock_eval_self_test()
         run_repair_lab_self_tests()

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: KGG GPT Preview and Project Memory GitHub API
-  version: "1.3.0"
+  version: "1.4.0"
   description: Pre-authorized Admin/Patient Preview operations, separately approved release gates, and private shared memory/coordination.
 servers:
   - url: https://api.github.com
@@ -19,11 +19,11 @@ paths:
           content:
             application/json:
               schema: {type: object, additionalProperties: true}
-  /repos/Kayus24/kgg/actions/workflows/kgg-gpt-preview-only.yml/dispatches:
+  /repos/Kayus24/kgg/actions/workflows/kgg-gpt-preview-auto.yml/dispatches:
     post:
-      operationId: submitKggPreviewGate
-      summary: Validate or publish a guarded Admin Test-App Preview without changing main.
-      description: Max pre-authorized validate_only and publish_preview. The workflow cannot create a PR or merge main.
+      operationId: submitKggPreviewAuto
+      summary: Validate and publish a guarded Admin Test-App Preview in one automatic run.
+      description: Max pre-authorized this complete Preview-only pipeline. It validates first, publishes only after green validation, writes Test-App status updates and cannot create a PR or merge main.
       x-openai-isConsequential: false
       security:
         - githubBearer: []
@@ -40,11 +40,8 @@ paths:
                   enum: [main]
                 inputs:
                   type: object
-                  required: [mode, request_id, payload_json]
+                  required: [request_id, payload_json]
                   properties:
-                    mode:
-                      type: string
-                      enum: [validate_only, publish_preview]
                     request_id:
                       type: string
                       pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
@@ -154,10 +151,10 @@ paths:
       responses:
         "200":
           description: Recent workflow runs.
-  /repos/Kayus24/kgg/actions/workflows/kgg-gpt-preview-only.yml/runs:
+  /repos/Kayus24/kgg/actions/workflows/kgg-gpt-preview-auto.yml/runs:
     get:
-      operationId: listKggPreviewGateRuns
-      summary: List recent pre-authorized Admin Preview-only runs.
+      operationId: listKggPreviewAutoRuns
+      summary: List recent automatic Admin Preview-only runs.
       x-openai-isConsequential: false
       security:
         - githubBearer: []

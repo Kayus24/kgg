@@ -47,4 +47,4 @@ Der Browser-Selbsttest verlangt pro Fall: Golden `PASS`, beschaedigt `FAIL`, Kon
 
 ## Produktionsgrenze
 
-Ein Repair-Lab-PASS erzeugt weder Preview/Test-App noch PR oder Main-Aenderung. Ein echter App-Patch laeuft weiterhin separat ueber `validate_only -> publish_preview -> Max prueft Test-App -> create_pr/publish_admin_beta`.
+Ein Repair-Lab-PASS erzeugt weder Preview/Test-App noch PR oder Main-Aenderung. Ein echter App-Patch laeuft separat ueber einen `submitKggPreviewAuto`-Run, der intern `validate_only -> publish_preview` erzwingt; danach prueft Max die Test-App vor `create_pr` oder `publish_admin_beta`.

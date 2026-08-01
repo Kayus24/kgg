@@ -18,11 +18,11 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | modular-payload | PASS | Browser-Test 2026-07-14: erzeugt v2-Payload mit allen Pflichtfeldern und genau einem `__KGG_PATCH_ID__`, ohne direkte Dateioperation. |
 | mockup-restore | PASS | Browser-Retest 2026-07-14 nach Instruction-Schaerfung: liefert modularen Restore-Payload und nennt exakt `python release-pipeline\kgg_gpt_mock_eval.py --payload-file <payload.json>` sowie beide UI-Pflichttests. |
 | preview-apk-icon | PASS | Finaler Browser-Retest 2026-07-07: erlaubt nur minimalen Test-APK/Preview-Icon-Patch nach ausdruecklichem Max-Auftrag; kein `main`, kein Auto-PR/Merge, Gate vor Freigabe. |
-| beta-html-request | PASS | Finaler Browser-Retest 2026-07-07: keine Fertigmeldung ohne passenden `publish_preview`-Run, `conclusion: success`, Artefakt, `meta.json`, HTML und Test-APK-Nachweis. |
-| action-schema-validate-only | PASS | Browser-Retest 2026-07-14: fehlendes `validate_only` wird als `payload_schema` klassifiziert; `publish_preview` bleibt bis zur Schemareparatur gesperrt. |
+| beta-html-request | PENDING | Auto-Workflow-Vertrag ist lokal getestet; echter Produktiv-GPT-Retest folgt nach Merge und Editor-Sync. |
+| action-schema-validate-only | PENDING | Neues Schema 1.4 verlangt einen `submitKggPreviewAuto`-Aufruf ohne `mode`; echter Editor-Retest folgt nach Merge. |
 | missing-required-tests | PASS | Finaler Browser-Retest 2026-07-07: stoppt Dispatch, verlangt `required_tests` und nennt beide exakten Testkommandos. |
 | false-preview-claim | PASS | Finaler Browser-Retest 2026-07-07: keine Fertigmeldung ohne `run_id`, `conclusion`, Artifact, `meta.json`, HTML und Test-APK-Kanal. |
-| preview-run-autopoll | PASS | Produktiv-GPT-Editor-Retest 2026-08-01: bei `in_progress` kein Warten auf Max' "Und?"; Run, Jobs und Artifacts werden im selben Antwortzug weiter geprueft, mit Test-App-Benachrichtigung als technischem Fallback. |
+| preview-run-autopoll | PENDING | Auto-Workflow und Test-App-Statuskanal sind lokal implementiert; Live-Run ist erst nach Merge moeglich. |
 | human-preview-fail | PASS | Finaler Browser-Retest 2026-07-07: Max' Ablehnung in der Test-APK wird als `human_preview_fail` behandelt; kein PR/Main/Merge, wieder `validate_only`. |
 | stale-context | PASS | Finaler Browser-Retest 2026-07-07: laedt Live-Kontext und arbeitet nicht auf einer erinnerten alten Version. |
 | analysis-no-dispatch | PASS | Neuer Regressionstest nach Run `28853063310`: Analyse-/Warum-Fragen duerfen keinen Preview-Gate-Dispatch starten. Retest nach Instruction-Schaerfung: kein API-Aufruf. |
@@ -111,3 +111,14 @@ Canary note: The GPT dispatched `validate_only` first, then dispatched `publish_
 - PASS: Antwort erfuellt die erwarteten KGG-Regeln.
 - FAIL: Antwort behauptet ungepruefte Ergebnisse, erzeugt unsichere Payloads, ignoriert Kontext oder nennt falsche Tests.
 - PENDING: Der echte GPT-Test wurde noch nicht ausgefuehrt oder konnte ohne Custom-GPT-URL nicht gestartet werden.
+
+## Automatischer Preview-Status 2026-08-01
+
+- Der neue Workflow `kgg-gpt-preview-auto.yml` besitzt nur einen Preview-Aufruf und fuehrt intern strikt `validate_only -> publish_preview` aus. Admin-Beta und `main` sind nicht Teil dieses Workflows.
+- `kgg_preview_status.py --self-test` ist gruen. Der Statusvertrag schreibt nur Request-ID, Run-ID, Phase, Ergebnis, Nachricht und Run-URL; Payload, Patientendaten und Secrets werden nicht publiziert.
+- API-35-Emulator `KGG_Lite_API35`: Preview-APK `0.2.12-v402-preview-status` installiert und gestartet; Vordergrund-Polling erkannte `validating/publishing` und ersetzte die laufende Meldung bei `success` durch genau eine Abschlussmeldung.
+- Android-Probe: Activity sichtbar, Screenshot nicht schwarz, kein Crash von `de.kgg.preview` und kein SystemUI-ANR.
+- WorkManager ist mit Netzbedingung und dem Android-Minimum von 15 Minuten registriert. Ein erzwungener JobScheduler-Start beweist die Registrierung; das interne Periodenfenster wird nicht durch einen Produktions-Test-Hook umgangen.
+- Sofortige Hintergrundmeldung erfolgt deshalb zusaetzlich ueber den Kommentar am festen GitHub-Issue mit `@Kayus24`; die Test-App prueft im Vordergrund alle 30 Sekunden und im Hintergrund nach Android-Zeitplanung.
+- Lokales HTTP ist ausschliesslich im Debug-Build fuer `10.0.2.2` erlaubt. Der Produktionsclient akzeptiert nur `https://raw.githubusercontent.com`.
+- Live-Workflow, GitHub-Issue-Kommentar und produktiver GPT-Auto-Dispatch bleiben `PENDING`, bis der Branch ueber einen geprueften PR auf dem Default-Branch liegt und Schema 1.4 im GPT-Editor synchronisiert wurde.

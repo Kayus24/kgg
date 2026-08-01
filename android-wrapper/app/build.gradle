@@ -14,6 +14,7 @@ android {
         versionName "0.2.11-v401-share-apk-provider"
         manifestPlaceholders = [appLabel: "KGG Physio"]
         buildConfigField "String", "KGG_GITHUB_CLIENT_ID", "\"${project.findProperty('KGG_GITHUB_CLIENT_ID') ?: ''}\""
+        buildConfigField "String", "KGG_PREVIEW_STATUS_URL", '""'
     }
 
     buildFeatures { buildConfig true }
@@ -33,7 +34,10 @@ android {
         preview {
             dimension "profile"
             applicationId "de.kgg.preview"
+            versionCode 34
+            versionName "0.2.12-v402-preview-status"
             manifestPlaceholders = [appLabel: "KGG Preview"]
+            buildConfigField "String", "KGG_PREVIEW_STATUS_URL", "\"${project.findProperty('KGG_PREVIEW_STATUS_URL') ?: 'https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/status/latest.json'}\""
         }
     }
 
@@ -68,4 +72,5 @@ afterEvaluate {
 
 dependencies {
     implementation "androidx.core:core:1.13.1"
+    implementation "androidx.work:work-runtime:2.11.2"
 }

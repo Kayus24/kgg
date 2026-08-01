@@ -42,8 +42,8 @@ Tablet splitter UI probe included: no
 | `modular-payload` | PASS | `` | Real browser retest emitted the modular v2 payload contract. |
 | `mockup-restore` | PASS | `` | Two consecutive real GPT payloads restored the removed mock function and passed executable behavior evaluation. |
 | `preview-apk-icon` | PASS | `` | Real browser retest kept icon work in the Preview/Test-APK profile. |
-| `beta-html-request` | PASS | `` | Real browser retest required run, artifact, meta, HTML and Test-APK evidence. |
-| `action-schema-validate-only` | PASS | `` | Real browser retest classified missing validate_only as payload_schema. |
+| `beta-html-request` | PENDING | `` | Auto-workflow live retest follows after merge and editor sync. |
+| `action-schema-validate-only` | PENDING | `` | Schema 1.4 single-dispatch live retest follows after merge. |
 | `missing-required-tests` | PASS | `` | Real browser retest required both exact UI test commands. |
 | `false-preview-claim` | PASS | `` | Real browser retest made no success claim without evidence. |
 | `human-preview-fail` | PASS | `` | Real browser retest treated Max rejection as a regression and blocked main. |
@@ -71,6 +71,18 @@ Tablet splitter UI probe included: no
 ## Akzeptanz
 
 - PASS erst nach zwei kompletten gruenen Runden.
-- `validate_only` muss vor `publish_preview` gruen sein.
+- Der einzelne Auto-Run muss intern `validate_only` vor `publish_preview` gruen abschliessen.
 - Test-APK/Preview-Kanal muss aktualisiert und von Max akzeptiert sein.
 - Jeder FAIL wird als Regression aufgenommen, bevor der gleiche Prompt erneut getestet wird.
+
+## Auto-Preview-Erweiterung 2026-08-01
+
+| Check | Status | Fehlerklasse | Notiz |
+| --- | --- | --- | --- |
+| `auto-preview-contract` | PASS | `` | Ein Preview-only Dispatch fuehrt intern validate_only vor publish_preview aus. |
+| `status-json-self-test` | PASS | `` | Atomare, begrenzte Statusdateien ohne Payload oder Secrets. |
+| `preview-apk-foreground-notification` | PASS | `` | API-35-Emulator erkannte laufenden und erfolgreichen Run; Fortschrittsmeldung wurde beendet. |
+| `preview-apk-background-schedule` | PASS | `` | WorkManager-Job mit Netzbedingung und 15-Minuten-Intervall ist im Android JobScheduler registriert. |
+| `preview-apk-runtime-smoke` | PASS | `` | APK installiert, Activity sichtbar, Screenshot nicht schwarz, kein App-Crash und kein SystemUI-ANR. |
+| `auto-preview-live-run` | PENDING | `` | Erst nach geprueftem Merge des Workflows auf den Default-Branch moeglich. |
+| `production-gpt-schema-1.4` | PENDING | `` | Editor-Sync folgt erst, wenn die neue Action-URL auf dem Default-Branch verfuegbar ist. |
