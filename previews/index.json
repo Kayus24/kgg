@@ -4,6 +4,22 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "kgg-camera-flow-rollback-20260801-b",
+      "patchHash": "87e9a13bc79c12e3ed54909549d5458b6977813ea82303033226cf475dc2926b",
+      "baseSha": "13fc1c9deb68ae0ba79abb93e0bb05c6896d2a18",
+      "baseVersionCode": 61,
+      "rolloutCode": 1785602103,
+      "title": "KGG-Kameraweg wiederherstellen",
+      "summary": "Die abgelehnte Preview-Umschaltung auf die normale Systemkamera wird verworfen. Die Test-App wird neu aus main gebaut und laesst den vorhandenen KGG-Kameraweg unveraendert aktiv.",
+      "patchId": "kgg-v061-camera-flow-rollback",
+      "patchFile": "patches/v061-camera-flow-rollback.html",
+      "versionName": "1.0.61-camera-flow-rollback",
+      "createdAt": "2026-08-01T16:35:03Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-camera-flow-rollback-20260801-b/admin.html",
+      "sha256": "114c888dc20d7237887d3470140cb13de2d7d8c74e19821fef3937c877227c0a"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-camera-wide-no-zoom-20260801-a",
       "patchHash": "7bd700b7f98c7f5cc131a49338aeebba32c353376d72698fb286251022f8ef2d",
       "baseSha": "13fc1c9deb68ae0ba79abb93e0bb05c6896d2a18",
@@ -284,35 +300,22 @@
       "createdAt": "2026-07-05T07:46:34Z",
       "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-gpt-canary-20260705-a/admin.html",
       "sha256": "b4ed7316e890edf6a0e8937fdc742d458e7301c3189e3b1a4c18bf1b6df0d9d9"
-    },
-    {
-      "kind": "kgg_gpt_preview",
-      "requestId": "kgg-gpt-e2e-canary-20260703",
-      "patchHash": "bf7aef6b364f6daada4a24e985598976f2c6f431ea08f1edb72b706154a9d59c",
-      "baseSha": "b54606b3b64093eb2bfa5c4374191b93b5f95c25",
-      "baseVersionCode": 57,
-      "rolloutCode": 1783112912,
-      "title": "GPT E2E Canary",
-      "summary": "Controlled preview canary proving validate-first Custom GPT flow through publish_preview.",
-      "createdAt": "2026-07-03T21:08:32Z",
-      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-gpt-e2e-canary-20260703/admin.html",
-      "sha256": "824fc847f831e6788725e448ab2468a66a5c2f9329f5aa08ffad896659b29228"
     }
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-camera-wide-no-zoom-20260801-a",
-    "patchHash": "7bd700b7f98c7f5cc131a49338aeebba32c353376d72698fb286251022f8ef2d",
+    "requestId": "kgg-camera-flow-rollback-20260801-b",
+    "patchHash": "87e9a13bc79c12e3ed54909549d5458b6977813ea82303033226cf475dc2926b",
     "baseSha": "13fc1c9deb68ae0ba79abb93e0bb05c6896d2a18",
     "baseVersionCode": 61,
-    "rolloutCode": 1785599906,
-    "title": "Kamera ohne starken Zoom",
-    "summary": "Der Kamera-Button nutzt wieder den rckseitigen Standard-Kamerapfad, damit der vollstndige Bildausschnitt sichtbar bleibt; Galerie und bestehende Scan-Auswertung bleiben unverndert.",
-    "patchId": "kgg-v061-camera-wide-no-zoom",
-    "patchFile": "patches/v061-camera-wide-no-zoom.html",
-    "versionName": "1.0.61-camera-wide-no-zoom",
-    "createdAt": "2026-08-01T15:58:26Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-camera-wide-no-zoom-20260801-a/admin.html",
-    "sha256": "36a93acff8cbb3f1c3a05b528552e0a8a5c937886f5f4a691aa222d60dcef6b2"
+    "rolloutCode": 1785602103,
+    "title": "KGG-Kameraweg wiederherstellen",
+    "summary": "Die abgelehnte Preview-Umschaltung auf die normale Systemkamera wird verworfen. Die Test-App wird neu aus main gebaut und laesst den vorhandenen KGG-Kameraweg unveraendert aktiv.",
+    "patchId": "kgg-v061-camera-flow-rollback",
+    "patchFile": "patches/v061-camera-flow-rollback.html",
+    "versionName": "1.0.61-camera-flow-rollback",
+    "createdAt": "2026-08-01T16:35:03Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-camera-flow-rollback-20260801-b/admin.html",
+    "sha256": "114c888dc20d7237887d3470140cb13de2d7d8c74e19821fef3937c877227c0a"
   }
 }

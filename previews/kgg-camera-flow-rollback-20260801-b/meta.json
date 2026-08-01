@@ -1,0 +1,16 @@
+{
+  "kind": "kgg_gpt_preview",
+  "requestId": "kgg-camera-flow-rollback-20260801-b",
+  "patchHash": "87e9a13bc79c12e3ed54909549d5458b6977813ea82303033226cf475dc2926b",
+  "baseSha": "13fc1c9deb68ae0ba79abb93e0bb05c6896d2a18",
+  "baseVersionCode": 61,
+  "rolloutCode": 1785602103,
+  "title": "KGG-Kameraweg wiederherstellen",
+  "summary": "Die abgelehnte Preview-Umschaltung auf die normale Systemkamera wird verworfen. Die Test-App wird neu aus main gebaut und laesst den vorhandenen KGG-Kameraweg unveraendert aktiv.",
+  "patchId": "kgg-v061-camera-flow-rollback",
+  "patchFile": "patches/v061-camera-flow-rollback.html",
+  "versionName": "1.0.61-camera-flow-rollback",
+  "createdAt": "2026-08-01T16:35:03Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-camera-flow-rollback-20260801-b/admin.html",
+  "sha256": "114c888dc20d7237887d3470140cb13de2d7d8c74e19821fef3937c877227c0a"
+}
