@@ -495,6 +495,7 @@ def check_prompt_and_expected_docs() -> None:
         preview_workflow,
         [
             "status-validating",
+            "pull-requests: write",
             "mode: validate_only",
             "status-publishing",
             "mode: publish_preview",
