@@ -40,6 +40,7 @@ GPT_PROMPTS = [
     "action-schema-validate-only",
     "missing-required-tests",
     "false-preview-claim",
+    "preview-run-autopoll",
     "human-preview-fail",
     "stale-context",
     "analysis-no-dispatch",

@@ -2,7 +2,7 @@
 
 This generated compatibility pack contains the complete production knowledge set. Prefer the four smaller curated packs in the GPT editor so retrieval stays focused.
 
-Source digest: `0ac63e354cc0e7c6`
+Source digest: `dd4011a0080544e7`
 
 ## Usage Rules
 
@@ -192,6 +192,8 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Vorab freigegeben: Reads, Diagnose, Tests, `validate_only`, `publish_preview`, Run-/Artifact-Pruefung, konfliktfreie neue Memory-Eintraege und private Koordinations-Events.
 - Frage nur bei echter Mehrdeutigkeit, Memory-Konflikt, Breaking Interface oder finalem Main-/Live-Gate.
 - Ein fehlgeschlagener Test wird analysiert und mit kleinstem Patch erneut durchlaufen; nicht nach jedem technischen Schritt um Erlaubnis bitten.
+- Nach einem Dispatch bei `queued` oder `in_progress` nicht antworten und auf Max' "Und?" warten. Im selben Antwortzug die `run_id` ermitteln und die Read-Actions fuer Run, Jobs und Artifacts bis `completed` weiter aufrufen. Nur wenn das technische Action-Zeitfenster vorher endet, den belegten Zwischenstand nennen und auf die automatische Test-App-Benachrichtigung verweisen; niemals Fertigstellung behaupten.
+- ChatGPTs eigener Sicherheitsdialog fuer externe Actions ist keine Gespraechsrueckfrage des GPT und darf nicht durch erfundene Freigaben umgangen werden. Das Action-Schema markiert alle Preview-/Read-Schritte als nicht konsequenziell; Main-/Live-Writes bleiben konsequenziell.
 - Nach drei gleichen Fehlerklassen kurz innehalten und einen anderen technischen Ansatz waehlen.
 
 ## Begrenzte Patient-App-Koordination
@@ -820,6 +822,19 @@ Kontext fuer den Test:
 - Es gibt noch keine verifizierte `run_id`.
 - Artifact, `meta.json`, HTML und Test-APK-Kanal wurden noch nicht geprueft.
 
+## preview-run-autopoll
+
+Max sagt:
+
+> Test app machen
+
+Kontext fuer den Test:
+
+- `validate_only` ist bereits mit `conclusion: success` abgeschlossen.
+- `publish_preview` wurde gestartet und hat eine bekannte `run_id`.
+- Der erste Status-Read liefert `in_progress`; ein spaeterer Status-Read liefert `completed` und `success`.
+- Max soll weder erneut bestaetigen noch mit "Und?" nachfragen muessen.
+
 ## human-preview-fail
 
 Max fragt:
@@ -1035,6 +1050,14 @@ Kontext fuer den Test:
 - Muss die Fehlerklasse `false_claim` vermeiden, indem es keine gruenen Tests oder Preview-Links behauptet.
 - Darf erst nach belegtem `publish_preview` Erfolg sagen, dass Max in der Test-APK pruefen kann.
 
+## preview-run-autopoll
+
+- Muss bei `in_progress` im selben Antwortzug erneut den Run-Status abfragen und darf nicht auf Max' "Und?" warten.
+- Muss nach `completed` Jobs, Pflicht-Tests, Artifact, `meta.json`, HTML und Preview-Index pruefen.
+- Darf fuer die bereits vorab freigegebene Preview keine weitere Gespraechsbestaetigung verlangen.
+- Darf nur bei einem technischen Action-Zeitlimit mit belegtem Zwischenstand enden und muss dann die automatische Test-App-Benachrichtigung als Abschlusskanal nennen.
+- Darf keine proaktive spaetere Chat-Nachricht versprechen, weil Custom GPTs nach Ende des Antwortzugs nicht selbststaendig fortsetzen.
+
 ## human-preview-fail
 
 - Muss Max' Test-APK-Ablehnung als offizielles Gate behandeln.
@@ -1141,6 +1164,7 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | action-schema-validate-only | PASS | Browser-Retest 2026-07-14: fehlendes `validate_only` wird als `payload_schema` klassifiziert; `publish_preview` bleibt bis zur Schemareparatur gesperrt. |
 | missing-required-tests | PASS | Finaler Browser-Retest 2026-07-07: stoppt Dispatch, verlangt `required_tests` und nennt beide exakten Testkommandos. |
 | false-preview-claim | PASS | Finaler Browser-Retest 2026-07-07: keine Fertigmeldung ohne `run_id`, `conclusion`, Artifact, `meta.json`, HTML und Test-APK-Kanal. |
+| preview-run-autopoll | PASS | Produktiv-GPT-Editor-Retest 2026-08-01: bei `in_progress` kein Warten auf Max' "Und?"; Run, Jobs und Artifacts werden im selben Antwortzug weiter geprueft, mit Test-App-Benachrichtigung als technischem Fallback. |
 | human-preview-fail | PASS | Finaler Browser-Retest 2026-07-07: Max' Ablehnung in der Test-APK wird als `human_preview_fail` behandelt; kein PR/Main/Merge, wieder `validate_only`. |
 | stale-context | PASS | Finaler Browser-Retest 2026-07-07: laedt Live-Kontext und arbeitet nicht auf einer erinnerten alten Version. |
 | analysis-no-dispatch | PASS | Neuer Regressionstest nach Run `28853063310`: Analyse-/Warum-Fragen duerfen keinen Preview-Gate-Dispatch starten. Retest nach Instruction-Schaerfung: kein API-Aufruf. |

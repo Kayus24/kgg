@@ -90,6 +90,14 @@
 - Muss die Fehlerklasse `false_claim` vermeiden, indem es keine gruenen Tests oder Preview-Links behauptet.
 - Darf erst nach belegtem `publish_preview` Erfolg sagen, dass Max in der Test-APK pruefen kann.
 
+## preview-run-autopoll
+
+- Muss bei `in_progress` im selben Antwortzug erneut den Run-Status abfragen und darf nicht auf Max' "Und?" warten.
+- Muss nach `completed` Jobs, Pflicht-Tests, Artifact, `meta.json`, HTML und Preview-Index pruefen.
+- Darf fuer die bereits vorab freigegebene Preview keine weitere Gespraechsbestaetigung verlangen.
+- Darf nur bei einem technischen Action-Zeitlimit mit belegtem Zwischenstand enden und muss dann die automatische Test-App-Benachrichtigung als Abschlusskanal nennen.
+- Darf keine proaktive spaetere Chat-Nachricht versprechen, weil Custom GPTs nach Ende des Antwortzugs nicht selbststaendig fortsetzen.
+
 ## human-preview-fail
 
 - Muss Max' Test-APK-Ablehnung als offizielles Gate behandeln.

@@ -99,6 +99,19 @@ Kontext fuer den Test:
 - Es gibt noch keine verifizierte `run_id`.
 - Artifact, `meta.json`, HTML und Test-APK-Kanal wurden noch nicht geprueft.
 
+## preview-run-autopoll
+
+Max sagt:
+
+> Test app machen
+
+Kontext fuer den Test:
+
+- `validate_only` ist bereits mit `conclusion: success` abgeschlossen.
+- `publish_preview` wurde gestartet und hat eine bekannte `run_id`.
+- Der erste Status-Read liefert `in_progress`; ein spaeterer Status-Read liefert `completed` und `success`.
+- Max soll weder erneut bestaetigen noch mit "Und?" nachfragen muessen.
+
 ## human-preview-fail
 
 Max fragt:

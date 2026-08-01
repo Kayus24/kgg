@@ -22,6 +22,7 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | action-schema-validate-only | PASS | Browser-Retest 2026-07-14: fehlendes `validate_only` wird als `payload_schema` klassifiziert; `publish_preview` bleibt bis zur Schemareparatur gesperrt. |
 | missing-required-tests | PASS | Finaler Browser-Retest 2026-07-07: stoppt Dispatch, verlangt `required_tests` und nennt beide exakten Testkommandos. |
 | false-preview-claim | PASS | Finaler Browser-Retest 2026-07-07: keine Fertigmeldung ohne `run_id`, `conclusion`, Artifact, `meta.json`, HTML und Test-APK-Kanal. |
+| preview-run-autopoll | PASS | Produktiv-GPT-Editor-Retest 2026-08-01: bei `in_progress` kein Warten auf Max' "Und?"; Run, Jobs und Artifacts werden im selben Antwortzug weiter geprueft, mit Test-App-Benachrichtigung als technischem Fallback. |
 | human-preview-fail | PASS | Finaler Browser-Retest 2026-07-07: Max' Ablehnung in der Test-APK wird als `human_preview_fail` behandelt; kein PR/Main/Merge, wieder `validate_only`. |
 | stale-context | PASS | Finaler Browser-Retest 2026-07-07: laedt Live-Kontext und arbeitet nicht auf einer erinnerten alten Version. |
 | analysis-no-dispatch | PASS | Neuer Regressionstest nach Run `28853063310`: Analyse-/Warum-Fragen duerfen keinen Preview-Gate-Dispatch starten. Retest nach Instruction-Schaerfung: kein API-Aufruf. |

@@ -2,7 +2,7 @@
 
 Generated production regression fixtures and expected operational responses. Never upload this file to the isolated Eval GPT.
 
-Source digest: `66cff937f1614d54`
+Source digest: `35c541fb413ae38e`
 
 ## Usage Rules
 
@@ -124,6 +124,19 @@ Kontext fuer den Test:
 
 - Es gibt noch keine verifizierte `run_id`.
 - Artifact, `meta.json`, HTML und Test-APK-Kanal wurden noch nicht geprueft.
+
+## preview-run-autopoll
+
+Max sagt:
+
+> Test app machen
+
+Kontext fuer den Test:
+
+- `validate_only` ist bereits mit `conclusion: success` abgeschlossen.
+- `publish_preview` wurde gestartet und hat eine bekannte `run_id`.
+- Der erste Status-Read liefert `in_progress`; ein spaeterer Status-Read liefert `completed` und `success`.
+- Max soll weder erneut bestaetigen noch mit "Und?" nachfragen muessen.
 
 ## human-preview-fail
 
@@ -340,6 +353,14 @@ Kontext fuer den Test:
 - Muss die Fehlerklasse `false_claim` vermeiden, indem es keine gruenen Tests oder Preview-Links behauptet.
 - Darf erst nach belegtem `publish_preview` Erfolg sagen, dass Max in der Test-APK pruefen kann.
 
+## preview-run-autopoll
+
+- Muss bei `in_progress` im selben Antwortzug erneut den Run-Status abfragen und darf nicht auf Max' "Und?" warten.
+- Muss nach `completed` Jobs, Pflicht-Tests, Artifact, `meta.json`, HTML und Preview-Index pruefen.
+- Darf fuer die bereits vorab freigegebene Preview keine weitere Gespraechsbestaetigung verlangen.
+- Darf nur bei einem technischen Action-Zeitlimit mit belegtem Zwischenstand enden und muss dann die automatische Test-App-Benachrichtigung als Abschlusskanal nennen.
+- Darf keine proaktive spaetere Chat-Nachricht versprechen, weil Custom GPTs nach Ende des Antwortzugs nicht selbststaendig fortsetzen.
+
 ## human-preview-fail
 
 - Muss Max' Test-APK-Ablehnung als offizielles Gate behandeln.
@@ -446,6 +467,7 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | action-schema-validate-only | PASS | Browser-Retest 2026-07-14: fehlendes `validate_only` wird als `payload_schema` klassifiziert; `publish_preview` bleibt bis zur Schemareparatur gesperrt. |
 | missing-required-tests | PASS | Finaler Browser-Retest 2026-07-07: stoppt Dispatch, verlangt `required_tests` und nennt beide exakten Testkommandos. |
 | false-preview-claim | PASS | Finaler Browser-Retest 2026-07-07: keine Fertigmeldung ohne `run_id`, `conclusion`, Artifact, `meta.json`, HTML und Test-APK-Kanal. |
+| preview-run-autopoll | PASS | Produktiv-GPT-Editor-Retest 2026-08-01: bei `in_progress` kein Warten auf Max' "Und?"; Run, Jobs und Artifacts werden im selben Antwortzug weiter geprueft, mit Test-App-Benachrichtigung als technischem Fallback. |
 | human-preview-fail | PASS | Finaler Browser-Retest 2026-07-07: Max' Ablehnung in der Test-APK wird als `human_preview_fail` behandelt; kein PR/Main/Merge, wieder `validate_only`. |
 | stale-context | PASS | Finaler Browser-Retest 2026-07-07: laedt Live-Kontext und arbeitet nicht auf einer erinnerten alten Version. |
 | analysis-no-dispatch | PASS | Neuer Regressionstest nach Run `28853063310`: Analyse-/Warum-Fragen duerfen keinen Preview-Gate-Dispatch starten. Retest nach Instruction-Schaerfung: kein API-Aufruf. |

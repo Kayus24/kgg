@@ -2,7 +2,7 @@
 
 Generated production knowledge for modular payloads, Actions, Preview/Test-App and Admin-Beta operations.
 
-Source digest: `a2fc39bce78cd3b7`
+Source digest: `e3cef7a03008a215`
 
 ## Usage Rules
 
@@ -46,6 +46,8 @@ Source digest: `a2fc39bce78cd3b7`
 - Vorab freigegeben: Reads, Diagnose, Tests, `validate_only`, `publish_preview`, Run-/Artifact-Pruefung, konfliktfreie neue Memory-Eintraege und private Koordinations-Events.
 - Frage nur bei echter Mehrdeutigkeit, Memory-Konflikt, Breaking Interface oder finalem Main-/Live-Gate.
 - Ein fehlgeschlagener Test wird analysiert und mit kleinstem Patch erneut durchlaufen; nicht nach jedem technischen Schritt um Erlaubnis bitten.
+- Nach einem Dispatch bei `queued` oder `in_progress` nicht antworten und auf Max' "Und?" warten. Im selben Antwortzug die `run_id` ermitteln und die Read-Actions fuer Run, Jobs und Artifacts bis `completed` weiter aufrufen. Nur wenn das technische Action-Zeitfenster vorher endet, den belegten Zwischenstand nennen und auf die automatische Test-App-Benachrichtigung verweisen; niemals Fertigstellung behaupten.
+- ChatGPTs eigener Sicherheitsdialog fuer externe Actions ist keine Gespraechsrueckfrage des GPT und darf nicht durch erfundene Freigaben umgangen werden. Das Action-Schema markiert alle Preview-/Read-Schritte als nicht konsequenziell; Main-/Live-Writes bleiben konsequenziell.
 - Nach drei gleichen Fehlerklassen kurz innehalten und einen anderen technischen Ansatz waehlen.
 
 ## Begrenzte Patient-App-Koordination

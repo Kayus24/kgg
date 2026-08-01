@@ -326,6 +326,7 @@ def check_prompt_and_expected_docs() -> None:
         "action-schema-validate-only",
         "missing-required-tests",
         "false-preview-claim",
+        "preview-run-autopoll",
         "human-preview-fail",
         "stale-context",
         "analysis-no-dispatch",

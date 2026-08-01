@@ -13,7 +13,7 @@
     "profileVersion": "3.0.0",
     "editorBootstrap": {
       "path": "docs/kgg-custom-gpt-editor-bootstrap.md",
-      "sha256": "a5c4d6ee913aba0c8c967e257de8e2e2e895309b13712199770a8cea5a757bd2"
+      "sha256": "137d78d6c185c82472931509a0f6a77a5b4710d4fc4fb4ffa0199d7fdf5d4cb0"
     },
     "capabilities": {
       "webSearch": true,
@@ -30,7 +30,7 @@
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-operations.md",
-        "sha256": "eee1b40e69307365bd13b6335c4b899f5ac49c8ca2aa1bbea78405985f48a886"
+        "sha256": "32f389c2083a4d27f34f0e5f5725786505120851c1cfac3a0400b55f1488ecf4"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-safety.md",
@@ -38,7 +38,7 @@
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-testing.md",
-        "sha256": "95a3fcbc6c2e8baf1ba3e05ac059e4a65fb397c622dc2f285abfc2788e6bfc38"
+        "sha256": "d3e4bad207c550144555ad3775d77dc885ba9e2832cd60d1d1726bea77be9f6d"
       }
     ],
     "actions": [
@@ -48,7 +48,7 @@
       },
       {
         "path": "docs/kgg-custom-gpt-action-api-openapi.yaml",
-        "sha256": "4b56231813de6e29fa8efffaf1274def0554674ba09c53f74d09e551c7ed7de4"
+        "sha256": "bf3ea67417a1a172e0e44a9e7b5baf0b2f46217db7d0690d4d8ba44ba87c2994"
       }
     ],
     "freshness": "GitHub live context and source chunks are authoritative; generated Knowledge is a retrieval accelerator and must pass --check.",

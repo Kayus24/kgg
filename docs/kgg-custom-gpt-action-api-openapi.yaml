@@ -199,7 +199,7 @@ paths:
   /repos/Kayus24/kgg/actions/runs/{run_id}:
     get:
       operationId: getKggPreviewGateRun
-      summary: Get status and conclusion for one Preview Gate run.
+      summary: Poll one Preview Gate run until completed; do not stop at queued or in_progress.
       x-openai-isConsequential: false
       security:
         - githubBearer: []
