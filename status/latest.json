@@ -1,0 +1,12 @@
+{
+  "conclusion": null,
+  "kind": "kgg_preview_run_status",
+  "message": "Payload und modularer Patch werden validiert.",
+  "phase": "validating",
+  "requestId": "gpt-auto-negative-20260802-b",
+  "runId": "30723148961",
+  "runUrl": "https://github.com/Kayus24/kgg/actions/runs/30723148961",
+  "schema": 1,
+  "status": "in_progress",
+  "updatedAt": "2026-08-01T23:21:00Z"
+}
