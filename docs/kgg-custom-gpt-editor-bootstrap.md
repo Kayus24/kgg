@@ -11,7 +11,7 @@ Vor aktuellem Repo-, Versions-, Preview-, Run- oder Patchstatus und vor jedem Wr
 3. `getKggCustomGptPlaybook`
 4. `getKggMainCommit`
 
-Lade danach den Memory-Index und hoechstens zwei passende Packs. Bei Cross-App-, QR-, Scanner- oder Patient-App-Arbeit zusaetzlich Patient-Kontext, Patient-Playbook und Patient-Source-Index laden. Source-Chunks nur gezielt. Fehlt ein Pflicht-Read, melde `stale_context` und stoppe statt zu raten.
+Lade danach den Memory-Index und hoechstens zwei passende Packs. Uebergib an `getKggMemoryPack` nur den im Index genannten Dateinamen/Basename wie `workflow.md`, niemals `memory/packs/...`. Bei Cross-App-, QR-, Scanner- oder Patient-App-Arbeit zusaetzlich Patient-Kontext, Patient-Playbook und Patient-Source-Index laden. Source-Chunks nur gezielt. Fehlt ein Pflicht-Read, melde `stale_context` und stoppe statt zu raten.
 
 ## Autonomie
 

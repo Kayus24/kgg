@@ -2,7 +2,7 @@
 
 This generated compatibility pack contains the complete production knowledge set. Prefer the four smaller curated packs in the GPT editor so retrieval stays focused.
 
-Source digest: `be4b57bfbcf6cea9`
+Source digest: `eba58cb4a114c76e`
 
 ## Usage Rules
 
@@ -176,7 +176,7 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 1. Lade Ressourcenmanifest, `docs/kgg-gpt-context.md`, dieses Playbook und die exakte Main-SHA.
 2. Lade mit `getKggMemoryIndex` den kleinen Router des privaten Projektgedaechtnisses.
-3. Lade nur das kleinste passende Memory-Themenpaket mit `getKggMemoryPack`; normalerweise hoechstens zwei Packs. Einzelne Records nur fuer Begruendung, Historie oder Konflikte laden.
+3. Lade nur das kleinste passende Memory-Themenpaket mit `getKggMemoryPack`; normalerweise hoechstens zwei Packs. Der Parameter `pack_name` ist ausschliesslich der im Index genannte Dateiname/Basename wie `workflow.md`, nie `memory/packs/...`. Einzelne Records nur fuer Begruendung, Historie oder Konflikte laden.
 4. Lade `docs/kgg-custom-gpt-action-schema.md`.
 5. Lade bei Patchfragen `docs/kgg-gpt-area-routes.md` und die passenden Source-Chunks.
 6. Lade `docs/kgg-gpt-bug-lessons.md` und `docs/kgg-gpt-patch-patterns.md`.
@@ -425,7 +425,7 @@ The private repository `Kayus24/kgg-project-memory` stores curated durable decis
 Read in this order:
 
 1. `getKggMemoryIndex`.
-2. Only the smallest matching file via `getKggMemoryPack` (normally one or two packs).
+2. Only the smallest matching file via `getKggMemoryPack` (normally one or two packs). Pass only the basename from the index, for example `workflow.md`; never pass `memory/packs/...` as `pack_name`.
 3. `getKggMemoryRecord` or `getKggMemoryHistory` only for rationale, history or conflicts.
 
 Valid memory payload:
@@ -1172,11 +1172,11 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | modular-payload | PASS | Browser-Test 2026-07-14: erzeugt v2-Payload mit allen Pflichtfeldern und genau einem `__KGG_PATCH_ID__`, ohne direkte Dateioperation. |
 | mockup-restore | PASS | Browser-Retest 2026-07-14 nach Instruction-Schaerfung: liefert modularen Restore-Payload und nennt exakt `python release-pipeline\kgg_gpt_mock_eval.py --payload-file <payload.json>` sowie beide UI-Pflichttests. |
 | preview-apk-icon | PASS | Finaler Browser-Retest 2026-07-07: erlaubt nur minimalen Test-APK/Preview-Icon-Patch nach ausdruecklichem Max-Auftrag; kein `main`, kein Auto-PR/Merge, Gate vor Freigabe. |
-| beta-html-request | PENDING | Auto-Workflow-Vertrag ist lokal getestet; echter Produktiv-GPT-Retest folgt nach Merge und Editor-Sync. |
-| action-schema-validate-only | PENDING | Neues Schema 1.4 verlangt einen `submitKggPreviewAuto`-Aufruf ohne `mode`; echter Editor-Retest folgt nach Merge. |
+| beta-html-request | PASS | Produktiv-GPT-Run `30723304822`: gruene Test-HTML, APK, Artifact, `meta.json` und Preview-Index. |
+| action-schema-validate-only | PASS | Produktiv-GPT nutzte genau einen `submitKggPreviewAuto`-Dispatch; Workflow fuehrte intern `validate_only -> publish_preview` aus. |
 | missing-required-tests | PASS | Finaler Browser-Retest 2026-07-07: stoppt Dispatch, verlangt `required_tests` und nennt beide exakten Testkommandos. |
 | false-preview-claim | PASS | Finaler Browser-Retest 2026-07-07: keine Fertigmeldung ohne `run_id`, `conclusion`, Artifact, `meta.json`, HTML und Test-APK-Kanal. |
-| preview-run-autopoll | PENDING | Auto-Workflow und Test-App-Statuskanal sind lokal implementiert; Live-Run ist erst nach Merge moeglich. |
+| preview-run-autopoll | PASS | GPT verfolgte Run `30723304822` bis `completed/success` und lieferte den Abschlussbericht ohne weitere Nachfrage. |
 | human-preview-fail | PASS | Finaler Browser-Retest 2026-07-07: Max' Ablehnung in der Test-APK wird als `human_preview_fail` behandelt; kein PR/Main/Merge, wieder `validate_only`. |
 | stale-context | PASS | Finaler Browser-Retest 2026-07-07: laedt Live-Kontext und arbeitet nicht auf einer erinnerten alten Version. |
 | analysis-no-dispatch | PASS | Neuer Regressionstest nach Run `28853063310`: Analyse-/Warum-Fragen duerfen keinen Preview-Gate-Dispatch starten. Retest nach Instruction-Schaerfung: kein API-Aufruf. |
@@ -1185,7 +1185,7 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | memory-safe-auto-update | PENDING | Deterministischer Vertragstest und echter Remote-Gate-Test sind gruen; der Custom-GPT-Dialogtest folgt nach Einspielen des API-Schemas und der privaten Repo-Berechtigung. |
 | memory-conflict-needs-approval | PENDING | Das Remote-Memory-Gate lieferte `needs_approval` und schrieb nichts; der Custom-GPT-Dialogtest folgt nach Einspielen des API-Schemas. |
 | cross-app-camera-qr | PENDING | Neuer Produktiv-GPT-Test nach Schema-/Knowledge-Sync; lokaler Gate- und Browservertrag ist gruen. |
-| preview-autonomy | PENDING | Neuer Produktiv-GPT-Test muss bestaetigen, dass Preview-only ohne Zwischenbestaetigungen durchlaeuft. |
+| preview-autonomy | PASS | Produktiv-GPT absolvierte Pflicht-Reads, einen Dispatch, Run-/Job-/Artifact-Pruefung und Abschluss ohne Zwischenbestaetigung. |
 | main-approval-phrase | PENDING | Mechanischer Gate-Selbsttest ist gruen; echter Dialogtest folgt nach Editor-Sync. |
 | agent-coordination | PENDING | Private Queue und Unit-Tests sind gruen; echter Agent-Dialogtest folgt nach Merge und Editor-Sync. |
 
@@ -1231,7 +1231,7 @@ Canary note: The GPT dispatched `validate_only` first, then dispatched `publish_
 - Der erste Admin-Beta-Erfolgsnachweis war zu vage. Nach Instruction-Anpassung nannte der Retest alle vier verbindlichen Belege.
 - Der Stale-Context-Test bestand: Bei nicht bestaetigter Live-Version erzeugte der GPT weder Payload noch Dispatch.
 - Abschlussstand: 16/16 kritische Browser-Promptklassen PASS. Es wurde dabei kein neuer Preview-, Test-App- oder Main-Push behauptet oder ausgeloest.
-- Der Knowledge-Dateiupload im GPT-Editor blieb wegen des lokalen Browser-Dateidialogs blockiert. Das beeintraechtigt die Aktualitaetsgarantie nicht, weil statisches Knowledge absichtlich nicht autoritativ ist; die gespeicherten Instructions und Live-Actions erzwingen das Aktualitaets-Gate.
+- Der Knowledge-Dateiupload wurde am 2026-08-02 im internen Browser erfolgreich abgeschlossen. Ein frischer Editor-Tab bestaetigte vier Knowledge-Dateien sowie die beiden Action-Schemas 1.4.0; Live-Actions bleiben weiterhin die autoritative Quelle fuer aktuellen Stand und Runs.
 
 ## Mockup-Verhaltenstest 2026-07-14
 
@@ -1275,7 +1275,18 @@ Canary note: The GPT dispatched `validate_only` first, then dispatched `publish_
 - WorkManager ist mit Netzbedingung und dem Android-Minimum von 15 Minuten registriert. Ein erzwungener JobScheduler-Start beweist die Registrierung; das interne Periodenfenster wird nicht durch einen Produktions-Test-Hook umgangen.
 - Sofortige Hintergrundmeldung erfolgt deshalb zusaetzlich ueber den Kommentar am festen GitHub-Issue mit `@Kayus24`; die Test-App prueft im Vordergrund alle 30 Sekunden und im Hintergrund nach Android-Zeitplanung.
 - Lokales HTTP ist ausschliesslich im Debug-Build fuer `10.0.2.2` erlaubt. Der Produktionsclient akzeptiert nur `https://raw.githubusercontent.com`.
-- Live-Workflow, GitHub-Issue-Kommentar und produktiver GPT-Auto-Dispatch bleiben `PENDING`, bis der Branch ueber einen geprueften PR auf dem Default-Branch liegt und Schema 1.4 im GPT-Editor synchronisiert wurde.
+- Live-Workflow, GitHub-Issue-Kommentar und produktiver GPT-Auto-Dispatch wurden am 2026-08-02 erfolgreich nachgewiesen; Details stehen im folgenden Abschnitt.
+
+## Produktiver Auto-Preview-E2E 2026-08-02
+
+- Editor verifiziert: Bootstrap v4, Action-Schema 1.4.0, vier aktuelle Knowledge-Dateien, `GPT-5.6 Thinking`, Websuche, Code Interpreter und Bildgenerierung.
+- Negativlauf `30723148961` wurde korrekt im Schritt `Preflight guarded GPT payload` beendet. Kein Publish, kein Artifact und kein falscher Erfolgsclaim; Statusdatei und GitHub-Issue-Kommentar wurden geschrieben.
+- Produktiv-GPT-Request `gpt-auto-canary-20260802-a`: Run `30723304822`, `completed/success`, genau ein Auto-Dispatch und intern gruene Reihenfolge `validate_only -> publish_preview`.
+- Pflichtnachweise: `critical` und `ui-stability regression` gruen; Artifact `8825561705` (`kgg-preview-gpt-auto-canary-20260802-a`) vorhanden und nicht abgelaufen; `meta.json`, HTML, Status und Preview-Index HTTP 200.
+- Generiertes Modul: `kgg-update/src/patches/v062-auto-canary-20260802-a.html`; HTML-SHA256 `0fae2d75f1cb696e52d94441dfd6b630c03aafdb4c92b17b1bedd1ed7b456e09`.
+- API-35-Emulator: APK installiert, `de.kgg.preview/de.kgg.app.MainActivity` gestartet, Benachrichtigung `Neue KGG Preview bereit` mit Request-ID empfangen, kompakter Preview-Chip und Details geprueft, App-Eingabe danach weiterhin bedienbar; kein App-Crash und kein SystemUI-ANR.
+- Beobachtete Effizienzabweichung: Der GPT uebergab beim ersten Memory-Pack-Read einen Verzeichnispfad statt nur des Basenames und korrigierte den folgenden `404` selbst. Bootstrap, Playbook, Schema und Eval wurden deshalb um die eindeutige Basename-Regel erweitert.
+- Kein `publish_admin_beta`, kein Admin-App-Release und kein direkter App-Push nach `main`.
 
 ---
 

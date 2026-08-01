@@ -441,6 +441,7 @@ paths:
         - name: pack_name
           in: path
           required: true
+          description: Basename from memory/index.json, for example workflow.md. Never include memory/packs/ or another directory prefix.
           schema:
             type: string
             pattern: "^[a-z0-9][a-z0-9-]{1,63}\\.md$"

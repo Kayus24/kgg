@@ -4,7 +4,7 @@
 
 1. Lade Ressourcenmanifest, `docs/kgg-gpt-context.md`, dieses Playbook und die exakte Main-SHA.
 2. Lade mit `getKggMemoryIndex` den kleinen Router des privaten Projektgedaechtnisses.
-3. Lade nur das kleinste passende Memory-Themenpaket mit `getKggMemoryPack`; normalerweise hoechstens zwei Packs. Einzelne Records nur fuer Begruendung, Historie oder Konflikte laden.
+3. Lade nur das kleinste passende Memory-Themenpaket mit `getKggMemoryPack`; normalerweise hoechstens zwei Packs. Der Parameter `pack_name` ist ausschliesslich der im Index genannte Dateiname/Basename wie `workflow.md`, nie `memory/packs/...`. Einzelne Records nur fuer Begruendung, Historie oder Konflikte laden.
 4. Lade `docs/kgg-custom-gpt-action-schema.md`.
 5. Lade bei Patchfragen `docs/kgg-gpt-area-routes.md` und die passenden Source-Chunks.
 6. Lade `docs/kgg-gpt-bug-lessons.md` und `docs/kgg-gpt-patch-patterns.md`.
