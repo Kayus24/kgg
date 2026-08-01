@@ -4,6 +4,89 @@
 - Lines: 25621-26040
 
 ```html
+      "kggPlanSectionFrozen",
+      "is-scrolling",
+      "phoneTextFocus",
+      "kggPhoneDrawerOpen",
+      "kggPhoneDbBrowseMode"
+    );
+
+    Array.prototype.forEach.call(document.querySelectorAll(".phoneButtonFloat"), function(btn){
+      btn.classList.remove("phoneButtonFloat");
+    });
+  }
+
+  function hardClean(reason){
+    /*
+      If a resize/orientation interrupts an active original drag handler, ask the
+      original pointercancel listener to close first. Otherwise its later pointerup
+      could see a removed placeholder and reorder the plan unexpectedly.
+    */
+    if(hasLivePlanGesture()){
+      try{
+        document.dispatchEvent(new Event("pointercancel", {bubbles:true, cancelable:true}));
+      }catch(err){
+        try{
+          var ev = document.createEvent("Event");
+          ev.initEvent("pointercancel", true, true);
+          document.dispatchEvent(ev);
+        }catch(err2){}
+      }
+    }
+
+    cleanBodyState();
+    cleanPlanCardInlineState();
+    cleanPlanContainerInlineState();
+
+    window.KGG_PHONE_VIEWPORT_STATE_RELEASE_GUARD_V14.lastClean = {
+      reason: reason || "manual",
+      at: new Date().toISOString(),
+      phone: isPhone()
+    };
+  }
+
+  function cleanIfSafe(reason){
+    /*
+      During an active pointer gesture, the original handlers own the live motion.
+      This must also protect tablet/split-screen swipes; otherwise a pointercancel
+      can erase the visible card translation before pointerup resolves it.
+    */
+    if(hasLivePlanGesture()) return;
+    hardClean(reason);
+  }
+
+  function scheduleClean(reason, delay){
+    clearTimeout(cleanupTimer);
+    cleanupTimer = setTimeout(function(){
+      cleanIfSafe(reason);
+    }, Number.isFinite(delay) ? delay : 80);
+  }
+
+  function install(){
+    window.KGG_PHONE_VIEWPORT_STATE_RELEASE_GUARD_V14 = window.KGG_PHONE_VIEWPORT_STATE_RELEASE_GUARD_V14 || {};
+    window.KGG_PHONE_VIEWPORT_STATE_RELEASE_GUARD_V14.patchId = PATCH_ID;
+    window.KGG_PHONE_VIEWPORT_STATE_RELEASE_GUARD_V14.clean = hardClean;
+    window.KGG_PHONE_VIEWPORT_STATE_RELEASE_GUARD_V14.check = function(){
+      var b = body();
+      var block = currentPlanBlock();
+      var list = planList();
+      return {
+        patchId: PATCH_ID,
+        phone: isPhone(),
+        bodyClasses: b ? b.className : "",
+        hasLivePlanGesture: hasLivePlanGesture(),
+        planFreezeHeight: block ? block.style.getPropertyValue("--kgg-current-plan-freeze-h") : "",
+        planListInlinePosition: list ? list.style.getPropertyValue("position") : "",
+        releaseFallback: !!(window.KGGReleaseControl && window.KGGReleaseControl.fallback),
+        nativeReleaseBridge: !!(window.KGGReleaseControl && !window.KGGReleaseControl.fallback)
+      };
+    };
+
+    ["pointerup","pointercancel","touchend","touchcancel"].forEach(function(type){
+      window.addEventListener(type, function(){
+        scheduleClean(type, 140);
+        scheduleClean(type + ":late", 420);
+      }, {capture:true, passive:true});
     });
 
     window.addEventListener("resize", function(){
@@ -341,87 +424,4 @@
 <!-- SOURCE FILE: kgg-update/src/patches/v042-phone-dock-anchored-correction.html -->
 
 <!-- KGG PATCH START kgg-v042-phone-dock-anchored-correction -->
-<style id="kgg-v042-phone-dock-anchored-correction-style">
-  @media(max-width:759px){
-    #createPanel .planHeader{
-      position:relative;
-      grid-template-columns:minmax(0,1fr) auto auto;
-    }
-    body.adminMode #createPanel .planHeader .kggPhoneAdminMenu{
-      display:block;
-      position:relative!important;
-      right:auto!important;
-      top:auto!important;
-      z-index:46!important;
-      align-self:center;
-      justify-self:end;
-      grid-column:auto;
-    }
-    body.adminMode > .kggPhoneAdminMenu{display:none!important}
-    #createPanel .planHeader .kggPhoneAdminMenuBtn{
-      width:42px;
-      height:42px;
-      min-width:42px;
-      min-height:42px;
-      border-radius:15px;
-      border:1px solid rgba(255,255,255,.72);
-      background:linear-gradient(180deg,rgba(255,255,255,.86),rgba(238,244,252,.64));
-      color:#071027;
-      box-shadow:0 10px 24px rgba(7,16,39,.14),inset 0 1px 0 rgba(255,255,255,.9);
-      backdrop-filter:blur(16px) saturate(1.35);
-      -webkit-backdrop-filter:blur(16px) saturate(1.35);
-    }
-    #createPanel .planHeader .kggPhoneAdminMenuPanel{
-      top:calc(100% + 8px);
-      right:0;
-      z-index:96;
-      background:rgba(255,255,255,.92);
-      backdrop-filter:blur(18px) saturate(1.28);
-      -webkit-backdrop-filter:blur(18px) saturate(1.28);
-    }
-
-    #scanHub{
-      grid-template-columns:minmax(0,1fr)!important;
-      z-index:40!important;
-    }
-    #scanHub > .phonePhotoMenuToggle{display:none!important}
-    #scanHub #scanBtn,
-    body.kggPhoneHasPlan #createPanel.planMode #finishBtn:not(.hidden){
-      border:1px solid rgba(255,255,255,.68)!important;
-      background:
-        linear-gradient(180deg,rgba(255,255,255,.86),rgba(233,242,252,.58))!important;
-      color:#071027!important;
-      box-shadow:0 14px 30px rgba(7,16,39,.18),inset 0 1px 0 rgba(255,255,255,.95)!important;
-      backdrop-filter:blur(18px) saturate(1.38)!important;
-      -webkit-backdrop-filter:blur(18px) saturate(1.38)!important;
-    }
-    #scanHub #scanBtn{
-      display:flex!important;
-      grid-column:1!important;
-      justify-content:space-between!important;
-      gap:10px!important;
-      padding:0 7px 0 18px!important;
-      text-align:left!important;
-    }
-    #scanHub #scanBtn .phoneScanLabel{
-      min-width:0;
-      flex:1 1 auto;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
-    #scanHub #scanBtn #phonePhotoMenuToggle{
-      position:static!important;
-      display:inline-flex!important;
-      flex:0 0 46px;
-      width:46px!important;
-      height:46px!important;
-      min-width:46px!important;
-      min-height:46px!important;
-      align-items:center!important;
-      justify-content:center!important;
-      border-radius:14px!important;
-      border:1px solid rgba(255,255,255,.82)!important;
-      background:rgba(255,255,255,.74)!important;
-      color:#071027!important;
 ```

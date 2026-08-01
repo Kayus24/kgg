@@ -4,6 +4,39 @@
 - Lines: 15121-15540
 
 ```html
+            error = true;
+        }
+    }
+    if (!error) {
+        return outputBytes;
+    }
+    var syndrome = new GenericGFPoly_1.default(field, syndromeCoefficients);
+    var sigmaOmega = runEuclideanAlgorithm(field, field.buildMonomial(twoS, 1), syndrome, twoS);
+    if (sigmaOmega === null) {
+        return null;
+    }
+    var errorLocations = findErrorLocations(field, sigmaOmega[0]);
+    if (errorLocations == null) {
+        return null;
+    }
+    var errorMagnitudes = findErrorMagnitudes(field, sigmaOmega[1], errorLocations);
+    for (var i = 0; i < errorLocations.length; i++) {
+        var position = outputBytes.length - 1 - field.log(errorLocations[i]);
+        if (position < 0) {
+            return null;
+        }
+        outputBytes[position] = GenericGF_1.addOrSubtractGF(outputBytes[position], errorMagnitudes[i]);
+    }
+    return outputBytes;
+}
+exports.decode = decode;
+
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VERSIONS = [
@@ -391,37 +424,4 @@ exports.VERSIONS = [
                 ],
             },
             {
-                ecCodewordsPerBlock: 24,
-                ecBlocks: [
-                    { numBlocks: 4, dataCodewordsPerBlock: 40 },
-                    { numBlocks: 5, dataCodewordsPerBlock: 41 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 20,
-                ecBlocks: [
-                    { numBlocks: 11, dataCodewordsPerBlock: 16 },
-                    { numBlocks: 5, dataCodewordsPerBlock: 17 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 24,
-                ecBlocks: [
-                    { numBlocks: 11, dataCodewordsPerBlock: 12 },
-                    { numBlocks: 5, dataCodewordsPerBlock: 13 },
-                ],
-            },
-        ],
-    },
-    {
-        infoBits: 0x0F928,
-        versionNumber: 15,
-        alignmentPatternCenters: [6, 26, 48, 70],
-        errorCorrectionLevels: [
-            {
-                ecCodewordsPerBlock: 22,
-                ecBlocks: [
-                    { numBlocks: 5, dataCodewordsPerBlock: 87 },
-                    { numBlocks: 1, dataCodewordsPerBlock: 88 },
-                ],
 ```

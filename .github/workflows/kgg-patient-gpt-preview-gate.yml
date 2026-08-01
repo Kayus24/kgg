@@ -21,6 +21,26 @@ on:
         description: Guarded patient GPT replace-exact payload
         required: true
         type: string
+      approval_phrase:
+        description: Exact final Max approval; required only for patient PR/live modes
+        required: false
+        default: ""
+        type: string
+  workflow_call:
+    inputs:
+      mode:
+        required: true
+        type: string
+      request_id:
+        required: true
+        type: string
+      payload_json:
+        required: true
+        type: string
+      approval_phrase:
+        required: false
+        default: ""
+        type: string
 
 permissions:
   actions: read
@@ -103,6 +123,7 @@ jobs:
             --mode '${{ inputs.mode }}'
             --payload-file "$RUNNER_TEMP/kgg-patient-gpt-payload.json"
             --github-output "$GITHUB_OUTPUT"
+            --approval-phrase '${{ inputs.approval_phrase }}'
           )
           if [[ '${{ inputs.mode }}' != 'validate_only' ]]; then
             args+=(--preview-root "$GITHUB_WORKSPACE/preview")

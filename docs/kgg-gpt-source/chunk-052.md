@@ -4,6 +4,39 @@
 - Lines: 21841-22260
 
 ```html
+    if(finishNotice)finishNotice.textContent='';
+    const link=$('patientAppLink'), notice=$('patientShareNotice'), box=$('patientQrBox'), status=$('patientQrStatus'), copyBtn=$('copyPatientLink');
+    $('shareText').value='INTERNE DEBUG-TESTAUSGABE – nicht an Patient:innen weitergeben\n\nLokaler Testlink:\n'+share.debugUrl+'\n\nPayload JSON:\n'+JSON.stringify(share.payload,null,2);
+    const dbg=$('debugPayloadBox'); if(dbg)dbg.open=false;
+    if(!share.shareable){
+      if(notice)notice.textContent='Lokaler Test.';
+      if(link){link.classList.remove('hidden'); link.href=share.debugUrl; link.textContent='Patienten-Test öffnen';}
+      if(copyBtn){copyBtn.classList.remove('hidden'); setPatientCopyButtonLabel();}
+      setManualPatientLinkField(share.debugUrl,false,false);
+      setupPatientLinkCopyLongPress();
+      if(box)box.innerHTML='<span class="qrStatus">Lokaler Test.</span>';
+      if(status)status.textContent='Testlink bereit.';
+      return share.debugUrl;
+    }
+    if(notice){
+      const mediaInfo=share.payload&&share.payload.meta&&share.payload.meta.media;
+      const longInfo=ttlSeconds>=MEDIA_UPLOAD_LONG_TTL_SECONDS?' 24h aktiv.':'';
+      notice.textContent='Patient:innen-Link bereit.'+(mediaInfo&&mediaInfo.expected?' Bilder bereit.':'')+longInfo;
+    }
+    if(link){link.classList.remove('hidden'); link.href=share.url;}
+    if(copyBtn){copyBtn.classList.remove('hidden'); setPatientCopyButtonLabel();}
+    setManualPatientLinkField(share.url,false,false);
+    setupPatientLinkCopyLongPress();
+    tryRenderQrCode(share.url);
+    return share.url;
+  }
+  function makeShare(){return buildPatientShareFromCurrentPlan().url;}
+
+  function resetFinishModal(){
+    const choices=$('finishChoices'), output=$('patientOutputBox'), close=$('closeShare'), notice=$('finishNotice'), dbg=$('debugPayloadBox'), copyBtn=$('copyPatientLink');
+    if(choices)choices.classList.remove('hidden');
+    if(output)output.classList.add('hidden');
+    if(close)close.classList.add('hidden');
     if(notice)notice.textContent='';
     if(dbg)dbg.open=false;
     patientShareTtlSeconds=MEDIA_UPLOAD_TTL_SECONDS;
@@ -391,37 +424,4 @@
     if(mode==='softContrast'){
       ctx.save();
       ctx.filter='contrast(1.45) brightness(1.05) saturate(0)';
-      ctx.drawImage(src,0,0);
-      ctx.restore();
-      return canvas;
-    }
-    if(mode==='threshold'||mode==='thresholdLow'||mode==='thresholdHigh'||mode==='invert'){
-      const img=ctx.getImageData(0,0,canvas.width,canvas.height);
-      const d=img.data;
-      const threshold=mode==='thresholdLow'?118:(mode==='thresholdHigh'?178:148);
-      for(let i=0;i<d.length;i+=4){
-        let g=(d[i]*.299+d[i+1]*.587+d[i+2]*.114)>threshold?255:0;
-        if(mode==='invert')g=255-g;
-        d[i]=d[i+1]=d[i+2]=g;
-      }
-      ctx.putImageData(img,0,0);
-      return canvas;
-    }
-    return canvas;
-  }
-  /* kgg-mini-patch-v400-10-qr-gallery-bitmap-debug
-     Galerie-/Fotodatenbank-QR-Fix:
-     Einige Android WebViews erkennen QR-Codes per BarcodeDetector auf Kamera-Bildern,
-     aber nicht zuverlässig auf Canvas-Crops aus Galerie-Dateien. Deshalb wird jeder
-     Canvas-Versuch zusätzlich als PNG-Blob -> ImageBitmap dekodiert und dann erneut
-     an BarcodeDetector gegeben. Außerdem bleiben Warnungen in der Scan-Vorschau sichtbar.
-  */
-  function scanCanvasToBlob(canvas,type,quality){
-    return new Promise(resolve=>{
-      try{
-        canvas.toBlob(blob=>resolve(blob),type||'image/png',quality||.92);
-      }catch(err){resolve(null);}
-    });
-  }
-  async function scanDetectQrViaBitmapFromCanvas(canvas,detector){
 ```

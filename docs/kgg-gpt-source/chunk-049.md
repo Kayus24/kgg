@@ -4,6 +4,39 @@
 - Lines: 20581-21000
 
 ```html
+      if(status)status.textContent=nativeSyncLastStatus;
+      renderSyncDiagnostics();
+      return false;
+    }
+  }
+  async function importNativeSyncFile(file){
+    const status=$('syncPairStatus');
+    try{
+      if(!file)throw new Error('Keine Datei ausgewaehlt.');
+      const text=await file.text();
+      const payload=JSON.parse(text);
+      const result=mergeNativeExerciseBankSyncDocument(payload,{allowUnfollowed:true});
+      try{await pushNativeExerciseBankSync('sync_file_import');}catch(err){}
+      const bankResult=result&&result.bank?result.bank:{added:0,updated:0,total:0};
+      const packageResult=result&&result.packages?result.packages:{added:0,updated:0,total:0};
+      nativeSyncLastStatus='Import OK · DB +'+bankResult.added+'/'+bankResult.updated+' · Pakete +'+packageResult.added+'/'+packageResult.updated;
+      if(status)status.textContent=nativeSyncLastStatus;
+      renderSyncPeerList();
+      renderSyncDiagnostics();
+      return result;
+    }catch(err){
+      nativeSyncLastStatus='Import fehlgeschlagen: '+(err&&err.message?err.message:'ungueltige Datei');
+      if(status)status.textContent=nativeSyncLastStatus;
+      renderSyncDiagnostics();
+      return null;
+    }
+  }
+  function isNativeSyncInvitePayload(payload){
+    return payload&&payload.kind==='kgg_sync_invite'&&(payload.version===1||payload.version===2)&&payload.deviceId;
+  }
+  function isNativeSyncBundlePayload(payload){
+    return payload&&payload.kind==='kgg_sync_bundle'&&(payload.version===1||payload.version===2)&&(payload.invite||payload.sync);
+  }
   function applyNativeSyncInvite(invite){
     if(!isNativeSyncInvitePayload(invite))throw new Error('Sync-QR ist nicht lesbar.');
     const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig()||{});
@@ -391,37 +424,4 @@
     const dh=Math.max(1,Math.round(ih*scale));
     const dx=Math.round((targetW-dw)/2),dy=Math.round((targetH-dh)/2);
     ctx.imageSmoothingEnabled=true;
-    ctx.imageSmoothingQuality='high';
-    try{ctx.filter='grayscale(1) contrast(1.08)';}catch(e){}
-    ctx.drawImage(img,dx,dy,dw,dh);
-    try{
-      const data=ctx.getImageData(0,0,targetW,targetH);
-      for(let i=0;i<data.data.length;i+=4){
-        const grey=Math.round((data.data[i]*0.299)+(data.data[i+1]*0.587)+(data.data[i+2]*0.114));
-        data.data[i]=grey; data.data[i+1]=grey; data.data[i+2]=grey; data.data[i+3]=255;
-      }
-      ctx.putImageData(data,0,0);
-    }catch(e){}
-    return canvas.toDataURL('image/jpeg',.68);
-  }
-  async function loadKggPdfExerciseThumbnail(sourceExercise){
-    const media=firstPdfExerciseImageMedia(sourceExercise);
-    if(!media)return null;
-    try{
-      const record=await getEncryptedMediaBlob(media.id);
-      if(!record||!record.blob)return null;
-      const imageBlob=await patientDecryptMedia(media,record.blob);
-      const dataUrl=await createKggPdfThumbnailDataUrl(imageBlob);
-      if(!/^data:image\/jpeg;base64,/i.test(dataUrl))return null;
-      return {
-        kind:'kgg-pdf-exercise-thumbnail',
-        sourceId:String(media.id||''),
-        mime:'image/jpeg',
-        width:150,
-        height:110,
-        dataUrl
-      };
-    }catch(err){
-      console.warn('PDF-Uebungsbild wird ausgelassen:',err);
-      return null;
 ```

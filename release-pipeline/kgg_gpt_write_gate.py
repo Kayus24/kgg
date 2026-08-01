@@ -31,6 +31,9 @@ PREVIEW_MARKER_START = "<!-- KGG_PREVIEW_MARKER_START -->"
 PREVIEW_MARKER_END = "<!-- KGG_PREVIEW_MARKER_END -->"
 MAX_PAYLOAD_BYTES = 120_000
 MAX_CONTENT_BYTES = 80_000
+MAX_REGRESSION_ASSERTIONS = 12
+MAX_REGRESSION_VALUE_CHARS = 300
+REGRESSION_ROOT = ROOT / "release-pipeline" / "gpt-regressions"
 
 SECRET_PATTERN = re.compile(
     "("
@@ -69,6 +72,14 @@ FORBIDDEN_CONTENT_TOKENS = (
     "<!-- KGG PATCH END",
 )
 LEGACY_PAYLOAD_FIELDS = ("operations", "old_text", "oldText", "new_text", "newText", "path", "file", "filename", "target")
+CROSS_APP_SCOPE = "cross-app-qr-preview"
+CROSS_APP_PROTECTED_AREAS = {"QR/Patienten-App", "Scan/OCR"}
+CROSS_APP_ALLOWED_PROTECTED_TOKENS = {"scanQrFromImageFile"}
+MAIN_APPROVAL_PHRASE = "Gut für Main"
+CRITICAL_TEST = "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical"
+UI_REGRESSION_TEST = "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
+CAMERA_QR_TEST = "cmd /c release-pipeline\\run-kgg-tests.cmd --suite camera-qr --level regression"
+PATIENT_SCAN_TEST = "cmd /c release-pipeline\\run-kgg-tests.cmd --suite patient-scan --level regression"
 
 
 class GateError(RuntimeError):
@@ -98,6 +109,8 @@ def write_json(path: Path, value: dict[str, Any]) -> None:
 def canonical_payload(payload: dict[str, Any]) -> str:
     value = {
         "patch_content": payload["patch_content"],
+        "protected_scope": payload["protected_scope"],
+        "regression_contract": payload["regression_contract"],
         "request_id": payload["request_id"],
         "required_tests": payload["required_tests"],
         "summary": payload["summary"],
@@ -159,7 +172,7 @@ def reject_legacy_payload(payload: dict[str, Any]) -> None:
         )
 
 
-def validate_patch_content(content: str) -> str:
+def validate_patch_content(content: str, protected_scope: str = "none") -> str:
     if not isinstance(content, str) or not content.strip():
         fail("patch_content must be a non-empty HTML fragment")
     if len(content.encode("utf-8")) > MAX_CONTENT_BYTES:
@@ -173,7 +186,8 @@ def validate_patch_content(content: str) -> str:
             fail(f"patch_content contains forbidden generated-output token: {token}")
     if SECRET_PATTERN.search(normalized):
         fail("patch_content contains a token-shaped secret")
-    touched = [token for token in PROTECTED_TOKENS if token in normalized]
+    allowed = CROSS_APP_ALLOWED_PROTECTED_TOKENS if protected_scope == CROSS_APP_SCOPE else set()
+    touched = [token for token in PROTECTED_TOKENS if token in normalized and token not in allowed]
     if touched:
         fail("patch_content touches protected area tokens: " + ", ".join(touched))
     try:
@@ -181,6 +195,46 @@ def validate_patch_content(content: str) -> str:
     except UnicodeError as exc:
         fail(f"patch_content must be valid UTF-8 text: {exc}")
     return normalized
+
+
+def validate_regression_contract(value: Any, protected_scope: str) -> list[dict[str, str]]:
+    if value is None:
+        return []
+    if not isinstance(value, list) or not value or len(value) > MAX_REGRESSION_ASSERTIONS:
+        fail(f"regression_contract must contain 1 to {MAX_REGRESSION_ASSERTIONS} assertions")
+    allowed_protected = CROSS_APP_ALLOWED_PROTECTED_TOKENS if protected_scope == CROSS_APP_SCOPE else set()
+    assertions: list[dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for index, item in enumerate(value, start=1):
+        if not isinstance(item, dict):
+            fail(f"regression_contract assertion {index} must be an object")
+        kind = str(item.get("kind") or "").strip().lower()
+        token = item.get("value")
+        if kind not in {"contains", "not_contains"}:
+            fail(f"regression_contract assertion {index} kind must be contains or not_contains")
+        if not isinstance(token, str):
+            fail(f"regression_contract assertion {index} value must be a string")
+        token = token.replace("\r\n", "\n").replace("\r", "\n").strip()
+        if len(token) < 3 or len(token) > MAX_REGRESSION_VALUE_CHARS or "\x00" in token:
+            fail(
+                f"regression_contract assertion {index} value must contain 3 to "
+                f"{MAX_REGRESSION_VALUE_CHARS} safe characters"
+            )
+        if SECRET_PATTERN.search(token):
+            fail(f"regression_contract assertion {index} contains a token-shaped secret")
+        protected = [name for name in PROTECTED_TOKENS if name in token and name not in allowed_protected]
+        if protected:
+            fail(
+                f"regression_contract assertion {index} touches protected tokens: "
+                + ", ".join(protected)
+            )
+        key = (kind, token)
+        if key not in seen:
+            assertions.append({"kind": kind, "value": token})
+            seen.add(key)
+    if not any(item["kind"] == "contains" for item in assertions):
+        fail("regression_contract requires at least one contains assertion")
+    return assertions
 
 
 def validate_payload(raw: str) -> dict[str, Any]:
@@ -206,12 +260,36 @@ def validate_payload(raw: str) -> dict[str, Any]:
         fail("version_slug must contain lowercase letters/numbers separated by single hyphens")
     touched_areas = normalized_string_list(payload, "touched_areas", "touchedAreas")
     required_tests = normalized_string_list(payload, "required_tests", "requiredTests")
-    patch_content = validate_patch_content(payload.get("patch_content") or payload.get("patchContent"))
+    protected_scope = str(payload.get("protected_scope") or payload.get("protectedScope") or "none").strip().lower()
+    if protected_scope not in {"none", CROSS_APP_SCOPE}:
+        fail(f"protected_scope must be none or {CROSS_APP_SCOPE}")
+    patch_content = validate_patch_content(
+        payload.get("patch_content") or payload.get("patchContent"),
+        protected_scope,
+    )
+    regression_contract = validate_regression_contract(
+        payload.get("regression_contract", payload.get("regressionContract")),
+        protected_scope,
+    )
 
     protected_norm = {normalize_area(area): area for area in module_patch.PROTECTED_AREAS}
     selected_protected = [protected_norm[normalize_area(area)] for area in touched_areas if normalize_area(area) in protected_norm]
-    if selected_protected:
+    if selected_protected and protected_scope != CROSS_APP_SCOPE:
         fail("protected touched_areas require explicit Max approval outside the GPT gate: " + ", ".join(selected_protected))
+    if protected_scope == CROSS_APP_SCOPE:
+        unexpected_protected = sorted(set(selected_protected) - CROSS_APP_PROTECTED_AREAS)
+        if unexpected_protected:
+            fail("cross-app QR scope cannot touch protected areas: " + ", ".join(unexpected_protected))
+        if not set(selected_protected) & CROSS_APP_PROTECTED_AREAS:
+            fail("cross-app QR scope requires QR/Patienten-App or Scan/OCR in touched_areas")
+        declared = {item.casefold() for item in required_tests}
+        missing = [
+            required
+            for required in (CRITICAL_TEST, UI_REGRESSION_TEST, CAMERA_QR_TEST, PATIENT_SCAN_TEST)
+            if required.casefold() not in declared
+        ]
+        if missing:
+            fail("cross-app QR scope requires these exact tests: " + "; ".join(missing))
 
     combined_text = json.dumps(
         {
@@ -221,6 +299,8 @@ def validate_payload(raw: str) -> dict[str, Any]:
             "touched_areas": touched_areas,
             "required_tests": required_tests,
             "patch_content": patch_content,
+            "protected_scope": protected_scope,
+            "regression_contract": regression_contract,
         },
         ensure_ascii=False,
     )
@@ -235,6 +315,8 @@ def validate_payload(raw: str) -> dict[str, Any]:
         "touched_areas": touched_areas,
         "required_tests": required_tests,
         "patch_content": patch_content,
+        "protected_scope": protected_scope,
+        "regression_contract": regression_contract,
     }
 
 
@@ -245,9 +327,13 @@ def plan_modular_patch(payload: dict[str, Any]) -> tuple[dict[Path, bytes], dict
         summary=payload["summary"],
         area=payload["touched_areas"],
         version_name=None,
-        allow_protected=False,
+        allow_protected=payload["protected_scope"] == CROSS_APP_SCOPE,
         allow_changelog_overflow=True,
-        approval_note="Gate-managed Custom GPT module patch; Max approved modular GPT migration with existing embedded changelog overflow.",
+        approval_note=(
+            "Gate-managed cross-app QR Preview scope authorized by Max; PR/Main still require the exact final approval phrase."
+            if payload["protected_scope"] == CROSS_APP_SCOPE
+            else "Gate-managed Custom GPT module patch; Max approved modular GPT migration with existing embedded changelog overflow."
+        ),
         patch_content=payload["patch_content"],
     )
     planned, report = module_patch.prepare(args)
@@ -259,6 +345,20 @@ def plan_modular_patch(payload: dict[str, Any]) -> tuple[dict[Path, bytes], dict
         patch_path.relative_to(ROOT / "kgg-update" / "src" / "patches")
     except ValueError as exc:
         raise GateError(f"generated patch file escapes patches directory: {patch_file}") from exc
+    if payload["regression_contract"]:
+        contract_path = (REGRESSION_ROOT / f"{payload['request_id']}.json").resolve()
+        try:
+            contract_path.relative_to(REGRESSION_ROOT.resolve())
+        except ValueError as exc:
+            raise GateError("generated regression contract path is unsafe") from exc
+        contract = {
+            "schemaVersion": 1,
+            "requestId": payload["request_id"],
+            "patchId": str(report["patchId"]),
+            "assertions": payload["regression_contract"],
+        }
+        planned[contract_path] = (json.dumps(contract, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+        report["regressionContractFile"] = str(contract_path.relative_to(ROOT)).replace("\\", "/")
     return planned, report
 
 
@@ -446,7 +546,22 @@ def verify_preview_acceptance(preview_root: Path, payload: dict[str, Any], diges
     return meta
 
 
-def run(payload: dict[str, Any], mode: str, preview_root: Path | None, github_output: str | None) -> None:
+def impact_outputs(payload: dict[str, Any]) -> dict[str, str]:
+    cross_app = payload["protected_scope"] == CROSS_APP_SCOPE
+    return {
+        "run_camera_qr": str(cross_app).lower(),
+        "run_patient_scan": str(cross_app).lower(),
+        "run_ui_stability": str(cross_app).lower(),
+    }
+
+
+def run(
+    payload: dict[str, Any],
+    mode: str,
+    preview_root: Path | None,
+    github_output: str | None,
+    approval_phrase: str = "",
+) -> None:
     digest = patch_hash(payload)
     planned, report = plan_modular_patch(payload)
 
@@ -460,11 +575,14 @@ def run(payload: dict[str, Any], mode: str, preview_root: Path | None, github_ou
                 "patch_file": str(report["patchFile"]),
                 "version_name": str(report["versionName"]),
                 "validation": "ok",
+                **impact_outputs(payload),
             },
         )
         return
 
     if mode in {"create_pr", "publish_admin_beta"}:
+        if approval_phrase.strip() != MAIN_APPROVAL_PHRASE:
+            fail(f"{mode} requires Max's exact approval phrase: {MAIN_APPROVAL_PHRASE}")
         if preview_root is None:
             fail(f"--preview-root is required for {mode}")
         verify_preview_acceptance(preview_root, payload, digest)
@@ -488,6 +606,7 @@ def run(payload: dict[str, Any], mode: str, preview_root: Path | None, github_ou
                 "preview_url": str(meta["url"]),
                 "preview_sha256": str(meta["sha256"]),
                 "rollout_code": str(meta["rolloutCode"]),
+                **impact_outputs(payload),
             },
         )
         return
@@ -510,6 +629,7 @@ def run(payload: dict[str, Any], mode: str, preview_root: Path | None, github_ou
                 "patch_file": str(report["patchFile"]),
                 "version_name": str(report["versionName"]),
                 "release_id": str(release["releaseId"]),
+                **impact_outputs(payload),
             },
         )
         return
@@ -523,12 +643,13 @@ def main() -> int:
     parser.add_argument("--payload-file", required=True, type=Path)
     parser.add_argument("--preview-root", type=Path)
     parser.add_argument("--github-output", default=os.environ.get("GITHUB_OUTPUT"))
+    parser.add_argument("--approval-phrase", default="")
     args = parser.parse_args()
 
     try:
         payload = validate_payload(args.payload_file.read_text(encoding="utf-8-sig"))
         preview_root = args.preview_root.resolve() if args.preview_root else None
-        run(payload, args.mode, preview_root, args.github_output)
+        run(payload, args.mode, preview_root, args.github_output, args.approval_phrase)
         print(f"KGG GPT write gate OK: {args.mode} {payload['request_id']} {patch_hash(payload)[:12]}")
         return 0
     except (GateError, pipeline.ReleaseError, module_patch.ScaffoldError, builder.BuildError) as exc:

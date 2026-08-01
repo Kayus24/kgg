@@ -4,6 +4,39 @@
 - Lines: 2101-2520
 
 ```html
+      .kggScanV295 .scanDecision{z-index:99990!important}
+      .scanHub #scanPreview:not(.hidden){z-index:70!important}
+      #inputWrap{z-index:30}
+      #bankArea{z-index:25}
+      @keyframes kggTabletAnchorOverlayIn{0%{opacity:0;transform:scale(.965)}100%{opacity:1;transform:scale(1)}}
+      @media (max-width:920px){
+        #baseFields:not(.hidden),#recentList:not(.hidden),#packageList:not(.hidden){
+          padding:12px!important;
+        }
+      }
+    }
+
+
+    /* v317 Plan-Card-Polish auf Basis v316: Medien-Badge + gelbe Neu/Prüfen-Karten wie im schöneren Planlayout. */
+    .planCard{
+      background:#fff;
+      border:1px solid rgba(220,227,235,.95);
+      box-shadow:0 2px 10px rgba(7,16,39,.055);
+      align-items:center;
+      gap:10px;
+    }
+    .planCard.is-new,
+    .planCard.is-review{
+      background:#fff9df;
+      border-color:#dfc265;
+      box-shadow:0 2px 10px rgba(120,87,0,.08);
+    }
+    .planCard .planMain{
+      min-width:0;
+      gap:10px;
+    }
+    .planThumb{
+      width:42px;
       height:42px;
       min-width:42px;
       border:1px solid rgba(220,227,235,.95);
@@ -391,37 +424,4 @@
       #rightPlanStack .planCard{box-shadow:none;border-color:rgba(220,227,235,.9)}
     }
 
-
-    /* v327 Tablet Shell Full-Bleed Fix:
-       Ziel: Tablet wirkt nicht mehr wie frei schwebende Mockup-Karte.
-       Nur äußere Tablet-Shell/Viewport, keine PDF/QR/Scan/Parser/Plan-State-Logik. */
-    @media (min-width:760px){
-      html,body{
-        width:100%;
-        min-width:0;
-        height:100%;
-        min-height:100%;
-        overflow:hidden;
-        background:#f7f9fc;
-      }
-      body{
-        display:block;
-        padding:0!important;
-        margin:0!important;
-        align-items:stretch!important;
-        justify-content:stretch!important;
-      }
-      .app{
-        width:100vw!important;
-        max-width:none!important;
-        height:100vh!important;
-        height:100dvh!important;
-        height:var(--kgg-visual-vh,100dvh)!important;
-        max-height:var(--kgg-visual-vh,100dvh)!important;
-        min-height:0!important;
-        margin:0!important;
-        border:0!important;
-        border-radius:0!important;
-        box-shadow:none!important;
-        background:#f7f9fc!important;
 ```

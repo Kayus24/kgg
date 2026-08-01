@@ -4,6 +4,39 @@
 - Lines: 18061-18480
 
 ```html
+      ?(manifest.latestAdminAndroidApkSha256||manifest.adminAndroidApkSha256||manifest.latestAndroidApkSha256)
+      :(manifest.latestColleagueAndroidApkSha256||manifest.colleagueAndroidApkSha256||manifest.latestAndroidApkSha256);
+    if(!latestVersion||!latestUrl)return null;
+    const nativeStatus=nativeAppUpdateStatus();
+    const currentShell=Number(nativeStatus.currentShellVersion||0);
+    if(currentShell&&kggVersionNumber(latestVersion)<=currentShell)return null;
+    return {version:latestVersion,url:latestUrl,sha256:latestSha||'',notes:manifest.releaseNotes||manifest.notes||''};
+  }
+  function isKggLocalContentNoRedirectRuntime(){
+    const protocol=String(location.protocol||'').toLowerCase();
+    const href=String(location.href||'').toLowerCase();
+    return protocol==='content:'||
+      protocol==='capacitor:'||
+      protocol==='android-app:'||
+      href.indexOf('/media/external/file/')!==-1||
+      href.indexOf('content://')===0||
+      href.indexOf('file://')===0;
+  }
+  const kggNoAutoReleaseNavigationMarker='kgg-no-auto-release-navigation-v32';
+  function stageManualRemoteWebUpdate(target){
+    if(!target||!target.url)return false;
+    window.KGGRemoteUpdateUrl=target.url;
+    window.KGGPendingRemoteUpdateVersion=target.version;
+    window.KGGPendingRemoteUpdateNotes=target.notes;
+    showInstallPrompt('remoteUpdate');
+    return true;
+  }
+  function autoApplyRemoteWebUpdate(target){
+    // v32: Beim Booten niemals automatisch auf GitHub-Pages/Release-HTML navigieren.
+    // ChatGPT-/Android-/Datei-Viewer fangen solche Redirects als externen Link ab.
+    // Updates duerfen nur noch nach bewusstem Tippen auf den sichtbaren Button oeffnen.
+    void target;
+    return false;
   }
   async function checkGithubAppUpdate(){
     if(!window.fetch||isLocalHtmlTestRuntime())return;
@@ -391,37 +424,4 @@
       const parsed=parseExerciseQuantityText(raw);
       const parsedSide=parseSideModeFromText(raw);
       const cleanName=stripExerciseName(raw)||raw;
-      const exact=exactBankExercise(cleanName);
-      const id=existing&&(existing.localId||existing.id)||makeLocalId();
-      const base=exact||existing||{id:'new_'+Date.now(),name:cleanName,sets:3,unit:parsed.unit||'Wdh',weightUnit:parsed.weightUnit||'kg',loadUnit:parsed.loadUnit||parsed.weightUnit||'kg'};
-      const pendingNew=!exact;
-      const loadUnit=parsed.weightUnit||parsed.loadUnit||base.weightUnit||base.loadUnit||'kg';
-      const needsReview=pendingNew||parsed.needsReview;
-      return {...base,id,localId:id,sourceId:exact?exact.id:'',bankId:exact?exact.id:'',name:exact?exact.name:cleanName,sets:(existing&&existing.sets)||base.sets||3,unit:parsed.unit||base.unit||'Wdh',metricUnit:parsed.metricUnit||parsed.unit||base.metricUnit||base.unit||'Wdh',weightUnit:loadUnit,loadUnit,explicitLoadUnit:!!(parsed.weightUnit||parsed.loadUnit),startMetric:parsed.startMetric||(existing&&existing.startMetric)||'',startLoad:parsed.startLoad||(existing&&existing.startLoad)||'',side:parsedSide||normalizeSideMode(existing&&existing.side||'BI'),rawText:raw,liveDraft:false,changedByLiveText:false,textMaster:true,pendingNew,needsReview,customLoadUnit:parsed.customLoadUnit||undefined,sourceFlags:[pendingNew?'textMasterReview':'',needsReview?'needsReview':'',parsed.customLoadUnit?'customUnit':''].filter(Boolean)};
-    }
-    const raw=String(text||'').trim();
-    const letters=raw.replace(/[^A-Za-zÄÖÜäöüß]/g,'');
-    if(letters.length<3)return null;
-    const parsedSide=parseSideModeFromText(raw);
-    const nums=raw.match(/\d+(?:[,.]\d+)?/g)||[];
-    let metric='',load='';
-    const kg=raw.match(/(\d+(?:[,.]\d+)?)\s*kg/i);
-    const rep=raw.match(/(\d+)\s*(wdh|wh|reps)/i);
-    const time=raw.match(/(\d+(?:[,.]\d+)?)\s*(min|sek|sec|s)\b/i);
-    if(rep) metric=rep[1]; else if(time) metric=time[1].replace(',','.')+' '+time[2].toLowerCase();
-    if(kg) load=kg[1].replace(',','.'); else if(nums.length>1&&!time) load=nums[0].replace(',','.');
-    const cleanName=stripExerciseName(raw)||raw;
-    const exact=exactBankExercise(cleanName);
-    const id=existing&&(existing.localId||existing.id)||makeLocalId();
-    const base=exact||existing||{id:'new_'+Date.now(),name:cleanName,sets:3,unit:(time?'Zeit':'Wdh'),weightUnit:(kg?'kg':'kg')};
-    const pendingNew=!exact;
-    return {...base,id,localId:id,sourceId:exact?exact.id:'',bankId:exact?exact.id:'',name:exact?exact.name:cleanName,sets:(existing&&existing.sets)||base.sets||3,startMetric:metric||(existing&&existing.startMetric)||'',startLoad:load||(existing&&existing.startLoad)||'',side:parsedSide||normalizeSideMode(existing&&existing.side||'BI'),rawText:raw,liveDraft:false,changedByLiveText:false,textMaster:true,pendingNew,needsReview:pendingNew,sourceFlags:[pendingNew?'textMasterReview':''].filter(Boolean)};
-  }
-  function findExistingForTextSegment(segment,index){
-    const current=(state.plan||[])[index];
-    if(current)return current;
-    const c=compact(stripExerciseName(segment)||segment);
-    return (state.plan||[]).find(ex=>compact(ex.rawText||ex.name)===c)||null;
-  }
-  function formatExerciseTextLine(ex){
 ```

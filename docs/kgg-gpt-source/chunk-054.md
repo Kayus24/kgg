@@ -4,6 +4,39 @@
 - Lines: 22681-23100
 
 ```html
+    return scanExerciseToDocText(item);
+  }
+  function scanResultToPlanText(result){
+    if(!result)return '';
+    if(typeof result==='string')return cleanGeminiScanText(result);
+    if(result.planText)return String(result.planText||'').trim();
+    if(result.text)return cleanGeminiScanText(result.text);
+    if(result.rawText)return cleanGeminiScanText(result.rawText);
+    const exercises=scanPayloadExercises(result);
+    if(exercises.length)return exercises.map(scanExerciseToDocText).filter(Boolean).join('\n\n');
+    return '';
+  }
+  function scanResultToApplyText(result){
+    if(!result)return '';
+    if(result.applyText)return String(result.applyText||'').trim();
+    const exercises=scanPayloadExercises(result);
+    if(exercises.length)return scanApplyTextFromExercises(exercises);
+    const text=scanResultToPlanText(result);
+    return String(text||'').split(/\n+/).map(line=>line.trim()).filter(line=>line&&!/^Satz\s+\d+\s*:/i.test(line)&&!/^\s*(Li|Re|Schmerz)\s*:/i.test(line)).join(', ');
+  }
+  function scanResultToCopyText(job){
+    const short=job&&job.short?String(job.short).trim():'';
+    const result=job&&job.result||{};
+    const quality=result.quality||{};
+    const text=result.copyText||result.planText||scanResultToPlanText(result)||result.rawText||'';
+    const lines=[];
+    if(short)lines.push(short);
+    if(result.type)lines.push('Typ: '+result.type);
+    if(quality.warnings&&quality.warnings.length)lines.push('Prüfen: '+quality.warnings.join(', '));
+    if(text)lines.push('',text);
+    return lines.join('\n').trim();
+  }
+  function scanPaperQuality(text,result){
     const raw=String(text||'').trim();
     const parts=raw.split(/[,\n]+/).map(part=>part.trim()).filter(Boolean);
     const exerciseLike=parts.filter(part=>/[a-zäöüß]{4,}/i.test(part)&&!/^unbekannte\s+übung/i.test(part));
@@ -369,14 +402,13 @@
     if(parts.length>=2)return parts[0]+' '+parts[1].charAt(0)+'.';
     return value.slice(0,16);
   }
-  async function scanAcceptFile(file,kind){
+  async function scanAcceptQrRaw(raw,file,hit,strict){
     const forceNew=scanState.next==='plan'||!scanState.jobs.length;
     let job=forceNew?scanNewJob('paper'):scanCurrentJob();
-    const qr=await scanQrFromImageFile(file);
-    if(qr.raw){
+    if(raw){
       setScanStatus('QR erkannt: Inhalt wird gelesen ...');
       try{
-        const parsed=parseScannedQrRaw(qr.raw);
+        const parsed=parseScannedQrRaw(raw);
         if(parsed&&(parsed.type==='KGGCFG1'||parsed.type==='KGGCFG2')){
           setScanStatus(parsed.type==='KGGCFG2'?'QR erkannt: verschluesselter API-Key / Konfig-Transfer. Transfer-Code wird abgefragt ...':'QR erkannt: API-Key / Konfig-Transfer wird lokal gespeichert ...');
           const idx=scanState.jobs.indexOf(job);
@@ -392,36 +424,4 @@
           const idx=scanState.jobs.indexOf(job);
           if(idx>=0&&!job.pages.length&&!job.result&&job.status==='new'){
             scanState.jobs.splice(idx,1);
-            scanState.activeIndex=Math.max(0,Math.min(scanState.activeIndex,scanState.jobs.length-1));
-          }
-          if(parsed.type==='KGGSYNC2'){
-            await applyNativeSyncBundle(parsed.json);
-            return {type:'syncBundle',json:parsed.json};
-          }
-          applyNativeSyncInvite(parsed.json);
-          return {type:'syncInvite',json:parsed.json};
-        }
-        if(job.pages.length||job.result){job=scanNewJob('qr');}
-        setScanStatus('QR erkannt: Patientenplan wird gelesen ...');
-        job.type='qr';
-        job.pages.push(scanFileMeta(file));
-        job.result=qrParsedToScanResult(parsed);
-        job.result.qrHit=qr.hit||null;
-        job.status='ready';
-        job.short=job.short||patientShortGuess();
-        scanState.next='plan';
-        return job;
-      }catch(err){
-        setScanStatus('QR erkannt, aber Format nicht lesbar: '+(err&&err.message||err));
-        if(job.pages.length||job.result){job=scanNewJob('paper');}
-        job.type='paper';
-        job.pages.push(scanFileMeta(file));
-        job.warnings.push('QR erkannt, aber nicht parsebar: '+(err&&err.message||err));
-        scanState.next='page';
-        return job;
-      }
-    }
-    if(forceNew||job.type==='qr'||job.result){job=forceNew?job:scanNewJob('paper');}
-    job.type='paper';
-    job.pages.push(scanFileMeta(file));
 ```

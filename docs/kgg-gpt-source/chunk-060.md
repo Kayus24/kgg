@@ -4,6 +4,89 @@
 - Lines: 25201-25620
 
 ```html
+      if(isInsidePlanCard(ev.target)){
+        cleanScrollFlag();
+        cleanFreeze();
+        requestAnimationFrame(cleanFreeze);
+      }
+    },{capture:true,passive:true});
+
+    window.addEventListener('pointermove',function(ev){
+      if(!isPhone()) return;
+      if(document.body && (
+        document.body.classList.contains('kggPlanCardSwiping') ||
+        document.body.classList.contains('kggPlanCardReordering')
+      )){
+        cleanScrollFlag();
+        cleanFreeze();
+      }
+    },{capture:true,passive:true});
+
+    ['pointerup','pointercancel','touchend','touchcancel'].forEach(function(type){
+      window.addEventListener(type,function(){
+        if(!isPhone()) return;
+        cleanFreeze();
+        setTimeout(cleanStaleGestureClasses,80);
+        setTimeout(cleanStaleGestureClasses,260);
+      },{capture:true,passive:true});
+    });
+
+    var observer=new MutationObserver(function(){
+      if(!isPhone()) return;
+      cleanFreeze();
+    });
+
+    observer.observe(document.body,{attributes:true,attributeFilter:['class']});
+
+    window.addEventListener('resize',function(){
+      setTimeout(cleanStaleGestureClasses,60);
+    },{passive:true});
+
+    window.addEventListener('orientationchange',function(){
+      setTimeout(cleanStaleGestureClasses,140);
+    },{passive:true});
+
+    if(window.visualViewport){
+      window.visualViewport.addEventListener('resize',function(){
+        setTimeout(cleanStaleGestureClasses,60);
+      },{passive:true});
+    }
+
+    cleanStaleGestureClasses();
+
+    window.KGG_PHONE_TOUCH_TABLET_PARITY_HARD_V3={
+      patchId:PATCH_ID,
+      scope:'phone-only max-width:759px',
+      check:function(){
+        return {
+          patchId:PATCH_ID,
+          phone:isPhone(),
+          freezeBlocked:!!originalClassListAdd,
+          bodyFrozen:!!(document.body && document.body.classList.contains('kggPlanSectionFrozen')),
+          planFreezeHeight:currentPlanBlock() ? currentPlanBlock().style.getPropertyValue('--kgg-current-plan-freeze-h') : ''
+        };
+      },
+      clean:cleanStaleGestureClasses
+    };
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',installListeners,{once:true});
+  }else{
+    installListeners();
+  }
+})();
+</script>
+<!-- END KGG CLEAN MERGE v11 -->
+
+<script id="kgg-v11-clean-merge-marker">
+(function(){
+  "use strict";
+  window.KGG_PHONE_TOUCH_CLEAN_MERGE_V11={
+    patchId:"kgg-v11-clean-merge-original-features-phone-drag-local-list",
+    base:"KGG_CURRENT_ADMIN_HTML.html",
+    keeps:"Original feature code, remote update prompt, QR/PDF/Scan/Parser/Storage/Plan-State/Admin",
+    changes:[
       "Phone drag-reorder uses #planList local absolute coordinates",
       "Phone plan freeze is neutralized only below 760px",
       "Local Android/content test files do not auto-redirect to GitHub; manifest prompt remains allowed"
@@ -341,87 +424,4 @@
     b.classList.remove(
       "kggPlanCardReordering",
       "kggPlanCardSwiping",
-      "kggPlanSectionFrozen",
-      "is-scrolling",
-      "phoneTextFocus",
-      "kggPhoneDrawerOpen",
-      "kggPhoneDbBrowseMode"
-    );
-
-    Array.prototype.forEach.call(document.querySelectorAll(".phoneButtonFloat"), function(btn){
-      btn.classList.remove("phoneButtonFloat");
-    });
-  }
-
-  function hardClean(reason){
-    /*
-      If a resize/orientation interrupts an active original drag handler, ask the
-      original pointercancel listener to close first. Otherwise its later pointerup
-      could see a removed placeholder and reorder the plan unexpectedly.
-    */
-    if(hasLivePlanGesture()){
-      try{
-        document.dispatchEvent(new Event("pointercancel", {bubbles:true, cancelable:true}));
-      }catch(err){
-        try{
-          var ev = document.createEvent("Event");
-          ev.initEvent("pointercancel", true, true);
-          document.dispatchEvent(ev);
-        }catch(err2){}
-      }
-    }
-
-    cleanBodyState();
-    cleanPlanCardInlineState();
-    cleanPlanContainerInlineState();
-
-    window.KGG_PHONE_VIEWPORT_STATE_RELEASE_GUARD_V14.lastClean = {
-      reason: reason || "manual",
-      at: new Date().toISOString(),
-      phone: isPhone()
-    };
-  }
-
-  function cleanIfSafe(reason){
-    /*
-      During an active pointer gesture, the original handlers own the live motion.
-      This must also protect tablet/split-screen swipes; otherwise a pointercancel
-      can erase the visible card translation before pointerup resolves it.
-    */
-    if(hasLivePlanGesture()) return;
-    hardClean(reason);
-  }
-
-  function scheduleClean(reason, delay){
-    clearTimeout(cleanupTimer);
-    cleanupTimer = setTimeout(function(){
-      cleanIfSafe(reason);
-    }, Number.isFinite(delay) ? delay : 80);
-  }
-
-  function install(){
-    window.KGG_PHONE_VIEWPORT_STATE_RELEASE_GUARD_V14 = window.KGG_PHONE_VIEWPORT_STATE_RELEASE_GUARD_V14 || {};
-    window.KGG_PHONE_VIEWPORT_STATE_RELEASE_GUARD_V14.patchId = PATCH_ID;
-    window.KGG_PHONE_VIEWPORT_STATE_RELEASE_GUARD_V14.clean = hardClean;
-    window.KGG_PHONE_VIEWPORT_STATE_RELEASE_GUARD_V14.check = function(){
-      var b = body();
-      var block = currentPlanBlock();
-      var list = planList();
-      return {
-        patchId: PATCH_ID,
-        phone: isPhone(),
-        bodyClasses: b ? b.className : "",
-        hasLivePlanGesture: hasLivePlanGesture(),
-        planFreezeHeight: block ? block.style.getPropertyValue("--kgg-current-plan-freeze-h") : "",
-        planListInlinePosition: list ? list.style.getPropertyValue("position") : "",
-        releaseFallback: !!(window.KGGReleaseControl && window.KGGReleaseControl.fallback),
-        nativeReleaseBridge: !!(window.KGGReleaseControl && !window.KGGReleaseControl.fallback)
-      };
-    };
-
-    ["pointerup","pointercancel","touchend","touchcancel"].forEach(function(type){
-      window.addEventListener(type, function(){
-        scheduleClean(type, 140);
-        scheduleClean(type + ":late", 420);
-      }, {capture:true, passive:true});
 ```

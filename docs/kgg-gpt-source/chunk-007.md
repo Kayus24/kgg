@@ -4,6 +4,39 @@
 - Lines: 2941-3360
 
 ```html
+      .bankArea.bankOpen.alphaBankOpen .az{
+        width:48px!important;
+      }
+      .az button{
+        font-size:12px!important;
+        min-height:18px!important;
+      }
+      .bankRow{
+        padding:12px 14px!important;
+      }
+      .bankRow b{
+        font-size:17px!important;
+      }
+      .bankRow small{
+        font-size:12px!important;
+      }
+
+      #createPanel.planMode #currentPlanToggle{
+        min-height:56px!important;
+        font-size:21px!important;
+      }
+      .planCard{
+        padding:14px 16px!important;
+      }
+      .planCard b{
+        font-size:18px!important;
+      }
+      .planCard small{
+        font-size:12px!important;
+      }
+
+      #createPanel.planMode #recentToggle,
+      #createPanel.planMode #packageToggle{
         height:64px!important;
         min-height:64px!important;
         font-size:18px!important;
@@ -391,37 +424,4 @@
         text-align:center;
         color:#38475b;
         font-size:12px;
-        font-weight:1000;
-      }
-      .tabletLayoutResizeHandle{
-        position:fixed;
-        z-index:95;
-        width:26px;
-        min-height:160px;
-        cursor:col-resize;
-        touch-action:none;
-      }
-      .tabletLayoutResizeHandle::before{
-        content:"";
-        position:absolute;
-        left:11px;
-        top:0;
-        bottom:0;
-        width:4px;
-        border-radius:999px;
-        background:rgba(7,16,39,.18);
-        box-shadow:0 0 0 8px rgba(94,167,232,.10);
-      }
-      body.tabletLayoutUnlocked .tabletLayoutResizeHandle{display:block}
-      body.tabletLayoutDragging .tabletLayoutResizeHandle::before{
-        background:rgba(7,16,39,.34);
-        box-shadow:0 0 0 10px rgba(94,167,232,.16);
-      }
-      body.tabletLayoutCustom .app{
-        grid-template-columns:clamp(320px,var(--kgg-tablet-left-col,42vw),720px) minmax(0,1fr) minmax(0,.72fr)!important;
-      }
-      body.tabletLayoutCustom #exerciseInput,
-      body.tabletLayoutCustom #inputWrap textarea{
-        font-size:calc(23px * var(--kgg-tablet-ui-scale,1))!important;
-      }
 ```

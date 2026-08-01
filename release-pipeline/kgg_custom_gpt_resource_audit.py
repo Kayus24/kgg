@@ -22,6 +22,12 @@ PRODUCTION_KNOWLEDGE = [
     "docs/kgg-custom-gpt-knowledge-safety.md",
     "docs/kgg-custom-gpt-knowledge-testing.md",
 ]
+PRODUCTION_ACTIONS = [
+    "docs/kgg-custom-gpt-action-openapi.yaml",
+    "docs/kgg-custom-gpt-action-api-openapi.yaml",
+]
+PRODUCTION_BOOTSTRAP = "docs/kgg-custom-gpt-editor-bootstrap.md"
+PRODUCTION_EDITOR_SNAPSHOT = ROOT / "docs" / "kgg-custom-gpt-editor-snapshot.json"
 EVAL_KNOWLEDGE = ["docs/kgg-custom-gpt-eval-knowledge.md"]
 PATIENT_KNOWLEDGE = [
     "docs/kgg-patient-custom-gpt-knowledge-architecture.md",
@@ -69,6 +75,8 @@ def expected_manifest() -> dict[str, Any]:
         },
         "production": {
             "name": "KGG Update-Agent",
+            "profileVersion": "4.0.0",
+            "editorBootstrap": resource(PRODUCTION_BOOTSTRAP),
             "capabilities": {
                 "webSearch": True,
                 "codeInterpreter": True,
@@ -78,11 +86,9 @@ def expected_manifest() -> dict[str, Any]:
                 "actions": True,
             },
             "knowledge": [resource(path) for path in PRODUCTION_KNOWLEDGE],
-            "actions": [
-                resource("docs/kgg-custom-gpt-action-openapi.yaml"),
-                resource("docs/kgg-custom-gpt-action-api-openapi.yaml"),
-            ],
+            "actions": [resource(path) for path in PRODUCTION_ACTIONS],
             "freshness": "GitHub live context and source chunks are authoritative; generated Knowledge is a retrieval accelerator and must pass --check.",
+            "visibility": "private",
         },
         "eval": {
             "name": "KGG Repair-Lab Eval",
@@ -112,7 +118,7 @@ def expected_manifest() -> dict[str, Any]:
         },
         "patientProduction": {
             "name": "KGG Patienten-App Update-Agent",
-            "profileVersion": "1.0.2",
+            "profileVersion": "1.1.0",
             "editorBootstrap": resource(PATIENT_BOOTSTRAP),
             "capabilities": {
                 "webSearch": True,
@@ -150,10 +156,10 @@ def validate_snapshot(path: Path, profile: str) -> None:
         raise AuditError(f"{profile} profileVersion mismatch")
     if expected.get("visibility") and snapshot.get("visibility") != expected["visibility"]:
         raise AuditError(f"{profile} visibility mismatch")
-    if profile == "patientProduction" and not re.fullmatch(
+    if profile in {"production", "patientProduction"} and not re.fullmatch(
         r"g-[a-z0-9]{16,64}", str(snapshot.get("gptId") or "")
     ):
-        raise AuditError("patientProduction GPT id is missing or invalid")
+        raise AuditError(f"{profile} GPT id is missing or invalid")
     if snapshot.get("model") != HIGHEST_ACTIONS_COMPATIBLE_MODEL:
         raise AuditError(f"{profile} GPT model is not {HIGHEST_ACTIONS_COMPATIBLE_MODEL}")
     for key, wanted in expected["capabilities"].items():
@@ -180,6 +186,8 @@ def self_test() -> None:
         raise AuditError("production Apps must stay disabled because Custom Actions are required")
     if manifest["production"]["capabilities"]["canvas"]:
         raise AuditError("Canvas must stay disabled for the selected GPT model")
+    if manifest["production"]["visibility"] != "private":
+        raise AuditError("production GPT must remain private")
     if manifest["eval"]["capabilities"]["webSearch"]:
         raise AuditError("Eval GPT Web Search would compromise blind testing")
     if manifest["patientProduction"]["capabilities"]["apps"]:
@@ -189,6 +197,8 @@ def self_test() -> None:
     if manifest["patientProduction"]["visibility"] != "private":
         raise AuditError("patientProduction must remain private")
     for label, path in [
+        ("admin raw", PRODUCTION_ACTIONS[0]),
+        ("admin api", PRODUCTION_ACTIONS[1]),
         ("patient raw", PATIENT_ACTIONS[0]),
         ("patient api", PATIENT_ACTIONS[1]),
     ]:
@@ -231,8 +241,11 @@ def main() -> int:
             if not args.profile:
                 raise AuditError("--profile is required with --editor-snapshot")
             validate_snapshot(args.editor_snapshot, args.profile)
-        elif PATIENT_EDITOR_SNAPSHOT.exists():
-            validate_snapshot(PATIENT_EDITOR_SNAPSHOT, "patientProduction")
+        elif PRODUCTION_EDITOR_SNAPSHOT.exists() or PATIENT_EDITOR_SNAPSHOT.exists():
+            if PRODUCTION_EDITOR_SNAPSHOT.exists():
+                validate_snapshot(PRODUCTION_EDITOR_SNAPSHOT, "production")
+            if PATIENT_EDITOR_SNAPSHOT.exists():
+                validate_snapshot(PATIENT_EDITOR_SNAPSHOT, "patientProduction")
         print(json.dumps({"status": "PASS", "manifest": str(OUTPUT.relative_to(ROOT))}))
         return 0
     except Exception as exc:  # noqa: BLE001

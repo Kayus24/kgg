@@ -2,7 +2,7 @@
 
 Generated production knowledge for modular payloads, Actions, Preview/Test-App and Admin-Beta operations.
 
-Source digest: `e4d6b493f0dbfb0b`
+Source digest: `3b99bd9cc717776d`
 
 ## Usage Rules
 
@@ -28,17 +28,36 @@ Source digest: `e4d6b493f0dbfb0b`
 
 ## Arbeitsreihenfolge
 
-1. Lade `docs/kgg-gpt-context.md`.
+1. Lade Ressourcenmanifest, `docs/kgg-gpt-context.md`, dieses Playbook und die exakte Main-SHA.
 2. Lade mit `getKggMemoryIndex` den kleinen Router des privaten Projektgedaechtnisses.
 3. Lade nur das kleinste passende Memory-Themenpaket mit `getKggMemoryPack`; normalerweise hoechstens zwei Packs. Einzelne Records nur fuer Begruendung, Historie oder Konflikte laden.
 4. Lade `docs/kgg-custom-gpt-action-schema.md`.
 5. Lade bei Patchfragen `docs/kgg-gpt-area-routes.md` und die passenden Source-Chunks.
 6. Lade `docs/kgg-gpt-bug-lessons.md` und `docs/kgg-gpt-patch-patterns.md`.
 7. Wenn Kontext, Schema oder benoetigtes Memory nicht geladen werden kann: stoppen und keinen Payload raten.
-8. Bei Analysefragen nur Diagnose/Handoff schreiben; kein `submitKggPreviewGate`.
-9. Bei Preview/Test-App-Wunsch immer `validate_only -> publish_preview`.
+8. Bei Analysefragen nur Diagnose/Handoff schreiben; kein `submitKggPreviewAuto`.
+9. Bei Preview/Test-App-Wunsch genau einmal `submitKggPreviewAuto` aufrufen. Der Workflow erzwingt intern `validate_only -> publish_preview` mit identischem Payload.
 10. Nach `publish_preview` wartet der Prozess auf Max' Test-App/Test-APK/Preview-APK-Freigabe.
-11. Erst nach Max-Freigabe `create_pr` oder, wenn Max Haupt-App verlangt, `publish_admin_beta`.
+11. Keinen zweiten Preview-Dispatch und keine Zwischenfrage senden. Der Auto-Workflow setzt die Kette selbst fort; Run und Belege pruefen.
+12. `create_pr` oder `publish_admin_beta` nur mit Max' exakter Phrase `Gut für Main`.
+
+## Autonomie ohne Bestaetigungsschleife
+
+- Vorab freigegeben: Reads, Diagnose, Tests, ein `submitKggPreviewAuto`-Dispatch, Run-/Artifact-Pruefung, konfliktfreie neue Memory-Eintraege und private Koordinations-Events.
+- Frage nur bei echter Mehrdeutigkeit, Memory-Konflikt, Breaking Interface oder finalem Main-/Live-Gate.
+- Ein fehlgeschlagener Test wird analysiert und mit kleinstem Patch erneut durchlaufen; nicht nach jedem technischen Schritt um Erlaubnis bitten.
+- Nach einem Dispatch bei `queued` oder `in_progress` nicht auf Max' "Und?" warten. Der GitHub-Workflow laeuft ohne weiteren GPT-Aufruf automatisch durch Validierung und Publish. Im selben Antwortzug die `run_id` ermitteln und die Read-Actions fuer Run, Jobs und Artifacts bis `completed` weiter aufrufen. Endet das technische Action-Zeitfenster vorher, den belegten Zwischenstand nennen und auf die automatische Test-App-/GitHub-Benachrichtigung verweisen; niemals Fertigstellung behaupten.
+- ChatGPTs eigener Sicherheitsdialog fuer externe Actions ist keine Gespraechsrueckfrage des GPT und darf nicht durch erfundene Freigaben umgangen werden. Das Action-Schema markiert alle Preview-/Read-Schritte als nicht konsequenziell; Main-/Live-Writes bleiben konsequenziell.
+- Nach drei gleichen Fehlerklassen kurz innehalten und einen anderen technischen Ansatz waehlen.
+
+## Begrenzte Patient-App-Koordination
+
+- Bei QR, Scanner, Storage oder Patient/Admin-Schnittstellen Patient-Kontext, Patient-Playbook und gezielte Patient-Source-Chunks live laden.
+- Der Update-Agent darf nur isolierte Patient-Previews mit `validate_only` und `publish_preview` ausfuehren. Kein Patient-PR und kein Patient-Live.
+- `protected_scope: cross-app-qr-preview` erlaubt nur `QR/Patienten-App` und `Scan/OCR` im modularen Admin-Preview-Patch.
+- Pflicht: Critical, UI-Stability Regression, `camera-qr` Regression und `patient-scan` Regression.
+- Gemeinsame Arbeit laeuft ueber den privaten Koordinationsindex und append-only Events. Die Queue startet keinen GPT automatisch.
+- Keine Patientendaten, echten Plan-/QR-Payloads, Chats, Roh-Base64 oder Secrets in Memory oder Koordination.
 
 ## Privates Projektgedaechtnis
 
@@ -75,6 +94,8 @@ Pflichtfelder:
 - `touched_areas`
 - `required_tests`
 - `patch_content`
+
+Optional: `regression_contract` mit 1 bis 12 deklarativen Assertions. Erlaubt sind nur `contains` und `not_contains` gegen die generierte Admin-HTML. Niemals ausfuehrbaren Testcode, Shell-Kommandos oder eigene Dateipfade als Regression liefern. Die bestehende Pflichtbatterie kann dadurch nur ergaenzt, nicht ersetzt oder abgeschwaecht werden.
 
 `patch_content` ist ein HTML-Fragment und muss `__KGG_PATCH_ID__` enthalten.
 
@@ -152,10 +173,11 @@ The Custom GPT must follow this shape exactly.
 The public app still loads `kgg-update/index.html`, but that file is generated output.
 The GPT must patch the modular source through the gate; it must not request direct edits to `kgg-update/index.html`.
 
-## Modes
+## Preview automation and release modes
 
-- `validate_only`: validate JSON, scaffold the modular patch in memory, verify build invariants. Writes nothing.
-- `publish_preview`: validate, create a module under `kgg-update/src/patches/`, rebuild generated HTML, run tests, build Preview APK, publish HTML/meta to `gpt-preview`.
+- `submitKggPreviewAuto`: the only production GPT Preview write. One dispatch runs `validate_only` and, only after success, the identical payload as `publish_preview`. It also publishes status JSON and a final GitHub notification. It cannot create a PR or change `main`.
+- `validate_only`: internal first stage of the automatic Preview workflow. It writes nothing.
+- `publish_preview`: internal second stage. It creates a module under `kgg-update/src/patches/`, rebuilds generated HTML, runs tests, builds Preview APK and publishes HTML/meta to `gpt-preview`.
 - `create_pr`: only after Max accepts the matching Test-App/Test-APK/Preview-APK. Creates a PR, never merges.
 - `publish_admin_beta`: only after Max accepts the matching Test-App/Test-APK/Preview-APK and asks for Haupt-App/Admin-Beta. Creates an `[admin-beta]` PR, labels it `kgg-auto-merge`, waits for required checks and merges the Admin beta to `main`.
 
@@ -167,10 +189,15 @@ The GPT must patch the modular source through the gate; it must not request dire
   "title": "Tablet Splitter und Skalierung trennen",
   "summary": "Tablet Splitter liegt auf der Spaltengrenze; Plus/Minus bleibt reine Skalierung.",
   "version_slug": "tablet-split-scale",
+  "protected_scope": "none",
   "touched_areas": ["Tablet-Layout"],
   "required_tests": [
     "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
     "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
+  ],
+  "regression_contract": [
+    {"kind": "contains", "value": "tabletLayoutResizeHandle"},
+    {"kind": "not_contains", "value": "unsafe-global-touch-rule"}
   ],
   "patch_content": "<style id=\"__KGG_PATCH_ID__-style\">...</style>\n<script id=\"__KGG_PATCH_ID__\">...</script>\n"
 }
@@ -183,6 +210,12 @@ The GPT must patch the modular source through the gate; it must not request dire
 - `touched_areas`: non-empty list. Protected areas are rejected unless Max explicitly authorizes a separate guarded path.
 - `required_tests`: non-empty list. UI-like payloads must include `critical` and `ui-stability regression`.
 - `patch_content`: HTML fragment only. It must include `__KGG_PATCH_ID__`; the gate replaces it with the generated Patch-ID.
+- `protected_scope`: optional, default `none`. Only `cross-app-qr-preview` is additionally allowed.
+- `regression_contract`: optional list of 1-12 declarative `contains`/`not_contains` assertions against the generated Admin HTML. It can extend the battery without executing GPT-provided test code.
+
+## Cross-App QR Preview scope
+
+`cross-app-qr-preview` is Max' durable Preview-only authorization for Admin/Patient QR scanner coordination. It allows only `QR/Patienten-App` and `Scan/OCR`, never Android/APK, PDF, Parser, Plan-State, Medien, Secrets or Manifest. It requires all four exact commands: Critical, UI-Stability Regression, `camera-qr` Regression and `patient-scan` Regression.
 
 ## Forbidden payload fields
 
@@ -203,6 +236,7 @@ The gate creates all of these:
 - source-truth/changelog metadata
 - generated `kgg-update/index.html`
 - `kgg-update/version.json` hash
+- optional gate-owned `release-pipeline/gpt-regressions/<request_id>.json`
 
 ## Preview artifact response checklist
 
@@ -221,11 +255,16 @@ The GPT may say a Preview is available only after it has verified:
 
 ## Required GPT Action operations
 
-- `submitKggPreviewGate` must allow `mode` values `validate_only`, `publish_preview`, `create_pr` and `publish_admin_beta`.
-- `listKggPreviewGateRuns` must be available so the GPT can find the run for a `request_id`.
+- `submitKggPreviewAuto` exposes the single pre-authorized `.github/workflows/kgg-gpt-preview-auto.yml` dispatch. Its inputs do not contain `mode`.
+- `submitKggMainGate` exposes only `create_pr` and `publish_admin_beta` and requires `approval_phrase: "Gut für Main"`.
+- `listKggPreviewAutoRuns` must be available so the GPT can find the one orchestrator run for a `request_id`.
 - `getKggPreviewGateRun` must be available so the GPT can verify `status` and `conclusion`.
 - `getKggPreviewGateJobs` must be available so the GPT can report failed job/step names.
 - `getKggPreviewGateArtifacts` must be available so the GPT can verify the Preview artifact exists and is not expired.
+- `submitKggPatientPreviewFromAdmin` exposes only isolated Patient `validate_only` and `publish_preview`.
+- Coordination uses `getKggAgentCoordinationIndex`, one selected thread and guarded append-only events.
+
+The public status channel is `gpt-preview/status/latest.json`, with per-request history under `gpt-preview/status/requests/<request_id>.json`. It contains only request/run state and no payload, patient data or secret. The Preview app polls it while open and through WorkManager in the background. This status channel is progress evidence, but final success still requires the run, tests, artifact, `meta.json`, HTML and Preview index.
 
 ## Custom GPT Editor Domains
 
@@ -289,23 +328,23 @@ Required memory operations:
 
 Use this order for every Preview/Test-HTML/Test-APK request.
 
-Canonical order: `dispatch -> run status -> logs -> tests -> artifact -> meta -> html -> Test-APK -> Max acceptance -> Admin beta merge`.
+Canonical order: `single auto dispatch -> validating status -> publish status -> tests -> artifact -> meta -> html -> Test-APK notification -> Max acceptance -> Admin beta merge`.
 
 ## Run order
 
 1. Load live context, bug lessons, action schema, negative examples and area routes.
 2. Build the smallest modular v2 payload with `patch_content`; do not send `replace_exact`, `operations` or direct `kgg-update/index.html` paths.
-3. Dispatch `validate_only` first.
-4. If `validate_only` fails, report the failed step and exact error. Do not publish.
-5. If validation succeeds, dispatch `publish_preview`.
-6. Use `listKggPreviewGateRuns` and the workflow run name/request id to find the GitHub run.
+3. Dispatch `submitKggPreviewAuto` exactly once. Do not provide a mode.
+4. The orchestrator runs `validate_only` first and automatically blocks publish on failure.
+5. After green validation, the orchestrator automatically runs the identical payload as `publish_preview`.
+6. Use `listKggPreviewAutoRuns` and the workflow run name/request id to find the one GitHub run.
 7. Use `getKggPreviewGateRun` until `status` is `completed`.
 8. Verify that run `headSha` and Preview `baseSha` contain the expected Default-Branch fix. An open PR is not production evidence.
 9. If the run fails, use `getKggPreviewGateJobs` and report the failed job/step and exact visible error context.
 10. If the run succeeds, verify artifact, `meta.json` and HTML URL.
 11. If the request targets the Test-APK, verify that the Preview/Test-APK channel is updated.
 12. Tell Max that the Preview/Test-APK is ready for his review.
-13. If Max rejects the Test-APK result, document `human_preview_fail`, add/update the regression fixture and restart at `validate_only`.
+13. If Max rejects the Test-APK result, document `human_preview_fail`, add/update the regression fixture and start one new auto run.
 14. Use `create_pr` only after Max explicitly accepts the same Preview and only a PR is requested.
 15. Use `publish_admin_beta` only when Max explicitly wants a real Haupt-App/Admin-Beta push. Success requires a merged `[admin-beta]` PR, updated `android_update_manifest.json` on `main`, and HTTP 200 for the new Admin HTML.
 
@@ -341,6 +380,14 @@ Do not use vague wording:
 These are allowed only when the run is still actually in progress.
 
 If `critical` fails with `Missing tool pdftoppm`, `Missing tool pdfinfo`, `poppler-utils` or another runner dependency, classify it as `ci_tooling`. Do not blame the UI patch until the failed subtest log proves an app assertion failed.
+
+## Automatic status channel
+
+- `status/latest.json` and `status/requests/<request_id>.json` are updated to `validating`, `publishing`, then `success` or `failure`.
+- The open Preview app checks about every 30 seconds. Android WorkManager checks in the background at the platform minimum interval of about 15 minutes.
+- The final workflow state also comments on the persistent `KGG Preview Status` issue and mentions Max for GitHub Mobile push delivery.
+- Status JSON never contains the patch payload, patient data or secrets.
+- These notifications remove the need for an "Und?" message; they do not weaken final artifact verification or Max' Main gate.
 
 ---
 

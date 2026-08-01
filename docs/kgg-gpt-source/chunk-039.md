@@ -4,6 +4,39 @@
 - Lines: 16381-16800
 
 ```html
+            },
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 42, dataCodewordsPerBlock: 15 },
+                    { numBlocks: 32, dataCodewordsPerBlock: 16 },
+                ],
+            },
+        ],
+    },
+    {
+        infoBits: 0x27541,
+        versionNumber: 39,
+        alignmentPatternCenters: [6, 26, 54, 82, 110, 138, 166],
+        errorCorrectionLevels: [
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 20, dataCodewordsPerBlock: 117 },
+                    { numBlocks: 4, dataCodewordsPerBlock: 118 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 28,
+                ecBlocks: [
+                    { numBlocks: 40, dataCodewordsPerBlock: 47 },
+                    { numBlocks: 7, dataCodewordsPerBlock: 48 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 43, dataCodewordsPerBlock: 24 },
                     { numBlocks: 22, dataCodewordsPerBlock: 25 },
                 ],
             },
@@ -391,37 +424,4 @@ function locate(matrix) {
                 var validAlignmentPattern = Math.abs(scans[2] - averageAlignmentPatternBlocksize) < averageAlignmentPatternBlocksize &&
                     Math.abs(scans[3] - averageAlignmentPatternBlocksize) < averageAlignmentPatternBlocksize &&
                     Math.abs(scans[4] - averageAlignmentPatternBlocksize) < averageAlignmentPatternBlocksize &&
-                    v; // Is the current pixel black since alignment patterns are bordered in black
-                if (validFinderPattern) {
-                    // Compute the start and end x values of the large center black square
-                    var endX_1 = x - scans[3] - scans[4];
-                    var startX_1 = endX_1 - scans[2];
-                    var line = { startX: startX_1, endX: endX_1, y: y };
-                    // Is there a quad directly above the current spot? If so, extend it with the new line. Otherwise, create a new quad with
-                    // that line as the starting point.
-                    var matchingQuads = activeFinderPatternQuads.filter(function (q) {
-                        return (startX_1 >= q.bottom.startX && startX_1 <= q.bottom.endX) ||
-                            (endX_1 >= q.bottom.startX && startX_1 <= q.bottom.endX) ||
-                            (startX_1 <= q.bottom.startX && endX_1 >= q.bottom.endX && ((scans[2] / (q.bottom.endX - q.bottom.startX)) < MAX_QUAD_RATIO &&
-                                (scans[2] / (q.bottom.endX - q.bottom.startX)) > MIN_QUAD_RATIO));
-                    });
-                    if (matchingQuads.length > 0) {
-                        matchingQuads[0].bottom = line;
-                    }
-                    else {
-                        activeFinderPatternQuads.push({ top: line, bottom: line });
-                    }
-                }
-                if (validAlignmentPattern) {
-                    // Compute the start and end x values of the center black square
-                    var endX_2 = x - scans[4];
-                    var startX_2 = endX_2 - scans[3];
-                    var line = { startX: startX_2, y: y, endX: endX_2 };
-                    // Is there a quad directly above the current spot? If so, extend it with the new line. Otherwise, create a new quad with
-                    // that line as the starting point.
-                    var matchingQuads = activeAlignmentPatternQuads.filter(function (q) {
-                        return (startX_2 >= q.bottom.startX && startX_2 <= q.bottom.endX) ||
-                            (endX_2 >= q.bottom.startX && startX_2 <= q.bottom.endX) ||
-                            (startX_2 <= q.bottom.startX && endX_2 >= q.bottom.endX && ((scans[2] / (q.bottom.endX - q.bottom.startX)) < MAX_QUAD_RATIO &&
-                                (scans[2] / (q.bottom.endX - q.bottom.startX)) > MIN_QUAD_RATIO));
 ```

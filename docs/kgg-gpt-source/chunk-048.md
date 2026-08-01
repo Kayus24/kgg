@@ -4,6 +4,39 @@
 - Lines: 20161-20580
 
 ```html
+  async function kggConfigTransferKey(passCode,saltBytes){
+    const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(String(passCode||'')),{name:'PBKDF2'},false,['deriveKey']);
+    return crypto.subtle.deriveKey({name:'PBKDF2',salt:saltBytes,iterations:140000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+  }
+  async function encryptKggConfigTransferPlain(plain,passCode){
+    if(!(window.crypto&&crypto.subtle&&window.TextEncoder))return {payloadCode:'KGGCFG1:'+safeBase64JsonEncode(plain),encrypted:false};
+    const salt=kggConfigTransferRandomBytes(16);
+    const iv=kggConfigTransferRandomBytes(12);
+    const key=await kggConfigTransferKey(passCode,salt);
+    const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(plain)));
+    const envelope={kind:'kgg_config_transfer_encrypted_v2',version:2,alg:'PBKDF2-SHA256-AES-GCM',salt:kggConfigTransferBytesToBase64Url(salt),iv:kggConfigTransferBytesToBase64Url(iv),ciphertext:kggConfigTransferBytesToBase64Url(new Uint8Array(cipher)),createdAt:plain.createdAt,expiresAt:plain.expiresAt};
+    return {payloadCode:'KGGCFG2:'+safeBase64JsonEncode(envelope),encrypted:true};
+  }
+  async function decryptKggConfigTransferEnvelope(envelope,passCode){
+    if(!(window.crypto&&crypto.subtle&&window.TextDecoder))throw new Error('Dieses Geraet kann den verschluesselten Transfer nicht lesen.');
+    const salt=kggConfigTransferBase64UrlToBytes(envelope.salt);
+    const iv=kggConfigTransferBase64UrlToBytes(envelope.iv);
+    const cipher=kggConfigTransferBase64UrlToBytes(envelope.ciphertext);
+    const key=await kggConfigTransferKey(passCode,salt);
+    const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,cipher);
+    return JSON.parse(new TextDecoder().decode(plain));
+  }
+  function applyKggConfigTransferPlain(plain){
+    if(!plain||plain.kind!=='kgg_config_transfer_v2')throw new Error('Kein KGG-Konfig-Transfer.');
+    if(plain.expiresAt&&Date.parse(plain.expiresAt)<Date.now())throw new Error('Konfig-Transfer ist abgelaufen.');
+    const secrets=plain.secrets||{};
+    applyAdminCodePackageData({
+      geminiKeys:Array.isArray(secrets.geminiKeys)?secrets.geminiKeys:[],
+      mediaDropzoneEndpoint:secrets.mediaDropzoneEndpoint||'',
+      mediaDropzoneUploadToken:secrets.mediaDropzoneUploadToken||''
+    });
+    return true;
+  }
   async function buildKggEncryptedConfigTransferForQr(options){
     const plain=buildKggConfigTransferPlain();
     if(!kggConfigTransferHasCodes(plain)){
@@ -391,37 +424,4 @@
       return true;
     }catch(err){
       nativeSyncLastStatus='Sync-Datei konnte nicht gespeichert werden.';
-      if(status)status.textContent=nativeSyncLastStatus;
-      renderSyncDiagnostics();
-      return false;
-    }
-  }
-  async function importNativeSyncFile(file){
-    const status=$('syncPairStatus');
-    try{
-      if(!file)throw new Error('Keine Datei ausgewaehlt.');
-      const text=await file.text();
-      const payload=JSON.parse(text);
-      const result=mergeNativeExerciseBankSyncDocument(payload,{allowUnfollowed:true});
-      try{await pushNativeExerciseBankSync('sync_file_import');}catch(err){}
-      const bankResult=result&&result.bank?result.bank:{added:0,updated:0,total:0};
-      const packageResult=result&&result.packages?result.packages:{added:0,updated:0,total:0};
-      nativeSyncLastStatus='Import OK · DB +'+bankResult.added+'/'+bankResult.updated+' · Pakete +'+packageResult.added+'/'+packageResult.updated;
-      if(status)status.textContent=nativeSyncLastStatus;
-      renderSyncPeerList();
-      renderSyncDiagnostics();
-      return result;
-    }catch(err){
-      nativeSyncLastStatus='Import fehlgeschlagen: '+(err&&err.message?err.message:'ungueltige Datei');
-      if(status)status.textContent=nativeSyncLastStatus;
-      renderSyncDiagnostics();
-      return null;
-    }
-  }
-  function isNativeSyncInvitePayload(payload){
-    return payload&&payload.kind==='kgg_sync_invite'&&(payload.version===1||payload.version===2)&&payload.deviceId;
-  }
-  function isNativeSyncBundlePayload(payload){
-    return payload&&payload.kind==='kgg_sync_bundle'&&(payload.version===1||payload.version===2)&&(payload.invite||payload.sync);
-  }
 ```

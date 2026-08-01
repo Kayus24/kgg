@@ -450,6 +450,37 @@
     },
     {
       "areas": [
+        "parser-textblocks",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera"
+      ],
+      "cause": "Der HTML-Patch nutzte `getUserMedia`, doch der Android-WebView leitete `PermissionRequest.RESOURCE_VIDEO_CAPTURE` nicht an die Seite weiter. Der Catch-Pfad oeffnete still die alte Datei-/Systemkamera. Mocks bewiesen nur JavaScript-Logik, nicht den nativen WebView-Vertrag.",
+      "do_not_touch": "Kein Mikrofonzugriff, kein erzwungener Zoom, keine echten Patientendaten oder echten QR-Payloads in Tests, Memory oder Agent-Koordination.",
+      "fix_pattern": "WebView-Kameraberechtigung nur fuer lokal verifizierte HTML und ausschliesslich Video freigeben. Einen versionierten nativen Capability-Vertrag anbieten. Die Admin-Kamera nutzt denselben BarcodeDetector-plus-lokalen-jsQR-Fallback wie der Patientenscanner und uebergibt QR-Rohtext direkt an den Admin-Parser.",
+      "id": "docs-bug-debug-2026-08-01-webview-camera-cross-app-qr-md-webview-kamera-und-cross-app-qr-brauchen-reale-vertragsbelege",
+      "keywords": [
+        "parser-textblocks",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "webview-kamera-und-cross-app-qr-brauchen-reale-vertragsbelege"
+      ],
+      "markers": [
+        ".RESOURCE_VIDEO_CAPTURE",
+        "PermissionRequest.RESOURCE_VIDEO_CAPTURE",
+        "camera-qr",
+        "getUserMedia",
+        "patient-scan"
+      ],
+      "risks": "Ein gruenes HTML-Mock ohne nativen Capability-Test ist kein Beweis fuer die Test-App. Ein stiller Fallback kann den alten Fehler verdecken.",
+      "source_path": "docs/bug-debug/2026-08-01-webview-camera-cross-app-qr.md",
+      "symptom": "Eine gruen gebaute HTML-Preview behauptete automatische QR-Uebernahme, auf dem Android-Geraet erschien aber weiter die alte stark gezoomte Systemkamera.",
+      "tests": "Pflicht sind Critical, UI-Stability, Admin `camera-qr`, Patient `patient-scan`, Android-Wrapper-Vertrag und Preview-APK-Build. Browser-Smoke prueft Auto-QR, jsQR-Fallback, Permission-Fallback, manuelles Foto und Track-Cleanup getrennt. Ein Emulator ersetzt den abschliessenden Handytest nicht.",
+      "title": "WebView-Kamera und Cross-App-QR brauchen reale Vertragsbelege"
+    },
+    {
+      "areas": [
         "debug",
         "qr-patient"
       ],
@@ -725,6 +756,7 @@
     "docs/bug-debug/2026-07-03-custom-gpt-payload-schema-path.md",
     "docs/bug-debug/2026-07-03-custom-gpt-preview-gate-lessons.md",
     "docs/bug-debug/2026-07-29-preview-marker-default-branch-drift.md",
+    "docs/bug-debug/2026-08-01-webview-camera-cross-app-qr.md",
     "docs/bug-debug/README.md",
     "docs/bugfixes/mobile-share-modal-css-regression.md",
     "docs/release-handoffs/2026-06-18-v003a-plan-ui-stability.md",

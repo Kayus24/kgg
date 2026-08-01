@@ -4,6 +4,39 @@
 - Lines: 21001-21420
 
 ```html
+    ctx.imageSmoothingQuality='high';
+    try{ctx.filter='grayscale(1) contrast(1.08)';}catch(e){}
+    ctx.drawImage(img,dx,dy,dw,dh);
+    try{
+      const data=ctx.getImageData(0,0,targetW,targetH);
+      for(let i=0;i<data.data.length;i+=4){
+        const grey=Math.round((data.data[i]*0.299)+(data.data[i+1]*0.587)+(data.data[i+2]*0.114));
+        data.data[i]=grey; data.data[i+1]=grey; data.data[i+2]=grey; data.data[i+3]=255;
+      }
+      ctx.putImageData(data,0,0);
+    }catch(e){}
+    return canvas.toDataURL('image/jpeg',.68);
+  }
+  async function loadKggPdfExerciseThumbnail(sourceExercise){
+    const media=firstPdfExerciseImageMedia(sourceExercise);
+    if(!media)return null;
+    try{
+      const record=await getEncryptedMediaBlob(media.id);
+      if(!record||!record.blob)return null;
+      const imageBlob=await patientDecryptMedia(media,record.blob);
+      const dataUrl=await createKggPdfThumbnailDataUrl(imageBlob);
+      if(!/^data:image\/jpeg;base64,/i.test(dataUrl))return null;
+      return {
+        kind:'kgg-pdf-exercise-thumbnail',
+        sourceId:String(media.id||''),
+        mime:'image/jpeg',
+        width:150,
+        height:110,
+        dataUrl
+      };
+    }catch(err){
+      console.warn('PDF-Uebungsbild wird ausgelassen:',err);
+      return null;
     }
   }
   async function attachKggPdfExerciseThumbnails(snapshot,plan){
@@ -391,37 +424,4 @@
   function nativePdfBridge(){
     return window.KGGNativePdf&&window.KGGNativePdf.available?window.KGGNativePdf:null;
   }
-  async function sendPdfToNative(action){
-    if(!currentPdfPreview||!currentPdfPreview.blob)return false;
-    const bridge=nativePdfBridge();
-    if(!bridge)return false;
-    try{
-      const base64=await pdfBlobToBase64(currentPdfPreview.blob);
-      if(action==='download'&&typeof bridge.download==='function')return !!bridge.download(currentPdfPreview.filename,base64);
-      if(action==='print'&&typeof bridge.print==='function')return !!bridge.print(currentPdfPreview.filename,base64);
-      if(typeof bridge.open==='function')return !!bridge.open(currentPdfPreview.filename,base64);
-    }catch(err){console.warn('Native PDF-Aktion fehlgeschlagen:',err);}
-    return false;
-  }
-  let currentPdfPreview=null;
-  let pdfPreviewFallbackTimer=null;
-  function setPdfPreviewFallbackVisible(isVisible){
-    const fallback=$('pdfPreviewFallback');
-    if(fallback)fallback.classList.toggle('hidden',!isVisible);
-  }
-  function shouldUsePdfMobileBridge(){
-    return !!(window.matchMedia && (window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(max-width: 700px)').matches));
-  }
-  function setPdfMobileBridgeVisible(isVisible){
-    const bridge=$('pdfPreviewMobileBridge');
-    const modal=$('pdfPreviewModal');
-    if(bridge)bridge.classList.toggle('hidden',!isVisible);
-    if(modal)modal.classList.toggle('pdfPreviewModalMobile',isVisible);
-  }
-  function openPdfPreview(result){
-    if(!result||!result.blob)return;
-    if(currentPdfPreview&&currentPdfPreview.url)URL.revokeObjectURL(currentPdfPreview.url);
-    if(pdfPreviewFallbackTimer)clearTimeout(pdfPreviewFallbackTimer);
-    const url=URL.createObjectURL(result.blob);
-    currentPdfPreview={url,blob:result.blob,filename:result.filename||'kgg_trainingsplan.pdf'};
 ```

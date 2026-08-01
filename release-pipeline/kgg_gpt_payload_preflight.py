@@ -36,6 +36,8 @@ UI_KEYWORDS = (
 
 CRITICAL_TEST = "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical"
 UI_REGRESSION_TEST = "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
+CAMERA_QR_TEST = "cmd /c release-pipeline\\run-kgg-tests.cmd --suite camera-qr --level regression"
+PATIENT_SCAN_TEST = "cmd /c release-pipeline\\run-kgg-tests.cmd --suite patient-scan --level regression"
 
 
 def fail(message: str) -> None:
@@ -85,6 +87,15 @@ def require_ui_tests(payload: dict[str, Any]) -> None:
         )
 
 
+def require_cross_app_tests(payload: dict[str, Any]) -> None:
+    if payload.get("protected_scope") != write_gate.CROSS_APP_SCOPE:
+        return
+    tests = {str(item).strip().lower() for item in payload.get("required_tests", [])}
+    for required in (CAMERA_QR_TEST, PATIENT_SCAN_TEST):
+        if required.lower() not in tests:
+            fail(f"cross-app QR payloads must declare the exact impact test: {required}")
+
+
 def reject_manual_version_bump(payload: dict[str, Any]) -> None:
     patch_content = str(payload.get("patch_content") or payload.get("patchContent") or "")
     version_tokens = (
@@ -102,6 +113,7 @@ def preflight_payload(payload: dict[str, Any], *, check_source: bool = True) -> 
     reject_manual_version_bump(payload)
     validated = write_gate.validate_payload(json.dumps(payload, ensure_ascii=False))
     require_ui_tests(validated)
+    require_cross_app_tests(validated)
     if check_source:
         write_gate.plan_modular_patch(validated)
     return validated
@@ -215,6 +227,54 @@ def self_test() -> None:
         "__KGG_PATCH_ID__",
     )
     expect_success("good-modular-payload", base)
+    expect_success(
+        "good-declarative-regression-contract",
+        {
+            **base,
+            "regression_contract": [
+                {"kind": "contains", "value": ".kgg-gpt-self-test-marker"},
+                {"kind": "not_contains", "value": "unsafe-global-touch-rule"},
+            ],
+        },
+    )
+    expect_failure(
+        "executable-regression-contract-rejected",
+        {
+            **base,
+            "regression_contract": [{"kind": "run", "value": "node arbitrary-test.js"}],
+        },
+        "contains or not_contains",
+    )
+    planned_payload = preflight_payload(
+        {
+            **base,
+            "request_id": "gpt-contract-self-test",
+            "regression_contract": [{"kind": "contains", "value": ".kgg-gpt-self-test-marker"}],
+        }
+    )
+    planned, report = write_gate.plan_modular_patch(planned_payload)
+    contract_path = write_gate.REGRESSION_ROOT / "gpt-contract-self-test.json"
+    if contract_path not in planned or contract_path.exists():
+        fail("self-test declarative contract must be planned without changing the repository")
+    contract = json.loads(planned[contract_path].decode("utf-8"))
+    if contract.get("patchId") != report.get("patchId") or contract.get("schemaVersion") != 1:
+        fail("self-test declarative contract does not match the planned modular patch")
+    cross_app = {
+        **base,
+        "request_id": "gpt-cross-app-self-test",
+        "title": "QR Kamera Vertrag",
+        "summary": "Admin Preview liest einen synthetischen Patient QR ueber die Live Kamera.",
+        "version_slug": "cross-app-qr-self-test",
+        "touched_areas": ["QR/Patienten-App", "Scan/OCR"],
+        "protected_scope": "cross-app-qr-preview",
+        "required_tests": [CRITICAL_TEST, UI_REGRESSION_TEST, CAMERA_QR_TEST, PATIENT_SCAN_TEST],
+    }
+    expect_success("good-cross-app-payload", cross_app)
+    expect_failure(
+        "cross-app-missing-camera-test",
+        {**cross_app, "required_tests": [CRITICAL_TEST, UI_REGRESSION_TEST, PATIENT_SCAN_TEST]},
+        CAMERA_QR_TEST,
+    )
     print("KGG GPT payload preflight self-test OK")
 
 

@@ -389,15 +389,21 @@
       "startLine": 26461
     },
     {
-      "endLine": 27254,
+      "endLine": 27300,
       "name": "chunk-064.md",
       "path": "docs/kgg-gpt-source/chunk-064.md",
       "startLine": 26881
+    },
+    {
+      "endLine": 27545,
+      "name": "chunk-065.md",
+      "path": "docs/kgg-gpt-source/chunk-065.md",
+      "startLine": 27301
     }
   ],
   "kind": "kgg_gpt_source_index",
   "linesPerChunk": 420,
   "sourcePath": "kgg-update/src",
-  "sourceSha256": "83e1aebd31f956f1976085fc65671f5075b2c3e2d55c150bfac0cdbfa5e53cfb",
+  "sourceSha256": "d8337b12c452bbe4d8c4a4ef6108e3b58ba43cee93181c60a04134bd134cef7e",
   "version": 1
 }

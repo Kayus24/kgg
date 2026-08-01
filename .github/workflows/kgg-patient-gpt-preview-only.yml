@@ -1,0 +1,38 @@
+name: KGG Patient GPT Preview Only
+run-name: KGG Patient GPT Preview Only | ${{ inputs.mode }} | ${{ inputs.request_id }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Pre-authorized patient test-channel action
+        required: true
+        type: choice
+        options:
+          - validate_only
+          - publish_preview
+      request_id:
+        description: Stable patient GPT request id
+        required: true
+        type: string
+      payload_json:
+        description: Guarded patient GPT replace-exact payload
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  checks: read
+  contents: write
+  pull-requests: write
+  statuses: read
+
+jobs:
+  preview-only:
+    uses: ./.github/workflows/kgg-patient-gpt-preview-gate.yml
+    with:
+      mode: ${{ inputs.mode }}
+      request_id: ${{ inputs.request_id }}
+      payload_json: ${{ inputs.payload_json }}
+      approval_phrase: ""
+    secrets: inherit

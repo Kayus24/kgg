@@ -4,6 +4,53 @@
 - Lines: 23101-23520
 
 ```html
+            scanState.activeIndex=Math.max(0,Math.min(scanState.activeIndex,scanState.jobs.length-1));
+          }
+          if(parsed.type==='KGGSYNC2'){
+            await applyNativeSyncBundle(parsed.json);
+            return {type:'syncBundle',json:parsed.json};
+          }
+          applyNativeSyncInvite(parsed.json);
+          return {type:'syncInvite',json:parsed.json};
+        }
+        if(job.pages.length||job.result){job=scanNewJob('qr');}
+        setScanStatus('QR erkannt: Patientenplan wird gelesen ...');
+        job.type='qr';
+        job.pages.push(scanFileMeta(file));
+        job.result=qrParsedToScanResult(parsed);
+        job.result.qrHit=hit||null;
+        job.status='ready';
+        job.short=job.short||patientShortGuess();
+        scanState.next='plan';
+        return job;
+      }catch(err){
+        setScanStatus('QR erkannt, aber Format nicht lesbar: '+(err&&err.message||err));
+        if(strict){
+          const idx=scanState.jobs.indexOf(job);
+          if(idx>=0&&!job.pages.length&&!job.result&&job.status==='new'){
+            scanState.jobs.splice(idx,1);
+            scanState.activeIndex=Math.max(0,Math.min(scanState.activeIndex,scanState.jobs.length-1));
+          }
+          return {type:'invalidQr',error:String(err&&err.message||err)};
+        }
+        if(job.pages.length||job.result){job=scanNewJob('paper');}
+        job.type='paper';
+        job.pages.push(scanFileMeta(file));
+        job.warnings.push('QR erkannt, aber nicht parsebar: '+(err&&err.message||err));
+        scanState.next='page';
+        return job;
+      }
+    }
+    return null;
+  }
+  async function scanAcceptFile(file,kind){
+    const qr=await scanQrFromImageFile(file);
+    if(qr.raw)return scanAcceptQrRaw(qr.raw,file,qr.hit,false);
+    const forceNew=scanState.next==='plan'||!scanState.jobs.length;
+    let job=forceNew?scanNewJob('paper'):scanCurrentJob();
+    if(forceNew||job.type==='qr'||job.result){job=forceNew?job:scanNewJob('paper');}
+    job.type='paper';
+    job.pages.push(scanFileMeta(file));
     if(kind==='file'&&qr&&!qr.raw){
       const qrWarn='QR-Foto-Import: '+(qr.reason||'Kein QR im Bild erkannt.');
       job.warnings.push(qrWarn);
@@ -377,51 +424,4 @@
           }
           input.click();
         }
-      },
-    async handleInput(input,kind){
-      const normalizedKind=rememberScanInputKind(kind||lastScanInputKind());
-      const files=Array.from(input&&input.files||[]).filter(Boolean);
-      try{if(input)input.value='';}catch(err){}
-      if(!files.length)return scanStateSnapshot();
-      scanState.busy=true;
-      scanState.lastError='';
-      scanState.decision=false;
-      setScanStatus(files.length===1?'Prüfe: '+(files[0].name||'Kamera-Foto'):files.length+' Bilder werden vorbereitet …');
-      renderScanPreview();
-      try{
-        let syncCodeCount=0;
-        let acceptedCount=0;
-        for(const file of files){
-          const accepted=await scanAcceptFile(file,normalizedKind);
-          if(accepted&&(accepted.type==='syncInvite'||accepted.type==='syncBundle'))syncCodeCount++;
-          else if(accepted)acceptedCount++;
-        }
-        if(syncCodeCount&&!acceptedCount){
-          scanState.decision=false;
-          state.scanPanelOpen='plan';
-          save();
-          render();
-          return scanStateSnapshot();
-        }
-        scanState.decision=true;
-        state.scanPanelOpen='scanned';
-        save();
-        render();
-        setScanStatus('Foto hinzugefügt. Bitte entscheiden.');
-      }catch(err){
-        scanState.lastError='Scan fehlgeschlagen: '+(err&&err.message||err);
-        setScanStatus(scanState.lastError);
-      }finally{
-        scanState.busy=false;
-        renderScanPreview();
-      }
-      return scanStateSnapshot();
-    },
-    async start(){
-      scanState.decision=false;
-      scanState.busy=true;
-      scanState.lastError='';
-      renderScanPreview();
-      try{
-        const jobs=scanState.jobs.filter(job=>job.pages.length||job.result);
 ```

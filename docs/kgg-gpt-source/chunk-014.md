@@ -4,6 +4,39 @@
 - Lines: 5881-6300
 
 ```html
+      box-shadow:none!important;
+      visibility:visible!important;
+      pointer-events:auto!important;
+      overflow:hidden!important;
+    }
+    body.tabletLayoutCustom #rightPlanStack #scannedPlansBlock.hidden{
+      display:none!important;
+    }
+    body.tabletLayoutCustom #currentPlanToggle{
+      flex:0 0 auto!important;
+      min-height:44px!important;
+      padding:8px 10px!important;
+      font-size:18px!important;
+      border-radius:12px!important;
+    }
+    body.tabletLayoutCustom #currentPlanBlock .planSectionBody{
+      flex:1 1 auto!important;
+      min-height:0!important;
+      overflow:auto!important;
+      padding:8px 0 0!important;
+    }
+    body.tabletLayoutCustom #currentPlanBlock #planList{
+      min-height:100%!important;
+      margin:0!important;
+      padding:0!important;
+      display:grid!important;
+      align-content:start!important;
+    }
+    body.tabletLayoutCustom #currentPlanBlock #planList:empty::before{
+      content:"Noch keine Übungen im Plan\A Füge Übungen aus der Datenbank hinzu.";
+      white-space:pre;
+      min-height:220px;
+      display:grid;
       place-items:center;
       text-align:center;
       color:#5f6875;
@@ -390,38 +423,5 @@
       num(this._lineWidth * MM_TO_PT) + ' w\n' +
       num(this._x(x1)) + ' ' + num(this._y(y1)) + ' m ' +
       num(this._x(x2)) + ' ' + num(this._y(y2)) + ' l S\nQ');
-    return this;
-  };
-
-  KGGOfflineJsPDF.prototype.text = function(text,x,y,opts){
-    opts = opts || {};
-    var size = this._fontSize;
-    var px = this._x(x);
-    if(opts.align === 'right') px -= approxTextWidth(text, size);
-    if(opts.align === 'center') px -= approxTextWidth(text, size) / 2;
-    var py = this._y(y);
-    var fontName = this._font === 'bold' ? '/F2' : '/F1';
-    this._push('q\n' + colorCmd(this._textColor,'rg') + '\nBT\n' +
-      fontName + ' ' + num(size) + ' Tf\n' +
-      num(px) + ' ' + num(py) + ' Td\n' +
-      pdfString(text) + ' Tj\nET\nQ');
-    return this;
-  };
-
-  KGGOfflineJsPDF.prototype.addImage = function(dataUrl, format, x, y, w, h){
-    var fmt = String(format || '').toUpperCase();
-    var raw = String(dataUrl || '');
-    if(fmt !== 'JPEG' && fmt !== 'JPG' && raw.slice(0, 22).toLowerCase().indexOf('data:image/jpeg') !== 0){
-      return this;
-    }
-    var binary = binaryFromDataUrl(raw);
-    if(!binary) return this;
-    var size = jpegSizeFromBinary(binary);
-    var name = 'Im' + (++this._imageSeq);
-    this._images.push({ name: name, data: binary, width: size.w, height: size.h });
-    this._page.images.push(name);
-    this._push('q\n' +
-      num((Number(w) || 1) * MM_TO_PT) + ' 0 0 ' + num((Number(h) || 1) * MM_TO_PT) + ' ' +
-      num(this._x(x)) + ' ' + num(this._y((Number(y) || 0) + (Number(h) || 1))) + ' cm\n/' + name + ' Do\nQ');
     return this;
 ```

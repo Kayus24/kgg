@@ -4,6 +4,89 @@
 - Lines: 24361-24780
 
 ```html
+    if(!blob)throw new Error('missing_pdf_blob');
+    return {blob,filename};
+  }
+  async function printKggAdminMenuQr(){
+    try{
+      const result=buildKggAdminMenuQrPrintPdf();
+      const bridge=nativePdfBridge();
+      if(bridge&&typeof bridge.print==='function'){
+        const base64=await pdfBlobToBase64(result.blob);
+        if(bridge.print(result.filename,base64))return true;
+      }
+      const url=URL.createObjectURL(result.blob);
+      if(openPdfUrlCrossBrowser(url)){
+        setTimeout(()=>URL.revokeObjectURL(url),60000);
+        return true;
+      }
+      URL.revokeObjectURL(url);
+      downloadPdfBlob(result.blob,result.filename);
+      return true;
+    }catch(err){
+      console.warn('QR-Druck konnte nicht gestartet werden:',err);
+      alert('QR-Druck konnte nicht gestartet werden. Bitte Link kopieren oder erneut versuchen.');
+      return false;
+    }
+  }
+  if($('tabletMenuAdminConfigBtn'))$('tabletMenuAdminConfigBtn').onclick=()=>{setTabletSideMenuOpen(false); const btn=$('adminConfigBtn'); if(btn)btn.click();};
+  if($('tabletMenuSharedBankBtn'))$('tabletMenuSharedBankBtn').onclick=()=>{setTabletSideMenuOpen(false); const btn=$('sharedBankBtn'); if(btn)btn.click();};
+  if($('tabletMenuSyncQrBtn'))$('tabletMenuSyncQrBtn').onclick=()=>{setTabletSideMenuOpen(false); openSyncPairModal();};
+  if($('tabletMenuConfigTransferBtn'))$('tabletMenuConfigTransferBtn').onclick=async()=>{setTabletSideMenuOpen(false); try{await openKggConfigTransferQr();}catch(err){console.warn('Konfig-Transfer QR fehlgeschlagen:',err); alert('Konfig-Transfer konnte nicht erstellt werden.');}};
+  function toggleTabletSideMenuLayoutPanel(){
+    const panel=$('tabletMenuLayoutPanel'), btn=$('tabletMenuLayoutBtn');
+    if(!panel)return;
+    const opening=!!panel.hidden;
+    panel.hidden=!opening;
+    if(btn)btn.setAttribute('aria-expanded',String(opening));
+  }
+  function toggleTabletMenuAnchoredPanel(kind){
+    const cfg=tabletPanelConfig(kind);
+    const panel=cfg&&$(cfg.panelId);
+    if(!panel)return;
+    if(panel.classList.contains('hidden'))openTabletAnchoredPanel(kind);
+    else closeTabletAnchoredPanel(kind);
+  }
+  if($('tabletMenuRecentBtn'))$('tabletMenuRecentBtn').onclick=()=>{closeTabletPackageOverlay(false);setTabletLayoutEditMode(false);toggleTabletMenuAnchoredPanel('recent');};
+  if($('tabletMenuPackagesBtn'))$('tabletMenuPackagesBtn').onclick=toggleTabletPackageOverlay;
+  if($('tabletMenuTherapistShareBtn'))$('tabletMenuTherapistShareBtn').onclick=()=>{closeTabletPackageOverlay(false);setTabletLayoutEditMode(false);setTabletSideMenuOpen(false); openKggTherapistAppOnlyQr();};
+  if($('tabletMenuLayoutBtn'))$('tabletMenuLayoutBtn').onclick=toggleTabletLayoutEditMode;
+  if($('tabletPackageClose'))$('tabletPackageClose').onclick=()=>closeTabletPackageOverlay(false);
+  if($('tabletPackageShade'))$('tabletPackageShade').onclick=()=>closeTabletPackageOverlay(false);
+  if($('tabletPackageSearch'))$('tabletPackageSearch').addEventListener('input',renderTabletPackageOverlay);
+  function bindV399TabletMenuAction(id,handler,tabletOnly){
+    const el=$(id);
+    if(!el||el.dataset.kggV399ActionBound==='1')return;
+    el.dataset.kggV399ActionBound='1';
+    el.onclick=null;
+    el.addEventListener('click',ev=>{
+      if(tabletOnly!==false&&!isTabletLayout())return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();
+      handler(ev);
+    },true);
+  }
+  bindV399TabletMenuAction('tabletMenuRecentBtn',()=>{closeTabletPackageOverlay(false);setTabletLayoutEditMode(false);toggleTabletMenuAnchoredPanel('recent');});
+  bindV399TabletMenuAction('tabletMenuPackagesBtn',()=>toggleTabletPackageOverlay());
+  bindV399TabletMenuAction('tabletMenuTherapistShareBtn',()=>{closeTabletPackageOverlay(false);setTabletLayoutEditMode(false);setTabletSideMenuOpen(false);openKggTherapistAppOnlyQr();});
+  bindV399TabletMenuAction('tabletMenuLayoutBtn',()=>toggleTabletLayoutEditMode());
+  bindV399TabletMenuAction('tabletPackageClose',()=>closeTabletPackageOverlay(false),false);
+  bindV399TabletMenuAction('tabletPackageShade',()=>closeTabletPackageOverlay(false),false);
+  if($('kggTherapistShareModal'))$('kggTherapistShareModal').addEventListener('click',ev=>{if(ev.target===$('kggTherapistShareModal'))closeKggTherapistShareModal();});
+  if($('therapistShareCancel'))$('therapistShareCancel').onclick=closeKggTherapistShareModal;
+  if($('therapistShareAppOnly'))$('therapistShareAppOnly').onclick=openKggTherapistAppOnlyQr;
+  if($('therapistShareSetup'))$('therapistShareSetup').onclick=()=>openKggTherapistSetupQr().catch(err=>{console.warn('Therapeuten-Setup-QR fehlgeschlagen:',err); alert('Setup-QR konnte nicht erstellt werden.');});
+  if($('therapistShareApiOnly'))$('therapistShareApiOnly').onclick=()=>openKggTherapistApiOnlyQr().catch(err=>{console.warn('API-Key-QR fehlgeschlagen:',err); alert('API-Key-QR konnte nicht erstellt werden.');});
+  document.querySelectorAll('[data-kgg-admin-menu-qr]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const target=kggAdminMenuQrTargets[btn.getAttribute('data-kgg-admin-menu-qr')];
+      if(target){setTabletSideMenuOpen(false); openKggAdminMenuQr(target);}
+    });
+  });
+  if($('kggAdminMenuQrClose'))$('kggAdminMenuQrClose').onclick=closeKggAdminMenuQrModal;
+  if($('kggAdminMenuQrModal'))$('kggAdminMenuQrModal').addEventListener('click',ev=>{if(ev.target===$('kggAdminMenuQrModal'))closeKggAdminMenuQrModal();});
+  if($('kggAdminMenuQrCopy'))$('kggAdminMenuQrCopy').onclick=async()=>{const link=$('kggAdminMenuQrLink'); if(!link)return; const ok=await copyTextValue(link.value); if(!ok){link.focus(); link.select();}};
   if($('kggAdminMenuQrOpen'))$('kggAdminMenuQrOpen').onclick=()=>{const link=$('kggAdminMenuQrLink'); if(link&&link.value&&/^https?:\/\//.test(link.value))window.open(link.value,'_blank','noopener');};
   if($('kggAdminMenuQrPrint'))$('kggAdminMenuQrPrint').onclick=()=>printKggAdminMenuQr();
   $('dismissInstallPrompt').onclick=()=>{localStorage.setItem(pwaInstallPromptSeenKey,new Date().toISOString()); closeInstallPrompt();};
@@ -341,87 +424,4 @@
     }
 
     body.classList.add('kggPlanSectionFrozen');
-    clearTimeout(releaseTimer);
-    releaseTimer=setTimeout(releasePlanSection, Number.isFinite(ms) ? ms : 520);
-  }
-
-  function releasePlanSection(){
-    const body=document.body;
-    const block=currentPlanBlock();
-    if(body) body.classList.remove('kggPlanSectionFrozen');
-    if(block) block.style.removeProperty('--kgg-current-plan-freeze-h');
-  }
-
-  function delayedRelease(delay){
-    clearTimeout(releaseTimer);
-    releaseTimer=setTimeout(releasePlanSection, Number.isFinite(delay) ? delay : 320);
-  }
-
-  function installListeners(){
-    if(!document.body) return;
-
-    document.addEventListener('pointerdown', function(ev){
-      if(isPlanCardTarget(ev.target)) freezePlanSection(760);
-    }, {capture:true, passive:true});
-
-    document.addEventListener('pointermove', function(){
-      const body=document.body;
-      if(body && body.classList.contains('kggPlanCardReordering')) freezePlanSection(760);
-    }, {capture:true, passive:true});
-
-    document.addEventListener('pointerup', function(){
-      const body=document.body;
-      if(body && (body.classList.contains('kggPlanCardReordering') || body.classList.contains('kggPlanSectionFrozen'))){
-        delayedRelease(340);
-      }
-    }, {capture:true, passive:true});
-
-    document.addEventListener('pointercancel', function(){
-      delayedRelease(220);
-    }, {capture:true, passive:true});
-
-    bodyObserver=new MutationObserver(function(){
-      const body=document.body;
-      if(!body || !isPhone()) return;
-      if(body.classList.contains('kggPlanCardReordering') || body.classList.contains('kggPlanCardSwiping')){
-        freezePlanSection(800);
-      }
-    });
-    bodyObserver.observe(document.body,{attributes:true,attributeFilter:['class']});
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', installListeners, {once:true});
-  }else{
-    installListeners();
-  }
-
-  window.addEventListener('resize', function(){
-    if(!isPhone()) releasePlanSection();
-  }, {passive:true});
-})();
-</script>
-
-<!-- KGG PATCH START kgg-v021-embed-jsqr-gallery-decode wrapper -->
-<script id="kgg-v021-embed-jsqr-gallery-decode-wrapper">
-
-(function(){
-  var oldDetect = window.detectQrOnCanvas;
-  function getImageData(canvas){
-    try{
-      var ctx = canvas && canvas.getContext && canvas.getContext('2d',{willReadFrequently:true});
-      return ctx ? ctx.getImageData(0,0,canvas.width,canvas.height) : null;
-    }catch(e){ return null; }
-  }
-  function jsqrFallback(canvas){
-    if(!canvas || typeof window.jsQR !== 'function') return '';
-    var img = getImageData(canvas);
-    if(!img) return '';
-    try{
-      var hit = window.jsQR(img.data, canvas.width, canvas.height, {inversionAttempts:'attemptBoth'});
-      return hit && hit.data ? String(hit.data) : '';
-    }catch(e){ return ''; }
-  }
-  async function wrappedDetect(canvas, detector){
-    if(typeof oldDetect === 'function' && oldDetect !== wrappedDetect){
 ```

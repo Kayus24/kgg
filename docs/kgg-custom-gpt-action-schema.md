@@ -6,10 +6,11 @@ The Custom GPT must follow this shape exactly.
 The public app still loads `kgg-update/index.html`, but that file is generated output.
 The GPT must patch the modular source through the gate; it must not request direct edits to `kgg-update/index.html`.
 
-## Modes
+## Preview automation and release modes
 
-- `validate_only`: validate JSON, scaffold the modular patch in memory, verify build invariants. Writes nothing.
-- `publish_preview`: validate, create a module under `kgg-update/src/patches/`, rebuild generated HTML, run tests, build Preview APK, publish HTML/meta to `gpt-preview`.
+- `submitKggPreviewAuto`: the only production GPT Preview write. One dispatch runs `validate_only` and, only after success, the identical payload as `publish_preview`. It also publishes status JSON and a final GitHub notification. It cannot create a PR or change `main`.
+- `validate_only`: internal first stage of the automatic Preview workflow. It writes nothing.
+- `publish_preview`: internal second stage. It creates a module under `kgg-update/src/patches/`, rebuilds generated HTML, runs tests, builds Preview APK and publishes HTML/meta to `gpt-preview`.
 - `create_pr`: only after Max accepts the matching Test-App/Test-APK/Preview-APK. Creates a PR, never merges.
 - `publish_admin_beta`: only after Max accepts the matching Test-App/Test-APK/Preview-APK and asks for Haupt-App/Admin-Beta. Creates an `[admin-beta]` PR, labels it `kgg-auto-merge`, waits for required checks and merges the Admin beta to `main`.
 
@@ -21,10 +22,15 @@ The GPT must patch the modular source through the gate; it must not request dire
   "title": "Tablet Splitter und Skalierung trennen",
   "summary": "Tablet Splitter liegt auf der Spaltengrenze; Plus/Minus bleibt reine Skalierung.",
   "version_slug": "tablet-split-scale",
+  "protected_scope": "none",
   "touched_areas": ["Tablet-Layout"],
   "required_tests": [
     "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
     "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
+  ],
+  "regression_contract": [
+    {"kind": "contains", "value": "tabletLayoutResizeHandle"},
+    {"kind": "not_contains", "value": "unsafe-global-touch-rule"}
   ],
   "patch_content": "<style id=\"__KGG_PATCH_ID__-style\">...</style>\n<script id=\"__KGG_PATCH_ID__\">...</script>\n"
 }
@@ -37,6 +43,12 @@ The GPT must patch the modular source through the gate; it must not request dire
 - `touched_areas`: non-empty list. Protected areas are rejected unless Max explicitly authorizes a separate guarded path.
 - `required_tests`: non-empty list. UI-like payloads must include `critical` and `ui-stability regression`.
 - `patch_content`: HTML fragment only. It must include `__KGG_PATCH_ID__`; the gate replaces it with the generated Patch-ID.
+- `protected_scope`: optional, default `none`. Only `cross-app-qr-preview` is additionally allowed.
+- `regression_contract`: optional list of 1-12 declarative `contains`/`not_contains` assertions against the generated Admin HTML. It can extend the battery without executing GPT-provided test code.
+
+## Cross-App QR Preview scope
+
+`cross-app-qr-preview` is Max' durable Preview-only authorization for Admin/Patient QR scanner coordination. It allows only `QR/Patienten-App` and `Scan/OCR`, never Android/APK, PDF, Parser, Plan-State, Medien, Secrets or Manifest. It requires all four exact commands: Critical, UI-Stability Regression, `camera-qr` Regression and `patient-scan` Regression.
 
 ## Forbidden payload fields
 
@@ -57,6 +69,7 @@ The gate creates all of these:
 - source-truth/changelog metadata
 - generated `kgg-update/index.html`
 - `kgg-update/version.json` hash
+- optional gate-owned `release-pipeline/gpt-regressions/<request_id>.json`
 
 ## Preview artifact response checklist
 
@@ -75,11 +88,16 @@ The GPT may say a Preview is available only after it has verified:
 
 ## Required GPT Action operations
 
-- `submitKggPreviewGate` must allow `mode` values `validate_only`, `publish_preview`, `create_pr` and `publish_admin_beta`.
-- `listKggPreviewGateRuns` must be available so the GPT can find the run for a `request_id`.
+- `submitKggPreviewAuto` exposes the single pre-authorized `.github/workflows/kgg-gpt-preview-auto.yml` dispatch. Its inputs do not contain `mode`.
+- `submitKggMainGate` exposes only `create_pr` and `publish_admin_beta` and requires `approval_phrase: "Gut für Main"`.
+- `listKggPreviewAutoRuns` must be available so the GPT can find the one orchestrator run for a `request_id`.
 - `getKggPreviewGateRun` must be available so the GPT can verify `status` and `conclusion`.
 - `getKggPreviewGateJobs` must be available so the GPT can report failed job/step names.
 - `getKggPreviewGateArtifacts` must be available so the GPT can verify the Preview artifact exists and is not expired.
+- `submitKggPatientPreviewFromAdmin` exposes only isolated Patient `validate_only` and `publish_preview`.
+- Coordination uses `getKggAgentCoordinationIndex`, one selected thread and guarded append-only events.
+
+The public status channel is `gpt-preview/status/latest.json`, with per-request history under `gpt-preview/status/requests/<request_id>.json`. It contains only request/run state and no payload, patient data or secret. The Preview app polls it while open and through WorkManager in the background. This status channel is progress evidence, but final success still requires the run, tests, artifact, `meta.json`, HTML and Preview index.
 
 ## Custom GPT Editor Domains
 

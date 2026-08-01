@@ -4,6 +4,39 @@
 - Lines: 4621-5040
 
 ```html
+  .scanHub{
+    grid-template-columns:58px minmax(148px,.78fr) minmax(148px,.78fr) minmax(140px,.82fr) minmax(170px,1fr)!important;
+    align-items:stretch!important;
+    column-gap:12px!important;
+  }
+  body.colleagueMode .scanHub{
+    grid-template-columns:58px minmax(150px,.82fr) minmax(150px,.82fr) minmax(170px,1fr)!important;
+  }
+  .tabletMenuBtn{
+    display:inline-grid!important;
+    place-items:center;
+    grid-column:1!important;
+    grid-row:1!important;
+    width:54px;
+    min-width:54px;
+    min-height:54px;
+    border:1.4px solid rgba(10,16,36,.14);
+    border-radius:18px;
+    background:#fff;
+    box-shadow:0 12px 26px rgba(10,16,36,.10), inset 0 1px 0 rgba(255,255,255,.78);
+    cursor:pointer;
+    touch-action:manipulation;
+  }
+  .tabletMenuBtn span{
+    display:block;
+    width:25px;
+    height:3px;
+    border-radius:999px;
+    background:#0a1024;
+    margin:3px 0;
+    transition:transform .18s ease, opacity .18s ease;
+  }
+  body.tabletMenuOpen .tabletMenuBtn span:nth-child(1){transform:translateY(9px) rotate(45deg);}
   body.tabletMenuOpen .tabletMenuBtn span:nth-child(2){opacity:0;}
   body.tabletMenuOpen .tabletMenuBtn span:nth-child(3){transform:translateY(-9px) rotate(-45deg);}
   .tabletSideBackdrop{
@@ -391,37 +424,4 @@
       backdrop-filter:blur(10px);
       -webkit-backdrop-filter:blur(10px);
       transform-origin:bottom center;
-      animation:kggPhoneDrawerFromDock .30s cubic-bezier(.18,.84,.24,1) both!important;
-    }
-    body.kggPhoneDrawerOpen #recentList:not(.hidden) .notice,
-    body.kggPhoneDrawerOpen #packageList:not(.hidden) .notice{margin-top:0}
-    @keyframes kggPhoneButtonDock{
-      0%{opacity:.92;transform:translateY(18px) scale(.96);filter:blur(1px)}
-      65%{opacity:1;transform:translateY(-3px) scale(1.015);filter:blur(0)}
-      100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
-    }
-    @keyframes kggPhoneDrawerFromDock{
-      0%{opacity:0;transform:translateY(28px) scale(.965);filter:blur(2px)}
-      72%{opacity:1;transform:translateY(-4px) scale(1.01);filter:blur(0)}
-      100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
-    }
-    body.is-scrolling :is(#recentList,#packageList,#baseFields,#bankContent,.bankArea,.dbTitle,.dbTitleTrain,.planActions,.finishBtn,#recentToggle,#packageToggle,#bankToggle,.phoneButtonFloat,.scanJobCard){
-      transition:none!important;
-      animation:none!important;
-      scroll-behavior:auto!important;
-    }
-    body.is-scrolling :is(.dbTitle .dbTitleTrain,.bankArea.bankOpen #bankContent,#recentList,#packageList){
-      transform:none!important;
-      filter:none!important;
-    }
-  }
-  /* v383: UI flow stability only. No PDF/QR/parser/plan-state changes. */
-  @media (max-width:759px){
-    body.is-scrolling.phoneTextFocus #inputWrap{
-      position:relative!important;
-      bottom:auto!important;
-      z-index:auto!important;
-      transform:none!important;
-      animation:none!important;
-      box-shadow:var(--shadow)!important;
 ```

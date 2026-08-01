@@ -21,6 +21,10 @@ Nicht erlaubt sind Therapeut:innen-App, PDF, Android/APK, API-Key-Logik, binaere
 11. Bei Ablehnung: `human_preview_fail`, Lektion festhalten und mit neuer `request_id` bei Schritt 1 beginnen.
 12. Bei Zustimmung: `create_pr` oder nur auf ausdruecklichen Live-Auftrag `publish_patient_live`.
 
+Die Schritte 7 bis 9 sind vorab freigegeben und laufen ohne Zwischenfrage. PR und Live erfordern die exakte Phrase `Gut für PAT live`. Nur echte Mehrdeutigkeit, ein Memory-Konflikt oder ein Breaking Interface rechtfertigt vorher eine Rueckfrage.
+
+Offene Cross-App-Anfragen stehen im privaten Koordinationsindex. Der Patient-Agent liest nur passende Threads, antwortet append-only und speichert dort weder Patientendaten noch echte Plan-/QR-Payloads. Eine Queue-Antwort startet den anderen GPT nicht automatisch.
+
 ## Payload v1
 
 ```json

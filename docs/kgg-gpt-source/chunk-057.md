@@ -4,6 +4,89 @@
 - Lines: 23941-24360
 
 ```html
+  function positionTabletAnchoredOverlay(kind){
+    if(!isTabletLayout())return false;
+    const cfg=tabletPanelConfig(kind);
+    if(!cfg)return false;
+    const panel=$(cfg.panelId), anchor=$(cfg.anchorId), app=document.querySelector('.app');
+    if(!panel||!anchor||!app||panel.classList.contains('hidden'))return false;
+    const appRect=app.getBoundingClientRect();
+    const anchorRect=anchor.getBoundingClientRect();
+    const vv=window.visualViewport||null;
+    const viewTop=vv?vv.offsetTop:0;
+    const viewHeight=vv?vv.height:window.innerHeight;
+    const viewBottom=viewTop+viewHeight;
+    const margin=12;
+    const availableWidth=Math.max(280,appRect.width-(margin*2));
+    const minW=Math.min(cfg.minWidth||360,availableWidth);
+    const maxW=Math.min(cfg.maxWidth||620,availableWidth);
+    let width=clampNumber(Math.max(anchorRect.width,minW),minW,maxW);
+    let left=(cfg.align==='right')?(anchorRect.right-width):anchorRect.left;
+    left=clampNumber(left,appRect.left+margin,appRect.right-width-margin);
+
+    panel.style.setProperty('--kgg-overlay-width',Math.round(width)+'px');
+    panel.style.setProperty('--kgg-overlay-left',Math.round(left)+'px');
+    panel.style.setProperty('--kgg-overlay-max-height','min(72vh,520px)');
+
+    const measured=panel.getBoundingClientRect();
+    const wantedHeight=Math.max(160,Math.min(measured.height||panel.scrollHeight||320,Math.min(520,viewHeight-(margin*2))));
+    const belowTop=anchorRect.bottom+8;
+    const aboveTop=anchorRect.top-wantedHeight-8;
+    const enoughBelow=(belowTop+wantedHeight)<=Math.min(viewBottom-margin,appRect.bottom-margin);
+    const enoughAbove=aboveTop>=Math.max(viewTop+margin,appRect.top+margin);
+    let direction=cfg.preferred||'below';
+    if(direction==='below'&&!enoughBelow&&enoughAbove)direction='above';
+    if(direction==='above'&&!enoughAbove&&enoughBelow)direction='below';
+    if(!enoughBelow&&!enoughAbove)direction=((anchorRect.top-appRect.top)>(appRect.bottom-anchorRect.bottom))?'above':'below';
+    let top;
+    let maxHeight;
+    if(direction==='above'){
+      maxHeight=Math.max(160,Math.min(520,anchorRect.top-Math.max(viewTop+margin,appRect.top+margin)-8));
+      top=Math.max(viewTop+margin,anchorRect.top-Math.min(wantedHeight,maxHeight)-8);
+    }else{
+      top=belowTop;
+      maxHeight=Math.max(160,Math.min(520,Math.min(viewBottom-margin,appRect.bottom-margin)-top));
+    }
+    top=clampNumber(top,viewTop+margin,Math.max(viewTop+margin,viewBottom-margin-120));
+    const originX=clampNumber((anchorRect.left+anchorRect.width/2)-left,24,width-24);
+    panel.style.setProperty('--kgg-overlay-top',Math.round(top)+'px');
+    panel.style.setProperty('--kgg-overlay-max-height',Math.round(maxHeight)+'px');
+    panel.style.setProperty('--kgg-overlay-origin',Math.round(originX)+'px '+(direction==='above'?'bottom':'top'));
+    tabletOverlayState.kind=kind;
+    document.body.classList.add('kggTabletOverlayActive');
+    return true;
+  }
+  function openTabletAnchoredPanel(kind){
+    if(!isTabletLayout())return false;
+    const cfg=tabletPanelConfig(kind);
+    if(!cfg)return false;
+    const needsRender=closeTabletFloatingPanelsExcept(kind);
+    if(needsRender)render();
+    const panel=$(cfg.panelId);
+    if(!panel)return false;
+    panel.classList.remove('hidden');
+    tabletOverlayState.kind=kind;
+    if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>positionTabletAnchoredOverlay(kind));
+    else setTimeout(()=>positionTabletAnchoredOverlay(kind),0);
+    setTabletOverlayActiveFlag();
+    return true;
+  }
+  function closeTabletAnchoredPanel(kind){
+    const cfg=tabletPanelConfig(kind);
+    const panel=cfg&&$(cfg.panelId);
+    if(panel){panel.classList.add('hidden');clearTabletOverlayStyles(panel);}
+    if(tabletOverlayState.kind===kind)tabletOverlayState.kind=null;
+    setTabletOverlayActiveFlag();
+    updateToggleCarets();
+    setTabletAnchorActiveClasses();
+  }
+  function setTabletLayoutEditMode(open){
+    const next=!!open&&isTabletLayout();
+    document.body.classList.toggle('tabletLayoutEditMode',next);
+    const btn=$('tabletMenuLayoutBtn');
+    const panel=$('tabletMenuLayoutPanel');
+    if(btn)btn.setAttribute('aria-expanded',String(next));
+    if(panel)panel.hidden=!next;
     if(next){closeTabletPackageOverlay(false);closeTabletFloatingPanelsExcept('layout');}
     requestAnimationFrame(()=>{updateTabletLayoutHandle();updateTabletLayoutCollisionGuard();});
   }
@@ -341,87 +424,4 @@
     doc.text('Keine Admin-Funktionen, keine API-Keys, keine Patientendaten.',16,222);
     const filename='kgg_kolleginnen_app_qr_'+new Date().toISOString().slice(0,10)+'.pdf';
     const blob=pdfBlobFromDoc(doc);
-    if(!blob)throw new Error('missing_pdf_blob');
-    return {blob,filename};
-  }
-  async function printKggAdminMenuQr(){
-    try{
-      const result=buildKggAdminMenuQrPrintPdf();
-      const bridge=nativePdfBridge();
-      if(bridge&&typeof bridge.print==='function'){
-        const base64=await pdfBlobToBase64(result.blob);
-        if(bridge.print(result.filename,base64))return true;
-      }
-      const url=URL.createObjectURL(result.blob);
-      if(openPdfUrlCrossBrowser(url)){
-        setTimeout(()=>URL.revokeObjectURL(url),60000);
-        return true;
-      }
-      URL.revokeObjectURL(url);
-      downloadPdfBlob(result.blob,result.filename);
-      return true;
-    }catch(err){
-      console.warn('QR-Druck konnte nicht gestartet werden:',err);
-      alert('QR-Druck konnte nicht gestartet werden. Bitte Link kopieren oder erneut versuchen.');
-      return false;
-    }
-  }
-  if($('tabletMenuAdminConfigBtn'))$('tabletMenuAdminConfigBtn').onclick=()=>{setTabletSideMenuOpen(false); const btn=$('adminConfigBtn'); if(btn)btn.click();};
-  if($('tabletMenuSharedBankBtn'))$('tabletMenuSharedBankBtn').onclick=()=>{setTabletSideMenuOpen(false); const btn=$('sharedBankBtn'); if(btn)btn.click();};
-  if($('tabletMenuSyncQrBtn'))$('tabletMenuSyncQrBtn').onclick=()=>{setTabletSideMenuOpen(false); openSyncPairModal();};
-  if($('tabletMenuConfigTransferBtn'))$('tabletMenuConfigTransferBtn').onclick=async()=>{setTabletSideMenuOpen(false); try{await openKggConfigTransferQr();}catch(err){console.warn('Konfig-Transfer QR fehlgeschlagen:',err); alert('Konfig-Transfer konnte nicht erstellt werden.');}};
-  function toggleTabletSideMenuLayoutPanel(){
-    const panel=$('tabletMenuLayoutPanel'), btn=$('tabletMenuLayoutBtn');
-    if(!panel)return;
-    const opening=!!panel.hidden;
-    panel.hidden=!opening;
-    if(btn)btn.setAttribute('aria-expanded',String(opening));
-  }
-  function toggleTabletMenuAnchoredPanel(kind){
-    const cfg=tabletPanelConfig(kind);
-    const panel=cfg&&$(cfg.panelId);
-    if(!panel)return;
-    if(panel.classList.contains('hidden'))openTabletAnchoredPanel(kind);
-    else closeTabletAnchoredPanel(kind);
-  }
-  if($('tabletMenuRecentBtn'))$('tabletMenuRecentBtn').onclick=()=>{closeTabletPackageOverlay(false);setTabletLayoutEditMode(false);toggleTabletMenuAnchoredPanel('recent');};
-  if($('tabletMenuPackagesBtn'))$('tabletMenuPackagesBtn').onclick=toggleTabletPackageOverlay;
-  if($('tabletMenuTherapistShareBtn'))$('tabletMenuTherapistShareBtn').onclick=()=>{closeTabletPackageOverlay(false);setTabletLayoutEditMode(false);setTabletSideMenuOpen(false); openKggTherapistAppOnlyQr();};
-  if($('tabletMenuLayoutBtn'))$('tabletMenuLayoutBtn').onclick=toggleTabletLayoutEditMode;
-  if($('tabletPackageClose'))$('tabletPackageClose').onclick=()=>closeTabletPackageOverlay(false);
-  if($('tabletPackageShade'))$('tabletPackageShade').onclick=()=>closeTabletPackageOverlay(false);
-  if($('tabletPackageSearch'))$('tabletPackageSearch').addEventListener('input',renderTabletPackageOverlay);
-  function bindV399TabletMenuAction(id,handler,tabletOnly){
-    const el=$(id);
-    if(!el||el.dataset.kggV399ActionBound==='1')return;
-    el.dataset.kggV399ActionBound='1';
-    el.onclick=null;
-    el.addEventListener('click',ev=>{
-      if(tabletOnly!==false&&!isTabletLayout())return;
-      ev.preventDefault();
-      ev.stopPropagation();
-      if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();
-      handler(ev);
-    },true);
-  }
-  bindV399TabletMenuAction('tabletMenuRecentBtn',()=>{closeTabletPackageOverlay(false);setTabletLayoutEditMode(false);toggleTabletMenuAnchoredPanel('recent');});
-  bindV399TabletMenuAction('tabletMenuPackagesBtn',()=>toggleTabletPackageOverlay());
-  bindV399TabletMenuAction('tabletMenuTherapistShareBtn',()=>{closeTabletPackageOverlay(false);setTabletLayoutEditMode(false);setTabletSideMenuOpen(false);openKggTherapistAppOnlyQr();});
-  bindV399TabletMenuAction('tabletMenuLayoutBtn',()=>toggleTabletLayoutEditMode());
-  bindV399TabletMenuAction('tabletPackageClose',()=>closeTabletPackageOverlay(false),false);
-  bindV399TabletMenuAction('tabletPackageShade',()=>closeTabletPackageOverlay(false),false);
-  if($('kggTherapistShareModal'))$('kggTherapistShareModal').addEventListener('click',ev=>{if(ev.target===$('kggTherapistShareModal'))closeKggTherapistShareModal();});
-  if($('therapistShareCancel'))$('therapistShareCancel').onclick=closeKggTherapistShareModal;
-  if($('therapistShareAppOnly'))$('therapistShareAppOnly').onclick=openKggTherapistAppOnlyQr;
-  if($('therapistShareSetup'))$('therapistShareSetup').onclick=()=>openKggTherapistSetupQr().catch(err=>{console.warn('Therapeuten-Setup-QR fehlgeschlagen:',err); alert('Setup-QR konnte nicht erstellt werden.');});
-  if($('therapistShareApiOnly'))$('therapistShareApiOnly').onclick=()=>openKggTherapistApiOnlyQr().catch(err=>{console.warn('API-Key-QR fehlgeschlagen:',err); alert('API-Key-QR konnte nicht erstellt werden.');});
-  document.querySelectorAll('[data-kgg-admin-menu-qr]').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const target=kggAdminMenuQrTargets[btn.getAttribute('data-kgg-admin-menu-qr')];
-      if(target){setTabletSideMenuOpen(false); openKggAdminMenuQr(target);}
-    });
-  });
-  if($('kggAdminMenuQrClose'))$('kggAdminMenuQrClose').onclick=closeKggAdminMenuQrModal;
-  if($('kggAdminMenuQrModal'))$('kggAdminMenuQrModal').addEventListener('click',ev=>{if(ev.target===$('kggAdminMenuQrModal'))closeKggAdminMenuQrModal();});
-  if($('kggAdminMenuQrCopy'))$('kggAdminMenuQrCopy').onclick=async()=>{const link=$('kggAdminMenuQrLink'); if(!link)return; const ok=await copyTextValue(link.value); if(!ok){link.focus(); link.select();}};
 ```

@@ -4,6 +4,39 @@
 - Lines: 19321-19740
 
 ```html
+            target:target,
+            clientX:startX,
+            clientY:startY,
+            pointerId:pointerId,
+            preventDefault:function(){},
+            stopPropagation:function(){}
+          });
+        },140);
+        document.addEventListener('pointermove',moveBefore,{passive:true});
+        document.addEventListener('pointerup',upBefore,{passive:true});
+        document.addEventListener('pointercancel',upBefore,{passive:true});
+      },{passive:false});
+    });
+  }
+  function bindPlanSwipeDelete(list){
+    if(!list)return;
+    list.querySelectorAll('.planCard[data-plan-id]').forEach(card=>{
+      if(card.dataset.swipeDeleteBound==='1')return;
+      card.dataset.swipeDeleteBound='1';
+      card.addEventListener('pointerdown',startPlanCardSwipeDelete,{passive:false});
+      card.addEventListener('click',ev=>{
+        if(Number(card.dataset.swipeSuppressClickUntil||0)>Date.now()){
+          ev.preventDefault();
+          ev.stopPropagation();
+        }
+      },true);
+    });
+  }
+  function resetPlanCardSwipe(card){
+    if(!card)return;
+    card.classList.remove('swipe-dragging','swipe-armed','swipe-left','swipe-right','swipe-removing');
+    document.body.classList.remove('kggPlanCardSwiping');
+    card.style.removeProperty('transform');
     card.style.removeProperty('opacity');
     card.style.removeProperty('transition');
     card.style.removeProperty('--swipe-strength');
@@ -391,37 +424,4 @@
     if(press.preUp)document.removeEventListener('pointerup',press.preUp);
     document.removeEventListener('pointermove',onAnimatedReorderMove);
     animatedReorder=null;
-    if(suppressClick){state.reorderSuppressClick=true;setTimeout(()=>{state.reorderSuppressClick=false;},350);}
-  }
-
-  function restoreRecentPlan(index){
-    const item=(state.recent||[])[index];
-    if(!item)return;
-    state.patient={...(state.patient||{}),...(item.patient||{})};
-    state.plan=Array.isArray(item.exercises)?item.exercises.map(ensureUiExerciseShape):[];
-    if($('patientName'))$('patientName').value=state.patient.name||'';
-    if($('planDate'))$('planDate').value=state.patient.date||new Date().toISOString().slice(0,10);
-    if($('therapistName'))$('therapistName').value=state.patient.therapist||'';
-    if($('planNotes'))$('planNotes').value=state.patient.notes||'';
-    syncStatePlanToStore('ui_restore_recent_plan');
-    syncTextInputFromPlan('ui_restore_recent_plan');
-    if($('recentList'))$('recentList').classList.add('hidden');
-    save();
-    render();
-  }
-  function renderRecent(){
-    const el=$('recentList');
-    const items=(state.recent||[]).slice(0,5);
-    el.innerHTML=items.map((p,i)=>'<div class="notice"><b>'+escapeHtml(p.name||('Plan '+(i+1)))+'</b><br><small>'+((p.exercises||[]).length)+' Übungen'+(p.date?' · '+escapeHtml(String(p.date).slice(0,10)):'')+'</small><br><button class="mutedBtn" data-recent-index="'+i+'" type="button" style="width:100%;margin-top:8px">Plan wieder öffnen</button></div>').join('')||'<div class="notice">Keine Pläne.</div>';
-    el.querySelectorAll('[data-recent-index]').forEach(btn=>btn.onclick=()=>restoreRecentPlan(Number(btn.dataset.recentIndex)));
-  }
-  function defaultPackageName(){const patient=String(state.patient&&state.patient.name||'').trim(); const stamp=new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}); return (patient?patient+' ':'')+'Paket '+stamp;}
-  function openPackageSaveModal(){
-    if(!(state.plan||[]).length)return;
-    const btn=$('savePackageBtn'), input=$('packageNameInput');
-    if(btn){btn.classList.remove('packagePulse'); void btn.offsetWidth; btn.classList.add('packagePulse'); setTimeout(()=>btn.classList.remove('packagePulse'),560);}
-    if(input)input.value=defaultPackageName();
-    $('packageSaveModal').classList.add('open');
-    setTimeout(()=>input&&input.focus&&input.focus(),30);
-  }
 ```

@@ -1,7 +1,7 @@
 {
   "gptId": "g-6a69fc9d9ccc819194ca68b00227bf8f",
   "name": "KGG Patienten-App Update-Agent",
-  "profileVersion": "1.0.2",
+  "profileVersion": "1.1.0",
   "model": "GPT-5.6 Thinking",
   "visibility": "private",
   "capabilities": {
@@ -12,15 +12,16 @@
     "apps": false,
     "actions": true
   },
-  "instructionsSha256": "80ed018603c5c2350a89fb1bd1c4f6eb8708cd87331f8b07270adecd859c4a2f",
+  "syncStatus": "target-pending-live-editor-sync",
+  "instructionsSha256": "fa8e7644fd8301a1f94f1e7a77f97161b3383258ace26fce3a7aed4a14100bb7",
   "knowledgeSha256": [
-    "ff82c35105a58029535e9245ee04905e158274f59dae5ce5e1f36e6f2b4572fd",
-    "7fc374ea5e4b654575e166af8c6bf536a3a90d6142ea8bf0f5489f0e1fe6ddf3",
-    "adbd83f077a393b9feec05992f87761e5410a8ae7b3b538f5db7fe70b79c89ba",
+    "d059bf8d39690d87ccf176095d7e25b811692b773fcfc46a61c00130a457031e",
+    "5b094e20b5b7396238181b47fc4040cc3ecc105fd360598d4c6d09c66386ae7c",
+    "b59b2c43a0b0c2819ba14c6ec9782d6442b0ff52bc0d816c9203531993962729",
     "265d1b4a78c3555dba1055c775944776ac1cabf104671e3b6f070b98b512b12e"
   ],
   "actionSha256": [
     "a7514673c0af2cccfddc5b5e8e4fc51215a766e8fdca2cc3b75f917b43aa5dc3",
-    "456a1a9864d13edaa19cd8167d9d56bcc2a00184ad4fa4727d1b8919822cb3a4"
+    "2ce664718a2984295a45b35d111f007d4cd82aa345fd67c6a3c994628029336b"
   ]
 }

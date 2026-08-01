@@ -4,6 +4,39 @@
 - Lines: 21421-21840
 
 ```html
+  async function sendPdfToNative(action){
+    if(!currentPdfPreview||!currentPdfPreview.blob)return false;
+    const bridge=nativePdfBridge();
+    if(!bridge)return false;
+    try{
+      const base64=await pdfBlobToBase64(currentPdfPreview.blob);
+      if(action==='download'&&typeof bridge.download==='function')return !!bridge.download(currentPdfPreview.filename,base64);
+      if(action==='print'&&typeof bridge.print==='function')return !!bridge.print(currentPdfPreview.filename,base64);
+      if(typeof bridge.open==='function')return !!bridge.open(currentPdfPreview.filename,base64);
+    }catch(err){console.warn('Native PDF-Aktion fehlgeschlagen:',err);}
+    return false;
+  }
+  let currentPdfPreview=null;
+  let pdfPreviewFallbackTimer=null;
+  function setPdfPreviewFallbackVisible(isVisible){
+    const fallback=$('pdfPreviewFallback');
+    if(fallback)fallback.classList.toggle('hidden',!isVisible);
+  }
+  function shouldUsePdfMobileBridge(){
+    return !!(window.matchMedia && (window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(max-width: 700px)').matches));
+  }
+  function setPdfMobileBridgeVisible(isVisible){
+    const bridge=$('pdfPreviewMobileBridge');
+    const modal=$('pdfPreviewModal');
+    if(bridge)bridge.classList.toggle('hidden',!isVisible);
+    if(modal)modal.classList.toggle('pdfPreviewModalMobile',isVisible);
+  }
+  function openPdfPreview(result){
+    if(!result||!result.blob)return;
+    if(currentPdfPreview&&currentPdfPreview.url)URL.revokeObjectURL(currentPdfPreview.url);
+    if(pdfPreviewFallbackTimer)clearTimeout(pdfPreviewFallbackTimer);
+    const url=URL.createObjectURL(result.blob);
+    currentPdfPreview={url,blob:result.blob,filename:result.filename||'kgg_trainingsplan.pdf'};
     const frame=$('pdfPreviewFrame');
     const useMobileBridge=shouldUsePdfMobileBridge();
     setPdfPreviewFallbackVisible(false);
@@ -391,37 +424,4 @@
     if(output)output.classList.remove('hidden');
     if(choices)choices.classList.add('hidden');
     if(close)close.classList.remove('hidden');
-    if(finishNotice)finishNotice.textContent='';
-    const link=$('patientAppLink'), notice=$('patientShareNotice'), box=$('patientQrBox'), status=$('patientQrStatus'), copyBtn=$('copyPatientLink');
-    $('shareText').value='INTERNE DEBUG-TESTAUSGABE – nicht an Patient:innen weitergeben\n\nLokaler Testlink:\n'+share.debugUrl+'\n\nPayload JSON:\n'+JSON.stringify(share.payload,null,2);
-    const dbg=$('debugPayloadBox'); if(dbg)dbg.open=false;
-    if(!share.shareable){
-      if(notice)notice.textContent='Lokaler Test.';
-      if(link){link.classList.remove('hidden'); link.href=share.debugUrl; link.textContent='Patienten-Test öffnen';}
-      if(copyBtn){copyBtn.classList.remove('hidden'); setPatientCopyButtonLabel();}
-      setManualPatientLinkField(share.debugUrl,false,false);
-      setupPatientLinkCopyLongPress();
-      if(box)box.innerHTML='<span class="qrStatus">Lokaler Test.</span>';
-      if(status)status.textContent='Testlink bereit.';
-      return share.debugUrl;
-    }
-    if(notice){
-      const mediaInfo=share.payload&&share.payload.meta&&share.payload.meta.media;
-      const longInfo=ttlSeconds>=MEDIA_UPLOAD_LONG_TTL_SECONDS?' 24h aktiv.':'';
-      notice.textContent='Patient:innen-Link bereit.'+(mediaInfo&&mediaInfo.expected?' Bilder bereit.':'')+longInfo;
-    }
-    if(link){link.classList.remove('hidden'); link.href=share.url;}
-    if(copyBtn){copyBtn.classList.remove('hidden'); setPatientCopyButtonLabel();}
-    setManualPatientLinkField(share.url,false,false);
-    setupPatientLinkCopyLongPress();
-    tryRenderQrCode(share.url);
-    return share.url;
-  }
-  function makeShare(){return buildPatientShareFromCurrentPlan().url;}
-
-  function resetFinishModal(){
-    const choices=$('finishChoices'), output=$('patientOutputBox'), close=$('closeShare'), notice=$('finishNotice'), dbg=$('debugPayloadBox'), copyBtn=$('copyPatientLink');
-    if(choices)choices.classList.remove('hidden');
-    if(output)output.classList.add('hidden');
-    if(close)close.classList.add('hidden');
 ```

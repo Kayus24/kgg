@@ -10,6 +10,11 @@
   },
   "production": {
     "name": "KGG Update-Agent",
+    "profileVersion": "4.0.0",
+    "editorBootstrap": {
+      "path": "docs/kgg-custom-gpt-editor-bootstrap.md",
+      "sha256": "93c5da5730287043f9563c0a024057a5f8933014b4eefa9cc9632ecc111d0734"
+    },
     "capabilities": {
       "webSearch": true,
       "codeInterpreter": true,
@@ -21,32 +26,33 @@
     "knowledge": [
       {
         "path": "docs/kgg-custom-gpt-knowledge-architecture.md",
-        "sha256": "5edb004357c8e4971ca36a66c688ceec6db43fe3080baf1c4941bac0fdd19ac1"
+        "sha256": "71b125b6f1a0e39343c7ed4d373cffe0c8e96e5c4b25e38a8deab096c5b7ea0a"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-operations.md",
-        "sha256": "d4ce7c61d0881fe3efb8d3fa6109f7cfa48d00cd94dd759f758d598403cd9499"
+        "sha256": "f44e01ad365402e22a53ba9f994d4aa811253873af505769308cc246a07adcc3"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-safety.md",
-        "sha256": "0f4f93d1f0f258b136f2a7868913216c1eda0d3888967542030dc1fa2a4eb006"
+        "sha256": "db9db338406f2625d735a2d77a1f2129c35e865d2011b8907775f455ad977a45"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-testing.md",
-        "sha256": "ea06ad76f150e446cee31a522ea6435a50d923e9b5f39589f7222ace5da993da"
+        "sha256": "a6aa7b5d68674c36fd38cccc51d4dd9ec8c253e73753d9ac32e77b09cd801e42"
       }
     ],
     "actions": [
       {
         "path": "docs/kgg-custom-gpt-action-openapi.yaml",
-        "sha256": "82704938aeec112c5f15681661cf0f28bea60928711ba7b57a5459ae64a02212"
+        "sha256": "0a27548e49b62ac2a5668541183b49b3c41de1b2fa9cffcf854ba67f8dc5b1cf"
       },
       {
         "path": "docs/kgg-custom-gpt-action-api-openapi.yaml",
-        "sha256": "fad8eb40d827713ac7b28ee3be8e34046a7d6b6c2fc486cf324d628b09be8053"
+        "sha256": "697f9093abf44ab26f4acdd1ddf538e0c67965c880b186155eb1b1c44936a78c"
       }
     ],
-    "freshness": "GitHub live context and source chunks are authoritative; generated Knowledge is a retrieval accelerator and must pass --check."
+    "freshness": "GitHub live context and source chunks are authoritative; generated Knowledge is a retrieval accelerator and must pass --check.",
+    "visibility": "private"
   },
   "eval": {
     "name": "KGG Repair-Lab Eval",
@@ -87,10 +93,10 @@
   },
   "patientProduction": {
     "name": "KGG Patienten-App Update-Agent",
-    "profileVersion": "1.0.2",
+    "profileVersion": "1.1.0",
     "editorBootstrap": {
       "path": "docs/kgg-patient-custom-gpt-editor-bootstrap.md",
-      "sha256": "80ed018603c5c2350a89fb1bd1c4f6eb8708cd87331f8b07270adecd859c4a2f"
+      "sha256": "fa8e7644fd8301a1f94f1e7a77f97161b3383258ace26fce3a7aed4a14100bb7"
     },
     "capabilities": {
       "webSearch": true,
@@ -103,15 +109,15 @@
     "knowledge": [
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-architecture.md",
-        "sha256": "ff82c35105a58029535e9245ee04905e158274f59dae5ce5e1f36e6f2b4572fd"
+        "sha256": "d059bf8d39690d87ccf176095d7e25b811692b773fcfc46a61c00130a457031e"
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-operations.md",
-        "sha256": "7fc374ea5e4b654575e166af8c6bf536a3a90d6142ea8bf0f5489f0e1fe6ddf3"
+        "sha256": "5b094e20b5b7396238181b47fc4040cc3ecc105fd360598d4c6d09c66386ae7c"
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-safety.md",
-        "sha256": "adbd83f077a393b9feec05992f87761e5410a8ae7b3b538f5db7fe70b79c89ba"
+        "sha256": "b59b2c43a0b0c2819ba14c6ec9782d6442b0ff52bc0d816c9203531993962729"
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-testing.md",
@@ -125,7 +131,7 @@
       },
       {
         "path": "docs/kgg-patient-custom-gpt-action-api-openapi.yaml",
-        "sha256": "456a1a9864d13edaa19cd8167d9d56bcc2a00184ad4fa4727d1b8919822cb3a4"
+        "sha256": "2ce664718a2984295a45b35d111f007d4cd82aa345fd67c6a3c994628029336b"
       }
     ],
     "freshness": "Live patient context, current source chunks and Preview evidence override static Knowledge.",

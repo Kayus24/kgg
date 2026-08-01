@@ -153,6 +153,20 @@ def run_patient_scan_camera() -> None:
     run([node_executable(), "release-pipeline/kgg_patient_scan_camera_smoke.js"])
 
 
+def run_admin_camera_qr() -> None:
+    global PATIENT_SCAN_PREPARED
+    npm = npm_executable()
+    if not npm:
+        raise BatteryError("npm not found. Install npm or set KGG_NPM for the Admin camera/QR battery.")
+    if not PATIENT_SCAN_PREPARED:
+        run([npm, "--prefix", "release-pipeline", "ci", "--ignore-scripts"])
+        if os.environ.get("KGG_SKIP_PLAYWRIGHT_INSTALL") != "1":
+            run([node_executable(), "release-pipeline/node_modules/playwright/cli.js", "install", "chromium"])
+        PATIENT_SCAN_PREPARED = True
+    log("== Admin live camera / patient QR battery ==")
+    run([node_executable(), "release-pipeline/kgg_admin_camera_qr_smoke.js"])
+
+
 def run_ui_contract() -> None:
     log("== KGG UI/function contract ==")
     npm = npm_executable()
@@ -297,10 +311,14 @@ def run_android_wrapper_contract() -> None:
     )
     build_gradle = (ROOT / "android-wrapper" / "app" / "build.gradle").read_text(encoding="utf-8")
     android_manifest = (ROOT / "android-wrapper" / "app" / "src" / "main" / "AndroidManifest.xml").read_text(encoding="utf-8")
+    debug_android_manifest = (ROOT / "android-wrapper" / "app" / "src" / "debug" / "AndroidManifest.xml").read_text(
+        encoding="utf-8"
+    )
     file_paths = (ROOT / "android-wrapper" / "app" / "src" / "main" / "res" / "xml" / "kgg_file_paths.xml").read_text(
         encoding="utf-8"
     )
     android_workflow = (ROOT / ".github" / "workflows" / "android-wrapper-check.yml").read_text(encoding="utf-8")
+    preview_auto_workflow = (ROOT / ".github" / "workflows" / "kgg-gpt-preview-auto.yml").read_text(encoding="utf-8")
     expected_shell = str(manifest.get("latestAndroidShellVersion", "")).lstrip("v")
     required = [
         (f"ANDROID_SHELL_VERSION = {expected_shell}", "MainActivity shell version must match android_update_manifest"),
@@ -328,13 +346,42 @@ def run_android_wrapper_contract() -> None:
         ('<cache-path name="apk_cache" path="apk/" />', "FileProvider must expose APK cache files"),
         ("rememberPendingApkFile(apkFile, versionLabel, false)", "background APK checks must not request installer"),
         ("if (force) {\n                    runOnUiThread(() -> installApkFile(apkFile, versionLabel));", "explicit APK check may open installer"),
+        ("PermissionRequest.RESOURCE_VIDEO_CAPTURE", "WebView camera permission must grant video only"),
+        ("WEB_CAMERA_PERMISSION_REQUEST", "WebView camera permission has a dedicated Android request code"),
+        ("isTrustedLocalWebRequest", "WebView camera permission must be limited to the locally verified HTML"),
+        ("currentUrl.equals(trustedUrl)", "WebView camera permission must match the exact verified local app URL"),
+        ("request.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE})", "WebView must grant only video capture after Android permission"),
+        ("getCameraCapabilities()", "Android bridge must publish its live-camera capability contract"),
+        ("webVideoCaptureVersion", "Android and JavaScript must negotiate a versioned live-camera contract"),
+        ("getCapabilities: function()", "JavaScript bootstrap must expose native camera capabilities"),
+        ("android.permission.POST_NOTIFICATIONS", "Preview APK requests Android notification permission"),
+        ("KGG_PREVIEW_STATUS_URL", "Preview APK has an isolated workflow status endpoint"),
+        ("versionName \"0.2.12-v402-preview-status\"", "Preview flavor has an updateable v402 package version"),
+        ("androidx.work:work-runtime:2.11.2", "Preview status background checks use stable WorkManager"),
+        ("KggPreviewStatusWorker", "Preview status has a background worker"),
+        ('BuildConfig.DEBUG && protocol.equals("http") && host.equals("10.0.2.2")', "HTTP status access is limited to the debug emulator host"),
+        ("PREVIEW_STATUS_FOREGROUND_INTERVAL_MS = 30_000L", "open Preview app polls status every 30 seconds"),
+        ("status-validating", "automatic Preview workflow publishes validating status"),
+        ("mode: validate_only", "automatic Preview workflow validates before publishing"),
+        ("mode: publish_preview", "automatic Preview workflow publishes after validation"),
+        ("status-final", "automatic Preview workflow publishes a terminal status"),
     ]
-    haystacks = "\n".join([main_activity, bootstrap, build_gradle, android_manifest, file_paths, android_workflow])
+    preview_status_sources = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in (ROOT / "android-wrapper" / "app" / "src" / "main" / "java" / "de" / "kgg" / "app").glob("KggPreviewStatus*.java")
+    )
+    haystacks = "\n".join([main_activity, bootstrap, build_gradle, android_manifest, debug_android_manifest, file_paths, android_workflow, preview_auto_workflow, preview_status_sources])
     missing = [reason for token, reason in required if token not in haystacks]
     if missing:
         raise BatteryError("Android wrapper contract missing: " + ", ".join(missing))
     if "if (window.KGGNativeSync || !window.KGGAndroidSync) return;" in bootstrap:
         raise BatteryError("Android bootstrap must not let Sync availability block PDF/Camera/AppUpdate bridges.")
+    if "PermissionRequest.RESOURCE_AUDIO_CAPTURE" in main_activity:
+        raise BatteryError("Android WebView camera bridge must never grant microphone capture.")
+    if 'android:usesCleartextTraffic="true"' in android_manifest:
+        raise BatteryError("Production Android builds must not allow cleartext traffic.")
+    if 'android:usesCleartextTraffic="true"' not in debug_android_manifest:
+        raise BatteryError("Debug Android builds must explicitly allow the isolated emulator status server.")
     for density in ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]:
         for name in ["ic_launcher.png", "ic_launcher_round.png"]:
             icon = ROOT / "android-wrapper" / "app" / "src" / "main" / "res" / f"mipmap-{density}" / name
@@ -343,6 +390,8 @@ def run_android_wrapper_contract() -> None:
             admin_icon = ROOT / "android-wrapper" / "app" / "src" / "admin" / "res" / f"mipmap-{density}" / name
             if not admin_icon.exists() or admin_icon.stat().st_size < 500:
                 raise BatteryError(f"Android admin launcher icon override missing or too small: {admin_icon}")
+    run([sys.executable, "release-pipeline/kgg_android_preview_probe.py", "--self-test"])
+    run([sys.executable, "release-pipeline/kgg_preview_status.py", "--self-test"])
     log("Android wrapper contract OK")
 
 
@@ -354,6 +403,11 @@ def run_gpt_payload_preflight_self_test() -> None:
 def run_gpt_eval() -> None:
     log("== Custom GPT deterministic eval ==")
     run([sys.executable, "release-pipeline/kgg_gpt_eval.py"])
+
+
+def run_gpt_regression_contracts() -> None:
+    log("== Custom GPT declarative regression contracts ==")
+    run([sys.executable, "release-pipeline/kgg_gpt_regression_contracts.py"])
 
 
 def run_patch_hygiene() -> None:
@@ -470,6 +524,21 @@ def run_release_drift_check() -> None:
     )
 
 
+def run_no_release_pr_contract() -> None:
+    log("== Explicit no-release PR workflow contract ==")
+    required_gate = (ROOT / ".github" / "workflows" / "kgg-required-gate.yml").read_text(encoding="utf-8")
+    release_pr = (ROOT / ".github" / "workflows" / "release-pr.yml").read_text(encoding="utf-8")
+    label_guard = "contains(github.event.pull_request.labels.*.name, 'kgg-no-release')"
+    for name, workflow in [("required gate", required_gate), ("release validation", release_pr)]:
+        if label_guard not in workflow:
+            raise BatteryError(f"{name} must recognize the explicit kgg-no-release label.")
+        if "KGG_ALLOW_RELEASE_DRIFT:" not in workflow:
+            raise BatteryError(f"{name} must pass the explicit no-release decision to the release drift guard.")
+    if "ready_for_review, labeled, unlabeled" not in required_gate:
+        raise BatteryError("Required Gate must rerun when the explicit no-release label changes.")
+    log("Explicit no-release PR workflow contract OK")
+
+
 TEST_REGISTRY = [
     {
         "id": "module-source",
@@ -491,6 +560,13 @@ TEST_REGISTRY = [
         "suite": "release",
         "reason": "Release artifacts and manifests must stay buildable before any merge.",
         "run": run_release_contracts,
+    },
+    {
+        "id": "no-release-pr-contract",
+        "level": "critical",
+        "suite": "release",
+        "reason": "A labeled Preview/Test-App source PR must pass drift checks without granting merge or Admin release authority.",
+        "run": run_no_release_pr_contract,
     },
     {
         "id": "encoding-guard",
@@ -547,6 +623,13 @@ TEST_REGISTRY = [
         "suite": "gpt",
         "reason": "Custom GPT playbook, routing and expected-answer fixtures must stay complete and testable.",
         "run": run_gpt_eval,
+    },
+    {
+        "id": "gpt-regression-contracts",
+        "level": "critical",
+        "suite": "gpt",
+        "reason": "Gate-generated declarative regression contracts must remain true for the assembled Admin HTML.",
+        "run": run_gpt_regression_contracts,
     },
     {
         "id": "mobile-inbox-dry-run",
@@ -624,6 +707,13 @@ TEST_REGISTRY = [
         "suite": "patient-scan",
         "reason": "Patient plan QR photos and synthetic camera streams must reach the parser and preserve existing plan data.",
         "run": run_patient_scan_camera,
+    },
+    {
+        "id": "admin-camera-qr-regression",
+        "level": "regression",
+        "suite": "camera-qr",
+        "reason": "Admin live camera must recognize patient QR payloads automatically, preserve manual paper capture and stop camera streams.",
+        "run": run_admin_camera_qr,
     },
     {
         "id": "ui-stability-regression",
@@ -801,7 +891,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--suite",
-        choices=["all", "hygiene", "mobile-inbox", "sync", "native-sync", "textblocks", "pdf", "patient-scan", "ui-stability", "syntax", "security", "release", "android", "gpt"],
+        choices=["all", "hygiene", "mobile-inbox", "sync", "native-sync", "textblocks", "pdf", "patient-qr", "patient-scan", "camera-qr", "ui-stability", "syntax", "security", "release", "android", "gpt"],
         default=None,
         help="Optionally limit to one suite. Without --level this keeps legacy behavior and runs all non-live tests in that suite.",
     )

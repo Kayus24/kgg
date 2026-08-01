@@ -4,6 +4,39 @@
 - Lines: 18901-19320
 
 ```html
+  function renderSuggestion(text){
+    const tabletBank=isTabletLayout();
+    bankSelectMode=(state.bankOpen||tabletBank)?(text?'replaceActive':'append'):'replaceActive';
+    const el=$('suggestion');
+    if(!text || state.bankOpen || tabletBank){el.classList.add('hidden'); el.onclick=null; el.innerHTML=''; return;}
+    const hit=search(text,1)[0];
+    if(!hit){el.classList.add('hidden'); el.onclick=null; el.innerHTML=''; return;}
+    el.innerHTML='<div class="row"><button class="iconBtn" type="button" data-open-top8 aria-label="Top-8-Treffer öffnen">▸ 🏋️</button><button class="iconBtn" type="button" data-apply-hit aria-label="Treffer übernehmen"><b>'+escapeHtml(hit.name)+'</b></button></div>';
+    el.classList.remove('hidden');
+    el.onclick=null;
+    const open=el.querySelector('[data-open-top8]');
+    const apply=el.querySelector('[data-apply-hit]');
+    if(open)open.onclick=ev=>{ev.preventDefault();ev.stopPropagation();state.bankOpen=true;render();};
+    if(apply){preventButtonFocusSteal(apply); apply.onclick=ev=>{ev.preventDefault();ev.stopPropagation();applySelectedExerciseToText(hit,{keepFocus:true});};}
+  }
+  function nextAvailableBankLetter(requested,available){const letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''); const wanted=String(requested||'').toUpperCase(); const start=Math.max(0,letters.indexOf(wanted)); for(let i=start;i<letters.length;i++){if(available.includes(letters[i]))return letters[i];} for(let i=start-1;i>=0;i--){if(available.includes(letters[i]))return letters[i];} return available[0]||'';}
+  function setActiveAzLetter(nav,letter){if(!nav)return; nav.querySelectorAll('[data-jump]').forEach(btn=>btn.classList.toggle('active',btn.dataset.jump===letter));}
+  function setAzTouchPreview(nav,letter){
+    if(!nav)return;
+    const buttons=[...nav.querySelectorAll('[data-jump]')];
+    const index=buttons.findIndex(btn=>btn.dataset.jump===letter);
+    buttons.forEach((btn,i)=>{
+      const dist=index<0?99:Math.abs(i-index);
+      btn.classList.toggle('touch-preview',dist===0);
+      btn.classList.toggle('touch-near1',dist===1);
+      btn.classList.toggle('touch-near2',dist===2);
+    });
+  }
+  function jumpBankToLetter(container,letter,instant){const nav=container&&container.querySelector('.az'); const rowsWrap=container&&container.querySelector('.bankRows'); if(!container||!rowsWrap)return; const available=[...container.querySelectorAll('.bankRow[data-letter]')].map(row=>row.dataset.letter).filter((l,i,a)=>l&&a.indexOf(l)===i); const targetLetter=nextAvailableBankLetter(letter,available); if(!targetLetter)return; const target=container.querySelector('.bankRow[data-letter="'+targetLetter+'"]'); if(target){const rowRect=target.getBoundingClientRect(); const wrapRect=rowsWrap.getBoundingClientRect(); const nextTop=Math.max(0,rowsWrap.scrollTop+(rowRect.top-wrapRect.top)); rowsWrap.scrollTo({top:nextTop,behavior:instant?'auto':'smooth'}); setActiveAzLetter(nav,targetLetter);}}
+  function azLetterFromPoint(nav,clientY){if(!nav)return''; const rect=nav.getBoundingClientRect(); const buttons=[...nav.querySelectorAll('[data-jump]')]; if(!buttons.length)return''; const ratio=Math.max(0,Math.min(1,(clientY-rect.top)/Math.max(1,rect.height))); return buttons[Math.min(buttons.length-1,Math.floor(ratio*buttons.length))].dataset.jump;}
+  function bindAzScrollrad(container){const nav=container&&container.querySelector('.az'); if(!nav||nav.dataset.azBound==='1')return; nav.dataset.azBound='1'; let active=false,tapTimer=0; const setTouching=on=>{nav.classList.toggle('azTouching',!!on); if(!on)setAzTouchPreview(nav,'');}; const showTapWave=letter=>{clearTimeout(tapTimer); nav.classList.add('azTouching'); setAzTouchPreview(nav,letter); tapTimer=setTimeout(()=>setTouching(false),180);}; const jumpFromEvent=ev=>{const touch=ev.touches&&ev.touches[0]||ev.changedTouches&&ev.changedTouches[0]; const y=touch?touch.clientY:ev.clientY; const letter=azLetterFromPoint(nav,y); if(letter){setAzTouchPreview(nav,letter); jumpBankToLetter(container,letter,true);}}; nav.addEventListener('click',ev=>{const btn=ev.target&&ev.target.closest?ev.target.closest('[data-jump]'):null; if(!btn||!nav.contains(btn))return; ev.preventDefault(); showTapWave(btn.dataset.jump); jumpBankToLetter(container,btn.dataset.jump);}); nav.addEventListener('pointerdown',ev=>{clearTimeout(tapTimer); active=true; setTouching(true); nav.setPointerCapture&&nav.setPointerCapture(ev.pointerId); ev.preventDefault(); jumpFromEvent(ev);}); nav.addEventListener('pointermove',ev=>{if(!active)return; ev.preventDefault(); jumpFromEvent(ev);}); nav.addEventListener('pointerup',ev=>{active=false; setTouching(false); try{nav.releasePointerCapture&&nav.releasePointerCapture(ev.pointerId);}catch(e){}}); nav.addEventListener('pointercancel',()=>{active=false; setTouching(false);}); nav.addEventListener('touchstart',ev=>{clearTimeout(tapTimer); active=true; setTouching(true); jumpFromEvent(ev);},{passive:false}); nav.addEventListener('touchmove',ev=>{if(!active)return; ev.preventDefault(); jumpFromEvent(ev);},{passive:false}); nav.addEventListener('touchend',()=>{active=false; setTouching(false);},{passive:true});}
+  function bankCardThumbnailHtml(ex){
+    const media=ensureExerciseMediaList(ex).find(item=>item&&item.type==='image'&&item.id);
     if(!media)return '';
     return '<span class="bankThumb bankThumbFallback" data-bank-thumb-id="'+escapeHtml(media.id)+'" title="Bild vorhanden" aria-hidden="true"></span>';
   }
@@ -391,37 +424,4 @@
           startAnimatedReorderPress({
             button:0,
             currentTarget:card,
-            target:target,
-            clientX:startX,
-            clientY:startY,
-            pointerId:pointerId,
-            preventDefault:function(){},
-            stopPropagation:function(){}
-          });
-        },140);
-        document.addEventListener('pointermove',moveBefore,{passive:true});
-        document.addEventListener('pointerup',upBefore,{passive:true});
-        document.addEventListener('pointercancel',upBefore,{passive:true});
-      },{passive:false});
-    });
-  }
-  function bindPlanSwipeDelete(list){
-    if(!list)return;
-    list.querySelectorAll('.planCard[data-plan-id]').forEach(card=>{
-      if(card.dataset.swipeDeleteBound==='1')return;
-      card.dataset.swipeDeleteBound='1';
-      card.addEventListener('pointerdown',startPlanCardSwipeDelete,{passive:false});
-      card.addEventListener('click',ev=>{
-        if(Number(card.dataset.swipeSuppressClickUntil||0)>Date.now()){
-          ev.preventDefault();
-          ev.stopPropagation();
-        }
-      },true);
-    });
-  }
-  function resetPlanCardSwipe(card){
-    if(!card)return;
-    card.classList.remove('swipe-dragging','swipe-armed','swipe-left','swipe-right','swipe-removing');
-    document.body.classList.remove('kggPlanCardSwiping');
-    card.style.removeProperty('transform');
 ```

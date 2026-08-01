@@ -18,6 +18,8 @@ import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Environment;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -28,6 +30,7 @@ import android.print.PrintDocumentInfo;
 import android.print.PrintManager;
 import android.util.Base64;
 import android.webkit.ValueCallback;
+import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -46,6 +49,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.core.content.FileProvider;
+import androidx.work.Constraints;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import org.json.JSONObject;
 
@@ -64,10 +72,15 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST = 4201;
     private static final int CAMERA_PERMISSION_REQUEST = 4202;
+    private static final int WEB_CAMERA_PERMISSION_REQUEST = 4203;
+    private static final int PREVIEW_NOTIFICATION_PERMISSION_REQUEST = 4204;
+    private static final int WEB_VIDEO_CAPTURE_VERSION = 1;
     private static final int RELEASE_HTML_REQUEST = 4301;
     private static final int ANDROID_SHELL_VERSION = 401;
     private static final int BUNDLED_WEB_VERSION = 419;
@@ -76,6 +89,8 @@ public class MainActivity extends Activity {
     private static final int MAX_HTML_UPDATE_BYTES = 5_500_000;
     private static final int MAX_APK_UPDATE_BYTES = 80_000_000;
     private static final long APK_UPDATE_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000L;
+    private static final long PREVIEW_STATUS_FOREGROUND_INTERVAL_MS = 30_000L;
+    private static final String PREVIEW_STATUS_WORK_NAME = "kgg-preview-status-monitor";
     private static final String BUNDLED_COLLEAGUE_APP_ASSET =
             "www/KGG_APP_KOLLEGEN_v389_flow_stability.html";
     private static final String BUNDLED_ADMIN_APP_ASSET =
@@ -112,10 +127,43 @@ public class MainActivity extends Activity {
     private WebView webView;
     private ValueCallback<Uri[]> filePathCallback;
     private WebChromeClient.FileChooserParams pendingFileChooserParams;
+    private PermissionRequest pendingWebCameraRequest;
     private Uri cameraCaptureUri;
     private String nextFileChooserMode = "";
     private boolean pendingForceCamera;
     private KggReleaseController releaseController;
+    private final Handler previewStatusHandler = new Handler(Looper.getMainLooper());
+    private final AtomicBoolean previewStatusRequestRunning = new AtomicBoolean(false);
+    private boolean previewStatusPolling;
+    private String lastPreviewSuccessRunId = "";
+    private final Runnable previewStatusPoll = new Runnable() {
+        @Override
+        public void run() {
+            if (!previewStatusPolling || !isPreviewProfile()) {
+                return;
+            }
+            if (previewStatusRequestRunning.compareAndSet(false, true)) {
+                new Thread(() -> {
+                    try {
+                        KggPreviewStatus status = KggPreviewStatusClient.fetch();
+                        KggPreviewStatusNotifier.notifyIfChanged(MainActivity.this, status);
+                        if (status != null && status.isSuccess() && !status.runId.equals(lastPreviewSuccessRunId)) {
+                            lastPreviewSuccessRunId = status.runId;
+                            checkForPreviewWebAppUpdate();
+                        }
+                    } catch (Exception ignored) {
+                    } finally {
+                        previewStatusRequestRunning.set(false);
+                        if (previewStatusPolling) {
+                            previewStatusHandler.postDelayed(this, PREVIEW_STATUS_FOREGROUND_INTERVAL_MS);
+                        }
+                    }
+                }, "kgg-preview-status").start();
+            } else {
+                previewStatusHandler.postDelayed(this, PREVIEW_STATUS_FOREGROUND_INTERVAL_MS);
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,7 +177,9 @@ public class MainActivity extends Activity {
         prepareLocalWebApp();
         webView.loadUrl(localWebAppUrl());
         checkForWebAppUpdate();
-        if (!isPreviewProfile()) {
+        if (isPreviewProfile()) {
+            configurePreviewStatusMonitoring();
+        } else {
             checkForAndroidAppUpdate(false);
         }
     }
@@ -165,9 +215,57 @@ public class MainActivity extends Activity {
         super.onResume();
         installPendingApkIfAllowed();
         checkForWebAppUpdate();
-        if (!isPreviewProfile()) {
+        if (isPreviewProfile()) {
+            startPreviewStatusPolling();
+        } else {
             checkForAndroidAppUpdate(false);
         }
+    }
+
+    @Override
+    protected void onPause() {
+        stopPreviewStatusPolling();
+        super.onPause();
+    }
+
+    private void configurePreviewStatusMonitoring() {
+        if (BuildConfig.KGG_PREVIEW_STATUS_URL.trim().isEmpty()) {
+            return;
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(
+                    new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                    PREVIEW_NOTIFICATION_PERMISSION_REQUEST
+            );
+        }
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build();
+        PeriodicWorkRequest request = new PeriodicWorkRequest.Builder(
+                KggPreviewStatusWorker.class,
+                15,
+                TimeUnit.MINUTES
+        ).setConstraints(constraints).build();
+        WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork(
+                PREVIEW_STATUS_WORK_NAME,
+                ExistingPeriodicWorkPolicy.UPDATE,
+                request
+        );
+    }
+
+    private void startPreviewStatusPolling() {
+        if (BuildConfig.KGG_PREVIEW_STATUS_URL.trim().isEmpty()) {
+            return;
+        }
+        previewStatusPolling = true;
+        previewStatusHandler.removeCallbacks(previewStatusPoll);
+        previewStatusHandler.post(previewStatusPoll);
+    }
+
+    private void stopPreviewStatusPolling() {
+        previewStatusPolling = false;
+        previewStatusHandler.removeCallbacks(previewStatusPoll);
     }
 
     private void configureWebView() {
@@ -192,6 +290,20 @@ public class MainActivity extends Activity {
             }
         });
         webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onPermissionRequest(PermissionRequest request) {
+                runOnUiThread(() -> handleWebPermissionRequest(request));
+            }
+
+            @Override
+            public void onPermissionRequestCanceled(PermissionRequest request) {
+                runOnUiThread(() -> {
+                    if (pendingWebCameraRequest == request) {
+                        pendingWebCameraRequest = null;
+                    }
+                });
+            }
+
             @Override
             public boolean onShowFileChooser(
                     WebView webView,
@@ -247,9 +359,69 @@ public class MainActivity extends Activity {
                 || checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
     }
 
+    private boolean requestsVideoCapture(PermissionRequest request) {
+        if (request == null || request.getResources() == null) {
+            return false;
+        }
+        for (String resource : request.getResources()) {
+            if (PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(resource)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isTrustedLocalWebRequest(PermissionRequest request) {
+        if (request == null || request.getOrigin() == null || webView == null) {
+            return false;
+        }
+        String scheme = request.getOrigin().getScheme();
+        String currentUrl = webView.getUrl();
+        String trustedUrl = localWebAppUrl();
+        return "file".equalsIgnoreCase(scheme)
+                && currentUrl != null
+                && trustedUrl != null
+                && (currentUrl.equals(trustedUrl)
+                    || currentUrl.startsWith(trustedUrl + "#")
+                    || currentUrl.startsWith(trustedUrl + "?"));
+    }
+
+    private void handleWebPermissionRequest(PermissionRequest request) {
+        if (!isTrustedLocalWebRequest(request) || !requestsVideoCapture(request)) {
+            request.deny();
+            return;
+        }
+        if (pendingWebCameraRequest != null && pendingWebCameraRequest != request) {
+            pendingWebCameraRequest.deny();
+        }
+        if (hasCameraPermission()) {
+            request.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE});
+            return;
+        }
+        pendingWebCameraRequest = request;
+        requestPermissions(new String[]{Manifest.permission.CAMERA}, WEB_CAMERA_PERMISSION_REQUEST);
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == WEB_CAMERA_PERMISSION_REQUEST) {
+            PermissionRequest request = pendingWebCameraRequest;
+            pendingWebCameraRequest = null;
+            if (request == null) {
+                return;
+            }
+            boolean granted = grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    && isTrustedLocalWebRequest(request);
+            if (granted) {
+                request.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE});
+            } else {
+                request.deny();
+                Toast.makeText(this, "Kamera-Berechtigung fehlt", Toast.LENGTH_SHORT).show();
+            }
+            return;
+        }
         if (requestCode != CAMERA_PERMISSION_REQUEST) {
             return;
         }
@@ -330,6 +502,14 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void setNextFileChooserMode(String mode) {
             MainActivity.this.setNextFileChooserMode(mode);
+        }
+
+        @JavascriptInterface
+        public String getCameraCapabilities() {
+            return "{\"available\":true,\"platform\":\"android\","
+                    + "\"webVideoCapture\":true,\"webVideoCaptureVersion\":"
+                    + WEB_VIDEO_CAPTURE_VERSION
+                    + ",\"cameraPermission\":" + hasCameraPermission() + "}";
         }
 
         @JavascriptInterface

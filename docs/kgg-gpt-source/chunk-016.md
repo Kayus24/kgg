@@ -4,6 +4,39 @@
 - Lines: 6721-7140
 
 ```html
+      will-change:transform,opacity!important;
+    }
+    body.kggPlanCardSwiping .planCard.swipe-removing,
+    body.is-scrolling.kggPlanCardSwiping .planCard.swipe-removing{
+      transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
+    }
+    .modal.open{
+      overscroll-behavior:contain;
+    }
+    .sheet{
+      -webkit-overflow-scrolling:touch;
+    }
+  }
+</style>
+
+<style id="kgg-github-patch-v401-phone-plan-ui-isolation">
+  /* v401 GitHub Update 003: Phone-only Plan-UI Stabilisierung.
+     Fixes:
+     - Plan-Karten flackern beim Scrollen nicht mehr.
+     - Antippen/Anheben einer Plan-Karte darf den Rest der App nicht nach unten schieben.
+     - Reorder-Bewegungen bleiben innerhalb "Übungen im Plan".
+     Scope: nur max-width:759px. Tablet-/Wrapper-Code bleibt unverändert. */
+  @media (max-width:759px){
+    #rightPlanStack,
+    #currentPlanBlock.planSectionCurrent{
+      contain:layout paint!important;
+      overflow:hidden!important;
+      transform:translateZ(0);
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+    }
+
+    body.kggPlanSectionFrozen #currentPlanBlock.planSectionCurrent{
       height:var(--kgg-current-plan-freeze-h,auto)!important;
       min-height:var(--kgg-current-plan-freeze-h,auto)!important;
       max-height:var(--kgg-current-plan-freeze-h,none)!important;
@@ -390,38 +423,5 @@ var GenericGFPoly = /** @class */ (function () {
     GenericGFPoly.prototype.multiplyPoly = function (other) {
         if (this.isZero() || other.isZero()) {
             return this.field.zero;
-        }
-        var aCoefficients = this.coefficients;
-        var aLength = aCoefficients.length;
-        var bCoefficients = other.coefficients;
-        var bLength = bCoefficients.length;
-        var product = new Uint8ClampedArray(aLength + bLength - 1);
-        for (var i = 0; i < aLength; i++) {
-            var aCoeff = aCoefficients[i];
-            for (var j = 0; j < bLength; j++) {
-                product[i + j] = GenericGF_1.addOrSubtractGF(product[i + j], this.field.multiply(aCoeff, bCoefficients[j]));
-            }
-        }
-        return new GenericGFPoly(this.field, product);
-    };
-    GenericGFPoly.prototype.multiplyByMonomial = function (degree, coefficient) {
-        if (degree < 0) {
-            throw new Error("Invalid degree less than 0");
-        }
-        if (coefficient === 0) {
-            return this.field.zero;
-        }
-        var size = this.coefficients.length;
-        var product = new Uint8ClampedArray(size + degree);
-        for (var i = 0; i < size; i++) {
-            product[i] = this.field.multiply(this.coefficients[i], coefficient);
-        }
-        return new GenericGFPoly(this.field, product);
-    };
-    GenericGFPoly.prototype.evaluateAt = function (a) {
-        var result = 0;
-        if (a === 0) {
-            // Just return the x^0 coefficient
-            return this.getCoefficient(0);
         }
 ```

@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Architecture
 
-Generated retrieval pack. Source digest: `a27c586957efb51c`.
+Generated retrieval pack. Source digest: `41ad14b04cac3922`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -20,9 +20,11 @@ Reload before every diagnosis involving current code and before every Preview, P
 - Current patient PWA version from `service-worker.js`: `v72`.
 - Recovery: `https://kayus24.github.io/kgg/update-recovery.html`.
 - Isolated preview host: `https://kayus24.github.io/kgg-patient-preview/`.
-- Patient Preview workflow: `.github/workflows/kgg-patient-gpt-preview-gate.yml`.
+- Pre-authorized Patient Preview workflow: `.github/workflows/kgg-patient-gpt-preview-only.yml`.
+- Consequential Patient PR/live workflow: `.github/workflows/kgg-patient-gpt-preview-gate.yml`.
 - Guard implementation: `release-pipeline/kgg_patient_gpt_write_gate.py`.
 - Private project memory: `Kayus24/kgg-project-memory`.
+- Private cross-agent coordination: `coordination/index.json` and guarded append-only threads.
 
 ## Patient Source Files
 
@@ -58,6 +60,8 @@ Reload before every diagnosis involving current code and before every Preview, P
 
 - Work in German, make one smallest safe patch and preserve existing hooks.
 - Never write directly to `main`; use exact Preview hash, PR and protected live approval.
+- Reads, validate_only, publish_preview, evidence checks and safe coordination responses are pre-authorized; do not ask after every step.
+- Patient PR/live requires Max' exact phrase `Gut für PAT live`.
 - Patient output never exposes raw JSON, Base64, KGGH2/KGGD1 or debug payloads.
 - Preview fixtures are synthetic and contain no patient data.
 - Version, cache name, Recovery release, version label and changelog are owned by the gate.

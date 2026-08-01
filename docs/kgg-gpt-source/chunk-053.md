@@ -4,6 +4,39 @@
 - Lines: 22261-22680
 
 ```html
+      ctx.drawImage(src,0,0);
+      ctx.restore();
+      return canvas;
+    }
+    if(mode==='threshold'||mode==='thresholdLow'||mode==='thresholdHigh'||mode==='invert'){
+      const img=ctx.getImageData(0,0,canvas.width,canvas.height);
+      const d=img.data;
+      const threshold=mode==='thresholdLow'?118:(mode==='thresholdHigh'?178:148);
+      for(let i=0;i<d.length;i+=4){
+        let g=(d[i]*.299+d[i+1]*.587+d[i+2]*.114)>threshold?255:0;
+        if(mode==='invert')g=255-g;
+        d[i]=d[i+1]=d[i+2]=g;
+      }
+      ctx.putImageData(img,0,0);
+      return canvas;
+    }
+    return canvas;
+  }
+  /* kgg-mini-patch-v400-10-qr-gallery-bitmap-debug
+     Galerie-/Fotodatenbank-QR-Fix:
+     Einige Android WebViews erkennen QR-Codes per BarcodeDetector auf Kamera-Bildern,
+     aber nicht zuverlässig auf Canvas-Crops aus Galerie-Dateien. Deshalb wird jeder
+     Canvas-Versuch zusätzlich als PNG-Blob -> ImageBitmap dekodiert und dann erneut
+     an BarcodeDetector gegeben. Außerdem bleiben Warnungen in der Scan-Vorschau sichtbar.
+  */
+  function scanCanvasToBlob(canvas,type,quality){
+    return new Promise(resolve=>{
+      try{
+        canvas.toBlob(blob=>resolve(blob),type||'image/png',quality||.92);
+      }catch(err){resolve(null);}
+    });
+  }
+  async function scanDetectQrViaBitmapFromCanvas(canvas,detector){
     if(!detector||!window.createImageBitmap||!canvas||!canvas.toBlob)return '';
     let blob=null,bitmap=null;
     try{
@@ -391,37 +424,4 @@
     return [name].concat(lines).filter(Boolean).join('\n');
   }
   function formatScanExerciseLine(item){
-    return scanExerciseToDocText(item);
-  }
-  function scanResultToPlanText(result){
-    if(!result)return '';
-    if(typeof result==='string')return cleanGeminiScanText(result);
-    if(result.planText)return String(result.planText||'').trim();
-    if(result.text)return cleanGeminiScanText(result.text);
-    if(result.rawText)return cleanGeminiScanText(result.rawText);
-    const exercises=scanPayloadExercises(result);
-    if(exercises.length)return exercises.map(scanExerciseToDocText).filter(Boolean).join('\n\n');
-    return '';
-  }
-  function scanResultToApplyText(result){
-    if(!result)return '';
-    if(result.applyText)return String(result.applyText||'').trim();
-    const exercises=scanPayloadExercises(result);
-    if(exercises.length)return scanApplyTextFromExercises(exercises);
-    const text=scanResultToPlanText(result);
-    return String(text||'').split(/\n+/).map(line=>line.trim()).filter(line=>line&&!/^Satz\s+\d+\s*:/i.test(line)&&!/^\s*(Li|Re|Schmerz)\s*:/i.test(line)).join(', ');
-  }
-  function scanResultToCopyText(job){
-    const short=job&&job.short?String(job.short).trim():'';
-    const result=job&&job.result||{};
-    const quality=result.quality||{};
-    const text=result.copyText||result.planText||scanResultToPlanText(result)||result.rawText||'';
-    const lines=[];
-    if(short)lines.push(short);
-    if(result.type)lines.push('Typ: '+result.type);
-    if(quality.warnings&&quality.warnings.length)lines.push('Prüfen: '+quality.warnings.join(', '));
-    if(text)lines.push('',text);
-    return lines.join('\n').trim();
-  }
-  function scanPaperQuality(text,result){
 ```

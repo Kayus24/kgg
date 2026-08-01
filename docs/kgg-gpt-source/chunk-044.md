@@ -4,6 +4,39 @@
 - Lines: 18481-18900
 
 ```html
+      const exact=exactBankExercise(cleanName);
+      const id=existing&&(existing.localId||existing.id)||makeLocalId();
+      const base=exact||existing||{id:'new_'+Date.now(),name:cleanName,sets:3,unit:parsed.unit||'Wdh',weightUnit:parsed.weightUnit||'kg',loadUnit:parsed.loadUnit||parsed.weightUnit||'kg'};
+      const pendingNew=!exact;
+      const loadUnit=parsed.weightUnit||parsed.loadUnit||base.weightUnit||base.loadUnit||'kg';
+      const needsReview=pendingNew||parsed.needsReview;
+      return {...base,id,localId:id,sourceId:exact?exact.id:'',bankId:exact?exact.id:'',name:exact?exact.name:cleanName,sets:(existing&&existing.sets)||base.sets||3,unit:parsed.unit||base.unit||'Wdh',metricUnit:parsed.metricUnit||parsed.unit||base.metricUnit||base.unit||'Wdh',weightUnit:loadUnit,loadUnit,explicitLoadUnit:!!(parsed.weightUnit||parsed.loadUnit),startMetric:parsed.startMetric||(existing&&existing.startMetric)||'',startLoad:parsed.startLoad||(existing&&existing.startLoad)||'',side:parsedSide||normalizeSideMode(existing&&existing.side||'BI'),rawText:raw,liveDraft:false,changedByLiveText:false,textMaster:true,pendingNew,needsReview,customLoadUnit:parsed.customLoadUnit||undefined,sourceFlags:[pendingNew?'textMasterReview':'',needsReview?'needsReview':'',parsed.customLoadUnit?'customUnit':''].filter(Boolean)};
+    }
+    const raw=String(text||'').trim();
+    const letters=raw.replace(/[^A-Za-zÄÖÜäöüß]/g,'');
+    if(letters.length<3)return null;
+    const parsedSide=parseSideModeFromText(raw);
+    const nums=raw.match(/\d+(?:[,.]\d+)?/g)||[];
+    let metric='',load='';
+    const kg=raw.match(/(\d+(?:[,.]\d+)?)\s*kg/i);
+    const rep=raw.match(/(\d+)\s*(wdh|wh|reps)/i);
+    const time=raw.match(/(\d+(?:[,.]\d+)?)\s*(min|sek|sec|s)\b/i);
+    if(rep) metric=rep[1]; else if(time) metric=time[1].replace(',','.')+' '+time[2].toLowerCase();
+    if(kg) load=kg[1].replace(',','.'); else if(nums.length>1&&!time) load=nums[0].replace(',','.');
+    const cleanName=stripExerciseName(raw)||raw;
+    const exact=exactBankExercise(cleanName);
+    const id=existing&&(existing.localId||existing.id)||makeLocalId();
+    const base=exact||existing||{id:'new_'+Date.now(),name:cleanName,sets:3,unit:(time?'Zeit':'Wdh'),weightUnit:(kg?'kg':'kg')};
+    const pendingNew=!exact;
+    return {...base,id,localId:id,sourceId:exact?exact.id:'',bankId:exact?exact.id:'',name:exact?exact.name:cleanName,sets:(existing&&existing.sets)||base.sets||3,startMetric:metric||(existing&&existing.startMetric)||'',startLoad:load||(existing&&existing.startLoad)||'',side:parsedSide||normalizeSideMode(existing&&existing.side||'BI'),rawText:raw,liveDraft:false,changedByLiveText:false,textMaster:true,pendingNew,needsReview:pendingNew,sourceFlags:[pendingNew?'textMasterReview':''].filter(Boolean)};
+  }
+  function findExistingForTextSegment(segment,index){
+    const current=(state.plan||[])[index];
+    if(current)return current;
+    const c=compact(stripExerciseName(segment)||segment);
+    return (state.plan||[]).find(ex=>compact(ex.rawText||ex.name)===c)||null;
+  }
+  function formatExerciseTextLine(ex){
     const parts=[String(ex&&ex.name||'').trim()].filter(Boolean);
     if(normalizeSideMode(ex&&ex.side)==='LR')parts.push('li/re');
     const loadUnit=ex&&(ex.weightUnit||ex.loadUnit);
@@ -391,37 +424,4 @@
   }
   function render(){const rawText=activeText(); const text=activeBankQuerySegment(); const hasPlan=state.plan.length>0; const dbTitle=$('dbTitle'), inputLabel=$('inputLabel'); $('stateBadge').textContent=state.bankOpen?(text?'DB offen mit Text':'DB offen ohne Text'):(rawText?'Textfeld aktiv':(hasPlan?'Aktueller Plan':'Leerzustand')); $('createPanel').classList.toggle('planMode',hasPlan); $('planActions').classList.toggle('hasPlan',hasPlan); $('panelTitle').textContent=hasPlan?'✏️ Aktueller Plan':'➕ Neuen Plan erstellen'; inputLabel.textContent='Übungen eingeben'; inputLabel.classList.toggle('hidden',state.bankOpen||hasPlan); $('finishBtn').classList.toggle('hidden',!hasPlan); $('savePackageBtn').classList.toggle('hidden',!hasPlan); renderDbTitle(dbTitle,text); renderSuggestion(text); renderBank(text); bindBankSwipeDelete($('bankContent')); renderPlan(); renderRecent(); renderPackages(); $('patientMini').textContent=state.patient.name||''; updateToggleCarets(); setTabletAnchorActiveClasses(); updatePhoneKeyboardInset();}
   function bankLetterForName(name){const first=String(name||'').trim().charAt(0).toUpperCase(); return /^[A-ZÄÖÜ]$/.test(first)?first:'#';}
-  function renderSuggestion(text){
-    const tabletBank=isTabletLayout();
-    bankSelectMode=(state.bankOpen||tabletBank)?(text?'replaceActive':'append'):'replaceActive';
-    const el=$('suggestion');
-    if(!text || state.bankOpen || tabletBank){el.classList.add('hidden'); el.onclick=null; el.innerHTML=''; return;}
-    const hit=search(text,1)[0];
-    if(!hit){el.classList.add('hidden'); el.onclick=null; el.innerHTML=''; return;}
-    el.innerHTML='<div class="row"><button class="iconBtn" type="button" data-open-top8 aria-label="Top-8-Treffer öffnen">▸ 🏋️</button><button class="iconBtn" type="button" data-apply-hit aria-label="Treffer übernehmen"><b>'+escapeHtml(hit.name)+'</b></button></div>';
-    el.classList.remove('hidden');
-    el.onclick=null;
-    const open=el.querySelector('[data-open-top8]');
-    const apply=el.querySelector('[data-apply-hit]');
-    if(open)open.onclick=ev=>{ev.preventDefault();ev.stopPropagation();state.bankOpen=true;render();};
-    if(apply){preventButtonFocusSteal(apply); apply.onclick=ev=>{ev.preventDefault();ev.stopPropagation();applySelectedExerciseToText(hit,{keepFocus:true});};}
-  }
-  function nextAvailableBankLetter(requested,available){const letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''); const wanted=String(requested||'').toUpperCase(); const start=Math.max(0,letters.indexOf(wanted)); for(let i=start;i<letters.length;i++){if(available.includes(letters[i]))return letters[i];} for(let i=start-1;i>=0;i--){if(available.includes(letters[i]))return letters[i];} return available[0]||'';}
-  function setActiveAzLetter(nav,letter){if(!nav)return; nav.querySelectorAll('[data-jump]').forEach(btn=>btn.classList.toggle('active',btn.dataset.jump===letter));}
-  function setAzTouchPreview(nav,letter){
-    if(!nav)return;
-    const buttons=[...nav.querySelectorAll('[data-jump]')];
-    const index=buttons.findIndex(btn=>btn.dataset.jump===letter);
-    buttons.forEach((btn,i)=>{
-      const dist=index<0?99:Math.abs(i-index);
-      btn.classList.toggle('touch-preview',dist===0);
-      btn.classList.toggle('touch-near1',dist===1);
-      btn.classList.toggle('touch-near2',dist===2);
-    });
-  }
-  function jumpBankToLetter(container,letter,instant){const nav=container&&container.querySelector('.az'); const rowsWrap=container&&container.querySelector('.bankRows'); if(!container||!rowsWrap)return; const available=[...container.querySelectorAll('.bankRow[data-letter]')].map(row=>row.dataset.letter).filter((l,i,a)=>l&&a.indexOf(l)===i); const targetLetter=nextAvailableBankLetter(letter,available); if(!targetLetter)return; const target=container.querySelector('.bankRow[data-letter="'+targetLetter+'"]'); if(target){const rowRect=target.getBoundingClientRect(); const wrapRect=rowsWrap.getBoundingClientRect(); const nextTop=Math.max(0,rowsWrap.scrollTop+(rowRect.top-wrapRect.top)); rowsWrap.scrollTo({top:nextTop,behavior:instant?'auto':'smooth'}); setActiveAzLetter(nav,targetLetter);}}
-  function azLetterFromPoint(nav,clientY){if(!nav)return''; const rect=nav.getBoundingClientRect(); const buttons=[...nav.querySelectorAll('[data-jump]')]; if(!buttons.length)return''; const ratio=Math.max(0,Math.min(1,(clientY-rect.top)/Math.max(1,rect.height))); return buttons[Math.min(buttons.length-1,Math.floor(ratio*buttons.length))].dataset.jump;}
-  function bindAzScrollrad(container){const nav=container&&container.querySelector('.az'); if(!nav||nav.dataset.azBound==='1')return; nav.dataset.azBound='1'; let active=false,tapTimer=0; const setTouching=on=>{nav.classList.toggle('azTouching',!!on); if(!on)setAzTouchPreview(nav,'');}; const showTapWave=letter=>{clearTimeout(tapTimer); nav.classList.add('azTouching'); setAzTouchPreview(nav,letter); tapTimer=setTimeout(()=>setTouching(false),180);}; const jumpFromEvent=ev=>{const touch=ev.touches&&ev.touches[0]||ev.changedTouches&&ev.changedTouches[0]; const y=touch?touch.clientY:ev.clientY; const letter=azLetterFromPoint(nav,y); if(letter){setAzTouchPreview(nav,letter); jumpBankToLetter(container,letter,true);}}; nav.addEventListener('click',ev=>{const btn=ev.target&&ev.target.closest?ev.target.closest('[data-jump]'):null; if(!btn||!nav.contains(btn))return; ev.preventDefault(); showTapWave(btn.dataset.jump); jumpBankToLetter(container,btn.dataset.jump);}); nav.addEventListener('pointerdown',ev=>{clearTimeout(tapTimer); active=true; setTouching(true); nav.setPointerCapture&&nav.setPointerCapture(ev.pointerId); ev.preventDefault(); jumpFromEvent(ev);}); nav.addEventListener('pointermove',ev=>{if(!active)return; ev.preventDefault(); jumpFromEvent(ev);}); nav.addEventListener('pointerup',ev=>{active=false; setTouching(false); try{nav.releasePointerCapture&&nav.releasePointerCapture(ev.pointerId);}catch(e){}}); nav.addEventListener('pointercancel',()=>{active=false; setTouching(false);}); nav.addEventListener('touchstart',ev=>{clearTimeout(tapTimer); active=true; setTouching(true); jumpFromEvent(ev);},{passive:false}); nav.addEventListener('touchmove',ev=>{if(!active)return; ev.preventDefault(); jumpFromEvent(ev);},{passive:false}); nav.addEventListener('touchend',()=>{active=false; setTouching(false);},{passive:true});}
-  function bankCardThumbnailHtml(ex){
-    const media=ensureExerciseMediaList(ex).find(item=>item&&item.type==='image'&&item.id);
 ```

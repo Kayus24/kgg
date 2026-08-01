@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Operations
 
-Generated retrieval pack. Source digest: `2466871be87c1fee`.
+Generated retrieval pack. Source digest: `1344d43362353e64`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -30,6 +30,10 @@ Nicht erlaubt sind Therapeut:innen-App, PDF, Android/APK, API-Key-Logik, binaere
 10. Max testet den Preview-Link im internen Browser.
 11. Bei Ablehnung: `human_preview_fail`, Lektion festhalten und mit neuer `request_id` bei Schritt 1 beginnen.
 12. Bei Zustimmung: `create_pr` oder nur auf ausdruecklichen Live-Auftrag `publish_patient_live`.
+
+Die Schritte 7 bis 9 sind vorab freigegeben und laufen ohne Zwischenfrage. PR und Live erfordern die exakte Phrase `Gut für PAT live`. Nur echte Mehrdeutigkeit, ein Memory-Konflikt oder ein Breaking Interface rechtfertigt vorher eine Rueckfrage.
+
+Offene Cross-App-Anfragen stehen im privaten Koordinationsindex. Der Patient-Agent liest nur passende Threads, antwortet append-only und speichert dort weder Patientendaten noch echte Plan-/QR-Payloads. Eine Queue-Antwort startet den anderen GPT nicht automatisch.
 
 ## Payload v1
 
@@ -124,6 +128,7 @@ Die Action unter `api.github.com` verwendet Bearer-Authentifizierung und stellt 
 - Run-, Job- und Artifact-Abfragen fuer den Patient Preview Gate Workflow;
 - kleinen privaten Memory-Index und einzelne Packs;
 - `submitKggMemoryUpdate` sowie Run-/Artifact-Nachweise.
+- privaten Koordinationsindex, einzelne Threads und `submitKggAgentCoordinationEvent`.
 
 ## Modi
 
@@ -132,8 +137,10 @@ Die Action unter `api.github.com` verwendet Bearer-Authentifizierung und stellt 
 - `create_pr`: nur nach akzeptiertem identischem Preview einen PR erstellen; nie mergen.
 - `publish_patient_live`: nur nach Max' ausdruecklicher Preview-Freigabe einen PR erstellen; Merge wartet auf Required Checks und `patient-live` Environment Approval.
 
+`submitKggPatientPreviewGate` ist Preview-only und vorab freigegeben. `submitKggPatientMainGate` ist getrennt, consequential und akzeptiert PR/Live nur mit `approval_phrase: "Gut für PAT live"`.
+
 ## Konsequenz
 
-Dispatch-Actions und Memory-Updates sind consequential. Read-, Run-, Job- und Artifact-Actions sind nicht consequential.
+Preview-only- und abgesicherte Koordinations-Actions sind vorab freigegeben und nicht consequential. Main-/Live-Actions bleiben consequential. Memory-Konflikte bleiben mechanisch zustimmungspflichtig.
 
 Die Action darf keine Patientendaten, echten Planpayloads, Secrets oder Roh-Base64 uebertragen. Preview-Plaene werden ausschliesslich im Gate synthetisch erzeugt.

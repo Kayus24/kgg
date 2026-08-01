@@ -20,6 +20,7 @@ Die Action unter `api.github.com` verwendet Bearer-Authentifizierung und stellt 
 - Run-, Job- und Artifact-Abfragen fuer den Patient Preview Gate Workflow;
 - kleinen privaten Memory-Index und einzelne Packs;
 - `submitKggMemoryUpdate` sowie Run-/Artifact-Nachweise.
+- privaten Koordinationsindex, einzelne Threads und `submitKggAgentCoordinationEvent`.
 
 ## Modi
 
@@ -28,8 +29,10 @@ Die Action unter `api.github.com` verwendet Bearer-Authentifizierung und stellt 
 - `create_pr`: nur nach akzeptiertem identischem Preview einen PR erstellen; nie mergen.
 - `publish_patient_live`: nur nach Max' ausdruecklicher Preview-Freigabe einen PR erstellen; Merge wartet auf Required Checks und `patient-live` Environment Approval.
 
+`submitKggPatientPreviewGate` ist Preview-only und vorab freigegeben. `submitKggPatientMainGate` ist getrennt, consequential und akzeptiert PR/Live nur mit `approval_phrase: "Gut für PAT live"`.
+
 ## Konsequenz
 
-Dispatch-Actions und Memory-Updates sind consequential. Read-, Run-, Job- und Artifact-Actions sind nicht consequential.
+Preview-only- und abgesicherte Koordinations-Actions sind vorab freigegeben und nicht consequential. Main-/Live-Actions bleiben consequential. Memory-Konflikte bleiben mechanisch zustimmungspflichtig.
 
 Die Action darf keine Patientendaten, echten Planpayloads, Secrets oder Roh-Base64 uebertragen. Preview-Plaene werden ausschliesslich im Gate synthetisch erzeugt.

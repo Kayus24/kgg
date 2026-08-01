@@ -1,0 +1,27 @@
+{
+  "gptId": "g-6a45fba0f3408191ac1fb2c987a2e960",
+  "name": "KGG Update-Agent",
+  "profileVersion": "4.0.0",
+  "model": "GPT-5.6 Thinking",
+  "visibility": "private",
+  "syncStatus": "target-pending-live-editor-sync",
+  "capabilities": {
+    "webSearch": true,
+    "codeInterpreter": true,
+    "imageGeneration": true,
+    "canvas": false,
+    "apps": false,
+    "actions": true
+  },
+  "instructionsSha256": "93c5da5730287043f9563c0a024057a5f8933014b4eefa9cc9632ecc111d0734",
+  "knowledgeSha256": [
+    "71b125b6f1a0e39343c7ed4d373cffe0c8e96e5c4b25e38a8deab096c5b7ea0a",
+    "f44e01ad365402e22a53ba9f994d4aa811253873af505769308cc246a07adcc3",
+    "db9db338406f2625d735a2d77a1f2129c35e865d2011b8907775f455ad977a45",
+    "a6aa7b5d68674c36fd38cccc51d4dd9ec8c253e73753d9ac32e77b09cd801e42"
+  ],
+  "actionSha256": [
+    "0a27548e49b62ac2a5668541183b49b3c41de1b2fa9cffcf854ba67f8dc5b1cf",
+    "697f9093abf44ab26f4acdd1ddf538e0c67965c880b186155eb1b1c44936a78c"
+  ]
+}

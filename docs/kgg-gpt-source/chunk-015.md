@@ -6,6 +6,39 @@
 ```html
   };
 
+  KGGOfflineJsPDF.prototype.text = function(text,x,y,opts){
+    opts = opts || {};
+    var size = this._fontSize;
+    var px = this._x(x);
+    if(opts.align === 'right') px -= approxTextWidth(text, size);
+    if(opts.align === 'center') px -= approxTextWidth(text, size) / 2;
+    var py = this._y(y);
+    var fontName = this._font === 'bold' ? '/F2' : '/F1';
+    this._push('q\n' + colorCmd(this._textColor,'rg') + '\nBT\n' +
+      fontName + ' ' + num(size) + ' Tf\n' +
+      num(px) + ' ' + num(py) + ' Td\n' +
+      pdfString(text) + ' Tj\nET\nQ');
+    return this;
+  };
+
+  KGGOfflineJsPDF.prototype.addImage = function(dataUrl, format, x, y, w, h){
+    var fmt = String(format || '').toUpperCase();
+    var raw = String(dataUrl || '');
+    if(fmt !== 'JPEG' && fmt !== 'JPG' && raw.slice(0, 22).toLowerCase().indexOf('data:image/jpeg') !== 0){
+      return this;
+    }
+    var binary = binaryFromDataUrl(raw);
+    if(!binary) return this;
+    var size = jpegSizeFromBinary(binary);
+    var name = 'Im' + (++this._imageSeq);
+    this._images.push({ name: name, data: binary, width: size.w, height: size.h });
+    this._page.images.push(name);
+    this._push('q\n' +
+      num((Number(w) || 1) * MM_TO_PT) + ' 0 0 ' + num((Number(h) || 1) * MM_TO_PT) + ' ' +
+      num(this._x(x)) + ' ' + num(this._y((Number(y) || 0) + (Number(h) || 1))) + ' cm\n/' + name + ' Do\nQ');
+    return this;
+  };
+
   function objectString(id, body){
     return id + ' 0 obj\n' + body + '\nendobj\n';
   }
@@ -391,37 +424,4 @@
     body.is-scrolling.kggPlanCardSwiping .planCard.swipe-dragging{
       transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
       transition:none!important;
-      will-change:transform,opacity!important;
-    }
-    body.kggPlanCardSwiping .planCard.swipe-removing,
-    body.is-scrolling.kggPlanCardSwiping .planCard.swipe-removing{
-      transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
-    }
-    .modal.open{
-      overscroll-behavior:contain;
-    }
-    .sheet{
-      -webkit-overflow-scrolling:touch;
-    }
-  }
-</style>
-
-<style id="kgg-github-patch-v401-phone-plan-ui-isolation">
-  /* v401 GitHub Update 003: Phone-only Plan-UI Stabilisierung.
-     Fixes:
-     - Plan-Karten flackern beim Scrollen nicht mehr.
-     - Antippen/Anheben einer Plan-Karte darf den Rest der App nicht nach unten schieben.
-     - Reorder-Bewegungen bleiben innerhalb "Übungen im Plan".
-     Scope: nur max-width:759px. Tablet-/Wrapper-Code bleibt unverändert. */
-  @media (max-width:759px){
-    #rightPlanStack,
-    #currentPlanBlock.planSectionCurrent{
-      contain:layout paint!important;
-      overflow:hidden!important;
-      transform:translateZ(0);
-      backface-visibility:hidden;
-      -webkit-backface-visibility:hidden;
-    }
-
-    body.kggPlanSectionFrozen #currentPlanBlock.planSectionCurrent{
 ```

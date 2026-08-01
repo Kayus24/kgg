@@ -4,6 +4,39 @@
 - Lines: 2521-2940
 
 ```html
+
+    /* v327 Tablet Shell Full-Bleed Fix:
+       Ziel: Tablet wirkt nicht mehr wie frei schwebende Mockup-Karte.
+       Nur äußere Tablet-Shell/Viewport, keine PDF/QR/Scan/Parser/Plan-State-Logik. */
+    @media (min-width:760px){
+      html,body{
+        width:100%;
+        min-width:0;
+        height:100%;
+        min-height:100%;
+        overflow:hidden;
+        background:#f7f9fc;
+      }
+      body{
+        display:block;
+        padding:0!important;
+        margin:0!important;
+        align-items:stretch!important;
+        justify-content:stretch!important;
+      }
+      .app{
+        width:100vw!important;
+        max-width:none!important;
+        height:100vh!important;
+        height:100dvh!important;
+        height:var(--kgg-visual-vh,100dvh)!important;
+        max-height:var(--kgg-visual-vh,100dvh)!important;
+        min-height:0!important;
+        margin:0!important;
+        border:0!important;
+        border-radius:0!important;
+        box-shadow:none!important;
+        background:#f7f9fc!important;
         padding:12px 14px 10px!important;
         overflow:hidden!important;
         grid-template-columns:minmax(360px,430px) minmax(0,1fr) minmax(150px,190px)!important;
@@ -391,37 +424,4 @@
         grid-template-columns:60px minmax(0,1fr)!important;
         column-gap:10px!important;
       }
-      .bankArea.bankOpen.alphaBankOpen .az{
-        width:48px!important;
-      }
-      .az button{
-        font-size:12px!important;
-        min-height:18px!important;
-      }
-      .bankRow{
-        padding:12px 14px!important;
-      }
-      .bankRow b{
-        font-size:17px!important;
-      }
-      .bankRow small{
-        font-size:12px!important;
-      }
-
-      #createPanel.planMode #currentPlanToggle{
-        min-height:56px!important;
-        font-size:21px!important;
-      }
-      .planCard{
-        padding:14px 16px!important;
-      }
-      .planCard b{
-        font-size:18px!important;
-      }
-      .planCard small{
-        font-size:12px!important;
-      }
-
-      #createPanel.planMode #recentToggle,
-      #createPanel.planMode #packageToggle{
 ```

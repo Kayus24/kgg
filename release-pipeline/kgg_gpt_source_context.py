@@ -57,9 +57,24 @@ AREA_ROUTES = [
     {
         "id": "qr-patient",
         "triggers": ["qr", "patient", "patienten-app", "plan qr"],
-        "markers": ["finishWithPatientApp", "KGGH2", "tryApplyKggSetupFromHash", "openKggTherapistAppOnlyQr"],
-        "tests": ["cmd /c release-pipeline\\run-kgg-tests.cmd --level critical"],
+        "markers": ["finishWithPatientApp", "KGGH2", "tryApplyKggSetupFromHash", "openKggTherapistAppOnlyQr", "handleQrRaw"],
+        "tests": [
+            "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
+            "cmd /c release-pipeline\\run-kgg-tests.cmd --suite patient-scan --level regression",
+        ],
         "notes": "Patient output must not expose raw JSON, Base64 or debug payloads.",
+    },
+    {
+        "id": "camera-qr",
+        "triggers": ["kamera", "camera", "automatischer qr", "zoom", "webview", "barcode detector"],
+        "markers": ["KGGNativeCamera", "getCameraCapabilities", "handleQrRaw", "LIVE_VARIANTS", "getUserMedia"],
+        "tests": [
+            "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
+            "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression",
+            "cmd /c release-pipeline\\run-kgg-tests.cmd --suite camera-qr --level regression",
+            "cmd /c release-pipeline\\run-kgg-tests.cmd --suite patient-scan --level regression",
+        ],
+        "notes": "Browser QR logic and Android WebView video permission are separate contracts. Never force zoom or audio.",
     },
     {
         "id": "pdf",

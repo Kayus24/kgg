@@ -2,7 +2,7 @@
 
 Generated production knowledge for live app structure, source routing and current release context.
 
-Source digest: `c0c943e16e775c99`
+Source digest: `15aa87aad17b1af7`
 
 ## Usage Rules
 
@@ -38,6 +38,7 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Android/Web release manifest: `therapist-app/android_update_manifest.json`.
 - Release pipeline docs: `release-pipeline/README.md`.
 - Custom GPT playbook: `docs/kgg-custom-gpt-playbook.md`.
+- Custom GPT editor bootstrap: `docs/kgg-custom-gpt-editor-bootstrap.md`.
 - Custom GPT action schema: `docs/kgg-custom-gpt-action-schema.md`.
 - Custom GPT combined Action OpenAPI: `docs/kgg-custom-gpt-action-openapi.yaml`.
 - Custom GPT API-only Action OpenAPI for the current split editor setup: `docs/kgg-custom-gpt-action-api-openapi.yaml`.
@@ -58,12 +59,14 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Blind Repair-Lab runner: `release-pipeline/kgg_gpt_repair_lab.py`; acceptance tracker: `release-pipeline/kgg_gpt_repair_stabilize.py`.
 - GPT preview channel branch: `gpt-preview`, files below `previews/`.
 - Private project memory: `Kayus24/kgg-project-memory`; load `memory/index.json` first and then only the smallest matching pack.
+- Private agent coordination: load `coordination/index.json` first and only relevant open threads; the queue never stores patient data or raw QR payloads.
+- Limited Patient-App context/actions: `docs/kgg-patient-gpt-context.md`, Patient source chunks and isolated Patient Preview-only gate.
 - The Custom GPT may write app changes only through `KGG GPT Preview Gate` and durable knowledge only through `KGG Project Memory Gate`; other direct writes and direct merges stay forbidden.
 
 ## Current Versions
 
-- Source web version: v60 / `1.0.60-tablet-html-release-label`.
-- Source index URL: `index.html?v=60`.
+- Source web version: v61 / `1.0.61-cross-app-live-qr-camera`.
+- Source index URL: `index.html?v=61`.
 - Source notes: v060: Zeigt Release, HTML-Build und geladenen Dateinamen unten rechts im ausgefahrenen Tablet-Menue.
 - Live Admin release: `r0424` / `1.0.60-tablet-html-release-label`.
 - Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0424/admin.html`.
@@ -85,6 +88,8 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Existing uncommitted local changes belong to Max or another run. Do not reset them.
 - Automatically add confirmed durable decisions and lessons to the private project memory, but never overwrite an active instruction without Max' explicit approval.
 - Do not store chats, patient data, secrets or transient debug output in the project memory.
+- Reads, one submitKggPreviewAuto dispatch, evidence checks, safe new memory records and coordination events are pre-authorized; do not ask after every step.
+- Admin PR/Main requires Max' exact phrase `Gut für Main`; Patient PR/Live requires `Gut für PAT live`.
 
 ## Patch Routing
 
@@ -94,8 +99,9 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - If a known bug-history lesson matches, reuse its caution, do-not-touch rules and tests.
 - Run payload JSON through `python release-pipeline/kgg_gpt_payload_preflight.py --payload-file <file>` before dispatching.
 - New GPT patches use payload v2 with `patch_content`; direct operations against `kgg-update/index.html` are forbidden because `index.html` is generated output.
+- Explicit QR/Scanner coordination uses only `protected_scope: cross-app-qr-preview`; it cannot authorize Android/APK, PDF, Parser, Plan-State, Medien, Secrets or Manifest.
 - Do not assume the newest local HTML is live.
-- If Max asks for a beta, use `KGG GPT Preview Gate` in `validate_only` mode first, then `publish_preview` after green validation; do not create a PR until Max explicitly accepts the Test-App/Preview-APK result.
+- If Max asks for a beta, dispatch `submitKggPreviewAuto` exactly once. The workflow enforces `validate_only -> publish_preview`; do not create a PR until Max explicitly accepts the Test-App/Preview-APK result.
 - If Max asks for Test-APK review, publish only through the Preview/Test-APK channel and wait for Max' Test-APK acceptance before PR/main steps.
 - If Max says the preview is good, use `create_pr` only with the same `request_id` and patch hash unless Max explicitly requests the real Admin-Beta/Haupt-App push.
 - A positive end-to-end push test requires both `publish_preview` for Test-App/Preview-App and `publish_admin_beta` for Admin-Beta merge to `main`.
@@ -116,6 +122,7 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Parser or text-block changes: also `cmd /c release-pipeline\run-kgg-tests.cmd --suite textblocks --level regression`.
 - Sync, bank, package or peer changes: also `cmd /c release-pipeline\run-kgg-tests.cmd --suite sync --level regression`.
 - Android sync bridge changes: also `cmd /c release-pipeline\run-kgg-tests.cmd --suite native-sync --level regression`.
+- Cross-App Kamera/QR changes: also `cmd /c release-pipeline\run-kgg-tests.cmd --suite camera-qr --level regression` and `cmd /c release-pipeline\run-kgg-tests.cmd --suite patient-scan --level regression`.
 - `mobile-inbox-live` is never automatic because it intentionally creates a new Admin beta.
 
 ## GitHub Guardrails
@@ -123,12 +130,14 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - `main` is protected and must not be written directly.
 - Required status check: `KGG Required Gate / required-gate`.
 - Admin beta auto-merge requires green checks plus the explicit `kgg-auto-merge` label.
-- Custom GPT write access is limited to workflow dispatch for `.github/workflows/kgg-gpt-preview-gate.yml`.
+- Pre-authorized Admin Preview access uses `.github/workflows/kgg-gpt-preview-only.yml`; PR/Main stays on the separate consequential gate.
+- Pre-authorized Patient Preview access uses `.github/workflows/kgg-patient-gpt-preview-only.yml`; Patient PR/Live stays separate.
 - The isolated Eval GPT may dispatch only `.github/workflows/kgg-gpt-repair-lab.yml`; that workflow cannot create Preview, PR, Admin-Beta or main changes.
 - Project-memory write access is limited to workflow dispatch for `Kayus24/kgg-project-memory/.github/workflows/kgg-memory-gate.yml`.
+- Cross-agent coordination write access is limited to `kgg-agent-coordination-gate.yml`; it cannot modify either app.
 - Memory reads must start with `getKggMemoryIndex`, then use only matching packs; history and records are on-demand only.
 - A memory update uses `validate_only` before `apply`; `needs_approval` must stop until Max explicitly approves the superseding record.
-- GPT Action schema must expose `validate_only`, `publish_preview`, `create_pr`, `publish_admin_beta` and run/job/artifact status reads.
+- GPT Actions split pre-authorized Preview-only operations from consequential PR/Main operations and expose run/job/artifact status reads.
 - Current GPT editor setup uses split Actions; paste the API-only schema into `api.github.com` to avoid duplicate `raw.githubusercontent.com` domains.
 - Preview writes go only to branch `gpt-preview`; production writes are PR-only and never auto-merge.
 
@@ -162,48 +171,62 @@ Generated from `kgg-update/src` modular source. Use this before loading source c
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression`
 - Notes: Plus/Minus controls scale; horizontal drag controls the left column width.
 - Markers:
-  - `tabletLayoutFreeTools`: `docs/kgg-gpt-source/chunk-007.md` line 3317
-  - `tabletLayoutResizeHandle`: `docs/kgg-gpt-source/chunk-007.md` line 3256
-  - `--kgg-tablet-left-col`: `docs/kgg-gpt-source/chunk-007.md` line 3355
-  - `--kgg-tablet-ui-scale`: `docs/kgg-gpt-source/chunk-005.md` line 2286
-  - `updateTabletLayoutHandle`: `docs/kgg-gpt-source/chunk-056.md` line 23615
-  - `initTabletLayoutControls`: `docs/kgg-gpt-source/chunk-056.md` line 23751
+  - `tabletLayoutFreeTools`: `docs/kgg-gpt-source/chunk-007.md` line 3350
+  - `tabletLayoutResizeHandle`: `docs/kgg-gpt-source/chunk-007.md` line 3289
+  - `--kgg-tablet-left-col`: `docs/kgg-gpt-source/chunk-008.md` line 3388
+  - `--kgg-tablet-ui-scale`: `docs/kgg-gpt-source/chunk-005.md` line 2319
+  - `updateTabletLayoutHandle`: `docs/kgg-gpt-source/chunk-056.md` line 23698
+  - `initTabletLayoutControls`: `docs/kgg-gpt-source/chunk-056.md` line 23834
 
 ## phone-layout
 
 - Triggers: `phone`, `handy`, `dock`, `drawer`, `scan button`, `759`
-- Source chunks: `docs/kgg-gpt-source/chunk-002.md`, `docs/kgg-gpt-source/chunk-003.md`, `docs/kgg-gpt-source/chunk-005.md`, `docs/kgg-gpt-source/chunk-010.md`, `docs/kgg-gpt-source/chunk-011.md`, `docs/kgg-gpt-source/chunk-013.md`, `docs/kgg-gpt-source/chunk-061.md`, `docs/kgg-gpt-source/chunk-062.md`
+- Source chunks: `docs/kgg-gpt-source/chunk-002.md`, `docs/kgg-gpt-source/chunk-003.md`, `docs/kgg-gpt-source/chunk-005.md`, `docs/kgg-gpt-source/chunk-010.md`, `docs/kgg-gpt-source/chunk-012.md`, `docs/kgg-gpt-source/chunk-013.md`, `docs/kgg-gpt-source/chunk-061.md`, `docs/kgg-gpt-source/chunk-062.md`
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression`
 - Notes: Do not change the 759/760 px breakpoint incidentally.
 - Markers:
-  - `kggPhoneAdminMenu`: `docs/kgg-gpt-source/chunk-061.md` line 25730
-  - `phonePhotoMenuToggle`: `docs/kgg-gpt-source/chunk-061.md` line 25730
-  - `kggPhoneHasPlan`: `docs/kgg-gpt-source/chunk-061.md` line 25764
-  - `phoneTextFocus`: `docs/kgg-gpt-source/chunk-002.md` line 1090
-  - `max-width:759px`: `docs/kgg-gpt-source/chunk-003.md` line 1466
+  - `kggPhoneAdminMenu`: `docs/kgg-gpt-source/chunk-061.md` line 25813
+  - `phonePhotoMenuToggle`: `docs/kgg-gpt-source/chunk-061.md` line 25813
+  - `kggPhoneHasPlan`: `docs/kgg-gpt-source/chunk-061.md` line 25847
+  - `phoneTextFocus`: `docs/kgg-gpt-source/chunk-002.md` line 1123
+  - `max-width:759px`: `docs/kgg-gpt-source/chunk-003.md` line 1499
 
 ## qr-patient
 
 - Triggers: `qr`, `patient`, `patienten-app`, `plan qr`
-- Source chunks: `docs/kgg-gpt-source/chunk-000.md`, `docs/kgg-gpt-source/chunk-048.md`, `docs/kgg-gpt-source/chunk-051.md`, `docs/kgg-gpt-source/chunk-052.md`, `docs/kgg-gpt-source/chunk-057.md`, `docs/kgg-gpt-source/chunk-058.md`, `docs/kgg-gpt-source/chunk-062.md`
-- Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`
+- Source chunks: `docs/kgg-gpt-source/chunk-000.md`, `docs/kgg-gpt-source/chunk-048.md`, `docs/kgg-gpt-source/chunk-051.md`, `docs/kgg-gpt-source/chunk-052.md`, `docs/kgg-gpt-source/chunk-056.md`, `docs/kgg-gpt-source/chunk-057.md`, `docs/kgg-gpt-source/chunk-058.md`, `docs/kgg-gpt-source/chunk-062.md`, `docs/kgg-gpt-source/chunk-065.md`
+- Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite patient-scan --level regression`
 - Notes: Patient output must not expose raw JSON, Base64 or debug payloads.
 - Markers:
-  - `finishWithPatientApp`: `docs/kgg-gpt-source/chunk-052.md` line 21888
-  - `KGGH2`: `docs/kgg-gpt-source/chunk-000.md` line 337
-  - `tryApplyKggSetupFromHash`: `docs/kgg-gpt-source/chunk-048.md` line 20195
-  - `openKggTherapistAppOnlyQr`: `docs/kgg-gpt-source/chunk-057.md` line 24157
+  - `finishWithPatientApp`: `docs/kgg-gpt-source/chunk-052.md` line 21921
+  - `KGGH2`: `docs/kgg-gpt-source/chunk-000.md` line 370
+  - `tryApplyKggSetupFromHash`: `docs/kgg-gpt-source/chunk-048.md` line 20228
+  - `openKggTherapistAppOnlyQr`: `docs/kgg-gpt-source/chunk-057.md` line 24240
+  - `handleQrRaw`: `docs/kgg-gpt-source/chunk-056.md` line 23561
+
+## camera-qr
+
+- Triggers: `kamera`, `camera`, `automatischer qr`, `zoom`, `webview`, `barcode detector`
+- Source chunks: `docs/kgg-gpt-source/chunk-055.md`, `docs/kgg-gpt-source/chunk-056.md`, `docs/kgg-gpt-source/chunk-065.md`
+- Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite camera-qr --level regression`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite patient-scan --level regression`
+- Notes: Browser QR logic and Android WebView video permission are separate contracts. Never force zoom or audio.
+- Markers:
+  - `KGGNativeCamera`: `docs/kgg-gpt-source/chunk-055.md` line 23492
+  - `getCameraCapabilities`: `docs/kgg-gpt-source/chunk-056.md` line 23591
+  - `handleQrRaw`: `docs/kgg-gpt-source/chunk-056.md` line 23561
+  - `LIVE_VARIANTS`: `docs/kgg-gpt-source/chunk-065.md` line 27344
+  - `getUserMedia`: `docs/kgg-gpt-source/chunk-056.md` line 23592
 
 ## pdf
 
 - Triggers: `pdf`, `druck`, `trainingsplan`
-- Source chunks: `docs/kgg-gpt-source/chunk-014.md`, `docs/kgg-gpt-source/chunk-050.md`, `docs/kgg-gpt-source/chunk-051.md`, `docs/kgg-gpt-source/chunk-052.md`, `docs/kgg-gpt-source/chunk-057.md`, `docs/kgg-gpt-source/chunk-063.md`
+- Source chunks: `docs/kgg-gpt-source/chunk-014.md`, `docs/kgg-gpt-source/chunk-050.md`, `docs/kgg-gpt-source/chunk-051.md`, `docs/kgg-gpt-source/chunk-052.md`, `docs/kgg-gpt-source/chunk-057.md`, `docs/kgg-gpt-source/chunk-064.md`
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`
 - Notes: PDF changes need bounded thumbnail/card behavior.
 - Markers:
-  - `finishWithPdf`: `docs/kgg-gpt-source/chunk-052.md` line 21870
-  - `KGGOfflineJsPDF`: `docs/kgg-gpt-source/chunk-014.md` line 6175
-  - `attachKggPdfExerciseThumbnails`: `docs/kgg-gpt-source/chunk-050.md` line 21003
+  - `finishWithPdf`: `docs/kgg-gpt-source/chunk-052.md` line 21903
+  - `KGGOfflineJsPDF`: `docs/kgg-gpt-source/chunk-014.md` line 6208
+  - `attachKggPdfExerciseThumbnails`: `docs/kgg-gpt-source/chunk-050.md` line 21036
 
 ## android-apk
 
@@ -213,20 +236,20 @@ Generated from `kgg-update/src` modular source. Use this before loading source c
 - Notes: Android/APK is protected unless Max explicitly asks for it.
 - Markers:
   - `KGGAndroidPdf`: not found
-  - `KGGNativeSync`: `docs/kgg-gpt-source/chunk-042.md` line 18004
+  - `KGGNativeSync`: `docs/kgg-gpt-source/chunk-042.md` line 18037
   - `PREVIEW_MANIFEST_URL`: not found
 
 ## sync
 
 - Triggers: `sync`, `paket`, `uebungsbank`, `peer`, `kollegen`
-- Source chunks: `docs/kgg-gpt-source/chunk-002.md`, `docs/kgg-gpt-source/chunk-041.md`, `docs/kgg-gpt-source/chunk-042.md`, `docs/kgg-gpt-source/chunk-047.md`, `docs/kgg-gpt-source/chunk-048.md`
+- Source chunks: `docs/kgg-gpt-source/chunk-002.md`, `docs/kgg-gpt-source/chunk-041.md`, `docs/kgg-gpt-source/chunk-042.md`, `docs/kgg-gpt-source/chunk-047.md`, `docs/kgg-gpt-source/chunk-048.md`, `docs/kgg-gpt-source/chunk-049.md`
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite sync --level regression`
 - Notes: Sync export must exclude patients and secrets.
 - Markers:
-  - `KGGDataStore`: `docs/kgg-gpt-source/chunk-002.md` line 1004
-  - `kgg_sync_bundle`: `docs/kgg-gpt-source/chunk-048.md` line 20297
+  - `KGGDataStore`: `docs/kgg-gpt-source/chunk-002.md` line 1037
+  - `kgg_sync_bundle`: `docs/kgg-gpt-source/chunk-048.md` line 20330
   - `nativeExerciseBankSync`: not found
-  - `KGGNativeSync`: `docs/kgg-gpt-source/chunk-042.md` line 18004
+  - `KGGNativeSync`: `docs/kgg-gpt-source/chunk-042.md` line 18037
 
 ## parser-textblocks
 
@@ -237,7 +260,7 @@ Generated from `kgg-update/src` modular source. Use this before loading source c
 - Markers:
   - `parseExerciseText`: not found
   - `textBlocks`: not found
-  - `scanState`: `docs/kgg-gpt-source/chunk-045.md` line 19085
+  - `scanState`: `docs/kgg-gpt-source/chunk-045.md` line 19118
 
 ## preview-gate
 
@@ -247,5 +270,5 @@ Generated from `kgg-update/src` modular source. Use this before loading source c
 - Notes: A missing preview URL is not success; inspect the GitHub run first.
 - Markers:
   - `kgg-gpt-preview-banner`: not found
-  - `kgg-source-truth`: `docs/kgg-gpt-source/chunk-000.md` line 49
-  - `kgg-changelog`: `docs/kgg-gpt-source/chunk-000.md` line 189
+  - `kgg-source-truth`: `docs/kgg-gpt-source/chunk-000.md` line 51
+  - `kgg-changelog`: `docs/kgg-gpt-source/chunk-000.md` line 191

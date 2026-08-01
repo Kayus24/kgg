@@ -4,6 +4,39 @@
 - Lines: 3361-3780
 
 ```html
+        font-weight:1000;
+      }
+      .tabletLayoutResizeHandle{
+        position:fixed;
+        z-index:95;
+        width:26px;
+        min-height:160px;
+        cursor:col-resize;
+        touch-action:none;
+      }
+      .tabletLayoutResizeHandle::before{
+        content:"";
+        position:absolute;
+        left:11px;
+        top:0;
+        bottom:0;
+        width:4px;
+        border-radius:999px;
+        background:rgba(7,16,39,.18);
+        box-shadow:0 0 0 8px rgba(94,167,232,.10);
+      }
+      body.tabletLayoutUnlocked .tabletLayoutResizeHandle{display:block}
+      body.tabletLayoutDragging .tabletLayoutResizeHandle::before{
+        background:rgba(7,16,39,.34);
+        box-shadow:0 0 0 10px rgba(94,167,232,.16);
+      }
+      body.tabletLayoutCustom .app{
+        grid-template-columns:clamp(320px,var(--kgg-tablet-left-col,42vw),720px) minmax(0,1fr) minmax(0,.72fr)!important;
+      }
+      body.tabletLayoutCustom #exerciseInput,
+      body.tabletLayoutCustom #inputWrap textarea{
+        font-size:calc(23px * var(--kgg-tablet-ui-scale,1))!important;
+      }
       body.tabletLayoutCustom .bankRow b,
       body.tabletLayoutCustom .planCard b{
         font-size:calc(19px * var(--kgg-tablet-ui-scale,1))!important;
@@ -391,37 +424,4 @@
 
     /* v343 Tablet Collision Avoidance:
        Fix sperrt nur die Regler, gespeicherte Groesse/Breite bleibt sichtbar.
-       Paket und Schloss stehen nebeneinander. */
-    @media (min-width:760px){
-      body.tabletLayoutCustom .app{
-        grid-template-columns:minmax(40px,var(--kgg-tablet-left-col,42vw)) minmax(110px,1fr) minmax(52px,.72fr)!important;
-      }
-      body.tabletLayoutCustom #exerciseInput,
-      body.tabletLayoutCustom #inputWrap textarea{
-        font-size:clamp(10px,calc(23px * var(--kgg-tablet-ui-scale,1)),46px)!important;
-      }
-      body.tabletLayoutCustom .bankRow b,
-      body.tabletLayoutCustom .planCard b{
-        font-size:clamp(9px,calc(19px * var(--kgg-tablet-ui-scale,1)),38px)!important;
-      }
-      body.tabletLayoutCustom .bankRow small,
-      body.tabletLayoutCustom .planCard small{
-        font-size:clamp(8px,calc(13px * var(--kgg-tablet-ui-scale,1)),26px)!important;
-      }
-      body.tabletLayoutCustom .drawerBtn,
-      body.tabletLayoutCustom .baseCard,
-      body.tabletLayoutCustom .primary,
-      body.tabletLayoutCustom .mutedBtn{
-        font-size:clamp(10px,calc(18px * var(--kgg-tablet-ui-scale,1)),36px)!important;
-      }
-      .packageLayoutSlot{
-        grid-column:3!important;
-        grid-row:5!important;
-        align-self:stretch!important;
-        justify-self:stretch!important;
-        min-width:0!important;
-        display:grid!important;
-        grid-template-columns:minmax(0,1fr) 82px!important;
-        gap:10px!important;
-      }
 ```

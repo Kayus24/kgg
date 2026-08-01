@@ -4,6 +4,39 @@
 - Lines: 1681-2100
 
 ```html
+      #inputLabel{grid-column:1;grid-row:3;margin:0}
+      #dbTitle{grid-column:1;grid-row:4}
+      #inputWrap{grid-column:1;grid-row:5}
+      #bankArea{grid-column:1;grid-row:6;min-width:0}
+      #currentPlanBlock{grid-column:2;grid-row:3/7;align-self:stretch;min-width:0;border:1px solid var(--line);border-radius:18px;background:#fbfdff;padding:12px;box-shadow:var(--shadow)}
+      #currentPlanBlock.hidden{display:block!important;visibility:hidden;pointer-events:none}
+      #currentPlanBlock .label{margin-top:0;font-size:16px}
+      #planList{max-height:530px;overflow:auto;padding-right:2px}
+      #exerciseInput{min-height:118px}
+      .bankArea.bankOpen #bankContent{margin-top:8px}
+      .bankRows{max-height:420px}
+      .tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,.48fr);gap:10px;margin-top:0}
+      .planActions{grid-column:1;min-height:58px}
+      #recentList{grid-column:1/-1}
+      #packageToggle{grid-column:2;grid-row:1;height:58px;min-height:58px}
+      #packageList{grid-column:1/-1}
+      .bottomPad{grid-column:1;height:12px}
+      .footerActions{width:min(100%,1180px)}
+      .modal{align-items:center}
+      .sheet{width:min(92vw,620px);border-radius:24px}
+    }
+    @media (min-width:760px){
+      .app{min-height:100vh}
+      .scanHub{grid-template-columns:minmax(190px,.9fr) minmax(190px,.9fr);align-self:start}
+      .panel{min-height:calc(100vh - 124px)}
+      .panel .inner{grid-template-columns:minmax(380px,440px) minmax(0,1fr);grid-template-rows:auto auto auto auto auto minmax(0,1fr);min-height:0;height:min(72vh,690px);align-content:start}
+      #baseFields:not(.hidden){display:grid;grid-template-columns:1fr 1fr;gap:10px}
+      #baseFields .field{margin:0}
+      #baseFields .field:last-child{grid-column:1/-1}
+      #inputWrap{min-height:0;align-self:start}
+      #exerciseInput{min-height:112px;max-height:190px}
+      #bankArea{align-self:stretch;overflow:hidden}
+      #bankArea.bankOpen{max-height:100%;display:flex;flex-direction:column}
       #bankArea.bankOpen #bankContent{flex:1;min-height:0}
       .bankRows{max-height:360px}
       #bankArea.bankOpen .bankRows{max-height:none;flex:1;min-height:0;overflow:auto}
@@ -391,37 +424,4 @@
       #recentList:not(.hidden) .notice,#packageList:not(.hidden) .notice{margin-top:0}
       .modal.open{z-index:220!important}
       .kggScanV295 .scanDecisionBackdrop{z-index:99980!important}
-      .kggScanV295 .scanDecision{z-index:99990!important}
-      .scanHub #scanPreview:not(.hidden){z-index:70!important}
-      #inputWrap{z-index:30}
-      #bankArea{z-index:25}
-      @keyframes kggTabletAnchorOverlayIn{0%{opacity:0;transform:scale(.965)}100%{opacity:1;transform:scale(1)}}
-      @media (max-width:920px){
-        #baseFields:not(.hidden),#recentList:not(.hidden),#packageList:not(.hidden){
-          padding:12px!important;
-        }
-      }
-    }
-
-
-    /* v317 Plan-Card-Polish auf Basis v316: Medien-Badge + gelbe Neu/Prüfen-Karten wie im schöneren Planlayout. */
-    .planCard{
-      background:#fff;
-      border:1px solid rgba(220,227,235,.95);
-      box-shadow:0 2px 10px rgba(7,16,39,.055);
-      align-items:center;
-      gap:10px;
-    }
-    .planCard.is-new,
-    .planCard.is-review{
-      background:#fff9df;
-      border-color:#dfc265;
-      box-shadow:0 2px 10px rgba(120,87,0,.08);
-    }
-    .planCard .planMain{
-      min-width:0;
-      gap:10px;
-    }
-    .planThumb{
-      width:42px;
 ```
