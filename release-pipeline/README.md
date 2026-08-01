@@ -216,6 +216,8 @@ cmd /c release-pipeline\run-kgg-tests.cmd --level critical --suite release
 Remove-Item Env:\KGG_ALLOW_RELEASE_DRIFT
 ```
 
+Enthaelt ein PR bewusst eine noch nicht live geschaltete Source-Version fuer den Preview-/Test-App-Kanal, muss er das Label `kgg-no-release` tragen. Required Gate und Admin-Beta-Validierung setzen den Override nur fuer Pipeline-only-PRs oder dieses ausdrueckliche Label. Label-Aenderungen starten beide Gates erneut; das Label erteilt keine Merge- oder Admin-Beta-Freigabe.
+
 Ohne diesen Override blockiert `admin-release-drift`, sobald `kgg-update/index.html` neuer ist als der vorbereitete oder live referenzierte Admin-Release. Das ist bei App-Aenderungen beabsichtigt.
 
 ## Admin-Beta per PR vorbereiten

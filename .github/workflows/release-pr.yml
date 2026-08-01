@@ -76,7 +76,7 @@ jobs:
       - name: Run critical KGG test battery
         shell: bash
         env:
-          KGG_ALLOW_RELEASE_DRIFT: ${{ steps.scope.outputs.pipeline_only == 'true' && '1' || '' }}
+          KGG_ALLOW_RELEASE_DRIFT: ${{ (steps.scope.outputs.pipeline_only == 'true' || contains(github.event.pull_request.labels.*.name, 'kgg-no-release')) && '1' || '' }}
         run: python release-pipeline/kgg_test_battery.py --level critical
 
       - name: Commit generated artifacts back to the PR branch

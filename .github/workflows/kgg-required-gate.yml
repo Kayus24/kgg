@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - main
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
 
 permissions:
   contents: read
@@ -69,7 +69,7 @@ jobs:
       - name: Run critical KGG test battery
         shell: bash
         env:
-          KGG_ALLOW_RELEASE_DRIFT: ${{ steps.scope.outputs.pipeline_only == 'true' && '1' || '' }}
+          KGG_ALLOW_RELEASE_DRIFT: ${{ (steps.scope.outputs.pipeline_only == 'true' || contains(github.event.pull_request.labels.*.name, 'kgg-no-release')) && '1' || '' }}
         run: python release-pipeline/kgg_test_battery.py --level critical
       - name: Run patient PWA contract smoke
         if: steps.scope.outputs.pwa_contract == 'true'

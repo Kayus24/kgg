@@ -524,6 +524,21 @@ def run_release_drift_check() -> None:
     )
 
 
+def run_no_release_pr_contract() -> None:
+    log("== Explicit no-release PR workflow contract ==")
+    required_gate = (ROOT / ".github" / "workflows" / "kgg-required-gate.yml").read_text(encoding="utf-8")
+    release_pr = (ROOT / ".github" / "workflows" / "release-pr.yml").read_text(encoding="utf-8")
+    label_guard = "contains(github.event.pull_request.labels.*.name, 'kgg-no-release')"
+    for name, workflow in [("required gate", required_gate), ("release validation", release_pr)]:
+        if label_guard not in workflow:
+            raise BatteryError(f"{name} must recognize the explicit kgg-no-release label.")
+        if "KGG_ALLOW_RELEASE_DRIFT:" not in workflow:
+            raise BatteryError(f"{name} must pass the explicit no-release decision to the release drift guard.")
+    if "ready_for_review, labeled, unlabeled" not in required_gate:
+        raise BatteryError("Required Gate must rerun when the explicit no-release label changes.")
+    log("Explicit no-release PR workflow contract OK")
+
+
 TEST_REGISTRY = [
     {
         "id": "module-source",
@@ -545,6 +560,13 @@ TEST_REGISTRY = [
         "suite": "release",
         "reason": "Release artifacts and manifests must stay buildable before any merge.",
         "run": run_release_contracts,
+    },
+    {
+        "id": "no-release-pr-contract",
+        "level": "critical",
+        "suite": "release",
+        "reason": "A labeled Preview/Test-App source PR must pass drift checks without granting merge or Admin release authority.",
+        "run": run_no_release_pr_contract,
     },
     {
         "id": "encoding-guard",
