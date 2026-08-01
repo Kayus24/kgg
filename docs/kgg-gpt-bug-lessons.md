@@ -59,6 +59,14 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Caution: - App-Feature-Code - PDF - QR/Patienten-App - Scan/OCR - Parser - Plan-State - Medien/Upload - Android/APK, ausser Max fragt explizit danach - PDF - QR/Patienten-App - Scan/OCR - Parser - Plan-State - Medien/Upload - Android/APK - GitHub Manifest - Handy-Layout
 - Tests: - Payload mit geschuetztem Token im Patch-Kommentar wird im Preflight geblockt. - GPT-Eval `failed-preview-run` verlangt den echten roten Step. - GPT-Eval `protected-token-payload` verlangt Stop vor Dispatch. - UI-Stability-Probe `tablet-splitter-scale-drag` prueft die konkrete Bedienlogik. - GPT-Eval `tablet-splitter` muss die richtigen Klassen, Variablen u
 
+### 2026-07-29 - OCR-Kamera und nativer Scanner
+
+- Source: `docs/bug-debug/2026-07-29-ocr-camera-native-scanner.md`
+- Areas: debug, phone-layout, scan-camera
+- Lesson: Die Test-App startete die rueckseitige Systemkamera mit einem optisch starken Zoom. Ein vorheriger HTML-Preview-Patch versuchte das ueber den Datei-Input zu beheben, umging dabei aber die native Picker-Modus-Meldung und beschaedigte den automatischen Scan-Ablauf.
+- Caution: Keep patch scoped to the requested area.
+- Tests: - Android-Vertrag gruen. - Preview-Debug-APK baut lokal gruen. - Vollstaendige Critical-Batterie gruen. - UI-Stability Regression isoliert gruen. - API-35-Emulator: APK installiert und gestartet, kein App-Crash. - ML-Kit-Modul war im Emulator nicht ladbar; der neue technische Fallback erreichte nachweisbar die bestehende Kamera-Berechtigungsabfrage.
+
 ### 2026-07-29 - Preview-Marker und Default-Branch-Drift
 
 - Source: `docs/bug-debug/2026-07-29-preview-marker-default-branch-drift.md`

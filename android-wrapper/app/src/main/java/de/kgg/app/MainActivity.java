@@ -8,6 +8,7 @@ import android.content.ClipData;
 import android.content.ContentValues;
 import android.content.SharedPreferences;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -47,6 +48,16 @@ import android.widget.Toast;
 
 import androidx.core.content.FileProvider;
 
+import com.google.android.gms.common.moduleinstall.InstallStatusListener;
+import com.google.android.gms.common.moduleinstall.ModuleInstall;
+import com.google.android.gms.common.moduleinstall.ModuleInstallClient;
+import com.google.android.gms.common.moduleinstall.ModuleInstallRequest;
+import com.google.android.gms.common.moduleinstall.ModuleInstallStatusUpdate;
+import com.google.mlkit.vision.documentscanner.GmsDocumentScanner;
+import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions;
+import com.google.mlkit.vision.documentscanner.GmsDocumentScanning;
+import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult;
+
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
@@ -68,6 +79,7 @@ import java.util.Locale;
 public class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST = 4201;
     private static final int CAMERA_PERMISSION_REQUEST = 4202;
+    private static final int DOCUMENT_SCANNER_REQUEST = 4203;
     private static final int RELEASE_HTML_REQUEST = 4301;
     private static final int ANDROID_SHELL_VERSION = 401;
     private static final int BUNDLED_WEB_VERSION = 419;
@@ -112,9 +124,15 @@ public class MainActivity extends Activity {
     private WebView webView;
     private ValueCallback<Uri[]> filePathCallback;
     private WebChromeClient.FileChooserParams pendingFileChooserParams;
+    private WebChromeClient.FileChooserParams pendingDocumentScannerParams;
     private Uri cameraCaptureUri;
     private String nextFileChooserMode = "";
     private boolean pendingForceCamera;
+    private boolean pendingDocumentScannerForceCamera;
+    private boolean documentScannerFallbackStarted;
+    private boolean documentScannerLaunchStarted;
+    private ModuleInstallClient documentScannerModuleClient;
+    private InstallStatusListener documentScannerInstallListener;
     private KggReleaseController releaseController;
 
     @Override
@@ -199,47 +217,195 @@ public class MainActivity extends Activity {
                     FileChooserParams fileChooserParams
             ) {
                 if (MainActivity.this.filePathCallback != null) {
-                    MainActivity.this.filePathCallback.onReceiveValue(null);
+                    completeFileChooserResult(null);
                 }
                 MainActivity.this.filePathCallback = filePathCallback;
                 cameraCaptureUri = null;
                 boolean forceCamera = consumeNextFileChooserMode().equals("camera");
                 boolean wantsCamera = forceCamera || isCameraCaptureRequest(fileChooserParams);
-                if (wantsCamera && !hasCameraPermission()) {
-                    pendingFileChooserParams = fileChooserParams;
-                    pendingForceCamera = forceCamera;
-                    requestPermissions(new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUEST);
+                if (isPreviewProfile() && wantsCamera) {
+                    pendingDocumentScannerParams = fileChooserParams;
+                    pendingDocumentScannerForceCamera = forceCamera;
+                    documentScannerFallbackStarted = false;
+                    documentScannerLaunchStarted = false;
+                    startDocumentScannerOrCameraFallback();
                     return true;
                 }
-                Intent intent = wantsCamera ? createCameraCaptureIntent() : null;
-                pendingFileChooserParams = null;
-                pendingForceCamera = false;
-                if (intent == null && !forceCamera) {
-                    intent = fileChooserParams.createIntent();
-                } else if (intent == null) {
-                    MainActivity.this.filePathCallback = null;
-                    Toast.makeText(MainActivity.this, "Kamera konnte nicht geoeffnet werden", Toast.LENGTH_SHORT).show();
-                    return false;
-                }
+                return startCurrentFileChooserFlow(fileChooserParams, forceCamera);
+            }
+        });
+    }
+
+    private boolean startCurrentFileChooserFlow(
+            WebChromeClient.FileChooserParams fileChooserParams,
+            boolean forceCamera
+    ) {
+        boolean wantsCamera = forceCamera || isCameraCaptureRequest(fileChooserParams);
+        if (wantsCamera && !hasCameraPermission()) {
+            pendingFileChooserParams = fileChooserParams;
+            pendingForceCamera = forceCamera;
+            requestPermissions(new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUEST);
+            return true;
+        }
+        Intent intent = wantsCamera ? createCameraCaptureIntent() : null;
+        pendingFileChooserParams = null;
+        pendingForceCamera = false;
+        if (intent == null && !forceCamera) {
+            intent = fileChooserParams.createIntent();
+        } else if (intent == null) {
+            completeFileChooserResult(null);
+            Toast.makeText(this, "Kamera konnte nicht geoeffnet werden", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        try {
+            startActivityForResult(intent, FILE_CHOOSER_REQUEST);
+            return true;
+        } catch (Exception err) {
+            if (wantsCamera && !forceCamera) {
                 try {
-                    startActivityForResult(intent, FILE_CHOOSER_REQUEST);
+                    cameraCaptureUri = null;
+                    startActivityForResult(fileChooserParams.createIntent(), FILE_CHOOSER_REQUEST);
                     return true;
-                } catch (Exception err) {
-                    if (wantsCamera && !forceCamera) {
-                        try {
-                            cameraCaptureUri = null;
-                            startActivityForResult(fileChooserParams.createIntent(), FILE_CHOOSER_REQUEST);
-                            return true;
-                        } catch (ActivityNotFoundException fallbackErr) {
-                            MainActivity.this.filePathCallback = null;
-                            return false;
-                        }
-                    }
-                    MainActivity.this.filePathCallback = null;
+                } catch (ActivityNotFoundException fallbackErr) {
+                    completeFileChooserResult(null);
                     return false;
                 }
             }
-        });
+            completeFileChooserResult(null);
+            return false;
+        }
+    }
+
+    private void startDocumentScannerOrCameraFallback() {
+        GmsDocumentScannerOptions options = new GmsDocumentScannerOptions.Builder()
+                .setGalleryImportAllowed(false)
+                .setPageLimit(1)
+                .setResultFormats(GmsDocumentScannerOptions.RESULT_FORMAT_JPEG)
+                .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL)
+                .build();
+        GmsDocumentScanner scanner = GmsDocumentScanning.getClient(options);
+        ModuleInstallClient moduleClient = ModuleInstall.getClient(this);
+        moduleClient.areModulesAvailable(scanner)
+                .addOnSuccessListener(response -> {
+                    if (filePathCallback == null) {
+                        return;
+                    }
+                    if (response.areModulesAvailable()) {
+                        launchDocumentScanner(scanner);
+                    } else {
+                        installDocumentScannerModule(scanner, moduleClient);
+                    }
+                })
+                .addOnFailureListener(err -> startLegacyScannerFallback());
+    }
+
+    private void installDocumentScannerModule(
+            GmsDocumentScanner scanner,
+            ModuleInstallClient moduleClient
+    ) {
+        documentScannerModuleClient = moduleClient;
+        InstallStatusListener listener = new InstallStatusListener() {
+            @Override
+            public void onInstallStatusUpdated(ModuleInstallStatusUpdate update) {
+                if (documentScannerInstallListener != this || filePathCallback == null) {
+                    return;
+                }
+                int state = update.getInstallState();
+                if (state == ModuleInstallStatusUpdate.InstallState.STATE_COMPLETED) {
+                    clearDocumentScannerInstallListener();
+                    launchDocumentScanner(scanner);
+                } else if (state == ModuleInstallStatusUpdate.InstallState.STATE_CANCELED
+                        || state == ModuleInstallStatusUpdate.InstallState.STATE_FAILED) {
+                    clearDocumentScannerInstallListener();
+                    startLegacyScannerFallback();
+                }
+            }
+        };
+        documentScannerInstallListener = listener;
+        ModuleInstallRequest request = ModuleInstallRequest.newBuilder()
+                .addApi(scanner)
+                .setListener(listener)
+                .build();
+        moduleClient.installModules(request)
+                .addOnSuccessListener(response -> {
+                    if (response.areModulesAlreadyInstalled() && filePathCallback != null) {
+                        clearDocumentScannerInstallListener();
+                        launchDocumentScanner(scanner);
+                    }
+                })
+                .addOnFailureListener(err -> {
+                    clearDocumentScannerInstallListener();
+                    startLegacyScannerFallback();
+                });
+    }
+
+    private void launchDocumentScanner(GmsDocumentScanner scanner) {
+        if (documentScannerLaunchStarted || documentScannerFallbackStarted || filePathCallback == null) {
+            return;
+        }
+        clearDocumentScannerInstallListener();
+        documentScannerLaunchStarted = true;
+        scanner.getStartScanIntent(this)
+                .addOnSuccessListener(intentSender -> {
+                    try {
+                        startIntentSenderForResult(
+                                intentSender,
+                                DOCUMENT_SCANNER_REQUEST,
+                                null,
+                                0,
+                                0,
+                                0
+                        );
+                    } catch (IntentSender.SendIntentException err) {
+                        documentScannerLaunchStarted = false;
+                        startLegacyScannerFallback();
+                    }
+                })
+                .addOnFailureListener(err -> {
+                    documentScannerLaunchStarted = false;
+                    startLegacyScannerFallback();
+                });
+    }
+
+    private void clearDocumentScannerInstallListener() {
+        ModuleInstallClient moduleClient = documentScannerModuleClient;
+        InstallStatusListener listener = documentScannerInstallListener;
+        documentScannerModuleClient = null;
+        documentScannerInstallListener = null;
+        if (moduleClient != null && listener != null) {
+            moduleClient.unregisterListener(listener);
+        }
+    }
+
+    private void startLegacyScannerFallback() {
+        if (documentScannerFallbackStarted || documentScannerLaunchStarted || filePathCallback == null) {
+            return;
+        }
+        clearDocumentScannerInstallListener();
+        documentScannerFallbackStarted = true;
+        WebChromeClient.FileChooserParams params = pendingDocumentScannerParams;
+        boolean forceCamera = pendingDocumentScannerForceCamera;
+        pendingDocumentScannerParams = null;
+        pendingDocumentScannerForceCamera = false;
+        if (params == null || !startCurrentFileChooserFlow(params, forceCamera)) {
+            completeFileChooserResult(null);
+        }
+    }
+
+    private void completeFileChooserResult(Uri[] result) {
+        ValueCallback<Uri[]> callback = filePathCallback;
+        filePathCallback = null;
+        pendingFileChooserParams = null;
+        pendingForceCamera = false;
+        pendingDocumentScannerParams = null;
+        pendingDocumentScannerForceCamera = false;
+        documentScannerFallbackStarted = false;
+        documentScannerLaunchStarted = false;
+        clearDocumentScannerInstallListener();
+        cameraCaptureUri = null;
+        if (callback != null) {
+            callback.onReceiveValue(result);
+        }
     }
 
     private boolean hasCameraPermission() {
@@ -258,12 +424,11 @@ public class MainActivity extends Activity {
         pendingFileChooserParams = null;
         pendingForceCamera = false;
         if (filePathCallback == null || params == null) {
+            completeFileChooserResult(null);
             return;
         }
         if (grantResults.length == 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-            filePathCallback.onReceiveValue(null);
-            filePathCallback = null;
-            cameraCaptureUri = null;
+            completeFileChooserResult(null);
             Toast.makeText(this, "Kamera-Berechtigung fehlt", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -271,18 +436,14 @@ public class MainActivity extends Activity {
         if (intent == null && !forceCamera) {
             intent = params.createIntent();
         } else if (intent == null) {
-            filePathCallback.onReceiveValue(null);
-            filePathCallback = null;
-            cameraCaptureUri = null;
+            completeFileChooserResult(null);
             Toast.makeText(this, "Kamera konnte nicht geoeffnet werden", Toast.LENGTH_SHORT).show();
             return;
         }
         try {
             startActivityForResult(intent, FILE_CHOOSER_REQUEST);
         } catch (Exception err) {
-            filePathCallback.onReceiveValue(null);
-            filePathCallback = null;
-            cameraCaptureUri = null;
+            completeFileChooserResult(null);
             Toast.makeText(this, "Kamera konnte nicht geoeffnet werden", Toast.LENGTH_SHORT).show();
         }
     }
@@ -1338,6 +1499,38 @@ public class MainActivity extends Activity {
             }
             return;
         }
+        if (requestCode == DOCUMENT_SCANNER_REQUEST) {
+            if (filePathCallback == null) {
+                pendingDocumentScannerParams = null;
+                pendingDocumentScannerForceCamera = false;
+                documentScannerFallbackStarted = false;
+                return;
+            }
+            if (resultCode == RESULT_CANCELED) {
+                completeFileChooserResult(null);
+                return;
+            }
+            if (resultCode == RESULT_OK) {
+                try {
+                    GmsDocumentScanningResult scanResult =
+                            GmsDocumentScanningResult.fromActivityResultIntent(data);
+                    if (scanResult != null
+                            && scanResult.getPages() != null
+                            && !scanResult.getPages().isEmpty()
+                            && scanResult.getPages().get(0).getImageUri() != null) {
+                        completeFileChooserResult(new Uri[]{
+                                scanResult.getPages().get(0).getImageUri()
+                        });
+                        return;
+                    }
+                } catch (Exception ignored) {
+                }
+                startLegacyScannerFallback();
+                return;
+            }
+            completeFileChooserResult(null);
+            return;
+        }
         if (requestCode != FILE_CHOOSER_REQUEST || filePathCallback == null) {
             return;
         }
@@ -1348,9 +1541,7 @@ public class MainActivity extends Activity {
                 result = new Uri[]{cameraCaptureUri};
             }
         }
-        filePathCallback.onReceiveValue(result);
-        filePathCallback = null;
-        cameraCaptureUri = null;
+        completeFileChooserResult(result);
     }
 
     @Override

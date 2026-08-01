@@ -19,6 +19,12 @@ CHUNK_DIR = ROOT / "docs" / "kgg-gpt-source"
 ROUTES_JSON_PATH = ROOT / "docs" / "kgg-gpt-area-routes.json"
 ROUTES_MD_PATH = ROOT / "docs" / "kgg-gpt-area-routes.md"
 LINES_PER_CHUNK = 420
+NATIVE_CONTEXT_PATHS = [
+    ROOT / "android-wrapper" / "app" / "build.gradle",
+    ROOT / "android-wrapper" / "app" / "src" / "main" / "AndroidManifest.xml",
+    ROOT / "android-wrapper" / "app" / "src" / "main" / "java" / "de" / "kgg" / "app" / "MainActivity.java",
+    ROOT / "android-wrapper" / "app" / "src" / "main" / "assets" / "android" / "kgg_android_sync_bootstrap.js",
+]
 
 AREA_ROUTES = [
     {
@@ -70,13 +76,22 @@ AREA_ROUTES = [
     },
     {
         "id": "android-apk",
-        "triggers": ["apk", "android", "preview app", "icon"],
-        "markers": ["KGGAndroidPdf", "KGGNativeSync", "PREVIEW_MANIFEST_URL"],
+        "triggers": ["apk", "android", "preview app", "icon", "kamera", "camera", "zoom", "scanner"],
+        "markers": [
+            "KGGAndroidPdf",
+            "KGGNativeSync",
+            "PREVIEW_MANIFEST_URL",
+            "onShowFileChooser",
+            "ACTION_IMAGE_CAPTURE",
+            "setNextFileChooserMode",
+            "GmsDocumentScanner",
+        ],
         "tests": [
             "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
+            "cmd /c release-pipeline\\run-kgg-tests.cmd --suite android --level critical",
             "GitHub android-wrapper-check must build assemblePreviewDebug when APK output matters.",
         ],
-        "notes": "Android/APK is protected unless Max explicitly asks for it.",
+        "notes": "Android/APK is protected unless Max explicitly asks for it. Camera behavior must be traced from the HTML picker through the native bridge and MainActivity before proposing a patch.",
     },
     {
         "id": "sync",
@@ -133,6 +148,15 @@ def read_source() -> str:
             label = path.relative_to(ROOT).as_posix()
         except ValueError:
             label = str(path)
+        sections.extend(
+            [
+                f"<!-- SOURCE FILE: {label} -->",
+                path.read_text(encoding="utf-8", errors="replace").rstrip(),
+                "",
+            ]
+        )
+    for path in NATIVE_CONTEXT_PATHS:
+        label = path.relative_to(ROOT).as_posix()
         sections.extend(
             [
                 f"<!-- SOURCE FILE: {label} -->",
@@ -208,13 +232,14 @@ def render_area_routes(source: str) -> tuple[str, str]:
         "kind": "kgg_gpt_area_routes",
         "version": 1,
         "sourcePath": "kgg-update/src",
+        "contextPaths": [path.relative_to(ROOT).as_posix() for path in NATIVE_CONTEXT_PATHS],
         "linesPerChunk": LINES_PER_CHUNK,
         "routes": routes,
     }
     md_lines = [
         "# KGG GPT Area Routes",
         "",
-        "Generated from `kgg-update/src` modular source. Use this before loading source chunks.",
+        "Generated from the modular web source and fixed read-only Android context. Use this before loading source chunks.",
         "",
     ]
     for route in routes:

@@ -406,6 +406,41 @@
     {
       "areas": [
         "debug",
+        "phone-layout",
+        "scan-camera"
+      ],
+      "cause": "",
+      "do_not_touch": "",
+      "fix_pattern": "- Nur das Preview-Profil verwendet den ML-Kit-Dokument-Scanner. - Galerieimport bleibt aus, Ausgabe bleibt ein einzelnes JPEG. - Das dynamische Google-Play-Modul wird vor dem Start geprueft und kontrolliert installiert. - Installations- oder Startfehler fallen auf den bisherigen Kamera-Intent zurueck. - Ein echter Abbruch im bereits gestarteten Scanner bleib",
+      "id": "docs-bug-debug-2026-07-29-ocr-camera-native-scanner-md-2026-07-29-ocr-kamera-und-nativer-scanner",
+      "keywords": [
+        "2026-07-29-ocr-kamera-und-nativer-scanner",
+        "debug",
+        "phone-layout",
+        "scan-camera"
+      ],
+      "markers": [
+        ".ACTION_IMAGE_CAPTURE",
+        ".onShowFileChooser",
+        ".pick",
+        "KGGAndroidApp",
+        "KGGNativeCamera",
+        "KGGScan.pick('camera')",
+        "MainActivity.onShowFileChooser()",
+        "MediaStore.ACTION_IMAGE_CAPTURE",
+        "ValueCallback<Uri[]>",
+        "capability_gap",
+        "fileInput"
+      ],
+      "risks": "",
+      "source_path": "docs/bug-debug/2026-07-29-ocr-camera-native-scanner.md",
+      "symptom": "Die Test-App startete die rueckseitige Systemkamera mit einem optisch starken Zoom. Ein vorheriger HTML-Preview-Patch versuchte das ueber den Datei-Input zu beheben, umging dabei aber die native Picker-Modus-Meldung und beschaedigte den automatischen Scan-Ablauf.",
+      "tests": "- Android-Vertrag gruen. - Preview-Debug-APK baut lokal gruen. - Vollstaendige Critical-Batterie gruen. - UI-Stability Regression isoliert gruen. - API-35-Emulator: APK installiert und gestartet, kein App-Crash. - ML-Kit-Modul war im Emulator nicht ladbar; der neue technische Fallback erreichte nachweisbar die bestehende Kamera-Berechtigungsabfrage.",
+      "title": "2026-07-29 - OCR-Kamera und nativer Scanner"
+    },
+    {
+      "areas": [
+        "debug",
         "modal",
         "parser-textblocks",
         "pdf",
@@ -724,6 +759,7 @@
     "docs/bug-debug/2026-06-20-v011-tablet-layout-cache-rollback.md",
     "docs/bug-debug/2026-07-03-custom-gpt-payload-schema-path.md",
     "docs/bug-debug/2026-07-03-custom-gpt-preview-gate-lessons.md",
+    "docs/bug-debug/2026-07-29-ocr-camera-native-scanner.md",
     "docs/bug-debug/2026-07-29-preview-marker-default-branch-drift.md",
     "docs/bug-debug/README.md",
     "docs/bugfixes/mobile-share-modal-css-regression.md",
