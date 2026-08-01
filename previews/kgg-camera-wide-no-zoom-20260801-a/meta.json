@@ -1,0 +1,16 @@
+{
+  "kind": "kgg_gpt_preview",
+  "requestId": "kgg-camera-wide-no-zoom-20260801-a",
+  "patchHash": "7bd700b7f98c7f5cc131a49338aeebba32c353376d72698fb286251022f8ef2d",
+  "baseSha": "13fc1c9deb68ae0ba79abb93e0bb05c6896d2a18",
+  "baseVersionCode": 61,
+  "rolloutCode": 1785599906,
+  "title": "Kamera ohne starken Zoom",
+  "summary": "Der Kamera-Button nutzt wieder den rckseitigen Standard-Kamerapfad, damit der vollstndige Bildausschnitt sichtbar bleibt; Galerie und bestehende Scan-Auswertung bleiben unverndert.",
+  "patchId": "kgg-v061-camera-wide-no-zoom",
+  "patchFile": "patches/v061-camera-wide-no-zoom.html",
+  "versionName": "1.0.61-camera-wide-no-zoom",
+  "createdAt": "2026-08-01T15:58:26Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-camera-wide-no-zoom-20260801-a/admin.html",
+  "sha256": "36a93acff8cbb3f1c3a05b528552e0a8a5c937886f5f4a691aa222d60dcef6b2"
+}

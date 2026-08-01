@@ -4,6 +4,22 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "kgg-camera-wide-no-zoom-20260801-a",
+      "patchHash": "7bd700b7f98c7f5cc131a49338aeebba32c353376d72698fb286251022f8ef2d",
+      "baseSha": "13fc1c9deb68ae0ba79abb93e0bb05c6896d2a18",
+      "baseVersionCode": 61,
+      "rolloutCode": 1785599906,
+      "title": "Kamera ohne starken Zoom",
+      "summary": "Der Kamera-Button nutzt wieder den rckseitigen Standard-Kamerapfad, damit der vollstndige Bildausschnitt sichtbar bleibt; Galerie und bestehende Scan-Auswertung bleiben unverndert.",
+      "patchId": "kgg-v061-camera-wide-no-zoom",
+      "patchFile": "patches/v061-camera-wide-no-zoom.html",
+      "versionName": "1.0.61-camera-wide-no-zoom",
+      "createdAt": "2026-08-01T15:58:26Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-camera-wide-no-zoom-20260801-a/admin.html",
+      "sha256": "36a93acff8cbb3f1c3a05b528552e0a8a5c937886f5f4a691aa222d60dcef6b2"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-camera-shutter-live-qr",
       "patchHash": "ad7ad1c1b11d0dcb6440bf9fad67716100ffec3057af9b0bed71dc21ebeab1bb",
       "baseSha": "a367c001c1c3db4a87652e36811a08a0b74ea870",
@@ -281,35 +297,22 @@
       "createdAt": "2026-07-03T21:08:32Z",
       "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-gpt-e2e-canary-20260703/admin.html",
       "sha256": "824fc847f831e6788725e448ab2468a66a5c2f9329f5aa08ffad896659b29228"
-    },
-    {
-      "kind": "kgg_gpt_preview",
-      "requestId": "kgg-v057-tablet-split-scale",
-      "patchHash": "c6808403694dcb5b63d86d24bed958f4539086ea31ad70ded23f933cb92d14a5",
-      "baseSha": "5e6dec513d96e7b2521ffb84891071d506c75674",
-      "baseVersionCode": 57,
-      "rolloutCode": 1783088527,
-      "title": "v057 Tablet Splitter und Skalierung trennen",
-      "summary": "Tablet-Layoutsteuerung: sichtbarer Griff liegt auf der Spaltengrenze, seitliches Ziehen aendert die linke Spalte; Plus/Minus bleibt reine Skalierung.",
-      "createdAt": "2026-07-03T14:22:07Z",
-      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v057-tablet-split-scale/admin.html",
-      "sha256": "c0d86d5cc2e61698aeeceebe4f826d854f31bb12c125f22d59ca5f44645b08d5"
     }
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-camera-shutter-live-qr",
-    "patchHash": "ad7ad1c1b11d0dcb6440bf9fad67716100ffec3057af9b0bed71dc21ebeab1bb",
-    "baseSha": "a367c001c1c3db4a87652e36811a08a0b74ea870",
+    "requestId": "kgg-camera-wide-no-zoom-20260801-a",
+    "patchHash": "7bd700b7f98c7f5cc131a49338aeebba32c353376d72698fb286251022f8ef2d",
+    "baseSha": "13fc1c9deb68ae0ba79abb93e0bb05c6896d2a18",
     "baseVersionCode": 61,
-    "rolloutCode": 1785405702,
-    "title": "Normale Kamera mit Ausloeser und Live-QR",
-    "summary": "Der Kamera-Scan oeffnet eine normale 1x-Vorschau mit manuellem Ausloeser. Parallel wird lokal im sichtbaren Bild nach QR-Codes gesucht; bei einem Treffer wird derselbe Kameraframe an die bestehende Scan-Verarbeitung uebe",
-    "patchId": "kgg-v061-camera-shutter-live-qr",
-    "patchFile": "patches/v061-camera-shutter-live-qr.html",
-    "versionName": "1.0.61-camera-shutter-live-qr",
-    "createdAt": "2026-07-30T10:01:42Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-camera-shutter-live-qr/admin.html",
-    "sha256": "dffed418c9eb9490eb897cbb3f43978ec8d29ee820487aa313f779426283965f"
+    "rolloutCode": 1785599906,
+    "title": "Kamera ohne starken Zoom",
+    "summary": "Der Kamera-Button nutzt wieder den rckseitigen Standard-Kamerapfad, damit der vollstndige Bildausschnitt sichtbar bleibt; Galerie und bestehende Scan-Auswertung bleiben unverndert.",
+    "patchId": "kgg-v061-camera-wide-no-zoom",
+    "patchFile": "patches/v061-camera-wide-no-zoom.html",
+    "versionName": "1.0.61-camera-wide-no-zoom",
+    "createdAt": "2026-08-01T15:58:26Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-camera-wide-no-zoom-20260801-a/admin.html",
+    "sha256": "36a93acff8cbb3f1c3a05b528552e0a8a5c937886f5f4a691aa222d60dcef6b2"
   }
 }
