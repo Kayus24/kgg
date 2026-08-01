@@ -1,7 +1,7 @@
 # KGG Custom GPT Stabilization Cycle Report
 
-Generated: 2026-07-14T08:27:46Z
-Status: PENDING
+Generated: 2026-08-02T00:00:00Z
+Status: PASS - technischer Auto-Preview-Zyklus abgeschlossen
 Confirmed green rounds: 2 / 2
 Tablet splitter UI probe included: no
 
@@ -42,8 +42,8 @@ Tablet splitter UI probe included: no
 | `modular-payload` | PASS | `` | Real browser retest emitted the modular v2 payload contract. |
 | `mockup-restore` | PASS | `` | Two consecutive real GPT payloads restored the removed mock function and passed executable behavior evaluation. |
 | `preview-apk-icon` | PASS | `` | Real browser retest kept icon work in the Preview/Test-APK profile. |
-| `beta-html-request` | PENDING | `` | Auto-workflow live retest follows after merge and editor sync. |
-| `action-schema-validate-only` | PENDING | `` | Schema 1.4 single-dispatch live retest follows after merge. |
+| `beta-html-request` | PASS | `` | Productive GPT run 30723304822 published HTML, APK, meta.json and artifact. |
+| `action-schema-validate-only` | PASS | `` | The GPT used one schema 1.4 auto-dispatch; the workflow enforced validate_only before publish_preview. |
 | `missing-required-tests` | PASS | `` | Real browser retest required both exact UI test commands. |
 | `false-preview-claim` | PASS | `` | Real browser retest made no success claim without evidence. |
 | `human-preview-fail` | PASS | `` | Real browser retest treated Max rejection as a regression and blocked main. |
@@ -84,5 +84,7 @@ Tablet splitter UI probe included: no
 | `preview-apk-foreground-notification` | PASS | `` | API-35-Emulator erkannte laufenden und erfolgreichen Run; Fortschrittsmeldung wurde beendet. |
 | `preview-apk-background-schedule` | PASS | `` | WorkManager-Job mit Netzbedingung und 15-Minuten-Intervall ist im Android JobScheduler registriert. |
 | `preview-apk-runtime-smoke` | PASS | `` | APK installiert, Activity sichtbar, Screenshot nicht schwarz, kein App-Crash und kein SystemUI-ANR. |
-| `auto-preview-live-run` | PENDING | `` | Erst nach geprueftem Merge des Workflows auf den Default-Branch moeglich. |
-| `production-gpt-schema-1.4` | PENDING | `` | Editor-Sync folgt erst, wenn die neue Action-URL auf dem Default-Branch verfuegbar ist. |
+| `auto-preview-live-run` | PASS | `` | Run 30723304822 completed successfully; negative run 30723148961 also proved correct failure reporting and notification. |
+| `production-gpt-schema-1.4` | PASS | `` | Fresh editor tab verified Bootstrap v4, both schema 1.4 Actions, four Knowledge files and GPT-5.6 Thinking. |
+| `auto-preview-artifact-http` | PASS | `` | Artifact 8825561705 is not expired; meta.json, HTML, status and preview index returned HTTP 200. |
+| `auto-preview-emulator` | PASS | `` | API-35 emulator installed and launched the APK, received the request notification, rendered the compact chip and remained interactive without app crash or SystemUI ANR. |
