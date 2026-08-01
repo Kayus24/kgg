@@ -153,6 +153,20 @@ def run_patient_scan_camera() -> None:
     run([node_executable(), "release-pipeline/kgg_patient_scan_camera_smoke.js"])
 
 
+def run_admin_camera_qr() -> None:
+    global PATIENT_SCAN_PREPARED
+    npm = npm_executable()
+    if not npm:
+        raise BatteryError("npm not found. Install npm or set KGG_NPM for the Admin camera/QR battery.")
+    if not PATIENT_SCAN_PREPARED:
+        run([npm, "--prefix", "release-pipeline", "ci", "--ignore-scripts"])
+        if os.environ.get("KGG_SKIP_PLAYWRIGHT_INSTALL") != "1":
+            run([node_executable(), "release-pipeline/node_modules/playwright/cli.js", "install", "chromium"])
+        PATIENT_SCAN_PREPARED = True
+    log("== Admin live camera / patient QR battery ==")
+    run([node_executable(), "release-pipeline/kgg_admin_camera_qr_smoke.js"])
+
+
 def run_ui_contract() -> None:
     log("== KGG UI/function contract ==")
     npm = npm_executable()
@@ -328,6 +342,14 @@ def run_android_wrapper_contract() -> None:
         ('<cache-path name="apk_cache" path="apk/" />', "FileProvider must expose APK cache files"),
         ("rememberPendingApkFile(apkFile, versionLabel, false)", "background APK checks must not request installer"),
         ("if (force) {\n                    runOnUiThread(() -> installApkFile(apkFile, versionLabel));", "explicit APK check may open installer"),
+        ("PermissionRequest.RESOURCE_VIDEO_CAPTURE", "WebView camera permission must grant video only"),
+        ("WEB_CAMERA_PERMISSION_REQUEST", "WebView camera permission has a dedicated Android request code"),
+        ("isTrustedLocalWebRequest", "WebView camera permission must be limited to the locally verified HTML"),
+        ("currentUrl.equals(trustedUrl)", "WebView camera permission must match the exact verified local app URL"),
+        ("request.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE})", "WebView must grant only video capture after Android permission"),
+        ("getCameraCapabilities()", "Android bridge must publish its live-camera capability contract"),
+        ("webVideoCaptureVersion", "Android and JavaScript must negotiate a versioned live-camera contract"),
+        ("getCapabilities: function()", "JavaScript bootstrap must expose native camera capabilities"),
     ]
     haystacks = "\n".join([main_activity, bootstrap, build_gradle, android_manifest, file_paths, android_workflow])
     missing = [reason for token, reason in required if token not in haystacks]
@@ -335,6 +357,8 @@ def run_android_wrapper_contract() -> None:
         raise BatteryError("Android wrapper contract missing: " + ", ".join(missing))
     if "if (window.KGGNativeSync || !window.KGGAndroidSync) return;" in bootstrap:
         raise BatteryError("Android bootstrap must not let Sync availability block PDF/Camera/AppUpdate bridges.")
+    if "PermissionRequest.RESOURCE_AUDIO_CAPTURE" in main_activity:
+        raise BatteryError("Android WebView camera bridge must never grant microphone capture.")
     for density in ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]:
         for name in ["ic_launcher.png", "ic_launcher_round.png"]:
             icon = ROOT / "android-wrapper" / "app" / "src" / "main" / "res" / f"mipmap-{density}" / name
@@ -343,6 +367,7 @@ def run_android_wrapper_contract() -> None:
             admin_icon = ROOT / "android-wrapper" / "app" / "src" / "admin" / "res" / f"mipmap-{density}" / name
             if not admin_icon.exists() or admin_icon.stat().st_size < 500:
                 raise BatteryError(f"Android admin launcher icon override missing or too small: {admin_icon}")
+    run([sys.executable, "release-pipeline/kgg_android_preview_probe.py", "--self-test"])
     log("Android wrapper contract OK")
 
 
@@ -354,6 +379,11 @@ def run_gpt_payload_preflight_self_test() -> None:
 def run_gpt_eval() -> None:
     log("== Custom GPT deterministic eval ==")
     run([sys.executable, "release-pipeline/kgg_gpt_eval.py"])
+
+
+def run_gpt_regression_contracts() -> None:
+    log("== Custom GPT declarative regression contracts ==")
+    run([sys.executable, "release-pipeline/kgg_gpt_regression_contracts.py"])
 
 
 def run_patch_hygiene() -> None:
@@ -549,6 +579,13 @@ TEST_REGISTRY = [
         "run": run_gpt_eval,
     },
     {
+        "id": "gpt-regression-contracts",
+        "level": "critical",
+        "suite": "gpt",
+        "reason": "Gate-generated declarative regression contracts must remain true for the assembled Admin HTML.",
+        "run": run_gpt_regression_contracts,
+    },
+    {
         "id": "mobile-inbox-dry-run",
         "level": "critical",
         "suite": "mobile-inbox",
@@ -624,6 +661,13 @@ TEST_REGISTRY = [
         "suite": "patient-scan",
         "reason": "Patient plan QR photos and synthetic camera streams must reach the parser and preserve existing plan data.",
         "run": run_patient_scan_camera,
+    },
+    {
+        "id": "admin-camera-qr-regression",
+        "level": "regression",
+        "suite": "camera-qr",
+        "reason": "Admin live camera must recognize patient QR payloads automatically, preserve manual paper capture and stop camera streams.",
+        "run": run_admin_camera_qr,
     },
     {
         "id": "ui-stability-regression",
@@ -801,7 +845,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--suite",
-        choices=["all", "hygiene", "mobile-inbox", "sync", "native-sync", "textblocks", "pdf", "patient-scan", "ui-stability", "syntax", "security", "release", "android", "gpt"],
+        choices=["all", "hygiene", "mobile-inbox", "sync", "native-sync", "textblocks", "pdf", "patient-qr", "patient-scan", "camera-qr", "ui-stability", "syntax", "security", "release", "android", "gpt"],
         default=None,
         help="Optionally limit to one suite. Without --level this keeps legacy behavior and runs all non-live tests in that suite.",
     )

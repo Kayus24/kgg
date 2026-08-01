@@ -50,7 +50,10 @@ def main() -> int:
                 "exakte Fuenf-Felder-Form",
                 "vollstaendige ausgeschriebene `https://`-Klartext-URLs",
                 "Leere oder nur beschriftete Markdown-Links sind kein Nachweis",
-                "patient-v1",
+                "patient-v2",
+                "Gut für PAT live",
+                "getKggAgentCoordinationIndex",
+                "submitKggAgentCoordinationEvent",
             ),
         )
         require(
@@ -91,10 +94,13 @@ def main() -> int:
             "patient API Action",
             (
                 "submitKggPatientPreviewGate",
+                "submitKggPatientMainGate",
                 "getKggPatientMainCommit",
                 "getKggPatientPreviewGateJobs",
                 "getKggMemoryIndex",
                 "submitKggMemoryUpdate",
+                "getKggAgentCoordinationIndex",
+                "submitKggAgentCoordinationEvent",
             ),
         )
         for label, schema in (("raw", raw_action), ("api", api_action)):

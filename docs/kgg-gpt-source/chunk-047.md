@@ -4,6 +4,39 @@
 - Lines: 19741-20160
 
 ```html
+    if(suppressClick){state.reorderSuppressClick=true;setTimeout(()=>{state.reorderSuppressClick=false;},350);}
+  }
+
+  function restoreRecentPlan(index){
+    const item=(state.recent||[])[index];
+    if(!item)return;
+    state.patient={...(state.patient||{}),...(item.patient||{})};
+    state.plan=Array.isArray(item.exercises)?item.exercises.map(ensureUiExerciseShape):[];
+    if($('patientName'))$('patientName').value=state.patient.name||'';
+    if($('planDate'))$('planDate').value=state.patient.date||new Date().toISOString().slice(0,10);
+    if($('therapistName'))$('therapistName').value=state.patient.therapist||'';
+    if($('planNotes'))$('planNotes').value=state.patient.notes||'';
+    syncStatePlanToStore('ui_restore_recent_plan');
+    syncTextInputFromPlan('ui_restore_recent_plan');
+    if($('recentList'))$('recentList').classList.add('hidden');
+    save();
+    render();
+  }
+  function renderRecent(){
+    const el=$('recentList');
+    const items=(state.recent||[]).slice(0,5);
+    el.innerHTML=items.map((p,i)=>'<div class="notice"><b>'+escapeHtml(p.name||('Plan '+(i+1)))+'</b><br><small>'+((p.exercises||[]).length)+' Übungen'+(p.date?' · '+escapeHtml(String(p.date).slice(0,10)):'')+'</small><br><button class="mutedBtn" data-recent-index="'+i+'" type="button" style="width:100%;margin-top:8px">Plan wieder öffnen</button></div>').join('')||'<div class="notice">Keine Pläne.</div>';
+    el.querySelectorAll('[data-recent-index]').forEach(btn=>btn.onclick=()=>restoreRecentPlan(Number(btn.dataset.recentIndex)));
+  }
+  function defaultPackageName(){const patient=String(state.patient&&state.patient.name||'').trim(); const stamp=new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}); return (patient?patient+' ':'')+'Paket '+stamp;}
+  function openPackageSaveModal(){
+    if(!(state.plan||[]).length)return;
+    const btn=$('savePackageBtn'), input=$('packageNameInput');
+    if(btn){btn.classList.remove('packagePulse'); void btn.offsetWidth; btn.classList.add('packagePulse'); setTimeout(()=>btn.classList.remove('packagePulse'),560);}
+    if(input)input.value=defaultPackageName();
+    $('packageSaveModal').classList.add('open');
+    setTimeout(()=>input&&input.focus&&input.focus(),30);
+  }
   function closePackageSaveModal(){$('packageSaveModal').classList.remove('open');}
   function confirmPackageSave(){
     const input=$('packageNameInput');
@@ -390,38 +423,5 @@
   function kggConfigTransferHasCodes(plain){
     const secrets=plain&&plain.secrets||{};
     return !!((Array.isArray(secrets.geminiKeys)&&secrets.geminiKeys.length)||secrets.mediaDropzoneEndpoint||secrets.mediaDropzoneUploadToken);
-  }
-  async function kggConfigTransferKey(passCode,saltBytes){
-    const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(String(passCode||'')),{name:'PBKDF2'},false,['deriveKey']);
-    return crypto.subtle.deriveKey({name:'PBKDF2',salt:saltBytes,iterations:140000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
-  }
-  async function encryptKggConfigTransferPlain(plain,passCode){
-    if(!(window.crypto&&crypto.subtle&&window.TextEncoder))return {payloadCode:'KGGCFG1:'+safeBase64JsonEncode(plain),encrypted:false};
-    const salt=kggConfigTransferRandomBytes(16);
-    const iv=kggConfigTransferRandomBytes(12);
-    const key=await kggConfigTransferKey(passCode,salt);
-    const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(plain)));
-    const envelope={kind:'kgg_config_transfer_encrypted_v2',version:2,alg:'PBKDF2-SHA256-AES-GCM',salt:kggConfigTransferBytesToBase64Url(salt),iv:kggConfigTransferBytesToBase64Url(iv),ciphertext:kggConfigTransferBytesToBase64Url(new Uint8Array(cipher)),createdAt:plain.createdAt,expiresAt:plain.expiresAt};
-    return {payloadCode:'KGGCFG2:'+safeBase64JsonEncode(envelope),encrypted:true};
-  }
-  async function decryptKggConfigTransferEnvelope(envelope,passCode){
-    if(!(window.crypto&&crypto.subtle&&window.TextDecoder))throw new Error('Dieses Geraet kann den verschluesselten Transfer nicht lesen.');
-    const salt=kggConfigTransferBase64UrlToBytes(envelope.salt);
-    const iv=kggConfigTransferBase64UrlToBytes(envelope.iv);
-    const cipher=kggConfigTransferBase64UrlToBytes(envelope.ciphertext);
-    const key=await kggConfigTransferKey(passCode,salt);
-    const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,cipher);
-    return JSON.parse(new TextDecoder().decode(plain));
-  }
-  function applyKggConfigTransferPlain(plain){
-    if(!plain||plain.kind!=='kgg_config_transfer_v2')throw new Error('Kein KGG-Konfig-Transfer.');
-    if(plain.expiresAt&&Date.parse(plain.expiresAt)<Date.now())throw new Error('Konfig-Transfer ist abgelaufen.');
-    const secrets=plain.secrets||{};
-    applyAdminCodePackageData({
-      geminiKeys:Array.isArray(secrets.geminiKeys)?secrets.geminiKeys:[],
-      mediaDropzoneEndpoint:secrets.mediaDropzoneEndpoint||'',
-      mediaDropzoneUploadToken:secrets.mediaDropzoneUploadToken||''
-    });
-    return true;
   }
 ```

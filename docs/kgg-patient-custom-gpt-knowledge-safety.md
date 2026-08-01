@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Safety
 
-Generated retrieval pack. Source digest: `c2413f439a75147a`.
+Generated retrieval pack. Source digest: `3521263df59b1940`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -124,6 +124,14 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Lesson: Die KGG Test-App zeigte erneut einen schwarzen, vollhohen Balken mit kompletter Preview-Beschreibung. Der Balken verschob die eigentliche App und schnitt Bedienelemente am linken Rand an, obwohl ein kompakter Marker bereits auf einem offenen Arbeitsbranch implementiert und getestet war.
 - Caution: - Admin- und Kolleg:innen-HTML - PDF - QR/Patienten-App - Scan/OCR - Parser - Plan-State - Medien/Upload - Android- und Admin-Manifest
 - Tests: - Ein altes Sticky-Banner wird ersetzt und nicht dupliziert. - Der eingeklappte Marker ist hoechstens 92 x 24 CSS-Pixel gross. - App-Geometrie und horizontaler Overflow bleiben mit und ohne Marker identisch. - Menue, Scanner und Dock bleiben bei geschlossenem Marker anklickbar. - Details oeffnen und schliessen per Toggle, Aussenklick und Escape. - Viewports:
+
+### WebView-Kamera und Cross-App-QR brauchen reale Vertragsbelege
+
+- Source: `docs/bug-debug/2026-08-01-webview-camera-cross-app-qr.md`
+- Areas: parser-textblocks, phone-layout, qr-patient, scan-camera
+- Lesson: Eine gruen gebaute HTML-Preview behauptete automatische QR-Uebernahme, auf dem Android-Geraet erschien aber weiter die alte stark gezoomte Systemkamera.
+- Caution: Kein Mikrofonzugriff, kein erzwungener Zoom, keine echten Patientendaten oder echten QR-Payloads in Tests, Memory oder Agent-Koordination.
+- Tests: Pflicht sind Critical, UI-Stability, Admin `camera-qr`, Patient `patient-scan`, Android-Wrapper-Vertrag und Preview-APK-Build. Browser-Smoke prueft Auto-QR, jsQR-Fallback, Permission-Fallback, manuelles Foto und Track-Cleanup getrennt. Ein Emulator ersetzt den abschliessenden Handytest nicht.
 
 ### Debug JSON Seite
 

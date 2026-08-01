@@ -8,6 +8,39 @@
       "testStatus": {
         "local": "pending",
         "githubPages": "pending",
+        "notes": "Critical plus UI-Stability Regression vor Release."
+      }
+    },
+    {
+      "versionCode": 54,
+      "versionName": "1.0.54-patient-qr-latest",
+      "patchId": "kgg-v054-patient-qr-latest",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Patienten-QR nutzt aktuelle Patient-App",
+      "reason": "Trainingsplan-QR-Codes duerfen nicht auf das alte Root-Bundle der ersten Patient-Web-App zeigen.",
+      "whatChanged": [
+        "Default-Patienten-App-Basis zeigt auf kgg-update/index.html als aktuellen Patient-Hash-Renderer.",
+        "Logic-Smoke prueft, dass der QR-Link nicht mehr media-inline-bundle-7 verwendet."
+      ],
+      "touchedAreas": [
+        "Patient QR base URL",
+        "Patient share URL tests",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Parser",
+        "Scan/OCR parser",
+        "Plan-State",
+        "PDF generation",
+        "Android/APK",
+        "Sync data model",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
         "notes": "Critical plus patient-qr logic smoke vor Release."
       }
     },
@@ -391,37 +424,4 @@
       ],
       "testStatus": {
         "local": "pending",
-        "githubPages": "pending",
-        "androidApp": "pending"
-      },
-      "handoffNote": "v043 nutzt weiterhin den bestehenden animated reorder; nur Tablet-Kartenflaechen werden als zusaetzlicher Startbereich gebunden."
-    },
-    {
-      "versionCode": 42,
-      "versionName": "1.0.42-phone-dock-anchored-correction",
-      "patchId": "kgg-v042-phone-dock-anchored-correction",
-      "status": "active",
-      "type": "local-html-patch",
-      "title": "Handy-Dock korrigieren",
-      "reason": "Der Foto-Pfeil gehoert in den Kamera-Button, das Admin-Menue soll in der UI verankert sein und Scan/Fertig duerfen Floating-Fenster nicht ueberdecken.",
-      "whatChanged": [
-        "Foto-Optionen werden als Pfeilbereich direkt im Plan-scannen-Button geoeffnet.",
-        "Das Handy-Admin-Menue sitzt im Plan-Header statt fixed oben rechts.",
-        "Plan scannen und Fertig erhalten eine dezente Glasoptik und bleiben z-index-seitig unter Drawern und Modals.",
-        "Browser-Smokes pruefen Admin-Verankerung, integrierten Foto-Pfeil, Glasstil und Floating-Layer-Reihenfolge."
-      ],
-      "touchedAreas": [
-        "Phone scan dock",
-        "Phone admin submenu",
-        "Local test batteries",
-        "HTML embedded metadata"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR-Erzeugung",
-        "Patienten-App",
-        "Scan/OCR parser",
-        "Plan-State",
-        "Android-Wrapper",
-        "API-Key-Logik"
 ```

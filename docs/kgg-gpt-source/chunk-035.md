@@ -4,6 +4,39 @@
 - Lines: 14701-15120
 
 ```html
+    0xE8E1: 0x97A6,
+    0xE8E2: 0x97A3,
+    0xE8E3: 0x97B3,
+    0xE8E4: 0x97B4,
+    0xE8E5: 0x97C3,
+    0xE8E6: 0x97C6,
+    0xE8E7: 0x97C8,
+    0xE8E8: 0x97CB,
+    0xE8E9: 0x97DC,
+    0xE8EA: 0x97ED,
+    0xE8EB: 0x9F4F,
+    0xE8EC: 0x97F2,
+    0xE8ED: 0x7ADF,
+    0xE8EE: 0x97F6,
+    0xE8EF: 0x97F5,
+    0xE8F0: 0x980F,
+    0xE8F1: 0x980C,
+    0xE8F2: 0x9838,
+    0xE8F3: 0x9824,
+    0xE8F4: 0x9821,
+    0xE8F5: 0x9837,
+    0xE8F6: 0x983D,
+    0xE8F7: 0x9846,
+    0xE8F8: 0x984F,
+    0xE8F9: 0x984B,
+    0xE8FA: 0x986B,
+    0xE8FB: 0x986F,
+    0xE8FC: 0x9870,
+    0xE940: 0x9871,
+    0xE941: 0x9874,
+    0xE942: 0x9873,
+    0xE943: 0x98AA,
+    0xE944: 0x98AF,
     0xE945: 0x98B1,
     0xE946: 0x98B6,
     0xE947: 0x98C4,
@@ -391,37 +424,4 @@ function decode(bytes, twoS) {
         var evaluation = poly.evaluateAt(field.exp(s + field.generatorBase));
         syndromeCoefficients[syndromeCoefficients.length - 1 - s] = evaluation;
         if (evaluation !== 0) {
-            error = true;
-        }
-    }
-    if (!error) {
-        return outputBytes;
-    }
-    var syndrome = new GenericGFPoly_1.default(field, syndromeCoefficients);
-    var sigmaOmega = runEuclideanAlgorithm(field, field.buildMonomial(twoS, 1), syndrome, twoS);
-    if (sigmaOmega === null) {
-        return null;
-    }
-    var errorLocations = findErrorLocations(field, sigmaOmega[0]);
-    if (errorLocations == null) {
-        return null;
-    }
-    var errorMagnitudes = findErrorMagnitudes(field, sigmaOmega[1], errorLocations);
-    for (var i = 0; i < errorLocations.length; i++) {
-        var position = outputBytes.length - 1 - field.log(errorLocations[i]);
-        if (position < 0) {
-            return null;
-        }
-        outputBytes[position] = GenericGF_1.addOrSubtractGF(outputBytes[position], errorMagnitudes[i]);
-    }
-    return outputBytes;
-}
-exports.decode = decode;
-
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
 ```

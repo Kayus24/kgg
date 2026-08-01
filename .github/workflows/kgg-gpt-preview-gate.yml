@@ -29,6 +29,30 @@ on:
         options:
           - "false"
           - "true"
+      approval_phrase:
+        description: Exact final Max approval; required only for PR or Admin/Main modes
+        required: false
+        default: ""
+        type: string
+  workflow_call:
+    inputs:
+      mode:
+        required: true
+        type: string
+      request_id:
+        required: true
+        type: string
+      payload_json:
+        required: true
+        type: string
+      ui_stability:
+        required: false
+        default: "false"
+        type: string
+      approval_phrase:
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: write
@@ -138,6 +162,7 @@ jobs:
             --mode '${{ inputs.mode }}' \
             --payload-file "$RUNNER_TEMP/kgg-gpt-payload.json" \
             --preview-root "$GITHUB_WORKSPACE/preview" \
+            --approval-phrase '${{ inputs.approval_phrase }}' \
             --github-output "$GITHUB_OUTPUT"
 
       - name: Refresh generated GPT context files for PR mode
@@ -162,12 +187,28 @@ jobs:
           python release-pipeline/kgg_test_battery.py --level critical
 
       - name: Run UI stability regression when requested
-        if: inputs.mode != 'validate_only' && inputs.ui_stability == 'true'
+        if: inputs.mode != 'validate_only' && (inputs.ui_stability == 'true' || steps.gate.outputs.run_ui_stability == 'true')
         shell: bash
         run: |
           set -euo pipefail
           cd base
           python release-pipeline/kgg_test_battery.py --suite ui-stability --level regression
+
+      - name: Run Admin camera and patient QR regression
+        if: inputs.mode != 'validate_only' && steps.gate.outputs.run_camera_qr == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          python release-pipeline/kgg_test_battery.py --suite camera-qr --level regression
+
+      - name: Run patient scanner compatibility regression
+        if: inputs.mode != 'validate_only' && steps.gate.outputs.run_patient_scan == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          python release-pipeline/kgg_test_battery.py --suite patient-scan --level regression
 
       - name: Build fixed Preview APK
         if: inputs.mode == 'publish_preview'
@@ -220,7 +261,7 @@ jobs:
           git switch -c "$branch"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add kgg-update/src kgg-update/index.html kgg-update/version.json release-inbox docs/kgg-gpt-context.md docs/kgg-gpt-bug-index.json docs/kgg-gpt-bug-lessons.md docs/kgg-gpt-patch-patterns.md docs/kgg-gpt-source-index.json docs/kgg-gpt-area-routes.md docs/kgg-gpt-area-routes.json docs/kgg-gpt-source docs/kgg-custom-gpt-playbook.md docs/kgg-custom-gpt-action-schema.md docs/kgg-custom-gpt-negative-examples.md docs/kgg-custom-gpt-preview-runbook.md docs/kgg-custom-gpt-preview-report-template.md docs/kgg-custom-gpt-test-prompts.md docs/kgg-custom-gpt-expected-results.md docs/kgg-custom-gpt-test-report.md docs/kgg-custom-gpt-cycle-report.md docs/kgg-custom-gpt-knowledge-pack.md docs/kgg-custom-gpt-knowledge-architecture.md docs/kgg-custom-gpt-knowledge-operations.md docs/kgg-custom-gpt-knowledge-safety.md docs/kgg-custom-gpt-knowledge-testing.md docs/kgg-custom-gpt-resource-manifest.json release-pipeline/kgg_gpt_source_context.py release-pipeline/kgg_gpt_payload_preflight.py release-pipeline/kgg_gpt_eval.py release-pipeline/kgg_gpt_stabilize.py release-pipeline/kgg_custom_gpt_knowledge_pack.py release-pipeline/kgg_custom_gpt_resource_audit.py release-pipeline/kgg_android_preview_probe.py
+          git add kgg-update/src kgg-update/index.html kgg-update/version.json release-inbox release-pipeline/gpt-regressions docs/kgg-gpt-context.md docs/kgg-gpt-bug-index.json docs/kgg-gpt-bug-lessons.md docs/kgg-gpt-patch-patterns.md docs/kgg-gpt-source-index.json docs/kgg-gpt-area-routes.md docs/kgg-gpt-area-routes.json docs/kgg-gpt-source docs/kgg-custom-gpt-playbook.md docs/kgg-custom-gpt-action-schema.md docs/kgg-custom-gpt-negative-examples.md docs/kgg-custom-gpt-preview-runbook.md docs/kgg-custom-gpt-preview-report-template.md docs/kgg-custom-gpt-test-prompts.md docs/kgg-custom-gpt-expected-results.md docs/kgg-custom-gpt-test-report.md docs/kgg-custom-gpt-cycle-report.md docs/kgg-custom-gpt-knowledge-pack.md docs/kgg-custom-gpt-knowledge-architecture.md docs/kgg-custom-gpt-knowledge-operations.md docs/kgg-custom-gpt-knowledge-safety.md docs/kgg-custom-gpt-knowledge-testing.md docs/kgg-custom-gpt-resource-manifest.json release-pipeline/kgg_gpt_source_context.py release-pipeline/kgg_gpt_payload_preflight.py release-pipeline/kgg_gpt_eval.py release-pipeline/kgg_gpt_stabilize.py release-pipeline/kgg_custom_gpt_knowledge_pack.py release-pipeline/kgg_custom_gpt_resource_audit.py release-pipeline/kgg_android_preview_probe.py
           git commit -m "gpt write gate ${{ inputs.request_id }}"
           git push -u origin "$branch"
           body="$(mktemp)"
@@ -247,7 +288,7 @@ jobs:
           git switch -c "$branch"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add kgg-update/src kgg-update/index.html kgg-update/version.json release-inbox docs/kgg-gpt-context.md docs/kgg-gpt-bug-index.json docs/kgg-gpt-bug-lessons.md docs/kgg-gpt-patch-patterns.md docs/kgg-gpt-source-index.json docs/kgg-gpt-area-routes.md docs/kgg-gpt-area-routes.json docs/kgg-gpt-source docs/kgg-custom-gpt-knowledge-pack.md docs/kgg-custom-gpt-knowledge-architecture.md docs/kgg-custom-gpt-knowledge-operations.md docs/kgg-custom-gpt-knowledge-safety.md docs/kgg-custom-gpt-knowledge-testing.md docs/kgg-custom-gpt-resource-manifest.json
+          git add kgg-update/src kgg-update/index.html kgg-update/version.json release-inbox release-pipeline/gpt-regressions docs/kgg-gpt-context.md docs/kgg-gpt-bug-index.json docs/kgg-gpt-bug-lessons.md docs/kgg-gpt-patch-patterns.md docs/kgg-gpt-source-index.json docs/kgg-gpt-area-routes.md docs/kgg-gpt-area-routes.json docs/kgg-gpt-source docs/kgg-custom-gpt-knowledge-pack.md docs/kgg-custom-gpt-knowledge-architecture.md docs/kgg-custom-gpt-knowledge-operations.md docs/kgg-custom-gpt-knowledge-safety.md docs/kgg-custom-gpt-knowledge-testing.md docs/kgg-custom-gpt-resource-manifest.json
           git commit -m "admin beta ${{ inputs.request_id }}"
           git push -u origin "$branch"
           body="$(mktemp)"

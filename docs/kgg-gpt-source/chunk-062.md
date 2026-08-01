@@ -4,6 +4,89 @@
 - Lines: 26041-26460
 
 ```html
+<style id="kgg-v042-phone-dock-anchored-correction-style">
+  @media(max-width:759px){
+    #createPanel .planHeader{
+      position:relative;
+      grid-template-columns:minmax(0,1fr) auto auto;
+    }
+    body.adminMode #createPanel .planHeader .kggPhoneAdminMenu{
+      display:block;
+      position:relative!important;
+      right:auto!important;
+      top:auto!important;
+      z-index:46!important;
+      align-self:center;
+      justify-self:end;
+      grid-column:auto;
+    }
+    body.adminMode > .kggPhoneAdminMenu{display:none!important}
+    #createPanel .planHeader .kggPhoneAdminMenuBtn{
+      width:42px;
+      height:42px;
+      min-width:42px;
+      min-height:42px;
+      border-radius:15px;
+      border:1px solid rgba(255,255,255,.72);
+      background:linear-gradient(180deg,rgba(255,255,255,.86),rgba(238,244,252,.64));
+      color:#071027;
+      box-shadow:0 10px 24px rgba(7,16,39,.14),inset 0 1px 0 rgba(255,255,255,.9);
+      backdrop-filter:blur(16px) saturate(1.35);
+      -webkit-backdrop-filter:blur(16px) saturate(1.35);
+    }
+    #createPanel .planHeader .kggPhoneAdminMenuPanel{
+      top:calc(100% + 8px);
+      right:0;
+      z-index:96;
+      background:rgba(255,255,255,.92);
+      backdrop-filter:blur(18px) saturate(1.28);
+      -webkit-backdrop-filter:blur(18px) saturate(1.28);
+    }
+
+    #scanHub{
+      grid-template-columns:minmax(0,1fr)!important;
+      z-index:40!important;
+    }
+    #scanHub > .phonePhotoMenuToggle{display:none!important}
+    #scanHub #scanBtn,
+    body.kggPhoneHasPlan #createPanel.planMode #finishBtn:not(.hidden){
+      border:1px solid rgba(255,255,255,.68)!important;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.86),rgba(233,242,252,.58))!important;
+      color:#071027!important;
+      box-shadow:0 14px 30px rgba(7,16,39,.18),inset 0 1px 0 rgba(255,255,255,.95)!important;
+      backdrop-filter:blur(18px) saturate(1.38)!important;
+      -webkit-backdrop-filter:blur(18px) saturate(1.38)!important;
+    }
+    #scanHub #scanBtn{
+      display:flex!important;
+      grid-column:1!important;
+      justify-content:space-between!important;
+      gap:10px!important;
+      padding:0 7px 0 18px!important;
+      text-align:left!important;
+    }
+    #scanHub #scanBtn .phoneScanLabel{
+      min-width:0;
+      flex:1 1 auto;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    #scanHub #scanBtn #phonePhotoMenuToggle{
+      position:static!important;
+      display:inline-flex!important;
+      flex:0 0 46px;
+      width:46px!important;
+      height:46px!important;
+      min-width:46px!important;
+      min-height:46px!important;
+      align-items:center!important;
+      justify-content:center!important;
+      border-radius:14px!important;
+      border:1px solid rgba(255,255,255,.82)!important;
+      background:rgba(255,255,255,.74)!important;
+      color:#071027!important;
       box-shadow:inset 0 1px 0 rgba(255,255,255,.96),0 4px 12px rgba(7,16,39,.12)!important;
       font-size:24px!important;
       font-weight:1000!important;
@@ -341,87 +424,4 @@
     if(window.KGGAdmin&&typeof window.KGGAdmin.openConfig==="function"){window.KGGAdmin.openConfig();return;}
     clickExisting("adminConfigBtn");
   }
-  function bind(id,handler){
-    var el=byId(id);
-    if(!el||el.dataset.kggV044Bound==="1")return;
-    el.dataset.kggV044Bound="1";
-    el.addEventListener("click",function(ev){ev.preventDefault();ev.stopPropagation();handler();},true);
-  }
-  function enhanceScanButton(){
-    var scan=byId("scanBtn");
-    var label=scan?scan.querySelector(".phoneScanLabel"):null;
-    var toggle=byId("phonePhotoMenuToggle");
-    if(scan&&!scan.classList.contains("kggPhoneLiquidAction"))scan.classList.add("kggScanButtonWithMenu","kggPhoneLiquidAction");
-    if(label&&label.textContent!=="📷 Plan scannen")label.textContent="📷 Plan scannen";
-    if(toggle){
-      if(!toggle.classList.contains("kggPhoneLiquidChevron"))toggle.classList.add("kggPhoneLiquidChevron");
-      if(toggle.textContent!=="⌃")toggle.textContent="⌃";
-      if(toggle.getAttribute("aria-label")!=="Foto-Optionen oeffnen")toggle.setAttribute("aria-label","Foto-Optionen oeffnen");
-      if(toggle.getAttribute("title")!=="Foto-Optionen")toggle.setAttribute("title","Foto-Optionen");
-    }
-    var finish=byId("finishBtn");
-    if(finish&&!finish.classList.contains("kggPhoneLiquidAction"))finish.classList.add("kggPhoneLiquidAction");
-  }
-  function enhancePhoneAdminMenu(){
-    var panel=byId("kggPhoneAdminMenuPanel");
-    if(!panel||panel.dataset.kggV044Menu==="1")return;
-    panel.dataset.kggV044Menu="1";
-    panel.innerHTML=
-      '<div class="kggPhoneMenuGroup" data-kgg-phone-menu-group="update"><div class="kggPhoneMenuGroupTitle">Update</div><button id="kggPhoneUpdateCenterMenu" type="button">Update-Zentrale</button></div>'+
-      '<div class="kggPhoneMenuGroup" data-kgg-phone-menu-group="sync-share"><div class="kggPhoneMenuGroupTitle">Sync &amp; Weitergeben</div><button id="kggPhoneDeviceSyncMenu" type="button">Geräte-Sync</button><button id="kggPhoneTherapistShareMenu" type="button">Kolleg:innen-App weitergeben</button><button id="kggPhoneBankShareMenu" type="button">Übungsdatenbank teilen</button></div>'+
-      '<div class="kggPhoneMenuGroup" data-kgg-phone-menu-group="admin"><div class="kggPhoneMenuGroupTitle">Admin</div><button id="kggPhoneAdminConfigMenu" type="button">Admin-Konfig</button></div>';
-    bind("kggPhoneUpdateCenterMenu",openReleaseCenter);
-    bind("kggPhoneDeviceSyncMenu",openDeviceSync);
-    bind("kggPhoneTherapistShareMenu",openTherapistShare);
-    bind("kggPhoneBankShareMenu",openSharedBank);
-    bind("kggPhoneAdminConfigMenu",openAdminConfig);
-  }
-  function install(){
-    enhanceScanButton();
-    enhancePhoneAdminMenu();
-  }
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});
-  else install();
-  [80,220,600,1200].forEach(function(ms){setTimeout(install,ms);});
-  if(document.body){
-    new MutationObserver(function(){install();}).observe(document.body,{childList:true,subtree:true});
-  }
-  window.KGG_UI_PHONE_LIQUID_ACTIONS_V044={patchId:PATCH_ID,install:install};
-})();
-</script>
-<!-- KGG PATCH END kgg-v044-phone-liquid-actions -->
-
-<!-- SOURCE FILE: kgg-update/src/patches/v045-phone-drawer-bank-align.html -->
-
-<!-- KGG PATCH START kgg-v045-phone-drawer-bank-align -->
-<style id="kgg-v045-phone-drawer-bank-align-style">
-  @media(max-width:759px){
-    #createPanel{
-      margin-top:clamp(28px,5dvh,44px)!important;
-    }
-    body.kggPhoneDrawerSafeOpen .kggPhoneDrawerBackdrop{
-      opacity:1!important;
-      pointer-events:auto!important;
-    }
-    body.kggPhoneDrawerSafeOpen #recentToggle.phoneButtonFloat,
-    body.kggPhoneDrawerSafeOpen #packageToggle.phoneButtonFloat{
-      position:fixed!important;
-      left:16px!important;
-      right:16px!important;
-      bottom:calc(12px + env(safe-area-inset-bottom))!important;
-      z-index:92!important;
-      width:auto!important;
-      min-width:0!important;
-      height:58px!important;
-      min-height:58px!important;
-      border-radius:18px!important;
-      justify-content:center!important;
-      background:#fff!important;
-      color:var(--ink)!important;
-      border:1px solid rgba(220,227,235,.96)!important;
-      box-shadow:0 22px 54px rgba(7,16,39,.26),0 5px 14px rgba(7,16,39,.12)!important;
-    }
-    body.kggPhoneDrawerSafeOpen #recentList:not(.hidden),
-    body.kggPhoneDrawerSafeOpen #packageList:not(.hidden){
-      position:fixed!important;
 ```

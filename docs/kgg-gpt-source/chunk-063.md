@@ -4,6 +4,89 @@
 - Lines: 26461-26880
 
 ```html
+  function bind(id,handler){
+    var el=byId(id);
+    if(!el||el.dataset.kggV044Bound==="1")return;
+    el.dataset.kggV044Bound="1";
+    el.addEventListener("click",function(ev){ev.preventDefault();ev.stopPropagation();handler();},true);
+  }
+  function enhanceScanButton(){
+    var scan=byId("scanBtn");
+    var label=scan?scan.querySelector(".phoneScanLabel"):null;
+    var toggle=byId("phonePhotoMenuToggle");
+    if(scan&&!scan.classList.contains("kggPhoneLiquidAction"))scan.classList.add("kggScanButtonWithMenu","kggPhoneLiquidAction");
+    if(label&&label.textContent!=="📷 Plan scannen")label.textContent="📷 Plan scannen";
+    if(toggle){
+      if(!toggle.classList.contains("kggPhoneLiquidChevron"))toggle.classList.add("kggPhoneLiquidChevron");
+      if(toggle.textContent!=="⌃")toggle.textContent="⌃";
+      if(toggle.getAttribute("aria-label")!=="Foto-Optionen oeffnen")toggle.setAttribute("aria-label","Foto-Optionen oeffnen");
+      if(toggle.getAttribute("title")!=="Foto-Optionen")toggle.setAttribute("title","Foto-Optionen");
+    }
+    var finish=byId("finishBtn");
+    if(finish&&!finish.classList.contains("kggPhoneLiquidAction"))finish.classList.add("kggPhoneLiquidAction");
+  }
+  function enhancePhoneAdminMenu(){
+    var panel=byId("kggPhoneAdminMenuPanel");
+    if(!panel||panel.dataset.kggV044Menu==="1")return;
+    panel.dataset.kggV044Menu="1";
+    panel.innerHTML=
+      '<div class="kggPhoneMenuGroup" data-kgg-phone-menu-group="update"><div class="kggPhoneMenuGroupTitle">Update</div><button id="kggPhoneUpdateCenterMenu" type="button">Update-Zentrale</button></div>'+
+      '<div class="kggPhoneMenuGroup" data-kgg-phone-menu-group="sync-share"><div class="kggPhoneMenuGroupTitle">Sync &amp; Weitergeben</div><button id="kggPhoneDeviceSyncMenu" type="button">Geräte-Sync</button><button id="kggPhoneTherapistShareMenu" type="button">Kolleg:innen-App weitergeben</button><button id="kggPhoneBankShareMenu" type="button">Übungsdatenbank teilen</button></div>'+
+      '<div class="kggPhoneMenuGroup" data-kgg-phone-menu-group="admin"><div class="kggPhoneMenuGroupTitle">Admin</div><button id="kggPhoneAdminConfigMenu" type="button">Admin-Konfig</button></div>';
+    bind("kggPhoneUpdateCenterMenu",openReleaseCenter);
+    bind("kggPhoneDeviceSyncMenu",openDeviceSync);
+    bind("kggPhoneTherapistShareMenu",openTherapistShare);
+    bind("kggPhoneBankShareMenu",openSharedBank);
+    bind("kggPhoneAdminConfigMenu",openAdminConfig);
+  }
+  function install(){
+    enhanceScanButton();
+    enhancePhoneAdminMenu();
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});
+  else install();
+  [80,220,600,1200].forEach(function(ms){setTimeout(install,ms);});
+  if(document.body){
+    new MutationObserver(function(){install();}).observe(document.body,{childList:true,subtree:true});
+  }
+  window.KGG_UI_PHONE_LIQUID_ACTIONS_V044={patchId:PATCH_ID,install:install};
+})();
+</script>
+<!-- KGG PATCH END kgg-v044-phone-liquid-actions -->
+
+<!-- SOURCE FILE: kgg-update/src/patches/v045-phone-drawer-bank-align.html -->
+
+<!-- KGG PATCH START kgg-v045-phone-drawer-bank-align -->
+<style id="kgg-v045-phone-drawer-bank-align-style">
+  @media(max-width:759px){
+    #createPanel{
+      margin-top:clamp(28px,5dvh,44px)!important;
+    }
+    body.kggPhoneDrawerSafeOpen .kggPhoneDrawerBackdrop{
+      opacity:1!important;
+      pointer-events:auto!important;
+    }
+    body.kggPhoneDrawerSafeOpen #recentToggle.phoneButtonFloat,
+    body.kggPhoneDrawerSafeOpen #packageToggle.phoneButtonFloat{
+      position:fixed!important;
+      left:16px!important;
+      right:16px!important;
+      bottom:calc(12px + env(safe-area-inset-bottom))!important;
+      z-index:92!important;
+      width:auto!important;
+      min-width:0!important;
+      height:58px!important;
+      min-height:58px!important;
+      border-radius:18px!important;
+      justify-content:center!important;
+      background:#fff!important;
+      color:var(--ink)!important;
+      border:1px solid rgba(220,227,235,.96)!important;
+      box-shadow:0 22px 54px rgba(7,16,39,.26),0 5px 14px rgba(7,16,39,.12)!important;
+    }
+    body.kggPhoneDrawerSafeOpen #recentList:not(.hidden),
+    body.kggPhoneDrawerSafeOpen #packageList:not(.hidden){
+      position:fixed!important;
       left:16px!important;
       right:16px!important;
       bottom:calc(86px + env(safe-area-inset-bottom))!important;
@@ -341,87 +424,4 @@
     }
     if(!hub.classList.contains("kggPhoneScanMenuInline"))hub.classList.add("kggPhoneScanMenuInline");
     if(menu.parentElement!==hub)hub.appendChild(menu);
-    if(toggle){
-      if(toggle.textContent!=="\u2303")toggle.textContent="\u2303";
-      if(toggle.getAttribute("aria-label")!=="Foto-Optionen oeffnen")toggle.setAttribute("aria-label","Foto-Optionen oeffnen");
-      if(toggle.getAttribute("title")!=="Foto-Optionen")toggle.setAttribute("title","Foto-Optionen");
-    }
-  }
-  function install(){
-    if(!document.body)return;
-    placeAdminMenu();
-    placeInlinePhotoMenu();
-  }
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});
-  else install();
-  [80,220,600,1200].forEach(function(ms){setTimeout(install,ms);});
-  window.addEventListener("resize",function(){setTimeout(install,90);},{passive:true});
-  window.addEventListener("orientationchange",function(){setTimeout(install,180);},{passive:true});
-  if(document.body){
-    new MutationObserver(function(){install();}).observe(document.body,{childList:true,subtree:true});
-  }
-  window.KGG_UI_PHONE_MINI_FIX_V050={patchId:PATCH_ID,install:install};
-})();
-</script>
-<!-- KGG PATCH END kgg-v050-phone-ui-mini-fix -->
-
-<!-- SOURCE FILE: kgg-update/src/patches/v051-android-qr-pdf-bridge.html -->
-
-<!-- KGG PATCH START kgg-v051-android-qr-pdf-bridge -->
-<script id="kgg-v051-android-qr-pdf-bridge-probe">
-window.KGG_ANDROID_QR_PDF_BRIDGE_V051={
-  patchId:'kgg-v051-android-qr-pdf-bridge',
-  qrPrintButtonId:'kggAdminMenuQrPrint',
-  androidShellVersion:'v399'
-};
-</script>
-<!-- KGG PATCH END kgg-v051-android-qr-pdf-bridge -->
-
-<!-- SOURCE FILE: kgg-update/src/patches/v052-pdf-plan-thumbnails.html -->
-
-<!-- KGG PATCH START kgg-v052-pdf-plan-thumbnails -->
-<script id="kgg-v052-pdf-plan-thumbnails-probe">
-window.KGG_PDF_PLAN_THUMBNAILS_V052={
-  patchId:'kgg-v052-pdf-plan-thumbnails',
-  snapshotHelper:'attachKggPdfExerciseThumbnails',
-  drawTarget:'drawKggExerciseBox'
-};
-</script>
-<!-- KGG PATCH END kgg-v052-pdf-plan-thumbnails -->
-
-<!-- SOURCE FILE: kgg-update/src/patches/v053-ui-tablet-stability.html -->
-
-<!-- KGG PATCH START kgg-v053-ui-tablet-stability -->
-<style id="kgg-v053-ui-tablet-stability-style">
-  @media(max-width:759px){
-    body.phoneTextFocus #scanHub,
-    body.phoneTextFocus.kggPhoneHasPlan #scanHub{
-      bottom:calc(12px + env(safe-area-inset-bottom))!important;
-      transform:translateY(var(--kgg-phone-keyboard-inset,0px))!important;
-    }
-    body.phoneTextFocus.kggPhoneHasPlan #createPanel.planMode #finishBtn:not(.hidden){
-      bottom:calc(12px + env(safe-area-inset-bottom))!important;
-      transform:translateY(var(--kgg-phone-keyboard-inset,0px))!important;
-    }
-    body.adminMode #createPanel.planMode .planHeader{
-      padding-right:54px!important;
-      grid-template-columns:minmax(0,1fr) auto!important;
-    }
-    body.adminMode #createPanel.planMode .planHeader #kggPhoneAdminMenu{
-      position:absolute!important;
-      top:4px!important;
-      right:0!important;
-      left:auto!important;
-      transform:none!important;
-      z-index:76!important;
-      margin:0!important;
-    }
-    body.adminMode #createPanel.planMode .planHeader #savePackageBtn:not(.hidden){
-      margin-right:8px!important;
-    }
-  }
-
-  @media(min-width:760px){
-    body.tabletLayoutCustom #scanHub{
-      position:relative!important;
 ```

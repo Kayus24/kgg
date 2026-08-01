@@ -19,7 +19,8 @@
     "kgg-v051-android-qr-pdf-bridge",
     "kgg-v052-pdf-plan-thumbnails",
     "kgg-v053-ui-tablet-stability",
-    "kgg-v060-tablet-html-release-label"
+    "kgg-v060-tablet-html-release-label",
+    "kgg-v061-cross-app-live-qr-camera"
   ],
   "parts": [
     "base-head.html",
@@ -38,6 +39,7 @@
     "patches/v052-pdf-plan-thumbnails.html",
     "patches/v053-ui-tablet-stability.html",
     "patches/v060-tablet-html-release-label.html",
+    "patches/v061-cross-app-live-qr-camera.html",
     "footer.html"
   ]
 }
@@ -89,30 +91,30 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "grossdruck-pdf-readable-images",
     "grossdruck-readability-beta",
     "059-ui-scaler-push-canary",
-    "tablet-html-release-label"
+    "tablet-html-release-label",
+    "cross-app-live-qr-camera"
   ],
   "currentVersion": {
-    "versionCode": 60,
-    "versionName": "1.0.60-tablet-html-release-label",
-    "lastPatchId": "kgg-v060-tablet-html-release-label",
+    "versionCode": 61,
+    "versionName": "1.0.61-cross-app-live-qr-camera",
+    "lastPatchId": "kgg-v061-cross-app-live-qr-camera",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v060-tablet-html-release-label",
+  "latestPatchId": "kgg-v061-cross-app-live-qr-camera",
   "lastUpdateIntent": {
-    "id": "kgg-v060-tablet-html-release-label",
-    "summary": "Zeigt den Namen der aktuell geladenen HTML-Version unten rechts im ausgefahrenen Tablet-Menue.",
+    "id": "kgg-v061-cross-app-live-qr-camera",
+    "summary": "Uebernimmt den bewaehrten kontinuierlichen Patienten-QR-Scan mit lokalem jsQR-Fallback und manueller Papieraufnahme in die Admin-Test-App.",
     "touched": [
-      "Tablet-Menue"
+      "Scan/OCR",
+      "QR/Patienten-App",
+      "Android/APK"
     ],
     "notTouched": [
       "PDF",
-      "QR/Patienten-App",
-      "Scan/OCR",
       "Parser",
       "Plan-State",
       "Medien/Upload",
       "API-Key-Logik",
-      "Android/APK",
       "GitHub Manifest",
       "Handy-Layout"
     ]
@@ -159,30 +161,30 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "grossdruck-pdf-readable-images",
     "grossdruck-readability-beta",
     "059-ui-scaler-push-canary",
-    "tablet-html-release-label"
+    "tablet-html-release-label",
+    "cross-app-live-qr-camera"
   ],
   "currentVersion": {
-    "versionCode": 60,
-    "versionName": "1.0.60-tablet-html-release-label",
-    "lastPatchId": "kgg-v060-tablet-html-release-label",
+    "versionCode": 61,
+    "versionName": "1.0.61-cross-app-live-qr-camera",
+    "lastPatchId": "kgg-v061-cross-app-live-qr-camera",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v060-tablet-html-release-label",
+  "latestPatchId": "kgg-v061-cross-app-live-qr-camera",
   "lastUpdateIntent": {
-    "id": "kgg-v060-tablet-html-release-label",
-    "summary": "Zeigt den Namen der aktuell geladenen HTML-Version unten rechts im ausgefahrenen Tablet-Menue.",
+    "id": "kgg-v061-cross-app-live-qr-camera",
+    "summary": "Uebernimmt den bewaehrten kontinuierlichen Patienten-QR-Scan mit lokalem jsQR-Fallback und manueller Papieraufnahme in die Admin-Test-App.",
     "touched": [
-      "Tablet-Menue"
+      "Scan/OCR",
+      "QR/Patienten-App",
+      "Android/APK"
     ],
     "notTouched": [
       "PDF",
-      "QR/Patienten-App",
-      "Scan/OCR",
       "Parser",
       "Plan-State",
       "Medien/Upload",
       "API-Key-Logik",
-      "Android/APK",
       "GitHub Manifest",
       "Handy-Layout"
     ]
@@ -196,8 +198,39 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 60,
+  "latestVersionCode": 61,
   "entries": [
+    {
+      "versionCode": 61,
+      "versionName": "1.0.61-cross-app-live-qr-camera",
+      "patchId": "kgg-v061-cross-app-live-qr-camera",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "PAT Live-QR-Kamera fuer Admin",
+      "reason": "Uebernimmt den bewaehrten kontinuierlichen Patienten-QR-Scan mit lokalem jsQR-Fallback und manueller Papieraufnahme in die Admin-Test-App.",
+      "whatChanged": [
+        "Uebernimmt den bewaehrten kontinuierlichen Patienten-QR-Scan mit lokalem jsQR-Fallback und manueller Papieraufnahme in die Admin-Test-App."
+      ],
+      "touchedAreas": [
+        "Scan/OCR",
+        "QR/Patienten-App",
+        "Android/APK"
+      ],
+      "notTouched": [
+        "PDF",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Max hat den PAT-Scanner-Port und den begrenzten Cross-App-Kamerazugriff am 2026-08-01 ausdruecklich beauftragt."
+    },
     {
       "versionCode": 60,
       "versionName": "1.0.60-tablet-html-release-label",
@@ -389,39 +422,6 @@ Before editing this app, any LLM/agent/human should read these blocks:
         "Scan/OCR parser",
         "Plan-State",
         "PDF generation",
-        "Sync data model",
-        "API-Key-Logik"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "githubPages": "pending",
-        "notes": "Critical plus UI-Stability Regression vor Release."
-      }
-    },
-    {
-      "versionCode": 54,
-      "versionName": "1.0.54-patient-qr-latest",
-      "patchId": "kgg-v054-patient-qr-latest",
-      "status": "active",
-      "type": "local-html-patch",
-      "title": "Patienten-QR nutzt aktuelle Patient-App",
-      "reason": "Trainingsplan-QR-Codes duerfen nicht auf das alte Root-Bundle der ersten Patient-Web-App zeigen.",
-      "whatChanged": [
-        "Default-Patienten-App-Basis zeigt auf kgg-update/index.html als aktuellen Patient-Hash-Renderer.",
-        "Logic-Smoke prueft, dass der QR-Link nicht mehr media-inline-bundle-7 verwendet."
-      ],
-      "touchedAreas": [
-        "Patient QR base URL",
-        "Patient share URL tests",
-        "Source Truth",
-        "version.json"
-      ],
-      "notTouched": [
-        "Parser",
-        "Scan/OCR parser",
-        "Plan-State",
-        "PDF generation",
-        "Android/APK",
         "Sync data model",
         "API-Key-Logik"
 ```

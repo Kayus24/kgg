@@ -24,6 +24,7 @@ PREVIEW_INDEX = Path("previews/index.json")
 MAX_PAYLOAD_BYTES = 60_000
 MAX_OPERATIONS = 4
 MAX_REPLACEMENT_BYTES = 40_000
+PATIENT_APPROVAL_PHRASE = "Gut für PAT live"
 
 VERSION_MARKERS = (
     "const APP_VERSION",
@@ -572,21 +573,23 @@ def run(
     preview_root: Path | None,
     github_output: str | None,
     root: Path = ROOT,
+    approval_phrase: str = "",
 ) -> None:
     digest = payload_hash(payload)
     accepted_preview: dict[str, Any] | None = None
     if mode in {"create_pr", "publish_patient_live"}:
+        if approval_phrase.strip() != PATIENT_APPROVAL_PHRASE:
+            fail(f"{mode} requires Max's exact approval phrase: {PATIENT_APPROVAL_PHRASE}")
         if preview_root is None:
             fail(f"--preview-root is required for {mode}")
         accepted_preview = verify_preview(preview_root, payload, digest, root)
 
     with tempfile.TemporaryDirectory(prefix="kgg-patient-gate-") as temp_dir:
         temp_root = Path(temp_dir) / "candidate"
-        shutil.copytree(
-            root,
-            temp_root,
-            ignore=shutil.ignore_patterns(".git", "tmp", "node_modules", "__pycache__"),
-        )
+        temp_root.mkdir()
+        for source in root.iterdir():
+            if source.is_file():
+                shutil.copy2(source, temp_root / source.name)
         changed = apply_operations(payload, temp_root)
         version = bump_patient_version(payload, temp_root)
 
@@ -663,6 +666,13 @@ def self_test(root: Path = ROOT) -> None:
     }
     validated = validate_payload(payload, root)
     run(validated, "validate_only", None, None, root)
+    try:
+        run(validated, "create_pr", None, None, root)
+    except GateError as exc:
+        if PATIENT_APPROVAL_PHRASE not in str(exc):
+            raise
+    else:
+        fail("self-test expected the exact Patient PR/live approval phrase")
 
     invalid_path = json.loads(json.dumps(payload))
     invalid_path["operations"][0]["path"] = "therapist-app/admin.html"
@@ -736,6 +746,7 @@ def main() -> int:
     parser.add_argument("--payload-file", type=Path)
     parser.add_argument("--preview-root", type=Path)
     parser.add_argument("--github-output", default=os.environ.get("GITHUB_OUTPUT"))
+    parser.add_argument("--approval-phrase", default="")
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
 
@@ -751,6 +762,7 @@ def main() -> int:
             args.mode,
             args.preview_root.resolve() if args.preview_root else None,
             args.github_output,
+            approval_phrase=args.approval_phrase,
         )
         print(
             "KGG patient GPT write gate OK: "

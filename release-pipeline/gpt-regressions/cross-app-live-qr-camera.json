@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "requestId": "cross-app-live-qr-camera",
+  "patchId": "kgg-v061-cross-app-live-qr-camera",
+  "assertions": [
+    {
+      "kind": "contains",
+      "value": "object-fit:contain"
+    },
+    {
+      "kind": "contains",
+      "value": "typeof scan.handleQrRaw==='function'"
+    },
+    {
+      "kind": "contains",
+      "value": "audio:false"
+    },
+    {
+      "kind": "contains",
+      "value": "facingMode:{ideal:'environment'}"
+    },
+    {
+      "kind": "not_contains",
+      "value": "zoom:{exact:"
+    },
+    {
+      "kind": "not_contains",
+      "value": "audio:true"
+    }
+  ]
+}

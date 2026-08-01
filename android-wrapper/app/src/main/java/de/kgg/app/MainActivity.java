@@ -28,6 +28,7 @@ import android.print.PrintDocumentInfo;
 import android.print.PrintManager;
 import android.util.Base64;
 import android.webkit.ValueCallback;
+import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -68,6 +69,8 @@ import java.util.Locale;
 public class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST = 4201;
     private static final int CAMERA_PERMISSION_REQUEST = 4202;
+    private static final int WEB_CAMERA_PERMISSION_REQUEST = 4203;
+    private static final int WEB_VIDEO_CAPTURE_VERSION = 1;
     private static final int RELEASE_HTML_REQUEST = 4301;
     private static final int ANDROID_SHELL_VERSION = 401;
     private static final int BUNDLED_WEB_VERSION = 419;
@@ -112,6 +115,7 @@ public class MainActivity extends Activity {
     private WebView webView;
     private ValueCallback<Uri[]> filePathCallback;
     private WebChromeClient.FileChooserParams pendingFileChooserParams;
+    private PermissionRequest pendingWebCameraRequest;
     private Uri cameraCaptureUri;
     private String nextFileChooserMode = "";
     private boolean pendingForceCamera;
@@ -193,6 +197,20 @@ public class MainActivity extends Activity {
         });
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
+            public void onPermissionRequest(PermissionRequest request) {
+                runOnUiThread(() -> handleWebPermissionRequest(request));
+            }
+
+            @Override
+            public void onPermissionRequestCanceled(PermissionRequest request) {
+                runOnUiThread(() -> {
+                    if (pendingWebCameraRequest == request) {
+                        pendingWebCameraRequest = null;
+                    }
+                });
+            }
+
+            @Override
             public boolean onShowFileChooser(
                     WebView webView,
                     ValueCallback<Uri[]> filePathCallback,
@@ -247,9 +265,69 @@ public class MainActivity extends Activity {
                 || checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
     }
 
+    private boolean requestsVideoCapture(PermissionRequest request) {
+        if (request == null || request.getResources() == null) {
+            return false;
+        }
+        for (String resource : request.getResources()) {
+            if (PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(resource)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isTrustedLocalWebRequest(PermissionRequest request) {
+        if (request == null || request.getOrigin() == null || webView == null) {
+            return false;
+        }
+        String scheme = request.getOrigin().getScheme();
+        String currentUrl = webView.getUrl();
+        String trustedUrl = localWebAppUrl();
+        return "file".equalsIgnoreCase(scheme)
+                && currentUrl != null
+                && trustedUrl != null
+                && (currentUrl.equals(trustedUrl)
+                    || currentUrl.startsWith(trustedUrl + "#")
+                    || currentUrl.startsWith(trustedUrl + "?"));
+    }
+
+    private void handleWebPermissionRequest(PermissionRequest request) {
+        if (!isTrustedLocalWebRequest(request) || !requestsVideoCapture(request)) {
+            request.deny();
+            return;
+        }
+        if (pendingWebCameraRequest != null && pendingWebCameraRequest != request) {
+            pendingWebCameraRequest.deny();
+        }
+        if (hasCameraPermission()) {
+            request.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE});
+            return;
+        }
+        pendingWebCameraRequest = request;
+        requestPermissions(new String[]{Manifest.permission.CAMERA}, WEB_CAMERA_PERMISSION_REQUEST);
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == WEB_CAMERA_PERMISSION_REQUEST) {
+            PermissionRequest request = pendingWebCameraRequest;
+            pendingWebCameraRequest = null;
+            if (request == null) {
+                return;
+            }
+            boolean granted = grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    && isTrustedLocalWebRequest(request);
+            if (granted) {
+                request.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE});
+            } else {
+                request.deny();
+                Toast.makeText(this, "Kamera-Berechtigung fehlt", Toast.LENGTH_SHORT).show();
+            }
+            return;
+        }
         if (requestCode != CAMERA_PERMISSION_REQUEST) {
             return;
         }
@@ -330,6 +408,14 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void setNextFileChooserMode(String mode) {
             MainActivity.this.setNextFileChooserMode(mode);
+        }
+
+        @JavascriptInterface
+        public String getCameraCapabilities() {
+            return "{\"available\":true,\"platform\":\"android\","
+                    + "\"webVideoCapture\":true,\"webVideoCaptureVersion\":"
+                    + WEB_VIDEO_CAPTURE_VERSION
+                    + ",\"cameraPermission\":" + hasCameraPermission() + "}";
         }
 
         @JavascriptInterface

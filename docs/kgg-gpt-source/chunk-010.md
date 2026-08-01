@@ -4,6 +4,39 @@
 - Lines: 4201-4620
 
 ```html
+        font-size:clamp(10px,calc(16px * var(--kgg-tablet-ui-scale,1)),30px)!important;
+        min-height:clamp(38px,calc(48px * var(--kgg-tablet-ui-scale,1)),86px)!important;
+      }
+      .tabletLayoutFreeTools{
+        width:106px!important;
+        padding:14px 10px!important;
+        gap:12px!important;
+        border-radius:38px!important;
+      }
+      .tabletLayoutFreeTools button{
+        width:84px!important;
+        height:66px!important;
+        min-height:66px!important;
+        font-size:40px!important;
+        border-radius:28px!important;
+      }
+      #tabletLayoutReset{
+        height:54px!important;
+        min-height:54px!important;
+        font-size:30px!important;
+        background:#fff!important;
+        color:#38475b!important;
+        border:1px solid rgba(220,227,235,.95)!important;
+      }
+      .tabletScaleValue{
+        min-height:126px!important;
+        font-size:15px!important;
+      }
+      .tabletLayoutFreeTools::before{
+        top:92px!important;
+        bottom:154px!important;
+      }
+      .tabletLayoutControls,
       .packageLayoutSlot .tabletLayoutControls{
         min-width:82px!important;
       }
@@ -391,37 +424,4 @@
 }
 
 @media (min-width:760px){
-  .scanHub{
-    grid-template-columns:58px minmax(148px,.78fr) minmax(148px,.78fr) minmax(140px,.82fr) minmax(170px,1fr)!important;
-    align-items:stretch!important;
-    column-gap:12px!important;
-  }
-  body.colleagueMode .scanHub{
-    grid-template-columns:58px minmax(150px,.82fr) minmax(150px,.82fr) minmax(170px,1fr)!important;
-  }
-  .tabletMenuBtn{
-    display:inline-grid!important;
-    place-items:center;
-    grid-column:1!important;
-    grid-row:1!important;
-    width:54px;
-    min-width:54px;
-    min-height:54px;
-    border:1.4px solid rgba(10,16,36,.14);
-    border-radius:18px;
-    background:#fff;
-    box-shadow:0 12px 26px rgba(10,16,36,.10), inset 0 1px 0 rgba(255,255,255,.78);
-    cursor:pointer;
-    touch-action:manipulation;
-  }
-  .tabletMenuBtn span{
-    display:block;
-    width:25px;
-    height:3px;
-    border-radius:999px;
-    background:#0a1024;
-    margin:3px 0;
-    transition:transform .18s ease, opacity .18s ease;
-  }
-  body.tabletMenuOpen .tabletMenuBtn span:nth-child(1){transform:translateY(9px) rotate(45deg);}
 ```

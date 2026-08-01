@@ -48,7 +48,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v060 Tablet HTML Release Label</title>
+  <title>KGG Update v061 PAT Live-QR-Kamera fuer Admin</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -15765,11 +15765,11 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
 
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v060_tablet_html_release_label';
+  const VERSION='KGG_GITHUB_UPDATE_v061_cross_app_live_qr_camera';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v060","buildTime":"2026-07-13T12:04:29Z","buildCode":"module-v060-tablet-html-release-label","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v061","buildTime":"2026-08-01T12:15:33Z","buildCode":"module-v061-cross-app-live-qr-camera","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -21494,14 +21494,13 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     if(parts.length>=2)return parts[0]+' '+parts[1].charAt(0)+'.';
     return value.slice(0,16);
   }
-  async function scanAcceptFile(file,kind){
+  async function scanAcceptQrRaw(raw,file,hit,strict){
     const forceNew=scanState.next==='plan'||!scanState.jobs.length;
     let job=forceNew?scanNewJob('paper'):scanCurrentJob();
-    const qr=await scanQrFromImageFile(file);
-    if(qr.raw){
+    if(raw){
       setScanStatus('QR erkannt: Inhalt wird gelesen ...');
       try{
-        const parsed=parseScannedQrRaw(qr.raw);
+        const parsed=parseScannedQrRaw(raw);
         if(parsed&&(parsed.type==='KGGCFG1'||parsed.type==='KGGCFG2')){
           setScanStatus(parsed.type==='KGGCFG2'?'QR erkannt: verschluesselter API-Key / Konfig-Transfer. Transfer-Code wird abgefragt ...':'QR erkannt: API-Key / Konfig-Transfer wird lokal gespeichert ...');
           const idx=scanState.jobs.indexOf(job);
@@ -21531,13 +21530,21 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
         job.type='qr';
         job.pages.push(scanFileMeta(file));
         job.result=qrParsedToScanResult(parsed);
-        job.result.qrHit=qr.hit||null;
+        job.result.qrHit=hit||null;
         job.status='ready';
         job.short=job.short||patientShortGuess();
         scanState.next='plan';
         return job;
       }catch(err){
         setScanStatus('QR erkannt, aber Format nicht lesbar: '+(err&&err.message||err));
+        if(strict){
+          const idx=scanState.jobs.indexOf(job);
+          if(idx>=0&&!job.pages.length&&!job.result&&job.status==='new'){
+            scanState.jobs.splice(idx,1);
+            scanState.activeIndex=Math.max(0,Math.min(scanState.activeIndex,scanState.jobs.length-1));
+          }
+          return {type:'invalidQr',error:String(err&&err.message||err)};
+        }
         if(job.pages.length||job.result){job=scanNewJob('paper');}
         job.type='paper';
         job.pages.push(scanFileMeta(file));
@@ -21546,6 +21553,13 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
         return job;
       }
     }
+    return null;
+  }
+  async function scanAcceptFile(file,kind){
+    const qr=await scanQrFromImageFile(file);
+    if(qr.raw)return scanAcceptQrRaw(qr.raw,file,qr.hit,false);
+    const forceNew=scanState.next==='plan'||!scanState.jobs.length;
+    let job=forceNew?scanNewJob('paper'):scanCurrentJob();
     if(forceNew||job.type==='qr'||job.result){job=forceNew?job:scanNewJob('paper');}
     job.type='paper';
     job.pages.push(scanFileMeta(file));
@@ -21961,6 +21975,42 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
         renderScanPreview();
       }
       return scanStateSnapshot();
+    },
+    async handleQrRaw(raw,source){
+      const value=String(raw||'').trim();
+      if(!value)return {type:'invalidQr',error:'empty'};
+      scanState.busy=true;
+      scanState.lastError='';
+      scanState.decision=false;
+      setScanStatus('QR erkannt: Inhalt wird gelesen ...');
+      renderScanPreview();
+      try{
+        const accepted=await scanAcceptQrRaw(value,null,{source:String(source||'live-camera')},true);
+        if(!accepted||accepted.type==='invalidQr')return accepted||{type:'invalidQr',error:'unknown'};
+        if(accepted.type==='syncInvite'||accepted.type==='syncBundle'||accepted.type==='configTransfer'||accepted.type==='configTransferCancelled'){
+          scanState.decision=false;
+          state.scanPanelOpen='plan';
+        }else{
+          scanState.decision=true;
+          state.scanPanelOpen='scanned';
+        }
+        save();
+        render();
+        return {type:accepted.type||'qr',accepted:true};
+      }catch(err){
+        scanState.lastError='QR-Scan fehlgeschlagen: '+(err&&err.message||err);
+        setScanStatus(scanState.lastError);
+        return {type:'invalidQr',error:String(err&&err.message||err)};
+      }finally{
+        scanState.busy=false;
+        renderScanPreview();
+      }
+    },
+    getCameraCapabilities(){
+      const web=!!(navigator.mediaDevices&&typeof navigator.mediaDevices.getUserMedia==='function');
+      let nativeCaps=null;
+      try{nativeCaps=window.KGGNativeCamera&&typeof window.KGGNativeCamera.getCapabilities==='function'?window.KGGNativeCamera.getCapabilities():null;}catch(err){}
+      return {webVideoCapture:web,native:nativeCaps||null,barcodeDetector:'BarcodeDetector' in window,jsQR:typeof window.jsQR==='function'};
     },
     async start(){
       scanState.decision=false;

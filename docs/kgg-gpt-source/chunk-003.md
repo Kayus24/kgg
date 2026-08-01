@@ -4,6 +4,39 @@
 - Lines: 1261-1680
 
 ```html
+        "Scan-Kamera",
+        "Parser",
+        "Android-Wrapper",
+        "Tablet core layout/breakpoints",
+        "Plan-State",
+        "Storage"
+      ],
+      "testStatus": {
+        "tabletMenu": "pending",
+        "phoneMenu": "pending",
+        "debugReportCopy": "pending",
+        "adminActions": "pending"
+      },
+      "rollbackNote": "Remove or supersede only with explicit new admin debug menu patch; do not silently delete feedback tooling.",
+      "createdAt": "2026-06-20T22:34:33.470984+00:00"
+    },
+    {
+      "versionCode": 9,
+      "versionName": "1.0.7-patch-retention-changelog-guard",
+      "patchId": "web-v009-patch-retention-changelog-guard",
+      "status": "active",
+      "type": "github-web-update",
+      "title": "Patch-Retention und Changelog-Größenwarnung",
+      "reason": "Max will verhindern, dass spätere LLMs den letzten funktionalen Patch einer Funktion versehentlich löschen, und möchte gewarnt werden, wenn der interne Changelog zu groß wird.",
+      "whatChanged": [
+        "Patch-Retention-Policy direkt in kgg-source-truth eingebettet.",
+        "kgg-patch-rules als eigener maschinenlesbarer JSON-Block ergänzt.",
+        "Changelog-Größenpolicy mit Entry- und Byte-Warnschwellen ergänzt.",
+        "Kleiner KGG_PATCH_GUARD im Browser ergänzt, der Source Truth/Changelog/Patch Rules auslesen und Changelog-Größe prüfen kann.",
+        "LLM-Regeln erweitert: Patches nicht still löschen; bei Konflikten oder Größenwarnungen Max fragen."
+      ],
+      "touchedAreas": [
+        "HTML embedded metadata",
         "Source Truth",
         "Changelog",
         "Patch rules",
@@ -90,7 +123,7 @@
       "handoffNote": "Lokale LLMs können index.html lesen und finden kgg-source-truth sowie kgg-changelog direkt im Code."
     }
   ],
-  "latestVersionName": "1.0.60-tablet-html-release-label"
+  "latestVersionName": "1.0.61-cross-app-live-qr-camera"
 }
 </script>
 <!-- END kgg-changelog -->
@@ -204,7 +237,7 @@
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v060-tablet-html-release-label",
+  "lastUpdatedByPatchId": "kgg-v061-cross-app-live-qr-camera",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
@@ -343,7 +376,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v060 Tablet HTML Release Label</title>
+  <title>KGG Update v061 PAT Live-QR-Kamera fuer Admin</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -391,37 +424,4 @@
       .panel .inner{display:grid;grid-template-columns:minmax(360px,430px) minmax(0,1fr);grid-template-rows:auto auto auto auto minmax(0,1fr);gap:10px 14px;align-items:start;min-height:560px}
       #baseToggle{grid-column:1/-1;grid-row:1}
       #baseFields{grid-column:1/-1;grid-row:2}
-      #inputLabel{grid-column:1;grid-row:3;margin:0}
-      #dbTitle{grid-column:1;grid-row:4}
-      #inputWrap{grid-column:1;grid-row:5}
-      #bankArea{grid-column:1;grid-row:6;min-width:0}
-      #currentPlanBlock{grid-column:2;grid-row:3/7;align-self:stretch;min-width:0;border:1px solid var(--line);border-radius:18px;background:#fbfdff;padding:12px;box-shadow:var(--shadow)}
-      #currentPlanBlock.hidden{display:block!important;visibility:hidden;pointer-events:none}
-      #currentPlanBlock .label{margin-top:0;font-size:16px}
-      #planList{max-height:530px;overflow:auto;padding-right:2px}
-      #exerciseInput{min-height:118px}
-      .bankArea.bankOpen #bankContent{margin-top:8px}
-      .bankRows{max-height:420px}
-      .tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,.48fr);gap:10px;margin-top:0}
-      .planActions{grid-column:1;min-height:58px}
-      #recentList{grid-column:1/-1}
-      #packageToggle{grid-column:2;grid-row:1;height:58px;min-height:58px}
-      #packageList{grid-column:1/-1}
-      .bottomPad{grid-column:1;height:12px}
-      .footerActions{width:min(100%,1180px)}
-      .modal{align-items:center}
-      .sheet{width:min(92vw,620px);border-radius:24px}
-    }
-    @media (min-width:760px){
-      .app{min-height:100vh}
-      .scanHub{grid-template-columns:minmax(190px,.9fr) minmax(190px,.9fr);align-self:start}
-      .panel{min-height:calc(100vh - 124px)}
-      .panel .inner{grid-template-columns:minmax(380px,440px) minmax(0,1fr);grid-template-rows:auto auto auto auto auto minmax(0,1fr);min-height:0;height:min(72vh,690px);align-content:start}
-      #baseFields:not(.hidden){display:grid;grid-template-columns:1fr 1fr;gap:10px}
-      #baseFields .field{margin:0}
-      #baseFields .field:last-child{grid-column:1/-1}
-      #inputWrap{min-height:0;align-self:start}
-      #exerciseInput{min-height:112px;max-height:190px}
-      #bankArea{align-self:stretch;overflow:hidden}
-      #bankArea.bankOpen{max-height:100%;display:flex;flex-direction:column}
 ```

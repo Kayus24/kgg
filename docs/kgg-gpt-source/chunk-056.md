@@ -4,6 +4,89 @@
 - Lines: 23521-23940
 
 ```html
+      },
+    async handleInput(input,kind){
+      const normalizedKind=rememberScanInputKind(kind||lastScanInputKind());
+      const files=Array.from(input&&input.files||[]).filter(Boolean);
+      try{if(input)input.value='';}catch(err){}
+      if(!files.length)return scanStateSnapshot();
+      scanState.busy=true;
+      scanState.lastError='';
+      scanState.decision=false;
+      setScanStatus(files.length===1?'Prüfe: '+(files[0].name||'Kamera-Foto'):files.length+' Bilder werden vorbereitet …');
+      renderScanPreview();
+      try{
+        let syncCodeCount=0;
+        let acceptedCount=0;
+        for(const file of files){
+          const accepted=await scanAcceptFile(file,normalizedKind);
+          if(accepted&&(accepted.type==='syncInvite'||accepted.type==='syncBundle'))syncCodeCount++;
+          else if(accepted)acceptedCount++;
+        }
+        if(syncCodeCount&&!acceptedCount){
+          scanState.decision=false;
+          state.scanPanelOpen='plan';
+          save();
+          render();
+          return scanStateSnapshot();
+        }
+        scanState.decision=true;
+        state.scanPanelOpen='scanned';
+        save();
+        render();
+        setScanStatus('Foto hinzugefügt. Bitte entscheiden.');
+      }catch(err){
+        scanState.lastError='Scan fehlgeschlagen: '+(err&&err.message||err);
+        setScanStatus(scanState.lastError);
+      }finally{
+        scanState.busy=false;
+        renderScanPreview();
+      }
+      return scanStateSnapshot();
+    },
+    async handleQrRaw(raw,source){
+      const value=String(raw||'').trim();
+      if(!value)return {type:'invalidQr',error:'empty'};
+      scanState.busy=true;
+      scanState.lastError='';
+      scanState.decision=false;
+      setScanStatus('QR erkannt: Inhalt wird gelesen ...');
+      renderScanPreview();
+      try{
+        const accepted=await scanAcceptQrRaw(value,null,{source:String(source||'live-camera')},true);
+        if(!accepted||accepted.type==='invalidQr')return accepted||{type:'invalidQr',error:'unknown'};
+        if(accepted.type==='syncInvite'||accepted.type==='syncBundle'||accepted.type==='configTransfer'||accepted.type==='configTransferCancelled'){
+          scanState.decision=false;
+          state.scanPanelOpen='plan';
+        }else{
+          scanState.decision=true;
+          state.scanPanelOpen='scanned';
+        }
+        save();
+        render();
+        return {type:accepted.type||'qr',accepted:true};
+      }catch(err){
+        scanState.lastError='QR-Scan fehlgeschlagen: '+(err&&err.message||err);
+        setScanStatus(scanState.lastError);
+        return {type:'invalidQr',error:String(err&&err.message||err)};
+      }finally{
+        scanState.busy=false;
+        renderScanPreview();
+      }
+    },
+    getCameraCapabilities(){
+      const web=!!(navigator.mediaDevices&&typeof navigator.mediaDevices.getUserMedia==='function');
+      let nativeCaps=null;
+      try{nativeCaps=window.KGGNativeCamera&&typeof window.KGGNativeCamera.getCapabilities==='function'?window.KGGNativeCamera.getCapabilities():null;}catch(err){}
+      return {webVideoCapture:web,native:nativeCaps||null,barcodeDetector:'BarcodeDetector' in window,jsQR:typeof window.jsQR==='function'};
+    },
+    async start(){
+      scanState.decision=false;
+      scanState.busy=true;
+      scanState.lastError='';
+      renderScanPreview();
+      try{
+        const jobs=scanState.jobs.filter(job=>job.pages.length||job.result);
         if(!jobs.length)throw new Error('Bitte zuerst mindestens ein Foto hinzufügen.');
         for(const job of jobs){
           if(!job.result||job.type==='paper')await processPaperJob(job);
@@ -341,87 +424,4 @@
     return needsRender;
   }
   function clampNumber(value,min,max){return Math.max(min,Math.min(max,value));}
-  function positionTabletAnchoredOverlay(kind){
-    if(!isTabletLayout())return false;
-    const cfg=tabletPanelConfig(kind);
-    if(!cfg)return false;
-    const panel=$(cfg.panelId), anchor=$(cfg.anchorId), app=document.querySelector('.app');
-    if(!panel||!anchor||!app||panel.classList.contains('hidden'))return false;
-    const appRect=app.getBoundingClientRect();
-    const anchorRect=anchor.getBoundingClientRect();
-    const vv=window.visualViewport||null;
-    const viewTop=vv?vv.offsetTop:0;
-    const viewHeight=vv?vv.height:window.innerHeight;
-    const viewBottom=viewTop+viewHeight;
-    const margin=12;
-    const availableWidth=Math.max(280,appRect.width-(margin*2));
-    const minW=Math.min(cfg.minWidth||360,availableWidth);
-    const maxW=Math.min(cfg.maxWidth||620,availableWidth);
-    let width=clampNumber(Math.max(anchorRect.width,minW),minW,maxW);
-    let left=(cfg.align==='right')?(anchorRect.right-width):anchorRect.left;
-    left=clampNumber(left,appRect.left+margin,appRect.right-width-margin);
-
-    panel.style.setProperty('--kgg-overlay-width',Math.round(width)+'px');
-    panel.style.setProperty('--kgg-overlay-left',Math.round(left)+'px');
-    panel.style.setProperty('--kgg-overlay-max-height','min(72vh,520px)');
-
-    const measured=panel.getBoundingClientRect();
-    const wantedHeight=Math.max(160,Math.min(measured.height||panel.scrollHeight||320,Math.min(520,viewHeight-(margin*2))));
-    const belowTop=anchorRect.bottom+8;
-    const aboveTop=anchorRect.top-wantedHeight-8;
-    const enoughBelow=(belowTop+wantedHeight)<=Math.min(viewBottom-margin,appRect.bottom-margin);
-    const enoughAbove=aboveTop>=Math.max(viewTop+margin,appRect.top+margin);
-    let direction=cfg.preferred||'below';
-    if(direction==='below'&&!enoughBelow&&enoughAbove)direction='above';
-    if(direction==='above'&&!enoughAbove&&enoughBelow)direction='below';
-    if(!enoughBelow&&!enoughAbove)direction=((anchorRect.top-appRect.top)>(appRect.bottom-anchorRect.bottom))?'above':'below';
-    let top;
-    let maxHeight;
-    if(direction==='above'){
-      maxHeight=Math.max(160,Math.min(520,anchorRect.top-Math.max(viewTop+margin,appRect.top+margin)-8));
-      top=Math.max(viewTop+margin,anchorRect.top-Math.min(wantedHeight,maxHeight)-8);
-    }else{
-      top=belowTop;
-      maxHeight=Math.max(160,Math.min(520,Math.min(viewBottom-margin,appRect.bottom-margin)-top));
-    }
-    top=clampNumber(top,viewTop+margin,Math.max(viewTop+margin,viewBottom-margin-120));
-    const originX=clampNumber((anchorRect.left+anchorRect.width/2)-left,24,width-24);
-    panel.style.setProperty('--kgg-overlay-top',Math.round(top)+'px');
-    panel.style.setProperty('--kgg-overlay-max-height',Math.round(maxHeight)+'px');
-    panel.style.setProperty('--kgg-overlay-origin',Math.round(originX)+'px '+(direction==='above'?'bottom':'top'));
-    tabletOverlayState.kind=kind;
-    document.body.classList.add('kggTabletOverlayActive');
-    return true;
-  }
-  function openTabletAnchoredPanel(kind){
-    if(!isTabletLayout())return false;
-    const cfg=tabletPanelConfig(kind);
-    if(!cfg)return false;
-    const needsRender=closeTabletFloatingPanelsExcept(kind);
-    if(needsRender)render();
-    const panel=$(cfg.panelId);
-    if(!panel)return false;
-    panel.classList.remove('hidden');
-    tabletOverlayState.kind=kind;
-    if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>positionTabletAnchoredOverlay(kind));
-    else setTimeout(()=>positionTabletAnchoredOverlay(kind),0);
-    setTabletOverlayActiveFlag();
-    return true;
-  }
-  function closeTabletAnchoredPanel(kind){
-    const cfg=tabletPanelConfig(kind);
-    const panel=cfg&&$(cfg.panelId);
-    if(panel){panel.classList.add('hidden');clearTabletOverlayStyles(panel);}
-    if(tabletOverlayState.kind===kind)tabletOverlayState.kind=null;
-    setTabletOverlayActiveFlag();
-    updateToggleCarets();
-    setTabletAnchorActiveClasses();
-  }
-  function setTabletLayoutEditMode(open){
-    const next=!!open&&isTabletLayout();
-    document.body.classList.toggle('tabletLayoutEditMode',next);
-    const btn=$('tabletMenuLayoutBtn');
-    const panel=$('tabletMenuLayoutPanel');
-    if(btn)btn.setAttribute('aria-expanded',String(next));
-    if(panel)panel.hidden=!next;
 ```

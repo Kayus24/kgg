@@ -4,6 +4,39 @@
 - Lines: 17221-17640
 
 ```html
+  <div class="grid2"><button class="mutedBtn" id="cancelLargePdf" type="button">Abbrechen</button><button class="primary" id="confirmLargePdf" type="button">PDF erzeugen</button></div>
+</div></div>
+
+<div class="modal" id="longMediaConfirmModal"><div class="sheet">
+  <h2>24-Stunden-Code?</h2>
+  <p class="notice">24h-Code erstellen? Bilddateien bleiben länger abrufbar.</p>
+  <div class="grid2"><button class="mutedBtn" id="cancelLongMediaShare" type="button">Abbrechen</button><button class="primary" id="confirmLongMediaShare" type="button">Ja, erstellen</button></div>
+</div></div>
+
+<div class="modal" id="installPromptModal"><div class="sheet">
+  <h2 id="installPromptTitle">App installieren?</h2>
+  <p class="notice" id="installPromptText">Installieren und lokale Daten über Updates behalten.</p>
+  <div class="grid2"><button class="mutedBtn" id="dismissInstallPrompt" type="button">Später</button><button class="primary" id="acceptInstallPrompt" type="button">Installieren</button></div>
+</div></div>
+
+<div class="modal" id="adminSecretsModal"><div class="sheet">
+  <h2>Admin-Konfig</h2>
+  <p class="notice">Codes bleiben nur lokal auf diesem Geraet. In dieser Admin-Testdatei sind keine API-Keys fest eingebaut.</p>
+  <div class="field"><label>Gemini API-Key 1</label><input id="adminGeminiKey1" type="password" autocomplete="off" spellcheck="false"></div>
+  <div class="field"><label>Gemini API-Key 2</label><input id="adminGeminiKey2" type="password" autocomplete="off" spellcheck="false"></div>
+  <div class="field"><label>Medien-Dropzone URL</label><input id="adminMediaDropzoneEndpoint" type="url" autocomplete="off" spellcheck="false" placeholder="https://...workers.dev"></div>
+  <div class="field"><label>Medien Upload-Code</label><input id="adminMediaDropzoneUploadToken" type="password" autocomplete="off" spellcheck="false"></div>
+  <span class="secretStatus" id="adminSecretStatus">Keine lokalen Codes gespeichert.</span>
+  <div class="adminCodePackageTools">
+    <button class="mutedBtn wide" id="loadAdminSafeFile" type="button">Admin-Safe-Datei laden</button>
+    <button class="mutedBtn" id="importAdminCodePackage" type="button">Code-Paket einfuegen</button>
+    <button class="mutedBtn" id="exportAdminCodePackage" type="button">Code-Paket kopieren</button>
+    <button class="mutedBtn wide" id="downloadAdminSafeFile" type="button">Admin-Safe-Datei speichern</button>
+  </div>
+  <input id="adminSafeFileInput" class="hidden" type="file" accept=".kggsafe,.bin,.txt,.json,text/plain,application/json,application/octet-stream,*/*">
+  <div class="adminPackageHint">Admin-Safe-Dateien bleiben lokal und gehoeren nicht in GitHub, Chat oder Patient:innen-Ausgabe.</div>
+  <div class="grid2" style="margin-top:12px"><button class="mutedBtn danger" id="clearAdminSecrets" type="button">Löschen</button><button class="primary" id="saveAdminSecrets" type="button">Lokal speichern</button></div>
+  <button class="mutedBtn" id="closeAdminSecrets" type="button" style="width:100%;margin-top:8px">Schließen</button>
 </div></div>
 
 <div class="modal" id="sharedBankModal"><div class="sheet">
@@ -100,11 +133,11 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
 
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v060_tablet_html_release_label';
+  const VERSION='KGG_GITHUB_UPDATE_v061_cross_app_live_qr_camera';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v060","buildTime":"2026-07-13T12:04:29Z","buildCode":"module-v060-tablet-html-release-label","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v061","buildTime":"2026-08-01T12:15:33Z","buildCode":"module-v061-cross-app-live-qr-camera","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -391,37 +424,4 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
       retrySeconds:media.retrySeconds||MEDIA_RETRY_SECONDS,
       crypto:media.crypto||null
     };
-  }
-  async function blobToBase64Url(blob){
-    return bytesToBase64Url(await blob.arrayBuffer());
-  }
-  async function mediaItemsForBundle(exercises){
-    const seen=new Set();
-    const items=[];
-    for(const ex of (exercises||[])){
-      for(const media of ensureExerciseMediaList(ex)){
-        if(media.type!=='image'||!media.id||seen.has(media.id))continue;
-        seen.add(media.id);
-        const record=await getEncryptedMediaBlob(media.id);
-        if(!record||!record.blob)throw new Error('Verschluesselte Bilddatei fehlt lokal: '+(media.name||media.id));
-        const item=publicMediaBundleItem(media);
-        item.status='ready';
-        item.downloadUrl='';
-        item.dataEncoding='base64url';
-        item.data=await blobToBase64Url(record.blob);
-        item.encryptedBytes=record.blob.size||media.encryptedSize||0;
-        items.push(item);
-      }
-    }
-    return items;
-  }
-  async function uploadMediaBundle(adapter,exercises,ttlSeconds){
-    const bundleItems=await mediaItemsForBundle(exercises);
-    if(!bundleItems.length){lastPatientMediaBundleManifest=null; return null;}
-    const plain={kind:'kgg-media-bundle-v1',version:1,createdAt:new Date().toISOString(),items:bundleItems};
-    const encrypted=await encryptMediaBlob(new Blob([JSON.stringify(plain)],{type:'application/json'}));
-    const bundleId='bundle_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
-    const result=await adapter.upload(encrypted.blob,{manifest:{id:bundleId,type:'bundle',mime:'application/octet-stream'},ttlSeconds});
-    if(!result||!result.downloadUrl)throw new Error('Medien-Bundle lieferte keinen Download-Link.');
-    const bundle={
 ```

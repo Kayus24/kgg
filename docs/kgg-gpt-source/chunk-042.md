@@ -4,6 +4,39 @@
 - Lines: 17641-18060
 
 ```html
+  }
+  async function blobToBase64Url(blob){
+    return bytesToBase64Url(await blob.arrayBuffer());
+  }
+  async function mediaItemsForBundle(exercises){
+    const seen=new Set();
+    const items=[];
+    for(const ex of (exercises||[])){
+      for(const media of ensureExerciseMediaList(ex)){
+        if(media.type!=='image'||!media.id||seen.has(media.id))continue;
+        seen.add(media.id);
+        const record=await getEncryptedMediaBlob(media.id);
+        if(!record||!record.blob)throw new Error('Verschluesselte Bilddatei fehlt lokal: '+(media.name||media.id));
+        const item=publicMediaBundleItem(media);
+        item.status='ready';
+        item.downloadUrl='';
+        item.dataEncoding='base64url';
+        item.data=await blobToBase64Url(record.blob);
+        item.encryptedBytes=record.blob.size||media.encryptedSize||0;
+        items.push(item);
+      }
+    }
+    return items;
+  }
+  async function uploadMediaBundle(adapter,exercises,ttlSeconds){
+    const bundleItems=await mediaItemsForBundle(exercises);
+    if(!bundleItems.length){lastPatientMediaBundleManifest=null; return null;}
+    const plain={kind:'kgg-media-bundle-v1',version:1,createdAt:new Date().toISOString(),items:bundleItems};
+    const encrypted=await encryptMediaBlob(new Blob([JSON.stringify(plain)],{type:'application/json'}));
+    const bundleId='bundle_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
+    const result=await adapter.upload(encrypted.blob,{manifest:{id:bundleId,type:'bundle',mime:'application/octet-stream'},ttlSeconds});
+    if(!result||!result.downloadUrl)throw new Error('Medien-Bundle lieferte keinen Download-Link.');
+    const bundle={
       id:result.id||bundleId,
       schema:'kgg-media-bundle-v1',
       count:bundleItems.length,
@@ -391,37 +424,4 @@
       ?(manifest.latestAdminAndroidApkUrl||manifest.adminAndroidApkUrl||manifest.latestAndroidApkUrl)
       :(manifest.latestColleagueAndroidApkUrl||manifest.colleagueAndroidApkUrl||manifest.latestAndroidApkUrl);
     const latestSha=profile==='admin'
-      ?(manifest.latestAdminAndroidApkSha256||manifest.adminAndroidApkSha256||manifest.latestAndroidApkSha256)
-      :(manifest.latestColleagueAndroidApkSha256||manifest.colleagueAndroidApkSha256||manifest.latestAndroidApkSha256);
-    if(!latestVersion||!latestUrl)return null;
-    const nativeStatus=nativeAppUpdateStatus();
-    const currentShell=Number(nativeStatus.currentShellVersion||0);
-    if(currentShell&&kggVersionNumber(latestVersion)<=currentShell)return null;
-    return {version:latestVersion,url:latestUrl,sha256:latestSha||'',notes:manifest.releaseNotes||manifest.notes||''};
-  }
-  function isKggLocalContentNoRedirectRuntime(){
-    const protocol=String(location.protocol||'').toLowerCase();
-    const href=String(location.href||'').toLowerCase();
-    return protocol==='content:'||
-      protocol==='capacitor:'||
-      protocol==='android-app:'||
-      href.indexOf('/media/external/file/')!==-1||
-      href.indexOf('content://')===0||
-      href.indexOf('file://')===0;
-  }
-  const kggNoAutoReleaseNavigationMarker='kgg-no-auto-release-navigation-v32';
-  function stageManualRemoteWebUpdate(target){
-    if(!target||!target.url)return false;
-    window.KGGRemoteUpdateUrl=target.url;
-    window.KGGPendingRemoteUpdateVersion=target.version;
-    window.KGGPendingRemoteUpdateNotes=target.notes;
-    showInstallPrompt('remoteUpdate');
-    return true;
-  }
-  function autoApplyRemoteWebUpdate(target){
-    // v32: Beim Booten niemals automatisch auf GitHub-Pages/Release-HTML navigieren.
-    // ChatGPT-/Android-/Datei-Viewer fangen solche Redirects als externen Link ab.
-    // Updates duerfen nur noch nach bewusstem Tippen auf den sichtbaren Button oeffnen.
-    void target;
-    return false;
 ```

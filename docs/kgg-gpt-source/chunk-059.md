@@ -4,6 +4,89 @@
 - Lines: 24781-25200
 
 ```html
+    clearTimeout(releaseTimer);
+    releaseTimer=setTimeout(releasePlanSection, Number.isFinite(ms) ? ms : 520);
+  }
+
+  function releasePlanSection(){
+    const body=document.body;
+    const block=currentPlanBlock();
+    if(body) body.classList.remove('kggPlanSectionFrozen');
+    if(block) block.style.removeProperty('--kgg-current-plan-freeze-h');
+  }
+
+  function delayedRelease(delay){
+    clearTimeout(releaseTimer);
+    releaseTimer=setTimeout(releasePlanSection, Number.isFinite(delay) ? delay : 320);
+  }
+
+  function installListeners(){
+    if(!document.body) return;
+
+    document.addEventListener('pointerdown', function(ev){
+      if(isPlanCardTarget(ev.target)) freezePlanSection(760);
+    }, {capture:true, passive:true});
+
+    document.addEventListener('pointermove', function(){
+      const body=document.body;
+      if(body && body.classList.contains('kggPlanCardReordering')) freezePlanSection(760);
+    }, {capture:true, passive:true});
+
+    document.addEventListener('pointerup', function(){
+      const body=document.body;
+      if(body && (body.classList.contains('kggPlanCardReordering') || body.classList.contains('kggPlanSectionFrozen'))){
+        delayedRelease(340);
+      }
+    }, {capture:true, passive:true});
+
+    document.addEventListener('pointercancel', function(){
+      delayedRelease(220);
+    }, {capture:true, passive:true});
+
+    bodyObserver=new MutationObserver(function(){
+      const body=document.body;
+      if(!body || !isPhone()) return;
+      if(body.classList.contains('kggPlanCardReordering') || body.classList.contains('kggPlanCardSwiping')){
+        freezePlanSection(800);
+      }
+    });
+    bodyObserver.observe(document.body,{attributes:true,attributeFilter:['class']});
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', installListeners, {once:true});
+  }else{
+    installListeners();
+  }
+
+  window.addEventListener('resize', function(){
+    if(!isPhone()) releasePlanSection();
+  }, {passive:true});
+})();
+</script>
+
+<!-- KGG PATCH START kgg-v021-embed-jsqr-gallery-decode wrapper -->
+<script id="kgg-v021-embed-jsqr-gallery-decode-wrapper">
+
+(function(){
+  var oldDetect = window.detectQrOnCanvas;
+  function getImageData(canvas){
+    try{
+      var ctx = canvas && canvas.getContext && canvas.getContext('2d',{willReadFrequently:true});
+      return ctx ? ctx.getImageData(0,0,canvas.width,canvas.height) : null;
+    }catch(e){ return null; }
+  }
+  function jsqrFallback(canvas){
+    if(!canvas || typeof window.jsQR !== 'function') return '';
+    var img = getImageData(canvas);
+    if(!img) return '';
+    try{
+      var hit = window.jsQR(img.data, canvas.width, canvas.height, {inversionAttempts:'attemptBoth'});
+      return hit && hit.data ? String(hit.data) : '';
+    }catch(e){ return ''; }
+  }
+  async function wrappedDetect(canvas, detector){
+    if(typeof oldDetect === 'function' && oldDetect !== wrappedDetect){
       try{
         var oldResult = await oldDetect(canvas, detector);
         if(oldResult) return oldResult;
@@ -341,87 +424,4 @@
     */
     window.addEventListener('pointerdown',function(ev){
       if(!isPhone()) return;
-      if(isInsidePlanCard(ev.target)){
-        cleanScrollFlag();
-        cleanFreeze();
-        requestAnimationFrame(cleanFreeze);
-      }
-    },{capture:true,passive:true});
-
-    window.addEventListener('pointermove',function(ev){
-      if(!isPhone()) return;
-      if(document.body && (
-        document.body.classList.contains('kggPlanCardSwiping') ||
-        document.body.classList.contains('kggPlanCardReordering')
-      )){
-        cleanScrollFlag();
-        cleanFreeze();
-      }
-    },{capture:true,passive:true});
-
-    ['pointerup','pointercancel','touchend','touchcancel'].forEach(function(type){
-      window.addEventListener(type,function(){
-        if(!isPhone()) return;
-        cleanFreeze();
-        setTimeout(cleanStaleGestureClasses,80);
-        setTimeout(cleanStaleGestureClasses,260);
-      },{capture:true,passive:true});
-    });
-
-    var observer=new MutationObserver(function(){
-      if(!isPhone()) return;
-      cleanFreeze();
-    });
-
-    observer.observe(document.body,{attributes:true,attributeFilter:['class']});
-
-    window.addEventListener('resize',function(){
-      setTimeout(cleanStaleGestureClasses,60);
-    },{passive:true});
-
-    window.addEventListener('orientationchange',function(){
-      setTimeout(cleanStaleGestureClasses,140);
-    },{passive:true});
-
-    if(window.visualViewport){
-      window.visualViewport.addEventListener('resize',function(){
-        setTimeout(cleanStaleGestureClasses,60);
-      },{passive:true});
-    }
-
-    cleanStaleGestureClasses();
-
-    window.KGG_PHONE_TOUCH_TABLET_PARITY_HARD_V3={
-      patchId:PATCH_ID,
-      scope:'phone-only max-width:759px',
-      check:function(){
-        return {
-          patchId:PATCH_ID,
-          phone:isPhone(),
-          freezeBlocked:!!originalClassListAdd,
-          bodyFrozen:!!(document.body && document.body.classList.contains('kggPlanSectionFrozen')),
-          planFreezeHeight:currentPlanBlock() ? currentPlanBlock().style.getPropertyValue('--kgg-current-plan-freeze-h') : ''
-        };
-      },
-      clean:cleanStaleGestureClasses
-    };
-  }
-
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',installListeners,{once:true});
-  }else{
-    installListeners();
-  }
-})();
-</script>
-<!-- END KGG CLEAN MERGE v11 -->
-
-<script id="kgg-v11-clean-merge-marker">
-(function(){
-  "use strict";
-  window.KGG_PHONE_TOUCH_CLEAN_MERGE_V11={
-    patchId:"kgg-v11-clean-merge-original-features-phone-drag-local-list",
-    base:"KGG_CURRENT_ADMIN_HTML.html",
-    keeps:"Original feature code, remote update prompt, QR/PDF/Scan/Parser/Storage/Plan-State/Admin",
-    changes:[
 ```

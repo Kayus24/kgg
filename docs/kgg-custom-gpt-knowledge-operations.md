@@ -2,7 +2,7 @@
 
 Generated production knowledge for modular payloads, Actions, Preview/Test-App and Admin-Beta operations.
 
-Source digest: `e4d6b493f0dbfb0b`
+Source digest: `a2fc39bce78cd3b7`
 
 ## Usage Rules
 
@@ -28,7 +28,7 @@ Source digest: `e4d6b493f0dbfb0b`
 
 ## Arbeitsreihenfolge
 
-1. Lade `docs/kgg-gpt-context.md`.
+1. Lade Ressourcenmanifest, `docs/kgg-gpt-context.md`, dieses Playbook und die exakte Main-SHA.
 2. Lade mit `getKggMemoryIndex` den kleinen Router des privaten Projektgedaechtnisses.
 3. Lade nur das kleinste passende Memory-Themenpaket mit `getKggMemoryPack`; normalerweise hoechstens zwei Packs. Einzelne Records nur fuer Begruendung, Historie oder Konflikte laden.
 4. Lade `docs/kgg-custom-gpt-action-schema.md`.
@@ -38,7 +38,24 @@ Source digest: `e4d6b493f0dbfb0b`
 8. Bei Analysefragen nur Diagnose/Handoff schreiben; kein `submitKggPreviewGate`.
 9. Bei Preview/Test-App-Wunsch immer `validate_only -> publish_preview`.
 10. Nach `publish_preview` wartet der Prozess auf Max' Test-App/Test-APK/Preview-APK-Freigabe.
-11. Erst nach Max-Freigabe `create_pr` oder, wenn Max Haupt-App verlangt, `publish_admin_beta`.
+11. Nach gruenem `validate_only` ohne Zwischenfrage den identischen Payload als `publish_preview` ausfuehren und alle Belege pruefen.
+12. `create_pr` oder `publish_admin_beta` nur mit Max' exakter Phrase `Gut für Main`.
+
+## Autonomie ohne Bestaetigungsschleife
+
+- Vorab freigegeben: Reads, Diagnose, Tests, `validate_only`, `publish_preview`, Run-/Artifact-Pruefung, konfliktfreie neue Memory-Eintraege und private Koordinations-Events.
+- Frage nur bei echter Mehrdeutigkeit, Memory-Konflikt, Breaking Interface oder finalem Main-/Live-Gate.
+- Ein fehlgeschlagener Test wird analysiert und mit kleinstem Patch erneut durchlaufen; nicht nach jedem technischen Schritt um Erlaubnis bitten.
+- Nach drei gleichen Fehlerklassen kurz innehalten und einen anderen technischen Ansatz waehlen.
+
+## Begrenzte Patient-App-Koordination
+
+- Bei QR, Scanner, Storage oder Patient/Admin-Schnittstellen Patient-Kontext, Patient-Playbook und gezielte Patient-Source-Chunks live laden.
+- Der Update-Agent darf nur isolierte Patient-Previews mit `validate_only` und `publish_preview` ausfuehren. Kein Patient-PR und kein Patient-Live.
+- `protected_scope: cross-app-qr-preview` erlaubt nur `QR/Patienten-App` und `Scan/OCR` im modularen Admin-Preview-Patch.
+- Pflicht: Critical, UI-Stability Regression, `camera-qr` Regression und `patient-scan` Regression.
+- Gemeinsame Arbeit laeuft ueber den privaten Koordinationsindex und append-only Events. Die Queue startet keinen GPT automatisch.
+- Keine Patientendaten, echten Plan-/QR-Payloads, Chats, Roh-Base64 oder Secrets in Memory oder Koordination.
 
 ## Privates Projektgedaechtnis
 
@@ -75,6 +92,8 @@ Pflichtfelder:
 - `touched_areas`
 - `required_tests`
 - `patch_content`
+
+Optional: `regression_contract` mit 1 bis 12 deklarativen Assertions. Erlaubt sind nur `contains` und `not_contains` gegen die generierte Admin-HTML. Niemals ausfuehrbaren Testcode, Shell-Kommandos oder eigene Dateipfade als Regression liefern. Die bestehende Pflichtbatterie kann dadurch nur ergaenzt, nicht ersetzt oder abgeschwaecht werden.
 
 `patch_content` ist ein HTML-Fragment und muss `__KGG_PATCH_ID__` enthalten.
 
@@ -167,10 +186,15 @@ The GPT must patch the modular source through the gate; it must not request dire
   "title": "Tablet Splitter und Skalierung trennen",
   "summary": "Tablet Splitter liegt auf der Spaltengrenze; Plus/Minus bleibt reine Skalierung.",
   "version_slug": "tablet-split-scale",
+  "protected_scope": "none",
   "touched_areas": ["Tablet-Layout"],
   "required_tests": [
     "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
     "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
+  ],
+  "regression_contract": [
+    {"kind": "contains", "value": "tabletLayoutResizeHandle"},
+    {"kind": "not_contains", "value": "unsafe-global-touch-rule"}
   ],
   "patch_content": "<style id=\"__KGG_PATCH_ID__-style\">...</style>\n<script id=\"__KGG_PATCH_ID__\">...</script>\n"
 }
@@ -183,6 +207,12 @@ The GPT must patch the modular source through the gate; it must not request dire
 - `touched_areas`: non-empty list. Protected areas are rejected unless Max explicitly authorizes a separate guarded path.
 - `required_tests`: non-empty list. UI-like payloads must include `critical` and `ui-stability regression`.
 - `patch_content`: HTML fragment only. It must include `__KGG_PATCH_ID__`; the gate replaces it with the generated Patch-ID.
+- `protected_scope`: optional, default `none`. Only `cross-app-qr-preview` is additionally allowed.
+- `regression_contract`: optional list of 1-12 declarative `contains`/`not_contains` assertions against the generated Admin HTML. It can extend the battery without executing GPT-provided test code.
+
+## Cross-App QR Preview scope
+
+`cross-app-qr-preview` is Max' durable Preview-only authorization for Admin/Patient QR scanner coordination. It allows only `QR/Patienten-App` and `Scan/OCR`, never Android/APK, PDF, Parser, Plan-State, Medien, Secrets or Manifest. It requires all four exact commands: Critical, UI-Stability Regression, `camera-qr` Regression and `patient-scan` Regression.
 
 ## Forbidden payload fields
 
@@ -203,6 +233,7 @@ The gate creates all of these:
 - source-truth/changelog metadata
 - generated `kgg-update/index.html`
 - `kgg-update/version.json` hash
+- optional gate-owned `release-pipeline/gpt-regressions/<request_id>.json`
 
 ## Preview artifact response checklist
 
@@ -221,11 +252,14 @@ The GPT may say a Preview is available only after it has verified:
 
 ## Required GPT Action operations
 
-- `submitKggPreviewGate` must allow `mode` values `validate_only`, `publish_preview`, `create_pr` and `publish_admin_beta`.
+- `submitKggPreviewGate` exposes only pre-authorized `validate_only` and `publish_preview` through the Preview-only workflow.
+- `submitKggMainGate` exposes only `create_pr` and `publish_admin_beta` and requires `approval_phrase: "Gut für Main"`.
 - `listKggPreviewGateRuns` must be available so the GPT can find the run for a `request_id`.
 - `getKggPreviewGateRun` must be available so the GPT can verify `status` and `conclusion`.
 - `getKggPreviewGateJobs` must be available so the GPT can report failed job/step names.
 - `getKggPreviewGateArtifacts` must be available so the GPT can verify the Preview artifact exists and is not expired.
+- `submitKggPatientPreviewFromAdmin` exposes only isolated Patient `validate_only` and `publish_preview`.
+- Coordination uses `getKggAgentCoordinationIndex`, one selected thread and guarded append-only events.
 
 ## Custom GPT Editor Domains
 

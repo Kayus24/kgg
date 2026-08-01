@@ -21,10 +21,15 @@ The GPT must patch the modular source through the gate; it must not request dire
   "title": "Tablet Splitter und Skalierung trennen",
   "summary": "Tablet Splitter liegt auf der Spaltengrenze; Plus/Minus bleibt reine Skalierung.",
   "version_slug": "tablet-split-scale",
+  "protected_scope": "none",
   "touched_areas": ["Tablet-Layout"],
   "required_tests": [
     "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
     "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
+  ],
+  "regression_contract": [
+    {"kind": "contains", "value": "tabletLayoutResizeHandle"},
+    {"kind": "not_contains", "value": "unsafe-global-touch-rule"}
   ],
   "patch_content": "<style id=\"__KGG_PATCH_ID__-style\">...</style>\n<script id=\"__KGG_PATCH_ID__\">...</script>\n"
 }
@@ -37,6 +42,12 @@ The GPT must patch the modular source through the gate; it must not request dire
 - `touched_areas`: non-empty list. Protected areas are rejected unless Max explicitly authorizes a separate guarded path.
 - `required_tests`: non-empty list. UI-like payloads must include `critical` and `ui-stability regression`.
 - `patch_content`: HTML fragment only. It must include `__KGG_PATCH_ID__`; the gate replaces it with the generated Patch-ID.
+- `protected_scope`: optional, default `none`. Only `cross-app-qr-preview` is additionally allowed.
+- `regression_contract`: optional list of 1-12 declarative `contains`/`not_contains` assertions against the generated Admin HTML. It can extend the battery without executing GPT-provided test code.
+
+## Cross-App QR Preview scope
+
+`cross-app-qr-preview` is Max' durable Preview-only authorization for Admin/Patient QR scanner coordination. It allows only `QR/Patienten-App` and `Scan/OCR`, never Android/APK, PDF, Parser, Plan-State, Medien, Secrets or Manifest. It requires all four exact commands: Critical, UI-Stability Regression, `camera-qr` Regression and `patient-scan` Regression.
 
 ## Forbidden payload fields
 
@@ -57,6 +68,7 @@ The gate creates all of these:
 - source-truth/changelog metadata
 - generated `kgg-update/index.html`
 - `kgg-update/version.json` hash
+- optional gate-owned `release-pipeline/gpt-regressions/<request_id>.json`
 
 ## Preview artifact response checklist
 
@@ -75,11 +87,14 @@ The GPT may say a Preview is available only after it has verified:
 
 ## Required GPT Action operations
 
-- `submitKggPreviewGate` must allow `mode` values `validate_only`, `publish_preview`, `create_pr` and `publish_admin_beta`.
+- `submitKggPreviewGate` exposes only pre-authorized `validate_only` and `publish_preview` through the Preview-only workflow.
+- `submitKggMainGate` exposes only `create_pr` and `publish_admin_beta` and requires `approval_phrase: "Gut für Main"`.
 - `listKggPreviewGateRuns` must be available so the GPT can find the run for a `request_id`.
 - `getKggPreviewGateRun` must be available so the GPT can verify `status` and `conclusion`.
 - `getKggPreviewGateJobs` must be available so the GPT can report failed job/step names.
 - `getKggPreviewGateArtifacts` must be available so the GPT can verify the Preview artifact exists and is not expired.
+- `submitKggPatientPreviewFromAdmin` exposes only isolated Patient `validate_only` and `publish_preview`.
+- Coordination uses `getKggAgentCoordinationIndex`, one selected thread and guarded append-only events.
 
 ## Custom GPT Editor Domains
 

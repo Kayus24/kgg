@@ -1,9 +1,92 @@
 # KGG Source Chunk 064
 
 - Source: `kgg-update/src` modular source
-- Lines: 26881-27254
+- Lines: 26881-27300
 
 ```html
+    if(toggle){
+      if(toggle.textContent!=="\u2303")toggle.textContent="\u2303";
+      if(toggle.getAttribute("aria-label")!=="Foto-Optionen oeffnen")toggle.setAttribute("aria-label","Foto-Optionen oeffnen");
+      if(toggle.getAttribute("title")!=="Foto-Optionen")toggle.setAttribute("title","Foto-Optionen");
+    }
+  }
+  function install(){
+    if(!document.body)return;
+    placeAdminMenu();
+    placeInlinePhotoMenu();
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});
+  else install();
+  [80,220,600,1200].forEach(function(ms){setTimeout(install,ms);});
+  window.addEventListener("resize",function(){setTimeout(install,90);},{passive:true});
+  window.addEventListener("orientationchange",function(){setTimeout(install,180);},{passive:true});
+  if(document.body){
+    new MutationObserver(function(){install();}).observe(document.body,{childList:true,subtree:true});
+  }
+  window.KGG_UI_PHONE_MINI_FIX_V050={patchId:PATCH_ID,install:install};
+})();
+</script>
+<!-- KGG PATCH END kgg-v050-phone-ui-mini-fix -->
+
+<!-- SOURCE FILE: kgg-update/src/patches/v051-android-qr-pdf-bridge.html -->
+
+<!-- KGG PATCH START kgg-v051-android-qr-pdf-bridge -->
+<script id="kgg-v051-android-qr-pdf-bridge-probe">
+window.KGG_ANDROID_QR_PDF_BRIDGE_V051={
+  patchId:'kgg-v051-android-qr-pdf-bridge',
+  qrPrintButtonId:'kggAdminMenuQrPrint',
+  androidShellVersion:'v399'
+};
+</script>
+<!-- KGG PATCH END kgg-v051-android-qr-pdf-bridge -->
+
+<!-- SOURCE FILE: kgg-update/src/patches/v052-pdf-plan-thumbnails.html -->
+
+<!-- KGG PATCH START kgg-v052-pdf-plan-thumbnails -->
+<script id="kgg-v052-pdf-plan-thumbnails-probe">
+window.KGG_PDF_PLAN_THUMBNAILS_V052={
+  patchId:'kgg-v052-pdf-plan-thumbnails',
+  snapshotHelper:'attachKggPdfExerciseThumbnails',
+  drawTarget:'drawKggExerciseBox'
+};
+</script>
+<!-- KGG PATCH END kgg-v052-pdf-plan-thumbnails -->
+
+<!-- SOURCE FILE: kgg-update/src/patches/v053-ui-tablet-stability.html -->
+
+<!-- KGG PATCH START kgg-v053-ui-tablet-stability -->
+<style id="kgg-v053-ui-tablet-stability-style">
+  @media(max-width:759px){
+    body.phoneTextFocus #scanHub,
+    body.phoneTextFocus.kggPhoneHasPlan #scanHub{
+      bottom:calc(12px + env(safe-area-inset-bottom))!important;
+      transform:translateY(var(--kgg-phone-keyboard-inset,0px))!important;
+    }
+    body.phoneTextFocus.kggPhoneHasPlan #createPanel.planMode #finishBtn:not(.hidden){
+      bottom:calc(12px + env(safe-area-inset-bottom))!important;
+      transform:translateY(var(--kgg-phone-keyboard-inset,0px))!important;
+    }
+    body.adminMode #createPanel.planMode .planHeader{
+      padding-right:54px!important;
+      grid-template-columns:minmax(0,1fr) auto!important;
+    }
+    body.adminMode #createPanel.planMode .planHeader #kggPhoneAdminMenu{
+      position:absolute!important;
+      top:4px!important;
+      right:0!important;
+      left:auto!important;
+      transform:none!important;
+      z-index:76!important;
+      margin:0!important;
+    }
+    body.adminMode #createPanel.planMode .planHeader #savePackageBtn:not(.hidden){
+      margin-right:8px!important;
+    }
+  }
+
+  @media(min-width:760px){
+    body.tabletLayoutCustom #scanHub{
+      position:relative!important;
       z-index:82!important;
     }
     body.tabletLayoutCustom #tabletMenuBtn{
@@ -341,41 +424,4 @@
     if(!label)return;
     var text=currentIdentity();
     label.textContent=text;
-    label.title=text;
-  }
-
-  function install(){
-    var menu=document.getElementById("tabletSideMenu");
-    if(!menu)return false;
-    var label=document.getElementById("kggTabletHtmlReleaseLabel");
-    if(!label){
-      label=document.createElement("small");
-      label.id="kggTabletHtmlReleaseLabel";
-      label.setAttribute("aria-label","Aktuell geladene HTML-Version");
-      menu.appendChild(label);
-    }
-    render();
-    var button=document.getElementById("tabletMenuBtn");
-    if(button&&!button.dataset.kggHtmlReleaseLabelBound){
-      button.dataset.kggHtmlReleaseLabelBound="1";
-      button.addEventListener("click",function(){window.setTimeout(render,0);});
-    }
-    return true;
-  }
-
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});
-  else install();
-  window.addEventListener("pageshow",render);
-  document.addEventListener("visibilitychange",function(){if(!document.hidden)render();});
-
-  window.KGG_PATCHES=window.KGG_PATCHES||{};
-  window.KGG_PATCHES[PATCH_ID]={installed:true,render:render,currentIdentity:currentIdentity};
-})();
-</script>
-<!-- KGG PATCH END kgg-v060-tablet-html-release-label -->
-
-<!-- SOURCE FILE: kgg-update/src/footer.html -->
-
-</body>
-</html>
 ```

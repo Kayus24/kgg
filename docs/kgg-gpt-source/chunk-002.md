@@ -4,6 +4,39 @@
 - Lines: 841-1260
 
 ```html
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "v043 nutzt weiterhin den bestehenden animated reorder; nur Tablet-Kartenflaechen werden als zusaetzlicher Startbereich gebunden."
+    },
+    {
+      "versionCode": 42,
+      "versionName": "1.0.42-phone-dock-anchored-correction",
+      "patchId": "kgg-v042-phone-dock-anchored-correction",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Handy-Dock korrigieren",
+      "reason": "Der Foto-Pfeil gehoert in den Kamera-Button, das Admin-Menue soll in der UI verankert sein und Scan/Fertig duerfen Floating-Fenster nicht ueberdecken.",
+      "whatChanged": [
+        "Foto-Optionen werden als Pfeilbereich direkt im Plan-scannen-Button geoeffnet.",
+        "Das Handy-Admin-Menue sitzt im Plan-Header statt fixed oben rechts.",
+        "Plan scannen und Fertig erhalten eine dezente Glasoptik und bleiben z-index-seitig unter Drawern und Modals.",
+        "Browser-Smokes pruefen Admin-Verankerung, integrierten Foto-Pfeil, Glasstil und Floating-Layer-Reihenfolge."
+      ],
+      "touchedAreas": [
+        "Phone scan dock",
+        "Phone admin submenu",
+        "Local test batteries",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Android-Wrapper",
+        "API-Key-Logik"
       ],
       "testStatus": {
         "local": "pending",
@@ -391,37 +424,4 @@
         "PDF",
         "QR-Erzeugung",
         "Patienten-App",
-        "Scan-Kamera",
-        "Parser",
-        "Android-Wrapper",
-        "Tablet core layout/breakpoints",
-        "Plan-State",
-        "Storage"
-      ],
-      "testStatus": {
-        "tabletMenu": "pending",
-        "phoneMenu": "pending",
-        "debugReportCopy": "pending",
-        "adminActions": "pending"
-      },
-      "rollbackNote": "Remove or supersede only with explicit new admin debug menu patch; do not silently delete feedback tooling.",
-      "createdAt": "2026-06-20T22:34:33.470984+00:00"
-    },
-    {
-      "versionCode": 9,
-      "versionName": "1.0.7-patch-retention-changelog-guard",
-      "patchId": "web-v009-patch-retention-changelog-guard",
-      "status": "active",
-      "type": "github-web-update",
-      "title": "Patch-Retention und Changelog-Größenwarnung",
-      "reason": "Max will verhindern, dass spätere LLMs den letzten funktionalen Patch einer Funktion versehentlich löschen, und möchte gewarnt werden, wenn der interne Changelog zu groß wird.",
-      "whatChanged": [
-        "Patch-Retention-Policy direkt in kgg-source-truth eingebettet.",
-        "kgg-patch-rules als eigener maschinenlesbarer JSON-Block ergänzt.",
-        "Changelog-Größenpolicy mit Entry- und Byte-Warnschwellen ergänzt.",
-        "Kleiner KGG_PATCH_GUARD im Browser ergänzt, der Source Truth/Changelog/Patch Rules auslesen und Changelog-Größe prüfen kann.",
-        "LLM-Regeln erweitert: Patches nicht still löschen; bei Konflikten oder Größenwarnungen Max fragen."
-      ],
-      "touchedAreas": [
-        "HTML embedded metadata",
 ```

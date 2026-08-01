@@ -4,6 +4,39 @@
 - Lines: 5461-5880
 
 ```html
+      margin:0!important;
+      font-size:12px!important;
+      line-height:1.15!important;
+      overflow:hidden!important;
+      text-overflow:ellipsis!important;
+      white-space:nowrap!important;
+    }
+    #editorModal .editorMediaActions{
+      grid-column:3!important;
+      display:flex!important;
+      justify-content:flex-end!important;
+      gap:6px!important;
+    }
+    #editorModal .editorMediaActions button{
+      min-height:42px!important;
+      border-radius:12px!important;
+      padding:0 11px!important;
+      font-size:14px!important;
+      white-space:nowrap!important;
+    }
+    #editorModal .editorMediaPreview:not(.hidden){
+      grid-column:1/-1!important;
+      min-height:54px!important;
+      margin-top:2px!important;
+      border-radius:12px!important;
+    }
+    #editorModal .editorMediaPreview img{
+      max-height:84px!important;
+      object-fit:cover!important;
+    }
+    #editorModal .editorAdvanced{
+      margin-top:8px!important;
+      padding:0!important;
       border-radius:14px!important;
       overflow:hidden!important;
     }
@@ -391,37 +424,4 @@
       border:2px solid #111827!important;
       border-radius:18px!important;
       background:#fff!important;
-      box-shadow:none!important;
-      visibility:visible!important;
-      pointer-events:auto!important;
-      overflow:hidden!important;
-    }
-    body.tabletLayoutCustom #rightPlanStack #scannedPlansBlock.hidden{
-      display:none!important;
-    }
-    body.tabletLayoutCustom #currentPlanToggle{
-      flex:0 0 auto!important;
-      min-height:44px!important;
-      padding:8px 10px!important;
-      font-size:18px!important;
-      border-radius:12px!important;
-    }
-    body.tabletLayoutCustom #currentPlanBlock .planSectionBody{
-      flex:1 1 auto!important;
-      min-height:0!important;
-      overflow:auto!important;
-      padding:8px 0 0!important;
-    }
-    body.tabletLayoutCustom #currentPlanBlock #planList{
-      min-height:100%!important;
-      margin:0!important;
-      padding:0!important;
-      display:grid!important;
-      align-content:start!important;
-    }
-    body.tabletLayoutCustom #currentPlanBlock #planList:empty::before{
-      content:"Noch keine Übungen im Plan\A Füge Übungen aus der Datenbank hinzu.";
-      white-space:pre;
-      min-height:220px;
-      display:grid;
 ```

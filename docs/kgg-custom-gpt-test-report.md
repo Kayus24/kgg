@@ -29,6 +29,10 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | admin-beta-push-gate | PASS | Browser-Retest 2026-07-14: Erfolg erst bei gemergtem `[admin-beta]` PR, gruenen Required Checks, aktualisiertem `therapist-app/android_update_manifest.json` auf `main` und Admin-HTML HTTP 200. |
 | memory-safe-auto-update | PENDING | Deterministischer Vertragstest und echter Remote-Gate-Test sind gruen; der Custom-GPT-Dialogtest folgt nach Einspielen des API-Schemas und der privaten Repo-Berechtigung. |
 | memory-conflict-needs-approval | PENDING | Das Remote-Memory-Gate lieferte `needs_approval` und schrieb nichts; der Custom-GPT-Dialogtest folgt nach Einspielen des API-Schemas. |
+| cross-app-camera-qr | PENDING | Neuer Produktiv-GPT-Test nach Schema-/Knowledge-Sync; lokaler Gate- und Browservertrag ist gruen. |
+| preview-autonomy | PENDING | Neuer Produktiv-GPT-Test muss bestaetigen, dass Preview-only ohne Zwischenbestaetigungen durchlaeuft. |
+| main-approval-phrase | PENDING | Mechanischer Gate-Selbsttest ist gruen; echter Dialogtest folgt nach Editor-Sync. |
+| agent-coordination | PENDING | Private Queue und Unit-Tests sind gruen; echter Agent-Dialogtest folgt nach Merge und Editor-Sync. |
 
 ## Aktualitaets-Gate
 
@@ -92,7 +96,7 @@ Canary note: The GPT dispatched `validate_only` first, then dispatched `publish_
 - Das Gate erzeugte `parts.json`, `requiredPatchIds`, `version.json` und `kgg-update/index.html`; der GPT lieferte nur `patch_content` und Metadaten.
 - Artifact `8304658462`, Name `kgg-preview-modular-gpt-canary-20260714-b`, ist vorhanden und nicht abgelaufen.
 - `meta.json`, Admin-HTML und Preview-Index liefern HTTP 200. Der Index zeigt `modular-gpt-canary-20260714-b` als `latest`; HTML enthaelt `TEST-2`, `data-kgg-gpt-canary` und Patch-ID.
-- Der schlanke AVD `KGG_Lite_API35` installierte und startete `de.kgg.preview/de.kgg.app.MainActivity`. Nach einmaligem Wegklicken eines Emulator-SystemUI-Dialogs war der kontrollierte Wiederholungslauf gruen: sichtbarer Marker, Screenshot nicht schwarz, kein App-Crash und kein weiterer SystemUI-Dialog.
+- Der schlanke AVD `KGG_Lite_API35` zeigte in einem frischen Lauf einen SystemUI-ANR und in einem weiteren Lauf zunaechst ein weisses Startfenster. Nach Haertung des Probe-Runners war der kontrollierte Wiederholungslauf pixel-verifiziert gruen: App sichtbar, kein KGG-Crash, kein SystemUI-ANR und QEMU beendet. Wegen der beobachteten Emulator-Instabilitaet bleibt die physische Test-App das verbindliche Kamera-/Berechtigungs-Gate.
 - Max' Sichtpruefung auf dem echten Handy bleibt `PENDING`. Deshalb wurden weder `publish_admin_beta` noch PR oder Merge nach `main` ausgefuehrt.
 
 ## Separater App-Baseline-Befund

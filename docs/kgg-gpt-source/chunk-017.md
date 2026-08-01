@@ -4,6 +4,39 @@
 - Lines: 7141-7560
 
 ```html
+        var aCoefficients = this.coefficients;
+        var aLength = aCoefficients.length;
+        var bCoefficients = other.coefficients;
+        var bLength = bCoefficients.length;
+        var product = new Uint8ClampedArray(aLength + bLength - 1);
+        for (var i = 0; i < aLength; i++) {
+            var aCoeff = aCoefficients[i];
+            for (var j = 0; j < bLength; j++) {
+                product[i + j] = GenericGF_1.addOrSubtractGF(product[i + j], this.field.multiply(aCoeff, bCoefficients[j]));
+            }
+        }
+        return new GenericGFPoly(this.field, product);
+    };
+    GenericGFPoly.prototype.multiplyByMonomial = function (degree, coefficient) {
+        if (degree < 0) {
+            throw new Error("Invalid degree less than 0");
+        }
+        if (coefficient === 0) {
+            return this.field.zero;
+        }
+        var size = this.coefficients.length;
+        var product = new Uint8ClampedArray(size + degree);
+        for (var i = 0; i < size; i++) {
+            product[i] = this.field.multiply(this.coefficients[i], coefficient);
+        }
+        return new GenericGFPoly(this.field, product);
+    };
+    GenericGFPoly.prototype.evaluateAt = function (a) {
+        var result = 0;
+        if (a === 0) {
+            // Just return the x^0 coefficient
+            return this.getCoefficient(0);
+        }
         var size = this.coefficients.length;
         if (a === 1) {
             // Just the sum of the coefficients
@@ -391,37 +424,4 @@ function readFormatInformation(matrix) {
     }
     var dimension = matrix.height;
     var topRightBottomRightFormatInfoBits = 0;
-    for (var y = dimension - 1; y >= dimension - 7; y--) { // bottom left
-        topRightBottomRightFormatInfoBits = pushBit(matrix.get(8, y), topRightBottomRightFormatInfoBits);
-    }
-    for (var x = dimension - 8; x < dimension; x++) { // top right
-        topRightBottomRightFormatInfoBits = pushBit(matrix.get(x, 8), topRightBottomRightFormatInfoBits);
-    }
-    var bestDifference = Infinity;
-    var bestFormatInfo = null;
-    for (var _i = 0, FORMAT_INFO_TABLE_1 = FORMAT_INFO_TABLE; _i < FORMAT_INFO_TABLE_1.length; _i++) {
-        var _a = FORMAT_INFO_TABLE_1[_i], bits = _a.bits, formatInfo = _a.formatInfo;
-        if (bits === topLeftFormatInfoBits || bits === topRightBottomRightFormatInfoBits) {
-            return formatInfo;
-        }
-        var difference = numBitsDiffering(topLeftFormatInfoBits, bits);
-        if (difference < bestDifference) {
-            bestFormatInfo = formatInfo;
-            bestDifference = difference;
-        }
-        if (topLeftFormatInfoBits !== topRightBottomRightFormatInfoBits) { // also try the other option
-            difference = numBitsDiffering(topRightBottomRightFormatInfoBits, bits);
-            if (difference < bestDifference) {
-                bestFormatInfo = formatInfo;
-                bestDifference = difference;
-            }
-        }
-    }
-    // Hamming distance of the 32 masked codes is 7, by construction, so <= 3 bits differing means we found a match
-    if (bestDifference <= 3) {
-        return bestFormatInfo;
-    }
-    return null;
-}
-function getDataBlocks(codewords, version, ecLevel) {
 ```

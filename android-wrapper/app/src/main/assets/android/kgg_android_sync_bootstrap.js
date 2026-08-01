@@ -34,6 +34,17 @@
   if (!window.KGGNativeCamera && window.KGGAndroidApp) {
     window.KGGNativeCamera = {
       available: true,
+      getCapabilities: function(){
+        if (typeof window.KGGAndroidApp.getCameraCapabilities !== 'function') {
+          return {available:true, platform:'android', webVideoCapture:false, webVideoCaptureVersion:0};
+        }
+        return safeParse(window.KGGAndroidApp.getCameraCapabilities(), {
+          available:true,
+          platform:'android',
+          webVideoCapture:false,
+          webVideoCaptureVersion:0
+        });
+      },
       setNextPickerMode: function(mode){
         try {
           window.KGGAndroidApp.setNextFileChooserMode(mode === 'camera' ? 'camera' : 'file');

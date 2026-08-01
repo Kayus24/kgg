@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import binascii
 import json
 import os
 import re
@@ -11,14 +12,16 @@ import subprocess
 import sys
 import time
 import xml.etree.ElementTree as ET
+import struct
+import zlib
 from pathlib import Path
 from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_AVD = "Medium_Phone_API_36.1"
+DEFAULT_AVD = "KGG_Lite_API35"
 DEFAULT_PACKAGE = "de.kgg.preview"
-DEFAULT_MARKER = "Groesse 100%"
+DEFAULT_MARKER = "Neuen Plan erstellen"
 
 
 def sdk_path(*parts: str) -> Path:
@@ -38,14 +41,16 @@ def resolve_tool(explicit: str | None, env_name: str, default_path: Path, fallba
 
 
 def run(args: list[str], *, timeout: int = 30, binary: bool = False) -> subprocess.CompletedProcess[Any]:
-    return subprocess.run(
-        args,
-        cwd=str(ROOT),
-        input=None,
-        text=not binary,
-        capture_output=True,
-        timeout=timeout,
-    )
+    options: dict[str, Any] = {
+        "cwd": str(ROOT),
+        "input": None,
+        "text": not binary,
+        "capture_output": True,
+        "timeout": timeout,
+    }
+    if not binary:
+        options.update({"encoding": "utf-8", "errors": "replace"})
+    return subprocess.run(args, **options)
 
 
 def adb(adb_path: str, serial: str | None, args: list[str], *, timeout: int = 30, binary: bool = False) -> subprocess.CompletedProcess[Any]:
@@ -68,9 +73,24 @@ def list_devices(adb_path: str) -> list[str]:
     return devices
 
 
-def start_emulator(emulator_path: str, avd: str) -> None:
-    subprocess.Popen(
-        [emulator_path, "-avd", avd, "-no-snapshot-save"],
+def start_emulator(emulator_path: str, avd: str) -> subprocess.Popen[Any]:
+    return subprocess.Popen(
+        [
+            emulator_path,
+            "-avd",
+            avd,
+            "-no-window",
+            "-no-audio",
+            "-no-boot-anim",
+            "-no-snapshot-load",
+            "-no-snapshot-save",
+            "-gpu",
+            "swiftshader_indirect",
+            "-memory",
+            "2048",
+            "-cores",
+            "2",
+        ],
         cwd=str(ROOT),
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
@@ -83,7 +103,10 @@ def wait_for_device(adb_path: str, timeout_s: int) -> str | None:
     while time.time() < deadline:
         devices = list_devices(adb_path)
         if devices:
-            return devices[0]
+            serial = devices[0]
+            boot = adb(adb_path, serial, ["shell", "getprop", "sys.boot_completed"], timeout=10)
+            if boot.returncode == 0 and boot.stdout.strip() == "1":
+                return serial
         time.sleep(3)
     return None
 
@@ -148,12 +171,27 @@ def dump_ui(adb_path: str, serial: str, out_dir: Path, marker: str) -> dict[str,
     ui_path = out_dir / "ui.xml"
     ui_path.write_text(xml_text, encoding="utf-8", newline="\n")
     summary = summarize_ui(xml_text)
+    tree_present = "<hierarchy" in xml_text and "android.webkit.WebView" in xml_text
     return {
-        "ok": proc.returncode == 0 and bool(summary),
+        "ok": proc.returncode == 0 and tree_present,
         "path": str(ui_path),
         "marker_found": marker in xml_text,
         "summary": summary,
     }
+
+
+def wait_for_app_window(adb_path: str, serial: str, package: str, timeout_s: int = 35) -> bool:
+    deadline = time.time() + timeout_s
+    package_lower = package.lower()
+    while time.time() < deadline:
+        proc = adb(adb_path, serial, ["shell", "dumpsys", "window", "windows"], timeout=15)
+        text = ((proc.stdout or "") + "\n" + (proc.stderr or "")).lower()
+        has_package = package_lower in text
+        has_splash = "splash screen " + package_lower in text or "starting " + package_lower in text
+        if proc.returncode == 0 and has_package and not has_splash:
+            return True
+        time.sleep(2)
+    return False
 
 
 def screenshot(adb_path: str, serial: str, out_dir: Path) -> dict[str, Any]:
@@ -162,13 +200,125 @@ def screenshot(adb_path: str, serial: str, out_dir: Path) -> dict[str, Any]:
     data = proc.stdout if isinstance(proc.stdout, bytes) else bytes(proc.stdout or "", "utf-8")
     if proc.returncode == 0 and data:
         path.write_bytes(data)
-        return {"ok": True, "path": str(path)}
+        visual = png_visual_health(data)
+        return {"ok": True, "path": str(path), **visual}
     return {"ok": False, "path": str(path), "notes": str(proc.stderr)[-300:]}
+
+
+def png_visual_health(data: bytes) -> dict[str, Any]:
+    try:
+        if not data.startswith(b"\x89PNG\r\n\x1a\n"):
+            raise ValueError("not a PNG")
+        offset = 8
+        width = height = color_type = bit_depth = interlace = 0
+        compressed = bytearray()
+        while offset + 12 <= len(data):
+            length = struct.unpack(">I", data[offset : offset + 4])[0]
+            kind = data[offset + 4 : offset + 8]
+            payload = data[offset + 8 : offset + 8 + length]
+            offset += 12 + length
+            if kind == b"IHDR":
+                width, height, bit_depth, color_type, _compression, _filter, interlace = struct.unpack(
+                    ">IIBBBBB", payload
+                )
+            elif kind == b"IDAT":
+                compressed.extend(payload)
+            elif kind == b"IEND":
+                break
+        channels = {2: 3, 6: 4}.get(color_type)
+        if not width or not height or bit_depth != 8 or interlace != 0 or channels is None:
+            raise ValueError("unsupported PNG layout")
+        raw = zlib.decompress(bytes(compressed))
+        stride = width * channels
+        previous = bytearray(stride)
+        cursor = 0
+        min_channel = 255
+        max_channel = 0
+        sampled = 0
+        sample_step = max(1, min(width, height) // 80)
+        for y in range(height):
+            filter_type = raw[cursor]
+            cursor += 1
+            encoded = raw[cursor : cursor + stride]
+            cursor += stride
+            current = bytearray(stride)
+            for index, value in enumerate(encoded):
+                left = current[index - channels] if index >= channels else 0
+                up = previous[index]
+                upper_left = previous[index - channels] if index >= channels else 0
+                if filter_type == 0:
+                    decoded = value
+                elif filter_type == 1:
+                    decoded = (value + left) & 255
+                elif filter_type == 2:
+                    decoded = (value + up) & 255
+                elif filter_type == 3:
+                    decoded = (value + ((left + up) // 2)) & 255
+                elif filter_type == 4:
+                    estimate = left + up - upper_left
+                    pa, pb, pc = abs(estimate - left), abs(estimate - up), abs(estimate - upper_left)
+                    predictor = left if pa <= pb and pa <= pc else up if pb <= pc else upper_left
+                    decoded = (value + predictor) & 255
+                else:
+                    raise ValueError("unsupported PNG filter")
+                current[index] = decoded
+            if y % sample_step == 0:
+                for x in range(0, width, sample_step):
+                    start = x * channels
+                    rgb = current[start : start + 3]
+                    min_channel = min(min_channel, *rgb)
+                    max_channel = max(max_channel, *rgb)
+                    sampled += 1
+            previous = current
+        channel_range = max_channel - min_channel
+        return {
+            "visual_nonblank": sampled > 0 and channel_range >= 24,
+            "visual_channel_range": channel_range,
+            "visual_samples": sampled,
+        }
+    except Exception as exc:  # noqa: BLE001 - compact probe evidence
+        return {"visual_nonblank": False, "visual_error": str(exc)}
+
+
+def probe_self_test() -> None:
+    def chunk(kind: bytes, payload: bytes) -> bytes:
+        return struct.pack(">I", len(payload)) + kind + payload + struct.pack(">I", binascii.crc32(kind + payload) & 0xFFFFFFFF)
+
+    def png(pixels: list[tuple[int, int, int]]) -> bytes:
+        rows = b"".join(
+            b"\x00" + bytes(channel for pixel in pixels[index : index + 2] for channel in pixel)
+            for index in range(0, 4, 2)
+        )
+        return (
+            b"\x89PNG\r\n\x1a\n"
+            + chunk(b"IHDR", struct.pack(">IIBBBBB", 2, 2, 8, 2, 0, 0, 0))
+            + chunk(b"IDAT", zlib.compress(rows))
+            + chunk(b"IEND", b"")
+        )
+
+    white = png([(255, 255, 255)] * 4)
+    varied = png([(255, 255, 255), (0, 0, 0), (40, 120, 220), (255, 255, 255)])
+    if png_visual_health(white).get("visual_nonblank"):
+        raise RuntimeError("blank screenshot self-test was accepted")
+    if not png_visual_health(varied).get("visual_nonblank"):
+        raise RuntimeError("nonblank screenshot self-test was rejected")
+    print("KGG Android Preview probe self-test OK")
+
+
+def wait_for_visual(adb_path: str, serial: str, out_dir: Path, timeout_s: int = 30) -> dict[str, Any]:
+    deadline = time.time() + timeout_s
+    latest: dict[str, Any] = {"ok": False, "visual_nonblank": False}
+    while time.time() < deadline:
+        latest = screenshot(adb_path, serial, out_dir)
+        if latest.get("ok") and latest.get("visual_nonblank"):
+            return latest
+        time.sleep(2)
+    return latest
 
 
 def crash_log(adb_path: str, serial: str, out_dir: Path, package: str) -> dict[str, Any]:
     proc = adb(adb_path, serial, ["logcat", "-d", "-b", "crash"], timeout=20)
-    text = (proc.stdout + "\n" + proc.stderr).strip()
+    text = ((proc.stdout or "") + "\n" + (proc.stderr or "")).strip()
     path = out_dir / "logcat-crash.txt"
     path.write_text(text, encoding="utf-8", newline="\n")
     crash_lines = [line for line in text.splitlines() if package in line or "FATAL EXCEPTION" in line]
@@ -178,6 +328,35 @@ def crash_log(adb_path: str, serial: str, out_dir: Path, package: str) -> dict[s
         "crash_detected": bool(crash_lines),
         "summary": crash_lines[-10:],
     }
+
+
+def system_ui_health(adb_path: str, serial: str, out_dir: Path, ui_summary: list[str]) -> dict[str, Any]:
+    proc = adb(adb_path, serial, ["logcat", "-d", "-v", "brief"], timeout=30)
+    text = (proc.stdout + "\n" + proc.stderr).strip()
+    relevant = [
+        line
+        for line in text.splitlines()
+        if "ANR in com.android.systemui" in line
+        or "System UI isn't responding" in line
+        or ("ActivityManager" in line and "com.android.systemui" in line and "ANR" in line)
+    ]
+    dialog_visible = any("System UI isn't responding" in item for item in ui_summary)
+    path = out_dir / "logcat-system-ui.txt"
+    path.write_text("\n".join(relevant) + ("\n" if relevant else ""), encoding="utf-8", newline="\n")
+    return {
+        "ok": proc.returncode == 0,
+        "path": str(path),
+        "anr_detected": bool(relevant) or dialog_visible,
+        "dialog_visible": dialog_visible,
+        "summary": relevant[-10:],
+    }
+
+
+def stop_emulator(adb_path: str, serial: str) -> None:
+    try:
+        adb(adb_path, serial, ["emu", "kill"], timeout=20)
+    except Exception:
+        pass
 
 
 def package_installed(adb_path: str, serial: str, package: str) -> bool:
@@ -195,8 +374,12 @@ def main() -> int:
     parser.add_argument("--adb", help="Path to adb.exe.")
     parser.add_argument("--emulator", help="Path to emulator.exe.")
     parser.add_argument("--start-emulator", action="store_true", help="Start the configured AVD when no adb device is connected.")
+    parser.add_argument("--self-test", action="store_true", help="Run dependency-free screenshot health checks.")
     parser.add_argument("--timeout", type=int, default=180, help="Seconds to wait for emulator boot/device.")
     args = parser.parse_args()
+    if args.self_test:
+        probe_self_test()
+        return 0
 
     adb_path = resolve_tool(args.adb, "KGG_ADB", sdk_path("platform-tools", "adb.exe"), "adb")
     emulator_path = resolve_tool(args.emulator, "KGG_EMULATOR", sdk_path("emulator", "emulator.exe"), "emulator")
@@ -213,17 +396,25 @@ def main() -> int:
         "installed": None,
         "activity": None,
         "activity_started": False,
+        "app_window_ready": False,
         "visible_marker_found": False,
         "screenshot_path": None,
         "ui_summary": [],
         "crash_detected": None,
         "log_summary": [],
+        "system_ui_anr": None,
+        "emulator_started_by_probe": False,
     }
 
+    serial: str | None = None
+    emulator_started = False
+    emulator_process: subprocess.Popen[Any] | None = None
     try:
         devices = list_devices(adb_path)
         if not devices and args.start_emulator:
-            start_emulator(emulator_path, args.avd)
+            emulator_process = start_emulator(emulator_path, args.avd)
+            emulator_started = True
+            result["emulator_started_by_probe"] = True
             serial = wait_for_device(adb_path, args.timeout)
         else:
             serial = devices[0] if devices else None
@@ -253,11 +444,14 @@ def main() -> int:
         started = start_activity(adb_path, serial, activity)
         result["activity_started"] = started["ok"]
         result["activity_start"] = started["notes"]
-        time.sleep(5)
+        time.sleep(2)
+        result["app_window_ready"] = wait_for_app_window(adb_path, serial, args.package)
 
-        shot = screenshot(adb_path, serial, out_dir)
+        shot = wait_for_visual(adb_path, serial, out_dir)
         result["screenshot_path"] = shot.get("path")
         result["screenshot_ok"] = shot.get("ok")
+        result["visual_nonblank"] = shot.get("visual_nonblank")
+        result["visual_channel_range"] = shot.get("visual_channel_range")
 
         ui = dump_ui(adb_path, serial, out_dir, args.marker)
         result["ui_path"] = ui.get("path")
@@ -269,13 +463,39 @@ def main() -> int:
         result["crash_log_path"] = logs.get("path")
         result["log_summary"] = logs.get("summary")
 
-        result["ok"] = bool(started["ok"] and not result["crash_detected"])
+        system_ui = system_ui_health(adb_path, serial, out_dir, result["ui_summary"])
+        result["system_ui_anr"] = system_ui.get("anr_detected")
+        result["system_ui_log_path"] = system_ui.get("path")
+        result["system_ui_summary"] = system_ui.get("summary")
+
+        result["ok"] = bool(
+            started["ok"]
+            and result["app_window_ready"]
+            and shot.get("ok")
+            and shot.get("visual_nonblank")
+            and ui.get("ok")
+            and not result["crash_detected"]
+            and not result["system_ui_anr"]
+        )
+        if result["system_ui_anr"]:
+            result["error"] = "emulator SystemUI ANR; use the physical Test-App as the visual approval gate"
+        elif not shot.get("visual_nonblank"):
+            result["error"] = "emulator app window stayed visually blank"
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0 if result["ok"] else 5
     except Exception as exc:  # noqa: BLE001 - CLI boundary
         result["error"] = str(exc)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 1
+    finally:
+        if emulator_started and serial:
+            stop_emulator(adb_path, serial)
+            time.sleep(12)
+        if emulator_process is not None:
+            try:
+                emulator_process.wait(timeout=45)
+            except subprocess.TimeoutExpired:
+                emulator_process.terminate()
 
 
 if __name__ == "__main__":

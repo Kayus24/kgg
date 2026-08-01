@@ -4,6 +4,39 @@
 - Lines: 3781-4200
 
 ```html
+       Paket und Schloss stehen nebeneinander. */
+    @media (min-width:760px){
+      body.tabletLayoutCustom .app{
+        grid-template-columns:minmax(40px,var(--kgg-tablet-left-col,42vw)) minmax(110px,1fr) minmax(52px,.72fr)!important;
+      }
+      body.tabletLayoutCustom #exerciseInput,
+      body.tabletLayoutCustom #inputWrap textarea{
+        font-size:clamp(10px,calc(23px * var(--kgg-tablet-ui-scale,1)),46px)!important;
+      }
+      body.tabletLayoutCustom .bankRow b,
+      body.tabletLayoutCustom .planCard b{
+        font-size:clamp(9px,calc(19px * var(--kgg-tablet-ui-scale,1)),38px)!important;
+      }
+      body.tabletLayoutCustom .bankRow small,
+      body.tabletLayoutCustom .planCard small{
+        font-size:clamp(8px,calc(13px * var(--kgg-tablet-ui-scale,1)),26px)!important;
+      }
+      body.tabletLayoutCustom .drawerBtn,
+      body.tabletLayoutCustom .baseCard,
+      body.tabletLayoutCustom .primary,
+      body.tabletLayoutCustom .mutedBtn{
+        font-size:clamp(10px,calc(18px * var(--kgg-tablet-ui-scale,1)),36px)!important;
+      }
+      .packageLayoutSlot{
+        grid-column:3!important;
+        grid-row:5!important;
+        align-self:stretch!important;
+        justify-self:stretch!important;
+        min-width:0!important;
+        display:grid!important;
+        grid-template-columns:minmax(0,1fr) 82px!important;
+        gap:10px!important;
+      }
       #createPanel:not(.planMode) .packageLayoutSlot,
       #createPanel.planMode .packageLayoutSlot{
         grid-column:3!important;
@@ -391,37 +424,4 @@
       body.tabletLayoutCustom .sheet :is(input,select,textarea,button),
       body.tabletLayoutCustom #recentList:not(.hidden) button,
       body.tabletLayoutCustom #packageList:not(.hidden) button{
-        font-size:clamp(10px,calc(16px * var(--kgg-tablet-ui-scale,1)),30px)!important;
-        min-height:clamp(38px,calc(48px * var(--kgg-tablet-ui-scale,1)),86px)!important;
-      }
-      .tabletLayoutFreeTools{
-        width:106px!important;
-        padding:14px 10px!important;
-        gap:12px!important;
-        border-radius:38px!important;
-      }
-      .tabletLayoutFreeTools button{
-        width:84px!important;
-        height:66px!important;
-        min-height:66px!important;
-        font-size:40px!important;
-        border-radius:28px!important;
-      }
-      #tabletLayoutReset{
-        height:54px!important;
-        min-height:54px!important;
-        font-size:30px!important;
-        background:#fff!important;
-        color:#38475b!important;
-        border:1px solid rgba(220,227,235,.95)!important;
-      }
-      .tabletScaleValue{
-        min-height:126px!important;
-        font-size:15px!important;
-      }
-      .tabletLayoutFreeTools::before{
-        top:92px!important;
-        bottom:154px!important;
-      }
-      .tabletLayoutControls,
 ```

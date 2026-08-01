@@ -1,709 +1,279 @@
 openapi: 3.1.0
 info:
-  title: KGG Repository Context
-  version: 1.2.0
-  description: Live KGG repository context plus guarded Preview and private append-only Project Memory workflows.
+  title: KGG Public Live Context
+  version: 1.3.0
+  description: Read-only live Admin and limited Patient-App context. All writes use the separate authenticated API Action.
 servers:
   - url: https://raw.githubusercontent.com
 security: []
 paths:
+  /Kayus24/kgg/main/docs/kgg-custom-gpt-resource-manifest.json:
+    get:
+      operationId: getKggCustomGptResourceManifest
+      summary: Get current GPT resource, Action, model and Knowledge hashes.
+      responses:
+        "200":
+          description: GPT resource manifest.
+          content:
+            application/json:
+              schema: {type: object, additionalProperties: true}
   /Kayus24/kgg/main/docs/kgg-gpt-context.md:
     get:
       operationId: getKggProjectContext
-      summary: Get generated KGG GPT live repository context.
+      summary: Get generated Admin live repository context.
       responses:
         "200":
-          description: Markdown context.
+          description: Admin live context.
           content:
             text/plain:
-              schema:
-                type: string
+              schema: {type: string}
   /Kayus24/kgg/main/docs/kgg-custom-gpt-playbook.md:
     get:
       operationId: getKggCustomGptPlaybook
-      summary: Get the KGG Custom GPT playbook.
+      summary: Get current Admin Update-Agent playbook.
       responses:
         "200":
-          description: Markdown playbook.
+          description: Admin playbook.
           content:
             text/plain:
-              schema:
-                type: string
+              schema: {type: string}
   /Kayus24/kgg/main/docs/kgg-custom-gpt-action-schema.md:
     get:
       operationId: getKggCustomGptActionSchema
-      summary: Get the canonical guarded payload/action schema rules.
+      summary: Get the canonical guarded payload and approval contract.
       responses:
         "200":
-          description: Markdown action schema.
+          description: Action contract.
           content:
             text/plain:
-              schema:
-                type: string
+              schema: {type: string}
   /Kayus24/kgg/main/docs/kgg-custom-gpt-negative-examples.md:
     get:
       operationId: getKggCustomGptNegativeExamples
-      summary: Get negative examples the GPT must reject.
+      summary: Get current unsafe-pattern examples.
       responses:
         "200":
-          description: Markdown negative examples.
+          description: Negative examples.
           content:
             text/plain:
-              schema:
-                type: string
+              schema: {type: string}
   /Kayus24/kgg/main/docs/kgg-custom-gpt-preview-runbook.md:
     get:
       operationId: getKggCustomGptPreviewRunbook
-      summary: Get Preview Gate run order and verification rules.
+      summary: Get exact Preview dispatch and verification sequence.
       responses:
         "200":
-          description: Markdown runbook.
+          description: Preview runbook.
           content:
             text/plain:
-              schema:
-                type: string
+              schema: {type: string}
   /Kayus24/kgg/main/docs/kgg-custom-gpt-preview-report-template.md:
     get:
       operationId: getKggCustomGptPreviewReportTemplate
-      summary: Get required Preview report fields.
+      summary: Get evidence fields required for Preview reporting.
       responses:
         "200":
-          description: Markdown report template.
+          description: Preview report template.
           content:
             text/plain:
-              schema:
-                type: string
+              schema: {type: string}
   /Kayus24/kgg/main/docs/kgg-gpt-bug-lessons.md:
     get:
       operationId: getKggBugLessons
-      summary: Get generated KGG bug-history lessons.
+      summary: Get durable KGG bug lessons.
       responses:
         "200":
-          description: Markdown bug-history lessons.
+          description: Bug lessons.
           content:
             text/plain:
-              schema:
-                type: string
+              schema: {type: string}
   /Kayus24/kgg/main/docs/kgg-gpt-bug-index.json:
     get:
       operationId: getKggBugIndex
-      summary: Get structured KGG bug-history records and forbidden patterns.
+      summary: Get compact bug-history routing index.
       responses:
         "200":
-          description: Structured KGG bug-history knowledge.
+          description: Bug index.
           content:
             application/json:
-              schema:
-                type: object
-                properties: {}
-                additionalProperties: true
+              schema: {type: object, additionalProperties: true}
   /Kayus24/kgg/main/docs/kgg-gpt-patch-patterns.md:
     get:
       operationId: getKggPatchPatterns
-      summary: Get forbidden patch patterns and area-specific test hints.
+      summary: Get accepted and rejected patch patterns.
       responses:
         "200":
-          description: Markdown patch pattern guardrails.
+          description: Patch patterns.
           content:
             text/plain:
-              schema:
-                type: string
+              schema: {type: string}
   /Kayus24/kgg/main/docs/kgg-gpt-area-routes.md:
     get:
       operationId: getKggAreaRoutes
-      summary: Get source routing guidance by app area.
+      summary: Get human-readable Admin source routing.
       responses:
         "200":
-          description: Markdown area routes.
+          description: Area routes.
           content:
             text/plain:
-              schema:
-                type: string
+              schema: {type: string}
   /Kayus24/kgg/main/docs/kgg-gpt-area-routes.json:
     get:
       operationId: getKggAreaRoutesJson
-      summary: Get structured source routing guidance by app area.
+      summary: Get structured Admin source routing.
       responses:
         "200":
           description: Structured area routes.
           content:
             application/json:
-              schema:
-                type: object
-                properties: {}
-                additionalProperties: true
+              schema: {type: object, additionalProperties: true}
   /Kayus24/kgg/main/docs/kgg-gpt-source-index.json:
     get:
       operationId: getKggSourceIndex
-      summary: Get generated source chunk index for the modular kgg-update/src source.
+      summary: Get current Admin source chunk index and hashes.
       responses:
         "200":
-          description: Structured source chunk index.
+          description: Admin source index.
           content:
             application/json:
-              schema:
-                type: object
-                properties: {}
-                additionalProperties: true
+              schema: {type: object, additionalProperties: true}
   /Kayus24/kgg/main/docs/kgg-gpt-source/{chunk_name}:
     get:
       operationId: getKggSourceChunk
-      summary: Get one generated KGG source chunk by file name, for example chunk-012.md.
+      summary: Get one Admin source chunk selected by the source index.
       parameters:
         - name: chunk_name
           in: path
           required: true
-          schema:
-            type: string
-            pattern: "^chunk-[0-9]{3}\\.md$"
+          schema: {type: string, pattern: "^chunk-[0-9]{3}\\.md$"}
       responses:
         "200":
-          description: Markdown source chunk.
+          description: Admin source chunk.
           content:
             text/plain:
-              schema:
-                type: string
+              schema: {type: string}
   /Kayus24/kgg/main/kgg-update/version.json:
     get:
       operationId: getKggVersion
-      summary: Get current KGG web update version metadata.
+      summary: Get current generated Admin source version and hash.
       responses:
         "200":
-          description: KGG web version metadata.
+          description: Admin version.
           content:
             application/json:
-              schema:
-                type: object
-                properties: {}
-                additionalProperties: true
+              schema: {type: object, additionalProperties: true}
   /Kayus24/kgg/main/therapist-app/android_update_manifest.json:
     get:
       operationId: getKggAndroidManifest
-      summary: Get current KGG Android/Web release manifest.
+      summary: Get current Admin and Android release manifest.
       responses:
         "200":
-          description: KGG Android/Web release manifest.
+          description: Android release manifest.
           content:
             application/json:
-              schema:
-                type: object
-                properties: {}
-                additionalProperties: true
+              schema: {type: object, additionalProperties: true}
   /Kayus24/kgg/gpt-preview/previews/index.json:
     get:
       operationId: getKggPreviewIndex
-      summary: Get latest GPT preview channel manifest.
+      summary: Get current Admin Test-App Preview index.
       responses:
         "200":
-          description: GPT preview manifest.
+          description: Admin Preview index.
           content:
             application/json:
-              schema:
-                type: object
-                properties: {}
-                additionalProperties: true
+              schema: {type: object, additionalProperties: true}
   /Kayus24/kgg/gpt-preview/previews/{request_id}/meta.json:
     get:
       operationId: getKggPreviewMeta
-      summary: Get metadata for one GPT preview request.
+      summary: Get exact Admin Preview metadata.
       parameters:
         - name: request_id
           in: path
           required: true
-          schema:
-            type: string
-            pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
+          schema: {type: string, pattern: "^[a-z0-9][a-z0-9-]{5,63}$"}
       responses:
         "200":
-          description: GPT preview metadata.
+          description: Admin Preview metadata.
           content:
             application/json:
-              schema:
-                type: object
-                properties: {}
-                additionalProperties: true
-  /repos/Kayus24/kgg/actions/workflows/kgg-gpt-preview-gate.yml/dispatches:
-    post:
-      servers:
-        - url: https://api.github.com
-      operationId: submitKggPreviewGate
-      summary: Dispatch the guarded KGG GPT Preview Gate workflow.
-      security:
-        - githubBearer: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - ref
-                - inputs
-              properties:
-                ref:
-                  type: string
-                  enum:
-                    - main
-                inputs:
-                  type: object
-                  required:
-                    - mode
-                    - request_id
-                    - payload_json
-                  properties:
-                    mode:
-                      type: string
-                      enum:
-                        - validate_only
-                        - publish_preview
-                        - create_pr
-                        - publish_admin_beta
-                    request_id:
-                      type: string
-                      pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
-                    payload_json:
-                      type: string
-                      description: JSON string containing request_id, title, summary, version_slug, touched_areas, required_tests and patch_content. Do not send operations, old_text, new_text or path. UI payloads must include critical and ui-stability regression tests.
-                    ui_stability:
-                      type: string
-                      enum:
-                        - "false"
-                        - "true"
-                      default: "false"
-      responses:
-        "204":
-          description: Workflow dispatch accepted.
-  /repos/Kayus24/kgg/actions/workflows/kgg-gpt-preview-gate.yml/runs:
+              schema: {type: object, additionalProperties: true}
+  /Kayus24/kgg/main/docs/kgg-patient-gpt-context.md:
     get:
-      servers:
-        - url: https://api.github.com
-      operationId: listKggPreviewGateRuns
-      summary: List recent KGG Preview Gate runs to find the run for a request_id.
-      security:
-        - githubBearer: []
-      parameters:
-        - name: branch
-          in: query
-          required: false
-          schema:
-            type: string
-            enum:
-              - main
-        - name: event
-          in: query
-          required: false
-          schema:
-            type: string
-            enum:
-              - workflow_dispatch
-        - name: status
-          in: query
-          required: false
-          schema:
-            type: string
-            enum:
-              - queued
-              - in_progress
-              - completed
-        - name: per_page
-          in: query
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 20
-            default: 10
+      operationId: getKggPatientContextForAdmin
+      summary: Read Patient-App interface and release context for cross-app diagnosis.
       responses:
         "200":
-          description: Recent workflow runs.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties: {}
-                additionalProperties: true
-  /repos/Kayus24/kgg/actions/runs/{run_id}:
-    get:
-      servers:
-        - url: https://api.github.com
-      operationId: getKggPreviewGateRun
-      summary: Get status and conclusion for one Preview Gate run.
-      security:
-        - githubBearer: []
-      parameters:
-        - name: run_id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: Workflow run status.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties: {}
-                additionalProperties: true
-  /repos/Kayus24/kgg/actions/runs/{run_id}/jobs:
-    get:
-      servers:
-        - url: https://api.github.com
-      operationId: getKggPreviewGateJobs
-      summary: Get jobs and steps for one Preview Gate run.
-      security:
-        - githubBearer: []
-      parameters:
-        - name: run_id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: Workflow jobs with step status.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties: {}
-                additionalProperties: true
-  /repos/Kayus24/kgg/actions/runs/{run_id}/artifacts:
-    get:
-      servers:
-        - url: https://api.github.com
-      operationId: getKggPreviewGateArtifacts
-      summary: Get uploaded artifacts for one Preview Gate run.
-      security:
-        - githubBearer: []
-      parameters:
-        - name: run_id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: Workflow artifacts.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties: {}
-                additionalProperties: true
-  /repos/Kayus24/kgg-project-memory/contents/memory/index.json:
-    get:
-      servers:
-        - url: https://api.github.com
-      operationId: getKggMemoryIndex
-      summary: Get the small routing index for the private KGG project memory.
-      description: Always call this before loading a memory pack. Do not load all records.
-      security:
-        - githubBearer: []
-      parameters:
-        - name: Accept
-          in: header
-          required: true
-          schema:
-            type: string
-            enum:
-              - application/vnd.github.raw+json
-            default: application/vnd.github.raw+json
-        - name: ref
-          in: query
-          required: false
-          schema:
-            type: string
-            enum:
-              - main
-            default: main
-      responses:
-        "200":
-          description: Raw JSON routing index.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties: {}
-                additionalProperties: true
-  /repos/Kayus24/kgg-project-memory/contents/memory/packs/{pack_name}:
-    get:
-      servers:
-        - url: https://api.github.com
-      operationId: getKggMemoryPack
-      summary: Get one compact active KGG memory topic pack selected from the index.
-      security:
-        - githubBearer: []
-      parameters:
-        - name: pack_name
-          in: path
-          required: true
-          schema:
-            type: string
-            pattern: "^[a-z0-9][a-z0-9-]{1,63}\\.md$"
-        - name: Accept
-          in: header
-          required: true
-          schema:
-            type: string
-            enum:
-              - application/vnd.github.raw+json
-            default: application/vnd.github.raw+json
-        - name: ref
-          in: query
-          required: false
-          schema:
-            type: string
-            enum:
-              - main
-            default: main
-      responses:
-        "200":
-          description: Raw Markdown memory pack.
+          description: Patient live context.
           content:
             text/plain:
-              schema:
-                type: string
-  /repos/Kayus24/kgg-project-memory/contents/memory/records/{record_name}:
+              schema: {type: string}
+  /Kayus24/kgg/main/docs/kgg-patient-custom-gpt-playbook.md:
     get:
-      servers:
-        - url: https://api.github.com
-      operationId: getKggMemoryRecord
-      summary: Get one immutable KGG memory record for history, rationale or conflict review.
-      security:
-        - githubBearer: []
-      parameters:
-        - name: record_name
-          in: path
-          required: true
-          schema:
-            type: string
-            pattern: "^[a-z0-9][a-z0-9-]{5,63}\\.md$"
-        - name: Accept
-          in: header
-          required: true
-          schema:
-            type: string
-            enum:
-              - application/vnd.github.raw+json
-            default: application/vnd.github.raw+json
-        - name: ref
-          in: query
-          required: false
-          schema:
-            type: string
-            enum:
-              - main
-            default: main
+      operationId: getKggPatientPlaybookForAdmin
+      summary: Read Patient-App ownership and interface rules before cross-app work.
       responses:
         "200":
-          description: Raw immutable Markdown record.
+          description: Patient playbook.
           content:
             text/plain:
-              schema:
-                type: string
-  /repos/Kayus24/kgg-project-memory/contents/memory/history.json:
+              schema: {type: string}
+  /Kayus24/kgg/main/docs/kgg-patient-custom-gpt-action-schema.md:
     get:
-      servers:
-        - url: https://api.github.com
-      operationId: getKggMemoryHistory
-      summary: Get the KGG memory history catalog only when audit or conflict context is required.
-      security:
-        - githubBearer: []
-      parameters:
-        - name: Accept
-          in: header
-          required: true
-          schema:
-            type: string
-            enum:
-              - application/vnd.github.raw+json
-            default: application/vnd.github.raw+json
-        - name: ref
-          in: query
-          required: false
-          schema:
-            type: string
-            enum:
-              - main
-            default: main
+      operationId: getKggPatientActionContractForAdmin
+      summary: Read the Patient Preview payload contract.
       responses:
         "200":
-          description: Raw JSON history catalog.
+          description: Patient action contract.
           content:
-            application/json:
-              schema:
-                type: object
-                properties: {}
-                additionalProperties: true
-  /repos/Kayus24/kgg-project-memory/actions/workflows/kgg-memory-gate.yml/dispatches:
-    post:
-      servers:
-        - url: https://api.github.com
-      operationId: submitKggMemoryUpdate
-      summary: Validate or apply one guarded append-only project-memory record.
-      description: Use validate_only first. Apply only an identical safe payload. needs_approval must stop until Max explicitly approves.
-      security:
-        - githubBearer: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - ref
-                - inputs
-              properties:
-                ref:
-                  type: string
-                  enum:
-                    - main
-                inputs:
-                  type: object
-                  required:
-                    - mode
-                    - request_id
-                    - payload_json
-                  properties:
-                    mode:
-                      type: string
-                      enum:
-                        - validate_only
-                        - apply
-                    request_id:
-                      type: string
-                      pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
-                    payload_json:
-                      type: string
-                      description: JSON string containing the identical request_id and one curated record. Never include chats, patient data, secrets or raw Base64.
-      responses:
-        "204":
-          description: Memory workflow dispatch accepted.
-  /repos/Kayus24/kgg-project-memory/actions/workflows/kgg-memory-gate.yml/runs:
+            text/plain:
+              schema: {type: string}
+  /Kayus24/kgg/main/docs/kgg-patient-gpt-source-index.json:
     get:
-      servers:
-        - url: https://api.github.com
-      operationId: listKggMemoryUpdateRuns
-      summary: List recent KGG Project Memory Gate runs.
-      security:
-        - githubBearer: []
-      parameters:
-        - name: branch
-          in: query
-          required: false
-          schema:
-            type: string
-            enum:
-              - main
-            default: main
-        - name: event
-          in: query
-          required: false
-          schema:
-            type: string
-            enum:
-              - workflow_dispatch
-            default: workflow_dispatch
-        - name: status
-          in: query
-          required: false
-          schema:
-            type: string
-            enum:
-              - queued
-              - in_progress
-              - completed
-        - name: per_page
-          in: query
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 20
-            default: 10
+      operationId: getKggPatientSourceIndexForAdmin
+      summary: Route limited cross-app analysis to current Patient source chunks.
       responses:
         "200":
-          description: Recent memory workflow runs.
+          description: Patient source index.
           content:
             application/json:
-              schema:
-                type: object
-                properties: {}
-                additionalProperties: true
-  /repos/Kayus24/kgg-project-memory/actions/runs/{memory_run_id}:
+              schema: {type: object, additionalProperties: true}
+  /Kayus24/kgg/main/docs/kgg-patient-gpt-source/{chunk_name}:
     get:
-      servers:
-        - url: https://api.github.com
-      operationId: getKggMemoryUpdateRun
-      summary: Get status and conclusion for one Project Memory Gate run.
-      security:
-        - githubBearer: []
+      operationId: getKggPatientSourceChunkForAdmin
+      summary: Read one Patient source chunk selected by the Patient source index.
       parameters:
-        - name: memory_run_id
+        - name: chunk_name
           in: path
           required: true
-          schema:
-            type: integer
+          schema: {type: string, pattern: "^chunk-[0-9]{3}\\.md$"}
       responses:
         "200":
-          description: Memory workflow run status.
+          description: Patient source chunk.
+          content:
+            text/plain:
+              schema: {type: string}
+  /Kayus24/kgg-patient-preview/main/previews/index.json:
+    get:
+      operationId: getKggPatientPreviewIndexForAdmin
+      summary: Read the isolated Patient-App Preview index.
+      responses:
+        "200":
+          description: Patient Preview index.
           content:
             application/json:
-              schema:
-                type: object
-                properties: {}
-                additionalProperties: true
-  /repos/Kayus24/kgg-project-memory/actions/runs/{memory_run_id}/jobs:
+              schema: {type: object, additionalProperties: true}
+  /Kayus24/kgg-patient-preview/main/previews/{patient_request_id}/meta.json:
     get:
-      servers:
-        - url: https://api.github.com
-      operationId: getKggMemoryUpdateStatus
-      summary: Get jobs and named status steps for one Project Memory Gate run.
-      description: Inspect steps for applied, no_change, needs_approval or rejected behavior before reporting success.
-      security:
-        - githubBearer: []
+      operationId: getKggPatientPreviewMetaForAdmin
+      summary: Read one coordinated Patient-App Preview result.
       parameters:
-        - name: memory_run_id
+        - name: patient_request_id
           in: path
           required: true
-          schema:
-            type: integer
+          schema: {type: string, pattern: "^[a-z0-9][a-z0-9-]{5,63}$"}
       responses:
         "200":
-          description: Memory workflow jobs and steps.
+          description: Patient Preview metadata.
           content:
             application/json:
-              schema:
-                type: object
-                properties: {}
-                additionalProperties: true
-  /repos/Kayus24/kgg-project-memory/actions/runs/{memory_run_id}/artifacts:
-    get:
-      servers:
-        - url: https://api.github.com
-      operationId: getKggMemoryUpdateArtifacts
-      summary: List the structured result artifact for one Project Memory Gate run.
-      security:
-        - githubBearer: []
-      parameters:
-        - name: memory_run_id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: Memory workflow artifacts.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties: {}
-                additionalProperties: true
-components:
-  schemas: {}
-  securitySchemes:
-    githubBearer:
-      type: http
-      scheme: bearer
+              schema: {type: object, additionalProperties: true}

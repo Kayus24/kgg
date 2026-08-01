@@ -4,6 +4,39 @@
 - Lines: 7561-7980
 
 ```html
+    for (var y = dimension - 1; y >= dimension - 7; y--) { // bottom left
+        topRightBottomRightFormatInfoBits = pushBit(matrix.get(8, y), topRightBottomRightFormatInfoBits);
+    }
+    for (var x = dimension - 8; x < dimension; x++) { // top right
+        topRightBottomRightFormatInfoBits = pushBit(matrix.get(x, 8), topRightBottomRightFormatInfoBits);
+    }
+    var bestDifference = Infinity;
+    var bestFormatInfo = null;
+    for (var _i = 0, FORMAT_INFO_TABLE_1 = FORMAT_INFO_TABLE; _i < FORMAT_INFO_TABLE_1.length; _i++) {
+        var _a = FORMAT_INFO_TABLE_1[_i], bits = _a.bits, formatInfo = _a.formatInfo;
+        if (bits === topLeftFormatInfoBits || bits === topRightBottomRightFormatInfoBits) {
+            return formatInfo;
+        }
+        var difference = numBitsDiffering(topLeftFormatInfoBits, bits);
+        if (difference < bestDifference) {
+            bestFormatInfo = formatInfo;
+            bestDifference = difference;
+        }
+        if (topLeftFormatInfoBits !== topRightBottomRightFormatInfoBits) { // also try the other option
+            difference = numBitsDiffering(topRightBottomRightFormatInfoBits, bits);
+            if (difference < bestDifference) {
+                bestFormatInfo = formatInfo;
+                bestDifference = difference;
+            }
+        }
+    }
+    // Hamming distance of the 32 masked codes is 7, by construction, so <= 3 bits differing means we found a match
+    if (bestDifference <= 3) {
+        return bestFormatInfo;
+    }
+    return null;
+}
+function getDataBlocks(codewords, version, ecLevel) {
     var ecInfo = version.errorCorrectionLevels[ecLevel];
     var dataBlocks = [];
     var totalCodewords = 0;
@@ -391,37 +424,4 @@ exports.BitStream = BitStream;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.shiftJISTable = {
     0x20: 0x0020,
-    0x21: 0x0021,
-    0x22: 0x0022,
-    0x23: 0x0023,
-    0x24: 0x0024,
-    0x25: 0x0025,
-    0x26: 0x0026,
-    0x27: 0x0027,
-    0x28: 0x0028,
-    0x29: 0x0029,
-    0x2A: 0x002A,
-    0x2B: 0x002B,
-    0x2C: 0x002C,
-    0x2D: 0x002D,
-    0x2E: 0x002E,
-    0x2F: 0x002F,
-    0x30: 0x0030,
-    0x31: 0x0031,
-    0x32: 0x0032,
-    0x33: 0x0033,
-    0x34: 0x0034,
-    0x35: 0x0035,
-    0x36: 0x0036,
-    0x37: 0x0037,
-    0x38: 0x0038,
-    0x39: 0x0039,
-    0x3A: 0x003A,
-    0x3B: 0x003B,
-    0x3C: 0x003C,
-    0x3D: 0x003D,
-    0x3E: 0x003E,
-    0x3F: 0x003F,
-    0x40: 0x0040,
-    0x41: 0x0041,
 ```

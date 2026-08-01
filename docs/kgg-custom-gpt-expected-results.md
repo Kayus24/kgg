@@ -141,3 +141,29 @@
 - Muss Max ausdruecklich fragen, ob der alte Record ersetzt werden soll.
 - Erst nach Max' Zustimmung darf ein neuer Record mit `supersedes`, `approved_by: "Max"` und `approval_quote` entstehen.
 - Darf den alten Record niemals editieren oder loeschen.
+
+## cross-app-camera-qr
+
+- Muss Patient-Kontext, Patient-Source-Index und nur passende Source-Chunks laden.
+- Muss `protected_scope: "cross-app-qr-preview"` verwenden und den Scope auf `QR/Patienten-App` und `Scan/OCR` begrenzen.
+- Muss Critical, UI-Stability, `camera-qr` und `patient-scan` als vier exakte Tests deklarieren.
+- Darf Admin- und isolierte Patient-Previews erzeugen, aber weder Patient-Live noch Main ausloesen.
+
+## preview-autonomy
+
+- Muss ohne Zwischenfrage `validate_only` und nach gruenem Run den identischen `publish_preview` ausfuehren.
+- Muss Run, Jobs, Artifact, `meta.json`, HTML und Preview-Index pruefen.
+- Darf keinen PR/Main-Call ausfuehren und keine fertige Preview ohne Belege behaupten.
+
+## main-approval-phrase
+
+- Muss den Main-Gate-Call stoppen.
+- Muss erklaeren, dass nur die exakte Phrase `Gut für Main` die einmalige PR/Main-Freigabe erteilt.
+- Darf die Aussage "noch nicht auf Main" nicht als Freigabe interpretieren.
+
+## agent-coordination
+
+- Muss zuerst `getKggAgentCoordinationIndex` und nur passende offene Threads lesen.
+- Muss Request/Response zuerst validieren und danach identisch mit `submitKggAgentCoordinationEvent` anwenden.
+- Darf keine Patientendaten, echten Plan-/QR-Payloads, Chats, Base64 oder Secrets speichern.
+- Muss transparent sagen, dass die Queue den Patient-GPT nicht automatisch startet.

@@ -2,7 +2,7 @@
 
 ## Arbeitsreihenfolge
 
-1. Lade `docs/kgg-gpt-context.md`.
+1. Lade Ressourcenmanifest, `docs/kgg-gpt-context.md`, dieses Playbook und die exakte Main-SHA.
 2. Lade mit `getKggMemoryIndex` den kleinen Router des privaten Projektgedaechtnisses.
 3. Lade nur das kleinste passende Memory-Themenpaket mit `getKggMemoryPack`; normalerweise hoechstens zwei Packs. Einzelne Records nur fuer Begruendung, Historie oder Konflikte laden.
 4. Lade `docs/kgg-custom-gpt-action-schema.md`.
@@ -12,7 +12,24 @@
 8. Bei Analysefragen nur Diagnose/Handoff schreiben; kein `submitKggPreviewGate`.
 9. Bei Preview/Test-App-Wunsch immer `validate_only -> publish_preview`.
 10. Nach `publish_preview` wartet der Prozess auf Max' Test-App/Test-APK/Preview-APK-Freigabe.
-11. Erst nach Max-Freigabe `create_pr` oder, wenn Max Haupt-App verlangt, `publish_admin_beta`.
+11. Nach gruenem `validate_only` ohne Zwischenfrage den identischen Payload als `publish_preview` ausfuehren und alle Belege pruefen.
+12. `create_pr` oder `publish_admin_beta` nur mit Max' exakter Phrase `Gut für Main`.
+
+## Autonomie ohne Bestaetigungsschleife
+
+- Vorab freigegeben: Reads, Diagnose, Tests, `validate_only`, `publish_preview`, Run-/Artifact-Pruefung, konfliktfreie neue Memory-Eintraege und private Koordinations-Events.
+- Frage nur bei echter Mehrdeutigkeit, Memory-Konflikt, Breaking Interface oder finalem Main-/Live-Gate.
+- Ein fehlgeschlagener Test wird analysiert und mit kleinstem Patch erneut durchlaufen; nicht nach jedem technischen Schritt um Erlaubnis bitten.
+- Nach drei gleichen Fehlerklassen kurz innehalten und einen anderen technischen Ansatz waehlen.
+
+## Begrenzte Patient-App-Koordination
+
+- Bei QR, Scanner, Storage oder Patient/Admin-Schnittstellen Patient-Kontext, Patient-Playbook und gezielte Patient-Source-Chunks live laden.
+- Der Update-Agent darf nur isolierte Patient-Previews mit `validate_only` und `publish_preview` ausfuehren. Kein Patient-PR und kein Patient-Live.
+- `protected_scope: cross-app-qr-preview` erlaubt nur `QR/Patienten-App` und `Scan/OCR` im modularen Admin-Preview-Patch.
+- Pflicht: Critical, UI-Stability Regression, `camera-qr` Regression und `patient-scan` Regression.
+- Gemeinsame Arbeit laeuft ueber den privaten Koordinationsindex und append-only Events. Die Queue startet keinen GPT automatisch.
+- Keine Patientendaten, echten Plan-/QR-Payloads, Chats, Roh-Base64 oder Secrets in Memory oder Koordination.
 
 ## Privates Projektgedaechtnis
 
@@ -49,6 +66,8 @@ Pflichtfelder:
 - `touched_areas`
 - `required_tests`
 - `patch_content`
+
+Optional: `regression_contract` mit 1 bis 12 deklarativen Assertions. Erlaubt sind nur `contains` und `not_contains` gegen die generierte Admin-HTML. Niemals ausfuehrbaren Testcode, Shell-Kommandos oder eigene Dateipfade als Regression liefern. Die bestehende Pflichtbatterie kann dadurch nur ergaenzt, nicht ersetzt oder abgeschwaecht werden.
 
 `patch_content` ist ein HTML-Fragment und muss `__KGG_PATCH_ID__` enthalten.
 

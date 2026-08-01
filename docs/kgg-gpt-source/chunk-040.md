@@ -4,6 +4,39 @@
 - Lines: 16801-17220
 
 ```html
+                    v; // Is the current pixel black since alignment patterns are bordered in black
+                if (validFinderPattern) {
+                    // Compute the start and end x values of the large center black square
+                    var endX_1 = x - scans[3] - scans[4];
+                    var startX_1 = endX_1 - scans[2];
+                    var line = { startX: startX_1, endX: endX_1, y: y };
+                    // Is there a quad directly above the current spot? If so, extend it with the new line. Otherwise, create a new quad with
+                    // that line as the starting point.
+                    var matchingQuads = activeFinderPatternQuads.filter(function (q) {
+                        return (startX_1 >= q.bottom.startX && startX_1 <= q.bottom.endX) ||
+                            (endX_1 >= q.bottom.startX && startX_1 <= q.bottom.endX) ||
+                            (startX_1 <= q.bottom.startX && endX_1 >= q.bottom.endX && ((scans[2] / (q.bottom.endX - q.bottom.startX)) < MAX_QUAD_RATIO &&
+                                (scans[2] / (q.bottom.endX - q.bottom.startX)) > MIN_QUAD_RATIO));
+                    });
+                    if (matchingQuads.length > 0) {
+                        matchingQuads[0].bottom = line;
+                    }
+                    else {
+                        activeFinderPatternQuads.push({ top: line, bottom: line });
+                    }
+                }
+                if (validAlignmentPattern) {
+                    // Compute the start and end x values of the center black square
+                    var endX_2 = x - scans[4];
+                    var startX_2 = endX_2 - scans[3];
+                    var line = { startX: startX_2, y: y, endX: endX_2 };
+                    // Is there a quad directly above the current spot? If so, extend it with the new line. Otherwise, create a new quad with
+                    // that line as the starting point.
+                    var matchingQuads = activeAlignmentPatternQuads.filter(function (q) {
+                        return (startX_2 >= q.bottom.startX && startX_2 <= q.bottom.endX) ||
+                            (endX_2 >= q.bottom.startX && startX_2 <= q.bottom.endX) ||
+                            (startX_2 <= q.bottom.startX && endX_2 >= q.bottom.endX && ((scans[2] / (q.bottom.endX - q.bottom.startX)) < MAX_QUAD_RATIO &&
+                                (scans[2] / (q.bottom.endX - q.bottom.startX)) > MIN_QUAD_RATIO));
                     });
                     if (matchingQuads.length > 0) {
                         matchingQuads[0].bottom = line;
@@ -391,37 +424,4 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
 <div class="modal" id="largePdfModal"><div class="sheet">
   <h2>Großdruck-PDF</h2>
   <p class="notice">Großdruck-PDF erzeugen?</p>
-  <div class="grid2"><button class="mutedBtn" id="cancelLargePdf" type="button">Abbrechen</button><button class="primary" id="confirmLargePdf" type="button">PDF erzeugen</button></div>
-</div></div>
-
-<div class="modal" id="longMediaConfirmModal"><div class="sheet">
-  <h2>24-Stunden-Code?</h2>
-  <p class="notice">24h-Code erstellen? Bilddateien bleiben länger abrufbar.</p>
-  <div class="grid2"><button class="mutedBtn" id="cancelLongMediaShare" type="button">Abbrechen</button><button class="primary" id="confirmLongMediaShare" type="button">Ja, erstellen</button></div>
-</div></div>
-
-<div class="modal" id="installPromptModal"><div class="sheet">
-  <h2 id="installPromptTitle">App installieren?</h2>
-  <p class="notice" id="installPromptText">Installieren und lokale Daten über Updates behalten.</p>
-  <div class="grid2"><button class="mutedBtn" id="dismissInstallPrompt" type="button">Später</button><button class="primary" id="acceptInstallPrompt" type="button">Installieren</button></div>
-</div></div>
-
-<div class="modal" id="adminSecretsModal"><div class="sheet">
-  <h2>Admin-Konfig</h2>
-  <p class="notice">Codes bleiben nur lokal auf diesem Geraet. In dieser Admin-Testdatei sind keine API-Keys fest eingebaut.</p>
-  <div class="field"><label>Gemini API-Key 1</label><input id="adminGeminiKey1" type="password" autocomplete="off" spellcheck="false"></div>
-  <div class="field"><label>Gemini API-Key 2</label><input id="adminGeminiKey2" type="password" autocomplete="off" spellcheck="false"></div>
-  <div class="field"><label>Medien-Dropzone URL</label><input id="adminMediaDropzoneEndpoint" type="url" autocomplete="off" spellcheck="false" placeholder="https://...workers.dev"></div>
-  <div class="field"><label>Medien Upload-Code</label><input id="adminMediaDropzoneUploadToken" type="password" autocomplete="off" spellcheck="false"></div>
-  <span class="secretStatus" id="adminSecretStatus">Keine lokalen Codes gespeichert.</span>
-  <div class="adminCodePackageTools">
-    <button class="mutedBtn wide" id="loadAdminSafeFile" type="button">Admin-Safe-Datei laden</button>
-    <button class="mutedBtn" id="importAdminCodePackage" type="button">Code-Paket einfuegen</button>
-    <button class="mutedBtn" id="exportAdminCodePackage" type="button">Code-Paket kopieren</button>
-    <button class="mutedBtn wide" id="downloadAdminSafeFile" type="button">Admin-Safe-Datei speichern</button>
-  </div>
-  <input id="adminSafeFileInput" class="hidden" type="file" accept=".kggsafe,.bin,.txt,.json,text/plain,application/json,application/octet-stream,*/*">
-  <div class="adminPackageHint">Admin-Safe-Dateien bleiben lokal und gehoeren nicht in GitHub, Chat oder Patient:innen-Ausgabe.</div>
-  <div class="grid2" style="margin-top:12px"><button class="mutedBtn danger" id="clearAdminSecrets" type="button">Löschen</button><button class="primary" id="saveAdminSecrets" type="button">Lokal speichern</button></div>
-  <button class="mutedBtn" id="closeAdminSecrets" type="button" style="width:100%;margin-top:8px">Schließen</button>
 ```

@@ -146,6 +146,33 @@ def run_validate_only_self_test() -> None:
         fail(f"validate_only self-test failed: {output}")
 
 
+def run_main_approval_self_test() -> None:
+    payload = {
+        "request_id": "gpt-main-approval-self-test",
+        "title": "Main approval self test",
+        "summary": "PR and Main modes must require Max's exact final approval phrase.",
+        "version_slug": "main-approval-self-test",
+        "protected_scope": "none",
+        "touched_areas": ["Admin-Web UI"],
+        "required_tests": [
+            "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
+            "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression",
+        ],
+        "patch_content": (
+            '<style id="__KGG_PATCH_ID__-style">.kgg-main-approval-self-test{display:none}</style>\n'
+            '<script id="__KGG_PATCH_ID__">(function(){"use strict";const PATCH_ID="__KGG_PATCH_ID__";'
+            'window.KGG_PATCHES=window.KGG_PATCHES||{};window.KGG_PATCHES[PATCH_ID]={installed:true};})();</script>\n'
+        ),
+    }
+    validated = write_gate.validate_payload(json.dumps(payload, ensure_ascii=False))
+    try:
+        write_gate.run(validated, "create_pr", None, None)
+    except write_gate.GateError as exc:
+        require(str(exc), "Gut für Main", "exact Main approval gate")
+    else:
+        fail("create_pr was accepted without Max's exact approval phrase")
+
+
 def run_preview_banner_self_test() -> None:
     payload = {
         "request_id": "preview-banner-self-test",
@@ -305,7 +332,11 @@ def check_prompt_and_expected_docs() -> None:
         "ci-tooling-pdftoppm",
         "admin-beta-push-gate",
         "memory-safe-auto-update",
-        "memory-conflict-needs-approval",
+            "memory-conflict-needs-approval",
+            "cross-app-camera-qr",
+            "preview-autonomy",
+            "main-approval-phrase",
+            "agent-coordination",
     ]
     for case in cases:
         require(prompts, f"## {case}", f"prompt fixture {case}")
@@ -344,6 +375,11 @@ def check_prompt_and_expected_docs() -> None:
             "getKggMemoryUpdateStatus",
             "needs_approval",
             "supersedes",
+            "cross-app-qr-preview",
+            "camera-qr",
+            "patient-scan",
+            "Gut für Main",
+            "submitKggAgentCoordinationEvent",
         ],
         "expected behavior text",
     )
@@ -372,34 +408,25 @@ def check_prompt_and_expected_docs() -> None:
             "submitKggMemoryUpdate",
             "needs_approval",
             "supersedes",
+            "cross-app-qr-preview",
+            "submitKggMainGate",
+            "Gut für Main",
+            "submitKggPatientPreviewFromAdmin",
+            "getKggAgentCoordinationIndex",
         ],
         "action schema text",
     )
     require_all(
         openapi_schema,
         [
-            "submitKggPreviewGate",
-            "- validate_only",
-            "- publish_preview",
-            "- create_pr",
-            "- publish_admin_beta",
-            "listKggPreviewGateRuns",
-            "getKggPreviewGateRun",
-            "getKggPreviewGateJobs",
-            "getKggPreviewGateArtifacts",
-            "required_tests",
-            "patch_content",
-            "schemas: {}",
-            "properties:",
-            "getKggMemoryIndex",
-            "getKggMemoryPack",
-            "getKggMemoryRecord",
-            "getKggMemoryHistory",
-            "submitKggMemoryUpdate",
-            "listKggMemoryUpdateRuns",
-            "getKggMemoryUpdateRun",
-            "getKggMemoryUpdateStatus",
-            "getKggMemoryUpdateArtifacts",
+            "getKggCustomGptResourceManifest",
+            "getKggProjectContext",
+            "getKggSourceIndex",
+            "getKggSourceChunk",
+            "getKggPatientContextForAdmin",
+            "getKggPatientSourceIndexForAdmin",
+            "getKggPatientSourceChunkForAdmin",
+            "getKggPatientPreviewIndexForAdmin",
         ],
         "custom GPT OpenAPI schema",
     )
@@ -407,10 +434,11 @@ def check_prompt_and_expected_docs() -> None:
         api_openapi_schema,
         [
             "submitKggPreviewGate",
-            "- validate_only",
-            "- publish_preview",
-            "- create_pr",
-            "- publish_admin_beta",
+            "submitKggMainGate",
+            "validate_only",
+            "publish_preview",
+            "create_pr",
+            "publish_admin_beta",
             "listKggPreviewGateRuns",
             "getKggPreviewGateRun",
             "getKggPreviewGateJobs",
@@ -428,6 +456,12 @@ def check_prompt_and_expected_docs() -> None:
             "getKggMemoryUpdateRun",
             "getKggMemoryUpdateStatus",
             "getKggMemoryUpdateArtifacts",
+            "submitKggPatientPreviewFromAdmin",
+            "getKggAgentCoordinationIndex",
+            "getKggAgentCoordinationThread",
+            "submitKggAgentCoordinationEvent",
+            "listKggAgentCoordinationRuns",
+            "Gut für Main",
         ],
         "custom GPT API-only OpenAPI schema",
     )
@@ -496,7 +530,7 @@ def check_area_routes() -> None:
         fail("missing docs/kgg-gpt-area-routes.json; run kgg_gpt_source_context.py --write")
     data = json.loads(route_json.read_text(encoding="utf-8"))
     routes = {route["id"]: route for route in data.get("routes", [])}
-    for route_id in ["tablet-layout", "phone-layout", "qr-patient", "pdf", "android-apk", "sync", "preview-gate"]:
+    for route_id in ["tablet-layout", "phone-layout", "qr-patient", "camera-qr", "pdf", "android-apk", "sync", "preview-gate"]:
         if route_id not in routes:
             fail(f"missing area route: {route_id}")
     tablet = routes["tablet-layout"]
@@ -555,6 +589,7 @@ def main() -> int:
         run_mock_eval_self_test()
         run_repair_lab_self_tests()
         run_validate_only_self_test()
+        run_main_approval_self_test()
         run_preview_banner_self_test()
         run_modular_rollback_self_test()
         print("KGG Custom GPT eval OK")
