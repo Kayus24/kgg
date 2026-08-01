@@ -1,0 +1,16 @@
+{
+  "kind": "kgg_gpt_preview",
+  "requestId": "gpt-auto-canary-20260802-a",
+  "patchHash": "15f05ea41f0458378fbac97205d9eb1bf725385aed45eff312880e2c79ce44fa",
+  "baseSha": "0e019c9a9eb5bb50943b4b3bd2d386cff2ff3b38",
+  "baseVersionCode": 62,
+  "rolloutCode": 1785626847,
+  "title": "Unsichtbarer Test-App Auto-Canary",
+  "summary": "Setzt ausschlielich den nicht sichtbaren Dokument-Dataset-Canary 20260802-a und registriert das Modul im KGG-Patchobjekt.",
+  "patchId": "kgg-v062-auto-canary-20260802-a",
+  "patchFile": "patches/v062-auto-canary-20260802-a.html",
+  "versionName": "1.0.62-auto-canary-20260802-a",
+  "createdAt": "2026-08-01T23:27:27Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/gpt-auto-canary-20260802-a/admin.html",
+  "sha256": "0fae2d75f1cb696e52d94441dfd6b630c03aafdb4c92b17b1bedd1ed7b456e09"
+}

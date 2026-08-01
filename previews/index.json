@@ -4,6 +4,22 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "gpt-auto-canary-20260802-a",
+      "patchHash": "15f05ea41f0458378fbac97205d9eb1bf725385aed45eff312880e2c79ce44fa",
+      "baseSha": "0e019c9a9eb5bb50943b4b3bd2d386cff2ff3b38",
+      "baseVersionCode": 62,
+      "rolloutCode": 1785626847,
+      "title": "Unsichtbarer Test-App Auto-Canary",
+      "summary": "Setzt ausschlielich den nicht sichtbaren Dokument-Dataset-Canary 20260802-a und registriert das Modul im KGG-Patchobjekt.",
+      "patchId": "kgg-v062-auto-canary-20260802-a",
+      "patchFile": "patches/v062-auto-canary-20260802-a.html",
+      "versionName": "1.0.62-auto-canary-20260802-a",
+      "createdAt": "2026-08-01T23:27:27Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/gpt-auto-canary-20260802-a/admin.html",
+      "sha256": "0fae2d75f1cb696e52d94441dfd6b630c03aafdb4c92b17b1bedd1ed7b456e09"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-camera-flow-rollback-20260801-b",
       "patchHash": "87e9a13bc79c12e3ed54909549d5458b6977813ea82303033226cf475dc2926b",
       "baseSha": "13fc1c9deb68ae0ba79abb93e0bb05c6896d2a18",
@@ -287,35 +303,22 @@
       "createdAt": "2026-07-06T11:41:15Z",
       "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v403-alt-names-inline-arrow/admin.html",
       "sha256": "14926ed810b6f5f4a6afdcdb3c54aaf77644409c80162bf0d43dbb5710ca4a1d"
-    },
-    {
-      "kind": "kgg_gpt_preview",
-      "requestId": "kgg-gpt-canary-20260705-a",
-      "patchHash": "687dd75ff08a7c5c6dae927b6e3e7ba9c298f3891d9f8c6931ccc38d21c7ca13",
-      "baseSha": "780ce081b957ca5a60ae7c09f72d09208397f230",
-      "baseVersionCode": 57,
-      "rolloutCode": 1783237594,
-      "title": "GPT Preview Canary",
-      "summary": "Canary: prueft validate_only -> publish_preview ohne App-Funktionsaenderung.",
-      "createdAt": "2026-07-05T07:46:34Z",
-      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-gpt-canary-20260705-a/admin.html",
-      "sha256": "b4ed7316e890edf6a0e8937fdc742d458e7301c3189e3b1a4c18bf1b6df0d9d9"
     }
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-camera-flow-rollback-20260801-b",
-    "patchHash": "87e9a13bc79c12e3ed54909549d5458b6977813ea82303033226cf475dc2926b",
-    "baseSha": "13fc1c9deb68ae0ba79abb93e0bb05c6896d2a18",
-    "baseVersionCode": 61,
-    "rolloutCode": 1785602103,
-    "title": "KGG-Kameraweg wiederherstellen",
-    "summary": "Die abgelehnte Preview-Umschaltung auf die normale Systemkamera wird verworfen. Die Test-App wird neu aus main gebaut und laesst den vorhandenen KGG-Kameraweg unveraendert aktiv.",
-    "patchId": "kgg-v061-camera-flow-rollback",
-    "patchFile": "patches/v061-camera-flow-rollback.html",
-    "versionName": "1.0.61-camera-flow-rollback",
-    "createdAt": "2026-08-01T16:35:03Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-camera-flow-rollback-20260801-b/admin.html",
-    "sha256": "114c888dc20d7237887d3470140cb13de2d7d8c74e19821fef3937c877227c0a"
+    "requestId": "gpt-auto-canary-20260802-a",
+    "patchHash": "15f05ea41f0458378fbac97205d9eb1bf725385aed45eff312880e2c79ce44fa",
+    "baseSha": "0e019c9a9eb5bb50943b4b3bd2d386cff2ff3b38",
+    "baseVersionCode": 62,
+    "rolloutCode": 1785626847,
+    "title": "Unsichtbarer Test-App Auto-Canary",
+    "summary": "Setzt ausschlielich den nicht sichtbaren Dokument-Dataset-Canary 20260802-a und registriert das Modul im KGG-Patchobjekt.",
+    "patchId": "kgg-v062-auto-canary-20260802-a",
+    "patchFile": "patches/v062-auto-canary-20260802-a.html",
+    "versionName": "1.0.62-auto-canary-20260802-a",
+    "createdAt": "2026-08-01T23:27:27Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/gpt-auto-canary-20260802-a/admin.html",
+    "sha256": "0fae2d75f1cb696e52d94441dfd6b630c03aafdb4c92b17b1bedd1ed7b456e09"
   }
 }
