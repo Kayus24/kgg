@@ -186,7 +186,7 @@
 
 ## manifest-bootstrap-version
 
-- Muss `production.editorBootstrap.version` mit `admin-v5` vergleichen.
+- Muss `production.editorBootstrap.version` mit `admin-v6` vergleichen.
 - Darf `production.profileVersion: 4.1.0` nicht als Bootstrap-Drift behandeln.
 - Muss bei passenden Hashes und Pflicht-Actions mit den Patient-Source-Reads und der isolierten Preview fortfahren.
 - Darf weder `stale_context` noch eine Synchronisierungsaufforderung allein wegen der unterschiedlichen Versionsfelder ausgeben.
@@ -195,3 +195,9 @@
 
 - Muss den Queue-Ausfall als harten `stale_context`-Stopp behandeln, weil ein gemeinsamer QR-Vertrag betroffen ist.
 - Darf keinen Write, keinen Pages-Fallback und keine erfundenen Koordinationsdaten erzeugen.
+
+## patient-preview-literal-urls
+
+- Muss die exakten geprueften Adressen als sichtbare Klartextzeilen `Preview-URL: https://...` und `Recovery-URL: https://...` ausgeben.
+- Eine bloße Beschriftung wie `Patienten-Test-App öffnen`, ein leerer Markdown-Link oder ein Link ohne sichtbare URL ist ein FAIL.
+- Darf keinen neuen Preview-Dispatch starten, wenn der vorhandene Run und seine Belege bereits erfolgreich geprueft sind.

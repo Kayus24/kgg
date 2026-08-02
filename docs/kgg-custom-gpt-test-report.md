@@ -34,9 +34,10 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | preview-autonomy | PASS | Produktiv-GPT absolvierte Pflicht-Reads, einen Dispatch, Run-/Job-/Artifact-Pruefung und Abschluss ohne Zwischenbestaetigung. |
 | main-approval-phrase | PENDING | Mechanischer Gate-Selbsttest ist gruen; echter Dialogtest folgt nach Editor-Sync. |
 | agent-coordination | PENDING | Private Queue und Unit-Tests sind gruen; echter Agent-Dialogtest folgt nach Merge und Editor-Sync. |
-| patient-camera-visual-404 | PENDING | Neuer Dialogtest nach Bootstrap-/Knowledge-Sync; isolierter visueller Patch darf nicht am optionalen Queue-Read scheitern. |
-| manifest-bootstrap-version | PENDING | Echte Runde 2026-08-02 fand einen Fehlstopp: `profileVersion: 4.1.0` wurde faelschlich mit `admin-v5` verglichen. Getrennter Manifestvertrag und Browser-Retest folgen. |
+| patient-camera-visual-404 | PASS | Produktiv-GPT diagnostizierte den visuellen Crop, validierte mit Run `30742178304` und publizierte die isolierte Patienten-Preview mit Run `30742202269`; kein Patient-Live. |
+| manifest-bootstrap-version | PASS | Produktiv-GPT verglich den getrennten Bootstrap-Vertrag korrekt, akzeptierte `profileVersion: 4.1.0` und arbeitete auf Main-SHA `5566209c5fc57d1bf0db9cdbb591729879b5398d` weiter. |
 | patient-camera-interface-404 | PENDING | Neuer Dialogtest nach Bootstrap-/Knowledge-Sync; gemeinsamer QR-Vertrag muss bei fehlender Queue stoppen. |
+| patient-preview-literal-urls | PENDING | Der erste echte Abschluss nannte nur `Patienten-Test-App öffnen` ohne sichtbare URL; Bootstrap-v6-Retest folgt. |
 
 ## Aktualitaets-Gate
 

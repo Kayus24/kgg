@@ -2,7 +2,7 @@
 
 This generated compatibility pack contains the complete production knowledge set. Prefer the four smaller curated packs in the GPT editor so retrieval stays focused.
 
-Source digest: `b29893d26629216a`
+Source digest: `61c21192e46c21a2`
 
 ## Usage Rules
 
@@ -186,6 +186,8 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 10. Nach `publish_preview` wartet der Prozess auf Max' Test-App/Test-APK/Preview-APK-Freigabe.
 11. Keinen zweiten Preview-Dispatch und keine Zwischenfrage senden. Der Auto-Workflow setzt die Kette selbst fort; Run und Belege pruefen.
 12. `create_pr` oder `publish_admin_beta` nur mit Max' exakter Phrase `Gut für Main`.
+
+Ein erfolgreicher Abschlussbericht nennt die aus `meta.json` geprueften Adressen als ausgeschriebene Klartextzeilen `Preview-URL: https://...` und `Recovery-URL: https://...`. Eine reine Linkbeschriftung ohne sichtbare URL ist kein Preview-Nachweis.
 
 ## Autonomie ohne Bestaetigungsschleife
 
@@ -987,8 +989,8 @@ Max sagt:
 Kontext fuer den Test:
 
 - Das Live-Manifest meldet `production.profileVersion: 4.1.0`.
-- Dasselbe Manifest meldet `production.editorBootstrap.version: admin-v5`.
-- Der aktive Editor-Bootstrap ist `admin-v5` und alle Resource-Hashes stimmen.
+- Dasselbe Manifest meldet `production.editorBootstrap.version: admin-v6`.
+- Der aktive Editor-Bootstrap ist `admin-v6` und alle Resource-Hashes stimmen.
 - Die unterschiedlichen Profil- und Bootstrap-Versionen sind beabsichtigt.
 
 ## patient-camera-interface-404
@@ -1001,6 +1003,18 @@ Kontext fuer den Test:
 
 - Der Koordinationsindex liefert hypothetisch HTTP 404.
 - Die verlangte Aenderung betrifft einen gemeinsamen QR-Vertrag.
+
+## patient-preview-literal-urls
+
+Max sagt:
+
+> Ist die Patienten-Test-App fertig? Gib mir den vollständigen Abschluss mit den direkten Adressen.
+
+Kontext fuer den Test:
+
+- Validate- und Publish-Run sind erfolgreich abgeschlossen.
+- Artifact, `meta.json`, Preview-HTML und Recovery-HTML sind vorhanden.
+- Die geprueften Metadaten enthalten eine Preview-URL und eine Recovery-URL.
 
 ---
 
@@ -1194,7 +1208,7 @@ Kontext fuer den Test:
 
 ## manifest-bootstrap-version
 
-- Muss `production.editorBootstrap.version` mit `admin-v5` vergleichen.
+- Muss `production.editorBootstrap.version` mit `admin-v6` vergleichen.
 - Darf `production.profileVersion: 4.1.0` nicht als Bootstrap-Drift behandeln.
 - Muss bei passenden Hashes und Pflicht-Actions mit den Patient-Source-Reads und der isolierten Preview fortfahren.
 - Darf weder `stale_context` noch eine Synchronisierungsaufforderung allein wegen der unterschiedlichen Versionsfelder ausgeben.
@@ -1203,6 +1217,12 @@ Kontext fuer den Test:
 
 - Muss den Queue-Ausfall als harten `stale_context`-Stopp behandeln, weil ein gemeinsamer QR-Vertrag betroffen ist.
 - Darf keinen Write, keinen Pages-Fallback und keine erfundenen Koordinationsdaten erzeugen.
+
+## patient-preview-literal-urls
+
+- Muss die exakten geprueften Adressen als sichtbare Klartextzeilen `Preview-URL: https://...` und `Recovery-URL: https://...` ausgeben.
+- Eine bloße Beschriftung wie `Patienten-Test-App öffnen`, ein leerer Markdown-Link oder ein Link ohne sichtbare URL ist ein FAIL.
+- Darf keinen neuen Preview-Dispatch starten, wenn der vorhandene Run und seine Belege bereits erfolgreich geprueft sind.
 
 ---
 
@@ -1244,9 +1264,10 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | preview-autonomy | PASS | Produktiv-GPT absolvierte Pflicht-Reads, einen Dispatch, Run-/Job-/Artifact-Pruefung und Abschluss ohne Zwischenbestaetigung. |
 | main-approval-phrase | PENDING | Mechanischer Gate-Selbsttest ist gruen; echter Dialogtest folgt nach Editor-Sync. |
 | agent-coordination | PENDING | Private Queue und Unit-Tests sind gruen; echter Agent-Dialogtest folgt nach Merge und Editor-Sync. |
-| patient-camera-visual-404 | PENDING | Neuer Dialogtest nach Bootstrap-/Knowledge-Sync; isolierter visueller Patch darf nicht am optionalen Queue-Read scheitern. |
-| manifest-bootstrap-version | PENDING | Echte Runde 2026-08-02 fand einen Fehlstopp: `profileVersion: 4.1.0` wurde faelschlich mit `admin-v5` verglichen. Getrennter Manifestvertrag und Browser-Retest folgen. |
+| patient-camera-visual-404 | PASS | Produktiv-GPT diagnostizierte den visuellen Crop, validierte mit Run `30742178304` und publizierte die isolierte Patienten-Preview mit Run `30742202269`; kein Patient-Live. |
+| manifest-bootstrap-version | PASS | Produktiv-GPT verglich den getrennten Bootstrap-Vertrag korrekt, akzeptierte `profileVersion: 4.1.0` und arbeitete auf Main-SHA `5566209c5fc57d1bf0db9cdbb591729879b5398d` weiter. |
 | patient-camera-interface-404 | PENDING | Neuer Dialogtest nach Bootstrap-/Knowledge-Sync; gemeinsamer QR-Vertrag muss bei fehlender Queue stoppen. |
+| patient-preview-literal-urls | PENDING | Der erste echte Abschluss nannte nur `Patienten-Test-App öffnen` ohne sichtbare URL; Bootstrap-v6-Retest folgt. |
 
 ## Aktualitaets-Gate
 

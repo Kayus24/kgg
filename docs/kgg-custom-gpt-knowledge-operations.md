@@ -2,7 +2,7 @@
 
 Generated production knowledge for modular payloads, Actions, Preview/Test-App and Admin-Beta operations.
 
-Source digest: `4e2628f22f1a4fdf`
+Source digest: `6a049521eff6af41`
 
 ## Usage Rules
 
@@ -40,6 +40,8 @@ Source digest: `4e2628f22f1a4fdf`
 10. Nach `publish_preview` wartet der Prozess auf Max' Test-App/Test-APK/Preview-APK-Freigabe.
 11. Keinen zweiten Preview-Dispatch und keine Zwischenfrage senden. Der Auto-Workflow setzt die Kette selbst fort; Run und Belege pruefen.
 12. `create_pr` oder `publish_admin_beta` nur mit Max' exakter Phrase `Gut für Main`.
+
+Ein erfolgreicher Abschlussbericht nennt die aus `meta.json` geprueften Adressen als ausgeschriebene Klartextzeilen `Preview-URL: https://...` und `Recovery-URL: https://...`. Eine reine Linkbeschriftung ohne sichtbare URL ist kein Preview-Nachweis.
 
 ## Autonomie ohne Bestaetigungsschleife
 

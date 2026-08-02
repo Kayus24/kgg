@@ -27,7 +27,7 @@ PRODUCTION_ACTIONS = [
     "docs/kgg-custom-gpt-action-api-openapi.yaml",
 ]
 PRODUCTION_BOOTSTRAP = "docs/kgg-custom-gpt-editor-bootstrap.md"
-PRODUCTION_BOOTSTRAP_VERSION = "admin-v5"
+PRODUCTION_BOOTSTRAP_VERSION = "admin-v6"
 PRODUCTION_EDITOR_SNAPSHOT = ROOT / "docs" / "kgg-custom-gpt-editor-snapshot.json"
 EVAL_KNOWLEDGE = ["docs/kgg-custom-gpt-eval-knowledge.md"]
 PATIENT_KNOWLEDGE = [

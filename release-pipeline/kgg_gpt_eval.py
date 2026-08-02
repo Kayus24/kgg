@@ -357,6 +357,7 @@ def check_prompt_and_expected_docs() -> None:
             "patient-camera-visual-404",
             "manifest-bootstrap-version",
             "patient-camera-interface-404",
+            "patient-preview-literal-urls",
     ]
     for case in cases:
         require(prompts, f"## {case}", f"prompt fixture {case}")
@@ -404,6 +405,8 @@ def check_prompt_and_expected_docs() -> None:
             "object-fit: cover",
             "patient-start-scan.js",
             "patient-camera",
+            "Preview-URL: https://...",
+            "Recovery-URL: https://...",
         ],
         "expected behavior text",
     )

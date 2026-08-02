@@ -252,8 +252,8 @@ Max sagt:
 Kontext fuer den Test:
 
 - Das Live-Manifest meldet `production.profileVersion: 4.1.0`.
-- Dasselbe Manifest meldet `production.editorBootstrap.version: admin-v5`.
-- Der aktive Editor-Bootstrap ist `admin-v5` und alle Resource-Hashes stimmen.
+- Dasselbe Manifest meldet `production.editorBootstrap.version: admin-v6`.
+- Der aktive Editor-Bootstrap ist `admin-v6` und alle Resource-Hashes stimmen.
 - Die unterschiedlichen Profil- und Bootstrap-Versionen sind beabsichtigt.
 
 ## patient-camera-interface-404
@@ -266,3 +266,15 @@ Kontext fuer den Test:
 
 - Der Koordinationsindex liefert hypothetisch HTTP 404.
 - Die verlangte Aenderung betrifft einen gemeinsamen QR-Vertrag.
+
+## patient-preview-literal-urls
+
+Max sagt:
+
+> Ist die Patienten-Test-App fertig? Gib mir den vollständigen Abschluss mit den direkten Adressen.
+
+Kontext fuer den Test:
+
+- Validate- und Publish-Run sind erfolgreich abgeschlossen.
+- Artifact, `meta.json`, Preview-HTML und Recovery-HTML sind vorhanden.
+- Die geprueften Metadaten enthalten eine Preview-URL und eine Recovery-URL.
