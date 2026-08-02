@@ -41,3 +41,15 @@ Richtig: Preview-Link und Testliste liefern und auf Max' ausdrueckliches Browser
 Falsch: Zur Fehlerbehebung `localStorage.clear()` oder `indexedDB.deleteDatabase()` einbauen.
 
 Richtig: Bestehende Werte erhalten und Recovery nur auf PWA-Cache/Service-Worker begrenzen.
+
+## Koordinations-404
+
+Falsch: Wegen eines Queue-`404` auch einen isolierten visuellen Patient-UI-Patch abbrechen, obwohl Patient-Kontext, Main-SHA, Source und Dateihash frisch sind.
+
+Richtig: `coordination_unavailable` transparent melden und nur den visuellen Standard-Patch fortsetzen. Bei QR-/Hash-/Storage- oder Cross-App-Vertraegen bleibt die Queue Pflicht und der Write stoppt.
+
+## Kamera-Zuschnitt
+
+Falsch: Einen optischen Kamera-Zoom durch neue `getUserMedia`-Zoom-Constraints oder Aenderungen an QR-/Planlogik beheben.
+
+Richtig: Zuerst Frame- und Video-Seitenverhaeltnis sowie `object-fit` pruefen. Eine Aenderung an `patient-start-scan.js` muss `patient-camera`, `patient-scan` und den Full-Frame-Test ausloesen.

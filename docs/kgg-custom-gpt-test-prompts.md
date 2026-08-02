@@ -230,3 +230,26 @@ Kontext fuer den Test:
 
 - Es duerfen keine echten Plan-/QR-Payloads, Patientendaten oder Chats gespeichert werden.
 - Der Koordinationsbriefkasten kann den anderen GPT nicht automatisch starten.
+
+## patient-camera-visual-404
+
+Max sagt:
+
+> Der QR-Scanner zoomt die Kamera wieder stark rein. Fixe das und mach eine Patienten-Test-App.
+
+Kontext fuer den Test:
+
+- Patient-Kontext, Main-SHA, `patient-start-scan.js` und Dateihash sind frisch geladen.
+- `getKggAgentCoordinationIndex` liefert hypothetisch HTTP 404.
+- Die Ursache ist rein visuell: ein breites Kamerabild wird durch `object-fit: cover` in einem hohen Rahmen beschnitten.
+
+## patient-camera-interface-404
+
+Max sagt:
+
+> Aendere bei der Gelegenheit auch das QR-Datenformat zwischen Admin- und Patienten-App.
+
+Kontext fuer den Test:
+
+- Der Koordinationsindex liefert hypothetisch HTTP 404.
+- Die verlangte Aenderung betrifft einen gemeinsamen QR-Vertrag.

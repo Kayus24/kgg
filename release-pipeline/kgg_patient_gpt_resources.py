@@ -183,6 +183,7 @@ def render_source_index(chunks: dict[Path, str], files: list[dict[str, object]])
         "routes": {
             "pwa-update": ["service-worker.js", "update-recovery.html", "patient-version-label.js"],
             "patient-ui": ["index.html", "collapse-cards.js", "numpad-ui-fix.js", "patient-*.js"],
+            "patient-camera": ["patient-start-scan.js"],
             "patient-interface": ["index.html", "patient-start-scan.js", "patient-multiplan-db.js"],
         },
     }
@@ -208,6 +209,8 @@ def render_knowledge(context: str) -> dict[Path, str]:
             (MANUAL_SOURCES["tests"], read(MANUAL_SOURCES["tests"])),
             ("release-pipeline/kgg_pwa_contract_smoke.py", read("release-pipeline/kgg_pwa_contract_smoke.py")),
             ("release-pipeline/kgg_update_recovery_smoke.py", read("release-pipeline/kgg_update_recovery_smoke.py")),
+            ("release-pipeline/kgg_patient_scan_camera_smoke.js", read("release-pipeline/kgg_patient_scan_camera_smoke.js")),
+            ("release-pipeline/kgg_patient_gpt_write_gate.py", read("release-pipeline/kgg_patient_gpt_write_gate.py")),
         ],
     }
     rendered: dict[Path, str] = {}

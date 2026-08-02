@@ -2,7 +2,7 @@
 
 Generated production knowledge for modular payloads, Actions, Preview/Test-App and Admin-Beta operations.
 
-Source digest: `9b4f272abbfe7290`
+Source digest: `4e2628f22f1a4fdf`
 
 ## Usage Rules
 
@@ -57,6 +57,7 @@ Source digest: `9b4f272abbfe7290`
 - `protected_scope: cross-app-qr-preview` erlaubt nur `QR/Patienten-App` und `Scan/OCR` im modularen Admin-Preview-Patch.
 - Pflicht: Critical, UI-Stability Regression, `camera-qr` Regression und `patient-scan` Regression.
 - Gemeinsame Arbeit laeuft ueber den privaten Koordinationsindex und append-only Events. Die Queue startet keinen GPT automatisch.
+- Ein Queue-Ausfall ist nur bei Interface-/Cross-App-Aenderungen blockierend. Ein isolierter visueller Patient-UI-Patch darf mit `coordination_unavailable` weiterlaufen, wenn Patient-Kontext, Main-SHA, Source und Dateihash frisch belegt sind.
 - Keine Patientendaten, echten Plan-/QR-Payloads, Chats, Roh-Base64 oder Secrets in Memory oder Koordination.
 
 ## Privates Projektgedaechtnis

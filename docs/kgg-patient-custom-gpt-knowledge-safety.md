@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Safety
 
-Generated retrieval pack. Source digest: `3521263df59b1940`.
+Generated retrieval pack. Source digest: `d8eba4fea7ccc4b4`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -51,6 +51,18 @@ Richtig: Preview-Link und Testliste liefern und auf Max' ausdrueckliches Browser
 Falsch: Zur Fehlerbehebung `localStorage.clear()` oder `indexedDB.deleteDatabase()` einbauen.
 
 Richtig: Bestehende Werte erhalten und Recovery nur auf PWA-Cache/Service-Worker begrenzen.
+
+## Koordinations-404
+
+Falsch: Wegen eines Queue-`404` auch einen isolierten visuellen Patient-UI-Patch abbrechen, obwohl Patient-Kontext, Main-SHA, Source und Dateihash frisch sind.
+
+Richtig: `coordination_unavailable` transparent melden und nur den visuellen Standard-Patch fortsetzen. Bei QR-/Hash-/Storage- oder Cross-App-Vertraegen bleibt die Queue Pflicht und der Write stoppt.
+
+## Kamera-Zuschnitt
+
+Falsch: Einen optischen Kamera-Zoom durch neue `getUserMedia`-Zoom-Constraints oder Aenderungen an QR-/Planlogik beheben.
+
+Richtig: Zuerst Frame- und Video-Seitenverhaeltnis sowie `object-fit` pruefen. Eine Aenderung an `patient-start-scan.js` muss `patient-camera`, `patient-scan` und den Full-Frame-Test ausloesen.
 
 ---
 
@@ -132,6 +144,14 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Lesson: Eine gruen gebaute HTML-Preview behauptete automatische QR-Uebernahme, auf dem Android-Geraet erschien aber weiter die alte stark gezoomte Systemkamera.
 - Caution: Kein Mikrofonzugriff, kein erzwungener Zoom, keine echten Patientendaten oder echten QR-Payloads in Tests, Memory oder Agent-Koordination.
 - Tests: Pflicht sind Critical, UI-Stability, Admin `camera-qr`, Patient `patient-scan`, Android-Wrapper-Vertrag und Preview-APK-Build. Browser-Smoke prueft Auto-QR, jsQR-Fallback, Permission-Fallback, manuelles Foto und Track-Cleanup getrennt. Ein Emulator ersetzt den abschliessenden Handytest nicht.
+
+### Patient-Kamera wirkt gezoomt und GPT stoppt an Koordinations-404
+
+- Source: `docs/bug-debug/2026-08-02-patient-camera-crop-coordination-404.md`
+- Areas: debug, parser-textblocks, pdf, phone-layout, qr-patient, scan-camera
+- Lesson: Der mobile Live-Scanner der Patient:innen-App zeigt nur einen Ausschnitt des Kamerabilds und wirkt dadurch stark gezoomt. Der Update-GPT diagnostiziert die Ursache, startet aber keinen Patient-Preview-Write, weil der private Koordinationsindex HTTP 404 liefert.
+- Caution: - QR-/KGGH2-/KGGD1-Vertrag - Parser und Plan-State - Patientenspeicher und Trainingswerte - Admin-App, PDF und Android-Wrapper
+- Tests: - Breiter Stream `1280x720` und hoher Stream `720x1280` bleiben im mobilen Kamerarahmen vollstaendig sichtbar. - `getComputedStyle(video).objectFit` ist `contain`. - Kein horizontaler Overflow; Schliessen und Fallbacks bleiben bedienbar. - QR-Erkennung, Track-Cleanup, Plan und Trainingswerte bleiben unveraendert. - Koordinationsindex liefert keinen 404 und e
 
 ### Debug JSON Seite
 

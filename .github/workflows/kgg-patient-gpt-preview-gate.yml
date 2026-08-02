@@ -171,6 +171,14 @@ jobs:
           cd base
           python release-pipeline/kgg_test_battery.py --suite patient-scan --level regression
 
+      - name: Run patient camera full-frame regression
+        if: inputs.mode != 'validate_only' && steps.gate.outputs.run_patient_scan == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          node release-pipeline/kgg_patient_scan_camera_smoke.js --case=live-camera-full-frame
+
       - name: Upload candidate evidence
         if: inputs.mode != 'validate_only'
         uses: actions/upload-artifact@v4

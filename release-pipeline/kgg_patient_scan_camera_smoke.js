@@ -12,7 +12,9 @@ const qrFactory = require("qrcode-generator");
 const ROOT = path.resolve(__dirname, "..");
 const FIXTURE_DIR = path.join(__dirname, "patient-scan-fixtures");
 const FIXTURE_MANIFEST = path.join(FIXTURE_DIR, "camera-fixtures.json");
-const SCANNER_PATH = path.join(ROOT, "patient-start-scan.js");
+const SCANNER_PATH = process.env.KGG_PATIENT_SCANNER_PATH
+  ? path.resolve(process.env.KGG_PATIENT_SCANNER_PATH)
+  : path.join(ROOT, "patient-start-scan.js");
 const SERVICE_WORKER_PATH = path.join(ROOT, "service-worker.js");
 const JSQR_PATH = require.resolve("jsqr");
 const OUTPUT_DIR = path.join(ROOT, "tmp", "patient-scan-camera");
@@ -741,6 +743,85 @@ async function runStreamCase(browser, baseUrl, renderPage, definition) {
   return result;
 }
 
+async function runCameraFramingCase(browser, baseUrl) {
+  const session = await createPatientPage(browser, baseUrl, { detectorMode: "absent" });
+  const result = {
+    id: "live-camera-full-frame",
+    category: "camera-framing",
+    gate: true,
+    status: "pass",
+    decoder: "not-applicable",
+    formats: [],
+    notes: []
+  };
+  if (!HAS_LIVE_SCANNER) {
+    result.status = "fail";
+    result.notes.push("continuous MediaStream scanner is required for camera framing verification");
+    await session.context.close();
+    return result;
+  }
+  try {
+    for (const format of [
+      { id: "landscape", width: 1280, height: 720 },
+      { id: "portrait", width: 720, height: 1280 }
+    ]) {
+      await session.page.evaluate(({ width, height }) => window.__kggBeginSyntheticStream(width, height), format);
+      await session.page.locator("#kggPlanScanBtn").click();
+      await session.page.waitForSelector("#kggLiveScanVideo");
+      await session.page.waitForFunction(() => {
+        const video = document.getElementById("kggLiveScanVideo");
+        return !!(video && video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0);
+      });
+      const framing = await session.page.evaluate(() => {
+        const video = document.getElementById("kggLiveScanVideo");
+        const view = video.closest(".kggLiveScanView");
+        const close = document.querySelector(".kggLiveScanClose");
+        const videoStyle = getComputedStyle(video);
+        const viewRect = view.getBoundingClientRect();
+        const closeRect = close.getBoundingClientRect();
+        const scale = Math.min(viewRect.width / video.videoWidth, viewRect.height / video.videoHeight);
+        const renderedWidth = video.videoWidth * scale;
+        const renderedHeight = video.videoHeight * scale;
+        return {
+          objectFit: videoStyle.objectFit,
+          videoWidth: video.videoWidth,
+          videoHeight: video.videoHeight,
+          viewportWidth: window.innerWidth,
+          documentWidth: document.documentElement.scrollWidth,
+          view: { left: viewRect.left, right: viewRect.right, width: viewRect.width, height: viewRect.height },
+          close: { left: closeRect.left, right: closeRect.right, top: closeRect.top, bottom: closeRect.bottom },
+          renderedWidth,
+          renderedHeight,
+          sourceEdgesVisible: videoStyle.objectFit === "contain" && renderedWidth <= viewRect.width + 0.5 && renderedHeight <= viewRect.height + 0.5
+        };
+      });
+      assert(framing.objectFit === "contain", `${format.id}: camera preview uses ${framing.objectFit}, expected contain`);
+      assert(framing.videoWidth === format.width && framing.videoHeight === format.height, `${format.id}: unexpected source dimensions ${framing.videoWidth}x${framing.videoHeight}`);
+      assert(framing.sourceEdgesVisible, `${format.id}: camera source edges are cropped`);
+      assert(framing.documentWidth <= framing.viewportWidth, `${format.id}: scanner causes horizontal overflow`);
+      assert(framing.view.left >= 0 && framing.view.right <= framing.viewportWidth + 0.5, `${format.id}: camera frame leaves the viewport`);
+      assert(framing.close.left >= 0 && framing.close.right <= framing.viewportWidth && framing.close.top >= 0, `${format.id}: close button is not reachable`);
+      result.formats.push({ id: format.id, ...framing });
+
+      await session.page.locator(".kggLiveScanClose").click();
+      await session.page.waitForFunction(() => !document.getElementById("kggLiveScan"));
+      const stopped = await session.page.evaluate(() => window.__kggSyntheticCameraSnapshot());
+      assert(stopped.trackStops >= 1, `${format.id}: closing scanner did not stop the camera track`);
+      await session.page.evaluate(() => window.__kggEndSyntheticStream && window.__kggEndSyntheticStream());
+    }
+    const after = await session.page.evaluate(() => window.__kggPatientTestSnapshot());
+    assert(same(session.before.p, after.p), "camera framing check changed the active plan");
+    assert(same(session.before.v, after.v) && same(session.before.done, after.done), "camera framing check changed training values");
+  } catch (error) {
+    result.status = "fail";
+    result.notes.push(error.message);
+  } finally {
+    try { await session.page.evaluate(() => window.__kggEndSyntheticStream && window.__kggEndSyntheticStream()); } catch (error) {}
+    await session.context.close();
+  }
+  return result;
+}
+
 async function runCameraLifecycleCase(browser, baseUrl) {
   const session = await createPatientPage(browser, baseUrl, { detectorMode: "absent" });
   const result = {
@@ -946,6 +1027,10 @@ async function main() {
     for (const definition of decoderCases.filter((item) => !selectedCase || item.id === selectedCase)) {
       console.log(`RUN  ${definition.id}`);
       results.push(await runDecoderCase(browser, baseUrl, definition, references.compact));
+    }
+    if (selectedCase === "live-camera-full-frame") {
+      console.log("RUN  live-camera-full-frame");
+      results.push(await runCameraFramingCase(browser, baseUrl));
     }
     if (!selectedCase || selectedCase === "live-camera-permission-and-cleanup") {
       console.log("RUN  live-camera-permission-and-cleanup");

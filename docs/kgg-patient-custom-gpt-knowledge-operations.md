@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Operations
 
-Generated retrieval pack. Source digest: `1344d43362353e64`.
+Generated retrieval pack. Source digest: `9d04ad0e3691d22e`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -33,7 +33,7 @@ Nicht erlaubt sind Therapeut:innen-App, PDF, Android/APK, API-Key-Logik, binaere
 
 Die Schritte 7 bis 9 sind vorab freigegeben und laufen ohne Zwischenfrage. PR und Live erfordern die exakte Phrase `Gut für PAT live`. Nur echte Mehrdeutigkeit, ein Memory-Konflikt oder ein Breaking Interface rechtfertigt vorher eine Rueckfrage.
 
-Offene Cross-App-Anfragen stehen im privaten Koordinationsindex. Der Patient-Agent liest nur passende Threads, antwortet append-only und speichert dort weder Patientendaten noch echte Plan-/QR-Payloads. Eine Queue-Antwort startet den anderen GPT nicht automatisch.
+Offene Cross-App-Anfragen stehen im privaten Koordinationsindex. Der Patient-Agent liest nur passende Threads, antwortet append-only und speichert dort weder Patientendaten noch echte Plan-/QR-Payloads. Eine Queue-Antwort startet den anderen GPT nicht automatisch. Die Queue ist fuer Interface-/Cross-App-Arbeit Pflicht. Bei rein visuellen Patient-UI-Patches darf ein Queue-Ausfall als `coordination_unavailable` protokolliert werden, ohne einen ansonsten frisch belegten Patch zu blockieren.
 
 ## Payload v1
 
@@ -76,7 +76,8 @@ Jeder publizierte Preview- oder PR-Lauf prueft:
 - PWA- und Update-Recovery-Vertrag;
 - Kartenfortschritt, Installation, Planloeschung und Summary;
 - mobilen synthetischen Browser-Flow;
-- bei Interface-Risiko zusaetzlich Patient-Scan/QR-Regression.
+- bei Interface-Risiko oder einer Aenderung an `patient-start-scan.js` zusaetzlich Patient-Scan/QR-Regression;
+- fuer `patient-start-scan.js` zusaetzlich den Full-Frame-Fall mit breitem und hohem synthetischen Kamerastream.
 
 Fehlende Runner-Werkzeuge sind `ci_tooling`, kein bewiesener App-Fehler. Ein fehlgeschlagener App-Test ist kein Preview-Erfolg.
 

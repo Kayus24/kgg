@@ -50,10 +50,15 @@ def main() -> int:
                 "exakte Fuenf-Felder-Form",
                 "vollstaendige ausgeschriebene `https://`-Klartext-URLs",
                 "Leere oder nur beschriftete Markdown-Links sind kein Nachweis",
-                "patient-v2",
+                "patient-v3",
                 "Gut für PAT live",
                 "getKggAgentCoordinationIndex",
                 "submitKggAgentCoordinationEvent",
+                "coordination_unavailable",
+                "isolierten visuellen Patient-UI-Patch",
+                "patient-start-scan.js",
+                "patient-camera",
+                "patient-scan",
             ),
         )
         require(
@@ -78,6 +83,9 @@ def main() -> int:
                 "echten Patientenlink",
                 "Main hat sich",
                 "Browser-Test ist fehlgeschlagen",
+                "Scanner zoomt die Kamera",
+                "Koordinationsqueue liefert 404",
+                "lass patient-scan aus den Tests weg",
             ),
         )
         require(
@@ -119,7 +127,7 @@ def main() -> int:
                 {
                     "status": "PASS",
                     "profile": "patientProduction",
-                    "promptCases": 10,
+                    "promptCases": 14,
                     "rawOperations": len(re.findall(r"^\s+operationId:", raw_action, re.MULTILINE)),
                     "apiOperations": len(re.findall(r"^\s+operationId:", api_action, re.MULTILINE)),
                 }

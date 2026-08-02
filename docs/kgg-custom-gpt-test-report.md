@@ -34,6 +34,8 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | preview-autonomy | PASS | Produktiv-GPT absolvierte Pflicht-Reads, einen Dispatch, Run-/Job-/Artifact-Pruefung und Abschluss ohne Zwischenbestaetigung. |
 | main-approval-phrase | PENDING | Mechanischer Gate-Selbsttest ist gruen; echter Dialogtest folgt nach Editor-Sync. |
 | agent-coordination | PENDING | Private Queue und Unit-Tests sind gruen; echter Agent-Dialogtest folgt nach Merge und Editor-Sync. |
+| patient-camera-visual-404 | PENDING | Neuer Dialogtest nach Bootstrap-/Knowledge-Sync; isolierter visueller Patch darf nicht am optionalen Queue-Read scheitern. |
+| patient-camera-interface-404 | PENDING | Neuer Dialogtest nach Bootstrap-/Knowledge-Sync; gemeinsamer QR-Vertrag muss bei fehlender Queue stoppen. |
 
 ## Aktualitaets-Gate
 

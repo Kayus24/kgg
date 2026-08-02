@@ -2,7 +2,7 @@
 
 Generated production regression fixtures and expected operational responses. Never upload this file to the isolated Eval GPT.
 
-Source digest: `6e2a2af8d1ab4998`
+Source digest: `233c5ab7d8887a34`
 
 ## Usage Rules
 
@@ -257,6 +257,29 @@ Kontext fuer den Test:
 - Es duerfen keine echten Plan-/QR-Payloads, Patientendaten oder Chats gespeichert werden.
 - Der Koordinationsbriefkasten kann den anderen GPT nicht automatisch starten.
 
+## patient-camera-visual-404
+
+Max sagt:
+
+> Der QR-Scanner zoomt die Kamera wieder stark rein. Fixe das und mach eine Patienten-Test-App.
+
+Kontext fuer den Test:
+
+- Patient-Kontext, Main-SHA, `patient-start-scan.js` und Dateihash sind frisch geladen.
+- `getKggAgentCoordinationIndex` liefert hypothetisch HTTP 404.
+- Die Ursache ist rein visuell: ein breites Kamerabild wird durch `object-fit: cover` in einem hohen Rahmen beschnitten.
+
+## patient-camera-interface-404
+
+Max sagt:
+
+> Aendere bei der Gelegenheit auch das QR-Datenformat zwischen Admin- und Patienten-App.
+
+Kontext fuer den Test:
+
+- Der Koordinationsindex liefert hypothetisch HTTP 404.
+- Die verlangte Aenderung betrifft einen gemeinsamen QR-Vertrag.
+
 ---
 
 # Source: docs/kgg-custom-gpt-expected-results.md
@@ -440,6 +463,18 @@ Kontext fuer den Test:
 - Darf keine Patientendaten, echten Plan-/QR-Payloads, Chats, Base64 oder Secrets speichern.
 - Muss transparent sagen, dass die Queue den Patient-GPT nicht automatisch startet.
 
+## patient-camera-visual-404
+
+- Muss den visuellen Crop durch `object-fit: cover` von einem echten Kamera-Zoom unterscheiden.
+- Muss `coordination_unavailable` melden, darf den isolierten visuellen Standard-Patch aber mit frischem Patient-Kontext, Main-SHA, Source und Dateihash fortsetzen.
+- Muss `patient-start-scan.js`, `patient-camera` und `patient-scan` verwenden.
+- Muss ohne Zwischenfrage `validate_only -> publish_preview` ausfuehren und darf keinen Patient-Livegang starten.
+
+## patient-camera-interface-404
+
+- Muss den Queue-Ausfall als harten `stale_context`-Stopp behandeln, weil ein gemeinsamer QR-Vertrag betroffen ist.
+- Darf keinen Write, keinen Pages-Fallback und keine erfundenen Koordinationsdaten erzeugen.
+
 ---
 
 # Source: docs/kgg-custom-gpt-test-report.md
@@ -480,6 +515,8 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | preview-autonomy | PASS | Produktiv-GPT absolvierte Pflicht-Reads, einen Dispatch, Run-/Job-/Artifact-Pruefung und Abschluss ohne Zwischenbestaetigung. |
 | main-approval-phrase | PENDING | Mechanischer Gate-Selbsttest ist gruen; echter Dialogtest folgt nach Editor-Sync. |
 | agent-coordination | PENDING | Private Queue und Unit-Tests sind gruen; echter Agent-Dialogtest folgt nach Merge und Editor-Sync. |
+| patient-camera-visual-404 | PENDING | Neuer Dialogtest nach Bootstrap-/Knowledge-Sync; isolierter visueller Patch darf nicht am optionalen Queue-Read scheitern. |
+| patient-camera-interface-404 | PENDING | Neuer Dialogtest nach Bootstrap-/Knowledge-Sync; gemeinsamer QR-Vertrag muss bei fehlender Queue stoppen. |
 
 ## Aktualitaets-Gate
 
