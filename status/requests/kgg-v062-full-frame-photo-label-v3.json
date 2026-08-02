@@ -1,12 +1,12 @@
 {
-  "conclusion": null,
+  "conclusion": "failure",
   "kind": "kgg_preview_run_status",
-  "message": "Validierung ist gruen. Tests und Test-App-Preview laufen.",
-  "phase": "publishing",
+  "message": "Preview fehlgeschlagen. Oeffne den Run fuer den fehlgeschlagenen Schritt.",
+  "phase": "failure",
   "requestId": "kgg-v062-full-frame-photo-label-v3",
   "runId": "30754986327",
   "runUrl": "https://github.com/Kayus24/kgg/actions/runs/30754986327",
   "schema": 1,
-  "status": "in_progress",
-  "updatedAt": "2026-08-02T15:44:04Z"
+  "status": "completed",
+  "updatedAt": "2026-08-02T15:45:22Z"
 }
