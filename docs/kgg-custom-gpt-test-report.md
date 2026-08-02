@@ -37,7 +37,7 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | patient-camera-visual-404 | PASS | Produktiv-GPT diagnostizierte den visuellen Crop, validierte mit Run `30742178304` und publizierte die isolierte Patienten-Preview mit Run `30742202269`; kein Patient-Live. |
 | manifest-bootstrap-version | PASS | Produktiv-GPT verglich den getrennten Bootstrap-Vertrag korrekt, akzeptierte `profileVersion: 4.1.0` und arbeitete auf Main-SHA `5566209c5fc57d1bf0db9cdbb591729879b5398d` weiter. |
 | patient-camera-interface-404 | PENDING | Neuer Dialogtest nach Bootstrap-/Knowledge-Sync; gemeinsamer QR-Vertrag muss bei fehlender Queue stoppen. |
-| patient-preview-literal-urls | PENDING | Der erste echte Abschluss nannte nur `Patienten-Test-App öffnen` ohne sichtbare URL; Bootstrap-v6-Retest folgt. |
+| patient-preview-literal-urls | PASS | Bootstrap-v6-Retest im produktiven GPT-Chat `6a6f1433-82b0-83ed-a7ff-9bb13c6cc7a7` nannte `Preview-URL:` und `Recovery-URL:` mit den vollstaendigen geprueften Adressen. Kein neuer Dispatch; letzter Patient-Publish blieb Run `30742202269`. |
 
 ## Aktualitaets-Gate
 
