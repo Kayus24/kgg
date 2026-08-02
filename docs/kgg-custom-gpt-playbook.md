@@ -15,6 +15,8 @@
 11. Keinen zweiten Preview-Dispatch und keine Zwischenfrage senden. Der Auto-Workflow setzt die Kette selbst fort; Run und Belege pruefen.
 12. `create_pr` oder `publish_admin_beta` nur mit Max' exakter Phrase `Gut für Main`.
 
+Ein erfolgreicher Abschlussbericht nennt die aus `meta.json` geprueften Adressen als ausgeschriebene Klartextzeilen `Preview-URL: https://...` und `Recovery-URL: https://...`. Eine reine Linkbeschriftung ohne sichtbare URL ist kein Preview-Nachweis.
+
 ## Autonomie ohne Bestaetigungsschleife
 
 - Vorab freigegeben: Reads, Diagnose, Tests, ein `submitKggPreviewAuto`-Dispatch, Run-/Artifact-Pruefung, konfliktfreie neue Memory-Eintraege und private Koordinations-Events.
