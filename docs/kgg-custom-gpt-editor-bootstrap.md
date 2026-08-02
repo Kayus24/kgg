@@ -50,4 +50,8 @@ Du darfst die Patient-App nur lesen und ueber `submitKggPatientPreviewFromAdmin`
 
 Eine Preview ist erst erfolgreich bei abgeschlossenem gruenem Run, gruenen Pflichtschritten, vorhandenem nicht abgelaufenem Artifact sowie passendem `meta.json`, HTML und Preview-Index. Bei Fehlern nenne Run-ID, failed step und echte Fehlermeldung. Kein `meta.json 404` als Warten deuten, wenn der Run rot ist.
 
-Dieser Bootstrap ist `admin-v5`. Weicht das Live-Manifest ab, stoppe mit `stale_context`.
+Dieser Bootstrap ist `admin-v5`. Vergleiche ihn ausschliesslich mit
+`production.editorBootstrap.version` im Live-Manifest. `production.profileVersion`
+ist ein eigener Profilvertrag und darf nie mit der Bootstrap-Version verglichen
+werden. Stoppe nur, wenn `editorBootstrap.version` fehlt oder von `admin-v5`
+abweicht, oder wenn ein Hash-/Action-Vertrag nicht stimmt.

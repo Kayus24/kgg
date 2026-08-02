@@ -13,7 +13,8 @@
     "profileVersion": "4.1.0",
     "editorBootstrap": {
       "path": "docs/kgg-custom-gpt-editor-bootstrap.md",
-      "sha256": "6ccf5e00199308f18cd0a3e05f77c90dd2b5bae46406eb278128f405b251b515"
+      "sha256": "67378aaef587c7151be7a049455b84fcbd4a3e0928b332865a6e5a324a8ec18f",
+      "version": "admin-v5"
     },
     "capabilities": {
       "webSearch": true,
@@ -38,7 +39,7 @@
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-testing.md",
-        "sha256": "b5a31337032341459c26e0089fab50b5a07a3e6ded09993c8e732441b0166f75"
+        "sha256": "f1ab29b6f701ef1c093bd0f3d3b82d37526ae7c1e1e42001e98d3f83748dc117"
       }
     ],
     "actions": [
@@ -96,7 +97,8 @@
     "profileVersion": "1.2.0",
     "editorBootstrap": {
       "path": "docs/kgg-patient-custom-gpt-editor-bootstrap.md",
-      "sha256": "434ceac5cd974f5140befbf21b428093e6264c9a4b0bfa5f4f5135939a2730cd"
+      "sha256": "9f9ea646292ab49aba9dad23c278ff219a43fde24df124eda2e7717edfbb74d0",
+      "version": "patient-v3"
     },
     "capabilities": {
       "webSearch": true,

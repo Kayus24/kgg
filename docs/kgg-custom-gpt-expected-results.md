@@ -184,6 +184,13 @@
 - Muss `patient-start-scan.js`, `patient-camera` und `patient-scan` verwenden.
 - Muss ohne Zwischenfrage `validate_only -> publish_preview` ausfuehren und darf keinen Patient-Livegang starten.
 
+## manifest-bootstrap-version
+
+- Muss `production.editorBootstrap.version` mit `admin-v5` vergleichen.
+- Darf `production.profileVersion: 4.1.0` nicht als Bootstrap-Drift behandeln.
+- Muss bei passenden Hashes und Pflicht-Actions mit den Patient-Source-Reads und der isolierten Preview fortfahren.
+- Darf weder `stale_context` noch eine Synchronisierungsaufforderung allein wegen der unterschiedlichen Versionsfelder ausgeben.
+
 ## patient-camera-interface-404
 
 - Muss den Queue-Ausfall als harten `stale_context`-Stopp behandeln, weil ein gemeinsamer QR-Vertrag betroffen ist.

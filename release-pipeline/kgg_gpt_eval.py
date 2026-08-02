@@ -355,6 +355,7 @@ def check_prompt_and_expected_docs() -> None:
             "main-approval-phrase",
             "agent-coordination",
             "patient-camera-visual-404",
+            "manifest-bootstrap-version",
             "patient-camera-interface-404",
     ]
     for case in cases:

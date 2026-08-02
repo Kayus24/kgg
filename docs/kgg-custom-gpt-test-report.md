@@ -35,6 +35,7 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | main-approval-phrase | PENDING | Mechanischer Gate-Selbsttest ist gruen; echter Dialogtest folgt nach Editor-Sync. |
 | agent-coordination | PENDING | Private Queue und Unit-Tests sind gruen; echter Agent-Dialogtest folgt nach Merge und Editor-Sync. |
 | patient-camera-visual-404 | PENDING | Neuer Dialogtest nach Bootstrap-/Knowledge-Sync; isolierter visueller Patch darf nicht am optionalen Queue-Read scheitern. |
+| manifest-bootstrap-version | PENDING | Echte Runde 2026-08-02 fand einen Fehlstopp: `profileVersion: 4.1.0` wurde faelschlich mit `admin-v5` verglichen. Getrennter Manifestvertrag und Browser-Retest folgen. |
 | patient-camera-interface-404 | PENDING | Neuer Dialogtest nach Bootstrap-/Knowledge-Sync; gemeinsamer QR-Vertrag muss bei fehlender Queue stoppen. |
 
 ## Aktualitaets-Gate

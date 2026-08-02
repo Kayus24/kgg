@@ -27,6 +27,7 @@ PRODUCTION_ACTIONS = [
     "docs/kgg-custom-gpt-action-api-openapi.yaml",
 ]
 PRODUCTION_BOOTSTRAP = "docs/kgg-custom-gpt-editor-bootstrap.md"
+PRODUCTION_BOOTSTRAP_VERSION = "admin-v5"
 PRODUCTION_EDITOR_SNAPSHOT = ROOT / "docs" / "kgg-custom-gpt-editor-snapshot.json"
 EVAL_KNOWLEDGE = ["docs/kgg-custom-gpt-eval-knowledge.md"]
 PATIENT_KNOWLEDGE = [
@@ -40,6 +41,7 @@ PATIENT_ACTIONS = [
     "docs/kgg-patient-custom-gpt-action-api-openapi.yaml",
 ]
 PATIENT_BOOTSTRAP = "docs/kgg-patient-custom-gpt-editor-bootstrap.md"
+PATIENT_BOOTSTRAP_VERSION = "patient-v3"
 PATIENT_EDITOR_SNAPSHOT = ROOT / "docs" / "kgg-patient-custom-gpt-editor-snapshot.json"
 CUSTOM_GPT_ACTION_LIMIT = 30
 
@@ -60,8 +62,11 @@ def digest(path: str) -> str:
     return normalized_text_digest(full.read_bytes())
 
 
-def resource(path: str) -> dict[str, str]:
-    return {"path": path, "sha256": digest(path)}
+def resource(path: str, *, version: str | None = None) -> dict[str, str]:
+    result = {"path": path, "sha256": digest(path)}
+    if version is not None:
+        result["version"] = version
+    return result
 
 
 def expected_manifest() -> dict[str, Any]:
@@ -76,7 +81,9 @@ def expected_manifest() -> dict[str, Any]:
         "production": {
             "name": "KGG Update-Agent",
             "profileVersion": "4.1.0",
-            "editorBootstrap": resource(PRODUCTION_BOOTSTRAP),
+            "editorBootstrap": resource(
+                PRODUCTION_BOOTSTRAP, version=PRODUCTION_BOOTSTRAP_VERSION
+            ),
             "capabilities": {
                 "webSearch": True,
                 "codeInterpreter": True,
@@ -119,7 +126,9 @@ def expected_manifest() -> dict[str, Any]:
         "patientProduction": {
             "name": "KGG Patienten-App Update-Agent",
             "profileVersion": "1.2.0",
-            "editorBootstrap": resource(PATIENT_BOOTSTRAP),
+            "editorBootstrap": resource(
+                PATIENT_BOOTSTRAP, version=PATIENT_BOOTSTRAP_VERSION
+            ),
             "capabilities": {
                 "webSearch": True,
                 "codeInterpreter": True,
@@ -174,6 +183,8 @@ def validate_snapshot(path: Path, profile: str) -> None:
     if expected_action_hashes != actual_action_hashes:
         raise AuditError(f"{profile} Action digest mismatch")
     if expected.get("editorBootstrap"):
+        if snapshot.get("bootstrapVersion") != expected["editorBootstrap"]["version"]:
+            raise AuditError(f"{profile} editor Bootstrap version mismatch")
         if snapshot.get("instructionsSha256") != expected["editorBootstrap"]["sha256"]:
             raise AuditError(f"{profile} editor Instructions digest mismatch")
 
@@ -188,6 +199,8 @@ def self_test() -> None:
         raise AuditError("Canvas must stay disabled for the selected GPT model")
     if manifest["production"]["visibility"] != "private":
         raise AuditError("production GPT must remain private")
+    if manifest["production"]["editorBootstrap"]["version"] == manifest["production"]["profileVersion"]:
+        raise AuditError("production bootstrap and profile versions must remain separate contracts")
     if manifest["eval"]["capabilities"]["webSearch"]:
         raise AuditError("Eval GPT Web Search would compromise blind testing")
     if manifest["patientProduction"]["capabilities"]["apps"]:
@@ -196,6 +209,8 @@ def self_test() -> None:
         raise AuditError("patientProduction does not need Image Generation")
     if manifest["patientProduction"]["visibility"] != "private":
         raise AuditError("patientProduction must remain private")
+    if manifest["patientProduction"]["editorBootstrap"]["version"] == manifest["patientProduction"]["profileVersion"]:
+        raise AuditError("patient bootstrap and profile versions must remain separate contracts")
     for label, path in [
         ("admin raw", PRODUCTION_ACTIONS[0]),
         ("admin api", PRODUCTION_ACTIONS[1]),

@@ -85,4 +85,9 @@ Nicht sensible Schnittstellenfragen mit `submitKggAgentCoordinationEvent` zuerst
 
 ## Drift-Stopp
 
-Dieser Bootstrap hat Version `patient-v3`. Fordert das Live-Manifest eine andere Version, stimmen Knowledge-/Action-Hashes nicht oder fehlen Pflicht-Actions, melde `stale_context` und fuehre keinen Write aus.
+Dieser Bootstrap hat Version `patient-v3`. Vergleiche ihn ausschliesslich mit
+`patientProduction.editorBootstrap.version` im Live-Manifest.
+`patientProduction.profileVersion` ist ein eigener Profilvertrag und darf nie
+mit der Bootstrap-Version verglichen werden. Fehlt die Bootstrap-Version, weicht
+sie ab, stimmen Knowledge-/Action-Hashes nicht oder fehlen Pflicht-Actions,
+melde `stale_context` und fuehre keinen Write aus.
