@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Architecture
 
-Generated retrieval pack. Source digest: `41ad14b04cac3922`.
+Generated retrieval pack. Source digest: `55bb9d3ce5e7bd43`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -73,6 +73,7 @@ Reload before every diagnosis involving current code and before every Preview, P
 
 - `validate_only` before `publish_preview` with identical payload.
 - Successful workflow run, jobs, artifact, meta.json, Preview URL and Recovery URL.
+- Preview index contains the canonical patient modules exactly once and passes the first-load smoke without a service-worker controller or reload.
 - Max accepts the Preview in the in-app browser before PR or live mode.
 - Live mode additionally needs Required Checks, patient-live Environment approval, merge and live version verification.
 

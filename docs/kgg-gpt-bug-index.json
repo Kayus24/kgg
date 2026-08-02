@@ -527,6 +527,32 @@
     },
     {
       "areas": [
+        "qr-patient",
+        "scan-camera"
+      ],
+      "cause": "`release-pipeline/kgg_patient_gpt_write_gate.py` kopierte die Root-`index.html` unveraendert in den isolierten Preview-Ordner. Die kanonische Modulliste existierte nur in `service-worker.js`. Beim ersten Aufruf war noch kein Service-Worker-Controller aktiv. Dadurch konnte die Test-App eine unvollstaendige Preview anzeigen, bis ein Reload oder eine weitere Na",
+      "do_not_touch": "",
+      "fix_pattern": "- Der Preview-Publisher liest die kanonische Modulinjektion aus dem mitgelieferten Service Worker. - Er entfernt vorhandene direkte Modul-Tags und fuegt dieselbe Liste genau einmal in die Preview-`index.html` ein. - Fehlende Dateien, doppelte Module oder eine nicht eindeutig lesbare Service-Worker-Injektion blockieren das Gate. - Ein Browser-Smoke startet di",
+      "id": "docs-bug-debug-2026-08-02-patient-preview-first-load-modules-md-patient-preview-first-load-modules",
+      "keywords": [
+        "patient-preview-first-load-modules",
+        "qr-patient",
+        "scan-camera"
+      ],
+      "markers": [
+        ".html",
+        "index.html",
+        "release-pipeline/kgg_patient_gpt_write_gate.py",
+        "service-worker.js"
+      ],
+      "risks": "",
+      "source_path": "docs/bug-debug/2026-08-02-patient-preview-first-load-modules.md",
+      "symptom": "Ein Patient-Preview-Run konnte vollstaendig gruen sein, obwohl die erste im Browser oder in der Test-App geoeffnete `index.html` den Scanner und weitere Patient-Module noch nicht geladen hatte. Die Dateien waren im Artefakt vorhanden, wurden aber erst durch `service-worker.js` in einen spaeteren, bereits kontrollierten Seitenaufruf injiziert. `release-pipeli",
+      "tests": "",
+      "title": "Patient Preview First-Load Modules"
+    },
+    {
+      "areas": [
         "debug",
         "qr-patient"
       ],
@@ -804,6 +830,7 @@
     "docs/bug-debug/2026-07-29-preview-marker-default-branch-drift.md",
     "docs/bug-debug/2026-08-01-webview-camera-cross-app-qr.md",
     "docs/bug-debug/2026-08-02-patient-camera-crop-coordination-404.md",
+    "docs/bug-debug/2026-08-02-patient-preview-first-load-modules.md",
     "docs/bug-debug/README.md",
     "docs/bugfixes/mobile-share-modal-css-regression.md",
     "docs/release-handoffs/2026-06-18-v003a-plan-ui-stability.md",

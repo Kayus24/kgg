@@ -99,7 +99,7 @@ jobs:
         shell: bash
         run: |
           python release-pipeline/kgg_patient_gpt_resources.py --check
-          python release-pipeline/kgg_patient_gpt_write_gate.py --self-test
+          python release-pipeline/kgg_patient_gpt_write_gate.py --self-test --self-test-preview-root "$RUNNER_TEMP/kgg-patient-preview-smoke"
           python release-pipeline/kgg_patient_gpt_eval.py
       - name: Install Patient GPT browser dependencies
         if: steps.scope.outputs.patient_gpt == 'true'
@@ -111,7 +111,9 @@ jobs:
       - name: Run Patient GPT browser smoke
         if: steps.scope.outputs.patient_gpt == 'true'
         shell: bash
-        run: node release-pipeline/kgg_patient_gpt_browser_smoke.js
+        run: |
+          node release-pipeline/kgg_patient_gpt_browser_smoke.js
+          node release-pipeline/kgg_patient_preview_first_load_smoke.js "$RUNNER_TEMP/kgg-patient-preview-smoke/previews/patient-gate-self-test"
       - name: Check Custom GPT live context freshness
         shell: bash
         run: python release-pipeline/kgg_gpt_context.py --check

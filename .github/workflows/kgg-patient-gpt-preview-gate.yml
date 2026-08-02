@@ -162,6 +162,7 @@ jobs:
           node release-pipeline/kgg_patient_plan_delete_smoke.js
           node release-pipeline/kgg_patient_summary_smoke.js
           node release-pipeline/kgg_patient_gpt_browser_smoke.js
+          node release-pipeline/kgg_patient_preview_first_load_smoke.js "$GITHUB_WORKSPACE/preview/previews/${{ inputs.request_id }}"
 
       - name: Run patient interface regression
         if: inputs.mode != 'validate_only' && steps.gate.outputs.run_patient_scan == 'true'
