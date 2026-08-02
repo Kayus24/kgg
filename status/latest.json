@@ -1,12 +1,12 @@
 {
   "conclusion": null,
   "kind": "kgg_preview_run_status",
-  "message": "Payload und modularer Patch werden validiert.",
-  "phase": "validating",
+  "message": "Validierung ist gruen. Tests und Test-App-Preview laufen.",
+  "phase": "publishing",
   "requestId": "kgg-v062-patient-frame-manual-photo",
   "runId": "30746094949",
   "runUrl": "https://github.com/Kayus24/kgg/actions/runs/30746094949",
   "schema": 1,
   "status": "in_progress",
-  "updatedAt": "2026-08-02T11:36:47Z"
+  "updatedAt": "2026-08-02T11:37:19Z"
 }
