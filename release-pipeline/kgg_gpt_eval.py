@@ -354,6 +354,8 @@ def check_prompt_and_expected_docs() -> None:
             "preview-autonomy",
             "main-approval-phrase",
             "agent-coordination",
+            "patient-camera-visual-404",
+            "patient-camera-interface-404",
     ]
     for case in cases:
         require(prompts, f"## {case}", f"prompt fixture {case}")
@@ -397,6 +399,10 @@ def check_prompt_and_expected_docs() -> None:
             "patient-scan",
             "Gut für Main",
             "submitKggAgentCoordinationEvent",
+            "coordination_unavailable",
+            "object-fit: cover",
+            "patient-start-scan.js",
+            "patient-camera",
         ],
         "expected behavior text",
     )

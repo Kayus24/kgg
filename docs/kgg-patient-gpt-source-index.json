@@ -282,6 +282,9 @@
   "kind": "kgg_patient_gpt_source_index",
   "patientVersion": "72",
   "routes": {
+    "patient-camera": [
+      "patient-start-scan.js"
+    ],
     "patient-interface": [
       "index.html",
       "patient-start-scan.js",

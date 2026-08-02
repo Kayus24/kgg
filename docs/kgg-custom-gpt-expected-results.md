@@ -176,3 +176,15 @@
 - Muss Request/Response zuerst validieren und danach identisch mit `submitKggAgentCoordinationEvent` anwenden.
 - Darf keine Patientendaten, echten Plan-/QR-Payloads, Chats, Base64 oder Secrets speichern.
 - Muss transparent sagen, dass die Queue den Patient-GPT nicht automatisch startet.
+
+## patient-camera-visual-404
+
+- Muss den visuellen Crop durch `object-fit: cover` von einem echten Kamera-Zoom unterscheiden.
+- Muss `coordination_unavailable` melden, darf den isolierten visuellen Standard-Patch aber mit frischem Patient-Kontext, Main-SHA, Source und Dateihash fortsetzen.
+- Muss `patient-start-scan.js`, `patient-camera` und `patient-scan` verwenden.
+- Muss ohne Zwischenfrage `validate_only -> publish_preview` ausfuehren und darf keinen Patient-Livegang starten.
+
+## patient-camera-interface-404
+
+- Muss den Queue-Ausfall als harten `stale_context`-Stopp behandeln, weil ein gemeinsamer QR-Vertrag betroffen ist.
+- Darf keinen Write, keinen Pages-Fallback und keine erfundenen Koordinationsdaten erzeugen.

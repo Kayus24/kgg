@@ -482,6 +482,52 @@
     {
       "areas": [
         "debug",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera"
+      ],
+      "cause": "`patient-start-scan.js` setzt einen breiten Kamerastream mit `object-fit: cover` in einen mobilen `3/4`-Rahmen. Das beschneidet die Seiten des Bilds. Unabhaengig davon verwiesen beide GPT-Actions bereits auf `coordination/index.json`, obwohl der vorbereitete Koordinationsbranch noch nicht in `kgg-project-memory/main` integriert war.",
+      "do_not_touch": "- QR-/KGGH2-/KGGD1-Vertrag - Parser und Plan-State - Patientenspeicher und Trainingswerte - Admin-App, PDF und Android-Wrapper",
+      "fix_pattern": "- Fuer den visuellen Scanner-Patch `object-fit: contain` verwenden und keine Kamera-Zoom-Constraints einfuehren. - Aenderungen an `patient-start-scan.js` immer als `patient-camera` routen und die `patient-scan`-Regression ausfuehren. - Die private Koordinationsqueue vollstaendig ausrollen. - Queue-Ausfaelle nur bei echten Interface-/Cross-App-Aenderungen als",
+      "id": "docs-bug-debug-2026-08-02-patient-camera-crop-coordination-404-md-patient-kamera-wirkt-gezoomt-und-gpt-stoppt-an-koordinations-404",
+      "keywords": [
+        "debug",
+        "parser-textblocks",
+        "patient-kamera-wirkt-gezoomt-und-gpt-stoppt-an-koordinations-404",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera"
+      ],
+      "markers": [
+        ".json",
+        ".objectFit",
+        "1280x720",
+        "3/4",
+        "720x1280",
+        "contain",
+        "coordination/index.js",
+        "coordination/index.json",
+        "coordination_unavailable",
+        "getComputedStyle(video).objectFit",
+        "kgg-project-memory/main",
+        "object-fit: contain",
+        "object-fit: cover",
+        "patient-camera",
+        "patient-scan",
+        "patient-start-scan.js"
+      ],
+      "risks": "`contain` kann bei abweichendem Seitenverhaeltnis schwarze Restflaechen anzeigen. Das ist akzeptiert; ein abgeschnittenes Kamerabild ist nicht akzeptiert.",
+      "source_path": "docs/bug-debug/2026-08-02-patient-camera-crop-coordination-404.md",
+      "symptom": "Der mobile Live-Scanner der Patient:innen-App zeigt nur einen Ausschnitt des Kamerabilds und wirkt dadurch stark gezoomt. Der Update-GPT diagnostiziert die Ursache, startet aber keinen Patient-Preview-Write, weil der private Koordinationsindex HTTP 404 liefert.",
+      "tests": "- Breiter Stream `1280x720` und hoher Stream `720x1280` bleiben im mobilen Kamerarahmen vollstaendig sichtbar. - `getComputedStyle(video).objectFit` ist `contain`. - Kein horizontaler Overflow; Schliessen und Fallbacks bleiben bedienbar. - QR-Erkennung, Track-Cleanup, Plan und Trainingswerte bleiben unveraendert. - Koordinationsindex liefert keinen 404 und e",
+      "title": "Patient-Kamera wirkt gezoomt und GPT stoppt an Koordinations-404"
+    },
+    {
+      "areas": [
+        "debug",
         "qr-patient"
       ],
       "cause": "",
@@ -757,6 +803,7 @@
     "docs/bug-debug/2026-07-03-custom-gpt-preview-gate-lessons.md",
     "docs/bug-debug/2026-07-29-preview-marker-default-branch-drift.md",
     "docs/bug-debug/2026-08-01-webview-camera-cross-app-qr.md",
+    "docs/bug-debug/2026-08-02-patient-camera-crop-coordination-404.md",
     "docs/bug-debug/README.md",
     "docs/bugfixes/mobile-share-modal-css-regression.md",
     "docs/release-handoffs/2026-06-18-v003a-plan-ui-stability.md",

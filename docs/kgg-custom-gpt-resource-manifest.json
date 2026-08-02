@@ -10,10 +10,10 @@
   },
   "production": {
     "name": "KGG Update-Agent",
-    "profileVersion": "4.0.0",
+    "profileVersion": "4.1.0",
     "editorBootstrap": {
       "path": "docs/kgg-custom-gpt-editor-bootstrap.md",
-      "sha256": "e37e379e52642d7f285ef3949451d21c88879a4e4f65596d170c982d528b22ef"
+      "sha256": "6ccf5e00199308f18cd0a3e05f77c90dd2b5bae46406eb278128f405b251b515"
     },
     "capabilities": {
       "webSearch": true,
@@ -30,15 +30,15 @@
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-operations.md",
-        "sha256": "80e1abc1b152b8590ed12dbebe7fae2c40ebdc80f67fc0e6d9a4694c3960920b"
+        "sha256": "a9d8258fead8ce07b83b8c798dc3f048501917f845284721395116c956163d21"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-safety.md",
-        "sha256": "db9db338406f2625d735a2d77a1f2129c35e865d2011b8907775f455ad977a45"
+        "sha256": "3f51bb318889fa7240cd53262f6b711fcb7dd7bf0c5b20b78b247d5758794cb4"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-testing.md",
-        "sha256": "cacd09ae625bd52d9e5b9a6e05b29c5688b2c2a45d023f604b6e334c050936c1"
+        "sha256": "b5a31337032341459c26e0089fab50b5a07a3e6ded09993c8e732441b0166f75"
       }
     ],
     "actions": [
@@ -93,10 +93,10 @@
   },
   "patientProduction": {
     "name": "KGG Patienten-App Update-Agent",
-    "profileVersion": "1.1.0",
+    "profileVersion": "1.2.0",
     "editorBootstrap": {
       "path": "docs/kgg-patient-custom-gpt-editor-bootstrap.md",
-      "sha256": "fa8e7644fd8301a1f94f1e7a77f97161b3383258ace26fce3a7aed4a14100bb7"
+      "sha256": "434ceac5cd974f5140befbf21b428093e6264c9a4b0bfa5f4f5135939a2730cd"
     },
     "capabilities": {
       "webSearch": true,
@@ -113,15 +113,15 @@
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-operations.md",
-        "sha256": "5b094e20b5b7396238181b47fc4040cc3ecc105fd360598d4c6d09c66386ae7c"
+        "sha256": "5d738409cef6355e5e5e43054e42cabfeca0becb3cadd8a0f411ac8570b8ec09"
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-safety.md",
-        "sha256": "b59b2c43a0b0c2819ba14c6ec9782d6442b0ff52bc0d816c9203531993962729"
+        "sha256": "a3ae4ef526552855b0ee2c5fe7afb3b42968fe47a78f9095916259862db72bc4"
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-testing.md",
-        "sha256": "265d1b4a78c3555dba1055c775944776ac1cabf104671e3b6f070b98b512b12e"
+        "sha256": "ac0f176c3a580c3599b77fdb4784e3ade820a6f3b3a859f04bc9b07c67fe48b3"
       }
     ],
     "actions": [

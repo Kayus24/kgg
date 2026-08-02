@@ -139,6 +139,13 @@ def contains_secret(text: str) -> bool:
     return any(pattern.search(text) for pattern in SECRET_PATTERNS)
 
 
+def requires_patient_scan(payload: dict[str, Any]) -> bool:
+    return payload["risk_class"] == "interface" or any(
+        operation["path"] == "patient-start-scan.js"
+        for operation in payload["operations"]
+    )
+
+
 def payload_hash(payload: dict[str, Any]) -> str:
     canonical = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
@@ -284,6 +291,11 @@ def validate_payload(data: dict[str, Any], root: Path = ROOT) -> dict[str, Any]:
 
     if interface_change and risk_class != "interface":
         fail("QR/hash/storage interface markers require risk_class=interface")
+    if any(operation["path"] == "patient-start-scan.js" for operation in normalized_operations):
+        if "patient-camera" not in touched_areas:
+            fail("patient-start-scan.js changes require touched_areas to include patient-camera")
+        if "patient-scan" not in required_tests:
+            fail("patient-start-scan.js changes require required_tests to include patient-scan")
 
     return {
         "request_id": request_id,
@@ -601,7 +613,7 @@ def run(
                     "patch_hash": digest,
                     "patient_version": str(version),
                     "risk_class": payload["risk_class"],
-                    "run_patient_scan": str(payload["risk_class"] == "interface").lower(),
+                    "run_patient_scan": str(requires_patient_scan(payload)).lower(),
                     "validation": "ok",
                 },
             )
@@ -627,7 +639,7 @@ def run(
         "patch_hash": digest,
         "patient_version": str(version),
         "risk_class": payload["risk_class"],
-        "run_patient_scan": str(payload["risk_class"] == "interface").lower(),
+        "run_patient_scan": str(requires_patient_scan(payload)).lower(),
     }
     if mode == "publish_preview":
         if preview_root is None:
@@ -702,6 +714,39 @@ def self_test(root: Path = ROOT) -> None:
         pass
     else:
         fail("self-test expected a new network sink failure")
+
+    scanner_path = root / "patient-start-scan.js"
+    scanner_source = normalize(scanner_path.read_text(encoding="utf-8"))
+    scanner_payload = {
+        "request_id": "patient-camera-gate-self-test",
+        "base_sha": git_sha(root),
+        "title": "Patient camera gate self test",
+        "summary": "Camera source changes must select the dedicated patient scan regression.",
+        "version_slug": "camera-gate-self-test",
+        "risk_class": "standard",
+        "touched_areas": ["patient-camera"],
+        "required_tests": ["patient-scan"],
+        "operations": [
+            {
+                "type": "replace_exact",
+                "path": scanner_path.name,
+                "old_sha256": sha256_text(scanner_source),
+                "old_text": "object-fit:cover",
+                "new_text": "object-fit:contain",
+            }
+        ],
+    }
+    validated_scanner = validate_payload(scanner_payload, root)
+    if not requires_patient_scan(validated_scanner):
+        fail("self-test expected patient-start-scan.js to select patient-scan")
+    missing_camera_area = json.loads(json.dumps(scanner_payload))
+    missing_camera_area["touched_areas"] = ["patient-ui"]
+    try:
+        validate_payload(missing_camera_area, root)
+    except GateError:
+        pass
+    else:
+        fail("self-test expected patient-start-scan.js to require patient-camera")
 
     with tempfile.TemporaryDirectory(prefix="kgg-patient-preview-self-test-") as temp_name:
         temp = Path(temp_name)

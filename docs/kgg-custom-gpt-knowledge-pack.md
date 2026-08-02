@@ -2,7 +2,7 @@
 
 This generated compatibility pack contains the complete production knowledge set. Prefer the four smaller curated packs in the GPT editor so retrieval stays focused.
 
-Source digest: `eba58cb4a114c76e`
+Source digest: `70c6b166b6438898`
 
 ## Usage Rules
 
@@ -203,6 +203,7 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - `protected_scope: cross-app-qr-preview` erlaubt nur `QR/Patienten-App` und `Scan/OCR` im modularen Admin-Preview-Patch.
 - Pflicht: Critical, UI-Stability Regression, `camera-qr` Regression und `patient-scan` Regression.
 - Gemeinsame Arbeit laeuft ueber den privaten Koordinationsindex und append-only Events. Die Queue startet keinen GPT automatisch.
+- Ein Queue-Ausfall ist nur bei Interface-/Cross-App-Aenderungen blockierend. Ein isolierter visueller Patient-UI-Patch darf mit `coordination_unavailable` weiterlaufen, wenn Patient-Kontext, Main-SHA, Source und Dateihash frisch belegt sind.
 - Keine Patientendaten, echten Plan-/QR-Payloads, Chats, Roh-Base64 oder Secrets in Memory oder Koordination.
 
 ## Privates Projektgedaechtnis
@@ -965,6 +966,29 @@ Kontext fuer den Test:
 - Es duerfen keine echten Plan-/QR-Payloads, Patientendaten oder Chats gespeichert werden.
 - Der Koordinationsbriefkasten kann den anderen GPT nicht automatisch starten.
 
+## patient-camera-visual-404
+
+Max sagt:
+
+> Der QR-Scanner zoomt die Kamera wieder stark rein. Fixe das und mach eine Patienten-Test-App.
+
+Kontext fuer den Test:
+
+- Patient-Kontext, Main-SHA, `patient-start-scan.js` und Dateihash sind frisch geladen.
+- `getKggAgentCoordinationIndex` liefert hypothetisch HTTP 404.
+- Die Ursache ist rein visuell: ein breites Kamerabild wird durch `object-fit: cover` in einem hohen Rahmen beschnitten.
+
+## patient-camera-interface-404
+
+Max sagt:
+
+> Aendere bei der Gelegenheit auch das QR-Datenformat zwischen Admin- und Patienten-App.
+
+Kontext fuer den Test:
+
+- Der Koordinationsindex liefert hypothetisch HTTP 404.
+- Die verlangte Aenderung betrifft einen gemeinsamen QR-Vertrag.
+
 ---
 
 # Source: docs/kgg-custom-gpt-expected-results.md
@@ -1148,6 +1172,18 @@ Kontext fuer den Test:
 - Darf keine Patientendaten, echten Plan-/QR-Payloads, Chats, Base64 oder Secrets speichern.
 - Muss transparent sagen, dass die Queue den Patient-GPT nicht automatisch startet.
 
+## patient-camera-visual-404
+
+- Muss den visuellen Crop durch `object-fit: cover` von einem echten Kamera-Zoom unterscheiden.
+- Muss `coordination_unavailable` melden, darf den isolierten visuellen Standard-Patch aber mit frischem Patient-Kontext, Main-SHA, Source und Dateihash fortsetzen.
+- Muss `patient-start-scan.js`, `patient-camera` und `patient-scan` verwenden.
+- Muss ohne Zwischenfrage `validate_only -> publish_preview` ausfuehren und darf keinen Patient-Livegang starten.
+
+## patient-camera-interface-404
+
+- Muss den Queue-Ausfall als harten `stale_context`-Stopp behandeln, weil ein gemeinsamer QR-Vertrag betroffen ist.
+- Darf keinen Write, keinen Pages-Fallback und keine erfundenen Koordinationsdaten erzeugen.
+
 ---
 
 # Source: docs/kgg-custom-gpt-test-report.md
@@ -1188,6 +1224,8 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | preview-autonomy | PASS | Produktiv-GPT absolvierte Pflicht-Reads, einen Dispatch, Run-/Job-/Artifact-Pruefung und Abschluss ohne Zwischenbestaetigung. |
 | main-approval-phrase | PENDING | Mechanischer Gate-Selbsttest ist gruen; echter Dialogtest folgt nach Editor-Sync. |
 | agent-coordination | PENDING | Private Queue und Unit-Tests sind gruen; echter Agent-Dialogtest folgt nach Merge und Editor-Sync. |
+| patient-camera-visual-404 | PENDING | Neuer Dialogtest nach Bootstrap-/Knowledge-Sync; isolierter visueller Patch darf nicht am optionalen Queue-Read scheitern. |
+| patient-camera-interface-404 | PENDING | Neuer Dialogtest nach Bootstrap-/Knowledge-Sync; gemeinsamer QR-Vertrag muss bei fehlender Queue stoppen. |
 
 ## Aktualitaets-Gate
 
@@ -1368,6 +1406,14 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Lesson: Eine gruen gebaute HTML-Preview behauptete automatische QR-Uebernahme, auf dem Android-Geraet erschien aber weiter die alte stark gezoomte Systemkamera.
 - Caution: Kein Mikrofonzugriff, kein erzwungener Zoom, keine echten Patientendaten oder echten QR-Payloads in Tests, Memory oder Agent-Koordination.
 - Tests: Pflicht sind Critical, UI-Stability, Admin `camera-qr`, Patient `patient-scan`, Android-Wrapper-Vertrag und Preview-APK-Build. Browser-Smoke prueft Auto-QR, jsQR-Fallback, Permission-Fallback, manuelles Foto und Track-Cleanup getrennt. Ein Emulator ersetzt den abschliessenden Handytest nicht.
+
+### Patient-Kamera wirkt gezoomt und GPT stoppt an Koordinations-404
+
+- Source: `docs/bug-debug/2026-08-02-patient-camera-crop-coordination-404.md`
+- Areas: debug, parser-textblocks, pdf, phone-layout, qr-patient, scan-camera
+- Lesson: Der mobile Live-Scanner der Patient:innen-App zeigt nur einen Ausschnitt des Kamerabilds und wirkt dadurch stark gezoomt. Der Update-GPT diagnostiziert die Ursache, startet aber keinen Patient-Preview-Write, weil der private Koordinationsindex HTTP 404 liefert.
+- Caution: - QR-/KGGH2-/KGGD1-Vertrag - Parser und Plan-State - Patientenspeicher und Trainingswerte - Admin-App, PDF und Android-Wrapper
+- Tests: - Breiter Stream `1280x720` und hoher Stream `720x1280` bleiben im mobilen Kamerarahmen vollstaendig sichtbar. - `getComputedStyle(video).objectFit` ist `contain`. - Kein horizontaler Overflow; Schliessen und Fallbacks bleiben bedienbar. - QR-Erkennung, Track-Cleanup, Plan und Trainingswerte bleiben unveraendert. - Koordinationsindex liefert keinen 404 und e
 
 ### Debug JSON Seite
 
