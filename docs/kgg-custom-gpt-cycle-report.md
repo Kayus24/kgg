@@ -88,3 +88,12 @@ Tablet splitter UI probe included: no
 | `production-gpt-schema-1.4` | PASS | `` | Fresh editor tab verified Bootstrap v4, both schema 1.4 Actions, four Knowledge files and GPT-5.6 Thinking. |
 | `auto-preview-artifact-http` | PASS | `` | Artifact 8825561705 is not expired; meta.json, HTML, status and preview index returned HTTP 200. |
 | `auto-preview-emulator` | PASS | `` | API-35 emulator installed and launched the APK, received the request notification, rendered the compact chip and remained interactive without app crash or SystemUI ANR. |
+
+## Patienten-Kamera-Preview 2026-08-02
+
+- Produktiv-GPT-Request `patient-camera-contain-20260802-a`: `validate_only` Run `30742178304` und `publish_preview` Run `30742202269`, beide `completed/success`.
+- Artifact `8831673942` (`kgg-patient-preview-patient-camera-contain-20260802-a`) ist vorhanden und nicht abgelaufen. `meta.json` und Preview-HTML liefern HTTP 200; `firstLoadModules` ist `true`.
+- Der GPT fuehrte den visuellen Kamera-Patch autonom aus, ohne Patient-Live oder Admin-Main. Der Scanner verwendet im Preview `object-fit: contain`; QR-, Speicher- und Planvertraege blieben unveraendert.
+- Bootstrap-v6-Abschlusstest im produktiven Chat `6a6f1433-82b0-83ed-a7ff-9bb13c6cc7a7` bestand: ausgeschriebene `Preview-URL:` und `Recovery-URL:`, kein zweiter Dispatch.
+- API-35-Emulator `KGG_Lite_API35`: erster Aufruf ohne bestehenden Service Worker zeigte sofort die vollstaendige v73-Rettungsoberflaeche samt `Plan-QR scannen`; Screenshot nicht schwarz, kein Chrome-/App-Crash und kein SystemUI-ANR.
+- Die optische Kamera-Framing- und echte QR-Uebernahmepruefung bleibt das physische Handy-Gate. Kein Patient-Live-Release wurde ausgefuehrt.
