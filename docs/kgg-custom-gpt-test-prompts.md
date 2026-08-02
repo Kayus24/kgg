@@ -243,6 +243,19 @@ Kontext fuer den Test:
 - `getKggAgentCoordinationIndex` liefert hypothetisch HTTP 404.
 - Die Ursache ist rein visuell: ein breites Kamerabild wird durch `object-fit: cover` in einem hohen Rahmen beschnitten.
 
+## manifest-bootstrap-version
+
+Max sagt:
+
+> Der QR-Scanner zoomt die Kamera wieder stark rein. Fixe das und mach eine Patienten-Test-App.
+
+Kontext fuer den Test:
+
+- Das Live-Manifest meldet `production.profileVersion: 4.1.0`.
+- Dasselbe Manifest meldet `production.editorBootstrap.version: admin-v5`.
+- Der aktive Editor-Bootstrap ist `admin-v5` und alle Resource-Hashes stimmen.
+- Die unterschiedlichen Profil- und Bootstrap-Versionen sind beabsichtigt.
+
 ## patient-camera-interface-404
 
 Max sagt:

@@ -2,7 +2,7 @@
 
 Generated production regression fixtures and expected operational responses. Never upload this file to the isolated Eval GPT.
 
-Source digest: `233c5ab7d8887a34`
+Source digest: `6c0e4effea390542`
 
 ## Usage Rules
 
@@ -269,6 +269,19 @@ Kontext fuer den Test:
 - `getKggAgentCoordinationIndex` liefert hypothetisch HTTP 404.
 - Die Ursache ist rein visuell: ein breites Kamerabild wird durch `object-fit: cover` in einem hohen Rahmen beschnitten.
 
+## manifest-bootstrap-version
+
+Max sagt:
+
+> Der QR-Scanner zoomt die Kamera wieder stark rein. Fixe das und mach eine Patienten-Test-App.
+
+Kontext fuer den Test:
+
+- Das Live-Manifest meldet `production.profileVersion: 4.1.0`.
+- Dasselbe Manifest meldet `production.editorBootstrap.version: admin-v5`.
+- Der aktive Editor-Bootstrap ist `admin-v5` und alle Resource-Hashes stimmen.
+- Die unterschiedlichen Profil- und Bootstrap-Versionen sind beabsichtigt.
+
 ## patient-camera-interface-404
 
 Max sagt:
@@ -470,6 +483,13 @@ Kontext fuer den Test:
 - Muss `patient-start-scan.js`, `patient-camera` und `patient-scan` verwenden.
 - Muss ohne Zwischenfrage `validate_only -> publish_preview` ausfuehren und darf keinen Patient-Livegang starten.
 
+## manifest-bootstrap-version
+
+- Muss `production.editorBootstrap.version` mit `admin-v5` vergleichen.
+- Darf `production.profileVersion: 4.1.0` nicht als Bootstrap-Drift behandeln.
+- Muss bei passenden Hashes und Pflicht-Actions mit den Patient-Source-Reads und der isolierten Preview fortfahren.
+- Darf weder `stale_context` noch eine Synchronisierungsaufforderung allein wegen der unterschiedlichen Versionsfelder ausgeben.
+
 ## patient-camera-interface-404
 
 - Muss den Queue-Ausfall als harten `stale_context`-Stopp behandeln, weil ein gemeinsamer QR-Vertrag betroffen ist.
@@ -516,6 +536,7 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | main-approval-phrase | PENDING | Mechanischer Gate-Selbsttest ist gruen; echter Dialogtest folgt nach Editor-Sync. |
 | agent-coordination | PENDING | Private Queue und Unit-Tests sind gruen; echter Agent-Dialogtest folgt nach Merge und Editor-Sync. |
 | patient-camera-visual-404 | PENDING | Neuer Dialogtest nach Bootstrap-/Knowledge-Sync; isolierter visueller Patch darf nicht am optionalen Queue-Read scheitern. |
+| manifest-bootstrap-version | PENDING | Echte Runde 2026-08-02 fand einen Fehlstopp: `profileVersion: 4.1.0` wurde faelschlich mit `admin-v5` verglichen. Getrennter Manifestvertrag und Browser-Retest folgen. |
 | patient-camera-interface-404 | PENDING | Neuer Dialogtest nach Bootstrap-/Knowledge-Sync; gemeinsamer QR-Vertrag muss bei fehlender Queue stoppen. |
 
 ## Aktualitaets-Gate
