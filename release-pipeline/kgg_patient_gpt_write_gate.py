@@ -69,6 +69,11 @@ RUNTIME_EXACT = {
     "collapse-cards.js",
     "numpad-ui-fix.js",
 }
+MODULE_INJECTION_PATTERN = re.compile(
+    r"html=html\.replace\('</body>','(?P<markup>.*?)</body>'\)",
+    re.DOTALL,
+)
+MODULE_SCRIPT_PATTERN = re.compile(r'<script src="(?P<src>\./[^"?]+\.js(?:\?[^"?]+)?)"></script>')
 
 
 class GateError(RuntimeError):
@@ -402,6 +407,48 @@ def patient_runtime_files(root: Path = ROOT) -> list[Path]:
     return sorted(files)
 
 
+def service_worker_module_markup(worker: str, runtime_root: Path = ROOT) -> tuple[str, list[str]]:
+    matches = list(MODULE_INJECTION_PATTERN.finditer(worker))
+    if len(matches) != 1:
+        fail("service-worker.js must expose exactly one canonical module injection block")
+    markup = matches[0].group("markup")
+    sources = [match.group("src") for match in MODULE_SCRIPT_PATTERN.finditer(markup)]
+    if not sources or "./patient-start-scan.js" not in {source.split("?", 1)[0] for source in sources}:
+        fail("service-worker.js canonical module block is missing patient-start-scan.js")
+    paths = [source.split("?", 1)[0].removeprefix("./") for source in sources]
+    if len(paths) != len(set(paths)):
+        fail("service-worker.js canonical module block contains duplicate scripts")
+    missing = [relative for relative in paths if not (runtime_root / relative).is_file()]
+    if missing:
+        fail("service-worker.js canonical module files are missing: " + ", ".join(missing))
+    return markup, sources
+
+
+def inject_first_load_modules(html: str, worker: str, runtime_root: Path = ROOT) -> str:
+    markup, sources = service_worker_module_markup(worker, runtime_root)
+    updated = html
+    for source in sources:
+        relative = source.split("?", 1)[0]
+        script_pattern = re.compile(
+            r'<script src="' + re.escape(relative) + r'(?:\?[^"\']*)?"></script>'
+        )
+        updated = script_pattern.sub("", updated)
+    if updated.count("</body>") != 1:
+        fail("patient preview index.html must contain exactly one closing body tag")
+    updated = updated.replace("</body>", markup + "</body>", 1)
+    for source in sources:
+        relative = source.split("?", 1)[0]
+        count = len(
+            re.findall(
+                r'<script src="' + re.escape(relative) + r'(?:\?[^"\']*)?"></script>',
+                updated,
+            )
+        )
+        if count != 1:
+            fail(f"patient preview first-load module count is {count} for {relative}")
+    return updated
+
+
 def synthetic_plan_query() -> str:
     plan = {
         "i": "kgg-patient-preview",
@@ -464,7 +511,6 @@ def write_preview(
     ), preview_index.count("<head>")
     if robots_count != 1:
         fail("patient preview could not add its noindex policy")
-    preview_index_path.write_text(preview_index, encoding="utf-8", newline="\n")
     preview_worker_path = preview_dir / "service-worker.js"
     preview_worker = normalize(preview_worker_path.read_text(encoding="utf-8"))
     preview_cache_prefix = f"kgg-patient-preview-{request_id}-"
@@ -495,6 +541,8 @@ def write_preview(
     )
     if (cache_name_count, index_scope_count, recovery_scope_count) != (1, 1, 1):
         fail("patient preview could not isolate the service-worker scope")
+    preview_index = inject_first_load_modules(preview_index, preview_worker, preview_dir)
+    preview_index_path.write_text(preview_index, encoding="utf-8", newline="\n")
     preview_worker_path.write_text(preview_worker, encoding="utf-8", newline="\n")
     preview_recovery_path = preview_dir / "update-recovery.html"
     preview_recovery = normalize(preview_recovery_path.read_text(encoding="utf-8"))
@@ -524,6 +572,7 @@ def write_preview(
         "recoveryUrl": f"{PREVIEW_BASE_URL}/{request_id}/update-recovery.html?auto=1&v={version}",
         "previewScopePatched": True,
         "previewCacheName": preview_cache_name,
+        "firstLoadModules": True,
     }
     write_json(preview_dir / "meta.json", meta)
     index_path = preview_root / PREVIEW_INDEX
@@ -566,6 +615,15 @@ def verify_preview(
         fail("patient preview patchHash differs from the requested payload")
     if meta.get("baseSha") != payload["base_sha"]:
         fail("patient preview baseSha differs from the requested payload")
+    preview_dir = meta_path.parent
+    preview_html_path = preview_dir / "index.html"
+    preview_worker_path = preview_dir / "service-worker.js"
+    if meta.get("firstLoadModules") is not True or not preview_html_path.is_file() or not preview_worker_path.is_file():
+        fail("patient preview is missing first-load module evidence; publish a fresh preview")
+    preview_html = normalize(preview_html_path.read_text(encoding="utf-8-sig"))
+    preview_worker = normalize(preview_worker_path.read_text(encoding="utf-8"))
+    if inject_first_load_modules(preview_html, preview_worker, preview_dir) != preview_html:
+        fail("patient preview index.html is not canonical for first-load modules")
     if payload["base_sha"] != git_sha(root):
         fail("main changed after patient preview; start again with validate_only")
     return meta
@@ -653,7 +711,7 @@ def run(
     write_github_output(github_output, values)
 
 
-def self_test(root: Path = ROOT) -> None:
+def self_test(root: Path = ROOT, preview_output: Path | None = None) -> None:
     sample_path = root / "patient-card-progress.js"
     source = normalize(sample_path.read_text(encoding="utf-8"))
     old_text = source.splitlines()[0] + "\n"
@@ -757,7 +815,9 @@ def self_test(root: Path = ROOT) -> None:
         shutil.copy2(root / "CHANGELOG_PATIENT_APP.md", candidate / "CHANGELOG_PATIENT_APP.md")
         apply_operations(validated, candidate)
         version = bump_patient_version(validated, candidate)
-        preview_root = temp / "preview"
+        preview_root = preview_output.resolve() if preview_output else temp / "preview"
+        if preview_output and preview_root.exists():
+            shutil.rmtree(preview_root)
         meta = write_preview(preview_root, validated, payload_hash(validated), version, candidate)
         preview_html = (preview_root / "previews" / validated["request_id"] / "index.html").read_text(
             encoding="utf-8"
@@ -770,7 +830,18 @@ def self_test(root: Path = ROOT) -> None:
         ).read_text(encoding="utf-8")
         if '<meta name="robots" content="noindex,nofollow,noarchive">' not in preview_html:
             fail("self-test expected a noindex patient preview")
-        if meta.get("patientVersion") != version or meta.get("patchHash") != payload_hash(validated):
+        module_markup, module_sources = service_worker_module_markup(preview_worker, preview_root / "previews" / validated["request_id"])
+        if module_markup not in preview_html:
+            fail("self-test expected the service-worker module block in first-load preview HTML")
+        for source in module_sources:
+            relative = source.split("?", 1)[0]
+            if len(re.findall(r'<script src="' + re.escape(relative) + r'(?:\?[^"\']*)?"></script>', preview_html)) != 1:
+                fail(f"self-test expected exactly one first-load script for {relative}")
+        if (
+            meta.get("patientVersion") != version
+            or meta.get("patchHash") != payload_hash(validated)
+            or meta.get("firstLoadModules") is not True
+        ):
             fail("self-test expected matching patient preview evidence")
         if (
             str(meta.get("previewCacheName") or "") not in preview_worker
@@ -778,6 +849,17 @@ def self_test(root: Path = ROOT) -> None:
             not in preview_recovery
         ):
             fail("self-test expected a request-isolated patient preview cache")
+        verify_preview(preview_root, validated, payload_hash(validated), root)
+        legacy_meta = dict(meta)
+        legacy_meta.pop("firstLoadModules", None)
+        write_json(preview_root / "previews" / validated["request_id"] / "meta.json", legacy_meta)
+        try:
+            verify_preview(preview_root, validated, payload_hash(validated), root)
+        except GateError as exc:
+            if "first-load module evidence" not in str(exc):
+                raise
+        else:
+            fail("self-test expected a legacy patient preview to be rejected")
 
     print("KGG patient GPT write gate self-test PASS")
 
@@ -793,11 +875,12 @@ def main() -> int:
     parser.add_argument("--github-output", default=os.environ.get("GITHUB_OUTPUT"))
     parser.add_argument("--approval-phrase", default="")
     parser.add_argument("--self-test", action="store_true")
+    parser.add_argument("--self-test-preview-root", type=Path)
     args = parser.parse_args()
 
     try:
         if args.self_test:
-            self_test()
+            self_test(preview_output=args.self_test_preview_root)
             return 0
         if not args.mode or not args.payload_file:
             fail("--mode and --payload-file are required")

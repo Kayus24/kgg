@@ -121,6 +121,7 @@ def render_context() -> str:
             "",
             "- `validate_only` before `publish_preview` with identical payload.",
             "- Successful workflow run, jobs, artifact, meta.json, Preview URL and Recovery URL.",
+            "- Preview index contains the canonical patient modules exactly once and passes the first-load smoke without a service-worker controller or reload.",
             "- Max accepts the Preview in the in-app browser before PR or live mode.",
             "- Live mode additionally needs Required Checks, patient-live Environment approval, merge and live version verification.",
             "",

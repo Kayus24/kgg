@@ -2,7 +2,7 @@
 
 This generated compatibility pack contains the complete production knowledge set. Prefer the four smaller curated packs in the GPT editor so retrieval stays focused.
 
-Source digest: `0401400d6fd1ea09`
+Source digest: `b29893d26629216a`
 
 ## Usage Rules
 
@@ -1435,6 +1435,14 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Lesson: Der mobile Live-Scanner der Patient:innen-App zeigt nur einen Ausschnitt des Kamerabilds und wirkt dadurch stark gezoomt. Der Update-GPT diagnostiziert die Ursache, startet aber keinen Patient-Preview-Write, weil der private Koordinationsindex HTTP 404 liefert.
 - Caution: - QR-/KGGH2-/KGGD1-Vertrag - Parser und Plan-State - Patientenspeicher und Trainingswerte - Admin-App, PDF und Android-Wrapper
 - Tests: - Breiter Stream `1280x720` und hoher Stream `720x1280` bleiben im mobilen Kamerarahmen vollstaendig sichtbar. - `getComputedStyle(video).objectFit` ist `contain`. - Kein horizontaler Overflow; Schliessen und Fallbacks bleiben bedienbar. - QR-Erkennung, Track-Cleanup, Plan und Trainingswerte bleiben unveraendert. - Koordinationsindex liefert keinen 404 und e
+
+### Patient Preview First-Load Modules
+
+- Source: `docs/bug-debug/2026-08-02-patient-preview-first-load-modules.md`
+- Areas: qr-patient, scan-camera
+- Lesson: Ein Patient-Preview-Run konnte vollstaendig gruen sein, obwohl die erste im Browser oder in der Test-App geoeffnete `index.html` den Scanner und weitere Patient-Module noch nicht geladen hatte. Die Dateien waren im Artefakt vorhanden, wurden aber erst durch `service-worker.js` in einen spaeteren, bereits kontrollierten Seitenaufruf injiziert. `release-pipeli
+- Caution: Keep patch scoped to the requested area.
+- Tests: Run the risk-matched KGG battery.
 
 ### Debug JSON Seite
 

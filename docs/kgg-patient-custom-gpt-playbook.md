@@ -16,7 +16,7 @@ Nicht erlaubt sind Therapeut:innen-App, PDF, Android/APK, API-Key-Logik, binaere
 6. Mit `getKggPatientMainCommit` die aktuelle Main-SHA laden und den Payload gegen diese SHA sowie aktuelle Dateihashes bauen.
 7. `validate_only` ausfuehren und erfolgreichen Run pruefen.
 8. Identischen Payload mit `publish_preview` ausfuehren.
-9. Preview-Metadaten, Artefakt und Test-URLs pruefen.
+9. Preview-Metadaten, Artefakt, Test-URLs und den service-worker-unabhaengigen First-Load-Smoke pruefen.
 10. Max testet den Preview-Link im internen Browser.
 11. Bei Ablehnung: `human_preview_fail`, Lektion festhalten und mit neuer `request_id` bei Schritt 1 beginnen.
 12. Bei Zustimmung: `create_pr` oder nur auf ausdruecklichen Live-Auftrag `publish_patient_live`.
@@ -66,6 +66,7 @@ Jeder publizierte Preview- oder PR-Lauf prueft:
 - PWA- und Update-Recovery-Vertrag;
 - Kartenfortschritt, Installation, Planloeschung und Summary;
 - mobilen synthetischen Browser-Flow;
+- direkten Preview-First-Load ohne Service-Worker-Controller; Scanner-Modul und No-Plan-Rettungsbutton muessen ohne Reload funktionieren;
 - bei Interface-Risiko oder einer Aenderung an `patient-start-scan.js` zusaetzlich Patient-Scan/QR-Regression;
 - fuer `patient-start-scan.js` zusaetzlich den Full-Frame-Fall mit breitem und hohem synthetischen Kamerastream.
 
@@ -80,6 +81,7 @@ Erfolg erfordert:
 - numerische neue Patientenversion;
 - Artefakt `kgg-patient-preview-<request_id>`;
 - Preview- und Recovery-URL unter `kayus24.github.io/kgg-patient-preview`;
+- Preview-`index.html` enthaelt die kanonischen Patient-Module genau einmal und funktioniert beim ersten Aufruf ohne Service-Worker-Reload;
 - ausschliesslich synthetischer Plan.
 
 ## Live-Belege
