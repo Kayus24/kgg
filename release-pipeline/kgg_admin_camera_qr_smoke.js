@@ -9,9 +9,68 @@ const { chromium } = require("playwright");
 const ROOT = path.resolve(__dirname, "..");
 const HTML_PATH = path.join(ROOT, "kgg-update", "index.html");
 const PATCH_ID = "kgg-v061-cross-app-live-qr-camera";
+const TOTAL_TIMEOUT_MS = Number(process.env.KGG_CAMERA_QR_TOTAL_TIMEOUT_MS || 180000);
+const CASE_TIMEOUT_MS = Number(process.env.KGG_CAMERA_QR_CASE_TIMEOUT_MS || 30000);
+const CLOSE_TIMEOUT_MS = Number(process.env.KGG_CAMERA_QR_CLOSE_TIMEOUT_MS || 5000);
+
+let activeBrowser = null;
+const activeContexts = new Set();
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
+}
+
+function log(message) {
+  process.stdout.write(`[camera-qr] ${message}\n`);
+}
+
+function withTimeout(promise, timeoutMs, label) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label} timed out after ${timeoutMs} ms`)), timeoutMs);
+  });
+  return Promise.race([Promise.resolve(promise), timeout]).finally(() => clearTimeout(timer));
+}
+
+async function closeQuietly(resource, label) {
+  if (!resource) return;
+  try {
+    await withTimeout(resource.close(), CLOSE_TIMEOUT_MS, `${label} close`);
+  } catch (error) {
+    console.error(`[camera-qr] cleanup warning: ${error.message}`);
+  }
+}
+
+async function stopPageTracks(page) {
+  if (!page || page.isClosed()) return;
+  try {
+    await withTimeout(
+      page.evaluate(() => {
+        const streams = new Set();
+        for (const media of document.querySelectorAll("video,audio")) {
+          if (media.srcObject) streams.add(media.srcObject);
+        }
+        if (window.__kggAdminCameraTest && window.__kggAdminCameraTest.stream) {
+          streams.add(window.__kggAdminCameraTest.stream);
+        }
+        for (const stream of streams) {
+          if (stream && typeof stream.getTracks === "function") {
+            for (const track of stream.getTracks()) track.stop();
+          }
+        }
+      }),
+      CLOSE_TIMEOUT_MS,
+      "media-track cleanup"
+    );
+  } catch (error) {
+    console.error(`[camera-qr] cleanup warning: ${error.message}`);
+  }
+}
+
+async function closeContext(context, page, label) {
+  await stopPageTracks(page);
+  await closeQuietly(context, label);
+  activeContexts.delete(context);
 }
 
 function encodePlan(plan) {
@@ -86,30 +145,41 @@ function cameraInitScript(mode, detectorRaw) {
 
 async function createPage(browser, mode, detectorRaw = "") {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: "block" });
-  await context.route(/^https?:\/\//, async (route) => {
-    await route.fulfill({ status: 204, contentType: "application/json", body: "{}" });
-  });
-  await context.addInitScript({ content: cameraInitScript(mode, detectorRaw) });
-  const page = await context.newPage();
-  const pageErrors = [];
-  page.on("pageerror", (error) => pageErrors.push(error.message));
-  await page.goto(pathToFileURL(HTML_PATH).href, { waitUntil: "domcontentloaded", timeout: 60000 });
-  await page.waitForFunction((patchId) => {
-    return !!(
-      window.KGGScan &&
-      window.KGGScan.__kggLiveQrCameraInstalled &&
-      window.KGG_PATCHES &&
-      window.KGG_PATCHES[patchId]
-    );
-  }, PATCH_ID, { timeout: 15000 });
-  assert(pageErrors.length === 0, `page boot errors: ${pageErrors.join(" | ")}`);
-  return { context, page };
+  activeContexts.add(context);
+  let page = null;
+  try {
+    await context.route(/^https?:\/\//, async (route) => {
+      await route.fulfill({ status: 204, contentType: "application/json", body: "{}" });
+    });
+    await context.addInitScript({ content: cameraInitScript(mode, detectorRaw) });
+    page = await context.newPage();
+    page.setDefaultTimeout(15000);
+    page.setDefaultNavigationTimeout(30000);
+    const pageErrors = [];
+    page.on("pageerror", (error) => pageErrors.push(error.message));
+    await page.goto(pathToFileURL(HTML_PATH).href, { waitUntil: "domcontentloaded", timeout: 30000 });
+    await page.waitForFunction((patchId) => {
+      return !!(
+        window.KGGScan &&
+        window.KGGScan.__kggLiveQrCameraInstalled &&
+        window.KGG_PATCHES &&
+        window.KGG_PATCHES[patchId]
+      );
+    }, PATCH_ID, { timeout: 15000 });
+    assert(pageErrors.length === 0, `page boot errors: ${pageErrors.join(" | ")}`);
+    return { context, page };
+  } catch (error) {
+    await closeContext(context, page, `failed ${mode} context`);
+    throw error;
+  }
 }
 
 async function runBarcodeCase(browser) {
   const { context, page } = await createPage(browser, "barcode", QR_RAW);
   try {
-    await page.evaluate(() => window.KGGScan.pick("camera"));
+    // Never return the long-running scanner promise to Playwright. The page
+    // assertions observe its result; page.evaluate itself must finish at once.
+    await page.evaluate(() => { window.KGGScan.pick("camera"); });
     await page.waitForFunction(() => {
       const state = window.KGGScan.getState();
       return state.jobs.some((job) => job.type === "qr" && job.hasResult);
@@ -117,7 +187,7 @@ async function runBarcodeCase(browser) {
     await page.waitForFunction((patchId) => {
       const root = document.getElementById(`${patchId}-camera`);
       return !!(root && root.hidden && window.__kggAdminCameraTest.trackStops >= 1);
-    }, PATCH_ID);
+    }, PATCH_ID, { timeout: 10000 });
     const result = await page.evaluate((patchId) => ({
       test: window.__kggAdminCameraTest,
       state: window.KGGScan.getState(),
@@ -134,7 +204,7 @@ async function runBarcodeCase(browser) {
     assert(result.capabilities.webVideoCapture && result.capabilities.jsQR, "camera capability contract is incomplete");
     return { id: "barcode-detector-auto-transfer", status: "pass", decoderAttempts: result.test.detectorAttempts };
   } finally {
-    await context.close();
+    await closeContext(context, page, "barcode context");
   }
 }
 
@@ -157,7 +227,7 @@ async function runJsQrFallbackCase(browser) {
     assert(result.trackStops >= 1, "camera track was not stopped after jsQR success");
     return { id: "local-jsqr-auto-transfer", status: "pass", jsQrAttempts: result.jsQrAttempts };
   } finally {
-    await context.close();
+    await closeContext(context, page, "jsQR context");
   }
 }
 
@@ -172,7 +242,7 @@ async function runPermissionFallbackCase(browser) {
       });
       window.KGGScan.pick("camera");
     });
-    await page.waitForFunction(() => window.__kggAdminCameraTest.fallbackClicks === 1);
+    await page.waitForFunction(() => window.__kggAdminCameraTest.fallbackClicks === 1, null, { timeout: 10000 });
     const result = await page.evaluate((patchId) => ({
       fallbackClicks: window.__kggAdminCameraTest.fallbackClicks,
       overlayHidden: document.getElementById(`${patchId}-camera`).hidden,
@@ -181,7 +251,7 @@ async function runPermissionFallbackCase(browser) {
     assert(result.overlayHidden, "permission denial left the live camera overlay open");
     return { id: "permission-system-camera-fallback", status: "pass" };
   } finally {
-    await context.close();
+    await closeContext(context, page, "permission context");
   }
 }
 
@@ -201,16 +271,23 @@ async function runManualCaptureCase(browser) {
       const video = document.querySelector(`#${patchId}-camera video`);
       return !!(video && video.videoWidth > 0 && video.videoHeight > 0);
     }, PATCH_ID, { timeout: 10000 });
-    await page.locator(".kggLiveQrShutter").click();
-    await page.waitForFunction(() => window.__kggAdminCameraTest.manualFiles.length === 1);
+    await page.locator(".kggLiveQrShutter").click({ timeout: 10000 });
+    await page.waitForFunction(() => window.__kggAdminCameraTest.manualFiles.length === 1, null, { timeout: 10000 });
     const result = await page.evaluate(() => ({ ...window.__kggAdminCameraTest }));
     assert(result.manualFiles[0].kind === "camera", "manual shutter did not use the camera input route");
     assert(result.manualFiles[0].type === "image/jpeg" && result.manualFiles[0].size > 0, "manual shutter did not create a JPEG file");
     assert(result.trackStops >= 1, "camera track was not stopped after manual capture");
     return { id: "manual-paper-shutter", status: "pass", fileSize: result.manualFiles[0].size };
   } finally {
-    await context.close();
+    await closeContext(context, page, "manual context");
   }
+}
+
+async function runCase(label, callback) {
+  log(`start ${label}`);
+  const result = await withTimeout(callback(), CASE_TIMEOUT_MS, label);
+  log(`pass ${label}`);
+  return result;
 }
 
 async function main() {
@@ -226,20 +303,39 @@ async function main() {
   ]) {
     assert(html.includes(token), `camera/QR source contract missing: ${token}`);
   }
-  const browser = await chromium.launch({ headless: true });
+
+  log(`launch browser; hard timeout ${TOTAL_TIMEOUT_MS} ms`);
+  activeBrowser = await chromium.launch({ headless: true });
   try {
     const results = [];
-    results.push(await runBarcodeCase(browser));
-    results.push(await runJsQrFallbackCase(browser));
-    results.push(await runPermissionFallbackCase(browser));
-    results.push(await runManualCaptureCase(browser));
+    results.push(await runCase("barcode-detector-auto-transfer", () => runBarcodeCase(activeBrowser)));
+    results.push(await runCase("local-jsqr-auto-transfer", () => runJsQrFallbackCase(activeBrowser)));
+    results.push(await runCase("permission-system-camera-fallback", () => runPermissionFallbackCase(activeBrowser)));
+    results.push(await runCase("manual-paper-shutter", () => runManualCaptureCase(activeBrowser)));
     process.stdout.write(`${JSON.stringify({ status: "pass", patchId: PATCH_ID, results }, null, 2)}\n`);
   } finally {
-    await browser.close();
+    for (const context of Array.from(activeContexts)) {
+      await closeContext(context, null, "remaining context");
+    }
+    await closeQuietly(activeBrowser, "browser");
+    activeBrowser = null;
   }
 }
 
-main().catch((error) => {
-  console.error(`ERROR: ${error.stack || error.message}`);
-  process.exit(1);
-});
+const hardWatchdog = setTimeout(() => {
+  console.error(`ERROR: Admin camera/QR smoke exceeded hard timeout of ${TOTAL_TIMEOUT_MS} ms`);
+  // Forced exit prevents lingering Playwright or Chromium handles from keeping
+  // the enclosing Python battery alive forever.
+  process.exit(124);
+}, TOTAL_TIMEOUT_MS);
+
+main()
+  .then(() => {
+    clearTimeout(hardWatchdog);
+    process.exit(0);
+  })
+  .catch((error) => {
+    clearTimeout(hardWatchdog);
+    console.error(`ERROR: ${error.stack || error.message}`);
+    process.exit(1);
+  });
