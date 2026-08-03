@@ -4,6 +4,22 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "kgg-v062-camera-crop-diagnostic-b",
+      "patchHash": "c1a94a6d8004d055420cc2b3989df84ef0d884359632df909ea5784bdd134dc0",
+      "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
+      "baseVersionCode": 62,
+      "rolloutCode": 1785778318,
+      "title": "Kamera-Cropping getrennt vom gelieferten Stream prfen",
+      "summary": "Eine isolierte Test-App-Diagnose zeigt denselben WebView-Kamerastream gleichzeitig vollstndig mit contain, beschnitten mit cover und als vollstndigen rohen Canvas-Frame. Stream-Mae und der theoretische Cover-Zuschnitt we",
+      "patchId": "kgg-v062-camera-crop-diagnostic-b",
+      "patchFile": "patches/v062-camera-crop-diagnostic-b.html",
+      "versionName": "1.0.62-camera-crop-diagnostic-b",
+      "createdAt": "2026-08-03T17:31:58Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-camera-crop-diagnostic-b/admin.html",
+      "sha256": "d7d744ba0aa927f58d63154f1d104b92a99f69bffcc17ee89c7ba88df35e406b"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-v062-tablet-package-overlay-stability",
       "patchHash": "f2caba0abf295607bc58ae773c4bd0ef69c1867f62741971ed37fe42a586d726",
       "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
@@ -299,35 +315,22 @@
       "createdAt": "2026-07-13T09:43:13Z",
       "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-tablet-splitter-polish-20260713-a/admin.html",
       "sha256": "ad492719b9efd207b880ab5f587f576e313cada40a91662aeb9cef03fe3d6fba"
-    },
-    {
-      "kind": "kgg_gpt_preview",
-      "requestId": "kgg-tablet-splitter-columns-20260710-a",
-      "patchHash": "a73f0257249eda3ab7c070cf1bcf4a1640cf968704614c68508ab11b698dbcb5",
-      "baseSha": "e96b259812a44053e48d70c1f198ead01920e8c0",
-      "baseVersionCode": 60,
-      "rolloutCode": 1783711072,
-      "title": "Tablet Splitter: Skalierung und Spaltenbreite trennen",
-      "summary": "Entfernt das alte Skalierungs-Artefakt im Seitenmenue, positioniert den Splitter an der echten Grid-Grenze und macht die mittlere Kapsel horizontal ziehbar; Plus/Minus bleibt reine Skalierung.",
-      "createdAt": "2026-07-10T19:17:52Z",
-      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-tablet-splitter-columns-20260710-a/admin.html",
-      "sha256": "badfd0bffb6ab6f38906cb5154d92195e3cd7f4fc4df4aa1475cc3fec7a6e16c"
     }
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-v062-tablet-package-overlay-stability",
-    "patchHash": "f2caba0abf295607bc58ae773c4bd0ef69c1867f62741971ed37fe42a586d726",
+    "requestId": "kgg-v062-camera-crop-diagnostic-b",
+    "patchHash": "c1a94a6d8004d055420cc2b3989df84ef0d884359632df909ea5784bdd134dc0",
     "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
     "baseVersionCode": 62,
-    "rolloutCode": 1785771609,
-    "title": "Tablet-Hintergrund beim ffnen der bungspakete stabil halten",
-    "summary": "Beim ffnen des bungspakete-Overlays bleibt die App hinter dem weiterhin geffneten Tablet-Seitenmen exakt an derselben Position und Breite. Es wird ausschlielich die konfliktierende Overlay-Geometrie korrigiert.",
-    "patchId": "kgg-v062-tablet-package-overlay-stability",
-    "patchFile": "patches/v062-tablet-package-overlay-stability.html",
-    "versionName": "1.0.62-tablet-package-overlay-stability",
-    "createdAt": "2026-08-03T15:40:09Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-tablet-package-overlay-stability/admin.html",
-    "sha256": "5d62a6dd65e754eb16237fa2b0d34b08a54b9811d0f2b6ed2f4173c95336c64b"
+    "rolloutCode": 1785778318,
+    "title": "Kamera-Cropping getrennt vom gelieferten Stream prfen",
+    "summary": "Eine isolierte Test-App-Diagnose zeigt denselben WebView-Kamerastream gleichzeitig vollstndig mit contain, beschnitten mit cover und als vollstndigen rohen Canvas-Frame. Stream-Mae und der theoretische Cover-Zuschnitt we",
+    "patchId": "kgg-v062-camera-crop-diagnostic-b",
+    "patchFile": "patches/v062-camera-crop-diagnostic-b.html",
+    "versionName": "1.0.62-camera-crop-diagnostic-b",
+    "createdAt": "2026-08-03T17:31:58Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-camera-crop-diagnostic-b/admin.html",
+    "sha256": "d7d744ba0aa927f58d63154f1d104b92a99f69bffcc17ee89c7ba88df35e406b"
   }
 }
