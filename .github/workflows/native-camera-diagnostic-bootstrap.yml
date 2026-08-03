@@ -1,0 +1,158 @@
+name: Native camera diagnostic bootstrap
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened]
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: native-camera-diagnostic-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  apply-test-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+
+      - name: Verify immutable base
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --depth=50
+          expected=8c7689833e4e0247a1acdab297352357e09219d7
+          actual="$(git merge-base origin/main HEAD)"
+          test "$actual" = "$expected"
+          echo "Verified base: $actual"
+
+      - name: Create and verify valid Git patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .github/native-camera-diagnostic-bootstrap/chunk-* > .github/native-camera-diagnostic-bootstrap/apply_native_camera_diagnostic.py
+          python .github/native-camera-diagnostic-bootstrap/apply_native_camera_diagnostic.py
+          mkdir -p "$RUNNER_TEMP/kgg-native-camera-artifact"
+          git diff --binary --full-index -- android-wrapper > "$RUNNER_TEMP/kgg-native-camera-artifact/native-camera-diagnostic.valid.patch"
+          test -s "$RUNNER_TEMP/kgg-native-camera-artifact/native-camera-diagnostic.valid.patch"
+          git restore --worktree --staged android-wrapper
+          git clean -f -- android-wrapper/app/src/main/java/de/kgg/app/KggNativeCameraDiagnosticActivity.java
+          test ! -e android-wrapper/app/src/main/java/de/kgg/app/KggNativeCameraDiagnosticActivity.java
+          git apply --check "$RUNNER_TEMP/kgg-native-camera-artifact/native-camera-diagnostic.valid.patch"
+          git apply "$RUNNER_TEMP/kgg-native-camera-artifact/native-camera-diagnostic.valid.patch"
+          git diff --check
+
+      - name: Verify preview-only and privacy contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'KGG_NATIVE_CAMERA_DIAGNOSTIC", "false"' android-wrapper/app/build.gradle
+          grep -q 'KGG_NATIVE_CAMERA_DIAGNOSTIC", "true"' android-wrapper/app/build.gradle
+          grep -q 'android:name=".KggNativeCameraDiagnosticActivity"' android-wrapper/app/src/main/AndroidManifest.xml
+          grep -A3 'android:name=".KggNativeCameraDiagnosticActivity"' android-wrapper/app/src/main/AndroidManifest.xml | grep -q 'android:exported="false"'
+          grep -q 'BuildConfig.KGG_NATIVE_CAMERA_DIAGNOSTIC && isPreviewProfile()' android-wrapper/app/src/main/java/de/kgg/app/MainActivity.java
+          grep -q 'nativeCameraDiagnosticVersion\\":' android-wrapper/app/src/main/java/de/kgg/app/MainActivity.java
+          grep -q 'getPhysicalCameraInfos' android-wrapper/app/src/main/java/de/kgg/app/KggNativeCameraDiagnosticActivity.java
+          grep -q 'setPhysicalCameraId' android-wrapper/app/src/main/java/de/kgg/app/KggNativeCameraDiagnosticActivity.java
+          grep -q 'PreviewView.ScaleType.FIT_CENTER' android-wrapper/app/src/main/java/de/kgg/app/KggNativeCameraDiagnosticActivity.java
+          grep -q 'closeLiveCamera' android-wrapper/app/src/main/java/de/kgg/app/MainActivity.java
+          ! grep -Eq 'FileOutputStream|MediaStore\.Images|ImageCapture|takePicture|openOutputStream|SQLite|SharedPreferences' android-wrapper/app/src/main/java/de/kgg/app/KggNativeCameraDiagnosticActivity.java
+
+      - name: Install regression dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
+          cd release-pipeline
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Run five required KGG regressions
+        shell: bash
+        env:
+          KGG_ALLOW_RELEASE_DRIFT: "1"
+        run: |
+          set -euo pipefail
+          python release-pipeline/kgg_test_battery.py --level critical
+          python release-pipeline/kgg_test_battery.py --suite ui-stability --level regression
+          python release-pipeline/kgg_test_battery.py --suite camera-qr --level regression
+          python release-pipeline/kgg_test_battery.py --suite patient-scan --level regression
+          python release-pipeline/kgg_test_battery.py --suite native-sync --level regression
+
+      - name: Build all Android profiles
+        shell: bash
+        working-directory: android-wrapper
+        run: gradle clean assembleAdminDebug assembleKollegenDebug assemblePreviewDebug
+
+      - name: Verify profile separation and diagnostic gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          ADMIN_APK=android-wrapper/app/build/outputs/apk/admin/debug/app-admin-debug.apk
+          COLLEAGUE_APK=android-wrapper/app/build/outputs/apk/kollegen/debug/app-kollegen-debug.apk
+          PREVIEW_APK=android-wrapper/app/build/outputs/apk/preview/debug/app-preview-debug.apk
+          test -s "$ADMIN_APK"
+          test -s "$COLLEAGUE_APK"
+          test -s "$PREVIEW_APK"
+          unzip -l "$ADMIN_APK" | grep -q 'assets/android/kgg_release_control_bootstrap.js'
+          ! unzip -l "$COLLEAGUE_APK" | grep -q 'kgg_release_control_bootstrap.js'
+          ! unzip -l "$PREVIEW_APK" | grep -q 'kgg_release_control_bootstrap.js'
+          unzip -p "$PREVIEW_APK" assets/preview.html > /tmp/preview.html
+          grep -q 'KGGDataStore' /tmp/preview.html
+          unzip -p "$COLLEAGUE_APK" assets/colleague.html > /tmp/colleague.html
+          ! grep -Eq 'window\.KGGAdmin|id="adminConfigBtn"|id="adminSecretsModal"|kggReleaseCenter' /tmp/colleague.html
+          grep -R -q 'KGG_NATIVE_CAMERA_DIAGNOSTIC = true' android-wrapper/app/build/generated/source/buildConfig/preview/debug
+          grep -R -q 'KGG_NATIVE_CAMERA_DIAGNOSTIC = false' android-wrapper/app/build/generated/source/buildConfig/admin/debug
+          grep -R -q 'KGG_NATIVE_CAMERA_DIAGNOSTIC = false' android-wrapper/app/build/generated/source/buildConfig/kollegen/debug
+          cp "$PREVIEW_APK" "$RUNNER_TEMP/kgg-native-camera-artifact/kgg-native-camera-diagnostic-preview.apk"
+          sha256sum "$RUNNER_TEMP/kgg-native-camera-artifact"/* > "$RUNNER_TEMP/kgg-native-camera-artifact/SHA256SUMS.txt"
+
+      - name: Upload Preview APK and evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgg-native-camera-diagnostic-preview-20260803-a
+          if-no-files-found: error
+          retention-days: 30
+          path: ${{ runner.temp }}/kgg-native-camera-artifact/*
+
+      - name: Commit tested Android implementation to branch
+        shell: bash
+        env:
+          HEAD_BRANCH: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add android-wrapper
+          rm -f .github/native-camera-diagnostic-bootstrap/apply_native_camera_diagnostic.py
+          git rm .github/workflows/native-camera-diagnostic-bootstrap.yml
+          git rm -r .github/native-camera-diagnostic-bootstrap
+          git commit -m 'Implement Preview native camera diagnostic'
+          git push origin "HEAD:$HEAD_BRANCH"
