@@ -4,6 +4,22 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "kgg-v062-camera-diagnostic-lab-a",
+      "patchHash": "2bf91efaa58e17b5b56520a1f387824cc841b002782f3769128955b5af1ad4d1",
+      "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
+      "baseVersionCode": 62,
+      "rolloutCode": 1785758635,
+      "title": "Kamera-Diagnose fr Zoomursache",
+      "summary": "Eine isolierte Test-App-Diagnose listet die in Android WebView sichtbaren Kameras auf, startet jede Linse gezielt, vergleicht Auto-, 4:3- und 16:9-Streams und zeigt Track-Einstellungen sowie Zoom-Fhigkeiten. Der bestehen",
+      "patchId": "kgg-v062-camera-diagnostic-lab-a",
+      "patchFile": "patches/v062-camera-diagnostic-lab-a.html",
+      "versionName": "1.0.62-camera-diagnostic-lab-a",
+      "createdAt": "2026-08-03T12:03:55Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-camera-diagnostic-lab-a/admin.html",
+      "sha256": "336c565371da9178ab4c81dabbf0a02e65d2508dccf237b92a4c74facea0f8a4"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-v062-one-shot-full-frame-photo-v5",
       "patchHash": "965fb39eeefe1c65f956f136fb0ad6b71c0a0550370e0bf38570d4db4c1f59c0",
       "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
@@ -293,35 +309,22 @@
       "createdAt": "2026-07-10T09:52:06Z",
       "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/ui-scaler-canary-20260707-a/admin.html",
       "sha256": "7990a4cb162c2e1e1053f4a09f4af3c834a00d1510a70e756d50e4ca6d0b198f"
-    },
-    {
-      "kind": "kgg_gpt_preview",
-      "requestId": "kgg-v404-name-arrow-unit-custom",
-      "patchHash": "4ebf8e18014a35d28da9f787684b93f6d6c60728ccd3dfa09bd30b6a56d2717a",
-      "baseSha": "efad629fe8d8390ae06f9c98aa884cf91129b1ef",
-      "baseVersionCode": 57,
-      "rolloutCode": 1783350915,
-      "title": "v404 Name Pfeil wie Select und freie Einheit",
-      "summary": "Name-Feld nutzt ein Select-artiges Pfeilchen ohne sichtbaren Button; Einheit erhaelt sec und Andere mit Freitext.",
-      "createdAt": "2026-07-06T15:15:15Z",
-      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v404-name-arrow-unit-custom/admin.html",
-      "sha256": "594f0a992fd42e576235f2166613ee8179911bf08418548663a87d22cb8add1b"
     }
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-v062-one-shot-full-frame-photo-v5",
-    "patchHash": "965fb39eeefe1c65f956f136fb0ad6b71c0a0550370e0bf38570d4db4c1f59c0",
+    "requestId": "kgg-v062-camera-diagnostic-lab-a",
+    "patchHash": "2bf91efaa58e17b5b56520a1f387824cc841b002782f3769128955b5af1ad4d1",
     "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
     "baseVersionCode": 62,
-    "rolloutCode": 1785757097,
-    "title": "Kamera einmalig in vollstndigem 4:3 ffnen",
-    "summary": "Der bestehende QR-Scanner bleibt unverndert. Nur whrend seines Kameraaufrufs werden feste 16:9-Mae entfernt und ein vollstndiges 4:3-Bild bevorzugt; anschlieend wird die ursprngliche Browser-Kamerafunktion sofort wiederh",
-    "patchId": "kgg-v062-one-shot-full-frame-photo-v5",
-    "patchFile": "patches/v062-one-shot-full-frame-photo-v5.html",
-    "versionName": "1.0.62-one-shot-full-frame-photo-v5",
-    "createdAt": "2026-08-03T11:38:17Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-one-shot-full-frame-photo-v5/admin.html",
-    "sha256": "08b4b83b66c5891b0800a634566fd6dc2f15f4d0b14bd77a1b5a7240a329b930"
+    "rolloutCode": 1785758635,
+    "title": "Kamera-Diagnose fr Zoomursache",
+    "summary": "Eine isolierte Test-App-Diagnose listet die in Android WebView sichtbaren Kameras auf, startet jede Linse gezielt, vergleicht Auto-, 4:3- und 16:9-Streams und zeigt Track-Einstellungen sowie Zoom-Fhigkeiten. Der bestehen",
+    "patchId": "kgg-v062-camera-diagnostic-lab-a",
+    "patchFile": "patches/v062-camera-diagnostic-lab-a.html",
+    "versionName": "1.0.62-camera-diagnostic-lab-a",
+    "createdAt": "2026-08-03T12:03:55Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-camera-diagnostic-lab-a/admin.html",
+    "sha256": "336c565371da9178ab4c81dabbf0a02e65d2508dccf237b92a4c74facea0f8a4"
   }
 }

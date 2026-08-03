@@ -1,0 +1,16 @@
+{
+  "kind": "kgg_gpt_preview",
+  "requestId": "kgg-v062-camera-diagnostic-lab-a",
+  "patchHash": "2bf91efaa58e17b5b56520a1f387824cc841b002782f3769128955b5af1ad4d1",
+  "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
+  "baseVersionCode": 62,
+  "rolloutCode": 1785758635,
+  "title": "Kamera-Diagnose fr Zoomursache",
+  "summary": "Eine isolierte Test-App-Diagnose listet die in Android WebView sichtbaren Kameras auf, startet jede Linse gezielt, vergleicht Auto-, 4:3- und 16:9-Streams und zeigt Track-Einstellungen sowie Zoom-Fhigkeiten. Der bestehen",
+  "patchId": "kgg-v062-camera-diagnostic-lab-a",
+  "patchFile": "patches/v062-camera-diagnostic-lab-a.html",
+  "versionName": "1.0.62-camera-diagnostic-lab-a",
+  "createdAt": "2026-08-03T12:03:55Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-camera-diagnostic-lab-a/admin.html",
+  "sha256": "336c565371da9178ab4c81dabbf0a02e65d2508dccf237b92a4c74facea0f8a4"
+}
