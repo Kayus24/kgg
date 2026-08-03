@@ -1,16 +1,16 @@
 name: Native camera diagnostic bootstrap
 
 on:
-  pull_request:
-    branches: [main]
-    types: [opened, reopened]
+  push:
+    branches:
+      - codex/native-camera-diagnostic-preview
 
 permissions:
   contents: write
   actions: read
 
 concurrency:
-  group: native-camera-diagnostic-${{ github.event.pull_request.number }}
+  group: native-camera-diagnostic-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.ref_name }}
           fetch-depth: 0
 
       - uses: actions/setup-python@v5
@@ -145,7 +145,7 @@ jobs:
       - name: Commit tested Android implementation to branch
         shell: bash
         env:
-          HEAD_BRANCH: ${{ github.head_ref }}
+          HEAD_BRANCH: ${{ github.ref_name }}
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
