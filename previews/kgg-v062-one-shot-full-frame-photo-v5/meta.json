@@ -1,0 +1,16 @@
+{
+  "kind": "kgg_gpt_preview",
+  "requestId": "kgg-v062-one-shot-full-frame-photo-v5",
+  "patchHash": "965fb39eeefe1c65f956f136fb0ad6b71c0a0550370e0bf38570d4db4c1f59c0",
+  "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
+  "baseVersionCode": 62,
+  "rolloutCode": 1785757097,
+  "title": "Kamera einmalig in vollstndigem 4:3 ffnen",
+  "summary": "Der bestehende QR-Scanner bleibt unverndert. Nur whrend seines Kameraaufrufs werden feste 16:9-Mae entfernt und ein vollstndiges 4:3-Bild bevorzugt; anschlieend wird die ursprngliche Browser-Kamerafunktion sofort wiederh",
+  "patchId": "kgg-v062-one-shot-full-frame-photo-v5",
+  "patchFile": "patches/v062-one-shot-full-frame-photo-v5.html",
+  "versionName": "1.0.62-one-shot-full-frame-photo-v5",
+  "createdAt": "2026-08-03T11:38:17Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-one-shot-full-frame-photo-v5/admin.html",
+  "sha256": "08b4b83b66c5891b0800a634566fd6dc2f15f4d0b14bd77a1b5a7240a329b930"
+}

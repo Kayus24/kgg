@@ -4,6 +4,22 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "kgg-v062-one-shot-full-frame-photo-v5",
+      "patchHash": "965fb39eeefe1c65f956f136fb0ad6b71c0a0550370e0bf38570d4db4c1f59c0",
+      "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
+      "baseVersionCode": 62,
+      "rolloutCode": 1785757097,
+      "title": "Kamera einmalig in vollstndigem 4:3 ffnen",
+      "summary": "Der bestehende QR-Scanner bleibt unverndert. Nur whrend seines Kameraaufrufs werden feste 16:9-Mae entfernt und ein vollstndiges 4:3-Bild bevorzugt; anschlieend wird die ursprngliche Browser-Kamerafunktion sofort wiederh",
+      "patchId": "kgg-v062-one-shot-full-frame-photo-v5",
+      "patchFile": "patches/v062-one-shot-full-frame-photo-v5.html",
+      "versionName": "1.0.62-one-shot-full-frame-photo-v5",
+      "createdAt": "2026-08-03T11:38:17Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-one-shot-full-frame-photo-v5/admin.html",
+      "sha256": "08b4b83b66c5891b0800a634566fd6dc2f15f4d0b14bd77a1b5a7240a329b930"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "gpt-auto-canary-20260802-a",
       "patchHash": "15f05ea41f0458378fbac97205d9eb1bf725385aed45eff312880e2c79ce44fa",
       "baseSha": "0e019c9a9eb5bb50943b4b3bd2d386cff2ff3b38",
@@ -290,35 +306,22 @@
       "createdAt": "2026-07-06T15:15:15Z",
       "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v404-name-arrow-unit-custom/admin.html",
       "sha256": "594f0a992fd42e576235f2166613ee8179911bf08418548663a87d22cb8add1b"
-    },
-    {
-      "kind": "kgg_gpt_preview",
-      "requestId": "kgg-v403-alt-names-inline-arrow",
-      "patchHash": "62737dee3beaf1a0d41810f0640e23e7fedc37c1a8ab0de86b91d7fd3cc202b7",
-      "baseSha": "efad629fe8d8390ae06f9c98aa884cf91129b1ef",
-      "baseVersionCode": 57,
-      "rolloutCode": 1783338075,
-      "title": "v403 Alternative Uebungsnamen im Namensfeld",
-      "summary": "Name-Feld bekommt einen kleinen integrierten Pfeil; darunter klappen vereinfachter und englischer Uebungsname auf, mit planweiter Patienten-App-Anzeige.",
-      "createdAt": "2026-07-06T11:41:15Z",
-      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v403-alt-names-inline-arrow/admin.html",
-      "sha256": "14926ed810b6f5f4a6afdcdb3c54aaf77644409c80162bf0d43dbb5710ca4a1d"
     }
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "gpt-auto-canary-20260802-a",
-    "patchHash": "15f05ea41f0458378fbac97205d9eb1bf725385aed45eff312880e2c79ce44fa",
-    "baseSha": "0e019c9a9eb5bb50943b4b3bd2d386cff2ff3b38",
+    "requestId": "kgg-v062-one-shot-full-frame-photo-v5",
+    "patchHash": "965fb39eeefe1c65f956f136fb0ad6b71c0a0550370e0bf38570d4db4c1f59c0",
+    "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
     "baseVersionCode": 62,
-    "rolloutCode": 1785626847,
-    "title": "Unsichtbarer Test-App Auto-Canary",
-    "summary": "Setzt ausschlielich den nicht sichtbaren Dokument-Dataset-Canary 20260802-a und registriert das Modul im KGG-Patchobjekt.",
-    "patchId": "kgg-v062-auto-canary-20260802-a",
-    "patchFile": "patches/v062-auto-canary-20260802-a.html",
-    "versionName": "1.0.62-auto-canary-20260802-a",
-    "createdAt": "2026-08-01T23:27:27Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/gpt-auto-canary-20260802-a/admin.html",
-    "sha256": "0fae2d75f1cb696e52d94441dfd6b630c03aafdb4c92b17b1bedd1ed7b456e09"
+    "rolloutCode": 1785757097,
+    "title": "Kamera einmalig in vollstndigem 4:3 ffnen",
+    "summary": "Der bestehende QR-Scanner bleibt unverndert. Nur whrend seines Kameraaufrufs werden feste 16:9-Mae entfernt und ein vollstndiges 4:3-Bild bevorzugt; anschlieend wird die ursprngliche Browser-Kamerafunktion sofort wiederh",
+    "patchId": "kgg-v062-one-shot-full-frame-photo-v5",
+    "patchFile": "patches/v062-one-shot-full-frame-photo-v5.html",
+    "versionName": "1.0.62-one-shot-full-frame-photo-v5",
+    "createdAt": "2026-08-03T11:38:17Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-one-shot-full-frame-photo-v5/admin.html",
+    "sha256": "08b4b83b66c5891b0800a634566fd6dc2f15f4d0b14bd77a1b5a7240a329b930"
   }
 }
