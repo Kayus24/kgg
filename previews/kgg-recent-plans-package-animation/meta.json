@@ -1,0 +1,16 @@
+{
+  "kind": "kgg_gpt_preview",
+  "requestId": "kgg-recent-plans-package-animation",
+  "patchHash": "aee6c96095a15631ff05872bb2edad1c5a336286a0f786ae6dea4e253e2f48f3",
+  "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
+  "baseVersionCode": 62,
+  "rolloutCode": 1785778641,
+  "title": "Letzte Plne mit Paket-Animation ffnen",
+  "summary": "Die Tablet-Ansicht von Letzte Plne verwendet beim ffnen dieselbe ruhige Links-nach-rechts-Slide-Kurve wie die bungspakete, ohne Inhalt, Plan-State oder Paketlogik zu ndern.",
+  "patchId": "kgg-v062-recent-plans-package-animation",
+  "patchFile": "patches/v062-recent-plans-package-animation.html",
+  "versionName": "1.0.62-recent-plans-package-animation",
+  "createdAt": "2026-08-03T17:37:21Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-recent-plans-package-animation/admin.html",
+  "sha256": "ff6678e8ba5a9511d518fbd52d56ec1122279526d0118858e3ba4dc64a890ed2"
+}
