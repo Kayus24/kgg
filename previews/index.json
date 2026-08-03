@@ -4,6 +4,22 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "kgg-v062-tablet-package-overlay-stability",
+      "patchHash": "f2caba0abf295607bc58ae773c4bd0ef69c1867f62741971ed37fe42a586d726",
+      "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
+      "baseVersionCode": 62,
+      "rolloutCode": 1785771609,
+      "title": "Tablet-Hintergrund beim ffnen der bungspakete stabil halten",
+      "summary": "Beim ffnen des bungspakete-Overlays bleibt die App hinter dem weiterhin geffneten Tablet-Seitenmen exakt an derselben Position und Breite. Es wird ausschlielich die konfliktierende Overlay-Geometrie korrigiert.",
+      "patchId": "kgg-v062-tablet-package-overlay-stability",
+      "patchFile": "patches/v062-tablet-package-overlay-stability.html",
+      "versionName": "1.0.62-tablet-package-overlay-stability",
+      "createdAt": "2026-08-03T15:40:09Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-tablet-package-overlay-stability/admin.html",
+      "sha256": "5d62a6dd65e754eb16237fa2b0d34b08a54b9811d0f2b6ed2f4173c95336c64b"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-v062-camera-diagnostic-lab-a",
       "patchHash": "2bf91efaa58e17b5b56520a1f387824cc841b002782f3769128955b5af1ad4d1",
       "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
@@ -296,35 +312,22 @@
       "createdAt": "2026-07-10T19:17:52Z",
       "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-tablet-splitter-columns-20260710-a/admin.html",
       "sha256": "badfd0bffb6ab6f38906cb5154d92195e3cd7f4fc4df4aa1475cc3fec7a6e16c"
-    },
-    {
-      "kind": "kgg_gpt_preview",
-      "requestId": "ui-scaler-canary-20260707-a",
-      "patchHash": "babaf97a11eca70f95fd1c7dc03ea2b9f339a18cbc8ebba1a59e72725fd62a2a",
-      "baseSha": "08978d899ca5c81502f3a18a41b398228617cbef",
-      "baseVersionCode": 59,
-      "rolloutCode": 1783677126,
-      "title": "UI Scaler Push Canary",
-      "summary": "Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification.",
-      "createdAt": "2026-07-10T09:52:06Z",
-      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/ui-scaler-canary-20260707-a/admin.html",
-      "sha256": "7990a4cb162c2e1e1053f4a09f4af3c834a00d1510a70e756d50e4ca6d0b198f"
     }
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-v062-camera-diagnostic-lab-a",
-    "patchHash": "2bf91efaa58e17b5b56520a1f387824cc841b002782f3769128955b5af1ad4d1",
+    "requestId": "kgg-v062-tablet-package-overlay-stability",
+    "patchHash": "f2caba0abf295607bc58ae773c4bd0ef69c1867f62741971ed37fe42a586d726",
     "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
     "baseVersionCode": 62,
-    "rolloutCode": 1785758635,
-    "title": "Kamera-Diagnose fr Zoomursache",
-    "summary": "Eine isolierte Test-App-Diagnose listet die in Android WebView sichtbaren Kameras auf, startet jede Linse gezielt, vergleicht Auto-, 4:3- und 16:9-Streams und zeigt Track-Einstellungen sowie Zoom-Fhigkeiten. Der bestehen",
-    "patchId": "kgg-v062-camera-diagnostic-lab-a",
-    "patchFile": "patches/v062-camera-diagnostic-lab-a.html",
-    "versionName": "1.0.62-camera-diagnostic-lab-a",
-    "createdAt": "2026-08-03T12:03:55Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-camera-diagnostic-lab-a/admin.html",
-    "sha256": "336c565371da9178ab4c81dabbf0a02e65d2508dccf237b92a4c74facea0f8a4"
+    "rolloutCode": 1785771609,
+    "title": "Tablet-Hintergrund beim ffnen der bungspakete stabil halten",
+    "summary": "Beim ffnen des bungspakete-Overlays bleibt die App hinter dem weiterhin geffneten Tablet-Seitenmen exakt an derselben Position und Breite. Es wird ausschlielich die konfliktierende Overlay-Geometrie korrigiert.",
+    "patchId": "kgg-v062-tablet-package-overlay-stability",
+    "patchFile": "patches/v062-tablet-package-overlay-stability.html",
+    "versionName": "1.0.62-tablet-package-overlay-stability",
+    "createdAt": "2026-08-03T15:40:09Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-tablet-package-overlay-stability/admin.html",
+    "sha256": "5d62a6dd65e754eb16237fa2b0d34b08a54b9811d0f2b6ed2f4173c95336c64b"
   }
 }
