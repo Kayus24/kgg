@@ -3,7 +3,7 @@ name: Native camera diagnostic validation
 on:
   pull_request:
     branches: [main]
-    types: [reopened, ready_for_review]
+    types: [reopened, ready_for_review, synchronize]
 
 permissions:
   contents: read
@@ -116,13 +116,30 @@ jobs:
           test -s "$ADMIN_APK"
           test -s "$COLLEAGUE_APK"
           test -s "$PREVIEW_APK"
-          unzip -p "$PREVIEW_APK" classes.dex | strings | grep -q 'KggNativeCameraDiagnosticActivity'
-          for apk in "$ADMIN_APK" "$COLLEAGUE_APK"; do
-            for dex in $(unzip -Z1 "$apk" | grep -E '^classes[0-9]*\.dex$'); do
-              ! unzip -p "$apk" "$dex" | strings | grep -q 'KggNativeCameraDiagnosticActivity'
-              ! unzip -p "$apk" "$dex" | strings | grep -q 'KggPreviewCameraDiagnosticApplication'
-            done
-          done
+
+          contains_class() {
+            local apk="$1"
+            local pattern="$2"
+            local dex
+            local extracted="$RUNNER_TEMP/kgg-current.dex"
+            local strings_file="$RUNNER_TEMP/kgg-current.strings"
+            while IFS= read -r dex; do
+              unzip -p "$apk" "$dex" > "$extracted"
+              strings "$extracted" > "$strings_file"
+              if grep -Fq "$pattern" "$strings_file"; then
+                return 0
+              fi
+            done < <(unzip -Z1 "$apk" | grep -E '^classes([0-9]+)?\.dex$')
+            return 1
+          }
+
+          contains_class "$PREVIEW_APK" 'KggNativeCameraDiagnosticActivity'
+          contains_class "$PREVIEW_APK" 'KggPreviewCameraDiagnosticApplication'
+          ! contains_class "$ADMIN_APK" 'KggNativeCameraDiagnosticActivity'
+          ! contains_class "$ADMIN_APK" 'KggPreviewCameraDiagnosticApplication'
+          ! contains_class "$COLLEAGUE_APK" 'KggNativeCameraDiagnosticActivity'
+          ! contains_class "$COLLEAGUE_APK" 'KggPreviewCameraDiagnosticApplication'
+
           cp "$PREVIEW_APK" "$RUNNER_TEMP/kgg-native-camera-artifact/kgg-native-camera-diagnostic-preview.apk"
           sha256sum "$RUNNER_TEMP/kgg-native-camera-artifact"/* \
             > "$RUNNER_TEMP/kgg-native-camera-artifact/SHA256SUMS.txt"
