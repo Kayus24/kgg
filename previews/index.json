@@ -4,6 +4,22 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "kgg-v062-tablet-recent-side-panel",
+      "patchHash": "5e07e1fd47fc07403b2a14a498ce77d58652d664b1d7b1165cefe4b08f3b7d8f",
+      "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
+      "baseVersionCode": 62,
+      "rolloutCode": 1785842437,
+      "title": "Tablet-Historie wie bungspakete ffnen",
+      "summary": "Die bungshistorie verwendet im Tablet denselben Seitenmen- und Panelzustand wie die bungspakete. Der bestehende Historieninhalt bleibt unverndert; alte Popover-Positionierung wird nur fr diesen Tablet-ffnungsweg bereinig",
+      "patchId": "kgg-v062-tablet-recent-side-panel",
+      "patchFile": "patches/v062-tablet-recent-side-panel.html",
+      "versionName": "1.0.62-tablet-recent-side-panel",
+      "createdAt": "2026-08-04T11:20:37Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-tablet-recent-side-panel/admin.html",
+      "sha256": "3eede40ee1d030836b2fa695af0efb589fbdcdcc2992613985f3b7814bafc286"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-v062-tablet-package-overlay-stability-v2",
       "patchHash": "5095f002616d07a9b62cb147039e3ae4e8f3eb6e839fb029141ea84509328425",
       "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
@@ -305,38 +321,22 @@
       "createdAt": "2026-07-20T15:02:33Z",
       "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/gpt-modular-canary-20260720-c/admin.html",
       "sha256": "052f8af17c0ef3f9d3dc0e046d6b21c88b172a6e342aebb7d36e2af8e781296b"
-    },
-    {
-      "kind": "kgg_gpt_preview",
-      "requestId": "modular-gpt-canary-20260714-b",
-      "patchHash": "3ccfa52cecc6e90b2905ae904a132dfec669fc8b909fa449e796eb1fcc8eb1d7",
-      "baseSha": "e1576b6b98a9b3a5a51bfec4ace35acdbfcf2dc4",
-      "baseVersionCode": 61,
-      "rolloutCode": 1784017343,
-      "title": "Modularer GPT Test-App Canary Runde 2",
-      "summary": "Zeigt am Tablet-UI-Scaler eine harmlose TEST-2-Markierung, damit die zweite modular erzeugte Preview in HTML und Test-App eindeutig erkennbar ist.",
-      "patchId": "kgg-v061-gpt-test-app-canary-round-2",
-      "patchFile": "patches/v061-gpt-test-app-canary-round-2.html",
-      "versionName": "1.0.61-gpt-test-app-canary-round-2",
-      "createdAt": "2026-07-14T08:22:23Z",
-      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/modular-gpt-canary-20260714-b/admin.html",
-      "sha256": "8667af3df4e315fdd4a8c6e800908545f5a2a2e0d58180f413c4965f1ee73562"
     }
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-v062-tablet-package-overlay-stability-v2",
-    "patchHash": "5095f002616d07a9b62cb147039e3ae4e8f3eb6e839fb029141ea84509328425",
+    "requestId": "kgg-v062-tablet-recent-side-panel",
+    "patchHash": "5e07e1fd47fc07403b2a14a498ce77d58652d664b1d7b1165cefe4b08f3b7d8f",
     "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
     "baseVersionCode": 62,
-    "rolloutCode": 1785839027,
-    "title": "Tablet-bungspakete-Overlay stabil halten",
-    "summary": "Beim ffnen der bungspakete bleibt die App hinter dem geffneten Tablet-Seitenmen exakt an derselben Position und Breite. Letzte Plne und alle brigen Bereiche bleiben unverndert.",
-    "patchId": "kgg-v062-tablet-package-overlay-stability-v2",
-    "patchFile": "patches/v062-tablet-package-overlay-stability-v2.html",
-    "versionName": "1.0.62-tablet-package-overlay-stability-v2",
-    "createdAt": "2026-08-04T10:23:47Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-tablet-package-overlay-stability-v2/admin.html",
-    "sha256": "72ecfc8a817fc2088b4bd5f1d4fe33bee7d221ab1f1b77e6c1ab9e1a4c80e872"
+    "rolloutCode": 1785842437,
+    "title": "Tablet-Historie wie bungspakete ffnen",
+    "summary": "Die bungshistorie verwendet im Tablet denselben Seitenmen- und Panelzustand wie die bungspakete. Der bestehende Historieninhalt bleibt unverndert; alte Popover-Positionierung wird nur fr diesen Tablet-ffnungsweg bereinig",
+    "patchId": "kgg-v062-tablet-recent-side-panel",
+    "patchFile": "patches/v062-tablet-recent-side-panel.html",
+    "versionName": "1.0.62-tablet-recent-side-panel",
+    "createdAt": "2026-08-04T11:20:37Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-tablet-recent-side-panel/admin.html",
+    "sha256": "3eede40ee1d030836b2fa695af0efb589fbdcdcc2992613985f3b7814bafc286"
   }
 }
