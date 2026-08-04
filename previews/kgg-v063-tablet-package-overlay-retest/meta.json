@@ -1,0 +1,16 @@
+{
+  "kind": "kgg_gpt_preview",
+  "requestId": "kgg-v063-tablet-package-overlay-retest",
+  "patchHash": "d9d3c33779a42542567d2a2992c16067ee726afdea5b85c61db98cbe3f43300e",
+  "baseSha": "2450bc48d79421dbeab63f68865f0d482d8e748a",
+  "baseVersionCode": 62,
+  "rolloutCode": 1785861672,
+  "title": "bungspakete-Overlay erneut isoliert testen",
+  "summary": "Der besttigte Tablet-Geometriefix fr das bungspakete-Overlay wird auf der aktuellen Main-Basis erneut als alleiniger Test-App-Patch verffentlicht. nderungen an Letzte Plne sind nicht enthalten.",
+  "patchId": "kgg-v062-tablet-package-overlay-retest",
+  "patchFile": "patches/v062-tablet-package-overlay-retest.html",
+  "versionName": "1.0.62-tablet-package-overlay-retest",
+  "createdAt": "2026-08-04T16:41:12Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v063-tablet-package-overlay-retest/admin.html",
+  "sha256": "8de36fec364199323db8011970141771c986938c100e2a0fb3231ea4eb750c51"
+}

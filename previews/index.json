@@ -4,6 +4,22 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "kgg-v063-tablet-package-overlay-retest",
+      "patchHash": "d9d3c33779a42542567d2a2992c16067ee726afdea5b85c61db98cbe3f43300e",
+      "baseSha": "2450bc48d79421dbeab63f68865f0d482d8e748a",
+      "baseVersionCode": 62,
+      "rolloutCode": 1785861672,
+      "title": "bungspakete-Overlay erneut isoliert testen",
+      "summary": "Der besttigte Tablet-Geometriefix fr das bungspakete-Overlay wird auf der aktuellen Main-Basis erneut als alleiniger Test-App-Patch verffentlicht. nderungen an Letzte Plne sind nicht enthalten.",
+      "patchId": "kgg-v062-tablet-package-overlay-retest",
+      "patchFile": "patches/v062-tablet-package-overlay-retest.html",
+      "versionName": "1.0.62-tablet-package-overlay-retest",
+      "createdAt": "2026-08-04T16:41:12Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v063-tablet-package-overlay-retest/admin.html",
+      "sha256": "8de36fec364199323db8011970141771c986938c100e2a0fb3231ea4eb750c51"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-camera-crop-lab-20260804-a",
       "patchHash": "96c4a6bfa7b9c54165acbbcdce09545e2bb18c6da4e737dcd5945c90ee79a83b",
       "baseSha": "e0bc312aad37ac3aaed523cfc16ab92f41ac3941",
@@ -305,38 +321,22 @@
       "createdAt": "2026-07-28T15:25:55Z",
       "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v061-combo-camera-scanner-normal-1x/admin.html",
       "sha256": "43bb3eef14e16dcc719097df2d9fba78b8a87c8891b0ddac22e111f43963bfc7"
-    },
-    {
-      "kind": "kgg_gpt_preview",
-      "requestId": "kgg-v061-combo-camera-scanner",
-      "patchHash": "66f125783ca13239e8eadb8381f24a26dae15051d77d51244ac960e3e599e42f",
-      "baseSha": "6c5674602edbcfd1b33e5851ce41aa093bb30f33",
-      "baseVersionCode": 61,
-      "rolloutCode": 1785244862,
-      "title": "Kombi-Kamera f?r QR und Papierplan",
-      "summary": "Von Max beauftragter Kamera-Scan: QR wird automatisch gesucht, der manuelle Ausl?ser bleibt jederzeit verf?gbar; beide Wege nutzen dieselbe bestehende Scan-Verarbeitung ohne Hinweistext im Kamerabild.",
-      "patchId": "kgg-v061-combo-camera-scanner",
-      "patchFile": "patches/v061-combo-camera-scanner.html",
-      "versionName": "1.0.61-combo-camera-scanner",
-      "createdAt": "2026-07-28T13:21:02Z",
-      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v061-combo-camera-scanner/admin.html",
-      "sha256": "2c8fe94a88f136182da55df197da836f6af7ff979bbcf56cd12c5aa0a64b9629"
     }
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-camera-crop-lab-20260804-a",
-    "patchHash": "96c4a6bfa7b9c54165acbbcdce09545e2bb18c6da4e737dcd5945c90ee79a83b",
-    "baseSha": "e0bc312aad37ac3aaed523cfc16ab92f41ac3941",
+    "requestId": "kgg-v063-tablet-package-overlay-retest",
+    "patchHash": "d9d3c33779a42542567d2a2992c16067ee726afdea5b85c61db98cbe3f43300e",
+    "baseSha": "2450bc48d79421dbeab63f68865f0d482d8e748a",
     "baseVersionCode": 62,
-    "rolloutCode": 1785857952,
-    "title": "Test-App Kamera- und Crop-Labor",
-    "summary": "Ergaenzt im bestehenden Preview-Kanal ein sitzungsbasiertes Kamera-Inventar mit sequenzieller Vollbildvorschau, Start- und Cleanup-Messung, drei Stabilitaetszyklen und redigiertem Bericht.",
-    "patchId": "kgg-v062-camera-crop-lab",
-    "patchFile": "patches/v062-camera-crop-lab.html",
-    "versionName": "1.0.62-camera-crop-lab",
-    "createdAt": "2026-08-04T15:39:12Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-camera-crop-lab-20260804-a/admin.html",
-    "sha256": "74f2e6e69ccc26708b3e7fd6cffb0c4d9648a91622fe1e024eeb7e4af788044b"
+    "rolloutCode": 1785861672,
+    "title": "bungspakete-Overlay erneut isoliert testen",
+    "summary": "Der besttigte Tablet-Geometriefix fr das bungspakete-Overlay wird auf der aktuellen Main-Basis erneut als alleiniger Test-App-Patch verffentlicht. nderungen an Letzte Plne sind nicht enthalten.",
+    "patchId": "kgg-v062-tablet-package-overlay-retest",
+    "patchFile": "patches/v062-tablet-package-overlay-retest.html",
+    "versionName": "1.0.62-tablet-package-overlay-retest",
+    "createdAt": "2026-08-04T16:41:12Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v063-tablet-package-overlay-retest/admin.html",
+    "sha256": "8de36fec364199323db8011970141771c986938c100e2a0fb3231ea4eb750c51"
   }
 }
