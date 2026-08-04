@@ -33,7 +33,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python release-pipeline/kgg_patient_gpt_resources.py
+          python release-pipeline/kgg_patient_gpt_resources.py --write
           if ! git diff --quiet -- docs/kgg-patient-gpt-context.md docs/kgg-patient-gpt-source-index.json docs/kgg-patient-gpt-source docs/kgg-patient-custom-gpt-knowledge-architecture.md docs/kgg-patient-custom-gpt-knowledge-operations.md docs/kgg-patient-custom-gpt-knowledge-safety.md docs/kgg-patient-custom-gpt-knowledge-testing.md; then
             git config user.name github-actions[bot]
             git config user.email 41898282+github-actions[bot]@users.noreply.github.com
