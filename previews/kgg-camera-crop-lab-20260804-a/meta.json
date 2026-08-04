@@ -1,0 +1,16 @@
+{
+  "kind": "kgg_gpt_preview",
+  "requestId": "kgg-camera-crop-lab-20260804-a",
+  "patchHash": "96c4a6bfa7b9c54165acbbcdce09545e2bb18c6da4e737dcd5945c90ee79a83b",
+  "baseSha": "e0bc312aad37ac3aaed523cfc16ab92f41ac3941",
+  "baseVersionCode": 62,
+  "rolloutCode": 1785857952,
+  "title": "Test-App Kamera- und Crop-Labor",
+  "summary": "Ergaenzt im bestehenden Preview-Kanal ein sitzungsbasiertes Kamera-Inventar mit sequenzieller Vollbildvorschau, Start- und Cleanup-Messung, drei Stabilitaetszyklen und redigiertem Bericht.",
+  "patchId": "kgg-v062-camera-crop-lab",
+  "patchFile": "patches/v062-camera-crop-lab.html",
+  "versionName": "1.0.62-camera-crop-lab",
+  "createdAt": "2026-08-04T15:39:12Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-camera-crop-lab-20260804-a/admin.html",
+  "sha256": "74f2e6e69ccc26708b3e7fd6cffb0c4d9648a91622fe1e024eeb7e4af788044b"
+}

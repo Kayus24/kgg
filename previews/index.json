@@ -4,6 +4,22 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "kgg-camera-crop-lab-20260804-a",
+      "patchHash": "96c4a6bfa7b9c54165acbbcdce09545e2bb18c6da4e737dcd5945c90ee79a83b",
+      "baseSha": "e0bc312aad37ac3aaed523cfc16ab92f41ac3941",
+      "baseVersionCode": 62,
+      "rolloutCode": 1785857952,
+      "title": "Test-App Kamera- und Crop-Labor",
+      "summary": "Ergaenzt im bestehenden Preview-Kanal ein sitzungsbasiertes Kamera-Inventar mit sequenzieller Vollbildvorschau, Start- und Cleanup-Messung, drei Stabilitaetszyklen und redigiertem Bericht.",
+      "patchId": "kgg-v062-camera-crop-lab",
+      "patchFile": "patches/v062-camera-crop-lab.html",
+      "versionName": "1.0.62-camera-crop-lab",
+      "createdAt": "2026-08-04T15:39:12Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-camera-crop-lab-20260804-a/admin.html",
+      "sha256": "74f2e6e69ccc26708b3e7fd6cffb0c4d9648a91622fe1e024eeb7e4af788044b"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-v062-tablet-recent-body-panel",
       "patchHash": "3034ed5faeae9a0f66e564178ddca862f6900292f4ddd322ea0ee25ef1e628ff",
       "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
@@ -305,38 +321,22 @@
       "createdAt": "2026-07-28T13:21:02Z",
       "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v061-combo-camera-scanner/admin.html",
       "sha256": "2c8fe94a88f136182da55df197da836f6af7ff979bbcf56cd12c5aa0a64b9629"
-    },
-    {
-      "kind": "kgg_gpt_preview",
-      "requestId": "kgg-tablet-editor-two-column-footer-20260727-a",
-      "patchHash": "9fe0918f0ebaf4e7c7d82272f723ac665cc9a07a731397629d1bca63e044077b",
-      "baseSha": "c7c3f2f10bba679d8393af05bd7cf63dcb334026",
-      "baseVersionCode": 61,
-      "rolloutCode": 1785111337,
-      "title": "Tablet bungseditor mit zwei Spalten und sichtbarer Speicherleiste",
-      "summary": "Stellt den bungseditor ab 760 px auf zwei Spalten und reserviert eine feste untere Aktionszeile, damit Speichern im Tablet-Dialog sichtbar bleibt.",
-      "patchId": "kgg-v061-tablet-editor-two-column-save-footer",
-      "patchFile": "patches/v061-tablet-editor-two-column-save-footer.html",
-      "versionName": "1.0.61-tablet-editor-two-column-save-footer",
-      "createdAt": "2026-07-27T00:15:37Z",
-      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-tablet-editor-two-column-footer-20260727-a/admin.html",
-      "sha256": "4311bb2973da0d92f4f2e490ad82cae19eda987730f3fdf6f98e3c1e8d343df6"
     }
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-v062-tablet-recent-body-panel",
-    "patchHash": "3034ed5faeae9a0f66e564178ddca862f6900292f4ddd322ea0ee25ef1e628ff",
-    "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
+    "requestId": "kgg-camera-crop-lab-20260804-a",
+    "patchHash": "96c4a6bfa7b9c54165acbbcdce09545e2bb18c6da4e737dcd5945c90ee79a83b",
+    "baseSha": "e0bc312aad37ac3aaed523cfc16ab92f41ac3941",
     "baseVersionCode": 62,
-    "rolloutCode": 1785843353,
-    "title": "Tablet-Historie als echtes Seitenpanel ffnen",
-    "summary": "Die bestehende bungshistorie wird im Tablet beim ffnen aus der transformierten App-Ebene in ein Body-Level-Seitenpanel verschoben und beim Schlieen an ihre ursprngliche Position zurckgesetzt. Panel, Shade, App-Geometrie",
-    "patchId": "kgg-v062-tablet-recent-body-panel",
-    "patchFile": "patches/v062-tablet-recent-body-panel.html",
-    "versionName": "1.0.62-tablet-recent-body-panel",
-    "createdAt": "2026-08-04T11:35:53Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-tablet-recent-body-panel/admin.html",
-    "sha256": "7e6c2e1cb6d99186c2891e469b917f41f905aa8f254e475d828e19e76bbb66ed"
+    "rolloutCode": 1785857952,
+    "title": "Test-App Kamera- und Crop-Labor",
+    "summary": "Ergaenzt im bestehenden Preview-Kanal ein sitzungsbasiertes Kamera-Inventar mit sequenzieller Vollbildvorschau, Start- und Cleanup-Messung, drei Stabilitaetszyklen und redigiertem Bericht.",
+    "patchId": "kgg-v062-camera-crop-lab",
+    "patchFile": "patches/v062-camera-crop-lab.html",
+    "versionName": "1.0.62-camera-crop-lab",
+    "createdAt": "2026-08-04T15:39:12Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-camera-crop-lab-20260804-a/admin.html",
+    "sha256": "74f2e6e69ccc26708b3e7fd6cffb0c4d9648a91622fe1e024eeb7e4af788044b"
   }
 }
