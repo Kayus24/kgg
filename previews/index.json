@@ -4,6 +4,22 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "kgg-v062-tablet-recent-body-panel",
+      "patchHash": "3034ed5faeae9a0f66e564178ddca862f6900292f4ddd322ea0ee25ef1e628ff",
+      "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
+      "baseVersionCode": 62,
+      "rolloutCode": 1785843353,
+      "title": "Tablet-Historie als echtes Seitenpanel ffnen",
+      "summary": "Die bestehende bungshistorie wird im Tablet beim ffnen aus der transformierten App-Ebene in ein Body-Level-Seitenpanel verschoben und beim Schlieen an ihre ursprngliche Position zurckgesetzt. Panel, Shade, App-Geometrie",
+      "patchId": "kgg-v062-tablet-recent-body-panel",
+      "patchFile": "patches/v062-tablet-recent-body-panel.html",
+      "versionName": "1.0.62-tablet-recent-body-panel",
+      "createdAt": "2026-08-04T11:35:53Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-tablet-recent-body-panel/admin.html",
+      "sha256": "7e6c2e1cb6d99186c2891e469b917f41f905aa8f254e475d828e19e76bbb66ed"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-v062-tablet-recent-side-panel",
       "patchHash": "5e07e1fd47fc07403b2a14a498ce77d58652d664b1d7b1165cefe4b08f3b7d8f",
       "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
@@ -305,38 +321,22 @@
       "createdAt": "2026-07-27T00:15:37Z",
       "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-tablet-editor-two-column-footer-20260727-a/admin.html",
       "sha256": "4311bb2973da0d92f4f2e490ad82cae19eda987730f3fdf6f98e3c1e8d343df6"
-    },
-    {
-      "kind": "kgg_gpt_preview",
-      "requestId": "gpt-modular-canary-20260720-c",
-      "patchHash": "71c4740c36ed5c3830c8f2c5af1c3640bf38f5e1a8adeb583a7c54f9d5ae734d",
-      "baseSha": "5d5030140301e8c4083b7081cfad371d4e590d7f",
-      "baseVersionCode": 61,
-      "rolloutCode": 1784559753,
-      "title": "Tablet-Skalierungswert mit Preview-Badge",
-      "summary": "Zeigt im Tablet-Layout-Control direkt nach dem Skalierungswert ein kleines blaues PREVIEW-Badge, ohne Bedienlogik oder gespeicherten Layout-State zu verndern.",
-      "patchId": "kgg-v061-tablet-scale-preview-badge",
-      "patchFile": "patches/v061-tablet-scale-preview-badge.html",
-      "versionName": "1.0.61-tablet-scale-preview-badge",
-      "createdAt": "2026-07-20T15:02:33Z",
-      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/gpt-modular-canary-20260720-c/admin.html",
-      "sha256": "052f8af17c0ef3f9d3dc0e046d6b21c88b172a6e342aebb7d36e2af8e781296b"
     }
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-v062-tablet-recent-side-panel",
-    "patchHash": "5e07e1fd47fc07403b2a14a498ce77d58652d664b1d7b1165cefe4b08f3b7d8f",
+    "requestId": "kgg-v062-tablet-recent-body-panel",
+    "patchHash": "3034ed5faeae9a0f66e564178ddca862f6900292f4ddd322ea0ee25ef1e628ff",
     "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
     "baseVersionCode": 62,
-    "rolloutCode": 1785842437,
-    "title": "Tablet-Historie wie bungspakete ffnen",
-    "summary": "Die bungshistorie verwendet im Tablet denselben Seitenmen- und Panelzustand wie die bungspakete. Der bestehende Historieninhalt bleibt unverndert; alte Popover-Positionierung wird nur fr diesen Tablet-ffnungsweg bereinig",
-    "patchId": "kgg-v062-tablet-recent-side-panel",
-    "patchFile": "patches/v062-tablet-recent-side-panel.html",
-    "versionName": "1.0.62-tablet-recent-side-panel",
-    "createdAt": "2026-08-04T11:20:37Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-tablet-recent-side-panel/admin.html",
-    "sha256": "3eede40ee1d030836b2fa695af0efb589fbdcdcc2992613985f3b7814bafc286"
+    "rolloutCode": 1785843353,
+    "title": "Tablet-Historie als echtes Seitenpanel ffnen",
+    "summary": "Die bestehende bungshistorie wird im Tablet beim ffnen aus der transformierten App-Ebene in ein Body-Level-Seitenpanel verschoben und beim Schlieen an ihre ursprngliche Position zurckgesetzt. Panel, Shade, App-Geometrie",
+    "patchId": "kgg-v062-tablet-recent-body-panel",
+    "patchFile": "patches/v062-tablet-recent-body-panel.html",
+    "versionName": "1.0.62-tablet-recent-body-panel",
+    "createdAt": "2026-08-04T11:35:53Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-tablet-recent-body-panel/admin.html",
+    "sha256": "7e6c2e1cb6d99186c2891e469b917f41f905aa8f254e475d828e19e76bbb66ed"
   }
 }
