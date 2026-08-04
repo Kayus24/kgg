@@ -1,10 +1,3 @@
-# KGG Patient Source Chunk 021
-
-- Source file: `patient-plan-replace-slot-fix.js`
-- Characters: 1-2243
-- Full source SHA-256: `4d5ed03851a9e885722a66edfa54309b0f91bfb9516750d2efa1c5480c1dd3bb`
-
-```
 (()=>{
   const VERSION='plan-replace-active-slot-v1';
   if(window.__kggPlanReplaceSlotFix===VERSION)return;
@@ -59,4 +52,3 @@
     return nativeSetItem.call(this,key,value);
   };
 })();
-```
