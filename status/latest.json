@@ -1,12 +1,12 @@
 {
-  "conclusion": null,
+  "conclusion": "success",
   "kind": "kgg_preview_run_status",
-  "message": "Validierung ist gruen. Tests und Test-App-Preview laufen.",
-  "phase": "publishing",
+  "message": "Test-App-Preview ist bereit und wurde veroeffentlicht.",
+  "phase": "success",
   "requestId": "kgg-v062-recent-plans-safe-package-motion-v2",
   "runId": "30885907906",
   "runUrl": "https://github.com/Kayus24/kgg/actions/runs/30885907906",
   "schema": 1,
-  "status": "in_progress",
-  "updatedAt": "2026-08-04T06:58:32Z"
+  "status": "completed",
+  "updatedAt": "2026-08-04T07:01:56Z"
 }
