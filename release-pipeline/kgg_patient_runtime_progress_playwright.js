@@ -202,7 +202,11 @@ async function main() {
 
     const card = page.locator("#list .ex").first();
     await card.waitFor({ state: "visible" });
-    await page.locator("#kgg-collapse-toggle").click({ force: true });
+    await page.evaluate(() => {
+      const button = document.getElementById("kgg-collapse-toggle");
+      if (!button) throw new Error("collapse toggle is missing");
+      button.click();
+    });
     await page.waitForFunction(() => document.body.classList.contains("kggCardsCollapsed"));
     await setCardOpen(page, card, false);
     await assertVisibleBadge(page, card, "open", "○ Offen");
