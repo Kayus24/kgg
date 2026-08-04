@@ -202,6 +202,12 @@ async function main() {
 
     const card = page.locator("#list .ex").first();
     await card.waitFor({ state: "visible" });
+    const inputs = card.locator(".set input.num");
+    const inputCount = await inputs.count();
+    assert(inputCount >= 2, "synthetic exercise exposes fewer than two normal fields");
+    for (let index = 0; index < inputCount; index += 1) {
+      await setInputValue(inputs.nth(index), "");
+    }
     await page.evaluate(() => {
       const button = document.getElementById("kgg-collapse-toggle");
       if (!button) throw new Error("collapse toggle is missing");
@@ -212,8 +218,6 @@ async function main() {
     await assertVisibleBadge(page, card, "open", "○ Offen");
 
     await setCardOpen(page, card, true);
-    const inputs = card.locator(".set input.num");
-    assert((await inputs.count()) >= 2, "synthetic exercise exposes fewer than two normal fields");
     await setInputValue(inputs.nth(0), "10");
     await setCardOpen(page, card, false);
     await assertVisibleBadge(page, card, "partial", "◐ Teilweise");
@@ -224,8 +228,9 @@ async function main() {
     await assertVisibleBadge(page, card, "done", "✓ Bearbeitet");
 
     await setCardOpen(page, card, true);
-    await setInputValue(inputs.nth(0), "");
-    await setInputValue(inputs.nth(1), "");
+    for (let index = 0; index < inputCount; index += 1) {
+      await setInputValue(inputs.nth(index), "");
+    }
     const pain = card.locator(".pain input").first();
     if (await pain.count()) await setInputValue(pain, "7");
     await setCardOpen(page, card, false);
