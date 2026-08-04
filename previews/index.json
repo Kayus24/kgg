@@ -4,6 +4,22 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "kgg-v062-recent-plans-safe-package-motion-v2",
+      "patchHash": "e541b156383f5f8b124c4d0b5be19f368b4346d9e90e23b1ce30f7d82ae5cc88",
+      "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
+      "baseVersionCode": 62,
+      "rolloutCode": 1785826784,
+      "title": "Letzte Plne mit stabiler Paket-Bewegung ffnen",
+      "summary": "Die Tablet-Historie ffnet mit derselben 0,22-Sekunden-Kurve und einer begrenzten Links-nach-rechts-Bewegung wie das bungspakete-Panel. Der besttigte Paket-Overlay-Geometriefix bleibt enthalten; die fehlerhafte Regression",
+      "patchId": "kgg-v062-recent-plans-safe-package-motion-v2",
+      "patchFile": "patches/v062-recent-plans-safe-package-motion-v2.html",
+      "versionName": "1.0.62-recent-plans-safe-package-motion-v2",
+      "createdAt": "2026-08-04T06:59:44Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-recent-plans-safe-package-motion-v2/admin.html",
+      "sha256": "388061f5da31364a164bc35d647ed0a63eaaaa5f6de4939e828513326c79c69b"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-recent-plans-package-animation",
       "patchHash": "aee6c96095a15631ff05872bb2edad1c5a336286a0f786ae6dea4e253e2f48f3",
       "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
@@ -305,35 +321,22 @@
       "createdAt": "2026-07-14T08:10:16Z",
       "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/modular-gpt-canary-20260714-a/admin.html",
       "sha256": "eae7128682cacfbf4f0394c250dfa65c6ee5851c03eb04b18d89c1b002ff519a"
-    },
-    {
-      "kind": "kgg_gpt_preview",
-      "requestId": "kgg-tablet-splitter-measured-drag-20260713-b",
-      "patchHash": "a4c9f226c9e07e1385fdd64bb192b43f2668698ed4ddd455c1b6918bd449fda8",
-      "baseSha": "e96b259812a44053e48d70c1f198ead01920e8c0",
-      "baseVersionCode": 60,
-      "rolloutCode": 1783937986,
-      "title": "Tablet Splitter an sichtbarer Panelgrenze messen und ziehen",
-      "summary": "Der Splitter wird zwischen den sichtbaren Kanten von Uebungsdatenbank und Plan positioniert. Layout anpassen entsperrt automatisch; Plus/Minus skaliert, der Pfeilgriff aendert nur die Spaltenbreite.",
-      "createdAt": "2026-07-13T10:19:46Z",
-      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-tablet-splitter-measured-drag-20260713-b/admin.html",
-      "sha256": "67661a306941c9efed100d11e0ccfa66ed189bd1a021ebe22d6c174d5be7d6aa"
     }
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-recent-plans-package-animation",
-    "patchHash": "aee6c96095a15631ff05872bb2edad1c5a336286a0f786ae6dea4e253e2f48f3",
+    "requestId": "kgg-v062-recent-plans-safe-package-motion-v2",
+    "patchHash": "e541b156383f5f8b124c4d0b5be19f368b4346d9e90e23b1ce30f7d82ae5cc88",
     "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
     "baseVersionCode": 62,
-    "rolloutCode": 1785778641,
-    "title": "Letzte Plne mit Paket-Animation ffnen",
-    "summary": "Die Tablet-Ansicht von Letzte Plne verwendet beim ffnen dieselbe ruhige Links-nach-rechts-Slide-Kurve wie die bungspakete, ohne Inhalt, Plan-State oder Paketlogik zu ndern.",
-    "patchId": "kgg-v062-recent-plans-package-animation",
-    "patchFile": "patches/v062-recent-plans-package-animation.html",
-    "versionName": "1.0.62-recent-plans-package-animation",
-    "createdAt": "2026-08-03T17:37:21Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-recent-plans-package-animation/admin.html",
-    "sha256": "ff6678e8ba5a9511d518fbd52d56ec1122279526d0118858e3ba4dc64a890ed2"
+    "rolloutCode": 1785826784,
+    "title": "Letzte Plne mit stabiler Paket-Bewegung ffnen",
+    "summary": "Die Tablet-Historie ffnet mit derselben 0,22-Sekunden-Kurve und einer begrenzten Links-nach-rechts-Bewegung wie das bungspakete-Panel. Der besttigte Paket-Overlay-Geometriefix bleibt enthalten; die fehlerhafte Regression",
+    "patchId": "kgg-v062-recent-plans-safe-package-motion-v2",
+    "patchFile": "patches/v062-recent-plans-safe-package-motion-v2.html",
+    "versionName": "1.0.62-recent-plans-safe-package-motion-v2",
+    "createdAt": "2026-08-04T06:59:44Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-recent-plans-safe-package-motion-v2/admin.html",
+    "sha256": "388061f5da31364a164bc35d647ed0a63eaaaa5f6de4939e828513326c79c69b"
   }
 }

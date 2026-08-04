@@ -1,0 +1,16 @@
+{
+  "kind": "kgg_gpt_preview",
+  "requestId": "kgg-v062-recent-plans-safe-package-motion-v2",
+  "patchHash": "e541b156383f5f8b124c4d0b5be19f368b4346d9e90e23b1ce30f7d82ae5cc88",
+  "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
+  "baseVersionCode": 62,
+  "rolloutCode": 1785826784,
+  "title": "Letzte Plne mit stabiler Paket-Bewegung ffnen",
+  "summary": "Die Tablet-Historie ffnet mit derselben 0,22-Sekunden-Kurve und einer begrenzten Links-nach-rechts-Bewegung wie das bungspakete-Panel. Der besttigte Paket-Overlay-Geometriefix bleibt enthalten; die fehlerhafte Regression",
+  "patchId": "kgg-v062-recent-plans-safe-package-motion-v2",
+  "patchFile": "patches/v062-recent-plans-safe-package-motion-v2.html",
+  "versionName": "1.0.62-recent-plans-safe-package-motion-v2",
+  "createdAt": "2026-08-04T06:59:44Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-recent-plans-safe-package-motion-v2/admin.html",
+  "sha256": "388061f5da31364a164bc35d647ed0a63eaaaa5f6de4939e828513326c79c69b"
+}
