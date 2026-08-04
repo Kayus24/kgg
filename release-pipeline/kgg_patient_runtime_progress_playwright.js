@@ -87,9 +87,9 @@ async function waitForControlledRuntime(page) {
   for (let attempt = 0; attempt < 3; attempt += 1) {
     await page.locator("#plan").waitFor({ state: "visible" });
     const hasRuntime = (await page.locator("#kgg-collapse-toggle").count()) > 0 &&
-      (await page.locator("#kggAppVersion").count()) > 0;
+      (await page.locator("#kggAppVersion").count()) > 0 &&
+      (await page.locator("#list .ex .kggCardProgress").count()) > 0;
     if (hasRuntime) {
-      await page.locator("#kgg-collapse-toggle").waitFor({ state: "visible" });
       await page.locator("#kggAppVersion").waitFor({ state: "visible" });
       return;
     }
@@ -101,6 +101,15 @@ async function waitForControlledRuntime(page) {
     bodyClasses: document.body.className,
   }));
   throw new Error(`controlled patient runtime modules were not injected: ${JSON.stringify(diagnostics)}`);
+}
+
+async function setCardOpen(page, card, open) {
+  const isOpen = await card.evaluate((element) => element.classList.contains("kggOpen"));
+  if (isOpen !== open) await card.locator("h3").click();
+  await page.waitForFunction(
+    ({ open }) => Boolean(document.querySelector("#list .ex")?.classList.contains("kggOpen")) === open,
+    { open }
+  );
 }
 
 async function assertVisibleBadge(page, card, state, text) {
@@ -184,24 +193,22 @@ async function main() {
 
     const card = page.locator("#list .ex").first();
     await card.waitFor({ state: "visible" });
-    await page.locator("#kgg-collapse-toggle").click();
-    await page.waitForFunction(() => document.body.classList.contains("kggCardsCollapsed"));
+    await setCardOpen(page, card, false);
     await assertVisibleBadge(page, card, "open", "○ Offen");
 
-    await card.locator("h3").click();
-    await page.waitForFunction(() => document.querySelector("#list .ex")?.classList.contains("kggOpen"));
+    await setCardOpen(page, card, true);
     const inputs = card.locator(".set input.num");
     assert((await inputs.count()) >= 2, "synthetic exercise exposes fewer than two normal fields");
     await inputs.nth(0).fill("10");
-    await card.locator("h3").click();
+    await setCardOpen(page, card, false);
     await assertVisibleBadge(page, card, "partial", "◐ Teilweise");
 
-    await card.locator("h3").click();
+    await setCardOpen(page, card, true);
     await inputs.nth(1).fill("12");
-    await card.locator("h3").click();
+    await setCardOpen(page, card, false);
     await assertVisibleBadge(page, card, "done", "✓ Bearbeitet");
 
-    await card.locator("h3").click();
+    await setCardOpen(page, card, true);
     await inputs.nth(0).fill("");
     await inputs.nth(1).fill("");
     const pain = card.locator(".pain input").first();
@@ -212,7 +219,7 @@ async function main() {
         element.dispatchEvent(new Event("change", { bubbles: true }));
       });
     }
-    await card.locator("h3").click();
+    await setCardOpen(page, card, false);
     await assertVisibleBadge(page, card, "open", "○ Offen");
 
     console.log(`Patient runtime/progress Playwright smoke: PASS (v${workerVersion})`);
