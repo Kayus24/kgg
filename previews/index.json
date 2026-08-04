@@ -4,6 +4,22 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "kgg-v062-tablet-package-overlay-stability-v2",
+      "patchHash": "5095f002616d07a9b62cb147039e3ae4e8f3eb6e839fb029141ea84509328425",
+      "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
+      "baseVersionCode": 62,
+      "rolloutCode": 1785839027,
+      "title": "Tablet-bungspakete-Overlay stabil halten",
+      "summary": "Beim ffnen der bungspakete bleibt die App hinter dem geffneten Tablet-Seitenmen exakt an derselben Position und Breite. Letzte Plne und alle brigen Bereiche bleiben unverndert.",
+      "patchId": "kgg-v062-tablet-package-overlay-stability-v2",
+      "patchFile": "patches/v062-tablet-package-overlay-stability-v2.html",
+      "versionName": "1.0.62-tablet-package-overlay-stability-v2",
+      "createdAt": "2026-08-04T10:23:47Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-tablet-package-overlay-stability-v2/admin.html",
+      "sha256": "72ecfc8a817fc2088b4bd5f1d4fe33bee7d221ab1f1b77e6c1ab9e1a4c80e872"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-v062-recent-plans-safe-package-motion-v2",
       "patchHash": "e541b156383f5f8b124c4d0b5be19f368b4346d9e90e23b1ce30f7d82ae5cc88",
       "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
@@ -305,38 +321,22 @@
       "createdAt": "2026-07-14T08:22:23Z",
       "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/modular-gpt-canary-20260714-b/admin.html",
       "sha256": "8667af3df4e315fdd4a8c6e800908545f5a2a2e0d58180f413c4965f1ee73562"
-    },
-    {
-      "kind": "kgg_gpt_preview",
-      "requestId": "modular-gpt-canary-20260714-a",
-      "patchHash": "0d046aabda77a38b74107c092dc3c3b4d136bd82a1e1ff77b9211c6f4e6c49be",
-      "baseSha": "e1576b6b98a9b3a5a51bfec4ace35acdbfcf2dc4",
-      "baseVersionCode": 61,
-      "rolloutCode": 1784016616,
-      "title": "Modularer GPT Test-App Canary",
-      "summary": "Zeigt am Tablet-UI-Scaler eine harmlose TEST-Markierung, damit die modular erzeugte Preview in HTML und Test-App eindeutig erkennbar ist.",
-      "patchId": "kgg-v061-gpt-test-app-canary",
-      "patchFile": "patches/v061-gpt-test-app-canary.html",
-      "versionName": "1.0.61-gpt-test-app-canary",
-      "createdAt": "2026-07-14T08:10:16Z",
-      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/modular-gpt-canary-20260714-a/admin.html",
-      "sha256": "eae7128682cacfbf4f0394c250dfa65c6ee5851c03eb04b18d89c1b002ff519a"
     }
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-v062-recent-plans-safe-package-motion-v2",
-    "patchHash": "e541b156383f5f8b124c4d0b5be19f368b4346d9e90e23b1ce30f7d82ae5cc88",
+    "requestId": "kgg-v062-tablet-package-overlay-stability-v2",
+    "patchHash": "5095f002616d07a9b62cb147039e3ae4e8f3eb6e839fb029141ea84509328425",
     "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
     "baseVersionCode": 62,
-    "rolloutCode": 1785826784,
-    "title": "Letzte Plne mit stabiler Paket-Bewegung ffnen",
-    "summary": "Die Tablet-Historie ffnet mit derselben 0,22-Sekunden-Kurve und einer begrenzten Links-nach-rechts-Bewegung wie das bungspakete-Panel. Der besttigte Paket-Overlay-Geometriefix bleibt enthalten; die fehlerhafte Regression",
-    "patchId": "kgg-v062-recent-plans-safe-package-motion-v2",
-    "patchFile": "patches/v062-recent-plans-safe-package-motion-v2.html",
-    "versionName": "1.0.62-recent-plans-safe-package-motion-v2",
-    "createdAt": "2026-08-04T06:59:44Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-recent-plans-safe-package-motion-v2/admin.html",
-    "sha256": "388061f5da31364a164bc35d647ed0a63eaaaa5f6de4939e828513326c79c69b"
+    "rolloutCode": 1785839027,
+    "title": "Tablet-bungspakete-Overlay stabil halten",
+    "summary": "Beim ffnen der bungspakete bleibt die App hinter dem geffneten Tablet-Seitenmen exakt an derselben Position und Breite. Letzte Plne und alle brigen Bereiche bleiben unverndert.",
+    "patchId": "kgg-v062-tablet-package-overlay-stability-v2",
+    "patchFile": "patches/v062-tablet-package-overlay-stability-v2.html",
+    "versionName": "1.0.62-tablet-package-overlay-stability-v2",
+    "createdAt": "2026-08-04T10:23:47Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-tablet-package-overlay-stability-v2/admin.html",
+    "sha256": "72ecfc8a817fc2088b4bd5f1d4fe33bee7d221ab1f1b77e6c1ab9e1a4c80e872"
   }
 }

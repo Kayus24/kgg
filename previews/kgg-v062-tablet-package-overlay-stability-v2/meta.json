@@ -1,0 +1,16 @@
+{
+  "kind": "kgg_gpt_preview",
+  "requestId": "kgg-v062-tablet-package-overlay-stability-v2",
+  "patchHash": "5095f002616d07a9b62cb147039e3ae4e8f3eb6e839fb029141ea84509328425",
+  "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
+  "baseVersionCode": 62,
+  "rolloutCode": 1785839027,
+  "title": "Tablet-bungspakete-Overlay stabil halten",
+  "summary": "Beim ffnen der bungspakete bleibt die App hinter dem geffneten Tablet-Seitenmen exakt an derselben Position und Breite. Letzte Plne und alle brigen Bereiche bleiben unverndert.",
+  "patchId": "kgg-v062-tablet-package-overlay-stability-v2",
+  "patchFile": "patches/v062-tablet-package-overlay-stability-v2.html",
+  "versionName": "1.0.62-tablet-package-overlay-stability-v2",
+  "createdAt": "2026-08-04T10:23:47Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-tablet-package-overlay-stability-v2/admin.html",
+  "sha256": "72ecfc8a817fc2088b4bd5f1d4fe33bee7d221ab1f1b77e6c1ab9e1a4c80e872"
+}
