@@ -7,7 +7,7 @@ on:
     types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
 
 permissions:
-  contents: write
+  contents: read
   pull-requests: read
 
 concurrency:
@@ -21,7 +21,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
@@ -29,18 +28,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Regenerate patient GPT resources once
-        shell: bash
-        run: |
-          set -euo pipefail
-          python release-pipeline/kgg_patient_gpt_resources.py --write
-          if ! git diff --quiet -- docs/kgg-patient-gpt-context.md docs/kgg-patient-gpt-source-index.json docs/kgg-patient-gpt-source docs/kgg-patient-custom-gpt-knowledge-architecture.md docs/kgg-patient-custom-gpt-knowledge-operations.md docs/kgg-patient-custom-gpt-knowledge-safety.md docs/kgg-patient-custom-gpt-knowledge-testing.md; then
-            git config user.name github-actions[bot]
-            git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-            git add docs/kgg-patient-gpt-context.md docs/kgg-patient-gpt-source-index.json docs/kgg-patient-gpt-source docs/kgg-patient-custom-gpt-knowledge-architecture.md docs/kgg-patient-custom-gpt-knowledge-operations.md docs/kgg-patient-custom-gpt-knowledge-safety.md docs/kgg-patient-custom-gpt-knowledge-testing.md
-            git commit -m "docs: refresh patient GPT resources for v73"
-            git push origin HEAD:${{ github.event.pull_request.head.ref }}
-          fi
       - name: Install Poppler for PDF readability smoke
         shell: bash
         run: sudo apt-get update && sudo apt-get install -y poppler-utils
