@@ -2,7 +2,7 @@
 
 - Source file: `update-recovery.html`
 - Characters: 1-5778
-- Full source SHA-256: `94e621b15119cc6f55bb596cb54e1a30d8d587bc8fba69bd6d450b5234ca1aea`
+- Full source SHA-256: `8522669c2cdb796b87733f5d183a7994c0515c55779e5f6aef2e732e4adaea48`
 
 ```
 <!doctype html>
@@ -32,7 +32,7 @@
   </main>
   <script>
   (()=>{
-    const RELEASE='72';
+    const RELEASE='73';
     const CACHE_PREFIX='kgg-handyplan-';
     const statusEl=document.getElementById('status');
     const runButton=document.getElementById('run');
