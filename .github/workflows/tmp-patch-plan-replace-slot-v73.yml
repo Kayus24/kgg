@@ -99,3 +99,4 @@ console.log('Patient plan replace active-slot smoke: OK');
           git add patient-start-scan.js service-worker.js patient-version-label.js update-recovery.html release-pipeline/kgg_patient_plan_replace_slot_smoke.js .github/workflows/kgg-required-gate.yml .github/workflows/tmp-patch-plan-replace-slot-v73.yml
           git commit -m "fix: replace active patient plan slot (v73)"
           git push origin HEAD:fix/patient-plan-replace-slot-v73
+# retrigger 2026-08-04
