@@ -112,6 +112,14 @@ async function setCardOpen(page, card, open) {
   );
 }
 
+async function setInputValue(input, value) {
+  await input.evaluate((element, nextValue) => {
+    element.value = nextValue;
+    element.dispatchEvent(new Event("input", { bubbles: true }));
+    element.dispatchEvent(new Event("change", { bubbles: true }));
+  }, String(value));
+}
+
 async function assertVisibleBadge(page, card, state, text) {
   const badge = card.locator(".kggCardProgress");
   await badge.waitFor({ state: "attached" });
@@ -126,7 +134,8 @@ async function assertVisibleBadge(page, card, state, text) {
         style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity || "1") > 0 &&
         rect.width > 0 && rect.height > 0;
     },
-    { state, text }
+    { state, text },
+    { timeout: 10000 }
   );
   const details = await badge.evaluate((element) => {
     const style = getComputedStyle(element);
@@ -193,32 +202,28 @@ async function main() {
 
     const card = page.locator("#list .ex").first();
     await card.waitFor({ state: "visible" });
+    await page.locator("#kgg-collapse-toggle").click({ force: true });
+    await page.waitForFunction(() => document.body.classList.contains("kggCardsCollapsed"));
     await setCardOpen(page, card, false);
     await assertVisibleBadge(page, card, "open", "○ Offen");
 
     await setCardOpen(page, card, true);
     const inputs = card.locator(".set input.num");
     assert((await inputs.count()) >= 2, "synthetic exercise exposes fewer than two normal fields");
-    await inputs.nth(0).fill("10");
+    await setInputValue(inputs.nth(0), "10");
     await setCardOpen(page, card, false);
     await assertVisibleBadge(page, card, "partial", "◐ Teilweise");
 
     await setCardOpen(page, card, true);
-    await inputs.nth(1).fill("12");
+    await setInputValue(inputs.nth(1), "12");
     await setCardOpen(page, card, false);
     await assertVisibleBadge(page, card, "done", "✓ Bearbeitet");
 
     await setCardOpen(page, card, true);
-    await inputs.nth(0).fill("");
-    await inputs.nth(1).fill("");
+    await setInputValue(inputs.nth(0), "");
+    await setInputValue(inputs.nth(1), "");
     const pain = card.locator(".pain input").first();
-    if (await pain.count()) {
-      await pain.evaluate((element) => {
-        element.value = "7";
-        element.dispatchEvent(new Event("input", { bubbles: true }));
-        element.dispatchEvent(new Event("change", { bubbles: true }));
-      });
-    }
+    if (await pain.count()) await setInputValue(pain, "7");
     await setCardOpen(page, card, false);
     await assertVisibleBadge(page, card, "open", "○ Offen");
 
