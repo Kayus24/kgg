@@ -84,15 +84,29 @@ async function waitForControlledRuntime(page) {
   await page.waitForFunction(() => Boolean(navigator.serviceWorker && navigator.serviceWorker.controller), null, {
     timeout: 12000,
   });
-  await page.locator("#plan").waitFor({ state: "visible" });
-  await page.locator("#kgg-collapse-toggle").waitFor({ state: "visible" });
-  await page.locator("#kggAppVersion").waitFor({ state: "visible" });
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await page.locator("#plan").waitFor({ state: "visible" });
+    const hasRuntime = (await page.locator("#kgg-collapse-toggle").count()) > 0 &&
+      (await page.locator("#kggAppVersion").count()) > 0;
+    if (hasRuntime) {
+      await page.locator("#kgg-collapse-toggle").waitFor({ state: "visible" });
+      await page.locator("#kggAppVersion").waitFor({ state: "visible" });
+      return;
+    }
+    await page.reload({ waitUntil: "domcontentloaded" });
+  }
+  const diagnostics = await page.evaluate(() => ({
+    controlled: Boolean(navigator.serviceWorker && navigator.serviceWorker.controller),
+    scripts: Array.from(document.scripts).map((script) => script.src).filter(Boolean),
+    bodyClasses: document.body.className,
+  }));
+  throw new Error(`controlled patient runtime modules were not injected: ${JSON.stringify(diagnostics)}`);
 }
 
-async function assertVisibleBadge(card, state, text) {
+async function assertVisibleBadge(page, card, state, text) {
   const badge = card.locator(".kggCardProgress");
   await badge.waitFor({ state: "attached" });
-  await badge.page().waitForFunction(
+  await page.waitForFunction(
     ({ state, text }) => {
       const card = document.querySelector("#list .ex");
       const badge = card && card.querySelector(".kggCardProgress");
@@ -172,7 +186,7 @@ async function main() {
     await card.waitFor({ state: "visible" });
     await page.locator("#kgg-collapse-toggle").click();
     await page.waitForFunction(() => document.body.classList.contains("kggCardsCollapsed"));
-    await assertVisibleBadge(card, "open", "○ Offen");
+    await assertVisibleBadge(page, card, "open", "○ Offen");
 
     await card.locator("h3").click();
     await page.waitForFunction(() => document.querySelector("#list .ex")?.classList.contains("kggOpen"));
@@ -180,20 +194,26 @@ async function main() {
     assert((await inputs.count()) >= 2, "synthetic exercise exposes fewer than two normal fields");
     await inputs.nth(0).fill("10");
     await card.locator("h3").click();
-    await assertVisibleBadge(card, "partial", "◐ Teilweise");
+    await assertVisibleBadge(page, card, "partial", "◐ Teilweise");
 
     await card.locator("h3").click();
     await inputs.nth(1).fill("12");
     await card.locator("h3").click();
-    await assertVisibleBadge(card, "done", "✓ Bearbeitet");
+    await assertVisibleBadge(page, card, "done", "✓ Bearbeitet");
 
     await card.locator("h3").click();
     await inputs.nth(0).fill("");
     await inputs.nth(1).fill("");
     const pain = card.locator(".pain input").first();
-    if (await pain.count()) await pain.fill("7");
+    if (await pain.count()) {
+      await pain.evaluate((element) => {
+        element.value = "7";
+        element.dispatchEvent(new Event("input", { bubbles: true }));
+        element.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+    }
     await card.locator("h3").click();
-    await assertVisibleBadge(card, "open", "○ Offen");
+    await assertVisibleBadge(page, card, "open", "○ Offen");
 
     console.log(`Patient runtime/progress Playwright smoke: PASS (v${workerVersion})`);
   } finally {
