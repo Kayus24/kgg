@@ -1,12 +1,12 @@
 # KGG Patient Source Chunk 020
 
 - Source file: `patient-pain-vertical-scale.js`
-- Characters: 1-16493
-- Full source SHA-256: `a25719dacfab946076550f138704db8e7e68e524ed4f7f909a850a97e255109a`
+- Characters: 1-16846
+- Full source SHA-256: `70c3d1e97826c658e690fa7694c6678dc710182c80920d8e41a9e6bec806fc6c`
 
 ```
 (()=>{
-  const VERSION='vertical-pain-v1-exercise-only';
+  const VERSION='vertical-pain-v2-force-hide-legacy';
   const STYLE_ID='kggPainVerticalStyle';
   const LANG_KEY='kggPatientLang';
   const ROOT_CLASS='kggPainVerticalReady';
@@ -88,11 +88,11 @@
     const row=root.querySelector(':scope > .painRow');
     if(!row)return false;
     if(state.row!==row){
-      state.row=row;state.rowHidden=row.hidden;state.rowAria=row.getAttribute('aria-hidden');state.rowInert=Boolean(row.inert);
+      state.row=row;state.rowHidden=row.hidden;state.rowAria=row.getAttribute('aria-hidden');state.rowInert=Boolean(row.inert);state.rowDisplay=row.style.getPropertyValue('display');state.rowDisplayPriority=row.style.getPropertyPriority('display');
     }
     if(state.oldLabel!==label){state.oldLabel=label;state.labelHidden=label?label.hidden:false}
     if(label)label.hidden=true;
-    row.hidden=true;row.inert=true;row.setAttribute('aria-hidden','true');
+    row.hidden=true;row.inert=true;row.setAttribute('aria-hidden','true');row.style.setProperty('display','none','important');
     row.querySelectorAll('button,input').forEach(control=>{if(!control.hasAttribute('data-kgg-old-tabindex'))control.setAttribute('data-kgg-old-tabindex',String(control.tabIndex));control.tabIndex=-1});
     return true
   }
@@ -100,7 +100,7 @@
     const row=state&&state.row,label=state&&state.oldLabel;
     if(label&&label.isConnected)label.hidden=Boolean(state.labelHidden);
     if(row&&row.isConnected){
-      row.hidden=Boolean(state.rowHidden);row.inert=Boolean(state.rowInert);
+      row.hidden=Boolean(state.rowHidden);row.inert=Boolean(state.rowInert);if(state.rowDisplay)row.style.setProperty('display',state.rowDisplay,state.rowDisplayPriority||'');else row.style.removeProperty('display');
       if(state.rowAria==null)row.removeAttribute('aria-hidden');else row.setAttribute('aria-hidden',state.rowAria);
       row.querySelectorAll('[data-kgg-old-tabindex]').forEach(control=>{control.tabIndex=Number(control.getAttribute('data-kgg-old-tabindex'));control.removeAttribute('data-kgg-old-tabindex')})
     }
@@ -167,7 +167,7 @@
     stage.append(track,fill,thumb,values);panelInner.appendChild(stage);panel.appendChild(panelInner);
     const hint=document.createElement('div');hint.className='kggPainVerticalHint';panelInner.appendChild(hint);
     wrap.append(toggle,panel);root.appendChild(wrap);
-    const state={ei,wrap,toggle,titleLabel:label,current,panel,stage,values:rows,hint,selected:false,committed:0,draft:0,gesture:null,keyboardDirty:false,closeTimer:0,row:null,oldLabel:null,labelHidden:false,rowHidden:false,rowAria:null,rowInert:false};
+    const state={ei,wrap,toggle,titleLabel:label,current,panel,stage,values:rows,hint,selected:false,committed:0,draft:0,gesture:null,keyboardDirty:false,closeTimer:0,row:null,oldLabel:null,labelHidden:false,rowHidden:false,rowAria:null,rowInert:false,rowDisplay:'',rowDisplayPriority:''};
     states.set(root,state);
     toggle.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();togglePanel(root)});
     wrap.addEventListener('click',event=>event.stopPropagation());
