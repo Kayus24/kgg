@@ -74,6 +74,7 @@ async function main() {
   const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:"allow",hasTouch:true});
   const page=await context.newPage();
   const cdp=await context.newCDPSession(page);
+  await cdp.send("Emulation.setTouchEmulationEnabled",{enabled:true,maxTouchPoints:1});
   const plan={i:"vertical-pain-playwright",t:"Vertikale Schmerzskala",v:1,d:6,e:[["Beinpresse",1,"B","kg","Wdh"],["Satzschmerz",2,"B","kg","Wdh"]]};
   const payload=`KGGH2:${encodePlan(plan)}`;
   const url=`http://127.0.0.1:${port}/kgg/?plan=${encodeURIComponent(payload)}`;
