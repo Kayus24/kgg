@@ -8,6 +8,7 @@ const vm = require("vm");
 const ROOT = path.resolve(__dirname, "..");
 const sourcePath = path.join(ROOT, "patient-pain-vertical-scale.js");
 const source = fs.readFileSync(sourcePath, "utf8");
+const browserSource = fs.readFileSync(path.join(ROOT, "release-pipeline/kgg_patient_pain_vertical_playwright.js"), "utf8");
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -52,4 +53,6 @@ assert(source.includes("row.inert=true"), "hidden legacy controls are not made i
 assert(source.includes("row.style.setProperty('display','none','important')"), "legacy pain row is not force-hidden against existing important CSS");
 assert(source.includes("row.style.removeProperty('display')"), "legacy pain row display cannot be restored after fallback");
 assert(source.includes("restoreOriginal(state)"), "legacy pain fallback cannot be restored after teardown");
+assert(browserSource.includes('nth(1).evaluate(element=>element.click())'), "day-2 separation test still depends on top-bar visibility");
+assert(browserSource.includes('typeof d!=="undefined"&&Number(d)===1'), "day-1 return does not verify the runtime day");
 console.log("Patient vertical pain smoke: PASS");
