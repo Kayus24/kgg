@@ -98,11 +98,19 @@ async function main() {
     assert(await second.locator(".kggPainVertical").count()===0,"exercise-pain trigger must not appear in set-pain mode");
 
     await page.evaluate(()=>window.scrollTo(0,Math.min(250,document.documentElement.scrollHeight-window.innerHeight)));
-    const before=await page.evaluate(()=>({scrollY:window.scrollY,first:document.querySelectorAll("#list .ex")[0].getBoundingClientRect(),second:document.querySelectorAll("#list .ex")[1].getBoundingClientRect()}));
+    const before=await page.evaluate(()=>{
+    const cards=[...document.querySelectorAll("#list .ex")];
+    const layoutTop=element=>{let top=0;for(let node=element;node;node=node.offsetParent)top+=node.offsetTop;return top};
+    return{scrollY:window.scrollY,firstHeight:cards[0].offsetHeight,secondLayoutTop:layoutTop(cards[1])};
+  });
     await openModal(toggle,modal);
-    const after=await page.evaluate(()=>({scrollY:window.scrollY,first:document.querySelectorAll("#list .ex")[0].getBoundingClientRect(),second:document.querySelectorAll("#list .ex")[1].getBoundingClientRect(),bodyPosition:getComputedStyle(document.body).position}));
-    assert(Math.abs(before.first.height-after.first.height)<1,"opening modal changed exercise-card height");
-    assert(Math.abs(before.second.top-after.second.top)<1,"opening modal shifted following exercise");
+    const after=await page.evaluate(()=>{
+    const cards=[...document.querySelectorAll("#list .ex")];
+    const layoutTop=element=>{let top=0;for(let node=element;node;node=node.offsetParent)top+=node.offsetTop;return top};
+    return{firstHeight:cards[0].offsetHeight,secondLayoutTop:layoutTop(cards[1]),bodyPosition:getComputedStyle(document.body).position};
+  });
+    assert(before.firstHeight===after.firstHeight,"opening modal changed exercise-card height");
+    assert(before.secondLayoutTop===after.secondLayoutTop,"opening modal shifted following exercise");
     assert(after.bodyPosition==="fixed","background scroll was not locked");
     const modalStyle=await modal.evaluate(el=>{const s=getComputedStyle(el);return{position:s.position,zIndex:Number(s.zIndex),backdrop:s.backdropFilter||s.webkitBackdropFilter,background:s.backgroundColor}});
     assert(modalStyle.position==="fixed","pain window is not a fixed overlay");
