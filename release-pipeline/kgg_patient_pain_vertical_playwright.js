@@ -83,9 +83,11 @@ async function main() {
     await stage.waitFor({state:"visible"});
     const top=first.locator('.kggPainVerticalValue[data-kgg-pain-value="10"]');
     const bottom=first.locator('.kggPainVerticalValue[data-kgg-pain-value="0"]');
-    const topBox=await top.boundingBox(),bottomBox=await bottom.boundingBox(),stageBox=await stage.boundingBox(),cardBox=await first.boundingBox();
+    const pain=first.locator(":scope > .pain");
+    const topBox=await top.boundingBox(),bottomBox=await bottom.boundingBox(),stageBox=await stage.boundingBox(),painBox=await pain.boundingBox();
     assert(topBox&&bottomBox&&topBox.y<bottomBox.y,"10 must be above 0");
-    assert(stageBox&&cardBox&&Math.abs((cardBox.x+cardBox.width)-(stageBox.x+stageBox.width))<30,"vertical scale is not right aligned");
+    assert(stageBox&&painBox&&Math.abs((painBox.x+painBox.width)-(stageBox.x+stageBox.width))<4,`vertical scale is not right aligned inside pain content: ${JSON.stringify({stageBox,painBox})}`);
+    assert(stageBox&&painBox&&(stageBox.x+stageBox.width/2)>(painBox.x+painBox.width/2),"vertical scale is not in the right half of the pain content");
     assert(await stage.evaluate(el=>getComputedStyle(el).touchAction)==="none","slider touch zone must disable page scrolling");
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),"slider creates horizontal overflow");
 
