@@ -1,55 +1,17 @@
 # KGG Patient Source Chunk 027
 
-- Source file: `patient-start-values-day1.js`
-- Characters: 1-2931
-- Full source SHA-256: `e78b53bc3ebf6f51faeea2a04201541cdfb01fe02565d3265a1f73b722b8e80c`
+- Source file: `patient-start-scan.js`
+- Characters: 24001-28169
+- Full source SHA-256: `48ad614edb3a2ae3609f16cebb9090a58fa10975ba7700f53dcd3d87e2323973`
 
 ```
-(()=>{
-  const VERSION='start-values-day1-v1';
-  const MARK_PREFIX='kggStartValuesDay1AppliedV1:';
-  let busy=false;
-  const safe=f=>{try{return f()}catch(e){return null}};
-  const txt=x=>String(x??'').trim();
-  const hasValue=x=>txt(x)!=='';
-  const isEmptyValue=x=>x===undefined||x===null||txt(x)==='';
-  const hash=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)};
-  function ready(){return typeof p!=='undefined'&&p&&Array.isArray(p.ex)&&typeof v!=='undefined'&&v&&Array.isArray(done)&&typeof k==='function'&&typeof save==='function'}
-  function signature(){return hash(JSON.stringify({id:p.id||'plan',title:p.title||'',days:p.days||0,e:p.ex.map(e=>[e.n,e.sets,e.side,e.u,e.m,e.sl||'',e.sm||''])}))}
-  function markKey(){return MARK_PREFIX+(p.id||'plan')+':'+signature()}
-  function startValuePairs(e){const out=[];if(hasValue(e.sl)&&hasValue(e.u))out.push(['a',txt(e.sl)]);if(hasValue(e.sm)&&hasValue(e.m))out.push(['b',txt(e.sm)]);return out}
-  function hasAnyStartValues(){return p.ex.some(e=>startValuePairs(e).length>0)}
-  function hasPatientProgress(){if(done&&done.length)return true;return Object.keys(v||{}).some(key=>/^[0-9]+\|/.test(key)&&hasValue(v[key]))}
-  function sidesFor(e){return e.side==='LR'?['L','R']:['B']}
-  function applyStartValues(){
-    if(busy||!ready())return false;
-    busy=true;
-    try{
-      if(!hasAnyStartValues())return false;
-      const marker=markKey();
-      if(localStorage.getItem(marker))return false;
-      if(hasPatientProgress()){localStorage.setItem(marker,'skipped-existing-progress');return false}
-      let wrote=0;
-      (p.ex||[]).forEach((e,ei)=>{
-        const sets=Number(e.sets)||3,pairs=startValuePairs(e),sides=sidesFor(e);
-        if(!pairs.length)return;
-        for(let s=1;s<=sets;s++)sides.forEach(side=>pairs.forEach(([field,value])=>{
-          const key=k(ei,s,side,field,1);
-          if(isEmptyValue(v[key])){v[key]=value;wrote++}
-        }))
-      });
-      if(!wrote){localStorage.setItem(marker,'no-empty-targets');return false}
-      if(!done.includes(1))done.push(1);
-      if(Number(p.days||0)>=2)d=2;else d=1;
-      save();
-      localStorage.setItem(marker,new Date().toISOString());
-      safe(()=>setStatus('Startwerte aus der Therapie wurden als Tag 1 gespeichert.','ok'));
-      safe(()=>render());
-      return true;
-    }finally{busy=false}
-  }
-  function patchRender(){if(window.__kggStartValuesDay1RenderPatch||typeof render!=='function')return;window.__kggStartValuesDay1RenderPatch=1;const old=render;render=function(){const r=old.apply(this,arguments);setTimeout(applyStartValues,0);return r}}
-  function init(){window.__kggPatientStartValuesDay1=VERSION;patchRender();setTimeout(applyStartValues,0);setTimeout(applyStartValues,300);setTimeout(applyStartValues,1200)}
+ggLiveScanView{position:relative;margin-top:12px;overflow:hidden;border-radius:16px;background:#000;aspect-ratio:4/3}.kggLiveScanView video{width:100%;height:100%;object-fit:cover}.kggLiveScanGuide{position:absolute;left:15%;top:10%;width:70%;height:80%;border:4px solid #fff;border-radius:18px;box-shadow:0 0 0 999px #02061755}.kggLiveScanStatus{margin-top:12px;padding:11px;border-radius:13px;background:#1e293b;font-weight:900}.kggLiveScanStatus.ok{background:#14532d}.kggLiveScanStatus.warn{background:#78350f}.kggLiveScanFallback{display:grid;gap:8px;margin-top:10px}.kggLiveScanFallback[hidden]{display:none}.kggLiveScanFallback button{min-height:48px;border-radius:13px;border:1px solid #64748b;background:#fff;color:#111827;font-weight:900}.kggLiveScanPanel>p{margin:10px 2px 0;color:#cbd5e1;font-size:13px;line-height:1.4}@media(max-width:430px){.kggLiveScan{padding:8px}.kggLiveScanPanel{border-radius:18px;padding:10px}.kggLiveScanView{aspect-ratio:3/4}.kggLiveScanGuide{left:9%;top:19%;width:82%;height:62%}}';document.head.appendChild(s);}
+  function noPlanVisible(){const st=$('status');return !!(st&&/Kein Plan gefunden|No plan found/i.test(st.textContent||''));}
+  function ensureRescue(){ensureStyle();ensureScanInput();if(!noPlanVisible())return;const st=$('status');if(!st||$('kggQrRescue'))return;const box=document.createElement('div');box.id='kggQrRescue';box.className='kggQrRescue';box.innerHTML='<b>'+tr('Plan erneut öffnen','Open plan again')+'</b><p>'+tr('Wenn diese Web-App ohne Plan startet, scanne den Plan-QR-Code hier noch einmal.','If this web app opens without a plan, scan the plan QR code here again.')+'</p><button type="button" class="scanBig">📷 '+tr('Plan-QR scannen','Scan plan QR')+'</button><button type="button" class="pasteLink">'+tr('Plan-Link einfügen','Paste plan link')+'</button>';st.insertAdjacentElement('afterend',box);box.querySelector('.scanBig').onclick=()=>openCameraScan('update');box.querySelector('.pasteLink').onclick=()=>{scanMode='update';promptFallback();};}
+  function ensureReplaceBubble(){const box=$('kggActionBubbles');if(!box)return;let btn=$('kggBubbleReplace');if(!btn){btn=document.createElement('button');btn.id='kggBubbleReplace';btn.type='button';btn.className='kggBubble';const add=$('kggBubbleAdd');box.insertBefore(btn,add||null);}btn.textContent='♻ '+tr('Plan ersetzen','Replace plan');btn.onclick=e=>{e.preventDefault();e.stopPropagation();box.hidden=true;const fab=$('kggActionFab');if(fab)fab.classList.remove('open');openCameraScan('replace');};}
+  function ensureScanButton(){const row=$('installSmall');if(!row)return;row.classList.remove('hide');let btn=$('kggPlanScanBtn');if(!btn){btn=document.createElement('button');btn.id='kggPlanScanBtn';btn.type='button';btn.style.minHeight='38px';btn.style.borderRadius='999px';btn.style.border='1px solid #bfdbfe';btn.style.background='#eff6ff';btn.style.color='#111827';btn.style.fontWeight='950';btn.style.padding='6px 10px';btn.onclick=e=>{e.preventDefault();e.stopPropagation();openCameraScan('update');};row.insertBefore(btn,row.children[1]||null);}btn.textContent=tr('QR-Scan','QR scan');ensureScanInput();ensureRescue();setTimeout(ensureReplaceBubble,80);}
+  function patchRender(){if(window.__kggStartScanPatchV8)return;window.__kggStartScanPatchV8=true;if(typeof render==='function'){const old=render;window.render=function(){const r=old.apply(this,arguments);setTimeout(autoFillStartValues,0);setTimeout(ensureScanButton,0);setTimeout(ensureRescue,20);setTimeout(ensureReplaceBubble,100);return r;};}}
+  function init(){patchRender();ensureScanButton();ensureRescue();ensureReplaceBubble();autoFillStartValues();setTimeout(autoFillStartValues,300);setTimeout(autoFillStartValues,1000);setTimeout(ensureScanButton,300);setTimeout(ensureReplaceBubble,500);setTimeout(ensureReplaceBubble,1200);setTimeout(ensureRescue,500);setTimeout(ensureRescue,1500);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')closeLiveScanner(false)});window.addEventListener('pagehide',()=>closeLiveScanner(false));}
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
 })();
 ```
