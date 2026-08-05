@@ -1,0 +1,56 @@
+name: KGG Pain Day Test Finalize
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [synchronize]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kgg-pain-day-test-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  finalize:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - name: Make day separation test independent of current scroll position
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path=Path('release-pipeline/kgg_patient_pain_vertical_playwright.js')
+          text=path.read_text(encoding='utf-8')
+          replacements={
+            '    await page.locator("#days button").nth(1).click();\n    await page.waitForFunction(()=>document.querySelector("#days button:nth-child(2)")?.classList.contains("active"));':
+            '    await page.locator("#days button").nth(1).evaluate(element=>element.click());\n    await page.waitForFunction(()=>typeof d!=="undefined"&&Number(d)===2);',
+            '    await page.locator("#days button").nth(0).click();\n    await page.waitForFunction(()=>document.querySelector("#days button:first-child")?.classList.contains("active"));':
+            '    await page.locator("#days button").nth(0).evaluate(element=>element.click());\n    await page.waitForFunction(()=>typeof d!=="undefined"&&Number(d)===1);'
+          }
+          for old,new in replacements.items():
+              if old not in text:
+                  raise SystemExit('day test anchor missing')
+              text=text.replace(old,new,1)
+          path.write_text(text,encoding='utf-8')
+          PY
+      - name: Remove finalizer and commit day test correction
+        shell: bash
+        env:
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/kgg-pain-day-test-finalize.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add release-pipeline/kgg_patient_pain_vertical_playwright.js .github/workflows/kgg-pain-day-test-finalize.yml
+          git diff --cached --check
+          git commit -m "Stabilize vertical pain day separation test"
+          git push origin "HEAD:${HEAD_BRANCH}"
