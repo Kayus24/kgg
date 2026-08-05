@@ -105,6 +105,7 @@ async function main() {
     return{scrollY:window.scrollY,firstHeight:cards[0].offsetHeight,secondLayoutTop:layoutTop(cards[1])};
   });
     await openModal(toggle,modal);
+    await page.waitForTimeout(220);
     const after=await page.evaluate(()=>{
     const cards=[...document.querySelectorAll("#list .ex")];
     const layoutTop=element=>{let top=0;for(let node=element;node;node=node.offsetParent)top+=node.offsetTop;return top};
