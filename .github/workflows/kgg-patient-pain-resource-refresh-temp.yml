@@ -1,0 +1,53 @@
+name: KGG Patient Pain Resource Refresh Temp
+
+on:
+  push:
+    branches:
+      - feat/patient-vertical-pain-scale-v74
+    paths:
+      - .github/workflows/kgg-patient-pain-resource-refresh-temp.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/patient-vertical-pain-scale-v74
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Regenerate patient resources
+        shell: bash
+        run: |
+          set -euo pipefail
+          python release-pipeline/kgg_patient_gpt_resources.py --write
+          python release-pipeline/kgg_custom_gpt_resource_audit.py --write
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          manifest = json.loads(Path('docs/kgg-custom-gpt-resource-manifest.json').read_text(encoding='utf-8'))
+          path = Path('docs/kgg-patient-custom-gpt-editor-snapshot.json')
+          snapshot = json.loads(path.read_text(encoding='utf-8'))
+          profile = manifest['patientProduction']
+          snapshot['instructionsSha256'] = profile['editorBootstrap']['sha256']
+          snapshot['knowledgeSha256'] = [item['sha256'] for item in profile['knowledge']]
+          snapshot['actionSha256'] = [item['sha256'] for item in profile['actions']]
+          path.write_text(json.dumps(snapshot, ensure_ascii=False, indent=2) + '\n', encoding='utf-8', newline='\n')
+          PY
+          python release-pipeline/kgg_patient_gpt_resources.py --check
+          python release-pipeline/kgg_custom_gpt_resource_audit.py --check
+      - name: Commit generated resources and remove temp workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git rm .github/workflows/kgg-patient-pain-resource-refresh-temp.yml
+          git add docs/kgg-patient-gpt-context.md docs/kgg-patient-gpt-source-index.json docs/kgg-patient-gpt-source docs/kgg-patient-custom-gpt-knowledge-architecture.md docs/kgg-patient-custom-gpt-knowledge-operations.md docs/kgg-patient-custom-gpt-knowledge-safety.md docs/kgg-patient-custom-gpt-knowledge-testing.md docs/kgg-custom-gpt-resource-manifest.json docs/kgg-patient-custom-gpt-editor-snapshot.json
+          git commit -m "chore(patient): refresh generated pain modal resources"
+          git push origin HEAD:feat/patient-vertical-pain-scale-v74
