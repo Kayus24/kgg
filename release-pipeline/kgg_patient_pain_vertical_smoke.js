@@ -57,6 +57,9 @@ assert(source.includes("aria-describedby"),"endpoint descriptions are not connec
 assert(source.includes("row.inert=true"),"hidden legacy controls are not made inert");
 assert(source.includes("row.style.setProperty('display','none','important')"),"legacy pain row is not force-hidden");
 assert(source.includes("restoreOriginal(state)"),"legacy pain fallback cannot be restored");
+assert(source.includes("refreshAfterLifecycleChange"),"day and plan lifecycle remount scheduler is missing");
+assert(source.includes("setTimeout(()=>{observe();mountAll()},delay)"),"observer is not rebound after lifecycle renders");
+assert(source.includes("#days button,#kggDayHub button"),"day controls are not covered by lifecycle remounting");
 assert(!source.includes("setTimeout(()=>closeModal"),"modal must not auto-close after selecting a value");
 assert(browserSource.includes('opening modal changed exercise-card height'),"browser test does not protect card height");
 assert(browserSource.includes('firstHeight:cards[0].offsetHeight'),"browser test measures viewport geometry instead of intrinsic card height");
