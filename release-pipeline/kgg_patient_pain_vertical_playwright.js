@@ -94,8 +94,11 @@ async function main() {
     await first.locator('.kggPainVerticalValue[data-kgg-pain-value="7"]').click();
     await page.waitForFunction(()=>document.querySelector("#list .ex .kggPainVerticalCurrent")?.textContent==="7/10");
     assert((await first.locator(".kggCardProgress").getAttribute("data-kgg-progress"))==="open","pain alone changed exercise progress");
+    await page.waitForFunction(()=>document.querySelector("#list .ex .kggPainVerticalToggle")?.getAttribute("aria-expanded")==="false");
 
     await toggle.click();
+    await page.waitForFunction(()=>document.querySelector("#list .ex .kggPainVerticalToggle")?.getAttribute("aria-expanded")==="true");
+    await stage.waitFor({state:"visible"});
     const box=await stage.boundingBox();assert(box,"slider box missing for drag");
     await page.mouse.move(box.x+35,box.y+box.height-22);await page.mouse.down();await page.mouse.move(box.x+35,box.y+22,{steps:8});await page.mouse.up();
     await page.waitForFunction(()=>document.querySelector("#list .ex .kggPainVerticalCurrent")?.textContent==="10/10");
