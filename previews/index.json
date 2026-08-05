@@ -4,6 +4,22 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "kgg-v063-tablet-recent-package-shell",
+      "patchHash": "41067fcd09a32bdf587458fabf554729b65290f74513c5fe6b259a88eafd3755",
+      "baseSha": "2450bc48d79421dbeab63f68865f0d482d8e748a",
+      "baseVersionCode": 62,
+      "rolloutCode": 1785936311,
+      "title": "Plan-Historie in der bungspakete-Shell ffnen",
+      "summary": "Die Tablet-Plan-Historie verwendet die bestehende seitliche bungspakete-Shell samt Men-, Shade- und Schliemechanismus. Der bestehende Historieninhalt wird nur fr die Anzeige in die Shell umgesetzt und danach zuverlssig z",
+      "patchId": "kgg-v062-tablet-recent-package-shell",
+      "patchFile": "patches/v062-tablet-recent-package-shell.html",
+      "versionName": "1.0.62-tablet-recent-package-shell",
+      "createdAt": "2026-08-05T13:25:11Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v063-tablet-recent-package-shell/admin.html",
+      "sha256": "30bbb30156afba6da4f7cb349e55224abfcc09ff7892160fb63a2ef917c558f4"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-v063-tablet-package-overlay-retest",
       "patchHash": "d9d3c33779a42542567d2a2992c16067ee726afdea5b85c61db98cbe3f43300e",
       "baseSha": "2450bc48d79421dbeab63f68865f0d482d8e748a",
@@ -305,38 +321,22 @@
       "createdAt": "2026-07-28T20:31:49Z",
       "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v061-combo-camera-normal-1x-compact-banner/admin.html",
       "sha256": "fd6c217e6ca2331819e94cea7f425272f11a7ba869ae3a4a71fef78bb83a60af"
-    },
-    {
-      "kind": "kgg_gpt_preview",
-      "requestId": "kgg-v061-combo-camera-scanner-normal-1x",
-      "patchHash": "0e899fd2c1137f36eeb45545d02a509e6c08f18106c7375f806fd7e99098021b",
-      "baseSha": "15e39b2e23a7acf65588939fecacfaae971ab514",
-      "baseVersionCode": 61,
-      "rolloutCode": 1785252355,
-      "title": "Kombi-Kamera startet normal bei 1x",
-      "summary": "Behebt den optisch starken Startzoom der Test-App-Kamera: Das vollstndige Kamerabild bleibt sichtbar und ein untersttzter Kamera-Track wird auf 1x gesetzt; QR-Automatik und manueller Auslser bleiben erhalten.",
-      "patchId": "kgg-v061-combo-camera-normal-1x",
-      "patchFile": "patches/v061-combo-camera-normal-1x.html",
-      "versionName": "1.0.61-combo-camera-normal-1x",
-      "createdAt": "2026-07-28T15:25:55Z",
-      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v061-combo-camera-scanner-normal-1x/admin.html",
-      "sha256": "43bb3eef14e16dcc719097df2d9fba78b8a87c8891b0ddac22e111f43963bfc7"
     }
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-v063-tablet-package-overlay-retest",
-    "patchHash": "d9d3c33779a42542567d2a2992c16067ee726afdea5b85c61db98cbe3f43300e",
+    "requestId": "kgg-v063-tablet-recent-package-shell",
+    "patchHash": "41067fcd09a32bdf587458fabf554729b65290f74513c5fe6b259a88eafd3755",
     "baseSha": "2450bc48d79421dbeab63f68865f0d482d8e748a",
     "baseVersionCode": 62,
-    "rolloutCode": 1785861672,
-    "title": "bungspakete-Overlay erneut isoliert testen",
-    "summary": "Der besttigte Tablet-Geometriefix fr das bungspakete-Overlay wird auf der aktuellen Main-Basis erneut als alleiniger Test-App-Patch verffentlicht. nderungen an Letzte Plne sind nicht enthalten.",
-    "patchId": "kgg-v062-tablet-package-overlay-retest",
-    "patchFile": "patches/v062-tablet-package-overlay-retest.html",
-    "versionName": "1.0.62-tablet-package-overlay-retest",
-    "createdAt": "2026-08-04T16:41:12Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v063-tablet-package-overlay-retest/admin.html",
-    "sha256": "8de36fec364199323db8011970141771c986938c100e2a0fb3231ea4eb750c51"
+    "rolloutCode": 1785936311,
+    "title": "Plan-Historie in der bungspakete-Shell ffnen",
+    "summary": "Die Tablet-Plan-Historie verwendet die bestehende seitliche bungspakete-Shell samt Men-, Shade- und Schliemechanismus. Der bestehende Historieninhalt wird nur fr die Anzeige in die Shell umgesetzt und danach zuverlssig z",
+    "patchId": "kgg-v062-tablet-recent-package-shell",
+    "patchFile": "patches/v062-tablet-recent-package-shell.html",
+    "versionName": "1.0.62-tablet-recent-package-shell",
+    "createdAt": "2026-08-05T13:25:11Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v063-tablet-recent-package-shell/admin.html",
+    "sha256": "30bbb30156afba6da4f7cb349e55224abfcc09ff7892160fb63a2ef917c558f4"
   }
 }
