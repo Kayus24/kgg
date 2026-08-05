@@ -59,6 +59,8 @@ assert(source.includes("row.style.setProperty('display','none','important')"),"l
 assert(source.includes("restoreOriginal(state)"),"legacy pain fallback cannot be restored");
 assert(!source.includes("setTimeout(()=>closeModal"),"modal must not auto-close after selecting a value");
 assert(browserSource.includes('opening modal changed exercise-card height'),"browser test does not protect card height");
+assert(browserSource.includes('firstHeight:cards[0].offsetHeight'),"browser test measures viewport geometry instead of intrinsic card height");
+assert(browserSource.includes('secondLayoutTop:layoutTop(cards[1])'),"browser test does not protect the next card document position");
 assert(browserSource.includes('Schlimmster vorstellbarer Schmerz'),"browser test does not verify maximum description");
 assert(browserSource.includes('Gar kein Schmerz'),"browser test does not verify minimum description");
 assert(browserSource.includes('modal auto-closed after choosing a value'),"browser test does not protect deliberate closing");
