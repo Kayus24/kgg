@@ -1,12 +1,12 @@
 # KGG Patient Source Chunk 020
 
 - Source file: `patient-pain-vertical-scale.js`
-- Characters: 1-16846
-- Full source SHA-256: `70c3d1e97826c658e690fa7694c6678dc710182c80920d8e41a9e6bec806fc6c`
+- Characters: 1-16863
+- Full source SHA-256: `adedf8db2ca9c91a1f0c9d7964faef1b8f96dc249edd0d09c30ec1abe176b663`
 
 ```
 (()=>{
-  const VERSION='vertical-pain-v2-force-hide-legacy';
+  const VERSION='vertical-pain-v3-safe-pointer-capture';
   const STYLE_ID='kggPainVerticalStyle';
   const LANG_KEY='kggPatientLang';
   const ROOT_CLASS='kggPainVerticalReady';
@@ -177,7 +177,7 @@
       const exact=event.target.closest('[data-kgg-pain-value]');
       const rect=stage.getBoundingClientRect(),top=rect.top+ROW_HEIGHT/2,bottom=rect.bottom-ROW_HEIGHT/2;
       const next=exact?clampValue(exact.dataset.kggPainValue):valueFromY(top,bottom,event.clientY);
-      state.gesture={pointerId:event.pointerId};stage.setPointerCapture&&stage.setPointerCapture(event.pointerId);updateVisual(state,next,true)
+      state.gesture={pointerId:event.pointerId};try{stage.setPointerCapture&&stage.setPointerCapture(event.pointerId)}catch(e){}updateVisual(state,next,true)
     });
     stage.addEventListener('pointermove',event=>{
       if(!state.gesture||state.gesture.pointerId!==event.pointerId)return;

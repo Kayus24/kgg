@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='vertical-pain-v2-force-hide-legacy';
+  const VERSION='vertical-pain-v3-safe-pointer-capture';
   const STYLE_ID='kggPainVerticalStyle';
   const LANG_KEY='kggPatientLang';
   const ROOT_CLASS='kggPainVerticalReady';
@@ -170,7 +170,7 @@
       const exact=event.target.closest('[data-kgg-pain-value]');
       const rect=stage.getBoundingClientRect(),top=rect.top+ROW_HEIGHT/2,bottom=rect.bottom-ROW_HEIGHT/2;
       const next=exact?clampValue(exact.dataset.kggPainValue):valueFromY(top,bottom,event.clientY);
-      state.gesture={pointerId:event.pointerId};stage.setPointerCapture&&stage.setPointerCapture(event.pointerId);updateVisual(state,next,true)
+      state.gesture={pointerId:event.pointerId};try{stage.setPointerCapture&&stage.setPointerCapture(event.pointerId)}catch(e){}updateVisual(state,next,true)
     });
     stage.addEventListener('pointermove',event=>{
       if(!state.gesture||state.gesture.pointerId!==event.pointerId)return;
