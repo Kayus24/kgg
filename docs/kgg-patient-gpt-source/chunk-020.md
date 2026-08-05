@@ -2,11 +2,11 @@
 
 - Source file: `patient-pain-vertical-scale.js`
 - Characters: 1-24000
-- Full source SHA-256: `f536c3773bdcc08f377491eb2f3a65868450d62ca077bfe4fdae1b44a6188627`
+- Full source SHA-256: `42cfb5f6f2473265c4d7d4c17b71d978c2feb01c1f1ecca7c15316b26f73f3ac`
 
 ```
 (()=>{
-  const VERSION='vertical-pain-v5-lifecycle-remount';
+  const VERSION='vertical-pain-v6-mode-source';
   const STYLE_ID='kggPainVerticalStyle';
   const MODAL_ID='kggPainModal';
   const DIALOG_ID='kggPainModalDialog';
@@ -294,9 +294,18 @@
     const state=states.get(root);if(!state)return;
     if(activeRoot===root)closeModal({returnFocus:false});restoreOriginal(state);state.wrap.remove();root.classList.remove(ROOT_CLASS);states.delete(root)
   }
+  function exercisePainMode(ei){
+    const ex=safe(()=>p&&Array.isArray(p.ex)?p.ex[ei]:null);
+    const runtimeMode=String(ex&&ex.painMode||'').toLowerCase();
+    if(runtimeMode)return runtimeMode;
+    const settings=safe(()=>JSON.parse(localStorage.getItem('kggPatientExerciseSettingsV1')||'{}'))||{};
+    const planId=String(safe(()=>p.id)||'plan'),name=String(ex&&ex.n||'exercise');
+    const saved=settings[(planId+'|'+name).toLowerCase()];
+    return String(saved&&saved.painMode||'exercise').toLowerCase()
+  }
   function mountRoot(root,ei){
     const card=root.closest('.ex');
-    const setMode=Boolean(card&&card.querySelector('.kggSetPain'))||root.classList.contains('kggHiddenGlobalPain')||root.style.display==='none';
+    const setMode=exercisePainMode(ei)==='set'||Boolean(card&&card.querySelector('.kggSetPain'))||root.classList.contains('kggHiddenGlobalPain')||root.style.display==='none';
     if(setMode){teardown(root);return}
     if(!originalReady(root)||typeof setPain!=='function'||!ensureModal())return;
     let state=states.get(root);if(!state){state=buildCompact(root,ei);root.classList.add(ROOT_CLASS)}else state.ei=ei;
@@ -318,12 +327,5 @@
     ensureStyle();ensureModal();observe();mountAll();setTimeout(()=>{observe();mountAll()},250);setTimeout(mountAll,900);
     document.addEventListener('click',event=>{if(event.target&&event.target.closest&&event.target.closest('#kggLangSwitch'))setTimeout(()=>{refreshLanguage();mountAll()},0)},true);
     document.addEventListener('keydown',event=>{if(event.key==='Escape'&&modal&&!modal.overlay.hidden){event.preventDefault();closeModal()}},true);
-    const refreshAfterLifecycleChange=()=>[0,80,250].forEach(delay=>setTimeout(()=>{observe();mountAll()},delay));
-    document.addEventListener('click',event=>{
-      const target=event.target&&event.target.closest?event.target.closest('#days button,#kggDayHub button,#kggBubblePlans,#kggBubbleAdd,#kggBubbleReplace,#kggPlanScanBtn,#qr img'):null;
-      if(!target)return;
-      if(modal&&!modal.overlay.hidden)closeModal({returnFocus:false});
-      refreshAfterLifecycleChange()
-    },true);
-    addEventListener('resize',()=>scheduleMount(80),{passive:true});addEventListener('orientati
+    const refreshAfterLifecycleChange=()=>[0,80,2
 ```

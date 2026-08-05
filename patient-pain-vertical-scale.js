@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='vertical-pain-v5-lifecycle-remount';
+  const VERSION='vertical-pain-v6-mode-source';
   const STYLE_ID='kggPainVerticalStyle';
   const MODAL_ID='kggPainModal';
   const DIALOG_ID='kggPainModalDialog';
@@ -287,9 +287,18 @@
     const state=states.get(root);if(!state)return;
     if(activeRoot===root)closeModal({returnFocus:false});restoreOriginal(state);state.wrap.remove();root.classList.remove(ROOT_CLASS);states.delete(root)
   }
+  function exercisePainMode(ei){
+    const ex=safe(()=>p&&Array.isArray(p.ex)?p.ex[ei]:null);
+    const runtimeMode=String(ex&&ex.painMode||'').toLowerCase();
+    if(runtimeMode)return runtimeMode;
+    const settings=safe(()=>JSON.parse(localStorage.getItem('kggPatientExerciseSettingsV1')||'{}'))||{};
+    const planId=String(safe(()=>p.id)||'plan'),name=String(ex&&ex.n||'exercise');
+    const saved=settings[(planId+'|'+name).toLowerCase()];
+    return String(saved&&saved.painMode||'exercise').toLowerCase()
+  }
   function mountRoot(root,ei){
     const card=root.closest('.ex');
-    const setMode=Boolean(card&&card.querySelector('.kggSetPain'))||root.classList.contains('kggHiddenGlobalPain')||root.style.display==='none';
+    const setMode=exercisePainMode(ei)==='set'||Boolean(card&&card.querySelector('.kggSetPain'))||root.classList.contains('kggHiddenGlobalPain')||root.style.display==='none';
     if(setMode){teardown(root);return}
     if(!originalReady(root)||typeof setPain!=='function'||!ensureModal())return;
     let state=states.get(root);if(!state){state=buildCompact(root,ei);root.classList.add(ROOT_CLASS)}else state.ei=ei;
