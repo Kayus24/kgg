@@ -1,0 +1,39 @@
+name: KGG Patient Resource Capture
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Generate patient GPT resources
+        shell: bash
+        run: python release-pipeline/kgg_patient_gpt_resources.py --write
+      - name: Pack generated patient GPT resources
+        shell: bash
+        run: |
+          tar -czf "$RUNNER_TEMP/kgg-patient-generated-resources.tar.gz" \
+            docs/kgg-patient-gpt-context.md \
+            docs/kgg-patient-gpt-source-index.json \
+            docs/kgg-patient-gpt-source \
+            docs/kgg-patient-custom-gpt-knowledge-architecture.md \
+            docs/kgg-patient-custom-gpt-knowledge-operations.md \
+            docs/kgg-patient-custom-gpt-knowledge-safety.md \
+            docs/kgg-patient-custom-gpt-knowledge-testing.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kgg-patient-generated-resources-${{ github.run_id }}
+          path: ${{ runner.temp }}/kgg-patient-generated-resources.tar.gz
+          if-no-files-found: error
+          retention-days: 1
