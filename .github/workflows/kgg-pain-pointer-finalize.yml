@@ -1,0 +1,64 @@
+name: KGG Pain Pointer Finalize
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [synchronize]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kgg-pain-pointer-finalize-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  finalize:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Harden pointer capture and regenerate patient resources
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('patient-pain-vertical-scale.js')
+          text = path.read_text(encoding='utf-8')
+          text = text.replace("const VERSION='vertical-pain-v2-force-hide-legacy';", "const VERSION='vertical-pain-v3-safe-pointer-capture';")
+          old = "state.gesture={pointerId:event.pointerId};stage.setPointerCapture&&stage.setPointerCapture(event.pointerId);updateVisual(state,next,true)"
+          new = "state.gesture={pointerId:event.pointerId};try{stage.setPointerCapture&&stage.setPointerCapture(event.pointerId)}catch(e){}updateVisual(state,next,true)"
+          if old not in text:
+              raise SystemExit('pointer capture anchor missing')
+          text = text.replace(old, new, 1)
+          path.write_text(text, encoding='utf-8')
+          PY
+          python release-pipeline/kgg_patient_gpt_resources.py --write
+      - name: Remove finalizer and commit exact output
+        shell: bash
+        env:
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/kgg-pain-pointer-finalize.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add patient-pain-vertical-scale.js \
+            docs/kgg-patient-gpt-context.md \
+            docs/kgg-patient-gpt-source-index.json \
+            docs/kgg-patient-gpt-source \
+            docs/kgg-patient-custom-gpt-knowledge-architecture.md \
+            docs/kgg-patient-custom-gpt-knowledge-operations.md \
+            docs/kgg-patient-custom-gpt-knowledge-safety.md \
+            docs/kgg-patient-custom-gpt-knowledge-testing.md \
+            .github/workflows/kgg-pain-pointer-finalize.yml
+          git diff --cached --check
+          git commit -m "Harden vertical pain pointer capture"
+          git push origin "HEAD:${HEAD_BRANCH}"
