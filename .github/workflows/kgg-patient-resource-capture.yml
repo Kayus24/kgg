@@ -1,39 +1,50 @@
-name: KGG Patient Resource Capture
+name: KGG Patient Resource Finalize
 
 on:
   pull_request:
     branches:
       - main
-    types: [opened, synchronize, reopened]
+    types: [synchronize]
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: kgg-patient-resource-finalize-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
-  capture:
+  finalize:
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Generate patient GPT resources
+      - name: Generate exact patient GPT resources
         shell: bash
         run: python release-pipeline/kgg_patient_gpt_resources.py --write
-      - name: Pack generated patient GPT resources
+      - name: Remove one-time finalizer and commit generated output
         shell: bash
+        env:
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
         run: |
-          tar -czf "$RUNNER_TEMP/kgg-patient-generated-resources.tar.gz" \
-            docs/kgg-patient-gpt-context.md \
+          set -euo pipefail
+          rm -f .github/workflows/kgg-patient-resource-capture.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/kgg-patient-gpt-context.md \
             docs/kgg-patient-gpt-source-index.json \
             docs/kgg-patient-gpt-source \
             docs/kgg-patient-custom-gpt-knowledge-architecture.md \
             docs/kgg-patient-custom-gpt-knowledge-operations.md \
             docs/kgg-patient-custom-gpt-knowledge-safety.md \
-            docs/kgg-patient-custom-gpt-knowledge-testing.md
-      - uses: actions/upload-artifact@v4
-        with:
-          name: kgg-patient-generated-resources-${{ github.run_id }}
-          path: ${{ runner.temp }}/kgg-patient-generated-resources.tar.gz
-          if-no-files-found: error
-          retention-days: 1
+            docs/kgg-patient-custom-gpt-knowledge-testing.md \
+            .github/workflows/kgg-patient-resource-capture.yml
+          git diff --cached --check
+          git commit -m "Refresh patient GPT resources for v74 pain scale"
+          git push origin "HEAD:${HEAD_BRANCH}"
