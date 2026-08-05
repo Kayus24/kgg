@@ -104,12 +104,12 @@
     {
       "characters": 24202,
       "path": "docs/kgg-patient-gpt-source/chunk-020.md",
-      "sha256": "b7328646f4026bb11e72ef2af3914206c891c0c895f4b5d6a7e41ae36c99e0dd"
+      "sha256": "18ecfb01055cd74baa4d088be2faf55c5ebf04b0dd2f42e6f2a15cf19a91d02f"
     },
     {
-      "characters": 324,
+      "characters": 524,
       "path": "docs/kgg-patient-gpt-source/chunk-021.md",
-      "sha256": "2c31af2e0b570799e60a7322e9cb42065734ea76a5aa8457328b83534af0bb22"
+      "sha256": "f017bdb7259b063fa6cfb6c28cd8f413e43470a8836737ffae10fde0034660f1"
     },
     {
       "characters": 9494,
@@ -259,9 +259,9 @@
       "sha256": "317abaac251d0bc9db75f7fa200d9da7f651351b23680bd3c780784065da1e15"
     },
     {
-      "characters": 24119,
+      "characters": 24319,
       "path": "patient-pain-vertical-scale.js",
-      "sha256": "e72ea4b1b508d280dea3aa22458f1fda564d31a808617df4e3d33352c143bc57"
+      "sha256": "f536c3773bdcc08f377491eb2f3a65868450d62ca077bfe4fdae1b44a6188627"
     },
     {
       "characters": 9302,

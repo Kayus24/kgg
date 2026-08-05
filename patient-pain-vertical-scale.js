@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='vertical-pain-v4-floating-modal';
+  const VERSION='vertical-pain-v5-lifecycle-remount';
   const STYLE_ID='kggPainVerticalStyle';
   const MODAL_ID='kggPainModal';
   const DIALOG_ID='kggPainModalDialog';
@@ -311,7 +311,13 @@
     ensureStyle();ensureModal();observe();mountAll();setTimeout(()=>{observe();mountAll()},250);setTimeout(mountAll,900);
     document.addEventListener('click',event=>{if(event.target&&event.target.closest&&event.target.closest('#kggLangSwitch'))setTimeout(()=>{refreshLanguage();mountAll()},0)},true);
     document.addEventListener('keydown',event=>{if(event.key==='Escape'&&modal&&!modal.overlay.hidden){event.preventDefault();closeModal()}},true);
-    document.addEventListener('click',event=>{if(!modal||modal.overlay.hidden)return;const target=event.target&&event.target.closest?event.target.closest('#days button,#kggBubblePlans,#kggBubbleAdd,#kggBubbleReplace,#kggPlanScanBtn,#qr img'):null;if(target)closeModal({returnFocus:false})},true);
+    const refreshAfterLifecycleChange=()=>[0,80,250].forEach(delay=>setTimeout(()=>{observe();mountAll()},delay));
+    document.addEventListener('click',event=>{
+      const target=event.target&&event.target.closest?event.target.closest('#days button,#kggDayHub button,#kggBubblePlans,#kggBubbleAdd,#kggBubbleReplace,#kggPlanScanBtn,#qr img'):null;
+      if(!target)return;
+      if(modal&&!modal.overlay.hidden)closeModal({returnFocus:false});
+      refreshAfterLifecycleChange()
+    },true);
     addEventListener('resize',()=>scheduleMount(80),{passive:true});addEventListener('orientationchange',()=>scheduleMount(180),{passive:true});addEventListener('pagehide',()=>closeModal({returnFocus:false}))
   }
   if(window.__KGG_TEST__)window.__kggPainVerticalTest={clampValue,valueFromY,currentText};
