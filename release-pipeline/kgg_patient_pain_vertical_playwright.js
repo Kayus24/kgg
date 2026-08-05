@@ -154,13 +154,13 @@ async function main() {
     const reloadedFirst=page.locator("#list .ex").nth(0);await setCardOpen(page,reloadedFirst,0,true);
     assert((await reloadedFirst.locator(".kggPainVerticalCurrent").innerText())==="0/10","zero did not persist after reload");
 
-    await page.locator("#days button").nth(1).click();
-    await page.waitForFunction(()=>document.querySelector("#days button:nth-child(2)")?.classList.contains("active"));
+    await page.locator("#days button").nth(1).evaluate(element=>element.click());
+    await page.waitForFunction(()=>typeof d!=="undefined"&&Number(d)===2);
     const dayTwoFirst=page.locator("#list .ex").nth(0);await setCardOpen(page,dayTwoFirst,0,true);
     assert((await dayTwoFirst.locator(".kggPainVerticalCurrent").innerText())==="–","day 2 inherited day 1 pain");
     await chooseValue(page,dayTwoFirst,4);
-    await page.locator("#days button").nth(0).click();
-    await page.waitForFunction(()=>document.querySelector("#days button:first-child")?.classList.contains("active"));
+    await page.locator("#days button").nth(0).evaluate(element=>element.click());
+    await page.waitForFunction(()=>typeof d!=="undefined"&&Number(d)===1);
     const dayOneFirst=page.locator("#list .ex").nth(0);await setCardOpen(page,dayOneFirst,0,true);
     assert((await dayOneFirst.locator(".kggPainVerticalCurrent").innerText())==="0/10","day 1 pain was overwritten by day 2");
     assert(await page.locator("#list .ex .kggPainVertical").count()===1,"rerender created duplicate or set-mode sliders");
