@@ -99,7 +99,11 @@ async function main() {
     await toggle.click();
     await page.waitForFunction(()=>document.querySelector("#list .ex .kggPainVerticalToggle")?.getAttribute("aria-expanded")==="true");
     await stage.waitFor({state:"visible"});
+    await stage.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(60);
     const box=await stage.boundingBox();assert(box,"slider box missing for drag");
+    const viewport=page.viewportSize();
+    assert(viewport&&box.y>=0&&box.y+box.height<=viewport.height+1,`slider endpoints are outside the viewport: ${JSON.stringify({box,viewport})}`);
     await page.mouse.move(box.x+35,box.y+box.height-22);await page.mouse.down();await page.mouse.move(box.x+35,box.y+22,{steps:8});await page.mouse.up();
     await page.waitForFunction(()=>document.querySelector("#list .ex .kggPainVerticalCurrent")?.textContent==="10/10");
 
