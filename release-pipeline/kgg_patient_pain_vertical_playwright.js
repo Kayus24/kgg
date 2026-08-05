@@ -42,6 +42,16 @@ async function chooseValue(page, card, value) {
   await card.locator(`.kggPainVerticalValue[data-kgg-pain-value="${value}"]`).click();
   await page.waitForFunction(({ value }) => document.querySelector("#list .ex .kggPainVerticalCurrent")?.textContent === `${value}/10`, { value });
 }
+async function centerFullyExpandedStage(page, stage) {
+  await page.waitForTimeout(280);
+  await stage.evaluate(element => {
+    const rect=element.getBoundingClientRect();
+    const absoluteTop=rect.top+window.scrollY;
+    const target=Math.max(0,absoluteTop-(window.innerHeight-rect.height)/2);
+    window.scrollTo({top:target,behavior:"instant"});
+  });
+  await page.waitForTimeout(80);
+}
 async function touchDrag(cdp, x, startY, endY, steps=8) {
   const point = y => ({ x:Math.round(x), y:Math.round(y), radiusX:8, radiusY:8, force:1, id:1 });
   await cdp.send("Input.dispatchTouchEvent", { type:"touchStart", touchPoints:[point(startY)] });
@@ -109,8 +119,7 @@ async function main() {
     await toggle.click();
     await page.waitForFunction(()=>document.querySelector("#list .ex .kggPainVerticalToggle")?.getAttribute("aria-expanded")==="true");
     await stage.waitFor({state:"visible"});
-    await stage.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(60);
+    await centerFullyExpandedStage(page,stage);
     const box=await stage.boundingBox();assert(box,"slider box missing for drag");
     const viewport=page.viewportSize();
     assert(viewport&&box.y>=0&&box.y+box.height<=viewport.height+1,`slider endpoints are outside the viewport: ${JSON.stringify({box,viewport})}`);
@@ -122,10 +131,10 @@ async function main() {
     await page.waitForTimeout(450);
     const dragState=await page.evaluate(()=>{
       const card=document.querySelector("#list .ex");
-      const stage=card&&card.querySelector(".kggPainVerticalStage");
+      const slider=card&&card.querySelector(".kggPainVerticalStage");
       return{
         current:card&&card.querySelector(".kggPainVerticalCurrent")?.textContent,
-        ariaNow:stage&&stage.getAttribute("aria-valuenow"),
+        ariaNow:slider&&slider.getAttribute("aria-valuenow"),
         expanded:card&&card.querySelector(".kggPainVerticalToggle")?.getAttribute("aria-expanded"),
         pointerLog:window.__kggPainPointerLog||[],
         values:typeof v!=="undefined"?Object.assign({},v):null
