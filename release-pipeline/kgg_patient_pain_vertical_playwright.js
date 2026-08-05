@@ -36,21 +36,14 @@ async function setCardOpen(page, card, index, open) {
   if (isOpen !== open) await card.locator("h3").click();
   await page.waitForFunction(({ index, open }) => Boolean(document.querySelectorAll("#list .ex")[index]?.classList.contains("kggOpen")) === open, { index, open });
 }
-async function chooseValue(page, card, value) {
-  const toggle = card.locator(".kggPainVerticalToggle");
+async function openModal(toggle, modal) {
   if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
-  await card.locator(`.kggPainVerticalValue[data-kgg-pain-value="${value}"]`).click();
-  await page.waitForFunction(({ value }) => document.querySelector("#list .ex .kggPainVerticalCurrent")?.textContent === `${value}/10`, { value });
+  await modal.waitFor({ state:"visible" });
 }
-async function centerFullyExpandedStage(page, stage) {
-  await page.waitForTimeout(280);
-  await stage.evaluate(element => {
-    const rect=element.getBoundingClientRect();
-    const absoluteTop=rect.top+window.scrollY;
-    const target=Math.max(0,absoluteTop-(window.innerHeight-rect.height)/2);
-    window.scrollTo({top:target,behavior:"instant"});
-  });
-  await page.waitForTimeout(80);
+async function chooseValue(page, value) {
+  const modal=page.locator("#kggPainModal");
+  await modal.locator(`.kggPainVerticalValue[data-kgg-pain-value="${value}"]`).click();
+  await page.waitForFunction(({ value }) => document.querySelector("#kggPainModal .kggPainVerticalStage")?.getAttribute("aria-valuenow") === String(value), { value });
 }
 async function pointerDrag(stage, x, startY, endY, steps=8) {
   await stage.evaluate((element, gesture) => {
@@ -92,81 +85,103 @@ async function main() {
     const first=cards.nth(0),second=cards.nth(1);
     await setCardOpen(page,first,0,true);
     const toggle=first.locator(".kggPainVerticalToggle");
+    const modal=page.locator("#kggPainModal");
     await toggle.waitFor({state:"visible"});
-    assert((await first.locator(".kggPainVerticalLabel").innerText())==="Schmerzen bei der Übung","compact label is wrong");
+    assert((await first.locator(".kggPainVerticalLabel").innerText())==="Schmerzen bei der Übung?","compact label is wrong");
     assert((await first.locator(".kggPainVerticalCurrent").innerText())==="–","unset value must show a dash");
     assert((await toggle.getAttribute("aria-expanded"))==="false","scale must start closed");
+    assert(await page.locator("#kggPainModal").count()===1,"floating pain modal must be a singleton");
     const legacy=first.locator(":scope > .pain > .painRow");
     assert(await legacy.isHidden(),"legacy horizontal scale is still visible");
     assert(await legacy.evaluate(el=>el.inert===true&&el.getAttribute("aria-hidden")==="true"),"legacy scale is not inert and aria-hidden");
     assert(await second.locator(".kggSetPain").count()>0,"set-pain mode was not created");
-    assert(await second.locator(".kggPainVertical").count()===0,"exercise-pain slider must not appear in set-pain mode");
+    assert(await second.locator(".kggPainVertical").count()===0,"exercise-pain trigger must not appear in set-pain mode");
 
-    await toggle.click();
-    const stage=first.locator(".kggPainVerticalStage");
-    await stage.waitFor({state:"visible"});
-    const top=first.locator('.kggPainVerticalValue[data-kgg-pain-value="10"]');
-    const bottom=first.locator('.kggPainVerticalValue[data-kgg-pain-value="0"]');
-    const pain=first.locator(":scope > .pain");
-    const topBox=await top.boundingBox(),bottomBox=await bottom.boundingBox(),stageBox=await stage.boundingBox(),painBox=await pain.boundingBox();
-    assert(topBox&&bottomBox&&topBox.y<bottomBox.y,"10 must be above 0");
-    assert(stageBox&&painBox&&Math.abs((painBox.x+painBox.width)-(stageBox.x+stageBox.width))<4,`vertical scale is not right aligned inside pain content: ${JSON.stringify({stageBox,painBox})}`);
-    assert(stageBox&&painBox&&(stageBox.x+stageBox.width/2)>(painBox.x+painBox.width/2),"vertical scale is not in the right half of the pain content");
-    assert(await stage.evaluate(el=>getComputedStyle(el).touchAction)==="none","slider touch zone must disable page scrolling");
-    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),"slider creates horizontal overflow");
+    await page.evaluate(()=>window.scrollTo(0,Math.min(250,document.documentElement.scrollHeight-window.innerHeight)));
+    const before=await page.evaluate(()=>({scrollY:window.scrollY,first:document.querySelectorAll("#list .ex")[0].getBoundingClientRect(),second:document.querySelectorAll("#list .ex")[1].getBoundingClientRect()}));
+    await openModal(toggle,modal);
+    const after=await page.evaluate(()=>({scrollY:window.scrollY,first:document.querySelectorAll("#list .ex")[0].getBoundingClientRect(),second:document.querySelectorAll("#list .ex")[1].getBoundingClientRect(),bodyPosition:getComputedStyle(document.body).position}));
+    assert(Math.abs(before.first.height-after.first.height)<1,"opening modal changed exercise-card height");
+    assert(Math.abs(before.second.top-after.second.top)<1,"opening modal shifted following exercise");
+    assert(after.bodyPosition==="fixed","background scroll was not locked");
+    const modalStyle=await modal.evaluate(el=>{const s=getComputedStyle(el);return{position:s.position,zIndex:Number(s.zIndex),backdrop:s.backdropFilter||s.webkitBackdropFilter,background:s.backgroundColor}});
+    assert(modalStyle.position==="fixed","pain window is not a fixed overlay");
+    assert(modalStyle.zIndex===9500,"pain overlay z-index contract changed");
+    assert(modalStyle.backdrop&&modalStyle.backdrop!=="none","pain overlay has no blur");
+    assert((await modal.locator("#kggPainModalTitle").innerText())==="Schmerzen bei der Übung?","modal title is wrong");
+    assert((await modal.locator("#kggPainModalMaxDescription").innerText())==="Schlimmster vorstellbarer Schmerz","maximum description is wrong");
+    assert((await modal.locator("#kggPainModalMinDescription").innerText())==="Gar kein Schmerz","minimum description is wrong");
+    const maxDescBox=await modal.locator("#kggPainModalMaxDescription").boundingBox();
+    const minDescBox=await modal.locator("#kggPainModalMinDescription").boundingBox();
+    const tenBox=await modal.locator('[data-kgg-pain-value="10"]').boundingBox();
+    const zeroBox=await modal.locator('[data-kgg-pain-value="0"]').boundingBox();
+    assert(maxDescBox&&tenBox&&maxDescBox.y+maxDescBox.height<=tenBox.y+1,"maximum description is not above 10");
+    assert(minDescBox&&zeroBox&&minDescBox.y>=zeroBox.y+zeroBox.height-1,"minimum description is not below 0");
+    assert(await page.locator("body > *:not(#kggPainModal)[inert]").count()>0,"background content was not made inert");
 
-    await first.locator('.kggPainVerticalValue[data-kgg-pain-value="7"]').click();
-    await page.waitForFunction(()=>document.querySelector("#list .ex .kggPainVerticalCurrent")?.textContent==="7/10");
+    await chooseValue(page,7);
+    assert((await first.locator(".kggPainVerticalCurrent").innerText())==="7/10","tap did not update compact value");
+    assert(await modal.isVisible(),"modal auto-closed after choosing a value");
+    assert((await toggle.getAttribute("aria-expanded"))==="true","trigger no longer reports open modal");
     assert((await first.locator(".kggCardProgress").getAttribute("data-kgg-progress"))==="open","pain alone changed exercise progress");
-    await page.waitForFunction(()=>document.querySelector("#list .ex .kggPainVerticalToggle")?.getAttribute("aria-expanded")==="false");
 
-    await toggle.click();
-    await page.waitForFunction(()=>document.querySelector("#list .ex .kggPainVerticalToggle")?.getAttribute("aria-expanded")==="true");
-    await stage.waitFor({state:"visible"});
-    await centerFullyExpandedStage(page,stage);
-    const box=await stage.boundingBox();assert(box,"slider box missing for drag");
-    const viewport=page.viewportSize();
-    assert(viewport&&box.y>=0&&box.y+box.height<=viewport.height+1,`slider endpoints are outside the viewport: ${JSON.stringify({box,viewport})}`);
-    await stage.evaluate(el=>{
-      window.__kggPainPointerLog=[];
-      ["pointerdown","pointermove","pointerup","pointercancel"].forEach(type=>el.addEventListener(type,event=>window.__kggPainPointerLog.push({type,pointerId:event.pointerId,pointerType:event.pointerType,clientY:event.clientY}),true));
-    });
-    await pointerDrag(stage,box.x+35,box.y+box.height-22,box.y+22,8);
-    await page.waitForTimeout(450);
-    const dragState=await page.evaluate(()=>{
-      const card=document.querySelector("#list .ex");
-      const slider=card&&card.querySelector(".kggPainVerticalStage");
-      return{
-        current:card&&card.querySelector(".kggPainVerticalCurrent")?.textContent,
-        ariaNow:slider&&slider.getAttribute("aria-valuenow"),
-        expanded:card&&card.querySelector(".kggPainVerticalToggle")?.getAttribute("aria-expanded"),
-        pointerLog:window.__kggPainPointerLog||[],
-        values:typeof v!=="undefined"?Object.assign({},v):null
-      }
-    });
-    const pointerTypes=dragState.pointerLog.map(event=>event.type);
-  assert(pointerTypes[0]==="pointerdown"&&pointerTypes.includes("pointermove")&&pointerTypes.at(-1)==="pointerup",`pointer drag sequence is incomplete: ${JSON.stringify(dragState)}`);
-  assert(dragState.current==="10/10",`pointer drag did not commit 10: ${JSON.stringify(dragState)}`);
+    const stage=modal.locator(".kggPainVerticalStage");
+    const stageBox=await stage.boundingBox();assert(stageBox,"slider box missing for drag");
+    await pointerDrag(stage,stageBox.x+35,stageBox.y+stageBox.height-stageBox.height/22,stageBox.y+stageBox.height/22,8);
+    await page.waitForFunction(()=>document.querySelector("#list .ex .kggPainVerticalCurrent")?.textContent==="10/10");
+    assert(await modal.isVisible(),"modal closed after pointer drag");
 
-    await chooseValue(page,first,0);
+    const dialog=modal.locator("#kggPainModalDialog");
+    await dialog.click({position:{x:20,y:20}});
+    assert(await modal.isVisible(),"click inside dialog closed modal");
+    await modal.click({position:{x:8,y:8}});
+    await modal.waitFor({state:"hidden"});
+    await page.waitForTimeout(30);
+    const restored=await page.evaluate(()=>({scrollY:window.scrollY,bodyPosition:getComputedStyle(document.body).position,active:document.activeElement?.className||""}));
+    assert(Math.abs(restored.scrollY-before.scrollY)<=1,"closing modal did not restore scroll position");
+    assert(restored.bodyPosition!=="fixed","closing modal did not unlock body");
+    assert(String(restored.active).includes("kggPainVerticalToggle"),"focus did not return to pain trigger");
+
+    await openModal(toggle,modal);
+    await chooseValue(page,0);
     assert((await first.locator(".kggPainVerticalCurrent").innerText())==="0/10","selected zero was treated as unset");
+    await modal.locator(".kggPainModalClose").click();
+    await modal.waitFor({state:"hidden"});
     await page.reload({waitUntil:"domcontentloaded"});await waitForRuntime(page);
     const reloadedFirst=page.locator("#list .ex").nth(0);await setCardOpen(page,reloadedFirst,0,true);
     assert((await reloadedFirst.locator(".kggPainVerticalCurrent").innerText())==="0/10","zero did not persist after reload");
 
+    const reloadedToggle=reloadedFirst.locator(".kggPainVerticalToggle");
+    await openModal(reloadedToggle,page.locator("#kggPainModal"));
     await page.locator("#days button").nth(1).evaluate(element=>element.click());
     await page.waitForFunction(()=>typeof d!=="undefined"&&Number(d)===2);
+    assert(await page.locator("#kggPainModal").isHidden(),"day change did not close pain modal");
     const dayTwoFirst=page.locator("#list .ex").nth(0);await setCardOpen(page,dayTwoFirst,0,true);
     assert((await dayTwoFirst.locator(".kggPainVerticalCurrent").innerText())==="–","day 2 inherited day 1 pain");
-    await chooseValue(page,dayTwoFirst,4);
+    await openModal(dayTwoFirst.locator(".kggPainVerticalToggle"),page.locator("#kggPainModal"));
+    await chooseValue(page,4);
+    await page.locator("#kggPainModal .kggPainModalClose").click();
     await page.locator("#days button").nth(0).evaluate(element=>element.click());
     await page.waitForFunction(()=>typeof d!=="undefined"&&Number(d)===1);
     const dayOneFirst=page.locator("#list .ex").nth(0);await setCardOpen(page,dayOneFirst,0,true);
     assert((await dayOneFirst.locator(".kggPainVerticalCurrent").innerText())==="0/10","day 1 pain was overwritten by day 2");
-    assert(await page.locator("#list .ex .kggPainVertical").count()===1,"rerender created duplicate or set-mode sliders");
-    console.log("Patient vertical pain Playwright smoke: PASS");
+    assert(await page.locator("#kggPainModal").count()===1,"rerender created duplicate overlays");
+    assert(await page.locator("#list .ex .kggPainVertical").count()===1,"rerender created duplicate or set-mode triggers");
+
+    await page.setViewportSize({width:844,height:390});
+    await openModal(dayOneFirst.locator(".kggPainVerticalToggle"),page.locator("#kggPainModal"));
+    const shortViewport=await page.evaluate(()=>{
+      const dialog=document.getElementById("kggPainModalDialog")?.getBoundingClientRect();
+      const ten=document.querySelector('[data-kgg-pain-value="10"]')?.getBoundingClientRect();
+      const zero=document.querySelector('[data-kgg-pain-value="0"]')?.getBoundingClientRect();
+      return{dialog,ten,zero,height:innerHeight,width:document.documentElement.scrollWidth};
+    });
+    assert(shortViewport.dialog&&shortViewport.dialog.top>=0&&shortViewport.dialog.bottom<=shortViewport.height+1,"dialog overflows short viewport");
+    assert(shortViewport.ten&&shortViewport.zero&&shortViewport.ten.top>=0&&shortViewport.zero.bottom<=shortViewport.height+1,"0 or 10 is unreachable in short viewport");
+    assert(shortViewport.width<=844+1,"modal creates horizontal overflow");
+    console.log("Patient vertical pain floating modal Playwright smoke: PASS");
   } finally {
     await context.close();await browser.close();await new Promise(resolve=>server.close(resolve));
   }
 }
-main().catch(error=>{console.error(`Patient vertical pain Playwright smoke failed: ${error.stack||error.message}`);process.exitCode=1;});
+main().catch(error=>{console.error(`Patient vertical pain floating modal Playwright smoke failed: ${error.stack||error.message}`);process.exitCode=1;});
