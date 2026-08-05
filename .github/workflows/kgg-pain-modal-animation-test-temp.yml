@@ -1,0 +1,47 @@
+name: KGG Pain Modal Animation Test Temp
+
+on:
+  push:
+    branches:
+      - feat/patient-vertical-pain-scale-v74
+    paths:
+      - .github/workflows/kgg-pain-modal-animation-test-temp.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/patient-vertical-pain-scale-v74
+          fetch-depth: 0
+      - name: Wait for modal animation before geometry assertions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          path=Path('release-pipeline/kgg_patient_pain_vertical_playwright.js')
+          text=path.read_text(encoding='utf-8')
+          old='''    await openModal(toggle,modal);
+              const after=await page.evaluate(()=>{'''
+          new='''    await openModal(toggle,modal);
+              await page.waitForTimeout(220);
+              const after=await page.evaluate(()=>{'''
+          if old not in text: raise SystemExit('modal baseline target not found')
+          path.write_text(text.replace(old,new,1),encoding='utf-8',newline='\n')
+          PY
+          node --check release-pipeline/kgg_patient_pain_vertical_playwright.js
+      - name: Commit correction and remove temp workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git rm .github/workflows/kgg-pain-modal-animation-test-temp.yml
+          git add release-pipeline/kgg_patient_pain_vertical_playwright.js
+          git commit -m "test(patient): measure pain endpoints after modal animation"
+          git push origin HEAD:feat/patient-vertical-pain-scale-v74
