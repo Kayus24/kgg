@@ -48,4 +48,5 @@ assert(!source.includes("localStorage.setItem("), "vertical pain UI must not cre
 assert(source.includes("pointercancel"), "pointer cancellation contract is missing");
 assert(source.includes("aria-orientation','vertical'"), "vertical slider accessibility contract is missing");
 assert(source.includes("row.inert=true"), "hidden legacy controls are not made inert");
+assert(source.includes("restoreOriginal(state)"), "legacy pain fallback cannot be restored after teardown");
 console.log("Patient vertical pain smoke: PASS");
