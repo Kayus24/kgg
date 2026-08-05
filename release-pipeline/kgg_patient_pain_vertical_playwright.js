@@ -42,6 +42,15 @@ async function chooseValue(page, card, value) {
   await card.locator(`.kggPainVerticalValue[data-kgg-pain-value="${value}"]`).click();
   await page.waitForFunction(({ value }) => document.querySelector("#list .ex .kggPainVerticalCurrent")?.textContent === `${value}/10`, { value });
 }
+async function touchDrag(cdp, x, startY, endY, steps=8) {
+  const point = y => ({ x:Math.round(x), y:Math.round(y), radiusX:8, radiusY:8, force:1, id:1 });
+  await cdp.send("Input.dispatchTouchEvent", { type:"touchStart", touchPoints:[point(startY)] });
+  for (let step=1; step<=steps; step+=1) {
+    const y=startY+(endY-startY)*(step/steps);
+    await cdp.send("Input.dispatchTouchEvent", { type:"touchMove", touchPoints:[point(y)] });
+  }
+  await cdp.send("Input.dispatchTouchEvent", { type:"touchEnd", touchPoints:[] });
+}
 async function main() {
   const server = http.createServer((request,response) => {
     const file=safeFile(request.url);
@@ -52,8 +61,9 @@ async function main() {
   await new Promise(resolve=>server.listen(0,"127.0.0.1",resolve));
   const {port}=server.address();
   const browser=await chromium.launch({headless:true});
-  const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:"allow"});
+  const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:"allow",hasTouch:true});
   const page=await context.newPage();
+  const cdp=await context.newCDPSession(page);
   const plan={i:"vertical-pain-playwright",t:"Vertikale Schmerzskala",v:1,d:6,e:[["Beinpresse",1,"B","kg","Wdh"],["Satzschmerz",2,"B","kg","Wdh"]]};
   const payload=`KGGH2:${encodePlan(plan)}`;
   const url=`http://127.0.0.1:${port}/kgg/?plan=${encodeURIComponent(payload)}`;
@@ -104,8 +114,24 @@ async function main() {
     const box=await stage.boundingBox();assert(box,"slider box missing for drag");
     const viewport=page.viewportSize();
     assert(viewport&&box.y>=0&&box.y+box.height<=viewport.height+1,`slider endpoints are outside the viewport: ${JSON.stringify({box,viewport})}`);
-    await page.mouse.move(box.x+35,box.y+box.height-22);await page.mouse.down();await page.mouse.move(box.x+35,box.y+22,{steps:8});await page.mouse.up();
-    await page.waitForFunction(()=>document.querySelector("#list .ex .kggPainVerticalCurrent")?.textContent==="10/10");
+    await stage.evaluate(el=>{
+      window.__kggPainPointerLog=[];
+      ["pointerdown","pointermove","pointerup","pointercancel"].forEach(type=>el.addEventListener(type,event=>window.__kggPainPointerLog.push({type,pointerId:event.pointerId,pointerType:event.pointerType,clientY:event.clientY}),true));
+    });
+    await touchDrag(cdp,box.x+35,box.y+box.height-22,box.y+22,8);
+    await page.waitForTimeout(450);
+    const dragState=await page.evaluate(()=>{
+      const card=document.querySelector("#list .ex");
+      const stage=card&&card.querySelector(".kggPainVerticalStage");
+      return{
+        current:card&&card.querySelector(".kggPainVerticalCurrent")?.textContent,
+        ariaNow:stage&&stage.getAttribute("aria-valuenow"),
+        expanded:card&&card.querySelector(".kggPainVerticalToggle")?.getAttribute("aria-expanded"),
+        pointerLog:window.__kggPainPointerLog||[],
+        values:typeof v!=="undefined"?Object.assign({},v):null
+      }
+    });
+    assert(dragState.current==="10/10",`touch drag did not commit 10: ${JSON.stringify(dragState)}`);
 
     await chooseValue(page,first,0);
     assert((await first.locator(".kggPainVerticalCurrent").innerText())==="0/10","selected zero was treated as unset");
