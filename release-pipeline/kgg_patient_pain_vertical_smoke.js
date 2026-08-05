@@ -48,7 +48,11 @@ assert(source.includes("if(event.target===overlay)"),"backdrop-only close contra
 assert(source.includes("body.style.position='fixed'"),"scroll lock contract is missing");
 assert(source.includes("window.scrollTo(0,lock.scrollY)"),"scroll restoration contract is missing");
 assert(source.includes("node.inert=true"),"background inert contract is missing");
-assert(source.includes("card.querySelector('.kggSetPain')"),"set-pain mode exclusion is missing");
+assert(source.includes("function exercisePainMode(ei)"),"pain-mode source reader is missing");
+assert(source.includes("ex&&ex.painMode"),"runtime exercise pain mode is not checked");
+assert(source.includes("kggPatientExerciseSettingsV1"),"saved pain-mode fallback is not checked");
+assert(source.includes("exercisePainMode(ei)==='set'"),"set-pain mode is not blocked before DOM enhancement");
+assert(source.includes("card.querySelector('.kggSetPain')"),"set-pain DOM fallback is missing");
 assert(source.includes("typeof setPain==='function'"),"existing exercise-pain commit handler is not reused");
 assert(!source.includes("localStorage.setItem("),"vertical pain UI must not create a second storage writer");
 assert(source.includes("pointercancel"),"pointer cancellation contract is missing");
