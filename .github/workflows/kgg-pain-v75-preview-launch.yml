@@ -1,0 +1,38 @@
+name: KGG Vertical Pain v75 Preview Launch
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [synchronize]
+
+permissions:
+  actions: read
+  checks: read
+  contents: write
+  pull-requests: write
+  statuses: read
+
+concurrency:
+  group: kgg-pain-v75-preview-launch-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    uses: ./.github/workflows/kgg-patient-gpt-preview-gate.yml
+    with:
+      mode: validate_only
+      request_id: patient-vertical-pain-v75-preview-a
+      payload_json: >-
+        {"request_id":"patient-vertical-pain-v75-preview-a","base_sha":"${{ github.sha }}","title":"Vertikale Schmerzskala für Übungsschmerzen","summary":"Kennzeichnet den vollständig geprüften vertikalen Übungsschmerz-Regler als reproduzierbaren mobilen Preview-Kandidaten.","version_slug":"vertical-exercise-pain","risk_class":"standard","touched_areas":["patient-ui"],"required_tests":["patient-pwa","patient-browser","ui-stability"],"operations":[{"type":"replace_exact","path":"patient-pain-vertical-scale.js","old_sha256":"adedf8db2ca9c91a1f0c9d7964faef1b8f96dc249edd0d09c30ec1abe176b663","old_text":"const VERSION='vertical-pain-v3-safe-pointer-capture';","new_text":"const VERSION='vertical-pain-v4-mobile-preview-candidate';"}]}
+    secrets: inherit
+
+  publish:
+    needs: validate
+    uses: ./.github/workflows/kgg-patient-gpt-preview-gate.yml
+    with:
+      mode: publish_preview
+      request_id: patient-vertical-pain-v75-preview-a
+      payload_json: >-
+        {"request_id":"patient-vertical-pain-v75-preview-a","base_sha":"${{ github.sha }}","title":"Vertikale Schmerzskala für Übungsschmerzen","summary":"Kennzeichnet den vollständig geprüften vertikalen Übungsschmerz-Regler als reproduzierbaren mobilen Preview-Kandidaten.","version_slug":"vertical-exercise-pain","risk_class":"standard","touched_areas":["patient-ui"],"required_tests":["patient-pwa","patient-browser","ui-stability"],"operations":[{"type":"replace_exact","path":"patient-pain-vertical-scale.js","old_sha256":"adedf8db2ca9c91a1f0c9d7964faef1b8f96dc249edd0d09c30ec1abe176b663","old_text":"const VERSION='vertical-pain-v3-safe-pointer-capture';","new_text":"const VERSION='vertical-pain-v4-mobile-preview-candidate';"}]}
+    secrets: inherit
