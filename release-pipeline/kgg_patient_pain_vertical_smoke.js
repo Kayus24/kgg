@@ -9,6 +9,7 @@ const ROOT = path.resolve(__dirname, "..");
 const sourcePath = path.join(ROOT, "patient-pain-vertical-scale.js");
 const source = fs.readFileSync(sourcePath, "utf8");
 const browserSource = fs.readFileSync(path.join(ROOT, "release-pipeline/kgg_patient_pain_vertical_playwright.js"), "utf8");
+const resourceManifest = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/kgg-custom-gpt-resource-manifest.json"), "utf8"));
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -55,4 +56,6 @@ assert(source.includes("row.style.removeProperty('display')"), "legacy pain row 
 assert(source.includes("restoreOriginal(state)"), "legacy pain fallback cannot be restored after teardown");
 assert(browserSource.includes('nth(1).evaluate(element=>element.click())'), "day-2 separation test still depends on top-bar visibility");
 assert(browserSource.includes('typeof d!=="undefined"&&Number(d)===1'), "day-1 return does not verify the runtime day");
+assert(resourceManifest.patientProduction && resourceManifest.patientProduction.knowledge.length === 4, "patient GPT resource manifest knowledge contract is incomplete");
+assert(resourceManifest.patientProduction.knowledge.every(item => /^[a-f0-9]{64}$/.test(item.sha256)), "patient GPT resource manifest contains an invalid digest");
 console.log("Patient vertical pain smoke: PASS");
