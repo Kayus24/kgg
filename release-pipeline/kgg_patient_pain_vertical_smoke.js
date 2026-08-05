@@ -41,6 +41,7 @@ assert(source.includes("Schlimmster vorstellbarer Schmerz"),"maximum pain descri
 assert(source.includes("Gar kein Schmerz"),"minimum pain description is missing");
 assert(source.includes("Worst imaginable pain")&&source.includes("No pain at all"),"English endpoint descriptions are missing");
 assert(source.includes("const MODAL_ID='kggPainModal'"),"singleton modal contract is missing");
+assert(source.includes("toggle.setAttribute('aria-haspopup','dialog')"),"pain trigger does not expose dialog semantics");
 assert(source.includes("document.body.appendChild(overlay)"),"floating modal is not mounted under body");
 assert(source.includes("backdrop-filter:blur(4px)"),"background blur is missing");
 assert(source.includes("if(event.target===overlay)"),"backdrop-only close contract is missing");
