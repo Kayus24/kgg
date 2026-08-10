@@ -1,5 +1,0 @@
-{
-  "releaseId": "r0425",
-  "versionName": "1.0.62-tablet-recent-package-shell-geometry",
-  "notes": "v062: Die bereits bestätigte Tablet-Historien-Shell bleibt unverändert; zusätzlich übernimmt sie exakt die grüne Arbeitsflächen-Geometrie des Übungspakete-Overlays, damit der Hintergrund beim Öffnen nicht mehr verspringt."
-}

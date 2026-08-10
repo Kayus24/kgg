@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0425",
+  "versionName": "1.0.62-tablet-recent-package-shell-geometry",
+  "notes": "v062: Die bereits bestätigte Tablet-Historien-Shell bleibt unverändert; zusätzlich übernimmt sie exakt die grüne Arbeitsflächen-Geometrie des Übungspakete-Overlays, damit der Hintergrund beim Öffnen nicht mehr verspringt.",
+  "createdAt": "2026-08-10T17:47:38Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0425",
+      "profile": "admin",
+      "versionName": "1.0.62-tablet-recent-package-shell-geometry",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0425/admin.html",
+      "sha256": "af274863e5f0e01442b2756ba8517b49f481c86b6bc9a380976c9bfa335d38ec",
+      "notes": "v062: Die bereits bestätigte Tablet-Historien-Shell bleibt unverändert; zusätzlich übernimmt sie exakt die grüne Arbeitsflächen-Geometrie des Übungspakete-Overlays, damit der Hintergrund beim Öffnen nicht mehr verspringt."
+    },
+    "colleague": {
+      "releaseId": "r0425",
+      "profile": "colleague",
+      "versionName": "1.0.62-tablet-recent-package-shell-geometry",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0425/colleague.html",
+      "sha256": "d9d27b99663b4d382220063446a718a667c8c61ca8cf813e68e41d0fcb6af202",
+      "notes": "v062: Die bereits bestätigte Tablet-Historien-Shell bleibt unverändert; zusätzlich übernimmt sie exakt die grüne Arbeitsflächen-Geometrie des Übungspakete-Overlays, damit der Hintergrund beim Öffnen nicht mehr verspringt."
+    }
+  }
+}
