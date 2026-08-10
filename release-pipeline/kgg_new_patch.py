@@ -233,7 +233,15 @@ def prepare(args: argparse.Namespace) -> tuple[dict[Path, bytes], dict]:
     assembled = b"".join(assembled_parts)
     builder.validate_assembled(assembled, manifest)
     digest = hashlib.sha256(assembled).hexdigest()
-    version.update({"versionCode": code, "versionName": version_name, "indexUrl": f"index.html?v={code}", "sha256": digest})
+    version.update(
+        {
+            "versionCode": code,
+            "versionName": version_name,
+            "indexUrl": f"index.html?v={code}",
+            "sha256": digest,
+            "notes": f"v{code:03d}: {args.summary.strip()}",
+        }
+    )
     planned[VERSION] = (json.dumps(version, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
     planned[ROOT / "kgg-update" / "index.html"] = assembled
     report = {

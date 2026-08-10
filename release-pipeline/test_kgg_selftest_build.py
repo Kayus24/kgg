@@ -247,6 +247,11 @@ class GateTests(unittest.TestCase):
         planned, report = scaffolder.prepare(SimpleNamespace(**base_args))
         self.assertEqual(current_version + 1, report["versionCode"])
         self.assertIn(ROOT / "kgg-update" / "index.html", planned)
+        planned_version = json.loads(planned[ROOT / "kgg-update" / "version.json"])
+        self.assertEqual(
+            f"v{report['versionCode']:03d}: {base_args['summary']}",
+            planned_version["notes"],
+        )
         self.assertFalse((ROOT / "kgg-update" / "src" / report["patchFile"]).exists())
         self.assertEqual(before, (ROOT / "kgg-update" / "index.html").read_bytes())
 
