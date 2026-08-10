@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0426",
+  "versionName": "1.0.65-source-control-char-guard",
+  "notes": "Mobile-Inbox r0426: KGG Update v065 Source-Steuerzeichen-Guard (232f1d0315ef).",
+  "createdAt": "2026-08-10T19:47:57Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0426",
+      "profile": "admin",
+      "versionName": "1.0.65-source-control-char-guard",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/admin.html",
+      "sha256": "232f1d0315efb172cb3afbe1d5633c7bf9971c5a5e310446a825840bcd5c09e1",
+      "notes": "Mobile-Inbox r0426: KGG Update v065 Source-Steuerzeichen-Guard (232f1d0315ef)."
+    },
+    "colleague": {
+      "releaseId": "r0426",
+      "profile": "colleague",
+      "versionName": "1.0.65-source-control-char-guard",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html",
+      "sha256": "670c47aee4205bdd80b3305d4d0ac63f0a953751564918cfb3f2d886e67c5fee",
+      "notes": "Mobile-Inbox r0426: KGG Update v065 Source-Steuerzeichen-Guard (232f1d0315ef)."
+    }
+  }
+}
