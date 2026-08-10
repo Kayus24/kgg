@@ -4,6 +4,22 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "kgg-v063-tablet-recent-package-shell-geometry",
+      "patchHash": "f154fdf6c739796d26383d0defa940557f87303b7292448d5a9148220c67eb53",
+      "baseSha": "2450bc48d79421dbeab63f68865f0d482d8e748a",
+      "baseVersionCode": 62,
+      "rolloutCode": 1786369671,
+      "title": "Plan-Historie mit stabiler Hintergrund-Geometrie",
+      "summary": "Die bereits besttigte Tablet-Historien-Shell bleibt unverndert; zustzlich bernimmt sie exakt die grne Arbeitsflchen-Geometrie des bungspakete-Overlays, damit der Hintergrund beim ffnen nicht mehr verspringt.",
+      "patchId": "kgg-v062-tablet-recent-package-shell-geometry",
+      "patchFile": "patches/v062-tablet-recent-package-shell-geometry.html",
+      "versionName": "1.0.62-tablet-recent-package-shell-geometry",
+      "createdAt": "2026-08-10T13:47:51Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v063-tablet-recent-package-shell-geometry/admin.html",
+      "sha256": "c6f7eb4656b47d493d9d0c962cf973156127611625ced9c4d592656d64755544"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-v063-tablet-recent-package-shell",
       "patchHash": "41067fcd09a32bdf587458fabf554729b65290f74513c5fe6b259a88eafd3755",
       "baseSha": "2450bc48d79421dbeab63f68865f0d482d8e748a",
@@ -305,38 +321,22 @@
       "createdAt": "2026-07-29T09:09:54Z",
       "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-ocr-camera-wide-preview/admin.html",
       "sha256": "8f261d70cb6d510d15fceda6fb7a2594dc49e65e1296e8fe1b5f6c4fca63f893"
-    },
-    {
-      "kind": "kgg_gpt_preview",
-      "requestId": "kgg-v061-combo-camera-normal-1x-compact-banner",
-      "patchHash": "b9b89d5f7a4663ca6c40d1a98b0b43e62f4ad422243ff59b587bf015aae0051e",
-      "baseSha": "6c5674602edbcfd1b33e5851ce41aa093bb30f33",
-      "baseVersionCode": 61,
-      "rolloutCode": 1785270709,
-      "title": "Kombi-Kamera startet normal bei 1x",
-      "summary": "Behebt den optisch starken Startzoom der Test-App-Kamera: Das vollst?ndige Kamerabild bleibt sichtbar und ein unterst?tzter Kamera-Track wird auf 1x gesetzt; QR-Automatik und manueller Ausl?ser bleiben erhalten.",
-      "patchId": "kgg-v061-combo-camera-normal-1x",
-      "patchFile": "patches/v061-combo-camera-normal-1x.html",
-      "versionName": "1.0.61-combo-camera-normal-1x",
-      "createdAt": "2026-07-28T20:31:49Z",
-      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v061-combo-camera-normal-1x-compact-banner/admin.html",
-      "sha256": "fd6c217e6ca2331819e94cea7f425272f11a7ba869ae3a4a71fef78bb83a60af"
     }
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-v063-tablet-recent-package-shell",
-    "patchHash": "41067fcd09a32bdf587458fabf554729b65290f74513c5fe6b259a88eafd3755",
+    "requestId": "kgg-v063-tablet-recent-package-shell-geometry",
+    "patchHash": "f154fdf6c739796d26383d0defa940557f87303b7292448d5a9148220c67eb53",
     "baseSha": "2450bc48d79421dbeab63f68865f0d482d8e748a",
     "baseVersionCode": 62,
-    "rolloutCode": 1785936311,
-    "title": "Plan-Historie in der bungspakete-Shell ffnen",
-    "summary": "Die Tablet-Plan-Historie verwendet die bestehende seitliche bungspakete-Shell samt Men-, Shade- und Schliemechanismus. Der bestehende Historieninhalt wird nur fr die Anzeige in die Shell umgesetzt und danach zuverlssig z",
-    "patchId": "kgg-v062-tablet-recent-package-shell",
-    "patchFile": "patches/v062-tablet-recent-package-shell.html",
-    "versionName": "1.0.62-tablet-recent-package-shell",
-    "createdAt": "2026-08-05T13:25:11Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v063-tablet-recent-package-shell/admin.html",
-    "sha256": "30bbb30156afba6da4f7cb349e55224abfcc09ff7892160fb63a2ef917c558f4"
+    "rolloutCode": 1786369671,
+    "title": "Plan-Historie mit stabiler Hintergrund-Geometrie",
+    "summary": "Die bereits besttigte Tablet-Historien-Shell bleibt unverndert; zustzlich bernimmt sie exakt die grne Arbeitsflchen-Geometrie des bungspakete-Overlays, damit der Hintergrund beim ffnen nicht mehr verspringt.",
+    "patchId": "kgg-v062-tablet-recent-package-shell-geometry",
+    "patchFile": "patches/v062-tablet-recent-package-shell-geometry.html",
+    "versionName": "1.0.62-tablet-recent-package-shell-geometry",
+    "createdAt": "2026-08-10T13:47:51Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v063-tablet-recent-package-shell-geometry/admin.html",
+    "sha256": "c6f7eb4656b47d493d9d0c962cf973156127611625ced9c4d592656d64755544"
   }
 }

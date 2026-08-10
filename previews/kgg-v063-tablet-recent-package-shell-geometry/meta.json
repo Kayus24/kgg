@@ -1,0 +1,16 @@
+{
+  "kind": "kgg_gpt_preview",
+  "requestId": "kgg-v063-tablet-recent-package-shell-geometry",
+  "patchHash": "f154fdf6c739796d26383d0defa940557f87303b7292448d5a9148220c67eb53",
+  "baseSha": "2450bc48d79421dbeab63f68865f0d482d8e748a",
+  "baseVersionCode": 62,
+  "rolloutCode": 1786369671,
+  "title": "Plan-Historie mit stabiler Hintergrund-Geometrie",
+  "summary": "Die bereits besttigte Tablet-Historien-Shell bleibt unverndert; zustzlich bernimmt sie exakt die grne Arbeitsflchen-Geometrie des bungspakete-Overlays, damit der Hintergrund beim ffnen nicht mehr verspringt.",
+  "patchId": "kgg-v062-tablet-recent-package-shell-geometry",
+  "patchFile": "patches/v062-tablet-recent-package-shell-geometry.html",
+  "versionName": "1.0.62-tablet-recent-package-shell-geometry",
+  "createdAt": "2026-08-10T13:47:51Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v063-tablet-recent-package-shell-geometry/admin.html",
+  "sha256": "c6f7eb4656b47d493d9d0c962cf973156127611625ced9c4d592656d64755544"
+}
