@@ -15,11 +15,108 @@ from unittest import mock
 
 import build_therapist_source as builder
 import kgg_new_patch as scaffolder
+import kgg_patch_hygiene as hygiene
 import kgg_selftest_build as gate
 import kgg_test_battery as battery
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+class ReleaseDriftBaselineTests(unittest.TestCase):
+    def test_required_release_paths_are_classified(self) -> None:
+        paths = {
+            "kgg-update/src/base-app.html",
+            "kgg-update/index.html",
+            "kgg-update/version.json",
+            "therapist-app/android_update_manifest.json",
+            "therapist-app/kgg_update_manifest.json",
+            "therapist-app/releases/web/r9999/admin.html",
+            "release-inbox/admin.html",
+            "release-pipeline/release_pipeline.py",
+        }
+        self.assertEqual(paths, hygiene.release_alignment_paths(paths))
+
+    def test_tooling_only_paths_are_not_release_relevant(self) -> None:
+        paths = {
+            "release-pipeline/kgg_patch_hygiene.py",
+            "release-pipeline/kgg_test_battery.py",
+            "release-pipeline/test_kgg_selftest_build.py",
+        }
+        self.assertEqual(set(), hygiene.release_alignment_paths(paths))
+
+    def test_patch_hygiene_accepts_inherited_drift_for_non_release_branch_diff(self) -> None:
+        with ExitStack() as stack:
+            stack.enter_context(
+                mock.patch.object(
+                    hygiene,
+                    "changed_paths_since_main",
+                    return_value={"release-pipeline/kgg_patch_hygiene.py"},
+                )
+            )
+            stack.enter_context(mock.patch.object(hygiene, "status_paths", return_value=set()))
+            stack.enter_context(mock.patch.object(hygiene, "is_origin_main_ancestor", return_value=True))
+            alignment = stack.enter_context(mock.patch.object(hygiene, "assert_source_release_alignment"))
+            hygiene.run(ROOT)
+        alignment.assert_not_called()
+
+    def test_patch_hygiene_enforces_alignment_for_release_branch_diff(self) -> None:
+        with ExitStack() as stack:
+            stack.enter_context(
+                mock.patch.object(
+                    hygiene,
+                    "changed_paths_since_main",
+                    return_value={"kgg-update/version.json"},
+                )
+            )
+            stack.enter_context(mock.patch.object(hygiene, "status_paths", return_value=set()))
+            stack.enter_context(mock.patch.object(hygiene, "is_origin_main_ancestor", return_value=True))
+            alignment = stack.enter_context(mock.patch.object(hygiene, "assert_source_release_alignment"))
+            hygiene.run(ROOT)
+        alignment.assert_called_once_with(ROOT)
+
+    def test_patch_hygiene_enforces_alignment_for_dirty_release_path(self) -> None:
+        with ExitStack() as stack:
+            stack.enter_context(
+                mock.patch.object(
+                    hygiene,
+                    "changed_paths_since_main",
+                    return_value={"release-pipeline/kgg_patch_hygiene.py"},
+                )
+            )
+            stack.enter_context(
+                mock.patch.object(
+                    hygiene,
+                    "status_paths",
+                    return_value={"therapist-app/kgg_update_manifest.json"},
+                )
+            )
+            stack.enter_context(mock.patch.object(hygiene, "is_origin_main_ancestor", return_value=True))
+            alignment = stack.enter_context(mock.patch.object(hygiene, "assert_source_release_alignment"))
+            hygiene.run(ROOT)
+        alignment.assert_called_once_with(ROOT)
+
+    def test_battery_accepts_inherited_drift_for_non_release_diff(self) -> None:
+        with mock.patch.object(
+            hygiene,
+            "touched_paths",
+            return_value={"release-pipeline/kgg_test_battery.py"},
+        ), mock.patch.object(hygiene, "assert_source_release_alignment") as alignment:
+            battery.run_release_drift_check()
+        alignment.assert_not_called()
+
+    def test_battery_delegates_relevant_drift_to_fail_closed_guard(self) -> None:
+        with mock.patch.object(
+            hygiene,
+            "touched_paths",
+            return_value={"kgg-update/src/base-app.html"},
+        ), mock.patch.object(
+            hygiene,
+            "assert_source_release_alignment",
+            side_effect=hygiene.HygieneError("expected release drift failure"),
+        ):
+            with self.assertRaisesRegex(battery.BatteryError, "expected release drift failure"):
+                battery.run_release_drift_check()
 
 
 def patch_block(patch_id: str) -> str:
