@@ -4,424 +4,424 @@
 - Lines: 4621-5040
 
 ```html
-    .tabletSyncQrBtn{display:none!important}
-  }
-  @media(min-width:760px){
-    .scanHub .syncQrBtn{display:none!important}
-    .tabletSyncQrBtn{
-      width:100%;
-      min-height:38px;
-      border-radius:12px;
-      padding:0 8px;
-      font-size:13px;
-      line-height:1;
+    body.tabletLayoutCustom .tabletMenuBtn{
+      top:max(14px,calc(env(safe-area-inset-top) + 12px))!important;
+      z-index:1200!important;
+      pointer-events:auto!important;
+      touch-action:manipulation!important;
     }
-    .packageLayoutSlot .tabletLayoutControls{
-      height:auto!important;
-      min-height:66px!important;
-      display:grid!important;
-      grid-template-columns:1fr!important;
-      gap:6px!important;
-      padding:4px!important;
+    #rightPlanStack .planSectionHeader,
+    #bankArea #bankToggle{
+      flex:0 0 auto!important;
     }
-    .packageLayoutSlot .tabletLayoutControls .tabletLockSwitch,
-    .packageLayoutSlot .tabletLayoutControls .tabletSyncQrBtn{
+    #rightPlanStack .planSectionBody,
+    #rightPlanStack .scanInboxList,
+    #bankArea.bankOpen .bankRows{
+      min-height:0!important;
+      overscroll-behavior:contain;
+    }
+    #createPanel.planMode #recentToggle,
+    #createPanel.planMode #packageToggle{
+      justify-content:center!important;
+      min-width:0!important;
       width:100%!important;
     }
   }
-
-/* v361: Tablet side menu, safe top spacing and clean bottom actions */
-.tabletMenuBtn,
-.tabletSideBackdrop,
-.tabletSideMenu{display:none;}
-
-@media (max-width:759px){
-  .app{
-    padding-top:max(24px,calc(env(safe-area-inset-top) + 20px))!important;
-    padding-left:14px!important;
-    padding-right:14px!important;
-  }
-  .scanHub{margin-top:6px!important;}
-  .tabletMenuBtn,
-  .tabletSideBackdrop,
-  .tabletSideMenu{display:none!important;}
-}
-
-@media (min-width:760px){
-  .scanHub{
-    grid-template-columns:58px minmax(148px,.78fr) minmax(148px,.78fr) minmax(140px,.82fr) minmax(170px,1fr)!important;
-    align-items:stretch!important;
-    column-gap:12px!important;
-  }
-  body.colleagueMode .scanHub{
-    grid-template-columns:58px minmax(150px,.82fr) minmax(150px,.82fr) minmax(170px,1fr)!important;
-  }
-  .tabletMenuBtn{
-    display:inline-grid!important;
-    place-items:center;
-    grid-column:1!important;
-    grid-row:1!important;
-    width:54px;
-    min-width:54px;
-    min-height:54px;
-    border:1.4px solid rgba(10,16,36,.14);
-    border-radius:18px;
-    background:#fff;
-    box-shadow:0 12px 26px rgba(10,16,36,.10), inset 0 1px 0 rgba(255,255,255,.78);
-    cursor:pointer;
-    touch-action:manipulation;
-  }
-  .tabletMenuBtn span{
-    display:block;
-    width:25px;
-    height:3px;
-    border-radius:999px;
-    background:#0a1024;
-    margin:3px 0;
-    transition:transform .18s ease, opacity .18s ease;
-  }
-  body.tabletMenuOpen .tabletMenuBtn span:nth-child(1){transform:translateY(9px) rotate(45deg);}
-  body.tabletMenuOpen .tabletMenuBtn span:nth-child(2){opacity:0;}
-  body.tabletMenuOpen .tabletMenuBtn span:nth-child(3){transform:translateY(-9px) rotate(-45deg);}
-  .tabletSideBackdrop{
-    position:fixed;
-    inset:0;
-    z-index:1090;
-    display:block;
-    opacity:0;
-    pointer-events:none;
-    background:rgba(10,16,36,.18);
-    backdrop-filter:blur(10px);
-    transition:opacity .22s ease;
-  }
-  body.tabletMenuOpen .tabletSideBackdrop{
-    opacity:1;
-    pointer-events:auto;
-  }
-  .tabletSideMenu{
-    position:fixed;
-    top:0;
-    bottom:0;
-    left:0;
-    z-index:1100;
-    display:flex;
-    width:min(380px,86vw);
-    flex-direction:column;
-    gap:18px;
-    padding:calc(env(safe-area-inset-top) + 22px) 18px calc(env(safe-area-inset-bottom) + 22px);
-    background:rgba(255,255,255,.96);
-    border-right:1.5px solid rgba(10,16,36,.10);
-    box-shadow:26px 0 70px rgba(10,16,36,.18);
-    transform:translateX(-106%);
-    transition:transform .24s cubic-bezier(.22,.8,.32,1);
-  }
-  body.tabletMenuOpen .tabletSideMenu{transform:translateX(0);}
-  .tabletSideMenuHead{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-    font-size:1.25rem;
-    font-weight:900;
-  }
-  .tabletMenuClose{
-    width:42px;
-    height:42px;
-    border-radius:999px;
-    border:1px solid rgba(10,16,36,.12);
-    background:#fff;
-    font-size:1.35rem;
-    font-weight:900;
-    color:#0a1024;
-    cursor:pointer;
-  }
-  .tabletSideMenuGroup{
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    padding:14px;
-    border:1px solid rgba(10,16,36,.10);
-    border-radius:22px;
-    background:#f8fafc;
-  }
-  .tabletSideMenuGroup h3{
-    margin:0;
-    font-size:1rem;
-    font-weight:900;
-    color:#0a1024;
-  }
-  .tabletSideHint{
-    margin:0;
-    font-size:.86rem;
-    line-height:1.35;
-    color:#667085;
-    font-weight:750;
-  }
-  .tabletSideMenu .tabletLayoutControls{
-    position:static!important;
-    display:grid!important;
-    grid-template-columns:1fr 1fr;
-    width:100%!important;
-    min-width:0!important;
-    height:auto!important;
-    padding:0!important;
-    gap:10px!important;
-    border:0!important;
-    box-shadow:none!important;
-    background:transparent!important;
-  }
-  .tabletSideMenu .tabletLockSwitch,
-  .tabletSideMenu .tabletSyncQrBtn{
-    min-height:54px!important;
-    width:100%!important;
-    border-radius:17px!important;
-    font-size:.92rem!important;
-  }
-  .tabletSideMenu .tabletLayoutFreeTools{
-    grid-column:1 / -1!important;
-    position:static!important;
-    display:grid!important;
-    grid-template-columns:58px 1fr 58px!important;
-    grid-template-areas:"plus value minus" "reset reset reset";
-    /* v361 side menu scale grid polish */
-    align-items:center!important;
-    width:100%!important;
-    min-width:0!important;
-    height:auto!important;
-    padding:10px!important;
-    border-radius:21px!important;
-  }
-  .tabletSideMenu #tabletScalePlus{grid-area:plus;}
-  .tabletSideMenu #tabletScaleValue{grid-area:value;text-align:center;}
-  .tabletSideMenu #tabletScaleMinus{grid-area:minus;}
-  .tabletSideMenu #tabletLayoutReset{grid-area:reset;min-height:44px!important;}
-  .tabletSideMenu .tabletLayoutFreeTools.hidden{display:none!important;}
-  /* v375: Admin tools live in the tablet side menu, not in the scan row. */
-  body.adminMode .scanHub{
-    grid-template-columns:58px minmax(148px,1fr) minmax(148px,1fr)!important;
-  }
-  body.adminMode .scanHub .adminConfigBtn,
-  body.adminMode .scanHub .sharedBankBtn,
-  body.adminMode .scanHub .syncQrBtn{
-    display:none!important;
-  }
-  body.adminMode .scanHub #scanPreview{
-    grid-column:1 / -1!important;
-  }
-  .tabletSideMenu{
-    overflow-y:auto;
-  }
-  .tabletSideMenuAction{
-    min-height:54px;
-    width:100%;
-    border:1px solid rgba(10,16,36,.12);
-    border-radius:17px;
-    background:#fff;
-    color:#0a1024;
-    font-size:.94rem;
-    font-weight:900;
-    text-align:left;
-    padding:0 14px;
-    box-shadow:0 10px 22px rgba(10,16,36,.07), inset 0 1px 0 rgba(255,255,255,.82);
-    cursor:pointer;
-  }
-  .tabletSideMenuAction:active{
-    transform:translateY(1px);
-  }
-  .tabletSideMenuQrActions{
-    display:grid;
-    grid-template-columns:1fr;
-    gap:10px;
-  }
-  .packageLayoutSlot{
-    grid-template-columns:1fr!important;
-    align-items:stretch!important;
-  }
-  .packageLayoutSlot .tabletLayoutControls{display:none!important;}
-  .packageLayoutSlot #packageToggle{width:100%!important;min-width:0!important;}
-}
-
-.kggAdminMenuQrModal{
-  position:fixed;
-  inset:0;
-  z-index:1300;
-  display:none;
-  place-items:center;
-  padding:22px;
-  background:rgba(10,16,36,.26);
-  backdrop-filter:blur(10px);
-}
-.kggAdminMenuQrModal.isOpen{display:grid;}
-.kggAdminMenuQrSheet{
-  width:min(520px,94vw);
-  border:1.5px solid rgba(10,16,36,.12);
-  border-radius:26px;
-  background:#fff;
-  box-shadow:0 30px 90px rgba(10,16,36,.22);
-  padding:22px;
-}
-.kggAdminMenuQrSheet h2{
-  margin:0 0 8px;
-  color:#0a1024;
-  font-size:1.35rem;
-  font-weight:950;
-}
-.kggAdminMenuQrHint{
-  margin:0 0 14px;
-  color:#667085;
-  font-size:.94rem;
-  line-height:1.35;
-  font-weight:750;
-}
-.kggAdminMenuQrBox{
-  min-height:250px;
-  display:grid;
-  place-items:center;
-  border:1px solid rgba(10,16,36,.10);
-  border-radius:20px;
-  background:#f8fafc;
-  padding:14px;
-}
-.kggAdminMenuQrBox img{
-  width:min(300px,72vw);
-  height:min(300px,72vw);
-  image-rendering:pixelated;
-}
-.kggAdminMenuQrLink{
-  width:100%;
-  min-height:76px;
-  margin-top:12px;
-  border:1px solid rgba(10,16,36,.12);
-  border-radius:16px;
-  padding:10px;
-  resize:vertical;
-  font-size:.82rem;
-  line-height:1.35;
-  color:#344054;
-}
-.kggAdminMenuQrButtons{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-  margin-top:12px;
-}
-.kggAdminMenuQrButtons button{
-  min-height:48px;
-  border-radius:16px;
-  border:1px solid rgba(10,16,36,.12);
-  background:#fff;
-  color:#0a1024;
-  font-weight:900;
-  cursor:pointer;
-}
-.kggAdminMenuQrButtons .primary{
-  background:#0a1024;
-  color:#fff;
-}
-
-
-/* v362: keep the plan-card delete X in the top-right corner. */
-.planCard{position:relative;}
-.planCard .planDeleteBtn{
-  position:absolute!important;
-  top:6px!important;
-  right:8px!important;
-  z-index:5;
-  display:inline-grid!important;
-  place-items:center!important;
-  width:30px!important;
-  min-width:30px!important;
-  height:30px!important;
-  min-height:30px!important;
-  padding:0!important;
-  line-height:1!important;
-  border-radius:999px!important;
-}
-.planCardActions{padding-right:24px;}
-
-/* v376: tablet density and right-side menu polish from the latest QA screenshots. */
-@media (min-width:760px){
-  body.tabletLayoutCustom .app{
-    width:min(100%,1280px)!important;
-    grid-template-columns:minmax(300px,390px) minmax(0,1fr)!important;
-    gap:10px!important;
-    padding:12px 14px 76px!important;
-  }
-  body.tabletLayoutCustom .tabletMenuBtn{
-    position:fixed!important;
-    right:16px!important;
-    top:16px!important;
-    left:auto!important;
-    z-index:1200!important;
-    width:44px!important;
-    min-width:44px!important;
-    height:44px!important;
-    min-height:44px!important;
-    padding:8px!important;
-    border-radius:14px!important;
-    background:#fff!important;
-    border:1px solid rgba(10,16,36,.16)!important;
-    box-shadow:0 8px 22px rgba(7,16,39,.13)!important;
-  }
-  body.tabletLayoutCustom .scanHub{
-    grid-template-columns:1fr 1fr!important;
-    grid-auto-rows:56px!important;
-    gap:8px!important;
-    padding:0!important;
-    min-height:0!important;
-  }
-  body.tabletLayoutCustom .scanHub .scanBtn,
-  body.tabletLayoutCustom .scanHub .scanMeta,
-  body.tabletLayoutCustom :is(#baseToggle,#finishBtn,#recentToggle,#packageToggle){
-    min-height:46px!important;
-    height:46px!important;
-    border-radius:13px!important;
-    padding:0 12px!important;
-    font-size:15px!important;
-    line-height:1.08!important;
-  }
-  body.tabletLayoutCustom .scanHub .scanMeta small{display:none!important}
-  body.tabletLayoutCustom .panel{padding:10px!important;border-radius:18px!important}
-  body.tabletLayoutCustom .inner{padding:8px!important;border-radius:16px!important}
-  body.tabletLayoutCustom .panelTitle{font-size:24px!important;line-height:1.05!important;margin-bottom:8px!important}
-  body.tabletLayoutCustom textarea{
-    min-height:70px!important;
-    max-height:118px!important;
-    padding:12px 38px 12px 12px!important;
-    font-size:16px!important;
-    line-height:1.28!important;
-  }
-  body.tabletLayoutCustom .dbTitle{font-size:18px!important;margin:6px 0!important}
-  body.tabletLayoutCustom .bankRows{max-height:calc(var(--kgg-visual-vh,100vh) - 214px)!important}
-  body.tabletLayoutCustom .bankRow{min-height:48px!important;padding:7px 9px!important}
-  body.tabletLayoutCustom .bankRow b{font-size:14px!important;line-height:1.12!important}
-  body.tabletLayoutCustom .bankRow small{font-size:10px!important;margin-top:1px!important}
-  body.tabletLayoutCustom .bankWithAz{grid-template-columns:38px minmax(0,1fr)!important}
-  body.tabletLayoutCustom .az{font-size:10px!important;line-height:1.12!important;padding:4px 0!important}
-  body.tabletLayoutCustom .az button{font-size:10px!important;min-height:14px!important}
-  body.tabletLayoutCustom .rightPlanStack{min-height:calc(var(--kgg-visual-vh,100vh) - 180px)!important}
-  body.tabletLayoutCustom .planCard{min-height:48px!important;padding:7px 9px!important;border-radius:13px!important}
-  body.tabletLayoutCustom .planCard b{font-size:14px!important;line-height:1.15!important}
-  body.tabletLayoutCustom .planCard small{font-size:10px!important;line-height:1.15!important}
-  body.tabletLayoutCustom .planCard .drag,
-  body.tabletLayoutCustom .planCard .iconBtn{width:30px!important;height:30px!important;min-width:30px!important;min-height:30px!important;padding:0!important}
-  body.tabletLayoutCustom #planActions{
-    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
-    gap:10px!important;
-  }
-}</style>
-<style>
-  /* v365: Finish modal output actions are balanced; PDF is no longer the dominant black action. */
-  #shareModal .finishOutputBtn{display:flex;align-items:center;justify-content:center;gap:9px;font-weight:1000}
-  #shareModal .finishPdfBtn{background:#fff;border:1px solid var(--line);color:var(--ink)}
-  #shareModal .finishAppBtn{background:#edf5ff;border:1px solid #9cccf4;color:#073254}
-  #shareModal .finishIcon{display:inline-flex;align-items:center;justify-content:center;font-size:20px;line-height:1}</style>
-<style>
-  /* v366: mobile history/packages open from a floating bottom anchor. */
+  /* v385: actual UI-flow fixes layered after the v384 build-identity baseline. */
   @media (max-width:759px){
-    .kggPhoneDrawerBackdrop{
-      position:fixed;
-      inset:0;
-      z-index:88;
-      background:rgba(7,16,39,.24);
+    body.is-scrolling :is(#currentPlanBlock,#planList,#rightPlanStack,.planSection,.planSectionBody){
+      transition:none!important;
+      animation:none!important;
+      scroll-behavior:auto!important;
+    }
+    body.is-scrolling .planSection.collapsed{
+      max-height:58px!important;
+    }
+    body.kggPlanCardSwiping .planCard.swipe-dragging,
+    body.is-scrolling .planCard.swipe-dragging{
+      transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
+      transition:none!important;
+      will-change:transform,opacity;
+    }
+    body.kggPlanCardSwiping .planCard.swipe-removing,
+    body.is-scrolling .planCard.swipe-removing{
+      transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
+    }
+  }
+  @media (min-width:760px){
+    :root{
+      --kgg-tablet-safe-top:max(46px,calc(env(safe-area-inset-top) + 34px));
+      --kgg-tablet-safe-bottom:max(8px,env(safe-area-inset-bottom));
+    }
+    body{
+      padding-top:var(--kgg-tablet-safe-top)!important;
+      padding-bottom:var(--kgg-tablet-safe-bottom)!important;
+    }
+    .app,
+    body.tabletLayoutCustom .app{
+      height:calc(var(--kgg-visual-vh,100dvh) - var(--kgg-tablet-safe-top) - var(--kgg-tablet-safe-bottom))!important;
+      max-height:calc(var(--kgg-visual-vh,100dvh) - var(--kgg-tablet-safe-top) - var(--kgg-tablet-safe-bottom))!important;
+    }
+    .scanHub{
+      position:relative!important;
+      z-index:80!important;
+    }
+    .tabletMenuBtn,
+    body.tabletLayoutCustom .tabletMenuBtn{
+      position:relative!important;
+      top:auto!important;
+      left:auto!important;
+      z-index:1300!important;
+      pointer-events:auto!important;
+      touch-action:manipulation!important;
+      align-self:center!important;
+      justify-self:center!important;
+    }
+    body.tabletMenuOpen .tabletMenuBtn{
+      position:fixed!important;
+      top:calc(var(--kgg-tablet-safe-top) + 2px)!important;
+      left:18px!important;
+    }
+    .tabletSideBackdrop{z-index:1200!important;}
+    .tabletSideMenu{z-index:1210!important;}
+    #createPanel.planMode .planActions{
+      grid-column:2/4!important;
+      grid-row:5!important;
+      display:grid!important;
+      grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+      gap:12px!important;
+      align-self:stretch!important;
+      min-width:0!important;
+    }
+    #createPanel.planMode #recentToggle{
+      grid-column:1!important;
+      grid-row:1!important;
+      align-self:stretch!important;
+      justify-self:stretch!important;
+      width:100%!important;
+    }
+    #createPanel.planMode .packageLayoutSlot{
+      grid-column:3!important;
+      grid-row:5!important;
+      align-self:stretch!important;
+      justify-self:stretch!important;
+      width:100%!important;
+    }
+  }
+  /* v382: automatic web update and Android APK update handoff. */
+  @media (max-width:759px){
+    #currentPlanBlock #planList.planList{
+      gap:6px!important;
+      margin:6px 0!important;
+    }
+    #currentPlanBlock .planCard{
+      min-height:50px!important;
+      padding:7px 8px!important;
+      border-radius:14px!important;
+      grid-template-columns:minmax(0,1fr) auto!important;
+      gap:6px!important;
+      align-items:center!important;
+    }
+    #currentPlanBlock .planCard .planMain{
+      gap:6px!important;
+      min-width:0!important;
+      align-items:center!important;
+    }
+    #currentPlanBlock .planCard .drag{
+      width:28px!important;
+      min-width:28px!important;
+      height:36px!important;
+      min-height:36px!important;
+      padding:0!important;
+      margin:0!important;
+      border-radius:10px!important;
+      font-size:16px!important;
+      line-height:1!important;
+    }
+    #currentPlanBlock .planThumb{
+      width:30px!important;
+      min-width:30px!important;
+      height:30px!important;
+      border-radius:9px!important;
+    }
+    #currentPlanBlock .planCard .planText{
+      gap:0!important;
+      min-width:0!important;
+    }
+    #currentPlanBlock .planCard .planText b{
+      flex-wrap:nowrap!important;
+      gap:3px!important;
+      min-width:0!important;
+      font-size:16px!important;
+      line-height:1.12!important;
+    }
+    #currentPlanBlock .planIndex,
+    #currentPlanBlock .planBadges{
+      flex:0 0 auto!important;
+    }
+    #currentPlanBlock .planName{
+      min-width:0!important;
+      overflow:hidden!important;
+      overflow-wrap:normal!important;
+      text-overflow:ellipsis!important;
+      white-space:nowrap!important;
+    }
+    #currentPlanBlock .planMetaLine{
+      display:block!important;
+      margin-top:1px!important;
+      color:#637083!important;
+      font-size:12px!important;
+      line-height:1.12!important;
+      overflow:hidden!important;
+      text-overflow:ellipsis!important;
+      white-space:nowrap!important;
+    }
+    #currentPlanBlock .planCardActions{
+      gap:1px!important;
+      padding-right:18px!important;
+    }
+    #currentPlanBlock .planCardActions .iconBtn[data-planedit]{
+      width:36px!important;
+      min-width:36px!important;
+      height:36px!important;
+      min-height:36px!important;
+      padding:0!important;
+      border-radius:999px!important;
+      font-size:16px!important;
+      box-shadow:0 1px 5px rgba(7,16,39,.06)!important;
+    }
+    #currentPlanBlock .planDeleteBtn{
+      top:4px!important;
+      right:5px!important;
+      width:24px!important;
+      min-width:24px!important;
+      height:24px!important;
+      min-height:24px!important;
+      border:0!important;
+      background:transparent!important;
+      box-shadow:none!important;
+      font-size:18px!important;
+      opacity:.58!important;
+    }
+    #editorModal .editorSheet{
+      max-height:calc(100dvh - 18px)!important;
+      overflow:auto!important;
+      padding:14px 14px calc(14px + env(safe-area-inset-bottom))!important;
+      border-radius:22px 22px 0 0!important;
+      scroll-padding-bottom:14px!important;
+    }
+    #editorModal .editorHeader{
+      gap:8px!important;
+      margin-bottom:8px!important;
+    }
+    #editorModal .editorHeader h2{
+      font-size:22px!important;
+      line-height:1.05!important;
+    }
+    #editorModal .editorDeleteBtn{
+      width:34px!important;
+      min-width:34px!important;
+      height:34px!important;
+      min-height:34px!important;
+      border-radius:11px!important;
+      font-size:17px!important;
+      box-shadow:none!important;
+      opacity:.78!important;
+    }
+    #editorModal .grid2{
+      gap:7px!important;
+    }
+    #editorModal .field{
+      gap:3px!important;
+      margin:4px 0!important;
+    }
+    #editorModal .field label{
+      font-size:11px!important;
+      line-height:1.1!important;
+    }
+    #editorModal .field input,
+    #editorModal .field select{
+      min-height:44px!important;
+      height:44px!important;
+      border-radius:11px!important;
+      padding:8px 10px!important;
+      font-size:15px!important;
+    }
+    #editorModal .editorStartHint{
+      margin-top:8px!important;
+      padding:10px!important;
+      border-radius:14px!important;
+    }
+    #editorModal .editorStartHint>b{
+      display:block!important;
+      margin-bottom:5px!important;
+      font-size:15px!important;
+      line-height:1.1!important;
+    }
+    #editorModal .editorStartGrid{
+      gap:7px!important;
+      margin-top:0!important;
+    }
+    #editorModal .editorMediaBox{
+      display:grid!important;
+      grid-template-columns:auto minmax(0,1fr) auto!important;
+      align-items:center!important;
+      gap:8px!important;
+      margin-top:8px!important;
+      padding:8px 10px!important;
+      border-radius:14px!important;
+    }
+    #editorModal .editorMediaHead{
+      display:contents!important;
+    }
+    #editorModal .editorMediaHead b{
+      grid-column:1!important;
+      font-size:16px!important;
+      line-height:1!important;
+      white-space:nowrap!important;
+    }
+    #editorModal .editorMediaStatus{
+      grid-column:2!important;
+      display:block!important;
+      min-width:0!important;
+      margin:0!important;
+      font-size:12px!important;
+      line-height:1.15!important;
+      overflow:hidden!important;
+      text-overflow:ellipsis!important;
+      white-space:nowrap!important;
+    }
+    #editorModal .editorMediaActions{
+      grid-column:3!important;
+      display:flex!important;
+      justify-content:flex-end!important;
+      gap:6px!important;
+    }
+    #editorModal .editorMediaActions button{
+      min-height:42px!important;
+      border-radius:12px!important;
+      padding:0 11px!important;
+      font-size:14px!important;
+      white-space:nowrap!important;
+    }
+    #editorModal .editorMediaPreview:not(.hidden){
+      grid-column:1/-1!important;
+      min-height:54px!important;
+      margin-top:2px!important;
+      border-radius:12px!important;
+    }
+    #editorModal .editorMediaPreview img{
+      max-height:84px!important;
+      object-fit:cover!important;
+    }
+    #editorModal .editorAdvanced{
+      margin-top:8px!important;
+      padding:0!important;
+      border-radius:14px!important;
+      overflow:hidden!important;
+    }
+    #editorModal .editorAdvanced summary{
+      min-height:44px!important;
+      padding:0 12px!important;
+      align-items:center!important;
+      justify-content:space-between!important;
+      list-style:none!important;
+      cursor:pointer!important;
+    }
+    #editorModal .editorAdvanced summary::-webkit-details-marker{
+      display:none!important;
+    }
+    #editorModal .editorAdvanced summary::after{
+      content:"▾";
+      color:#071027;
+      font-size:18px;
+      line-height:1;
+    }
+    #editorModal .editorAdvanced[open]{
+      padding-bottom:10px!important;
+    }
+    #editorModal .editorAdvanced[open] summary::after{
+      transform:rotate(180deg);
+    }
+    #editorModal .editorAdvancedGrid{
+      grid-template-columns:1fr!important;
+      gap:6px!important;
+      margin:0 10px!important;
+    }
+    #editorModal .editorActions{
+      gap:6px!important;
+      margin-top:10px!important;
+    }
+    #editorModal .editorActions button{
+      min-height:46px!important;
+      border-radius:13px!important;
+      font-size:16px!important;
+    }
+    #editorModal .editorCancelBtn{
+      min-height:42px!important;
+      margin-top:6px!important;
+      border:0!important;
+      background:transparent!important;
+      box-shadow:none!important;
+      font-size:15px!important;
+    }
+  }
+  /* v386 source patch: visible tablet/phone flow corrections on the v385 base. */
+  @media (min-width:760px) and (orientation:landscape){
+    :root{
+      --kgg-tablet-safe-top:max(66px,calc(env(safe-area-inset-top) + 54px));
+      --kgg-tablet-safe-bottom:max(10px,env(safe-area-inset-bottom));
+    }
+    body{
+      background:#eef4fb!important;
+      padding-top:var(--kgg-tablet-safe-top)!important;
+      padding-bottom:var(--kgg-tablet-safe-bottom)!important;
+    }
+    .app,
+    body.tabletLayoutCustom .app{
+      height:calc(var(--kgg-visual-vh,100dvh) - var(--kgg-tablet-safe-top) - var(--kgg-tablet-safe-bottom))!important;
+      max-height:calc(var(--kgg-visual-vh,100dvh) - var(--kgg-tablet-safe-top) - var(--kgg-tablet-safe-bottom))!important;
+      overflow:hidden!important;
+    }
+    .scanHub,
+    body.tabletLayoutCustom .scanHub,
+    body.adminMode .scanHub{
+      grid-template-columns:54px minmax(132px,1fr) minmax(132px,1fr)!important;
+      grid-auto-rows:54px!important;
+      gap:10px!important;
+      padding:0!important;
+      margin:0!important;
+      align-items:stretch!important;
+      overflow:visible!important;
+    }
+    .tabletMenuBtn,
+    body.tabletLayoutCustom .tabletMenuBtn{
+      position:relative!important;
+      grid-column:1!important;
+      grid-row:1!important;
+      top:auto!important;
+      right:auto!important;
+      bottom:auto!important;
+      left:auto!important;
+      width:54px!important;
+      min-width:54px!important;
+      height:54px!important;
+      min-height:54px!important;
+      align-self:stretch!important;
+      justify-self:stretch!important;
+      z-index:1400!important;
+    }
+    .scanHub .scanBtn{
+      grid-column:2!important;
+      grid-row:1!important;
+      width:100%!important;
+    }
+    .scanHub .scanMeta{
+      grid-column:3!important;
+      grid-row:1!important;
+      width:100%!important;
+    }
+    .scanHub .syncQrBtn,
+    .scanHub .adminConfigBtn,
+    .scanHub .sharedBankBtn{
 ```

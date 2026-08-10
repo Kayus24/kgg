@@ -4,424 +4,424 @@
 - Lines: 22681-23100
 
 ```html
+  function scanStateSnapshot(){
+    return {next:scanState.next,activeIndex:scanState.activeIndex,busy:scanState.busy,jobs:scanState.jobs.map(job=>({id:job.id,label:job.label,short:job.short,type:job.type,status:job.status,pages:job.pages.map(page=>({name:page.name,size:page.size,type:page.type})),hasResult:!!job.result,warnings:job.warnings||[]}))};
+  }
+  function setScanStatus(text){const el=$('scanStatus'); if(el){el.classList.remove('hidden'); el.textContent=text||'Bereit.';}}
+  function ensureScanV295Styles(){
+    if(document.getElementById('kggV295ScanCss'))return;
+    const style=document.createElement('style');
+    style.id='kggV295ScanCss';
+    style.textContent='.kggScanV295{display:grid;gap:10px}.kggScanV295 .scanDecisionBackdrop{position:fixed;inset:0;z-index:99980;background:rgba(7,16,39,.34);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}.kggScanV295 .scanDecision{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:99990;width:min(92vw,500px);background:#fff;border:2px solid #1b2230;border-radius:22px;padding:14px;box-shadow:0 18px 55px rgba(7,16,39,.22)}.kggScanV295 .scanDecision h3{font-size:22px;margin:0 0 6px}.kggScanV295 .scanDecisionBtns{display:grid;gap:10px;margin-top:10px}.kggScanV295 .scanDecisionBtns.scanDecisionRepeatSource{grid-template-columns:1fr 1fr}.kggScanV295 .scanDecisionBtns.scanDecisionRepeatSource .scanRepeatBtn{min-height:58px;border:2px solid #1b2230;background:#fff;color:#071027;border-radius:16px;font-weight:1000;box-shadow:0 3px 10px rgba(7,16,39,.08)}.kggScanV295 .scanDecisionBtns.scanDecisionRepeatSource .scanFinishBtn{grid-column:1/-1;min-height:64px;border-radius:18px;font-size:20px;box-shadow:0 8px 22px rgba(7,16,39,.22)}.kggScanV295 .scanJobCard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:var(--shadow)}.kggScanV295 .scanJobCard.warn{border-color:#f2d38a;background:#fff8e8}.kggScanV295 .scanJobCard.good{border-color:#93d8a0;background:#f4fff6}.kggScanV295 .scanJobHead{display:flex;justify-content:space-between;gap:8px;align-items:center}.kggScanV295 .scanFileList{font-size:12px;color:var(--muted);font-weight:850;margin-top:6px}.kggScanV295 .scanResultText{width:100%;min-height:118px;border:1px solid var(--line);border-radius:14px;padding:10px;font-size:13px;line-height:1.35;margin-top:8px}.kggScanV295 .scanCardActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.kggScanV295 .scanCardActionsCompact{grid-template-columns:1fr 1.15fr}.kggScanV295 input.scanShort{width:100%;border:1px solid var(--line);border-radius:12px;padding:9px;font-size:14px;margin-top:8px}.kggScanV295 .scanWarning{font-size:12px;color:#8a5a00;font-weight:850;margin-top:6px}.kggScanV295 .scanJobCard.collapsed{padding:9px 12px;background:#f7fff8;border-color:#93d8a0}.kggScanV295 .scanJobCard.collapsed .scanCollapsedHint{display:block;font-size:12px;color:#54715a;font-weight:900;margin-top:2px}.kggScanV295 .scanJobTopActions{display:flex;align-items:center;gap:6px;flex:0 0 auto}.kggScanV295 .scanMiniBtn{border:1px solid var(--line);background:#fff;border-radius:999px;min-width:32px;height:32px;padding:0 8px;font-weight:1000;line-height:1;color:#071027}.kggScanV295 .scanRemoveBtn{border:1px solid rgba(226,59,84,.32);background:#fff5f7;color:#e23b54;border-radius:999px;width:34px;height:34px;padding:0;font-size:20px;font-weight:1000;line-height:1}.kggScanV295 .scanJobHeadMain{min-width:0;display:grid;gap:2px}.kggScanV295 .scanJobHeadMain b,.kggScanV295 .scanJobHeadMain small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}@media(max-width:520px){.kggScanV295 .scanCardActions{grid-template-columns:1fr}.kggScanV295 .scanDecisionBtns{grid-template-columns:1fr}.kggScanV295 .scanDecisionBtns.scanDecisionRepeatSource{grid-template-columns:1fr}}';
+    document.head.appendChild(style);
+  }
+  function renderScanDecisionOverlay(){
+    const id='kggScanDecisionOverlay';
+    let layer=document.getElementById(id);
+    if(!scanState.decision){if(layer)layer.remove();return;}
+    if(!layer){
+      layer=document.createElement('div');
+      layer.id=id;
+      layer.className='kggScanV295';
+      document.body.appendChild(layer);
+    }
+    layer.innerHTML='<div class="scanDecisionBackdrop" aria-hidden="true"></div><div class="scanDecision" role="dialog" aria-modal="true"><h3>Foto hinzugef&uuml;gt</h3><p class="notice">Was kommt als N&auml;chstes?</p><div class="scanDecisionBtns scanDecisionRepeatSource"><button type="button" class="scanRepeatBtn" onclick="window.KGGScan.repeatSource(\'page\')">+ weitere Seite zu diesem Plan</button><button type="button" class="scanRepeatBtn" onclick="window.KGGScan.repeatSource(\'plan\')">+ weiterer Plan / Patient</button><button type="button" class="primary scanFinishBtn" onclick="window.KGGScan.start()">Fertig</button></div></div>';
+  }
+  function renderScanPreview(){
+    ensureScanV295Styles();
+    renderScanDecisionOverlay();
+    const preview=$('scanPreview');
+    if(!preview)return;
+    const useInbox=!!$('scannedPlansBlock');
+    const hasContent=(useInbox?(scanState.busy||scanState.lastError):(scanState.jobs.length||scanState.busy||scanState.lastError));
+    preview.classList.toggle('hidden',!hasContent);
+    if(!hasContent){preview.innerHTML='';return;}
+    const jobsHtml=useInbox?'':scanState.jobs.map((job,index)=>{
+      const resultText=scanResultToCopyText(job);
+      const quality=job.result&&job.result.quality||{};
+      const warn=[...(job.warnings||[]),...((quality.warnings)||[])];
+      const cls=job.result?(quality.ok===false?'warn':'good'):(warn.length?'warn':'');
+      const collapsed=!!job.collapsed;
+      const typeLabel=job.type==='qr'?'QR-Plan':'Papierplan';
+      const title=escapeHtml(job.short||job.label);
+      const meta=escapeHtml(typeLabel+' · '+job.pages.length+' Bild(er)');
+      const head='<div class="scanJobHead"><div class="scanJobHeadMain"><b>'+title+'</b><small>'+meta+'</small>'+(collapsed?'<span class="scanCollapsedHint">eingeklappt · antippen zum Öffnen</span>':'')+'</div><div class="scanJobTopActions"><button type="button" class="scanMiniBtn" onclick="window.KGGScan.toggleCollapse('+index+')" aria-label="Scankarte '+(collapsed?'ausklappen':'einklappen')+'">'+(collapsed?'▾':'▴')+'</button><button type="button" class="scanRemoveBtn" onclick="window.KGGScan.removeJob('+index+')" aria-label="Scankarte entfernen">×</button></div></div>';
+      if(collapsed){
+        return '<div class="scanJobCard '+cls+' collapsed">'+head+'</div>';
+      }
+      return '<div class="scanJobCard '+cls+'">'+
+        head+
+        '<input class="scanShort" value="'+escapeHtml(job.short||'')+'" placeholder="lokales Kürzel, z. B. Max M." oninput="window.KGGScan.setShort('+index+',this.value)">'+
+        '<div class="scanFileList">'+escapeHtml(job.pages.map(p=>p.name).join(' · ')||'Noch kein Bild')+'</div>'+
+        (warn.length?'<div class="scanWarning">Prüfen: '+escapeHtml(warn.join(' · '))+'</div>':'')+
+        '<textarea id="kggScanCopyField'+index+'" class="scanResultText" readonly>'+escapeHtml(resultText||'Noch nicht ausgelesen.')+'</textarea>'+
+        '<div class="scanCardActions scanCardActionsCompact">'+
+          '<button type="button" class="mutedBtn" onclick="window.KGGScan.copyResult('+index+')">kopieren</button>'+
+          '<button type="button" class="primary" onclick="window.KGGScan.applyResult('+index+')">weiter bearbeiten</button>'+
+        '</div></div>';
+    }).join('');
+    const decisionHtml='';
+    preview.innerHTML='<div class="kggScanV295">'+decisionHtml+(scanState.busy?'<div class="notice"><b>Scan läuft …</b></div>':'')+(scanState.lastError?'<div class="notice danger">'+escapeHtml(scanState.lastError)+'</div>':'')+jobsHtml+'</div>';
+  }
+  function collapseScanCards(reason){
+    if(shouldIgnorePhoneScrollToggle())return scanStateSnapshot();
+    let changed=false;
+    (scanState.jobs||[]).forEach(job=>{if(job&&!job.collapsed){job.collapsed=true; changed=true;}});
+    if(changed){scanState.lastCollapseReason=reason||'ui'; renderScanPreview();}
+    return scanStateSnapshot();
+  }
+  function removeScanJob(index){
+    const i=Number(index)||0;
+    if(i>=0&&i<scanState.jobs.length){scanState.jobs.splice(i,1);}
+    if(scanState.activeIndex>=scanState.jobs.length)scanState.activeIndex=Math.max(0,scanState.jobs.length-1);
+    if(!scanState.jobs.length){scanState.decision=false; state.scanPanelOpen='plan';}
+    renderScanPreview();
+    render();
+    return scanStateSnapshot();
+  }
+  function toggleScanJobCollapse(index){
+    if(shouldIgnorePhoneScrollToggle())return scanStateSnapshot();
+    const job=scanState.jobs[Number(index)||0];
+    if(job){job.collapsed=!job.collapsed; renderScanPreview();}
+    return scanStateSnapshot();
+  }
+  function initScanAutoCollapseOnUiOpen(){
+    if(window.__kggScanAutoCollapseBound)return;
+    window.__kggScanAutoCollapseBound=true;
+    const watchedIds=['editorModal','packageSaveModal','bankDeleteModal','shareModal','largePdfModal','longMediaConfirmModal','installPromptModal','adminSecretsModal','sharedBankModal','pdfPreviewModal','recentList','packageList','baseFields','bankContent'];
+    const visible=function(el){
+      if(!el)return false;
+      if(el.classList.contains('open'))return true;
+      if(el.id==='recentList'||el.id==='packageList'||el.id==='baseFields'||el.id==='bankContent')return !el.classList.contains('hidden');
+      return false;
+    };
+    const previous=new Map();
+    watchedIds.forEach(id=>{const el=$(id); if(el)previous.set(id,visible(el));});
+    const check=function(id,el){
+      if(shouldIgnorePhoneScrollToggle())return;
+      const now=visible(el);
+      const before=previous.get(id)||false;
+      previous.set(id,now);
+      if(now&&!before)collapseScanCards('auto_'+id);
+    };
+    const observer=new MutationObserver(records=>{
+      records.forEach(record=>{const el=record.target; if(el&&el.id)check(el.id,el);});
+    });
+    watchedIds.forEach(id=>{
+      const el=$(id);
+      if(el)observer.observe(el,{attributes:true,attributeFilter:['class','style','open']});
+    });
+    document.addEventListener('click',ev=>{
+      if(shouldIgnorePhoneScrollToggle())return;
+      const target=ev.target&&ev.target.closest?ev.target.closest('button,.drawerBtn,.baseCard,.dbTitle,.modal,.sheet'):null;
+      if(!target)return;
+      if(target.closest&&target.closest('#scanPreview'))return;
+      const opensOtherUi=target.id==='baseToggle'||target.id==='recentToggle'||target.id==='packageToggle'||target.id==='bankToggle'||target.id==='dbTitle'||target.id==='finishBtn'||target.closest('.modal');
+      if(opensOtherUi)setTimeout(()=>collapseScanCards('click_'+(target.id||'ui')),0);
+    },true);
+  }
+  async function processPaperJob(job){
+    if(job.result&&job.type==='qr')return job.result;
+    if(!job.pages.length)throw new Error(job.label+': keine Bilder.');
+    const texts=[]; const raw=[]; const warnings=[];
+    for(let i=0;i<job.pages.length;i++){
+      const page=job.pages[i];
+      if(!page.file){warnings.push('Bilddatei nicht mehr im Speicher: '+page.name); continue;}
+      setScanStatus(job.label+': Seite '+(i+1)+' wird ausgelesen …');
+      const result=await callGeminiPaperFallback(page.file);
+      if(result.planText)texts.push(result.planText);
+      raw.push(result.rawText||'');
+      if(result.quality&&result.quality.warnings)warnings.push(...result.quality.warnings);
+    }
+    const planText=texts.join(', ').replace(/(?:,\s*){2,}/g,', ').trim();
+    const quality=scanPaperQuality(planText,{raw});
+    quality.warnings=[...new Set([...(quality.warnings||[]),...warnings])];
+    quality.ok=!quality.warnings.length;
+    job.result={type:'paper',planText,rawText:raw.join('\n---\n'),quality};
+    job.status='ready';
+    return job.result;
+  }
+  async function copyTextWithFallback(text,fieldId){
+    const field=$(fieldId);
+    let ok=false;
+    try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(text);ok=true;}}catch(err){}
+    if(!ok&&field){
+      try{field.focus({preventScroll:true});field.select();field.setSelectionRange(0,field.value.length);ok=document.execCommand('copy');}catch(err){}
+    }
+    return ok;
+  }
+  function scanValueToString(value){
+    if(value==null||value==='')return '';
+    const n=Number(value);
+    if(Number.isFinite(n))return String(Math.round(n*100)/100).replace('.',',');
+    return String(value).trim();
+  }
+  function scanSetsFromNumberSequence(nums,source){
+    const values=(nums||[]).map(Number).filter(Number.isFinite);
+    const side=normalizeSideMode(source&&source.side||source&&source.side_mode||source&&source.laterality||source&&source.seite||'BI');
+    const metricUnit=scanUnitLabel(source&&source.unit||source&&source.metricUnit||source&&source.metric_unit,(source&&source.measure)==='Sek.'?'Sek.':'Wdh');
+    const loadUnit=scanUnitLabel(source&&source.weightUnit||source&&source.loadUnit||source&&source.weight_unit,/sek|zeit|time/i.test(metricUnit)?'keine':'kg');
+    const isTime=/zeit|sek|sec|min|time/i.test(metricUnit)||/keine/i.test(loadUnit);
+    const pains=scanFindPainValues(source||{});
+    const sets=[];
+    if(side==='LR'&&values.length>=12){
+      for(let i=0;i<3;i++){
+        const b=i*4;
+        sets.push({
+          li:{load:scanValueToString(values[b]),metric:scanValueToString(values[b+1])},
+          re:{load:scanValueToString(values[b+2]),metric:scanValueToString(values[b+3])},
+          pain:scanValueToString(pains[i]||values[12+i]||'')
+        });
+      }
+      return sets;
     }
     if(isTime){
-      for(let s=0;s<3;s++){
-        const idx=nums.length>=6?s*2+1:s;
-        const metric=scanFormatNumber(nums[idx]);
-        const pain=scanFormatPain(pains[s]||nums[(nums.length>=9?s*3+2:-1)]);
-        if(metric)lines.push('Satz '+(s+1)+': '+metric+' '+metricUnit+(pain?' · Schmerz: '+pain+'/10':''));
+      for(let i=0;i<3;i++){
+        const idx=values.length>=6?i*2+1:i;
+        const metric=scanValueToString(values[idx]);
+        if(metric)sets.push({metric,pain:scanValueToString(pains[i]||'')});
       }
-      return lines;
+      return sets;
     }
-    if(nums.length>=9){
-      for(let s=0;s<3;s++){
-        const base=s*3;
-        const load=scanFormatNumber(nums[base]), metric=scanFormatNumber(nums[base+1]), pain=scanFormatPain(nums[base+2]||pains[s]);
-        if(load||metric)lines.push('Satz '+(s+1)+': '+(metric||'')+' '+metricUnit+(load?' @ '+load+' '+loadUnit:'')+(pain?' · Schmerz: '+pain+'/10':''));
+    if(values.length>=9){
+      for(let i=0;i<3;i++){
+        const b=i*3;
+        sets.push({load:scanValueToString(values[b]),metric:scanValueToString(values[b+1]),pain:scanValueToString(values[b+2]||pains[i]||'')});
       }
-      return lines;
+      return sets;
     }
-    if(nums.length>=6){
-      for(let s=0;s<3;s++){
-        const load=scanFormatNumber(nums[s*2]), metric=scanFormatNumber(nums[s*2+1]), pain=scanFormatPain(pains[s]);
-        if(load||metric)lines.push('Satz '+(s+1)+': '+(metric||'')+' '+metricUnit+(load?' @ '+load+' '+loadUnit:'')+(pain?' · Schmerz: '+pain+'/10':''));
+    if(values.length>=6){
+      for(let i=0;i<3;i++){
+        sets.push({load:scanValueToString(values[i*2]),metric:scanValueToString(values[i*2+1]),pain:scanValueToString(pains[i]||'')});
       }
-      return lines;
+      return sets;
     }
-    const load=scanNonEmptyValue(source.startLoad||source.load||source.weight||source.lastLoad||'');
-    const metric=scanNonEmptyValue(source.startMetric||source.metric||source.reps||source.time||source.lastMetric||'');
-    const pain=scanFormatPain((pains||[])[0]||source.pain||source.schmerz);
-    if(metric||load)lines.push('Satz 1: '+(metric?scanFormatNumber(metric)+' '+metricUnit:'')+(load?' @ '+scanFormatNumber(load)+' '+loadUnit:'')+(pain?' · Schmerz: '+pain+'/10':''));
-    else if(pain)lines.push('Schmerz: '+pain+'/10');
-    return lines;
-  }
-  function scanExerciseToDocText(item){
-    if(typeof item==='string')return stripScanExerciseName(item);
-    let source=item;
-    if(Array.isArray(item)){
-      try{source=expandKggH2Exercise(item);}catch(err){source={name:item[0]||''};}
-    }
-    const name=scanExerciseName(source);
-    if(!name)return '';
-    const lines=scanStructuredSetLinesFromValues(item,source);
-    return [name].concat(lines).filter(Boolean).join('\n');
-  }
-  function formatScanExerciseLine(item){
-    return scanExerciseToDocText(item);
-  }
-  function scanResultToPlanText(result){
-    if(!result)return '';
-    if(typeof result==='string')return cleanGeminiScanText(result);
-    if(result.planText)return String(result.planText||'').trim();
-    if(result.text)return cleanGeminiScanText(result.text);
-    if(result.rawText)return cleanGeminiScanText(result.rawText);
-    const exercises=scanPayloadExercises(result);
-    if(exercises.length)return exercises.map(scanExerciseToDocText).filter(Boolean).join('\n\n');
-    return '';
-  }
-  function scanResultToApplyText(result){
-    if(!result)return '';
-    if(result.applyText)return String(result.applyText||'').trim();
-    const exercises=scanPayloadExercises(result);
-    if(exercises.length)return scanApplyTextFromExercises(exercises);
-    const text=scanResultToPlanText(result);
-    return String(text||'').split(/\n+/).map(line=>line.trim()).filter(line=>line&&!/^Satz\s+\d+\s*:/i.test(line)&&!/^\s*(Li|Re|Schmerz)\s*:/i.test(line)).join(', ');
-  }
-  function scanResultToCopyText(job){
-    const short=job&&job.short?String(job.short).trim():'';
-    const result=job&&job.result||{};
-    const quality=result.quality||{};
-    const text=result.copyText||result.planText||scanResultToPlanText(result)||result.rawText||'';
-    const lines=[];
-    if(short)lines.push(short);
-    if(result.type)lines.push('Typ: '+result.type);
-    if(quality.warnings&&quality.warnings.length)lines.push('Prüfen: '+quality.warnings.join(', '));
-    if(text)lines.push('',text);
-    return lines.join('\n').trim();
-  }
-  function scanPaperQuality(text,result){
-    const raw=String(text||'').trim();
-    const parts=raw.split(/[,\n]+/).map(part=>part.trim()).filter(Boolean);
-    const exerciseLike=parts.filter(part=>/[a-zäöüß]{4,}/i.test(part)&&!/^unbekannte\s+übung/i.test(part));
-    const numbers=(raw.match(/\d+(?:[,.]\d+)?/g)||[]).length;
-    const unknown=(raw.match(/unbekannte\s+übung|\?{2,}/gi)||[]).length;
-    const days=(raw.match(/\bT(?:ag)?\s*\d+\b/gi)||[]).map(x=>Number((x.match(/\d+/)||[0])[0])).filter(Boolean);
-    const warnings=[];
-    if(exerciseLike.length<1)warnings.push('wenige Übungsnamen erkannt');
-    if(unknown>1)warnings.push('zu viele unsichere Treffer');
-    if(numbers>90)warnings.push('zu viele Zahlen statt Übungsstruktur');
-    if(days.length&&Math.max(...days)>8)warnings.push('möglicherweise erfundene Tage');
-    if(/(?:unbekannte\s+übung\s*,?\s*){2,}/i.test(raw))warnings.push('Unbekannte-Übung-Kaskade');
-    return {ok:!warnings.length,exerciseCount:exerciseLike.length,numberCount:numbers,warnings,rawResult:!!result};
-  }
-  function createScanReadingCanvas(src){
-    const canvas=scanCloneCanvas(src);
-    const ctx=canvas.getContext('2d',{willReadFrequently:true});
-    ctx.save();
-    ctx.filter='contrast(1.12) brightness(1.04) saturate(.96)';
-    ctx.drawImage(src,0,0);
-    ctx.restore();
-    return canvas;
-  }
-  function fillRedactionRects(ctx,rects){
-    ctx.save();
-    ctx.fillStyle='#fff';
-    rects.forEach(r=>ctx.fillRect(Math.max(0,r[0]),Math.max(0,r[1]),Math.max(0,r[2]),Math.max(0,r[3])));
-    ctx.restore();
-  }
-  function redactScanCanvasForExternalOcr(src){
-    const canvas=scanCloneCanvas(src);
-    const ctx=canvas.getContext('2d',{willReadFrequently:true});
-    const w=canvas.width,h=canvas.height;
-    const top=Math.round(h*.145);
-    const bottom=Math.round(h*.065);
-    const side=Math.round(w*.075);
-    const wideSide=Math.round(w*.115);
-    const rects=[[0,0,w,top],[0,h-bottom,w,bottom],[0,0,side,h],[w-side,0,side,h]];
-    if(w>h)rects.push([w-wideSide,0,wideSide,h],[0,0,Math.round(w*.095),h]);
-    fillRedactionRects(ctx,rects);
-    canvas.dataset.redacted='true';
-    canvas.dataset.redaction='white-randmask-v295';
-    return canvas;
-  }
-  function canvasToGeminiInlineData(canvas){
-    const dataUrl=canvas.toDataURL('image/jpeg',.72);
-    return {mime_type:'image/jpeg',data:dataUrl.split(',')[1]||''};
-  }
-  function cleanGeminiScanText(text){
-    let out=String(text||'').replace(/```(?:json|[a-z]+)?/gi,'').replace(/```/g,'').trim();
-    if(!out)return '';
-    const json=parseLooseJson(out);
-    if(json.ok){
-      const asText=scanResultToPlanText(json.json);
-      if(asText)return asText;
-    }
-    out=out.split(/\n+/).map(line=>line.replace(/^\s*(?:[-*]|\d+[.)])\s*/,'').trim()).filter(Boolean).join(', ');
-    out=out.replace(/\b(?:EX|ÜB|UE)\s*\d+\s*[:.)|\-–—]*\s*/gi,'');
-    out=out.replace(/\s*;\s*/g,', ').replace(/\s*,\s*/g,', ').replace(/(?:,\s*){2,}/g,', ').replace(/\s+/g,' ').trim();
-    if(/^keine auslesbaren/i.test(out))return '';
-    return out;
-  }
-  function geminiScanResponseText(json){
-    const candidates=Array.isArray(json&&json.candidates)?json.candidates:[];
-    return candidates.map(candidate=>{
-      const parts=candidate&&candidate.content&&Array.isArray(candidate.content.parts)?candidate.content.parts:[];
-      return parts.map(part=>part&&part.text||'').join('\n');
-    }).filter(Boolean).join('\n').trim();
-  }
-  function geminiScanPrompt(){
-    return [
-      'Du liest einen deutschen KGG/Physio-Papierplan als Foto.',
-      'QR-Codes werden lokal gelesen; du bist nur Papierplan-Fallback.',
-      'Ignoriere Patientendaten, Kopfzeilen, Randnotizen und Datenschutzmasken.',
-      'Entferne EX1/EX2/UE1-Praefixe aus Übungsnamen.',
-      'Gib nur übungsbezogene Inhalte aus: Übungsname, Seite links/rechts falls erkennbar, Last, Wdh oder Zeit.',
-      'Keine Tage erfinden. Keine leeren Tabellenzeilen als Übungen ausgeben.',
-      'Bei unsicheren Werten lieber null/unsicher statt raten.',
-      'Bevorzugtes JSON: {"exercises":[{"name":"...","side":"BI oder LR","load":"","reps":"","time":"","uncertain":false}],"warnings":[]}',
-      'Wenn JSON unsicher ist, gib zusätzlich klaren Text mit einer Übung pro Zeile aus.'
-    ].join('\n');
-  }
-  function localGeminiKeys(){
-    loadAdminSecrets();
-    if(window.KGGAdmin&&typeof window.KGGAdmin.getGeminiKeysForLocalUse==='function')return window.KGGAdmin.getGeminiKeysForLocalUse().map(cleanSecret).filter(Boolean);
-    return (adminSecrets.geminiKeys||[]).map(cleanSecret).filter(Boolean);
-  }
-  function currentLocalGeminiKey(){return localGeminiKeys()[0]||'';}
-
-  /* ========================================================================
-     KGG v308 QR STRUCTURED OUTPUT + CURRENT-LAYOUT CONTACT-SHEET SCAN START
-     Integrationskandidat aus v306: TPL-BASIS-A-CLASSIC-L6-v2, EX1-EX6,
-     T1-Zeilen-Crops -> Contact-Sheet -> ein Gemini-Call -> lokale Zuordnung.
-     Später entfernbar/isolierbar, aber KEINE zweite KGGScan-Engine.
-     ======================================================================== */
-  const KGG_CURRENT_LAYOUT_ID='TPL-BASIS-A-CLASSIC-L6-v2';
-  const KGG_CURRENT_LAYOUT_BOXES=[
-    {ex:1,name:'Adduktion Maschine',x:.027,y:.134,w:.470,h:.225,measure:'Wdh'},
-    {ex:2,name:'Ein-Beinpresse',x:.503,y:.134,w:.470,h:.225,measure:'Wdh'},
-    {ex:3,name:'Ein-Beinpresse',x:.027,y:.385,w:.470,h:.225,measure:'Wdh'},
-    {ex:4,name:'Ein-Beinpresse',x:.503,y:.385,w:.470,h:.225,measure:'Wdh'},
-    {ex:5,name:'Copenhagen Plank',x:.027,y:.637,w:.470,h:.318,measure:'Sek.'},
-    {ex:6,name:'Beinpresse',x:.503,y:.637,w:.470,h:.318,measure:'Wdh'}
-  ];
-  function kggClampRect(rect,w,h){
-    const x=Math.max(0,Math.min(w-1,Math.round(rect.x)));
-    const y=Math.max(0,Math.min(h-1,Math.round(rect.y)));
-    const rw=Math.max(1,Math.min(w-x,Math.round(rect.w)));
-    const rh=Math.max(1,Math.min(h-y,Math.round(rect.h)));
-    return {x,y,w:rw,h:rh};
-  }
-  function kggCropCanvas(src,rect){
-    const r=kggClampRect(rect,src.width,src.height);
-    const c=document.createElement('canvas');
-    c.width=r.w; c.height=r.h;
-    const x=c.getContext('2d',{willReadFrequently:true});
-    x.fillStyle='#fff'; x.fillRect(0,0,c.width,c.height);
-    x.drawImage(src,r.x,r.y,r.w,r.h,0,0,r.w,r.h);
-    return c;
-  }
-  function kggCurrentLayoutRowStripRect(box,imgW,imgH,wide){
-    const bx=box.x*imgW, by=box.y*imgH, bw=box.w*imgW, bh=box.h*imgH;
-    const valueLeft=bx+bw*.110;
-    const valueRight=bx+bw*.858;
-    const cy=by+(box.ex<=4?bh*.595:bh*.485);
-    const stripH=wide?Math.max(54,bh*.19):Math.max(42,bh*.15);
-    return {x:valueLeft,y:cy-stripH*.55,w:valueRight-valueLeft,h:stripH};
-  }
-  function kggNormalizeCanvasForCurrentLayout(src){
-    const canvas=scanCloneCanvas(src);
-    const ctx=canvas.getContext('2d',{willReadFrequently:true});
-    ctx.save();
-    ctx.filter='contrast(1.18) brightness(1.03) saturate(.92)';
-    ctx.drawImage(src,0,0);
-    ctx.restore();
-    canvas.dataset.kggLayout=KGG_CURRENT_LAYOUT_ID;
-    return canvas;
-  }
-  function kggBuildCurrentLayoutT1Strips(srcCanvas){
-    const src=kggNormalizeCanvasForCurrentLayout(srcCanvas);
-    return KGG_CURRENT_LAYOUT_BOXES.map(box=>{
-      const rect=kggCurrentLayoutRowStripRect(box,src.width,src.height,true);
-      return {ex:box.ex,name:box.name,measure:box.measure,rect,canvas:kggCropCanvas(src,rect)};
-    });
-  }
-  function kggBuildCurrentLayoutContactSheet(strips){
-    const list=strips||[];
-    if(!list.length)throw new Error('Keine T1-Zeilen-Crops erzeugt.');
-    const scale=1.5;
-    const labelW=180;
-    const rowH=92;
-    const maxW=Math.max.apply(null,list.map(s=>s.canvas.width));
-    const c=document.createElement('canvas');
-    c.width=Math.round(labelW+maxW*scale+40);
-    c.height=36+list.length*rowH+24;
-    const x=c.getContext('2d',{willReadFrequently:true});
-    x.fillStyle='#fff'; x.fillRect(0,0,c.width,c.height);
-    x.fillStyle='#071027'; x.font='bold 24px Arial';
-    x.fillText('KGG T1 Contact-Sheet · aktuelles Layout EX1-EX6',20,28);
-    list.forEach((s,i)=>{
-      const y=46+i*rowH;
-      x.fillStyle='#eef6ff'; x.fillRect(16,y-8,c.width-32,rowH-8);
-      x.strokeStyle='#dce3eb'; x.strokeRect(16,y-8,c.width-32,rowH-8);
-      x.fillStyle='#071027'; x.font='bold 28px Arial'; x.fillText('EX'+s.ex,26,y+36);
-      x.font='bold 16px Arial'; x.fillText(s.name,78,y+26);
-      x.font='12px Arial'; x.fillStyle='#657386'; x.fillText(s.measure==='Sek.'?'Zeit/Sekunden':'kg/Wdh links nach rechts',78,y+46);
-      x.drawImage(s.canvas,labelW,y-2,s.canvas.width*scale,s.canvas.height*scale);
-    });
-    c.dataset.kggContactSheet='current-layout-t1-v307';
-    return c;
-  }
-  function kggCurrentLayoutPrompt(){
-    return [
-      'Lies das KGG Contact-Sheet. Es zeigt EX1 bis EX6, jeweils nur die handschriftlich ausgefüllte T1-Zeile aus dem Layout '+KGG_CURRENT_LAYOUT_ID+'.',
-      'Gib ausschließlich gültiges JSON aus. Schema: {"groups":[[...EX1 Zahlen...],[...EX2 Zahlen...],[...EX3 Zahlen...],[...EX4 Zahlen...],[...EX5 Zahlen...],[...EX6 Zahlen...]],"warnings":[]}.',
-      'Jede Gruppe enthält nur die sichtbaren handschriftlichen Zahlen der jeweiligen EX-Zeile in Leserichtung von links nach rechts.',
-      'Keine Übungsnamen raten. Keine leeren Tabellenwerte ergänzen. Keine Erklärungen. Keine Markdown-Codeblöcke.'
-    ].join('\n');
-  }
-  function kggNormalizeGroupsFromJson(json){
-    if(!json)return [];
-    if(Array.isArray(json.groups))return json.groups.map(g=>Array.isArray(g)?g.map(Number).filter(Number.isFinite):[]);
-    if(Array.isArray(json.exercises))return json.exercises.map(ex=>(ex.numbers||ex.values||[]).map(Number).filter(Number.isFinite));
-    if(Array.isArray(json))return json.map(g=>Array.isArray(g)?g.map(Number).filter(Number.isFinite):[]);
     return [];
   }
-  function kggCurrentLayoutGroupsQuality(groups){
-    const warnings=[];
-    const normalized=KGG_CURRENT_LAYOUT_BOXES.map((box,i)=>({ex:box.ex,name:box.name,measure:box.measure,numbers:Array.isArray(groups&&groups[i])?groups[i].map(Number).filter(Number.isFinite):[]}));
-    if(normalized.length!==6)warnings.push('6 EX-Gruppen erwartet');
-    normalized.forEach(item=>{
-      if(!item.numbers.length)warnings.push('EX'+item.ex+' leer');
-      if(item.numbers.length!==6)warnings.push('EX'+item.ex+' hat '+item.numbers.length+' statt 6 Werte');
-      if(item.numbers.length>10)warnings.push('EX'+item.ex+' zu viele Zahlen');
+  function scanPlanExerciseFromNumbers(name,numbers,source){
+    const cleanName=stripScanExerciseName(name||scanExerciseName(source));
+    if(!cleanName)return null;
+    const metricUnit=scanUnitLabel(source&&source.unit||source&&source.metricUnit||source&&source.metric_unit,(source&&source.measure)==='Sek.'?'Sek.':'Wdh');
+    const loadUnit=scanUnitLabel(source&&source.weightUnit||source&&source.loadUnit||source&&source.weight_unit,/sek|zeit|time/i.test(metricUnit)?'keine':'kg');
+    const side=normalizeSideMode(source&&source.side||source&&source.side_mode||source&&source.laterality||source&&source.seite||'BI');
+    const scanSets=scanSetsFromNumberSequence(numbers, {...(source||{}),unit:metricUnit,metricUnit,weightUnit:loadUnit,loadUnit,side});
+    const first=scanSets[0]||{};
+    const exact=exactBankExercise(cleanName);
+    const id=makeLocalId();
+    const isTime=/zeit|sek|sec|min|time/i.test(metricUnit)||/keine/i.test(loadUnit);
+    return ensureUiExerciseShape({
+      ...(exact||{}),
+      id,localId:id,sourceId:exact?exact.id:'',bankId:exact?exact.id:'',
+      name:exact?exact.name:cleanName,
+      sets:3,side,unit:isTime?'Zeit':'Wdh',metricUnit:isTime?'Sek.':'Wdh',weightUnit:isTime?'keine':loadUnit,loadUnit:isTime?'keine':loadUnit,measure:isTime?'zeit':'wdh',
+      startLoad:(first&&first.load)||'',
+      startMetric:(first&&first.metric)||'',
+      scanSets,scanImported:true,scanSource:'Scan: kg/Wdh übernommen',
+      rawText:scanSets.length?kggScanPlanExerciseToText(cleanName,scanSets,{metricUnit:isTime?'Sek.':'Wdh',loadUnit:isTime?'keine':loadUnit,side}):(source&&source.rawText||cleanName),
+      pendingNew:!exact,needsReview:!exact
     });
-    const totalFound=normalized.reduce((sum,item)=>sum+item.numbers.length,0);
-    const completeBoxes=normalized.filter(item=>item.numbers.length===6).length;
-    return {ok:!warnings.length,layout:KGG_CURRENT_LAYOUT_ID,exerciseCount:normalized.length,numberCount:totalFound,completeBoxes,warnings,normalized};
   }
-  function kggCurrentLayoutGroupToText(box,values){
-    const nums=(values||[]).map(v=>String(v).trim()).filter(Boolean);
-    if(box.measure==='Sek.'){
-      const s1=nums.length>=6?nums[1]:(nums[0]||'');
-      const s2=nums.length>=6?nums[3]:(nums[1]||'');
-      const s3=nums.length>=6?nums[5]:(nums[2]||'');
-      return [box.name,'Satz 1: '+(s1||'')+' Sek.','Satz 2: '+(s2||'')+' Sek.','Satz 3: '+(s3||'')+' Sek.'].join('\n');
-    }
-    const kg1=nums[0]||'', w1=nums[1]||'';
-    const kg2=nums[2]||'', w2=nums[3]||'';
-    const kg3=nums[4]||'', w3=nums[5]||'';
-    return [box.name,'Satz 1: '+w1+' wdh @ '+kg1+' kg','Satz 2: '+w2+' wdh @ '+kg2+' kg','Satz 3: '+w3+' wdh @ '+kg3+' kg'].join('\n');
-  }
-  function kggCurrentLayoutGroupsToPlanText(groups){
-    return KGG_CURRENT_LAYOUT_BOXES.map((box,i)=>kggCurrentLayoutGroupToText(box,groups&&groups[i]||[])).join('\n\n').trim();
-  }
-  async function callGeminiCurrentLayoutContactSheet(file){
-    const keys=localGeminiKeys();
-    if(!keys.length)throw new Error('Kein QR. OCR braucht Admin-Konfig.');
-    const imageCanvas=await scanImageCanvasFromFile(file,1900);
-    const redacted=redactScanCanvasForExternalOcr(imageCanvas);
-    const strips=kggBuildCurrentLayoutT1Strips(redacted);
-    const contact=kggBuildCurrentLayoutContactSheet(strips);
-    const inline=canvasToGeminiInlineData(contact);
-    const models=['gemini-2.5-flash-lite',GEMINI_SCAN_MODEL,'gemini-2.5-flash'].filter((v,i,a)=>v&&a.indexOf(v)===i);
-    let lastError=null;
-    for(const model of models){
-      for(const key of keys){
-        const controller=new AbortController();
-        const timer=setTimeout(()=>controller.abort(),18000);
-        try{
-          const body={
-            contents:[{role:'user',parts:[{text:kggCurrentLayoutPrompt()},{inline_data:inline}]}],
-            generationConfig:{temperature:0,responseMimeType:'application/json',maxOutputTokens:1000}
-          };
-          const response=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',{
-            method:'POST',
-            headers:{'Content-Type':'application/json','x-goog-api-key':key},
-            body:JSON.stringify(body),
-            signal:controller.signal
-          });
-          const json=await response.json().catch(()=>({}));
-          if(!response.ok)throw new Error((json&&json.error&&json.error.message)||('Gemini OCR HTTP '+response.status));
-          const rawText=geminiScanResponseText(json);
-          const parsed=parseLooseJson(rawText);
-          if(!parsed.ok)throw new Error('Contact-Sheet JSON nicht parsebar.');
-          const groups=kggNormalizeGroupsFromJson(parsed.json);
-          const quality=kggCurrentLayoutGroupsQuality(groups);
-          const planText=kggCurrentLayoutGroupsToPlanText(groups);
-          if(!planText)throw new Error('Contact-Sheet OCR hat keinen Plantext erzeugt.');
-          return {
-            type:'paper-current-layout-contactsheet',
-            planText,
-            rawText,
-            model,
-            json:parsed.json,
-            jsonRepaired:!!parsed.repaired,
-            groups,
-            quality,
-            applyText:KGG_CURRENT_LAYOUT_BOXES.map(box=>box.name).join(', '),
-            redactedBeforeExternalOcr:true,
-            contactSheet:true,
-            layout:KGG_CURRENT_LAYOUT_ID
-          };
-        }catch(err){
-          lastError=err;
-        }finally{clearTimeout(timer);}
+  function kggScanPlanExerciseToText(name,sets,source){
+    const metricUnit=source&&source.metricUnit||'Wdh';
+    const loadUnit=source&&source.loadUnit||'kg';
+    const isTime=/zeit|sek|sec|min|time/i.test(metricUnit)||/keine/i.test(loadUnit);
+    const lines=[name];
+    (sets||[]).slice(0,3).forEach((set,i)=>{
+      if(set&&set.li||set&&set.re){
+        const li=set.li||{}, re=set.re||{};
+        lines.push('Satz '+(i+1)+':');
+        lines.push('  Li: '+(li.metric||'')+' '+metricUnit+(li.load?' @ '+li.load+' '+loadUnit:''));
+        lines.push('  Re: '+(re.metric||'')+' '+metricUnit+(re.load?' @ '+re.load+' '+loadUnit:''));
+        if(set.pain)lines.push('  Schmerz: '+set.pain+'/10');
+      }else if(isTime){
+        lines.push('Satz '+(i+1)+': '+(set&&set.metric||'')+' '+metricUnit+(set&&set.pain?' · Schmerz: '+set.pain+'/10':''));
+      }else{
+        lines.push('Satz '+(i+1)+': '+(set&&set.metric||'')+' '+metricUnit+(set&&set.load?' @ '+set.load+' '+loadUnit:'')+(set&&set.pain?' · Schmerz: '+set.pain+'/10':''));
       }
-    }
-    throw lastError||new Error('Current-layout Contact-Sheet-OCR fehlgeschlagen.');
+    });
+    return lines.join('\n');
   }
-  async function callGeminiPaperFallback(file){
+  function scanPlanExerciseFromPayloadItem(item,fallbackBox){
+    let source=item;
+    if(Array.isArray(item)){try{source=expandKggH2Exercise(item);}catch(err){source={name:item[0]||''};}}
+    const name=scanExerciseName(source)||fallbackBox&&fallbackBox.name||'';
+    const numbers=scanFindNumberSequence(source);
+    return scanPlanExerciseFromNumbers(name,numbers,{...(source||{}),measure:fallbackBox&&fallbackBox.measure});
+  }
+  function scanPlanExercisesFromDocText(text){
+    const lines=String(text||'').split(/\n+/).map(l=>l.trim()).filter(Boolean);
+    const out=[];
+    let current=null;
+    lines.forEach(line=>{
+      if(/^Satz\s+\d+\s*:/i.test(line)&&current){
+        const m=line.match(/^Satz\s+(\d+)\s*:\s*([\d,.]+)?\s*(wdh|wh|sek\.?|sec|s)?(?:\s*@\s*([\d,.]+)\s*(kg|hub|stufe|watt|bar)?)?/i);
+        if(m){
+          const metric=scanValueToString(m[2]||'');
+          const load=scanValueToString(m[4]||'');
+          const metricUnit=/sek|sec|\bs\b/i.test(m[3]||'')?'Sek.':'Wdh';
+          current.metricUnit=metricUnit;
+          if(metricUnit==='Sek.')current.weightUnit='keine';
+          current.scanSets=current.scanSets||[];
+          current.scanSets[Number(m[1])-1]={metric,load};
+        }
+      }else if(!/^Typ:|^Prüfen:/i.test(line)){
+        if(current)out.push(current);
+        current={name:stripScanExerciseName(line),scanSets:[],sets:3,side:'BI',metricUnit:'Wdh',weightUnit:'kg'};
+      }
+    });
+    if(current)out.push(current);
+    return out.filter(ex=>ex.name).map(ex=>{
+      const isTime=/Sek\./i.test(ex.metricUnit)||ex.weightUnit==='keine';
+      const first=(ex.scanSets||[])[0]||{};
+      return scanPlanExerciseFromNumbers(ex.name,(ex.scanSets||[]).flatMap(s=>isTime?[0,s&&s.metric||'']:[s&&s.load||'',s&&s.metric||'']),{unit:isTime?'Sek.':'Wdh',metricUnit:isTime?'Sek.':'Wdh',weightUnit:isTime?'keine':'kg',loadUnit:isTime?'keine':'kg'});
+    }).filter(Boolean);
+  }
+  function scanPlanExercisesFromResult(result){
+    if(!result)return [];
+    if(Array.isArray(result.groups)&&String(result.layout||'')===KGG_CURRENT_LAYOUT_ID){
+      return KGG_CURRENT_LAYOUT_BOXES.map((box,i)=>scanPlanExerciseFromNumbers(box.name,result.groups[i]||[],{measure:box.measure,unit:box.measure,metricUnit:box.measure,weightUnit:box.measure==='Sek.'?'keine':'kg',loadUnit:box.measure==='Sek.'?'keine':'kg'})).filter(Boolean);
+    }
+    const payloadExercises=scanPayloadExercises(result.json||result);
+    if(payloadExercises.length)return payloadExercises.map(scanPlanExerciseFromPayloadItem).filter(Boolean);
+    const text=result.planText||result.copyText||result.rawText||'';
+    return scanPlanExercisesFromDocText(text);
+  }
+  function appendScanExercisesToCurrentPlan(exercises,reason){
+    const clean=(exercises||[]).filter(ex=>ex&&ex.name);
+    if(!clean.length){setScanStatus('Kein Übungstext zum Übernehmen.');return false;}
+    const input=$('exerciseInput');
+    if(input&&input.value.trim())syncPlanFromTextInput('scan_preserve_existing_text_before_apply');
+    state.plan=[...(state.plan||[]),...clean.map(ensureUiExerciseShape)];
+    state.bankOpen=false;
+    state.liveDraftId=null;
+    state.scanPanelOpen='plan';
+    syncStatePlanToStore(reason||'scan_apply_structured_exercises');
+    syncTextInputFromPlan(reason||'scan_apply_structured_exercises_text');
+    save();
+    render();
+    setScanStatus('Scan-Ergebnis mit kg/Wdh übernommen.');
+    return true;
+  }
+  function applyScanResultToCurrentPlan(result,reason){
+    const structured=scanPlanExercisesFromResult(result);
+    if(structured.length)return appendScanExercisesToCurrentPlan(structured,reason||'scan_apply_result_structured');
+    const text=scanResultToApplyText(result)||scanResultToPlanText(result)||'';
+    const fromText=scanPlanExercisesFromDocText(text);
+    if(fromText.length)return appendScanExercisesToCurrentPlan(fromText,reason||'scan_apply_result_text_structured');
+    return applyScanTextToCurrentPlan(text,reason||'scan_apply_result_fallback');
+  }
+  function applyScanTextToCurrentPlan(text,reason){
+    const clean=String(text||'').replace(/^Typ:.*$/gm,'').replace(/^Prüfen:.*$/gm,'').replace(/\n+/g,', ').replace(/(?:,\s*){2,}/g,', ').trim();
+    if(!clean){setScanStatus('Kein Übungstext zum Übernehmen.');return false;}
+    const input=$('exerciseInput');
+    if(!input)return false;
+    const existing=String(input.value||'').trim();
+    input.value=existing?withTrailingExerciseComma(existing.replace(/,+$/,'')+', '+clean):withTrailingExerciseComma(clean);
+    syncPlanFromTextInput(reason||'scan_v319_apply_result_preserve_text');
+    state.bankOpen=false;
+    state.scanPanelOpen='plan';
+    save();
+    render();
+    setScanStatus('Scan-Ergebnis übernommen.');
+    return true;
+  }
+  function updateScanQueueInfo(){renderScanPreview();}
+  function showAfterPhotoPrompt(){scanState.decision=true;renderScanPreview();}
+  window.KGGScanBridge={
+    getStatus:()=>({singleEngine:true,hasLocalKey:!!currentLocalGeminiKey(),jobs:scanStateSnapshot().jobs.length}),
+    redactCanvasForExternalOcr:redactScanCanvasForExternalOcr,
+    createReadingCanvas:createScanReadingCanvas,
+    qualityCheck:scanPaperQuality,
+    scanResultToPlanText,
+    applyText:(text)=>applyScanTextToCurrentPlan(text,'scan_bridge_apply_text')
+  };
+  function notifyNativeScanPickerMode(kind){
+    const normalized=normalizeScanInputKind(kind);
     try{
-      const result=await callGeminiCurrentLayoutContactSheet(file);
-      if(result&&result.planText)return result;
-    }catch(err){
-      console.warn('v307 Contact-Sheet-OCR fehlgeschlagen, Legacy-Fallback wird versucht:',err);
-    }
-    return callGeminiLegacyPaperFallback(file);
-  }
-  /* ========================================================================
-     KGG v308 QR STRUCTURED OUTPUT + CURRENT-LAYOUT CONTACT-SHEET SCAN ENDE
-     ======================================================================== */
-  async function callGeminiLegacyPaperFallback(file){
-    const keys=localGeminiKeys();
-    if(!keys.length)throw new Error('Kein QR. OCR braucht Admin-Konfig.');
-    const canvas=redactScanCanvasForExternalOcr(createScanReadingCanvas(await scanImageCanvasFromFile(file,1500)));
-    const inline=canvasToGeminiInlineData(canvas);
-    const models=['gemini-2.5-flash-lite',GEMINI_SCAN_MODEL,'gemini-2.5-flash'].filter((v,i,a)=>v&&a.indexOf(v)===i);
-    let lastError=null;
-    for(const model of models){
-      for(const key of keys){
-        const controller=new AbortController();
-        const timer=setTimeout(()=>controller.abort(),35000);
-        try{
-          const body={
-            contents:[{role:'user',parts:[{text:geminiScanPrompt()},{inline_data:inline}]}],
-            generationConfig:{temperature:0,responseMimeType:'application/json',maxOutputTokens:1400}
-          };
-          const response=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',{
-            method:'POST',
-            headers:{'Content-Type':'application/json','x-goog-api-key':key},
-            body:JSON.stringify(body),
-            signal:controller.signal
-          });
-          const json=await response.json().catch(()=>({}));
-          if(!response.ok)throw new Error((json&&json.error&&json.error.message)||('Gemini OCR HTTP '+response.status));
-          const rawText=geminiScanResponseText(json);
-          const parsed=parseLooseJson(rawText);
-          const planText=parsed.ok?scanResultToPlanText(parsed.json):cleanGeminiScanText(rawText);
-          const quality=scanPaperQuality(planText,parsed.ok?parsed.json:null);
-          if(planText)return {type:'paper',planText,rawText,model,quality,json:parsed.ok?parsed.json:null,jsonRepaired:!!parsed.repaired,redactedBeforeExternalOcr:true};
-          throw new Error('Gemini OCR hat keinen Übungstext erkannt.');
-        }catch(err){
-          lastError=err;
-        }finally{clearTimeout(timer);}
+      if(window.KGGNativeCamera&&typeof window.KGGNativeCamera.setNextPickerMode==='function'){
+        window.KGGNativeCamera.setNextPickerMode(normalized);
+        return;
       }
+      if(window.KGGAndroidApp&&typeof window.KGGAndroidApp.setNextFileChooserMode==='function'){
+        window.KGGAndroidApp.setNextFileChooserMode(normalized);
+      }
+    }catch(err){
+      console.warn('Native Kamera-Bridge nicht verfuegbar:',err);
     }
-    throw lastError||new Error('Papierplan-OCR fehlgeschlagen.');
   }
-  function qrParsedToScanResult(parsed){
-    const json=parsed&&parsed.json;
-    let payload=json;
-    if(parsed&&parsed.type==='KGGH2')payload=convertKggH2PayloadToPatientPayload(json);
-    const exercises=scanPayloadExercises(payload);
-    const planText=scanResultToPlanText(payload);
-    const applyText=exercises.length?exercises.map(scanExerciseToDocText).filter(Boolean).join('\n\n'):'';
-    const warnings=[];
-    if(!planText)warnings.push('QR erkannt, aber kein strukturierter Übungstext erzeugt.');
-    return {type:'qr',qrType:parsed&&parsed.type||'QR',planText,applyText,rawText:planText||'QR erkannt.',json:payload,quality:{ok:warnings.length===0,warnings}};
-  }
-  const scanState={next:'page',activeIndex:0,jobs:[],decision:false,busy:false,lastError:'',lastInputKind:'camera'};
-  window.scanJobsState=scanState.jobs;
-  function scanNewJob(type){
-    const job={id:'scan_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),label:'Plan '+(scanState.jobs.length+1),short:'',type:type||'paper',pages:[],result:null,createdAt:new Date().toISOString(),status:'new',warnings:[]};
-    scanState.jobs.push(job);
-    scanState.activeIndex=scanState.jobs.length-1;
-    return job;
-  }
-  function scanCurrentJob(){
-    if(!scanState.jobs.length)return scanNewJob('paper');
-    return scanState.jobs[Math.max(0,Math.min(scanState.activeIndex,scanState.jobs.length-1))]||scanNewJob('paper');
-  }
-  function scanFileMeta(file){return {name:file&&file.name||'Kamera-Foto',size:file&&file.size||0,type:file&&file.type||'image',addedAt:new Date().toISOString(),file:file||null};}
+  window.KGGScan={
+    pick(kind){
+        const normalized=rememberScanInputKind(kind||lastScanInputKind());
+        notifyNativeScanPickerMode(normalized);
+        const input=normalized==='camera'?$('fileInput'):$('filePickerInput');
+        if(input){
+          try{input.value='';}catch(_e){}
+          if(normalized==='camera'){
+            input.accept='image/*';
+            input.setAttribute('capture','environment');
+            input.removeAttribute('multiple');
+          }else{
+            input.accept='image/*,.jpg,.jpeg,.png,.webp';
+            input.removeAttribute('capture');
+            input.setAttribute('multiple','multiple');
+          }
+          input.click();
+        }
+      },
+    async handleInput(input,kind){
+      const normalizedKind=rememberScanInputKind(kind||lastScanInputKind());
+      const files=Array.from(input&&input.files||[]).filter(Boolean);
+      try{if(input)input.value='';}catch(err){}
+      if(!files.length)return scanStateSnapshot();
+      scanState.busy=true;
+      scanState.lastError='';
+      scanState.decision=false;
+      setScanStatus(files.length===1?'Prüfe: '+(files[0].name||'Kamera-Foto'):files.length+' Bilder werden vorbereitet …');
+      renderScanPreview();
+      try{
+        let syncCodeCount=0;
+        let acceptedCount=0;
+        for(const file of files){
+          const accepted=await scanAcceptFile(file,normalizedKind);
+          if(accepted&&(accepted.type==='syncInvite'||accepted.type==='syncBundle'))syncCodeCount++;
+          else if(accepted)acceptedCount++;
+        }
+        if(syncCodeCount&&!acceptedCount){
+          scanState.decision=false;
+          state.scanPanelOpen='plan';
+          save();
+          render();
+          return scanStateSnapshot();
+        }
+        scanState.decision=true;
+        state.scanPanelOpen='scanned';
+        save();
+        render();
+        setScanStatus('Foto hinzugefügt. Bitte entscheiden.');
+      }catch(err){
+        scanState.lastError='Scan fehlgeschlagen: '+(err&&err.message||err);
+        setScanStatus(scanState.lastError);
+      }finally{
+        scanState.busy=false;
+        renderScanPreview();
+      }
+      return scanStateSnapshot();
+    },
+    async handleQrRaw(raw,source){
+      const value=String(raw||'').trim();
+      if(!value)return {type:'invalidQr',error:'empty'};
+      scanState.busy=true;
+      scanState.lastError='';
+      scanState.decision=false;
+      setScanStatus('QR erkannt: Inhalt wird gelesen ...');
+      renderScanPreview();
+      try{
+        const accepted=await scanAcceptQrRaw(value,null,{source:String(source||'live-camera')},true);
+        if(!accepted||accepted.type==='invalidQr')return accepted||{type:'invalidQr',error:'unknown'};
+        if(accepted.type==='syncInvite'||accepted.type==='syncBundle'||accepted.type==='configTransfer'||accepted.type==='configTransferCancelled'){
+          scanState.decision=false;
+          state.scanPanelOpen='plan';
+        }else{
+          scanState.decision=true;
+          state.scanPanelOpen='scanned';
 ```

@@ -4,424 +4,424 @@
 - Lines: 5881-6300
 
 ```html
-      min-height:0!important;
-      max-height:none!important;
-      margin:0!important;
-      align-self:stretch!important;
-      border-radius:16px!important;
-      overflow:hidden!important;
-    }
-    body.tabletLayoutCustom #bankContent,
-    body.tabletLayoutCustom #bankContent .bankWithAz,
-    body.tabletLayoutCustom #bankContent .bankRows{
-      min-height:0!important;
-      max-height:none!important;
-      height:100%!important;
-    }
-    body.tabletLayoutCustom #rightPlanStack,
-    body.tabletLayoutCustom #rightPlanStack.hidden{
-      grid-column:2/4!important;
-      grid-row:2/4!important;
-      display:flex!important;
-      flex-direction:column!important;
-      width:100%!important;
-      height:100%!important;
-      min-height:0!important;
-      margin:0!important;
-      gap:0!important;
-      align-self:stretch!important;
-      justify-self:stretch!important;
-      visibility:visible!important;
-      pointer-events:auto!important;
-      overflow:hidden!important;
-    }
-    body.tabletLayoutCustom #currentPlanBlock,
-    body.tabletLayoutCustom #rightPlanStack #currentPlanBlock.hidden{
-      display:flex!important;
-      flex-direction:column!important;
-      flex:1 1 auto!important;
-      width:100%!important;
-      height:100%!important;
-      min-height:0!important;
-      margin:0!important;
-      padding:12px!important;
-      border:2px solid #111827!important;
-      border-radius:18px!important;
-      background:#fff!important;
-      box-shadow:none!important;
-      visibility:visible!important;
-      pointer-events:auto!important;
-      overflow:hidden!important;
-    }
-    body.tabletLayoutCustom #rightPlanStack #scannedPlansBlock.hidden{
-      display:none!important;
-    }
-    body.tabletLayoutCustom #currentPlanToggle{
-      flex:0 0 auto!important;
-      min-height:44px!important;
-      padding:8px 10px!important;
-      font-size:18px!important;
-      border-radius:12px!important;
-    }
-    body.tabletLayoutCustom #currentPlanBlock .planSectionBody{
-      flex:1 1 auto!important;
-      min-height:0!important;
-      overflow:auto!important;
-      padding:8px 0 0!important;
-    }
-    body.tabletLayoutCustom #currentPlanBlock #planList{
-      min-height:100%!important;
-      margin:0!important;
-      padding:0!important;
-      display:grid!important;
-      align-content:start!important;
-    }
-    body.tabletLayoutCustom #currentPlanBlock #planList:empty::before{
-      content:"Noch keine Übungen im Plan\A Füge Übungen aus der Datenbank hinzu.";
-      white-space:pre;
-      min-height:220px;
-      display:grid;
-      place-items:center;
-      text-align:center;
-      color:#5f6875;
-      font-weight:800;
-      font-size:13px;
-    }
-    body.tabletLayoutCustom #recentToggle,
-    body.tabletLayoutCustom #packageToggle,
-    body.tabletLayoutCustom #recentList,
-    body.tabletLayoutCustom #packageList,
-    body.tabletLayoutCustom #packageLayoutSlot{
-      display:none!important;
-    }
-    body.tabletLayoutCustom #finishBtn,
-    body.tabletLayoutCustom #finishBtn.hidden,
-    body.tabletLayoutCustom #createPanel:not(.planMode) #finishBtn,
-    body.tabletLayoutCustom #createPanel:not(.planMode) #finishBtn.hidden{
-      display:none!important;
-    }
-    body.tabletLayoutCustom #createPanel .tools,
-    body.tabletLayoutCustom #createPanel .tools #planActions,
-    body.tabletLayoutCustom #createPanel:not(.planMode) .tools #planActions,
-    body.tabletLayoutCustom #createPanel.planMode .tools #planActions{
-      display:contents!important;
-      width:auto!important;
-      height:auto!important;
-      min-height:0!important;
-      margin:0!important;
-      padding:0!important;
-      border:0!important;
-      box-shadow:none!important;
-      background:transparent!important;
-    }
-    body.tabletLayoutCustom #createPanel .tools #packageLayoutSlot,
-    body.tabletLayoutCustom #createPanel:not(.planMode) .tools #packageLayoutSlot,
-    body.tabletLayoutCustom #createPanel.planMode .tools #packageLayoutSlot,
-    body.tabletLayoutCustom #createPanel .tools #packageToggle,
-    body.tabletLayoutCustom #createPanel.planMode .tools #packageToggle,
-    body.tabletLayoutCustom #createPanel .tools #recentToggle,
-    body.tabletLayoutCustom #createPanel.planMode .tools #recentToggle{
-      display:none!important;
-      width:0!important;
-      height:0!important;
-      min-height:0!important;
-      margin:0!important;
-      padding:0!important;
-      border:0!important;
-      overflow:hidden!important;
-    }
-    body.tabletLayoutCustom #createPanel #rightPlanStack,
-    body.tabletLayoutCustom #createPanel #rightPlanStack.hidden,
-    body.tabletLayoutCustom #createPanel:not(.planMode) #rightPlanStack,
-    body.tabletLayoutCustom #createPanel:not(.planMode) #rightPlanStack.hidden,
-    body.tabletLayoutCustom #createPanel.planMode #rightPlanStack,
-    body.tabletLayoutCustom #createPanel.planMode #rightPlanStack.hidden{
-      grid-column:2/4!important;
-      grid-row:2/4!important;
-      display:flex!important;
-      flex-direction:column!important;
-      width:100%!important;
-      height:100%!important;
-      min-height:0!important;
-      margin:0!important;
-      gap:0!important;
-      align-self:stretch!important;
-      justify-self:stretch!important;
-      visibility:visible!important;
-      pointer-events:auto!important;
-      overflow:hidden!important;
-    }
-    body.tabletLayoutCustom #createPanel #rightPlanStack #currentPlanBlock,
-    body.tabletLayoutCustom #createPanel #rightPlanStack #currentPlanBlock.hidden,
-    body.tabletLayoutCustom #createPanel:not(.planMode) #rightPlanStack #currentPlanBlock.hidden,
-    body.tabletLayoutCustom #createPanel.planMode #rightPlanStack #currentPlanBlock.hidden{
-      display:flex!important;
-      flex-direction:column!important;
-      flex:1 1 auto!important;
-      width:100%!important;
-      height:100%!important;
-      min-height:0!important;
-      margin:0!important;
-      visibility:visible!important;
-      pointer-events:auto!important;
-    }
-    body.tabletLayoutCustom #createPanel.planMode #finishBtn{
-      grid-column:3!important;
-      grid-row:1!important;
-      display:flex!important;
-      visibility:visible!important;
-      opacity:1!important;
-      pointer-events:auto!important;
-      scale:1 1!important;
-      width:126px!important;
-      min-width:126px!important;
-      height:44px!important;
-      min-height:44px!important;
-      margin:0!important;
-      justify-content:center!important;
-      align-items:center!important;
-      padding:0 16px!important;
-      border-width:0!important;
-      border-radius:14px!important;
-      font-size:16px!important;
-    }
-  }
+  <script>
+    // PDF-Testversion: jsPDF wird local-first geladen, damit PDF weiter lokal im Browser erzeugt wird.
+    // GitHub Pages bleibt nur fuer die Patienten-App-Shell, nicht fuer PDF-Erzeugung.
+    window.KGG_JSPDF_TEST_SOURCES = window.KGG_JSPDF_TEST_SOURCES || [];
+    window.KGG_JSPDF_TEST_LOAD_STATE = window.KGG_JSPDF_TEST_LOAD_STATE || {status:'idle', index:0, error:null, promise:null};
+    window.KGGLoadJsPdfForTest = function KGGLoadJsPdfForTest(){
+      if((window.jspdf && window.jspdf.jsPDF) || window.jsPDF) return Promise.resolve((window.jspdf&&window.jspdf.jsPDF)||window.jsPDF);
+      const state = window.KGG_JSPDF_TEST_LOAD_STATE;
+      if(state.promise) return state.promise;
+      const sources = window.KGG_JSPDF_TEST_SOURCES || [];
+      state.status = 'loading';
+      state.promise = new Promise((resolve,reject)=>{
+        function trySource(i){
+          state.index = i;
+          if((window.jspdf && window.jspdf.jsPDF) || window.jsPDF){
+            state.status = 'loaded';
+            resolve((window.jspdf&&window.jspdf.jsPDF)||window.jsPDF);
+            return;
+          }
+          if(i >= sources.length){
+            state.status = 'failed';
+            state.error = 'jsPDF konnte aus keiner Testquelle geladen werden.';
+            reject(new Error(state.error));
+            return;
+          }
+          const script = document.createElement('script');
+          script.src = sources[i];
+          script.async = true;
+          script.onload = function(){
+            const ctor = (window.jspdf&&window.jspdf.jsPDF)||window.jsPDF||null;
+            if(ctor){
+              state.status = 'loaded';
+              resolve(ctor);
+            }else{
+              trySource(i+1);
+            }
+          };
+          script.onerror = function(){trySource(i+1);};
+          document.head.appendChild(script);
+        }
+        trySource(0);
+      });
+      return state.promise;
+    };
+    window.KGGLoadJsPdfForTest();
+  </script>
 
-  /* v398: Confirmed Tablet Sidebar + Tab S9 layout only.
-     No PDF, patient app, Scan/OCR core, parser, plan-state or media/upload changes. */
+<style id="kgg-mini-patch-v400-01-menu-icon-stays-hamburger">
+  /* v400 mini01: Tablet-Menü-Icon bleibt Hamburger.
+     Nur UI-CSS. Keine PDF/QR/Scan/Parser/Plan-State-Logik. */
   @media (min-width:760px){
-    :root{--kgg-tablet-sidebar-w:230px;--kgg-tablet-safe-top:calc(env(safe-area-inset-top) + 32px);--kgg-tablet-gap:8px;--kgg-tablet-left-default:clamp(460px,42vw,540px);--kgg-tablet-left-menu:clamp(360px,40vw,440px);}
-    html,body{width:100%!important;min-height:100%!important;margin:0!important;overflow:hidden!important;background:#e8eef6!important;}
-    body.tabletLayoutCustom{padding:var(--kgg-tablet-safe-top) 0 0!important;box-sizing:border-box!important;}
-    body.tabletLayoutCustom .app{width:100vw!important;max-width:none!important;height:calc(100dvh - var(--kgg-tablet-safe-top))!important;max-height:calc(100dvh - var(--kgg-tablet-safe-top))!important;margin:0!important;padding:0 10px 8px!important;box-sizing:border-box!important;display:grid!important;grid-template-columns:var(--kgg-tablet-left-col,var(--kgg-tablet-left-default)) minmax(0,1fr) 126px!important;grid-template-rows:44px 92px minmax(0,1fr)!important;gap:var(--kgg-tablet-gap)!important;transform:translateX(0)!important;transition:width .2s ease,transform .2s ease,grid-template-columns .2s ease!important;overflow:hidden!important;}
-    body.tabletLayoutCustom.tabletMenuOpen .app{width:calc(100vw - var(--kgg-tablet-sidebar-w))!important;transform:translateX(var(--kgg-tablet-sidebar-w))!important;grid-template-columns:var(--kgg-tablet-left-col,var(--kgg-tablet-left-menu)) minmax(0,1fr) 126px!important;}
-    body.tabletLayoutCustom #scanHub{grid-template-columns:36px minmax(0,1fr) minmax(0,1fr)!important;}
-    body.tabletLayoutCustom .tabletSideBackdrop,body.tabletLayoutCustom.tabletMenuOpen .tabletSideBackdrop{display:none!important;opacity:0!important;pointer-events:none!important;visibility:hidden!important;}
-    body.tabletLayoutCustom .tabletSideMenu{display:flex!important;position:fixed!important;left:0!important;top:var(--kgg-tablet-safe-top)!important;bottom:auto!important;width:var(--kgg-tablet-sidebar-w)!important;min-width:var(--kgg-tablet-sidebar-w)!important;max-width:var(--kgg-tablet-sidebar-w)!important;height:calc(100dvh - var(--kgg-tablet-safe-top))!important;max-height:calc(100dvh - var(--kgg-tablet-safe-top))!important;padding:calc(env(safe-area-inset-top) + 16px) 12px calc(env(safe-area-inset-bottom) + 14px)!important;box-sizing:border-box!important;gap:18px!important;background:rgba(255,255,255,.98)!important;border-right:1px solid rgba(15,23,42,.12)!important;box-shadow:16px 0 40px rgba(15,23,42,.12)!important;transform:translateX(-100%)!important;transition:transform .22s cubic-bezier(.22,.8,.32,1)!important;z-index:1210!important;overflow-x:hidden!important;overflow-y:auto!important;visibility:visible!important;}
-    body.tabletLayoutCustom.tabletMenuOpen .tabletSideMenu{transform:translateX(0)!important;}
-    body.tabletLayoutCustom .tabletSideMenuHead{min-height:34px!important;padding:0!important;margin:0!important;font-size:18px!important;line-height:1!important;}
-    body.tabletLayoutCustom .tabletMenuClose{width:34px!important;height:34px!important;min-width:34px!important;border-radius:999px!important;font-size:22px!important;}
-    body.tabletLayoutCustom .tabletSideMenuMain{display:grid!important;gap:12px!important;margin:0!important;padding:0!important;border:0!important;}
-    body.tabletLayoutCustom .tabletMenuNavAction{width:100%!important;min-height:50px!important;display:grid!important;grid-template-columns:32px minmax(0,1fr)!important;align-items:center!important;justify-items:start!important;gap:8px!important;padding:8px 8px!important;border:0!important;border-radius:12px!important;background:#fff!important;color:#071027!important;box-shadow:none!important;overflow:visible!important;text-align:left!important;font-size:13px!important;line-height:1.15!important;font-weight:950!important;white-space:normal!important;}
-    body.tabletLayoutCustom .tabletMenuActionIcon{width:30px!important;height:30px!important;display:grid!important;place-items:center!important;font-size:21px!important;line-height:1!important;flex:0 0 auto!important;color:#071027!important;}
-    body.tabletLayoutCustom .tabletSideMenuLayoutPanel[hidden]{display:none!important;}
-    body.tabletLayoutCustom .tabletSideMenuLayoutPanel{display:grid!important;gap:8px!important;padding:8px!important;border:1px solid rgba(220,227,235,.95)!important;border-radius:12px!important;background:#f7f9fc!important;}
-    body.tabletLayoutCustom .tabletSideMenu .tabletLayoutControls{display:grid!important;gap:8px!important;width:100%!important;}
-    body.tabletLayoutCustom .tabletSideMenu .tabletLayoutFreeTools{display:grid!important;grid-template-columns:42px minmax(0,1fr) 42px!important;grid-template-areas:"plus value minus" "reset reset reset"!important;gap:6px!important;}
-    body.tabletLayoutCustom .tabletSideMenu .tabletLayoutFreeTools.hidden{display:none!important;}
-    body.tabletLayoutCustom .tabletSideMenu .tabletLayoutFreeTools button,body.tabletLayoutCustom .tabletSideMenu .tabletLockSwitch{min-height:38px!important;border-radius:10px!important;}
-    body.tabletLayoutCustom #recentList:not(.hidden),body.tabletLayoutCustom #packageList:not(.hidden){display:block!important;position:fixed!important;left:calc(var(--kgg-tablet-sidebar-w) + 14px)!important;top:calc(var(--kgg-tablet-safe-top) + 58px)!important;width:min(480px,calc(100vw - var(--kgg-tablet-sidebar-w) - 34px))!important;max-height:calc(100dvh - var(--kgg-tablet-safe-top) - 86px)!important;overflow:auto!important;z-index:1205!important;background:rgba(255,255,255,.98)!important;border:1px solid rgba(220,227,235,.95)!important;border-radius:16px!important;box-shadow:0 18px 48px rgba(7,16,39,.18)!important;padding:10px!important;}
-    body.tabletLayoutCustom .kggTherapistShareModal{position:fixed!important;inset:0!important;display:none!important;place-items:center!important;z-index:1320!important;background:rgba(7,16,39,.35)!important;padding:18px!important;box-sizing:border-box!important;}
-    body.tabletLayoutCustom .kggTherapistShareModal.isOpen{display:grid!important;}
-    .kggTherapistShareSheet{width:min(92vw,440px)!important;display:grid!important;gap:12px!important;background:#fff!important;color:#071027!important;border:2px solid #111827!important;border-radius:20px!important;padding:16px!important;box-shadow:0 22px 70px rgba(7,16,39,.24)!important;}
-    .kggTherapistShareSheet h2{margin:0!important;font-size:22px!important;line-height:1.05!important;}
-    .kggTherapistShareHint{margin:0!important;color:#657386!important;font-weight:800!important;}
-    .kggTherapistShareChoices{display:grid!important;gap:10px!important;}
-    .kggTherapistShareChoices button{min-height:62px!important;padding:10px 12px!important;border:1px solid #dce3eb!important;border-radius:14px!important;background:#fff!important;text-align:left!important;box-shadow:0 4px 14px rgba(7,16,39,.08)!important;}
-    .kggTherapistShareChoices b{display:block!important;font-size:16px!important;}
-    .kggTherapistShareChoices small{display:block!important;margin-top:3px!important;color:#657386!important;font-weight:800!important;line-height:1.25!important;}
-  }
-  /* v399: Tablet package overlay, split-handle scale control and safer scaled buttons only. */
-  @media (min-width:760px){
-    :root{--kgg-tablet-package-w:clamp(360px,32vw,520px);--kgg-tablet-collision-gap:14px;--kgg-tablet-button-safe-gap:clamp(10px,var(--kgg-tablet-collision-gap),28px);}
-    body.tabletLayoutCustom .tabletMenuBtn{display:inline-flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;width:44px!important;min-width:44px!important;max-width:44px!important;padding:0!important;box-sizing:border-box!important;}
-    body.tabletLayoutCustom .tabletMenuBtn span{display:block!important;margin:0!important;flex:0 0 auto!important;width:24px!important;height:3px!important;}
-    body.tabletLayoutCustom .app{gap:max(var(--kgg-tablet-gap),var(--kgg-tablet-button-safe-gap))!important;column-gap:max(var(--kgg-tablet-gap),var(--kgg-tablet-button-safe-gap))!important;row-gap:max(var(--kgg-tablet-gap),calc(var(--kgg-tablet-button-safe-gap) - 2px))!important;}
-    body.tabletLayoutCustom .scanHub{gap:var(--kgg-tablet-button-safe-gap)!important;}
-    body.tabletLayoutCustom .scanHub :is(.scanBtn,.scanMeta),body.tabletLayoutCustom #baseToggle,body.tabletLayoutCustom :is(#finishBtn,#recentToggle,#packageToggle){min-width:0!important;overflow:hidden!important;text-wrap:balance;}
-    body.tabletLayoutCollisionTight .scanHub{gap:var(--kgg-tablet-button-safe-gap)!important;}
-    body.tabletLayoutCollisionTight .scanHub :is(.scanBtn,.scanMeta,.adminConfigBtn,.sharedBankBtn),body.tabletLayoutCollisionTight #baseToggle{font-size:clamp(8px,calc(13px * var(--kgg-tablet-ui-scale,1)),22px)!important;line-height:1.08!important;padding:6px 8px!important;}
-    body.tabletLayoutCustom .tabletLayoutResizeHandle{pointer-events:none!important;z-index:1190!important;}
-    body.tabletLayoutEditMode .tabletLayoutResizeHandle{display:block!important;pointer-events:auto!important;}
-    body.tabletLayoutEditMode .tabletLayoutResizeHandle::before{width:18px!important;background:rgba(255,255,255,.92)!important;border:1px solid rgba(210,218,229,.98)!important;box-shadow:0 10px 28px rgba(7,16,39,.14)!important;}
-    .tabletSplitScaleControl{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:none;grid-template-rows:42px 34px 42px;align-items:center;justify-items:center;width:48px;padding:7px 5px;border:1px solid rgba(210,218,229,.98);border-radius:999px;background:rgba(255,255,255,.98);box-shadow:0 14px 34px rgba(7,16,39,.16),inset 0 1px 0 rgba(255,255,255,.9);gap:4px;}
-    body.tabletLayoutEditMode .tabletSplitScaleControl{display:grid;}
-    .tabletSplitScaleControl button{width:36px;height:36px;border-radius:999px;border:1px solid rgba(210,218,229,.98);background:#fff;color:#071027;font-size:22px;font-weight:950;line-height:1;box-shadow:0 5px 13px rgba(7,16,39,.09);}
-    .tabletSplitScaleValue{font-size:12px;font-weight:950;color:#344054;line-height:1;white-space:nowrap;}
-    body.tabletLayoutEditMode #tabletMenuLayoutBtn,body.tabletPackageOverlayOpen #tabletMenuPackagesBtn{background:#eef5ff!important;color:#071027!important;box-shadow:inset 3px 0 0 #0b63ce,0 8px 18px rgba(7,16,39,.08)!important;}
-    body.tabletPackageOverlayOpen.tabletMenuOpen .app{width:100vw!important;transform:translateX(0)!important;}
-    .tabletPackageShade{display:none;position:fixed;left:var(--kgg-tablet-sidebar-w);right:0;top:var(--kgg-tablet-safe-top);bottom:0;background:rgba(7,16,39,.42);z-index:1212;backdrop-filter:blur(1px);}
-    body.tabletPackageOverlayOpen .tabletPackageShade{display:block!important;}
-    .tabletPackageOverlay{display:flex;position:fixed;left:var(--kgg-tablet-sidebar-w);top:var(--kgg-tablet-safe-top);bottom:0;width:var(--kgg-tablet-package-w);max-width:calc(100vw - var(--kgg-tablet-sidebar-w) - 20px);z-index:1220;flex-direction:column;gap:14px;padding:16px 16px 18px;box-sizing:border-box;background:rgba(255,255,255,.98);border-right:1px solid rgba(15,23,42,.12);border-radius:0 20px 20px 0;box-shadow:24px 0 58px rgba(7,16,39,.18);transform:translateX(calc(-100% - var(--kgg-tablet-sidebar-w)));transition:transform .22s cubic-bezier(.22,.8,.32,1);overflow:hidden;visibility:hidden;}
-    body.tabletPackageOverlayOpen .tabletPackageOverlay{transform:translate3d(0,0,0)!important;visibility:visible!important;transition:none!important;}
-    .tabletPackageHead{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:38px;}
-    .tabletPackageTitle{display:flex;align-items:center;gap:10px;color:#071027;font-size:20px;font-weight:950;}
-    .tabletPackageTitle span{width:32px;height:32px;display:grid;place-items:center;border-radius:10px;background:#eef5ff;}
-    .tabletPackageClose{width:36px;height:36px;border-radius:999px;border:1px solid rgba(220,227,235,.95);background:#fff;color:#071027;font-size:24px;font-weight:900;line-height:1;}
-    .tabletPackageSearch{display:grid;grid-template-columns:24px minmax(0,1fr);align-items:center;gap:8px;min-height:46px;padding:0 12px;border:1px solid rgba(220,227,235,.95);border-radius:14px;background:#fff;box-shadow:0 4px 14px rgba(7,16,39,.05);color:#667085;}
-    .tabletPackageSearch input{border:0!important;outline:0!important;background:transparent!important;font-size:14px!important;font-weight:750!important;color:#071027!important;min-width:0!important;}
-    .tabletPackageCards{display:grid;gap:12px;overflow:auto;padding:2px 2px 8px;overscroll-behavior:contain;}
-    .tabletPackageCard{display:grid;grid-template-columns:54px minmax(0,1fr) 30px;gap:12px;align-items:center;width:100%;min-height:118px;padding:12px;border:1px solid rgba(220,227,235,.95);border-radius:14px;background:#fff;color:#071027;text-align:left;box-shadow:0 5px 18px rgba(7,16,39,.07);}
-    .tabletPackageIcon{width:48px;height:48px;display:grid;place-items:center;border-radius:12px;background:#eef5ff;font-size:24px;}
-    .tabletPackageCard:nth-child(4n+2) .tabletPackageIcon{background:#f1f8e9;}
-    .tabletPackageCard:nth-child(4n+3) .tabletPackageIcon{background:#f4edff;}
-    .tabletPackageCard:nth-child(4n+4) .tabletPackageIcon{background:#eaf8fb;}
-    .tabletPackageBody{min-width:0;display:grid;gap:7px;}
-    .tabletPackageBody b{font-size:15px;font-weight:950;line-height:1.15;}
-    .tabletPackageBody p{margin:0;color:#475467;font-size:12px;font-weight:750;line-height:1.32;}
-    .tabletPackageMeta{display:flex;gap:8px;flex-wrap:wrap;}
-    .tabletPackageMeta span{display:inline-flex;align-items:center;min-height:24px;padding:0 8px;border:1px solid rgba(220,227,235,.95);border-radius:999px;background:#f8fafc;color:#344054;font-size:11px;font-weight:900;}
-    .tabletPackageArrow{font-size:26px;color:#071027;font-weight:950;text-align:center;}
-    .tabletPackageEmpty{padding:18px;border:1px dashed rgba(148,163,184,.8);border-radius:14px;background:#f8fafc;color:#667085;font-weight:850;line-height:1.35;}
+    body.tabletMenuOpen .tabletMenuBtn span:nth-child(1),
+    body.tabletMenuOpen .tabletMenuBtn span:nth-child(2),
+    body.tabletMenuOpen .tabletMenuBtn span:nth-child(3){
+      transform:none!important;
+      opacity:1!important;
+    }
   }
 </style>
 
-  <script>
-    /* KGG v182 mobile single-file: inline offline PDF runtime, no external file needed. */
-/*
- * KGG offline PDF runtime shim.
- * Provides the small jsPDF API surface used by kgg_plan_generator_v178/v179.
- * No network, no API keys, no JSON output.
- */
-(function(global){
-  'use strict';
 
-  var MM_TO_PT = 72 / 25.4;
-  var PAGE_SIZES = {
-    a4: { portrait: { w: 210, h: 297 }, landscape: { w: 297, h: 210 } }
-  };
-
-  function resolvePageSize(format, orientation){
-    var isLandscape = String(orientation || 'portrait').toLowerCase() === 'landscape';
-    if(Array.isArray(format) && format.length >= 2){
-      var w = Number(format[0]) || 297;
-      var h = Number(format[1]) || 210;
-      if(isLandscape && w < h){ var tmp = w; w = h; h = tmp; }
-      if(!isLandscape && w > h){ var tmp2 = w; w = h; h = tmp2; }
-      return { w: w, h: h };
+<style id="kgg-mini-patch-v400-03-menu-handle-layout-persists">
+  /* v400 mini03: Seitenmenü-Handle + Layout-Bearbeitung bleibt aktiv.
+     Nur Tablet-UI. Keine PDF/QR/Scan/Parser/Patient-App/Plan-State-Logik. */
+  @media (min-width:760px){
+    body.tabletLayoutCustom .tabletMenuBtn{
+      border:1px solid rgba(10,16,36,.18)!important;
+      background:#fff!important;
+      box-shadow:0 1px 3px rgba(10,16,36,.12),inset 0 1px 0 rgba(255,255,255,.9)!important;
+      backdrop-filter:none!important;
+      -webkit-backdrop-filter:none!important;
+      transform:none!important;
+      outline:none!important;
     }
-    var key = String(format || 'a4').toLowerCase();
-    return (PAGE_SIZES[key] && PAGE_SIZES[key][isLandscape ? 'landscape' : 'portrait']) || PAGE_SIZES.a4.landscape;
-  }
-
-  function clampByte(value){
-    value = Number(value);
-    if(!isFinite(value)) return 0;
-    return Math.max(0, Math.min(255, value));
-  }
-
-  function colorFromArgs(args){
-    if(args.length === 1){
-      var g = clampByte(args[0]);
-      return [g, g, g];
+    body.tabletLayoutCustom .tabletMenuBtn span{
+      transform:none!important;
+      opacity:1!important;
+      background:#0a1024!important;
+      box-shadow:none!important;
     }
-    return [clampByte(args[0]), clampByte(args[1]), clampByte(args[2])];
-  }
-
-  function colorCmd(color, op){
-    return (color[0] / 255).toFixed(3) + ' ' +
-      (color[1] / 255).toFixed(3) + ' ' +
-      (color[2] / 255).toFixed(3) + ' ' + op;
-  }
-
-  function num(value){
-    value = Number(value);
-    if(!isFinite(value)) value = 0;
-    return String(Math.round(value * 1000) / 1000);
-  }
-
-  function sanitizeText(value){
-    return String(value == null ? '' : value)
-      .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue')
-      .replace(/Ä/g,'Ae').replace(/Ö/g,'Oe').replace(/Ü/g,'Ue')
-      .replace(/ß/g,'ss')
-      .replace(/[–—]/g,'-').replace(/…/g,'...')
-      .replace(/[·•]/g,' - ')
-      .replace(/[^\x09\x0A\x0D\x20-\x7E]/g,'');
-  }
-
-  function pdfString(value){
-    return '(' + sanitizeText(value).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)') + ')';
-  }
-
-  function approxTextWidth(text, fontSize){
-    return sanitizeText(text).length * fontSize * 0.48;
-  }
-
-  function makePage(size){
-    return { w: size.w, h: size.h, ops: [], images: [] };
-  }
-
-  function binaryFromDataUrl(dataUrl){
-    var raw = String(dataUrl || '');
-    var comma = raw.indexOf(',');
-    if(comma < 0) return '';
-    var header = raw.slice(0, comma).toLowerCase();
-    var data = raw.slice(comma + 1);
-    if(header.indexOf(';base64') >= 0){
-      try{ return atob(data); }catch(e){ return ''; }
+    body.tabletLayoutCustom.tabletMenuOpen .tabletMenuBtn{
+      position:fixed!important;
+      left:calc(var(--kgg-tablet-sidebar-w) - 1px)!important;
+      top:calc(var(--kgg-tablet-safe-top) + 18px)!important;
+      right:auto!important;
+      bottom:auto!important;
+      width:42px!important;
+      min-width:42px!important;
+      height:68px!important;
+      min-height:68px!important;
+      padding:0!important;
+      display:grid!important;
+      place-items:center!important;
+      border-left:0!important;
+      border-radius:0 16px 16px 0!important;
+      background:rgba(255,255,255,.985)!important;
+      box-shadow:7px 0 18px rgba(10,16,36,.10), inset 1px 0 0 rgba(255,255,255,.95)!important;
+      z-index:1230!important;
     }
-    try{ return decodeURIComponent(data); }catch(e){ return data; }
-  }
-
-  function jpegSizeFromBinary(binary){
-    if(!binary || binary.length < 4) return { w: 1, h: 1 };
-    function byte(i){ return binary.charCodeAt(i) & 255; }
-    if(byte(0) !== 255 || byte(1) !== 216) return { w: 1, h: 1 };
-    var i = 2;
-    while(i + 8 < binary.length){
-      while(i < binary.length && byte(i) !== 255) i++;
-      while(i < binary.length && byte(i) === 255) i++;
-      var marker = byte(i++);
-      if(marker === 217 || marker === 218) break;
-      if(i + 2 > binary.length) break;
-      var len = (byte(i) << 8) | byte(i + 1);
-      if(len < 2 || i + len > binary.length) break;
-      if((marker >= 192 && marker <= 195) || (marker >= 197 && marker <= 199) || (marker >= 201 && marker <= 203) || (marker >= 205 && marker <= 207)){
-        return { h: ((byte(i + 3) << 8) | byte(i + 4)) || 1, w: ((byte(i + 5) << 8) | byte(i + 6)) || 1 };
-      }
-      i += len;
+    body.tabletLayoutCustom.tabletMenuOpen .tabletMenuBtn::before{
+      content:"";
+      position:absolute;
+      left:-1px;
+      top:0;
+      bottom:0;
+      width:2px;
+      background:rgba(255,255,255,.985);
     }
-    return { w: 1, h: 1 };
+    body.tabletLayoutCustom.tabletMenuOpen .tabletMenuBtn span{
+      width:22px!important;
+      height:3px!important;
+      margin:2.5px 0!important;
+      border-radius:999px!important;
+    }
+    body.tabletLayoutCustom.tabletMenuOpen .tabletMenuBtn span:nth-child(1),
+    body.tabletLayoutCustom.tabletMenuOpen .tabletMenuBtn span:nth-child(2),
+    body.tabletLayoutCustom.tabletMenuOpen .tabletMenuBtn span:nth-child(3){
+      transform:none!important;
+      opacity:1!important;
+    }
+    body.tabletLayoutEditMode .tabletLayoutResizeHandle,
+    body.tabletLayoutEditMode .tabletSplitScaleControl{
+      pointer-events:auto!important;
+    }
   }
+</style>
 
-  function KGGOfflineJsPDF(options){
-    options = options || {};
-    var orientation = String(options.orientation || 'portrait').toLowerCase();
-    var size = resolvePageSize(options.format || 'a4', orientation);
-    this._pages = [makePage(size)];
-    this._page = this._pages[0];
-    this._font = 'normal';
-    this._fontSize = 10;
-    this._lineWidth = 0.2;
-    this._drawColor = [0,0,0];
-    this._textColor = [0,0,0];
-    this._fillColor = [0,0,0];
-    this._properties = {};
-    this._imageSeq = 0;
-    this._images = [];
-    this.internal = {
-      pageSize: {
-        width: size.w,
-        height: size.h,
-        getWidth: function(){ return size.w; },
-        getHeight: function(){ return size.h; }
-      }
-    };
+<style id="kgg-mini-patch-v400-04-phone-clean-tablet-ui-guard">
+  /* v400 mini04: Phone-Clean-Guard.
+     Ziel: Tablet-/Admin-/Weitergabe-Overlays dürfen im echten Handy-Layout nicht sichtbar werden.
+     Scope: nur max-width:759px. Tablet-Layout ab 760px bleibt unangetastet.
+     Keine PDF-/QR-/Scan-/Parser-/Plan-State-Logik. */
+  @media (max-width:759px){
+    html,body{
+      min-width:0!important;
+      overflow-x:hidden!important;
+    }
+    #tabletMenuBtn,
+    #tabletSideMenu,
+    #tabletSideBackdrop,
+    #tabletPackageShade,
+    #tabletPackageOverlay,
+    #tabletLayoutResizeHandle,
+    #tabletSplitScaleControl,
+    .tabletMenuBtn,
+    .tabletSideMenu,
+    .tabletSideBackdrop,
+    .tabletPackageShade,
+    .tabletPackageOverlay,
+    .tabletLayoutResizeHandle,
+    .tabletSplitScaleControl{
+      display:none!important;
+      visibility:hidden!important;
+      opacity:0!important;
+      pointer-events:none!important;
+      transform:none!important;
+    }
+    #kggTherapistShareModal,
+    #kggAdminMenuQrModal,
+    .kggTherapistShareModal,
+    .kggAdminMenuQrModal{
+      display:none!important;
+      visibility:hidden!important;
+      opacity:0!important;
+      pointer-events:none!important;
+    }
+    body.tabletMenuOpen #tabletSideMenu,
+    body.tabletMenuOpen .tabletSideMenu,
+    body.tabletPackageOverlayOpen #tabletPackageOverlay,
+    body.tabletPackageOverlayOpen .tabletPackageOverlay{
+      display:none!important;
+      transform:none!important;
+    }
+    body.tabletMenuOpen,
+    body.tabletPackageOverlayOpen,
+    body.tabletLayoutEditMode{
+      overflow-x:hidden!important;
+    }
   }
+</style>
 
-  KGGOfflineJsPDF.prototype._x = function(x){ return x * MM_TO_PT; };
-  KGGOfflineJsPDF.prototype._y = function(y){ return this._page.h * MM_TO_PT - y * MM_TO_PT; };
-  KGGOfflineJsPDF.prototype._push = function(cmd){ this._page.ops.push(cmd); };
 
-  KGGOfflineJsPDF.prototype.setProperties = function(props){
-    this._properties = props || {};
-    return this;
-  };
+<style id="kgg-mini-patch-v400-05-phone-remove-grey-helper-text">
+  /* v400 mini05: Phone-only cleanup.
+     Entfernt die grauen Hilfs-/Beschreibungstexte in Phone-Drawern und der
+     Therapeuten-App-Auswahl, ohne Tablet-Layout/CSS ab 760px anzufassen. */
+  @media (max-width:759px){
+    .kggTherapistShareHint,
+    .kggTherapistShareChoices small,
+    #packageList .notice small,
+    .tabletPackageBody p{
+      display:none!important;
+    }
 
-  KGGOfflineJsPDF.prototype.setFont = function(_family, style){
-    this._font = /bold/i.test(String(style || '')) ? 'bold' : 'normal';
-    return this;
-  };
+    #packageList .notice b + br,
+    #packageList .notice small + br{
+      display:none!important;
+    }
 
-  KGGOfflineJsPDF.prototype.setFontSize = function(size){
-    this._fontSize = Number(size) || this._fontSize;
-    return this;
-  };
+    .kggTherapistShareChoices button{
+      min-height:48px!important;
+      display:flex!important;
+      align-items:center!important;
+      padding:12px 14px!important;
+    }
 
-  KGGOfflineJsPDF.prototype.setLineWidth = function(width){
-    this._lineWidth = Number(width) || 0.1;
-    return this;
-  };
+    .kggTherapistShareChoices b{
+      font-size:16px!important;
+      line-height:1.15!important;
+    }
 
+    #packageList .notice{
+      display:grid!important;
+      gap:8px!important;
+    }
+
+    #packageList .notice .mutedBtn{
+      margin-top:0!important;
+    }
+  }
+</style>
+
+
+
+<style id="kgg-mini-patch-v400-06-phone-plan-gesture-fix">
+  /* v400 mini06: Phone-only Plan-Karten Gesten-Fix.
+     Scope: nur Handy-Layout bis 759px. Tablet-Layout ab 760px bleibt unveraendert.
+     Repariert Swipe links/rechts und Drag-Reorder, die durch den Phone-Scroll-Guard
+     transform/transition auf den Uebungskarten blockiert wurden. */
+  @media (max-width:759px){
+    body.kggPlanCardSwiping .planCard.swipe-dragging{
+      transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
+      will-change:transform,opacity!important;
+    }
+    body.kggPlanCardSwiping .planCard.swipe-armed{
+      transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
+    }
+    body.kggPlanCardReordering .planCard.reorder-lifted,
+    body.is-scrolling .planCard.reorder-lifted{
+      transform:translateY(var(--drag-y,0px)) scale(1.035)!important;
+      transition:none!important;
+      will-change:transform!important;
+      pointer-events:none!important;
+    }
+    body.kggPlanCardReordering .planList.reorder-active .planCard:not(.reorder-lifted){
+      transition:transform .14s ease,margin .14s ease,opacity .14s ease!important;
+    }
+    body.kggPlanCardReordering .planCard.reorder-placeholder{
+      display:block!important;
+      visibility:visible!important;
+    }
+  }
+</style>
+
+
+
+
+<style id="kgg-mini-patch-v400-07-android-wrapper-fixes">
+  /* v400 mini07: Android-WebView/Phone polish.
+     Scope: UI-only. Tablet layout ab 760px bleibt unveraendert. */
+  @media (max-width:759px){
+    body.kggPlanCardReordering #bankArea,
+    body.kggPlanCardReordering #dbTitle,
+    body.kggPlanCardReordering .bankArea,
+    body.kggPlanCardReordering .bankRows,
+    body.kggPlanCardReordering .az{
+      pointer-events:none!important;
+    }
+    body.kggPlanCardReordering .planCard.reorder-lifted,
+    body.is-scrolling.kggPlanCardReordering .planCard.reorder-lifted{
+      transform:translateY(var(--drag-y,0px)) scale(1.035)!important;
+      z-index:9999!important;
+      transition:none!important;
+      will-change:transform!important;
+      pointer-events:none!important;
+    }
+    body.kggPlanCardSwiping .planCard.swipe-dragging,
+    body.is-scrolling.kggPlanCardSwiping .planCard.swipe-dragging{
+      transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
+      transition:none!important;
+      will-change:transform,opacity!important;
+    }
+    body.kggPlanCardSwiping .planCard.swipe-removing,
+    body.is-scrolling.kggPlanCardSwiping .planCard.swipe-removing{
+      transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
+    }
+    .modal.open{
+      overscroll-behavior:contain;
+    }
+    .sheet{
+      -webkit-overflow-scrolling:touch;
+    }
+  }
+</style>
+
+<style id="kgg-github-patch-v401-phone-plan-ui-isolation">
+  /* v401 GitHub Update 003: Phone-only Plan-UI Stabilisierung.
+     Fixes:
+     - Plan-Karten flackern beim Scrollen nicht mehr.
+     - Antippen/Anheben einer Plan-Karte darf den Rest der App nicht nach unten schieben.
+     - Reorder-Bewegungen bleiben innerhalb "Übungen im Plan".
+     Scope: nur max-width:759px. Tablet-/Wrapper-Code bleibt unverändert. */
+  @media (max-width:759px){
+    #rightPlanStack,
+    #currentPlanBlock.planSectionCurrent{
+      contain:layout paint!important;
+      overflow:hidden!important;
+      transform:translateZ(0);
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+    }
+
+    body.kggPlanSectionFrozen #currentPlanBlock.planSectionCurrent{
+      height:var(--kgg-current-plan-freeze-h,auto)!important;
+      min-height:var(--kgg-current-plan-freeze-h,auto)!important;
+      max-height:var(--kgg-current-plan-freeze-h,none)!important;
+    }
+
+    #currentPlanBlock .planSectionBody{
+      contain:layout paint!important;
+      overflow:auto!important;
+      overscroll-behavior:contain!important;
+      -webkit-overflow-scrolling:touch;
+      max-height:min(46dvh,380px);
+      transform:translateZ(0);
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+    }
+
+    #currentPlanBlock #planList.planList{
+      contain:layout paint!important;
+      isolation:isolate;
+      transform:translateZ(0);
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+    }
+
+    #currentPlanBlock .planCard{
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+      transform:translate3d(0,0,0);
+      will-change:auto;
+    }
+
+    body.is-scrolling #currentPlanBlock .planCard:not(.swipe-dragging):not(.swipe-removing):not(.reorder-lifted):not(.reorder-prelift){
+      transform:translate3d(0,0,0)!important;
+      transition:none!important;
+      animation:none!important;
+      filter:none!important;
+    }
+
+    #currentPlanBlock .planCard.reorder-prelift,
+    body.kggPlanSectionFrozen #currentPlanBlock .planCard.reorder-prelift{
+      position:relative;
+      z-index:8;
+      transform:translate3d(0,-3px,0) scale(1.018)!important;
+      box-shadow:0 10px 26px rgba(7,16,39,.16),0 2px 8px rgba(7,16,39,.10)!important;
+      transition:transform .11s cubic-bezier(.2,.85,.2,1),box-shadow .11s ease!important;
+    }
+
+    body.kggPlanCardReordering #currentPlanBlock .planSectionBody{
+      overflow:hidden!important;
+      touch-action:none!important;
+    }
+
+    body.kggPlanCardReordering #currentPlanBlock .planCard.reorder-lifted,
+    body.is-scrolling.kggPlanCardReordering #currentPlanBlock .planCard.reorder-lifted{
+      transform:translate3d(0,var(--drag-y,0px),0) scale(1.035)!important;
+      z-index:9999!important;
+      opacity:.985!important;
+      transition:none!important;
+      pointer-events:none!important;
+      will-change:transform!important;
+    }
+
+    body.kggPlanCardReordering #currentPlanBlock .planCard.reorder-placeholder{
+      height:20px!important;
+      min-height:20px!important;
+      padding:0!important;
+      margin:2px 0!important;
+      border:0!important;
+      border-radius:999px!important;
+      background:transparent!important;
+      box-shadow:none!important;
+      overflow:visible!important;
+      opacity:1!important;
+      transform:none!important;
+    }
+
+    body.kggPlanCardReordering #currentPlanBlock .planCard.reorder-placeholder::before{
+      content:"";
+      position:absolute;
+      left:16%;
+      right:16%;
+      top:50%;
+      height:12px;
+      transform:translateY(-50%);
+      border-radius:999px;
+      background:radial-gradient(ellipse at center,rgba(7,16,39,.20) 0%,rgba(7,16,39,.10) 45%,rgba(7,16,39,0) 78%);
+      filter:blur(7px);
+    }
+
+    body.kggPlanCardReordering #currentPlanBlock .planCard.reorder-gap-before,
+    body.kggPlanCardReordering #currentPlanBlock .planCard.reorder-gap-after{
+      margin-top:0!important;
+      margin-bottom:0!important;
+    }
+
+    body.kggPlanCardReordering :is(#bankArea,#dbTitle,.bankArea,.bankRows,.az,#inputWrap,#exerciseInput,.suggestion){
+      transition:none!important;
+      animation:none!important;
+      transform:none!important;
+      filter:none!important;
+      pointer-events:none!important;
+    }
+  }
+</style>
+<style id="kgg-mini-patch-v400-08-phone-hide-admin-file-banner">
+  /* v400 mini08: Phone-only cleanup.
+     Entfernt die gelbe ADMIN-DATEI/Admin-Test-Box nur im Handy-Layout.
 ```

@@ -4,424 +4,424 @@
 - Lines: 4201-4620
 
 ```html
-      body.tabletLayoutCustom:not(.adminMode) .scanHub .adminConfigBtn,
-      body.tabletLayoutCustom:not(.adminMode) .scanHub .sharedBankBtn{
-        display:none!important;
-      }
-      body.tabletLayoutCustom #baseToggle{
-        overflow:hidden!important;
-        z-index:20!important;
-      }
-      body.tabletLayoutCustom #inputWrap{
-        z-index:18!important;
-      }
-      body.tabletLayoutCollisionTight .scanHub{
-        grid-template-columns:repeat(auto-fit,minmax(62px,1fr))!important;
-        gap:8px!important;
-      }
-      body.tabletLayoutCollisionTight .scanHub :is(.scanBtn,.scanMeta,.adminConfigBtn,.sharedBankBtn),
-      body.tabletLayoutCollisionTight #baseToggle{
-        font-size:clamp(7px,calc(14px * var(--kgg-tablet-ui-scale,1)),24px)!important;
-        line-height:1.02!important;
-        padding:5px 7px!important;
-      }
-      body.tabletLayoutCustom .planActions{
-        gap:var(--kgg-tablet-live-gap)!important;
-        align-items:stretch!important;
-      }
-      body.tabletLayoutCustom #createPanel.planMode :is(#recentToggle,#packageToggle,#finishBtn),
-      body.tabletLayoutCustom #createPanel:not(.planMode) :is(#recentToggle,#packageToggle){
-        min-height:clamp(48px,calc(64px * var(--kgg-tablet-ui-scale,1)),112px)!important;
-        height:auto!important;
-        align-self:stretch!important;
-        box-sizing:border-box!important;
-      }
-      body.tabletLayoutCustom #baseFields:not(.hidden),
-      body.tabletLayoutCustom #recentList:not(.hidden),
-      body.tabletLayoutCustom #packageList:not(.hidden),
-      body.tabletLayoutCustom .sheet{
-        font-size:clamp(11px,calc(16px * var(--kgg-tablet-ui-scale,1)),30px)!important;
-        padding:clamp(10px,calc(16px * var(--kgg-tablet-ui-scale,1)),30px)!important;
-        border-radius:clamp(16px,calc(24px * var(--kgg-tablet-ui-scale,1)),38px)!important;
-      }
-      body.tabletLayoutCustom #baseFields:not(.hidden) :is(input,select,textarea),
-      body.tabletLayoutCustom .sheet :is(input,select,textarea,button),
-      body.tabletLayoutCustom #recentList:not(.hidden) button,
-      body.tabletLayoutCustom #packageList:not(.hidden) button{
-        font-size:clamp(10px,calc(16px * var(--kgg-tablet-ui-scale,1)),30px)!important;
-        min-height:clamp(38px,calc(48px * var(--kgg-tablet-ui-scale,1)),86px)!important;
-      }
-      .tabletLayoutFreeTools{
-        width:106px!important;
-        padding:14px 10px!important;
-        gap:12px!important;
-        border-radius:38px!important;
-      }
-      .tabletLayoutFreeTools button{
-        width:84px!important;
-        height:66px!important;
-        min-height:66px!important;
-        font-size:40px!important;
-        border-radius:28px!important;
-      }
-      #tabletLayoutReset{
-        height:54px!important;
-        min-height:54px!important;
-        font-size:30px!important;
-        background:#fff!important;
-        color:#38475b!important;
-        border:1px solid rgba(220,227,235,.95)!important;
-      }
-      .tabletScaleValue{
-        min-height:126px!important;
-        font-size:15px!important;
-      }
-      .tabletLayoutFreeTools::before{
-        top:92px!important;
-        bottom:154px!important;
-      }
-      .tabletLayoutControls,
-      .packageLayoutSlot .tabletLayoutControls{
-        min-width:82px!important;
-      }
-      body.tabletLayoutRightTiny .tabletLayoutControls,
-      body.tabletLayoutRightTiny .packageLayoutSlot .tabletLayoutControls{
-        min-width:52px!important;
-      }
-    }
-
-    /* v346 phone keyboard and drawer polish */
-    @media (max-width:759px){
-      body.phoneTextFocus{
-        scroll-padding-bottom:calc(var(--kgg-phone-keyboard-inset,0px) + 170px);
-      }
-      body.phoneTextFocus #inputWrap{
-        position:sticky;
-        bottom:calc(var(--kgg-phone-keyboard-inset,0px) + 12px);
-        z-index:74;
-        transform:translateZ(0);
-        box-shadow:0 14px 34px rgba(7,16,39,.16),0 0 0 1px rgba(220,227,235,.92);
-        animation:phoneInputLift .18s cubic-bezier(.2,.75,.22,1) both;
-      }
-      body.phoneTextFocus #suggestion:not(.hidden),
-      .suggestion:not(.hidden){
-        transform-origin:top center;
-        animation:phoneSuggestionIn .22s cubic-bezier(.2,.75,.22,1) both;
-      }
-      #bankArea.bankOpen{
-        transform-origin:top center;
-        animation:phoneBankShellIn .26s cubic-bezier(.18,.84,.24,1) both;
-      }
-      #bankArea.bankOpen #bankContent{
-        transform-origin:top center;
-        animation:phoneBankContentIn .28s cubic-bezier(.18,.84,.24,1) both!important;
-      }
-      #bankToggle.phoneButtonFloat,
-      #recentToggle.phoneButtonFloat,
-      #packageToggle.phoneButtonFloat{
-        position:relative;
-        z-index:90;
-        transform-origin:center bottom;
-        box-shadow:0 18px 38px rgba(7,16,39,.22),0 1px 0 rgba(255,255,255,.9) inset;
-        animation:phoneButtonDockFloat .32s cubic-bezier(.2,.85,.22,1) both;
-      }
-      #recentList:not(.hidden),
-      #packageList:not(.hidden){
-        transform-origin:bottom center;
-        animation:phoneDrawerFromButton .34s cubic-bezier(.18,.84,.24,1) both!important;
-      }
-      @keyframes phoneInputLift{
-        0%{transform:translateY(10px) scale(.992);opacity:.98}
-        100%{transform:translateY(0) scale(1);opacity:1}
-      }
-      @keyframes phoneSuggestionIn{
-        0%{opacity:0;transform:translateY(-8px) scale(.985);filter:blur(1px)}
-        100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
-      }
-      @keyframes phoneBankShellIn{
-        0%{opacity:.92;transform:translateY(-6px) scale(.992)}
-        100%{opacity:1;transform:translateY(0) scale(1)}
-      }
-      @keyframes phoneBankContentIn{
-        0%{opacity:0;transform:translateY(-10px) scale(.985);clip-path:inset(0 0 100% 0 round 16px)}
-        100%{opacity:1;transform:translateY(0) scale(1);clip-path:inset(0 0 0 0 round 16px)}
-      }
-      @keyframes phoneButtonDockFloat{
-        0%{transform:translateY(0) scale(1)}
-        55%{transform:translateY(10px) scale(1.035)}
-        100%{transform:translateY(16px) scale(1.02)}
-      }
-      @keyframes phoneDrawerFromButton{
-        0%{opacity:0;transform:translateY(34px) scale(.94);filter:blur(2px)}
-        65%{opacity:1;transform:translateY(-3px) scale(1.01);filter:blur(0)}
-        100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
-      }
-    }
-
-    /* Composer state clarity */
-    @media (max-width:759px){
-      .bankArea.bankOpen.searchBankOpen{
-        display:grid;
-        grid-template-columns:56px minmax(0,1fr);
-        column-gap:8px;
-        align-items:start;
-      }
-      .bankArea.bankOpen.searchBankOpen #bankToggle{
-        grid-column:1;
-        grid-row:1;
-      }
-      .bankArea.bankOpen.searchBankOpen #bankContent{
-        grid-column:2;
-        grid-row:1;
-        margin-top:0;
-      }
-      .bankArea.bankOpen.searchBankOpen .bankLabel{
-        margin:0 0 4px;
-        border-radius:10px;
-      }
-    }
-    /* Tablet DB search: Top-Treffer beginnen neben dem Uebungsdatenbank-Maennchen. */
-    @media (min-width:760px){
-      #bankArea.bankOpen.searchBankOpen{
-        display:grid;
-        grid-template-columns:56px minmax(0,1fr);
-        column-gap:8px;
-        align-items:start;
-        align-content:start;
-        height:auto;
-        min-height:0;
-      }
-      #bankArea.bankOpen.searchBankOpen #bankToggle{
-        grid-column:1;
-        grid-row:1;
-      }
-      #bankArea.bankOpen.searchBankOpen #bankContent{
-        grid-column:2;
-        grid-row:1;
-        flex:none;
-        height:auto;
-        min-height:0;
-        margin-top:0;
-        overflow:visible;
-      }
-      #bankArea.bankOpen.searchBankOpen .bankLabel{
-        margin:0 0 4px;
-        border-radius:10px;
-      }
-      #bankArea.bankOpen.searchBankOpen .bankRows{
-        max-height:min(46vh,440px);
-        height:auto;
-        overflow:auto;
-      }
-    }
-    .planCard.is-live-draft{
-      border-style:dashed;
-      background:#fffdf5;
-      box-shadow:0 0 0 2px rgba(242,211,138,.32) inset,0 6px 18px rgba(7,16,39,.05);
-    }
-    .planCard.is-live-draft .planIndex{
-      display:none;
-    }
-    .planCard.is-live-draft .drag,
-    .planCard.is-live-draft [data-planedit],
-    .planCard.is-live-draft [data-plandel]{
-      opacity:.55;
-    }
-    .planBadge.live{
-      background:#fff8e8;
-      color:#72490a;
-      border-color:#f2d38a;
-    }
-
-    /* Tablet plan action row cleanup:
-       With exercises in the plan, history/package/layout lock stay in one calm row. */
-    @media (min-width:760px){
-      #createPanel.planMode{
-        --kgg-plan-action-h:clamp(56px,calc(64px * var(--kgg-tablet-ui-scale,1)),128px);
-      }
-      #createPanel.planMode .planActions{
-        grid-column:2!important;
-        grid-row:5!important;
-        display:contents!important;
-      }
-      #createPanel.planMode #recentToggle{
-        grid-column:2!important;
-        grid-row:5!important;
-        align-self:start!important;
-        justify-self:stretch!important;
-        width:100%!important;
-        min-width:0!important;
-        height:var(--kgg-plan-action-h)!important;
-        min-height:var(--kgg-plan-action-h)!important;
-        max-height:var(--kgg-plan-action-h)!important;
-        padding:8px 14px!important;
-        border-radius:18px!important;
-        box-sizing:border-box!important;
-        overflow:hidden!important;
-      }
-      #createPanel.planMode .packageLayoutSlot{
-        grid-column:3!important;
-        grid-row:5!important;
-        align-self:start!important;
-        justify-self:stretch!important;
-        width:100%!important;
-        min-width:0!important;
-        height:var(--kgg-plan-action-h)!important;
-        min-height:var(--kgg-plan-action-h)!important;
-        max-height:var(--kgg-plan-action-h)!important;
-        display:grid!important;
-        grid-template-columns:minmax(0,1fr) minmax(72px,82px)!important;
-        gap:10px!important;
-        box-sizing:border-box!important;
-        overflow:visible!important;
-      }
-      #createPanel.planMode .packageLayoutSlot #packageToggle{
-        grid-column:1!important;
-        grid-row:1!important;
-        width:100%!important;
-        min-width:0!important;
-        height:var(--kgg-plan-action-h)!important;
-        min-height:var(--kgg-plan-action-h)!important;
-        max-height:var(--kgg-plan-action-h)!important;
-        padding:8px 12px!important;
-        justify-content:center!important;
-        box-sizing:border-box!important;
-      }
-      #createPanel.planMode .packageLayoutSlot .tabletLayoutControls{
-        grid-column:2!important;
-        grid-row:1!important;
-        align-self:stretch!important;
-        justify-self:stretch!important;
-        width:auto!important;
-        min-width:72px!important;
-        max-width:82px!important;
-        height:var(--kgg-plan-action-h)!important;
-        min-height:var(--kgg-plan-action-h)!important;
-        max-height:var(--kgg-plan-action-h)!important;
-        box-sizing:border-box!important;
-      }
-      #createPanel.planMode .packageLayoutSlot .tabletLockSwitch{
-        width:100%!important;
-        height:var(--kgg-plan-action-h)!important;
-        min-height:var(--kgg-plan-action-h)!important;
-        max-height:var(--kgg-plan-action-h)!important;
-        padding:6px 8px!important;
-        box-sizing:border-box!important;
-      }
-      #createPanel.planMode .packageLayoutSlot #packageToggle > span,
-      #createPanel.planMode #recentToggle .recentText,
-      #createPanel.planMode #recentToggle .recentMini{
-        max-width:100%!important;
-        opacity:1!important;
-      }
-    }
-    @media (min-width:760px) and (max-width:980px){
-      #createPanel.planMode .packageLayoutSlot{
-        grid-template-columns:minmax(0,1fr) minmax(66px,76px)!important;
-        gap:8px!important;
-      }
-      #createPanel.planMode .packageLayoutSlot .tabletLayoutControls{
-        min-width:66px!important;
-        max-width:76px!important;
-      }
-      #createPanel.planMode #recentToggle,
-      #createPanel.planMode .packageLayoutSlot #packageToggle{
-        padding-left:10px!important;
-        padding-right:10px!important;
-      }
-    }
-  .syncQrBtn,
-  .tabletSyncQrBtn{
-    border:1px solid var(--line);
+    padding:10px!important;
+    border-radius:21px!important;
+  }
+  .tabletSideMenu #tabletScalePlus{grid-area:plus;}
+  .tabletSideMenu #tabletScaleValue{grid-area:value;text-align:center;}
+  .tabletSideMenu #tabletScaleMinus{grid-area:minus;}
+  .tabletSideMenu #tabletLayoutReset{grid-area:reset;min-height:44px!important;}
+  .tabletSideMenu .tabletLayoutFreeTools.hidden{display:none!important;}
+  /* v375: Admin tools live in the tablet side menu, not in the scan row. */
+  body.adminMode .scanHub{
+    grid-template-columns:58px minmax(148px,1fr) minmax(148px,1fr)!important;
+  }
+  body.adminMode .scanHub .adminConfigBtn,
+  body.adminMode .scanHub .sharedBankBtn,
+  body.adminMode .scanHub .syncQrBtn{
+    display:none!important;
+  }
+  body.adminMode .scanHub #scanPreview{
+    grid-column:1 / -1!important;
+  }
+  .tabletSideMenu{
+    overflow-y:auto;
+  }
+  .tabletSideMenuAction{
+    min-height:54px;
+    width:100%;
+    border:1px solid rgba(10,16,36,.12);
+    border-radius:17px;
     background:#fff;
-    color:#071027;
-    font-weight:1000;
-    box-shadow:var(--shadow);
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-  }
-  .syncQrBtn{
-    border-radius:16px;
-    min-width:58px;
-    min-height:58px;
-    padding:0 14px;
-    font-size:21px;
-  }
-  .syncPairSheet .notice{margin-top:8px}
-  .syncPairQrBox{min-height:280px}
-  .syncPairStatus{
-    display:block;
-    margin-top:8px;
-    color:var(--muted);
+    color:#0a1024;
+    font-size:.94rem;
     font-weight:900;
-    font-size:13px;
-    text-align:center;
+    text-align:left;
+    padding:0 14px;
+    box-shadow:0 10px 22px rgba(10,16,36,.07), inset 0 1px 0 rgba(255,255,255,.82);
+    cursor:pointer;
   }
-  .syncPeerList{
-    margin-top:10px;
-    border:1px solid var(--line);
-    border-radius:14px;
-    background:#fff;
-    padding:8px;
+  .tabletSideMenuAction:active{
+    transform:translateY(1px);
+  }
+  .tabletSideMenuQrActions{
     display:grid;
-    gap:7px;
+    grid-template-columns:1fr;
+    gap:10px;
   }
-  .syncPeerHead{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:8px;
-    font-weight:1000;
-    font-size:13px;
-    color:#071027;
+  .packageLayoutSlot{
+    grid-template-columns:1fr!important;
+    align-items:stretch!important;
   }
-  .syncPeerHead small{color:var(--muted);font-weight:900}
-  .syncPeerRow{
-    display:grid;
-    grid-template-columns:auto minmax(0,1fr);
-    align-items:center;
-    gap:8px;
-    border-top:1px solid rgba(15,23,42,.08);
-    padding-top:7px;
-    font-size:13px;
+  .packageLayoutSlot .tabletLayoutControls{display:none!important;}
+  .packageLayoutSlot #packageToggle{width:100%!important;min-width:0!important;}
+}
+
+.kggAdminMenuQrModal{
+  position:fixed;
+  inset:0;
+  z-index:1300;
+  display:none;
+  place-items:center;
+  padding:22px;
+  background:rgba(10,16,36,.26);
+  backdrop-filter:blur(10px);
+}
+.kggAdminMenuQrModal.isOpen{display:grid;}
+.kggAdminMenuQrSheet{
+  width:min(520px,94vw);
+  border:1.5px solid rgba(10,16,36,.12);
+  border-radius:26px;
+  background:#fff;
+  box-shadow:0 30px 90px rgba(10,16,36,.22);
+  padding:22px;
+}
+.kggAdminMenuQrSheet h2{
+  margin:0 0 8px;
+  color:#0a1024;
+  font-size:1.35rem;
+  font-weight:950;
+}
+.kggAdminMenuQrHint{
+  margin:0 0 14px;
+  color:#667085;
+  font-size:.94rem;
+  line-height:1.35;
+  font-weight:750;
+}
+.kggAdminMenuQrBox{
+  min-height:250px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(10,16,36,.10);
+  border-radius:20px;
+  background:#f8fafc;
+  padding:14px;
+}
+.kggAdminMenuQrBox img{
+  width:min(300px,72vw);
+  height:min(300px,72vw);
+  image-rendering:pixelated;
+}
+.kggAdminMenuQrLink{
+  width:100%;
+  min-height:76px;
+  margin-top:12px;
+  border:1px solid rgba(10,16,36,.12);
+  border-radius:16px;
+  padding:10px;
+  resize:vertical;
+  font-size:.82rem;
+  line-height:1.35;
+  color:#344054;
+}
+.kggAdminMenuQrButtons{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:12px;
+}
+.kggAdminMenuQrButtons button{
+  min-height:48px;
+  border-radius:16px;
+  border:1px solid rgba(10,16,36,.12);
+  background:#fff;
+  color:#0a1024;
+  font-weight:900;
+  cursor:pointer;
+}
+.kggAdminMenuQrButtons .primary{
+  background:#0a1024;
+  color:#fff;
+}
+
+
+/* v362: keep the plan-card delete X in the top-right corner. */
+.planCard{position:relative;}
+.planCard .planDeleteBtn{
+  position:absolute!important;
+  top:6px!important;
+  right:8px!important;
+  z-index:5;
+  display:inline-grid!important;
+  place-items:center!important;
+  width:30px!important;
+  min-width:30px!important;
+  height:30px!important;
+  min-height:30px!important;
+  padding:0!important;
+  line-height:1!important;
+  border-radius:999px!important;
+}
+.planCardActions{padding-right:24px;}
+
+/* v376: tablet density and right-side menu polish from the latest QA screenshots. */
+@media (min-width:760px){
+  body.tabletLayoutCustom .app{
+    width:min(100%,1280px)!important;
+    grid-template-columns:minmax(300px,390px) minmax(0,1fr)!important;
+    gap:10px!important;
+    padding:12px 14px 76px!important;
   }
-  .syncPeerRow input{width:18px;height:18px}
-  .syncPeerName{font-weight:1000;color:#071027;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .syncPeerMeta{color:var(--muted);font-weight:850;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .syncPeerEmpty{color:var(--muted);font-weight:900;font-size:12px;text-align:center}
-  .syncDiagnostics{
-    margin-top:10px;
-    border:1px solid var(--line);
-    border-radius:14px;
-    background:#f8fbff;
-    padding:9px 10px;
-    color:#324154;
-    font-size:12px;
-    font-weight:850;
-    display:grid;
-    gap:4px;
+  body.tabletLayoutCustom .tabletMenuBtn{
+    position:fixed!important;
+    right:16px!important;
+    top:16px!important;
+    left:auto!important;
+    z-index:1200!important;
+    width:44px!important;
+    min-width:44px!important;
+    height:44px!important;
+    min-height:44px!important;
+    padding:8px!important;
+    border-radius:14px!important;
+    background:#fff!important;
+    border:1px solid rgba(10,16,36,.16)!important;
+    box-shadow:0 8px 22px rgba(7,16,39,.13)!important;
   }
-  .syncDiagnostics b{color:#071027}
-  .syncDiagnostics .warn{color:#9a3412}
-  .syncPairActions{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:8px;
-    margin-top:10px;
+  body.tabletLayoutCustom .scanHub{
+    grid-template-columns:1fr 1fr!important;
+    grid-auto-rows:56px!important;
+    gap:8px!important;
+    padding:0!important;
+    min-height:0!important;
   }
-  .syncPairActions .primary{grid-column:1/-1}
-  @media(max-width:759px){
-    .scanHub{
-      display:grid;
-      grid-template-columns:minmax(0,1fr) auto;
-      gap:10px;
-      align-items:stretch;
+  body.tabletLayoutCustom .scanHub .scanBtn,
+  body.tabletLayoutCustom .scanHub .scanMeta,
+  body.tabletLayoutCustom :is(#baseToggle,#finishBtn,#recentToggle,#packageToggle){
+    min-height:46px!important;
+    height:46px!important;
+    border-radius:13px!important;
+    padding:0 12px!important;
+    font-size:15px!important;
+    line-height:1.08!important;
+  }
+  body.tabletLayoutCustom .scanHub .scanMeta small{display:none!important}
+  body.tabletLayoutCustom .panel{padding:10px!important;border-radius:18px!important}
+  body.tabletLayoutCustom .inner{padding:8px!important;border-radius:16px!important}
+  body.tabletLayoutCustom .panelTitle{font-size:24px!important;line-height:1.05!important;margin-bottom:8px!important}
+  body.tabletLayoutCustom textarea{
+    min-height:70px!important;
+    max-height:118px!important;
+    padding:12px 38px 12px 12px!important;
+    font-size:16px!important;
+    line-height:1.28!important;
+  }
+  body.tabletLayoutCustom .dbTitle{font-size:18px!important;margin:6px 0!important}
+  body.tabletLayoutCustom .bankRows{max-height:calc(var(--kgg-visual-vh,100vh) - 214px)!important}
+  body.tabletLayoutCustom .bankRow{min-height:48px!important;padding:7px 9px!important}
+  body.tabletLayoutCustom .bankRow b{font-size:14px!important;line-height:1.12!important}
+  body.tabletLayoutCustom .bankRow small{font-size:10px!important;margin-top:1px!important}
+  body.tabletLayoutCustom .bankWithAz{grid-template-columns:38px minmax(0,1fr)!important}
+  body.tabletLayoutCustom .az{font-size:10px!important;line-height:1.12!important;padding:4px 0!important}
+  body.tabletLayoutCustom .az button{font-size:10px!important;min-height:14px!important}
+  body.tabletLayoutCustom .rightPlanStack{min-height:calc(var(--kgg-visual-vh,100vh) - 180px)!important}
+  body.tabletLayoutCustom .planCard{min-height:48px!important;padding:7px 9px!important;border-radius:13px!important}
+  body.tabletLayoutCustom .planCard b{font-size:14px!important;line-height:1.15!important}
+  body.tabletLayoutCustom .planCard small{font-size:10px!important;line-height:1.15!important}
+  body.tabletLayoutCustom .planCard .drag,
+  body.tabletLayoutCustom .planCard .iconBtn{width:30px!important;height:30px!important;min-width:30px!important;min-height:30px!important;padding:0!important}
+  body.tabletLayoutCustom #planActions{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    gap:10px!important;
+  }
+}</style>
+<style>
+  /* v365: Finish modal output actions are balanced; PDF is no longer the dominant black action. */
+  #shareModal .finishOutputBtn{display:flex;align-items:center;justify-content:center;gap:9px;font-weight:1000}
+  #shareModal .finishPdfBtn{background:#fff;border:1px solid var(--line);color:var(--ink)}
+  #shareModal .finishAppBtn{background:#edf5ff;border:1px solid #9cccf4;color:#073254}
+  #shareModal .finishIcon{display:inline-flex;align-items:center;justify-content:center;font-size:20px;line-height:1}</style>
+<style>
+  /* v366: mobile history/packages open from a floating bottom anchor. */
+  @media (max-width:759px){
+    .kggPhoneDrawerBackdrop{
+      position:fixed;
+      inset:0;
+      z-index:88;
+      background:rgba(7,16,39,.24);
+      backdrop-filter:blur(8px);
+      -webkit-backdrop-filter:blur(8px);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .22s ease;
     }
-    .scanHub .scanBtn{grid-column:1;grid-row:1}
-    .scanHub .syncQrBtn{grid-column:2;grid-row:1}
-    .scanHub .scanMeta{grid-column:1/-1}
-    .scanHub .adminConfigBtn,
-    .scanHub .sharedBankBtn,
-    .scanHub #scanPreview{grid-column:1/-1}
+    body.kggPhoneDrawerOpen .kggPhoneDrawerBackdrop{opacity:1;pointer-events:auto}
+    body.kggPhoneDrawerOpen #recentToggle.phoneButtonFloat,
+    body.kggPhoneDrawerOpen #packageToggle.phoneButtonFloat{
+      position:fixed!important;
+      left:16px!important;
+      right:16px!important;
+      bottom:calc(12px + env(safe-area-inset-bottom))!important;
+      z-index:92!important;
+      width:auto!important;
+      min-width:0!important;
+      height:58px!important;
+      min-height:58px!important;
+      border-radius:18px!important;
+      justify-content:center!important;
+      background:#fff!important;
+      color:var(--ink)!important;
+      border:1px solid rgba(220,227,235,.96)!important;
+      box-shadow:0 22px 54px rgba(7,16,39,.26),0 5px 14px rgba(7,16,39,.12)!important;
+      transform-origin:center bottom;
+      animation:kggPhoneButtonDock .28s cubic-bezier(.18,.84,.24,1) both!important;
+    }
+    body.kggPhoneDrawerOpen #recentList:not(.hidden),
+    body.kggPhoneDrawerOpen #packageList:not(.hidden){
+      position:fixed!important;
+      left:16px!important;
+      right:16px!important;
+      bottom:calc(86px + env(safe-area-inset-bottom))!important;
+      z-index:91!important;
+      max-height:min(56dvh,390px)!important;
+      overflow:auto!important;
+      background:rgba(255,255,255,.98)!important;
+      border:1px solid rgba(220,227,235,.96)!important;
+      border-radius:22px!important;
+      padding:10px!important;
+      box-shadow:0 22px 58px rgba(7,16,39,.24),0 4px 14px rgba(7,16,39,.10)!important;
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+      transform-origin:bottom center;
+      animation:kggPhoneDrawerFromDock .30s cubic-bezier(.18,.84,.24,1) both!important;
+    }
+    body.kggPhoneDrawerOpen #recentList:not(.hidden) .notice,
+    body.kggPhoneDrawerOpen #packageList:not(.hidden) .notice{margin-top:0}
+    @keyframes kggPhoneButtonDock{
+      0%{opacity:.92;transform:translateY(18px) scale(.96);filter:blur(1px)}
+      65%{opacity:1;transform:translateY(-3px) scale(1.015);filter:blur(0)}
+      100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+    }
+    @keyframes kggPhoneDrawerFromDock{
+      0%{opacity:0;transform:translateY(28px) scale(.965);filter:blur(2px)}
+      72%{opacity:1;transform:translateY(-4px) scale(1.01);filter:blur(0)}
+      100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+    }
+    body.is-scrolling :is(#recentList,#packageList,#baseFields,#bankContent,.bankArea,.dbTitle,.dbTitleTrain,.planActions,.finishBtn,#recentToggle,#packageToggle,#bankToggle,.phoneButtonFloat,.scanJobCard){
+      transition:none!important;
+      animation:none!important;
+      scroll-behavior:auto!important;
+    }
+    body.is-scrolling :is(.dbTitle .dbTitleTrain,.bankArea.bankOpen #bankContent,#recentList,#packageList){
+      transform:none!important;
+      filter:none!important;
+    }
+  }
+  /* v383: UI flow stability only. No PDF/QR/parser/plan-state changes. */
+  @media (max-width:759px){
+    body.is-scrolling.phoneTextFocus #inputWrap{
+      position:relative!important;
+      bottom:auto!important;
+      z-index:auto!important;
+      transform:none!important;
+      animation:none!important;
+      box-shadow:var(--shadow)!important;
+    }
+    body.is-scrolling :is(#recentList,#packageList,#baseFields,#bankContent,.bankArea,.dbTitle,.dbTitleTrain,.planActions,.finishBtn,#recentToggle,#packageToggle,#bankToggle,#baseToggle,.phoneButtonFloat,.scanJobCard,#inputWrap,.suggestion,#currentPlanBlock,.planSection,.planCard){
+      transition:none!important;
+      animation:none!important;
+      scroll-behavior:auto!important;
+    }
+    body.is-scrolling :is(.dbTitle .dbTitleTrain,.bankArea.bankOpen #bankContent,#recentList,#packageList,#inputWrap,.suggestion,.phoneButtonFloat,.finishBtn,.planCard){
+      transform:none!important;
+      filter:none!important;
+      scale:1 1!important;
+    }
+    .planActions,
+    .planActions .finishBtn,
+    .planActions #recentToggle,
+    .recentText,
+    .recentMini{
+      transition:none!important;
+    }
+    .planActions.hasPlan .finishBtn{
+      animation:none!important;
+      transform:none!important;
+      scale:1 1!important;
+    }
+    :is(.finishBtn,#recentToggle,#packageToggle,#bankToggle,#baseToggle,.planSectionHeader,.iconBtn):active{
+      transform:none!important;
+      scale:1 1!important;
+    }
+    .dbTitle.fullBankOpen .dbTitleTrain,
+    .bankArea.bankOpen #bankContent,
+    #bankArea.bankOpen{
+      animation:none!important;
+      transform:none!important;
+      filter:none!important;
+      clip-path:none!important;
+    }
+    #bankArea.bankOpen{
+      overflow:hidden!important;
+    }
+    #bankArea.bankOpen #bankContent{
+      min-height:0!important;
+      overflow:hidden!important;
+    }
+    #bankArea.bankOpen .bankRows{
+      overflow:auto!important;
+      overscroll-behavior:contain;
+      scroll-behavior:auto!important;
+    }
+    #bankArea.bankOpen.searchBankOpen{
+      grid-template-columns:56px minmax(0,1fr)!important;
+      align-items:start!important;
+    }
+    #bankArea.bankOpen.searchBankOpen #bankToggle{
+      grid-column:1!important;
+      grid-row:1!important;
+    }
+    #bankArea.bankOpen.searchBankOpen #bankContent{
+      grid-column:2!important;
+      grid-row:1!important;
+      min-width:0!important;
+      margin-top:0!important;
+    }
+    #bankArea.bankOpen.searchBankOpen .bankRows{
+      max-height:min(52dvh,420px)!important;
+    }
+    body.kggPhoneDrawerOpen #recentToggle.phoneButtonFloat,
+    body.kggPhoneDrawerOpen #packageToggle.phoneButtonFloat,
+    body.kggPhoneDrawerOpen #recentList:not(.hidden),
+    body.kggPhoneDrawerOpen #packageList:not(.hidden){
+      animation:none!important;
+      transform:none!important;
+      filter:none!important;
+    }
+    #editorModal{
+      align-items:center!important;
+      padding:14px!important;
+      background:rgba(7,16,39,.52)!important;
+    }
+    #editorModal .editorSheet{
+      width:min(100% - 28px,520px)!important;
+      max-height:calc(100dvh - 28px)!important;
+      border-radius:22px!important;
+      overflow:auto!important;
+      overscroll-behavior:contain;
+      box-shadow:0 24px 70px rgba(7,16,39,.28)!important;
+    }
+    #editorModal .editorMediaPreview img,
+    #currentPlanBlock .planThumb img,
+    .kggAdminMenuQrBox img,
+    .qrBox img{
+      object-fit:contain!important;
+    }
+    #editorModal .editorCancelBtn{
+      display:grid!important;
+      place-items:center!important;
+      color:#38475b!important;
+    }
+  }
+  @media (min-width:760px){
+    body{
+      padding-top:max(18px,calc(env(safe-area-inset-top) + 14px))!important;
+    }
+    .app,
+    body.tabletLayoutCustom .app{
+      height:calc(var(--kgg-visual-vh,100dvh) - 36px - env(safe-area-inset-top))!important;
+      max-height:calc(var(--kgg-visual-vh,100dvh) - 36px - env(safe-area-inset-top))!important;
+    }
+    .tabletMenuBtn,
 ```

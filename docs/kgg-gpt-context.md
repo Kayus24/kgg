@@ -41,9 +41,9 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 ## Current Versions
 
-- Source web version: v62 / `1.0.62-tablet-recent-package-shell-geometry`.
-- Source index URL: `index.html?v=62`.
-- Source notes: v060: Zeigt Release, HTML-Build und geladenen Dateinamen unten rechts im ausgefahrenen Tablet-Menue.
+- Source web version: v65 / `1.0.65-source-control-char-guard`.
+- Source index URL: `index.html?v=65`.
+- Source notes: v065: Ersetzt vier versehentliche U+0008-Zeichen durch Regex-Wortgrenzen, repariert den fehlkodierten SJIS-Prüfwert und blockiert C0-, C1- sowie DEL-Steuerzeichen in editierbaren Source-Teilen.
 - Live Admin release: `r0425` / `1.0.62-tablet-recent-package-shell-geometry`.
 - Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0425/admin.html`.
 - Live colleague release: `r0397` / `1.0.29-camera-touch-parser-fix`.

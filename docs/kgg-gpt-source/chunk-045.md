@@ -4,424 +4,424 @@
 - Lines: 18901-19320
 
 ```html
-    if(!btn)return;
-    btn.classList.remove('phoneButtonFloat');
-    void btn.offsetWidth;
-    btn.classList.add('phoneButtonFloat');
-    setTimeout(()=>{
-      if(document.body.classList.contains('kggPhoneDrawerOpen')&&(id==='recentToggle'||id==='packageToggle'))return;
-      btn.classList.remove('phoneButtonFloat');
-    },430);
-  }
-  function initPhoneKeyboardAndDrawers(){
-    initPhoneScrollGuard();
-    const input=$('exerciseInput');
-    if(input){
-      input.addEventListener('focus',keepPhoneTextInputVisible);
-      input.addEventListener('input',keepPhoneTextInputVisible);
-      input.addEventListener('blur',releasePhoneTextFocusSoon);
-    }
-    ['bankToggle','recentToggle','packageToggle'].forEach(id=>{
-      const btn=$(id);
-      if(btn)btn.addEventListener('pointerup',()=>markPhoneButtonFloat(id),{passive:true});
-    });
-    window.addEventListener('resize',()=>{if(isPhoneUserScrolling()){updatePhoneKeyboardInset();return;} keepPhoneTextInputVisible();});
-    window.addEventListener('orientationchange',()=>setTimeout(keepPhoneTextInputVisible,180));
-    if(window.visualViewport){
-      window.visualViewport.addEventListener('resize',()=>{if(isPhoneUserScrolling()){updatePhoneKeyboardInset();return;} keepPhoneTextInputVisible();});
-      window.visualViewport.addEventListener('scroll',()=>{markPhoneUserScrolling(); updatePhoneKeyboardInset();});
-    }
-  }
-  function renderDbTitle(dbTitle,text){
-    if(!dbTitle)return;
-    const isOpen=!!state.bankOpen;
-    const mode=isOpen?(text?'open-search':'open-full'):'closed';
-    dbTitle.classList.toggle('hidden',!isOpen);
-    dbTitle.classList.toggle('fullBankOpen',isOpen&&!text);
-    dbTitle.classList.toggle('searchBankOpen',isOpen&&!!text);
-    if(dbTitle.dataset.titleMode!==mode){
-      dbTitle.innerHTML=isOpen?'<span class="dbTitleTrain">\u00dcbungsdatenbank</span>':'&#9656; &#x1f3cb;&#xfe0f; \u00dcbungsdatenbank';
-      dbTitle.dataset.titleMode=mode;
-    }
-    dbTitle.setAttribute('aria-expanded',isOpen?'true':'false');
-    dbTitle.setAttribute('aria-label',isOpen?'\u00dcbungsdatenbank schlie\u00dfen':'\u00dcbungsdatenbank \u00f6ffnen');
-  }
-  function render(){const rawText=activeText(); const text=activeBankQuerySegment(); const hasPlan=state.plan.length>0; const dbTitle=$('dbTitle'), inputLabel=$('inputLabel'); $('stateBadge').textContent=state.bankOpen?(text?'DB offen mit Text':'DB offen ohne Text'):(rawText?'Textfeld aktiv':(hasPlan?'Aktueller Plan':'Leerzustand')); $('createPanel').classList.toggle('planMode',hasPlan); $('planActions').classList.toggle('hasPlan',hasPlan); $('panelTitle').textContent=hasPlan?'✏️ Aktueller Plan':'➕ Neuen Plan erstellen'; inputLabel.textContent='Übungen eingeben'; inputLabel.classList.toggle('hidden',state.bankOpen||hasPlan); $('finishBtn').classList.toggle('hidden',!hasPlan); $('savePackageBtn').classList.toggle('hidden',!hasPlan); renderDbTitle(dbTitle,text); renderSuggestion(text); renderBank(text); bindBankSwipeDelete($('bankContent')); renderPlan(); renderRecent(); renderPackages(); $('patientMini').textContent=state.patient.name||''; updateToggleCarets(); setTabletAnchorActiveClasses(); updatePhoneKeyboardInset();}
-  function bankLetterForName(name){const first=String(name||'').trim().charAt(0).toUpperCase(); return /^[A-ZÄÖÜ]$/.test(first)?first:'#';}
-  function renderSuggestion(text){
-    const tabletBank=isTabletLayout();
-    bankSelectMode=(state.bankOpen||tabletBank)?(text?'replaceActive':'append'):'replaceActive';
-    const el=$('suggestion');
-    if(!text || state.bankOpen || tabletBank){el.classList.add('hidden'); el.onclick=null; el.innerHTML=''; return;}
-    const hit=search(text,1)[0];
-    if(!hit){el.classList.add('hidden'); el.onclick=null; el.innerHTML=''; return;}
-    el.innerHTML='<div class="row"><button class="iconBtn" type="button" data-open-top8 aria-label="Top-8-Treffer öffnen">▸ 🏋️</button><button class="iconBtn" type="button" data-apply-hit aria-label="Treffer übernehmen"><b>'+escapeHtml(hit.name)+'</b></button></div>';
-    el.classList.remove('hidden');
-    el.onclick=null;
-    const open=el.querySelector('[data-open-top8]');
-    const apply=el.querySelector('[data-apply-hit]');
-    if(open)open.onclick=ev=>{ev.preventDefault();ev.stopPropagation();state.bankOpen=true;render();};
-    if(apply){preventButtonFocusSteal(apply); apply.onclick=ev=>{ev.preventDefault();ev.stopPropagation();applySelectedExerciseToText(hit,{keepFocus:true});};}
-  }
-  function nextAvailableBankLetter(requested,available){const letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''); const wanted=String(requested||'').toUpperCase(); const start=Math.max(0,letters.indexOf(wanted)); for(let i=start;i<letters.length;i++){if(available.includes(letters[i]))return letters[i];} for(let i=start-1;i>=0;i--){if(available.includes(letters[i]))return letters[i];} return available[0]||'';}
-  function setActiveAzLetter(nav,letter){if(!nav)return; nav.querySelectorAll('[data-jump]').forEach(btn=>btn.classList.toggle('active',btn.dataset.jump===letter));}
-  function setAzTouchPreview(nav,letter){
-    if(!nav)return;
-    const buttons=[...nav.querySelectorAll('[data-jump]')];
-    const index=buttons.findIndex(btn=>btn.dataset.jump===letter);
-    buttons.forEach((btn,i)=>{
-      const dist=index<0?99:Math.abs(i-index);
-      btn.classList.toggle('touch-preview',dist===0);
-      btn.classList.toggle('touch-near1',dist===1);
-      btn.classList.toggle('touch-near2',dist===2);
-    });
-  }
-  function jumpBankToLetter(container,letter,instant){const nav=container&&container.querySelector('.az'); const rowsWrap=container&&container.querySelector('.bankRows'); if(!container||!rowsWrap)return; const available=[...container.querySelectorAll('.bankRow[data-letter]')].map(row=>row.dataset.letter).filter((l,i,a)=>l&&a.indexOf(l)===i); const targetLetter=nextAvailableBankLetter(letter,available); if(!targetLetter)return; const target=container.querySelector('.bankRow[data-letter="'+targetLetter+'"]'); if(target){const rowRect=target.getBoundingClientRect(); const wrapRect=rowsWrap.getBoundingClientRect(); const nextTop=Math.max(0,rowsWrap.scrollTop+(rowRect.top-wrapRect.top)); rowsWrap.scrollTo({top:nextTop,behavior:instant?'auto':'smooth'}); setActiveAzLetter(nav,targetLetter);}}
-  function azLetterFromPoint(nav,clientY){if(!nav)return''; const rect=nav.getBoundingClientRect(); const buttons=[...nav.querySelectorAll('[data-jump]')]; if(!buttons.length)return''; const ratio=Math.max(0,Math.min(1,(clientY-rect.top)/Math.max(1,rect.height))); return buttons[Math.min(buttons.length-1,Math.floor(ratio*buttons.length))].dataset.jump;}
-  function bindAzScrollrad(container){const nav=container&&container.querySelector('.az'); if(!nav||nav.dataset.azBound==='1')return; nav.dataset.azBound='1'; let active=false,tapTimer=0; const setTouching=on=>{nav.classList.toggle('azTouching',!!on); if(!on)setAzTouchPreview(nav,'');}; const showTapWave=letter=>{clearTimeout(tapTimer); nav.classList.add('azTouching'); setAzTouchPreview(nav,letter); tapTimer=setTimeout(()=>setTouching(false),180);}; const jumpFromEvent=ev=>{const touch=ev.touches&&ev.touches[0]||ev.changedTouches&&ev.changedTouches[0]; const y=touch?touch.clientY:ev.clientY; const letter=azLetterFromPoint(nav,y); if(letter){setAzTouchPreview(nav,letter); jumpBankToLetter(container,letter,true);}}; nav.addEventListener('click',ev=>{const btn=ev.target&&ev.target.closest?ev.target.closest('[data-jump]'):null; if(!btn||!nav.contains(btn))return; ev.preventDefault(); showTapWave(btn.dataset.jump); jumpBankToLetter(container,btn.dataset.jump);}); nav.addEventListener('pointerdown',ev=>{clearTimeout(tapTimer); active=true; setTouching(true); nav.setPointerCapture&&nav.setPointerCapture(ev.pointerId); ev.preventDefault(); jumpFromEvent(ev);}); nav.addEventListener('pointermove',ev=>{if(!active)return; ev.preventDefault(); jumpFromEvent(ev);}); nav.addEventListener('pointerup',ev=>{active=false; setTouching(false); try{nav.releasePointerCapture&&nav.releasePointerCapture(ev.pointerId);}catch(e){}}); nav.addEventListener('pointercancel',()=>{active=false; setTouching(false);}); nav.addEventListener('touchstart',ev=>{clearTimeout(tapTimer); active=true; setTouching(true); jumpFromEvent(ev);},{passive:false}); nav.addEventListener('touchmove',ev=>{if(!active)return; ev.preventDefault(); jumpFromEvent(ev);},{passive:false}); nav.addEventListener('touchend',()=>{active=false; setTouching(false);},{passive:true});}
-  function bankCardThumbnailHtml(ex){
-    const media=ensureExerciseMediaList(ex).find(item=>item&&item.type==='image'&&item.id);
-    if(!media)return '';
-    return '<span class="bankThumb bankThumbFallback" data-bank-thumb-id="'+escapeHtml(media.id)+'" title="Bild vorhanden" aria-hidden="true"></span>';
-  }
-  async function hydrateBankThumbnails(root){
-    if(!root)return;
-    Array.from(root.querySelectorAll('[data-bank-thumb-id]')).forEach(async node=>{
-      const id=String(node.getAttribute('data-bank-thumb-id')||'');
-      if(!id)return;
-      try{
-        const owner=bank.find(ex=>ensureExerciseMediaList(ex).some(item=>String(item&&item.id)===id));
-        const media=owner&&ensureExerciseMediaList(owner).find(item=>String(item&&item.id)===id);
-        if(!media)throw new Error('Kein Bildmanifest');
-        const record=await getEncryptedMediaBlob(id);
-        if(!node.isConnected)return;
-        if(!record||!record.blob)throw new Error('Lokales Bild fehlt');
-        const imageBlob=await patientDecryptMedia(media,record.blob);
-        if(!node.isConnected)return;
-        if(node._kggThumbUrl)URL.revokeObjectURL(node._kggThumbUrl);
-        const url=URL.createObjectURL(imageBlob);
-        node._kggThumbUrl=url;
-        node.classList.remove('bankThumbFallback');
-        node.innerHTML='<img src="'+url+'" alt="">';
-        setTimeout(()=>{try{if(node._kggThumbUrl===url){URL.revokeObjectURL(url);node._kggThumbUrl='';}}catch(e){}},60000);
-      }catch(err){
-        if(node.isConnected){node.classList.add('bankThumbFallback');node.innerHTML='';}
-      }
-    });
-  }
-  function renderBank(text){const c=$('bankContent'); const btn=$('bankToggle'); const area=$('bankArea'); const effectiveOpen=state.bankOpen||isTabletLayout(); const shouldHideToggle=!effectiveOpen&&!!text; btn.classList.toggle('hidden',shouldHideToggle); btn.classList.toggle('dbMascotDock',effectiveOpen); const caret=effectiveOpen?'▾':'▸'; btn.innerHTML='<span class="dbToggleMain"><span class="dbMascotBubble" aria-hidden="true"><span class="dbCaret">'+caret+'</span><span class="dbMascot">🏋️</span></span><span class="dbToggleText">Übungsdatenbank</span></span>'; btn.setAttribute('aria-label',effectiveOpen?'Übungsdatenbank schließen':'Übungsdatenbank öffnen'); c.classList.toggle('hidden',!effectiveOpen); area.classList.toggle('bankOpen',effectiveOpen); area.classList.toggle('alphaBankOpen',effectiveOpen&&!text); area.classList.toggle('searchBankOpen',effectiveOpen&&!!text); if(!effectiveOpen){c.innerHTML=''; return;} const matches=text?search(text,8):allAlpha(); const list=text?fillBankListWithFallback(matches,8):matches; const fallbackOnly=!!text&&matches.length===0; let rows=list.map((ex,i)=>{const letter=bankLetterForName(ex.name); return '<div class="bankRow" data-letter="'+letter+'" data-bank-index="'+i+'"><button class="iconBtn bankAddBtn" data-add="'+ex.id+'" aria-label="Übung übernehmen">'+bankCardThumbnailHtml(ex)+'<span class="bankText"><b>'+escapeHtml(ex.name)+'</b><small>'+(ex.unit||'Wdh')+' · '+(ex.weightUnit||'kg')+'</small></span></button><button class="iconBtn" data-edit="'+ex.id+'" aria-label="Übung bearbeiten">⚙️</button></div>';}).join(''); if(text){const label=fallbackOnly?'Alternative Treffer':'Beste Treffer'; c.innerHTML='<div class="bankLabel">'+label+'</div><div class="bankRows">'+rows+'</div>';} else {const availableLetters=new Set(list.map(ex=>bankLetterForName(ex.name))); c.innerHTML='<div class="bankWithAz"><nav class="az" aria-label="A-Z Sprungleiste">'+'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(l=>'<button type="button" data-jump="'+l+'" class="'+(availableLetters.has(l)?'':'az-empty')+'">'+l+'</button>').join('')+'</nav><div class="bankRows">'+rows+'</div></div>'; bindAzScrollrad(c);} hydrateBankThumbnails(c); c.querySelectorAll('[data-add]').forEach(b=>{preventButtonFocusSteal(b); b.onclick=ev=>{ev.preventDefault();ev.stopPropagation();if(Date.now()<bankSwipeSuppressClickUntil)return; applySelectedExerciseToText(bank.find(x=>x.id===b.dataset.add),{keepFocus:!isPhoneLayout()||!document.body.classList.contains('kggPhoneDbBrowseMode')});};}); c.querySelectorAll('[data-edit]').forEach(b=>b.onclick=ev=>{if(Date.now()<bankSwipeSuppressClickUntil){ev.preventDefault();ev.stopPropagation();return;} openEditor(bank.find(x=>x.id===b.dataset.edit));});}
-  function bindBankSwipeDelete(container){
-    if(!container)return;
-    container.querySelectorAll('.bankRow').forEach(row=>{
-      if(row.dataset.bankSwipeBound==='1')return;
-      const btn=row.querySelector('[data-add],[data-edit]');
-      const id=btn&&(btn.dataset.add||btn.dataset.edit);
-      if(!id)return;
-      row.dataset.bankId=id;
-      row.dataset.bankSwipeBound='1';
-      row.addEventListener('click',ev=>{if(Date.now()<bankSwipeSuppressClickUntil){ev.preventDefault();ev.stopPropagation();}},true);
-      row.addEventListener('pointerdown',startBankRowSwipeDelete,{passive:true});
-    });
-  }
-  function resetBankRowSwipe(row){
-    if(!row)return;
-    row.classList.remove('bank-swipe-dragging','bank-swipe-armed','bank-swipe-left','bank-swipe-right');
-    row.style.removeProperty('transform');
-    row.style.removeProperty('opacity');
-    row.style.removeProperty('transition');
-    row.style.removeProperty('--bank-swipe-strength');
-  }
-  function startBankRowSwipeDelete(ev){
-    if(ev.button!=null&&ev.button!==0)return;
-    if(ev.target&&ev.target.closest&&ev.target.closest('[data-edit],input,textarea,select,a'))return;
-    const row=ev.currentTarget;
-    const id=row&&row.dataset&&row.dataset.bankId;
-    if(!row||!id)return;
-    const startX=ev.clientX,startY=ev.clientY;
-    const swipe={row,id,startX,startY,active:false,dx:0,pointerId:ev.pointerId};
-    const threshold=()=>Math.min(128,Math.max(74,row.offsetWidth*0.34));
-    const cleanup=()=>{document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);document.removeEventListener('pointercancel',cancel);};
-    const move=e=>{
-      const dx=e.clientX-startX,dy=e.clientY-startY;
-      if(!swipe.active){
-        if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)*1.2){cleanup();return;}
-        if(Math.abs(dx)<12||Math.abs(dx)<Math.abs(dy)*1.25)return;
+        if(pendingTabletReorder&&animatedReorder===pendingTabletReorder){
+          clearTimeout(pendingTabletReorder.timer);
+          cleanupAnimatedReorder(false);
+        }
         swipe.active=true;
-        row.classList.add('bank-swipe-dragging');
-        try{row.setPointerCapture&&row.setPointerCapture(swipe.pointerId);}catch(err){}
+        document.body.classList.add('kggPlanCardSwiping');
+        clearPhoneScrollStateForPlanGesture(420);
+        card.classList.add('swipe-dragging');
+        try{card.setPointerCapture&&card.setPointerCapture(swipe.pointerId);}catch(err){}
       }
       if(!swipe.active)return;
-      e.preventDefault();
-      const max=row.offsetWidth*0.86;
+      clearPhoneScrollStateForPlanGesture(420);
+      e.preventDefault(); if(e.stopPropagation)e.stopPropagation();
+      const max=card.offsetWidth*0.86;
       swipe.dx=Math.max(-max,Math.min(max,dx));
       const strength=Math.min(1,Math.abs(swipe.dx)/threshold());
-      row.classList.toggle('bank-swipe-left',swipe.dx<0);
-      row.classList.toggle('bank-swipe-right',swipe.dx>0);
-      row.classList.toggle('bank-swipe-armed',Math.abs(swipe.dx)>=threshold());
-      row.style.setProperty('--bank-swipe-strength',String(strength));
-      row.style.transform='translateX('+swipe.dx+'px)';
-      row.style.opacity=String(1-strength*0.12);
+      card.classList.toggle('swipe-left',swipe.dx<0);
+      card.classList.toggle('swipe-right',swipe.dx>0);
+      card.classList.toggle('swipe-armed',Math.abs(swipe.dx)>=threshold());
+      card.style.setProperty('--swipe-strength',String(strength));
+      card.style.setProperty('--kgg-plan-swipe-x',swipe.dx+'px');
+      card.style.transform='translateX(var(--kgg-plan-swipe-x,0px))';
+      card.style.opacity=String(1-strength*0.16);
     };
     const up=e=>{
       cleanup();
-      if(!swipe.active){resetBankRowSwipe(row);return;}
-      e.preventDefault();
-      bankSwipeSuppressClickUntil=Date.now()+380;
-      const shouldAsk=Math.abs(swipe.dx)>=threshold();
-      row.style.transition='transform .2s cubic-bezier(.2,.9,.2,1), opacity .16s ease, box-shadow .16s ease';
-      row.style.transform='translateX(0)';
-      row.style.opacity='1';
-      setTimeout(()=>{resetBankRowSwipe(row); if(shouldAsk)openBankDeleteModal(id);},210);
+      if(!swipe.active){resetPlanCardSwipe(card);return;}
+      e.preventDefault(); if(e.stopPropagation)e.stopPropagation(); card.dataset.swipeSuppressClickUntil=String(Date.now()+360);
+      clearPhoneScrollStateForPlanGesture(520);
+      document.body.classList.remove('kggPlanCardSwiping');
+      const shouldDelete=Math.abs(swipe.dx)>=threshold();
+      if(shouldDelete){
+        const dir=swipe.dx<0?-1:1;
+        card.classList.add('swipe-removing');
+        card.style.transition='transform .18s cubic-bezier(.2,.9,.2,1), opacity .18s ease';
+        card.style.setProperty('--kgg-plan-swipe-x',(dir*(card.offsetWidth+96))+'px');
+        card.style.transform='translateX(var(--kgg-plan-swipe-x,0px))';
+        card.style.opacity='0';
+        setTimeout(()=>{document.body.classList.remove('kggPlanCardSwiping');removeExercise(id);},190);
+        return;
+      }
+      card.style.transition='transform .22s cubic-bezier(.2,.9,.2,1), opacity .18s ease, box-shadow .18s ease';
+      card.style.setProperty('--kgg-plan-swipe-x','0px');
+      card.style.transform='translateX(var(--kgg-plan-swipe-x,0px))';
+      card.style.opacity='1';
+      setTimeout(()=>resetPlanCardSwipe(card),230);
     };
-    const cancel=()=>{cleanup(); if(swipe.active){row.style.transition='transform .18s ease, opacity .18s ease';row.style.transform='translateX(0)';row.style.opacity='1';setTimeout(()=>resetBankRowSwipe(row),190);}else resetBankRowSwipe(row);};
+    const cancel=()=>{
+      if(swipe.active){
+        clearTimeout(swipe.cancelTimer);
+        swipe.cancelTimer=setTimeout(()=>{cleanup();resetPlanCardSwipe(card);},900);
+        return;
+      }
+      cleanup();
+      resetPlanCardSwipe(card);
+    };
     document.addEventListener('pointermove',move,{passive:false});
     document.addEventListener('pointerup',up,{passive:false,once:true});
     document.addEventListener('pointercancel',cancel,{passive:true,once:true});
   }
-  function scanSetSummaryForPlanCard(ex){
-    const sets=Array.isArray(ex&&ex.scanSets)?ex.scanSets:[];
-    if(!sets.length)return '';
-    const metricUnit=ex&&ex.metricUnit||ex&&ex.unit||measureUnitLabel(ex&&ex.measure);
-    const loadUnit=normalizeLoadUnit(ex&&ex.weightUnit||ex&&ex.loadUnit||'kg');
-    const isTime=/zeit|sek|sec|min|time/i.test(metricUnit)||/keine/i.test(loadUnit);
-    return sets.slice(0,3).map((set,i)=>{
-      if(set&&set.li||set&&set.re){
-        const li=set.li||{}, re=set.re||{};
-        const liText=(li.metric?li.metric+' '+metricUnit:'')+(li.load?' @ '+li.load+' '+loadUnit:'');
-        const reText=(re.metric?re.metric+' '+metricUnit:'')+(re.load?' @ '+re.load+' '+loadUnit:'');
-        return 'S'+(i+1)+': Li '+(liText||'-')+' / Re '+(reText||'-')+(set.pain?' · Schmerz '+set.pain+'/10':'');
+  function movePlanExerciseByButton(localId,delta){
+    const idx=(state.plan||[]).findIndex(ex=>String(ex.localId||ex.id)===String(localId));
+    if(idx<0)return;
+    const target=idx+delta;
+    if(target<0||target>=state.plan.length)return;
+    const next=state.plan.slice();
+    const item=next.splice(idx,1)[0];
+    next.splice(target,0,item);
+    state.plan=next;
+    state.sortMenuId=String(item.localId||item.id);
+    syncStatePlanToStore('ui_reorder_plan_buttons');
+    syncTextInputFromPlan('ui_reorder_plan_buttons');
+    save();
+    renderPlan();
+  }
+  let animatedReorder=null;
+  function startAnimatedReorderPress(ev){
+    if(ev.button!=null && ev.button!==0)return;
+    const eventTarget=ev.currentTarget;
+    const cardFromTarget=eventTarget&&eventTarget.closest?eventTarget.closest('.planCard'):null;
+    const handle=(eventTarget&&eventTarget.matches&&eventTarget.matches('.drag[data-sort-id]'))?eventTarget:(cardFromTarget?cardFromTarget.querySelector('.drag[data-sort-id]'):null);
+    const id=String((handle&&handle.dataset&&handle.dataset.sortId)||'');
+    const card=(handle&&handle.closest?handle.closest('.planCard'):null)||cardFromTarget;
+    const list=$('planList');
+    if(!id||!card||!list||state.plan.length<2)return;
+    let startX=ev.clientX,startY=ev.clientY;
+    const downRect=card.getBoundingClientRect();
+    const press={
+      id,handle,card,list,startX,startY,pointerId:ev.pointerId,timer:null,active:false,cancelled:false,
+      /*
+        v5 phone drag anchor:
+        keep the lifted card anchored to the exact finger offset captured before
+        the prelift CSS transform can change its rect.
+      */
+      downRect:{
+        left:downRect.left,
+        top:downRect.top,
+        width:downRect.width,
+        height:downRect.height
+      },
+      pointerOffsetX:ev.clientX-downRect.left,
+      pointerOffsetY:ev.clientY-downRect.top,
+      phoneAnchoredDrag:false,
+      fixedOffset:{left:0,top:0}
+    };
+    animatedReorder=press;
+    handle.classList.add('reorder-armed');
+    card.classList.add('reorder-prelift');
+    press.timer=setTimeout(()=>activateAnimatedReorder(press,ev),100);
+    const moveBefore=e=>{
+      if(animatedReorder!==press)return;
+      const dx=Math.abs(e.clientX-startX),dy=Math.abs(e.clientY-startY);
+      if(!press.active && (dx>10 || dy>10)){
+        clearTimeout(press.timer);
+        press.cancelled=true;
+        cleanupAnimatedReorder(false);
       }
-      if(isTime)return 'S'+(i+1)+': '+(set&&set.metric||'-')+' '+metricUnit+(set&&set.pain?' · Schmerz '+set.pain+'/10':'');
-      return 'S'+(i+1)+': '+(set&&set.metric||'-')+' '+metricUnit+(set&&set.load?' @ '+set.load+' '+loadUnit:'')+(set&&set.pain?' · Schmerz '+set.pain+'/10':'');
-    }).join(' · ');
+    };
+    const upBefore=e=>{
+      if(animatedReorder!==press)return;
+      if(!press.active){clearTimeout(press.timer);cleanupAnimatedReorder(false);}
+    };
+    press.preMove=moveBefore;
+    press.preUp=upBefore;
+    document.addEventListener('pointermove',moveBefore,{passive:true});
+    document.addEventListener('pointerup',upBefore,{passive:true,once:true});
+    document.addEventListener('pointercancel',upBefore,{passive:true,once:true});
   }
-  function exerciseMeta(ex){
-    const scanSummary=scanSetSummaryForPlanCard(ex);
-    if(scanSummary)return scanSummary;
-    const parts=[];
-    parts.push(normalizeSetCount(ex&&ex.sets||3)+' Sätze');
-    parts.push(sideModeLabel(ex&&ex.side));
-    const loadUnit=normalizeLoadUnit(ex&&ex.weightUnit||ex&&ex.loadUnit||'kg');
-    const metricUnit=ex&&ex.unit||ex&&ex.metricUnit||measureUnitLabel(ex&&ex.measure);
-    parts.push(loadUnit);
-    parts.push(metricUnit||'Wdh');
-    return parts.filter(Boolean).join(' · ');
-  }
-  function planCardSourceText(ex){
-    if(ex&&ex.scanImported)return ex.scanSource||'Scan übernommen';
-    const raw=String(ex&&ex.rawText||'').trim();
-    const name=String(ex&&ex.name||'').trim();
-    if(raw&&compact(raw)!==compact(name))return raw;
-    return name||String(ex&&ex.source||ex&&ex.sourceId||ex&&ex.bankId||'').trim();
-  }
-  function planCardBadgesHtml(ex){
-    const mediaCount=ensureExerciseMediaList(ex).length;
-    const bits=[];
-    if(mediaCount)bits.push('<span class="planBadge media">🖼 Medien</span>');
-    if(ex&&ex.pendingNew)bits.push('<span class="planBadge new">neu</span>');
-    else if(ex&&ex.needsReview)bits.push('<span class="planBadge review">prüfen</span>');
-    if(ex&&ex.liveDraft)bits.push('<span class="planBadge live">live</span>');
-    return bits.join('');
-  }
-  function planCardThumbnailHtml(ex){
-    const media=ensureExerciseMediaList(ex).find(item=>item&&item.type==='image'&&item.id);
-    if(!media)return '';
-    return '<span class="planThumb planThumbFallback" data-plan-thumb-id="'+escapeHtml(media.id)+'" title="Bild vorhanden" aria-hidden="true"></span>';
-  }
-  function planCardSourceText(ex){
-    return '';
-  }
-  function planCardBadgesHtml(ex){
-    const mediaCount=ensureExerciseMediaList(ex).length;
-    const bits=[];
-    if(mediaCount)bits.push('<span class="planBadge media">Bild</span>');
-    if(ex&&ex.liveDraft)bits.push('<span class="planBadge live">Vorschau</span>');
-    else if(ex&&ex.pendingNew)bits.push('<span class="planBadge new">neu</span>');
-    else if(ex&&ex.needsReview)bits.push('<span class="planBadge review">pruefen</span>');
-    return bits.join('');
-  }
-  async function hydratePlanThumbnails(root){
-    if(!root)return;
-    Array.from(root.querySelectorAll('[data-plan-thumb-id]')).forEach(async node=>{
-      const id=String(node.getAttribute('data-plan-thumb-id')||'');
-      if(!id)return;
-      try{
-        const owner=(state.plan||[]).find(ex=>ensureExerciseMediaList(ex).some(item=>String(item&&item.id)===id));
-        const media=owner&&ensureExerciseMediaList(owner).find(item=>String(item&&item.id)===id);
-        if(!media)throw new Error('Kein Bildmanifest');
-        const record=await getEncryptedMediaBlob(id);
-        if(!node.isConnected)return;
-        if(!record||!record.blob)throw new Error('Lokales Bild fehlt');
-        const imageBlob=await patientDecryptMedia(media,record.blob);
-        if(!node.isConnected)return;
-        if(node._kggThumbUrl)URL.revokeObjectURL(node._kggThumbUrl);
-        const url=URL.createObjectURL(imageBlob);
-        node._kggThumbUrl=url;
-        node.classList.remove('planThumbFallback');
-        node.innerHTML='<img src="'+url+'" alt="">';
-        setTimeout(()=>{try{if(node._kggThumbUrl===url){URL.revokeObjectURL(url);node._kggThumbUrl='';}}catch(e){}},60000);
-      }catch(err){
-        if(node.isConnected){node.classList.add('planThumbFallback');node.innerHTML='';}
+  function fixedContainingBlockOffset(el){
+    let node=el&&el.parentElement;
+    while(node&&node!==document.documentElement){
+      const cs=getComputedStyle(node);
+      const backdrop=cs.backdropFilter||cs.webkitBackdropFilter||'none';
+      const contain=cs.contain||'';
+      const willChange=cs.willChange||'';
+      const createsFixedBlock=
+        cs.transform!=='none'||
+        cs.perspective!=='none'||
+        cs.filter!=='none'||
+        backdrop!=='none'||
+        contain.includes('paint')||
+        contain.includes('layout')||
+        willChange.includes('transform');
+      if(createsFixedBlock){
+        const r=node.getBoundingClientRect();
+        return {left:r.left,top:r.top};
       }
-    });
-  }
-  function scanInboxJobs(){try{return (typeof scanState!=='undefined'&&Array.isArray(scanState.jobs))?scanState.jobs:[];}catch(err){return [];}}
-  function updateToggleCarets(){
-    const baseBtn=$('baseToggle');
-    const baseFields=$('baseFields');
-    if(baseBtn){
-      const open=!!(baseFields&&!baseFields.classList.contains('hidden'));
-      const label=baseBtn.querySelector('span:first-child');
-      if(label)label.textContent=(open?'▼':'▶')+' 👤 Basisdaten';
-      baseBtn.setAttribute('aria-expanded',open?'true':'false');
+      node=node.parentElement;
     }
-    const currentToggle=$('currentPlanToggle');
-    if(currentToggle && !currentToggle.hasAttribute('aria-expanded'))currentToggle.setAttribute('aria-expanded','false');
-    const scannedToggle=$('scannedPlansToggle');
-    if(scannedToggle && !scannedToggle.hasAttribute('aria-expanded'))scannedToggle.setAttribute('aria-expanded','false');
+    return {left:0,top:0};
   }
-  function setTabletAnchorActiveClasses(){
-    const configs=[
-      ['base','baseToggle','baseFields'],
-      ['recent','recentToggle','recentList'],
-      ['package','packageToggle','packageList']
-    ];
-    configs.forEach(([kind,anchorId,panelId])=>{
-      const anchor=$(anchorId), panel=$(panelId);
-      const active=!!(isTabletLayout()&&panel&&!panel.classList.contains('hidden')&&tabletOverlayState.kind===kind);
-      if(anchor)anchor.classList.toggle('kggOverlayAnchorActive',active);
-    });
-  }
-  function syncScannedPlansMobileDock(){
-    const block=$('scannedPlansBlock'), dock=$('mobileScannedPlansDock'), stack=$('rightPlanStack');
-    if(!block||!dock||!stack)return;
-    const mobile=!isTabletLayout();
-    if(mobile){
-      if(block.parentNode!==dock)dock.appendChild(block);
-      dock.classList.toggle('hidden',block.classList.contains('hidden'));
+  function activateAnimatedReorder(press,initialEv){
+    if(animatedReorder!==press||press.cancelled)return;
+    const card=press.card,list=press.list;
+    const phoneDrag=isPhoneLayout();
+    /*
+      v5 phone drag anchor:
+      On phone, use the card rect captured at pointerdown, not the transformed
+      prelift rect after the 100ms hold. This prevents the lifted card from
+      jumping away from the finger at activation.
+    */
+    const liveRect=card.getBoundingClientRect();
+    const rect=(phoneDrag&&press.downRect)?press.downRect:liveRect;
+    const fixedOffset=fixedContainingBlockOffset(card);
+    press.fixedOffset=fixedOffset;
+    press.phoneAnchoredDrag=!!phoneDrag;
+    const placeholder=document.createElement('div');
+    placeholder.className='planCard reorder-placeholder';
+    const placeholderHeight=Math.max(48,rect.height);
+    placeholder.style.height=placeholderHeight+'px';
+    /*
+      v4b phone drag-position-only:
+      v401 still forces phone placeholders to 20px via !important.
+      Do not touch layout CSS. Override only this live placeholder inline,
+      only in phone layout, so the list keeps the same height reserve as tablet.
+    */
+    if(isPhoneLayout()){
+      placeholder.style.setProperty('height',placeholderHeight+'px','important');
+      placeholder.style.setProperty('min-height',placeholderHeight+'px','important');
+      placeholder.style.setProperty('padding','0','important');
+      placeholder.style.setProperty('box-sizing','border-box','important');
+    }
+    placeholder.setAttribute('aria-hidden','true');
+    card.after(placeholder);
+    if(isPhoneLayout()){
+      document.body.classList.add('kggPlanCardReordering');
+      clearPhoneScrollStateForPlanGesture(520);
+    }
+    card.classList.remove('reorder-prelift');
+    card.classList.add('reorder-lifted');
+    if(phoneDrag){
+      /*
+        v7 phone drag local-list coordinates:
+        Do not use position:fixed on phone. Some mobile WebViews resolve fixed
+        against transformed/contained ancestors, which moves the lifted card far
+        away from the finger. Keep the card absolutely positioned inside #planList
+        and calculate left/top in that local coordinate system.
+      */
+      const anchorX=Number.isFinite(press.pointerOffsetX)?press.pointerOffsetX:(rect.width/2);
+      const anchorY=Number.isFinite(press.pointerOffsetY)?press.pointerOffsetY:(rect.height/2);
+      const initialX=initialEv&&Number.isFinite(initialEv.clientX)?initialEv.clientX:press.startX;
+      const initialY=initialEv&&Number.isFinite(initialEv.clientY)?initialEv.clientY:press.startY;
+      const listRect=list.getBoundingClientRect();
+      press.phoneListAbsoluteDrag=true;
+      press.dragAnchorX=anchorX;
+      press.dragAnchorY=anchorY;
+      /*
+        v8 tablet safety:
+        v7 left #planList with inline position:relative after a phone drag.
+        That can leak into tablet/orientation mode in the same session.
+        Store and restore the exact previous inline value.
+      */
+      press.listPrevPosition=list.style.getPropertyValue('position');
+      press.listPrevPositionPriority=list.style.getPropertyPriority('position');
+      list.style.setProperty('position','relative');
+      card.style.setProperty('position','absolute','important');
+      card.style.setProperty('left',(initialX-anchorX-listRect.left+list.scrollLeft)+'px','important');
+      card.style.setProperty('top',(initialY-anchorY-listRect.top+list.scrollTop)+'px','important');
+      card.style.setProperty('right','auto','important');
+      card.style.setProperty('bottom','auto','important');
+      card.style.setProperty('margin','0','important');
+      card.style.setProperty('width',rect.width+'px','important');
+      card.style.setProperty('transform','translate3d(0,0,0)','important');
+      card.style.setProperty('transform-origin',anchorX+'px '+anchorY+'px','important');
+      card.style.setProperty('--drag-left','0px');
+      card.style.setProperty('--drag-top','0px');
+      card.style.setProperty('--drag-y','0px');
     }else{
-      if(block.parentNode!==stack)stack.appendChild(block);
-      dock.classList.add('hidden');
+      card.style.setProperty('--drag-left',(rect.left-fixedOffset.left)+'px');
+      card.style.setProperty('--drag-top',(rect.top-fixedOffset.top)+'px');
+      card.style.setProperty('--drag-y','0px');
+      card.style.width=rect.width+'px';
+    }
+    list.classList.add('reorder-active');
+    press.active=true;
+    press.placeholder=placeholder;
+    press.startTop=rect.top;
+    press.cardHeight=rect.height;
+    press.currentIndex=(state.plan||[]).findIndex(ex=>String(ex.localId||ex.id)===press.id);
+    press.targetIndex=press.currentIndex;
+    state.reorderSuppressClick=true;
+    try{press.handle.setPointerCapture&&press.handle.setPointerCapture(press.pointerId);}catch(e){}
+    document.removeEventListener('pointermove',press.preMove);
+    document.removeEventListener('pointerup',press.preUp);
+    document.addEventListener('pointermove',onAnimatedReorderMove,{passive:false});
+    document.addEventListener('pointerup',finishAnimatedReorder,{passive:false,once:true});
+    document.addEventListener('pointercancel',cancelAnimatedReorder,{passive:false,once:true});
+    if(initialEv)onAnimatedReorderMove(initialEv);
+  }
+  function onAnimatedReorderMove(ev){
+    const press=animatedReorder;
+    if(!press||!press.active)return;
+    clearPhoneScrollStateForPlanGesture(520);
+    ev.preventDefault();
+    const dy=ev.clientY-press.startY;
+    let floatingMid;
+    if(press.phoneListAbsoluteDrag){
+      const anchorX=Number.isFinite(press.dragAnchorX)?press.dragAnchorX:(Number.isFinite(press.pointerOffsetX)?press.pointerOffsetX:0);
+      const anchorY=Number.isFinite(press.dragAnchorY)?press.dragAnchorY:(Number.isFinite(press.pointerOffsetY)?press.pointerOffsetY:0);
+      const listRect=press.list.getBoundingClientRect();
+      const nextLeft=ev.clientX-anchorX-listRect.left+press.list.scrollLeft;
+      const nextTop=ev.clientY-anchorY-listRect.top+press.list.scrollTop;
+      press.card.style.setProperty('left',nextLeft+'px','important');
+      press.card.style.setProperty('top',nextTop+'px','important');
+      press.card.style.setProperty('transform','translate3d(0,0,0)','important');
+      press.card.style.setProperty('--drag-y','0px');
+      floatingMid=ev.clientY-anchorY+(Number.isFinite(press.cardHeight)?press.cardHeight:press.card.getBoundingClientRect().height)/2;
+    }else if(press.phoneAnchoredDrag){
+      const anchorX=Number.isFinite(press.pointerOffsetX)?press.pointerOffsetX:0;
+      const anchorY=Number.isFinite(press.pointerOffsetY)?press.pointerOffsetY:0;
+      const fixedOffset=press.fixedOffset||{left:0,top:0};
+      const nextLeft=ev.clientX-anchorX-fixedOffset.left;
+      const nextTop=ev.clientY-anchorY-fixedOffset.top;
+      press.card.style.setProperty('--drag-left',nextLeft+'px');
+      press.card.style.setProperty('--drag-top',nextTop+'px');
+      press.card.style.setProperty('--drag-y','0px');
+      floatingMid=ev.clientY-anchorY+(Number.isFinite(press.cardHeight)?press.cardHeight:press.card.getBoundingClientRect().height)/2;
+    }else{
+      press.card.style.setProperty('--drag-y',dy+'px');
+      floatingMid=press.startTop+dy+(press.card.getBoundingClientRect().height/2);
+    }
+    const cards=Array.from(press.list.querySelectorAll('.planCard[data-plan-id]:not(.reorder-lifted)'));
+    let target=cards.length;
+    for(let i=0;i<cards.length;i++){
+      const r=cards[i].getBoundingClientRect();
+      if(floatingMid<r.top+r.height/2){target=i;break;}
+    }
+    press.targetIndex=target;
+    const ref=cards[target]||null;
+    if(ref)press.list.insertBefore(press.placeholder,ref); else press.list.appendChild(press.placeholder);
+    cards.forEach(c=>c.classList.remove('reorder-gap-before','reorder-gap-after'));
+    if(ref)ref.classList.add('reorder-gap-before');
+    else if(cards.length)cards[cards.length-1].classList.add('reorder-gap-after');
+  }
+  function finishAnimatedReorder(ev){
+    const press=animatedReorder;
+    if(!press||!press.active){cleanupAnimatedReorder(false);return;}
+    ev.preventDefault();
+    const dbAnchor=state.bankOpen&&typeof captureDbScrollAnchor==='function'?captureDbScrollAnchor():null;
+    const from=(state.plan||[]).findIndex(ex=>String(ex.localId||ex.id)===press.id);
+    let to=Array.from(press.list.children).indexOf(press.placeholder);
+    if(from<0){cleanupAnimatedReorder(false);return;}
+    if(to>from)to-=1;
+    to=Math.max(0,Math.min(state.plan.length-1,to));
+    const moved=to!==from;
+    if(moved){
+      const next=state.plan.slice();
+      const item=next.splice(from,1)[0];
+      next.splice(to,0,item);
+      state.plan=next;
+      syncStatePlanToStore('ui_reorder_plan_animated');
+      syncTextInputFromPlan('ui_reorder_plan_animated');
+      save();
+    }
+    cleanupAnimatedReorder(true);
+    renderPlan();
+    if(dbAnchor&&typeof restoreDbScrollAnchor==='function'){
+      restoreDbScrollAnchor(dbAnchor);
+      setTimeout(()=>restoreDbScrollAnchor(dbAnchor),40);
     }
   }
-  function setRightPlanPanel(kind,reason){
-    state.scanPanelOpen=kind==='scanned'?'scanned':'plan';
-    try{save();}catch(err){}
-    render();
-  }
-  function scanDecisionMarkup(kind){
-    if(!scanState.decision)return '';
-    const cls=kind==='inbox'?'scanInboxDecision':'scanDecision';
-    return '<div class="'+cls+'"><h3>Foto hinzugef&uuml;gt</h3><p class="notice">Was kommt als N&auml;chstes?</p><div class="scanDecisionBtns scanDecisionRepeatSource"><button type="button" class="scanRepeatBtn" onclick="window.KGGScan.repeatSource(\'page\')">+ weitere Seite zu diesem Plan</button><button type="button" class="scanRepeatBtn" onclick="window.KGGScan.repeatSource(\'plan\')">+ weiterer Plan / Patient</button><button type="button" class="primary scanFinishBtn" onclick="window.KGGScan.start()">Fertig</button></div></div>';
-  }
-  function scanInboxCardHtml(job,index){
-    const resultText=scanResultToCopyText(job)||'Noch nicht ausgelesen.';
-    const quality=job.result&&job.result.quality||{};
-    const warn=[...(job.warnings||[]),...((quality.warnings)||[])];
-    const cls=job.result?(quality.ok===false?'warn':'good'):(warn.length?'warn':'');
-    const typeLabel=job.type==='qr'?'QR-Plan':'Papierplan';
-    const title=escapeHtml(job.short||job.label||('Plan '+(index+1)));
-    const meta=escapeHtml(typeLabel+' · '+(job.pages&&job.pages.length||0)+' Bild(er)');
-    return '<div class="scanInboxCard '+cls+'" data-scan-index="'+index+'">'+
-      '<button type="button" class="scanInboxRemoveTop" onclick="window.KGGScan.removeJob('+index+')" aria-label="Scan-Ergebnis entfernen">×</button>'+
-      '<div class="scanInboxHead"><div><b>'+title+'</b><small>'+meta+'</small></div></div>'+
-      '<textarea id="kggScanInboxField'+index+'" class="scanInboxText" readonly>'+escapeHtml(resultText)+'</textarea>'+
-      (warn.length?'<div class="scanWarning">Prüfen: '+escapeHtml(warn.join(' · '))+'</div>':'')+
-      '<div class="scanInboxActions">'+
-        '<button type="button" class="mutedBtn" onclick="window.KGGScan.copyResult('+index+')">kopieren</button>'+
-        '<button type="button" class="primary" onclick="window.KGGScan.applyResult('+index+')">weiter bearbeiten</button>'+
-      '</div></div>';
-  }
-  function renderScannedPlansInbox(){
-    const block=$('scannedPlansBlock'), list=$('scannedPlansList'), count=$('scannedPlansCount'), right=$('rightPlanStack');
-    if(!block||!list)return;
-    const jobs=scanInboxJobs();
-    const hasScan=jobs.length>0;
-    block.classList.toggle('hidden',!hasScan);
-    const scanExpanded=hasScan&&state.scanPanelOpen==='scanned';
-    block.classList.toggle('collapsed',hasScan&&!scanExpanded);
-    if(count)count.textContent=hasScan?(jobs.length+' Scan'+(jobs.length===1?'':'s')):'';
-    if(!hasScan){list.innerHTML=''; updateToggleCarets(); syncScannedPlansMobileDock(); return;}
-    list.innerHTML=jobs.map(scanInboxCardHtml).join('');
-    const toggle=$('scannedPlansToggle');
-    if(toggle){toggle.onclick=()=>setRightPlanPanel('scanned','ui_open_scanned_plans'); toggle.setAttribute('aria-expanded',scanExpanded?'true':'false');}
-    updateToggleCarets();
-    syncScannedPlansMobileDock();
-  }
-  function renderPlan(){
-    syncStoreToStatePlan('ui_render_plan');
-    syncScannedPlansMobileDock();
-    const block=$('currentPlanBlock'), list=$('planList'), right=$('rightPlanStack');
-    const jobs=scanInboxJobs();
-    const hasScan=jobs.length>0;
-    const hasPlan=state.plan.length>0;
-    const mobileDock=!isTabletLayout();
-    if(!state.scanPanelOpen)state.scanPanelOpen=hasScan&&!hasPlan?'scanned':'plan';
-    if(hasScan&&state.scanPanelOpen!=='plan')state.scanPanelOpen='scanned';
-    const scanOpen=hasScan&&state.scanPanelOpen==='scanned';
-    const planOpen=mobileDock?hasPlan:!scanOpen;
-    if(right){
-      right.classList.toggle('hidden',mobileDock?!hasPlan:!(hasPlan||hasScan));
-      right.classList.toggle('scanOpen',scanOpen);
-      right.classList.toggle('planOpen',planOpen);
+  function cancelAnimatedReorder(ev){cleanupAnimatedReorder(true);renderPlan();}
+  function cleanupAnimatedReorder(suppressClick){
+    const press=animatedReorder;
+    if(!press)return;
+    clearTimeout(press.timer);
+    if(press.handle)press.handle.classList.remove('reorder-armed');
+    if(press.list)press.list.classList.remove('reorder-active');
+    document.body.classList.remove('kggPlanCardReordering');
+    clearPhoneScrollStateForPlanGesture(280);
+    if(press.card){
+      const keepSwipeStyles=press.card.classList.contains('swipe-dragging')||document.body.classList.contains('kggPlanCardSwiping');
+      press.card.classList.remove('reorder-lifted','reorder-prelift');
+      if(!keepSwipeStyles){
+        press.card.style.removeProperty('--drag-left');
+        press.card.style.removeProperty('--drag-top');
+        press.card.style.removeProperty('--drag-y');
+        press.card.style.removeProperty('width');
+        press.card.style.removeProperty('position');
+        press.card.style.removeProperty('left');
+        press.card.style.removeProperty('top');
+        press.card.style.removeProperty('right');
+        press.card.style.removeProperty('bottom');
+        press.card.style.removeProperty('margin');
+        press.card.style.removeProperty('transform');
+        press.card.style.removeProperty('transform-origin');
+      }
     }
-    const createPanel=$('createPanel');
-    if(createPanel){
-      createPanel.classList.toggle('scanPanelOpen',!!scanOpen);
-      createPanel.classList.toggle('planPanelOpen',!!(planOpen&&(hasPlan||hasScan)));
+    if(press.placeholder&&press.placeholder.parentNode)press.placeholder.parentNode.removeChild(press.placeholder);
+    if(press.list){
+      if(press.phoneListAbsoluteDrag){
+        if(press.listPrevPosition){
+          press.list.style.setProperty('position',press.listPrevPosition,press.listPrevPositionPriority||'');
+        }else{
+          press.list.style.removeProperty('position');
+        }
+      }
+      Array.from(press.list.querySelectorAll('.reorder-gap-before,.reorder-gap-after')).forEach(c=>c.classList.remove('reorder-gap-before','reorder-gap-after'));
     }
-    if(block){
-      block.classList.toggle('hidden',!hasPlan);
-      block.classList.toggle('collapsed',hasPlan&&!planOpen);
-    }
-    const planCount=$('currentPlanCount');
-    if(planCount){
-      const planInfo=hasPlan?(state.plan.length+' Übung'+(state.plan.length===1?'':'en')):'';
-      planCount.textContent=planInfo;
-    }
-    const planToggle=$('currentPlanToggle');
-    if(planToggle){
-      const planToggleLabel=planToggle.querySelector('span');
-      if(planToggleLabel)planToggleLabel.textContent='Übungen im Plan';
-      planToggle.onclick=()=>setRightPlanPanel('plan','ui_open_current_plan');
-      planToggle.setAttribute('aria-expanded',(hasPlan&&planOpen)?'true':'false');
-    }
-    if(list){
-      list.innerHTML=state.plan.map((ex,i)=>{
-        const id=escapeHtml(ex.localId||ex.id);
-        const classes=['planCard'];
-        if(ensureExerciseMediaList(ex).length)classes.push('has-media');
-        if(ex.liveDraft)classes.push('is-live-draft');
-        if(ex.pendingNew)classes.push('is-new');
-        else if(ex.needsReview)classes.push('is-review');
-        const sourceHtml='';
-        const thumbnailHtml=planCardThumbnailHtml(ex);
-        return '<div class="'+classes.join(' ')+'" data-plan-id="'+id+'">'+
-          '<div class="planMain">'+
-            '<button class="drag" data-sort-id="'+id+'" type="button" aria-label="Übung verschieben">⠿</button>'+
-            thumbnailHtml+
-            '<span class="planText">'+
-              '<b><span class="planIndex">'+(i+1)+'.</span> <span class="planName">'+escapeHtml(ex.name)+'</span> <span class="planBadges">'+planCardBadgesHtml(ex)+'</span></b>'+
-              '<small class="planMetaLine">'+escapeHtml(exerciseMeta(ex))+'</small>'+
-              sourceHtml+
-            '</span>'+
-          '</div>'+
-          '<div class="planCardActions">'+
-            '<button class="iconBtn" data-planedit="'+id+'" aria-label="Übung bearbeiten">⚙️</button>'+
-            '<button class="iconBtn danger planDeleteBtn" data-del="'+id+'" aria-label="Übung löschen">×</button>'+
-          '</div>'+
-        '</div>';
-      }).join('');
-      list.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>removeExercise(b.dataset.del));
-      list.querySelectorAll('[data-planedit]').forEach(b=>b.onclick=()=>openEditor(state.plan.find(x=>(x.localId||x.id)===b.dataset.planedit)));
-      bindPlanSwipeDelete(list);
-      bindPlanReorderButtons(list);
-      hydratePlanThumbnails(list);
-    }
-    renderScannedPlansInbox();
+    if(press.preMove)document.removeEventListener('pointermove',press.preMove);
+    if(press.preUp)document.removeEventListener('pointerup',press.preUp);
+    document.removeEventListener('pointermove',onAnimatedReorderMove);
+    animatedReorder=null;
+    if(suppressClick){state.reorderSuppressClick=true;setTimeout(()=>{state.reorderSuppressClick=false;},350);}
   }
 
-  function bindPlanReorderButtons(list){
-    if(!list)return;
-    list.querySelectorAll('.drag[data-sort-id]').forEach(handle=>{
+  function restoreRecentPlan(index){
+    const item=(state.recent||[])[index];
+    if(!item)return;
+    state.patient={...(state.patient||{}),...(item.patient||{})};
+    state.plan=Array.isArray(item.exercises)?item.exercises.map(ensureUiExerciseShape):[];
+    if($('patientName'))$('patientName').value=state.patient.name||'';
+    if($('planDate'))$('planDate').value=state.patient.date||new Date().toISOString().slice(0,10);
+    if($('therapistName'))$('therapistName').value=state.patient.therapist||'';
+    if($('planNotes'))$('planNotes').value=state.patient.notes||'';
+    syncStatePlanToStore('ui_restore_recent_plan');
+    syncTextInputFromPlan('ui_restore_recent_plan');
+    if($('recentList'))$('recentList').classList.add('hidden');
+    save();
+    render();
+  }
+  function renderRecent(){
+    const el=$('recentList');
+    const items=(state.recent||[]).slice(0,5);
+    el.innerHTML=items.map((p,i)=>'<div class="notice"><b>'+escapeHtml(p.name||('Plan '+(i+1)))+'</b><br><small>'+((p.exercises||[]).length)+' Übungen'+(p.date?' · '+escapeHtml(String(p.date).slice(0,10)):'')+'</small><br><button class="mutedBtn" data-recent-index="'+i+'" type="button" style="width:100%;margin-top:8px">Plan wieder öffnen</button></div>').join('')||'<div class="notice">Keine Pläne.</div>';
+    el.querySelectorAll('[data-recent-index]').forEach(btn=>btn.onclick=()=>restoreRecentPlan(Number(btn.dataset.recentIndex)));
+  }
+  function defaultPackageName(){const patient=String(state.patient&&state.patient.name||'').trim(); const stamp=new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}); return (patient?patient+' ':'')+'Paket '+stamp;}
+  function openPackageSaveModal(){
+    if(!(state.plan||[]).length)return;
+    const btn=$('savePackageBtn'), input=$('packageNameInput');
+    if(btn){btn.classList.remove('packagePulse'); void btn.offsetWidth; btn.classList.add('packagePulse'); setTimeout(()=>btn.classList.remove('packagePulse'),560);}
+    if(input)input.value=defaultPackageName();
+    $('packageSaveModal').classList.add('open');
+    setTimeout(()=>input&&input.focus&&input.focus(),30);
+  }
+  function closePackageSaveModal(){$('packageSaveModal').classList.remove('open');}
+  function confirmPackageSave(){
+    const input=$('packageNameInput');
+    const name=String(input&&input.value||'').trim();
+    const exercises=(state.plan||[]).map(ex=>String(ex&&ex.name||'').trim()).filter(Boolean);
+    if(!name||!exercises.length){if(input)input.focus(); return;}
+    state.packages=Array.isArray(state.packages)?state.packages:[];
+    state.packages.unshift({id:'pkg_'+Date.now(),name,exercises,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),source:'current-plan'});
+    save();
+    queueNativeExerciseBankSync('package_saved');
+    closePackageSaveModal();
+    if($('packageList'))$('packageList').classList.remove('hidden');
+    render();
+  }
+  function applyPackageToPlan(packageId){
+    const p=(state.packages||[]).find(x=>String(x.id)===String(packageId));
+    if(!p)return;
+    (p.exercises||[]).forEach(n=>addExercise(search(n,1)[0]||{name:n,sets:3,unit:'Wdh',weightUnit:'kg'}));
+  }
+  function packageOverlayDescription(pkg){
+    const exercises=(pkg&&pkg.exercises||[]).map(x=>String(x||'').trim()).filter(Boolean);
+    if(!exercises.length)return 'Noch keine Uebungen in diesem Paket.';
+    const listed=exercises.slice(0,4).join(', ');
+    return 'Enthaelt '+listed+(exercises.length>4?' und weitere Uebungen.':'.');
 ```

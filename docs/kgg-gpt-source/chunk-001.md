@@ -4,6 +4,106 @@
 - Lines: 421-840
 
 ```html
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "github": "pending",
+        "notes": "Required Gate and release-pr validate-build must pass before merge."
+      }
+    },
+    {
+      "versionCode": 58,
+      "versionName": "1.0.58-grossdruck-readability-beta",
+      "patchId": "kgg-v058-grossdruck-readability-beta",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Grossdruck-PDF mit Kurzsichtigkeits-Test",
+      "reason": "Die Grossdruck-PDF soll fuer kurzsichtige Leser:innen bei Uebungsname, Satz, Wdh, kg/Gewicht und Schmerzskala messbar lesbarer sein, bevor eine Admin-Beta gebaut wird.",
+      "whatChanged": [
+        "Grossdruck-Titel, Meta-Zeilen und Tabellenlabels werden auf 14pt, 8.6pt und 7pt Mindestgroessen angehoben.",
+        "Die Grossdruck-Vorlage bleibt bei 3 Uebungen pro A4-Seite, nutzt aber groessere Abstaende und ein L3-v3 Template.",
+        "Eine lokale PDF-Readability-Testengine erzeugt Test-PDFs, Poppler-Renderings und Kurzsichtigkeits-Simulationen."
+      ],
+      "touchedAreas": [
+        "PDF generation",
+        "Grossdruck PDF layout",
+        "PDF readability test engine",
+        "Release test battery",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "QR/Patienten-App",
+        "Scan/OCR parser",
+        "Gemini API pipeline",
+        "Parser",
+        "Plan-State",
+        "Android/APK",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "notes": "node release-pipeline/kgg_pdf_readability_smoke.js plus PDF critical und critical suite vor Admin-Beta."
+      }
+    },
+    {
+      "versionCode": 57,
+      "versionName": "1.0.57-grossdruck-pdf-readable-images",
+      "patchId": "kgg-v057-grossdruck-pdf-readable-images",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Grossdruck-PDF mit Bildern und groesserer Schrift",
+      "reason": "Die vergroesserte PDF-Version soll vorhandene Uebungsbilder zeigen und auf A4 lesbarer sein, ohne Scan/OCR, QR oder Plan-State zu aendern.",
+      "whatChanged": [
+        "Grossdruck-PDF wird als echtes A4-Portrait mit 3 Uebungen pro Seite erzeugt.",
+        "Lokale PDF-Uebungsbilder werden auch im Grossdruck-Snapshot geladen.",
+        "Grossdruck-Tabellen, Kopfzeilen und Karten nutzen groessere Fontgroessen und Abstaende."
+      ],
+      "touchedAreas": [
+        "PDF generation",
+        "Grossdruck PDF layout",
+        "PDF exercise thumbnails",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "QR/Patienten-App",
+        "Scan/OCR parser",
+        "Gemini API pipeline",
+        "Parser",
+        "Plan-State",
+        "Android/APK",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "notes": "Critical plus PDF render smoke; Gemini-Live-Smoke nur mit lokal vorhandener Admin-Konfig/API-Key."
+      }
+    },
+    {
+      "versionCode": 56,
+      "versionName": "1.0.56-patient-qr-root-query",
+      "patchId": "kgg-v056-patient-qr-root-query",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Patienten-QR nutzt Root-App mit Query-Payload",
+      "reason": "Der Trainingsplan-QR soll die aktuelle Patienten-App oeffnen und den Plan direkt ueber ?plan=KGGH2:... uebergeben, statt auf den alten Renderer-Pfad oder gespeicherte Altplaene zu fallen.",
+      "whatChanged": [
+        "Default-Patienten-App-Basis zeigt auf https://kayus24.github.io/kgg/.",
+        "Neue Patienten-QRs verwenden ?plan=KGGH2:<payload>.",
+        "Tests blockieren kgg-update/index.html, releases und media-inline-bundle-7 als Standard-Patientenlink."
+      ],
+      "touchedAreas": [
         "Patient QR base URL",
         "Patient share URL tests",
         "Source Truth",
@@ -287,141 +387,41 @@
         "androidApp": "pending"
       },
       "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
-    },
+    }
+  ],
+  "latestVersionName": "1.0.65-source-control-char-guard",
+  "archiveSnapshots": [
     {
-      "versionCode": 47,
-      "versionName": "1.0.47-phone-landscape-tablet-menu",
-      "patchId": "kgg-v047-phone-landscape-tablet-menu",
-      "status": "active",
-      "type": "local-html-patch",
-      "title": "Handy-Landscape nutzt Tablet-Menue",
-      "reason": "Wenn das Handy quer gehalten wird, soll die App als kleine Tablet-Arbeitsflaeche mit Tablet-Menue nutzbar sein; Portrait bleibt Handy-UI.",
-      "whatChanged": [
-        "Ein frueher Viewport-Schalter setzt nur in flacher Landscape-Ansicht virtuell width=760.",
-        "Die zentrale Layout-Erkennung behandelt diesen Landscape-Modus als Tablet-Layout.",
-        "Aktive Phone-Dock-/Drawer-Patches werden in diesem Landscape-Tablet-Modus nicht installiert."
-      ],
-      "touchedAreas": [
-        "Early viewport switching",
-        "Phone landscape tablet menu",
-        "Layout mode detection",
-        "Local test batteries",
-        "HTML embedded metadata"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR-Erzeugung",
-        "Patienten-App",
-        "Scan/OCR parser",
-        "Plan-State",
-        "Android-Wrapper",
-        "Sync",
-        "API-Key-Logik"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "githubPages": "pending",
-        "androidApp": "pending"
-      },
-      "handoffNote": "v047 ist ein Landscape-Viewport-Hotfix: Handy-Portrait bleibt Phone-UI, Handy-Landscape soll Tablet-Menue und Tablet-Arbeitsflaeche zeigen."
-    },
-    {
-      "versionCode": 46,
-      "versionName": "1.0.46-tablet-runtime-viewport-guard",
-      "patchId": "kgg-v046-tablet-runtime-viewport-guard",
-      "status": "active",
-      "type": "local-html-patch",
-      "title": "Tablet-Boot und Split-Screen-Phone-UI getrennt",
-      "reason": "Phone-only Runtime-Patches duerfen den breiten Tablet-Boot nicht blockieren, muessen aber im schmalen Tablet-Split-Screen weiter aktiv bleiben.",
-      "whatChanged": [
-        "v041/v042 installieren Phone-Menues, Scan-Dock-Umbauten und Observer nur noch bei Viewports unter 760px.",
-        "Beim Wechsel zur breiten Tablet-Ansicht werden Phone-Klassen, Phone-Menues und der umgebaute Scanbutton sauber zurueckgesetzt.",
-        "Die UI-Testbatterie prueft echten Tablet-App-Boot und einen Tablet-Split-Screen-Phone-Layout-Fall."
-      ],
-      "touchedAreas": [
-        "Phone viewport runtime gates",
-        "Tablet boot runtime safety",
-        "Tablet split-screen phone layout",
-        "Local test batteries",
-        "HTML embedded metadata"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR-Erzeugung",
-        "Patienten-App",
-        "Scan/OCR parser",
-        "Plan-State",
-        "Android-Wrapper",
-        "Tablet layout CSS",
-        "API-Key-Logik"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "githubPages": "pending",
-        "androidApp": "pending"
-      },
-      "handoffNote": "v046 ist ein Runtime-Gate-Hotfix: breite Tablets bleiben Tablet-UI, schmale Split-Screen-Viewports bekommen weiter die Phone-UI."
-    },
-    {
-      "versionCode": 45,
-      "versionName": "1.0.45-phone-drawer-bank-align",
-      "patchId": "kgg-v045-phone-drawer-bank-align",
-      "status": "active",
-      "type": "local-html-patch",
-      "title": "Handy-Drawer und Datenbank-Ausrichtung stabilisiert",
-      "reason": "Plan-Historie und Uebungspakete duerfen beim Antippen nicht haengen; die geoeffnete Uebungsdatenbank soll sauber oberhalb des festen Plan-scannen-Docks enden.",
-      "whatChanged": [
-        "Plan-Historie und Uebungspakete nutzen im Phone-Modus einen finalen Safe-Click-Handler ohne Render- oder Tablet-Overlay-Nebenwirkung.",
-        "Das neue Planfenster bekommt im Phone-Modus mehr oberen Abstand.",
-        "Beim Oeffnen der Uebungsdatenbank wird die Ansicht nach dem Rendern so ausgerichtet, dass das Bank-Ende knapp oberhalb des Scan-Docks liegt.",
-        "Die UI-Testbatterie prueft jetzt echte Klicks auf Plan-Historie/Uebungspakete und die Datenbank-Ausrichtung."
-      ],
-      "touchedAreas": [
-        "Phone Plan-Historie drawer",
-        "Phone Uebungspakete drawer",
-        "Phone exercise-bank scroll alignment",
-        "Local test batteries",
-        "HTML embedded metadata"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR-Erzeugung",
-        "Patienten-App",
-        "Scan/OCR parser",
-        "Plan-State",
-        "Android-Wrapper",
-        "Tablet layout",
-        "API-Key-Logik"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "githubPages": "pending",
-        "androidApp": "pending"
-      },
-      "handoffNote": "v045 ist ein Phone-only Safety-Patch nach v044; er ersetzt keine Tablet-, Parser-, Sync- oder APK-Logik."
-    },
-    {
-      "versionCode": 44,
-      "versionName": "1.0.44-phone-liquid-actions",
-      "patchId": "kgg-v044-phone-liquid-actions",
-      "status": "active",
-      "type": "local-html-patch",
-      "title": "Handy-Aktionen als staerkere Glass-Kapseln",
-      "reason": "Plan scannen und Fertig sollen optisch konsistent als staerkere Liquid-Glass-Aktionen erscheinen; das Phone-Admin-Menue soll ohne verschachtelte Umwege zur Update-Zentrale fuehren.",
-      "whatChanged": [
-        "Plan scannen bekommt eine helle Glass-Kapsel mit Label, Trennlinie und Chevron.",
-        "Fertig nutzt im Phone-Planmodus denselben Glass-Stil.",
-        "Plan-Historie bleibt im Phone-Planmodus lesbar und kollabiert nicht auf Icon-Breite.",
-        "Das Phone-Admin-Menue wird in Update, Sync & Weitergeben und Admin gegliedert."
-      ],
-      "touchedAreas": [
-        "Phone scan dock",
-        "Phone finish action",
-        "Phone admin submenu",
-        "Local test batteries",
-        "HTML embedded metadata"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR-Erzeugung",
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
+      "snapshotVersionCode": 62,
+      "entryCount": 34,
+      "entriesSha256": "d1b3a5d67dd78ae6819bfbf28b321c66cdacdc173b4c39b358344e380fb30fef",
+      "retainedEntryCountAtCompaction": 14,
+      "createdByPatchId": "kgg-v063-changelog-archive-window"
+    }
+  ]
+}
+</script>
+<!-- END kgg-changelog -->
+
+<!-- SOURCE FILE: kgg-update/src/metadata/patch-rules.html -->
+
+<!-- BEGIN kgg-patch-rules: embedded Patch Rules; READ THIS BEFORE PATCHING -->
+<script type="application/json" id="kgg-patch-rules">
+{
+  "schema": 1,
+  "id": "kgg-patch-rules",
+  "readFirst": [
+    "#kgg-source-truth",
+    "#kgg-changelog",
+    "#kgg-patch-rules"
+  ],
+  "mustUpdateOnEveryPatch": [
+    "kgg-source-truth.currentWebVersion",
+    "kgg-source-truth.lastUpdateIntent",
+    "kgg-changelog.entries",
+    "kgg-update/version.json.versionCode",
+    "kgg-update/version.json.versionName",
+    "kgg-update/version.json.sha256",
+    "kgg-source-truth.currentVersion",
 ```

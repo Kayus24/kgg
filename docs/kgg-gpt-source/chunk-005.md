@@ -4,424 +4,424 @@
 - Lines: 2101-2520
 
 ```html
-        #bankArea.bankOpen.alphaBankOpen .bankRow{min-height:58px}
-      }
-    }
-
-
-
-    /* v316 Tablet Anchor Overlay Manager: Panels bleiben im sicheren Layer, öffnen aber aus ihrem Button-Anker. Keine Scan/PDF/QR/DB-Datenlogik. */
-    @media (min-width:760px){
-      body.kggTabletOverlayActive .app{isolation:isolate}
-      /* Basisdaten, Plan-Historie und Pakete werden auf Tablet dynamisch am jeweiligen Button positioniert. */
-      #baseFields:not(.hidden),
-      #recentList:not(.hidden),
-      #packageList:not(.hidden){
-        position:fixed!important;
-        z-index:160!important;
-        left:var(--kgg-overlay-left,calc(50% - min(92vw,760px)/2))!important;
-        right:auto!important;
-        top:var(--kgg-overlay-top,84px)!important;
-        width:var(--kgg-overlay-width,min(92vw,760px))!important;
-        max-height:var(--kgg-overlay-max-height,calc(100dvh - 130px))!important;
-        overflow:auto!important;
-        grid-column:auto!important;
-        grid-row:auto!important;
-        align-self:auto!important;
-        justify-self:auto!important;
-        background:rgba(255,255,255,.985)!important;
-        border:2px solid #111827!important;
-        border-radius:24px!important;
-        padding:14px!important;
-        box-shadow:0 22px 64px rgba(7,16,39,.28),0 5px 18px rgba(7,16,39,.12)!important;
-        backdrop-filter:none!important;
-        transform-origin:var(--kgg-overlay-origin,top center)!important;
-        animation:kggTabletAnchorOverlayIn .18s cubic-bezier(.18,.84,.24,1) both!important;
-      }
-      #baseFields:not(.hidden){
-        display:grid!important;
-        grid-template-columns:1fr 1fr!important;
-        gap:10px!important;
-      }
-      #baseFields:not(.hidden) .field:last-child{grid-column:1/-1!important}
-      #recentList:not(.hidden),#packageList:not(.hidden){display:block!important}
-      #recentList:not(.hidden) .notice,#packageList:not(.hidden) .notice{margin-top:0}
-      .modal.open{z-index:220!important}
-      .kggScanV295 .scanDecisionBackdrop{z-index:99980!important}
-      .kggScanV295 .scanDecision{z-index:99990!important}
-      .scanHub #scanPreview:not(.hidden){z-index:70!important}
-      #inputWrap{z-index:30}
-      #bankArea{z-index:25}
-      @keyframes kggTabletAnchorOverlayIn{0%{opacity:0;transform:scale(.965)}100%{opacity:1;transform:scale(1)}}
-      @media (max-width:920px){
-        #baseFields:not(.hidden),#recentList:not(.hidden),#packageList:not(.hidden){
-          padding:12px!important;
-        }
-      }
-    }
-
-
-    /* v317 Plan-Card-Polish auf Basis v316: Medien-Badge + gelbe Neu/Prüfen-Karten wie im schöneren Planlayout. */
-    .planCard{
-      background:#fff;
-      border:1px solid rgba(220,227,235,.95);
-      box-shadow:0 2px 10px rgba(7,16,39,.055);
-      align-items:center;
-      gap:10px;
-    }
-    .planCard.is-new,
-    .planCard.is-review{
-      background:#fff9df;
-      border-color:#dfc265;
-      box-shadow:0 2px 10px rgba(120,87,0,.08);
-    }
-    .planCard .planMain{
-      min-width:0;
-      gap:10px;
-    }
-    .planThumb{
-      width:42px;
-      height:42px;
-      min-width:42px;
-      border:1px solid rgba(220,227,235,.95);
-      border-radius:12px;
-      background:#f6f8fb;
-      display:inline-grid;
-      place-items:center;
-      overflow:hidden;
-      color:#637083;
-      font-size:18px;
-      box-shadow:0 2px 8px rgba(7,16,39,.045);
-    }
-    .planThumb img{
-      width:100%;
-      height:100%;
-      display:block;
-      object-fit:cover;
-    }
-    .planThumbFallback{
-      background:#eef3f8;
-    }
-    .planCard .drag{
-      width:34px;
-      height:34px;
-      min-width:34px;
-      border:1px solid rgba(220,227,235,.95);
-      background:#fff;
-      color:#2d3a4e;
-      font-size:18px;
-      line-height:1;
-      border-radius:999px;
-      margin-right:0;
-    }
-    .planCard .planText{
-      min-width:0;
-      gap:2px;
-    }
-    .planCard .planText b{
-      display:flex;
-      align-items:center;
-      flex-wrap:wrap;
-      gap:4px;
-      min-width:0;
-      line-height:1.15;
-    }
-    .planCard .planName{
-      min-width:0;
-      overflow-wrap:anywhere;
-    }
-    .planCard.is-new .planName,
-    .planCard.is-review .planName{
-      color:#72490a;
-    }
-    .planMetaLine,
-    .planSourceLine{
-      display:block;
-      color:var(--muted);
-      font-weight:850;
-      line-height:1.25;
-    }
-    .planSourceLine{
-      font-size:12px;
-      opacity:.9;
-    }
-    .planBadges{
-      display:inline-flex;
-      align-items:center;
-      gap:4px;
-      flex-wrap:wrap;
-      vertical-align:middle;
-    }
-    .planBadge{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-height:18px;
-      padding:2px 6px;
-      border-radius:999px;
-      font-size:11px;
-      line-height:1;
-      font-weight:1000;
-      border:1px solid rgba(220,227,235,.95);
-      background:#f6f8fb;
-      color:#38475b;
-      white-space:nowrap;
-    }
-    .planBadge.media{
-      background:#eef6ff;
-      color:#214969;
-      border-color:#cfe3f8;
-    }
-    .planBadge.new,
-    .planBadge.review{
-      background:#ffe69b;
-      color:#6b4300;
-      border-color:#d9b13a;
-    }
-    .planBadge.live{
-      background:#ecfdf3;
-      color:#14532d;
-      border-color:#bbf7d0;
-    }
-    .planCardActions{
-      display:flex;
-      align-items:center;
-      justify-content:flex-end;
-      gap:4px;
-      flex:0 0 auto;
-    }
-    .planCardActions .iconBtn[data-planedit]{
-      width:42px;
-      height:42px;
-      border-radius:999px;
-      background:#f8fafc;
-      border:1px solid rgba(220,227,235,.95);
-      box-shadow:0 2px 8px rgba(7,16,39,.06);
-      font-size:20px;
-    }
-    .planDeleteBtn{
-      width:28px;
-      min-width:28px;
-      height:28px;
-      opacity:.75;
-    }
-    @media (min-width:760px){
-      #currentPlanBlock .planCard{
-        min-height:70px;
-        padding:12px 14px;
-      }
-      #currentPlanBlock .planCard b{
-        font-size:19px;
-      }
-      #currentPlanBlock .planMetaLine{
-        font-size:12px;
-      }
-      #currentPlanBlock .planSourceLine{
-        font-size:11px;
-      }
-    }
-    .app.softKeyboard #currentPlanBlock .planCard{
-      min-height:58px;
-    }
-    .app.softKeyboard #currentPlanBlock .planCard b{
-      font-size:16px;
-    }
-    .app.softKeyboard #currentPlanBlock .planSourceLine{
-      display:none;
-    }
-
-
-
-    /* v319 Gescannte-Pläne-Inbox: Scan-Ergebnisse getrennt vom Textfeld, Toggle gegen Übungen im Plan. */
-    .rightPlanStack{display:flex;flex-direction:column;gap:10px;min-width:0;min-height:0;transition:gap .18s ease}
-    .rightPlanStack.hidden{display:none!important}
-    .planSection{background:#fff;border:2px solid #111827;border-radius:24px;box-shadow:var(--shadow);overflow:hidden;min-width:0;transition:transform .20s cubic-bezier(.2,.85,.2,1),max-height .20s cubic-bezier(.2,.85,.2,1),opacity .16s ease,background .16s ease}
-    .planSectionHeader{width:100%;min-height:50px;border:0;background:#fff;color:#071027;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;text-align:left;font-weight:1000;font-size:20px;cursor:pointer}
-    .planSectionHeader small{color:var(--muted);font-size:12px;font-weight:900;white-space:nowrap}
-    .planSectionBody,.scanInboxList{padding:0 12px 12px;min-height:0;overflow:auto}
-    .planSection.collapsed{max-height:58px;background:#f8fafc;opacity:.96}
-    .planSection.collapsed .planSectionBody,.planSection.collapsed .scanInboxList{display:none!important}
-    .rightPlanStack.scanOpen #scannedPlansBlock{order:1;animation:kggSectionSwapIn .20s cubic-bezier(.2,.85,.2,1) both}
-    .rightPlanStack.scanOpen #currentPlanBlock{order:2}
-    .rightPlanStack.planOpen #currentPlanBlock{order:1;animation:kggSectionSwapIn .20s cubic-bezier(.2,.85,.2,1) both}
-    .rightPlanStack.planOpen #scannedPlansBlock{order:2}
-    @keyframes kggSectionSwapIn{0%{transform:translateY(8px);opacity:.86}100%{transform:translateY(0);opacity:1}}
-    .scanInboxBlock{border-color:#93d8a0;background:#f4fff6}
-    .scanInboxCard{position:relative;background:#fff;border:1px solid #dce3eb;border-radius:18px;padding:12px;margin:0 0 10px;box-shadow:0 2px 10px rgba(7,16,39,.055)}
-    .scanInboxCard.good{border-color:#93d8a0;background:#fbfffc}.scanInboxCard.warn{border-color:#f2d38a;background:#fff8e8}
-    .scanInboxHead{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding-right:38px}.scanInboxHead b{font-size:17px}.scanInboxHead small{display:block;color:var(--muted);font-weight:850;font-size:12px;margin-top:2px}
-    .scanInboxText{width:100%;min-height:110px;border:1px solid var(--line);border-radius:14px;padding:10px;font-size:13px;line-height:1.35;margin-top:8px;background:#fff;resize:vertical}
-    .scanInboxActions{display:grid;grid-template-columns:1fr 1.2fr;gap:8px;margin-top:8px}.scanInboxActions button{min-height:44px}.scanInboxRemoveTop{position:absolute;right:10px;top:10px;width:34px;height:34px;border:1px solid rgba(226,59,84,.32);background:#fff5f7;color:#e23b54;border-radius:12px;font-weight:1000;font-size:20px;padding:0;line-height:1}
-    #rightPlanStack #currentPlanBlock.hidden,#rightPlanStack #scannedPlansBlock.hidden{display:none!important;visibility:visible!important;pointer-events:auto!important}
-    .app:has(#createPanel.planMode) .scanHub #scanPreview:not(.hidden){display:block!important}
-    @media (max-width:520px){.scanInboxActions{grid-template-columns:1fr}.planSectionHeader{font-size:18px}}
-    /* v356 Scan-Inbox: overview text compact; remove action returns to card top right. */
-    .scanInboxDecision{background:#fff;border:1px solid var(--line);border-radius:18px;padding:10px;margin:0 0 10px;box-shadow:0 2px 10px rgba(7,16,39,.055)}
-    .scanInboxDecision h3{font-size:16px;margin:0 0 4px;font-weight:1000}
-    .scanInboxDecision .notice{margin:0 0 8px;padding:8px 10px;font-size:12px;line-height:1.25}
-    .scanInboxDecision .scanDecisionBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .scanInboxDecision .scanRepeatBtn,.scanInboxDecision .scanFinishBtn{min-height:42px;border-radius:14px;font-size:14px;font-weight:1000}
-    .scanInboxDecision .scanRepeatBtn{border:1px solid #1b2230;background:#fff;color:#071027}
-    .scanInboxDecision .scanFinishBtn{grid-column:1/-1}
-    .scanInboxText{font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;font-size:12.5px!important;line-height:1.3!important;min-height:74px!important;max-height:150px!important;padding:8px 10px!important}
-    @media (min-width:760px){
-      body.tabletLayoutCustom #scannedPlansBlock textarea.scanInboxText{
-        font-size:clamp(10px,calc(12.5px * var(--kgg-tablet-ui-scale,1)),18px)!important;
-        line-height:1.3!important;
-        min-height:clamp(64px,calc(76px * var(--kgg-tablet-ui-scale,1)),128px)!important;
-        max-height:clamp(120px,calc(150px * var(--kgg-tablet-ui-scale,1)),220px)!important;
-        padding:clamp(6px,calc(8px * var(--kgg-tablet-ui-scale,1)),14px) clamp(8px,calc(10px * var(--kgg-tablet-ui-scale,1)),18px)!important;
-      }
-      body.tabletLayoutCustom #scannedPlansBlock .scanInboxDecision :is(button,.notice){
-        font-size:clamp(10px,calc(14px * var(--kgg-tablet-ui-scale,1)),22px)!important;
-      }
-    }
-    @media (min-width:760px){
-      #rightPlanStack{grid-column:2/4!important;grid-row:3/5!important;align-self:stretch;min-height:0;overflow:hidden}
-      #rightPlanStack #currentPlanBlock,#rightPlanStack #scannedPlansBlock{grid-column:auto!important;grid-row:auto!important;align-self:auto!important;padding:0!important;min-height:0!important;overflow:hidden!important}
-      #rightPlanStack #currentPlanBlock:not(.collapsed),#rightPlanStack #scannedPlansBlock:not(.collapsed){flex:1 1 auto;max-height:none}
-      #rightPlanStack .planSectionBody,#rightPlanStack .scanInboxList{max-height:100%;overflow:auto}
-      #rightPlanStack #planList{max-height:none!important;height:auto!important;overflow:visible!important;padding-right:0!important}
-      #rightPlanStack #currentPlanBlock .label{display:none!important}
-      #currentPlanBlock{grid-column:auto!important;grid-row:auto!important}
-      #createPanel:not(.planMode) #rightPlanStack.hidden{display:none!important}
-    }
-
-
-
-    /* v321 Tablet Layout/Caret Fix:
-       - Aktueller-Plan-Titel im Tablet-Planmodus ausblenden
-       - Fertig eine Zeile tiefer setzen
-       - +Paket-Button auf Höhe von "Übungen im Plan" andocken
-       - Gescannte Pläne/Übungen im Plan wirklich vollständig kollabieren
-       - Carets für Basisdaten / Übungen im Plan / Gescannte Pläne stabilisieren
-       - Aktive Floating-Button-Anker bleiben über dem Popup klickbar */
-    .planSectionHeader{
-      justify-content:flex-start;
-    }
-    .planSectionHeader::before{
-      content:"▶";
-      flex:0 0 auto;
-      display:inline-grid;
-      place-items:center;
-      width:1.1em;
-      margin-right:4px;
-      font-size:.92em;
-      line-height:1;
-      color:#071027;
-    }
-    .planSectionHeader[aria-expanded="true"]::before{
-      content:"▼";
-    }
-    .planSectionHeader > span{
-      flex:1 1 auto;
-      min-width:0;
-    }
-    .planSectionHeader > small{
-      flex:0 0 auto;
-      margin-left:auto;
-    }
-    .planSection.collapsed{
-      flex:0 0 54px!important;
-      height:54px!important;
-      min-height:54px!important;
-      max-height:54px!important;
-      overflow:hidden!important;
-      background:#f8fafc;
-      opacity:.98;
-    }
-    .planSection.collapsed .planSectionBody,
-    .planSection.collapsed .scanInboxList{
-      display:none!important;
-      height:0!important;
-      min-height:0!important;
-      max-height:0!important;
-      padding:0!important;
-      margin:0!important;
-      overflow:hidden!important;
-    }
-
-    @media (min-width:760px){
-      /* Großer doppelter Titel "Aktueller Plan" ist im Planmodus überflüssig. */
+      /* Der globale Titel konkurriert mit der eigentlichen Plan-Kopfzeile. */
       #createPanel.planMode .planHeader .panelTitle{
         display:none!important;
       }
 
-      /* Fertig rutscht aus der obersten Kopfzeile in die Button-Zeile neben Basisdaten. */
-      #createPanel.planMode #finishBtn{
-        grid-column:3;
-        grid-row:2;
-        align-self:stretch;
-        justify-self:stretch;
-        width:100%;
-        height:68px;
-        min-height:68px;
-        margin:0;
-        border-radius:18px;
-        font-size:20px;
-        opacity:1;
-        scale:1 1;
-        animation:none;
+      /* Stift gehört zum konkreten Abschnitt, nicht als großer Seitentitel. */
+      #createPanel.planMode #currentPlanToggle > span::before{
+        content:"✏️ ";
       }
 
-      /* +Paket-Button optisch an die Kopfzeile des Planblocks andocken. */
+      /* +Paket nicht als schwebender rechter Großbutton, sondern als Kopfzeilen-Aktion. */
       #createPanel.planMode #savePackageBtn{
-        grid-column:3;
-        grid-row:3;
-        align-self:start;
-        justify-self:stretch;
-        width:100%;
-        height:50px;
-        min-height:50px;
-        margin:0;
-        border-radius:18px;
-        z-index:46;
+        grid-column:2 / 4!important;
+        grid-row:3!important;
+        justify-self:end!important;
+        align-self:start!important;
+        width:118px!important;
+        min-width:118px!important;
+        max-width:118px!important;
+        height:48px!important;
+        min-height:48px!important;
+        margin:0 14px 0 0!important;
+        border-radius:18px!important;
+        z-index:66!important;
       }
-      #createPanel.planMode #rightPlanStack.planOpen #currentPlanToggle{
-        padding-right:176px;
+      #createPanel.planMode #currentPlanToggle{
+        padding-right:154px!important;
+      }
+      #createPanel.planMode #currentPlanToggle > small{
+        margin-right:6px;
       }
       #createPanel.planMode:has(#rightPlanStack.scanOpen) #savePackageBtn{
         visibility:hidden!important;
         pointer-events:none!important;
       }
 
-      /* Kollabierte Scan-/Planleisten bleiben wirklich nur Headerleisten. */
-      #rightPlanStack .planSection.collapsed{
-        flex:0 0 54px!important;
-        height:54px!important;
-        min-height:54px!important;
-        max-height:54px!important;
+      /* Untere Aktionsbuttons: gleiche Breite, gleiche Höhe, ruhige Zeile. */
+      #createPanel.planMode #recentToggle,
+      #createPanel.planMode #packageToggle{
+        grid-row:5!important;
+        width:100%!important;
+        min-width:0!important;
+        height:60px!important;
+        min-height:60px!important;
+        justify-self:stretch!important;
+        align-self:stretch!important;
       }
-      #rightPlanStack .planSection.collapsed .planSectionBody,
-      #rightPlanStack .planSection.collapsed .scanInboxList{
-        display:none!important;
-        padding:0!important;
-        margin:0!important;
-        height:0!important;
-        max-height:0!important;
-        overflow:hidden!important;
+      #createPanel.planMode #recentToggle{grid-column:2!important;}
+      #createPanel.planMode #packageToggle{grid-column:3!important;}
+      .planActions.hasPlan #recentToggle{
+        width:100%!important;
+        min-width:0!important;
+        padding:10px 12px!important;
       }
-
-      /* Der zugehörige Button bleibt als aktiver Anker über dem schwebenden Fenster. */
-      .kggOverlayAnchorActive{
-        position:relative!important;
-        z-index:190!important;
-        box-shadow:0 18px 42px rgba(7,16,39,.22), var(--shadow)!important;
-        outline:2px solid rgba(7,16,39,.16);
-        outline-offset:2px;
+      .planActions.hasPlan .recentText,
+      .planActions.hasPlan .recentMini{
+        max-width:none!important;
+        opacity:1!important;
       }
 
       @media (max-width:920px){
-        #createPanel.planMode #finishBtn{
-          height:60px;
-          min-height:60px;
-          font-size:18px;
+        .app{
+          grid-template-columns:minmax(320px,390px) minmax(0,1fr) minmax(0,1fr)!important;
         }
         #createPanel.planMode #savePackageBtn{
-          height:48px;
-          min-height:48px;
+          width:104px!important;
+          min-width:104px!important;
+          max-width:104px!important;
+          height:46px!important;
+          min-height:46px!important;
+          margin-right:10px!important;
         }
-        #createPanel.planMode #rightPlanStack.planOpen #currentPlanToggle{
-          padding-right:142px;
+        #createPanel.planMode #currentPlanToggle{
+          padding-right:132px!important;
         }
+        #createPanel.planMode #recentToggle,
+        #createPanel.planMode #packageToggle{
+          height:56px!important;
+          min-height:56px!important;
+        }
+      }
+    }
+
+
+    /* v329 Tablet Package Button Header Align:
+       Der +📦 Button war zwar im Planheader, klebte aber optisch am oberen Rand.
+       Nur Tablet-CSS: kleiner, flacher, vertikal in der Kopfzeile zentriert. Keine Logik. */
+    @media (min-width:760px){
+      #createPanel.planMode #currentPlanBlock{
+        position:relative;
+      }
+      #createPanel.planMode #savePackageBtn{
+        grid-column:2 / 4!important;
+        grid-row:3!important;
+        justify-self:end!important;
+        align-self:start!important;
+        width:86px!important;
+        min-width:86px!important;
+        max-width:86px!important;
+        height:36px!important;
+        min-height:36px!important;
+        margin:8px 14px 0 0!important;
+        padding:0 10px!important;
+        border:1px solid rgba(220,227,235,.96)!important;
+        border-radius:14px!important;
+        background:#fff!important;
+        box-shadow:0 1px 5px rgba(7,16,39,.055)!important;
+        z-index:66!important;
+        align-items:center!important;
+        justify-content:center!important;
+        line-height:1!important;
+      }
+      #createPanel.planMode #savePackageBtn .packageBox{
+        font-size:23px!important;
+        line-height:1!important;
+      }
+      #createPanel.planMode #savePackageBtn .packagePlus{
+        font-size:16px!important;
+        line-height:1!important;
+      }
+      #createPanel.planMode #currentPlanToggle{
+        min-height:52px!important;
+        padding-right:112px!important;
+        align-items:center!important;
+      }
+      #createPanel.planMode #currentPlanToggle > small{
+        margin-right:0!important;
+      }
+      @media (max-width:920px){
+        #createPanel.planMode #savePackageBtn{
+          width:78px!important;
+          min-width:78px!important;
+          max-width:78px!important;
+          height:34px!important;
+          min-height:34px!important;
+          margin:8px 10px 0 0!important;
+          padding:0 8px!important;
+        }
+        #createPanel.planMode #savePackageBtn .packageBox{font-size:21px!important;}
+        #createPanel.planMode #savePackageBtn .packagePlus{font-size:15px!important;}
+        #createPanel.planMode #currentPlanToggle{padding-right:96px!important;}
+      }
+    }
+
+
+    /* v330 Tablet Column/Package Balance:
+       Linke Spalte bekommt mehr Raum Richtung Mitte; Mittelabstand kleiner.
+       +📦 Button wird innerhalb der Plan-Kopfzeile tiefer/zentrierter geführt.
+       Nur Tablet-CSS, keine PDF/QR/Patienten-App/Scan/Parser/Plan-State-Logik. */
+    @media (min-width:760px){
+      /* Linke Arbeits-Spalte breiter, rechte Arbeitszone bleibt zwei gleich große Aktionsspalten. */
+      .app{
+        grid-template-columns:minmax(420px,500px) minmax(0,1fr) minmax(0,1fr)!important;
+        gap:10px!important;
+        column-gap:10px!important;
+      }
+
+      /* Linke Spalte optisch etwas mehr in die Mitte holen, ohne die rechte Planliste zu beschädigen. */
+      .scanHub,
+      #inputWrap,
+      #bankArea{
+        justify-self:stretch!important;
+        width:100%!important;
+      }
+
+      /* Planbereich bleibt bündig, bekommt aber weniger übertriebene Leerweite. */
+      #rightPlanStack,
+      #currentPlanBlock{
+        min-width:0!important;
+      }
+
+      /* +📦 nicht an der oberen Kante kleben lassen: Header wird minimal höher, Button sitzt darin zentriert. */
+      #createPanel.planMode #currentPlanToggle{
+        min-height:62px!important;
+        padding-top:14px!important;
+        padding-bottom:12px!important;
+        padding-right:118px!important;
+        align-items:center!important;
+      }
+      #createPanel.planMode #savePackageBtn{
+        grid-column:2 / 4!important;
+        grid-row:3!important;
+        justify-self:end!important;
+        align-self:start!important;
+        width:86px!important;
+        min-width:86px!important;
+        max-width:86px!important;
+        height:38px!important;
+        min-height:38px!important;
+        margin:12px 16px 0 0!important;
+        padding:0 10px!important;
+        border-radius:15px!important;
+        z-index:72!important;
+      }
+
+      /* Untere Buttons exakt gleich groß halten. */
+      #createPanel.planMode #recentToggle,
+      #createPanel.planMode #packageToggle{
+        width:100%!important;
+        min-width:0!important;
+        height:60px!important;
+        min-height:60px!important;
+      }
+
+      @media (max-width:1040px){
+        .app{
+          grid-template-columns:minmax(390px,460px) minmax(0,1fr) minmax(0,1fr)!important;
+          gap:9px!important;
+          column-gap:9px!important;
+        }
+        #createPanel.planMode #currentPlanToggle{
+          padding-right:108px!important;
+        }
+        #createPanel.planMode #savePackageBtn{
+          width:80px!important;
+          min-width:80px!important;
+          max-width:80px!important;
+          height:36px!important;
+          min-height:36px!important;
+          margin:12px 12px 0 0!important;
+        }
+      }
+
+      @media (max-width:920px){
+        .app{
+          grid-template-columns:minmax(350px,420px) minmax(0,1fr) minmax(0,1fr)!important;
+          gap:8px!important;
+          column-gap:8px!important;
+        }
+        #createPanel.planMode #currentPlanToggle{
+          min-height:58px!important;
+          padding-top:12px!important;
+          padding-bottom:10px!important;
+          padding-right:98px!important;
+        }
+        #createPanel.planMode #savePackageBtn{
+          width:74px!important;
+          min-width:74px!important;
+          max-width:74px!important;
+          height:34px!important;
+          min-height:34px!important;
+          margin:12px 10px 0 0!important;
+          padding:0 8px!important;
+        }
+      }
+    }
+
+
+
+
+    /* v331 Tablet Left Column + Scale Up:
+       - linke Spalte bekommt mehr Raum zur Mitte
+       - gesamtes Tablet-Layout wieder leicht größer
+       - keine Logikänderung */
+    @media (min-width:760px){
+      .app{
+        grid-template-columns:minmax(395px,475px) minmax(0,1fr) minmax(0,.92fr)!important;
+        gap:16px!important;
+      }
+
+      #inputWrap textarea,
+      #exerciseInput{
+        font-size:21px!important;
+        line-height:1.34!important;
+      }
+      #inputWrap textarea{
+        min-height:106px!important;
+      }
+
+      .scanBtn,
+      .scanMeta.filePickBtn,
+      #baseToggle,
+      #finishBtn{
+        font-size:19px!important;
+      }
+
+      .bankArea.bankOpen.alphaBankOpen .bankWithAz{
+        grid-template-columns:60px minmax(0,1fr)!important;
+        column-gap:10px!important;
+      }
+      .bankArea.bankOpen.alphaBankOpen .az{
+        width:48px!important;
+      }
+      .az button{
+        font-size:12px!important;
+        min-height:18px!important;
+      }
+      .bankRow{
+        padding:12px 14px!important;
+      }
+      .bankRow b{
+        font-size:17px!important;
+      }
+      .bankRow small{
+        font-size:12px!important;
+      }
+
+      #createPanel.planMode #currentPlanToggle{
+        min-height:56px!important;
+        font-size:21px!important;
+      }
+      .planCard{
+        padding:14px 16px!important;
+      }
+      .planCard b{
+        font-size:18px!important;
+      }
+      .planCard small{
+        font-size:12px!important;
+      }
+
+      #createPanel.planMode #recentToggle,
+      #createPanel.planMode #packageToggle{
+        height:64px!important;
+        min-height:64px!important;
+        font-size:18px!important;
+      }
+    }
+
+    @media (min-width:760px) and (max-width:920px){
+      .app{
+        grid-template-columns:minmax(350px,420px) minmax(0,1fr) minmax(0,.92fr)!important;
+        gap:14px!important;
+      }
+      #inputWrap textarea,
+      #exerciseInput{
+        font-size:20px!important;
+      }
+      .bankRow b{
+        font-size:16px!important;
+      }
+      .planCard b{
+        font-size:17px!important;
+      }
+    }
+
+
+
+    /* v332 Tablet Left Column More Width + Readability:
+       - linke Spalte nochmals breiter
+       - Tablet-Gesamtlayout etwas größer für bessere Lesbarkeit
+       - keine Logikänderung */
+    @media (min-width:760px){
+      .app{
+        grid-template-columns:minmax(430px,520px) minmax(0,1.08fr) minmax(0,.88fr)!important;
+        gap:18px!important;
+        padding:18px!important;
+      }
+
+      .scanHub{
+        gap:12px!important;
+      }
+      .scanBtn,
+      .scanMeta.filePickBtn,
+      #baseToggle,
+      #finishBtn,
+      #recentToggle,
+      #packageToggle{
+        font-size:20px!important;
+      }
+      #baseToggle,
+      #finishBtn{
+        min-height:62px!important;
+      }
+
+      #inputWrap textarea,
+      #exerciseInput{
+        font-size:22px!important;
+        line-height:1.36!important;
+      }
+      #inputWrap textarea{
+        min-height:118px!important;
+        padding:18px 48px 18px 16px!important;
+      }
+
+      .bankArea.bankOpen.alphaBankOpen .bankWithAz{
+        grid-template-columns:64px minmax(0,1fr)!important;
+        column-gap:12px!important;
+      }
+      .bankArea.bankOpen.alphaBankOpen .az{
+        width:52px!important;
+        margin-top:68px!important;
+      }
+      .az button{
+        font-size:12.5px!important;
+        min-height:20px!important;
+      }
+      .bankRows{
+        max-height:none!important;
+      }
+      .bankRow{
+        padding:13px 15px!important;
+      }
+      .bankRow b{
+        font-size:18px!important;
+      }
+      .bankRow small{
+        font-size:12px!important;
+      }
+
+      #createPanel.planMode #currentPlanToggle{
+        min-height:58px!important;
+        font-size:22px!important;
+        padding-left:14px!important;
+      }
+      #createPanel.planMode #currentPlanToggle > small{
+        font-size:13px!important;
+      }
+
+      .planCard{
+        padding:15px 17px!important;
+        border-radius:18px!important;
+      }
+      .planCard b{
+        font-size:19px!important;
+      }
+      .planCard small{
+        font-size:12.5px!important;
+      }
+      .planCard .drag{
 ```

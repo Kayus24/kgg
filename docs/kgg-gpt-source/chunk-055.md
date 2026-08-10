@@ -4,424 +4,424 @@
 - Lines: 23101-23520
 
 ```html
-  // v313 Scan-Popup Repeat-Source-Modul:
-  // Merkt sich, ob der letzte Bildweg Kamera oder Galerie/Datei war.
-  // Weitere Seite / weiterer Plan verwenden danach automatisch denselben Weg.
-  function normalizeScanInputKind(kind){return kind==='file'?'file':'camera';}
-  function rememberScanInputKind(kind){
-    const normalized=normalizeScanInputKind(kind);
-    scanState.lastInputKind=normalized;
-    try{localStorage.setItem('kgg_scan_last_input_kind_v1',normalized);}catch(err){}
-    return normalized;
-  }
-  function lastScanInputKind(){
-    if(scanState.lastInputKind==='file'||scanState.lastInputKind==='camera')return scanState.lastInputKind;
-    try{const stored=localStorage.getItem('kgg_scan_last_input_kind_v1'); if(stored==='file'||stored==='camera')return stored;}catch(err){}
-    return 'camera';
-  }
-  function patientShortGuess(){
-    const value=String(state.patient&&state.patient.name||$('patientName')&&$('patientName').value||'').trim();
-    if(!value)return '';
-    const parts=value.split(/\s+/).filter(Boolean);
-    if(parts.length>=2)return parts[0]+' '+parts[1].charAt(0)+'.';
-    return value.slice(0,16);
-  }
-  async function scanAcceptQrRaw(raw,file,hit,strict){
-    const forceNew=scanState.next==='plan'||!scanState.jobs.length;
-    let job=forceNew?scanNewJob('paper'):scanCurrentJob();
-    if(raw){
-      setScanStatus('QR erkannt: Inhalt wird gelesen ...');
-      try{
-        const parsed=parseScannedQrRaw(raw);
-        if(parsed&&(parsed.type==='KGGCFG1'||parsed.type==='KGGCFG2')){
-          setScanStatus(parsed.type==='KGGCFG2'?'QR erkannt: verschluesselter API-Key / Konfig-Transfer. Transfer-Code wird abgefragt ...':'QR erkannt: API-Key / Konfig-Transfer wird lokal gespeichert ...');
-          const idx=scanState.jobs.indexOf(job);
-          if(idx>=0&&!job.pages.length&&!job.result&&job.status==='new'){
-            scanState.jobs.splice(idx,1);
-            scanState.activeIndex=Math.max(0,Math.min(scanState.activeIndex,scanState.jobs.length-1));
-          }
-          const ok=await applyKggConfigTransferParsed(parsed);
-          return {type:ok?'configTransfer':'configTransferCancelled',json:parsed.json};
         }
-        if(parsed&&(parsed.type==='KGGSYNC1'||parsed.type==='KGGSYNC2')){
-          setScanStatus(parsed.type==='KGGSYNC2'?'QR erkannt: Sync-Verbindung mit Daten wird gelesen ...':'QR erkannt: Sync-Kopplung wird gespeichert ...');
-          const idx=scanState.jobs.indexOf(job);
-          if(idx>=0&&!job.pages.length&&!job.result&&job.status==='new'){
-            scanState.jobs.splice(idx,1);
-            scanState.activeIndex=Math.max(0,Math.min(scanState.activeIndex,scanState.jobs.length-1));
-          }
-          if(parsed.type==='KGGSYNC2'){
-            await applyNativeSyncBundle(parsed.json);
-            return {type:'syncBundle',json:parsed.json};
-          }
-          applyNativeSyncInvite(parsed.json);
-          return {type:'syncInvite',json:parsed.json};
-        }
-        if(job.pages.length||job.result){job=scanNewJob('qr');}
-        setScanStatus('QR erkannt: Patientenplan wird gelesen ...');
-        job.type='qr';
-        job.pages.push(scanFileMeta(file));
-        job.result=qrParsedToScanResult(parsed);
-        job.result.qrHit=hit||null;
-        job.status='ready';
-        job.short=job.short||patientShortGuess();
-        scanState.next='plan';
-        return job;
+        save();
+        render();
+        return {type:accepted.type||'qr',accepted:true};
       }catch(err){
-        setScanStatus('QR erkannt, aber Format nicht lesbar: '+(err&&err.message||err));
-        if(strict){
-          const idx=scanState.jobs.indexOf(job);
-          if(idx>=0&&!job.pages.length&&!job.result&&job.status==='new'){
-            scanState.jobs.splice(idx,1);
-            scanState.activeIndex=Math.max(0,Math.min(scanState.activeIndex,scanState.jobs.length-1));
-          }
-          return {type:'invalidQr',error:String(err&&err.message||err)};
+        scanState.lastError='QR-Scan fehlgeschlagen: '+(err&&err.message||err);
+        setScanStatus(scanState.lastError);
+        return {type:'invalidQr',error:String(err&&err.message||err)};
+      }finally{
+        scanState.busy=false;
+        renderScanPreview();
+      }
+    },
+    getCameraCapabilities(){
+      const web=!!(navigator.mediaDevices&&typeof navigator.mediaDevices.getUserMedia==='function');
+      let nativeCaps=null;
+      try{nativeCaps=window.KGGNativeCamera&&typeof window.KGGNativeCamera.getCapabilities==='function'?window.KGGNativeCamera.getCapabilities():null;}catch(err){}
+      return {webVideoCapture:web,native:nativeCaps||null,barcodeDetector:'BarcodeDetector' in window,jsQR:typeof window.jsQR==='function'};
+    },
+    async start(){
+      scanState.decision=false;
+      scanState.busy=true;
+      scanState.lastError='';
+      renderScanPreview();
+      try{
+        const jobs=scanState.jobs.filter(job=>job.pages.length||job.result);
+        if(!jobs.length)throw new Error('Bitte zuerst mindestens ein Foto hinzufügen.');
+        for(const job of jobs){
+          if(!job.result||job.type==='paper')await processPaperJob(job);
         }
-        if(job.pages.length||job.result){job=scanNewJob('paper');}
-        job.type='paper';
-        job.pages.push(scanFileMeta(file));
-        job.warnings.push('QR erkannt, aber nicht parsebar: '+(err&&err.message||err));
-        scanState.next='page';
-        return job;
+        state.scanPanelOpen='scanned';
+        save();
+        render();
+        setScanStatus('Scan fertig: '+jobs.length+' Plan/Pläne.');
+      }catch(err){
+        scanState.lastError='Scan fehlgeschlagen: '+(err&&err.message||err);
+        setScanStatus(scanState.lastError);
+      }finally{
+        scanState.busy=false;
+        renderScanPreview();
+      }
+      return scanStateSnapshot();
+    },
+    repeatSource(mode){
+      const nextMode=mode==='plan'?'plan':'page';
+      this.setNext(nextMode);
+      return this.pick(lastScanInputKind());
+    },
+    setNext(mode){
+      scanState.next=mode==='plan'?'plan':'page';
+      if(mode==='plan')scanState.activeIndex=scanState.jobs.length;
+      scanState.decision=false;
+      setScanStatus(scanState.next==='plan'?'Nächstes Foto wird neuer Plan.':'Nächstes Foto wird weitere Seite.');
+      renderScanPreview();
+      return scanStateSnapshot();
+    },
+    removePage(jobIndex,pageIndex){
+      const job=scanState.jobs[Number(jobIndex)||0];
+      if(job&&job.pages){job.pages.splice(Number(pageIndex)||0,1); if(job.type==='paper')job.result=null; if(!job.pages.length&&!job.result)scanState.jobs.splice(Number(jobIndex)||0,1);}
+      if(scanState.activeIndex>=scanState.jobs.length)scanState.activeIndex=Math.max(0,scanState.jobs.length-1);
+      renderScanPreview();
+      return scanStateSnapshot();
+    },
+    setActive(index){
+      scanState.activeIndex=Math.max(0,Math.min(Number(index)||0,scanState.jobs.length-1));
+      scanState.next='page';
+      setScanStatus((scanState.jobs[scanState.activeIndex]&&scanState.jobs[scanState.activeIndex].label||'Plan')+' aktiv.');
+      renderScanPreview();
+      return scanStateSnapshot();
+    },
+    setShort(index,value){
+      const job=scanState.jobs[Number(index)||0];
+      if(job)job.short=String(value||'').trim();
+      const field=$('kggScanCopyField'+index);
+      if(field&&job)field.value=scanResultToCopyText(job)||field.value;
+      return scanStateSnapshot();
+    },
+    toggleCollapse(index){return toggleScanJobCollapse(index);},
+    removeJob(index){return removeScanJob(index);},
+    collapseAll(reason){return collapseScanCards(reason);},
+    closeDecision(){scanState.decision=false;renderScanPreview();return scanStateSnapshot();},
+    async copyResult(index){
+      const job=scanState.jobs[Number(index)||0];
+      if(!job)return false;
+      const text=scanResultToCopyText(job);
+      const fieldId=$('kggScanCopyField'+index)?'kggScanCopyField'+index:'kggScanInboxField'+index;
+      const ok=await copyTextWithFallback(text,fieldId);
+      setScanStatus(ok?'Kopiert.':'Text markiert - bitte manuell kopieren.');
+      return ok;
+    },
+    applyResult(index){
+      const job=scanState.jobs[Number(index)||0];
+      if(!job)return false;
+      const ok=applyScanResultToCurrentPlan(job.result,'scan_v319_continue_edit_job_'+index); if(ok){state.scanPanelOpen='plan'; save(); render();} return ok;
+    },
+    getState:scanStateSnapshot
+  };
+
+  /* v316 Tablet Anchor Overlay Manager: ein Nebenfenster aktiv, aber am jeweiligen Button verankert. */
+  const tabletLayoutKeys={
+    locked:'kgg_tablet_layout_locked',
+    left:'kgg_tablet_left_col_width',
+    scale:'kgg_tablet_ui_scale'
+  };
+  const tabletLayoutState={locked:true,leftCol:'',scale:1,dragging:false};
+  function clampTabletScale(value){const n=Number(value)||1; return Math.max(.01,Math.min(2,n));}
+  function loadTabletLayoutSettings(){
+    try{
+      tabletLayoutState.locked=localStorage.getItem(tabletLayoutKeys.locked)!=='false';
+      tabletLayoutState.leftCol=localStorage.getItem(tabletLayoutKeys.left)||'';
+      tabletLayoutState.scale=clampTabletScale(localStorage.getItem(tabletLayoutKeys.scale)||1);
+    }catch(err){tabletLayoutState.locked=true;tabletLayoutState.leftCol='';tabletLayoutState.scale=1;}
+  }
+  function saveTabletLayoutSettings(){
+    try{
+      localStorage.setItem(tabletLayoutKeys.locked,tabletLayoutState.locked?'true':'false');
+      if(tabletLayoutState.leftCol)localStorage.setItem(tabletLayoutKeys.left,tabletLayoutState.leftCol); else localStorage.removeItem(tabletLayoutKeys.left);
+      localStorage.setItem(tabletLayoutKeys.scale,String(tabletLayoutState.scale));
+    }catch(err){}
+  }
+  function updateTabletLayoutHandle(){
+    const handle=$('tabletLayoutResizeHandle'), app=document.querySelector('.app');
+    if(!handle||!app||!isTabletLayout()){return;}
+    const rect=app.getBoundingClientRect();
+    const appStyle=getComputedStyle(app);
+    const gap=parseFloat(appStyle.columnGap)||0;
+    const visibleRect=el=>{
+      if(!el)return null;
+      const style=getComputedStyle(el);
+      if(style.display==='none'||style.visibility==='hidden'||style.opacity==='0')return null;
+      const r=el.getBoundingClientRect();
+      return (r.width>2&&r.height>2)?r:null;
+    };
+    const gridFirstCol=()=>{
+      const first=String(appStyle.gridTemplateColumns||'').trim().split(/\s+/)[0]||'';
+      const px=parseFloat(first);
+      return Number.isFinite(px)&&px>2?px:null;
+    };
+    const leftRects=[$('bankArea'),$('inputWrap'),$('scanHub'),document.querySelector('.scanHub')]
+      .map(visibleRect)
+      .filter(Boolean)
+      .filter(r=>r.left>=rect.left-4&&r.right<=rect.right+4);
+    const measuredLeftEdge=leftRects.length?Math.max(...leftRects.map(r=>r.right)):null;
+    const cssLeft=gridFirstCol();
+    const storedLeft=parseFloat(String(tabletLayoutState.leftCol||'').replace('px',''));
+    const fallbackLeft=Number.isFinite(cssLeft)?cssLeft:(Number.isFinite(storedLeft)?storedLeft:Math.min(Math.max(rect.width*.42,360),660));
+    const leftEdge=Number.isFinite(measuredLeftEdge)?measuredLeftEdge:rect.left+fallbackLeft;
+    const rightRects=[$('rightPlanStack'),$('currentPlanBlock'),$('baseToggle'),$('recentToggle'),$('packageLayoutSlot')]
+      .map(visibleRect)
+      .filter(Boolean)
+      .filter(r=>r.left>=leftEdge-12&&r.left<=rect.right+4);
+    const rightEdge=rightRects.length?Math.min(...rightRects.map(r=>r.left)):Math.min(rect.right,rect.left+fallbackLeft+gap);
+    const handleWidth=handle.getBoundingClientRect().width||58;
+    const center=(rightEdge>leftEdge+2)?((leftEdge+rightEdge)/2):leftEdge+Math.max(0,gap/2);
+    handle.style.left=Math.round(center-(handleWidth/2))+'px';
+    handle.style.top=Math.round(rect.top+8)+'px';
+    handle.style.height=Math.max(160,Math.round(rect.height-16))+'px';
+  }
+  function updateTabletLayoutAdaptiveClasses(){
+    const app=document.querySelector('.app');
+    const active=isTabletLayout()&&app&&document.body.classList.contains('tabletLayoutCustom');
+    let left=0, rightSlot=0, recentW=0, planW=0;
+    if(active){
+      const rect=app.getBoundingClientRect();
+      const fallback=Math.min(Math.max(rect.width*.42,360),660);
+      const leftEl=$('bankArea')||$('inputWrap')||document.querySelector('.scanHub');
+      left=leftEl?leftEl.getBoundingClientRect().width:(parseFloat(String(tabletLayoutState.leftCol||'').replace('px',''))||fallback);
+      const slot=$('packageLayoutSlot')||$('packageToggle');
+      rightSlot=slot?slot.getBoundingClientRect().width:0;
+      recentW=$('recentToggle')?$('recentToggle').getBoundingClientRect().width:0;
+      planW=$('currentPlanBlock')?$('currentPlanBlock').getBoundingClientRect().width:0;
+    }
+    document.body.classList.toggle('tabletLayoutLeftSlim',!!active&&left<320);
+    document.body.classList.toggle('tabletLayoutLeftTiny',!!active&&left<190);
+    document.body.classList.toggle('tabletLayoutRightSlim',!!active&&((rightSlot>0&&rightSlot<270)||(recentW>0&&recentW<250)||(planW>0&&planW<360)));
+    document.body.classList.toggle('tabletLayoutRightTiny',!!active&&((rightSlot>0&&rightSlot<150)||(recentW>0&&recentW<135)));
+    document.body.classList.toggle('tabletLayoutScaleHuge',!!active&&tabletLayoutState.scale>1.35);
+  }
+  function getTabletLayoutRect(el){
+    if(!el)return null;
+    const style=getComputedStyle(el);
+    if(style.display==='none'||style.visibility==='hidden'||style.opacity==='0')return null;
+    const rect=el.getBoundingClientRect();
+    if(rect.width<2||rect.height<2)return null;
+    return rect;
+  }
+  function tabletRectsCollide(a,b,gap){
+    return !(a.right+gap<=b.left||b.right+gap<=a.left||a.bottom+gap<=b.top||b.bottom+gap<=a.top);
+  }
+  function updateTabletLayoutCollisionGuard(){
+    const active=isTabletLayout()&&document.body.classList.contains('tabletLayoutCustom');
+    if(!active){
+      document.body.classList.remove('tabletLayoutCollisionTight');
+      document.documentElement.style.setProperty('--kgg-tablet-collision-gap','14px');
+      return;
+    }
+    const scale=Number(tabletLayoutState.scale)||1;
+    const safetyGap=Math.max(10,Math.min(28,Math.round(12+(scale-1)*18)));
+    document.documentElement.style.setProperty('--kgg-tablet-collision-gap',safetyGap+'px');
+    const selectors=['.scanHub .scanBtn','.scanHub .scanMeta','.scanHub .adminConfigBtn','.scanHub .sharedBankBtn','#baseToggle','#inputWrap','#bankArea','#rightPlanStack','#recentToggle','#packageLayoutSlot'];
+    const rects=selectors.flatMap(sel=>[...document.querySelectorAll(sel)]).map(getTabletLayoutRect).filter(Boolean);
+    let collision=false;
+    for(let i=0;i<rects.length&&!collision;i++){
+      for(let j=i+1;j<rects.length;j++){
+        if(tabletRectsCollide(rects[i],rects[j],safetyGap)){collision=true;break;}
       }
     }
+    document.body.classList.toggle('tabletLayoutCollisionTight',collision);
+  }
+  function applyTabletLayoutSettings(){
+    const tabletActive=isTabletLayout();
+    document.body.classList.toggle('tabletLayoutUnlocked',!tabletLayoutState.locked);
+    document.body.classList.toggle('tabletLayoutCustom',tabletActive);
+    document.documentElement.style.setProperty('--kgg-tablet-ui-scale',String(tabletLayoutState.scale));
+    if(tabletLayoutState.leftCol)document.documentElement.style.setProperty('--kgg-tablet-left-col',tabletLayoutState.leftCol);
+    else document.documentElement.style.removeProperty('--kgg-tablet-left-col');
+    const btn=$('tabletLayoutLockBtn'), value=$('tabletScaleValue'), splitValue=$('tabletSplitScaleValue');
+    if(btn){
+      btn.setAttribute('aria-pressed',tabletLayoutState.locked?'true':'false');
+      btn.setAttribute('aria-label',tabletLayoutState.locked?'Layout fixiert':'Layout frei verschiebbar');
+      const icon=btn.querySelector('.tabletLockIcon');
+      const text=btn.querySelector('.tabletLockText');
+      if(icon)icon.textContent=String.fromCodePoint(tabletLayoutState.locked?128274:128275);
+      if(text)text.textContent=tabletLayoutState.locked?'Fix':'Frei';
+    }
+    const scaleLabel=Math.round(tabletLayoutState.scale*100)+'%';
+    const scaleDisplay='Groesse '+scaleLabel;
+    if(value)value.textContent=scaleDisplay;
+    if(splitValue)splitValue.textContent=scaleDisplay;
+    updateTabletLayoutAdaptiveClasses();
+    requestAnimationFrame(()=>{updateTabletLayoutHandle();updateTabletLayoutCollisionGuard();});
+  }
+  function setTabletLayoutLocked(locked){
+    tabletLayoutState.locked=!!locked;
+    saveTabletLayoutSettings();
+    applyTabletLayoutSettings();
+  }
+  function setTabletLayoutScale(next){
+    tabletLayoutState.scale=clampTabletScale(next);
+    saveTabletLayoutSettings();
+    applyTabletLayoutSettings();
+  }
+  function adjustTabletLayoutScale(direction){
+    if(tabletLayoutState.locked||!isTabletLayout())return;
+    setTabletLayoutScale(tabletLayoutState.scale+(direction>0?.05:-.05));
+  }
+  function adjustTabletSplitLayoutScale(direction){
+    if(!isTabletLayout())return;
+    setTabletLayoutScale(tabletLayoutState.scale+(direction>0?.05:-.05));
+  }
+  function resetTabletLayoutDefaults(){
+    tabletLayoutState.leftCol='';
+    tabletLayoutState.scale=1;
+    saveTabletLayoutSettings();
+    applyTabletLayoutSettings();
+  }
+  function initTabletLayoutControls(){
+    loadTabletLayoutSettings();
+    const btn=$('tabletLayoutLockBtn'), minus=$('tabletScaleMinus'), plus=$('tabletScalePlus'), reset=$('tabletLayoutReset'), handle=$('tabletLayoutResizeHandle'), tools=$('tabletLayoutFreeTools'), splitMinus=$('tabletSplitScaleMinus'), splitPlus=$('tabletSplitScalePlus');
+    if(btn)btn.onclick=()=>setTabletLayoutLocked(!tabletLayoutState.locked);
+    if(minus)minus.onclick=()=>adjustTabletLayoutScale(-1);
+    if(plus)plus.onclick=()=>adjustTabletLayoutScale(1);
+    if(reset)reset.onclick=()=>resetTabletLayoutDefaults();
+    if(splitMinus)splitMinus.onclick=ev=>{ev.preventDefault();ev.stopPropagation();adjustTabletSplitLayoutScale(-1);};
+    if(splitPlus)splitPlus.onclick=ev=>{ev.preventDefault();ev.stopPropagation();adjustTabletSplitLayoutScale(1);};
+    if(tools){
+      tools.addEventListener('wheel',ev=>{
+        if(tabletLayoutState.locked||!isTabletLayout())return;
+        ev.preventDefault();
+        adjustTabletLayoutScale(ev.deltaY<0?1:-1);
+      },{passive:false});
+      let scaleDragY=null;
+      tools.addEventListener('pointerdown',ev=>{
+        if(tabletLayoutState.locked||!isTabletLayout()||ev.target.closest('button'))return;
+        scaleDragY=ev.clientY;
+        try{tools.setPointerCapture(ev.pointerId);}catch(err){}
+      });
+      tools.addEventListener('pointermove',ev=>{
+        if(scaleDragY===null||tabletLayoutState.locked)return;
+        const dy=ev.clientY-scaleDragY;
+        if(Math.abs(dy)<18)return;
+        adjustTabletLayoutScale(dy<0?1:-1);
+        scaleDragY=ev.clientY;
+      });
+      const endScaleDrag=()=>{scaleDragY=null;};
+      tools.addEventListener('pointerup',endScaleDrag);
+      tools.addEventListener('pointercancel',endScaleDrag);
+    }
+    if(handle){
+      handle.addEventListener('pointerdown',ev=>{
+        if(ev.target&&ev.target.closest&&ev.target.closest('.tabletSplitScaleControl'))return;
+        if(tabletLayoutState.locked||!isTabletLayout())return;
+        const app=document.querySelector('.app');
+        if(!app)return;
+        ev.preventDefault();
+        tabletLayoutState.dragging=true;
+        document.body.classList.add('tabletLayoutDragging');
+        try{handle.setPointerCapture(ev.pointerId);}catch(err){}
+        const move=moveEv=>{
+          if(!tabletLayoutState.dragging)return;
+          const rect=app.getBoundingClientRect();
+          const min=24;
+          const max=Math.max(min,rect.width-48);
+          const gap=parseFloat(getComputedStyle(app).columnGap)||0;
+          const next=Math.max(min,Math.min(max,moveEv.clientX-rect.left-(gap/2)));
+          tabletLayoutState.leftCol=Math.round(next)+'px';
+          document.documentElement.style.setProperty('--kgg-tablet-left-col',tabletLayoutState.leftCol);
+          updateTabletLayoutAdaptiveClasses();
+          updateTabletLayoutHandle();
+          updateTabletLayoutCollisionGuard();
+        };
+        const up=()=>{
+          tabletLayoutState.dragging=false;
+          document.body.classList.remove('tabletLayoutDragging');
+          saveTabletLayoutSettings();
+          document.removeEventListener('pointermove',move);
+          document.removeEventListener('pointerup',up);
+          document.removeEventListener('pointercancel',up);
+        };
+        document.addEventListener('pointermove',move,{passive:true});
+        document.addEventListener('pointerup',up,{once:true});
+        document.addEventListener('pointercancel',up,{once:true});
+      });
+    }
+    window.addEventListener('resize',()=>requestAnimationFrame(()=>{updateTabletLayoutAdaptiveClasses();updateTabletLayoutHandle();updateTabletLayoutCollisionGuard();}));
+    window.addEventListener('orientationchange',()=>setTimeout(()=>{updateTabletLayoutAdaptiveClasses();updateTabletLayoutHandle();updateTabletLayoutCollisionGuard();},120));
+    applyTabletLayoutSettings();
+  }
+  const tabletOverlayState={kind:null};
+  function tabletPanelConfig(kind){
+    if(kind==='base')return {kind:'base',panelId:'baseFields',anchorId:'baseToggle',preferred:'below',align:'left',minWidth:420,maxWidth:680};
+    if(kind==='recent')return {kind:'recent',panelId:'recentList',anchorId:(document.body.classList.contains('tabletMenuOpen')&&$('tabletMenuRecentBtn'))?'tabletMenuRecentBtn':'recentToggle',preferred:document.body.classList.contains('tabletMenuOpen')?'below':'above',align:'left',minWidth:360,maxWidth:560};
+    if(kind==='package')return {kind:'package',panelId:'packageList',anchorId:(document.body.classList.contains('tabletMenuOpen')&&$('tabletMenuPackagesBtn'))?'tabletMenuPackagesBtn':'packageToggle',preferred:document.body.classList.contains('tabletMenuOpen')?'below':'above',align:'left',minWidth:360,maxWidth:620};
     return null;
   }
-  async function scanAcceptFile(file,kind){
-    const qr=await scanQrFromImageFile(file);
-    if(qr.raw)return scanAcceptQrRaw(qr.raw,file,qr.hit,false);
-    const forceNew=scanState.next==='plan'||!scanState.jobs.length;
-    let job=forceNew?scanNewJob('paper'):scanCurrentJob();
-    if(forceNew||job.type==='qr'||job.result){job=forceNew?job:scanNewJob('paper');}
-    job.type='paper';
-    job.pages.push(scanFileMeta(file));
-    if(kind==='file'&&qr&&!qr.raw){
-      const qrWarn='QR-Foto-Import: '+(qr.reason||'Kein QR im Bild erkannt.');
-      job.warnings.push(qrWarn);
-      try{console.warn(qrWarn,qr.debug||{});}catch(err){}
+  function clearTabletOverlayStyles(panel){
+    if(!panel)return;
+    ['--kgg-overlay-left','--kgg-overlay-top','--kgg-overlay-width','--kgg-overlay-max-height','--kgg-overlay-origin'].forEach(name=>panel.style.removeProperty(name));
+  }
+  function setTabletOverlayActiveFlag(){
+    const active=!!(isTabletLayout()&&(
+      ($('baseFields')&&!$('baseFields').classList.contains('hidden'))||
+      ($('recentList')&&!$('recentList').classList.contains('hidden'))||
+      ($('packageList')&&!$('packageList').classList.contains('hidden'))
+    ));
+    document.body.classList.toggle('kggTabletOverlayActive',active);
+    if(!active)tabletOverlayState.kind=null;
+    updateToggleCarets();
+    setTabletAnchorActiveClasses();
+  }
+  function closeTabletFloatingPanelsExcept(except){
+    const base=$('baseFields'), recent=$('recentList'), packages=$('packageList');
+    if(base&&except!=='base'){base.classList.add('hidden');clearTabletOverlayStyles(base);}
+    if(recent&&except!=='recent'){recent.classList.add('hidden');clearTabletOverlayStyles(recent);}
+    if(packages&&except!=='package'){packages.classList.add('hidden');clearTabletOverlayStyles(packages);}
+    if(!['base','recent','package'].includes(except||''))tabletOverlayState.kind=null;
+    let needsRender=false;
+    if(except!=='bank'&&state&&state.bankOpen){state.bankOpen=false; needsRender=true;}
+    if(window.KGGScan&&typeof window.KGGScan.collapseAll==='function')window.KGGScan.collapseAll('tablet_overlay_'+(except||'none'));
+    setTabletOverlayActiveFlag();
+    return needsRender;
+  }
+  function clampNumber(value,min,max){return Math.max(min,Math.min(max,value));}
+  function positionTabletAnchoredOverlay(kind){
+    if(!isTabletLayout())return false;
+    const cfg=tabletPanelConfig(kind);
+    if(!cfg)return false;
+    const panel=$(cfg.panelId), anchor=$(cfg.anchorId), app=document.querySelector('.app');
+    if(!panel||!anchor||!app||panel.classList.contains('hidden'))return false;
+    const appRect=app.getBoundingClientRect();
+    const anchorRect=anchor.getBoundingClientRect();
+    const vv=window.visualViewport||null;
+    const viewTop=vv?vv.offsetTop:0;
+    const viewHeight=vv?vv.height:window.innerHeight;
+    const viewBottom=viewTop+viewHeight;
+    const margin=12;
+    const availableWidth=Math.max(280,appRect.width-(margin*2));
+    const minW=Math.min(cfg.minWidth||360,availableWidth);
+    const maxW=Math.min(cfg.maxWidth||620,availableWidth);
+    let width=clampNumber(Math.max(anchorRect.width,minW),minW,maxW);
+    let left=(cfg.align==='right')?(anchorRect.right-width):anchorRect.left;
+    left=clampNumber(left,appRect.left+margin,appRect.right-width-margin);
+
+    panel.style.setProperty('--kgg-overlay-width',Math.round(width)+'px');
+    panel.style.setProperty('--kgg-overlay-left',Math.round(left)+'px');
+    panel.style.setProperty('--kgg-overlay-max-height','min(72vh,520px)');
+
+    const measured=panel.getBoundingClientRect();
+    const wantedHeight=Math.max(160,Math.min(measured.height||panel.scrollHeight||320,Math.min(520,viewHeight-(margin*2))));
+    const belowTop=anchorRect.bottom+8;
+    const aboveTop=anchorRect.top-wantedHeight-8;
+    const enoughBelow=(belowTop+wantedHeight)<=Math.min(viewBottom-margin,appRect.bottom-margin);
+    const enoughAbove=aboveTop>=Math.max(viewTop+margin,appRect.top+margin);
+    let direction=cfg.preferred||'below';
+    if(direction==='below'&&!enoughBelow&&enoughAbove)direction='above';
+    if(direction==='above'&&!enoughAbove&&enoughBelow)direction='below';
+    if(!enoughBelow&&!enoughAbove)direction=((anchorRect.top-appRect.top)>(appRect.bottom-anchorRect.bottom))?'above':'below';
+    let top;
+    let maxHeight;
+    if(direction==='above'){
+      maxHeight=Math.max(160,Math.min(520,anchorRect.top-Math.max(viewTop+margin,appRect.top+margin)-8));
+      top=Math.max(viewTop+margin,anchorRect.top-Math.min(wantedHeight,maxHeight)-8);
+    }else{
+      top=belowTop;
+      maxHeight=Math.max(160,Math.min(520,Math.min(viewBottom-margin,appRect.bottom-margin)-top));
     }
-    job.status='queued';
-    job.short=job.short||patientShortGuess();
-    scanState.next='page';
-    return job;
-  }
-  function scanStateSnapshot(){
-    return {next:scanState.next,activeIndex:scanState.activeIndex,busy:scanState.busy,jobs:scanState.jobs.map(job=>({id:job.id,label:job.label,short:job.short,type:job.type,status:job.status,pages:job.pages.map(page=>({name:page.name,size:page.size,type:page.type})),hasResult:!!job.result,warnings:job.warnings||[]}))};
-  }
-  function setScanStatus(text){const el=$('scanStatus'); if(el){el.classList.remove('hidden'); el.textContent=text||'Bereit.';}}
-  function ensureScanV295Styles(){
-    if(document.getElementById('kggV295ScanCss'))return;
-    const style=document.createElement('style');
-    style.id='kggV295ScanCss';
-    style.textContent='.kggScanV295{display:grid;gap:10px}.kggScanV295 .scanDecisionBackdrop{position:fixed;inset:0;z-index:99980;background:rgba(7,16,39,.34);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}.kggScanV295 .scanDecision{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:99990;width:min(92vw,500px);background:#fff;border:2px solid #1b2230;border-radius:22px;padding:14px;box-shadow:0 18px 55px rgba(7,16,39,.22)}.kggScanV295 .scanDecision h3{font-size:22px;margin:0 0 6px}.kggScanV295 .scanDecisionBtns{display:grid;gap:10px;margin-top:10px}.kggScanV295 .scanDecisionBtns.scanDecisionRepeatSource{grid-template-columns:1fr 1fr}.kggScanV295 .scanDecisionBtns.scanDecisionRepeatSource .scanRepeatBtn{min-height:58px;border:2px solid #1b2230;background:#fff;color:#071027;border-radius:16px;font-weight:1000;box-shadow:0 3px 10px rgba(7,16,39,.08)}.kggScanV295 .scanDecisionBtns.scanDecisionRepeatSource .scanFinishBtn{grid-column:1/-1;min-height:64px;border-radius:18px;font-size:20px;box-shadow:0 8px 22px rgba(7,16,39,.22)}.kggScanV295 .scanJobCard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:var(--shadow)}.kggScanV295 .scanJobCard.warn{border-color:#f2d38a;background:#fff8e8}.kggScanV295 .scanJobCard.good{border-color:#93d8a0;background:#f4fff6}.kggScanV295 .scanJobHead{display:flex;justify-content:space-between;gap:8px;align-items:center}.kggScanV295 .scanFileList{font-size:12px;color:var(--muted);font-weight:850;margin-top:6px}.kggScanV295 .scanResultText{width:100%;min-height:118px;border:1px solid var(--line);border-radius:14px;padding:10px;font-size:13px;line-height:1.35;margin-top:8px}.kggScanV295 .scanCardActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.kggScanV295 .scanCardActionsCompact{grid-template-columns:1fr 1.15fr}.kggScanV295 input.scanShort{width:100%;border:1px solid var(--line);border-radius:12px;padding:9px;font-size:14px;margin-top:8px}.kggScanV295 .scanWarning{font-size:12px;color:#8a5a00;font-weight:850;margin-top:6px}.kggScanV295 .scanJobCard.collapsed{padding:9px 12px;background:#f7fff8;border-color:#93d8a0}.kggScanV295 .scanJobCard.collapsed .scanCollapsedHint{display:block;font-size:12px;color:#54715a;font-weight:900;margin-top:2px}.kggScanV295 .scanJobTopActions{display:flex;align-items:center;gap:6px;flex:0 0 auto}.kggScanV295 .scanMiniBtn{border:1px solid var(--line);background:#fff;border-radius:999px;min-width:32px;height:32px;padding:0 8px;font-weight:1000;line-height:1;color:#071027}.kggScanV295 .scanRemoveBtn{border:1px solid rgba(226,59,84,.32);background:#fff5f7;color:#e23b54;border-radius:999px;width:34px;height:34px;padding:0;font-size:20px;font-weight:1000;line-height:1}.kggScanV295 .scanJobHeadMain{min-width:0;display:grid;gap:2px}.kggScanV295 .scanJobHeadMain b,.kggScanV295 .scanJobHeadMain small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}@media(max-width:520px){.kggScanV295 .scanCardActions{grid-template-columns:1fr}.kggScanV295 .scanDecisionBtns{grid-template-columns:1fr}.kggScanV295 .scanDecisionBtns.scanDecisionRepeatSource{grid-template-columns:1fr}}';
-    document.head.appendChild(style);
-  }
-  function renderScanDecisionOverlay(){
-    const id='kggScanDecisionOverlay';
-    let layer=document.getElementById(id);
-    if(!scanState.decision){if(layer)layer.remove();return;}
-    if(!layer){
-      layer=document.createElement('div');
-      layer.id=id;
-      layer.className='kggScanV295';
-      document.body.appendChild(layer);
-    }
-    layer.innerHTML='<div class="scanDecisionBackdrop" aria-hidden="true"></div><div class="scanDecision" role="dialog" aria-modal="true"><h3>Foto hinzugef&uuml;gt</h3><p class="notice">Was kommt als N&auml;chstes?</p><div class="scanDecisionBtns scanDecisionRepeatSource"><button type="button" class="scanRepeatBtn" onclick="window.KGGScan.repeatSource(\'page\')">+ weitere Seite zu diesem Plan</button><button type="button" class="scanRepeatBtn" onclick="window.KGGScan.repeatSource(\'plan\')">+ weiterer Plan / Patient</button><button type="button" class="primary scanFinishBtn" onclick="window.KGGScan.start()">Fertig</button></div></div>';
-  }
-  function renderScanPreview(){
-    ensureScanV295Styles();
-    renderScanDecisionOverlay();
-    const preview=$('scanPreview');
-    if(!preview)return;
-    const useInbox=!!$('scannedPlansBlock');
-    const hasContent=(useInbox?(scanState.busy||scanState.lastError):(scanState.jobs.length||scanState.busy||scanState.lastError));
-    preview.classList.toggle('hidden',!hasContent);
-    if(!hasContent){preview.innerHTML='';return;}
-    const jobsHtml=useInbox?'':scanState.jobs.map((job,index)=>{
-      const resultText=scanResultToCopyText(job);
-      const quality=job.result&&job.result.quality||{};
-      const warn=[...(job.warnings||[]),...((quality.warnings)||[])];
-      const cls=job.result?(quality.ok===false?'warn':'good'):(warn.length?'warn':'');
-      const collapsed=!!job.collapsed;
-      const typeLabel=job.type==='qr'?'QR-Plan':'Papierplan';
-      const title=escapeHtml(job.short||job.label);
-      const meta=escapeHtml(typeLabel+' · '+job.pages.length+' Bild(er)');
-      const head='<div class="scanJobHead"><div class="scanJobHeadMain"><b>'+title+'</b><small>'+meta+'</small>'+(collapsed?'<span class="scanCollapsedHint">eingeklappt · antippen zum Öffnen</span>':'')+'</div><div class="scanJobTopActions"><button type="button" class="scanMiniBtn" onclick="window.KGGScan.toggleCollapse('+index+')" aria-label="Scankarte '+(collapsed?'ausklappen':'einklappen')+'">'+(collapsed?'▾':'▴')+'</button><button type="button" class="scanRemoveBtn" onclick="window.KGGScan.removeJob('+index+')" aria-label="Scankarte entfernen">×</button></div></div>';
-      if(collapsed){
-        return '<div class="scanJobCard '+cls+' collapsed">'+head+'</div>';
-      }
-      return '<div class="scanJobCard '+cls+'">'+
-        head+
-        '<input class="scanShort" value="'+escapeHtml(job.short||'')+'" placeholder="lokales Kürzel, z. B. Max M." oninput="window.KGGScan.setShort('+index+',this.value)">'+
-        '<div class="scanFileList">'+escapeHtml(job.pages.map(p=>p.name).join(' · ')||'Noch kein Bild')+'</div>'+
-        (warn.length?'<div class="scanWarning">Prüfen: '+escapeHtml(warn.join(' · '))+'</div>':'')+
-        '<textarea id="kggScanCopyField'+index+'" class="scanResultText" readonly>'+escapeHtml(resultText||'Noch nicht ausgelesen.')+'</textarea>'+
-        '<div class="scanCardActions scanCardActionsCompact">'+
-          '<button type="button" class="mutedBtn" onclick="window.KGGScan.copyResult('+index+')">kopieren</button>'+
-          '<button type="button" class="primary" onclick="window.KGGScan.applyResult('+index+')">weiter bearbeiten</button>'+
-        '</div></div>';
-    }).join('');
-    const decisionHtml='';
-    preview.innerHTML='<div class="kggScanV295">'+decisionHtml+(scanState.busy?'<div class="notice"><b>Scan läuft …</b></div>':'')+(scanState.lastError?'<div class="notice danger">'+escapeHtml(scanState.lastError)+'</div>':'')+jobsHtml+'</div>';
-  }
-  function collapseScanCards(reason){
-    if(shouldIgnorePhoneScrollToggle())return scanStateSnapshot();
-    let changed=false;
-    (scanState.jobs||[]).forEach(job=>{if(job&&!job.collapsed){job.collapsed=true; changed=true;}});
-    if(changed){scanState.lastCollapseReason=reason||'ui'; renderScanPreview();}
-    return scanStateSnapshot();
-  }
-  function removeScanJob(index){
-    const i=Number(index)||0;
-    if(i>=0&&i<scanState.jobs.length){scanState.jobs.splice(i,1);}
-    if(scanState.activeIndex>=scanState.jobs.length)scanState.activeIndex=Math.max(0,scanState.jobs.length-1);
-    if(!scanState.jobs.length){scanState.decision=false; state.scanPanelOpen='plan';}
-    renderScanPreview();
-    render();
-    return scanStateSnapshot();
-  }
-  function toggleScanJobCollapse(index){
-    if(shouldIgnorePhoneScrollToggle())return scanStateSnapshot();
-    const job=scanState.jobs[Number(index)||0];
-    if(job){job.collapsed=!job.collapsed; renderScanPreview();}
-    return scanStateSnapshot();
-  }
-  function initScanAutoCollapseOnUiOpen(){
-    if(window.__kggScanAutoCollapseBound)return;
-    window.__kggScanAutoCollapseBound=true;
-    const watchedIds=['editorModal','packageSaveModal','bankDeleteModal','shareModal','largePdfModal','longMediaConfirmModal','installPromptModal','adminSecretsModal','sharedBankModal','pdfPreviewModal','recentList','packageList','baseFields','bankContent'];
-    const visible=function(el){
-      if(!el)return false;
-      if(el.classList.contains('open'))return true;
-      if(el.id==='recentList'||el.id==='packageList'||el.id==='baseFields'||el.id==='bankContent')return !el.classList.contains('hidden');
-      return false;
-    };
-    const previous=new Map();
-    watchedIds.forEach(id=>{const el=$(id); if(el)previous.set(id,visible(el));});
-    const check=function(id,el){
-      if(shouldIgnorePhoneScrollToggle())return;
-      const now=visible(el);
-      const before=previous.get(id)||false;
-      previous.set(id,now);
-      if(now&&!before)collapseScanCards('auto_'+id);
-    };
-    const observer=new MutationObserver(records=>{
-      records.forEach(record=>{const el=record.target; if(el&&el.id)check(el.id,el);});
-    });
-    watchedIds.forEach(id=>{
-      const el=$(id);
-      if(el)observer.observe(el,{attributes:true,attributeFilter:['class','style','open']});
-    });
-    document.addEventListener('click',ev=>{
-      if(shouldIgnorePhoneScrollToggle())return;
-      const target=ev.target&&ev.target.closest?ev.target.closest('button,.drawerBtn,.baseCard,.dbTitle,.modal,.sheet'):null;
-      if(!target)return;
-      if(target.closest&&target.closest('#scanPreview'))return;
-      const opensOtherUi=target.id==='baseToggle'||target.id==='recentToggle'||target.id==='packageToggle'||target.id==='bankToggle'||target.id==='dbTitle'||target.id==='finishBtn'||target.closest('.modal');
-      if(opensOtherUi)setTimeout(()=>collapseScanCards('click_'+(target.id||'ui')),0);
-    },true);
-  }
-  async function processPaperJob(job){
-    if(job.result&&job.type==='qr')return job.result;
-    if(!job.pages.length)throw new Error(job.label+': keine Bilder.');
-    const texts=[]; const raw=[]; const warnings=[];
-    for(let i=0;i<job.pages.length;i++){
-      const page=job.pages[i];
-      if(!page.file){warnings.push('Bilddatei nicht mehr im Speicher: '+page.name); continue;}
-      setScanStatus(job.label+': Seite '+(i+1)+' wird ausgelesen …');
-      const result=await callGeminiPaperFallback(page.file);
-      if(result.planText)texts.push(result.planText);
-      raw.push(result.rawText||'');
-      if(result.quality&&result.quality.warnings)warnings.push(...result.quality.warnings);
-    }
-    const planText=texts.join(', ').replace(/(?:,\s*){2,}/g,', ').trim();
-    const quality=scanPaperQuality(planText,{raw});
-    quality.warnings=[...new Set([...(quality.warnings||[]),...warnings])];
-    quality.ok=!quality.warnings.length;
-    job.result={type:'paper',planText,rawText:raw.join('\n---\n'),quality};
-    job.status='ready';
-    return job.result;
-  }
-  async function copyTextWithFallback(text,fieldId){
-    const field=$(fieldId);
-    let ok=false;
-    try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(text);ok=true;}}catch(err){}
-    if(!ok&&field){
-      try{field.focus({preventScroll:true});field.select();field.setSelectionRange(0,field.value.length);ok=document.execCommand('copy');}catch(err){}
-    }
-    return ok;
-  }
-  function scanValueToString(value){
-    if(value==null||value==='')return '';
-    const n=Number(value);
-    if(Number.isFinite(n))return String(Math.round(n*100)/100).replace('.',',');
-    return String(value).trim();
-  }
-  function scanSetsFromNumberSequence(nums,source){
-    const values=(nums||[]).map(Number).filter(Number.isFinite);
-    const side=normalizeSideMode(source&&source.side||source&&source.side_mode||source&&source.laterality||source&&source.seite||'BI');
-    const metricUnit=scanUnitLabel(source&&source.unit||source&&source.metricUnit||source&&source.metric_unit,(source&&source.measure)==='Sek.'?'Sek.':'Wdh');
-    const loadUnit=scanUnitLabel(source&&source.weightUnit||source&&source.loadUnit||source&&source.weight_unit,/sek|zeit|time/i.test(metricUnit)?'keine':'kg');
-    const isTime=/zeit|sek|sec|min|time/i.test(metricUnit)||/keine/i.test(loadUnit);
-    const pains=scanFindPainValues(source||{});
-    const sets=[];
-    if(side==='LR'&&values.length>=12){
-      for(let i=0;i<3;i++){
-        const b=i*4;
-        sets.push({
-          li:{load:scanValueToString(values[b]),metric:scanValueToString(values[b+1])},
-          re:{load:scanValueToString(values[b+2]),metric:scanValueToString(values[b+3])},
-          pain:scanValueToString(pains[i]||values[12+i]||'')
-        });
-      }
-      return sets;
-    }
-    if(isTime){
-      for(let i=0;i<3;i++){
-        const idx=values.length>=6?i*2+1:i;
-        const metric=scanValueToString(values[idx]);
-        if(metric)sets.push({metric,pain:scanValueToString(pains[i]||'')});
-      }
-      return sets;
-    }
-    if(values.length>=9){
-      for(let i=0;i<3;i++){
-        const b=i*3;
-        sets.push({load:scanValueToString(values[b]),metric:scanValueToString(values[b+1]),pain:scanValueToString(values[b+2]||pains[i]||'')});
-      }
-      return sets;
-    }
-    if(values.length>=6){
-      for(let i=0;i<3;i++){
-        sets.push({load:scanValueToString(values[i*2]),metric:scanValueToString(values[i*2+1]),pain:scanValueToString(pains[i]||'')});
-      }
-      return sets;
-    }
-    return [];
-  }
-  function scanPlanExerciseFromNumbers(name,numbers,source){
-    const cleanName=stripScanExerciseName(name||scanExerciseName(source));
-    if(!cleanName)return null;
-    const metricUnit=scanUnitLabel(source&&source.unit||source&&source.metricUnit||source&&source.metric_unit,(source&&source.measure)==='Sek.'?'Sek.':'Wdh');
-    const loadUnit=scanUnitLabel(source&&source.weightUnit||source&&source.loadUnit||source&&source.weight_unit,/sek|zeit|time/i.test(metricUnit)?'keine':'kg');
-    const side=normalizeSideMode(source&&source.side||source&&source.side_mode||source&&source.laterality||source&&source.seite||'BI');
-    const scanSets=scanSetsFromNumberSequence(numbers, {...(source||{}),unit:metricUnit,metricUnit,weightUnit:loadUnit,loadUnit,side});
-    const first=scanSets[0]||{};
-    const exact=exactBankExercise(cleanName);
-    const id=makeLocalId();
-    const isTime=/zeit|sek|sec|min|time/i.test(metricUnit)||/keine/i.test(loadUnit);
-    return ensureUiExerciseShape({
-      ...(exact||{}),
-      id,localId:id,sourceId:exact?exact.id:'',bankId:exact?exact.id:'',
-      name:exact?exact.name:cleanName,
-      sets:3,side,unit:isTime?'Zeit':'Wdh',metricUnit:isTime?'Sek.':'Wdh',weightUnit:isTime?'keine':loadUnit,loadUnit:isTime?'keine':loadUnit,measure:isTime?'zeit':'wdh',
-      startLoad:(first&&first.load)||'',
-      startMetric:(first&&first.metric)||'',
-      scanSets,scanImported:true,scanSource:'Scan: kg/Wdh übernommen',
-      rawText:scanSets.length?kggScanPlanExerciseToText(cleanName,scanSets,{metricUnit:isTime?'Sek.':'Wdh',loadUnit:isTime?'keine':loadUnit,side}):(source&&source.rawText||cleanName),
-      pendingNew:!exact,needsReview:!exact
-    });
-  }
-  function kggScanPlanExerciseToText(name,sets,source){
-    const metricUnit=source&&source.metricUnit||'Wdh';
-    const loadUnit=source&&source.loadUnit||'kg';
-    const isTime=/zeit|sek|sec|min|time/i.test(metricUnit)||/keine/i.test(loadUnit);
-    const lines=[name];
-    (sets||[]).slice(0,3).forEach((set,i)=>{
-      if(set&&set.li||set&&set.re){
-        const li=set.li||{}, re=set.re||{};
-        lines.push('Satz '+(i+1)+':');
-        lines.push('  Li: '+(li.metric||'')+' '+metricUnit+(li.load?' @ '+li.load+' '+loadUnit:''));
-        lines.push('  Re: '+(re.metric||'')+' '+metricUnit+(re.load?' @ '+re.load+' '+loadUnit:''));
-        if(set.pain)lines.push('  Schmerz: '+set.pain+'/10');
-      }else if(isTime){
-        lines.push('Satz '+(i+1)+': '+(set&&set.metric||'')+' '+metricUnit+(set&&set.pain?' · Schmerz: '+set.pain+'/10':''));
-      }else{
-        lines.push('Satz '+(i+1)+': '+(set&&set.metric||'')+' '+metricUnit+(set&&set.load?' @ '+set.load+' '+loadUnit:'')+(set&&set.pain?' · Schmerz: '+set.pain+'/10':''));
-      }
-    });
-    return lines.join('\n');
-  }
-  function scanPlanExerciseFromPayloadItem(item,fallbackBox){
-    let source=item;
-    if(Array.isArray(item)){try{source=expandKggH2Exercise(item);}catch(err){source={name:item[0]||''};}}
-    const name=scanExerciseName(source)||fallbackBox&&fallbackBox.name||'';
-    const numbers=scanFindNumberSequence(source);
-    return scanPlanExerciseFromNumbers(name,numbers,{...(source||{}),measure:fallbackBox&&fallbackBox.measure});
-  }
-  function scanPlanExercisesFromDocText(text){
-    const lines=String(text||'').split(/\n+/).map(l=>l.trim()).filter(Boolean);
-    const out=[];
-    let current=null;
-    lines.forEach(line=>{
-      if(/^Satz\s+\d+\s*:/i.test(line)&&current){
-        const m=line.match(/^Satz\s+(\d+)\s*:\s*([\d,.]+)?\s*(wdh|wh|sek\.?|sec|s)?(?:\s*@\s*([\d,.]+)\s*(kg|hub|stufe|watt|bar)?)?/i);
-        if(m){
-          const metric=scanValueToString(m[2]||'');
-          const load=scanValueToString(m[4]||'');
-          const metricUnit=/sek|sec|\bs\b/i.test(m[3]||'')?'Sek.':'Wdh';
-          current.metricUnit=metricUnit;
-          if(metricUnit==='Sek.')current.weightUnit='keine';
-          current.scanSets=current.scanSets||[];
-          current.scanSets[Number(m[1])-1]={metric,load};
-        }
-      }else if(!/^Typ:|^Prüfen:/i.test(line)){
-        if(current)out.push(current);
-        current={name:stripScanExerciseName(line),scanSets:[],sets:3,side:'BI',metricUnit:'Wdh',weightUnit:'kg'};
-      }
-    });
-    if(current)out.push(current);
-    return out.filter(ex=>ex.name).map(ex=>{
-      const isTime=/Sek\./i.test(ex.metricUnit)||ex.weightUnit==='keine';
-      const first=(ex.scanSets||[])[0]||{};
-      return scanPlanExerciseFromNumbers(ex.name,(ex.scanSets||[]).flatMap(s=>isTime?[0,s&&s.metric||'']:[s&&s.load||'',s&&s.metric||'']),{unit:isTime?'Sek.':'Wdh',metricUnit:isTime?'Sek.':'Wdh',weightUnit:isTime?'keine':'kg',loadUnit:isTime?'keine':'kg'});
-    }).filter(Boolean);
-  }
-  function scanPlanExercisesFromResult(result){
-    if(!result)return [];
-    if(Array.isArray(result.groups)&&String(result.layout||'')===KGG_CURRENT_LAYOUT_ID){
-      return KGG_CURRENT_LAYOUT_BOXES.map((box,i)=>scanPlanExerciseFromNumbers(box.name,result.groups[i]||[],{measure:box.measure,unit:box.measure,metricUnit:box.measure,weightUnit:box.measure==='Sek.'?'keine':'kg',loadUnit:box.measure==='Sek.'?'keine':'kg'})).filter(Boolean);
-    }
-    const payloadExercises=scanPayloadExercises(result.json||result);
-    if(payloadExercises.length)return payloadExercises.map(scanPlanExerciseFromPayloadItem).filter(Boolean);
-    const text=result.planText||result.copyText||result.rawText||'';
-    return scanPlanExercisesFromDocText(text);
-  }
-  function appendScanExercisesToCurrentPlan(exercises,reason){
-    const clean=(exercises||[]).filter(ex=>ex&&ex.name);
-    if(!clean.length){setScanStatus('Kein Übungstext zum Übernehmen.');return false;}
-    const input=$('exerciseInput');
-    if(input&&input.value.trim())syncPlanFromTextInput('scan_preserve_existing_text_before_apply');
-    state.plan=[...(state.plan||[]),...clean.map(ensureUiExerciseShape)];
-    state.bankOpen=false;
-    state.liveDraftId=null;
-    state.scanPanelOpen='plan';
-    syncStatePlanToStore(reason||'scan_apply_structured_exercises');
-    syncTextInputFromPlan(reason||'scan_apply_structured_exercises_text');
-    save();
-    render();
-    setScanStatus('Scan-Ergebnis mit kg/Wdh übernommen.');
+    top=clampNumber(top,viewTop+margin,Math.max(viewTop+margin,viewBottom-margin-120));
+    const originX=clampNumber((anchorRect.left+anchorRect.width/2)-left,24,width-24);
+    panel.style.setProperty('--kgg-overlay-top',Math.round(top)+'px');
+    panel.style.setProperty('--kgg-overlay-max-height',Math.round(maxHeight)+'px');
+    panel.style.setProperty('--kgg-overlay-origin',Math.round(originX)+'px '+(direction==='above'?'bottom':'top'));
+    tabletOverlayState.kind=kind;
+    document.body.classList.add('kggTabletOverlayActive');
     return true;
   }
-  function applyScanResultToCurrentPlan(result,reason){
-    const structured=scanPlanExercisesFromResult(result);
-    if(structured.length)return appendScanExercisesToCurrentPlan(structured,reason||'scan_apply_result_structured');
-    const text=scanResultToApplyText(result)||scanResultToPlanText(result)||'';
-    const fromText=scanPlanExercisesFromDocText(text);
-    if(fromText.length)return appendScanExercisesToCurrentPlan(fromText,reason||'scan_apply_result_text_structured');
-    return applyScanTextToCurrentPlan(text,reason||'scan_apply_result_fallback');
-  }
-  function applyScanTextToCurrentPlan(text,reason){
-    const clean=String(text||'').replace(/^Typ:.*$/gm,'').replace(/^Prüfen:.*$/gm,'').replace(/\n+/g,', ').replace(/(?:,\s*){2,}/g,', ').trim();
-    if(!clean){setScanStatus('Kein Übungstext zum Übernehmen.');return false;}
-    const input=$('exerciseInput');
-    if(!input)return false;
-    const existing=String(input.value||'').trim();
-    input.value=existing?withTrailingExerciseComma(existing.replace(/,+$/,'')+', '+clean):withTrailingExerciseComma(clean);
-    syncPlanFromTextInput(reason||'scan_v319_apply_result_preserve_text');
-    state.bankOpen=false;
-    state.scanPanelOpen='plan';
-    save();
-    render();
-    setScanStatus('Scan-Ergebnis übernommen.');
+  function openTabletAnchoredPanel(kind){
+    if(!isTabletLayout())return false;
+    const cfg=tabletPanelConfig(kind);
+    if(!cfg)return false;
+    const needsRender=closeTabletFloatingPanelsExcept(kind);
 ```

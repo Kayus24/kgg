@@ -4,424 +4,424 @@
 - Lines: 21841-22260
 
 ```html
-  }
-  function closeLongMediaConfirmModal(){$('longMediaConfirmModal').classList.remove('open');}
-  function confirmLongMediaShare(){closeLongMediaConfirmModal(); enableLongMediaShare();}
-  function setupPatientLinkCopyLongPress(){
-    const btn=$('copyPatientLink');
-    if(!btn||btn.dataset.longPressBound)return;
-    btn.dataset.longPressBound='1';
-    let timer=null;
-    let holding=false;
-    const reset=()=>{if(timer){clearTimeout(timer);timer=null;} if(holding){holding=false;setPatientCopyButtonLabel();}};
-    btn.addEventListener('pointerdown',()=>{
-      if(!lastPatientSharePlanSnapshot)return;
-      holding=true;
-      btn.textContent='5 Sek. halten für 24h';
-      timer=setTimeout(()=>{
-        timer=null;
-        holding=false;
-        copyPatientLinkSuppressClickUntil=Date.now()+700;
-        openLongMediaConfirmModal();
-      },MEDIA_LONG_PRESS_MS);
-    });
-    btn.addEventListener('pointerup',reset);
-    btn.addEventListener('pointerleave',reset);
-    btn.addEventListener('pointercancel',reset);
-    btn.onclick=copyPatientLink;
-  }
-  async function renderPatientShareOutput(options){
-    const output=$('patientOutputBox'), choices=$('finishChoices'), close=$('closeShare'), finishNotice=$('finishNotice');
-    const planOverride=options&&options.plan;
-    const ttlSeconds=Number(options&&options.ttlSeconds)||currentMediaShareTtlSeconds();
-    if(finishNotice)finishNotice.textContent='Ausgabe wird vorbereitet ...';
-    const mediaPrep=await prepareMediaUploadsForPatientShare({plan:planOverride,ttlSeconds,force:!!(options&&options.force)});
-    if(!mediaPrep.ok){
-      if(output)output.classList.add('hidden');
-      if(choices)choices.classList.remove('hidden');
-      if(close)close.classList.add('hidden');
-      if(finishNotice)finishNotice.textContent=mediaPrep.message||'Medien fehlgeschlagen. Plan bleibt offen.';
-      return '';
+        }
+      }catch(err){}
+      const bitmapRaw=await scanDetectQrViaBitmapFromCanvas(canvas,detector);
+      if(bitmapRaw)return bitmapRaw;
     }
-    const share=buildPatientShareFromCurrentPlan(planOverride,{ttlSeconds});
-    lastPatientSharePlanSnapshot=cloneSharePlan(share.plan);
-    if(output)output.classList.remove('hidden');
-    if(choices)choices.classList.add('hidden');
-    if(close)close.classList.remove('hidden');
-    if(finishNotice)finishNotice.textContent='';
-    const link=$('patientAppLink'), notice=$('patientShareNotice'), box=$('patientQrBox'), status=$('patientQrStatus'), copyBtn=$('copyPatientLink');
-    $('shareText').value='INTERNE DEBUG-TESTAUSGABE – nicht an Patient:innen weitergeben\n\nLokaler Testlink:\n'+share.debugUrl+'\n\nPayload JSON:\n'+JSON.stringify(share.payload,null,2);
-    const dbg=$('debugPayloadBox'); if(dbg)dbg.open=false;
-    if(!share.shareable){
-      if(notice)notice.textContent='Lokaler Test.';
-      if(link){link.classList.remove('hidden'); link.href=share.debugUrl; link.textContent='Patienten-Test öffnen';}
-      if(copyBtn){copyBtn.classList.remove('hidden'); setPatientCopyButtonLabel();}
-      setManualPatientLinkField(share.debugUrl,false,false);
-      setupPatientLinkCopyLongPress();
-      if(box)box.innerHTML='<span class="qrStatus">Lokaler Test.</span>';
-      if(status)status.textContent='Testlink bereit.';
-      return share.debugUrl;
-    }
-    if(notice){
-      const mediaInfo=share.payload&&share.payload.meta&&share.payload.meta.media;
-      const longInfo=ttlSeconds>=MEDIA_UPLOAD_LONG_TTL_SECONDS?' 24h aktiv.':'';
-      notice.textContent='Patient:innen-Link bereit.'+(mediaInfo&&mediaInfo.expected?' Bilder bereit.':'')+longInfo;
-    }
-    if(link){link.classList.remove('hidden'); link.href=share.url;}
-    if(copyBtn){copyBtn.classList.remove('hidden'); setPatientCopyButtonLabel();}
-    setManualPatientLinkField(share.url,false,false);
-    setupPatientLinkCopyLongPress();
-    tryRenderQrCode(share.url);
-    return share.url;
-  }
-  function makeShare(){return buildPatientShareFromCurrentPlan().url;}
-
-  function resetFinishModal(){
-    const choices=$('finishChoices'), output=$('patientOutputBox'), close=$('closeShare'), notice=$('finishNotice'), dbg=$('debugPayloadBox'), copyBtn=$('copyPatientLink');
-    if(choices)choices.classList.remove('hidden');
-    if(output)output.classList.add('hidden');
-    if(close)close.classList.add('hidden');
-    if(notice)notice.textContent='';
-    if(dbg)dbg.open=false;
-    patientShareTtlSeconds=MEDIA_UPLOAD_TTL_SECONDS;
-    lastPatientSharePlanSnapshot=null;
-    if(copyBtn)copyBtn.textContent='Link kopieren';
-    setManualPatientLinkField('',false,false);
-  }
-  function openFinishModal(){resetFinishModal(); $('shareModal').classList.add('open');}
-  function closeFinishModal(){$('shareModal').classList.remove('open');}
-  function openLargePdfModal(){$('largePdfModal').classList.add('open');}
-  function closeLargePdfModal(){$('largePdfModal').classList.remove('open');}
-  function archiveAndCloseCurrentPlan(reason){
-    const plan=getCurrentPlanForOutput(reason||'ui_finish_archive');
-    const exercises=Array.isArray(plan.exercises)?plan.exercises:[];
-    if(exercises.length){
-      const patient=plan.patient||{};
-      const title=patient.name||plan.title||'KGG Plan';
-      const entry={id:plan.id||makeLocalId(),name:title,date:new Date().toISOString(),patient:{...patient},exercises:exercises.map(ex=>({...ex})),source:reason||'finished'};
-      state.recent=[entry].concat(state.recent||[]).slice(0,20);
-    }
-    state.plan=[];
-    state.liveDraftId=null;
-    state.bankOpen=false;
-    state.planText='';
-    if($('exerciseInput'))$('exerciseInput').value='';
-    syncStatePlanToStore(reason||'ui_finish_close_current_plan');
-    save();
-    render();
-  }
-  async function finishWithPdf(options){
-    const notice=$('finishNotice');
-    const hasModeOverride=!!(options&&Object.prototype.hasOwnProperty.call(options,'large'));
-    const previousLargeMode=state.largePdfMode;
-    if(hasModeOverride){state.largePdfMode=!!options.large; applyLargePdfMode();}
-    if(notice)notice.textContent='PDF wird erstellt ...';
-    try{
-      const pdfResult=await buildPdfFromCurrentPlan();
-      if(hasModeOverride){state.largePdfMode=previousLargeMode; applyLargePdfMode();}
-      archiveAndCloseCurrentPlan('ui_finish_pdf');
-      closeFinishModal();
-      openPdfPreview(pdfResult);
-    }catch(err){
-      if(hasModeOverride){state.largePdfMode=previousLargeMode; applyLargePdfMode(); save();}
-      console.warn('PDF konnte nicht erzeugt werden:',err);
-      if(notice)notice.textContent='PDF fehlgeschlagen. Plan bleibt offen.';
-    }
-  }
-  async function finishWithPatientApp(){
-    const notice=$('finishNotice');
-    try{
-      const url=await renderPatientShareOutput();
-      if(!url)return;
-      archiveAndCloseCurrentPlan('ui_finish_patient_app');
-    }catch(err){
-      console.warn('Patienten-Ausgabe konnte nicht erzeugt werden:',err);
-      if(notice)notice.textContent='Ausgabe fehlgeschlagen. Plan bleibt offen.';
-    }
-  }
-
-  function decodePatientPayloadFromHash(){
-    const hash=String(location.hash||'');
-    const publicMatch=hash.match(/^#KGGH2:(.+)$/i);
-    if(publicMatch){
-      try{return convertKggH2PayloadToPatientPayload(decodeKggJsonBase64Url(publicMatch[1]));}
-      catch(err){console.warn('KGGH2 Patienten-Link konnte nicht gelesen werden:',err); return {error:true};}
-    }
-    const match=hash.match(/^#kgg=(.+)$/);
-    if(!match)return null;
-    try{
-      const encoded=decodeURIComponent(match[1]).replace(/-/g,'+').replace(/_/g,'/');
-      const padded=encoded+'='.repeat((4-encoded.length%4)%4);
-      return JSON.parse(decodeURIComponent(escape(atob(padded))));
-    }catch(err){
-      console.warn('Patienten-Link konnte nicht gelesen werden:',err);
-      return {error:true};
-    }
-  }
-  function base64UrlToBytes(value){
-    const text=String(value||'').replace(/-/g,'+').replace(/_/g,'/');
-    const padded=text+'='.repeat((4-text.length%4)%4);
-    const binary=atob(padded);
-    const bytes=new Uint8Array(binary.length);
-    for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
-    return bytes;
-  }
-  function patientMediaDb(){
-    return new Promise((resolve,reject)=>{
-      if(!('indexedDB' in window)){reject(new Error('IndexedDB nicht verfuegbar'));return;}
-      const req=indexedDB.open('kgg_patient_media_v1',1);
-      req.onupgradeneeded=()=>{const db=req.result; if(!db.objectStoreNames.contains('images'))db.createObjectStore('images',{keyPath:'id'});};
-      req.onsuccess=()=>resolve(req.result);
-      req.onerror=()=>reject(req.error||new Error('Patienten-Medien-Speicher nicht verfuegbar'));
-    });
-  }
-  async function patientGetCachedMedia(id){
-    const db=await patientMediaDb();
-    return new Promise(resolve=>{
-      const tx=db.transaction('images','readonly');
-      const req=tx.objectStore('images').get(id);
-      req.onsuccess=()=>resolve(req.result||null);
-      req.onerror=()=>resolve(null);
-    });
-  }
-  async function patientPutCachedMedia(record){
-    const db=await patientMediaDb();
-    return new Promise((resolve,reject)=>{
-      const tx=db.transaction('images','readwrite');
-      tx.objectStore('images').put(record);
-      tx.oncomplete=()=>resolve(record);
-      tx.onerror=()=>reject(tx.error||new Error('Bild konnte nicht lokal gespeichert werden'));
-    });
-  }
-  async function patientFetchEncryptedMedia(media){
-    if(window.KGGPatientMediaFetchAdapter&&typeof window.KGGPatientMediaFetchAdapter.fetch==='function')return window.KGGPatientMediaFetchAdapter.fetch(media);
-    if(!media.downloadUrl)throw new Error('Bild ist noch nicht bereit');
-    const res=await fetch(media.downloadUrl,{cache:'no-store'});
-    if(!res.ok)throw new Error('Bild konnte nicht geladen werden');
-    return res.blob();
-  }
-  async function patientDecryptMedia(media,encryptedBlob){
-    if(!window.crypto||!crypto.subtle)throw new Error('Web Crypto nicht verfuegbar');
-    const info=media.crypto||{};
-    if(!info.key||!info.iv)throw new Error('Medienschluessel fehlt');
-    const key=await crypto.subtle.importKey('raw',base64UrlToBytes(info.key),{name:'AES-GCM'},false,['decrypt']);
-    const encrypted=await encryptedBlob.arrayBuffer();
-    const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:base64UrlToBytes(info.iv)},key,encrypted);
-    return new Blob([plain],{type:media.mime||'image/jpeg'});
-  }
-  function updatePatientMediaBox(id,html,kind){
-    const selector='[data-patient-media-id="'+String(id).replace(/"/g,'\\"')+'"]';
-    const box=document.querySelector(selector);
-    if(!box)return;
-    box.className='patientMedia patientMedia_'+(kind||'loading');
-    box.innerHTML=html;
-  }
-  async function loadPatientMediaItem(media){
-    const id=String(media&&media.id||'');
-    if(!id)return false;
-    const cached=await patientGetCachedMedia(id);
-    if(cached&&cached.blob){
-      const url=URL.createObjectURL(cached.blob);
-      updatePatientMediaBox(id,'<img src="'+url+'" alt="Uebungsbild"><small>Bild lokal gespeichert.</small>','ready');
-      return true;
-    }
-    const encrypted=await patientFetchEncryptedMedia(media);
-    const imageBlob=await patientDecryptMedia(media,encrypted);
-    await patientPutCachedMedia({id,blob:imageBlob,mime:media.mime||'image/jpeg',savedAt:new Date().toISOString()});
-    const url=URL.createObjectURL(imageBlob);
-    updatePatientMediaBox(id,'<img src="'+url+'" alt="Uebungsbild"><small>Bild lokal gespeichert.</small>','ready');
-    return true;
-  }
-  function retryPatientMediaItem(media){
-    const id=String(media&&media.id||'');
-    if(!id)return;
-    const retryMs=Math.max(10,Number(media.retrySeconds)||MEDIA_RETRY_SECONDS)*1000;
-    const until=Date.now()+retryMs;
-    const tick=async()=>{
+    if(window.jsQR){
       try{
-        await loadPatientMediaItem(media);
+        const ctx=canvas.getContext('2d',{willReadFrequently:true});
+        const img=ctx.getImageData(0,0,canvas.width,canvas.height);
+        const code=window.jsQR(img.data,canvas.width,canvas.height,{inversionAttempts:'attemptBoth'});
+        if(code&&code.data)return code.data;
+      }catch(err){}
+    }
+    return '';
+  }
+  async function scanDetectQrDirectFromFile(file,detector){
+    if(!detector||!window.createImageBitmap)return '';
+    let bitmap=null;
+    try{
+      bitmap=await createImageBitmap(file,{imageOrientation:'from-image'});
+      const hits=await detector.detect(bitmap).catch(()=>[]);
+      if(hits&&hits.length)return hits[0].rawValue||hits[0].rawData||'';
+    }catch(err){
+      console.warn('QR-Dateibild: Direkt-BarcodeDetector fehlgeschlagen.',err);
+    }finally{
+      if(bitmap){try{bitmap.close();}catch(closeErr){}}
+    }
+    return '';
+  }
+  async function scanQrFromImageFile(file){
+    const fileName=String(file&&file.name||'Bild');
+    const fileType=String(file&&file.type||'unbekannter Typ');
+    const fileSize=Number(file&&file.size||0);
+    const heicHint=/heic|heif/i.test(fileName+' '+fileType);
+    let detector=null;
+    if('BarcodeDetector' in window){
+      try{detector=new BarcodeDetector({formats:['qr_code']});}catch(err){detector=null;}
+    }
+    if(!detector&&!window.jsQR){
+      return {
+        raw:'',
+        attempts:0,
+        reason:'QR-Erkennung ist in diesem WebView nicht verfügbar. BarcodeDetector/jsQR fehlt.',
+        debug:{fileName,fileType,fileSize,barcodeDetector:false,jsQR:false}
+      };
+    }
+
+    const direct=await scanDetectQrDirectFromFile(file,detector);
+    if(direct)return {raw:direct,attempts:1,hit:{source:'direct-bitmap',mode:'native'},debug:{fileName,fileType,fileSize}};
+
+    const crops=[
+      {id:'full',x:0,y:0,w:1,h:1},
+      {id:'center',x:.08,y:.08,w:.84,h:.84},
+      {id:'center-tight',x:.20,y:.20,w:.60,h:.60},
+      {id:'wide-center',x:.03,y:.15,w:.94,h:.70},
+      {id:'tall-center',x:.15,y:.03,w:.70,h:.94},
+      {id:'top-left',x:0,y:0,w:.62,h:.62},
+      {id:'top-right',x:.38,y:0,w:.62,h:.62},
+      {id:'bottom-left',x:0,y:.38,w:.62,h:.62},
+      {id:'bottom-right',x:.38,y:.38,w:.62,h:.62},
+      {id:'top-band',x:0,y:0,w:1,h:.48},
+      {id:'bottom-band',x:0,y:.52,w:1,h:.48},
+      {id:'left-band',x:0,y:0,w:.48,h:1},
+      {id:'right-band',x:.52,y:0,w:.48,h:1},
+      {id:'top-third-left',x:0,y:0,w:.54,h:.44},
+      {id:'top-third-right',x:.46,y:0,w:.54,h:.44},
+      {id:'mid-third-left',x:0,y:.28,w:.54,h:.44},
+      {id:'mid-third-right',x:.46,y:.28,w:.54,h:.44},
+      {id:'bottom-third-left',x:0,y:.56,w:.54,h:.44},
+      {id:'bottom-third-right',x:.46,y:.56,w:.54,h:.44}
+    ];
+    const modes=['normal','softContrast','contrast','thresholdLow','threshold','thresholdHigh','invert'];
+    const maxSides=[4096,3200,2600,1800,1200];
+    const rotations=[0,90,180,270];
+    const seenBases=new Set();
+    let attempts=1;
+    let lastReason='';
+    let lastCanvas='';
+    for(const maxSide of maxSides){
+      let base=null;
+      try{
+        base=await scanImageCanvasFromFile(file,maxSide);
       }catch(err){
-        if(Date.now()<until){
-          updatePatientMediaBox(id,'<span>Bild wird geladen ...</span><small>Die App versucht es automatisch erneut.</small>','loading');
-          setTimeout(tick,4000);
-        }else{
-          updatePatientMediaBox(id,'<span>Bild konnte nicht geladen werden.</span><small>Der Plan bleibt ohne Bild nutzbar. Bitte bei Bedarf neuen QR-Code erstellen lassen.</small>','error');
+        lastReason=err&&err.message||String(err);
+        continue;
+      }
+      const key=base.width+'x'+base.height;
+      lastCanvas=key;
+      if(seenBases.has(key))continue;
+      seenBases.add(key);
+      for(const rot of rotations){
+        const rotated=scanRotateCanvas(base,rot);
+        for(const box of crops){
+          const crop=box.id==='full'?rotated:scanCropCanvas(rotated,box);
+          const prepared=scanScaleCanvas(crop,860,3200);
+          for(const mode of modes){
+            attempts++;
+            const target=scanFilteredCanvas(prepared,mode);
+            const raw=await detectQrOnCanvas(target,detector);
+            if(raw){
+              return {
+                raw,
+                attempts,
+                hit:{rot,crop:box.id,mode,maxSide,canvas:key,detector:!!detector,jsQR:!!window.jsQR},
+                debug:{fileName,fileType,fileSize,lastCanvas:key}
+              };
+            }
+          }
         }
       }
+    }
+    const support='BarcodeDetector='+(!!detector)+', jsQR='+(!!window.jsQR);
+    const heicText=heicHint?' HEIC/HEIF wird von Android WebView oft nicht als Canvas-Bild dekodiert; bitte als Screenshot/PNG/JPG testen.':'';
+    return {
+      raw:'',
+      attempts,
+      reason:(lastReason?lastReason+'; ':'')+'Kein QR im hochgeladenen Bild gefunden. '+support+', Datei='+fileName+', Typ='+fileType+', Groesse='+fileSize+', Canvas='+lastCanvas+'.'+heicText,
+      debug:{fileName,fileType,fileSize,attempts,lastCanvas,barcodeDetector:!!detector,jsQR:!!window.jsQR,heicHint}
     };
-    tick();
   }
-  function patientMediaMarkup(ex){
-    const media=ensureExerciseMediaList(ex).filter(item=>item.type==='image');
-    if(!media.length)return '';
-    return '<div class="patientMediaList">'+media.map(item=>'<div class="patientMedia patientMedia_loading" data-patient-media-id="'+escapeHtml(item.id)+'"><span>Bild wird geladen ...</span><small>Verschluesselte Datei wird geholt und lokal gespeichert.</small></div>').join('')+'</div>';
+  function safeBase64JsonDecode(value){
+    const raw=String(value||'').trim();
+    const body=raw.replace(/^[^:]+:/,'').replace(/-/g,'+').replace(/_/g,'/');
+    const padded=body+'='.repeat((4-body.length%4)%4);
+    const decoded=decodeURIComponent(escape(atob(padded)));
+    return parseLooseJson(decoded).json;
   }
-  function initPatientMediaDownloads(exercises){
-    (exercises||[]).forEach(ex=>ensureExerciseMediaList(ex).filter(item=>item.type==='image').forEach(retryPatientMediaItem));
+  function safeJsonRepair(text){
+    let s=String(text||'').trim();
+    s=s.replace(/```(?:json)?/gi,'').replace(/```/g,'').trim();
+    const firstObj=s.indexOf('{'), firstArr=s.indexOf('[');
+    let start=-1,end=-1;
+    if(firstArr>=0&&(firstObj<0||firstArr<firstObj)){start=firstArr;end=s.lastIndexOf(']');}
+    else {start=firstObj;end=s.lastIndexOf('}');}
+    if(start>=0&&end>start)s=s.slice(start,end+1);
+    s=s.replace(/,\s*([}\]])/g,'$1');
+    s=s.replace(/}\s*{/g,'},{').replace(/]\s*\[/g,'],[');
+    s=s.replace(/"\s*\n\s*"/g,'","');
+    s=s.replace(/\n/g,' ');
+    return s;
   }
-
-  function patientExerciseLine(ex,index){
-    const name=escapeHtml(ex&&ex.name||'Übung '+(index+1));
-    const sets=escapeHtml(ex&&ex.sets||3);
-    const metric=escapeHtml(ex&&ex.startMetric||ex&&ex.metric||'');
-    const metricUnit=escapeHtml(ex&&ex.unit||ex&&ex.metricUnit||'Wdh');
-    const load=escapeHtml(ex&&ex.startLoad||ex&&ex.load||ex&&ex.weight||'');
-    const loadUnit=escapeHtml(ex&&ex.weightUnit||ex&&ex.loadUnit||'kg');
-    const side=sideModeLabel(ex&&ex.side||ex&&ex.laterality||'BI');
-    const details=[sets+' Sätze'];
-    if(metric)details.push(metric+' '+metricUnit);
-    if(load)details.push(load+' '+loadUnit);
-    details.push(side);
-    return '<article class="patientExercise"><b>'+(index+1)+'. '+name+'</b><small>'+details.map(escapeHtml).join(' · ')+'</small>'+patientMediaMarkup(ex)+'</article>';
-  }
-
-  function renderPatientHashView(){
-    const payload=decodePatientPayloadFromHash();
-    if(!payload)return false;
-    const plan=Array.isArray(payload.plan)?payload.plan:(Array.isArray(payload.exercises)?payload.exercises:[]);
-    const patient=payload.patient||{};
-    const displayName=escapeHtml(patient.name||patient.initials||patient.id||'Patient/in');
-    const date=escapeHtml(patient.date||patient.startDate||'');
-    const exercises=plan.filter(Boolean);
-    document.body.innerHTML='<main class="patientAppView">'+
-      '<header><h1>KGG Trainingsplan</h1><p>'+displayName+(date?' · '+date:'')+'</p></header>'+
-      (payload.error?'<section class="patientNotice">Dieser Patienten-Link konnte nicht gelesen werden.</section>':'')+
-      '<section class="patientExercises">'+
-      (exercises.length?exercises.map(patientExerciseLine).join(''):'<p class="patientNotice">Keine Übungen im Plan gefunden.</p>')+
-      '</section>'+
-      '<footer>Bitte trainiere nach Rücksprache mit deiner Praxis. Schmerzen und Auffälligkeiten dort melden.</footer>'+
-      '</main>';
-    const style=document.createElement('style');
-    style.textContent='body{display:block;background:#e8eef6;color:#071027}.patientAppView{width:min(100%,520px);min-height:100vh;margin:0 auto;padding:18px 14px 34px;background:#e8eef6}.patientAppView header{background:#fff;border:2px solid #1b2230;border-radius:22px;padding:16px;box-shadow:0 4px 14px rgba(7,16,39,.08)}.patientAppView h1{font-size:28px;line-height:1.05;margin:0 0 8px}.patientAppView p{margin:0;color:#657386;font-weight:800}.patientExercises{display:grid;gap:10px;margin-top:14px}.patientExercise{background:#fff;border:1px solid #dce3eb;border-radius:16px;padding:14px;box-shadow:0 4px 14px rgba(7,16,39,.08)}.patientExercise b{display:block;font-size:20px}.patientExercise small{display:block;margin-top:7px;color:#38475b;font-size:15px;font-weight:850}.patientMediaList{display:grid;gap:8px;margin-top:12px}.patientMedia{border:1px solid #dce3eb;border-radius:14px;background:#f6f8fb;padding:10px;color:#38475b;font-weight:850}.patientMedia span{display:block}.patientMedia small{font-size:13px;color:#657386}.patientMedia img{display:block;width:100%;max-height:320px;object-fit:contain;border-radius:12px;background:#fff}.patientMedia_ready{background:#fff}.patientMedia_error{background:#fff8e8;border-color:#f2d38a}.patientNotice{background:#fff8e8;border:1px solid #f2d38a;border-radius:16px;padding:14px;margin-top:14px;font-weight:800}.patientAppView footer{margin-top:18px;color:#657386;font-size:13px;font-weight:800}';
-    document.head.appendChild(style);
-    initPatientMediaDownloads(exercises);
-    return true;
-  }
-
-  function renderRuntimeVersionInUi(){
-    const el=document.querySelector('.topbar small');
-    if(!el)return;
-    const marker=' · '+VERSION+' · TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-    if(!el.textContent.includes('TEMPLATE_MATCH_V1_RUNTIME_GUARD'))el.textContent=(el.textContent||'')+marker;
-  }
-  function androidBuildStatus(){
-    try{
-      if(!(window.KGGAndroidApp&&typeof window.KGGAndroidApp.updateStatus==='function'))return null;
-      return JSON.parse(window.KGGAndroidApp.updateStatus()||'{}');
-    }catch(err){return null;}
-  }
-  function renderBuildIdentityInUi(){
-    const el=$('kggBuildBadge');
-    if(!el)return;
-    const native=androidBuildStatus()||{};
-    const parts=[
-      'App-Version '+VERSION,
-      'Build-Zeit '+KGG_BUILD_INFO.buildTime,
-      'Build-Code '+KGG_BUILD_INFO.buildCode,
-      'HTML '+KGG_BUILD_INFO.htmlFile
-    ];
-    if(native.versionName||native.versionCode)parts.push('Android '+(native.versionName||'')+' ('+(native.versionCode||'?')+')');
-    if(native.packageName)parts.push('Package '+native.packageName);
-    if(native.currentWebVersion)parts.push('WebStore v'+native.currentWebVersion);
-    el.textContent=parts.join(' · ');
-  }
-  /* v295 SINGLE KGGScan REBUILD
-     Architekturentscheidung: genau ein aktiver Scan-Controller.
-     QR wird lokal zuerst gelesen; Gemini ist nur Papierplan-Fallback.
-     Keine zweite scanJobsState-Wahrheit, keine Beta-Parallel-Scanlogik.
-  */
-  /* kgg-mini-patch-v400-09-qr-photo-upload-decode
-     Robustere QR-Erkennung fuer Bilder aus Galerie/Foto-Datenbank.
-     Kamera-Scan bleibt unveraendert; nur Datei-/Bild-Decoding wird verbessert.
-  */
-  function scanReadFileAsDataUrl(file){
-    return new Promise((resolve,reject)=>{
-      const reader=new FileReader();
-      reader.onload=()=>resolve(String(reader.result||''));
-      reader.onerror=()=>reject(reader.error||new Error('Bild konnte nicht gelesen werden'));
-      reader.readAsDataURL(file);
-    });
-  }
-  function scanCanvasFromImageSource(source,width,height,maxSide){
-    const srcW=Math.max(1,Math.round(width||source.naturalWidth||source.videoWidth||source.width||1));
-    const srcH=Math.max(1,Math.round(height||source.naturalHeight||source.videoHeight||source.height||1));
-    const limit=Math.max(320,Number(maxSide)||2200);
-    const scale=Math.min(1,limit/Math.max(1,srcW,srcH));
-    const canvas=document.createElement('canvas');
-    canvas.width=Math.max(1,Math.round(srcW*scale));
-    canvas.height=Math.max(1,Math.round(srcH*scale));
-    const ctx=canvas.getContext('2d',{willReadFrequently:true});
-    ctx.fillStyle='#fff';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.imageSmoothingEnabled=true;
-    ctx.imageSmoothingQuality='high';
-    ctx.drawImage(source,0,0,canvas.width,canvas.height);
-    return canvas;
-  }
-  function scanImageElementFromUrl(url){
-    return new Promise((resolve,reject)=>{
-      const img=new Image();
-      img.onload=()=>resolve(img);
-      img.onerror=()=>reject(new Error('Bild konnte nicht gelesen werden'));
-      img.decoding='async';
-      img.src=url;
-    });
-  }
-  async function scanImageCanvasFromFile(file,maxSide){
-    const limit=Math.max(320,Number(maxSide)||2200);
-    if(window.createImageBitmap){
-      try{
-        const bitmap=await createImageBitmap(file,{imageOrientation:'from-image'});
-        try{return scanCanvasFromImageSource(bitmap,bitmap.width,bitmap.height,limit);}
-        finally{try{bitmap.close();}catch(closeErr){}}
-      }catch(bitmapErr){
-        console.warn('QR-Dateibild: createImageBitmap fehlgeschlagen, fallback auf Image/FileReader.',bitmapErr);
-      }
+  function parseLooseJson(text){
+    const original=String(text||'');
+    const tries=[original,safeJsonRepair(original)];
+    let last=null;
+    for(const candidate of tries){
+      if(!candidate||!candidate.trim())continue;
+      try{return {ok:true,json:JSON.parse(candidate),source:candidate,repaired:candidate!==original};}
+      catch(err){last=err;}
     }
-    let url='';
-    try{
-      url=URL.createObjectURL(file);
-      const img=await scanImageElementFromUrl(url);
-      return scanCanvasFromImageSource(img,img.naturalWidth||img.width,img.naturalHeight||img.height,limit);
-    }catch(objectUrlErr){
-      console.warn('QR-Dateibild: ObjectURL fehlgeschlagen, fallback auf DataURL.',objectUrlErr);
-      try{
-        const dataUrl=await scanReadFileAsDataUrl(file);
-        const img=await scanImageElementFromUrl(dataUrl);
-        return scanCanvasFromImageSource(img,img.naturalWidth||img.width,img.naturalHeight||img.height,limit);
-      }catch(dataUrlErr){
-        throw dataUrlErr||objectUrlErr||new Error('Bild konnte nicht gelesen werden');
-      }
-    }finally{
-      if(url){try{URL.revokeObjectURL(url);}catch(revokeErr){}}
-    }
+    return {ok:false,json:null,source:original,error:last};
   }
-  function scanCloneCanvas(src){
-    const canvas=document.createElement('canvas');
-    canvas.width=src.width;
-    canvas.height=src.height;
+  function decodeKggQueryPayload(value){
+    const encoded=decodeURIComponent(String(value||'')).trim();
+    try{return safeBase64JsonDecode(encoded);}catch(err){}
+    return parseLooseJson(encoded).json;
+  }
+  function parseScannedQrRaw(raw){
+    const text=String(raw||'').trim();
+    if(!text)throw new Error('QR leer.');
+    let payloadText=text;
+    try{
+      const url=new URL(text);
+      if(url.hash)payloadText=url.hash;
+      const q=url.searchParams.get('kgg')||url.searchParams.get('payload')||url.searchParams.get('p');
+      if(q)return {type:'query',json:decodeKggQueryPayload(q),raw:text};
+    }catch(err){}
+    const candidates=[payloadText,text];
+    try{candidates.push(decodeURIComponent(payloadText));}catch(err){}
+    try{candidates.push(decodeURIComponent(text));}catch(err){}
+    const findCode=prefix=>{
+      const re=new RegExp(prefix+':([A-Za-z0-9_-]+)','i');
+      for(const candidate of candidates){
+        const hit=String(candidate||'').match(re);
+        if(hit)return hit;
+      }
+      return null;
+    };
+    const cfg2=findCode('KGGCFG2');
+    if(cfg2)return {type:'KGGCFG2',json:safeBase64JsonDecode(cfg2[1]),raw:text};
+    const cfg1=findCode('KGGCFG1');
+    if(cfg1)return {type:'KGGCFG1',json:safeBase64JsonDecode(cfg1[1]),raw:text};
+    const h2=findCode('KGGH2');
+    if(h2)return {type:'KGGH2',json:safeBase64JsonDecode(h2[1]),raw:text};
+    const sync2=findCode('KGGSYNC2');
+    if(sync2)return {type:'KGGSYNC2',json:safeBase64JsonDecode(sync2[1]),raw:text};
+    const sync1=findCode('KGGSYNC1');
+    if(sync1)return {type:'KGGSYNC1',json:safeBase64JsonDecode(sync1[1]),raw:text};
+    const d1=findCode('KGGD1');
+    if(d1)return {type:'KGGD1',json:safeBase64JsonDecode(d1[1]),raw:text};
+    for(const candidate of candidates){
+      const hashKgg=String(candidate||'').match(/#kgg=([^&\s]+)/i);
+      if(hashKgg)return {type:'hash-kgg',json:decodeKggQueryPayload(hashKgg[1]),raw:text};
+    }
+    const parsed=parseLooseJson(text);
+    if(parsed.ok)return {type:'json',json:parsed.json,raw:text,repaired:parsed.repaired};
+    throw new Error('QR erkannt, aber Format nicht lesbar.');
+  }
+  function stripScanExerciseName(name){
+    return String(name||'').replace(/^\s*(?:EX|ÜB|UE)\s*\d+\s*[:.)|\-–—]*\s*/i,'').replace(/\s+/g,' ').trim();
+  }
+  function scanPayloadExercises(payload){
+    if(!payload)return [];
+    if(Array.isArray(payload))return payload;
+    if(Array.isArray(payload.exercises))return payload.exercises;
+    if(Array.isArray(payload.planExercises))return payload.planExercises;
+    if(Array.isArray(payload.plan))return payload.plan;
+    if(Array.isArray(payload.e)){
+      try{return convertKggH2PayloadToPatientPayload(payload).plan||[];}catch(err){return payload.e;}
+    }
+    if(payload.payload)return scanPayloadExercises(payload.payload);
+    if(payload.json)return scanPayloadExercises(payload.json);
+    return [];
+  }
+  function scanNonEmptyValue(value){
+    if(value==null)return '';
+    if(Array.isArray(value))return value.map(scanNonEmptyValue).filter(v=>v!=='').join(',');
+    const text=String(value).trim();
+    if(!text||text==='null'||text==='undefined')return '';
+    return text;
+  }
+  function scanAsNumberList(value){
+    if(value==null)return [];
+    if(Array.isArray(value))return value.flatMap(scanAsNumberList);
+    if(typeof value==='number'&&Number.isFinite(value))return [value];
+    if(typeof value==='string')return (value.match(/-?\d+(?:[,.]\d+)?/g)||[]).map(v=>Number(String(v).replace(',','.'))).filter(Number.isFinite);
+    return [];
+  }
+  function scanIsBlankValue(value){
+    const text=scanNonEmptyValue(value);
+    return !text || text==='0' || text==='0.0' || text==='0,0';
+  }
+  function scanUnitLabel(value,fallback){return scanNonEmptyValue(value)||fallback||'';}
+  function scanExerciseName(item){
+    if(typeof item==='string')return stripScanExerciseName(item);
+    if(Array.isArray(item)){
+      try{return stripScanExerciseName(expandKggH2Exercise(item).name);}catch(err){return stripScanExerciseName(item[0]||'');}
+    }
+    return stripScanExerciseName(item&&((item.name||item.title||item.exercise||item.uebung||item['übung'])||''));
+  }
+  function scanExerciseApplyLine(item){
+    const name=scanExerciseName(item);
+    if(!name)return '';
+    let source=item;
+    if(Array.isArray(item)){try{source=expandKggH2Exercise(item);}catch(err){source={};}}
+    const side=normalizeSideMode(source&&source.side||source&&source.side_mode||source&&source.laterality||source&&source.seite||'BI');
+    return name+(side==='LR'?' li/re':'');
+  }
+  function scanApplyTextFromExercises(exercises){
+    return (exercises||[]).map(scanExerciseApplyLine).filter(Boolean).join(', ');
+  }
+  function scanFindNumberSequence(item){
+    if(!item)return [];
+    const candidates=[item.values,item.numbers,item.group,item.t1,item.T1,item.row,item.rowValues,item.load,item.weight,item.startLoad,item.lastLoad,item.metric,item.reps,item.time,item.startMetric,item.lastMetric];
+    for(const candidate of candidates){
+      const nums=scanAsNumberList(candidate);
+      if(nums.length>=3)return nums;
+    }
+    if(item.sets&&Array.isArray(item.sets)){
+      const out=[];
+      item.sets.forEach(set=>{
+        if(set.right||set.left){
+          const li=set.left||set.li||set.L||{};
+          const re=set.right||set.re||set.R||{};
+          out.push(...scanAsNumberList(li.load||li.weight||li.kg));
+          out.push(...scanAsNumberList(li.reps||li.metric||li.wdh||li.time||li.sec));
+          out.push(...scanAsNumberList(re.load||re.weight||re.kg));
+          out.push(...scanAsNumberList(re.reps||re.metric||re.wdh||re.time||re.sec));
+          const p=scanAsNumberList(set.pain||set.schmerz); if(p.length)out.push(p[0]);
+        }else{
+          out.push(...scanAsNumberList(set.load||set.weight||set.kg));
+          out.push(...scanAsNumberList(set.reps||set.metric||set.wdh||set.time||set.sec));
+          const p=scanAsNumberList(set.pain||set.schmerz); if(p.length)out.push(p[0]);
+        }
+      });
+      if(out.length)return out;
+    }
+    return [];
+  }
+  function scanFindPainValues(item){
+    if(!item)return [];
+    const candidates=[item.pain,item.schmerz,item.painValues,item.schmerzwerte,item.painScale,item.painScores,item.scores];
+    for(const c of candidates){const nums=scanAsNumberList(c); if(nums.length)return nums;}
+    if(item.sets&&Array.isArray(item.sets))return item.sets.map(set=>scanAsNumberList(set.pain||set.schmerz)[0]).filter(Number.isFinite);
+    return [];
+  }
+  function scanFormatNumber(value){
+    if(value==null||value==='')return '';
+    const n=Number(value);
+    if(Number.isFinite(n))return String(Math.round(n*100)/100).replace('.',',');
+    return String(value).trim();
+  }
+  function scanFormatPain(value){
+    if(value==null||value==='')return '';
+    const n=Number(value);
+    if(!Number.isFinite(n))return String(value).trim();
+    if(n<=0)return '';
+    return String(n).replace('.',',');
+  }
+  function scanStructuredSetLinesFromValues(item,source){
+    const side=normalizeSideMode(source.side||source.side_mode||source.laterality||source.seite||'BI');
+    const loadUnit=scanUnitLabel(source.weightUnit||source.loadUnit||source.weight_unit,'kg');
+    const metricUnit=scanUnitLabel(source.unit||source.metricUnit||source.metric_unit,'Wdh');
+    const isTime=/zeit|sek|sec|min|time/i.test(metricUnit) || /keine/i.test(loadUnit);
+    const nums=scanFindNumberSequence(source);
+    const pains=scanFindPainValues(source);
+    const lines=[];
+    if(side==='LR' && nums.length>=12){
+      for(let s=0;s<3;s++){
+        const base=s*4;
+        const liLoad=scanFormatNumber(nums[base]), liMetric=scanFormatNumber(nums[base+1]);
+        const reLoad=scanFormatNumber(nums[base+2]), reMetric=scanFormatNumber(nums[base+3]);
+        const pain=scanFormatPain(pains[s]||nums[12+s]);
+        lines.push('Satz '+(s+1)+':');
+        lines.push('  Li: '+liMetric+' '+metricUnit+(liLoad?' @ '+liLoad+' '+loadUnit:''));
+        lines.push('  Re: '+reMetric+' '+metricUnit+(reLoad?' @ '+reLoad+' '+loadUnit:''));
+        if(pain)lines.push('  Schmerz: '+pain+'/10');
+      }
+      return lines;
+    }
+    if(isTime){
+      for(let s=0;s<3;s++){
+        const idx=nums.length>=6?s*2+1:s;
+        const metric=scanFormatNumber(nums[idx]);
+        const pain=scanFormatPain(pains[s]||nums[(nums.length>=9?s*3+2:-1)]);
+        if(metric)lines.push('Satz '+(s+1)+': '+metric+' '+metricUnit+(pain?' · Schmerz: '+pain+'/10':''));
+      }
+      return lines;
+    }
+    if(nums.length>=9){
+      for(let s=0;s<3;s++){
+        const base=s*3;
+        const load=scanFormatNumber(nums[base]), metric=scanFormatNumber(nums[base+1]), pain=scanFormatPain(nums[base+2]||pains[s]);
+        if(load||metric)lines.push('Satz '+(s+1)+': '+(metric||'')+' '+metricUnit+(load?' @ '+load+' '+loadUnit:'')+(pain?' · Schmerz: '+pain+'/10':''));
+      }
+      return lines;
+    }
+    if(nums.length>=6){
+      for(let s=0;s<3;s++){
+        const load=scanFormatNumber(nums[s*2]), metric=scanFormatNumber(nums[s*2+1]), pain=scanFormatPain(pains[s]);
+        if(load||metric)lines.push('Satz '+(s+1)+': '+(metric||'')+' '+metricUnit+(load?' @ '+load+' '+loadUnit:'')+(pain?' · Schmerz: '+pain+'/10':''));
+      }
+      return lines;
+    }
+    const load=scanNonEmptyValue(source.startLoad||source.load||source.weight||source.lastLoad||'');
+    const metric=scanNonEmptyValue(source.startMetric||source.metric||source.reps||source.time||source.lastMetric||'');
+    const pain=scanFormatPain((pains||[])[0]||source.pain||source.schmerz);
+    if(metric||load)lines.push('Satz 1: '+(metric?scanFormatNumber(metric)+' '+metricUnit:'')+(load?' @ '+scanFormatNumber(load)+' '+loadUnit:'')+(pain?' · Schmerz: '+pain+'/10':''));
+    else if(pain)lines.push('Schmerz: '+pain+'/10');
+    return lines;
+  }
+  function scanExerciseToDocText(item){
+    if(typeof item==='string')return stripScanExerciseName(item);
+    let source=item;
+    if(Array.isArray(item)){
+      try{source=expandKggH2Exercise(item);}catch(err){source={name:item[0]||''};}
+    }
+    const name=scanExerciseName(source);
+    if(!name)return '';
+    const lines=scanStructuredSetLinesFromValues(item,source);
+    return [name].concat(lines).filter(Boolean).join('\n');
+  }
+  function formatScanExerciseLine(item){
+    return scanExerciseToDocText(item);
+  }
+  function scanResultToPlanText(result){
+    if(!result)return '';
+    if(typeof result==='string')return cleanGeminiScanText(result);
+    if(result.planText)return String(result.planText||'').trim();
+    if(result.text)return cleanGeminiScanText(result.text);
+    if(result.rawText)return cleanGeminiScanText(result.rawText);
+    const exercises=scanPayloadExercises(result);
+    if(exercises.length)return exercises.map(scanExerciseToDocText).filter(Boolean).join('\n\n');
+    return '';
+  }
+  function scanResultToApplyText(result){
+    if(!result)return '';
+    if(result.applyText)return String(result.applyText||'').trim();
+    const exercises=scanPayloadExercises(result);
+    if(exercises.length)return scanApplyTextFromExercises(exercises);
+    const text=scanResultToPlanText(result);
+    return String(text||'').split(/\n+/).map(line=>line.trim()).filter(line=>line&&!/^Satz\s+\d+\s*:/i.test(line)&&!/^\s*(Li|Re|Schmerz)\s*:/i.test(line)).join(', ');
+  }
+  function scanResultToCopyText(job){
+    const short=job&&job.short?String(job.short).trim():'';
+    const result=job&&job.result||{};
+    const quality=result.quality||{};
+    const text=result.copyText||result.planText||scanResultToPlanText(result)||result.rawText||'';
+    const lines=[];
+    if(short)lines.push(short);
+    if(result.type)lines.push('Typ: '+result.type);
+    if(quality.warnings&&quality.warnings.length)lines.push('Prüfen: '+quality.warnings.join(', '));
+    if(text)lines.push('',text);
+    return lines.join('\n').trim();
+  }
+  function scanPaperQuality(text,result){
+    const raw=String(text||'').trim();
+    const parts=raw.split(/[,\n]+/).map(part=>part.trim()).filter(Boolean);
+    const exerciseLike=parts.filter(part=>/[a-zäöüß]{4,}/i.test(part)&&!/^unbekannte\s+übung/i.test(part));
+    const numbers=(raw.match(/\d+(?:[,.]\d+)?/g)||[]).length;
+    const unknown=(raw.match(/unbekannte\s+übung|\?{2,}/gi)||[]).length;
+    const days=(raw.match(/\bT(?:ag)?\s*\d+\b/gi)||[]).map(x=>Number((x.match(/\d+/)||[0])[0])).filter(Boolean);
+    const warnings=[];
+    if(exerciseLike.length<1)warnings.push('wenige Übungsnamen erkannt');
+    if(unknown>1)warnings.push('zu viele unsichere Treffer');
+    if(numbers>90)warnings.push('zu viele Zahlen statt Übungsstruktur');
+    if(days.length&&Math.max(...days)>8)warnings.push('möglicherweise erfundene Tage');
+    if(/(?:unbekannte\s+übung\s*,?\s*){2,}/i.test(raw))warnings.push('Unbekannte-Übung-Kaskade');
+    return {ok:!warnings.length,exerciseCount:exerciseLike.length,numberCount:numbers,warnings,rawResult:!!result};
+  }
+  function createScanReadingCanvas(src){
+    const canvas=scanCloneCanvas(src);
     const ctx=canvas.getContext('2d',{willReadFrequently:true});
-    ctx.fillStyle='#fff';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.save();
+    ctx.filter='contrast(1.12) brightness(1.04) saturate(.96)';
     ctx.drawImage(src,0,0);
+    ctx.restore();
     return canvas;
   }
-  function scanCropCanvas(src,box){
-    const canvas=document.createElement('canvas');
-    canvas.width=Math.max(64,Math.round(src.width*box.w));
-    canvas.height=Math.max(64,Math.round(src.height*box.h));
-    const ctx=canvas.getContext('2d',{willReadFrequently:true});
-    ctx.fillStyle='#fff';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.drawImage(src,src.width*box.x,src.height*box.y,src.width*box.w,src.height*box.h,0,0,canvas.width,canvas.height);
-    return canvas;
-  }
-  function scanRotateCanvas(src,rotation){
-    const rot=((Number(rotation)||0)%360+360)%360;
-    if(!rot)return src;
-    const flip=rot===90||rot===270;
-    const canvas=document.createElement('canvas');
-    canvas.width=flip?src.height:src.width;
-    canvas.height=flip?src.width:src.height;
-    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+  function fillRedactionRects(ctx,rects){
 ```

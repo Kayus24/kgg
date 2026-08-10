@@ -21,7 +21,10 @@
     "kgg-v053-ui-tablet-stability",
     "kgg-v060-tablet-html-release-label",
     "kgg-v061-cross-app-live-qr-camera",
-    "kgg-v062-tablet-recent-package-shell-geometry"
+    "kgg-v062-tablet-recent-package-shell-geometry",
+    "kgg-v063-changelog-archive-window",
+    "kgg-v064-typed-update-versions",
+    "kgg-v065-source-control-char-guard"
   ],
   "parts": [
     "base-head.html",
@@ -42,6 +45,9 @@
     "patches/v060-tablet-html-release-label.html",
     "patches/v061-cross-app-live-qr-camera.html",
     "patches/v062-tablet-recent-package-shell-geometry.html",
+    "patches/v063-changelog-archive-window.html",
+    "patches/v064-typed-update-versions.html",
+    "patches/v065-source-control-char-guard.html",
     "footer.html"
   ]
 }
@@ -95,28 +101,28 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "059-ui-scaler-push-canary",
     "tablet-html-release-label",
     "cross-app-live-qr-camera",
-    "tablet-recent-package-shell-geometry"
+    "tablet-recent-package-shell-geometry",
+    "changelog-archive-window",
+    "typed-update-versions",
+    "source-control-char-guard"
   ],
   "currentVersion": {
-    "versionCode": 62,
-    "versionName": "1.0.62-tablet-recent-package-shell-geometry",
-    "lastPatchId": "kgg-v062-tablet-recent-package-shell-geometry",
+    "versionCode": 65,
+    "versionName": "1.0.65-source-control-char-guard",
+    "lastPatchId": "kgg-v065-source-control-char-guard",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v062-tablet-recent-package-shell-geometry",
+  "latestPatchId": "kgg-v065-source-control-char-guard",
   "lastUpdateIntent": {
-    "id": "kgg-v062-tablet-recent-package-shell-geometry",
-    "summary": "Die bereits bestätigte Tablet-Historien-Shell bleibt unverändert; zusätzlich übernimmt sie exakt die grüne Arbeitsflächen-Geometrie des Übungspakete-Overlays, damit der Hintergrund beim Öffnen nicht mehr verspringt.",
+    "id": "kgg-v065-source-control-char-guard",
+    "summary": "Ersetzt vier versehentliche U+0008-Zeichen durch Regex-Wortgrenzen, repariert den fehlkodierten SJIS-Prüfwert und blockiert C0-, C1- sowie DEL-Steuerzeichen in editierbaren Source-Teilen.",
     "touched": [
-      "Tablet-Layout",
-      "Historien-Overlay",
-      "Übungspakete-Overlay-Shell"
+      "Parser"
     ],
     "notTouched": [
       "PDF",
       "QR/Patienten-App",
       "Scan/OCR",
-      "Parser",
       "Plan-State",
       "Medien/Upload",
       "API-Key-Logik",
@@ -169,28 +175,28 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "059-ui-scaler-push-canary",
     "tablet-html-release-label",
     "cross-app-live-qr-camera",
-    "tablet-recent-package-shell-geometry"
+    "tablet-recent-package-shell-geometry",
+    "changelog-archive-window",
+    "typed-update-versions",
+    "source-control-char-guard"
   ],
   "currentVersion": {
-    "versionCode": 62,
-    "versionName": "1.0.62-tablet-recent-package-shell-geometry",
-    "lastPatchId": "kgg-v062-tablet-recent-package-shell-geometry",
+    "versionCode": 65,
+    "versionName": "1.0.65-source-control-char-guard",
+    "lastPatchId": "kgg-v065-source-control-char-guard",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v062-tablet-recent-package-shell-geometry",
+  "latestPatchId": "kgg-v065-source-control-char-guard",
   "lastUpdateIntent": {
-    "id": "kgg-v062-tablet-recent-package-shell-geometry",
-    "summary": "Die bereits bestätigte Tablet-Historien-Shell bleibt unverändert; zusätzlich übernimmt sie exakt die grüne Arbeitsflächen-Geometrie des Übungspakete-Overlays, damit der Hintergrund beim Öffnen nicht mehr verspringt.",
+    "id": "kgg-v065-source-control-char-guard",
+    "summary": "Ersetzt vier versehentliche U+0008-Zeichen durch Regex-Wortgrenzen, repariert den fehlkodierten SJIS-Prüfwert und blockiert C0-, C1- sowie DEL-Steuerzeichen in editierbaren Source-Teilen.",
     "touched": [
-      "Tablet-Layout",
-      "Historien-Overlay",
-      "Übungspakete-Overlay-Shell"
+      "Parser"
     ],
     "notTouched": [
       "PDF",
       "QR/Patienten-App",
       "Scan/OCR",
-      "Parser",
       "Plan-State",
       "Medien/Upload",
       "API-Key-Logik",
@@ -208,8 +214,102 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 62,
+  "latestVersionCode": 65,
   "entries": [
+    {
+      "versionCode": 65,
+      "versionName": "1.0.65-source-control-char-guard",
+      "patchId": "kgg-v065-source-control-char-guard",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Source-Steuerzeichen-Guard",
+      "reason": "Ersetzt vier versehentliche U+0008-Zeichen durch Regex-Wortgrenzen, repariert den fehlkodierten SJIS-Prüfwert und blockiert C0-, C1- sowie DEL-Steuerzeichen in editierbaren Source-Teilen.",
+      "whatChanged": [
+        "Ersetzt vier versehentliche U+0008-Zeichen durch Regex-Wortgrenzen, repariert den fehlkodierten SJIS-Prüfwert und blockiert C0-, C1- sowie DEL-Steuerzeichen in editierbaren Source-Teilen."
+      ],
+      "touchedAreas": [
+        "Parser"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Max hat den separaten Parser-Hygiene-Patch im angepassten Strukturplan ausdrücklich freigegeben."
+    },
+    {
+      "versionCode": 64,
+      "versionName": "1.0.64-typed-update-versions",
+      "patchId": "kgg-v064-typed-update-versions",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Strikte Update-Versionstypen",
+      "reason": "Trennt Source-Code, Web-Release-ID, semantischen Versionsnamen und Android-Shell-Version fail-closed voneinander.",
+      "whatChanged": [
+        "Trennt Source-Code, Web-Release-ID, semantischen Versionsnamen und Android-Shell-Version fail-closed voneinander."
+      ],
+      "touchedAreas": [
+        "GitHub Manifest",
+        "Android/APK"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Max hat die getrennte Manifest- und Versionsauswertung im angepassten Strukturplan ausdrücklich freigegeben."
+    },
+    {
+      "versionCode": 63,
+      "versionName": "1.0.63-changelog-archive-window",
+      "patchId": "kgg-v063-changelog-archive-window",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Changelog-Archivfenster",
+      "reason": "Archiviert den vollständigen Changelog-Stand bis v62 und begrenzt die Laufzeit-Metadaten auf v63 plus die 14 neuesten Vorgänger.",
+      "whatChanged": [
+        "Archiviert den vollständigen Changelog-Stand bis v62 und begrenzt die Laufzeit-Metadaten auf v63 plus die 14 neuesten Vorgänger."
+      ],
+      "touchedAreas": [
+        "Release-Metadaten"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Max hat die vollständige v62-Changelog-Archivierung und das 15-Einträge-Fenster freigegeben."
+    },
     {
       "versionCode": 62,
       "versionName": "1.0.62-tablet-recent-package-shell-geometry",
@@ -324,104 +424,4 @@ Before editing this app, any LLM/agent/human should read these blocks:
       ],
       "notTouched": [
         "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "Manifest"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "github": "pending",
-        "notes": "Required Gate and release-pr validate-build must pass before merge."
-      }
-    },
-    {
-      "versionCode": 58,
-      "versionName": "1.0.58-grossdruck-readability-beta",
-      "patchId": "kgg-v058-grossdruck-readability-beta",
-      "status": "active",
-      "type": "local-html-patch",
-      "title": "Grossdruck-PDF mit Kurzsichtigkeits-Test",
-      "reason": "Die Grossdruck-PDF soll fuer kurzsichtige Leser:innen bei Uebungsname, Satz, Wdh, kg/Gewicht und Schmerzskala messbar lesbarer sein, bevor eine Admin-Beta gebaut wird.",
-      "whatChanged": [
-        "Grossdruck-Titel, Meta-Zeilen und Tabellenlabels werden auf 14pt, 8.6pt und 7pt Mindestgroessen angehoben.",
-        "Die Grossdruck-Vorlage bleibt bei 3 Uebungen pro A4-Seite, nutzt aber groessere Abstaende und ein L3-v3 Template.",
-        "Eine lokale PDF-Readability-Testengine erzeugt Test-PDFs, Poppler-Renderings und Kurzsichtigkeits-Simulationen."
-      ],
-      "touchedAreas": [
-        "PDF generation",
-        "Grossdruck PDF layout",
-        "PDF readability test engine",
-        "Release test battery",
-        "Source Truth",
-        "version.json"
-      ],
-      "notTouched": [
-        "QR/Patienten-App",
-        "Scan/OCR parser",
-        "Gemini API pipeline",
-        "Parser",
-        "Plan-State",
-        "Android/APK",
-        "API-Key-Logik"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "githubPages": "pending",
-        "notes": "node release-pipeline/kgg_pdf_readability_smoke.js plus PDF critical und critical suite vor Admin-Beta."
-      }
-    },
-    {
-      "versionCode": 57,
-      "versionName": "1.0.57-grossdruck-pdf-readable-images",
-      "patchId": "kgg-v057-grossdruck-pdf-readable-images",
-      "status": "active",
-      "type": "local-html-patch",
-      "title": "Grossdruck-PDF mit Bildern und groesserer Schrift",
-      "reason": "Die vergroesserte PDF-Version soll vorhandene Uebungsbilder zeigen und auf A4 lesbarer sein, ohne Scan/OCR, QR oder Plan-State zu aendern.",
-      "whatChanged": [
-        "Grossdruck-PDF wird als echtes A4-Portrait mit 3 Uebungen pro Seite erzeugt.",
-        "Lokale PDF-Uebungsbilder werden auch im Grossdruck-Snapshot geladen.",
-        "Grossdruck-Tabellen, Kopfzeilen und Karten nutzen groessere Fontgroessen und Abstaende."
-      ],
-      "touchedAreas": [
-        "PDF generation",
-        "Grossdruck PDF layout",
-        "PDF exercise thumbnails",
-        "Source Truth",
-        "version.json"
-      ],
-      "notTouched": [
-        "QR/Patienten-App",
-        "Scan/OCR parser",
-        "Gemini API pipeline",
-        "Parser",
-        "Plan-State",
-        "Android/APK",
-        "API-Key-Logik"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "githubPages": "pending",
-        "notes": "Critical plus PDF render smoke; Gemini-Live-Smoke nur mit lokal vorhandener Admin-Konfig/API-Key."
-      }
-    },
-    {
-      "versionCode": 56,
-      "versionName": "1.0.56-patient-qr-root-query",
-      "patchId": "kgg-v056-patient-qr-root-query",
-      "status": "active",
-      "type": "local-html-patch",
-      "title": "Patienten-QR nutzt Root-App mit Query-Payload",
-      "reason": "Der Trainingsplan-QR soll die aktuelle Patienten-App oeffnen und den Plan direkt ueber ?plan=KGGH2:... uebergeben, statt auf den alten Renderer-Pfad oder gespeicherte Altplaene zu fallen.",
-      "whatChanged": [
-        "Default-Patienten-App-Basis zeigt auf https://kayus24.github.io/kgg/.",
-        "Neue Patienten-QRs verwenden ?plan=KGGH2:<payload>.",
-        "Tests blockieren kgg-update/index.html, releases und media-inline-bundle-7 als Standard-Patientenlink."
-      ],
-      "touchedAreas": [
 ```
