@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0420",
+  "versionName": "1.0.56-patient-qr-root-query",
+  "notes": "v056: Patienten-QRs nutzen die Root-Patienten-App mit ?plan=KGGH2-Payload; Root-App importiert Query-Plan direkt.",
+  "createdAt": "2026-07-02T13:01:14Z",
+  "source": "kgg-update/index.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0420",
+      "profile": "admin",
+      "versionName": "1.0.56-patient-qr-root-query",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0420/admin.html",
+      "sha256": "a41714f372f97a2d84c1da356366d4089714dba9b1c2d6ab799fe26f615b3fd7",
+      "notes": "v056: Patienten-QRs nutzen die Root-Patienten-App mit ?plan=KGGH2-Payload; Root-App importiert Query-Plan direkt."
+    },
+    "colleague": {
+      "releaseId": "r0420",
+      "profile": "colleague",
+      "versionName": "1.0.56-patient-qr-root-query",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0420/colleague.html",
+      "sha256": "99639e39684043b338b0f66ede6d9039d1bec6366e5cda1342fde6c943adeec3",
+      "notes": "v056: Patienten-QRs nutzen die Root-Patienten-App mit ?plan=KGGH2-Payload; Root-App importiert Query-Plan direkt."
+    }
+  }
+}

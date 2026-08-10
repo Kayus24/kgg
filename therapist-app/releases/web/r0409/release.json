@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0409",
+  "versionName": "1.0.45-phone-drawer-bank-align",
+  "notes": "v045: Phone Plan-Historie und Uebungspakete oeffnen stabil; die Uebungsdatenbank richtet sich beim Oeffnen sauber oberhalb des Plan-scannen-Docks aus.",
+  "createdAt": "2026-06-27T12:19:18Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0409",
+      "profile": "admin",
+      "versionName": "1.0.45-phone-drawer-bank-align",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0409/admin.html",
+      "sha256": "4674c8301d8f47c2b5ec00a7cfe0aa621c0eb6626d38c93ebef66c70839226d6",
+      "notes": "v045: Phone Plan-Historie und Uebungspakete oeffnen stabil; die Uebungsdatenbank richtet sich beim Oeffnen sauber oberhalb des Plan-scannen-Docks aus."
+    },
+    "colleague": {
+      "releaseId": "r0409",
+      "profile": "colleague",
+      "versionName": "1.0.45-phone-drawer-bank-align",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0409/colleague.html",
+      "sha256": "a376f684355801abb8f61487cb7368a3e6f361e27b5c74a48994ad7696115070",
+      "notes": "v045: Phone Plan-Historie und Uebungspakete oeffnen stabil; die Uebungsdatenbank richtet sich beim Oeffnen sauber oberhalb des Plan-scannen-Docks aus."
+    }
+  }
+}

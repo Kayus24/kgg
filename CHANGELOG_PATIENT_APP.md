@@ -1,5 +1,82 @@
 # Patient App Changelog
 
+## 2026-06-18 – Numpad input morph polish
+
+### Changed
+- The large numpad value field now starts visually from the tapped kg/Wdh input before expanding into the popup value field.
+- The tapped source input stays highlighted while the numpad is open.
+- The transition uses a short shared-element style morph so the popup feels more like an enlarged input field.
+- Service worker cache bumped to `kgg-handyplan-v38-input-morph-polish`.
+
+### Files
+- `patient-numpad-visibility-fix.js`
+- `service-worker.js`
+
+### Commits
+- `5f268f5326135cc46bdb171233a73f6f8e0b8715`
+- `ed121485ec11bfaa1e3def86c041ed930b443d91`
+
+### Safety
+- No changes to PDF, QR, parser, scan/OCR, media/image logic, storage, exercise database, card collapse behavior, or numpad value logic.
+
+## 2026-06-18 – Numpad outside-tap card guard
+
+### Changed
+- Closing the patient numpad by tapping outside should no longer collapse the opened exercise card.
+- Added a small guard module and injected it through the service worker.
+- Service worker cache bumped to `kgg-handyplan-v37-numpad-card-close-fix`.
+
+### Files
+- `patient-numpad-card-guard.js`
+- `service-worker.js`
+
+### Commits
+- `140601d8e26b114665682b1a93204aa9006cc6e9`
+- `39cbad37897ae2aa3949bd220fa68c765b527e1e`
+
+### Safety
+- No changes to PDF, QR, parser, scan/OCR, media/image logic, storage, exercise database, or main exercise layout.
+
+## 2026-06-18 – QR fullscreen high-contrast display
+
+### Changed
+- Tapping a generated patient QR code now opens it in a fullscreen high-contrast view.
+- The fullscreen QR view uses a white background and scales the QR as large as possible for therapist camera scanning.
+- The fullscreen view can be closed with the close button, tapping the white backdrop, or Escape on desktop.
+- A screen wake lock is requested when supported, so the QR screen is less likely to dim while being scanned.
+
+### Files
+- `patient-qr-fullscreen.js`
+- `service-worker.js`
+
+### Commits
+- `452a3e6769626d4bae8ea099b83c37ef542f5be7`
+- `231c29717fe9433797338caed4f3baf0c86ad340`
+
+### Safety
+- QR payload/generation unchanged.
+- No changes to PDF, parser, scan/OCR, storage, Numpad, exercise database logic, or main exercise layout.
+
+## 2026-06-18 – Open-card image lightbox
+
+### Changed
+- Images inside opened exercise cards can now be tapped to open a larger full-screen view.
+- The lightbox closes with the close button, tapping the dark backdrop, or Escape on desktop.
+- Closed-card thumbnails stay preview-only and do not open the lightbox.
+
+### Files
+- `patient-media-retry-cache_v2.js`
+- `service-worker.js`
+
+### Commits
+- `4696df02e690e1df87d142d327a5a04f32962f2c`
+- `a19c536430c5aa48c5dd6c25ac39dc2931326d3e`
+
+### Safety
+- No changes to PDF.
+- No changes to QR generation.
+- No changes to parser, scan/OCR, storage, Numpad, or exercise database logic.
+
 ## 2026-06-18 – Light KGG web app icon
 
 ### Changed

@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0402",
+  "versionName": "1.0.33-mobile-inbox-r0402",
+  "notes": "Mobile-Inbox r0402: KGG Update v32 No Boot Redirect (f8c8a6ec99a1).",
+  "createdAt": "2026-06-24T20:17:46Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0402",
+      "profile": "admin",
+      "versionName": "1.0.33-mobile-inbox-r0402",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0402/admin.html",
+      "sha256": "f8c8a6ec99a108ab792d4d23a1536402c5ec6695c3b58682f08b27b07e53671e",
+      "notes": "Mobile-Inbox r0402: KGG Update v32 No Boot Redirect (f8c8a6ec99a1)."
+    },
+    "colleague": {
+      "releaseId": "r0402",
+      "profile": "colleague",
+      "versionName": "1.0.33-mobile-inbox-r0402",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0402/colleague.html",
+      "sha256": "383388dd67cef286f924bdd35ba8add826e036751adf6a9c6f41d27fb2afeb36",
+      "notes": "Mobile-Inbox r0402: KGG Update v32 No Boot Redirect (f8c8a6ec99a1)."
+    }
+  }
+}

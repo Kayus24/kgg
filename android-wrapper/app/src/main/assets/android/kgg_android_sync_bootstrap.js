@@ -1,39 +1,50 @@
 (function(){
-  if (window.KGGNativeSync || !window.KGGAndroidSync) return;
-
   function safeParse(text, fallback){
     try { return JSON.parse(text); } catch (err) { return fallback; }
   }
 
-  window.KGGNativeSync = {
-    available: true,
-    platform: 'android',
-    status: function(){
-      return safeParse(window.KGGAndroidSync.getStatus(), {available:true, platform:'android'});
-    },
-    read: function(){
-      return safeParse(window.KGGAndroidSync.readSyncJson(), null);
-    },
-    write: function(syncDocument){
-      return window.KGGAndroidSync.writeSyncJson(JSON.stringify(syncDocument || {}));
-    },
-    listPeers: function(){
-      if (typeof window.KGGAndroidSync.listPeerSyncJson !== 'function') {
-        return {kind:'kgg_cross_data_safe_sync_mesh', peers:[]};
+  if (!window.KGGNativeSync && window.KGGAndroidSync) {
+    window.KGGNativeSync = {
+      available: true,
+      platform: 'android',
+      status: function(){
+        return safeParse(window.KGGAndroidSync.getStatus(), {available:true, platform:'android'});
+      },
+      read: function(){
+        return safeParse(window.KGGAndroidSync.readSyncJson(), null);
+      },
+      write: function(syncDocument){
+        return window.KGGAndroidSync.writeSyncJson(JSON.stringify(syncDocument || {}));
+      },
+      listPeers: function(){
+        if (typeof window.KGGAndroidSync.listPeerSyncJson !== 'function') {
+          return {kind:'kgg_cross_data_safe_sync_mesh', peers:[]};
+        }
+        return safeParse(window.KGGAndroidSync.listPeerSyncJson(), {kind:'kgg_cross_data_safe_sync_mesh', peers:[]});
+      },
+      getFollowConfig: function(){
+        return safeParse(window.KGGAndroidSync.readFollowConfig(), {therapistId:'', syncRoomId:'', followedTherapists:[]});
+      },
+      setFollowConfig: function(config){
+        return window.KGGAndroidSync.writeFollowConfig(JSON.stringify(config || {}));
       }
-      return safeParse(window.KGGAndroidSync.listPeerSyncJson(), {kind:'kgg_cross_data_safe_sync_mesh', peers:[]});
-    },
-    getFollowConfig: function(){
-      return safeParse(window.KGGAndroidSync.readFollowConfig(), {therapistId:'', syncRoomId:'', followedTherapists:[]});
-    },
-    setFollowConfig: function(config){
-      return window.KGGAndroidSync.writeFollowConfig(JSON.stringify(config || {}));
-    }
-  };
+    };
+  }
 
   if (!window.KGGNativeCamera && window.KGGAndroidApp) {
     window.KGGNativeCamera = {
       available: true,
+      getCapabilities: function(){
+        if (typeof window.KGGAndroidApp.getCameraCapabilities !== 'function') {
+          return {available:true, platform:'android', webVideoCapture:false, webVideoCaptureVersion:0};
+        }
+        return safeParse(window.KGGAndroidApp.getCameraCapabilities(), {
+          available:true,
+          platform:'android',
+          webVideoCapture:false,
+          webVideoCaptureVersion:0
+        });
+      },
       setNextPickerMode: function(mode){
         try {
           window.KGGAndroidApp.setNextFileChooserMode(mode === 'camera' ? 'camera' : 'file');
@@ -87,7 +98,9 @@
     }
   } catch (err) {}
 
-  window.dispatchEvent(new CustomEvent('kgg:native-sync-ready', {
-    detail: window.KGGNativeSync.status()
-  }));
+  if (window.KGGNativeSync) {
+    window.dispatchEvent(new CustomEvent('kgg:native-sync-ready', {
+      detail: window.KGGNativeSync.status()
+    }));
+  }
 })();

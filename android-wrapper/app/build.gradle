@@ -10,10 +10,11 @@ android {
         applicationId "de.kgg.app"
         minSdk 26
         targetSdk 36
-        versionCode 30
-        versionName "0.2.8-force-r0400-html"
+        versionCode 33
+        versionName "0.2.11-v401-share-apk-provider"
         manifestPlaceholders = [appLabel: "KGG Physio"]
         buildConfigField "String", "KGG_GITHUB_CLIENT_ID", "\"${project.findProperty('KGG_GITHUB_CLIENT_ID') ?: ''}\""
+        buildConfigField "String", "KGG_PREVIEW_STATUS_URL", '""'
     }
 
     buildFeatures { buildConfig true }
@@ -30,29 +31,46 @@ android {
             applicationId "de.kgg.admin"
             manifestPlaceholders = [appLabel: "KGG Admin"]
         }
+        preview {
+            dimension "profile"
+            applicationId "de.kgg.preview"
+            versionCode 34
+            versionName "0.2.12-v402-preview-status"
+            manifestPlaceholders = [appLabel: "KGG Preview"]
+            buildConfigField "String", "KGG_PREVIEW_STATUS_URL", "\"${project.findProperty('KGG_PREVIEW_STATUS_URL') ?: 'https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/status/latest.json'}\""
+        }
     }
 
     sourceSets {
         admin.assets.srcDir layout.buildDirectory.dir("generated/kggAssets/admin")
         kollegen.assets.srcDir layout.buildDirectory.dir("generated/kggAssets/kollegen")
+        preview.assets.srcDir layout.buildDirectory.dir("generated/kggAssets/preview")
     }
 }
 
 def stageAdminProfileAsset = tasks.register("stageAdminProfileAsset", Copy) {
-    from("../../therapist-app/releases/web/r0400/admin.html")
+    from("../../therapist-app/releases/web/r0419/admin.html")
     into(layout.buildDirectory.dir("generated/kggAssets/admin"))
 }
 
 def stageColleagueProfileAsset = tasks.register("stageColleagueProfileAsset", Copy) {
-    from("../../therapist-app/releases/web/r0400/colleague.html")
+    from("../../therapist-app/releases/web/r0419/colleague.html")
     into(layout.buildDirectory.dir("generated/kggAssets/kollegen"))
+}
+
+def stagePreviewProfileAsset = tasks.register("stagePreviewProfileAsset", Copy) {
+    from("../../kgg-update/index.html")
+    into(layout.buildDirectory.dir("generated/kggAssets/preview"))
+    rename { "preview.html" }
 }
 
 afterEvaluate {
     tasks.named("mergeAdminDebugAssets").configure { dependsOn(stageAdminProfileAsset) }
     tasks.named("mergeKollegenDebugAssets").configure { dependsOn(stageColleagueProfileAsset) }
+    tasks.named("mergePreviewDebugAssets").configure { dependsOn(stagePreviewProfileAsset) }
 }
 
 dependencies {
     implementation "androidx.core:core:1.13.1"
+    implementation "androidx.work:work-runtime:2.11.2"
 }

@@ -2,6 +2,7 @@ package de.kgg.app;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ContentValues;
@@ -9,12 +10,16 @@ import android.content.SharedPreferences;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Environment;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -25,19 +30,30 @@ import android.print.PrintDocumentInfo;
 import android.print.PrintManager;
 import android.util.Base64;
 import android.webkit.ValueCallback;
+import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.JavascriptInterface;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.window.OnBackInvokedDispatcher;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.core.content.FileProvider;
+import androidx.work.Constraints;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import org.json.JSONObject;
 
@@ -53,30 +69,44 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST = 4201;
     private static final int CAMERA_PERMISSION_REQUEST = 4202;
+    private static final int WEB_CAMERA_PERMISSION_REQUEST = 4203;
+    private static final int PREVIEW_NOTIFICATION_PERMISSION_REQUEST = 4204;
+    private static final int WEB_VIDEO_CAPTURE_VERSION = 1;
     private static final int RELEASE_HTML_REQUEST = 4301;
-    private static final int ANDROID_SHELL_VERSION = 398;
-    private static final int BUNDLED_WEB_VERSION = 400;
-    private static final String BUILD_TIME = "2026-06-24T12:30:00+02:00";
-    private static final String BUILD_CODE = "r0400-no-boot-redirect-force-bundled-html";
+    private static final int ANDROID_SHELL_VERSION = 401;
+    private static final int BUNDLED_WEB_VERSION = 419;
+    private static final String BUILD_TIME = "2026-07-01T00:00:00+02:00";
+    private static final String BUILD_CODE = "v401-r0419-share-apk-provider";
     private static final int MAX_HTML_UPDATE_BYTES = 5_500_000;
     private static final int MAX_APK_UPDATE_BYTES = 80_000_000;
     private static final long APK_UPDATE_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000L;
+    private static final long PREVIEW_STATUS_FOREGROUND_INTERVAL_MS = 30_000L;
+    private static final String PREVIEW_STATUS_WORK_NAME = "kgg-preview-status-monitor";
     private static final String BUNDLED_COLLEAGUE_APP_ASSET =
             "www/KGG_APP_KOLLEGEN_v389_flow_stability.html";
     private static final String BUNDLED_ADMIN_APP_ASSET =
             "admin.html";
     private static final String BUNDLED_COLLEAGUE_APP_ASSET_V2 =
             "colleague.html";
+    private static final String BUNDLED_PREVIEW_APP_ASSET =
+            "preview.html";
     private static final String UPDATE_MANIFEST_URL =
             "https://kayus24.github.io/kgg/therapist-app/android_update_manifest.json";
+    private static final String PREVIEW_MANIFEST_URL =
+            "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/index.json";
     private static final String TRUSTED_UPDATE_PREFIX =
             "https://kayus24.github.io/kgg/therapist-app/";
+    private static final String TRUSTED_PREVIEW_PREFIX =
+            "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/";
     private static final String UPDATE_PREFS = "kgg_android_update_prefs";
     private static final String PREF_WEB_VERSION = "current_web_version";
     private static final String PREF_ROLLOUT_CODE = "current_rollout_code_v2";
@@ -89,6 +119,7 @@ public class MainActivity extends Activity {
     private static final String PREF_BUNDLED_ASSET = "bundled_asset";
     private static final String PREF_PENDING_APK_PATH = "pending_apk_path";
     private static final String PREF_PENDING_APK_VERSION = "pending_apk_version";
+    private static final String PREF_PENDING_APK_INSTALL_REQUESTED = "pending_apk_install_requested";
     private static final String LOCAL_WEB_FILE_NAME = "kgg_android_current.html";
     private static final String PREVIOUS_WEB_FILE_NAME = "kgg_android_previous.html";
     private static final String APK_MIME_TYPE = "application/vnd.android.package-archive";
@@ -96,10 +127,43 @@ public class MainActivity extends Activity {
     private WebView webView;
     private ValueCallback<Uri[]> filePathCallback;
     private WebChromeClient.FileChooserParams pendingFileChooserParams;
+    private PermissionRequest pendingWebCameraRequest;
     private Uri cameraCaptureUri;
     private String nextFileChooserMode = "";
     private boolean pendingForceCamera;
     private KggReleaseController releaseController;
+    private final Handler previewStatusHandler = new Handler(Looper.getMainLooper());
+    private final AtomicBoolean previewStatusRequestRunning = new AtomicBoolean(false);
+    private boolean previewStatusPolling;
+    private String lastPreviewSuccessRunId = "";
+    private final Runnable previewStatusPoll = new Runnable() {
+        @Override
+        public void run() {
+            if (!previewStatusPolling || !isPreviewProfile()) {
+                return;
+            }
+            if (previewStatusRequestRunning.compareAndSet(false, true)) {
+                new Thread(() -> {
+                    try {
+                        KggPreviewStatus status = KggPreviewStatusClient.fetch();
+                        KggPreviewStatusNotifier.notifyIfChanged(MainActivity.this, status);
+                        if (status != null && status.isSuccess() && !status.runId.equals(lastPreviewSuccessRunId)) {
+                            lastPreviewSuccessRunId = status.runId;
+                            checkForPreviewWebAppUpdate();
+                        }
+                    } catch (Exception ignored) {
+                    } finally {
+                        previewStatusRequestRunning.set(false);
+                        if (previewStatusPolling) {
+                            previewStatusHandler.postDelayed(this, PREVIEW_STATUS_FOREGROUND_INTERVAL_MS);
+                        }
+                    }
+                }, "kgg-preview-status").start();
+            } else {
+                previewStatusHandler.postDelayed(this, PREVIEW_STATUS_FOREGROUND_INTERVAL_MS);
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,7 +177,11 @@ public class MainActivity extends Activity {
         prepareLocalWebApp();
         webView.loadUrl(localWebAppUrl());
         checkForWebAppUpdate();
-        checkForAndroidAppUpdate(false);
+        if (isPreviewProfile()) {
+            configurePreviewStatusMonitoring();
+        } else {
+            checkForAndroidAppUpdate(false);
+        }
     }
 
     private void configureBackHandling() {
@@ -147,7 +215,57 @@ public class MainActivity extends Activity {
         super.onResume();
         installPendingApkIfAllowed();
         checkForWebAppUpdate();
-        checkForAndroidAppUpdate(false);
+        if (isPreviewProfile()) {
+            startPreviewStatusPolling();
+        } else {
+            checkForAndroidAppUpdate(false);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        stopPreviewStatusPolling();
+        super.onPause();
+    }
+
+    private void configurePreviewStatusMonitoring() {
+        if (BuildConfig.KGG_PREVIEW_STATUS_URL.trim().isEmpty()) {
+            return;
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(
+                    new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                    PREVIEW_NOTIFICATION_PERMISSION_REQUEST
+            );
+        }
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build();
+        PeriodicWorkRequest request = new PeriodicWorkRequest.Builder(
+                KggPreviewStatusWorker.class,
+                15,
+                TimeUnit.MINUTES
+        ).setConstraints(constraints).build();
+        WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork(
+                PREVIEW_STATUS_WORK_NAME,
+                ExistingPeriodicWorkPolicy.UPDATE,
+                request
+        );
+    }
+
+    private void startPreviewStatusPolling() {
+        if (BuildConfig.KGG_PREVIEW_STATUS_URL.trim().isEmpty()) {
+            return;
+        }
+        previewStatusPolling = true;
+        previewStatusHandler.removeCallbacks(previewStatusPoll);
+        previewStatusHandler.post(previewStatusPoll);
+    }
+
+    private void stopPreviewStatusPolling() {
+        previewStatusPolling = false;
+        previewStatusHandler.removeCallbacks(previewStatusPoll);
     }
 
     private void configureWebView() {
@@ -172,6 +290,20 @@ public class MainActivity extends Activity {
             }
         });
         webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onPermissionRequest(PermissionRequest request) {
+                runOnUiThread(() -> handleWebPermissionRequest(request));
+            }
+
+            @Override
+            public void onPermissionRequestCanceled(PermissionRequest request) {
+                runOnUiThread(() -> {
+                    if (pendingWebCameraRequest == request) {
+                        pendingWebCameraRequest = null;
+                    }
+                });
+            }
+
             @Override
             public boolean onShowFileChooser(
                     WebView webView,
@@ -227,9 +359,69 @@ public class MainActivity extends Activity {
                 || checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
     }
 
+    private boolean requestsVideoCapture(PermissionRequest request) {
+        if (request == null || request.getResources() == null) {
+            return false;
+        }
+        for (String resource : request.getResources()) {
+            if (PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(resource)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isTrustedLocalWebRequest(PermissionRequest request) {
+        if (request == null || request.getOrigin() == null || webView == null) {
+            return false;
+        }
+        String scheme = request.getOrigin().getScheme();
+        String currentUrl = webView.getUrl();
+        String trustedUrl = localWebAppUrl();
+        return "file".equalsIgnoreCase(scheme)
+                && currentUrl != null
+                && trustedUrl != null
+                && (currentUrl.equals(trustedUrl)
+                    || currentUrl.startsWith(trustedUrl + "#")
+                    || currentUrl.startsWith(trustedUrl + "?"));
+    }
+
+    private void handleWebPermissionRequest(PermissionRequest request) {
+        if (!isTrustedLocalWebRequest(request) || !requestsVideoCapture(request)) {
+            request.deny();
+            return;
+        }
+        if (pendingWebCameraRequest != null && pendingWebCameraRequest != request) {
+            pendingWebCameraRequest.deny();
+        }
+        if (hasCameraPermission()) {
+            request.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE});
+            return;
+        }
+        pendingWebCameraRequest = request;
+        requestPermissions(new String[]{Manifest.permission.CAMERA}, WEB_CAMERA_PERMISSION_REQUEST);
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == WEB_CAMERA_PERMISSION_REQUEST) {
+            PermissionRequest request = pendingWebCameraRequest;
+            pendingWebCameraRequest = null;
+            if (request == null) {
+                return;
+            }
+            boolean granted = grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    && isTrustedLocalWebRequest(request);
+            if (granted) {
+                request.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE});
+            } else {
+                request.deny();
+                Toast.makeText(this, "Kamera-Berechtigung fehlt", Toast.LENGTH_SHORT).show();
+            }
+            return;
+        }
         if (requestCode != CAMERA_PERMISSION_REQUEST) {
             return;
         }
@@ -310,6 +502,14 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void setNextFileChooserMode(String mode) {
             MainActivity.this.setNextFileChooserMode(mode);
+        }
+
+        @JavascriptInterface
+        public String getCameraCapabilities() {
+            return "{\"available\":true,\"platform\":\"android\","
+                    + "\"webVideoCapture\":true,\"webVideoCaptureVersion\":"
+                    + WEB_VIDEO_CAPTURE_VERSION
+                    + ",\"cameraPermission\":" + hasCameraPermission() + "}";
         }
 
         @JavascriptInterface
@@ -503,15 +703,26 @@ public class MainActivity extends Activity {
         return getPackageName().toLowerCase(Locale.ROOT).contains(".admin");
     }
 
+    private boolean isPreviewProfile() {
+        return getPackageName().toLowerCase(Locale.ROOT).contains(".preview");
+    }
+
     boolean isAdminProfileForReleaseControl() {
-        return isAdminProfile();
+        return isAdminProfile() && !isPreviewProfile();
     }
 
     private String bundledAppAsset() {
+        if (isPreviewProfile()) {
+            return BUNDLED_PREVIEW_APP_ASSET;
+        }
         return isAdminProfile() ? BUNDLED_ADMIN_APP_ASSET : BUNDLED_COLLEAGUE_APP_ASSET_V2;
     }
 
     private void checkForWebAppUpdate() {
+        if (isPreviewProfile()) {
+            checkForPreviewWebAppUpdate();
+            return;
+        }
         new Thread(() -> {
             try {
                 JSONObject manifest = new JSONObject(downloadText(UPDATE_MANIFEST_URL, 512_000));
@@ -565,6 +776,55 @@ public class MainActivity extends Activity {
             } catch (Exception ignored) {
             }
         }, "kgg-web-update").start();
+    }
+
+    private void checkForPreviewWebAppUpdate() {
+        new Thread(() -> {
+            try {
+                JSONObject manifest = new JSONObject(downloadText(PREVIEW_MANIFEST_URL, 512_000));
+                if (!"kgg_gpt_preview_manifest".equals(manifest.optString("kind"))) {
+                    return;
+                }
+                JSONObject latest = manifest.optJSONObject("latest");
+                if (latest == null) {
+                    return;
+                }
+                int rolloutCode = latest.optInt("rolloutCode", 0);
+                SharedPreferences prefs = getSharedPreferences(UPDATE_PREFS, MODE_PRIVATE);
+                int currentVersion = prefs.getInt(PREF_ROLLOUT_CODE, BUNDLED_WEB_VERSION);
+                if (rolloutCode <= currentVersion) {
+                    return;
+                }
+                String htmlUrl = latest.optString("url");
+                if (!isTrustedHtmlUrl(htmlUrl)) {
+                    return;
+                }
+                byte[] bytes = downloadBytes(htmlUrl, MAX_HTML_UPDATE_BYTES);
+                String html = new String(bytes, StandardCharsets.UTF_8);
+                if (!isSafeHtmlUpdate(html)) {
+                    return;
+                }
+                String expectedSha256 = latest.optString("sha256", "").toLowerCase(Locale.ROOT);
+                if (!expectedSha256.isEmpty() && !expectedSha256.equals(sha256Hex(bytes))) {
+                    return;
+                }
+                backupCurrentWebApp();
+                writeTextAtomically(localWebAppFile(), html);
+                prefs.edit()
+                        .putInt(PREF_PREVIOUS_ROLLOUT, currentVersion)
+                        .putString(PREF_PREVIOUS_RELEASE, prefs.getString(PREF_RELEASE_ID, "preview-bundled"))
+                        .putInt(PREF_WEB_VERSION, rolloutCode)
+                        .putInt(PREF_ROLLOUT_CODE, rolloutCode)
+                        .putString(PREF_RELEASE_ID, latest.optString("requestId", "preview"))
+                        .putBoolean(PREF_PENDING_HEALTH, true)
+                        .apply();
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "KGG Preview geladen", Toast.LENGTH_SHORT).show();
+                    webView.loadUrl(localWebAppUrl());
+                });
+            } catch (Exception ignored) {
+            }
+        }, "kgg-preview-update").start();
     }
 
     private void backupCurrentWebApp() throws Exception {
@@ -644,7 +904,12 @@ public class MainActivity extends Activity {
                     return;
                 }
                 File apkFile = writeApkCacheFile(latestShellVersion, apkBytes);
-                runOnUiThread(() -> installApkFile(apkFile, "v" + latestShellVersion));
+                String versionLabel = "v" + latestShellVersion;
+                if (force) {
+                    runOnUiThread(() -> installApkFile(apkFile, versionLabel));
+                } else {
+                    rememberPendingApkFile(apkFile, versionLabel, false);
+                }
             } catch (Exception ignored) {
             }
         }, "kgg-apk-update").start();
@@ -725,16 +990,25 @@ public class MainActivity extends Activity {
                 || getPackageManager().canRequestPackageInstalls();
     }
 
+    private void rememberPendingApkFile(File file, String versionLabel, boolean installRequested) {
+        if (file == null) {
+            return;
+        }
+        getSharedPreferences(UPDATE_PREFS, MODE_PRIVATE)
+                .edit()
+                .putString(PREF_PENDING_APK_PATH, file.getAbsolutePath())
+                .putString(PREF_PENDING_APK_VERSION, versionLabel == null ? "" : versionLabel)
+                .putBoolean(PREF_PENDING_APK_INSTALL_REQUESTED, installRequested)
+                .apply();
+    }
+
     private boolean installApkFile(File file, String versionLabel) {
         try {
             if (file == null || !file.exists() || file.length() <= 0) {
                 return false;
             }
             SharedPreferences prefs = getSharedPreferences(UPDATE_PREFS, MODE_PRIVATE);
-            prefs.edit()
-                    .putString(PREF_PENDING_APK_PATH, file.getAbsolutePath())
-                    .putString(PREF_PENDING_APK_VERSION, versionLabel == null ? "" : versionLabel)
-                    .apply();
+            rememberPendingApkFile(file, versionLabel, true);
             if (!canRequestApkInstalls()) {
                 Toast.makeText(this, "Installation aus dieser App bitte erlauben", Toast.LENGTH_LONG).show();
                 Intent settingsIntent = new Intent(
@@ -752,6 +1026,7 @@ public class MainActivity extends Activity {
             prefs.edit()
                     .remove(PREF_PENDING_APK_PATH)
                     .remove(PREF_PENDING_APK_VERSION)
+                    .remove(PREF_PENDING_APK_INSTALL_REQUESTED)
                     .apply();
             Toast.makeText(this, "KGG-Update wird installiert", Toast.LENGTH_SHORT).show();
             startActivity(intent);
@@ -766,7 +1041,8 @@ public class MainActivity extends Activity {
         try {
             SharedPreferences prefs = getSharedPreferences(UPDATE_PREFS, MODE_PRIVATE);
             String path = prefs.getString(PREF_PENDING_APK_PATH, "");
-            if (path == null || path.trim().isEmpty() || !canRequestApkInstalls()) {
+            boolean installRequested = prefs.getBoolean(PREF_PENDING_APK_INSTALL_REQUESTED, false);
+            if (!installRequested || path == null || path.trim().isEmpty() || !canRequestApkInstalls()) {
                 return;
             }
             installApkFile(new File(path), prefs.getString(PREF_PENDING_APK_VERSION, ""));
@@ -784,7 +1060,8 @@ public class MainActivity extends Activity {
             status.put("buildTime", BUILD_TIME);
             status.put("buildCode", BUILD_CODE);
             status.put("packageName", getPackageName());
-            status.put("profile", isAdminProfile() ? "admin" : "kollegen");
+            status.put("profile", isPreviewProfile() ? "preview" : (isAdminProfile() ? "admin" : "kollegen"));
+            status.put("previewChannel", isPreviewProfile());
             status.put("currentWebVersion", prefs.getInt(PREF_WEB_VERSION, BUNDLED_WEB_VERSION));
             status.put("rolloutCode", prefs.getInt(PREF_ROLLOUT_CODE, BUNDLED_WEB_VERSION));
             status.put("releaseId", prefs.getString(PREF_RELEASE_ID, "v389"));
@@ -802,15 +1079,18 @@ public class MainActivity extends Activity {
             status.put("canRequestPackageInstalls", canRequestApkInstalls());
             status.put("lastApkCheckAt", prefs.getLong(PREF_LAST_APK_CHECK_AT, 0L));
             status.put("pendingApkVersion", prefs.getString(PREF_PENDING_APK_VERSION, ""));
+            status.put("pendingApkInstallRequested", prefs.getBoolean(PREF_PENDING_APK_INSTALL_REQUESTED, false));
         } catch (Exception ignored) {
         }
         return status.toString();
     }
 
     private boolean isTrustedHtmlUrl(String url) {
-        return url != null
-                && url.startsWith(TRUSTED_UPDATE_PREFIX)
-                && url.endsWith(".html");
+        if (url == null || !url.endsWith(".html")) {
+            return false;
+        }
+        String trustedPrefix = isPreviewProfile() ? TRUSTED_PREVIEW_PREFIX : TRUSTED_UPDATE_PREFIX;
+        return url.startsWith(trustedPrefix);
     }
 
     private int parseVersionNumber(String value) {
@@ -947,10 +1227,109 @@ public class MainActivity extends Activity {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setDataAndType(uri, "application/pdf");
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            if (intent.resolveActivity(getPackageManager()) == null) {
+                return openPdfFileInternally(file);
+            }
             startActivity(intent);
             return true;
+        } catch (ActivityNotFoundException err) {
+            return openPdfFileInternally(file);
         } catch (Exception err) {
-            Toast.makeText(this, "Kein PDF-Viewer gefunden", Toast.LENGTH_SHORT).show();
+            boolean openedInternally = openPdfFileInternally(file);
+            if (!openedInternally) {
+                Toast.makeText(this, "PDF konnte nicht geoeffnet werden", Toast.LENGTH_SHORT).show();
+            }
+            return openedInternally;
+        }
+    }
+
+    private boolean openPdfFileInternally(File file) {
+        ArrayList<Bitmap> bitmaps = new ArrayList<>();
+        try {
+            if (file == null || !file.exists() || file.length() <= 0) {
+                return false;
+            }
+            ParcelFileDescriptor descriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+            PdfRenderer renderer = new PdfRenderer(descriptor);
+            int pageCount = renderer.getPageCount();
+            int maxPages = Math.min(pageCount, 10);
+            LinearLayout content = new LinearLayout(this);
+            content.setOrientation(LinearLayout.VERTICAL);
+            content.setPadding(24, 24, 24, 24);
+            content.setBackgroundColor(Color.rgb(245, 248, 252));
+
+            TextView title = new TextView(this);
+            title.setText("KGG PDF-Vorschau");
+            title.setTextColor(Color.rgb(7, 16, 39));
+            title.setTextSize(20);
+            title.setGravity(Gravity.CENTER_VERTICAL);
+            title.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+            content.addView(title, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            ));
+
+            if (pageCount > maxPages) {
+                TextView note = new TextView(this);
+                note.setText("Vorschau zeigt die ersten " + maxPages + " von " + pageCount + " Seiten. Download/Druck bleiben vollstaendig.");
+                note.setTextColor(Color.rgb(102, 112, 133));
+                note.setTextSize(13);
+                note.setPadding(0, 8, 0, 12);
+                content.addView(note);
+            }
+
+            for (int index = 0; index < maxPages; index++) {
+                PdfRenderer.Page page = renderer.openPage(index);
+                int targetWidth = Math.min(1200, Math.max(720, getResources().getDisplayMetrics().widthPixels - 48));
+                int targetHeight = Math.max(1, Math.round(targetWidth * (page.getHeight() / (float) page.getWidth())));
+                Bitmap bitmap = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888);
+                bitmap.eraseColor(Color.WHITE);
+                page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+                page.close();
+                bitmaps.add(bitmap);
+
+                ImageView image = new ImageView(this);
+                image.setAdjustViewBounds(true);
+                image.setBackgroundColor(Color.WHITE);
+                image.setImageBitmap(bitmap);
+                LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+                imageParams.setMargins(0, 16, 0, 16);
+                content.addView(image, imageParams);
+            }
+            renderer.close();
+            descriptor.close();
+
+            ScrollView scroll = new ScrollView(this);
+            scroll.addView(content);
+
+            Dialog dialog = new Dialog(this);
+            dialog.setTitle("KGG PDF");
+            dialog.setContentView(scroll);
+            dialog.setOnDismissListener(ignored -> {
+                for (Bitmap bitmap : bitmaps) {
+                    if (bitmap != null && !bitmap.isRecycled()) {
+                        bitmap.recycle();
+                    }
+                }
+            });
+            dialog.setOnShowListener(ignored -> {
+                Window shown = dialog.getWindow();
+                if (shown != null) {
+                    shown.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
+                }
+            });
+            dialog.show();
+            Toast.makeText(this, "Interne PDF-Vorschau geoeffnet", Toast.LENGTH_SHORT).show();
+            return true;
+        } catch (Exception err) {
+            for (Bitmap bitmap : bitmaps) {
+                if (bitmap != null && !bitmap.isRecycled()) {
+                    bitmap.recycle();
+                }
+            }
             return false;
         }
     }

@@ -2,6 +2,7 @@
   const STYLE_ID='kgg-numpad-ui-fix-style';
   let activeInput=null;
   let oldValue='';
+  let scrollTimer=null;
 
   function $(id){return document.getElementById(id)}
 
@@ -33,14 +34,27 @@
     if(activeInput) activeInput.value=x;
   }
 
+  function cancelPendingScroll(){
+    if(scrollTimer!==null){
+      clearTimeout(scrollTimer);
+      scrollTimer=null;
+    }
+  }
+
   function scrollInputAbovePad(input){
-    setTimeout(()=>{
-      if(!input) return;
-      const padBox=document.querySelector('.padBox');
-      const padTop=padBox ? padBox.getBoundingClientRect().top : window.innerHeight*0.55;
+    cancelPendingScroll();
+    scrollTimer=setTimeout(()=>{
+      scrollTimer=null;
+      if(!input || input!==activeInput || !input.isConnected) return;
+      const pad=$('pad');
+      if(!pad || pad.classList.contains('hide') || !document.body.classList.contains('kggPadOpen')) return;
+      const padBox=pad.querySelector('.padBox');
+      if(!padBox) return;
+      const padRect=padBox.getBoundingClientRect();
+      if(padRect.height<=0 || padRect.bottom<=0 || padRect.top>=window.innerHeight) return;
       const r=input.getBoundingClientRect();
       const safeTop=84;
-      const safeBottom=padTop-28;
+      const safeBottom=padRect.top-28;
       let delta=0;
       if(r.bottom>safeBottom) delta=r.bottom-safeBottom;
       if(r.top<safeTop) delta=r.top-safeTop;
@@ -93,6 +107,7 @@
     };
 
     window.closePad=function(ok){
+      cancelPendingScroll();
       if(!ok && activeInput) activeInput.value=oldValue;
       const result=oldClose.apply(this,arguments);
       if(activeInput) activeInput.classList.remove('kggEditing');

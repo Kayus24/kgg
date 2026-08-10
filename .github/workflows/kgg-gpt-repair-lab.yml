@@ -1,0 +1,165 @@
+name: KGG GPT Repair Lab
+run-name: KGG GPT Repair Lab | ${{ inputs.mode }} | ${{ inputs.round_id }} | ${{ inputs.challenge_id }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Publish a blind challenge round or evaluate one attempt
+        required: true
+        type: choice
+        options:
+          - publish_challenges
+          - evaluate_attempt
+      round_id:
+        description: Stable round id used to reproduce opaque challenge ids
+        required: true
+        type: string
+      challenge_id:
+        description: Opaque challenge id; required for evaluate_attempt
+        required: false
+        default: ""
+        type: string
+      payload_json:
+        description: Modular v2 payload JSON; required for evaluate_attempt
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: kgg-gpt-repair-lab-${{ inputs.mode }}-${{ inputs.round_id }}-${{ inputs.challenge_id }}
+  cancel-in-progress: false
+
+jobs:
+  repair-lab:
+    runs-on: ubuntu-latest
+    env:
+      PAYLOAD_JSON: ${{ inputs.payload_json }}
+    steps:
+      - name: Checkout dispatched source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Chromium test runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm exec --yes --package=playwright@1.61.1 -- playwright install --with-deps chromium
+
+      - name: Generate isolated full-app challenges
+        shell: bash
+        run: |
+          set -euo pipefail
+          python release-pipeline/kgg_gpt_repair_lab.py \
+            --generate \
+            --round-id '${{ inputs.round_id }}' \
+            --output "$RUNNER_TEMP/kgg-repair-lab" \
+            --include-holdouts
+
+      - name: Publish sanitized challenge branch
+        if: inputs.mode == 'publish_challenges'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          repo_url="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+          target="$RUNNER_TEMP/kgg-repair-public"
+          if git ls-remote --exit-code "$repo_url" refs/heads/gpt-repair-lab >/dev/null 2>&1; then
+            git clone --depth=1 --branch gpt-repair-lab "$repo_url" "$target"
+          else
+            mkdir -p "$target"
+            git -C "$target" init
+            git -C "$target" remote add origin "$repo_url"
+            git -C "$target" checkout --orphan gpt-repair-lab
+          fi
+          python - "$target" "$RUNNER_TEMP/kgg-repair-lab/public" <<'PY'
+          import shutil
+          import sys
+          from pathlib import Path
+
+          target = Path(sys.argv[1])
+          source = Path(sys.argv[2])
+          for child in target.iterdir():
+              if child.name == ".git":
+                  continue
+              if child.is_dir():
+                  shutil.rmtree(child)
+              else:
+                  child.unlink()
+          for child in source.iterdir():
+              destination = target / child.name
+              if child.is_dir():
+                  shutil.copytree(child, destination)
+              else:
+                  shutil.copy2(child, destination)
+          PY
+          git -C "$target" config user.name 'github-actions[bot]'
+          git -C "$target" config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C "$target" add --all
+          if git -C "$target" diff --cached --quiet; then
+            echo "Challenge branch already matches this round."
+          else
+            git -C "$target" commit -m "publish blind repair lab ${{ inputs.round_id }}"
+            git -C "$target" push origin HEAD:gpt-repair-lab
+          fi
+          echo "Challenge index: https://raw.githubusercontent.com/${{ github.repository }}/gpt-repair-lab/index.json" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Validate evaluate inputs
+        if: inputs.mode == 'evaluate_attempt'
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ '${{ inputs.challenge_id }}' =~ ^repair-[a-f0-9]{16}$ ]] || { echo "Invalid challenge_id" >&2; exit 1; }
+          [[ -n "$PAYLOAD_JSON" ]] || { echo "payload_json is required" >&2; exit 1; }
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          payload = json.loads(os.environ["PAYLOAD_JSON"])
+          Path(os.environ["RUNNER_TEMP"], "kgg-repair-attempt.json").write_text(
+              json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+              newline="\n",
+          )
+          PY
+
+      - name: Evaluate blind repair attempt
+        if: inputs.mode == 'evaluate_attempt'
+        shell: bash
+        run: |
+          set -euo pipefail
+          challenge="$RUNNER_TEMP/kgg-repair-lab/public/challenges/${{ inputs.challenge_id }}"
+          NODE_PATH="$(npm root -g):${NODE_PATH:-}" python release-pipeline/kgg_gpt_repair_lab.py \
+            --evaluate \
+            --challenge-id '${{ inputs.challenge_id }}' \
+            --challenge-dir "$challenge" \
+            --internal-manifest "$RUNNER_TEMP/kgg-repair-lab/internal/index.json" \
+            --payload-file "$RUNNER_TEMP/kgg-repair-attempt.json" \
+            --artifacts-dir "$RUNNER_TEMP/kgg-repair-result"
+
+      - name: Upload compact evaluation evidence
+        if: always() && inputs.mode == 'evaluate_attempt'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgg-repair-${{ inputs.round_id }}-${{ inputs.challenge_id }}-${{ github.run_attempt }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            ${{ runner.temp }}/kgg-repair-result/report.json
+            ${{ runner.temp }}/kgg-repair-result/repaired.png

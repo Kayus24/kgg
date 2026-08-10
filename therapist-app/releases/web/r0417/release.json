@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0417",
+  "versionName": "v053-ui-tablet-stability",
+  "notes": "v053: Phone-Dock bleibt bei Tastatur stabil, Tablet-Swipe zum Loeschen funktioniert wieder, Tablet-Editor nutzt eine zweispaltige Aufteilung.",
+  "createdAt": "2026-07-01T18:08:13Z",
+  "source": "kgg-update/index.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0417",
+      "profile": "admin",
+      "versionName": "v053-ui-tablet-stability",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0417/admin.html",
+      "sha256": "c8f2a095204b2adceca9d313ae78da9f9efaf95f7027bed18515cd04ae09971c",
+      "notes": "v053: Phone-Dock bleibt bei Tastatur stabil, Tablet-Swipe zum Loeschen funktioniert wieder, Tablet-Editor nutzt eine zweispaltige Aufteilung."
+    },
+    "colleague": {
+      "releaseId": "r0417",
+      "profile": "colleague",
+      "versionName": "v053-ui-tablet-stability",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0417/colleague.html",
+      "sha256": "50d0addad58a4e098a90a43b93d5f8441f14e87f1585611dc9c85dfa212b2e9f",
+      "notes": "v053: Phone-Dock bleibt bei Tastatur stabil, Tablet-Swipe zum Loeschen funktioniert wieder, Tablet-Editor nutzt eine zweispaltige Aufteilung."
+    }
+  }
+}

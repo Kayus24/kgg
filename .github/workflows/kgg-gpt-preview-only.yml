@@ -1,0 +1,48 @@
+name: KGG GPT Preview Only
+run-name: KGG GPT Preview Only | ${{ inputs.mode }} | ${{ inputs.request_id }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Pre-authorized test-channel action
+        required: true
+        type: choice
+        options:
+          - validate_only
+          - publish_preview
+      request_id:
+        description: Stable GPT request id
+        required: true
+        type: string
+      payload_json:
+        description: Guarded modular GPT patch payload JSON
+        required: true
+        type: string
+      ui_stability:
+        description: Run UI stability regression
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: read
+  checks: read
+  statuses: read
+
+jobs:
+  preview-only:
+    uses: ./.github/workflows/kgg-gpt-preview-gate.yml
+    with:
+      mode: ${{ inputs.mode }}
+      request_id: ${{ inputs.request_id }}
+      payload_json: ${{ inputs.payload_json }}
+      ui_stability: ${{ inputs.ui_stability }}
+      approval_phrase: ""
+    secrets: inherit

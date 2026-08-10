@@ -1,0 +1,164 @@
+openapi: 3.1.0
+info:
+  title: KGG Patient Update Agent Read API
+  version: 1.0.0
+  description: Read-only live context, source and preview evidence for the private KGG patient Custom GPT.
+servers:
+  - url: https://raw.githubusercontent.com
+paths:
+  /Kayus24/kgg/main/docs/kgg-custom-gpt-resource-manifest.json:
+    get:
+      operationId: getKggPatientResourceManifest
+      summary: Get the live Custom GPT resource manifest and patientProduction profile.
+      x-openai-isConsequential: false
+      responses:
+        "200":
+          description: Resource manifest JSON.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /Kayus24/kgg/main/docs/kgg-patient-gpt-context.md:
+    get:
+      operationId: getKggPatientContext
+      summary: Get current patient PWA version, boundaries and workflow context.
+      x-openai-isConsequential: false
+      responses:
+        "200":
+          description: Patient live context Markdown.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /Kayus24/kgg/main/docs/kgg-patient-custom-gpt-playbook.md:
+    get:
+      operationId: getKggPatientPlaybook
+      summary: Get the current patient diagnosis, Preview and release playbook.
+      x-openai-isConsequential: false
+      responses:
+        "200":
+          description: Patient playbook Markdown.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /Kayus24/kgg/main/docs/kgg-patient-custom-gpt-action-schema.md:
+    get:
+      operationId: getKggPatientActionContract
+      summary: Get the patient Action and payload contract.
+      x-openai-isConsequential: false
+      responses:
+        "200":
+          description: Patient Action contract Markdown.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /Kayus24/kgg/main/docs/kgg-patient-custom-gpt-negative-examples.md:
+    get:
+      operationId: getKggPatientNegativeExamples
+      summary: Get unsafe patient patch examples and their safe alternatives.
+      x-openai-isConsequential: false
+      responses:
+        "200":
+          description: Patient negative examples Markdown.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /Kayus24/kgg/main/docs/kgg-gpt-bug-lessons.md:
+    get:
+      operationId: getKggBugLessons
+      summary: Get current KGG regression lessons before diagnosing a patient bug.
+      x-openai-isConsequential: false
+      responses:
+        "200":
+          description: Bug lessons Markdown.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /Kayus24/kgg/main/docs/kgg-gpt-bug-index.json:
+    get:
+      operationId: getKggBugIndex
+      summary: Get the compact current bug routing index.
+      x-openai-isConsequential: false
+      responses:
+        "200":
+          description: Bug index JSON.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /Kayus24/kgg/main/docs/kgg-patient-gpt-source-index.json:
+    get:
+      operationId: getKggPatientSourceIndex
+      summary: Get patient source files, hashes, routes and chunk names.
+      x-openai-isConsequential: false
+      responses:
+        "200":
+          description: Patient source index JSON.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /Kayus24/kgg/main/docs/kgg-patient-gpt-source/{chunk_name}:
+    get:
+      operationId: getKggPatientSourceChunk
+      summary: Get one current patient source chunk selected from the source index.
+      x-openai-isConsequential: false
+      parameters:
+        - name: chunk_name
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^chunk-[0-9]{3}\\.md$"
+      responses:
+        "200":
+          description: Patient source chunk Markdown.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /Kayus24/kgg-patient-preview/main/previews/index.json:
+    get:
+      operationId: getKggPatientPreviewIndex
+      summary: Get the isolated patient Preview index.
+      x-openai-isConsequential: false
+      responses:
+        "200":
+          description: Patient Preview index JSON.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /Kayus24/kgg-patient-preview/main/previews/{request_id}/meta.json:
+    get:
+      operationId: getKggPatientPreviewMeta
+      summary: Get exact patient Preview metadata for a request id.
+      x-openai-isConsequential: false
+      parameters:
+        - name: request_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
+      responses:
+        "200":
+          description: Patient Preview metadata JSON.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true

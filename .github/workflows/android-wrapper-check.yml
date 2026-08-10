@@ -23,17 +23,23 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.11.1"
-      - name: Build both profiles
+      - name: Build app profiles
         working-directory: android-wrapper
-        run: gradle clean assembleAdminDebug assembleKollegenDebug
+        run: gradle clean assembleAdminDebug assembleKollegenDebug assemblePreviewDebug
       - name: Verify colleague APK contains no admin release control
         run: |
           ADMIN_APK=android-wrapper/app/build/outputs/apk/admin/debug/app-admin-debug.apk
           COLLEAGUE_APK=android-wrapper/app/build/outputs/apk/kollegen/debug/app-kollegen-debug.apk
+          PREVIEW_APK=android-wrapper/app/build/outputs/apk/preview/debug/app-preview-debug.apk
           unzip -l "$ADMIN_APK" | grep -q 'assets/android/kgg_release_control_bootstrap.js'
           ! unzip -l "$COLLEAGUE_APK" | grep -q 'kgg_release_control_bootstrap.js'
+          ! unzip -l "$PREVIEW_APK" | grep -q 'kgg_release_control_bootstrap.js'
+          unzip -p "$PREVIEW_APK" assets/preview.html > /tmp/preview.html
+          grep -q 'KGGDataStore' /tmp/preview.html
           unzip -p "$COLLEAGUE_APK" assets/colleague.html > /tmp/colleague.html
           ! grep -Eq 'window\.KGGAdmin|id="adminConfigBtn"|id="adminSecretsModal"|kggReleaseCenter' /tmp/colleague.html
-          for dex in $(unzip -Z1 "$COLLEAGUE_APK" | grep -E '^classes[0-9]*\.dex$'); do
-            ! unzip -p "$COLLEAGUE_APK" "$dex" | strings | grep -Eq 'KggReleaseBridge|KGGReleaseControl|Update-Zentrale'
+          for apk in "$COLLEAGUE_APK" "$PREVIEW_APK"; do
+            for dex in $(unzip -Z1 "$apk" | grep -E '^classes[0-9]*\.dex$'); do
+              ! unzip -p "$apk" "$dex" | strings | grep -Eq 'KggReleaseBridge|KGGReleaseControl|Update-Zentrale'
+            done
           done

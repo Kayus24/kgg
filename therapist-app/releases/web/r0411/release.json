@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0411",
+  "versionName": "1.0.48-encoding-guard-r0411",
+  "notes": "v048: repairs UTF-8 mojibake and moves charset before non-ASCII content; adds critical encoding guard.",
+  "createdAt": "2026-06-30T13:21:18Z",
+  "source": "kgg-update/index.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0411",
+      "profile": "admin",
+      "versionName": "1.0.48-encoding-guard-r0411",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0411/admin.html",
+      "sha256": "565f8db6c2d4b6aa9e964f8469699a014e8dfedbe78c9997be9fdf24dc29aced",
+      "notes": "v048: repairs UTF-8 mojibake and moves charset before non-ASCII content; adds critical encoding guard."
+    },
+    "colleague": {
+      "releaseId": "r0411",
+      "profile": "colleague",
+      "versionName": "1.0.48-encoding-guard-r0411",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0411/colleague.html",
+      "sha256": "5f2f29f1e94c967e457e37af427974ffef8671162e734011c094524aa754ba79",
+      "notes": "v048: repairs UTF-8 mojibake and moves charset before non-ASCII content; adds critical encoding guard."
+    }
+  }
+}

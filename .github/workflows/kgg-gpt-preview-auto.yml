@@ -1,0 +1,187 @@
+name: KGG GPT Preview Auto
+run-name: KGG GPT Preview Auto | ${{ inputs.request_id }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      request_id:
+        description: Stable GPT request id
+        required: true
+        type: string
+      payload_json:
+        description: Guarded modular GPT patch payload JSON
+        required: true
+        type: string
+      ui_stability:
+        description: Run UI stability regression
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: read
+  checks: read
+  statuses: read
+
+concurrency:
+  group: kgg-gpt-preview-auto
+  cancel-in-progress: false
+
+jobs:
+  status-validating:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          path: base
+      - name: Checkout Preview status channel
+        uses: actions/checkout@v4
+        with:
+          ref: gpt-preview
+          path: preview
+      - name: Publish validating status
+        shell: bash
+        run: |
+          set -euo pipefail
+          python base/release-pipeline/kgg_preview_status.py \
+            --preview-root preview \
+            --request-id '${{ inputs.request_id }}' \
+            --run-id '${{ github.run_id }}' \
+            --run-url '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}' \
+            --phase validating \
+            --message 'Payload und modularer Patch werden validiert.'
+          cd preview
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add status
+          git commit -m 'preview status validating ${{ inputs.request_id }}'
+          git pull --rebase origin gpt-preview
+          git push origin HEAD:gpt-preview
+
+  validate:
+    needs: status-validating
+    uses: ./.github/workflows/kgg-gpt-preview-gate.yml
+    with:
+      mode: validate_only
+      request_id: ${{ inputs.request_id }}
+      payload_json: ${{ inputs.payload_json }}
+      ui_stability: ${{ inputs.ui_stability }}
+      approval_phrase: ""
+    secrets: inherit
+
+  status-publishing:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          path: base
+      - name: Checkout Preview status channel
+        uses: actions/checkout@v4
+        with:
+          ref: gpt-preview
+          path: preview
+      - name: Publish building status
+        shell: bash
+        run: |
+          set -euo pipefail
+          python base/release-pipeline/kgg_preview_status.py \
+            --preview-root preview \
+            --request-id '${{ inputs.request_id }}' \
+            --run-id '${{ github.run_id }}' \
+            --run-url '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}' \
+            --phase publishing \
+            --message 'Validierung ist gruen. Tests und Test-App-Preview laufen.'
+          cd preview
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add status
+          git commit -m 'preview status publishing ${{ inputs.request_id }}'
+          git pull --rebase origin gpt-preview
+          git push origin HEAD:gpt-preview
+
+  publish:
+    needs: status-publishing
+    uses: ./.github/workflows/kgg-gpt-preview-gate.yml
+    with:
+      mode: publish_preview
+      request_id: ${{ inputs.request_id }}
+      payload_json: ${{ inputs.payload_json }}
+      ui_stability: ${{ inputs.ui_stability }}
+      approval_phrase: ""
+    secrets: inherit
+
+  status-final:
+    if: always()
+    needs: [status-validating, validate, status-publishing, publish]
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VALIDATE_RESULT: ${{ needs.validate.result }}
+      PUBLISH_RESULT: ${{ needs.publish.result }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          path: base
+      - name: Checkout Preview status channel
+        uses: actions/checkout@v4
+        with:
+          ref: gpt-preview
+          path: preview
+      - name: Publish final status
+        id: final
+        shell: bash
+        run: |
+          set -euo pipefail
+          phase=failure
+          message='Preview fehlgeschlagen. Oeffne den Run fuer den fehlgeschlagenen Schritt.'
+          if [[ "$VALIDATE_RESULT" == 'success' && "$PUBLISH_RESULT" == 'success' ]]; then
+            phase=success
+            message='Test-App-Preview ist bereit und wurde veroeffentlicht.'
+          elif [[ "$VALIDATE_RESULT" != 'success' ]]; then
+            message='Validierung fehlgeschlagen. Es wurde keine Preview veroeffentlicht.'
+          fi
+          python base/release-pipeline/kgg_preview_status.py \
+            --preview-root preview \
+            --request-id '${{ inputs.request_id }}' \
+            --run-id '${{ github.run_id }}' \
+            --run-url '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}' \
+            --phase "$phase" \
+            --message "$message"
+          cd preview
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add status
+          git commit -m "preview status $phase ${{ inputs.request_id }}"
+          git pull --rebase origin gpt-preview
+          git push origin HEAD:gpt-preview
+          echo "phase=$phase" >> "$GITHUB_OUTPUT"
+          echo "message=$message" >> "$GITHUB_OUTPUT"
+      - name: Send final GitHub notification
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh label create kgg-preview-status \
+            --repo "$GITHUB_REPOSITORY" \
+            --description 'Persistent KGG Test-App Preview status' \
+            --color 0969DA || true
+          issue="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --label kgg-preview-status --json number --jq '.[0].number')"
+          if [[ -z "$issue" ]]; then
+            issue="$(gh issue create --repo "$GITHUB_REPOSITORY" --title 'KGG Preview Status' --label kgg-preview-status --body 'Automatische Statusmeldungen fuer die KGG Test-App.' | sed 's#.*/##')"
+          fi
+          gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body "@Kayus24 **${{ steps.final.outputs.phase }}** | \`${{ inputs.request_id }}\` | ${{ steps.final.outputs.message }} [Run ${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          {
+            echo "Preview status: ${{ steps.final.outputs.phase }}"
+            echo "Request: ${{ inputs.request_id }}"
+            echo "Status JSON: https://raw.githubusercontent.com/${{ github.repository }}/gpt-preview/status/latest.json"
+          } >> "$GITHUB_STEP_SUMMARY"

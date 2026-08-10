@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0410",
+  "versionName": "1.0.48-mobile-inbox-r0410",
+  "notes": "Mobile-Inbox r0410: KGG Update v47 Phone Landscape Tablet Menu (b71051d8e9aa).",
+  "createdAt": "2026-06-30T11:14:21Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0410",
+      "profile": "admin",
+      "versionName": "1.0.48-mobile-inbox-r0410",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0410/admin.html",
+      "sha256": "b71051d8e9aaf7d886b89c718f4de217aa540125c54bbd0c8421a140cce16f0d",
+      "notes": "Mobile-Inbox r0410: KGG Update v47 Phone Landscape Tablet Menu (b71051d8e9aa)."
+    },
+    "colleague": {
+      "releaseId": "r0410",
+      "profile": "colleague",
+      "versionName": "1.0.48-mobile-inbox-r0410",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0410/colleague.html",
+      "sha256": "9cf4d04c2013b59c729318361d6f5d102754a963e3256b42035d4f385e968f93",
+      "notes": "Mobile-Inbox r0410: KGG Update v47 Phone Landscape Tablet Menu (b71051d8e9aa)."
+    }
+  }
+}

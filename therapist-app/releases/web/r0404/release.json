@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0404",
+  "versionName": "1.0.35-parser-schmerz-tag-blocks",
+  "notes": "Admin-Beta r0404: Parser erkennt echte Schmerz-/Tag-Textbloecke, Last-vor-Wdh-Satzzeilen und verhindert Satz-/Schmerz-Muellkarten. Keine Patientendaten oder Secrets.",
+  "createdAt": "2026-06-25T13:50:33Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0404",
+      "profile": "admin",
+      "versionName": "1.0.35-parser-schmerz-tag-blocks",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0404/admin.html",
+      "sha256": "033580827c473feb51748ff1c62d443f8d9093255243030fc75988a12d6b69cb",
+      "notes": "Admin-Beta r0404: Parser erkennt echte Schmerz-/Tag-Textbloecke, Last-vor-Wdh-Satzzeilen und verhindert Satz-/Schmerz-Muellkarten. Keine Patientendaten oder Secrets."
+    },
+    "colleague": {
+      "releaseId": "r0404",
+      "profile": "colleague",
+      "versionName": "1.0.35-parser-schmerz-tag-blocks",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0404/colleague.html",
+      "sha256": "a99135d6e19dfb227d8fe34b8f315e10d54128cbe1fb531c709d191c53bda267",
+      "notes": "Admin-Beta r0404: Parser erkennt echte Schmerz-/Tag-Textbloecke, Last-vor-Wdh-Satzzeilen und verhindert Satz-/Schmerz-Muellkarten. Keine Patientendaten oder Secrets."
+    }
+  }
+}

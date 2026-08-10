@@ -1,0 +1,99 @@
+# KGG Custom GPT Stabilization Cycle Report
+
+Generated: 2026-08-02T00:00:00Z
+Status: PASS - technischer Auto-Preview-Zyklus abgeschlossen
+Confirmed green rounds: 2 / 2
+Tablet splitter UI probe included: no
+
+## Fehlerklassen
+
+| Klasse | Bedeutung |
+| --- | --- |
+| `payload_schema` | Invalid modular payload shape, JSON, forbidden path/file/operations field, missing patch_content or missing required_tests. |
+| `preview_gate` | GitHub Preview Gate, run, artifact, meta.json or publish-preview failure. |
+| `ci_tooling` | Missing runner/browser/emulator tool or CI dependency such as poppler/pdftoppm. |
+| `unsafe_patch` | Protected token, manual versioning, broad append or unsafe patch surface. |
+| `ui_logic` | UI behavior mismatch such as splitter/scale overlap or visible artifacts. |
+| `false_claim` | The GPT claimed success without verified run/test/artifact evidence. |
+| `stale_context` | The GPT used outdated repo context, source chunks or wrong base file. |
+| `human_preview_fail` | Max rejected the result in the Test-APK or preview channel. |
+
+## Lokale Checks
+
+| Check | Status | Fehlerklasse | Notiz |
+| --- | --- | --- | --- |
+| `context-check` | PASS | `` | OK |
+| `bug-knowledge-check` | PASS | `` | OK |
+| `source-context-check` | PASS | `` | OK |
+| `knowledge-pack-check` | PASS | `` | OK |
+| `payload-preflight-self-test` | PASS | `` | OK |
+| `mock-eval-self-test` | PASS | `` | OK |
+| `gpt-eval` | PASS | `` | OK |
+| `gpt-suite-critical` | PASS | `` | OK |
+
+## Echter Custom-GPT-Test
+
+| Check | Status | Fehlerklasse | Notiz |
+| --- | --- | --- | --- |
+| `tablet-splitter` | PASS | `` | Real browser retest passed with correct split between scale and column drag plus exact UI tests. |
+| `failed-preview-run` | PASS | `` | Real browser retest reported the failed run and failed step without a false waiting claim. |
+| `protected-token-payload` | PASS | `` | Real browser retest blocked protected payload content before dispatch. |
+| `payload-schema-path` | PASS | `` | Real browser retest rejected direct index.html operations and required modular patch_content. |
+| `modular-payload` | PASS | `` | Real browser retest emitted the modular v2 payload contract. |
+| `mockup-restore` | PASS | `` | Two consecutive real GPT payloads restored the removed mock function and passed executable behavior evaluation. |
+| `preview-apk-icon` | PASS | `` | Real browser retest kept icon work in the Preview/Test-APK profile. |
+| `beta-html-request` | PASS | `` | Productive GPT run 30723304822 published HTML, APK, meta.json and artifact. |
+| `action-schema-validate-only` | PASS | `` | The GPT used one schema 1.4 auto-dispatch; the workflow enforced validate_only before publish_preview. |
+| `missing-required-tests` | PASS | `` | Real browser retest required both exact UI test commands. |
+| `false-preview-claim` | PASS | `` | Real browser retest made no success claim without evidence. |
+| `human-preview-fail` | PASS | `` | Real browser retest treated Max rejection as a regression and blocked main. |
+| `stale-context` | PASS | `` | Real browser retest stopped when live context could not be confirmed. |
+| `analysis-no-dispatch` | PASS | `` | Real browser retest did not dispatch for an analysis-only request. |
+| `ci-tooling-pdftoppm` | PASS | `` | Real browser retest classified missing pdftoppm as ci_tooling. |
+| `admin-beta-push-gate` | PASS | `` | Real browser retest required Max approval, green checks, merged PR, manifest and Admin HTML evidence. |
+
+## Preview/Test-APK-Gate
+
+| Check | Status | Fehlerklasse | Notiz |
+| --- | --- | --- | --- |
+| `validate_only` | PASS | `` | Runs 29316986136 and 29317707104 succeeded on the modular feature branch. |
+| `publish_preview` | PASS | `` | Runs 29317016629 and 29317731561 succeeded with critical, UI regression, APK build and channel publish. |
+| `artifact` | PASS | `` | Artifacts 8304391163 and 8304658462 exist and are not expired. |
+| `meta_json` | PASS | `` | Both modular canary meta.json URLs returned HTTP 200 with patchFile and patchHash. |
+| `html_url` | PASS | `` | Both generated Admin preview HTML URLs returned HTTP 200 and contained their canary markers. |
+| `test_apk_channel` | PASS | `` | gpt-preview index latest points to modular-gpt-canary-20260714-b; APK artifact exists. |
+| `max_test_apk_acceptance` | PENDING | `` | Technical emulator smoke passed; Max must still accept the preview on the physical Test-App. |
+| `admin_beta_main_merge` | SKIP | `` | Correctly not attempted before Max Test-App approval. |
+| `admin_html_http_200` | SKIP | `` | Admin release is intentionally not created before Max approval. |
+| `visible_scaler_canary` | PASS | `` | Emulator screenshot shows the Preview canary panel and the app; retry probe found the visible marker without app crash or SystemUI dialog. |
+| `no_open_red_runs` | PASS | `` | The latest validate and publish runs for both accepted rounds are green; historical run 29316592989 remains documented as the regression trigger. |
+
+## Akzeptanz
+
+- PASS erst nach zwei kompletten gruenen Runden.
+- Der einzelne Auto-Run muss intern `validate_only` vor `publish_preview` gruen abschliessen.
+- Test-APK/Preview-Kanal muss aktualisiert und von Max akzeptiert sein.
+- Jeder FAIL wird als Regression aufgenommen, bevor der gleiche Prompt erneut getestet wird.
+
+## Auto-Preview-Erweiterung 2026-08-01
+
+| Check | Status | Fehlerklasse | Notiz |
+| --- | --- | --- | --- |
+| `auto-preview-contract` | PASS | `` | Ein Preview-only Dispatch fuehrt intern validate_only vor publish_preview aus. |
+| `status-json-self-test` | PASS | `` | Atomare, begrenzte Statusdateien ohne Payload oder Secrets. |
+| `preview-apk-foreground-notification` | PASS | `` | API-35-Emulator erkannte laufenden und erfolgreichen Run; Fortschrittsmeldung wurde beendet. |
+| `preview-apk-background-schedule` | PASS | `` | WorkManager-Job mit Netzbedingung und 15-Minuten-Intervall ist im Android JobScheduler registriert. |
+| `preview-apk-runtime-smoke` | PASS | `` | APK installiert, Activity sichtbar, Screenshot nicht schwarz, kein App-Crash und kein SystemUI-ANR. |
+| `auto-preview-live-run` | PASS | `` | Run 30723304822 completed successfully; negative run 30723148961 also proved correct failure reporting and notification. |
+| `production-gpt-schema-1.4` | PASS | `` | Fresh editor tab verified Bootstrap v4, both schema 1.4 Actions, four Knowledge files and GPT-5.6 Thinking. |
+| `auto-preview-artifact-http` | PASS | `` | Artifact 8825561705 is not expired; meta.json, HTML, status and preview index returned HTTP 200. |
+| `auto-preview-emulator` | PASS | `` | API-35 emulator installed and launched the APK, received the request notification, rendered the compact chip and remained interactive without app crash or SystemUI ANR. |
+
+## Patienten-Kamera-Preview 2026-08-02
+
+- Produktiv-GPT-Request `patient-camera-contain-20260802-a`: `validate_only` Run `30742178304` und `publish_preview` Run `30742202269`, beide `completed/success`.
+- Artifact `8831673942` (`kgg-patient-preview-patient-camera-contain-20260802-a`) ist vorhanden und nicht abgelaufen. `meta.json` und Preview-HTML liefern HTTP 200; `firstLoadModules` ist `true`.
+- Der GPT fuehrte den visuellen Kamera-Patch autonom aus, ohne Patient-Live oder Admin-Main. Der Scanner verwendet im Preview `object-fit: contain`; QR-, Speicher- und Planvertraege blieben unveraendert.
+- Bootstrap-v6-Abschlusstest im produktiven Chat `6a6f1433-82b0-83ed-a7ff-9bb13c6cc7a7` bestand: ausgeschriebene `Preview-URL:` und `Recovery-URL:`, kein zweiter Dispatch.
+- API-35-Emulator `KGG_Lite_API35`: erster Aufruf ohne bestehenden Service Worker zeigte sofort die vollstaendige v73-Rettungsoberflaeche samt `Plan-QR scannen`; Screenshot nicht schwarz, kein Chrome-/App-Crash und kein SystemUI-ANR.
+- Die optische Kamera-Framing- und echte QR-Uebernahmepruefung bleibt das physische Handy-Gate. Kein Patient-Live-Release wurde ausgefuehrt.

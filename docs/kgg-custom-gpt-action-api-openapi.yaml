@@ -1,0 +1,833 @@
+openapi: 3.1.0
+info:
+  title: KGG GPT Preview and Project Memory GitHub API
+  version: "1.4.0"
+  description: Pre-authorized Admin/Patient Preview operations, separately approved release gates, and private shared memory/coordination.
+servers:
+  - url: https://api.github.com
+paths:
+  /repos/Kayus24/kgg/git/ref/heads/main:
+    get:
+      operationId: getKggMainCommit
+      summary: Get the exact current main SHA before Admin or Patient Preview work.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      responses:
+        "200":
+          description: Current main Git ref.
+          content:
+            application/json:
+              schema: {type: object, additionalProperties: true}
+  /repos/Kayus24/kgg/actions/workflows/kgg-gpt-preview-auto.yml/dispatches:
+    post:
+      operationId: submitKggPreviewAuto
+      summary: Validate and publish a guarded Admin Test-App Preview in one automatic run.
+      description: Max pre-authorized this complete Preview-only pipeline. It validates first, publishes only after green validation, writes Test-App status updates and cannot create a PR or merge main.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ref, inputs]
+              properties:
+                ref:
+                  type: string
+                  enum: [main]
+                inputs:
+                  type: object
+                  required: [request_id, payload_json]
+                  properties:
+                    request_id:
+                      type: string
+                      pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
+                    payload_json:
+                      type: string
+                      description: Guarded modular v2 payload. It may include only declarative contains/not_contains regression_contract assertions. Cross-app QR work uses protected_scope cross-app-qr-preview and all four exact impact tests.
+                    ui_stability:
+                      type: string
+                      enum: ["false", "true"]
+                      default: "false"
+      responses:
+        "204":
+          description: Test-only workflow dispatch accepted.
+  /repos/Kayus24/kgg/actions/workflows/kgg-gpt-preview-gate.yml/dispatches:
+    post:
+      operationId: submitKggMainGate
+      summary: Create the accepted Admin PR or publish the accepted Admin beta after Max's final approval.
+      description: Consequential release gate. Requires the exact phrase Gut für Main and a matching accepted Test-App Preview.
+      x-openai-isConsequential: true
+      security:
+        - githubBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ref
+                - inputs
+              properties:
+                ref:
+                  type: string
+                  enum:
+                    - main
+                inputs:
+                  type: object
+                  required:
+                    - mode
+                    - request_id
+                    - payload_json
+                    - approval_phrase
+                  properties:
+                    mode:
+                      type: string
+                      enum:
+                        - create_pr
+                        - publish_admin_beta
+                    request_id:
+                      type: string
+                      pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
+                    payload_json:
+                      type: string
+                      description: JSON string containing request_id, title, summary, version_slug, touched_areas, required_tests and patch_content, plus optional declarative regression_contract assertions. Do not send executable tests, operations, old_text, new_text or path. UI payloads must include critical and ui-stability regression tests.
+                    ui_stability:
+                      type: string
+                      enum:
+                        - "false"
+                        - "true"
+                      default: "false"
+                    approval_phrase:
+                      type: string
+                      enum:
+                        - Gut für Main
+      responses:
+        "204":
+          description: Workflow dispatch accepted.
+  /repos/Kayus24/kgg/actions/workflows/kgg-gpt-preview-gate.yml/runs:
+    get:
+      operationId: listKggMainGateRuns
+      summary: List recent approved Admin PR/Main gate runs.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: branch
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - main
+        - name: event
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - workflow_dispatch
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - queued
+              - in_progress
+              - completed
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 10
+      responses:
+        "200":
+          description: Recent workflow runs.
+  /repos/Kayus24/kgg/actions/workflows/kgg-gpt-preview-auto.yml/runs:
+    get:
+      operationId: listKggPreviewAutoRuns
+      summary: List recent automatic Admin Preview-only runs.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: branch
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [main]
+        - name: event
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [workflow_dispatch]
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [queued, in_progress, completed]
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 30
+            default: 10
+      responses:
+        "200":
+          description: Recent Preview-only workflow runs.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /repos/Kayus24/kgg/actions/runs/{run_id}:
+    get:
+      operationId: getKggPreviewGateRun
+      summary: Poll one Preview Gate run until completed; do not stop at queued or in_progress.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Workflow run status.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  display_title:
+                    type: string
+                  status:
+                    type: string
+                  conclusion:
+                    type:
+                      - string
+                      - "null"
+                  html_url:
+                    type: string
+                additionalProperties: true
+  /repos/Kayus24/kgg/actions/runs/{run_id}/jobs:
+    get:
+      operationId: getKggPreviewGateJobs
+      summary: Get jobs and steps for one Preview Gate run.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Workflow jobs with step status.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  jobs:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        status:
+                          type: string
+                        conclusion:
+                          type:
+                            - string
+                            - "null"
+                        steps:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              status:
+                                type: string
+                              conclusion:
+                                type:
+                                  - string
+                                  - "null"
+                additionalProperties: true
+  /repos/Kayus24/kgg/actions/runs/{run_id}/artifacts:
+    get:
+      operationId: getKggPreviewGateArtifacts
+      summary: Get uploaded artifacts for one Preview Gate run.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Workflow artifacts.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  artifacts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        expired:
+                          type: boolean
+                        archive_download_url:
+                          type: string
+                additionalProperties: true
+  /repos/Kayus24/kgg/actions/workflows/kgg-patient-gpt-preview-only.yml/dispatches:
+    post:
+      operationId: submitKggPatientPreviewFromAdmin
+      summary: Validate or publish an isolated Patient-App Preview for cross-app coordination.
+      description: Max pre-authorized only validate_only and publish_preview. This endpoint cannot create a Patient PR or publish live.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ref, inputs]
+              properties:
+                ref:
+                  type: string
+                  enum: [main]
+                inputs:
+                  type: object
+                  required: [mode, request_id, payload_json]
+                  properties:
+                    mode:
+                      type: string
+                      enum: [validate_only, publish_preview]
+                    request_id:
+                      type: string
+                      pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
+                    payload_json:
+                      type: string
+                      maxLength: 60000
+                      description: Patient payload v1 with synthetic-only test data and no secrets.
+      responses:
+        "204":
+          description: Isolated Patient Preview workflow accepted.
+  /repos/Kayus24/kgg/actions/workflows/kgg-patient-gpt-preview-only.yml/runs:
+    get:
+      operationId: listKggPatientPreviewRunsFromAdmin
+      summary: List recent isolated Patient Preview-only runs.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: branch
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [main]
+        - name: event
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [workflow_dispatch]
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [queued, in_progress, completed]
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 30
+            default: 10
+      responses:
+        "200":
+          description: Recent Patient Preview-only workflow runs.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /repos/Kayus24/kgg-project-memory/contents/memory/index.json:
+    get:
+      operationId: getKggMemoryIndex
+      summary: Get the small routing index for the private KGG project memory.
+      description: Always call this before loading a memory pack. Do not load all records.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: Accept
+          in: header
+          required: true
+          schema:
+            type: string
+            enum:
+              - application/vnd.github.raw+json
+            default: application/vnd.github.raw+json
+        - name: ref
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - main
+            default: main
+      responses:
+        "200":
+          description: Raw JSON routing index.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /repos/Kayus24/kgg-project-memory/contents/memory/packs/{pack_name}:
+    get:
+      operationId: getKggMemoryPack
+      summary: Get one compact active KGG memory topic pack selected from the index.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: pack_name
+          in: path
+          required: true
+          description: Basename from memory/index.json, for example workflow.md. Never include memory/packs/ or another directory prefix.
+          schema:
+            type: string
+            pattern: "^[a-z0-9][a-z0-9-]{1,63}\\.md$"
+        - name: Accept
+          in: header
+          required: true
+          schema:
+            type: string
+            enum:
+              - application/vnd.github.raw+json
+            default: application/vnd.github.raw+json
+        - name: ref
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - main
+            default: main
+      responses:
+        "200":
+          description: Raw Markdown memory pack.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /repos/Kayus24/kgg-project-memory/contents/memory/records/{record_name}:
+    get:
+      operationId: getKggMemoryRecord
+      summary: Get one immutable KGG memory record for history, rationale or conflict review.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: record_name
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9][a-z0-9-]{5,63}\\.md$"
+        - name: Accept
+          in: header
+          required: true
+          schema:
+            type: string
+            enum:
+              - application/vnd.github.raw+json
+            default: application/vnd.github.raw+json
+        - name: ref
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - main
+            default: main
+      responses:
+        "200":
+          description: Raw immutable Markdown record.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /repos/Kayus24/kgg-project-memory/contents/memory/history.json:
+    get:
+      operationId: getKggMemoryHistory
+      summary: Get the KGG memory history catalog only when audit or conflict context is required.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: Accept
+          in: header
+          required: true
+          schema:
+            type: string
+            enum:
+              - application/vnd.github.raw+json
+            default: application/vnd.github.raw+json
+        - name: ref
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - main
+            default: main
+      responses:
+        "200":
+          description: Raw JSON history catalog.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /repos/Kayus24/kgg-project-memory/contents/coordination/index.json:
+    get:
+      operationId: getKggAgentCoordinationIndex
+      summary: Read the private cross-agent coordination router before checking open work.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: Accept
+          in: header
+          required: true
+          schema:
+            type: string
+            enum: [application/vnd.github.raw+json]
+            default: application/vnd.github.raw+json
+        - name: ref
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [main]
+            default: main
+      responses:
+        "200":
+          description: Coordination index.
+          content:
+            application/json:
+              schema: {type: object, additionalProperties: true}
+  /repos/Kayus24/kgg-project-memory/contents/coordination/threads/{coordination_request_id}.json:
+    get:
+      operationId: getKggAgentCoordinationThread
+      summary: Read one relevant coordination thread selected from the index.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: coordination_request_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
+        - name: Accept
+          in: header
+          required: true
+          schema:
+            type: string
+            enum: [application/vnd.github.raw+json]
+            default: application/vnd.github.raw+json
+        - name: ref
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [main]
+            default: main
+      responses:
+        "200":
+          description: Coordination thread.
+          content:
+            application/json:
+              schema: {type: object, additionalProperties: true}
+  /repos/Kayus24/kgg-project-memory/actions/workflows/kgg-agent-coordination-gate.yml/dispatches:
+    post:
+      operationId: submitKggAgentCoordinationEvent
+      summary: Validate or append one non-sensitive cross-agent coordination event.
+      description: Pre-authorized private queue write. It cannot modify either app, create PRs or release main/live.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ref, inputs]
+              properties:
+                ref:
+                  type: string
+                  enum: [main]
+                inputs:
+                  type: object
+                  required: [mode, request_id, payload_json]
+                  properties:
+                    mode:
+                      type: string
+                      enum: [validate_only, apply]
+                    request_id:
+                      type: string
+                      pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
+                    payload_json:
+                      type: string
+                      description: One guarded request, response or close event. Never include patient data, raw QR payloads, chats, secrets or Base64.
+      responses:
+        "204":
+          description: Coordination workflow accepted.
+  /repos/Kayus24/kgg-project-memory/actions/workflows/kgg-agent-coordination-gate.yml/runs:
+    get:
+      operationId: listKggAgentCoordinationRuns
+      summary: List recent coordination workflow runs.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: branch
+          in: query
+          required: false
+          schema: {type: string, enum: [main], default: main}
+        - name: event
+          in: query
+          required: false
+          schema: {type: string, enum: [workflow_dispatch], default: workflow_dispatch}
+        - name: status
+          in: query
+          required: false
+          schema: {type: string, enum: [queued, in_progress, completed]}
+        - name: per_page
+          in: query
+          required: false
+          schema: {type: integer, minimum: 1, maximum: 30, default: 10}
+      responses:
+        "200":
+          description: Recent coordination runs.
+          content:
+            application/json:
+              schema: {type: object, additionalProperties: true}
+  /repos/Kayus24/kgg-project-memory/actions/workflows/kgg-memory-gate.yml/dispatches:
+    post:
+      operationId: submitKggMemoryUpdate
+      summary: Validate or apply one guarded append-only project-memory record.
+      description: Use validate_only first. Apply only an identical safe payload. needs_approval must stop until Max explicitly approves.
+      x-openai-isConsequential: true
+      security:
+        - githubBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ref
+                - inputs
+              properties:
+                ref:
+                  type: string
+                  enum:
+                    - main
+                inputs:
+                  type: object
+                  required:
+                    - mode
+                    - request_id
+                    - payload_json
+                  properties:
+                    mode:
+                      type: string
+                      enum:
+                        - validate_only
+                        - apply
+                    request_id:
+                      type: string
+                      pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
+                    payload_json:
+                      type: string
+                      description: JSON string containing the identical request_id and one curated record. Never include chats, patient data, secrets or raw Base64.
+      responses:
+        "204":
+          description: Memory workflow dispatch accepted.
+  /repos/Kayus24/kgg-project-memory/actions/workflows/kgg-memory-gate.yml/runs:
+    get:
+      operationId: listKggMemoryUpdateRuns
+      summary: List recent KGG Project Memory Gate runs.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: branch
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - main
+            default: main
+        - name: event
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - workflow_dispatch
+            default: workflow_dispatch
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - queued
+              - in_progress
+              - completed
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 10
+      responses:
+        "200":
+          description: Recent memory workflow runs.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /repos/Kayus24/kgg-project-memory/actions/runs/{memory_run_id}:
+    get:
+      operationId: getKggMemoryUpdateRun
+      summary: Get status and conclusion for one Project Memory Gate run.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: memory_run_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Memory workflow run status.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /repos/Kayus24/kgg-project-memory/actions/runs/{memory_run_id}/jobs:
+    get:
+      operationId: getKggMemoryUpdateStatus
+      summary: Get jobs and named status steps for one Project Memory Gate run.
+      description: Inspect steps for applied, no_change, needs_approval or rejected behavior before reporting success.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: memory_run_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Memory workflow jobs and steps.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /repos/Kayus24/kgg-project-memory/actions/runs/{memory_run_id}/artifacts:
+    get:
+      operationId: getKggMemoryUpdateArtifacts
+      summary: List the structured result artifact for one Project Memory Gate run.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: memory_run_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Memory workflow artifacts.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+components:
+  schemas: {}
+  securitySchemes:
+    githubBearer:
+      type: http
+      scheme: bearer

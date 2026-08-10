@@ -1,46 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
   <title id="title">KGG App Icon</title>
-  <desc id="desc">Cream rounded KGG icon with olive training figure, yellow motion arc and dumbbell.</desc>
+  <desc id="desc">Official KGG logo with olive training figure, yellow motion arc and dumbbell.</desc>
   <defs>
-    <linearGradient id="cream" x1="78" y1="42" x2="430" y2="470" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#fffdf2"/>
-      <stop offset="1" stop-color="#f1ecd8"/>
+    <linearGradient id="bg" x1="40" y1="28" x2="470" y2="484" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fffef8"/>
+      <stop offset="1" stop-color="#f5f1e4"/>
     </linearGradient>
-    <linearGradient id="olive" x1="126" y1="112" x2="398" y2="390" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#7b8732"/>
-      <stop offset="0.55" stop-color="#596829"/>
-      <stop offset="1" stop-color="#3f4f1c"/>
+    <linearGradient id="olive" x1="160" y1="120" x2="390" y2="430" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#87934f"/>
+      <stop offset="1" stop-color="#52652a"/>
     </linearGradient>
-    <linearGradient id="gold" x1="82" y1="114" x2="430" y2="390" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#ffdc2e"/>
-      <stop offset="0.58" stop-color="#f6c21b"/>
-      <stop offset="1" stop-color="#e2a90e"/>
+    <linearGradient id="gold" x1="110" y1="90" x2="420" y2="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffc928"/>
+      <stop offset="1" stop-color="#e7ae16"/>
     </linearGradient>
-    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#10200b" flood-opacity="0.18"/>
-    </filter>
-    <filter id="tiny" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#10200b" flood-opacity="0.16"/>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="9" stdDeviation="11" flood-color="#1f2937" flood-opacity=".18"/>
     </filter>
   </defs>
 
-  <rect x="22" y="22" width="468" height="468" rx="82" fill="url(#cream)" filter="url(#soft)"/>
+  <rect x="20" y="20" width="472" height="472" rx="86" fill="url(#bg)" filter="url(#shadow)"/>
 
-  <path d="M135 366C78 281 107 160 207 112c50-24 112-25 169-4" fill="none" stroke="url(#gold)" stroke-width="14" stroke-linecap="round" opacity="0.96"/>
-  <path d="M165 402c80 42 190 35 259-29" fill="none" stroke="url(#gold)" stroke-width="12" stroke-linecap="round" opacity="0.95"/>
+  <path d="M132 365C71 278 110 153 218 108c44-18 96-22 147-10" fill="none" stroke="url(#gold)" stroke-width="15" stroke-linecap="round"/>
+  <path d="M158 405c82 43 192 32 264-32" fill="none" stroke="url(#gold)" stroke-width="13" stroke-linecap="round"/>
 
-  <g filter="url(#tiny)">
-    <circle cx="298" cy="139" r="32" fill="url(#olive)"/>
-    <path d="M150 251c65-64 137-73 207-46 40 15 74 6 118-51-11 57-45 97-92 121-51 27-93 58-121 106-20 34-62 32-82 2 34-27 64-57 78-92 17-43 4-59-47-50-22 4-42 10-61 10z" fill="url(#olive)"/>
-    <path d="M93 409c99-55 178-112 236-174 26-28 48-61 63-100 7 52-3 91-34 125-65 71-154 120-265 149z" fill="url(#olive)"/>
-    <path d="M305 282c54-14 102 0 129 39 28 42 19 96-21 121 10-58-15-86-67-83-35 2-76 20-121 52 16-55 41-98 80-129z" fill="url(#olive)"/>
+  <circle cx="294" cy="145" r="32" fill="url(#olive)"/>
+
+  <path d="M144 254c58-49 123-66 187-42 35 13 66 3 111-56-11 57-44 98-92 123-43 23-79 51-108 86-20 24-44 42-74 58 37-40 69-80 83-116 14-38 1-51-42-44-24 4-45 13-65 27-6 4-9-1-5-11l5-25z" fill="url(#olive)"/>
+
+  <path d="M91 414c108-58 194-119 256-183 26-27 47-58 62-92 5 49-8 91-42 127-66 68-157 118-276 148z" fill="url(#olive)"/>
+
+  <path d="M282 291c53-20 105-11 137 28 34 42 30 101-8 137 5-53-20-83-72-85-43-1-88 17-137 53 18-56 44-101 80-133z" fill="url(#olive)"/>
+
+  <g transform="rotate(39 414 92)" fill="url(#gold)">
+    <rect x="369" y="82" width="90" height="18" rx="7"/>
+    <rect x="350" y="62" width="36" height="58" rx="10"/>
+    <rect x="443" y="62" width="36" height="58" rx="10"/>
   </g>
 
-  <g transform="rotate(38 400 95)" fill="url(#gold)" filter="url(#tiny)">
-    <rect x="353" y="70" width="84" height="20" rx="8"/>
-    <rect x="334" y="55" width="36" height="50" rx="9"/>
-    <rect x="421" y="55" width="36" height="50" rx="9"/>
-  </g>
-
-  <text x="214" y="409" font-family="Arial Black, Arial, Helvetica, sans-serif" font-size="75" font-weight="900" letter-spacing="-8" fill="url(#olive)" opacity="0.96">KGG</text>
+  <text x="210" y="418" font-family="Arial Black,Arial,Helvetica,sans-serif" font-size="74" font-weight="900" letter-spacing="-7" fill="url(#olive)">KGG</text>
 </svg>

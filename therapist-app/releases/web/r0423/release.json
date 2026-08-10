@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0423",
+  "versionName": "1.0.59-ui-scaler-push-canary",
+  "notes": "Byte-identische modulare Quelluebernahme; Laufzeit unveraendert gegenueber r0422.",
+  "createdAt": "2026-07-13T11:45:06Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0423",
+      "profile": "admin",
+      "versionName": "1.0.59-ui-scaler-push-canary",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0423/admin.html",
+      "sha256": "74974ab424eac0cbe1a7c178e188ddff9a0d28d393b49a3c71d8e7a7bc20b509",
+      "notes": "Byte-identische modulare Quelluebernahme; Laufzeit unveraendert gegenueber r0422."
+    },
+    "colleague": {
+      "releaseId": "r0423",
+      "profile": "colleague",
+      "versionName": "1.0.59-ui-scaler-push-canary",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0423/colleague.html",
+      "sha256": "7a061546a046d4cb0196080ab972bebc141771967a4adf6025cbfd577fd0c5c6",
+      "notes": "Byte-identische modulare Quelluebernahme; Laufzeit unveraendert gegenueber r0422."
+    }
+  }
+}

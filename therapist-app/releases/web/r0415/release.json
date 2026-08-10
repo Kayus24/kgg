@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0415",
+  "versionName": "1.0.52-pdf-plan-thumbnails-r0415",
+  "notes": "v052: PDF-Trainingskarten zeigen lokale Schwarzweiss-Uebungsbilder oben rechts, ohne Kartenhoehe zu vergroessern.",
+  "createdAt": "2026-07-01T08:35:07Z",
+  "source": "kgg-update/index.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0415",
+      "profile": "admin",
+      "versionName": "1.0.52-pdf-plan-thumbnails-r0415",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0415/admin.html",
+      "sha256": "5cd5e487651ff71ef6ff2db4c00baef24fc65718faa2e07c15da1685e6117960",
+      "notes": "v052: PDF-Trainingskarten zeigen lokale Schwarzweiss-Uebungsbilder oben rechts, ohne Kartenhoehe zu vergroessern."
+    },
+    "colleague": {
+      "releaseId": "r0415",
+      "profile": "colleague",
+      "versionName": "1.0.52-pdf-plan-thumbnails-r0415",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0415/colleague.html",
+      "sha256": "f28612ef9e249b5ff7416f42913f011e2f357ccc1fc6b8ffc54838d0b059201f",
+      "notes": "v052: PDF-Trainingskarten zeigen lokale Schwarzweiss-Uebungsbilder oben rechts, ohne Kartenhoehe zu vergroessern."
+    }
+  }
+}

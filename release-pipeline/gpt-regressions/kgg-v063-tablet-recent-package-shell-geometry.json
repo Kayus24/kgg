@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "requestId": "kgg-v063-tablet-recent-package-shell-geometry",
+  "patchId": "kgg-v062-tablet-recent-package-shell-geometry",
+  "assertions": [
+    {
+      "kind": "contains",
+      "value": "tabletRecentOverlayMode"
+    },
+    {
+      "kind": "contains",
+      "value": "tabletRecentHost"
+    },
+    {
+      "kind": "contains",
+      "value": "body.tabletLayoutCustom.tabletMenuOpen.tabletPackageOverlayOpen .app"
+    },
+    {
+      "kind": "contains",
+      "value": "kgg-tablet-recent-package-shell-geometry"
+    }
+  ]
+}

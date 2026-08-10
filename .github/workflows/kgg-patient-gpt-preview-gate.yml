@@ -1,0 +1,289 @@
+name: KGG Patient GPT Preview Gate
+run-name: KGG Patient GPT Preview Gate | ${{ inputs.mode }} | ${{ inputs.request_id }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: validate_only, publish_preview, create_pr or publish_patient_live
+        required: true
+        type: choice
+        options:
+          - validate_only
+          - publish_preview
+          - create_pr
+          - publish_patient_live
+      request_id:
+        description: Stable patient GPT request id
+        required: true
+        type: string
+      payload_json:
+        description: Guarded patient GPT replace-exact payload
+        required: true
+        type: string
+      approval_phrase:
+        description: Exact final Max approval; required only for patient PR/live modes
+        required: false
+        default: ""
+        type: string
+  workflow_call:
+    inputs:
+      mode:
+        required: true
+        type: string
+      request_id:
+        required: true
+        type: string
+      payload_json:
+        required: true
+        type: string
+      approval_phrase:
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  actions: read
+  checks: read
+  contents: write
+  pull-requests: write
+  statuses: read
+
+concurrency:
+  group: kgg-patient-gpt-${{ inputs.request_id }}
+  cancel-in-progress: false
+
+jobs:
+  patient-gate:
+    runs-on: ubuntu-latest
+    outputs:
+      patch_hash: ${{ steps.gate.outputs.patch_hash }}
+      patient_version: ${{ steps.gate.outputs.patient_version }}
+      preview_url: ${{ steps.gate.outputs.preview_url }}
+      recovery_url: ${{ steps.gate.outputs.recovery_url }}
+      pr_url: ${{ steps.pull_request.outputs.pr_url }}
+    env:
+      GH_TOKEN: ${{ secrets.KGG_PATIENT_AUTOMATION_TOKEN || github.token }}
+      PAYLOAD_JSON: ${{ inputs.payload_json }}
+    steps:
+      - name: Checkout dispatched patient source
+        uses: actions/checkout@v4
+        with:
+          path: base
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+          token: ${{ secrets.KGG_PATIENT_AUTOMATION_TOKEN || github.token }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install patient test dependencies
+        if: inputs.mode != 'validate_only'
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
+          cd base/release-pipeline
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Write guarded dispatch payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          path = Path(os.environ["RUNNER_TEMP"]) / "kgg-patient-gpt-payload.json"
+          path.write_text(os.environ["PAYLOAD_JSON"], encoding="utf-8", newline="\n")
+          print(path)
+          PY
+
+      - name: Prepare isolated patient preview checkout
+        if: inputs.mode != 'validate_only'
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh auth setup-git
+          gh repo clone Kayus24/kgg-patient-preview preview
+
+      - name: Validate or apply guarded patient payload
+        id: gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          args=(
+            --mode '${{ inputs.mode }}'
+            --payload-file "$RUNNER_TEMP/kgg-patient-gpt-payload.json"
+            --github-output "$GITHUB_OUTPUT"
+            --approval-phrase '${{ inputs.approval_phrase }}'
+          )
+          if [[ '${{ inputs.mode }}' != 'validate_only' ]]; then
+            args+=(--preview-root "$GITHUB_WORKSPACE/preview")
+          fi
+          python release-pipeline/kgg_patient_gpt_write_gate.py "${args[@]}"
+
+      - name: Refresh patient GPT resources for PR modes
+        if: inputs.mode == 'create_pr' || inputs.mode == 'publish_patient_live'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          python release-pipeline/kgg_patient_gpt_resources.py --write
+          python release-pipeline/kgg_custom_gpt_resource_audit.py --write
+
+      - name: Run critical KGG tests
+        if: inputs.mode != 'validate_only'
+        shell: bash
+        env:
+          KGG_ALLOW_RELEASE_DRIFT: "1"
+        run: |
+          set -euo pipefail
+          cd base
+          python release-pipeline/kgg_test_battery.py --level critical
+
+      - name: Run patient PWA and browser regression
+        if: inputs.mode != 'validate_only'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          python release-pipeline/kgg_pwa_contract_smoke.py
+          python release-pipeline/kgg_update_recovery_smoke.py
+          node release-pipeline/kgg_patient_card_progress_smoke.js
+          node release-pipeline/kgg_patient_install_prompt_smoke.js
+          node release-pipeline/kgg_patient_plan_delete_smoke.js
+          node release-pipeline/kgg_patient_summary_smoke.js
+          node release-pipeline/kgg_patient_gpt_browser_smoke.js
+          node release-pipeline/kgg_patient_preview_first_load_smoke.js "$GITHUB_WORKSPACE/preview/previews/${{ inputs.request_id }}"
+
+      - name: Run patient interface regression
+        if: inputs.mode != 'validate_only' && steps.gate.outputs.run_patient_scan == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          python release-pipeline/kgg_test_battery.py --suite patient-scan --level regression
+
+      - name: Run patient camera full-frame regression
+        if: inputs.mode != 'validate_only' && steps.gate.outputs.run_patient_scan == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          node release-pipeline/kgg_patient_scan_camera_smoke.js --case=live-camera-full-frame
+
+      - name: Upload candidate evidence
+        if: inputs.mode != 'validate_only'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgg-patient-preview-${{ inputs.request_id }}
+          path: |
+            preview/previews/${{ inputs.request_id }}/
+            base/CHANGELOG_PATIENT_APP.md
+
+      - name: Publish isolated patient preview
+        if: inputs.mode == 'publish_preview'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd preview
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add previews
+          if git diff --cached --quiet; then
+            echo "No patient preview changes to publish."
+          else
+            git commit -m "publish patient preview ${{ inputs.request_id }}"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+          {
+            echo "Patient preview: ${{ steps.gate.outputs.preview_url }}"
+            echo "Recovery preview: ${{ steps.gate.outputs.recovery_url }}"
+            echo "Patch hash: ${{ steps.gate.outputs.patch_hash }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Create accepted patient PR
+        id: pull_request
+        if: inputs.mode == 'create_pr' || inputs.mode == 'publish_patient_live'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          branch="patient-gpt/${{ inputs.request_id }}-${{ github.run_id }}"
+          git switch -c "$branch"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add \
+            index.html service-worker.js update-recovery.html manifest.json \
+            manifest-v*.webmanifest collapse-cards.js numpad-ui-fix.js patient-*.js \
+            CHANGELOG_PATIENT_APP.md docs/kgg-patient-* \
+            docs/kgg-custom-gpt-resource-manifest.json
+          git commit -m "patient app ${{ inputs.request_id }}"
+          git push -u origin "$branch"
+          body="$(mktemp)"
+          cat > "$body" <<BODY
+          Guarded Patient-App Custom GPT patch.
+
+          - Preview request: \`${{ inputs.request_id }}\`
+          - Patch hash: \`${{ steps.gate.outputs.patch_hash }}\`
+          - Patient version: \`v${{ steps.gate.outputs.patient_version }}\`
+          - Risk class: \`${{ steps.gate.outputs.risk_class }}\`
+          - Accepted preview: \`${{ steps.gate.outputs.preview_url }}\`
+
+          The patch is based on the exact accepted preview and never writes directly to \`main\`.
+          BODY
+          url="$(gh pr create \
+            --base main \
+            --head "$branch" \
+            --title "[patient-app] ${{ inputs.request_id }} v${{ steps.gate.outputs.patient_version }}" \
+            --body-file "$body")"
+          echo "pr_url=$url" >> "$GITHUB_OUTPUT"
+          echo "Patient PR: $url" >> "$GITHUB_STEP_SUMMARY"
+
+  merge-patient-live:
+    if: inputs.mode == 'publish_patient_live'
+    needs: patient-gate
+    runs-on: ubuntu-latest
+    environment: patient-live
+    env:
+      GH_TOKEN: ${{ secrets.KGG_PATIENT_AUTOMATION_TOKEN }}
+    steps:
+      - name: Require configured patient automation token
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$GH_TOKEN"
+
+      - name: Wait for required checks and merge accepted patient release
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh pr checks '${{ needs.patient-gate.outputs.pr_url }}' --required --watch --fail-fast
+          gh pr merge '${{ needs.patient-gate.outputs.pr_url }}' --squash
+          echo "Merged patient release: ${{ needs.patient-gate.outputs.pr_url }}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify live patient version
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected='${{ needs.patient-gate.outputs.patient_version }}'
+          for attempt in {1..12}; do
+            worker="$(curl --fail --silent --show-error \
+              "https://kayus24.github.io/kgg/service-worker.js?verify=${GITHUB_RUN_ID}-${attempt}" || true)"
+            if grep -Fq "const APP_VERSION = '${expected}';" <<<"$worker"; then
+              echo "Live patient version v${expected} verified." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "GitHub Pages did not expose patient version v${expected} in time." >&2
+          exit 1

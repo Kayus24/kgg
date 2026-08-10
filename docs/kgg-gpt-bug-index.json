@@ -1,0 +1,840 @@
+{
+  "forbidden_patterns": [
+    {
+      "avoid": "Do not add broad `touch-action`, `pointer-events` or gesture rules on app-wide containers.",
+      "id": "global-touch-action",
+      "prefer": "Limit gesture rules to the exact handle/control and run UI stability regression.",
+      "risk": "Global touch or pointer rules can break swipe, scroll and drag/reorder flows."
+    },
+    {
+      "avoid": "Do not hide modal overlays only below `body.tabletLayoutCustom`.",
+      "id": "modal-scoped-only-to-tablet",
+      "prefer": "Give the modal a global hidden base rule and then layer tablet-specific presentation separately.",
+      "risk": "Closed modals can leak into the phone document flow when hiding rules are scoped only to tablet classes."
+    },
+    {
+      "avoid": "Do not test breakpoints with browser zoom or change phone/tablet media queries incidentally.",
+      "id": "breakpoint-drift",
+      "prefer": "Use real viewports: phone <=759 px, tablet >=760 px.",
+      "risk": "Phone and tablet UI can both become active if the 759/760 px split drifts."
+    },
+    {
+      "avoid": "Do not route debug pages or payload dumps into normal patient flows.",
+      "id": "debug-output-to-patient",
+      "prefer": "Keep debug output internal and preserve patient-safe rendering.",
+      "risk": "Patient-facing output must never expose raw JSON, Base64 or debug payloads."
+    },
+    {
+      "avoid": "Do not edit protected feature blocks unless Max explicitly asked for that area.",
+      "id": "side-effect-feature-touch",
+      "prefer": "Make one scoped patch and list all untouched protected areas in the PR.",
+      "risk": "Small UI fixes often become unsafe when they also touch QR, PDF, parser, scan or plan state."
+    }
+  ],
+  "kind": "kgg_gpt_bug_knowledge",
+  "records": [
+    {
+      "areas": [
+        "debug",
+        "parser-textblocks",
+        "pdf",
+        "qr-patient",
+        "scan-camera",
+        "sync",
+        "tablet-layout"
+      ],
+      "cause": "",
+      "do_not_touch": "- Keine Aenderung an HTML/CSS/JS-App-Logik. - Keine Layout-Aenderung. - Keine Aenderung an PDF, QR, Parser, Scan/OCR, Storage oder Uebungsdatenbank. - Keine API-Keys oder Secrets ergaenzt.",
+      "fix_pattern": "",
+      "id": "docs-changelog-therapist-app-md-therapeuten-app-changelog",
+      "keywords": [
+        "debug",
+        "parser-textblocks",
+        "pdf",
+        "qr-patient",
+        "scan-camera",
+        "sync",
+        "tablet-layout",
+        "therapeuten-app-changelog"
+      ],
+      "markers": [
+        "CHANGELOG_PATIENT_APP.md",
+        "docs/CHANGELOG_THERAPIST_APP.md",
+        "docs/bug-debug/README.md"
+      ],
+      "risks": "",
+      "source_path": "docs/CHANGELOG_THERAPIST_APP.md",
+      "symptom": "Dieses Changelog dokumentiert bewusst nur Aenderungen an der Therapeuten-/Admin-/Kolleg:innen-App. Patient:innen-App-Aenderungen gehoeren in `CHANGELOG_PATIENT_APP.md`. - Eigenes Changelog fuer die Therapeuten-/Admin-App angelegt. - Verweis auf strukturierten Bug-Debug-Ordner ergaenzt. - Aenderungen an der Therapeuten-App getrennt von Patient:innen-App-Fixes",
+      "tests": "",
+      "title": "Therapeuten-App Changelog"
+    },
+    {
+      "areas": [
+        "general"
+      ],
+      "cause": "",
+      "do_not_touch": "",
+      "fix_pattern": "",
+      "id": "docs-versionslog-md-versionslog",
+      "keywords": [
+        "general",
+        "versionslog"
+      ],
+      "markers": [],
+      "risks": "",
+      "source_path": "docs/VERSIONSLOG.md",
+      "symptom": "Hier werden stabile Staende und Fehlerstaende festgehalten. --- Datum: 2026-05-12 Commit: bitte aktuellen Commit nachtragen Geaendert: - Sicherheits-Dokumente fuer kontrollierte ChatGPT-Patches angelegt Funktioniert: - Noch nicht getestet Kaputt/auffaellig: - Noch nicht geprueft Naechster Schritt: - Aktuelle beste HTML/App-Version in das Repo hochladen oder",
+      "tests": "",
+      "title": "Versionslog"
+    },
+    {
+      "areas": [
+        "debug",
+        "drag-reorder",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "sync",
+        "tablet-layout"
+      ],
+      "cause": "Die Phone-Scroll-Stabilisierung setzte bei Touch-/Pointer-Bewegungen `body.is-scrolling`. In der Phone-CSS-Schicht wurden dabei Animationen und Transforms zu breit deaktiviert. Dadurch wurde auch `.planCard` getroffen. Problematisch war insbesondere: Die Swipe-Logik arbeitet aber aktiv mit: Dadurch bekam die Karte zwar Pointer-Events, die sichtbare Bewegung",
+      "do_not_touch": "- PDF - QR - Patient-App - Scan - Parser - Plan-State - Storage - Tablet-Layout - Uebungsdatenbank-Logik",
+      "fix_pattern": "Phone-only CSS-Patch ergaenzt: Danach wurde als separater Mini-Patch nur die Identitaet korrigiert: - `<title>` - `VERSION` - `KGG_BUILD_INFO` Keine Layout-/Logikaenderung im Identitaets-Fix.",
+      "id": "docs-bug-debug-2026-06-18-phone-gesture-identity-autoupdate-md-2026-06-18-phone-gesten-fix-mini07-identitaets-fix-auto-update-handoff",
+      "keywords": [
+        "2026-06-18-phone-gesten-fix-mini07-identitaets-fix-auto-update-handoff",
+        "debug",
+        "drag-reorder",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "sync",
+        "tablet-layout"
+      ],
+      "markers": [
+        ".html",
+        ".is-scrolling",
+        ".json",
+        ".kggPlanCardSwiping",
+        ".matches",
+        ".planCard",
+        ".swipe-dragging",
+        ".swipe-removing",
+        "/path/to/KGG_APP_ADMIN_v400_mini07_identity_fix.html",
+        "<title>",
+        "KGG_APP_ADMIN_v400_mini06_phone_gesture_fix.html",
+        "KGG_APP_ADMIN_v400_mini07_identity_fix.html",
+        "KGG_BUILD_INFO",
+        "VERSION",
+        "body.is-scrolling",
+        "index.html",
+        "kgg-update/index.html",
+        "kgg-update/version.js",
+        "kgg-update/version.json",
+        "matchMedia('(max-width:759px)').matches === true",
+        "scripts/make_kgg_update_payload.py",
+        "versionCode"
+      ],
+      "risks": "- Wenn `body.is-scrolling` spaeter wieder global auf `.planCard` erweitert wird, kann derselbe Fehler zurueckkommen. - Wenn `kgg-update/version.json` einen falschen SHA enthaelt, blockiert der Android-Wrapper das Update korrekt. - Native Wrapper-Aenderungen aktualisieren sich nicht ueber `kgg-update/index.html`; dafuer braucht es ein neues APK.",
+      "source_path": "docs/bug-debug/2026-06-18-phone-gesture-identity-autoupdate.md",
+      "symptom": "Im Handy-Layout waren die Gesten der Uebungskarten im aktuellen Plan fehlerhaft: - Swipe links/rechts lief nicht sichtbar oder sprang zurueck. - Die Swipe-Animation wurde durch Phone-Scroll-CSS ueberschrieben. - Drag/Reorder per Griff `` war optisch unzuverlaessig. - Tablet war nicht betroffen. Zusaetzlich war nach dem Funktionsfix die interne Build-Identita",
+      "tests": "- [ ] Handy-Viewport 390844 oder 400844 testen. - [ ] `matchMedia('(max-width:759px)').matches === true`. - [ ] Mindestens zwei Uebungen in den Plan legen. - [ ] Karte links/rechts swipen: Karte muss sichtbar mitlaufen. - [ ] Ueber Loeschschwelle swipen: Karte muss entfernt werden. - [ ] Griff `` halten und Karte verschieben. - [ ] Tablet-Viewport ab 760 px",
+      "title": "2026-06-18 Phone-Gesten-Fix + mini07 Identitaets-Fix + Auto-Update-Handoff"
+    },
+    {
+      "areas": [
+        "debug",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "tablet-layout"
+      ],
+      "cause": "",
+      "do_not_touch": "- PDF - QR - Patienten-App - Scan - Parser - Android Wrapper - Tablet-Layout - Plan-State - Storage",
+      "fix_pattern": "",
+      "id": "docs-bug-debug-2026-06-19-phone-admin-banner-hide-md-buglog-phone-admin-datei-banner-ausblenden",
+      "keywords": [
+        "buglog-phone-admin-datei-banner-ausblenden",
+        "debug",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "tablet-layout"
+      ],
+      "markers": [
+        ".adminTestBanner",
+        ".clear",
+        ".html",
+        ".innerWidth",
+        ".json",
+        ".matches",
+        ".reload",
+        "1.0.3-phone-admin-banner-clean",
+        "</head>",
+        "ADMIN-DATEI",
+        "kgg-mini-patch-v400-08-phone-hide-admin-file-banner",
+        "kgg-update/index.html",
+        "kgg-update/version.js",
+        "kgg-update/version.json",
+        "localStorage.clear(); sessionStorage.clear(); location.reload();",
+        "matchMedia('(max-width:759px)').matches === true",
+        "scripts/apply_v004_phone_hide_admin_banner.py",
+        "window.innerWidth <= 759",
+        "window.innerWidth >= 760"
+      ],
+      "risks": "",
+      "source_path": "docs/bug-debug/2026-06-19-phone-admin-banner-hide.md",
+      "symptom": "Im Handy-Layout ist eine gelbe interne Admin-/Testbox sichtbar: Diese Box gehoert nicht in den normalen Handy-Flow.",
+      "tests": "1. Clean State: `localStorage.clear(); sessionStorage.clear(); location.reload();` 2. Handy-Viewport: 390 x 844. 3. Pruefen: - `window.innerWidth <= 759` - `matchMedia('(max-width:759px)').matches === true` - Gelbe `ADMIN-DATEI`-Box nicht sichtbar. 4. Tablet-Viewport: 820 x 1180. 5. Pruefen: - `window.innerWidth >= 760` - Tablet-Layout unveraendert.",
+      "title": "Buglog Phone Admin-Datei Banner ausblenden"
+    },
+    {
+      "areas": [
+        "debug",
+        "parser-textblocks",
+        "pdf",
+        "qr-patient",
+        "scan-camera",
+        "sync",
+        "tablet-layout"
+      ],
+      "cause": "Der bestehende Datei-Pfad `scanQrFromImageFile(file)` laedt Bilder nur ueber `URL.createObjectURL(file)` in ein `Image`-Element und scannt anschliessend eine 1800px-Canvas-Version mit wenigen Crops/Filtern. Auf Android/WebView und bei Bildern aus der Galerie kann das fehlschlagen durch: - EXIF-/Orientierungsprobleme, - sehr grosse Fotos, bei denen der QR bei",
+      "do_not_touch": "",
+      "fix_pattern": "- `scanImageCanvasFromFile()` wird robuster: - zuerst `createImageBitmap(file, { imageOrientation: \"from-image\" })` - danach ObjectURL-Fallback - danach DataURL/FileReader-Fallback - `scanQrFromImageFile()` wird robuster: - direkter `BarcodeDetector`-Versuch auf `ImageBitmap` - mehrere Canvas-Groessen: 2200, 3200, 1600 - mehr Crops: Ecken, Baender, Drittelbe",
+      "id": "docs-bug-debug-2026-06-19-qr-photo-upload-decode-md-patchlog-v007-qr-scan-aus-fotodatenbank-reparieren",
+      "keywords": [
+        "debug",
+        "parser-textblocks",
+        "patchlog-v007-qr-scan-aus-fotodatenbank-reparieren",
+        "pdf",
+        "qr-patient",
+        "scan-camera",
+        "sync",
+        "tablet-layout"
+      ],
+      "markers": [
+        ".createObjectURL",
+        ".html",
+        ".json",
+        "BarcodeDetector",
+        "Image",
+        "ImageBitmap",
+        "URL.createObjectURL(file)",
+        "content://",
+        "createImageBitmap(file, { imageOrientation: \"from-image\" })",
+        "kgg-update/index.html",
+        "kgg-update/version.js",
+        "scanImageCanvasFromFile()",
+        "scanQrFromImageFile()",
+        "scanQrFromImageFile(file)",
+        "scripts/apply_v007_qr_photo_upload_decode.py"
+      ],
+      "risks": "",
+      "source_path": "docs/bug-debug/2026-06-19-qr-photo-upload-decode.md",
+      "symptom": "Der QR-Scan ueber die Kamera funktioniert, aber QR-Codes aus hochgeladenen Bildern/Fotos aus der Fotodatenbank werden nicht zuverlaessig erkannt. Der bestehende Datei-Pfad `scanQrFromImageFile(file)` laedt Bilder nur ueber `URL.createObjectURL(file)` in ein `Image`-Element und scannt anschliessend eine 1800px-Canvas-Version mit wenigen Crops/Filtern. Auf And",
+      "tests": "1. App oeffnen. 2. QR-Scan ueber Kamera testen. 3. Foto-/Datei-Upload oeffnen. 4. Ein gespeichertes QR-Bild aus der Galerie auswaehlen. 5. Erwartung: App erkennt den QR und verarbeitet ihn wie beim Kamera-Scan. 6. Negativtest: normales Papierplan-Foto ohne QR soll weiterhin in den Papierplan-/OCR-Pfad gehen.",
+      "title": "PATCHLOG v007 QR-Scan aus Fotodatenbank reparieren"
+    },
+    {
+      "areas": [
+        "debug",
+        "parser-textblocks",
+        "pdf",
+        "qr-patient",
+        "scan-camera",
+        "tablet-layout"
+      ],
+      "cause": "Der Rollback im Repository war korrekt, aber die installierte App hatte lokal bereits `versionCode 10` / `1.0.9-restore-lkg-qr-gallery-decode` gesehen. Der zurueckgesetzte Manifest-Stand hatte wieder `versionCode 9`. Dadurch nahm die App den Rollback nicht als neues Update an oder blieb durch Service-Worker/WebView-Cache auf der kaputten Datei. Kurz: Bei PWA",
+      "do_not_touch": "- PDF - QR-Erzeugung - Patienten-App - Scan-Kamera - Parser - Android-Wrapper - Tablet-Layout - Plan-State - Storage",
+      "fix_pattern": "1. Kaputten v011-Stand gesichert: - Branch: `backup/broken-v011-before-rollback` 2. `main` zuerst auf den Commit vor v011 zurueckgesetzt: - guter Stand: `c2a259cca21c3681b56f3933fc0977efcd465fac` 3. Danach `kgg-update/version.json` erneut erhoeht, damit die installierte App den guten Stand wieder laedt: - `versionCode`: `20` - `versionName`: `1.0.20-stable`",
+      "id": "docs-bug-debug-2026-06-20-v011-tablet-layout-cache-rollback-md-2026-06-20-v011-tablet-layout-nach-rollback-weiter-kaputt-wegen-versioncode-cache",
+      "keywords": [
+        "2026-06-20-v011-tablet-layout-nach-rollback-weiter-kaputt-wegen-versioncode-cache",
+        "debug",
+        "parser-textblocks",
+        "pdf",
+        "qr-patient",
+        "scan-camera",
+        "tablet-layout"
+      ],
+      "markers": [
+        ".html",
+        ".json",
+        "1.0.20-stable",
+        "1.0.7-patch-retention-changelog-guard",
+        "1.0.9-restore-lkg-qr-gallery-decode",
+        "20",
+        "Hat geklappt",
+        "KGG Update: aktuell (1.0.9-restore-lkg-qr-gallery-decode)",
+        "backup/broken-v011-before-rollback",
+        "c2a259cca21c3681b56f3933fc0977efcd465fac",
+        "ff81621997d2007fdb776c71688c4dfc1b2d052439efeead796cf98cee888eb1",
+        "index.html",
+        "index.html?v=20",
+        "index.html?v=<neuerCode>",
+        "indexUrl",
+        "kgg-update/index.html",
+        "kgg-update/version.js",
+        "kgg-update/version.json",
+        "main",
+        "sha256",
+        "update-inbox/patch.py",
+        "update-inbox/release.js",
+        "update-inbox/release.json",
+        "versionCode"
+      ],
+      "risks": "- Service Worker / WebView / PWA-Cache kann alte HTML weiter halten. - Direkter Rollback auf niedrigeren `versionCode` wirkt lokal nicht zuverlaessig. - Update-Inbox-Patches koennen trotz Repo-Rollback in installierten Apps sichtbar bleiben, bis ein hoeherer Manifest-Code ausgeliefert wird.",
+      "source_path": "docs/bug-debug/2026-06-20-v011-tablet-layout-cache-rollback.md",
+      "symptom": "Nach dem v011-Update war das Tablet-Layout sichtbar kaputt. Der direkte Rollback auf den Stand vor v011 stellte `kgg-update/index.html` und `kgg-update/version.json` zwar im Repository wieder her, die installierte App zeigte aber weiter den kaputten v011-Stand. Sichtbar in der App: - Toast: `KGG Update: aktuell (1.0.9-restore-lkg-qr-gallery-decode)` - Tablet",
+      "tests": "- [x] Tablet-App komplett schliessen. - [x] App neu oeffnen. - [x] App laedt nicht mehr den kaputten v011-Stand. - [x] Tablet-Layout funktioniert wieder laut Max-Screenshot/Rueckmeldung. - [x] Max hat bestaetigt: `Hat geklappt`. - [ ] Galerie-QR separat neu testen, wenn ein neuer QR-Fix vorbereitet wird. - [ ] Kamera-Scan separat neu testen, wenn ein neuer Q",
+      "title": "2026-06-20 v011 Tablet-Layout nach Rollback weiter kaputt wegen versionCode/Cache"
+    },
+    {
+      "areas": [
+        "debug",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "tablet-layout"
+      ],
+      "cause": "Das alte v1-Write-Gate erlaubte nur Operationen mit: - `path: \"kgg-update/index.html\"` - `old_text` - `new_text` Alias-Felder wie `file`, `filename` oder `target` werden nicht akzeptiert. Das aktuelle v2-Gate akzeptiert gar keine `operations`, `path`, `file`, `old_text` oder `new_text` mehr. Der GPT liefert nur `patch_content` und Metadaten; das Gate erzeugt",
+      "do_not_touch": "- App-Feature-Code - PDF - QR/Patienten-App - Scan/OCR - Parser - Plan-State - Medien/Upload - Android/APK - GitHub Manifest - Handy-Layout",
+      "fix_pattern": "Der GPT muss jeden Payload vor Dispatch stoppen, wenn er `operations`, `path`, `file`, `filename`, `target`, `old_text` oder `new_text` nutzt. Der korrekte v2-Payload liefert kein Repository-Ziel, sondern nur Patchinhalt und Metadaten:",
+      "id": "docs-bug-debug-2026-07-03-custom-gpt-payload-schema-path-md-custom-gpt-payload-schema-alter-v1-pfad-statt-modularer-v2-payload",
+      "keywords": [
+        "custom-gpt-payload-schema-alter-v1-pfad-statt-modularer-v2-payload",
+        "debug",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "tablet-layout"
+      ],
+      "markers": [
+        ".cmd",
+        ".html",
+        ".json",
+        "28665968004",
+        "Apply guarded GPT payload",
+        "ERROR: v1 only allows kgg-update/index.html",
+        "__KGG_PATCH_ID__",
+        "file",
+        "filename",
+        "index.html",
+        "kgg-update/index.html",
+        "kgg-update/src/patches/",
+        "meta.js",
+        "meta.json 404",
+        "modular-payload",
+        "new_text",
+        "old_text",
+        "operations",
+        "patch_content",
+        "path",
+        "path: \"kgg-update/index.html\"",
+        "payload-schema-path",
+        "release-pipeline/kgg_gpt_payload_preflight.py",
+        "release-pipeline/kgg_gpt_payload_preflight.py --self-test"
+      ],
+      "risks": "",
+      "source_path": "docs/bug-debug/2026-07-03-custom-gpt-payload-schema-path.md",
+      "symptom": "Ein Custom-GPT-Preview-Dispatch kann formal plausibel aussehen, aber im Write-Gate scheitern, wenn er ein altes v1-Operationsschema verwendet. Historischer Run: `28665968004` scheiterte im Step `Apply guarded GPT payload` mit `ERROR: v1 only allows kgg-update/index.html`. Seit der modularen Quelle ist auch `path: \"kgg-update/index.html\"` falsch, weil `index.",
+      "tests": "- `release-pipeline/kgg_gpt_payload_preflight.py --self-test` blockt einen Payload mit `file`. - GPT-Eval `payload-schema-path` blockt alte `operations` gegen `kgg-update/index.html`. - GPT-Eval `modular-payload` verlangt `patch_content` mit `__KGG_PATCH_ID__`. - Der GPT darf bei rotem Run nicht nur `meta.json 404` melden, sondern muss den fehlgeschlagenen S",
+      "title": "Custom GPT Payload Schema: alter v1-Pfad statt modularer v2-Payload"
+    },
+    {
+      "areas": [
+        "debug",
+        "drag-reorder",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "sync",
+        "tablet-layout"
+      ],
+      "cause": "Das Write-Gate blockt geschuetzte Tokens auch dann, wenn sie nur in einem Patch-Kommentar innerhalb `new_text` stehen. Ein weiterer Fehler ist, Run-Status, fehlgeschlagenen Step und Artefakte nicht in dieser Reihenfolge zu pruefen. `tabletLayoutFreeTools` ist das alte Skalierungs-Control. `tabletLayoutResizeHandle` ist der Splitter/Handle. Der sichtbare Grif",
+      "do_not_touch": "- App-Feature-Code - PDF - QR/Patienten-App - Scan/OCR - Parser - Plan-State - Medien/Upload - Android/APK, ausser Max fragt explizit danach - PDF - QR/Patienten-App - Scan/OCR - Parser - Plan-State - Medien/Upload - Android/APK - GitHub Manifest - Handy-Layout",
+      "fix_pattern": "Der GPT muss vor jeder Erfolgsaussage den GitHub-Run lesen. Bei rotem Run muss er den fehlgeschlagenen Step und die konkrete Gate-Meldung nennen. Schutzbereich-Hinweise gehoeren in Antwort oder PR-Handoff, nicht in Patch-`old_text` oder Patch-`new_text`. Der GPT muss diese Logik getrennt halten: Plus/Minus veraendert `--kgg-tablet-ui-scale`. Drag links/recht",
+      "id": "docs-bug-debug-2026-07-03-custom-gpt-preview-gate-lessons-md-custom-gpt-preview-gate-lessons",
+      "keywords": [
+        "custom-gpt-preview-gate-lessons",
+        "debug",
+        "drag-reorder",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "sync",
+        "tablet-layout"
+      ],
+      "markers": [
+        "--kgg-tablet-left-col",
+        "--kgg-tablet-ui-scale",
+        "Apply guarded GPT payload",
+        "critical",
+        "failed-preview-run",
+        "new_text",
+        "old_text",
+        "protected-token-payload",
+        "tablet-splitter",
+        "tablet-splitter-scale-drag",
+        "tabletLayoutFreeTools",
+        "tabletLayoutResizeHandle",
+        "ui-stability regression",
+        "updateTabletLayoutHandle()"
+      ],
+      "risks": "",
+      "source_path": "docs/bug-debug/2026-07-03-custom-gpt-preview-gate-lessons.md",
+      "symptom": "Der Custom GPT kann bei Preview-/Beta-Anfragen plausibel antworten, obwohl der GitHub-Run bereits fehlgeschlagen ist. Ein konkreter Fehler war: Die Antwort deutete einen fehlenden Preview-Manifest-Eintrag als \"noch nicht veroeffentlicht\", obwohl `Apply guarded GPT payload` rot war. Beim Tablet-Layout vermischt der GPT leicht zwei Bedienkonzepte: das alte Sca",
+      "tests": "- Payload mit geschuetztem Token im Patch-Kommentar wird im Preflight geblockt. - GPT-Eval `failed-preview-run` verlangt den echten roten Step. - GPT-Eval `protected-token-payload` verlangt Stop vor Dispatch. - UI-Stability-Probe `tablet-splitter-scale-drag` prueft die konkrete Bedienlogik. - GPT-Eval `tablet-splitter` muss die richtigen Klassen, Variablen u",
+      "title": "Custom GPT Preview-Gate Lessons"
+    },
+    {
+      "areas": [
+        "debug",
+        "modal",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "tablet-layout"
+      ],
+      "cause": "Der kompakte Marker war nur in PR #110 vorhanden. Der produktive `workflow_dispatch` lief weiterhin aus dem Default-Branch `main`, dessen `inject_preview_banner()` noch ein `position:sticky`-Element mit der kompletten Request-Beschreibung erzeugte. Ein gruener Branch-Test beweist nicht, dass ein Fix bereits fuer produktive GPT-Actions aktiv ist.",
+      "do_not_touch": "- Admin- und Kolleg:innen-HTML - PDF - QR/Patienten-App - Scan/OCR - Parser - Plan-State - Medien/Upload - Android- und Admin-Manifest",
+      "fix_pattern": "- Der produktive Marker ist ein kleines, fixed positioniertes Overlay und nimmt nicht am App-Layout teil. - Die eingeklappte Kennung zeigt nur `TEST` plus Hash-Kurzform. - Details mit Titel, Request-ID und vollem Hash werden nur auf Anforderung eingeblendet. - Das Gate entfernt eigene alte Marker vor jeder Injektion, statt vorhandene Marker ungeprueft zu ueb",
+      "id": "docs-bug-debug-2026-07-29-preview-marker-default-branch-drift-md-2026-07-29-preview-marker-und-default-branch-drift",
+      "keywords": [
+        "2026-07-29-preview-marker-und-default-branch-drift",
+        "debug",
+        "modal",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "tablet-layout"
+      ],
+      "markers": [
+        "15e39b2e23a7acf65588939fecacfaae971ab514",
+        "30397801575",
+        "TEST",
+        "baseSha",
+        "headSha",
+        "inject_preview_banner()",
+        "kgg-ocr-camera-wide-preview",
+        "main",
+        "position:sticky",
+        "release-pipeline/kgg_gpt_write_gate.py",
+        "workflow_dispatch"
+      ],
+      "risks": "- Ein offener PR darf nie als produktiver Stand beschrieben werden. - Eine erneute Preview aus einem alten Workflow-Ref kann alte Gate-Logik wiederverwenden. - Sichtbare Request-Beschreibungen duerfen nicht erneut in einen permanenten Marker gepackt werden.",
+      "source_path": "docs/bug-debug/2026-07-29-preview-marker-default-branch-drift.md",
+      "symptom": "Die KGG Test-App zeigte erneut einen schwarzen, vollhohen Balken mit kompletter Preview-Beschreibung. Der Balken verschob die eigentliche App und schnitt Bedienelemente am linken Rand an, obwohl ein kompakter Marker bereits auf einem offenen Arbeitsbranch implementiert und getestet war.",
+      "tests": "- Ein altes Sticky-Banner wird ersetzt und nicht dupliziert. - Der eingeklappte Marker ist hoechstens 92 x 24 CSS-Pixel gross. - App-Geometrie und horizontaler Overflow bleiben mit und ohne Marker identisch. - Menue, Scanner und Dock bleiben bei geschlossenem Marker anklickbar. - Details oeffnen und schliessen per Toggle, Aussenklick und Escape. - Viewports:",
+      "title": "2026-07-29 - Preview-Marker und Default-Branch-Drift"
+    },
+    {
+      "areas": [
+        "parser-textblocks",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera"
+      ],
+      "cause": "Der HTML-Patch nutzte `getUserMedia`, doch der Android-WebView leitete `PermissionRequest.RESOURCE_VIDEO_CAPTURE` nicht an die Seite weiter. Der Catch-Pfad oeffnete still die alte Datei-/Systemkamera. Mocks bewiesen nur JavaScript-Logik, nicht den nativen WebView-Vertrag.",
+      "do_not_touch": "Kein Mikrofonzugriff, kein erzwungener Zoom, keine echten Patientendaten oder echten QR-Payloads in Tests, Memory oder Agent-Koordination.",
+      "fix_pattern": "WebView-Kameraberechtigung nur fuer lokal verifizierte HTML und ausschliesslich Video freigeben. Einen versionierten nativen Capability-Vertrag anbieten. Die Admin-Kamera nutzt denselben BarcodeDetector-plus-lokalen-jsQR-Fallback wie der Patientenscanner und uebergibt QR-Rohtext direkt an den Admin-Parser.",
+      "id": "docs-bug-debug-2026-08-01-webview-camera-cross-app-qr-md-webview-kamera-und-cross-app-qr-brauchen-reale-vertragsbelege",
+      "keywords": [
+        "parser-textblocks",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "webview-kamera-und-cross-app-qr-brauchen-reale-vertragsbelege"
+      ],
+      "markers": [
+        ".RESOURCE_VIDEO_CAPTURE",
+        "PermissionRequest.RESOURCE_VIDEO_CAPTURE",
+        "camera-qr",
+        "getUserMedia",
+        "patient-scan"
+      ],
+      "risks": "Ein gruenes HTML-Mock ohne nativen Capability-Test ist kein Beweis fuer die Test-App. Ein stiller Fallback kann den alten Fehler verdecken.",
+      "source_path": "docs/bug-debug/2026-08-01-webview-camera-cross-app-qr.md",
+      "symptom": "Eine gruen gebaute HTML-Preview behauptete automatische QR-Uebernahme, auf dem Android-Geraet erschien aber weiter die alte stark gezoomte Systemkamera.",
+      "tests": "Pflicht sind Critical, UI-Stability, Admin `camera-qr`, Patient `patient-scan`, Android-Wrapper-Vertrag und Preview-APK-Build. Browser-Smoke prueft Auto-QR, jsQR-Fallback, Permission-Fallback, manuelles Foto und Track-Cleanup getrennt. Ein Emulator ersetzt den abschliessenden Handytest nicht.",
+      "title": "WebView-Kamera und Cross-App-QR brauchen reale Vertragsbelege"
+    },
+    {
+      "areas": [
+        "debug",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera"
+      ],
+      "cause": "`patient-start-scan.js` setzt einen breiten Kamerastream mit `object-fit: cover` in einen mobilen `3/4`-Rahmen. Das beschneidet die Seiten des Bilds. Unabhaengig davon verwiesen beide GPT-Actions bereits auf `coordination/index.json`, obwohl der vorbereitete Koordinationsbranch noch nicht in `kgg-project-memory/main` integriert war.",
+      "do_not_touch": "- QR-/KGGH2-/KGGD1-Vertrag - Parser und Plan-State - Patientenspeicher und Trainingswerte - Admin-App, PDF und Android-Wrapper",
+      "fix_pattern": "- Fuer den visuellen Scanner-Patch `object-fit: contain` verwenden und keine Kamera-Zoom-Constraints einfuehren. - Aenderungen an `patient-start-scan.js` immer als `patient-camera` routen und die `patient-scan`-Regression ausfuehren. - Die private Koordinationsqueue vollstaendig ausrollen. - Queue-Ausfaelle nur bei echten Interface-/Cross-App-Aenderungen als",
+      "id": "docs-bug-debug-2026-08-02-patient-camera-crop-coordination-404-md-patient-kamera-wirkt-gezoomt-und-gpt-stoppt-an-koordinations-404",
+      "keywords": [
+        "debug",
+        "parser-textblocks",
+        "patient-kamera-wirkt-gezoomt-und-gpt-stoppt-an-koordinations-404",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera"
+      ],
+      "markers": [
+        ".json",
+        ".objectFit",
+        "1280x720",
+        "3/4",
+        "720x1280",
+        "contain",
+        "coordination/index.js",
+        "coordination/index.json",
+        "coordination_unavailable",
+        "getComputedStyle(video).objectFit",
+        "kgg-project-memory/main",
+        "object-fit: contain",
+        "object-fit: cover",
+        "patient-camera",
+        "patient-scan",
+        "patient-start-scan.js"
+      ],
+      "risks": "`contain` kann bei abweichendem Seitenverhaeltnis schwarze Restflaechen anzeigen. Das ist akzeptiert; ein abgeschnittenes Kamerabild ist nicht akzeptiert.",
+      "source_path": "docs/bug-debug/2026-08-02-patient-camera-crop-coordination-404.md",
+      "symptom": "Der mobile Live-Scanner der Patient:innen-App zeigt nur einen Ausschnitt des Kamerabilds und wirkt dadurch stark gezoomt. Der Update-GPT diagnostiziert die Ursache, startet aber keinen Patient-Preview-Write, weil der private Koordinationsindex HTTP 404 liefert.",
+      "tests": "- Breiter Stream `1280x720` und hoher Stream `720x1280` bleiben im mobilen Kamerarahmen vollstaendig sichtbar. - `getComputedStyle(video).objectFit` ist `contain`. - Kein horizontaler Overflow; Schliessen und Fallbacks bleiben bedienbar. - QR-Erkennung, Track-Cleanup, Plan und Trainingswerte bleiben unveraendert. - Koordinationsindex liefert keinen 404 und e",
+      "title": "Patient-Kamera wirkt gezoomt und GPT stoppt an Koordinations-404"
+    },
+    {
+      "areas": [
+        "qr-patient",
+        "scan-camera"
+      ],
+      "cause": "`release-pipeline/kgg_patient_gpt_write_gate.py` kopierte die Root-`index.html` unveraendert in den isolierten Preview-Ordner. Die kanonische Modulliste existierte nur in `service-worker.js`. Beim ersten Aufruf war noch kein Service-Worker-Controller aktiv. Dadurch konnte die Test-App eine unvollstaendige Preview anzeigen, bis ein Reload oder eine weitere Na",
+      "do_not_touch": "",
+      "fix_pattern": "- Der Preview-Publisher liest die kanonische Modulinjektion aus dem mitgelieferten Service Worker. - Er entfernt vorhandene direkte Modul-Tags und fuegt dieselbe Liste genau einmal in die Preview-`index.html` ein. - Fehlende Dateien, doppelte Module oder eine nicht eindeutig lesbare Service-Worker-Injektion blockieren das Gate. - Ein Browser-Smoke startet di",
+      "id": "docs-bug-debug-2026-08-02-patient-preview-first-load-modules-md-patient-preview-first-load-modules",
+      "keywords": [
+        "patient-preview-first-load-modules",
+        "qr-patient",
+        "scan-camera"
+      ],
+      "markers": [
+        ".html",
+        "index.html",
+        "release-pipeline/kgg_patient_gpt_write_gate.py",
+        "service-worker.js"
+      ],
+      "risks": "",
+      "source_path": "docs/bug-debug/2026-08-02-patient-preview-first-load-modules.md",
+      "symptom": "Ein Patient-Preview-Run konnte vollstaendig gruen sein, obwohl die erste im Browser oder in der Test-App geoeffnete `index.html` den Scanner und weitere Patient-Module noch nicht geladen hatte. Die Dateien waren im Artefakt vorhanden, wurden aber erst durch `service-worker.js` in einen spaeteren, bereits kontrollierten Seitenaufruf injiziert. `release-pipeli",
+      "tests": "",
+      "title": "Patient Preview First-Load Modules"
+    },
+    {
+      "areas": [
+        "debug",
+        "qr-patient"
+      ],
+      "cause": "",
+      "do_not_touch": "",
+      "fix_pattern": "",
+      "id": "docs-bug-debug-readme-md-debug-json-seite",
+      "keywords": [
+        "debug",
+        "debug-json-seite",
+        "qr-patient"
+      ],
+      "markers": [
+        ".html",
+        "debug.html"
+      ],
+      "risks": "",
+      "source_path": "docs/bug-debug/README.md",
+      "symptom": "Bei PWA-/Storage-/Service-Worker-Problemen braucht es eine einfache Diagnoseausgabe.",
+      "tests": "",
+      "title": "Debug JSON Seite"
+    },
+    {
+      "areas": [
+        "drag-reorder",
+        "phone-layout",
+        "tablet-layout"
+      ],
+      "cause": "",
+      "do_not_touch": "Keine Layout-Aenderungen nebenbei. ---",
+      "fix_pattern": "",
+      "id": "docs-bug-debug-readme-md-drag-drop-reorder-hitbox",
+      "keywords": [
+        "drag-drop-reorder-hitbox",
+        "drag-reorder",
+        "phone-layout",
+        "tablet-layout"
+      ],
+      "markers": [],
+      "risks": "",
+      "source_path": "docs/bug-debug/README.md",
+      "symptom": "Verschieben von Uebungskarten kann je nach Layout/Viewport anders reagieren. Tablet und Handy getrennt testen.",
+      "tests": "- Nach oben/unten verschieben testen. - Links/rechts Swipe/Delete-Animation separat testen. - Handy und Tablet getrennt pruefen.",
+      "title": "Drag-Drop / Reorder-Hitbox"
+    },
+    {
+      "areas": [
+        "parser-textblocks",
+        "pdf",
+        "qr-patient",
+        "scan-camera",
+        "tablet-layout"
+      ],
+      "cause": "",
+      "do_not_touch": "Therapeuten-App-Layout, PDF, Parser und Scan nur aendern, wenn explizit noetig. ---",
+      "fix_pattern": "",
+      "id": "docs-bug-debug-readme-md-patient-app-ios-pwa-startet-leere-basis-app",
+      "keywords": [
+        "parser-textblocks",
+        "patient-app-ios-pwa-startet-leere-basis-app",
+        "pdf",
+        "qr-patient",
+        "scan-camera",
+        "tablet-layout"
+      ],
+      "markers": [],
+      "risks": "",
+      "source_path": "docs/bug-debug/README.md",
+      "symptom": "Home-Screen-Installation oder Favoriten oeffnen teilweise nur die leere Basis-App. Konkreter Patient:innenplan kann beim Start fehlen oder alte Versionen werden zuerst geoeffnet.",
+      "tests": "",
+      "title": "Patient-App iOS/PWA startet leere Basis-App"
+    },
+    {
+      "areas": [
+        "phone-layout",
+        "tablet-layout"
+      ],
+      "cause": "",
+      "do_not_touch": "Tablet-Funktionen nicht durch Handy-Cleanup zerstoeren. ---",
+      "fix_pattern": "",
+      "id": "docs-bug-debug-readme-md-tablet-handy-layout-grenze-759-760-px",
+      "keywords": [
+        "phone-layout",
+        "tablet-handy-layout-grenze-759-760-px",
+        "tablet-layout"
+      ],
+      "markers": [
+        "innerWidth <= 759",
+        "innerWidth >= 760",
+        "max-width",
+        "max-width:759px",
+        "min-width",
+        "min-width:760px"
+      ],
+      "risks": "",
+      "source_path": "docs/bug-debug/README.md",
+      "symptom": "Handy-UI und Tablet-UI duerfen nicht gleichzeitig aktiv sein. Handy: `max-width:759px`. Tablet: `min-width:760px`.",
+      "tests": "Nicht mit Browser-Zoom testen, sondern mit echten Viewports: - Handy z. B. 390 844 oder 400 844 - Tablet z. B. 820 1180",
+      "title": "Tablet/Handy Layout-Grenze 759/760 px"
+    },
+    {
+      "areas": [
+        "debug"
+      ],
+      "cause": "",
+      "do_not_touch": "Haupt-App bleibt im Diagnose-Test moeglichst unveraendert. ---",
+      "fix_pattern": "Diagnose-Frame-Pfad korrigiert und geladenen App-Pfad im Diagnose-JSON mitgefuehrt.",
+      "id": "docs-bug-debug-readme-md-v389-textfeld-jitter-diagnostik",
+      "keywords": [
+        "debug",
+        "v389-textfeld-jitter-diagnostik"
+      ],
+      "markers": [
+        ".html",
+        "therapist-app/test-lab/textfield-jitter/KGG_APP_KOLLEGEN_v389_textfield_jitter_INSTRUMENTED.html"
+      ],
+      "risks": "",
+      "source_path": "docs/bug-debug/README.md",
+      "symptom": "Textfeld-/Render-Jitter musste isoliert messbar gemacht werden.",
+      "tests": "",
+      "title": "v389 Textfeld-Jitter-Diagnostik"
+    },
+    {
+      "areas": [
+        "modal",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "tablet-layout"
+      ],
+      "cause": "Die versteckende/positionierende Modal-Regel ist zu eng scoped: Diese Regel greift nur, wenn `body.tabletLayoutCustom` aktiv ist. Im Handy-Layout fehlt diese Klasse bzw. der Tablet-Kontext. `aria-hidden=\"true\"` versteckt visuell nichts. Dadurch kann der Modal-Block im Handy-Layout als normaler Seiteninhalt sichtbar werden.",
+      "do_not_touch": "- QR-Core - API-Key-Transfer-Logik - PDF-Core - Parser - Scan-Core - Patient-App-Payload - Plan-State - `.scanHub` / obere Scanbox, da das ein separater UI-Flow-Punkt ist",
+      "fix_pattern": "Die Modal-Grundregel muss global gelten, nicht nur unter `body.tabletLayoutCustom`. Optional: Die alte Tablet-spezifische Regel kann bestehen bleiben, aber die globale Regel muss nach Moeglichkeit spaeter im CSS stehen oder mindestens gleich spezifisch sein. Besser: Tablet-Regel nicht duplizieren, sondern auf die globale Basisregel reduzieren.",
+      "id": "docs-bugfixes-mobile-share-modal-css-regression-md-bugfix-doku-mobile-share-modal-faellt-in-den-normalen-handy-flow",
+      "keywords": [
+        "bugfix-doku-mobile-share-modal-faellt-in-den-normalen-handy-flow",
+        "modal",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "tablet-layout"
+      ],
+      "markers": [
+        "#dce3eb",
+        "#fff",
+        "#kggTherapistShareModal",
+        ".getBoundingClientRect",
+        ".getElementById",
+        ".height",
+        ".html",
+        ".isOpen",
+        ".kggTherapistShareChoices",
+        ".kggTherapistShareModal",
+        ".kggTherapistShareSheet",
+        ".scanHub",
+        ".tabletLayoutCustom",
+        "KGG_APP_ADMIN_v400_mini03_menu_handle_layout_persist.html",
+        "aria-hidden=\"true\"",
+        "body.tabletLayoutCustom",
+        "closeKggTherapistShareModal()",
+        "display:none",
+        "document.getElementById('kggTherapistShareModal').getBoundingClientRect().height",
+        "kggTherapistShareChoices",
+        "kggTherapistShareModal",
+        "openKggTherapistShareModal()"
+      ],
+      "risks": "",
+      "source_path": "docs/bugfixes/mobile-share-modal-css-regression.md",
+      "symptom": "Im Handy-Layout (< 760 px) werden die Elemente des Dialogs Therapeuten-App weitergeben sichtbar im normalen Seitenfluss angezeigt: - Ueberschrift Therapeuten-App weitergeben - Hinweis Waehle, was der QR-Code enthalten soll. - Auswahlbuttons Nur App, App + API-Key, Nur API-Key Diese Elemente gehoeren nicht in den normalen Handy-Flow. Sie sollen nur erscheinen",
+      "tests": "1. Viewport 390 x 844 px oeffnen. 2. Pruefen: Therapeuten-App weitergeben und die drei Optionen sind nicht im normalen Handy-Flow sichtbar. 3. Viewport 390 x 844 px: `document.getElementById('kggTherapistShareModal').getBoundingClientRect().height` soll im geschlossenen Zustand 0 oder das Element `display:none` haben. 4. Modal gezielt oeffnen: `openKggTherap",
+      "title": "Bugfix-Doku: Mobile Share-Modal faellt in den normalen Handy-Flow"
+    },
+    {
+      "areas": [
+        "debug",
+        "drag-reorder",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "tablet-layout"
+      ],
+      "cause": "",
+      "do_not_touch": "- PDF - QR - Patient-App - Scan - Parser - Plan-State - Storage - Tablet-Layout",
+      "fix_pattern": "",
+      "id": "docs-release-handoffs-2026-06-18-v003a-plan-ui-stability-md-2026-06-18-v003a-plan-ui-stability-handoff",
+      "keywords": [
+        "2026-06-18-v003a-plan-ui-stability-handoff",
+        "debug",
+        "drag-reorder",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "tablet-layout"
+      ],
+      "markers": [
+        ".html",
+        ".json",
+        ".release",
+        ".zip",
+        "/tmp/kgg-v003a/kgg-update/index.html",
+        "/tmp/kgg-v003a/kgg-update/version.js",
+        "<title>",
+        "KGG_BUILD_INFO.release",
+        "KGG_GitHub_Update_v003_plan_ui_stability.zip",
+        "VERSION",
+        "chatgpt/mini07-identity-autoupdate",
+        "index.html",
+        "kgg-update/index.html",
+        "kgg-update/version.js",
+        "mini03",
+        "sha256sum",
+        "v399",
+        "version.js",
+        "versionCode: 3"
+      ],
+      "risks": "",
+      "source_path": "docs/release-handoffs/2026-06-18-v003a-plan-ui-stability.md",
+      "symptom": "Nicht die originale `KGG_GitHub_Update_v003_plan_ui_stability.zip` deployen. Grund: Die originale v003 enthaelt zwar den funktionalen Plan-UI-Stability-Patch, traegt intern aber alte Build-Identitaet: - `<title>` zeigt noch `mini03` - `VERSION` zeigt noch `v399` - `KGG_BUILD_INFO.release` zeigt noch `v399` Das wuerde den vorherigen mini07-Identitaets-Fix zur",
+      "tests": "Phone: - Viewport 390844 oder 400844. - Mindestens zwei Uebungen in den Plan legen. - Uebungskarte antippen: Nur Karte/Planbereich darf reagieren, darunterliegende UI darf nicht nach unten creepen. - Uebung per Griff `` verschieben: Nur Karten im Plan sollen sich bewegen. - Vertikal scrollen: Plan-Karten duerfen nicht flackern. - Swipe links/rechts muss weit",
+      "title": "2026-06-18 v003a Plan UI Stability Handoff"
+    },
+    {
+      "areas": [
+        "debug",
+        "parser-textblocks",
+        "pdf",
+        "qr-patient",
+        "scan-camera",
+        "tablet-layout"
+      ],
+      "cause": "",
+      "do_not_touch": "PDF, QR-Erzeugung, Patienten-App, Scan-Kamera, Parser, Android-Wrapper, Tablet-Layout, Plan-State, Storage.",
+      "fix_pattern": "",
+      "id": "docs-release-handoffs-2026-06-19-v007-qr-photo-upload-decode-md-release-handoff-v007-qr-photo-upload-decode",
+      "keywords": [
+        "debug",
+        "parser-textblocks",
+        "pdf",
+        "qr-patient",
+        "release-handoff-v007-qr-photo-upload-decode",
+        "scan-camera",
+        "tablet-layout"
+      ],
+      "markers": [
+        ".html",
+        ".json",
+        "kgg-update/index.html",
+        "kgg-update/version.js",
+        "scripts/apply_v007_qr_photo_upload_decode.py"
+      ],
+      "risks": "",
+      "source_path": "docs/release-handoffs/2026-06-19-v007-qr-photo-upload-decode.md",
+      "symptom": "Bereit als GitHub-Update-Patchscript. Keine grosse HTML-Datei muss ueber den Connector hochgeladen werden. Wenn andere Dateien geaendert werden: stoppen. PDF, QR-Erzeugung, Patienten-App, Scan-Kamera, Parser, Android-Wrapper, Tablet-Layout, Plan-State, Storage.",
+      "tests": "",
+      "title": "Release Handoff v007 QR Photo Upload Decode"
+    }
+  ],
+  "sources": [
+    "docs/CHANGELOG_THERAPIST_APP.md",
+    "docs/VERSIONSLOG.md",
+    "docs/bug-debug/2026-06-18-phone-gesture-identity-autoupdate.md",
+    "docs/bug-debug/2026-06-19-phone-admin-banner-hide.md",
+    "docs/bug-debug/2026-06-19-qr-photo-upload-decode.md",
+    "docs/bug-debug/2026-06-20-v011-tablet-layout-cache-rollback.md",
+    "docs/bug-debug/2026-07-03-custom-gpt-payload-schema-path.md",
+    "docs/bug-debug/2026-07-03-custom-gpt-preview-gate-lessons.md",
+    "docs/bug-debug/2026-07-29-preview-marker-default-branch-drift.md",
+    "docs/bug-debug/2026-08-01-webview-camera-cross-app-qr.md",
+    "docs/bug-debug/2026-08-02-patient-camera-crop-coordination-404.md",
+    "docs/bug-debug/2026-08-02-patient-preview-first-load-modules.md",
+    "docs/bug-debug/README.md",
+    "docs/bugfixes/mobile-share-modal-css-regression.md",
+    "docs/release-handoffs/2026-06-18-v003a-plan-ui-stability.md",
+    "docs/release-handoffs/2026-06-19-v007-qr-photo-upload-decode.md"
+  ],
+  "version": 1
+}

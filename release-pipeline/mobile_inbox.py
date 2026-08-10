@@ -32,9 +32,10 @@ SECRET_PATTERN = re.compile(
     + ")"
 )
 VERSION_PATTERNS = (
-    re.compile(r"KGG_GITHUB_UPDATE_v0*([0-9]+)", re.I),
+    pipeline.SOURCE_VERSION_PATTERN,
     re.compile(r"<title>\s*KGG\s+Update\s+v0*([0-9]+)\b", re.I),
 )
+SOURCE_TRUTH_PATTERN = pipeline.SOURCE_TRUTH_PATTERN
 
 
 def html_version_code(html: str) -> int | None:
@@ -45,12 +46,20 @@ def html_version_code(html: str) -> int | None:
     return None
 
 
+def html_source_marker_code(html: str) -> int | None:
+    return pipeline.html_source_marker_code(html)
+
+
 def html_title(html: str) -> str:
     match = re.search(r"<title>(.*?)</title>", html, re.I | re.S)
     if not match:
         return "Admin HTML vom Handy"
     title = re.sub(r"\s+", " ", match.group(1)).strip()
     return title[:90] or "Admin HTML vom Handy"
+
+
+def html_source_identity(html: str) -> tuple[int, str]:
+    return pipeline.html_source_identity(html, "Mobile Inbox candidate")
 
 
 def next_release_id(root: Path) -> str:
@@ -79,7 +88,7 @@ def next_release_id(root: Path) -> str:
     return f"r{max(numbers) + 1:04d}"
 
 
-def validate_mobile_candidate(candidate: Path, root: Path) -> tuple[str, int]:
+def validate_mobile_candidate(candidate: Path, root: Path) -> tuple[str, int, str]:
     html = pipeline.read_text(candidate)
     pipeline.validate_html(html, "Mobile Inbox candidate")
     if SECRET_PATTERN.search(html):
@@ -89,26 +98,26 @@ def validate_mobile_candidate(candidate: Path, root: Path) -> tuple[str, int]:
     current_code = current_version.get("versionCode")
     if not isinstance(current_code, int):
         pipeline.fail("kgg-update/version.json versionCode must be an integer")
-    candidate_code = html_version_code(html)
-    if candidate_code is None:
-        pipeline.fail("Mobile Inbox candidate is missing KGG_GITHUB_UPDATE_vNNN or title version marker")
+    candidate_code, candidate_version_name = html_source_identity(html)
     if candidate_code < current_code:
         pipeline.fail(
             f"Mobile Inbox candidate is based on v{candidate_code:03d}, "
             f"but current source truth is v{current_code:03d}"
         )
+    current_version_name = current_version.get("versionName")
+    if candidate_code == current_code and candidate_version_name != current_version_name:
+        pipeline.fail("Mobile Inbox candidate versionName differs from the current source truth")
 
     colleague = pipeline.derive_colleague(html)
     pipeline.validate_html(colleague, "Mobile Inbox colleague build")
     if pipeline.sha256_text(html) == pipeline.sha256_text(colleague):
         pipeline.fail("Mobile Inbox Admin and colleague builds would be identical")
-    return html, current_code
+    return html, candidate_code, candidate_version_name
 
 
 def prepare(candidate: Path, release_json: Path, copy_to: Path, root: Path) -> dict:
-    html, current_code = validate_mobile_candidate(candidate, root)
+    html, _candidate_code, version_name = validate_mobile_candidate(candidate, root)
     release_id = next_release_id(root)
-    version_name = f"1.0.{current_code + 1}-mobile-inbox-{release_id}"
     digest = hashlib.sha256(html.encode("utf-8")).hexdigest()[:12]
     notes = f"Mobile-Inbox {release_id}: {html_title(html)} ({digest})."
 

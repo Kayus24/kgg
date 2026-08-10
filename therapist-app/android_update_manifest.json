@@ -4,15 +4,15 @@
   "schema": 2,
   "channels": {
     "admin": {
-      "releaseId": "r0400",
+      "releaseId": "r0425",
       "profile": "admin",
-      "versionName": "1.0.32-no-boot-redirect",
-      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0400/admin.html",
-      "sha256": "8db76416bcd2373c3e9ebbe62ee8812190922443754819bbf1d1cb0a3ca572c4",
-      "notes": "Max' funktionierende Phone-Viewport-/Local-List-Drag-HTML bleibt Basis; Web-Updates werden beim Booten nicht mehr automatisch per location.replace geoeffnet.",
-      "rolloutCode": 399,
-      "previousReleaseId": "r0397",
-      "releasedAt": "2026-06-24T10:00:23Z"
+      "versionName": "1.0.62-tablet-recent-package-shell-geometry",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0425/admin.html",
+      "sha256": "af274863e5f0e01442b2756ba8517b49f481c86b6bc9a380976c9bfa335d38ec",
+      "notes": "v062: Die bereits bestätigte Tablet-Historien-Shell bleibt unverändert; zusätzlich übernimmt sie exakt die grüne Arbeitsflächen-Geometrie des Übungspakete-Overlays, damit der Hintergrund beim Öffnen nicht mehr verspringt.",
+      "rolloutCode": 425,
+      "previousReleaseId": "r0424",
+      "releasedAt": "2026-08-10T17:47:38Z"
     },
     "colleague": {
       "releaseId": "r0397",
@@ -27,17 +27,23 @@
     }
   },
   "latestWebVersion": "r0397",
-  "latestAndroidShellVersion": "v398",
+  "latestAndroidShellVersion": "v401",
   "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0397/colleague.html",
   "colleagueSha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
-  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0400/admin.html",
-  "adminSha256": "8db76416bcd2373c3e9ebbe62ee8812190922443754819bbf1d1cb0a3ca572c4",
+  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0425/admin.html",
+  "adminSha256": "af274863e5f0e01442b2756ba8517b49f481c86b6bc9a380976c9bfa335d38ec",
   "sha256": "ccbf29e0bef47aaeb833a72efd488a9a7e6e2c96f3f2496bb9642dfb991ab5e2",
-  "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v398/android/KGG_ANDROID_KOLLEGEN_v398_force_r0400_html_debug.apk",
-  "androidApkSha256": "c4a4e022a7bfa2511538f18bb80c025eb4a1057a186637ac12146ea55dd807ed",
-  "colleagueAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v398/android/KGG_ANDROID_KOLLEGEN_v398_force_r0400_html_debug.apk",
-  "colleagueAndroidApkSha256": "c4a4e022a7bfa2511538f18bb80c025eb4a1057a186637ac12146ea55dd807ed",
-  "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v398/android/KGG_ANDROID_ADMIN_v398_force_r0400_html_debug.apk",
-  "adminAndroidApkSha256": "e64553647a10a5fa4286f319b6a4284052c0c030b93b5150f9ac8ef0a1708c34",
-  "notes": "Admin beta r0400 + Android v398: APK schreibt r0400 sicher in den lokalen HTML-Slot, damit alte gespeicherte HTML nicht weitergeladen wird."
+  "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",
+  "androidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
+  "colleagueAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",
+  "colleagueAndroidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
+  "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_ADMIN_v401_share_apk_provider_debug.apk",
+  "adminAndroidApkSha256": "366c63594eeb6bdb89a7ab9c44cf4b84b43004ddfb24e5019012de0766f21499",
+  "notes": "Admin beta r0425: v062: Die bereits bestätigte Tablet-Historien-Shell bleibt unverändert; zusätzlich übernimmt sie exakt die grüne Arbeitsflächen-Geometrie des Übungspakete-Overlays, damit der Hintergrund beim Öffnen nicht mehr verspringt.",
+  "latestAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",
+  "latestAndroidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
+  "latestColleagueAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",
+  "latestColleagueAndroidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
+  "latestAdminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_ADMIN_v401_share_apk_provider_debug.apk",
+  "latestAdminAndroidApkSha256": "366c63594eeb6bdb89a7ab9c44cf4b84b43004ddfb24e5019012de0766f21499"
 }

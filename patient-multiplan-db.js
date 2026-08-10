@@ -1,5 +1,5 @@
 (()=>{
-  const ADDON_VERSION='v8_gray_transparent_fab';
+  const ADDON_VERSION='v9_lossless_media_plans';
   const LANG_KEY='kggPatientLang';
   const MULTI_KEY='kggPatientMultiPlansV1';
   const CURRENT_KEY='kggCurrentPlanV1';
@@ -35,16 +35,22 @@
     document.head.appendChild(s);
   }
 
+  function clone(v){try{return JSON.parse(JSON.stringify(v||{}))}catch(e){return v&&typeof v==='object'?{...v}:{}}}
+  function storedCurrentPlan(){const saved=safe(()=>JSON.parse(localStorage.getItem(CURRENT_KEY)||'null'));return saved&&saved.plan&&typeof saved.plan==='object'?saved.plan:null}
+  function hasMediaValue(value){if(Array.isArray(value))return value.length>0;if(value&&typeof value==='object')return true;return String(value||'').trim()!==''}
   function exObj(e){if(!Array.isArray(e))e=[];return{n:e[0]||'Übung',sets:Number(e[1])||3,side:e[2]||'LR',u:e[3]||'kg',m:e[4]||'Wdh',sl:e[5]||'',sm:e[6]||'',media:e[7]||'',videoUrl:e[8]||'',videoLabel:e[9]||'Video öffnen',painMode:e[10]||'exercise'}}
-  function exRaw(e){return[e.n,e.sets,e.side,e.u,e.m,e.sl||'',e.sm||'',e.media||'',e.videoUrl||'',e.videoLabel||'Video öffnen',e.painMode||'exercise']}
-  function rawFromRuntime(){return{i:p?.id||'plan',t:p?.title||'KGG Trainingsplan',v:p?.version||1,d:p?.days||6,extendDays:p?p.extendDays!==false:true,stepDays:p?.stepDays||6,e:Array.isArray(p?.ex)?p.ex.map(exRaw):[]}}
+  function exRaw(e,base){const raw=Array.isArray(base)?base.slice():[];raw[0]=e.n;raw[1]=e.sets;raw[2]=e.side;raw[3]=e.u;raw[4]=e.m;raw[5]=e.sl||'';raw[6]=e.sm||'';if(hasMediaValue(e.media))raw[7]=e.media;else if(raw.length<8)raw[7]='';raw[8]=e.videoUrl||raw[8]||'';raw[9]=e.videoLabel||raw[9]||'Video öffnen';raw[10]=e.painMode||raw[10]||'exercise';return raw}
+  function rawFromRuntime(baseRaw){const raw=clone(baseRaw);raw.i=p?.id||raw.i||'plan';raw.t=p?.title||raw.t||'KGG Trainingsplan';raw.v=p?.version||raw.v||1;raw.d=p?.days||raw.d||6;raw.extendDays=p?p.extendDays!==false:raw.extendDays!==false;raw.stepDays=p?.stepDays||raw.stepDays||6;const old=Array.isArray(raw.e)?raw.e:[];raw.e=Array.isArray(p?.ex)?p.ex.map((ex,i)=>exRaw(ex,old[i])):old;return raw}
   function runtimeFromRaw(raw){return{id:raw.i||'plan',title:raw.t||'KGG Trainingsplan',version:+raw.v||1,days:+raw.d||6,extendDays:raw.extendDays!==false,stepDays:+raw.stepDays||6,ex:(raw.e||[]).map(exObj)}}
   function readState(){try{return JSON.parse(localStorage.getItem(MULTI_KEY)||'null')}catch(e){return null}}
   function writeState(s){s.updatedAt=new Date().toISOString();localStorage.setItem(MULTI_KEY,JSON.stringify(s))}
-  function ensureState(){let s=readState();if(!s||!Array.isArray(s.plans))s={version:1,plans:[],active:0,day:{}};if(!s.plans.length&&safe(()=>p))s.plans.push(rawFromRuntime());s.day=s.day||{};if(typeof s.active!=='number')s.active=0;writeState(s);return s}
-  function saveCurrentSlot(){const s=ensureState();const i=Math.max(0,Math.min(Number(s.active)||0,s.plans.length-1));safe(()=>safeSave());s.plans[i]=rawFromRuntime();writeState(s);localStorage.setItem(CURRENT_KEY,JSON.stringify({plan:s.plans[i],importedAt:new Date().toISOString()}))}
+  function persistCurrent(raw){localStorage.setItem(CURRENT_KEY,JSON.stringify({plan:raw,importedAt:new Date().toISOString()}))}
+  function currentBasePlan(s,i){return (s&&Array.isArray(s.plans)&&s.plans[i])||storedCurrentPlan()||null}
+  function pokeMedia(){[80,300,900].forEach(delay=>setTimeout(()=>{safe(()=>window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.prefetch&&window.KGGPatientMediaRetryCache.prefetch());safe(()=>window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.render&&window.KGGPatientMediaRetryCache.render())},delay))}
+  function ensureState(){let s=readState();if(!s||!Array.isArray(s.plans))s={version:1,plans:[],active:0,day:{}};if(!s.plans.length&&safe(()=>p))s.plans.push(rawFromRuntime(storedCurrentPlan()));s.day=s.day||{};if(typeof s.active!=='number'||s.active<0||s.active>=s.plans.length)s.active=0;writeState(s);return s}
+  function saveCurrentSlot(){const s=ensureState();const i=Math.max(0,Math.min(Number(s.active)||0,s.plans.length-1));safe(()=>safeSave());s.plans[i]=rawFromRuntime(currentBasePlan(s,i));writeState(s);persistCurrent(s.plans[i])}
   function loadValuesForPlan(){safe(()=>{v=read(sk(),'{}')});safe(()=>{done=read(dk(),'[]').map(Number).filter(n=>n>=1&&n<=p.days)})}
-  function switchTo(idx){const s=ensureState();if(!s.plans[idx])return false;if(Number(s.active)===idx)return true;saveCurrentSlot();s.active=idx;writeState(s);p=runtimeFromRaw(s.plans[idx]);localStorage.setItem(CURRENT_KEY,JSON.stringify({plan:s.plans[idx],importedAt:new Date().toISOString()}));loadValuesForPlan();safe(()=>save());safe(()=>render());safe(()=>setStatus(t('Plan gewechselt. Werte bleiben erhalten.','Plan switched. Values kept.'),'ok'));return true}
+  function switchTo(idx){let s=ensureState();if(!s.plans[idx])return false;if(Number(s.active)===idx)return true;saveCurrentSlot();s=ensureState();if(!s.plans[idx])return false;s.active=idx;const raw=s.plans[idx];writeState(s);p=runtimeFromRaw(raw);persistCurrent(raw);loadValuesForPlan();safe(()=>save());safe(()=>render());pokeMedia();safe(()=>setStatus(t('Plan gewechselt. Werte bleiben erhalten.','Plan switched. Values kept.'),'ok'));return true}
 
   function currentHas(name){const key=norm(name);return Array.isArray(p?.ex)&&p.ex.some(ex=>norm(ex.n)===key)}
   function collectDb(){
@@ -77,8 +83,8 @@
     saveCurrentSlot();
     p.ex=p.ex||[];p.ex.push({...ex});
     const s=ensureState();const i=Math.max(0,Math.min(Number(s.active)||0,s.plans.length-1));
-    s.plans[i]=rawFromRuntime();writeState(s);localStorage.setItem(CURRENT_KEY,JSON.stringify({plan:s.plans[i],importedAt:new Date().toISOString()}));
-    safe(()=>save());safe(()=>render());safe(()=>setStatus(t('Übung aus Datenbank hinzugefügt.','Exercise added from database.'),'ok'));
+    s.plans[i]=rawFromRuntime(currentBasePlan(s,i));writeState(s);persistCurrent(s.plans[i]);
+    safe(()=>save());safe(()=>render());pokeMedia();safe(()=>setStatus(t('Übung aus Datenbank hinzugefügt.','Exercise added from database.'),'ok'));
     closeDb();
   }
 
