@@ -156,11 +156,14 @@ Pipeline die vorherige `index.html` und `version.json` wieder her. JSON-,
 Markdown- und HTML-Berichte sowie Screenshots liegen unter
 `tmp/kgg-selftest/`; dieser Ordner ist nicht versioniert.
 
-Der lokale Hook unter `.githooks/pre-commit` blockiert Commits an Modulen und
-Buildwerkzeugen, bis `--certify` gruen ist. Aktivierung in dieser Sandbox:
+Der lokale Hook unter `.githooks/pre-commit` scannt jeden Commit auf Secrets
+und blockiert Commits an Modulen und Buildwerkzeugen, bis `--certify` gruen
+ist. Git aktiviert eingecheckte Hooks in frischen Clones nicht automatisch.
+Deshalb jeden neuen Workspace einmal initialisieren und vor Pushes pruefen:
 
 ```powershell
-git config core.hooksPath .githooks
+python release-pipeline/kgg_hook_guard.py --install
+python release-pipeline/kgg_hook_guard.py --check
 ```
 
 Ein neuer Patch wird mit `release-pipeline/kgg_new_patch.py` vorbereitet. Das

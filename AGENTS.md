@@ -25,6 +25,12 @@ PDF, QR/Patienten-App, Scan/OCR, Parser, Plan-State, Medien/Upload, API-Key-Logi
 - Nicht aus lokalen Altdateien oder Modellgedächtnis auf den Live-Stand schließen.
 - App-, HTML-, Release- und Uploadänderungen niemals direkt auf `main` schreiben; Branch, Tests und Pull Request verwenden.
 
+## Workspace-Schutz
+
+- In jedem neuen Clone vor der ersten Aenderung einmal `python release-pipeline/kgg_hook_guard.py --install` ausfuehren.
+- Vor Commit oder Push mit `python release-pipeline/kgg_hook_guard.py --check` pruefen, dass `.githooks` aktiv ist.
+- Fehlende Hook-Aktivierung ist ein Stop-Signal. GitHub Push Protection und Required Gate bleiben zusaetzliche, nicht ersetzende Schutzschichten.
+
 ## Repo-Navigation und Suchhygiene
 
 - Patienten-App: `index.html`, `patient-*.js`, `collapse-cards.js`, `service-worker.js` und die zugehörigen PWA-Dateien.
