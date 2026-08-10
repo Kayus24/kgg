@@ -1,12 +1,12 @@
 {
   "conclusion": null,
   "kind": "kgg_preview_run_status",
-  "message": "Payload und modularer Patch werden validiert.",
-  "phase": "validating",
+  "message": "Validierung ist gruen. Tests und Test-App-Preview laufen.",
+  "phase": "publishing",
   "requestId": "kgg-v063-tablet-recent-package-shell-geometry",
   "runId": "31394509555",
   "runUrl": "https://github.com/Kayus24/kgg/actions/runs/31394509555",
   "schema": 1,
   "status": "in_progress",
-  "updatedAt": "2026-08-10T13:45:44Z"
+  "updatedAt": "2026-08-10T13:46:45Z"
 }
