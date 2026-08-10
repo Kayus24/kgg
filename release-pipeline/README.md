@@ -138,8 +138,10 @@ git config core.hooksPath .githooks
 
 Ein neuer Patch wird mit `release-pipeline/kgg_new_patch.py` vorbereitet. Das
 Tool erhoeht die Zielversion, aktualisiert Metadaten und Manifest, baut die
-HTML und berechnet den Hash. Geschuetzte Bereiche und das bereits erreichte
-Changelog-Limit sind fail-closed und brauchen eine explizite Approval-Notiz.
+HTML und berechnet den Hash. Geschuetzte Bereiche und kuenftige Ueberschreitungen
+der Changelog-Grenzen sind fail-closed. Der Changelog-Archiv-Contract prueft
+den unveraenderten Vollsnapshot bis v062 und das kompakte Laufzeitfenster.
+Overflow-Overrides sind nur fuer ausdruecklich freigegebene Notfaelle gedacht.
 
 Nach einem sauberen, zertifizierten Sandbox-Commit erzeugt
 `release-pipeline/kgg_export_handoff.py` ein Review-Buendel unter

@@ -39,8 +39,8 @@ Source-Truth, Changelog, Patch-Regeln, Build-Identitaet, Manifest und Hash als
 eine validierte Transaktion. Geschuetzte Bereiche brauchen
 `--allow-protected` plus `--approval-note`.
 
-Der eingebettete Changelog liegt in der aktuellen Basis bereits ueber seinem
-konfigurierten Limit (31 statt 30 Eintraege). Darum blockiert der Scaffolder
-standardmaessig. Keine Historie wird automatisch geloescht; bis zu einer
-freigegebenen Archivierung ist ein bewusster Override mit
-`--allow-changelog-overflow --approval-note "..."` erforderlich.
+Der vollstaendige Changelog-Stand bis v062 liegt unveraendert als versionierter
+Snapshot unter `docs/changelog-archive/`. In den Laufzeit-Metadaten bleiben v063
+und die 14 neuesten Vorgaenger, damit normale Patches wieder ohne Overflow-
+Override scaffoldbar sind. Der Archiv-Contract prueft Snapshot-Hash, Reihenfolge
+und die lueckenlose Ueberlappung mit dem eingebetteten Fenster.

@@ -1,7 +1,7 @@
 {
-  "versionCode": 62,
-  "versionName": "1.0.62-tablet-recent-package-shell-geometry",
-  "indexUrl": "index.html?v=62",
-  "sha256": "af274863e5f0e01442b2756ba8517b49f481c86b6bc9a380976c9bfa335d38ec",
-  "notes": "v060: Zeigt Release, HTML-Build und geladenen Dateinamen unten rechts im ausgefahrenen Tablet-Menue."
+  "versionCode": 63,
+  "versionName": "1.0.63-changelog-archive-window",
+  "indexUrl": "index.html?v=63",
+  "sha256": "6bc0a65411c453bd380568662d764790fcac5884744c497deba785dab7f20677",
+  "notes": "v063: Archiviert den vollständigen Changelog-Stand bis v62 und begrenzt die Laufzeit-Metadaten auf v63 plus die 14 neuesten Vorgänger."
 }

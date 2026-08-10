@@ -52,6 +52,10 @@
   },
   "changelogSizePolicy": {
     "scope": "embedded kgg-changelog in index.html",
+    "targetEmbeddedEntriesAfterCompaction": 15,
+    "archiveSnapshotMode": "full-pre-compaction-snapshot",
+    "archiveReferenceField": "kgg-changelog.archiveSnapshots",
+    "archiveLoadPolicy": "Load only for history older than the embedded runtime window.",
     "warnAtEntries": 18,
     "maxEmbeddedEntries": 30,
     "warnAtBytes": 35000,
@@ -106,7 +110,7 @@
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v062-tablet-recent-package-shell-geometry",
+  "lastUpdatedByPatchId": "kgg-v063-changelog-archive-window",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",

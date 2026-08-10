@@ -241,11 +241,9 @@ class GateTests(unittest.TestCase):
         )
         before = (ROOT / "kgg-update" / "index.html").read_bytes()
         current_version = json.loads((ROOT / "kgg-update" / "version.json").read_text(encoding="utf-8"))["versionCode"]
-        with self.assertRaisesRegex(scaffolder.ScaffoldError, "changelog"):
-            scaffolder.prepare(SimpleNamespace(**base_args))
-        base_args.update(allow_changelog_overflow=True, approval_note="Automatischer lokaler Unit-Dry-run.")
         planned, report = scaffolder.prepare(SimpleNamespace(**base_args))
         self.assertEqual(current_version + 1, report["versionCode"])
+        self.assertGreater(report["changelogBytesAfter"], 0)
         self.assertIn(ROOT / "kgg-update" / "index.html", planned)
         planned_version = json.loads(planned[ROOT / "kgg-update" / "version.json"])
         self.assertEqual(
@@ -263,12 +261,29 @@ class GateTests(unittest.TestCase):
             area=["Plan-State"],
             version_name=None,
             allow_protected=False,
-            allow_changelog_overflow=True,
+            allow_changelog_overflow=False,
             approval_note="Automatischer lokaler Unit-Dry-run.",
             dry_run=True,
         )
         with self.assertRaisesRegex(scaffolder.ScaffoldError, "protected area"):
             scaffolder.prepare(args)
+
+    def test_scaffolder_blocks_entry_and_byte_overflow_without_override(self) -> None:
+        entry_overflow = {"entries": [{} for _ in range(31)]}
+        with self.assertRaisesRegex(scaffolder.ScaffoldError, "31 entries"):
+            scaffolder.assert_changelog_limits(
+                entry_overflow,
+                {"maxEmbeddedEntries": 30, "maxEmbeddedBytes": 55000},
+                False,
+            )
+
+        byte_overflow = {"entries": [{"summary": "x" * 1000}]}
+        with self.assertRaisesRegex(scaffolder.ScaffoldError, "UTF-8 bytes"):
+            scaffolder.assert_changelog_limits(
+                byte_overflow,
+                {"maxEmbeddedEntries": 30, "maxEmbeddedBytes": 100},
+                False,
+            )
 
     def test_failed_transaction_restores_previous_output_and_version(self) -> None:
         self.fixture.write()
