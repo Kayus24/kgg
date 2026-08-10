@@ -21,6 +21,14 @@ MOBILE_SPEC.loader.exec_module(mobile_inbox)
 
 
 class ReleasePipelineTests(unittest.TestCase):
+    def test_legacy_direct_main_workflows_are_retired(self):
+        for relative in (
+            ".github/workflows/apply-update-inbox.yml",
+            ".github/workflows/generate-kgg-update.yml",
+            ".github/workflows/generate-kgg-v007-qr-photo-update.yml",
+        ):
+            self.assertFalse((pipeline.ROOT / relative).exists(), relative)
+
     def test_v24_profile_transform_is_hardened(self):
         admin = pipeline.read_text(pipeline.BASE_ADMIN)
         colleague = pipeline.derive_colleague(admin)
