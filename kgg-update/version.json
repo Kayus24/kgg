@@ -1,7 +1,7 @@
 {
-  "versionCode": 61,
-  "versionName": "1.0.61-cross-app-live-qr-camera",
-  "indexUrl": "index.html?v=61",
-  "sha256": "7ef86d117e5488dd652f89ecde35acc9aed4c5c8b81f85bf83d761ecac40552c",
+  "versionCode": 62,
+  "versionName": "1.0.62-tablet-recent-package-shell-geometry",
+  "indexUrl": "index.html?v=62",
+  "sha256": "af274863e5f0e01442b2756ba8517b49f481c86b6bc9a380976c9bfa335d38ec",
   "notes": "v060: Zeigt Release, HTML-Build und geladenen Dateinamen unten rechts im ausgefahrenen Tablet-Menue."
 }

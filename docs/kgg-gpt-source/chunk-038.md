@@ -4,6 +4,50 @@
 - Lines: 15961-16380
 
 ```html
+                ecCodewordsPerBlock: 28,
+                ecBlocks: [
+                    { numBlocks: 8, dataCodewordsPerBlock: 47 },
+                    { numBlocks: 13, dataCodewordsPerBlock: 48 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 7, dataCodewordsPerBlock: 24 },
+                    { numBlocks: 22, dataCodewordsPerBlock: 25 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 22, dataCodewordsPerBlock: 15 },
+                    { numBlocks: 13, dataCodewordsPerBlock: 16 },
+                ],
+            },
+        ],
+    },
+    {
+        infoBits: 0x1AFAB,
+        versionNumber: 26,
+        alignmentPatternCenters: [6, 30, 58, 86, 114],
+        errorCorrectionLevels: [
+            {
+                ecCodewordsPerBlock: 28,
+                ecBlocks: [
+                    { numBlocks: 10, dataCodewordsPerBlock: 114 },
+                    { numBlocks: 2, dataCodewordsPerBlock: 115 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 28,
+                ecBlocks: [
+                    { numBlocks: 19, dataCodewordsPerBlock: 46 },
+                    { numBlocks: 4, dataCodewordsPerBlock: 47 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 28,
+                ecBlocks: [
                     { numBlocks: 28, dataCodewordsPerBlock: 22 },
                     { numBlocks: 6, dataCodewordsPerBlock: 23 },
                 ],
@@ -380,48 +424,4 @@
                 ecCodewordsPerBlock: 28,
                 ecBlocks: [
                     { numBlocks: 29, dataCodewordsPerBlock: 46 },
-                    { numBlocks: 14, dataCodewordsPerBlock: 47 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 30,
-                ecBlocks: [
-                    { numBlocks: 49, dataCodewordsPerBlock: 24 },
-                    { numBlocks: 10, dataCodewordsPerBlock: 25 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 30,
-                ecBlocks: [
-                    { numBlocks: 24, dataCodewordsPerBlock: 15 },
-                    { numBlocks: 46, dataCodewordsPerBlock: 16 },
-                ],
-            },
-        ],
-    },
-    {
-        infoBits: 0x26A64,
-        versionNumber: 38,
-        alignmentPatternCenters: [6, 32, 58, 84, 110, 136, 162],
-        errorCorrectionLevels: [
-            {
-                ecCodewordsPerBlock: 30,
-                ecBlocks: [
-                    { numBlocks: 4, dataCodewordsPerBlock: 122 },
-                    { numBlocks: 18, dataCodewordsPerBlock: 123 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 28,
-                ecBlocks: [
-                    { numBlocks: 13, dataCodewordsPerBlock: 46 },
-                    { numBlocks: 32, dataCodewordsPerBlock: 47 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 30,
-                ecBlocks: [
-                    { numBlocks: 48, dataCodewordsPerBlock: 24 },
-                    { numBlocks: 14, dataCodewordsPerBlock: 25 },
-                ],
 ```

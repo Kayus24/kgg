@@ -4,6 +4,50 @@
 - Lines: 6721-7140
 
 ```html
+    }
+    body.kggPlanCardReordering .planCard.reorder-lifted,
+    body.is-scrolling .planCard.reorder-lifted{
+      transform:translateY(var(--drag-y,0px)) scale(1.035)!important;
+      transition:none!important;
+      will-change:transform!important;
+      pointer-events:none!important;
+    }
+    body.kggPlanCardReordering .planList.reorder-active .planCard:not(.reorder-lifted){
+      transition:transform .14s ease,margin .14s ease,opacity .14s ease!important;
+    }
+    body.kggPlanCardReordering .planCard.reorder-placeholder{
+      display:block!important;
+      visibility:visible!important;
+    }
+  }
+</style>
+
+
+
+
+<style id="kgg-mini-patch-v400-07-android-wrapper-fixes">
+  /* v400 mini07: Android-WebView/Phone polish.
+     Scope: UI-only. Tablet layout ab 760px bleibt unveraendert. */
+  @media (max-width:759px){
+    body.kggPlanCardReordering #bankArea,
+    body.kggPlanCardReordering #dbTitle,
+    body.kggPlanCardReordering .bankArea,
+    body.kggPlanCardReordering .bankRows,
+    body.kggPlanCardReordering .az{
+      pointer-events:none!important;
+    }
+    body.kggPlanCardReordering .planCard.reorder-lifted,
+    body.is-scrolling.kggPlanCardReordering .planCard.reorder-lifted{
+      transform:translateY(var(--drag-y,0px)) scale(1.035)!important;
+      z-index:9999!important;
+      transition:none!important;
+      will-change:transform!important;
+      pointer-events:none!important;
+    }
+    body.kggPlanCardSwiping .planCard.swipe-dragging,
+    body.is-scrolling.kggPlanCardSwiping .planCard.swipe-dragging{
+      transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
+      transition:none!important;
       will-change:transform,opacity!important;
     }
     body.kggPlanCardSwiping .planCard.swipe-removing,
@@ -380,48 +424,4 @@ var GenericGFPoly = /** @class */ (function () {
     GenericGFPoly.prototype.isZero = function () {
         return this.coefficients[0] === 0;
     };
-    GenericGFPoly.prototype.getCoefficient = function (degree) {
-        return this.coefficients[this.coefficients.length - 1 - degree];
-    };
-    GenericGFPoly.prototype.addOrSubtract = function (other) {
-        var _a;
-        if (this.isZero()) {
-            return other;
-        }
-        if (other.isZero()) {
-            return this;
-        }
-        var smallerCoefficients = this.coefficients;
-        var largerCoefficients = other.coefficients;
-        if (smallerCoefficients.length > largerCoefficients.length) {
-            _a = [largerCoefficients, smallerCoefficients], smallerCoefficients = _a[0], largerCoefficients = _a[1];
-        }
-        var sumDiff = new Uint8ClampedArray(largerCoefficients.length);
-        var lengthDiff = largerCoefficients.length - smallerCoefficients.length;
-        for (var i = 0; i < lengthDiff; i++) {
-            sumDiff[i] = largerCoefficients[i];
-        }
-        for (var i = lengthDiff; i < largerCoefficients.length; i++) {
-            sumDiff[i] = GenericGF_1.addOrSubtractGF(smallerCoefficients[i - lengthDiff], largerCoefficients[i]);
-        }
-        return new GenericGFPoly(this.field, sumDiff);
-    };
-    GenericGFPoly.prototype.multiply = function (scalar) {
-        if (scalar === 0) {
-            return this.field.zero;
-        }
-        if (scalar === 1) {
-            return this;
-        }
-        var size = this.coefficients.length;
-        var product = new Uint8ClampedArray(size);
-        for (var i = 0; i < size; i++) {
-            product[i] = this.field.multiply(this.coefficients[i], scalar);
-        }
-        return new GenericGFPoly(this.field, product);
-    };
-    GenericGFPoly.prototype.multiplyPoly = function (other) {
-        if (this.isZero() || other.isZero()) {
-            return this.field.zero;
-        }
 ```

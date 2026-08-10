@@ -4,6 +4,50 @@
 - Lines: 3361-3780
 
 ```html
+        gap:8px;
+        min-width:112px;
+      }
+      .tabletLockIcon{
+        width:18px;
+        text-align:center;
+      }
+      .tabletSwitchTrack{
+        position:relative;
+        width:40px;
+        height:22px;
+        border-radius:999px;
+        background:#071027;
+        box-shadow:inset 0 0 0 1px rgba(7,16,39,.22);
+      }
+      .tabletSwitchKnob{
+        position:absolute;
+        left:3px;
+        top:3px;
+        width:16px;
+        height:16px;
+        border-radius:999px;
+        background:#fff;
+        box-shadow:0 2px 6px rgba(7,16,39,.24);
+        transition:transform .2s ease;
+      }
+      body.tabletLayoutUnlocked .tabletSwitchTrack{background:#e9eef5}
+      body.tabletLayoutUnlocked .tabletSwitchKnob{transform:translateX(18px);background:#071027}
+      .tabletLockText{
+        min-width:28px;
+        font-size:12px;
+        font-weight:1000;
+      }
+      .tabletLayoutFreeTools{
+        display:none;
+        align-items:center;
+        gap:6px;
+      }
+      body.tabletLayoutUnlocked .tabletLayoutFreeTools{display:flex}
+      .tabletScaleValue{
+        min-width:48px;
+        text-align:center;
+        color:#38475b;
+        font-size:12px;
         font-weight:1000;
       }
       .tabletLayoutResizeHandle{
@@ -380,48 +424,4 @@
       }
       .tabletLayoutFreeTools button{
         background:#071027!important;
-        color:#fff!important;
-        border:0!important;
-        box-shadow:0 8px 18px rgba(7,16,39,.22)!important;
-      }
-      .tabletLayoutResizeHandle{
-        width:42px!important;
-        border:1px solid rgba(220,227,235,.95);
-        border-radius:999px;
-        background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(245,248,252,.9));
-        box-shadow:0 18px 42px rgba(7,16,39,.14),0 1px 0 rgba(255,255,255,.9) inset;
-        backdrop-filter:blur(12px);
-      }
-      .tabletLayoutResizeHandle::before{
-        left:50%!important;
-        top:50%!important;
-        bottom:auto!important;
-        width:5px!important;
-        height:84px!important;
-        transform:translate(-50%,-50%)!important;
-        background:linear-gradient(180deg,rgba(7,16,39,.18),rgba(94,167,232,.34),rgba(7,16,39,.18))!important;
-        box-shadow:none!important;
-      }
-      .tabletLayoutResizeHandle::after{
-        content:"";
-        position:absolute;
-        left:50%;
-        top:50%;
-        width:18px;
-        height:104px;
-        transform:translate(-50%,-50%);
-        border-radius:999px;
-        background:
-          radial-gradient(circle at 50% 22%,rgba(7,16,39,.34) 0 2px,transparent 3px),
-          radial-gradient(circle at 50% 50%,rgba(7,16,39,.28) 0 2px,transparent 3px),
-          radial-gradient(circle at 50% 78%,rgba(7,16,39,.34) 0 2px,transparent 3px);
-        pointer-events:none;
-      }
-      body.tabletLayoutDragging .tabletLayoutResizeHandle{
-        box-shadow:0 24px 56px rgba(7,16,39,.2),0 0 0 5px rgba(94,167,232,.14)!important;
-      }
-    }
-
-    /* v343 Tablet Collision Avoidance:
-       Fix sperrt nur die Regler, gespeicherte Groesse/Breite bleibt sichtbar.
 ```

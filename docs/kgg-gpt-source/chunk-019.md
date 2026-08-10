@@ -4,6 +4,50 @@
 - Lines: 7981-8400
 
 ```html
+            var bitsToNotRead = bitsLeft - toRead;
+            var mask = (0xFF >> (8 - toRead)) << bitsToNotRead;
+            result = (this.bytes[this.byteOffset] & mask) >> bitsToNotRead;
+            numBits -= toRead;
+            this.bitOffset += toRead;
+            if (this.bitOffset === 8) {
+                this.bitOffset = 0;
+                this.byteOffset++;
+            }
+        }
+        // Next read whole bytes
+        if (numBits > 0) {
+            while (numBits >= 8) {
+                result = (result << 8) | (this.bytes[this.byteOffset] & 0xFF);
+                this.byteOffset++;
+                numBits -= 8;
+            }
+            // Finally read a partial byte
+            if (numBits > 0) {
+                var bitsToNotRead = 8 - numBits;
+                var mask = (0xFF >> bitsToNotRead) << bitsToNotRead;
+                result = (result << numBits) | ((this.bytes[this.byteOffset] & mask) >> bitsToNotRead);
+                this.bitOffset += numBits;
+            }
+        }
+        return result;
+    };
+    BitStream.prototype.available = function () {
+        return 8 * (this.bytes.length - this.byteOffset) - this.bitOffset;
+    };
+    return BitStream;
+}());
+exports.BitStream = BitStream;
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.shiftJISTable = {
+    0x20: 0x0020,
     0x21: 0x0021,
     0x22: 0x0022,
     0x23: 0x0023,
@@ -380,48 +424,4 @@
     0x82E5: 0x3087,
     0x82E6: 0x3088,
     0x82E7: 0x3089,
-    0x82E8: 0x308A,
-    0x82E9: 0x308B,
-    0x82EA: 0x308C,
-    0x82EB: 0x308D,
-    0x82EC: 0x308E,
-    0x82ED: 0x308F,
-    0x82EE: 0x3090,
-    0x82EF: 0x3091,
-    0x82F0: 0x3092,
-    0x82F1: 0x3093,
-    0x8340: 0x30A1,
-    0x8341: 0x30A2,
-    0x8342: 0x30A3,
-    0x8343: 0x30A4,
-    0x8344: 0x30A5,
-    0x8345: 0x30A6,
-    0x8346: 0x30A7,
-    0x8347: 0x30A8,
-    0x8348: 0x30A9,
-    0x8349: 0x30AA,
-    0x834A: 0x30AB,
-    0x834B: 0x30AC,
-    0x834C: 0x30AD,
-    0x834D: 0x30AE,
-    0x834E: 0x30AF,
-    0x834F: 0x30B0,
-    0x8350: 0x30B1,
-    0x8351: 0x30B2,
-    0x8352: 0x30B3,
-    0x8353: 0x30B4,
-    0x8354: 0x30B5,
-    0x8355: 0x30B6,
-    0x8356: 0x30B7,
-    0x8357: 0x30B8,
-    0x8358: 0x30B9,
-    0x8359: 0x30BA,
-    0x835A: 0x30BB,
-    0x835B: 0x30BC,
-    0x835C: 0x30BD,
-    0x835D: 0x30BE,
-    0x835E: 0x30BF,
-    0x835F: 0x30C0,
-    0x8360: 0x30C1,
-    0x8361: 0x30C2,
 ```

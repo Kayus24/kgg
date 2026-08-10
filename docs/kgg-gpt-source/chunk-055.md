@@ -4,6 +4,50 @@
 - Lines: 23101-23520
 
 ```html
+  // v313 Scan-Popup Repeat-Source-Modul:
+  // Merkt sich, ob der letzte Bildweg Kamera oder Galerie/Datei war.
+  // Weitere Seite / weiterer Plan verwenden danach automatisch denselben Weg.
+  function normalizeScanInputKind(kind){return kind==='file'?'file':'camera';}
+  function rememberScanInputKind(kind){
+    const normalized=normalizeScanInputKind(kind);
+    scanState.lastInputKind=normalized;
+    try{localStorage.setItem('kgg_scan_last_input_kind_v1',normalized);}catch(err){}
+    return normalized;
+  }
+  function lastScanInputKind(){
+    if(scanState.lastInputKind==='file'||scanState.lastInputKind==='camera')return scanState.lastInputKind;
+    try{const stored=localStorage.getItem('kgg_scan_last_input_kind_v1'); if(stored==='file'||stored==='camera')return stored;}catch(err){}
+    return 'camera';
+  }
+  function patientShortGuess(){
+    const value=String(state.patient&&state.patient.name||$('patientName')&&$('patientName').value||'').trim();
+    if(!value)return '';
+    const parts=value.split(/\s+/).filter(Boolean);
+    if(parts.length>=2)return parts[0]+' '+parts[1].charAt(0)+'.';
+    return value.slice(0,16);
+  }
+  async function scanAcceptQrRaw(raw,file,hit,strict){
+    const forceNew=scanState.next==='plan'||!scanState.jobs.length;
+    let job=forceNew?scanNewJob('paper'):scanCurrentJob();
+    if(raw){
+      setScanStatus('QR erkannt: Inhalt wird gelesen ...');
+      try{
+        const parsed=parseScannedQrRaw(raw);
+        if(parsed&&(parsed.type==='KGGCFG1'||parsed.type==='KGGCFG2')){
+          setScanStatus(parsed.type==='KGGCFG2'?'QR erkannt: verschluesselter API-Key / Konfig-Transfer. Transfer-Code wird abgefragt ...':'QR erkannt: API-Key / Konfig-Transfer wird lokal gespeichert ...');
+          const idx=scanState.jobs.indexOf(job);
+          if(idx>=0&&!job.pages.length&&!job.result&&job.status==='new'){
+            scanState.jobs.splice(idx,1);
+            scanState.activeIndex=Math.max(0,Math.min(scanState.activeIndex,scanState.jobs.length-1));
+          }
+          const ok=await applyKggConfigTransferParsed(parsed);
+          return {type:ok?'configTransfer':'configTransferCancelled',json:parsed.json};
+        }
+        if(parsed&&(parsed.type==='KGGSYNC1'||parsed.type==='KGGSYNC2')){
+          setScanStatus(parsed.type==='KGGSYNC2'?'QR erkannt: Sync-Verbindung mit Daten wird gelesen ...':'QR erkannt: Sync-Kopplung wird gespeichert ...');
+          const idx=scanState.jobs.indexOf(job);
+          if(idx>=0&&!job.pages.length&&!job.result&&job.status==='new'){
+            scanState.jobs.splice(idx,1);
             scanState.activeIndex=Math.max(0,Math.min(scanState.activeIndex,scanState.jobs.length-1));
           }
           if(parsed.type==='KGGSYNC2'){
@@ -380,48 +424,4 @@
     save();
     render();
     setScanStatus('Scan-Ergebnis übernommen.');
-    return true;
-  }
-  function updateScanQueueInfo(){renderScanPreview();}
-  function showAfterPhotoPrompt(){scanState.decision=true;renderScanPreview();}
-  window.KGGScanBridge={
-    getStatus:()=>({singleEngine:true,hasLocalKey:!!currentLocalGeminiKey(),jobs:scanStateSnapshot().jobs.length}),
-    redactCanvasForExternalOcr:redactScanCanvasForExternalOcr,
-    createReadingCanvas:createScanReadingCanvas,
-    qualityCheck:scanPaperQuality,
-    scanResultToPlanText,
-    applyText:(text)=>applyScanTextToCurrentPlan(text,'scan_bridge_apply_text')
-  };
-  function notifyNativeScanPickerMode(kind){
-    const normalized=normalizeScanInputKind(kind);
-    try{
-      if(window.KGGNativeCamera&&typeof window.KGGNativeCamera.setNextPickerMode==='function'){
-        window.KGGNativeCamera.setNextPickerMode(normalized);
-        return;
-      }
-      if(window.KGGAndroidApp&&typeof window.KGGAndroidApp.setNextFileChooserMode==='function'){
-        window.KGGAndroidApp.setNextFileChooserMode(normalized);
-      }
-    }catch(err){
-      console.warn('Native Kamera-Bridge nicht verfuegbar:',err);
-    }
-  }
-  window.KGGScan={
-    pick(kind){
-        const normalized=rememberScanInputKind(kind||lastScanInputKind());
-        notifyNativeScanPickerMode(normalized);
-        const input=normalized==='camera'?$('fileInput'):$('filePickerInput');
-        if(input){
-          try{input.value='';}catch(_e){}
-          if(normalized==='camera'){
-            input.accept='image/*';
-            input.setAttribute('capture','environment');
-            input.removeAttribute('multiple');
-          }else{
-            input.accept='image/*,.jpg,.jpeg,.png,.webp';
-            input.removeAttribute('capture');
-            input.setAttribute('multiple','multiple');
-          }
-          input.click();
-        }
 ```

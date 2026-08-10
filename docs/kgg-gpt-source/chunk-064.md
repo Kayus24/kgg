@@ -4,6 +4,50 @@
 - Lines: 26881-27300
 
 ```html
+    }
+    body.kggPhonePhotoMenuOpen #scanHub.kggPhoneScanMenuInline #kggPhonePhotoMenu{
+      display:grid!important;
+    }
+    #scanHub.kggPhoneScanMenuInline #kggPhonePhotoMenu button{
+      width:100%!important;
+      min-height:52px!important;
+      border:0!important;
+      border-radius:16px!important;
+      background:rgba(243,247,253,.96)!important;
+      color:#071027!important;
+      font-weight:1000!important;
+      font-size:18px!important;
+      text-align:center!important;
+    }
+  }
+</style>
+
+<script id="kgg-v050-phone-ui-mini-fix-script">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v050-phone-ui-mini-fix";
+  var PHONE_QUERY="(max-width:759px)";
+  function byId(id){return document.getElementById(id);}
+  function isPhone(){
+    return !!(window.matchMedia&&window.matchMedia(PHONE_QUERY).matches&&!(window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive()));
+  }
+  function placeAdminMenu(){
+    var menu=byId("kggPhoneAdminMenu");
+    var header=document.querySelector("#createPanel.planMode .planHeader");
+    if(menu&&header&&!header.contains(menu))header.appendChild(menu);
+  }
+  function placeInlinePhotoMenu(){
+    var hub=byId("scanHub");
+    var menu=byId("kggPhonePhotoMenu");
+    var toggle=byId("phonePhotoMenuToggle");
+    if(!hub||!menu)return;
+    if(!isPhone()){
+      if(hub.classList.contains("kggPhoneScanMenuInline"))hub.classList.remove("kggPhoneScanMenuInline");
+      if(menu.parentElement!==document.body)document.body.appendChild(menu);
+      return;
+    }
+    if(!hub.classList.contains("kggPhoneScanMenuInline"))hub.classList.add("kggPhoneScanMenuInline");
+    if(menu.parentElement!==hub)hub.appendChild(menu);
     if(toggle){
       if(toggle.textContent!=="\u2303")toggle.textContent="\u2303";
       if(toggle.getAttribute("aria-label")!=="Foto-Optionen oeffnen")toggle.setAttribute("aria-label","Foto-Optionen oeffnen");
@@ -380,48 +424,4 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
         return parseStatus(window.KGGNativeAppUpdate.status());
       }
     }catch(err){}
-    return {};
-  }
-
-  function fileName(value){
-    var clean=String(value||"").split(/[?#]/)[0].replace(/\\/g,"/");
-    var parts=clean.split("/").filter(Boolean);
-    var last=parts.pop()||"";
-    try{return decodeURIComponent(last);}catch(err){return last;}
-  }
-
-  function buildInfo(){
-    try{if(typeof KGG_BUILD_INFO!=="undefined"&&KGG_BUILD_INFO)return KGG_BUILD_INFO;}catch(err){}
-    if(window.KGG_BUILD_INFO)return window.KGG_BUILD_INFO;
-    try{
-      var source=document.getElementById("kgg-source-truth");
-      var data=source?JSON.parse(source.textContent||"{}"):{};
-      var current=data.currentVersion||{};
-      var code=Number(current.versionCode);
-      if(Number.isFinite(code))return {release:"v"+String(code).padStart(3,"0"),versionName:current.versionName||"",htmlFile:"kgg-update/index.html"};
-    }catch(err){}
-    return {};
-  }
-
-  function currentIdentity(){
-    var native=nativeStatus();
-    var info=buildInfo();
-    var path=String((window.location&&window.location.pathname)||"");
-    var release=String(native.releaseId||"").trim();
-    var pathRelease=path.match(/\/releases\/web\/(r[0-9]+)\//i);
-    if(!release&&pathRelease)release=pathRelease[1].toLowerCase();
-    var build=info.release||"";
-    var source=fileName(native.loadedHtmlSource)||fileName(path)||fileName(info.htmlFile)||"index.html";
-    var parts=[];
-    if(release)parts.push(release);
-    if(build&&build!==release)parts.push(build);
-    parts.push(source);
-    return "HTML "+parts.join(" · ");
-  }
-
-  function render(){
-    var label=document.getElementById("kggTabletHtmlReleaseLabel");
-    if(!label)return;
-    var text=currentIdentity();
-    label.textContent=text;
 ```

@@ -4,6 +4,50 @@
 - Lines: 2941-3360
 
 ```html
+          width:74px!important;
+          min-width:74px!important;
+          max-width:74px!important;
+          height:34px!important;
+          min-height:34px!important;
+          margin:12px 10px 0 0!important;
+          padding:0 8px!important;
+        }
+      }
+    }
+
+
+
+
+    /* v331 Tablet Left Column + Scale Up:
+       - linke Spalte bekommt mehr Raum zur Mitte
+       - gesamtes Tablet-Layout wieder leicht größer
+       - keine Logikänderung */
+    @media (min-width:760px){
+      .app{
+        grid-template-columns:minmax(395px,475px) minmax(0,1fr) minmax(0,.92fr)!important;
+        gap:16px!important;
+      }
+
+      #inputWrap textarea,
+      #exerciseInput{
+        font-size:21px!important;
+        line-height:1.34!important;
+      }
+      #inputWrap textarea{
+        min-height:106px!important;
+      }
+
+      .scanBtn,
+      .scanMeta.filePickBtn,
+      #baseToggle,
+      #finishBtn{
+        font-size:19px!important;
+      }
+
+      .bankArea.bankOpen.alphaBankOpen .bankWithAz{
+        grid-template-columns:60px minmax(0,1fr)!important;
+        column-gap:10px!important;
+      }
       .bankArea.bankOpen.alphaBankOpen .az{
         width:48px!important;
       }
@@ -380,48 +424,4 @@
       .tabletLockSwitch{
         display:flex;
         align-items:center;
-        gap:8px;
-        min-width:112px;
-      }
-      .tabletLockIcon{
-        width:18px;
-        text-align:center;
-      }
-      .tabletSwitchTrack{
-        position:relative;
-        width:40px;
-        height:22px;
-        border-radius:999px;
-        background:#071027;
-        box-shadow:inset 0 0 0 1px rgba(7,16,39,.22);
-      }
-      .tabletSwitchKnob{
-        position:absolute;
-        left:3px;
-        top:3px;
-        width:16px;
-        height:16px;
-        border-radius:999px;
-        background:#fff;
-        box-shadow:0 2px 6px rgba(7,16,39,.24);
-        transition:transform .2s ease;
-      }
-      body.tabletLayoutUnlocked .tabletSwitchTrack{background:#e9eef5}
-      body.tabletLayoutUnlocked .tabletSwitchKnob{transform:translateX(18px);background:#071027}
-      .tabletLockText{
-        min-width:28px;
-        font-size:12px;
-        font-weight:1000;
-      }
-      .tabletLayoutFreeTools{
-        display:none;
-        align-items:center;
-        gap:6px;
-      }
-      body.tabletLayoutUnlocked .tabletLayoutFreeTools{display:flex}
-      .tabletScaleValue{
-        min-width:48px;
-        text-align:center;
-        color:#38475b;
-        font-size:12px;
 ```

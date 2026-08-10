@@ -4,6 +4,50 @@
 - Lines: 26041-26460
 
 ```html
+    var hasPlan=!!(createPanel&&createPanel.classList.contains("planMode"))||!!document.querySelector("#planList .planCard[data-plan-id]");
+    document.body.classList.toggle("kggPhoneHasPlan",hasPlan);
+  }
+  function installObserver(){
+    if(observer||!document.body||!isPhone())return;
+    observer=new MutationObserver(function(){syncPhonePlanState();});
+    observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:["class"]});
+  }
+  function install(){
+    if(!document.body)return;
+    if(!isPhone()){
+      closePhoneUi();
+      return;
+    }
+    ensurePhoneAdminMenu();
+    ensurePhonePhotoMenu();
+    installObserver();
+    syncPhonePlanState();
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});
+  else install();
+  window.addEventListener("resize",function(){setTimeout(install,80);},{passive:true});
+  window.addEventListener("orientationchange",function(){setTimeout(install,180);},{passive:true});
+  window.KGG_UI_MINI_SERIES={
+    patchId:PATCH_ID,
+    check:function(){
+      return {
+        patchId:PATCH_ID,
+        phone:isPhone(),
+        adminMenu:!!byId("kggPhoneAdminMenu"),
+        photoToggle:!!byId("phonePhotoMenuToggle"),
+        photoMenu:!!byId("kggPhonePhotoMenu"),
+        phoneHasPlan:!!(document.body&&document.body.classList.contains("kggPhoneHasPlan")),
+        bankThumbnails:document.querySelectorAll("[data-bank-thumb-id]").length
+      };
+    }
+  };
+})();
+</script>
+<!-- KGG PATCH END kgg-v041-ui-mini-series -->
+
+<!-- SOURCE FILE: kgg-update/src/patches/v042-phone-dock-anchored-correction.html -->
+
+<!-- KGG PATCH START kgg-v042-phone-dock-anchored-correction -->
 <style id="kgg-v042-phone-dock-anchored-correction-style">
   @media(max-width:759px){
     #createPanel .planHeader{
@@ -380,48 +424,4 @@
   }
 </style>
 
-<script id="kgg-v044-phone-liquid-actions-script">
-(function(){
-  "use strict";
-  var PATCH_ID="kgg-v044-phone-liquid-actions";
-  function byId(id){return document.getElementById(id);}
-  function clickExisting(id){var el=byId(id); if(el&&typeof el.click==="function")el.click();}
-  function closePhoneAdminMenu(){
-    var panel=byId("kggPhoneAdminMenuPanel");
-    var btn=byId("kggPhoneAdminMenuBtn");
-    if(panel)panel.hidden=true;
-    if(btn)btn.setAttribute("aria-expanded","false");
-  }
-  function openReleaseCenter(){
-    closePhoneAdminMenu();
-    if(window.KGGReleaseCenter&&typeof window.KGGReleaseCenter.open==="function"){window.KGGReleaseCenter.open();return;}
-    clickExisting("kggReleaseCenterOpenPhone");
-    clickExisting("kggReleaseCenterOpen");
-  }
-  function openDeviceSync(){
-    closePhoneAdminMenu();
-    if(typeof window.openSyncPairModal==="function"){window.openSyncPairModal();return;}
-    clickExisting("syncQrBtn");
-  }
-  function openTherapistShare(){
-    closePhoneAdminMenu();
-    if(typeof window.openKggTherapistAppOnlyQr==="function"){window.openKggTherapistAppOnlyQr();return;}
-    if(typeof window.openKggAdminMenuQr==="function"){
-      window.openKggAdminMenuQr({
-        title:"Kolleg:innen-App APK QR",
-        hint:"Oeffnet die aktuelle Android-Download-Seite fuer Kolleg:innen. Keine API-Keys, keine Sync-Daten.",
-        url:"https://kayus24.github.io/kgg/therapist-app/latest-android.html"
-      });
-    }
-  }
-  function openSharedBank(){
-    closePhoneAdminMenu();
-    if(window.KGGSharedBank&&typeof window.KGGSharedBank.open==="function"){window.KGGSharedBank.open();return;}
-    clickExisting("sharedBankBtn");
-  }
-  function openAdminConfig(){
-    closePhoneAdminMenu();
-    if(window.KGGAdmin&&typeof window.KGGAdmin.openConfig==="function"){window.KGGAdmin.openConfig();return;}
-    clickExisting("adminConfigBtn");
-  }
 ```

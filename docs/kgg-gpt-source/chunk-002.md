@@ -4,6 +4,50 @@
 - Lines: 841-1260
 
 ```html
+        "Patienten-App",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Android-Wrapper",
+        "Tablet layout",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "v044 ist ein Phone-only UI-Aufraeumpatch auf Basis von v041/v042; Kamera-/Galerie-, Sync- und Update-Handler werden wiederverwendet."
+    },
+    {
+      "versionCode": 43,
+      "versionName": "1.0.43-tablet-card-reorder",
+      "patchId": "kgg-v043-tablet-card-reorder",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Tablet-Karten direkt verschieben",
+      "reason": "Im Tablet-Modus sollen Uebungskarten per Longpress auf der Karte verschiebbar sein, nicht nur ueber den linken Verschiebegriff.",
+      "whatChanged": [
+        "Tablet-Karten erhalten einen eigenen Longpress-Einstieg in die bestehende Reorder-Geste.",
+        "Buttons, Eingabefelder, Links, Karten-Actions und der linke Verschiebegriff bleiben von der Kartenflaechen-Geste ausgenommen.",
+        "Der vorhandene animierte Reorder-Pfad erkennt nun Griff- und Karten-Starts sauber ueber dieselbe Funktion.",
+        "Static-Smokes pruefen die Tablet-only-Bindung und die interaktiven Zielausnahmen."
+      ],
+      "touchedAreas": [
+        "Tablet plan-card reorder gesture",
+        "Local test batteries",
+        "HTML embedded metadata"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Android-Wrapper",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
         "githubPages": "pending",
         "androidApp": "pending"
       },
@@ -380,48 +424,4 @@
         "Source Truth",
         "Changelog",
         "Patch rules"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR-Erzeugung",
-        "Patienten-App",
-        "Scan-Kamera",
-        "Parser",
-        "Android-Wrapper",
-        "Plan-State",
-        "Storage"
-      ],
-      "testStatus": {
-        "debugFabVisible": "pending",
-        "debugReportCopy": "pending",
-        "workflowIndexUrl": "pending"
-      },
-      "createdAt": "2026-06-20T22:59:57.580956+00:00"
-    },
-    {
-      "versionCode": 22,
-      "versionName": "1.0.22-admin-debug-menu-feedback",
-      "patchId": "kgg-v022-admin-debug-menu-feedback",
-      "status": "active",
-      "type": "github-web-update",
-      "title": "Admin Debug-/Feedback-Menue",
-      "reason": "Max braucht eine Admin-Oberfläche, die bei QR-, Layout-, Update-, Speicher- und anderen Problemen direkt verwertbares Feedback liefert.",
-      "whatChanged": [
-        "Adds Admin Debug / Feedback menu as v022.",
-        "Tablet: Debug entry is inserted into the scan/admin side rail.",
-        "Phone: Admin-Konfig, QR/Sync and Übungsdatenbank teilen are hidden from the scan hub and exposed through one Admin-Menue button.",
-        "Debug report includes version, feature availability, QR debug, layout rectangles, source truth/changelog summary, localStorage key summary and last runtime errors.",
-        "Adds global KGG_ADMIN_DEBUG_MENU.report() for future agents."
-      ],
-      "touchedAreas": [
-        "Admin debug UI",
-        "HTML embedded metadata",
-        "Source Truth",
-        "Changelog",
-        "Patch rules"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR-Erzeugung",
-        "Patienten-App",
 ```

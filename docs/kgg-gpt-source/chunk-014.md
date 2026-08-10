@@ -4,6 +4,50 @@
 - Lines: 5881-6300
 
 ```html
+      min-height:0!important;
+      max-height:none!important;
+      margin:0!important;
+      align-self:stretch!important;
+      border-radius:16px!important;
+      overflow:hidden!important;
+    }
+    body.tabletLayoutCustom #bankContent,
+    body.tabletLayoutCustom #bankContent .bankWithAz,
+    body.tabletLayoutCustom #bankContent .bankRows{
+      min-height:0!important;
+      max-height:none!important;
+      height:100%!important;
+    }
+    body.tabletLayoutCustom #rightPlanStack,
+    body.tabletLayoutCustom #rightPlanStack.hidden{
+      grid-column:2/4!important;
+      grid-row:2/4!important;
+      display:flex!important;
+      flex-direction:column!important;
+      width:100%!important;
+      height:100%!important;
+      min-height:0!important;
+      margin:0!important;
+      gap:0!important;
+      align-self:stretch!important;
+      justify-self:stretch!important;
+      visibility:visible!important;
+      pointer-events:auto!important;
+      overflow:hidden!important;
+    }
+    body.tabletLayoutCustom #currentPlanBlock,
+    body.tabletLayoutCustom #rightPlanStack #currentPlanBlock.hidden{
+      display:flex!important;
+      flex-direction:column!important;
+      flex:1 1 auto!important;
+      width:100%!important;
+      height:100%!important;
+      min-height:0!important;
+      margin:0!important;
+      padding:12px!important;
+      border:2px solid #111827!important;
+      border-radius:18px!important;
+      background:#fff!important;
       box-shadow:none!important;
       visibility:visible!important;
       pointer-events:auto!important;
@@ -380,48 +424,4 @@
     return this;
   };
 
-  KGGOfflineJsPDF.prototype.setDrawColor = function(){
-    this._drawColor = colorFromArgs(arguments);
-    return this;
-  };
-
-  KGGOfflineJsPDF.prototype.setTextColor = function(){
-    this._textColor = colorFromArgs(arguments);
-    return this;
-  };
-
-  KGGOfflineJsPDF.prototype.setFillColor = function(){
-    this._fillColor = colorFromArgs(arguments);
-    return this;
-  };
-
-  KGGOfflineJsPDF.prototype.addPage = function(_format, orientation){
-    var current = this._pages[0];
-    var useLandscape = String(orientation || '').toLowerCase() === 'landscape' || current.w > current.h;
-    var size = resolvePageSize(Array.isArray(_format) ? _format : [current.w, current.h], useLandscape ? 'landscape' : 'portrait');
-    this._page = makePage(size);
-    this._pages.push(this._page);
-    return this;
-  };
-
-  KGGOfflineJsPDF.prototype.rect = function(x,y,w,h,style){
-    var op = String(style || '').toUpperCase().indexOf('F') >= 0 ? 'f' : 'S';
-    var px = this._x(x);
-    var py = this._y(y + h);
-    this._push('q\n' + colorCmd(this._drawColor,'RG') + '\n' + colorCmd(this._fillColor,'rg') + '\n' +
-      num(this._lineWidth * MM_TO_PT) + ' w\n' +
-      num(px) + ' ' + num(py) + ' ' + num(w * MM_TO_PT) + ' ' + num(h * MM_TO_PT) + ' re ' + op + '\nQ');
-    return this;
-  };
-
-  KGGOfflineJsPDF.prototype.roundedRect = function(x,y,w,h){
-    return this.rect(x,y,w,h);
-  };
-
-  KGGOfflineJsPDF.prototype.line = function(x1,y1,x2,y2){
-    this._push('q\n' + colorCmd(this._drawColor,'RG') + '\n' +
-      num(this._lineWidth * MM_TO_PT) + ' w\n' +
-      num(this._x(x1)) + ' ' + num(this._y(y1)) + ' m ' +
-      num(this._x(x2)) + ' ' + num(this._y(y2)) + ' l S\nQ');
-    return this;
 ```

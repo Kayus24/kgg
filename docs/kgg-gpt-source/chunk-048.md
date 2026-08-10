@@ -4,6 +4,50 @@
 - Lines: 20161-20580
 
 ```html
+  }
+  function kggConfigTransferBytesToBase64Url(bytes){
+    let binary='';
+    for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));
+    return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+  function kggConfigTransferBase64UrlToBytes(value){
+    const body=String(value||'').replace(/-/g,'+').replace(/_/g,'/');
+    const padded=body+'='.repeat((4-body.length%4)%4);
+    const binary=atob(padded);
+    const bytes=new Uint8Array(binary.length);
+    for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+    return bytes;
+  }
+  function kggConfigTransferRandomBytes(length){
+    const bytes=new Uint8Array(length);
+    if(window.crypto&&crypto.getRandomValues)crypto.getRandomValues(bytes);
+    else for(let i=0;i<bytes.length;i++)bytes[i]=Math.floor(Math.random()*256);
+    return bytes;
+  }
+  function kggConfigTransferPassCode(){
+    const bytes=kggConfigTransferRandomBytes(4);
+    const value=((bytes[0]<<24)>>>0)+(bytes[1]<<16)+(bytes[2]<<8)+bytes[3];
+    return String(100000+(value%900000));
+  }
+  function buildKggConfigTransferPlain(){
+    loadAdminSecrets();
+    return {
+      kind:'kgg_config_transfer_v2',
+      version:2,
+      appVersion:VERSION,
+      createdAt:new Date().toISOString(),
+      expiresAt:new Date(Date.now()+10*60*1000).toISOString(),
+      secrets:{
+        geminiKeys:(adminSecrets.geminiKeys||[]).map(cleanSecret).filter(Boolean).slice(0,4),
+        mediaDropzoneEndpoint:cleanSecret(adminSecrets.mediaDropzoneEndpoint),
+        mediaDropzoneUploadToken:cleanSecret(adminSecrets.mediaDropzoneUploadToken)
+      }
+    };
+  }
+  function kggConfigTransferHasCodes(plain){
+    const secrets=plain&&plain.secrets||{};
+    return !!((Array.isArray(secrets.geminiKeys)&&secrets.geminiKeys.length)||secrets.mediaDropzoneEndpoint||secrets.mediaDropzoneUploadToken);
+  }
   async function kggConfigTransferKey(passCode,saltBytes){
     const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(String(passCode||'')),{name:'PBKDF2'},false,['deriveKey']);
     return crypto.subtle.deriveKey({name:'PBKDF2',salt:saltBytes,iterations:140000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
@@ -380,48 +424,4 @@
   }
   async function testNativeSyncRoundtrip(){
     const status=$('syncPairStatus');
-    try{
-      const doc=buildNativeExerciseBankSyncDocument();
-      if(!nativeExerciseSyncAvailable()){
-        nativeSyncLastStatus='Datenformat OK, aber keine Android-Bridge aktiv.';
-        if(status)status.textContent=nativeSyncLastStatus;
-        renderSyncDiagnostics();
-        return {native:false,doc};
-      }
-      const writeOk=!!(await resolveNativeSyncValue(window.KGGNativeSync.write(doc)));
-      let mesh=null,result=null;
-      if(typeof window.KGGNativeSync.listPeers==='function')mesh=await resolveNativeSyncValue(window.KGGNativeSync.listPeers());
-      if(!mesh&&typeof window.KGGNativeSync.read==='function')mesh=await resolveNativeSyncValue(window.KGGNativeSync.read());
-      if(mesh)result=mergeNativeExerciseBankSyncDocument(mesh);
-      const peers=result&&result.mesh?result.mesh.seen:((mesh&&Array.isArray(mesh.peers))?mesh.peers.length:0);
-      nativeSyncLastStatus=(writeOk?'Schreiben OK':'Schreiben fehlgeschlagen')+' · Peers '+peers;
-      if(status)status.textContent='Sync-Test: '+nativeSyncLastStatus+'. '+nativeSyncTransportStatusText();
-      renderSyncPeerList();
-      renderSyncDiagnostics();
-      return {native:true,writeOk,mesh,result};
-    }catch(err){
-      nativeSyncLastStatus='Fehler: '+(err&&err.message?err.message:'Sync-Test fehlgeschlagen');
-      if(status)status.textContent=nativeSyncLastStatus;
-      renderSyncDiagnostics();
-      return null;
-    }
-  }
-  function downloadNativeSyncFile(){
-    const status=$('syncPairStatus');
-    try{
-      const doc=buildNativeExerciseBankSyncDocument();
-      const blob=new Blob([JSON.stringify(doc,null,2)],{type:'application/json'});
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement('a');
-      const stamp=new Date().toISOString().slice(0,19).replace(/[-:T]/g,'');
-      a.href=url;
-      a.download='kgg_sync_'+syncPeerIdShort(doc.roomId||'room')+'_'+stamp+'.json';
-      a.click();
-      setTimeout(()=>URL.revokeObjectURL(url),1200);
-      nativeSyncLastStatus='Sync-Datei gespeichert.';
-      if(status)status.textContent=nativeSyncLastStatus;
-      renderSyncDiagnostics();
-      return true;
-    }catch(err){
-      nativeSyncLastStatus='Sync-Datei konnte nicht gespeichert werden.';
 ```

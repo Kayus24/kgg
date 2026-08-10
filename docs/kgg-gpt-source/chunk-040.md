@@ -4,6 +4,50 @@
 - Lines: 16801-17220
 
 ```html
+    }
+    var x = (leftX + rightX) / 2;
+    var topY = Math.round(p.y);
+    while (matrix.get(Math.round(x), topY)) {
+        topY--;
+    }
+    var bottomY = Math.round(p.y);
+    while (matrix.get(Math.round(x), bottomY)) {
+        bottomY++;
+    }
+    var y = (topY + bottomY) / 2;
+    return { x: x, y: y };
+}
+function locate(matrix) {
+    var finderPatternQuads = [];
+    var activeFinderPatternQuads = [];
+    var alignmentPatternQuads = [];
+    var activeAlignmentPatternQuads = [];
+    var _loop_1 = function (y) {
+        var length_1 = 0;
+        var lastBit = false;
+        var scans = [0, 0, 0, 0, 0];
+        var _loop_2 = function (x) {
+            var v = matrix.get(x, y);
+            if (v === lastBit) {
+                length_1++;
+            }
+            else {
+                scans = [scans[1], scans[2], scans[3], scans[4], length_1];
+                length_1 = 1;
+                lastBit = v;
+                // Do the last 5 color changes ~ match the expected ratio for a finder pattern? 1:1:3:1:1 of b:w:b:w:b
+                var averageFinderPatternBlocksize = sum(scans) / 7;
+                var validFinderPattern = Math.abs(scans[0] - averageFinderPatternBlocksize) < averageFinderPatternBlocksize &&
+                    Math.abs(scans[1] - averageFinderPatternBlocksize) < averageFinderPatternBlocksize &&
+                    Math.abs(scans[2] - 3 * averageFinderPatternBlocksize) < 3 * averageFinderPatternBlocksize &&
+                    Math.abs(scans[3] - averageFinderPatternBlocksize) < averageFinderPatternBlocksize &&
+                    Math.abs(scans[4] - averageFinderPatternBlocksize) < averageFinderPatternBlocksize &&
+                    !v; // And make sure the current pixel is white since finder patterns are bordered in white
+                // Do the last 3 color changes ~ match the expected ratio for an alignment pattern? 1:1:1 of w:b:w
+                var averageAlignmentPatternBlocksize = sum(scans.slice(-3)) / 3;
+                var validAlignmentPattern = Math.abs(scans[2] - averageAlignmentPatternBlocksize) < averageAlignmentPatternBlocksize &&
+                    Math.abs(scans[3] - averageAlignmentPatternBlocksize) < averageAlignmentPatternBlocksize &&
+                    Math.abs(scans[4] - averageAlignmentPatternBlocksize) < averageAlignmentPatternBlocksize &&
                     v; // Is the current pixel black since alignment patterns are bordered in black
                 if (validFinderPattern) {
                     // Compute the start and end x values of the large center black square
@@ -380,48 +424,4 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   <button class="mutedBtn editorCancelBtn" id="closeEditor">Abbrechen</button>
 </div></div>
 
-<div class="modal" id="packageSaveModal"><div class="sheet">
-  <h2>Übungspaket speichern</h2>
-  <p class="notice">Aus aktuellem Plan.</p>
-  <div class="field"><label>Paketname</label><input id="packageNameInput" placeholder="z. B. Knie Standard"></div>
-  <div class="grid2"><button class="mutedBtn" id="cancelPackageSave" type="button">Abbrechen</button><button class="primary" id="confirmPackageSave" type="button">OK</button></div>
-</div></div>
-
-<div class="modal" id="bankDeleteModal"><div class="sheet">
-  <h2>Übung löschen?</h2>
-  <p class="notice"><b id="bankDeleteName"></b> endgültig löschen?</p>
-  <div class="grid2"><button class="mutedBtn" id="cancelBankDelete" type="button">Nein</button><button class="primary" id="confirmBankDelete" type="button">Ja</button></div>
-</div></div>
-
-<div class="modal" id="shareModal"><div class="sheet">
-  <p class="notice" id="finishNotice"></p>
-  <div class="finishChoices" id="finishChoices">
-    <div class="finishPdfRow">
-      <button class="mutedBtn finishOutputBtn finishPdfBtn" id="finishPdfBtn" type="button"><span class="finishIcon" aria-hidden="true">📄</span><span>PDF erzeugen</span></button>
-      <button class="mutedBtn finishPdfLargeBtn" id="finishLargePdfBtn" type="button" aria-label="Großdruck-PDF für Menschen mit Sehbeeinträchtigung">👓</button>
-    </div>
-    <button class="mutedBtn finishOutputBtn finishAppBtn" id="finishPatientBtn" type="button"><span class="finishIcon" aria-hidden="true">▦</span><span>App erzeugen</span></button>
-    <button class="mutedBtn" id="finishCancelBtn" type="button">Abbrechen</button>
-  </div>
-  <div class="patientOutput hidden patientQrOutput" id="patientOutputBox">
-    <b class="patientOutputTitle">Patient:innen</b>
-    <p class="notice" id="patientShareNotice" style="margin-top:8px">Lokaler Test.</p>
-    <a class="patientLink" id="patientAppLink" href="#" target="_blank" rel="noopener">Patienten-App öffnen</a>
-    <button class="mutedBtn" style="width:100%;margin-top:8px" id="copyPatientLink" type="button">Link kopieren</button>
-    <textarea class="patientLinkCopyField hidden" id="patientLinkCopyField" readonly aria-label="Patienten-Link zum manuellen Kopieren"></textarea>
-    <div class="qrBox" id="patientQrBox"><span class="qrStatus">QR wird vorbereitet …</span></div>
-    <div class="qrStatus" id="patientQrStatus"></div>
-  </div>
-  <details class="apiBox" id="debugPayloadBox">
-    <summary>⚙️ Debug/Test: Roh-Payload intern anzeigen</summary>
-    <p><b>Nicht für Patient:innen.</b> Dieser Bereich ist nur intern/therapeutisch/entwicklerisch zum Testen.</p>
-    <textarea id="shareText" style="min-height:150px;font-size:13px"></textarea>
-    <button class="mutedBtn" style="width:100%;margin-top:8px" id="copyShare">Debug-Payload kopieren</button>
-  </details>
-  <button class="mutedBtn hidden" style="width:100%;margin-top:8px" id="closeShare">Schließen</button>
-</div></div>
-
-<div class="modal" id="largePdfModal"><div class="sheet">
-  <h2>Großdruck-PDF</h2>
-  <p class="notice">Großdruck-PDF erzeugen?</p>
 ```

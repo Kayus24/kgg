@@ -4,6 +4,50 @@
 - Lines: 21001-21420
 
 ```html
+        cornerMarkers:'black',
+        exerciseLabels,
+        machineLineFormat:'#EX|slot|name|sets|side|loadUnit|metricUnit',
+        tables:['T1','T2','T3','T4','T5','T6'],
+        sets:['S1','S2','S3'],
+        columns:['kg','Wdh','Schmerz 1-10'],
+        renderedInThisPatch:false
+      },
+      tableContract:{
+        days:['T1','T2','T3','T4','T5','T6'],
+        setRows:['S1','S2','S3'],
+        columns:[
+          {key:'kg',label:'kg',type:'number',patientWritable:true},
+          {key:'wdh',label:'Wdh',type:'numberOrTime',patientWritable:true},
+          {key:'pain',label:'Schmerz 1-10',type:'scale',min:1,max:10,patientWritable:true}
+        ]
+      },
+      pages,
+      exerciseCount:exercises.length,
+      pageCount:pages.length,
+      emptySlotCount:pages.reduce((sum,p)=>sum+p.emptySlotCount,0),
+      audience:'pdf-output-not-json-patient-file',
+      jsonPolicy:'JSON bleibt intern; Patient:innen bekommen PDF oder Patienten-App/QR, keine JSON-Datei.',
+      pdfRuntimeFingerprint:PDF_RUNTIME_FINGERPRINT
+    };
+    window.KGGLatestPdfSnapshot=snapshot;
+    return snapshot;
+  }
+  function firstPdfExerciseImageMedia(ex){
+    return ensureExerciseMediaList(ex).find(item=>item&&item.type==='image'&&item.id) || null;
+  }
+  async function createKggPdfThumbnailDataUrl(imageBlob){
+    const img=await loadImageFromBlob(imageBlob);
+    const targetW=150,targetH=110;
+    const canvas=document.createElement('canvas');
+    canvas.width=targetW; canvas.height=targetH;
+    const ctx=canvas.getContext('2d',{alpha:false});
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,targetW,targetH);
+    const iw=img.naturalWidth||img.width||1,ih=img.naturalHeight||img.height||1;
+    const scale=Math.min(targetW/iw,targetH/ih);
+    const dw=Math.max(1,Math.round(iw*scale));
+    const dh=Math.max(1,Math.round(ih*scale));
+    const dx=Math.round((targetW-dw)/2),dy=Math.round((targetH-dh)/2);
+    ctx.imageSmoothingEnabled=true;
     ctx.imageSmoothingQuality='high';
     try{ctx.filter='grayscale(1) contrast(1.08)';}catch(e){}
     ctx.drawImage(img,dx,dy,dw,dh);
@@ -380,48 +424,4 @@
   function pdfBytesFromBinaryString(pdf){
     const bytes=new Uint8Array(pdf.length);
     for(let i=0;i<pdf.length;i++)bytes[i]=pdf.charCodeAt(i)&255;
-    return bytes;
-  }
-  function pdfBlobFromDoc(doc){
-    if(!doc)return null;
-    if(typeof doc.output==='function'){
-      try{
-        const blob=doc.output('blob');
-        if(blob instanceof Blob)return blob;
-      }catch(e){}
-      try{
-        const buffer=doc.output('arraybuffer');
-        if(buffer)return new Blob([buffer],{type:'application/pdf'});
-      }catch(e){}
-      try{
-        const text=doc.output();
-        if(typeof text==='string')return new Blob([pdfBytesFromBinaryString(text)],{type:'application/pdf'});
-      }catch(e){}
-    }
-    if(typeof doc._buildPdf==='function'){
-      try{return new Blob([pdfBytesFromBinaryString(doc._buildPdf())],{type:'application/pdf'});}catch(e){}
-    }
-    return null;
-  }
-  function downloadPdfBlob(blob,filename){
-    if(!blob)return;
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;
-    a.download=filename||'kgg_trainingsplan.pdf';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},1000);
-  }
-  function pdfBlobToBase64(blob){
-    return new Promise((resolve,reject)=>{
-      const reader=new FileReader();
-      reader.onload=()=>resolve(String(reader.result||'').split(',')[1]||'');
-      reader.onerror=()=>reject(reader.error||new Error('PDF konnte nicht gelesen werden.'));
-      reader.readAsDataURL(blob);
-    });
-  }
-  function nativePdfBridge(){
-    return window.KGGNativePdf&&window.KGGNativePdf.available?window.KGGNativePdf:null;
-  }
 ```

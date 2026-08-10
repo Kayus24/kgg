@@ -4,6 +4,50 @@
 - Lines: 20581-21000
 
 ```html
+    try{
+      const doc=buildNativeExerciseBankSyncDocument();
+      if(!nativeExerciseSyncAvailable()){
+        nativeSyncLastStatus='Datenformat OK, aber keine Android-Bridge aktiv.';
+        if(status)status.textContent=nativeSyncLastStatus;
+        renderSyncDiagnostics();
+        return {native:false,doc};
+      }
+      const writeOk=!!(await resolveNativeSyncValue(window.KGGNativeSync.write(doc)));
+      let mesh=null,result=null;
+      if(typeof window.KGGNativeSync.listPeers==='function')mesh=await resolveNativeSyncValue(window.KGGNativeSync.listPeers());
+      if(!mesh&&typeof window.KGGNativeSync.read==='function')mesh=await resolveNativeSyncValue(window.KGGNativeSync.read());
+      if(mesh)result=mergeNativeExerciseBankSyncDocument(mesh);
+      const peers=result&&result.mesh?result.mesh.seen:((mesh&&Array.isArray(mesh.peers))?mesh.peers.length:0);
+      nativeSyncLastStatus=(writeOk?'Schreiben OK':'Schreiben fehlgeschlagen')+' · Peers '+peers;
+      if(status)status.textContent='Sync-Test: '+nativeSyncLastStatus+'. '+nativeSyncTransportStatusText();
+      renderSyncPeerList();
+      renderSyncDiagnostics();
+      return {native:true,writeOk,mesh,result};
+    }catch(err){
+      nativeSyncLastStatus='Fehler: '+(err&&err.message?err.message:'Sync-Test fehlgeschlagen');
+      if(status)status.textContent=nativeSyncLastStatus;
+      renderSyncDiagnostics();
+      return null;
+    }
+  }
+  function downloadNativeSyncFile(){
+    const status=$('syncPairStatus');
+    try{
+      const doc=buildNativeExerciseBankSyncDocument();
+      const blob=new Blob([JSON.stringify(doc,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      const stamp=new Date().toISOString().slice(0,19).replace(/[-:T]/g,'');
+      a.href=url;
+      a.download='kgg_sync_'+syncPeerIdShort(doc.roomId||'room')+'_'+stamp+'.json';
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(url),1200);
+      nativeSyncLastStatus='Sync-Datei gespeichert.';
+      if(status)status.textContent=nativeSyncLastStatus;
+      renderSyncDiagnostics();
+      return true;
+    }catch(err){
+      nativeSyncLastStatus='Sync-Datei konnte nicht gespeichert werden.';
       if(status)status.textContent=nativeSyncLastStatus;
       renderSyncDiagnostics();
       return false;
@@ -380,48 +424,4 @@
         orientation:largeSingleRow?'portrait':'landscape',
         grid:gridCols+'x'+gridRows,
         exercisesPerPage:slotsPerPage,
-        cornerMarkers:'black',
-        exerciseLabels,
-        machineLineFormat:'#EX|slot|name|sets|side|loadUnit|metricUnit',
-        tables:['T1','T2','T3','T4','T5','T6'],
-        sets:['S1','S2','S3'],
-        columns:['kg','Wdh','Schmerz 1-10'],
-        renderedInThisPatch:false
-      },
-      tableContract:{
-        days:['T1','T2','T3','T4','T5','T6'],
-        setRows:['S1','S2','S3'],
-        columns:[
-          {key:'kg',label:'kg',type:'number',patientWritable:true},
-          {key:'wdh',label:'Wdh',type:'numberOrTime',patientWritable:true},
-          {key:'pain',label:'Schmerz 1-10',type:'scale',min:1,max:10,patientWritable:true}
-        ]
-      },
-      pages,
-      exerciseCount:exercises.length,
-      pageCount:pages.length,
-      emptySlotCount:pages.reduce((sum,p)=>sum+p.emptySlotCount,0),
-      audience:'pdf-output-not-json-patient-file',
-      jsonPolicy:'JSON bleibt intern; Patient:innen bekommen PDF oder Patienten-App/QR, keine JSON-Datei.',
-      pdfRuntimeFingerprint:PDF_RUNTIME_FINGERPRINT
-    };
-    window.KGGLatestPdfSnapshot=snapshot;
-    return snapshot;
-  }
-  function firstPdfExerciseImageMedia(ex){
-    return ensureExerciseMediaList(ex).find(item=>item&&item.type==='image'&&item.id) || null;
-  }
-  async function createKggPdfThumbnailDataUrl(imageBlob){
-    const img=await loadImageFromBlob(imageBlob);
-    const targetW=150,targetH=110;
-    const canvas=document.createElement('canvas');
-    canvas.width=targetW; canvas.height=targetH;
-    const ctx=canvas.getContext('2d',{alpha:false});
-    ctx.fillStyle='#fff'; ctx.fillRect(0,0,targetW,targetH);
-    const iw=img.naturalWidth||img.width||1,ih=img.naturalHeight||img.height||1;
-    const scale=Math.min(targetW/iw,targetH/ih);
-    const dw=Math.max(1,Math.round(iw*scale));
-    const dh=Math.max(1,Math.round(ih*scale));
-    const dx=Math.round((targetW-dw)/2),dy=Math.round((targetH-dh)/2);
-    ctx.imageSmoothingEnabled=true;
 ```

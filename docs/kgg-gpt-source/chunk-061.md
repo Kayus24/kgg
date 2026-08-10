@@ -4,6 +4,50 @@
 - Lines: 25621-26040
 
 ```html
+        "height",
+        "min-height",
+        "max-height",
+        "overflow",
+        "contain"
+      ]);
+    }
+
+    if(list){
+      list.classList.remove("reorder-active");
+      /*
+        The phone drag code temporarily sets #planList to position:relative.
+        If a resize/orientation interrupts cleanup, remove that inline value so
+        tablet layout uses stylesheet rules again.
+      */
+      removeStyleProps(list, [
+        "position",
+        "overflow",
+        "contain",
+        "transform",
+        "isolation"
+      ]);
+    }
+
+    Array.prototype.forEach.call(document.querySelectorAll("#currentPlanBlock .planSectionBody"), function(section){
+      removeStyleProps(section, [
+        "height",
+        "min-height",
+        "max-height",
+        "overflow",
+        "contain",
+        "transform",
+        "touch-action"
+      ]);
+    });
+  }
+
+  function cleanBodyState(){
+    var b = body();
+    if(!b) return;
+
+    b.classList.remove(
+      "kggPlanCardReordering",
+      "kggPlanCardSwiping",
       "kggPlanSectionFrozen",
       "is-scrolling",
       "phoneTextFocus",
@@ -380,48 +424,4 @@
       return;
     }
     var createPanel=byId("createPanel");
-    var hasPlan=!!(createPanel&&createPanel.classList.contains("planMode"))||!!document.querySelector("#planList .planCard[data-plan-id]");
-    document.body.classList.toggle("kggPhoneHasPlan",hasPlan);
-  }
-  function installObserver(){
-    if(observer||!document.body||!isPhone())return;
-    observer=new MutationObserver(function(){syncPhonePlanState();});
-    observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:["class"]});
-  }
-  function install(){
-    if(!document.body)return;
-    if(!isPhone()){
-      closePhoneUi();
-      return;
-    }
-    ensurePhoneAdminMenu();
-    ensurePhonePhotoMenu();
-    installObserver();
-    syncPhonePlanState();
-  }
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});
-  else install();
-  window.addEventListener("resize",function(){setTimeout(install,80);},{passive:true});
-  window.addEventListener("orientationchange",function(){setTimeout(install,180);},{passive:true});
-  window.KGG_UI_MINI_SERIES={
-    patchId:PATCH_ID,
-    check:function(){
-      return {
-        patchId:PATCH_ID,
-        phone:isPhone(),
-        adminMenu:!!byId("kggPhoneAdminMenu"),
-        photoToggle:!!byId("phonePhotoMenuToggle"),
-        photoMenu:!!byId("kggPhonePhotoMenu"),
-        phoneHasPlan:!!(document.body&&document.body.classList.contains("kggPhoneHasPlan")),
-        bankThumbnails:document.querySelectorAll("[data-bank-thumb-id]").length
-      };
-    }
-  };
-})();
-</script>
-<!-- KGG PATCH END kgg-v041-ui-mini-series -->
-
-<!-- SOURCE FILE: kgg-update/src/patches/v042-phone-dock-anchored-correction.html -->
-
-<!-- KGG PATCH START kgg-v042-phone-dock-anchored-correction -->
 ```

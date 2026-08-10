@@ -4,6 +4,50 @@
 - Lines: 17641-18060
 
 ```html
+    return mediaItemsFromExercises(exercises||state.plan||[]);
+  }
+  function scheduleTemporaryMediaDelete(adapter,media){
+    if(!adapter)return;
+    const delay=Math.max(1,Number(media.ttlSeconds)||MEDIA_UPLOAD_TTL_SECONDS)*1000;
+    if(typeof adapter.scheduleDelete==='function'){
+      try{adapter.scheduleDelete(media,{delayMs:delay});}catch(err){console.warn('Media scheduleDelete fehlgeschlagen:',err);}
+      return;
+    }
+    if(typeof adapter.delete==='function'){
+      setTimeout(()=>{try{adapter.delete(media);}catch(err){console.warn('Media delete fehlgeschlagen:',err);}},delay);
+    }
+  }
+  async function uploadOneMediaItem(adapter,media,options){
+    const ttlSeconds=Number(options&&options.ttlSeconds)||MEDIA_UPLOAD_TTL_SECONDS;
+    const force=!!(options&&options.force);
+    if(media.downloadUrl&&media.status==='ready'&&!force&&(Number(media.ttlSeconds)||0)>=ttlSeconds)return media;
+    const record=await getEncryptedMediaBlob(media.id);
+    if(!record||!record.blob)throw new Error('Verschluesselte Bilddatei fehlt lokal.');
+    const uploadManifest=ensureMediaShape({...media,ttlSeconds,retrySeconds:MEDIA_RETRY_SECONDS});
+    const result=await adapter.upload(record.blob,{manifest:uploadManifest,ttlSeconds});
+    if(!result||!result.downloadUrl)throw new Error('Upload lieferte keinen Download-Link.');
+    const uploadedAt=new Date().toISOString();
+    const expiresAt=result.expiresAt||new Date(Date.now()+ttlSeconds*1000).toISOString();
+    const updated=ensureMediaShape({...media,downloadUrl:result.downloadUrl,deleteUrl:result.deleteUrl||media.deleteUrl||'',deleteToken:result.deleteToken||media.deleteToken||'',storage:result.storage||'temporary-web-encrypted',status:'ready',uploadedAt,expiresAt,ttlSeconds,retrySeconds:MEDIA_RETRY_SECONDS});
+    scheduleTemporaryMediaDelete(adapter,updated);
+    return updated;
+  }
+  function publicMediaBundleItem(media){
+    return {
+      id:media.id,
+      type:'image',
+      mime:media.mime,
+      name:media.name,
+      width:media.width,
+      height:media.height,
+      bytes:media.encryptedSize||0,
+      encrypted:true,
+      status:media.downloadUrl?'ready':'upload-pending',
+      downloadUrl:media.downloadUrl||'',
+      expiresInSeconds:media.ttlSeconds||MEDIA_UPLOAD_TTL_SECONDS,
+      retrySeconds:media.retrySeconds||MEDIA_RETRY_SECONDS,
+      crypto:media.crypto||null
+    };
   }
   async function blobToBase64Url(blob){
     return bytesToBase64Url(await blob.arrayBuffer());
@@ -380,48 +424,4 @@
   function isLocalHtmlTestRuntime(){return location.protocol==='file:'||location.hostname==='localhost'||location.hostname==='127.0.0.1';}
   function isStandalonePwa(){return window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;}
   async function initStoragePersistence(){
-    if(!navigator.storage||!navigator.storage.persist)return;
-    try{await navigator.storage.persist();}catch(err){console.warn('Persistenter Speicher nicht bestätigt:',err);}
-  }
-
-  function kggVersionNumber(value){
-    const match=String(value||'').match(/v(\d+)/i);
-    return match?parseInt(match[1],10):0;
-  }
-  function currentRolloutProfile(){
-    return (window.KGG_ROLLOUT_PROFILE||'colleague').toLowerCase()==='admin'?'admin':'colleague';
-  }
-  function githubUpdateTargetFromManifest(manifest){
-    const profile=currentRolloutProfile();
-    const latestVersion=profile==='admin'?(manifest.latestAdminVersion||manifest.latestVersion):(manifest.latestColleagueVersion||manifest.latestVersion);
-    const latestUrl=profile==='admin'?(manifest.adminUrl||manifest.latestUrl):(manifest.colleagueUrl||manifest.latestUrl);
-    if(!latestVersion||!latestUrl)return null;
-    if(kggVersionNumber(latestVersion)<=kggVersionNumber(VERSION))return null;
-    return {version:latestVersion,url:latestUrl,notes:manifest.releaseNotes||''};
-  }
-  function isNativeAndroidShell(){
-    return !!(window.KGGAndroidApp||window.KGGAndroidSync||window.KGGNativeSync);
-  }
-  function nativeAppUpdateStatus(){
-    try{
-      if(window.KGGNativeAppUpdate&&typeof window.KGGNativeAppUpdate.status==='function')return window.KGGNativeAppUpdate.status()||{};
-      if(window.KGGAndroidApp&&typeof window.KGGAndroidApp.updateStatus==='function')return JSON.parse(window.KGGAndroidApp.updateStatus()||'{}');
-    }catch(err){}
-    return {};
-  }
-  function requestNativeAppUpdateCheck(){
-    try{
-      if(window.KGGNativeAppUpdate&&typeof window.KGGNativeAppUpdate.checkNow==='function')return !!window.KGGNativeAppUpdate.checkNow();
-      if(window.KGGAndroidApp&&typeof window.KGGAndroidApp.checkForAppUpdate==='function')return !!window.KGGAndroidApp.checkForAppUpdate();
-    }catch(err){}
-    return false;
-  }
-  function androidApkUpdateTargetFromManifest(manifest){
-    if(!isNativeAndroidShell())return null;
-    const profile=currentRolloutProfile();
-    const latestVersion=manifest.latestAndroidShellVersion||manifest.latestWebVersion||'';
-    const latestUrl=profile==='admin'
-      ?(manifest.latestAdminAndroidApkUrl||manifest.adminAndroidApkUrl||manifest.latestAndroidApkUrl)
-      :(manifest.latestColleagueAndroidApkUrl||manifest.colleagueAndroidApkUrl||manifest.latestAndroidApkUrl);
-    const latestSha=profile==='admin'
 ```

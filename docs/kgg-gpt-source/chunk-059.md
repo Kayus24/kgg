@@ -4,6 +4,50 @@
 - Lines: 24781-25200
 
 ```html
+    document.addEventListener('DOMContentLoaded',cleanPhoneTabletState,{once:true});
+  }else{
+    cleanPhoneTabletState();
+  }
+  window.addEventListener('resize',()=>setTimeout(cleanPhoneTabletState,30),{passive:true});
+  window.addEventListener('orientationchange',()=>setTimeout(cleanPhoneTabletState,140),{passive:true});
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize',()=>setTimeout(cleanPhoneTabletState,30),{passive:true});
+  }
+})();
+</script>
+<script id="kgg-github-patch-v401-phone-plan-ui-isolation">
+/* v401 GitHub Update 003: Phone-only Plan-Interaktion einfrieren.
+   Hält die Außen-UI stabil, während Plan-Karten angetippt/verschoben werden.
+   Keine Änderung an Plan-State, Parser, QR, PDF, Kamera oder Tablet-Layout. */
+(function(){
+  const PHONE_QUERY='(max-width:759px)';
+  let releaseTimer=0;
+  let bodyObserver=null;
+
+  function isPhone(){
+    return !!(window.matchMedia && window.matchMedia(PHONE_QUERY).matches);
+  }
+
+  function currentPlanBlock(){
+    return document.getElementById('currentPlanBlock');
+  }
+
+  function isPlanCardTarget(target){
+    return !!(target && target.closest && target.closest('#currentPlanBlock .planCard'));
+  }
+
+  function freezePlanSection(ms){
+    if(!isPhone()) return;
+    const block=currentPlanBlock();
+    const body=document.body;
+    if(!block || !body) return;
+
+    const rect=block.getBoundingClientRect();
+    if(rect && rect.height > 0){
+      block.style.setProperty('--kgg-current-plan-freeze-h', Math.ceil(rect.height) + 'px');
+    }
+
+    body.classList.add('kggPlanSectionFrozen');
     clearTimeout(releaseTimer);
     releaseTimer=setTimeout(releasePlanSection, Number.isFinite(ms) ? ms : 520);
   }
@@ -380,48 +424,4 @@
     DOMTokenList.prototype.add=function(){
       var args=Array.prototype.slice.call(arguments);
 
-      try{
-        if(isPhone() && isBodyClassList(this) && args.indexOf('kggPlanSectionFrozen') !== -1){
-          args=args.filter(function(token){ return token !== 'kggPlanSectionFrozen'; });
-          setTimeout(cleanFreeze,0);
-          if(!args.length) return undefined;
-        }
-      }catch(err){}
-
-      return originalClassListAdd.apply(this,args);
-    };
-  }
-
-  function disablePhoneScrollToggleForButtons(){
-    /*
-      These names are global in this single-file app. Assigning them here leaves
-      every other feature intact but prevents phone drawer/buttons from being
-      swallowed after a touch/scroll gesture.
-    */
-    try{
-      if(typeof guardPhoneScrollToggle === 'function'){
-        guardPhoneScrollToggle=function(){ return false; };
-      }
-    }catch(err){}
-
-    try{
-      if(typeof window.guardPhoneScrollToggle === 'function'){
-        window.guardPhoneScrollToggle=function(){ return false; };
-      }
-    }catch(err){}
-  }
-
-  function installListeners(){
-    if(installed || !document.body) return;
-    installed=true;
-
-    installClassListFreezeBlock();
-    disablePhoneScrollToggleForButtons();
-
-    /*
-      Capture before document-level phone freeze side effects become visible.
-      We do not stop propagation, so original swipe/delete/reorder handlers still run.
-    */
-    window.addEventListener('pointerdown',function(ev){
-      if(!isPhone()) return;
 ```

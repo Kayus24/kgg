@@ -4,6 +4,50 @@
 - Lines: 21841-22260
 
 ```html
+  }
+  function closeLongMediaConfirmModal(){$('longMediaConfirmModal').classList.remove('open');}
+  function confirmLongMediaShare(){closeLongMediaConfirmModal(); enableLongMediaShare();}
+  function setupPatientLinkCopyLongPress(){
+    const btn=$('copyPatientLink');
+    if(!btn||btn.dataset.longPressBound)return;
+    btn.dataset.longPressBound='1';
+    let timer=null;
+    let holding=false;
+    const reset=()=>{if(timer){clearTimeout(timer);timer=null;} if(holding){holding=false;setPatientCopyButtonLabel();}};
+    btn.addEventListener('pointerdown',()=>{
+      if(!lastPatientSharePlanSnapshot)return;
+      holding=true;
+      btn.textContent='5 Sek. halten für 24h';
+      timer=setTimeout(()=>{
+        timer=null;
+        holding=false;
+        copyPatientLinkSuppressClickUntil=Date.now()+700;
+        openLongMediaConfirmModal();
+      },MEDIA_LONG_PRESS_MS);
+    });
+    btn.addEventListener('pointerup',reset);
+    btn.addEventListener('pointerleave',reset);
+    btn.addEventListener('pointercancel',reset);
+    btn.onclick=copyPatientLink;
+  }
+  async function renderPatientShareOutput(options){
+    const output=$('patientOutputBox'), choices=$('finishChoices'), close=$('closeShare'), finishNotice=$('finishNotice');
+    const planOverride=options&&options.plan;
+    const ttlSeconds=Number(options&&options.ttlSeconds)||currentMediaShareTtlSeconds();
+    if(finishNotice)finishNotice.textContent='Ausgabe wird vorbereitet ...';
+    const mediaPrep=await prepareMediaUploadsForPatientShare({plan:planOverride,ttlSeconds,force:!!(options&&options.force)});
+    if(!mediaPrep.ok){
+      if(output)output.classList.add('hidden');
+      if(choices)choices.classList.remove('hidden');
+      if(close)close.classList.add('hidden');
+      if(finishNotice)finishNotice.textContent=mediaPrep.message||'Medien fehlgeschlagen. Plan bleibt offen.';
+      return '';
+    }
+    const share=buildPatientShareFromCurrentPlan(planOverride,{ttlSeconds});
+    lastPatientSharePlanSnapshot=cloneSharePlan(share.plan);
+    if(output)output.classList.remove('hidden');
+    if(choices)choices.classList.add('hidden');
+    if(close)close.classList.remove('hidden');
     if(finishNotice)finishNotice.textContent='';
     const link=$('patientAppLink'), notice=$('patientShareNotice'), box=$('patientQrBox'), status=$('patientQrStatus'), copyBtn=$('copyPatientLink');
     $('shareText').value='INTERNE DEBUG-TESTAUSGABE – nicht an Patient:innen weitergeben\n\nLokaler Testlink:\n'+share.debugUrl+'\n\nPayload JSON:\n'+JSON.stringify(share.payload,null,2);
@@ -380,48 +424,4 @@
     canvas.width=flip?src.height:src.width;
     canvas.height=flip?src.width:src.height;
     const ctx=canvas.getContext('2d',{willReadFrequently:true});
-    ctx.fillStyle='#fff';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.save();
-    if(rot===90){ctx.translate(canvas.width,0);ctx.rotate(Math.PI/2);}
-    else if(rot===180){ctx.translate(canvas.width,canvas.height);ctx.rotate(Math.PI);}
-    else if(rot===270){ctx.translate(0,canvas.height);ctx.rotate(-Math.PI/2);}
-    ctx.drawImage(src,0,0);
-    ctx.restore();
-    return canvas;
-  }
-  function scanScaleCanvas(src,minSide,maxSide){
-    const shortest=Math.max(1,Math.min(src.width,src.height));
-    const longest=Math.max(1,Math.max(src.width,src.height));
-    const minTarget=Math.max(120,Number(minSide)||0);
-    const maxTarget=Math.max(minTarget,Number(maxSide)||2600);
-    let scale=1;
-    if(minTarget&&shortest<minTarget)scale=minTarget/shortest;
-    if(longest*scale>maxTarget)scale=maxTarget/longest;
-    if(Math.abs(scale-1)<0.03)return src;
-    const canvas=document.createElement('canvas');
-    canvas.width=Math.max(1,Math.round(src.width*scale));
-    canvas.height=Math.max(1,Math.round(src.height*scale));
-    const ctx=canvas.getContext('2d',{willReadFrequently:true});
-    ctx.fillStyle='#fff';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.imageSmoothingEnabled=scale<1;
-    ctx.imageSmoothingQuality='high';
-    ctx.drawImage(src,0,0,canvas.width,canvas.height);
-    return canvas;
-  }
-  function scanFilteredCanvas(src,mode){
-    if(mode==='normal')return src;
-    const canvas=scanCloneCanvas(src);
-    const ctx=canvas.getContext('2d',{willReadFrequently:true});
-    if(mode==='contrast'){
-      ctx.save();
-      ctx.filter='contrast(2.05) brightness(1.12) saturate(0)';
-      ctx.drawImage(src,0,0);
-      ctx.restore();
-      return canvas;
-    }
-    if(mode==='softContrast'){
-      ctx.save();
-      ctx.filter='contrast(1.45) brightness(1.05) saturate(0)';
 ```

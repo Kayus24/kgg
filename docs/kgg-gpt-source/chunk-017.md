@@ -4,6 +4,50 @@
 - Lines: 7141-7560
 
 ```html
+    GenericGFPoly.prototype.getCoefficient = function (degree) {
+        return this.coefficients[this.coefficients.length - 1 - degree];
+    };
+    GenericGFPoly.prototype.addOrSubtract = function (other) {
+        var _a;
+        if (this.isZero()) {
+            return other;
+        }
+        if (other.isZero()) {
+            return this;
+        }
+        var smallerCoefficients = this.coefficients;
+        var largerCoefficients = other.coefficients;
+        if (smallerCoefficients.length > largerCoefficients.length) {
+            _a = [largerCoefficients, smallerCoefficients], smallerCoefficients = _a[0], largerCoefficients = _a[1];
+        }
+        var sumDiff = new Uint8ClampedArray(largerCoefficients.length);
+        var lengthDiff = largerCoefficients.length - smallerCoefficients.length;
+        for (var i = 0; i < lengthDiff; i++) {
+            sumDiff[i] = largerCoefficients[i];
+        }
+        for (var i = lengthDiff; i < largerCoefficients.length; i++) {
+            sumDiff[i] = GenericGF_1.addOrSubtractGF(smallerCoefficients[i - lengthDiff], largerCoefficients[i]);
+        }
+        return new GenericGFPoly(this.field, sumDiff);
+    };
+    GenericGFPoly.prototype.multiply = function (scalar) {
+        if (scalar === 0) {
+            return this.field.zero;
+        }
+        if (scalar === 1) {
+            return this;
+        }
+        var size = this.coefficients.length;
+        var product = new Uint8ClampedArray(size);
+        for (var i = 0; i < size; i++) {
+            product[i] = this.field.multiply(this.coefficients[i], scalar);
+        }
+        return new GenericGFPoly(this.field, product);
+    };
+    GenericGFPoly.prototype.multiplyPoly = function (other) {
+        if (this.isZero() || other.isZero()) {
+            return this.field.zero;
+        }
         var aCoefficients = this.coefficients;
         var aLength = aCoefficients.length;
         var bCoefficients = other.coefficients;
@@ -380,48 +424,4 @@ function readVersion(matrix) {
             topRightVersionBits = pushBit(matrix.get(x, y), topRightVersionBits);
         }
     }
-    var bottomLeftVersionBits = 0;
-    for (var x = 5; x >= 0; x--) {
-        for (var y = dimension - 9; y >= dimension - 11; y--) {
-            bottomLeftVersionBits = pushBit(matrix.get(x, y), bottomLeftVersionBits);
-        }
-    }
-    var bestDifference = Infinity;
-    var bestVersion;
-    for (var _i = 0, VERSIONS_1 = version_1.VERSIONS; _i < VERSIONS_1.length; _i++) {
-        var version = VERSIONS_1[_i];
-        if (version.infoBits === topRightVersionBits || version.infoBits === bottomLeftVersionBits) {
-            return version;
-        }
-        var difference = numBitsDiffering(topRightVersionBits, version.infoBits);
-        if (difference < bestDifference) {
-            bestVersion = version;
-            bestDifference = difference;
-        }
-        difference = numBitsDiffering(bottomLeftVersionBits, version.infoBits);
-        if (difference < bestDifference) {
-            bestVersion = version;
-            bestDifference = difference;
-        }
-    }
-    // We can tolerate up to 3 bits of error since no two version info codewords will
-    // differ in less than 8 bits.
-    if (bestDifference <= 3) {
-        return bestVersion;
-    }
-}
-function readFormatInformation(matrix) {
-    var topLeftFormatInfoBits = 0;
-    for (var x = 0; x <= 8; x++) {
-        if (x !== 6) { // Skip timing pattern bit
-            topLeftFormatInfoBits = pushBit(matrix.get(x, 8), topLeftFormatInfoBits);
-        }
-    }
-    for (var y = 7; y >= 0; y--) {
-        if (y !== 6) { // Skip timing pattern bit
-            topLeftFormatInfoBits = pushBit(matrix.get(8, y), topLeftFormatInfoBits);
-        }
-    }
-    var dimension = matrix.height;
-    var topRightBottomRightFormatInfoBits = 0;
 ```
