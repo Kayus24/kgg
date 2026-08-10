@@ -102,7 +102,7 @@ jobs:
           set -euo pipefail
           cd base
           if git grep -nE '(sk-proj-|gh[pousr]_[A-Za-z0-9_]{20,}|AIza[0-9A-Za-z_-]{25,})' -- \
-            release-pipeline kgg-update therapist-app/android_update_manifest.json therapist-app/releases/web 2>/dev/null; then
+            release-pipeline kgg-update therapist-app/android_update_manifest.json therapist-app/kgg_update_manifest.json therapist-app/releases/web 2>/dev/null; then
             echo 'Potential secret found in release-controlled files.' >&2
             exit 1
           fi
@@ -116,7 +116,7 @@ jobs:
           git switch -c "$branch"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A release-inbox therapist-app/android_update_manifest.json therapist-app/releases/web
+          git add -A release-inbox therapist-app/android_update_manifest.json therapist-app/kgg_update_manifest.json therapist-app/releases/web
           git commit -m "mobile inbox admin beta ${{ steps.mobile.outputs.release_id }}"
           git push -u origin "$branch"
           body="$(mktemp)"

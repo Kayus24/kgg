@@ -1,10 +1,13 @@
-import importlib.util
+import copy
 import hashlib
+import importlib.util
 import json
 import re
 import sys
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 HERE = Path(__file__).resolve().parent
@@ -21,6 +24,195 @@ MOBILE_SPEC.loader.exec_module(mobile_inbox)
 
 
 class ReleasePipelineTests(unittest.TestCase):
+    def test_legacy_manifest_projection_matches_checked_in_file(self):
+        canonical = pipeline.load_json(pipeline.MANIFEST)
+        projected = pipeline.project_legacy_manifest(canonical)
+        self.assertEqual(projected, pipeline.load_json(pipeline.LEGACY_MANIFEST))
+        self.assertEqual(pipeline.render_json_bytes(projected), pipeline.LEGACY_MANIFEST.read_bytes())
+
+    def test_legacy_projection_uses_channels_not_flat_web_aliases(self):
+        canonical = pipeline.load_json(pipeline.MANIFEST)
+        canonical.update({
+            "latestWebVersion": "r0001",
+            "adminHtmlUrl": "http://stale.invalid/admin.html",
+            "adminSha256": "stale",
+            "colleagueHtmlUrl": "http://stale.invalid/colleague.html",
+            "colleagueSha256": "stale",
+            "sha256": "stale",
+            "androidApkUrl": "http://stale.invalid/app.apk",
+            "androidApkSha256": "stale",
+            "latestAndroidApkUrl": "http://stale.invalid/app.apk",
+            "latestAndroidApkSha256": "stale",
+            "latestColleagueAndroidApkUrl": "http://stale.invalid/colleague.apk",
+            "latestColleagueAndroidApkSha256": "stale",
+            "latestAdminAndroidApkUrl": "http://stale.invalid/admin.apk",
+            "latestAdminAndroidApkSha256": "stale",
+        })
+        projected = pipeline.project_legacy_manifest(canonical)
+        self.assertEqual(canonical["channels"]["admin"]["releaseId"], projected["latestAdminReleaseId"])
+        self.assertEqual(canonical["channels"]["admin"]["url"], projected["adminUrl"])
+        self.assertEqual(canonical["channels"]["colleague"]["releaseId"], projected["latestVersion"])
+        self.assertEqual(canonical["channels"]["colleague"]["url"], projected["latestUrl"])
+        self.assertEqual(canonical["colleagueAndroidApkUrl"], projected["latestAndroidApkUrl"])
+        self.assertEqual(canonical["colleagueAndroidApkSha256"], projected["latestColleagueAndroidApkSha256"])
+        self.assertEqual(canonical["adminAndroidApkUrl"], projected["latestAdminAndroidApkUrl"])
+        self.assertEqual(canonical["adminAndroidApkSha256"], projected["latestAdminAndroidApkSha256"])
+
+    def test_legacy_projection_rejects_invalid_contract_fields(self):
+        cases = (
+            (("schema",), 1),
+            (("channels", "admin", "releaseId"), "admin-424"),
+            (("channels", "admin", "releaseId"), "r424"),
+            (("channels", "admin", "releaseId"), "v401"),
+            (("channels", "admin", "versionName"), "version-60"),
+            (("channels", "colleague", "sha256"), "ABC"),
+            (("channels", "colleague", "url"), "http://example.invalid/r0397/colleague.html"),
+            (("latestAndroidShellVersion",), "401"),
+            (("colleagueAndroidApkUrl",), "http://example.invalid/app.apk"),
+            (("adminAndroidApkSha256",), "0" * 63),
+        )
+        baseline = pipeline.load_json(pipeline.MANIFEST)
+        for path, value in cases:
+            with self.subTest(path=path):
+                canonical = copy.deepcopy(baseline)
+                target = canonical
+                for key in path[:-1]:
+                    target = target[key]
+                target[path[-1]] = value
+                with self.assertRaises(pipeline.ReleaseError):
+                    pipeline.project_legacy_manifest(canonical)
+
+    def test_v389_sentinel_uses_explicit_historical_urls(self):
+        canonical = pipeline.load_json(pipeline.MANIFEST)
+        for profile, filename in (
+            ("admin", "KGG_APP_ADMIN_v389_flow_stability.html"),
+            ("colleague", "KGG_APP_KOLLEGEN_v389_flow_stability.html"),
+        ):
+            canonical["channels"][profile].update({
+                "releaseId": "v389",
+                "versionName": filename.removesuffix(".html"),
+                "url": f"https://kayus24.github.io/kgg/therapist-app/releases/v389/web/{filename}",
+            })
+        projected = pipeline.project_legacy_manifest(canonical)
+        self.assertEqual("v389", projected["latestAdminReleaseId"])
+        self.assertEqual("v389", projected["latestColleagueReleaseId"])
+        self.assertIn("/v389/web/KGG_APP_ADMIN_v389_flow_stability.html", projected["adminUrl"])
+        self.assertIn("/v389/web/KGG_APP_KOLLEGEN_v389_flow_stability.html", projected["colleagueUrl"])
+        invalid_name = copy.deepcopy(canonical)
+        invalid_name["channels"]["admin"]["versionName"] = "1.0.389-release-pipeline-baseline"
+        with self.assertRaises(pipeline.ReleaseError):
+            pipeline.project_legacy_manifest(invalid_name)
+        invalid_url = copy.deepcopy(canonical)
+        invalid_url["channels"]["colleague"]["url"] = (
+            "https://kayus24.github.io/kgg/therapist-app/releases/v389/colleague.html"
+        )
+        with self.assertRaises(pipeline.ReleaseError):
+            pipeline.project_legacy_manifest(invalid_url)
+
+    def test_v389_rollback_remains_publishable_for_both_channels(self):
+        baseline = pipeline.MANIFEST.read_bytes()
+        for profile in ("admin", "colleague"):
+            with self.subTest(profile=profile), tempfile.TemporaryDirectory() as temporary_directory:
+                temporary = Path(temporary_directory)
+                canonical_path = temporary / "android_update_manifest.json"
+                legacy_path = temporary / "kgg_update_manifest.json"
+                canonical_path.write_bytes(baseline)
+                with mock.patch.object(pipeline, "ROOT", temporary), mock.patch.object(
+                    pipeline, "MANIFEST", canonical_path
+                ), mock.patch.object(pipeline, "LEGACY_MANIFEST", legacy_path):
+                    target = pipeline.rollback(profile, "v389")
+                    self.assertEqual("v389", target["releaseId"])
+                    expected_name = (
+                        "KGG_APP_ADMIN_v389_flow_stability"
+                        if profile == "admin"
+                        else "KGG_APP_KOLLEGEN_v389_flow_stability"
+                    )
+                    self.assertEqual(expected_name, target["versionName"])
+                    self.assertEqual("current", pipeline.sync_legacy_manifest(check=True)["status"])
+
+    def test_legacy_projection_is_deterministic_without_timestamp(self):
+        canonical = pipeline.load_json(pipeline.MANIFEST)
+        original = copy.deepcopy(canonical)
+        first = pipeline.render_json_bytes(pipeline.project_legacy_manifest(canonical))
+        second = pipeline.render_json_bytes(pipeline.project_legacy_manifest(canonical))
+        self.assertEqual(original, canonical)
+        self.assertEqual(first, second)
+        self.assertTrue(first.endswith(b"\n"))
+        self.assertNotIn(b"\r\n", first)
+        self.assertNotIn(b"releasedAt", first)
+        self.assertIn(b'\n  "kind":', first)
+
+    def test_manifest_writer_and_sync_check_keep_pair_byte_exact(self):
+        canonical = pipeline.load_json(pipeline.MANIFEST)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            temporary = Path(temporary_directory)
+            canonical_path = temporary / "android_update_manifest.json"
+            legacy_path = temporary / "kgg_update_manifest.json"
+            with mock.patch.object(pipeline, "ROOT", temporary), mock.patch.object(
+                pipeline, "MANIFEST", canonical_path
+            ), mock.patch.object(pipeline, "LEGACY_MANIFEST", legacy_path):
+                pipeline.write_update_manifests(canonical)
+                self.assertEqual(pipeline.render_json_bytes(canonical), canonical_path.read_bytes())
+                expected_legacy = pipeline.render_json_bytes(pipeline.project_legacy_manifest(canonical))
+                self.assertEqual(expected_legacy, legacy_path.read_bytes())
+                self.assertEqual("current", pipeline.sync_legacy_manifest(check=True)["status"])
+                legacy_path.write_text("{}\n", encoding="utf-8")
+                with self.assertRaises(pipeline.ReleaseError):
+                    pipeline.sync_legacy_manifest(check=True)
+                self.assertEqual("written", pipeline.sync_legacy_manifest()["status"])
+                self.assertEqual(expected_legacy, legacy_path.read_bytes())
+
+    def test_manifest_pair_restores_canonical_when_legacy_write_fails(self):
+        canonical = pipeline.load_json(pipeline.MANIFEST)
+        canonical["notes"] = "Transactional writer test"
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            temporary = Path(temporary_directory)
+            canonical_path = temporary / "android_update_manifest.json"
+            legacy_path = temporary / "kgg_update_manifest.json"
+            original_canonical = b'{"original":"canonical"}\n'
+            original_legacy = b'{"original":"legacy"}\n'
+            canonical_path.write_bytes(original_canonical)
+            legacy_path.write_bytes(original_legacy)
+            real_atomic_write = pipeline.atomic_write_bytes
+            write_count = 0
+
+            def fail_second_write(path, value):
+                nonlocal write_count
+                write_count += 1
+                if write_count == 2:
+                    real_atomic_write(path, value)
+                    raise pipeline.ReleaseError("synthetic legacy write failure")
+                real_atomic_write(path, value)
+
+            with mock.patch.object(pipeline, "MANIFEST", canonical_path), mock.patch.object(
+                pipeline, "LEGACY_MANIFEST", legacy_path
+            ), mock.patch.object(pipeline, "atomic_write_bytes", side_effect=fail_second_write):
+                with self.assertRaises(pipeline.ReleaseError):
+                    pipeline.write_update_manifests(canonical)
+
+            self.assertEqual(4, write_count)
+            self.assertEqual(original_canonical, canonical_path.read_bytes())
+            self.assertEqual(original_legacy, legacy_path.read_bytes())
+
+    def test_manifest_writing_workflows_stage_both_projections(self):
+        for relative in (
+            ".github/workflows/mobile-inbox-release.yml",
+            ".github/workflows/promote-latest-admin-beta.yml",
+            ".github/workflows/release-control.yml",
+            ".github/workflows/release-pr.yml",
+        ):
+            workflow = pipeline.read_text(pipeline.ROOT / relative)
+            self.assertIn("therapist-app/android_update_manifest.json", workflow, relative)
+            self.assertIn("therapist-app/kgg_update_manifest.json", workflow, relative)
+            self.assertRegex(
+                workflow,
+                r"git add[^\n]*therapist-app/android_update_manifest\.json[^\n]*therapist-app/kgg_update_manifest\.json",
+                relative,
+            )
+
+        release_pr = pipeline.read_text(pipeline.ROOT / ".github/workflows/release-pr.yml")
+        self.assertIn("(android_update_manifest|kgg_update_manifest)", release_pr)
+
     def test_legacy_direct_main_workflows_are_retired(self):
         for relative in (
             ".github/workflows/apply-update-inbox.yml",

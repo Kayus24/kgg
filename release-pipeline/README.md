@@ -9,6 +9,27 @@ Eine Release-Logik fuer drei gleichberechtigte Bedienwege:
 
 Alle Schreibaktionen erzeugen einen Branch und Pull Request. `main` wird nicht direkt beschrieben.
 
+## Kanonisches und kompatibles Update-Manifest
+
+`therapist-app/android_update_manifest.json` ist die einzige Quelle fuer Web-Kanaele,
+Android-Shell und APK-Identitaeten. `therapist-app/kgg_update_manifest.json` bleibt
+fuer bestehende Clients erhalten und wird deterministisch daraus projiziert. Die
+Release-Befehle `prepare`, `promote` und `rollback` schreiben beide Dateien ueber
+denselben validierenden Writer; flache Web-Aliase im kanonischen Manifest sind
+keine Projektionsquelle.
+
+Die Projektion lokal aktualisieren oder bytegenau pruefen:
+
+```powershell
+python release-pipeline/release_pipeline.py sync-legacy
+python release-pipeline/release_pipeline.py sync-legacy --check
+```
+
+Der Check blockiert bei ungueltigem Schema, Release-ID, SemVer, Shell-Version,
+SHA-256 oder nicht-HTTPS-basierten HTML-/APK-URLs. Die Ausgabe ist UTF-8 mit
+Zwei-Leerzeichen-Einrueckung und LF, ohne generierten Zeitstempel. Der exakt
+definierte historische `v389`-Sentinel behaelt Namen und URLs unveraendert.
+
 ## Handy-Standardweg ohne Codex
 
 Die Admin-App speichert die aktuelle HTML lokal. Danach wird die Datei auf dem Branch `mobile-inbox` in den Ordner `mobile-inbox/` hochgeladen. Die Action `KGG Mobile Inbox Release` validiert die HTML gegen die aktuelle KGG-Basis, erzeugt automatisch `releaseId` und Release-Notiz, baut Admin-/Kolleg:innen-Artefakte und merged den geprueften PR.
