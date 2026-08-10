@@ -32,13 +32,10 @@ SECRET_PATTERN = re.compile(
     + ")"
 )
 VERSION_PATTERNS = (
-    re.compile(r"\bconst\s+VERSION\s*=\s*['\"]KGG_GITHUB_UPDATE_v([0-9]{3,8})_[a-z0-9_]+['\"]", re.I),
+    pipeline.SOURCE_VERSION_PATTERN,
     re.compile(r"<title>\s*KGG\s+Update\s+v0*([0-9]+)\b", re.I),
 )
-SOURCE_TRUTH_PATTERN = re.compile(
-    r"^[ \t]*<script\b[^>]*\bid=['\"]kgg-source-truth['\"][^>]*>\s*(.*?)\s*</script>",
-    re.I | re.M | re.S,
-)
+SOURCE_TRUTH_PATTERN = pipeline.SOURCE_TRUTH_PATTERN
 
 
 def html_version_code(html: str) -> int | None:
@@ -50,8 +47,7 @@ def html_version_code(html: str) -> int | None:
 
 
 def html_source_marker_code(html: str) -> int | None:
-    match = VERSION_PATTERNS[0].search(html)
-    return int(match.group(1)) if match else None
+    return pipeline.html_source_marker_code(html)
 
 
 def html_title(html: str) -> str:
@@ -63,35 +59,7 @@ def html_title(html: str) -> str:
 
 
 def html_source_identity(html: str) -> tuple[int, str]:
-    matches = SOURCE_TRUTH_PATTERN.findall(html)
-    if len(matches) != 1:
-        pipeline.fail("Mobile Inbox candidate requires exactly one kgg-source-truth block")
-    try:
-        source_truth = json.loads(matches[0])
-    except json.JSONDecodeError as exc:
-        pipeline.fail(f"Mobile Inbox candidate has invalid kgg-source-truth JSON: {exc}")
-    current = source_truth.get("currentVersion") if isinstance(source_truth, dict) else None
-    if not isinstance(current, dict):
-        pipeline.fail("Mobile Inbox candidate is missing kgg-source-truth.currentVersion")
-    code = current.get("versionCode")
-    version_name = current.get("versionName")
-    if isinstance(code, bool) or not isinstance(code, int) or code <= 0:
-        pipeline.fail("Mobile Inbox candidate source versionCode must be a positive integer")
-    if not isinstance(version_name, str) or version_name != version_name.strip():
-        pipeline.fail("Mobile Inbox candidate source versionName must be a non-empty string")
-    pipeline.validate_semver(version_name, "Mobile Inbox candidate source versionName")
-    parsed_version = pipeline.SEMVER_PATTERN.fullmatch(version_name)
-    if (
-        parsed_version is None
-        or int(parsed_version.group("major")) != 1
-        or int(parsed_version.group("minor")) != 0
-        or int(parsed_version.group("patch")) != code
-    ):
-        pipeline.fail("Mobile Inbox candidate source versionName must use 1.0.<versionCode>")
-    marker_code = html_source_marker_code(html)
-    if marker_code != code:
-        pipeline.fail("Mobile Inbox candidate VERSION marker and kgg-source-truth versionCode differ")
-    return code, version_name
+    return pipeline.html_source_identity(html, "Mobile Inbox candidate")
 
 
 def next_release_id(root: Path) -> str:

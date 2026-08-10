@@ -44,6 +44,14 @@ SEMVER_PATTERN = re.compile(
 )
 SHA256_PATTERN = re.compile(r"[0-9a-f]{64}")
 ANDROID_SHELL_PATTERN = re.compile(r"v[0-9]{3,8}")
+SOURCE_VERSION_PATTERN = re.compile(
+    r"\bconst\s+VERSION\s*=\s*['\"]KGG_GITHUB_UPDATE_v([0-9]{3,8})_[a-z0-9_]+['\"]",
+    re.I,
+)
+SOURCE_TRUTH_PATTERN = re.compile(
+    r"^[ \t]*<script\b[^>]*\bid=['\"]kgg-source-truth['\"][^>]*>\s*(.*?)\s*</script>",
+    re.I | re.M | re.S,
+)
 
 CORE_MARKERS = (
     "KGGDataStore",
@@ -164,6 +172,51 @@ def validate_semver(value: str, label: str) -> str:
             if identifier.isdigit() and len(identifier) > 1 and identifier.startswith("0"):
                 fail(f"{label} has a numeric prerelease identifier with a leading zero")
     return value
+
+
+def html_source_marker_code(html: str) -> int | None:
+    match = SOURCE_VERSION_PATTERN.search(html)
+    return int(match.group(1)) if match else None
+
+
+def html_source_identity(html: str, label: str) -> tuple[int, str]:
+    matches = SOURCE_TRUTH_PATTERN.findall(html)
+    if len(matches) != 1:
+        fail(f"{label} requires exactly one kgg-source-truth block")
+    try:
+        source_truth = json.loads(matches[0])
+    except json.JSONDecodeError as exc:
+        fail(f"{label} has invalid kgg-source-truth JSON: {exc}")
+    current = source_truth.get("currentVersion") if isinstance(source_truth, dict) else None
+    if not isinstance(current, dict):
+        fail(f"{label} is missing kgg-source-truth.currentVersion")
+    code = current.get("versionCode")
+    version_name = current.get("versionName")
+    if isinstance(code, bool) or not isinstance(code, int) or code <= 0:
+        fail(f"{label} source versionCode must be a positive integer")
+    if not isinstance(version_name, str) or version_name != version_name.strip():
+        fail(f"{label} source versionName must be a non-empty string")
+    validate_semver(version_name, f"{label} source versionName")
+    parsed_version = SEMVER_PATTERN.fullmatch(version_name)
+    if (
+        parsed_version is None
+        or int(parsed_version.group("major")) != 1
+        or int(parsed_version.group("minor")) != 0
+        or int(parsed_version.group("patch")) != code
+    ):
+        fail(f"{label} source versionName must use 1.0.<versionCode>")
+    marker_code = html_source_marker_code(html)
+    if marker_code != code:
+        fail(f"{label} VERSION marker and kgg-source-truth versionCode differ")
+    return code, version_name
+
+
+def validate_release_version_identity(html: str, version_name: str) -> tuple[int, str]:
+    validate_semver(version_name, "release.json.versionName")
+    code, source_version_name = html_source_identity(html, "Admin candidate")
+    if version_name != source_version_name:
+        fail("release.json.versionName must exactly match the Admin candidate source versionName")
+    return code, source_version_name
 
 
 def validate_sha256(value: str, label: str) -> str:
@@ -700,6 +753,7 @@ def prepare(candidate_path: Path, release_json_path: Path) -> dict:
 
     admin_html = read_text(candidate_path)
     validate_html(admin_html, "Admin candidate")
+    validate_release_version_identity(admin_html, version_name)
     colleague_html = derive_colleague(admin_html)
     validate_html(colleague_html, "Colleague build")
     if sha256_text(admin_html) == sha256_text(colleague_html):

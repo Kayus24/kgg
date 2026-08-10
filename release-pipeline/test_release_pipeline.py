@@ -299,6 +299,18 @@ class ReleasePipelineTests(unittest.TestCase):
         normalized_digest = hashlib.sha256(html_bytes.replace(b"\r\n", b"\n")).hexdigest()
         self.assertIn(version["sha256"], {raw_digest, normalized_digest})
 
+    def test_release_version_must_match_candidate_source_identity(self):
+        html = pipeline.read_text(pipeline.BASE_ADMIN)
+        version = pipeline.load_json(pipeline.ROOT / "kgg-update" / "version.json")
+        self.assertEqual(
+            (version["versionCode"], version["versionName"]),
+            pipeline.validate_release_version_identity(html, version["versionName"]),
+        )
+        with self.assertRaisesRegex(pipeline.ReleaseError, "exactly match"):
+            pipeline.validate_release_version_identity(html, "1.0.999-wrong-but-valid")
+        with self.assertRaisesRegex(pipeline.ReleaseError, "semantic version"):
+            pipeline.validate_release_version_identity(html, "version-65")
+
     def test_release_center_is_explicit_admin_only_block(self):
         admin = pipeline.read_text(pipeline.BASE_ADMIN)
         self.assertEqual(1, admin.count(pipeline.ADMIN_START))
