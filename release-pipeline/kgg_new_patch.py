@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import build_therapist_source as builder
+import kgg_changelog_archive as changelog_archive
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -99,6 +100,30 @@ def render_patch_module(patch_id: str, title: str, patch_content: str | None = N
     ).encode("utf-8")
 
 
+def changelog_json_bytes(changelog: dict) -> int:
+    return len(json.dumps(changelog, ensure_ascii=False, indent=2).encode("utf-8"))
+
+
+def assert_changelog_limits(changelog: dict, policy: dict, allow_overflow: bool) -> int:
+    entries = changelog.get("entries")
+    if not isinstance(entries, list):
+        raise ScaffoldError("kgg-changelog.entries must be a list")
+    maximum_entries = int(policy.get("maxEmbeddedEntries", 30))
+    maximum_bytes = int(policy.get("maxEmbeddedBytes", 55000))
+    size_bytes = changelog_json_bytes(changelog)
+    if not allow_overflow and len(entries) > maximum_entries:
+        raise ScaffoldError(
+            f"planned embedded changelog has {len(entries)} entries (limit {maximum_entries}); "
+            "archive/compaction approval is required"
+        )
+    if not allow_overflow and size_bytes > maximum_bytes:
+        raise ScaffoldError(
+            f"planned embedded changelog has {size_bytes} UTF-8 bytes (limit {maximum_bytes}); "
+            "archive/compaction approval is required"
+        )
+    return size_bytes
+
+
 def prepare(args: argparse.Namespace) -> tuple[dict[Path, bytes], dict]:
     slug = args.slug.strip().lower()
     if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", slug):
@@ -161,12 +186,10 @@ def prepare(args: argparse.Namespace) -> tuple[dict[Path, bytes], dict]:
     entries = changelog.get("entries")
     if not isinstance(entries, list):
         raise ScaffoldError("kgg-changelog.entries must be a list")
-    maximum = int(policy.get("maxEmbeddedEntries", 30))
-    if len(entries) >= maximum and not args.allow_changelog_overflow:
-        raise ScaffoldError(
-            f"embedded changelog already has {len(entries)} entries (limit {maximum}); "
-            "archive/compaction approval or --allow-changelog-overflow with --approval-note is required"
-        )
+    try:
+        changelog_archive.validate_changelog_archives(changelog, ROOT, required=True)
+    except changelog_archive.ChangelogArchiveError as exc:
+        raise ScaffoldError(str(exc)) from exc
     entry = {
         "versionCode": code,
         "versionName": version_name,
@@ -185,6 +208,7 @@ def prepare(args: argparse.Namespace) -> tuple[dict[Path, bytes], dict]:
     entries.insert(0, entry)
     changelog["latestVersionCode"] = code
     changelog["latestVersionName"] = version_name
+    changelog_bytes = assert_changelog_limits(changelog, policy, args.allow_changelog_overflow)
 
     head_text = BASE_HEAD.read_text(encoding="utf-8")
     head_text = replace_json_script(head_text, "kgg-source-truth", source)
@@ -233,7 +257,15 @@ def prepare(args: argparse.Namespace) -> tuple[dict[Path, bytes], dict]:
     assembled = b"".join(assembled_parts)
     builder.validate_assembled(assembled, manifest)
     digest = hashlib.sha256(assembled).hexdigest()
-    version.update({"versionCode": code, "versionName": version_name, "indexUrl": f"index.html?v={code}", "sha256": digest})
+    version.update(
+        {
+            "versionCode": code,
+            "versionName": version_name,
+            "indexUrl": f"index.html?v={code}",
+            "sha256": digest,
+            "notes": f"v{code:03d}: {args.summary.strip()}",
+        }
+    )
     planned[VERSION] = (json.dumps(version, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
     planned[ROOT / "kgg-update" / "index.html"] = assembled
     report = {
@@ -245,6 +277,7 @@ def prepare(args: argparse.Namespace) -> tuple[dict[Path, bytes], dict]:
         "areas": areas,
         "protectedAreas": selected_protected,
         "changelogEntriesAfter": len(entries),
+        "changelogBytesAfter": changelog_bytes,
     }
     return planned, report
 

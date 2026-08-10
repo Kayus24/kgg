@@ -4,424 +4,424 @@
 - Lines: 23521-23940
 
 ```html
+    if(needsRender)render();
+    const panel=$(cfg.panelId);
+    if(!panel)return false;
+    panel.classList.remove('hidden');
+    tabletOverlayState.kind=kind;
+    if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>positionTabletAnchoredOverlay(kind));
+    else setTimeout(()=>positionTabletAnchoredOverlay(kind),0);
+    setTabletOverlayActiveFlag();
     return true;
   }
-  function updateScanQueueInfo(){renderScanPreview();}
-  function showAfterPhotoPrompt(){scanState.decision=true;renderScanPreview();}
-  window.KGGScanBridge={
-    getStatus:()=>({singleEngine:true,hasLocalKey:!!currentLocalGeminiKey(),jobs:scanStateSnapshot().jobs.length}),
-    redactCanvasForExternalOcr:redactScanCanvasForExternalOcr,
-    createReadingCanvas:createScanReadingCanvas,
-    qualityCheck:scanPaperQuality,
-    scanResultToPlanText,
-    applyText:(text)=>applyScanTextToCurrentPlan(text,'scan_bridge_apply_text')
-  };
-  function notifyNativeScanPickerMode(kind){
-    const normalized=normalizeScanInputKind(kind);
-    try{
-      if(window.KGGNativeCamera&&typeof window.KGGNativeCamera.setNextPickerMode==='function'){
-        window.KGGNativeCamera.setNextPickerMode(normalized);
-        return;
-      }
-      if(window.KGGAndroidApp&&typeof window.KGGAndroidApp.setNextFileChooserMode==='function'){
-        window.KGGAndroidApp.setNextFileChooserMode(normalized);
-      }
-    }catch(err){
-      console.warn('Native Kamera-Bridge nicht verfuegbar:',err);
-    }
+  function closeTabletAnchoredPanel(kind){
+    const cfg=tabletPanelConfig(kind);
+    const panel=cfg&&$(cfg.panelId);
+    if(panel){panel.classList.add('hidden');clearTabletOverlayStyles(panel);}
+    if(tabletOverlayState.kind===kind)tabletOverlayState.kind=null;
+    setTabletOverlayActiveFlag();
+    updateToggleCarets();
+    setTabletAnchorActiveClasses();
   }
-  window.KGGScan={
-    pick(kind){
-        const normalized=rememberScanInputKind(kind||lastScanInputKind());
-        notifyNativeScanPickerMode(normalized);
-        const input=normalized==='camera'?$('fileInput'):$('filePickerInput');
-        if(input){
-          try{input.value='';}catch(_e){}
-          if(normalized==='camera'){
-            input.accept='image/*';
-            input.setAttribute('capture','environment');
-            input.removeAttribute('multiple');
-          }else{
-            input.accept='image/*,.jpg,.jpeg,.png,.webp';
-            input.removeAttribute('capture');
-            input.setAttribute('multiple','multiple');
-          }
-          input.click();
-        }
-      },
-    async handleInput(input,kind){
-      const normalizedKind=rememberScanInputKind(kind||lastScanInputKind());
-      const files=Array.from(input&&input.files||[]).filter(Boolean);
-      try{if(input)input.value='';}catch(err){}
-      if(!files.length)return scanStateSnapshot();
-      scanState.busy=true;
-      scanState.lastError='';
-      scanState.decision=false;
-      setScanStatus(files.length===1?'Prüfe: '+(files[0].name||'Kamera-Foto'):files.length+' Bilder werden vorbereitet …');
-      renderScanPreview();
-      try{
-        let syncCodeCount=0;
-        let acceptedCount=0;
-        for(const file of files){
-          const accepted=await scanAcceptFile(file,normalizedKind);
-          if(accepted&&(accepted.type==='syncInvite'||accepted.type==='syncBundle'))syncCodeCount++;
-          else if(accepted)acceptedCount++;
-        }
-        if(syncCodeCount&&!acceptedCount){
-          scanState.decision=false;
-          state.scanPanelOpen='plan';
-          save();
-          render();
-          return scanStateSnapshot();
-        }
-        scanState.decision=true;
-        state.scanPanelOpen='scanned';
-        save();
-        render();
-        setScanStatus('Foto hinzugefügt. Bitte entscheiden.');
-      }catch(err){
-        scanState.lastError='Scan fehlgeschlagen: '+(err&&err.message||err);
-        setScanStatus(scanState.lastError);
-      }finally{
-        scanState.busy=false;
-        renderScanPreview();
-      }
-      return scanStateSnapshot();
-    },
-    async handleQrRaw(raw,source){
-      const value=String(raw||'').trim();
-      if(!value)return {type:'invalidQr',error:'empty'};
-      scanState.busy=true;
-      scanState.lastError='';
-      scanState.decision=false;
-      setScanStatus('QR erkannt: Inhalt wird gelesen ...');
-      renderScanPreview();
-      try{
-        const accepted=await scanAcceptQrRaw(value,null,{source:String(source||'live-camera')},true);
-        if(!accepted||accepted.type==='invalidQr')return accepted||{type:'invalidQr',error:'unknown'};
-        if(accepted.type==='syncInvite'||accepted.type==='syncBundle'||accepted.type==='configTransfer'||accepted.type==='configTransferCancelled'){
-          scanState.decision=false;
-          state.scanPanelOpen='plan';
-        }else{
-          scanState.decision=true;
-          state.scanPanelOpen='scanned';
-        }
-        save();
-        render();
-        return {type:accepted.type||'qr',accepted:true};
-      }catch(err){
-        scanState.lastError='QR-Scan fehlgeschlagen: '+(err&&err.message||err);
-        setScanStatus(scanState.lastError);
-        return {type:'invalidQr',error:String(err&&err.message||err)};
-      }finally{
-        scanState.busy=false;
-        renderScanPreview();
-      }
-    },
-    getCameraCapabilities(){
-      const web=!!(navigator.mediaDevices&&typeof navigator.mediaDevices.getUserMedia==='function');
-      let nativeCaps=null;
-      try{nativeCaps=window.KGGNativeCamera&&typeof window.KGGNativeCamera.getCapabilities==='function'?window.KGGNativeCamera.getCapabilities():null;}catch(err){}
-      return {webVideoCapture:web,native:nativeCaps||null,barcodeDetector:'BarcodeDetector' in window,jsQR:typeof window.jsQR==='function'};
-    },
-    async start(){
-      scanState.decision=false;
-      scanState.busy=true;
-      scanState.lastError='';
-      renderScanPreview();
-      try{
-        const jobs=scanState.jobs.filter(job=>job.pages.length||job.result);
-        if(!jobs.length)throw new Error('Bitte zuerst mindestens ein Foto hinzufügen.');
-        for(const job of jobs){
-          if(!job.result||job.type==='paper')await processPaperJob(job);
-        }
-        state.scanPanelOpen='scanned';
-        save();
-        render();
-        setScanStatus('Scan fertig: '+jobs.length+' Plan/Pläne.');
-      }catch(err){
-        scanState.lastError='Scan fehlgeschlagen: '+(err&&err.message||err);
-        setScanStatus(scanState.lastError);
-      }finally{
-        scanState.busy=false;
-        renderScanPreview();
-      }
-      return scanStateSnapshot();
-    },
-    repeatSource(mode){
-      const nextMode=mode==='plan'?'plan':'page';
-      this.setNext(nextMode);
-      return this.pick(lastScanInputKind());
-    },
-    setNext(mode){
-      scanState.next=mode==='plan'?'plan':'page';
-      if(mode==='plan')scanState.activeIndex=scanState.jobs.length;
-      scanState.decision=false;
-      setScanStatus(scanState.next==='plan'?'Nächstes Foto wird neuer Plan.':'Nächstes Foto wird weitere Seite.');
-      renderScanPreview();
-      return scanStateSnapshot();
-    },
-    removePage(jobIndex,pageIndex){
-      const job=scanState.jobs[Number(jobIndex)||0];
-      if(job&&job.pages){job.pages.splice(Number(pageIndex)||0,1); if(job.type==='paper')job.result=null; if(!job.pages.length&&!job.result)scanState.jobs.splice(Number(jobIndex)||0,1);}
-      if(scanState.activeIndex>=scanState.jobs.length)scanState.activeIndex=Math.max(0,scanState.jobs.length-1);
-      renderScanPreview();
-      return scanStateSnapshot();
-    },
-    setActive(index){
-      scanState.activeIndex=Math.max(0,Math.min(Number(index)||0,scanState.jobs.length-1));
-      scanState.next='page';
-      setScanStatus((scanState.jobs[scanState.activeIndex]&&scanState.jobs[scanState.activeIndex].label||'Plan')+' aktiv.');
-      renderScanPreview();
-      return scanStateSnapshot();
-    },
-    setShort(index,value){
-      const job=scanState.jobs[Number(index)||0];
-      if(job)job.short=String(value||'').trim();
-      const field=$('kggScanCopyField'+index);
-      if(field&&job)field.value=scanResultToCopyText(job)||field.value;
-      return scanStateSnapshot();
-    },
-    toggleCollapse(index){return toggleScanJobCollapse(index);},
-    removeJob(index){return removeScanJob(index);},
-    collapseAll(reason){return collapseScanCards(reason);},
-    closeDecision(){scanState.decision=false;renderScanPreview();return scanStateSnapshot();},
-    async copyResult(index){
-      const job=scanState.jobs[Number(index)||0];
-      if(!job)return false;
-      const text=scanResultToCopyText(job);
-      const fieldId=$('kggScanCopyField'+index)?'kggScanCopyField'+index:'kggScanInboxField'+index;
-      const ok=await copyTextWithFallback(text,fieldId);
-      setScanStatus(ok?'Kopiert.':'Text markiert - bitte manuell kopieren.');
-      return ok;
-    },
-    applyResult(index){
-      const job=scanState.jobs[Number(index)||0];
-      if(!job)return false;
-      const ok=applyScanResultToCurrentPlan(job.result,'scan_v319_continue_edit_job_'+index); if(ok){state.scanPanelOpen='plan'; save(); render();} return ok;
-    },
-    getState:scanStateSnapshot
-  };
-
-  /* v316 Tablet Anchor Overlay Manager: ein Nebenfenster aktiv, aber am jeweiligen Button verankert. */
-  const tabletLayoutKeys={
-    locked:'kgg_tablet_layout_locked',
-    left:'kgg_tablet_left_col_width',
-    scale:'kgg_tablet_ui_scale'
-  };
-  const tabletLayoutState={locked:true,leftCol:'',scale:1,dragging:false};
-  function clampTabletScale(value){const n=Number(value)||1; return Math.max(.01,Math.min(2,n));}
-  function loadTabletLayoutSettings(){
-    try{
-      tabletLayoutState.locked=localStorage.getItem(tabletLayoutKeys.locked)!=='false';
-      tabletLayoutState.leftCol=localStorage.getItem(tabletLayoutKeys.left)||'';
-      tabletLayoutState.scale=clampTabletScale(localStorage.getItem(tabletLayoutKeys.scale)||1);
-    }catch(err){tabletLayoutState.locked=true;tabletLayoutState.leftCol='';tabletLayoutState.scale=1;}
-  }
-  function saveTabletLayoutSettings(){
-    try{
-      localStorage.setItem(tabletLayoutKeys.locked,tabletLayoutState.locked?'true':'false');
-      if(tabletLayoutState.leftCol)localStorage.setItem(tabletLayoutKeys.left,tabletLayoutState.leftCol); else localStorage.removeItem(tabletLayoutKeys.left);
-      localStorage.setItem(tabletLayoutKeys.scale,String(tabletLayoutState.scale));
-    }catch(err){}
-  }
-  function updateTabletLayoutHandle(){
-    const handle=$('tabletLayoutResizeHandle'), app=document.querySelector('.app');
-    if(!handle||!app||!isTabletLayout()){return;}
-    const rect=app.getBoundingClientRect();
-    const appStyle=getComputedStyle(app);
-    const gap=parseFloat(appStyle.columnGap)||0;
-    const visibleRect=el=>{
-      if(!el)return null;
-      const style=getComputedStyle(el);
-      if(style.display==='none'||style.visibility==='hidden'||style.opacity==='0')return null;
-      const r=el.getBoundingClientRect();
-      return (r.width>2&&r.height>2)?r:null;
-    };
-    const gridFirstCol=()=>{
-      const first=String(appStyle.gridTemplateColumns||'').trim().split(/\s+/)[0]||'';
-      const px=parseFloat(first);
-      return Number.isFinite(px)&&px>2?px:null;
-    };
-    const leftRects=[$('bankArea'),$('inputWrap'),$('scanHub'),document.querySelector('.scanHub')]
-      .map(visibleRect)
-      .filter(Boolean)
-      .filter(r=>r.left>=rect.left-4&&r.right<=rect.right+4);
-    const measuredLeftEdge=leftRects.length?Math.max(...leftRects.map(r=>r.right)):null;
-    const cssLeft=gridFirstCol();
-    const storedLeft=parseFloat(String(tabletLayoutState.leftCol||'').replace('px',''));
-    const fallbackLeft=Number.isFinite(cssLeft)?cssLeft:(Number.isFinite(storedLeft)?storedLeft:Math.min(Math.max(rect.width*.42,360),660));
-    const leftEdge=Number.isFinite(measuredLeftEdge)?measuredLeftEdge:rect.left+fallbackLeft;
-    const rightRects=[$('rightPlanStack'),$('currentPlanBlock'),$('baseToggle'),$('recentToggle'),$('packageLayoutSlot')]
-      .map(visibleRect)
-      .filter(Boolean)
-      .filter(r=>r.left>=leftEdge-12&&r.left<=rect.right+4);
-    const rightEdge=rightRects.length?Math.min(...rightRects.map(r=>r.left)):Math.min(rect.right,rect.left+fallbackLeft+gap);
-    const handleWidth=handle.getBoundingClientRect().width||58;
-    const center=(rightEdge>leftEdge+2)?((leftEdge+rightEdge)/2):leftEdge+Math.max(0,gap/2);
-    handle.style.left=Math.round(center-(handleWidth/2))+'px';
-    handle.style.top=Math.round(rect.top+8)+'px';
-    handle.style.height=Math.max(160,Math.round(rect.height-16))+'px';
-  }
-  function updateTabletLayoutAdaptiveClasses(){
-    const app=document.querySelector('.app');
-    const active=isTabletLayout()&&app&&document.body.classList.contains('tabletLayoutCustom');
-    let left=0, rightSlot=0, recentW=0, planW=0;
-    if(active){
-      const rect=app.getBoundingClientRect();
-      const fallback=Math.min(Math.max(rect.width*.42,360),660);
-      const leftEl=$('bankArea')||$('inputWrap')||document.querySelector('.scanHub');
-      left=leftEl?leftEl.getBoundingClientRect().width:(parseFloat(String(tabletLayoutState.leftCol||'').replace('px',''))||fallback);
-      const slot=$('packageLayoutSlot')||$('packageToggle');
-      rightSlot=slot?slot.getBoundingClientRect().width:0;
-      recentW=$('recentToggle')?$('recentToggle').getBoundingClientRect().width:0;
-      planW=$('currentPlanBlock')?$('currentPlanBlock').getBoundingClientRect().width:0;
-    }
-    document.body.classList.toggle('tabletLayoutLeftSlim',!!active&&left<320);
-    document.body.classList.toggle('tabletLayoutLeftTiny',!!active&&left<190);
-    document.body.classList.toggle('tabletLayoutRightSlim',!!active&&((rightSlot>0&&rightSlot<270)||(recentW>0&&recentW<250)||(planW>0&&planW<360)));
-    document.body.classList.toggle('tabletLayoutRightTiny',!!active&&((rightSlot>0&&rightSlot<150)||(recentW>0&&recentW<135)));
-    document.body.classList.toggle('tabletLayoutScaleHuge',!!active&&tabletLayoutState.scale>1.35);
-  }
-  function getTabletLayoutRect(el){
-    if(!el)return null;
-    const style=getComputedStyle(el);
-    if(style.display==='none'||style.visibility==='hidden'||style.opacity==='0')return null;
-    const rect=el.getBoundingClientRect();
-    if(rect.width<2||rect.height<2)return null;
-    return rect;
-  }
-  function tabletRectsCollide(a,b,gap){
-    return !(a.right+gap<=b.left||b.right+gap<=a.left||a.bottom+gap<=b.top||b.bottom+gap<=a.top);
-  }
-  function updateTabletLayoutCollisionGuard(){
-    const active=isTabletLayout()&&document.body.classList.contains('tabletLayoutCustom');
-    if(!active){
-      document.body.classList.remove('tabletLayoutCollisionTight');
-      document.documentElement.style.setProperty('--kgg-tablet-collision-gap','14px');
-      return;
-    }
-    const scale=Number(tabletLayoutState.scale)||1;
-    const safetyGap=Math.max(10,Math.min(28,Math.round(12+(scale-1)*18)));
-    document.documentElement.style.setProperty('--kgg-tablet-collision-gap',safetyGap+'px');
-    const selectors=['.scanHub .scanBtn','.scanHub .scanMeta','.scanHub .adminConfigBtn','.scanHub .sharedBankBtn','#baseToggle','#inputWrap','#bankArea','#rightPlanStack','#recentToggle','#packageLayoutSlot'];
-    const rects=selectors.flatMap(sel=>[...document.querySelectorAll(sel)]).map(getTabletLayoutRect).filter(Boolean);
-    let collision=false;
-    for(let i=0;i<rects.length&&!collision;i++){
-      for(let j=i+1;j<rects.length;j++){
-        if(tabletRectsCollide(rects[i],rects[j],safetyGap)){collision=true;break;}
-      }
-    }
-    document.body.classList.toggle('tabletLayoutCollisionTight',collision);
-  }
-  function applyTabletLayoutSettings(){
-    const tabletActive=isTabletLayout();
-    document.body.classList.toggle('tabletLayoutUnlocked',!tabletLayoutState.locked);
-    document.body.classList.toggle('tabletLayoutCustom',tabletActive);
-    document.documentElement.style.setProperty('--kgg-tablet-ui-scale',String(tabletLayoutState.scale));
-    if(tabletLayoutState.leftCol)document.documentElement.style.setProperty('--kgg-tablet-left-col',tabletLayoutState.leftCol);
-    else document.documentElement.style.removeProperty('--kgg-tablet-left-col');
-    const btn=$('tabletLayoutLockBtn'), value=$('tabletScaleValue'), splitValue=$('tabletSplitScaleValue');
-    if(btn){
-      btn.setAttribute('aria-pressed',tabletLayoutState.locked?'true':'false');
-      btn.setAttribute('aria-label',tabletLayoutState.locked?'Layout fixiert':'Layout frei verschiebbar');
-      const icon=btn.querySelector('.tabletLockIcon');
-      const text=btn.querySelector('.tabletLockText');
-      if(icon)icon.textContent=String.fromCodePoint(tabletLayoutState.locked?128274:128275);
-      if(text)text.textContent=tabletLayoutState.locked?'Fix':'Frei';
-    }
-    const scaleLabel=Math.round(tabletLayoutState.scale*100)+'%';
-    const scaleDisplay='Groesse '+scaleLabel;
-    if(value)value.textContent=scaleDisplay;
-    if(splitValue)splitValue.textContent=scaleDisplay;
-    updateTabletLayoutAdaptiveClasses();
+  function setTabletLayoutEditMode(open){
+    const next=!!open&&isTabletLayout();
+    document.body.classList.toggle('tabletLayoutEditMode',next);
+    const btn=$('tabletMenuLayoutBtn');
+    const panel=$('tabletMenuLayoutPanel');
+    if(btn)btn.setAttribute('aria-expanded',String(next));
+    if(panel)panel.hidden=!next;
+    if(next){closeTabletPackageOverlay(false);closeTabletFloatingPanelsExcept('layout');}
     requestAnimationFrame(()=>{updateTabletLayoutHandle();updateTabletLayoutCollisionGuard();});
   }
-  function setTabletLayoutLocked(locked){
-    tabletLayoutState.locked=!!locked;
-    saveTabletLayoutSettings();
-    applyTabletLayoutSettings();
-  }
-  function setTabletLayoutScale(next){
-    tabletLayoutState.scale=clampTabletScale(next);
-    saveTabletLayoutSettings();
-    applyTabletLayoutSettings();
-  }
-  function adjustTabletLayoutScale(direction){
-    if(tabletLayoutState.locked||!isTabletLayout())return;
-    setTabletLayoutScale(tabletLayoutState.scale+(direction>0?.05:-.05));
-  }
-  function adjustTabletSplitLayoutScale(direction){
-    if(!isTabletLayout())return;
-    setTabletLayoutScale(tabletLayoutState.scale+(direction>0?.05:-.05));
-  }
-  function resetTabletLayoutDefaults(){
-    tabletLayoutState.leftCol='';
-    tabletLayoutState.scale=1;
-    saveTabletLayoutSettings();
-    applyTabletLayoutSettings();
-  }
-  function initTabletLayoutControls(){
-    loadTabletLayoutSettings();
-    const btn=$('tabletLayoutLockBtn'), minus=$('tabletScaleMinus'), plus=$('tabletScalePlus'), reset=$('tabletLayoutReset'), handle=$('tabletLayoutResizeHandle'), tools=$('tabletLayoutFreeTools'), splitMinus=$('tabletSplitScaleMinus'), splitPlus=$('tabletSplitScalePlus');
-    if(btn)btn.onclick=()=>setTabletLayoutLocked(!tabletLayoutState.locked);
-    if(minus)minus.onclick=()=>adjustTabletLayoutScale(-1);
-    if(plus)plus.onclick=()=>adjustTabletLayoutScale(1);
-    if(reset)reset.onclick=()=>resetTabletLayoutDefaults();
-    if(splitMinus)splitMinus.onclick=ev=>{ev.preventDefault();ev.stopPropagation();adjustTabletSplitLayoutScale(-1);};
-    if(splitPlus)splitPlus.onclick=ev=>{ev.preventDefault();ev.stopPropagation();adjustTabletSplitLayoutScale(1);};
-    if(tools){
-      tools.addEventListener('wheel',ev=>{
-        if(tabletLayoutState.locked||!isTabletLayout())return;
-        ev.preventDefault();
-        adjustTabletLayoutScale(ev.deltaY<0?1:-1);
-      },{passive:false});
-      let scaleDragY=null;
-      tools.addEventListener('pointerdown',ev=>{
-        if(tabletLayoutState.locked||!isTabletLayout()||ev.target.closest('button'))return;
-        scaleDragY=ev.clientY;
-        try{tools.setPointerCapture(ev.pointerId);}catch(err){}
-      });
-      tools.addEventListener('pointermove',ev=>{
-        if(scaleDragY===null||tabletLayoutState.locked)return;
-        const dy=ev.clientY-scaleDragY;
-        if(Math.abs(dy)<18)return;
-        adjustTabletLayoutScale(dy<0?1:-1);
-        scaleDragY=ev.clientY;
-      });
-      const endScaleDrag=()=>{scaleDragY=null;};
-      tools.addEventListener('pointerup',endScaleDrag);
-      tools.addEventListener('pointercancel',endScaleDrag);
+  function toggleTabletLayoutEditMode(){setTabletLayoutEditMode(!document.body.classList.contains('tabletLayoutEditMode'));}
+  function closeTabletPackageOverlay(closeMenu){
+    document.body.classList.remove('tabletPackageOverlayOpen');
+    const overlay=$('tabletPackageOverlay'), shade=$('tabletPackageShade');
+    if(overlay){
+      overlay.setAttribute('aria-hidden','true');
+      overlay.style.removeProperty('transform');
+      overlay.style.removeProperty('visibility');
+      overlay.style.removeProperty('transition');
     }
-    if(handle){
-      handle.addEventListener('pointerdown',ev=>{
-        if(ev.target&&ev.target.closest&&ev.target.closest('.tabletSplitScaleControl'))return;
-        if(tabletLayoutState.locked||!isTabletLayout())return;
-        const app=document.querySelector('.app');
-        if(!app)return;
-        ev.preventDefault();
-        tabletLayoutState.dragging=true;
-        document.body.classList.add('tabletLayoutDragging');
-        try{handle.setPointerCapture(ev.pointerId);}catch(err){}
-        const move=moveEv=>{
-          if(!tabletLayoutState.dragging)return;
-          const rect=app.getBoundingClientRect();
-          const min=24;
-          const max=Math.max(min,rect.width-48);
-          const gap=parseFloat(getComputedStyle(app).columnGap)||0;
-          const next=Math.max(min,Math.min(max,moveEv.clientX-rect.left-(gap/2)));
-          tabletLayoutState.leftCol=Math.round(next)+'px';
-          document.documentElement.style.setProperty('--kgg-tablet-left-col',tabletLayoutState.leftCol);
-          updateTabletLayoutAdaptiveClasses();
-          updateTabletLayoutHandle();
-          updateTabletLayoutCollisionGuard();
-        };
-        const up=()=>{
-          tabletLayoutState.dragging=false;
-          document.body.classList.remove('tabletLayoutDragging');
-          saveTabletLayoutSettings();
-          document.removeEventListener('pointermove',move);
-          document.removeEventListener('pointerup',up);
-          document.removeEventListener('pointercancel',up);
-        };
+    if(shade){shade.hidden=true;shade.setAttribute('aria-hidden','true');}
+    const btn=$('tabletMenuPackagesBtn');
+    if(btn)btn.setAttribute('aria-expanded','false');
+    if(closeMenu)setTabletSideMenuOpen(false);
+  }
+  function openTabletPackageOverlay(){
+    if(!isTabletLayout())return false;
+    setTabletLayoutEditMode(false);
+    closeTabletFloatingPanelsExcept('packageOverlay');
+    document.body.classList.add('tabletPackageOverlayOpen');
+    const overlay=$('tabletPackageOverlay'), shade=$('tabletPackageShade'), btn=$('tabletMenuPackagesBtn');
+    if(shade){shade.hidden=false;shade.setAttribute('aria-hidden','false');}
+    if(overlay){
+      overlay.setAttribute('aria-hidden','false');
+      overlay.style.setProperty('transition','none','important');
+      overlay.style.setProperty('transform','translate3d(0,0,0)','important');
+      overlay.style.setProperty('visibility','visible','important');
+    }
+    if(btn)btn.setAttribute('aria-expanded','true');
+    setTabletSideMenuOpen(true);
+    renderTabletPackageOverlay();
+    setTimeout(()=>{const input=$('tabletPackageSearch'); if(input)input.focus();},40);
+    return true;
+  }
+  function toggleTabletPackageOverlay(){
+    if(document.body.classList.contains('tabletPackageOverlayOpen')){closeTabletPackageOverlay(false);return true;}
+    return openTabletPackageOverlay();
+  }
+  const phoneFloatingDrawerState={kind:null};
+  function ensurePhoneDrawerBackdrop(){
+    let backdrop=$('phoneDrawerBackdrop');
+    if(!backdrop){
+      backdrop=document.createElement('div');
+      backdrop.id='phoneDrawerBackdrop';
+      backdrop.className='kggPhoneDrawerBackdrop';
+      backdrop.setAttribute('aria-hidden','true');
+      backdrop.addEventListener('click',()=>closePhoneFloatingDrawer());
+      document.body.appendChild(backdrop);
+    }
+    return backdrop;
+  }
+  function closePhoneFloatingDrawer(){
+    const recent=$('recentList'), packages=$('packageList'), recentBtn=$('recentToggle'), packageBtn=$('packageToggle');
+    if(recent)recent.classList.add('hidden');
+    if(packages)packages.classList.add('hidden');
+    if(recentBtn)recentBtn.classList.remove('phoneButtonFloat');
+    if(packageBtn)packageBtn.classList.remove('phoneButtonFloat');
+    document.body.classList.remove('kggPhoneDrawerOpen');
+    phoneFloatingDrawerState.kind=null;
+    setTabletOverlayActiveFlag();
+  }
+  function openPhoneFloatingDrawer(kind){
+    if(!isPhoneLayout())return false;
+    if(shouldIgnorePhoneScrollToggle())return false;
+    const recent=$('recentList'), packages=$('packageList'), recentBtn=$('recentToggle'), packageBtn=$('packageToggle');
+    const target=kind==='recent'?recent:packages;
+    const targetBtn=kind==='recent'?recentBtn:packageBtn;
+    const other=kind==='recent'?packages:recent;
+    const otherBtn=kind==='recent'?packageBtn:recentBtn;
+    if(!target||!targetBtn)return false;
+    if(phoneFloatingDrawerState.kind===kind&&!target.classList.contains('hidden')){
+      closePhoneFloatingDrawer();
+      return true;
+    }
+    ensurePhoneDrawerBackdrop();
+    if(other)other.classList.add('hidden');
+    if(otherBtn)otherBtn.classList.remove('phoneButtonFloat');
+    target.classList.remove('hidden');
+    targetBtn.classList.add('phoneButtonFloat');
+    document.body.classList.add('kggPhoneDrawerOpen');
+    phoneFloatingDrawerState.kind=kind;
+    setTabletOverlayActiveFlag();
+    return true;
+  }
+  function openTabletExclusivePanel(kind){
+    if(!isTabletLayout())return false;
+    if(kind==='package')return openTabletPackageOverlay();
+    if(['base','recent'].includes(kind))return openTabletAnchoredPanel(kind);
+    const needsRender=closeTabletFloatingPanelsExcept(kind);
+    if(needsRender)render();
+    return true;
+  }
+  function repositionTabletOverlay(){
+    if(!isTabletLayout())return;
+    if(tabletOverlayState.kind)positionTabletAnchoredOverlay(tabletOverlayState.kind);
+  }
+  function setTabletSideMenuOpen(open){
+    const next=!!open&&isTabletLayout();
+    document.body.classList.toggle('tabletMenuOpen',next);
+    const btn=$('tabletMenuBtn');
+    if(btn){
+      btn.setAttribute('aria-expanded',String(next));
+      btn.setAttribute('aria-label',next?'Tablet-Menue schliessen':'Tablet-Menue oeffnen');
+    }
+    const menu=$('tabletSideMenu');
+    if(menu)menu.setAttribute('aria-hidden',String(!next));
+    const backdrop=$('tabletSideBackdrop');
+    if(backdrop)backdrop.setAttribute('aria-hidden',String(!next));
+    if(next)closeTabletFloatingPanelsExcept('menu');
+    else{closeTabletPackageOverlay(false); if(document.body.classList.contains('tabletLayoutEditMode'))setTabletLayoutEditMode(false);}
+    requestAnimationFrame(()=>{updateTabletLayoutHandle();updateTabletLayoutCollisionGuard();});
+    setTimeout(()=>{updateTabletLayoutHandle();updateTabletLayoutCollisionGuard();},260);
+    return next;
+  }
+  window.addEventListener('resize',()=>{setTimeout(repositionTabletOverlay,30); setTimeout(syncScannedPlansMobileDock,30); setTimeout(()=>{if(!isTabletLayout())setTabletSideMenuOpen(false);},30);});
+  window.addEventListener('orientationchange',()=>setTimeout(repositionTabletOverlay,120));
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize',()=>{setTimeout(repositionTabletOverlay,30); setTimeout(syncScannedPlansMobileDock,30);});
+    window.visualViewport.addEventListener('scroll',()=>setTimeout(repositionTabletOverlay,30));
+  }
+  document.addEventListener('pointerdown',ev=>{
+    if(!isTabletLayout()||!tabletOverlayState.kind)return;
+    const cfg=tabletPanelConfig(tabletOverlayState.kind);
+    if(!cfg)return;
+    const panel=$(cfg.panelId), anchor=$(cfg.anchorId);
+    const target=ev.target;
+    if(panel&&panel.contains(target))return;
+    if(anchor&&anchor.contains(target))return;
+    closeTabletAnchoredPanel(tabletOverlayState.kind);
+  },true);
+  document.addEventListener('keydown',ev=>{
+    if(ev.key!=='Escape'||!isTabletLayout())return;
+    if(document.body.classList.contains('tabletPackageOverlayOpen')){closeTabletPackageOverlay(false);return;}
+    if(tabletOverlayState.kind)closeTabletAnchoredPanel(tabletOverlayState.kind);
+  });
+
+  initScanAutoCollapseOnUiOpen();
+  if(renderPatientHashView())return;
+  $('visionBtn').onclick=()=>setLargePdfMode(!state.largePdfMode);
+  $('exerciseInput').addEventListener('input',()=>upsertLiveExerciseFromText()); $('exerciseInput').addEventListener('focus',()=>render()); $('clearInput').onclick=()=>{clearInputAndRemoveLiveTextExercises();};
+  $('bankToggle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; const opening=!state.bankOpen; if(opening)openTabletExclusivePanel('bank'); toggleBankOpenFromUi(); setTabletOverlayActiveFlag();};
+  $('dbTitle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; const opening=!state.bankOpen; if(opening)openTabletExclusivePanel('bank'); state.bankOpen=!state.bankOpen; render(); setTabletOverlayActiveFlag();};
+  $('dbTitle').addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();if(guardPhoneScrollToggle(ev))return; const opening=!state.bankOpen; if(opening)openTabletExclusivePanel('bank'); state.bankOpen=!state.bankOpen; render(); setTabletOverlayActiveFlag();}});
+  $('finishBtn').onclick=()=>{closeTabletFloatingPanelsExcept('modal'); openFinishModal();};
+  $('baseToggle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; const base=$('baseFields'); const opening=base.classList.contains('hidden'); if(isTabletLayout()){if(opening)openTabletAnchoredPanel('base'); else closeTabletAnchoredPanel('base');}else{base.classList.toggle('hidden',!opening); setTabletOverlayActiveFlag();}};
+  $('recentToggle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; const recent=$('recentList'); const opening=recent.classList.contains('hidden'); if(isTabletLayout()){if(opening)openTabletAnchoredPanel('recent'); else closeTabletAnchoredPanel('recent');}else{openPhoneFloatingDrawer('recent');}};
+  $('packageToggle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; if(isTabletLayout())toggleTabletPackageOverlay(); else openPhoneFloatingDrawer('package');};
+  $('exportBtn').onclick=exportData; $('pdfBtn').onclick=finishWithPdf; $('patientBtn').onclick=finishWithPatientApp; $('closeShare').onclick=closeFinishModal; $('copyShare').onclick=()=>navigator.clipboard&&navigator.clipboard.writeText($('shareText').value); $('patientName').addEventListener('input',()=>{state.patient.name=$('patientName').value;syncStatePlanToStore('ui_patient_name_input');save();render();}); $('planDate').addEventListener('input',()=>{state.patient.date=$('planDate').value;save();syncStatePlanToStore('ui_patient_date_input');}); $('therapistName').addEventListener('input',()=>{state.patient.therapist=$('therapistName').value;save();syncStatePlanToStore('ui_patient_therapist_input');}); $('planNotes').addEventListener('input',()=>{state.patient.notes=$('planNotes').value;save();syncStatePlanToStore('ui_patient_notes_input');}); $('scanBtn').onclick=()=>window.KGGScan.pick('camera'); $('filePickBtn').onclick=()=>window.KGGScan.pick('file'); $('filePickBtn').addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();window.KGGScan.pick('file');}}); $('fileInput').onchange=ev=>window.KGGScan.handleInput(ev.target,'camera'); $('filePickerInput').onchange=ev=>window.KGGScan.handleInput(ev.target,'file'); $('closeEditor').onclick=closeEditor; $('saveExercise').onclick=saveEditedExercise; $('deleteExercise').onclick=()=>{if(state.editId){if($('deleteExercise').dataset.scope==='bank')openBankDeleteModal(state.editId); else removeExercise(state.editId);} closeEditor();};
+  $('attachExerciseImage').onclick=()=>$('editMediaFile').click();
+  $('editMediaFile').onchange=handleEditorMediaFileSelected;
+  $('removeExerciseImage').onclick=removeEditorMedia;
+  $('finishPdfBtn').onclick=()=>finishWithPdf({large:false});
+  $('finishLargePdfBtn').onclick=openLargePdfModal;
+  $('finishPatientBtn').onclick=finishWithPatientApp;
+  $('finishCancelBtn').onclick=closeFinishModal;
+  $('shareModal').addEventListener('click',ev=>{if(ev.target===$('shareModal'))closeFinishModal();});
+  $('cancelLargePdf').onclick=closeLargePdfModal;
+  $('confirmLargePdf').onclick=()=>{closeLargePdfModal();finishWithPdf({large:true});};
+  $('largePdfModal').addEventListener('click',ev=>{if(ev.target===$('largePdfModal'))closeLargePdfModal();});
+  $('cancelLongMediaShare').onclick=closeLongMediaConfirmModal;
+  $('confirmLongMediaShare').onclick=confirmLongMediaShare;
+  $('longMediaConfirmModal').addEventListener('click',ev=>{if(ev.target===$('longMediaConfirmModal'))closeLongMediaConfirmModal();});
+  $('adminConfigBtn').onclick=openAdminSecretsModal;
+  $('closeAdminSecrets').onclick=closeAdminSecretsModal;
+  $('saveAdminSecrets').onclick=saveAdminSecretsFromModal;
+  if($('loadAdminSafeFile'))$('loadAdminSafeFile').onclick=()=>$('adminSafeFileInput').click();
+  if($('adminSafeFileInput'))$('adminSafeFileInput').onchange=ev=>importAdminSafeFile(ev.target.files&&ev.target.files[0]).catch(err=>alert('Admin-Safe-Datei konnte nicht gelesen werden: '+err.message)).finally(()=>{ev.target.value='';});
+  if($('importAdminCodePackage'))$('importAdminCodePackage').onclick=()=>importAdminCodePackageFromClipboard().catch(err=>alert('Code-Paket konnte nicht gelesen werden: '+err.message));
+  if($('exportAdminCodePackage'))$('exportAdminCodePackage').onclick=()=>exportAdminCodePackageToClipboard().catch(err=>alert('Code-Paket konnte nicht kopiert werden: '+err.message));
+  if($('downloadAdminSafeFile'))$('downloadAdminSafeFile').onclick=downloadAdminSafeFile;
+  $('clearAdminSecrets').onclick=()=>{clearLocalAdminSecrets(); if($('adminGeminiKey1'))$('adminGeminiKey1').value=''; if($('adminGeminiKey2'))$('adminGeminiKey2').value=''; if($('adminMediaDropzoneEndpoint'))$('adminMediaDropzoneEndpoint').value=''; if($('adminMediaDropzoneUploadToken'))$('adminMediaDropzoneUploadToken').value='';};
+  $('adminSecretsModal').addEventListener('click',ev=>{if(ev.target===$('adminSecretsModal'))closeAdminSecretsModal();});
+  $('sharedBankBtn').onclick=openSharedBankModal;
+  $('copySharedBank').onclick=copySharedBankPayload;
+  $('pickSharedBankFile').onclick=()=>$('sharedBankFile').click();
+  $('sharedBankFile').onchange=handleSharedBankFile;
+  $('applySharedBank').onclick=applySharedBankFromText;
+  $('closeSharedBank').onclick=closeSharedBankModal;
+  $('sharedBankModal').addEventListener('click',ev=>{if(ev.target===$('sharedBankModal'))closeSharedBankModal();});
+
+  if($('tabletMenuBtn'))$('tabletMenuBtn').onclick=()=>setTabletSideMenuOpen(!document.body.classList.contains('tabletMenuOpen'));
+  if($('tabletMenuClose'))$('tabletMenuClose').onclick=()=>setTabletSideMenuOpen(false);
+  if($('tabletSideBackdrop'))$('tabletSideBackdrop').onclick=()=>setTabletSideMenuOpen(false);
+  if($('syncQrBtn'))$('syncQrBtn').onclick=openSyncPairModal;
+  if($('tabletSyncQrBtn'))$('tabletSyncQrBtn').onclick=openSyncPairModal;
+  if($('copySyncPairCode'))$('copySyncPairCode').onclick=copySyncPairCode;
+  if($('testNativeSyncBtn'))$('testNativeSyncBtn').onclick=()=>testNativeSyncRoundtrip();
+  if($('downloadSyncFileBtn'))$('downloadSyncFileBtn').onclick=downloadNativeSyncFile;
+  if($('importSyncFileBtn'))$('importSyncFileBtn').onclick=()=>{const input=$('syncImportInput'); if(input)input.click();};
+  if($('syncImportInput'))$('syncImportInput').onchange=ev=>{const file=ev&&ev.target&&ev.target.files&&ev.target.files[0]; importNativeSyncFile(file).finally(()=>{if(ev&&ev.target)ev.target.value='';});};
+  if($('closeSyncPairModal'))$('closeSyncPairModal').onclick=closeSyncPairModal;
+  if($('syncPairModal'))$('syncPairModal').addEventListener('click',ev=>{if(ev.target===$('syncPairModal'))closeSyncPairModal();});
+  const kggAdminMenuQrTargets={
+    colleague:{title:'Kolleg:innen-Web-App QR',hint:'Oeffnet die jeweils verlinkte Kolleg:innen-Web-App.',url:'https://kayus24.github.io/kgg/therapist-app/latest-html.html'},
+    admin:{title:'Admin-Web-App QR',hint:'Oeffnet diese Admin-Web-App-Version. Manifest/Latest wird separat freigegeben.',url:'https://kayus24.github.io/kgg/therapist-app/releases/v388/web/KGG_APP_ADMIN_v388_android_flow_fixes.html'},
+    android:{title:'Kolleg:innen-App APK QR',hint:'Oeffnet die aktuelle Android-Download-Seite fuer Kolleg:innen. Keine API-Keys, keine Sync-Daten.',url:'https://kayus24.github.io/kgg/therapist-app/latest-android.html'}
+  };
+  function closeKggTherapistShareModal(){
+    const modal=$('kggTherapistShareModal');
+    if(!modal)return;
+    modal.classList.remove('isOpen');
+    modal.setAttribute('aria-hidden','true');
+  }
+  function openKggTherapistShareModal(){
+    const modal=$('kggTherapistShareModal');
+    if(!modal)return;
+    modal.classList.add('isOpen');
+    modal.setAttribute('aria-hidden','false');
+  }
+  function kggTherapistAppUrl(){
+    const target=kggAdminMenuQrTargets&&kggAdminMenuQrTargets.android;
+    return target&&target.url||'https://kayus24.github.io/kgg/therapist-app/latest-android.html';
+  }
+  function openKggTherapistAppOnlyQr(){
+    closeKggTherapistShareModal();
+    const url=kggTherapistAppUrl();
+    openKggAdminMenuQr({title:'Kolleg:innen-App APK QR',hint:'Oeffnet die aktuelle Android-Download-Seite fuer Kolleg:innen. Keine API-Keys, keine Sync-Daten.',url});
+  }
+  async function openKggTherapistSetupQr(){
+    const transfer=await buildKggEncryptedConfigTransferForQr({requireEncrypted:true});
+    if(!transfer)return;
+    closeKggTherapistShareModal();
+    const url=buildKggTherapistSetupUrl(kggTherapistAppUrl(),transfer.payloadCode);
+    openKggAdminMenuQr({title:'Therapeuten-App + API-Key',hint:'Setup-Link plus verschluesselter API-Key-Transfer. Transfer-Code: '+transfer.passCode,url});
+  }
+  async function openKggTherapistApiOnlyQr(){
+    closeKggTherapistShareModal();
+    await openKggConfigTransferQr();
+  }
+  function closeKggAdminMenuQrModal(){
+    const modal=$('kggAdminMenuQrModal');
+    if(!modal)return;
+    modal.classList.remove('isOpen');
+    modal.setAttribute('aria-hidden','true');
+  }
+  function renderKggAdminMenuQr(value){
+    const box=$('kggAdminMenuQrBox');
+    if(!box)return;
+    box.innerHTML='';
+    try{
+      if(window.KGGQrCore&&typeof window.KGGQrCore.renderQrToImg==='function'){
+        const img=document.createElement('img');
+        img.alt='QR-Code';
+        img.src=window.KGGQrCore.renderQrToImg(value,{cellSize:8,margin:4});
+        box.appendChild(img);
+        return;
+      }
+      if(typeof window.qrcode==='function'){
+        const qr=window.qrcode(0,'M');
+        qr.addData(value);
+        qr.make();
+        const img=document.createElement('img');
+        img.alt='QR-Code';
+        img.src=qr.createDataURL(8,4);
+        box.appendChild(img);
+        return;
+      }
+    }catch(err){
+      console.warn('Admin-Menue-QR konnte nicht gerendert werden:',err);
+    }
+    box.textContent='QR konnte nicht erzeugt werden. Link nutzen.';
+  }
+  function openKggAdminMenuQr(target){
+    const modal=$('kggAdminMenuQrModal'), title=$('kggAdminMenuQrTitle'), hint=$('kggAdminMenuQrHint'), link=$('kggAdminMenuQrLink');
+    if(!modal||!title||!hint||!link)return;
+    title.textContent=target.title;
+    hint.textContent=target.hint;
+    const value=target.url||target.text||'';
+    window.KGG_ADMIN_MENU_QR_CURRENT={title:target.title||'KGG QR',hint:target.hint||'',value};
+    link.value=value;
+    if(value)renderKggAdminMenuQr(value);
+    else if($('kggAdminMenuQrBox'))$('kggAdminMenuQrBox').textContent='';
+    modal.classList.add('isOpen');
+    modal.setAttribute('aria-hidden','false');
+  }
+  window.openKggAdminMenuQr=openKggAdminMenuQr;
+  window.openKggTherapistAppOnlyQr=openKggTherapistAppOnlyQr;
+  function wrapKggQrPrintText(text,maxChars){
+    const words=String(text||'').replace(/\s+/g,' ').trim().split(' ').filter(Boolean);
+    const lines=[];
+    let line='';
+    words.forEach(word=>{
+      if(word.length>maxChars){
+        if(line){lines.push(line);line='';}
+        for(let i=0;i<word.length;i+=maxChars)lines.push(word.slice(i,i+maxChars));
+        return;
+      }
+      const next=line?line+' '+word:word;
+      if(next.length>maxChars&&line){lines.push(line);line=word;}
+      else line=next;
+    });
+    if(line)lines.push(line);
+    return lines.length?lines:[''];
+  }
+  function buildKggAdminMenuQrPrintPdf(){
+    const current=window.KGG_ADMIN_MENU_QR_CURRENT||{};
+    const value=String(current.value||($('kggAdminMenuQrLink')&&$('kggAdminMenuQrLink').value)||'').trim();
+    if(!value)throw new Error('missing_qr_value');
+    const JsPdfCtor=findJsPdfConstructor();
+    if(!JsPdfCtor)throw new Error('missing_pdf_runtime');
+    if(typeof window.qrcode!=='function')throw new Error('missing_qr_runtime');
+    const doc=new JsPdfCtor({orientation:'portrait',unit:'mm',format:'a4'});
+    try{doc.setProperties({title:'KGG Kolleg:innen-App QR',subject:'KGG APK QR',creator:VERSION});}catch(e){}
+    const title=String(current.title||'Kolleg:innen-App APK QR');
+    const hint=String(current.hint||'QR-Code scannen oder Link oeffnen.');
+    try{doc.setFont('helvetica','bold');}catch(e){}
+    doc.setFontSize(18); doc.setTextColor(7,16,39); doc.text(title,16,20);
+    try{doc.setFont('helvetica','normal');}catch(e){}
+    doc.setFontSize(10); doc.setTextColor(80,94,112);
+    wrapKggQrPrintText(hint,92).slice(0,3).forEach((line,index)=>doc.text(line,16,29+(index*5)));
+    const qr=window.qrcode(0,'M');
+    qr.addData(value);
+    qr.make();
+    const count=qr.getModuleCount();
+    const size=124;
+    const x=(210-size)/2;
+    const y=48;
+    const cell=size/count;
+    doc.setDrawColor(225,231,239);
+    doc.setFillColor(255,255,255);
+    doc.rect(x-5,y-5,size+10,size+10,'F');
+    doc.rect(x-5,y-5,size+10,size+10,'S');
+    doc.setFillColor(0,0,0);
+    for(let row=0;row<count;row++){
+      for(let col=0;col<count;col++){
+        if(qr.isDark(row,col))doc.rect(x+(col*cell),y+(row*cell),cell+.03,cell+.03,'F');
+      }
+    }
+    doc.setFontSize(8); doc.setTextColor(52,64,84);
+    wrapKggQrPrintText(value,92).slice(0,5).forEach((line,index)=>doc.text(line,16,188+(index*4.5)));
+    doc.setFontSize(9); doc.setTextColor(102,112,133);
+    doc.text('Keine Admin-Funktionen, keine API-Keys, keine Patientendaten.',16,222);
+    const filename='kgg_kolleginnen_app_qr_'+new Date().toISOString().slice(0,10)+'.pdf';
+    const blob=pdfBlobFromDoc(doc);
+    if(!blob)throw new Error('missing_pdf_blob');
+    return {blob,filename};
+  }
+  async function printKggAdminMenuQr(){
+    try{
+      const result=buildKggAdminMenuQrPrintPdf();
+      const bridge=nativePdfBridge();
+      if(bridge&&typeof bridge.print==='function'){
+        const base64=await pdfBlobToBase64(result.blob);
+        if(bridge.print(result.filename,base64))return true;
+      }
+      const url=URL.createObjectURL(result.blob);
+      if(openPdfUrlCrossBrowser(url)){
+        setTimeout(()=>URL.revokeObjectURL(url),60000);
+        return true;
+      }
+      URL.revokeObjectURL(url);
+      downloadPdfBlob(result.blob,result.filename);
+      return true;
+    }catch(err){
+      console.warn('QR-Druck konnte nicht gestartet werden:',err);
+      alert('QR-Druck konnte nicht gestartet werden. Bitte Link kopieren oder erneut versuchen.');
+      return false;
+    }
+  }
+  if($('tabletMenuAdminConfigBtn'))$('tabletMenuAdminConfigBtn').onclick=()=>{setTabletSideMenuOpen(false); const btn=$('adminConfigBtn'); if(btn)btn.click();};
+  if($('tabletMenuSharedBankBtn'))$('tabletMenuSharedBankBtn').onclick=()=>{setTabletSideMenuOpen(false); const btn=$('sharedBankBtn'); if(btn)btn.click();};
+  if($('tabletMenuSyncQrBtn'))$('tabletMenuSyncQrBtn').onclick=()=>{setTabletSideMenuOpen(false); openSyncPairModal();};
+  if($('tabletMenuConfigTransferBtn'))$('tabletMenuConfigTransferBtn').onclick=async()=>{setTabletSideMenuOpen(false); try{await openKggConfigTransferQr();}catch(err){console.warn('Konfig-Transfer QR fehlgeschlagen:',err); alert('Konfig-Transfer konnte nicht erstellt werden.');}};
+  function toggleTabletSideMenuLayoutPanel(){
+    const panel=$('tabletMenuLayoutPanel'), btn=$('tabletMenuLayoutBtn');
+    if(!panel)return;
+    const opening=!!panel.hidden;
+    panel.hidden=!opening;
+    if(btn)btn.setAttribute('aria-expanded',String(opening));
+  }
+  function toggleTabletMenuAnchoredPanel(kind){
+    const cfg=tabletPanelConfig(kind);
+    const panel=cfg&&$(cfg.panelId);
+    if(!panel)return;
+    if(panel.classList.contains('hidden'))openTabletAnchoredPanel(kind);
+    else closeTabletAnchoredPanel(kind);
+  }
+  if($('tabletMenuRecentBtn'))$('tabletMenuRecentBtn').onclick=()=>{closeTabletPackageOverlay(false);setTabletLayoutEditMode(false);toggleTabletMenuAnchoredPanel('recent');};
+  if($('tabletMenuPackagesBtn'))$('tabletMenuPackagesBtn').onclick=toggleTabletPackageOverlay;
+  if($('tabletMenuTherapistShareBtn'))$('tabletMenuTherapistShareBtn').onclick=()=>{closeTabletPackageOverlay(false);setTabletLayoutEditMode(false);setTabletSideMenuOpen(false); openKggTherapistAppOnlyQr();};
+  if($('tabletMenuLayoutBtn'))$('tabletMenuLayoutBtn').onclick=toggleTabletLayoutEditMode;
+  if($('tabletPackageClose'))$('tabletPackageClose').onclick=()=>closeTabletPackageOverlay(false);
+  if($('tabletPackageShade'))$('tabletPackageShade').onclick=()=>closeTabletPackageOverlay(false);
+  if($('tabletPackageSearch'))$('tabletPackageSearch').addEventListener('input',renderTabletPackageOverlay);
+  function bindV399TabletMenuAction(id,handler,tabletOnly){
+    const el=$(id);
+    if(!el||el.dataset.kggV399ActionBound==='1')return;
+    el.dataset.kggV399ActionBound='1';
+    el.onclick=null;
+    el.addEventListener('click',ev=>{
+      if(tabletOnly!==false&&!isTabletLayout())return;
 ```

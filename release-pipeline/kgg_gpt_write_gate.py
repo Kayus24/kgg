@@ -328,11 +328,11 @@ def plan_modular_patch(payload: dict[str, Any]) -> tuple[dict[Path, bytes], dict
         area=payload["touched_areas"],
         version_name=None,
         allow_protected=payload["protected_scope"] == CROSS_APP_SCOPE,
-        allow_changelog_overflow=True,
+        allow_changelog_overflow=False,
         approval_note=(
             "Gate-managed cross-app QR Preview scope authorized by Max; PR/Main still require the exact final approval phrase."
             if payload["protected_scope"] == CROSS_APP_SCOPE
-            else "Gate-managed Custom GPT module patch; Max approved modular GPT migration with existing embedded changelog overflow."
+            else ""
         ),
         patch_content=payload["patch_content"],
     )

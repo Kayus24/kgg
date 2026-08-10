@@ -4,424 +4,424 @@
 - Lines: 23941-24360
 
 ```html
-        document.addEventListener('pointermove',move,{passive:true});
-        document.addEventListener('pointerup',up,{once:true});
-        document.addEventListener('pointercancel',up,{once:true});
+      ev.preventDefault();
+      ev.stopPropagation();
+      if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();
+      handler(ev);
+    },true);
+  }
+  bindV399TabletMenuAction('tabletMenuRecentBtn',()=>{closeTabletPackageOverlay(false);setTabletLayoutEditMode(false);toggleTabletMenuAnchoredPanel('recent');});
+  bindV399TabletMenuAction('tabletMenuPackagesBtn',()=>toggleTabletPackageOverlay());
+  bindV399TabletMenuAction('tabletMenuTherapistShareBtn',()=>{closeTabletPackageOverlay(false);setTabletLayoutEditMode(false);setTabletSideMenuOpen(false);openKggTherapistAppOnlyQr();});
+  bindV399TabletMenuAction('tabletMenuLayoutBtn',()=>toggleTabletLayoutEditMode());
+  bindV399TabletMenuAction('tabletPackageClose',()=>closeTabletPackageOverlay(false),false);
+  bindV399TabletMenuAction('tabletPackageShade',()=>closeTabletPackageOverlay(false),false);
+  if($('kggTherapistShareModal'))$('kggTherapistShareModal').addEventListener('click',ev=>{if(ev.target===$('kggTherapistShareModal'))closeKggTherapistShareModal();});
+  if($('therapistShareCancel'))$('therapistShareCancel').onclick=closeKggTherapistShareModal;
+  if($('therapistShareAppOnly'))$('therapistShareAppOnly').onclick=openKggTherapistAppOnlyQr;
+  if($('therapistShareSetup'))$('therapistShareSetup').onclick=()=>openKggTherapistSetupQr().catch(err=>{console.warn('Therapeuten-Setup-QR fehlgeschlagen:',err); alert('Setup-QR konnte nicht erstellt werden.');});
+  if($('therapistShareApiOnly'))$('therapistShareApiOnly').onclick=()=>openKggTherapistApiOnlyQr().catch(err=>{console.warn('API-Key-QR fehlgeschlagen:',err); alert('API-Key-QR konnte nicht erstellt werden.');});
+  document.querySelectorAll('[data-kgg-admin-menu-qr]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const target=kggAdminMenuQrTargets[btn.getAttribute('data-kgg-admin-menu-qr')];
+      if(target){setTabletSideMenuOpen(false); openKggAdminMenuQr(target);}
+    });
+  });
+  if($('kggAdminMenuQrClose'))$('kggAdminMenuQrClose').onclick=closeKggAdminMenuQrModal;
+  if($('kggAdminMenuQrModal'))$('kggAdminMenuQrModal').addEventListener('click',ev=>{if(ev.target===$('kggAdminMenuQrModal'))closeKggAdminMenuQrModal();});
+  if($('kggAdminMenuQrCopy'))$('kggAdminMenuQrCopy').onclick=async()=>{const link=$('kggAdminMenuQrLink'); if(!link)return; const ok=await copyTextValue(link.value); if(!ok){link.focus(); link.select();}};
+  if($('kggAdminMenuQrOpen'))$('kggAdminMenuQrOpen').onclick=()=>{const link=$('kggAdminMenuQrLink'); if(link&&link.value&&/^https?:\/\//.test(link.value))window.open(link.value,'_blank','noopener');};
+  if($('kggAdminMenuQrPrint'))$('kggAdminMenuQrPrint').onclick=()=>printKggAdminMenuQr();
+  $('dismissInstallPrompt').onclick=()=>{localStorage.setItem(pwaInstallPromptSeenKey,new Date().toISOString()); closeInstallPrompt();};
+  $('acceptInstallPrompt').onclick=acceptInstallPrompt;
+  $('installPromptModal').addEventListener('click',ev=>{if(ev.target===$('installPromptModal')){$('dismissInstallPrompt').click();}});
+  $('printPdfPreview').onclick=printCurrentPdfPreview;
+  $('downloadPdfPreview').onclick=downloadCurrentPdfPreview;
+  $('openPdfPreviewTab').onclick=openCurrentPdfPreviewTab;
+  $('openPdfPreviewFallback').onclick=openCurrentPdfPreviewTab;
+  $('openPdfPreviewMobileBridge').onclick=openCurrentPdfPreviewTab;
+  $('closePdfPreview').onclick=closePdfPreview;
+  $('pdfPreviewModal').addEventListener('click',ev=>{if(ev.target===$('pdfPreviewModal'))closePdfPreview();});
+  $('savePackageBtn').onclick=openPackageSaveModal;
+  $('cancelPackageSave').onclick=closePackageSaveModal;
+  $('confirmPackageSave').onclick=confirmPackageSave;
+  $('packageSaveModal').addEventListener('click',ev=>{if(ev.target===$('packageSaveModal'))closePackageSaveModal();});
+  $('packageNameInput').addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();confirmPackageSave();} if(ev.key==='Escape'){ev.preventDefault();closePackageSaveModal();}});
+  $('cancelBankDelete').onclick=closeBankDeleteModal;
+  $('confirmBankDelete').onclick=confirmBankDelete;
+  $('bankDeleteModal').addEventListener('click',ev=>{if(ev.target===$('bankDeleteModal'))closeBankDeleteModal();});
+  function installKggV383UiFlowStability(){
+    let phoneTapSuppressUntil=0;
+    let phoneBankBrowseMode=false;
+    const pointFromEvent=ev=>{
+      const point=ev&&ev.touches&&ev.touches[0]||ev&&ev.changedTouches&&ev.changedTouches[0]||ev||{};
+      return {x:Number(point.clientX)||0,y:Number(point.clientY)||0};
+    };
+    trackPhoneTouchStart=function(ev){
+      if(!isPhoneLayout())return;
+      const point=pointFromEvent(ev);
+      phoneTapSuppressUntil=0;
+      kggPhoneTouchStart={x:point.x,y:point.y,moved:false};
+    };
+    trackPhoneTouchMove=function(ev){
+      if(!isPhoneLayout())return;
+      const point=pointFromEvent(ev);
+      if(kggPhoneTouchStart){
+        const dx=Math.abs(point.x-kggPhoneTouchStart.x);
+        const dy=Math.abs(point.y-kggPhoneTouchStart.y);
+        if(dx>7||dy>7)kggPhoneTouchStart.moved=true;
+      }
+      if(kggPhoneTouchStart&&kggPhoneTouchStart.moved)markPhoneUserScrolling();
+    };
+    trackPhoneTouchEnd=function(){
+      if(kggPhoneTouchStart&&kggPhoneTouchStart.moved){
+        phoneTapSuppressUntil=Date.now()+170;
+        markPhoneUserScrolling();
+      }
+      kggPhoneTouchStart=null;
+    };
+    shouldIgnorePhoneScrollToggle=function(){
+      return isPhoneLayout()&&Date.now()<phoneTapSuppressUntil;
+    };
+    guardPhoneScrollToggle=function(ev){
+      if(!shouldIgnorePhoneScrollToggle())return false;
+      if(ev){ev.preventDefault();ev.stopPropagation();}
+      return true;
+    };
+    initPhoneScrollGuard=function(){
+      if(window.__kggPhoneScrollGuardBound)return;
+      window.__kggPhoneScrollGuardBound=true;
+      window.addEventListener('scroll',markPhoneUserScrolling,{passive:true});
+      if(window.PointerEvent){
+        document.addEventListener('pointerdown',ev=>{if(ev.pointerType==='touch')trackPhoneTouchStart(ev);},{passive:true});
+        document.addEventListener('pointermove',ev=>{if(ev.pointerType==='touch')trackPhoneTouchMove(ev);},{passive:true});
+        document.addEventListener('pointerup',ev=>{if(ev.pointerType==='touch')trackPhoneTouchEnd(ev);},{passive:true});
+        document.addEventListener('pointercancel',ev=>{if(ev.pointerType==='touch')trackPhoneTouchEnd(ev);},{passive:true});
+      }else{
+        document.addEventListener('touchstart',trackPhoneTouchStart,{passive:true});
+        document.addEventListener('touchmove',trackPhoneTouchMove,{passive:true});
+        document.addEventListener('touchend',trackPhoneTouchEnd,{passive:true});
+        document.addEventListener('touchcancel',trackPhoneTouchEnd,{passive:true});
+      }
+    };
+    markPhoneButtonFloat=function(){};
+    const blurPhoneComposerForBrowse=()=>{
+      if(!isPhoneLayout())return;
+      phoneBankBrowseMode=true;
+      document.body.classList.add('kggPhoneDbBrowseMode');
+      const input=$('exerciseInput');
+      if(input&&document.activeElement===input){
+        try{input.blur();}catch(err){}
+      }
+      document.body.classList.remove('phoneTextFocus');
+      updatePhoneKeyboardInset();
+    };
+    const openOrCloseBankFromBrowseTap=ev=>{
+      if(guardPhoneScrollToggle(ev))return;
+      if(isPhoneLayout())blurPhoneComposerForBrowse();
+      const opening=!state.bankOpen;
+      if(opening&&isTabletLayout())openTabletExclusivePanel('bank');
+      state.bankOpen=opening;
+      render();
+      setTabletOverlayActiveFlag();
+    };
+    const input=$('exerciseInput');
+    if(input){
+      input.addEventListener('focus',()=>{phoneBankBrowseMode=false;document.body.classList.remove('kggPhoneDbBrowseMode');});
+      input.addEventListener('input',()=>{phoneBankBrowseMode=false;document.body.classList.remove('kggPhoneDbBrowseMode');});
+    }
+    const oldApplySelectedExerciseToText=applySelectedExerciseToText;
+    applySelectedExerciseToText=function(ex,options){
+      const next={...(options||{})};
+      if(isPhoneLayout()&&phoneBankBrowseMode)next.keepFocus=false;
+      return oldApplySelectedExerciseToText(ex,next);
+    };
+    if($('bankToggle'))$('bankToggle').onclick=openOrCloseBankFromBrowseTap;
+    if($('dbTitle')){
+      $('dbTitle').onclick=openOrCloseBankFromBrowseTap;
+      $('dbTitle').onkeydown=null;
+      $('dbTitle').addEventListener('keydown',ev=>{
+        if(ev.key==='Enter'||ev.key===' '){
+          ev.preventDefault();
+          ev.stopImmediatePropagation();
+          openOrCloseBankFromBrowseTap(ev);
+        }
+      },true);
+    }
+    if($('baseToggle'))$('baseToggle').onclick=ev=>{
+      if(guardPhoneScrollToggle(ev))return;
+      const base=$('baseFields');
+      const opening=base.classList.contains('hidden');
+      if(isTabletLayout()){
+        if(opening)openTabletAnchoredPanel('base'); else closeTabletAnchoredPanel('base');
+      }else{
+        base.classList.toggle('hidden',!opening);
+        setTabletOverlayActiveFlag();
+        updateToggleCarets();
+      }
+    };
+    if($('recentToggle'))$('recentToggle').onclick=ev=>{
+      if(guardPhoneScrollToggle(ev))return;
+      const recent=$('recentList');
+      const opening=recent.classList.contains('hidden');
+      if(isTabletLayout()){
+        if(opening)openTabletAnchoredPanel('recent'); else closeTabletAnchoredPanel('recent');
+      }else{
+        openPhoneFloatingDrawer('recent');
+      }
+    };
+    const packageToggleBtn=$('packageToggle');
+    if(packageToggleBtn)packageToggleBtn.onclick=ev=>{
+      if(guardPhoneScrollToggle(ev))return;
+      if(isTabletLayout())toggleTabletPackageOverlay();
+      else openPhoneFloatingDrawer('package');
+    };
+    const modalClosers={
+      editorModal:typeof closeEditor==='function'?closeEditor:null,
+      shareModal:typeof closeFinishModal==='function'?closeFinishModal:null,
+      largePdfModal:typeof closeLargePdfModal==='function'?closeLargePdfModal:null,
+      longMediaConfirmModal:typeof closeLongMediaConfirmModal==='function'?closeLongMediaConfirmModal:null,
+      adminSecretsModal:typeof closeAdminSecretsModal==='function'?closeAdminSecretsModal:null,
+      sharedBankModal:typeof closeSharedBankModal==='function'?closeSharedBankModal:null,
+      syncPairModal:typeof closeSyncPairModal==='function'?closeSyncPairModal:null
+    };
+    document.querySelectorAll('.modal').forEach(modal=>{
+      if(modal.dataset.kggV383BackdropBound==='1')return;
+      modal.dataset.kggV383BackdropBound='1';
+      modal.addEventListener('pointerup',ev=>{
+        if(ev.target!==modal)return;
+        ev.preventDefault();
+        ev.stopPropagation();
+        const close=modalClosers[modal.id];
+        if(typeof close==='function')close();
+        else modal.classList.remove('open');
+      });
+    });
+    const adminQrModal=$('kggAdminMenuQrModal');
+    if(adminQrModal&&!adminQrModal.dataset.kggV383BackdropBound){
+      adminQrModal.dataset.kggV383BackdropBound='1';
+      adminQrModal.addEventListener('pointerup',ev=>{
+        if(ev.target!==adminQrModal)return;
+        ev.preventDefault();
+        if(typeof closeKggAdminMenuQrModal==='function')closeKggAdminMenuQrModal();
       });
     }
-    window.addEventListener('resize',()=>requestAnimationFrame(()=>{updateTabletLayoutAdaptiveClasses();updateTabletLayoutHandle();updateTabletLayoutCollisionGuard();}));
-    window.addEventListener('orientationchange',()=>setTimeout(()=>{updateTabletLayoutAdaptiveClasses();updateTabletLayoutHandle();updateTabletLayoutCollisionGuard();},120));
-    applyTabletLayoutSettings();
+    const oldApplyNativeSyncInvite=applyNativeSyncInvite;
+    applyNativeSyncInvite=function(invite){
+      setScanStatus('QR erkannt: Sync-Kopplung wird gelesen ...');
+      try{
+        const entry=oldApplyNativeSyncInvite(invite);
+        const peers=syncPeerDisplayEntries().length;
+        setScanStatus('Sync-Kopplung gespeichert. Dieses Geraet liest und schreibt im Sync-Raum. '+(peers?'Anderes Geraet gefunden: Synchronisation aktiv.':'Warte auf weitere Geraete mit diesem QR.'));
+        return entry;
+      }catch(err){
+        setScanStatus('Fehler: ungueltige Sync-Daten.');
+        throw err;
+      }
+    };
+    const oldApplyNativeSyncBundle=applyNativeSyncBundle;
+    applyNativeSyncBundle=async function(bundle){
+      setScanStatus('QR erkannt: Sync-Datenpaket wird gelesen ...');
+      try{
+        const result=await oldApplyNativeSyncBundle(bundle);
+        const peers=syncPeerDisplayEntries().length;
+        setScanStatus('Sync-Datenpaket gespeichert. Verbindung und Daten wurden lokal uebernommen. '+(peers?'Synchronisation aktiv.':'Warte auf weitere Geraete mit diesem QR.'));
+        return result;
+      }catch(err){
+        setScanStatus('Fehler: Sync-Verbindung nicht moeglich.');
+        throw err;
+      }
+    };
   }
-  const tabletOverlayState={kind:null};
-  function tabletPanelConfig(kind){
-    if(kind==='base')return {kind:'base',panelId:'baseFields',anchorId:'baseToggle',preferred:'below',align:'left',minWidth:420,maxWidth:680};
-    if(kind==='recent')return {kind:'recent',panelId:'recentList',anchorId:(document.body.classList.contains('tabletMenuOpen')&&$('tabletMenuRecentBtn'))?'tabletMenuRecentBtn':'recentToggle',preferred:document.body.classList.contains('tabletMenuOpen')?'below':'above',align:'left',minWidth:360,maxWidth:560};
-    if(kind==='package')return {kind:'package',panelId:'packageList',anchorId:(document.body.classList.contains('tabletMenuOpen')&&$('tabletMenuPackagesBtn'))?'tabletMenuPackagesBtn':'packageToggle',preferred:document.body.classList.contains('tabletMenuOpen')?'below':'above',align:'left',minWidth:360,maxWidth:620};
-    return null;
+  function installKggV388AndroidFlowFixes(){
+    let lastTabletMenuToggleAt=0;
+    const menu=tabletMenuBtn;
+    const toggle=ev=>{
+      if(!isTabletLayout())return;
+      const now=Date.now();
+      if(now-lastTabletMenuToggleAt<220){
+        if(ev){ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();}
+        return;
+      }
+      lastTabletMenuToggleAt=now;
+      if(ev){ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();}
+      setTabletSideMenuOpen(!document.body.classList.contains('tabletMenuOpen'));
+    };
+    const isMenuHit=ev=>{
+      if(!menu||!ev)return false;
+      const point=ev.touches&&ev.touches[0]?ev.touches[0]:ev;
+      const r=menu.getBoundingClientRect();
+      const pad=10;
+      return point.clientX>=r.left-pad&&point.clientX<=r.right+pad&&point.clientY>=r.top-pad&&point.clientY<=r.bottom+pad;
+    };
+    if(menu&&menu.dataset.kggV388MenuBound!=='1'){
+      menu.dataset.kggV388MenuBound='1';
+      menu.addEventListener('pointerdown',toggle,{capture:true});
+      menu.addEventListener('click',toggle,{capture:true});
+      menu.addEventListener('touchstart',toggle,{capture:true,passive:false});
+      menu.addEventListener('keydown',ev=>{
+        if(ev.key!=='Enter'&&ev.key!==' ')return;
+        toggle(ev);
+      },true);
+      document.addEventListener('pointerdown',ev=>{
+        if(!isTabletLayout()||!isMenuHit(ev))return;
+        toggle(ev);
+      },true);
+      document.addEventListener('touchstart',ev=>{
+        if(!isTabletLayout()||!isMenuHit(ev))return;
+        toggle(ev);
+      },{capture:true,passive:false});
+    }
+    const close=tabletMenuClose;
+    if(close&&close.dataset.kggV388MenuBound!=='1'){
+      close.dataset.kggV388MenuBound='1';
+      close.addEventListener('click',ev=>{ev.preventDefault();setTabletSideMenuOpen(false);},{capture:true});
+    }
+    const backdrop=tabletSideBackdrop;
+    if(backdrop&&backdrop.dataset.kggV388MenuBound!=='1'){
+      backdrop.dataset.kggV388MenuBound='1';
+      backdrop.addEventListener('click',ev=>{ev.preventDefault();setTabletSideMenuOpen(false);},{capture:true});
+    }
   }
-  function clearTabletOverlayStyles(panel){
-    if(!panel)return;
-    ['--kgg-overlay-left','--kgg-overlay-top','--kgg-overlay-width','--kgg-overlay-max-height','--kgg-overlay-origin'].forEach(name=>panel.style.removeProperty(name));
-  }
-  function setTabletOverlayActiveFlag(){
-    const active=!!(isTabletLayout()&&(
-      ($('baseFields')&&!$('baseFields').classList.contains('hidden'))||
-      ($('recentList')&&!$('recentList').classList.contains('hidden'))||
-      ($('packageList')&&!$('packageList').classList.contains('hidden'))
-    ));
-    document.body.classList.toggle('kggTabletOverlayActive',active);
-    if(!active)tabletOverlayState.kind=null;
-    updateToggleCarets();
-    setTabletAnchorActiveClasses();
-  }
-  function closeTabletFloatingPanelsExcept(except){
-    const base=$('baseFields'), recent=$('recentList'), packages=$('packageList');
-    if(base&&except!=='base'){base.classList.add('hidden');clearTabletOverlayStyles(base);}
-    if(recent&&except!=='recent'){recent.classList.add('hidden');clearTabletOverlayStyles(recent);}
-    if(packages&&except!=='package'){packages.classList.add('hidden');clearTabletOverlayStyles(packages);}
-    if(!['base','recent','package'].includes(except||''))tabletOverlayState.kind=null;
-    let needsRender=false;
-    if(except!=='bank'&&state&&state.bankOpen){state.bankOpen=false; needsRender=true;}
-    if(window.KGGScan&&typeof window.KGGScan.collapseAll==='function')window.KGGScan.collapseAll('tablet_overlay_'+(except||'none'));
-    setTabletOverlayActiveFlag();
-    return needsRender;
-  }
-  function clampNumber(value,min,max){return Math.max(min,Math.min(max,value));}
-  function positionTabletAnchoredOverlay(kind){
-    if(!isTabletLayout())return false;
-    const cfg=tabletPanelConfig(kind);
-    if(!cfg)return false;
-    const panel=$(cfg.panelId), anchor=$(cfg.anchorId), app=document.querySelector('.app');
-    if(!panel||!anchor||!app||panel.classList.contains('hidden'))return false;
-    const appRect=app.getBoundingClientRect();
-    const anchorRect=anchor.getBoundingClientRect();
-    const vv=window.visualViewport||null;
-    const viewTop=vv?vv.offsetTop:0;
-    const viewHeight=vv?vv.height:window.innerHeight;
-    const viewBottom=viewTop+viewHeight;
-    const margin=12;
-    const availableWidth=Math.max(280,appRect.width-(margin*2));
-    const minW=Math.min(cfg.minWidth||360,availableWidth);
-    const maxW=Math.min(cfg.maxWidth||620,availableWidth);
-    let width=clampNumber(Math.max(anchorRect.width,minW),minW,maxW);
-    let left=(cfg.align==='right')?(anchorRect.right-width):anchorRect.left;
-    left=clampNumber(left,appRect.left+margin,appRect.right-width-margin);
+  /* KGG_LOGIC_SMOKE_BOOT_BOUNDARY */
+  installKggV383UiFlowStability();
+  installKggV388AndroidFlowFixes();
+  load(); initLargePdfMode(); renderRuntimeVersionInUi(); renderBuildIdentityInUi(); setTimeout(renderBuildIdentityInUi,500); initPwaAndUpdates(); initAdminModeAccess(); initTabletSoftKeyboardLayout(); initPhoneKeyboardAndDrawers(); initTabletLayoutControls(); initNativeExerciseBankSync(); ensureKGGDataStore().init({appVersion:VERSION}); syncStatePlanToStore('app_init_after_load'); if(state.patient.name) $('patientName').value=state.patient.name; if(state.patient.date) $('planDate').value=state.patient.date; if(state.patient.therapist) $('therapistName').value=state.patient.therapist; if(state.patient.notes) $('planNotes').value=state.patient.notes; syncTextInputFromPlan('app_init_text_master'); render(); setTabletOverlayActiveFlag(); tryApplyKggSetupFromHash().catch(err=>{console.warn('Therapeuten-Setup konnte nicht uebernommen werden:',err);});
+})();
+</script>
 
-    panel.style.setProperty('--kgg-overlay-width',Math.round(width)+'px');
-    panel.style.setProperty('--kgg-overlay-left',Math.round(left)+'px');
-    panel.style.setProperty('--kgg-overlay-max-height','min(72vh,520px)');
-
-    const measured=panel.getBoundingClientRect();
-    const wantedHeight=Math.max(160,Math.min(measured.height||panel.scrollHeight||320,Math.min(520,viewHeight-(margin*2))));
-    const belowTop=anchorRect.bottom+8;
-    const aboveTop=anchorRect.top-wantedHeight-8;
-    const enoughBelow=(belowTop+wantedHeight)<=Math.min(viewBottom-margin,appRect.bottom-margin);
-    const enoughAbove=aboveTop>=Math.max(viewTop+margin,appRect.top+margin);
-    let direction=cfg.preferred||'below';
-    if(direction==='below'&&!enoughBelow&&enoughAbove)direction='above';
-    if(direction==='above'&&!enoughAbove&&enoughBelow)direction='below';
-    if(!enoughBelow&&!enoughAbove)direction=((anchorRect.top-appRect.top)>(appRect.bottom-anchorRect.bottom))?'above':'below';
-    let top;
-    let maxHeight;
-    if(direction==='above'){
-      maxHeight=Math.max(160,Math.min(520,anchorRect.top-Math.max(viewTop+margin,appRect.top+margin)-8));
-      top=Math.max(viewTop+margin,anchorRect.top-Math.min(wantedHeight,maxHeight)-8);
-    }else{
-      top=belowTop;
-      maxHeight=Math.max(160,Math.min(520,Math.min(viewBottom-margin,appRect.bottom-margin)-top));
+<script id="kgg-mini-patch-v400-04-phone-clean-state-guard">
+/* v400 mini04: räumt nur im Phone-Viewport Tablet-Zustände auf.
+   Kein Eingriff in PDF/QR/Scan/Parser/Plan-State. */
+(function(){
+  const PHONE_QUERY='(max-width: 759px)';
+  function isPhone(){
+    return !!(window.matchMedia && window.matchMedia(PHONE_QUERY).matches);
+  }
+  function cleanPhoneTabletState(){
+    if(!isPhone()) return;
+    const body=document.body;
+    if(!body) return;
+    body.classList.remove('tabletMenuOpen','tabletPackageOverlayOpen','tabletLayoutEditMode');
+    const menu=document.getElementById('tabletSideMenu');
+    if(menu) menu.setAttribute('aria-hidden','true');
+    const menuBtn=document.getElementById('tabletMenuBtn');
+    if(menuBtn){
+      menuBtn.setAttribute('aria-expanded','false');
+      menuBtn.setAttribute('aria-label','Tablet-Menue oeffnen');
     }
-    top=clampNumber(top,viewTop+margin,Math.max(viewTop+margin,viewBottom-margin-120));
-    const originX=clampNumber((anchorRect.left+anchorRect.width/2)-left,24,width-24);
-    panel.style.setProperty('--kgg-overlay-top',Math.round(top)+'px');
-    panel.style.setProperty('--kgg-overlay-max-height',Math.round(maxHeight)+'px');
-    panel.style.setProperty('--kgg-overlay-origin',Math.round(originX)+'px '+(direction==='above'?'bottom':'top'));
-    tabletOverlayState.kind=kind;
-    document.body.classList.add('kggTabletOverlayActive');
-    return true;
-  }
-  function openTabletAnchoredPanel(kind){
-    if(!isTabletLayout())return false;
-    const cfg=tabletPanelConfig(kind);
-    if(!cfg)return false;
-    const needsRender=closeTabletFloatingPanelsExcept(kind);
-    if(needsRender)render();
-    const panel=$(cfg.panelId);
-    if(!panel)return false;
-    panel.classList.remove('hidden');
-    tabletOverlayState.kind=kind;
-    if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>positionTabletAnchoredOverlay(kind));
-    else setTimeout(()=>positionTabletAnchoredOverlay(kind),0);
-    setTabletOverlayActiveFlag();
-    return true;
-  }
-  function closeTabletAnchoredPanel(kind){
-    const cfg=tabletPanelConfig(kind);
-    const panel=cfg&&$(cfg.panelId);
-    if(panel){panel.classList.add('hidden');clearTabletOverlayStyles(panel);}
-    if(tabletOverlayState.kind===kind)tabletOverlayState.kind=null;
-    setTabletOverlayActiveFlag();
-    updateToggleCarets();
-    setTabletAnchorActiveClasses();
-  }
-  function setTabletLayoutEditMode(open){
-    const next=!!open&&isTabletLayout();
-    document.body.classList.toggle('tabletLayoutEditMode',next);
-    const btn=$('tabletMenuLayoutBtn');
-    const panel=$('tabletMenuLayoutPanel');
-    if(btn)btn.setAttribute('aria-expanded',String(next));
-    if(panel)panel.hidden=!next;
-    if(next){closeTabletPackageOverlay(false);closeTabletFloatingPanelsExcept('layout');}
-    requestAnimationFrame(()=>{updateTabletLayoutHandle();updateTabletLayoutCollisionGuard();});
-  }
-  function toggleTabletLayoutEditMode(){setTabletLayoutEditMode(!document.body.classList.contains('tabletLayoutEditMode'));}
-  function closeTabletPackageOverlay(closeMenu){
-    document.body.classList.remove('tabletPackageOverlayOpen');
-    const overlay=$('tabletPackageOverlay'), shade=$('tabletPackageShade');
-    if(overlay){
-      overlay.setAttribute('aria-hidden','true');
-      overlay.style.removeProperty('transform');
-      overlay.style.removeProperty('visibility');
-      overlay.style.removeProperty('transition');
+    const packageOverlay=document.getElementById('tabletPackageOverlay');
+    if(packageOverlay) packageOverlay.setAttribute('aria-hidden','true');
+    const shareModal=document.getElementById('kggTherapistShareModal');
+    if(shareModal){
+      shareModal.classList.remove('isOpen');
+      shareModal.setAttribute('aria-hidden','true');
     }
-    if(shade){shade.hidden=true;shade.setAttribute('aria-hidden','true');}
-    const btn=$('tabletMenuPackagesBtn');
-    if(btn)btn.setAttribute('aria-expanded','false');
-    if(closeMenu)setTabletSideMenuOpen(false);
-  }
-  function openTabletPackageOverlay(){
-    if(!isTabletLayout())return false;
-    setTabletLayoutEditMode(false);
-    closeTabletFloatingPanelsExcept('packageOverlay');
-    document.body.classList.add('tabletPackageOverlayOpen');
-    const overlay=$('tabletPackageOverlay'), shade=$('tabletPackageShade'), btn=$('tabletMenuPackagesBtn');
-    if(shade){shade.hidden=false;shade.setAttribute('aria-hidden','false');}
-    if(overlay){
-      overlay.setAttribute('aria-hidden','false');
-      overlay.style.setProperty('transition','none','important');
-      overlay.style.setProperty('transform','translate3d(0,0,0)','important');
-      overlay.style.setProperty('visibility','visible','important');
+    const adminQr=document.getElementById('kggAdminMenuQrModal');
+    if(adminQr){
+      adminQr.classList.remove('isOpen');
+      adminQr.setAttribute('aria-hidden','true');
     }
-    if(btn)btn.setAttribute('aria-expanded','true');
-    setTabletSideMenuOpen(true);
-    renderTabletPackageOverlay();
-    setTimeout(()=>{const input=$('tabletPackageSearch'); if(input)input.focus();},40);
-    return true;
   }
-  function toggleTabletPackageOverlay(){
-    if(document.body.classList.contains('tabletPackageOverlayOpen')){closeTabletPackageOverlay(false);return true;}
-    return openTabletPackageOverlay();
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',cleanPhoneTabletState,{once:true});
+  }else{
+    cleanPhoneTabletState();
   }
-  const phoneFloatingDrawerState={kind:null};
-  function ensurePhoneDrawerBackdrop(){
-    let backdrop=$('phoneDrawerBackdrop');
-    if(!backdrop){
-      backdrop=document.createElement('div');
-      backdrop.id='phoneDrawerBackdrop';
-      backdrop.className='kggPhoneDrawerBackdrop';
-      backdrop.setAttribute('aria-hidden','true');
-      backdrop.addEventListener('click',()=>closePhoneFloatingDrawer());
-      document.body.appendChild(backdrop);
-    }
-    return backdrop;
-  }
-  function closePhoneFloatingDrawer(){
-    const recent=$('recentList'), packages=$('packageList'), recentBtn=$('recentToggle'), packageBtn=$('packageToggle');
-    if(recent)recent.classList.add('hidden');
-    if(packages)packages.classList.add('hidden');
-    if(recentBtn)recentBtn.classList.remove('phoneButtonFloat');
-    if(packageBtn)packageBtn.classList.remove('phoneButtonFloat');
-    document.body.classList.remove('kggPhoneDrawerOpen');
-    phoneFloatingDrawerState.kind=null;
-    setTabletOverlayActiveFlag();
-  }
-  function openPhoneFloatingDrawer(kind){
-    if(!isPhoneLayout())return false;
-    if(shouldIgnorePhoneScrollToggle())return false;
-    const recent=$('recentList'), packages=$('packageList'), recentBtn=$('recentToggle'), packageBtn=$('packageToggle');
-    const target=kind==='recent'?recent:packages;
-    const targetBtn=kind==='recent'?recentBtn:packageBtn;
-    const other=kind==='recent'?packages:recent;
-    const otherBtn=kind==='recent'?packageBtn:recentBtn;
-    if(!target||!targetBtn)return false;
-    if(phoneFloatingDrawerState.kind===kind&&!target.classList.contains('hidden')){
-      closePhoneFloatingDrawer();
-      return true;
-    }
-    ensurePhoneDrawerBackdrop();
-    if(other)other.classList.add('hidden');
-    if(otherBtn)otherBtn.classList.remove('phoneButtonFloat');
-    target.classList.remove('hidden');
-    targetBtn.classList.add('phoneButtonFloat');
-    document.body.classList.add('kggPhoneDrawerOpen');
-    phoneFloatingDrawerState.kind=kind;
-    setTabletOverlayActiveFlag();
-    return true;
-  }
-  function openTabletExclusivePanel(kind){
-    if(!isTabletLayout())return false;
-    if(kind==='package')return openTabletPackageOverlay();
-    if(['base','recent'].includes(kind))return openTabletAnchoredPanel(kind);
-    const needsRender=closeTabletFloatingPanelsExcept(kind);
-    if(needsRender)render();
-    return true;
-  }
-  function repositionTabletOverlay(){
-    if(!isTabletLayout())return;
-    if(tabletOverlayState.kind)positionTabletAnchoredOverlay(tabletOverlayState.kind);
-  }
-  function setTabletSideMenuOpen(open){
-    const next=!!open&&isTabletLayout();
-    document.body.classList.toggle('tabletMenuOpen',next);
-    const btn=$('tabletMenuBtn');
-    if(btn){
-      btn.setAttribute('aria-expanded',String(next));
-      btn.setAttribute('aria-label',next?'Tablet-Menue schliessen':'Tablet-Menue oeffnen');
-    }
-    const menu=$('tabletSideMenu');
-    if(menu)menu.setAttribute('aria-hidden',String(!next));
-    const backdrop=$('tabletSideBackdrop');
-    if(backdrop)backdrop.setAttribute('aria-hidden',String(!next));
-    if(next)closeTabletFloatingPanelsExcept('menu');
-    else{closeTabletPackageOverlay(false); if(document.body.classList.contains('tabletLayoutEditMode'))setTabletLayoutEditMode(false);}
-    requestAnimationFrame(()=>{updateTabletLayoutHandle();updateTabletLayoutCollisionGuard();});
-    setTimeout(()=>{updateTabletLayoutHandle();updateTabletLayoutCollisionGuard();},260);
-    return next;
-  }
-  window.addEventListener('resize',()=>{setTimeout(repositionTabletOverlay,30); setTimeout(syncScannedPlansMobileDock,30); setTimeout(()=>{if(!isTabletLayout())setTabletSideMenuOpen(false);},30);});
-  window.addEventListener('orientationchange',()=>setTimeout(repositionTabletOverlay,120));
+  window.addEventListener('resize',()=>setTimeout(cleanPhoneTabletState,30),{passive:true});
+  window.addEventListener('orientationchange',()=>setTimeout(cleanPhoneTabletState,140),{passive:true});
   if(window.visualViewport){
-    window.visualViewport.addEventListener('resize',()=>{setTimeout(repositionTabletOverlay,30); setTimeout(syncScannedPlansMobileDock,30);});
-    window.visualViewport.addEventListener('scroll',()=>setTimeout(repositionTabletOverlay,30));
+    window.visualViewport.addEventListener('resize',()=>setTimeout(cleanPhoneTabletState,30),{passive:true});
   }
-  document.addEventListener('pointerdown',ev=>{
-    if(!isTabletLayout()||!tabletOverlayState.kind)return;
-    const cfg=tabletPanelConfig(tabletOverlayState.kind);
-    if(!cfg)return;
-    const panel=$(cfg.panelId), anchor=$(cfg.anchorId);
-    const target=ev.target;
-    if(panel&&panel.contains(target))return;
-    if(anchor&&anchor.contains(target))return;
-    closeTabletAnchoredPanel(tabletOverlayState.kind);
-  },true);
-  document.addEventListener('keydown',ev=>{
-    if(ev.key!=='Escape'||!isTabletLayout())return;
-    if(document.body.classList.contains('tabletPackageOverlayOpen')){closeTabletPackageOverlay(false);return;}
-    if(tabletOverlayState.kind)closeTabletAnchoredPanel(tabletOverlayState.kind);
-  });
+})();
+</script>
+<script id="kgg-github-patch-v401-phone-plan-ui-isolation">
+/* v401 GitHub Update 003: Phone-only Plan-Interaktion einfrieren.
+   Hält die Außen-UI stabil, während Plan-Karten angetippt/verschoben werden.
+   Keine Änderung an Plan-State, Parser, QR, PDF, Kamera oder Tablet-Layout. */
+(function(){
+  const PHONE_QUERY='(max-width:759px)';
+  let releaseTimer=0;
+  let bodyObserver=null;
 
-  initScanAutoCollapseOnUiOpen();
-  if(renderPatientHashView())return;
-  $('visionBtn').onclick=()=>setLargePdfMode(!state.largePdfMode);
-  $('exerciseInput').addEventListener('input',()=>upsertLiveExerciseFromText()); $('exerciseInput').addEventListener('focus',()=>render()); $('clearInput').onclick=()=>{clearInputAndRemoveLiveTextExercises();};
-  $('bankToggle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; const opening=!state.bankOpen; if(opening)openTabletExclusivePanel('bank'); toggleBankOpenFromUi(); setTabletOverlayActiveFlag();};
-  $('dbTitle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; const opening=!state.bankOpen; if(opening)openTabletExclusivePanel('bank'); state.bankOpen=!state.bankOpen; render(); setTabletOverlayActiveFlag();};
-  $('dbTitle').addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();if(guardPhoneScrollToggle(ev))return; const opening=!state.bankOpen; if(opening)openTabletExclusivePanel('bank'); state.bankOpen=!state.bankOpen; render(); setTabletOverlayActiveFlag();}});
-  $('finishBtn').onclick=()=>{closeTabletFloatingPanelsExcept('modal'); openFinishModal();};
-  $('baseToggle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; const base=$('baseFields'); const opening=base.classList.contains('hidden'); if(isTabletLayout()){if(opening)openTabletAnchoredPanel('base'); else closeTabletAnchoredPanel('base');}else{base.classList.toggle('hidden',!opening); setTabletOverlayActiveFlag();}};
-  $('recentToggle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; const recent=$('recentList'); const opening=recent.classList.contains('hidden'); if(isTabletLayout()){if(opening)openTabletAnchoredPanel('recent'); else closeTabletAnchoredPanel('recent');}else{openPhoneFloatingDrawer('recent');}};
-  $('packageToggle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; if(isTabletLayout())toggleTabletPackageOverlay(); else openPhoneFloatingDrawer('package');};
-  $('exportBtn').onclick=exportData; $('pdfBtn').onclick=finishWithPdf; $('patientBtn').onclick=finishWithPatientApp; $('closeShare').onclick=closeFinishModal; $('copyShare').onclick=()=>navigator.clipboard&&navigator.clipboard.writeText($('shareText').value); $('patientName').addEventListener('input',()=>{state.patient.name=$('patientName').value;syncStatePlanToStore('ui_patient_name_input');save();render();}); $('planDate').addEventListener('input',()=>{state.patient.date=$('planDate').value;save();syncStatePlanToStore('ui_patient_date_input');}); $('therapistName').addEventListener('input',()=>{state.patient.therapist=$('therapistName').value;save();syncStatePlanToStore('ui_patient_therapist_input');}); $('planNotes').addEventListener('input',()=>{state.patient.notes=$('planNotes').value;save();syncStatePlanToStore('ui_patient_notes_input');}); $('scanBtn').onclick=()=>window.KGGScan.pick('camera'); $('filePickBtn').onclick=()=>window.KGGScan.pick('file'); $('filePickBtn').addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();window.KGGScan.pick('file');}}); $('fileInput').onchange=ev=>window.KGGScan.handleInput(ev.target,'camera'); $('filePickerInput').onchange=ev=>window.KGGScan.handleInput(ev.target,'file'); $('closeEditor').onclick=closeEditor; $('saveExercise').onclick=saveEditedExercise; $('deleteExercise').onclick=()=>{if(state.editId){if($('deleteExercise').dataset.scope==='bank')openBankDeleteModal(state.editId); else removeExercise(state.editId);} closeEditor();};
-  $('attachExerciseImage').onclick=()=>$('editMediaFile').click();
-  $('editMediaFile').onchange=handleEditorMediaFileSelected;
-  $('removeExerciseImage').onclick=removeEditorMedia;
-  $('finishPdfBtn').onclick=()=>finishWithPdf({large:false});
-  $('finishLargePdfBtn').onclick=openLargePdfModal;
-  $('finishPatientBtn').onclick=finishWithPatientApp;
-  $('finishCancelBtn').onclick=closeFinishModal;
-  $('shareModal').addEventListener('click',ev=>{if(ev.target===$('shareModal'))closeFinishModal();});
-  $('cancelLargePdf').onclick=closeLargePdfModal;
-  $('confirmLargePdf').onclick=()=>{closeLargePdfModal();finishWithPdf({large:true});};
-  $('largePdfModal').addEventListener('click',ev=>{if(ev.target===$('largePdfModal'))closeLargePdfModal();});
-  $('cancelLongMediaShare').onclick=closeLongMediaConfirmModal;
-  $('confirmLongMediaShare').onclick=confirmLongMediaShare;
-  $('longMediaConfirmModal').addEventListener('click',ev=>{if(ev.target===$('longMediaConfirmModal'))closeLongMediaConfirmModal();});
-  $('adminConfigBtn').onclick=openAdminSecretsModal;
-  $('closeAdminSecrets').onclick=closeAdminSecretsModal;
-  $('saveAdminSecrets').onclick=saveAdminSecretsFromModal;
-  if($('loadAdminSafeFile'))$('loadAdminSafeFile').onclick=()=>$('adminSafeFileInput').click();
-  if($('adminSafeFileInput'))$('adminSafeFileInput').onchange=ev=>importAdminSafeFile(ev.target.files&&ev.target.files[0]).catch(err=>alert('Admin-Safe-Datei konnte nicht gelesen werden: '+err.message)).finally(()=>{ev.target.value='';});
-  if($('importAdminCodePackage'))$('importAdminCodePackage').onclick=()=>importAdminCodePackageFromClipboard().catch(err=>alert('Code-Paket konnte nicht gelesen werden: '+err.message));
-  if($('exportAdminCodePackage'))$('exportAdminCodePackage').onclick=()=>exportAdminCodePackageToClipboard().catch(err=>alert('Code-Paket konnte nicht kopiert werden: '+err.message));
-  if($('downloadAdminSafeFile'))$('downloadAdminSafeFile').onclick=downloadAdminSafeFile;
-  $('clearAdminSecrets').onclick=()=>{clearLocalAdminSecrets(); if($('adminGeminiKey1'))$('adminGeminiKey1').value=''; if($('adminGeminiKey2'))$('adminGeminiKey2').value=''; if($('adminMediaDropzoneEndpoint'))$('adminMediaDropzoneEndpoint').value=''; if($('adminMediaDropzoneUploadToken'))$('adminMediaDropzoneUploadToken').value='';};
-  $('adminSecretsModal').addEventListener('click',ev=>{if(ev.target===$('adminSecretsModal'))closeAdminSecretsModal();});
-  $('sharedBankBtn').onclick=openSharedBankModal;
-  $('copySharedBank').onclick=copySharedBankPayload;
-  $('pickSharedBankFile').onclick=()=>$('sharedBankFile').click();
-  $('sharedBankFile').onchange=handleSharedBankFile;
-  $('applySharedBank').onclick=applySharedBankFromText;
-  $('closeSharedBank').onclick=closeSharedBankModal;
-  $('sharedBankModal').addEventListener('click',ev=>{if(ev.target===$('sharedBankModal'))closeSharedBankModal();});
+  function isPhone(){
+    return !!(window.matchMedia && window.matchMedia(PHONE_QUERY).matches);
+  }
 
-  if($('tabletMenuBtn'))$('tabletMenuBtn').onclick=()=>setTabletSideMenuOpen(!document.body.classList.contains('tabletMenuOpen'));
-  if($('tabletMenuClose'))$('tabletMenuClose').onclick=()=>setTabletSideMenuOpen(false);
-  if($('tabletSideBackdrop'))$('tabletSideBackdrop').onclick=()=>setTabletSideMenuOpen(false);
-  if($('syncQrBtn'))$('syncQrBtn').onclick=openSyncPairModal;
-  if($('tabletSyncQrBtn'))$('tabletSyncQrBtn').onclick=openSyncPairModal;
-  if($('copySyncPairCode'))$('copySyncPairCode').onclick=copySyncPairCode;
-  if($('testNativeSyncBtn'))$('testNativeSyncBtn').onclick=()=>testNativeSyncRoundtrip();
-  if($('downloadSyncFileBtn'))$('downloadSyncFileBtn').onclick=downloadNativeSyncFile;
-  if($('importSyncFileBtn'))$('importSyncFileBtn').onclick=()=>{const input=$('syncImportInput'); if(input)input.click();};
-  if($('syncImportInput'))$('syncImportInput').onchange=ev=>{const file=ev&&ev.target&&ev.target.files&&ev.target.files[0]; importNativeSyncFile(file).finally(()=>{if(ev&&ev.target)ev.target.value='';});};
-  if($('closeSyncPairModal'))$('closeSyncPairModal').onclick=closeSyncPairModal;
-  if($('syncPairModal'))$('syncPairModal').addEventListener('click',ev=>{if(ev.target===$('syncPairModal'))closeSyncPairModal();});
-  const kggAdminMenuQrTargets={
-    colleague:{title:'Kolleg:innen-Web-App QR',hint:'Oeffnet die jeweils verlinkte Kolleg:innen-Web-App.',url:'https://kayus24.github.io/kgg/therapist-app/latest-html.html'},
-    admin:{title:'Admin-Web-App QR',hint:'Oeffnet diese Admin-Web-App-Version. Manifest/Latest wird separat freigegeben.',url:'https://kayus24.github.io/kgg/therapist-app/releases/v388/web/KGG_APP_ADMIN_v388_android_flow_fixes.html'},
-    android:{title:'Kolleg:innen-App APK QR',hint:'Oeffnet die aktuelle Android-Download-Seite fuer Kolleg:innen. Keine API-Keys, keine Sync-Daten.',url:'https://kayus24.github.io/kgg/therapist-app/latest-android.html'}
-  };
-  function closeKggTherapistShareModal(){
-    const modal=$('kggTherapistShareModal');
-    if(!modal)return;
-    modal.classList.remove('isOpen');
-    modal.setAttribute('aria-hidden','true');
+  function currentPlanBlock(){
+    return document.getElementById('currentPlanBlock');
   }
-  function openKggTherapistShareModal(){
-    const modal=$('kggTherapistShareModal');
-    if(!modal)return;
-    modal.classList.add('isOpen');
-    modal.setAttribute('aria-hidden','false');
+
+  function isPlanCardTarget(target){
+    return !!(target && target.closest && target.closest('#currentPlanBlock .planCard'));
   }
-  function kggTherapistAppUrl(){
-    const target=kggAdminMenuQrTargets&&kggAdminMenuQrTargets.android;
-    return target&&target.url||'https://kayus24.github.io/kgg/therapist-app/latest-android.html';
-  }
-  function openKggTherapistAppOnlyQr(){
-    closeKggTherapistShareModal();
-    const url=kggTherapistAppUrl();
-    openKggAdminMenuQr({title:'Kolleg:innen-App APK QR',hint:'Oeffnet die aktuelle Android-Download-Seite fuer Kolleg:innen. Keine API-Keys, keine Sync-Daten.',url});
-  }
-  async function openKggTherapistSetupQr(){
-    const transfer=await buildKggEncryptedConfigTransferForQr({requireEncrypted:true});
-    if(!transfer)return;
-    closeKggTherapistShareModal();
-    const url=buildKggTherapistSetupUrl(kggTherapistAppUrl(),transfer.payloadCode);
-    openKggAdminMenuQr({title:'Therapeuten-App + API-Key',hint:'Setup-Link plus verschluesselter API-Key-Transfer. Transfer-Code: '+transfer.passCode,url});
-  }
-  async function openKggTherapistApiOnlyQr(){
-    closeKggTherapistShareModal();
-    await openKggConfigTransferQr();
-  }
-  function closeKggAdminMenuQrModal(){
-    const modal=$('kggAdminMenuQrModal');
-    if(!modal)return;
-    modal.classList.remove('isOpen');
-    modal.setAttribute('aria-hidden','true');
-  }
-  function renderKggAdminMenuQr(value){
-    const box=$('kggAdminMenuQrBox');
-    if(!box)return;
-    box.innerHTML='';
-    try{
-      if(window.KGGQrCore&&typeof window.KGGQrCore.renderQrToImg==='function'){
-        const img=document.createElement('img');
-        img.alt='QR-Code';
-        img.src=window.KGGQrCore.renderQrToImg(value,{cellSize:8,margin:4});
-        box.appendChild(img);
-        return;
-      }
-      if(typeof window.qrcode==='function'){
-        const qr=window.qrcode(0,'M');
-        qr.addData(value);
-        qr.make();
-        const img=document.createElement('img');
-        img.alt='QR-Code';
-        img.src=qr.createDataURL(8,4);
-        box.appendChild(img);
-        return;
-      }
-    }catch(err){
-      console.warn('Admin-Menue-QR konnte nicht gerendert werden:',err);
+
+  function freezePlanSection(ms){
+    if(!isPhone()) return;
+    const block=currentPlanBlock();
+    const body=document.body;
+    if(!block || !body) return;
+
+    const rect=block.getBoundingClientRect();
+    if(rect && rect.height > 0){
+      block.style.setProperty('--kgg-current-plan-freeze-h', Math.ceil(rect.height) + 'px');
     }
-    box.textContent='QR konnte nicht erzeugt werden. Link nutzen.';
+
+    body.classList.add('kggPlanSectionFrozen');
+    clearTimeout(releaseTimer);
+    releaseTimer=setTimeout(releasePlanSection, Number.isFinite(ms) ? ms : 520);
   }
-  function openKggAdminMenuQr(target){
-    const modal=$('kggAdminMenuQrModal'), title=$('kggAdminMenuQrTitle'), hint=$('kggAdminMenuQrHint'), link=$('kggAdminMenuQrLink');
-    if(!modal||!title||!hint||!link)return;
-    title.textContent=target.title;
-    hint.textContent=target.hint;
-    const value=target.url||target.text||'';
-    window.KGG_ADMIN_MENU_QR_CURRENT={title:target.title||'KGG QR',hint:target.hint||'',value};
-    link.value=value;
-    if(value)renderKggAdminMenuQr(value);
-    else if($('kggAdminMenuQrBox'))$('kggAdminMenuQrBox').textContent='';
-    modal.classList.add('isOpen');
-    modal.setAttribute('aria-hidden','false');
+
+  function releasePlanSection(){
+    const body=document.body;
+    const block=currentPlanBlock();
+    if(body) body.classList.remove('kggPlanSectionFrozen');
+    if(block) block.style.removeProperty('--kgg-current-plan-freeze-h');
   }
-  window.openKggAdminMenuQr=openKggAdminMenuQr;
-  window.openKggTherapistAppOnlyQr=openKggTherapistAppOnlyQr;
-  function wrapKggQrPrintText(text,maxChars){
-    const words=String(text||'').replace(/\s+/g,' ').trim().split(' ').filter(Boolean);
-    const lines=[];
-    let line='';
-    words.forEach(word=>{
-      if(word.length>maxChars){
-        if(line){lines.push(line);line='';}
-        for(let i=0;i<word.length;i+=maxChars)lines.push(word.slice(i,i+maxChars));
-        return;
+
+  function delayedRelease(delay){
+    clearTimeout(releaseTimer);
+    releaseTimer=setTimeout(releasePlanSection, Number.isFinite(delay) ? delay : 320);
+  }
+
+  function installListeners(){
+    if(!document.body) return;
+
+    document.addEventListener('pointerdown', function(ev){
+      if(isPlanCardTarget(ev.target)) freezePlanSection(760);
+    }, {capture:true, passive:true});
+
+    document.addEventListener('pointermove', function(){
+      const body=document.body;
+      if(body && body.classList.contains('kggPlanCardReordering')) freezePlanSection(760);
+    }, {capture:true, passive:true});
+
+    document.addEventListener('pointerup', function(){
+      const body=document.body;
+      if(body && (body.classList.contains('kggPlanCardReordering') || body.classList.contains('kggPlanSectionFrozen'))){
+        delayedRelease(340);
       }
-      const next=line?line+' '+word:word;
-      if(next.length>maxChars&&line){lines.push(line);line=word;}
-      else line=next;
+    }, {capture:true, passive:true});
+
+    document.addEventListener('pointercancel', function(){
+      delayedRelease(220);
+    }, {capture:true, passive:true});
+
+    bodyObserver=new MutationObserver(function(){
+      const body=document.body;
+      if(!body || !isPhone()) return;
+      if(body.classList.contains('kggPlanCardReordering') || body.classList.contains('kggPlanCardSwiping')){
+        freezePlanSection(800);
+      }
+    });
+    bodyObserver.observe(document.body,{attributes:true,attributeFilter:['class']});
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', installListeners, {once:true});
+  }else{
+    installListeners();
+  }
+
+  window.addEventListener('resize', function(){
 ```

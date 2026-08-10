@@ -1,427 +1,297 @@
 # KGG Source Chunk 064
 
 - Source: `kgg-update/src` modular source
-- Lines: 26881-27300
+- Lines: 26881-27170
 
 ```html
-    }
-    body.kggPhonePhotoMenuOpen #scanHub.kggPhoneScanMenuInline #kggPhonePhotoMenu{
-      display:grid!important;
-    }
-    #scanHub.kggPhoneScanMenuInline #kggPhonePhotoMenu button{
-      width:100%!important;
-      min-height:52px!important;
-      border:0!important;
-      border-radius:16px!important;
-      background:rgba(243,247,253,.96)!important;
-      color:#071027!important;
-      font-weight:1000!important;
-      font-size:18px!important;
-      text-align:center!important;
-    }
   }
-</style>
-
-<script id="kgg-v050-phone-ui-mini-fix-script">
-(function(){
-  "use strict";
-  var PATCH_ID="kgg-v050-phone-ui-mini-fix";
-  var PHONE_QUERY="(max-width:759px)";
-  function byId(id){return document.getElementById(id);}
-  function isPhone(){
-    return !!(window.matchMedia&&window.matchMedia(PHONE_QUERY).matches&&!(window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive()));
+  function supportsLiveCamera(){
+    if(!navigator.mediaDevices||typeof navigator.mediaDevices.getUserMedia!=='function')return false;
+    const caps=nativeCapabilities();
+    return !caps||caps.platform!=='android'||(caps.webVideoCapture===true&&Number(caps.webVideoCaptureVersion)>=1);
   }
-  function placeAdminMenu(){
-    var menu=byId("kggPhoneAdminMenu");
-    var header=document.querySelector("#createPanel.planMode .planHeader");
-    if(menu&&header&&!header.contains(menu))header.appendChild(menu);
+  function ensureUi(){
+    let root=document.getElementById(PATCH_ID+'-camera');
+    if(root)return root;
+    root=document.createElement('div');
+    root.id=PATCH_ID+'-camera';
+    root.className='kggLiveQrCamera';
+    root.hidden=true;
+    root.innerHTML='<div class="kggLiveQrHead"><b>Plan-QR automatisch scannen</b><button type="button" class="kggLiveQrClose" aria-label="Kamera schliessen">&times;</button></div><div class="kggLiveQrStage"><video class="kggLiveQrVideo" autoplay playsinline muted></video><div class="kggLiveQrGuide" aria-hidden="true"></div><div class="kggLiveQrStatus" role="status">Kamera wird gestartet ...</div></div><div class="kggLiveQrActions"><button type="button" class="kggLiveQrFallback">Systemkamera</button><button type="button" class="kggLiveQrShutter" aria-label="Papierfoto aufnehmen"></button><span class="kggLiveQrHint">QR automatisch, Papier manuell</span></div>';
+    document.body.appendChild(root);
+    root.querySelector('.kggLiveQrClose').addEventListener('click',closeCamera);
+    root.querySelector('.kggLiveQrShutter').addEventListener('click',capturePaperPhoto);
+    return root;
   }
-  function placeInlinePhotoMenu(){
-    var hub=byId("scanHub");
-    var menu=byId("kggPhonePhotoMenu");
-    var toggle=byId("phonePhotoMenuToggle");
-    if(!hub||!menu)return;
-    if(!isPhone()){
-      if(hub.classList.contains("kggPhoneScanMenuInline"))hub.classList.remove("kggPhoneScanMenuInline");
-      if(menu.parentElement!==document.body)document.body.appendChild(menu);
+  function setStatus(text){
+    const node=document.querySelector('#'+PATCH_ID+'-camera .kggLiveQrStatus');
+    if(node)node.textContent=text;
+  }
+  function stopSession(){
+    const current=session;
+    session=null;
+    if(!current)return;
+    current.active=false;
+    clearTimeout(current.timer);
+    try{current.stream&&current.stream.getTracks().forEach(function(track){track.stop();});}catch(err){}
+    try{current.video.srcObject=null;}catch(err){}
+  }
+  function closeCamera(){
+    stopSession();
+    const root=document.getElementById(PATCH_ID+'-camera');
+    if(root)root.hidden=true;
+  }
+  function sourceSize(source){return {w:Number(source.videoWidth||source.width)||0,h:Number(source.videoHeight||source.height)||0};}
+  function renderVariant(source,variant){
+    const size=sourceSize(source);
+    if(!size.w||!size.h)return null;
+    const crop=variant.crop||1;
+    const sw=Math.max(1,Math.round(size.w*crop));
+    const sh=Math.max(1,Math.round(size.h*crop));
+    const sx=Math.round((size.w-sw)/2);
+    const sy=Math.round((size.h-sh)/2);
+    const scale=Math.min(variant.upscale||1,(variant.max||1280)/Math.max(sw,sh));
+    const canvas=document.createElement('canvas');
+    canvas.width=Math.max(1,Math.round(sw*scale));
+    canvas.height=Math.max(1,Math.round(sh*scale));
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    ctx.imageSmoothingEnabled=true;
+    ctx.imageSmoothingQuality='high';
+    if(variant.contrast)ctx.filter='contrast('+variant.contrast+')';
+    ctx.drawImage(source,sx,sy,sw,sh,0,0,canvas.width,canvas.height);
+    return canvas;
+  }
+  async function createDetector(){
+    if(!('BarcodeDetector' in window))return null;
+    try{
+      if(typeof BarcodeDetector.getSupportedFormats==='function'){
+        const formats=await BarcodeDetector.getSupportedFormats();
+        if(Array.isArray(formats)&&!formats.includes('qr_code'))return null;
+      }
+      return new BarcodeDetector({formats:['qr_code']});
+    }catch(err){return null;}
+  }
+  async function detectFrame(current){
+    if(current.detector){
+      try{
+        const hits=await current.detector.detect(current.video);
+        if(hits&&hits[0])return {raw:hits[0].rawValue||'',decoder:'barcode-detector'};
+      }catch(err){current.detector=null;}
+    }
+    if(typeof window.jsQR!=='function')return {raw:'',decoder:'none'};
+    const variant=LIVE_VARIANTS[current.variant%LIVE_VARIANTS.length];
+    current.variant++;
+    const canvas=renderVariant(current.video,variant);
+    if(!canvas)return {raw:'',decoder:'jsqr'};
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    const image=ctx.getImageData(0,0,canvas.width,canvas.height);
+    const hit=window.jsQR(image.data,canvas.width,canvas.height,{inversionAttempts:'attemptBoth'});
+    return {raw:hit&&hit.data||'',decoder:'jsqr'};
+  }
+  async function scanLoop(current){
+    if(!current.active||session!==current)return;
+    if(current.busy){current.timer=setTimeout(function(){scanLoop(current);},220);return;}
+    if(Date.now()-current.startedAt>30000){
+      setStatus('Noch kein KGG-QR erkannt. Naeher herangehen oder Systemkamera verwenden.');
+      current.timer=setTimeout(function(){scanLoop(current);},600);
       return;
     }
-    if(!hub.classList.contains("kggPhoneScanMenuInline"))hub.classList.add("kggPhoneScanMenuInline");
-    if(menu.parentElement!==hub)hub.appendChild(menu);
-    if(toggle){
-      if(toggle.textContent!=="\u2303")toggle.textContent="\u2303";
-      if(toggle.getAttribute("aria-label")!=="Foto-Optionen oeffnen")toggle.setAttribute("aria-label","Foto-Optionen oeffnen");
-      if(toggle.getAttribute("title")!=="Foto-Optionen")toggle.setAttribute("title","Foto-Optionen");
-    }
-  }
-  function install(){
-    if(!document.body)return;
-    placeAdminMenu();
-    placeInlinePhotoMenu();
-  }
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});
-  else install();
-  [80,220,600,1200].forEach(function(ms){setTimeout(install,ms);});
-  window.addEventListener("resize",function(){setTimeout(install,90);},{passive:true});
-  window.addEventListener("orientationchange",function(){setTimeout(install,180);},{passive:true});
-  if(document.body){
-    new MutationObserver(function(){install();}).observe(document.body,{childList:true,subtree:true});
-  }
-  window.KGG_UI_PHONE_MINI_FIX_V050={patchId:PATCH_ID,install:install};
-})();
-</script>
-<!-- KGG PATCH END kgg-v050-phone-ui-mini-fix -->
-
-<!-- SOURCE FILE: kgg-update/src/patches/v051-android-qr-pdf-bridge.html -->
-
-<!-- KGG PATCH START kgg-v051-android-qr-pdf-bridge -->
-<script id="kgg-v051-android-qr-pdf-bridge-probe">
-window.KGG_ANDROID_QR_PDF_BRIDGE_V051={
-  patchId:'kgg-v051-android-qr-pdf-bridge',
-  qrPrintButtonId:'kggAdminMenuQrPrint',
-  androidShellVersion:'v399'
-};
-</script>
-<!-- KGG PATCH END kgg-v051-android-qr-pdf-bridge -->
-
-<!-- SOURCE FILE: kgg-update/src/patches/v052-pdf-plan-thumbnails.html -->
-
-<!-- KGG PATCH START kgg-v052-pdf-plan-thumbnails -->
-<script id="kgg-v052-pdf-plan-thumbnails-probe">
-window.KGG_PDF_PLAN_THUMBNAILS_V052={
-  patchId:'kgg-v052-pdf-plan-thumbnails',
-  snapshotHelper:'attachKggPdfExerciseThumbnails',
-  drawTarget:'drawKggExerciseBox'
-};
-</script>
-<!-- KGG PATCH END kgg-v052-pdf-plan-thumbnails -->
-
-<!-- SOURCE FILE: kgg-update/src/patches/v053-ui-tablet-stability.html -->
-
-<!-- KGG PATCH START kgg-v053-ui-tablet-stability -->
-<style id="kgg-v053-ui-tablet-stability-style">
-  @media(max-width:759px){
-    body.phoneTextFocus #scanHub,
-    body.phoneTextFocus.kggPhoneHasPlan #scanHub{
-      bottom:calc(12px + env(safe-area-inset-bottom))!important;
-      transform:translateY(var(--kgg-phone-keyboard-inset,0px))!important;
-    }
-    body.phoneTextFocus.kggPhoneHasPlan #createPanel.planMode #finishBtn:not(.hidden){
-      bottom:calc(12px + env(safe-area-inset-bottom))!important;
-      transform:translateY(var(--kgg-phone-keyboard-inset,0px))!important;
-    }
-    body.adminMode #createPanel.planMode .planHeader{
-      padding-right:54px!important;
-      grid-template-columns:minmax(0,1fr) auto!important;
-    }
-    body.adminMode #createPanel.planMode .planHeader #kggPhoneAdminMenu{
-      position:absolute!important;
-      top:4px!important;
-      right:0!important;
-      left:auto!important;
-      transform:none!important;
-      z-index:76!important;
-      margin:0!important;
-    }
-    body.adminMode #createPanel.planMode .planHeader #savePackageBtn:not(.hidden){
-      margin-right:8px!important;
-    }
-  }
-
-  @media(min-width:760px){
-    body.tabletLayoutCustom #scanHub{
-      position:relative!important;
-      z-index:82!important;
-    }
-    body.tabletLayoutCustom #tabletMenuBtn{
-      position:fixed!important;
-      left:10px!important;
-      top:var(--kgg-tablet-safe-top)!important;
-      z-index:1505!important;
-      pointer-events:auto!important;
-    }
-    #editorModal .editorSheet{
-      width:min(94vw,920px)!important;
-      max-height:min(90vh,760px)!important;
-      overflow:hidden!important;
-      display:grid!important;
-      grid-template-columns:minmax(0,1fr) minmax(300px,.92fr)!important;
-      grid-template-areas:
-        "header header"
-        "name media"
-        "sets media"
-        "units media"
-        "start media"
-        "advanced media"
-        "actions actions"
-        "cancel cancel"!important;
-      column-gap:14px!important;
-      row-gap:9px!important;
-      padding:16px!important;
-    }
-    #editorModal .editorHeader{grid-area:header!important;margin-bottom:0!important}
-    #editorModal .editorSheet > .field:first-of-type{grid-area:name!important;margin:0!important}
-    #editorModal .editorSheet > .grid2:nth-of-type(1){grid-area:sets!important}
-    #editorModal .editorSheet > .grid2:nth-of-type(2){grid-area:units!important}
-    #editorModal .editorStartHint{grid-area:start!important;margin:0!important}
-    #editorModal .editorMediaBox{
-      grid-area:media!important;
-      margin:0!important;
-      min-height:0!important;
-      display:grid!important;
-      grid-template-rows:auto minmax(190px,1fr) auto!important;
-      align-self:stretch!important;
-    }
-    #editorModal .editorMediaPreview{
-      min-height:190px!important;
-      max-height:min(42vh,330px)!important;
-      overflow:hidden!important;
-    }
-    #editorModal .editorMediaPreview img{
-      width:100%!important;
-      height:100%!important;
-      object-fit:contain!important;
-    }
-    #editorModal .editorAdvanced{
-      grid-area:advanced!important;
-      margin:0!important;
-      max-height:112px!important;
-      overflow:auto!important;
-    }
-    #editorModal .editorActions{
-      grid-area:actions!important;
-      margin:0!important;
-    }
-    #editorModal .editorCancelBtn{
-      grid-area:cancel!important;
-      margin:0!important;
-    }
-  }
-</style>
-<script id="kgg-v053-ui-tablet-stability-script">
-(function(){
-  "use strict";
-  var PATCH_ID="kgg-v053-ui-tablet-stability";
-  function byId(id){return document.getElementById(id);}
-  function isTablet(){
-    return !!(window.matchMedia&&window.matchMedia("(min-width:760px)").matches&&document.body&&document.body.classList.contains("tabletLayoutCustom"));
-  }
-  function anchorTabletMenuButton(){
-    var btn=byId("tabletMenuBtn");
-    var hub=byId("scanHub");
-    if(!btn||!hub||!document.body)return;
-    if(isTablet()){
-      if(btn.parentElement!==document.body)document.body.appendChild(btn);
-      return;
-    }
-    if(btn.parentElement!==hub)hub.insertBefore(btn,hub.firstChild);
-  }
-  function resetTabletSwipe(card){
-    if(!card)return;
-    card.classList.remove("swipe-dragging","swipe-armed","swipe-left","swipe-right","swipe-removing");
-    document.body.classList.remove("kggPlanCardSwiping");
-    card.style.removeProperty("transform");
-    card.style.removeProperty("opacity");
-    card.style.removeProperty("transition");
-    card.style.removeProperty("--swipe-strength");
-    card.style.removeProperty("--kgg-plan-swipe-x");
-  }
-  function startTabletSwipeForCard(ev,card){
-    if(!isTablet())return;
-    if(!card)return;
-    if(ev.button!=null&&ev.button!==0)return;
-    if(ev.target&&ev.target.closest&&ev.target.closest("button,input,textarea,select,a,.planCardActions,.drag"))return;
-    var pointerKey=String(ev.pointerId||"mouse");
-    if(card.dataset.kggV053SwipePointer===pointerKey)return;
-    card.dataset.kggV053SwipePointer=pointerKey;
-    card.dataset.kggV053SwipeStarted="1";
-    var planId=card.dataset&&card.dataset.planId?String(card.dataset.planId):"";
-    function currentCard(){
-      if(card&&card.isConnected)return card;
-      if(planId){
-        var cards=Array.from(document.querySelectorAll("#planList .planCard[data-plan-id]"));
-        var live=cards.find(function(node){return node.dataset&&String(node.dataset.planId)===planId;});
-        if(live)return live;
+    current.busy=true;
+    try{
+      if(current.video.readyState>=2){
+        const hit=await detectFrame(current);
+        if(hit.raw){
+          setStatus('QR erkannt, Inhalt wird geprueft ...');
+          const scan=getScan();
+          const result=scan&&typeof scan.handleQrRaw==='function'?await scan.handleQrRaw(hit.raw,'live-camera:'+hit.decoder):null;
+          if(result&&result.type!=='invalidQr'){
+            closeCamera();
+            return;
+          }
+          setStatus('QR erkannt, aber kein lesbarer KGG-Code. Suche weiter ...');
+        }else{
+          setStatus('Suche KGG-Plan-QR ...');
+        }
       }
-      return card;
-    }
-    var startX=ev.clientX,startY=ev.clientY,pointerId=ev.pointerId,active=false,dx=0,cancelTimer=null;
-    function threshold(){var live=currentCard();return Math.min(132,Math.max(78,(live?live.offsetWidth:0)*0.34));}
-    function cleanup(){
-      clearTimeout(cancelTimer);
-      delete card.dataset.kggV053SwipePointer;
-      document.removeEventListener("pointermove",move,true);
-      document.removeEventListener("pointerup",up,true);
-      document.removeEventListener("pointercancel",cancel,true);
-    }
-    function move(e){
-      var live=currentCard();
-      if(!live){cleanup();return;}
-      dx=e.clientX-startX;
-      var dy=e.clientY-startY;
-      if(!active){
-        if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)*1.2){cleanup();return;}
-        if(Math.abs(dx)<12||Math.abs(dx)<Math.abs(dy)*1.25)return;
-        active=true;
-        document.body.classList.add("kggPlanCardSwiping");
-        live.classList.add("swipe-dragging");
-        try{live.setPointerCapture&&live.setPointerCapture(pointerId);}catch(err){}
-      }
-      e.preventDefault();
-      if(e.stopImmediatePropagation)e.stopImmediatePropagation();
-      dx=Math.max(-live.offsetWidth*.86,Math.min(live.offsetWidth*.86,dx));
-      var strength=Math.min(1,Math.abs(dx)/threshold());
-      live.classList.toggle("swipe-left",dx<0);
-      live.classList.toggle("swipe-right",dx>0);
-      live.classList.toggle("swipe-armed",Math.abs(dx)>=threshold());
-      live.style.setProperty("--swipe-strength",String(strength));
-      live.style.setProperty("--kgg-plan-swipe-x",dx+"px");
-      live.style.transform="translateX(var(--kgg-plan-swipe-x,0px))";
-      live.style.opacity=String(1-strength*.16);
-    }
-    function up(e){
-      var live=currentCard();
-      cleanup();
-      if(!active){resetTabletSwipe(live);return;}
-      e.preventDefault();
-      document.body.classList.remove("kggPlanCardSwiping");
-      if(Math.abs(dx)>=threshold()){
-        live.classList.add("swipe-removing");
-        live.style.transition="transform .18s cubic-bezier(.2,.9,.2,1), opacity .18s ease";
-        live.style.setProperty("--kgg-plan-swipe-x",((dx<0?-1:1)*(live.offsetWidth+96))+"px");
-        live.style.opacity="0";
-        setTimeout(function(){
-          var del=live.querySelector(".planDeleteBtn,[data-del]");
-          if(del&&typeof del.click==="function")del.click();
-        },160);
-        return;
-      }
-      live.style.transition="transform .22s cubic-bezier(.2,.9,.2,1), opacity .18s ease";
-      live.style.setProperty("--kgg-plan-swipe-x","0px");
-      live.style.opacity="1";
-      setTimeout(function(){resetTabletSwipe(live);},230);
-    }
-    function cancel(){
-      var live=currentCard();
-      if(active){
-        clearTimeout(cancelTimer);
-        cancelTimer=setTimeout(function(){cleanup();resetTabletSwipe(currentCard());},900);
-        return;
-      }
-      cleanup();
-      resetTabletSwipe(live);
-    }
-    document.addEventListener("pointermove",move,true);
-    document.addEventListener("pointerup",up,true);
-    document.addEventListener("pointercancel",cancel,true);
+    }catch(err){setStatus('Bild wird weiter geprueft ...');}
+    finally{current.busy=false;}
+    if(current.active&&session===current)current.timer=setTimeout(function(){scanLoop(current);},220);
   }
-  function startTabletSwipe(ev){
-    startTabletSwipeForCard(ev,ev.currentTarget);
-  }
-  function bindTabletSwipeGuard(){
-    if(!document.body)return;
-    if(document.documentElement&&!document.documentElement.dataset.kggV053TabletSwipeDocumentGuard){
-      document.documentElement.dataset.kggV053TabletSwipeDocumentGuard="1";
-      document.addEventListener("pointerdown",function(ev){
-        if(!isTablet())return;
-        var target=ev.target;
-        var card=target&&target.closest&&target.closest("#planList .planCard[data-plan-id]");
-        if(card)startTabletSwipeForCard(ev,card);
-      },true);
-    }
-    document.querySelectorAll("#planList .planCard[data-plan-id]").forEach(function(card){
-      if(card.dataset.kggV053TabletSwipeGuard==="1")return;
-      card.dataset.kggV053TabletSwipeGuard="1";
-      card.addEventListener("pointerdown",startTabletSwipe,true);
-      card.onpointerdown=card.onpointerdown||startTabletSwipe;
+  function frameFile(video){
+    if(!video||!video.videoWidth||!video.videoHeight)return Promise.reject(new Error('Kamerabild noch nicht bereit.'));
+    const canvas=document.createElement('canvas');
+    canvas.width=video.videoWidth;
+    canvas.height=video.videoHeight;
+    canvas.getContext('2d').drawImage(video,0,0,canvas.width,canvas.height);
+    return new Promise(function(resolve,reject){
+      canvas.toBlob(function(blob){
+        if(!blob)return reject(new Error('Foto konnte nicht erstellt werden.'));
+        resolve(new File([blob],'Kamera-Foto-'+Date.now()+'.jpg',{type:'image/jpeg',lastModified:Date.now()}));
+      },'image/jpeg',.92);
     });
   }
-  function install(){
-    var menu=byId("kggPhoneAdminMenu");
-    var header=document.querySelector("#createPanel.planMode .planHeader")||document.querySelector("#createPanel .planHeader");
-    if(menu&&header&&!header.contains(menu))header.appendChild(menu);
-    anchorTabletMenuButton();
-    bindTabletSwipeGuard();
-  }
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});
-  else install();
-  [80,240,700].forEach(function(ms){setTimeout(install,ms);});
-  window.addEventListener("resize",function(){setTimeout(install,80);},{passive:true});
-  window.addEventListener("orientationchange",function(){setTimeout(install,160);},{passive:true});
-  if(document.body){
-    new MutationObserver(function(){install();}).observe(document.body,{attributes:true,attributeFilter:["class"],childList:true,subtree:true});
-  }
-  window.KGG_UI_TABLET_STABILITY_V053={
-    patchId:PATCH_ID,
-    install:install,
-    check:function(){
-      var menu=byId("kggPhoneAdminMenu");
-      var editor=document.querySelector("#editorModal .editorSheet");
-      return {
-        patchId:PATCH_ID,
-        menuAnchored:!!(menu&&menu.closest("#createPanel .planHeader")),
-        editorDisplay:editor?getComputedStyle(editor).display:"",
-        editorColumns:editor?getComputedStyle(editor).gridTemplateColumns:""
-      };
+  async function capturePaperPhoto(){
+    const current=session;
+    if(!current||current.busy)return;
+    current.busy=true;
+    try{
+      setStatus('Papierfoto wird verarbeitet ...');
+      const file=await frameFile(current.video);
+      closeCamera();
+      const scan=getScan();
+      if(!scan||typeof scan.handleInput!=='function')throw new Error('Scan-Verarbeitung nicht bereit.');
+      await scan.handleInput({files:[file],value:''},'camera');
+    }catch(err){
+      if(session===current){current.busy=false;setStatus(err&&err.message||'Aufnahme fehlgeschlagen.');}
     }
-  };
+  }
+  async function openCamera(originalPick){
+    closeCamera();
+    if(!supportsLiveCamera()){originalPick('camera');return;}
+    const root=ensureUi();
+    root.hidden=false;
+    root.querySelector('.kggLiveQrFallback').onclick=function(){closeCamera();originalPick('camera');};
+    setStatus('Kamera wird gestartet ...');
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({
+        audio:false,
+        video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:10,max:15}}
+      });
+      const video=root.querySelector('video');
+      const current={active:true,busy:false,stream:stream,video:video,detector:null,variant:0,startedAt:Date.now(),timer:0};
+      session=current;
+      video.srcObject=stream;
+      await video.play();
+      current.detector=await createDetector();
+      setStatus(current.detector||typeof window.jsQR==='function'?'Suche KGG-Plan-QR ...':'Automatische QR-Erkennung fehlt. Papierfoto ist weiter moeglich.');
+      if(current.detector||typeof window.jsQR==='function')scanLoop(current);
+    }catch(err){
+      closeCamera();
+      originalPick('camera');
+    }
+  }
+  function install(){
+    const scan=getScan();
+    if(!scan||typeof scan.pick!=='function'||typeof scan.handleQrRaw!=='function'||scan.__kggLiveQrCameraInstalled)return false;
+    const originalPick=scan.pick.bind(scan);
+    scan.openLiveCamera=function(){return openCamera(originalPick);};
+    scan.closeLiveCamera=closeCamera;
+    scan.pick=function(kind){return kind==='file'?originalPick('file'):openCamera(originalPick);};
+    scan.__kggLiveQrCameraInstalled=true;
+    window.KGG_PATCHES=window.KGG_PATCHES||{};
+    window.KGG_PATCHES[PATCH_ID]={installed:true,kind:'cross-app-camera-qr'};
+    return true;
+  }
+  if(!install())window.addEventListener('load',install,{once:true});
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')closeCamera();});
+  window.addEventListener('pagehide',closeCamera);
 })();
 </script>
-<!-- KGG PATCH END kgg-v053-ui-tablet-stability -->
+<!-- KGG PATCH END kgg-v061-cross-app-live-qr-camera -->
 
-<!-- SOURCE FILE: kgg-update/src/patches/v060-tablet-html-release-label.html -->
-<!-- KGG PATCH START kgg-v060-tablet-html-release-label -->
-<!-- Tablet HTML Release Label -->
-<style id="kgg-v060-tablet-html-release-label-style">
-#kggTabletHtmlReleaseLabel{display:none}
+<!-- SOURCE FILE: kgg-update/src/patches/v062-tablet-recent-package-shell-geometry.html -->
+<!-- KGG PATCH START kgg-v062-tablet-recent-package-shell-geometry -->
+<!-- Plan-Historie mit stabiler Hintergrund-Geometrie -->
+<style id="kgg-v062-tablet-recent-package-shell-geometry-style">
+.tabletRecentHost[hidden]{display:none!important;}
 @media (min-width:760px){
-  #tabletSideMenu{
-    overflow-y:hidden!important;
+  body.tabletLayoutCustom.tabletMenuOpen.tabletPackageOverlayOpen .app{
+    width:calc(100vw - var(--kgg-tablet-sidebar-w,380px))!important;
+    max-width:calc(100vw - var(--kgg-tablet-sidebar-w,380px))!important;
+    transform:translateX(var(--kgg-tablet-sidebar-w,380px))!important;
   }
-  #tabletSideMenu .tabletSideMenuMain{
-    flex:1 1 auto;
+  body.tabletRecentOverlayMode #tabletPackageOverlay .tabletPackageSearch,
+  body.tabletRecentOverlayMode #tabletPackageOverlay #tabletPackageCards{
+    display:none!important;
+  }
+  body.tabletRecentOverlayMode #tabletPackageOverlay #tabletRecentHost{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr);
+    gap:12px;
     min-height:0;
-    overflow-y:auto!important;
-    align-content:start;
+    overflow:auto;
+    padding:2px 2px 8px;
+    overscroll-behavior:contain;
   }
-  #tabletSideMenu #kggTabletHtmlReleaseLabel{
-    display:block;
-    flex:0 0 auto;
-    align-self:flex-end;
-    max-width:100%;
-    margin:0;
-    padding:5px 7px;
-    border:1px solid rgba(10,16,36,.10);
-    border-radius:9px;
-    background:rgba(255,255,255,.94);
-    color:#667085;
-    font-size:10px;
-    font-weight:850;
-    line-height:1.2;
-    overflow-wrap:anywhere;
-    text-align:right;
-    pointer-events:none;
+  body.tabletRecentOverlayMode #tabletPackageOverlay #recentList:not(.hidden){
+    display:grid!important;
+    gap:12px!important;
+    position:static!important;
+    inset:auto!important;
+    left:auto!important;
+    right:auto!important;
+    top:auto!important;
+    bottom:auto!important;
+    width:100%!important;
+    max-width:none!important;
+    max-height:none!important;
+    overflow:visible!important;
+    z-index:auto!important;
+    margin:0!important;
+    padding:0!important;
+    background:transparent!important;
+    border:0!important;
+    border-radius:0!important;
+    box-shadow:none!important;
+    transform:none!important;
+    animation:none!important;
   }
+  body.tabletRecentOverlayMode #tabletPackageOverlay #recentList>.notice{margin:0!important;}
+  body.tabletRecentOverlayMode #tabletMenuRecentBtn{background:#eef5ff!important;color:#071027!important;box-shadow:inset 3px 0 0 #0b63ce,0 8px 18px rgba(7,16,39,.08)!important;}
+  body.tabletRecentOverlayMode #tabletMenuPackagesBtn{background:#fff!important;color:#0a1024!important;box-shadow:0 10px 22px rgba(10,16,36,.07),inset 0 1px 0 rgba(255,255,255,.82)!important;}
 }
 </style>
-<script id="kgg-v060-tablet-html-release-label">
+<script id="kgg-v062-tablet-recent-package-shell-geometry">
 (function(){
-  "use strict";
-  var PATCH_ID="kgg-v060-tablet-html-release-label";
+  'use strict';
+  var PATCH_ID='kgg-v062-tablet-recent-package-shell-geometry';
+  var TABLET_QUERY='(min-width:760px)';
+  var recentMode=false,allowPackageClick=false,returnFocusAfterClose=false,closeCleanupTimer=0,focusTimer=0,opener=null,originMarker=null,originParent=null,originNext=null,shellDefaults=null;
+  function byId(id){return document.getElementById(id);}
+  function isTablet(){return !!(window.matchMedia&&window.matchMedia(TABLET_QUERY).matches&&document.body&&document.body.classList.contains('tabletLayoutCustom'));}
+  function shellParts(){var overlay=byId('tabletPackageOverlay');return {overlay:overlay,shade:byId('tabletPackageShade'),close:byId('tabletPackageClose'),search:overlay&&overlay.querySelector('.tabletPackageSearch'),cards:byId('tabletPackageCards'),titleIcon:overlay&&overlay.querySelector('.tabletPackageTitle span'),titleText:overlay&&overlay.querySelector('.tabletPackageTitle strong')};}
+  function rememberShellDefaults(parts){if(shellDefaults||!parts.overlay)return;shellDefaults={overlayLabel:parts.overlay.getAttribute('aria-label')||'Uebungspakete',closeLabel:parts.close&&parts.close.getAttribute('aria-label')||'Uebungspakete schliessen',icon:parts.titleIcon&&parts.titleIcon.textContent||'📦',title:parts.titleText&&parts.titleText.textContent||'Übungspakete'};}
+  function ensureRecentHost(){var parts=shellParts(),recent=byId('recentList');if(!parts.overlay||!recent)return null;rememberShellDefaults(parts);var host=byId('tabletRecentHost');if(!host){host=document.createElement('div');host.id='tabletRecentHost';host.className='tabletRecentHost';host.hidden=true;parts.overlay.appendChild(host);}if(!originMarker||!originMarker.parentNode){originParent=recent.parentNode;originNext=recent.nextSibling;originMarker=document.createComment('kgg-tablet-recent-origin');if(originParent)originParent.insertBefore(originMarker,recent);}return host;}
+  function restoreRecentNode(){var recent=byId('recentList');if(!recent)return;if(originMarker&&originMarker.parentNode){originMarker.parentNode.insertBefore(recent,originMarker.nextSibling);return;}if(originParent){var next=originNext&&originNext.parentNode===originParent?originNext:null;originParent.insertBefore(recent,next);}}
+  function setExpanded(id,value){var el=byId(id);if(el)el.setAttribute('aria-expanded',String(!!value));}
+  function setRecentChrome(){var parts=shellParts();rememberShellDefaults(parts);if(parts.overlay)parts.overlay.setAttribute('aria-label','Plan-Historie');if(parts.close)parts.close.setAttribute('aria-label','Plan-Historie schliessen');if(parts.titleIcon)parts.titleIcon.textContent='🕘';if(parts.titleText)parts.titleText.textContent='Plan-Historie';setExpanded('tabletMenuRecentBtn',true);setExpanded('recentToggle',true);setExpanded('tabletMenuPackagesBtn',false);setExpanded('packageToggle',false);}
+  function restorePackageChrome(keepOverlay){var parts=shellParts();if(shellDefaults){if(parts.overlay)parts.overlay.setAttribute('aria-label',shellDefaults.overlayLabel);if(parts.close)parts.close.setAttribute('aria-label',shellDefaults.closeLabel);if(parts.titleIcon)parts.titleIcon.textContent=shellDefaults.icon;if(parts.titleText)parts.titleText.textContent=shellDefaults.title;}setExpanded('tabletMenuRecentBtn',false);setExpanded('recentToggle',false);setExpanded('tabletMenuPackagesBtn',!!keepOverlay);setExpanded('packageToggle',!!keepOverlay);}
+  function focusRecentEntry(){clearTimeout(focusTimer);focusTimer=setTimeout(function(){if(!recentMode)return;var recent=byId('recentList');var target=recent&&recent.querySelector('[data-recent-index]');if(!target)target=byId('tabletPackageClose');if(target&&target.focus)target.focus();},80);}
+  function cleanupTabletRecentMode(options){options=options||{};if(!recentMode&&!document.body.classList.contains('tabletRecentOverlayMode'))return;clearTimeout(closeCleanupTimer);clearTimeout(focusTimer);var focusTarget=opener;var keepOverlay=!!options.keepOverlay&&document.body.classList.contains('tabletPackageOverlayOpen');recentMode=false;document.body.classList.remove('tabletRecentOverlayMode');var recent=byId('recentList');if(recent)recent.classList.add('hidden');restoreRecentNode();var host=byId('tabletRecentHost');if(host)host.hidden=true;restorePackageChrome(keepOverlay);opener=null;returnFocusAfterClose=false;if(options.focus&&focusTarget&&focusTarget.isConnected&&focusTarget.focus){setTimeout(function(){try{focusTarget.focus();}catch(err){}},0);}}
+  function scheduleClosedCleanup(){clearTimeout(closeCleanupTimer);closeCleanupTimer=setTimeout(function(){if(recentMode&&!document.body.classList.contains('tabletPackageOverlayOpen'))cleanupTabletRecentMode({focus:returnFocusAfterClose});},240);}
+  function openOriginalPackageShell(){if(document.body.classList.contains('tabletPackageOverlayOpen'))return true;var button=byId('tabletMenuPackagesBtn')||byId('packageToggle');if(!button)return false;allowPackageClick=true;try{button.click();}finally{allowPackageClick=false;}return document.body.classList.contains('tabletPackageOverlayOpen');}
+  function openTabletRecentInPackageShell(source){if(!isTablet())return false;if(recentMode){returnFocusAfterClose=true;var closeButton=byId('tabletPackageClose');if(closeButton)closeButton.click();else cleanupTabletRecentMode({focus:true});return true;}var host=ensureRecentHost(),recent=byId('recentList');if(!host||!recent)return false;opener=source||byId('tabletMenuRecentBtn')||byId('recentToggle');recent.classList.add('hidden');['--kgg-overlay-width','--kgg-overlay-left','--kgg-overlay-top','--kgg-overlay-max-height','--kgg-overlay-origin'].forEach(function(name){recent.style.removeProperty(name);});if(!openOriginalPackageShell())return false;document.body.classList.add('tabletRecentOverlayMode');recentMode=true;returnFocusAfterClose=false;host.hidden=false;host.appendChild(recent);recent.classList.remove('hidden');setRecentChrome();focusRecentEntry();return true;}
+  function switchToPackages(){if(!recentMode)return false;cleanupTabletRecentMode({keepOverlay:true,focus:false});clearTimeout(focusTimer);focusTimer=setTimeout(function(){var input=byId('tabletPackageSearch');if(input&&input.focus)input.focus();},60);return true;}
+  function closeAfterRecentRestore(){setTimeout(function(){if(!recentMode)return;returnFocusAfterClose=false;var closeButton=byId('tabletPackageClose');if(closeButton)closeButton.click();else cleanupTabletRecentMode({focus:false});},0);}
+  function captureTabletClicks(ev){var target=ev.target&&ev.target.closest?ev.target.closest('button,#tabletPackageShade'):null;if(!target)return;if(recentMode){var restore=ev.target.closest&&ev.target.closest('#tabletRecentHost [data-recent-index]');if(restore){returnFocusAfterClose=false;closeAfterRecentRestore();return;}if((target.id==='tabletMenuPackagesBtn'||target.id==='packageToggle')&&!allowPackageClick){ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();switchToPackages();return;}if(target.id==='tabletMenuRecentBtn'||target.id==='recentToggle'){ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();returnFocusAfterClose=true;var closeButton=byId('tabletPackageClose');if(closeButton)closeButton.click();else cleanupTabletRecentMode({focus:true});return;}if(target.id==='tabletPackageClose'||target.id==='tabletPackageShade'){returnFocusAfterClose=true;return;}if(target.id==='tabletMenuClose'||target.id==='tabletMenuBtn'||target.id==='tabletSideBackdrop'||target.closest('.tabletSideMenuAction'))returnFocusAfterClose=false;}if(!isTablet()||allowPackageClick)return;if(target.id==='tabletMenuRecentBtn'||target.id==='recentToggle'){ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();openTabletRecentInPackageShell(target);}}
+  function install(){if(!document.body)return;ensureRecentHost();document.addEventListener('click',captureTabletClicks,true);document.addEventListener('keydown',function(ev){if(recentMode&&ev.key==='Escape')returnFocusAfterClose=true;},true);new MutationObserver(function(){if(recentMode&&!document.body.classList.contains('tabletPackageOverlayOpen'))scheduleClosedCleanup();}).observe(document.body,{attributes:true,attributeFilter:['class']});var recent=byId('recentList');if(recent)new MutationObserver(function(){if(recentMode&&recent.classList.contains('hidden')&&document.body.classList.contains('tabletPackageOverlayOpen'))closeAfterRecentRestore();}).observe(recent,{attributes:true,attributeFilter:['class']});var cleanupViewport=function(){if(recentMode&&!isTablet())cleanupTabletRecentMode({focus:false});};window.addEventListener('resize',function(){setTimeout(cleanupViewport,40);},{passive:true});window.addEventListener('orientationchange',function(){setTimeout(cleanupViewport,140);},{passive:true});window.addEventListener('pageshow',cleanupViewport,{passive:true});}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
+  window.KGG_TABLET_RECENT_PACKAGE_SHELL={patchId:PATCH_ID,open:openTabletRecentInPackageShell,cleanup:cleanupTabletRecentMode,switchToPackages:switchToPackages};
+  window.KGG_PATCHES=window.KGG_PATCHES||{};window.KGG_PATCHES[PATCH_ID]={installed:true,kind:'kgg-tablet-recent-package-shell-geometry'};
+})();
+</script>
+<!-- KGG PATCH END kgg-v062-tablet-recent-package-shell-geometry -->
 
-  function parseStatus(value){
-    if(value&&typeof value==="object")return value;
-    if(typeof value!=="string"||!value.trim())return {};
-    try{return JSON.parse(value);}catch(err){return {};}
-  }
+<!-- SOURCE FILE: kgg-update/src/patches/v063-changelog-archive-window.html -->
+<!-- KGG PATCH START kgg-v063-changelog-archive-window -->
+<!-- Changelog-Archivfenster -->
+<!-- Metadata-only changelog archive/window migration; no runtime behavior. -->
+<!-- KGG PATCH END kgg-v063-changelog-archive-window -->
 
-  function nativeStatus(){
-    try{
-      if(window.KGGAndroidApp&&typeof window.KGGAndroidApp.updateStatus==="function"){
-        return parseStatus(window.KGGAndroidApp.updateStatus());
-      }
-      if(window.KGGNativeAppUpdate&&typeof window.KGGNativeAppUpdate.status==="function"){
-        return parseStatus(window.KGGNativeAppUpdate.status());
-      }
-    }catch(err){}
+<!-- SOURCE FILE: kgg-update/src/patches/v064-typed-update-versions.html -->
+<!-- KGG PATCH START kgg-v064-typed-update-versions -->
+<!-- Strikte Update-Versionstypen -->
+<!-- Version type contract lives in base-app; no additional runtime hook. -->
+<!-- KGG PATCH END kgg-v064-typed-update-versions -->
+
+<!-- SOURCE FILE: kgg-update/src/patches/v065-source-control-char-guard.html -->
+<!-- KGG PATCH START kgg-v065-source-control-char-guard -->
+<!-- Source-Steuerzeichen-Guard -->
+<!-- Source control-character guard lives in builder/base-app; no extra runtime hook. -->
+<!-- KGG PATCH END kgg-v065-source-control-char-guard -->
+
+<!-- SOURCE FILE: kgg-update/src/footer.html -->
+
+</body>
+</html>
 ```

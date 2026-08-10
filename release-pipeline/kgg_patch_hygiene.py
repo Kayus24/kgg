@@ -15,6 +15,33 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
+RELEASE_ALIGNMENT_EXACT_PATHS = {
+    "kgg-update/index.html",
+    "kgg-update/version.json",
+    "therapist-app/admin.html",
+    "therapist-app/kollegen.html",
+    "therapist-app/android_update_manifest.json",
+    "therapist-app/kgg_update_manifest.json",
+    "release-pipeline/build_therapist_source.py",
+    "release-pipeline/kgg_new_patch.py",
+    "release-pipeline/kgg_gpt_write_gate.py",
+    "release-pipeline/mobile_inbox.py",
+    "release-pipeline/release_pipeline.py",
+    ".github/workflows/kgg-gpt-preview-gate.yml",
+    ".github/workflows/mobile-inbox-release.yml",
+    ".github/workflows/promote-latest-admin-beta.yml",
+    ".github/workflows/release-control.yml",
+    ".github/workflows/release-pr.yml",
+}
+
+RELEASE_ALIGNMENT_PREFIXES = (
+    "kgg-update/src/",
+    "release-inbox/",
+    "mobile-inbox/",
+    "update-inbox/",
+    "therapist-app/releases/",
+)
+
 
 class HygieneError(RuntimeError):
     pass
@@ -55,8 +82,21 @@ def status_paths(root: Path) -> set[str]:
 def changed_paths_since_main(root: Path) -> set[str]:
     if git(["rev-parse", "--verify", "origin/main"], root, check=False).returncode != 0:
         raise HygieneError("Cannot find origin/main. Run `git fetch origin main` before the test battery.")
-    proc = git(["diff", "--name-only", "origin/main...HEAD"], root)
+    proc = git(["diff", "--name-only", "--no-renames", "origin/main...HEAD"], root)
     return {normalize_path(line) for line in proc.stdout.splitlines() if line.strip()}
+
+
+def touched_paths(root: Path) -> set[str]:
+    return changed_paths_since_main(root) | status_paths(root)
+
+
+def release_alignment_paths(paths: set[str]) -> set[str]:
+    return {
+        path
+        for path in paths
+        if path in RELEASE_ALIGNMENT_EXACT_PATHS
+        or any(path.startswith(prefix) for prefix in RELEASE_ALIGNMENT_PREFIXES)
+    }
 
 
 def is_origin_main_ancestor(root: Path) -> bool:
@@ -187,9 +227,7 @@ def assert_source_release_alignment(root: Path) -> None:
 
 
 def run(root: Path) -> None:
-    changed = changed_paths_since_main(root)
-    dirty = status_paths(root)
-    touched = changed | dirty
+    touched = touched_paths(root)
 
     if not is_origin_main_ancestor(root):
         message = "Current branch is stale: origin/main is not an ancestor of HEAD. Start from fresh origin/main."
@@ -202,7 +240,18 @@ def run(root: Path) -> None:
     assert_release_inbox_pair(root)
     assert_modular_source_edit_path(root, touched)
     assert_version_json_for_index(root, touched)
-    assert_source_release_alignment(root)
+    release_paths = release_alignment_paths(touched)
+    if release_paths:
+        log(
+            "Release alignment required because release-relevant paths changed: "
+            + ", ".join(sorted(release_paths))
+        )
+        assert_source_release_alignment(root)
+    else:
+        log(
+            "Patch hygiene accepts the source/release drift inherited from origin/main "
+            "because no release-relevant paths changed."
+        )
     log("Patch hygiene OK")
 
 

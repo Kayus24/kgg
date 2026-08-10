@@ -19,6 +19,12 @@ const { pathToFileURL } = require("url");
 
 const ROOT = path.resolve(__dirname, "..");
 const HTML_PATH = path.resolve(process.env.KGG_UI_SMOKE_HTML || path.join(ROOT, "kgg-update", "index.html"));
+const CHANGELOG_ARCHIVE_PATH = path.join(
+  ROOT,
+  "docs",
+  "changelog-archive",
+  "kgg-therapist-changelog-through-v062.json"
+);
 const STORAGE_KEY = "kgg_html_app_v2_state";
 const CUSTOM_BANK_KEY = "kgg_html_app_v2_custom_exercise_bank";
 
@@ -61,6 +67,13 @@ function assertRegex(text, pattern, label) {
 function readHtml() {
   if (!fs.existsSync(HTML_PATH)) fail(`HTML file not found: ${HTML_PATH}`);
   return fs.readFileSync(HTML_PATH, "utf8");
+}
+
+function readChangelogArchive() {
+  if (!fs.existsSync(CHANGELOG_ARCHIVE_PATH)) {
+    fail(`Changelog archive not found: ${CHANGELOG_ARCHIVE_PATH}`);
+  }
+  return fs.readFileSync(CHANGELOG_ARCHIVE_PATH, "utf8");
 }
 
 function staticGestureGuardSuite() {
@@ -150,7 +163,7 @@ function staticUiMiniSeriesGuardSuite(caseName) {
   }
 
   if (caseMatches(caseName, ["ui-mini-series", "tablet-card-reorder"])) {
-    assertIncludes(html, "kgg-v043-tablet-card-reorder", "v043 tablet card reorder marker");
+    assertIncludes(readChangelogArchive(), "kgg-v043-tablet-card-reorder", "archived v043 tablet card reorder marker");
     assertIncludes(html, "tabletCardReorderBound", "tablet card reorder binding guard");
     assertIncludes(html, "const timer=setTimeout(()=>{", "tablet card-surface reorder uses a hold timer");
     assertIncludes(html, "startAnimatedReorderPress({", "tablet card-surface reorder starts from guarded synthetic press");

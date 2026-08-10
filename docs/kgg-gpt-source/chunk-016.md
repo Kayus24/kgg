@@ -4,424 +4,424 @@
 - Lines: 6721-7140
 
 ```html
-    }
-    body.kggPlanCardReordering .planCard.reorder-lifted,
-    body.is-scrolling .planCard.reorder-lifted{
-      transform:translateY(var(--drag-y,0px)) scale(1.035)!important;
-      transition:none!important;
-      will-change:transform!important;
-      pointer-events:none!important;
-    }
-    body.kggPlanCardReordering .planList.reorder-active .planCard:not(.reorder-lifted){
-      transition:transform .14s ease,margin .14s ease,opacity .14s ease!important;
-    }
-    body.kggPlanCardReordering .planCard.reorder-placeholder{
-      display:block!important;
-      visibility:visible!important;
-    }
-  }
-</style>
-
-
-
-
-<style id="kgg-mini-patch-v400-07-android-wrapper-fixes">
-  /* v400 mini07: Android-WebView/Phone polish.
-     Scope: UI-only. Tablet layout ab 760px bleibt unveraendert. */
-  @media (max-width:759px){
-    body.kggPlanCardReordering #bankArea,
-    body.kggPlanCardReordering #dbTitle,
-    body.kggPlanCardReordering .bankArea,
-    body.kggPlanCardReordering .bankRows,
-    body.kggPlanCardReordering .az{
-      pointer-events:none!important;
-    }
-    body.kggPlanCardReordering .planCard.reorder-lifted,
-    body.is-scrolling.kggPlanCardReordering .planCard.reorder-lifted{
-      transform:translateY(var(--drag-y,0px)) scale(1.035)!important;
-      z-index:9999!important;
-      transition:none!important;
-      will-change:transform!important;
-      pointer-events:none!important;
-    }
-    body.kggPlanCardSwiping .planCard.swipe-dragging,
-    body.is-scrolling.kggPlanCardSwiping .planCard.swipe-dragging{
-      transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
-      transition:none!important;
-      will-change:transform,opacity!important;
-    }
-    body.kggPlanCardSwiping .planCard.swipe-removing,
-    body.is-scrolling.kggPlanCardSwiping .planCard.swipe-removing{
-      transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
-    }
-    .modal.open{
-      overscroll-behavior:contain;
-    }
-    .sheet{
-      -webkit-overflow-scrolling:touch;
-    }
-  }
-</style>
-
-<style id="kgg-github-patch-v401-phone-plan-ui-isolation">
-  /* v401 GitHub Update 003: Phone-only Plan-UI Stabilisierung.
-     Fixes:
-     - Plan-Karten flackern beim Scrollen nicht mehr.
-     - Antippen/Anheben einer Plan-Karte darf den Rest der App nicht nach unten schieben.
-     - Reorder-Bewegungen bleiben innerhalb "Übungen im Plan".
-     Scope: nur max-width:759px. Tablet-/Wrapper-Code bleibt unverändert. */
-  @media (max-width:759px){
-    #rightPlanStack,
-    #currentPlanBlock.planSectionCurrent{
-      contain:layout paint!important;
-      overflow:hidden!important;
-      transform:translateZ(0);
-      backface-visibility:hidden;
-      -webkit-backface-visibility:hidden;
-    }
-
-    body.kggPlanSectionFrozen #currentPlanBlock.planSectionCurrent{
-      height:var(--kgg-current-plan-freeze-h,auto)!important;
-      min-height:var(--kgg-current-plan-freeze-h,auto)!important;
-      max-height:var(--kgg-current-plan-freeze-h,none)!important;
-    }
-
-    #currentPlanBlock .planSectionBody{
-      contain:layout paint!important;
-      overflow:auto!important;
-      overscroll-behavior:contain!important;
-      -webkit-overflow-scrolling:touch;
-      max-height:min(46dvh,380px);
-      transform:translateZ(0);
-      backface-visibility:hidden;
-      -webkit-backface-visibility:hidden;
-    }
-
-    #currentPlanBlock #planList.planList{
-      contain:layout paint!important;
-      isolation:isolate;
-      transform:translateZ(0);
-      backface-visibility:hidden;
-      -webkit-backface-visibility:hidden;
-    }
-
-    #currentPlanBlock .planCard{
-      backface-visibility:hidden;
-      -webkit-backface-visibility:hidden;
-      transform:translate3d(0,0,0);
-      will-change:auto;
-    }
-
-    body.is-scrolling #currentPlanBlock .planCard:not(.swipe-dragging):not(.swipe-removing):not(.reorder-lifted):not(.reorder-prelift){
-      transform:translate3d(0,0,0)!important;
-      transition:none!important;
-      animation:none!important;
-      filter:none!important;
-    }
-
-    #currentPlanBlock .planCard.reorder-prelift,
-    body.kggPlanSectionFrozen #currentPlanBlock .planCard.reorder-prelift{
-      position:relative;
-      z-index:8;
-      transform:translate3d(0,-3px,0) scale(1.018)!important;
-      box-shadow:0 10px 26px rgba(7,16,39,.16),0 2px 8px rgba(7,16,39,.10)!important;
-      transition:transform .11s cubic-bezier(.2,.85,.2,1),box-shadow .11s ease!important;
-    }
-
-    body.kggPlanCardReordering #currentPlanBlock .planSectionBody{
-      overflow:hidden!important;
-      touch-action:none!important;
-    }
-
-    body.kggPlanCardReordering #currentPlanBlock .planCard.reorder-lifted,
-    body.is-scrolling.kggPlanCardReordering #currentPlanBlock .planCard.reorder-lifted{
-      transform:translate3d(0,var(--drag-y,0px),0) scale(1.035)!important;
-      z-index:9999!important;
-      opacity:.985!important;
-      transition:none!important;
-      pointer-events:none!important;
-      will-change:transform!important;
-    }
-
-    body.kggPlanCardReordering #currentPlanBlock .planCard.reorder-placeholder{
-      height:20px!important;
-      min-height:20px!important;
-      padding:0!important;
-      margin:2px 0!important;
-      border:0!important;
-      border-radius:999px!important;
-      background:transparent!important;
-      box-shadow:none!important;
-      overflow:visible!important;
-      opacity:1!important;
-      transform:none!important;
-    }
-
-    body.kggPlanCardReordering #currentPlanBlock .planCard.reorder-placeholder::before{
-      content:"";
-      position:absolute;
-      left:16%;
-      right:16%;
-      top:50%;
-      height:12px;
-      transform:translateY(-50%);
-      border-radius:999px;
-      background:radial-gradient(ellipse at center,rgba(7,16,39,.20) 0%,rgba(7,16,39,.10) 45%,rgba(7,16,39,0) 78%);
-      filter:blur(7px);
-    }
-
-    body.kggPlanCardReordering #currentPlanBlock .planCard.reorder-gap-before,
-    body.kggPlanCardReordering #currentPlanBlock .planCard.reorder-gap-after{
-      margin-top:0!important;
-      margin-bottom:0!important;
-    }
-
-    body.kggPlanCardReordering :is(#bankArea,#dbTitle,.bankArea,.bankRows,.az,#inputWrap,#exerciseInput,.suggestion){
-      transition:none!important;
-      animation:none!important;
-      transform:none!important;
-      filter:none!important;
-      pointer-events:none!important;
-    }
-  }
-</style>
-<style id="kgg-mini-patch-v400-08-phone-hide-admin-file-banner">
-  /* v400 mini08: Phone-only cleanup.
-     Entfernt die gelbe ADMIN-DATEI/Admin-Test-Box nur im Handy-Layout.
-     Tablet-Layout ab 760px bleibt unveraendert. */
-  @media (max-width:759px){
-    .adminTestBanner{
-      display:none!important;
-    }
-  }
-</style>
-
-  <!-- KGG kgg-source-truth: embedded Source Truth. Machine-readable; safe for local LLM/code review. -->
-<!-- KGG kgg-changelog: embedded Changelog. Machine-readable; safe for local LLM/code review. -->
-
-<!-- KGG PATCH START kgg-v021-embed-jsqr-gallery-decode lib sha256=bc40c8a15196236b2314db0856f72ca0b49980cd5413b8c852a7349f5fee0859 -->
-<script id="kgg-v021-embed-jsqr-gallery-decode-lib">
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory();
-	else if(typeof define === 'function' && define.amd)
-		define([], factory);
-	else if(typeof exports === 'object')
-		exports["jsQR"] = factory();
-	else
-		root["jsQR"] = factory();
-})(typeof self !== 'undefined' ? self : this, function() {
-return /******/ (function(modules) { // webpackBootstrap
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
-/******/ 			return installedModules[moduleId].exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			i: moduleId,
-/******/ 			l: false,
-/******/ 			exports: {}
-/******/ 		};
-/******/
-/******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.l = true;
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/
-/******/
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
-/******/
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
-/******/
-/******/ 	// define getter function for harmony exports
-/******/ 	__webpack_require__.d = function(exports, name, getter) {
-/******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, {
-/******/ 				configurable: false,
-/******/ 				enumerable: true,
-/******/ 				get: getter
-/******/ 			});
-/******/ 		}
-/******/ 	};
-/******/
-/******/ 	// getDefaultExport function for compatibility with non-harmony modules
-/******/ 	__webpack_require__.n = function(module) {
-/******/ 		var getter = module && module.__esModule ?
-/******/ 			function getDefault() { return module['default']; } :
-/******/ 			function getModuleExports() { return module; };
-/******/ 		__webpack_require__.d(getter, 'a', getter);
-/******/ 		return getter;
-/******/ 	};
-/******/
-/******/ 	// Object.prototype.hasOwnProperty.call
-/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
-/******/
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
-/******/
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 3);
-/******/ })
-/************************************************************************/
-/******/ ([
-/* 0 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var BitMatrix = /** @class */ (function () {
-    function BitMatrix(data, width) {
-        this.width = width;
-        this.height = data.length / width;
-        this.data = data;
-    }
-    BitMatrix.createEmpty = function (width, height) {
-        return new BitMatrix(new Uint8ClampedArray(width * height), width);
-    };
-    BitMatrix.prototype.get = function (x, y) {
-        if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
-            return false;
-        }
-        return !!this.data[y * this.width + x];
-    };
-    BitMatrix.prototype.set = function (x, y, v) {
-        this.data[y * this.width + x] = v ? 1 : 0;
-    };
-    BitMatrix.prototype.setRegion = function (left, top, width, height, v) {
-        for (var y = top; y < top + height; y++) {
-            for (var x = left; x < left + width; x++) {
-                this.set(x, y, !!v);
-            }
-        }
-    };
-    return BitMatrix;
+    return Matrix;
 }());
-exports.BitMatrix = BitMatrix;
-
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var GenericGFPoly_1 = __webpack_require__(2);
-function addOrSubtractGF(a, b) {
-    return a ^ b; // tslint:disable-line:no-bitwise
-}
-exports.addOrSubtractGF = addOrSubtractGF;
-var GenericGF = /** @class */ (function () {
-    function GenericGF(primitive, size, genBase) {
-        this.primitive = primitive;
-        this.size = size;
-        this.generatorBase = genBase;
-        this.expTable = new Array(this.size);
-        this.logTable = new Array(this.size);
-        var x = 1;
-        for (var i = 0; i < this.size; i++) {
-            this.expTable[i] = x;
-            x = x * 2;
-            if (x >= this.size) {
-                x = (x ^ this.primitive) & (this.size - 1); // tslint:disable-line:no-bitwise
-            }
-        }
-        for (var i = 0; i < this.size - 1; i++) {
-            this.logTable[this.expTable[i]] = i;
-        }
-        this.zero = new GenericGFPoly_1.default(this, Uint8ClampedArray.from([0]));
-        this.one = new GenericGFPoly_1.default(this, Uint8ClampedArray.from([1]));
+function binarize(data, width, height, returnInverted) {
+    if (data.length !== width * height * 4) {
+        throw new Error("Malformed data passed to binarizer.");
     }
-    GenericGF.prototype.multiply = function (a, b) {
-        if (a === 0 || b === 0) {
-            return 0;
+    // Convert image to greyscale
+    var greyscalePixels = new Matrix(width, height);
+    for (var x = 0; x < width; x++) {
+        for (var y = 0; y < height; y++) {
+            var r = data[((y * width + x) * 4) + 0];
+            var g = data[((y * width + x) * 4) + 1];
+            var b = data[((y * width + x) * 4) + 2];
+            greyscalePixels.set(x, y, 0.2126 * r + 0.7152 * g + 0.0722 * b);
         }
-        return this.expTable[(this.logTable[a] + this.logTable[b]) % (this.size - 1)];
-    };
-    GenericGF.prototype.inverse = function (a) {
-        if (a === 0) {
-            throw new Error("Can't invert 0");
-        }
-        return this.expTable[this.size - this.logTable[a] - 1];
-    };
-    GenericGF.prototype.buildMonomial = function (degree, coefficient) {
-        if (degree < 0) {
-            throw new Error("Invalid monomial degree less than 0");
-        }
-        if (coefficient === 0) {
-            return this.zero;
-        }
-        var coefficients = new Uint8ClampedArray(degree + 1);
-        coefficients[0] = coefficient;
-        return new GenericGFPoly_1.default(this, coefficients);
-    };
-    GenericGF.prototype.log = function (a) {
-        if (a === 0) {
-            throw new Error("Can't take log(0)");
-        }
-        return this.logTable[a];
-    };
-    GenericGF.prototype.exp = function (a) {
-        return this.expTable[a];
-    };
-    return GenericGF;
-}());
-exports.default = GenericGF;
-
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var GenericGF_1 = __webpack_require__(1);
-var GenericGFPoly = /** @class */ (function () {
-    function GenericGFPoly(field, coefficients) {
-        if (coefficients.length === 0) {
-            throw new Error("No coefficients.");
-        }
-        this.field = field;
-        var coefficientsLength = coefficients.length;
-        if (coefficientsLength > 1 && coefficients[0] === 0) {
-            // Leading term must be non-zero for anything except the constant polynomial "0"
-            var firstNonZero = 1;
-            while (firstNonZero < coefficientsLength && coefficients[firstNonZero] === 0) {
-                firstNonZero++;
+    }
+    var horizontalRegionCount = Math.ceil(width / REGION_SIZE);
+    var verticalRegionCount = Math.ceil(height / REGION_SIZE);
+    var blackPoints = new Matrix(horizontalRegionCount, verticalRegionCount);
+    for (var verticalRegion = 0; verticalRegion < verticalRegionCount; verticalRegion++) {
+        for (var hortizontalRegion = 0; hortizontalRegion < horizontalRegionCount; hortizontalRegion++) {
+            var sum = 0;
+            var min = Infinity;
+            var max = 0;
+            for (var y = 0; y < REGION_SIZE; y++) {
+                for (var x = 0; x < REGION_SIZE; x++) {
+                    var pixelLumosity = greyscalePixels.get(hortizontalRegion * REGION_SIZE + x, verticalRegion * REGION_SIZE + y);
+                    sum += pixelLumosity;
+                    min = Math.min(min, pixelLumosity);
+                    max = Math.max(max, pixelLumosity);
+                }
             }
-            if (firstNonZero === coefficientsLength) {
-                this.coefficients = field.zero.coefficients;
+            var average = sum / (Math.pow(REGION_SIZE, 2));
+            if (max - min <= MIN_DYNAMIC_RANGE) {
+                // If variation within the block is low, assume this is a block with only light or only
+                // dark pixels. In that case we do not want to use the average, as it would divide this
+                // low contrast area into black and white pixels, essentially creating data out of noise.
+                //
+                // Default the blackpoint for these blocks to be half the min - effectively white them out
+                average = min / 2;
+                if (verticalRegion > 0 && hortizontalRegion > 0) {
+                    // Correct the "white background" assumption for blocks that have neighbors by comparing
+                    // the pixels in this block to the previously calculated black points. This is based on
+                    // the fact that dark barcode symbology is always surrounded by some amount of light
+                    // background for which reasonable black point estimates were made. The bp estimated at
+                    // the boundaries is used for the interior.
+                    // The (min < bp) is arbitrary but works better than other heuristics that were tried.
+                    var averageNeighborBlackPoint = (blackPoints.get(hortizontalRegion, verticalRegion - 1) +
+                        (2 * blackPoints.get(hortizontalRegion - 1, verticalRegion)) +
+                        blackPoints.get(hortizontalRegion - 1, verticalRegion - 1)) / 4;
+                    if (min < averageNeighborBlackPoint) {
+                        average = averageNeighborBlackPoint;
+                    }
+                }
             }
-            else {
-                this.coefficients = new Uint8ClampedArray(coefficientsLength - firstNonZero);
-                for (var i = 0; i < this.coefficients.length; i++) {
-                    this.coefficients[i] = coefficients[firstNonZero + i];
+            blackPoints.set(hortizontalRegion, verticalRegion, average);
+        }
+    }
+    var binarized = BitMatrix_1.BitMatrix.createEmpty(width, height);
+    var inverted = null;
+    if (returnInverted) {
+        inverted = BitMatrix_1.BitMatrix.createEmpty(width, height);
+    }
+    for (var verticalRegion = 0; verticalRegion < verticalRegionCount; verticalRegion++) {
+        for (var hortizontalRegion = 0; hortizontalRegion < horizontalRegionCount; hortizontalRegion++) {
+            var left = numBetween(hortizontalRegion, 2, horizontalRegionCount - 3);
+            var top_1 = numBetween(verticalRegion, 2, verticalRegionCount - 3);
+            var sum = 0;
+            for (var xRegion = -2; xRegion <= 2; xRegion++) {
+                for (var yRegion = -2; yRegion <= 2; yRegion++) {
+                    sum += blackPoints.get(left + xRegion, top_1 + yRegion);
+                }
+            }
+            var threshold = sum / 25;
+            for (var xRegion = 0; xRegion < REGION_SIZE; xRegion++) {
+                for (var yRegion = 0; yRegion < REGION_SIZE; yRegion++) {
+                    var x = hortizontalRegion * REGION_SIZE + xRegion;
+                    var y = verticalRegion * REGION_SIZE + yRegion;
+                    var lum = greyscalePixels.get(x, y);
+                    binarized.set(x, y, lum <= threshold);
+                    if (returnInverted) {
+                        inverted.set(x, y, !(lum <= threshold));
+                    }
                 }
             }
         }
-        else {
-            this.coefficients = coefficients;
+    }
+    if (returnInverted) {
+        return { binarized: binarized, inverted: inverted };
+    }
+    return { binarized: binarized };
+}
+exports.binarize = binarize;
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var BitMatrix_1 = __webpack_require__(0);
+var decodeData_1 = __webpack_require__(6);
+var reedsolomon_1 = __webpack_require__(9);
+var version_1 = __webpack_require__(10);
+// tslint:disable:no-bitwise
+function numBitsDiffering(x, y) {
+    var z = x ^ y;
+    var bitCount = 0;
+    while (z) {
+        bitCount++;
+        z &= z - 1;
+    }
+    return bitCount;
+}
+function pushBit(bit, byte) {
+    return (byte << 1) | bit;
+}
+// tslint:enable:no-bitwise
+var FORMAT_INFO_TABLE = [
+    { bits: 0x5412, formatInfo: { errorCorrectionLevel: 1, dataMask: 0 } },
+    { bits: 0x5125, formatInfo: { errorCorrectionLevel: 1, dataMask: 1 } },
+    { bits: 0x5E7C, formatInfo: { errorCorrectionLevel: 1, dataMask: 2 } },
+    { bits: 0x5B4B, formatInfo: { errorCorrectionLevel: 1, dataMask: 3 } },
+    { bits: 0x45F9, formatInfo: { errorCorrectionLevel: 1, dataMask: 4 } },
+    { bits: 0x40CE, formatInfo: { errorCorrectionLevel: 1, dataMask: 5 } },
+    { bits: 0x4F97, formatInfo: { errorCorrectionLevel: 1, dataMask: 6 } },
+    { bits: 0x4AA0, formatInfo: { errorCorrectionLevel: 1, dataMask: 7 } },
+    { bits: 0x77C4, formatInfo: { errorCorrectionLevel: 0, dataMask: 0 } },
+    { bits: 0x72F3, formatInfo: { errorCorrectionLevel: 0, dataMask: 1 } },
+    { bits: 0x7DAA, formatInfo: { errorCorrectionLevel: 0, dataMask: 2 } },
+    { bits: 0x789D, formatInfo: { errorCorrectionLevel: 0, dataMask: 3 } },
+    { bits: 0x662F, formatInfo: { errorCorrectionLevel: 0, dataMask: 4 } },
+    { bits: 0x6318, formatInfo: { errorCorrectionLevel: 0, dataMask: 5 } },
+    { bits: 0x6C41, formatInfo: { errorCorrectionLevel: 0, dataMask: 6 } },
+    { bits: 0x6976, formatInfo: { errorCorrectionLevel: 0, dataMask: 7 } },
+    { bits: 0x1689, formatInfo: { errorCorrectionLevel: 3, dataMask: 0 } },
+    { bits: 0x13BE, formatInfo: { errorCorrectionLevel: 3, dataMask: 1 } },
+    { bits: 0x1CE7, formatInfo: { errorCorrectionLevel: 3, dataMask: 2 } },
+    { bits: 0x19D0, formatInfo: { errorCorrectionLevel: 3, dataMask: 3 } },
+    { bits: 0x0762, formatInfo: { errorCorrectionLevel: 3, dataMask: 4 } },
+    { bits: 0x0255, formatInfo: { errorCorrectionLevel: 3, dataMask: 5 } },
+    { bits: 0x0D0C, formatInfo: { errorCorrectionLevel: 3, dataMask: 6 } },
+    { bits: 0x083B, formatInfo: { errorCorrectionLevel: 3, dataMask: 7 } },
+    { bits: 0x355F, formatInfo: { errorCorrectionLevel: 2, dataMask: 0 } },
+    { bits: 0x3068, formatInfo: { errorCorrectionLevel: 2, dataMask: 1 } },
+    { bits: 0x3F31, formatInfo: { errorCorrectionLevel: 2, dataMask: 2 } },
+    { bits: 0x3A06, formatInfo: { errorCorrectionLevel: 2, dataMask: 3 } },
+    { bits: 0x24B4, formatInfo: { errorCorrectionLevel: 2, dataMask: 4 } },
+    { bits: 0x2183, formatInfo: { errorCorrectionLevel: 2, dataMask: 5 } },
+    { bits: 0x2EDA, formatInfo: { errorCorrectionLevel: 2, dataMask: 6 } },
+    { bits: 0x2BED, formatInfo: { errorCorrectionLevel: 2, dataMask: 7 } },
+];
+var DATA_MASKS = [
+    function (p) { return ((p.y + p.x) % 2) === 0; },
+    function (p) { return (p.y % 2) === 0; },
+    function (p) { return p.x % 3 === 0; },
+    function (p) { return (p.y + p.x) % 3 === 0; },
+    function (p) { return (Math.floor(p.y / 2) + Math.floor(p.x / 3)) % 2 === 0; },
+    function (p) { return ((p.x * p.y) % 2) + ((p.x * p.y) % 3) === 0; },
+    function (p) { return ((((p.y * p.x) % 2) + (p.y * p.x) % 3) % 2) === 0; },
+    function (p) { return ((((p.y + p.x) % 2) + (p.y * p.x) % 3) % 2) === 0; },
+];
+function buildFunctionPatternMask(version) {
+    var dimension = 17 + 4 * version.versionNumber;
+    var matrix = BitMatrix_1.BitMatrix.createEmpty(dimension, dimension);
+    matrix.setRegion(0, 0, 9, 9, true); // Top left finder pattern + separator + format
+    matrix.setRegion(dimension - 8, 0, 8, 9, true); // Top right finder pattern + separator + format
+    matrix.setRegion(0, dimension - 8, 9, 8, true); // Bottom left finder pattern + separator + format
+    // Alignment patterns
+    for (var _i = 0, _a = version.alignmentPatternCenters; _i < _a.length; _i++) {
+        var x = _a[_i];
+        for (var _b = 0, _c = version.alignmentPatternCenters; _b < _c.length; _b++) {
+            var y = _c[_b];
+            if (!(x === 6 && y === 6 || x === 6 && y === dimension - 7 || x === dimension - 7 && y === 6)) {
+                matrix.setRegion(x - 2, y - 2, 5, 5, true);
+            }
         }
     }
-    GenericGFPoly.prototype.degree = function () {
-        return this.coefficients.length - 1;
-    };
-    GenericGFPoly.prototype.isZero = function () {
-        return this.coefficients[0] === 0;
-    };
+    matrix.setRegion(6, 9, 1, dimension - 17, true); // Vertical timing pattern
+    matrix.setRegion(9, 6, dimension - 17, 1, true); // Horizontal timing pattern
+    if (version.versionNumber > 6) {
+        matrix.setRegion(dimension - 11, 0, 3, 6, true); // Version info, top right
+        matrix.setRegion(0, dimension - 11, 6, 3, true); // Version info, bottom left
+    }
+    return matrix;
+}
+function readCodewords(matrix, version, formatInfo) {
+    var dataMask = DATA_MASKS[formatInfo.dataMask];
+    var dimension = matrix.height;
+    var functionPatternMask = buildFunctionPatternMask(version);
+    var codewords = [];
+    var currentByte = 0;
+    var bitsRead = 0;
+    // Read columns in pairs, from right to left
+    var readingUp = true;
+    for (var columnIndex = dimension - 1; columnIndex > 0; columnIndex -= 2) {
+        if (columnIndex === 6) { // Skip whole column with vertical alignment pattern;
+            columnIndex--;
+        }
+        for (var i = 0; i < dimension; i++) {
+            var y = readingUp ? dimension - 1 - i : i;
+            for (var columnOffset = 0; columnOffset < 2; columnOffset++) {
+                var x = columnIndex - columnOffset;
+                if (!functionPatternMask.get(x, y)) {
+                    bitsRead++;
+                    var bit = matrix.get(x, y);
+                    if (dataMask({ y: y, x: x })) {
+                        bit = !bit;
+                    }
+                    currentByte = pushBit(bit, currentByte);
+                    if (bitsRead === 8) { // Whole bytes
+                        codewords.push(currentByte);
+                        bitsRead = 0;
+                        currentByte = 0;
+                    }
+                }
+            }
+        }
+        readingUp = !readingUp;
+    }
+    return codewords;
+}
+function readVersion(matrix) {
+    var dimension = matrix.height;
+    var provisionalVersion = Math.floor((dimension - 17) / 4);
+    if (provisionalVersion <= 6) { // 6 and under dont have version info in the QR code
+        return version_1.VERSIONS[provisionalVersion - 1];
+    }
+    var topRightVersionBits = 0;
+    for (var y = 5; y >= 0; y--) {
+        for (var x = dimension - 9; x >= dimension - 11; x--) {
+            topRightVersionBits = pushBit(matrix.get(x, y), topRightVersionBits);
+        }
+    }
+    var bottomLeftVersionBits = 0;
+    for (var x = 5; x >= 0; x--) {
+        for (var y = dimension - 9; y >= dimension - 11; y--) {
+            bottomLeftVersionBits = pushBit(matrix.get(x, y), bottomLeftVersionBits);
+        }
+    }
+    var bestDifference = Infinity;
+    var bestVersion;
+    for (var _i = 0, VERSIONS_1 = version_1.VERSIONS; _i < VERSIONS_1.length; _i++) {
+        var version = VERSIONS_1[_i];
+        if (version.infoBits === topRightVersionBits || version.infoBits === bottomLeftVersionBits) {
+            return version;
+        }
+        var difference = numBitsDiffering(topRightVersionBits, version.infoBits);
+        if (difference < bestDifference) {
+            bestVersion = version;
+            bestDifference = difference;
+        }
+        difference = numBitsDiffering(bottomLeftVersionBits, version.infoBits);
+        if (difference < bestDifference) {
+            bestVersion = version;
+            bestDifference = difference;
+        }
+    }
+    // We can tolerate up to 3 bits of error since no two version info codewords will
+    // differ in less than 8 bits.
+    if (bestDifference <= 3) {
+        return bestVersion;
+    }
+}
+function readFormatInformation(matrix) {
+    var topLeftFormatInfoBits = 0;
+    for (var x = 0; x <= 8; x++) {
+        if (x !== 6) { // Skip timing pattern bit
+            topLeftFormatInfoBits = pushBit(matrix.get(x, 8), topLeftFormatInfoBits);
+        }
+    }
+    for (var y = 7; y >= 0; y--) {
+        if (y !== 6) { // Skip timing pattern bit
+            topLeftFormatInfoBits = pushBit(matrix.get(8, y), topLeftFormatInfoBits);
+        }
+    }
+    var dimension = matrix.height;
+    var topRightBottomRightFormatInfoBits = 0;
+    for (var y = dimension - 1; y >= dimension - 7; y--) { // bottom left
+        topRightBottomRightFormatInfoBits = pushBit(matrix.get(8, y), topRightBottomRightFormatInfoBits);
+    }
+    for (var x = dimension - 8; x < dimension; x++) { // top right
+        topRightBottomRightFormatInfoBits = pushBit(matrix.get(x, 8), topRightBottomRightFormatInfoBits);
+    }
+    var bestDifference = Infinity;
+    var bestFormatInfo = null;
+    for (var _i = 0, FORMAT_INFO_TABLE_1 = FORMAT_INFO_TABLE; _i < FORMAT_INFO_TABLE_1.length; _i++) {
+        var _a = FORMAT_INFO_TABLE_1[_i], bits = _a.bits, formatInfo = _a.formatInfo;
+        if (bits === topLeftFormatInfoBits || bits === topRightBottomRightFormatInfoBits) {
+            return formatInfo;
+        }
+        var difference = numBitsDiffering(topLeftFormatInfoBits, bits);
+        if (difference < bestDifference) {
+            bestFormatInfo = formatInfo;
+            bestDifference = difference;
+        }
+        if (topLeftFormatInfoBits !== topRightBottomRightFormatInfoBits) { // also try the other option
+            difference = numBitsDiffering(topRightBottomRightFormatInfoBits, bits);
+            if (difference < bestDifference) {
+                bestFormatInfo = formatInfo;
+                bestDifference = difference;
+            }
+        }
+    }
+    // Hamming distance of the 32 masked codes is 7, by construction, so <= 3 bits differing means we found a match
+    if (bestDifference <= 3) {
+        return bestFormatInfo;
+    }
+    return null;
+}
+function getDataBlocks(codewords, version, ecLevel) {
+    var ecInfo = version.errorCorrectionLevels[ecLevel];
+    var dataBlocks = [];
+    var totalCodewords = 0;
+    ecInfo.ecBlocks.forEach(function (block) {
+        for (var i = 0; i < block.numBlocks; i++) {
+            dataBlocks.push({ numDataCodewords: block.dataCodewordsPerBlock, codewords: [] });
+            totalCodewords += block.dataCodewordsPerBlock + ecInfo.ecCodewordsPerBlock;
+        }
+    });
+    // In some cases the QR code will be malformed enough that we pull off more or less than we should.
+    // If we pull off less there's nothing we can do.
+    // If we pull off more we can safely truncate
+    if (codewords.length < totalCodewords) {
+        return null;
+    }
+    codewords = codewords.slice(0, totalCodewords);
+    var shortBlockSize = ecInfo.ecBlocks[0].dataCodewordsPerBlock;
+    // Pull codewords to fill the blocks up to the minimum size
+    for (var i = 0; i < shortBlockSize; i++) {
+        for (var _i = 0, dataBlocks_1 = dataBlocks; _i < dataBlocks_1.length; _i++) {
+            var dataBlock = dataBlocks_1[_i];
+            dataBlock.codewords.push(codewords.shift());
+        }
+    }
+    // If there are any large blocks, pull codewords to fill the last element of those
+    if (ecInfo.ecBlocks.length > 1) {
+        var smallBlockCount = ecInfo.ecBlocks[0].numBlocks;
+        var largeBlockCount = ecInfo.ecBlocks[1].numBlocks;
+        for (var i = 0; i < largeBlockCount; i++) {
+            dataBlocks[smallBlockCount + i].codewords.push(codewords.shift());
+        }
+    }
+    // Add the rest of the codewords to the blocks. These are the error correction codewords.
+    while (codewords.length > 0) {
+        for (var _a = 0, dataBlocks_2 = dataBlocks; _a < dataBlocks_2.length; _a++) {
+            var dataBlock = dataBlocks_2[_a];
+            dataBlock.codewords.push(codewords.shift());
+        }
+    }
+    return dataBlocks;
+}
+function decodeMatrix(matrix) {
+    var version = readVersion(matrix);
+    if (!version) {
+        return null;
+    }
+    var formatInfo = readFormatInformation(matrix);
+    if (!formatInfo) {
+        return null;
+    }
+    var codewords = readCodewords(matrix, version, formatInfo);
+    var dataBlocks = getDataBlocks(codewords, version, formatInfo.errorCorrectionLevel);
+    if (!dataBlocks) {
+        return null;
+    }
+    // Count total number of data bytes
+    var totalBytes = dataBlocks.reduce(function (a, b) { return a + b.numDataCodewords; }, 0);
+    var resultBytes = new Uint8ClampedArray(totalBytes);
+    var resultIndex = 0;
+    for (var _i = 0, dataBlocks_3 = dataBlocks; _i < dataBlocks_3.length; _i++) {
+        var dataBlock = dataBlocks_3[_i];
+        var correctedBytes = reedsolomon_1.decode(dataBlock.codewords, dataBlock.codewords.length - dataBlock.numDataCodewords);
+        if (!correctedBytes) {
+            return null;
+        }
+        for (var i = 0; i < dataBlock.numDataCodewords; i++) {
+            resultBytes[resultIndex++] = correctedBytes[i];
+        }
+    }
+    try {
+        return decodeData_1.decode(resultBytes, version.versionNumber);
+    }
+    catch (_a) {
+        return null;
+    }
+}
+function decode(matrix) {
+    if (matrix == null) {
+        return null;
+    }
+    var result = decodeMatrix(matrix);
+    if (result) {
+        return result;
+    }
+    // Decoding didn't work, try mirroring the QR across the topLeft -> bottomRight line.
+    for (var x = 0; x < matrix.width; x++) {
+        for (var y = x + 1; y < matrix.height; y++) {
+            if (matrix.get(x, y) !== matrix.get(y, x)) {
+                matrix.set(x, y, !matrix.get(x, y));
+                matrix.set(y, x, !matrix.get(y, x));
+            }
+        }
+    }
+    return decodeMatrix(matrix);
+}
+exports.decode = decode;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+// tslint:disable:no-bitwise
+var BitStream_1 = __webpack_require__(7);
 ```

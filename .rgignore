@@ -1,0 +1,22 @@
+# Immutable historical release artifacts.
+# Use rg --no-ignore with an explicit narrow path for release audits.
+/therapist-app/releases/
+
+# Heavy historical aliases; never use as patch bases.
+/therapist-app/admin.html
+/therapist-app/kollegen.html
+
+# Binary application packages.
+*.apk
+
+# Local/generated workspaces and build output.
+/tmp/
+**/build/
+**/.gradle/
+**/node_modules/
+
+# Root-level Preview output/checkouts only.
+# android-wrapper/app/src/preview remains searchable.
+/preview/
+/previews/
+/preview-artifacts/

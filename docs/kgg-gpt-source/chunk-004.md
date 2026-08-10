@@ -4,424 +4,424 @@
 - Lines: 1681-2100
 
 ```html
+      flex:0 0 auto;
     }
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent} html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-    body{display:flex;justify-content:center}.app{width:min(100%,520px);min-height:100vh;background:var(--bg);padding:14px 12px 64px}.topbar{position:sticky;top:0;z-index:10;margin:-14px -12px 12px;padding:10px 12px;background:rgba(232,238,246,.92);backdrop-filter:blur(8px);border-bottom:1px solid rgba(220,227,235,.7)}
-    .topbar h1{font-size:18px;margin:0}.topbar small{color:var(--muted);font-weight:700}.scanHub{background:var(--blue2);border:2px solid #5ea7e8;border-radius:20px;padding:14px;margin:8px 0 12px;box-shadow:var(--shadow)}.scanBtn,.primary{background:var(--accent);color:white;border:0;border-radius:14px;padding:12px 18px;font-weight:900;font-size:16px;box-shadow:0 4px 10px rgba(7,16,39,.18)}button{font:inherit;cursor:pointer}.mutedBtn{background:white;border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-weight:800}.scanMeta{border-top:1px solid var(--line);margin-top:14px;padding-top:12px;color:var(--muted);font-weight:900;font-size:20px}.scanMeta.filePickBtn{cursor:pointer;user-select:none}.scanMeta.filePickBtn:focus-visible{outline:3px solid rgba(94,167,232,.45);outline-offset:4px;border-radius:10px}.scanMeta small{display:block;font-size:14px;margin-top:6px}.panel{background:var(--paper);border:2px solid #1b2230;border-radius:26px;padding:12px;margin:0 0 12px;box-shadow:var(--shadow)}.panelTitle{font-size:30px;line-height:1;font-weight:1000;margin:0 0 12px;letter-spacing:-1px}.inner{border:2px solid #1b2230;border-radius:22px;padding:10px;background:white}.row{display:flex;align-items:center;gap:8px}.baseCard,.drawerBtn{width:100%;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:18px;font-weight:900;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:center}.label{font-size:14px;font-weight:900;margin:12px 0 6px}.inputWrap{position:relative;border:1px solid var(--line);border-radius:16px;background:white;box-shadow:var(--shadow);overflow:hidden}textarea{width:100%;min-height:72px;resize:vertical;border:0;outline:0;padding:16px 46px 16px 14px;font-size:20px;line-height:1.35;color:var(--ink);background:white}textarea::placeholder{color:#8c98a9}.clearBtn{position:absolute;right:10px;top:10px;border:0;background:transparent;color:var(--danger);font-size:24px;font-weight:1000;padding:6px}.suggestion{background:#edf5ff;border-top:1px solid var(--line);padding:10px 12px;font-weight:1000;font-size:18px}.suggestion small{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}.tools{display:grid;gap:10px;margin-top:10px}.drawerBtn{font-size:18px}.drawerBtn .mini{font-size:12px;color:var(--muted)}.planList{display:grid;gap:8px;margin:10px 0}.planCard{border:1px solid var(--line);border-radius:16px;padding:10px 12px;background:#fbfdff;box-shadow:var(--shadow);display:grid;grid-template-columns:1fr auto;gap:8px}.planCard b{font-size:17px}.planCard small{color:var(--muted);font-weight:800}.iconBtn{border:0;background:transparent;font-size:18px;padding:8px}.dbHead{display:flex;align-items:center;justify-content:space-between}.dbTitle{font-size:24px;font-weight:1000;margin:8px 0;display:flex;align-items:center;justify-content:flex-start;gap:10px;cursor:pointer;user-select:none}.finishBtn{width:100%;margin-top:14px;border-radius:18px;padding:16px;font-size:22px}.planMode .panelTitle{font-size:28px}.planCard{position:relative}.planCard .drag{display:inline-grid;place-items:center;width:34px;height:34px;border:0;border-radius:999px;background:#edf5ff;margin-right:8px;color:#31536f;font-weight:1000;touch-action:none;user-select:none;cursor:pointer}.planCard.reorder-placeholder{opacity:.55;transform:scaleY(.5);transform-origin:center;min-height:34px;border:2px dashed #9bb7d8;background:#edf5ff;box-shadow:none}.planCard.reorder-gap-before{margin-top:18px}.planCard.reorder-gap-after{margin-bottom:18px}.planCard.reorder-lifted{position:fixed!important;z-index:80;width:calc(min(100vw,520px) - 48px);left:var(--drag-left,12px);top:var(--drag-top,0px);transform:translateY(var(--drag-y,0px)) scale(1.035);opacity:.94;box-shadow:0 2px 3px rgba(7,16,39,.10),0 10px 24px rgba(7,16,39,.18),0 28px 60px rgba(7,16,39,.22);filter:drop-shadow(0 1px 0 rgba(255,255,255,.65));pointer-events:none}.planList.reorder-active .planCard:not(.reorder-lifted){transition:transform .14s ease,margin .14s ease,opacity .14s ease}.drag.reorder-armed{background:#dcecff;box-shadow:0 0 0 3px rgba(94,167,232,.25);color:#123a5c}.planCard.reorder-prelift{box-shadow:0 8px 20px rgba(7,16,39,.15);transform:scale(1.006);transition:box-shadow .12s ease,transform .12s ease}.planCard .planMain{display:flex;align-items:center}.planCard .planText{display:grid}.bankArea{margin-top:0;border-radius:16px;overflow:hidden;background:white}.bankOpen{border:1px solid var(--line);box-shadow:var(--shadow)}.bankRows{max-height:440px;overflow:auto;scroll-behavior:smooth;background:white}.bankRow{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px 12px;border-bottom:1px solid #eef2f6;background:white}.bankRow b{font-size:15px}.bankRow small{display:block;color:var(--muted);font-weight:800;margin-top:3px;font-size:11px}.bankLabel{background:#edf5ff;color:#4d6685;font-size:11px;font-weight:1000;padding:5px 10px}.bankWithAz{display:grid;grid-template-columns:42px 1fr}.az{background:#f5f8fc;border-right:1px solid var(--line);padding:7px 0;text-align:center;font-size:11px;font-weight:1000;color:#425267;line-height:1.28;user-select:none;touch-action:none;overscroll-behavior:contain;overflow:visible}.az button{display:block;position:relative;width:100%;min-height:16px;border:0;background:transparent;font-size:11px;font-weight:1000;color:#425267;padding:0;border-radius:999px;transform-origin:center;transition:transform .1s ease,background .1s ease,color .1s ease,box-shadow .1s ease}.az button.active,.az button:active{background:#071027;color:#fff;transform:scale(1.08)}.az.azTouching button.active,.az button:active{z-index:3;transform:translateY(-6px) scale(1.45);box-shadow:0 5px 12px rgba(7,16,39,.2)}.bottomPad{height:220px}.stateBadge{display:inline-block;background:#071027;color:#fff;border-radius:999px;padding:6px 10px;font-weight:900;font-size:12px}.hidden{display:none!important}.modal{position:fixed;inset:0;background:rgba(7,16,39,.45);z-index:50;display:none;align-items:flex-end;justify-content:center}.modal.open{display:flex}.sheet{width:min(100%,520px);background:white;border-radius:24px 24px 0 0;padding:16px;box-shadow:0 -8px 30px rgba(0,0,0,.18)}.sheet h2{margin:0 0 10px}.field{display:grid;gap:5px;margin:8px 0}.field label{font-size:12px;color:var(--muted);font-weight:900}.field input,.field select{border:1px solid var(--line);border-radius:12px;padding:11px;font-size:16px;background:white;color:var(--ink);width:100%}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.notice{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;color:#38475b;font-weight:750;margin-top:10px}.danger{color:var(--danger)}.apiBox{background:#fff8e8;border:1px solid #f2d38a;border-radius:16px;padding:12px;margin-top:10px;color:#6a4c00;font-weight:750}.patientOutput{background:#f7fbff;border:2px solid #5ea7e8;border-radius:18px;padding:12px;margin-top:10px}.patientLink{display:block;text-align:center;background:#071027;color:#fff;text-decoration:none;border-radius:14px;padding:13px 12px;font-weight:1000;margin-top:10px}.qrBox{display:grid;place-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;min-height:clamp(220px,64vw,340px);padding:14px;margin-top:10px}.qrBox img{width:92%;max-width:380px;height:auto;image-rendering:pixelated}.qrStatus{font-size:12px;color:var(--muted);font-weight:900;text-align:center;margin-top:8px}.footerActions{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,520px);display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;background:rgba(232,238,246,.94);padding:10px 12px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line);backdrop-filter:blur(8px)}
-    @media (max-width:390px){.panelTitle{font-size:25px}.dbTitle{font-size:24px}textarea{font-size:18px}.bankRows{max-height:380px}}
-    @media (max-width:759px){
-      .tools{position:relative}
-      #recentList:not(.hidden),#packageList:not(.hidden){position:absolute;left:0;right:0;bottom:calc(100% + 10px);z-index:42;max-height:min(54vh,360px);overflow:auto;background:rgba(255,255,255,.97);border:1px solid rgba(220,227,235,.94);border-radius:22px;padding:10px;box-shadow:0 18px 48px rgba(7,16,39,.2),0 4px 14px rgba(7,16,39,.1);backdrop-filter:blur(10px);transform-origin:bottom center;animation:mobileDrawerRise .26s cubic-bezier(.18,.84,.24,1) both}
-      #recentList:not(.hidden) .notice,#packageList:not(.hidden) .notice{margin-top:0}
-      @keyframes mobileDrawerRise{0%{opacity:0;transform:translateY(18px) scale(.97);filter:blur(2px)}70%{opacity:1;transform:translateY(-3px) scale(1.01);filter:blur(0)}100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+    .planCardActions .iconBtn[data-planedit]{
+      width:42px;
+      height:42px;
+      border-radius:999px;
+      background:#f8fafc;
+      border:1px solid rgba(220,227,235,.95);
+      box-shadow:0 2px 8px rgba(7,16,39,.06);
+      font-size:20px;
     }
-    .topbar,.footerActions,body>.app>.apiBox,#debugPayloadBox{display:none!important}.nativeFileInput{position:fixed;left:-100vw;top:0;width:1px;height:1px;opacity:.01}.app{padding-top:12px;padding-bottom:24px}.bottomPad{height:24px}.finishChoices{display:grid;gap:10px;margin-top:12px}.finishChoices button{width:100%;min-height:52px}.finishPdfRow{display:grid;grid-template-columns:minmax(0,1fr) 58px;gap:8px}.finishPdfLargeBtn{font-size:24px;line-height:1;padding:0;min-height:52px;border-radius:16px}.pdfPreviewSheet{width:min(96vw,860px);height:min(92vh,780px);display:grid;grid-template-rows:auto auto auto minmax(220px,1fr) auto auto;gap:8px}.pdfPreviewFrame{width:100%;height:100%;border:1px solid var(--line);border-radius:16px;background:#fff}.pdfPreviewFallback{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;background:#f6f8fb;border:1px solid var(--line);border-radius:16px;padding:10px 12px;color:#38475b;font-weight:800}.pdfPreviewFallback.hidden{display:none!important}.pdfPreviewFallback small{display:block;color:var(--muted);font-weight:800;margin-top:2px}.pdfPreviewFallback .mutedBtn{white-space:nowrap}.patientOutput.hidden{display:none!important}.modal{align-items:center}.sheet{border-radius:24px;max-height:92vh;overflow:auto}
-    .pdfPreviewMobileBridge{display:grid;gap:8px;background:#f6f8fb;border:1px solid var(--line);border-radius:16px;padding:10px 12px}.pdfPreviewMobileBridge.hidden{display:none!important}.pdfPreviewMobileBridge .primary{width:100%;min-height:56px;border-radius:16px}.pdfPreviewMobileBridge small{display:block;color:var(--muted);font-weight:800;line-height:1.25}.pdfPreviewModalMobile .pdfPreviewSheet{height:auto;grid-template-rows:auto auto auto auto auto}.pdfPreviewModalMobile .pdfPreviewFrame{display:none}.pdfPreviewModalMobile .pdfPreviewFallback{display:none!important}
-    .dbTitle{position:relative;min-height:32px;overflow:visible;gap:0;margin:6px 0 6px;font-size:22px;line-height:1.15}.dbTitle .dbTitleTrain{display:inline-block;white-space:nowrap;transform-origin:left center}.dbTitle.fullBankOpen,.dbTitle.searchBankOpen{margin:6px 0 6px}.dbTitle.fullBankOpen .dbTitleTrain{animation:dbTitleSlideUp .48s cubic-bezier(.2,.9,.2,1) both}.dbTitle.searchBankOpen .dbTitleTrain{animation:none}.bankArea.bankOpen{display:block;padding:8px}.bankArea.bankOpen #bankContent{min-width:0;margin-top:8px}.drawerBtn.dbMascotDock{width:56px;height:56px;min-height:56px;margin:0;padding:0;border:0;background:transparent;box-shadow:none;justify-content:center}.dbToggleMain{display:flex;align-items:center;gap:10px;min-width:0}.dbToggleText{white-space:nowrap}.dbMascotBubble{display:inline-flex;align-items:center;justify-content:center;gap:2px;width:48px;height:48px;border:2px solid #1b2230;border-radius:999px;background:#fff;box-shadow:var(--shadow);line-height:1;flex:0 0 auto}.dbMascotBubble .dbCaret{font-size:13px;line-height:1;transform:translateY(-1px)}.dbMascotBubble .dbMascot{font-size:18px;line-height:1}.bankArea:not(.bankOpen) .dbMascotBubble{width:auto;height:auto;border:0;border-radius:0;background:transparent;box-shadow:none}.bankArea:not(.bankOpen) .dbMascotBubble .dbCaret{font-size:18px}.drawerBtn.dbMascotDock .dbToggleText{display:none}@keyframes dbTitleSlideUp{0%{transform:translateY(var(--db-title-start-y,86px)) scale(.98);opacity:.86}100%{transform:translateY(0) scale(1);opacity:1}}
-    .bankArea.bankOpen.alphaBankOpen{position:relative}.bankArea.bankOpen.alphaBankOpen #bankToggle{position:absolute;left:8px;top:8px;z-index:2}.bankArea.bankOpen.alphaBankOpen #bankContent{margin-top:0}.bankArea.bankOpen.alphaBankOpen .bankWithAz{grid-template-columns:56px minmax(0,1fr);column-gap:8px}.bankArea.bankOpen.alphaBankOpen .az{width:42px;justify-self:center;margin-top:64px;border-right:0;border-radius:999px}.bankArea.bankOpen.alphaBankOpen .bankRows{grid-column:2}
-    .planActions{display:grid;grid-template-columns:minmax(0,0fr) minmax(0,1fr);gap:10px;align-items:stretch;transition:grid-template-columns .34s cubic-bezier(.2,.85,.2,1)}.planActions.hasPlan{grid-template-columns:minmax(112px,1fr) 56px}.planActions .finishBtn{margin:0;min-width:0;overflow:hidden;white-space:nowrap;transform-origin:left center;opacity:0;scale:.65 1;transition:opacity .18s ease,scale .34s cubic-bezier(.2,.85,.2,1),padding .34s cubic-bezier(.2,.85,.2,1)}.planActions .finishBtn.hidden{display:block!important;visibility:hidden;pointer-events:none;padding-left:0;padding-right:0;border-width:0}.planActions.hasPlan .finishBtn{opacity:1;scale:1 1;animation:finishGrowIn .34s cubic-bezier(.2,.85,.2,1) both}.planActions #recentToggle{min-width:0;overflow:hidden;transition:width .34s cubic-bezier(.2,.85,.2,1),padding .34s cubic-bezier(.2,.85,.2,1);white-space:nowrap}.recentIcon{flex:0 0 auto}.recentText,.recentMini{overflow:hidden;transition:max-width .24s ease,opacity .18s ease}.planActions.hasPlan #recentToggle{width:56px;min-width:56px;padding-left:0;padding-right:0;justify-content:center}.planActions.hasPlan .recentText,.planActions.hasPlan .recentMini{max-width:0;opacity:0}@keyframes finishGrowIn{0%{transform:scaleX(.48);opacity:.1}65%{transform:scaleX(1.03);opacity:1}100%{transform:scaleX(1);opacity:1}}
-    .planHeader{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;margin-bottom:12px}.planHeader .panelTitle{margin:0}.packageSaveBtn{position:relative;width:auto;min-width:74px;height:44px;padding:0 13px;border:2px solid #1b2230;border-radius:16px;background:#fff;box-shadow:0 2px 8px rgba(7,16,39,.08);display:flex;align-items:center;justify-content:center;gap:6px;overflow:hidden;font-weight:1000;margin:0}.packageSaveBtn.hidden{display:none!important}.packageSaveBtn .packageBox{font-size:27px;line-height:1}.packageSaveBtn .packagePlus{font-size:20px;line-height:1;color:#071027;text-shadow:0 1px 0 #fff}.packageSaveBtn.packagePulse .packagePlus{animation:packagePlusFly .48s cubic-bezier(.2,.9,.2,1) both}.packageSaveBtn.packagePulse .packageBox{animation:packageBoxPop .48s cubic-bezier(.2,.9,.2,1) both}@keyframes packagePlusFly{0%{transform:translate(0,0) scale(1);opacity:1}55%{transform:translate(14px,7px) scale(.82);opacity:1}100%{transform:translate(20px,9px) scale(.45);opacity:0}}@keyframes packageBoxPop{0%,100%{transform:scale(1)}58%{transform:scale(1.08)}}
-    .inputWrap textarea{padding-right:36px}.inputWrap #exerciseInput{overflow:hidden;resize:none}.inputWrap #exerciseInput.hasText{min-height:0}.clearBtn{top:2px;right:4px;padding:4px 6px;line-height:1}
-    .planActions:not(.hasPlan){grid-template-columns:minmax(0,0fr) minmax(0,1fr);gap:0}.planActions:not(.hasPlan) #recentToggle,#createPanel:not(.planMode) #packageToggle{height:58px;min-height:58px;box-sizing:border-box;align-items:center}.planActions:not(.hasPlan) .finishBtn.hidden{width:0}
-    .az.azTouching button.active:not(.touch-preview){transform:scale(1.08);box-shadow:none}.az button.az-empty:not(.active){color:#7f8b9a;background:#e3e9f0}.az.azTouching button.touch-near2{z-index:4;transform:translateY(-10px) scale(1.16)}.az.azTouching button.touch-near1{z-index:5;transform:translateY(-24px) scale(1.48);box-shadow:0 5px 14px rgba(7,16,39,.14)}.az.azTouching button.touch-preview,.az button:active{z-index:6;transform:translateY(-48px) scale(2.15);box-shadow:0 10px 24px rgba(7,16,39,.24),0 0 0 2px rgba(255,255,255,.92)}
-    .planCard.reorder-lifted{opacity:.98;border-color:rgba(120,137,158,.34);box-shadow:0 1px 2px rgba(7,16,39,.08),0 8px 18px rgba(7,16,39,.18),0 22px 42px rgba(7,16,39,.16);filter:none}
-    .planCard.reorder-placeholder{opacity:1;transform:none;min-height:48px;border:0;background:transparent;box-shadow:none;backdrop-filter:none;position:relative;overflow:visible}
-    .planCard.reorder-placeholder::before{content:"";position:absolute;left:9%;right:9%;top:50%;height:44%;transform:translateY(-50%);border-radius:999px;background:radial-gradient(ellipse at center,rgba(7,16,39,.24) 0%,rgba(7,16,39,.15) 34%,rgba(7,16,39,.07) 58%,rgba(7,16,39,0) 78%);filter:blur(9px)}
-    .patientLinkCopyField{width:100%;min-height:64px;margin-top:8px;border:1px solid var(--line);border-radius:12px;padding:9px 10px;font-size:12px;line-height:1.25;background:#fff;color:#38475b;resize:none;word-break:break-all}
-    .adminConfigBtn,.sharedBankBtn{display:none;width:100%;margin-top:10px}.adminMode .adminConfigBtn,.adminMode .sharedBankBtn{display:block}.secretStatus{display:block;color:var(--muted);font-size:13px;font-weight:800;margin-top:4px}.adminCodePackageTools{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.adminCodePackageTools .wide{grid-column:1/-1}.adminPackageHint{font-size:12px;color:var(--muted);font-weight:800;margin-top:8px}.sharedBankText{width:100%;min-height:180px;margin-top:8px;border:1px solid var(--line);border-radius:12px;padding:10px;font-size:12px;line-height:1.3;background:#fff;color:#38475b}
-    .dbTitle.fullBankOpen .dbTitleTrain{animation:dbTitleGlideUp .34s cubic-bezier(.22,.61,.36,1) both}.bankArea.bankOpen #bankContent{animation:bankContentGlide .24s cubic-bezier(.22,.61,.36,1) both;transform-origin:top center}@keyframes dbTitleGlideUp{0%{transform:translateY(clamp(18px,var(--db-title-start-y,42px),44px));opacity:.72}100%{transform:translateY(0);opacity:1}}@keyframes bankContentGlide{0%{opacity:.68;transform:translateY(-6px)}100%{opacity:1;transform:translateY(0)}}
-    .editorSheet{padding:18px 16px calc(22px + env(safe-area-inset-bottom));scroll-padding-bottom:24px}.editorHeader{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.editorHeader h2{margin:0}.editorDeleteBtn{width:44px;height:44px;min-width:44px;padding:0;border:1px solid rgba(226,59,84,.24);border-radius:14px;background:#fff5f7;display:grid;place-items:center;font-size:21px;box-shadow:0 4px 12px rgba(226,59,84,.10)}.editorSheet .field{margin:7px 0}.editorSheet .notice{margin-top:12px}.editorMediaBox{display:grid;gap:10px}.editorMediaHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.editorMediaStatus{display:block;color:var(--muted);font-size:13px;font-weight:800;margin-top:3px}.editorMediaPreview{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#f6f8fb;min-height:96px;display:grid;place-items:center;color:var(--muted);font-size:13px;font-weight:800}.editorMediaPreview img{width:100%;max-height:180px;object-fit:cover;display:block}.editorMediaActions{display:grid;grid-template-columns:1fr auto;gap:8px}.editorMediaActions button{min-height:48px}.editorAdvanced{padding:13px 12px}.editorAdvanced summary{min-height:34px;display:flex;align-items:center}.editorAdvancedGrid{grid-template-columns:1fr;margin-top:12px}.editorActions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}.editorActions button,.editorCancelBtn{min-height:52px}.editorCancelBtn{width:100%;margin-top:10px}
-    @media (min-width:760px){body{align-items:flex-start}.app{width:min(100%,960px);padding:20px 22px 76px;display:grid;grid-template-columns:minmax(260px,330px) minmax(420px,1fr);gap:14px;align-items:start}.topbar{grid-column:1/-1;margin:-20px -22px 0;padding:12px 22px}.scanHub{grid-column:1;position:sticky;top:76px;margin:0}.panel{grid-column:2;margin:0}.bottomPad{grid-column:1/-1;height:70px}.footerActions{width:min(100%,960px)}.modal{align-items:center}.sheet{width:min(92vw,620px);border-radius:24px}}
-    @media (min-width:760px){
-      body{align-items:flex-start}
-      .app{width:min(100%,1180px);padding:18px;display:grid;grid-template-columns:1fr;grid-template-rows:auto auto 1fr;gap:14px;align-items:stretch}
-      .scanHub{grid-column:1;position:static;top:auto;margin:0;display:grid;grid-template-columns:minmax(180px,1fr) minmax(180px,1fr);gap:10px;align-items:center;padding:12px;border-radius:22px}
-      .scanHub .scanBtn,.scanHub .scanMeta{height:58px;min-height:58px;display:flex;align-items:center;justify-content:center}
-      .scanHub .scanMeta{border-top:0;margin:0;padding:0 14px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);font-size:18px;color:var(--ink)}
-      .scanHub .scanMeta small{display:inline;margin:0 0 0 8px;font-size:12px;color:var(--muted)}
-      .adminMode .scanHub{grid-template-columns:minmax(180px,1fr) minmax(180px,1fr) minmax(150px,.7fr) minmax(190px,.9fr)}
-      .adminMode .scanHub .adminConfigBtn,.adminMode .scanHub .sharedBankBtn{display:flex;margin:0;height:58px;align-items:center;justify-content:center}
-      .scanHub #scanPreview{grid-column:1/-1;margin:0}
-      .panel{grid-column:1;margin:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:12px}
-      .planHeader{margin:0}
-      .planHeader .panelTitle{font-size:30px}
-      .panel .inner{display:grid;grid-template-columns:minmax(360px,430px) minmax(0,1fr);grid-template-rows:auto auto auto auto minmax(0,1fr);gap:10px 14px;align-items:start;min-height:560px}
-      #baseToggle{grid-column:1/-1;grid-row:1}
-      #baseFields{grid-column:1/-1;grid-row:2}
-      #inputLabel{grid-column:1;grid-row:3;margin:0}
-      #dbTitle{grid-column:1;grid-row:4}
-      #inputWrap{grid-column:1;grid-row:5}
-      #bankArea{grid-column:1;grid-row:6;min-width:0}
-      #currentPlanBlock{grid-column:2;grid-row:3/7;align-self:stretch;min-width:0;border:1px solid var(--line);border-radius:18px;background:#fbfdff;padding:12px;box-shadow:var(--shadow)}
-      #currentPlanBlock.hidden{display:block!important;visibility:hidden;pointer-events:none}
-      #currentPlanBlock .label{margin-top:0;font-size:16px}
-      #planList{max-height:530px;overflow:auto;padding-right:2px}
-      #exerciseInput{min-height:118px}
-      .bankArea.bankOpen #bankContent{margin-top:8px}
-      .bankRows{max-height:420px}
-      .tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,.48fr);gap:10px;margin-top:0}
-      .planActions{grid-column:1;min-height:58px}
-      #recentList{grid-column:1/-1}
-      #packageToggle{grid-column:2;grid-row:1;height:58px;min-height:58px}
-      #packageList{grid-column:1/-1}
-      .bottomPad{grid-column:1;height:12px}
-      .footerActions{width:min(100%,1180px)}
-      .modal{align-items:center}
-      .sheet{width:min(92vw,620px);border-radius:24px}
+    .planDeleteBtn{
+      width:28px;
+      min-width:28px;
+      height:28px;
+      opacity:.75;
     }
     @media (min-width:760px){
-      .app{min-height:100vh}
-      .scanHub{grid-template-columns:minmax(190px,.9fr) minmax(190px,.9fr);align-self:start}
-      .panel{min-height:calc(100vh - 124px)}
-      .panel .inner{grid-template-columns:minmax(380px,440px) minmax(0,1fr);grid-template-rows:auto auto auto auto auto minmax(0,1fr);min-height:0;height:min(72vh,690px);align-content:start}
-      #baseFields:not(.hidden){display:grid;grid-template-columns:1fr 1fr;gap:10px}
-      #baseFields .field{margin:0}
-      #baseFields .field:last-child{grid-column:1/-1}
-      #inputWrap{min-height:0;align-self:start}
-      #exerciseInput{min-height:112px;max-height:190px}
-      #bankArea{align-self:stretch;overflow:hidden}
-      #bankArea.bankOpen{max-height:100%;display:flex;flex-direction:column}
-      #bankArea.bankOpen #bankContent{flex:1;min-height:0}
-      .bankRows{max-height:360px}
-      #bankArea.bankOpen .bankRows{max-height:none;flex:1;min-height:0;overflow:auto}
-      #currentPlanBlock{display:block!important;min-height:0;overflow:hidden}
-      #currentPlanBlock.hidden{visibility:hidden;pointer-events:none}
-      #planList{max-height:calc(100dvh - 300px);overflow:auto}
-      .planCard{padding:12px 14px}
-      .planCard b{font-size:18px}
-      .planActions.hasPlan{grid-template-columns:minmax(220px,1fr) 66px}
-      .planActions.hasPlan #recentToggle{width:66px;min-width:66px}
-      #packageToggle{justify-content:center}
-      #recentList,#packageList{max-height:220px;overflow:auto}
-    }
-    .planCard[data-plan-id]{touch-action:pan-y;overflow:hidden}
-    .planCard.swipe-dragging{transition:none;will-change:transform,opacity,box-shadow;box-shadow:0 8px 22px rgba(7,16,39,.14)}
-    .planCard.swipe-armed{background:#fffafa;box-shadow:0 0 0 2px rgba(226,59,84,.18),0 14px 34px rgba(7,16,39,.2)}
-    .planCard.swipe-removing{pointer-events:none}
-    .planCard.swipe-dragging::after{content:"Löschen";position:absolute;top:50%;transform:translateY(-50%);padding:6px 10px;border-radius:999px;background:rgba(226,59,84,.1);color:#b01830;font-size:12px;font-weight:1000;opacity:var(--swipe-strength,0)}
-    .planCard.swipe-left::after{right:14px}.planCard.swipe-right::after{left:14px}
-    .bankRow[data-bank-id]{touch-action:pan-y;overflow:hidden;position:relative}
-    .bankRow.bank-swipe-dragging{transition:none;will-change:transform,opacity,box-shadow;box-shadow:0 8px 20px rgba(7,16,39,.12);z-index:1}
-    .bankRow.bank-swipe-armed{background:#fffafa;box-shadow:0 0 0 2px rgba(226,59,84,.18),0 10px 26px rgba(7,16,39,.16)}
-    .bankRow.bank-swipe-dragging::after{content:"Löschen";position:absolute;top:50%;transform:translateY(-50%);padding:5px 9px;border-radius:999px;background:rgba(226,59,84,.1);color:#b01830;font-size:11px;font-weight:1000;opacity:var(--bank-swipe-strength,0)}
-    .bankRow.bank-swipe-left::after{right:12px}.bankRow.bank-swipe-right::after{left:12px}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px}.topbarText{min-width:0}.visionBtn{flex:0 0 auto;border:2px solid #071027;background:#fff;color:#071027;border-radius:14px;padding:9px 12px;font-weight:1000;font-size:17px;line-height:1;min-width:48px}
-    body.a11y{--bg:#fff;--paper:#fff;--ink:#000;--muted:#172033;--line:#111;--blue:#e9f4ff;--blue2:#f6fbff;--accent:#000;--danger:#b00020;--shadow:none}
-    body.a11y .app{width:min(100%,640px);padding-bottom:18px}body.a11y .topbar{background:#fff;border-bottom:2px solid #111}body.a11y .topbar h1{font-size:23px;line-height:1.12}body.a11y .topbar small{font-size:15px;color:#111}body.a11y .stateBadge{font-size:15px;border-radius:10px}
-    body.a11y .scanBtn,body.a11y .primary,body.a11y .mutedBtn,body.a11y .drawerBtn,body.a11y .baseCard{font-size:20px;min-height:52px;border-width:2px}body.a11y .panelTitle{font-size:34px;line-height:1.08;letter-spacing:0}body.a11y .label{font-size:18px}body.a11y textarea{font-size:24px;line-height:1.45;min-height:92px}body.a11y .suggestion{font-size:22px}body.a11y .suggestion small{font-size:15px}
-    body.a11y .planCard{border:2px solid #111;padding:14px;grid-template-columns:1fr}body.a11y .planCard b{font-size:23px}body.a11y .planCard small{font-size:19px;color:#111;line-height:1.35}body.a11y .planCard .drag{width:44px;height:44px;font-size:24px}body.a11y .iconBtn{font-size:25px;min-width:44px;min-height:44px}
-    body.a11y .field label{font-size:17px;color:#111}body.a11y .field input,body.a11y .field select{font-size:21px;min-height:52px;border:2px solid #111}body.a11y .notice,body.a11y .apiBox{font-size:18px;line-height:1.35;border:2px solid #111;color:#111}body.a11y .footerActions{position:static;left:auto;bottom:auto;transform:none;width:100%;grid-template-columns:1fr;margin-top:10px;background:#fff;border-top:2px solid #111}body.a11y .bottomPad{height:12px}
-    .adminTestBanner{grid-column:1/-1;background:#fff8e8;border:2px solid #b88700;border-radius:16px;padding:10px 12px;margin:0 0 10px;color:#3d2a00;font-weight:900;box-shadow:var(--shadow)}.adminTestBanner small{display:block;margin-top:3px;color:#6a4c00;font-weight:800}
-    .kggBuildBadge{display:block;margin-top:4px;color:#536273;font-size:10px;line-height:1.25;font-weight:850;word-break:break-word}
-    @media (min-width:760px){
-      body{align-items:flex-start;padding:18px;background:#e8eef6}
-      .app{width:min(100%,1180px);height:calc(100vh - 36px);min-height:640px;background:#f7f9fc;border:3px solid #111827;border-radius:34px;box-shadow:0 20px 60px rgba(7,16,39,.18);padding:18px;display:grid;grid-template-columns:minmax(360px,430px) minmax(0,1fr) 160px;grid-template-rows:auto 68px minmax(126px,auto) minmax(0,1fr) 64px;gap:14px;align-items:stretch;overflow:hidden}
-      .scanHub{grid-column:1;grid-row:2;margin:0;padding:0;background:transparent;border:0;box-shadow:none;display:grid;grid-template-columns:1fr 1fr;gap:10px;min-width:0}
-      .scanHub .scanBtn,.scanHub .scanMeta{height:100%;min-height:0;margin:0;display:flex;align-items:center;justify-content:center;border-radius:16px;font-size:17px}
-      .scanHub .scanMeta{border:1px solid var(--line);padding:0 12px;background:#fff;box-shadow:var(--shadow);color:var(--ink);border-top:1px solid var(--line)}
-      .scanHub .scanMeta small{display:none}
-      .scanHub input.hidden{display:none!important}
-      .scanHub #scanPreview{grid-column:1/-1;margin:0}
-      .adminMode .scanHub{grid-template-columns:1fr 1fr;grid-auto-rows:68px}
-      .adminMode .scanHub .adminConfigBtn,.adminMode .scanHub .sharedBankBtn{display:flex;margin:0;height:68px;align-items:center;justify-content:center;border-radius:16px}
-      .panel,.panel .inner,.tools{display:contents}
-      .planHeader{display:contents}
-      .planHeader .panelTitle{grid-column:2/4;grid-row:1;font-size:30px;margin:0;line-height:1.05;align-self:end}
-      #savePackageBtn{grid-column:3;grid-row:2;align-self:stretch;width:100%;height:68px;min-height:68px;border-radius:18px}
-      #savePackageBtn.hidden{display:block!important;visibility:hidden;pointer-events:none}
-      #baseToggle{grid-column:2;grid-row:2;height:68px;min-height:68px;border-radius:18px;font-size:21px;box-shadow:var(--shadow)}
-      #baseFields{grid-column:1/4;grid-row:2;background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:var(--shadow);z-index:4}
-      #baseFields.hidden{display:none!important}
-      #inputLabel{grid-column:1;grid-row:1;margin:0;align-self:end;font-size:20px;line-height:1;font-weight:1000}
-      #dbTitle{grid-column:1;grid-row:1;margin:0;align-self:end}
-      #inputWrap{grid-column:1;grid-row:3;align-self:stretch;border-radius:20px}
-      #exerciseInput{min-height:126px;max-height:190px;font-size:22px}
-      #bankArea{grid-column:1;grid-row:4;align-self:stretch;min-height:0;overflow:hidden;background:#fff;border-radius:20px}
-      #bankArea.bankOpen{display:flex;flex-direction:column;overflow:hidden;border:2px solid #111827;box-shadow:var(--shadow);padding:10px;height:100%;min-height:0}
-      #bankArea.bankOpen #bankContent{flex:1;min-height:0;margin-top:8px}
-      #bankArea.bankOpen .bankRows{max-height:none;height:100%}
-      #bankArea:not(.bankOpen) .drawerBtn{height:64px;min-height:64px;border:2px solid #111827;border-radius:20px;font-size:20px}
-      #currentPlanBlock{grid-column:2/4;grid-row:3/5;align-self:start;min-height:38vh;min-width:0;background:#fff;border:2px solid #111827;border-radius:24px;box-shadow:var(--shadow);padding:14px;overflow:hidden}
-      #currentPlanBlock.hidden{display:block!important;visibility:hidden;pointer-events:none}
-      #currentPlanBlock .label{margin:0 0 12px;font-size:20px;line-height:1;font-weight:1000}
-      #planList{max-height:calc(100dvh - 310px);overflow:auto;padding-right:2px}
-      .planCard{border-radius:18px;padding:12px 14px;grid-template-columns:minmax(0,1fr) auto}
-      .planCard b{font-size:20px}
-      .planCard small{font-size:14px}
-      .planActions{grid-column:2;grid-row:5;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:14px;align-self:stretch}
-      .planActions:not(.hasPlan){grid-template-columns:1fr}
-      .planActions:not(.hasPlan) #finishBtn.hidden{display:none!important}
-      #createPanel:not(.planMode) #recentToggle,#createPanel:not(.planMode) #packageToggle{height:64px;min-height:64px;width:100%;box-sizing:border-box;align-self:stretch}
-      #finishBtn{grid-column:auto;grid-row:auto;height:64px;min-height:64px;margin:0;border-radius:18px;font-size:22px}
-      #finishBtn.hidden{display:block!important;visibility:hidden;pointer-events:none;padding-left:0;padding-right:0;border-width:0}
-      #recentToggle{grid-column:auto;grid-row:auto;height:64px;min-height:64px;border-radius:18px;justify-content:center}
-      #packageToggle{grid-column:3;grid-row:5;height:64px;min-height:64px;border-radius:18px;justify-content:center}
-      #createPanel:not(.planMode) .planActions{grid-column:2/4;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-      #createPanel:not(.planMode) #recentToggle{grid-column:1;width:100%}
-      #createPanel:not(.planMode) #packageToggle{grid-column:2/4;grid-row:5;justify-self:end;width:calc(50% - 7px)}
-      #createPanel.planMode .planHeader .panelTitle{grid-column:2;grid-row:1}
-      #createPanel.planMode .planActions{display:contents}
-      #createPanel.planMode #finishBtn{grid-column:3;grid-row:1;align-self:end;justify-self:stretch;width:100%;height:54px;min-height:54px;border-radius:18px;font-size:20px;opacity:1;scale:1 1;animation:none}
-      #createPanel.planMode #recentToggle{grid-column:2;grid-row:5;width:100%;min-width:0}
-      #createPanel.planMode #packageToggle{grid-column:3;grid-row:5;width:100%}
-      .planActions.hasPlan #recentToggle{width:auto;min-width:0;padding:10px 12px}
-      #createPanel.planMode #recentToggle{width:100%;justify-self:stretch}
-      .planActions.hasPlan .recentText,.planActions.hasPlan .recentMini{max-width:none;opacity:1}
-      #recentList,#packageList{grid-row:4/5;align-self:end;z-index:28;max-height:min(42vh,360px);overflow:auto;background:rgba(255,255,255,.96);border:1px solid rgba(220,227,235,.92);border-radius:22px;padding:10px;box-shadow:0 18px 48px rgba(7,16,39,.18),0 4px 14px rgba(7,16,39,.08);backdrop-filter:blur(10px);transform-origin:bottom center;animation:tabletDrawerRise .28s cubic-bezier(.18,.84,.24,1) both}
-      #recentList{grid-column:2}
-      #packageList{grid-column:2/4}
-      #recentList.hidden,#packageList.hidden{display:none!important}
-      #recentList .notice,#packageList .notice{margin-top:0}
-      @keyframes tabletDrawerRise{0%{opacity:0;transform:translateY(22px) scale(.96);filter:blur(2px)}70%{opacity:1;transform:translateY(-4px) scale(1.01);filter:blur(0)}100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
-      .bottomPad{display:none}
-      .footerActions{display:none!important}
-      .modal{align-items:center}
-      .sheet{width:min(92vw,620px);border-radius:24px}
-      .app.softKeyboard{height:calc(var(--kgg-visual-vh,100vh) - 20px);min-height:0;padding:12px;gap:10px;grid-template-rows:auto 56px minmax(82px,auto) minmax(0,1fr)}
-      .app.softKeyboard .scanHub{gap:8px}
-      .app.softKeyboard .scanHub .scanBtn,.app.softKeyboard .scanHub .scanMeta{font-size:15px;border-radius:14px}
-      .app.softKeyboard .planHeader .panelTitle{font-size:26px}
-      .app.softKeyboard #baseToggle,.app.softKeyboard #savePackageBtn{height:56px;min-height:56px;border-radius:15px}
-      .app.softKeyboard #inputLabel,.app.softKeyboard #dbTitle{font-size:18px}
-      .app.softKeyboard #inputWrap{border-radius:16px}
-      .app.softKeyboard #exerciseInput{min-height:82px;max-height:120px;font-size:20px;line-height:1.25;padding-top:12px;padding-bottom:12px}
-      .app.softKeyboard #bankArea{grid-row:4;min-height:0}
-      .app.softKeyboard #bankArea.bankOpen{padding:8px;height:100%;min-height:0}
-      .app.softKeyboard #bankArea.bankOpen #bankContent,.app.softKeyboard #bankArea.bankOpen .bankWithAz{height:100%;min-height:0}
-      .app.softKeyboard #bankArea.bankOpen.alphaBankOpen .az{display:flex;flex-direction:column;height:calc(100% - 58px);margin-top:58px;padding:2px 0}
-      .app.softKeyboard #bankArea.bankOpen.alphaBankOpen .az button{flex:1 1 0;min-height:0;font-size:10px;line-height:1}
-      .app.softKeyboard .bankRow{padding:8px 10px}
-      .app.softKeyboard .bankRow b{font-size:14px}
-      .app.softKeyboard .bankRow small{font-size:10px}
-      .app.softKeyboard #currentPlanBlock{padding:10px;border-radius:20px}
-      .app.softKeyboard #currentPlanBlock .label{font-size:17px;margin-bottom:8px}
-      .app.softKeyboard .planCard{padding:8px 10px;border-radius:15px}
-      .app.softKeyboard .planCard b{font-size:17px}
-      .app.softKeyboard .planCard small{font-size:12px}
-      .app.softKeyboard #finishBtn,.app.softKeyboard #recentToggle,.app.softKeyboard #packageToggle{display:none!important}
-      .app.softKeyboard #recentList,.app.softKeyboard #packageList{max-height:min(34vh,260px)}
-    }
-    #finishNotice:empty{display:none}
-    .patientQrOutput{padding:8px;margin-top:4px;display:flex;flex-direction:column}
-    .patientQrOutput .patientOutputTitle,
-    .patientQrOutput #patientShareNotice,
-    .patientQrOutput #patientQrStatus{display:none!important}
-    .patientQrOutput .qrBox{margin-top:0;min-height:clamp(360px,84vw,520px);padding:6px;border-radius:18px}
-    .patientQrOutput .qrBox img{width:100%;max-width:min(88vw,500px);height:auto}
-    .patientQrOutput #patientQrBox{order:1}
-    .patientQrOutput #patientAppLink{order:2}
-    .patientQrOutput #copyPatientLink{order:3;width:100%;margin-top:8px}
-    .patientQrOutput #patientLinkCopyField{order:4}
-    .patientShareActions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:8px}
-    .patientShareActions .patientLink,
-    .patientShareActions .mutedBtn{margin-top:0;min-height:48px;display:grid;place-items:center}
-    @media (max-width:390px){.patientQrOutput .qrBox{min-height:clamp(330px,82vw,470px)}.patientShareActions{grid-template-columns:1fr}.patientShareActions .patientLink,.patientShareActions .mutedBtn{min-height:44px}}
-
-
-    /* v309 Tablet Layout Fix: nur Tablet-CSS, keine PDF/QR/Scan/Parser-Logik. */
-    @media (min-width:760px){
-      .app{position:relative;isolation:isolate}
-
-      /* Admin-Hinweis darf nicht mehr als ungeplantes Grid-Item unten ins Layout rutschen. */
-      .adminTestBanner{position:absolute;left:18px;right:18px;bottom:8px;z-index:3;margin:0;padding:8px 10px;font-size:13px;line-height:1.15;pointer-events:none;opacity:.92}
-      .adminTestBanner small{font-size:11px;line-height:1.15}
-
-      /* Sichtbares Tablet-Raster stabilisieren. */
-      .app{grid-template-columns:minmax(360px,430px) minmax(0,1fr) minmax(150px,190px);grid-template-rows:auto 68px minmax(126px,auto) minmax(0,1fr) 64px;gap:14px;align-items:stretch}
-      .scanHub{grid-column:1;grid-row:2;align-self:stretch;min-width:0}
-      .planHeader .panelTitle{grid-column:2/4;grid-row:1;align-self:end;min-width:0}
-      #inputLabel,#dbTitle{grid-column:1;grid-row:1;align-self:end;min-width:0}
-      #inputWrap{grid-column:1;grid-row:3;min-width:0;align-self:stretch}
-      #bankArea{grid-column:1;grid-row:4;min-width:0;align-self:stretch}
-      #currentPlanBlock{grid-column:2/4;grid-row:3/5;min-width:0;align-self:stretch}
-      #baseToggle{grid-column:2;grid-row:2;min-width:0;align-self:stretch}
-      #savePackageBtn{grid-column:3;grid-row:2;align-self:stretch;justify-self:stretch}
-      #baseFields{grid-column:1/4;grid-row:2;align-self:start}
-
-      /* Wenn kein Paket-Speichern-Button sichtbar ist, darf Basisdaten nicht schmal/frei schweben. */
-      #createPanel:not(.planMode) #baseToggle,
-      #savePackageBtn.hidden + #baseToggle{grid-column:2/4}
-      #createPanel:not(.planMode) #savePackageBtn.hidden{display:none!important}
-
-      /* Versteckte Planfläche soll im Leerzustand keine unsichtbare große Box erzwingen. */
-      #createPanel:not(.planMode) #currentPlanBlock.hidden{display:none!important}
-
-      /* Untere Tablet-Aktionen bündig halten. */
-      #createPanel:not(.planMode) .planActions{grid-column:2;grid-row:5;display:grid;grid-template-columns:1fr;gap:14px;min-width:0}
-      #createPanel:not(.planMode) #recentToggle{grid-column:1;grid-row:1;width:100%;height:64px;min-height:64px;justify-content:center}
-      #createPanel:not(.planMode) #packageToggle{grid-column:3;grid-row:5;width:100%;justify-self:stretch;height:64px;min-height:64px}
-      #createPanel.planMode #recentToggle,
-      #createPanel.planMode #packageToggle{height:64px;min-height:64px;align-self:stretch}
-
-      /* Eingabe/DB links als eine ruhige Spalte; rechts Planfläche voll ausnutzen. */
-      #exerciseInput{width:100%;min-height:126px;max-height:190px}
-      #bankArea:not(.bankOpen) .drawerBtn{width:100%;height:64px;min-height:64px}
-      #currentPlanBlock .label{white-space:nowrap}
-      #planList{max-height:100%;overflow:auto}
-
-      /* Schmaler Tablet-Splitscreen: feste rechte Icon-Spalte etwas entspannen. */
-      @media (max-width:920px){
-        .app{grid-template-columns:minmax(320px,390px) minmax(0,1fr) minmax(126px,150px);gap:12px;padding:14px}
-        #baseToggle{font-size:19px}
-        #packageToggle,#recentToggle,#finishBtn{font-size:18px}
-        .adminTestBanner{left:14px;right:14px;bottom:6px}
+      #currentPlanBlock .planCard{
+        min-height:70px;
+        padding:12px 14px;
+      }
+      #currentPlanBlock .planCard b{
+        font-size:19px;
+      }
+      #currentPlanBlock .planMetaLine{
+        font-size:12px;
+      }
+      #currentPlanBlock .planSourceLine{
+        font-size:11px;
       }
     }
-
-    /* v310 Tablet Layout Overlap Fix: Scan-Vorschau aus dem linken Eingabe-Raster nehmen, Bottom-Zeile sichtbar halten. */
-    @media (min-width:760px){
-      body{padding:8px;background:#e8eef6;overflow:hidden}
-      .app{
-        height:calc(100vh - 16px);
-        height:calc(100dvh - 16px);
-        height:calc(var(--kgg-visual-vh,100dvh) - 16px);
-        max-height:calc(var(--kgg-visual-vh,100dvh) - 16px);
-        min-height:0;
-        grid-template-rows:auto 68px minmax(112px,auto) minmax(0,1fr) 64px;
-        overflow:hidden;
-      }
-
-      /* Der Admin-Hinweis darf auf Tablet keinen Platz fressen und keine Buttons unten verdecken. */
-      .adminTestBanner{display:none!important}
-
-      /* ScanPreview war der sichtbare Überlappungsfehler: nicht mehr als dritte Zeile in .scanHub wachsen lassen. */
-      .scanHub{overflow:visible;z-index:30;align-self:stretch}
-      .scanHub #scanPreview:not(.hidden){
-        position:absolute;
-        left:calc(18px + min(430px,36vw) + 14px);
-        right:18px;
-        top:164px;
-        max-height:calc(100% - 246px);
-        overflow:auto;
-        margin:0;
-        z-index:35;
-        border:2px solid #93d8a0;
-        box-shadow:0 14px 40px rgba(7,16,39,.16);
-      }
-      .app:has(#createPanel.planMode) .scanHub #scanPreview{display:none!important}
-
-      /* Eingabe und DB bleiben links sauber gestapelt; keine Vorschau darf darunterlaufen. */
-      #inputWrap{position:relative;z-index:2;align-self:start}
-      #bankArea{position:relative;z-index:1;min-height:0}
-      #exerciseInput{min-height:112px;max-height:154px}
-      #bankArea:not(.bankOpen) .drawerBtn{height:64px;min-height:64px}
-
-      /* Rechter Leerzustand: keine unsichtbare Planbox und keine abgeschnittene untere Zeile. */
-      #createPanel:not(.planMode) #currentPlanBlock.hidden{display:none!important}
-      #createPanel:not(.planMode) .planActions,
-      #createPanel:not(.planMode) #packageToggle,
-      #createPanel.planMode #recentToggle,
-      #createPanel.planMode #packageToggle,
-      #createPanel.planMode #finishBtn{align-self:stretch;min-height:64px;height:64px}
-      #recentList,#packageList{max-height:min(36vh,300px)}
-
-      @media (max-width:920px){
-        body{padding:6px}
-        .app{height:calc(100dvh - 12px);height:calc(var(--kgg-visual-vh,100dvh) - 12px);max-height:calc(var(--kgg-visual-vh,100dvh) - 12px);padding:12px;gap:10px;grid-template-rows:auto 60px minmax(98px,auto) minmax(0,1fr) 58px}
-        .scanHub #scanPreview:not(.hidden){left:calc(12px + min(390px,42vw) + 10px);right:12px;top:142px;max-height:calc(100% - 212px)}
-        .scanHub .scanBtn,.scanHub .scanMeta{font-size:15px}
-        #baseToggle,#savePackageBtn{height:60px;min-height:60px}
-        #exerciseInput{min-height:98px;max-height:132px;font-size:20px}
-        #bankArea:not(.bankOpen) .drawerBtn,#recentToggle,#packageToggle,#finishBtn{height:58px;min-height:58px}
-      }
+    .app.softKeyboard #currentPlanBlock .planCard{
+      min-height:58px;
+    }
+    .app.softKeyboard #currentPlanBlock .planCard b{
+      font-size:16px;
+    }
+    .app.softKeyboard #currentPlanBlock .planSourceLine{
+      display:none;
     }
 
 
 
-    /* v311 Tablet Textfeld Visibility Fix: Admin-Buttons dürfen die Eingabezeile nicht überdecken. */
+    /* v319 Gescannte-Pläne-Inbox: Scan-Ergebnisse getrennt vom Textfeld, Toggle gegen Übungen im Plan. */
+    .rightPlanStack{display:flex;flex-direction:column;gap:10px;min-width:0;min-height:0;transition:gap .18s ease}
+    .rightPlanStack.hidden{display:none!important}
+    .planSection{background:#fff;border:2px solid #111827;border-radius:24px;box-shadow:var(--shadow);overflow:hidden;min-width:0;transition:transform .20s cubic-bezier(.2,.85,.2,1),max-height .20s cubic-bezier(.2,.85,.2,1),opacity .16s ease,background .16s ease}
+    .planSectionHeader{width:100%;min-height:50px;border:0;background:#fff;color:#071027;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;text-align:left;font-weight:1000;font-size:20px;cursor:pointer}
+    .planSectionHeader small{color:var(--muted);font-size:12px;font-weight:900;white-space:nowrap}
+    .planSectionBody,.scanInboxList{padding:0 12px 12px;min-height:0;overflow:auto}
+    .planSection.collapsed{max-height:58px;background:#f8fafc;opacity:.96}
+    .planSection.collapsed .planSectionBody,.planSection.collapsed .scanInboxList{display:none!important}
+    .rightPlanStack.scanOpen #scannedPlansBlock{order:1;animation:kggSectionSwapIn .20s cubic-bezier(.2,.85,.2,1) both}
+    .rightPlanStack.scanOpen #currentPlanBlock{order:2}
+    .rightPlanStack.planOpen #currentPlanBlock{order:1;animation:kggSectionSwapIn .20s cubic-bezier(.2,.85,.2,1) both}
+    .rightPlanStack.planOpen #scannedPlansBlock{order:2}
+    @keyframes kggSectionSwapIn{0%{transform:translateY(8px);opacity:.86}100%{transform:translateY(0);opacity:1}}
+    .scanInboxBlock{border-color:#93d8a0;background:#f4fff6}
+    .scanInboxCard{position:relative;background:#fff;border:1px solid #dce3eb;border-radius:18px;padding:12px;margin:0 0 10px;box-shadow:0 2px 10px rgba(7,16,39,.055)}
+    .scanInboxCard.good{border-color:#93d8a0;background:#fbfffc}.scanInboxCard.warn{border-color:#f2d38a;background:#fff8e8}
+    .scanInboxHead{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding-right:38px}.scanInboxHead b{font-size:17px}.scanInboxHead small{display:block;color:var(--muted);font-weight:850;font-size:12px;margin-top:2px}
+    .scanInboxText{width:100%;min-height:110px;border:1px solid var(--line);border-radius:14px;padding:10px;font-size:13px;line-height:1.35;margin-top:8px;background:#fff;resize:vertical}
+    .scanInboxActions{display:grid;grid-template-columns:1fr 1.2fr;gap:8px;margin-top:8px}.scanInboxActions button{min-height:44px}.scanInboxRemoveTop{position:absolute;right:10px;top:10px;width:34px;height:34px;border:1px solid rgba(226,59,84,.32);background:#fff5f7;color:#e23b54;border-radius:12px;font-weight:1000;font-size:20px;padding:0;line-height:1}
+    #rightPlanStack #currentPlanBlock.hidden,#rightPlanStack #scannedPlansBlock.hidden{display:none!important;visibility:visible!important;pointer-events:auto!important}
+    .app:has(#createPanel.planMode) .scanHub #scanPreview:not(.hidden){display:block!important}
+    @media (max-width:520px){.scanInboxActions{grid-template-columns:1fr}.planSectionHeader{font-size:18px}}
+    /* v356 Scan-Inbox: overview text compact; remove action returns to card top right. */
+    .scanInboxDecision{background:#fff;border:1px solid var(--line);border-radius:18px;padding:10px;margin:0 0 10px;box-shadow:0 2px 10px rgba(7,16,39,.055)}
+    .scanInboxDecision h3{font-size:16px;margin:0 0 4px;font-weight:1000}
+    .scanInboxDecision .notice{margin:0 0 8px;padding:8px 10px;font-size:12px;line-height:1.25}
+    .scanInboxDecision .scanDecisionBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .scanInboxDecision .scanRepeatBtn,.scanInboxDecision .scanFinishBtn{min-height:42px;border-radius:14px;font-size:14px;font-weight:1000}
+    .scanInboxDecision .scanRepeatBtn{border:1px solid #1b2230;background:#fff;color:#071027}
+    .scanInboxDecision .scanFinishBtn{grid-column:1/-1}
+    .scanInboxText{font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;font-size:12.5px!important;line-height:1.3!important;min-height:74px!important;max-height:150px!important;padding:8px 10px!important}
     @media (min-width:760px){
-      /* Im Admin-Modus erzeugen Admin-Konfig + DB-Teilen eine zweite ScanHub-Zeile.
-         Diese lief über grid-row:3 und verdeckte das Übungseingabe-Textfeld.
-         Für Tablet-Testlayout werden diese Nebenbuttons ausgeblendet; Scan/Datei bleiben sichtbar. */
-      .adminMode .scanHub .adminConfigBtn,
-      .adminMode .scanHub .sharedBankBtn{
+      body.tabletLayoutCustom #scannedPlansBlock textarea.scanInboxText{
+        font-size:clamp(10px,calc(12.5px * var(--kgg-tablet-ui-scale,1)),18px)!important;
+        line-height:1.3!important;
+        min-height:clamp(64px,calc(76px * var(--kgg-tablet-ui-scale,1)),128px)!important;
+        max-height:clamp(120px,calc(150px * var(--kgg-tablet-ui-scale,1)),220px)!important;
+        padding:clamp(6px,calc(8px * var(--kgg-tablet-ui-scale,1)),14px) clamp(8px,calc(10px * var(--kgg-tablet-ui-scale,1)),18px)!important;
+      }
+      body.tabletLayoutCustom #scannedPlansBlock .scanInboxDecision :is(button,.notice){
+        font-size:clamp(10px,calc(14px * var(--kgg-tablet-ui-scale,1)),22px)!important;
+      }
+    }
+    @media (min-width:760px){
+      #rightPlanStack{grid-column:2/4!important;grid-row:3/5!important;align-self:stretch;min-height:0;overflow:hidden}
+      #rightPlanStack #currentPlanBlock,#rightPlanStack #scannedPlansBlock{grid-column:auto!important;grid-row:auto!important;align-self:auto!important;padding:0!important;min-height:0!important;overflow:hidden!important}
+      #rightPlanStack #currentPlanBlock:not(.collapsed),#rightPlanStack #scannedPlansBlock:not(.collapsed){flex:1 1 auto;max-height:none}
+      #rightPlanStack .planSectionBody,#rightPlanStack .scanInboxList{max-height:100%;overflow:auto}
+      #rightPlanStack #planList{max-height:none!important;height:auto!important;overflow:visible!important;padding-right:0!important}
+      #rightPlanStack #currentPlanBlock .label{display:none!important}
+      #currentPlanBlock{grid-column:auto!important;grid-row:auto!important}
+      #createPanel:not(.planMode) #rightPlanStack.hidden{display:none!important}
+    }
+
+
+
+    /* v321 Tablet Layout/Caret Fix:
+       - Aktueller-Plan-Titel im Tablet-Planmodus ausblenden
+       - Fertig eine Zeile tiefer setzen
+       - +Paket-Button auf Höhe von "Übungen im Plan" andocken
+       - Gescannte Pläne/Übungen im Plan wirklich vollständig kollabieren
+       - Carets für Basisdaten / Übungen im Plan / Gescannte Pläne stabilisieren
+       - Aktive Floating-Button-Anker bleiben über dem Popup klickbar */
+    .planSectionHeader{
+      justify-content:flex-start;
+    }
+    .planSectionHeader::before{
+      content:"▶";
+      flex:0 0 auto;
+      display:inline-grid;
+      place-items:center;
+      width:1.1em;
+      margin-right:4px;
+      font-size:.92em;
+      line-height:1;
+      color:#071027;
+    }
+    .planSectionHeader[aria-expanded="true"]::before{
+      content:"▼";
+    }
+    .planSectionHeader > span{
+      flex:1 1 auto;
+      min-width:0;
+    }
+    .planSectionHeader > small{
+      flex:0 0 auto;
+      margin-left:auto;
+    }
+    .planSection.collapsed{
+      flex:0 0 54px!important;
+      height:54px!important;
+      min-height:54px!important;
+      max-height:54px!important;
+      overflow:hidden!important;
+      background:#f8fafc;
+      opacity:.98;
+    }
+    .planSection.collapsed .planSectionBody,
+    .planSection.collapsed .scanInboxList{
+      display:none!important;
+      height:0!important;
+      min-height:0!important;
+      max-height:0!important;
+      padding:0!important;
+      margin:0!important;
+      overflow:hidden!important;
+    }
+
+    @media (min-width:760px){
+      /* Großer doppelter Titel "Aktueller Plan" ist im Planmodus überflüssig. */
+      #createPanel.planMode .planHeader .panelTitle{
         display:none!important;
       }
-      .adminMode .scanHub{
-        grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
-        grid-auto-rows:68px!important;
-        overflow:visible;
+
+      /* Fertig rutscht aus der obersten Kopfzeile in die Button-Zeile neben Basisdaten. */
+      #createPanel.planMode #finishBtn{
+        grid-column:3;
+        grid-row:2;
+        align-self:stretch;
+        justify-self:stretch;
+        width:100%;
+        height:68px;
+        min-height:68px;
+        margin:0;
+        border-radius:18px;
+        font-size:20px;
+        opacity:1;
+        scale:1 1;
+        animation:none;
       }
-      .scanHub .scanBtn,
-      .scanHub .scanMeta{
-        grid-row:1!important;
+
+      /* +Paket-Button optisch an die Kopfzeile des Planblocks andocken. */
+      #createPanel.planMode #savePackageBtn{
+        grid-column:3;
+        grid-row:3;
+        align-self:start;
+        justify-self:stretch;
+        width:100%;
+        height:50px;
+        min-height:50px;
+        margin:0;
+        border-radius:18px;
+        z-index:46;
       }
-      #inputWrap{
-        display:block!important;
-        visibility:visible!important;
-        opacity:1!important;
-        z-index:40;
+      #createPanel.planMode #rightPlanStack.planOpen #currentPlanToggle{
+        padding-right:176px;
       }
-      #bankArea{
-        z-index:10;
+      #createPanel.planMode:has(#rightPlanStack.scanOpen) #savePackageBtn{
+        visibility:hidden!important;
+        pointer-events:none!important;
       }
-      #exerciseInput{
-        display:block!important;
-        visibility:visible!important;
+
+      /* Kollabierte Scan-/Planleisten bleiben wirklich nur Headerleisten. */
+      #rightPlanStack .planSection.collapsed{
+        flex:0 0 54px!important;
+        height:54px!important;
+        min-height:54px!important;
+        max-height:54px!important;
       }
+      #rightPlanStack .planSection.collapsed .planSectionBody,
+      #rightPlanStack .planSection.collapsed .scanInboxList{
+        display:none!important;
+        padding:0!important;
+        margin:0!important;
+        height:0!important;
+        max-height:0!important;
+        overflow:hidden!important;
+      }
+
+      /* Der zugehörige Button bleibt als aktiver Anker über dem schwebenden Fenster. */
+      .kggOverlayAnchorActive{
+        position:relative!important;
+        z-index:190!important;
+        box-shadow:0 18px 42px rgba(7,16,39,.22), var(--shadow)!important;
+        outline:2px solid rgba(7,16,39,.16);
+        outline-offset:2px;
+      }
+
       @media (max-width:920px){
-        .adminMode .scanHub{grid-auto-rows:60px!important;}
+        #createPanel.planMode #finishBtn{
+          height:60px;
+          min-height:60px;
+          font-size:18px;
+        }
+        #createPanel.planMode #savePackageBtn{
+          height:48px;
+          min-height:48px;
+        }
+        #createPanel.planMode #rightPlanStack.planOpen #currentPlanToggle{
+          padding-right:142px;
+        }
       }
     }
 
 
-    /* v312 Tablet Bank/A-Z Height Fix: Bank links bis zur unteren Kante erweitern und A-Z-Leiste als echte volle Touch-Leiste nutzbar machen. */
+    /* v324: In beiden UI-Varianten heißt der übergeordnete Planbereich wieder "Aktueller Plan". */
     @media (min-width:760px){
-      /* Linke Bank darf die sonst leere linke Bottom-Zeile mitnutzen. Rechte Bottom-Buttons bleiben in Spalte 2/3. */
-      #bankArea{
-        grid-row:4/6;
-        align-self:stretch;
-        min-height:0;
-      }
-      #bankArea.bankOpen{
-        display:flex;
-        flex-direction:column;
+      #createPanel.planMode .planHeader .panelTitle{display:block!important}
+    }
+
+    /* v324 Aktueller-Plan/Scan-Dock Fix:
+       Mobile-only: "Gescannte Pläne" sitzt außerhalb der Aktueller-Plan-Bubble, oberhalb davon.
+       Keine PDF/QR/Patienten-App/Parser/Scan-Core-Änderungen. */
+    @media (max-width:759px){
+      /* Aktueller Plan ist wieder die Überschrift für Basisdaten + Übungskarten. */
+      #createPanel.planMode .planHeader{display:grid!important;grid-template-columns:minmax(0,1fr) auto;align-items:center;margin:0 0 8px;min-height:0}
+      #createPanel.planMode .planHeader .panelTitle{display:block!important;font-size:26px;line-height:1.05;margin:0;letter-spacing:-.4px}
+      #createPanel.scanPanelOpen .planHeader{display:grid!important}
+
+      /* Scan-Ergebnisse werden auf Handy in den separaten Dock oberhalb der Plan-Bubble verschoben. */
+      .mobileScannedPlansDock{display:block;margin:0 0 10px}
+      .mobileScannedPlansDock.hidden{display:none!important}
+      .mobileScannedPlansDock .planSection{border:1px solid #bfe8c5!important;border-radius:20px;box-shadow:0 2px 10px rgba(7,16,39,.055);background:#f7fff8!important;overflow:hidden}
+      .mobileScannedPlansDock .planSectionHeader{min-height:48px;padding:10px 12px;font-size:18px;background:#f7fff8!important}
+      .mobileScannedPlansDock .scanInboxList{padding:0 8px 8px}
+      .mobileScannedPlansDock .scanInboxCard{border:1px solid #e3e9ef;border-radius:16px;box-shadow:none;padding:10px;margin-bottom:8px;background:#fff}
+      .mobileScannedPlansDock .scanInboxText{min-height:88px;border-color:#e3e9ef;border-radius:12px;font-size:12.5px;line-height:1.32}
+      .mobileScannedPlansDock .planSection.collapsed{flex:0 0 48px!important;height:48px!important;min-height:48px!important;max-height:48px!important;border-color:#bfe8c5!important;background:#f7fff8!important}
+      .mobileScannedPlansDock .planSection.collapsed .scanInboxList{display:none!important;height:0!important;min-height:0!important;max-height:0!important;padding:0!important;margin:0!important;overflow:hidden!important}
+
+      /* Rechte Planstruktur enthält auf Handy nur noch den Übungsbereich; Scans sitzen im Dock darüber. */
+      .rightPlanStack{gap:8px;margin:8px 0 10px}
+      .rightPlanStack.planOpen #currentPlanBlock{order:1!important;animation:kggSectionSwapIn .20s cubic-bezier(.2,.85,.2,1) both}
+      .rightPlanStack.scanOpen #currentPlanBlock{order:1!important}
+
+      /* Rahmen reduzieren: Struktur bleibt, aber keine Kiste-in-Kiste-Optik. */
+      .panel{border:1px solid rgba(17,24,39,.18);box-shadow:0 2px 12px rgba(7,16,39,.055);border-radius:22px;padding:10px;background:rgba(255,255,255,.82)}
+      .inner{border:0;border-radius:18px;padding:8px;background:transparent}
+      #rightPlanStack .planSection{border:1px solid rgba(17,24,39,.22);border-radius:20px;box-shadow:0 2px 10px rgba(7,16,39,.055)}
+      #rightPlanStack .planSection.collapsed{flex:0 0 48px!important;height:48px!important;min-height:48px!important;max-height:48px!important;border-color:rgba(17,24,39,.16);background:#fbfcfe}
+      #rightPlanStack .planSectionHeader{min-height:48px;padding:10px 12px;font-size:18px}
+      #rightPlanStack .planSectionBody{padding:0 8px 8px}
+      #rightPlanStack .planCard{box-shadow:none;border-color:rgba(220,227,235,.9)}
+    }
+
+
+    /* v327 Tablet Shell Full-Bleed Fix:
+       Ziel: Tablet wirkt nicht mehr wie frei schwebende Mockup-Karte.
+       Nur äußere Tablet-Shell/Viewport, keine PDF/QR/Scan/Parser/Plan-State-Logik. */
+    @media (min-width:760px){
+      html,body{
+        width:100%;
+        min-width:0;
         height:100%;
-        min-height:0;
+        min-height:100%;
         overflow:hidden;
+        background:#f7f9fc;
       }
-      #bankArea.bankOpen #bankContent{
-        flex:1 1 auto;
-        height:100%;
-        min-height:0;
-        overflow:hidden;
+      body{
+        display:block;
+        padding:0!important;
+        margin:0!important;
+        align-items:stretch!important;
+        justify-content:stretch!important;
       }
-      #bankArea.bankOpen.alphaBankOpen .bankWithAz{
-        height:100%;
-        min-height:0;
-        grid-template-columns:56px minmax(0,1fr);
-        column-gap:8px;
+      .app{
+        width:100vw!important;
+        max-width:none!important;
+        height:100vh!important;
+        height:100dvh!important;
+        height:var(--kgg-visual-vh,100dvh)!important;
+        max-height:var(--kgg-visual-vh,100dvh)!important;
+        min-height:0!important;
+        margin:0!important;
+        border:0!important;
+        border-radius:0!important;
+        box-shadow:none!important;
+        background:#f7f9fc!important;
+        padding:12px 14px 10px!important;
+        overflow:hidden!important;
+        grid-template-columns:minmax(360px,430px) minmax(0,1fr) minmax(150px,190px)!important;
+        grid-template-rows:auto 64px minmax(104px,auto) minmax(0,1fr) 60px!important;
+        gap:12px!important;
+      }
+      /* Innenkarten behalten die App-Struktur, nur der Außen-Mockup-Rahmen verschwindet. */
+      #inputWrap,
+      #bankArea.bankOpen,
+      #currentPlanBlock,
+      #scannedPlansBlock,
+      .planSection,
+      .baseCard,
+      .drawerBtn,
+      .scanHub .scanBtn,
+      .scanHub .scanMeta{
+        box-shadow:0 2px 10px rgba(7,16,39,.055);
+      }
+      .scanHub .scanBtn,
+      .scanHub .scanMeta,
+      #baseToggle,
+      #finishBtn,
+      #recentToggle,
+      #packageToggle{
+        min-height:60px!important;
+        height:60px!important;
+      }
+      #savePackageBtn{
+        min-height:48px!important;
+        height:48px!important;
+      }
+      #exerciseInput{
+        min-height:104px;
+        max-height:160px;
       }
       #bankArea.bankOpen.alphaBankOpen .az{
-        display:flex;
-        flex-direction:column;
-        height:calc(100% - 64px);
-        min-height:0;
-        margin-top:64px;
-        padding:4px 0;
-        touch-action:none;
-        pointer-events:auto;
-        z-index:6;
+        height:calc(100% - 58px);
+        margin-top:58px;
       }
-      #bankArea.bankOpen.alphaBankOpen .az button{
-        flex:1 1 0;
-        min-height:13px;
-        display:grid;
-        place-items:center;
-        font-size:10px;
-        line-height:1;
-        padding:0;
+      #recentList:not(.hidden),
+      #packageList:not(.hidden),
+      #baseFields:not(.hidden){
+        max-height:calc(var(--kgg-visual-vh,100dvh) - 104px)!important;
       }
-      #bankArea.bankOpen.alphaBankOpen .bankRows{
-        height:100%;
-        max-height:none;
-        min-height:0;
-        overflow:auto;
-        overscroll-behavior:contain;
+      .app.softKeyboard{
+        height:var(--kgg-visual-vh,100dvh)!important;
+        max-height:var(--kgg-visual-vh,100dvh)!important;
+        padding:8px 10px!important;
+        gap:8px!important;
+        grid-template-rows:auto 54px minmax(78px,auto) minmax(0,1fr) 0!important;
       }
-      #bankArea.bankOpen.alphaBankOpen .bankRow{
-        min-height:62px;
+      .app.softKeyboard .scanHub .scanBtn,
+      .app.softKeyboard .scanHub .scanMeta,
+      .app.softKeyboard #baseToggle,
+      .app.softKeyboard #finishBtn,
+      .app.softKeyboard #recentToggle,
+      .app.softKeyboard #packageToggle{
+        min-height:54px!important;
+        height:54px!important;
+      }
+      .app.softKeyboard #exerciseInput{
+        min-height:78px;
+        max-height:116px;
       }
       @media (max-width:920px){
-        #bankArea.bankOpen.alphaBankOpen .az button{min-height:11px;font-size:9.5px}
+        .app{
+          padding:8px 10px 8px!important;
+          gap:10px!important;
+          grid-template-columns:minmax(320px,390px) minmax(0,1fr) minmax(126px,150px)!important;
+          grid-template-rows:auto 58px minmax(92px,auto) minmax(0,1fr) 56px!important;
+        }
+        .scanHub .scanBtn,
+        .scanHub .scanMeta,
+        #baseToggle,
+        #finishBtn,
+        #recentToggle,
+        #packageToggle{
+          min-height:56px!important;
+          height:56px!important;
+        }
+        #exerciseInput{
+          min-height:92px;
+          max-height:132px;
+        }
+      }
+    }
+
+
+    /* v328 Tablet Header/Package Fix:
+       - ausgefahrene Übungsdatenbank-Überschrift auf Tablet ausblenden
+       - großen Titel "Aktueller Plan" im Tablet-Planmodus entfernen
+       - Stift-Symbol direkt an "Übungen im Plan" hängen
+       - +📦 sauber in die Plan-Kopfzeile docken, ohne Zähler/Text zu verdecken
+       - Plan-Historie und Übungspakete unten gleich groß machen
+       Keine PDF/QR/Patienten-App/Scan/Parser/Plan-State-Logik. */
+    @media (min-width:760px){
+      /* Rechts und unten echte gleichmäßige Tablet-Arbeitszonen. */
+      .app{
+        grid-template-columns:minmax(360px,430px) minmax(0,1fr) minmax(0,1fr)!important;
+      }
+
+      /* Ausgefahrene DB braucht keine zusätzliche Kopfzeile oben links. */
+      #dbTitle.fullBankOpen,
+      #dbTitle.searchBankOpen{
+        display:none!important;
+      }
+
 ```

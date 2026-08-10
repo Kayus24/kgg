@@ -14,7 +14,10 @@
     "kgg-v053-ui-tablet-stability",
     "kgg-v060-tablet-html-release-label",
     "kgg-v061-cross-app-live-qr-camera",
-    "kgg-v062-tablet-recent-package-shell-geometry"
+    "kgg-v062-tablet-recent-package-shell-geometry",
+    "kgg-v063-changelog-archive-window",
+    "kgg-v064-typed-update-versions",
+    "kgg-v065-source-control-char-guard"
   ],
   "parts": [
     "base-head.html",
@@ -35,6 +38,9 @@
     "patches/v060-tablet-html-release-label.html",
     "patches/v061-cross-app-live-qr-camera.html",
     "patches/v062-tablet-recent-package-shell-geometry.html",
+    "patches/v063-changelog-archive-window.html",
+    "patches/v064-typed-update-versions.html",
+    "patches/v065-source-control-char-guard.html",
     "footer.html"
   ]
 }

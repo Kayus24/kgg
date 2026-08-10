@@ -4,424 +4,424 @@
 - Lines: 19321-19740
 
 ```html
-      handle.onclick=ev=>{
-        ev.preventDefault();
-        ev.stopPropagation();
-        if(state.reorderSuppressClick)state.reorderSuppressClick=false;
-      };
-      handle.addEventListener('pointerdown',startAnimatedReorderPress,{passive:false});
-    });
-    list.querySelectorAll('.planCard[data-plan-id]').forEach(card=>{
-      if(card.dataset.tabletCardReorderBound==='1')return;
-      card.dataset.tabletCardReorderBound='1';
-      card.addEventListener('pointerdown',ev=>{
-        if(!isTabletLayout())return;
-        if(ev.button!=null&&ev.button!==0)return;
-        if(animatedReorder)return;
-        const target=ev.target;
-        if(target&&target.closest&&target.closest('button,input,textarea,select,a,.planCardActions,.drag'))return;
-        const startX=ev.clientX,startY=ev.clientY,pointerId=ev.pointerId;
-        let cancelled=false;
-        const cleanup=()=>{
-          document.removeEventListener('pointermove',moveBefore);
-          document.removeEventListener('pointerup',upBefore);
-          document.removeEventListener('pointercancel',upBefore);
-        };
-        const moveBefore=e=>{
-          if(e.pointerId!==pointerId)return;
-          const dx=Math.abs(e.clientX-startX),dy=Math.abs(e.clientY-startY);
-          if(dx>10||dy>10){
-            cancelled=true;
-            clearTimeout(timer);
-            cleanup();
-          }
-        };
-        const upBefore=e=>{
-          if(e.pointerId!==pointerId)return;
-          cancelled=true;
-          clearTimeout(timer);
-          cleanup();
-        };
-        const timer=setTimeout(()=>{
-          cleanup();
-          if(cancelled||animatedReorder)return;
-          startAnimatedReorderPress({
-            button:0,
-            currentTarget:card,
-            target:target,
-            clientX:startX,
-            clientY:startY,
-            pointerId:pointerId,
-            preventDefault:function(){},
-            stopPropagation:function(){}
-          });
-        },140);
-        document.addEventListener('pointermove',moveBefore,{passive:true});
-        document.addEventListener('pointerup',upBefore,{passive:true});
-        document.addEventListener('pointercancel',upBefore,{passive:true});
-      },{passive:false});
-    });
   }
-  function bindPlanSwipeDelete(list){
-    if(!list)return;
-    list.querySelectorAll('.planCard[data-plan-id]').forEach(card=>{
-      if(card.dataset.swipeDeleteBound==='1')return;
-      card.dataset.swipeDeleteBound='1';
-      card.addEventListener('pointerdown',startPlanCardSwipeDelete,{passive:false});
-      card.addEventListener('click',ev=>{
-        if(Number(card.dataset.swipeSuppressClickUntil||0)>Date.now()){
-          ev.preventDefault();
-          ev.stopPropagation();
+  function packageOverlayTags(pkg){
+    const exercises=(pkg&&pkg.exercises||[]).filter(Boolean);
+    const tags=[exercises.length+' Uebungen'];
+    if(pkg&&pkg.source==='current-plan')tags.push('Eigener Plan');
+    else tags.push('Paket');
+    return tags;
+  }
+  function renderTabletPackageOverlay(){
+    const cards=$('tabletPackageCards');
+    if(!cards)return;
+    const input=$('tabletPackageSearch');
+    const query=compact(input&&input.value||'');
+    const packages=(state.packages||[]).filter(pkg=>{
+      if(!query)return true;
+      const hay=compact([pkg.name,(pkg.exercises||[]).join(' ')].join(' '));
+      return hay.includes(query);
+    });
+    if(!packages.length){cards.innerHTML='<div class="tabletPackageEmpty">Keine passenden Uebungspakete gefunden.</div>';return;}
+    cards.innerHTML=packages.map(pkg=>{
+      const tags=packageOverlayTags(pkg).map(tag=>'<span>'+escapeHtml(tag)+'</span>').join('');
+      return '<button class="tabletPackageCard" type="button" data-tablet-pkg="'+escapeHtml(pkg.id)+'"><span class="tabletPackageIcon" aria-hidden="true">&#128230;</span><span class="tabletPackageBody"><b>'+escapeHtml(pkg.name||'Uebungspaket')+'</b><p>'+escapeHtml(packageOverlayDescription(pkg))+'</p><span class="tabletPackageMeta">'+tags+'</span></span><span class="tabletPackageArrow" aria-hidden="true">›</span></button>';
+    }).join('');
+    cards.querySelectorAll('[data-tablet-pkg]').forEach(btn=>btn.onclick=()=>applyPackageToPlan(btn.dataset.tabletPkg));
+  }
+  function renderPackages(){
+    const el=$('packageList');
+    if(el){
+      el.innerHTML=(state.packages||[]).map(p=>'<div class="notice"><b>'+escapeHtml(p.name)+'</b><br><small>'+(p.exercises||[]).map(escapeHtml).join(', ')+'</small><br><button class="mutedBtn" data-pkg="'+p.id+'">Paket in Plan uebernehmen</button></div>').join('');
+      el.querySelectorAll('[data-pkg]').forEach(b=>b.onclick=()=>applyPackageToPlan(b.dataset.pkg));
+    }
+    renderTabletPackageOverlay();
+  }
+  function sanitizeSharedBankExercise(ex){
+    return {
+      id:String(ex.id||ex.sourceId||('shared_'+compact(ex.name))).slice(0,80),
+      name:String(ex.name||'').trim(),
+      aliases:String(ex.aliases||ex.name||'').trim(),
+      sets:normalizeSetCount(ex.sets||3),
+      unit:String(ex.unit||'Wdh'),
+      weightUnit:normalizeLoadUnit(ex.weightUnit||'kg'),
+      shared:true,
+      createdAt:String(ex.createdAt||ex.updatedAt||new Date().toISOString()),
+      updatedAt:String(ex.updatedAt||new Date().toISOString())
+    };
+  }
+  function buildSharedExerciseBankPayload(){
+    const exercises=bank.map(sanitizeSharedBankExercise).filter(ex=>ex.name);
+    return {kind:'kgg-shared-exercise-bank',version:1,appVersion:VERSION,exportedAt:new Date().toISOString(),exercises};
+  }
+  function parseSharedExerciseBankPayload(raw){
+    const payload=typeof raw==='string'?JSON.parse(raw):raw;
+    const exercises=Array.isArray(payload)?payload:(Array.isArray(payload&&payload.exercises)?payload.exercises:(Array.isArray(payload&&payload.exerciseBank)?payload.exerciseBank:[]));
+    if(!exercises.length)throw new Error('Keine Übungen im Import gefunden.');
+    return exercises.map(sanitizeSharedBankExercise).filter(ex=>ex.name);
+  }
+  function mergeSharedExerciseBank(raw){
+    const incoming=parseSharedExerciseBankPayload(raw);
+    let added=0,updated=0;
+    incoming.forEach(ex=>{
+      const existing=bank.find(item=>compact(item.name)===compact(ex.name));
+      if(existing){
+        if(syncTimestamp(ex.updatedAt)>=syncTimestamp(existing.updatedAt||existing.createdAt)){
+          existing.aliases=ex.aliases||existing.aliases;
+          existing.sets=ex.sets||existing.sets;
+          existing.unit=ex.unit||existing.unit;
+          existing.weightUnit=ex.weightUnit||existing.weightUnit;
+          existing.shared=true;
+          existing.updatedAt=ex.updatedAt||new Date().toISOString();
+          updated+=1;
         }
-      },true);
+      }else{
+        bank.push({...ex,id:ex.id||('shared_'+Date.now()+'_'+added),custom:true,shared:true});
+        added+=1;
+      }
+      deletedBankIds.delete(String(ex.id||''));
+    });
+    persistDeletedBankIds();
+    persistCustomBank();
+    render();
+    return {added,updated,total:incoming.length};
+  }
+  function openSharedBankModal(){
+    const text=$('sharedBankText'), status=$('sharedBankStatus');
+    if(text)text.value=JSON.stringify(buildSharedExerciseBankPayload(),null,2);
+    if(status)status.textContent='Bereit.';
+    $('sharedBankModal').classList.add('open');
+  }
+  function closeSharedBankModal(){$('sharedBankModal').classList.remove('open');}
+  async function copySharedBankPayload(){
+    const text=$('sharedBankText'), status=$('sharedBankStatus');
+    if(!text)return;
+    try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(text.value); if(status)status.textContent='Export kopiert.'; return;}}catch(err){console.warn('DB-Export konnte nicht kopiert werden:',err);}
+    text.focus(); text.select(); if(status)status.textContent='Export markiert.';
+  }
+  function applySharedBankFromText(){
+    const status=$('sharedBankStatus');
+    try{const result=mergeSharedExerciseBank($('sharedBankText').value); if(status)status.textContent='Import übernommen: '+result.added+' neu, '+result.updated+' aktualisiert.';}
+    catch(err){if(status)status.textContent='Import nicht übernommen: '+(err&&err.message||'unbekannter Fehler');}
+  }
+  function handleSharedBankFile(ev){
+    const file=ev.target.files&&ev.target.files[0];
+    ev.target.value='';
+    if(!file)return;
+    const reader=new FileReader();
+    reader.onload=()=>{if($('sharedBankText'))$('sharedBankText').value=String(reader.result||''); if($('sharedBankStatus'))$('sharedBankStatus').textContent='Import geladen.';};
+    reader.readAsText(file);
+  }
+  window.KGGSharedBank={exportPayload:buildSharedExerciseBankPayload,merge:mergeSharedExerciseBank,open:openSharedBankModal};
+  let nativeExerciseSyncTimer=null;
+  let nativeExerciseSyncApplying=false;
+  function nativeExerciseSyncAvailable(){
+    return !!(window.KGGNativeSync&&window.KGGNativeSync.available&&typeof window.KGGNativeSync.read==='function'&&typeof window.KGGNativeSync.write==='function');
+  }
+  function syncTimestamp(value){const t=Date.parse(value||''); return Number.isFinite(t)?t:0;}
+  function assertCrossDataSafeSyncDocument(doc){
+    const allowedPolicyKeys=new Set(['patients','secrets','debugPayloads','rawData']);
+    const blockedKeyPattern=new RegExp(['patient','gemini','api'+'key','api'+'_'+'key','secret','token','raw'+'payload','base64'+'payload','qrraw'].join('|'));
+    const blocked=[];
+    const visit=(value,path)=>{
+      if(!value||typeof value!=='object')return;
+      Object.keys(value).forEach(key=>{
+        const lower=String(key).toLowerCase();
+        const policyKey=(path==='sync.privacy'||path.endsWith('.privacy'))&&allowedPolicyKeys.has(key);
+        if(policyKey){
+          if(value[key]!==false)blocked.push(path+'.'+key);
+        }else if(blockedKeyPattern.test(lower)){
+          blocked.push(path+'.'+key);
+        }
+        visit(value[key],path+'.'+key);
+      });
+    };
+    visit(doc,'sync');
+    if(blocked.length)throw new Error('Sync-Safe blockiert geschuetzte Felder: '+blocked.slice(0,3).join(', '));
+    return doc;
+  }
+  function syncSafeOrigin(){
+    let deviceId='';
+    try{deviceId=syncPairDeviceId();}catch(err){deviceId='web_'+Date.now().toString(36);}
+    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig&&nativeSyncFollowConfig()||{});
+    const displayName=String(($('therapistName')&&$('therapistName').value)||state.patient.therapist||'KGG Geraet').trim();
+    return {deviceId,therapistId:String(config.therapistId||deviceId),displayName,roomId:syncPairRoomId()};
+  }
+  function syncSafeTombstones(exportedAt){
+    return [...deletedBankIds].map(id=>({id:String(id),deleted:true,updatedAt:exportedAt}));
+  }
+  function sanitizeNativeSyncPackage(pkg){
+    return {
+      id:String(pkg&&pkg.id||('pkg_'+compact(pkg&&pkg.name||''))).slice(0,96),
+      name:String(pkg&&pkg.name||'').trim(),
+      exercises:Array.isArray(pkg&&pkg.exercises)?pkg.exercises.map(name=>String(name||'').trim()).filter(Boolean):[],
+      createdAt:String(pkg&&pkg.createdAt||new Date().toISOString()),
+      updatedAt:String(pkg&&pkg.updatedAt||pkg&&pkg.createdAt||new Date().toISOString()),
+      source:String(pkg&&pkg.source||'exercise-package')
+    };
+  }
+  function buildNativeExerciseBankSyncDocument(){
+    const exportedAt=new Date().toISOString();
+    return assertCrossDataSafeSyncDocument({
+      kind:'kgg_cross_data_safe_sync',
+      version:2,
+      appVersion:VERSION,
+      exportedAt,
+      roomId:syncPairRoomId(),
+      schema:'exercise-bank-packages-v2',
+      scopes:['exerciseBank','packages'],
+      privacy:{patients:false,secrets:false,debugPayloads:false,rawData:false},
+      origin:syncSafeOrigin(),
+      exerciseBank:buildSharedExerciseBankPayload().exercises,
+      packages:(state.packages||[]).map(sanitizeNativeSyncPackage).filter(pkg=>pkg.name&&pkg.exercises.length),
+      tombstones:{exerciseBank:syncSafeTombstones(exportedAt)}
     });
   }
-  function resetPlanCardSwipe(card){
-    if(!card)return;
-    card.classList.remove('swipe-dragging','swipe-armed','swipe-left','swipe-right','swipe-removing');
-    document.body.classList.remove('kggPlanCardSwiping');
-    card.style.removeProperty('transform');
-    card.style.removeProperty('opacity');
-    card.style.removeProperty('transition');
-    card.style.removeProperty('--swipe-strength');
-    card.style.removeProperty('--kgg-plan-swipe-x');
+  function applyNativeSyncExerciseTombstones(rawTombstones){
+    const incoming=Array.isArray(rawTombstones)?rawTombstones:[];
+    let removed=0;
+    incoming.forEach(item=>{
+      const id=String(item&&item.id||'').trim();
+      if(!id)return;
+      const idx=bank.findIndex(ex=>String(ex&&ex.id)===id);
+      if(idx>=0){bank.splice(idx,1);removed+=1;}
+      deletedBankIds.add(id);
+    });
+    if(incoming.length){persistDeletedBankIds();persistCustomBank();render();}
+    return {removed,total:incoming.length,ids:new Set(incoming.map(item=>String(item&&item.id||'')).filter(Boolean))};
   }
-  function startPlanCardSwipeDelete(ev){
-    if(ev.button!=null&&ev.button!==0)return;
-    const pendingTabletReorder=(animatedReorder&&isTabletLayout()&&animatedReorder.card===ev.currentTarget&&!animatedReorder.active)?animatedReorder:null;
-    if(animatedReorder&&!pendingTabletReorder)return;
-    const interactiveTarget=ev.target&&ev.target.closest?ev.target.closest('button,input,textarea,select,a'):null;
-    const actionSwipeTarget=interactiveTarget&&interactiveTarget.closest&&interactiveTarget.closest('.planCardActions');
-    if(interactiveTarget&&!actionSwipeTarget)return;
-    const card=ev.currentTarget;
-    const id=card&&card.dataset&&card.dataset.planId;
-    if(!card||!id)return;
-    const startX=ev.clientX,startY=ev.clientY;
-    const swipe={card,id,startX,startY,active:false,dx:0,pointerId:ev.pointerId,cancelTimer:null};
-    const threshold=()=>Math.min(132,Math.max(78,card.offsetWidth*0.34));
-    const cleanup=()=>{clearTimeout(swipe.cancelTimer);document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);document.removeEventListener('pointercancel',cancel);};
-    const move=e=>{
-      const dx=e.clientX-startX,dy=e.clientY-startY;
-      if(!swipe.active){
-        if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)*1.2){cleanup();return;}
-        if(Math.abs(dx)<12||Math.abs(dx)<Math.abs(dy)*1.25)return;
-        if(pendingTabletReorder&&animatedReorder===pendingTabletReorder){
-          clearTimeout(pendingTabletReorder.timer);
-          cleanupAnimatedReorder(false);
+  function mergeNativeSyncPackages(rawPackages){
+    const incoming=(Array.isArray(rawPackages)?rawPackages:[]).map(sanitizeNativeSyncPackage).filter(pkg=>pkg.name&&pkg.exercises.length);
+    if(!incoming.length)return {added:0,updated:0,total:0};
+    state.packages=Array.isArray(state.packages)?state.packages:[];
+    let added=0,updated=0;
+    incoming.forEach(pkg=>{
+      const existing=state.packages.find(item=>String(item&&item.id)===pkg.id||compact(item&&item.name)===compact(pkg.name));
+      if(existing){
+        if(syncTimestamp(pkg.updatedAt)>=syncTimestamp(existing.updatedAt||existing.createdAt)){
+          Object.assign(existing,pkg);
+          updated+=1;
         }
-        swipe.active=true;
-        document.body.classList.add('kggPlanCardSwiping');
-        clearPhoneScrollStateForPlanGesture(420);
-        card.classList.add('swipe-dragging');
-        try{card.setPointerCapture&&card.setPointerCapture(swipe.pointerId);}catch(err){}
+      }else{
+        state.packages.push(pkg);
+        added+=1;
       }
-      if(!swipe.active)return;
-      clearPhoneScrollStateForPlanGesture(420);
-      e.preventDefault(); if(e.stopPropagation)e.stopPropagation();
-      const max=card.offsetWidth*0.86;
-      swipe.dx=Math.max(-max,Math.min(max,dx));
-      const strength=Math.min(1,Math.abs(swipe.dx)/threshold());
-      card.classList.toggle('swipe-left',swipe.dx<0);
-      card.classList.toggle('swipe-right',swipe.dx>0);
-      card.classList.toggle('swipe-armed',Math.abs(swipe.dx)>=threshold());
-      card.style.setProperty('--swipe-strength',String(strength));
-      card.style.setProperty('--kgg-plan-swipe-x',swipe.dx+'px');
-      card.style.transform='translateX(var(--kgg-plan-swipe-x,0px))';
-      card.style.opacity=String(1-strength*0.16);
-    };
-    const up=e=>{
-      cleanup();
-      if(!swipe.active){resetPlanCardSwipe(card);return;}
-      e.preventDefault(); if(e.stopPropagation)e.stopPropagation(); card.dataset.swipeSuppressClickUntil=String(Date.now()+360);
-      clearPhoneScrollStateForPlanGesture(520);
-      document.body.classList.remove('kggPlanCardSwiping');
-      const shouldDelete=Math.abs(swipe.dx)>=threshold();
-      if(shouldDelete){
-        const dir=swipe.dx<0?-1:1;
-        card.classList.add('swipe-removing');
-        card.style.transition='transform .18s cubic-bezier(.2,.9,.2,1), opacity .18s ease';
-        card.style.setProperty('--kgg-plan-swipe-x',(dir*(card.offsetWidth+96))+'px');
-        card.style.transform='translateX(var(--kgg-plan-swipe-x,0px))';
-        card.style.opacity='0';
-        setTimeout(()=>{document.body.classList.remove('kggPlanCardSwiping');removeExercise(id);},190);
-        return;
-      }
-      card.style.transition='transform .22s cubic-bezier(.2,.9,.2,1), opacity .18s ease, box-shadow .18s ease';
-      card.style.setProperty('--kgg-plan-swipe-x','0px');
-      card.style.transform='translateX(var(--kgg-plan-swipe-x,0px))';
-      card.style.opacity='1';
-      setTimeout(()=>resetPlanCardSwipe(card),230);
-    };
-    const cancel=()=>{
-      if(swipe.active){
-        clearTimeout(swipe.cancelTimer);
-        swipe.cancelTimer=setTimeout(()=>{cleanup();resetPlanCardSwipe(card);},900);
-        return;
-      }
-      cleanup();
-      resetPlanCardSwipe(card);
-    };
-    document.addEventListener('pointermove',move,{passive:false});
-    document.addEventListener('pointerup',up,{passive:false,once:true});
-    document.addEventListener('pointercancel',cancel,{passive:true,once:true});
+    });
+    return {added,updated,total:incoming.length};
   }
-  function movePlanExerciseByButton(localId,delta){
-    const idx=(state.plan||[]).findIndex(ex=>String(ex.localId||ex.id)===String(localId));
-    if(idx<0)return;
-    const target=idx+delta;
-    if(target<0||target>=state.plan.length)return;
-    const next=state.plan.slice();
-    const item=next.splice(idx,1)[0];
-    next.splice(target,0,item);
-    state.plan=next;
-    state.sortMenuId=String(item.localId||item.id);
-    syncStatePlanToStore('ui_reorder_plan_buttons');
-    syncTextInputFromPlan('ui_reorder_plan_buttons');
-    save();
-    renderPlan();
+  function syncPeerIdShort(value){const text=String(value||''); return text.length>8?text.slice(-8):text;}
+  function syncOriginIsSelf(origin){
+    if(!origin)return false;
+    const selfId=syncPairDeviceId();
+    return String(origin.deviceId||'')===selfId;
   }
-  let animatedReorder=null;
-  function startAnimatedReorderPress(ev){
-    if(ev.button!=null && ev.button!==0)return;
-    const eventTarget=ev.currentTarget;
-    const cardFromTarget=eventTarget&&eventTarget.closest?eventTarget.closest('.planCard'):null;
-    const handle=(eventTarget&&eventTarget.matches&&eventTarget.matches('.drag[data-sort-id]'))?eventTarget:(cardFromTarget?cardFromTarget.querySelector('.drag[data-sort-id]'):null);
-    const id=String((handle&&handle.dataset&&handle.dataset.sortId)||'');
-    const card=(handle&&handle.closest?handle.closest('.planCard'):null)||cardFromTarget;
-    const list=$('planList');
-    if(!id||!card||!list||state.plan.length<2)return;
-    let startX=ev.clientX,startY=ev.clientY;
-    const downRect=card.getBoundingClientRect();
-    const press={
-      id,handle,card,list,startX,startY,pointerId:ev.pointerId,timer:null,active:false,cancelled:false,
-      /*
-        v5 phone drag anchor:
-        keep the lifted card anchored to the exact finger offset captured before
-        the prelift CSS transform can change its rect.
-      */
-      downRect:{
-        left:downRect.left,
-        top:downRect.top,
-        width:downRect.width,
-        height:downRect.height
-      },
-      pointerOffsetX:ev.clientX-downRect.left,
-      pointerOffsetY:ev.clientY-downRect.top,
-      phoneAnchoredDrag:false,
-      fixedOffset:{left:0,top:0}
-    };
-    animatedReorder=press;
-    handle.classList.add('reorder-armed');
-    card.classList.add('reorder-prelift');
-    press.timer=setTimeout(()=>activateAnimatedReorder(press,ev),100);
-    const moveBefore=e=>{
-      if(animatedReorder!==press)return;
-      const dx=Math.abs(e.clientX-startX),dy=Math.abs(e.clientY-startY);
-      if(!press.active && (dx>10 || dy>10)){
-        clearTimeout(press.timer);
-        press.cancelled=true;
-        cleanupAnimatedReorder(false);
-      }
-    };
-    const upBefore=e=>{
-      if(animatedReorder!==press)return;
-      if(!press.active){clearTimeout(press.timer);cleanupAnimatedReorder(false);}
-    };
-    press.preMove=moveBefore;
-    press.preUp=upBefore;
-    document.addEventListener('pointermove',moveBefore,{passive:true});
-    document.addEventListener('pointerup',upBefore,{passive:true,once:true});
-    document.addEventListener('pointercancel',upBefore,{passive:true,once:true});
+  function syncFollowEntryForOrigin(origin){
+    if(!origin)return null;
+    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig&&nativeSyncFollowConfig()||{});
+    const list=Array.isArray(config.followedTherapists)?config.followedTherapists:[];
+    return list.find(item=>String(item.deviceId||'')===String(origin.deviceId||'')||String(item.therapistId||'')===String(origin.therapistId||''));
   }
-  function fixedContainingBlockOffset(el){
-    let node=el&&el.parentElement;
-    while(node&&node!==document.documentElement){
-      const cs=getComputedStyle(node);
-      const backdrop=cs.backdropFilter||cs.webkitBackdropFilter||'none';
-      const contain=cs.contain||'';
-      const willChange=cs.willChange||'';
-      const createsFixedBlock=
-        cs.transform!=='none'||
-        cs.perspective!=='none'||
-        cs.filter!=='none'||
-        backdrop!=='none'||
-        contain.includes('paint')||
-        contain.includes('layout')||
-        willChange.includes('transform');
-      if(createsFixedBlock){
-        const r=node.getBoundingClientRect();
-        return {left:r.left,top:r.top};
-      }
-      node=node.parentElement;
-    }
-    return {left:0,top:0};
-  }
-  function activateAnimatedReorder(press,initialEv){
-    if(animatedReorder!==press||press.cancelled)return;
-    const card=press.card,list=press.list;
-    const phoneDrag=isPhoneLayout();
-    /*
-      v5 phone drag anchor:
-      On phone, use the card rect captured at pointerdown, not the transformed
-      prelift rect after the 100ms hold. This prevents the lifted card from
-      jumping away from the finger at activation.
-    */
-    const liveRect=card.getBoundingClientRect();
-    const rect=(phoneDrag&&press.downRect)?press.downRect:liveRect;
-    const fixedOffset=fixedContainingBlockOffset(card);
-    press.fixedOffset=fixedOffset;
-    press.phoneAnchoredDrag=!!phoneDrag;
-    const placeholder=document.createElement('div');
-    placeholder.className='planCard reorder-placeholder';
-    const placeholderHeight=Math.max(48,rect.height);
-    placeholder.style.height=placeholderHeight+'px';
-    /*
-      v4b phone drag-position-only:
-      v401 still forces phone placeholders to 20px via !important.
-      Do not touch layout CSS. Override only this live placeholder inline,
-      only in phone layout, so the list keeps the same height reserve as tablet.
-    */
-    if(isPhoneLayout()){
-      placeholder.style.setProperty('height',placeholderHeight+'px','important');
-      placeholder.style.setProperty('min-height',placeholderHeight+'px','important');
-      placeholder.style.setProperty('padding','0','important');
-      placeholder.style.setProperty('box-sizing','border-box','important');
-    }
-    placeholder.setAttribute('aria-hidden','true');
-    card.after(placeholder);
-    if(isPhoneLayout()){
-      document.body.classList.add('kggPlanCardReordering');
-      clearPhoneScrollStateForPlanGesture(520);
-    }
-    card.classList.remove('reorder-prelift');
-    card.classList.add('reorder-lifted');
-    if(phoneDrag){
-      /*
-        v7 phone drag local-list coordinates:
-        Do not use position:fixed on phone. Some mobile WebViews resolve fixed
-        against transformed/contained ancestors, which moves the lifted card far
-        away from the finger. Keep the card absolutely positioned inside #planList
-        and calculate left/top in that local coordinate system.
-      */
-      const anchorX=Number.isFinite(press.pointerOffsetX)?press.pointerOffsetX:(rect.width/2);
-      const anchorY=Number.isFinite(press.pointerOffsetY)?press.pointerOffsetY:(rect.height/2);
-      const initialX=initialEv&&Number.isFinite(initialEv.clientX)?initialEv.clientX:press.startX;
-      const initialY=initialEv&&Number.isFinite(initialEv.clientY)?initialEv.clientY:press.startY;
-      const listRect=list.getBoundingClientRect();
-      press.phoneListAbsoluteDrag=true;
-      press.dragAnchorX=anchorX;
-      press.dragAnchorY=anchorY;
-      /*
-        v8 tablet safety:
-        v7 left #planList with inline position:relative after a phone drag.
-        That can leak into tablet/orientation mode in the same session.
-        Store and restore the exact previous inline value.
-      */
-      press.listPrevPosition=list.style.getPropertyValue('position');
-      press.listPrevPositionPriority=list.style.getPropertyPriority('position');
-      list.style.setProperty('position','relative');
-      card.style.setProperty('position','absolute','important');
-      card.style.setProperty('left',(initialX-anchorX-listRect.left+list.scrollLeft)+'px','important');
-      card.style.setProperty('top',(initialY-anchorY-listRect.top+list.scrollTop)+'px','important');
-      card.style.setProperty('right','auto','important');
-      card.style.setProperty('bottom','auto','important');
-      card.style.setProperty('margin','0','important');
-      card.style.setProperty('width',rect.width+'px','important');
-      card.style.setProperty('transform','translate3d(0,0,0)','important');
-      card.style.setProperty('transform-origin',anchorX+'px '+anchorY+'px','important');
-      card.style.setProperty('--drag-left','0px');
-      card.style.setProperty('--drag-top','0px');
-      card.style.setProperty('--drag-y','0px');
+  function upsertSyncPeerFromOrigin(origin,autoDownloadDefault){
+    if(!origin||syncOriginIsSelf(origin))return null;
+    const now=new Date().toISOString();
+    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig&&nativeSyncFollowConfig()||{});
+    const list=Array.isArray(config.followedTherapists)?config.followedTherapists.slice():[];
+    const entry={
+      therapistId:String(origin.therapistId||origin.deviceId||''),
+      deviceId:String(origin.deviceId||origin.therapistId||''),
+      displayName:String(origin.displayName||'KGG Geraet'),
+      roomId:String(origin.roomId||config.syncRoomId||syncPairRoomId()),
+      scopes:['exerciseBank','packages'],
+      autoDownload:!!autoDownloadDefault,
+      pairedAt:now,
+      lastSeenAt:now
+    };
+    const idx=list.findIndex(item=>String(item.deviceId||'')===entry.deviceId||String(item.therapistId||'')===entry.therapistId);
+    if(idx>=0){
+      list[idx]={...list[idx],...entry,autoDownload:autoDownloadDefault?true:list[idx].autoDownload!==false,pairedAt:list[idx].pairedAt||now,lastSeenAt:now};
     }else{
-      card.style.setProperty('--drag-left',(rect.left-fixedOffset.left)+'px');
-      card.style.setProperty('--drag-top',(rect.top-fixedOffset.top)+'px');
-      card.style.setProperty('--drag-y','0px');
-      card.style.width=rect.width+'px';
+      list.push(entry);
     }
-    list.classList.add('reorder-active');
-    press.active=true;
-    press.placeholder=placeholder;
-    press.startTop=rect.top;
-    press.cardHeight=rect.height;
-    press.currentIndex=(state.plan||[]).findIndex(ex=>String(ex.localId||ex.id)===press.id);
-    press.targetIndex=press.currentIndex;
-    state.reorderSuppressClick=true;
-    try{press.handle.setPointerCapture&&press.handle.setPointerCapture(press.pointerId);}catch(e){}
-    document.removeEventListener('pointermove',press.preMove);
-    document.removeEventListener('pointerup',press.preUp);
-    document.addEventListener('pointermove',onAnimatedReorderMove,{passive:false});
-    document.addEventListener('pointerup',finishAnimatedReorder,{passive:false,once:true});
-    document.addEventListener('pointercancel',cancelAnimatedReorder,{passive:false,once:true});
-    if(initialEv)onAnimatedReorderMove(initialEv);
+    config.followedTherapists=list;
+    if(entry.roomId&&!config.syncRoomId)config.syncRoomId=entry.roomId;
+    if(!config.therapistId)config.therapistId=syncPairDeviceId();
+    writeNativeSyncFollowConfig(config);
+    return idx>=0?list[idx]:entry;
   }
-  function onAnimatedReorderMove(ev){
-    const press=animatedReorder;
-    if(!press||!press.active)return;
-    clearPhoneScrollStateForPlanGesture(520);
-    ev.preventDefault();
-    const dy=ev.clientY-press.startY;
-    let floatingMid;
-    if(press.phoneListAbsoluteDrag){
-      const anchorX=Number.isFinite(press.dragAnchorX)?press.dragAnchorX:(Number.isFinite(press.pointerOffsetX)?press.pointerOffsetX:0);
-      const anchorY=Number.isFinite(press.dragAnchorY)?press.dragAnchorY:(Number.isFinite(press.pointerOffsetY)?press.pointerOffsetY:0);
-      const listRect=press.list.getBoundingClientRect();
-      const nextLeft=ev.clientX-anchorX-listRect.left+press.list.scrollLeft;
-      const nextTop=ev.clientY-anchorY-listRect.top+press.list.scrollTop;
-      press.card.style.setProperty('left',nextLeft+'px','important');
-      press.card.style.setProperty('top',nextTop+'px','important');
-      press.card.style.setProperty('transform','translate3d(0,0,0)','important');
-      press.card.style.setProperty('--drag-y','0px');
-      floatingMid=ev.clientY-anchorY+(Number.isFinite(press.cardHeight)?press.cardHeight:press.card.getBoundingClientRect().height)/2;
-    }else if(press.phoneAnchoredDrag){
-      const anchorX=Number.isFinite(press.pointerOffsetX)?press.pointerOffsetX:0;
-      const anchorY=Number.isFinite(press.pointerOffsetY)?press.pointerOffsetY:0;
-      const fixedOffset=press.fixedOffset||{left:0,top:0};
-      const nextLeft=ev.clientX-anchorX-fixedOffset.left;
-      const nextTop=ev.clientY-anchorY-fixedOffset.top;
-      press.card.style.setProperty('--drag-left',nextLeft+'px');
-      press.card.style.setProperty('--drag-top',nextTop+'px');
-      press.card.style.setProperty('--drag-y','0px');
-      floatingMid=ev.clientY-anchorY+(Number.isFinite(press.cardHeight)?press.cardHeight:press.card.getBoundingClientRect().height)/2;
-    }else{
-      press.card.style.setProperty('--drag-y',dy+'px');
-      floatingMid=press.startTop+dy+(press.card.getBoundingClientRect().height/2);
-    }
-    const cards=Array.from(press.list.querySelectorAll('.planCard[data-plan-id]:not(.reorder-lifted)'));
-    let target=cards.length;
-    for(let i=0;i<cards.length;i++){
-      const r=cards[i].getBoundingClientRect();
-      if(floatingMid<r.top+r.height/2){target=i;break;}
-    }
-    press.targetIndex=target;
-    const ref=cards[target]||null;
-    if(ref)press.list.insertBefore(press.placeholder,ref); else press.list.appendChild(press.placeholder);
-    cards.forEach(c=>c.classList.remove('reorder-gap-before','reorder-gap-after'));
-    if(ref)ref.classList.add('reorder-gap-before');
-    else if(cards.length)cards[cards.length-1].classList.add('reorder-gap-after');
+  function syncAutoDownloadAllowed(origin,options){
+    if(options&&options.allowUnfollowed)return true;
+    if(!origin)return true;
+    if(syncOriginIsSelf(origin))return false;
+    const entry=syncFollowEntryForOrigin(origin);
+    return !!entry&&entry.autoDownload!==false;
   }
-  function finishAnimatedReorder(ev){
-    const press=animatedReorder;
-    if(!press||!press.active){cleanupAnimatedReorder(false);return;}
-    ev.preventDefault();
-    const dbAnchor=state.bankOpen&&typeof captureDbScrollAnchor==='function'?captureDbScrollAnchor():null;
-    const from=(state.plan||[]).findIndex(ex=>String(ex.localId||ex.id)===press.id);
-    let to=Array.from(press.list.children).indexOf(press.placeholder);
-    if(from<0){cleanupAnimatedReorder(false);return;}
-    if(to>from)to-=1;
-    to=Math.max(0,Math.min(state.plan.length-1,to));
-    const moved=to!==from;
-    if(moved){
-      const next=state.plan.slice();
-      const item=next.splice(from,1)[0];
-      next.splice(to,0,item);
-      state.plan=next;
-      syncStatePlanToStore('ui_reorder_plan_animated');
-      syncTextInputFromPlan('ui_reorder_plan_animated');
-      save();
+  function mergeNativeSyncMeshDocument(doc,options){
+    const peers=Array.isArray(doc.peers)?doc.peers:[];
+    const total={bank:{added:0,updated:0,total:0},packages:{added:0,updated:0,total:0},tombstones:{removed:0,total:0},mesh:{seen:peers.length,merged:0,skipped:0}};
+    peers.forEach(peer=>{
+      if(!peer||peer.kind!=='kgg_cross_data_safe_sync'){total.mesh.skipped+=1;return;}
+      upsertSyncPeerFromOrigin(peer.origin,false);
+      if(!syncAutoDownloadAllowed(peer.origin,options)){total.mesh.skipped+=1;return;}
+      const result=mergeNativeExerciseBankSyncDocument(peer,{...(options||{}),fromMesh:true});
+      if(result&&result.bank){total.bank.added+=result.bank.added||0;total.bank.updated+=result.bank.updated||0;total.bank.total+=result.bank.total||0;}
+      if(result&&result.packages){total.packages.added+=result.packages.added||0;total.packages.updated+=result.packages.updated||0;total.packages.total+=result.packages.total||0;}
+      if(result&&result.tombstones){total.tombstones.removed+=result.tombstones.removed||0;total.tombstones.total+=result.tombstones.total||0;}
+      total.mesh.merged+=1;
+    });
+    renderSyncPeerList();
+    return total;
+  }
+  function mergeNativeExerciseBankSyncDocument(raw,options){
+    const doc=assertCrossDataSafeSyncDocument(typeof raw==='string'?JSON.parse(raw):(raw||{}));
+    if(doc.kind==='kgg_cross_data_safe_sync_mesh')return mergeNativeSyncMeshDocument(doc,options||{});
+    if(!syncAutoDownloadAllowed(doc.origin,options||{}))return {bank:{added:0,updated:0,total:0},packages:{added:0,updated:0,total:0},tombstones:{removed:0,total:0},skipped:true};
+    upsertSyncPeerFromOrigin(doc.origin,!!(options&&options.allowUnfollowed));
+    const tombstoneResult=applyNativeSyncExerciseTombstones(doc.tombstones&&doc.tombstones.exerciseBank);
+    const exercises=Array.isArray(doc.exerciseBank)?doc.exerciseBank:(Array.isArray(doc.exercises)?doc.exercises:[]);
+    const filteredExercises=exercises.filter(ex=>!tombstoneResult.ids.has(String(ex&&ex.id||'')));
+    let bankResult={added:0,updated:0,total:0};
+    if(filteredExercises.length)bankResult=mergeSharedExerciseBank({exercises:filteredExercises});
+    const packageResult=mergeNativeSyncPackages(doc.packages);
+    if(packageResult.added||packageResult.updated){save(); render();}
+    return {bank:bankResult,packages:packageResult,tombstones:tombstoneResult};
+  }
+  async function resolveNativeSyncValue(value){return value&&typeof value.then==='function'?await value:value;}
+  async function pullNativeExerciseBankSync(reason){
+    if(!nativeExerciseSyncAvailable())return null;
+    nativeExerciseSyncApplying=true;
+    try{return mergeNativeExerciseBankSyncDocument(await resolveNativeSyncValue(window.KGGNativeSync.read()));}
+    catch(err){console.warn('Native Sync konnte nicht gelesen werden:',err);return null;}
+    finally{nativeExerciseSyncApplying=false;}
+  }
+  async function pushNativeExerciseBankSync(reason){
+    if(!nativeExerciseSyncAvailable())return false;
+    try{return !!(await resolveNativeSyncValue(window.KGGNativeSync.write(buildNativeExerciseBankSyncDocument())));}
+    catch(err){console.warn('Native Sync konnte nicht geschrieben werden:',err);return false;}
+  }
+  function queueNativeExerciseBankSync(reason){
+    if(nativeExerciseSyncApplying||!nativeExerciseSyncAvailable())return;
+    clearTimeout(nativeExerciseSyncTimer);
+    nativeExerciseSyncTimer=setTimeout(()=>pushNativeExerciseBankSync(reason),350);
+  }
+  function initNativeExerciseBankSync(){
+    const activate=()=>{pullNativeExerciseBankSync('native_ready').finally(()=>queueNativeExerciseBankSync('native_ready'));};
+    if(nativeExerciseSyncAvailable())activate();
+    window.addEventListener('kgg:native-sync-ready',activate,{once:true});
+  }
+  window.KGGNativeExerciseSync={build:buildNativeExerciseBankSyncDocument,merge:mergeNativeExerciseBankSyncDocument,pull:pullNativeExerciseBankSync,push:pushNativeExerciseBankSync};
+  const syncPairDeviceIdKey='kgg_sync_pair_device_id_v1';
+  const syncPairFallbackConfigKey='kgg_sync_pair_follow_config_v1';
+  const syncPairRoomIdKey='kgg_sync_room_id_v1';
+  const nativeSyncQrMaxLength=2400;
+  let lastSyncPairCode='';
+  let nativeSyncLastStatus='';
+  function safeBase64JsonEncode(value){
+    const json=JSON.stringify(value||{});
+    const bytes=new TextEncoder().encode(json);
+    let binary='';
+    for(let i=0;i<bytes.length;i+=0x8000){
+      binary+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));
     }
-    cleanupAnimatedReorder(true);
-    renderPlan();
-    if(dbAnchor&&typeof restoreDbScrollAnchor==='function'){
-      restoreDbScrollAnchor(dbAnchor);
-      setTimeout(()=>restoreDbScrollAnchor(dbAnchor),40);
+    return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+  function kggConfigTransferBytesToBase64Url(bytes){
+    let binary='';
+    for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));
+    return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+  function kggConfigTransferBase64UrlToBytes(value){
+    const body=String(value||'').replace(/-/g,'+').replace(/_/g,'/');
+    const padded=body+'='.repeat((4-body.length%4)%4);
+    const binary=atob(padded);
+    const bytes=new Uint8Array(binary.length);
+    for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+    return bytes;
+  }
+  function kggConfigTransferRandomBytes(length){
+    const bytes=new Uint8Array(length);
+    if(window.crypto&&crypto.getRandomValues)crypto.getRandomValues(bytes);
+    else for(let i=0;i<bytes.length;i++)bytes[i]=Math.floor(Math.random()*256);
+    return bytes;
+  }
+  function kggConfigTransferPassCode(){
+    const bytes=kggConfigTransferRandomBytes(4);
+    const value=((bytes[0]<<24)>>>0)+(bytes[1]<<16)+(bytes[2]<<8)+bytes[3];
+    return String(100000+(value%900000));
+  }
+  function buildKggConfigTransferPlain(){
+    loadAdminSecrets();
+    return {
+      kind:'kgg_config_transfer_v2',
+      version:2,
+      appVersion:VERSION,
+      createdAt:new Date().toISOString(),
+      expiresAt:new Date(Date.now()+10*60*1000).toISOString(),
+      secrets:{
+        geminiKeys:(adminSecrets.geminiKeys||[]).map(cleanSecret).filter(Boolean).slice(0,4),
+        mediaDropzoneEndpoint:cleanSecret(adminSecrets.mediaDropzoneEndpoint),
+        mediaDropzoneUploadToken:cleanSecret(adminSecrets.mediaDropzoneUploadToken)
+      }
+    };
+  }
+  function kggConfigTransferHasCodes(plain){
+    const secrets=plain&&plain.secrets||{};
+    return !!((Array.isArray(secrets.geminiKeys)&&secrets.geminiKeys.length)||secrets.mediaDropzoneEndpoint||secrets.mediaDropzoneUploadToken);
+  }
+  async function kggConfigTransferKey(passCode,saltBytes){
+    const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(String(passCode||'')),{name:'PBKDF2'},false,['deriveKey']);
+    return crypto.subtle.deriveKey({name:'PBKDF2',salt:saltBytes,iterations:140000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+  }
+  async function encryptKggConfigTransferPlain(plain,passCode){
+    if(!(window.crypto&&crypto.subtle&&window.TextEncoder))return {payloadCode:'KGGCFG1:'+safeBase64JsonEncode(plain),encrypted:false};
+    const salt=kggConfigTransferRandomBytes(16);
+    const iv=kggConfigTransferRandomBytes(12);
+    const key=await kggConfigTransferKey(passCode,salt);
+    const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(plain)));
+    const envelope={kind:'kgg_config_transfer_encrypted_v2',version:2,alg:'PBKDF2-SHA256-AES-GCM',salt:kggConfigTransferBytesToBase64Url(salt),iv:kggConfigTransferBytesToBase64Url(iv),ciphertext:kggConfigTransferBytesToBase64Url(new Uint8Array(cipher)),createdAt:plain.createdAt,expiresAt:plain.expiresAt};
+    return {payloadCode:'KGGCFG2:'+safeBase64JsonEncode(envelope),encrypted:true};
+  }
+  async function decryptKggConfigTransferEnvelope(envelope,passCode){
+    if(!(window.crypto&&crypto.subtle&&window.TextDecoder))throw new Error('Dieses Geraet kann den verschluesselten Transfer nicht lesen.');
+    const salt=kggConfigTransferBase64UrlToBytes(envelope.salt);
+    const iv=kggConfigTransferBase64UrlToBytes(envelope.iv);
+    const cipher=kggConfigTransferBase64UrlToBytes(envelope.ciphertext);
+    const key=await kggConfigTransferKey(passCode,salt);
+    const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,cipher);
+    return JSON.parse(new TextDecoder().decode(plain));
+  }
+  function applyKggConfigTransferPlain(plain){
+    if(!plain||plain.kind!=='kgg_config_transfer_v2')throw new Error('Kein KGG-Konfig-Transfer.');
+    if(plain.expiresAt&&Date.parse(plain.expiresAt)<Date.now())throw new Error('Konfig-Transfer ist abgelaufen.');
+    const secrets=plain.secrets||{};
+    applyAdminCodePackageData({
+      geminiKeys:Array.isArray(secrets.geminiKeys)?secrets.geminiKeys:[],
+      mediaDropzoneEndpoint:secrets.mediaDropzoneEndpoint||'',
+      mediaDropzoneUploadToken:secrets.mediaDropzoneUploadToken||''
+    });
+    return true;
+  }
+  async function buildKggEncryptedConfigTransferForQr(options){
+    const plain=buildKggConfigTransferPlain();
+    if(!kggConfigTransferHasCodes(plain)){
+      openAdminSecretsModal();
+      return null;
+    }
+    const passCode=kggConfigTransferPassCode();
+    const encrypted=await encryptKggConfigTransferPlain(plain,passCode);
+    if((options&&options.requireEncrypted)!==false&&!encrypted.encrypted){
+      alert('API-Key-QR kann auf diesem Geraet nur verschluesselt erstellt werden.');
+      return null;
+    }
+    return {payloadCode:encrypted.payloadCode,passCode,encrypted:encrypted.encrypted,plain};
+  }
+  async function openKggConfigTransferQr(){
+    const transfer=await buildKggEncryptedConfigTransferForQr({requireEncrypted:true});
+    if(!transfer)return;
+    openKggAdminMenuQr({
+      title:'Konfig-Transfer QR',
+      hint:'Verschluesselt, 10 Minuten gueltig. Transfer-Code: '+transfer.passCode,
+      text:transfer.payloadCode
+    });
+  }
+  function parseKggConfigTransferCode(code){
 ```

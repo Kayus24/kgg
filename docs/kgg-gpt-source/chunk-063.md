@@ -4,424 +4,424 @@
 - Lines: 26461-26880
 
 ```html
-<script id="kgg-v044-phone-liquid-actions-script">
-(function(){
-  "use strict";
-  var PATCH_ID="kgg-v044-phone-liquid-actions";
-  function byId(id){return document.getElementById(id);}
-  function clickExisting(id){var el=byId(id); if(el&&typeof el.click==="function")el.click();}
-  function closePhoneAdminMenu(){
-    var panel=byId("kggPhoneAdminMenuPanel");
-    var btn=byId("kggPhoneAdminMenuBtn");
-    if(panel)panel.hidden=true;
-    if(btn)btn.setAttribute("aria-expanded","false");
-  }
-  function openReleaseCenter(){
-    closePhoneAdminMenu();
-    if(window.KGGReleaseCenter&&typeof window.KGGReleaseCenter.open==="function"){window.KGGReleaseCenter.open();return;}
-    clickExisting("kggReleaseCenterOpenPhone");
-    clickExisting("kggReleaseCenterOpen");
-  }
-  function openDeviceSync(){
-    closePhoneAdminMenu();
-    if(typeof window.openSyncPairModal==="function"){window.openSyncPairModal();return;}
-    clickExisting("syncQrBtn");
-  }
-  function openTherapistShare(){
-    closePhoneAdminMenu();
-    if(typeof window.openKggTherapistAppOnlyQr==="function"){window.openKggTherapistAppOnlyQr();return;}
-    if(typeof window.openKggAdminMenuQr==="function"){
-      window.openKggAdminMenuQr({
-        title:"Kolleg:innen-App APK QR",
-        hint:"Oeffnet die aktuelle Android-Download-Seite fuer Kolleg:innen. Keine API-Keys, keine Sync-Daten.",
-        url:"https://kayus24.github.io/kgg/therapist-app/latest-android.html"
-      });
+      transform:translateY(var(--kgg-phone-keyboard-inset,0px))!important;
+    }
+    body.phoneTextFocus.kggPhoneHasPlan #createPanel.planMode #finishBtn:not(.hidden){
+      bottom:calc(12px + env(safe-area-inset-bottom))!important;
+      transform:translateY(var(--kgg-phone-keyboard-inset,0px))!important;
+    }
+    body.adminMode #createPanel.planMode .planHeader{
+      padding-right:54px!important;
+      grid-template-columns:minmax(0,1fr) auto!important;
+    }
+    body.adminMode #createPanel.planMode .planHeader #kggPhoneAdminMenu{
+      position:absolute!important;
+      top:4px!important;
+      right:0!important;
+      left:auto!important;
+      transform:none!important;
+      z-index:76!important;
+      margin:0!important;
+    }
+    body.adminMode #createPanel.planMode .planHeader #savePackageBtn:not(.hidden){
+      margin-right:8px!important;
     }
   }
-  function openSharedBank(){
-    closePhoneAdminMenu();
-    if(window.KGGSharedBank&&typeof window.KGGSharedBank.open==="function"){window.KGGSharedBank.open();return;}
-    clickExisting("sharedBankBtn");
-  }
-  function openAdminConfig(){
-    closePhoneAdminMenu();
-    if(window.KGGAdmin&&typeof window.KGGAdmin.openConfig==="function"){window.KGGAdmin.openConfig();return;}
-    clickExisting("adminConfigBtn");
-  }
-  function bind(id,handler){
-    var el=byId(id);
-    if(!el||el.dataset.kggV044Bound==="1")return;
-    el.dataset.kggV044Bound="1";
-    el.addEventListener("click",function(ev){ev.preventDefault();ev.stopPropagation();handler();},true);
-  }
-  function enhanceScanButton(){
-    var scan=byId("scanBtn");
-    var label=scan?scan.querySelector(".phoneScanLabel"):null;
-    var toggle=byId("phonePhotoMenuToggle");
-    if(scan&&!scan.classList.contains("kggPhoneLiquidAction"))scan.classList.add("kggScanButtonWithMenu","kggPhoneLiquidAction");
-    if(label&&label.textContent!=="📷 Plan scannen")label.textContent="📷 Plan scannen";
-    if(toggle){
-      if(!toggle.classList.contains("kggPhoneLiquidChevron"))toggle.classList.add("kggPhoneLiquidChevron");
-      if(toggle.textContent!=="⌃")toggle.textContent="⌃";
-      if(toggle.getAttribute("aria-label")!=="Foto-Optionen oeffnen")toggle.setAttribute("aria-label","Foto-Optionen oeffnen");
-      if(toggle.getAttribute("title")!=="Foto-Optionen")toggle.setAttribute("title","Foto-Optionen");
-    }
-    var finish=byId("finishBtn");
-    if(finish&&!finish.classList.contains("kggPhoneLiquidAction"))finish.classList.add("kggPhoneLiquidAction");
-  }
-  function enhancePhoneAdminMenu(){
-    var panel=byId("kggPhoneAdminMenuPanel");
-    if(!panel||panel.dataset.kggV044Menu==="1")return;
-    panel.dataset.kggV044Menu="1";
-    panel.innerHTML=
-      '<div class="kggPhoneMenuGroup" data-kgg-phone-menu-group="update"><div class="kggPhoneMenuGroupTitle">Update</div><button id="kggPhoneUpdateCenterMenu" type="button">Update-Zentrale</button></div>'+
-      '<div class="kggPhoneMenuGroup" data-kgg-phone-menu-group="sync-share"><div class="kggPhoneMenuGroupTitle">Sync &amp; Weitergeben</div><button id="kggPhoneDeviceSyncMenu" type="button">Geräte-Sync</button><button id="kggPhoneTherapistShareMenu" type="button">Kolleg:innen-App weitergeben</button><button id="kggPhoneBankShareMenu" type="button">Übungsdatenbank teilen</button></div>'+
-      '<div class="kggPhoneMenuGroup" data-kgg-phone-menu-group="admin"><div class="kggPhoneMenuGroupTitle">Admin</div><button id="kggPhoneAdminConfigMenu" type="button">Admin-Konfig</button></div>';
-    bind("kggPhoneUpdateCenterMenu",openReleaseCenter);
-    bind("kggPhoneDeviceSyncMenu",openDeviceSync);
-    bind("kggPhoneTherapistShareMenu",openTherapistShare);
-    bind("kggPhoneBankShareMenu",openSharedBank);
-    bind("kggPhoneAdminConfigMenu",openAdminConfig);
-  }
-  function install(){
-    enhanceScanButton();
-    enhancePhoneAdminMenu();
-  }
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});
-  else install();
-  [80,220,600,1200].forEach(function(ms){setTimeout(install,ms);});
-  if(document.body){
-    new MutationObserver(function(){install();}).observe(document.body,{childList:true,subtree:true});
-  }
-  window.KGG_UI_PHONE_LIQUID_ACTIONS_V044={patchId:PATCH_ID,install:install};
-})();
-</script>
-<!-- KGG PATCH END kgg-v044-phone-liquid-actions -->
 
-<!-- SOURCE FILE: kgg-update/src/patches/v045-phone-drawer-bank-align.html -->
-
-<!-- KGG PATCH START kgg-v045-phone-drawer-bank-align -->
-<style id="kgg-v045-phone-drawer-bank-align-style">
-  @media(max-width:759px){
-    #createPanel{
-      margin-top:clamp(28px,5dvh,44px)!important;
+  @media(min-width:760px){
+    body.tabletLayoutCustom #scanHub{
+      position:relative!important;
+      z-index:82!important;
     }
-    body.kggPhoneDrawerSafeOpen .kggPhoneDrawerBackdrop{
-      opacity:1!important;
+    body.tabletLayoutCustom #tabletMenuBtn{
+      position:fixed!important;
+      left:10px!important;
+      top:var(--kgg-tablet-safe-top)!important;
+      z-index:1505!important;
       pointer-events:auto!important;
     }
-    body.kggPhoneDrawerSafeOpen #recentToggle.phoneButtonFloat,
-    body.kggPhoneDrawerSafeOpen #packageToggle.phoneButtonFloat{
-      position:fixed!important;
-      left:16px!important;
-      right:16px!important;
-      bottom:calc(12px + env(safe-area-inset-bottom))!important;
-      z-index:92!important;
-      width:auto!important;
-      min-width:0!important;
-      height:58px!important;
-      min-height:58px!important;
-      border-radius:18px!important;
-      justify-content:center!important;
-      background:#fff!important;
-      color:var(--ink)!important;
-      border:1px solid rgba(220,227,235,.96)!important;
-      box-shadow:0 22px 54px rgba(7,16,39,.26),0 5px 14px rgba(7,16,39,.12)!important;
+    #editorModal .editorSheet{
+      width:min(94vw,920px)!important;
+      max-height:min(90vh,760px)!important;
+      overflow:hidden!important;
+      display:grid!important;
+      grid-template-columns:minmax(0,1fr) minmax(300px,.92fr)!important;
+      grid-template-areas:
+        "header header"
+        "name media"
+        "sets media"
+        "units media"
+        "start media"
+        "advanced media"
+        "actions actions"
+        "cancel cancel"!important;
+      column-gap:14px!important;
+      row-gap:9px!important;
+      padding:16px!important;
     }
-    body.kggPhoneDrawerSafeOpen #recentList:not(.hidden),
-    body.kggPhoneDrawerSafeOpen #packageList:not(.hidden){
-      position:fixed!important;
-      left:16px!important;
-      right:16px!important;
-      bottom:calc(86px + env(safe-area-inset-bottom))!important;
-      z-index:91!important;
-      overscroll-behavior:contain!important;
-      touch-action:pan-y!important;
+    #editorModal .editorHeader{grid-area:header!important;margin-bottom:0!important}
+    #editorModal .editorSheet > .field:first-of-type{grid-area:name!important;margin:0!important}
+    #editorModal .editorSheet > .grid2:nth-of-type(1){grid-area:sets!important}
+    #editorModal .editorSheet > .grid2:nth-of-type(2){grid-area:units!important}
+    #editorModal .editorStartHint{grid-area:start!important;margin:0!important}
+    #editorModal .editorMediaBox{
+      grid-area:media!important;
+      margin:0!important;
+      min-height:0!important;
+      display:grid!important;
+      grid-template-rows:auto minmax(190px,1fr) auto!important;
+      align-self:stretch!important;
+    }
+    #editorModal .editorMediaPreview{
+      min-height:190px!important;
+      max-height:min(42vh,330px)!important;
+      overflow:hidden!important;
+    }
+    #editorModal .editorMediaPreview img{
+      width:100%!important;
+      height:100%!important;
+      object-fit:contain!important;
+    }
+    #editorModal .editorAdvanced{
+      grid-area:advanced!important;
+      margin:0!important;
+      max-height:112px!important;
       overflow:auto!important;
-      background:rgba(255,255,255,.98)!important;
-      border:1px solid rgba(220,227,235,.96)!important;
-      border-radius:22px!important;
-      padding:10px!important;
-      box-shadow:0 22px 58px rgba(7,16,39,.24),0 4px 14px rgba(7,16,39,.10)!important;
-      backdrop-filter:blur(10px)!important;
-      -webkit-backdrop-filter:blur(10px)!important;
-      max-height:min(54dvh,390px)!important;
     }
-    body.kggPhoneDrawerSafeOpen #recentList:not(.hidden) .notice,
-    body.kggPhoneDrawerSafeOpen #packageList:not(.hidden) .notice{margin-top:0!important}
-    body.kggPhoneDrawerSafeOpen #scanHub,
-    body.kggPhoneDrawerSafeOpen #createPanel.planMode #finishBtn:not(.hidden){
-      z-index:40!important;
+    #editorModal .editorActions{
+      grid-area:actions!important;
+      margin:0!important;
     }
-    body.kggPhoneDrawerSafeOpen .kggPhonePhotoMenu{display:none!important}
+    #editorModal .editorCancelBtn{
+      grid-area:cancel!important;
+      margin:0!important;
+    }
   }
 </style>
-
-<script id="kgg-v045-phone-drawer-bank-align-script">
+<script id="kgg-v053-ui-tablet-stability-script">
 (function(){
   "use strict";
-  var PATCH_ID="kgg-v045-phone-drawer-bank-align";
-  var PHONE_QUERY="(max-width:759px)";
+  var PATCH_ID="kgg-v053-ui-tablet-stability";
   function byId(id){return document.getElementById(id);}
-  function isPhone(){return !!(window.matchMedia&&window.matchMedia(PHONE_QUERY).matches&&!(window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive()));}
-  function ensureBackdrop(){
-    var backdrop=byId("phoneDrawerBackdrop");
-    if(!backdrop){
-      backdrop=document.createElement("div");
-      backdrop.id="phoneDrawerBackdrop";
-      backdrop.className="kggPhoneDrawerBackdrop";
-      backdrop.setAttribute("aria-hidden","true");
-      document.body.appendChild(backdrop);
+  function isTablet(){
+    return !!(window.matchMedia&&window.matchMedia("(min-width:760px)").matches&&document.body&&document.body.classList.contains("tabletLayoutCustom"));
+  }
+  function anchorTabletMenuButton(){
+    var btn=byId("tabletMenuBtn");
+    var hub=byId("scanHub");
+    if(!btn||!hub||!document.body)return;
+    if(isTablet()){
+      if(btn.parentElement!==document.body)document.body.appendChild(btn);
+      return;
     }
-    if(backdrop.dataset.kggV045Bound!=="1"){
-      backdrop.dataset.kggV045Bound="1";
-      backdrop.addEventListener("click",function(ev){
-        ev.preventDefault();
-        ev.stopImmediatePropagation();
-        closePhoneDrawerSafe();
+    if(btn.parentElement!==hub)hub.insertBefore(btn,hub.firstChild);
+  }
+  function resetTabletSwipe(card){
+    if(!card)return;
+    card.classList.remove("swipe-dragging","swipe-armed","swipe-left","swipe-right","swipe-removing");
+    document.body.classList.remove("kggPlanCardSwiping");
+    card.style.removeProperty("transform");
+    card.style.removeProperty("opacity");
+    card.style.removeProperty("transition");
+    card.style.removeProperty("--swipe-strength");
+    card.style.removeProperty("--kgg-plan-swipe-x");
+  }
+  function startTabletSwipeForCard(ev,card){
+    if(!isTablet())return;
+    if(!card)return;
+    if(ev.button!=null&&ev.button!==0)return;
+    if(ev.target&&ev.target.closest&&ev.target.closest("button,input,textarea,select,a,.planCardActions,.drag"))return;
+    var pointerKey=String(ev.pointerId||"mouse");
+    if(card.dataset.kggV053SwipePointer===pointerKey)return;
+    card.dataset.kggV053SwipePointer=pointerKey;
+    card.dataset.kggV053SwipeStarted="1";
+    var planId=card.dataset&&card.dataset.planId?String(card.dataset.planId):"";
+    function currentCard(){
+      if(card&&card.isConnected)return card;
+      if(planId){
+        var cards=Array.from(document.querySelectorAll("#planList .planCard[data-plan-id]"));
+        var live=cards.find(function(node){return node.dataset&&String(node.dataset.planId)===planId;});
+        if(live)return live;
+      }
+      return card;
+    }
+    var startX=ev.clientX,startY=ev.clientY,pointerId=ev.pointerId,active=false,dx=0,cancelTimer=null;
+    function threshold(){var live=currentCard();return Math.min(132,Math.max(78,(live?live.offsetWidth:0)*0.34));}
+    function cleanup(){
+      clearTimeout(cancelTimer);
+      delete card.dataset.kggV053SwipePointer;
+      document.removeEventListener("pointermove",move,true);
+      document.removeEventListener("pointerup",up,true);
+      document.removeEventListener("pointercancel",cancel,true);
+    }
+    function move(e){
+      var live=currentCard();
+      if(!live){cleanup();return;}
+      dx=e.clientX-startX;
+      var dy=e.clientY-startY;
+      if(!active){
+        if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)*1.2){cleanup();return;}
+        if(Math.abs(dx)<12||Math.abs(dx)<Math.abs(dy)*1.25)return;
+        active=true;
+        document.body.classList.add("kggPlanCardSwiping");
+        live.classList.add("swipe-dragging");
+        try{live.setPointerCapture&&live.setPointerCapture(pointerId);}catch(err){}
+      }
+      e.preventDefault();
+      if(e.stopImmediatePropagation)e.stopImmediatePropagation();
+      dx=Math.max(-live.offsetWidth*.86,Math.min(live.offsetWidth*.86,dx));
+      var strength=Math.min(1,Math.abs(dx)/threshold());
+      live.classList.toggle("swipe-left",dx<0);
+      live.classList.toggle("swipe-right",dx>0);
+      live.classList.toggle("swipe-armed",Math.abs(dx)>=threshold());
+      live.style.setProperty("--swipe-strength",String(strength));
+      live.style.setProperty("--kgg-plan-swipe-x",dx+"px");
+      live.style.transform="translateX(var(--kgg-plan-swipe-x,0px))";
+      live.style.opacity=String(1-strength*.16);
+    }
+    function up(e){
+      var live=currentCard();
+      cleanup();
+      if(!active){resetTabletSwipe(live);return;}
+      e.preventDefault();
+      document.body.classList.remove("kggPlanCardSwiping");
+      if(Math.abs(dx)>=threshold()){
+        live.classList.add("swipe-removing");
+        live.style.transition="transform .18s cubic-bezier(.2,.9,.2,1), opacity .18s ease";
+        live.style.setProperty("--kgg-plan-swipe-x",((dx<0?-1:1)*(live.offsetWidth+96))+"px");
+        live.style.opacity="0";
+        setTimeout(function(){
+          var del=live.querySelector(".planDeleteBtn,[data-del]");
+          if(del&&typeof del.click==="function")del.click();
+        },160);
+        return;
+      }
+      live.style.transition="transform .22s cubic-bezier(.2,.9,.2,1), opacity .18s ease";
+      live.style.setProperty("--kgg-plan-swipe-x","0px");
+      live.style.opacity="1";
+      setTimeout(function(){resetTabletSwipe(live);},230);
+    }
+    function cancel(){
+      var live=currentCard();
+      if(active){
+        clearTimeout(cancelTimer);
+        cancelTimer=setTimeout(function(){cleanup();resetTabletSwipe(currentCard());},900);
+        return;
+      }
+      cleanup();
+      resetTabletSwipe(live);
+    }
+    document.addEventListener("pointermove",move,true);
+    document.addEventListener("pointerup",up,true);
+    document.addEventListener("pointercancel",cancel,true);
+  }
+  function startTabletSwipe(ev){
+    startTabletSwipeForCard(ev,ev.currentTarget);
+  }
+  function bindTabletSwipeGuard(){
+    if(!document.body)return;
+    if(document.documentElement&&!document.documentElement.dataset.kggV053TabletSwipeDocumentGuard){
+      document.documentElement.dataset.kggV053TabletSwipeDocumentGuard="1";
+      document.addEventListener("pointerdown",function(ev){
+        if(!isTablet())return;
+        var target=ev.target;
+        var card=target&&target.closest&&target.closest("#planList .planCard[data-plan-id]");
+        if(card)startTabletSwipeForCard(ev,card);
       },true);
     }
-    return backdrop;
-  }
-  function closePhoneDrawerSafe(){
-    var recent=byId("recentList");
-    var packages=byId("packageList");
-    var recentBtn=byId("recentToggle");
-    var packageBtn=byId("packageToggle");
-    if(recent)recent.classList.add("hidden");
-    if(packages)packages.classList.add("hidden");
-    if(recentBtn){recentBtn.classList.remove("phoneButtonFloat");recentBtn.setAttribute("aria-expanded","false");}
-    if(packageBtn){packageBtn.classList.remove("phoneButtonFloat");packageBtn.setAttribute("aria-expanded","false");}
-    if(document.body)document.body.classList.remove("kggPhoneDrawerSafeOpen","kggPhoneDrawerOpen");
-  }
-  function openPhoneDrawerSafe(kind){
-    if(!isPhone())return false;
-    var recent=byId("recentList");
-    var packages=byId("packageList");
-    var recentBtn=byId("recentToggle");
-    var packageBtn=byId("packageToggle");
-    var target=kind==="recent"?recent:packages;
-    var targetBtn=kind==="recent"?recentBtn:packageBtn;
-    var other=kind==="recent"?packages:recent;
-    var otherBtn=kind==="recent"?packageBtn:recentBtn;
-    if(!target||!targetBtn)return false;
-    if(!target.classList.contains("hidden")&&targetBtn.classList.contains("phoneButtonFloat")){
-      closePhoneDrawerSafe();
-      return true;
-    }
-    ensureBackdrop();
-    if(other)other.classList.add("hidden");
-    if(otherBtn){otherBtn.classList.remove("phoneButtonFloat");otherBtn.setAttribute("aria-expanded","false");}
-    target.classList.remove("hidden");
-    targetBtn.classList.add("phoneButtonFloat");
-    targetBtn.setAttribute("aria-expanded","true");
-    if(document.body){
-      document.body.classList.add("kggPhoneDrawerSafeOpen");
-      document.body.classList.remove("kggPhonePhotoMenuOpen");
-    }
-    return true;
-  }
-  function bindDrawerButton(id,kind){
-    var btn=byId(id);
-    if(!btn||btn.dataset.kggV045DrawerBound==="1")return;
-    btn.dataset.kggV045DrawerBound="1";
-    btn.addEventListener("click",function(ev){
-      if(!isPhone())return;
-      ev.preventDefault();
-      ev.stopImmediatePropagation();
-      openPhoneDrawerSafe(kind);
-    },true);
-  }
-  function alignBankEndToScanDock(){
-    if(!isPhone())return false;
-    var bank=byId("bankArea");
-    var hub=byId("scanHub");
-    if(!bank||!hub||!bank.classList.contains("bankOpen"))return false;
-    var bankRect=bank.getBoundingClientRect();
-    var hubRect=hub.getBoundingClientRect();
-    if(!bankRect.height||!hubRect.height)return false;
-    var targetBottom=hubRect.top-10;
-    var delta=bankRect.bottom-targetBottom;
-    if(Math.abs(delta)>2)window.scrollBy({top:delta,behavior:"auto"});
-    return true;
-  }
-  function scheduleBankAlign(){
-    if(!isPhone())return;
-    var run=function(){alignBankEndToScanDock();};
-    if(typeof requestAnimationFrame==="function"){
-      requestAnimationFrame(function(){requestAnimationFrame(run);});
-      setTimeout(run,260);
-      setTimeout(run,520);
-    }else{
-      setTimeout(run,80);
-      setTimeout(run,320);
-    }
-  }
-  function bindBankOpenAlign(id){
-    var el=byId(id);
-    if(!el||el.dataset.kggV045BankAlignBound==="1")return;
-    el.dataset.kggV045BankAlignBound="1";
-    el.addEventListener("click",function(){
-      if(!isPhone())return;
-      var bank=byId("bankArea");
-      var opening=!(bank&&bank.classList.contains("bankOpen"));
-      if(opening)scheduleBankAlign();
-    },true);
-    el.addEventListener("keydown",function(ev){
-      if(!isPhone()||!(ev.key==="Enter"||ev.key===" "))return;
-      var bank=byId("bankArea");
-      var opening=!(bank&&bank.classList.contains("bankOpen"));
-      if(opening)scheduleBankAlign();
-    },true);
+    document.querySelectorAll("#planList .planCard[data-plan-id]").forEach(function(card){
+      if(card.dataset.kggV053TabletSwipeGuard==="1")return;
+      card.dataset.kggV053TabletSwipeGuard="1";
+      card.addEventListener("pointerdown",startTabletSwipe,true);
+      card.onpointerdown=card.onpointerdown||startTabletSwipe;
+    });
   }
   function install(){
-    bindDrawerButton("recentToggle","recent");
-    bindDrawerButton("packageToggle","package");
-    bindBankOpenAlign("bankToggle");
-    bindBankOpenAlign("dbTitle");
+    var menu=byId("kggPhoneAdminMenu");
+    var header=document.querySelector("#createPanel.planMode .planHeader")||document.querySelector("#createPanel .planHeader");
+    if(menu&&header&&!header.contains(menu))header.appendChild(menu);
+    anchorTabletMenuButton();
+    bindTabletSwipeGuard();
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});
   else install();
-  [80,220,600,1200].forEach(function(ms){setTimeout(install,ms);});
+  [80,240,700].forEach(function(ms){setTimeout(install,ms);});
+  window.addEventListener("resize",function(){setTimeout(install,80);},{passive:true});
+  window.addEventListener("orientationchange",function(){setTimeout(install,160);},{passive:true});
   if(document.body){
-    new MutationObserver(function(){install();}).observe(document.body,{childList:true,subtree:true});
+    new MutationObserver(function(){install();}).observe(document.body,{attributes:true,attributeFilter:["class"],childList:true,subtree:true});
   }
-  window.KGG_UI_PHONE_DRAWER_BANK_ALIGN_V045={
+  window.KGG_UI_TABLET_STABILITY_V053={
     patchId:PATCH_ID,
     install:install,
-    closeDrawer:closePhoneDrawerSafe,
-    openDrawer:openPhoneDrawerSafe,
-    alignBank:alignBankEndToScanDock
-  };
-})();
-</script>
-<!-- KGG PATCH END kgg-v045-phone-drawer-bank-align -->
-
-<!-- SOURCE FILE: kgg-update/src/patches/v046-tablet-runtime-viewport-guard.html -->
-
-<!-- KGG PATCH START kgg-v046-tablet-runtime-viewport-guard -->
-<script id="kgg-v046-tablet-runtime-viewport-guard-script">
-(function(){
-  "use strict";
-  var PATCH_ID="kgg-v046-tablet-runtime-viewport-guard";
-  var PHONE_QUERY="(max-width:759px)";
-  function isPhoneViewport(){return !!(window.matchMedia&&window.matchMedia(PHONE_QUERY).matches);}
-  window.KGG_TABLET_RUNTIME_VIEWPORT_GUARD_V046={
-    patchId:PATCH_ID,
-    phoneQuery:PHONE_QUERY,
     check:function(){
+      var menu=byId("kggPhoneAdminMenu");
+      var editor=document.querySelector("#editorModal .editorSheet");
       return {
         patchId:PATCH_ID,
-        phoneViewport:isPhoneViewport(),
-        phoneHasPlanClass:!!(document.body&&document.body.classList.contains("kggPhoneHasPlan")),
-        phonePhotoOpen:!!(document.body&&document.body.classList.contains("kggPhonePhotoMenuOpen")),
-        scanHydrated:!!(document.getElementById("scanBtn")&&document.getElementById("scanBtn").dataset.kggV042ScanHydrated==="1")
+        menuAnchored:!!(menu&&menu.closest("#createPanel .planHeader")),
+        editorDisplay:editor?getComputedStyle(editor).display:"",
+        editorColumns:editor?getComputedStyle(editor).gridTemplateColumns:""
       };
     }
   };
 })();
 </script>
-<!-- KGG PATCH END kgg-v046-tablet-runtime-viewport-guard -->
+<!-- KGG PATCH END kgg-v053-ui-tablet-stability -->
 
-<!-- SOURCE FILE: kgg-update/src/patches/v050-phone-ui-mini-fix.html -->
+<!-- SOURCE FILE: kgg-update/src/patches/v060-tablet-html-release-label.html -->
+<!-- KGG PATCH START kgg-v060-tablet-html-release-label -->
+<!-- Tablet HTML Release Label -->
+<style id="kgg-v060-tablet-html-release-label-style">
+#kggTabletHtmlReleaseLabel{display:none}
+@media (min-width:760px){
+  #tabletSideMenu{
+    overflow-y:hidden!important;
+  }
+  #tabletSideMenu .tabletSideMenuMain{
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto!important;
+    align-content:start;
+  }
+  #tabletSideMenu #kggTabletHtmlReleaseLabel{
+    display:block;
+    flex:0 0 auto;
+    align-self:flex-end;
+    max-width:100%;
+    margin:0;
+    padding:5px 7px;
+    border:1px solid rgba(10,16,36,.10);
+    border-radius:9px;
+    background:rgba(255,255,255,.94);
+    color:#667085;
+    font-size:10px;
+    font-weight:850;
+    line-height:1.2;
+    overflow-wrap:anywhere;
+    text-align:right;
+    pointer-events:none;
+  }
+}
+</style>
+<script id="kgg-v060-tablet-html-release-label">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v060-tablet-html-release-label";
 
-<!-- KGG PATCH START kgg-v050-phone-ui-mini-fix -->
-<style id="kgg-v050-phone-ui-mini-fix-style">
-  @media(max-width:759px){
-    body.adminMode #createPanel.planMode .planHeader{
-      position:relative!important;
-      grid-template-columns:minmax(0,1fr) auto!important;
-    }
-    body.adminMode #createPanel.planMode .planHeader #kggPhoneAdminMenu{
-      position:absolute!important;
-      top:8px!important;
-      right:88px!important;
-      left:auto!important;
-      transform:none!important;
-      z-index:74!important;
-      margin:0!important;
-      align-self:auto!important;
-      justify-self:auto!important;
-    }
-    body.adminMode #createPanel.planMode .planHeader #kggPhoneAdminMenuPanel{
-      top:calc(100% + 8px)!important;
-      right:0!important;
-    }
-    body.kggPhoneHasPlan #createPanel.planMode .planActions.hasPlan{
-      grid-template-columns:1fr!important;
-      gap:10px!important;
-    }
-    body.kggPhoneHasPlan #createPanel.planMode .planActions.hasPlan #recentToggle,
-    body.kggPhoneHasPlan #createPanel.planMode .planActions.hasPlan #packageToggle{
-      width:100%!important;
-      min-width:0!important;
-      max-width:none!important;
-      justify-content:space-between!important;
-      padding-left:18px!important;
-      padding-right:18px!important;
-      overflow:visible!important;
-    }
-    body.kggPhoneHasPlan #createPanel.planMode .planActions.hasPlan #recentToggle .recentText,
-    body.kggPhoneHasPlan #createPanel.planMode .planActions.hasPlan #recentToggle .recentMini{
-      display:inline-flex!important;
-      max-width:none!important;
-      min-width:0!important;
-      opacity:1!important;
-      overflow:visible!important;
-      white-space:nowrap!important;
-    }
+  function parseStatus(value){
+    if(value&&typeof value==="object")return value;
+    if(typeof value!=="string"||!value.trim())return {};
+    try{return JSON.parse(value);}catch(err){return {};}
+  }
 
-    #scanHub.kggPhoneScanMenuInline{
-      align-content:end!important;
-      overflow:visible!important;
-      transition:min-height .18s ease, padding .18s ease!important;
+  function nativeStatus(){
+    try{
+      if(window.KGGAndroidApp&&typeof window.KGGAndroidApp.updateStatus==="function"){
+        return parseStatus(window.KGGAndroidApp.updateStatus());
+      }
+      if(window.KGGNativeAppUpdate&&typeof window.KGGNativeAppUpdate.status==="function"){
+        return parseStatus(window.KGGNativeAppUpdate.status());
+      }
+    }catch(err){}
+    return {};
+  }
+
+  function fileName(value){
+    var clean=String(value||"").split(/[?#]/)[0].replace(/\\/g,"/");
+    var parts=clean.split("/").filter(Boolean);
+    var last=parts.pop()||"";
+    try{return decodeURIComponent(last);}catch(err){return last;}
+  }
+
+  function buildInfo(){
+    try{if(typeof KGG_BUILD_INFO!=="undefined"&&KGG_BUILD_INFO)return KGG_BUILD_INFO;}catch(err){}
+    if(window.KGG_BUILD_INFO)return window.KGG_BUILD_INFO;
+    try{
+      var source=document.getElementById("kgg-source-truth");
+      var data=source?JSON.parse(source.textContent||"{}"):{};
+      var current=data.currentVersion||{};
+      var code=Number(current.versionCode);
+      if(Number.isFinite(code))return {release:"v"+String(code).padStart(3,"0"),versionName:current.versionName||"",htmlFile:"kgg-update/index.html"};
+    }catch(err){}
+    return {};
+  }
+
+  function currentIdentity(){
+    var native=nativeStatus();
+    var info=buildInfo();
+    var path=String((window.location&&window.location.pathname)||"");
+    var release=String(native.releaseId||"").trim();
+    var pathRelease=path.match(/\/releases\/web\/(r[0-9]+)\//i);
+    if(!release&&pathRelease)release=pathRelease[1].toLowerCase();
+    var build=info.release||"";
+    var source=fileName(native.loadedHtmlSource)||fileName(path)||fileName(info.htmlFile)||"index.html";
+    var parts=[];
+    if(release)parts.push(release);
+    if(build&&build!==release)parts.push(build);
+    parts.push(source);
+    return "HTML "+parts.join(" · ");
+  }
+
+  function render(){
+    var label=document.getElementById("kggTabletHtmlReleaseLabel");
+    if(!label)return;
+    var text=currentIdentity();
+    label.textContent=text;
+    label.title=text;
+  }
+
+  function install(){
+    var menu=document.getElementById("tabletSideMenu");
+    if(!menu)return false;
+    var label=document.getElementById("kggTabletHtmlReleaseLabel");
+    if(!label){
+      label=document.createElement("small");
+      label.id="kggTabletHtmlReleaseLabel";
+      label.setAttribute("aria-label","Aktuell geladene HTML-Version");
+      menu.appendChild(label);
     }
-    body.kggPhonePhotoMenuOpen #scanHub.kggPhoneScanMenuInline{
-      min-height:170px!important;
-      padding-top:10px!important;
+    render();
+    var button=document.getElementById("tabletMenuBtn");
+    if(button&&!button.dataset.kggHtmlReleaseLabelBound){
+      button.dataset.kggHtmlReleaseLabelBound="1";
+      button.addEventListener("click",function(){window.setTimeout(render,0);});
     }
-    #scanHub.kggPhoneScanMenuInline #scanBtn.kggScanButtonWithMenu{
-      position:relative!important;
-      overflow:visible!important;
-      isolation:isolate!important;
-    }
-    #scanHub.kggPhoneScanMenuInline #scanBtn.kggScanButtonWithMenu #phonePhotoMenuToggle{
-      align-self:center!important;
-      height:60px!important;
-      min-height:60px!important;
-      width:54px!important;
-      min-width:54px!important;
-      flex-basis:54px!important;
-      border:0!important;
-      border-radius:18px!important;
-      background:transparent!important;
-      box-shadow:none!important;
-      font-size:26px!important;
-      line-height:1!important;
-    }
-    #scanHub.kggPhoneScanMenuInline #scanBtn.kggScanButtonWithMenu #phonePhotoMenuToggle::before{
-      content:none!important;
-      display:none!important;
-    }
-    body.kggPhonePhotoMenuOpen #scanHub.kggPhoneScanMenuInline #scanBtn.kggScanButtonWithMenu #phonePhotoMenuToggle{
-      background:rgba(7,16,39,.92)!important;
-      color:#fff!important;
-      box-shadow:0 10px 24px rgba(7,16,39,.20),inset 0 1px 0 rgba(255,255,255,.16)!important;
-    }
-    #scanHub.kggPhoneScanMenuInline #kggPhonePhotoMenu{
-      order:-1!important;
-      position:static!important;
-      display:none!important;
-      width:100%!important;
-      min-width:0!important;
-      margin:0 0 9px 0!important;
-      padding:9px!important;
-      border:1px solid rgba(255,255,255,.82)!important;
-      border-radius:22px!important;
-      background:rgba(255,255,255,.86)!important;
-      box-shadow:0 18px 42px rgba(7,16,39,.18),inset 0 1px 0 rgba(255,255,255,.94)!important;
-      backdrop-filter:blur(24px) saturate(1.45)!important;
-      -webkit-backdrop-filter:blur(24px) saturate(1.45)!important;
-      gap:8px!important;
-      z-index:auto!important;
+    return true;
+  }
+
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});
+  else install();
+  window.addEventListener("pageshow",render);
+  document.addEventListener("visibilitychange",function(){if(!document.hidden)render();});
+
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES[PATCH_ID]={installed:true,render:render,currentIdentity:currentIdentity};
+})();
+</script>
+<!-- KGG PATCH END kgg-v060-tablet-html-release-label -->
+
+<!-- SOURCE FILE: kgg-update/src/patches/v061-cross-app-live-qr-camera.html -->
+<!-- KGG PATCH START kgg-v061-cross-app-live-qr-camera -->
+<!-- PAT Live-QR-Kamera fuer Admin -->
+<style id="kgg-v061-cross-app-live-qr-camera-style">
+.kggLiveQrCamera{position:fixed;inset:0;z-index:100120;display:grid;grid-template-rows:auto minmax(0,1fr) auto;background:#05070b;color:#fff}.kggLiveQrCamera[hidden]{display:none}.kggLiveQrHead,.kggLiveQrActions{display:flex;align-items:center;gap:12px;padding:12px 14px;background:#05070bf2}.kggLiveQrHead{justify-content:space-between}.kggLiveQrHead b{font-size:16px}.kggLiveQrClose{width:42px;height:42px;border:1px solid #ffffff55;border-radius:50%;background:#ffffff1f;color:#fff;font-size:25px}.kggLiveQrStage{position:relative;min-height:0;display:grid;place-items:center;overflow:hidden;background:#000}.kggLiveQrVideo{width:100%;height:100%;object-fit:contain;background:#000}.kggLiveQrGuide{position:absolute;inset:9% 8%;border:3px solid #fff;border-radius:18px;box-shadow:0 0 0 9999px #00000024;pointer-events:none}.kggLiveQrStatus{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);max-width:92%;padding:8px 12px;border-radius:999px;background:#000c;text-align:center;font-size:13px;font-weight:850}.kggLiveQrActions{display:grid;grid-template-columns:1fr auto 1fr;padding-bottom:max(18px,env(safe-area-inset-bottom,0px))}.kggLiveQrFallback{justify-self:start;border:1px solid #ffffff66;border-radius:12px;background:transparent;color:#fff;padding:10px 12px;font-weight:850}.kggLiveQrShutter{width:74px;height:74px;border:6px solid #fff;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 5px #111}.kggLiveQrHint{justify-self:end;max-width:130px;color:#dbe5f1;font-size:12px;font-weight:750;text-align:right}@media(max-width:430px){.kggLiveQrGuide{inset:14% 5%}.kggLiveQrActions{padding-left:10px;padding-right:10px}.kggLiveQrHint{max-width:90px}}
+</style>
+<script id="kgg-v061-cross-app-live-qr-camera-script">
+(function(){
+  'use strict';
+  const PATCH_ID='kgg-v061-cross-app-live-qr-camera';
+  const LIVE_VARIANTS=[
+    {crop:1,max:1280},
+    {crop:.82,max:1280,upscale:1.5},
+    {crop:.62,max:1280,upscale:2},
+    {crop:1,max:1280,contrast:1.35},
+    {crop:.82,max:1280,upscale:1.5,contrast:1.35},
+    {crop:.62,max:1280,upscale:2,contrast:1.35}
+  ];
+  let session=null;
+  function getScan(){return window.KGGScan||null;}
+  function nativeCapabilities(){
+    try{return window.KGGNativeCamera&&typeof window.KGGNativeCamera.getCapabilities==='function'?window.KGGNativeCamera.getCapabilities():null;}
+    catch(err){return null;}
 ```

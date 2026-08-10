@@ -296,7 +296,15 @@ async function exerciseCoreFlows(page, viewportId) {
     await page.waitForTimeout(120);
     const open = await page.locator("#recentList").evaluate((node) => !node.classList.contains("hidden"));
     if (!open) fail(`${viewportId}: history button did not open history list`);
-    await page.locator("#recentToggle").click();
+    const phoneDrawerOpen = await page.locator("body").evaluate((node) => (
+      node.classList.contains("kggPhoneDrawerSafeOpen") || node.classList.contains("kggPhoneDrawerOpen")
+    ));
+    if (phoneDrawerOpen) {
+      await page.locator("#phoneDrawerBackdrop").click({ position: { x: 2, y: 2 } });
+    } else {
+      await page.locator("#recentToggle").click();
+    }
+    await page.locator("#recentList").waitFor({ state: "hidden", timeout: 5000 });
   }
 
   if (await page.locator("#packageToggle").isVisible()) {

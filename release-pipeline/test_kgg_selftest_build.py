@@ -15,11 +15,108 @@ from unittest import mock
 
 import build_therapist_source as builder
 import kgg_new_patch as scaffolder
+import kgg_patch_hygiene as hygiene
 import kgg_selftest_build as gate
 import kgg_test_battery as battery
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+class ReleaseDriftBaselineTests(unittest.TestCase):
+    def test_required_release_paths_are_classified(self) -> None:
+        paths = {
+            "kgg-update/src/base-app.html",
+            "kgg-update/index.html",
+            "kgg-update/version.json",
+            "therapist-app/android_update_manifest.json",
+            "therapist-app/kgg_update_manifest.json",
+            "therapist-app/releases/web/r9999/admin.html",
+            "release-inbox/admin.html",
+            "release-pipeline/release_pipeline.py",
+        }
+        self.assertEqual(paths, hygiene.release_alignment_paths(paths))
+
+    def test_tooling_only_paths_are_not_release_relevant(self) -> None:
+        paths = {
+            "release-pipeline/kgg_patch_hygiene.py",
+            "release-pipeline/kgg_test_battery.py",
+            "release-pipeline/test_kgg_selftest_build.py",
+        }
+        self.assertEqual(set(), hygiene.release_alignment_paths(paths))
+
+    def test_patch_hygiene_accepts_inherited_drift_for_non_release_branch_diff(self) -> None:
+        with ExitStack() as stack:
+            stack.enter_context(
+                mock.patch.object(
+                    hygiene,
+                    "changed_paths_since_main",
+                    return_value={"release-pipeline/kgg_patch_hygiene.py"},
+                )
+            )
+            stack.enter_context(mock.patch.object(hygiene, "status_paths", return_value=set()))
+            stack.enter_context(mock.patch.object(hygiene, "is_origin_main_ancestor", return_value=True))
+            alignment = stack.enter_context(mock.patch.object(hygiene, "assert_source_release_alignment"))
+            hygiene.run(ROOT)
+        alignment.assert_not_called()
+
+    def test_patch_hygiene_enforces_alignment_for_release_branch_diff(self) -> None:
+        with ExitStack() as stack:
+            stack.enter_context(
+                mock.patch.object(
+                    hygiene,
+                    "changed_paths_since_main",
+                    return_value={"kgg-update/version.json"},
+                )
+            )
+            stack.enter_context(mock.patch.object(hygiene, "status_paths", return_value=set()))
+            stack.enter_context(mock.patch.object(hygiene, "is_origin_main_ancestor", return_value=True))
+            alignment = stack.enter_context(mock.patch.object(hygiene, "assert_source_release_alignment"))
+            hygiene.run(ROOT)
+        alignment.assert_called_once_with(ROOT)
+
+    def test_patch_hygiene_enforces_alignment_for_dirty_release_path(self) -> None:
+        with ExitStack() as stack:
+            stack.enter_context(
+                mock.patch.object(
+                    hygiene,
+                    "changed_paths_since_main",
+                    return_value={"release-pipeline/kgg_patch_hygiene.py"},
+                )
+            )
+            stack.enter_context(
+                mock.patch.object(
+                    hygiene,
+                    "status_paths",
+                    return_value={"therapist-app/kgg_update_manifest.json"},
+                )
+            )
+            stack.enter_context(mock.patch.object(hygiene, "is_origin_main_ancestor", return_value=True))
+            alignment = stack.enter_context(mock.patch.object(hygiene, "assert_source_release_alignment"))
+            hygiene.run(ROOT)
+        alignment.assert_called_once_with(ROOT)
+
+    def test_battery_accepts_inherited_drift_for_non_release_diff(self) -> None:
+        with mock.patch.object(
+            hygiene,
+            "touched_paths",
+            return_value={"release-pipeline/kgg_test_battery.py"},
+        ), mock.patch.object(hygiene, "assert_source_release_alignment") as alignment:
+            battery.run_release_drift_check()
+        alignment.assert_not_called()
+
+    def test_battery_delegates_relevant_drift_to_fail_closed_guard(self) -> None:
+        with mock.patch.object(
+            hygiene,
+            "touched_paths",
+            return_value={"kgg-update/src/base-app.html"},
+        ), mock.patch.object(
+            hygiene,
+            "assert_source_release_alignment",
+            side_effect=hygiene.HygieneError("expected release drift failure"),
+        ):
+            with self.assertRaisesRegex(battery.BatteryError, "expected release drift failure"):
+                battery.run_release_drift_check()
 
 
 def patch_block(patch_id: str) -> str:
@@ -110,6 +207,32 @@ class BuilderNegativeTests(unittest.TestCase):
         with self.assertRaisesRegex(builder.BuildError, "external scripts"):
             builder.load_build(self.fixture.manifest)
 
+    def test_rejects_forbidden_source_control_characters(self) -> None:
+        raw = valid_html(["test-patch-a", "test-patch-b"]).replace(
+            b"KGGDataStore.currentPlan",
+            b"KGGDataStore.currentPlan\x08",
+        )
+        self.fixture.write(html=raw)
+        with self.assertRaisesRegex(builder.BuildError, r"U\+0008.*line"):
+            builder.load_build(self.fixture.manifest)
+
+    def test_rejects_unicode_c1_source_control_characters(self) -> None:
+        raw = valid_html(["test-patch-a", "test-patch-b"]).replace(
+            b"KGGDataStore.currentPlan",
+            b"KGGDataStore.currentPlan" + "\u0085".encode("utf-8"),
+        )
+        self.fixture.write(html=raw)
+        with self.assertRaisesRegex(builder.BuildError, r"U\+0085.*line"):
+            builder.load_build(self.fixture.manifest)
+
+    def test_allows_source_tabs_and_lf(self) -> None:
+        raw = valid_html(["test-patch-a", "test-patch-b"]).replace(
+            b"KGGDataStore.currentPlan",
+            b"\tKGGDataStore.currentPlan",
+        )
+        self.fixture.write(html=raw)
+        builder.load_build(self.fixture.manifest)
+
     def test_rejects_generated_output_drift(self) -> None:
         self.fixture.write()
         self.fixture.output.write_bytes(b"direct edit")
@@ -144,12 +267,15 @@ class GateTests(unittest.TestCase):
         )
         before = (ROOT / "kgg-update" / "index.html").read_bytes()
         current_version = json.loads((ROOT / "kgg-update" / "version.json").read_text(encoding="utf-8"))["versionCode"]
-        with self.assertRaisesRegex(scaffolder.ScaffoldError, "changelog"):
-            scaffolder.prepare(SimpleNamespace(**base_args))
-        base_args.update(allow_changelog_overflow=True, approval_note="Automatischer lokaler Unit-Dry-run.")
         planned, report = scaffolder.prepare(SimpleNamespace(**base_args))
         self.assertEqual(current_version + 1, report["versionCode"])
+        self.assertGreater(report["changelogBytesAfter"], 0)
         self.assertIn(ROOT / "kgg-update" / "index.html", planned)
+        planned_version = json.loads(planned[ROOT / "kgg-update" / "version.json"])
+        self.assertEqual(
+            f"v{report['versionCode']:03d}: {base_args['summary']}",
+            planned_version["notes"],
+        )
         self.assertFalse((ROOT / "kgg-update" / "src" / report["patchFile"]).exists())
         self.assertEqual(before, (ROOT / "kgg-update" / "index.html").read_bytes())
 
@@ -161,12 +287,29 @@ class GateTests(unittest.TestCase):
             area=["Plan-State"],
             version_name=None,
             allow_protected=False,
-            allow_changelog_overflow=True,
+            allow_changelog_overflow=False,
             approval_note="Automatischer lokaler Unit-Dry-run.",
             dry_run=True,
         )
         with self.assertRaisesRegex(scaffolder.ScaffoldError, "protected area"):
             scaffolder.prepare(args)
+
+    def test_scaffolder_blocks_entry_and_byte_overflow_without_override(self) -> None:
+        entry_overflow = {"entries": [{} for _ in range(31)]}
+        with self.assertRaisesRegex(scaffolder.ScaffoldError, "31 entries"):
+            scaffolder.assert_changelog_limits(
+                entry_overflow,
+                {"maxEmbeddedEntries": 30, "maxEmbeddedBytes": 55000},
+                False,
+            )
+
+        byte_overflow = {"entries": [{"summary": "x" * 1000}]}
+        with self.assertRaisesRegex(scaffolder.ScaffoldError, "UTF-8 bytes"):
+            scaffolder.assert_changelog_limits(
+                byte_overflow,
+                {"maxEmbeddedEntries": 30, "maxEmbeddedBytes": 100},
+                False,
+            )
 
     def test_failed_transaction_restores_previous_output_and_version(self) -> None:
         self.fixture.write()

@@ -18,27 +18,13 @@ import subprocess
 import sys
 from pathlib import Path
 
+import kgg_patch_hygiene as patch_hygiene
+
 
 ROOT = Path(__file__).resolve().parents[1]
 LEVEL_RANK = {"critical": 0, "regression": 1, "comfort": 2}
 PLAYWRIGHT_PREPARED = False
 PATIENT_SCAN_PREPARED = False
-SECRET_PATTERN = (
-    "("
-    + "sk-" + "proj-"
-    + r"|gh[pousr]_[A-Za-z0-9_]{20,}"
-    + "|AI" + r"za[0-9A-Za-z_-]{25,}"
-    + ")"
-)
-SECRET_SCAN_PATHS = [
-    "release-inbox",
-    "release-pipeline",
-    "kgg-update",
-    "therapist-app/android_update_manifest.json",
-    "therapist-app/releases/web",
-]
-
-
 class BatteryError(RuntimeError):
     pass
 
@@ -423,7 +409,18 @@ def run_module_source_check() -> None:
 
 def run_release_contracts() -> None:
     log("== Release contract tests ==")
-    run([sys.executable, "-m", "unittest", "release-pipeline/test_release_pipeline.py", "release-pipeline/test_encoding_guard.py"])
+    run(
+        [
+            sys.executable,
+            "-m",
+            "unittest",
+            "release-pipeline/test_release_pipeline.py",
+            "release-pipeline/test_encoding_guard.py",
+            "release-pipeline/test_kgg_changelog_archive.py",
+            "release-pipeline/test_kgg_hook_guard.py",
+            "release-pipeline/test_kgg_secret_scan.py",
+        ]
+    )
 
 
 def run_encoding_guard() -> None:
@@ -465,64 +462,29 @@ def run_version_json_check() -> None:
 
 def run_secret_scan() -> None:
     log("== Secret scan ==")
-    args = ["git", "grep", "-nE", SECRET_PATTERN, "--", *SECRET_SCAN_PATHS]
-    log("+ " + " ".join(args))
-    proc = subprocess.run(args, cwd=str(ROOT), text=True, capture_output=True)
-    if proc.returncode == 0:
-        print(proc.stdout, file=sys.stderr)
-        raise BatteryError("Potential secret found in release-controlled files.")
-    if proc.returncode != 1:
-        if proc.stdout:
-            print(proc.stdout, file=sys.stderr)
-        if proc.stderr:
-            print(proc.stderr, file=sys.stderr)
-        raise BatteryError(f"Secret scan failed with exit code {proc.returncode}.")
-    log("Secret scan OK")
-
-
-def html_version_marker(path: Path) -> int | None:
-    if not path.exists() or not path.is_file():
-        return None
-    text = path.read_text(encoding="utf-8", errors="replace")
-    match = re.search(r"KGG_GITHUB_UPDATE_v0*([0-9]+)", text, re.I)
-    if match:
-        return int(match.group(1))
-    match = re.search(r"<title>\s*KGG\s+Update\s+v0*([0-9]+)\b", text, re.I)
-    return int(match.group(1)) if match else None
+    run([sys.executable, "release-pipeline/kgg_secret_scan.py"])
 
 
 def run_release_drift_check() -> None:
     log("== Admin release drift check ==")
-    if os.environ.get("KGG_ALLOW_RELEASE_DRIFT") == "1":
-        log("Release drift check skipped by KGG_ALLOW_RELEASE_DRIFT=1")
-        return
-    source = ROOT / "kgg-update" / "index.html"
-    source_code = html_version_marker(source)
-    if source_code is None:
-        raise BatteryError("Cannot read KGG source version marker from kgg-update/index.html.")
+    try:
+        touched = patch_hygiene.touched_paths(ROOT)
+        release_paths = patch_hygiene.release_alignment_paths(touched)
+    except patch_hygiene.HygieneError as exc:
+        raise BatteryError(str(exc)) from exc
 
-    inbox = ROOT / "release-inbox" / "admin.html"
-    inbox_code = html_version_marker(inbox)
-    if inbox_code == source_code:
-        log(f"Release drift OK: release-inbox/admin.html carries v{source_code:03d}")
-        return
-
-    manifest = json.loads((ROOT / "therapist-app" / "android_update_manifest.json").read_text(encoding="utf-8"))
-    admin_url = str(manifest.get("adminHtmlUrl") or manifest.get("channels", {}).get("admin", {}).get("url") or "")
-    match = re.search(r"/therapist-app/releases/web/(r[0-9]{4,})/admin\.html$", admin_url)
-    if not match:
-        raise BatteryError(f"Cannot derive Admin release path from manifest admin URL: {admin_url}")
-    admin_path = ROOT / "therapist-app" / "releases" / "web" / match.group(1) / "admin.html"
-    admin_code = html_version_marker(admin_path)
-    if admin_code == source_code:
-        log(f"Release drift OK: manifest Admin {match.group(1)} carries v{source_code:03d}")
+    if not release_paths:
+        log(
+            "Release drift inherited unchanged from origin/main; "
+            "no release-relevant paths changed."
+        )
         return
 
-    raise BatteryError(
-        "kgg-update source is newer than the prepared/live Admin release "
-        f"(source v{source_code:03d}, release-inbox v{inbox_code}, manifest admin v{admin_code}). "
-        "Add release-inbox/admin.html for this source or set KGG_ALLOW_RELEASE_DRIFT=1 for an explicit no-release PR."
-    )
+    log("Release-relevant paths changed: " + ", ".join(sorted(release_paths)))
+    try:
+        patch_hygiene.assert_source_release_alignment(ROOT)
+    except patch_hygiene.HygieneError as exc:
+        raise BatteryError(str(exc)) from exc
 
 
 def run_no_release_pr_contract() -> None:
@@ -589,6 +551,13 @@ TEST_REGISTRY = [
         "suite": "syntax",
         "reason": "APK/Web update checks depend on version.json matching index.html.",
         "run": run_version_json_check,
+    },
+    {
+        "id": "version-types-critical",
+        "level": "critical",
+        "suite": "release",
+        "reason": "Source, Web release, SemVer and Android shell identities must never be compared across types.",
+        "run": lambda: run_html_logic("version-types-critical"),
     },
     {
         "id": "admin-release-drift",

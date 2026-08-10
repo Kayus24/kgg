@@ -8,6 +8,7 @@ on:
       - 'release-pipeline/**'
       - 'kgg-update/**'
       - 'therapist-app/android_update_manifest.json'
+      - 'therapist-app/kgg_update_manifest.json'
       - 'therapist-app/releases/web/**'
       - '.github/workflows/release-pr.yml'
       - '.github/workflows/kgg-required-gate.yml'
@@ -86,7 +87,7 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A release-inbox therapist-app/android_update_manifest.json therapist-app/releases/web
+          git add -A release-inbox therapist-app/android_update_manifest.json therapist-app/kgg_update_manifest.json therapist-app/releases/web
           git commit -m 'chore: build immutable KGG beta artifacts'
           git push origin "HEAD:${{ github.head_ref }}"
 
@@ -99,7 +100,7 @@ jobs:
           if [[ '${{ steps.prepare.outputs.prepared }}' == 'true' ]]; then
             ready=true
           elif git diff --name-only "origin/${{ github.base_ref }}"...HEAD \
-            | grep -Eq '^(therapist-app/releases/web/[^/]+/(admin|kollegen)\.html|therapist-app/android_update_manifest\.json)$'; then
+            | grep -Eq '^(therapist-app/releases/web/[^/]+/(admin|kollegen)\.html|therapist-app/(android_update_manifest|kgg_update_manifest)\.json)$'; then
             ready=true
           fi
           echo "ready=$ready" >> "$GITHUB_OUTPUT"

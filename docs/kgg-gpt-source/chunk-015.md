@@ -4,424 +4,424 @@
 - Lines: 6301-6720
 
 ```html
-  KGGOfflineJsPDF.prototype.setDrawColor = function(){
-    this._drawColor = colorFromArgs(arguments);
-    return this;
-  };
-
-  KGGOfflineJsPDF.prototype.setTextColor = function(){
-    this._textColor = colorFromArgs(arguments);
-    return this;
-  };
-
-  KGGOfflineJsPDF.prototype.setFillColor = function(){
-    this._fillColor = colorFromArgs(arguments);
-    return this;
-  };
-
-  KGGOfflineJsPDF.prototype.addPage = function(_format, orientation){
-    var current = this._pages[0];
-    var useLandscape = String(orientation || '').toLowerCase() === 'landscape' || current.w > current.h;
-    var size = resolvePageSize(Array.isArray(_format) ? _format : [current.w, current.h], useLandscape ? 'landscape' : 'portrait');
-    this._page = makePage(size);
-    this._pages.push(this._page);
-    return this;
-  };
-
-  KGGOfflineJsPDF.prototype.rect = function(x,y,w,h,style){
-    var op = String(style || '').toUpperCase().indexOf('F') >= 0 ? 'f' : 'S';
-    var px = this._x(x);
-    var py = this._y(y + h);
-    this._push('q\n' + colorCmd(this._drawColor,'RG') + '\n' + colorCmd(this._fillColor,'rg') + '\n' +
-      num(this._lineWidth * MM_TO_PT) + ' w\n' +
-      num(px) + ' ' + num(py) + ' ' + num(w * MM_TO_PT) + ' ' + num(h * MM_TO_PT) + ' re ' + op + '\nQ');
-    return this;
-  };
-
-  KGGOfflineJsPDF.prototype.roundedRect = function(x,y,w,h){
-    return this.rect(x,y,w,h);
-  };
-
-  KGGOfflineJsPDF.prototype.line = function(x1,y1,x2,y2){
-    this._push('q\n' + colorCmd(this._drawColor,'RG') + '\n' +
-      num(this._lineWidth * MM_TO_PT) + ' w\n' +
-      num(this._x(x1)) + ' ' + num(this._y(y1)) + ' m ' +
-      num(this._x(x2)) + ' ' + num(this._y(y2)) + ' l S\nQ');
-    return this;
-  };
-
-  KGGOfflineJsPDF.prototype.text = function(text,x,y,opts){
-    opts = opts || {};
-    var size = this._fontSize;
-    var px = this._x(x);
-    if(opts.align === 'right') px -= approxTextWidth(text, size);
-    if(opts.align === 'center') px -= approxTextWidth(text, size) / 2;
-    var py = this._y(y);
-    var fontName = this._font === 'bold' ? '/F2' : '/F1';
-    this._push('q\n' + colorCmd(this._textColor,'rg') + '\nBT\n' +
-      fontName + ' ' + num(size) + ' Tf\n' +
-      num(px) + ' ' + num(py) + ' Td\n' +
-      pdfString(text) + ' Tj\nET\nQ');
-    return this;
-  };
-
-  KGGOfflineJsPDF.prototype.addImage = function(dataUrl, format, x, y, w, h){
-    var fmt = String(format || '').toUpperCase();
-    var raw = String(dataUrl || '');
-    if(fmt !== 'JPEG' && fmt !== 'JPG' && raw.slice(0, 22).toLowerCase().indexOf('data:image/jpeg') !== 0){
-      return this;
+     Tablet-Layout ab 760px bleibt unveraendert. */
+  @media (max-width:759px){
+    .adminTestBanner{
+      display:none!important;
     }
-    var binary = binaryFromDataUrl(raw);
-    if(!binary) return this;
-    var size = jpegSizeFromBinary(binary);
-    var name = 'Im' + (++this._imageSeq);
-    this._images.push({ name: name, data: binary, width: size.w, height: size.h });
-    this._page.images.push(name);
-    this._push('q\n' +
-      num((Number(w) || 1) * MM_TO_PT) + ' 0 0 ' + num((Number(h) || 1) * MM_TO_PT) + ' ' +
-      num(this._x(x)) + ' ' + num(this._y((Number(y) || 0) + (Number(h) || 1))) + ' cm\n/' + name + ' Do\nQ');
-    return this;
-  };
-
-  function objectString(id, body){
-    return id + ' 0 obj\n' + body + '\nendobj\n';
   }
+</style>
 
-  function streamObject(id, stream){
-    return objectString(id, '<< /Length ' + stream.length + ' >>\nstream\n' + stream + '\nendstream');
-  }
+  <!-- KGG kgg-source-truth: embedded Source Truth. Machine-readable; safe for local LLM/code review. -->
+<!-- KGG kgg-changelog: embedded Changelog. Machine-readable; safe for local LLM/code review. -->
 
-  function infoString(props){
-    props = props || {};
-    return '<< /Title ' + pdfString(props.title || 'KGG Trainingsplan') +
-      ' /Subject ' + pdfString(props.subject || '') +
-      ' /Creator ' + pdfString(props.creator || 'KGG offline PDF runtime') + ' >>';
-  }
+<!-- KGG PATCH START kgg-v021-embed-jsqr-gallery-decode lib sha256=bc40c8a15196236b2314db0856f72ca0b49980cd5413b8c852a7349f5fee0859 -->
+<script id="kgg-v021-embed-jsqr-gallery-decode-lib">
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["jsQR"] = factory();
+	else
+		root["jsQR"] = factory();
+})(typeof self !== 'undefined' ? self : this, function() {
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, {
+/******/ 				configurable: false,
+/******/ 				enumerable: true,
+/******/ 				get: getter
+/******/ 			});
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 3);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, exports, __webpack_require__) {
 
-  KGGOfflineJsPDF.prototype._buildPdf = function(){
-    var objects = [];
-    var pagesRootId = 2;
-    var fontRegularId = 3;
-    var fontBoldId = 4;
-    var infoId = 5;
-    var nextId = 6;
-    var pageIds = [];
-    var contentIds = [];
-    var imageIds = {};
-    var self = this;
+"use strict";
 
-    this._pages.forEach(function(page){
-      pageIds.push(nextId++);
-      contentIds.push(nextId++);
-    });
-    this._images.forEach(function(image){
-      imageIds[image.name] = nextId++;
-    });
-
-    objects.push(objectString(1, '<< /Type /Catalog /Pages ' + pagesRootId + ' 0 R >>'));
-    objects.push(objectString(fontRegularId, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'));
-    objects.push(objectString(fontBoldId, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>'));
-    objects.push(objectString(infoId, infoString(this._properties)));
-
-    var kids = pageIds.map(function(id){ return id + ' 0 R'; }).join(' ');
-    objects.push(objectString(pagesRootId, '<< /Type /Pages /Kids [' + kids + '] /Count ' + pageIds.length + ' >>'));
-
-    this._pages.forEach(function(page, index){
-      var content = page.ops.join('\n') + '\n';
-      var xObjects = '';
-      if(page.images && page.images.length){
-        var seen = {};
-        var refs = page.images.filter(function(name){ if(seen[name]) return false; seen[name] = true; return true; })
-          .map(function(name){ return '/' + name + ' ' + imageIds[name] + ' 0 R'; }).join(' ');
-        xObjects = ' /XObject << ' + refs + ' >>';
-      }
-      objects.push(objectString(pageIds[index],
-        '<< /Type /Page /Parent ' + pagesRootId + ' 0 R /MediaBox [0 0 ' +
-        num(page.w * MM_TO_PT) + ' ' + num(page.h * MM_TO_PT) + '] /Resources << /Font << /F1 ' +
-        fontRegularId + ' 0 R /F2 ' + fontBoldId + ' 0 R >>' + xObjects + ' >> /Contents ' + contentIds[index] + ' 0 R >>'));
-      objects.push(streamObject(contentIds[index], content));
-    });
-
-    this._images.forEach(function(image){
-      objects.push(objectString(imageIds[image.name],
-        '<< /Type /XObject /Subtype /Image /Width ' + Math.max(1, Number(image.width) || 1) +
-        ' /Height ' + Math.max(1, Number(image.height) || 1) +
-        ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + image.data.length +
-        ' >>\nstream\n' + image.data + '\nendstream'));
-    });
-
-    objects.sort(function(a,b){ return Number(a.match(/^(\d+)/)[1]) - Number(b.match(/^(\d+)/)[1]); });
-    var pdf = '%PDF-1.4\n%\xE2\xE3\xCF\xD3\n';
-    var offsets = [0];
-    objects.forEach(function(obj){
-      offsets.push(pdf.length);
-      pdf += obj;
-    });
-    var xrefStart = pdf.length;
-    pdf += 'xref\n0 ' + offsets.length + '\n0000000000 65535 f \n';
-    for(var i=1;i<offsets.length;i++){
-      pdf += String(offsets[i]).padStart(10,'0') + ' 00000 n \n';
+Object.defineProperty(exports, "__esModule", { value: true });
+var BitMatrix = /** @class */ (function () {
+    function BitMatrix(data, width) {
+        this.width = width;
+        this.height = data.length / width;
+        this.data = data;
     }
-    pdf += 'trailer\n<< /Size ' + offsets.length + ' /Root 1 0 R /Info ' + infoId + ' 0 R >>\nstartxref\n' + xrefStart + '\n%%EOF';
-    return pdf;
-  };
-
-  KGGOfflineJsPDF.prototype.save = function(filename){
-    var pdf = this._buildPdf();
-    var bytes = new Uint8Array(pdf.length);
-    for(var i=0;i<pdf.length;i++) bytes[i] = pdf.charCodeAt(i) & 255;
-    var blob = new Blob([bytes], {type:'application/pdf'});
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = filename || 'kgg_trainingsplan.pdf';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 1000);
-    return this;
-  };
-
-  global.jspdf = global.jspdf || {};
-  global.jspdf.jsPDF = KGGOfflineJsPDF;
-  global.jsPDF = global.jsPDF || KGGOfflineJsPDF;
-})(window);
-
-  </script>
-
-  <script>
-    // PDF-Testversion: jsPDF wird local-first geladen, damit PDF weiter lokal im Browser erzeugt wird.
-    // GitHub Pages bleibt nur fuer die Patienten-App-Shell, nicht fuer PDF-Erzeugung.
-    window.KGG_JSPDF_TEST_SOURCES = window.KGG_JSPDF_TEST_SOURCES || [];
-    window.KGG_JSPDF_TEST_LOAD_STATE = window.KGG_JSPDF_TEST_LOAD_STATE || {status:'idle', index:0, error:null, promise:null};
-    window.KGGLoadJsPdfForTest = function KGGLoadJsPdfForTest(){
-      if((window.jspdf && window.jspdf.jsPDF) || window.jsPDF) return Promise.resolve((window.jspdf&&window.jspdf.jsPDF)||window.jsPDF);
-      const state = window.KGG_JSPDF_TEST_LOAD_STATE;
-      if(state.promise) return state.promise;
-      const sources = window.KGG_JSPDF_TEST_SOURCES || [];
-      state.status = 'loading';
-      state.promise = new Promise((resolve,reject)=>{
-        function trySource(i){
-          state.index = i;
-          if((window.jspdf && window.jspdf.jsPDF) || window.jsPDF){
-            state.status = 'loaded';
-            resolve((window.jspdf&&window.jspdf.jsPDF)||window.jsPDF);
-            return;
-          }
-          if(i >= sources.length){
-            state.status = 'failed';
-            state.error = 'jsPDF konnte aus keiner Testquelle geladen werden.';
-            reject(new Error(state.error));
-            return;
-          }
-          const script = document.createElement('script');
-          script.src = sources[i];
-          script.async = true;
-          script.onload = function(){
-            const ctor = (window.jspdf&&window.jspdf.jsPDF)||window.jsPDF||null;
-            if(ctor){
-              state.status = 'loaded';
-              resolve(ctor);
-            }else{
-              trySource(i+1);
-            }
-          };
-          script.onerror = function(){trySource(i+1);};
-          document.head.appendChild(script);
-        }
-        trySource(0);
-      });
-      return state.promise;
+    BitMatrix.createEmpty = function (width, height) {
+        return new BitMatrix(new Uint8ClampedArray(width * height), width);
     };
-    window.KGGLoadJsPdfForTest();
-  </script>
-
-<style id="kgg-mini-patch-v400-01-menu-icon-stays-hamburger">
-  /* v400 mini01: Tablet-Menü-Icon bleibt Hamburger.
-     Nur UI-CSS. Keine PDF/QR/Scan/Parser/Plan-State-Logik. */
-  @media (min-width:760px){
-    body.tabletMenuOpen .tabletMenuBtn span:nth-child(1),
-    body.tabletMenuOpen .tabletMenuBtn span:nth-child(2),
-    body.tabletMenuOpen .tabletMenuBtn span:nth-child(3){
-      transform:none!important;
-      opacity:1!important;
-    }
-  }
-</style>
-
-
-<style id="kgg-mini-patch-v400-03-menu-handle-layout-persists">
-  /* v400 mini03: Seitenmenü-Handle + Layout-Bearbeitung bleibt aktiv.
-     Nur Tablet-UI. Keine PDF/QR/Scan/Parser/Patient-App/Plan-State-Logik. */
-  @media (min-width:760px){
-    body.tabletLayoutCustom .tabletMenuBtn{
-      border:1px solid rgba(10,16,36,.18)!important;
-      background:#fff!important;
-      box-shadow:0 1px 3px rgba(10,16,36,.12),inset 0 1px 0 rgba(255,255,255,.9)!important;
-      backdrop-filter:none!important;
-      -webkit-backdrop-filter:none!important;
-      transform:none!important;
-      outline:none!important;
-    }
-    body.tabletLayoutCustom .tabletMenuBtn span{
-      transform:none!important;
-      opacity:1!important;
-      background:#0a1024!important;
-      box-shadow:none!important;
-    }
-    body.tabletLayoutCustom.tabletMenuOpen .tabletMenuBtn{
-      position:fixed!important;
-      left:calc(var(--kgg-tablet-sidebar-w) - 1px)!important;
-      top:calc(var(--kgg-tablet-safe-top) + 18px)!important;
-      right:auto!important;
-      bottom:auto!important;
-      width:42px!important;
-      min-width:42px!important;
-      height:68px!important;
-      min-height:68px!important;
-      padding:0!important;
-      display:grid!important;
-      place-items:center!important;
-      border-left:0!important;
-      border-radius:0 16px 16px 0!important;
-      background:rgba(255,255,255,.985)!important;
-      box-shadow:7px 0 18px rgba(10,16,36,.10), inset 1px 0 0 rgba(255,255,255,.95)!important;
-      z-index:1230!important;
-    }
-    body.tabletLayoutCustom.tabletMenuOpen .tabletMenuBtn::before{
-      content:"";
-      position:absolute;
-      left:-1px;
-      top:0;
-      bottom:0;
-      width:2px;
-      background:rgba(255,255,255,.985);
-    }
-    body.tabletLayoutCustom.tabletMenuOpen .tabletMenuBtn span{
-      width:22px!important;
-      height:3px!important;
-      margin:2.5px 0!important;
-      border-radius:999px!important;
-    }
-    body.tabletLayoutCustom.tabletMenuOpen .tabletMenuBtn span:nth-child(1),
-    body.tabletLayoutCustom.tabletMenuOpen .tabletMenuBtn span:nth-child(2),
-    body.tabletLayoutCustom.tabletMenuOpen .tabletMenuBtn span:nth-child(3){
-      transform:none!important;
-      opacity:1!important;
-    }
-    body.tabletLayoutEditMode .tabletLayoutResizeHandle,
-    body.tabletLayoutEditMode .tabletSplitScaleControl{
-      pointer-events:auto!important;
-    }
-  }
-</style>
-
-<style id="kgg-mini-patch-v400-04-phone-clean-tablet-ui-guard">
-  /* v400 mini04: Phone-Clean-Guard.
-     Ziel: Tablet-/Admin-/Weitergabe-Overlays dürfen im echten Handy-Layout nicht sichtbar werden.
-     Scope: nur max-width:759px. Tablet-Layout ab 760px bleibt unangetastet.
-     Keine PDF-/QR-/Scan-/Parser-/Plan-State-Logik. */
-  @media (max-width:759px){
-    html,body{
-      min-width:0!important;
-      overflow-x:hidden!important;
-    }
-    #tabletMenuBtn,
-    #tabletSideMenu,
-    #tabletSideBackdrop,
-    #tabletPackageShade,
-    #tabletPackageOverlay,
-    #tabletLayoutResizeHandle,
-    #tabletSplitScaleControl,
-    .tabletMenuBtn,
-    .tabletSideMenu,
-    .tabletSideBackdrop,
-    .tabletPackageShade,
-    .tabletPackageOverlay,
-    .tabletLayoutResizeHandle,
-    .tabletSplitScaleControl{
-      display:none!important;
-      visibility:hidden!important;
-      opacity:0!important;
-      pointer-events:none!important;
-      transform:none!important;
-    }
-    #kggTherapistShareModal,
-    #kggAdminMenuQrModal,
-    .kggTherapistShareModal,
-    .kggAdminMenuQrModal{
-      display:none!important;
-      visibility:hidden!important;
-      opacity:0!important;
-      pointer-events:none!important;
-    }
-    body.tabletMenuOpen #tabletSideMenu,
-    body.tabletMenuOpen .tabletSideMenu,
-    body.tabletPackageOverlayOpen #tabletPackageOverlay,
-    body.tabletPackageOverlayOpen .tabletPackageOverlay{
-      display:none!important;
-      transform:none!important;
-    }
-    body.tabletMenuOpen,
-    body.tabletPackageOverlayOpen,
-    body.tabletLayoutEditMode{
-      overflow-x:hidden!important;
-    }
-  }
-</style>
+    BitMatrix.prototype.get = function (x, y) {
+        if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
+            return false;
+        }
+        return !!this.data[y * this.width + x];
+    };
+    BitMatrix.prototype.set = function (x, y, v) {
+        this.data[y * this.width + x] = v ? 1 : 0;
+    };
+    BitMatrix.prototype.setRegion = function (left, top, width, height, v) {
+        for (var y = top; y < top + height; y++) {
+            for (var x = left; x < left + width; x++) {
+                this.set(x, y, !!v);
+            }
+        }
+    };
+    return BitMatrix;
+}());
+exports.BitMatrix = BitMatrix;
 
 
-<style id="kgg-mini-patch-v400-05-phone-remove-grey-helper-text">
-  /* v400 mini05: Phone-only cleanup.
-     Entfernt die grauen Hilfs-/Beschreibungstexte in Phone-Drawern und der
-     Therapeuten-App-Auswahl, ohne Tablet-Layout/CSS ab 760px anzufassen. */
-  @media (max-width:759px){
-    .kggTherapistShareHint,
-    .kggTherapistShareChoices small,
-    #packageList .notice small,
-    .tabletPackageBody p{
-      display:none!important;
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var GenericGFPoly_1 = __webpack_require__(2);
+function addOrSubtractGF(a, b) {
+    return a ^ b; // tslint:disable-line:no-bitwise
+}
+exports.addOrSubtractGF = addOrSubtractGF;
+var GenericGF = /** @class */ (function () {
+    function GenericGF(primitive, size, genBase) {
+        this.primitive = primitive;
+        this.size = size;
+        this.generatorBase = genBase;
+        this.expTable = new Array(this.size);
+        this.logTable = new Array(this.size);
+        var x = 1;
+        for (var i = 0; i < this.size; i++) {
+            this.expTable[i] = x;
+            x = x * 2;
+            if (x >= this.size) {
+                x = (x ^ this.primitive) & (this.size - 1); // tslint:disable-line:no-bitwise
+            }
+        }
+        for (var i = 0; i < this.size - 1; i++) {
+            this.logTable[this.expTable[i]] = i;
+        }
+        this.zero = new GenericGFPoly_1.default(this, Uint8ClampedArray.from([0]));
+        this.one = new GenericGFPoly_1.default(this, Uint8ClampedArray.from([1]));
     }
+    GenericGF.prototype.multiply = function (a, b) {
+        if (a === 0 || b === 0) {
+            return 0;
+        }
+        return this.expTable[(this.logTable[a] + this.logTable[b]) % (this.size - 1)];
+    };
+    GenericGF.prototype.inverse = function (a) {
+        if (a === 0) {
+            throw new Error("Can't invert 0");
+        }
+        return this.expTable[this.size - this.logTable[a] - 1];
+    };
+    GenericGF.prototype.buildMonomial = function (degree, coefficient) {
+        if (degree < 0) {
+            throw new Error("Invalid monomial degree less than 0");
+        }
+        if (coefficient === 0) {
+            return this.zero;
+        }
+        var coefficients = new Uint8ClampedArray(degree + 1);
+        coefficients[0] = coefficient;
+        return new GenericGFPoly_1.default(this, coefficients);
+    };
+    GenericGF.prototype.log = function (a) {
+        if (a === 0) {
+            throw new Error("Can't take log(0)");
+        }
+        return this.logTable[a];
+    };
+    GenericGF.prototype.exp = function (a) {
+        return this.expTable[a];
+    };
+    return GenericGF;
+}());
+exports.default = GenericGF;
 
-    #packageList .notice b + br,
-    #packageList .notice small + br{
-      display:none!important;
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var GenericGF_1 = __webpack_require__(1);
+var GenericGFPoly = /** @class */ (function () {
+    function GenericGFPoly(field, coefficients) {
+        if (coefficients.length === 0) {
+            throw new Error("No coefficients.");
+        }
+        this.field = field;
+        var coefficientsLength = coefficients.length;
+        if (coefficientsLength > 1 && coefficients[0] === 0) {
+            // Leading term must be non-zero for anything except the constant polynomial "0"
+            var firstNonZero = 1;
+            while (firstNonZero < coefficientsLength && coefficients[firstNonZero] === 0) {
+                firstNonZero++;
+            }
+            if (firstNonZero === coefficientsLength) {
+                this.coefficients = field.zero.coefficients;
+            }
+            else {
+                this.coefficients = new Uint8ClampedArray(coefficientsLength - firstNonZero);
+                for (var i = 0; i < this.coefficients.length; i++) {
+                    this.coefficients[i] = coefficients[firstNonZero + i];
+                }
+            }
+        }
+        else {
+            this.coefficients = coefficients;
+        }
     }
+    GenericGFPoly.prototype.degree = function () {
+        return this.coefficients.length - 1;
+    };
+    GenericGFPoly.prototype.isZero = function () {
+        return this.coefficients[0] === 0;
+    };
+    GenericGFPoly.prototype.getCoefficient = function (degree) {
+        return this.coefficients[this.coefficients.length - 1 - degree];
+    };
+    GenericGFPoly.prototype.addOrSubtract = function (other) {
+        var _a;
+        if (this.isZero()) {
+            return other;
+        }
+        if (other.isZero()) {
+            return this;
+        }
+        var smallerCoefficients = this.coefficients;
+        var largerCoefficients = other.coefficients;
+        if (smallerCoefficients.length > largerCoefficients.length) {
+            _a = [largerCoefficients, smallerCoefficients], smallerCoefficients = _a[0], largerCoefficients = _a[1];
+        }
+        var sumDiff = new Uint8ClampedArray(largerCoefficients.length);
+        var lengthDiff = largerCoefficients.length - smallerCoefficients.length;
+        for (var i = 0; i < lengthDiff; i++) {
+            sumDiff[i] = largerCoefficients[i];
+        }
+        for (var i = lengthDiff; i < largerCoefficients.length; i++) {
+            sumDiff[i] = GenericGF_1.addOrSubtractGF(smallerCoefficients[i - lengthDiff], largerCoefficients[i]);
+        }
+        return new GenericGFPoly(this.field, sumDiff);
+    };
+    GenericGFPoly.prototype.multiply = function (scalar) {
+        if (scalar === 0) {
+            return this.field.zero;
+        }
+        if (scalar === 1) {
+            return this;
+        }
+        var size = this.coefficients.length;
+        var product = new Uint8ClampedArray(size);
+        for (var i = 0; i < size; i++) {
+            product[i] = this.field.multiply(this.coefficients[i], scalar);
+        }
+        return new GenericGFPoly(this.field, product);
+    };
+    GenericGFPoly.prototype.multiplyPoly = function (other) {
+        if (this.isZero() || other.isZero()) {
+            return this.field.zero;
+        }
+        var aCoefficients = this.coefficients;
+        var aLength = aCoefficients.length;
+        var bCoefficients = other.coefficients;
+        var bLength = bCoefficients.length;
+        var product = new Uint8ClampedArray(aLength + bLength - 1);
+        for (var i = 0; i < aLength; i++) {
+            var aCoeff = aCoefficients[i];
+            for (var j = 0; j < bLength; j++) {
+                product[i + j] = GenericGF_1.addOrSubtractGF(product[i + j], this.field.multiply(aCoeff, bCoefficients[j]));
+            }
+        }
+        return new GenericGFPoly(this.field, product);
+    };
+    GenericGFPoly.prototype.multiplyByMonomial = function (degree, coefficient) {
+        if (degree < 0) {
+            throw new Error("Invalid degree less than 0");
+        }
+        if (coefficient === 0) {
+            return this.field.zero;
+        }
+        var size = this.coefficients.length;
+        var product = new Uint8ClampedArray(size + degree);
+        for (var i = 0; i < size; i++) {
+            product[i] = this.field.multiply(this.coefficients[i], coefficient);
+        }
+        return new GenericGFPoly(this.field, product);
+    };
+    GenericGFPoly.prototype.evaluateAt = function (a) {
+        var result = 0;
+        if (a === 0) {
+            // Just return the x^0 coefficient
+            return this.getCoefficient(0);
+        }
+        var size = this.coefficients.length;
+        if (a === 1) {
+            // Just the sum of the coefficients
+            this.coefficients.forEach(function (coefficient) {
+                result = GenericGF_1.addOrSubtractGF(result, coefficient);
+            });
+            return result;
+        }
+        result = this.coefficients[0];
+        for (var i = 1; i < size; i++) {
+            result = GenericGF_1.addOrSubtractGF(this.field.multiply(a, result), this.coefficients[i]);
+        }
+        return result;
+    };
+    return GenericGFPoly;
+}());
+exports.default = GenericGFPoly;
 
-    .kggTherapistShareChoices button{
-      min-height:48px!important;
-      display:flex!important;
-      align-items:center!important;
-      padding:12px 14px!important;
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var binarizer_1 = __webpack_require__(4);
+var decoder_1 = __webpack_require__(5);
+var extractor_1 = __webpack_require__(11);
+var locator_1 = __webpack_require__(12);
+function scan(matrix) {
+    var locations = locator_1.locate(matrix);
+    if (!locations) {
+        return null;
     }
-
-    .kggTherapistShareChoices b{
-      font-size:16px!important;
-      line-height:1.15!important;
+    for (var _i = 0, locations_1 = locations; _i < locations_1.length; _i++) {
+        var location_1 = locations_1[_i];
+        var extracted = extractor_1.extract(matrix, location_1);
+        var decoded = decoder_1.decode(extracted.matrix);
+        if (decoded) {
+            return {
+                binaryData: decoded.bytes,
+                data: decoded.text,
+                chunks: decoded.chunks,
+                version: decoded.version,
+                location: {
+                    topRightCorner: extracted.mappingFunction(location_1.dimension, 0),
+                    topLeftCorner: extracted.mappingFunction(0, 0),
+                    bottomRightCorner: extracted.mappingFunction(location_1.dimension, location_1.dimension),
+                    bottomLeftCorner: extracted.mappingFunction(0, location_1.dimension),
+                    topRightFinderPattern: location_1.topRight,
+                    topLeftFinderPattern: location_1.topLeft,
+                    bottomLeftFinderPattern: location_1.bottomLeft,
+                    bottomRightAlignmentPattern: location_1.alignmentPattern,
+                },
+            };
+        }
     }
-
-    #packageList .notice{
-      display:grid!important;
-      gap:8px!important;
+    return null;
+}
+var defaultOptions = {
+    inversionAttempts: "attemptBoth",
+};
+function jsQR(data, width, height, providedOptions) {
+    if (providedOptions === void 0) { providedOptions = {}; }
+    var options = defaultOptions;
+    Object.keys(options || {}).forEach(function (opt) {
+        options[opt] = providedOptions[opt] || options[opt];
+    });
+    var shouldInvert = options.inversionAttempts === "attemptBoth" || options.inversionAttempts === "invertFirst";
+    var tryInvertedFirst = options.inversionAttempts === "onlyInvert" || options.inversionAttempts === "invertFirst";
+    var _a = binarizer_1.binarize(data, width, height, shouldInvert), binarized = _a.binarized, inverted = _a.inverted;
+    var result = scan(tryInvertedFirst ? inverted : binarized);
+    if (!result && (options.inversionAttempts === "attemptBoth" || options.inversionAttempts === "invertFirst")) {
+        result = scan(tryInvertedFirst ? binarized : inverted);
     }
+    return result;
+}
+jsQR.default = jsQR;
+exports.default = jsQR;
 
-    #packageList .notice .mutedBtn{
-      margin-top:0!important;
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var BitMatrix_1 = __webpack_require__(0);
+var REGION_SIZE = 8;
+var MIN_DYNAMIC_RANGE = 24;
+function numBetween(value, min, max) {
+    return value < min ? min : value > max ? max : value;
+}
+// Like BitMatrix but accepts arbitry Uint8 values
+var Matrix = /** @class */ (function () {
+    function Matrix(width, height) {
+        this.width = width;
+        this.data = new Uint8ClampedArray(width * height);
     }
-  }
-</style>
-
-
-
-<style id="kgg-mini-patch-v400-06-phone-plan-gesture-fix">
-  /* v400 mini06: Phone-only Plan-Karten Gesten-Fix.
-     Scope: nur Handy-Layout bis 759px. Tablet-Layout ab 760px bleibt unveraendert.
-     Repariert Swipe links/rechts und Drag-Reorder, die durch den Phone-Scroll-Guard
-     transform/transition auf den Uebungskarten blockiert wurden. */
-  @media (max-width:759px){
-    body.kggPlanCardSwiping .planCard.swipe-dragging{
-      transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
-      will-change:transform,opacity!important;
-    }
-    body.kggPlanCardSwiping .planCard.swipe-armed{
-      transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
+    Matrix.prototype.get = function (x, y) {
+        return this.data[y * this.width + x];
+    };
+    Matrix.prototype.set = function (x, y, value) {
+        this.data[y * this.width + x] = value;
+    };
 ```

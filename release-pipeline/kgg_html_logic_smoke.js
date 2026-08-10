@@ -9,11 +9,7 @@ const vm = require("vm");
 const ROOT = path.resolve(__dirname, "..");
 const HTML_PATH = path.join(ROOT, "kgg-update", "index.html");
 const ROOT_PATIENT_HTML_PATH = path.join(ROOT, "index.html");
-const BOOT_MARKER = [
-  "  installKggV383UiFlowStability();",
-  "  installKggV388AndroidFlowFixes();",
-  "  load();",
-].join("\n");
+const BOOT_MARKER = "  /* KGG_LOGIC_SMOKE_BOOT_BOUNDARY */";
 
 function fail(message) {
   throw new Error(message);
@@ -36,6 +32,7 @@ function parseArgs(argv) {
     "pdf-critical",
     "patient-qr",
     "patient-qr-critical",
+    "version-types-critical",
     "textblocks",
     "textblocks-critical",
     "textblocks-regression",
@@ -65,6 +62,7 @@ function readMainAppScript() {
   const normalizedMain = main.replace(/\r\n/g, "\n");
   const bootIndex = normalizedMain.indexOf(BOOT_MARKER);
   if (bootIndex < 0) fail("KGG boot marker not found; update kgg_html_logic_smoke.js");
+  if (bootIndex !== normalizedMain.lastIndexOf(BOOT_MARKER)) fail("KGG boot marker must occur exactly once");
   return normalizedMain.slice(0, bootIndex);
 }
 
@@ -257,6 +255,96 @@ function runInsideApp(testCode) {
 })();`;
   vm.runInContext(source, context, { filename: "kgg-update/index.html#logic-smoke" });
   return context.window.__results || {};
+}
+
+function versionTypesCriticalSuite() {
+  return runInsideApp(`
+    const sourceMarker=VERSION;
+    const sourceCode=parseKggSourceVersionCode(sourceMarker);
+    assert(Number.isSafeInteger(sourceCode)&&sourceCode>0,'current source marker was not parsed');
+    assert(parseKggSourceVersionCode('v064')===null,'bare Android-shaped version leaked into source parser');
+    assert(parseKggSourceVersionCode('r0424')===null,'web release leaked into source parser');
+    assert(parseKggSourceVersionCode('1.0.64-test')===null,'SemVer leaked into source parser');
+
+    assert(parseKggWebReleaseId('r0424')===424,'web release r0424 was not parsed');
+    ['r424','v401','1.0.64-test',sourceMarker].forEach(value=>assert(parseKggWebReleaseId(value)===null,'foreign value accepted as web release: '+value));
+
+    assert(parseKggAndroidShellVersion('v401')===401,'Android shell v401 was not parsed');
+    ['401','r0424','1.0.64-test',sourceMarker].forEach(value=>assert(parseKggAndroidShellVersion(value)===null,'foreign value accepted as Android shell: '+value));
+    assert(parseKggNativeShellCode(401)===401,'numeric native shell was not parsed');
+    assert(parseKggNativeShellCode('401')===401,'numeric-string native shell was not parsed');
+    assert(parseKggNativeShellCode('v401')===null,'manifest shell leaked into native shell code');
+
+    assert(!!parseKggVersionName('1.0.64-typed-update-versions'),'KGG SemVer was not parsed');
+    ['r0424','v401',sourceMarker,'1.0.064-bad'].forEach(value=>assert(parseKggVersionName(value)===null,'foreign/invalid value accepted as SemVer: '+value));
+    assert(compareKggVersionNames('1.0.100-next','1.0.99-old')===1,'SemVer numeric comparison regressed');
+    assert(compareKggVersionNames('1.0.64-a','1.0.64-b')===0,'KGG labels must not reorder equal SemVer cores');
+    assert(compareKggVersionNames('r0425','1.0.64-a')===null,'cross-type comparison must fail closed');
+
+    const sourceNode=document.getElementById('kgg-source-truth');
+    const setSourceTruth=(code,versionName)=>{sourceNode.textContent=JSON.stringify({currentVersion:{versionCode:code,versionName}});};
+    const currentVersionName='1.0.'+sourceCode+'-logic-smoke';
+    setSourceTruth(sourceCode,currentVersionName);
+    assert(currentKggVersionIdentity().sourceCode===sourceCode,'consistent source identity was rejected');
+    setSourceTruth(sourceCode-1,currentVersionName);
+    assert(currentKggVersionIdentity()===null,'source metadata drift did not fail closed');
+    setSourceTruth(sourceCode,currentVersionName);
+
+    window.KGG_ROLLOUT_PROFILE='admin';
+    const webManifest={
+      latestAdminReleaseId:'r0425',
+      latestAdminVersion:'1.0.'+(sourceCode+1)+'-next',
+      adminUrl:'https://kayus24.github.io/kgg/therapist-app/releases/web/r0425/admin.html',
+      releaseNotes:'next web release'
+    };
+    const webTarget=githubUpdateTargetFromManifest(webManifest);
+    assert(webTarget&&webTarget.version===webManifest.latestAdminVersion&&webTarget.webReleaseId==='r0425','newer typed web target missing');
+    assert(githubUpdateTargetFromManifest({...webManifest,latestAdminVersion:'1.0.'+sourceCode+'-other'})===null,'equal SemVer core created an update');
+    assert(githubUpdateTargetFromManifest({...webManifest,latestAdminVersion:'1.0.'+(sourceCode-1)+'-old'})===null,'older SemVer created an update');
+    assert(githubUpdateTargetFromManifest({...webManifest,latestAdminReleaseId:'v402'})===null,'Android shell accepted as web release');
+    assert(githubUpdateTargetFromManifest({...webManifest,latestAdminReleaseId:'',adminUrl:'https://example.invalid/no-release/admin.html'})===null,'missing web release identity did not fail closed');
+    assert(githubUpdateTargetFromManifest({...webManifest,latestAdminVersion:'r9999'})===null,'web release ID was interpreted as SemVer');
+    assert(githubUpdateTargetFromManifest({...webManifest,latestAdminReleaseId:'r0426'})===null,'web release ID/URL mismatch did not fail closed');
+    assert(githubUpdateTargetFromManifest({...webManifest,adminUrl:'https://kayus24.github.io/kgg/therapist-app/releases/web/r0425/colleague.html'})===null,'colleague URL accepted for Admin profile');
+
+    window.KGG_ROLLOUT_PROFILE='colleague';
+    const colleagueTarget=githubUpdateTargetFromManifest({
+      latestVersion:'r0398',
+      latestColleagueReleaseId:'r0398',
+      latestColleagueVersion:'1.0.'+(sourceCode+1)+'-colleague-next',
+      colleagueUrl:'https://kayus24.github.io/kgg/therapist-app/releases/web/r0398/colleague.html'
+    });
+    assert(colleagueTarget&&colleagueTarget.webReleaseId==='r0398'&&colleagueTarget.url.endsWith('/colleague.html'),'colleague profile target mapping regressed');
+
+    window.KGG_ROLLOUT_PROFILE='admin';
+    const channelTarget=githubUpdateTargetFromManifest({channels:{admin:{
+      profile:'admin',releaseId:'r0425',versionName:'1.0.'+(sourceCode+1)+'-channel-next',
+      url:'https://kayus24.github.io/kgg/therapist-app/releases/web/r0425/admin.html',notes:'channel target'
+    }}});
+    assert(channelTarget&&channelTarget.webReleaseId==='r0425','canonical channel target mapping regressed');
+    assert(githubUpdateTargetFromManifest({channels:{admin:{
+      profile:'colleague',releaseId:'r0425',versionName:'1.0.'+(sourceCode+1)+'-channel-next',
+      url:'https://kayus24.github.io/kgg/therapist-app/releases/web/r0425/admin.html'
+    }}})===null,'wrong channel profile did not fail closed');
+
+    window.KGGAndroidApp={updateStatus(){return JSON.stringify({currentShellVersion:401});}};
+    const apkManifest={
+      latestAndroidShellVersion:'v402',
+      latestAdminAndroidApkUrl:'https://kayus24.github.io/kgg/therapist-app/releases/v402/android/KGG_ANDROID_ADMIN_v402.apk',
+      latestAdminAndroidApkSha256:'a'.repeat(64),
+      releaseNotes:'next shell'
+    };
+    const apkTarget=androidApkUpdateTargetFromManifest(apkManifest);
+    assert(apkTarget&&apkTarget.version==='v402'&&apkTarget.androidShellVersion==='v402','newer Android shell target missing');
+    assert(androidApkUpdateTargetFromManifest({...apkManifest,latestAndroidShellVersion:'v401'})===null,'equal Android shell created an update');
+    assert(androidApkUpdateTargetFromManifest({...apkManifest,latestAndroidShellVersion:'r0425'})===null,'web release accepted as Android shell');
+    assert(androidApkUpdateTargetFromManifest({...apkManifest,latestAndroidShellVersion:'1.0.402'})===null,'SemVer accepted as Android shell');
+    assert(androidApkUpdateTargetFromManifest({...apkManifest,latestAndroidShellVersion:'',latestWebVersion:'v999'})===null,'latestWebVersion replaced a missing Android shell');
+    assert(androidApkUpdateTargetFromManifest({...apkManifest,latestAdminAndroidApkSha256:''})===null,'missing APK SHA did not fail closed');
+    assert(androidApkUpdateTargetFromManifest({...apkManifest,latestAdminAndroidApkUrl:'https://kayus24.github.io/kgg/therapist-app/releases/v403/android/KGG_ANDROID_ADMIN_v403.apk'})===null,'APK URL shell mismatch did not fail closed');
+    assert(androidApkUpdateTargetFromManifest({...apkManifest,latestAdminAndroidApkUrl:'https://kayus24.github.io/kgg/therapist-app/releases/v402/android/KGG_ANDROID_KOLLEGEN_v402.apk'})===null,'colleague APK accepted for Admin profile');
+    window.__results={suite:'version-types-critical',sourceCode,webReleaseId:webTarget.webReleaseId,androidShell:apkTarget.androidShellVersion};
+  `);
 }
 
 function pdfCriticalSuite() {
@@ -672,7 +760,7 @@ function textblockSuite() {
 function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) {
-    console.log("Usage: node release-pipeline/kgg_html_logic_smoke.js [--suite all|sync|sync-critical|sync-regression|native-sync|native-sync-regression|pdf|pdf-critical|patient-qr|patient-qr-critical|textblocks|textblocks-critical|textblocks-regression]");
+    console.log("Usage: node release-pipeline/kgg_html_logic_smoke.js [--suite all|sync|sync-critical|sync-regression|native-sync|native-sync-regression|pdf|pdf-critical|patient-qr|patient-qr-critical|version-types-critical|textblocks|textblocks-critical|textblocks-regression]");
     return 0;
   }
   const results = {};
@@ -680,6 +768,7 @@ function main() {
   if (args.suite === "textblocks-critical") results.textblocksCritical = textblockCriticalSuite();
   if (args.suite === "pdf-critical") results.pdfCritical = pdfCriticalSuite();
   if (args.suite === "patient-qr-critical") results.patientQrCritical = patientQrCriticalSuite();
+  if (args.suite === "all" || args.suite === "version-types-critical") results.versionTypesCritical = versionTypesCriticalSuite();
   if (args.suite === "sync-regression") results.sync = syncSuite();
   if (args.suite === "native-sync-regression") results.nativeSync = nativeSyncSuite();
   if (args.suite === "textblocks-regression") results.textblocks = textblockSuite();

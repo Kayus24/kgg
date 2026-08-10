@@ -9,6 +9,33 @@ Eine Release-Logik fuer drei gleichberechtigte Bedienwege:
 
 Alle Schreibaktionen erzeugen einen Branch und Pull Request. `main` wird nicht direkt beschrieben.
 
+## Kanonisches und kompatibles Update-Manifest
+
+`therapist-app/android_update_manifest.json` ist die einzige Quelle fuer Web-Kanaele,
+Android-Shell und APK-Identitaeten. `therapist-app/kgg_update_manifest.json` bleibt
+fuer bestehende Clients erhalten und wird deterministisch daraus projiziert. Die
+Release-Befehle `prepare`, `promote` und `rollback` schreiben beide Dateien ueber
+denselben validierenden Writer; flache Web-Aliase im kanonischen Manifest sind
+keine Projektionsquelle.
+
+Die Projektion lokal aktualisieren oder bytegenau pruefen:
+
+```powershell
+python release-pipeline/release_pipeline.py sync-legacy
+python release-pipeline/release_pipeline.py sync-legacy --check
+```
+
+Der Check blockiert bei ungueltigem Schema, Release-ID, SemVer, Shell-Version,
+SHA-256 oder nicht-HTTPS-basierten HTML-/APK-URLs. Die Ausgabe ist UTF-8 mit
+Zwei-Leerzeichen-Einrueckung und LF, ohne generierten Zeitstempel. Der exakt
+definierte historische `v389`-Sentinel behaelt Namen und URLs unveraendert.
+
+Versionswerte bleiben typisiert: `KGG_GITHUB_UPDATE_vNNN_*` bezeichnet die
+editierbare Source, `rNNNN` ein unveraenderliches Web-Artefakt, `1.0.N-*` den
+semantischen Versionsnamen und `vNNN` die Android-Shell. Runtime und Mobile-
+Inbox vergleichen diese Typen nie quer; `latestWebVersion` ist insbesondere
+kein Ersatz fuer `latestAndroidShellVersion`.
+
 ## Handy-Standardweg ohne Codex
 
 Die Admin-App speichert die aktuelle HTML lokal. Danach wird die Datei auf dem Branch `mobile-inbox` in den Ordner `mobile-inbox/` hochgeladen. Die Action `KGG Mobile Inbox Release` validiert die HTML gegen die aktuelle KGG-Basis, erzeugt automatisch `releaseId` und Release-Notiz, baut Admin-/Kolleg:innen-Artefakte und merged den geprueften PR.
@@ -129,17 +156,22 @@ Pipeline die vorherige `index.html` und `version.json` wieder her. JSON-,
 Markdown- und HTML-Berichte sowie Screenshots liegen unter
 `tmp/kgg-selftest/`; dieser Ordner ist nicht versioniert.
 
-Der lokale Hook unter `.githooks/pre-commit` blockiert Commits an Modulen und
-Buildwerkzeugen, bis `--certify` gruen ist. Aktivierung in dieser Sandbox:
+Der lokale Hook unter `.githooks/pre-commit` scannt jeden Commit auf Secrets
+und blockiert Commits an Modulen und Buildwerkzeugen, bis `--certify` gruen
+ist. Git aktiviert eingecheckte Hooks in frischen Clones nicht automatisch.
+Deshalb jeden neuen Workspace einmal initialisieren und vor Pushes pruefen:
 
 ```powershell
-git config core.hooksPath .githooks
+python release-pipeline/kgg_hook_guard.py --install
+python release-pipeline/kgg_hook_guard.py --check
 ```
 
 Ein neuer Patch wird mit `release-pipeline/kgg_new_patch.py` vorbereitet. Das
 Tool erhoeht die Zielversion, aktualisiert Metadaten und Manifest, baut die
-HTML und berechnet den Hash. Geschuetzte Bereiche und das bereits erreichte
-Changelog-Limit sind fail-closed und brauchen eine explizite Approval-Notiz.
+HTML und berechnet den Hash. Geschuetzte Bereiche und kuenftige Ueberschreitungen
+der Changelog-Grenzen sind fail-closed. Der Changelog-Archiv-Contract prueft
+den unveraenderten Vollsnapshot bis v062 und das kompakte Laufzeitfenster.
+Overflow-Overrides sind nur fuer ausdruecklich freigegebene Notfaelle gedacht.
 
 Nach einem sauberen, zertifizierten Sandbox-Commit erzeugt
 `release-pipeline/kgg_export_handoff.py` ein Review-Buendel unter
@@ -227,7 +259,7 @@ Auf dem Release-Branch liegen temporaer:
 - `release-inbox/admin.html`
 - `release-inbox/release.json` mit `releaseId`, `versionName` und `notes`
 
-Der PR-Workflow validiert die Datei, erzeugt unveraenderliche Admin-/Kolleg:innen-Artefakte und entfernt die Inbox-Dateien vor dem Merge. Verbindliche UI-Basis ist `kgg-update/index.html` ab v24. Privilegierte DOM-/JavaScript-Bloecke werden beim Kolleg:innen-Build fail-closed entfernt. Neue Admin-Bloecke muessen zwischen `KGG_ADMIN_ONLY_START` und `KGG_ADMIN_ONLY_END` liegen.
+`versionName` muss exakt der Source-Identitaet aus `kgg-source-truth` und dem `KGG_GITHUB_UPDATE_vNNN_*`-Marker der hochgeladenen Admin-HTML entsprechen. Der PR-Workflow validiert die Datei fail-closed, erzeugt unveraenderliche Admin-/Kolleg:innen-Artefakte und entfernt die Inbox-Dateien vor dem Merge. Verbindliche UI-Basis ist `kgg-update/index.html` ab v24. Privilegierte DOM-/JavaScript-Bloecke werden beim Kolleg:innen-Build fail-closed entfernt. Neue Admin-Bloecke muessen zwischen `KGG_ADMIN_ONLY_START` und `KGG_ADMIN_ONLY_END` liegen.
 
 ## Freigabe und Rollback
 

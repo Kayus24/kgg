@@ -11,17 +11,21 @@ import argparse
 import difflib
 import hashlib
 import json
+import os
 import re
 import sys
+import tempfile
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from kgg_encoding_guard import validate_html_encoding
 
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "therapist-app" / "android_update_manifest.json"
+LEGACY_MANIFEST = ROOT / "therapist-app" / "kgg_update_manifest.json"
 RELEASES = ROOT / "therapist-app" / "releases" / "web"
 BASE_ADMIN = ROOT / "kgg-update" / "index.html"
 LEGACY_ADMIN = ROOT / "therapist-app" / "releases" / "v389" / "web" / "KGG_APP_ADMIN_v389_flow_stability.html"
@@ -30,6 +34,24 @@ PAGES_BASE = "https://kayus24.github.io/kgg/therapist-app/releases/web"
 MAX_HTML_BYTES = 5_500_000
 ADMIN_START = "<!-- KGG_ADMIN_ONLY_START -->"
 ADMIN_END = "<!-- KGG_ADMIN_ONLY_END -->"
+
+SEMVER_PATTERN = re.compile(
+    r"(?P<major>0|[1-9][0-9]*)\."
+    r"(?P<minor>0|[1-9][0-9]*)\."
+    r"(?P<patch>0|[1-9][0-9]*)"
+    r"(?:-(?P<prerelease>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?"
+    r"(?:\+(?P<build>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?"
+)
+SHA256_PATTERN = re.compile(r"[0-9a-f]{64}")
+ANDROID_SHELL_PATTERN = re.compile(r"v[0-9]{3,8}")
+SOURCE_VERSION_PATTERN = re.compile(
+    r"\bconst\s+VERSION\s*=\s*['\"]KGG_GITHUB_UPDATE_v([0-9]{3,8})_[a-z0-9_]+['\"]",
+    re.I,
+)
+SOURCE_TRUTH_PATTERN = re.compile(
+    r"^[ \t]*<script\b[^>]*\bid=['\"]kgg-source-truth['\"][^>]*>\s*(.*?)\s*</script>",
+    re.I | re.M | re.S,
+)
 
 CORE_MARKERS = (
     "KGGDataStore",
@@ -91,6 +113,34 @@ def write_json(path: Path, value: dict) -> None:
     write_text(path, json.dumps(value, ensure_ascii=False, indent=2) + "\n")
 
 
+def render_json_bytes(value: dict) -> bytes:
+    """Render checked-in JSON deterministically as UTF-8, two-space indented LF."""
+    return (json.dumps(value, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+
+
+def atomic_write_bytes(path: Path, value: bytes) -> None:
+    """Replace one file atomically after its complete content is on the same volume."""
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        descriptor, temporary_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+    except OSError as exc:
+        fail(f"Cannot stage atomic write for {path}: {exc}")
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "wb") as handle:
+            handle.write(value)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    except OSError as exc:
+        fail(f"Cannot atomically write {path}: {exc}")
+    finally:
+        try:
+            temporary.unlink()
+        except FileNotFoundError:
+            pass
+
+
 def sha256_text(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
@@ -100,9 +150,261 @@ def utc_now() -> str:
 
 
 def validate_release_id(value: str) -> str:
-    if not re.fullmatch(r"[rv][0-9]{3,8}", value or ""):
-        fail("releaseId must match rNNNN (for example r0390); v389 is retained as the legacy baseline")
+    if value != "v389" and not re.fullmatch(r"r[0-9]{4,8}", value or ""):
+        fail("releaseId must match rNNNN (for example r0390); only v389 is retained as a legacy sentinel")
     return value
+
+
+def require_string(container: dict, key: str, label: str) -> str:
+    value = container.get(key)
+    if not isinstance(value, str) or not value or value != value.strip():
+        fail(f"{label}.{key} must be a non-empty string without surrounding whitespace")
+    return value
+
+
+def validate_semver(value: str, label: str) -> str:
+    match = SEMVER_PATTERN.fullmatch(value)
+    if not match:
+        fail(f"{label} must be a valid semantic version")
+    prerelease = match.group("prerelease")
+    if prerelease:
+        for identifier in prerelease.split("."):
+            if identifier.isdigit() and len(identifier) > 1 and identifier.startswith("0"):
+                fail(f"{label} has a numeric prerelease identifier with a leading zero")
+    return value
+
+
+def html_source_marker_code(html: str) -> int | None:
+    match = SOURCE_VERSION_PATTERN.search(html)
+    return int(match.group(1)) if match else None
+
+
+def html_source_identity(html: str, label: str) -> tuple[int, str]:
+    matches = SOURCE_TRUTH_PATTERN.findall(html)
+    if len(matches) != 1:
+        fail(f"{label} requires exactly one kgg-source-truth block")
+    try:
+        source_truth = json.loads(matches[0])
+    except json.JSONDecodeError as exc:
+        fail(f"{label} has invalid kgg-source-truth JSON: {exc}")
+    current = source_truth.get("currentVersion") if isinstance(source_truth, dict) else None
+    if not isinstance(current, dict):
+        fail(f"{label} is missing kgg-source-truth.currentVersion")
+    code = current.get("versionCode")
+    version_name = current.get("versionName")
+    if isinstance(code, bool) or not isinstance(code, int) or code <= 0:
+        fail(f"{label} source versionCode must be a positive integer")
+    if not isinstance(version_name, str) or version_name != version_name.strip():
+        fail(f"{label} source versionName must be a non-empty string")
+    validate_semver(version_name, f"{label} source versionName")
+    parsed_version = SEMVER_PATTERN.fullmatch(version_name)
+    if (
+        parsed_version is None
+        or int(parsed_version.group("major")) != 1
+        or int(parsed_version.group("minor")) != 0
+        or int(parsed_version.group("patch")) != code
+    ):
+        fail(f"{label} source versionName must use 1.0.<versionCode>")
+    marker_code = html_source_marker_code(html)
+    if marker_code != code:
+        fail(f"{label} VERSION marker and kgg-source-truth versionCode differ")
+    return code, version_name
+
+
+def validate_release_version_identity(html: str, version_name: str) -> tuple[int, str]:
+    validate_semver(version_name, "release.json.versionName")
+    code, source_version_name = html_source_identity(html, "Admin candidate")
+    if version_name != source_version_name:
+        fail("release.json.versionName must exactly match the Admin candidate source versionName")
+    return code, source_version_name
+
+
+def validate_sha256(value: str, label: str) -> str:
+    if not SHA256_PATTERN.fullmatch(value):
+        fail(f"{label} must be a lowercase 64-character SHA-256 digest")
+    return value
+
+
+def validate_https_url(value: str, label: str, suffix: str) -> str:
+    parsed = urlsplit(value)
+    if (
+        parsed.scheme != "https"
+        or not parsed.hostname
+        or parsed.username is not None
+        or parsed.password is not None
+        or any(character.isspace() for character in value)
+        or not parsed.path.lower().endswith(suffix)
+    ):
+        fail(f"{label} must be an HTTPS URL ending in {suffix}")
+    return value
+
+
+def validate_apk_url(value: str, label: str, profile: str, shell_version: str) -> str:
+    url = validate_https_url(value, label, ".apk")
+    path = urlsplit(url).path
+    expected_directory = f"/releases/{shell_version}/android/"
+    expected_prefix = "KGG_ANDROID_ADMIN_" if profile == "admin" else "KGG_ANDROID_KOLLEGEN_"
+    filename = path.rsplit("/", 1)[-1]
+    if expected_directory not in path or not filename.startswith(expected_prefix):
+        fail(f"{label} must identify the {profile} APK for Android shell {shell_version}")
+    return url
+
+
+def validate_manifest_channel(channel: object, profile: str) -> dict:
+    label = f"channels.{profile}"
+    if not isinstance(channel, dict):
+        fail(f"{label} must be an object")
+    release_id = validate_release_id(require_string(channel, "releaseId", label))
+    if require_string(channel, "profile", label) != profile:
+        fail(f"{label}.profile must be {profile}")
+    version_name = require_string(channel, "versionName", label)
+    url = validate_https_url(require_string(channel, "url", label), f"{label}.url", ".html")
+    if release_id == "v389":
+        expected_version_name = (
+            "KGG_APP_ADMIN_v389_flow_stability"
+            if profile == "admin"
+            else "KGG_APP_KOLLEGEN_v389_flow_stability"
+        )
+        if version_name != expected_version_name:
+            fail(f"{label}.versionName must preserve the v389 sentinel identity")
+        legacy_filename = (
+            "KGG_APP_ADMIN_v389_flow_stability.html"
+            if profile == "admin"
+            else "KGG_APP_KOLLEGEN_v389_flow_stability.html"
+        )
+        expected_path = f"/v389/web/{legacy_filename}"
+    else:
+        validate_semver(version_name, f"{label}.versionName")
+        expected_path = f"/{release_id}/{profile}.html"
+    if not urlsplit(url).path.endswith(expected_path):
+        fail(f"{label}.url must end in {expected_path}")
+    validate_sha256(require_string(channel, "sha256", label), f"{label}.sha256")
+    rollout_code = channel.get("rolloutCode")
+    if isinstance(rollout_code, bool) or not isinstance(rollout_code, int) or rollout_code < 0:
+        fail(f"{label}.rolloutCode must be a non-negative integer")
+    previous = channel.get("previousReleaseId")
+    if previous is not None:
+        if not isinstance(previous, str):
+            fail(f"{label}.previousReleaseId must be null or a release ID")
+        validate_release_id(previous)
+    return channel
+
+
+def project_legacy_manifest(canonical: dict) -> dict:
+    """Create the deterministic flat compatibility manifest from canonical v2 data."""
+    if not isinstance(canonical, dict):
+        fail("Canonical update manifest must be an object")
+    if canonical.get("kind") != "kgg_android_web_update_manifest":
+        fail("Canonical update manifest has an unsupported kind")
+    for key in ("version", "schema"):
+        value = canonical.get(key)
+        if isinstance(value, bool) or not isinstance(value, int) or value != 2:
+            fail(f"Canonical update manifest {key} must be integer 2")
+
+    channels = canonical.get("channels")
+    if not isinstance(channels, dict):
+        fail("Canonical update manifest channels must be an object")
+    admin = validate_manifest_channel(channels.get("admin"), "admin")
+    colleague = validate_manifest_channel(channels.get("colleague"), "colleague")
+
+    shell_version = require_string(canonical, "latestAndroidShellVersion", "manifest")
+    if not ANDROID_SHELL_PATTERN.fullmatch(shell_version):
+        fail("manifest.latestAndroidShellVersion must match vNNN")
+
+    apk_profiles: dict[str, str] = {}
+    for profile in ("colleague", "admin"):
+        url_key = f"{profile}AndroidApkUrl"
+        sha_key = f"{profile}AndroidApkSha256"
+        apk_profiles[url_key] = validate_apk_url(
+            require_string(canonical, url_key, "manifest"),
+            f"manifest.{url_key}",
+            profile,
+            shell_version,
+        )
+        apk_profiles[sha_key] = validate_sha256(
+            require_string(canonical, sha_key, "manifest"),
+            f"manifest.{sha_key}",
+        )
+
+    notes = require_string(canonical, "notes", "manifest")
+    return {
+        "kind": "kgg_app_update_manifest",
+        "version": 1,
+        "latestVersion": colleague["releaseId"],
+        "latestAdminReleaseId": admin["releaseId"],
+        "latestColleagueReleaseId": colleague["releaseId"],
+        "latestAdminVersion": admin["versionName"],
+        "latestColleagueVersion": colleague["versionName"],
+        "adminUrl": admin["url"],
+        "colleagueUrl": colleague["url"],
+        "latestUrl": colleague["url"],
+        "latestAndroidShellVersion": shell_version,
+        "latestAndroidApkUrl": apk_profiles["colleagueAndroidApkUrl"],
+        "latestAndroidApkSha256": apk_profiles["colleagueAndroidApkSha256"],
+        "latestColleagueAndroidApkUrl": apk_profiles["colleagueAndroidApkUrl"],
+        "latestColleagueAndroidApkSha256": apk_profiles["colleagueAndroidApkSha256"],
+        "latestAdminAndroidApkUrl": apk_profiles["adminAndroidApkUrl"],
+        "latestAdminAndroidApkSha256": apk_profiles["adminAndroidApkSha256"],
+        "releaseNotes": notes,
+    }
+
+
+def write_update_manifests(canonical: dict) -> dict:
+    """Validate the pair, then replace both files with rollback on the second write."""
+    legacy = project_legacy_manifest(canonical)
+    canonical_bytes = render_json_bytes(canonical)
+    legacy_bytes = render_json_bytes(legacy)
+    originals: dict[Path, bytes | None] = {}
+    for path in (MANIFEST, LEGACY_MANIFEST):
+        try:
+            originals[path] = path.read_bytes()
+        except FileNotFoundError:
+            originals[path] = None
+        except OSError as exc:
+            fail(f"Cannot snapshot update manifest {path}: {exc}")
+
+    try:
+        atomic_write_bytes(MANIFEST, canonical_bytes)
+        atomic_write_bytes(LEGACY_MANIFEST, legacy_bytes)
+    except (OSError, ReleaseError) as write_error:
+        rollback_errors = []
+        for path, original in originals.items():
+            try:
+                current = path.read_bytes()
+            except FileNotFoundError:
+                current = None
+            except OSError as exc:
+                rollback_errors.append(f"cannot inspect {path}: {exc}")
+                continue
+            if current == original:
+                continue
+            try:
+                if original is None:
+                    path.unlink(missing_ok=True)
+                else:
+                    atomic_write_bytes(path, original)
+            except (OSError, ReleaseError) as rollback_error:
+                rollback_errors.append(f"cannot restore {path}: {rollback_error}")
+        if rollback_errors:
+            fail(f"Manifest pair write failed ({write_error}); rollback failed: {'; '.join(rollback_errors)}")
+        raise
+    return legacy
+
+
+def sync_legacy_manifest(*, check: bool = False) -> dict:
+    canonical = load_json(MANIFEST)
+    legacy = project_legacy_manifest(canonical)
+    expected = render_json_bytes(legacy)
+    if check:
+        try:
+            actual = LEGACY_MANIFEST.read_bytes()
+        except OSError as exc:
+            fail(f"Cannot read legacy manifest {LEGACY_MANIFEST}: {exc}")
+        if actual != expected:
+            fail("Legacy update manifest is stale; run release_pipeline.py sync-legacy")
+        return {"status": "current", "path": str(LEGACY_MANIFEST.relative_to(ROOT)).replace("\\", "/")}
+    atomic_write_bytes(LEGACY_MANIFEST, expected)
+    return {"status": "written", "path": str(LEGACY_MANIFEST.relative_to(ROOT)).replace("\\", "/")}
 
 
 def validate_html(html: str, label: str) -> None:
@@ -417,6 +719,7 @@ def ensure_schema_v2(manifest: dict) -> dict:
         channels["admin"] = {
             "rolloutCode": 0,
             "releaseId": "v389",
+            "profile": "admin",
             "versionName": "KGG_APP_ADMIN_v389_flow_stability",
             "url": manifest["adminHtmlUrl"],
             "sha256": manifest["adminSha256"],
@@ -426,6 +729,7 @@ def ensure_schema_v2(manifest: dict) -> dict:
         channels["colleague"] = {
             "rolloutCode": 0,
             "releaseId": "v389",
+            "profile": "colleague",
             "versionName": "KGG_APP_KOLLEGEN_v389_flow_stability",
             "url": manifest["colleagueHtmlUrl"],
             "sha256": manifest["colleagueSha256"],
@@ -449,6 +753,7 @@ def prepare(candidate_path: Path, release_json_path: Path) -> dict:
 
     admin_html = read_text(candidate_path)
     validate_html(admin_html, "Admin candidate")
+    validate_release_version_identity(admin_html, version_name)
     colleague_html = derive_colleague(admin_html)
     validate_html(colleague_html, "Colleague build")
     if sha256_text(admin_html) == sha256_text(colleague_html):
@@ -486,7 +791,7 @@ def prepare(candidate_path: Path, release_json_path: Path) -> dict:
     manifest["adminHtmlUrl"] = admin_channel["url"]
     manifest["adminSha256"] = admin_channel["sha256"]
     manifest["notes"] = f"Admin beta {release_id}: {notes}"
-    write_json(MANIFEST, manifest)
+    write_update_manifests(manifest)
     return metadata
 
 
@@ -541,7 +846,7 @@ def promote(release_id: str) -> dict:
     manifest["sha256"] = target["sha256"]
     manifest["latestWebVersion"] = release_id
     manifest["notes"] = f"Stable promotion {release_id}: {release.get('notes', '')}"
-    write_json(MANIFEST, manifest)
+    write_update_manifests(manifest)
     return target
 
 
@@ -566,7 +871,7 @@ def rollback(channel_name: str, release_id: str) -> dict:
         manifest["sha256"] = target["sha256"]
         manifest["latestWebVersion"] = release_id
     manifest["notes"] = f"{channel_name} rollback to {release_id}"
-    write_json(MANIFEST, manifest)
+    write_update_manifests(manifest)
     return target
 
 
@@ -586,6 +891,8 @@ def main() -> int:
     p_rollback = sub.add_parser("rollback")
     p_rollback.add_argument("--channel", choices=("admin", "colleague"), required=True)
     p_rollback.add_argument("--release-id", required=True)
+    p_sync_legacy = sub.add_parser("sync-legacy")
+    p_sync_legacy.add_argument("--check", action="store_true")
     sub.add_parser("status")
     args = parser.parse_args()
 
@@ -596,6 +903,8 @@ def main() -> int:
             result = promote(args.release_id)
         elif args.command == "rollback":
             result = rollback(args.channel, args.release_id)
+        elif args.command == "sync-legacy":
+            result = sync_legacy_manifest(check=args.check)
         else:
             result = status()
         print(json.dumps(result, ensure_ascii=False, indent=2))

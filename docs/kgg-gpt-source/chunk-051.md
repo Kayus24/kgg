@@ -4,424 +4,424 @@
 - Lines: 21421-21840
 
 ```html
+    if($('exerciseInput'))$('exerciseInput').value='';
+    syncStatePlanToStore(reason||'ui_finish_close_current_plan');
+    save();
+    render();
+  }
+  async function finishWithPdf(options){
+    const notice=$('finishNotice');
+    const hasModeOverride=!!(options&&Object.prototype.hasOwnProperty.call(options,'large'));
+    const previousLargeMode=state.largePdfMode;
+    if(hasModeOverride){state.largePdfMode=!!options.large; applyLargePdfMode();}
+    if(notice)notice.textContent='PDF wird erstellt ...';
+    try{
+      const pdfResult=await buildPdfFromCurrentPlan();
+      if(hasModeOverride){state.largePdfMode=previousLargeMode; applyLargePdfMode();}
+      archiveAndCloseCurrentPlan('ui_finish_pdf');
+      closeFinishModal();
+      openPdfPreview(pdfResult);
+    }catch(err){
+      if(hasModeOverride){state.largePdfMode=previousLargeMode; applyLargePdfMode(); save();}
+      console.warn('PDF konnte nicht erzeugt werden:',err);
+      if(notice)notice.textContent='PDF fehlgeschlagen. Plan bleibt offen.';
+    }
+  }
+  async function finishWithPatientApp(){
+    const notice=$('finishNotice');
+    try{
+      const url=await renderPatientShareOutput();
+      if(!url)return;
+      archiveAndCloseCurrentPlan('ui_finish_patient_app');
+    }catch(err){
+      console.warn('Patienten-Ausgabe konnte nicht erzeugt werden:',err);
+      if(notice)notice.textContent='Ausgabe fehlgeschlagen. Plan bleibt offen.';
+    }
+  }
+
+  function decodePatientPayloadFromHash(){
+    const hash=String(location.hash||'');
+    const publicMatch=hash.match(/^#KGGH2:(.+)$/i);
+    if(publicMatch){
+      try{return convertKggH2PayloadToPatientPayload(decodeKggJsonBase64Url(publicMatch[1]));}
+      catch(err){console.warn('KGGH2 Patienten-Link konnte nicht gelesen werden:',err); return {error:true};}
+    }
+    const match=hash.match(/^#kgg=(.+)$/);
+    if(!match)return null;
+    try{
+      const encoded=decodeURIComponent(match[1]).replace(/-/g,'+').replace(/_/g,'/');
+      const padded=encoded+'='.repeat((4-encoded.length%4)%4);
+      return JSON.parse(decodeURIComponent(escape(atob(padded))));
+    }catch(err){
+      console.warn('Patienten-Link konnte nicht gelesen werden:',err);
+      return {error:true};
+    }
+  }
+  function base64UrlToBytes(value){
+    const text=String(value||'').replace(/-/g,'+').replace(/_/g,'/');
+    const padded=text+'='.repeat((4-text.length%4)%4);
+    const binary=atob(padded);
+    const bytes=new Uint8Array(binary.length);
+    for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
     return bytes;
   }
-  function pdfBlobFromDoc(doc){
-    if(!doc)return null;
-    if(typeof doc.output==='function'){
-      try{
-        const blob=doc.output('blob');
-        if(blob instanceof Blob)return blob;
-      }catch(e){}
-      try{
-        const buffer=doc.output('arraybuffer');
-        if(buffer)return new Blob([buffer],{type:'application/pdf'});
-      }catch(e){}
-      try{
-        const text=doc.output();
-        if(typeof text==='string')return new Blob([pdfBytesFromBinaryString(text)],{type:'application/pdf'});
-      }catch(e){}
-    }
-    if(typeof doc._buildPdf==='function'){
-      try{return new Blob([pdfBytesFromBinaryString(doc._buildPdf())],{type:'application/pdf'});}catch(e){}
-    }
-    return null;
-  }
-  function downloadPdfBlob(blob,filename){
-    if(!blob)return;
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;
-    a.download=filename||'kgg_trainingsplan.pdf';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},1000);
-  }
-  function pdfBlobToBase64(blob){
+  function patientMediaDb(){
     return new Promise((resolve,reject)=>{
-      const reader=new FileReader();
-      reader.onload=()=>resolve(String(reader.result||'').split(',')[1]||'');
-      reader.onerror=()=>reject(reader.error||new Error('PDF konnte nicht gelesen werden.'));
-      reader.readAsDataURL(blob);
+      if(!('indexedDB' in window)){reject(new Error('IndexedDB nicht verfuegbar'));return;}
+      const req=indexedDB.open('kgg_patient_media_v1',1);
+      req.onupgradeneeded=()=>{const db=req.result; if(!db.objectStoreNames.contains('images'))db.createObjectStore('images',{keyPath:'id'});};
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error||new Error('Patienten-Medien-Speicher nicht verfuegbar'));
     });
   }
-  function nativePdfBridge(){
-    return window.KGGNativePdf&&window.KGGNativePdf.available?window.KGGNativePdf:null;
+  async function patientGetCachedMedia(id){
+    const db=await patientMediaDb();
+    return new Promise(resolve=>{
+      const tx=db.transaction('images','readonly');
+      const req=tx.objectStore('images').get(id);
+      req.onsuccess=()=>resolve(req.result||null);
+      req.onerror=()=>resolve(null);
+    });
   }
-  async function sendPdfToNative(action){
-    if(!currentPdfPreview||!currentPdfPreview.blob)return false;
-    const bridge=nativePdfBridge();
-    if(!bridge)return false;
-    try{
-      const base64=await pdfBlobToBase64(currentPdfPreview.blob);
-      if(action==='download'&&typeof bridge.download==='function')return !!bridge.download(currentPdfPreview.filename,base64);
-      if(action==='print'&&typeof bridge.print==='function')return !!bridge.print(currentPdfPreview.filename,base64);
-      if(typeof bridge.open==='function')return !!bridge.open(currentPdfPreview.filename,base64);
-    }catch(err){console.warn('Native PDF-Aktion fehlgeschlagen:',err);}
-    return false;
+  async function patientPutCachedMedia(record){
+    const db=await patientMediaDb();
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction('images','readwrite');
+      tx.objectStore('images').put(record);
+      tx.oncomplete=()=>resolve(record);
+      tx.onerror=()=>reject(tx.error||new Error('Bild konnte nicht lokal gespeichert werden'));
+    });
   }
-  let currentPdfPreview=null;
-  let pdfPreviewFallbackTimer=null;
-  function setPdfPreviewFallbackVisible(isVisible){
-    const fallback=$('pdfPreviewFallback');
-    if(fallback)fallback.classList.toggle('hidden',!isVisible);
+  async function patientFetchEncryptedMedia(media){
+    if(window.KGGPatientMediaFetchAdapter&&typeof window.KGGPatientMediaFetchAdapter.fetch==='function')return window.KGGPatientMediaFetchAdapter.fetch(media);
+    if(!media.downloadUrl)throw new Error('Bild ist noch nicht bereit');
+    const res=await fetch(media.downloadUrl,{cache:'no-store'});
+    if(!res.ok)throw new Error('Bild konnte nicht geladen werden');
+    return res.blob();
   }
-  function shouldUsePdfMobileBridge(){
-    return !!(window.matchMedia && (window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(max-width: 700px)').matches));
+  async function patientDecryptMedia(media,encryptedBlob){
+    if(!window.crypto||!crypto.subtle)throw new Error('Web Crypto nicht verfuegbar');
+    const info=media.crypto||{};
+    if(!info.key||!info.iv)throw new Error('Medienschluessel fehlt');
+    const key=await crypto.subtle.importKey('raw',base64UrlToBytes(info.key),{name:'AES-GCM'},false,['decrypt']);
+    const encrypted=await encryptedBlob.arrayBuffer();
+    const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:base64UrlToBytes(info.iv)},key,encrypted);
+    return new Blob([plain],{type:media.mime||'image/jpeg'});
   }
-  function setPdfMobileBridgeVisible(isVisible){
-    const bridge=$('pdfPreviewMobileBridge');
-    const modal=$('pdfPreviewModal');
-    if(bridge)bridge.classList.toggle('hidden',!isVisible);
-    if(modal)modal.classList.toggle('pdfPreviewModalMobile',isVisible);
+  function updatePatientMediaBox(id,html,kind){
+    const selector='[data-patient-media-id="'+String(id).replace(/"/g,'\\"')+'"]';
+    const box=document.querySelector(selector);
+    if(!box)return;
+    box.className='patientMedia patientMedia_'+(kind||'loading');
+    box.innerHTML=html;
   }
-  function openPdfPreview(result){
-    if(!result||!result.blob)return;
-    if(currentPdfPreview&&currentPdfPreview.url)URL.revokeObjectURL(currentPdfPreview.url);
-    if(pdfPreviewFallbackTimer)clearTimeout(pdfPreviewFallbackTimer);
-    const url=URL.createObjectURL(result.blob);
-    currentPdfPreview={url,blob:result.blob,filename:result.filename||'kgg_trainingsplan.pdf'};
-    const frame=$('pdfPreviewFrame');
-    const useMobileBridge=shouldUsePdfMobileBridge();
-    setPdfPreviewFallbackVisible(false);
-    setPdfMobileBridgeVisible(useMobileBridge);
-    if(frame){frame.src=useMobileBridge?'about:blank':url;frame.onerror=()=>setPdfPreviewFallbackVisible(true);}
-    const notice=$('pdfPreviewNotice');
-    if(notice)notice.textContent=useMobileBridge?'PDF bereit. Öffnen oder herunterladen.':'PDF bereit. Drucken oder herunterladen.';
-    $('pdfPreviewModal').classList.add('open');
-    if(!useMobileBridge){
-      pdfPreviewFallbackTimer=setTimeout(()=>{
-        if(currentPdfPreview)setPdfPreviewFallbackVisible(true);
-      },1200);
-    }
-  }
-  function closePdfPreview(){
-    if(pdfPreviewFallbackTimer)clearTimeout(pdfPreviewFallbackTimer);
-    pdfPreviewFallbackTimer=null;
-    $('pdfPreviewModal').classList.remove('open');
-    const frame=$('pdfPreviewFrame');
-    if(frame)frame.src='about:blank';
-    setPdfPreviewFallbackVisible(false);
-    setPdfMobileBridgeVisible(false);
-    if(currentPdfPreview&&currentPdfPreview.url)URL.revokeObjectURL(currentPdfPreview.url);
-    currentPdfPreview=null;
-  }
-  async function printCurrentPdfPreview(){
-    if(await sendPdfToNative('print'))return;
-    if(shouldUsePdfMobileBridge()){
-      openCurrentPdfPreviewTab();
-      return;
-    }
-    const frame=$('pdfPreviewFrame');
-    try{
-      if(frame&&frame.contentWindow){frame.contentWindow.focus();frame.contentWindow.print();return;}
-    }catch(e){}
-    if(currentPdfPreview&&currentPdfPreview.url){
-      const win=window.open(currentPdfPreview.url,'_blank');
-      if(win)setTimeout(()=>{try{win.focus();win.print();}catch(e){}},600);
-    }
-  }
-  async function downloadCurrentPdfPreview(){
-    if(await sendPdfToNative('download'))return;
-    if(currentPdfPreview)downloadPdfBlob(currentPdfPreview.blob,currentPdfPreview.filename);
-  }
-  function openPdfUrlCrossBrowser(url){
-    if(!url)return false;
-    try{
-      const win=window.open('','_blank');
-      if(win){
-        try{win.opener=null;}catch(e){}
-        win.location.href=url;
-        return true;
-      }
-    }catch(e){}
-    try{
-      const a=document.createElement('a');
-      a.href=url;
-      a.target='_blank';
-      a.rel='noopener';
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(()=>a.remove(),1000);
+  async function loadPatientMediaItem(media){
+    const id=String(media&&media.id||'');
+    if(!id)return false;
+    const cached=await patientGetCachedMedia(id);
+    if(cached&&cached.blob){
+      const url=URL.createObjectURL(cached.blob);
+      updatePatientMediaBox(id,'<img src="'+url+'" alt="Uebungsbild"><small>Bild lokal gespeichert.</small>','ready');
       return true;
-    }catch(e){}
-    return false;
-  }
-  async function openCurrentPdfPreviewTab(){
-    if(!currentPdfPreview||!currentPdfPreview.url)return;
-    if(await sendPdfToNative('open'))return;
-    if(!openPdfUrlCrossBrowser(currentPdfPreview.url)){
-      downloadPdfBlob(currentPdfPreview.blob,currentPdfPreview.filename);
     }
-  }
-
-  async function buildPdfFromCurrentPlan(){
-    savePendingToBank('ui_make_pdf');
-    const plan=getCurrentPlanForOutput('ui_make_pdf');
-    const snapshot=buildKggPdfSnapshot(plan,state.largePdfMode?{layout:'large-single-row'}:null);
-    await attachKggPdfExerciseThumbnails(snapshot,plan);
-    window.KGGLatestPdfSnapshot=snapshot;
-    let JsPdfCtor=null;
-    try{JsPdfCtor=await ensureJsPdfForPdfTest();}catch(e){console.warn('KGG jsPDF Testloader:',e);}
-    if(!JsPdfCtor){
-      alert('jsPDF-Testeinbindung konnte nicht geladen werden. PDF wird lokal im Browser erzeugt, sobald jsPDF verfuegbar ist. Der aktuelle Plan-Snapshot wurde nur intern vorbereitet.');
-      console.info('KGG PDF Snapshot Adapter:',snapshot);
-      return snapshot;
-    }
-    const pdfMode=state.largePdfMode?'grossdruck':'standard';
-    const doc=new JsPdfCtor({orientation:state.largePdfMode?'portrait':'landscape',unit:'mm',format:'a4'});
-    const patientName=snapshot.patient&&snapshot.patient.displayName||snapshot.patient&&snapshot.patient.name||'patient';
-    const safeName=String(patientName).replace(/[^a-z0-9äöüß_-]+/ig,'_').replace(/^_+|_+$/g,'')||'patient';
-    const stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\..+$/,'').replace('T','_');
-    try{doc.setProperties({title:'KGG Trainingsplan '+safeName,subject:PDF_RUNTIME_FINGERPRINT+' '+pdfMode,creator:VERSION});}catch(e){}
-    drawKggPdfLayoutV1(doc,snapshot);
-    const filename='kgg_trainingsplan_'+safeName+'_'+VERSION+'_'+pdfMode+'_'+stamp+'.pdf';
-    const blob=pdfBlobFromDoc(doc);
-    if(!blob)doc.save(filename);
-    return {snapshot,blob,filename,pdfMode};
-  }
-
-  function encodePatientPayload(payload){return (window.KGGQrCore&&typeof window.KGGQrCore.encodePayload==='function')?window.KGGQrCore.encodePayload(payload):btoa(unescape(encodeURIComponent(JSON.stringify(payload))));}
-  function isShareablePatientBaseUrl(url){
-    const raw=String(url||'').trim();
-    if(!raw)return false;
-    if(/^(content|file|blob|data|about):/i.test(raw))return false;
-    if(!/^https?:\/\//i.test(raw))return false;
-    try{const parsed=new URL(raw); const host=parsed.hostname.toLowerCase(); if(host==='localhost'||host==='127.0.0.1'||host==='0.0.0.0'||host.endsWith('.local'))return false;}catch(e){return false;}
+    const encrypted=await patientFetchEncryptedMedia(media);
+    const imageBlob=await patientDecryptMedia(media,encrypted);
+    await patientPutCachedMedia({id,blob:imageBlob,mime:media.mime||'image/jpeg',savedAt:new Date().toISOString()});
+    const url=URL.createObjectURL(imageBlob);
+    updatePatientMediaBox(id,'<img src="'+url+'" alt="Uebungsbild"><small>Bild lokal gespeichert.</small>','ready');
     return true;
   }
-  function makeUrlWithPayload(baseUrl,payload){
-    const base=String(baseUrl||'').split('#')[0].split('?')[0];
-    const publicPayload=payload&&Array.isArray(payload.e)?payload:buildKggH2PayloadFromInternalPayload(payload);
-    return base+'?plan='+encodeURIComponent('KGGH2:'+encodeKggJsonBase64Url(publicPayload));
-  }
-  function buildExerciseMediaManifestForPatient(ex){
-    return ensureExerciseMediaList(ex).filter(item=>item.type==='image').map(item=>({
-      id:item.id,
-      type:'image',
-      mime:item.mime,
-      name:item.name,
-      width:item.width,
-      height:item.height,
-      bytes:item.encryptedSize||0,
-      encrypted:true,
-      status:item.downloadUrl?'ready':'upload-pending',
-      downloadUrl:item.downloadUrl||'',
-      expiresInSeconds:item.ttlSeconds||MEDIA_UPLOAD_TTL_SECONDS,
-      retrySeconds:item.retrySeconds||MEDIA_RETRY_SECONDS,
-      crypto:item.crypto||null
-    }));
-  }
-  function buildExerciseMediaRefsForPatient(ex){
-    const ids=ensureExerciseMediaList(ex).filter(item=>item.type==='image'&&item.id).map(item=>item.id);
-    return ids.length?ids:'';
-  }
-  function compactMediaBundleForQr(bundle){
-    if(!bundle||!bundle.downloadUrl||!bundle.crypto)return null;
-    return {
-      u:bundle.downloadUrl,
-      k:bundle.crypto.key,
-      i:bundle.crypto.iv,
-      c:Number(bundle.count)||0,
-      t:Number(bundle.expiresInSeconds)||MEDIA_UPLOAD_TTL_SECONDS,
-      r:Number(bundle.retrySeconds)||MEDIA_RETRY_SECONDS
-    };
-  }
-  function buildPatientExercisePayload(ex){
-    const copy={...ex};
-    const media=buildExerciseMediaManifestForPatient(ex);
-    if(media.length)copy.media=media; else delete copy.media;
-    return copy;
-  }
-  function buildPlanMediaMeta(rawExercises,ttlSeconds){
-    const items=(rawExercises||[]).flatMap(ensureExerciseMediaList);
-    const count=items.length;
-    const bundle=compactMediaBundleForQr(lastPatientMediaBundleManifest);
-    const ready=bundle?count:items.filter(item=>item.downloadUrl&&item.status==='ready').length;
-    const meta={expected:count>0,count,ready,ttlSeconds:Number(ttlSeconds)||currentMediaShareTtlSeconds(),retrySeconds:MEDIA_RETRY_SECONDS,status:count?(ready===count?'ready':'upload-pending'):'none'};
-    if(bundle)meta.b=bundle;
-    return meta;
-  }
-  function encodeKggJsonBase64Url(value){
-    return btoa(unescape(encodeURIComponent(JSON.stringify(value||{})))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-  }
-  function decodeKggJsonBase64Url(value){
-    const encoded=String(value||'').replace(/-/g,'+').replace(/_/g,'/');
-    const padded=encoded+'='.repeat((4-encoded.length%4)%4);
-    return JSON.parse(decodeURIComponent(escape(atob(padded))));
-  }
-  function compactKggH2Exercise(ex){
-    const media=lastPatientMediaBundleManifest?buildExerciseMediaRefsForPatient(ex):buildExerciseMediaManifestForPatient(ex);
-    const loadUnit=ex&&ex.weightUnit||ex&&ex.loadUnit||'kg';
-    const metricUnit=ex&&ex.unit||ex&&ex.metricUnit||'Wdh';
-    return [
-      ex&&ex.name||'Übung',
-      normalizeSetCount(ex&&ex.sets),
-      normalizeSideMode(ex&&ex.side||ex&&ex.laterality||'BI'),
-      loadUnit,
-      metricUnit,
-      ex&&ex.startLoad||ex&&ex.load||ex&&ex.weight||'',
-      ex&&ex.startMetric||ex&&ex.metric||ex&&ex.reps||'',
-      media&&media.length?media:'',
-      ex&&ex.videoUrl||'',
-      ex&&ex.videoLabel||'Video öffnen'
-    ];
-  }
-  function buildKggH2PayloadFromPlan(plan,exercises,patient,mediaMeta){
-    const sourcePlan=plan||{};
-    const sourcePatient=patient||{};
-    return {
-      v:2,
-      i:String(sourcePlan.id||sourcePlan.planId||'plan_'+Date.now()),
-      t:String(sourcePlan.title||'KGG Trainingsplan'),
-      d:Number(sourcePlan.days)||6,
-      extendDays:true,
-      stepDays:6,
-      e:(exercises||[]).map(compactKggH2Exercise),
-      patient:{
-        name:sourcePatient.name||sourcePatient.displayName||'',
-        date:sourcePatient.date||sourcePatient.startDate||'',
-        therapist:sourcePatient.therapist||'',
-        notes:sourcePatient.notes||''
-      },
-      m:{
-        source:'kgg-therapist-app',
-        schema:'KGGH2',
-        createdAt:new Date().toISOString(),
-        media:mediaMeta||{expected:false,count:0,ready:0,status:'none'}
+  function retryPatientMediaItem(media){
+    const id=String(media&&media.id||'');
+    if(!id)return;
+    const retryMs=Math.max(10,Number(media.retrySeconds)||MEDIA_RETRY_SECONDS)*1000;
+    const until=Date.now()+retryMs;
+    const tick=async()=>{
+      try{
+        await loadPatientMediaItem(media);
+      }catch(err){
+        if(Date.now()<until){
+          updatePatientMediaBox(id,'<span>Bild wird geladen ...</span><small>Die App versucht es automatisch erneut.</small>','loading');
+          setTimeout(tick,4000);
+        }else{
+          updatePatientMediaBox(id,'<span>Bild konnte nicht geladen werden.</span><small>Der Plan bleibt ohne Bild nutzbar. Bitte bei Bedarf neuen QR-Code erstellen lassen.</small>','error');
+        }
       }
     };
+    tick();
   }
-  function buildKggH2PayloadFromInternalPayload(payload){
-    const p=payload||{};
-    const meta=p.meta||{};
-    const plan={id:meta.planId||p.id||'',title:meta.title||'KGG Trainingsplan',days:meta.days||6};
-    return buildKggH2PayloadFromPlan(plan,Array.isArray(p.plan)?p.plan:[],p.patient||{},meta.media||null);
+  function patientMediaMarkup(ex){
+    const media=ensureExerciseMediaList(ex).filter(item=>item.type==='image');
+    if(!media.length)return '';
+    return '<div class="patientMediaList">'+media.map(item=>'<div class="patientMedia patientMedia_loading" data-patient-media-id="'+escapeHtml(item.id)+'"><span>Bild wird geladen ...</span><small>Verschluesselte Datei wird geholt und lokal gespeichert.</small></div>').join('')+'</div>';
   }
-  function makeKggH2ShareUrl(baseUrl,publicPayload){
-    const base=String(baseUrl||'').split('#')[0].split('?')[0];
-    return base+'?plan='+encodeURIComponent('KGGH2:'+encodeKggJsonBase64Url(publicPayload));
+  function initPatientMediaDownloads(exercises){
+    (exercises||[]).forEach(ex=>ensureExerciseMediaList(ex).filter(item=>item.type==='image').forEach(retryPatientMediaItem));
   }
-  function expandKggH2Exercise(item){
-    const e=Array.isArray(item)?item:[];
-    const media=Array.isArray(e[7])?e[7]:(e[7]?[e[7]]:[]);
-    const loadUnit=e[3]||'kg';
-    const metricUnit=e[4]||'Wdh';
-    return {
-      name:e[0]||'Übung',
-      sets:Number(e[1])||3,
-      side:normalizeSideMode(e[2]||'BI'),
-      weightUnit:loadUnit,
-      loadUnit,
-      unit:metricUnit,
-      metricUnit,
-      startLoad:e[5]||'',
-      startMetric:e[6]||'',
-      media:media.map(entry=>typeof entry==='string'?{id:entry,type:'image',bundleRef:true}:ensureMediaShape(entry)),
-      videoUrl:e[8]||'',
-      videoLabel:e[9]||'Video öffnen'
-    };
+
+  function patientExerciseLine(ex,index){
+    const name=escapeHtml(ex&&ex.name||'Übung '+(index+1));
+    const sets=escapeHtml(ex&&ex.sets||3);
+    const metric=escapeHtml(ex&&ex.startMetric||ex&&ex.metric||'');
+    const metricUnit=escapeHtml(ex&&ex.unit||ex&&ex.metricUnit||'Wdh');
+    const load=escapeHtml(ex&&ex.startLoad||ex&&ex.load||ex&&ex.weight||'');
+    const loadUnit=escapeHtml(ex&&ex.weightUnit||ex&&ex.loadUnit||'kg');
+    const side=sideModeLabel(ex&&ex.side||ex&&ex.laterality||'BI');
+    const details=[sets+' Sätze'];
+    if(metric)details.push(metric+' '+metricUnit);
+    if(load)details.push(load+' '+loadUnit);
+    details.push(side);
+    return '<article class="patientExercise"><b>'+(index+1)+'. '+name+'</b><small>'+details.map(escapeHtml).join(' · ')+'</small>'+patientMediaMarkup(ex)+'</article>';
   }
-  function convertKggH2PayloadToPatientPayload(raw){
-    const data=raw||{};
-    return {
-      kind:'kgg-patient-plan',
-      version:2,
-      createdAt:data.m&&data.m.createdAt||new Date().toISOString(),
-      patient:data.patient||data.p||{},
-      plan:Array.isArray(data.e)?data.e.map(expandKggH2Exercise):[],
-      meta:{planId:data.i||'',title:data.t||'KGG Trainingsplan',source:'KGGH2',media:data.m&&data.m.media||null}
-    };
+
+  function renderPatientHashView(){
+    const payload=decodePatientPayloadFromHash();
+    if(!payload)return false;
+    const plan=Array.isArray(payload.plan)?payload.plan:(Array.isArray(payload.exercises)?payload.exercises:[]);
+    const patient=payload.patient||{};
+    const displayName=escapeHtml(patient.name||patient.initials||patient.id||'Patient/in');
+    const date=escapeHtml(patient.date||patient.startDate||'');
+    const exercises=plan.filter(Boolean);
+    document.body.innerHTML='<main class="patientAppView">'+
+      '<header><h1>KGG Trainingsplan</h1><p>'+displayName+(date?' · '+date:'')+'</p></header>'+
+      (payload.error?'<section class="patientNotice">Dieser Patienten-Link konnte nicht gelesen werden.</section>':'')+
+      '<section class="patientExercises">'+
+      (exercises.length?exercises.map(patientExerciseLine).join(''):'<p class="patientNotice">Keine Übungen im Plan gefunden.</p>')+
+      '</section>'+
+      '<footer>Bitte trainiere nach Rücksprache mit deiner Praxis. Schmerzen und Auffälligkeiten dort melden.</footer>'+
+      '</main>';
+    const style=document.createElement('style');
+    style.textContent='body{display:block;background:#e8eef6;color:#071027}.patientAppView{width:min(100%,520px);min-height:100vh;margin:0 auto;padding:18px 14px 34px;background:#e8eef6}.patientAppView header{background:#fff;border:2px solid #1b2230;border-radius:22px;padding:16px;box-shadow:0 4px 14px rgba(7,16,39,.08)}.patientAppView h1{font-size:28px;line-height:1.05;margin:0 0 8px}.patientAppView p{margin:0;color:#657386;font-weight:800}.patientExercises{display:grid;gap:10px;margin-top:14px}.patientExercise{background:#fff;border:1px solid #dce3eb;border-radius:16px;padding:14px;box-shadow:0 4px 14px rgba(7,16,39,.08)}.patientExercise b{display:block;font-size:20px}.patientExercise small{display:block;margin-top:7px;color:#38475b;font-size:15px;font-weight:850}.patientMediaList{display:grid;gap:8px;margin-top:12px}.patientMedia{border:1px solid #dce3eb;border-radius:14px;background:#f6f8fb;padding:10px;color:#38475b;font-weight:850}.patientMedia span{display:block}.patientMedia small{font-size:13px;color:#657386}.patientMedia img{display:block;width:100%;max-height:320px;object-fit:contain;border-radius:12px;background:#fff}.patientMedia_ready{background:#fff}.patientMedia_error{background:#fff8e8;border-color:#f2d38a}.patientNotice{background:#fff8e8;border:1px solid #f2d38a;border-radius:16px;padding:14px;margin-top:14px;font-weight:800}.patientAppView footer{margin-top:18px;color:#657386;font-size:13px;font-weight:800}';
+    document.head.appendChild(style);
+    initPatientMediaDownloads(exercises);
+    return true;
   }
-  function buildPatientShareFromCurrentPlan(planOverride,options){
-    if(!planOverride)savePendingToBank('ui_make_patient_payload');
-    const plan=planOverride||getCurrentPlanForOutput('ui_make_patient_payload');
-    const rawExercises=Array.isArray(plan.exercises)?plan.exercises:[];
-    const exercises=rawExercises.map(buildPatientExercisePayload);
-    const patient=plan.patient||state.patient||{};
-    const ttlSeconds=Number(options&&options.ttlSeconds)||currentMediaShareTtlSeconds();
-    const mediaMeta=buildPlanMediaMeta(rawExercises,ttlSeconds);
-    const payload=(window.KGGQrCore&&typeof window.KGGQrCore.makePatientPayload==='function')?window.KGGQrCore.makePatientPayload(exercises,patient,{planId:plan.id||'',updatedAt:plan.updatedAt||'',source:'current-plan-state',media:mediaMeta}):{kind:'kgg-patient-plan',version:1,createdAt:new Date().toISOString(),patient,plan:exercises,meta:{planId:plan.id||'',updatedAt:plan.updatedAt||'',source:'current-plan-state',media:mediaMeta}};
-    payload.meta={...(payload.meta||{}),media:mediaMeta};
-    const publicPayload=buildKggH2PayloadFromPlan(plan,exercises,patient,mediaMeta);
-    const debugBase=String(location.href||'').split('#')[0];
-    const debugUrl=debugBase+'#kgg='+encodePatientPayload(payload);
-    const shareable=isShareablePatientBaseUrl(patientBaseUrl);
-    const patientUrl=shareable?makeKggH2ShareUrl(patientBaseUrl,publicPayload):'';
-    return {url:patientUrl,debugUrl,payload,publicPayload,plan,shareable};
+
+  function renderRuntimeVersionInUi(){
+    const el=document.querySelector('.topbar small');
+    if(!el)return;
+    const marker=' · '+VERSION+' · TEMPLATE_MATCH_V1_RUNTIME_GUARD';
+    if(!el.textContent.includes('TEMPLATE_MATCH_V1_RUNTIME_GUARD'))el.textContent=(el.textContent||'')+marker;
   }
-  function tryRenderQrCode(url){const box=$('patientQrBox'), status=$('patientQrStatus'); if(!box||!status)return; box.innerHTML=''; status.textContent=''; try{let imgData=''; if(window.KGGQrCore&&typeof window.KGGQrCore.renderQrToImg==='function'){imgData=window.KGGQrCore.renderQrToImg(url,{cellSize:10,margin:4});} else if(typeof window.qrcode==='function'){const qr=window.qrcode(0,'L'); qr.addData(url); qr.make(); imgData=qr.createDataURL(10,4);} if(imgData){const img=document.createElement('img'); img.alt='QR-Code zur Patienten-App'; img.src=imgData; box.appendChild(img); return;}}catch(err){console.warn('QR konnte nicht gerendert werden:',err);} box.innerHTML='<span class="qrStatus">QR fehlgeschlagen. Link nutzen.</span>'; status.textContent='Link nutzen.';}
-  function cloneSharePlan(plan){return plan?JSON.parse(JSON.stringify(plan)):null;}
-  function planHasMedia(plan){
-    const exercises=plan&&Array.isArray(plan.exercises)?plan.exercises:[];
-    return exercises.some(ex=>ensureExerciseMediaList(ex).length>0);
-  }
-  function currentPatientLinkUrl(){
-    const link=$('patientAppLink');
-    return link&&link.href&&link.href!=='#'?link.href:'';
-  }
-  function setPatientCopyButtonLabel(){
-    const btn=$('copyPatientLink');
-    if(btn)btn.textContent=currentMediaShareTtlSeconds()>=MEDIA_UPLOAD_LONG_TTL_SECONDS?'24h-Link kopieren':'Link kopieren';
-  }
-  function setManualPatientLinkField(value,visible,selectText){
-    const field=$('patientLinkCopyField');
-    if(!field)return;
-    field.value=value||'';
-    field.classList.toggle('hidden',!visible);
-    if(visible&&selectText){
-      try{field.focus({preventScroll:true});}catch(err){try{field.focus();}catch(innerErr){}}
-      try{field.select();}catch(err){}
-      try{field.setSelectionRange(0,field.value.length);}catch(err){}
-    }
-  }
-  async function copyTextValue(value){
-    if(!value)return false;
-    if(navigator.clipboard&&window.isSecureContext){
-      try{await navigator.clipboard.writeText(value);return true;}catch(err){console.warn('Clipboard API blockiert:',err);}
-    }
-    const field=$('patientLinkCopyField');
-    if(!field||!document.execCommand)return false;
-    setManualPatientLinkField(value,true,true);
-    try{return !!document.execCommand('copy');}catch(err){console.warn('execCommand copy blockiert:',err);return false;}
-  }
-  async function copyPatientLink(){
-    if(Date.now()<copyPatientLinkSuppressClickUntil)return;
-    const status=$('patientQrStatus');
-    const url=currentPatientLinkUrl();
-    if(!url){if(status)status.textContent='Kein Link.';return;}
+  function androidBuildStatus(){
     try{
-      const ok=await copyTextValue(url);
-      if(ok){
-        setManualPatientLinkField(url,false,false);
-        if(status)status.textContent=currentMediaShareTtlSeconds()>=MEDIA_UPLOAD_LONG_TTL_SECONDS?'24h-Link kopiert.':'Link kopiert.';
-      }else{
-        setManualPatientLinkField(url,true,true);
-        if(status)status.textContent='Kopieren blockiert. Link ist markiert.';
+      if(!(window.KGGAndroidApp&&typeof window.KGGAndroidApp.updateStatus==='function'))return null;
+      return JSON.parse(window.KGGAndroidApp.updateStatus()||'{}');
+    }catch(err){return null;}
+  }
+  function renderBuildIdentityInUi(){
+    const el=$('kggBuildBadge');
+    if(!el)return;
+    const native=androidBuildStatus()||{};
+    const parts=[
+      'App-Version '+VERSION,
+      'Build-Zeit '+KGG_BUILD_INFO.buildTime,
+      'Build-Code '+KGG_BUILD_INFO.buildCode,
+      'HTML '+KGG_BUILD_INFO.htmlFile
+    ];
+    if(native.versionName||native.versionCode)parts.push('Android '+(native.versionName||'')+' ('+(native.versionCode||'?')+')');
+    if(native.packageName)parts.push('Package '+native.packageName);
+    if(native.currentWebVersion)parts.push('WebStore v'+native.currentWebVersion);
+    el.textContent=parts.join(' · ');
+  }
+  /* v295 SINGLE KGGScan REBUILD
+     Architekturentscheidung: genau ein aktiver Scan-Controller.
+     QR wird lokal zuerst gelesen; Gemini ist nur Papierplan-Fallback.
+     Keine zweite scanJobsState-Wahrheit, keine Beta-Parallel-Scanlogik.
+  */
+  /* kgg-mini-patch-v400-09-qr-photo-upload-decode
+     Robustere QR-Erkennung fuer Bilder aus Galerie/Foto-Datenbank.
+     Kamera-Scan bleibt unveraendert; nur Datei-/Bild-Decoding wird verbessert.
+  */
+  function scanReadFileAsDataUrl(file){
+    return new Promise((resolve,reject)=>{
+      const reader=new FileReader();
+      reader.onload=()=>resolve(String(reader.result||''));
+      reader.onerror=()=>reject(reader.error||new Error('Bild konnte nicht gelesen werden'));
+      reader.readAsDataURL(file);
+    });
+  }
+  function scanCanvasFromImageSource(source,width,height,maxSide){
+    const srcW=Math.max(1,Math.round(width||source.naturalWidth||source.videoWidth||source.width||1));
+    const srcH=Math.max(1,Math.round(height||source.naturalHeight||source.videoHeight||source.height||1));
+    const limit=Math.max(320,Number(maxSide)||2200);
+    const scale=Math.min(1,limit/Math.max(1,srcW,srcH));
+    const canvas=document.createElement('canvas');
+    canvas.width=Math.max(1,Math.round(srcW*scale));
+    canvas.height=Math.max(1,Math.round(srcH*scale));
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    ctx.fillStyle='#fff';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.imageSmoothingEnabled=true;
+    ctx.imageSmoothingQuality='high';
+    ctx.drawImage(source,0,0,canvas.width,canvas.height);
+    return canvas;
+  }
+  function scanImageElementFromUrl(url){
+    return new Promise((resolve,reject)=>{
+      const img=new Image();
+      img.onload=()=>resolve(img);
+      img.onerror=()=>reject(new Error('Bild konnte nicht gelesen werden'));
+      img.decoding='async';
+      img.src=url;
+    });
+  }
+  async function scanImageCanvasFromFile(file,maxSide){
+    const limit=Math.max(320,Number(maxSide)||2200);
+    if(window.createImageBitmap){
+      try{
+        const bitmap=await createImageBitmap(file,{imageOrientation:'from-image'});
+        try{return scanCanvasFromImageSource(bitmap,bitmap.width,bitmap.height,limit);}
+        finally{try{bitmap.close();}catch(closeErr){}}
+      }catch(bitmapErr){
+        console.warn('QR-Dateibild: createImageBitmap fehlgeschlagen, fallback auf Image/FileReader.',bitmapErr);
+      }
+    }
+    let url='';
+    try{
+      url=URL.createObjectURL(file);
+      const img=await scanImageElementFromUrl(url);
+      return scanCanvasFromImageSource(img,img.naturalWidth||img.width,img.naturalHeight||img.height,limit);
+    }catch(objectUrlErr){
+      console.warn('QR-Dateibild: ObjectURL fehlgeschlagen, fallback auf DataURL.',objectUrlErr);
+      try{
+        const dataUrl=await scanReadFileAsDataUrl(file);
+        const img=await scanImageElementFromUrl(dataUrl);
+        return scanCanvasFromImageSource(img,img.naturalWidth||img.width,img.naturalHeight||img.height,limit);
+      }catch(dataUrlErr){
+        throw dataUrlErr||objectUrlErr||new Error('Bild konnte nicht gelesen werden');
+      }
+    }finally{
+      if(url){try{URL.revokeObjectURL(url);}catch(revokeErr){}}
+    }
+  }
+  function scanCloneCanvas(src){
+    const canvas=document.createElement('canvas');
+    canvas.width=src.width;
+    canvas.height=src.height;
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    ctx.fillStyle='#fff';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(src,0,0);
+    return canvas;
+  }
+  function scanCropCanvas(src,box){
+    const canvas=document.createElement('canvas');
+    canvas.width=Math.max(64,Math.round(src.width*box.w));
+    canvas.height=Math.max(64,Math.round(src.height*box.h));
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    ctx.fillStyle='#fff';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(src,src.width*box.x,src.height*box.y,src.width*box.w,src.height*box.h,0,0,canvas.width,canvas.height);
+    return canvas;
+  }
+  function scanRotateCanvas(src,rotation){
+    const rot=((Number(rotation)||0)%360+360)%360;
+    if(!rot)return src;
+    const flip=rot===90||rot===270;
+    const canvas=document.createElement('canvas');
+    canvas.width=flip?src.height:src.width;
+    canvas.height=flip?src.width:src.height;
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    ctx.fillStyle='#fff';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.save();
+    if(rot===90){ctx.translate(canvas.width,0);ctx.rotate(Math.PI/2);}
+    else if(rot===180){ctx.translate(canvas.width,canvas.height);ctx.rotate(Math.PI);}
+    else if(rot===270){ctx.translate(0,canvas.height);ctx.rotate(-Math.PI/2);}
+    ctx.drawImage(src,0,0);
+    ctx.restore();
+    return canvas;
+  }
+  function scanScaleCanvas(src,minSide,maxSide){
+    const shortest=Math.max(1,Math.min(src.width,src.height));
+    const longest=Math.max(1,Math.max(src.width,src.height));
+    const minTarget=Math.max(120,Number(minSide)||0);
+    const maxTarget=Math.max(minTarget,Number(maxSide)||2600);
+    let scale=1;
+    if(minTarget&&shortest<minTarget)scale=minTarget/shortest;
+    if(longest*scale>maxTarget)scale=maxTarget/longest;
+    if(Math.abs(scale-1)<0.03)return src;
+    const canvas=document.createElement('canvas');
+    canvas.width=Math.max(1,Math.round(src.width*scale));
+    canvas.height=Math.max(1,Math.round(src.height*scale));
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    ctx.fillStyle='#fff';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.imageSmoothingEnabled=scale<1;
+    ctx.imageSmoothingQuality='high';
+    ctx.drawImage(src,0,0,canvas.width,canvas.height);
+    return canvas;
+  }
+  function scanFilteredCanvas(src,mode){
+    if(mode==='normal')return src;
+    const canvas=scanCloneCanvas(src);
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    if(mode==='contrast'){
+      ctx.save();
+      ctx.filter='contrast(2.05) brightness(1.12) saturate(0)';
+      ctx.drawImage(src,0,0);
+      ctx.restore();
+      return canvas;
+    }
+    if(mode==='softContrast'){
+      ctx.save();
+      ctx.filter='contrast(1.45) brightness(1.05) saturate(0)';
+      ctx.drawImage(src,0,0);
+      ctx.restore();
+      return canvas;
+    }
+    if(mode==='threshold'||mode==='thresholdLow'||mode==='thresholdHigh'||mode==='invert'){
+      const img=ctx.getImageData(0,0,canvas.width,canvas.height);
+      const d=img.data;
+      const threshold=mode==='thresholdLow'?118:(mode==='thresholdHigh'?178:148);
+      for(let i=0;i<d.length;i+=4){
+        let g=(d[i]*.299+d[i+1]*.587+d[i+2]*.114)>threshold?255:0;
+        if(mode==='invert')g=255-g;
+        d[i]=d[i+1]=d[i+2]=g;
+      }
+      ctx.putImageData(img,0,0);
+      return canvas;
+    }
+    return canvas;
+  }
+  /* kgg-mini-patch-v400-10-qr-gallery-bitmap-debug
+     Galerie-/Fotodatenbank-QR-Fix:
+     Einige Android WebViews erkennen QR-Codes per BarcodeDetector auf Kamera-Bildern,
+     aber nicht zuverlässig auf Canvas-Crops aus Galerie-Dateien. Deshalb wird jeder
+     Canvas-Versuch zusätzlich als PNG-Blob -> ImageBitmap dekodiert und dann erneut
+     an BarcodeDetector gegeben. Außerdem bleiben Warnungen in der Scan-Vorschau sichtbar.
+  */
+  function scanCanvasToBlob(canvas,type,quality){
+    return new Promise(resolve=>{
+      try{
+        canvas.toBlob(blob=>resolve(blob),type||'image/png',quality||.92);
+      }catch(err){resolve(null);}
+    });
+  }
+  async function scanDetectQrViaBitmapFromCanvas(canvas,detector){
+    if(!detector||!window.createImageBitmap||!canvas||!canvas.toBlob)return '';
+    let blob=null,bitmap=null;
+    try{
+      blob=await scanCanvasToBlob(canvas,'image/png',.92);
+      if(!blob)return '';
+      bitmap=await createImageBitmap(blob);
+      const hits=await detector.detect(bitmap).catch(()=>[]);
+      if(hits&&hits.length){
+        return hits[0].rawValue||hits[0].rawData||'';
       }
     }catch(err){
-      console.warn('Patienten-Link konnte nicht kopiert werden:',err);
-      setManualPatientLinkField(url,true,true);
-      if(status)status.textContent='Kopieren blockiert. Link ist markiert.';
-    }
-  }
-  async function enableLongMediaShare(){
-    const btn=$('copyPatientLink'), status=$('patientQrStatus');
-    if(!lastPatientSharePlanSnapshot){if(status)status.textContent='Erst Patienten-Link erzeugen.';return;}
-    if(!planHasMedia(lastPatientSharePlanSnapshot)){if(status)status.textContent='Keine Bilder im Plan.';return;}
-    patientShareTtlSeconds=MEDIA_UPLOAD_LONG_TTL_SECONDS;
-    if(btn)btn.textContent='24h-Link wird erstellt ...';
-    try{
-      const url=await renderPatientShareOutput({plan:lastPatientSharePlanSnapshot,ttlSeconds:MEDIA_UPLOAD_LONG_TTL_SECONDS,force:true});
-      setManualPatientLinkField(url,!!url,true);
-      if(status)status.textContent=url?'24h-Link bereit und markiert.':'24h-Link fehlgeschlagen.';
+      return '';
     }finally{
-      setPatientCopyButtonLabel();
+      if(bitmap){try{bitmap.close();}catch(closeErr){}}
     }
+    return '';
   }
-  function openLongMediaConfirmModal(){
-    const status=$('patientQrStatus');
-    if(!lastPatientSharePlanSnapshot){if(status)status.textContent='Erst Patienten-Link erzeugen.';return;}
-    if(!planHasMedia(lastPatientSharePlanSnapshot)){if(status)status.textContent='Keine Bilder im Plan.';return;}
-    $('longMediaConfirmModal').classList.add('open');
+  async function detectQrOnCanvas(canvas,detector){
+    if(detector){
+      try{
+        const hits=await detector.detect(canvas).catch(()=>[]);
+        if(hits&&hits.length){
+          const raw=hits[0].rawValue||hits[0].rawData||'';
+          if(raw)return raw;
 ```

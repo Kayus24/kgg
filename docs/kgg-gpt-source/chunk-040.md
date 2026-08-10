@@ -4,424 +4,424 @@
 - Lines: 16801-17220
 
 ```html
-    }
-    var x = (leftX + rightX) / 2;
-    var topY = Math.round(p.y);
-    while (matrix.get(Math.round(x), topY)) {
-        topY--;
-    }
-    var bottomY = Math.round(p.y);
-    while (matrix.get(Math.round(x), bottomY)) {
-        bottomY++;
-    }
-    var y = (topY + bottomY) / 2;
-    return { x: x, y: y };
-}
-function locate(matrix) {
-    var finderPatternQuads = [];
-    var activeFinderPatternQuads = [];
-    var alignmentPatternQuads = [];
-    var activeAlignmentPatternQuads = [];
-    var _loop_1 = function (y) {
-        var length_1 = 0;
-        var lastBit = false;
-        var scans = [0, 0, 0, 0, 0];
-        var _loop_2 = function (x) {
-            var v = matrix.get(x, y);
-            if (v === lastBit) {
-                length_1++;
-            }
-            else {
-                scans = [scans[1], scans[2], scans[3], scans[4], length_1];
-                length_1 = 1;
-                lastBit = v;
-                // Do the last 5 color changes ~ match the expected ratio for a finder pattern? 1:1:3:1:1 of b:w:b:w:b
-                var averageFinderPatternBlocksize = sum(scans) / 7;
-                var validFinderPattern = Math.abs(scans[0] - averageFinderPatternBlocksize) < averageFinderPatternBlocksize &&
-                    Math.abs(scans[1] - averageFinderPatternBlocksize) < averageFinderPatternBlocksize &&
-                    Math.abs(scans[2] - 3 * averageFinderPatternBlocksize) < 3 * averageFinderPatternBlocksize &&
-                    Math.abs(scans[3] - averageFinderPatternBlocksize) < averageFinderPatternBlocksize &&
-                    Math.abs(scans[4] - averageFinderPatternBlocksize) < averageFinderPatternBlocksize &&
-                    !v; // And make sure the current pixel is white since finder patterns are bordered in white
-                // Do the last 3 color changes ~ match the expected ratio for an alignment pattern? 1:1:1 of w:b:w
-                var averageAlignmentPatternBlocksize = sum(scans.slice(-3)) / 3;
-                var validAlignmentPattern = Math.abs(scans[2] - averageAlignmentPatternBlocksize) < averageAlignmentPatternBlocksize &&
-                    Math.abs(scans[3] - averageAlignmentPatternBlocksize) < averageAlignmentPatternBlocksize &&
-                    Math.abs(scans[4] - averageAlignmentPatternBlocksize) < averageAlignmentPatternBlocksize &&
-                    v; // Is the current pixel black since alignment patterns are bordered in black
-                if (validFinderPattern) {
-                    // Compute the start and end x values of the large center black square
-                    var endX_1 = x - scans[3] - scans[4];
-                    var startX_1 = endX_1 - scans[2];
-                    var line = { startX: startX_1, endX: endX_1, y: y };
-                    // Is there a quad directly above the current spot? If so, extend it with the new line. Otherwise, create a new quad with
-                    // that line as the starting point.
-                    var matchingQuads = activeFinderPatternQuads.filter(function (q) {
-                        return (startX_1 >= q.bottom.startX && startX_1 <= q.bottom.endX) ||
-                            (endX_1 >= q.bottom.startX && startX_1 <= q.bottom.endX) ||
-                            (startX_1 <= q.bottom.startX && endX_1 >= q.bottom.endX && ((scans[2] / (q.bottom.endX - q.bottom.startX)) < MAX_QUAD_RATIO &&
-                                (scans[2] / (q.bottom.endX - q.bottom.startX)) > MIN_QUAD_RATIO));
-                    });
-                    if (matchingQuads.length > 0) {
-                        matchingQuads[0].bottom = line;
-                    }
-                    else {
-                        activeFinderPatternQuads.push({ top: line, bottom: line });
-                    }
-                }
-                if (validAlignmentPattern) {
-                    // Compute the start and end x values of the center black square
-                    var endX_2 = x - scans[4];
-                    var startX_2 = endX_2 - scans[3];
-                    var line = { startX: startX_2, y: y, endX: endX_2 };
-                    // Is there a quad directly above the current spot? If so, extend it with the new line. Otherwise, create a new quad with
-                    // that line as the starting point.
-                    var matchingQuads = activeAlignmentPatternQuads.filter(function (q) {
-                        return (startX_2 >= q.bottom.startX && startX_2 <= q.bottom.endX) ||
-                            (endX_2 >= q.bottom.startX && startX_2 <= q.bottom.endX) ||
-                            (startX_2 <= q.bottom.startX && endX_2 >= q.bottom.endX && ((scans[2] / (q.bottom.endX - q.bottom.startX)) < MAX_QUAD_RATIO &&
-                                (scans[2] / (q.bottom.endX - q.bottom.startX)) > MIN_QUAD_RATIO));
-                    });
-                    if (matchingQuads.length > 0) {
-                        matchingQuads[0].bottom = line;
-                    }
-                    else {
-                        activeAlignmentPatternQuads.push({ top: line, bottom: line });
-                    }
-                }
-            }
-        };
-        for (var x = -1; x <= matrix.width; x++) {
-            _loop_2(x);
-        }
-        finderPatternQuads.push.apply(finderPatternQuads, activeFinderPatternQuads.filter(function (q) { return q.bottom.y !== y && q.bottom.y - q.top.y >= 2; }));
-        activeFinderPatternQuads = activeFinderPatternQuads.filter(function (q) { return q.bottom.y === y; });
-        alignmentPatternQuads.push.apply(alignmentPatternQuads, activeAlignmentPatternQuads.filter(function (q) { return q.bottom.y !== y; }));
-        activeAlignmentPatternQuads = activeAlignmentPatternQuads.filter(function (q) { return q.bottom.y === y; });
+  const customBankKey='kgg_html_app_v2_custom_exercise_bank';
+  const deletedBankKey='kgg_html_app_v2_deleted_exercise_bank_ids';
+  const pwaInstallPromptSeenKey='kgg_pwa_install_prompt_seen_v1';
+  const pwaServiceWorkerUrl='kgg_therapist_sw.js';
+
+  const kggUpdateManifestUrl='https://kayus24.github.io/kgg/therapist-app/kgg_update_manifest.json';
+  const kggAutoUpdateCheckMs=30*60*1000;
+  const kggAutoUpdateSessionKey='kgg_auto_update_target_v1';
+  const adminSecretsKey='kgg_admin_local_secrets_v1';
+  let deferredInstallPrompt=null;
+  let adminSecrets={geminiKeys:[],mediaDropzoneEndpoint:'',mediaDropzoneUploadToken:'',updatedAt:''};
+  const norm=s=>String(s||'').toLowerCase().replace(/[ä]/g,'ae').replace(/[ö]/g,'oe').replace(/[ü]/g,'ue').replace(/[ß]/g,'ss').replace(/[^a-z0-9]+/g,' ').trim();
+  const compact=s=>norm(s).replace(/\s+/g,'');
+  const bank=[
+    ['abd','Abduktion Maschine','abd,abduktion,abductor,abduktor,hüft abduktion',3,'Wdh','kg'],['add','Adduktion Maschine','add,adduktion,adduktor,adductor,hüft adduktion',3,'Wdh','kg'],['legpress','Beinpresse','beinpresse,bein presse,leg press,presse',3,'Wdh','kg'],['bridge','Bridging','bridge,bridging,beckenheben,glute bridge',3,'Wdh','kg'],['copenhagen','Copenhagen Plank','copenhagen,adduktoren plank',3,'Zeit','keine'],['bike','Ergometer / Bike','fahrrad,bike,ergometer,warmup,cardio,rad',1,'Zeit','Stufe/Watt'],['fire','Fire Hydrants','fire hydrant,hydrants,vierfüßler abduktion',3,'Wdh','kg'],['hipthrust','Hip Thrust','hip thrust,glute thrust',3,'Wdh','kg'],['legcurl','Kniebeuger Maschine','kniebeuger,leg curl,hamstring curl,beinbeuger',3,'Wdh','kg'],['kneeext','Kniestrecker Maschine','kniestrecker,knieextension,beinstrecker,leg extension,knei ext',3,'Wdh','kg'],['row','Rudern','rudern,seated row,kabelrudern,ruderzug',3,'Wdh','kg'],['lat','Latziehen','latziehen,latzug,lat pulldown,pulldown,lat',3,'Wdh','kg'],['pallof','Pallof Press','pallof,pallof press,anti rotation',3,'Wdh','kg'],['plank','Plank','plank,blank,unterarmstütz,stütz',3,'Zeit','keine'],['squat','Squat','squat,kniebeuge,kniebeugen',3,'Wdh','kg'],['rdl','Romanian Deadlift','romanian deadlift,rdl,dead lift',3,'Wdh','kg'],['deadlift','Wadenheben','wadenheben,calf raise',3,'Wdh','kg'],['shoulder','Schulterpresse','schulter presse,shoulder press',3,'Wdh','kg']
+  ].map(a=>({id:a[0],name:a[1],aliases:a[2],sets:a[3],unit:a[4],weightUnit:a[5]}));
+  let state={plan:[],recent:[],packages:[{id:'pkg1',name:'Knie Standard',exercises:['Beinpresse','Kniebeuger Maschine','Kniestrecker Maschine']},{id:'pkg2',name:'Rücken Standard',exercises:['Rudern','Latziehen','Pallof Press']}],patient:{},bankOpen:false,editId:null,sortMenuId:null,reorderSuppressClick:false,largePdfMode:false,textSyncing:false};
+  let bankSelectMode='replaceActive';
+  let deletedBankIds=new Set();
+  let pendingBankDeleteId=null;
+  let bankSwipeSuppressClickUntil=0;
+  const MEDIA_UPLOAD_TTL_SECONDS=300;
+  const MEDIA_UPLOAD_LONG_TTL_SECONDS=86400;
+  const MEDIA_LONG_PRESS_MS=5000;
+  const MEDIA_RETRY_SECONDS=240;
+  const MEDIA_IMAGE_MAX_DIM=1280;
+  const MEDIA_IMAGE_QUALITY=.78;
+  const mediaDbName='kgg_media_v1';
+  const mediaStoreName='encryptedBlobs';
+  let mediaDbPromise=null;
+  let patientShareTtlSeconds=MEDIA_UPLOAD_TTL_SECONDS;
+  let lastPatientSharePlanSnapshot=null;
+  let lastPatientMediaBundleManifest=null;
+  let copyPatientLinkSuppressClickUntil=0;
+  const mediaDropzoneRuntimeTokens={};
+
+  // v2 Plan-State-Adapter: KGGDataStore.currentPlan ist die zentrale Planquelle.
+  // state.plan bleibt als bestehender UI-/Legacy-Spiegel erhalten.
+  function makeLocalId(){return 'p_'+Date.now()+'_'+Math.random().toString(36).slice(2,8)}
+  function makeMediaId(){return 'media_'+Date.now()+'_'+Math.random().toString(36).slice(2,10)}
+  function getMediaDropzoneSetting(key){
+    try{return String(window[key]||localStorage.getItem(key)||'').trim();}catch(e){return String(window[key]||'').trim();}
+  }
+  function cleanMediaDropzoneEndpoint(value){return String(value||'').trim().replace(/\/+$/,'');}
+  function cleanMediaDropzoneId(value){return String(value||'').replace(/[^a-zA-Z0-9._-]/g,'').slice(0,96);}
+  function initMediaDropzoneUploadAdapter(){
+    const endpoint=cleanMediaDropzoneEndpoint(getMediaDropzoneSetting('KGG_MEDIA_DROPZONE_ENDPOINT')||getMediaDropzoneSetting('kggMediaDropzoneEndpoint'));
+    window.KGGMediaDropzone={
+      setEndpoint(url){try{localStorage.setItem('kggMediaDropzoneEndpoint',cleanMediaDropzoneEndpoint(url));}catch(e){}},
+      setUploadToken(token){try{localStorage.setItem('kggMediaDropzoneUploadToken',String(token||'').trim());}catch(e){}},
+      clear(){try{localStorage.removeItem('kggMediaDropzoneEndpoint');localStorage.removeItem('kggMediaDropzoneUploadToken');}catch(e){}}
     };
-    for (var y = 0; y <= matrix.height; y++) {
-        _loop_1(y);
-    }
-    finderPatternQuads.push.apply(finderPatternQuads, activeFinderPatternQuads.filter(function (q) { return q.bottom.y - q.top.y >= 2; }));
-    alignmentPatternQuads.push.apply(alignmentPatternQuads, activeAlignmentPatternQuads);
-    var finderPatternGroups = finderPatternQuads
-        .filter(function (q) { return q.bottom.y - q.top.y >= 2; }) // All quads must be at least 2px tall since the center square is larger than a block
-        .map(function (q) {
-        var x = (q.top.startX + q.top.endX + q.bottom.startX + q.bottom.endX) / 4;
-        var y = (q.top.y + q.bottom.y + 1) / 2;
-        if (!matrix.get(Math.round(x), Math.round(y))) {
-            return;
-        }
-        var lengths = [q.top.endX - q.top.startX, q.bottom.endX - q.bottom.startX, q.bottom.y - q.top.y + 1];
-        var size = sum(lengths) / lengths.length;
-        var score = scorePattern({ x: Math.round(x), y: Math.round(y) }, [1, 1, 3, 1, 1], matrix);
-        return { score: score, x: x, y: y, size: size };
-    })
-        .filter(function (q) { return !!q; }) // Filter out any rejected quads from above
-        .sort(function (a, b) { return a.score - b.score; })
-        // Now take the top finder pattern options and try to find 2 other options with a similar size.
-        .map(function (point, i, finderPatterns) {
-        if (i > MAX_FINDERPATTERNS_TO_SEARCH) {
-            return null;
-        }
-        var otherPoints = finderPatterns
-            .filter(function (p, ii) { return i !== ii; })
-            .map(function (p) { return ({ x: p.x, y: p.y, score: p.score + (Math.pow((p.size - point.size), 2)) / point.size, size: p.size }); })
-            .sort(function (a, b) { return a.score - b.score; });
-        if (otherPoints.length < 2) {
-            return null;
-        }
-        var score = point.score + otherPoints[0].score + otherPoints[1].score;
-        return { points: [point].concat(otherPoints.slice(0, 2)), score: score };
-    })
-        .filter(function (q) { return !!q; }) // Filter out any rejected finder patterns from above
-        .sort(function (a, b) { return a.score - b.score; });
-    if (finderPatternGroups.length === 0) {
-        return null;
-    }
-    var _a = reorderFinderPatterns(finderPatternGroups[0].points[0], finderPatternGroups[0].points[1], finderPatternGroups[0].points[2]), topRight = _a.topRight, topLeft = _a.topLeft, bottomLeft = _a.bottomLeft;
-    var alignment = findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, bottomLeft);
-    var result = [];
-    if (alignment) {
-        result.push({
-            alignmentPattern: { x: alignment.alignmentPattern.x, y: alignment.alignmentPattern.y },
-            bottomLeft: { x: bottomLeft.x, y: bottomLeft.y },
-            dimension: alignment.dimension,
-            topLeft: { x: topLeft.x, y: topLeft.y },
-            topRight: { x: topRight.x, y: topRight.y },
-        });
-    }
-    // We normally use the center of the quads as the location of the tracking points, which is optimal for most cases and will account
-    // for a skew in the image. However, In some cases, a slight skew might not be real and instead be caused by image compression
-    // errors and/or low resolution. For those cases, we'd be better off centering the point exactly in the middle of the black area. We
-    // compute and return the location data for the naively centered points as it is little additional work and allows for multiple
-    // attempts at decoding harder images.
-    var midTopRight = recenterLocation(matrix, topRight);
-    var midTopLeft = recenterLocation(matrix, topLeft);
-    var midBottomLeft = recenterLocation(matrix, bottomLeft);
-    var centeredAlignment = findAlignmentPattern(matrix, alignmentPatternQuads, midTopRight, midTopLeft, midBottomLeft);
-    if (centeredAlignment) {
-        result.push({
-            alignmentPattern: { x: centeredAlignment.alignmentPattern.x, y: centeredAlignment.alignmentPattern.y },
-            bottomLeft: { x: midBottomLeft.x, y: midBottomLeft.y },
-            topLeft: { x: midTopLeft.x, y: midTopLeft.y },
-            topRight: { x: midTopRight.x, y: midTopRight.y },
-            dimension: centeredAlignment.dimension,
-        });
-    }
-    if (result.length === 0) {
-        return null;
-    }
-    return result;
-}
-exports.locate = locate;
-function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, bottomLeft) {
-    var _a;
-    // Now that we've found the three finder patterns we can determine the blockSize and the size of the QR code.
-    // We'll use these to help find the alignment pattern but also later when we do the extraction.
-    var dimension;
-    var moduleSize;
-    try {
-        (_a = computeDimension(topLeft, topRight, bottomLeft, matrix), dimension = _a.dimension, moduleSize = _a.moduleSize);
-    }
-    catch (e) {
-        return null;
-    }
-    // Now find the alignment pattern
-    var bottomRightFinderPattern = {
-        x: topRight.x - topLeft.x + bottomLeft.x,
-        y: topRight.y - topLeft.y + bottomLeft.y,
+    if(!endpoint)return;
+    if(window.KGGMediaUploadAdapter&&!window.KGGMediaUploadAdapter.isMock)return;
+    window.KGGMediaUploadAdapter={
+      name:'kgg-media-dropzone-kv-v1',
+      isMock:false,
+      async upload(blob,context){
+        const manifest=context&&context.manifest||{};
+        const id=cleanMediaDropzoneId(manifest.id)||makeMediaId();
+        const ttlSeconds=Math.max(60,Math.min(MEDIA_UPLOAD_LONG_TTL_SECONDS,Number(context&&context.ttlSeconds)||MEDIA_UPLOAD_TTL_SECONDS));
+        const token=getMediaDropzoneSetting('KGG_MEDIA_DROPZONE_UPLOAD_TOKEN')||getMediaDropzoneSetting('kggMediaDropzoneUploadToken');
+        const headers={'Content-Type':'application/octet-stream','X-KGG-Media-Id':id,'X-KGG-Media-Mime':manifest.mime||'application/octet-stream','X-KGG-Media-Bytes':String(blob&&blob.size||0)};
+        if(token)headers['X-KGG-Upload-Token']=token;
+        const res=await fetch(endpoint+'/upload?ttl='+encodeURIComponent(ttlSeconds),{method:'POST',headers,body:blob,cache:'no-store'});
+        if(!res.ok)throw new Error('Medien-Upload fehlgeschlagen ('+res.status+').');
+        const data=await res.json();
+        if(data&&data.id&&data.deleteToken)mediaDropzoneRuntimeTokens[data.id]=data.deleteToken;
+        return data;
+      },
+      scheduleDelete(media,options){
+        const delay=Math.max(1000,Number(options&&options.delayMs)||((Number(media&&media.ttlSeconds)||MEDIA_UPLOAD_TTL_SECONDS)*1000));
+        setTimeout(()=>{this.delete(media);},delay);
+      },
+      async delete(media){
+        const id=cleanMediaDropzoneId(media&&media.id);
+        if(!id)return false;
+        const deleteToken=(media&&media.deleteToken)||mediaDropzoneRuntimeTokens[id]||'';
+        const deleteUrl=(media&&media.deleteUrl)||endpoint+'/media/'+encodeURIComponent(id);
+        try{
+          const res=await fetch(deleteUrl,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({deleteToken}),cache:'no-store'});
+          return res.ok||res.status===404||res.status===410;
+        }catch(err){console.warn('Media delete fehlgeschlagen:',err);return false;}
+      }
     };
-    var modulesBetweenFinderPatterns = ((distance(topLeft, bottomLeft) + distance(topLeft, topRight)) / 2 / moduleSize);
-    var correctionToTopLeft = 1 - (3 / modulesBetweenFinderPatterns);
-    var expectedAlignmentPattern = {
-        x: topLeft.x + correctionToTopLeft * (bottomRightFinderPattern.x - topLeft.x),
-        y: topLeft.y + correctionToTopLeft * (bottomRightFinderPattern.y - topLeft.y),
+  }
+  initMediaDropzoneUploadAdapter();
+  function bytesToBase64Url(input){
+    const bytes=input instanceof Uint8Array?input:new Uint8Array(input);
+    let binary='';
+    for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));
+    return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+  function ensureMediaShape(media){
+    const src=media||{};
+    return {
+      id:src.id||makeMediaId(),
+      type:src.type||src.kind||'image',
+      name:src.name||src.originalName||'uebungsbild.jpg',
+      mime:src.mime||'image/jpeg',
+      width:Number(src.width)||0,
+      height:Number(src.height)||0,
+      originalSize:Number(src.originalSize)||0,
+      compressedSize:Number(src.compressedSize)||0,
+      encryptedSize:Number(src.encryptedSize)||0,
+      status:src.status||'local-encrypted',
+      encrypted:src.encrypted!==false,
+      storage:src.storage||'indexeddb-local',
+      downloadUrl:src.downloadUrl||'',
+      deleteUrl:src.deleteUrl||'',
+      deleteToken:src.deleteToken||'',
+      ttlSeconds:Number(src.ttlSeconds)||MEDIA_UPLOAD_TTL_SECONDS,
+      retrySeconds:Number(src.retrySeconds)||MEDIA_RETRY_SECONDS,
+      createdAt:src.createdAt||new Date().toISOString(),
+      crypto:src.crypto||null
     };
-    var alignmentPatterns = alignmentPatternQuads
-        .map(function (q) {
-        var x = (q.top.startX + q.top.endX + q.bottom.startX + q.bottom.endX) / 4;
-        var y = (q.top.y + q.bottom.y + 1) / 2;
-        if (!matrix.get(Math.floor(x), Math.floor(y))) {
-            return;
-        }
-        var lengths = [q.top.endX - q.top.startX, q.bottom.endX - q.bottom.startX, (q.bottom.y - q.top.y + 1)];
-        var size = sum(lengths) / lengths.length;
-        var sizeScore = scorePattern({ x: Math.floor(x), y: Math.floor(y) }, [1, 1, 1], matrix);
-        var score = sizeScore + distance({ x: x, y: y }, expectedAlignmentPattern);
-        return { x: x, y: y, score: score };
-    })
-        .filter(function (v) { return !!v; })
-        .sort(function (a, b) { return a.score - b.score; });
-    // If there are less than 15 modules between finder patterns it's a version 1 QR code and as such has no alignmemnt pattern
-    // so we can only use our best guess.
-    var alignmentPattern = modulesBetweenFinderPatterns >= 15 && alignmentPatterns.length ? alignmentPatterns[0] : expectedAlignmentPattern;
-    return { alignmentPattern: alignmentPattern, dimension: dimension };
-}
-
-
-/***/ })
-/******/ ])["default"];
-});
-</script>
-<!-- KGG PATCH END kgg-v021-embed-jsqr-gallery-decode lib -->
-
-<style id="kgg-v024-rollback-v023-debug-breakage-guard-style">
-/* KGG PATCH START: kgg-v024-rollback-v023-debug-breakage-guard-style */
-#kggAdminDebugFab,
-#kggAdminDebugBtn,
-#kggAdminHubBtn,
-.kggAdminDebugBtn,
-.kggAdminHubBtn,
-#kggDebugPanelOverlay,
-.kggDebugPanelOverlay,
-.kggDebugToast{
-  display:none!important;
-  visibility:hidden!important;
-  opacity:0!important;
-  pointer-events:none!important;
-}
-/* KGG PATCH END: kgg-v024-rollback-v023-debug-breakage-guard-style */
-</style>
-</head>
-<body class="adminMode">
-<div class="tabletSideBackdrop" id="tabletSideBackdrop" hidden></div>
-  <aside class="tabletSideMenu" id="tabletSideMenu" aria-hidden="true">
-    <div class="tabletSideMenuHead">
-      <strong>Menue</strong>
-      <button class="tabletMenuClose" id="tabletMenuClose" type="button" aria-label="Menue schliessen">&times;</button>
-    </div>
-    <nav class="tabletSideMenuGroup tabletSideMenuMain" aria-label="Tablet-Menue">
-      <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuRecentBtn" type="button"><span class="tabletMenuActionIcon" aria-hidden="true">&#128337;</span><span>Letzte Pl&auml;ne</span></button>
-      <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuPackagesBtn" type="button"><span class="tabletMenuActionIcon" aria-hidden="true">&#128230;</span><span>&Uuml;bungspakete</span></button>
-      <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuTherapistShareBtn" type="button"><span class="tabletMenuActionIcon" aria-hidden="true">&#128188;</span><span>Therapeuten-App weitergeben</span></button>
-      <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuLayoutBtn" type="button" aria-expanded="false"><span class="tabletMenuActionIcon" aria-hidden="true">&#9881;</span><span>Layout anpassen</span></button>
-      <div class="tabletSideMenuLayoutPanel" id="tabletMenuLayoutPanel" hidden>
-        <div class="tabletLayoutControls" id="tabletLayoutControls" aria-label="Tablet-Layout">
-          <button class="tabletLockSwitch" id="tabletLayoutLockBtn" type="button" aria-pressed="true" aria-label="Layout fixiert">
-            <span class="tabletLockIcon" aria-hidden="true">&#128274;</span>
-            <span class="tabletSwitchTrack" aria-hidden="true"><span class="tabletSwitchKnob"></span></span>
-            <span class="tabletLockText">Fix</span>
-          </button>
-          <div class="tabletLayoutFreeTools" id="tabletLayoutFreeTools" aria-label="Freies Tablet-Layout">
-            <button id="tabletScalePlus" type="button" aria-label="UI groesser">+</button>
-            <span class="tabletScaleValue" id="tabletScaleValue">100%</span>
-            <button id="tabletLayoutReset" type="button" aria-label="Tablet-Layout zuruecksetzen">&#8634;</button>
-            <button id="tabletScaleMinus" type="button" aria-label="UI kleiner">-</button>
-          </div>
-        </div>
-      </div>
-    </nav>
-  </aside>
-<div class="tabletPackageShade" id="tabletPackageShade" hidden></div>
-<aside class="tabletPackageOverlay" id="tabletPackageOverlay" aria-hidden="true" aria-label="Uebungspakete">
-  <div class="tabletPackageHead">
-    <div class="tabletPackageTitle"><span aria-hidden="true">&#128230;</span><strong>&Uuml;bungspakete</strong></div>
-    <button class="tabletPackageClose" id="tabletPackageClose" type="button" aria-label="Uebungspakete schliessen">&times;</button>
-  </div>
-  <label class="tabletPackageSearch"><span aria-hidden="true">&#128269;</span><input id="tabletPackageSearch" type="search" placeholder="Uebungspakete suchen ..." autocomplete="off"></label>
-  <div class="tabletPackageCards" id="tabletPackageCards"></div>
-</aside>
-<div class="app">
-  <div class="adminTestBanner">ADMIN-DATEI · v32 No Boot Redirect<small>Nur intern fuer Max/Admin. Nicht fuer Patient:innen verwenden. Keine API-Keys fest eingebaut.</small></div>
-  <header class="topbar"><div class="topbarText"><h1>KGG Plan App <span class="stateBadge" id="stateBadge">Leerzustand</span></h1><small id="kggRuntimeVersion">Plain HTML/CSS/JS · offlinefähig · mobile-first</small><small class="kggBuildBadge" id="kggBuildBadge">Build wird geladen</small></div><button class="visionBtn" id="visionBtn" type="button" aria-pressed="false" aria-label="Großdruck-PDF umschalten">PDF A+</button></header>
-
-  <section class="scanHub" id="scanHub">
-    <button class="tabletMenuBtn" id="tabletMenuBtn" type="button" aria-label="Tablet-Menue oeffnen" aria-expanded="false"><span></span><span></span><span></span></button>
-    <button class="scanBtn" id="scanBtn">📷 Plan scannen</button>
-    <button class="syncQrBtn" id="syncQrBtn" type="button" aria-label="Sync-QR erzeugen" title="Sync-QR">QR</button>
-    <input id="fileInput" class="nativeFileInput" type="file" accept="image/*" capture="environment">
-    <input id="filePickerInput" class="nativeFileInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp" multiple>
-    <div class="scanMeta filePickBtn" id="filePickBtn" role="button" tabindex="0" aria-label="Foto oder Datei auswählen">Foto / Datei <small id="scanStatus" class="hidden"></small></div>
-    <button class="mutedBtn adminConfigBtn" id="adminConfigBtn" type="button">Admin-Konfig</button>
-    <button class="mutedBtn sharedBankBtn" id="sharedBankBtn" type="button">Übungsdatenbank teilen</button>
-    <div id="scanPreview" class="notice hidden"></div>
-  </section>
-  <div class="kggAdminMenuQrModal" id="kggAdminMenuQrModal" aria-hidden="true">
-    <div class="kggAdminMenuQrSheet" role="dialog" aria-modal="true" aria-labelledby="kggAdminMenuQrTitle">
-      <h2 id="kggAdminMenuQrTitle">QR</h2>
-      <p class="kggAdminMenuQrHint" id="kggAdminMenuQrHint"></p>
-      <div class="kggAdminMenuQrBox" id="kggAdminMenuQrBox"></div>
-      <textarea class="kggAdminMenuQrLink" id="kggAdminMenuQrLink" readonly></textarea>
-      <div class="kggAdminMenuQrButtons">
-        <button type="button" id="kggAdminMenuQrCopy">kopieren</button>
-        <button type="button" class="primary" id="kggAdminMenuQrOpen">oeffnen</button>
-        <button type="button" id="kggAdminMenuQrPrint">QR drucken</button>
-        <button type="button" id="kggAdminMenuQrClose">schliessen</button>
-      </div>
-    </div>
-  </div>
-  <div class="kggTherapistShareModal" id="kggTherapistShareModal" aria-hidden="true">
-    <div class="kggTherapistShareSheet" role="dialog" aria-modal="true" aria-labelledby="kggTherapistShareTitle">
-      <h2 id="kggTherapistShareTitle">Therapeuten-App weitergeben</h2>
-      <p class="kggTherapistShareHint">QR fuer die Kolleg:innen-App/APK. Keine Sync-Daten, keine API-Keys.</p>
-      <div class="kggTherapistShareChoices">
-        <button type="button" id="therapistShareAppOnly"><b>Kolleg:innen-App APK</b><small>QR mit aktuellem Android-Download-Link fuer Kolleg:innen.</small></button>
-      </div>
-      <button type="button" class="mutedBtn" id="therapistShareCancel">Abbrechen</button>
-    </div>
-  </div>
-  <div id="mobileScannedPlansDock" class="mobileScannedPlansDock hidden" aria-live="polite"></div>
-  <div class="tabletLayoutResizeHandle" id="tabletLayoutResizeHandle" role="separator" aria-orientation="vertical" aria-label="Tablet-Spaltenbreite ziehen"><div class="tabletSplitScaleControl" id="tabletSplitScaleControl" aria-hidden="true"><button id="tabletSplitScalePlus" type="button" aria-label="UI groesser">+</button><span class="tabletSplitScaleValue" id="tabletSplitScaleValue">100%</span><button id="tabletSplitScaleMinus" type="button" aria-label="UI kleiner">-</button></div></div>
-
-  <main class="panel" id="createPanel">
-    <div class="planHeader">
-      <h2 class="panelTitle" id="panelTitle">➕ Neuen Plan erstellen</h2>
-      <button class="packageSaveBtn hidden" id="savePackageBtn" type="button" aria-label="Aktuellen Plan als Übungspaket speichern"><span class="packagePlus">+</span><span class="packageBox">📦</span></button>
-    </div>
-    <section class="inner">
-      <button class="baseCard" id="baseToggle"><span>▶ 👤 Basisdaten</span><span class="mini" id="patientMini"></span></button>
-      <div id="baseFields" class="hidden">
-        <div class="grid2"><div class="field"><label>Patient/in</label><input id="patientName" placeholder="V. Nachname"></div><div class="field"><label>Datum</label><input id="planDate" type="date"></div></div>
-        <div class="field"><label>Therapeut/in</label><input id="therapistName" placeholder="Name"></div>
-        <div class="field"><label>Zusatzinfo</label><textarea id="planNotes" placeholder="Optional" style="min-height:78px;font-size:16px"></textarea></div>
-      </div>
-
-      <div id="rightPlanStack" class="rightPlanStack hidden" aria-live="polite">
-        <div id="currentPlanBlock" class="planSection planSectionCurrent hidden">
-          <button class="planSectionHeader" id="currentPlanToggle" type="button" aria-expanded="true">
-            <span>✏️ Übungen im Plan</span><small id="currentPlanCount"></small>
-          </button>
-          <div class="planSectionBody">
-            <div class="planList" id="planList"></div>
-          </div>
-        </div>
-        <div id="scannedPlansBlock" class="planSection scanInboxBlock hidden">
-          <button class="planSectionHeader" id="scannedPlansToggle" type="button" aria-expanded="false">
-            <span>Gescannte Pläne</span><small id="scannedPlansCount"></small>
-          </button>
-          <div class="scanInboxList" id="scannedPlansList"></div>
-        </div>
-      </div>
-
-      <div class="label" id="inputLabel">Übungen eingeben</div>
-      <div id="dbTitle" class="dbTitle hidden" role="button" tabindex="0" aria-expanded="true">▼ 🏋️ Übungsdatenbank</div>
-      <div class="inputWrap" id="inputWrap">
-        <textarea id="exerciseInput" placeholder="Übungen, mit Komma getrennt" autocomplete="off" autocapitalize="none"></textarea>
-        <button class="clearBtn" id="clearInput" aria-label="Text löschen">×</button>
-        <div class="suggestion hidden" id="suggestion"></div>
-      </div>
-
-      <div class="bankArea" id="bankArea">
-        <button class="drawerBtn" id="bankToggle"><span>▸ 🏋️ Übungsdatenbank</span></button>
-        <div id="bankContent" class="hidden"></div>
-      </div>
-    </section>
-
-    <div class="tools">
-      <div class="planActions" id="planActions">
-        <button class="primary finishBtn hidden" id="finishBtn" type="button">Fertig</button>
-        <button class="drawerBtn" id="recentToggle"><span class="recentIcon">🕘</span><span class="recentText">Plan-Historie</span><span class="mini recentMini">öffnen</span></button>
-      </div>
-      <div id="recentList" class="hidden"></div>
-      <div class="packageLayoutSlot" id="packageLayoutSlot">
-        <button class="drawerBtn" id="packageToggle"><span>📦 Übungspakete anzeigen</span></button>
-      </div>
-      <div id="packageList" class="hidden"></div>
-    </div>
-  </main>
-
-  <div class="bottomPad"></div>
-</div>
-
-<div class="footerActions">
-  <button class="mutedBtn" id="exportBtn">JSON Export</button>
-  <button class="mutedBtn" id="pdfBtn">PDF erzeugen</button>
-  <button class="primary" id="patientBtn">Patienten-App / QR</button>
-</div>
-
-<div class="modal" id="editorModal"><div class="sheet editorSheet">
-  <div class="editorHeader"><h2>Übung bearbeiten</h2><button class="iconBtn danger editorDeleteBtn" id="deleteExercise" type="button" aria-label="Übung löschen" title="Übung löschen">🗑️</button></div>
-  <div class="field"><label>Name</label><input id="editName"></div>
-  <div class="grid2">
-    <div class="field"><label>Sätze</label><select id="editSets"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div>
-    <div class="field"><label>Ausführung</label><select id="editSide"><option value="BI">beidseitig</option><option value="LR">links/rechts getrennt</option></select></div>
-  </div>
-  <div class="grid2">
-    <div class="field"><label>Einheit</label><select id="editUnit"><option value="kg">kg</option><option value="BW">BW</option><option value="Hub">Hub</option><option value="Stufe">Stufe</option><option value="Watt">Watt</option><option value="Stufe/Watt">Stufe/Watt</option><option value="bar">bar</option><option value="keine">keine</option></select></div>
-    <div class="field"><label>Messwert</label><select id="editMeasure"><option value="wdh">Wdh</option><option value="zeit">Zeit</option></select></div>
-  </div>
-  <div class="notice editorStartHint">
-    <b>Startvorschlag für Tag 1</b>
-    <div class="grid2 editorStartGrid"><div class="field"><label>Startgewicht / Startstufe</label><input id="editLoad"></div><div class="field"><label>Start-Wdh / Startzeit</label><input id="editMetric"></div></div>
-  </div>
-  <div class="notice editorMediaBox">
-    <div class="editorMediaHead">
-      <div><b>Bild</b><small class="editorMediaStatus" id="editMediaStatus">Kein Bild.</small></div>
-    </div>
-    <div id="editMediaPreview" class="editorMediaPreview hidden"></div>
-    <div class="editorMediaActions">
-      <button class="mutedBtn" id="attachExerciseImage" type="button">Bild wählen</button>
-      <button class="mutedBtn danger hidden" id="removeExerciseImage" type="button">Entfernen</button>
-    </div>
-    <input id="editMediaFile" class="hidden" type="file" accept="image/*">
-  </div>
-  <details class="notice editorAdvanced">
-    <summary><b>Mehr</b></summary>
-    <div class="grid2 editorAdvancedGrid"><div class="field"><label>Video-Link für Zuhause</label><input id="editVideoUrl" placeholder="https://..."></div><div class="field"><label>Button-Text</label><input id="editVideoLabel" placeholder="Video öffnen"></div></div>
-  </details>
-  <div class="editorActions"><button class="primary" id="saveExercise">Speichern</button></div>
-  <button class="mutedBtn editorCancelBtn" id="closeEditor">Abbrechen</button>
-</div></div>
-
+  }
+  function ensureExerciseMediaList(ex){return Array.isArray(ex&&ex.media)?ex.media.map(ensureMediaShape):[];}
+  function openMediaDb(){
+    if(mediaDbPromise)return mediaDbPromise;
+    mediaDbPromise=new Promise((resolve,reject)=>{
+      if(!('indexedDB' in window)){reject(new Error('IndexedDB nicht verfuegbar'));return;}
+      const req=indexedDB.open(mediaDbName,1);
+      req.onupgradeneeded=()=>{const db=req.result; if(!db.objectStoreNames.contains(mediaStoreName))db.createObjectStore(mediaStoreName,{keyPath:'id'});};
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error||new Error('Media-DB konnte nicht geoeffnet werden'));
+    });
+    return mediaDbPromise;
+  }
+  function putEncryptedMediaBlob(record){
+    return openMediaDb().then(db=>new Promise((resolve,reject)=>{
+      const tx=db.transaction(mediaStoreName,'readwrite');
+      tx.objectStore(mediaStoreName).put(record);
+      tx.oncomplete=()=>resolve(record);
+      tx.onerror=()=>reject(tx.error||new Error('Media-Blob konnte nicht gespeichert werden'));
+    }));
+  }
+  function getEncryptedMediaBlob(id){
+    return openMediaDb().then(db=>new Promise((resolve,reject)=>{
+      const tx=db.transaction(mediaStoreName,'readonly');
+      const req=tx.objectStore(mediaStoreName).get(id);
+      req.onsuccess=()=>resolve(req.result||null);
+      req.onerror=()=>reject(req.error||new Error('Media-Blob konnte nicht gelesen werden'));
+    }));
+  }
+  function deleteEncryptedMediaBlob(id){
+    return openMediaDb().then(db=>new Promise(resolve=>{
+      const tx=db.transaction(mediaStoreName,'readwrite');
+      tx.objectStore(mediaStoreName).delete(id);
+      tx.oncomplete=()=>resolve(true);
+      tx.onerror=()=>resolve(false);
+    })).catch(()=>false);
+  }
+  function isMediaReferencedElsewhere(id,owner){
+    const sid=String(id||'');
+    if(!sid)return false;
+    const ownerId=owner&&(owner.localId||owner.id);
+    const lists=[...(state.plan||[]),...bank];
+    return lists.some(ex=>{
+      if(!ex)return false;
+      if(owner&&String(ex.localId||ex.id)===String(ownerId))return false;
+      return ensureExerciseMediaList(ex).some(media=>String(media.id)===sid);
+    });
+  }
+  function deleteUnsharedMediaBlob(media,owner){
+    if(media&&media.id&&!isMediaReferencedElsewhere(media.id,owner))deleteEncryptedMediaBlob(media.id);
+  }
+  function loadImageFromBlob(blob){
+    return new Promise((resolve,reject)=>{
+      const url=URL.createObjectURL(blob);
+      const img=new Image();
+      img.onload=()=>{URL.revokeObjectURL(url); resolve(img);};
+      img.onerror=()=>{URL.revokeObjectURL(url); reject(new Error('Bild konnte nicht gelesen werden'));};
+      img.src=url;
+    });
+  }
+  async function compressImageFile(file){
+    const img=await loadImageFromBlob(file);
+    const maxSide=Math.max(img.naturalWidth||img.width,img.naturalHeight||img.height,1);
+    const scale=Math.min(1,MEDIA_IMAGE_MAX_DIM/maxSide);
+    const width=Math.max(1,Math.round((img.naturalWidth||img.width)*scale));
+    const height=Math.max(1,Math.round((img.naturalHeight||img.height)*scale));
+    const canvas=document.createElement('canvas');
+    canvas.width=width; canvas.height=height;
+    const ctx=canvas.getContext('2d',{alpha:false});
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,width,height); ctx.drawImage(img,0,0,width,height);
+    const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('Bild konnte nicht komprimiert werden')),'image/jpeg',MEDIA_IMAGE_QUALITY));
+    return {blob,width,height,mime:'image/jpeg'};
+  }
+  async function encryptMediaBlob(blob){
+    if(!window.crypto||!crypto.subtle)throw new Error('Web Crypto ist in diesem Browser nicht verfuegbar');
+    const key=await crypto.subtle.generateKey({name:'AES-GCM',length:256},true,['encrypt','decrypt']);
+    const iv=crypto.getRandomValues(new Uint8Array(12));
+    const plain=await blob.arrayBuffer();
+    const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,plain);
+    const rawKey=await crypto.subtle.exportKey('raw',key);
+    return {blob:new Blob([cipher],{type:'application/octet-stream'}),encryptedSize:cipher.byteLength,key:bytesToBase64Url(rawKey),iv:bytesToBase64Url(iv)};
+  }
+  async function prepareImageMediaFile(file){
+    if(!file||!String(file.type||'').startsWith('image/'))throw new Error('Bitte ein Bild auswaehlen');
+    const id=makeMediaId();
+    const compressed=await compressImageFile(file);
+    const encrypted=await encryptMediaBlob(compressed.blob);
+    const now=new Date().toISOString();
+    const manifest=ensureMediaShape({
+      id,
+      type:'image',
+      name:file.name||'uebungsbild.jpg',
+      mime:compressed.mime,
+      width:compressed.width,
+      height:compressed.height,
+      originalSize:file.size||0,
+      compressedSize:compressed.blob.size||0,
+      encryptedSize:encrypted.encryptedSize,
+      status:'local-encrypted',
+      encrypted:true,
+      storage:'indexeddb-local',
+      ttlSeconds:MEDIA_UPLOAD_TTL_SECONDS,
+      retrySeconds:MEDIA_RETRY_SECONDS,
+      createdAt:now,
+      crypto:{alg:'AES-GCM',iv:encrypted.iv,key:encrypted.key}
+    });
+    await putEncryptedMediaBlob({id,blob:encrypted.blob,manifest,createdAt:now});
+    return manifest;
+  }
+  function mediaUploadAdapter(){
+    const adapter=window.KGGMediaUploadAdapter;
+    return adapter&&typeof adapter.upload==='function'?adapter:null;
+  }
+  function currentMediaShareTtlSeconds(){
+    return Math.max(MEDIA_UPLOAD_TTL_SECONDS,Number(patientShareTtlSeconds)||MEDIA_UPLOAD_TTL_SECONDS);
+  }
+  function mediaItemsFromExercises(exercises){
+    return (exercises||[]).flatMap(ex=>ensureExerciseMediaList(ex).map(media=>({ex,media})));
+  }
+  function allPlanMediaItems(exercises){
+    return mediaItemsFromExercises(exercises||state.plan||[]);
+  }
+  function scheduleTemporaryMediaDelete(adapter,media){
+    if(!adapter)return;
+    const delay=Math.max(1,Number(media.ttlSeconds)||MEDIA_UPLOAD_TTL_SECONDS)*1000;
+    if(typeof adapter.scheduleDelete==='function'){
+      try{adapter.scheduleDelete(media,{delayMs:delay});}catch(err){console.warn('Media scheduleDelete fehlgeschlagen:',err);}
+      return;
+    }
+    if(typeof adapter.delete==='function'){
+      setTimeout(()=>{try{adapter.delete(media);}catch(err){console.warn('Media delete fehlgeschlagen:',err);}},delay);
+    }
+  }
+  async function uploadOneMediaItem(adapter,media,options){
+    const ttlSeconds=Number(options&&options.ttlSeconds)||MEDIA_UPLOAD_TTL_SECONDS;
+    const force=!!(options&&options.force);
+    if(media.downloadUrl&&media.status==='ready'&&!force&&(Number(media.ttlSeconds)||0)>=ttlSeconds)return media;
+    const record=await getEncryptedMediaBlob(media.id);
+    if(!record||!record.blob)throw new Error('Verschluesselte Bilddatei fehlt lokal.');
+    const uploadManifest=ensureMediaShape({...media,ttlSeconds,retrySeconds:MEDIA_RETRY_SECONDS});
+    const result=await adapter.upload(record.blob,{manifest:uploadManifest,ttlSeconds});
+    if(!result||!result.downloadUrl)throw new Error('Upload lieferte keinen Download-Link.');
+    const uploadedAt=new Date().toISOString();
+    const expiresAt=result.expiresAt||new Date(Date.now()+ttlSeconds*1000).toISOString();
+    const updated=ensureMediaShape({...media,downloadUrl:result.downloadUrl,deleteUrl:result.deleteUrl||media.deleteUrl||'',deleteToken:result.deleteToken||media.deleteToken||'',storage:result.storage||'temporary-web-encrypted',status:'ready',uploadedAt,expiresAt,ttlSeconds,retrySeconds:MEDIA_RETRY_SECONDS});
+    scheduleTemporaryMediaDelete(adapter,updated);
+    return updated;
+  }
+  function publicMediaBundleItem(media){
+    return {
+      id:media.id,
+      type:'image',
+      mime:media.mime,
+      name:media.name,
+      width:media.width,
+      height:media.height,
+      bytes:media.encryptedSize||0,
+      encrypted:true,
+      status:media.downloadUrl?'ready':'upload-pending',
+      downloadUrl:media.downloadUrl||'',
+      expiresInSeconds:media.ttlSeconds||MEDIA_UPLOAD_TTL_SECONDS,
+      retrySeconds:media.retrySeconds||MEDIA_RETRY_SECONDS,
+      crypto:media.crypto||null
+    };
+  }
+  async function blobToBase64Url(blob){
+    return bytesToBase64Url(await blob.arrayBuffer());
+  }
+  async function mediaItemsForBundle(exercises){
+    const seen=new Set();
+    const items=[];
+    for(const ex of (exercises||[])){
+      for(const media of ensureExerciseMediaList(ex)){
+        if(media.type!=='image'||!media.id||seen.has(media.id))continue;
+        seen.add(media.id);
+        const record=await getEncryptedMediaBlob(media.id);
+        if(!record||!record.blob)throw new Error('Verschluesselte Bilddatei fehlt lokal: '+(media.name||media.id));
+        const item=publicMediaBundleItem(media);
+        item.status='ready';
+        item.downloadUrl='';
+        item.dataEncoding='base64url';
+        item.data=await blobToBase64Url(record.blob);
+        item.encryptedBytes=record.blob.size||media.encryptedSize||0;
+        items.push(item);
+      }
+    }
+    return items;
+  }
+  async function uploadMediaBundle(adapter,exercises,ttlSeconds){
+    const bundleItems=await mediaItemsForBundle(exercises);
+    if(!bundleItems.length){lastPatientMediaBundleManifest=null; return null;}
+    const plain={kind:'kgg-media-bundle-v1',version:1,createdAt:new Date().toISOString(),items:bundleItems};
+    const encrypted=await encryptMediaBlob(new Blob([JSON.stringify(plain)],{type:'application/json'}));
+    const bundleId='bundle_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
+    const result=await adapter.upload(encrypted.blob,{manifest:{id:bundleId,type:'bundle',mime:'application/octet-stream'},ttlSeconds});
+    if(!result||!result.downloadUrl)throw new Error('Medien-Bundle lieferte keinen Download-Link.');
+    const bundle={
+      id:result.id||bundleId,
+      schema:'kgg-media-bundle-v1',
+      count:bundleItems.length,
+      downloadUrl:result.downloadUrl,
+      deleteUrl:result.deleteUrl||'',
+      deleteToken:result.deleteToken||'',
+      expiresInSeconds:ttlSeconds,
+      retrySeconds:MEDIA_RETRY_SECONDS,
+      encrypted:true,
+      crypto:{alg:'AES-GCM',iv:encrypted.iv,key:encrypted.key}
+    };
+    scheduleTemporaryMediaDelete(adapter,{id:bundle.id,deleteUrl:bundle.deleteUrl,deleteToken:bundle.deleteToken,ttlSeconds});
+    lastPatientMediaBundleManifest=bundle;
+    return bundle;
+  }
+  async function prepareMediaUploadsForPatientShare(options){
+    lastPatientMediaBundleManifest=null;
+    const sourcePlan=options&&options.plan;
+    const exercises=sourcePlan&&Array.isArray(sourcePlan.exercises)?sourcePlan.exercises:state.plan;
+    const items=allPlanMediaItems(exercises);
+    if(!items.length)return {ok:true,count:0};
+    const adapter=mediaUploadAdapter();
+    if(!adapter)return {ok:false,count:items.length,message:'Medien-Upload fehlt. Plan bleibt offen.'};
+    const ttlSeconds=Number(options&&options.ttlSeconds)||currentMediaShareTtlSeconds();
+    let bundle=null;
+    try{
+      bundle=await uploadMediaBundle(adapter,exercises,ttlSeconds);
+    }catch(err){
+      console.warn('Medien-Bundle konnte nicht erstellt werden:',err);
+      return {ok:false,count:items.length,message:err&&err.message?err.message:'Medien-Bundle fehlgeschlagen. Plan bleibt offen.'};
+    }
+    if(!sourcePlan){
+      syncStatePlanToStore('ui_prepare_media_uploads_for_patient_share');
+      save();
+    }
+    return {ok:true,count:items.length,uploaded:items.length,bundle};
+  }
+  function normalizeSideMode(value){
+    const raw=String(value||'BI').trim().toUpperCase().replace(/\s+/g,'');
+    if(['L','LI','LINKS','LEFT','R','RE','RECHTS','RIGHT'].includes(raw))return 'LR';
+    if(['LR','L/R','LI/RE','LINKS/RECHTS','LINKSRECHTS','LEFT/RIGHT','BEIDSEITIGGETRENNT'].includes(raw))return 'LR';
+    if((raw.includes('LINKS')&&raw.includes('RECHTS'))||(raw.includes('LI')&&raw.includes('RE')))return 'LR';
+    if(['BI','BID','BEIDE','BEIDSEITIG','BILATERAL'].includes(raw))return 'BI';
+    return 'BI';
+  }
+  function sideModeLabel(value){return ({BI:'beidseitig',LR:'links/rechts getrennt'})[normalizeSideMode(value)]||'beidseitig';}
+  function normalizeSetCount(value){const n=Number(value)||3; return Math.max(1,Math.min(5,n));}
+  function normalizeMeasureMode(value){
+    const raw=String(value||'').trim().toLowerCase();
+    if(['zeit','time','dauer','sek','sek.','sec','s'].includes(raw))return 'zeit';
+    return 'wdh';
+  }
+  function measureUnitLabel(measure){return normalizeMeasureMode(measure)==='zeit'?'Sek.':'Wdh';}
+  function cleanFreeUnitLabel(value){
+    return String(value||'').trim().replace(/\s*\/\s*/g,'/').replace(/\s+/g,' ').replace(/^[.@:;,\-\s]+|[.@:;,\-\s]+$/g,'');
+  }
+  function normalizeLoadUnitInfo(value,fallback){
+    const fallbackUnit=fallback||'kg';
+    const raw=cleanFreeUnitLabel(value);
+    if(!raw)return {unit:fallbackUnit,custom:false,explicit:false};
+    const lower=raw.toLowerCase().replace(/\./g,'').replace(/\s+/g,' ');
+    const compact=lower.replace(/\s+/g,'');
+    if(['kg','kgs','kilo','kilos','kilogramm','kilogram'].includes(lower))return {unit:'kg',custom:false,explicit:true};
+    if(['bw','bodyweight','body weight','koerpergewicht','körpergewicht','eigengewicht'].includes(lower)||compact==='bodyweight')return {unit:'BW',custom:false,explicit:true};
+    if(['hub','huebe','hübe'].includes(lower))return {unit:'Hub',custom:false,explicit:true};
+    if(['stufe'].includes(lower))return {unit:'Stufe',custom:false,explicit:true};
+    if(['watt','w'].includes(lower))return {unit:'Watt',custom:false,explicit:true};
+    if(['stufe/watt','stufe watt','stufe+watt','stufewatt'].includes(lower)||compact==='stufe/watt')return {unit:'Stufe/Watt',custom:false,explicit:true};
+    if(['bar'].includes(lower))return {unit:'bar',custom:false,explicit:true};
+    if(['keine','kein','none','ohne'].includes(lower))return {unit:'keine',custom:false,explicit:true};
+    return {unit:raw,custom:true,explicit:true};
+  }
+  function normalizeLoadUnit(value){
+    return normalizeLoadUnitInfo(value,'kg').unit;
+  }
+  function structuredNumberPattern(){return '-?\\d+(?:[,.]\\d+)?';}
+  function structuredUnitPattern(){return '[A-Za-zÄÖÜäöüß%°/._-]+(?:\\s*/\\s*[A-Za-zÄÖÜäöüß%°/._-]+)?';}
+  function normalizeStructuredNumber(value){return String(value||'').replace(',','.').trim();}
+  function normalizeMetricToken(token){
+    const raw=String(token||'').trim().replace('.','');
+    const lower=raw.toLowerCase();
+    if(['wdh','wh','rep','reps'].includes(lower))return {unit:'Wdh',metricUnit:'Wdh',time:false,label:'Wdh'};
+    if(['min','minute','minutes','minuten','sek','sec','secs','s','zeit','time','dauer'].includes(lower))return {unit:'Zeit',metricUnit:'Zeit',time:true,label:raw||'Zeit'};
+    return {unit:raw||'Wdh',metricUnit:raw||'Wdh',time:false,label:raw||'Wdh',custom:true};
+  }
+  function parseExerciseQuantityText(text){
+    const body=String(text||'');
+    const n=structuredNumberPattern(), u=structuredUnitPattern();
+    const freeU='([^\\s\\d@,:;]+(?:\\s*/\\s*[^\\s\\d@,:;]+)?)';
+    const out={startMetric:'',unit:'',metricUnit:'',startLoad:'',weightUnit:'',loadUnit:'',customLoadUnit:false,needsReview:false};
+    const loadBeforeMetric=body.match(new RegExp('('+n+')\\s*'+freeU+'\\s*@\\s*('+n+')\\s*(wdh|wh|rep|reps)\\b','i'));
+    if(loadBeforeMetric){
+      const loadUnitInfo=normalizeLoadUnitInfo(loadBeforeMetric[2]||'kg','kg');
+      out.startLoad=normalizeStructuredNumber(loadBeforeMetric[1]);
+      out.weightUnit=loadUnitInfo.unit;
+      out.loadUnit=loadUnitInfo.unit;
+      out.customLoadUnit=!!loadUnitInfo.custom;
+      out.startMetric=normalizeStructuredNumber(loadBeforeMetric[3]);
+      out.unit='Wdh'; out.metricUnit='Wdh';
+      if(loadUnitInfo.custom)out.needsReview=true;
+      return out;
+    }
+    const compact=body.match(new RegExp('('+n+')\\s*x\\s*('+n+')(?:\\s*('+u+'))?','i'));
+    const rep=body.match(new RegExp('('+n+')\\s*(wdh|wh|rep|reps)\\b','i'));
+    const time=body.match(new RegExp('('+n+')\\s*(min|minute|minutes|minuten|sek\\.?|sec|secs|s|zeit|time|dauer)\\b','i'));
+    if(rep){
+      out.startMetric=normalizeStructuredNumber(rep[1]);
 ```
