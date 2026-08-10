@@ -552,6 +552,13 @@ TEST_REGISTRY = [
         "run": run_version_json_check,
     },
     {
+        "id": "version-types-critical",
+        "level": "critical",
+        "suite": "release",
+        "reason": "Source, Web release, SemVer and Android shell identities must never be compared across types.",
+        "run": lambda: run_html_logic("version-types-critical"),
+    },
+    {
         "id": "admin-release-drift",
         "level": "critical",
         "suite": "release",

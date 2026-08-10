@@ -186,6 +186,17 @@ def validate_https_url(value: str, label: str, suffix: str) -> str:
     return value
 
 
+def validate_apk_url(value: str, label: str, profile: str, shell_version: str) -> str:
+    url = validate_https_url(value, label, ".apk")
+    path = urlsplit(url).path
+    expected_directory = f"/releases/{shell_version}/android/"
+    expected_prefix = "KGG_ANDROID_ADMIN_" if profile == "admin" else "KGG_ANDROID_KOLLEGEN_"
+    filename = path.rsplit("/", 1)[-1]
+    if expected_directory not in path or not filename.startswith(expected_prefix):
+        fail(f"{label} must identify the {profile} APK for Android shell {shell_version}")
+    return url
+
+
 def validate_manifest_channel(channel: object, profile: str) -> dict:
     label = f"channels.{profile}"
     if not isinstance(channel, dict):
@@ -251,10 +262,11 @@ def project_legacy_manifest(canonical: dict) -> dict:
     for profile in ("colleague", "admin"):
         url_key = f"{profile}AndroidApkUrl"
         sha_key = f"{profile}AndroidApkSha256"
-        apk_profiles[url_key] = validate_https_url(
+        apk_profiles[url_key] = validate_apk_url(
             require_string(canonical, url_key, "manifest"),
             f"manifest.{url_key}",
-            ".apk",
+            profile,
+            shell_version,
         )
         apk_profiles[sha_key] = validate_sha256(
             require_string(canonical, sha_key, "manifest"),

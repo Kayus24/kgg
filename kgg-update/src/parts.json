@@ -15,7 +15,8 @@
     "kgg-v060-tablet-html-release-label",
     "kgg-v061-cross-app-live-qr-camera",
     "kgg-v062-tablet-recent-package-shell-geometry",
-    "kgg-v063-changelog-archive-window"
+    "kgg-v063-changelog-archive-window",
+    "kgg-v064-typed-update-versions"
   ],
   "parts": [
     "base-head.html",
@@ -37,6 +38,7 @@
     "patches/v061-cross-app-live-qr-camera.html",
     "patches/v062-tablet-recent-package-shell-geometry.html",
     "patches/v063-changelog-archive-window.html",
+    "patches/v064-typed-update-versions.html",
     "footer.html"
   ]
 }

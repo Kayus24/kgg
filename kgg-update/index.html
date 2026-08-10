@@ -47,20 +47,22 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "tablet-html-release-label",
     "cross-app-live-qr-camera",
     "tablet-recent-package-shell-geometry",
-    "changelog-archive-window"
+    "changelog-archive-window",
+    "typed-update-versions"
   ],
   "currentVersion": {
-    "versionCode": 63,
-    "versionName": "1.0.63-changelog-archive-window",
-    "lastPatchId": "kgg-v063-changelog-archive-window",
+    "versionCode": 64,
+    "versionName": "1.0.64-typed-update-versions",
+    "lastPatchId": "kgg-v064-typed-update-versions",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v063-changelog-archive-window",
+  "latestPatchId": "kgg-v064-typed-update-versions",
   "lastUpdateIntent": {
-    "id": "kgg-v063-changelog-archive-window",
-    "summary": "Archiviert den vollständigen Changelog-Stand bis v62 und begrenzt die Laufzeit-Metadaten auf v63 plus die 14 neuesten Vorgänger.",
+    "id": "kgg-v064-typed-update-versions",
+    "summary": "Trennt Source-Code, Web-Release-ID, semantischen Versionsnamen und Android-Shell-Version fail-closed voneinander.",
     "touched": [
-      "Release-Metadaten"
+      "GitHub Manifest",
+      "Android/APK"
     ],
     "notTouched": [
       "PDF",
@@ -70,8 +72,6 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Plan-State",
       "Medien/Upload",
       "API-Key-Logik",
-      "Android/APK",
-      "GitHub Manifest",
       "Handy-Layout"
     ]
   }
@@ -118,20 +118,22 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "tablet-html-release-label",
     "cross-app-live-qr-camera",
     "tablet-recent-package-shell-geometry",
-    "changelog-archive-window"
+    "changelog-archive-window",
+    "typed-update-versions"
   ],
   "currentVersion": {
-    "versionCode": 63,
-    "versionName": "1.0.63-changelog-archive-window",
-    "lastPatchId": "kgg-v063-changelog-archive-window",
+    "versionCode": 64,
+    "versionName": "1.0.64-typed-update-versions",
+    "lastPatchId": "kgg-v064-typed-update-versions",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v063-changelog-archive-window",
+  "latestPatchId": "kgg-v064-typed-update-versions",
   "lastUpdateIntent": {
-    "id": "kgg-v063-changelog-archive-window",
-    "summary": "Archiviert den vollständigen Changelog-Stand bis v62 und begrenzt die Laufzeit-Metadaten auf v63 plus die 14 neuesten Vorgänger.",
+    "id": "kgg-v064-typed-update-versions",
+    "summary": "Trennt Source-Code, Web-Release-ID, semantischen Versionsnamen und Android-Shell-Version fail-closed voneinander.",
     "touched": [
-      "Release-Metadaten"
+      "GitHub Manifest",
+      "Android/APK"
     ],
     "notTouched": [
       "PDF",
@@ -141,8 +143,6 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Plan-State",
       "Medien/Upload",
       "API-Key-Logik",
-      "Android/APK",
-      "GitHub Manifest",
       "Handy-Layout"
     ]
   }
@@ -153,8 +153,39 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 63,
+  "latestVersionCode": 64,
   "entries": [
+    {
+      "versionCode": 64,
+      "versionName": "1.0.64-typed-update-versions",
+      "patchId": "kgg-v064-typed-update-versions",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Strikte Update-Versionstypen",
+      "reason": "Trennt Source-Code, Web-Release-ID, semantischen Versionsnamen und Android-Shell-Version fail-closed voneinander.",
+      "whatChanged": [
+        "Trennt Source-Code, Web-Release-ID, semantischen Versionsnamen und Android-Shell-Version fail-closed voneinander."
+      ],
+      "touchedAreas": [
+        "GitHub Manifest",
+        "Android/APK"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Max hat die getrennte Manifest- und Versionsauswertung im angepassten Strukturplan ausdrücklich freigegeben."
+    },
     {
       "versionCode": 63,
       "versionName": "1.0.63-changelog-archive-window",
@@ -686,7 +717,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
     }
   ],
-  "latestVersionName": "1.0.63-changelog-archive-window",
+  "latestVersionName": "1.0.64-typed-update-versions",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -812,7 +843,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v063-changelog-archive-window",
+  "lastUpdatedByPatchId": "kgg-v064-typed-update-versions",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
@@ -947,7 +978,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v063 Changelog-Archivfenster</title>
+  <title>KGG Update v064 Strikte Update-Versionstypen</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -16664,11 +16695,11 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
 
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v063_changelog_archive_window';
+  const VERSION='KGG_GITHUB_UPDATE_v064_typed_update_versions';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v063","buildTime":"2026-08-10T18:03:47Z","buildCode":"module-v063-changelog-archive-window","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v064","buildTime":"2026-08-10T18:14:11Z","buildCode":"module-v064-typed-update-versions","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -17335,20 +17366,101 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     try{await navigator.storage.persist();}catch(err){console.warn('Persistenter Speicher nicht bestätigt:',err);}
   }
 
-  function kggVersionNumber(value){
-    const match=String(value||'').match(/v(\d+)/i);
-    return match?parseInt(match[1],10):0;
+  function parseKggSourceVersionCode(value){
+    const match=String(value||'').match(/^KGG_GITHUB_UPDATE_v([0-9]{3,8})_[a-z0-9_]+$/i);
+    if(!match)return null;
+    const code=Number(match[1]);
+    return Number.isSafeInteger(code)&&code>0?code:null;
+  }
+  function parseKggWebReleaseId(value){
+    const match=String(value||'').match(/^r([0-9]{4,8})$/);
+    if(!match)return null;
+    const code=Number(match[1]);
+    return Number.isSafeInteger(code)&&code>0?code:null;
+  }
+  function parseKggVersionName(value){
+    const raw=String(value||'');
+    const match=raw.match(/^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/);
+    if(!match)return null;
+    if(match[4]&&match[4].split('.').some(part=>/^0[0-9]+$/.test(part)))return null;
+    const parsed={major:Number(match[1]),minor:Number(match[2]),patch:Number(match[3]),label:match[4]||'',build:match[5]||'',raw};
+    return [parsed.major,parsed.minor,parsed.patch].every(Number.isSafeInteger)?parsed:null;
+  }
+  function compareKggVersionNames(left,right){
+    const a=parseKggVersionName(left),b=parseKggVersionName(right);
+    if(!a||!b)return null;
+    for(const key of ['major','minor','patch']){
+      if(a[key]!==b[key])return a[key]>b[key]?1:-1;
+    }
+    return 0;
+  }
+  function parseKggAndroidShellVersion(value){
+    const match=String(value||'').match(/^v([0-9]{3,8})$/);
+    if(!match)return null;
+    const code=Number(match[1]);
+    return Number.isSafeInteger(code)&&code>0?code:null;
+  }
+  function parseKggNativeShellCode(value){
+    if(typeof value==='number')return Number.isSafeInteger(value)&&value>0?value:null;
+    if(typeof value!=='string'||!/^[1-9][0-9]{0,7}$/.test(value))return null;
+    const code=Number(value);
+    return Number.isSafeInteger(code)?code:null;
+  }
+  function isKggHttpsAssetUrl(value,suffix){
+    try{
+      const parsed=new URL(String(value||''));
+      return parsed.protocol==='https:'&&!parsed.username&&!parsed.password&&parsed.pathname.toLowerCase().endsWith(suffix);
+    }catch(err){return false;}
+  }
+  function kggWebReleaseIdFromUrl(value,profile){
+    try{
+      const parsed=new URL(String(value||''));
+      const match=parsed.pathname.match(/\/releases\/web\/(r[0-9]{4,8})\/(admin|colleague)\.html$/);
+      return match&&match[2]===profile?match[1]:'';
+    }catch(err){return '';}
+  }
+  function kggAndroidShellFromApkUrl(value,profile){
+    try{
+      const parsed=new URL(String(value||''));
+      const match=parsed.pathname.match(/\/releases\/(v[0-9]{3,8})\/android\/([^/]+\.apk)$/i);
+      if(!match)return '';
+      const expectedPrefix=profile==='admin'?'KGG_ANDROID_ADMIN_':'KGG_ANDROID_KOLLEGEN_';
+      return match[2].startsWith(expectedPrefix)?match[1]:'';
+    }catch(err){return '';}
+  }
+  function currentKggVersionIdentity(){
+    const sourceCode=parseKggSourceVersionCode(VERSION);
+    const node=document.getElementById('kgg-source-truth');
+    if(!sourceCode||!node)return null;
+    try{
+      const data=JSON.parse(node.textContent||'{}');
+      const current=data&&data.currentVersion;
+      const metadataCode=current&&current.versionCode;
+      const versionName=parseKggVersionName(current&&current.versionName);
+      if(!Number.isSafeInteger(metadataCode)||metadataCode!==sourceCode||!versionName)return null;
+      if(versionName.major!==1||versionName.minor!==0||versionName.patch!==sourceCode)return null;
+      return {sourceCode,versionName};
+    }catch(err){return null;}
   }
   function currentRolloutProfile(){
     return (window.KGG_ROLLOUT_PROFILE||'colleague').toLowerCase()==='admin'?'admin':'colleague';
   }
   function githubUpdateTargetFromManifest(manifest){
+    if(!manifest||typeof manifest!=='object')return null;
     const profile=currentRolloutProfile();
-    const latestVersion=profile==='admin'?(manifest.latestAdminVersion||manifest.latestVersion):(manifest.latestColleagueVersion||manifest.latestVersion);
-    const latestUrl=profile==='admin'?(manifest.adminUrl||manifest.latestUrl):(manifest.colleagueUrl||manifest.latestUrl);
-    if(!latestVersion||!latestUrl)return null;
-    if(kggVersionNumber(latestVersion)<=kggVersionNumber(VERSION))return null;
-    return {version:latestVersion,url:latestUrl,notes:manifest.releaseNotes||''};
+    const channel=manifest.channels&&typeof manifest.channels==='object'&&manifest.channels[profile]&&typeof manifest.channels[profile]==='object'?manifest.channels[profile]:null;
+    if(channel&&channel.profile&&channel.profile!==profile)return null;
+    const latestVersion=channel&&channel.versionName||(profile==='admin'?manifest.latestAdminVersion:manifest.latestColleagueVersion);
+    const latestUrl=channel&&channel.url||(profile==='admin'?manifest.adminUrl:manifest.colleagueUrl);
+    const explicitReleaseId=channel&&channel.releaseId||(profile==='admin'?manifest.latestAdminReleaseId:manifest.latestColleagueReleaseId)||(profile==='colleague'?manifest.latestVersion:'');
+    const urlReleaseId=kggWebReleaseIdFromUrl(latestUrl,profile);
+    const releaseId=explicitReleaseId||urlReleaseId;
+    const current=currentKggVersionIdentity();
+    const latest=parseKggVersionName(latestVersion);
+    if(!current||!latest||!urlReleaseId||parseKggWebReleaseId(releaseId)===null||String(releaseId)!==urlReleaseId)return null;
+    if(!isKggHttpsAssetUrl(latestUrl,'.html'))return null;
+    if(compareKggVersionNames(latest.raw,current.versionName.raw)!==1)return null;
+    return {version:latest.raw,webReleaseId:String(releaseId),url:latestUrl,notes:channel&&channel.notes||manifest.releaseNotes||manifest.notes||''};
   }
   function isNativeAndroidShell(){
     return !!(window.KGGAndroidApp||window.KGGAndroidSync||window.KGGNativeSync);
@@ -17368,20 +17480,22 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     return false;
   }
   function androidApkUpdateTargetFromManifest(manifest){
-    if(!isNativeAndroidShell())return null;
+    if(!isNativeAndroidShell()||!manifest||typeof manifest!=='object')return null;
     const profile=currentRolloutProfile();
-    const latestVersion=manifest.latestAndroidShellVersion||manifest.latestWebVersion||'';
+    const latestVersion=manifest.latestAndroidShellVersion||'';
     const latestUrl=profile==='admin'
       ?(manifest.latestAdminAndroidApkUrl||manifest.adminAndroidApkUrl||manifest.latestAndroidApkUrl)
       :(manifest.latestColleagueAndroidApkUrl||manifest.colleagueAndroidApkUrl||manifest.latestAndroidApkUrl);
     const latestSha=profile==='admin'
       ?(manifest.latestAdminAndroidApkSha256||manifest.adminAndroidApkSha256||manifest.latestAndroidApkSha256)
       :(manifest.latestColleagueAndroidApkSha256||manifest.colleagueAndroidApkSha256||manifest.latestAndroidApkSha256);
-    if(!latestVersion||!latestUrl)return null;
+    const latestShell=parseKggAndroidShellVersion(latestVersion);
+    const urlShell=kggAndroidShellFromApkUrl(latestUrl,profile);
+    if(latestShell===null||!isKggHttpsAssetUrl(latestUrl,'.apk')||urlShell!==latestVersion||!/^[0-9a-f]{64}$/.test(String(latestSha||'')))return null;
     const nativeStatus=nativeAppUpdateStatus();
-    const currentShell=Number(nativeStatus.currentShellVersion||0);
-    if(currentShell&&kggVersionNumber(latestVersion)<=currentShell)return null;
-    return {version:latestVersion,url:latestUrl,sha256:latestSha||'',notes:manifest.releaseNotes||manifest.notes||''};
+    const currentShell=parseKggNativeShellCode(nativeStatus.currentShellVersion);
+    if(currentShell===null||latestShell<=currentShell)return null;
+    return {version:latestVersion,androidShellVersion:latestVersion,url:latestUrl,sha256:latestSha,notes:manifest.releaseNotes||manifest.notes||''};
   }
   function isKggLocalContentNoRedirectRuntime(){
     const protocol=String(location.protocol||'').toLowerCase();
@@ -24011,6 +24125,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
       backdrop.addEventListener('click',ev=>{ev.preventDefault();setTabletSideMenuOpen(false);},{capture:true});
     }
   }
+  /* KGG_LOGIC_SMOKE_BOOT_BOUNDARY */
   installKggV383UiFlowStability();
   installKggV388AndroidFlowFixes();
   load(); initLargePdfMode(); renderRuntimeVersionInUi(); renderBuildIdentityInUi(); setTimeout(renderBuildIdentityInUi,500); initPwaAndUpdates(); initAdminModeAccess(); initTabletSoftKeyboardLayout(); initPhoneKeyboardAndDrawers(); initTabletLayoutControls(); initNativeExerciseBankSync(); ensureKGGDataStore().init({appVersion:VERSION}); syncStatePlanToStore('app_init_after_load'); if(state.patient.name) $('patientName').value=state.patient.name; if(state.patient.date) $('planDate').value=state.patient.date; if(state.patient.therapist) $('therapistName').value=state.patient.therapist; if(state.patient.notes) $('planNotes').value=state.patient.notes; syncTextInputFromPlan('app_init_text_master'); render(); setTabletOverlayActiveFlag(); tryApplyKggSetupFromHash().catch(err=>{console.warn('Therapeuten-Setup konnte nicht uebernommen werden:',err);});
@@ -26918,6 +27033,10 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
 <!-- Changelog-Archivfenster -->
 <!-- Metadata-only changelog archive/window migration; no runtime behavior. -->
 <!-- KGG PATCH END kgg-v063-changelog-archive-window -->
+<!-- KGG PATCH START kgg-v064-typed-update-versions -->
+<!-- Strikte Update-Versionstypen -->
+<!-- Version type contract lives in base-app; no additional runtime hook. -->
+<!-- KGG PATCH END kgg-v064-typed-update-versions -->
 
 </body>
 </html>

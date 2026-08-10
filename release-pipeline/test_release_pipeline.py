@@ -59,6 +59,7 @@ class ReleasePipelineTests(unittest.TestCase):
         self.assertEqual(canonical["adminAndroidApkSha256"], projected["latestAdminAndroidApkSha256"])
 
     def test_legacy_projection_rejects_invalid_contract_fields(self):
+        baseline = pipeline.load_json(pipeline.MANIFEST)
         cases = (
             (("schema",), 1),
             (("channels", "admin", "releaseId"), "admin-424"),
@@ -68,10 +69,11 @@ class ReleasePipelineTests(unittest.TestCase):
             (("channels", "colleague", "sha256"), "ABC"),
             (("channels", "colleague", "url"), "http://example.invalid/r0397/colleague.html"),
             (("latestAndroidShellVersion",), "401"),
+            (("latestAndroidShellVersion",), "v402"),
             (("colleagueAndroidApkUrl",), "http://example.invalid/app.apk"),
+            (("adminAndroidApkUrl",), baseline["colleagueAndroidApkUrl"]),
             (("adminAndroidApkSha256",), "0" * 63),
         )
-        baseline = pipeline.load_json(pipeline.MANIFEST)
         for path, value in cases:
             with self.subTest(path=path):
                 canonical = copy.deepcopy(baseline)
@@ -288,6 +290,52 @@ class ReleasePipelineTests(unittest.TestCase):
             1,
         )
         self.assertLess(mobile_inbox.html_version_code(old_html), current)
+        with self.assertRaisesRegex(mobile_inbox.pipeline.ReleaseError, "VERSION marker"):
+            mobile_inbox.html_source_identity(old_html)
+
+    def test_mobile_inbox_uses_candidate_source_version_name(self):
+        current = pipeline.load_json(pipeline.ROOT / "kgg-update" / "version.json")
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            temporary = Path(temporary_directory)
+            release = mobile_inbox.prepare(
+                pipeline.BASE_ADMIN,
+                temporary / "release.json",
+                temporary / "admin.html",
+                pipeline.ROOT,
+            )
+        self.assertEqual(current["versionName"], release["versionName"])
+        self.assertNotIn("mobile-inbox-r", release["versionName"])
+
+    def test_mobile_inbox_rejects_source_marker_metadata_mismatch(self):
+        html = pipeline.read_text(pipeline.BASE_ADMIN)
+        match = mobile_inbox.SOURCE_TRUTH_PATTERN.search(html)
+        self.assertIsNotNone(match)
+        source_truth = json.loads(match.group(1))
+        source_truth["currentVersion"]["versionCode"] += 1
+        future_code = source_truth["currentVersion"]["versionCode"]
+        source_truth["currentVersion"]["versionName"] = f"1.0.{future_code}-future-fixture"
+        replacement = json.dumps(source_truth, ensure_ascii=False, indent=2)
+        mismatched = html[: match.start(1)] + replacement + html[match.end(1) :]
+        with self.assertRaisesRegex(mobile_inbox.pipeline.ReleaseError, "VERSION marker"):
+            mobile_inbox.html_source_identity(mismatched)
+
+    def test_mobile_inbox_source_contract_matches_runtime_parser(self):
+        html = pipeline.read_text(pipeline.BASE_ADMIN)
+        current = pipeline.load_json(pipeline.ROOT / "kgg-update" / "version.json")["versionCode"]
+        marker = re.search(r"KGG_GITHUB_UPDATE_v[0-9]{3,8}_[a-z0-9_]+", html, re.I)
+        self.assertIsNotNone(marker)
+        without_suffix = html[: marker.start()] + f"KGG_GITHUB_UPDATE_v{current:03d}" + html[marker.end() :]
+        with self.assertRaisesRegex(mobile_inbox.pipeline.ReleaseError, "VERSION marker"):
+            mobile_inbox.html_source_identity(without_suffix)
+
+        source_match = mobile_inbox.SOURCE_TRUTH_PATTERN.search(html)
+        self.assertIsNotNone(source_match)
+        source_truth = json.loads(source_match.group(1))
+        source_truth["currentVersion"]["versionName"] = f"2.5.{current}-wrong-contract"
+        replacement = json.dumps(source_truth, ensure_ascii=False, indent=2)
+        wrong_semver = html[: source_match.start(1)] + replacement + html[source_match.end(1) :]
+        with self.assertRaisesRegex(mobile_inbox.pipeline.ReleaseError, "1.0"):
+            mobile_inbox.html_source_identity(wrong_semver)
 
     def test_mobile_inbox_next_release_id_advances(self):
         release_id = mobile_inbox.next_release_id(pipeline.ROOT)

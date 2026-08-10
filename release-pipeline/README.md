@@ -30,6 +30,12 @@ SHA-256 oder nicht-HTTPS-basierten HTML-/APK-URLs. Die Ausgabe ist UTF-8 mit
 Zwei-Leerzeichen-Einrueckung und LF, ohne generierten Zeitstempel. Der exakt
 definierte historische `v389`-Sentinel behaelt Namen und URLs unveraendert.
 
+Versionswerte bleiben typisiert: `KGG_GITHUB_UPDATE_vNNN_*` bezeichnet die
+editierbare Source, `rNNNN` ein unveraenderliches Web-Artefakt, `1.0.N-*` den
+semantischen Versionsnamen und `vNNN` die Android-Shell. Runtime und Mobile-
+Inbox vergleichen diese Typen nie quer; `latestWebVersion` ist insbesondere
+kein Ersatz fuer `latestAndroidShellVersion`.
+
 ## Handy-Standardweg ohne Codex
 
 Die Admin-App speichert die aktuelle HTML lokal. Danach wird die Datei auf dem Branch `mobile-inbox` in den Ordner `mobile-inbox/` hochgeladen. Die Action `KGG Mobile Inbox Release` validiert die HTML gegen die aktuelle KGG-Basis, erzeugt automatisch `releaseId` und Release-Notiz, baut Admin-/Kolleg:innen-Artefakte und merged den geprueften PR.
