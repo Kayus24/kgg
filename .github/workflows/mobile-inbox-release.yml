@@ -53,9 +53,18 @@ jobs:
         run: |
           set -euo pipefail
           cd upload
-          candidate="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" \
-            | grep -Ei '^mobile-inbox/.*\.html$' | head -n 1 || true)"
-          if [[ -z "$candidate" ]]; then
+          mapfile -t changed_html < <(
+            git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" \
+              | grep -Ei '^mobile-inbox/.*\.html$' || true
+          )
+          if [[ "${#changed_html[@]}" -gt 1 ]]; then
+            echo "Expected exactly one changed HTML file below mobile-inbox/." >&2
+            printf '%s\n' "${changed_html[@]}" >&2
+            exit 1
+          fi
+          if [[ "${#changed_html[@]}" -eq 1 ]]; then
+            candidate="${changed_html[0]}"
+          else
             mapfile -t html_files < <(find mobile-inbox -type f -iname '*.html' | sort)
             if [[ "${#html_files[@]}" -ne 1 ]]; then
               echo "Expected exactly one changed HTML file below mobile-inbox/." >&2

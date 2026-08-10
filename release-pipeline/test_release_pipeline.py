@@ -232,6 +232,17 @@ class ReleasePipelineTests(unittest.TestCase):
         self.assertLess(workflow.index(scanner), workflow.index('git switch -c "$branch"'))
         self.assertLess(workflow.index(scanner), workflow.index("git commit -m"))
 
+    def test_mobile_inbox_rejects_ambiguous_html_uploads(self):
+        workflow = pipeline.read_text(
+            pipeline.ROOT / ".github/workflows/mobile-inbox-release.yml"
+        )
+
+        self.assertIn("mapfile -t changed_html", workflow)
+        self.assertIn('"${#changed_html[@]}" -gt 1', workflow)
+        self.assertIn('"${#changed_html[@]}" -eq 1', workflow)
+        self.assertNotIn("head -n 1", workflow)
+        self.assertIn("Expected exactly one changed HTML file", workflow)
+
     def test_legacy_direct_main_workflows_are_retired(self):
         for relative in (
             ".github/workflows/apply-update-inbox.yml",
