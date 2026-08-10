@@ -25,22 +25,6 @@ ROOT = Path(__file__).resolve().parents[1]
 LEVEL_RANK = {"critical": 0, "regression": 1, "comfort": 2}
 PLAYWRIGHT_PREPARED = False
 PATIENT_SCAN_PREPARED = False
-SECRET_PATTERN = (
-    "("
-    + "sk-" + "proj-"
-    + r"|gh[pousr]_[A-Za-z0-9_]{20,}"
-    + "|AI" + r"za[0-9A-Za-z_-]{25,}"
-    + ")"
-)
-SECRET_SCAN_PATHS = [
-    "release-inbox",
-    "release-pipeline",
-    "kgg-update",
-    "therapist-app/android_update_manifest.json",
-    "therapist-app/releases/web",
-]
-
-
 class BatteryError(RuntimeError):
     pass
 
@@ -425,7 +409,16 @@ def run_module_source_check() -> None:
 
 def run_release_contracts() -> None:
     log("== Release contract tests ==")
-    run([sys.executable, "-m", "unittest", "release-pipeline/test_release_pipeline.py", "release-pipeline/test_encoding_guard.py"])
+    run(
+        [
+            sys.executable,
+            "-m",
+            "unittest",
+            "release-pipeline/test_release_pipeline.py",
+            "release-pipeline/test_encoding_guard.py",
+            "release-pipeline/test_kgg_secret_scan.py",
+        ]
+    )
 
 
 def run_encoding_guard() -> None:
@@ -467,19 +460,7 @@ def run_version_json_check() -> None:
 
 def run_secret_scan() -> None:
     log("== Secret scan ==")
-    args = ["git", "grep", "-nE", SECRET_PATTERN, "--", *SECRET_SCAN_PATHS]
-    log("+ " + " ".join(args))
-    proc = subprocess.run(args, cwd=str(ROOT), text=True, capture_output=True)
-    if proc.returncode == 0:
-        print(proc.stdout, file=sys.stderr)
-        raise BatteryError("Potential secret found in release-controlled files.")
-    if proc.returncode != 1:
-        if proc.stdout:
-            print(proc.stdout, file=sys.stderr)
-        if proc.stderr:
-            print(proc.stderr, file=sys.stderr)
-        raise BatteryError(f"Secret scan failed with exit code {proc.returncode}.")
-    log("Secret scan OK")
+    run([sys.executable, "release-pipeline/kgg_secret_scan.py"])
 
 
 def run_release_drift_check() -> None:
