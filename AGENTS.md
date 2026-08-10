@@ -25,6 +25,34 @@ PDF, QR/Patienten-App, Scan/OCR, Parser, Plan-State, Medien/Upload, API-Key-Logi
 - Nicht aus lokalen Altdateien oder Modellgedächtnis auf den Live-Stand schließen.
 - App-, HTML-, Release- und Uploadänderungen niemals direkt auf `main` schreiben; Branch, Tests und Pull Request verwenden.
 
+## Repo-Navigation und Suchhygiene
+
+- Patienten-App: `index.html`, `patient-*.js`, `collapse-cards.js`, `service-worker.js` und die zugehörigen PWA-Dateien.
+- Editierbare Therapeut:innen-Quelle: `kgg-update/src/**`.
+- Generiertes Therapeut:innen-Artefakt: `kgg-update/index.html`; niemals direkt als Patchbasis bearbeiten.
+- Source-/Kandidatenstand: `kgg-update/version.json`. Ein Kandidat kann dem veröffentlichten Stand voraus sein und ist deshalb nicht automatisch live.
+- Kanonischer Live- und APK-Stand: `therapist-app/android_update_manifest.json`, getrennt nach Admin- und Kolleg:innen-Kanal.
+- `therapist-app/kgg_update_manifest.json` ist eine Legacy-Kompatibilitätsdatei und keine kanonische Patch- oder Live-Quelle.
+- Android-Quelle: `android-wrapper/**`; Release- und Prüfwerkzeuge: `release-pipeline/**`.
+- `therapist-app/releases/**` enthält unveränderliche historische Artefakte und wird nur für gezielte Release-, Hash- oder Regressionsprüfungen geöffnet.
+- `therapist-app/admin.html` ist bytegleich mit `therapist-app/releases/web/r0389/admin.html` und dem v389-Admin-Artefakt. Es ist ein historischer Alias, keine Patchbasis.
+- `therapist-app/kollegen.html` ist bytegleich mit dem historischen v389-Kolleg:innen-Artefakt, aber nicht mit `therapist-app/releases/web/r0389/colleague.html`. Auch diese Datei ist keine Patchbasis.
+- Normale Suchen vom Repository-Root aus auf die aktive Quelle begrenzen. `--no-ignore` nur zusammen mit einem ausdrücklich eingegrenzten Historienpfad verwenden.
+
+Normale Suche:
+
+```powershell
+rg -n "KGGDataStore|finishWithPdf" kgg-update/src release-pipeline
+rg -n "KGGH2|patientVersion" . -g "index.html" -g "patient-*.js" -g "service-worker.js"
+```
+
+Gezielte Historiensuche:
+
+```powershell
+rg --no-ignore -n "KGGDataStore" therapist-app/releases/web/r0424/admin.html
+rg --no-ignore --files therapist-app/releases
+```
+
 ## Privates Projektgedächtnis
 
 - Repository: `Kayus24/kgg-project-memory` (privat).
