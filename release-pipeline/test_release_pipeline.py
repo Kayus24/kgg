@@ -240,6 +240,20 @@ class ReleasePipelineTests(unittest.TestCase):
         ):
             self.assertFalse((pipeline.ROOT / relative).exists(), relative)
 
+        guide = pipeline.read_text(pipeline.ROOT / "update-inbox/README.md")
+        self.assertIn("# update-inbox (stillgelegt)", guide)
+        self.assertIn("Niemals `patch.py` oder `release.json`", guide)
+        self.assertIn("Branch namens `mobile-inbox`", guide)
+        self.assertIn("Genau eine neue oder geänderte Admin-HTML", guide)
+        self.assertIn(".github/workflows/mobile-inbox-release.yml", guide)
+        self.assertIn("unveränderliche Release-Artefakte", guide)
+        self.assertIn("geprüften Pull Request", guide)
+        self.assertIn("`kgg-update/src/**`", guide)
+        self.assertIn("build_therapist_source.py --check", guide)
+        self.assertNotIn("`patch.py` hier hochladen", guide)
+        self.assertNotIn("Beides nach `main` committen", guide)
+        self.assertNotIn("Action `Apply Update Inbox`", guide)
+
     def test_v24_profile_transform_is_hardened(self):
         admin = pipeline.read_text(pipeline.BASE_ADMIN)
         colleague = pipeline.derive_colleague(admin)
