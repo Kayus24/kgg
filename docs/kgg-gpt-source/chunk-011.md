@@ -4,6 +4,50 @@
 - Lines: 4621-5040
 
 ```html
+    .tabletSyncQrBtn{display:none!important}
+  }
+  @media(min-width:760px){
+    .scanHub .syncQrBtn{display:none!important}
+    .tabletSyncQrBtn{
+      width:100%;
+      min-height:38px;
+      border-radius:12px;
+      padding:0 8px;
+      font-size:13px;
+      line-height:1;
+    }
+    .packageLayoutSlot .tabletLayoutControls{
+      height:auto!important;
+      min-height:66px!important;
+      display:grid!important;
+      grid-template-columns:1fr!important;
+      gap:6px!important;
+      padding:4px!important;
+    }
+    .packageLayoutSlot .tabletLayoutControls .tabletLockSwitch,
+    .packageLayoutSlot .tabletLayoutControls .tabletSyncQrBtn{
+      width:100%!important;
+    }
+  }
+
+/* v361: Tablet side menu, safe top spacing and clean bottom actions */
+.tabletMenuBtn,
+.tabletSideBackdrop,
+.tabletSideMenu{display:none;}
+
+@media (max-width:759px){
+  .app{
+    padding-top:max(24px,calc(env(safe-area-inset-top) + 20px))!important;
+    padding-left:14px!important;
+    padding-right:14px!important;
+  }
+  .scanHub{margin-top:6px!important;}
+  .tabletMenuBtn,
+  .tabletSideBackdrop,
+  .tabletSideMenu{display:none!important;}
+}
+
+@media (min-width:760px){
   .scanHub{
     grid-template-columns:58px minmax(148px,.78fr) minmax(148px,.78fr) minmax(140px,.82fr) minmax(170px,1fr)!important;
     align-items:stretch!important;
@@ -380,48 +424,4 @@
       inset:0;
       z-index:88;
       background:rgba(7,16,39,.24);
-      backdrop-filter:blur(8px);
-      -webkit-backdrop-filter:blur(8px);
-      opacity:0;
-      pointer-events:none;
-      transition:opacity .22s ease;
-    }
-    body.kggPhoneDrawerOpen .kggPhoneDrawerBackdrop{opacity:1;pointer-events:auto}
-    body.kggPhoneDrawerOpen #recentToggle.phoneButtonFloat,
-    body.kggPhoneDrawerOpen #packageToggle.phoneButtonFloat{
-      position:fixed!important;
-      left:16px!important;
-      right:16px!important;
-      bottom:calc(12px + env(safe-area-inset-bottom))!important;
-      z-index:92!important;
-      width:auto!important;
-      min-width:0!important;
-      height:58px!important;
-      min-height:58px!important;
-      border-radius:18px!important;
-      justify-content:center!important;
-      background:#fff!important;
-      color:var(--ink)!important;
-      border:1px solid rgba(220,227,235,.96)!important;
-      box-shadow:0 22px 54px rgba(7,16,39,.26),0 5px 14px rgba(7,16,39,.12)!important;
-      transform-origin:center bottom;
-      animation:kggPhoneButtonDock .28s cubic-bezier(.18,.84,.24,1) both!important;
-    }
-    body.kggPhoneDrawerOpen #recentList:not(.hidden),
-    body.kggPhoneDrawerOpen #packageList:not(.hidden){
-      position:fixed!important;
-      left:16px!important;
-      right:16px!important;
-      bottom:calc(86px + env(safe-area-inset-bottom))!important;
-      z-index:91!important;
-      max-height:min(56dvh,390px)!important;
-      overflow:auto!important;
-      background:rgba(255,255,255,.98)!important;
-      border:1px solid rgba(220,227,235,.96)!important;
-      border-radius:22px!important;
-      padding:10px!important;
-      box-shadow:0 22px 58px rgba(7,16,39,.24),0 4px 14px rgba(7,16,39,.10)!important;
-      backdrop-filter:blur(10px);
-      -webkit-backdrop-filter:blur(10px);
-      transform-origin:bottom center;
 ```

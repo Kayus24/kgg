@@ -4,6 +4,50 @@
 - Lines: 19321-19740
 
 ```html
+      handle.onclick=ev=>{
+        ev.preventDefault();
+        ev.stopPropagation();
+        if(state.reorderSuppressClick)state.reorderSuppressClick=false;
+      };
+      handle.addEventListener('pointerdown',startAnimatedReorderPress,{passive:false});
+    });
+    list.querySelectorAll('.planCard[data-plan-id]').forEach(card=>{
+      if(card.dataset.tabletCardReorderBound==='1')return;
+      card.dataset.tabletCardReorderBound='1';
+      card.addEventListener('pointerdown',ev=>{
+        if(!isTabletLayout())return;
+        if(ev.button!=null&&ev.button!==0)return;
+        if(animatedReorder)return;
+        const target=ev.target;
+        if(target&&target.closest&&target.closest('button,input,textarea,select,a,.planCardActions,.drag'))return;
+        const startX=ev.clientX,startY=ev.clientY,pointerId=ev.pointerId;
+        let cancelled=false;
+        const cleanup=()=>{
+          document.removeEventListener('pointermove',moveBefore);
+          document.removeEventListener('pointerup',upBefore);
+          document.removeEventListener('pointercancel',upBefore);
+        };
+        const moveBefore=e=>{
+          if(e.pointerId!==pointerId)return;
+          const dx=Math.abs(e.clientX-startX),dy=Math.abs(e.clientY-startY);
+          if(dx>10||dy>10){
+            cancelled=true;
+            clearTimeout(timer);
+            cleanup();
+          }
+        };
+        const upBefore=e=>{
+          if(e.pointerId!==pointerId)return;
+          cancelled=true;
+          clearTimeout(timer);
+          cleanup();
+        };
+        const timer=setTimeout(()=>{
+          cleanup();
+          if(cancelled||animatedReorder)return;
+          startAnimatedReorderPress({
+            button:0,
+            currentTarget:card,
             target:target,
             clientX:startX,
             clientY:startY,
@@ -380,48 +424,4 @@
     if(dbAnchor&&typeof restoreDbScrollAnchor==='function'){
       restoreDbScrollAnchor(dbAnchor);
       setTimeout(()=>restoreDbScrollAnchor(dbAnchor),40);
-    }
-  }
-  function cancelAnimatedReorder(ev){cleanupAnimatedReorder(true);renderPlan();}
-  function cleanupAnimatedReorder(suppressClick){
-    const press=animatedReorder;
-    if(!press)return;
-    clearTimeout(press.timer);
-    if(press.handle)press.handle.classList.remove('reorder-armed');
-    if(press.list)press.list.classList.remove('reorder-active');
-    document.body.classList.remove('kggPlanCardReordering');
-    clearPhoneScrollStateForPlanGesture(280);
-    if(press.card){
-      const keepSwipeStyles=press.card.classList.contains('swipe-dragging')||document.body.classList.contains('kggPlanCardSwiping');
-      press.card.classList.remove('reorder-lifted','reorder-prelift');
-      if(!keepSwipeStyles){
-        press.card.style.removeProperty('--drag-left');
-        press.card.style.removeProperty('--drag-top');
-        press.card.style.removeProperty('--drag-y');
-        press.card.style.removeProperty('width');
-        press.card.style.removeProperty('position');
-        press.card.style.removeProperty('left');
-        press.card.style.removeProperty('top');
-        press.card.style.removeProperty('right');
-        press.card.style.removeProperty('bottom');
-        press.card.style.removeProperty('margin');
-        press.card.style.removeProperty('transform');
-        press.card.style.removeProperty('transform-origin');
-      }
-    }
-    if(press.placeholder&&press.placeholder.parentNode)press.placeholder.parentNode.removeChild(press.placeholder);
-    if(press.list){
-      if(press.phoneListAbsoluteDrag){
-        if(press.listPrevPosition){
-          press.list.style.setProperty('position',press.listPrevPosition,press.listPrevPositionPriority||'');
-        }else{
-          press.list.style.removeProperty('position');
-        }
-      }
-      Array.from(press.list.querySelectorAll('.reorder-gap-before,.reorder-gap-after')).forEach(c=>c.classList.remove('reorder-gap-before','reorder-gap-after'));
-    }
-    if(press.preMove)document.removeEventListener('pointermove',press.preMove);
-    if(press.preUp)document.removeEventListener('pointerup',press.preUp);
-    document.removeEventListener('pointermove',onAnimatedReorderMove);
-    animatedReorder=null;
 ```

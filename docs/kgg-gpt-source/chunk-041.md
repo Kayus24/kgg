@@ -4,6 +4,50 @@
 - Lines: 17221-17640
 
 ```html
+<div class="modal" id="packageSaveModal"><div class="sheet">
+  <h2>Übungspaket speichern</h2>
+  <p class="notice">Aus aktuellem Plan.</p>
+  <div class="field"><label>Paketname</label><input id="packageNameInput" placeholder="z. B. Knie Standard"></div>
+  <div class="grid2"><button class="mutedBtn" id="cancelPackageSave" type="button">Abbrechen</button><button class="primary" id="confirmPackageSave" type="button">OK</button></div>
+</div></div>
+
+<div class="modal" id="bankDeleteModal"><div class="sheet">
+  <h2>Übung löschen?</h2>
+  <p class="notice"><b id="bankDeleteName"></b> endgültig löschen?</p>
+  <div class="grid2"><button class="mutedBtn" id="cancelBankDelete" type="button">Nein</button><button class="primary" id="confirmBankDelete" type="button">Ja</button></div>
+</div></div>
+
+<div class="modal" id="shareModal"><div class="sheet">
+  <p class="notice" id="finishNotice"></p>
+  <div class="finishChoices" id="finishChoices">
+    <div class="finishPdfRow">
+      <button class="mutedBtn finishOutputBtn finishPdfBtn" id="finishPdfBtn" type="button"><span class="finishIcon" aria-hidden="true">📄</span><span>PDF erzeugen</span></button>
+      <button class="mutedBtn finishPdfLargeBtn" id="finishLargePdfBtn" type="button" aria-label="Großdruck-PDF für Menschen mit Sehbeeinträchtigung">👓</button>
+    </div>
+    <button class="mutedBtn finishOutputBtn finishAppBtn" id="finishPatientBtn" type="button"><span class="finishIcon" aria-hidden="true">▦</span><span>App erzeugen</span></button>
+    <button class="mutedBtn" id="finishCancelBtn" type="button">Abbrechen</button>
+  </div>
+  <div class="patientOutput hidden patientQrOutput" id="patientOutputBox">
+    <b class="patientOutputTitle">Patient:innen</b>
+    <p class="notice" id="patientShareNotice" style="margin-top:8px">Lokaler Test.</p>
+    <a class="patientLink" id="patientAppLink" href="#" target="_blank" rel="noopener">Patienten-App öffnen</a>
+    <button class="mutedBtn" style="width:100%;margin-top:8px" id="copyPatientLink" type="button">Link kopieren</button>
+    <textarea class="patientLinkCopyField hidden" id="patientLinkCopyField" readonly aria-label="Patienten-Link zum manuellen Kopieren"></textarea>
+    <div class="qrBox" id="patientQrBox"><span class="qrStatus">QR wird vorbereitet …</span></div>
+    <div class="qrStatus" id="patientQrStatus"></div>
+  </div>
+  <details class="apiBox" id="debugPayloadBox">
+    <summary>⚙️ Debug/Test: Roh-Payload intern anzeigen</summary>
+    <p><b>Nicht für Patient:innen.</b> Dieser Bereich ist nur intern/therapeutisch/entwicklerisch zum Testen.</p>
+    <textarea id="shareText" style="min-height:150px;font-size:13px"></textarea>
+    <button class="mutedBtn" style="width:100%;margin-top:8px" id="copyShare">Debug-Payload kopieren</button>
+  </details>
+  <button class="mutedBtn hidden" style="width:100%;margin-top:8px" id="closeShare">Schließen</button>
+</div></div>
+
+<div class="modal" id="largePdfModal"><div class="sheet">
+  <h2>Großdruck-PDF</h2>
+  <p class="notice">Großdruck-PDF erzeugen?</p>
   <div class="grid2"><button class="mutedBtn" id="cancelLargePdf" type="button">Abbrechen</button><button class="primary" id="confirmLargePdf" type="button">PDF erzeugen</button></div>
 </div></div>
 
@@ -133,11 +177,11 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
 
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v061_cross_app_live_qr_camera';
+  const VERSION='KGG_GITHUB_UPDATE_v062_tablet_recent_package_shell_geometry';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v061","buildTime":"2026-08-01T12:15:33Z","buildCode":"module-v061-cross-app-live-qr-camera","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v062","buildTime":"2026-08-10T15:31:28Z","buildCode":"module-v062-tablet-recent-package-shell-geometry","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -380,48 +424,4 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     return (exercises||[]).flatMap(ex=>ensureExerciseMediaList(ex).map(media=>({ex,media})));
   }
   function allPlanMediaItems(exercises){
-    return mediaItemsFromExercises(exercises||state.plan||[]);
-  }
-  function scheduleTemporaryMediaDelete(adapter,media){
-    if(!adapter)return;
-    const delay=Math.max(1,Number(media.ttlSeconds)||MEDIA_UPLOAD_TTL_SECONDS)*1000;
-    if(typeof adapter.scheduleDelete==='function'){
-      try{adapter.scheduleDelete(media,{delayMs:delay});}catch(err){console.warn('Media scheduleDelete fehlgeschlagen:',err);}
-      return;
-    }
-    if(typeof adapter.delete==='function'){
-      setTimeout(()=>{try{adapter.delete(media);}catch(err){console.warn('Media delete fehlgeschlagen:',err);}},delay);
-    }
-  }
-  async function uploadOneMediaItem(adapter,media,options){
-    const ttlSeconds=Number(options&&options.ttlSeconds)||MEDIA_UPLOAD_TTL_SECONDS;
-    const force=!!(options&&options.force);
-    if(media.downloadUrl&&media.status==='ready'&&!force&&(Number(media.ttlSeconds)||0)>=ttlSeconds)return media;
-    const record=await getEncryptedMediaBlob(media.id);
-    if(!record||!record.blob)throw new Error('Verschluesselte Bilddatei fehlt lokal.');
-    const uploadManifest=ensureMediaShape({...media,ttlSeconds,retrySeconds:MEDIA_RETRY_SECONDS});
-    const result=await adapter.upload(record.blob,{manifest:uploadManifest,ttlSeconds});
-    if(!result||!result.downloadUrl)throw new Error('Upload lieferte keinen Download-Link.');
-    const uploadedAt=new Date().toISOString();
-    const expiresAt=result.expiresAt||new Date(Date.now()+ttlSeconds*1000).toISOString();
-    const updated=ensureMediaShape({...media,downloadUrl:result.downloadUrl,deleteUrl:result.deleteUrl||media.deleteUrl||'',deleteToken:result.deleteToken||media.deleteToken||'',storage:result.storage||'temporary-web-encrypted',status:'ready',uploadedAt,expiresAt,ttlSeconds,retrySeconds:MEDIA_RETRY_SECONDS});
-    scheduleTemporaryMediaDelete(adapter,updated);
-    return updated;
-  }
-  function publicMediaBundleItem(media){
-    return {
-      id:media.id,
-      type:'image',
-      mime:media.mime,
-      name:media.name,
-      width:media.width,
-      height:media.height,
-      bytes:media.encryptedSize||0,
-      encrypted:true,
-      status:media.downloadUrl?'ready':'upload-pending',
-      downloadUrl:media.downloadUrl||'',
-      expiresInSeconds:media.ttlSeconds||MEDIA_UPLOAD_TTL_SECONDS,
-      retrySeconds:media.retrySeconds||MEDIA_RETRY_SECONDS,
-      crypto:media.crypto||null
-    };
 ```

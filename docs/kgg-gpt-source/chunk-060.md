@@ -4,6 +4,50 @@
 - Lines: 25201-25620
 
 ```html
+      try{
+        if(isPhone() && isBodyClassList(this) && args.indexOf('kggPlanSectionFrozen') !== -1){
+          args=args.filter(function(token){ return token !== 'kggPlanSectionFrozen'; });
+          setTimeout(cleanFreeze,0);
+          if(!args.length) return undefined;
+        }
+      }catch(err){}
+
+      return originalClassListAdd.apply(this,args);
+    };
+  }
+
+  function disablePhoneScrollToggleForButtons(){
+    /*
+      These names are global in this single-file app. Assigning them here leaves
+      every other feature intact but prevents phone drawer/buttons from being
+      swallowed after a touch/scroll gesture.
+    */
+    try{
+      if(typeof guardPhoneScrollToggle === 'function'){
+        guardPhoneScrollToggle=function(){ return false; };
+      }
+    }catch(err){}
+
+    try{
+      if(typeof window.guardPhoneScrollToggle === 'function'){
+        window.guardPhoneScrollToggle=function(){ return false; };
+      }
+    }catch(err){}
+  }
+
+  function installListeners(){
+    if(installed || !document.body) return;
+    installed=true;
+
+    installClassListFreezeBlock();
+    disablePhoneScrollToggleForButtons();
+
+    /*
+      Capture before document-level phone freeze side effects become visible.
+      We do not stop propagation, so original swipe/delete/reorder handlers still run.
+    */
+    window.addEventListener('pointerdown',function(ev){
+      if(!isPhone()) return;
       if(isInsidePlanCard(ev.target)){
         cleanScrollFlag();
         cleanFreeze();
@@ -380,48 +424,4 @@
     if(block){
       removeStyleProps(block, [
         "--kgg-current-plan-freeze-h",
-        "height",
-        "min-height",
-        "max-height",
-        "overflow",
-        "contain"
-      ]);
-    }
-
-    if(list){
-      list.classList.remove("reorder-active");
-      /*
-        The phone drag code temporarily sets #planList to position:relative.
-        If a resize/orientation interrupts cleanup, remove that inline value so
-        tablet layout uses stylesheet rules again.
-      */
-      removeStyleProps(list, [
-        "position",
-        "overflow",
-        "contain",
-        "transform",
-        "isolation"
-      ]);
-    }
-
-    Array.prototype.forEach.call(document.querySelectorAll("#currentPlanBlock .planSectionBody"), function(section){
-      removeStyleProps(section, [
-        "height",
-        "min-height",
-        "max-height",
-        "overflow",
-        "contain",
-        "transform",
-        "touch-action"
-      ]);
-    });
-  }
-
-  function cleanBodyState(){
-    var b = body();
-    if(!b) return;
-
-    b.classList.remove(
-      "kggPlanCardReordering",
-      "kggPlanCardSwiping",
 ```

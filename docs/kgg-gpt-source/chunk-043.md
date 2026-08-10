@@ -4,6 +4,50 @@
 - Lines: 18061-18480
 
 ```html
+    if(!navigator.storage||!navigator.storage.persist)return;
+    try{await navigator.storage.persist();}catch(err){console.warn('Persistenter Speicher nicht bestätigt:',err);}
+  }
+
+  function kggVersionNumber(value){
+    const match=String(value||'').match(/v(\d+)/i);
+    return match?parseInt(match[1],10):0;
+  }
+  function currentRolloutProfile(){
+    return (window.KGG_ROLLOUT_PROFILE||'colleague').toLowerCase()==='admin'?'admin':'colleague';
+  }
+  function githubUpdateTargetFromManifest(manifest){
+    const profile=currentRolloutProfile();
+    const latestVersion=profile==='admin'?(manifest.latestAdminVersion||manifest.latestVersion):(manifest.latestColleagueVersion||manifest.latestVersion);
+    const latestUrl=profile==='admin'?(manifest.adminUrl||manifest.latestUrl):(manifest.colleagueUrl||manifest.latestUrl);
+    if(!latestVersion||!latestUrl)return null;
+    if(kggVersionNumber(latestVersion)<=kggVersionNumber(VERSION))return null;
+    return {version:latestVersion,url:latestUrl,notes:manifest.releaseNotes||''};
+  }
+  function isNativeAndroidShell(){
+    return !!(window.KGGAndroidApp||window.KGGAndroidSync||window.KGGNativeSync);
+  }
+  function nativeAppUpdateStatus(){
+    try{
+      if(window.KGGNativeAppUpdate&&typeof window.KGGNativeAppUpdate.status==='function')return window.KGGNativeAppUpdate.status()||{};
+      if(window.KGGAndroidApp&&typeof window.KGGAndroidApp.updateStatus==='function')return JSON.parse(window.KGGAndroidApp.updateStatus()||'{}');
+    }catch(err){}
+    return {};
+  }
+  function requestNativeAppUpdateCheck(){
+    try{
+      if(window.KGGNativeAppUpdate&&typeof window.KGGNativeAppUpdate.checkNow==='function')return !!window.KGGNativeAppUpdate.checkNow();
+      if(window.KGGAndroidApp&&typeof window.KGGAndroidApp.checkForAppUpdate==='function')return !!window.KGGAndroidApp.checkForAppUpdate();
+    }catch(err){}
+    return false;
+  }
+  function androidApkUpdateTargetFromManifest(manifest){
+    if(!isNativeAndroidShell())return null;
+    const profile=currentRolloutProfile();
+    const latestVersion=manifest.latestAndroidShellVersion||manifest.latestWebVersion||'';
+    const latestUrl=profile==='admin'
+      ?(manifest.latestAdminAndroidApkUrl||manifest.adminAndroidApkUrl||manifest.latestAndroidApkUrl)
+      :(manifest.latestColleagueAndroidApkUrl||manifest.colleagueAndroidApkUrl||manifest.latestAndroidApkUrl);
+    const latestSha=profile==='admin'
       ?(manifest.latestAdminAndroidApkSha256||manifest.adminAndroidApkSha256||manifest.latestAndroidApkSha256)
       :(manifest.latestColleagueAndroidApkSha256||manifest.colleagueAndroidApkSha256||manifest.latestAndroidApkSha256);
     if(!latestVersion||!latestUrl)return null;
@@ -380,48 +424,4 @@
         return;
       }
       if(isStructuredPainLine(line))return;
-      if(current)blocks.push(current);
-      current={name:line.replace(/\s+/g,' ').trim(),setLines:[]};
-    });
-    if(current)blocks.push(current);
-    if(!sawSetLine)return null;
-    return blocks.filter(block=>{
-      const letters=String(block.name||'').replace(/[^A-Za-zÄÖÜäöüß]/g,'');
-      return letters.length>=3;
-    });
-  }
-  function parseStructuredTextExerciseBlock(block,existing){
-    if(!block||!block.name)return null;
-    const ex=parseTextExercise(block.name,existing);
-    if(!ex)return null;
-    const firstInfo=(block.setLines||[]).map(parseStructuredSetLine).find(info=>info.startMetric||info.startLoad)||{};
-    const next={...ex,rawText:[block.name].concat(block.setLines||[]).join('\n'),textMaster:true,liveDraft:false,changedByLiveText:false};
-    if(firstInfo.startMetric){next.startMetric=firstInfo.startMetric;next.unit=firstInfo.unit||next.unit||'Wdh';next.metricUnit=firstInfo.metricUnit||next.unit||'Wdh';}
-    if(firstInfo.startLoad)next.startLoad=firstInfo.startLoad;
-    if(firstInfo.weightUnit||firstInfo.loadUnit){next.weightUnit=firstInfo.weightUnit||firstInfo.loadUnit;next.loadUnit=firstInfo.loadUnit||firstInfo.weightUnit;next.explicitLoadUnit=true;}
-    if(firstInfo.customLoadUnit){next.customLoadUnit=true;next.needsReview=true;next.sourceFlags=Array.from(new Set([...(next.sourceFlags||[]),'customUnit','needsReview']));}
-    return next;
-  }
-  function structuredExercisesFromPlanText(text){
-    const blocks=structuredPlanBlocksFromText(text);
-    if(blocks===null)return null;
-    return blocks.map((block,index)=>parseStructuredTextExerciseBlock(block,findExistingForTextSegment(block.name,index))).filter(Boolean);
-  }
-  function activeTextSegment(){
-    const input=$('exerciseInput');
-    if(!input)return'';
-    const parts=splitPlanText(input.value);
-    const pos=typeof input.selectionStart==='number'?input.selectionStart:input.value.length;
-    const hit=parts.find(p=>pos>=p.start&&pos<=p.end)||parts[parts.length-1];
-    return (hit&&hit.text||'').trim();
-  }
-  function exactBankExercise(name){const c=compact(name); return bank.find(ex=>compact(ex.name)===c)||null;}
-  function parseTextExercise(text,existing){
-    {
-      const raw=String(text||'').trim();
-      const letters=raw.replace(/[^A-Za-zÄÖÜäöüß]/g,'');
-      if(letters.length<3)return null;
-      const parsed=parseExerciseQuantityText(raw);
-      const parsedSide=parseSideModeFromText(raw);
-      const cleanName=stripExerciseName(raw)||raw;
 ```

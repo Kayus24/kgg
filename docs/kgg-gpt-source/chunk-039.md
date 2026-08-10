@@ -4,6 +4,50 @@
 - Lines: 16381-16800
 
 ```html
+                    { numBlocks: 14, dataCodewordsPerBlock: 47 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 49, dataCodewordsPerBlock: 24 },
+                    { numBlocks: 10, dataCodewordsPerBlock: 25 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 24, dataCodewordsPerBlock: 15 },
+                    { numBlocks: 46, dataCodewordsPerBlock: 16 },
+                ],
+            },
+        ],
+    },
+    {
+        infoBits: 0x26A64,
+        versionNumber: 38,
+        alignmentPatternCenters: [6, 32, 58, 84, 110, 136, 162],
+        errorCorrectionLevels: [
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 4, dataCodewordsPerBlock: 122 },
+                    { numBlocks: 18, dataCodewordsPerBlock: 123 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 28,
+                ecBlocks: [
+                    { numBlocks: 13, dataCodewordsPerBlock: 46 },
+                    { numBlocks: 32, dataCodewordsPerBlock: 47 },
+                ],
+            },
+            {
+                ecCodewordsPerBlock: 30,
+                ecBlocks: [
+                    { numBlocks: 48, dataCodewordsPerBlock: 24 },
+                    { numBlocks: 14, dataCodewordsPerBlock: 25 },
+                ],
             },
             {
                 ecCodewordsPerBlock: 30,
@@ -380,48 +424,4 @@ function recenterLocation(matrix, p) {
     var rightX = Math.round(p.x);
     while (matrix.get(rightX, Math.round(p.y))) {
         rightX++;
-    }
-    var x = (leftX + rightX) / 2;
-    var topY = Math.round(p.y);
-    while (matrix.get(Math.round(x), topY)) {
-        topY--;
-    }
-    var bottomY = Math.round(p.y);
-    while (matrix.get(Math.round(x), bottomY)) {
-        bottomY++;
-    }
-    var y = (topY + bottomY) / 2;
-    return { x: x, y: y };
-}
-function locate(matrix) {
-    var finderPatternQuads = [];
-    var activeFinderPatternQuads = [];
-    var alignmentPatternQuads = [];
-    var activeAlignmentPatternQuads = [];
-    var _loop_1 = function (y) {
-        var length_1 = 0;
-        var lastBit = false;
-        var scans = [0, 0, 0, 0, 0];
-        var _loop_2 = function (x) {
-            var v = matrix.get(x, y);
-            if (v === lastBit) {
-                length_1++;
-            }
-            else {
-                scans = [scans[1], scans[2], scans[3], scans[4], length_1];
-                length_1 = 1;
-                lastBit = v;
-                // Do the last 5 color changes ~ match the expected ratio for a finder pattern? 1:1:3:1:1 of b:w:b:w:b
-                var averageFinderPatternBlocksize = sum(scans) / 7;
-                var validFinderPattern = Math.abs(scans[0] - averageFinderPatternBlocksize) < averageFinderPatternBlocksize &&
-                    Math.abs(scans[1] - averageFinderPatternBlocksize) < averageFinderPatternBlocksize &&
-                    Math.abs(scans[2] - 3 * averageFinderPatternBlocksize) < 3 * averageFinderPatternBlocksize &&
-                    Math.abs(scans[3] - averageFinderPatternBlocksize) < averageFinderPatternBlocksize &&
-                    Math.abs(scans[4] - averageFinderPatternBlocksize) < averageFinderPatternBlocksize &&
-                    !v; // And make sure the current pixel is white since finder patterns are bordered in white
-                // Do the last 3 color changes ~ match the expected ratio for an alignment pattern? 1:1:1 of w:b:w
-                var averageAlignmentPatternBlocksize = sum(scans.slice(-3)) / 3;
-                var validAlignmentPattern = Math.abs(scans[2] - averageAlignmentPatternBlocksize) < averageAlignmentPatternBlocksize &&
-                    Math.abs(scans[3] - averageAlignmentPatternBlocksize) < averageAlignmentPatternBlocksize &&
-                    Math.abs(scans[4] - averageAlignmentPatternBlocksize) < averageAlignmentPatternBlocksize &&
 ```

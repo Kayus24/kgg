@@ -4,6 +4,50 @@
 - Lines: 6301-6720
 
 ```html
+  KGGOfflineJsPDF.prototype.setDrawColor = function(){
+    this._drawColor = colorFromArgs(arguments);
+    return this;
+  };
+
+  KGGOfflineJsPDF.prototype.setTextColor = function(){
+    this._textColor = colorFromArgs(arguments);
+    return this;
+  };
+
+  KGGOfflineJsPDF.prototype.setFillColor = function(){
+    this._fillColor = colorFromArgs(arguments);
+    return this;
+  };
+
+  KGGOfflineJsPDF.prototype.addPage = function(_format, orientation){
+    var current = this._pages[0];
+    var useLandscape = String(orientation || '').toLowerCase() === 'landscape' || current.w > current.h;
+    var size = resolvePageSize(Array.isArray(_format) ? _format : [current.w, current.h], useLandscape ? 'landscape' : 'portrait');
+    this._page = makePage(size);
+    this._pages.push(this._page);
+    return this;
+  };
+
+  KGGOfflineJsPDF.prototype.rect = function(x,y,w,h,style){
+    var op = String(style || '').toUpperCase().indexOf('F') >= 0 ? 'f' : 'S';
+    var px = this._x(x);
+    var py = this._y(y + h);
+    this._push('q\n' + colorCmd(this._drawColor,'RG') + '\n' + colorCmd(this._fillColor,'rg') + '\n' +
+      num(this._lineWidth * MM_TO_PT) + ' w\n' +
+      num(px) + ' ' + num(py) + ' ' + num(w * MM_TO_PT) + ' ' + num(h * MM_TO_PT) + ' re ' + op + '\nQ');
+    return this;
+  };
+
+  KGGOfflineJsPDF.prototype.roundedRect = function(x,y,w,h){
+    return this.rect(x,y,w,h);
+  };
+
+  KGGOfflineJsPDF.prototype.line = function(x1,y1,x2,y2){
+    this._push('q\n' + colorCmd(this._drawColor,'RG') + '\n' +
+      num(this._lineWidth * MM_TO_PT) + ' w\n' +
+      num(this._x(x1)) + ' ' + num(this._y(y1)) + ' m ' +
+      num(this._x(x2)) + ' ' + num(this._y(y2)) + ' l S\nQ');
+    return this;
   };
 
   KGGOfflineJsPDF.prototype.text = function(text,x,y,opts){
@@ -380,48 +424,4 @@
     }
     body.kggPlanCardSwiping .planCard.swipe-armed{
       transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
-    }
-    body.kggPlanCardReordering .planCard.reorder-lifted,
-    body.is-scrolling .planCard.reorder-lifted{
-      transform:translateY(var(--drag-y,0px)) scale(1.035)!important;
-      transition:none!important;
-      will-change:transform!important;
-      pointer-events:none!important;
-    }
-    body.kggPlanCardReordering .planList.reorder-active .planCard:not(.reorder-lifted){
-      transition:transform .14s ease,margin .14s ease,opacity .14s ease!important;
-    }
-    body.kggPlanCardReordering .planCard.reorder-placeholder{
-      display:block!important;
-      visibility:visible!important;
-    }
-  }
-</style>
-
-
-
-
-<style id="kgg-mini-patch-v400-07-android-wrapper-fixes">
-  /* v400 mini07: Android-WebView/Phone polish.
-     Scope: UI-only. Tablet layout ab 760px bleibt unveraendert. */
-  @media (max-width:759px){
-    body.kggPlanCardReordering #bankArea,
-    body.kggPlanCardReordering #dbTitle,
-    body.kggPlanCardReordering .bankArea,
-    body.kggPlanCardReordering .bankRows,
-    body.kggPlanCardReordering .az{
-      pointer-events:none!important;
-    }
-    body.kggPlanCardReordering .planCard.reorder-lifted,
-    body.is-scrolling.kggPlanCardReordering .planCard.reorder-lifted{
-      transform:translateY(var(--drag-y,0px)) scale(1.035)!important;
-      z-index:9999!important;
-      transition:none!important;
-      will-change:transform!important;
-      pointer-events:none!important;
-    }
-    body.kggPlanCardSwiping .planCard.swipe-dragging,
-    body.is-scrolling.kggPlanCardSwiping .planCard.swipe-dragging{
-      transform:translateX(var(--kgg-plan-swipe-x,0px))!important;
-      transition:none!important;
 ```

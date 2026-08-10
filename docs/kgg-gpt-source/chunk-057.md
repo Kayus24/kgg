@@ -4,6 +4,50 @@
 - Lines: 23941-24360
 
 ```html
+        document.addEventListener('pointermove',move,{passive:true});
+        document.addEventListener('pointerup',up,{once:true});
+        document.addEventListener('pointercancel',up,{once:true});
+      });
+    }
+    window.addEventListener('resize',()=>requestAnimationFrame(()=>{updateTabletLayoutAdaptiveClasses();updateTabletLayoutHandle();updateTabletLayoutCollisionGuard();}));
+    window.addEventListener('orientationchange',()=>setTimeout(()=>{updateTabletLayoutAdaptiveClasses();updateTabletLayoutHandle();updateTabletLayoutCollisionGuard();},120));
+    applyTabletLayoutSettings();
+  }
+  const tabletOverlayState={kind:null};
+  function tabletPanelConfig(kind){
+    if(kind==='base')return {kind:'base',panelId:'baseFields',anchorId:'baseToggle',preferred:'below',align:'left',minWidth:420,maxWidth:680};
+    if(kind==='recent')return {kind:'recent',panelId:'recentList',anchorId:(document.body.classList.contains('tabletMenuOpen')&&$('tabletMenuRecentBtn'))?'tabletMenuRecentBtn':'recentToggle',preferred:document.body.classList.contains('tabletMenuOpen')?'below':'above',align:'left',minWidth:360,maxWidth:560};
+    if(kind==='package')return {kind:'package',panelId:'packageList',anchorId:(document.body.classList.contains('tabletMenuOpen')&&$('tabletMenuPackagesBtn'))?'tabletMenuPackagesBtn':'packageToggle',preferred:document.body.classList.contains('tabletMenuOpen')?'below':'above',align:'left',minWidth:360,maxWidth:620};
+    return null;
+  }
+  function clearTabletOverlayStyles(panel){
+    if(!panel)return;
+    ['--kgg-overlay-left','--kgg-overlay-top','--kgg-overlay-width','--kgg-overlay-max-height','--kgg-overlay-origin'].forEach(name=>panel.style.removeProperty(name));
+  }
+  function setTabletOverlayActiveFlag(){
+    const active=!!(isTabletLayout()&&(
+      ($('baseFields')&&!$('baseFields').classList.contains('hidden'))||
+      ($('recentList')&&!$('recentList').classList.contains('hidden'))||
+      ($('packageList')&&!$('packageList').classList.contains('hidden'))
+    ));
+    document.body.classList.toggle('kggTabletOverlayActive',active);
+    if(!active)tabletOverlayState.kind=null;
+    updateToggleCarets();
+    setTabletAnchorActiveClasses();
+  }
+  function closeTabletFloatingPanelsExcept(except){
+    const base=$('baseFields'), recent=$('recentList'), packages=$('packageList');
+    if(base&&except!=='base'){base.classList.add('hidden');clearTabletOverlayStyles(base);}
+    if(recent&&except!=='recent'){recent.classList.add('hidden');clearTabletOverlayStyles(recent);}
+    if(packages&&except!=='package'){packages.classList.add('hidden');clearTabletOverlayStyles(packages);}
+    if(!['base','recent','package'].includes(except||''))tabletOverlayState.kind=null;
+    let needsRender=false;
+    if(except!=='bank'&&state&&state.bankOpen){state.bankOpen=false; needsRender=true;}
+    if(window.KGGScan&&typeof window.KGGScan.collapseAll==='function')window.KGGScan.collapseAll('tablet_overlay_'+(except||'none'));
+    setTabletOverlayActiveFlag();
+    return needsRender;
+  }
+  function clampNumber(value,min,max){return Math.max(min,Math.min(max,value));}
   function positionTabletAnchoredOverlay(kind){
     if(!isTabletLayout())return false;
     const cfg=tabletPanelConfig(kind);
@@ -380,48 +424,4 @@
       const next=line?line+' '+word:word;
       if(next.length>maxChars&&line){lines.push(line);line=word;}
       else line=next;
-    });
-    if(line)lines.push(line);
-    return lines.length?lines:[''];
-  }
-  function buildKggAdminMenuQrPrintPdf(){
-    const current=window.KGG_ADMIN_MENU_QR_CURRENT||{};
-    const value=String(current.value||($('kggAdminMenuQrLink')&&$('kggAdminMenuQrLink').value)||'').trim();
-    if(!value)throw new Error('missing_qr_value');
-    const JsPdfCtor=findJsPdfConstructor();
-    if(!JsPdfCtor)throw new Error('missing_pdf_runtime');
-    if(typeof window.qrcode!=='function')throw new Error('missing_qr_runtime');
-    const doc=new JsPdfCtor({orientation:'portrait',unit:'mm',format:'a4'});
-    try{doc.setProperties({title:'KGG Kolleg:innen-App QR',subject:'KGG APK QR',creator:VERSION});}catch(e){}
-    const title=String(current.title||'Kolleg:innen-App APK QR');
-    const hint=String(current.hint||'QR-Code scannen oder Link oeffnen.');
-    try{doc.setFont('helvetica','bold');}catch(e){}
-    doc.setFontSize(18); doc.setTextColor(7,16,39); doc.text(title,16,20);
-    try{doc.setFont('helvetica','normal');}catch(e){}
-    doc.setFontSize(10); doc.setTextColor(80,94,112);
-    wrapKggQrPrintText(hint,92).slice(0,3).forEach((line,index)=>doc.text(line,16,29+(index*5)));
-    const qr=window.qrcode(0,'M');
-    qr.addData(value);
-    qr.make();
-    const count=qr.getModuleCount();
-    const size=124;
-    const x=(210-size)/2;
-    const y=48;
-    const cell=size/count;
-    doc.setDrawColor(225,231,239);
-    doc.setFillColor(255,255,255);
-    doc.rect(x-5,y-5,size+10,size+10,'F');
-    doc.rect(x-5,y-5,size+10,size+10,'S');
-    doc.setFillColor(0,0,0);
-    for(let row=0;row<count;row++){
-      for(let col=0;col<count;col++){
-        if(qr.isDark(row,col))doc.rect(x+(col*cell),y+(row*cell),cell+.03,cell+.03,'F');
-      }
-    }
-    doc.setFontSize(8); doc.setTextColor(52,64,84);
-    wrapKggQrPrintText(value,92).slice(0,5).forEach((line,index)=>doc.text(line,16,188+(index*4.5)));
-    doc.setFontSize(9); doc.setTextColor(102,112,133);
-    doc.text('Keine Admin-Funktionen, keine API-Keys, keine Patientendaten.',16,222);
-    const filename='kgg_kolleginnen_app_qr_'+new Date().toISOString().slice(0,10)+'.pdf';
-    const blob=pdfBlobFromDoc(doc);
 ```

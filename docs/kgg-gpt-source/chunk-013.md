@@ -4,6 +4,50 @@
 - Lines: 5461-5880
 
 ```html
+    #editorModal .field select{
+      min-height:44px!important;
+      height:44px!important;
+      border-radius:11px!important;
+      padding:8px 10px!important;
+      font-size:15px!important;
+    }
+    #editorModal .editorStartHint{
+      margin-top:8px!important;
+      padding:10px!important;
+      border-radius:14px!important;
+    }
+    #editorModal .editorStartHint>b{
+      display:block!important;
+      margin-bottom:5px!important;
+      font-size:15px!important;
+      line-height:1.1!important;
+    }
+    #editorModal .editorStartGrid{
+      gap:7px!important;
+      margin-top:0!important;
+    }
+    #editorModal .editorMediaBox{
+      display:grid!important;
+      grid-template-columns:auto minmax(0,1fr) auto!important;
+      align-items:center!important;
+      gap:8px!important;
+      margin-top:8px!important;
+      padding:8px 10px!important;
+      border-radius:14px!important;
+    }
+    #editorModal .editorMediaHead{
+      display:contents!important;
+    }
+    #editorModal .editorMediaHead b{
+      grid-column:1!important;
+      font-size:16px!important;
+      line-height:1!important;
+      white-space:nowrap!important;
+    }
+    #editorModal .editorMediaStatus{
+      grid-column:2!important;
+      display:block!important;
+      min-width:0!important;
       margin:0!important;
       font-size:12px!important;
       line-height:1.15!important;
@@ -380,48 +424,4 @@
       grid-row:3!important;
       width:100%!important;
       height:100%!important;
-      min-height:0!important;
-      max-height:none!important;
-      margin:0!important;
-      align-self:stretch!important;
-      border-radius:16px!important;
-      overflow:hidden!important;
-    }
-    body.tabletLayoutCustom #bankContent,
-    body.tabletLayoutCustom #bankContent .bankWithAz,
-    body.tabletLayoutCustom #bankContent .bankRows{
-      min-height:0!important;
-      max-height:none!important;
-      height:100%!important;
-    }
-    body.tabletLayoutCustom #rightPlanStack,
-    body.tabletLayoutCustom #rightPlanStack.hidden{
-      grid-column:2/4!important;
-      grid-row:2/4!important;
-      display:flex!important;
-      flex-direction:column!important;
-      width:100%!important;
-      height:100%!important;
-      min-height:0!important;
-      margin:0!important;
-      gap:0!important;
-      align-self:stretch!important;
-      justify-self:stretch!important;
-      visibility:visible!important;
-      pointer-events:auto!important;
-      overflow:hidden!important;
-    }
-    body.tabletLayoutCustom #currentPlanBlock,
-    body.tabletLayoutCustom #rightPlanStack #currentPlanBlock.hidden{
-      display:flex!important;
-      flex-direction:column!important;
-      flex:1 1 auto!important;
-      width:100%!important;
-      height:100%!important;
-      min-height:0!important;
-      margin:0!important;
-      padding:12px!important;
-      border:2px solid #111827!important;
-      border-radius:18px!important;
-      background:#fff!important;
 ```

@@ -4,6 +4,50 @@
 - Lines: 18901-19320
 
 ```html
+    if(!btn)return;
+    btn.classList.remove('phoneButtonFloat');
+    void btn.offsetWidth;
+    btn.classList.add('phoneButtonFloat');
+    setTimeout(()=>{
+      if(document.body.classList.contains('kggPhoneDrawerOpen')&&(id==='recentToggle'||id==='packageToggle'))return;
+      btn.classList.remove('phoneButtonFloat');
+    },430);
+  }
+  function initPhoneKeyboardAndDrawers(){
+    initPhoneScrollGuard();
+    const input=$('exerciseInput');
+    if(input){
+      input.addEventListener('focus',keepPhoneTextInputVisible);
+      input.addEventListener('input',keepPhoneTextInputVisible);
+      input.addEventListener('blur',releasePhoneTextFocusSoon);
+    }
+    ['bankToggle','recentToggle','packageToggle'].forEach(id=>{
+      const btn=$(id);
+      if(btn)btn.addEventListener('pointerup',()=>markPhoneButtonFloat(id),{passive:true});
+    });
+    window.addEventListener('resize',()=>{if(isPhoneUserScrolling()){updatePhoneKeyboardInset();return;} keepPhoneTextInputVisible();});
+    window.addEventListener('orientationchange',()=>setTimeout(keepPhoneTextInputVisible,180));
+    if(window.visualViewport){
+      window.visualViewport.addEventListener('resize',()=>{if(isPhoneUserScrolling()){updatePhoneKeyboardInset();return;} keepPhoneTextInputVisible();});
+      window.visualViewport.addEventListener('scroll',()=>{markPhoneUserScrolling(); updatePhoneKeyboardInset();});
+    }
+  }
+  function renderDbTitle(dbTitle,text){
+    if(!dbTitle)return;
+    const isOpen=!!state.bankOpen;
+    const mode=isOpen?(text?'open-search':'open-full'):'closed';
+    dbTitle.classList.toggle('hidden',!isOpen);
+    dbTitle.classList.toggle('fullBankOpen',isOpen&&!text);
+    dbTitle.classList.toggle('searchBankOpen',isOpen&&!!text);
+    if(dbTitle.dataset.titleMode!==mode){
+      dbTitle.innerHTML=isOpen?'<span class="dbTitleTrain">\u00dcbungsdatenbank</span>':'&#9656; &#x1f3cb;&#xfe0f; \u00dcbungsdatenbank';
+      dbTitle.dataset.titleMode=mode;
+    }
+    dbTitle.setAttribute('aria-expanded',isOpen?'true':'false');
+    dbTitle.setAttribute('aria-label',isOpen?'\u00dcbungsdatenbank schlie\u00dfen':'\u00dcbungsdatenbank \u00f6ffnen');
+  }
+  function render(){const rawText=activeText(); const text=activeBankQuerySegment(); const hasPlan=state.plan.length>0; const dbTitle=$('dbTitle'), inputLabel=$('inputLabel'); $('stateBadge').textContent=state.bankOpen?(text?'DB offen mit Text':'DB offen ohne Text'):(rawText?'Textfeld aktiv':(hasPlan?'Aktueller Plan':'Leerzustand')); $('createPanel').classList.toggle('planMode',hasPlan); $('planActions').classList.toggle('hasPlan',hasPlan); $('panelTitle').textContent=hasPlan?'✏️ Aktueller Plan':'➕ Neuen Plan erstellen'; inputLabel.textContent='Übungen eingeben'; inputLabel.classList.toggle('hidden',state.bankOpen||hasPlan); $('finishBtn').classList.toggle('hidden',!hasPlan); $('savePackageBtn').classList.toggle('hidden',!hasPlan); renderDbTitle(dbTitle,text); renderSuggestion(text); renderBank(text); bindBankSwipeDelete($('bankContent')); renderPlan(); renderRecent(); renderPackages(); $('patientMini').textContent=state.patient.name||''; updateToggleCarets(); setTabletAnchorActiveClasses(); updatePhoneKeyboardInset();}
+  function bankLetterForName(name){const first=String(name||'').trim().charAt(0).toUpperCase(); return /^[A-ZÄÖÜ]$/.test(first)?first:'#';}
   function renderSuggestion(text){
     const tabletBank=isTabletLayout();
     bankSelectMode=(state.bankOpen||tabletBank)?(text?'replaceActive':'append'):'replaceActive';
@@ -380,48 +424,4 @@
   function bindPlanReorderButtons(list){
     if(!list)return;
     list.querySelectorAll('.drag[data-sort-id]').forEach(handle=>{
-      handle.onclick=ev=>{
-        ev.preventDefault();
-        ev.stopPropagation();
-        if(state.reorderSuppressClick)state.reorderSuppressClick=false;
-      };
-      handle.addEventListener('pointerdown',startAnimatedReorderPress,{passive:false});
-    });
-    list.querySelectorAll('.planCard[data-plan-id]').forEach(card=>{
-      if(card.dataset.tabletCardReorderBound==='1')return;
-      card.dataset.tabletCardReorderBound='1';
-      card.addEventListener('pointerdown',ev=>{
-        if(!isTabletLayout())return;
-        if(ev.button!=null&&ev.button!==0)return;
-        if(animatedReorder)return;
-        const target=ev.target;
-        if(target&&target.closest&&target.closest('button,input,textarea,select,a,.planCardActions,.drag'))return;
-        const startX=ev.clientX,startY=ev.clientY,pointerId=ev.pointerId;
-        let cancelled=false;
-        const cleanup=()=>{
-          document.removeEventListener('pointermove',moveBefore);
-          document.removeEventListener('pointerup',upBefore);
-          document.removeEventListener('pointercancel',upBefore);
-        };
-        const moveBefore=e=>{
-          if(e.pointerId!==pointerId)return;
-          const dx=Math.abs(e.clientX-startX),dy=Math.abs(e.clientY-startY);
-          if(dx>10||dy>10){
-            cancelled=true;
-            clearTimeout(timer);
-            cleanup();
-          }
-        };
-        const upBefore=e=>{
-          if(e.pointerId!==pointerId)return;
-          cancelled=true;
-          clearTimeout(timer);
-          cleanup();
-        };
-        const timer=setTimeout(()=>{
-          cleanup();
-          if(cancelled||animatedReorder)return;
-          startAnimatedReorderPress({
-            button:0,
-            currentTarget:card,
 ```

@@ -4,6 +4,50 @@
 - Lines: 26461-26880
 
 ```html
+<script id="kgg-v044-phone-liquid-actions-script">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v044-phone-liquid-actions";
+  function byId(id){return document.getElementById(id);}
+  function clickExisting(id){var el=byId(id); if(el&&typeof el.click==="function")el.click();}
+  function closePhoneAdminMenu(){
+    var panel=byId("kggPhoneAdminMenuPanel");
+    var btn=byId("kggPhoneAdminMenuBtn");
+    if(panel)panel.hidden=true;
+    if(btn)btn.setAttribute("aria-expanded","false");
+  }
+  function openReleaseCenter(){
+    closePhoneAdminMenu();
+    if(window.KGGReleaseCenter&&typeof window.KGGReleaseCenter.open==="function"){window.KGGReleaseCenter.open();return;}
+    clickExisting("kggReleaseCenterOpenPhone");
+    clickExisting("kggReleaseCenterOpen");
+  }
+  function openDeviceSync(){
+    closePhoneAdminMenu();
+    if(typeof window.openSyncPairModal==="function"){window.openSyncPairModal();return;}
+    clickExisting("syncQrBtn");
+  }
+  function openTherapistShare(){
+    closePhoneAdminMenu();
+    if(typeof window.openKggTherapistAppOnlyQr==="function"){window.openKggTherapistAppOnlyQr();return;}
+    if(typeof window.openKggAdminMenuQr==="function"){
+      window.openKggAdminMenuQr({
+        title:"Kolleg:innen-App APK QR",
+        hint:"Oeffnet die aktuelle Android-Download-Seite fuer Kolleg:innen. Keine API-Keys, keine Sync-Daten.",
+        url:"https://kayus24.github.io/kgg/therapist-app/latest-android.html"
+      });
+    }
+  }
+  function openSharedBank(){
+    closePhoneAdminMenu();
+    if(window.KGGSharedBank&&typeof window.KGGSharedBank.open==="function"){window.KGGSharedBank.open();return;}
+    clickExisting("sharedBankBtn");
+  }
+  function openAdminConfig(){
+    closePhoneAdminMenu();
+    if(window.KGGAdmin&&typeof window.KGGAdmin.openConfig==="function"){window.KGGAdmin.openConfig();return;}
+    clickExisting("adminConfigBtn");
+  }
   function bind(id,handler){
     var el=byId(id);
     if(!el||el.dataset.kggV044Bound==="1")return;
@@ -380,48 +424,4 @@
       -webkit-backdrop-filter:blur(24px) saturate(1.45)!important;
       gap:8px!important;
       z-index:auto!important;
-    }
-    body.kggPhonePhotoMenuOpen #scanHub.kggPhoneScanMenuInline #kggPhonePhotoMenu{
-      display:grid!important;
-    }
-    #scanHub.kggPhoneScanMenuInline #kggPhonePhotoMenu button{
-      width:100%!important;
-      min-height:52px!important;
-      border:0!important;
-      border-radius:16px!important;
-      background:rgba(243,247,253,.96)!important;
-      color:#071027!important;
-      font-weight:1000!important;
-      font-size:18px!important;
-      text-align:center!important;
-    }
-  }
-</style>
-
-<script id="kgg-v050-phone-ui-mini-fix-script">
-(function(){
-  "use strict";
-  var PATCH_ID="kgg-v050-phone-ui-mini-fix";
-  var PHONE_QUERY="(max-width:759px)";
-  function byId(id){return document.getElementById(id);}
-  function isPhone(){
-    return !!(window.matchMedia&&window.matchMedia(PHONE_QUERY).matches&&!(window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive()));
-  }
-  function placeAdminMenu(){
-    var menu=byId("kggPhoneAdminMenu");
-    var header=document.querySelector("#createPanel.planMode .planHeader");
-    if(menu&&header&&!header.contains(menu))header.appendChild(menu);
-  }
-  function placeInlinePhotoMenu(){
-    var hub=byId("scanHub");
-    var menu=byId("kggPhonePhotoMenu");
-    var toggle=byId("phonePhotoMenuToggle");
-    if(!hub||!menu)return;
-    if(!isPhone()){
-      if(hub.classList.contains("kggPhoneScanMenuInline"))hub.classList.remove("kggPhoneScanMenuInline");
-      if(menu.parentElement!==document.body)document.body.appendChild(menu);
-      return;
-    }
-    if(!hub.classList.contains("kggPhoneScanMenuInline"))hub.classList.add("kggPhoneScanMenuInline");
-    if(menu.parentElement!==hub)hub.appendChild(menu);
 ```

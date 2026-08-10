@@ -4,6 +4,50 @@
 - Lines: 3781-4200
 
 ```html
+        color:#fff!important;
+        border:0!important;
+        box-shadow:0 8px 18px rgba(7,16,39,.22)!important;
+      }
+      .tabletLayoutResizeHandle{
+        width:42px!important;
+        border:1px solid rgba(220,227,235,.95);
+        border-radius:999px;
+        background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(245,248,252,.9));
+        box-shadow:0 18px 42px rgba(7,16,39,.14),0 1px 0 rgba(255,255,255,.9) inset;
+        backdrop-filter:blur(12px);
+      }
+      .tabletLayoutResizeHandle::before{
+        left:50%!important;
+        top:50%!important;
+        bottom:auto!important;
+        width:5px!important;
+        height:84px!important;
+        transform:translate(-50%,-50%)!important;
+        background:linear-gradient(180deg,rgba(7,16,39,.18),rgba(94,167,232,.34),rgba(7,16,39,.18))!important;
+        box-shadow:none!important;
+      }
+      .tabletLayoutResizeHandle::after{
+        content:"";
+        position:absolute;
+        left:50%;
+        top:50%;
+        width:18px;
+        height:104px;
+        transform:translate(-50%,-50%);
+        border-radius:999px;
+        background:
+          radial-gradient(circle at 50% 22%,rgba(7,16,39,.34) 0 2px,transparent 3px),
+          radial-gradient(circle at 50% 50%,rgba(7,16,39,.28) 0 2px,transparent 3px),
+          radial-gradient(circle at 50% 78%,rgba(7,16,39,.34) 0 2px,transparent 3px);
+        pointer-events:none;
+      }
+      body.tabletLayoutDragging .tabletLayoutResizeHandle{
+        box-shadow:0 24px 56px rgba(7,16,39,.2),0 0 0 5px rgba(94,167,232,.14)!important;
+      }
+    }
+
+    /* v343 Tablet Collision Avoidance:
+       Fix sperrt nur die Regler, gespeicherte Groesse/Breite bleibt sichtbar.
        Paket und Schloss stehen nebeneinander. */
     @media (min-width:760px){
       body.tabletLayoutCustom .app{
@@ -380,48 +424,4 @@
         display:flex!important;
         margin:0!important;
       }
-      body.tabletLayoutCustom:not(.adminMode) .scanHub .adminConfigBtn,
-      body.tabletLayoutCustom:not(.adminMode) .scanHub .sharedBankBtn{
-        display:none!important;
-      }
-      body.tabletLayoutCustom #baseToggle{
-        overflow:hidden!important;
-        z-index:20!important;
-      }
-      body.tabletLayoutCustom #inputWrap{
-        z-index:18!important;
-      }
-      body.tabletLayoutCollisionTight .scanHub{
-        grid-template-columns:repeat(auto-fit,minmax(62px,1fr))!important;
-        gap:8px!important;
-      }
-      body.tabletLayoutCollisionTight .scanHub :is(.scanBtn,.scanMeta,.adminConfigBtn,.sharedBankBtn),
-      body.tabletLayoutCollisionTight #baseToggle{
-        font-size:clamp(7px,calc(14px * var(--kgg-tablet-ui-scale,1)),24px)!important;
-        line-height:1.02!important;
-        padding:5px 7px!important;
-      }
-      body.tabletLayoutCustom .planActions{
-        gap:var(--kgg-tablet-live-gap)!important;
-        align-items:stretch!important;
-      }
-      body.tabletLayoutCustom #createPanel.planMode :is(#recentToggle,#packageToggle,#finishBtn),
-      body.tabletLayoutCustom #createPanel:not(.planMode) :is(#recentToggle,#packageToggle){
-        min-height:clamp(48px,calc(64px * var(--kgg-tablet-ui-scale,1)),112px)!important;
-        height:auto!important;
-        align-self:stretch!important;
-        box-sizing:border-box!important;
-      }
-      body.tabletLayoutCustom #baseFields:not(.hidden),
-      body.tabletLayoutCustom #recentList:not(.hidden),
-      body.tabletLayoutCustom #packageList:not(.hidden),
-      body.tabletLayoutCustom .sheet{
-        font-size:clamp(11px,calc(16px * var(--kgg-tablet-ui-scale,1)),30px)!important;
-        padding:clamp(10px,calc(16px * var(--kgg-tablet-ui-scale,1)),30px)!important;
-        border-radius:clamp(16px,calc(24px * var(--kgg-tablet-ui-scale,1)),38px)!important;
-      }
-      body.tabletLayoutCustom #baseFields:not(.hidden) :is(input,select,textarea),
-      body.tabletLayoutCustom .sheet :is(input,select,textarea,button),
-      body.tabletLayoutCustom #recentList:not(.hidden) button,
-      body.tabletLayoutCustom #packageList:not(.hidden) button{
 ```

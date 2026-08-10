@@ -4,6 +4,50 @@
 - Lines: 24361-24780
 
 ```html
+    });
+    if(line)lines.push(line);
+    return lines.length?lines:[''];
+  }
+  function buildKggAdminMenuQrPrintPdf(){
+    const current=window.KGG_ADMIN_MENU_QR_CURRENT||{};
+    const value=String(current.value||($('kggAdminMenuQrLink')&&$('kggAdminMenuQrLink').value)||'').trim();
+    if(!value)throw new Error('missing_qr_value');
+    const JsPdfCtor=findJsPdfConstructor();
+    if(!JsPdfCtor)throw new Error('missing_pdf_runtime');
+    if(typeof window.qrcode!=='function')throw new Error('missing_qr_runtime');
+    const doc=new JsPdfCtor({orientation:'portrait',unit:'mm',format:'a4'});
+    try{doc.setProperties({title:'KGG Kolleg:innen-App QR',subject:'KGG APK QR',creator:VERSION});}catch(e){}
+    const title=String(current.title||'Kolleg:innen-App APK QR');
+    const hint=String(current.hint||'QR-Code scannen oder Link oeffnen.');
+    try{doc.setFont('helvetica','bold');}catch(e){}
+    doc.setFontSize(18); doc.setTextColor(7,16,39); doc.text(title,16,20);
+    try{doc.setFont('helvetica','normal');}catch(e){}
+    doc.setFontSize(10); doc.setTextColor(80,94,112);
+    wrapKggQrPrintText(hint,92).slice(0,3).forEach((line,index)=>doc.text(line,16,29+(index*5)));
+    const qr=window.qrcode(0,'M');
+    qr.addData(value);
+    qr.make();
+    const count=qr.getModuleCount();
+    const size=124;
+    const x=(210-size)/2;
+    const y=48;
+    const cell=size/count;
+    doc.setDrawColor(225,231,239);
+    doc.setFillColor(255,255,255);
+    doc.rect(x-5,y-5,size+10,size+10,'F');
+    doc.rect(x-5,y-5,size+10,size+10,'S');
+    doc.setFillColor(0,0,0);
+    for(let row=0;row<count;row++){
+      for(let col=0;col<count;col++){
+        if(qr.isDark(row,col))doc.rect(x+(col*cell),y+(row*cell),cell+.03,cell+.03,'F');
+      }
+    }
+    doc.setFontSize(8); doc.setTextColor(52,64,84);
+    wrapKggQrPrintText(value,92).slice(0,5).forEach((line,index)=>doc.text(line,16,188+(index*4.5)));
+    doc.setFontSize(9); doc.setTextColor(102,112,133);
+    doc.text('Keine Admin-Funktionen, keine API-Keys, keine Patientendaten.',16,222);
+    const filename='kgg_kolleginnen_app_qr_'+new Date().toISOString().slice(0,10)+'.pdf';
+    const blob=pdfBlobFromDoc(doc);
     if(!blob)throw new Error('missing_pdf_blob');
     return {blob,filename};
   }
@@ -380,48 +424,4 @@
     }
   }
   if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',cleanPhoneTabletState,{once:true});
-  }else{
-    cleanPhoneTabletState();
-  }
-  window.addEventListener('resize',()=>setTimeout(cleanPhoneTabletState,30),{passive:true});
-  window.addEventListener('orientationchange',()=>setTimeout(cleanPhoneTabletState,140),{passive:true});
-  if(window.visualViewport){
-    window.visualViewport.addEventListener('resize',()=>setTimeout(cleanPhoneTabletState,30),{passive:true});
-  }
-})();
-</script>
-<script id="kgg-github-patch-v401-phone-plan-ui-isolation">
-/* v401 GitHub Update 003: Phone-only Plan-Interaktion einfrieren.
-   Hält die Außen-UI stabil, während Plan-Karten angetippt/verschoben werden.
-   Keine Änderung an Plan-State, Parser, QR, PDF, Kamera oder Tablet-Layout. */
-(function(){
-  const PHONE_QUERY='(max-width:759px)';
-  let releaseTimer=0;
-  let bodyObserver=null;
-
-  function isPhone(){
-    return !!(window.matchMedia && window.matchMedia(PHONE_QUERY).matches);
-  }
-
-  function currentPlanBlock(){
-    return document.getElementById('currentPlanBlock');
-  }
-
-  function isPlanCardTarget(target){
-    return !!(target && target.closest && target.closest('#currentPlanBlock .planCard'));
-  }
-
-  function freezePlanSection(ms){
-    if(!isPhone()) return;
-    const block=currentPlanBlock();
-    const body=document.body;
-    if(!block || !body) return;
-
-    const rect=block.getBoundingClientRect();
-    if(rect && rect.height > 0){
-      block.style.setProperty('--kgg-current-plan-freeze-h', Math.ceil(rect.height) + 'px');
-    }
-
-    body.classList.add('kggPlanSectionFrozen');
 ```

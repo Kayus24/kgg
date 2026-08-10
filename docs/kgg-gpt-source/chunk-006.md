@@ -4,6 +4,50 @@
 - Lines: 2521-2940
 
 ```html
+      }
+    }
+
+
+    /* v324: In beiden UI-Varianten heißt der übergeordnete Planbereich wieder "Aktueller Plan". */
+    @media (min-width:760px){
+      #createPanel.planMode .planHeader .panelTitle{display:block!important}
+    }
+
+    /* v324 Aktueller-Plan/Scan-Dock Fix:
+       Mobile-only: "Gescannte Pläne" sitzt außerhalb der Aktueller-Plan-Bubble, oberhalb davon.
+       Keine PDF/QR/Patienten-App/Parser/Scan-Core-Änderungen. */
+    @media (max-width:759px){
+      /* Aktueller Plan ist wieder die Überschrift für Basisdaten + Übungskarten. */
+      #createPanel.planMode .planHeader{display:grid!important;grid-template-columns:minmax(0,1fr) auto;align-items:center;margin:0 0 8px;min-height:0}
+      #createPanel.planMode .planHeader .panelTitle{display:block!important;font-size:26px;line-height:1.05;margin:0;letter-spacing:-.4px}
+      #createPanel.scanPanelOpen .planHeader{display:grid!important}
+
+      /* Scan-Ergebnisse werden auf Handy in den separaten Dock oberhalb der Plan-Bubble verschoben. */
+      .mobileScannedPlansDock{display:block;margin:0 0 10px}
+      .mobileScannedPlansDock.hidden{display:none!important}
+      .mobileScannedPlansDock .planSection{border:1px solid #bfe8c5!important;border-radius:20px;box-shadow:0 2px 10px rgba(7,16,39,.055);background:#f7fff8!important;overflow:hidden}
+      .mobileScannedPlansDock .planSectionHeader{min-height:48px;padding:10px 12px;font-size:18px;background:#f7fff8!important}
+      .mobileScannedPlansDock .scanInboxList{padding:0 8px 8px}
+      .mobileScannedPlansDock .scanInboxCard{border:1px solid #e3e9ef;border-radius:16px;box-shadow:none;padding:10px;margin-bottom:8px;background:#fff}
+      .mobileScannedPlansDock .scanInboxText{min-height:88px;border-color:#e3e9ef;border-radius:12px;font-size:12.5px;line-height:1.32}
+      .mobileScannedPlansDock .planSection.collapsed{flex:0 0 48px!important;height:48px!important;min-height:48px!important;max-height:48px!important;border-color:#bfe8c5!important;background:#f7fff8!important}
+      .mobileScannedPlansDock .planSection.collapsed .scanInboxList{display:none!important;height:0!important;min-height:0!important;max-height:0!important;padding:0!important;margin:0!important;overflow:hidden!important}
+
+      /* Rechte Planstruktur enthält auf Handy nur noch den Übungsbereich; Scans sitzen im Dock darüber. */
+      .rightPlanStack{gap:8px;margin:8px 0 10px}
+      .rightPlanStack.planOpen #currentPlanBlock{order:1!important;animation:kggSectionSwapIn .20s cubic-bezier(.2,.85,.2,1) both}
+      .rightPlanStack.scanOpen #currentPlanBlock{order:1!important}
+
+      /* Rahmen reduzieren: Struktur bleibt, aber keine Kiste-in-Kiste-Optik. */
+      .panel{border:1px solid rgba(17,24,39,.18);box-shadow:0 2px 12px rgba(7,16,39,.055);border-radius:22px;padding:10px;background:rgba(255,255,255,.82)}
+      .inner{border:0;border-radius:18px;padding:8px;background:transparent}
+      #rightPlanStack .planSection{border:1px solid rgba(17,24,39,.22);border-radius:20px;box-shadow:0 2px 10px rgba(7,16,39,.055)}
+      #rightPlanStack .planSection.collapsed{flex:0 0 48px!important;height:48px!important;min-height:48px!important;max-height:48px!important;border-color:rgba(17,24,39,.16);background:#fbfcfe}
+      #rightPlanStack .planSectionHeader{min-height:48px;padding:10px 12px;font-size:18px}
+      #rightPlanStack .planSectionBody{padding:0 8px 8px}
+      #rightPlanStack .planCard{box-shadow:none;border-color:rgba(220,227,235,.9)}
+    }
+
 
     /* v327 Tablet Shell Full-Bleed Fix:
        Ziel: Tablet wirkt nicht mehr wie frei schwebende Mockup-Karte.
@@ -380,48 +424,4 @@
           padding-right:98px!important;
         }
         #createPanel.planMode #savePackageBtn{
-          width:74px!important;
-          min-width:74px!important;
-          max-width:74px!important;
-          height:34px!important;
-          min-height:34px!important;
-          margin:12px 10px 0 0!important;
-          padding:0 8px!important;
-        }
-      }
-    }
-
-
-
-
-    /* v331 Tablet Left Column + Scale Up:
-       - linke Spalte bekommt mehr Raum zur Mitte
-       - gesamtes Tablet-Layout wieder leicht größer
-       - keine Logikänderung */
-    @media (min-width:760px){
-      .app{
-        grid-template-columns:minmax(395px,475px) minmax(0,1fr) minmax(0,.92fr)!important;
-        gap:16px!important;
-      }
-
-      #inputWrap textarea,
-      #exerciseInput{
-        font-size:21px!important;
-        line-height:1.34!important;
-      }
-      #inputWrap textarea{
-        min-height:106px!important;
-      }
-
-      .scanBtn,
-      .scanMeta.filePickBtn,
-      #baseToggle,
-      #finishBtn{
-        font-size:19px!important;
-      }
-
-      .bankArea.bankOpen.alphaBankOpen .bankWithAz{
-        grid-template-columns:60px minmax(0,1fr)!important;
-        column-gap:10px!important;
-      }
 ```

@@ -4,6 +4,50 @@
 - Lines: 22681-23100
 
 ```html
+    }
+    if(isTime){
+      for(let s=0;s<3;s++){
+        const idx=nums.length>=6?s*2+1:s;
+        const metric=scanFormatNumber(nums[idx]);
+        const pain=scanFormatPain(pains[s]||nums[(nums.length>=9?s*3+2:-1)]);
+        if(metric)lines.push('Satz '+(s+1)+': '+metric+' '+metricUnit+(pain?' · Schmerz: '+pain+'/10':''));
+      }
+      return lines;
+    }
+    if(nums.length>=9){
+      for(let s=0;s<3;s++){
+        const base=s*3;
+        const load=scanFormatNumber(nums[base]), metric=scanFormatNumber(nums[base+1]), pain=scanFormatPain(nums[base+2]||pains[s]);
+        if(load||metric)lines.push('Satz '+(s+1)+': '+(metric||'')+' '+metricUnit+(load?' @ '+load+' '+loadUnit:'')+(pain?' · Schmerz: '+pain+'/10':''));
+      }
+      return lines;
+    }
+    if(nums.length>=6){
+      for(let s=0;s<3;s++){
+        const load=scanFormatNumber(nums[s*2]), metric=scanFormatNumber(nums[s*2+1]), pain=scanFormatPain(pains[s]);
+        if(load||metric)lines.push('Satz '+(s+1)+': '+(metric||'')+' '+metricUnit+(load?' @ '+load+' '+loadUnit:'')+(pain?' · Schmerz: '+pain+'/10':''));
+      }
+      return lines;
+    }
+    const load=scanNonEmptyValue(source.startLoad||source.load||source.weight||source.lastLoad||'');
+    const metric=scanNonEmptyValue(source.startMetric||source.metric||source.reps||source.time||source.lastMetric||'');
+    const pain=scanFormatPain((pains||[])[0]||source.pain||source.schmerz);
+    if(metric||load)lines.push('Satz 1: '+(metric?scanFormatNumber(metric)+' '+metricUnit:'')+(load?' @ '+scanFormatNumber(load)+' '+loadUnit:'')+(pain?' · Schmerz: '+pain+'/10':''));
+    else if(pain)lines.push('Schmerz: '+pain+'/10');
+    return lines;
+  }
+  function scanExerciseToDocText(item){
+    if(typeof item==='string')return stripScanExerciseName(item);
+    let source=item;
+    if(Array.isArray(item)){
+      try{source=expandKggH2Exercise(item);}catch(err){source={name:item[0]||''};}
+    }
+    const name=scanExerciseName(source);
+    if(!name)return '';
+    const lines=scanStructuredSetLinesFromValues(item,source);
+    return [name].concat(lines).filter(Boolean).join('\n');
+  }
+  function formatScanExerciseLine(item){
     return scanExerciseToDocText(item);
   }
   function scanResultToPlanText(result){
@@ -380,48 +424,4 @@
     return scanState.jobs[Math.max(0,Math.min(scanState.activeIndex,scanState.jobs.length-1))]||scanNewJob('paper');
   }
   function scanFileMeta(file){return {name:file&&file.name||'Kamera-Foto',size:file&&file.size||0,type:file&&file.type||'image',addedAt:new Date().toISOString(),file:file||null};}
-  // v313 Scan-Popup Repeat-Source-Modul:
-  // Merkt sich, ob der letzte Bildweg Kamera oder Galerie/Datei war.
-  // Weitere Seite / weiterer Plan verwenden danach automatisch denselben Weg.
-  function normalizeScanInputKind(kind){return kind==='file'?'file':'camera';}
-  function rememberScanInputKind(kind){
-    const normalized=normalizeScanInputKind(kind);
-    scanState.lastInputKind=normalized;
-    try{localStorage.setItem('kgg_scan_last_input_kind_v1',normalized);}catch(err){}
-    return normalized;
-  }
-  function lastScanInputKind(){
-    if(scanState.lastInputKind==='file'||scanState.lastInputKind==='camera')return scanState.lastInputKind;
-    try{const stored=localStorage.getItem('kgg_scan_last_input_kind_v1'); if(stored==='file'||stored==='camera')return stored;}catch(err){}
-    return 'camera';
-  }
-  function patientShortGuess(){
-    const value=String(state.patient&&state.patient.name||$('patientName')&&$('patientName').value||'').trim();
-    if(!value)return '';
-    const parts=value.split(/\s+/).filter(Boolean);
-    if(parts.length>=2)return parts[0]+' '+parts[1].charAt(0)+'.';
-    return value.slice(0,16);
-  }
-  async function scanAcceptQrRaw(raw,file,hit,strict){
-    const forceNew=scanState.next==='plan'||!scanState.jobs.length;
-    let job=forceNew?scanNewJob('paper'):scanCurrentJob();
-    if(raw){
-      setScanStatus('QR erkannt: Inhalt wird gelesen ...');
-      try{
-        const parsed=parseScannedQrRaw(raw);
-        if(parsed&&(parsed.type==='KGGCFG1'||parsed.type==='KGGCFG2')){
-          setScanStatus(parsed.type==='KGGCFG2'?'QR erkannt: verschluesselter API-Key / Konfig-Transfer. Transfer-Code wird abgefragt ...':'QR erkannt: API-Key / Konfig-Transfer wird lokal gespeichert ...');
-          const idx=scanState.jobs.indexOf(job);
-          if(idx>=0&&!job.pages.length&&!job.result&&job.status==='new'){
-            scanState.jobs.splice(idx,1);
-            scanState.activeIndex=Math.max(0,Math.min(scanState.activeIndex,scanState.jobs.length-1));
-          }
-          const ok=await applyKggConfigTransferParsed(parsed);
-          return {type:ok?'configTransfer':'configTransferCancelled',json:parsed.json};
-        }
-        if(parsed&&(parsed.type==='KGGSYNC1'||parsed.type==='KGGSYNC2')){
-          setScanStatus(parsed.type==='KGGSYNC2'?'QR erkannt: Sync-Verbindung mit Daten wird gelesen ...':'QR erkannt: Sync-Kopplung wird gespeichert ...');
-          const idx=scanState.jobs.indexOf(job);
-          if(idx>=0&&!job.pages.length&&!job.result&&job.status==='new'){
-            scanState.jobs.splice(idx,1);
 ```

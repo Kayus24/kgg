@@ -3,8 +3,42 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 61,
+  "latestVersionCode": 62,
   "entries": [
+    {
+      "versionCode": 62,
+      "versionName": "1.0.62-tablet-recent-package-shell-geometry",
+      "patchId": "kgg-v062-tablet-recent-package-shell-geometry",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Plan-Historie mit stabiler Hintergrund-Geometrie",
+      "reason": "Die bereits bestätigte Tablet-Historien-Shell bleibt unverändert; zusätzlich übernimmt sie exakt die grüne Arbeitsflächen-Geometrie des Übungspakete-Overlays, damit der Hintergrund beim Öffnen nicht mehr verspringt.",
+      "whatChanged": [
+        "Die bereits bestätigte Tablet-Historien-Shell bleibt unverändert; zusätzlich übernimmt sie exakt die grüne Arbeitsflächen-Geometrie des Übungspakete-Overlays, damit der Hintergrund beim Öffnen nicht mehr verspringt."
+      ],
+      "touchedAreas": [
+        "Tablet-Layout",
+        "Historien-Overlay",
+        "Übungspakete-Overlay-Shell"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Gate-managed Custom GPT module patch; Max approved modular GPT migration with existing embedded changelog overflow."
+    },
     {
       "versionCode": 61,
       "versionName": "1.0.61-cross-app-live-qr-camera",
@@ -1188,7 +1222,7 @@
       "handoffNote": "Lokale LLMs können index.html lesen und finden kgg-source-truth sowie kgg-changelog direkt im Code."
     }
   ],
-  "latestVersionName": "1.0.61-cross-app-live-qr-camera"
+  "latestVersionName": "1.0.62-tablet-recent-package-shell-geometry"
 }
 </script>
 <!-- END kgg-changelog -->

@@ -4,6 +4,50 @@
 - Lines: 21421-21840
 
 ```html
+    return bytes;
+  }
+  function pdfBlobFromDoc(doc){
+    if(!doc)return null;
+    if(typeof doc.output==='function'){
+      try{
+        const blob=doc.output('blob');
+        if(blob instanceof Blob)return blob;
+      }catch(e){}
+      try{
+        const buffer=doc.output('arraybuffer');
+        if(buffer)return new Blob([buffer],{type:'application/pdf'});
+      }catch(e){}
+      try{
+        const text=doc.output();
+        if(typeof text==='string')return new Blob([pdfBytesFromBinaryString(text)],{type:'application/pdf'});
+      }catch(e){}
+    }
+    if(typeof doc._buildPdf==='function'){
+      try{return new Blob([pdfBytesFromBinaryString(doc._buildPdf())],{type:'application/pdf'});}catch(e){}
+    }
+    return null;
+  }
+  function downloadPdfBlob(blob,filename){
+    if(!blob)return;
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=filename||'kgg_trainingsplan.pdf';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},1000);
+  }
+  function pdfBlobToBase64(blob){
+    return new Promise((resolve,reject)=>{
+      const reader=new FileReader();
+      reader.onload=()=>resolve(String(reader.result||'').split(',')[1]||'');
+      reader.onerror=()=>reject(reader.error||new Error('PDF konnte nicht gelesen werden.'));
+      reader.readAsDataURL(blob);
+    });
+  }
+  function nativePdfBridge(){
+    return window.KGGNativePdf&&window.KGGNativePdf.available?window.KGGNativePdf:null;
+  }
   async function sendPdfToNative(action){
     if(!currentPdfPreview||!currentPdfPreview.blob)return false;
     const bridge=nativePdfBridge();
@@ -380,48 +424,4 @@
     if(!lastPatientSharePlanSnapshot){if(status)status.textContent='Erst Patienten-Link erzeugen.';return;}
     if(!planHasMedia(lastPatientSharePlanSnapshot)){if(status)status.textContent='Keine Bilder im Plan.';return;}
     $('longMediaConfirmModal').classList.add('open');
-  }
-  function closeLongMediaConfirmModal(){$('longMediaConfirmModal').classList.remove('open');}
-  function confirmLongMediaShare(){closeLongMediaConfirmModal(); enableLongMediaShare();}
-  function setupPatientLinkCopyLongPress(){
-    const btn=$('copyPatientLink');
-    if(!btn||btn.dataset.longPressBound)return;
-    btn.dataset.longPressBound='1';
-    let timer=null;
-    let holding=false;
-    const reset=()=>{if(timer){clearTimeout(timer);timer=null;} if(holding){holding=false;setPatientCopyButtonLabel();}};
-    btn.addEventListener('pointerdown',()=>{
-      if(!lastPatientSharePlanSnapshot)return;
-      holding=true;
-      btn.textContent='5 Sek. halten für 24h';
-      timer=setTimeout(()=>{
-        timer=null;
-        holding=false;
-        copyPatientLinkSuppressClickUntil=Date.now()+700;
-        openLongMediaConfirmModal();
-      },MEDIA_LONG_PRESS_MS);
-    });
-    btn.addEventListener('pointerup',reset);
-    btn.addEventListener('pointerleave',reset);
-    btn.addEventListener('pointercancel',reset);
-    btn.onclick=copyPatientLink;
-  }
-  async function renderPatientShareOutput(options){
-    const output=$('patientOutputBox'), choices=$('finishChoices'), close=$('closeShare'), finishNotice=$('finishNotice');
-    const planOverride=options&&options.plan;
-    const ttlSeconds=Number(options&&options.ttlSeconds)||currentMediaShareTtlSeconds();
-    if(finishNotice)finishNotice.textContent='Ausgabe wird vorbereitet ...';
-    const mediaPrep=await prepareMediaUploadsForPatientShare({plan:planOverride,ttlSeconds,force:!!(options&&options.force)});
-    if(!mediaPrep.ok){
-      if(output)output.classList.add('hidden');
-      if(choices)choices.classList.remove('hidden');
-      if(close)close.classList.add('hidden');
-      if(finishNotice)finishNotice.textContent=mediaPrep.message||'Medien fehlgeschlagen. Plan bleibt offen.';
-      return '';
-    }
-    const share=buildPatientShareFromCurrentPlan(planOverride,{ttlSeconds});
-    lastPatientSharePlanSnapshot=cloneSharePlan(share.plan);
-    if(output)output.classList.remove('hidden');
-    if(choices)choices.classList.add('hidden');
-    if(close)close.classList.remove('hidden');
 ```

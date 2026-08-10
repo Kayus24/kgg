@@ -20,7 +20,8 @@
     "kgg-v052-pdf-plan-thumbnails",
     "kgg-v053-ui-tablet-stability",
     "kgg-v060-tablet-html-release-label",
-    "kgg-v061-cross-app-live-qr-camera"
+    "kgg-v061-cross-app-live-qr-camera",
+    "kgg-v062-tablet-recent-package-shell-geometry"
   ],
   "parts": [
     "base-head.html",
@@ -40,6 +41,7 @@
     "patches/v053-ui-tablet-stability.html",
     "patches/v060-tablet-html-release-label.html",
     "patches/v061-cross-app-live-qr-camera.html",
+    "patches/v062-tablet-recent-package-shell-geometry.html",
     "footer.html"
   ]
 }
@@ -92,29 +94,33 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "grossdruck-readability-beta",
     "059-ui-scaler-push-canary",
     "tablet-html-release-label",
-    "cross-app-live-qr-camera"
+    "cross-app-live-qr-camera",
+    "tablet-recent-package-shell-geometry"
   ],
   "currentVersion": {
-    "versionCode": 61,
-    "versionName": "1.0.61-cross-app-live-qr-camera",
-    "lastPatchId": "kgg-v061-cross-app-live-qr-camera",
+    "versionCode": 62,
+    "versionName": "1.0.62-tablet-recent-package-shell-geometry",
+    "lastPatchId": "kgg-v062-tablet-recent-package-shell-geometry",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v061-cross-app-live-qr-camera",
+  "latestPatchId": "kgg-v062-tablet-recent-package-shell-geometry",
   "lastUpdateIntent": {
-    "id": "kgg-v061-cross-app-live-qr-camera",
-    "summary": "Uebernimmt den bewaehrten kontinuierlichen Patienten-QR-Scan mit lokalem jsQR-Fallback und manueller Papieraufnahme in die Admin-Test-App.",
+    "id": "kgg-v062-tablet-recent-package-shell-geometry",
+    "summary": "Die bereits bestätigte Tablet-Historien-Shell bleibt unverändert; zusätzlich übernimmt sie exakt die grüne Arbeitsflächen-Geometrie des Übungspakete-Overlays, damit der Hintergrund beim Öffnen nicht mehr verspringt.",
     "touched": [
-      "Scan/OCR",
-      "QR/Patienten-App",
-      "Android/APK"
+      "Tablet-Layout",
+      "Historien-Overlay",
+      "Übungspakete-Overlay-Shell"
     ],
     "notTouched": [
       "PDF",
+      "QR/Patienten-App",
+      "Scan/OCR",
       "Parser",
       "Plan-State",
       "Medien/Upload",
       "API-Key-Logik",
+      "Android/APK",
       "GitHub Manifest",
       "Handy-Layout"
     ]
@@ -162,29 +168,33 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "grossdruck-readability-beta",
     "059-ui-scaler-push-canary",
     "tablet-html-release-label",
-    "cross-app-live-qr-camera"
+    "cross-app-live-qr-camera",
+    "tablet-recent-package-shell-geometry"
   ],
   "currentVersion": {
-    "versionCode": 61,
-    "versionName": "1.0.61-cross-app-live-qr-camera",
-    "lastPatchId": "kgg-v061-cross-app-live-qr-camera",
+    "versionCode": 62,
+    "versionName": "1.0.62-tablet-recent-package-shell-geometry",
+    "lastPatchId": "kgg-v062-tablet-recent-package-shell-geometry",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v061-cross-app-live-qr-camera",
+  "latestPatchId": "kgg-v062-tablet-recent-package-shell-geometry",
   "lastUpdateIntent": {
-    "id": "kgg-v061-cross-app-live-qr-camera",
-    "summary": "Uebernimmt den bewaehrten kontinuierlichen Patienten-QR-Scan mit lokalem jsQR-Fallback und manueller Papieraufnahme in die Admin-Test-App.",
+    "id": "kgg-v062-tablet-recent-package-shell-geometry",
+    "summary": "Die bereits bestätigte Tablet-Historien-Shell bleibt unverändert; zusätzlich übernimmt sie exakt die grüne Arbeitsflächen-Geometrie des Übungspakete-Overlays, damit der Hintergrund beim Öffnen nicht mehr verspringt.",
     "touched": [
-      "Scan/OCR",
-      "QR/Patienten-App",
-      "Android/APK"
+      "Tablet-Layout",
+      "Historien-Overlay",
+      "Übungspakete-Overlay-Shell"
     ],
     "notTouched": [
       "PDF",
+      "QR/Patienten-App",
+      "Scan/OCR",
       "Parser",
       "Plan-State",
       "Medien/Upload",
       "API-Key-Logik",
+      "Android/APK",
       "GitHub Manifest",
       "Handy-Layout"
     ]
@@ -198,8 +208,42 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 61,
+  "latestVersionCode": 62,
   "entries": [
+    {
+      "versionCode": 62,
+      "versionName": "1.0.62-tablet-recent-package-shell-geometry",
+      "patchId": "kgg-v062-tablet-recent-package-shell-geometry",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Plan-Historie mit stabiler Hintergrund-Geometrie",
+      "reason": "Die bereits bestätigte Tablet-Historien-Shell bleibt unverändert; zusätzlich übernimmt sie exakt die grüne Arbeitsflächen-Geometrie des Übungspakete-Overlays, damit der Hintergrund beim Öffnen nicht mehr verspringt.",
+      "whatChanged": [
+        "Die bereits bestätigte Tablet-Historien-Shell bleibt unverändert; zusätzlich übernimmt sie exakt die grüne Arbeitsflächen-Geometrie des Übungspakete-Overlays, damit der Hintergrund beim Öffnen nicht mehr verspringt."
+      ],
+      "touchedAreas": [
+        "Tablet-Layout",
+        "Historien-Overlay",
+        "Übungspakete-Overlay-Shell"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Gate-managed Custom GPT module patch; Max approved modular GPT migration with existing embedded changelog overflow."
+    },
     {
       "versionCode": 61,
       "versionName": "1.0.61-cross-app-live-qr-camera",
@@ -380,48 +424,4 @@ Before editing this app, any LLM/agent/human should read these blocks:
         "Tests blockieren kgg-update/index.html, releases und media-inline-bundle-7 als Standard-Patientenlink."
       ],
       "touchedAreas": [
-        "Patient QR base URL",
-        "Patient share URL tests",
-        "Source Truth",
-        "version.json"
-      ],
-      "notTouched": [
-        "Parser",
-        "Scan/OCR parser",
-        "Plan-State",
-        "PDF generation",
-        "Android/APK",
-        "API-Key-Logik"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "githubPages": "pending",
-        "notes": "Critical plus patient-qr logic smoke vor Release."
-      }
-    },
-    {
-      "versionCode": 55,
-      "versionName": "1.0.55-colleague-share-apk-fix",
-      "patchId": "kgg-v055-colleague-share-apk-fix",
-      "status": "active",
-      "type": "local-html-patch",
-      "title": "Kolleg:innen-App-Weitergabe stabilisiert",
-      "reason": "Der Phone-Menuepunkt darf nicht in den APK-Update-Installer laufen, sondern muss direkt den Kolleg:innen-App/APK-QR anzeigen.",
-      "whatChanged": [
-        "Kolleg:innen-App weitergeben nutzt den direkten QR-Handler statt Fallback-Klicks.",
-        "Android-Web-Update-Check startet keine native APK-Installation mehr automatisch."
-      ],
-      "touchedAreas": [
-        "Phone Kolleg:innen-App Weitergabe",
-        "Android APK update handoff",
-        "Source Truth",
-        "version.json"
-      ],
-      "notTouched": [
-        "Parser",
-        "Scan/OCR parser",
-        "Plan-State",
-        "PDF generation",
-        "Sync data model",
-        "API-Key-Logik"
 ```

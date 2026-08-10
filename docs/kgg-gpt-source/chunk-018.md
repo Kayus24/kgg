@@ -4,6 +4,50 @@
 - Lines: 7561-7980
 
 ```html
+    var bottomLeftVersionBits = 0;
+    for (var x = 5; x >= 0; x--) {
+        for (var y = dimension - 9; y >= dimension - 11; y--) {
+            bottomLeftVersionBits = pushBit(matrix.get(x, y), bottomLeftVersionBits);
+        }
+    }
+    var bestDifference = Infinity;
+    var bestVersion;
+    for (var _i = 0, VERSIONS_1 = version_1.VERSIONS; _i < VERSIONS_1.length; _i++) {
+        var version = VERSIONS_1[_i];
+        if (version.infoBits === topRightVersionBits || version.infoBits === bottomLeftVersionBits) {
+            return version;
+        }
+        var difference = numBitsDiffering(topRightVersionBits, version.infoBits);
+        if (difference < bestDifference) {
+            bestVersion = version;
+            bestDifference = difference;
+        }
+        difference = numBitsDiffering(bottomLeftVersionBits, version.infoBits);
+        if (difference < bestDifference) {
+            bestVersion = version;
+            bestDifference = difference;
+        }
+    }
+    // We can tolerate up to 3 bits of error since no two version info codewords will
+    // differ in less than 8 bits.
+    if (bestDifference <= 3) {
+        return bestVersion;
+    }
+}
+function readFormatInformation(matrix) {
+    var topLeftFormatInfoBits = 0;
+    for (var x = 0; x <= 8; x++) {
+        if (x !== 6) { // Skip timing pattern bit
+            topLeftFormatInfoBits = pushBit(matrix.get(x, 8), topLeftFormatInfoBits);
+        }
+    }
+    for (var y = 7; y >= 0; y--) {
+        if (y !== 6) { // Skip timing pattern bit
+            topLeftFormatInfoBits = pushBit(matrix.get(8, y), topLeftFormatInfoBits);
+        }
+    }
+    var dimension = matrix.height;
+    var topRightBottomRightFormatInfoBits = 0;
     for (var y = dimension - 1; y >= dimension - 7; y--) { // bottom left
         topRightBottomRightFormatInfoBits = pushBit(matrix.get(8, y), topRightBottomRightFormatInfoBits);
     }
@@ -380,48 +424,4 @@ var BitStream = /** @class */ (function () {
         if (this.bitOffset > 0) {
             var bitsLeft = 8 - this.bitOffset;
             var toRead = numBits < bitsLeft ? numBits : bitsLeft;
-            var bitsToNotRead = bitsLeft - toRead;
-            var mask = (0xFF >> (8 - toRead)) << bitsToNotRead;
-            result = (this.bytes[this.byteOffset] & mask) >> bitsToNotRead;
-            numBits -= toRead;
-            this.bitOffset += toRead;
-            if (this.bitOffset === 8) {
-                this.bitOffset = 0;
-                this.byteOffset++;
-            }
-        }
-        // Next read whole bytes
-        if (numBits > 0) {
-            while (numBits >= 8) {
-                result = (result << 8) | (this.bytes[this.byteOffset] & 0xFF);
-                this.byteOffset++;
-                numBits -= 8;
-            }
-            // Finally read a partial byte
-            if (numBits > 0) {
-                var bitsToNotRead = 8 - numBits;
-                var mask = (0xFF >> bitsToNotRead) << bitsToNotRead;
-                result = (result << numBits) | ((this.bytes[this.byteOffset] & mask) >> bitsToNotRead);
-                this.bitOffset += numBits;
-            }
-        }
-        return result;
-    };
-    BitStream.prototype.available = function () {
-        return 8 * (this.bytes.length - this.byteOffset) - this.bitOffset;
-    };
-    return BitStream;
-}());
-exports.BitStream = BitStream;
-
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.shiftJISTable = {
-    0x20: 0x0020,
 ```

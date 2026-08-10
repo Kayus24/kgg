@@ -4,6 +4,50 @@
 - Lines: 19741-20160
 
 ```html
+    }
+  }
+  function cancelAnimatedReorder(ev){cleanupAnimatedReorder(true);renderPlan();}
+  function cleanupAnimatedReorder(suppressClick){
+    const press=animatedReorder;
+    if(!press)return;
+    clearTimeout(press.timer);
+    if(press.handle)press.handle.classList.remove('reorder-armed');
+    if(press.list)press.list.classList.remove('reorder-active');
+    document.body.classList.remove('kggPlanCardReordering');
+    clearPhoneScrollStateForPlanGesture(280);
+    if(press.card){
+      const keepSwipeStyles=press.card.classList.contains('swipe-dragging')||document.body.classList.contains('kggPlanCardSwiping');
+      press.card.classList.remove('reorder-lifted','reorder-prelift');
+      if(!keepSwipeStyles){
+        press.card.style.removeProperty('--drag-left');
+        press.card.style.removeProperty('--drag-top');
+        press.card.style.removeProperty('--drag-y');
+        press.card.style.removeProperty('width');
+        press.card.style.removeProperty('position');
+        press.card.style.removeProperty('left');
+        press.card.style.removeProperty('top');
+        press.card.style.removeProperty('right');
+        press.card.style.removeProperty('bottom');
+        press.card.style.removeProperty('margin');
+        press.card.style.removeProperty('transform');
+        press.card.style.removeProperty('transform-origin');
+      }
+    }
+    if(press.placeholder&&press.placeholder.parentNode)press.placeholder.parentNode.removeChild(press.placeholder);
+    if(press.list){
+      if(press.phoneListAbsoluteDrag){
+        if(press.listPrevPosition){
+          press.list.style.setProperty('position',press.listPrevPosition,press.listPrevPositionPriority||'');
+        }else{
+          press.list.style.removeProperty('position');
+        }
+      }
+      Array.from(press.list.querySelectorAll('.reorder-gap-before,.reorder-gap-after')).forEach(c=>c.classList.remove('reorder-gap-before','reorder-gap-after'));
+    }
+    if(press.preMove)document.removeEventListener('pointermove',press.preMove);
+    if(press.preUp)document.removeEventListener('pointerup',press.preUp);
+    document.removeEventListener('pointermove',onAnimatedReorderMove);
+    animatedReorder=null;
     if(suppressClick){state.reorderSuppressClick=true;setTimeout(()=>{state.reorderSuppressClick=false;},350);}
   }
 
@@ -380,48 +424,4 @@
       binary+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));
     }
     return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-  }
-  function kggConfigTransferBytesToBase64Url(bytes){
-    let binary='';
-    for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));
-    return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-  }
-  function kggConfigTransferBase64UrlToBytes(value){
-    const body=String(value||'').replace(/-/g,'+').replace(/_/g,'/');
-    const padded=body+'='.repeat((4-body.length%4)%4);
-    const binary=atob(padded);
-    const bytes=new Uint8Array(binary.length);
-    for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
-    return bytes;
-  }
-  function kggConfigTransferRandomBytes(length){
-    const bytes=new Uint8Array(length);
-    if(window.crypto&&crypto.getRandomValues)crypto.getRandomValues(bytes);
-    else for(let i=0;i<bytes.length;i++)bytes[i]=Math.floor(Math.random()*256);
-    return bytes;
-  }
-  function kggConfigTransferPassCode(){
-    const bytes=kggConfigTransferRandomBytes(4);
-    const value=((bytes[0]<<24)>>>0)+(bytes[1]<<16)+(bytes[2]<<8)+bytes[3];
-    return String(100000+(value%900000));
-  }
-  function buildKggConfigTransferPlain(){
-    loadAdminSecrets();
-    return {
-      kind:'kgg_config_transfer_v2',
-      version:2,
-      appVersion:VERSION,
-      createdAt:new Date().toISOString(),
-      expiresAt:new Date(Date.now()+10*60*1000).toISOString(),
-      secrets:{
-        geminiKeys:(adminSecrets.geminiKeys||[]).map(cleanSecret).filter(Boolean).slice(0,4),
-        mediaDropzoneEndpoint:cleanSecret(adminSecrets.mediaDropzoneEndpoint),
-        mediaDropzoneUploadToken:cleanSecret(adminSecrets.mediaDropzoneUploadToken)
-      }
-    };
-  }
-  function kggConfigTransferHasCodes(plain){
-    const secrets=plain&&plain.secrets||{};
-    return !!((Array.isArray(secrets.geminiKeys)&&secrets.geminiKeys.length)||secrets.mediaDropzoneEndpoint||secrets.mediaDropzoneUploadToken);
-  }
 ```

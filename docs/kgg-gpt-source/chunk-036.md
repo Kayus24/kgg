@@ -4,6 +4,50 @@
 - Lines: 15121-15540
 
 ```html
+    }
+    var result = new Array(numErrors);
+    var errorCount = 0;
+    for (var i = 1; i < field.size && errorCount < numErrors; i++) {
+        if (errorLocator.evaluateAt(i) === 0) {
+            result[errorCount] = field.inverse(i);
+            errorCount++;
+        }
+    }
+    if (errorCount !== numErrors) {
+        return null;
+    }
+    return result;
+}
+function findErrorMagnitudes(field, errorEvaluator, errorLocations) {
+    // This is directly applying Forney's Formula
+    var s = errorLocations.length;
+    var result = new Array(s);
+    for (var i = 0; i < s; i++) {
+        var xiInverse = field.inverse(errorLocations[i]);
+        var denominator = 1;
+        for (var j = 0; j < s; j++) {
+            if (i !== j) {
+                denominator = field.multiply(denominator, GenericGF_1.addOrSubtractGF(1, field.multiply(errorLocations[j], xiInverse)));
+            }
+        }
+        result[i] = field.multiply(errorEvaluator.evaluateAt(xiInverse), field.inverse(denominator));
+        if (field.generatorBase !== 0) {
+            result[i] = field.multiply(result[i], xiInverse);
+        }
+    }
+    return result;
+}
+function decode(bytes, twoS) {
+    var outputBytes = new Uint8ClampedArray(bytes.length);
+    outputBytes.set(bytes);
+    var field = new GenericGF_1.default(0x011D, 256, 0); // x^8 + x^4 + x^3 + x^2 + 1
+    var poly = new GenericGFPoly_1.default(field, outputBytes);
+    var syndromeCoefficients = new Uint8ClampedArray(twoS);
+    var error = false;
+    for (var s = 0; s < twoS; s++) {
+        var evaluation = poly.evaluateAt(field.exp(s + field.generatorBase));
+        syndromeCoefficients[syndromeCoefficients.length - 1 - s] = evaluation;
+        if (evaluation !== 0) {
             error = true;
         }
     }
@@ -380,48 +424,4 @@ exports.VERSIONS = [
         ],
     },
     {
-        infoBits: 0x0D847,
-        versionNumber: 13,
-        alignmentPatternCenters: [6, 34, 62],
-        errorCorrectionLevels: [
-            {
-                ecCodewordsPerBlock: 26,
-                ecBlocks: [{ numBlocks: 4, dataCodewordsPerBlock: 107 }],
-            },
-            {
-                ecCodewordsPerBlock: 22,
-                ecBlocks: [
-                    { numBlocks: 8, dataCodewordsPerBlock: 37 },
-                    { numBlocks: 1, dataCodewordsPerBlock: 38 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 24,
-                ecBlocks: [
-                    { numBlocks: 8, dataCodewordsPerBlock: 20 },
-                    { numBlocks: 4, dataCodewordsPerBlock: 21 },
-                ],
-            },
-            {
-                ecCodewordsPerBlock: 22,
-                ecBlocks: [
-                    { numBlocks: 12, dataCodewordsPerBlock: 11 },
-                    { numBlocks: 4, dataCodewordsPerBlock: 12 },
-                ],
-            },
-        ],
-    },
-    {
-        infoBits: 0x0E60D,
-        versionNumber: 14,
-        alignmentPatternCenters: [6, 26, 46, 66],
-        errorCorrectionLevels: [
-            {
-                ecCodewordsPerBlock: 30,
-                ecBlocks: [
-                    { numBlocks: 3, dataCodewordsPerBlock: 115 },
-                    { numBlocks: 1, dataCodewordsPerBlock: 116 },
-                ],
-            },
-            {
 ```

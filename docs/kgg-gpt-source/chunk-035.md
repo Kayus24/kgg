@@ -4,6 +4,50 @@
 - Lines: 14701-15120
 
 ```html
+    0xE8B5: 0x894D,
+    0xE8B6: 0x96DC,
+    0xE8B7: 0x970D,
+    0xE8B8: 0x96D5,
+    0xE8B9: 0x96F9,
+    0xE8BA: 0x9704,
+    0xE8BB: 0x9706,
+    0xE8BC: 0x9708,
+    0xE8BD: 0x9713,
+    0xE8BE: 0x970E,
+    0xE8BF: 0x9711,
+    0xE8C0: 0x970F,
+    0xE8C1: 0x9716,
+    0xE8C2: 0x9719,
+    0xE8C3: 0x9724,
+    0xE8C4: 0x972A,
+    0xE8C5: 0x9730,
+    0xE8C6: 0x9739,
+    0xE8C7: 0x973D,
+    0xE8C8: 0x973E,
+    0xE8C9: 0x9744,
+    0xE8CA: 0x9746,
+    0xE8CB: 0x9748,
+    0xE8CC: 0x9742,
+    0xE8CD: 0x9749,
+    0xE8CE: 0x975C,
+    0xE8CF: 0x9760,
+    0xE8D0: 0x9764,
+    0xE8D1: 0x9766,
+    0xE8D2: 0x9768,
+    0xE8D3: 0x52D2,
+    0xE8D4: 0x976B,
+    0xE8D5: 0x9771,
+    0xE8D6: 0x9779,
+    0xE8D7: 0x9785,
+    0xE8D8: 0x977C,
+    0xE8D9: 0x9781,
+    0xE8DA: 0x977A,
+    0xE8DB: 0x9786,
+    0xE8DC: 0x978B,
+    0xE8DD: 0x978F,
+    0xE8DE: 0x9790,
+    0xE8DF: 0x979C,
+    0xE8E0: 0x97A8,
     0xE8E1: 0x97A6,
     0xE8E2: 0x97A3,
     0xE8E3: 0x97B3,
@@ -380,48 +424,4 @@ function findErrorLocations(field, errorLocator) {
     var numErrors = errorLocator.degree();
     if (numErrors === 1) {
         return [errorLocator.getCoefficient(1)];
-    }
-    var result = new Array(numErrors);
-    var errorCount = 0;
-    for (var i = 1; i < field.size && errorCount < numErrors; i++) {
-        if (errorLocator.evaluateAt(i) === 0) {
-            result[errorCount] = field.inverse(i);
-            errorCount++;
-        }
-    }
-    if (errorCount !== numErrors) {
-        return null;
-    }
-    return result;
-}
-function findErrorMagnitudes(field, errorEvaluator, errorLocations) {
-    // This is directly applying Forney's Formula
-    var s = errorLocations.length;
-    var result = new Array(s);
-    for (var i = 0; i < s; i++) {
-        var xiInverse = field.inverse(errorLocations[i]);
-        var denominator = 1;
-        for (var j = 0; j < s; j++) {
-            if (i !== j) {
-                denominator = field.multiply(denominator, GenericGF_1.addOrSubtractGF(1, field.multiply(errorLocations[j], xiInverse)));
-            }
-        }
-        result[i] = field.multiply(errorEvaluator.evaluateAt(xiInverse), field.inverse(denominator));
-        if (field.generatorBase !== 0) {
-            result[i] = field.multiply(result[i], xiInverse);
-        }
-    }
-    return result;
-}
-function decode(bytes, twoS) {
-    var outputBytes = new Uint8ClampedArray(bytes.length);
-    outputBytes.set(bytes);
-    var field = new GenericGF_1.default(0x011D, 256, 0); // x^8 + x^4 + x^3 + x^2 + 1
-    var poly = new GenericGFPoly_1.default(field, outputBytes);
-    var syndromeCoefficients = new Uint8ClampedArray(twoS);
-    var error = false;
-    for (var s = 0; s < twoS; s++) {
-        var evaluation = poly.evaluateAt(field.exp(s + field.generatorBase));
-        syndromeCoefficients[syndromeCoefficients.length - 1 - s] = evaluation;
-        if (evaluation !== 0) {
 ```

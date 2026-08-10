@@ -4,6 +4,50 @@
 - Lines: 22261-22680
 
 ```html
+    ctx.fillStyle='#fff';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.save();
+    if(rot===90){ctx.translate(canvas.width,0);ctx.rotate(Math.PI/2);}
+    else if(rot===180){ctx.translate(canvas.width,canvas.height);ctx.rotate(Math.PI);}
+    else if(rot===270){ctx.translate(0,canvas.height);ctx.rotate(-Math.PI/2);}
+    ctx.drawImage(src,0,0);
+    ctx.restore();
+    return canvas;
+  }
+  function scanScaleCanvas(src,minSide,maxSide){
+    const shortest=Math.max(1,Math.min(src.width,src.height));
+    const longest=Math.max(1,Math.max(src.width,src.height));
+    const minTarget=Math.max(120,Number(minSide)||0);
+    const maxTarget=Math.max(minTarget,Number(maxSide)||2600);
+    let scale=1;
+    if(minTarget&&shortest<minTarget)scale=minTarget/shortest;
+    if(longest*scale>maxTarget)scale=maxTarget/longest;
+    if(Math.abs(scale-1)<0.03)return src;
+    const canvas=document.createElement('canvas');
+    canvas.width=Math.max(1,Math.round(src.width*scale));
+    canvas.height=Math.max(1,Math.round(src.height*scale));
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    ctx.fillStyle='#fff';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.imageSmoothingEnabled=scale<1;
+    ctx.imageSmoothingQuality='high';
+    ctx.drawImage(src,0,0,canvas.width,canvas.height);
+    return canvas;
+  }
+  function scanFilteredCanvas(src,mode){
+    if(mode==='normal')return src;
+    const canvas=scanCloneCanvas(src);
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    if(mode==='contrast'){
+      ctx.save();
+      ctx.filter='contrast(2.05) brightness(1.12) saturate(0)';
+      ctx.drawImage(src,0,0);
+      ctx.restore();
+      return canvas;
+    }
+    if(mode==='softContrast'){
+      ctx.save();
+      ctx.filter='contrast(1.45) brightness(1.05) saturate(0)';
       ctx.drawImage(src,0,0);
       ctx.restore();
       return canvas;
@@ -380,48 +424,4 @@
         if(pain)lines.push('  Schmerz: '+pain+'/10');
       }
       return lines;
-    }
-    if(isTime){
-      for(let s=0;s<3;s++){
-        const idx=nums.length>=6?s*2+1:s;
-        const metric=scanFormatNumber(nums[idx]);
-        const pain=scanFormatPain(pains[s]||nums[(nums.length>=9?s*3+2:-1)]);
-        if(metric)lines.push('Satz '+(s+1)+': '+metric+' '+metricUnit+(pain?' · Schmerz: '+pain+'/10':''));
-      }
-      return lines;
-    }
-    if(nums.length>=9){
-      for(let s=0;s<3;s++){
-        const base=s*3;
-        const load=scanFormatNumber(nums[base]), metric=scanFormatNumber(nums[base+1]), pain=scanFormatPain(nums[base+2]||pains[s]);
-        if(load||metric)lines.push('Satz '+(s+1)+': '+(metric||'')+' '+metricUnit+(load?' @ '+load+' '+loadUnit:'')+(pain?' · Schmerz: '+pain+'/10':''));
-      }
-      return lines;
-    }
-    if(nums.length>=6){
-      for(let s=0;s<3;s++){
-        const load=scanFormatNumber(nums[s*2]), metric=scanFormatNumber(nums[s*2+1]), pain=scanFormatPain(pains[s]);
-        if(load||metric)lines.push('Satz '+(s+1)+': '+(metric||'')+' '+metricUnit+(load?' @ '+load+' '+loadUnit:'')+(pain?' · Schmerz: '+pain+'/10':''));
-      }
-      return lines;
-    }
-    const load=scanNonEmptyValue(source.startLoad||source.load||source.weight||source.lastLoad||'');
-    const metric=scanNonEmptyValue(source.startMetric||source.metric||source.reps||source.time||source.lastMetric||'');
-    const pain=scanFormatPain((pains||[])[0]||source.pain||source.schmerz);
-    if(metric||load)lines.push('Satz 1: '+(metric?scanFormatNumber(metric)+' '+metricUnit:'')+(load?' @ '+scanFormatNumber(load)+' '+loadUnit:'')+(pain?' · Schmerz: '+pain+'/10':''));
-    else if(pain)lines.push('Schmerz: '+pain+'/10');
-    return lines;
-  }
-  function scanExerciseToDocText(item){
-    if(typeof item==='string')return stripScanExerciseName(item);
-    let source=item;
-    if(Array.isArray(item)){
-      try{source=expandKggH2Exercise(item);}catch(err){source={name:item[0]||''};}
-    }
-    const name=scanExerciseName(source);
-    if(!name)return '';
-    const lines=scanStructuredSetLinesFromValues(item,source);
-    return [name].concat(lines).filter(Boolean).join('\n');
-  }
-  function formatScanExerciseLine(item){
 ```
