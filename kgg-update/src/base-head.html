@@ -48,30 +48,31 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "cross-app-live-qr-camera",
     "tablet-recent-package-shell-geometry",
     "changelog-archive-window",
-    "typed-update-versions"
+    "typed-update-versions",
+    "source-control-char-guard"
   ],
   "currentVersion": {
-    "versionCode": 64,
-    "versionName": "1.0.64-typed-update-versions",
-    "lastPatchId": "kgg-v064-typed-update-versions",
+    "versionCode": 65,
+    "versionName": "1.0.65-source-control-char-guard",
+    "lastPatchId": "kgg-v065-source-control-char-guard",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v064-typed-update-versions",
+  "latestPatchId": "kgg-v065-source-control-char-guard",
   "lastUpdateIntent": {
-    "id": "kgg-v064-typed-update-versions",
-    "summary": "Trennt Source-Code, Web-Release-ID, semantischen Versionsnamen und Android-Shell-Version fail-closed voneinander.",
+    "id": "kgg-v065-source-control-char-guard",
+    "summary": "Ersetzt vier versehentliche U+0008-Zeichen durch Regex-Wortgrenzen, repariert den fehlkodierten SJIS-Prüfwert und blockiert C0-, C1- sowie DEL-Steuerzeichen in editierbaren Source-Teilen.",
     "touched": [
-      "GitHub Manifest",
-      "Android/APK"
+      "Parser"
     ],
     "notTouched": [
       "PDF",
       "QR/Patienten-App",
       "Scan/OCR",
-      "Parser",
       "Plan-State",
       "Medien/Upload",
       "API-Key-Logik",
+      "Android/APK",
+      "GitHub Manifest",
       "Handy-Layout"
     ]
   }

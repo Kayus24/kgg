@@ -207,6 +207,32 @@ class BuilderNegativeTests(unittest.TestCase):
         with self.assertRaisesRegex(builder.BuildError, "external scripts"):
             builder.load_build(self.fixture.manifest)
 
+    def test_rejects_forbidden_source_control_characters(self) -> None:
+        raw = valid_html(["test-patch-a", "test-patch-b"]).replace(
+            b"KGGDataStore.currentPlan",
+            b"KGGDataStore.currentPlan\x08",
+        )
+        self.fixture.write(html=raw)
+        with self.assertRaisesRegex(builder.BuildError, r"U\+0008.*line"):
+            builder.load_build(self.fixture.manifest)
+
+    def test_rejects_unicode_c1_source_control_characters(self) -> None:
+        raw = valid_html(["test-patch-a", "test-patch-b"]).replace(
+            b"KGGDataStore.currentPlan",
+            b"KGGDataStore.currentPlan" + "\u0085".encode("utf-8"),
+        )
+        self.fixture.write(html=raw)
+        with self.assertRaisesRegex(builder.BuildError, r"U\+0085.*line"):
+            builder.load_build(self.fixture.manifest)
+
+    def test_allows_source_tabs_and_lf(self) -> None:
+        raw = valid_html(["test-patch-a", "test-patch-b"]).replace(
+            b"KGGDataStore.currentPlan",
+            b"\tKGGDataStore.currentPlan",
+        )
+        self.fixture.write(html=raw)
+        builder.load_build(self.fixture.manifest)
+
     def test_rejects_generated_output_drift(self) -> None:
         self.fixture.write()
         self.fixture.output.write_bytes(b"direct edit")

@@ -51,10 +51,30 @@ def read_utf8_bytes(path: Path) -> bytes:
         raise BuildError(f"UTF-8 BOM is not allowed: {path}")
     if b"\r\n" in raw or b"\r" in raw:
         raise BuildError(f"Source parts must use LF line endings: {path}")
+    for offset, value in enumerate(raw):
+        if (value < 0x20 and value not in (0x09, 0x0A)) or value == 0x7F:
+            line = raw.count(b"\n", 0, offset) + 1
+            line_start = raw.rfind(b"\n", 0, offset)
+            column = offset - line_start
+            raise BuildError(
+                f"Forbidden source control character U+{value:04X} in {path} "
+                f"at byte {offset}, line {line}, column {column}"
+            )
     try:
-        raw.decode("utf-8", errors="strict")
+        text = raw.decode("utf-8", errors="strict")
     except UnicodeDecodeError as exc:
         raise BuildError(f"Source part is not strict UTF-8: {path}: {exc}") from exc
+    for character_offset, character in enumerate(text):
+        value = ord(character)
+        if 0x80 <= value <= 0x9F:
+            byte_offset = len(text[:character_offset].encode("utf-8"))
+            line = text.count("\n", 0, character_offset) + 1
+            line_start = text.rfind("\n", 0, character_offset)
+            column = character_offset - line_start
+            raise BuildError(
+                f"Forbidden source control character U+{value:04X} in {path} "
+                f"at byte {byte_offset}, line {line}, column {column}"
+            )
     return raw
 
 
