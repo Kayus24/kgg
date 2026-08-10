@@ -215,6 +215,23 @@ class ReleasePipelineTests(unittest.TestCase):
         release_pr = pipeline.read_text(pipeline.ROOT / ".github/workflows/release-pr.yml")
         self.assertIn("(android_update_manifest|kgg_update_manifest)", release_pr)
 
+    def test_mobile_inbox_stages_generated_artifacts_before_redacted_secret_scan(self):
+        workflow = pipeline.read_text(
+            pipeline.ROOT / ".github/workflows/mobile-inbox-release.yml"
+        )
+        stage = (
+            "git add -A -- release-inbox therapist-app/android_update_manifest.json "
+            "therapist-app/kgg_update_manifest.json therapist-app/releases/web"
+        )
+        scanner = "python release-pipeline/kgg_secret_scan.py"
+
+        self.assertNotIn("git grep -nE", workflow)
+        self.assertIn(stage, workflow)
+        self.assertIn(scanner, workflow)
+        self.assertLess(workflow.index(stage), workflow.index(scanner))
+        self.assertLess(workflow.index(scanner), workflow.index('git switch -c "$branch"'))
+        self.assertLess(workflow.index(scanner), workflow.index("git commit -m"))
+
     def test_legacy_direct_main_workflows_are_retired(self):
         for relative in (
             ".github/workflows/apply-update-inbox.yml",

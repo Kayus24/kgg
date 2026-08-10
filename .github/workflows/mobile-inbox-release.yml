@@ -96,16 +96,13 @@ jobs:
           python -m unittest release-pipeline/test_release_pipeline.py
           node release-pipeline/check_html_scripts.js kgg-update/index.html therapist-app/releases/web/*/*.html
 
-      - name: Reject secrets in release-controlled files
+      - name: Stage release artifacts and reject secrets
         shell: bash
         run: |
           set -euo pipefail
           cd base
-          if git grep -nE '(sk-proj-|gh[pousr]_[A-Za-z0-9_]{20,}|AIza[0-9A-Za-z_-]{25,})' -- \
-            release-pipeline kgg-update therapist-app/android_update_manifest.json therapist-app/kgg_update_manifest.json therapist-app/releases/web 2>/dev/null; then
-            echo 'Potential secret found in release-controlled files.' >&2
-            exit 1
-          fi
+          git add -A -- release-inbox therapist-app/android_update_manifest.json therapist-app/kgg_update_manifest.json therapist-app/releases/web
+          python release-pipeline/kgg_secret_scan.py
 
       - name: Create checked release PR and merge it
         shell: bash

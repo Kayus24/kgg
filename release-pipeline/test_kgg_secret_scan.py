@@ -115,6 +115,19 @@ class SecretScanTests(unittest.TestCase):
         self.assertNotIn(token, output)
         self.assertIn("[REDACTED]", output)
 
+    def test_pre_commit_always_runs_secret_scan_before_path_filter(self):
+        hook = (HERE.parent / ".githooks" / "pre-commit").read_text(encoding="utf-8")
+        changed_offset = hook.index('changed="$(git diff --cached')
+        early_exit_offset = hook.index("exit 0", changed_offset)
+
+        for command in (
+            "python release-pipeline/kgg_secret_scan.py",
+            "py -3 release-pipeline/kgg_secret_scan.py",
+        ):
+            with self.subTest(command=command):
+                self.assertLess(hook.index(command), changed_offset)
+                self.assertLess(hook.index(command), early_exit_offset)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
