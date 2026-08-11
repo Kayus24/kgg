@@ -11,9 +11,6 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  issues: write
-  checks: read
-  statuses: read
 
 concurrency:
   group: kgg-mobile-inbox-release
@@ -97,6 +94,17 @@ jobs:
             --release-json release-inbox/release.json
           rm -f release-inbox/admin.html release-inbox/release.json
 
+      - name: Refresh generated GPT release context
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          python release-pipeline/kgg_gpt_context.py --write
+          python release-pipeline/kgg_bug_knowledge.py --write
+          python release-pipeline/kgg_gpt_source_context.py --write
+          python release-pipeline/kgg_custom_gpt_knowledge_pack.py --write
+          python release-pipeline/kgg_custom_gpt_resource_audit.py --refresh-target-profile production
+
       - name: Run release contract tests
         shell: bash
         run: |
@@ -111,9 +119,10 @@ jobs:
           set -euo pipefail
           cd base
           git add -A -- release-inbox therapist-app/android_update_manifest.json therapist-app/kgg_update_manifest.json therapist-app/releases/web
+          git add -A -- docs/kgg-gpt-context.md docs/kgg-gpt-bug-index.json docs/kgg-gpt-bug-lessons.md docs/kgg-gpt-patch-patterns.md docs/kgg-gpt-source-index.json docs/kgg-gpt-area-routes.md docs/kgg-gpt-area-routes.json docs/kgg-gpt-source docs/kgg-custom-gpt-knowledge-pack.md docs/kgg-custom-gpt-eval-knowledge.md docs/kgg-custom-gpt-knowledge-architecture.md docs/kgg-custom-gpt-knowledge-operations.md docs/kgg-custom-gpt-knowledge-safety.md docs/kgg-custom-gpt-knowledge-testing.md docs/kgg-custom-gpt-resource-manifest.json docs/kgg-custom-gpt-editor-snapshot.json
           python release-pipeline/kgg_secret_scan.py
 
-      - name: Create checked release PR and merge it
+      - name: Create draft release PR for external review
         shell: bash
         run: |
           set -euo pipefail
@@ -123,6 +132,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A release-inbox therapist-app/android_update_manifest.json therapist-app/kgg_update_manifest.json therapist-app/releases/web
+          git add -A -- docs/kgg-gpt-context.md docs/kgg-gpt-bug-index.json docs/kgg-gpt-bug-lessons.md docs/kgg-gpt-patch-patterns.md docs/kgg-gpt-source-index.json docs/kgg-gpt-area-routes.md docs/kgg-gpt-area-routes.json docs/kgg-gpt-source docs/kgg-custom-gpt-knowledge-pack.md docs/kgg-custom-gpt-eval-knowledge.md docs/kgg-custom-gpt-knowledge-architecture.md docs/kgg-custom-gpt-knowledge-operations.md docs/kgg-custom-gpt-knowledge-safety.md docs/kgg-custom-gpt-knowledge-testing.md docs/kgg-custom-gpt-resource-manifest.json docs/kgg-custom-gpt-editor-snapshot.json
           git commit -m "mobile inbox admin beta ${{ steps.mobile.outputs.release_id }}"
           git push -u origin "$branch"
           body="$(mktemp)"
@@ -131,15 +141,17 @@ jobs:
 
           - HTML wurde gegen den aktuellen KGG-Vertrag validiert.
           - Admin- und Kolleg:innen-Artefakte wurden aus derselben geprueften Quelle erzeugt.
-          - Keine direkte Aenderung an main; Merge erfolgt ueber diesen PR nach Tests.
+          - GPT-Kontext, Knowledge und Resource-Zielartefakte wurden deterministisch aktualisiert.
+          - Dieser GITHUB_TOKEN-Lauf startet oder bewertet keine PR-Checks.
+          - Keine direkte Aenderung an main; Draft auf "Ready for review" setzen, normale Checks abwarten und erst dann extern mergen.
           BODY
-          url="$(gh pr create --base main --head "$branch" \
+          url="$(gh pr create --draft --base main --head "$branch" \
             --title "[admin-beta] ${{ steps.mobile.outputs.release_id }} ${{ steps.mobile.outputs.version_name }}" \
             --body-file "$body")"
-          gh label create kgg-auto-merge \
-            --description 'Allows guarded KGG admin beta auto-merge after required checks' \
-            --color 0E8A16 || true
-          gh pr edit "$url" --add-label kgg-auto-merge
-          gh pr checks "$url" --required --watch --fail-fast
-          gh pr merge "$url" --squash
-          echo "PR: $url" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## Draft-PR erzeugt"
+            echo ""
+            echo "- PR: $url"
+            echo "- Checks: von diesem GITHUB_TOKEN-Lauf weder gestartet noch als gruen bewertet"
+            echo "- Naechster Schritt: extern auf Ready for review setzen, Required Gate abwarten und nur bei gruenen Checks mergen"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -17,9 +17,13 @@ nicht als Release-Werkzeuge ausgeführt werden.
 2. Genau eine neue oder geänderte Admin-HTML unter `mobile-inbox/` ablegen.
 3. Diese eine HTML-Datei committen und den Branch pushen.
 4. `.github/workflows/mobile-inbox-release.yml` validiert die Datei, erzeugt
-   unveränderliche Release-Artefakte und öffnet einen geprüften Pull Request.
+   unveränderliche Release-Artefakte und öffnet einen Draft-Pull-Request.
+5. Den Draft extern auf `Ready for review` setzen, den normalen Required Gate
+   abwarten und nur bei grünen Checks manuell mergen.
 
-Der Workflow veröffentlicht nichts durch einen direkten Commit auf `main`.
+Der Workflow startet oder bewertet aufgrund des `GITHUB_TOKEN` keine PR-Checks,
+merged nicht selbst und veröffentlicht nichts durch einen direkten Commit auf
+`main`.
 
 ## Normale Quellpatches
 

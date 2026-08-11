@@ -38,9 +38,9 @@ kein Ersatz fuer `latestAndroidShellVersion`.
 
 ## Handy-Standardweg ohne Codex
 
-Die Admin-App speichert die aktuelle HTML lokal. Danach wird die Datei auf dem Branch `mobile-inbox` in den Ordner `mobile-inbox/` hochgeladen. Die Action `KGG Mobile Inbox Release` validiert die HTML gegen die aktuelle KGG-Basis, erzeugt automatisch `releaseId` und Release-Notiz, baut Admin-/Kolleg:innen-Artefakte und merged den geprueften PR.
+Die Admin-App speichert die aktuelle HTML lokal. Danach wird die Datei auf dem Branch `mobile-inbox` in den Ordner `mobile-inbox/` hochgeladen. Die Action `KGG Mobile Inbox Release` validiert die HTML gegen die aktuelle KGG-Basis, erzeugt automatisch `releaseId` und Release-Notiz, baut Admin-/Kolleg:innen-Artefakte und oeffnet einen Draft-PR. Der Action-Lauf bewertet keine PR-Checks und merged nicht. Der Draft wird extern auf `Ready for review` gesetzt, durchlaeuft den normalen Required Gate und darf erst danach manuell gemergt werden.
 
-Die Kolleg:innen-Freigabe passiert bewusst getrennt ueber `Promote latest KGG Admin beta`, damit eine Admin-Beta erst getestet werden kann.
+Die Kolleg:innen-Freigabe passiert bewusst getrennt ueber `Promote latest KGG Admin beta`, damit eine Admin-Beta erst getestet werden kann. Auch diese Action endet mit einem Draft-PR; sie verwendet keinen Admin-Bypass und merged nicht selbst.
 
 ## Mobile-Inbox Smoke automatisieren
 
@@ -61,12 +61,12 @@ python release-pipeline/mobile_inbox_live_smoke.py
 Der Live-Test braucht `gh auth login` mit Schreibrechten fuer `Kayus24/kgg`. Er schreibt absichtlich eine Smoke-HTML nach `mobile-inbox/KGG_MOBILE_INBOX_SMOKE.html`, wartet auf die Action `KGG Mobile Inbox Release` und prueft danach automatisch:
 
 - Workflow ist gruen.
-- ein neuer `[admin-beta] rNNNN ...` PR wurde erstellt und gemergt.
-- `origin/main` enthaelt `therapist-app/releases/web/rNNNN/admin.html`.
-- die GitHub-Pages-URL antwortet mit `200`.
-- das Manifest zeigt Admin auf die neue Release, Kolleg:innen bleibt unveraendert.
+- ein neuer `[admin-beta] rNNNN ...` Draft-PR wurde erstellt.
+- der Draft zielt auf `main` und bleibt offen.
+- Admin- und Kolleg:innen-Kanal auf `origin/main` bleiben unveraendert.
+- der Workflow behauptet weder gestartete noch gruene PR-Checks.
 
-Wichtig: Jeder Live-Test erzeugt bewusst eine neue Admin-Beta-Release. Er fuehrt keine Kolleg:innen-Freigabe aus.
+Wichtig: Jeder Live-Test erzeugt bewusst einen neuen Admin-Beta-Draft. Er veroeffentlicht keine Release und fuehrt keine Kolleg:innen-Freigabe aus. Draft und Smoke-Upload muessen nach manueller Sichtung separat behandelt werden.
 
 ## Lokale Test-Batterie
 
