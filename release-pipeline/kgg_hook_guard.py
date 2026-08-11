@@ -9,6 +9,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from kgg_git_environment import sanitized_git_environment
+
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_HOOKS_PATH = ".githooks"
@@ -22,6 +24,7 @@ def run_git(root: Path, *args: str, check: bool = True) -> subprocess.CompletedP
     process = subprocess.run(
         ["git", *args],
         cwd=root,
+        env=sanitized_git_environment(),
         text=True,
         capture_output=True,
         check=False,
