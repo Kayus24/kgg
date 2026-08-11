@@ -1,0 +1,71 @@
+<script type="application/json" id="kgg-source-truth">
+{
+  "schema": 1,
+  "app": "KGG Plan",
+  "activeFixes": [
+    "embedded-source-truth",
+    "patch-retention-guard",
+    "rollback-v023-debug-breakage",
+    "phone-viewport-state-leak-guard",
+    "phone-plan-local-list-drag",
+    "local-content-no-auto-redirect",
+    "no-auto-release-navigation",
+    "release-center-local-fallback",
+    "structured-textblock-parser",
+    "free-textfield-units",
+    "schmerz-tag-textblocks",
+    "native-sync-diagnostics",
+    "device-sync-menu-separation",
+    "ui-mini-series",
+    "phone-dock-anchored-correction",
+    "tablet-card-reorder",
+    "phone-liquid-actions",
+    "phone-drawer-bank-align",
+    "tablet-runtime-viewport-guard",
+    "phone-landscape-tablet-menu",
+    "encoding-guard-repair",
+    "symbol-encoding-hotfix",
+    "phone-ui-mini-fix",
+    "android-qr-pdf-bridge",
+    "pdf-plan-thumbnails",
+    "ui-tablet-stability",
+    "patient-qr-latest-base",
+    "colleague-share-apk-update-fix",
+    "patient-qr-root-query",
+    "grossdruck-pdf-readable-images",
+    "grossdruck-readability-beta",
+    "059-ui-scaler-push-canary",
+    "tablet-html-release-label",
+    "cross-app-live-qr-camera",
+    "tablet-recent-package-shell-geometry",
+    "changelog-archive-window",
+    "typed-update-versions",
+    "source-control-char-guard"
+  ],
+  "currentVersion": {
+    "versionCode": 65,
+    "versionName": "1.0.65-source-control-char-guard",
+    "lastPatchId": "kgg-v065-source-control-char-guard",
+    "updatedBy": "kgg-module-scaffolder"
+  },
+  "latestPatchId": "kgg-v065-source-control-char-guard",
+  "lastUpdateIntent": {
+    "id": "kgg-v065-source-control-char-guard",
+    "summary": "Ersetzt vier versehentliche U+0008-Zeichen durch Regex-Wortgrenzen, repariert den fehlkodierten SJIS-Prüfwert und blockiert C0-, C1- sowie DEL-Steuerzeichen in editierbaren Source-Teilen.",
+    "touched": [
+      "Parser"
+    ],
+    "notTouched": [
+      "PDF",
+      "QR/Patienten-App",
+      "Scan/OCR",
+      "Plan-State",
+      "Medien/Upload",
+      "API-Key-Logik",
+      "Android/APK",
+      "GitHub Manifest",
+      "Handy-Layout"
+    ]
+  }
+}
+</script>

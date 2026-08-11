@@ -419,6 +419,8 @@ def run_release_contracts() -> None:
             "release-pipeline/test_kgg_changelog_archive.py",
             "release-pipeline/test_kgg_hook_guard.py",
             "release-pipeline/test_kgg_secret_scan.py",
+            "release-pipeline/test_kgg_gpt_source_context.py",
+            "release-pipeline/test_kgg_custom_gpt_resource_audit.py",
         ]
     )
 

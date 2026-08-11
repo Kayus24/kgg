@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: KGG Public Live Context
-  version: 1.4.0
+  version: 1.5.0
   description: Read-only live Admin and limited Patient-App context. All writes use the separate authenticated API Action.
 servers:
   - url: https://raw.githubusercontent.com
@@ -145,7 +145,7 @@ paths:
         - name: chunk_name
           in: path
           required: true
-          schema: {type: string, pattern: "^chunk-[0-9]{3}\\.md$"}
+          schema: {type: string, pattern: "^chunk-([0-9]{3}|v2-[0-9a-f]{16})\\.md$"}
       responses:
         "200":
           description: Admin source chunk.

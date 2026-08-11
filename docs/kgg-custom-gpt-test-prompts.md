@@ -251,7 +251,7 @@ Max sagt:
 
 Kontext fuer den Test:
 
-- Das Live-Manifest meldet `production.profileVersion: 4.1.0`.
+- Das Ziel-Manifest meldet `production.profileVersion: 4.2.0`.
 - Dasselbe Manifest meldet `production.editorBootstrap.version: admin-v6`.
 - Der aktive Editor-Bootstrap ist `admin-v6` und alle Resource-Hashes stimmen.
 - Die unterschiedlichen Profil- und Bootstrap-Versionen sind beabsichtigt.

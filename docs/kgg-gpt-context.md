@@ -29,7 +29,7 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Custom GPT stabilization cycle report: `docs/kgg-custom-gpt-cycle-report.md`.
 - Bug-history lessons: `docs/kgg-gpt-bug-lessons.md`, `docs/kgg-gpt-bug-index.json`, `docs/kgg-gpt-patch-patterns.md`.
 - Source routing: `docs/kgg-gpt-area-routes.md`, `docs/kgg-gpt-area-routes.json`.
-- Source chunks for GPT patch planning: `docs/kgg-gpt-source-index.json` and `docs/kgg-gpt-source/chunk-*.md`.
+- Admin source chunks use source-local, content-addressed schema v2: read `docs/kgg-gpt-source-index.json`, then only referenced `docs/kgg-gpt-source/chunk-v2-<hash>.md` files.
 - GPT eval fixtures: `docs/kgg-custom-gpt-test-prompts.md`, `docs/kgg-custom-gpt-expected-results.md`, `docs/kgg-custom-gpt-test-report.md`.
 - GPT stabilization runner: `release-pipeline/kgg_gpt_stabilize.py`.
 - Blind Repair-Lab runner: `release-pipeline/kgg_gpt_repair_lab.py`; acceptance tracker: `release-pipeline/kgg_gpt_repair_stabilize.py`.
@@ -85,6 +85,7 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - If a Preview run fails, report the failed step and the actual error before checking `meta.json` or manifest URLs.
 - If the Custom GPT cannot load this context, it must say that repo context is unavailable instead of guessing or asking Max for old basis filenames.
 - Before each real GPT test cycle verify the highest Actions-compatible model and capability/Knowledge hashes against `docs/kgg-custom-gpt-resource-manifest.json`.
+- Resource audit `TARGET_PASS` proves a consistent upload target, not a live editor sync; only an explicit `--require-live-synced` check may report `LIVE_PASS`.
 - The isolated Eval GPT must not receive Web Search, production Actions, production Knowledge, intact main HTML, golden source, sample repairs or hidden assertions.
 - A Repair-Lab PASS is evaluation evidence only and never authorizes Preview/Test-App, PR, Admin-Beta or main.
 

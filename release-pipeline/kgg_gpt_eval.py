@@ -330,6 +330,9 @@ def check_prompt_and_expected_docs() -> None:
     knowledge_pack = read("docs/kgg-custom-gpt-knowledge-pack.md")
     openapi_schema = read("docs/kgg-custom-gpt-action-openapi.yaml")
     api_openapi_schema = read("docs/kgg-custom-gpt-action-api-openapi.yaml")
+    patient_openapi_schema = read("docs/kgg-patient-custom-gpt-action-openapi.yaml")
+    admin_chunk_pattern = 'pattern: "^chunk-([0-9]{3}|v2-[0-9a-f]{16})\\\\.md$"'
+    patient_chunk_pattern = 'pattern: "^chunk-[0-9]{3}\\\\.md$"'
     cases = [
         "tablet-splitter",
         "failed-preview-run",
@@ -447,6 +450,7 @@ def check_prompt_and_expected_docs() -> None:
     require_all(
         openapi_schema,
         [
+            "version: 1.5.0",
             "getKggCustomGptResourceManifest",
             "getKggProjectContext",
             "getKggSourceIndex",
@@ -455,9 +459,35 @@ def check_prompt_and_expected_docs() -> None:
             "getKggPatientSourceIndexForAdmin",
             "getKggPatientSourceChunkForAdmin",
             "getKggPatientPreviewIndexForAdmin",
+            admin_chunk_pattern,
+            patient_chunk_pattern,
         ],
         "custom GPT OpenAPI schema",
     )
+    require(
+        patient_openapi_schema,
+        patient_chunk_pattern,
+        "patient source chunk pattern",
+    )
+    if openapi_schema.count(admin_chunk_pattern) != 1:
+        fail("Admin raw action must expose the v1/v2 union for exactly one Admin endpoint")
+    if openapi_schema.count(patient_chunk_pattern) != 1:
+        fail("Admin raw action must keep its Patient endpoint on numeric v1 chunks")
+    if "v2-" in patient_openapi_schema:
+        fail("patient source action must remain on numeric v1 chunk names")
+
+    admin_chunk_name = re.compile(r"^chunk-([0-9]{3}|v2-[0-9a-f]{16})\.md$")
+    patient_chunk_name = re.compile(r"^chunk-[0-9]{3}\.md$")
+    for name in ["chunk-000.md", "chunk-v2-0123456789abcdef.md"]:
+        if admin_chunk_name.fullmatch(name) is None:
+            fail(f"Admin source action rejected supported chunk name: {name}")
+    for name in ["chunk-v2-0123456789abcde.md", "chunk-v2-0123456789ABCDEf.md", "../chunk-000.md"]:
+        if admin_chunk_name.fullmatch(name) is not None:
+            fail(f"Admin source action accepted invalid chunk name: {name}")
+    if patient_chunk_name.fullmatch("chunk-000.md") is None:
+        fail("patient source action rejected numeric v1 chunk name")
+    if patient_chunk_name.fullmatch("chunk-v2-0123456789abcdef.md") is not None:
+        fail("patient source action accepted an Admin-only v2 chunk name")
     require_all(
         api_openapi_schema,
         [
@@ -571,9 +601,20 @@ def check_prompt_and_expected_docs() -> None:
 
 def check_area_routes() -> None:
     route_json = ROOT / "docs" / "kgg-gpt-area-routes.json"
+    source_index_json = ROOT / "docs" / "kgg-gpt-source-index.json"
     if not route_json.exists():
         fail("missing docs/kgg-gpt-area-routes.json; run kgg_gpt_source_context.py --write")
+    if not source_index_json.exists():
+        fail("missing docs/kgg-gpt-source-index.json; run kgg_gpt_source_context.py --write")
     data = json.loads(route_json.read_text(encoding="utf-8"))
+    source_index = json.loads(source_index_json.read_text(encoding="utf-8"))
+    if data.get("version") != 2 or data.get("sourceIndex") != "docs/kgg-gpt-source-index.json":
+        fail("area routes must use source-local schema v2")
+    if source_index.get("version") != 2:
+        fail("Admin source index must use content-addressed schema v2")
+    sources = source_index.get("sources")
+    if not isinstance(sources, list) or not sources or sources[0].get("path") != "kgg-update/src/parts.json":
+        fail("Admin source index must start with kgg-update/src/parts.json")
     routes = {route["id"]: route for route in data.get("routes", [])}
     for route_id in ["tablet-layout", "phone-layout", "qr-patient", "camera-qr", "pdf", "android-apk", "sync", "preview-gate"]:
         if route_id not in routes:
@@ -590,10 +631,29 @@ def check_area_routes() -> None:
     missing = sorted(required - markers)
     if missing:
         fail("tablet-layout route missing markers: " + ", ".join(missing))
-    if data.get("sourcePath") != "kgg-update/src":
-        fail("area routes must be generated from modular source kgg-update/src")
     if not tablet.get("sourceChunks"):
         fail("tablet-layout route must resolve source chunks")
+    for chunk in tablet["sourceChunks"]:
+        required_chunk_fields = {
+            "sourcePath",
+            "sourceSha256",
+            "name",
+            "path",
+            "payloadSha256",
+            "payloadBytes",
+            "payloadLines",
+        }
+        if not isinstance(chunk, dict) or not required_chunk_fields.issubset(chunk):
+            fail("area route sourceChunks must expose source-local hash metadata")
+        if re.fullmatch(r"chunk-v2-[0-9a-f]{16}\.md", str(chunk["name"])) is None:
+            fail("area route references a non-v2 Admin source chunk")
+    for marker in tablet.get("markers", []):
+        if marker.get("marker") in required and (
+            not marker.get("sourcePath")
+            or not isinstance(marker.get("sourceLine"), int)
+            or not marker.get("payloadSha256")
+        ):
+            fail("tablet-layout marker is missing source-local v2 metadata")
 
 
 def check_repair_lab_contract() -> None:

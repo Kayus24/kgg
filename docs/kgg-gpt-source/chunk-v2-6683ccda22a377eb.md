@@ -1,0 +1,593 @@
+      req.onerror=()=>reject(req.error||new Error('Media-DB konnte nicht geoeffnet werden'));
+    });
+    return mediaDbPromise;
+  }
+  function putEncryptedMediaBlob(record){
+    return openMediaDb().then(db=>new Promise((resolve,reject)=>{
+      const tx=db.transaction(mediaStoreName,'readwrite');
+      tx.objectStore(mediaStoreName).put(record);
+      tx.oncomplete=()=>resolve(record);
+      tx.onerror=()=>reject(tx.error||new Error('Media-Blob konnte nicht gespeichert werden'));
+    }));
+  }
+  function getEncryptedMediaBlob(id){
+    return openMediaDb().then(db=>new Promise((resolve,reject)=>{
+      const tx=db.transaction(mediaStoreName,'readonly');
+      const req=tx.objectStore(mediaStoreName).get(id);
+      req.onsuccess=()=>resolve(req.result||null);
+      req.onerror=()=>reject(req.error||new Error('Media-Blob konnte nicht gelesen werden'));
+    }));
+  }
+  function deleteEncryptedMediaBlob(id){
+    return openMediaDb().then(db=>new Promise(resolve=>{
+      const tx=db.transaction(mediaStoreName,'readwrite');
+      tx.objectStore(mediaStoreName).delete(id);
+      tx.oncomplete=()=>resolve(true);
+      tx.onerror=()=>resolve(false);
+    })).catch(()=>false);
+  }
+  function isMediaReferencedElsewhere(id,owner){
+    const sid=String(id||'');
+    if(!sid)return false;
+    const ownerId=owner&&(owner.localId||owner.id);
+    const lists=[...(state.plan||[]),...bank];
+    return lists.some(ex=>{
+      if(!ex)return false;
+      if(owner&&String(ex.localId||ex.id)===String(ownerId))return false;
+      return ensureExerciseMediaList(ex).some(media=>String(media.id)===sid);
+    });
+  }
+  function deleteUnsharedMediaBlob(media,owner){
+    if(media&&media.id&&!isMediaReferencedElsewhere(media.id,owner))deleteEncryptedMediaBlob(media.id);
+  }
+  function loadImageFromBlob(blob){
+    return new Promise((resolve,reject)=>{
+      const url=URL.createObjectURL(blob);
+      const img=new Image();
+      img.onload=()=>{URL.revokeObjectURL(url); resolve(img);};
+      img.onerror=()=>{URL.revokeObjectURL(url); reject(new Error('Bild konnte nicht gelesen werden'));};
+      img.src=url;
+    });
+  }
+  async function compressImageFile(file){
+    const img=await loadImageFromBlob(file);
+    const maxSide=Math.max(img.naturalWidth||img.width,img.naturalHeight||img.height,1);
+    const scale=Math.min(1,MEDIA_IMAGE_MAX_DIM/maxSide);
+    const width=Math.max(1,Math.round((img.naturalWidth||img.width)*scale));
+    const height=Math.max(1,Math.round((img.naturalHeight||img.height)*scale));
+    const canvas=document.createElement('canvas');
+    canvas.width=width; canvas.height=height;
+    const ctx=canvas.getContext('2d',{alpha:false});
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,width,height); ctx.drawImage(img,0,0,width,height);
+    const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('Bild konnte nicht komprimiert werden')),'image/jpeg',MEDIA_IMAGE_QUALITY));
+    return {blob,width,height,mime:'image/jpeg'};
+  }
+  async function encryptMediaBlob(blob){
+    if(!window.crypto||!crypto.subtle)throw new Error('Web Crypto ist in diesem Browser nicht verfuegbar');
+    const key=await crypto.subtle.generateKey({name:'AES-GCM',length:256},true,['encrypt','decrypt']);
+    const iv=crypto.getRandomValues(new Uint8Array(12));
+    const plain=await blob.arrayBuffer();
+    const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,plain);
+    const rawKey=await crypto.subtle.exportKey('raw',key);
+    return {blob:new Blob([cipher],{type:'application/octet-stream'}),encryptedSize:cipher.byteLength,key:bytesToBase64Url(rawKey),iv:bytesToBase64Url(iv)};
+  }
+  async function prepareImageMediaFile(file){
+    if(!file||!String(file.type||'').startsWith('image/'))throw new Error('Bitte ein Bild auswaehlen');
+    const id=makeMediaId();
+    const compressed=await compressImageFile(file);
+    const encrypted=await encryptMediaBlob(compressed.blob);
+    const now=new Date().toISOString();
+    const manifest=ensureMediaShape({
+      id,
+      type:'image',
+      name:file.name||'uebungsbild.jpg',
+      mime:compressed.mime,
+      width:compressed.width,
+      height:compressed.height,
+      originalSize:file.size||0,
+      compressedSize:compressed.blob.size||0,
+      encryptedSize:encrypted.encryptedSize,
+      status:'local-encrypted',
+      encrypted:true,
+      storage:'indexeddb-local',
+      ttlSeconds:MEDIA_UPLOAD_TTL_SECONDS,
+      retrySeconds:MEDIA_RETRY_SECONDS,
+      createdAt:now,
+      crypto:{alg:'AES-GCM',iv:encrypted.iv,key:encrypted.key}
+    });
+    await putEncryptedMediaBlob({id,blob:encrypted.blob,manifest,createdAt:now});
+    return manifest;
+  }
+  function mediaUploadAdapter(){
+    const adapter=window.KGGMediaUploadAdapter;
+    return adapter&&typeof adapter.upload==='function'?adapter:null;
+  }
+  function currentMediaShareTtlSeconds(){
+    return Math.max(MEDIA_UPLOAD_TTL_SECONDS,Number(patientShareTtlSeconds)||MEDIA_UPLOAD_TTL_SECONDS);
+  }
+  function mediaItemsFromExercises(exercises){
+    return (exercises||[]).flatMap(ex=>ensureExerciseMediaList(ex).map(media=>({ex,media})));
+  }
+  function allPlanMediaItems(exercises){
+    return mediaItemsFromExercises(exercises||state.plan||[]);
+  }
+  function scheduleTemporaryMediaDelete(adapter,media){
+    if(!adapter)return;
+    const delay=Math.max(1,Number(media.ttlSeconds)||MEDIA_UPLOAD_TTL_SECONDS)*1000;
+    if(typeof adapter.scheduleDelete==='function'){
+      try{adapter.scheduleDelete(media,{delayMs:delay});}catch(err){console.warn('Media scheduleDelete fehlgeschlagen:',err);}
+      return;
+    }
+    if(typeof adapter.delete==='function'){
+      setTimeout(()=>{try{adapter.delete(media);}catch(err){console.warn('Media delete fehlgeschlagen:',err);}},delay);
+    }
+  }
+  async function uploadOneMediaItem(adapter,media,options){
+    const ttlSeconds=Number(options&&options.ttlSeconds)||MEDIA_UPLOAD_TTL_SECONDS;
+    const force=!!(options&&options.force);
+    if(media.downloadUrl&&media.status==='ready'&&!force&&(Number(media.ttlSeconds)||0)>=ttlSeconds)return media;
+    const record=await getEncryptedMediaBlob(media.id);
+    if(!record||!record.blob)throw new Error('Verschluesselte Bilddatei fehlt lokal.');
+    const uploadManifest=ensureMediaShape({...media,ttlSeconds,retrySeconds:MEDIA_RETRY_SECONDS});
+    const result=await adapter.upload(record.blob,{manifest:uploadManifest,ttlSeconds});
+    if(!result||!result.downloadUrl)throw new Error('Upload lieferte keinen Download-Link.');
+    const uploadedAt=new Date().toISOString();
+    const expiresAt=result.expiresAt||new Date(Date.now()+ttlSeconds*1000).toISOString();
+    const updated=ensureMediaShape({...media,downloadUrl:result.downloadUrl,deleteUrl:result.deleteUrl||media.deleteUrl||'',deleteToken:result.deleteToken||media.deleteToken||'',storage:result.storage||'temporary-web-encrypted',status:'ready',uploadedAt,expiresAt,ttlSeconds,retrySeconds:MEDIA_RETRY_SECONDS});
+    scheduleTemporaryMediaDelete(adapter,updated);
+    return updated;
+  }
+  function publicMediaBundleItem(media){
+    return {
+      id:media.id,
+      type:'image',
+      mime:media.mime,
+      name:media.name,
+      width:media.width,
+      height:media.height,
+      bytes:media.encryptedSize||0,
+      encrypted:true,
+      status:media.downloadUrl?'ready':'upload-pending',
+      downloadUrl:media.downloadUrl||'',
+      expiresInSeconds:media.ttlSeconds||MEDIA_UPLOAD_TTL_SECONDS,
+      retrySeconds:media.retrySeconds||MEDIA_RETRY_SECONDS,
+      crypto:media.crypto||null
+    };
+  }
+  async function blobToBase64Url(blob){
+    return bytesToBase64Url(await blob.arrayBuffer());
+  }
+  async function mediaItemsForBundle(exercises){
+    const seen=new Set();
+    const items=[];
+    for(const ex of (exercises||[])){
+      for(const media of ensureExerciseMediaList(ex)){
+        if(media.type!=='image'||!media.id||seen.has(media.id))continue;
+        seen.add(media.id);
+        const record=await getEncryptedMediaBlob(media.id);
+        if(!record||!record.blob)throw new Error('Verschluesselte Bilddatei fehlt lokal: '+(media.name||media.id));
+        const item=publicMediaBundleItem(media);
+        item.status='ready';
+        item.downloadUrl='';
+        item.dataEncoding='base64url';
+        item.data=await blobToBase64Url(record.blob);
+        item.encryptedBytes=record.blob.size||media.encryptedSize||0;
+        items.push(item);
+      }
+    }
+    return items;
+  }
+  async function uploadMediaBundle(adapter,exercises,ttlSeconds){
+    const bundleItems=await mediaItemsForBundle(exercises);
+    if(!bundleItems.length){lastPatientMediaBundleManifest=null; return null;}
+    const plain={kind:'kgg-media-bundle-v1',version:1,createdAt:new Date().toISOString(),items:bundleItems};
+    const encrypted=await encryptMediaBlob(new Blob([JSON.stringify(plain)],{type:'application/json'}));
+    const bundleId='bundle_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
+    const result=await adapter.upload(encrypted.blob,{manifest:{id:bundleId,type:'bundle',mime:'application/octet-stream'},ttlSeconds});
+    if(!result||!result.downloadUrl)throw new Error('Medien-Bundle lieferte keinen Download-Link.');
+    const bundle={
+      id:result.id||bundleId,
+      schema:'kgg-media-bundle-v1',
+      count:bundleItems.length,
+      downloadUrl:result.downloadUrl,
+      deleteUrl:result.deleteUrl||'',
+      deleteToken:result.deleteToken||'',
+      expiresInSeconds:ttlSeconds,
+      retrySeconds:MEDIA_RETRY_SECONDS,
+      encrypted:true,
+      crypto:{alg:'AES-GCM',iv:encrypted.iv,key:encrypted.key}
+    };
+    scheduleTemporaryMediaDelete(adapter,{id:bundle.id,deleteUrl:bundle.deleteUrl,deleteToken:bundle.deleteToken,ttlSeconds});
+    lastPatientMediaBundleManifest=bundle;
+    return bundle;
+  }
+  async function prepareMediaUploadsForPatientShare(options){
+    lastPatientMediaBundleManifest=null;
+    const sourcePlan=options&&options.plan;
+    const exercises=sourcePlan&&Array.isArray(sourcePlan.exercises)?sourcePlan.exercises:state.plan;
+    const items=allPlanMediaItems(exercises);
+    if(!items.length)return {ok:true,count:0};
+    const adapter=mediaUploadAdapter();
+    if(!adapter)return {ok:false,count:items.length,message:'Medien-Upload fehlt. Plan bleibt offen.'};
+    const ttlSeconds=Number(options&&options.ttlSeconds)||currentMediaShareTtlSeconds();
+    let bundle=null;
+    try{
+      bundle=await uploadMediaBundle(adapter,exercises,ttlSeconds);
+    }catch(err){
+      console.warn('Medien-Bundle konnte nicht erstellt werden:',err);
+      return {ok:false,count:items.length,message:err&&err.message?err.message:'Medien-Bundle fehlgeschlagen. Plan bleibt offen.'};
+    }
+    if(!sourcePlan){
+      syncStatePlanToStore('ui_prepare_media_uploads_for_patient_share');
+      save();
+    }
+    return {ok:true,count:items.length,uploaded:items.length,bundle};
+  }
+  function normalizeSideMode(value){
+    const raw=String(value||'BI').trim().toUpperCase().replace(/\s+/g,'');
+    if(['L','LI','LINKS','LEFT','R','RE','RECHTS','RIGHT'].includes(raw))return 'LR';
+    if(['LR','L/R','LI/RE','LINKS/RECHTS','LINKSRECHTS','LEFT/RIGHT','BEIDSEITIGGETRENNT'].includes(raw))return 'LR';
+    if((raw.includes('LINKS')&&raw.includes('RECHTS'))||(raw.includes('LI')&&raw.includes('RE')))return 'LR';
+    if(['BI','BID','BEIDE','BEIDSEITIG','BILATERAL'].includes(raw))return 'BI';
+    return 'BI';
+  }
+  function sideModeLabel(value){return ({BI:'beidseitig',LR:'links/rechts getrennt'})[normalizeSideMode(value)]||'beidseitig';}
+  function normalizeSetCount(value){const n=Number(value)||3; return Math.max(1,Math.min(5,n));}
+  function normalizeMeasureMode(value){
+    const raw=String(value||'').trim().toLowerCase();
+    if(['zeit','time','dauer','sek','sek.','sec','s'].includes(raw))return 'zeit';
+    return 'wdh';
+  }
+  function measureUnitLabel(measure){return normalizeMeasureMode(measure)==='zeit'?'Sek.':'Wdh';}
+  function cleanFreeUnitLabel(value){
+    return String(value||'').trim().replace(/\s*\/\s*/g,'/').replace(/\s+/g,' ').replace(/^[.@:;,\-\s]+|[.@:;,\-\s]+$/g,'');
+  }
+  function normalizeLoadUnitInfo(value,fallback){
+    const fallbackUnit=fallback||'kg';
+    const raw=cleanFreeUnitLabel(value);
+    if(!raw)return {unit:fallbackUnit,custom:false,explicit:false};
+    const lower=raw.toLowerCase().replace(/\./g,'').replace(/\s+/g,' ');
+    const compact=lower.replace(/\s+/g,'');
+    if(['kg','kgs','kilo','kilos','kilogramm','kilogram'].includes(lower))return {unit:'kg',custom:false,explicit:true};
+    if(['bw','bodyweight','body weight','koerpergewicht','körpergewicht','eigengewicht'].includes(lower)||compact==='bodyweight')return {unit:'BW',custom:false,explicit:true};
+    if(['hub','huebe','hübe'].includes(lower))return {unit:'Hub',custom:false,explicit:true};
+    if(['stufe'].includes(lower))return {unit:'Stufe',custom:false,explicit:true};
+    if(['watt','w'].includes(lower))return {unit:'Watt',custom:false,explicit:true};
+    if(['stufe/watt','stufe watt','stufe+watt','stufewatt'].includes(lower)||compact==='stufe/watt')return {unit:'Stufe/Watt',custom:false,explicit:true};
+    if(['bar'].includes(lower))return {unit:'bar',custom:false,explicit:true};
+    if(['keine','kein','none','ohne'].includes(lower))return {unit:'keine',custom:false,explicit:true};
+    return {unit:raw,custom:true,explicit:true};
+  }
+  function normalizeLoadUnit(value){
+    return normalizeLoadUnitInfo(value,'kg').unit;
+  }
+  function structuredNumberPattern(){return '-?\\d+(?:[,.]\\d+)?';}
+  function structuredUnitPattern(){return '[A-Za-zÄÖÜäöüß%°/._-]+(?:\\s*/\\s*[A-Za-zÄÖÜäöüß%°/._-]+)?';}
+  function normalizeStructuredNumber(value){return String(value||'').replace(',','.').trim();}
+  function normalizeMetricToken(token){
+    const raw=String(token||'').trim().replace('.','');
+    const lower=raw.toLowerCase();
+    if(['wdh','wh','rep','reps'].includes(lower))return {unit:'Wdh',metricUnit:'Wdh',time:false,label:'Wdh'};
+    if(['min','minute','minutes','minuten','sek','sec','secs','s','zeit','time','dauer'].includes(lower))return {unit:'Zeit',metricUnit:'Zeit',time:true,label:raw||'Zeit'};
+    return {unit:raw||'Wdh',metricUnit:raw||'Wdh',time:false,label:raw||'Wdh',custom:true};
+  }
+  function parseExerciseQuantityText(text){
+    const body=String(text||'');
+    const n=structuredNumberPattern(), u=structuredUnitPattern();
+    const freeU='([^\\s\\d@,:;]+(?:\\s*/\\s*[^\\s\\d@,:;]+)?)';
+    const out={startMetric:'',unit:'',metricUnit:'',startLoad:'',weightUnit:'',loadUnit:'',customLoadUnit:false,needsReview:false};
+    const loadBeforeMetric=body.match(new RegExp('('+n+')\\s*'+freeU+'\\s*@\\s*('+n+')\\s*(wdh|wh|rep|reps)\\b','i'));
+    if(loadBeforeMetric){
+      const loadUnitInfo=normalizeLoadUnitInfo(loadBeforeMetric[2]||'kg','kg');
+      out.startLoad=normalizeStructuredNumber(loadBeforeMetric[1]);
+      out.weightUnit=loadUnitInfo.unit;
+      out.loadUnit=loadUnitInfo.unit;
+      out.customLoadUnit=!!loadUnitInfo.custom;
+      out.startMetric=normalizeStructuredNumber(loadBeforeMetric[3]);
+      out.unit='Wdh'; out.metricUnit='Wdh';
+      if(loadUnitInfo.custom)out.needsReview=true;
+      return out;
+    }
+    const compact=body.match(new RegExp('('+n+')\\s*x\\s*('+n+')(?:\\s*('+u+'))?','i'));
+    const rep=body.match(new RegExp('('+n+')\\s*(wdh|wh|rep|reps)\\b','i'));
+    const time=body.match(new RegExp('('+n+')\\s*(min|minute|minutes|minuten|sek\\.?|sec|secs|s|zeit|time|dauer)\\b','i'));
+    if(rep){
+      out.startMetric=normalizeStructuredNumber(rep[1]);
+      out.unit='Wdh'; out.metricUnit='Wdh';
+    }else if(time){
+      const mt=normalizeMetricToken(time[2]);
+      out.startMetric=normalizeStructuredNumber(time[1])+' '+mt.label;
+      out.unit=mt.unit; out.metricUnit=mt.metricUnit;
+    }else if(compact){
+      out.startMetric=normalizeStructuredNumber(compact[1]);
+      out.unit='Wdh'; out.metricUnit='Wdh';
+    }
+    let loadUnitInfo=null, loadMatch=null;
+    loadMatch=body.match(new RegExp('@\\s*('+n+')\\s*('+u+')?','i'));
+    if(loadMatch){
+      out.startLoad=normalizeStructuredNumber(loadMatch[1]);
+      loadUnitInfo=normalizeLoadUnitInfo(loadMatch[2]||'kg','kg');
+    }else{
+      loadMatch=body.match(new RegExp('@\\s*('+u+')\\s*('+n+')','i'));
+      if(loadMatch){
+        out.startLoad=normalizeStructuredNumber(loadMatch[2]);
+        loadUnitInfo=normalizeLoadUnitInfo(loadMatch[1],'kg');
+      }else{
+        loadMatch=body.match(new RegExp('@\\s*('+u+')\\b','i'));
+        if(loadMatch)loadUnitInfo=normalizeLoadUnitInfo(loadMatch[1],'kg');
+      }
+    }
+    if(!loadUnitInfo&&compact){
+      out.startLoad=normalizeStructuredNumber(compact[2]);
+      loadUnitInfo=normalizeLoadUnitInfo(compact[3]||'kg','kg');
+    }
+    if(!loadUnitInfo){
+      let rest=body;
+      [compact,rep,time].forEach(m=>{if(m)rest=rest.replace(m[0],' ');});
+      rest=rest.replace(new RegExp('@\\s*(?:'+n+'\\s*'+u+'?|'+u+'\\s*'+n+'|'+u+')','ig'),' ');
+      loadMatch=rest.match(new RegExp('('+n+')\\s*('+u+')\\b','i'));
+      if(loadMatch){
+        out.startLoad=normalizeStructuredNumber(loadMatch[1]);
+        loadUnitInfo=normalizeLoadUnitInfo(loadMatch[2],'kg');
+      }else{
+        loadMatch=rest.match(new RegExp('('+u+')\\s*('+n+')\\b','i'));
+        if(loadMatch){
+          out.startLoad=normalizeStructuredNumber(loadMatch[2]);
+          loadUnitInfo=normalizeLoadUnitInfo(loadMatch[1],'kg');
+        }
+      }
+    }
+    if(loadUnitInfo&&loadUnitInfo.explicit){
+      out.weightUnit=loadUnitInfo.unit;
+      out.loadUnit=loadUnitInfo.unit;
+      out.customLoadUnit=!!loadUnitInfo.custom;
+      if(loadUnitInfo.custom)out.needsReview=true;
+    }
+    return out;
+  }
+  function parseSideModeFromText(text){
+    const raw=' '+String(text||'').toLowerCase().replace(/[.,;:]+/g,' ')+' ';
+    if(/\b(lr|l\/r|li\/re|links\/rechts|li|re|links|rechts)\b/.test(raw))return 'LR';
+    return 'BI';
+  }
+  function ensureKGGDataStore(){
+    if(window.KGGDataStore && typeof window.KGGDataStore.getCurrentPlan==='function')return window.KGGDataStore;
+    const store={currentPlan:{id:'plan_'+Date.now(),title:'KGG Plan',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),patient:{},exercises:[],source:'ui'}};
+    window.KGGDataStore={
+      init(meta){store.meta={...(store.meta||{}),...(meta||{})};return this;},
+      setCurrentPlan(plan,reason){store.currentPlan={...(store.currentPlan||{}),...(plan||{}),updatedAt:new Date().toISOString(),lastReason:reason||''};return store.currentPlan;},
+      getCurrentPlan(){return JSON.parse(JSON.stringify(store.currentPlan||{exercises:[]}));},
+      getState(){return JSON.parse(JSON.stringify(store));}
+    };
+    return window.KGGDataStore;
+  }
+  function ensureUiExerciseShape(ex){
+    const localId=ex.localId||ex.uiLocalId||(String(ex.id||'').startsWith('p_')?ex.id:makeLocalId());
+    return {...ex, id:localId, localId, side:normalizeSideMode(ex.side||ex.sides||ex.laterality||'BI'), media:ensureExerciseMediaList(ex), sourceId:ex.sourceId||ex.bankId||(!String(ex.id||'').startsWith('p_')?ex.id:''), bankId:ex.bankId||(!String(ex.id||'').startsWith('p_')?ex.id:'')};
+  }
+  function currentPatientData(){return {name:state.patient&&state.patient.name||'',date:$('planDate')&&$('planDate').value||'',therapist:state.patient&&state.patient.therapist||'',notes:state.patient&&state.patient.notes||''};}
+  function syncStatePlanToStore(reason){
+    const ds=ensureKGGDataStore();
+    state.plan=Array.isArray(state.plan)?state.plan.map(ensureUiExerciseShape):[];
+    ds.setCurrentPlan({
+      id:state.planId||'plan_'+(state.createdAt||Date.now()),
+      title:state.planTitle||'KGG Plan',
+      patient:{...(state.patient||{}),...currentPatientData()},
+      exercises:state.plan.map(ex=>({...ex})),
+      source:'ui-shell'
+    },reason||'sync_state_to_store');
+    return ds.getCurrentPlan();
+  }
+  function syncStoreToStatePlan(reason){
+    const ds=ensureKGGDataStore();
+    const plan=ds.getCurrentPlan()||{};
+    state.patient={...(state.patient||{}),...(plan.patient||{})};
+    state.plan=Array.isArray(plan.exercises)?plan.exercises.map(ensureUiExerciseShape):[];
+    return state.plan;
+  }
+  function getCurrentPlanForOutput(reason){
+    syncStatePlanToStore(reason||'get_current_plan_for_output');
+    return ensureKGGDataStore().getCurrentPlan();
+  }
+  function load(){try{const raw=localStorage.getItem(storageKey); if(raw) state={...state,...JSON.parse(raw)};}catch(e){console.warn(e)} loadCustomBank(); if(!$('planDate').value) $('planDate').value=new Date().toISOString().slice(0,10);}
+  function save(){try{localStorage.setItem(storageKey,JSON.stringify(state));}catch(e){console.warn(e)}}
+  function cleanSecret(value){return String(value||'').trim();}
+  function loadAdminSecrets(){
+    try{
+      const raw=localStorage.getItem(adminSecretsKey);
+      const parsed=raw?JSON.parse(raw):{};
+      adminSecrets={geminiKeys:Array.isArray(parsed.geminiKeys)?parsed.geminiKeys.map(cleanSecret).filter(Boolean):[],mediaDropzoneEndpoint:cleanSecret(parsed.mediaDropzoneEndpoint),mediaDropzoneUploadToken:cleanSecret(parsed.mediaDropzoneUploadToken),updatedAt:parsed.updatedAt||''};
+    }catch(err){console.warn('Admin-Secrets konnten nicht gelesen werden:',err); adminSecrets={geminiKeys:[],mediaDropzoneEndpoint:'',mediaDropzoneUploadToken:'',updatedAt:''};}
+    return adminSecrets;
+  }
+  function persistAdminSecrets(){
+    const data={version:2,updatedAt:new Date().toISOString(),geminiKeys:(adminSecrets.geminiKeys||[]).map(cleanSecret).filter(Boolean),mediaDropzoneEndpoint:cleanSecret(adminSecrets.mediaDropzoneEndpoint),mediaDropzoneUploadToken:cleanSecret(adminSecrets.mediaDropzoneUploadToken)};
+    localStorage.setItem(adminSecretsKey,JSON.stringify(data));
+    try{
+      if(data.mediaDropzoneEndpoint)localStorage.setItem('kggMediaDropzoneEndpoint',data.mediaDropzoneEndpoint); else localStorage.removeItem('kggMediaDropzoneEndpoint');
+      if(data.mediaDropzoneUploadToken)localStorage.setItem('kggMediaDropzoneUploadToken',data.mediaDropzoneUploadToken); else localStorage.removeItem('kggMediaDropzoneUploadToken');
+    }catch(e){}
+    adminSecrets={geminiKeys:data.geminiKeys,mediaDropzoneEndpoint:data.mediaDropzoneEndpoint,mediaDropzoneUploadToken:data.mediaDropzoneUploadToken,updatedAt:data.updatedAt};
+    try{initMediaDropzoneUploadAdapter();}catch(e){console.warn('Medien-Adapter konnte nach Admin-Safe-Import nicht neu starten:',e);}
+    renderAdminSecretStatus();
+  }
+  function clearLocalAdminSecrets(){adminSecrets={geminiKeys:[],mediaDropzoneEndpoint:'',mediaDropzoneUploadToken:'',updatedAt:''}; localStorage.removeItem(adminSecretsKey); try{localStorage.removeItem('kggMediaDropzoneEndpoint');localStorage.removeItem('kggMediaDropzoneUploadToken');}catch(e){} renderAdminSecretStatus();}
+  function maskSecret(value){const text=cleanSecret(value); return text?('•••• '+text.slice(-4)):'';}
+  function renderAdminSecretStatus(){
+    const status=$('adminSecretStatus');
+    if(status){const parts=[]; if(adminSecrets.geminiKeys.length)parts.push('Gemini: '+adminSecrets.geminiKeys.map(maskSecret).join(', ')); if(adminSecrets.mediaDropzoneEndpoint)parts.push('Medien: verbunden'+(adminSecrets.mediaDropzoneUploadToken?' '+maskSecret(adminSecrets.mediaDropzoneUploadToken):'')); status.textContent=parts.length?('Lokal gespeichert: '+parts.join(' · ')):'Keine lokalen Codes gespeichert.';}
+  }
+  function openAdminSecretsModal(){
+    loadAdminSecrets();
+    const k=adminSecrets.geminiKeys||[];
+    if($('adminGeminiKey1'))$('adminGeminiKey1').value=k[0]||'';
+    if($('adminGeminiKey2'))$('adminGeminiKey2').value=k[1]||'';
+    if($('adminMediaDropzoneEndpoint'))$('adminMediaDropzoneEndpoint').value=adminSecrets.mediaDropzoneEndpoint||'';
+    if($('adminMediaDropzoneUploadToken'))$('adminMediaDropzoneUploadToken').value=adminSecrets.mediaDropzoneUploadToken||'';
+    renderAdminSecretStatus();
+    $('adminSecretsModal').classList.add('open');
+  }
+  function closeAdminSecretsModal(){$('adminSecretsModal').classList.remove('open');}
+  function saveAdminSecretsFromModal(){
+    adminSecrets.geminiKeys=[cleanSecret($('adminGeminiKey1').value),cleanSecret($('adminGeminiKey2').value)].filter(Boolean);
+    adminSecrets.mediaDropzoneEndpoint=cleanSecret($('adminMediaDropzoneEndpoint')&&$('adminMediaDropzoneEndpoint').value);
+    adminSecrets.mediaDropzoneUploadToken=cleanSecret($('adminMediaDropzoneUploadToken')&&$('adminMediaDropzoneUploadToken').value);
+    persistAdminSecrets();
+    closeAdminSecretsModal();
+  }
+  function encodeAdminCodePackage(data){
+    const json=JSON.stringify({kind:'kgg-admin-codes-v1',version:1,...data});
+    return 'KGG_ADMIN_CODES_V1:'+btoa(unescape(encodeURIComponent(json))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+  function decodeAdminCodePackage(text){
+    let raw=cleanSecret(text).replace(/^\uFEFF/,'');
+    const embedded=raw.match(/KGG_ADMIN_CODES_V1\s*:\s*[A-Za-z0-9_-]+/);
+    if(embedded)raw=embedded[0];
+    raw=raw.replace(/^KGG_ADMIN_CODES_V1\s*:\s*/,'').trim();
+    const dataUrl=raw.match(/^data:[^,]+,([A-Za-z0-9+/=_-]+)$/i);
+    if(dataUrl)raw=dataUrl[1];
+    let data=null;
+    if(raw.startsWith('{')){
+      data=JSON.parse(raw);
+    }else{
+      const compact=raw.split(/\s+/).filter(Boolean).join('');
+      const base64=compact.replace(/-/g,'+').replace(/_/g,'/');
+      const padded=base64+'='.repeat((4-base64.length%4)%4);
+      data=JSON.parse(decodeURIComponent(escape(atob(padded))));
+    }
+    if(!data||data.kind!=='kgg-admin-codes-v1')throw new Error('Kein KGG Admin-Code-Paket.');
+    return data;
+  }
+  function applyAdminCodePackageData(data){
+    adminSecrets.geminiKeys=(Array.isArray(data.geminiKeys)?data.geminiKeys:[]).map(cleanSecret).filter(Boolean).slice(0,4);
+    adminSecrets.mediaDropzoneEndpoint=cleanSecret(data.mediaDropzoneEndpoint);
+    adminSecrets.mediaDropzoneUploadToken=cleanSecret(data.mediaDropzoneUploadToken);
+    persistAdminSecrets();
+    return adminSecrets;
+  }
+  async function importAdminCodePackageFromClipboard(){
+    let text='';
+    try{text=await navigator.clipboard.readText();}catch(err){}
+    if(!text)text=prompt('KGG Admin-Code-Paket einfuegen')||'';
+    if(!text)return;
+    applyAdminCodePackageData(decodeAdminCodePackage(text));
+    openAdminSecretsModal();
+  }
+  async function exportAdminCodePackageToClipboard(){
+    loadAdminSecrets();
+    const pack=encodeAdminCodePackage({
+      geminiKeys:(adminSecrets.geminiKeys||[]).map(cleanSecret).filter(Boolean),
+      mediaDropzoneEndpoint:cleanSecret(adminSecrets.mediaDropzoneEndpoint),
+      mediaDropzoneUploadToken:cleanSecret(adminSecrets.mediaDropzoneUploadToken),
+      exportedAt:new Date().toISOString()
+    });
+    try{await navigator.clipboard.writeText(pack);}catch(err){prompt('KGG Admin-Code-Paket kopieren',pack);}
+    renderAdminSecretStatus();
+  }
+  async function importAdminSafeFile(file){
+    if(!file)return;
+    const text=await file.text();
+    applyAdminCodePackageData(decodeAdminCodePackage(text));
+    openAdminSecretsModal();
+  }
+  function downloadAdminSafeFile(){
+    loadAdminSecrets();
+    const pack=encodeAdminCodePackage({
+      geminiKeys:(adminSecrets.geminiKeys||[]).map(cleanSecret).filter(Boolean),
+      mediaDropzoneEndpoint:cleanSecret(adminSecrets.mediaDropzoneEndpoint),
+      mediaDropzoneUploadToken:cleanSecret(adminSecrets.mediaDropzoneUploadToken),
+      exportedAt:new Date().toISOString()
+    });
+    const body=[
+      'KGG ADMIN SAFE FILE v1',
+      'DO NOT UPLOAD TO GITHUB',
+      'DO NOT SEND TO PATIENTS',
+      '',
+      pack,
+      ''
+    ].join('\n');
+    const blob=new Blob([body],{type:'text/plain;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download='KGG_PRIVATE_ADMIN_SAFE_v1_DO_NOT_UPLOAD.kggsafe';
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  function exposeAdminSecretApi(){
+    window.KGGAdmin=window.KGGAdmin||{};
+    window.KGGAdmin.openConfig=openAdminSecretsModal;
+    window.KGGAdmin.importCodePackage=text=>{applyAdminCodePackageData(decodeAdminCodePackage(text)); return window.KGGAdmin.getSecretStatus();};
+    window.KGGAdmin.exportCodePackage=()=>{loadAdminSecrets(); return encodeAdminCodePackage({geminiKeys:(adminSecrets.geminiKeys||[]).map(cleanSecret).filter(Boolean),mediaDropzoneEndpoint:cleanSecret(adminSecrets.mediaDropzoneEndpoint),mediaDropzoneUploadToken:cleanSecret(adminSecrets.mediaDropzoneUploadToken),exportedAt:new Date().toISOString()});};
+    window.KGGAdmin.getSecretStatus=()=>({geminiKeys:(adminSecrets.geminiKeys||[]).map(maskSecret),mediaDropzoneEndpoint:adminSecrets.mediaDropzoneEndpoint||'',mediaDropzoneUploadToken:maskSecret(adminSecrets.mediaDropzoneUploadToken),updatedAt:adminSecrets.updatedAt||''});
+    window.KGGAdmin.setGeminiKeys=keys=>{adminSecrets.geminiKeys=(Array.isArray(keys)?keys:[keys]).map(cleanSecret).filter(Boolean); persistAdminSecrets(); return window.KGGAdmin.getSecretStatus();};
+    window.KGGAdmin.setMediaDropzone=(endpoint,token)=>{adminSecrets.mediaDropzoneEndpoint=cleanSecret(endpoint); adminSecrets.mediaDropzoneUploadToken=cleanSecret(token); persistAdminSecrets(); return window.KGGAdmin.getSecretStatus();};
+    window.KGGAdmin.getGeminiKeyForLocalUse=()=>((adminSecrets.geminiKeys||[]).find(Boolean)||'');
+    window.KGGAdmin.getGeminiKeysForLocalUse=()=>((adminSecrets.geminiKeys||[]).map(cleanSecret).filter(Boolean));
+  }
+  function canUsePwaRuntime(){return location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1';}
+  function isLocalHtmlTestRuntime(){return location.protocol==='file:'||location.hostname==='localhost'||location.hostname==='127.0.0.1';}
+  function isStandalonePwa(){return window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;}
+  async function initStoragePersistence(){
+    if(!navigator.storage||!navigator.storage.persist)return;
+    try{await navigator.storage.persist();}catch(err){console.warn('Persistenter Speicher nicht bestätigt:',err);}
+  }
+
+  function parseKggSourceVersionCode(value){
+    const match=String(value||'').match(/^KGG_GITHUB_UPDATE_v([0-9]{3,8})_[a-z0-9_]+$/i);
+    if(!match)return null;
+    const code=Number(match[1]);
+    return Number.isSafeInteger(code)&&code>0?code:null;
+  }
+  function parseKggWebReleaseId(value){
+    const match=String(value||'').match(/^r([0-9]{4,8})$/);
+    if(!match)return null;
+    const code=Number(match[1]);
+    return Number.isSafeInteger(code)&&code>0?code:null;
+  }
+  function parseKggVersionName(value){
+    const raw=String(value||'');
+    const match=raw.match(/^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/);
+    if(!match)return null;
+    if(match[4]&&match[4].split('.').some(part=>/^0[0-9]+$/.test(part)))return null;
+    const parsed={major:Number(match[1]),minor:Number(match[2]),patch:Number(match[3]),label:match[4]||'',build:match[5]||'',raw};
+    return [parsed.major,parsed.minor,parsed.patch].every(Number.isSafeInteger)?parsed:null;
+  }
+  function compareKggVersionNames(left,right){
+    const a=parseKggVersionName(left),b=parseKggVersionName(right);
+    if(!a||!b)return null;
+    for(const key of ['major','minor','patch']){
+      if(a[key]!==b[key])return a[key]>b[key]?1:-1;
+    }
+    return 0;
+  }
+  function parseKggAndroidShellVersion(value){
+    const match=String(value||'').match(/^v([0-9]{3,8})$/);
+    if(!match)return null;
+    const code=Number(match[1]);
+    return Number.isSafeInteger(code)&&code>0?code:null;
+  }
+  function parseKggNativeShellCode(value){
+    if(typeof value==='number')return Number.isSafeInteger(value)&&value>0?value:null;
+    if(typeof value!=='string'||!/^[1-9][0-9]{0,7}$/.test(value))return null;
+    const code=Number(value);
+    return Number.isSafeInteger(code)?code:null;
+  }
+  function isKggHttpsAssetUrl(value,suffix){
+    try{
+      const parsed=new URL(String(value||''));
+      return parsed.protocol==='https:'&&!parsed.username&&!parsed.password&&parsed.pathname.toLowerCase().endsWith(suffix);
+    }catch(err){return false;}
+  }
+  function kggWebReleaseIdFromUrl(value,profile){
+    try{
+      const parsed=new URL(String(value||''));
+      const match=parsed.pathname.match(/\/releases\/web\/(r[0-9]{4,8})\/(admin|colleague)\.html$/);
+      return match&&match[2]===profile?match[1]:'';
+    }catch(err){return '';}
+  }
+  function kggAndroidShellFromApkUrl(value,profile){
+    try{
+      const parsed=new URL(String(value||''));
+      const match=parsed.pathname.match(/\/releases\/(v[0-9]{3,8})\/android\/([^/]+\.apk)$/i);
+      if(!match)return '';

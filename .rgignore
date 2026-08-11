@@ -20,3 +20,8 @@
 /preview/
 /previews/
 /preview-artifacts/
+
+# Generated large source views. Search the modular sources by default.
+/kgg-update/index.html
+/docs/kgg-gpt-source/
+/docs/kgg-patient-gpt-source/
