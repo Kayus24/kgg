@@ -1,14 +1,14 @@
 {
   "kind": "kgg_app_update_manifest",
   "version": 1,
-  "latestVersion": "r0397",
+  "latestVersion": "r0426",
   "latestAdminReleaseId": "r0426",
-  "latestColleagueReleaseId": "r0397",
+  "latestColleagueReleaseId": "r0426",
   "latestAdminVersion": "1.0.65-source-control-char-guard",
-  "latestColleagueVersion": "1.0.29-camera-touch-parser-fix",
+  "latestColleagueVersion": "1.0.65-source-control-char-guard",
   "adminUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/admin.html",
-  "colleagueUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0397/colleague.html",
-  "latestUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0397/colleague.html",
+  "colleagueUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html",
+  "latestUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html",
   "latestAndroidShellVersion": "v401",
   "latestAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",
   "latestAndroidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
@@ -16,5 +16,5 @@
   "latestColleagueAndroidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
   "latestAdminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_ADMIN_v401_share_apk_provider_debug.apk",
   "latestAdminAndroidApkSha256": "366c63594eeb6bdb89a7ab9c44cf4b84b43004ddfb24e5019012de0766f21499",
-  "releaseNotes": "Admin beta r0426: Mobile-Inbox r0426: KGG Update v065 Source-Steuerzeichen-Guard (232f1d0315ef)."
+  "releaseNotes": "Stable promotion r0426: Mobile-Inbox r0426: KGG Update v065 Source-Steuerzeichen-Guard (232f1d0315ef)."
 }
