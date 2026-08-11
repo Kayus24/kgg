@@ -3,8 +3,8 @@
   "output": "../index.html",
   "versionManifest": "../version.json",
   "sourceRoles": {
-    "documentTitle": "document/base-shell.html",
-    "runtimeIdentity": "runtime/base-runtime.html"
+    "documentTitle": "document/head-ui.html",
+    "runtimeIdentity": "runtime/app-core.html"
   },
   "requiredPatchIds": [
     "kgg-v041-ui-mini-series",
@@ -29,8 +29,20 @@
     "metadata/changelog.html",
     "metadata/patch-rules.html",
     "metadata/changelog-guard.html",
-    "document/base-shell.html",
-    "runtime/base-runtime.html",
+    "document/head-ui.html",
+    "runtime/pdf-offline.html",
+    "features/head-ui-guards.html",
+    "runtime/jsqr-gallery-decoder.html",
+    "document/head-close.html",
+    "document/body-shell.html",
+    "runtime/media-adapters.html",
+    "runtime/qrcode-generator.html",
+    "runtime/app-core.html",
+    "features/phone-state-guards.html",
+    "features/qr-gallery-wrapper.html",
+    "features/admin-release-center.html",
+    "compat/legacy-phone-touch.html",
+    "compat/legacy-viewport-release.html",
     "patches/v041-ui-mini-series.html",
     "patches/v042-phone-dock-anchored-correction.html",
     "patches/v044-phone-liquid-actions.html",
