@@ -5,7 +5,7 @@
   "bootstrapVersion": "admin-v6",
   "model": "GPT-5.6 Thinking",
   "visibility": "private",
-  "syncStatus": "target-pending-live-editor-sync",
+  "syncStatus": "live-synced",
   "capabilities": {
     "webSearch": true,
     "codeInterpreter": true,
@@ -24,5 +24,7 @@
   "actionSha256": [
     "1eefc8682e346b3d6f9977d0daa28a5a46809c489f39e2a25217201933b5793c",
     "b415ae4e4429363ad56c60f3a05b59d0e62d5d9f8e9b20af8bab68bbd226e0e4"
-  ]
+  ],
+  "lastVerifiedAt": "2026-08-12T05:52:10Z",
+  "lastVerifiedMainCommit": "48e1f549c58d8fd69942fac3c60ced192163ecb8"
 }
