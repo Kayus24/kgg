@@ -12,6 +12,7 @@ if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
 import kgg_secret_scan as secret_scan
+from kgg_git_environment import sanitized_git_environment
 
 
 class SecretScanTests(unittest.TestCase):
@@ -29,6 +30,7 @@ class SecretScanTests(unittest.TestCase):
         subprocess.run(
             ["git", *args],
             cwd=self.root,
+            env=sanitized_git_environment(),
             check=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,

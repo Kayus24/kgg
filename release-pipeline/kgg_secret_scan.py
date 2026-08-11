@@ -9,6 +9,8 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+from kgg_git_environment import sanitized_git_environment
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -57,6 +59,7 @@ def _git_grep_paths(root: Path, *, cached: bool) -> set[str]:
     proc = subprocess.run(
         args,
         cwd=str(root),
+        env=sanitized_git_environment(),
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         check=False,
