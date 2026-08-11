@@ -27,6 +27,35 @@ Bestände sind ein Fail-closed-Stoppsignal: Sie müssen beim echten Audit
 erreichbar und im Rettungspaket enthalten sein. Aus der Inventur folgt
 ausdrücklich **keine Cleanup-Sicherheit**.
 
+Der echte Read-only-Audit am 2026-08-11 erweiterte diese historische Sicht auf
+alle registrierten Abhängigkeiten: 21 logische Git-Fundstellen, 36 physische
+Worktrees in 7 gemeinsamen Git-Verzeichnissen, davon 28 sauber und 8 unsauber.
+Er belegte 196 Dirty-Pfade (0 staged, 58 unstaged, 138 untracked), 0 Konflikte,
+13.736 ignored Dateien, 13.970 getrackte Pfade, 106 reguläre Dateien direkt im
+Workspace-Root und 432 weitere lose Dateien außerhalb auditierter Git-Wurzeln.
+Der Audit endete ohne Warnung; die höheren Zahlen entstehen durch die bewusst
+mitinventarisierten extern registrierten Worktrees und ignored/losen Bestände.
+
+## Belegter historischer Objektdefekt
+
+Der erste reale Capture-Lauf am 2026-08-11 stoppte korrekt bei
+`KGG_MODULE_SANDBOX\.git`: Commit
+`ecf2e61c9579ebfb157e7169f10de1119f7a9ec9` verweist auf den dort fehlenden
+Parent `a348c7153884ef161af8aff9dcaa21968b79ed49`. Die vollständige erreichbare
+Closure benötigt 265 im Archiv fehlende Objekte (94 Commits, 97 Trees und 74
+Blobs; 638.358 Rohbytes). SHA-256 der sortierten OID-Liste einschließlich
+Abschluss-Newline ist
+`c45474664ff5fd2b88bcbb35df0c1a9114b4e82b213abc2e6b71815de2b9dfce`.
+
+Der aktive Klon `C:\src\kgg` enthält alle diese Objekte, besteht
+`git fsck --full --strict` und führt den fehlenden Commit weiterhin erreichbar
+über `origin/main`. Er darf deshalb beim Capture ausschließlich lesend als
+Recovery-Objektanbieter dienen. Das Archiv selbst wird nicht ergänzt oder
+repariert: Seine physische Git-Kopie bleibt bytegenau defekt. Ein separates
+Rescue-Overlay enthält die vollständige fehlende Teilmenge; die normalen Refs
+werden im Bundle/Mirror und abweichende Worktree-HEADs in eigenen Bundles ohne
+Anbieter verifiziert.
+
 ## Werkzeug
 
 `release-pipeline/kgg_workspace_preservation.py` hat zwei strikt getrennte
@@ -39,13 +68,28 @@ Betriebsarten:
   verstecktes `.run-....partial-...` mit `CAPTURE_FAILED.txt` erkennbar und wird
   nie als vollständige Rettung ausgegeben.
 
+Wenn ein Quell-`fsck` an fehlenden erreichbaren Objekten scheitert, bleibt
+`capture` ohne `--recovery-object-repo` fail-closed. Mit einem angegebenen
+fsck-grünen Anbieter werden alle vom Roh-`fsck` gemeldeten fehlenden Wurzeln
+samt vollständiger Objekt-Closure ermittelt. Die im Quell-Objektspeicher
+tatsächlich fehlende Teilmenge wird als lokales Rescue-Overlay geschrieben und
+einzeln durch Git-OID, Typ, Bytezahl und SHA-256 belegt. Repository- und
+Worktree-Bundles werden jeweils in einem leeren Bare-Repository ohne den
+Anbieter verifiziert; der endgültige Mirror wird ausschließlich aus dem
+Repository-Bundle erzeugt, gegen Quell-Refs und HEAD verglichen und besteht
+anschließend `fsck` ebenfalls ohne Alternate. Anbieter mit Git-Alternates oder
+Partial-/Promisor-Konfiguration werden abgelehnt; `GIT_NO_LAZY_FETCH=1`
+verhindert implizite Netz-Nachladungen. `CAPTURE_COMPLETE.txt` trägt in diesem
+Fall ausdrücklich `PASS_WITH_RECOVERED_SOURCE_DEFECTS`.
+
 Das Werkzeug dedupliziert physische Worktree-Wurzeln auch bei Junction-/Link-
 Aliasen, gruppiert gemeinsame Git-Verzeichnisse und nimmt alle dort
 registrierten erreichbaren Worktrees in die Inventur auf. Erfasst werden:
 
 - JSON-Inventur mit Branch/Detached-HEAD, HEAD und getrennten Zählern für
   staged, unstaged, untracked, ignored und Konflikte,
-- Git-Bundle und unabhängiger `--mirror`-Klon je gemeinsamem Git-Verzeichnis,
+- Git-Bundle und ein ausschließlich daraus erzeugter, selbständiger
+  `--mirror`-Klon je gemeinsamem Git-Verzeichnis,
 - byteweise physische Kopie jedes gemeinsamen Git-Verzeichnisses einschließlich
   Config, Hooks, Reflogs, unerreichbarer Objekte und lokaler LFS-Daten,
 - byteweise physische Kopien externer Git-Alternates/Object-Stores und absolut
@@ -107,11 +151,14 @@ Späterer Rettungslauf nach manueller Prüfung des Audit-JSON:
 ```powershell
 python release-pipeline\kgg_workspace_preservation.py capture `
   --workspace "<historischer Transferordner>" `
-  --rescue-root "C:\KGG_RESCUE\2026-08-10"
+  --rescue-root "C:\KGG_RESCUE\2026-08-10" `
+  --recovery-object-repo "C:\src\kgg"
 ```
 
-Für den Implementierungs- und Testschritt wird der zweite Befehl ausdrücklich
-nicht gegen das echte Archiv ausgeführt.
+Wenn nach erfolgreichem Preflight bereits ein partielles Ziel angelegt wurde,
+bleibt es als eigener Fehlernachweis bestehen und wird weder überschrieben noch
+als Basis eines späteren Laufs verwendet. Audit- oder Provider-Preflight-Fehler
+brechen dagegen bewusst ab, bevor überhaupt ein Rescue-Root entsteht.
 
 ## Grenzen und manuelle Prüfungen
 
@@ -123,9 +170,18 @@ partielles Paket sind kein ausreichendes Backup. Auch ein vollständiges Paket
 begründet keine Cleanup-Sicherheit: Es braucht eine zweite physische Kopie,
 einen Offline-Hashvergleich und eine manuelle Restore-Probe.
 
-Der Quellbestand muss während Audit und Capture ruhen. Die Filterprüfung wird
+Der Quellbestand und ein angegebener Recovery-Objektanbieter müssen während
+Audit und Capture ruhen. Die Filterprüfung wird
 unmittelbar vor den relevanten Git-Aufrufen wiederholt und die Quelle am Ende
 erneut inventarisiert und gehasht; eine gleichzeitig absichtlich veränderte
 Git-Konfiguration oder `.gitattributes` kann jedoch nicht atomar gegen alle
 Git-Lesevorgänge verriegelt werden. Ein solcher paralleler Schreibzugriff macht
 den Lauf ungültig und erfordert einen neuen Audit- und Capture-Durchlauf.
+
+Recovery setzt voraus, dass der anfängliche Read-only-Audit jeden Worktree und
+seinen aktuellen HEAD noch lesen kann. Fehlt bereits das direkte HEAD-Objekt,
+kann Git keinen verlässlichen Status- oder Diff-Snapshot mehr liefern; der Audit
+bricht dann bewusst vor dem Capture ab. Der Objektanbieter wird nicht benutzt,
+um einen nicht auditierbaren Quell-Worktree scheinbar gesund zu machen. Dieser
+Fall benötigt eine separate forensische Einzelrettung und darf nicht bereinigt
+werden.
