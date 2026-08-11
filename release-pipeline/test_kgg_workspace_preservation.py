@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import io
 import json
 import os
 import shutil
@@ -123,6 +124,19 @@ class WorkspacePreservationTests(unittest.TestCase):
         self.assertEqual(2, totals["untracked"])
         self.assertEqual(4, totals["dirtyPaths"])
 
+    def test_read_only_audit_never_creates_a_scratch_index(self) -> None:
+        workspace = self.base / "workspace"
+        init_repo(workspace / "repo")
+
+        with mock.patch.object(
+            preservation,
+            "_scratch_index_environment",
+            side_effect=AssertionError("audit attempted scratch-index creation"),
+        ):
+            result = preservation.audit_workspace(workspace)
+
+        self.assertEqual(1, len(result.worktrees))
+
     def test_inherited_git_routing_environment_cannot_redirect_audit(self) -> None:
         workspace = self.base / "workspace"
         target = workspace / "target"
@@ -143,6 +157,17 @@ class WorkspacePreservationTests(unittest.TestCase):
         self.assertEqual(1, len(result.worktrees))
         self.assertEqual(target_head, result.worktrees[0].head)
         self.assertEqual(target.resolve(), result.worktrees[0].physical_path)
+        with mock.patch.dict(
+            os.environ,
+            {
+                "GIT_ALTERNATE_OBJECT_DIRECTORIES": str(other / ".git" / "objects"),
+                "GIT_NO_LAZY_FETCH": "0",
+            },
+            clear=False,
+        ):
+            environment = preservation.sanitized_git_environment()
+        self.assertNotIn("GIT_ALTERNATE_OBJECT_DIRECTORIES", environment)
+        self.assertEqual("1", environment["GIT_NO_LAZY_FETCH"])
 
     def test_audit_refuses_external_filter_before_it_can_run(self) -> None:
         workspace = self.base / "workspace"
@@ -191,7 +216,9 @@ class WorkspacePreservationTests(unittest.TestCase):
         with self.assertRaisesRegex(
             preservation.PreservationError, "external Git filter drivers"
         ):
-            preservation._worktree_evidence(record)
+            preservation._worktree_evidence(
+                record, self.base / "evidence-output"
+            )
         self.assertFalse(marker.exists())
 
     def test_nested_gitlink_filter_is_rejected_without_parent_recursion(self) -> None:
@@ -354,6 +381,7 @@ class WorkspacePreservationTests(unittest.TestCase):
         self.assertFalse(any(rescue.glob(".run-*.partial-*")))
 
         inventory = json.loads((destination / "inventory.json").read_text("utf-8"))
+        self.assertEqual(2, inventory["formatVersion"])
         self.assertEqual(2, inventory["totals"]["physicalWorktrees"])
         self.assertEqual(1, inventory["totals"]["commonGitDirs"])
         self.assertEqual(1, inventory["totals"]["alternateObjectDirs"])
@@ -532,6 +560,434 @@ class WorkspacePreservationTests(unittest.TestCase):
                         )
                 finally:
                     manifest_path.write_bytes(original)
+
+    def test_capture_recovers_missing_reachable_objects_without_source_mutation(self) -> None:
+        workspace = self.base / "workspace"
+        repo = workspace / "repo"
+        provider = self.base / "provider"
+        rescue_without_provider = self.base / "rescue-without-provider"
+        rescue = self.base / "rescue"
+        init_repo(repo)
+        missing_commit = git(repo, "rev-parse", "HEAD").stdout.decode().strip()
+        (repo / "tracked-a.txt").write_text("a1\n", encoding="utf-8", newline="\n")
+        git(repo, "commit", "--quiet", "-am", "child of soon-missing commit")
+        shutil.copytree(repo, provider)
+        missing_object = (
+            repo / ".git" / "objects" / missing_commit[:2] / missing_commit[2:]
+        )
+        self.assertTrue(missing_object.is_file())
+        missing_object.chmod(0o666)
+        missing_object.unlink()
+        self.assertNotEqual(
+            0,
+            preservation.run_git(
+                repo, "fsck", "--full", "--strict", check=False
+            ).returncode,
+        )
+
+        with self.assertRaisesRegex(
+            preservation.PreservationError, "--recovery-object-repo"
+        ):
+            preservation.capture_workspace(repo, rescue_without_provider)
+        failed_runs = list(rescue_without_provider.glob(".run-*.partial-*"))
+        self.assertEqual(1, len(failed_runs))
+        self.assertTrue((failed_runs[0] / "CAPTURE_FAILED.txt").is_file())
+        self.assertFalse(any(rescue_without_provider.rglob("CAPTURE_COMPLETE.txt")))
+
+        destination = preservation.capture_workspace(
+            repo,
+            rescue,
+            recovery_object_repo=provider,
+            now=datetime(2026, 8, 11, 8, 9, 10, 111213, tzinfo=timezone.utc),
+        )
+        self.assertFalse(missing_object.exists())
+        self.assertTrue(
+            (destination / "CAPTURE_COMPLETE.txt")
+            .read_text("utf-8")
+            .startswith("PASS_WITH_RECOVERED_SOURCE_DEFECTS ")
+        )
+        evidence = json.loads(
+            (destination / "capture-evidence.json").read_text("utf-8")
+        )
+        repository = evidence["repositories"]["repository-001"]
+        self.assertNotEqual(0, repository["sourceFsckReturnCode"])
+        self.assertEqual(0, repository["mirrorFsckReturnCode"])
+        recovered = repository["recovery"]
+        recovered_ids = {item["oid"] for item in recovered["objects"]}
+        self.assertIn(missing_commit, recovered_ids)
+        self.assertEqual(len(recovered_ids), recovered["objectCount"])
+        self.assertEqual(
+            preservation.sha256_bytes(
+                ("".join(f"{oid}\n" for oid in sorted(recovered_ids))).encode(
+                    "ascii"
+                )
+            ),
+            recovered["objectIdsSha256"],
+        )
+        repository_capture = destination / "repositories" / "repository-001"
+        self.assertFalse(
+            (
+                repository_capture
+                / "common-git-physical"
+                / "objects"
+                / missing_commit[:2]
+                / missing_commit[2:]
+            ).exists()
+        )
+        mirror = repository_capture / "mirror.git"
+        self.assertEqual(
+            0,
+            preservation.run_git_dir(
+                mirror, "cat-file", "-e", f"{missing_commit}^{{commit}}", check=False
+            ).returncode,
+        )
+        self.assertEqual(
+            0,
+            preservation.run_git_dir(
+                mirror, "fsck", "--full", "--strict", check=False
+            ).returncode,
+        )
+        mirror_alternates = mirror / "objects" / "info" / "alternates"
+        self.assertFalse(
+            mirror_alternates.exists() and mirror_alternates.read_bytes().strip()
+        )
+
+    def test_recovery_handles_direct_broken_ref_and_index_only_blob(self) -> None:
+        workspace = self.base / "workspace"
+        repo = workspace / "repo"
+        provider = self.base / "provider"
+        rescue = self.base / "rescue"
+        init_repo(repo)
+        missing_commit = git(repo, "rev-parse", "HEAD").stdout.decode().strip()
+        git(repo, "update-ref", "refs/archive/lost", missing_commit)
+        tree = git(repo, "write-tree").stdout.decode().strip()
+        root_process = subprocess.run(
+            ["git", "-C", str(repo), "commit-tree", tree],
+            input=b"independent current root\n",
+            env=preservation.sanitized_git_environment(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=True,
+        )
+        independent_root = root_process.stdout.decode().strip()
+        branch = git(repo, "branch", "--show-current").stdout.decode().strip()
+        git(repo, "update-ref", f"refs/heads/{branch}", independent_root)
+        index_only = repo / "index-only.txt"
+        index_only.write_text("staged only\n", encoding="utf-8", newline="\n")
+        git(repo, "add", "index-only.txt")
+        missing_blob = git(repo, "hash-object", "index-only.txt").stdout.decode().strip()
+        shutil.copytree(repo, provider)
+
+        for object_id in (missing_commit, missing_blob):
+            object_path = repo / ".git" / "objects" / object_id[:2] / object_id[2:]
+            self.assertTrue(object_path.is_file())
+            object_path.chmod(0o666)
+            object_path.unlink()
+
+        destination = preservation.capture_workspace(
+            workspace, rescue, recovery_object_repo=provider
+        )
+        repository = json.loads(
+            (destination / "capture-evidence.json").read_text("utf-8")
+        )["repositories"]["repository-001"]["recovery"]
+        self.assertIn(missing_commit, repository["normalRefObjectIds"])
+        self.assertIn(missing_blob, repository["fsckOnlyObjectIds"])
+        self.assertTrue(
+            (destination / "worktrees" / "worktree-001" / "staged.patch")
+            .read_bytes()
+            .strip()
+        )
+
+    def test_recovered_cacheinfo_blob_never_refreshes_source_index(self) -> None:
+        workspace = self.base / "workspace"
+        repo = workspace / "repo"
+        provider = self.base / "provider"
+        rescue = self.base / "rescue"
+        init_repo(repo)
+
+        index_only = repo / "cacheinfo-only.txt"
+        index_only.write_bytes(b"provider-backed index entry\n")
+        missing_blob = git(
+            repo, "hash-object", "-w", "--", "cacheinfo-only.txt"
+        ).stdout.decode().strip()
+        git(
+            repo,
+            "update-index",
+            "--add",
+            "--cacheinfo",
+            "100644",
+            missing_blob,
+            "cacheinfo-only.txt",
+        )
+        shutil.copytree(repo, provider)
+
+        source_object = (
+            repo / ".git" / "objects" / missing_blob[:2] / missing_blob[2:]
+        )
+        self.assertTrue(source_object.is_file())
+        source_object.chmod(0o666)
+        source_object.unlink()
+        source_index = repo / ".git" / "index"
+        index_before = source_index.read_bytes()
+        index_sha_before = preservation.sha256_file(source_index)
+
+        destination = preservation.capture_workspace(
+            workspace, rescue, recovery_object_repo=provider
+        )
+
+        self.assertEqual(index_sha_before, preservation.sha256_file(source_index))
+        self.assertEqual(index_before, source_index.read_bytes())
+        captured_index = (
+            destination / "worktrees" / "worktree-001" / "index.raw"
+        )
+        self.assertEqual(index_sha_before, preservation.sha256_file(captured_index))
+        self.assertEqual(
+            index_before,
+            captured_index.read_bytes(),
+        )
+        self.assertFalse(any(destination.rglob(".index-scratch-*")))
+        self.assertTrue(
+            (destination / "CAPTURE_COMPLETE.txt")
+            .read_text("utf-8")
+            .startswith("PASS_WITH_RECOVERED_SOURCE_DEFECTS ")
+        )
+        recovery = json.loads(
+            (destination / "capture-evidence.json").read_text("utf-8")
+        )["repositories"]["repository-001"]["recovery"]
+        self.assertIn(missing_blob, recovery["fsckOnlyObjectIds"])
+        self.assertTrue(
+            (destination / "worktrees" / "worktree-001" / "staged.patch")
+            .read_bytes()
+            .strip()
+        )
+
+    def test_missing_fsck_root_parser_accepts_pointer_and_reflog_errors(self) -> None:
+        pointer = "1" * 40
+        reflog = "2" * 40
+        result = preservation.GitResult(
+            2,
+            b"",
+            (
+                f"error: refs/archive/lost: invalid sha1 pointer {pointer}\n"
+                f"error: refs/heads/main@{{1}}: invalid reflog entry {reflog}\n"
+            ).encode("ascii"),
+        )
+        self.assertEqual(
+            [pointer, reflog], preservation._missing_fsck_roots(result)
+        )
+
+    def test_capture_rejects_broken_recovery_object_provider(self) -> None:
+        workspace = self.base / "workspace"
+        repo = workspace / "repo"
+        provider = self.base / "provider"
+        init_repo(repo)
+        shutil.copytree(repo, provider)
+        provider_head = git(provider, "rev-parse", "HEAD").stdout.decode().strip()
+        provider_object = (
+            provider
+            / ".git"
+            / "objects"
+            / provider_head[:2]
+            / provider_head[2:]
+        )
+        self.assertTrue(provider_object.is_file())
+        provider_object.chmod(0o666)
+        provider_object.unlink()
+
+        with self.assertRaisesRegex(
+            preservation.PreservationError,
+            "recovery object provider does not pass git fsck",
+        ):
+            preservation.capture_workspace(
+                workspace,
+                self.base / "rescue",
+                recovery_object_repo=provider,
+            )
+        self.assertFalse((self.base / "rescue").exists())
+
+    def test_capture_rejects_recovery_provider_with_alternates(self) -> None:
+        workspace = self.base / "workspace"
+        repo = workspace / "repo"
+        provider = self.base / "provider"
+        alternate = self.base / "alternate.git"
+        init_repo(repo)
+        shutil.copytree(repo, provider)
+        alternate.mkdir()
+        subprocess.run(
+            ["git", "init", "--quiet", "--bare"],
+            cwd=alternate,
+            env=preservation.sanitized_git_environment(),
+            check=True,
+        )
+        alternates_file = provider / ".git" / "objects" / "info" / "alternates"
+        alternates_file.write_text(
+            str((alternate / "objects").resolve()) + "\n", encoding="utf-8"
+        )
+
+        with self.assertRaisesRegex(
+            preservation.PreservationError, "unsupported alternates"
+        ):
+            preservation.capture_workspace(
+                workspace,
+                self.base / "rescue",
+                recovery_object_repo=provider,
+            )
+        self.assertFalse((self.base / "rescue").exists())
+
+    def test_capture_rejects_partial_recovery_provider(self) -> None:
+        workspace = self.base / "workspace"
+        repo = workspace / "repo"
+        provider = self.base / "provider"
+        init_repo(repo)
+        shutil.copytree(repo, provider)
+        git(provider, "config", "remote.origin.promisor", "true")
+
+        with self.assertRaisesRegex(
+            preservation.PreservationError, "partial/promisor"
+        ):
+            preservation.capture_workspace(
+                workspace,
+                self.base / "rescue",
+                recovery_object_repo=provider,
+            )
+        self.assertFalse((self.base / "rescue").exists())
+
+    def test_cli_reports_recovered_source_defect_status(self) -> None:
+        destination = self.base / "run-test"
+        destination.mkdir()
+        (destination / "CAPTURE_COMPLETE.txt").write_text(
+            "PASS_WITH_RECOVERED_SOURCE_DEFECTS test\n", encoding="utf-8"
+        )
+        with mock.patch.object(
+            preservation, "capture_workspace", return_value=destination
+        ), mock.patch("sys.stdout", new_callable=io.StringIO) as stdout:
+            result = preservation.main(
+                [
+                    "capture",
+                    "--workspace",
+                    str(self.base / "workspace"),
+                    "--rescue-root",
+                    str(self.base / "rescue"),
+                ]
+            )
+        self.assertEqual(0, result)
+        self.assertEqual(
+            "PASS_WITH_RECOVERED_SOURCE_DEFECTS",
+            json.loads(stdout.getvalue())["status"],
+        )
+
+    def test_capture_preserves_non_default_and_detached_common_head(self) -> None:
+        for detached in (False, True):
+            with self.subTest(detached=detached):
+                workspace = self.base / f"workspace-head-{detached}"
+                repo = workspace / "repo"
+                rescue = self.base / f"rescue-head-{detached}"
+                init_repo(repo)
+                git(repo, "branch", "-M", "alpha")
+                git(repo, "switch", "--quiet", "-c", "zeta")
+                if detached:
+                    git(repo, "switch", "--quiet", "--detach", "HEAD")
+                    git(repo, "branch", "-D", "alpha", "zeta")
+                else:
+                    git(
+                        repo,
+                        "symbolic-ref",
+                        "refs/remotes/origin/HEAD",
+                        "refs/heads/alpha",
+                    )
+                source_head = preservation._common_head_state(repo / ".git")
+                source_refs = preservation._common_refs(repo / ".git")
+
+                destination = preservation.capture_workspace(workspace, rescue)
+                mirror = (
+                    destination
+                    / "repositories"
+                    / "repository-001"
+                    / "mirror.git"
+                )
+                self.assertEqual(source_head, preservation._common_head_state(mirror))
+                self.assertEqual(source_refs, preservation._common_refs(mirror))
+
+    def test_recovery_covers_detached_linked_worktree_without_polluting_mirror(self) -> None:
+        workspace = self.base / "workspace"
+        repo = workspace / "repo"
+        external = self.base / "detached-worktree"
+        provider = self.base / "provider.git"
+        rescue = self.base / "rescue"
+        init_repo(repo)
+        missing_commit = git(repo, "rev-parse", "HEAD").stdout.decode().strip()
+        git(repo, "worktree", "add", "--quiet", "--detach", str(external), "HEAD")
+        (external / "tracked-a.txt").write_text(
+            "detached child\n", encoding="utf-8", newline="\n"
+        )
+        git(external, "commit", "--quiet", "-am", "detached child")
+        detached_head = git(external, "rev-parse", "HEAD").stdout.decode().strip()
+
+        tree = git(repo, "write-tree").stdout.decode().strip()
+        root_process = subprocess.run(
+            ["git", "-C", str(repo), "commit-tree", tree],
+            input=b"independent root\n",
+            env=preservation.sanitized_git_environment(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=True,
+        )
+        independent_root = root_process.stdout.decode().strip()
+        branch = git(repo, "branch", "--show-current").stdout.decode().strip()
+        git(repo, "update-ref", f"refs/heads/{branch}", independent_root)
+        git(repo, "update-ref", "refs/recovery/provider-tip", detached_head)
+        subprocess.run(
+            ["git", "clone", "--quiet", "--mirror", "--no-local", str(repo), str(provider)],
+            env=preservation.sanitized_git_environment(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=True,
+        )
+        git(repo, "update-ref", "-d", "refs/recovery/provider-tip")
+        missing_object = (
+            repo / ".git" / "objects" / missing_commit[:2] / missing_commit[2:]
+        )
+        self.assertTrue(missing_object.is_file())
+        missing_object.chmod(0o666)
+        missing_object.unlink()
+
+        destination = preservation.capture_workspace(
+            workspace, rescue, recovery_object_repo=provider
+        )
+        repository_capture = destination / "repositories" / "repository-001"
+        evidence = json.loads(
+            (destination / "capture-evidence.json").read_text("utf-8")
+        )["repositories"]["repository-001"]["recovery"]
+        self.assertIn(missing_commit, evidence["worktreeHeadObjectIds"])
+        self.assertNotIn(missing_commit, evidence["normalRefObjectIds"])
+        mirror = repository_capture / "mirror.git"
+        self.assertNotEqual(
+            0,
+            preservation.run_git_dir(
+                mirror, "cat-file", "-e", missing_commit, check=False
+            ).returncode,
+        )
+        inventory = json.loads((destination / "inventory.json").read_text("utf-8"))
+        detached_entry = next(
+            item
+            for item in inventory["worktrees"]
+            if Path(item["path"]).name == external.name
+        )
+        head_bundle = (
+            destination / "worktrees" / detached_entry["id"] / "head.bundle"
+        )
+        empty = self.base / "empty-verifier.git"
+        subprocess.run(
+            ["git", "init", "--quiet", "--bare", str(empty)],
+            env=preservation.sanitized_git_environment(),
+            check=True,
+        )
+        self.assertEqual(
+            0,
+            preservation.run_git_dir(
+                empty, "bundle", "verify", head_bundle, check=False
+            ).returncode,
+        )
 
     def test_capture_refuses_destination_overlap(self) -> None:
         workspace = self.base / "workspace"
