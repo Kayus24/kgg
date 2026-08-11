@@ -187,7 +187,7 @@
 ## manifest-bootstrap-version
 
 - Muss `production.editorBootstrap.version` mit `admin-v6` vergleichen.
-- Darf `production.profileVersion: 4.1.0` nicht als Bootstrap-Drift behandeln.
+- Darf `production.profileVersion: 4.2.0` nicht als Bootstrap-Drift behandeln.
 - Muss bei passenden Hashes und Pflicht-Actions mit den Patient-Source-Reads und der isolierten Preview fortfahren.
 - Darf weder `stale_context` noch eine Synchronisierungsaufforderung allein wegen der unterschiedlichen Versionsfelder ausgeben.
 

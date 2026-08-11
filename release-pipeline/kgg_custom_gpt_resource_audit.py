@@ -4,10 +4,13 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime
 import hashlib
 import json
+import os
 import re
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -44,6 +47,14 @@ PATIENT_BOOTSTRAP = "docs/kgg-patient-custom-gpt-editor-bootstrap.md"
 PATIENT_BOOTSTRAP_VERSION = "patient-v3"
 PATIENT_EDITOR_SNAPSHOT = ROOT / "docs" / "kgg-patient-custom-gpt-editor-snapshot.json"
 CUSTOM_GPT_ACTION_LIMIT = 30
+TARGET_PENDING_SYNC_STATUS = "target-pending-live-editor-sync"
+LIVE_SYNC_STATUS = "live-synced"
+TARGET_PASS = "TARGET_PASS"
+LIVE_PASS = "LIVE_PASS"
+_RFC3339_UTC_RE = re.compile(
+    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$"
+)
+_MAIN_COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 
 
 class AuditError(RuntimeError):
@@ -80,7 +91,7 @@ def expected_manifest() -> dict[str, Any]:
         },
         "production": {
             "name": "KGG Update-Agent",
-            "profileVersion": "4.1.0",
+            "profileVersion": "4.2.0",
             "editorBootstrap": resource(
                 PRODUCTION_BOOTSTRAP, version=PRODUCTION_BOOTSTRAP_VERSION
             ),
@@ -155,14 +166,46 @@ def normalize(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, indent=2, sort_keys=False) + "\n"
 
 
-def validate_snapshot(path: Path, profile: str) -> None:
+def atomic_write_text(path: Path, content: str) -> None:
+    """Replace one text artifact without exposing a partial write."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            newline="\n",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            temporary = Path(handle.name)
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+        temporary.replace(path)
+    except Exception:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+        raise
+
+
+def read_snapshot(path: Path) -> dict[str, Any]:
     try:
         snapshot = json.loads(path.read_text(encoding="utf-8"))
     except Exception as exc:  # noqa: BLE001
         raise AuditError(f"cannot read editor snapshot: {exc}") from exc
-    expected = expected_manifest()[profile]
-    if snapshot.get("profileVersion") != expected.get("profileVersion", snapshot.get("profileVersion")):
-        raise AuditError(f"{profile} profileVersion mismatch")
+    if not isinstance(snapshot, dict):
+        raise AuditError("editor snapshot must be a JSON object")
+    return snapshot
+
+
+def validate_snapshot_identity(
+    snapshot: dict[str, Any], profile: str, expected: dict[str, Any]
+) -> None:
+    if snapshot.get("name") != expected.get("name"):
+        raise AuditError(f"{profile} GPT name mismatch")
     if expected.get("visibility") and snapshot.get("visibility") != expected["visibility"]:
         raise AuditError(f"{profile} visibility mismatch")
     if profile in {"production", "patientProduction"} and not re.fullmatch(
@@ -171,22 +214,114 @@ def validate_snapshot(path: Path, profile: str) -> None:
         raise AuditError(f"{profile} GPT id is missing or invalid")
     if snapshot.get("model") != HIGHEST_ACTIONS_COMPATIBLE_MODEL:
         raise AuditError(f"{profile} GPT model is not {HIGHEST_ACTIONS_COMPATIBLE_MODEL}")
+    capabilities = snapshot.get("capabilities")
+    if not isinstance(capabilities, dict):
+        raise AuditError(f"{profile} capabilities must be an object")
     for key, wanted in expected["capabilities"].items():
-        if bool(snapshot.get("capabilities", {}).get(key)) is not wanted:
+        if capabilities.get(key) is not wanted:
             raise AuditError(f"{profile} capability mismatch: {key} must be {wanted}")
-    expected_hashes = {item["sha256"] for item in expected["knowledge"]}
-    actual_hashes = set(snapshot.get("knowledgeSha256", []))
-    if expected_hashes != actual_hashes:
+
+
+def refresh_target_snapshot(path: Path, profile: str) -> None:
+    if profile not in {"production", "patientProduction"}:
+        raise AuditError("target refresh is supported only for production profiles")
+    snapshot = read_snapshot(path)
+    expected = expected_manifest()[profile]
+    validate_snapshot_identity(snapshot, profile, expected)
+    snapshot["profileVersion"] = expected["profileVersion"]
+    snapshot["knowledgeSha256"] = [item["sha256"] for item in expected["knowledge"]]
+    snapshot["actionSha256"] = [item["sha256"] for item in expected["actions"]]
+    if expected.get("editorBootstrap"):
+        snapshot["bootstrapVersion"] = expected["editorBootstrap"]["version"]
+        snapshot["instructionsSha256"] = expected["editorBootstrap"]["sha256"]
+    snapshot["syncStatus"] = TARGET_PENDING_SYNC_STATUS
+    snapshot.pop("lastVerifiedAt", None)
+    snapshot.pop("lastVerifiedMainCommit", None)
+    atomic_write_text(path, normalize(snapshot))
+
+
+def validate_live_verification(snapshot: dict[str, Any], profile: str) -> None:
+    verified_at = snapshot.get("lastVerifiedAt")
+    if not isinstance(verified_at, str) or not _RFC3339_UTC_RE.fullmatch(verified_at):
+        raise AuditError(
+            f"{profile} live snapshot requires RFC3339 UTC lastVerifiedAt"
+        )
+    try:
+        datetime.fromisoformat(verified_at[:-1] + "+00:00")
+    except ValueError as exc:
+        raise AuditError(
+            f"{profile} live snapshot requires RFC3339 UTC lastVerifiedAt"
+        ) from exc
+    verified_commit = snapshot.get("lastVerifiedMainCommit")
+    if not isinstance(verified_commit, str) or not _MAIN_COMMIT_RE.fullmatch(
+        verified_commit
+    ):
+        raise AuditError(
+            f"{profile} live snapshot requires a 40-character lowercase "
+            "lastVerifiedMainCommit"
+        )
+
+
+def validate_snapshot(
+    path: Path, profile: str, *, require_live_synced: bool = False
+) -> str:
+    snapshot = read_snapshot(path)
+    expected = expected_manifest()[profile]
+    validate_snapshot_identity(snapshot, profile, expected)
+    if snapshot.get("profileVersion") != expected.get(
+        "profileVersion", snapshot.get("profileVersion")
+    ):
+        raise AuditError(f"{profile} profileVersion mismatch")
+    expected_hashes = [item["sha256"] for item in expected["knowledge"]]
+    actual_hashes = snapshot.get("knowledgeSha256")
+    if (
+        not isinstance(actual_hashes, list)
+        or len(actual_hashes) != len(expected_hashes)
+        or set(expected_hashes) != set(actual_hashes)
+    ):
         raise AuditError(f"{profile} Knowledge digest mismatch")
-    expected_action_hashes = {item["sha256"] for item in expected["actions"]}
-    actual_action_hashes = set(snapshot.get("actionSha256", []))
-    if expected_action_hashes != actual_action_hashes:
+    expected_action_hashes = [item["sha256"] for item in expected["actions"]]
+    actual_action_hashes = snapshot.get("actionSha256")
+    if (
+        not isinstance(actual_action_hashes, list)
+        or len(actual_action_hashes) != len(expected_action_hashes)
+        or set(expected_action_hashes) != set(actual_action_hashes)
+    ):
         raise AuditError(f"{profile} Action digest mismatch")
     if expected.get("editorBootstrap"):
         if snapshot.get("bootstrapVersion") != expected["editorBootstrap"]["version"]:
             raise AuditError(f"{profile} editor Bootstrap version mismatch")
         if snapshot.get("instructionsSha256") != expected["editorBootstrap"]["sha256"]:
             raise AuditError(f"{profile} editor Instructions digest mismatch")
+    sync_status = snapshot.get("syncStatus")
+    if sync_status == TARGET_PENDING_SYNC_STATUS:
+        if require_live_synced:
+            raise AuditError(
+                f"{profile} editor snapshot is only a validated target; live sync is required"
+            )
+        return TARGET_PASS
+    if sync_status == LIVE_SYNC_STATUS:
+        validate_live_verification(snapshot, profile)
+        return LIVE_PASS
+    raise AuditError(
+        f"{profile} syncStatus must be {TARGET_PENDING_SYNC_STATUS!r} or "
+        f"{LIVE_SYNC_STATUS!r}"
+    )
+
+
+def combined_snapshot_status(statuses: list[str]) -> str:
+    if not statuses:
+        return "PASS"
+    if TARGET_PASS in statuses:
+        return TARGET_PASS
+    return LIVE_PASS
+
+
+def display_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
 
 
 def self_test() -> None:
@@ -238,30 +373,100 @@ def main() -> int:
     mode.add_argument("--write", action="store_true")
     mode.add_argument("--check", action="store_true")
     mode.add_argument("--self-test", action="store_true")
+    mode.add_argument(
+        "--refresh-target-profile",
+        choices=["production", "patientProduction"],
+        help="refresh one editor target snapshot and mark it pending without claiming live sync",
+    )
     parser.add_argument("--editor-snapshot", type=Path)
     parser.add_argument("--profile", choices=["production", "eval", "patientProduction"])
+    parser.add_argument(
+        "--require-live-synced",
+        action="store_true",
+        help="reject target-only editor snapshots and require verified live-editor evidence",
+    )
     args = parser.parse_args()
     try:
+        if args.self_test and (
+            args.editor_snapshot or args.profile or args.require_live_synced
+        ):
+            raise AuditError(
+                "--self-test cannot be combined with editor snapshot validation flags"
+            )
+        selected_snapshot = args.editor_snapshot
+        selected_profile = args.profile
+        if args.refresh_target_profile:
+            if args.profile:
+                raise AuditError(
+                    "--profile is derived from --refresh-target-profile"
+                )
+            if args.require_live_synced:
+                raise AuditError(
+                    "target refresh cannot be combined with --require-live-synced"
+                )
+            selected_profile = args.refresh_target_profile
+            selected_snapshot = selected_snapshot or (
+                PRODUCTION_EDITOR_SNAPSHOT
+                if selected_profile == "production"
+                else PATIENT_EDITOR_SNAPSHOT
+            )
+        elif args.profile and not args.editor_snapshot:
+            raise AuditError("--profile requires --editor-snapshot")
+        elif args.editor_snapshot and not args.profile:
+            raise AuditError("--editor-snapshot requires --profile")
+        if args.require_live_synced and (
+            not selected_snapshot or not selected_profile
+        ):
+            raise AuditError(
+                "--require-live-synced requires --editor-snapshot and --profile"
+            )
         self_test()
         expected = normalize(expected_manifest())
         if args.self_test:
             print(json.dumps({"status": "PASS", "test": "kgg_custom_gpt_resource_audit"}))
             return 0
-        if args.write:
-            OUTPUT.write_text(expected, encoding="utf-8", newline="\n")
+        if args.refresh_target_profile:
+            refresh_target_snapshot(selected_snapshot, selected_profile)
+            atomic_write_text(OUTPUT, expected)
+        elif args.write:
+            atomic_write_text(OUTPUT, expected)
         else:
             if not OUTPUT.exists() or OUTPUT.read_text(encoding="utf-8") != expected:
                 raise AuditError("resource manifest is missing or stale; run --write")
-        if args.editor_snapshot:
-            if not args.profile:
-                raise AuditError("--profile is required with --editor-snapshot")
-            validate_snapshot(args.editor_snapshot, args.profile)
+        snapshot_statuses: list[str] = []
+        if selected_snapshot:
+            snapshot_statuses.append(
+                validate_snapshot(
+                    selected_snapshot,
+                    selected_profile,
+                    require_live_synced=args.require_live_synced,
+                )
+            )
         elif PRODUCTION_EDITOR_SNAPSHOT.exists() or PATIENT_EDITOR_SNAPSHOT.exists():
             if PRODUCTION_EDITOR_SNAPSHOT.exists():
-                validate_snapshot(PRODUCTION_EDITOR_SNAPSHOT, "production")
+                snapshot_statuses.append(
+                    validate_snapshot(
+                        PRODUCTION_EDITOR_SNAPSHOT,
+                        "production",
+                        require_live_synced=args.require_live_synced,
+                    )
+                )
             if PATIENT_EDITOR_SNAPSHOT.exists():
-                validate_snapshot(PATIENT_EDITOR_SNAPSHOT, "patientProduction")
-        print(json.dumps({"status": "PASS", "manifest": str(OUTPUT.relative_to(ROOT))}))
+                snapshot_statuses.append(
+                    validate_snapshot(
+                        PATIENT_EDITOR_SNAPSHOT,
+                        "patientProduction",
+                        require_live_synced=args.require_live_synced,
+                    )
+                )
+        print(
+            json.dumps(
+                {
+                    "status": combined_snapshot_status(snapshot_statuses),
+                    "manifest": display_path(OUTPUT),
+                }
+            )
+        )
         return 0
     except Exception as exc:  # noqa: BLE001
         print(json.dumps({"status": "FAIL", "error": str(exc)}), file=sys.stderr)

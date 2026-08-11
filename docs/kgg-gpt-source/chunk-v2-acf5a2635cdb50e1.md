@@ -1,0 +1,337 @@
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var BitMatrix_1 = __webpack_require__(0);
+function squareToQuadrilateral(p1, p2, p3, p4) {
+    var dx3 = p1.x - p2.x + p3.x - p4.x;
+    var dy3 = p1.y - p2.y + p3.y - p4.y;
+    if (dx3 === 0 && dy3 === 0) { // Affine
+        return {
+            a11: p2.x - p1.x,
+            a12: p2.y - p1.y,
+            a13: 0,
+            a21: p3.x - p2.x,
+            a22: p3.y - p2.y,
+            a23: 0,
+            a31: p1.x,
+            a32: p1.y,
+            a33: 1,
+        };
+    }
+    else {
+        var dx1 = p2.x - p3.x;
+        var dx2 = p4.x - p3.x;
+        var dy1 = p2.y - p3.y;
+        var dy2 = p4.y - p3.y;
+        var denominator = dx1 * dy2 - dx2 * dy1;
+        var a13 = (dx3 * dy2 - dx2 * dy3) / denominator;
+        var a23 = (dx1 * dy3 - dx3 * dy1) / denominator;
+        return {
+            a11: p2.x - p1.x + a13 * p2.x,
+            a12: p2.y - p1.y + a13 * p2.y,
+            a13: a13,
+            a21: p4.x - p1.x + a23 * p4.x,
+            a22: p4.y - p1.y + a23 * p4.y,
+            a23: a23,
+            a31: p1.x,
+            a32: p1.y,
+            a33: 1,
+        };
+    }
+}
+function quadrilateralToSquare(p1, p2, p3, p4) {
+    // Here, the adjoint serves as the inverse:
+    var sToQ = squareToQuadrilateral(p1, p2, p3, p4);
+    return {
+        a11: sToQ.a22 * sToQ.a33 - sToQ.a23 * sToQ.a32,
+        a12: sToQ.a13 * sToQ.a32 - sToQ.a12 * sToQ.a33,
+        a13: sToQ.a12 * sToQ.a23 - sToQ.a13 * sToQ.a22,
+        a21: sToQ.a23 * sToQ.a31 - sToQ.a21 * sToQ.a33,
+        a22: sToQ.a11 * sToQ.a33 - sToQ.a13 * sToQ.a31,
+        a23: sToQ.a13 * sToQ.a21 - sToQ.a11 * sToQ.a23,
+        a31: sToQ.a21 * sToQ.a32 - sToQ.a22 * sToQ.a31,
+        a32: sToQ.a12 * sToQ.a31 - sToQ.a11 * sToQ.a32,
+        a33: sToQ.a11 * sToQ.a22 - sToQ.a12 * sToQ.a21,
+    };
+}
+function times(a, b) {
+    return {
+        a11: a.a11 * b.a11 + a.a21 * b.a12 + a.a31 * b.a13,
+        a12: a.a12 * b.a11 + a.a22 * b.a12 + a.a32 * b.a13,
+        a13: a.a13 * b.a11 + a.a23 * b.a12 + a.a33 * b.a13,
+        a21: a.a11 * b.a21 + a.a21 * b.a22 + a.a31 * b.a23,
+        a22: a.a12 * b.a21 + a.a22 * b.a22 + a.a32 * b.a23,
+        a23: a.a13 * b.a21 + a.a23 * b.a22 + a.a33 * b.a23,
+        a31: a.a11 * b.a31 + a.a21 * b.a32 + a.a31 * b.a33,
+        a32: a.a12 * b.a31 + a.a22 * b.a32 + a.a32 * b.a33,
+        a33: a.a13 * b.a31 + a.a23 * b.a32 + a.a33 * b.a33,
+    };
+}
+function extract(image, location) {
+    var qToS = quadrilateralToSquare({ x: 3.5, y: 3.5 }, { x: location.dimension - 3.5, y: 3.5 }, { x: location.dimension - 6.5, y: location.dimension - 6.5 }, { x: 3.5, y: location.dimension - 3.5 });
+    var sToQ = squareToQuadrilateral(location.topLeft, location.topRight, location.alignmentPattern, location.bottomLeft);
+    var transform = times(sToQ, qToS);
+    var matrix = BitMatrix_1.BitMatrix.createEmpty(location.dimension, location.dimension);
+    var mappingFunction = function (x, y) {
+        var denominator = transform.a13 * x + transform.a23 * y + transform.a33;
+        return {
+            x: (transform.a11 * x + transform.a21 * y + transform.a31) / denominator,
+            y: (transform.a12 * x + transform.a22 * y + transform.a32) / denominator,
+        };
+    };
+    for (var y = 0; y < location.dimension; y++) {
+        for (var x = 0; x < location.dimension; x++) {
+            var xValue = x + 0.5;
+            var yValue = y + 0.5;
+            var sourcePixel = mappingFunction(xValue, yValue);
+            matrix.set(x, y, image.get(Math.floor(sourcePixel.x), Math.floor(sourcePixel.y)));
+        }
+    }
+    return {
+        matrix: matrix,
+        mappingFunction: mappingFunction,
+    };
+}
+exports.extract = extract;
+
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var MAX_FINDERPATTERNS_TO_SEARCH = 4;
+var MIN_QUAD_RATIO = 0.5;
+var MAX_QUAD_RATIO = 1.5;
+var distance = function (a, b) { return Math.sqrt(Math.pow((b.x - a.x), 2) + Math.pow((b.y - a.y), 2)); };
+function sum(values) {
+    return values.reduce(function (a, b) { return a + b; });
+}
+// Takes three finder patterns and organizes them into topLeft, topRight, etc
+function reorderFinderPatterns(pattern1, pattern2, pattern3) {
+    var _a, _b, _c, _d;
+    // Find distances between pattern centers
+    var oneTwoDistance = distance(pattern1, pattern2);
+    var twoThreeDistance = distance(pattern2, pattern3);
+    var oneThreeDistance = distance(pattern1, pattern3);
+    var bottomLeft;
+    var topLeft;
+    var topRight;
+    // Assume one closest to other two is B; A and C will just be guesses at first
+    if (twoThreeDistance >= oneTwoDistance && twoThreeDistance >= oneThreeDistance) {
+        _a = [pattern2, pattern1, pattern3], bottomLeft = _a[0], topLeft = _a[1], topRight = _a[2];
+    }
+    else if (oneThreeDistance >= twoThreeDistance && oneThreeDistance >= oneTwoDistance) {
+        _b = [pattern1, pattern2, pattern3], bottomLeft = _b[0], topLeft = _b[1], topRight = _b[2];
+    }
+    else {
+        _c = [pattern1, pattern3, pattern2], bottomLeft = _c[0], topLeft = _c[1], topRight = _c[2];
+    }
+    // Use cross product to figure out whether bottomLeft (A) and topRight (C) are correct or flipped in relation to topLeft (B)
+    // This asks whether BC x BA has a positive z component, which is the arrangement we want. If it's negative, then
+    // we've got it flipped around and should swap topRight and bottomLeft.
+    if (((topRight.x - topLeft.x) * (bottomLeft.y - topLeft.y)) - ((topRight.y - topLeft.y) * (bottomLeft.x - topLeft.x)) < 0) {
+        _d = [topRight, bottomLeft], bottomLeft = _d[0], topRight = _d[1];
+    }
+    return { bottomLeft: bottomLeft, topLeft: topLeft, topRight: topRight };
+}
+// Computes the dimension (number of modules on a side) of the QR Code based on the position of the finder patterns
+function computeDimension(topLeft, topRight, bottomLeft, matrix) {
+    var moduleSize = (sum(countBlackWhiteRun(topLeft, bottomLeft, matrix, 5)) / 7 + // Divide by 7 since the ratio is 1:1:3:1:1
+        sum(countBlackWhiteRun(topLeft, topRight, matrix, 5)) / 7 +
+        sum(countBlackWhiteRun(bottomLeft, topLeft, matrix, 5)) / 7 +
+        sum(countBlackWhiteRun(topRight, topLeft, matrix, 5)) / 7) / 4;
+    if (moduleSize < 1) {
+        throw new Error("Invalid module size");
+    }
+    var topDimension = Math.round(distance(topLeft, topRight) / moduleSize);
+    var sideDimension = Math.round(distance(topLeft, bottomLeft) / moduleSize);
+    var dimension = Math.floor((topDimension + sideDimension) / 2) + 7;
+    switch (dimension % 4) {
+        case 0:
+            dimension++;
+            break;
+        case 2:
+            dimension--;
+            break;
+    }
+    return { dimension: dimension, moduleSize: moduleSize };
+}
+// Takes an origin point and an end point and counts the sizes of the black white run from the origin towards the end point.
+// Returns an array of elements, representing the pixel size of the black white run.
+// Uses a variant of http://en.wikipedia.org/wiki/Bresenham's_line_algorithm
+function countBlackWhiteRunTowardsPoint(origin, end, matrix, length) {
+    var switchPoints = [{ x: Math.floor(origin.x), y: Math.floor(origin.y) }];
+    var steep = Math.abs(end.y - origin.y) > Math.abs(end.x - origin.x);
+    var fromX;
+    var fromY;
+    var toX;
+    var toY;
+    if (steep) {
+        fromX = Math.floor(origin.y);
+        fromY = Math.floor(origin.x);
+        toX = Math.floor(end.y);
+        toY = Math.floor(end.x);
+    }
+    else {
+        fromX = Math.floor(origin.x);
+        fromY = Math.floor(origin.y);
+        toX = Math.floor(end.x);
+        toY = Math.floor(end.y);
+    }
+    var dx = Math.abs(toX - fromX);
+    var dy = Math.abs(toY - fromY);
+    var error = Math.floor(-dx / 2);
+    var xStep = fromX < toX ? 1 : -1;
+    var yStep = fromY < toY ? 1 : -1;
+    var currentPixel = true;
+    // Loop up until x == toX, but not beyond
+    for (var x = fromX, y = fromY; x !== toX + xStep; x += xStep) {
+        // Does current pixel mean we have moved white to black or vice versa?
+        // Scanning black in state 0,2 and white in state 1, so if we find the wrong
+        // color, advance to next state or end if we are in state 2 already
+        var realX = steep ? y : x;
+        var realY = steep ? x : y;
+        if (matrix.get(realX, realY) !== currentPixel) {
+            currentPixel = !currentPixel;
+            switchPoints.push({ x: realX, y: realY });
+            if (switchPoints.length === length + 1) {
+                break;
+            }
+        }
+        error += dy;
+        if (error > 0) {
+            if (y === toY) {
+                break;
+            }
+            y += yStep;
+            error -= dx;
+        }
+    }
+    var distances = [];
+    for (var i = 0; i < length; i++) {
+        if (switchPoints[i] && switchPoints[i + 1]) {
+            distances.push(distance(switchPoints[i], switchPoints[i + 1]));
+        }
+        else {
+            distances.push(0);
+        }
+    }
+    return distances;
+}
+// Takes an origin point and an end point and counts the sizes of the black white run in the origin point
+// along the line that intersects with the end point. Returns an array of elements, representing the pixel sizes
+// of the black white run. Takes a length which represents the number of switches from black to white to look for.
+function countBlackWhiteRun(origin, end, matrix, length) {
+    var _a;
+    var rise = end.y - origin.y;
+    var run = end.x - origin.x;
+    var towardsEnd = countBlackWhiteRunTowardsPoint(origin, end, matrix, Math.ceil(length / 2));
+    var awayFromEnd = countBlackWhiteRunTowardsPoint(origin, { x: origin.x - run, y: origin.y - rise }, matrix, Math.ceil(length / 2));
+    var middleValue = towardsEnd.shift() + awayFromEnd.shift() - 1; // Substract one so we don't double count a pixel
+    return (_a = awayFromEnd.concat(middleValue)).concat.apply(_a, towardsEnd);
+}
+// Takes in a black white run and an array of expected ratios. Returns the average size of the run as well as the "error" -
+// that is the amount the run diverges from the expected ratio
+function scoreBlackWhiteRun(sequence, ratios) {
+    var averageSize = sum(sequence) / sum(ratios);
+    var error = 0;
+    ratios.forEach(function (ratio, i) {
+        error += Math.pow((sequence[i] - ratio * averageSize), 2);
+    });
+    return { averageSize: averageSize, error: error };
+}
+// Takes an X,Y point and an array of sizes and scores the point against those ratios.
+// For example for a finder pattern takes the ratio list of 1:1:3:1:1 and checks horizontal, vertical and diagonal ratios
+// against that.
+function scorePattern(point, ratios, matrix) {
+    try {
+        var horizontalRun = countBlackWhiteRun(point, { x: -1, y: point.y }, matrix, ratios.length);
+        var verticalRun = countBlackWhiteRun(point, { x: point.x, y: -1 }, matrix, ratios.length);
+        var topLeftPoint = {
+            x: Math.max(0, point.x - point.y) - 1,
+            y: Math.max(0, point.y - point.x) - 1,
+        };
+        var topLeftBottomRightRun = countBlackWhiteRun(point, topLeftPoint, matrix, ratios.length);
+        var bottomLeftPoint = {
+            x: Math.min(matrix.width, point.x + point.y) + 1,
+            y: Math.min(matrix.height, point.y + point.x) + 1,
+        };
+        var bottomLeftTopRightRun = countBlackWhiteRun(point, bottomLeftPoint, matrix, ratios.length);
+        var horzError = scoreBlackWhiteRun(horizontalRun, ratios);
+        var vertError = scoreBlackWhiteRun(verticalRun, ratios);
+        var diagDownError = scoreBlackWhiteRun(topLeftBottomRightRun, ratios);
+        var diagUpError = scoreBlackWhiteRun(bottomLeftTopRightRun, ratios);
+        var ratioError = Math.sqrt(horzError.error * horzError.error +
+            vertError.error * vertError.error +
+            diagDownError.error * diagDownError.error +
+            diagUpError.error * diagUpError.error);
+        var avgSize = (horzError.averageSize + vertError.averageSize + diagDownError.averageSize + diagUpError.averageSize) / 4;
+        var sizeError = (Math.pow((horzError.averageSize - avgSize), 2) +
+            Math.pow((vertError.averageSize - avgSize), 2) +
+            Math.pow((diagDownError.averageSize - avgSize), 2) +
+            Math.pow((diagUpError.averageSize - avgSize), 2)) / avgSize;
+        return ratioError + sizeError;
+    }
+    catch (_a) {
+        return Infinity;
+    }
+}
+function recenterLocation(matrix, p) {
+    var leftX = Math.round(p.x);
+    while (matrix.get(leftX, Math.round(p.y))) {
+        leftX--;
+    }
+    var rightX = Math.round(p.x);
+    while (matrix.get(rightX, Math.round(p.y))) {
+        rightX++;
+    }
+    var x = (leftX + rightX) / 2;
+    var topY = Math.round(p.y);
+    while (matrix.get(Math.round(x), topY)) {
+        topY--;
+    }
+    var bottomY = Math.round(p.y);
+    while (matrix.get(Math.round(x), bottomY)) {
+        bottomY++;
+    }
+    var y = (topY + bottomY) / 2;
+    return { x: x, y: y };
+}
+function locate(matrix) {
+    var finderPatternQuads = [];
+    var activeFinderPatternQuads = [];
+    var alignmentPatternQuads = [];
+    var activeAlignmentPatternQuads = [];
+    var _loop_1 = function (y) {
+        var length_1 = 0;
+        var lastBit = false;
+        var scans = [0, 0, 0, 0, 0];
+        var _loop_2 = function (x) {
+            var v = matrix.get(x, y);
+            if (v === lastBit) {
+                length_1++;
+            }
+            else {
+                scans = [scans[1], scans[2], scans[3], scans[4], length_1];
+                length_1 = 1;
+                lastBit = v;
+                // Do the last 5 color changes ~ match the expected ratio for a finder pattern? 1:1:3:1:1 of b:w:b:w:b
+                var averageFinderPatternBlocksize = sum(scans) / 7;
+                var validFinderPattern = Math.abs(scans[0] - averageFinderPatternBlocksize) < averageFinderPatternBlocksize &&
+                    Math.abs(scans[1] - averageFinderPatternBlocksize) < averageFinderPatternBlocksize &&
+                    Math.abs(scans[2] - 3 * averageFinderPatternBlocksize) < 3 * averageFinderPatternBlocksize &&
+                    Math.abs(scans[3] - averageFinderPatternBlocksize) < averageFinderPatternBlocksize &&
+                    Math.abs(scans[4] - averageFinderPatternBlocksize) < averageFinderPatternBlocksize &&
+                    !v; // And make sure the current pixel is white since finder patterns are bordered in white
+                // Do the last 3 color changes ~ match the expected ratio for an alignment pattern? 1:1:1 of w:b:w
+                var averageAlignmentPatternBlocksize = sum(scans.slice(-3)) / 3;
+                var validAlignmentPattern = Math.abs(scans[2] - averageAlignmentPatternBlocksize) < averageAlignmentPatternBlocksize &&
+                    Math.abs(scans[3] - averageAlignmentPatternBlocksize) < averageAlignmentPatternBlocksize &&
+                    Math.abs(scans[4] - averageAlignmentPatternBlocksize) < averageAlignmentPatternBlocksize &&
+                    v; // Is the current pixel black since alignment patterns are bordered in black

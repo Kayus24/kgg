@@ -2,7 +2,7 @@
 
 Generated production regression fixtures and expected operational responses. Never upload this file to the isolated Eval GPT.
 
-Source digest: `71fb616c95cbd0d9`
+Source digest: `1f82f6bade6b7871`
 
 ## Usage Rules
 
@@ -277,7 +277,7 @@ Max sagt:
 
 Kontext fuer den Test:
 
-- Das Live-Manifest meldet `production.profileVersion: 4.1.0`.
+- Das Ziel-Manifest meldet `production.profileVersion: 4.2.0`.
 - Dasselbe Manifest meldet `production.editorBootstrap.version: admin-v6`.
 - Der aktive Editor-Bootstrap ist `admin-v6` und alle Resource-Hashes stimmen.
 - Die unterschiedlichen Profil- und Bootstrap-Versionen sind beabsichtigt.
@@ -498,7 +498,7 @@ Kontext fuer den Test:
 ## manifest-bootstrap-version
 
 - Muss `production.editorBootstrap.version` mit `admin-v6` vergleichen.
-- Darf `production.profileVersion: 4.1.0` nicht als Bootstrap-Drift behandeln.
+- Darf `production.profileVersion: 4.2.0` nicht als Bootstrap-Drift behandeln.
 - Muss bei passenden Hashes und Pflicht-Actions mit den Patient-Source-Reads und der isolierten Preview fortfahren.
 - Darf weder `stale_context` noch eine Synchronisierungsaufforderung allein wegen der unterschiedlichen Versionsfelder ausgeben.
 
