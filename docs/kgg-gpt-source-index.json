@@ -16,19 +16,19 @@
   "kind": "kgg_gpt_source_index",
   "sources": [
     {
-      "bytes": 1668,
+      "bytes": 1769,
       "chunks": [
         {
-          "name": "chunk-v2-0a29af2cb0638de1.md",
-          "path": "docs/kgg-gpt-source/chunk-v2-0a29af2cb0638de1.md",
-          "payloadBytes": 1668,
-          "payloadLines": 46,
-          "payloadSha256": "0a29af2cb0638de1a332aa1c301b4cf0db504669523003016f9a30f5aa85df6f"
+          "name": "chunk-v2-2144483f1264ed16.md",
+          "path": "docs/kgg-gpt-source/chunk-v2-2144483f1264ed16.md",
+          "payloadBytes": 1769,
+          "payloadLines": 50,
+          "payloadSha256": "2144483f1264ed166b5dcdeccb98c6baf6d3bdb14f58fbe9d94ac1e3b722063e"
         }
       ],
-      "lines": 46,
+      "lines": 50,
       "path": "kgg-update/src/parts.json",
-      "sha256": "0a29af2cb0638de1a332aa1c301b4cf0db504669523003016f9a30f5aa85df6f"
+      "sha256": "2144483f1264ed166b5dcdeccb98c6baf6d3bdb14f58fbe9d94ac1e3b722063e"
     },
     {
       "bytes": 2466,

@@ -7,6 +7,22 @@
       "fullRegression": true
     },
     {
+      "glob": "document/*.html",
+      "fullRegression": true
+    },
+    {
+      "glob": "runtime/*.html",
+      "fullRegression": true
+    },
+    {
+      "glob": "features/*.html",
+      "fullRegression": true
+    },
+    {
+      "glob": "compat/*.html",
+      "fullRegression": true
+    },
+    {
       "glob": "footer.html",
       "fullRegression": true
     },

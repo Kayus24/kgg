@@ -19,10 +19,25 @@ bei Fehler automatisch die letzte funktionierende `index.html` und
 `test-impact.json` zusaetzliche Tests; `--certify` startet die volle Batterie.
 Berichte und Screenshots landen ausschliesslich unter `tmp/kgg-selftest/`.
 
-Die Reihenfolge in `parts.json` ist laufzeitrelevant. `base-head.html`, die
-Fragmente unter `metadata/`, `base-app.html`, die versionierten Patches und
-`footer.html` ergeben byteweise die Laufzeitdatei. `index.html` nie direkt
+Die Reihenfolge in `parts.json` ist laufzeitrelevant. Alle dort gelisteten
+Fragmente ergeben byteweise die Laufzeitdatei. `sourceRoles.documentTitle` und
+`sourceRoles.runtimeIdentity` zeigen auf die Fragmente, in denen der Scaffolder
+Titel beziehungsweise `VERSION`/`KGG_BUILD_INFO` aktualisiert; diese Rollen
+muessen immer auf Eintraege aus `parts` zeigen. `index.html` nie direkt
 bearbeiten.
+
+Eine groessere Quelldatei darf nur mit einem vorab geprueften Split-Plan
+zerlegt werden. Jeder Anchor muss exakt einmal vorkommen, die Anchors muessen in
+Quellreihenfolge stehen und die neue Verkettung muss byteidentisch bleiben:
+
+```powershell
+python release-pipeline/kgg_split_therapist_source.py --plan <plan.json> --check
+python release-pipeline/kgg_split_therapist_source.py --plan <plan.json> --write
+```
+
+Der Writer ersetzt einen zusammenhaengenden Bereich aus `sourceParts` durch die
+angegebenen `segments`, aktualisiert explizite `sourceRoleUpdates` und rollt bei
+jedem Fehler Manifest, Quellteile und neue Dateien vollstaendig zurueck.
 
 ## Neuen Patch vorbereiten
 
