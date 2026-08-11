@@ -1,54 +1,3 @@
-    const next=withTrailingExerciseComma((state.plan||[]).map(formatExerciseTextLine).filter(Boolean).join(', '));
-    if(input.value!==next){state.textSyncing=true; input.value=next; state.textSyncing=false;}
-    state.planText=next;
-    resizeExerciseInputToContent();
-  }
-  function restoreTrailingCommaAfterPlanSync(shouldRestore){
-    const input=$('exerciseInput');
-    if(!shouldRestore||!input||(state.plan||[]).length===0)return;
-    const next=withTrailingExerciseComma(input.value);
-    if(input.value!==next){state.textSyncing=true; input.value=next; state.textSyncing=false;}
-    state.planText=input.value;
-    resizeExerciseInputToContent();
-  }
-  function syncPlanFromTextInput(reason){
-    if(state.textSyncing)return;
-    const input=$('exerciseInput');
-    resizeExerciseInputToContent();
-    const text=input&&input.value||'';
-    const structured=structuredExercisesFromPlanText(text);
-    if(structured!==null)state.plan=structured.map(ensureUiExerciseShape);
-    else{
-      const segments=splitPlanText(text).map(p=>p.text.trim()).filter(Boolean);
-      state.plan=segments.map((segment,index)=>parseTextExercise(segment,findExistingForTextSegment(segment,index))).filter(Boolean).map(ensureUiExerciseShape);
-    }
-    state.liveDraftId=null;
-    state.planText=input?input.value:'';
-    syncStatePlanToStore(reason||'ui_textfield_master_sync');
-    save();
-    render();
-  }
-  function captureDbScrollAnchor(){
-    const anchor=$('bankArea')||$('inputWrap');
-    if(!anchor)return null;
-    const rows=document.querySelector('#bankContent .bankRows');
-    return {top:anchor.getBoundingClientRect().top,rowsTop:rows?rows.scrollTop:0};
-  }
-  function restoreDbScrollAnchor(anchor){
-    if(!anchor||!state.bankOpen)return;
-    const rows=document.querySelector('#bankContent .bankRows');
-    if(rows)rows.scrollTop=anchor.rowsTop||0;
-    const el=$('bankArea')||$('inputWrap');
-    if(!el)return;
-    const apply=()=>{
-      const delta=el.getBoundingClientRect().top-anchor.top;
-      if(Math.abs(delta)>1)window.scrollBy(0,delta);
-      const nextRows=document.querySelector('#bankContent .bankRows');
-      if(nextRows)nextRows.scrollTop=anchor.rowsTop||0;
-    };
-    apply();
-    if(typeof requestAnimationFrame==='function')requestAnimationFrame(apply);
-  }
   function alignFullBankInputToViewportTop(){
     const inputWrap=$('inputWrap');
     if(!inputWrap)return;
@@ -497,3 +446,44 @@
     const loadUnit=normalizeLoadUnit(ex&&ex.weightUnit||ex&&ex.loadUnit||'kg');
     const isTime=/zeit|sek|sec|min|time/i.test(metricUnit)||/keine/i.test(loadUnit);
     return sets.slice(0,3).map((set,i)=>{
+      if(set&&set.li||set&&set.re){
+        const li=set.li||{}, re=set.re||{};
+        const liText=(li.metric?li.metric+' '+metricUnit:'')+(li.load?' @ '+li.load+' '+loadUnit:'');
+        const reText=(re.metric?re.metric+' '+metricUnit:'')+(re.load?' @ '+re.load+' '+loadUnit:'');
+        return 'S'+(i+1)+': Li '+(liText||'-')+' / Re '+(reText||'-')+(set.pain?' · Schmerz '+set.pain+'/10':'');
+      }
+      if(isTime)return 'S'+(i+1)+': '+(set&&set.metric||'-')+' '+metricUnit+(set&&set.pain?' · Schmerz '+set.pain+'/10':'');
+      return 'S'+(i+1)+': '+(set&&set.metric||'-')+' '+metricUnit+(set&&set.load?' @ '+set.load+' '+loadUnit:'')+(set&&set.pain?' · Schmerz '+set.pain+'/10':'');
+    }).join(' · ');
+  }
+  function exerciseMeta(ex){
+    const scanSummary=scanSetSummaryForPlanCard(ex);
+    if(scanSummary)return scanSummary;
+    const parts=[];
+    parts.push(normalizeSetCount(ex&&ex.sets||3)+' Sätze');
+    parts.push(sideModeLabel(ex&&ex.side));
+    const loadUnit=normalizeLoadUnit(ex&&ex.weightUnit||ex&&ex.loadUnit||'kg');
+    const metricUnit=ex&&ex.unit||ex&&ex.metricUnit||measureUnitLabel(ex&&ex.measure);
+    parts.push(loadUnit);
+    parts.push(metricUnit||'Wdh');
+    return parts.filter(Boolean).join(' · ');
+  }
+  function planCardSourceText(ex){
+    if(ex&&ex.scanImported)return ex.scanSource||'Scan übernommen';
+    const raw=String(ex&&ex.rawText||'').trim();
+    const name=String(ex&&ex.name||'').trim();
+    if(raw&&compact(raw)!==compact(name))return raw;
+    return name||String(ex&&ex.source||ex&&ex.sourceId||ex&&ex.bankId||'').trim();
+  }
+  function planCardBadgesHtml(ex){
+    const mediaCount=ensureExerciseMediaList(ex).length;
+    const bits=[];
+    if(mediaCount)bits.push('<span class="planBadge media">🖼 Medien</span>');
+    if(ex&&ex.pendingNew)bits.push('<span class="planBadge new">neu</span>');
+    else if(ex&&ex.needsReview)bits.push('<span class="planBadge review">prüfen</span>');
+    if(ex&&ex.liveDraft)bits.push('<span class="planBadge live">live</span>');
+    return bits.join('');
+  }
+  function planCardThumbnailHtml(ex){
+    const media=ensureExerciseMediaList(ex).find(item=>item&&item.type==='image'&&item.id);
+    if(!media)return '';
