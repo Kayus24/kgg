@@ -3,8 +3,8 @@
   "output": "../index.html",
   "versionManifest": "../version.json",
   "sourceRoles": {
-    "documentTitle": "base-app.html",
-    "runtimeIdentity": "base-app.html"
+    "documentTitle": "document/base-shell.html",
+    "runtimeIdentity": "runtime/base-runtime.html"
   },
   "requiredPatchIds": [
     "kgg-v041-ui-mini-series",
@@ -29,7 +29,8 @@
     "metadata/changelog.html",
     "metadata/patch-rules.html",
     "metadata/changelog-guard.html",
-    "base-app.html",
+    "document/base-shell.html",
+    "runtime/base-runtime.html",
     "patches/v041-ui-mini-series.html",
     "patches/v042-phone-dock-anchored-correction.html",
     "patches/v044-phone-liquid-actions.html",
