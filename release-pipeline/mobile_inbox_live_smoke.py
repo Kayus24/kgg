@@ -3,7 +3,8 @@
 
 Dry-run mode validates and builds the current Admin HTML in a temporary clone.
 Live mode pushes one smoke HTML to the `mobile-inbox` branch, waits for the
-GitHub Action, and verifies that a new Admin beta was published.
+GitHub Action, and verifies that a reviewable draft Admin-beta PR was created
+without changing `main`.
 """
 
 from __future__ import annotations
@@ -16,7 +17,6 @@ import subprocess
 import sys
 import tempfile
 import time
-import urllib.request
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -232,7 +232,7 @@ def list_runs(repo: str, head_sha: str) -> list[dict]:
             "--workflow",
             WORKFLOW_NAME,
             "--limit",
-            "20",
+            "100",
             "--json",
             "databaseId,status,conclusion,headBranch,headSha,createdAt,displayTitle,url",
         ],
@@ -260,23 +260,7 @@ def wait_for_run(repo: str, head_sha: str, timeout_seconds: int) -> dict:
     raise SmokeError(f"Timed out waiting for Mobile-Inbox workflow for SHA {head_sha}")
 
 
-def wait_for_public_url(url: str, timeout_seconds: int) -> None:
-    deadline = time.time() + timeout_seconds
-    last_error = ""
-    while time.time() < deadline:
-        try:
-            request = urllib.request.Request(url, method="HEAD")
-            with urllib.request.urlopen(request, timeout=15) as response:
-                if 200 <= response.status < 300:
-                    return
-                last_error = f"HTTP {response.status}"
-        except Exception as exc:  # noqa: BLE001 - surfaced in final smoke error
-            last_error = str(exc)
-        time.sleep(5)
-    raise SmokeError(f"Public Pages URL did not become available: {url} ({last_error})")
-
-
-def find_release_pr(repo: str, release_id: str) -> dict:
+def find_release_pr(repo: str, run_id: int) -> dict:
     raw = run(
         [
             "gh",
@@ -285,49 +269,42 @@ def find_release_pr(repo: str, release_id: str) -> dict:
             "--repo",
             repo,
             "--state",
-            "all",
+            "open",
             "--limit",
             "20",
             "--search",
-            release_id,
+            "[admin-beta] in:title",
             "--json",
-            "number,title,state,mergedAt,headRefName,baseRefName,url",
+            "number,title,state,isDraft,headRefName,baseRefName,url",
         ],
         cwd=ROOT,
     ).stdout
     for pr in load_json(raw):
-        if pr.get("state") == "MERGED" and release_id in str(pr.get("title", "")):
+        if str(pr.get("headRefName", "")).endswith(f"-{run_id}"):
             return pr
-    raise SmokeError(f"No merged Admin beta PR found for {release_id}")
+    raise SmokeError(f"No open Admin beta PR found for workflow run {run_id}")
 
 
-def verify_live_result(repo: str, before: dict, timeout_seconds: int) -> dict:
-    deadline = time.time() + timeout_seconds
-    before_admin = before["channels"]["admin"]["releaseId"]
-    before_colleague = before["channels"]["colleague"]["releaseId"]
-    manifest: dict | None = None
-    while time.time() < deadline:
-        fetch_refs()
-        manifest = manifest_from_ref("origin/main")
-        admin_release = manifest["channels"]["admin"]["releaseId"]
-        if admin_release != before_admin:
-            break
-        time.sleep(5)
-    if manifest is None:
-        raise SmokeError("Could not read updated origin/main manifest")
+def verify_draft_result(repo: str, before: dict, run_info: dict) -> dict:
+    pr = find_release_pr(repo, int(run_info["databaseId"]))
+    if pr.get("state") != "OPEN" or pr.get("isDraft") is not True:
+        raise SmokeError(f"Mobile-Inbox PR is not an open draft: {pr.get('url')}")
+    if pr.get("baseRefName") != "main":
+        raise SmokeError(f"Mobile-Inbox PR has unexpected base: {pr.get('baseRefName')}")
+    release_match = re.search(r"\[admin-beta\]\s+(r[0-9]{4,})\b", str(pr.get("title", "")))
+    if not release_match:
+        raise SmokeError(f"Mobile-Inbox PR title has no release ID: {pr.get('title')}")
 
-    admin = manifest["channels"]["admin"]
-    colleague = manifest["channels"]["colleague"]
-    release_id = admin["releaseId"]
-    if release_id == before_admin:
-        raise SmokeError(f"Admin release did not advance from {before_admin}")
-    if colleague["releaseId"] != before_colleague:
-        raise SmokeError(f"Colleague release changed unexpectedly: {before_colleague} -> {colleague['releaseId']}")
+    fetch_refs()
+    after = manifest_from_ref("origin/main")
+    before_channels = before.get("channels", {})
+    after_channels = after.get("channels", {})
+    if after_channels.get("admin") != before_channels.get("admin"):
+        raise SmokeError("Mobile-Inbox workflow changed the Admin channel on main")
+    if after_channels.get("colleague") != before_channels.get("colleague"):
+        raise SmokeError("Mobile-Inbox workflow changed the colleague channel on main")
 
-    run(["git", "cat-file", "-e", f"origin/main:therapist-app/releases/web/{release_id}/admin.html"], cwd=ROOT)
-    wait_for_public_url(admin["url"], timeout_seconds)
-    pr = find_release_pr(repo, release_id)
-    return {"releaseId": release_id, "adminUrl": admin["url"], "pr": pr}
+    return {"releaseId": release_match.group(1), "pr": pr}
 
 
 def main() -> int:
@@ -360,14 +337,14 @@ def main() -> int:
         head_sha = push_smoke_upload(upload, html, args.remote)
         log(f"Pushed Mobile-Inbox smoke commit: {head_sha}")
         run_info = wait_for_run(args.repo, head_sha, args.timeout)
-        live = verify_live_result(args.repo, before_manifest, args.timeout)
+        draft = verify_draft_result(args.repo, before_manifest, run_info)
         summary = {
-            "mode": "live",
+            "mode": "live-draft",
             "uploadSha": head_sha,
             "workflowRun": run_info["url"],
-            "releaseId": live["releaseId"],
-            "adminUrl": live["adminUrl"],
-            "pr": live["pr"]["url"],
+            "releaseId": draft["releaseId"],
+            "pr": draft["pr"]["url"],
+            "checks": "not-started-or-verified-by-workflow",
         }
         log(json.dumps(summary, indent=2))
         return 0

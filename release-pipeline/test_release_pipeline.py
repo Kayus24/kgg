@@ -215,6 +215,56 @@ class ReleasePipelineTests(unittest.TestCase):
         release_pr = pipeline.read_text(pipeline.ROOT / ".github/workflows/release-pr.yml")
         self.assertIn("(android_update_manifest|kgg_update_manifest)", release_pr)
 
+    def test_token_generated_release_prs_are_drafts_without_self_merge(self):
+        for relative in (
+            ".github/workflows/mobile-inbox-release.yml",
+            ".github/workflows/promote-latest-admin-beta.yml",
+        ):
+            with self.subTest(workflow=relative):
+                workflow = pipeline.read_text(pipeline.ROOT / relative)
+                self.assertIn('url="$(gh pr create --draft', workflow)
+                self.assertNotIn("gh pr checks", workflow)
+                self.assertNotIn("gh pr merge", workflow)
+                self.assertNotIn("--admin", workflow)
+                self.assertNotIn("kgg-auto-merge", workflow)
+                self.assertIn(
+                    "von diesem GITHUB_TOKEN-Lauf weder gestartet noch als gruen bewertet",
+                    workflow,
+                )
+                self.assertIn("Required Gate abwarten", workflow)
+
+    def test_release_workflows_refresh_and_stage_gpt_target_artifacts(self):
+        workflows = {
+            ".github/workflows/mobile-inbox-release.yml": "python release-pipeline/release_pipeline.py prepare",
+            ".github/workflows/promote-latest-admin-beta.yml": "python release-pipeline/release_pipeline.py promote",
+        }
+        refresh_commands = (
+            "python release-pipeline/kgg_gpt_context.py --write",
+            "python release-pipeline/kgg_bug_knowledge.py --write",
+            "python release-pipeline/kgg_gpt_source_context.py --write",
+            "python release-pipeline/kgg_custom_gpt_knowledge_pack.py --write",
+            "python release-pipeline/kgg_custom_gpt_resource_audit.py --refresh-target-profile production",
+        )
+        staged_targets = (
+            "docs/kgg-gpt-context.md",
+            "docs/kgg-custom-gpt-knowledge-architecture.md",
+            "docs/kgg-custom-gpt-resource-manifest.json",
+            "docs/kgg-custom-gpt-editor-snapshot.json",
+        )
+
+        for relative, release_command in workflows.items():
+            with self.subTest(workflow=relative):
+                workflow = pipeline.read_text(pipeline.ROOT / relative)
+                cursor = workflow.index(release_command)
+                for command in refresh_commands:
+                    next_cursor = workflow.index(command)
+                    self.assertLess(cursor, next_cursor, command)
+                    cursor = next_cursor
+                self.assertLess(cursor, workflow.index("git commit -m"))
+                self.assertLess(cursor, workflow.index("python release-pipeline/kgg_secret_scan.py"))
+                for target in staged_targets:
+                    self.assertIn(target, workflow)
+
     def test_mobile_inbox_stages_generated_artifacts_before_redacted_secret_scan(self):
         workflow = pipeline.read_text(
             pipeline.ROOT / ".github/workflows/mobile-inbox-release.yml"
@@ -243,6 +293,16 @@ class ReleasePipelineTests(unittest.TestCase):
         self.assertNotIn("head -n 1", workflow)
         self.assertIn("Expected exactly one changed HTML file", workflow)
 
+    def test_mobile_inbox_live_smoke_verifies_draft_without_claiming_publish(self):
+        smoke = pipeline.read_text(pipeline.ROOT / "release-pipeline/mobile_inbox_live_smoke.py")
+
+        self.assertIn("def verify_draft_result", smoke)
+        self.assertIn('pr.get("isDraft") is not True', smoke)
+        self.assertIn('"mode": "live-draft"', smoke)
+        self.assertIn('"checks": "not-started-or-verified-by-workflow"', smoke)
+        self.assertNotIn("verify_live_result", smoke)
+        self.assertNotIn("wait_for_public_url", smoke)
+
     def test_legacy_direct_main_workflows_are_retired(self):
         for relative in (
             ".github/workflows/apply-update-inbox.yml",
@@ -258,7 +318,8 @@ class ReleasePipelineTests(unittest.TestCase):
         self.assertIn("Genau eine neue oder geänderte Admin-HTML", guide)
         self.assertIn(".github/workflows/mobile-inbox-release.yml", guide)
         self.assertIn("unveränderliche Release-Artefakte", guide)
-        self.assertIn("geprüften Pull Request", guide)
+        self.assertIn("Draft-Pull-Request", guide)
+        self.assertIn("keine PR-Checks", guide)
         self.assertIn("`kgg-update/src/**`", guide)
         self.assertIn("build_therapist_source.py --check", guide)
         self.assertNotIn("`patch.py` hier hochladen", guide)

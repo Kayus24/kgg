@@ -53,14 +53,34 @@ jobs:
           branch="release/promote-latest-admin-${release_id}-${{ github.run_id }}"
           git switch -c "$branch"
           python release-pipeline/release_pipeline.py promote --release-id "$release_id"
+          python release-pipeline/kgg_gpt_context.py --write
+          python release-pipeline/kgg_bug_knowledge.py --write
+          python release-pipeline/kgg_gpt_source_context.py --write
+          python release-pipeline/kgg_custom_gpt_knowledge_pack.py --write
+          python release-pipeline/kgg_custom_gpt_resource_audit.py --refresh-target-profile production
           python -m unittest release-pipeline/test_release_pipeline.py
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add therapist-app/android_update_manifest.json therapist-app/kgg_update_manifest.json
+          git add -A -- docs/kgg-gpt-context.md docs/kgg-gpt-bug-index.json docs/kgg-gpt-bug-lessons.md docs/kgg-gpt-patch-patterns.md docs/kgg-gpt-source-index.json docs/kgg-gpt-area-routes.md docs/kgg-gpt-area-routes.json docs/kgg-gpt-source docs/kgg-custom-gpt-knowledge-pack.md docs/kgg-custom-gpt-eval-knowledge.md docs/kgg-custom-gpt-knowledge-architecture.md docs/kgg-custom-gpt-knowledge-operations.md docs/kgg-custom-gpt-knowledge-safety.md docs/kgg-custom-gpt-knowledge-testing.md docs/kgg-custom-gpt-resource-manifest.json docs/kgg-custom-gpt-editor-snapshot.json
+          python release-pipeline/kgg_secret_scan.py
           git commit -m "promote latest admin beta $release_id"
           git push -u origin "$branch"
-          url="$(gh pr create --base main --head "$branch" \
+          body="$(mktemp)"
+          cat > "$body" <<'BODY'
+          Automatisch erzeugte Kolleg:innen-Freigabe fuer die aktuelle gepruefte Admin-Beta.
+
+          - GPT-Kontext, Knowledge und Resource-Zielartefakte wurden deterministisch aktualisiert.
+          - Dieser GITHUB_TOKEN-Lauf startet oder bewertet keine PR-Checks.
+          - Keine direkte Aenderung an main; Draft auf "Ready for review" setzen, normale Checks abwarten und erst dann extern mergen.
+          BODY
+          url="$(gh pr create --draft --base main --head "$branch" \
             --title "[release] promote latest Admin beta $release_id (colleague)" \
-            --body 'Automatisch erzeugte Kolleg:innen-Freigabe fuer die aktuelle gepruefte Admin-Beta. Keine direkte main-Aenderung.')"
-          gh pr merge "$url" --admin --squash
-          echo "PR: $url" >> "$GITHUB_STEP_SUMMARY"
+            --body-file "$body")"
+          {
+            echo "## Draft-PR erzeugt"
+            echo ""
+            echo "- PR: $url"
+            echo "- Checks: von diesem GITHUB_TOKEN-Lauf weder gestartet noch als gruen bewertet"
+            echo "- Naechster Schritt: extern auf Ready for review setzen, Required Gate abwarten und nur bei gruenen Checks mergen"
+          } >> "$GITHUB_STEP_SUMMARY"
