@@ -135,6 +135,23 @@ blockiert direkte Änderungen an der erzeugten `index.html`, wenn kein passendes
 Quellfragment geändert wurde. Browser und Android laden weiterhin nur die eine
 zusammengebaute HTML-Datei.
 
+Semantische Schreibziele stehen in `parts.json` unter `sourceRoles`. Der
+Scaffolder löst `documentTitle` und `runtimeIdentity` daraus auf, statt einen
+bestimmten Dateinamen vorauszusetzen. Ein geplanter, rein struktureller Split
+wird vor dem Schreiben fail-closed und bytegenau geprüft:
+
+```powershell
+python release-pipeline/kgg_split_therapist_source.py --plan <plan.json> --check
+python release-pipeline/kgg_split_therapist_source.py --plan <plan.json> --write
+```
+
+Der Split-Plan verwendet Schema 1 mit einem zusammenhängenden
+`sourceParts`-Bereich, mindestens zwei `segments` und den eindeutigen
+`startAnchor`-Bytes aller Segmente nach dem ersten. Rollen, deren alte Datei
+entfernt wird, müssen über `sourceRoleUpdates` explizit auf ein neues Segment
+zeigen. Fehlende, mehrfach vorkommende oder falsch sortierte Anchors sowie jede
+Byteabweichung blockieren den Vorgang vor dem ersten Schreibzugriff.
+
 ### Transaktionaler Self-Test-Build (nur Modul-Sandbox)
 
 ```powershell

@@ -23,7 +23,6 @@ SOURCE_TRUTH = SRC / "metadata" / "source-truth.html"
 CHANGELOG = SRC / "metadata" / "changelog.html"
 PATCH_RULES = SRC / "metadata" / "patch-rules.html"
 BASE_HEAD = SRC / "base-head.html"
-BASE_APP = SRC / "base-app.html"
 PROTECTED_AREAS = [
     "PDF",
     "QR/Patienten-App",
@@ -124,6 +123,57 @@ def assert_changelog_limits(changelog: dict, policy: dict, allow_overflow: bool)
     return size_bytes
 
 
+def render_source_role_updates(
+    manifest: dict,
+    *,
+    code: int,
+    title: str,
+    slug: str,
+    build_time: str,
+    manifest_path: Path = MANIFEST,
+) -> dict[Path, bytes]:
+    """Update title/runtime identity via semantic roles, including shared files."""
+    roles = builder.resolve_source_roles(manifest, manifest_path)
+    updated: dict[Path, str] = {}
+
+    def current(path: Path) -> str:
+        if path not in updated:
+            updated[path] = builder.read_utf8_bytes(path).decode("utf-8", errors="strict")
+        return updated[path]
+
+    title_path = roles["documentTitle"]
+    updated[title_path] = replace_once(
+        current(title_path),
+        r"<title>.*?</title>",
+        f"<title>KGG Update v{code:03d} {title}</title>",
+        f"HTML title in sourceRoles.documentTitle ({title_path.name})",
+    )
+
+    runtime_path = roles["runtimeIdentity"]
+    runtime_text = replace_once(
+        current(runtime_path),
+        r"const VERSION='[^']+';",
+        f"const VERSION='KGG_GITHUB_UPDATE_v{code:03d}_{slug.replace('-', '_')}';",
+        f"VERSION constant in sourceRoles.runtimeIdentity ({runtime_path.name})",
+    )
+    runtime_text = replace_once(
+        runtime_text,
+        r"const KGG_BUILD_INFO=\{[^\n]+\};",
+        "const KGG_BUILD_INFO=" + json.dumps(
+            {
+                "release": f"v{code:03d}",
+                "buildTime": build_time,
+                "buildCode": f"module-v{code:03d}-{slug}",
+                "htmlFile": "kgg-update/index.html",
+            },
+            separators=(",", ":"),
+        ) + ";",
+        f"KGG_BUILD_INFO constant in sourceRoles.runtimeIdentity ({runtime_path.name})",
+    )
+    updated[runtime_path] = runtime_text
+    return {path: text.encode("utf-8") for path, text in updated.items()}
+
+
 def prepare(args: argparse.Namespace) -> tuple[dict[Path, bytes], dict]:
     slug = args.slug.strip().lower()
     if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", slug):
@@ -210,28 +260,20 @@ def prepare(args: argparse.Namespace) -> tuple[dict[Path, bytes], dict]:
     changelog["latestVersionName"] = version_name
     changelog_bytes = assert_changelog_limits(changelog, policy, args.allow_changelog_overflow)
 
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    builder.resolve_source_roles(manifest, MANIFEST)
+
     head_text = BASE_HEAD.read_text(encoding="utf-8")
     head_text = replace_json_script(head_text, "kgg-source-truth", source)
-    app_text = BASE_APP.read_text(encoding="utf-8")
-    app_text = replace_once(app_text, r"<title>.*?</title>", f"<title>KGG Update v{code:03d} {args.title.strip()}</title>", "HTML title")
-    app_text = replace_once(
-        app_text,
-        r"const VERSION='[^']+';",
-        f"const VERSION='KGG_GITHUB_UPDATE_v{code:03d}_{slug.replace('-', '_')}';",
-        "VERSION constant",
-    )
     build_time = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-    app_text = replace_once(
-        app_text,
-        r"const KGG_BUILD_INFO=\{[^\n]+\};",
-        "const KGG_BUILD_INFO=" + json.dumps(
-            {"release": f"v{code:03d}", "buildTime": build_time, "buildCode": f"module-v{code:03d}-{slug}", "htmlFile": "kgg-update/index.html"},
-            separators=(",", ":"),
-        ) + ";",
-        "KGG_BUILD_INFO constant",
+    role_updates = render_source_role_updates(
+        manifest,
+        code=code,
+        title=args.title.strip(),
+        slug=slug,
+        build_time=build_time,
     )
 
-    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     parts = manifest.get("parts")
     patch_ids = manifest.get("requiredPatchIds")
     if not isinstance(parts, list) or parts.count("footer.html") != 1 or parts[-1] != "footer.html":
@@ -246,9 +288,9 @@ def prepare(args: argparse.Namespace) -> tuple[dict[Path, bytes], dict]:
         CHANGELOG: replace_json_script(changelog_text, "kgg-changelog", changelog).encode("utf-8"),
         PATCH_RULES: replace_json_script(rules_text, "kgg-patch-rules", rules).encode("utf-8"),
         BASE_HEAD: head_text.encode("utf-8"),
-        BASE_APP: app_text.encode("utf-8"),
         patch_path: render_patch_module(patch_id, args.title.strip(), getattr(args, "patch_content", None)),
         MANIFEST: (json.dumps(manifest, ensure_ascii=False, indent=2) + "\n").encode("utf-8"),
+        **role_updates,
     }
     assembled_parts = []
     for relative in parts:

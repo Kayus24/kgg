@@ -2,6 +2,10 @@
   "schema": 1,
   "output": "../index.html",
   "versionManifest": "../version.json",
+  "sourceRoles": {
+    "documentTitle": "base-app.html",
+    "runtimeIdentity": "base-app.html"
+  },
   "requiredPatchIds": [
     "kgg-v041-ui-mini-series",
     "kgg-v042-phone-dock-anchored-correction",

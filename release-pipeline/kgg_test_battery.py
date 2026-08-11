@@ -212,8 +212,9 @@ for(const id of ["menu","scanner","dock"]){
 
 
 def run_selftest_gate_tests() -> None:
-    log("== KGG transactional build-gate tests ==")
+    log("== KGG transactional build-gate and source-split tests ==")
     run([sys.executable, "release-pipeline/test_kgg_selftest_build.py"])
+    run([sys.executable, "release-pipeline/test_kgg_split_therapist_source.py"])
 
 
 def run_native_sync_bridge_contract() -> None:
@@ -649,7 +650,7 @@ TEST_REGISTRY = [
         "id": "selftest-gate-critical",
         "level": "critical",
         "suite": "hygiene",
-        "reason": "Malformed module manifests, direct output drift and failed test transactions must be rejected and rolled back.",
+        "reason": "Malformed manifests, unsafe source splits, direct output drift and failed transactions must be rejected and rolled back.",
         "run": run_selftest_gate_tests,
     },
     {

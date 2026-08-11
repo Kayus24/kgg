@@ -25,8 +25,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class ReleaseDriftBaselineTests(unittest.TestCase):
     def test_required_release_paths_are_classified(self) -> None:
+        runtime_identity = builder.source_role_repo_path(
+            builder.DEFAULT_MANIFEST, "runtimeIdentity"
+        )
         paths = {
-            "kgg-update/src/base-app.html",
+            runtime_identity,
             "kgg-update/index.html",
             "kgg-update/version.json",
             "therapist-app/android_update_manifest.json",
@@ -106,10 +109,13 @@ class ReleaseDriftBaselineTests(unittest.TestCase):
         alignment.assert_not_called()
 
     def test_battery_delegates_relevant_drift_to_fail_closed_guard(self) -> None:
+        runtime_identity = builder.source_role_repo_path(
+            builder.DEFAULT_MANIFEST, "runtimeIdentity"
+        )
         with mock.patch.object(
             hygiene,
             "touched_paths",
-            return_value={"kgg-update/src/base-app.html"},
+            return_value={runtime_identity},
         ), mock.patch.object(
             hygiene,
             "assert_source_release_alignment",
@@ -141,6 +147,7 @@ def valid_html(patch_ids: list[str]) -> bytes:
 
 class Fixture:
     def __init__(self) -> None:
+        (ROOT / "tmp").mkdir(parents=True, exist_ok=True)
         self.path = Path(tempfile.mkdtemp(prefix="kgg-selftest-unit-", dir=ROOT / "tmp"))
         self.src = self.path / "src"
         self.src.mkdir(parents=True)
@@ -160,6 +167,10 @@ class Fixture:
             "schema": 1,
             "output": "../index.html",
             "versionManifest": "../version.json",
+            "sourceRoles": {
+                "documentTitle": "base.html",
+                "runtimeIdentity": "base.html",
+            },
             "requiredPatchIds": ids,
             "parts": ["base.html"],
         }
@@ -192,6 +203,22 @@ class BuilderNegativeTests(unittest.TestCase):
         manifest["parts"] = ["base.html", "base.html"]
         self.fixture.manifest.write_text(json.dumps(manifest) + "\n", encoding="utf-8")
         with self.assertRaisesRegex(builder.BuildError, "duplicate paths"):
+            builder.load_build(self.fixture.manifest)
+
+    def test_rejects_missing_required_source_role(self) -> None:
+        self.fixture.write()
+        manifest = json.loads(self.fixture.manifest.read_text(encoding="utf-8"))
+        del manifest["sourceRoles"]["runtimeIdentity"]
+        self.fixture.manifest.write_text(json.dumps(manifest) + "\n", encoding="utf-8")
+        with self.assertRaisesRegex(builder.BuildError, "missing required role.*runtimeIdentity"):
+            builder.load_build(self.fixture.manifest)
+
+    def test_rejects_source_role_outside_parts(self) -> None:
+        self.fixture.write()
+        manifest = json.loads(self.fixture.manifest.read_text(encoding="utf-8"))
+        manifest["sourceRoles"]["runtimeIdentity"] = "not-a-part.html"
+        self.fixture.manifest.write_text(json.dumps(manifest) + "\n", encoding="utf-8")
+        with self.assertRaisesRegex(builder.BuildError, "must reference exactly one entry"):
             builder.load_build(self.fixture.manifest)
 
     def test_rejects_wrong_patch_order(self) -> None:
@@ -252,6 +279,65 @@ class GateTests(unittest.TestCase):
         registered = {str(item["id"]) for item in battery.TEST_REGISTRY}
         referenced = {test_id for rule in policy["rules"] for test_id in rule.get("testIds", [])}
         self.assertEqual([], sorted(referenced - registered))
+
+    def test_future_source_directories_require_full_regression(self) -> None:
+        policy = json.loads((ROOT / "kgg-update" / "src" / "test-impact.json").read_text(encoding="utf-8"))
+        full_globs = {
+            rule.get("glob")
+            for rule in policy["rules"]
+            if rule.get("fullRegression") is True
+        }
+        self.assertTrue(
+            {"document/*.html", "runtime/*.html", "features/*.html", "compat/*.html"}
+            <= full_globs
+        )
+
+    def test_required_gate_resolves_runtime_identity_role(self) -> None:
+        workflow = (ROOT / ".github" / "workflows" / "kgg-required-gate.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("--print-source-role runtimeIdentity", workflow)
+        classification_line = next(
+            line for line in workflow.splitlines() if "admin_camera_qr=true" in line
+        )
+        self.assertIn("$runtime_identity_path", classification_line)
+        self.assertNotIn("base-app", classification_line)
+
+    def test_scaffolder_updates_separate_semantic_role_files(self) -> None:
+        (ROOT / "tmp").mkdir(parents=True, exist_ok=True)
+        fixture_root = Path(tempfile.mkdtemp(prefix="kgg-role-unit-", dir=ROOT / "tmp"))
+        try:
+            document = fixture_root / "document.html"
+            runtime = fixture_root / "runtime.html"
+            manifest_path = fixture_root / "parts.json"
+            document.write_text("<title>Old</title>\n", encoding="utf-8", newline="\n")
+            runtime.write_text(
+                "const VERSION='OLD';\nconst KGG_BUILD_INFO={\"old\":true};\n",
+                encoding="utf-8",
+                newline="\n",
+            )
+            manifest = {
+                "parts": ["document.html", "runtime.html"],
+                "sourceRoles": {
+                    "documentTitle": "document.html",
+                    "runtimeIdentity": "runtime.html",
+                },
+            }
+            manifest_path.write_text(json.dumps(manifest) + "\n", encoding="utf-8", newline="\n")
+            updates = scaffolder.render_source_role_updates(
+                manifest,
+                code=66,
+                title="Role Test",
+                slug="role-test",
+                build_time="2026-08-11T00:00:00Z",
+                manifest_path=manifest_path,
+            )
+            self.assertIn(b"<title>KGG Update v066 Role Test</title>", updates[document])
+            self.assertIn(b"KGG_GITHUB_UPDATE_v066_role_test", updates[runtime])
+            self.assertIn(b'"buildCode":"module-v066-role-test"', updates[runtime])
+            self.assertNotIn(b"KGG_GITHUB_UPDATE", updates[document])
+        finally:
+            shutil.rmtree(fixture_root, ignore_errors=True)
 
     def test_patch_scaffolder_dry_run_is_non_mutating_and_guarded(self) -> None:
         base_args = dict(

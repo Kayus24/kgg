@@ -15,6 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MANIFEST = ROOT / "kgg-update" / "src" / "parts.json"
+REQUIRED_SOURCE_ROLES = ("documentTitle", "runtimeIdentity")
 
 
 class BuildError(RuntimeError):
@@ -78,6 +79,49 @@ def read_utf8_bytes(path: Path) -> bytes:
     return raw
 
 
+def resolve_source_roles(manifest: dict, manifest_path: Path) -> dict[str, Path]:
+    """Resolve semantic source roles to files that are present in ``parts``."""
+    raw_parts = manifest.get("parts")
+    if not isinstance(raw_parts, list) or not raw_parts:
+        raise BuildError("parts must be a non-empty list")
+    raw_roles = manifest.get("sourceRoles")
+    if not isinstance(raw_roles, dict):
+        raise BuildError("sourceRoles must be an object")
+    missing = [role for role in REQUIRED_SOURCE_ROLES if role not in raw_roles]
+    if missing:
+        raise BuildError("sourceRoles is missing required role(s): " + ", ".join(missing))
+
+    resolved: dict[str, Path] = {}
+    for role, relative in raw_roles.items():
+        if not isinstance(role, str) or not role.strip():
+            raise BuildError("sourceRoles keys must be non-empty strings")
+        if (
+            not isinstance(relative, str)
+            or not relative.strip()
+            or relative.startswith(("/", "\\"))
+            or "\\" in relative
+            or Path(relative).is_absolute()
+        ):
+            raise BuildError(f"sourceRoles.{role} must be a non-empty POSIX relative path")
+        if relative not in raw_parts:
+            raise BuildError(f"sourceRoles.{role} must reference exactly one entry in parts: {relative}")
+        resolved[role] = resolve_inside(manifest_path.parent, relative, f"sourceRoles.{role}")
+    return resolved
+
+
+def source_role_repo_path(manifest_path: Path, role: str) -> str:
+    manifest = read_json(manifest_path)
+    roles = resolve_source_roles(manifest, manifest_path)
+    try:
+        path = roles[role]
+    except KeyError as exc:
+        raise BuildError(f"Unknown source role: {role}") from exc
+    try:
+        return path.relative_to(ROOT).as_posix()
+    except ValueError as exc:
+        raise BuildError(f"sourceRoles.{role} is outside repository root: {path}") from exc
+
+
 def load_build(manifest_path: Path) -> tuple[dict, Path, Path, list[Path], bytes]:
     manifest = read_json(manifest_path)
     if manifest.get("schema") != 1:
@@ -92,6 +136,7 @@ def load_build(manifest_path: Path) -> tuple[dict, Path, Path, list[Path], bytes
         raise BuildError("every parts entry must be a non-empty string")
     if len(set(raw_parts)) != len(raw_parts):
         raise BuildError("parts contains duplicate paths")
+    resolve_source_roles(manifest, manifest_path)
     parts = [resolve_inside(base, item, "part") for item in raw_parts]
     assembled = b"".join(read_utf8_bytes(path) for path in parts)
     validate_assembled(assembled, manifest)
@@ -206,10 +251,19 @@ def main() -> int:
     action = parser.add_mutually_exclusive_group(required=True)
     action.add_argument("--check", action="store_true", help="verify source/output/hash without writing")
     action.add_argument("--write", action="store_true", help="atomically rebuild output and hash")
+    action.add_argument(
+        "--print-source-role",
+        metavar="ROLE",
+        help="print the repository-relative source file assigned to a semantic role",
+    )
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     args = parser.parse_args()
     try:
-        message = check(args.manifest.resolve()) if args.check else write(args.manifest.resolve())
+        manifest_path = args.manifest.resolve()
+        if args.print_source_role:
+            message = source_role_repo_path(manifest_path, args.print_source_role)
+        else:
+            message = check(manifest_path) if args.check else write(manifest_path)
         print(message)
         return 0
     except BuildError as exc:
