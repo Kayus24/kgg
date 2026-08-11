@@ -68,6 +68,15 @@ Betriebsarten:
   verstecktes `.run-....partial-...` mit `CAPTURE_FAILED.txt` erkennbar und wird
   nie als vollständige Rettung ausgegeben.
 
+Das erzeugte Paketformat ist Version 3. Bei einem als shallow markierten
+Quell-Repository werden zwei getrennte Prüfungen dokumentiert: der native
+`fsck` mit der vorhandenen Shallow-Grenze und ein Full-History-`fsck` mit einer
+ausschließlich im partiellen Rettungsziel angelegten leeren
+`GIT_SHALLOW_FILE`. Die originale `shallow`-Datei, der Quellobjektspeicher und
+ihre Hashes werden dabei nicht verändert. Zeigt erst die Full-History-Sicht
+fehlende Vorfahren, bleibt der Lauf ohne vollständigen Objektanbieter
+fail-closed.
+
 Wenn ein Quell-`fsck` an fehlenden erreichbaren Objekten scheitert, bleibt
 `capture` ohne `--recovery-object-repo` fail-closed. Mit einem angegebenen
 fsck-grünen Anbieter werden alle vom Roh-`fsck` gemeldeten fehlenden Wurzeln
@@ -77,10 +86,19 @@ einzeln durch Git-OID, Typ, Bytezahl und SHA-256 belegt. Repository- und
 Worktree-Bundles werden jeweils in einem leeren Bare-Repository ohne den
 Anbieter verifiziert; der endgültige Mirror wird ausschließlich aus dem
 Repository-Bundle erzeugt, gegen Quell-Refs und HEAD verglichen und besteht
-anschließend `fsck` ebenfalls ohne Alternate. Anbieter mit Git-Alternates oder
-Partial-/Promisor-Konfiguration werden abgelehnt; `GIT_NO_LAZY_FETCH=1`
-verhindert implizite Netz-Nachladungen. `CAPTURE_COMPLETE.txt` trägt in diesem
-Fall ausdrücklich `PASS_WITH_RECOVERED_SOURCE_DEFECTS`.
+anschließend `fsck` ebenfalls ohne Alternate. Der Mirror muss ausdrücklich
+non-shallow und alternate-frei sein. Jedes Worktree-HEAD-Bundle wird zusätzlich
+in ein eigenes leeres Bare-Repository importiert; dort müssen der exakte
+HEAD-OID, non-shallow, Alternate-Freiheit und ein strikter Full-`fsck` belegt
+sein. Anbieter mit Git-Alternates, Shallow- oder Partial-/Promisor-Konfiguration
+werden abgelehnt; `GIT_NO_LAZY_FETCH=1` verhindert implizite
+Netz-Nachladungen. `CAPTURE_COMPLETE.txt` trägt in diesem Fall ausdrücklich
+`PASS_WITH_RECOVERED_SOURCE_DEFECTS`.
+
+Das Quell-Objektformat (`sha1` oder `sha256`) wird explizit erfasst. Leere
+Bundle-Verifikationsrepositories werden im selben Format initialisiert; Format,
+exakter HEAD, Shallow-Zustand, Alternates und `fsck` werden bei der
+Abschlussprüfung erneut kontrolliert.
 
 Das Werkzeug dedupliziert physische Worktree-Wurzeln auch bei Junction-/Link-
 Aliasen, gruppiert gemeinsame Git-Verzeichnisse und nimmt alle dort

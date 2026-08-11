@@ -28,7 +28,7 @@ from typing import Iterable, Iterator
 from kgg_git_environment import sanitized_git_environment as base_git_environment
 
 
-FORMAT_VERSION = 2
+FORMAT_VERSION = 3
 DEFAULT_RESCUE_ROOT = Path(r"C:\KGG_RESCUE\2026-08-10")
 MAX_SCAN_DIRECTORIES = 250_000
 GIT_BASE = (
@@ -54,6 +54,7 @@ PRESERVATION_GIT_ENVIRONMENT = {
     "GIT_NO_LAZY_FETCH",
     "GIT_NO_REPLACE_OBJECTS",
     "GIT_QUARANTINE_PATH",
+    "GIT_SHALLOW_FILE",
 }
 OID_PATTERN = re.compile(r"^[0-9a-f]{40}(?:[0-9a-f]{24})?$")
 MISSING_OBJECT_PATTERNS = (
@@ -338,6 +339,22 @@ def run_git_dir(
 
 def _git_text(worktree: Path, *args: str) -> str:
     return _decode(run_git(worktree, *args).stdout).strip()
+
+
+def _git_object_format(repository: Path, *, git_dir: bool = False) -> str:
+    runner = run_git_dir if git_dir else run_git
+    result = runner(
+        repository,
+        "rev-parse",
+        "--show-object-format",
+        check=False,
+    )
+    object_format = _decode(result.stdout).strip()
+    if result.returncode != 0 or object_format not in {"sha1", "sha256"}:
+        raise PreservationError(
+            f"cannot determine Git object format: {repository}"
+        )
+    return object_format
 
 
 def discover_git_roots(
@@ -1424,6 +1441,7 @@ def _capture_worktree(
     nested_worktrees: dict[str, str],
     logical_git_environment: dict[str, str] | None = None,
 ) -> dict[str, object]:
+    object_format = _git_object_format(record.path)
     index_source = record.git_dir / "index"
     if not os.path.isfile(_fs_path(index_source)):
         raise PreservationError(f"worktree Git index is missing: {index_source}")
@@ -1464,10 +1482,86 @@ def _capture_worktree(
         environment_overrides=logical_git_environment,
     )
     head_verify_repo = destination / "head-bundle-verification.git"
-    run_command((*GIT_BASE, "init", "--bare", head_verify_repo))
+    run_command(
+        (
+            *GIT_BASE,
+            "init",
+            "--bare",
+            f"--object-format={object_format}",
+            head_verify_repo,
+        )
+    )
+    head_verifier_object_format = _git_object_format(
+        head_verify_repo, git_dir=True
+    )
+    if head_verifier_object_format != object_format:
+        raise PreservationError(
+            f"worktree HEAD verifier uses the wrong object format: {record.path}"
+        )
     verify = run_git_dir(head_verify_repo, "bundle", "verify", head_bundle)
     _write_new_bytes(destination / "head-bundle-verify.stdout.txt", verify.stdout)
     _write_new_bytes(destination / "head-bundle-verify.stderr.txt", verify.stderr)
+    head_import = run_git_dir(
+        head_verify_repo,
+        "fetch",
+        "--no-tags",
+        head_bundle,
+        "HEAD:refs/heads/preserved-head",
+        check=False,
+    )
+    _write_new_bytes(
+        destination / "head-bundle-import.stdout.txt", head_import.stdout
+    )
+    _write_new_bytes(
+        destination / "head-bundle-import.stderr.txt", head_import.stderr
+    )
+    if head_import.returncode != 0:
+        detail = _decode(head_import.stderr or head_import.stdout).strip()
+        raise PreservationError(
+            "worktree HEAD bundle is not self-contained: "
+            f"{record.path}: {detail or 'unknown import error'}"
+        )
+    imported_head = _git_text(
+        head_verify_repo, "rev-parse", "--verify", "refs/heads/preserved-head"
+    )
+    if imported_head != before["head"]:
+        raise PreservationError(
+            f"worktree HEAD bundle imported the wrong commit: {record.path}"
+        )
+    head_import_shallow = run_git_dir(
+        head_verify_repo, "rev-parse", "--is-shallow-repository", check=False
+    )
+    if (
+        head_import_shallow.returncode != 0
+        or head_import_shallow.stdout.strip() != b"false"
+    ):
+        raise PreservationError(
+            f"worktree HEAD bundle imported as shallow: {record.path}"
+        )
+    head_import_alternates = (
+        head_verify_repo / "objects" / "info" / "alternates"
+    )
+    if os.path.isfile(_fs_path(head_import_alternates)):
+        with open(_fs_path(head_import_alternates), "rb") as handle:
+            if handle.read().strip():
+                raise PreservationError(
+                    f"worktree HEAD bundle import gained alternates: {record.path}"
+                )
+    head_import_fsck = run_git_dir(
+        head_verify_repo, "fsck", "--full", "--strict", check=False
+    )
+    _write_new_bytes(
+        destination / "head-bundle-import-fsck.stdout.txt",
+        head_import_fsck.stdout,
+    )
+    _write_new_bytes(
+        destination / "head-bundle-import-fsck.stderr.txt",
+        head_import_fsck.stderr,
+    )
+    if head_import_fsck.returncode != 0:
+        raise PreservationError(
+            f"worktree HEAD bundle import failed fsck: {record.path}"
+        )
 
     if not all(isinstance(item, str) for item in before["tracked"]):
         raise PreservationError("invalid internal tracked-file inventory")
@@ -1532,8 +1626,14 @@ def _capture_worktree(
         "gitAdminPhysicalSha256": (
             _manifest_sha256(admin_manifest) if admin_manifest is not None else None
         ),
+        "objectFormat": object_format,
         "head": before["head"],
         "headBundleSha256": sha256_file(head_bundle),
+        "headBundleImportReturnCode": head_import.returncode,
+        "headBundleImportedHead": imported_head,
+        "headBundleImportFsckReturnCode": head_import_fsck.returncode,
+        "headBundleImportIsShallow": False,
+        "headBundleVerifierObjectFormat": head_verifier_object_format,
     }
 
 
@@ -1544,6 +1644,7 @@ def _verify_final_worktree(
     nested_worktrees: dict[str, str],
     logical_git_environment: dict[str, str] | None = None,
 ) -> None:
+    source_object_format = _git_object_format(record.path)
     current = _worktree_evidence(record, destination, logical_git_environment)
     checks = {
         "statusSha256": sha256_bytes(current["status"]),
@@ -1564,6 +1665,43 @@ def _verify_final_worktree(
     ):
         raise PreservationError(
             f"captured worktree HEAD bundle changed: {record.path}"
+        )
+    head_verify_repo = destination / "head-bundle-verification.git"
+    head_verifier_object_format = _git_object_format(
+        head_verify_repo, git_dir=True
+    )
+    imported_head = _git_text(
+        head_verify_repo, "rev-parse", "--verify", "refs/heads/preserved-head"
+    )
+    head_import_shallow = run_git_dir(
+        head_verify_repo, "rev-parse", "--is-shallow-repository", check=False
+    )
+    head_import_fsck = run_git_dir(
+        head_verify_repo, "fsck", "--full", "--strict", check=False
+    )
+    head_import_alternates = (
+        head_verify_repo / "objects" / "info" / "alternates"
+    )
+    has_head_import_alternates = False
+    if os.path.isfile(_fs_path(head_import_alternates)):
+        with open(_fs_path(head_import_alternates), "rb") as handle:
+            has_head_import_alternates = bool(handle.read().strip())
+    if (
+        expected.get("headBundleImportReturnCode") != 0
+        or expected.get("objectFormat") != source_object_format
+        or expected.get("headBundleVerifierObjectFormat") != source_object_format
+        or head_verifier_object_format != source_object_format
+        or expected.get("headBundleImportedHead") != expected.get("head")
+        or imported_head != expected.get("head")
+        or expected.get("headBundleImportFsckReturnCode") != 0
+        or head_import_fsck.returncode != 0
+        or expected.get("headBundleImportIsShallow") is not False
+        or head_import_shallow.returncode != 0
+        or head_import_shallow.stdout.strip() != b"false"
+        or has_head_import_alternates
+    ):
+        raise PreservationError(
+            f"captured worktree HEAD bundle is no longer self-contained: {record.path}"
         )
 
     index_source = record.git_dir / "index"
@@ -1772,6 +1910,17 @@ def resolve_recovery_object_provider(path: Path) -> RecoveryObjectProvider:
         raise PreservationError(
             f"recovery object provider must not be a partial/promisor clone: {path}"
         )
+    shallow = run_git(
+        path, "rev-parse", "--is-shallow-repository", check=False
+    )
+    if shallow.returncode != 0 or shallow.stdout.strip() not in {b"true", b"false"}:
+        raise PreservationError(
+            f"cannot inspect recovery provider shallow state: {path}"
+        )
+    if shallow.stdout.strip() != b"false":
+        raise PreservationError(
+            f"recovery object provider must not be shallow: {path}"
+        )
     head = _git_text(path, "rev-parse", "--verify", "HEAD")
     provider_fsck = run_git_dir(
         common_git_dir, "fsck", "--full", "--strict", check=False
@@ -1975,6 +2124,55 @@ def _missing_fsck_roots(source_fsck: GitResult) -> list[str]:
     return sorted(roots)
 
 
+def _shallow_boundary_oids(common_git_dir: Path) -> list[str]:
+    shallow_file = common_git_dir / "shallow"
+    if not os.path.lexists(_fs_path(shallow_file)):
+        return []
+    info = os.stat(_fs_path(shallow_file), follow_symlinks=False)
+    if (
+        not stat.S_ISREG(info.st_mode)
+        or os.path.islink(_fs_path(shallow_file))
+        or _is_reparse(info)
+    ):
+        raise PreservationError(f"unsupported Git shallow file: {shallow_file}")
+    try:
+        lines = _stable_file_bytes(shallow_file).decode("ascii").splitlines()
+    except UnicodeDecodeError as exc:
+        raise PreservationError(f"invalid Git shallow file: {shallow_file}") from exc
+    boundaries = [line.strip() for line in lines if line.strip()]
+    if (
+        any(not OID_PATTERN.fullmatch(item) for item in boundaries)
+        or len(boundaries) != len(set(boundaries))
+    ):
+        raise PreservationError(f"invalid Git shallow boundaries: {shallow_file}")
+    return sorted(boundaries)
+
+
+def _shallow_parent_oids(
+    common_git_dir: Path, boundaries: list[str]
+) -> list[str]:
+    parents: set[str] = set()
+    for boundary in boundaries:
+        item, payload = _read_git_object(common_git_dir, boundary)
+        if item["type"] != "commit":
+            raise PreservationError(
+                f"Git shallow boundary is not a commit: {boundary}"
+            )
+        for line in payload.splitlines():
+            if not line:
+                break
+            name, separator, raw_value = line.partition(b" ")
+            if name != b"parent":
+                continue
+            parent = _decode(raw_value) if separator else ""
+            if not OID_PATTERN.fullmatch(parent):
+                raise PreservationError(
+                    f"invalid parent in shallow boundary commit: {boundary}"
+                )
+            parents.add(parent)
+    return sorted(parents)
+
+
 def _provider_object_closure(
     provider: RecoveryObjectProvider, roots: list[str]
 ) -> dict[str, tuple[dict[str, object], bytes]]:
@@ -1998,6 +2196,7 @@ def _write_recovery_overlay(
     object_dir: Path,
     objects: list[tuple[dict[str, object], bytes]],
 ) -> None:
+    os.makedirs(_fs_path(object_dir), exist_ok=False)
     for item, payload in objects:
         object_id = str(item["oid"])
         object_type = str(item["type"])
@@ -2012,6 +2211,7 @@ def _prepare_recovery(
     provider: RecoveryObjectProvider,
     destination: Path,
     source_fsck: GitResult,
+    base_environment: dict[str, str] | None = None,
 ) -> tuple[dict[str, object], dict[str, str]]:
     missing_roots = _missing_fsck_roots(source_fsck)
     if not missing_roots:
@@ -2029,7 +2229,8 @@ def _prepare_recovery(
     provider_objects = [item for item, _payload in recovered_items]
     overlay_object_dir = destination / "recovery-object-overlay" / "objects"
     _write_recovery_overlay(overlay_object_dir, recovered_items)
-    recovery_environment = _alternate_git_environment(overlay_object_dir)
+    recovery_environment = dict(base_environment or {})
+    recovery_environment.update(_alternate_git_environment(overlay_object_dir))
     recovered_fsck = run_git_dir(
         record.path,
         "fsck",
@@ -2179,10 +2380,15 @@ def _capture_common_git(
     destination: Path,
     recovery_provider: RecoveryObjectProvider | None = None,
 ) -> dict[str, object]:
+    object_format = _git_object_format(record.path, git_dir=True)
     refs_before = _common_refs(record.path)
     symbolic_refs_before = _common_symbolic_refs(record.path)
     head_before = _common_head_state(record.path)
     registrations_before, _parsed = registered_worktrees(record.path)
+    shallow_boundaries = _shallow_boundary_oids(record.path)
+    shallow_parent_roots = _shallow_parent_oids(
+        record.path, shallow_boundaries
+    )
 
     common_manifest = _copy_physical_tree(
         record.path, destination / "common-git-physical"
@@ -2254,19 +2460,56 @@ def _capture_common_git(
             }
         )
 
+    full_history_environment: dict[str, str] | None = None
+    full_history_shallow_file: Path | None = None
+    if shallow_boundaries:
+        full_history_shallow_file = destination / "full-history-shallow.empty"
+        _write_new_bytes(full_history_shallow_file, b"")
+        full_history_environment = {
+            "GIT_SHALLOW_FILE": str(full_history_shallow_file)
+        }
+
     source_fsck = run_git_dir(record.path, "fsck", "--full", "--strict", check=False)
     _write_new_bytes(destination / "source-fsck.stdout.txt", source_fsck.stdout)
     _write_new_bytes(destination / "source-fsck.stderr.txt", source_fsck.stderr)
+    source_full_history_fsck = run_git_dir(
+        record.path,
+        "fsck",
+        "--full",
+        "--strict",
+        check=False,
+        environment_overrides=full_history_environment,
+    )
+    _write_new_bytes(
+        destination / "source-full-history-fsck.stdout.txt",
+        source_full_history_fsck.stdout,
+    )
+    _write_new_bytes(
+        destination / "source-full-history-fsck.stderr.txt",
+        source_full_history_fsck.stderr,
+    )
     recovery_evidence: dict[str, object] | None = None
-    logical_git_environment: dict[str, str] | None = None
-    if source_fsck.returncode != 0:
+    logical_git_environment = (
+        dict(full_history_environment) if full_history_environment else None
+    )
+    if source_fsck.returncode != 0 or source_full_history_fsck.returncode != 0:
         if recovery_provider is None:
+            if shallow_boundaries:
+                raise PreservationError(
+                    "source full-history fsck failed behind Git shallow "
+                    "boundaries; a verified --recovery-object-repo is required "
+                    f"for a self-contained repository bundle: {record.path}"
+                )
             raise PreservationError(
                 f"source git fsck failed: {record.path}; a verified "
                 "--recovery-object-repo is required"
             )
         recovery_evidence, logical_git_environment = _prepare_recovery(
-            record, recovery_provider, destination, source_fsck
+            record,
+            recovery_provider,
+            destination,
+            source_full_history_fsck,
+            full_history_environment,
         )
 
     bundle = destination / "repository.bundle"
@@ -2282,17 +2525,53 @@ def _capture_common_git(
         environment_overrides=logical_git_environment,
     )
     bundle_verify_repo = destination / "bundle-verification.git"
-    run_command((*GIT_BASE, "init", "--bare", bundle_verify_repo))
+    run_command(
+        (
+            *GIT_BASE,
+            "init",
+            "--bare",
+            f"--object-format={object_format}",
+            bundle_verify_repo,
+        )
+    )
+    bundle_verifier_object_format = _git_object_format(
+        bundle_verify_repo, git_dir=True
+    )
+    if bundle_verifier_object_format != object_format:
+        raise PreservationError(
+            f"repository bundle verifier uses the wrong object format: {record.path}"
+        )
     bundle_verify = run_git_dir(bundle_verify_repo, "bundle", "verify", bundle)
     _write_new_bytes(destination / "bundle-verify.stdout.txt", bundle_verify.stdout)
     _write_new_bytes(destination / "bundle-verify.stderr.txt", bundle_verify.stderr)
 
     mirror = destination / "mirror.git"
-    run_command(
+    bundle_clone = run_command(
         (*GIT_BASE, "clone", "--mirror", bundle, mirror),
+        check=False,
     )
+    _write_new_bytes(destination / "bundle-clone.stdout.txt", bundle_clone.stdout)
+    _write_new_bytes(destination / "bundle-clone.stderr.txt", bundle_clone.stderr)
+    if bundle_clone.returncode != 0:
+        detail = _decode(bundle_clone.stderr or bundle_clone.stdout).strip()
+        raise PreservationError(
+            "repository bundle is not self-contained and cannot be cloned into "
+            f"an empty mirror: {record.path}: {detail or 'unknown clone error'}"
+        )
     _set_common_head_state(mirror, head_before)
     _set_common_symbolic_refs(mirror, symbolic_refs_before)
+    mirror_shallow = run_git_dir(
+        mirror, "rev-parse", "--is-shallow-repository", check=False
+    )
+    if mirror_shallow.returncode != 0 or mirror_shallow.stdout.strip() != b"false":
+        raise PreservationError(
+            f"captured mirror is unexpectedly shallow: {record.path}"
+        )
+    mirror_object_format = _git_object_format(mirror, git_dir=True)
+    if mirror_object_format != object_format:
+        raise PreservationError(
+            f"captured mirror uses the wrong object format: {record.path}"
+        )
     mirror_alternates = mirror / "objects" / "info" / "alternates"
     if os.path.isfile(_fs_path(mirror_alternates)):
         with open(_fs_path(mirror_alternates), "rb") as handle:
@@ -2355,7 +2634,26 @@ def _capture_common_git(
         "refsSha256": sha256_bytes(refs_before),
         "headSha256": sha256_bytes(head_before),
         "worktreeListSha256": sha256_bytes(registrations_before),
+        "shallowBoundaryOids": shallow_boundaries,
+        "shallowParentRoots": shallow_parent_roots,
+        "fullHistoryShallowFile": (
+            "full-history-shallow.empty"
+            if full_history_shallow_file is not None
+            else None
+        ),
+        "fullHistoryShallowFileSha256": (
+            sha256_file(full_history_shallow_file)
+            if full_history_shallow_file is not None
+            else None
+        ),
         "sourceFsckReturnCode": source_fsck.returncode,
+        "sourceFullHistoryFsckReturnCode": source_full_history_fsck.returncode,
+        "objectFormat": object_format,
+        "bundleVerifierObjectFormat": bundle_verifier_object_format,
+        "bundleCloneReturnCode": bundle_clone.returncode,
+        "bundleSelfContained": True,
+        "mirrorIsShallow": False,
+        "mirrorObjectFormat": mirror_object_format,
         "mirrorFsckReturnCode": mirror_fsck.returncode,
         "recovery": recovery_evidence,
     }
@@ -2367,9 +2665,12 @@ def _verify_final_common_git(
     expected: dict[str, object],
     recovery_provider: RecoveryObjectProvider | None = None,
 ) -> None:
+    source_object_format = _git_object_format(record.path, git_dir=True)
     refs = _common_refs(record.path)
     head = _common_head_state(record.path)
     registrations, _parsed = registered_worktrees(record.path)
+    shallow_boundaries = _shallow_boundary_oids(record.path)
+    shallow_parent_roots = _shallow_parent_oids(record.path, shallow_boundaries)
     if sha256_bytes(refs) != expected.get("refsSha256"):
         raise PreservationError(
             f"Git refs changed before capture finalization: {record.path}"
@@ -2388,6 +2689,45 @@ def _verify_final_common_git(
         raise PreservationError(
             f"captured repository bundle changed: {record.path}"
         )
+    if (
+        expected.get("shallowBoundaryOids") != shallow_boundaries
+        or expected.get("shallowParentRoots") != shallow_parent_roots
+    ):
+        raise PreservationError(
+            f"Git shallow boundaries changed before finalization: {record.path}"
+        )
+    full_history_environment: dict[str, str] | None = None
+    full_history_file = expected.get("fullHistoryShallowFile")
+    full_history_hash = expected.get("fullHistoryShallowFileSha256")
+    if shallow_boundaries:
+        if full_history_file != "full-history-shallow.empty":
+            raise PreservationError("invalid full-history shallow-file evidence")
+        captured_full_history_file = destination / full_history_file
+        if (
+            sha256_file(captured_full_history_file) != full_history_hash
+            or full_history_hash != sha256_bytes(b"")
+        ):
+            raise PreservationError("full-history shallow-file evidence changed")
+        full_history_environment = {
+            "GIT_SHALLOW_FILE": str(captured_full_history_file)
+        }
+    elif full_history_file is not None or full_history_hash is not None:
+        raise PreservationError("unexpected full-history shallow-file evidence")
+    if (
+        expected.get("bundleCloneReturnCode") != 0
+        or expected.get("bundleSelfContained") is not True
+        or expected.get("objectFormat") != source_object_format
+    ):
+        raise PreservationError("invalid self-contained bundle evidence")
+    bundle_verify_repo = destination / "bundle-verification.git"
+    bundle_verifier_object_format = _git_object_format(
+        bundle_verify_repo, git_dir=True
+    )
+    if (
+        expected.get("bundleVerifierObjectFormat") != source_object_format
+        or bundle_verifier_object_format != source_object_format
+    ):
+        raise PreservationError("captured bundle verifier object format changed")
     mirror = destination / "mirror.git"
     if (
         sha256_bytes(_common_refs(mirror)) != expected.get("refsSha256")
@@ -2395,6 +2735,35 @@ def _verify_final_common_git(
     ):
         raise PreservationError(
             f"captured mirror refs or HEAD changed: {record.path}"
+        )
+    mirror_shallow = run_git_dir(
+        mirror, "rev-parse", "--is-shallow-repository", check=False
+    )
+    if (
+        expected.get("mirrorIsShallow") is not False
+        or mirror_shallow.returncode != 0
+        or mirror_shallow.stdout.strip() != b"false"
+    ):
+        raise PreservationError(f"captured mirror became shallow: {record.path}")
+    mirror_object_format = _git_object_format(mirror, git_dir=True)
+    if (
+        expected.get("mirrorObjectFormat") != source_object_format
+        or mirror_object_format != source_object_format
+    ):
+        raise PreservationError(f"captured mirror object format changed: {record.path}")
+    mirror_alternates = mirror / "objects" / "info" / "alternates"
+    if os.path.isfile(_fs_path(mirror_alternates)):
+        with open(_fs_path(mirror_alternates), "rb") as handle:
+            if handle.read().strip():
+                raise PreservationError(
+                    f"captured mirror gained object alternates: {record.path}"
+                )
+    final_mirror_fsck = run_git_dir(
+        mirror, "fsck", "--full", "--strict", check=False
+    )
+    if final_mirror_fsck.returncode != 0:
+        raise PreservationError(
+            f"captured self-contained mirror no longer passes fsck: {record.path}"
         )
     source_manifest = _physical_tree_manifest(record.path)
     captured_manifest = _physical_tree_manifest(
@@ -2480,7 +2849,10 @@ def _verify_final_common_git(
 
     recovery = expected.get("recovery")
     if recovery is None:
-        if expected.get("sourceFsckReturnCode") != 0:
+        if (
+            expected.get("sourceFsckReturnCode") != 0
+            or expected.get("sourceFullHistoryFsckReturnCode") != 0
+        ):
             raise PreservationError("invalid source fsck evidence without recovery")
         return
     if not isinstance(recovery, dict) or recovery_provider is None:
@@ -2497,6 +2869,10 @@ def _verify_final_common_git(
             raise PreservationError(f"recovery provider changed ({name})")
     if _git_text(recovery_provider.path, "rev-parse", "--verify", "HEAD") != recovery_provider.head:
         raise PreservationError("recovery object provider HEAD changed during capture")
+    if _git_text(
+        recovery_provider.path, "rev-parse", "--is-shallow-repository"
+    ) != "false":
+        raise PreservationError("recovery object provider became shallow")
     objects = recovery.get("objects")
     if not isinstance(objects, list) or not all(
         isinstance(item, dict) and isinstance(item.get("oid"), str)
@@ -2508,6 +2884,12 @@ def _verify_final_common_git(
         "objectIdsSha256"
     ) != sha256_bytes(("".join(f"{item}\n" for item in object_ids)).encode("ascii")):
         raise PreservationError("recovered object inventory summary changed")
+    missing_roots = recovery.get("missingRootObjects")
+    if not isinstance(missing_roots, list) or not all(
+        isinstance(item, str) and OID_PATTERN.fullmatch(item)
+        for item in missing_roots
+    ) or len(missing_roots) != len(set(missing_roots)):
+        raise PreservationError("invalid recovery object roots")
     scope_lists: list[set[str]] = []
     for name in (
         "normalRefObjectIds",
@@ -2531,9 +2913,20 @@ def _verify_final_common_git(
     if overlay_relative != "recovery-object-overlay/objects":
         raise PreservationError("invalid recovery overlay path")
     overlay_object_dir = destination / "recovery-object-overlay" / "objects"
-    recovery_environment = _alternate_git_environment(overlay_object_dir)
+    recovery_environment = dict(full_history_environment or {})
+    recovery_environment.update(_alternate_git_environment(overlay_object_dir))
     if _git_object_evidence(record.path, object_ids, recovery_environment) != objects:
         raise PreservationError("source recovery object view changed during capture")
+    recovered_full_fsck = run_git_dir(
+        record.path,
+        "fsck",
+        "--full",
+        "--strict",
+        check=False,
+        environment_overrides=recovery_environment,
+    )
+    if recovered_full_fsck.returncode != 0:
+        raise PreservationError("source full-history recovery view changed")
     normal_ref_ids = scope_lists[0]
     expected_mirror_objects = [
         item for item in objects if item["oid"] in normal_ref_ids
@@ -2720,17 +3113,23 @@ def capture_workspace(
             record.physical_key: record.id for record in audit.worktrees
         }
         recovered_common_keys: set[str] = set()
-        recovered_environments: dict[str, dict[str, str]] = {}
+        logical_git_environments: dict[str, dict[str, str]] = {}
         for common in audit.common_git_dirs:
+            repository_destination = partial / "repositories" / common.id
             evidence = _capture_common_git(
                 common,
-                partial / "repositories" / common.id,
+                repository_destination,
                 recovery_provider,
             )
             capture_evidence["repositories"][common.id] = evidence
+            logical_environment: dict[str, str] = {}
+            if evidence.get("fullHistoryShallowFile") is not None:
+                logical_environment["GIT_SHALLOW_FILE"] = str(
+                    repository_destination / "full-history-shallow.empty"
+                )
             if evidence.get("recovery") is not None:
                 recovered_common_keys.add(common.physical_key)
-                recovered_environments[common.physical_key] = (
+                logical_environment.update(
                     _alternate_git_environment(
                         partial
                         / "repositories"
@@ -2739,13 +3138,15 @@ def capture_workspace(
                         / "objects"
                     )
                 )
+            if logical_environment:
+                logical_git_environments[common.physical_key] = logical_environment
 
         for worktree in audit.worktrees:
             evidence = _capture_worktree(
                 worktree,
                 partial / "worktrees" / worktree.id,
                 worktree_ids_by_physical,
-                recovered_environments.get(worktree.common_key),
+                logical_git_environments.get(worktree.common_key),
             )
             capture_evidence["worktrees"][worktree.id] = evidence
 
@@ -2805,7 +3206,7 @@ def capture_workspace(
                 partial / "worktrees" / worktree.id,
                 expected,
                 worktree_ids_by_physical,
-                recovered_environments.get(worktree.common_key),
+                logical_git_environments.get(worktree.common_key),
             )
         for item in root_manifest:
             source = audit.workspace / str(item["path"])

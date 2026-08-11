@@ -39,9 +39,12 @@ def git(path: Path, *args: str) -> subprocess.CompletedProcess[bytes]:
     )
 
 
-def init_repo(path: Path) -> None:
+def init_repo(path: Path, *, object_format: str | None = None) -> None:
     path.mkdir(parents=True)
-    git(path, "init", "--quiet")
+    arguments = ["init", "--quiet"]
+    if object_format is not None:
+        arguments.append(f"--object-format={object_format}")
+    git(path, *arguments)
     git(path, "config", "user.name", "KGG Preservation Test")
     git(path, "config", "user.email", "preservation-test@example.invalid")
     (path / "tracked-a.txt").write_text("a0\n", encoding="utf-8", newline="\n")
@@ -381,7 +384,7 @@ class WorkspacePreservationTests(unittest.TestCase):
         self.assertFalse(any(rescue.glob(".run-*.partial-*")))
 
         inventory = json.loads((destination / "inventory.json").read_text("utf-8"))
-        self.assertEqual(2, inventory["formatVersion"])
+        self.assertEqual(3, inventory["formatVersion"])
         self.assertEqual(2, inventory["totals"]["physicalWorktrees"])
         self.assertEqual(1, inventory["totals"]["commonGitDirs"])
         self.assertEqual(1, inventory["totals"]["alternateObjectDirs"])
@@ -652,6 +655,249 @@ class WorkspacePreservationTests(unittest.TestCase):
             mirror_alternates.exists() and mirror_alternates.read_bytes().strip()
         )
 
+    def test_shallow_history_bundle_is_recovered_and_self_contained(self) -> None:
+        workspace = self.base / "workspace"
+        repo = workspace / "repo"
+        provider = self.base / "provider"
+        rescue_without_provider = self.base / "rescue-without-provider"
+        rescue = self.base / "rescue"
+        init_repo(repo)
+        missing_parent = git(repo, "rev-parse", "HEAD").stdout.decode().strip()
+        (repo / "tracked-a.txt").write_text(
+            "shallow boundary\n", encoding="utf-8", newline="\n"
+        )
+        git(repo, "commit", "--quiet", "-am", "shallow boundary")
+        shallow_boundary = git(repo, "rev-parse", "HEAD").stdout.decode().strip()
+        (repo / "tracked-b.txt").write_text(
+            "descendant of boundary\n", encoding="utf-8", newline="\n"
+        )
+        git(repo, "commit", "--quiet", "-am", "shallow descendant")
+        source_head = git(repo, "rev-parse", "HEAD").stdout.decode().strip()
+        shutil.copytree(repo, provider)
+
+        shallow_file = repo / ".git" / "shallow"
+        shallow_file.write_text(
+            shallow_boundary + "\n", encoding="ascii", newline="\n"
+        )
+        shutil.rmtree(repo / ".git" / "logs")
+        missing_object = (
+            repo
+            / ".git"
+            / "objects"
+            / missing_parent[:2]
+            / missing_parent[2:]
+        )
+        self.assertTrue(missing_object.is_file())
+        missing_object.chmod(0o666)
+        missing_object.unlink()
+        shallow_before = shallow_file.read_bytes()
+        shallow_sha_before = preservation.sha256_file(shallow_file)
+        self.assertEqual(
+            0,
+            preservation.run_git_dir(
+                repo / ".git", "fsck", "--full", "--strict", check=False
+            ).returncode,
+        )
+
+        with self.assertRaisesRegex(
+            preservation.PreservationError,
+            "full-history fsck failed.*--recovery-object-repo",
+        ):
+            preservation.capture_workspace(workspace, rescue_without_provider)
+        self.assertFalse(any(rescue_without_provider.rglob("CAPTURE_COMPLETE.txt")))
+
+        destination = preservation.capture_workspace(
+            workspace, rescue, recovery_object_repo=provider
+        )
+        repository_capture = destination / "repositories" / "repository-001"
+        evidence = json.loads(
+            (destination / "capture-evidence.json").read_text("utf-8")
+        )["repositories"]["repository-001"]
+        self.assertTrue(evidence["bundleSelfContained"])
+        self.assertEqual(0, evidence["sourceFsckReturnCode"])
+        self.assertNotEqual(0, evidence["sourceFullHistoryFsckReturnCode"])
+        self.assertEqual([shallow_boundary], evidence["shallowBoundaryOids"])
+        self.assertEqual([missing_parent], evidence["shallowParentRoots"])
+        self.assertIn(missing_parent, evidence["recovery"]["missingRootObjects"])
+        self.assertIn(missing_parent, evidence["recovery"]["normalRefObjectIds"])
+        self.assertIn(
+            missing_parent,
+            {item["oid"] for item in evidence["recovery"]["objects"]},
+        )
+        self.assertEqual(
+            shallow_boundary + "\n",
+            (
+                repository_capture / "common-git-physical" / "shallow"
+            ).read_text("ascii"),
+        )
+        self.assertEqual(shallow_sha_before, preservation.sha256_file(shallow_file))
+        self.assertEqual(shallow_before, shallow_file.read_bytes())
+        self.assertFalse(missing_object.exists())
+        self.assertFalse((repo / ".git" / "full-history-shallow.empty").exists())
+
+        bundle = repository_capture / "repository.bundle"
+        head_bundle = destination / "worktrees" / "worktree-001" / "head.bundle"
+        os.replace(workspace, self.base / "source-moved-out-of-reach")
+        os.replace(provider, self.base / "provider-moved-out-of-reach")
+        restored = self.base / "restored.git"
+        clone = subprocess.run(
+            ["git", "clone", "--quiet", "--mirror", str(bundle), str(restored)],
+            env=preservation.sanitized_git_environment(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+        self.assertEqual(0, clone.returncode, clone.stderr.decode(errors="replace"))
+        self.assertEqual(
+            0,
+            preservation.run_git_dir(
+                restored, "fsck", "--full", "--strict", check=False
+            ).returncode,
+        )
+        self.assertEqual(
+            0,
+            preservation.run_git_dir(
+                restored,
+                "cat-file",
+                "-e",
+                f"{missing_parent}^{{commit}}",
+                check=False,
+            ).returncode,
+        )
+        head_restore = self.base / "head-restored.git"
+        subprocess.run(
+            ["git", "init", "--quiet", "--bare", str(head_restore)],
+            env=preservation.sanitized_git_environment(),
+            check=True,
+        )
+        head_fetch = preservation.run_git_dir(
+            head_restore,
+            "fetch",
+            "--no-tags",
+            head_bundle,
+            "HEAD:refs/heads/preserved-head",
+            check=False,
+        )
+        self.assertEqual(
+            0, head_fetch.returncode, head_fetch.stderr.decode(errors="replace")
+        )
+        self.assertEqual(
+            source_head,
+            preservation._git_text(
+                head_restore, "rev-parse", "refs/heads/preserved-head"
+            ),
+        )
+        self.assertEqual(
+            0,
+            preservation.run_git_dir(
+                head_restore, "fsck", "--full", "--strict", check=False
+            ).returncode,
+        )
+
+    def test_sha256_capture_uses_matching_standalone_verifiers(self) -> None:
+        workspace = self.base / "workspace"
+        repo = workspace / "repo"
+        rescue = self.base / "rescue"
+        init_repo(repo, object_format="sha256")
+        (repo / "tracked-a.txt").write_text(
+            "sha256 head\n", encoding="utf-8", newline="\n"
+        )
+        git(repo, "commit", "--quiet", "-am", "sha256 head")
+        source_head = git(repo, "rev-parse", "HEAD").stdout.decode().strip()
+        self.assertEqual(64, len(source_head))
+
+        destination = preservation.capture_workspace(workspace, rescue)
+        capture_evidence = json.loads(
+            (destination / "capture-evidence.json").read_text("utf-8")
+        )
+        repository_evidence = capture_evidence["repositories"]["repository-001"]
+        worktree_evidence = capture_evidence["worktrees"]["worktree-001"]
+        self.assertEqual("sha256", repository_evidence["objectFormat"])
+        self.assertEqual("sha256", repository_evidence["bundleVerifierObjectFormat"])
+        self.assertEqual("sha256", repository_evidence["mirrorObjectFormat"])
+        self.assertEqual("sha256", worktree_evidence["objectFormat"])
+        self.assertEqual(
+            "sha256", worktree_evidence["headBundleVerifierObjectFormat"]
+        )
+        self.assertEqual(source_head, worktree_evidence["headBundleImportedHead"])
+
+        repository_capture = destination / "repositories" / "repository-001"
+        head_bundle = destination / "worktrees" / "worktree-001" / "head.bundle"
+        repository_bundle = repository_capture / "repository.bundle"
+        os.replace(workspace, self.base / "sha256-source-moved-out-of-reach")
+
+        standalone_mirror = self.base / "sha256-standalone-mirror.git"
+        clone = subprocess.run(
+            [
+                "git",
+                "clone",
+                "--quiet",
+                "--mirror",
+                str(repository_bundle),
+                str(standalone_mirror),
+            ],
+            env=preservation.sanitized_git_environment(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+        self.assertEqual(0, clone.returncode, clone.stderr.decode(errors="replace"))
+        self.assertEqual(
+            "sha256",
+            preservation._git_object_format(standalone_mirror, git_dir=True),
+        )
+        self.assertEqual(
+            0,
+            preservation.run_git_dir(
+                standalone_mirror, "fsck", "--full", "--strict", check=False
+            ).returncode,
+        )
+
+        head_restore = self.base / "sha256-head-restored.git"
+        subprocess.run(
+            [
+                "git",
+                "init",
+                "--quiet",
+                "--bare",
+                "--object-format=sha256",
+                str(head_restore),
+            ],
+            env=preservation.sanitized_git_environment(),
+            check=True,
+        )
+        head_fetch = preservation.run_git_dir(
+            head_restore,
+            "fetch",
+            "--no-tags",
+            head_bundle,
+            "HEAD:refs/heads/preserved-head",
+            check=False,
+        )
+        self.assertEqual(
+            0, head_fetch.returncode, head_fetch.stderr.decode(errors="replace")
+        )
+        self.assertEqual(
+            source_head,
+            preservation._git_text(
+                head_restore, "rev-parse", "refs/heads/preserved-head"
+            ),
+        )
+        self.assertEqual(
+            "false",
+            preservation._git_text(
+                head_restore, "rev-parse", "--is-shallow-repository"
+            ),
+        )
+        alternates = head_restore / "objects" / "info" / "alternates"
+        self.assertFalse(alternates.exists() and alternates.read_bytes().strip())
+        self.assertEqual(
+            0,
+            preservation.run_git_dir(
+                head_restore, "fsck", "--full", "--strict", check=False
+            ).returncode,
+        )
+
     def test_recovery_handles_direct_broken_ref_and_index_only_blob(self) -> None:
         workspace = self.base / "workspace"
         repo = workspace / "repo"
@@ -851,6 +1097,39 @@ class WorkspacePreservationTests(unittest.TestCase):
                 recovery_object_repo=provider,
             )
         self.assertFalse((self.base / "rescue").exists())
+
+    def test_capture_rejects_shallow_recovery_provider(self) -> None:
+        workspace = self.base / "workspace"
+        repo = workspace / "repo"
+        provider = self.base / "provider"
+        init_repo(repo)
+        shutil.copytree(repo, provider)
+        provider_head = git(provider, "rev-parse", "HEAD").stdout.decode().strip()
+        (provider / ".git" / "shallow").write_text(
+            provider_head + "\n", encoding="ascii", newline="\n"
+        )
+
+        with self.assertRaisesRegex(
+            preservation.PreservationError, "provider must not be shallow"
+        ):
+            preservation.capture_workspace(
+                workspace,
+                self.base / "rescue",
+                recovery_object_repo=provider,
+            )
+        self.assertFalse((self.base / "rescue").exists())
+
+    def test_shallow_boundary_parser_accepts_sha256_oid(self) -> None:
+        common_git_dir = self.base / "sha256-common.git"
+        common_git_dir.mkdir()
+        oid = "a" * 64
+        (common_git_dir / "shallow").write_text(
+            oid + "\n", encoding="ascii", newline="\n"
+        )
+
+        self.assertEqual(
+            [oid], preservation._shallow_boundary_oids(common_git_dir)
+        )
 
     def test_cli_reports_recovered_source_defect_status(self) -> None:
         destination = self.base / "run-test"
