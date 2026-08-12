@@ -1,4 +1,4 @@
-name: Temporary integrate PR150 pain patch onto current main
+name: Temporary prepare PR150 required-gate integration blob
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  integrate:
+  prepare:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
@@ -20,34 +20,48 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Integrate approved patient pain runtime and resources
+      - name: Prepare patched Required Gate as ordinary file
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin feat/patient-vertical-pain-scale-v74
-          git checkout origin/feat/patient-vertical-pain-scale-v74 -- \
-            patient-pain-vertical-scale.js \
-            patient-version-label.js \
-            service-worker.js \
-            update-recovery.html \
-            release-pipeline/kgg_patient_pain_vertical_smoke.js \
-            release-pipeline/kgg_patient_pain_vertical_playwright.js
+          mkdir -p tmp
+          cp .github/workflows/kgg-required-gate.yml tmp/pr150-kgg-required-gate.yml
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('tmp/pr150-kgg-required-gate.yml')
+          text = path.read_text(encoding='utf-8')
 
-          python release-pipeline/kgg_patient_gpt_resources.py --write
-          python release-pipeline/kgg_custom_gpt_resource_audit.py --refresh-target-profile patientProduction
-          python release-pipeline/kgg_patient_gpt_resources.py --check
-          python release-pipeline/kgg_custom_gpt_resource_audit.py --check
-          node release-pipeline/kgg_patient_pain_vertical_smoke.js
+          old = "if grep -Eq '(^|/)[^/]+\\.(html|css)$|^kgg-update/|^therapist-app/test-lab/|^therapist-app/releases/web/|^release-pipeline/kgg_ui_stability_smoke\\.js$' \"$changed_file\"; then ui_or_html=true; fi"
+          new = "if grep -Eq '(^|/)[^/]+\\.(html|css)$|^kgg-update/|^therapist-app/test-lab/|^therapist-app/releases/web/|^release-pipeline/kgg_ui_stability_smoke\\.js$|^patient-pain-vertical-scale\\.js$' \"$changed_file\"; then ui_or_html=true; fi"
+          if old not in text and new not in text:
+              raise SystemExit('ui_or_html contract anchor not found')
+          text = text.replace(old, new, 1)
 
-          git add patient-pain-vertical-scale.js patient-version-label.js service-worker.js update-recovery.html \
-            release-pipeline/kgg_patient_pain_vertical_smoke.js \
-            release-pipeline/kgg_patient_pain_vertical_playwright.js \
-            docs/kgg-patient-gpt-context.md docs/kgg-patient-gpt-source-index.json \
-            docs/kgg-patient-gpt-source docs/kgg-patient-custom-gpt-knowledge-architecture.md \
-            docs/kgg-patient-custom-gpt-knowledge-operations.md docs/kgg-patient-custom-gpt-knowledge-safety.md \
-            docs/kgg-patient-custom-gpt-knowledge-testing.md docs/kgg-patient-custom-gpt-editor-snapshot.json \
-            docs/kgg-custom-gpt-resource-manifest.json
+          old = "if grep -Eq '^service-worker\\.js$|^patient-version-label\\.js$|^update-recovery\\.html$|^patient-card-progress\\.js$|^collapse-cards\\.js$|^release-pipeline/kgg_patient_(card_progress_smoke|runtime_progress_playwright)\\.js$|^release-pipeline/package(-lock)?\\.json$|^\\.github/workflows/kgg-required-gate\\.yml$' \"$changed_file\"; then patient_runtime=true; fi"
+          new = "if grep -Eq '^service-worker\\.js$|^patient-version-label\\.js$|^update-recovery\\.html$|^patient-card-progress\\.js$|^collapse-cards\\.js$|^release-pipeline/kgg_patient_(card_progress_smoke|runtime_progress_playwright|pain_vertical_(smoke|playwright))\\.js$|^patient-pain-vertical-scale\\.js$|^release-pipeline/package(-lock)?\\.json$|^\\.github/workflows/kgg-required-gate\\.yml$' \"$changed_file\"; then patient_runtime=true; fi"
+          if old not in text and new not in text:
+              raise SystemExit('patient_runtime contract anchor not found')
+          text = text.replace(old, new, 1)
+
+          anchor = "      - name: Run patient plan replace active-slot smoke\n        shell: bash\n        run: node release-pipeline/kgg_patient_plan_replace_slot_smoke.js\n"
+          addition = anchor + "      - name: Run patient vertical pain logic smoke\n        if: steps.scope.outputs.patient_runtime == 'true'\n        shell: bash\n        run: node release-pipeline/kgg_patient_pain_vertical_smoke.js\n"
+          if 'Run patient vertical pain logic smoke' not in text:
+              if anchor not in text:
+                  raise SystemExit('pain logic smoke insertion anchor not found')
+              text = text.replace(anchor, addition, 1)
+
+          anchor = "      - name: Run patient runtime and progress Playwright smoke\n        if: steps.scope.outputs.patient_runtime == 'true'\n        shell: bash\n        run: node release-pipeline/kgg_patient_runtime_progress_playwright.js\n"
+          addition = anchor + "      - name: Run patient vertical pain Playwright smoke\n        if: steps.scope.outputs.patient_runtime == 'true'\n        shell: bash\n        run: node release-pipeline/kgg_patient_pain_vertical_playwright.js\n"
+          if 'Run patient vertical pain Playwright smoke' not in text:
+              if anchor not in text:
+                  raise SystemExit('pain Playwright insertion anchor not found')
+              text = text.replace(anchor, addition, 1)
+
+          path.write_text(text, encoding='utf-8', newline='\n')
+          PY
+
+          git add tmp/pr150-kgg-required-gate.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'rebase patient pain modal onto current main'
+          git commit -m 'prepare PR150 required gate integration blob'
           git push origin HEAD:integration/pr150-pain-v74-current-main
