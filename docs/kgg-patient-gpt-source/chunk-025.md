@@ -1,17 +1,126 @@
 # KGG Patient Source Chunk 025
 
-- Source file: `patient-start-scan.js`
-- Characters: 24001-28169
-- Full source SHA-256: `48ad614edb3a2ae3609f16cebb9090a58fa10975ba7700f53dcd3d87e2323973`
+- Source file: `patient-set-summary-groups.js`
+- Characters: 1-6075
+- Full source SHA-256: `78061311ef7a80b2c6f2ee35733a192ddcc9a87ed88a34644da90f9207ff71a2`
 
 ```
-ggLiveScanView{position:relative;margin-top:12px;overflow:hidden;border-radius:16px;background:#000;aspect-ratio:4/3}.kggLiveScanView video{width:100%;height:100%;object-fit:cover}.kggLiveScanGuide{position:absolute;left:15%;top:10%;width:70%;height:80%;border:4px solid #fff;border-radius:18px;box-shadow:0 0 0 999px #02061755}.kggLiveScanStatus{margin-top:12px;padding:11px;border-radius:13px;background:#1e293b;font-weight:900}.kggLiveScanStatus.ok{background:#14532d}.kggLiveScanStatus.warn{background:#78350f}.kggLiveScanFallback{display:grid;gap:8px;margin-top:10px}.kggLiveScanFallback[hidden]{display:none}.kggLiveScanFallback button{min-height:48px;border-radius:13px;border:1px solid #64748b;background:#fff;color:#111827;font-weight:900}.kggLiveScanPanel>p{margin:10px 2px 0;color:#cbd5e1;font-size:13px;line-height:1.4}@media(max-width:430px){.kggLiveScan{padding:8px}.kggLiveScanPanel{border-radius:18px;padding:10px}.kggLiveScanView{aspect-ratio:3/4}.kggLiveScanGuide{left:9%;top:19%;width:82%;height:62%}}';document.head.appendChild(s);}
-  function noPlanVisible(){const st=$('status');return !!(st&&/Kein Plan gefunden|No plan found/i.test(st.textContent||''));}
-  function ensureRescue(){ensureStyle();ensureScanInput();if(!noPlanVisible())return;const st=$('status');if(!st||$('kggQrRescue'))return;const box=document.createElement('div');box.id='kggQrRescue';box.className='kggQrRescue';box.innerHTML='<b>'+tr('Plan erneut öffnen','Open plan again')+'</b><p>'+tr('Wenn diese Web-App ohne Plan startet, scanne den Plan-QR-Code hier noch einmal.','If this web app opens without a plan, scan the plan QR code here again.')+'</p><button type="button" class="scanBig">📷 '+tr('Plan-QR scannen','Scan plan QR')+'</button><button type="button" class="pasteLink">'+tr('Plan-Link einfügen','Paste plan link')+'</button>';st.insertAdjacentElement('afterend',box);box.querySelector('.scanBig').onclick=()=>openCameraScan('update');box.querySelector('.pasteLink').onclick=()=>{scanMode='update';promptFallback();};}
-  function ensureReplaceBubble(){const box=$('kggActionBubbles');if(!box)return;let btn=$('kggBubbleReplace');if(!btn){btn=document.createElement('button');btn.id='kggBubbleReplace';btn.type='button';btn.className='kggBubble';const add=$('kggBubbleAdd');box.insertBefore(btn,add||null);}btn.textContent='♻ '+tr('Plan ersetzen','Replace plan');btn.onclick=e=>{e.preventDefault();e.stopPropagation();box.hidden=true;const fab=$('kggActionFab');if(fab)fab.classList.remove('open');openCameraScan('replace');};}
-  function ensureScanButton(){const row=$('installSmall');if(!row)return;row.classList.remove('hide');let btn=$('kggPlanScanBtn');if(!btn){btn=document.createElement('button');btn.id='kggPlanScanBtn';btn.type='button';btn.style.minHeight='38px';btn.style.borderRadius='999px';btn.style.border='1px solid #bfdbfe';btn.style.background='#eff6ff';btn.style.color='#111827';btn.style.fontWeight='950';btn.style.padding='6px 10px';btn.onclick=e=>{e.preventDefault();e.stopPropagation();openCameraScan('update');};row.insertBefore(btn,row.children[1]||null);}btn.textContent=tr('QR-Scan','QR scan');ensureScanInput();ensureRescue();setTimeout(ensureReplaceBubble,80);}
-  function patchRender(){if(window.__kggStartScanPatchV8)return;window.__kggStartScanPatchV8=true;if(typeof render==='function'){const old=render;window.render=function(){const r=old.apply(this,arguments);setTimeout(autoFillStartValues,0);setTimeout(ensureScanButton,0);setTimeout(ensureRescue,20);setTimeout(ensureReplaceBubble,100);return r;};}}
-  function init(){patchRender();ensureScanButton();ensureRescue();ensureReplaceBubble();autoFillStartValues();setTimeout(autoFillStartValues,300);setTimeout(autoFillStartValues,1000);setTimeout(ensureScanButton,300);setTimeout(ensureReplaceBubble,500);setTimeout(ensureReplaceBubble,1200);setTimeout(ensureRescue,500);setTimeout(ensureRescue,1500);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')closeLiveScanner(false)});window.addEventListener('pagehide',()=>closeLiveScanner(false));}
+(()=>{
+  const VERSION='set-summary-groups-v2-range-label';
+  if(window.__kggSetSummaryGroups===VERSION)return;
+  window.__kggSetSummaryGroups=VERSION;
+
+  function normalizeValue(value){return String(value||'').replace(/\s+/g,' ').trim().toLowerCase()}
+  function setLine(line){return String(line||'').match(/^(\s*)(Satz|Set)\s*(\d+)\s*:\s*(.*?)\s*$/i)}
+  function labelText(label,start,end,value,indent){const head=start===end?`${label} ${start}:`:`${label} ${start}–${end}:`;return `${indent||''}${head} ${String(value||'').trim()}`.trimEnd()}
+  function flushGroup(out,group){
+    if(!group.length)return;
+    let prev=group[0],same=[group[0]];
+    const pushSame=()=>{out.push(labelText(same[0].label,same[0].no,same[same.length-1].no,same[0].value,same[0].indent))};
+    for(let i=1;i<group.length;i++){
+      const cur=group[i];
+      if(cur.no===prev.no+1&&normalizeValue(cur.value)===normalizeValue(prev.value)){same.push(cur)}
+      else{pushSame();same=[cur]}
+      prev=cur;
+    }
+    pushSame();
+  }
+  function compressLines(text){
+    const src=String(text||'');
+    const lines=src.split(/\n/);
+    const out=[];let group=[];
+    lines.forEach(line=>{const m=setLine(line);if(m){group.push({indent:m[1]||'',label:m[2],no:Number(m[3]),value:m[4]||''});return}flushGroup(out,group);group=[];out.push(line)});
+    flushGroup(out,group);
+    return out.join('\n')
+  }
+  function compressInline(text){
+    const src=String(text||'');
+    if(src.includes('\n'))return compressLines(src);
+    const re=/\b(Satz|Set)\s*(\d+)\s*:\s*([\s\S]*?)(?=(?:\s*\b(?:Satz|Set)\s*\d+\s*:)|$)/gi;
+    const group=[];let m,last=0;
+    while((m=re.exec(src))){if(src.slice(last,m.index).trim())return src;group.push({indent:'',label:m[1],no:Number(m[2]),value:(m[3]||'').trim()});last=re.lastIndex}
+    if(group.length<2||src.slice(last).trim())return src;
+    const out=[];flushGroup(out,group);return out.join('\n')
+  }
+  function compressText(text){return compressInline(compressLines(text))}
+
+  function exerciseName(ex){return String(ex&&(ex.n||ex.name||ex.title||ex[0])||'').trim()}
+  function exerciseSets(ex){return Math.max(1,Number(ex&&(ex.sets||ex[1]))||1)}
+  function valueMapSignature(values,day,exerciseIndex,setNo){
+    const prefix=`${day}|${exerciseIndex}|${setNo}|`;
+    const entries=Object.keys(values||{}).filter(key=>key.startsWith(prefix)).map(key=>[key.slice(prefix.length),String(values[key]??'').trim()]).filter(entry=>entry[1]!=='').sort((a,b)=>a[0].localeCompare(b[0]));
+    return entries.length?JSON.stringify(entries.map(entry=>[entry[0],normalizeValue(entry[1])])):''
+  }
+  function hasUniformCompletedSets(values,day,exerciseIndex,setCount){
+    if(!values||!day||setCount<2)return false;
+    const signatures=[];
+    for(let setNo=1;setNo<=setCount;setNo++){
+      const signature=valueMapSignature(values,day,exerciseIndex,setNo);
+      if(!signature)return false;
+      signatures.push(signature);
+    }
+    return signatures.every(signature=>signature===signatures[0])
+  }
+  function lineMatchesExercise(line,name){
+    const a=normalizeValue(line).replace(/^\s*(?:\d+[.)]|[-•])\s*/,'');
+    const b=normalizeValue(name);
+    return !!b&&(a===b||a.startsWith(b+':')||a.endsWith(' '+b))
+  }
+  function rangeLabel(lines,start,end,setCount){
+    const segment=lines.slice(start,end).join('\n');
+    const language=(localStorage.getItem('kggPatientLang')==='en'||/\bSet\s*\d+/i.test(segment))?'Set':'Satz';
+    return `${language} 1–${setCount}:`
+  }
+  function annotateUniformSetRanges(text,context){
+    const plan=context&&context.plan;
+    const values=context&&context.values;
+    const day=Number(context&&context.day)||0;
+    const exercises=plan&&Array.isArray(plan.ex)?plan.ex:[];
+    if(!exercises.length||!values||!day)return String(text||'');
+    const lines=String(text||'').split(/\n/);
+    const positions=[];
+    exercises.forEach((ex,index)=>{
+      const name=exerciseName(ex);
+      if(!name)return;
+      const lineIndex=lines.findIndex((line,at)=>!positions.some(pos=>pos.lineIndex===at)&&lineMatchesExercise(line,name));
+      if(lineIndex>=0)positions.push({exerciseIndex:index,lineIndex,name,setCount:exerciseSets(ex)})
+    });
+    positions.sort((a,b)=>a.lineIndex-b.lineIndex);
+    for(let posIndex=positions.length-1;posIndex>=0;posIndex--){
+      const pos=positions[posIndex];
+      if(pos.setCount<2||!hasUniformCompletedSets(values,day,pos.exerciseIndex,pos.setCount))continue;
+      const end=posIndex+1<positions.length?positions[posIndex+1].lineIndex:lines.length;
+      const segment=lines.slice(pos.lineIndex,end).join('\n');
+      const completeRange=new RegExp(`\\b(?:Satz|Set)\\s*1\\s*[–—-]\\s*${pos.setCount}\\s*:`,`i`);
+      if(completeRange.test(segment))continue;
+      if(/\b(?:Satz|Set)\s*\d+\s*:/i.test(segment))continue;
+      lines.splice(pos.lineIndex+1,0,rangeLabel(lines,pos.lineIndex,end,pos.setCount));
+    }
+    return lines.join('\n')
+  }
+  function currentContext(){
+    return {
+      plan:typeof p!=='undefined'&&p?p:null,
+      values:typeof v!=='undefined'&&v&&typeof v==='object'?v:null,
+      day:typeof d!=='undefined'?Number(d):0
+    }
+  }
+  function apply(){
+    const el=document.getElementById('sum');
+    if(!el)return;
+    const before=el.textContent||'';
+    const compressed=compressText(before);
+    const after=annotateUniformSetRanges(compressed,currentContext());
+    if(after!==before)el.textContent=after;
+  }
+  function patchShowQr(){
+    if(window.__kggSetSummaryGroupsPatched||typeof showQr!=='function')return;
+    window.__kggSetSummaryGroupsPatched=1;
+    const old=showQr;
+    window.showQr=function(){const r=old.apply(this,arguments);setTimeout(apply,0);setTimeout(apply,80);setTimeout(apply,240);return r};
+  }
+  if(window.__KGG_TEST__)window.__kggSetSummaryGroupsTest={compressText,annotateUniformSetRanges,valueMapSignature,hasUniformCompletedSets};
+  function init(){patchShowQr();setTimeout(patchShowQr,300);setTimeout(patchShowQr,1000);setTimeout(apply,1200)}
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
 })();
 ```
