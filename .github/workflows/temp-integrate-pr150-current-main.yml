@@ -60,7 +60,7 @@ jobs:
           path.write_text(text, encoding='utf-8', newline='\n')
           PY
 
-          git add tmp/pr150-kgg-required-gate.yml
+          git add -f tmp/pr150-kgg-required-gate.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m 'prepare PR150 required gate integration blob'
