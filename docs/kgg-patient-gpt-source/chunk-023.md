@@ -1,126 +1,241 @@
 # KGG Patient Source Chunk 023
 
-- Source file: `patient-set-summary-groups.js`
-- Characters: 1-6075
-- Full source SHA-256: `78061311ef7a80b2c6f2ee35733a192ddcc9a87ed88a34644da90f9207ff71a2`
+- Source file: `patient-plan-replace-slot-fix.js`
+- Characters: 1-9821
+- Full source SHA-256: `ca550410eb93e965d8a3051b08e28afa2f254a5a7a4374ddb0dd4c88d1de003c`
 
 ```
 (()=>{
-  const VERSION='set-summary-groups-v2-range-label';
-  if(window.__kggSetSummaryGroups===VERSION)return;
-  window.__kggSetSummaryGroups=VERSION;
+  const VERSION='patient-plan-slots-v2-add-mode';
+  if(window.__kggPlanReplaceSlotFix===VERSION)return;
+  window.__kggPlanReplaceSlotFix=VERSION;
 
-  function normalizeValue(value){return String(value||'').replace(/\s+/g,' ').trim().toLowerCase()}
-  function setLine(line){return String(line||'').match(/^(\s*)(Satz|Set)\s*(\d+)\s*:\s*(.*?)\s*$/i)}
-  function labelText(label,start,end,value,indent){const head=start===end?`${label} ${start}:`:`${label} ${start}–${end}:`;return `${indent||''}${head} ${String(value||'').trim()}`.trimEnd()}
-  function flushGroup(out,group){
-    if(!group.length)return;
-    let prev=group[0],same=[group[0]];
-    const pushSame=()=>{out.push(labelText(same[0].label,same[0].no,same[same.length-1].no,same[0].value,same[0].indent))};
-    for(let i=1;i<group.length;i++){
-      const cur=group[i];
-      if(cur.no===prev.no+1&&normalizeValue(cur.value)===normalizeValue(prev.value)){same.push(cur)}
-      else{pushSame();same=[cur]}
-      prev=cur;
-    }
-    pushSame();
-  }
-  function compressLines(text){
-    const src=String(text||'');
-    const lines=src.split(/\n/);
-    const out=[];let group=[];
-    lines.forEach(line=>{const m=setLine(line);if(m){group.push({indent:m[1]||'',label:m[2],no:Number(m[3]),value:m[4]||''});return}flushGroup(out,group);group=[];out.push(line)});
-    flushGroup(out,group);
-    return out.join('\n')
-  }
-  function compressInline(text){
-    const src=String(text||'');
-    if(src.includes('\n'))return compressLines(src);
-    const re=/\b(Satz|Set)\s*(\d+)\s*:\s*([\s\S]*?)(?=(?:\s*\b(?:Satz|Set)\s*\d+\s*:)|$)/gi;
-    const group=[];let m,last=0;
-    while((m=re.exec(src))){if(src.slice(last,m.index).trim())return src;group.push({indent:'',label:m[1],no:Number(m[2]),value:(m[3]||'').trim()});last=re.lastIndex}
-    if(group.length<2||src.slice(last).trim())return src;
-    const out=[];flushGroup(out,group);return out.join('\n')
-  }
-  function compressText(text){return compressInline(compressLines(text))}
+  const MULTI_KEY='kggPatientMultiPlansV1';
+  const CURRENT_KEY='kggCurrentPlanV1';
+  const nativeSetItem=Storage.prototype.setItem;
+  const nativeParse=JSON.parse;
+  let addSession=null;
+  let refreshQueued=false;
 
-  function exerciseName(ex){return String(ex&&(ex.n||ex.name||ex.title||ex[0])||'').trim()}
-  function exerciseSets(ex){return Math.max(1,Number(ex&&(ex.sets||ex[1]))||1)}
-  function valueMapSignature(values,day,exerciseIndex,setNo){
-    const prefix=`${day}|${exerciseIndex}|${setNo}|`;
-    const entries=Object.keys(values||{}).filter(key=>key.startsWith(prefix)).map(key=>[key.slice(prefix.length),String(values[key]??'').trim()]).filter(entry=>entry[1]!=='').sort((a,b)=>a[0].localeCompare(b[0]));
-    return entries.length?JSON.stringify(entries.map(entry=>[entry[0],normalizeValue(entry[1])])):''
+  function parse(value){
+    try{return nativeParse(String(value||''))}catch(e){return null}
   }
-  function hasUniformCompletedSets(values,day,exerciseIndex,setCount){
-    if(!values||!day||setCount<2)return false;
-    const signatures=[];
-    for(let setNo=1;setNo<=setCount;setNo++){
-      const signature=valueMapSignature(values,day,exerciseIndex,setNo);
-      if(!signature)return false;
-      signatures.push(signature);
+  function clone(value){
+    try{return nativeParse(JSON.stringify(value))}catch(e){return value&&typeof value==='object'?{...value}:value}
+  }
+  function clampActive(state){
+    const plans=Array.isArray(state&&state.plans)?state.plans:[];
+    return Math.max(0,Math.min(Number(state&&state.active)||0,Math.max(0,plans.length-1)));
+  }
+  function isReplacement(plan){
+    return !!(plan&&typeof plan==='object'&&('sourcePlanId' in plan)&&/-r[a-z0-9]+$/i.test(String(plan.i||'')));
+  }
+  function normalizeReplacement(previous,incoming){
+    if(!incoming||!Array.isArray(incoming.plans)||!incoming.plans.length)return incoming;
+    const appended=incoming.plans[incoming.plans.length-1];
+    if(!isReplacement(appended))return incoming;
+
+    const beforePlans=previous&&Array.isArray(previous.plans)?previous.plans:[];
+    const activeBefore=clampActive(previous||incoming);
+    const expectedAppend=beforePlans.length
+      ? incoming.plans.length===beforePlans.length+1
+      : incoming.plans.length===2;
+    const pointsToAppended=Number(incoming.active)===incoming.plans.length-1;
+    if(!expectedAppend||!pointsToAppended)return incoming;
+
+    const plans=beforePlans.length?incoming.plans.slice(0,-1):[];
+    if(plans.length)plans[activeBefore]=appended;
+    else plans.push(appended);
+    incoming.plans=plans;
+    incoming.active=beforePlans.length?activeBefore:0;
+    incoming.day=incoming.day&&typeof incoming.day==='object'?incoming.day:{};
+    delete incoming.day[String(incoming.plans.length)];
+    incoming.day[incoming.active]=1;
+    return incoming;
+  }
+  function normalizeAddedPlan(raw,stamp){
+    const plan=clone(raw&&typeof raw==='object'?raw:{});
+    const sourceId=String(plan.i||'plan');
+    plan.sourcePlanId=sourceId;
+    plan.i=sourceId+'-p'+String(stamp||Date.now()).toString(36);
+    plan.t=plan.t||'KGG Trainingsplan';
+    plan.v=Number(plan.v)||1;
+    plan.d=Number(plan.d)||6;
+    plan.extendDays=plan.extendDays!==false;
+    plan.stepDays=Number(plan.stepDays)||6;
+    plan.e=Array.isArray(plan.e)?plan.e.map(clone):[];
+    return plan;
+  }
+  function applyAddState(previous,current,added){
+    const state=previous&&Array.isArray(previous.plans)?clone(previous):{version:1,plans:[],active:0,day:{}};
+    state.version=Number(state.version)||1;
+    state.plans=Array.isArray(state.plans)?state.plans:[];
+    state.day=state.day&&typeof state.day==='object'?state.day:{};
+    if(!state.plans.length&&current)state.plans.push(clone(current));
+    state.plans.push(clone(added));
+    state.active=state.plans.length-1;
+    state.day[state.active]=1;
+    state.updatedAt=new Date().toISOString();
+    return state;
+  }
+  function existingPlanCount(){
+    const state=parse(window.localStorage&&window.localStorage.getItem(MULTI_KEY));
+    if(state&&Array.isArray(state.plans)&&state.plans.length)return state.plans.length;
+    const current=parse(window.localStorage&&window.localStorage.getItem(CURRENT_KEY));
+    if(current&&current.plan&&typeof current.plan==='object')return 1;
+    try{if(typeof p!=='undefined'&&p&&Array.isArray(p.ex))return 1}catch(e){}
+    return 0;
+  }
+  function nextPlanNumber(){return existingPlanCount()+1}
+  function ordinalEn(number){
+    const n=Math.max(1,Number(number)||1),mod100=n%100;
+    if(mod100>=11&&mod100<=13)return n+'th';
+    return n+({1:'st',2:'nd',3:'rd'}[n%10]||'th');
+  }
+  function isEnglish(){
+    try{return window.localStorage.getItem('kggPatientLang')==='en'}catch(e){return false}
+  }
+  function currentRaw(){
+    const saved=parse(window.localStorage&&window.localStorage.getItem(CURRENT_KEY));
+    return saved&&saved.plan&&typeof saved.plan==='object'?clone(saved.plan):null;
+  }
+  function currentState(){
+    const state=parse(window.localStorage&&window.localStorage.getItem(MULTI_KEY));
+    return state&&Array.isArray(state.plans)?clone(state):{version:1,plans:[],active:0,day:{}};
+  }
+  function beginAdd(){
+    try{
+      const api=window.KGGPatientMultiPlan;
+      if(api&&typeof api.saveCurrentSlot==='function')api.saveCurrentSlot();
+    }catch(e){}
+    addSession={
+      state:currentState(),
+      current:currentRaw(),
+      captured:null,
+      added:null,
+      number:nextPlanNumber(),
+      expiresAt:Date.now()+5*60*1000
+    };
+    refreshUi();
+    return addSession.number;
+  }
+  function cancelAdd(){addSession=null;refreshUi()}
+  function capturePlan(value){
+    if(!addSession||addSession.captured||Date.now()>addSession.expiresAt)return;
+    if(value&&typeof value==='object'&&Array.isArray(value.e))addSession.captured=clone(value);
+  }
+  function setRuntimeFromPlan(plan){
+    try{
+      if(typeof p!=='undefined')p={
+        id:plan.i||'plan',title:plan.t||'KGG Trainingsplan',version:Number(plan.v)||1,
+        days:Number(plan.d)||6,extendDays:plan.extendDays!==false,
+        stepDays:Number(plan.stepDays)||6,
+        ex:(plan.e||[]).map(e=>({n:e[0]||'Übung',sets:Number(e[1])||3,side:e[2]||'LR',u:e[3]||'kg',m:e[4]||'Wdh',sl:e[5]||'',sm:e[6]||'',media:e[7]||'',videoUrl:e[8]||'',videoLabel:e[9]||'Video öffnen',painMode:e[10]||'exercise'}))
+      };
+      if(typeof v!=='undefined')v={};
+      if(typeof done!=='undefined')done=[];
+      if(typeof d!=='undefined')d=1;
+    }catch(e){}
+  }
+  function writeAddedCurrent(key){
+    if(!addSession||!addSession.captured)return null;
+    if(!addSession.added)addSession.added=normalizeAddedPlan(addSession.captured,Date.now());
+    const wrapper={plan:addSession.added,importedAt:new Date().toISOString(),source:'add'};
+    nativeSetItem.call(window.localStorage,key,JSON.stringify(wrapper));
+    setRuntimeFromPlan(addSession.added);
+    return addSession.added;
+  }
+  function finishAdd(key){
+    if(!addSession||!addSession.added)return false;
+    const state=applyAddState(addSession.state,addSession.current,addSession.added);
+    nativeSetItem.call(window.localStorage,key,JSON.stringify(state));
+    addSession=null;
+    queueRefresh();
+    return true;
+  }
+
+  JSON.parse=function(text,reviver){
+    const value=nativeParse.call(JSON,text,reviver);
+    capturePlan(value);
+    return value;
+  };
+
+  Storage.prototype.setItem=function(key,value){
+    const name=String(key);
+    if(this===window.localStorage&&name===CURRENT_KEY&&addSession&&addSession.captured){
+      writeAddedCurrent(key);
+      return;
     }
-    return signatures.every(signature=>signature===signatures[0])
-  }
-  function lineMatchesExercise(line,name){
-    const a=normalizeValue(line).replace(/^\s*(?:\d+[.)]|[-•])\s*/,'');
-    const b=normalizeValue(name);
-    return !!b&&(a===b||a.startsWith(b+':')||a.endsWith(' '+b))
-  }
-  function rangeLabel(lines,start,end,setCount){
-    const segment=lines.slice(start,end).join('\n');
-    const language=(localStorage.getItem('kggPatientLang')==='en'||/\bSet\s*\d+/i.test(segment))?'Set':'Satz';
-    return `${language} 1–${setCount}:`
-  }
-  function annotateUniformSetRanges(text,context){
-    const plan=context&&context.plan;
-    const values=context&&context.values;
-    const day=Number(context&&context.day)||0;
-    const exercises=plan&&Array.isArray(plan.ex)?plan.ex:[];
-    if(!exercises.length||!values||!day)return String(text||'');
-    const lines=String(text||'').split(/\n/);
-    const positions=[];
-    exercises.forEach((ex,index)=>{
-      const name=exerciseName(ex);
-      if(!name)return;
-      const lineIndex=lines.findIndex((line,at)=>!positions.some(pos=>pos.lineIndex===at)&&lineMatchesExercise(line,name));
-      if(lineIndex>=0)positions.push({exerciseIndex:index,lineIndex,name,setCount:exerciseSets(ex)})
-    });
-    positions.sort((a,b)=>a.lineIndex-b.lineIndex);
-    for(let posIndex=positions.length-1;posIndex>=0;posIndex--){
-      const pos=positions[posIndex];
-      if(pos.setCount<2||!hasUniformCompletedSets(values,day,pos.exerciseIndex,pos.setCount))continue;
-      const end=posIndex+1<positions.length?positions[posIndex+1].lineIndex:lines.length;
-      const segment=lines.slice(pos.lineIndex,end).join('\n');
-      const completeRange=new RegExp(`\\b(?:Satz|Set)\\s*1\\s*[–—-]\\s*${pos.setCount}\\s*:`,`i`);
-      if(completeRange.test(segment))continue;
-      if(/\b(?:Satz|Set)\s*\d+\s*:/i.test(segment))continue;
-      lines.splice(pos.lineIndex+1,0,rangeLabel(lines,pos.lineIndex,end,pos.setCount));
+    if(this===window.localStorage&&name===MULTI_KEY){
+      if(addSession&&addSession.added&&finishAdd(key))return;
+      const previous=parse(this.getItem(MULTI_KEY));
+      const incoming=parse(value);
+      if(incoming){
+        const normalized=normalizeReplacement(previous,incoming);
+        const result=nativeSetItem.call(this,key,JSON.stringify(normalized));
+        queueRefresh();
+        return result;
+      }
     }
-    return lines.join('\n')
-  }
-  function currentContext(){
-    return {
-      plan:typeof p!=='undefined'&&p?p:null,
-      values:typeof v!=='undefined'&&v&&typeof v==='object'?v:null,
-      day:typeof d!=='undefined'?Number(d):0
+    const result=nativeSetItem.call(this,key,value);
+    if(this===window.localStorage&&(name===CURRENT_KEY||name===MULTI_KEY))queueRefresh();
+    return result;
+  };
+
+  function refreshUi(){
+    if(typeof document==='undefined')return;
+    const number=addSession&&addSession.number?addSession.number:nextPlanNumber();
+    const en=isEnglish();
+    const label=en?ordinalEn(number)+' plan':number+'. Plan';
+    const hidden=document.getElementById('kggPatientAddPlanBtn');
+    if(hidden&&hidden.textContent!==(label+' +'))hidden.textContent=label+' +';
+    const bubble=document.getElementById('kggBubbleAdd');
+    if(bubble&&bubble.textContent!==('➕ '+label))bubble.textContent='➕ '+label;
+    if(addSession){
+      const scanner=document.getElementById('kggLiveScan');
+      if(scanner){
+        scanner.setAttribute('aria-label',en?'Scan additional plan':'Zusätzlichen Plan scannen');
+        const title=scanner.querySelector('.kggLiveScanHead b');
+        const wanted=en?'Scan QR for '+ordinalEn(number)+' plan':'QR für '+number+'. Plan scannen';
+        if(title&&title.textContent!==wanted)title.textContent=wanted;
+        const status=scanner.querySelector('#kggLiveScanStatus');
+        if(status&&/Plan erkannt.*(aktualisiert|Updating)/i.test(status.textContent||'')){
+          status.textContent=en?'Plan detected. Adding as a separate plan …':number+'. Plan erkannt. Wird separat hinzugefügt …';
+        }
+      }
     }
   }
-  function apply(){
-    const el=document.getElementById('sum');
-    if(!el)return;
-    const before=el.textContent||'';
-    const compressed=compressText(before);
-    const after=annotateUniformSetRanges(compressed,currentContext());
-    if(after!==before)el.textContent=after;
+  function queueRefresh(){
+    if(refreshQueued)return;
+    refreshQueued=true;
+    const run=()=>{refreshQueued=false;refreshUi()};
+    if(typeof queueMicrotask==='function')queueMicrotask(run);else if(typeof setTimeout==='function')setTimeout(run,0);else run();
   }
-  function patchShowQr(){
-    if(window.__kggSetSummaryGroupsPatched||typeof showQr!=='function')return;
-    window.__kggSetSummaryGroupsPatched=1;
-    const old=showQr;
-    window.showQr=function(){const r=old.apply(this,arguments);setTimeout(apply,0);setTimeout(apply,80);setTimeout(apply,240);return r};
+  function installDomBridge(){
+    if(typeof document==='undefined')return;
+    document.addEventListener('click',event=>{
+      const target=event&&event.target&&event.target.closest?event.target.closest('#kggPatientAddPlanBtn,#kggLiveScan .kggLiveScanClose'):null;
+      if(!target)return;
+      if(target.id==='kggPatientAddPlanBtn')beginAdd();
+      else if(target.classList&&target.classList.contains('kggLiveScanClose'))cancelAdd();
+    },true);
+    if(typeof MutationObserver==='function'){
+      const observer=new MutationObserver(queueRefresh);
+      const root=document.documentElement||document.body;
+      if(root)observer.observe(root,{childList:true,subtree:true,characterData:true});
+    }
+    queueRefresh();
   }
-  if(window.__KGG_TEST__)window.__kggSetSummaryGroupsTest={compressText,annotateUniformSetRanges,valueMapSignature,hasUniformCompletedSets};
-  function init(){patchShowQr();setTimeout(patchShowQr,300);setTimeout(patchShowQr,1000);setTimeout(apply,1200)}
-  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
+
+  window.KGGPatientPlanSlots={
+    version:VERSION,
+    normalizeReplacement,
+    normalizeAddedPlan,
+    applyAddState,
+    nextPlanNumber,
+    beginAdd,
+    cancelAdd
+  };
+  installDomBridge();
 })();
 ```
