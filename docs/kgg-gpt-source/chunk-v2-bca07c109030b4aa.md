@@ -3,8 +3,40 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 65,
+  "latestVersionCode": 66,
   "entries": [
+    {
+      "versionCode": 66,
+      "versionName": "1.0.66-editor-trash-bank-delete",
+      "patchId": "kgg-v066-editor-trash-bank-delete",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Editor-Mülleimer löscht immer aus Übungsdatenbank",
+      "reason": "Der Mülleimer im Dialog Übung bearbeiten wird immer auf die bestehende bestätigte Datenbank-Löschung geroutet; das separate Entfernen aus dem aktuellen Plan bleibt unverändert.",
+      "whatChanged": [
+        "Der Mülleimer im Dialog Übung bearbeiten wird immer auf die bestehende bestätigte Datenbank-Löschung geroutet; das separate Entfernen aus dem aktuellen Plan bleibt unverändert."
+      ],
+      "touchedAreas": [
+        "Übungsdatenbank",
+        "Editor"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
     {
       "versionCode": 65,
       "versionName": "1.0.65-source-control-char-guard",
@@ -598,7 +630,7 @@
       "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
     }
   ],
-  "latestVersionName": "1.0.65-source-control-char-guard",
+  "latestVersionName": "1.0.66-editor-trash-bank-delete",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",

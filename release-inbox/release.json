@@ -1,7 +1,5 @@
 {
-  "versionCode": 66,
+  "releaseId": "r0427",
   "versionName": "1.0.66-editor-trash-bank-delete",
-  "indexUrl": "index.html?v=66",
-  "sha256": "bd142943354e43f27eef093509e509c147c9d8b92c8c88f48d6554f1489209d0",
   "notes": "v066: Der Mülleimer im Dialog Übung bearbeiten wird immer auf die bestehende bestätigte Datenbank-Löschung geroutet; das separate Entfernen aus dem aktuellen Plan bleibt unverändert."
 }
