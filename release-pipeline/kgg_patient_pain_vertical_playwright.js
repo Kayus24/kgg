@@ -31,10 +31,29 @@ async function waitForRuntime(page) {
   const diagnostics = await page.evaluate(() => ({ scripts:[...document.scripts].map(s=>s.src).filter(Boolean), body:document.body.className }));
   throw new Error(`vertical pain runtime was not injected: ${JSON.stringify(diagnostics)}`);
 }
-async function setCardOpen(page, card, index, open) {
-  const isOpen = await card.evaluate(el => el.classList.contains("kggOpen"));
-  if (isOpen !== open) await card.locator("h3").click();
-  await page.waitForFunction(({ index, open }) => Boolean(document.querySelectorAll("#list .ex")[index]?.classList.contains("kggOpen")) === open, { index, open });
+async function setCardOpen(page, _card, index, open) {
+  for (let attempt=0; attempt<4; attempt+=1) {
+    const card=page.locator("#list .ex").nth(index);
+    await card.waitFor({state:"attached",timeout:5000});
+    const isOpen=await card.evaluate(el=>el.classList.contains("kggOpen"));
+    if (isOpen===open) return;
+    const header=card.locator("h3");
+    await header.waitFor({state:"attached",timeout:5000});
+    await header.evaluate(element=>element.click());
+    try {
+      await page.waitForFunction(({index,open})=>Boolean(document.querySelectorAll("#list .ex")[index]?.classList.contains("kggOpen"))===open,{index,open},{timeout:1500});
+      return;
+    } catch (error) {
+      await page.waitForTimeout(60);
+    }
+  }
+  const diagnostic=await page.evaluate(({index,open})=>({
+    index,open,
+    cardCount:document.querySelectorAll("#list .ex").length,
+    classes:document.querySelectorAll("#list .ex")[index]?.className||"",
+    hasHeader:Boolean(document.querySelectorAll("#list .ex")[index]?.querySelector("h3")),
+  }),{index,open});
+  throw new Error(`card open state did not stabilize: ${JSON.stringify(diagnostic)}`);
 }
 async function openModal(toggle, modal) {
   if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
@@ -157,9 +176,12 @@ async function main() {
     assert(await modal.isVisible(),"click inside dialog closed modal");
     await modal.click({position:{x:8,y:8}});
     await modal.waitFor({state:"hidden"});
-    await page.waitForTimeout(30);
+    await page.waitForFunction(expected=>{
+      const active=String(document.activeElement?.className||"");
+      return Math.abs(window.scrollY-expected)<=1&&getComputedStyle(document.body).position!=="fixed"&&active.includes("kggPainVerticalToggle");
+    },before.scrollY,{timeout:2000});
     const restored=await page.evaluate(()=>({scrollY:window.scrollY,bodyPosition:getComputedStyle(document.body).position,active:document.activeElement?.className||""}));
-    assert(Math.abs(restored.scrollY-before.scrollY)<=1,"closing modal did not restore scroll position");
+    assert(Math.abs(restored.scrollY-before.scrollY)<=1,`closing modal did not restore scroll position: ${JSON.stringify({before:before.scrollY,restored})}`);
     assert(restored.bodyPosition!=="fixed","closing modal did not unlock body");
     assert(String(restored.active).includes("kggPainVerticalToggle"),"focus did not return to pain trigger");
 
