@@ -1,8 +1,8 @@
 # KGG Patient Source Chunk 022
 
 - Source file: `patient-plan-delete.js`
-- Characters: 1-9302
-- Full source SHA-256: `72ad65c06b9752af17e3a925fc71c535f4452144057525308b582ea499bb72d6`
+- Characters: 1-9498
+- Full source SHA-256: `15427836ba1c243167425f6ac6912efe6bce879083d0eb086c947cd1341ed408`
 
 ```
 (()=>{
@@ -63,8 +63,8 @@
   }
   function loadActive(raw){
     window.p=runtimeFromRaw(raw);persistCurrent(raw);
-    safe(()=>{window.v=read(sk(),'{}')});safe(()=>{window.done=read(dk(),'[]').map(Number).filter(n=>n>=1&&n<=p.days)});
-    safe(()=>save());safe(()=>render());
+    safe(()=>{window.v=read(sk(),'{}')});safe(()=>{const flow=window.KGGPatientDayFlow;window.done=flow&&typeof flow.normalizeDone==='function'?flow.normalizeDone(read(dk(),'[]')):read(dk(),'[]').map(Number).filter(n=>n>=1&&(p.extendDays!==false||n<=p.days))});
+    safe(()=>typeof restoreDay==='function'&&restoreDay());safe(()=>save());safe(()=>render());
     [80,300,900].forEach(delay=>setTimeout(()=>{safe(()=>window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.prefetch&&window.KGGPatientMediaRetryCache.prefetch());safe(()=>window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.render&&window.KGGPatientMediaRetryCache.render())},delay))
   }
   async function deletePlan(index,confirmFn){
