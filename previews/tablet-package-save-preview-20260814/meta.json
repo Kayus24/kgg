@@ -1,0 +1,16 @@
+{
+  "kind": "kgg_gpt_preview",
+  "requestId": "tablet-package-save-preview-20260814",
+  "patchHash": "06b7966d0c1e5ce0f3ffeeecaf60a777f6db33d818b59eb51bc229978d1e8c82",
+  "baseSha": "fa02dcb1e196601240c87347d1448059bb23e250",
+  "baseVersionCode": 66,
+  "rolloutCode": 1786660952,
+  "title": "Tablet-Paketbutton wiederherstellen",
+  "summary": "Zeigt den vorhandenen Paket-Speichern-Button nur im Tablet-Layout wieder in der Kopfzeile des aktuellen Plans mit 56 x 44 px Touch-Ziel; der bestehende Dialog-Handler bleibt unverndert.",
+  "patchId": "kgg-v066-tablet-package-save-preview",
+  "patchFile": "patches/v066-tablet-package-save-preview.html",
+  "versionName": "1.0.66-tablet-package-save-preview",
+  "createdAt": "2026-08-13T22:42:32Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/tablet-package-save-preview-20260814/admin.html",
+  "sha256": "c0187f8807fac9d5c406fb9ae2eec3075a4d8724121e0d245fe92e11fe1904ca"
+}

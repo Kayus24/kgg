@@ -4,6 +4,22 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "tablet-package-save-preview-20260814",
+      "patchHash": "06b7966d0c1e5ce0f3ffeeecaf60a777f6db33d818b59eb51bc229978d1e8c82",
+      "baseSha": "fa02dcb1e196601240c87347d1448059bb23e250",
+      "baseVersionCode": 66,
+      "rolloutCode": 1786660952,
+      "title": "Tablet-Paketbutton wiederherstellen",
+      "summary": "Zeigt den vorhandenen Paket-Speichern-Button nur im Tablet-Layout wieder in der Kopfzeile des aktuellen Plans mit 56 x 44 px Touch-Ziel; der bestehende Dialog-Handler bleibt unverndert.",
+      "patchId": "kgg-v066-tablet-package-save-preview",
+      "patchFile": "patches/v066-tablet-package-save-preview.html",
+      "versionName": "1.0.66-tablet-package-save-preview",
+      "createdAt": "2026-08-13T22:42:32Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/tablet-package-save-preview-20260814/admin.html",
+      "sha256": "c0187f8807fac9d5c406fb9ae2eec3075a4d8724121e0d245fe92e11fe1904ca"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "kgg-editor-trash-bank-delete",
       "patchHash": "f37677ff7cb58bf4627e4f09756a0d50d542c5c1a164627f9a2fdf344b29c649",
       "baseSha": "fa02dcb1e196601240c87347d1448059bb23e250",
@@ -305,38 +321,22 @@
       "createdAt": "2026-07-30T09:48:51Z",
       "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-live-qr-direct-no-auto-photo/admin.html",
       "sha256": "f7426f9de40db29783f21bba6bf0e4ef05e23000117b2d3bce172dacf2343a42"
-    },
-    {
-      "kind": "kgg_gpt_preview",
-      "requestId": "kgg-camera-live-qr-local-jsqr",
-      "patchHash": "2b0a08897b6babeefab60f3b10f07260314d22fb2dc1bf69b7b39234a0a330b4",
-      "baseSha": "a367c001c1c3db4a87652e36811a08a0b74ea870",
-      "baseVersionCode": 61,
-      "rolloutCode": 1785348854,
-      "title": "Kamera mit lokalem Live-QR wie Patienten-App",
-      "summary": "Die normale Kameravorschau behaelt den manuellen Ausloeser. Parallel prueft ein 200-ms-Live-Loop das sichtbare Videobild zuerst nativ und danach mit den bereits lokal vorhandenen jsQR-Funktionen und sechs rotierenden Can",
-      "patchId": "kgg-v061-camera-live-qr-local-jsqr",
-      "patchFile": "patches/v061-camera-live-qr-local-jsqr.html",
-      "versionName": "1.0.61-camera-live-qr-local-jsqr",
-      "createdAt": "2026-07-29T18:14:14Z",
-      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-camera-live-qr-local-jsqr/admin.html",
-      "sha256": "31d13122858199cd2a58fbcdf3d220e9d7d164337a78983031df310d1bf02aeb"
     }
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "kgg-editor-trash-bank-delete",
-    "patchHash": "f37677ff7cb58bf4627e4f09756a0d50d542c5c1a164627f9a2fdf344b29c649",
+    "requestId": "tablet-package-save-preview-20260814",
+    "patchHash": "06b7966d0c1e5ce0f3ffeeecaf60a777f6db33d818b59eb51bc229978d1e8c82",
     "baseSha": "fa02dcb1e196601240c87347d1448059bb23e250",
     "baseVersionCode": 66,
-    "rolloutCode": 1786643019,
-    "title": "Editor-Mlleimer lscht immer aus bungsdatenbank",
-    "summary": "Der Mlleimer im Dialog bung bearbeiten wird immer auf die bestehende besttigte Datenbank-Lschung geroutet; das separate Entfernen aus dem aktuellen Plan bleibt unverndert.",
-    "patchId": "kgg-v066-editor-trash-bank-delete",
-    "patchFile": "patches/v066-editor-trash-bank-delete.html",
-    "versionName": "1.0.66-editor-trash-bank-delete",
-    "createdAt": "2026-08-13T17:43:39Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-editor-trash-bank-delete/admin.html",
-    "sha256": "536706f33d1ad6bcb6624bbd7749cb14e50855bd32b88f9eea952336bc677b5c"
+    "rolloutCode": 1786660952,
+    "title": "Tablet-Paketbutton wiederherstellen",
+    "summary": "Zeigt den vorhandenen Paket-Speichern-Button nur im Tablet-Layout wieder in der Kopfzeile des aktuellen Plans mit 56 x 44 px Touch-Ziel; der bestehende Dialog-Handler bleibt unverndert.",
+    "patchId": "kgg-v066-tablet-package-save-preview",
+    "patchFile": "patches/v066-tablet-package-save-preview.html",
+    "versionName": "1.0.66-tablet-package-save-preview",
+    "createdAt": "2026-08-13T22:42:32Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/tablet-package-save-preview-20260814/admin.html",
+    "sha256": "c0187f8807fac9d5c406fb9ae2eec3075a4d8724121e0d245fe92e11fe1904ca"
   }
 }
