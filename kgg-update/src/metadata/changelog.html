@@ -3,8 +3,39 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 65,
+  "latestVersionCode": 67,
   "entries": [
+    {
+      "versionCode": 67,
+      "versionName": "1.0.67-plan-text-live-master-guard",
+      "patchId": "kgg-v067-plan-text-live-master-guard",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Plan-Text Live-Master Schutz",
+      "reason": "Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion.",
+      "whatChanged": [
+        "Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion."
+      ],
+      "touchedAreas": [
+        "Parser",
+        "Plan-State"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Max hat den P0 Parser- und Plan-State-Fix ausdruecklich beauftragt."
+    },
     {
       "versionCode": 65,
       "versionName": "1.0.65-source-control-char-guard",
@@ -598,7 +629,7 @@
       "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
     }
   ],
-  "latestVersionName": "1.0.65-source-control-char-guard",
+  "latestVersionName": "1.0.67-plan-text-live-master-guard",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",

@@ -1,10 +1,10 @@
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v065_source_control_char_guard';
+  const VERSION='KGG_GITHUB_UPDATE_v067_plan_text_live_master_guard';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v065","buildTime":"2026-08-10T18:41:19Z","buildCode":"module-v065-source-control-char-guard","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v067","buildTime":"2026-08-13T19:14:00Z","buildCode":"module-v067-plan-text-live-master-guard","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -1159,6 +1159,9 @@
   function parseStructuredSetLine(line){
     return parseExerciseQuantityText(stripStructuredSetPrefix(line));
   }
+  function splitStructuredExerciseNames(line){
+    return splitPlanText(line).map(part=>String(part&&part.text||'').replace(/\s+/g,' ').trim()).filter(Boolean);
+  }
   function structuredPlanBlocksFromText(text){
     const lines=String(text||'').replace(/\r/g,'').split(/\n+/).flatMap(splitInlineStructuredParts).map(line=>line.trim()).filter(Boolean);
     let sawSetLine=false,current=null;
@@ -1170,15 +1173,14 @@
         return;
       }
       if(isStructuredPainLine(line))return;
-      if(current)blocks.push(current);
-      current={name:line.replace(/\s+/g,' ').trim(),setLines:[]};
+      splitStructuredExerciseNames(line).forEach(name=>{
+        if(current)blocks.push(current);
+        current={name,setLines:[]};
+      });
     });
     if(current)blocks.push(current);
     if(!sawSetLine)return null;
-    return blocks.filter(block=>{
-      const letters=String(block.name||'').replace(/[^A-Za-zÄÖÜäöüß]/g,'');
-      return letters.length>=3;
-    });
+    return blocks;
   }
   function parseStructuredTextExerciseBlock(block,existing){
     if(!block||!block.name)return null;
@@ -1196,6 +1198,25 @@
     const blocks=structuredPlanBlocksFromText(text);
     if(blocks===null)return null;
     return blocks.map((block,index)=>parseStructuredTextExerciseBlock(block,findExistingForTextSegment(block.name,index))).filter(Boolean);
+  }
+  function compactTextExerciseName(value){
+    return compact(stripExerciseName(value)||value);
+  }
+  function isIncompleteKnownExerciseName(name){
+    const candidate=compactTextExerciseName(name);
+    if(!candidate)return true;
+    const knownNames=[...(state.plan||[]),...(bank||[])].map(ex=>compactTextExerciseName(ex&&(ex.name||ex.rawText))).filter(Boolean);
+    return knownNames.some(known=>known!==candidate&&known.startsWith(candidate));
+  }
+  function hasIncompleteTextExerciseSegment(text){
+    const raw=String(text||'');
+    const blocks=structuredPlanBlocksFromText(raw);
+    const names=(blocks===null?splitPlanText(raw).map(part=>part.text):(blocks||[]).map(block=>block.name)).map(name=>String(name||'').trim()).filter(Boolean);
+    if(!names.length){
+      const lines=raw.replace(/\r/g,'').split(/\n+/).flatMap(splitInlineStructuredParts).map(line=>line.trim()).filter(Boolean);
+      return lines.some(isStructuredSetLine);
+    }
+    return names.some(name=>name.replace(/[^A-Za-zÄÖÜäöüß]/g,'').length<3||isIncompleteKnownExerciseName(name));
   }
   function activeTextSegment(){
     const input=$('exerciseInput');
@@ -1290,6 +1311,7 @@
     const input=$('exerciseInput');
     resizeExerciseInputToContent();
     const text=input&&input.value||'';
+    if(hasIncompleteTextExerciseSegment(text))return;
     const structured=structuredExercisesFromPlanText(text);
     if(structured!==null)state.plan=structured.map(ensureUiExerciseShape);
     else{
@@ -7436,4 +7458,3 @@
   load(); initLargePdfMode(); renderRuntimeVersionInUi(); renderBuildIdentityInUi(); setTimeout(renderBuildIdentityInUi,500); initPwaAndUpdates(); initAdminModeAccess(); initTabletSoftKeyboardLayout(); initPhoneKeyboardAndDrawers(); initTabletLayoutControls(); initNativeExerciseBankSync(); ensureKGGDataStore().init({appVersion:VERSION}); syncStatePlanToStore('app_init_after_load'); if(state.patient.name) $('patientName').value=state.patient.name; if(state.patient.date) $('planDate').value=state.patient.date; if(state.patient.therapist) $('therapistName').value=state.patient.therapist; if(state.patient.notes) $('planNotes').value=state.patient.notes; syncTextInputFromPlan('app_init_text_master'); render(); setTabletOverlayActiveFlag(); tryApplyKggSetupFromHash().catch(err=>{console.warn('Therapeuten-Setup konnte nicht uebernommen werden:',err);});
 })();
 </script>
-

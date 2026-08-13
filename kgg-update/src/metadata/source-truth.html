@@ -40,26 +40,27 @@
     "tablet-recent-package-shell-geometry",
     "changelog-archive-window",
     "typed-update-versions",
-    "source-control-char-guard"
+    "source-control-char-guard",
+    "plan-text-live-master-guard"
   ],
   "currentVersion": {
-    "versionCode": 65,
-    "versionName": "1.0.65-source-control-char-guard",
-    "lastPatchId": "kgg-v065-source-control-char-guard",
+    "versionCode": 67,
+    "versionName": "1.0.67-plan-text-live-master-guard",
+    "lastPatchId": "kgg-v067-plan-text-live-master-guard",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v065-source-control-char-guard",
+  "latestPatchId": "kgg-v067-plan-text-live-master-guard",
   "lastUpdateIntent": {
-    "id": "kgg-v065-source-control-char-guard",
-    "summary": "Ersetzt vier versehentliche U+0008-Zeichen durch Regex-Wortgrenzen, repariert den fehlkodierten SJIS-Prüfwert und blockiert C0-, C1- sowie DEL-Steuerzeichen in editierbaren Source-Teilen.",
+    "id": "kgg-v067-plan-text-live-master-guard",
+    "summary": "Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion.",
     "touched": [
-      "Parser"
+      "Parser",
+      "Plan-State"
     ],
     "notTouched": [
       "PDF",
       "QR/Patienten-App",
       "Scan/OCR",
-      "Plan-State",
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",

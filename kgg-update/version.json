@@ -1,7 +1,7 @@
 {
-  "versionCode": 65,
-  "versionName": "1.0.65-source-control-char-guard",
-  "indexUrl": "index.html?v=65",
-  "sha256": "232f1d0315efb172cb3afbe1d5633c7bf9971c5a5e310446a825840bcd5c09e1",
-  "notes": "v065: Ersetzt vier versehentliche U+0008-Zeichen durch Regex-Wortgrenzen, repariert den fehlkodierten SJIS-Prüfwert und blockiert C0-, C1- sowie DEL-Steuerzeichen in editierbaren Source-Teilen."
+  "versionCode": 67,
+  "versionName": "1.0.67-plan-text-live-master-guard",
+  "indexUrl": "index.html?v=67",
+  "sha256": "36afe297928092c5d88737544a9f95ca70163c2b0e12b0ecb45dbd18ebeb4325",
+  "notes": "v067: Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion."
 }

@@ -49,26 +49,27 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "tablet-recent-package-shell-geometry",
     "changelog-archive-window",
     "typed-update-versions",
-    "source-control-char-guard"
+    "source-control-char-guard",
+    "plan-text-live-master-guard"
   ],
   "currentVersion": {
-    "versionCode": 65,
-    "versionName": "1.0.65-source-control-char-guard",
-    "lastPatchId": "kgg-v065-source-control-char-guard",
+    "versionCode": 67,
+    "versionName": "1.0.67-plan-text-live-master-guard",
+    "lastPatchId": "kgg-v067-plan-text-live-master-guard",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v065-source-control-char-guard",
+  "latestPatchId": "kgg-v067-plan-text-live-master-guard",
   "lastUpdateIntent": {
-    "id": "kgg-v065-source-control-char-guard",
-    "summary": "Ersetzt vier versehentliche U+0008-Zeichen durch Regex-Wortgrenzen, repariert den fehlkodierten SJIS-Prüfwert und blockiert C0-, C1- sowie DEL-Steuerzeichen in editierbaren Source-Teilen.",
+    "id": "kgg-v067-plan-text-live-master-guard",
+    "summary": "Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion.",
     "touched": [
-      "Parser"
+      "Parser",
+      "Plan-State"
     ],
     "notTouched": [
       "PDF",
       "QR/Patienten-App",
       "Scan/OCR",
-      "Plan-State",
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
@@ -121,26 +122,27 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "tablet-recent-package-shell-geometry",
     "changelog-archive-window",
     "typed-update-versions",
-    "source-control-char-guard"
+    "source-control-char-guard",
+    "plan-text-live-master-guard"
   ],
   "currentVersion": {
-    "versionCode": 65,
-    "versionName": "1.0.65-source-control-char-guard",
-    "lastPatchId": "kgg-v065-source-control-char-guard",
+    "versionCode": 67,
+    "versionName": "1.0.67-plan-text-live-master-guard",
+    "lastPatchId": "kgg-v067-plan-text-live-master-guard",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v065-source-control-char-guard",
+  "latestPatchId": "kgg-v067-plan-text-live-master-guard",
   "lastUpdateIntent": {
-    "id": "kgg-v065-source-control-char-guard",
-    "summary": "Ersetzt vier versehentliche U+0008-Zeichen durch Regex-Wortgrenzen, repariert den fehlkodierten SJIS-Prüfwert und blockiert C0-, C1- sowie DEL-Steuerzeichen in editierbaren Source-Teilen.",
+    "id": "kgg-v067-plan-text-live-master-guard",
+    "summary": "Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion.",
     "touched": [
-      "Parser"
+      "Parser",
+      "Plan-State"
     ],
     "notTouched": [
       "PDF",
       "QR/Patienten-App",
       "Scan/OCR",
-      "Plan-State",
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
@@ -155,8 +157,39 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 65,
+  "latestVersionCode": 67,
   "entries": [
+    {
+      "versionCode": 67,
+      "versionName": "1.0.67-plan-text-live-master-guard",
+      "patchId": "kgg-v067-plan-text-live-master-guard",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Plan-Text Live-Master Schutz",
+      "reason": "Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion.",
+      "whatChanged": [
+        "Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion."
+      ],
+      "touchedAreas": [
+        "Parser",
+        "Plan-State"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Max hat den P0 Parser- und Plan-State-Fix ausdruecklich beauftragt."
+    },
     {
       "versionCode": 65,
       "versionName": "1.0.65-source-control-char-guard",
@@ -750,7 +783,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
     }
   ],
-  "latestVersionName": "1.0.65-source-control-char-guard",
+  "latestVersionName": "1.0.67-plan-text-live-master-guard",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -876,7 +909,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v065-source-control-char-guard",
+  "lastUpdatedByPatchId": "kgg-v067-plan-text-live-master-guard",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
@@ -1011,7 +1044,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v065 Source-Steuerzeichen-Guard</title>
+  <title>KGG Update v067 Plan-Text Live-Master Schutz</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -5476,7 +5509,6 @@ Before editing this app, any LLM/agent/human should read these blocks:
     .tabletPackageEmpty{padding:18px;border:1px dashed rgba(148,163,184,.8);border-radius:14px;background:#f8fafc;color:#667085;font-weight:850;line-height:1.35;}
   }
 </style>
-
   <script>
     /* KGG v182 mobile single-file: inline offline PDF runtime, no external file needed. */
 /*
@@ -16728,11 +16760,11 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
 
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v065_source_control_char_guard';
+  const VERSION='KGG_GITHUB_UPDATE_v067_plan_text_live_master_guard';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v065","buildTime":"2026-08-10T18:41:19Z","buildCode":"module-v065-source-control-char-guard","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v067","buildTime":"2026-08-13T19:14:00Z","buildCode":"module-v067-plan-text-live-master-guard","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -17887,6 +17919,9 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   function parseStructuredSetLine(line){
     return parseExerciseQuantityText(stripStructuredSetPrefix(line));
   }
+  function splitStructuredExerciseNames(line){
+    return splitPlanText(line).map(part=>String(part&&part.text||'').replace(/\s+/g,' ').trim()).filter(Boolean);
+  }
   function structuredPlanBlocksFromText(text){
     const lines=String(text||'').replace(/\r/g,'').split(/\n+/).flatMap(splitInlineStructuredParts).map(line=>line.trim()).filter(Boolean);
     let sawSetLine=false,current=null;
@@ -17898,15 +17933,14 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
         return;
       }
       if(isStructuredPainLine(line))return;
-      if(current)blocks.push(current);
-      current={name:line.replace(/\s+/g,' ').trim(),setLines:[]};
+      splitStructuredExerciseNames(line).forEach(name=>{
+        if(current)blocks.push(current);
+        current={name,setLines:[]};
+      });
     });
     if(current)blocks.push(current);
     if(!sawSetLine)return null;
-    return blocks.filter(block=>{
-      const letters=String(block.name||'').replace(/[^A-Za-zÄÖÜäöüß]/g,'');
-      return letters.length>=3;
-    });
+    return blocks;
   }
   function parseStructuredTextExerciseBlock(block,existing){
     if(!block||!block.name)return null;
@@ -17924,6 +17958,25 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     const blocks=structuredPlanBlocksFromText(text);
     if(blocks===null)return null;
     return blocks.map((block,index)=>parseStructuredTextExerciseBlock(block,findExistingForTextSegment(block.name,index))).filter(Boolean);
+  }
+  function compactTextExerciseName(value){
+    return compact(stripExerciseName(value)||value);
+  }
+  function isIncompleteKnownExerciseName(name){
+    const candidate=compactTextExerciseName(name);
+    if(!candidate)return true;
+    const knownNames=[...(state.plan||[]),...(bank||[])].map(ex=>compactTextExerciseName(ex&&(ex.name||ex.rawText))).filter(Boolean);
+    return knownNames.some(known=>known!==candidate&&known.startsWith(candidate));
+  }
+  function hasIncompleteTextExerciseSegment(text){
+    const raw=String(text||'');
+    const blocks=structuredPlanBlocksFromText(raw);
+    const names=(blocks===null?splitPlanText(raw).map(part=>part.text):(blocks||[]).map(block=>block.name)).map(name=>String(name||'').trim()).filter(Boolean);
+    if(!names.length){
+      const lines=raw.replace(/\r/g,'').split(/\n+/).flatMap(splitInlineStructuredParts).map(line=>line.trim()).filter(Boolean);
+      return lines.some(isStructuredSetLine);
+    }
+    return names.some(name=>name.replace(/[^A-Za-zÄÖÜäöüß]/g,'').length<3||isIncompleteKnownExerciseName(name));
   }
   function activeTextSegment(){
     const input=$('exerciseInput');
@@ -18018,6 +18071,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     const input=$('exerciseInput');
     resizeExerciseInputToContent();
     const text=input&&input.value||'';
+    if(hasIncompleteTextExerciseSegment(text))return;
     const structured=structuredExercisesFromPlanText(text);
     if(structured!==null)state.plan=structured.map(ensureUiExerciseShape);
     else{
@@ -24164,7 +24218,6 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   load(); initLargePdfMode(); renderRuntimeVersionInUi(); renderBuildIdentityInUi(); setTimeout(renderBuildIdentityInUi,500); initPwaAndUpdates(); initAdminModeAccess(); initTabletSoftKeyboardLayout(); initPhoneKeyboardAndDrawers(); initTabletLayoutControls(); initNativeExerciseBankSync(); ensureKGGDataStore().init({appVersion:VERSION}); syncStatePlanToStore('app_init_after_load'); if(state.patient.name) $('patientName').value=state.patient.name; if(state.patient.date) $('planDate').value=state.patient.date; if(state.patient.therapist) $('therapistName').value=state.patient.therapist; if(state.patient.notes) $('planNotes').value=state.patient.notes; syncTextInputFromPlan('app_init_text_master'); render(); setTabletOverlayActiveFlag(); tryApplyKggSetupFromHash().catch(err=>{console.warn('Therapeuten-Setup konnte nicht uebernommen werden:',err);});
 })();
 </script>
-
 <script id="kgg-mini-patch-v400-04-phone-clean-state-guard">
 /* v400 mini04: räumt nur im Phone-Viewport Tablet-Zustände auf.
    Kein Eingriff in PDF/QR/Scan/Parser/Plan-State. */
@@ -27074,6 +27127,10 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
 <!-- Source-Steuerzeichen-Guard -->
 <!-- Source control-character guard lives in builder/base-app; no extra runtime hook. -->
 <!-- KGG PATCH END kgg-v065-source-control-char-guard -->
+<!-- KGG PATCH START kgg-v067-plan-text-live-master-guard -->
+<!-- Plan-Text Live-Master Schutz -->
+<!-- Parser- und Plan-State-Schutz lives in runtime/app-core.html; no extra runtime hook. -->
+<!-- KGG PATCH END kgg-v067-plan-text-live-master-guard -->
 
 </body>
 </html>

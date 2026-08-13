@@ -587,7 +587,57 @@ function textblockCriticalSuite() {
     assert(legpress.weightUnit==='kg' && storeLegpress.weightUnit==='kg','Beinpresse kg unit not preserved');
     const curl=state.plan.find(ex=>ex.name==='Kniebeuger Maschine');
     assert(curl && curl.startMetric==='12' && curl.startLoad==='35' && curl.weightUnit==='kg','load-before-reps Satz format not preserved');
-    window.__results={suite:'textblocks-critical',names};
+
+    save=function(){localStorage.setItem(storageKey,JSON.stringify(state));};
+    const hybridText=[
+      'Beinpresse, Dips, Abduktion Maschine, Adduktion Maschine, Latziehen',
+      'Satz 1: 12 Wdh @ 30 kg',
+      'Satz 2: 12 Wdh @ 30 kg'
+    ].join(String.fromCharCode(10));
+    const hybridNames=['Beinpresse','Dips','Abduktion Maschine','Adduktion Maschine','Latziehen'];
+    input.value=hybridText;
+    syncPlanFromTextInput('logic_smoke_textblocks_hybrid_live_master');
+    assert(state.plan.length===hybridNames.length,'hybrid text collapsed state.plan to '+state.plan.length+' exercise(s)');
+    assert(hybridNames.every(name=>state.plan.some(ex=>ex.name===name)),'hybrid text lost state.plan exercise(s): '+state.plan.map(ex=>ex.name).join('|'));
+    const hybridStore=window.KGGDataStore.getCurrentPlan();
+    assert(hybridStore && hybridStore.exercises.length===hybridNames.length,'hybrid text collapsed KGGDataStore.currentPlan');
+    assert(hybridNames.every(name=>hybridStore.exercises.some(ex=>ex.name===name)),'hybrid text lost store exercise(s)');
+    const persistedState=JSON.parse(localStorage.getItem(storageKey)||'{}');
+    assert(Array.isArray(persistedState.plan) && persistedState.plan.length===hybridNames.length,'hybrid text persisted a collapsed plan');
+    state={...state,plan:[],planText:''};
+    load();
+    assert(state.plan.length===hybridNames.length,'hybrid text reload lost exercise(s)');
+    syncTextInputFromPlan('logic_smoke_textblocks_hybrid_reload');
+    assert(hybridNames.every(name=>input.value.includes(name)),'hybrid text reload rewrote a lost exercise');
+    const outputPlan=getCurrentPlanForOutput('logic_smoke_textblocks_hybrid_output');
+    assert(outputPlan.exercises.length===hybridNames.length,'output state collapsed hybrid plan');
+    const pdfSnapshot=buildKggPdfSnapshot(outputPlan);
+    const pdfNames=pdfSnapshot.pages.flatMap(page=>page.slots.filter(slot=>!slot.empty).map(slot=>slot.name));
+    assert(hybridNames.every(name=>pdfNames.includes(name)),'PDF snapshot lost hybrid exercise(s): '+pdfNames.join('|'));
+    const patientShare=buildPatientShareFromCurrentPlan(outputPlan,{ttlSeconds:3600});
+    assert(patientShare.payload.plan.length===hybridNames.length,'patient share lost hybrid exercise(s)');
+    assert(hybridNames.every(name=>patientShare.payload.plan.some(ex=>ex.name===name)),'patient share names lost hybrid exercise(s)');
+
+    input.value='Beinpresse, D';
+    syncPlanFromTextInput('logic_smoke_textblocks_partial_name');
+    assert(state.plan.length===hybridNames.length,'short partial name destroyed the last valid plan');
+    assert(window.KGGDataStore.getCurrentPlan().exercises.length===hybridNames.length,'short partial name destroyed currentPlan');
+    assert(input.value==='Beinpresse, D','short partial name should remain editable text');
+    input.value='Beinpresse, Dip';
+    syncPlanFromTextInput('logic_smoke_textblocks_known_partial_name');
+    assert(state.plan.length===hybridNames.length,'known partial name destroyed the last valid plan');
+    assert(window.KGGDataStore.getCurrentPlan().exercises.length===hybridNames.length,'known partial name destroyed currentPlan');
+    assert(JSON.parse(localStorage.getItem(storageKey)||'{}').plan.length===hybridNames.length,'known partial name persisted a reduced plan');
+    input.value='Beinpresse, Dips, ';
+    syncPlanFromTextInput('logic_smoke_textblocks_intentional_delete');
+    assert(state.plan.length===2 && state.plan[0].name==='Beinpresse' && state.plan[1].name==='Dips','intentional text deletion should still apply immediately');
+    input.value='Dips, Beinpresse';
+    syncPlanFromTextInput('logic_smoke_textblocks_intentional_reorder');
+    assert(state.plan.length===2 && state.plan[0].name==='Dips' && state.plan[1].name==='Beinpresse','intentional text reorder should still apply immediately');
+    input.value='Dips Neu, Beinpresse';
+    syncPlanFromTextInput('logic_smoke_textblocks_intentional_rename');
+    assert(state.plan.length===2 && state.plan[0].name==='Dips Neu' && state.plan[1].name==='Beinpresse','intentional text rename should still apply immediately');
+    window.__results={suite:'textblocks-critical',names,hybridNames};
   `);
 }
 
