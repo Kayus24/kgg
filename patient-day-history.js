@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='v5_plan_dialog_title_desc';
+  const VERSION='v6_continuous_days_history';
   const STYLE='kggPatientDayHistoryStyle';
   const LANG='kggPatientLang';
   const MULTI_KEY='kggPatientMultiPlansV1';
@@ -9,6 +9,7 @@
   const safe=f=>{try{return f()}catch(e){return null}};
   const today=()=>safe(()=>next())||1;
   let switching=false;
+  let historyLimit=30;
 
   function readMulti(){try{return JSON.parse(localStorage.getItem(MULTI_KEY)||'null')}catch(e){return null}}
   function multiPlans(){const s=readMulti();return s&&Array.isArray(s.plans)?s.plans:[]}
@@ -54,7 +55,7 @@
   function isToday(){return Number(d)===today()}
   function planDesc(pl){return pl&&(pl.desc||pl.description||pl.info||pl.note||pl.patientInfo||pl.patientNote||pl.subtitle)||''}
   function updateHeader(){const title=activePlanName();const desc=activePlanDesc();const h=document.querySelector('h1');if(h&&title)h.textContent=title;let sub=$('kggPlanDescription');if(desc){if(!sub){sub=document.createElement('div');sub.id='kggPlanDescription';sub.style.cssText='margin:4px 0 10px;color:#64748b;font-size:14px;font-weight:800;line-height:1.35';if(h&&h.parentNode)h.parentNode.insertBefore(sub,h.nextSibling)}sub.textContent=desc}else if(sub)sub.remove()}
-  function ensureHub(){const days=$('days'); if(!days||!days.parentNode||!safe(()=>p))return;ensureBackdrop();ensurePlanDialog();updateHeader();let hub=$('kggDayHub');if(!hub){hub=document.createElement('div');hub.id='kggDayHub';days.parentNode.insertBefore(hub,days)}const cur=Number(d)||1,total=Number(safe(()=>p.days))||6,arr=multiPlans();const back=!isToday();const mainLabel=back?T('Zum heutigen Training zurückkehren','Return to today’s training'):T('Frühere Trainings anzeigen','Show previous trainings');const wasOpen=$('kggHistoryList')&&!$('kggHistoryList').hidden;hub.innerHTML=`
+  function ensureHub(){const days=$('days'); if(!days||!days.parentNode||!safe(()=>p))return;ensureBackdrop();ensurePlanDialog();updateHeader();let hub=$('kggDayHub');if(!hub){hub=document.createElement('div');hub.id='kggDayHub';days.parentNode.insertBefore(hub,days)}const cur=Number(d)||1,total=Math.max(cur,today()),arr=multiPlans();const back=!isToday();const mainLabel=back?T('Zum heutigen Training zurückkehren','Return to today’s training'):T('Frühere Trainings anzeigen','Show previous trainings');const wasOpen=$('kggHistoryList')&&!$('kggHistoryList').hidden;hub.innerHTML=`
       <button id="kggHistoryToggle" type="button">${wasOpen?T('Frühere Trainings ausblenden','Hide previous trainings'):mainLabel}</button>
       ${arr.length>1?`<button id="kggOtherPlanBtn" type="button">↔ ${T('Anderer Übungsplan','Other exercise plan')}</button>`:''}
       <div id="kggHistoryList" hidden></div>
@@ -64,9 +65,9 @@
         <div class="kggCurrentDayBadge">${dayDone(cur)?T('fertig','finished'):T('offen','open')}</div>
       </div>`;$('kggHistoryToggle').onclick=()=> back?openDay(today()):toggleHistory(total,cur);const btn=$('kggOtherPlanBtn');if(btn)btn.onclick=()=>openPlanDialog();if(wasOpen&&!back){renderHistory(total,cur);openHistoryVisual()}}
   function openHistoryVisual(){const list=$('kggHistoryList'),bd=$('kggHistoryBackdrop');if(list){list.hidden=false;list.onclick=e=>e.stopPropagation()}if(bd)bd.hidden=false;const btn=$('kggHistoryToggle');if(btn)btn.textContent=T('Frühere Trainings ausblenden','Hide previous trainings')}
-  function closeHistory(){const list=$('kggHistoryList'),bd=$('kggHistoryBackdrop');if(list)list.hidden=true;if(bd)bd.hidden=true;const btn=$('kggHistoryToggle');if(btn)btn.textContent=T('Frühere Trainings anzeigen','Show previous trainings')}
+  function closeHistory(){const list=$('kggHistoryList'),bd=$('kggHistoryBackdrop');if(list)list.hidden=true;if(bd)bd.hidden=true;historyLimit=30;const btn=$('kggHistoryToggle');if(btn)btn.textContent=T('Frühere Trainings anzeigen','Show previous trainings')}
   function toggleHistory(total,cur){const list=$('kggHistoryList');if(!list)return;if(!list.hidden){closeHistory();return}renderHistory(total,cur);openHistoryVisual()}
-  function renderHistory(total,cur){const list=$('kggHistoryList');if(!list)return;const days=[];for(let day=1;day<=total;day++){if(day===cur)continue;if(day<cur||dayHasData(day))days.push(day)}if(!days.length){list.innerHTML=`<div class="kggEmptyHist">${T('Noch keine früheren Trainings vorhanden.','No previous trainings yet.')}</div>`;return}list.innerHTML=days.map(day=>`<button type="button" class="kggDayCard ${dayDone(day)?'done':''}" data-day="${day}"><div class="kggDayHead"><b>${T('Tag','Day')} ${day}</b><span class="kggDayPill">${T('öffnen','open')}</span></div><div class="kggDayExerciseList">${dayCards(day)}</div></button>`).join('');list.querySelectorAll('.kggDayCard').forEach(btn=>btn.onclick=()=>openDay(Number(btn.dataset.day)||1))}
+  function renderHistory(total,cur){const list=$('kggHistoryList');if(!list)return;const upper=Math.max(1,Number(cur)||1),start=Math.max(1,upper-historyLimit),days=[];for(let day=start;day<upper;day++)days.push(day);if(!days.length){list.innerHTML=`<div class="kggEmptyHist">${T('Noch keine früheren Trainings vorhanden.','No previous trainings yet.')}</div>`;return}const more=start>1?`<button type="button" id="kggHistoryMore" class="kggDayCard"><div class="kggDayHead"><b>${T('Ältere Trainings anzeigen','Show older trainings')}</b><span class="kggDayPill">+30</span></div></button>`:'';list.innerHTML=more+days.map(day=>`<button type="button" class="kggDayCard ${dayDone(day)?'done':''}" data-day="${day}"><div class="kggDayHead"><b>${T('Tag','Day')} ${day}</b><span class="kggDayPill">${T('öffnen','open')}</span></div><div class="kggDayExerciseList">${dayCards(day)}</div></button>`).join('');list.querySelectorAll('.kggDayCard[data-day]').forEach(btn=>btn.onclick=()=>openDay(Number(btn.dataset.day)||1));const moreBtn=$('kggHistoryMore');if(moreBtn)moreBtn.onclick=()=>{historyLimit+=30;renderHistory(total,cur)}}
   function openDay(day){safe(()=>{d=day;save()});closeHistory();safe(()=>render());setTimeout(()=>{ensureHub();window.scrollTo({top:0,behavior:'smooth'})},40)}
   function openPlanDialog(){const arr=multiPlans();if(arr.length<2)return;const dlg=$('kggPlanDialog'),bd=$('kggPlanDialogBackdrop');if(!dlg||!bd)return;const active=currentPlanIndex();dlg.innerHTML=`<div class="kggPlanDialogHead"><b>${T('Übungsplan auswählen','Choose exercise plan')}</b><button type="button" class="kggPlanClose">×</button></div>`+arr.map((pl,i)=>`<button type="button" class="kggPlanOption ${i===active?'active':''}" data-i="${i}">${i===active?`<span class="pill">${T('aktuell','current')}</span>`:''}<b>${esc(pl.t||pl.title||pl.name||T('Plan ','Plan ')+(i+1))}</b>${planDesc(pl)?`<small>${esc(planDesc(pl))}</small>`:''}</button>`).join('');dlg.querySelector('.kggPlanClose').onclick=closePlanDialog;dlg.querySelectorAll('.kggPlanOption').forEach(b=>b.onclick=()=>{const idx=Number(b.dataset.i)||0;closePlanDialog();if(idx!==active)switchPlan(idx)});bd.hidden=false;dlg.hidden=false}
   function closePlanDialog(){const dlg=$('kggPlanDialog'),bd=$('kggPlanDialogBackdrop');if(dlg)dlg.hidden=true;if(bd)bd.hidden=true}
