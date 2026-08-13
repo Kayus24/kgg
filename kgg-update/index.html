@@ -50,18 +50,19 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "changelog-archive-window",
     "typed-update-versions",
     "source-control-char-guard",
-    "plan-text-live-master-guard"
+    "plan-text-live-master-guard",
+    "plan-text-boot-restore"
   ],
   "currentVersion": {
-    "versionCode": 67,
-    "versionName": "1.0.67-plan-text-live-master-guard",
-    "lastPatchId": "kgg-v067-plan-text-live-master-guard",
+    "versionCode": 68,
+    "versionName": "1.0.68-plan-text-boot-restore",
+    "lastPatchId": "kgg-v068-plan-text-boot-restore",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v067-plan-text-live-master-guard",
+  "latestPatchId": "kgg-v068-plan-text-boot-restore",
   "lastUpdateIntent": {
-    "id": "kgg-v067-plan-text-live-master-guard",
-    "summary": "Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion.",
+    "id": "kgg-v068-plan-text-boot-restore",
+    "summary": "Stellt gueltigen gespeicherten Live-Plantext beim Start wieder her und schuetzt nur kurz unvollstaendige Namenssegmente.",
     "touched": [
       "Parser",
       "Plan-State"
@@ -123,18 +124,19 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "changelog-archive-window",
     "typed-update-versions",
     "source-control-char-guard",
-    "plan-text-live-master-guard"
+    "plan-text-live-master-guard",
+    "plan-text-boot-restore"
   ],
   "currentVersion": {
-    "versionCode": 67,
-    "versionName": "1.0.67-plan-text-live-master-guard",
-    "lastPatchId": "kgg-v067-plan-text-live-master-guard",
+    "versionCode": 68,
+    "versionName": "1.0.68-plan-text-boot-restore",
+    "lastPatchId": "kgg-v068-plan-text-boot-restore",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v067-plan-text-live-master-guard",
+  "latestPatchId": "kgg-v068-plan-text-boot-restore",
   "lastUpdateIntent": {
-    "id": "kgg-v067-plan-text-live-master-guard",
-    "summary": "Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion.",
+    "id": "kgg-v068-plan-text-boot-restore",
+    "summary": "Stellt gueltigen gespeicherten Live-Plantext beim Start wieder her und schuetzt nur kurz unvollstaendige Namenssegmente.",
     "touched": [
       "Parser",
       "Plan-State"
@@ -157,8 +159,39 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 67,
+  "latestVersionCode": 68,
   "entries": [
+    {
+      "versionCode": 68,
+      "versionName": "1.0.68-plan-text-boot-restore",
+      "patchId": "kgg-v068-plan-text-boot-restore",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Plan-Text Boot Restore",
+      "reason": "Stellt gueltigen gespeicherten Live-Plantext beim Start wieder her und schuetzt nur kurz unvollstaendige Namenssegmente.",
+      "whatChanged": [
+        "Stellt gueltigen gespeicherten Live-Plantext beim Start wieder her und schuetzt nur kurz unvollstaendige Namenssegmente."
+      ],
+      "touchedAreas": [
+        "Parser",
+        "Plan-State"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Expliziter P0-Folgefix: Textfeld bleibt Live-Master, bestehende Mehruebungsplaene duerfen beim Boot oder bei Teilbearbeitung nicht verloren gehen."
+    },
     {
       "versionCode": 67,
       "versionName": "1.0.67-plan-text-live-master-guard",
@@ -783,7 +816,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
     }
   ],
-  "latestVersionName": "1.0.67-plan-text-live-master-guard",
+  "latestVersionName": "1.0.68-plan-text-boot-restore",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -909,7 +942,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v067-plan-text-live-master-guard",
+  "lastUpdatedByPatchId": "kgg-v068-plan-text-boot-restore",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
@@ -1044,7 +1077,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v067 Plan-Text Live-Master Schutz</title>
+  <title>KGG Update v068 Plan-Text Boot Restore</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -16760,11 +16793,11 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
 
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v067_plan_text_live_master_guard';
+  const VERSION='KGG_GITHUB_UPDATE_v068_plan_text_boot_restore';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v067","buildTime":"2026-08-13T19:14:00Z","buildCode":"module-v067-plan-text-live-master-guard","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v068","buildTime":"2026-08-13T19:33:54Z","buildCode":"module-v068-plan-text-boot-restore","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -17957,26 +17990,36 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   function structuredExercisesFromPlanText(text){
     const blocks=structuredPlanBlocksFromText(text);
     if(blocks===null)return null;
-    return blocks.map((block,index)=>parseStructuredTextExerciseBlock(block,findExistingForTextSegment(block.name,index))).filter(Boolean);
+    const usedExistingIds=new Set();
+    return blocks.map((block,index)=>parseStructuredTextExerciseBlock(block,findExistingForTextSegment(block.name,index,usedExistingIds))).filter(Boolean);
+  }
+  function textExerciseNamesFromPlanText(text){
+    const raw=String(text||'');
+    const blocks=structuredPlanBlocksFromText(raw);
+    return (blocks===null?splitPlanText(raw).map(part=>part.text):(blocks||[]).map(block=>block.name)).map(name=>String(name||'').trim()).filter(Boolean);
   }
   function compactTextExerciseName(value){
     return compact(stripExerciseName(value)||value);
   }
-  function isIncompleteKnownExerciseName(name){
-    const candidate=compactTextExerciseName(name);
-    if(!candidate)return true;
-    const knownNames=[...(state.plan||[]),...(bank||[])].map(ex=>compactTextExerciseName(ex&&(ex.name||ex.rawText))).filter(Boolean);
-    return knownNames.some(known=>known!==candidate&&known.startsWith(candidate));
-  }
-  function hasIncompleteTextExerciseSegment(text){
+  function hasIncompleteTextExerciseSegment(text,previousText){
     const raw=String(text||'');
-    const blocks=structuredPlanBlocksFromText(raw);
-    const names=(blocks===null?splitPlanText(raw).map(part=>part.text):(blocks||[]).map(block=>block.name)).map(name=>String(name||'').trim()).filter(Boolean);
+    const names=textExerciseNamesFromPlanText(raw);
     if(!names.length){
       const lines=raw.replace(/\r/g,'').split(/\n+/).flatMap(splitInlineStructuredParts).map(line=>line.trim()).filter(Boolean);
       return lines.some(isStructuredSetLine);
     }
-    return names.some(name=>name.replace(/[^A-Za-zÄÖÜäöüß]/g,'').length<3||isIncompleteKnownExerciseName(name));
+    // Protect only the same segment while it is being shortened. A global
+    // prefix guard would wrongly treat independent "Dips" and "Dips Neu"
+    // exercises as unfinished.
+    const previousNames=textExerciseNamesFromPlanText(previousText);
+    return names.some((name,index)=>{
+      const candidate=compactTextExerciseName(name);
+      if(candidate.length>=4)return false;
+      const previous=[previousNames[index],(state.plan||[])[index]&&((state.plan||[])[index].name||(state.plan||[])[index].rawText)]
+        .map(compactTextExerciseName)
+        .filter(Boolean);
+      return previous.some(known=>known.length>candidate.length&&known.startsWith(candidate));
+    });
   }
   function activeTextSegment(){
     const input=$('exerciseInput');
@@ -18021,11 +18064,15 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     const pendingNew=!exact;
     return {...base,id,localId:id,sourceId:exact?exact.id:'',bankId:exact?exact.id:'',name:exact?exact.name:cleanName,sets:(existing&&existing.sets)||base.sets||3,startMetric:metric||(existing&&existing.startMetric)||'',startLoad:load||(existing&&existing.startLoad)||'',side:parsedSide||normalizeSideMode(existing&&existing.side||'BI'),rawText:raw,liveDraft:false,changedByLiveText:false,textMaster:true,pendingNew,needsReview:pendingNew,sourceFlags:[pendingNew?'textMasterReview':''].filter(Boolean)};
   }
-  function findExistingForTextSegment(segment,index){
-    const current=(state.plan||[])[index];
-    if(current)return current;
+  function findExistingForTextSegment(segment,index,usedExistingIds){
+    const used=usedExistingIds||new Set();
+    const idOf=ex=>String(ex&&(ex.localId||ex.id)||'');
     const c=compact(stripExerciseName(segment)||segment);
-    return (state.plan||[]).find(ex=>compact(ex.rawText||ex.name)===c)||null;
+    const match=(state.plan||[]).find(ex=>!used.has(idOf(ex))&&compactTextExerciseName(ex&&(ex.name||ex.rawText))===c);
+    const fallback=(state.plan||[])[index];
+    const existing=match||(!used.has(idOf(fallback))&&fallback)||null;
+    if(existing)used.add(idOf(existing));
+    return existing;
   }
   function formatExerciseTextLine(ex){
     const parts=[String(ex&&ex.name||'').trim()].filter(Boolean);
@@ -18071,18 +18118,58 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     const input=$('exerciseInput');
     resizeExerciseInputToContent();
     const text=input&&input.value||'';
-    if(hasIncompleteTextExerciseSegment(text))return;
+    if(hasIncompleteTextExerciseSegment(text,state.planText)){
+      // The text remains the live master even while a small partial edit is
+      // protected from replacing the last valid structured plan.
+      state.planText=text;
+      save();
+      return;
+    }
     const structured=structuredExercisesFromPlanText(text);
     if(structured!==null)state.plan=structured.map(ensureUiExerciseShape);
     else{
       const segments=splitPlanText(text).map(p=>p.text.trim()).filter(Boolean);
-      state.plan=segments.map((segment,index)=>parseTextExercise(segment,findExistingForTextSegment(segment,index))).filter(Boolean).map(ensureUiExerciseShape);
+      const usedExistingIds=new Set();
+      state.plan=segments.map((segment,index)=>parseTextExercise(segment,findExistingForTextSegment(segment,index,usedExistingIds))).filter(Boolean).map(ensureUiExerciseShape);
     }
     state.liveDraftId=null;
     state.planText=input?input.value:'';
     syncStatePlanToStore(reason||'ui_textfield_master_sync');
     save();
     render();
+  }
+  function sameParsedTextExercise(left,right){
+    if(!left||!right||compactTextExerciseName(left.name||left.rawText)!==compactTextExerciseName(right.name||right.rawText))return false;
+    const fields=['startMetric','startLoad','unit','metricUnit','weightUnit','loadUnit'];
+    return fields.every(field=>String(left[field]||'')===String(right[field]||''));
+  }
+  function restorePlanFromSavedLiveText(){
+    const text=String(state.planText||'');
+    if(!text.trim())return false;
+    // Keep the exact saved field value in both cases.  A valid saved master
+    // repairs a stale/collapsed persisted state; an incomplete one keeps the
+    // previous valid state intact until the therapist finishes editing it.
+    if(hasIncompleteTextExerciseSegment(text,''))return true;
+    const structured=structuredExercisesFromPlanText(text);
+    const restored=structured!==null
+      ?structured.map(ensureUiExerciseShape)
+      :(()=>{const usedExistingIds=new Set(); return splitPlanText(text).map(part=>part.text.trim()).filter(Boolean).map((segment,index)=>parseTextExercise(segment,findExistingForTextSegment(segment,index,usedExistingIds))).filter(Boolean).map(ensureUiExerciseShape);})();
+    const current=Array.isArray(state.plan)?state.plan:[];
+    const differs=restored.length!==current.length||restored.some((exercise,index)=>!sameParsedTextExercise(exercise,current[index]));
+    if(restored.length&&differs){
+      state.plan=restored;
+      state.liveDraftId=null;
+    }
+    return true;
+  }
+  function restoreSavedLiveTextInput(){
+    const input=$('exerciseInput');
+    if(!input)return;
+    const text=String(state.planText||'');
+    state.textSyncing=true;
+    input.value=text;
+    state.textSyncing=false;
+    resizeExerciseInputToContent();
   }
   function captureDbScrollAnchor(){
     const anchor=$('bankArea')||$('inputWrap');
@@ -24215,7 +24302,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   /* KGG_LOGIC_SMOKE_BOOT_BOUNDARY */
   installKggV383UiFlowStability();
   installKggV388AndroidFlowFixes();
-  load(); initLargePdfMode(); renderRuntimeVersionInUi(); renderBuildIdentityInUi(); setTimeout(renderBuildIdentityInUi,500); initPwaAndUpdates(); initAdminModeAccess(); initTabletSoftKeyboardLayout(); initPhoneKeyboardAndDrawers(); initTabletLayoutControls(); initNativeExerciseBankSync(); ensureKGGDataStore().init({appVersion:VERSION}); syncStatePlanToStore('app_init_after_load'); if(state.patient.name) $('patientName').value=state.patient.name; if(state.patient.date) $('planDate').value=state.patient.date; if(state.patient.therapist) $('therapistName').value=state.patient.therapist; if(state.patient.notes) $('planNotes').value=state.patient.notes; syncTextInputFromPlan('app_init_text_master'); render(); setTabletOverlayActiveFlag(); tryApplyKggSetupFromHash().catch(err=>{console.warn('Therapeuten-Setup konnte nicht uebernommen werden:',err);});
+  load(); const restoredSavedLiveText=restorePlanFromSavedLiveText(); initLargePdfMode(); renderRuntimeVersionInUi(); renderBuildIdentityInUi(); setTimeout(renderBuildIdentityInUi,500); initPwaAndUpdates(); initAdminModeAccess(); initTabletSoftKeyboardLayout(); initPhoneKeyboardAndDrawers(); initTabletLayoutControls(); initNativeExerciseBankSync(); ensureKGGDataStore().init({appVersion:VERSION}); syncStatePlanToStore('app_init_after_load'); if(state.patient.name) $('patientName').value=state.patient.name; if(state.patient.date) $('planDate').value=state.patient.date; if(state.patient.therapist) $('therapistName').value=state.patient.therapist; if(state.patient.notes) $('planNotes').value=state.patient.notes; if(restoredSavedLiveText)restoreSavedLiveTextInput(); else syncTextInputFromPlan('app_init_text_master'); render(); setTabletOverlayActiveFlag(); tryApplyKggSetupFromHash().catch(err=>{console.warn('Therapeuten-Setup konnte nicht uebernommen werden:',err);});
 })();
 </script>
 <script id="kgg-mini-patch-v400-04-phone-clean-state-guard">
@@ -27131,6 +27218,18 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
 <!-- Plan-Text Live-Master Schutz -->
 <!-- Parser- und Plan-State-Schutz lives in runtime/app-core.html; no extra runtime hook. -->
 <!-- KGG PATCH END kgg-v067-plan-text-live-master-guard -->
+<!-- KGG PATCH START kgg-v068-plan-text-boot-restore -->
+<!-- Plan-Text Boot Restore -->
+<script id="kgg-v068-plan-text-boot-restore">
+(function(){
+  "use strict";
+  const PATCH_ID="kgg-v068-plan-text-boot-restore";
+  // Den kleinstmoeglichen Patch hier implementieren. Bestehende Hooks beibehalten.
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES[PATCH_ID]={installed:true};
+})();
+</script>
+<!-- KGG PATCH END kgg-v068-plan-text-boot-restore -->
 
 </body>
 </html>

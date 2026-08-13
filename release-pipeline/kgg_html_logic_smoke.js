@@ -604,11 +604,41 @@ function textblockCriticalSuite() {
     assert(hybridNames.every(name=>hybridStore.exercises.some(ex=>ex.name===name)),'hybrid text lost store exercise(s)');
     const persistedState=JSON.parse(localStorage.getItem(storageKey)||'{}');
     assert(Array.isArray(persistedState.plan) && persistedState.plan.length===hybridNames.length,'hybrid text persisted a collapsed plan');
-    state={...state,plan:[],planText:''};
+
+    const richPlan=JSON.parse(JSON.stringify(state.plan));
+    richPlan[0].media=[{id:'logic_smoke_media',type:'image',name:'beinpresse.jpg'}];
+    localStorage.setItem(storageKey,JSON.stringify({...state,plan:richPlan,planText:hybridText}));
+    state={...state,plan:[],planText:'',liveDraftId:null};
     load();
-    assert(state.plan.length===hybridNames.length,'hybrid text reload lost exercise(s)');
-    syncTextInputFromPlan('logic_smoke_textblocks_hybrid_reload');
-    assert(hybridNames.every(name=>input.value.includes(name)),'hybrid text reload rewrote a lost exercise');
+    assert(restorePlanFromSavedLiveText()===true,'matching saved planText was not recognised at boot');
+    assert(state.plan[0].media[0].id==='logic_smoke_media','matching saved planText discarded rich saved plan state');
+
+    const staleExercise=JSON.parse(JSON.stringify(state.plan[0]));
+    localStorage.setItem(storageKey,JSON.stringify({...state,plan:[staleExercise],planText:hybridText}));
+    state={...state,plan:[],planText:'',liveDraftId:null};
+    window.KGGDataStore.setCurrentPlan({exercises:[staleExercise]},'logic_smoke_boot_stale_store');
+    load();
+    assert(restorePlanFromSavedLiveText()===true,'saved valid planText was not restored at boot');
+    syncStatePlanToStore('logic_smoke_boot_saved_live_text');
+    restoreSavedLiveTextInput();
+    assert(state.plan.length===hybridNames.length,'saved valid planText did not repair collapsed boot state');
+    assert(hybridNames.every(name=>state.plan.some(ex=>ex.name===name)),'saved valid planText lost boot exercise(s)');
+    assert(window.KGGDataStore.getCurrentPlan().exercises.length===hybridNames.length,'saved valid planText did not repair KGGDataStore.currentPlan');
+    assert(input.value===hybridText,'saved valid planText was overwritten at boot');
+
+    const incompleteText='Beinpresse, Dip';
+    const lastValidPlan=JSON.parse(JSON.stringify(state.plan));
+    localStorage.setItem(storageKey,JSON.stringify({...state,plan:lastValidPlan,planText:incompleteText}));
+    state={...state,plan:[staleExercise],planText:'',liveDraftId:null};
+    window.KGGDataStore.setCurrentPlan({exercises:[staleExercise]},'logic_smoke_boot_incomplete_store');
+    load();
+    assert(restorePlanFromSavedLiveText()===true,'saved incomplete planText was not recognised at boot');
+    syncStatePlanToStore('logic_smoke_boot_incomplete_live_text');
+    restoreSavedLiveTextInput();
+    assert(state.plan.length===hybridNames.length,'saved incomplete planText destroyed the last valid structured plan');
+    assert(window.KGGDataStore.getCurrentPlan().exercises.length===hybridNames.length,'saved incomplete planText overwrote KGGDataStore.currentPlan');
+    assert(input.value===incompleteText,'saved incomplete planText was overwritten at boot');
+
     const outputPlan=getCurrentPlanForOutput('logic_smoke_textblocks_hybrid_output');
     assert(outputPlan.exercises.length===hybridNames.length,'output state collapsed hybrid plan');
     const pdfSnapshot=buildKggPdfSnapshot(outputPlan);
@@ -628,15 +658,27 @@ function textblockCriticalSuite() {
     assert(state.plan.length===hybridNames.length,'known partial name destroyed the last valid plan');
     assert(window.KGGDataStore.getCurrentPlan().exercises.length===hybridNames.length,'known partial name destroyed currentPlan');
     assert(JSON.parse(localStorage.getItem(storageKey)||'{}').plan.length===hybridNames.length,'known partial name persisted a reduced plan');
-    input.value='Beinpresse, Dips, ';
-    syncPlanFromTextInput('logic_smoke_textblocks_intentional_delete');
-    assert(state.plan.length===2 && state.plan[0].name==='Beinpresse' && state.plan[1].name==='Dips','intentional text deletion should still apply immediately');
+    assert(JSON.parse(localStorage.getItem(storageKey)||'{}').planText==='Beinpresse, Dip','partial live text was not retained for the next boot');
+
+    input.value='Dips, Dips Neu, Beinpresse';
+    syncPlanFromTextInput('logic_smoke_textblocks_dips_coexist');
+    assert(state.plan.map(ex=>ex.name).join('|')==='Dips|Dips Neu|Beinpresse','Dips and Dips Neu cannot coexist: '+state.plan.map(ex=>ex.name).join('|'));
+    const dipsId=state.plan[0].localId;
+    const dipsNeuId=state.plan[1].localId;
+    const legpressId=state.plan[2].localId;
+    assert(dipsId!==dipsNeuId,'Dips and Dips Neu reused one exercise identity');
+    input.value='Dips Neu, Dips, Beinpresse';
+    syncPlanFromTextInput('logic_smoke_textblocks_dips_reorder');
+    assert(state.plan.map(ex=>ex.name).join('|')==='Dips Neu|Dips|Beinpresse','Dips/Dips Neu reorder was blocked: '+state.plan.map(ex=>ex.name).join('|'));
+    assert(state.plan[0].localId===dipsNeuId&&state.plan[1].localId===dipsId&&state.plan[2].localId===legpressId,'Dips/Dips Neu reorder changed exercise identities');
+    input.value='Dips Neu umbenannt, Dips, Beinpresse';
+    syncPlanFromTextInput('logic_smoke_textblocks_dips_rename');
+    assert(state.plan.map(ex=>ex.name).join('|')==='Dips Neu umbenannt|Dips|Beinpresse','Dips/Dips Neu rename was blocked: '+state.plan.map(ex=>ex.name).join('|'));
+    assert(state.plan[0].localId===dipsNeuId&&state.plan[1].localId===dipsId,'Dips/Dips Neu rename changed exercise identities');
     input.value='Dips, Beinpresse';
-    syncPlanFromTextInput('logic_smoke_textblocks_intentional_reorder');
-    assert(state.plan.length===2 && state.plan[0].name==='Dips' && state.plan[1].name==='Beinpresse','intentional text reorder should still apply immediately');
-    input.value='Dips Neu, Beinpresse';
-    syncPlanFromTextInput('logic_smoke_textblocks_intentional_rename');
-    assert(state.plan.length===2 && state.plan[0].name==='Dips Neu' && state.plan[1].name==='Beinpresse','intentional text rename should still apply immediately');
+    syncPlanFromTextInput('logic_smoke_textblocks_dips_delete');
+    assert(state.plan.map(ex=>ex.name).join('|')==='Dips|Beinpresse','Dips/Dips Neu delete was blocked: '+state.plan.map(ex=>ex.name).join('|'));
+    assert(state.plan[0].localId===dipsId&&state.plan[1].localId===legpressId,'Dips/Dips Neu delete changed remaining exercise identities');
     window.__results={suite:'textblocks-critical',names,hybridNames};
   `);
 }

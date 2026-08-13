@@ -3,8 +3,39 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 67,
+  "latestVersionCode": 68,
   "entries": [
+    {
+      "versionCode": 68,
+      "versionName": "1.0.68-plan-text-boot-restore",
+      "patchId": "kgg-v068-plan-text-boot-restore",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Plan-Text Boot Restore",
+      "reason": "Stellt gueltigen gespeicherten Live-Plantext beim Start wieder her und schuetzt nur kurz unvollstaendige Namenssegmente.",
+      "whatChanged": [
+        "Stellt gueltigen gespeicherten Live-Plantext beim Start wieder her und schuetzt nur kurz unvollstaendige Namenssegmente."
+      ],
+      "touchedAreas": [
+        "Parser",
+        "Plan-State"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Expliziter P0-Folgefix: Textfeld bleibt Live-Master, bestehende Mehruebungsplaene duerfen beim Boot oder bei Teilbearbeitung nicht verloren gehen."
+    },
     {
       "versionCode": 67,
       "versionName": "1.0.67-plan-text-live-master-guard",
@@ -629,7 +660,7 @@
       "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
     }
   ],
-  "latestVersionName": "1.0.67-plan-text-live-master-guard",
+  "latestVersionName": "1.0.68-plan-text-boot-restore",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",

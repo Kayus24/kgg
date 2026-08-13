@@ -1,7 +1,7 @@
 {
-  "versionCode": 67,
-  "versionName": "1.0.67-plan-text-live-master-guard",
-  "indexUrl": "index.html?v=67",
-  "sha256": "36afe297928092c5d88737544a9f95ca70163c2b0e12b0ecb45dbd18ebeb4325",
-  "notes": "v067: Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion."
+  "versionCode": 68,
+  "versionName": "1.0.68-plan-text-boot-restore",
+  "indexUrl": "index.html?v=68",
+  "sha256": "68160e4691937f68bb1ad87f2cebb3c6caf51eca372f6d675923b1346e766c6a",
+  "notes": "v068: Stellt gueltigen gespeicherten Live-Plantext beim Start wieder her und schuetzt nur kurz unvollstaendige Namenssegmente."
 }
