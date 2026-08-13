@@ -1,12 +1,12 @@
 {
-  "conclusion": null,
+  "conclusion": "success",
   "kind": "kgg_preview_run_status",
-  "message": "Validierung ist gruen. Tests und Test-App-Preview laufen.",
-  "phase": "publishing",
+  "message": "Test-App-Preview ist bereit und wurde veroeffentlicht.",
+  "phase": "success",
   "requestId": "kgg-editor-trash-bank-delete",
   "runId": "31714171219",
   "runUrl": "https://github.com/Kayus24/kgg/actions/runs/31714171219",
   "schema": 1,
-  "status": "in_progress",
-  "updatedAt": "2026-08-13T15:13:32Z"
+  "status": "completed",
+  "updatedAt": "2026-08-13T15:16:43Z"
 }
