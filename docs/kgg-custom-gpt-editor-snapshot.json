@@ -5,7 +5,7 @@
   "bootstrapVersion": "admin-v6",
   "model": "GPT-5.6 Thinking",
   "visibility": "private",
-  "syncStatus": "live-synced",
+  "syncStatus": "target-pending-live-editor-sync",
   "capabilities": {
     "webSearch": true,
     "codeInterpreter": true,
@@ -16,7 +16,7 @@
   },
   "instructionsSha256": "e8739b2ec231015082d6e81591243841e3c23e1c1e03c43fb087060f70a8bf0a",
   "knowledgeSha256": [
-    "3fa778fcafc6c0e2dff8506fe1583d10c02ce70f394045b0da96340f7853705c",
+    "3552fc3e42617b90cdf0689ba262cf1c2fdd8f40b6b6b2ba168f038d3ec09000",
     "887aed7c6044d488a055e2248caab004e70995525293c796a3f5f267e9dfb154",
     "403ebd2c2bf229deff152e563770b3c6b1b32921a91b3f583b0521d59d19f45f",
     "40a1958789e01799fecbd73761bd4e06882eac0c529d90521de87dfd47e7e1a6"
@@ -24,7 +24,5 @@
   "actionSha256": [
     "1eefc8682e346b3d6f9977d0daa28a5a46809c489f39e2a25217201933b5793c",
     "b415ae4e4429363ad56c60f3a05b59d0e62d5d9f8e9b20af8bab68bbd226e0e4"
-  ],
-  "lastVerifiedAt": "2026-08-12T05:52:10Z",
-  "lastVerifiedMainCommit": "48e1f549c58d8fd69942fac3c60ced192163ecb8"
+  ]
 }
