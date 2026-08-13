@@ -1,0 +1,48 @@
+name: Temporary continuous day syntax fix
+on:
+  push:
+    branches: [fix/patient-continuous-training-days-v75]
+permissions:
+  contents: write
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/patient-continuous-training-days-v75
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fix patient core syntax and verify root HTML
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old='window.KGGPatientDayFlow={isContinuousPlan,maxCompletedDay,dayAllowed,normalizeDone:normalizeDoneDays,next,restoreDay,resumeDay}function firstFound'
+          new='window.KGGPatientDayFlow={isContinuousPlan,maxCompletedDay,dayAllowed,normalizeDone:normalizeDoneDays,next,restoreDay,resumeDay};function firstFound'
+          if s.count(old)!=1:
+              raise SystemExit(f'expected one syntax anchor, got {s.count(old)}')
+          p.write_text(s.replace(old,new,1),encoding='utf-8',newline='\n')
+          PY
+          node release-pipeline/check_html_scripts.js index.html
+          node release-pipeline/kgg_patient_continuous_days_smoke.js
+          python release-pipeline/kgg_patient_gpt_resources.py --write
+          python release-pipeline/kgg_custom_gpt_resource_audit.py --refresh-target-profile patientProduction
+          python release-pipeline/kgg_patient_gpt_resources.py --check
+          python release-pipeline/kgg_custom_gpt_resource_audit.py --check
+      - name: Commit syntax fix and generated resources
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html docs/kgg-patient-* docs/kgg-custom-gpt-resource-manifest.json docs/kgg-patient-custom-gpt-editor-snapshot.json
+          git commit -m 'fix(patient): terminate continuous day runtime contract'
+          git push origin HEAD:fix/patient-continuous-training-days-v75
