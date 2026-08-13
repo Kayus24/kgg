@@ -139,6 +139,25 @@ def run_patient_scan_camera() -> None:
     run([node_executable(), "release-pipeline/kgg_patient_scan_camera_smoke.js"])
 
 
+def run_patient_day_flow_smoke() -> None:
+    log("== Patient continuous day-flow critical smoke ==")
+    run([node_executable(), "release-pipeline/kgg_patient_continuous_days_smoke.js"])
+
+
+def run_patient_day_flow_browser() -> None:
+    global PATIENT_SCAN_PREPARED
+    npm = npm_executable()
+    if not npm:
+        raise BatteryError("npm not found. Install npm or set KGG_NPM for the patient day-flow browser battery.")
+    if not PATIENT_SCAN_PREPARED:
+        run([npm, "--prefix", "release-pipeline", "ci", "--ignore-scripts"])
+        if os.environ.get("KGG_SKIP_PLAYWRIGHT_INSTALL") != "1":
+            run([node_executable(), "release-pipeline/node_modules/playwright/cli.js", "install", "--with-deps", "chromium"])
+        PATIENT_SCAN_PREPARED = True
+    log("== Patient continuous day-flow browser regression ==")
+    run([node_executable(), "release-pipeline/kgg_patient_continuous_days_playwright.js"])
+
+
 def run_admin_camera_qr() -> None:
     global PATIENT_SCAN_PREPARED
     npm = npm_executable()
@@ -648,6 +667,13 @@ TEST_REGISTRY = [
         "run": lambda: run_html_logic("patient-qr-critical"),
     },
     {
+        "id": "patient-continuous-days-critical",
+        "level": "critical",
+        "suite": "patient-day-flow",
+        "reason": "Continuous patient plans must advance beyond their original day horizon without dropping T13+ state.",
+        "run": run_patient_day_flow_smoke,
+    },
+    {
         "id": "selftest-gate-critical",
         "level": "critical",
         "suite": "hygiene",
@@ -674,6 +700,13 @@ TEST_REGISTRY = [
         "suite": "textblocks",
         "reason": "Broad text formats and free units are likely to regress after parser changes.",
         "run": lambda: run_html_logic("textblocks-regression"),
+    },
+    {
+        "id": "patient-continuous-days-regression",
+        "level": "regression",
+        "suite": "patient-day-flow",
+        "reason": "Training completion, QR day identity, reload, paged history and per-plan day state must work together in a real browser.",
+        "run": run_patient_day_flow_browser,
     },
     {
         "id": "patient-scan-camera-regression",
@@ -865,7 +898,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--suite",
-        choices=["all", "hygiene", "mobile-inbox", "sync", "native-sync", "textblocks", "pdf", "patient-qr", "patient-scan", "camera-qr", "ui-stability", "syntax", "security", "release", "android", "gpt"],
+        choices=["all", "hygiene", "mobile-inbox", "sync", "native-sync", "textblocks", "pdf", "patient-qr", "patient-day-flow", "patient-scan", "camera-qr", "ui-stability", "syntax", "security", "release", "android", "gpt"],
         default=None,
         help="Optionally limit to one suite. Without --level this keeps legacy behavior and runs all non-live tests in that suite.",
     )
