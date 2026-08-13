@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0427",
+  "versionName": "1.0.66-editor-trash-bank-delete",
+  "notes": "v066: Der Mülleimer im Dialog Übung bearbeiten wird immer auf die bestehende bestätigte Datenbank-Löschung geroutet; das separate Entfernen aus dem aktuellen Plan bleibt unverändert.",
+  "createdAt": "2026-08-13T16:33:35Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0427",
+      "profile": "admin",
+      "versionName": "1.0.66-editor-trash-bank-delete",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0427/admin.html",
+      "sha256": "88701a097d74eb9ab238c3e493686a43f79523fb689c6e9b993c5a27928271ab",
+      "notes": "v066: Der Mülleimer im Dialog Übung bearbeiten wird immer auf die bestehende bestätigte Datenbank-Löschung geroutet; das separate Entfernen aus dem aktuellen Plan bleibt unverändert."
+    },
+    "colleague": {
+      "releaseId": "r0427",
+      "profile": "colleague",
+      "versionName": "1.0.66-editor-trash-bank-delete",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0427/colleague.html",
+      "sha256": "82c2505720edf205009b6e53460db0140cddcc7700f5c9760f5a2e4d3a8b52e0",
+      "notes": "v066: Der Mülleimer im Dialog Übung bearbeiten wird immer auf die bestehende bestätigte Datenbank-Löschung geroutet; das separate Entfernen aus dem aktuellen Plan bleibt unverändert."
+    }
+  }
+}
