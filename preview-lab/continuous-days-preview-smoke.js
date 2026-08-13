@@ -16,7 +16,30 @@ async function boot(page){
   await page.locator('#plan').waitFor({state:'visible',timeout:10000});
   await page.locator('#kggCurrentDayBox').waitFor({state:'visible',timeout:10000});
 }
-async function day(page,n){await page.waitForFunction(n=>Number(window.d)===n&&document.querySelector('#kggCurrentDayBox .kggCurrentDayBig')?.textContent.trim()===`Tag ${n}`,n,{timeout:10000})}
+async function day(page,n){
+  try{
+    await page.waitForFunction(n=>Number(window.d)===n&&document.querySelector('#kggCurrentDayBox .kggCurrentDayBig')?.textContent.trim()===`Tag ${n}`,n,{timeout:10000});
+  }catch(error){
+    const diagnostic=await page.evaluate(()=>({
+      href:location.href,
+      runtimeDay:Number(window.d),
+      done:Array.isArray(window.done)?window.done.slice():null,
+      next:typeof window.next==='function'?window.next():null,
+      hub:document.querySelector('#kggCurrentDayBox .kggCurrentDayBig')?.textContent||'',
+      status:document.getElementById('status')?.textContent||'',
+      planId:window.p?.id||'',
+      planDays:window.p?.days||null,
+      continuous:window.p?.extendDays!==false,
+      metaKey:typeof window.mk==='function'?window.mk():'',
+      meta:typeof window.mk==='function'?localStorage.getItem(window.mk()):null,
+      doneKey:typeof window.dk==='function'?window.dk():'',
+      storedDone:typeof window.dk==='function'?localStorage.getItem(window.dk()):null,
+      currentPlan:localStorage.getItem('kggCurrentPlanV1'),
+      multi:localStorage.getItem('kggPatientMultiPlansV1'),
+    }));
+    throw new Error(`expected T${n}; preview day diagnostic=${JSON.stringify(diagnostic)}; cause=${error.message}`);
+  }
+}
 async function menu(page,base){await page.goto(base+'continuous-days-test.html',{waitUntil:'domcontentloaded'});await page.locator('#scenario-t7').waitFor({state:'visible'})}
 async function clickScenario(page,id){await page.locator(id).click();await page.waitForLoadState('domcontentloaded');await boot(page)}
 async function finish(page,qrDay,nextDay){await page.locator('#plan > button.btn').click();await page.locator('#end').waitFor({state:'visible'});const payload=decodePayload(await page.locator('#qr').getAttribute('data-payload'));assert(Number(payload.d)===qrDay,`QR expected T${qrDay}, got ${payload.d}`);assert(payload.final===true,'final QR flag missing');assert(await page.evaluate(()=>Number(d))===nextDay,`expected prepared T${nextDay}`)}
