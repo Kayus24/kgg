@@ -26,29 +26,80 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - name: Clone isolated preview repository
         shell: bash
         run: |
           set -euo pipefail
           gh auth setup-git
           gh repo clone Kayus24/kgg-patient-preview preview
-      - name: Assemble exact runtime preview
+      - name: Assemble preview with canonical patient isolation
         shell: bash
         run: |
           set -euo pipefail
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          import shutil
+          import sys
+          from pathlib import Path
+
+          workspace = Path(os.environ['GITHUB_WORKSPACE'])
+          source = workspace / 'source'
+          preview = workspace / 'preview'
+          lab = workspace / 'lab'
+          request_id = os.environ['REQUEST_ID']
+          source_sha = os.environ['SOURCE_SHA']
+          sys.path.insert(0, str(source / 'release-pipeline'))
+          import kgg_patient_gpt_write_gate as gate
+
+          payload = {
+              'request_id': request_id,
+              'base_sha': source_sha,
+              'risk_class': 'interface',
+              'title': 'Patient v75 continuous training days',
+              'summary': 'Exact accepted v75 runtime with isolated preview scope for continuous training-day verification.',
+          }
+          digest = hashlib.sha256(('continuous-days-v75:' + source_sha).encode('utf-8')).hexdigest()
+          meta = gate.write_preview(preview, payload, digest, 75, source)
+          dest = preview / 'previews' / request_id
+
+          # The canonical preview builder isolates the service-worker scope and
+          # injects the exact canonical module block for first load. Keep the
+          # vendored QR decoder available too because scanner actions can need it.
+          source_vendor = source / 'vendor'
+          if source_vendor.is_dir():
+              shutil.copytree(source_vendor, dest / 'vendor', dirs_exist_ok=True)
+          shutil.copy2(lab / 'preview-lab' / 'continuous-days-test.html', dest / 'continuous-days-test.html')
+          provenance = {
+              'requestId': request_id,
+              'patientVersion': '75',
+              'sourceCommit': source_sha,
+              'requiredGate': '31685911499',
+              'continuousDaysGate': '31685911506',
+              'previewScopePatched': True,
+              'firstLoadModules': True,
+              'canonicalPreviewBuilder': 'kgg_patient_gpt_write_gate.write_preview',
+          }
+          (dest / 'preview-provenance.json').write_text(
+              json.dumps(provenance, ensure_ascii=False, indent=2, sort_keys=True) + '\n',
+              encoding='utf-8',
+              newline='\n',
+          )
+          assert meta['previewScopePatched'] is True
+          assert meta['firstLoadModules'] is True
+          assert meta['patientVersion'] == 75
+          print(json.dumps({'status':'ASSEMBLED','meta':meta,'sourceCommit':source_sha}))
+          PY
           dest="$GITHUB_WORKSPACE/preview/previews/$REQUEST_ID"
-          rm -rf "$dest"
-          mkdir -p "$dest/vendor"
-          cp source/index.html source/service-worker.js source/update-recovery.html "$dest/"
-          cp source/manifest.json source/manifest-v64.webmanifest "$dest/"
-          cp source/kgg-icon-192-v63.png source/kgg-icon-512-v63.png source/kgg-icon-maskable-512-v63.png "$dest/"
-          cp source/*.js "$dest/"
-          cp -R source/vendor/. "$dest/vendor/"
-          cp lab/preview-lab/continuous-days-test.html "$dest/continuous-days-test.html"
-          printf '{"requestId":"%s","patientVersion":"75","sourceCommit":"%s","requiredGate":"31685911499","continuousDaysGate":"31685911506"}\n' "$REQUEST_ID" "$SOURCE_SHA" > "$dest/preview-provenance.json"
           grep -F "const APP_VERSION = '75';" "$dest/service-worker.js"
-          grep -F "kgg-handyplan-v75-continuous-days" "$dest/service-worker.js"
+          grep -F "const CACHE_NAME = 'kgg-patient-preview-$REQUEST_ID-v75';" "$dest/service-worker.js"
+          grep -F "const scopePath=new URL(self.registration.scope).pathname" "$dest/service-worker.js"
           grep -F "function isContinuousPlan()" "$dest/index.html"
+          grep -F "patient-day-history.js" "$dest/index.html"
           node source/release-pipeline/check_html_scripts.js "$dest/index.html" "$dest/continuous-days-test.html"
       - name: Install browser dependencies
         shell: bash
@@ -57,9 +108,6 @@ jobs:
           cd source/release-pipeline
           npm ci
           npx playwright install --with-deps chromium
-          cd "$GITHUB_WORKSPACE/lab"
-          npm init -y >/dev/null 2>&1
-          npm install --no-save playwright@1.61.1 >/dev/null 2>&1
       - name: Recheck exact source feature contract
         shell: bash
         run: |
@@ -67,7 +115,7 @@ jobs:
           cd source
           node release-pipeline/kgg_patient_continuous_days_smoke.js
           timeout 180s node release-pipeline/kgg_patient_continuous_days_playwright.js
-      - name: Test exact assembled preview artifact
+      - name: Test exact isolated preview artifact
         shell: bash
         env:
           NODE_PATH: ${{ github.workspace }}/source/release-pipeline/node_modules
@@ -81,7 +129,7 @@ jobs:
           cd preview
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add "previews/$REQUEST_ID"
+          git add "previews/$REQUEST_ID" previews/index.json
           git commit -m "publish patient continuous-days v75 preview A"
           git pull --rebase origin main
           git push origin HEAD:main
