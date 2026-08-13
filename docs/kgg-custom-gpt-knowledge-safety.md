@@ -2,7 +2,7 @@
 
 Generated production knowledge for protected areas, regression history and safe patch patterns.
 
-Source digest: `521622c63da2b3de`
+Source digest: `d8817b0867f2104b`
 
 ## Usage Rules
 
@@ -229,6 +229,14 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Lesson: Ein Patient-Preview-Run konnte vollstaendig gruen sein, obwohl die erste im Browser oder in der Test-App geoeffnete `index.html` den Scanner und weitere Patient-Module noch nicht geladen hatte. Die Dateien waren im Artefakt vorhanden, wurden aber erst durch `service-worker.js` in einen spaeteren, bereits kontrollierten Seitenaufruf injiziert. `release-pipeli
 - Caution: Keep patch scoped to the requested area.
 - Tests: Run the risk-matched KGG battery.
+
+### 2026-08-13 - Custom-GPT Antwortzug-Reaktivierung und Editor-/Action-Drift
+
+- Source: `docs/bug-debug/2026-08-13-custom-gpt-answer-turn-editor-drift.md`
+- Areas: debug, modal, parser-textblocks, pdf, qr-patient, scan-camera, sync
+- Lesson: Ein KGG Custom GPT kann nach dem Ende seines ChatGPT-Antwortzugs nicht selbst einen neuen Antwortzug starten. Ein laufender GitHub-Workflow kann zwar weiter arbeiten, aber Run-, Job- und Artifact-Status werden danach nicht von selbst erneut gelesen. Wenn Codex den GPT erneut aktiviert, kann ohne klare Uebergabe ein doppelter Preview-Dispatch, eine falsche Fo
+- Caution: - App-Feature-Code, PDF, QR-/Patienten-App-Vertrag, Scan/OCR, Parser, Plan-State, Medien/Upload, Android/APK, Manifest und Geheimnisse. - Keine Patientendaten, echte Plan-/QR-Payloads, Chats, Tokens oder Rohdaten im Bug-Debug-Log, in der Koordination oder im Project Memory speichern.
+- Tests: - `python release-pipeline/kgg_bug_knowledge.py --check` ist gruen. - `python release-pipeline/kgg_custom_gpt_knowledge_pack.py --check` ist gruen. - `python release-pipeline/kgg_patient_gpt_resources.py --check` ist gruen. - Der Resource-Audit akzeptiert nur passende Hashes; nach einer kanonischen Knowledge-Aenderung bleibt ein Profil bis zur echten Editor-
 
 ### Debug JSON Seite
 

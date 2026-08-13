@@ -2,7 +2,7 @@
 
 This generated compatibility pack contains the complete production knowledge set. Prefer the four smaller curated packs in the GPT editor so retrieval stays focused.
 
-Source digest: `fed166d110365fbc`
+Source digest: `da92879207313c77`
 
 ## Usage Rules
 
@@ -199,10 +199,22 @@ Ein erfolgreicher Abschlussbericht nennt die aus `meta.json` geprueften Adressen
 - ChatGPTs eigener Sicherheitsdialog fuer externe Actions ist keine Gespraechsrueckfrage des GPT und darf nicht durch erfundene Freigaben umgangen werden. Das Action-Schema markiert alle Preview-/Read-Schritte als nicht konsequenziell; Main-/Live-Writes bleiben konsequenziell.
 - Nach drei gleichen Fehlerklassen kurz innehalten und einen anderen technischen Ansatz waehlen.
 
+Ein abgeschlossener ChatGPT-Antwortzug kann keinen neuen Read-/Action-Zug selbst starten. Bei einer leeren, abgebrochenen oder zeitlimitierten Antwort dokumentiert Codex den kompakten Handoff (`Zeit`, `GPT`, `Auftrag/Ziel`, `Vorheriger sichtbarer Zustand/Run-ID`, `Beleg`, `Auswirkung`, `Reaktivierungsaktion`, `Ergebnis`, `Folgeaktion`) im bestehenden `docs/bug-debug/`-Log. Bei Reaktivierung zuerst Manifest, Live-Kontext, Playbook und Main-SHA auffrischen und danach nur den bestehenden Run/Jobs/Artifacts lesen; niemals einen zweiten Preview-Dispatch erzeugen. Einzelne Laufzeitereignisse gehoeren nicht ins Project Memory und aendern niemals Regeln automatisch.
+
+Bei Editor-/Knowledge-/Action-Drift oder fehlendem Live-Beleg ist `stale_context` ein sicherer Stopp: Der Server blockiert `publish_preview`, PR und Main/Beta bis der passende Snapshot `live-synced` ist. Read-Actions und `validate_only` bleiben fuer Diagnose und lokale Payload-Pruefung erlaubt.
+
+Ein sichtbarer Browser-Button `Antwort stoppen` beweist nicht allein, dass ein
+Vorgang noch laeuft; Completion folgt nur aus Antwortinhalt, Action-Ergebnis,
+Run-Beleg oder stabilem Textzustand. Abweichende Editor-/Preview-Modelllabels
+sind `model_ui_ambiguous`, kein bewiesener Modellwechsel. Vor Kosten- oder
+Performanceaussagen immer die echte Editor-Auswahl und das Action-Verhalten
+pruefen.
+
 ## Begrenzte Patient-App-Koordination
 
 - Bei QR, Scanner, Storage oder Patient/Admin-Schnittstellen Patient-Kontext, Patient-Playbook und gezielte Patient-Source-Chunks live laden.
 - Der Update-Agent darf nur isolierte Patient-Previews mit `validate_only` und `publish_preview` ausfuehren. Kein Patient-PR und kein Patient-Live.
+- Ein Cross-App-`publish_preview` wird serverseitig nur ausgefuehrt, wenn Admin- und Patient-Editor-Snapshot `live-synced` sind; der kompatible Legacy-Preview-only-Weg hat dieselbe Admin-Sperre. `validate_only` bleibt fuer Diagnose erlaubt.
 - `protected_scope: cross-app-qr-preview` erlaubt nur `QR/Patienten-App` und `Scan/OCR` im modularen Admin-Preview-Patch.
 - Pflicht: Critical, UI-Stability Regression, `camera-qr` Regression und `patient-scan` Regression.
 - Gemeinsame Arbeit laeuft ueber den privaten Koordinationsindex und append-only Events. Die Queue startet keinen GPT automatisch.
@@ -330,6 +342,7 @@ The GPT must patch the modular source through the gate; it must not request dire
 - `publish_preview`: internal second stage. It creates a module under `kgg-update/src/patches/`, rebuilds generated HTML, runs tests, builds Preview APK and publishes HTML/meta to `gpt-preview`.
 - `create_pr`: only after Max accepts the matching Test-App/Test-APK/Preview-APK. Creates a PR, never merges.
 - `publish_admin_beta`: only after Max accepts the matching Test-App/Test-APK/Preview-APK and asks for Haupt-App/Admin-Beta. Creates an `[admin-beta]` PR, labels it `kgg-auto-merge`, waits for required checks and merges the Admin beta to `main`.
+- Server preflight: every Preview or release write requires the Admin editor snapshot to pass `--require-live-synced`. Read operations and `validate_only` stay available for diagnosis and local payload validation.
 
 ## Valid modular payload
 
@@ -411,7 +424,7 @@ The GPT may say a Preview is available only after it has verified:
 - `getKggPreviewGateRun` must be available so the GPT can verify `status` and `conclusion`.
 - `getKggPreviewGateJobs` must be available so the GPT can report failed job/step names.
 - `getKggPreviewGateArtifacts` must be available so the GPT can verify the Preview artifact exists and is not expired.
-- `submitKggPatientPreviewFromAdmin` exposes only isolated Patient `validate_only` and `publish_preview`.
+- `submitKggPatientPreviewFromAdmin` exposes only isolated Patient `validate_only` and `publish_preview`. Its server workflow requires both Admin and Patient snapshots to be `live-synced` before a cross-app Preview write; `validate_only` remains available. The legacy Patient Preview-only workflow enforces the same Admin preflight, so an older Admin Action schema cannot bypass it.
 - Coordination uses `getKggAgentCoordinationIndex`, one selected thread and guarded append-only events.
 
 The public status channel is `gpt-preview/status/latest.json`, with per-request history under `gpt-preview/status/requests/<request_id>.json`. It contains only request/run state and no payload, patient data or secret. The Preview app polls it while open and through WorkManager in the background. This status channel is progress evidence, but final success still requires the run, tests, artifact, `meta.json`, HTML and Preview index.
@@ -1465,6 +1478,14 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Lesson: Ein Patient-Preview-Run konnte vollstaendig gruen sein, obwohl die erste im Browser oder in der Test-App geoeffnete `index.html` den Scanner und weitere Patient-Module noch nicht geladen hatte. Die Dateien waren im Artefakt vorhanden, wurden aber erst durch `service-worker.js` in einen spaeteren, bereits kontrollierten Seitenaufruf injiziert. `release-pipeli
 - Caution: Keep patch scoped to the requested area.
 - Tests: Run the risk-matched KGG battery.
+
+### 2026-08-13 - Custom-GPT Antwortzug-Reaktivierung und Editor-/Action-Drift
+
+- Source: `docs/bug-debug/2026-08-13-custom-gpt-answer-turn-editor-drift.md`
+- Areas: debug, modal, parser-textblocks, pdf, qr-patient, scan-camera, sync
+- Lesson: Ein KGG Custom GPT kann nach dem Ende seines ChatGPT-Antwortzugs nicht selbst einen neuen Antwortzug starten. Ein laufender GitHub-Workflow kann zwar weiter arbeiten, aber Run-, Job- und Artifact-Status werden danach nicht von selbst erneut gelesen. Wenn Codex den GPT erneut aktiviert, kann ohne klare Uebergabe ein doppelter Preview-Dispatch, eine falsche Fo
+- Caution: - App-Feature-Code, PDF, QR-/Patienten-App-Vertrag, Scan/OCR, Parser, Plan-State, Medien/Upload, Android/APK, Manifest und Geheimnisse. - Keine Patientendaten, echte Plan-/QR-Payloads, Chats, Tokens oder Rohdaten im Bug-Debug-Log, in der Koordination oder im Project Memory speichern.
+- Tests: - `python release-pipeline/kgg_bug_knowledge.py --check` ist gruen. - `python release-pipeline/kgg_custom_gpt_knowledge_pack.py --check` ist gruen. - `python release-pipeline/kgg_patient_gpt_resources.py --check` ist gruen. - Der Resource-Audit akzeptiert nur passende Hashes; nach einer kanonischen Knowledge-Aenderung bleibt ein Profil bis zur echten Editor-
 
 ### Debug JSON Seite
 

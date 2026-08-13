@@ -3,6 +3,8 @@ import hashlib
 import importlib.util
 import json
 import re
+import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -21,6 +23,8 @@ MOBILE_SPEC = importlib.util.spec_from_file_location("kgg_mobile_inbox", HERE / 
 mobile_inbox = importlib.util.module_from_spec(MOBILE_SPEC)
 assert MOBILE_SPEC.loader
 MOBILE_SPEC.loader.exec_module(mobile_inbox)
+
+import kgg_custom_gpt_resource_audit as resource_audit
 
 
 class ReleasePipelineTests(unittest.TestCase):
@@ -264,6 +268,179 @@ class ReleasePipelineTests(unittest.TestCase):
                 self.assertLess(cursor, workflow.index("python release-pipeline/kgg_secret_scan.py"))
                 for target in staged_targets:
                     self.assertIn(target, workflow)
+
+    def test_gpt_workflows_gate_writes_on_verified_editor_sync(self):
+        admin_auto = pipeline.read_text(
+            pipeline.ROOT / ".github/workflows/kgg-gpt-preview-auto.yml"
+        )
+        self.assertIn("editor-sync-preflight:", admin_auto)
+        self.assertIn("Require verified Admin GPT editor sync", admin_auto)
+        self.assertIn("--require-live-synced", admin_auto)
+        self.assertIn(
+            "--editor-snapshot docs/kgg-custom-gpt-editor-snapshot.json",
+            admin_auto,
+        )
+        self.assertIn("ref: main", admin_auto)
+        self.assertGreaterEqual(admin_auto.count("ref: main"), 4)
+        self.assertRegex(
+            admin_auto,
+            r"status-validating:\s*\n\s+needs: editor-sync-preflight",
+        )
+
+        admin_gate = pipeline.read_text(
+            pipeline.ROOT / ".github/workflows/kgg-gpt-preview-gate.yml"
+        )
+        self.assertIn(
+            "Require verified Admin GPT editor sync for Preview or release writes",
+            admin_gate,
+        )
+        self.assertIn("if: inputs.mode != 'validate_only'", admin_gate)
+        self.assertIn("--require-live-synced", admin_gate)
+        self.assertIn(
+            "Checkout complete canonical Admin editor sync contract",
+            admin_gate,
+        )
+        self.assertIn(
+            "--editor-snapshot editor-contract/docs/kgg-custom-gpt-editor-snapshot.json",
+            admin_gate,
+        )
+        self.assertIn("path: editor-contract", admin_gate)
+        self.assertNotIn("sparse-checkout", admin_gate)
+        self.assertIn("ref: main", admin_gate)
+        self.assertIn("Checkout canonical main source", admin_gate)
+        self.assertNotIn("ref: ${{ github.ref_name }}", admin_gate)
+
+        patient_gate = pipeline.read_text(
+            pipeline.ROOT / ".github/workflows/kgg-patient-gpt-preview-gate.yml"
+        )
+        self.assertIn(
+            "Require verified Patient GPT editor sync for Preview or release writes",
+            patient_gate,
+        )
+        self.assertIn("if: inputs.mode != 'validate_only'", patient_gate)
+        self.assertIn("--require-live-synced", patient_gate)
+        self.assertIn(
+            "Checkout complete canonical Patient editor sync contract",
+            patient_gate,
+        )
+        self.assertIn(
+            "--editor-snapshot editor-contract/docs/kgg-patient-custom-gpt-editor-snapshot.json",
+            patient_gate,
+        )
+        self.assertIn("path: editor-contract", patient_gate)
+        self.assertNotIn("sparse-checkout", patient_gate)
+        self.assertIn("ref: main", patient_gate)
+        self.assertIn("Checkout canonical main patient source", patient_gate)
+        self.assertNotIn("ref: ${{ github.ref_name }}", patient_gate)
+        refresh = (
+            "python release-pipeline/kgg_custom_gpt_resource_audit.py "
+            "--refresh-target-profile patientProduction"
+        )
+        self.assertIn(refresh, patient_gate)
+        self.assertLess(
+            patient_gate.index("python release-pipeline/kgg_patient_gpt_resources.py --write"),
+            patient_gate.index(refresh),
+        )
+        self.assertLess(
+            patient_gate.index(refresh),
+            patient_gate.index('git commit -m "patient app ${{ inputs.request_id }}"'),
+        )
+
+        cross_app = pipeline.read_text(
+            pipeline.ROOT / ".github/workflows/kgg-patient-gpt-preview-from-admin.yml"
+        )
+        self.assertIn("Require verified Admin GPT editor sync", cross_app)
+        self.assertIn("if: inputs.mode == 'publish_preview'", cross_app)
+        self.assertIn("needs.admin-editor-sync-preflight.result == 'success'", cross_app)
+        self.assertIn(
+            "--editor-snapshot docs/kgg-custom-gpt-editor-snapshot.json",
+            cross_app,
+        )
+        self.assertIn("ref: main", cross_app)
+
+        legacy_preview = pipeline.read_text(
+            pipeline.ROOT / ".github/workflows/kgg-patient-gpt-preview-only.yml"
+        )
+        self.assertIn(
+            "Require verified Admin GPT editor sync for legacy Preview writes",
+            legacy_preview,
+        )
+        self.assertIn("if: inputs.mode == 'publish_preview'", legacy_preview)
+        self.assertIn("--profile production", legacy_preview)
+        self.assertIn("--require-live-synced", legacy_preview)
+        self.assertIn(
+            "needs.admin-editor-sync-preflight.result == 'success'", legacy_preview
+        )
+        self.assertIn("kgg-patient-gpt-preview-gate.yml", legacy_preview)
+        self.assertIn("--profile patientProduction", patient_gate)
+
+        admin_api = pipeline.read_text(
+            pipeline.ROOT / "docs/kgg-custom-gpt-action-api-openapi.yaml"
+        )
+        self.assertIn(
+            "/repos/Kayus24/kgg/actions/workflows/"
+            "kgg-patient-gpt-preview-from-admin.yml/dispatches:",
+            admin_api,
+        )
+        self.assertIn(
+            "/repos/Kayus24/kgg/actions/workflows/"
+            "kgg-patient-gpt-preview-from-admin.yml/runs:",
+            admin_api,
+        )
+        self.assertNotIn(
+            "kgg-patient-gpt-preview-only.yml/runs:",
+            admin_api,
+        )
+        self.assertEqual(1, admin_api.count("      description: Max pre-authorized only"))
+
+    def test_complete_editor_contract_checkout_reaches_the_live_sync_gate(self):
+        """A full checkout must contain every resource the audit computes, not a subset."""
+        manifest = resource_audit.expected_manifest()
+        resource_paths = {
+            "docs/kgg-custom-gpt-resource-manifest.json",
+            "docs/kgg-custom-gpt-editor-snapshot.json",
+            "docs/kgg-patient-custom-gpt-editor-snapshot.json",
+            "release-pipeline/kgg_custom_gpt_resource_audit.py",
+        }
+        for profile in ("production", "eval", "patientProduction"):
+            contract = manifest[profile]
+            if "editorBootstrap" in contract:
+                resource_paths.add(contract["editorBootstrap"]["path"])
+            resource_paths.update(item["path"] for item in contract["knowledge"])
+            resource_paths.update(item["path"] for item in contract["actions"])
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            editor_contract = Path(temporary_directory) / "editor-contract"
+            for relative_path in resource_paths:
+                source = pipeline.ROOT / relative_path
+                target = editor_contract / relative_path
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source, target)
+            for profile, snapshot in (
+                ("production", "docs/kgg-custom-gpt-editor-snapshot.json"),
+                ("patientProduction", "docs/kgg-patient-custom-gpt-editor-snapshot.json"),
+            ):
+                with self.subTest(profile=profile):
+                    result = subprocess.run(
+                        [
+                            sys.executable,
+                            "release-pipeline/kgg_custom_gpt_resource_audit.py",
+                            "--check",
+                            "--editor-snapshot",
+                            snapshot,
+                            "--profile",
+                            profile,
+                            "--require-live-synced",
+                        ],
+                        cwd=editor_contract,
+                        capture_output=True,
+                        check=False,
+                        text=True,
+                    )
+                    self.assertEqual(1, result.returncode, result.stderr)
+                    failure = json.loads(result.stderr)
+                    self.assertIn("live sync is required", failure["error"])
+                    self.assertNotIn("missing GPT resource", failure["error"])
 
     def test_mobile_inbox_stages_generated_artifacts_before_redacted_secret_scan(self):
         workflow = pipeline.read_text(

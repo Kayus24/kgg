@@ -26,10 +26,22 @@ Ein erfolgreicher Abschlussbericht nennt die aus `meta.json` geprueften Adressen
 - ChatGPTs eigener Sicherheitsdialog fuer externe Actions ist keine Gespraechsrueckfrage des GPT und darf nicht durch erfundene Freigaben umgangen werden. Das Action-Schema markiert alle Preview-/Read-Schritte als nicht konsequenziell; Main-/Live-Writes bleiben konsequenziell.
 - Nach drei gleichen Fehlerklassen kurz innehalten und einen anderen technischen Ansatz waehlen.
 
+Ein abgeschlossener ChatGPT-Antwortzug kann keinen neuen Read-/Action-Zug selbst starten. Bei einer leeren, abgebrochenen oder zeitlimitierten Antwort dokumentiert Codex den kompakten Handoff (`Zeit`, `GPT`, `Auftrag/Ziel`, `Vorheriger sichtbarer Zustand/Run-ID`, `Beleg`, `Auswirkung`, `Reaktivierungsaktion`, `Ergebnis`, `Folgeaktion`) im bestehenden `docs/bug-debug/`-Log. Bei Reaktivierung zuerst Manifest, Live-Kontext, Playbook und Main-SHA auffrischen und danach nur den bestehenden Run/Jobs/Artifacts lesen; niemals einen zweiten Preview-Dispatch erzeugen. Einzelne Laufzeitereignisse gehoeren nicht ins Project Memory und aendern niemals Regeln automatisch.
+
+Bei Editor-/Knowledge-/Action-Drift oder fehlendem Live-Beleg ist `stale_context` ein sicherer Stopp: Der Server blockiert `publish_preview`, PR und Main/Beta bis der passende Snapshot `live-synced` ist. Read-Actions und `validate_only` bleiben fuer Diagnose und lokale Payload-Pruefung erlaubt.
+
+Ein sichtbarer Browser-Button `Antwort stoppen` beweist nicht allein, dass ein
+Vorgang noch laeuft; Completion folgt nur aus Antwortinhalt, Action-Ergebnis,
+Run-Beleg oder stabilem Textzustand. Abweichende Editor-/Preview-Modelllabels
+sind `model_ui_ambiguous`, kein bewiesener Modellwechsel. Vor Kosten- oder
+Performanceaussagen immer die echte Editor-Auswahl und das Action-Verhalten
+pruefen.
+
 ## Begrenzte Patient-App-Koordination
 
 - Bei QR, Scanner, Storage oder Patient/Admin-Schnittstellen Patient-Kontext, Patient-Playbook und gezielte Patient-Source-Chunks live laden.
 - Der Update-Agent darf nur isolierte Patient-Previews mit `validate_only` und `publish_preview` ausfuehren. Kein Patient-PR und kein Patient-Live.
+- Ein Cross-App-`publish_preview` wird serverseitig nur ausgefuehrt, wenn Admin- und Patient-Editor-Snapshot `live-synced` sind; der kompatible Legacy-Preview-only-Weg hat dieselbe Admin-Sperre. `validate_only` bleibt fuer Diagnose erlaubt.
 - `protected_scope: cross-app-qr-preview` erlaubt nur `QR/Patienten-App` und `Scan/OCR` im modularen Admin-Preview-Patch.
 - Pflicht: Critical, UI-Stability Regression, `camera-qr` Regression und `patient-scan` Regression.
 - Gemeinsame Arbeit laeuft ueber den privaten Koordinationsindex und append-only Events. Die Queue startet keinen GPT automatisch.
