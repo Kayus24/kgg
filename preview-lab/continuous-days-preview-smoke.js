@@ -18,22 +18,22 @@ async function boot(page){
 }
 async function day(page,n){
   try{
-    await page.waitForFunction(n=>Number(window.d)===n&&document.querySelector('#kggCurrentDayBox .kggCurrentDayBig')?.textContent.trim()===`Tag ${n}`,n,{timeout:10000});
+    await page.waitForFunction(n=>Number(d)===n&&document.querySelector('#kggCurrentDayBox .kggCurrentDayBig')?.textContent.trim()===`Tag ${n}`,n,{timeout:10000});
   }catch(error){
     const diagnostic=await page.evaluate(()=>({
       href:location.href,
-      runtimeDay:Number(window.d),
-      done:Array.isArray(window.done)?window.done.slice():null,
-      next:typeof window.next==='function'?window.next():null,
+      runtimeDay:typeof d!=='undefined'?Number(d):null,
+      done:typeof done!=='undefined'&&Array.isArray(done)?done.slice():null,
+      next:typeof next==='function'?next():null,
       hub:document.querySelector('#kggCurrentDayBox .kggCurrentDayBig')?.textContent||'',
       status:document.getElementById('status')?.textContent||'',
-      planId:window.p?.id||'',
-      planDays:window.p?.days||null,
-      continuous:window.p?.extendDays!==false,
-      metaKey:typeof window.mk==='function'?window.mk():'',
-      meta:typeof window.mk==='function'?localStorage.getItem(window.mk()):null,
-      doneKey:typeof window.dk==='function'?window.dk():'',
-      storedDone:typeof window.dk==='function'?localStorage.getItem(window.dk()):null,
+      planId:typeof p!=='undefined'&&p?p.id||'':'',
+      planDays:typeof p!=='undefined'&&p?p.days||null:null,
+      continuous:typeof p!=='undefined'&&p?p.extendDays!==false:null,
+      metaKey:typeof mk==='function'?mk():'',
+      meta:typeof mk==='function'?localStorage.getItem(mk()):null,
+      doneKey:typeof dk==='function'?dk():'',
+      storedDone:typeof dk==='function'?localStorage.getItem(dk()):null,
       currentPlan:localStorage.getItem('kggCurrentPlanV1'),
       multi:localStorage.getItem('kggPatientMultiPlansV1'),
     }));
