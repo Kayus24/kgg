@@ -1,0 +1,28 @@
+name: KGG Patient Continuous Days Check
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+permissions:
+  contents: read
+concurrency:
+  group: kgg-continuous-days-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  continuous-days:
+    name: continuous-days
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run continuous-day logic contract
+        run: node release-pipeline/kgg_patient_continuous_days_smoke.js
+      - name: Install Chromium
+        run: |
+          cd release-pipeline
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Run continuous-day browser contract
+        run: node release-pipeline/kgg_patient_continuous_days_playwright.js
