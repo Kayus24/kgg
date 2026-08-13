@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Testing
 
-Generated retrieval pack. Source digest: `9260525faa60ca69`.
+Generated retrieval pack. Source digest: `1a6d075c81d7bb13`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -107,7 +107,7 @@ def validate_static_compatibility(manifest:dict,version:str)->None:
   "./patient-start-scan.js?v=plan-replace-1",
   "./patient-multiplan-db.js?v=lossless-media-plans-1",
   "./patient-plan-delete.js?v=plan-delete-2-red-x",
-  "./patient-card-settings.js?v=empty-unit-hides-field-1",
+  "./patient-card-settings.js?v=card-settings-2-no-thumb-padding",
   "./patient-start-values-day1.js?v=start-values-day1-1",
   "./patient-day-history.js?v=plan-dialog-title-1",
   "./patient-media-retry-cache_v2.js?v=thumb-layout-2-safe-text",
@@ -1425,11 +1425,31 @@ RUNTIME_EXACT = {
     "collapse-cards.js",
     "numpad-ui-fix.js",
 }
-MODULE_INJECTION_PATTERN = re.compile(
-    r"html=html\.replace\('</body>','(?P<markup>.*?)</body>'\)",
-    re.DOTALL,
-)
 MODULE_SCRIPT_PATTERN = re.compile(r'<script src="(?P<src>\./[^"?]+\.js(?:\?[^"?]+)?)"></script>')
+DIRECT_FIRST_LOAD_MODULES = (
+    "collapse-cards.js",
+    "patient-card-progress.js",
+    "patient-install-guide.js",
+    "patient-install-prompt.js",
+    "patient-plan-replace-slot-fix.js",
+    "patient-start-scan.js",
+    "patient-multiplan-db.js",
+    "patient-plan-delete.js",
+    "patient-card-settings.js",
+    "patient-start-values-day1.js",
+    "patient-day-history.js",
+    "patient-media-retry-cache_v2.js",
+    "patient-ui-micro-polish.js",
+    "patient-pain-vertical-scale.js",
+    "numpad-ui-fix.js",
+    "patient-numpad-visibility-fix.js",
+    "patient-extra-info-display.js",
+    "patient-last-value-hints.js",
+    "patient-set-summary-groups.js",
+    "patient-qr-fullscreen.js",
+    "patient-numpad-card-guard.js",
+    "patient-version-label.js",
+)
 
 
 class GateError(RuntimeError):
@@ -1684,9 +1704,11 @@ def apply_operations(payload: dict[str, Any], root: Path = ROOT) -> list[str]:
 
 def bump_patient_version(payload: dict[str, Any], root: Path = ROOT) -> int:
     service_path = root / "service-worker.js"
+    index_path = root / "index.html"
     label_path = root / "patient-version-label.js"
     recovery_path = root / "update-recovery.html"
     service = normalize(service_path.read_text(encoding="utf-8"))
+    index = normalize(index_path.read_text(encoding="utf-8-sig"))
     label = normalize(label_path.read_text(encoding="utf-8"))
     recovery = normalize(recovery_path.read_text(encoding="utf-8"))
     match = re.search(r"const APP_VERSION = '([0-9]+)';", service)
@@ -1713,6 +1735,11 @@ def bump_patient_version(payload: dict[str, Any], root: Path = ROOT) -> int:
         f"patient-version-label.js?v={next_version}",
         service,
     )
+    index, index_script_count = re.subn(
+        r"patient-version-label\.js\?v=[0-9]+",
+        f"patient-version-label.js?v={next_version}",
+        index,
+    )
     label, label_count = re.subn(
         r"const RELEASE='[0-9]+';",
         f"const RELEASE='{next_version}';",
@@ -1725,10 +1752,15 @@ def bump_patient_version(payload: dict[str, Any], root: Path = ROOT) -> int:
         recovery,
         count=1,
     )
-    if (app_count, cache_count, label_count, recovery_count) != (1, 1, 1, 1) or script_count < 1:
+    if (
+        (app_count, cache_count, label_count, recovery_count) != (1, 1, 1, 1)
+        or script_count < 1
+        or index_script_count != 1
+    ):
         fail("patient version markers are incomplete or ambiguous")
 
     service_path.write_text(service, encoding="utf-8", newline="\n")
+    index_path.write_text(index, encoding="utf-8", newline="\n")
     label_path.write_text(label, encoding="utf-8", newline="\n")
     recovery_path.write_text(recovery, encoding="utf-8", newline="\n")
 
@@ -1763,46 +1795,28 @@ def patient_runtime_files(root: Path = ROOT) -> list[Path]:
     return sorted(files)
 
 
-def service_worker_module_markup(worker: str, runtime_root: Path = ROOT) -> tuple[str, list[str]]:
-    matches = list(MODULE_INJECTION_PATTERN.finditer(worker))
-    if len(matches) != 1:
-        fail("service-worker.js must expose exactly one canonical module injection block")
-    markup = matches[0].group("markup")
-    sources = [match.group("src") for match in MODULE_SCRIPT_PATTERN.finditer(markup)]
-    if not sources or "./patient-start-scan.js" not in {source.split("?", 1)[0] for source in sources}:
-        fail("service-worker.js canonical module block is missing patient-start-scan.js")
+def canonical_direct_first_load_modules(
+    html: str, worker: str, runtime_root: Path = ROOT
+) -> list[str]:
+    """Require the direct root document module contract used on first visit."""
+    sources = [match.group("src") for match in MODULE_SCRIPT_PATTERN.finditer(html)]
     paths = [source.split("?", 1)[0].removeprefix("./") for source in sources]
+    if paths != list(DIRECT_FIRST_LOAD_MODULES):
+        fail("patient preview index.html must expose the exact direct first-load module list")
     if len(paths) != len(set(paths)):
-        fail("service-worker.js canonical module block contains duplicate scripts")
+        fail("patient preview direct first-load module list contains duplicate scripts")
     missing = [relative for relative in paths if not (runtime_root / relative).is_file()]
     if missing:
-        fail("service-worker.js canonical module files are missing: " + ", ".join(missing))
-    return markup, sources
-
-
-def inject_first_load_modules(html: str, worker: str, runtime_root: Path = ROOT) -> str:
-    markup, sources = service_worker_module_markup(worker, runtime_root)
-    updated = html
-    for source in sources:
-        relative = source.split("?", 1)[0]
-        script_pattern = re.compile(
-            r'<script src="' + re.escape(relative) + r'(?:\?[^"\']*)?"></script>'
-        )
-        updated = script_pattern.sub("", updated)
-    if updated.count("</body>") != 1:
-        fail("patient preview index.html must contain exactly one closing body tag")
-    updated = updated.replace("</body>", markup + "</body>", 1)
-    for source in sources:
-        relative = source.split("?", 1)[0]
-        count = len(
-            re.findall(
-                r'<script src="' + re.escape(relative) + r'(?:\?[^"\']*)?"></script>',
-                updated,
-            )
-        )
-        if count != 1:
-            fail(f"patient preview first-load module count is {count} for {relative}")
-    return updated
+        fail("patient preview direct first-load module files are missing: " + ", ".join(missing))
+    if "html=html.replace('</body>'" in worker:
+        fail("service-worker.js must not inject patient modules after first load")
+    if not re.search(r"function\s+injectModules\(response\)\{return\s+response\}", worker):
+        fail("service-worker.js must retain the direct first-load no-op module delivery")
+    worker_version = re.search(r"const APP_VERSION = '([0-9]+)';", worker)
+    version_source = next((source for source in sources if source.startswith("./patient-version-label.js?v=")), "")
+    if not worker_version or version_source != f"./patient-version-label.js?v={worker_version.group(1)}":
+        fail("patient preview direct version-label module does not match service-worker APP_VERSION")
+    return sources
 
 
 def synthetic_plan_query() -> str:
@@ -1897,7 +1911,7 @@ def write_preview(
     )
     if (cache_name_count, index_scope_count, recovery_scope_count) != (1, 1, 1):
         fail("patient preview could not isolate the service-worker scope")
-    preview_index = inject_first_load_modules(preview_index, preview_worker, preview_dir)
+    canonical_direct_first_load_modules(preview_index, preview_worker, preview_dir)
     preview_index_path.write_text(preview_index, encoding="utf-8", newline="\n")
     preview_worker_path.write_text(preview_worker, encoding="utf-8", newline="\n")
     preview_recovery_path = preview_dir / "update-recovery.html"
@@ -1978,8 +1992,7 @@ def verify_preview(
         fail("patient preview is missing first-load module evidence; publish a fresh preview")
     preview_html = normalize(preview_html_path.read_text(encoding="utf-8-sig"))
     preview_worker = normalize(preview_worker_path.read_text(encoding="utf-8"))
-    if inject_first_load_modules(preview_html, preview_worker, preview_dir) != preview_html:
-        fail("patient preview index.html is not canonical for first-load modules")
+    canonical_direct_first_load_modules(preview_html, preview_worker, preview_dir)
     if payload["base_sha"] != git_sha(root):
         fail("main changed after patient preview; start again with validate_only")
     return meta
@@ -2037,6 +2050,7 @@ def run(
             set(
                 changed
                 + [
+                    "index.html",
                     "service-worker.js",
                     "patient-version-label.js",
                     "update-recovery.html",
@@ -2186,13 +2200,25 @@ def self_test(root: Path = ROOT, preview_output: Path | None = None) -> None:
         ).read_text(encoding="utf-8")
         if '<meta name="robots" content="noindex,nofollow,noarchive">' not in preview_html:
             fail("self-test expected a noindex patient preview")
-        module_markup, module_sources = service_worker_module_markup(preview_worker, preview_root / "previews" / validated["request_id"])
-        if module_markup not in preview_html:
-            fail("self-test expected the service-worker module block in first-load preview HTML")
-        for source in module_sources:
-            relative = source.split("?", 1)[0]
-            if len(re.findall(r'<script src="' + re.escape(relative) + r'(?:\?[^"\']*)?"></script>', preview_html)) != 1:
-                fail(f"self-test expected exactly one first-load script for {relative}")
+        module_sources = canonical_direct_first_load_modules(
+            preview_html,
+            preview_worker,
+            preview_root / "previews" / validated["request_id"],
+        )
+        if [source.split("?", 1)[0].removeprefix("./") for source in module_sources] != list(DIRECT_FIRST_LOAD_MODULES):
+            fail("self-test expected the canonical direct first-load module order")
+        missing_module_preview = preview_html.replace(module_sources[0], "./missing-first-load-module.js", 1)
+        try:
+            canonical_direct_first_load_modules(
+                missing_module_preview,
+                preview_worker,
+                preview_root / "previews" / validated["request_id"],
+            )
+        except GateError as exc:
+            if "exact direct first-load module list" not in str(exc):
+                raise
+        else:
+            fail("self-test expected a missing direct first-load module to be rejected")
         if (
             meta.get("patientVersion") != version
             or meta.get("patchHash") != payload_hash(validated)

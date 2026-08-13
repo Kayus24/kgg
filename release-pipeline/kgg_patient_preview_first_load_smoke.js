@@ -94,16 +94,23 @@ async function assertVisibleBadge(page, state, text) {
   );
 }
 
-async function assertStaticModules(page) {
-  const counts = await page.evaluate((modules) => {
+async function assertDirectFirstLoadModules(page) {
+  const details = await page.evaluate((modules) => {
     const names = Array.from(document.scripts)
       .map((script) => script.src ? new URL(script.src, location.href).pathname.split("/").pop() : "")
       .filter(Boolean);
-    return Object.fromEntries(modules.map((name) => [name, names.filter((current) => current === name).length]));
+    const versionScript = Array.from(document.scripts).find((script) =>
+      script.src && new URL(script.src, location.href).pathname.endsWith("/patient-version-label.js")
+    );
+    return {
+      counts: Object.fromEntries(modules.map((name) => [name, names.filter((current) => current === name).length])),
+      version: versionScript ? new URL(versionScript.src, location.href).searchParams.get("v") || "" : "",
+    };
   }, REQUIRED_MODULES);
   for (const module of REQUIRED_MODULES) {
-    assert(counts[module] === 1, `first root load has ${counts[module] || 0} copies of ${module}`);
+    assert(details.counts[module] === 1, `first root load has ${details.counts[module] || 0} copies of ${module}`);
   }
+  assert(/^[0-9]+$/.test(details.version), "direct first-load version-label module is missing its numeric cache key");
 }
 
 async function main() {
@@ -139,13 +146,20 @@ async function main() {
     });
   });
   const pageErrors = [];
+  const rootNavigation = { documentRequests: 0 };
   page.on("pageerror", (error) => pageErrors.push(error.message));
   page.on("request", (request) => requests.push(request.url()));
+  page.on("request", (request) => {
+    if (request.isNavigationRequest() && request.frame() === page.mainFrame()) rootNavigation.documentRequests += 1;
+  });
 
   try {
     await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: "networkidle" });
     await page.locator("#kggQrRescue").waitFor({ state: "visible" });
-    await assertStaticModules(page);
+    await assertDirectFirstLoadModules(page);
+    assert(rootNavigation.documentRequests === 1, `fresh preview root reloaded before module readiness: ${rootNavigation.documentRequests} document requests`);
+    const rootNavigationTypes = await page.evaluate(() => performance.getEntriesByType("navigation").map((entry) => entry.type));
+    assert(rootNavigationTypes.length === 1 && rootNavigationTypes[0] === "navigate", `fresh preview root must not reload: ${JSON.stringify(rootNavigationTypes)}`);
     assert(await page.evaluate(() => Boolean(window.__kggStartScanVersion)), "patient scanner module did not initialize on first load");
     assert(await page.evaluate(() => Boolean(window.__kggPatientMultiPlanDbAddon)), "multi-plan module did not initialize on first load");
     assert(await page.evaluate(() => Boolean(window.__kggPlanDelete)), "plan deletion module did not initialize on first load");
@@ -172,12 +186,29 @@ async function main() {
       t: "Erster vollständiger Plan",
       v: 1,
       d: 6,
-      e: [["Abduktion Maschine mit langem Übungsnamen", 3, "B", "kg", "Wdh", "", ""]],
+      e: [
+        [
+          "Abduktion Maschine mit langem Übungsnamen und vollständigen Trainingsinformationen",
+          3,
+          "B",
+          "kg",
+          "Wdh",
+          "",
+          "",
+          {
+            id: "first-load-local-thumbnail",
+            type: "image",
+            mime: "image/png",
+            src: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLqGQAAAABJRU5ErkJggg==",
+          },
+        ],
+        ["Kniebeuger Maschine ohne Bild und mit langem Namen", 3, "B", "kg", "Wdh", "", ""],
+      ],
     };
     const payload = `KGGH2:${encodePlan(plan)}`;
     await page.goto(`http://127.0.0.1:${port}/?plan=${encodeURIComponent(payload)}`, { waitUntil: "networkidle" });
     await page.locator("#plan").waitFor({ state: "visible" });
-    await assertStaticModules(page);
+    await assertDirectFirstLoadModules(page);
 
     const card = page.locator("#list .ex").first();
     await card.waitFor({ state: "visible" });
@@ -199,30 +230,51 @@ async function main() {
     await setCardOpen(page, card, false);
     await assertVisibleBadge(page, "done", "✓ Bearbeitet");
 
+    await page.waitForFunction(() => {
+      const imageCard = document.querySelector("#list .ex");
+      const image = imageCard?.querySelector(".kggCardThumb img");
+      return Boolean(
+        imageCard?.classList.contains("kggHasThumb") &&
+        imageCard.classList.contains("kggThumbReady") &&
+        image?.complete && image.naturalWidth > 0 && image.currentSrc.startsWith("blob:")
+      );
+    }, null, { timeout: 10000 });
     const thumbGeometry = await page.evaluate(() => {
-      const target = document.querySelector("#list .ex");
-      const title = target?.querySelector("h3");
-      if (!target || !title) return null;
-      target.classList.add("kggHasThumb", "kggThumbReady");
-      let thumb = target.querySelector(".kggCardThumb");
-      if (!thumb) {
-        thumb = document.createElement("div");
-        thumb.className = "kggCardThumb";
-        thumb.innerHTML = '<img alt="" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==">';
-        target.appendChild(thumb);
-      }
+      const [imageCard, noImageCard] = document.querySelectorAll("#list .ex");
+      const title = imageCard?.querySelector("h3");
+      const metadata = imageCard?.querySelector(".muted");
+      const thumb = imageCard?.querySelector(".kggCardThumb");
+      const image = thumb?.querySelector("img");
+      if (!imageCard || !noImageCard || !title || !metadata || !thumb || !image) return null;
+      const cardBox = imageCard.getBoundingClientRect();
       const titleBox = title.getBoundingClientRect();
+      const metadataBox = metadata.getBoundingClientRect();
       const thumbBox = thumb.getBoundingClientRect();
+      const imagePaddingRight = Number.parseFloat(getComputedStyle(imageCard).paddingRight);
+      const noImagePaddingRight = Number.parseFloat(getComputedStyle(noImageCard).paddingRight);
       return {
         titleRight: titleBox.right,
+        metadataRight: metadataBox.right,
         thumbLeft: thumbBox.left,
         titleOverflow: title.scrollWidth > title.clientWidth,
-        thumbVisible: getComputedStyle(thumb).display !== "none" && thumbBox.width > 0,
+        metadataOverflow: metadata.scrollWidth > metadata.clientWidth,
+        thumbVisible: getComputedStyle(thumb).display !== "none" && thumbBox.width > 0 && thumbBox.height > 0,
+        thumbInsideCard: thumbBox.left >= cardBox.left && thumbBox.right <= cardBox.right && thumbBox.top >= cardBox.top && thumbBox.bottom <= cardBox.bottom,
+        decodedLocalImage: image.complete && image.naturalWidth > 0 && image.currentSrc.startsWith("blob:"),
+        imagePaddingRight,
+        noImagePaddingRight,
+        noImageHasThumb: noImageCard.classList.contains("kggHasThumb") || Boolean(noImageCard.querySelector(".kggCardThumb")),
       };
     });
-    assert(thumbGeometry?.thumbVisible, "closed-card thumbnail is not visible in fresh runtime");
+    assert(thumbGeometry?.decodedLocalImage, "local data:image was not decoded and inserted as the closed-card thumbnail");
+    assert(thumbGeometry.thumbVisible && thumbGeometry.thumbInsideCard, "closed-card thumbnail is not visibly contained in the card");
     assert(!thumbGeometry.titleOverflow, "long exercise name overflows beneath the thumbnail");
+    assert(!thumbGeometry.metadataOverflow, "training metadata overflows beneath the thumbnail");
     assert(thumbGeometry.titleRight <= thumbGeometry.thumbLeft, "exercise title overlaps the thumbnail");
+    assert(thumbGeometry.metadataRight <= thumbGeometry.thumbLeft, "training metadata overlaps the thumbnail");
+    assert(!thumbGeometry.noImageHasThumb, "card without media still reserves a thumbnail element");
+    assert(thumbGeometry.noImagePaddingRight <= 24, `card without media keeps thumbnail padding: ${thumbGeometry.noImagePaddingRight}px`);
+    assert(thumbGeometry.noImagePaddingRight + 48 <= thumbGeometry.imagePaddingRight, "card without media still reserves thumbnail space");
 
     await page.evaluate(() => {
       const api = window.KGGPatientMultiPlan;
@@ -276,10 +328,12 @@ async function main() {
     status: "PASS",
     runtimeRoot,
     serviceWorkerBlocked: true,
-    staticModules: REQUIRED_MODULES.length,
+    directFirstLoadModules: REQUIRED_MODULES.length,
+    freshRootNoReload: true,
     scannerLoadedOnce: true,
     progressCheckedForAllFields: true,
     redXPlanDeletionChecked: true,
+    localThumbnailGeometryChecked: true,
   }));
 }
 

@@ -7,6 +7,23 @@ const path = require("path");
 const { chromium } = require("playwright");
 
 const ROOT = path.resolve(__dirname, "..");
+const FIRST_LOAD_GLOBALS = [
+  "__kggStartScanVersion",
+  "__kggPatientMultiPlanDbAddon",
+  "__kggPlanDelete",
+  "__kggCardProgress",
+  "__kggSetSummaryGroups",
+  "KGGPatientMediaRetryCache",
+];
+const FIRST_LOAD_MODULES = [
+  "patient-start-scan.js",
+  "patient-multiplan-db.js",
+  "patient-plan-delete.js",
+  "patient-card-progress.js",
+  "patient-set-summary-groups.js",
+  "patient-media-retry-cache_v2.js",
+  "patient-version-label.js",
+];
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -76,31 +93,71 @@ async function activeWorkerVersion(page) {
   });
 }
 
-async function waitForControlledRuntime(page) {
-  await page.evaluate(() => navigator.serviceWorker.ready);
-  if (!(await page.evaluate(() => Boolean(navigator.serviceWorker.controller)))) {
-    await page.reload({ waitUntil: "domcontentloaded" });
-  }
-  await page.waitForFunction(() => Boolean(navigator.serviceWorker && navigator.serviceWorker.controller), null, {
-    timeout: 12000,
-  });
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    await page.locator("#plan").waitFor({ state: "visible" });
-    const hasRuntime = (await page.locator("#kgg-collapse-toggle").count()) > 0 &&
-      (await page.locator("#kggAppVersion").count()) > 0 &&
-      (await page.locator("#list .ex .kggCardProgress").count()) > 0;
-    if (hasRuntime) {
-      await page.locator("#kggAppVersion").waitFor({ state: "visible" });
-      return;
+function trackFreshLoadNavigation(page) {
+  const evidence = {
+    mainDocumentNavigations: 0,
+    documentNavigationsBeforeRuntime: [],
+    runtimeReady: false,
+  };
+  page.on("request", (request) => {
+    if (!request.isNavigationRequest() || request.frame() !== page.mainFrame()) return;
+    evidence.mainDocumentNavigations += 1;
+    if (evidence.mainDocumentNavigations > 1 && !evidence.runtimeReady) {
+      evidence.documentNavigationsBeforeRuntime.push(request.url());
     }
-    await page.reload({ waitUntil: "domcontentloaded" });
+  });
+  return evidence;
+}
+
+async function waitForFreshControlledRuntime(page, navigationEvidence) {
+  try {
+    await page.waitForFunction(
+      ({ globals, modules }) => {
+        const names = Array.from(document.scripts)
+          .map((script) => script.src ? new URL(script.src, location.href).pathname.split("/").pop() : "")
+          .filter(Boolean);
+        const allModules = modules.every((module) => names.filter((name) => name === module).length === 1);
+        const allGlobals = globals.every((name) => Boolean(window[name]));
+        const plan = document.querySelector("#plan");
+        return Boolean(
+          navigator.serviceWorker && navigator.serviceWorker.controller &&
+          allModules && allGlobals &&
+          plan && !plan.classList.contains("hide") &&
+          document.querySelector("#kgg-collapse-toggle") &&
+          document.querySelector("#kggAppVersion") &&
+          document.querySelector("#list .ex .kggCardProgress")
+        );
+      },
+      { globals: FIRST_LOAD_GLOBALS, modules: FIRST_LOAD_MODULES },
+      { timeout: 12000 }
+    );
+  } catch (error) {
+    const diagnostics = await page.evaluate(() => ({
+      controlled: Boolean(navigator.serviceWorker && navigator.serviceWorker.controller),
+      scripts: Array.from(document.scripts).map((script) => script.src).filter(Boolean),
+      globals: Object.fromEntries([
+        "__kggStartScanVersion",
+        "__kggPatientMultiPlanDbAddon",
+        "__kggPlanDelete",
+        "__kggCardProgress",
+        "__kggSetSummaryGroups",
+        "KGGPatientMediaRetryCache",
+      ].map((name) => [name, Boolean(window[name])])),
+      bodyClasses: document.body.className,
+    }));
+    throw new Error(`fresh controlled patient runtime was not ready without a reload: ${JSON.stringify({ navigationEvidence, diagnostics, cause: error.message })}`);
   }
-  const diagnostics = await page.evaluate(() => ({
-    controlled: Boolean(navigator.serviceWorker && navigator.serviceWorker.controller),
-    scripts: Array.from(document.scripts).map((script) => script.src).filter(Boolean),
-    bodyClasses: document.body.className,
-  }));
-  throw new Error(`controlled patient runtime modules were not available: ${JSON.stringify(diagnostics)}`);
+  navigationEvidence.runtimeReady = true;
+  assert(
+    navigationEvidence.mainDocumentNavigations === 1 && navigationEvidence.documentNavigationsBeforeRuntime.length === 0,
+    `fresh controlled PWA navigated or reloaded before required runtime was ready: ${JSON.stringify(navigationEvidence)}`
+  );
+  const navigationTypes = await page.evaluate(() => performance.getEntriesByType("navigation").map((entry) => entry.type));
+  assert(
+    navigationTypes.length === 1 && navigationTypes[0] === "navigate",
+    `fresh controlled PWA must have one initial navigation, never a reload: ${JSON.stringify(navigationTypes)}`
+  );
+  return { ...navigationEvidence, navigationTypes };
 }
 
 async function setCardOpen(page, card, open) {
@@ -180,6 +237,7 @@ async function main() {
     serviceWorkers: "allow",
   });
   const page = await context.newPage();
+  const navigationEvidence = trackFreshLoadNavigation(page);
   const plan = {
     i: "progress-playwright-91",
     t: "Fortschritts-Sichtbarkeit",
@@ -192,8 +250,7 @@ async function main() {
 
   try {
     await page.goto(url, { waitUntil: "domcontentloaded" });
-    await page.locator("#plan").waitFor({ state: "visible" });
-    await waitForControlledRuntime(page);
+    const firstLoadEvidence = await waitForFreshControlledRuntime(page, navigationEvidence);
 
     const workerVersion = await activeWorkerVersion(page);
     const visibleVersion = (await page.locator("#kggAppVersion").innerText()).replace(/^v/i, "");
@@ -238,7 +295,16 @@ async function main() {
     await setCardOpen(page, card, false);
     await assertVisibleBadge(page, card, "open", "○ Offen");
 
-    console.log(`Patient runtime/progress Playwright smoke: PASS (v${workerVersion})`);
+    console.log(JSON.stringify({
+      status: "PASS",
+      test: "patient-runtime-progress",
+      version: workerVersion,
+      freshControlledNoReload: true,
+      mainDocumentNavigations: firstLoadEvidence.mainDocumentNavigations,
+      navigationTypes: firstLoadEvidence.navigationTypes,
+      requiredGlobals: FIRST_LOAD_GLOBALS.length,
+      requiredModules: FIRST_LOAD_MODULES.length,
+    }));
   } finally {
     await context.close();
     await browser.close();

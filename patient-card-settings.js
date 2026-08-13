@@ -29,11 +29,11 @@
     const old=$(STYLE);if(old)old.remove();
     const s=document.createElement('style');s.id=STYLE;s.textContent=`
       #kgg-collapse-toggle{display:none!important}
-      body.kggAlwaysCollapsed .ex{position:relative;cursor:pointer;transition:box-shadow .18s ease,transform .16s ease,background .18s ease;padding-right:52px!important}
+      body.kggAlwaysCollapsed .ex{position:relative;cursor:pointer;transition:box-shadow .18s ease,transform .16s ease,background .18s ease}
       body.kggAlwaysCollapsed .ex:not(.kggOpen) .set,body.kggAlwaysCollapsed .ex:not(.kggOpen) .pain{display:none!important}
       body.kggAlwaysCollapsed .ex:not(.kggOpen)::after{content:'Antippen zum Öffnen';display:block;margin-top:8px;color:#64748b;font-size:12px;font-weight:800}
       body.kggLangEn.kggAlwaysCollapsed .ex:not(.kggOpen)::after{content:'Tap to open'}
-      body.kggAlwaysCollapsed .ex.kggOpen{box-shadow:0 12px 32px rgba(15,23,42,.12);border-color:#111827;background:#fff}
+      body.kggAlwaysCollapsed .ex.kggOpen{box-shadow:0 12px 32px rgba(15,23,42,.12);border-color:#111827;background:#fff;padding-right:52px!important}
       .kggCardDots{position:absolute;right:10px;top:10px;width:38px;height:38px;border-radius:999px;border:1px solid #cbd5e1;background:#fff;color:#111827;font-size:22px;font-weight:950;display:flex;align-items:center;justify-content:center;z-index:5;touch-action:manipulation}
       .kggCardDots:active{transform:scale(.94);background:#eff6ff}
       body.kggAlwaysCollapsed .ex:not(.kggOpen) .kggCardDots{display:none!important}

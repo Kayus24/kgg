@@ -2,11 +2,11 @@
 
 - Source file: `patient-plan-delete.js`
 - Characters: 1-9716
-- Full source SHA-256: `4d116bbd9469db47eda1651c105d13f683fbce31842aedfce36287dac281d891`
+- Full source SHA-256: `7b4b758b63088ce7afcd0717c89209fe44e06564415a8ddd9fec14b057989437`
 
 ```
 (()=>{
-  const VERSION='plan-delete-v1-safe';
+  const VERSION='plan-delete-2-red-x';
   const MULTI_KEY='kggPatientMultiPlansV1';
   const CURRENT_KEY='kggCurrentPlanV1';
   const MEDIA_DB='kgg_patient_media_v1';

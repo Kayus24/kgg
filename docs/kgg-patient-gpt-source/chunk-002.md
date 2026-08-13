@@ -1,8 +1,8 @@
 # KGG Patient Source Chunk 002
 
 - Source file: `service-worker.js`
-- Characters: 1-7187
-- Full source SHA-256: `da12f5c40d16e7cc1abfd2d938372e12ca30016b5c80ff2275bcd8a416ae3878`
+- Characters: 1-7195
+- Full source SHA-256: `7b8fa4713556231fcb8b6cf55501b3d1e9df1fb5a2e8e032754d7dd0627c6c81`
 
 ```
 const CACHE_NAME = 'kgg-handyplan-v76-first-load-static';
@@ -19,7 +19,7 @@ const START_SCAN_SCRIPT = './patient-start-scan.js?v=plan-replace-1';
 const JSQR_SCRIPT = './vendor/jsqr-1.4.0.js';
 const MULTIPLAN_DB_SCRIPT = './patient-multiplan-db.js?v=lossless-media-plans-1';
 const PLAN_DELETE_SCRIPT = './patient-plan-delete.js?v=plan-delete-2-red-x';
-const CARD_SETTINGS_SCRIPT = './patient-card-settings.js?v=empty-unit-hides-field-1';
+const CARD_SETTINGS_SCRIPT = './patient-card-settings.js?v=card-settings-2-no-thumb-padding';
 const START_VALUES_SCRIPT = './patient-start-values-day1.js?v=start-values-day1-1';
 const DAY_HISTORY_SCRIPT = './patient-day-history.js?v=plan-dialog-title-1';
 const MEDIA_SCRIPT = './patient-media-retry-cache_v2.js?v=thumb-layout-2-safe-text';

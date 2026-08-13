@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='plan-delete-v1-safe';
+  const VERSION='plan-delete-2-red-x';
   const MULTI_KEY='kggPatientMultiPlansV1';
   const CURRENT_KEY='kggCurrentPlanV1';
   const MEDIA_DB='kgg_patient_media_v1';

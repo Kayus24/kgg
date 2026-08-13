@@ -12,7 +12,7 @@ const START_SCAN_SCRIPT = './patient-start-scan.js?v=plan-replace-1';
 const JSQR_SCRIPT = './vendor/jsqr-1.4.0.js';
 const MULTIPLAN_DB_SCRIPT = './patient-multiplan-db.js?v=lossless-media-plans-1';
 const PLAN_DELETE_SCRIPT = './patient-plan-delete.js?v=plan-delete-2-red-x';
-const CARD_SETTINGS_SCRIPT = './patient-card-settings.js?v=empty-unit-hides-field-1';
+const CARD_SETTINGS_SCRIPT = './patient-card-settings.js?v=card-settings-2-no-thumb-padding';
 const START_VALUES_SCRIPT = './patient-start-values-day1.js?v=start-values-day1-1';
 const DAY_HISTORY_SCRIPT = './patient-day-history.js?v=plan-dialog-title-1';
 const MEDIA_SCRIPT = './patient-media-retry-cache_v2.js?v=thumb-layout-2-safe-text';

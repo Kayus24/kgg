@@ -62,7 +62,7 @@ def validate_static_compatibility(manifest:dict,version:str)->None:
   "./patient-start-scan.js?v=plan-replace-1",
   "./patient-multiplan-db.js?v=lossless-media-plans-1",
   "./patient-plan-delete.js?v=plan-delete-2-red-x",
-  "./patient-card-settings.js?v=empty-unit-hides-field-1",
+  "./patient-card-settings.js?v=card-settings-2-no-thumb-padding",
   "./patient-start-values-day1.js?v=start-values-day1-1",
   "./patient-day-history.js?v=plan-dialog-title-1",
   "./patient-media-retry-cache_v2.js?v=thumb-layout-2-safe-text",

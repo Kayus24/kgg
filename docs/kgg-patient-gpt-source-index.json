@@ -7,14 +7,14 @@
       "sha256": "03e76d07083402214af3957faca8bddb88091360db5aba176625c198585c3fcb"
     },
     {
-      "characters": 21705,
+      "characters": 21713,
       "path": "docs/kgg-patient-gpt-source/chunk-001.md",
-      "sha256": "d4a6a2bc56d91415e67bae9da565bceacd2b5d84cff5caa3ad1c59af9082f0f8"
+      "sha256": "a022224c0bc66936eedc4968fec7cfebda0efbaaf0d771f9efc2c0df01a5ed1e"
     },
     {
-      "characters": 7374,
+      "characters": 7382,
       "path": "docs/kgg-patient-gpt-source/chunk-002.md",
-      "sha256": "6732281f47cdd2e60d3b79f17612e85db120caf66897ca7802e16797de99889d"
+      "sha256": "b3356a15200357c4c13174125f58adcb1bc9e7dc3d17d1ee4b9bc73149695505"
     },
     {
       "characters": 5968,
@@ -49,7 +49,7 @@
     {
       "characters": 17463,
       "path": "docs/kgg-patient-gpt-source/chunk-009.md",
-      "sha256": "cde78e522ebd600e7fbc5926f35f889d62344de25e260de0a08bbd064a5af525"
+      "sha256": "2bc111031035d177afc36bb65ca29d9ae74123a7f2e9d746ff8aee6ec0251071"
     },
     {
       "characters": 15791,
@@ -114,7 +114,7 @@
     {
       "characters": 9908,
       "path": "docs/kgg-patient-gpt-source/chunk-022.md",
-      "sha256": "2af0a3cca8412f21335fd44d946038ef88a8f149b28d6509cf507891338e09c4"
+      "sha256": "cb11fa13b0cd5a267793be77fe57316426e28381ea6b32505d67bc1262470e3c"
     },
     {
       "characters": 10023,
@@ -164,14 +164,14 @@
       "sha256": "ca04c7a7642ebf72da9651dcb32866acc7c09add698db96181b7fac37df8e8b0"
     },
     {
-      "characters": 21524,
+      "characters": 21532,
       "path": "index.html",
-      "sha256": "39bdb9118f9f70d1ed92e5301e7c17c5bba290a76a5ff34c0596f48ac693f31f"
+      "sha256": "5bee6ad93ec431b3724588c162a73ac99995d56d98358e2337dd8c8311e8aacc"
     },
     {
-      "characters": 7187,
+      "characters": 7195,
       "path": "service-worker.js",
-      "sha256": "da12f5c40d16e7cc1abfd2d938372e12ca30016b5c80ff2275bcd8a416ae3878"
+      "sha256": "7b8fa4713556231fcb8b6cf55501b3d1e9df1fb5a2e8e032754d7dd0627c6c81"
     },
     {
       "characters": 5778,
@@ -206,7 +206,7 @@
     {
       "characters": 17268,
       "path": "patient-card-settings.js",
-      "sha256": "43cda92a104d56fc78772f07abedefcf38a2461d772adf3f3bb244c8e255517b"
+      "sha256": "d51f439c31aaa5a65e753f4ac7322f3ac791f7efb8bf5dfc5d7fcdd430031bf8"
     },
     {
       "characters": 15598,
@@ -266,7 +266,7 @@
     {
       "characters": 9716,
       "path": "patient-plan-delete.js",
-      "sha256": "4d116bbd9469db47eda1651c105d13f683fbce31842aedfce36287dac281d891"
+      "sha256": "7b4b758b63088ce7afcd0717c89209fe44e06564415a8ddd9fec14b057989437"
     },
     {
       "characters": 9821,
