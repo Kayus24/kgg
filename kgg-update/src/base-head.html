@@ -51,26 +51,28 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "typed-update-versions",
     "source-control-char-guard",
     "plan-text-live-master-guard",
-    "plan-text-boot-restore"
+    "plan-text-boot-restore",
+    "plan-text-recovery-finalize"
   ],
   "currentVersion": {
-    "versionCode": 68,
-    "versionName": "1.0.68-plan-text-boot-restore",
-    "lastPatchId": "kgg-v068-plan-text-boot-restore",
+    "versionCode": 69,
+    "versionName": "1.0.69-plan-text-recovery-finalize",
+    "lastPatchId": "kgg-v069-plan-text-recovery-finalize",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v068-plan-text-boot-restore",
+  "latestPatchId": "kgg-v069-plan-text-recovery-finalize",
   "lastUpdateIntent": {
-    "id": "kgg-v068-plan-text-boot-restore",
-    "summary": "Stellt gueltigen gespeicherten Live-Plantext beim Start wieder her und schuetzt nur kurz unvollstaendige Namenssegmente.",
+    "id": "kgg-v069-plan-text-recovery-finalize",
+    "summary": "Persistiert eine tatsaechliche Boot-Reparatur und unterscheidet kurze Zwischenedits von finalen Umbenennungen.",
     "touched": [
-      "Parser",
-      "Plan-State"
+      "Plan-State",
+      "Storage"
     ],
     "notTouched": [
       "PDF",
       "QR/Patienten-App",
       "Scan/OCR",
+      "Parser",
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",

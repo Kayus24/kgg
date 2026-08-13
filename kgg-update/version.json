@@ -1,7 +1,7 @@
 {
-  "versionCode": 68,
-  "versionName": "1.0.68-plan-text-boot-restore",
-  "indexUrl": "index.html?v=68",
-  "sha256": "68160e4691937f68bb1ad87f2cebb3c6caf51eca372f6d675923b1346e766c6a",
-  "notes": "v068: Stellt gueltigen gespeicherten Live-Plantext beim Start wieder her und schuetzt nur kurz unvollstaendige Namenssegmente."
+  "versionCode": 69,
+  "versionName": "1.0.69-plan-text-recovery-finalize",
+  "indexUrl": "index.html?v=69",
+  "sha256": "026610c89b928be328de668ee344fbdc5a1fd67585eb3907fcb30fe819e3cdca",
+  "notes": "v069: Persistiert eine tatsaechliche Boot-Reparatur und unterscheidet kurze Zwischenedits von finalen Umbenennungen."
 }

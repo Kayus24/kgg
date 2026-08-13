@@ -51,26 +51,28 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "typed-update-versions",
     "source-control-char-guard",
     "plan-text-live-master-guard",
-    "plan-text-boot-restore"
+    "plan-text-boot-restore",
+    "plan-text-recovery-finalize"
   ],
   "currentVersion": {
-    "versionCode": 68,
-    "versionName": "1.0.68-plan-text-boot-restore",
-    "lastPatchId": "kgg-v068-plan-text-boot-restore",
+    "versionCode": 69,
+    "versionName": "1.0.69-plan-text-recovery-finalize",
+    "lastPatchId": "kgg-v069-plan-text-recovery-finalize",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v068-plan-text-boot-restore",
+  "latestPatchId": "kgg-v069-plan-text-recovery-finalize",
   "lastUpdateIntent": {
-    "id": "kgg-v068-plan-text-boot-restore",
-    "summary": "Stellt gueltigen gespeicherten Live-Plantext beim Start wieder her und schuetzt nur kurz unvollstaendige Namenssegmente.",
+    "id": "kgg-v069-plan-text-recovery-finalize",
+    "summary": "Persistiert eine tatsaechliche Boot-Reparatur und unterscheidet kurze Zwischenedits von finalen Umbenennungen.",
     "touched": [
-      "Parser",
-      "Plan-State"
+      "Plan-State",
+      "Storage"
     ],
     "notTouched": [
       "PDF",
       "QR/Patienten-App",
       "Scan/OCR",
+      "Parser",
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
@@ -125,26 +127,28 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "typed-update-versions",
     "source-control-char-guard",
     "plan-text-live-master-guard",
-    "plan-text-boot-restore"
+    "plan-text-boot-restore",
+    "plan-text-recovery-finalize"
   ],
   "currentVersion": {
-    "versionCode": 68,
-    "versionName": "1.0.68-plan-text-boot-restore",
-    "lastPatchId": "kgg-v068-plan-text-boot-restore",
+    "versionCode": 69,
+    "versionName": "1.0.69-plan-text-recovery-finalize",
+    "lastPatchId": "kgg-v069-plan-text-recovery-finalize",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v068-plan-text-boot-restore",
+  "latestPatchId": "kgg-v069-plan-text-recovery-finalize",
   "lastUpdateIntent": {
-    "id": "kgg-v068-plan-text-boot-restore",
-    "summary": "Stellt gueltigen gespeicherten Live-Plantext beim Start wieder her und schuetzt nur kurz unvollstaendige Namenssegmente.",
+    "id": "kgg-v069-plan-text-recovery-finalize",
+    "summary": "Persistiert eine tatsaechliche Boot-Reparatur und unterscheidet kurze Zwischenedits von finalen Umbenennungen.",
     "touched": [
-      "Parser",
-      "Plan-State"
+      "Plan-State",
+      "Storage"
     ],
     "notTouched": [
       "PDF",
       "QR/Patienten-App",
       "Scan/OCR",
+      "Parser",
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
@@ -159,8 +163,40 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 68,
+  "latestVersionCode": 69,
   "entries": [
+    {
+      "versionCode": 69,
+      "versionName": "1.0.69-plan-text-recovery-finalize",
+      "patchId": "kgg-v069-plan-text-recovery-finalize",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Live-Plantext Recovery abschliessen",
+      "reason": "Persistiert eine tatsaechliche Boot-Reparatur und unterscheidet kurze Zwischenedits von finalen Umbenennungen.",
+      "whatChanged": [
+        "Persistiert eine tatsaechliche Boot-Reparatur und unterscheidet kurze Zwischenedits von finalen Umbenennungen."
+      ],
+      "touchedAreas": [
+        "Plan-State",
+        "Storage"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Vom Code-Review beauftragter P1-Folgepatch: Live-Text-Plan-State und lokale Persistenz muessen ohne Datenverlust korrigiert werden."
+    },
     {
       "versionCode": 68,
       "versionName": "1.0.68-plan-text-boot-restore",
@@ -816,7 +852,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
     }
   ],
-  "latestVersionName": "1.0.68-plan-text-boot-restore",
+  "latestVersionName": "1.0.69-plan-text-recovery-finalize",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -942,7 +978,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v068-plan-text-boot-restore",
+  "lastUpdatedByPatchId": "kgg-v069-plan-text-recovery-finalize",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
@@ -1077,7 +1113,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v068 Plan-Text Boot Restore</title>
+  <title>KGG Update v069 Live-Plantext Recovery abschliessen</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -16793,11 +16829,11 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
 
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v068_plan_text_boot_restore';
+  const VERSION='KGG_GITHUB_UPDATE_v069_plan_text_recovery_finalize';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v068","buildTime":"2026-08-13T19:33:54Z","buildCode":"module-v068-plan-text-boot-restore","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v069","buildTime":"2026-08-13T20:11:40Z","buildCode":"module-v069-plan-text-recovery-finalize","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -18001,7 +18037,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   function compactTextExerciseName(value){
     return compact(stripExerciseName(value)||value);
   }
-  function hasIncompleteTextExerciseSegment(text,previousText){
+  function hasIncompleteTextExerciseSegment(text,previousText,options){
     const raw=String(text||'');
     const names=textExerciseNamesFromPlanText(raw);
     if(!names.length){
@@ -18010,7 +18046,10 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     }
     // Protect only the same segment while it is being shortened. A global
     // prefix guard would wrongly treat independent "Dips" and "Dips Neu"
-    // exercises as unfinished.
+    // exercises as unfinished. A real completion boundary (change/confirm)
+    // may commit a parsable three-letter final name; one- and two-letter
+    // fragments always remain provisional.
+    const finalizeShortTextEdit=!!(options&&options.finalizeShortTextEdit);
     const previousNames=textExerciseNamesFromPlanText(previousText);
     return names.some((name,index)=>{
       const candidate=compactTextExerciseName(name);
@@ -18018,7 +18057,8 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
       const previous=[previousNames[index],(state.plan||[])[index]&&((state.plan||[])[index].name||(state.plan||[])[index].rawText)]
         .map(compactTextExerciseName)
         .filter(Boolean);
-      return previous.some(known=>known.length>candidate.length&&known.startsWith(candidate));
+      const shortenedKnownName=previous.some(known=>known.length>candidate.length&&known.startsWith(candidate));
+      return shortenedKnownName&&!(finalizeShortTextEdit&&candidate.length>=3);
     });
   }
   function activeTextSegment(){
@@ -18113,12 +18153,12 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     state.planText=input.value;
     resizeExerciseInputToContent();
   }
-  function syncPlanFromTextInput(reason){
+  function syncPlanFromTextInput(reason,options){
     if(state.textSyncing)return;
     const input=$('exerciseInput');
     resizeExerciseInputToContent();
     const text=input&&input.value||'';
-    if(hasIncompleteTextExerciseSegment(text,state.planText)){
+    if(hasIncompleteTextExerciseSegment(text,state.planText,options)){
       // The text remains the live master even while a small partial edit is
       // protected from replacing the last valid structured plan.
       state.planText=text;
@@ -18159,6 +18199,9 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     if(restored.length&&differs){
       state.plan=restored;
       state.liveDraftId=null;
+      // Persist only a real valid recovery. Incomplete live text keeps its
+      // previous valid structured plan and must never rewrite local storage.
+      save();
     }
     return true;
   }
@@ -18253,7 +18296,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
       input.setSelectionRange&&input.setSelectionRange(caret,caret);
       state.bankOpen=keepBankOpen;
       bankSelectMode='append';
-      syncPlanFromTextInput('ui_select_db_exercise_append_to_text');
+      syncPlanFromTextInput('ui_select_db_exercise_append_to_text',{finalizeShortTextEdit:true});
       restoreDbScrollAnchor(scrollAnchor);
       if(keepFocus)keepExerciseInputFocus(caret);
       bankSelectMode='append';
@@ -18290,7 +18333,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     }
     input.setSelectionRange&&input.setSelectionRange(caret,caret);
     state.bankOpen=keepBankOpen;
-    syncPlanFromTextInput('ui_select_db_exercise_into_text');
+    syncPlanFromTextInput('ui_select_db_exercise_into_text',{finalizeShortTextEdit:true});
     restoreDbScrollAnchor(scrollAnchor);
     if(keepFocus)keepExerciseInputFocus(caret);
     bankSelectMode=keepBankOpen?'append':'replaceActive';
@@ -18298,7 +18341,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   function addExercise(ex){const item=ensureUiExerciseShape(ex||{}); state.plan.push(item); syncStatePlanToStore('ui_add_exercise'); syncTextInputFromPlan('ui_add_exercise'); state.bankOpen=false; state.liveDraftId=null; save(); render();}
   function removeExercise(localId){const input=$('exerciseInput'); const keepTrailingComma=!!(input&&/,\s*$/.test(input.value)); state.plan=state.plan.filter(x=>(x.localId||x.id)!==localId); if(state.liveDraftId===localId)state.liveDraftId=null; if(state.sortMenuId===localId)state.sortMenuId=null; syncStatePlanToStore('ui_remove_exercise'); syncTextInputFromPlan('ui_remove_exercise'); restoreTrailingCommaAfterPlanSync(keepTrailingComma); save(); render();}
   function clearInputAndRemoveLiveTextExercises(){state.plan=[]; state.liveDraftId=null; $('exerciseInput').value=''; resizeExerciseInputToContent(); state.bankOpen=false; syncStatePlanToStore('ui_clear_text_master_plan'); save(); render();}
-  function confirmExerciseInput(){syncPlanFromTextInput('ui_confirm_text_master');}
+  function confirmExerciseInput(){syncPlanFromTextInput('ui_confirm_text_master',{finalizeShortTextEdit:true});}
   function upsertLiveExerciseFromText(){const input=$('exerciseInput'); const value=String(input&&input.value||''); const parts=splitPlanText(value).map(p=>String(p.text||'').trim()).filter(Boolean); const committed=/[,;\\n]\\s*$/.test(value)||parts.length>1; if(!committed){const hadDraft=!!state.liveDraftId||(state.plan||[]).some(ex=>ex&&ex.liveDraft); if(hadDraft){state.plan=(state.plan||[]).filter(ex=>!(ex&&ex.liveDraft)); state.liveDraftId=null; syncStatePlanToStore('ui_textfield_unconfirmed_not_plan'); save();} render(); return;} syncPlanFromTextInput('ui_textfield_master_input');}
   function activeText(){return activeTextSegment();}
   function hasSearchLetters(text){return /[A-Za-zÄÖÜäöüß]/.test(String(text||''));}
@@ -23073,7 +23116,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
     if(!input)return false;
     const existing=String(input.value||'').trim();
     input.value=existing?withTrailingExerciseComma(existing.replace(/,+$/,'')+', '+clean):withTrailingExerciseComma(clean);
-    syncPlanFromTextInput(reason||'scan_v319_apply_result_preserve_text');
+    syncPlanFromTextInput(reason||'scan_v319_apply_result_preserve_text',{finalizeShortTextEdit:true});
     state.bankOpen=false;
     state.scanPanelOpen='plan';
     save();
@@ -23768,7 +23811,7 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
   initScanAutoCollapseOnUiOpen();
   if(renderPatientHashView())return;
   $('visionBtn').onclick=()=>setLargePdfMode(!state.largePdfMode);
-  $('exerciseInput').addEventListener('input',()=>upsertLiveExerciseFromText()); $('exerciseInput').addEventListener('focus',()=>render()); $('clearInput').onclick=()=>{clearInputAndRemoveLiveTextExercises();};
+  $('exerciseInput').addEventListener('input',()=>upsertLiveExerciseFromText()); $('exerciseInput').addEventListener('change',()=>syncPlanFromTextInput('ui_textfield_master_change',{finalizeShortTextEdit:true})); $('exerciseInput').addEventListener('focus',()=>render()); $('clearInput').onclick=()=>{clearInputAndRemoveLiveTextExercises();};
   $('bankToggle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; const opening=!state.bankOpen; if(opening)openTabletExclusivePanel('bank'); toggleBankOpenFromUi(); setTabletOverlayActiveFlag();};
   $('dbTitle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; const opening=!state.bankOpen; if(opening)openTabletExclusivePanel('bank'); state.bankOpen=!state.bankOpen; render(); setTabletOverlayActiveFlag();};
   $('dbTitle').addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();if(guardPhoneScrollToggle(ev))return; const opening=!state.bankOpen; if(opening)openTabletExclusivePanel('bank'); state.bankOpen=!state.bankOpen; render(); setTabletOverlayActiveFlag();}});
@@ -27230,6 +27273,18 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
 })();
 </script>
 <!-- KGG PATCH END kgg-v068-plan-text-boot-restore -->
+<!-- KGG PATCH START kgg-v069-plan-text-recovery-finalize -->
+<!-- Live-Plantext Recovery abschliessen -->
+<script id="kgg-v069-plan-text-recovery-finalize">
+(function(){
+  "use strict";
+  const PATCH_ID="kgg-v069-plan-text-recovery-finalize";
+  // Den kleinstmoeglichen Patch hier implementieren. Bestehende Hooks beibehalten.
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES[PATCH_ID]={installed:true};
+})();
+</script>
+<!-- KGG PATCH END kgg-v069-plan-text-recovery-finalize -->
 
 </body>
 </html>

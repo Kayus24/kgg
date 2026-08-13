@@ -23,7 +23,8 @@
     "kgg-v064-typed-update-versions",
     "kgg-v065-source-control-char-guard",
     "kgg-v067-plan-text-live-master-guard",
-    "kgg-v068-plan-text-boot-restore"
+    "kgg-v068-plan-text-boot-restore",
+    "kgg-v069-plan-text-recovery-finalize"
   ],
   "parts": [
     "base-head.html",
@@ -62,6 +63,7 @@
     "patches/v065-source-control-char-guard.html",
     "patches/v067-plan-text-live-master-guard.html",
     "patches/v068-plan-text-boot-restore.html",
+    "patches/v069-plan-text-recovery-finalize.html",
     "footer.html"
   ]
 }

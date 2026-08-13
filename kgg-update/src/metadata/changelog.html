@@ -3,8 +3,40 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 68,
+  "latestVersionCode": 69,
   "entries": [
+    {
+      "versionCode": 69,
+      "versionName": "1.0.69-plan-text-recovery-finalize",
+      "patchId": "kgg-v069-plan-text-recovery-finalize",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Live-Plantext Recovery abschliessen",
+      "reason": "Persistiert eine tatsaechliche Boot-Reparatur und unterscheidet kurze Zwischenedits von finalen Umbenennungen.",
+      "whatChanged": [
+        "Persistiert eine tatsaechliche Boot-Reparatur und unterscheidet kurze Zwischenedits von finalen Umbenennungen."
+      ],
+      "touchedAreas": [
+        "Plan-State",
+        "Storage"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Vom Code-Review beauftragter P1-Folgepatch: Live-Text-Plan-State und lokale Persistenz muessen ohne Datenverlust korrigiert werden."
+    },
     {
       "versionCode": 68,
       "versionName": "1.0.68-plan-text-boot-restore",
@@ -660,7 +692,7 @@
       "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
     }
   ],
-  "latestVersionName": "1.0.68-plan-text-boot-restore",
+  "latestVersionName": "1.0.69-plan-text-recovery-finalize",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
