@@ -52,27 +52,29 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "source-control-char-guard",
     "plan-text-live-master-guard",
     "plan-text-boot-restore",
-    "plan-text-recovery-finalize"
+    "plan-text-recovery-finalize",
+    "tablet-package-save"
   ],
   "currentVersion": {
-    "versionCode": 69,
-    "versionName": "1.0.69-plan-text-recovery-finalize",
-    "lastPatchId": "kgg-v069-plan-text-recovery-finalize",
+    "versionCode": 70,
+    "versionName": "1.0.70-tablet-package-save",
+    "lastPatchId": "kgg-v070-tablet-package-save",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v069-plan-text-recovery-finalize",
+  "latestPatchId": "kgg-v070-tablet-package-save",
   "lastUpdateIntent": {
-    "id": "kgg-v069-plan-text-recovery-finalize",
-    "summary": "Persistiert eine tatsaechliche Boot-Reparatur und unterscheidet kurze Zwischenedits von finalen Umbenennungen.",
+    "id": "kgg-v070-tablet-package-save",
+    "summary": "Stellt den vorhandenen Tablet-Button zum Speichern als Uebungspaket wieder sichtbar und erreichbar her.",
     "touched": [
-      "Plan-State",
-      "Storage"
+      "Tablet-Layout"
     ],
     "notTouched": [
       "PDF",
       "QR/Patienten-App",
       "Scan/OCR",
       "Parser",
+      "Plan-State",
+      "Storage",
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
@@ -128,27 +130,29 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "source-control-char-guard",
     "plan-text-live-master-guard",
     "plan-text-boot-restore",
-    "plan-text-recovery-finalize"
+    "plan-text-recovery-finalize",
+    "tablet-package-save"
   ],
   "currentVersion": {
-    "versionCode": 69,
-    "versionName": "1.0.69-plan-text-recovery-finalize",
-    "lastPatchId": "kgg-v069-plan-text-recovery-finalize",
+    "versionCode": 70,
+    "versionName": "1.0.70-tablet-package-save",
+    "lastPatchId": "kgg-v070-tablet-package-save",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v069-plan-text-recovery-finalize",
+  "latestPatchId": "kgg-v070-tablet-package-save",
   "lastUpdateIntent": {
-    "id": "kgg-v069-plan-text-recovery-finalize",
-    "summary": "Persistiert eine tatsaechliche Boot-Reparatur und unterscheidet kurze Zwischenedits von finalen Umbenennungen.",
+    "id": "kgg-v070-tablet-package-save",
+    "summary": "Stellt den vorhandenen Tablet-Button zum Speichern als Uebungspaket wieder sichtbar und erreichbar her.",
     "touched": [
-      "Plan-State",
-      "Storage"
+      "Tablet-Layout"
     ],
     "notTouched": [
       "PDF",
       "QR/Patienten-App",
       "Scan/OCR",
       "Parser",
+      "Plan-State",
+      "Storage",
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
@@ -163,8 +167,43 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 69,
+  "latestVersionCode": 70,
   "entries": [
+    {
+      "versionCode": 70,
+      "versionName": "1.0.70-tablet-package-save",
+      "patchId": "kgg-v070-tablet-package-save",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Tablet-Paketbutton wiederherstellen",
+      "reason": "Der bereits vorhandene Paket-Speichern-Dialog war in der Tablet-Ansicht nicht sichtbar bzw. erreichbar.",
+      "whatChanged": [
+        "Verschiebt ausschließlich den bestehenden savePackageBtn im Tablet-Modus in die Kopfzeile des aktuellen Plans und lässt den vorhandenen Dialog-Handler unverändert.",
+        "Sichert für diesen Tablet-Button ein Touch-Ziel von mindestens 56 x 44 px."
+      ],
+      "touchedAreas": [
+        "Tablet-Layout",
+        "UI-Regressionstests"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Storage",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Max hat die Wiederherstellung des Tablet-Paketbuttons und ein mindestens 44px hohes Tablet-Touch-Ziel ausdrücklich freigegeben."
+    },
     {
       "versionCode": 69,
       "versionName": "1.0.69-plan-text-recovery-finalize",
@@ -852,7 +891,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
     }
   ],
-  "latestVersionName": "1.0.69-plan-text-recovery-finalize",
+  "latestVersionName": "1.0.70-tablet-package-save",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -978,7 +1017,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v069-plan-text-recovery-finalize",
+  "lastUpdatedByPatchId": "kgg-v070-tablet-package-save",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
@@ -1113,7 +1152,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v069 Live-Plantext Recovery abschliessen</title>
+  <title>KGG Update v070 Tablet-Paket speichern</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -16829,11 +16868,11 @@ var qrcode=function(){function i(t,r){function a(t,r){l=function(t){for(var r=ne
 
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v069_plan_text_recovery_finalize';
+  const VERSION='KGG_GITHUB_UPDATE_v070_tablet_package_save';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v069","buildTime":"2026-08-13T20:11:40Z","buildCode":"module-v069-plan-text-recovery-finalize","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v070","buildTime":"2026-08-13T20:40:11Z","buildCode":"module-v070-tablet-package-save","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -27285,6 +27324,98 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
 })();
 </script>
 <!-- KGG PATCH END kgg-v069-plan-text-recovery-finalize -->
+<!-- KGG PATCH START kgg-v070-tablet-package-save -->
+<!-- Tablet-Paket speichern -->
+<style id="kgg-v070-tablet-package-save-style">
+  /* Der vorhandene +Paket-Button bleibt derselbe Dialog-Trigger. Auf Tablet
+     liegt er erreichbar in der Kopfzeile des aktuellen Plans, nicht in einem
+     ausgeblendeten Mobile-Slot. 56 x 44 px sichert die Touch-Zielgröße. */
+  @media (min-width:760px){
+    body.tabletLayoutCustom #currentPlanBlock{position:relative!important;}
+    body.tabletLayoutCustom #currentPlanBlock #currentPlanToggle{padding-right:76px!important;}
+    body.tabletLayoutCustom #currentPlanBlock #savePackageBtn:not(.hidden){
+      position:absolute!important;
+      top:4px!important;
+      right:8px!important;
+      z-index:7!important;
+      display:inline-flex!important;
+      align-items:center!important;
+      justify-content:center!important;
+      gap:3px!important;
+      width:56px!important;
+      min-width:56px!important;
+      max-width:56px!important;
+      height:44px!important;
+      min-height:44px!important;
+      margin:0!important;
+      padding:0 7px!important;
+      border:1px solid rgba(220,227,235,.96)!important;
+      border-radius:12px!important;
+      background:#fff!important;
+      box-shadow:0 2px 8px rgba(7,16,39,.08)!important;
+      visibility:visible!important;
+      pointer-events:auto!important;
+    }
+    body.tabletLayoutCustom #currentPlanBlock #savePackageBtn .packagePlus,
+    body.tabletLayoutCustom #currentPlanBlock #savePackageBtn .packageBox{line-height:1!important;}
+    body.tabletLayoutCustom #currentPlanBlock #savePackageBtn .packagePlus{font-size:16px!important;}
+    body.tabletLayoutCustom #currentPlanBlock #savePackageBtn .packageBox{font-size:21px!important;}
+  }
+</style>
+<script id="kgg-v070-tablet-package-save">
+(function(){
+  "use strict";
+  const PATCH_ID="kgg-v070-tablet-package-save";
+  let originalParent=null;
+  let originalNextSibling=null;
+
+  function isTablet(){
+    return !!(document.body&&document.body.classList.contains("tabletLayoutCustom")&&window.matchMedia&&window.matchMedia("(min-width:760px)").matches);
+  }
+  function rememberOriginalSlot(button){
+    if(!button||originalParent)return;
+    originalParent=button.parentNode;
+    originalNextSibling=button.nextSibling;
+  }
+  function syncTabletPackageSaveButton(){
+    const button=document.getElementById("savePackageBtn");
+    if(!button)return;
+    rememberOriginalSlot(button);
+    if(isTablet()){
+      const planBlock=document.getElementById("currentPlanBlock");
+      if(planBlock&&button.parentNode!==planBlock)planBlock.appendChild(button);
+      return;
+    }
+    if(originalParent&&button.parentNode!==originalParent){
+      if(originalNextSibling&&originalNextSibling.parentNode===originalParent)originalParent.insertBefore(button,originalNextSibling);
+      else originalParent.appendChild(button);
+    }
+  }
+  function install(){
+    syncTabletPackageSaveButton();
+    [80,260].forEach(delay=>window.setTimeout(syncTabletPackageSaveButton,delay));
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});
+  else install();
+  window.addEventListener("resize",syncTabletPackageSaveButton,{passive:true});
+  window.addEventListener("orientationchange",()=>window.setTimeout(syncTabletPackageSaveButton,120),{passive:true});
+  if(document.body)new MutationObserver(syncTabletPackageSaveButton).observe(document.body,{attributes:true,attributeFilter:["class"]});
+  window.KGG_TABLET_PACKAGE_SAVE_V070={
+    patchId:PATCH_ID,
+    sync:syncTabletPackageSaveButton,
+    check:function(){
+      const button=document.getElementById("savePackageBtn");
+      return {
+        patchId:PATCH_ID,
+        tablet:isTablet(),
+        parentId:button&&button.parentElement?button.parentElement.id:"",
+        visible:!!(button&&!button.classList.contains("hidden")&&getComputedStyle(button).display!=="none")
+      };
+    }
+  };
+})();
+</script>
+<!-- KGG PATCH END kgg-v070-tablet-package-save -->
 
 </body>
 </html>

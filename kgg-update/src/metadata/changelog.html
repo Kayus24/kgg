@@ -3,8 +3,43 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 69,
+  "latestVersionCode": 70,
   "entries": [
+    {
+      "versionCode": 70,
+      "versionName": "1.0.70-tablet-package-save",
+      "patchId": "kgg-v070-tablet-package-save",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Tablet-Paketbutton wiederherstellen",
+      "reason": "Der bereits vorhandene Paket-Speichern-Dialog war in der Tablet-Ansicht nicht sichtbar bzw. erreichbar.",
+      "whatChanged": [
+        "Verschiebt ausschließlich den bestehenden savePackageBtn im Tablet-Modus in die Kopfzeile des aktuellen Plans und lässt den vorhandenen Dialog-Handler unverändert.",
+        "Sichert für diesen Tablet-Button ein Touch-Ziel von mindestens 56 x 44 px."
+      ],
+      "touchedAreas": [
+        "Tablet-Layout",
+        "UI-Regressionstests"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Storage",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Max hat die Wiederherstellung des Tablet-Paketbuttons und ein mindestens 44px hohes Tablet-Touch-Ziel ausdrücklich freigegeben."
+    },
     {
       "versionCode": 69,
       "versionName": "1.0.69-plan-text-recovery-finalize",
@@ -692,7 +727,7 @@
       "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
     }
   ],
-  "latestVersionName": "1.0.69-plan-text-recovery-finalize",
+  "latestVersionName": "1.0.70-tablet-package-save",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",

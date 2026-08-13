@@ -48,7 +48,7 @@ function parseArgs() {
 }
 
 function usage() {
-  console.log("Usage: node release-pipeline/kgg_ui_stability_smoke.js --level critical|regression [--case all|gestures|ui-mini-series|bank-thumbnails|phone-admin-menu|phone-scan-dock|phone-history-packages|phone-bank-align|tablet-layout-button|tablet-card-reorder|tablet-layout-visual|tablet-editor-layout|tablet-split-phone-layout|phone-landscape-tablet-menu|tablet-app-boot|tablet-splitter-scale-drag] [--browser]");
+  console.log("Usage: node release-pipeline/kgg_ui_stability_smoke.js --level critical|regression [--case all|gestures|ui-mini-series|bank-thumbnails|phone-admin-menu|phone-scan-dock|phone-history-packages|phone-bank-align|tablet-layout-button|tablet-package-save|tablet-card-reorder|tablet-layout-visual|tablet-editor-layout|tablet-split-phone-layout|phone-landscape-tablet-menu|tablet-app-boot|tablet-splitter-scale-drag] [--browser]");
   console.log("Optional: set KGG_UI_SMOKE_HTML to test a release HTML instead of kgg-update/index.html.");
 }
 
@@ -160,6 +160,12 @@ function staticUiMiniSeriesGuardSuite(caseName) {
       /function setTabletSideMenuOpen\(open\)[\s\S]{0,1250}setTabletLayoutEditMode\(false\)/,
       "tablet side menu closes layout edit mode"
     );
+  }
+
+  if (caseMatches(caseName, ["ui-mini-series", "tablet-package-save"])) {
+    assertIncludes(html, "kgg-v070-tablet-package-save", "v070 tablet package marker");
+    assertIncludes(html, "window.KGG_TABLET_PACKAGE_SAVE_V070", "v070 tablet package public probe");
+    assertIncludes(html, "min-height:44px!important", "tablet package save minimum touch target");
   }
 
   if (caseMatches(caseName, ["ui-mini-series", "tablet-card-reorder"])) {
@@ -597,7 +603,7 @@ function wantsPhoneMiniSeries(caseName) {
 }
 
 function wantsTabletMiniSeries(caseName) {
-  return caseMatches(caseName, ["tablet-layout-button", "tablet-card-reorder", "tablet-layout-visual", "tablet-editor-layout"]);
+  return caseMatches(caseName, ["tablet-layout-button", "tablet-package-save", "tablet-card-reorder", "tablet-layout-visual", "tablet-editor-layout"]);
 }
 
 function wantsTabletSplitPhoneMiniSeries(caseName) {
@@ -1347,7 +1353,7 @@ async function browserUiMiniSeriesSuite(caseName) {
         externalRequests.push(route.request().url());
         await route.fulfill({ status: 204, contentType: "application/json", body: "{}" });
       });
-      const realTabletRuntime = caseMatches(caseName, ["tablet-layout-button", "tablet-card-reorder", "tablet-editor-layout"]);
+      const realTabletRuntime = caseMatches(caseName, ["tablet-layout-button", "tablet-package-save", "tablet-card-reorder", "tablet-editor-layout"]);
       if (realTabletRuntime) {
         await context.addInitScript(({ storageKey, customBankKey, exercises, customBank }) => {
           localStorage.setItem(
@@ -1493,6 +1499,80 @@ async function browserUiMiniSeriesSuite(caseName) {
       }
 
       await page.waitForSelector("#tabletMenuBtn", { timeout: 15000 });
+      if (caseMatches(caseName, ["tablet-package-save"])) {
+        await page.waitForFunction(() => {
+          const probe = window.KGG_TABLET_PACKAGE_SAVE_V070 && window.KGG_TABLET_PACKAGE_SAVE_V070.check
+            ? window.KGG_TABLET_PACKAGE_SAVE_V070.check()
+            : null;
+          return !!(probe && probe.tablet && probe.parentId === "currentPlanBlock" && probe.visible);
+        }, null, { timeout: 10000 });
+        const packageSave = await page.evaluate(() => {
+          const button = document.getElementById("savePackageBtn");
+          const header = document.getElementById("currentPlanToggle");
+          const rect = (node) => {
+            if (!node) return null;
+            const r = node.getBoundingClientRect();
+            return { left: Math.round(r.left), top: Math.round(r.top), right: Math.round(r.right), bottom: Math.round(r.bottom), width: Math.round(r.width), height: Math.round(r.height) };
+          };
+          const buttonRect = rect(button);
+          const centerNode = buttonRect ? document.elementFromPoint(buttonRect.left + (buttonRect.width / 2), buttonRect.top + (buttonRect.height / 2)) : null;
+          return {
+            parentId: button && button.parentElement ? button.parentElement.id : "",
+            hidden: button ? button.classList.contains("hidden") : true,
+            display: button ? getComputedStyle(button).display : "missing",
+            pointerEvents: button ? getComputedStyle(button).pointerEvents : "missing",
+            ariaLabel: button ? button.getAttribute("aria-label") : "",
+            buttonRect,
+            headerRect: rect(header),
+            hitTargetIsButton: !!(button && centerNode && (centerNode === button || button.contains(centerNode))),
+          };
+        });
+        const insideHeader = packageSave.buttonRect && packageSave.headerRect &&
+          packageSave.buttonRect.left >= packageSave.headerRect.left &&
+          packageSave.buttonRect.right <= packageSave.headerRect.right &&
+          packageSave.buttonRect.top >= packageSave.headerRect.top &&
+          packageSave.buttonRect.bottom <= packageSave.headerRect.bottom;
+        if (
+          packageSave.parentId !== "currentPlanBlock" ||
+          packageSave.hidden ||
+          packageSave.display === "none" ||
+          packageSave.pointerEvents === "none" ||
+          !packageSave.ariaLabel.includes("Übungspaket speichern") ||
+          !packageSave.buttonRect ||
+          packageSave.buttonRect.width < 44 ||
+          packageSave.buttonRect.height < 44 ||
+          !packageSave.hitTargetIsButton ||
+          !insideHeader
+        ) {
+          fail(`Tablet direct package-save button failed: ${JSON.stringify(packageSave)}`);
+        }
+        await page.locator("#savePackageBtn").click({ timeout: 7000 });
+        await page.waitForSelector("#packageSaveModal.open", { timeout: 7000 });
+        await page.waitForFunction(() => document.activeElement && document.activeElement.id === "packageNameInput", null, { timeout: 3000 });
+        const saveModal = await page.evaluate(() => ({
+          open: document.getElementById("packageSaveModal").classList.contains("open"),
+          focused: document.activeElement ? document.activeElement.id : "",
+          defaultName: document.getElementById("packageNameInput").value,
+        }));
+        if (!saveModal.open || saveModal.focused !== "packageNameInput" || !saveModal.defaultName) {
+          fail(`Tablet package-save dialog did not open from direct button: ${JSON.stringify(saveModal)}`);
+        }
+        await page.locator("#cancelPackageSave").click({ timeout: 7000 });
+        await page.waitForFunction(() => !document.getElementById("packageSaveModal").classList.contains("open"), null, { timeout: 7000 });
+        await page.setViewportSize({ width: 650, height: 844 });
+        await page.waitForTimeout(360);
+        const phoneRestore = await page.evaluate(() => {
+          const button = document.getElementById("savePackageBtn");
+          const header = document.querySelector("#createPanel .planHeader");
+          return {
+            phoneMedia: window.matchMedia("(max-width:759px)").matches,
+            restoredToHeader: !!(button && header && button.parentElement === header),
+          };
+        });
+        if (!phoneRestore.phoneMedia || !phoneRestore.restoredToHeader) {
+          fail(`Tablet package-save button leaked into phone layout: ${JSON.stringify(phoneRestore)}`);
+        }
+      }
       if (caseMatches(caseName, ["ui-mini-series", "tablet-layout-visual"])) {
         await page.evaluate(() => document.body.classList.add("tabletMenuOpen"));
         const menuState = await page.evaluate(() => {
@@ -1516,7 +1596,7 @@ async function browserUiMiniSeriesSuite(caseName) {
           }
         }
       }
-      if (!caseMatches(caseName, ["tablet-layout-visual"])) {
+      if (caseMatches(caseName, ["tablet-layout-button", "tablet-card-reorder", "tablet-editor-layout"])) {
         await page.locator("#tabletMenuBtn").click();
         await page.waitForFunction(() => document.body.classList.contains("tabletMenuOpen"), null, { timeout: 10000 });
         await page.locator("#tabletMenuLayoutBtn").click();
@@ -1759,7 +1839,7 @@ async function main() {
   if (!["critical", "regression", "all"].includes(args.level)) {
     fail(`Unknown level: ${args.level}`);
   }
-  const knownCases = ["all", "gestures", "ui-mini-series", "bank-thumbnails", "phone-admin-menu", "phone-scan-dock", "phone-history-packages", "phone-bank-align", "tablet-layout-button", "tablet-card-reorder", "tablet-layout-visual", "tablet-editor-layout", "tablet-split-phone-layout", "phone-landscape-tablet-menu", "tablet-app-boot", "tablet-splitter-scale-drag"];
+  const knownCases = ["all", "gestures", "ui-mini-series", "bank-thumbnails", "phone-admin-menu", "phone-scan-dock", "phone-history-packages", "phone-bank-align", "tablet-layout-button", "tablet-package-save", "tablet-card-reorder", "tablet-layout-visual", "tablet-editor-layout", "tablet-split-phone-layout", "phone-landscape-tablet-menu", "tablet-app-boot", "tablet-splitter-scale-drag"];
   if (!knownCases.includes(args.caseName)) {
     fail(`Unknown case: ${args.caseName}`);
   }

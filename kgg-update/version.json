@@ -1,7 +1,7 @@
 {
-  "versionCode": 69,
-  "versionName": "1.0.69-plan-text-recovery-finalize",
-  "indexUrl": "index.html?v=69",
-  "sha256": "026610c89b928be328de668ee344fbdc5a1fd67585eb3907fcb30fe819e3cdca",
-  "notes": "v069: Persistiert eine tatsaechliche Boot-Reparatur und unterscheidet kurze Zwischenedits von finalen Umbenennungen."
+  "versionCode": 70,
+  "versionName": "1.0.70-tablet-package-save",
+  "indexUrl": "index.html?v=70",
+  "sha256": "fbec1d38eefa2e172d5979284f5ca46f2f1af47f133ee2b989b42b577104ab30",
+  "notes": "v070: Macht den bestehenden Tablet-Button zum Speichern als Übungspaket wieder erreichbar und sichert ein 44px hohes Touch-Ziel."
 }
