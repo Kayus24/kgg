@@ -25,4 +25,4 @@ jobs:
           npm ci
           npx playwright install --with-deps chromium
       - name: Run continuous-day browser contract
-        run: node release-pipeline/kgg_patient_continuous_days_playwright.js
+        run: timeout 180s node release-pipeline/kgg_patient_continuous_days_playwright.js
