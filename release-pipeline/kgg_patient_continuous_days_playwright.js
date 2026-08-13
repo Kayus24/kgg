@@ -61,7 +61,11 @@ async function main(){
   const url=`http://127.0.0.1:${port}/kgg/?plan=${encodeURIComponent('KGGH2:'+encodePlan(plan))}`;
   try{
     mark('boot continuous fixture');
-    await page.goto(url,{waitUntil:'domcontentloaded'});await waitForRuntime(page);
+    await page.goto(url,{waitUntil:'domcontentloaded'});
+    await page.waitForTimeout(800);
+    const boot=await page.evaluate(()=>({planHidden:document.getElementById('plan')?.classList.contains('hide'),status:document.getElementById('status')?.textContent||'',statusClass:document.getElementById('status')?.className||'',href:location.href,currentPlan:localStorage.getItem('kggCurrentPlanV1')||'',hasDayFlow:Boolean(window.KGGPatientDayFlow)}));
+    if(boot.planHidden)throw new Error('patient core boot failed before service worker: '+JSON.stringify({boot,pageErrors:errors}));
+    await waitForRuntime(page);
     assert((await page.locator('#meta').innerText()).includes('fortlaufender Trainingsplan'),'continuous plan metadata still shows a fixed day count');
     assert(await page.locator('#extendBtn').isHidden(),'legacy +days button is still visible');
 
