@@ -1,8 +1,8 @@
 # KGG Patient Source Chunk 028
 
 - Source file: `patient-start-values-day1.js`
-- Characters: 1-2931
-- Full source SHA-256: `e78b53bc3ebf6f51faeea2a04201541cdfb01fe02565d3265a1f73b722b8e80c`
+- Characters: 1-2953
+- Full source SHA-256: `3ced0d7f1e19ce5d3fe71c77e25c4500607fc11f6d7d6af65e648f62f91c11e3`
 
 ```
 (()=>{
@@ -40,7 +40,7 @@
       });
       if(!wrote){localStorage.setItem(marker,'no-empty-targets');return false}
       if(!done.includes(1))done.push(1);
-      if(Number(p.days||0)>=2)d=2;else d=1;
+      if(p.extendDays!==false||Number(p.days||0)>=2)d=2;else d=1;
       save();
       localStorage.setItem(marker,new Date().toISOString());
       safe(()=>setStatus('Startwerte aus der Therapie wurden als Tag 1 gespeichert.','ok'));

@@ -1,8 +1,8 @@
 # KGG Patient Source Chunk 017
 
 - Source file: `patient-multiplan-db.js`
-- Characters: 1-15418
-- Full source SHA-256: `64d38f9968e061d8795d4e412eca36abfd34b5f353bc8ad10c7ee933d030e5ab`
+- Characters: 1-15614
+- Full source SHA-256: `eaa7ea1c0a9b9a318036d19455d23e3e180bb890cf90db35d6ce945ad7ab36fc`
 
 ```
 (()=>{
@@ -56,8 +56,8 @@
   function pokeMedia(){[80,300,900].forEach(delay=>setTimeout(()=>{safe(()=>window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.prefetch&&window.KGGPatientMediaRetryCache.prefetch());safe(()=>window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.render&&window.KGGPatientMediaRetryCache.render())},delay))}
   function ensureState(){let s=readState();if(!s||!Array.isArray(s.plans))s={version:1,plans:[],active:0,day:{}};if(!s.plans.length&&safe(()=>p))s.plans.push(rawFromRuntime(storedCurrentPlan()));s.day=s.day||{};if(typeof s.active!=='number'||s.active<0||s.active>=s.plans.length)s.active=0;writeState(s);return s}
   function saveCurrentSlot(){const s=ensureState();const i=Math.max(0,Math.min(Number(s.active)||0,s.plans.length-1));safe(()=>safeSave());s.plans[i]=rawFromRuntime(currentBasePlan(s,i));writeState(s);persistCurrent(s.plans[i])}
-  function loadValuesForPlan(){safe(()=>{v=read(sk(),'{}')});safe(()=>{done=read(dk(),'[]').map(Number).filter(n=>n>=1&&n<=p.days)})}
-  function switchTo(idx){let s=ensureState();if(!s.plans[idx])return false;if(Number(s.active)===idx)return true;saveCurrentSlot();s=ensureState();if(!s.plans[idx])return false;s.active=idx;const raw=s.plans[idx];writeState(s);p=runtimeFromRaw(raw);persistCurrent(raw);loadValuesForPlan();safe(()=>save());safe(()=>render());pokeMedia();safe(()=>setStatus(t('Plan gewechselt. Werte bleiben erhalten.','Plan switched. Values kept.'),'ok'));return true}
+  function loadValuesForPlan(){safe(()=>{v=read(sk(),'{}')});safe(()=>{const flow=window.KGGPatientDayFlow;done=flow&&typeof flow.normalizeDone==='function'?flow.normalizeDone(read(dk(),'[]')):read(dk(),'[]').map(Number).filter(n=>n>=1&&(p.extendDays!==false||n<=p.days))})}
+  function switchTo(idx){let s=ensureState();if(!s.plans[idx])return false;if(Number(s.active)===idx)return true;saveCurrentSlot();s=ensureState();if(!s.plans[idx])return false;s.active=idx;const raw=s.plans[idx];writeState(s);p=runtimeFromRaw(raw);persistCurrent(raw);loadValuesForPlan();safe(()=>typeof restoreDay==='function'&&restoreDay());safe(()=>save());safe(()=>render());pokeMedia();safe(()=>setStatus(t('Plan gewechselt. Werte bleiben erhalten.','Plan switched. Values kept.'),'ok'));return true}
 
   function currentHas(name){const key=norm(name);return Array.isArray(p?.ex)&&p.ex.some(ex=>norm(ex.n)===key)}
   function collectDb(){

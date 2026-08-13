@@ -33,7 +33,7 @@
       });
       if(!wrote){localStorage.setItem(marker,'no-empty-targets');return false}
       if(!done.includes(1))done.push(1);
-      if(Number(p.days||0)>=2)d=2;else d=1;
+      if(p.extendDays!==false||Number(p.days||0)>=2)d=2;else d=1;
       save();
       localStorage.setItem(marker,new Date().toISOString());
       safe(()=>setStatus('Startwerte aus der Therapie wurden als Tag 1 gespeichert.','ok'));
