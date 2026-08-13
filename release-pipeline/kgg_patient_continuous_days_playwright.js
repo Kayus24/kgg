@@ -47,24 +47,30 @@ async function finishFromUi(page,expectedQrDay,expectedNextDay){
 function rawPlan(id,title){return{i:id,t:title,v:1,d:12,extendDays:true,stepDays:6,e:[[title+' Übung',1,'B','kg','Wdh']]}}
 
 async function main(){
+  const watchdog=setTimeout(()=>{console.error('KGG patient continuous days Playwright FAIL: global 150s watchdog');process.exit(1)},150000);
+  const mark=message=>console.log('[continuous-days] '+message);
   const server=http.createServer((request,response)=>{const file=safeFile(request.url);if(!file){response.writeHead(404,{'Content-Type':'text/plain'});response.end('not found');return}response.writeHead(200,{'Content-Type':contentType(file),'Cache-Control':'no-store','Service-Worker-Allowed':'/'});fs.createReadStream(file).pipe(response)});
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const {port}=server.address();
   const browser=await chromium.launch({headless:true});
   const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'allow'});
   const page=await context.newPage();
+  page.setDefaultTimeout(8000);page.setDefaultNavigationTimeout(15000);
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   const plan={i:'continuous-days-playwright',t:'Fortlaufender Testplan',v:1,d:12,extendDays:true,stepDays:6,e:[['Beinpresse',1,'B','kg','Wdh']]};
   const url=`http://127.0.0.1:${port}/kgg/?plan=${encodeURIComponent('KGGH2:'+encodePlan(plan))}`;
   try{
+    mark('boot continuous fixture');
     await page.goto(url,{waitUntil:'domcontentloaded'});await waitForRuntime(page);
     assert((await page.locator('#meta').innerText()).includes('fortlaufender Trainingsplan'),'continuous plan metadata still shows a fixed day count');
     assert(await page.locator('#extendBtn').isHidden(),'legacy +days button is still visible');
 
+    mark('T7 to T8');
     await seedCurrent(page,[1,2,3,4,5,6],7);
     await assertHubDay(page,7);
     await finishFromUi(page,7,8);
 
+    mark('T12 to T13 and reload');
     await seedCurrent(page,Array.from({length:12},(_,i)=>i+1),13);
     await assertHubDay(page,13);
     assert(await page.locator('#days button').count()===12,'continuous day growth created hidden future day buttons');
@@ -74,6 +80,7 @@ async function main(){
     assert(await page.evaluate(()=>v[k(0,1,'B','a',13)])==='42','T13 value was lost after reload');
     await finishFromUi(page,13,14);
 
+    mark('T99 to T100 and paged history');
     await seedCurrent(page,Array.from({length:99},(_,i)=>i+1),100);
     await assertHubDay(page,100);
     assert(await page.locator('#days button').count()===12,'T100 expanded the hidden day-button DOM');
@@ -85,6 +92,7 @@ async function main(){
     assert(await page.locator('#kggHistoryList .kggDayCard[data-day]').count()===60,'older-training pagination did not expand by 30');
     await page.locator('#kggHistoryBackdrop').click({position:{x:2,y:2}});
 
+    mark('historical finalize preserves front');
     await page.evaluate(()=>{d=4;render()});
     await page.waitForFunction(()=>Number(d)===4);
     await page.locator('#plan > button.btn').click();
@@ -94,6 +102,7 @@ async function main(){
     await page.reload({waitUntil:'domcontentloaded'});await waitForRuntime(page);await assertHubDay(page,100);
 
     // Two plans keep independent resume days.
+    mark('multi-plan independent days');
     await page.evaluate(({planA,planB})=>{
       function planHash(raw){const ex=(raw.e||[]).map(e=>[e[0]||'Übung',Number(e[1])||3,e[2]||'LR',e[3]||'kg',e[4]||'Wdh']);const text=JSON.stringify({i:raw.i||'plan',t:raw.t||'KGG Trainingsplan',e:ex});let h=2166136261;for(let i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)}
       function keys(raw){const base='kgg-'+raw.i+'-'+planHash(raw);return{done:base+'-done',meta:base+'-meta'}}
@@ -111,6 +120,7 @@ async function main(){
     await page.reload({waitUntil:'domcontentloaded'});await waitForRuntime(page);await assertHubDay(page,28);
 
     // Explicit fixed plans keep their hard end.
+    mark('fixed plan hard end');
     const fixed={i:'fixed-days-playwright',t:'Fester Testplan',v:1,d:12,extendDays:false,stepDays:6,e:[['Fix',1,'B','kg','Wdh']]};
     await page.goto(`http://127.0.0.1:${port}/kgg/?plan=${encodeURIComponent('KGGH2:'+encodePlan(fixed))}`,{waitUntil:'domcontentloaded'});await waitForRuntime(page);
     await seedCurrent(page,Array.from({length:12},(_,i)=>i+1),12);await assertHubDay(page,12);
@@ -119,8 +129,9 @@ async function main(){
     assert(decodePayload(await page.locator('#qr').getAttribute('data-payload')).d===12,'fixed plan final QR day is wrong');
     assert(await currentDay(page)===12,'fixed plan advanced beyond its hard end');
 
+    mark('final assertions');
     assert(errors.length===0,`continuous-day browser raised page errors: ${errors.join(' | ')}`);
     console.log(JSON.stringify({status:'PASS',t7ToT8:true,t12ToT13:true,t99ToT100:true,reloadT13:true,historyCards:30,multiPlanIndependent:true,fixedPlanBounded:true}));
-  }finally{await context.close();await browser.close();await new Promise(resolve=>server.close(resolve))}
+  }finally{clearTimeout(watchdog);await context.close().catch(()=>{});await browser.close().catch(()=>{});if(typeof server.closeAllConnections==='function')server.closeAllConnections();await Promise.race([new Promise(resolve=>server.close(()=>resolve())),new Promise(resolve=>setTimeout(resolve,2000))])}
 }
 main().catch(error=>{console.error(`KGG patient continuous days Playwright FAIL: ${error.stack||error.message}`);process.exitCode=1});
