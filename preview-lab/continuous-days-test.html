@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>KGG v75 Continuous-Day Test</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#f4f7fb;color:#111827;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}main{max-width:680px;margin:auto;padding:18px}.card{background:#fff;border:1px solid #dbe3ef;border-radius:20px;padding:16px;box-shadow:0 10px 30px #0f172a12}.muted{color:#64748b;line-height:1.45}.grid{display:grid;gap:10px;margin-top:16px}button{width:100%;min-height:58px;border-radius:16px;border:1px solid #cbd5e1;background:#fff;color:#111827;font-size:16px;font-weight:900;text-align:left;padding:12px 14px}button:active{transform:scale(.99);background:#eff6ff}.good{background:#ecfdf5;border-color:#bbf7d0}.tag{display:inline-block;border-radius:999px;background:#e0e7ff;color:#3730a3;padding:4px 8px;font-size:12px;font-weight:900;margin-bottom:8px}code{font-size:12px;word-break:break-all}</style>
+</head>
+<body>
+<main>
+  <section class="card">
+    <div class="tag">Patient Preview v75 · Continuous-Day Test</div>
+    <h1>Fortlaufende Trainingstage testen</h1>
+    <p class="muted">Jeder Button setzt einen reproduzierbaren lokalen Testzustand und öffnet danach exakt die v75-Preview-App. Mit der Browser-Zurück-Taste kommst du wieder zu diesem Menü.</p>
+    <div class="grid">
+      <button id="scenario-t7" class="good">T7 → T8 testen<br><small>Start auf Tag 7. Training beenden: QR muss T7 bleiben, danach Tag 8.</small></button>
+      <button id="scenario-t12">T12 → T13 testen<br><small>Die ursprünglichen 12 Trainingstage dürfen kein Endpunkt sein. App startet auf T13.</small></button>
+      <button id="scenario-t99">T99 → T100 testen<br><small>App startet auf T100; frühere Trainings werden in 30er-Blöcken geladen.</small></button>
+      <button id="scenario-multi">Multi-Plan T28 / T5 testen<br><small>Plan A startet T28, Plan B T5 und beide behalten ihren eigenen Tag.</small></button>
+      <button id="scenario-fixed">Festen 12-Tage-Plan testen<br><small>Kontrollfall: extendDays:false bleibt nach T12 auf T12.</small></button>
+    </div>
+    <p class="muted" style="margin-top:16px">Geprüfter Runtime-Commit:<br><code>cb69bc6b6fbe9a544db26bede50a71365a9492ed</code></p>
+  </section>
+</main>
+<script>
+const MULTI='kggPatientMultiPlansV1',CURRENT='kggCurrentPlanV1';
+function rawPlan(id,title,continuous=true){return{i:id,t:title,v:1,d:12,extendDays:continuous,stepDays:6,e:[[title+' Übung',1,'B','kg','Wdh']]}}
+function hash(raw){const ex=(raw.e||[]).map(e=>[e[0]||'Übung',Number(e[1])||3,e[2]||'LR',e[3]||'kg',e[4]||'Wdh']);const text=JSON.stringify({i:raw.i||'plan',t:raw.t||'KGG Trainingsplan',e:ex});let h=2166136261;for(let i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)}
+function keys(raw){const base='kgg-'+raw.i+'-'+hash(raw);return{values:base+'-values',done:base+'-done',meta:base+'-meta'}}
+function code(raw){let x=btoa(unescape(encodeURIComponent(JSON.stringify(raw)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');return'KGGH2:'+x}
+function clear(){localStorage.clear()}
+function seed(raw,done,day){const k=keys(raw);localStorage.setItem(k.values,'{}');localStorage.setItem(k.done,JSON.stringify(done));localStorage.setItem(k.meta,JSON.stringify({lastOpenDay:day,lastCompletedDay:done.length?Math.max(...done):0,storageVersion:6}));localStorage.setItem(CURRENT,JSON.stringify({plan:raw,importedAt:new Date().toISOString()}))}
+function launchSingle(id,title,done,day,continuous=true){clear();const raw=rawPlan(id,title,continuous);seed(raw,done,day);location.href='./?plan='+encodeURIComponent(code(raw))}
+function range(n){return Array.from({length:n},(_,i)=>i+1)}
+document.getElementById('scenario-t7').onclick=()=>launchSingle('preview-t7','Preview T7',range(6),7,true);
+document.getElementById('scenario-t12').onclick=()=>launchSingle('preview-t13','Preview T13',range(12),13,true);
+document.getElementById('scenario-t99').onclick=()=>launchSingle('preview-t100','Preview T100',range(99),100,true);
+document.getElementById('scenario-fixed').onclick=()=>launchSingle('preview-fixed','Preview Fixed',range(12),12,false);
+document.getElementById('scenario-multi').onclick=()=>{clear();const a=rawPlan('preview-plan-a','Plan A',true),b=rawPlan('preview-plan-b','Plan B',true);seed(a,range(27),28);seed(b,range(4),5);localStorage.setItem(MULTI,JSON.stringify({version:1,plans:[a,b],active:0,day:{0:28,1:5},updatedAt:new Date().toISOString()}));localStorage.setItem(CURRENT,JSON.stringify({plan:a,importedAt:new Date().toISOString()}));location.href='./'};
+</script>
+</body>
+</html>
