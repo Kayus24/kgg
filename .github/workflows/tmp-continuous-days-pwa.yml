@@ -1,0 +1,41 @@
+name: Temporary continuous day PWA fix
+on:
+  push:
+    branches: [fix/patient-continuous-training-days-v75]
+permissions:
+  contents: write
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/patient-continuous-training-days-v75
+      - name: Restore established module query contracts
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('service-worker.js')
+          s=p.read_text(encoding='utf-8')
+          pairs={
+            './patient-multiplan-db.js?v=continuous-days-1':'./patient-multiplan-db.js?v=lossless-media-plans-1',
+            './patient-plan-delete.js?v=continuous-days-1':'./patient-plan-delete.js?v=plan-delete-1-safe',
+            './patient-start-values-day1.js?v=continuous-days-1':'./patient-start-values-day1.js?v=start-values-day1-1',
+            './patient-day-history.js?v=continuous-days-1':'./patient-day-history.js?v=plan-dialog-title-1',
+          }
+          for old,new in pairs.items():
+              if old not in s: raise SystemExit('missing '+old)
+              s=s.replace(old,new)
+          p.write_text(s,encoding='utf-8',newline='\n')
+          PY
+          python release-pipeline/kgg_pwa_contract_smoke.py
+      - name: Commit PWA contract fix
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add service-worker.js
+          git commit -m 'fix(patient): keep established module query contracts'
+          git push origin HEAD:fix/patient-continuous-training-days-v75
