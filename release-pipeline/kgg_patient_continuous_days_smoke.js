@@ -4,6 +4,71 @@ const fs=require('fs');
 const path=require('path');
 
 function assert(condition,message){if(!condition)throw new Error(message)}
+const MIN_CONTINUOUS_DAYS_VERSION=75;
+
+function extractVersion(text,pattern,label){
+  const match=text.match(pattern);
+  assert(match,`${label} version marker missing`);
+  const value=Number(match[1]);
+  assert(Number.isInteger(value),`${label} version marker is not numeric`);
+  return value;
+}
+
+function assertPatientVersionContract(worker,label,recovery){
+  const appVersion=extractVersion(worker,/const APP_VERSION = '([0-9]+)';/,'service worker APP_VERSION');
+  assert(appVersion>=MIN_CONTINUOUS_DAYS_VERSION,`continuous-days requires patient version >= ${MIN_CONTINUOUS_DAYS_VERSION}, got ${appVersion}`);
+
+  const cacheVersion=extractVersion(worker,/const CACHE_NAME = 'kgg-handyplan-v([0-9]+)-[a-z0-9-]+';/,'service worker cache');
+  assert(cacheVersion===appVersion,`service worker cache v${cacheVersion} does not match APP_VERSION v${appVersion}`);
+
+  const scriptVersions=[...worker.matchAll(/patient-version-label\.js\?v=([0-9]+)/g)].map(match=>Number(match[1]));
+  assert(scriptVersions.length>0,'service worker patient-version-label.js version reference missing');
+  assert(scriptVersions.every(value=>value===appVersion),`service worker patient-version-label.js reference does not match APP_VERSION v${appVersion}`);
+
+  const labelVersion=extractVersion(label,/const RELEASE='([0-9]+)';/,'patient version label');
+  assert(labelVersion===appVersion,`patient version label v${labelVersion} does not match APP_VERSION v${appVersion}`);
+
+  const recoveryVersion=extractVersion(recovery,/const RELEASE='([0-9]+)';/,'update recovery');
+  assert(recoveryVersion===appVersion,`update recovery v${recoveryVersion} does not match APP_VERSION v${appVersion}`);
+  return appVersion;
+}
+
+function versionFixture(appVersion,overrides={}){
+  const cacheVersion=overrides.cacheVersion??appVersion;
+  const scriptVersion=overrides.scriptVersion??appVersion;
+  const labelVersion=overrides.labelVersion??appVersion;
+  const recoveryVersion=overrides.recoveryVersion??appVersion;
+  return {
+    worker:`const CACHE_NAME = 'kgg-handyplan-v${cacheVersion}-fixture';\nconst APP_VERSION = '${appVersion}';\nconst VERSION_LABEL_SCRIPT = './patient-version-label.js?v=${scriptVersion}';\n`,
+    label:`const RELEASE='${labelVersion}';\n`,
+    recovery:`const RELEASE='${recoveryVersion}';\n`,
+  };
+}
+
+function expectVersionContractFailure(fixture,message){
+  let failed=false;
+  try{assertPatientVersionContract(fixture.worker,fixture.label,fixture.recovery)}catch(_error){failed=true}
+  assert(failed,message);
+}
+
+function runVersionContractRegression(){
+  for(const candidate of [75,76,77]){
+    const fixture=versionFixture(candidate);
+    assert(assertPatientVersionContract(fixture.worker,fixture.label,fixture.recovery)===candidate,`patient version v${candidate} should satisfy the continuous-days version contract`);
+  }
+  expectVersionContractFailure(versionFixture(74),'patient version below the continuous-days feature floor must fail');
+  expectVersionContractFailure(versionFixture(76,{cacheVersion:75}),'cache/app version drift must fail');
+  expectVersionContractFailure(versionFixture(76,{scriptVersion:75}),'service-worker label-script/app version drift must fail');
+  expectVersionContractFailure(versionFixture(76,{labelVersion:75}),'patient label/app version drift must fail');
+  expectVersionContractFailure(versionFixture(76,{recoveryVersion:75}),'recovery/app version drift must fail');
+}
+
+if(process.argv.includes('--version-contract-self-test')){
+  runVersionContractRegression();
+  console.log(JSON.stringify({status:'PASS',versionContractRegression:true,minimumPatientVersion:MIN_CONTINUOUS_DAYS_VERSION}));
+  process.exit(0);
+}
+
 const root=path.resolve(__dirname,'..');
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const history=fs.readFileSync(path.join(root,'patient-day-history.js'),'utf8');
@@ -50,9 +115,7 @@ assert(start.includes("p.extendDays!==false||Number(p.days||0)>=2"),'start value
 assert(cardSettings.includes("const VERSION='v3_continuous_day_meta'"),'card settings continuous-day meta version missing');
 assert(cardSettings.includes("continuous?T('fortlaufender Trainingsplan','continuous training plan')"),'card settings still overwrites continuous plan meta with p.days');
 
-assert(sw.includes("const CACHE_NAME = 'kgg-handyplan-v75-continuous-days'"),'service worker cache is not v75 continuous-days');
-assert(sw.includes("const APP_VERSION = '75'"),'service worker app version is not 75');
-assert(version.includes("const RELEASE='75'"),'patient version label is not 75');
-assert(recovery.includes("const RELEASE='75'"),'update recovery is not 75');
+const patientVersion=assertPatientVersionContract(sw,version,recovery);
+runVersionContractRegression();
 
-console.log(JSON.stringify({status:'PASS',continuousDayContract:true,historyPaging:30,patientVersion:75}));
+console.log(JSON.stringify({status:'PASS',continuousDayContract:true,historyPaging:30,patientVersion,minimumPatientVersion:MIN_CONTINUOUS_DAYS_VERSION,versionContractRegression:true}));
