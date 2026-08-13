@@ -10,6 +10,7 @@ const history=fs.readFileSync(path.join(root,'patient-day-history.js'),'utf8');
 const multi=fs.readFileSync(path.join(root,'patient-multiplan-db.js'),'utf8');
 const del=fs.readFileSync(path.join(root,'patient-plan-delete.js'),'utf8');
 const start=fs.readFileSync(path.join(root,'patient-start-values-day1.js'),'utf8');
+const cardSettings=fs.readFileSync(path.join(root,'patient-card-settings.js'),'utf8');
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
 const version=fs.readFileSync(path.join(root,'patient-version-label.js'),'utf8');
 const recovery=fs.readFileSync(path.join(root,'update-recovery.html'),'utf8');
@@ -46,6 +47,8 @@ assert(multi.includes("typeof restoreDay==='function'&&restoreDay()"),'multi-pla
 assert(del.includes("flow&&typeof flow.normalizeDone==='function'?flow.normalizeDone"),'plan delete does not preserve T13+ done entries');
 assert(del.includes("typeof restoreDay==='function'&&restoreDay()"),'plan delete does not restore surviving plan day');
 assert(start.includes("p.extendDays!==false||Number(p.days||0)>=2"),'start values cannot advance a continuous one-day horizon to T2');
+assert(cardSettings.includes("const VERSION='v3_continuous_day_meta'"),'card settings continuous-day meta version missing');
+assert(cardSettings.includes("continuous?T('fortlaufender Trainingsplan','continuous training plan')"),'card settings still overwrites continuous plan meta with p.days');
 
 assert(sw.includes("const CACHE_NAME = 'kgg-handyplan-v75-continuous-days'"),'service worker cache is not v75 continuous-days');
 assert(sw.includes("const APP_VERSION = '75'"),'service worker app version is not 75');

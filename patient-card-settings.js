@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='v2_empty_unit_hides_field';
+  const VERSION='v3_continuous_day_meta';
   const STYLE='kggPatientCardSettingsStyle';
   const LANG='kggPatientLang';
   const PLAN_KEY='kggCurrentPlanV1';
@@ -131,7 +131,7 @@
     document.documentElement.lang=en()?'en':'de';document.body.classList.toggle('kggLangEn',en());
     const h=document.querySelector('main .card h1');if(h)h.textContent=T('KGG Handyplan','KGG Phone Plan');
     const intro=document.querySelector('main .card p.muted');if(intro)intro.textContent=T('Werte direkt am Handy eintragen. Schmerz 0–10 angeben. Daten bleiben lokal auf diesem Gerät.','Enter values directly on the phone. Pain 0–10. Data stays local on this device.');
-    const meta=$('meta');if(meta&&safe(()=>p))meta.textContent=(p.ex?.length||0)+' '+T('Übungen','exercises')+' · '+(p.days||0)+' '+T('Trainingstage','training days');
+    const meta=$('meta');if(meta&&safe(()=>p)){const flow=window.KGGPatientDayFlow,continuous=flow&&typeof flow.isContinuousPlan==='function'?flow.isContinuousPlan():p.extendDays!==false;meta.textContent=(p.ex?.length||0)+' '+T('Übungen','exercises')+' · '+(continuous?T('fortlaufender Trainingsplan','continuous training plan'):(p.days||0)+' '+T('Trainingstage','training days'));}
     document.querySelectorAll('#days button').forEach((b,i)=>b.textContent=T('Tag ','Day ')+(i+1));
     const ex=$('extendBtn');if(ex&&safe(()=>p))ex.textContent=T('+ '+p.stepDays+' weitere Tage hinzufügen','Add '+p.stepDays+' more days');
     const db=$('kggPatientDbBtn');if(db)db.textContent=T('📚 Übungsdatenbank','📚 Database');
