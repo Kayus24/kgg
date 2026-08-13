@@ -1,5 +1,16 @@
 # Patient App Changelog
 
+## 2026-08-13 – v77 Vorwert übernehmen
+
+### Changed
+- Der verfügbare Button „Vorwert übernehmen“ im Werte-Pad erhält einen zurückhaltenden, seltenen Glanzlauf von links nach rechts.
+
+### Accessibility
+- Bei aktivierter System-Einstellung „Bewegung reduzieren“ bleibt der Button vollständig ohne Animation.
+
+### Safety
+- Der Hinweis betrifft ausschließlich diesen einen Patienten-App-Button; Plan-, QR-, Speicher- und Eingabelogik bleiben unverändert.
+
 ## 2026-08-13 – Fortlaufende Trainingstage v75
 
 ### Changed

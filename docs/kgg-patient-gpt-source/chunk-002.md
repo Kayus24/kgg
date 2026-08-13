@@ -1,16 +1,16 @@
 # KGG Patient Source Chunk 002
 
 - Source file: `service-worker.js`
-- Characters: 1-7195
-- Full source SHA-256: `7b8fa4713556231fcb8b6cf55501b3d1e9df1fb5a2e8e032754d7dd0627c6c81`
+- Characters: 1-7194
+- Full source SHA-256: `f2c9c03454db11516253ef20c0761fda8ec145db36dd0d30b2441bea549d97b9`
 
 ```
-const CACHE_NAME = 'kgg-handyplan-v76-first-load-static';
-const APP_VERSION = '76';
+const CACHE_NAME = 'kgg-handyplan-v77-apply-shimmer';
+const APP_VERSION = '77';
 const CACHE_PREFIX = 'kgg-handyplan-';
 const RECOVERY_PATH = './update-recovery.html';
 const NUMPAD_UI_FIX_SCRIPT = './numpad-ui-fix.js?v=scroll-stable-1';
-const VERSION_LABEL_SCRIPT = './patient-version-label.js?v=76';
+const VERSION_LABEL_SCRIPT = './patient-version-label.js?v=77';
 const COLLAPSE_SCRIPT = './collapse-cards.js?v=plan-update-label-2-progress-visible';
 const CARD_PROGRESS_SCRIPT = './patient-card-progress.js?v=card-progress-2-complete-fields';
 const INSTALL_PROMPT_SCRIPT = './patient-install-prompt.js?v=install-prompt-1-shared-reference';
@@ -28,7 +28,7 @@ const PAIN_VERTICAL_SCRIPT = './patient-pain-vertical-scale.js?v=exercise-pain-v
 const INSTALL_GUIDE_SCRIPT = './patient-install-guide.js?v=install-guide-v2-query-plan-ios';
 const NUMPAD_VISIBILITY_SCRIPT = './patient-numpad-visibility-fix.js?v=stay-open-switch-1';
 const EXTRA_INFO_SCRIPT = './patient-extra-info-display.js?v=extra-info-filter-1';
-const LAST_VALUE_HINTS_SCRIPT = './patient-last-value-hints.js?v=last-value-button-sync-1';
+const LAST_VALUE_HINTS_SCRIPT = './patient-last-value-hints.js?v=last-value-button-shimmer-1';
 const SET_SUMMARY_GROUPS_SCRIPT = './patient-set-summary-groups.js?v=set-summary-groups-2-range-label';
 const QR_FULLSCREEN_SCRIPT = './patient-qr-fullscreen.js?v=qr-fullscreen-1';
 const NUMPAD_CARD_GUARD_SCRIPT = './patient-numpad-card-guard.js?v=numpad-input-switch-1';
