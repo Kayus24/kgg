@@ -40,25 +40,28 @@
     "tablet-recent-package-shell-geometry",
     "changelog-archive-window",
     "typed-update-versions",
-    "source-control-char-guard"
+    "source-control-char-guard",
+    "editor-trash-bank-delete"
   ],
   "currentVersion": {
-    "versionCode": 65,
-    "versionName": "1.0.65-source-control-char-guard",
-    "lastPatchId": "kgg-v065-source-control-char-guard",
+    "versionCode": 66,
+    "versionName": "1.0.66-editor-trash-bank-delete",
+    "lastPatchId": "kgg-v066-editor-trash-bank-delete",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v065-source-control-char-guard",
+  "latestPatchId": "kgg-v066-editor-trash-bank-delete",
   "lastUpdateIntent": {
-    "id": "kgg-v065-source-control-char-guard",
-    "summary": "Ersetzt vier versehentliche U+0008-Zeichen durch Regex-Wortgrenzen, repariert den fehlkodierten SJIS-Prüfwert und blockiert C0-, C1- sowie DEL-Steuerzeichen in editierbaren Source-Teilen.",
+    "id": "kgg-v066-editor-trash-bank-delete",
+    "summary": "Der Mülleimer im Dialog Übung bearbeiten wird immer auf die bestehende bestätigte Datenbank-Löschung geroutet; das separate Entfernen aus dem aktuellen Plan bleibt unverändert.",
     "touched": [
-      "Parser"
+      "Übungsdatenbank",
+      "Editor"
     ],
     "notTouched": [
       "PDF",
       "QR/Patienten-App",
       "Scan/OCR",
+      "Parser",
       "Plan-State",
       "Medien/Upload",
       "API-Key-Logik",

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "requestId": "kgg-editor-trash-bank-delete",
+  "patchId": "kgg-v066-editor-trash-bank-delete",
+  "assertions": [
+    {
+      "kind": "contains",
+      "value": "deleteButton.dataset.kggDeleteTarget='exercise-bank'"
+    },
+    {
+      "kind": "contains",
+      "value": "Aus Übungsdatenbank löschen"
+    }
+  ]
+}
