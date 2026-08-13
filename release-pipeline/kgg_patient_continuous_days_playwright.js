@@ -24,8 +24,9 @@ async function waitForRuntime(page){
 }
 async function seedCurrent(page,doneDays,lastOpenDay){
   await page.evaluate(({doneDays,lastOpenDay})=>{
-    localStorage.setItem(dk(),JSON.stringify(doneDays));
-    localStorage.setItem(mk(),JSON.stringify({lastOpenDay,lastCompletedDay:doneDays.length?doneDays[doneDays.length-1]:0,storageVersion:6}));
+    done=Array.from(doneDays||[],Number);
+    d=Number(lastOpenDay)||1;
+    save();
   },{doneDays,lastOpenDay});
   await page.reload({waitUntil:'domcontentloaded'});
   await waitForRuntime(page);
