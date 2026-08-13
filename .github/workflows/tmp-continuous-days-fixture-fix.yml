@@ -23,23 +23,8 @@ jobs:
           from pathlib import Path
           p=Path('release-pipeline/kgg_patient_continuous_days_playwright.js')
           s=p.read_text(encoding='utf-8')
-          old="""async function seedCurrent(page,doneDays,lastOpenDay){
-  await page.evaluate(({doneDays,lastOpenDay})=>{
-    localStorage.setItem(dk(),JSON.stringify(doneDays));
-    localStorage.setItem(mk(),JSON.stringify({lastOpenDay,lastCompletedDay:doneDays.length?doneDays[doneDays.length-1]:0,storageVersion:6}));
-  },{doneDays,lastOpenDay});
-  await page.reload({waitUntil:'domcontentloaded'});
-  await waitForRuntime(page);
-}"""
-          new="""async function seedCurrent(page,doneDays,lastOpenDay){
-  await page.evaluate(({doneDays,lastOpenDay})=>{
-    done=Array.from(doneDays||[],Number);
-    d=Number(lastOpenDay)||1;
-    save();
-  },{doneDays,lastOpenDay});
-  await page.reload({waitUntil:'domcontentloaded'});
-  await waitForRuntime(page);
-}"""
+          old="async function seedCurrent(page,doneDays,lastOpenDay){\n  await page.evaluate(({doneDays,lastOpenDay})=>{\n    localStorage.setItem(dk(),JSON.stringify(doneDays));\n    localStorage.setItem(mk(),JSON.stringify({lastOpenDay,lastCompletedDay:doneDays.length?doneDays[doneDays.length-1]:0,storageVersion:6}));\n  },{doneDays,lastOpenDay});\n  await page.reload({waitUntil:'domcontentloaded'});\n  await waitForRuntime(page);\n}"
+          new="async function seedCurrent(page,doneDays,lastOpenDay){\n  await page.evaluate(({doneDays,lastOpenDay})=>{\n    done=Array.from(doneDays||[],Number);\n    d=Number(lastOpenDay)||1;\n    save();\n  },{doneDays,lastOpenDay});\n  await page.reload({waitUntil:'domcontentloaded'});\n  await waitForRuntime(page);\n}"
           if old not in s: raise SystemExit('seedCurrent anchor missing')
           p.write_text(s.replace(old,new,1),encoding='utf-8',newline='\n')
           PY
