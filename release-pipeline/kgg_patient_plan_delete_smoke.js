@@ -13,4 +13,7 @@ r=api.removePlanState({plans:[A,B],active:0},9);assert(!r.ok&&r.state.plans.leng
 const ids=[...api.mediaIds(A)].sort();assert(ids.join(',')==='a-only,shared','media ids mismatch');
 const keys=api.planStorageKeys(A);assert(keys.length===3&&keys.every(k=>/^kgg-a-/.test(k)),'plan keys not isolated');
 assert(!source.includes('localStorage.clear('),'global localStorage.clear found');assert(!source.includes('indexedDB.deleteDatabase'),'global indexedDB delete found');
+assert(source.includes('plans.length>1?'),'last remaining plan still renders a destructive control');
+assert(source.includes('class="kggPlanDeleteBtn"'),'plan delete control is missing');
+assert(source.includes('font-size:25px'),'plan delete control is not rendered as a visible red x');
 console.log('Patient plan delete smoke: OK');

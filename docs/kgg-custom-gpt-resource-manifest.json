@@ -31,11 +31,11 @@
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-operations.md",
-        "sha256": "a1c3bd66e28f678fb75415d4143ffe003a6627b29b7f34b6976d91d22c58541d"
+        "sha256": "887aed7c6044d488a055e2248caab004e70995525293c796a3f5f267e9dfb154"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-safety.md",
-        "sha256": "fe47d4d6b1e62fc1eba57077c8ec491879dde5ffef257867db9fd32c769b3a6c"
+        "sha256": "403ebd2c2bf229deff152e563770b3c6b1b32921a91b3f583b0521d59d19f45f"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-testing.md",
@@ -49,7 +49,7 @@
       },
       {
         "path": "docs/kgg-custom-gpt-action-api-openapi.yaml",
-        "sha256": "eca05dce3a1878c494a8fe2c0c7451468550d6307d5f7d79f1c11d43e4bff2e8"
+        "sha256": "b415ae4e4429363ad56c60f3a05b59d0e62d5d9f8e9b20af8bab68bbd226e0e4"
       }
     ],
     "freshness": "GitHub live context and source chunks are authoritative; generated Knowledge is a retrieval accelerator and must pass --check.",
@@ -111,19 +111,19 @@
     "knowledge": [
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-architecture.md",
-        "sha256": "51e933ca067ad36b3cd5c7be842e95e3c034cdb5deb550a36de358dcac318838"
+        "sha256": "0d08b877d7e7c37ddc2021ca7b5683dcfcfc3d5f50260c0ea519b9d35dd05dd8"
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-operations.md",
-        "sha256": "123c0392b1f83e4ed0ce5deef4dbf4db0766e8f82f68c07b485028cd07f2c151"
+        "sha256": "7aa21246fb15b06ca871c11ee6c59dad03bb22a1544faf7b9693844425e9b018"
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-safety.md",
-        "sha256": "18c8b3fe6f4a86b08c81a895099292bd97350402f9d160034e60f492abad8845"
+        "sha256": "fc18065d3cc9e2af37d3d53e0a9f76a2ca39fe9263da5b18c4f2b9ae35f715f0"
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-testing.md",
-        "sha256": "ed6ec32edbc6a75bd8a9e7e502f889a02b21d859ab9fbbc90768e73c9704595e"
+        "sha256": "8e91d30a1d8b147b83d30dae29236b01dfab68ec1e8e7e042bc7187704e06c94"
       }
     ],
     "actions": [

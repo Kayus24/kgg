@@ -100,7 +100,7 @@ async function waitForControlledRuntime(page) {
     scripts: Array.from(document.scripts).map((script) => script.src).filter(Boolean),
     bodyClasses: document.body.className,
   }));
-  throw new Error(`controlled patient runtime modules were not injected: ${JSON.stringify(diagnostics)}`);
+  throw new Error(`controlled patient runtime modules were not available: ${JSON.stringify(diagnostics)}`);
 }
 
 async function setCardOpen(page, card, open) {
@@ -127,7 +127,7 @@ async function assertVisibleBadge(page, card, state, text) {
     ({ state, text }) => {
       const card = document.querySelector("#list .ex");
       const badge = card && card.querySelector(".kggCardProgress");
-      if (!card || !badge || card.classList.contains("kggOpen")) return false;
+      if (!card || !badge || card.classList.contains("kggOpen") || !document.body.classList.contains("kggAlwaysCollapsed")) return false;
       const style = getComputedStyle(badge);
       const rect = badge.getBoundingClientRect();
       return badge.dataset.kggProgress === state && badge.textContent === text &&
@@ -185,7 +185,7 @@ async function main() {
     t: "Fortschritts-Sichtbarkeit",
     v: 1,
     d: 6,
-    e: [["Beinpresse", 1, "B", "kg", "Wdh", "40", "10"]],
+    e: [["Beinpresse", 3, "B", "kg", "Wdh", "", ""]],
   };
   const payload = `KGGH2:${encodePlan(plan)}`;
   const url = `http://127.0.0.1:${port}/kgg/?plan=${encodeURIComponent(payload)}`;
@@ -204,16 +204,11 @@ async function main() {
     await card.waitFor({ state: "visible" });
     const inputs = card.locator(".set input.num");
     const inputCount = await inputs.count();
-    assert(inputCount >= 2, "synthetic exercise exposes fewer than two normal fields");
+    assert(inputCount === 6, `three bilateral sets must expose six normal fields, got ${inputCount}`);
     for (let index = 0; index < inputCount; index += 1) {
       await setInputValue(inputs.nth(index), "");
     }
-    await page.evaluate(() => {
-      const button = document.getElementById("kgg-collapse-toggle");
-      if (!button) throw new Error("collapse toggle is missing");
-      button.click();
-    });
-    await page.waitForFunction(() => document.body.classList.contains("kggCardsCollapsed"));
+    await page.waitForFunction(() => document.body.classList.contains("kggAlwaysCollapsed"));
     await setCardOpen(page, card, false);
     await assertVisibleBadge(page, card, "open", "○ Offen");
 
@@ -224,6 +219,13 @@ async function main() {
 
     await setCardOpen(page, card, true);
     await setInputValue(inputs.nth(1), "12");
+    await setCardOpen(page, card, false);
+    await assertVisibleBadge(page, card, "partial", "◐ Teilweise");
+
+    await setCardOpen(page, card, true);
+    for (let index = 2; index < inputCount; index += 1) {
+      await setInputValue(inputs.nth(index), String(12 + index));
+    }
     await setCardOpen(page, card, false);
     await assertVisibleBadge(page, card, "done", "✓ Bearbeitet");
 

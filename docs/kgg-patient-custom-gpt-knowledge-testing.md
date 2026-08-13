@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Testing
 
-Generated retrieval pack. Source digest: `be1fca21bd305498`.
+Generated retrieval pack. Source digest: `9260525faa60ca69`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -79,7 +79,7 @@ def validate_worker()->str:
  match=re.search(r"const APP_VERSION = '([0-9]+)';",worker)
  if not match:fail("service-worker.js has no numeric APP_VERSION")
  version=match.group(1)
- required=(f"kgg-handyplan-v{version}-",f"const APP_VERSION = '{version}';","const RECOVERY_PATH = './update-recovery.html';","./manifest-v64.webmanifest","./kgg-icon-192-v63.png","./kgg-icon-512-v63.png","./kgg-icon-maskable-512-v63.png",f"./patient-version-label.js?v={version}","./patient-set-summary-groups.js?v=set-summary-groups-2-range-label","./patient-card-progress.js?v=card-progress-1-two-fields","./patient-install-prompt.js?v=install-prompt-1-shared-reference","./patient-plan-delete.js?v=plan-delete-1-safe","GET_UPDATE_DIAGNOSTICS","isRecoveryRequest(event.request)",'rel="manifest" href="./manifest-v64.webmanifest"','rel="icon" type="image/png" sizes="192x192" href="./kgg-icon-192-v63.png"','rel="apple-touch-icon" sizes="192x192" href="./kgg-icon-192-v63.png"')
+ required=(f"kgg-handyplan-v{version}-",f"const APP_VERSION = '{version}';","const RECOVERY_PATH = './update-recovery.html';","./manifest-v64.webmanifest","./kgg-icon-192-v63.png","./kgg-icon-512-v63.png","./kgg-icon-maskable-512-v63.png",f"./patient-version-label.js?v={version}","./patient-set-summary-groups.js?v=set-summary-groups-2-range-label","./patient-card-progress.js?v=card-progress-2-complete-fields","./patient-install-prompt.js?v=install-prompt-1-shared-reference","./patient-plan-delete.js?v=plan-delete-2-red-x","./patient-numpad-card-guard.js?v=numpad-input-switch-1","GET_UPDATE_DIAGNOSTICS","isRecoveryRequest(event.request)","function injectModules(response){return response}")
  for fragment in required:
   if fragment not in worker:fail(f"service-worker.js is missing {fragment!r}")
  if "v59.png" in worker or "v59'" in worker or 'v59"' in worker:fail("service-worker.js still contains a v59 icon reference")
@@ -93,15 +93,45 @@ def validate_update_lifecycle(version:str)->None:
  if f"const RELEASE='{version}';" not in label:fail(f"patient-version-label.js is not aligned with release {version}")
  recovery=(ROOT/"update-recovery.html").read_text(encoding="utf-8")
  if f"const RELEASE='{version}';" not in recovery:fail(f"update-recovery.html is not aligned with release {version}")
-def validate_static_compatibility(manifest:dict)->None:
+def validate_static_compatibility(manifest:dict,version:str)->None:
  html=(ROOT/"index.html").read_text(encoding="utf-8-sig")
  if '<link rel="manifest" href="manifest.json">' not in html:fail("index.html no longer exposes the first-load compatibility manifest")
+ if '<link rel="icon" type="image/png" sizes="192x192" href="./kgg-icon-192-v63.png">' not in html:fail("index.html is missing the first-load icon")
+ if '<link rel="apple-touch-icon" sizes="192x192" href="./kgg-icon-192-v63.png">' not in html:fail("index.html is missing the first-load Apple icon")
+ scripts=(
+  "./collapse-cards.js?v=plan-update-label-2-progress-visible",
+  "./patient-card-progress.js?v=card-progress-2-complete-fields",
+  "./patient-install-guide.js?v=install-guide-v2-query-plan-ios",
+  "./patient-install-prompt.js?v=install-prompt-1-shared-reference",
+  "./patient-plan-replace-slot-fix.js?v=active-slot-1",
+  "./patient-start-scan.js?v=plan-replace-1",
+  "./patient-multiplan-db.js?v=lossless-media-plans-1",
+  "./patient-plan-delete.js?v=plan-delete-2-red-x",
+  "./patient-card-settings.js?v=empty-unit-hides-field-1",
+  "./patient-start-values-day1.js?v=start-values-day1-1",
+  "./patient-day-history.js?v=plan-dialog-title-1",
+  "./patient-media-retry-cache_v2.js?v=thumb-layout-2-safe-text",
+  "./patient-ui-micro-polish.js?v=unit-labels-pain-fit-1",
+  "./patient-pain-vertical-scale.js?v=exercise-pain-vertical-2-compact-modal",
+  "./numpad-ui-fix.js?v=scroll-stable-1",
+  "./patient-numpad-visibility-fix.js?v=stay-open-switch-1",
+  "./patient-extra-info-display.js?v=extra-info-filter-1",
+  "./patient-last-value-hints.js?v=last-value-button-sync-1",
+  "./patient-set-summary-groups.js?v=set-summary-groups-2-range-label",
+  "./patient-qr-fullscreen.js?v=qr-fullscreen-1",
+  "./patient-numpad-card-guard.js?v=numpad-input-switch-1",
+  f"./patient-version-label.js?v={version}",
+ )
+ for script in scripts:
+  tag=f'<script src="{script}"></script>'
+  if html.count(tag)!=1:fail(f"index.html must load {script} exactly once on first load")
+ if "patient-root-query-1" in html:fail("index.html still uses the legacy incomplete first-load module tag")
  if load_manifest(ROOT/"manifest.json")!=manifest:fail("manifest.json and manifest-v64.webmanifest must remain identical")
  if not (ROOT/"update-recovery.html").is_file():fail("update-recovery.html is missing")
 def main()->int:
  manifests=[load_manifest(path) for path in MANIFEST_PATHS]
  for manifest,path in zip(manifests,MANIFEST_PATHS):validate_manifest(manifest,path)
- validate_static_compatibility(manifests[1]);version=validate_worker();validate_update_lifecycle(version);print("Patient PWA contract: OK");return 0
+ version=validate_worker();validate_static_compatibility(manifests[1],version);validate_update_lifecycle(version);print("Patient PWA contract: OK");return 0
 if __name__=="__main__":raise SystemExit(main())
 
 ---
