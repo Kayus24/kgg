@@ -1,9 +1,14 @@
+# Patient App Changelog
 
-## v75 – Fortlaufende Trainingstage
+## 2026-08-13 – Fortlaufende Trainingstage v75
+
+### Changed
 - Fortlaufende Pläne wechseln nach Abschluss automatisch auf den nächsten Trainingstag und sind nicht mehr durch den ursprünglichen Planhorizont begrenzt.
 - T13+ bleiben über Reload, Planwechsel und Plan-Löschen erhalten; feste Pläne mit `extendDays:false` bleiben begrenzt.
 - Die Trainingshistorie lädt ältere Tage in 30er-Schritten statt unbegrenzt DOM-Karten aufzubauen.
-# Patient App Changelog
+
+### Safety
+- QR-Payload bleibt beim Abschluss auf dem tatsächlich beendeten Tag; Plan-, Schmerz-, Numpad-, Kamera- und Medienlogik bleiben unverändert.
 
 ## 2026-06-18 – Numpad input morph polish
 
