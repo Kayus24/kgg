@@ -3,8 +3,39 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 65,
+  "latestVersionCode": 66,
   "entries": [
+    {
+      "versionCode": 66,
+      "versionName": "1.0.66-tablet-package-save-preview",
+      "patchId": "kgg-v066-tablet-package-save-preview",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Tablet-Paketbutton wiederherstellen",
+      "reason": "Zeigt den vorhandenen Paket-Speichern-Button nur im Tablet-Layout wieder in der Kopfzeile des aktuellen Plans mit 56 x 44 px Touch-Ziel; der bestehende Dialog-Handler bleibt unverändert.",
+      "whatChanged": [
+        "Zeigt den vorhandenen Paket-Speichern-Button nur im Tablet-Layout wieder in der Kopfzeile des aktuellen Plans mit 56 x 44 px Touch-Ziel; der bestehende Dialog-Handler bleibt unverändert."
+      ],
+      "touchedAreas": [
+        "Tablet-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
     {
       "versionCode": 65,
       "versionName": "1.0.65-source-control-char-guard",
@@ -598,7 +629,7 @@
       "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
     }
   ],
-  "latestVersionName": "1.0.65-source-control-char-guard",
+  "latestVersionName": "1.0.66-tablet-package-save-preview",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",

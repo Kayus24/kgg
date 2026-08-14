@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "requestId": "tablet-package-save-preview-20260814",
+  "patchId": "kgg-v066-tablet-package-save-preview",
+  "assertions": [
+    {
+      "kind": "contains",
+      "value": "KGG_TABLET_PACKAGE_SAVE_PREVIEW"
+    },
+    {
+      "kind": "contains",
+      "value": "width:56px!important"
+    },
+    {
+      "kind": "contains",
+      "value": "height:44px!important"
+    },
+    {
+      "kind": "not_contains",
+      "value": "last-value-button-shimmer"
+    }
+  ]
+}

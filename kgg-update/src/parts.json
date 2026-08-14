@@ -21,7 +21,8 @@
     "kgg-v062-tablet-recent-package-shell-geometry",
     "kgg-v063-changelog-archive-window",
     "kgg-v064-typed-update-versions",
-    "kgg-v065-source-control-char-guard"
+    "kgg-v065-source-control-char-guard",
+    "kgg-v066-tablet-package-save-preview"
   ],
   "parts": [
     "base-head.html",
@@ -58,6 +59,7 @@
     "patches/v063-changelog-archive-window.html",
     "patches/v064-typed-update-versions.html",
     "patches/v065-source-control-char-guard.html",
+    "patches/v066-tablet-package-save-preview.html",
     "footer.html"
   ]
 }

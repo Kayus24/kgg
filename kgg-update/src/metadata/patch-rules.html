@@ -110,7 +110,7 @@
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v065-source-control-char-guard",
+  "lastUpdatedByPatchId": "kgg-v066-tablet-package-save-preview",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",

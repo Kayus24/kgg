@@ -1,7 +1,5 @@
 {
-  "versionCode": 66,
+  "releaseId": "r0427",
   "versionName": "1.0.66-tablet-package-save-preview",
-  "indexUrl": "index.html?v=66",
-  "sha256": "09b2ff1ccecc9f05b26638b770aaea6437ae1b6c4011e44de1c834c7e432132a",
   "notes": "v066: Zeigt den vorhandenen Paket-Speichern-Button nur im Tablet-Layout wieder in der Kopfzeile des aktuellen Plans mit 56 x 44 px Touch-Ziel; der bestehende Dialog-Handler bleibt unverändert."
 }

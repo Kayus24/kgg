@@ -49,25 +49,27 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "tablet-recent-package-shell-geometry",
     "changelog-archive-window",
     "typed-update-versions",
-    "source-control-char-guard"
+    "source-control-char-guard",
+    "tablet-package-save-preview"
   ],
   "currentVersion": {
-    "versionCode": 65,
-    "versionName": "1.0.65-source-control-char-guard",
-    "lastPatchId": "kgg-v065-source-control-char-guard",
+    "versionCode": 66,
+    "versionName": "1.0.66-tablet-package-save-preview",
+    "lastPatchId": "kgg-v066-tablet-package-save-preview",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v065-source-control-char-guard",
+  "latestPatchId": "kgg-v066-tablet-package-save-preview",
   "lastUpdateIntent": {
-    "id": "kgg-v065-source-control-char-guard",
-    "summary": "Ersetzt vier versehentliche U+0008-Zeichen durch Regex-Wortgrenzen, repariert den fehlkodierten SJIS-Prüfwert und blockiert C0-, C1- sowie DEL-Steuerzeichen in editierbaren Source-Teilen.",
+    "id": "kgg-v066-tablet-package-save-preview",
+    "summary": "Zeigt den vorhandenen Paket-Speichern-Button nur im Tablet-Layout wieder in der Kopfzeile des aktuellen Plans mit 56 x 44 px Touch-Ziel; der bestehende Dialog-Handler bleibt unverändert.",
     "touched": [
-      "Parser"
+      "Tablet-Layout"
     ],
     "notTouched": [
       "PDF",
       "QR/Patienten-App",
       "Scan/OCR",
+      "Parser",
       "Plan-State",
       "Medien/Upload",
       "API-Key-Logik",
