@@ -180,20 +180,37 @@ async function setInputValue(input, value) {
 async function assertVisibleBadge(page, card, state, text) {
   const badge = card.locator(".kggCardProgress");
   await badge.waitFor({ state: "attached" });
-  await page.waitForFunction(
-    ({ state, text }) => {
+  try {
+    await page.waitForFunction(
+      ({ state, text }) => {
+        const card = document.querySelector("#list .ex");
+        const badge = card && card.querySelector(".kggCardProgress");
+        if (!card || !badge || card.classList.contains("kggOpen") || !document.body.classList.contains("kggAlwaysCollapsed")) return false;
+        const style = getComputedStyle(badge);
+        const rect = badge.getBoundingClientRect();
+        return badge.dataset.kggProgress === state && badge.textContent === text &&
+          style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity || "1") > 0 &&
+          rect.width > 0 && rect.height > 0;
+      },
+      { state, text },
+      { timeout: 10000 }
+    );
+  } catch (error) {
+    const diagnostics = await page.evaluate(() => {
       const card = document.querySelector("#list .ex");
-      const badge = card && card.querySelector(".kggCardProgress");
-      if (!card || !badge || card.classList.contains("kggOpen") || !document.body.classList.contains("kggAlwaysCollapsed")) return false;
-      const style = getComputedStyle(badge);
-      const rect = badge.getBoundingClientRect();
-      return badge.dataset.kggProgress === state && badge.textContent === text &&
-        style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity || "1") > 0 &&
-        rect.width > 0 && rect.height > 0;
-    },
-    { state, text },
-    { timeout: 10000 }
-  );
+      const badge = card?.querySelector(".kggCardProgress");
+      const style = badge ? getComputedStyle(badge) : null;
+      const rect = badge?.getBoundingClientRect();
+      return {
+        bodyClass: document.body.className,
+        cardClass: card?.className || "",
+        badge: badge ? { state: badge.dataset.kggProgress || "", text: badge.textContent || "", display: style?.display || "", visibility: style?.visibility || "", width: rect?.width || 0, height: rect?.height || 0 } : null,
+        values: Array.from(card?.querySelectorAll(".set input.num") || []).map(input => input.value),
+      };
+    });
+    console.error(`progress badge settle diagnostics: ${JSON.stringify(diagnostics)}`);
+    throw error;
+  }
   const details = await badge.evaluate((element) => {
     const style = getComputedStyle(element);
     const rect = element.getBoundingClientRect();
