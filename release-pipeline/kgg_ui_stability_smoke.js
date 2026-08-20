@@ -1367,6 +1367,10 @@ async function browserUiMiniSeriesSuite(caseName) {
             })
           );
           localStorage.setItem(customBankKey, JSON.stringify(customBank));
+          localStorage.setItem(
+            "kgg_admin_local_secrets_v1",
+            JSON.stringify({ version: 2, updatedAt: "2026-07-01T00:00:00.000Z", geminiKeys: ["test-key"], mediaDropzoneEndpoint: "", mediaDropzoneUploadToken: "" })
+          );
           localStorage.setItem("kgg_pwa_install_prompt_seen_v1", "2026-07-01T00:00:00.000Z");
         }, { storageKey: STORAGE_KEY, customBankKey: CUSTOM_BANK_KEY, exercises: seededExercises(8), customBank: seededCustomBank() });
       }
