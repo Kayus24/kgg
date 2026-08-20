@@ -416,6 +416,23 @@ class ReleasePipelineTests(unittest.TestCase):
                 target = editor_contract / relative_path
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(source, target)
+            # This regression exercises the strict stop itself.  The real
+            # repository snapshots may legitimately be live-synced, so make
+            # the isolated contract explicitly pending instead of coupling
+            # the test to the repository's current editor state.
+            for snapshot in (
+                "docs/kgg-custom-gpt-editor-snapshot.json",
+                "docs/kgg-patient-custom-gpt-editor-snapshot.json",
+            ):
+                snapshot_path = editor_contract / snapshot
+                snapshot_payload = json.loads(snapshot_path.read_text(encoding="utf-8"))
+                snapshot_payload["syncStatus"] = "target-pending-live-editor-sync"
+                snapshot_payload.pop("lastVerifiedAt", None)
+                snapshot_payload.pop("lastVerifiedMainCommit", None)
+                snapshot_path.write_text(
+                    json.dumps(snapshot_payload, indent=2, ensure_ascii=False) + "\n",
+                    encoding="utf-8",
+                )
             for profile, snapshot in (
                 ("production", "docs/kgg-custom-gpt-editor-snapshot.json"),
                 ("patientProduction", "docs/kgg-patient-custom-gpt-editor-snapshot.json"),

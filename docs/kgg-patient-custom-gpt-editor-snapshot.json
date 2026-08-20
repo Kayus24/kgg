@@ -13,7 +13,9 @@
     "apps": false,
     "actions": true
   },
-  "syncStatus": "target-pending-live-editor-sync",
+  "syncStatus": "live-synced",
+  "lastVerifiedAt": "2026-08-20T15:56:43Z",
+  "lastVerifiedMainCommit": "a2fbbefb568a0aaaed44365d7cdc0c4d0363214c",
   "instructionsSha256": "9f9ea646292ab49aba9dad23c278ff219a43fde24df124eda2e7717edfbb74d0",
   "knowledgeSha256": [
     "0d08b877d7e7c37ddc2021ca7b5683dcfcfc3d5f50260c0ea519b9d35dd05dd8",
