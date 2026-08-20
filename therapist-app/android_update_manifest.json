@@ -4,15 +4,15 @@
   "schema": 2,
   "channels": {
     "admin": {
-      "releaseId": "r0426",
+      "releaseId": "r0427",
       "profile": "admin",
-      "versionName": "1.0.65-source-control-char-guard",
-      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/admin.html",
-      "sha256": "232f1d0315efb172cb3afbe1d5633c7bf9971c5a5e310446a825840bcd5c09e1",
-      "notes": "Mobile-Inbox r0426: KGG Update v065 Source-Steuerzeichen-Guard (232f1d0315ef).",
-      "rolloutCode": 426,
-      "previousReleaseId": "r0425",
-      "releasedAt": "2026-08-10T19:47:57Z"
+      "versionName": "1.0.66-editor-trash-bank-delete",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0427/admin.html",
+      "sha256": "27a93b1ace18ccea3f57336f949c1ddc09574558054869ab424689240a9663cf",
+      "notes": "v066: Der Mülleimer im Dialog Übung bearbeiten wird immer auf die bestehende bestätigte Datenbank-Löschung geroutet; das separate Entfernen aus dem aktuellen Plan bleibt unverändert.",
+      "rolloutCode": 427,
+      "previousReleaseId": "r0426",
+      "releasedAt": "2026-08-20T15:28:06Z"
     },
     "colleague": {
       "releaseId": "r0426",
@@ -30,8 +30,8 @@
   "latestAndroidShellVersion": "v401",
   "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html",
   "colleagueSha256": "670c47aee4205bdd80b3305d4d0ac63f0a953751564918cfb3f2d886e67c5fee",
-  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/admin.html",
-  "adminSha256": "232f1d0315efb172cb3afbe1d5633c7bf9971c5a5e310446a825840bcd5c09e1",
+  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0427/admin.html",
+  "adminSha256": "27a93b1ace18ccea3f57336f949c1ddc09574558054869ab424689240a9663cf",
   "sha256": "670c47aee4205bdd80b3305d4d0ac63f0a953751564918cfb3f2d886e67c5fee",
   "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",
   "androidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
@@ -39,7 +39,7 @@
   "colleagueAndroidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
   "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_ADMIN_v401_share_apk_provider_debug.apk",
   "adminAndroidApkSha256": "366c63594eeb6bdb89a7ab9c44cf4b84b43004ddfb24e5019012de0766f21499",
-  "notes": "Stable promotion r0426: Mobile-Inbox r0426: KGG Update v065 Source-Steuerzeichen-Guard (232f1d0315ef).",
+  "notes": "Admin beta r0427: v066: Der Mülleimer im Dialog Übung bearbeiten wird immer auf die bestehende bestätigte Datenbank-Löschung geroutet; das separate Entfernen aus dem aktuellen Plan bleibt unverändert.",
   "latestAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",
   "latestAndroidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
   "latestColleagueAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",
