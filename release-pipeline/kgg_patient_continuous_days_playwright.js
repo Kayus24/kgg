@@ -33,7 +33,7 @@ async function seedCurrent(page,doneDays,lastOpenDay){
 }
 async function currentDay(page){return page.evaluate(()=>Number(d))}
 async function assertHubDay(page,day){await page.waitForFunction(day=>document.querySelector('#kggCurrentDayBox .kggCurrentDayBig')?.textContent.trim()===`Tag ${day}`,day,{timeout:8000});assert(await currentDay(page)===day,`runtime day is not T${day}`)}
-async function waitForVisibleDayButtons(page,count){try{await page.waitForFunction(expected=>document.querySelectorAll('#days button').length===expected,count,{timeout:8000})}catch(error){const state=await page.evaluate(()=>({buttonCount:document.querySelectorAll('#days button').length,planDays:typeof p==='object'&&p?Number(p.days):null,currentDay:typeof d==='number'?d:null,historyHub:Boolean(document.querySelector('#kggDayHub')),dayHtml:document.querySelector('#days')?.innerHTML.slice(0,240)||''}));console.error(`day-button settle diagnostics: ${JSON.stringify(state)}`);throw error}assert(await page.locator('#days button').count()===count,`day-button DOM did not settle at ${count}`)}
+async function waitForVisibleDayButtons(page,count){await page.waitForFunction(expected=>document.querySelectorAll('#days button').length===expected,count,{timeout:8000});assert(await page.locator('#days button').count()===count,`day-button DOM did not settle at ${count}`)}
 async function dismissInstallOverlay(page){const box=page.locator('#installBox');if(await box.count()&&await box.isVisible().catch(()=>false)){const dismiss=box.getByRole('button',{name:/Nein danke|No thanks/i});if(await dismiss.count())await dismiss.click({force:true});else await page.evaluate(()=>document.getElementById('installBox')?.classList.add('hide'))}}
 async function finishFromUi(page,expectedQrDay,expectedNextDay){
   await dismissInstallOverlay(page);
@@ -59,6 +59,9 @@ async function main(){
   const browser=await chromium.launch({headless:true});
   const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'allow'});
   const page=await context.newPage();
+  // The install guide has a separate delayed auto-day migration. Keep this
+  // continuous-day regression focused on the day-history/runtime contract.
+  await page.addInitScript(()=>{window.__kggAutoDayRan=1});
   page.setDefaultTimeout(8000);page.setDefaultNavigationTimeout(15000);
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   const plan={i:'continuous-days-playwright',t:'Fortlaufender Testplan',v:1,d:12,extendDays:true,stepDays:6,e:[['Beinpresse',1,'B','kg','Wdh']]};
