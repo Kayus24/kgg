@@ -127,6 +127,45 @@ Patient:innen dürfen JSON/Base64 nie als normale Ausgabe sehen. Debug-Seiten si
 
 # Arbeitsregel
 
+## Custom-GPT-Workflow-Hindernis (gleicher Bug-Debug-Log, kein zweites System)
+
+Jede manuelle Wiederaufnahme oder erneute Aufforderung wird in **diesem** Ordner
+erfasst, wenn ein KGG Custom GPT nach einem abgeschlossenen, leeren,
+abgebrochenen oder zeitlimitierten Antwortzug nicht selbst weiterpollen oder
+weiterarbeiten kann. Dasselbe gilt fuer Editor-/Knowledge-/Action-Drift, wenn
+sie einen sicheren Ablauf blockiert. Kein separates Chat-Protokoll, kein
+zweites Incident-System und keine Patientendaten anlegen.
+
+Der Eintrag verwendet weiter das Standardformat und enthaelt zusaetzlich diese
+strukturierten Felder:
+
+- `Zeit`: RFC3339-UTC-Zeitpunkt der Beobachtung oder Reaktivierung.
+- `GPT`: exakter Profilname, bei Bedarf GPT-ID ohne Secrets.
+- `Auftrag/Ziel`: begrenzter Auftrag oder `request_id`.
+- `Vorheriger sichtbarer Zustand/Run-ID`: z. B. `empty_response`,
+  `aborted_response`, `answer_timeout`, `response_turn_ended`,
+  `action_window_ended`, `editor_drift`, `action_drift`, `stale_context` oder
+  `manual_reactivation`, plus Run-ID/Editor-Pruefung sofern vorhanden.
+- `Beleg`: nicht sensible Run-/Artifact-Antwort, Resource-Audit oder sichtbare
+  Editor-Pruefung; keine erinnerte Chat-Aussage.
+- `monitoring_ambiguous` oder `model_ui_ambiguous`: sichtbare UI-Signale sind
+  widerspruechlich und duerfen nicht als automatischer Fortschritts- oder
+  Modellnachweis behandelt werden.
+- `Auswirkung`: was dadurch nicht automatisch weiterlief oder sicher nicht
+  ausgefuehrt werden durfte.
+- `Reaktivierungsaktion`: der tatsaechliche begrenzte neue Auftrag oder
+  Read-Schritt; niemals ein verdeckter neuer Preview-/Main-Dispatch.
+- `Ergebnis`: belegtes Ergebnis der Wiederaufnahme, auch wenn es nur ein
+  weiter bestehender Blocker ist.
+- `Folgeaktion`: kleinster sichere naechste Schritt.
+
+Der Custom GPT liefert diese neun Werte als kompakten Handoff. Codex legt den
+Eintrag ab. Nur eine wiederkehrende oder dauerhaft relevante Regel wird danach
+ueber das bestehende KGG Project Memory Gate kuratiert; normale einzelne
+Laufzeitereignisse bleiben im Bug-Debug-Log. Ein Ereignis aendert niemals
+automatisch GPT-Instructions, Knowledge, Actions, Tests oder Project-Memory-
+Regeln: erst dokumentieren, dann spaeter gezielt pruefen, aendern und testen.
+
 Für jeden neuen Bugfix bitte zuerst entscheiden:
 
 1. Mini-Patch?
