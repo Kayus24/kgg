@@ -786,6 +786,13 @@ TEST_REGISTRY = [
         "run": lambda: run_ui_stability("regression", "tablet-layout-button"),
     },
     {
+        "id": "ui-tablet-package-save",
+        "level": "regression",
+        "suite": "ui-stability",
+        "reason": "The direct tablet button must open the existing current-plan package-save dialog with a 44px touch target.",
+        "run": lambda: run_ui_stability("regression", "tablet-package-save"),
+    },
+    {
         "id": "ui-tablet-card-reorder",
         "level": "regression",
         "suite": "ui-stability",

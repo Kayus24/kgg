@@ -7,6 +7,23 @@ const path = require("path");
 const { chromium } = require("playwright");
 
 const ROOT = path.resolve(__dirname, "..");
+const FIRST_LOAD_GLOBALS = [
+  "__kggStartScanVersion",
+  "__kggPatientMultiPlanDbAddon",
+  "__kggPlanDelete",
+  "__kggCardProgress",
+  "__kggSetSummaryGroups",
+  "KGGPatientMediaRetryCache",
+];
+const FIRST_LOAD_MODULES = [
+  "patient-start-scan.js",
+  "patient-multiplan-db.js",
+  "patient-plan-delete.js",
+  "patient-card-progress.js",
+  "patient-set-summary-groups.js",
+  "patient-media-retry-cache_v2.js",
+  "patient-version-label.js",
+];
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -76,31 +93,71 @@ async function activeWorkerVersion(page) {
   });
 }
 
-async function waitForControlledRuntime(page) {
-  await page.evaluate(() => navigator.serviceWorker.ready);
-  if (!(await page.evaluate(() => Boolean(navigator.serviceWorker.controller)))) {
-    await page.reload({ waitUntil: "domcontentloaded" });
-  }
-  await page.waitForFunction(() => Boolean(navigator.serviceWorker && navigator.serviceWorker.controller), null, {
-    timeout: 12000,
-  });
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    await page.locator("#plan").waitFor({ state: "visible" });
-    const hasRuntime = (await page.locator("#kgg-collapse-toggle").count()) > 0 &&
-      (await page.locator("#kggAppVersion").count()) > 0 &&
-      (await page.locator("#list .ex .kggCardProgress").count()) > 0;
-    if (hasRuntime) {
-      await page.locator("#kggAppVersion").waitFor({ state: "visible" });
-      return;
+function trackFreshLoadNavigation(page) {
+  const evidence = {
+    mainDocumentNavigations: 0,
+    documentNavigationsBeforeRuntime: [],
+    runtimeReady: false,
+  };
+  page.on("request", (request) => {
+    if (!request.isNavigationRequest() || request.frame() !== page.mainFrame()) return;
+    evidence.mainDocumentNavigations += 1;
+    if (evidence.mainDocumentNavigations > 1 && !evidence.runtimeReady) {
+      evidence.documentNavigationsBeforeRuntime.push(request.url());
     }
-    await page.reload({ waitUntil: "domcontentloaded" });
+  });
+  return evidence;
+}
+
+async function waitForFreshControlledRuntime(page, navigationEvidence) {
+  try {
+    await page.waitForFunction(
+      ({ globals, modules }) => {
+        const names = Array.from(document.scripts)
+          .map((script) => script.src ? new URL(script.src, location.href).pathname.split("/").pop() : "")
+          .filter(Boolean);
+        const allModules = modules.every((module) => names.filter((name) => name === module).length === 1);
+        const allGlobals = globals.every((name) => Boolean(window[name]));
+        const plan = document.querySelector("#plan");
+        return Boolean(
+          navigator.serviceWorker && navigator.serviceWorker.controller &&
+          allModules && allGlobals &&
+          plan && !plan.classList.contains("hide") &&
+          document.querySelector("#kgg-collapse-toggle") &&
+          document.querySelector("#kggAppVersion") &&
+          document.querySelector("#list .ex .kggCardProgress")
+        );
+      },
+      { globals: FIRST_LOAD_GLOBALS, modules: FIRST_LOAD_MODULES },
+      { timeout: 12000 }
+    );
+  } catch (error) {
+    const diagnostics = await page.evaluate(() => ({
+      controlled: Boolean(navigator.serviceWorker && navigator.serviceWorker.controller),
+      scripts: Array.from(document.scripts).map((script) => script.src).filter(Boolean),
+      globals: Object.fromEntries([
+        "__kggStartScanVersion",
+        "__kggPatientMultiPlanDbAddon",
+        "__kggPlanDelete",
+        "__kggCardProgress",
+        "__kggSetSummaryGroups",
+        "KGGPatientMediaRetryCache",
+      ].map((name) => [name, Boolean(window[name])])),
+      bodyClasses: document.body.className,
+    }));
+    throw new Error(`fresh controlled patient runtime was not ready without a reload: ${JSON.stringify({ navigationEvidence, diagnostics, cause: error.message })}`);
   }
-  const diagnostics = await page.evaluate(() => ({
-    controlled: Boolean(navigator.serviceWorker && navigator.serviceWorker.controller),
-    scripts: Array.from(document.scripts).map((script) => script.src).filter(Boolean),
-    bodyClasses: document.body.className,
-  }));
-  throw new Error(`controlled patient runtime modules were not injected: ${JSON.stringify(diagnostics)}`);
+  navigationEvidence.runtimeReady = true;
+  assert(
+    navigationEvidence.mainDocumentNavigations === 1 && navigationEvidence.documentNavigationsBeforeRuntime.length === 0,
+    `fresh controlled PWA navigated or reloaded before required runtime was ready: ${JSON.stringify(navigationEvidence)}`
+  );
+  const navigationTypes = await page.evaluate(() => performance.getEntriesByType("navigation").map((entry) => entry.type));
+  assert(
+    navigationTypes.length === 1 && navigationTypes[0] === "navigate",
+    `fresh controlled PWA must have one initial navigation, never a reload: ${JSON.stringify(navigationTypes)}`
+  );
+  return { ...navigationEvidence, navigationTypes };
 }
 
 async function setCardOpen(page, card, open) {
@@ -123,20 +180,37 @@ async function setInputValue(input, value) {
 async function assertVisibleBadge(page, card, state, text) {
   const badge = card.locator(".kggCardProgress");
   await badge.waitFor({ state: "attached" });
-  await page.waitForFunction(
-    ({ state, text }) => {
+  try {
+    await page.waitForFunction(
+      ({ state, text }) => {
+        const card = document.querySelector("#list .ex");
+        const badge = card && card.querySelector(".kggCardProgress");
+        if (!card || !badge || card.classList.contains("kggOpen") || !document.body.classList.contains("kggAlwaysCollapsed")) return false;
+        const style = getComputedStyle(badge);
+        const rect = badge.getBoundingClientRect();
+        return badge.dataset.kggProgress === state && badge.textContent === text &&
+          style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity || "1") > 0 &&
+          rect.width > 0 && rect.height > 0;
+      },
+      { state, text },
+      { timeout: 10000 }
+    );
+  } catch (error) {
+    const diagnostics = await page.evaluate(() => {
       const card = document.querySelector("#list .ex");
-      const badge = card && card.querySelector(".kggCardProgress");
-      if (!card || !badge || card.classList.contains("kggOpen")) return false;
-      const style = getComputedStyle(badge);
-      const rect = badge.getBoundingClientRect();
-      return badge.dataset.kggProgress === state && badge.textContent === text &&
-        style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity || "1") > 0 &&
-        rect.width > 0 && rect.height > 0;
-    },
-    { state, text },
-    { timeout: 10000 }
-  );
+      const badge = card?.querySelector(".kggCardProgress");
+      const style = badge ? getComputedStyle(badge) : null;
+      const rect = badge?.getBoundingClientRect();
+      return {
+        bodyClass: document.body.className,
+        cardClass: card?.className || "",
+        badge: badge ? { state: badge.dataset.kggProgress || "", text: badge.textContent || "", display: style?.display || "", visibility: style?.visibility || "", width: rect?.width || 0, height: rect?.height || 0 } : null,
+        values: Array.from(card?.querySelectorAll(".set input.num") || []).map(input => input.value),
+      };
+    });
+    console.error(`progress badge settle diagnostics: ${JSON.stringify(diagnostics)}`);
+    throw error;
+  }
   const details = await badge.evaluate((element) => {
     const style = getComputedStyle(element);
     const rect = element.getBoundingClientRect();
@@ -180,20 +254,20 @@ async function main() {
     serviceWorkers: "allow",
   });
   const page = await context.newPage();
+  const navigationEvidence = trackFreshLoadNavigation(page);
   const plan = {
     i: "progress-playwright-91",
     t: "Fortschritts-Sichtbarkeit",
     v: 1,
     d: 6,
-    e: [["Beinpresse", 1, "B", "kg", "Wdh", "40", "10"]],
+    e: [["Beinpresse", 3, "B", "kg", "Wdh", "", ""]],
   };
   const payload = `KGGH2:${encodePlan(plan)}`;
   const url = `http://127.0.0.1:${port}/kgg/?plan=${encodeURIComponent(payload)}`;
 
   try {
     await page.goto(url, { waitUntil: "domcontentloaded" });
-    await page.locator("#plan").waitFor({ state: "visible" });
-    await waitForControlledRuntime(page);
+    const firstLoadEvidence = await waitForFreshControlledRuntime(page, navigationEvidence);
 
     const workerVersion = await activeWorkerVersion(page);
     const visibleVersion = (await page.locator("#kggAppVersion").innerText()).replace(/^v/i, "");
@@ -204,16 +278,11 @@ async function main() {
     await card.waitFor({ state: "visible" });
     const inputs = card.locator(".set input.num");
     const inputCount = await inputs.count();
-    assert(inputCount >= 2, "synthetic exercise exposes fewer than two normal fields");
+    assert(inputCount === 6, `three bilateral sets must expose six normal fields, got ${inputCount}`);
     for (let index = 0; index < inputCount; index += 1) {
       await setInputValue(inputs.nth(index), "");
     }
-    await page.evaluate(() => {
-      const button = document.getElementById("kgg-collapse-toggle");
-      if (!button) throw new Error("collapse toggle is missing");
-      button.click();
-    });
-    await page.waitForFunction(() => document.body.classList.contains("kggCardsCollapsed"));
+    await page.waitForFunction(() => document.body.classList.contains("kggAlwaysCollapsed"));
     await setCardOpen(page, card, false);
     await assertVisibleBadge(page, card, "open", "○ Offen");
 
@@ -224,6 +293,13 @@ async function main() {
 
     await setCardOpen(page, card, true);
     await setInputValue(inputs.nth(1), "12");
+    await setCardOpen(page, card, false);
+    await assertVisibleBadge(page, card, "partial", "◐ Teilweise");
+
+    await setCardOpen(page, card, true);
+    for (let index = 2; index < inputCount; index += 1) {
+      await setInputValue(inputs.nth(index), String(12 + index));
+    }
     await setCardOpen(page, card, false);
     await assertVisibleBadge(page, card, "done", "✓ Bearbeitet");
 
@@ -236,7 +312,16 @@ async function main() {
     await setCardOpen(page, card, false);
     await assertVisibleBadge(page, card, "open", "○ Offen");
 
-    console.log(`Patient runtime/progress Playwright smoke: PASS (v${workerVersion})`);
+    console.log(JSON.stringify({
+      status: "PASS",
+      test: "patient-runtime-progress",
+      version: workerVersion,
+      freshControlledNoReload: true,
+      mainDocumentNavigations: firstLoadEvidence.mainDocumentNavigations,
+      navigationTypes: firstLoadEvidence.navigationTypes,
+      requiredGlobals: FIRST_LOAD_GLOBALS.length,
+      requiredModules: FIRST_LOAD_MODULES.length,
+    }));
   } finally {
     await context.close();
     await browser.close();

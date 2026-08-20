@@ -1,0 +1,92 @@
+<!-- KGG PATCH START kgg-v070-tablet-package-save -->
+<!-- Tablet-Paket speichern -->
+<style id="kgg-v070-tablet-package-save-style">
+  /* Der vorhandene +Paket-Button bleibt derselbe Dialog-Trigger. Auf Tablet
+     liegt er erreichbar in der Kopfzeile des aktuellen Plans, nicht in einem
+     ausgeblendeten Mobile-Slot. 56 x 44 px sichert die Touch-Zielgröße. */
+  @media (min-width:760px){
+    body.tabletLayoutCustom #currentPlanBlock{position:relative!important;}
+    body.tabletLayoutCustom #currentPlanBlock #currentPlanToggle{padding-right:76px!important;}
+    body.tabletLayoutCustom #currentPlanBlock #savePackageBtn:not(.hidden){
+      position:absolute!important;
+      top:4px!important;
+      right:8px!important;
+      z-index:7!important;
+      display:inline-flex!important;
+      align-items:center!important;
+      justify-content:center!important;
+      gap:3px!important;
+      width:56px!important;
+      min-width:56px!important;
+      max-width:56px!important;
+      height:44px!important;
+      min-height:44px!important;
+      margin:0!important;
+      padding:0 7px!important;
+      border:1px solid rgba(220,227,235,.96)!important;
+      border-radius:12px!important;
+      background:#fff!important;
+      box-shadow:0 2px 8px rgba(7,16,39,.08)!important;
+      visibility:visible!important;
+      pointer-events:auto!important;
+    }
+    body.tabletLayoutCustom #currentPlanBlock #savePackageBtn .packagePlus,
+    body.tabletLayoutCustom #currentPlanBlock #savePackageBtn .packageBox{line-height:1!important;}
+    body.tabletLayoutCustom #currentPlanBlock #savePackageBtn .packagePlus{font-size:16px!important;}
+    body.tabletLayoutCustom #currentPlanBlock #savePackageBtn .packageBox{font-size:21px!important;}
+  }
+</style>
+<script id="kgg-v070-tablet-package-save">
+(function(){
+  "use strict";
+  const PATCH_ID="kgg-v070-tablet-package-save";
+  let originalParent=null;
+  let originalNextSibling=null;
+
+  function isTablet(){
+    return !!(document.body&&document.body.classList.contains("tabletLayoutCustom")&&window.matchMedia&&window.matchMedia("(min-width:760px)").matches);
+  }
+  function rememberOriginalSlot(button){
+    if(!button||originalParent)return;
+    originalParent=button.parentNode;
+    originalNextSibling=button.nextSibling;
+  }
+  function syncTabletPackageSaveButton(){
+    const button=document.getElementById("savePackageBtn");
+    if(!button)return;
+    rememberOriginalSlot(button);
+    if(isTablet()){
+      const planBlock=document.getElementById("currentPlanBlock");
+      if(planBlock&&button.parentNode!==planBlock)planBlock.appendChild(button);
+      return;
+    }
+    if(originalParent&&button.parentNode!==originalParent){
+      if(originalNextSibling&&originalNextSibling.parentNode===originalParent)originalParent.insertBefore(button,originalNextSibling);
+      else originalParent.appendChild(button);
+    }
+  }
+  function install(){
+    syncTabletPackageSaveButton();
+    [80,260].forEach(delay=>window.setTimeout(syncTabletPackageSaveButton,delay));
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});
+  else install();
+  window.addEventListener("resize",syncTabletPackageSaveButton,{passive:true});
+  window.addEventListener("orientationchange",()=>window.setTimeout(syncTabletPackageSaveButton,120),{passive:true});
+  if(document.body)new MutationObserver(syncTabletPackageSaveButton).observe(document.body,{attributes:true,attributeFilter:["class"]});
+  window.KGG_TABLET_PACKAGE_SAVE_V070={
+    patchId:PATCH_ID,
+    sync:syncTabletPackageSaveButton,
+    check:function(){
+      const button=document.getElementById("savePackageBtn");
+      return {
+        patchId:PATCH_ID,
+        tablet:isTablet(),
+        parentId:button&&button.parentElement?button.parentElement.id:"",
+        visible:!!(button&&!button.classList.contains("hidden")&&getComputedStyle(button).display!=="none")
+      };
+    }
+  };
+})();
+</script>
+<!-- KGG PATCH END kgg-v070-tablet-package-save -->

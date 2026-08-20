@@ -475,6 +475,24 @@ async function createPatientPage(browser, baseUrl, options = {}) {
   return { context, page, dialogs, before };
 }
 
+async function openPatientScanner(page) {
+  const bubble = page.locator("#kggBubbleScan");
+  const fab = page.locator("#kggActionFab");
+  if (await bubble.count() && await bubble.isVisible().catch(() => false)) {
+    await bubble.click();
+    return;
+  }
+  if (await fab.count() && await fab.isVisible().catch(() => false)) {
+    await fab.click();
+    await bubble.waitFor({ state: "visible" });
+    await bubble.click();
+    return;
+  }
+  const direct = page.locator("#kggPlanScanBtn");
+  await direct.waitFor({ state: "visible" });
+  await direct.click();
+}
+
 async function waitForScan(page, dialogs, beforeAttempts, beforeDialogs, timeout = 5000) {
   const deadline = Date.now() + timeout;
   while (Date.now() < deadline) {
@@ -697,7 +715,7 @@ async function runStreamCase(browser, baseUrl, renderPage, definition) {
   }
   try {
     result.stream = await session.page.evaluate(({ width, height }) => window.__kggBeginSyntheticStream(width, height), definition);
-    await session.page.locator("#kggPlanScanBtn").click();
+    await openPatientScanner(session.page);
     await session.page.waitForSelector("#kggLiveScanVideo");
     await session.page.waitForFunction(() => {
       const video = document.getElementById("kggLiveScanVideo");
@@ -766,7 +784,7 @@ async function runCameraFramingCase(browser, baseUrl) {
       { id: "portrait", width: 720, height: 1280 }
     ]) {
       await session.page.evaluate(({ width, height }) => window.__kggBeginSyntheticStream(width, height), format);
-      await session.page.locator("#kggPlanScanBtn").click();
+      await openPatientScanner(session.page);
       await session.page.waitForSelector("#kggLiveScanVideo");
       await session.page.waitForFunction(() => {
         const video = document.getElementById("kggLiveScanVideo");
@@ -841,7 +859,7 @@ async function runCameraLifecycleCase(browser, baseUrl) {
   }
   try {
     await session.page.evaluate(() => window.__kggRejectSyntheticCamera());
-    await session.page.locator("#kggPlanScanBtn").click();
+    await openPatientScanner(session.page);
     await session.page.waitForFunction(() => {
       const fallback = document.getElementById("kggLiveScanFallback");
       return !!(fallback && !fallback.hidden);
@@ -852,7 +870,7 @@ async function runCameraLifecycleCase(browser, baseUrl) {
     assert(same(session.before.p, afterDenied.p) && same(session.before.v, afterDenied.v), "permission denial changed patient state");
     await session.page.locator(".kggLiveScanClose").click();
     await session.page.evaluate(() => window.__kggBeginSyntheticStream(1280, 720));
-    await session.page.locator("#kggPlanScanBtn").click();
+    await openPatientScanner(session.page);
     await session.page.waitForSelector("#kggLiveScanVideo");
     await session.page.evaluate(() => window.dispatchEvent(new Event("pagehide")));
     await session.page.waitForFunction(() => !document.getElementById("kggLiveScan"));

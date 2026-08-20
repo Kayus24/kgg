@@ -314,9 +314,65 @@ def check_playbook() -> None:
             "needs_approval",
             "supersedes",
             "Kayus24/kgg-project-memory",
+            "zeitlimitierten Antwort",
+            "Vorheriger sichtbarer Zustand/Run-ID",
+            "Reaktivierungsaktion",
+            "aendern niemals Regeln automatisch",
         ],
         "playbook contract",
     )
+
+
+def check_workflow_obstacle_lesson() -> None:
+    lesson = read("docs/bug-debug/2026-08-13-custom-gpt-answer-turn-editor-drift.md")
+    require_all(
+        lesson,
+        [
+            "Zeit",
+            "GPT",
+            "Auftrag/Ziel",
+            "Vorheriger sichtbarer Zustand/Run-ID",
+            "Beleg",
+            "Auswirkung",
+            "Reaktivierungsaktion",
+            "Ergebnis",
+            "Folgeaktion",
+            "empty_response",
+            "aborted_response",
+            "answer_timeout",
+            "keine Regel automatisch",
+            "Feature-PR mergen",
+            "separaten Commit/PR",
+            "alten Live-Sync in einem Ressourcen-Aenderungsbranch",
+            "Antwort stoppen",
+            "model_ui_ambiguous",
+            "Editor-Auswahl und das Action-Verhalten",
+        ],
+        "Custom-GPT workflow-obstacle lesson",
+    )
+    index = json.loads(read("docs/kgg-gpt-bug-index.json"))
+    records = index.get("records")
+    if not isinstance(records, list):
+        fail("Custom-GPT bug index must expose records")
+    workflow_records = [
+        record
+        for record in records
+        if isinstance(record, dict)
+        and record.get("source_path")
+        == "docs/bug-debug/2026-08-13-custom-gpt-answer-turn-editor-drift.md"
+    ]
+    if len(workflow_records) != 1:
+        fail("workflow-obstacle lesson must have exactly one indexed incident record")
+    if any(
+        isinstance(record, dict)
+        and record.get("title")
+        == "Custom-GPT-Workflow-Hindernis (gleicher Bug-Debug-Log, kein zweites System)"
+        for record in records
+    ):
+        fail("README workflow guidance must not duplicate the dated workflow incident")
+    sources = index.get("sources")
+    if not isinstance(sources, list) or "docs/bug-debug/README.md" not in sources:
+        fail("Bug-Debug README must remain discoverable as routing guidance")
 
 
 def check_prompt_and_expected_docs() -> None:
@@ -686,6 +742,7 @@ def check_repair_lab_contract() -> None:
 def main() -> int:
     try:
         check_playbook()
+        check_workflow_obstacle_lesson()
         check_prompt_and_expected_docs()
         check_area_routes()
         check_repair_lab_contract()

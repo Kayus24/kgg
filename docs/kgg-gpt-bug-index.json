@@ -530,26 +530,81 @@
         "qr-patient",
         "scan-camera"
       ],
-      "cause": "`release-pipeline/kgg_patient_gpt_write_gate.py` kopierte die Root-`index.html` unveraendert in den isolierten Preview-Ordner. Die kanonische Modulliste existierte nur in `service-worker.js`. Beim ersten Aufruf war noch kein Service-Worker-Controller aktiv. Dadurch konnte die Test-App eine unvollstaendige Preview anzeigen, bis ein Reload oder eine weitere Na",
+      "cause": "Die Root-`index.html` lud nur ein Teilmodul direkt. Die vollstaendige Modulliste existierte nur in `service-worker.js`. Beim ersten Aufruf war noch kein Service-Worker-Controller aktiv. Dadurch konnte die Test-App oder die echte Patienten-PWA eine unvollstaendige Ansicht anzeigen, bis ein Reload oder eine weitere Navigation erfolgte.",
       "do_not_touch": "",
-      "fix_pattern": "- Der Preview-Publisher liest die kanonische Modulinjektion aus dem mitgelieferten Service Worker. - Er entfernt vorhandene direkte Modul-Tags und fuegt dieselbe Liste genau einmal in die Preview-`index.html` ein. - Fehlende Dateien, doppelte Module oder eine nicht eindeutig lesbare Service-Worker-Injektion blockieren das Gate. - Ein Browser-Smoke startet di",
-      "id": "docs-bug-debug-2026-08-02-patient-preview-first-load-modules-md-patient-preview-first-load-modules",
+      "fix_pattern": "- Die Root-`index.html` laedt alle benoetigten Patienten-Module direkt und genau einmal. - `service-worker.js` liefert diese HTML-Datei unveraendert aus; er ist Cache/Offline-Schicht und keine Laufzeit-Abhaengigkeit fuer den ersten Aufruf. - Der PWA-Vertrag prueft die direkten Modul-Tags und die Cache-Liste. - Ein Browser-Smoke startet die Root-PWA mit block",
+      "id": "docs-bug-debug-2026-08-02-patient-preview-first-load-modules-md-patient-first-load-modules",
       "keywords": [
-        "patient-preview-first-load-modules",
+        "patient-first-load-modules",
         "qr-patient",
         "scan-camera"
       ],
       "markers": [
         ".html",
         "index.html",
-        "release-pipeline/kgg_patient_gpt_write_gate.py",
         "service-worker.js"
       ],
       "risks": "",
       "source_path": "docs/bug-debug/2026-08-02-patient-preview-first-load-modules.md",
-      "symptom": "Ein Patient-Preview-Run konnte vollstaendig gruen sein, obwohl die erste im Browser oder in der Test-App geoeffnete `index.html` den Scanner und weitere Patient-Module noch nicht geladen hatte. Die Dateien waren im Artefakt vorhanden, wurden aber erst durch `service-worker.js` in einen spaeteren, bereits kontrollierten Seitenaufruf injiziert. `release-pipeli",
+      "symptom": "Ein Patient-Preview-Run konnte vollstaendig gruen sein, obwohl die erste im Browser oder in der Test-App geoeffnete `index.html` den Scanner und weitere Patient-Module noch nicht geladen hatte. Das gleiche Risiko bestand fuer den echten ersten QR-Aufruf: Die Dateien waren im Artefakt vorhanden, wurden aber erst durch `service-worker.js` in einen spaeteren, b",
       "tests": "",
-      "title": "Patient Preview First-Load Modules"
+      "title": "Patient First-Load Modules"
+    },
+    {
+      "areas": [
+        "debug",
+        "modal",
+        "parser-textblocks",
+        "pdf",
+        "qr-patient",
+        "scan-camera",
+        "sync"
+      ],
+      "cause": "ChatGPT-Antwortzuege und GitHub-Workflows haben getrennte Lebenszyklen. Die Action-Reads koennen nur waehrend eines aktiven Antwortzugs ausgefuehrt werden. Editor-Instructions, Knowledge-Dateien und OpenAPI-Actions werden ausserhalb des Repositorys manuell verwaltet und koennen deshalb vom lokalen Vertrag abweichen.",
+      "do_not_touch": "- App-Feature-Code, PDF, QR-/Patienten-App-Vertrag, Scan/OCR, Parser, Plan-State, Medien/Upload, Android/APK, Manifest und Geheimnisse. - Keine Patientendaten, echte Plan-/QR-Payloads, Chats, Tokens oder Rohdaten im Bug-Debug-Log, in der Koordination oder im Project Memory speichern.",
+      "fix_pattern": "- Polling nach einem Dispatch im selben Antwortzug maximal ausnutzen und bei Ablauf nur den nachweisbaren Zwischenstand melden. - Jede notwendige Codex-Reaktivierung, leere/abgebrochene/zeitlimitierte Antwort oder Drift als vorhandenen Bug-Debug-Handoff erfassen; der GPT liefert Zeit, GPT, Auftrag/Ziel, vorherigen sichtbaren Zustand/Run-ID, Auswirkung, Reakt",
+      "id": "docs-bug-debug-2026-08-13-custom-gpt-answer-turn-editor-drift-md-2026-08-13-custom-gpt-antwortzug-reaktivierung-und-editor-action-drift",
+      "keywords": [
+        "2026-08-13-custom-gpt-antwortzug-reaktivierung-und-editor-action-drift",
+        "debug",
+        "modal",
+        "parser-textblocks",
+        "pdf",
+        "qr-patient",
+        "scan-camera",
+        "sync"
+      ],
+      "markers": [
+        ".json",
+        "2026-08-13T18:51:16Z",
+        "Antwort stoppen",
+        "Arbeitsablaeufe einordnen",
+        "KGG Patienten-App Update-Agent",
+        "KGG Update-Agent",
+        "Konfiguration zusammenfassen",
+        "Offene Themen geordnet",
+        "Thinking 5.6",
+        "Vom Ersteller empfohlenes Modell wird verwendet: GPT-5.6 Sol",
+        "aborted_response",
+        "action_drift",
+        "answer_timeout",
+        "docs/bug-debug/",
+        "docs/kgg-custom-gpt-playbook.md",
+        "docs/kgg-patient-custom-gpt-editor-snapshot.js",
+        "docs/kgg-patient-custom-gpt-editor-snapshot.json",
+        "editor_drift",
+        "empty_response",
+        "in_progress",
+        "kgg_custom_gpt_resource_audit.py",
+        "kgg_custom_gpt_resource_audit.py --check",
+        "live-synced",
+        "manual_reactivation"
+      ],
+      "risks": "- Ein fehlender Ereignislog erschwert spaetere Workflow-Verbesserungen und kann doppelte Dispatches beguenstigen. - Ein fiktiver `live-synced`-Status trotz geaenderter Knowledge oder Actions wuerde Editor-Drift verdecken. - Die Queue oder ein GitHub-Workflow startet keinen GPT automatisch; das muss im Handoff klar bleiben.",
+      "source_path": "docs/bug-debug/2026-08-13-custom-gpt-answer-turn-editor-drift.md",
+      "symptom": "Ein KGG Custom GPT kann nach dem Ende seines ChatGPT-Antwortzugs nicht selbst einen neuen Antwortzug starten. Ein laufender GitHub-Workflow kann zwar weiter arbeiten, aber Run-, Job- und Artifact-Status werden danach nicht von selbst erneut gelesen. Wenn Codex den GPT erneut aktiviert, kann ohne klare Uebergabe ein doppelter Preview-Dispatch, eine falsche Fo",
+      "tests": "- `python release-pipeline/kgg_bug_knowledge.py --check` ist gruen. - `python release-pipeline/kgg_custom_gpt_knowledge_pack.py --check` ist gruen. - `python release-pipeline/kgg_patient_gpt_resources.py --check` ist gruen. - Der Resource-Audit akzeptiert nur passende Hashes; nach einer kanonischen Knowledge-Aenderung bleibt ein Profil bis zur echten Editor-",
+      "title": "2026-08-13 - Custom-GPT Antwortzug-Reaktivierung und Editor-/Action-Drift"
     },
     {
       "areas": [
@@ -831,6 +886,7 @@
     "docs/bug-debug/2026-08-01-webview-camera-cross-app-qr.md",
     "docs/bug-debug/2026-08-02-patient-camera-crop-coordination-404.md",
     "docs/bug-debug/2026-08-02-patient-preview-first-load-modules.md",
+    "docs/bug-debug/2026-08-13-custom-gpt-answer-turn-editor-drift.md",
     "docs/bug-debug/README.md",
     "docs/bugfixes/mobile-share-modal-css-regression.md",
     "docs/release-handoffs/2026-06-18-v003a-plan-ui-stability.md",

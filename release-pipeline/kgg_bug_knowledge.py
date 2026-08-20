@@ -26,6 +26,12 @@ SOURCE_FILES = [
     ROOT / "docs" / "VERSIONSLOG.md",
 ]
 
+# README headings document how to create future entries. They are routing aids,
+# not independent incidents when a dated incident already carries the same rule.
+ROUTING_ONLY_README_TOPICS = {
+    "custom-gpt-workflow-hindernis-gleicher-bug-debug-log-kein-zweites-system",
+}
+
 SECTION_ALIASES = {
     "problem": ["problem", "kurzfassung"],
     "cause": ["ursache", "fehlerursache"],
@@ -259,6 +265,11 @@ def build_records() -> list[dict[str, Any]]:
         if path.name in {"CHANGELOG_THERAPIST_APP.md", "VERSIONSLOG.md"} and "## 2026-" not in text and "Version:" not in text:
             continue
         for title, body in split_readme_topics(path, text):
+            if (
+                path.name.lower() == "readme.md"
+                and slugify(title) in ROUTING_ONLY_README_TOPICS
+            ):
+                continue
             record = summarize_record(path, title, body)
             if record["symptom"] or record["fix_pattern"] or record["do_not_touch"]:
                 records.append(record)

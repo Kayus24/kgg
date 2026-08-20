@@ -7,6 +7,23 @@ const path = require("path");
 const { chromium } = require("playwright");
 
 const ROOT = path.resolve(__dirname, "..");
+const FIRST_LOAD_GLOBALS = [
+  "__kggStartScanVersion",
+  "__kggPatientMultiPlanDbAddon",
+  "__kggPlanDelete",
+  "__kggCardProgress",
+  "__kggSetSummaryGroups",
+  "KGGPatientMediaRetryCache",
+];
+const FIRST_LOAD_MODULES = [
+  "patient-start-scan.js",
+  "patient-multiplan-db.js",
+  "patient-plan-delete.js",
+  "patient-card-progress.js",
+  "patient-set-summary-groups.js",
+  "patient-media-retry-cache_v2.js",
+  "patient-version-label.js",
+];
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -55,6 +72,65 @@ async function activeWorkerVersion(page) {
   });
 }
 
+function trackFreshLoadNavigation(page) {
+  const evidence = {
+    mainDocumentNavigations: 0,
+    documentNavigationsBeforeRuntime: [],
+    runtimeReady: false,
+  };
+  page.on("request", (request) => {
+    if (!request.isNavigationRequest() || request.frame() !== page.mainFrame()) return;
+    evidence.mainDocumentNavigations += 1;
+    if (evidence.mainDocumentNavigations > 1 && !evidence.runtimeReady) {
+      evidence.documentNavigationsBeforeRuntime.push(request.url());
+    }
+  });
+  return evidence;
+}
+
+async function waitForFreshControlledRuntime(page, navigationEvidence) {
+  try {
+    await page.waitForFunction(
+      ({ globals, modules }) => {
+        const names = Array.from(document.scripts)
+          .map((script) => script.src ? new URL(script.src, location.href).pathname.split("/").pop() : "")
+          .filter(Boolean);
+        const allModules = modules.every((module) => names.filter((name) => name === module).length === 1);
+        const allGlobals = globals.every((name) => Boolean(window[name]));
+        const plan = document.querySelector("#plan");
+        return Boolean(
+          navigator.serviceWorker && navigator.serviceWorker.controller &&
+          allModules && allGlobals &&
+          plan && !plan.classList.contains("hide") &&
+          document.querySelector("#kgg-collapse-toggle") &&
+          document.querySelector("#kggAppVersion") &&
+          document.querySelector("#list .ex .kggCardProgress")
+        );
+      },
+      { globals: FIRST_LOAD_GLOBALS, modules: FIRST_LOAD_MODULES },
+      { timeout: 12000 }
+    );
+  } catch (error) {
+    const diagnostics = await page.evaluate(() => ({
+      controlled: Boolean(navigator.serviceWorker && navigator.serviceWorker.controller),
+      scripts: Array.from(document.scripts).map((script) => script.src).filter(Boolean),
+      bodyClasses: document.body.className,
+    }));
+    throw new Error(`fresh controlled patient GPT runtime was not ready without a reload: ${JSON.stringify({ navigationEvidence, diagnostics, cause: error.message })}`);
+  }
+  navigationEvidence.runtimeReady = true;
+  assert(
+    navigationEvidence.mainDocumentNavigations === 1 && navigationEvidence.documentNavigationsBeforeRuntime.length === 0,
+    `fresh controlled patient GPT runtime navigated or reloaded before readiness: ${JSON.stringify(navigationEvidence)}`
+  );
+  const navigationTypes = await page.evaluate(() => performance.getEntriesByType("navigation").map((entry) => entry.type));
+  assert(
+    navigationTypes.length === 1 && navigationTypes[0] === "navigate",
+    `fresh controlled patient GPT runtime must have one initial navigation, never a reload: ${JSON.stringify(navigationTypes)}`
+  );
+  return { ...navigationEvidence, navigationTypes };
+}
+
 async function main() {
   const server = http.createServer((request, response) => {
     const file = safeFile(request.url || "/");
@@ -78,6 +154,7 @@ async function main() {
     serviceWorkers: "allow",
   });
   const page = await context.newPage();
+  const navigationEvidence = trackFreshLoadNavigation(page);
   const plan = {
     i: "patient-gpt-browser-smoke",
     t: "Synthetischer Browser-Test",
@@ -92,10 +169,15 @@ async function main() {
 
   try {
     await page.goto(url, { waitUntil: "domcontentloaded" });
-    await page.locator("#plan").waitFor({ state: "visible" });
+    const firstLoadEvidence = await waitForFreshControlledRuntime(page, navigationEvidence);
     assert((await page.locator("#title").innerText()) === plan.t, "synthetic plan title was not rendered");
     assert((await page.locator(".ex").count()) === 2, "synthetic exercises were not rendered");
 
+    const firstCard = page.locator(".ex").first();
+    if (!(await firstCard.evaluate((card) => card.classList.contains("kggOpen")))) {
+      await firstCard.locator("h3").click();
+      await page.waitForFunction(() => document.querySelector(".ex")?.classList.contains("kggOpen"));
+    }
     const firstInput = page.locator(".num").first();
     await firstInput.click();
     await page.locator("#pad").waitFor({ state: "visible" });
@@ -109,13 +191,6 @@ async function main() {
 
     const workerVersion = await activeWorkerVersion(page);
     assert(/^[0-9]+$/.test(workerVersion), "active service worker did not report a numeric version");
-    await page.waitForFunction(() => navigator.serviceWorker && navigator.serviceWorker.controller, null, {
-      timeout: 10000,
-    });
-    if (!(await page.locator("#kggAppVersion").count())) {
-      await page.reload({ waitUntil: "domcontentloaded" });
-      await page.locator("#plan").waitFor({ state: "visible" });
-    }
     const versionLabelCount = await page.locator("#kggAppVersion").count();
     if (!versionLabelCount) {
       const diagnostics = await page.evaluate(() => ({
@@ -138,7 +213,14 @@ async function main() {
       "update recovery page did not render"
     );
     await recovery.close();
-    console.log(`Patient GPT browser smoke: PASS (v${workerVersion})`);
+    console.log(JSON.stringify({
+      status: "PASS",
+      test: "patient-gpt-browser",
+      version: workerVersion,
+      freshControlledNoReload: true,
+      mainDocumentNavigations: firstLoadEvidence.mainDocumentNavigations,
+      navigationTypes: firstLoadEvidence.navigationTypes,
+    }));
   } finally {
     await context.close();
     await browser.close();

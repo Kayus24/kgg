@@ -1,8 +1,8 @@
 # KGG Patient Source Chunk 016
 
 - Source file: `patient-media-retry-cache_v2.js`
-- Characters: 1-16420
-- Full source SHA-256: `c530c7444d19532d765bbec0eb174fa382f5d25f412269081fb9b502916d8640`
+- Characters: 1-17065
+- Full source SHA-256: `578dbb27fe4847c1a5d02ae118844ca8a003120dd6c3b810d357a2f6c2088d16`
 
 ```
 (()=>{
@@ -36,8 +36,11 @@
       .ex.kggOpen .kggMediaBox img{cursor:zoom-in}
       .kggMediaBox.ready{background:#fff}.kggMediaBox.error{background:#fffbeb;border-color:#fde68a;color:#92400e}
       body.kggAlwaysCollapsed .ex:not(.kggOpen) .kggMediaList{display:none!important}
-      #list .ex.kggHasThumb{position:relative;min-height:122px;padding-right:136px}
-      #list .ex.kggHasThumb.kggOpen{padding-right:12px}
+      #list .ex.kggHasThumb{position:relative}
+      #list .ex.kggHasThumb:not(.kggOpen){min-height:122px;padding-right:136px!important}
+      body.kggAlwaysCollapsed #list .ex.kggHasThumb:not(.kggOpen),body.kggCardsCollapsed #list .ex.kggHasThumb:not(.kggOpen){min-height:122px;padding-right:136px!important}
+      body.kggAlwaysCollapsed #list .ex.kggHasThumb.kggOpen,body.kggCardsCollapsed #list .ex.kggHasThumb.kggOpen,#list .ex.kggHasThumb.kggOpen{padding-right:12px!important}
+      #list .ex.kggHasThumb:not(.kggOpen) h3,#list .ex.kggHasThumb:not(.kggOpen) .muted{overflow-wrap:anywhere}
       #list .ex .kggCardThumb{position:absolute;right:12px;top:50%;width:104px;height:86px;transform:translateY(-50%);border:1px solid #dbe3ef;border-radius:16px;background:#f8fafc;box-shadow:0 7px 18px rgba(15,23,42,.08);overflow:hidden;display:none;pointer-events:none}
       #list .ex .kggCardThumb img{display:block;width:100%;height:100%;object-fit:cover;background:#fff;cursor:default}
       #list .ex:not(.kggOpen).kggThumbReady .kggCardThumb{display:block}
@@ -45,7 +48,7 @@
       .kggImageLightbox{position:fixed;inset:0;z-index:25000;background:rgba(15,23,42,.88);display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(2px)}
       .kggImageLightbox img{max-width:96vw;max-height:88vh;object-fit:contain;border-radius:16px;background:#fff;box-shadow:0 20px 60px rgba(0,0,0,.35)}
       .kggImageLightbox button{position:fixed;top:calc(12px + env(safe-area-inset-top));right:14px;width:48px;height:48px;border:0;border-radius:999px;background:#fff;color:#111827;font-size:26px;font-weight:950;box-shadow:0 12px 32px rgba(0,0,0,.25)}
-      @media(max-width:430px){#list .ex.kggHasThumb{padding-right:106px;min-height:112px}#list .ex .kggCardThumb{width:78px;height:68px;right:10px;border-radius:13px}.kggImageLightbox{padding:10px}.kggImageLightbox img{max-width:98vw;max-height:84vh;border-radius:14px}}
+      @media(max-width:430px){#list .ex.kggHasThumb:not(.kggOpen){padding-right:106px!important;min-height:112px}body.kggAlwaysCollapsed #list .ex.kggHasThumb:not(.kggOpen),body.kggCardsCollapsed #list .ex.kggHasThumb:not(.kggOpen){padding-right:106px!important;min-height:112px}#list .ex .kggCardThumb{width:78px;height:68px;right:10px;border-radius:13px}.kggImageLightbox{padding:10px}.kggImageLightbox img{max-width:98vw;max-height:84vh;border-radius:14px}}
     `;
     document.head.appendChild(style);
   }

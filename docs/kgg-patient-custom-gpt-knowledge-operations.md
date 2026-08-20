@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Operations
 
-Generated retrieval pack. Source digest: `57860b4288ce4b71`.
+Generated retrieval pack. Source digest: `db81ca8dc1970181`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -34,6 +34,35 @@ Nicht erlaubt sind Therapeut:innen-App, PDF, Android/APK, API-Key-Logik, binaere
 Die Schritte 7 bis 9 sind vorab freigegeben und laufen ohne Zwischenfrage. PR und Live erfordern die exakte Phrase `Gut für PAT live`. Nur echte Mehrdeutigkeit, ein Memory-Konflikt oder ein Breaking Interface rechtfertigt vorher eine Rueckfrage.
 
 Offene Cross-App-Anfragen stehen im privaten Koordinationsindex. Der Patient-Agent liest nur passende Threads, antwortet append-only und speichert dort weder Patientendaten noch echte Plan-/QR-Payloads. Eine Queue-Antwort startet den anderen GPT nicht automatisch. Die Queue ist fuer Interface-/Cross-App-Arbeit Pflicht. Bei rein visuellen Patient-UI-Patches darf ein Queue-Ausfall als `coordination_unavailable` protokolliert werden, ohne einen ansonsten frisch belegten Patch zu blockieren.
+
+Ein abgeschlossener ChatGPT-Antwortzug kann keinen neuen Read-/Action-Zug selbst
+starten. Bei einer leeren, abgebrochenen oder zeitlimitierten Antwort
+dokumentiert Codex den kompakten Handoff (`Zeit`, `GPT`, `Auftrag/Ziel`,
+`Vorheriger sichtbarer Zustand/Run-ID`, `Beleg`, `Auswirkung`,
+`Reaktivierungsaktion`, `Ergebnis`, `Folgeaktion`) im bestehenden
+`docs/bug-debug/`-Log. Bei Reaktivierung zuerst Resource-Manifest,
+Live-Kontext, Playbook und Main-SHA auffrischen und danach nur den vorhandenen
+Run, Jobs und Artifacts lesen; niemals einen zweiten Preview-Dispatch erzeugen.
+Einzelne Laufzeitereignisse gehoeren nicht ins Project Memory; sie aendern niemals Regeln automatisch. Bei Editor-/Knowledge-/Action-Drift oder fehlendem
+Live-Beleg ist `stale_context` ein sicherer Stopp: Der Server blockiert
+`publish_preview`, PR und Live bis der passende Snapshot `live-synced` ist.
+Der kompatible Legacy-Preview-only-Weg prueft bei `publish_preview` auch den
+Admin-Snapshot, damit ein aelteres Admin-Action-Schema den Write nicht umgeht.
+Read-Actions und `validate_only` bleiben fuer Diagnose und lokale
+Payload-Pruefung erlaubt.
+
+Wenn ein Patient-Feature generierten Context, Source-Chunks oder Knowledge
+aendert, bleibt dessen Ressourcen-Aenderungsbranch
+`target-pending-live-editor-sync`: zuerst Feature-PR mergen, dann den Editor
+gegen die neuen Artefakte und Live-Reads synchronisieren und erst danach den
+`live-synced`-Snapshot in einem separaten Commit/PR festhalten. Nie einen alten Live-Sync in einem Ressourcen-Aenderungsbranch behalten; ein alter Live-Sync in einem Ressourcen-Aenderungsbranch ist kein gueltiger Nachweis.
+
+Ein sichtbarer Browser-Button `Antwort stoppen` beweist nicht allein, dass ein
+Vorgang noch laeuft; Completion folgt nur aus Antwortinhalt, Action-Ergebnis,
+Run-Beleg oder stabilem Textzustand. Abweichende Editor-/Preview-Modelllabels
+sind `model_ui_ambiguous`, kein bewiesener Modellwechsel. Vor Kosten- oder
+Performanceaussagen immer die echte Editor-Auswahl und das Action-Verhalten
+pruefen.
 
 ## Payload v1
 
@@ -139,6 +168,8 @@ Die Action unter `api.github.com` verwendet Bearer-Authentifizierung und stellt 
 - `publish_preview`: identischen validierten Payload anwenden, Tests ausfuehren und isolierte GitHub-Pages-PWA publizieren.
 - `create_pr`: nur nach akzeptiertem identischem Preview einen PR erstellen; nie mergen.
 - `publish_patient_live`: nur nach Max' ausdruecklicher Preview-Freigabe einen PR erstellen; Merge wartet auf Required Checks und `patient-live` Environment Approval.
+
+Server-Preflight: Jeder Preview-, PR- oder Live-Write verlangt einen Patient-Editor-Snapshot mit `live-synced`. Der kompatible Preview-only-Workflow prueft bei `publish_preview` zusaetzlich den Admin-Snapshot, damit ein aelteres Admin-Action-Schema den Write nicht umgehen kann. Read-Actions und `validate_only` bleiben fuer Diagnose und lokale Payload-Pruefung verfuegbar.
 
 `submitKggPatientPreviewGate` ist Preview-only und vorab freigegeben. `submitKggPatientMainGate` ist getrennt, consequential und akzeptiert PR/Live nur mit `approval_phrase: "Gut für PAT live"`.
 

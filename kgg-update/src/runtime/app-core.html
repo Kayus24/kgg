@@ -1,10 +1,10 @@
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v065_source_control_char_guard';
+  const VERSION='KGG_GITHUB_UPDATE_v070_tablet_package_save';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v065","buildTime":"2026-08-10T18:41:19Z","buildCode":"module-v065-source-control-char-guard","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v070","buildTime":"2026-08-13T20:40:11Z","buildCode":"module-v070-tablet-package-save","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -1159,6 +1159,9 @@
   function parseStructuredSetLine(line){
     return parseExerciseQuantityText(stripStructuredSetPrefix(line));
   }
+  function splitStructuredExerciseNames(line){
+    return splitPlanText(line).map(part=>String(part&&part.text||'').replace(/\s+/g,' ').trim()).filter(Boolean);
+  }
   function structuredPlanBlocksFromText(text){
     const lines=String(text||'').replace(/\r/g,'').split(/\n+/).flatMap(splitInlineStructuredParts).map(line=>line.trim()).filter(Boolean);
     let sawSetLine=false,current=null;
@@ -1170,15 +1173,14 @@
         return;
       }
       if(isStructuredPainLine(line))return;
-      if(current)blocks.push(current);
-      current={name:line.replace(/\s+/g,' ').trim(),setLines:[]};
+      splitStructuredExerciseNames(line).forEach(name=>{
+        if(current)blocks.push(current);
+        current={name,setLines:[]};
+      });
     });
     if(current)blocks.push(current);
     if(!sawSetLine)return null;
-    return blocks.filter(block=>{
-      const letters=String(block.name||'').replace(/[^A-Za-zÄÖÜäöüß]/g,'');
-      return letters.length>=3;
-    });
+    return blocks;
   }
   function parseStructuredTextExerciseBlock(block,existing){
     if(!block||!block.name)return null;
@@ -1195,7 +1197,40 @@
   function structuredExercisesFromPlanText(text){
     const blocks=structuredPlanBlocksFromText(text);
     if(blocks===null)return null;
-    return blocks.map((block,index)=>parseStructuredTextExerciseBlock(block,findExistingForTextSegment(block.name,index))).filter(Boolean);
+    const usedExistingIds=new Set();
+    return blocks.map((block,index)=>parseStructuredTextExerciseBlock(block,findExistingForTextSegment(block.name,index,usedExistingIds))).filter(Boolean);
+  }
+  function textExerciseNamesFromPlanText(text){
+    const raw=String(text||'');
+    const blocks=structuredPlanBlocksFromText(raw);
+    return (blocks===null?splitPlanText(raw).map(part=>part.text):(blocks||[]).map(block=>block.name)).map(name=>String(name||'').trim()).filter(Boolean);
+  }
+  function compactTextExerciseName(value){
+    return compact(stripExerciseName(value)||value);
+  }
+  function hasIncompleteTextExerciseSegment(text,previousText,options){
+    const raw=String(text||'');
+    const names=textExerciseNamesFromPlanText(raw);
+    if(!names.length){
+      const lines=raw.replace(/\r/g,'').split(/\n+/).flatMap(splitInlineStructuredParts).map(line=>line.trim()).filter(Boolean);
+      return lines.some(isStructuredSetLine);
+    }
+    // Protect only the same segment while it is being shortened. A global
+    // prefix guard would wrongly treat independent "Dips" and "Dips Neu"
+    // exercises as unfinished. A real completion boundary (change/confirm)
+    // may commit a parsable three-letter final name; one- and two-letter
+    // fragments always remain provisional.
+    const finalizeShortTextEdit=!!(options&&options.finalizeShortTextEdit);
+    const previousNames=textExerciseNamesFromPlanText(previousText);
+    return names.some((name,index)=>{
+      const candidate=compactTextExerciseName(name);
+      if(candidate.length>=4)return false;
+      const previous=[previousNames[index],(state.plan||[])[index]&&((state.plan||[])[index].name||(state.plan||[])[index].rawText)]
+        .map(compactTextExerciseName)
+        .filter(Boolean);
+      const shortenedKnownName=previous.some(known=>known.length>candidate.length&&known.startsWith(candidate));
+      return shortenedKnownName&&!(finalizeShortTextEdit&&candidate.length>=3);
+    });
   }
   function activeTextSegment(){
     const input=$('exerciseInput');
@@ -1240,11 +1275,15 @@
     const pendingNew=!exact;
     return {...base,id,localId:id,sourceId:exact?exact.id:'',bankId:exact?exact.id:'',name:exact?exact.name:cleanName,sets:(existing&&existing.sets)||base.sets||3,startMetric:metric||(existing&&existing.startMetric)||'',startLoad:load||(existing&&existing.startLoad)||'',side:parsedSide||normalizeSideMode(existing&&existing.side||'BI'),rawText:raw,liveDraft:false,changedByLiveText:false,textMaster:true,pendingNew,needsReview:pendingNew,sourceFlags:[pendingNew?'textMasterReview':''].filter(Boolean)};
   }
-  function findExistingForTextSegment(segment,index){
-    const current=(state.plan||[])[index];
-    if(current)return current;
+  function findExistingForTextSegment(segment,index,usedExistingIds){
+    const used=usedExistingIds||new Set();
+    const idOf=ex=>String(ex&&(ex.localId||ex.id)||'');
     const c=compact(stripExerciseName(segment)||segment);
-    return (state.plan||[]).find(ex=>compact(ex.rawText||ex.name)===c)||null;
+    const match=(state.plan||[]).find(ex=>!used.has(idOf(ex))&&compactTextExerciseName(ex&&(ex.name||ex.rawText))===c);
+    const fallback=(state.plan||[])[index];
+    const existing=match||(!used.has(idOf(fallback))&&fallback)||null;
+    if(existing)used.add(idOf(existing));
+    return existing;
   }
   function formatExerciseTextLine(ex){
     const parts=[String(ex&&ex.name||'').trim()].filter(Boolean);
@@ -1285,22 +1324,66 @@
     state.planText=input.value;
     resizeExerciseInputToContent();
   }
-  function syncPlanFromTextInput(reason){
+  function syncPlanFromTextInput(reason,options){
     if(state.textSyncing)return;
     const input=$('exerciseInput');
     resizeExerciseInputToContent();
     const text=input&&input.value||'';
+    if(hasIncompleteTextExerciseSegment(text,state.planText,options)){
+      // The text remains the live master even while a small partial edit is
+      // protected from replacing the last valid structured plan.
+      state.planText=text;
+      save();
+      return;
+    }
     const structured=structuredExercisesFromPlanText(text);
     if(structured!==null)state.plan=structured.map(ensureUiExerciseShape);
     else{
       const segments=splitPlanText(text).map(p=>p.text.trim()).filter(Boolean);
-      state.plan=segments.map((segment,index)=>parseTextExercise(segment,findExistingForTextSegment(segment,index))).filter(Boolean).map(ensureUiExerciseShape);
+      const usedExistingIds=new Set();
+      state.plan=segments.map((segment,index)=>parseTextExercise(segment,findExistingForTextSegment(segment,index,usedExistingIds))).filter(Boolean).map(ensureUiExerciseShape);
     }
     state.liveDraftId=null;
     state.planText=input?input.value:'';
     syncStatePlanToStore(reason||'ui_textfield_master_sync');
     save();
     render();
+  }
+  function sameParsedTextExercise(left,right){
+    if(!left||!right||compactTextExerciseName(left.name||left.rawText)!==compactTextExerciseName(right.name||right.rawText))return false;
+    const fields=['startMetric','startLoad','unit','metricUnit','weightUnit','loadUnit'];
+    return fields.every(field=>String(left[field]||'')===String(right[field]||''));
+  }
+  function restorePlanFromSavedLiveText(){
+    const text=String(state.planText||'');
+    if(!text.trim())return false;
+    // Keep the exact saved field value in both cases.  A valid saved master
+    // repairs a stale/collapsed persisted state; an incomplete one keeps the
+    // previous valid state intact until the therapist finishes editing it.
+    if(hasIncompleteTextExerciseSegment(text,''))return true;
+    const structured=structuredExercisesFromPlanText(text);
+    const restored=structured!==null
+      ?structured.map(ensureUiExerciseShape)
+      :(()=>{const usedExistingIds=new Set(); return splitPlanText(text).map(part=>part.text.trim()).filter(Boolean).map((segment,index)=>parseTextExercise(segment,findExistingForTextSegment(segment,index,usedExistingIds))).filter(Boolean).map(ensureUiExerciseShape);})();
+    const current=Array.isArray(state.plan)?state.plan:[];
+    const differs=restored.length!==current.length||restored.some((exercise,index)=>!sameParsedTextExercise(exercise,current[index]));
+    if(restored.length&&differs){
+      state.plan=restored;
+      state.liveDraftId=null;
+      // Persist only a real valid recovery. Incomplete live text keeps its
+      // previous valid structured plan and must never rewrite local storage.
+      save();
+    }
+    return true;
+  }
+  function restoreSavedLiveTextInput(){
+    const input=$('exerciseInput');
+    if(!input)return;
+    const text=String(state.planText||'');
+    state.textSyncing=true;
+    input.value=text;
+    state.textSyncing=false;
+    resizeExerciseInputToContent();
   }
   function captureDbScrollAnchor(){
     const anchor=$('bankArea')||$('inputWrap');
@@ -1384,7 +1467,7 @@
       input.setSelectionRange&&input.setSelectionRange(caret,caret);
       state.bankOpen=keepBankOpen;
       bankSelectMode='append';
-      syncPlanFromTextInput('ui_select_db_exercise_append_to_text');
+      syncPlanFromTextInput('ui_select_db_exercise_append_to_text',{finalizeShortTextEdit:true});
       restoreDbScrollAnchor(scrollAnchor);
       if(keepFocus)keepExerciseInputFocus(caret);
       bankSelectMode='append';
@@ -1421,7 +1504,7 @@
     }
     input.setSelectionRange&&input.setSelectionRange(caret,caret);
     state.bankOpen=keepBankOpen;
-    syncPlanFromTextInput('ui_select_db_exercise_into_text');
+    syncPlanFromTextInput('ui_select_db_exercise_into_text',{finalizeShortTextEdit:true});
     restoreDbScrollAnchor(scrollAnchor);
     if(keepFocus)keepExerciseInputFocus(caret);
     bankSelectMode=keepBankOpen?'append':'replaceActive';
@@ -1429,7 +1512,7 @@
   function addExercise(ex){const item=ensureUiExerciseShape(ex||{}); state.plan.push(item); syncStatePlanToStore('ui_add_exercise'); syncTextInputFromPlan('ui_add_exercise'); state.bankOpen=false; state.liveDraftId=null; save(); render();}
   function removeExercise(localId){const input=$('exerciseInput'); const keepTrailingComma=!!(input&&/,\s*$/.test(input.value)); state.plan=state.plan.filter(x=>(x.localId||x.id)!==localId); if(state.liveDraftId===localId)state.liveDraftId=null; if(state.sortMenuId===localId)state.sortMenuId=null; syncStatePlanToStore('ui_remove_exercise'); syncTextInputFromPlan('ui_remove_exercise'); restoreTrailingCommaAfterPlanSync(keepTrailingComma); save(); render();}
   function clearInputAndRemoveLiveTextExercises(){state.plan=[]; state.liveDraftId=null; $('exerciseInput').value=''; resizeExerciseInputToContent(); state.bankOpen=false; syncStatePlanToStore('ui_clear_text_master_plan'); save(); render();}
-  function confirmExerciseInput(){syncPlanFromTextInput('ui_confirm_text_master');}
+  function confirmExerciseInput(){syncPlanFromTextInput('ui_confirm_text_master',{finalizeShortTextEdit:true});}
   function upsertLiveExerciseFromText(){const input=$('exerciseInput'); const value=String(input&&input.value||''); const parts=splitPlanText(value).map(p=>String(p.text||'').trim()).filter(Boolean); const committed=/[,;\\n]\\s*$/.test(value)||parts.length>1; if(!committed){const hadDraft=!!state.liveDraftId||(state.plan||[]).some(ex=>ex&&ex.liveDraft); if(hadDraft){state.plan=(state.plan||[]).filter(ex=>!(ex&&ex.liveDraft)); state.liveDraftId=null; syncStatePlanToStore('ui_textfield_unconfirmed_not_plan'); save();} render(); return;} syncPlanFromTextInput('ui_textfield_master_input');}
   function activeText(){return activeTextSegment();}
   function hasSearchLetters(text){return /[A-Za-zÄÖÜäöüß]/.test(String(text||''));}
@@ -6204,7 +6287,7 @@
     if(!input)return false;
     const existing=String(input.value||'').trim();
     input.value=existing?withTrailingExerciseComma(existing.replace(/,+$/,'')+', '+clean):withTrailingExerciseComma(clean);
-    syncPlanFromTextInput(reason||'scan_v319_apply_result_preserve_text');
+    syncPlanFromTextInput(reason||'scan_v319_apply_result_preserve_text',{finalizeShortTextEdit:true});
     state.bankOpen=false;
     state.scanPanelOpen='plan';
     save();
@@ -6899,7 +6982,7 @@
   initScanAutoCollapseOnUiOpen();
   if(renderPatientHashView())return;
   $('visionBtn').onclick=()=>setLargePdfMode(!state.largePdfMode);
-  $('exerciseInput').addEventListener('input',()=>upsertLiveExerciseFromText()); $('exerciseInput').addEventListener('focus',()=>render()); $('clearInput').onclick=()=>{clearInputAndRemoveLiveTextExercises();};
+  $('exerciseInput').addEventListener('input',()=>upsertLiveExerciseFromText()); $('exerciseInput').addEventListener('change',()=>syncPlanFromTextInput('ui_textfield_master_change',{finalizeShortTextEdit:true})); $('exerciseInput').addEventListener('focus',()=>render()); $('clearInput').onclick=()=>{clearInputAndRemoveLiveTextExercises();};
   $('bankToggle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; const opening=!state.bankOpen; if(opening)openTabletExclusivePanel('bank'); toggleBankOpenFromUi(); setTabletOverlayActiveFlag();};
   $('dbTitle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; const opening=!state.bankOpen; if(opening)openTabletExclusivePanel('bank'); state.bankOpen=!state.bankOpen; render(); setTabletOverlayActiveFlag();};
   $('dbTitle').addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();if(guardPhoneScrollToggle(ev))return; const opening=!state.bankOpen; if(opening)openTabletExclusivePanel('bank'); state.bankOpen=!state.bankOpen; render(); setTabletOverlayActiveFlag();}});
@@ -7433,7 +7516,6 @@
   /* KGG_LOGIC_SMOKE_BOOT_BOUNDARY */
   installKggV383UiFlowStability();
   installKggV388AndroidFlowFixes();
-  load(); initLargePdfMode(); renderRuntimeVersionInUi(); renderBuildIdentityInUi(); setTimeout(renderBuildIdentityInUi,500); initPwaAndUpdates(); initAdminModeAccess(); initTabletSoftKeyboardLayout(); initPhoneKeyboardAndDrawers(); initTabletLayoutControls(); initNativeExerciseBankSync(); ensureKGGDataStore().init({appVersion:VERSION}); syncStatePlanToStore('app_init_after_load'); if(state.patient.name) $('patientName').value=state.patient.name; if(state.patient.date) $('planDate').value=state.patient.date; if(state.patient.therapist) $('therapistName').value=state.patient.therapist; if(state.patient.notes) $('planNotes').value=state.patient.notes; syncTextInputFromPlan('app_init_text_master'); render(); setTabletOverlayActiveFlag(); tryApplyKggSetupFromHash().catch(err=>{console.warn('Therapeuten-Setup konnte nicht uebernommen werden:',err);});
+  load(); const restoredSavedLiveText=restorePlanFromSavedLiveText(); initLargePdfMode(); renderRuntimeVersionInUi(); renderBuildIdentityInUi(); setTimeout(renderBuildIdentityInUi,500); initPwaAndUpdates(); initAdminModeAccess(); initTabletSoftKeyboardLayout(); initPhoneKeyboardAndDrawers(); initTabletLayoutControls(); initNativeExerciseBankSync(); ensureKGGDataStore().init({appVersion:VERSION}); syncStatePlanToStore('app_init_after_load'); if(state.patient.name) $('patientName').value=state.patient.name; if(state.patient.date) $('planDate').value=state.patient.date; if(state.patient.therapist) $('therapistName').value=state.patient.therapist; if(state.patient.notes) $('planNotes').value=state.patient.notes; if(restoredSavedLiveText)restoreSavedLiveTextInput(); else syncTextInputFromPlan('app_init_text_master'); render(); setTabletOverlayActiveFlag(); tryApplyKggSetupFromHash().catch(err=>{console.warn('Therapeuten-Setup konnte nicht uebernommen werden:',err);});
 })();
 </script>
-

@@ -99,6 +99,7 @@ function classList() {
 }
 
 function fakeNode(id) {
+  const listeners = new Map();
   return {
     id,
     value: "",
@@ -123,8 +124,22 @@ function fakeNode(id) {
     replaceChildren(...children) {
       this.children = children;
     },
-    addEventListener() {},
-    removeEventListener() {},
+    addEventListener(type, handler) {
+      const handlers = listeners.get(type) || [];
+      handlers.push(handler);
+      listeners.set(type, handlers);
+    },
+    removeEventListener(type, handler) {
+      const handlers = listeners.get(type) || [];
+      listeners.set(type, handlers.filter((item) => item !== handler));
+    },
+    dispatchEvent(event) {
+      const next = typeof event === "string" ? { type: event } : (event || {});
+      next.target = next.target || this;
+      next.currentTarget = this;
+      (listeners.get(next.type) || []).slice().forEach((handler) => handler.call(this, next));
+      return !next.defaultPrevented;
+    },
     setAttribute() {},
     removeAttribute() {},
     focus() {},
@@ -587,7 +602,137 @@ function textblockCriticalSuite() {
     assert(legpress.weightUnit==='kg' && storeLegpress.weightUnit==='kg','Beinpresse kg unit not preserved');
     const curl=state.plan.find(ex=>ex.name==='Kniebeuger Maschine');
     assert(curl && curl.startMetric==='12' && curl.startLoad==='35' && curl.weightUnit==='kg','load-before-reps Satz format not preserved');
-    window.__results={suite:'textblocks-critical',names};
+
+    save=function(){localStorage.setItem(storageKey,JSON.stringify(state));};
+    const hybridText=[
+      'Beinpresse, Dips, Abduktion Maschine, Adduktion Maschine, Latziehen',
+      'Satz 1: 12 Wdh @ 30 kg',
+      'Satz 2: 12 Wdh @ 30 kg'
+    ].join(String.fromCharCode(10));
+    const hybridNames=['Beinpresse','Dips','Abduktion Maschine','Adduktion Maschine','Latziehen'];
+    input.value=hybridText;
+    syncPlanFromTextInput('logic_smoke_textblocks_hybrid_live_master');
+    assert(state.plan.length===hybridNames.length,'hybrid text collapsed state.plan to '+state.plan.length+' exercise(s)');
+    assert(hybridNames.every(name=>state.plan.some(ex=>ex.name===name)),'hybrid text lost state.plan exercise(s): '+state.plan.map(ex=>ex.name).join('|'));
+    const hybridStore=window.KGGDataStore.getCurrentPlan();
+    assert(hybridStore && hybridStore.exercises.length===hybridNames.length,'hybrid text collapsed KGGDataStore.currentPlan');
+    assert(hybridNames.every(name=>hybridStore.exercises.some(ex=>ex.name===name)),'hybrid text lost store exercise(s)');
+    const persistedState=JSON.parse(localStorage.getItem(storageKey)||'{}');
+    assert(Array.isArray(persistedState.plan) && persistedState.plan.length===hybridNames.length,'hybrid text persisted a collapsed plan');
+
+    const richPlan=JSON.parse(JSON.stringify(state.plan));
+    richPlan[0].media=[{id:'logic_smoke_media',type:'image',name:'beinpresse.jpg'}];
+    localStorage.setItem(storageKey,JSON.stringify({...state,plan:richPlan,planText:hybridText}));
+    state={...state,plan:[],planText:'',liveDraftId:null};
+    load();
+    assert(restorePlanFromSavedLiveText()===true,'matching saved planText was not recognised at boot');
+    assert(state.plan[0].media[0].id==='logic_smoke_media','matching saved planText discarded rich saved plan state');
+
+    const staleExercise=JSON.parse(JSON.stringify(state.plan[0]));
+    localStorage.setItem(storageKey,JSON.stringify({...state,plan:[staleExercise],planText:hybridText}));
+    state={...state,plan:[],planText:'',liveDraftId:null};
+    window.KGGDataStore.setCurrentPlan({exercises:[staleExercise]},'logic_smoke_boot_stale_store');
+    let bootRecoverySaveCalls=0;
+    const saveBeforeBootRecovery=save;
+    save=function(){bootRecoverySaveCalls+=1;localStorage.setItem(storageKey,JSON.stringify(state));};
+    load();
+    assert(restorePlanFromSavedLiveText()===true,'saved valid planText was not restored at boot');
+    assert(bootRecoverySaveCalls===1,'valid boot recovery did not persist exactly once');
+    const repairedBootState=JSON.parse(localStorage.getItem(storageKey)||'{}');
+    assert(Array.isArray(repairedBootState.plan)&&repairedBootState.plan.length===hybridNames.length,'valid boot recovery did not persist the repaired full plan');
+    syncStatePlanToStore('logic_smoke_boot_saved_live_text');
+    restoreSavedLiveTextInput();
+    assert(state.plan.length===hybridNames.length,'saved valid planText did not repair collapsed boot state');
+    assert(hybridNames.every(name=>state.plan.some(ex=>ex.name===name)),'saved valid planText lost boot exercise(s)');
+    assert(window.KGGDataStore.getCurrentPlan().exercises.length===hybridNames.length,'saved valid planText did not repair KGGDataStore.currentPlan');
+    assert(input.value===hybridText,'saved valid planText was overwritten at boot');
+
+    // A second boot reads the repaired local state directly and must not
+    // repeat a recovery save.
+    state={...state,plan:[],planText:'',liveDraftId:null};
+    bootRecoverySaveCalls=0;
+    load();
+    assert(restorePlanFromSavedLiveText()===true,'repaired saved planText was not recognised after reboot');
+    assert(bootRecoverySaveCalls===0,'matching repaired boot state was persisted again');
+    assert(state.plan.length===hybridNames.length,'reboot lost the repaired full plan');
+
+    const incompleteText='Beinpresse, Dip';
+    const lastValidPlan=JSON.parse(JSON.stringify(state.plan));
+    localStorage.setItem(storageKey,JSON.stringify({...state,plan:lastValidPlan,planText:incompleteText}));
+    state={...state,plan:[staleExercise],planText:'',liveDraftId:null};
+    window.KGGDataStore.setCurrentPlan({exercises:[staleExercise]},'logic_smoke_boot_incomplete_store');
+    bootRecoverySaveCalls=0;
+    load();
+    assert(restorePlanFromSavedLiveText()===true,'saved incomplete planText was not recognised at boot');
+    assert(bootRecoverySaveCalls===0,'incomplete boot text must not persist a fallback state');
+    const incompletePersistedState=JSON.parse(localStorage.getItem(storageKey)||'{}');
+    assert(incompletePersistedState.planText===incompleteText,'incomplete boot text was changed in localStorage');
+    assert(Array.isArray(incompletePersistedState.plan)&&incompletePersistedState.plan.length===hybridNames.length,'incomplete boot text rewrote the last valid local plan');
+    syncStatePlanToStore('logic_smoke_boot_incomplete_live_text');
+    restoreSavedLiveTextInput();
+    assert(state.plan.length===hybridNames.length,'saved incomplete planText destroyed the last valid structured plan');
+    assert(window.KGGDataStore.getCurrentPlan().exercises.length===hybridNames.length,'saved incomplete planText overwrote KGGDataStore.currentPlan');
+    assert(input.value===incompleteText,'saved incomplete planText was overwritten at boot');
+    save=saveBeforeBootRecovery;
+
+    const outputPlan=getCurrentPlanForOutput('logic_smoke_textblocks_hybrid_output');
+    assert(outputPlan.exercises.length===hybridNames.length,'output state collapsed hybrid plan');
+    const pdfSnapshot=buildKggPdfSnapshot(outputPlan);
+    const pdfNames=pdfSnapshot.pages.flatMap(page=>page.slots.filter(slot=>!slot.empty).map(slot=>slot.name));
+    assert(hybridNames.every(name=>pdfNames.includes(name)),'PDF snapshot lost hybrid exercise(s): '+pdfNames.join('|'));
+    const patientShare=buildPatientShareFromCurrentPlan(outputPlan,{ttlSeconds:3600});
+    assert(patientShare.payload.plan.length===hybridNames.length,'patient share lost hybrid exercise(s)');
+    assert(hybridNames.every(name=>patientShare.payload.plan.some(ex=>ex.name===name)),'patient share names lost hybrid exercise(s)');
+
+    input.value='Beinpresse, D';
+    syncPlanFromTextInput('logic_smoke_textblocks_partial_name');
+    assert(state.plan.length===hybridNames.length,'short partial name destroyed the last valid plan');
+    assert(window.KGGDataStore.getCurrentPlan().exercises.length===hybridNames.length,'short partial name destroyed currentPlan');
+    assert(input.value==='Beinpresse, D','short partial name should remain editable text');
+    input.value='Beinpresse, Dip';
+    syncPlanFromTextInput('logic_smoke_textblocks_known_partial_name');
+    assert(state.plan.length===hybridNames.length,'known partial name destroyed the last valid plan');
+    assert(window.KGGDataStore.getCurrentPlan().exercises.length===hybridNames.length,'known partial name destroyed currentPlan');
+    assert(JSON.parse(localStorage.getItem(storageKey)||'{}').plan.length===hybridNames.length,'known partial name persisted a reduced plan');
+    assert(JSON.parse(localStorage.getItem(storageKey)||'{}').planText==='Beinpresse, Dip','partial live text was not retained for the next boot');
+
+    input.value='Dips, Dips Neu, Beinpresse';
+    syncPlanFromTextInput('logic_smoke_textblocks_dips_coexist');
+    assert(state.plan.map(ex=>ex.name).join('|')==='Dips|Dips Neu|Beinpresse','Dips and Dips Neu cannot coexist: '+state.plan.map(ex=>ex.name).join('|'));
+    const dipsId=state.plan[0].localId;
+    const dipsNeuId=state.plan[1].localId;
+    const legpressId=state.plan[2].localId;
+    assert(dipsId!==dipsNeuId,'Dips and Dips Neu reused one exercise identity');
+    input.value='Dips Neu, Dips, Beinpresse';
+    syncPlanFromTextInput('logic_smoke_textblocks_dips_reorder');
+    assert(state.plan.map(ex=>ex.name).join('|')==='Dips Neu|Dips|Beinpresse','Dips/Dips Neu reorder was blocked: '+state.plan.map(ex=>ex.name).join('|'));
+    assert(state.plan[0].localId===dipsNeuId&&state.plan[1].localId===dipsId&&state.plan[2].localId===legpressId,'Dips/Dips Neu reorder changed exercise identities');
+    input.value='Dips Neu umbenannt, Dips, Beinpresse';
+    syncPlanFromTextInput('logic_smoke_textblocks_dips_rename');
+    assert(state.plan.map(ex=>ex.name).join('|')==='Dips Neu umbenannt|Dips|Beinpresse','Dips/Dips Neu rename was blocked: '+state.plan.map(ex=>ex.name).join('|'));
+    assert(state.plan[0].localId===dipsNeuId&&state.plan[1].localId===dipsId,'Dips/Dips Neu rename changed exercise identities');
+    input.value='Dips, Beinpresse';
+    syncPlanFromTextInput('logic_smoke_textblocks_dips_delete');
+    assert(state.plan.map(ex=>ex.name).join('|')==='Dips|Beinpresse','Dips/Dips Neu delete was blocked: '+state.plan.map(ex=>ex.name).join('|'));
+    assert(state.plan[0].localId===dipsId&&state.plan[1].localId===legpressId,'Dips/Dips Neu delete changed remaining exercise identities');
+    input.value='Dips, Beinpresse, ';
+    syncPlanFromTextInput('logic_smoke_textblocks_dips_trailing_comma');
+    input.value='Dip, Beinpresse, ';
+    input.dispatchEvent({type:'input',inputType:'deleteContentBackward',data:null});
+    assert(state.plan.map(ex=>ex.name).join('|')==='Dips|Beinpresse','temporary Dips to Dip edit destroyed the valid structured plan');
+    assert(state.planText==='Dip, Beinpresse, ','temporary short edit did not remain live text');
+    assert(window.KGGDataStore.getCurrentPlan().exercises[0].name==='Dips','temporary short edit overwrote KGGDataStore');
+    input.dispatchEvent({type:'change'});
+    assert(state.plan.map(ex=>ex.name).join('|')==='Dip|Beinpresse','deliberate final Dips to Dip rename was blocked');
+    assert(state.plan[0].localId===dipsId&&state.plan[1].localId===legpressId,'deliberate short rename changed remaining exercise identities');
+    const committedShortRename=JSON.parse(localStorage.getItem(storageKey)||'{}');
+    assert(committedShortRename.planText==='Dip, Beinpresse, ','deliberate short rename did not persist live text');
+    assert(committedShortRename.plan[0].name==='Dip','deliberate short rename did not persist the structured plan');
+    state={...state,plan:[],planText:'',liveDraftId:null};
+    load();
+    assert(restorePlanFromSavedLiveText()===true,'final short rename was not recognised after reboot');
+    assert(state.plan.map(ex=>ex.name).join('|')==='Dip|Beinpresse','final short rename reverted after reboot');
+    window.__results={suite:'textblocks-critical',names,hybridNames};
   `);
 }
 

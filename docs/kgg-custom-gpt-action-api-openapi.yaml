@@ -318,11 +318,11 @@ paths:
                         archive_download_url:
                           type: string
                 additionalProperties: true
-  /repos/Kayus24/kgg/actions/workflows/kgg-patient-gpt-preview-only.yml/dispatches:
+  /repos/Kayus24/kgg/actions/workflows/kgg-patient-gpt-preview-from-admin.yml/dispatches:
     post:
       operationId: submitKggPatientPreviewFromAdmin
       summary: Validate or publish an isolated Patient-App Preview for cross-app coordination.
-      description: Max pre-authorized only validate_only and publish_preview. This endpoint cannot create a Patient PR or publish live.
+      description: Max pre-authorized only validate_only and publish_preview. `validate_only` stays available for diagnosis; a cross-app `publish_preview` requires verified live editor sync for both the Admin and Patient GPT profiles. This endpoint cannot create a Patient PR or publish live.
       x-openai-isConsequential: false
       security:
         - githubBearer: []
@@ -354,7 +354,7 @@ paths:
       responses:
         "204":
           description: Isolated Patient Preview workflow accepted.
-  /repos/Kayus24/kgg/actions/workflows/kgg-patient-gpt-preview-only.yml/runs:
+  /repos/Kayus24/kgg/actions/workflows/kgg-patient-gpt-preview-from-admin.yml/runs:
     get:
       operationId: listKggPatientPreviewRunsFromAdmin
       summary: List recent isolated Patient Preview-only runs.

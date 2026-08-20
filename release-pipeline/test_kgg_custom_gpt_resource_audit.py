@@ -26,8 +26,10 @@ class CustomGptResourceAuditTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.temp.cleanup()
 
-    def snapshot(self, *, sync_status: str, **extra: object) -> Path:
-        expected = audit.expected_manifest()["production"]
+    def snapshot(
+        self, *, sync_status: str, profile: str = "production", **extra: object
+    ) -> Path:
+        expected = audit.expected_manifest()[profile]
         document = {
             "gptId": "g-0123456789abcdef",
             "name": expected["name"],
@@ -164,6 +166,44 @@ class CustomGptResourceAuditTests(unittest.TestCase):
 
         with self.assertRaisesRegex(audit.AuditError, "GPT name mismatch"):
             audit.refresh_target_snapshot(path, "production")
+
+    def test_patient_refresh_resets_live_claim_to_target_pending(self) -> None:
+        path = self.snapshot(
+            profile="patientProduction",
+            sync_status=audit.LIVE_SYNC_STATUS,
+            profileVersion="0.0.0",
+            knowledgeSha256=["0" * 64],
+            actionSha256=["1" * 64],
+            lastVerifiedAt="2026-08-11T08:09:10Z",
+            lastVerifiedMainCommit="0123456789abcdef0123456789abcdef01234567",
+        )
+
+        audit.refresh_target_snapshot(path, "patientProduction")
+
+        refreshed = json.loads(path.read_text(encoding="utf-8"))
+        expected = audit.expected_manifest()["patientProduction"]
+        self.assertEqual(audit.TARGET_PENDING_SYNC_STATUS, refreshed["syncStatus"])
+        self.assertEqual(expected["profileVersion"], refreshed["profileVersion"])
+        self.assertEqual(
+            [item["sha256"] for item in expected["knowledge"]],
+            refreshed["knowledgeSha256"],
+        )
+        self.assertEqual(
+            [item["sha256"] for item in expected["actions"]],
+            refreshed["actionSha256"],
+        )
+        self.assertNotIn("lastVerifiedAt", refreshed)
+        self.assertNotIn("lastVerifiedMainCommit", refreshed)
+        self.assertEqual(
+            audit.TARGET_PASS,
+            audit.validate_snapshot(path, "patientProduction"),
+        )
+        with self.assertRaisesRegex(audit.AuditError, "live sync is required"):
+            audit.validate_snapshot(
+                path,
+                "patientProduction",
+                require_live_synced=True,
+            )
 
     def test_cli_reports_target_pass_without_claiming_live_sync(self) -> None:
         snapshot = self.snapshot(sync_status=audit.TARGET_PENDING_SYNC_STATUS)

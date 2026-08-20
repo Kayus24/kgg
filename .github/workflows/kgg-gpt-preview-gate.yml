@@ -73,11 +73,11 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       PAYLOAD_JSON: ${{ inputs.payload_json }}
     steps:
-      - name: Checkout dispatched source
+      - name: Checkout canonical main source
         uses: actions/checkout@v4
         with:
           path: base
-          ref: ${{ github.ref_name }}
+          ref: main
           fetch-depth: 0
 
       - uses: actions/setup-python@v5
@@ -87,6 +87,24 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+
+      - name: Checkout complete canonical Admin editor sync contract
+        if: inputs.mode != 'validate_only'
+        uses: actions/checkout@v4
+        with:
+          path: editor-contract
+          ref: main
+
+      - name: Require verified Admin GPT editor sync for Preview or release writes
+        if: inputs.mode != 'validate_only'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python editor-contract/release-pipeline/kgg_custom_gpt_resource_audit.py \
+            --check \
+            --editor-snapshot editor-contract/docs/kgg-custom-gpt-editor-snapshot.json \
+            --profile production \
+            --require-live-synced
 
       - uses: actions/setup-java@v4
         if: inputs.mode == 'publish_preview'

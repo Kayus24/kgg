@@ -48,6 +48,7 @@ jobs:
           patient_gpt=false
           patient_runtime=false
           patient_day_flow=false
+          patient_last_value_shimmer=false
           admin_camera_qr=false
           while IFS= read -r path; do
             [[ -z "$path" ]] && continue
@@ -63,6 +64,7 @@ jobs:
           if grep -Eq '^docs/kgg-patient-|^release-pipeline/kgg_patient_gpt_|^\.github/workflows/kgg-patient-gpt-preview-gate\.yml$|^release-pipeline/kgg_custom_gpt_resource_audit\.py$' "$changed_file"; then patient_gpt=true; fi
           if grep -Eq '^service-worker\.js$|^patient-version-label\.js$|^update-recovery\.html$|^patient-card-progress\.js$|^collapse-cards\.js$|^release-pipeline/kgg_patient_(card_progress_smoke|runtime_progress_playwright|pain_vertical_(smoke|playwright))\.js$|^patient-pain-vertical-scale\.js$|^release-pipeline/package(-lock)?\.json$|^\.github/workflows/kgg-required-gate\.yml$' "$changed_file"; then patient_runtime=true; fi
           if grep -Eq '^index\.html$|^patient-(day-history|multiplan-db|plan-delete|start-values-day1|card-settings)\.js$|^release-pipeline/kgg_patient_continuous_days_(smoke|playwright)\.js$|^release-pipeline/kgg_test_battery\.py$|^\.github/workflows/kgg-required-gate\.yml$' "$changed_file"; then patient_day_flow=true; fi
+          if grep -Eq '^index\.html$|^service-worker\.js$|^patient-last-value-hints\.js$|^release-pipeline/kgg_patient_last_value_shimmer_playwright\.js$|^\.github/workflows/kgg-required-gate\.yml$' "$changed_file"; then patient_last_value_shimmer=true; fi
           if grep -Eq '^android-wrapper/app/src/main/(java/de/kgg/app/MainActivity\.java|assets/android/kgg_android_sync_bootstrap\.js)$|^kgg-update/src/patches/.*(camera|qr|scan).*$|^release-pipeline/kgg_admin_camera_qr_smoke\.js$' "$changed_file" || grep -Fxq 'kgg-update/src/parts.json' "$changed_file" || grep -Fxq "$runtime_identity_path" "$changed_file"; then admin_camera_qr=true; fi
           echo "pipeline_only=$pipeline_only" >> "$GITHUB_OUTPUT"
           echo "ui_or_html=$ui_or_html" >> "$GITHUB_OUTPUT"
@@ -72,6 +74,7 @@ jobs:
           echo "patient_gpt=$patient_gpt" >> "$GITHUB_OUTPUT"
           echo "patient_runtime=$patient_runtime" >> "$GITHUB_OUTPUT"
           echo "patient_day_flow=$patient_day_flow" >> "$GITHUB_OUTPUT"
+          echo "patient_last_value_shimmer=$patient_last_value_shimmer" >> "$GITHUB_OUTPUT"
           echo "admin_camera_qr=$admin_camera_qr" >> "$GITHUB_OUTPUT"
       - name: Run critical KGG test battery
         shell: bash
@@ -116,7 +119,7 @@ jobs:
           python release-pipeline/kgg_patient_gpt_write_gate.py --self-test --self-test-preview-root "$RUNNER_TEMP/kgg-patient-preview-smoke"
           python release-pipeline/kgg_patient_gpt_eval.py
       - name: Install patient browser dependencies
-        if: steps.scope.outputs.patient_gpt == 'true' || steps.scope.outputs.patient_runtime == 'true' || steps.scope.outputs.patient_day_flow == 'true'
+        if: steps.scope.outputs.patient_gpt == 'true' || steps.scope.outputs.patient_runtime == 'true' || steps.scope.outputs.patient_day_flow == 'true' || steps.scope.outputs.patient_last_value_shimmer == 'true'
         shell: bash
         run: |
           cd release-pipeline
@@ -136,6 +139,10 @@ jobs:
         if: steps.scope.outputs.patient_runtime == 'true'
         shell: bash
         run: node release-pipeline/kgg_patient_pain_vertical_playwright.js
+      - name: Run patient last-value shimmer Playwright smoke
+        if: steps.scope.outputs.patient_last_value_shimmer == 'true'
+        shell: bash
+        run: node release-pipeline/kgg_patient_last_value_shimmer_playwright.js
       - name: Run Patient GPT browser smoke
         if: steps.scope.outputs.patient_gpt == 'true'
         shell: bash

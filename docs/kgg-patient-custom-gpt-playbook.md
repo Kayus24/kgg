@@ -25,6 +25,35 @@ Die Schritte 7 bis 9 sind vorab freigegeben und laufen ohne Zwischenfrage. PR un
 
 Offene Cross-App-Anfragen stehen im privaten Koordinationsindex. Der Patient-Agent liest nur passende Threads, antwortet append-only und speichert dort weder Patientendaten noch echte Plan-/QR-Payloads. Eine Queue-Antwort startet den anderen GPT nicht automatisch. Die Queue ist fuer Interface-/Cross-App-Arbeit Pflicht. Bei rein visuellen Patient-UI-Patches darf ein Queue-Ausfall als `coordination_unavailable` protokolliert werden, ohne einen ansonsten frisch belegten Patch zu blockieren.
 
+Ein abgeschlossener ChatGPT-Antwortzug kann keinen neuen Read-/Action-Zug selbst
+starten. Bei einer leeren, abgebrochenen oder zeitlimitierten Antwort
+dokumentiert Codex den kompakten Handoff (`Zeit`, `GPT`, `Auftrag/Ziel`,
+`Vorheriger sichtbarer Zustand/Run-ID`, `Beleg`, `Auswirkung`,
+`Reaktivierungsaktion`, `Ergebnis`, `Folgeaktion`) im bestehenden
+`docs/bug-debug/`-Log. Bei Reaktivierung zuerst Resource-Manifest,
+Live-Kontext, Playbook und Main-SHA auffrischen und danach nur den vorhandenen
+Run, Jobs und Artifacts lesen; niemals einen zweiten Preview-Dispatch erzeugen.
+Einzelne Laufzeitereignisse gehoeren nicht ins Project Memory; sie aendern niemals Regeln automatisch. Bei Editor-/Knowledge-/Action-Drift oder fehlendem
+Live-Beleg ist `stale_context` ein sicherer Stopp: Der Server blockiert
+`publish_preview`, PR und Live bis der passende Snapshot `live-synced` ist.
+Der kompatible Legacy-Preview-only-Weg prueft bei `publish_preview` auch den
+Admin-Snapshot, damit ein aelteres Admin-Action-Schema den Write nicht umgeht.
+Read-Actions und `validate_only` bleiben fuer Diagnose und lokale
+Payload-Pruefung erlaubt.
+
+Wenn ein Patient-Feature generierten Context, Source-Chunks oder Knowledge
+aendert, bleibt dessen Ressourcen-Aenderungsbranch
+`target-pending-live-editor-sync`: zuerst Feature-PR mergen, dann den Editor
+gegen die neuen Artefakte und Live-Reads synchronisieren und erst danach den
+`live-synced`-Snapshot in einem separaten Commit/PR festhalten. Nie einen alten Live-Sync in einem Ressourcen-Aenderungsbranch behalten; ein alter Live-Sync in einem Ressourcen-Aenderungsbranch ist kein gueltiger Nachweis.
+
+Ein sichtbarer Browser-Button `Antwort stoppen` beweist nicht allein, dass ein
+Vorgang noch laeuft; Completion folgt nur aus Antwortinhalt, Action-Ergebnis,
+Run-Beleg oder stabilem Textzustand. Abweichende Editor-/Preview-Modelllabels
+sind `model_ui_ambiguous`, kein bewiesener Modellwechsel. Vor Kosten- oder
+Performanceaussagen immer die echte Editor-Auswahl und das Action-Verhalten
+pruefen.
+
 ## Payload v1
 
 ```json

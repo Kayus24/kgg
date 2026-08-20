@@ -3,8 +3,137 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 65,
+  "latestVersionCode": 70,
   "entries": [
+    {
+      "versionCode": 70,
+      "versionName": "1.0.70-tablet-package-save",
+      "patchId": "kgg-v070-tablet-package-save",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Tablet-Paketbutton wiederherstellen",
+      "reason": "Der bereits vorhandene Paket-Speichern-Dialog war in der Tablet-Ansicht nicht sichtbar bzw. erreichbar.",
+      "whatChanged": [
+        "Verschiebt ausschließlich den bestehenden savePackageBtn im Tablet-Modus in die Kopfzeile des aktuellen Plans und lässt den vorhandenen Dialog-Handler unverändert.",
+        "Sichert für diesen Tablet-Button ein Touch-Ziel von mindestens 56 x 44 px."
+      ],
+      "touchedAreas": [
+        "Tablet-Layout",
+        "UI-Regressionstests"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Storage",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Max hat die Wiederherstellung des Tablet-Paketbuttons und ein mindestens 44px hohes Tablet-Touch-Ziel ausdrücklich freigegeben."
+    },
+    {
+      "versionCode": 69,
+      "versionName": "1.0.69-plan-text-recovery-finalize",
+      "patchId": "kgg-v069-plan-text-recovery-finalize",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Live-Plantext Recovery abschliessen",
+      "reason": "Persistiert eine tatsaechliche Boot-Reparatur und unterscheidet kurze Zwischenedits von finalen Umbenennungen.",
+      "whatChanged": [
+        "Persistiert eine tatsaechliche Boot-Reparatur und unterscheidet kurze Zwischenedits von finalen Umbenennungen."
+      ],
+      "touchedAreas": [
+        "Plan-State",
+        "Storage"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Vom Code-Review beauftragter P1-Folgepatch: Live-Text-Plan-State und lokale Persistenz muessen ohne Datenverlust korrigiert werden."
+    },
+    {
+      "versionCode": 68,
+      "versionName": "1.0.68-plan-text-boot-restore",
+      "patchId": "kgg-v068-plan-text-boot-restore",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Plan-Text Boot Restore",
+      "reason": "Stellt gueltigen gespeicherten Live-Plantext beim Start wieder her und schuetzt nur kurz unvollstaendige Namenssegmente.",
+      "whatChanged": [
+        "Stellt gueltigen gespeicherten Live-Plantext beim Start wieder her und schuetzt nur kurz unvollstaendige Namenssegmente."
+      ],
+      "touchedAreas": [
+        "Parser",
+        "Plan-State"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Expliziter P0-Folgefix: Textfeld bleibt Live-Master, bestehende Mehruebungsplaene duerfen beim Boot oder bei Teilbearbeitung nicht verloren gehen."
+    },
+    {
+      "versionCode": 67,
+      "versionName": "1.0.67-plan-text-live-master-guard",
+      "patchId": "kgg-v067-plan-text-live-master-guard",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Plan-Text Live-Master Schutz",
+      "reason": "Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion.",
+      "whatChanged": [
+        "Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion."
+      ],
+      "touchedAreas": [
+        "Parser",
+        "Plan-State"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Max hat den P0 Parser- und Plan-State-Fix ausdruecklich beauftragt."
+    },
     {
       "versionCode": 65,
       "versionName": "1.0.65-source-control-char-guard",
@@ -598,7 +727,7 @@
       "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
     }
   ],
-  "latestVersionName": "1.0.65-source-control-char-guard",
+  "latestVersionName": "1.0.70-tablet-package-save",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",

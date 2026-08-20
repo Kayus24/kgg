@@ -49,26 +49,32 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "tablet-recent-package-shell-geometry",
     "changelog-archive-window",
     "typed-update-versions",
-    "source-control-char-guard"
+    "source-control-char-guard",
+    "plan-text-live-master-guard",
+    "plan-text-boot-restore",
+    "plan-text-recovery-finalize",
+    "tablet-package-save"
   ],
   "currentVersion": {
-    "versionCode": 65,
-    "versionName": "1.0.65-source-control-char-guard",
-    "lastPatchId": "kgg-v065-source-control-char-guard",
+    "versionCode": 70,
+    "versionName": "1.0.70-tablet-package-save",
+    "lastPatchId": "kgg-v070-tablet-package-save",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v065-source-control-char-guard",
+  "latestPatchId": "kgg-v070-tablet-package-save",
   "lastUpdateIntent": {
-    "id": "kgg-v065-source-control-char-guard",
-    "summary": "Ersetzt vier versehentliche U+0008-Zeichen durch Regex-Wortgrenzen, repariert den fehlkodierten SJIS-Prüfwert und blockiert C0-, C1- sowie DEL-Steuerzeichen in editierbaren Source-Teilen.",
+    "id": "kgg-v070-tablet-package-save",
+    "summary": "Stellt den vorhandenen Tablet-Button zum Speichern als Uebungspaket wieder sichtbar und erreichbar her.",
     "touched": [
-      "Parser"
+      "Tablet-Layout"
     ],
     "notTouched": [
       "PDF",
       "QR/Patienten-App",
       "Scan/OCR",
+      "Parser",
       "Plan-State",
+      "Storage",
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",

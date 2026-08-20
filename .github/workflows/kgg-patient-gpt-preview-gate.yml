@@ -66,11 +66,11 @@ jobs:
       GH_TOKEN: ${{ secrets.KGG_PATIENT_AUTOMATION_TOKEN || github.token }}
       PAYLOAD_JSON: ${{ inputs.payload_json }}
     steps:
-      - name: Checkout dispatched patient source
+      - name: Checkout canonical main patient source
         uses: actions/checkout@v4
         with:
           path: base
-          ref: ${{ github.ref_name }}
+          ref: main
           fetch-depth: 0
           token: ${{ secrets.KGG_PATIENT_AUTOMATION_TOKEN || github.token }}
 
@@ -81,6 +81,24 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+
+      - name: Checkout complete canonical Patient editor sync contract
+        if: inputs.mode != 'validate_only'
+        uses: actions/checkout@v4
+        with:
+          path: editor-contract
+          ref: main
+
+      - name: Require verified Patient GPT editor sync for Preview or release writes
+        if: inputs.mode != 'validate_only'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python editor-contract/release-pipeline/kgg_custom_gpt_resource_audit.py \
+            --check \
+            --editor-snapshot editor-contract/docs/kgg-patient-custom-gpt-editor-snapshot.json \
+            --profile patientProduction \
+            --require-live-synced
 
       - name: Install patient test dependencies
         if: inputs.mode != 'validate_only'
@@ -137,7 +155,7 @@ jobs:
           set -euo pipefail
           cd base
           python release-pipeline/kgg_patient_gpt_resources.py --write
-          python release-pipeline/kgg_custom_gpt_resource_audit.py --write
+          python release-pipeline/kgg_custom_gpt_resource_audit.py --refresh-target-profile patientProduction
 
       - name: Run critical KGG tests
         if: inputs.mode != 'validate_only'

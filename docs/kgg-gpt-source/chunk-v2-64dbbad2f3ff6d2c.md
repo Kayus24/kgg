@@ -1,3 +1,94 @@
+      const anchorX=Number.isFinite(press.pointerOffsetX)?press.pointerOffsetX:0;
+      const anchorY=Number.isFinite(press.pointerOffsetY)?press.pointerOffsetY:0;
+      const fixedOffset=press.fixedOffset||{left:0,top:0};
+      const nextLeft=ev.clientX-anchorX-fixedOffset.left;
+      const nextTop=ev.clientY-anchorY-fixedOffset.top;
+      press.card.style.setProperty('--drag-left',nextLeft+'px');
+      press.card.style.setProperty('--drag-top',nextTop+'px');
+      press.card.style.setProperty('--drag-y','0px');
+      floatingMid=ev.clientY-anchorY+(Number.isFinite(press.cardHeight)?press.cardHeight:press.card.getBoundingClientRect().height)/2;
+    }else{
+      press.card.style.setProperty('--drag-y',dy+'px');
+      floatingMid=press.startTop+dy+(press.card.getBoundingClientRect().height/2);
+    }
+    const cards=Array.from(press.list.querySelectorAll('.planCard[data-plan-id]:not(.reorder-lifted)'));
+    let target=cards.length;
+    for(let i=0;i<cards.length;i++){
+      const r=cards[i].getBoundingClientRect();
+      if(floatingMid<r.top+r.height/2){target=i;break;}
+    }
+    press.targetIndex=target;
+    const ref=cards[target]||null;
+    if(ref)press.list.insertBefore(press.placeholder,ref); else press.list.appendChild(press.placeholder);
+    cards.forEach(c=>c.classList.remove('reorder-gap-before','reorder-gap-after'));
+    if(ref)ref.classList.add('reorder-gap-before');
+    else if(cards.length)cards[cards.length-1].classList.add('reorder-gap-after');
+  }
+  function finishAnimatedReorder(ev){
+    const press=animatedReorder;
+    if(!press||!press.active){cleanupAnimatedReorder(false);return;}
+    ev.preventDefault();
+    const dbAnchor=state.bankOpen&&typeof captureDbScrollAnchor==='function'?captureDbScrollAnchor():null;
+    const from=(state.plan||[]).findIndex(ex=>String(ex.localId||ex.id)===press.id);
+    let to=Array.from(press.list.children).indexOf(press.placeholder);
+    if(from<0){cleanupAnimatedReorder(false);return;}
+    if(to>from)to-=1;
+    to=Math.max(0,Math.min(state.plan.length-1,to));
+    const moved=to!==from;
+    if(moved){
+      const next=state.plan.slice();
+      const item=next.splice(from,1)[0];
+      next.splice(to,0,item);
+      state.plan=next;
+      syncStatePlanToStore('ui_reorder_plan_animated');
+      syncTextInputFromPlan('ui_reorder_plan_animated');
+      save();
+    }
+    cleanupAnimatedReorder(true);
+    renderPlan();
+    if(dbAnchor&&typeof restoreDbScrollAnchor==='function'){
+      restoreDbScrollAnchor(dbAnchor);
+      setTimeout(()=>restoreDbScrollAnchor(dbAnchor),40);
+    }
+  }
+  function cancelAnimatedReorder(ev){cleanupAnimatedReorder(true);renderPlan();}
+  function cleanupAnimatedReorder(suppressClick){
+    const press=animatedReorder;
+    if(!press)return;
+    clearTimeout(press.timer);
+    if(press.handle)press.handle.classList.remove('reorder-armed');
+    if(press.list)press.list.classList.remove('reorder-active');
+    document.body.classList.remove('kggPlanCardReordering');
+    clearPhoneScrollStateForPlanGesture(280);
+    if(press.card){
+      const keepSwipeStyles=press.card.classList.contains('swipe-dragging')||document.body.classList.contains('kggPlanCardSwiping');
+      press.card.classList.remove('reorder-lifted','reorder-prelift');
+      if(!keepSwipeStyles){
+        press.card.style.removeProperty('--drag-left');
+        press.card.style.removeProperty('--drag-top');
+        press.card.style.removeProperty('--drag-y');
+        press.card.style.removeProperty('width');
+        press.card.style.removeProperty('position');
+        press.card.style.removeProperty('left');
+        press.card.style.removeProperty('top');
+        press.card.style.removeProperty('right');
+        press.card.style.removeProperty('bottom');
+        press.card.style.removeProperty('margin');
+        press.card.style.removeProperty('transform');
+        press.card.style.removeProperty('transform-origin');
+      }
+    }
+    if(press.placeholder&&press.placeholder.parentNode)press.placeholder.parentNode.removeChild(press.placeholder);
+    if(press.list){
+      if(press.phoneListAbsoluteDrag){
+        if(press.listPrevPosition){
+          press.list.style.setProperty('position',press.listPrevPosition,press.listPrevPositionPriority||'');
+        }else{
+          press.list.style.removeProperty('position');
+        }
+      }
+      Array.from(press.list.querySelectorAll('.reorder-gap-before,.reorder-gap-after')).forEach(c=>c.classList.remove('reorder-gap-before','reorder-gap-after'));
+    }
     if(press.preMove)document.removeEventListener('pointermove',press.preMove);
     if(press.preUp)document.removeEventListener('pointerup',press.preUp);
     document.removeEventListener('pointermove',onAnimatedReorderMove);
@@ -510,93 +601,3 @@
     }
     applyKggConfigTransferPlain(plain);
     setScanStatus('API-Key / Konfig lokal gespeichert. Scan/OCR kann die lokalen Daten nutzen.');
-    alert('API-Key / Konfig lokal gespeichert.');
-    return true;
-  }
-  function syncPairDeviceId(){
-    try{
-      let id=localStorage.getItem(syncPairDeviceIdKey);
-      if(!id){
-        const rand=(crypto&&crypto.getRandomValues)?Array.from(crypto.getRandomValues(new Uint32Array(2))).map(v=>v.toString(36)).join(''):Math.random().toString(36).slice(2);
-        id='kgg_'+Date.now().toString(36)+'_'+rand;
-        localStorage.setItem(syncPairDeviceIdKey,id);
-      }
-      return id;
-    }catch(err){return 'kgg_'+Date.now().toString(36);}
-  }
-  function normalizeNativeSyncFollowConfig(config){
-    const normalized=config&&typeof config==='object'?{...config}:{};
-    normalized.therapistId=String(normalized.therapistId||'').trim();
-    normalized.syncRoomId=String(normalized.syncRoomId||'').trim();
-    normalized.followedTherapists=Array.isArray(normalized.followedTherapists)?normalized.followedTherapists:[];
-    return normalized;
-  }
-  function nativeSyncFollowConfig(){
-    try{
-      if(window.KGGNativeSync&&typeof window.KGGNativeSync.getFollowConfig==='function'){
-        return normalizeNativeSyncFollowConfig(window.KGGNativeSync.getFollowConfig()||{therapistId:'',followedTherapists:[]});
-      }
-    }catch(err){}
-    try{return normalizeNativeSyncFollowConfig(JSON.parse(localStorage.getItem(syncPairFallbackConfigKey)||'{"therapistId":"","syncRoomId":"","followedTherapists":[]}'));}catch(err){}
-    return {therapistId:'',syncRoomId:'',followedTherapists:[]};
-  }
-  function writeNativeSyncFollowConfig(config){
-    try{
-      if(window.KGGNativeSync&&typeof window.KGGNativeSync.setFollowConfig==='function'){
-        return !!window.KGGNativeSync.setFollowConfig(config||{});
-      }
-    }catch(err){}
-    try{localStorage.setItem(syncPairFallbackConfigKey,JSON.stringify(config||{}));return true;}catch(err){return false;}
-  }
-  function syncPairRoomId(){
-    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig&&nativeSyncFollowConfig()||{});
-    if(config.syncRoomId)return config.syncRoomId;
-    let roomId='';
-    try{roomId=localStorage.getItem(syncPairRoomIdKey)||'';}catch(err){}
-    if(!roomId){
-      const rand=(crypto&&crypto.getRandomValues)?Array.from(crypto.getRandomValues(new Uint32Array(2))).map(v=>v.toString(36)).join(''):Math.random().toString(36).slice(2);
-      roomId='room_'+Date.now().toString(36)+'_'+rand;
-      try{localStorage.setItem(syncPairRoomIdKey,roomId);}catch(err){}
-    }
-    config.syncRoomId=roomId;
-    if(!config.therapistId)config.therapistId=syncPairDeviceId();
-    writeNativeSyncFollowConfig(config);
-    return roomId;
-  }
-  function buildNativeSyncInvite(){
-    const config=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig()||{});
-    const deviceId=syncPairDeviceId();
-    const therapistName=String(($('therapistName')&&$('therapistName').value)||state.patient.therapist||'').trim();
-    const therapistId=String(config.therapistId||deviceId).trim()||deviceId;
-    const roomId=syncPairRoomId();
-    return {
-      kind:'kgg_sync_invite',
-      version:2,
-      appVersion:VERSION,
-      createdAt:new Date().toISOString(),
-      expiresAt:new Date(Date.now()+5*60*1000).toISOString(),
-      roomId,
-      deviceId,
-      therapistId,
-      displayName:therapistName||'KGG Geraet',
-      scopes:['exerciseBank','packages'],
-      transport:'android-native-sync-folder-mesh',
-      peerMode:'host-and-client',
-      autoDownload:true
-    };
-  }
-  function nativeSyncPayloadCode(prefix,value){return prefix+':'+safeBase64JsonEncode(value);}
-  function buildNativeSyncQrPayload(){
-    const invite=buildNativeSyncInvite();
-    let syncDoc=null;
-    try{syncDoc=buildNativeExerciseBankSyncDocument();}catch(err){syncDoc=null;}
-    if(syncDoc){
-      const bundle={kind:'kgg_sync_bundle',version:2,appVersion:VERSION,createdAt:invite.createdAt,expiresAt:invite.expiresAt,roomId:invite.roomId,peerMode:'host-and-client',invite,sync:syncDoc};
-      const bundleCode=nativeSyncPayloadCode('KGGSYNC2',bundle);
-      if(bundleCode.length<=nativeSyncQrMaxLength){
-        return {code:bundleCode,type:'bundle',syncIncluded:true,length:bundleCode.length,invite,sync:syncDoc};
-      }
-      return {code:nativeSyncPayloadCode('KGGSYNC1',invite),type:'invite',syncIncluded:false,length:bundleCode.length,invite,sync:syncDoc,tooLarge:true};
-    }
-    return {code:nativeSyncPayloadCode('KGGSYNC1',invite),type:'invite',syncIncluded:false,length:0,invite,sync:null};
-  }

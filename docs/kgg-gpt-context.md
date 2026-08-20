@@ -41,9 +41,9 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 ## Current Versions
 
-- Source web version: v65 / `1.0.65-source-control-char-guard`.
-- Source index URL: `index.html?v=65`.
-- Source notes: v065: Ersetzt vier versehentliche U+0008-Zeichen durch Regex-Wortgrenzen, repariert den fehlkodierten SJIS-Prüfwert und blockiert C0-, C1- sowie DEL-Steuerzeichen in editierbaren Source-Teilen.
+- Source web version: v70 / `1.0.70-tablet-package-save`.
+- Source index URL: `index.html?v=70`.
+- Source notes: v070: Macht den bestehenden Tablet-Button zum Speichern als Übungspaket wieder erreichbar und sichert ein 44px hohes Touch-Ziel.
 - Live Admin release: `r0426` / `1.0.65-source-control-char-guard`.
 - Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.
