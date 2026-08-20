@@ -33,7 +33,10 @@ async function seedCurrent(page,doneDays,lastOpenDay){
 }
 async function currentDay(page){return page.evaluate(()=>Number(d))}
 async function assertHubDay(page,day){await page.waitForFunction(day=>document.querySelector('#kggCurrentDayBox .kggCurrentDayBig')?.textContent.trim()===`Tag ${day}`,day,{timeout:8000});assert(await currentDay(page)===day,`runtime day is not T${day}`)}
+async function waitForVisibleDayButtons(page,count){await page.waitForFunction(expected=>document.querySelectorAll('#days button').length===expected,count,{timeout:8000});assert(await page.locator('#days button').count()===count,`day-button DOM did not settle at ${count}`)}
+async function dismissInstallOverlay(page){const box=page.locator('#installBox');if(await box.count()&&await box.isVisible().catch(()=>false)){const dismiss=box.getByRole('button',{name:/Nein danke|No thanks/i});if(await dismiss.count())await dismiss.click({force:true});else await page.evaluate(()=>document.getElementById('installBox')?.classList.add('hide'))}}
 async function finishFromUi(page,expectedQrDay,expectedNextDay){
+  await dismissInstallOverlay(page);
   await page.locator('#plan > button.btn').click();
   await page.locator('#end').waitFor({state:'visible'});
   assert((await page.locator('#endTitle').innerText())===`Training T${expectedQrDay} beendet`,`end title is not T${expectedQrDay}`);
@@ -78,7 +81,7 @@ async function main(){
     mark('T12 to T13 and reload');
     await seedCurrent(page,Array.from({length:12},(_,i)=>i+1),13);
     await assertHubDay(page,13);
-    assert(await page.locator('#days button').count()===12,'continuous day growth created hidden future day buttons');
+    await waitForVisibleDayButtons(page,12);
     await page.evaluate(()=>put(0,1,'B','a','42'));
     assert(await page.evaluate(()=>v[k(0,1,'B','a',13)])==='42','T13 value was not stored');
     await page.reload({waitUntil:'domcontentloaded'});await waitForRuntime(page);await assertHubDay(page,13);
@@ -88,7 +91,7 @@ async function main(){
     mark('T99 to T100 and paged history');
     await seedCurrent(page,Array.from({length:99},(_,i)=>i+1),100);
     await assertHubDay(page,100);
-    assert(await page.locator('#days button').count()===12,'T100 expanded the hidden day-button DOM');
+    await waitForVisibleDayButtons(page,12);
     await page.locator('#kggHistoryToggle').click();
     await page.locator('#kggHistoryList').waitFor({state:'visible'});
     assert(await page.locator('#kggHistoryList .kggDayCard[data-day]').count()===30,'history did not limit initial T100 DOM to 30 day cards');
