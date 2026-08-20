@@ -1,3 +1,85 @@
+        if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)*1.2){cleanup();return;}
+        if(Math.abs(dx)<12||Math.abs(dx)<Math.abs(dy)*1.25)return;
+        swipe.active=true;
+        row.classList.add('bank-swipe-dragging');
+        try{row.setPointerCapture&&row.setPointerCapture(swipe.pointerId);}catch(err){}
+      }
+      if(!swipe.active)return;
+      e.preventDefault();
+      const max=row.offsetWidth*0.86;
+      swipe.dx=Math.max(-max,Math.min(max,dx));
+      const strength=Math.min(1,Math.abs(swipe.dx)/threshold());
+      row.classList.toggle('bank-swipe-left',swipe.dx<0);
+      row.classList.toggle('bank-swipe-right',swipe.dx>0);
+      row.classList.toggle('bank-swipe-armed',Math.abs(swipe.dx)>=threshold());
+      row.style.setProperty('--bank-swipe-strength',String(strength));
+      row.style.transform='translateX('+swipe.dx+'px)';
+      row.style.opacity=String(1-strength*0.12);
+    };
+    const up=e=>{
+      cleanup();
+      if(!swipe.active){resetBankRowSwipe(row);return;}
+      e.preventDefault();
+      bankSwipeSuppressClickUntil=Date.now()+380;
+      const shouldAsk=Math.abs(swipe.dx)>=threshold();
+      row.style.transition='transform .2s cubic-bezier(.2,.9,.2,1), opacity .16s ease, box-shadow .16s ease';
+      row.style.transform='translateX(0)';
+      row.style.opacity='1';
+      setTimeout(()=>{resetBankRowSwipe(row); if(shouldAsk)openBankDeleteModal(id);},210);
+    };
+    const cancel=()=>{cleanup(); if(swipe.active){row.style.transition='transform .18s ease, opacity .18s ease';row.style.transform='translateX(0)';row.style.opacity='1';setTimeout(()=>resetBankRowSwipe(row),190);}else resetBankRowSwipe(row);};
+    document.addEventListener('pointermove',move,{passive:false});
+    document.addEventListener('pointerup',up,{passive:false,once:true});
+    document.addEventListener('pointercancel',cancel,{passive:true,once:true});
+  }
+  function scanSetSummaryForPlanCard(ex){
+    const sets=Array.isArray(ex&&ex.scanSets)?ex.scanSets:[];
+    if(!sets.length)return '';
+    const metricUnit=ex&&ex.metricUnit||ex&&ex.unit||measureUnitLabel(ex&&ex.measure);
+    const loadUnit=normalizeLoadUnit(ex&&ex.weightUnit||ex&&ex.loadUnit||'kg');
+    const isTime=/zeit|sek|sec|min|time/i.test(metricUnit)||/keine/i.test(loadUnit);
+    return sets.slice(0,3).map((set,i)=>{
+      if(set&&set.li||set&&set.re){
+        const li=set.li||{}, re=set.re||{};
+        const liText=(li.metric?li.metric+' '+metricUnit:'')+(li.load?' @ '+li.load+' '+loadUnit:'');
+        const reText=(re.metric?re.metric+' '+metricUnit:'')+(re.load?' @ '+re.load+' '+loadUnit:'');
+        return 'S'+(i+1)+': Li '+(liText||'-')+' / Re '+(reText||'-')+(set.pain?' · Schmerz '+set.pain+'/10':'');
+      }
+      if(isTime)return 'S'+(i+1)+': '+(set&&set.metric||'-')+' '+metricUnit+(set&&set.pain?' · Schmerz '+set.pain+'/10':'');
+      return 'S'+(i+1)+': '+(set&&set.metric||'-')+' '+metricUnit+(set&&set.load?' @ '+set.load+' '+loadUnit:'')+(set&&set.pain?' · Schmerz '+set.pain+'/10':'');
+    }).join(' · ');
+  }
+  function exerciseMeta(ex){
+    const scanSummary=scanSetSummaryForPlanCard(ex);
+    if(scanSummary)return scanSummary;
+    const parts=[];
+    parts.push(normalizeSetCount(ex&&ex.sets||3)+' Sätze');
+    parts.push(sideModeLabel(ex&&ex.side));
+    const loadUnit=normalizeLoadUnit(ex&&ex.weightUnit||ex&&ex.loadUnit||'kg');
+    const metricUnit=ex&&ex.unit||ex&&ex.metricUnit||measureUnitLabel(ex&&ex.measure);
+    parts.push(loadUnit);
+    parts.push(metricUnit||'Wdh');
+    return parts.filter(Boolean).join(' · ');
+  }
+  function planCardSourceText(ex){
+    if(ex&&ex.scanImported)return ex.scanSource||'Scan übernommen';
+    const raw=String(ex&&ex.rawText||'').trim();
+    const name=String(ex&&ex.name||'').trim();
+    if(raw&&compact(raw)!==compact(name))return raw;
+    return name||String(ex&&ex.source||ex&&ex.sourceId||ex&&ex.bankId||'').trim();
+  }
+  function planCardBadgesHtml(ex){
+    const mediaCount=ensureExerciseMediaList(ex).length;
+    const bits=[];
+    if(mediaCount)bits.push('<span class="planBadge media">🖼 Medien</span>');
+    if(ex&&ex.pendingNew)bits.push('<span class="planBadge new">neu</span>');
+    else if(ex&&ex.needsReview)bits.push('<span class="planBadge review">prüfen</span>');
+    if(ex&&ex.liveDraft)bits.push('<span class="planBadge live">live</span>');
+    return bits.join('');
+  }
+  function planCardThumbnailHtml(ex){
+    const media=ensureExerciseMediaList(ex).find(item=>item&&item.type==='image'&&item.id);
+    if(!media)return '';
     return '<span class="planThumb planThumbFallback" data-plan-thumb-id="'+escapeHtml(media.id)+'" title="Bild vorhanden" aria-hidden="true"></span>';
   }
   function planCardSourceText(ex){
@@ -565,94 +647,3 @@
       press.card.style.setProperty('--drag-y','0px');
       floatingMid=ev.clientY-anchorY+(Number.isFinite(press.cardHeight)?press.cardHeight:press.card.getBoundingClientRect().height)/2;
     }else if(press.phoneAnchoredDrag){
-      const anchorX=Number.isFinite(press.pointerOffsetX)?press.pointerOffsetX:0;
-      const anchorY=Number.isFinite(press.pointerOffsetY)?press.pointerOffsetY:0;
-      const fixedOffset=press.fixedOffset||{left:0,top:0};
-      const nextLeft=ev.clientX-anchorX-fixedOffset.left;
-      const nextTop=ev.clientY-anchorY-fixedOffset.top;
-      press.card.style.setProperty('--drag-left',nextLeft+'px');
-      press.card.style.setProperty('--drag-top',nextTop+'px');
-      press.card.style.setProperty('--drag-y','0px');
-      floatingMid=ev.clientY-anchorY+(Number.isFinite(press.cardHeight)?press.cardHeight:press.card.getBoundingClientRect().height)/2;
-    }else{
-      press.card.style.setProperty('--drag-y',dy+'px');
-      floatingMid=press.startTop+dy+(press.card.getBoundingClientRect().height/2);
-    }
-    const cards=Array.from(press.list.querySelectorAll('.planCard[data-plan-id]:not(.reorder-lifted)'));
-    let target=cards.length;
-    for(let i=0;i<cards.length;i++){
-      const r=cards[i].getBoundingClientRect();
-      if(floatingMid<r.top+r.height/2){target=i;break;}
-    }
-    press.targetIndex=target;
-    const ref=cards[target]||null;
-    if(ref)press.list.insertBefore(press.placeholder,ref); else press.list.appendChild(press.placeholder);
-    cards.forEach(c=>c.classList.remove('reorder-gap-before','reorder-gap-after'));
-    if(ref)ref.classList.add('reorder-gap-before');
-    else if(cards.length)cards[cards.length-1].classList.add('reorder-gap-after');
-  }
-  function finishAnimatedReorder(ev){
-    const press=animatedReorder;
-    if(!press||!press.active){cleanupAnimatedReorder(false);return;}
-    ev.preventDefault();
-    const dbAnchor=state.bankOpen&&typeof captureDbScrollAnchor==='function'?captureDbScrollAnchor():null;
-    const from=(state.plan||[]).findIndex(ex=>String(ex.localId||ex.id)===press.id);
-    let to=Array.from(press.list.children).indexOf(press.placeholder);
-    if(from<0){cleanupAnimatedReorder(false);return;}
-    if(to>from)to-=1;
-    to=Math.max(0,Math.min(state.plan.length-1,to));
-    const moved=to!==from;
-    if(moved){
-      const next=state.plan.slice();
-      const item=next.splice(from,1)[0];
-      next.splice(to,0,item);
-      state.plan=next;
-      syncStatePlanToStore('ui_reorder_plan_animated');
-      syncTextInputFromPlan('ui_reorder_plan_animated');
-      save();
-    }
-    cleanupAnimatedReorder(true);
-    renderPlan();
-    if(dbAnchor&&typeof restoreDbScrollAnchor==='function'){
-      restoreDbScrollAnchor(dbAnchor);
-      setTimeout(()=>restoreDbScrollAnchor(dbAnchor),40);
-    }
-  }
-  function cancelAnimatedReorder(ev){cleanupAnimatedReorder(true);renderPlan();}
-  function cleanupAnimatedReorder(suppressClick){
-    const press=animatedReorder;
-    if(!press)return;
-    clearTimeout(press.timer);
-    if(press.handle)press.handle.classList.remove('reorder-armed');
-    if(press.list)press.list.classList.remove('reorder-active');
-    document.body.classList.remove('kggPlanCardReordering');
-    clearPhoneScrollStateForPlanGesture(280);
-    if(press.card){
-      const keepSwipeStyles=press.card.classList.contains('swipe-dragging')||document.body.classList.contains('kggPlanCardSwiping');
-      press.card.classList.remove('reorder-lifted','reorder-prelift');
-      if(!keepSwipeStyles){
-        press.card.style.removeProperty('--drag-left');
-        press.card.style.removeProperty('--drag-top');
-        press.card.style.removeProperty('--drag-y');
-        press.card.style.removeProperty('width');
-        press.card.style.removeProperty('position');
-        press.card.style.removeProperty('left');
-        press.card.style.removeProperty('top');
-        press.card.style.removeProperty('right');
-        press.card.style.removeProperty('bottom');
-        press.card.style.removeProperty('margin');
-        press.card.style.removeProperty('transform');
-        press.card.style.removeProperty('transform-origin');
-      }
-    }
-    if(press.placeholder&&press.placeholder.parentNode)press.placeholder.parentNode.removeChild(press.placeholder);
-    if(press.list){
-      if(press.phoneListAbsoluteDrag){
-        if(press.listPrevPosition){
-          press.list.style.setProperty('position',press.listPrevPosition,press.listPrevPositionPriority||'');
-        }else{
-          press.list.style.removeProperty('position');
-        }
-      }
-      Array.from(press.list.querySelectorAll('.reorder-gap-before,.reorder-gap-after')).forEach(c=>c.classList.remove('reorder-gap-before','reorder-gap-after'));
-    }

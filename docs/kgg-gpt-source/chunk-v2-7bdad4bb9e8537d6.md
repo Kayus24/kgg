@@ -394,6 +394,9 @@
   function parseStructuredSetLine(line){
     return parseExerciseQuantityText(stripStructuredSetPrefix(line));
   }
+  function splitStructuredExerciseNames(line){
+    return splitPlanText(line).map(part=>String(part&&part.text||'').replace(/\s+/g,' ').trim()).filter(Boolean);
+  }
   function structuredPlanBlocksFromText(text){
     const lines=String(text||'').replace(/\r/g,'').split(/\n+/).flatMap(splitInlineStructuredParts).map(line=>line.trim()).filter(Boolean);
     let sawSetLine=false,current=null;
@@ -405,15 +408,14 @@
         return;
       }
       if(isStructuredPainLine(line))return;
-      if(current)blocks.push(current);
-      current={name:line.replace(/\s+/g,' ').trim(),setLines:[]};
+      splitStructuredExerciseNames(line).forEach(name=>{
+        if(current)blocks.push(current);
+        current={name,setLines:[]};
+      });
     });
     if(current)blocks.push(current);
     if(!sawSetLine)return null;
-    return blocks.filter(block=>{
-      const letters=String(block.name||'').replace(/[^A-Za-zÄÖÜäöüß]/g,'');
-      return letters.length>=3;
-    });
+    return blocks;
   }
   function parseStructuredTextExerciseBlock(block,existing){
     if(!block||!block.name)return null;
@@ -430,7 +432,40 @@
   function structuredExercisesFromPlanText(text){
     const blocks=structuredPlanBlocksFromText(text);
     if(blocks===null)return null;
-    return blocks.map((block,index)=>parseStructuredTextExerciseBlock(block,findExistingForTextSegment(block.name,index))).filter(Boolean);
+    const usedExistingIds=new Set();
+    return blocks.map((block,index)=>parseStructuredTextExerciseBlock(block,findExistingForTextSegment(block.name,index,usedExistingIds))).filter(Boolean);
+  }
+  function textExerciseNamesFromPlanText(text){
+    const raw=String(text||'');
+    const blocks=structuredPlanBlocksFromText(raw);
+    return (blocks===null?splitPlanText(raw).map(part=>part.text):(blocks||[]).map(block=>block.name)).map(name=>String(name||'').trim()).filter(Boolean);
+  }
+  function compactTextExerciseName(value){
+    return compact(stripExerciseName(value)||value);
+  }
+  function hasIncompleteTextExerciseSegment(text,previousText,options){
+    const raw=String(text||'');
+    const names=textExerciseNamesFromPlanText(raw);
+    if(!names.length){
+      const lines=raw.replace(/\r/g,'').split(/\n+/).flatMap(splitInlineStructuredParts).map(line=>line.trim()).filter(Boolean);
+      return lines.some(isStructuredSetLine);
+    }
+    // Protect only the same segment while it is being shortened. A global
+    // prefix guard would wrongly treat independent "Dips" and "Dips Neu"
+    // exercises as unfinished. A real completion boundary (change/confirm)
+    // may commit a parsable three-letter final name; one- and two-letter
+    // fragments always remain provisional.
+    const finalizeShortTextEdit=!!(options&&options.finalizeShortTextEdit);
+    const previousNames=textExerciseNamesFromPlanText(previousText);
+    return names.some((name,index)=>{
+      const candidate=compactTextExerciseName(name);
+      if(candidate.length>=4)return false;
+      const previous=[previousNames[index],(state.plan||[])[index]&&((state.plan||[])[index].name||(state.plan||[])[index].rawText)]
+        .map(compactTextExerciseName)
+        .filter(Boolean);
+      const shortenedKnownName=previous.some(known=>known.length>candidate.length&&known.startsWith(candidate));
+      return shortenedKnownName&&!(finalizeShortTextEdit&&candidate.length>=3);
+    });
   }
   function activeTextSegment(){
     const input=$('exerciseInput');
@@ -475,11 +510,15 @@
     const pendingNew=!exact;
     return {...base,id,localId:id,sourceId:exact?exact.id:'',bankId:exact?exact.id:'',name:exact?exact.name:cleanName,sets:(existing&&existing.sets)||base.sets||3,startMetric:metric||(existing&&existing.startMetric)||'',startLoad:load||(existing&&existing.startLoad)||'',side:parsedSide||normalizeSideMode(existing&&existing.side||'BI'),rawText:raw,liveDraft:false,changedByLiveText:false,textMaster:true,pendingNew,needsReview:pendingNew,sourceFlags:[pendingNew?'textMasterReview':''].filter(Boolean)};
   }
-  function findExistingForTextSegment(segment,index){
-    const current=(state.plan||[])[index];
-    if(current)return current;
+  function findExistingForTextSegment(segment,index,usedExistingIds){
+    const used=usedExistingIds||new Set();
+    const idOf=ex=>String(ex&&(ex.localId||ex.id)||'');
     const c=compact(stripExerciseName(segment)||segment);
-    return (state.plan||[]).find(ex=>compact(ex.rawText||ex.name)===c)||null;
+    const match=(state.plan||[]).find(ex=>!used.has(idOf(ex))&&compactTextExerciseName(ex&&(ex.name||ex.rawText))===c);
+    const fallback=(state.plan||[])[index];
+    const existing=match||(!used.has(idOf(fallback))&&fallback)||null;
+    if(existing)used.add(idOf(existing));
+    return existing;
   }
   function formatExerciseTextLine(ex){
     const parts=[String(ex&&ex.name||'').trim()].filter(Boolean);
@@ -508,53 +547,3 @@
     const input=$('exerciseInput');
     if(!input)return;
     const next=withTrailingExerciseComma((state.plan||[]).map(formatExerciseTextLine).filter(Boolean).join(', '));
-    if(input.value!==next){state.textSyncing=true; input.value=next; state.textSyncing=false;}
-    state.planText=next;
-    resizeExerciseInputToContent();
-  }
-  function restoreTrailingCommaAfterPlanSync(shouldRestore){
-    const input=$('exerciseInput');
-    if(!shouldRestore||!input||(state.plan||[]).length===0)return;
-    const next=withTrailingExerciseComma(input.value);
-    if(input.value!==next){state.textSyncing=true; input.value=next; state.textSyncing=false;}
-    state.planText=input.value;
-    resizeExerciseInputToContent();
-  }
-  function syncPlanFromTextInput(reason){
-    if(state.textSyncing)return;
-    const input=$('exerciseInput');
-    resizeExerciseInputToContent();
-    const text=input&&input.value||'';
-    const structured=structuredExercisesFromPlanText(text);
-    if(structured!==null)state.plan=structured.map(ensureUiExerciseShape);
-    else{
-      const segments=splitPlanText(text).map(p=>p.text.trim()).filter(Boolean);
-      state.plan=segments.map((segment,index)=>parseTextExercise(segment,findExistingForTextSegment(segment,index))).filter(Boolean).map(ensureUiExerciseShape);
-    }
-    state.liveDraftId=null;
-    state.planText=input?input.value:'';
-    syncStatePlanToStore(reason||'ui_textfield_master_sync');
-    save();
-    render();
-  }
-  function captureDbScrollAnchor(){
-    const anchor=$('bankArea')||$('inputWrap');
-    if(!anchor)return null;
-    const rows=document.querySelector('#bankContent .bankRows');
-    return {top:anchor.getBoundingClientRect().top,rowsTop:rows?rows.scrollTop:0};
-  }
-  function restoreDbScrollAnchor(anchor){
-    if(!anchor||!state.bankOpen)return;
-    const rows=document.querySelector('#bankContent .bankRows');
-    if(rows)rows.scrollTop=anchor.rowsTop||0;
-    const el=$('bankArea')||$('inputWrap');
-    if(!el)return;
-    const apply=()=>{
-      const delta=el.getBoundingClientRect().top-anchor.top;
-      if(Math.abs(delta)>1)window.scrollBy(0,delta);
-      const nextRows=document.querySelector('#bankContent .bankRows');
-      if(nextRows)nextRows.scrollTop=anchor.rowsTop||0;
-    };
-    apply();
-    if(typeof requestAnimationFrame==='function')requestAnimationFrame(apply);
-  }

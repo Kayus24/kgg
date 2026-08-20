@@ -157,7 +157,7 @@
     if(!input)return false;
     const existing=String(input.value||'').trim();
     input.value=existing?withTrailingExerciseComma(existing.replace(/,+$/,'')+', '+clean):withTrailingExerciseComma(clean);
-    syncPlanFromTextInput(reason||'scan_v319_apply_result_preserve_text');
+    syncPlanFromTextInput(reason||'scan_v319_apply_result_preserve_text',{finalizeShortTextEdit:true});
     state.bankOpen=false;
     state.scanPanelOpen='plan';
     save();

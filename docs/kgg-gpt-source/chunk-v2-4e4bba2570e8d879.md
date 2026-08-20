@@ -253,4 +253,3 @@
     .tabletPackageEmpty{padding:18px;border:1px dashed rgba(148,163,184,.8);border-radius:14px;background:#f8fafc;color:#667085;font-weight:850;line-height:1.35;}
   }
 </style>
-
