@@ -27,15 +27,15 @@
     "knowledge": [
       {
         "path": "docs/kgg-custom-gpt-knowledge-architecture.md",
-        "sha256": "3fa778fcafc6c0e2dff8506fe1583d10c02ce70f394045b0da96340f7853705c"
+        "sha256": "5d4f741b82e0778c0c9bbc9e3b56de8c92cbbfa2543a6f98b931035a04e2132a"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-operations.md",
-        "sha256": "887aed7c6044d488a055e2248caab004e70995525293c796a3f5f267e9dfb154"
+        "sha256": "a1c3bd66e28f678fb75415d4143ffe003a6627b29b7f34b6976d91d22c58541d"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-safety.md",
-        "sha256": "403ebd2c2bf229deff152e563770b3c6b1b32921a91b3f583b0521d59d19f45f"
+        "sha256": "6eb44724a5449b427a4e3a8cc044360156160a8cc5ee0f5f1b370332e2857071"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-testing.md",
@@ -49,7 +49,7 @@
       },
       {
         "path": "docs/kgg-custom-gpt-action-api-openapi.yaml",
-        "sha256": "b415ae4e4429363ad56c60f3a05b59d0e62d5d9f8e9b20af8bab68bbd226e0e4"
+        "sha256": "eca05dce3a1878c494a8fe2c0c7451468550d6307d5f7d79f1c11d43e4bff2e8"
       }
     ],
     "freshness": "GitHub live context and source chunks are authoritative; generated Knowledge is a retrieval accelerator and must pass --check.",
@@ -115,11 +115,11 @@
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-operations.md",
-        "sha256": "7aa21246fb15b06ca871c11ee6c59dad03bb22a1544faf7b9693844425e9b018"
+        "sha256": "123c0392b1f83e4ed0ce5deef4dbf4db0766e8f82f68c07b485028cd07f2c151"
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-safety.md",
-        "sha256": "fc18065d3cc9e2af37d3d53e0a9f76a2ca39fe9263da5b18c4f2b9ae35f715f0"
+        "sha256": "b04a6228719bf966568f95180f45a82bb60bb1349b4f6fc7b215e9900ec4e959"
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-testing.md",

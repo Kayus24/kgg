@@ -578,8 +578,11 @@
         ".json",
         "2026-08-13T18:51:16Z",
         "Antwort stoppen",
+        "Arbeitsablaeufe einordnen",
         "KGG Patienten-App Update-Agent",
         "KGG Update-Agent",
+        "Konfiguration zusammenfassen",
+        "Offene Themen geordnet",
         "Thinking 5.6",
         "Vom Ersteller empfohlenes Modell wird verwendet: GPT-5.6 Sol",
         "aborted_response",
@@ -595,10 +598,7 @@
         "kgg_custom_gpt_resource_audit.py",
         "kgg_custom_gpt_resource_audit.py --check",
         "live-synced",
-        "manual_reactivation",
-        "model_ui_ambiguous",
-        "monitoring_ambiguous",
-        "python release-pipeline/kgg_bug_knowledge.py --check"
+        "manual_reactivation"
       ],
       "risks": "- Ein fehlender Ereignislog erschwert spaetere Workflow-Verbesserungen und kann doppelte Dispatches beguenstigen. - Ein fiktiver `live-synced`-Status trotz geaenderter Knowledge oder Actions wuerde Editor-Drift verdecken. - Die Queue oder ein GitHub-Workflow startet keinen GPT automatisch; das muss im Handoff klar bleiben.",
       "source_path": "docs/bug-debug/2026-08-13-custom-gpt-answer-turn-editor-drift.md",
