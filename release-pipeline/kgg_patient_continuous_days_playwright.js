@@ -61,7 +61,7 @@ async function main(){
   const page=await context.newPage();
   // The install guide has a separate delayed auto-day migration. Keep this
   // continuous-day regression focused on the day-history/runtime contract.
-  await page.addInitScript(()=>{window.__kggAutoDayRan=1});
+  await page.addInitScript(()=>{window.__kggAutoDayRan=1;localStorage.setItem('kggInstallAsked','1')});
   page.setDefaultTimeout(8000);page.setDefaultNavigationTimeout(15000);
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   const plan={i:'continuous-days-playwright',t:'Fortlaufender Testplan',v:1,d:12,extendDays:true,stepDays:6,e:[['Beinpresse',1,'B','kg','Wdh']]};
