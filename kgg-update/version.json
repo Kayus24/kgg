@@ -1,7 +1,7 @@
 {
-  "versionCode": 70,
-  "versionName": "1.0.70-tablet-package-save",
-  "indexUrl": "index.html?v=70",
-  "sha256": "fbec1d38eefa2e172d5979284f5ca46f2f1af47f133ee2b989b42b577104ab30",
-  "notes": "v070: Macht den bestehenden Tablet-Button zum Speichern als Übungspaket wieder erreichbar und sichert ein 44px hohes Touch-Ziel."
+  "versionCode": 71,
+  "versionName": "1.0.71-pdf-global-exercise-numbering",
+  "indexUrl": "index.html?v=71",
+  "sha256": "41af0dde6445862671776e49a0960262d8c6b7927a82301cf03e5665c13617e5",
+  "notes": "v071: Nummeriert Übungen in mehrseitigen Papierplänen über alle Seiten hinweg fortlaufend."
 }

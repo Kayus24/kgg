@@ -1,10 +1,10 @@
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v070_tablet_package_save';
+  const VERSION='KGG_GITHUB_UPDATE_v071_pdf_global_exercise_numbering';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v070","buildTime":"2026-08-13T20:40:11Z","buildCode":"module-v070-tablet-package-save","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v071","buildTime":"2026-08-20T21:45:00Z","buildCode":"module-v071-pdf-global-exercise-numbering","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -3689,12 +3689,13 @@
     const loadUnit=safePdfString(source.weightUnit||source.loadUnit,'kg')||'kg';
     const metricUnit=safePdfString(source.unit||source.metricUnit,'Wdh')||'Wdh';
     const slotNo=slotIndex+1;
-    const exNo='EX'+slotNo;
+    const globalIndex=index+1;
+    const exNo='EX'+globalIndex;
     const name=safePdfString(source.name,'Übung '+(index+1));
     const side=safePdfString(source.side||source.sides||source.laterality,'');
     const normalized={
       sourceId:safePdfString(source.localId||source.id||''),
-      globalIndex:index+1,
+      globalIndex,
       pageIndex:pageIndex+1,
       pageNo:pageIndex+1,
       slotIndex:slotNo,
@@ -3713,7 +3714,7 @@
       rawText:safePdfString(source.rawText||''),
       source:safePdfString(source.source||source.sourceId||source.bankId||''),
       flags:Array.isArray(source.sourceFlags)?source.sourceFlags.slice():[],
-      machineLine:'#EX|'+slotNo+'|'+name+'|'+sets+'|'+side+'|'+loadUnit+'|'+metricUnit,
+      machineLine:'#EX|'+globalIndex+'|'+name+'|'+sets+'|'+side+'|'+loadUnit+'|'+metricUnit,
       columns:['kg','Wdh','Schmerz 1-10'],
       tables:[]
     };
@@ -3736,11 +3737,13 @@
         const ex=items[slotIndex];
         slots.push(ex?normalizePdfExercise(ex,(pageIndex*slotsPerPage)+slotIndex,pageIndex,slotIndex):buildEmptyPdfSlot(pageIndex,slotIndex));
       }
+      const firstGlobalIndex=(pageIndex*slotsPerPage)+1;
+      const lastGlobalIndex=Math.min(exercises.length,firstGlobalIndex+slotsPerPage-1);
       return {
         pageNo:pageIndex+1,
         pageIndex:pageIndex+1,
         pageCount:null,
-        exRange:'EX1-EX'+slotsPerPage,
+        exRange:'EX'+firstGlobalIndex+'-EX'+lastGlobalIndex,
         layoutSlots:slotsPerPage,
         slotCount:slotsPerPage,
         slots,
@@ -3775,7 +3778,7 @@
         exercisesPerPage:slotsPerPage,
         cornerMarkers:'black',
         exerciseLabels,
-        machineLineFormat:'#EX|slot|name|sets|side|loadUnit|metricUnit',
+        machineLineFormat:'#EX|globalIndex|name|sets|side|loadUnit|metricUnit',
         tables:['T1','T2','T3','T4','T5','T6'],
         sets:['S1','S2','S3'],
         columns:['kg','Wdh','Schmerz 1-10'],
@@ -4043,7 +4046,7 @@
     doc.rect(x,y,labelW,labelH,'F');
     try{doc.setTextColor(255);}catch(e){}
     pdfSetFont(doc,largePrint?9.0:5.9,'bold');
-    pdfText(doc,String(ex.slotNo||ex.slotIndex||''),x+labelW/2,y+(largePrint?7.2:4.9),{align:'center'});
+    pdfText(doc,String(ex.globalIndex||ex.slotNo||ex.slotIndex||''),x+labelW/2,y+(largePrint?7.2:4.9),{align:'center'});
     try{doc.setTextColor(0);}catch(e){}
     if(canDrawThumb){
       try{
