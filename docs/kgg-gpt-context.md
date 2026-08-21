@@ -41,9 +41,9 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 ## Current Versions
 
-- Source web version: v70 / `1.0.70-tablet-package-save`.
-- Source index URL: `index.html?v=70`.
-- Source notes: v070: Macht den bestehenden Tablet-Button zum Speichern als Übungspaket wieder erreichbar und sichert ein 44px hohes Touch-Ziel.
+- Source web version: v71 / `1.0.71-pdf-global-exercise-numbering`.
+- Source index URL: `index.html?v=71`.
+- Source notes: v071: Nummeriert Übungen in mehrseitigen Papierplänen über alle Seiten hinweg fortlaufend.
 - Live Admin release: `r0426` / `1.0.65-source-control-char-guard`.
 - Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.

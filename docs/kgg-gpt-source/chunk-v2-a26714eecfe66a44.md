@@ -142,12 +142,13 @@
     const loadUnit=safePdfString(source.weightUnit||source.loadUnit,'kg')||'kg';
     const metricUnit=safePdfString(source.unit||source.metricUnit,'Wdh')||'Wdh';
     const slotNo=slotIndex+1;
-    const exNo='EX'+slotNo;
+    const globalIndex=index+1;
+    const exNo='EX'+globalIndex;
     const name=safePdfString(source.name,'Übung '+(index+1));
     const side=safePdfString(source.side||source.sides||source.laterality,'');
     const normalized={
       sourceId:safePdfString(source.localId||source.id||''),
-      globalIndex:index+1,
+      globalIndex,
       pageIndex:pageIndex+1,
       pageNo:pageIndex+1,
       slotIndex:slotNo,
@@ -166,7 +167,7 @@
       rawText:safePdfString(source.rawText||''),
       source:safePdfString(source.source||source.sourceId||source.bankId||''),
       flags:Array.isArray(source.sourceFlags)?source.sourceFlags.slice():[],
-      machineLine:'#EX|'+slotNo+'|'+name+'|'+sets+'|'+side+'|'+loadUnit+'|'+metricUnit,
+      machineLine:'#EX|'+globalIndex+'|'+name+'|'+sets+'|'+side+'|'+loadUnit+'|'+metricUnit,
       columns:['kg','Wdh','Schmerz 1-10'],
       tables:[]
     };
@@ -189,11 +190,13 @@
         const ex=items[slotIndex];
         slots.push(ex?normalizePdfExercise(ex,(pageIndex*slotsPerPage)+slotIndex,pageIndex,slotIndex):buildEmptyPdfSlot(pageIndex,slotIndex));
       }
+      const firstGlobalIndex=(pageIndex*slotsPerPage)+1;
+      const lastGlobalIndex=Math.min(exercises.length,firstGlobalIndex+slotsPerPage-1);
       return {
         pageNo:pageIndex+1,
         pageIndex:pageIndex+1,
         pageCount:null,
-        exRange:'EX1-EX'+slotsPerPage,
+        exRange:'EX'+firstGlobalIndex+'-EX'+lastGlobalIndex,
         layoutSlots:slotsPerPage,
         slotCount:slotsPerPage,
         slots,
@@ -228,7 +231,7 @@
         exercisesPerPage:slotsPerPage,
         cornerMarkers:'black',
         exerciseLabels,
-        machineLineFormat:'#EX|slot|name|sets|side|loadUnit|metricUnit',
+        machineLineFormat:'#EX|globalIndex|name|sets|side|loadUnit|metricUnit',
         tables:['T1','T2','T3','T4','T5','T6'],
         sets:['S1','S2','S3'],
         columns:['kg','Wdh','Schmerz 1-10'],
@@ -496,7 +499,7 @@
     doc.rect(x,y,labelW,labelH,'F');
     try{doc.setTextColor(255);}catch(e){}
     pdfSetFont(doc,largePrint?9.0:5.9,'bold');
-    pdfText(doc,String(ex.slotNo||ex.slotIndex||''),x+labelW/2,y+(largePrint?7.2:4.9),{align:'center'});
+    pdfText(doc,String(ex.globalIndex||ex.slotNo||ex.slotIndex||''),x+labelW/2,y+(largePrint?7.2:4.9),{align:'center'});
     try{doc.setTextColor(0);}catch(e){}
     if(canDrawThumb){
       try{
@@ -707,7 +710,4 @@
   function setPdfPreviewFallbackVisible(isVisible){
     const fallback=$('pdfPreviewFallback');
     if(fallback)fallback.classList.toggle('hidden',!isVisible);
-  }
-  function shouldUsePdfMobileBridge(){
-    return !!(window.matchMedia && (window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(max-width: 700px)').matches));
   }

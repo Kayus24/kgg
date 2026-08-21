@@ -608,6 +608,54 @@
     },
     {
       "areas": [
+        "drag-reorder",
+        "modal",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "sync",
+        "tablet-layout"
+      ],
+      "cause": "",
+      "do_not_touch": "",
+      "fix_pattern": "",
+      "id": "docs-bug-debug-2026-08-21-real-device-acceptance-handoff-md-kgg-realgeraete-abnahme-ticket-session-1",
+      "keywords": [
+        "drag-reorder",
+        "kgg-realgeraete-abnahme-ticket-session-1",
+        "modal",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "sync",
+        "tablet-layout"
+      ],
+      "markers": [
+        "--require-live-synced",
+        "blocked",
+        "blocked-remote-access",
+        "codex/ticket-session-1",
+        "d898b423ee324a8f8f4f4115a8dd015e2ed34afc",
+        "fail",
+        "live-synced",
+        "pass",
+        "pending-real-device",
+        "tablet-splitter-scale-drag",
+        "target-pending-live-editor-sync",
+        "v79"
+      ],
+      "risks": "",
+      "source_path": "docs/bug-debug/2026-08-21-real-device-acceptance-handoff.md",
+      "symptom": "**Status:** `pending-real-device` **Erstellt:** 2026-08-21 **Lokaler Stand:** `codex/ticket-session-1` / `d898b423ee324a8f8f4f4115a8dd015e2ed34afc` **Bereich:** Admin-/Patient-App, QR, PWA, Tablet, Planverwaltung Diese Uebergabe enthaelt nur Tests, die lokale Browser-, Parser- und PDF-Pruefungen nicht vollstaendig ersetzen koennen. Es werden keine Patientend",
+      "tests": "",
+      "title": "KGG Realgeraete-Abnahme Ticket-Session 1"
+    },
+    {
+      "areas": [
         "debug",
         "qr-patient"
       ],
@@ -887,6 +935,7 @@
     "docs/bug-debug/2026-08-02-patient-camera-crop-coordination-404.md",
     "docs/bug-debug/2026-08-02-patient-preview-first-load-modules.md",
     "docs/bug-debug/2026-08-13-custom-gpt-answer-turn-editor-drift.md",
+    "docs/bug-debug/2026-08-21-real-device-acceptance-handoff.md",
     "docs/bug-debug/README.md",
     "docs/bugfixes/mobile-share-modal-css-regression.md",
     "docs/release-handoffs/2026-06-18-v003a-plan-ui-stability.md",

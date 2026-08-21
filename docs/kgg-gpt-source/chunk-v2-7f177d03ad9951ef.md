@@ -1,4 +1,13 @@
-<script type="application/json" id="kgg-source-truth">
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<!--
+KGG INTERNAL SOURCE TRUTH — READ THIS FIRST
+
+Machine-readable app state, patch rules, and changelog are embedded near the top of this HTML.
+Before editing this app, any LLM/agent/human should read these blocks:
+1. <script type="application/json" id="kgg-source-truth">
 {
   "schema": 1,
   "app": "KGG Plan",
@@ -44,20 +53,22 @@
     "plan-text-live-master-guard",
     "plan-text-boot-restore",
     "plan-text-recovery-finalize",
-    "tablet-package-save"
+    "tablet-package-save",
+    "pdf-global-exercise-numbering"
   ],
   "currentVersion": {
-    "versionCode": 70,
-    "versionName": "1.0.70-tablet-package-save",
-    "lastPatchId": "kgg-v070-tablet-package-save",
+    "versionCode": 71,
+    "versionName": "1.0.71-pdf-global-exercise-numbering",
+    "lastPatchId": "kgg-v071-pdf-global-exercise-numbering",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v070-tablet-package-save",
+  "latestPatchId": "kgg-v071-pdf-global-exercise-numbering",
   "lastUpdateIntent": {
-    "id": "kgg-v070-tablet-package-save",
-    "summary": "Stellt den vorhandenen Tablet-Button zum Speichern als Uebungspaket wieder sichtbar und erreichbar her.",
+    "id": "kgg-v071-pdf-global-exercise-numbering",
+    "summary": "Nummeriert Übungen in mehrseitigen Papierplänen über alle Seiten hinweg fortlaufend.",
     "touched": [
-      "Tablet-Layout"
+      "PDF",
+      "Papierplan-Nummerierung"
     ],
     "notTouched": [
       "PDF",
@@ -70,8 +81,10 @@
       "API-Key-Logik",
       "Android/APK",
       "GitHub Manifest",
-      "Handy-Layout"
+      "Handy-Layout",
+      "Tablet-Layout"
     ]
   }
 }
 </script>
+<!-- END kgg-source-truth -->
