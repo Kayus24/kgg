@@ -1,3 +1,6 @@
+  function shouldUsePdfMobileBridge(){
+    return !!(window.matchMedia && (window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(max-width: 700px)').matches));
+  }
   function setPdfMobileBridgeVisible(isVisible){
     const bridge=$('pdfPreviewMobileBridge');
     const modal=$('pdfPreviewModal');

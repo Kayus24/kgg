@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Safety
 
-Generated retrieval pack. Source digest: `5ceb6942cc50502f`.
+Generated retrieval pack. Source digest: `e349bc469e54c866`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -168,6 +168,14 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Lesson: Ein KGG Custom GPT kann nach dem Ende seines ChatGPT-Antwortzugs nicht selbst einen neuen Antwortzug starten. Ein laufender GitHub-Workflow kann zwar weiter arbeiten, aber Run-, Job- und Artifact-Status werden danach nicht von selbst erneut gelesen. Wenn Codex den GPT erneut aktiviert, kann ohne klare Uebergabe ein doppelter Preview-Dispatch, eine falsche Fo
 - Caution: - App-Feature-Code, PDF, QR-/Patienten-App-Vertrag, Scan/OCR, Parser, Plan-State, Medien/Upload, Android/APK, Manifest und Geheimnisse. - Keine Patientendaten, echte Plan-/QR-Payloads, Chats, Tokens oder Rohdaten im Bug-Debug-Log, in der Koordination oder im Project Memory speichern.
 - Tests: - `python release-pipeline/kgg_bug_knowledge.py --check` ist gruen. - `python release-pipeline/kgg_custom_gpt_knowledge_pack.py --check` ist gruen. - `python release-pipeline/kgg_patient_gpt_resources.py --check` ist gruen. - Der Resource-Audit akzeptiert nur passende Hashes; nach einer kanonischen Knowledge-Aenderung bleibt ein Profil bis zur echten Editor-
+
+### KGG Realgeraete-Abnahme Ticket-Session 1
+
+- Source: `docs/bug-debug/2026-08-21-real-device-acceptance-handoff.md`
+- Areas: drag-reorder, modal, parser-textblocks, pdf, phone-layout, qr-patient, scan-camera, sync, tablet-layout
+- Lesson: **Status:** `pending-real-device` **Erstellt:** 2026-08-21 **Lokaler Stand:** `codex/ticket-session-1` / `d898b423ee324a8f8f4f4115a8dd015e2ed34afc` **Bereich:** Admin-/Patient-App, QR, PWA, Tablet, Planverwaltung Diese Uebergabe enthaelt nur Tests, die lokale Browser-, Parser- und PDF-Pruefungen nicht vollstaendig ersetzen koennen. Es werden keine Patientend
+- Caution: Keep patch scoped to the requested area.
+- Tests: Run the risk-matched KGG battery.
 
 ### Debug JSON Seite
 

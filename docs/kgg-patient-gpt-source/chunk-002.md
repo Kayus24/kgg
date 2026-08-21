@@ -1,16 +1,16 @@
 # KGG Patient Source Chunk 002
 
 - Source file: `service-worker.js`
-- Characters: 1-7194
-- Full source SHA-256: `f2c9c03454db11516253ef20c0761fda8ec145db36dd0d30b2441bea549d97b9`
+- Characters: 1-7199
+- Full source SHA-256: `08393115cb4c49927c39801a3052642aa01ab82b351b5d27a149657b015b91e1`
 
 ```
-const CACHE_NAME = 'kgg-handyplan-v77-apply-shimmer';
-const APP_VERSION = '77';
+const CACHE_NAME = 'kgg-handyplan-v79-plan-rename';
+const APP_VERSION = '79';
 const CACHE_PREFIX = 'kgg-handyplan-';
 const RECOVERY_PATH = './update-recovery.html';
 const NUMPAD_UI_FIX_SCRIPT = './numpad-ui-fix.js?v=scroll-stable-1';
-const VERSION_LABEL_SCRIPT = './patient-version-label.js?v=77';
+const VERSION_LABEL_SCRIPT = './patient-version-label.js?v=79';
 const COLLAPSE_SCRIPT = './collapse-cards.js?v=plan-update-label-2-progress-visible';
 const CARD_PROGRESS_SCRIPT = './patient-card-progress.js?v=card-progress-2-complete-fields';
 const INSTALL_PROMPT_SCRIPT = './patient-install-prompt.js?v=install-prompt-1-shared-reference';
@@ -18,7 +18,7 @@ const PLAN_REPLACE_SLOT_SCRIPT = './patient-plan-replace-slot-fix.js?v=active-sl
 const START_SCAN_SCRIPT = './patient-start-scan.js?v=plan-replace-1';
 const JSQR_SCRIPT = './vendor/jsqr-1.4.0.js';
 const MULTIPLAN_DB_SCRIPT = './patient-multiplan-db.js?v=lossless-media-plans-1';
-const PLAN_DELETE_SCRIPT = './patient-plan-delete.js?v=plan-delete-2-red-x';
+const PLAN_DELETE_SCRIPT = './patient-plan-delete.js?v=plan-delete-3-red-x-rename';
 const CARD_SETTINGS_SCRIPT = './patient-card-settings.js?v=card-settings-2-no-thumb-padding';
 const START_VALUES_SCRIPT = './patient-start-values-day1.js?v=start-values-day1-1';
 const DAY_HISTORY_SCRIPT = './patient-day-history.js?v=plan-dialog-title-1';

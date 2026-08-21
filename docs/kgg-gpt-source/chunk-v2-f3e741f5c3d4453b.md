@@ -3,8 +3,39 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 70,
+  "latestVersionCode": 71,
   "entries": [
+    {
+      "versionCode": 71,
+      "versionName": "1.0.71-pdf-global-exercise-numbering",
+      "patchId": "kgg-v071-pdf-global-exercise-numbering",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Fortlaufende Papierplan-Nummerierung",
+      "reason": "Übungsnummern dürfen auf Folgeseiten nicht wieder bei EX1 beginnen.",
+      "whatChanged": [
+        "Verwendet den globalen Übungsindex für sichtbare Nummern, Maschinenzeilen und Seitenspannen.",
+        "Ergänzt Regressionstests für klassische und große mehrseitige Papierpläne."
+      ],
+      "touchedAreas": [
+        "PDF",
+        "Papierplan-Nummerierung",
+        "Regressionstests"
+      ],
+      "notTouched": [
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Plan-State",
+        "Storage",
+        "Tablet-Layout",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Ticket 012: mehrseitige Papierpläne müssen über alle Seiten fortlaufend nummeriert werden."
+    },
     {
       "versionCode": 70,
       "versionName": "1.0.70-tablet-package-save",
@@ -727,7 +758,7 @@
       "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
     }
   ],
-  "latestVersionName": "1.0.70-tablet-package-save",
+  "latestVersionName": "1.0.71-pdf-global-exercise-numbering",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
