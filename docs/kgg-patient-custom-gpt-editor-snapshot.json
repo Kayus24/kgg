@@ -13,15 +13,13 @@
     "apps": false,
     "actions": true
   },
-  "syncStatus": "live-synced",
-  "lastVerifiedAt": "2026-08-20T15:56:43Z",
-  "lastVerifiedMainCommit": "a2fbbefb568a0aaaed44365d7cdc0c4d0363214c",
+  "syncStatus": "target-pending-live-editor-sync",
   "instructionsSha256": "9f9ea646292ab49aba9dad23c278ff219a43fde24df124eda2e7717edfbb74d0",
   "knowledgeSha256": [
-    "0d08b877d7e7c37ddc2021ca7b5683dcfcfc3d5f50260c0ea519b9d35dd05dd8",
+    "449fee2842c756a1c065ec42fa6e47eda1cae52ba9130c0213d997e42a9b80b3",
     "123c0392b1f83e4ed0ce5deef4dbf4db0766e8f82f68c07b485028cd07f2c151",
     "b04a6228719bf966568f95180f45a82bb60bb1349b4f6fc7b215e9900ec4e959",
-    "e2898f54fbf748a075cf722fa78da8681b2edda22aeb10720501b8e20027ace5"
+    "affabbe3ee5c453138bf6013ae3ff32e6c37b824d34dce2f0e25e43554b3b69a"
   ],
   "actionSha256": [
     "a7514673c0af2cccfddc5b5e8e4fc51215a766e8fdca2cc3b75f917b43aa5dc3",

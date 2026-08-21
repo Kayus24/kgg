@@ -34,7 +34,7 @@ def validate_worker()->str:
  match=re.search(r"const APP_VERSION = '([0-9]+)';",worker)
  if not match:fail("service-worker.js has no numeric APP_VERSION")
  version=match.group(1)
- required=(f"kgg-handyplan-v{version}-",f"const APP_VERSION = '{version}';","const RECOVERY_PATH = './update-recovery.html';","./manifest-v64.webmanifest","./kgg-icon-192-v63.png","./kgg-icon-512-v63.png","./kgg-icon-maskable-512-v63.png",f"./patient-version-label.js?v={version}","./patient-set-summary-groups.js?v=set-summary-groups-2-range-label","./patient-card-progress.js?v=card-progress-2-complete-fields","./patient-install-prompt.js?v=install-prompt-1-shared-reference","./patient-plan-delete.js?v=plan-delete-2-red-x","./patient-numpad-card-guard.js?v=numpad-input-switch-1","GET_UPDATE_DIAGNOSTICS","isRecoveryRequest(event.request)","function injectModules(response){return response}")
+ required=(f"kgg-handyplan-v{version}-",f"const APP_VERSION = '{version}';","const RECOVERY_PATH = './update-recovery.html';","./manifest-v64.webmanifest","./kgg-icon-192-v63.png","./kgg-icon-512-v63.png","./kgg-icon-maskable-512-v63.png",f"./patient-version-label.js?v={version}","./patient-set-summary-groups.js?v=set-summary-groups-2-range-label","./patient-card-progress.js?v=card-progress-2-complete-fields","./patient-install-prompt.js?v=install-prompt-1-shared-reference","./patient-plan-delete.js?v=plan-delete-3-red-x-rename","./patient-numpad-card-guard.js?v=numpad-input-switch-1","GET_UPDATE_DIAGNOSTICS","isRecoveryRequest(event.request)","function injectModules(response){return response}")
  for fragment in required:
   if fragment not in worker:fail(f"service-worker.js is missing {fragment!r}")
  if "v59.png" in worker or "v59'" in worker or 'v59"' in worker:fail("service-worker.js still contains a v59 icon reference")
@@ -61,7 +61,7 @@ def validate_static_compatibility(manifest:dict,version:str)->None:
   "./patient-plan-replace-slot-fix.js?v=active-slot-1",
   "./patient-start-scan.js?v=plan-replace-1",
   "./patient-multiplan-db.js?v=lossless-media-plans-1",
-  "./patient-plan-delete.js?v=plan-delete-2-red-x",
+  "./patient-plan-delete.js?v=plan-delete-3-red-x-rename",
   "./patient-card-settings.js?v=card-settings-2-no-thumb-padding",
   "./patient-start-values-day1.js?v=start-values-day1-1",
   "./patient-day-history.js?v=plan-dialog-title-1",
