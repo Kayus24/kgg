@@ -2,7 +2,7 @@
 
 - Source file: `patient-start-scan.js`
 - Characters: 1-24000
-- Full source SHA-256: `48ad614edb3a2ae3609f16cebb9090a58fa10975ba7700f53dcd3d87e2323973`
+- Full source SHA-256: `69b1ac2eeba577c402050e51af4177fdc64c2a5c725da3a8bf62e8966517c98c`
 
 ```
 (()=>{

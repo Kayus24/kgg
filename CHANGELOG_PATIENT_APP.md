@@ -1,5 +1,13 @@
 # Patient App Changelog
 
+## 2026-08-21 – v78 QR-Livebild zeigt den vollständigen Kamerarahmen
+
+### Changed
+
+- Die Patient-QR-Kamera verwendet für die sichtbare Vorschau `object-fit: contain` statt `cover`.
+- Der Decoder bleibt unverändert und nutzt weiterhin Vollbild- und Crop-Varianten.
+- Schwarze Letterbox-Flächen sind zulässig; QR-Führung und Touch-Bedienung bleiben unverändert.
+
 ## 2026-08-13 – v77 Vorwert übernehmen
 
 ### Changed
