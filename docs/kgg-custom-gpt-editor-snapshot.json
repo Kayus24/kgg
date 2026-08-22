@@ -5,7 +5,9 @@
   "bootstrapVersion": "admin-v6",
   "model": "GPT-5.6 Thinking",
   "visibility": "private",
-  "syncStatus": "target-pending-live-editor-sync",
+  "syncStatus": "live-synced",
+  "lastVerifiedAt": "2026-08-22T08:17:10Z",
+  "lastVerifiedMainCommit": "ad6433a41fa6bcf8b21c2b885e0330866b78b9ff",
   "capabilities": {
     "webSearch": true,
     "codeInterpreter": true,
