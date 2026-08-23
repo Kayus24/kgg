@@ -147,6 +147,15 @@
       return false;
     }
   }
+  function guardStartInput(){
+    const code=findPlanCode(global.location&&global.location.href||'');
+    if(!code)return false;
+    try{decodeCode(code);return true}catch(err){
+      global.__KGG_PLAN_FORMAT_ERROR=String(err&&err.message||err);
+      try{if(global.history&&typeof global.history.replaceState==='function')global.history.replaceState(null,'',String(global.location.pathname||''))}catch(innerErr){}
+      return false;
+    }
+  }
   function fingerprint(raw){
     const stable=value=>Array.isArray(value)?value.map(stable):value&&typeof value==='object'?Object.keys(value).sort().reduce((out,key)=>(out[key]=stable(value[key]),out),{}):value;
     let json='';try{json=JSON.stringify(stable(raw))}catch(err){json=''};
@@ -154,6 +163,5 @@
     return (hash>>>0).toString(16).padStart(8,'0');
   }
   global.KGGPlanFormat={version:VERSION,limits:LIMITS,validatePlan,decodeCode,decodePlanText,encodeKggH2,encodeKggH3,findPlanCode,rewriteH3StartInput,fingerprint};
-  try{rewriteH3StartInput()}catch(err){global.__KGG_PLAN_FORMAT_ERROR=String(err&&err.message||err)}
+  try{rewriteH3StartInput();guardStartInput()}catch(err){global.__KGG_PLAN_FORMAT_ERROR=String(err&&err.message||err)}
 })(typeof window!=='undefined'?window:globalThis);
-

@@ -17,13 +17,13 @@ assert(helper.includes('const TTL_MS=5*60*1000'),'five-minute pending TTL missin
 assert(helper.includes("query.get('plan')||query.get('kgg')"),'query plan/kgg variants missing');
 assert(helper.includes("source:'hash'"),'hash plan variant missing');
 assert(!helper.includes('window.prompt')&&!helper.includes('window.confirm')&&!helper.includes('prompt(')&&!helper.includes('confirm('),'choice helper uses a native dialog');
-assert((index.match(/patient-plan-link-choice\.js\?v=plan-link-choice-1/g)||[]).length===1,'index loads choice helper not exactly once');
+assert((index.match(/patient-plan-link-choice\.js\?v=plan-link-choice-2-kgg-h3/g)||[]).length===1,'index loads choice helper not exactly once');
 assert(index.indexOf('patient-plan-link-choice.js')<index.indexOf('load();</script>'),'choice helper is not loaded before patient boot');
-assert((index.match(/patient-version-label\.js\?v=80/g)||[]).length===1,'index version label is not v80');
+assert((index.match(/patient-version-label\.js\?v=81/g)||[]).length===1,'index version label is not v81');
 assert(!ios.includes('localStorage.setItem(K,JSON.stringify({plan:'),'ios-start still overwrites the current plan');
 assert(ios.includes("go(String(x).replace(/^KGGH2:/,''))"),'ios-start no longer forwards through the KGGH2 hash path');
-assert(worker.includes("const APP_VERSION = '80';")&&worker.includes("kgg-handyplan-v80-plan-link-choice"),'service worker is not v80');
-assert(worker.includes("const PLAN_LINK_CHOICE_SCRIPT = './patient-plan-link-choice.js?v=plan-link-choice-1';"),'service worker choice cache asset missing');
+assert(worker.includes("const APP_VERSION = '81';")&&worker.includes("kgg-handyplan-v81-kgg-h3-qr"),'service worker is not v81');
+assert(worker.includes("const PLAN_LINK_CHOICE_SCRIPT = './patient-plan-link-choice.js?v=plan-link-choice-2-kgg-h3';"),'service worker choice cache asset missing');
 assert(worker.includes("url.pathname.endsWith('/patient-plan-link-choice.js')"),'service worker choice delivery route missing');
 assert(slots.includes('function addPlan(raw)')&&slots.includes('addPlan'), 'existing add bridge is missing');
 assert(scan.includes('replacePlan(nextRaw,options)')&&scan.includes('replaceConfirmed:nextRaw=>replacePlan(nextRaw,{confirmed:true})'),'existing replace bridge is missing');

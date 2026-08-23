@@ -54,10 +54,10 @@ def validate_static_compatibility(manifest:dict,version:str)->None:
  if '<link rel="icon" type="image/png" sizes="192x192" href="./kgg-icon-192-v63.png">' not in html:fail("index.html is missing the first-load icon")
  if '<link rel="apple-touch-icon" sizes="192x192" href="./kgg-icon-192-v63.png">' not in html:fail("index.html is missing the first-load Apple icon")
  scripts=(
-  "./patient-plan-link-choice.js?v=plan-link-choice-1",
+  "./patient-plan-link-choice.js?v=plan-link-choice-2-kgg-h3",
   "./collapse-cards.js?v=plan-update-label-2-progress-visible",
   "./patient-card-progress.js?v=card-progress-2-complete-fields",
-  "./patient-install-guide.js?v=install-guide-v2-query-plan-ios",
+  "./patient-install-guide.js?v=install-guide-v81-ios-kgg-h3",
   "./patient-install-prompt.js?v=install-prompt-1-shared-reference",
   "./patient-plan-replace-slot-fix.js?v=active-slot-1",
   "./patient-start-scan.js?v=plan-replace-1",
