@@ -60,7 +60,7 @@ def validate_static_compatibility(manifest:dict,version:str)->None:
   "./patient-install-guide.js?v=install-guide-v81-ios-kgg-h3",
   "./patient-install-prompt.js?v=install-prompt-1-shared-reference",
   "./patient-plan-replace-slot-fix.js?v=active-slot-1",
-  "./patient-start-scan.js?v=plan-replace-1",
+  "./patient-start-scan.js?v=start-scan-v81-kgg-h3",
   "./patient-multiplan-db.js?v=lossless-media-plans-1",
   "./patient-plan-delete.js?v=plan-delete-3-red-x-rename",
   "./patient-card-settings.js?v=card-settings-2-no-thumb-padding",

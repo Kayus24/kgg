@@ -149,6 +149,15 @@ def run_patient_plan_link_choice_smoke() -> None:
     run([node_executable(), "release-pipeline/kgg_patient_plan_link_choice_smoke.js"])
 
 
+def run_patient_qr_v81_smoke() -> None:
+    npm = npm_executable()
+    if not npm:
+        raise BatteryError("npm not found. Install npm or set KGG_NPM for the patient QR v81 browser smoke.")
+    log("== Patient KGGH2/KGGH3 link and scanner format smoke ==")
+    for script in ("kgg_patient_scan_format_smoke.js", "kgg_ios_start_smoke.js"):
+        run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "node", f"release-pipeline/{script}"])
+
+
 def run_patient_day_flow_browser() -> None:
     global PATIENT_SCAN_PREPARED
     npm = npm_executable()
@@ -684,6 +693,13 @@ TEST_REGISTRY = [
         "suite": "patient-plan",
         "reason": "A second direct patient-plan link must ask before adding, replacing or cancelling without overwriting the active plan.",
         "run": run_patient_plan_link_choice_smoke,
+    },
+    {
+        "id": "patient-qr-format-v81-critical",
+        "level": "critical",
+        "suite": "patient-qr",
+        "reason": "KGGH2 and KGGH3 patient links, iOS start routing and scanner validation must preserve the complete synthetic plan before device testing.",
+        "run": run_patient_qr_v81_smoke,
     },
     {
         "id": "selftest-gate-critical",

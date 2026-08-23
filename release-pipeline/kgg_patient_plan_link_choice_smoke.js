@@ -27,7 +27,7 @@ assert(worker.includes("const APP_VERSION = '81';")&&worker.includes("kgg-handyp
 assert(worker.includes("const PLAN_LINK_CHOICE_SCRIPT = './patient-plan-link-choice.js?v=plan-link-choice-2-kgg-h3';"),'service worker choice cache asset missing');
 assert(worker.includes("url.pathname.endsWith('/patient-plan-link-choice.js')"),'service worker choice delivery route missing');
 assert(slots.includes('function addPlan(raw)')&&slots.includes('addPlan'), 'existing add bridge is missing');
-assert(scan.includes('replacePlan(nextRaw,options)')&&scan.includes('replaceConfirmed:nextRaw=>replacePlan(nextRaw,{confirmed:true})'),'existing replace bridge is missing');
+assert(scan.includes('replacePlan(nextRaw,options)')&&scan.includes('replaceConfirmed:nextRaw=>validPlan(nextRaw)&&replacePlan(nextRaw,{confirmed:true})'),'existing replace bridge is missing');
 
 class FakeStorage{
   constructor(){this.data=new Map()}

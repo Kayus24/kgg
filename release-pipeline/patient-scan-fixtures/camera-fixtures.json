@@ -1,11 +1,16 @@
 {
-  "version": "patient-scan-camera-v4-main-baseline",
+  "version": "patient-scan-camera-v5-kgg-h3",
   "seed": 24061986,
   "referencePayloads": [
     {
       "id": "compact-kgg-h2",
       "format": "raw-kgg-h2",
       "fixture": "canonical-compact.png"
+    },
+    {
+      "id": "compact-kgg-h3",
+      "format": "zlib-base64url-kgg-h3",
+      "fixture": "generated-in-memory"
     },
     {
       "id": "realistic-urlencoded-plan-link",
