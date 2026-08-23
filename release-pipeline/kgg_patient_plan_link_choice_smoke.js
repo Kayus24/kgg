@@ -21,7 +21,8 @@ assert((index.match(/patient-plan-link-choice\.js\?v=plan-link-choice-2-kgg-h3/g
 assert(index.indexOf('patient-plan-link-choice.js')<index.indexOf('load();</script>'),'choice helper is not loaded before patient boot');
 assert((index.match(/patient-version-label\.js\?v=81/g)||[]).length===1,'index version label is not v81');
 assert(!ios.includes('localStorage.setItem(K,JSON.stringify({plan:'),'ios-start still overwrites the current plan');
-assert(ios.includes("go(String(x).replace(/^KGGH2:/,''))"),'ios-start no longer forwards through the KGGH2 hash path');
+assert(ios.includes('./vendor/fflate-0.8.3.js?v=fflate-0.8.3')&&ios.includes('./patient-qr-format.js?v=v81-kgg-h3-plan-format'),'ios-start local KGGH3 codec assets missing');
+assert(ios.includes('encodeKggH3')&&!ios.includes("go(String(x).replace(/^KGGH2:/,''))"),'ios-start does not forward through the KGGH3 hash path');
 assert(worker.includes("const APP_VERSION = '81';")&&worker.includes("kgg-handyplan-v81-kgg-h3-qr"),'service worker is not v81');
 assert(worker.includes("const PLAN_LINK_CHOICE_SCRIPT = './patient-plan-link-choice.js?v=plan-link-choice-2-kgg-h3';"),'service worker choice cache asset missing');
 assert(worker.includes("url.pathname.endsWith('/patient-plan-link-choice.js')"),'service worker choice delivery route missing');
