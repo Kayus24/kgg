@@ -260,6 +260,13 @@
     .patientQrOutput #patientAppLink{order:2}
     .patientQrOutput #copyPatientLink{order:3;width:100%;margin-top:8px}
     .patientQrOutput #patientLinkCopyField{order:4}
+    .patientRootFallback{order:5;margin-top:14px;padding:12px;border:1px solid var(--line);border-radius:16px;background:#f7fafc}
+    .patientRootFallback[hidden]{display:none!important}
+    .patientRootFallback>p{margin:6px 0;color:var(--muted);font-size:12px}
+    .patientRootFallback .patientRootQrBox{min-height:0!important;margin:8px auto;padding:4px;width:min(100%,220px);background:#fff}
+    .patientRootFallback .patientRootQrBox img{width:100%;max-width:220px}
+    .patientRootFallback .patientLink{margin-top:8px}
+    .patientRootAppAddress{display:block;width:100%;box-sizing:border-box;margin-top:8px;padding:9px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font:700 12px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace}
     .patientShareActions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:8px}
     .patientShareActions .patientLink,
     .patientShareActions .mutedBtn{margin-top:0;min-height:48px;display:grid;place-items:center}

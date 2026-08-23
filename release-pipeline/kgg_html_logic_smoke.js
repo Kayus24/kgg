@@ -9,6 +9,8 @@ const vm = require("vm");
 const ROOT = path.resolve(__dirname, "..");
 const HTML_PATH = path.join(ROOT, "kgg-update", "index.html");
 const ROOT_PATIENT_HTML_PATH = path.join(ROOT, "index.html");
+const KGG_FFLATE_PATH = path.join(ROOT, "vendor", "fflate-0.8.3.js");
+const KGG_FORMAT_PATH = path.join(ROOT, "patient-qr-format.js");
 const BOOT_MARKER = "  /* KGG_LOGIC_SMOKE_BOOT_BOUNDARY */";
 
 function fail(message) {
@@ -229,6 +231,7 @@ function createContext() {
   };
 
   Object.assign(window, { TextEncoder, TextDecoder });
+  window.fflate = require(KGG_FFLATE_PATH);
 
   const context = {
     window,
@@ -259,6 +262,7 @@ function createContext() {
 function runInsideApp(testCode) {
   const context = createContext();
   vm.createContext(context);
+  vm.runInContext(fs.readFileSync(KGG_FORMAT_PATH, "utf8"), context, { filename: "patient-qr-format.js#logic-smoke" });
   const source = `${readMainAppScript()}
   function assert(condition,message){ if(!condition) throw new Error(message||'assertion failed'); }
   render=function(){};
@@ -448,18 +452,24 @@ function syncSuite() {
 }
 
 function patientQrCriticalSuite() {
+  const therapistHtml = fs.readFileSync(HTML_PATH, "utf8");
   const rootPatientHtml = fs.readFileSync(ROOT_PATIENT_HTML_PATH, "utf8");
   assert(rootPatientHtml.includes("function parseQueryPlan()"), "root patient app must parse ?plan query links directly");
   assert(rootPatientHtml.includes("new URLSearchParams(location.search)"), "root patient app must read location.search");
   assert(rootPatientHtml.includes("source:source||'link'"), "root patient app should persist the plan source");
   assert(rootPatientHtml.includes("planSource='query'"), "root patient app must prioritize query-plan imports over stored plans");
   assert(!rootPatientHtml.includes("media-inline-bundle-7"), "root patient app still references old media-inline-bundle-7 cache marker");
+  assert(therapistHtml.includes('id="patientRootFallback"') && therapistHtml.includes('id="patientRootAppAddress"'), "therapist output must offer the payload-free public app-address fallback");
   return runInsideApp(`
     assert(typeof buildPatientShareFromCurrentPlan==='function','patient share builder missing');
     assert(typeof makeKggH2ShareUrl==='function','KGGH2 share URL helper missing');
+    assert(typeof makeKggH3ShareUrl==='function','KGGH3 share URL helper missing');
+    assert(window.KGGPlanFormat&&typeof window.KGGPlanFormat.decodePlanText==='function','local KGGH3 codec missing in therapist app');
     assert(typeof KGG_PATIENT_LATEST_BASE_URL==='string','latest patient base constant missing');
     assert(KGG_PATIENT_LATEST_BASE_URL==='https://kayus24.github.io/kgg/','unexpected latest patient base URL: '+KGG_PATIENT_LATEST_BASE_URL);
     assert(patientBaseUrl===KGG_PATIENT_LATEST_BASE_URL,'patientBaseUrl default does not use latest base');
+    assert(typeof patientRootAppUrl==='function','small public app-address fallback helper missing');
+    assert(patientRootAppUrl()===KGG_PATIENT_LATEST_BASE_URL && !patientRootAppUrl().includes('?plan='),'app-address fallback must contain no personal plan payload');
     assert(!patientBaseUrl.includes('media-inline-bundle-7'),'old patient root bundle leaked into default patient base URL');
     const plan={
       id:'patient_qr_smoke',
@@ -469,16 +479,21 @@ function patientQrCriticalSuite() {
     };
     const share=buildPatientShareFromCurrentPlan(plan,{ttlSeconds:3600});
     assert(share.shareable===true,'patient share should be shareable with latest public base');
-    assert(share.url.startsWith('https://kayus24.github.io/kgg/?plan=KGGH2%3A'),'patient URL points to wrong base or encoding: '+share.url);
+    assert(share.url.startsWith('https://kayus24.github.io/kgg/?plan=KGGH3%3A'),'new patient URL must use KGGH3: '+share.url);
     assert(!share.url.includes('kgg-update/index.html'),'patient URL must not use therapist/update HTML path: '+share.url);
     assert(!share.url.includes('/therapist-app/'),'patient URL must not use therapist release path: '+share.url);
     assert(!share.url.includes('/releases/'),'patient URL must not use immutable therapist release path: '+share.url);
     assert(!share.url.includes('media-inline-bundle-7'),'patient URL still points to old root bundle: '+share.url);
     const parsed=new URL(share.url);
-    const encoded=parsed.searchParams.get('plan').replace(/^KGGH2:/,'');
-    const decoded=convertKggH2PayloadToPatientPayload(decodeKggJsonBase64Url(encoded));
+    const generatedCode=parsed.searchParams.get('plan');
+    assert(/^KGGH3:/i.test(generatedCode),'generated patient URL has no KGGH3 code');
+    const decoded=convertKggH2PayloadToPatientPayload(window.KGGPlanFormat.decodePlanText(generatedCode).raw);
     assert(decoded.plan.length===1 && decoded.plan[0].name==='Rudern','patient QR payload decode mismatch');
-    window.__results={suite:'patient-qr-critical',base:patientBaseUrl,urlPrefix:share.url.split('?')[0],exercise:decoded.plan[0].name};
+    const legacy=makeKggH2ShareUrl(patientBaseUrl,share.publicPayload);
+    assert(legacy.includes('?plan=KGGH2%3A'),'legacy KGGH2 helper must remain available');
+    const legacyCode=new URL(legacy).searchParams.get('plan');
+    assert(convertKggH2PayloadToPatientPayload(window.KGGPlanFormat.decodePlanText(legacyCode).raw).plan[0].name==='Rudern','legacy KGGH2 decode mismatch');
+    window.__results={suite:'patient-qr-critical',base:patientBaseUrl,urlPrefix:share.url.split('?')[0],format:'KGGH3',exercise:decoded.plan[0].name};
   `);
 }
 

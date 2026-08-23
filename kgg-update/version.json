@@ -1,7 +1,7 @@
 {
-  "versionCode": 71,
-  "versionName": "1.0.71-pdf-global-exercise-numbering",
-  "indexUrl": "index.html?v=71",
-  "sha256": "41af0dde6445862671776e49a0960262d8c6b7927a82301cf03e5665c13617e5",
-  "notes": "v071: Nummeriert Übungen in mehrseitigen Papierplänen über alle Seiten hinweg fortlaufend."
+  "versionCode": 81,
+  "versionName": "1.0.81-qr-full-plan-device-ladder",
+  "indexUrl": "index.html?v=81",
+  "sha256": "6f7bf47fb12b1fcf4fc1d910a06cea5043cf73ec65c57fcce055ad92e57b584d",
+  "notes": "v081: Vollständige persönliche KGGH3-Plan-QRs mit lokalem fflate 0.8.3, KGGH2-Rückwärtslesbarkeit und gestuftem Scanner-Test."
 }

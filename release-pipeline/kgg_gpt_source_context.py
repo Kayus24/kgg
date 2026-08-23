@@ -66,7 +66,7 @@ AREA_ROUTES = [
     {
         "id": "qr-patient",
         "triggers": ["qr", "patient", "patienten-app", "plan qr"],
-        "markers": ["finishWithPatientApp", "KGGH2", "tryApplyKggSetupFromHash", "openKggTherapistAppOnlyQr", "handleQrRaw"],
+        "markers": ["finishWithPatientApp", "KGGH2", "KGGH3", "makeKggH3ShareUrl", "tryApplyKggSetupFromHash", "openKggTherapistAppOnlyQr", "handleQrRaw"],
         "tests": [
             "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
             "cmd /c release-pipeline\\run-kgg-tests.cmd --suite patient-scan --level regression",

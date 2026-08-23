@@ -8,6 +8,7 @@ const { chromium } = require("playwright");
 
 const ROOT = path.resolve(__dirname, "..");
 const HTML_PATH = path.join(ROOT, "kgg-update", "index.html");
+const fflate = require(path.join(ROOT, "vendor", "fflate-0.8.3.js"));
 const PATCH_ID = "kgg-v061-cross-app-live-qr-camera";
 const TOTAL_TIMEOUT_MS = Number(process.env.KGG_CAMERA_QR_TOTAL_TIMEOUT_MS || 180000);
 const CASE_TIMEOUT_MS = Number(process.env.KGG_CAMERA_QR_CASE_TIMEOUT_MS || 30000);
@@ -77,13 +78,16 @@ function encodePlan(plan) {
   return Buffer.from(JSON.stringify(plan), "utf8").toString("base64url");
 }
 
-const QR_RAW = `KGGH2:${encodePlan({
+const PLAN_PAYLOAD = {
   i: "admin-live-camera-test",
   t: "Admin Live Camera Test",
   v: 1,
   d: 6,
   e: [["Rudern", 3, "B", "kg", "Wdh", "20", "12", "", "", "", "exercise"]],
-})}`;
+};
+const QR_RAW_H2 = `KGGH2:${encodePlan(PLAN_PAYLOAD)}`;
+const QR_RAW_H3 = `KGGH3:${Buffer.from(fflate.zlibSync(fflate.strToU8(JSON.stringify(PLAN_PAYLOAD)))).toString("base64url")}`;
+const QR_RAW = QR_RAW_H3;
 
 function cameraInitScript(mode, detectorRaw) {
   return `(() => {
@@ -208,6 +212,23 @@ async function runBarcodeCase(browser) {
   }
 }
 
+async function runLegacyH2Case(browser) {
+  const { context, page } = await createPage(browser, "barcode", QR_RAW_H2);
+  try {
+    await page.evaluate(() => { window.KGGScan.pick("camera"); });
+    await page.waitForFunction(() => {
+      const state = window.KGGScan.getState();
+      return state.jobs.some((job) => job.type === "qr" && job.hasResult);
+    }, null, { timeout: 10000 });
+    const result = await page.evaluate(() => ({ ...window.__kggAdminCameraTest }));
+    assert(result.detectorAttempts >= 1, "KGGH2 compatibility camera path did not use BarcodeDetector");
+    assert(result.trackStops >= 1, "KGGH2 compatibility camera path did not stop the stream");
+    return { id: "kggh2-compatibility-auto-transfer", status: "pass", decoderAttempts: result.detectorAttempts };
+  } finally {
+    await closeContext(context, page, "KGGH2 context");
+  }
+}
+
 async function runJsQrFallbackCase(browser) {
   const { context, page } = await createPage(browser, "jsqr");
   try {
@@ -309,6 +330,7 @@ async function main() {
   try {
     const results = [];
     results.push(await runCase("barcode-detector-auto-transfer", () => runBarcodeCase(activeBrowser)));
+    results.push(await runCase("kggh2-compatibility-auto-transfer", () => runLegacyH2Case(activeBrowser)));
     results.push(await runCase("local-jsqr-auto-transfer", () => runJsQrFallbackCase(activeBrowser)));
     results.push(await runCase("permission-system-camera-fallback", () => runPermissionFallbackCase(activeBrowser)));
     results.push(await runCase("manual-paper-shutter", () => runManualCaptureCase(activeBrowser)));
