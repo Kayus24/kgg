@@ -139,6 +139,27 @@ def run_patient_scan_camera() -> None:
     run([node_executable(), "release-pipeline/kgg_patient_scan_camera_smoke.js"])
 
 
+def run_patient_qr_v81_device_ladder() -> None:
+    global PATIENT_SCAN_PREPARED
+    npm = npm_executable()
+    if not npm:
+        raise BatteryError("npm not found. Install npm or set KGG_NPM for the patient QR v81 device ladder.")
+    if not PATIENT_SCAN_PREPARED:
+        run([npm, "--prefix", "release-pipeline", "ci", "--ignore-scripts"])
+        if os.environ.get("KGG_SKIP_PLAYWRIGHT_INSTALL") != "1":
+            run(
+                [
+                    node_executable(),
+                    "release-pipeline/node_modules/playwright/cli.js",
+                    "install",
+                    "chromium",
+                ]
+            )
+        PATIENT_SCAN_PREPARED = True
+    log("== Patient QR v81 full-plan device ladder ==")
+    run([node_executable(), "release-pipeline/kgg_patient_qr_v81_device_ladder.js"])
+
+
 def run_patient_day_flow_smoke() -> None:
     log("== Patient continuous day-flow critical smoke ==")
     run([node_executable(), "release-pipeline/kgg_patient_continuous_days_smoke.js"])
@@ -742,6 +763,13 @@ TEST_REGISTRY = [
         "suite": "patient-scan",
         "reason": "Patient plan QR photos and synthetic camera streams must reach the parser and preserve existing plan data.",
         "run": run_patient_scan_camera,
+    },
+    {
+        "id": "patient-qr-v81-device-ladder-regression",
+        "level": "regression",
+        "suite": "patient-scan",
+        "reason": "Full KGGH3 plans must survive synthetic 1/3/7/12/20 diagnostics, native/jsQR fallback, device profiles and QR photo/lifecycle paths.",
+        "run": run_patient_qr_v81_device_ladder,
     },
     {
         "id": "admin-camera-qr-regression",
