@@ -1,10 +1,3 @@
-# KGG Patient Source Chunk 023
-
-- Source file: `patient-plan-link-choice.js`
-- Characters: 1-9118
-- Full source SHA-256: `05fb20bdfcd7274b2a48609d5650b2ad8654b539ea9af48917c9df4e96d85ad1`
-
-```
 (()=>{
   const VERSION='v80-plan-link-choice';
   const CURRENT_KEY='kggCurrentPlanV1';
@@ -141,4 +134,3 @@
     else scheduleDialog();
   }
 })();
-```

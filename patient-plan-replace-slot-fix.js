@@ -146,6 +146,20 @@
     queueRefresh();
     return true;
   }
+  function addPlan(raw){
+    if(!raw||typeof raw!=='object'||!Array.isArray(raw.e))return false;
+    if(addSession)cancelAdd();
+    beginAdd();
+    addSession.captured=clone(raw);
+    writeAddedCurrent(CURRENT_KEY);
+    const added=finishAdd(MULTI_KEY);
+    if(added){
+      try{save()}catch(e){}
+      try{render()}catch(e){}
+      try{[80,300,900].forEach(delay=>setTimeout(()=>{window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.render&&window.KGGPatientMediaRetryCache.render()},delay))}catch(e){}
+    }
+    return added;
+  }
 
   JSON.parse=function(text,reviver){
     const value=nativeParse.call(JSON,text,reviver);
@@ -227,7 +241,8 @@
     applyAddState,
     nextPlanNumber,
     beginAdd,
-    cancelAdd
+    cancelAdd,
+    addPlan
   };
   installDomBridge();
 })();

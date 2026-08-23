@@ -1,5 +1,14 @@
 # Patient App Changelog
 
+## 2026-08-23 – v80 Auswahl beim Öffnen eines zweiten Plan-Links
+
+### Changed
+
+- Wenn bereits ein anderer Trainingsplan gespeichert ist, fragt ein app-eigener Dialog vor dem Import nach: zusätzlichen Plan hinzufügen, aktiven Plan ersetzen oder abbrechen.
+- Der vorhandene Plan und seine Werte werden vor der Auswahl nicht überschrieben.
+- Query-, Hash- und iOS-Startlinks verwenden dieselbe Entscheidung; ein kurzer Pending-Import bleibt bei einem Reload bis zu fünf Minuten erhalten.
+- Die sichtbare Patienten-App-Version und der Service-Worker stehen auf v80.
+
 ## 2026-08-21 – v79 Plan-Namen verwalten
 
 ### Changed

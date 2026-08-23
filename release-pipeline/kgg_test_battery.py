@@ -144,6 +144,11 @@ def run_patient_day_flow_smoke() -> None:
     run([node_executable(), "release-pipeline/kgg_patient_continuous_days_smoke.js"])
 
 
+def run_patient_plan_link_choice_smoke() -> None:
+    log("== Patient plan-link choice critical smoke ==")
+    run([node_executable(), "release-pipeline/kgg_patient_plan_link_choice_smoke.js"])
+
+
 def run_patient_day_flow_browser() -> None:
     global PATIENT_SCAN_PREPARED
     npm = npm_executable()
@@ -672,6 +677,13 @@ TEST_REGISTRY = [
         "suite": "patient-day-flow",
         "reason": "Continuous patient plans must advance beyond their original day horizon without dropping T13+ state.",
         "run": run_patient_day_flow_smoke,
+    },
+    {
+        "id": "patient-plan-link-choice-critical",
+        "level": "critical",
+        "suite": "patient-plan",
+        "reason": "A second direct patient-plan link must ask before adding, replacing or cancelling without overwriting the active plan.",
+        "run": run_patient_plan_link_choice_smoke,
     },
     {
         "id": "selftest-gate-critical",

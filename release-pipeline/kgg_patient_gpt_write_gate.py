@@ -71,6 +71,7 @@ RUNTIME_EXACT = {
 }
 MODULE_SCRIPT_PATTERN = re.compile(r'<script src="(?P<src>\./[^"?]+\.js(?:\?[^"?]+)?)"></script>')
 DIRECT_FIRST_LOAD_MODULES = (
+    "patient-plan-link-choice.js",
     "collapse-cards.js",
     "patient-card-progress.js",
     "patient-install-guide.js",
