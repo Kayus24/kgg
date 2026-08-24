@@ -32,6 +32,8 @@ import android.util.Base64;
 import android.webkit.ValueCallback;
 import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -132,6 +134,7 @@ public class MainActivity extends Activity {
     private String nextFileChooserMode = "";
     private boolean pendingForceCamera;
     private KggReleaseController releaseController;
+    private KggLiveKeyBridge liveKeyBridge;
     private final Handler previewStatusHandler = new Handler(Looper.getMainLooper());
     private final AtomicBoolean previewStatusRequestRunning = new AtomicBoolean(false);
     private boolean previewStatusPolling;
@@ -171,6 +174,7 @@ public class MainActivity extends Activity {
         configureSystemBars();
         webView = new WebView(this);
         setContentView(webView);
+        liveKeyBridge = new KggLiveKeyBridge(this, webView);
         configureWebView();
         configureBackHandling();
         rollbackUnhealthyPendingUpdate();
@@ -225,7 +229,19 @@ public class MainActivity extends Activity {
     @Override
     protected void onPause() {
         stopPreviewStatusPolling();
+        if (liveKeyBridge != null) {
+            liveKeyBridge.onPause();
+        }
         super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        detachLiveKeyBridge();
+        if (liveKeyBridge != null) {
+            liveKeyBridge.onDestroy();
+        }
+        super.onDestroy();
     }
 
     private void configurePreviewStatusMonitoring() {
@@ -283,10 +299,44 @@ public class MainActivity extends Activity {
         releaseController = KggReleaseControllerFactory.attach(this, webView);
         webView.setWebViewClient(new WebViewClient() {
             @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                detachLiveKeyBridge();
+                super.onPageStarted(view, url, favicon);
+            }
+
+            @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 injectAssetScript("android/kgg_android_sync_bootstrap.js");
                 KggReleaseControllerFactory.onPageFinished(MainActivity.this);
+                if (isTrustedKggPage(url)) {
+                    attachLiveKeyBridge(url);
+                } else {
+                    detachLiveKeyBridge();
+                }
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if (!isTrustedKggPage(url)) {
+                    detachLiveKeyBridge();
+                }
+                return false;
+            }
+
+            @Override
+            public void onReceivedError(
+                    WebView view,
+                    WebResourceRequest request,
+                    WebResourceError error
+            ) {
+                if (request == null || request.isForMainFrame()) {
+                    if (liveKeyBridge != null) {
+                        liveKeyBridge.onError();
+                    }
+                    detachLiveKeyBridgeInterface();
+                }
+                super.onReceivedError(view, request, error);
             }
         });
         webView.setWebChromeClient(new WebChromeClient() {
@@ -697,6 +747,42 @@ public class MainActivity extends Activity {
             return Uri.fromFile(current).toString();
         }
         return "file:///android_asset/" + bundledAppAsset();
+    }
+
+    private boolean isTrustedKggPage(String url) {
+        return KggLiveBridgePolicy.isTrustedPageUrl(url, localWebAppUrl());
+    }
+
+    private void attachLiveKeyBridge(String url) {
+        if (webView == null || liveKeyBridge == null) {
+            return;
+        }
+        String trustedUrl = localWebAppUrl();
+        if (!KggLiveBridgePolicy.isTrustedPageUrl(url, trustedUrl)) {
+            detachLiveKeyBridge();
+            return;
+        }
+        try {
+            webView.removeJavascriptInterface(KggLiveKeyBridge.JS_NAME);
+            liveKeyBridge.activateForPage(url, trustedUrl);
+            webView.addJavascriptInterface(liveKeyBridge, KggLiveKeyBridge.JS_NAME);
+        } catch (Exception ignored) {
+            liveKeyBridge.onError();
+            detachLiveKeyBridgeInterface();
+        }
+    }
+
+    private void detachLiveKeyBridge() {
+        if (liveKeyBridge != null) {
+            liveKeyBridge.deactivateForPage();
+        }
+        detachLiveKeyBridgeInterface();
+    }
+
+    private void detachLiveKeyBridgeInterface() {
+        if (webView != null) {
+            webView.removeJavascriptInterface(KggLiveKeyBridge.JS_NAME);
+        }
     }
 
     private boolean isAdminProfile() {
