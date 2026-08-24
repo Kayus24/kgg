@@ -5397,6 +5397,8 @@
     if(cfg2)return {type:'KGGCFG2',json:safeBase64JsonDecode(cfg2[1]),raw:text};
     const cfg1=findCode('KGGCFG1');
     if(cfg1)return {type:'KGGCFG1',json:safeBase64JsonDecode(cfg1[1]),raw:text};
+    const livePair=findCode('KGGLIVEPAIR1');
+    if(livePair)return {type:'KGGLIVEPAIR1',json:{code:'KGGLIVEPAIR1:'+livePair[1]},raw:text};
     const h3=findCode('KGGH3');
     if(h3)return {type:'KGGH3',json:decodeKggPlanCode('KGGH3:'+h3[1]),raw:text};
     const h2=findCode('KGGH2');
@@ -5995,6 +5997,17 @@
           const ok=await applyKggConfigTransferParsed(parsed);
           return {type:ok?'configTransfer':'configTransferCancelled',json:parsed.json};
         }
+        if(parsed&&parsed.type==='KGGLIVEPAIR1'){
+          setScanStatus('QR erkannt: Live-Kopplung wird lokal übergeben ...');
+          const idx=scanState.jobs.indexOf(job);
+          if(idx>=0&&!job.pages.length&&!job.result&&job.status==='new'){
+            scanState.jobs.splice(idx,1);
+            scanState.activeIndex=Math.max(0,Math.min(scanState.activeIndex,scanState.jobs.length-1));
+          }
+          if(!window.KGGLiveSync||typeof window.KGGLiveSync.handleScannedText!=='function')throw new Error('Live-Sync ist nicht verfügbar.');
+          const handled=await window.KGGLiveSync.handleScannedText(parsed.raw||raw,{source:'therapist-scanner'});
+          return {type:handled?'livePairing':'livePairingError'};
+        }
         if(parsed&&(parsed.type==='KGGSYNC1'||parsed.type==='KGGSYNC2')){
           setScanStatus(parsed.type==='KGGSYNC2'?'QR erkannt: Sync-Verbindung mit Daten wird gelesen ...':'QR erkannt: Sync-Kopplung wird gespeichert ...');
           const idx=scanState.jobs.indexOf(job);
@@ -6436,7 +6449,7 @@
         let acceptedCount=0;
         for(const file of files){
           const accepted=await scanAcceptFile(file,normalizedKind);
-          if(accepted&&(accepted.type==='syncInvite'||accepted.type==='syncBundle'))syncCodeCount++;
+          if(accepted&&(accepted.type==='syncInvite'||accepted.type==='syncBundle'||accepted.type==='livePairing'||accepted.type==='livePairingError'))syncCodeCount++;
           else if(accepted)acceptedCount++;
         }
         if(syncCodeCount&&!acceptedCount){
@@ -6471,7 +6484,7 @@
       try{
         const accepted=await scanAcceptQrRaw(value,null,{source:String(source||'live-camera')},true);
         if(!accepted||accepted.type==='invalidQr')return accepted||{type:'invalidQr',error:'unknown'};
-        if(accepted.type==='syncInvite'||accepted.type==='syncBundle'||accepted.type==='configTransfer'||accepted.type==='configTransferCancelled'){
+        if(accepted.type==='syncInvite'||accepted.type==='syncBundle'||accepted.type==='livePairing'||accepted.type==='livePairingError'||accepted.type==='configTransfer'||accepted.type==='configTransferCancelled'){
           scanState.decision=false;
           state.scanPanelOpen='plan';
         }else{

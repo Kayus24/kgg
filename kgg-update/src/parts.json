@@ -45,6 +45,7 @@
     "runtime/fflate-0.8.3.html",
     "runtime/kgg-plan-format.html",
     "runtime/app-core.html",
+    "runtime/kgg-live-sync.html",
     "features/phone-state-guards.html",
     "features/qr-gallery-wrapper.html",
     "features/admin-release-center.html",
