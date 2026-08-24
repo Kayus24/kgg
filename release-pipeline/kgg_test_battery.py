@@ -173,12 +173,18 @@ def run_patient_plan_link_choice_smoke() -> None:
 
 
 def run_patient_qr_v81_smoke() -> None:
+    global PATIENT_SCAN_PREPARED
     npm = npm_executable()
     if not npm:
         raise BatteryError("npm not found. Install npm or set KGG_NPM for the patient QR v81 browser smoke.")
+    if not PATIENT_SCAN_PREPARED:
+        run([npm, "--prefix", "release-pipeline", "ci", "--ignore-scripts"])
+        if os.environ.get("KGG_SKIP_PLAYWRIGHT_INSTALL") != "1":
+            run([node_executable(), "release-pipeline/node_modules/playwright/cli.js", "install", "chromium"])
+        PATIENT_SCAN_PREPARED = True
     log("== Patient KGGH2/KGGH3 link and scanner format smoke ==")
     for script in ("kgg_patient_scan_format_smoke.js", "kgg_ios_start_smoke.js"):
-        run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "node", f"release-pipeline/{script}"])
+        run([node_executable(), f"release-pipeline/{script}"])
 
 
 def run_patient_day_flow_browser() -> None:
