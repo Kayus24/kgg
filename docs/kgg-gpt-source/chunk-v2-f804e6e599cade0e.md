@@ -1,4 +1,13 @@
-<script type="application/json" id="kgg-source-truth">
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<!--
+KGG INTERNAL SOURCE TRUTH — READ THIS FIRST
+
+Machine-readable app state, patch rules, and changelog are embedded near the top of this HTML.
+Before editing this app, any LLM/agent/human should read these blocks:
+1. <script type="application/json" id="kgg-source-truth">
 {
   "schema": 1,
   "app": "KGG Plan",
@@ -45,25 +54,27 @@
     "plan-text-boot-restore",
     "plan-text-recovery-finalize",
     "tablet-package-save",
-    "pdf-global-exercise-numbering"
+    "pdf-global-exercise-numbering",
+    "qr-full-plan-device-ladder"
   ],
   "currentVersion": {
-    "versionCode": 71,
-    "versionName": "1.0.71-pdf-global-exercise-numbering",
-    "lastPatchId": "kgg-v071-pdf-global-exercise-numbering",
+    "versionCode": 81,
+    "versionName": "1.0.81-qr-full-plan-device-ladder",
+    "lastPatchId": "kgg-v081-qr-full-plan-device-ladder",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v071-pdf-global-exercise-numbering",
+  "latestPatchId": "kgg-v081-qr-full-plan-device-ladder",
   "lastUpdateIntent": {
-    "id": "kgg-v071-pdf-global-exercise-numbering",
-    "summary": "Nummeriert Übungen in mehrseitigen Papierplänen über alle Seiten hinweg fortlaufend.",
+    "id": "kgg-v081-qr-full-plan-device-ladder",
+    "summary": "Erzeugt vollständige persönliche KGGH3-Plan-QRs mit lokalem fflate-Codec und liest KGGH2/KGGH3 im internen Scanner.",
     "touched": [
-      "PDF",
-      "Papierplan-Nummerierung"
+      "QR/Patienten-App",
+      "KGGH2/KGGH3",
+      "fflate 0.8.3",
+      "Interner QR-Scanner"
     ],
     "notTouched": [
       "PDF",
-      "QR/Patienten-App",
       "Scan/OCR",
       "Parser",
       "Plan-State",
@@ -78,3 +89,4 @@
   }
 }
 </script>
+<!-- END kgg-source-truth -->
