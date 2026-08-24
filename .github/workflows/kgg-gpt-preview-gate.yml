@@ -5,12 +5,13 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: validate_only, publish_preview, create_pr or publish_admin_beta
+        description: validate_only, publish_preview, publish_device_test, create_pr or publish_admin_beta
         required: true
         type: choice
         options:
           - validate_only
           - publish_preview
+          - publish_device_test
           - create_pr
           - publish_admin_beta
       request_id:
@@ -34,6 +35,19 @@ on:
         required: false
         default: ""
         type: string
+      source_sha:
+        description: Exact pushed source commit; required only for publish_device_test
+        required: false
+        default: ""
+        type: string
+      device_test_profile:
+        description: Physical dual-device test profile
+        required: false
+        default: quick
+        type: choice
+        options:
+          - quick
+          - full
   workflow_call:
     inputs:
       mode:
@@ -52,6 +66,14 @@ on:
       approval_phrase:
         required: false
         default: ""
+        type: string
+      source_sha:
+        required: false
+        default: ""
+        type: string
+      device_test_profile:
+        required: false
+        default: quick
         type: string
 
 permissions:
@@ -73,12 +95,33 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       PAYLOAD_JSON: ${{ inputs.payload_json }}
     steps:
-      - name: Checkout canonical main source
+      - name: Checkout canonical main source or pinned device-test source
         uses: actions/checkout@v4
         with:
           path: base
-          ref: main
+          ref: ${{ inputs.mode == 'publish_device_test' && github.ref || 'main' }}
           fetch-depth: 0
+
+      - name: Pin dual-device source commit
+        if: inputs.mode == 'publish_device_test'
+        shell: bash
+        env:
+          KGG_SOURCE_SHA: ${{ inputs.source_sha }}
+          KGG_DEVICE_PROFILE: ${{ inputs.device_test_profile }}
+          KGG_REQUEST_ID: ${{ inputs.request_id }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$KGG_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "source_sha must be a full lowercase commit SHA" >&2
+            exit 1
+          fi
+          if [[ ! "$KGG_REQUEST_ID" =~ ^[a-z0-9][a-z0-9-]{5,63}$ ]]; then
+            echo "request_id contains unsupported characters" >&2
+            exit 1
+          fi
+          actual="$(git -C base rev-parse HEAD)"
+          test "$actual" = "$KGG_SOURCE_SHA"
+          test "$KGG_DEVICE_PROFILE" = 'quick' -o "$KGG_DEVICE_PROFILE" = 'full'
 
       - uses: actions/setup-python@v5
         with:
@@ -89,14 +132,14 @@ jobs:
           node-version: "20"
 
       - name: Checkout complete canonical Admin editor sync contract
-        if: inputs.mode != 'validate_only'
+        if: inputs.mode != 'validate_only' && inputs.mode != 'publish_device_test'
         uses: actions/checkout@v4
         with:
           path: editor-contract
           ref: main
 
       - name: Require verified Admin GPT editor sync for Preview or release writes
-        if: inputs.mode != 'validate_only'
+        if: inputs.mode != 'validate_only' && inputs.mode != 'publish_device_test'
         shell: bash
         run: |
           set -euo pipefail
@@ -107,16 +150,16 @@ jobs:
             --require-live-synced
 
       - uses: actions/setup-java@v4
-        if: inputs.mode == 'publish_preview'
+        if: inputs.mode == 'publish_preview' || inputs.mode == 'publish_device_test'
         with:
           distribution: temurin
           java-version: "17"
 
       - uses: android-actions/setup-android@v3
-        if: inputs.mode == 'publish_preview'
+        if: inputs.mode == 'publish_preview' || inputs.mode == 'publish_device_test'
 
       - uses: gradle/actions/setup-gradle@v4
-        if: inputs.mode == 'publish_preview'
+        if: inputs.mode == 'publish_preview' || inputs.mode == 'publish_device_test'
         with:
           gradle-version: "8.11.1"
 
@@ -131,6 +174,7 @@ jobs:
           pdfinfo -v
 
       - name: Write dispatch payload
+        if: inputs.mode != 'publish_device_test'
         shell: bash
         run: |
           set -euo pipefail
@@ -163,6 +207,7 @@ jobs:
           fi
 
       - name: Preflight guarded GPT payload
+        if: inputs.mode != 'publish_device_test'
         shell: bash
         run: |
           set -euo pipefail
@@ -172,6 +217,7 @@ jobs:
 
       - name: Apply guarded GPT payload
         id: gate
+        if: inputs.mode != 'publish_device_test'
         shell: bash
         run: |
           set -euo pipefail
@@ -194,9 +240,63 @@ jobs:
             --patch-hash '${{ steps.gate.outputs.patch_hash }}' \
             --base-sha "$(git rev-parse HEAD)" \
             --commit-sha "$(git rev-parse HEAD)" \
-            --preview-version '0.2.13-v403-tab-s9-test-station' \
+            --preview-version '0.2.14-v404-dual-device-qr-test' \
             --payload-file "$RUNNER_TEMP/kgg-gpt-payload.json" \
             --output "$RUNNER_TEMP/kgg-preview-context.json"
+
+      - name: Build bounded dual-device job and Preview context
+        id: device_job
+        if: inputs.mode == 'publish_device_test'
+        shell: bash
+        env:
+          KGG_SOURCE_SHA: ${{ inputs.source_sha }}
+          KGG_REQUEST_ID: ${{ inputs.request_id }}
+          KGG_DEVICE_PROFILE: ${{ inputs.device_test_profile }}
+        run: |
+          set -euo pipefail
+          source_sha="$KGG_SOURCE_SHA"
+          request_id="$KGG_REQUEST_ID"
+          profile="$KGG_DEVICE_PROFILE"
+          session_id="kgg-test-$(openssl rand -hex 16)"
+          patch_hash="$(printf '%s' "v404|$request_id|$source_sha|$profile" | sha256sum | cut -d' ' -f1)"
+          patient_pwa_url='https://kayus24.github.io/kgg-patient-preview/device-test/'
+          job_url="https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/device-tests/$request_id/job.json"
+          cd base
+          node release-pipeline/kgg_dual_device_job.js \
+            --request-id "$request_id" \
+            --source-sha "$source_sha" \
+            --patch-hash "$patch_hash" \
+            --session-id "$session_id" \
+            --profile "$profile" \
+            --patient-pwa-url "$patient_pwa_url" \
+            --output "$RUNNER_TEMP/kgg-device-test-job.json"
+          job_hash="$(jq -r .jobHash "$RUNNER_TEMP/kgg-device-test-job.json")"
+          python release-pipeline/kgg_preview_context.py \
+            --request-id "$request_id" \
+            --patch-hash "$patch_hash" \
+            --base-sha "$source_sha" \
+            --commit-sha "$source_sha" \
+            --preview-version '0.2.14-v404-dual-device-qr-test' \
+            --required-test critical \
+            --required-test patient-qr \
+            --required-test patient-scan \
+            --device-test-session-id "$session_id" \
+            --device-test-job-hash "$job_hash" \
+            --device-test-job-url "$job_url" \
+            --patient-pwa-url "$patient_pwa_url" \
+            --device-test-profile "$profile" \
+            --output "$RUNNER_TEMP/kgg-preview-context.json"
+          node release-pipeline/kgg_dual_device_package.js \
+            --source-sha "$source_sha" \
+            --job-file "$RUNNER_TEMP/kgg-device-test-job.json" \
+            --output "$RUNNER_TEMP/kgg-device-test-pwa"
+          {
+            echo "session_id=$session_id"
+            echo "job_hash=$job_hash"
+            echo "patch_hash=$patch_hash"
+            echo "job_url=$job_url"
+            echo "patient_pwa_url=$patient_pwa_url"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Refresh generated GPT context files for PR mode
         if: inputs.mode == 'create_pr' || inputs.mode == 'publish_admin_beta'
@@ -244,13 +344,58 @@ jobs:
           cd base
           python release-pipeline/kgg_test_battery.py --suite patient-scan --level regression
 
+      - name: Run dual-device QR contracts and scanner regressions
+        if: inputs.mode == 'publish_device_test'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          node release-pipeline/kgg_dual_device_job.js --self-test
+          node release-pipeline/kgg_dual_device_package.js --self-test
+          python release-pipeline/test_kgg_dual_device_v404.py
+          python release-pipeline/kgg_test_battery.py --suite patient-scan --level regression
+          python release-pipeline/kgg_test_battery.py --suite camera-qr --level regression
+
       - name: Build fixed Preview APK
-        if: inputs.mode == 'publish_preview'
+        if: inputs.mode == 'publish_preview' || inputs.mode == 'publish_device_test'
         shell: bash
         run: |
           set -euo pipefail
           cd base/android-wrapper
           gradle -PKGG_PREVIEW_CONTEXT_FILE="$RUNNER_TEMP/kgg-preview-context.json" assemblePreviewDebug
+
+      - name: Checkout public patient test PWA repository
+        if: inputs.mode == 'publish_device_test'
+        uses: actions/checkout@v4
+        with:
+          repository: Kayus24/kgg-patient-preview
+          token: ${{ secrets.KGG_PATIENT_AUTOMATION_TOKEN }}
+          path: patient-preview
+          fetch-depth: 0
+
+      - name: Stage public synthetic-only device test files
+        if: inputs.mode == 'publish_device_test'
+        shell: bash
+        env:
+          KGG_REQUEST_ID: ${{ inputs.request_id }}
+        run: |
+          set -euo pipefail
+          mkdir -p "preview/device-tests/$KGG_REQUEST_ID"
+          cp "$RUNNER_TEMP/kgg-device-test-job.json" "preview/device-tests/$KGG_REQUEST_ID/job.json"
+          rm -rf patient-preview/device-test
+          mkdir -p patient-preview/device-test
+          cp -R "$RUNNER_TEMP/kgg-device-test-pwa/." patient-preview/device-test/
+
+      - name: Upload dual-device APK, PWA and job artifacts
+        if: inputs.mode == 'publish_device_test'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgg-dual-device-${{ inputs.request_id }}
+          path: |
+            base/android-wrapper/app/build/outputs/apk/preview/debug/app-preview-debug.apk
+            ${{ runner.temp }}/kgg-device-test-pwa
+            ${{ runner.temp }}/kgg-device-test-job.json
+            ${{ runner.temp }}/kgg-preview-context.json
 
       - name: Upload Preview APK and HTML artifacts
         if: inputs.mode == 'publish_preview'
@@ -283,6 +428,48 @@ jobs:
           {
             echo "Preview HTML: ${{ steps.gate.outputs.preview_url }}"
             echo "Patch hash: ${{ steps.gate.outputs.patch_hash }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish synthetic job channel
+        if: inputs.mode == 'publish_device_test'
+        shell: bash
+        env:
+          KGG_REQUEST_ID: ${{ inputs.request_id }}
+        run: |
+          set -euo pipefail
+          cd preview
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "device-tests/$KGG_REQUEST_ID/job.json"
+          git commit -m "publish dual-device job $KGG_REQUEST_ID"
+          if git ls-remote --exit-code origin refs/heads/gpt-preview >/dev/null 2>&1; then
+            git pull --rebase origin gpt-preview
+          fi
+          git push origin HEAD:gpt-preview
+
+      - name: Publish public token-free patient test PWA
+        if: inputs.mode == 'publish_device_test'
+        shell: bash
+        env:
+          KGG_REQUEST_ID: ${{ inputs.request_id }}
+        run: |
+          set -euo pipefail
+          cd patient-preview
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add device-test
+          if git diff --cached --quiet; then
+            echo "Patient test PWA is already current."
+          else
+            git commit -m "publish patient device test $KGG_REQUEST_ID"
+            git pull --rebase origin "$(git branch --show-current)"
+            git push origin HEAD
+          fi
+          {
+            echo "Patient test PWA: ${{ steps.device_job.outputs.patient_pwa_url }}"
+            echo "Device job: ${{ steps.device_job.outputs.job_url }}"
+            echo "Session: ${{ steps.device_job.outputs.session_id }}"
+            echo "Job hash: ${{ steps.device_job.outputs.job_hash }}"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Create guarded PR from accepted preview

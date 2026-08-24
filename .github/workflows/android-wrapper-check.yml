@@ -4,6 +4,10 @@ on:
   pull_request:
     paths:
       - "android-wrapper/**"
+      - "device-test/**"
+      - "patient-start-scan.js"
+      - "release-pipeline/kgg_dual_device_*.js"
+      - "release-pipeline/test_kgg_dual_device_v404.py"
       - "therapist-app/android_update_manifest.json"
       - ".github/workflows/android-wrapper-check.yml"
 
@@ -34,9 +38,10 @@ jobs:
           unzip -l "$ADMIN_APK" | grep -q 'assets/android/kgg_release_control_bootstrap.js'
           ! unzip -l "$COLLEAGUE_APK" | grep -q 'kgg_release_control_bootstrap.js'
           ! unzip -l "$PREVIEW_APK" | grep -q 'kgg_release_control_bootstrap.js'
-          ! unzip -l "$ADMIN_APK" | grep -Eq 'kgg_device_test_station.js|kgg_preview_context.js'
-          ! unzip -l "$COLLEAGUE_APK" | grep -Eq 'kgg_device_test_station.js|kgg_preview_context.js'
+          ! unzip -l "$ADMIN_APK" | grep -Eq 'kgg_device_test_station.js|kgg_dual_device_fixtures.js|kgg_preview_context.js'
+          ! unzip -l "$COLLEAGUE_APK" | grep -Eq 'kgg_device_test_station.js|kgg_dual_device_fixtures.js|kgg_preview_context.js'
           unzip -l "$PREVIEW_APK" | grep -q 'assets/android/kgg_device_test_station.js'
+          unzip -l "$PREVIEW_APK" | grep -q 'assets/android/kgg_dual_device_fixtures.js'
           unzip -l "$PREVIEW_APK" | grep -q 'assets/android/kgg_preview_context.js'
           unzip -p "$PREVIEW_APK" assets/preview.html > /tmp/preview.html
           grep -q 'KGGDataStore' /tmp/preview.html

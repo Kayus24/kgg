@@ -158,6 +158,8 @@ def run_patient_qr_v81_device_ladder() -> None:
         PATIENT_SCAN_PREPARED = True
     log("== Patient QR v81 full-plan device ladder ==")
     run([node_executable(), "release-pipeline/kgg_patient_qr_v81_device_ladder.js"])
+    run([node_executable(), "release-pipeline/kgg_device_test_station_browser_smoke.js"])
+    run([node_executable(), "release-pipeline/kgg_patient_device_test_agent_smoke.js"])
 
 
 def run_patient_day_flow_smoke() -> None:
@@ -374,7 +376,7 @@ def run_android_wrapper_contract() -> None:
         ("from(\"../../therapist-app/releases/web/r0419/admin.html\")", "Admin APK bundles r0419"),
         ("from(\"../../therapist-app/releases/web/r0419/colleague.html\")", "Colleague APK bundles r0419"),
         ("applicationId \"de.kgg.preview\"", "Preview APK uses a separate package id"),
-        ("manifestPlaceholders = [appLabel: \"KGG Preview\"]", "Preview APK has a distinct launcher label"),
+        ("manifestPlaceholders = [appLabel: \"KGG QR-Teststation\"]", "Preview APK has a distinct v404 test-station label"),
         ("from(\"../../kgg-update/index.html\")", "Preview APK bundles current source HTML"),
         ("assemblePreviewDebug", "Android workflow builds the Preview profile"),
         ("PREVIEW_MANIFEST_URL", "Preview APK loads the GPT preview channel"),
@@ -397,8 +399,8 @@ def run_android_wrapper_contract() -> None:
         ("getCapabilities: function()", "JavaScript bootstrap must expose native camera capabilities"),
         ("android.permission.POST_NOTIFICATIONS", "Preview APK requests Android notification permission"),
         ("KGG_PREVIEW_STATUS_URL", "Preview APK has an isolated workflow status endpoint"),
-        ("versionName defaultPreviewVersion", "Preview flavor has an updateable v403 package version"),
-        ("defaultPreviewVersion = \"0.2.13-v403-tab-s9-test-station\"", "Preview flavor pins the Tab S9 v403 identity"),
+        ("versionName defaultPreviewVersion", "Preview flavor has an updateable v404 package version"),
+        ("defaultPreviewVersion = \"0.2.14-v404-dual-device-qr-test\"", "Preview flavor pins the dual-device v404 identity"),
         ("androidx.work:work-runtime:2.11.2", "Preview status background checks use stable WorkManager"),
         ("KggPreviewStatusWorker", "Preview status has a background worker"),
         ('BuildConfig.DEBUG && protocol.equals("http") && host.equals("10.0.2.2")', "HTTP status access is limited to the debug emulator host"),
@@ -440,8 +442,10 @@ def run_android_wrapper_contract() -> None:
 
 
 def run_tab_s9_test_station_contract() -> None:
-    log("== Tab S9 Preview test-station contract ==")
+    log("== Dual-device v404 Preview test-station contract ==")
     run([sys.executable, "release-pipeline/test_kgg_tab_s9_test_station.py"])
+    run([node_executable(), "release-pipeline/kgg_dual_device_job.js", "--self-test"])
+    run([node_executable(), "release-pipeline/kgg_dual_device_package.js", "--self-test"])
 
 
 def run_gpt_payload_preflight_self_test() -> None:
@@ -646,10 +650,10 @@ TEST_REGISTRY = [
         "run": run_android_wrapper_contract,
     },
     {
-        "id": "tab-s9-test-station-contract",
+        "id": "dual-device-v404-test-station-contract",
         "level": "critical",
         "suite": "android",
-        "reason": "The Preview-only Tab S9 bridge, guided steps, report redaction and fixed Issue host must stay isolated from product flavors.",
+        "reason": "The Preview-only Tab display, real patient scanner observer, synthetic job and fixed private report host must stay isolated and token-free.",
         "run": run_tab_s9_test_station_contract,
     },
     {

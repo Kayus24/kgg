@@ -8,8 +8,6 @@ import android.content.res.Configuration;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
-import android.os.Handler;
 import android.os.Looper;
 import android.view.Display;
 import android.view.Window;
@@ -23,45 +21,34 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/**
- * Preview-only native contract for the Tab S9 test station.
- *
- * The four JavaScript methods are deliberately small. The report input is
- * treated as untrusted: native code keeps only the fixed test ids, statuses,
- * durations and note codes before it persists or opens an issue draft.
- */
+/** Preview-only native boundary for the v404 dual-device QR test station. */
 public final class KggDeviceTestStationBridge {
-    private static final String PREFS = "kgg_device_test_station_v1";
+    private static final String PREFS = "kgg_dual_device_test_station_v2";
     private static final String ACTIVE = "active";
     private static final String SESSION_ID = "session_id";
     private static final String STARTED_AT = "started_at";
-    private static final String REQUEST_ID = "request_id";
-    private static final String PATCH_HASH = "patch_hash";
-    private static final String BASE_SHA = "base_sha";
-    private static final String COMMIT_SHA = "commit_sha";
-    private static final String PREVIEW_VERSION = "preview_version";
-    private static final String APP_VERSION_CODE = "app_version_code";
     private static final String PREVIOUS_KEEP_SCREEN_ON = "previous_keep_screen_on";
     private static final String LAST_REPORT = "last_report";
-
     private static final String REPORT_ISSUE_URL =
             "https://github.com/Kayus24/kgg-device-test-reports/issues/new";
-    private static final int REPORT_SCHEMA_VERSION = 1;
-    private static final int MAX_REPORT_CHARS = 16_000;
-    private static final int MAX_ISSUE_BODY_CHARS = 10_000;
+    private static final int REPORT_SCHEMA_VERSION = 2;
+    private static final int MAX_REPORT_CHARS = 32_000;
+    private static final int MAX_ISSUE_BODY_CHARS = 14_000;
     private static final long MAX_TEST_DURATION_MS = 24L * 60L * 60L * 1000L;
-    private static final String NOT_EXECUTED_NOTE_CODE = "not_executed";
-    private static final String[] TEST_IDS = {
+
+    private static final String[] ADMIN_TEST_IDS = {
             "admin-portrait",
             "admin-landscape",
             "admin-split-screen",
@@ -69,24 +56,37 @@ public final class KggDeviceTestStationBridge {
             "admin-touch-dialog-save",
             "admin-seven-exercises",
             "admin-reorder-save-reload",
-            "patient-first-start",
-            "patient-add-plan",
-            "patient-replace-cancel",
-            "patient-switch-plan",
-            "patient-rename",
-            "patient-values-reload",
-            "patient-offline-restore",
-            "qr-oppo-display",
-            "qr-scan-7",
-            "qr-scan-12",
-            "qr-scan-20",
-            "qr-angle-distance",
-            "qr-weak-photo-fallback",
-            "qr-camera-stop",
     };
-    private static final Map<String, String> NOTE_CODES = createNoteCodes();
-    private static final Set<String> OPTIONAL_TESTS =
-            Collections.singleton("qr-oppo-display");
+    private static final String[] QUICK_FIXTURE_IDS = {
+            "h2-1-baseline",
+            "h2-7-legacy",
+            "h3-7-normal",
+            "h3-12-normal",
+            "h3-20-normal",
+            "h3-20-far-angle",
+    };
+    private static final String[] FULL_FIXTURE_IDS = {
+            "h2-1-baseline",
+            "h2-7-legacy",
+            "h2-12-diagnostic",
+            "h2-20-diagnostic",
+            "h3-7-normal",
+            "h3-12-normal",
+            "h3-20-normal",
+            "h3-20-far-angle",
+            "h3-20-low-contrast",
+            "h3-20-photo",
+    };
+    private static final Map<String, String> NOTE_CODES = noteCodes();
+    private static final Map<String, Integer> FIXTURE_COUNTS = fixtureCounts();
+    private static final Map<String, String> FIXTURE_FORMATS = fixtureFormats();
+    private static final Map<String, String> FIXTURE_VARIANTS = fixtureVariants();
+    private static final Set<String> OPTIONAL_TESTS = Collections.unmodifiableSet(
+            new HashSet<>(Arrays.asList(
+                    "display-h2-12-diagnostic",
+                    "display-h2-20-diagnostic"
+            ))
+    );
 
     private final MainActivity activity;
     private final SharedPreferences preferences;
@@ -104,9 +104,10 @@ public final class KggDeviceTestStationBridge {
         try {
             return deviceInfo().toString();
         } catch (Exception ignored) {
-            return "{\"model\":\"unknown\",\"androidVersion\":\"unknown\","
-                    + "\"webViewVersion\":\"unknown\",\"screen\":{\"width\":0,\"height\":0,"
-                    + "\"orientation\":\"unknown\"}}";
+            return "{\"class\":\"android-tablet\",\"model\":\"unknown\","
+                    + "\"androidVersion\":\"unknown\",\"runtime\":\"unknown\","
+                    + "\"screen\":{\"width\":0,\"height\":0,\"orientation\":\"unknown\"},"
+                    + "\"wakeLock\":\"unknown\"}";
         }
     }
 
@@ -114,27 +115,24 @@ public final class KggDeviceTestStationBridge {
     public String beginSession() {
         synchronized (this) {
             try {
-                if (isActive() && nonEmpty(preferences.getString(SESSION_ID, ""))) {
-                    setKeepScreenOn(true);
-                    return sessionSnapshot(true).toString();
-                }
                 JSONObject context = buildContext();
-                String sessionId = "tab-s9-" + UUID.randomUUID().toString().replace("-", "");
+                String expectedSession = context.getString("sessionId");
+                if (isActive() && expectedSession.equals(preferences.getString(SESSION_ID, ""))) {
+                    setKeepScreenOn(true);
+                    return sessionSnapshot(true, context).toString();
+                }
+                if (isActive()) {
+                    restoreScreenState(preferences.getBoolean(PREVIOUS_KEEP_SCREEN_ON, false));
+                }
                 boolean previousKeepScreenOn = hasKeepScreenOnFlag();
                 preferences.edit()
                         .putBoolean(ACTIVE, true)
-                        .putString(SESSION_ID, sessionId)
+                        .putString(SESSION_ID, expectedSession)
                         .putString(STARTED_AT, utcNow())
-                        .putString(REQUEST_ID, context.getString("requestId"))
-                        .putString(PATCH_HASH, context.getString("patchHash"))
-                        .putString(BASE_SHA, context.getString("baseSha"))
-                        .putString(COMMIT_SHA, context.getString("commitSha"))
-                        .putString(PREVIEW_VERSION, context.getString("previewVersion"))
-                        .putInt(APP_VERSION_CODE, BuildConfig.VERSION_CODE)
                         .putBoolean(PREVIOUS_KEEP_SCREEN_ON, previousKeepScreenOn)
                         .apply();
                 setKeepScreenOn(true);
-                return sessionSnapshot(false).toString();
+                return sessionSnapshot(false, context).toString();
             } catch (Exception ignored) {
                 return error("preview_context_invalid").toString();
             }
@@ -159,20 +157,14 @@ public final class KggDeviceTestStationBridge {
                         .putBoolean(ACTIVE, false)
                         .remove(SESSION_ID)
                         .remove(STARTED_AT)
-                        .remove(REQUEST_ID)
-                        .remove(PATCH_HASH)
-                        .remove(BASE_SHA)
-                        .remove(COMMIT_SHA)
-                        .remove(PREVIEW_VERSION)
-                        .remove(APP_VERSION_CODE)
                         .remove(PREVIOUS_KEEP_SCREEN_ON)
                         .apply();
                 restoreScreenState(previousKeepScreenOn);
-                JSONObject result = new JSONObject();
-                result.put("ok", true);
-                result.put("sessionId", report.getString("sessionId"));
-                result.put("overallStatus", report.getString("overallStatus"));
-                return result.toString();
+                return new JSONObject()
+                        .put("ok", true)
+                        .put("sessionId", report.getString("sessionId"))
+                        .put("overallStatus", report.getString("overallStatus"))
+                        .toString();
             } catch (Exception ignored) {
                 return error("report_invalid").toString();
             }
@@ -181,19 +173,19 @@ public final class KggDeviceTestStationBridge {
 
     @JavascriptInterface
     public boolean openReportIssue() {
-        final String reportText = preferences.getString(LAST_REPORT, "");
+        String reportText = preferences.getString(LAST_REPORT, "");
         if (!nonEmpty(reportText)) {
             return false;
         }
         try {
             JSONObject report = new JSONObject(reportText);
-            String body = renderIssueBody(report);
+            String body = "KGG device test report\n\n```json\n"
+                    + report.toString(2) + "\n```";
             if (body.length() > MAX_ISSUE_BODY_CHARS) {
                 return false;
             }
-            String title = "KGG Tab S9 Testbericht " + safeText(
-                    report.optString("sessionId", "unbekannt"), "unbekannt", 80
-            );
+            String title = "KGG display Testbericht "
+                    + safeText(report.optString("sessionId"), "unknown", 80);
             Uri uri = new Uri.Builder()
                     .scheme("https")
                     .authority("github.com")
@@ -211,165 +203,175 @@ public final class KggDeviceTestStationBridge {
         }
     }
 
-    private static Map<String, String> createNoteCodes() {
-        Map<String, String> values = new HashMap<>();
-        values.put("admin-portrait", "layout_portrait");
-        values.put("admin-landscape", "layout_landscape");
-        values.put("admin-split-screen", "layout_split_screen");
-        values.put("admin-package-button", "package_button");
-        values.put("admin-touch-dialog-save", "touch_dialog_save");
-        values.put("admin-seven-exercises", "synthetic_exercise_set_7");
-        values.put("admin-reorder-save-reload", "reorder_persistence");
-        values.put("patient-first-start", "patient_first_start");
-        values.put("patient-add-plan", "plan_add");
-        values.put("patient-replace-cancel", "plan_replace_cancel");
-        values.put("patient-switch-plan", "plan_switch");
-        values.put("patient-rename", "plan_rename");
-        values.put("patient-values-reload", "values_reload");
-        values.put("patient-offline-restore", "offline_restore");
-        values.put("qr-oppo-display", "oppo_display_only");
-        values.put("qr-scan-7", "synthetic_kgg_plan_7");
-        values.put("qr-scan-12", "synthetic_kgg_plan_12");
-        values.put("qr-scan-20", "synthetic_kgg_plan_20");
-        values.put("qr-angle-distance", "camera_angle_distance");
-        values.put("qr-weak-photo-fallback", "weak_image_photo_fallback");
-        values.put("qr-camera-stop", "camera_stream_cleanup");
-        return Collections.unmodifiableMap(values);
-    }
-
     private JSONObject buildContext() throws JSONException {
-        JSONObject context = new JSONObject();
         String requestId = BuildConfig.KGG_PREVIEW_REQUEST_ID;
         String patchHash = BuildConfig.KGG_PREVIEW_PATCH_HASH;
-        String baseSha = BuildConfig.KGG_PREVIEW_BASE_SHA;
-        String commitSha = BuildConfig.KGG_PREVIEW_COMMIT_SHA;
-        if (!requestId.matches("[a-z0-9][a-z0-9-]{5,63}")) {
-            throw new IllegalStateException("request_id");
+        String sourceSha = BuildConfig.KGG_PREVIEW_COMMIT_SHA;
+        String sessionId = BuildConfig.KGG_DEVICE_TEST_SESSION_ID;
+        String jobHash = BuildConfig.KGG_DEVICE_TEST_JOB_HASH;
+        String jobUrl = BuildConfig.KGG_DEVICE_TEST_JOB_URL;
+        String patientPwaUrl = BuildConfig.KGG_PATIENT_PWA_URL;
+        String profile = BuildConfig.KGG_DEVICE_TEST_PROFILE;
+        if (!requestId.matches("[a-z0-9][a-z0-9-]{5,63}")
+                || !patchHash.matches("[0-9a-f]{64}")
+                || !sourceSha.matches("[0-9a-f]{40}")
+                || !sessionId.matches("kgg-test-[0-9a-f]{32}")
+                || !jobHash.matches("[0-9a-f]{64}")
+                || !("quick".equals(profile) || "full".equals(profile))
+                || !allowedHttps(jobUrl, "raw.githubusercontent.com")
+                || !allowedHttps(patientPwaUrl, "kayus24.github.io")) {
+            throw new IllegalStateException("context");
         }
-        if (!baseSha.matches("[0-9a-f]{40}")
-                || !commitSha.matches("[0-9a-f]{40}")
-                || !patchHash.matches("[0-9a-f]{64}")) {
-            throw new IllegalStateException("context_hash");
-        }
-        context.put("requestId", requestId);
-        context.put("patchHash", patchHash);
-        context.put("baseSha", baseSha);
-        context.put("commitSha", commitSha);
-        context.put("previewVersion", safeText(
-                BuildConfig.VERSION_NAME, "unknown-preview", 80
-        ));
-        return context;
+        return new JSONObject()
+                .put("requestId", requestId)
+                .put("patchHash", patchHash)
+                .put("sourceSha", sourceSha)
+                .put("sessionId", sessionId)
+                .put("jobHash", jobHash)
+                .put("jobUrl", jobUrl)
+                .put("patientPwaUrl", patientPwaUrl)
+                .put("profile", profile);
     }
 
-    private JSONObject sessionSnapshot(boolean resumed) throws JSONException {
-        JSONObject result = new JSONObject();
-        result.put("ok", true);
-        result.put("active", true);
-        result.put("resumed", resumed);
-        result.put("sessionId", preferences.getString(SESSION_ID, ""));
-        result.put("startedAt", preferences.getString(STARTED_AT, ""));
-        result.put("previewRequestId", preferences.getString(REQUEST_ID, ""));
-        result.put("previewVersion", preferences.getString(PREVIEW_VERSION, ""));
-        result.put("contextPinned", true);
-        return result;
+    private JSONObject sessionSnapshot(boolean resumed, JSONObject context)
+            throws JSONException {
+        return new JSONObject()
+                .put("ok", true)
+                .put("active", true)
+                .put("resumed", resumed)
+                .put("sessionId", preferences.getString(SESSION_ID, ""))
+                .put("startedAt", preferences.getString(STARTED_AT, ""))
+                .put("previewRequestId", context.getString("requestId"))
+                .put("previewVersion", BuildConfig.VERSION_NAME)
+                .put("jobHash", context.getString("jobHash"))
+                .put("profile", context.getString("profile"))
+                .put("contextPinned", true);
     }
 
     private JSONObject sanitizeReport(JSONObject input) throws JSONException {
-        if (!input.has("tests") || input.optJSONArray("tests") == null) {
+        JSONObject context = buildContext();
+        if (!"display".equals(input.optString("role"))
+                || !context.getString("profile").equals(input.optString("profile"))
+                || !context.getString("jobHash").equals(input.optString("jobHash"))) {
+            throw new IllegalArgumentException("identity");
+        }
+        JSONArray tests = sanitizeTests(input.optJSONArray("tests"), context.getString("profile"));
+        JSONArray fixtures = sanitizeFixtures(
+                input.optJSONArray("fixtures"),
+                context.getString("profile")
+        );
+        boolean failed = false;
+        boolean blocked = false;
+        for (int index = 0; index < tests.length(); index++) {
+            String status = tests.getJSONObject(index).getString("status");
+            failed |= "failed".equals(status);
+            blocked |= "blocked".equals(status);
+        }
+        return new JSONObject()
+                .put("kind", "kgg_device_test_report")
+                .put("schemaVersion", REPORT_SCHEMA_VERSION)
+                .put("sessionId", preferences.getString(SESSION_ID, ""))
+                .put("role", "display")
+                .put("requestId", context.getString("requestId"))
+                .put("sourceSha", context.getString("sourceSha"))
+                .put("patchHash", context.getString("patchHash"))
+                .put("jobHash", context.getString("jobHash"))
+                .put("appVersion", BuildConfig.VERSION_NAME)
+                .put("device", deviceInfo())
+                .put("profile", context.getString("profile"))
+                .put("startedAt", preferences.getString(STARTED_AT, ""))
+                .put("endedAt", utcNow())
+                .put("tests", tests)
+                .put("fixtures", fixtures)
+                .put("telemetry", new JSONArray())
+                .put("overallStatus", failed ? "failed" : blocked ? "blocked" : "passed")
+                .put("syntheticOnly", true);
+    }
+
+    private JSONArray sanitizeTests(JSONArray supplied, String profile)
+            throws JSONException {
+        List<String> expected = expectedTestIds(profile);
+        if (supplied == null || supplied.length() != expected.size()) {
             throw new IllegalArgumentException("tests");
         }
-        String sessionId = preferences.getString(SESSION_ID, "");
-        String startedAt = preferences.getString(STARTED_AT, "");
-        JSONArray supplied = input.optJSONArray("tests");
         Map<String, JSONObject> byId = new HashMap<>();
         for (int index = 0; index < supplied.length(); index++) {
-            JSONObject candidate = supplied.optJSONObject(index);
-            if (candidate == null) {
-                continue;
+            JSONObject value = supplied.optJSONObject(index);
+            String testId = value == null ? "" : value.optString("testId", "");
+            if (!expected.contains(testId) || byId.put(testId, value) != null) {
+                throw new IllegalArgumentException("test_id");
             }
-            String testId = candidate.optString("testId", "");
-            if (!NOTE_CODES.containsKey(testId) || byId.containsKey(testId)) {
-                continue;
-            }
-            byId.put(testId, candidate);
         }
-
-        JSONArray tests = new JSONArray();
-        boolean hasFailure = false;
-        boolean hasBlock = false;
-        for (String testId : TEST_IDS) {
-            JSONObject candidate = byId.get(testId);
-            String status = candidate == null
-                    ? "blocked"
-                    : candidate.optString("status", "blocked");
-            if (!isStatus(status)) {
-                status = "blocked";
+        JSONArray clean = new JSONArray();
+        for (String testId : expected) {
+            JSONObject value = byId.get(testId);
+            String status = value.optString("status", "blocked");
+            if (!isStatus(status)
+                    || ("skipped".equals(status) && !OPTIONAL_TESTS.contains(testId))) {
+                throw new IllegalArgumentException("test_status");
             }
-            if ("skipped".equals(status) && !OPTIONAL_TESTS.contains(testId)) {
-                status = "blocked";
-            }
-            long duration = candidate == null
-                    ? 0L
-                    : candidate.optLong("durationMs", 0L);
-            duration = Math.max(0L, Math.min(MAX_TEST_DURATION_MS, duration));
-            JSONObject clean = new JSONObject();
-            clean.put("testId", testId);
-            clean.put("status", status);
-            clean.put("durationMs", duration);
-            clean.put(
-                    "noteCode",
-                    candidate == null ? NOT_EXECUTED_NOTE_CODE : NOTE_CODES.get(testId)
+            long duration = Math.max(
+                    0L,
+                    Math.min(MAX_TEST_DURATION_MS, value.optLong("durationMs", 0L))
             );
-            tests.put(clean);
-            hasFailure |= "failed".equals(status);
-            hasBlock |= "blocked".equals(status);
+            clean.put(new JSONObject()
+                    .put("testId", testId)
+                    .put("status", status)
+                    .put("durationMs", duration)
+                    .put("noteCode", NOTE_CODES.get(testId)));
         }
+        return clean;
+    }
 
-        JSONObject context = new JSONObject();
-        context.put("kind", "kgg_device_test_report");
-        context.put("schemaVersion", REPORT_SCHEMA_VERSION);
-        context.put("sessionId", sessionId);
-        context.put("previewRequestId", preferences.getString(REQUEST_ID, ""));
-        context.put("commitSha", preferences.getString(COMMIT_SHA, ""));
-        context.put("baseSha", preferences.getString(BASE_SHA, ""));
-        context.put("patchHash", preferences.getString(PATCH_HASH, ""));
-        context.put("appVersion", safeText(
-                preferences.getString(PREVIEW_VERSION, BuildConfig.VERSION_NAME),
-                "unknown", 80
-        ));
-        context.put(
-                "appVersionCode",
-                preferences.getInt(APP_VERSION_CODE, BuildConfig.VERSION_CODE)
-        );
-        context.put("device", deviceInfo());
-        context.put("startedAt", startedAt);
-        context.put("endedAt", utcNow());
-        context.put("tests", tests);
-        context.put("overallStatus", hasFailure ? "failed" : hasBlock ? "blocked" : "passed");
-        context.put("syntheticOnly", true);
-        return context;
+    private JSONArray sanitizeFixtures(JSONArray supplied, String profile)
+            throws JSONException {
+        String[] expected = "full".equals(profile) ? FULL_FIXTURE_IDS : QUICK_FIXTURE_IDS;
+        if (supplied == null || supplied.length() != expected.length) {
+            throw new IllegalArgumentException("fixtures");
+        }
+        JSONArray clean = new JSONArray();
+        for (int index = 0; index < expected.length; index++) {
+            JSONObject value = supplied.optJSONObject(index);
+            String fixtureId = value == null ? "" : value.optString("fixtureId", "");
+            if (!expected[index].equals(fixtureId)
+                    || !FIXTURE_FORMATS.get(fixtureId).equals(value.optString("format"))
+                    || FIXTURE_COUNTS.get(fixtureId) != value.optInt("exerciseCount", -1)
+                    || !FIXTURE_VARIANTS.get(fixtureId).equals(value.optString("displayVariant"))
+                    || !value.optString("expectedFingerprint").matches("[0-9a-f]{8}")
+                    || !value.optString("expectedOrderDigest").matches("[0-9a-f]{8}")) {
+                throw new IllegalArgumentException("fixture_contract");
+            }
+            clean.put(new JSONObject()
+                    .put("fixtureId", fixtureId)
+                    .put("format", value.getString("format"))
+                    .put("exerciseCount", value.getInt("exerciseCount"))
+                    .put("required", value.optBoolean("required", false))
+                    .put("displayVariant", value.getString("displayVariant"))
+                    .put("importMode", safeText(value.optString("importMode"), "capture", 20))
+                    .put("expectedFingerprint", value.getString("expectedFingerprint"))
+                    .put("expectedOrderDigest", value.getString("expectedOrderDigest")));
+        }
+        return clean;
     }
 
     private JSONObject deviceInfo() throws JSONException {
-        JSONObject info = new JSONObject();
-        info.put("model", safeText(Build.MODEL, "unknown", 80));
-        info.put("androidVersion", safeText(Build.VERSION.RELEASE, "unknown", 40));
-        info.put("webViewVersion", webViewVersion());
-        JSONObject screen = new JSONObject();
-        int orientation = activity.getResources().getConfiguration().orientation;
-        screen.put(
-                "orientation",
-                orientation == Configuration.ORIENTATION_LANDSCAPE
-                        ? "landscape"
-                        : orientation == Configuration.ORIENTATION_PORTRAIT
-                        ? "portrait"
-                        : "unknown"
-        );
         Point size = screenSize();
-        screen.put("width", size.x);
-        screen.put("height", size.y);
-        info.put("screen", screen);
-        return info;
+        int orientation = activity.getResources().getConfiguration().orientation;
+        return new JSONObject()
+                .put("class", "android-tablet")
+                .put("model", safeText(Build.MODEL, "unknown", 80))
+                .put("androidVersion", safeText(Build.VERSION.RELEASE, "unknown", 40))
+                .put("runtime", "webview-" + webViewVersion())
+                .put("screen", new JSONObject()
+                        .put("width", size.x)
+                        .put("height", size.y)
+                        .put("orientation",
+                                orientation == Configuration.ORIENTATION_LANDSCAPE
+                                        ? "landscape"
+                                        : orientation == Configuration.ORIENTATION_PORTRAIT
+                                        ? "portrait"
+                                        : "unknown"))
+                .put("wakeLock", isActive() ? "active" : "released");
     }
 
     private String webViewVersion() {
@@ -400,52 +402,6 @@ public final class KggDeviceTestStationBridge {
         }
     }
 
-    private String renderIssueBody(JSONObject report) throws JSONException {
-        JSONObject device = report.optJSONObject("device");
-        JSONObject screen = device == null ? null : device.optJSONObject("screen");
-        StringBuilder body = new StringBuilder();
-        body.append("KGG device test report\n\n");
-        body.append("kind: ").append(safeText(report.optString("kind"), "unknown", 80)).append('\n');
-        body.append("schemaVersion: ").append(report.optInt("schemaVersion", 0)).append('\n');
-        body.append("sessionId: ").append(safeText(report.optString("sessionId"), "unknown", 80)).append('\n');
-        body.append("previewRequestId: ").append(safeText(report.optString("previewRequestId"), "unknown", 80)).append('\n');
-        body.append("commitSha: ").append(safeText(report.optString("commitSha"), "unknown", 80)).append('\n');
-        body.append("baseSha: ").append(safeText(report.optString("baseSha"), "unknown", 80)).append('\n');
-        body.append("patchHash: ").append(safeText(report.optString("patchHash"), "unknown", 90)).append('\n');
-        body.append("appVersion: ").append(safeText(report.optString("appVersion"), "unknown", 80)).append('\n');
-        body.append("appVersionCode: ").append(report.optInt("appVersionCode", 0)).append('\n');
-        body.append("model: ").append(safeText(device == null ? "" : device.optString("model"), "unknown", 80)).append('\n');
-        body.append("androidVersion: ").append(safeText(device == null ? "" : device.optString("androidVersion"), "unknown", 40)).append('\n');
-        body.append("webViewVersion: ").append(safeText(device == null ? "" : device.optString("webViewVersion"), "unknown", 80)).append('\n');
-        body.append("screen: ").append(screen == null ? 0 : screen.optInt("width", 0))
-                .append("x").append(screen == null ? 0 : screen.optInt("height", 0))
-                .append(" / ").append(safeText(screen == null ? "" : screen.optString("orientation"), "unknown", 20)).append('\n');
-        body.append("startedAt: ").append(safeText(report.optString("startedAt"), "unknown", 40)).append('\n');
-        body.append("endedAt: ").append(safeText(report.optString("endedAt"), "unknown", 40)).append('\n');
-        body.append("overallStatus: ").append(safeText(report.optString("overallStatus"), "unknown", 20)).append('\n');
-        body.append("syntheticOnly: true\n\n");
-        body.append("testCases:\n");
-        JSONArray tests = report.optJSONArray("tests");
-        if (tests != null) {
-            for (int index = 0; index < tests.length(); index++) {
-                JSONObject test = tests.optJSONObject(index);
-                if (test == null) {
-                    continue;
-                }
-                body.append("- ")
-                        .append(safeText(test.optString("testId"), "unknown", 80))
-                        .append(" | ")
-                        .append(safeText(test.optString("status"), "blocked", 20))
-                        .append(" | durationMs=")
-                        .append(Math.max(0L, Math.min(MAX_TEST_DURATION_MS, test.optLong("durationMs", 0L))))
-                        .append(" | noteCode=")
-                        .append(safeText(test.optString("noteCode"), NOT_EXECUTED_NOTE_CODE, 80))
-                        .append('\n');
-            }
-        }
-        return body.toString();
-    }
-
     private boolean launchIssue(Uri uri) throws InterruptedException {
         AtomicBoolean launched = new AtomicBoolean(false);
         Runnable action = () -> {
@@ -457,7 +413,11 @@ public final class KggDeviceTestStationBridge {
                 activity.startActivity(intent);
                 launched.set(true);
             } catch (Exception ignored) {
-                Toast.makeText(activity, "Bericht konnte nicht geöffnet werden", Toast.LENGTH_SHORT).show();
+                Toast.makeText(
+                        activity,
+                        "Bericht konnte nicht geöffnet werden",
+                        Toast.LENGTH_SHORT
+                ).show();
             }
         };
         if (Looper.myLooper() == Looper.getMainLooper()) {
@@ -483,7 +443,8 @@ public final class KggDeviceTestStationBridge {
     private boolean hasKeepScreenOnFlag() {
         Window window = activity.getWindow();
         return window != null
-                && (window.getAttributes().flags & WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) != 0;
+                && (window.getAttributes().flags
+                & WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) != 0;
     }
 
     private void setKeepScreenOn(boolean enabled) {
@@ -509,6 +470,85 @@ public final class KggDeviceTestStationBridge {
         setKeepScreenOn(previousKeepScreenOn);
     }
 
+    private static List<String> expectedTestIds(String profile) {
+        List<String> values = new ArrayList<>();
+        if ("full".equals(profile)) {
+            values.addAll(Arrays.asList(ADMIN_TEST_IDS));
+        }
+        values.add("display-pairing");
+        String[] fixtures = "full".equals(profile) ? FULL_FIXTURE_IDS : QUICK_FIXTURE_IDS;
+        for (String fixture : fixtures) {
+            values.add("display-" + fixture);
+        }
+        return values;
+    }
+
+    private static Map<String, String> noteCodes() {
+        Map<String, String> values = new HashMap<>();
+        values.put("admin-portrait", "layout_portrait");
+        values.put("admin-landscape", "layout_landscape");
+        values.put("admin-split-screen", "layout_split_screen");
+        values.put("admin-package-button", "package_button");
+        values.put("admin-touch-dialog-save", "touch_dialog_save");
+        values.put("admin-seven-exercises", "synthetic_exercise_set_7");
+        values.put("admin-reorder-save-reload", "reorder_persistence");
+        values.put("display-pairing", "pairing_displayed");
+        for (String fixture : FULL_FIXTURE_IDS) {
+            values.put("display-" + fixture, "display_" + fixture.replace('-', '_'));
+        }
+        return Collections.unmodifiableMap(values);
+    }
+
+    private static Map<String, Integer> fixtureCounts() {
+        Map<String, Integer> values = new HashMap<>();
+        values.put("h2-1-baseline", 1);
+        values.put("h2-7-legacy", 7);
+        values.put("h2-12-diagnostic", 12);
+        values.put("h2-20-diagnostic", 20);
+        values.put("h3-7-normal", 7);
+        values.put("h3-12-normal", 12);
+        values.put("h3-20-normal", 20);
+        values.put("h3-20-far-angle", 20);
+        values.put("h3-20-low-contrast", 20);
+        values.put("h3-20-photo", 20);
+        return Collections.unmodifiableMap(values);
+    }
+
+    private static Map<String, String> fixtureFormats() {
+        Map<String, String> values = new HashMap<>();
+        for (String fixture : FULL_FIXTURE_IDS) {
+            values.put(fixture, fixture.startsWith("h2-") ? "KGGH2" : "KGGH3");
+        }
+        return Collections.unmodifiableMap(values);
+    }
+
+    private static Map<String, String> fixtureVariants() {
+        Map<String, String> values = new HashMap<>();
+        values.put("h2-1-baseline", "normal");
+        values.put("h2-7-legacy", "normal");
+        values.put("h2-12-diagnostic", "normal");
+        values.put("h2-20-diagnostic", "normal");
+        values.put("h3-7-normal", "normal");
+        values.put("h3-12-normal", "normal");
+        values.put("h3-20-normal", "normal");
+        values.put("h3-20-far-angle", "far-angle");
+        values.put("h3-20-low-contrast", "low-contrast");
+        values.put("h3-20-photo", "photo");
+        return Collections.unmodifiableMap(values);
+    }
+
+    private static boolean allowedHttps(String value, String host) {
+        try {
+            Uri uri = Uri.parse(value);
+            return "https".equals(uri.getScheme())
+                    && host.equals(uri.getHost())
+                    && !nonEmpty(uri.getUserInfo())
+                    && !nonEmpty(uri.getFragment());
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
     private static boolean isStatus(String status) {
         return "passed".equals(status)
                 || "failed".equals(status)
@@ -527,10 +567,7 @@ public final class KggDeviceTestStationBridge {
         if (clean.isEmpty()) {
             return fallback;
         }
-        if (clean.length() > limit) {
-            clean = clean.substring(0, limit);
-        }
-        return clean;
+        return clean.length() > limit ? clean.substring(0, limit) : clean;
     }
 
     private static boolean nonEmpty(String value) {

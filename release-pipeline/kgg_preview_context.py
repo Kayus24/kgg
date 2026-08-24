@@ -8,10 +8,11 @@ import json
 import re
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 
-SCHEMA_VERSION = 1
-PREVIEW_APP_VERSION = "0.2.13-v403-tab-s9-test-station"
+SCHEMA_VERSION = 2
+PREVIEW_APP_VERSION = "0.2.14-v404-dual-device-qr-test"
 REQUEST_ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]{5,63}$")
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 PATCH_HASH_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -27,20 +28,17 @@ STATION_TEST_IDS = (
     "admin-touch-dialog-save",
     "admin-seven-exercises",
     "admin-reorder-save-reload",
-    "patient-first-start",
-    "patient-add-plan",
-    "patient-replace-cancel",
-    "patient-switch-plan",
-    "patient-rename",
-    "patient-values-reload",
-    "patient-offline-restore",
-    "qr-oppo-display",
-    "qr-scan-7",
-    "qr-scan-12",
-    "qr-scan-20",
-    "qr-angle-distance",
-    "qr-weak-photo-fallback",
-    "qr-camera-stop",
+    "display-pairing",
+    "display-h2-1-baseline",
+    "display-h2-7-legacy",
+    "display-h2-12-diagnostic",
+    "display-h2-20-diagnostic",
+    "display-h3-7-normal",
+    "display-h3-12-normal",
+    "display-h3-20-normal",
+    "display-h3-20-far-angle",
+    "display-h3-20-low-contrast",
+    "display-h3-20-photo",
 )
 
 
@@ -77,6 +75,20 @@ def _sha(value: Any, label: str, pattern: re.Pattern[str]) -> str:
     return clean
 
 
+def _https_url(value: Any, label: str, hosts: set[str]) -> str:
+    clean = _clean_text(value, label, 500)
+    parsed = urlsplit(clean)
+    if (
+        parsed.scheme != "https"
+        or parsed.hostname not in hosts
+        or parsed.username
+        or parsed.password
+        or parsed.fragment
+    ):
+        raise PreviewContextError(f"{label} is not an allowed HTTPS URL")
+    return clean
+
+
 def build_context(
     *,
     request_id: str,
@@ -86,24 +98,58 @@ def build_context(
     required_tests: list[str],
     preview_version: str = PREVIEW_APP_VERSION,
     web_version: str = "",
+    device_test_session_id: str = "",
+    device_test_job_hash: str = "",
+    device_test_job_url: str = "",
+    patient_pwa_url: str = "",
+    device_test_profile: str = "quick",
 ) -> dict[str, Any]:
     request = _clean_text(request_id, "requestId", 64).lower()
     if not REQUEST_ID_RE.fullmatch(request):
         raise PreviewContextError("requestId has an invalid shape")
     preview = _clean_text(preview_version, "previewVersion", 80)
     web = _clean_text(web_version, "webVersion", 80) if web_version else ""
-    station_ids = list(STATION_TEST_IDS)
+    clean_commit = _sha(commit_sha, "commitSha", SHA_RE)
+    clean_patch = _sha(patch_hash, "patchHash", PATCH_HASH_RE)
+    session_id = device_test_session_id or f"kgg-test-{clean_commit[:32]}"
+    if not re.fullmatch(r"kgg-test-[a-f0-9]{32}", session_id):
+        raise PreviewContextError("deviceTestSessionId has an invalid shape")
+    job_hash = _sha(
+        device_test_job_hash or clean_patch,
+        "deviceTestJobHash",
+        PATCH_HASH_RE,
+    )
+    job_url = _https_url(
+        device_test_job_url
+        or f"https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/device-tests/{request}/job.json",
+        "deviceTestJobUrl",
+        {"raw.githubusercontent.com"},
+    )
+    pwa_url = _https_url(
+        patient_pwa_url
+        or "https://kayus24.github.io/kgg-patient-preview/device-test/",
+        "patientPwaUrl",
+        {"kayus24.github.io"},
+    )
+    profile = _clean_text(device_test_profile, "deviceTestProfile", 10).lower()
+    if profile not in {"quick", "full"}:
+        raise PreviewContextError("deviceTestProfile must be quick or full")
     return {
         "kind": "kgg_preview_context",
         "schemaVersion": SCHEMA_VERSION,
         "requestId": request,
-        "patchHash": _sha(patch_hash, "patchHash", PATCH_HASH_RE),
+        "patchHash": clean_patch,
         "baseSha": _sha(base_sha, "baseSha", SHA_RE),
-        "commitSha": _sha(commit_sha, "commitSha", SHA_RE),
+        "commitSha": clean_commit,
         "previewVersion": preview,
         "webVersion": web,
         "requiredTests": _required_tests(required_tests),
-        "stationTestIds": station_ids,
+        "stationTestIds": list(STATION_TEST_IDS),
+        "deviceTestSessionId": session_id,
+        "deviceTestJobHash": job_hash,
+        "deviceTestJobUrl": job_url,
+        "patientPwaUrl": pwa_url,
+        "deviceTestProfile": profile,
     }
 
 
@@ -140,6 +186,11 @@ def self_test() -> None:
         base_sha="b" * 40,
         commit_sha="c" * 40,
         required_tests=["critical", "ui-stability"],
+        device_test_session_id="kgg-test-" + "d" * 32,
+        device_test_job_hash="e" * 64,
+        device_test_job_url="https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/device-tests/self-test/job.json",
+        patient_pwa_url="https://kayus24.github.io/kgg-patient-preview/device-test/",
+        device_test_profile="quick",
     )
     script = context_script(context)
     if context["stationTestIds"] != list(STATION_TEST_IDS):
@@ -188,6 +239,11 @@ def main() -> int:
     parser.add_argument("--commit-sha")
     parser.add_argument("--preview-version", default=PREVIEW_APP_VERSION)
     parser.add_argument("--web-version", default="")
+    parser.add_argument("--device-test-session-id", default="")
+    parser.add_argument("--device-test-job-hash", default="")
+    parser.add_argument("--device-test-job-url", default="")
+    parser.add_argument("--patient-pwa-url", default="")
+    parser.add_argument("--device-test-profile", default="quick")
     parser.add_argument("--payload-file", type=Path)
     parser.add_argument("--required-test", action="append", dest="required_tests")
     parser.add_argument("--output", type=Path)
@@ -212,6 +268,11 @@ def main() -> int:
             required_tests=required_tests,
             preview_version=args.preview_version,
             web_version=args.web_version,
+            device_test_session_id=args.device_test_session_id,
+            device_test_job_hash=args.device_test_job_hash,
+            device_test_job_url=args.device_test_job_url,
+            patient_pwa_url=args.patient_pwa_url,
+            device_test_profile=args.device_test_profile,
         )
         if args.output:
             write_context(args.output, context)
