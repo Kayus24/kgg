@@ -2,6 +2,137 @@ plugins {
     id "com.android.application"
 }
 
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import java.security.MessageDigest
+import java.util.Locale
+
+def javaStringLiteral = { String value ->
+    '"' + value
+            .replace("\\", "\\\\")
+            .replace('"', '\\"')
+            .replace("\r", "\\r")
+            .replace("\n", "\\n") + '"'
+}
+
+def gitHead = {
+    try {
+        def process = ["git", "rev-parse", "HEAD"].execute(null, project.projectDir)
+        process.waitFor()
+        def value = process.in.text.trim().toLowerCase(Locale.ROOT)
+        if (process.exitValue() == 0 && value ==~ /[0-9a-f]{40}/) {
+            return value
+        }
+    } catch (Exception ignored) {
+        // The source archive may not contain a Git checkout. The deterministic
+        // local fallback below keeps the Preview contract valid for builds.
+    }
+    return "0" * 40
+}
+
+def propertyOrEnvironment = { String name, String fallback ->
+    def propertyValue = project.findProperty(name)
+    if (propertyValue != null && propertyValue.toString().trim()) {
+        return propertyValue.toString().trim()
+    }
+    def environmentValue = System.getenv(name)
+    if (environmentValue != null && environmentValue.trim()) {
+        return environmentValue.trim()
+    }
+    return fallback
+}
+
+def defaultPreviewVersion = "0.2.13-v403-tab-s9-test-station"
+def defaultPreviewRequestId = "local-tab-s9-test-station"
+def defaultPreviewSha = gitHead()
+def defaultPreviewPatchHash = MessageDigest.getInstance("SHA-256")
+        .digest(("kgg-preview-local|" + defaultPreviewRequestId + "|" + defaultPreviewSha + "|" + defaultPreviewVersion).getBytes("UTF-8"))
+        .collect { String.format("%02x", it & 0xff) }
+        .join()
+def defaultStationTestIds = [
+        "admin-portrait",
+        "admin-landscape",
+        "admin-split-screen",
+        "admin-package-button",
+        "admin-touch-dialog-save",
+        "admin-seven-exercises",
+        "admin-reorder-save-reload",
+        "patient-first-start",
+        "patient-add-plan",
+        "patient-replace-cancel",
+        "patient-switch-plan",
+        "patient-rename",
+        "patient-values-reload",
+        "patient-offline-restore",
+        "qr-oppo-display",
+        "qr-scan-7",
+        "qr-scan-12",
+        "qr-scan-20",
+        "qr-angle-distance",
+        "qr-weak-photo-fallback",
+        "qr-camera-stop",
+]
+
+def previewContextFile = project.findProperty("KGG_PREVIEW_CONTEXT_FILE")
+def previewContext = [:]
+if (previewContextFile != null && file(previewContextFile.toString()).isFile()) {
+    def parsedContext = new JsonSlurper().parse(file(previewContextFile.toString()))
+    if (!(parsedContext instanceof Map)) {
+        throw new GradleException("KGG_PREVIEW_CONTEXT_FILE must contain a JSON object")
+    }
+    previewContext.putAll(parsedContext)
+}
+def previewRequestId = propertyOrEnvironment(
+        "KGG_PREVIEW_REQUEST_ID",
+        String.valueOf(previewContext.get("requestId") ?: defaultPreviewRequestId)
+)
+def previewBaseSha = propertyOrEnvironment(
+        "KGG_PREVIEW_BASE_SHA",
+        String.valueOf(previewContext.get("baseSha") ?: defaultPreviewSha)
+).toLowerCase(Locale.ROOT)
+def previewCommitSha = propertyOrEnvironment(
+        "KGG_PREVIEW_COMMIT_SHA",
+        String.valueOf(previewContext.get("commitSha") ?: previewBaseSha)
+).toLowerCase(Locale.ROOT)
+def previewPatchHash = propertyOrEnvironment(
+        "KGG_PREVIEW_PATCH_HASH",
+        String.valueOf(previewContext.get("patchHash") ?: defaultPreviewPatchHash)
+).toLowerCase(Locale.ROOT)
+def previewVersion = propertyOrEnvironment(
+        "KGG_PREVIEW_VERSION",
+        String.valueOf(previewContext.get("previewVersion") ?: defaultPreviewVersion)
+)
+def previewRequiredTests = previewContext.get("requiredTests")
+if (!(previewRequiredTests instanceof List) || previewRequiredTests.isEmpty()) {
+    previewRequiredTests = defaultStationTestIds
+}
+previewRequiredTests = previewRequiredTests.collect { String.valueOf(it).replaceAll(/[\r\n\t]/, " ").trim() }.findAll { it }
+def previewStationTestIds = previewContext.get("stationTestIds")
+if (!(previewStationTestIds instanceof List) || previewStationTestIds.isEmpty()) {
+    previewStationTestIds = defaultStationTestIds
+}
+previewStationTestIds = previewStationTestIds.collect { String.valueOf(it).trim() }.findAll { it }
+if (!(previewRequestId ==~ /[a-z0-9][a-z0-9-]{5,63}/)
+        || !(previewBaseSha ==~ /[0-9a-f]{40}/)
+        || !(previewCommitSha ==~ /[0-9a-f]{40}/)
+        || !(previewPatchHash ==~ /[0-9a-f]{64}/)
+        || previewVersion != defaultPreviewVersion
+        || previewRequiredTests.any { it.length() > 240 || it ==~ /(?i).*(token|cookie|password|secret|base64|account|location|network).*/ }) {
+    throw new GradleException("Preview context failed the bounded v403 contract")
+}
+def embeddedPreviewContext = [
+        kind: "kgg_preview_context",
+        schemaVersion: 1,
+        requestId: previewRequestId,
+        patchHash: previewPatchHash,
+        baseSha: previewBaseSha,
+        commitSha: previewCommitSha,
+        previewVersion: previewVersion,
+        requiredTests: previewRequiredTests,
+        stationTestIds: previewStationTestIds,
+]
+def embeddedPreviewContextJson = JsonOutput.toJson(embeddedPreviewContext)
+
 android {
     namespace "de.kgg.app"
     compileSdk 36
@@ -34,10 +165,15 @@ android {
         preview {
             dimension "profile"
             applicationId "de.kgg.preview"
-            versionCode 34
-            versionName "0.2.12-v402-preview-status"
+            versionCode 35
+            versionName defaultPreviewVersion
             manifestPlaceholders = [appLabel: "KGG Preview"]
-            buildConfigField "String", "KGG_PREVIEW_STATUS_URL", "\"${project.findProperty('KGG_PREVIEW_STATUS_URL') ?: 'https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/status/latest.json'}\""
+            buildConfigField "String", "KGG_PREVIEW_STATUS_URL", javaStringLiteral(project.findProperty("KGG_PREVIEW_STATUS_URL") ?: "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/status/latest.json")
+            buildConfigField "String", "KGG_PREVIEW_REQUEST_ID", javaStringLiteral(previewRequestId)
+            buildConfigField "String", "KGG_PREVIEW_PATCH_HASH", javaStringLiteral(previewPatchHash)
+            buildConfigField "String", "KGG_PREVIEW_BASE_SHA", javaStringLiteral(previewBaseSha)
+            buildConfigField "String", "KGG_PREVIEW_COMMIT_SHA", javaStringLiteral(previewCommitSha)
+            buildConfigField "String", "KGG_PREVIEW_REQUIRED_TESTS", javaStringLiteral(JsonOutput.toJson(previewRequiredTests))
         }
     }
 
@@ -62,6 +198,15 @@ def stagePreviewProfileAsset = tasks.register("stagePreviewProfileAsset", Copy) 
     from("../../kgg-update/index.html")
     into(layout.buildDirectory.dir("generated/kggAssets/preview"))
     rename { "preview.html" }
+    inputs.property("kggPreviewContext", embeddedPreviewContextJson)
+    doLast {
+        def contextDirectory = layout.buildDirectory.dir("generated/kggAssets/preview").get().asFile.toPath().resolve("android").toFile()
+        contextDirectory.mkdirs()
+        new File(contextDirectory, "kgg_preview_context.js").setText(
+                "window.KGGPreviewContext=Object.freeze(" + embeddedPreviewContextJson + ");\n",
+                "UTF-8"
+        )
+    }
 }
 
 afterEvaluate {

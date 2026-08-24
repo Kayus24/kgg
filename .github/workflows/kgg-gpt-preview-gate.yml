@@ -183,6 +183,21 @@ jobs:
             --approval-phrase '${{ inputs.approval_phrase }}' \
             --github-output "$GITHUB_OUTPUT"
 
+      - name: Build deterministic Preview context
+        if: inputs.mode == 'publish_preview'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          python release-pipeline/kgg_preview_context.py \
+            --request-id '${{ inputs.request_id }}' \
+            --patch-hash '${{ steps.gate.outputs.patch_hash }}' \
+            --base-sha "$(git rev-parse HEAD)" \
+            --commit-sha "$(git rev-parse HEAD)" \
+            --preview-version '0.2.13-v403-tab-s9-test-station' \
+            --payload-file "$RUNNER_TEMP/kgg-gpt-payload.json" \
+            --output "$RUNNER_TEMP/kgg-preview-context.json"
+
       - name: Refresh generated GPT context files for PR mode
         if: inputs.mode == 'create_pr' || inputs.mode == 'publish_admin_beta'
         shell: bash
@@ -235,7 +250,7 @@ jobs:
         run: |
           set -euo pipefail
           cd base/android-wrapper
-          gradle assemblePreviewDebug
+          gradle -PKGG_PREVIEW_CONTEXT_FILE="$RUNNER_TEMP/kgg-preview-context.json" assemblePreviewDebug
 
       - name: Upload Preview APK and HTML artifacts
         if: inputs.mode == 'publish_preview'

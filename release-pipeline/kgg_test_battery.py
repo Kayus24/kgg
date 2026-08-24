@@ -397,7 +397,8 @@ def run_android_wrapper_contract() -> None:
         ("getCapabilities: function()", "JavaScript bootstrap must expose native camera capabilities"),
         ("android.permission.POST_NOTIFICATIONS", "Preview APK requests Android notification permission"),
         ("KGG_PREVIEW_STATUS_URL", "Preview APK has an isolated workflow status endpoint"),
-        ("versionName \"0.2.12-v402-preview-status\"", "Preview flavor has an updateable v402 package version"),
+        ("versionName defaultPreviewVersion", "Preview flavor has an updateable v403 package version"),
+        ("defaultPreviewVersion = \"0.2.13-v403-tab-s9-test-station\"", "Preview flavor pins the Tab S9 v403 identity"),
         ("androidx.work:work-runtime:2.11.2", "Preview status background checks use stable WorkManager"),
         ("KggPreviewStatusWorker", "Preview status has a background worker"),
         ('BuildConfig.DEBUG && protocol.equals("http") && host.equals("10.0.2.2")', "HTTP status access is limited to the debug emulator host"),
@@ -434,7 +435,13 @@ def run_android_wrapper_contract() -> None:
                 raise BatteryError(f"Android admin launcher icon override missing or too small: {admin_icon}")
     run([sys.executable, "release-pipeline/kgg_android_preview_probe.py", "--self-test"])
     run([sys.executable, "release-pipeline/kgg_preview_status.py", "--self-test"])
+    run([sys.executable, "release-pipeline/kgg_preview_context.py", "--self-test"])
     log("Android wrapper contract OK")
+
+
+def run_tab_s9_test_station_contract() -> None:
+    log("== Tab S9 Preview test-station contract ==")
+    run([sys.executable, "release-pipeline/test_kgg_tab_s9_test_station.py"])
 
 
 def run_gpt_payload_preflight_self_test() -> None:
@@ -637,6 +644,13 @@ TEST_REGISTRY = [
         "suite": "android",
         "reason": "Android shell metadata, bundled web assets, launcher icon and PDF fallback must stay wired before APK PRs merge.",
         "run": run_android_wrapper_contract,
+    },
+    {
+        "id": "tab-s9-test-station-contract",
+        "level": "critical",
+        "suite": "android",
+        "reason": "The Preview-only Tab S9 bridge, guided steps, report redaction and fixed Issue host must stay isolated from product flavors.",
+        "run": run_tab_s9_test_station_contract,
     },
     {
         "id": "gpt-payload-preflight",
