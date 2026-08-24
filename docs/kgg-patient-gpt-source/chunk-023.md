@@ -1,241 +1,147 @@
 # KGG Patient Source Chunk 023
 
-- Source file: `patient-plan-replace-slot-fix.js`
-- Characters: 1-9821
-- Full source SHA-256: `ca550410eb93e965d8a3051b08e28afa2f254a5a7a4374ddb0dd4c88d1de003c`
+- Source file: `patient-plan-link-choice.js`
+- Characters: 1-9307
+- Full source SHA-256: `29db160f0fbaffead0dcb2983d093a7cbf6b5742b35adeef1b917f99fbbc4fd5`
 
 ```
 (()=>{
-  const VERSION='patient-plan-slots-v2-add-mode';
-  if(window.__kggPlanReplaceSlotFix===VERSION)return;
-  window.__kggPlanReplaceSlotFix=VERSION;
-
-  const MULTI_KEY='kggPatientMultiPlansV1';
+  const VERSION='v81-plan-link-choice-kgg-h3';
   const CURRENT_KEY='kggCurrentPlanV1';
-  const nativeSetItem=Storage.prototype.setItem;
-  const nativeParse=JSON.parse;
-  let addSession=null;
-  let refreshQueued=false;
+  const MULTI_KEY='kggPatientMultiPlansV1';
+  const PENDING_KEY='kggPendingPlanLinkV1';
+  const TTL_MS=5*60*1000;
+  if(window.__kggPatientPlanLinkChoice===VERSION)return;
+  window.__kggPatientPlanLinkChoice=VERSION;
+  let pendingMemory=null;
 
-  function parse(value){
-    try{return nativeParse(String(value||''))}catch(e){return null}
-  }
-  function clone(value){
-    try{return nativeParse(JSON.stringify(value))}catch(e){return value&&typeof value==='object'?{...value}:value}
-  }
-  function clampActive(state){
-    const plans=Array.isArray(state&&state.plans)?state.plans:[];
-    return Math.max(0,Math.min(Number(state&&state.active)||0,Math.max(0,plans.length-1)));
-  }
-  function isReplacement(plan){
-    return !!(plan&&typeof plan==='object'&&('sourcePlanId' in plan)&&/-r[a-z0-9]+$/i.test(String(plan.i||'')));
-  }
-  function normalizeReplacement(previous,incoming){
-    if(!incoming||!Array.isArray(incoming.plans)||!incoming.plans.length)return incoming;
-    const appended=incoming.plans[incoming.plans.length-1];
-    if(!isReplacement(appended))return incoming;
-
-    const beforePlans=previous&&Array.isArray(previous.plans)?previous.plans:[];
-    const activeBefore=clampActive(previous||incoming);
-    const expectedAppend=beforePlans.length
-      ? incoming.plans.length===beforePlans.length+1
-      : incoming.plans.length===2;
-    const pointsToAppended=Number(incoming.active)===incoming.plans.length-1;
-    if(!expectedAppend||!pointsToAppended)return incoming;
-
-    const plans=beforePlans.length?incoming.plans.slice(0,-1):[];
-    if(plans.length)plans[activeBefore]=appended;
-    else plans.push(appended);
-    incoming.plans=plans;
-    incoming.active=beforePlans.length?activeBefore:0;
-    incoming.day=incoming.day&&typeof incoming.day==='object'?incoming.day:{};
-    delete incoming.day[String(incoming.plans.length)];
-    incoming.day[incoming.active]=1;
-    return incoming;
-  }
-  function normalizeAddedPlan(raw,stamp){
-    const plan=clone(raw&&typeof raw==='object'?raw:{});
-    const sourceId=String(plan.i||'plan');
-    plan.sourcePlanId=sourceId;
-    plan.i=sourceId+'-p'+String(stamp||Date.now()).toString(36);
-    plan.t=plan.t||'KGG Trainingsplan';
-    plan.v=Number(plan.v)||1;
-    plan.d=Number(plan.d)||6;
-    plan.extendDays=plan.extendDays!==false;
-    plan.stepDays=Number(plan.stepDays)||6;
-    plan.e=Array.isArray(plan.e)?plan.e.map(clone):[];
-    return plan;
-  }
-  function applyAddState(previous,current,added){
-    const state=previous&&Array.isArray(previous.plans)?clone(previous):{version:1,plans:[],active:0,day:{}};
-    state.version=Number(state.version)||1;
-    state.plans=Array.isArray(state.plans)?state.plans:[];
-    state.day=state.day&&typeof state.day==='object'?state.day:{};
-    if(!state.plans.length&&current)state.plans.push(clone(current));
-    state.plans.push(clone(added));
-    state.active=state.plans.length-1;
-    state.day[state.active]=1;
-    state.updatedAt=new Date().toISOString();
-    return state;
-  }
-  function existingPlanCount(){
-    const state=parse(window.localStorage&&window.localStorage.getItem(MULTI_KEY));
-    if(state&&Array.isArray(state.plans)&&state.plans.length)return state.plans.length;
-    const current=parse(window.localStorage&&window.localStorage.getItem(CURRENT_KEY));
-    if(current&&current.plan&&typeof current.plan==='object')return 1;
-    try{if(typeof p!=='undefined'&&p&&Array.isArray(p.ex))return 1}catch(e){}
-    return 0;
-  }
-  function nextPlanNumber(){return existingPlanCount()+1}
-  function ordinalEn(number){
-    const n=Math.max(1,Number(number)||1),mod100=n%100;
-    if(mod100>=11&&mod100<=13)return n+'th';
-    return n+({1:'st',2:'nd',3:'rd'}[n%10]||'th');
-  }
-  function isEnglish(){
-    try{return window.localStorage.getItem('kggPatientLang')==='en'}catch(e){return false}
-  }
-  function currentRaw(){
-    const saved=parse(window.localStorage&&window.localStorage.getItem(CURRENT_KEY));
-    return saved&&saved.plan&&typeof saved.plan==='object'?clone(saved.plan):null;
-  }
-  function currentState(){
-    const state=parse(window.localStorage&&window.localStorage.getItem(MULTI_KEY));
-    return state&&Array.isArray(state.plans)?clone(state):{version:1,plans:[],active:0,day:{}};
-  }
-  function beginAdd(){
+  function clone(value){try{return JSON.parse(JSON.stringify(value))}catch(e){return value&&typeof value==='object'?{...value}:value}}
+  function readJson(storage,key){try{return JSON.parse(storage.getItem(key)||'null')}catch(e){return null}}
+  function decodePayload(value){
+    if(window.KGGPlanFormat&&typeof window.KGGPlanFormat.decodePlanText==='function'){
+      try{return window.KGGPlanFormat.decodePlanText(value).raw}catch(e){return null}
+    }
+    let text=String(value||'').trim().replace(/^KGGH2:/i,'').replace(/-/g,'+').replace(/_/g,'/');
+    if(!text)return null;
     try{
-      const api=window.KGGPatientMultiPlan;
-      if(api&&typeof api.saveCurrentSlot==='function')api.saveCurrentSlot();
-    }catch(e){}
-    addSession={
-      state:currentState(),
-      current:currentRaw(),
-      captured:null,
-      added:null,
-      number:nextPlanNumber(),
-      expiresAt:Date.now()+5*60*1000
-    };
-    refreshUi();
-    return addSession.number;
+      while(text.length%4)text+='=';
+      const binary=atob(text),bytes=new Uint8Array(binary.length);
+      for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+      const decoded=typeof TextDecoder==='function'?new TextDecoder().decode(bytes):decodeURIComponent(escape(binary));
+      const raw=JSON.parse(decoded);
+      return raw&&typeof raw==='object'&&Array.isArray(raw.e)?raw:null;
+    }catch(e){return null}
   }
-  function cancelAdd(){addSession=null;refreshUi()}
-  function capturePlan(value){
-    if(!addSession||addSession.captured||Date.now()>addSession.expiresAt)return;
-    if(value&&typeof value==='object'&&Array.isArray(value.e))addSession.captured=clone(value);
-  }
-  function setRuntimeFromPlan(plan){
+  function incomingLink(){
     try{
-      if(typeof p!=='undefined')p={
-        id:plan.i||'plan',title:plan.t||'KGG Trainingsplan',version:Number(plan.v)||1,
-        days:Number(plan.d)||6,extendDays:plan.extendDays!==false,
-        stepDays:Number(plan.stepDays)||6,
-        ex:(plan.e||[]).map(e=>({n:e[0]||'Übung',sets:Number(e[1])||3,side:e[2]||'LR',u:e[3]||'kg',m:e[4]||'Wdh',sl:e[5]||'',sm:e[6]||'',media:e[7]||'',videoUrl:e[8]||'',videoLabel:e[9]||'Video öffnen',painMode:e[10]||'exercise'}))
-      };
-      if(typeof v!=='undefined')v={};
-      if(typeof done!=='undefined')done=[];
-      if(typeof d!=='undefined')d=1;
+      const query=new URLSearchParams(location.search),queryValue=query.get('plan')||query.get('kgg')||'';
+      if(queryValue)return{raw:decodePayload(queryValue),source:'query'};
+      const hash=String(location.hash||'').slice(1);
+      if(/^KGGH[23]:/i.test(hash))return{raw:decodePayload(hash),source:'hash'};
     }catch(e){}
+    return null;
   }
-  function writeAddedCurrent(key){
-    if(!addSession||!addSession.captured)return null;
-    if(!addSession.added)addSession.added=normalizeAddedPlan(addSession.captured,Date.now());
-    const wrapper={plan:addSession.added,importedAt:new Date().toISOString(),source:'add'};
-    nativeSetItem.call(window.localStorage,key,JSON.stringify(wrapper));
-    setRuntimeFromPlan(addSession.added);
-    return addSession.added;
+  function activeStoredPlan(){
+    const state=readJson(window.localStorage,MULTI_KEY);
+    if(state&&Array.isArray(state.plans)&&state.plans.length){
+      const index=Math.max(0,Math.min(Number(state.active)||0,state.plans.length-1));
+      if(state.plans[index]&&typeof state.plans[index]==='object')return state.plans[index];
+    }
+    const wrapper=readJson(window.localStorage,CURRENT_KEY);
+    return wrapper&&wrapper.plan&&typeof wrapper.plan==='object'?wrapper.plan:null;
   }
-  function finishAdd(key){
-    if(!addSession||!addSession.added)return false;
-    const state=applyAddState(addSession.state,addSession.current,addSession.added);
-    nativeSetItem.call(window.localStorage,key,JSON.stringify(state));
-    addSession=null;
-    queueRefresh();
-    return true;
+  function planKey(raw){
+    const id=raw&&String(raw.sourcePlanId||raw.i||'').trim();
+    if(id)return'id:'+id;
+    try{return'json:'+JSON.stringify(raw)}catch(e){return'object'}
   }
-
-  JSON.parse=function(text,reviver){
-    const value=nativeParse.call(JSON,text,reviver);
-    capturePlan(value);
+  function stripIncomingUrl(){
+    try{if(window.history&&typeof history.replaceState==='function')history.replaceState(null,'',location.pathname)}catch(e){}
+  }
+  function writePending(link){
+    const now=Date.now();
+    pendingMemory={version:1,source:link.source,raw:clone(link.raw),createdAt:now,expiresAt:now+TTL_MS};
+    try{sessionStorage.setItem(PENDING_KEY,JSON.stringify(pendingMemory))}catch(e){}
+  }
+  function clearPending(){
+    pendingMemory=null;
+    try{sessionStorage.removeItem(PENDING_KEY)}catch(e){}
+  }
+  function readPending(){
+    let value=pendingMemory;
+    if(!value){try{value=JSON.parse(sessionStorage.getItem(PENDING_KEY)||'null')}catch(e){value=null}}
+    if(!value||!value.raw||!Array.isArray(value.raw.e)){clearPending();return null}
+    if(Number(value.expiresAt)<=Date.now()){clearPending();return null}
     return value;
-  };
-
-  Storage.prototype.setItem=function(key,value){
-    const name=String(key);
-    if(this===window.localStorage&&name===CURRENT_KEY&&addSession&&addSession.captured){
-      writeAddedCurrent(key);
-      return;
-    }
-    if(this===window.localStorage&&name===MULTI_KEY){
-      if(addSession&&addSession.added&&finishAdd(key))return;
-      const previous=parse(this.getItem(MULTI_KEY));
-      const incoming=parse(value);
-      if(incoming){
-        const normalized=normalizeReplacement(previous,incoming);
-        const result=nativeSetItem.call(this,key,JSON.stringify(normalized));
-        queueRefresh();
-        return result;
-      }
-    }
-    const result=nativeSetItem.call(this,key,value);
-    if(this===window.localStorage&&(name===CURRENT_KEY||name===MULTI_KEY))queueRefresh();
-    return result;
-  };
-
-  function refreshUi(){
-    if(typeof document==='undefined')return;
-    const number=addSession&&addSession.number?addSession.number:nextPlanNumber();
-    const en=isEnglish();
-    const label=en?ordinalEn(number)+' plan':number+'. Plan';
-    const hidden=document.getElementById('kggPatientAddPlanBtn');
-    if(hidden&&hidden.textContent!==(label+' +'))hidden.textContent=label+' +';
-    const bubble=document.getElementById('kggBubbleAdd');
-    if(bubble&&bubble.textContent!==('➕ '+label))bubble.textContent='➕ '+label;
-    if(addSession){
-      const scanner=document.getElementById('kggLiveScan');
-      if(scanner){
-        scanner.setAttribute('aria-label',en?'Scan additional plan':'Zusätzlichen Plan scannen');
-        const title=scanner.querySelector('.kggLiveScanHead b');
-        const wanted=en?'Scan QR for '+ordinalEn(number)+' plan':'QR für '+number+'. Plan scannen';
-        if(title&&title.textContent!==wanted)title.textContent=wanted;
-        const status=scanner.querySelector('#kggLiveScanStatus');
-        if(status&&/Plan erkannt.*(aktualisiert|Updating)/i.test(status.textContent||'')){
-          status.textContent=en?'Plan detected. Adding as a separate plan …':number+'. Plan erkannt. Wird separat hinzugefügt …';
-        }
-      }
-    }
   }
-  function queueRefresh(){
-    if(refreshQueued)return;
-    refreshQueued=true;
-    const run=()=>{refreshQueued=false;refreshUi()};
-    if(typeof queueMicrotask==='function')queueMicrotask(run);else if(typeof setTimeout==='function')setTimeout(run,0);else run();
+  function setStatus(text,kind){try{if(typeof window.setStatus==='function')window.setStatus(text,kind||'')}catch(e){}}
+  function readyForChoice(){
+    return !!(document&&document.body&&activeStoredPlan()&&
+      window.KGGPatientPlanSlots&&typeof window.KGGPatientPlanSlots.addPlan==='function'&&
+      window.KGGPatientPlanImport&&typeof window.KGGPatientPlanImport.replaceConfirmed==='function');
   }
-  function installDomBridge(){
-    if(typeof document==='undefined')return;
-    document.addEventListener('click',event=>{
-      const target=event&&event.target&&event.target.closest?event.target.closest('#kggPatientAddPlanBtn,#kggLiveScan .kggLiveScanClose'):null;
-      if(!target)return;
-      if(target.id==='kggPatientAddPlanBtn')beginAdd();
-      else if(target.classList&&target.classList.contains('kggLiveScanClose'))cancelAdd();
-    },true);
-    if(typeof MutationObserver==='function'){
-      const observer=new MutationObserver(queueRefresh);
-      const root=document.documentElement||document.body;
-      if(root)observer.observe(root,{childList:true,subtree:true,characterData:true});
-    }
-    queueRefresh();
+  function ensureStyle(){
+    if(document.getElementById('kggPlanLinkChoiceStyle'))return;
+    const style=document.createElement('style');
+    style.id='kggPlanLinkChoiceStyle';
+    style.textContent='#kggPlanLinkChoiceBackdrop{position:fixed;inset:0;z-index:2860;background:#0f172a55;padding:14px;display:grid;place-items:center}#kggPlanLinkChoiceBackdrop[hidden],#kggPlanLinkChoice[hidden]{display:none!important}#kggPlanLinkChoice{width:min(100%,520px);box-sizing:border-box;background:#fff;border:1px solid #dbe3ef;border-radius:20px;padding:18px;box-shadow:0 22px 70px #0f172a44;font:500 15px/1.4 system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#111827}#kggPlanLinkChoice h2{margin:0;font-size:20px;line-height:1.2}#kggPlanLinkChoice p{margin:10px 0;color:#475569}#kggPlanLinkChoice .kggPlanLinkChoiceNames{display:grid;gap:8px;margin:12px 0 16px;padding:12px;border-radius:14px;background:#f8fafc;border:1px solid #e2e8f0}#kggPlanLinkChoice .kggPlanLinkChoiceNames b{display:block;color:#64748b;font-size:12px}#kggPlanLinkChoice .kggPlanLinkChoiceNames span{display:block;overflow-wrap:anywhere}#kggPlanLinkChoice .kggPlanLinkChoiceActions{display:grid;gap:8px}#kggPlanLinkChoice button{min-height:46px;border-radius:13px;padding:9px 12px;font:800 15px/1.2 system-ui,-apple-system,Segoe UI,Arial,sans-serif;cursor:pointer}#kggPlanLinkChoice button:disabled{opacity:.55;cursor:wait}#kggPlanLinkChoiceAdd{border:1px solid #166534;background:#15803d;color:#fff}#kggPlanLinkChoiceReplace{border:1px solid #1d4ed8;background:#2563eb;color:#fff}#kggPlanLinkChoiceCancel{border:1px solid #cbd5e1;background:#fff;color:#111827}';
+    document.head.appendChild(style);
+  }
+  function closeDialog(){
+    const backdrop=document.getElementById('kggPlanLinkChoiceBackdrop');
+    if(backdrop)backdrop.remove();
+  }
+  function showDialog(pending){
+    if(document.getElementById('kggPlanLinkChoiceBackdrop'))return;
+    ensureStyle();
+    const current=activeStoredPlan(),incoming=pending.raw;
+    const backdrop=document.createElement('div');backdrop.id='kggPlanLinkChoiceBackdrop';backdrop.setAttribute('role','presentation');
+    const dialog=document.createElement('section');dialog.id='kggPlanLinkChoice';dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-labelledby','kggPlanLinkChoiceTitle');
+    const title=document.createElement('h2');title.id='kggPlanLinkChoiceTitle';title.textContent='Neuen Trainingsplan öffnen?';
+    const intro=document.createElement('p');intro.textContent='Es ist bereits ein anderer Trainingsplan gespeichert. Bitte wähle, wie der neue Plan geöffnet werden soll.';
+    const names=document.createElement('div');names.className='kggPlanLinkChoiceNames';
+    const oldLabel=document.createElement('div'),oldName=document.createElement('span'),newLabel=document.createElement('div'),newName=document.createElement('span');
+    oldLabel.innerHTML='<b>Vorhandener Plan</b>';newLabel.innerHTML='<b>Neuer Plan</b>';
+    oldName.textContent=String(current&& (current.t||current.title)||'Aktueller Plan');newName.textContent=String(incoming&&(incoming.t||incoming.title)||'Neuer Plan');
+    names.append(oldLabel,oldName,newLabel,newName);
+    const actions=document.createElement('div');actions.className='kggPlanLinkChoiceActions';
+    const add=document.createElement('button');add.type='button';add.id='kggPlanLinkChoiceAdd';add.textContent='Als zusätzlichen Plan hinzufügen';
+    const replace=document.createElement('button');replace.type='button';replace.id='kggPlanLinkChoiceReplace';replace.textContent='Aktiven Plan ersetzen';
+    const cancel=document.createElement('button');cancel.type='button';cancel.id='kggPlanLinkChoiceCancel';cancel.textContent='Abbrechen';
+    actions.append(add,replace,cancel);dialog.append(title,intro,names,actions);backdrop.appendChild(dialog);document.body.appendChild(backdrop);
+    let busy=false;
+    const finish=choice=>{
+      if(busy)return;
+      if(choice==='cancel'){clearPending();closeDialog();setStatus('Import abgebrochen.','');return}
+      busy=true;[add,replace,cancel].forEach(button=>button.disabled=true);
+      let result=false;
+      try{result=choice==='add'?window.KGGPatientPlanSlots.addPlan(clone(incoming)):window.KGGPatientPlanImport.replaceConfirmed(clone(incoming))}catch(e){result=false}
+      Promise.resolve(result).then(ok=>{
+        if(ok){clearPending();closeDialog()}
+        else{busy=false;[add,replace,cancel].forEach(button=>button.disabled=false);setStatus('Der neue Plan konnte nicht übernommen werden.','warn')}
+      });
+    };
+    add.onclick=()=>finish('add');replace.onclick=()=>finish('replace');cancel.onclick=()=>finish('cancel');
+    add.focus({preventScroll:true});
+  }
+  function scheduleDialog(){
+    let attempts=0;
+    const attempt=()=>{
+      const pending=readPending();
+      if(!pending)return;
+      if(readyForChoice()){showDialog(pending);return}
+      if(attempts++<120)setTimeout(attempt,50);
+    };
+    setTimeout(attempt,0);
   }
 
-  window.KGGPatientPlanSlots={
-    version:VERSION,
-    normalizeReplacement,
-    normalizeAddedPlan,
-    applyAddState,
-    nextPlanNumber,
-    beginAdd,
-    cancelAdd
-  };
-  installDomBridge();
+  const first=incomingLink(),current=activeStoredPlan();
+  if(first&&first.raw&&current&&planKey(first.raw)!==planKey(current)){writePending(first);stripIncomingUrl()}
+  window.KGGPatientPlanLinkChoice={version:VERSION,pendingKey:PENDING_KEY,readPending,clearPending,showPending:scheduleDialog};
+  if(window.__KGG_TEST__)window.__kggPatientPlanLinkChoiceTest={decodePayload,planKey,readPending,clearPending,TTL_MS};
+  if(typeof document!=='undefined'){
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',scheduleDialog,{once:true});
+    else scheduleDialog();
+  }
 })();
 ```

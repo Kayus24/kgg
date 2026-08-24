@@ -3,8 +3,42 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 71,
+  "latestVersionCode": 81,
   "entries": [
+    {
+      "versionCode": 81,
+      "versionName": "1.0.81-qr-full-plan-device-ladder",
+      "patchId": "kgg-v081-qr-full-plan-device-ladder",
+      "status": "candidate",
+      "type": "module-patch",
+      "title": "Vollständige KGGH3-Plan-QRs und Geräte-Testleiter",
+      "reason": "Komplette persönliche Pläne müssen von normalen Oppo-Ressourcen bis zu simulierten schwachen Geräten zuverlässig gelesen werden.",
+      "whatChanged": [
+        "Neue Plan-Ausgaben verwenden den lokalen, fest angehefteten KGGH3-Codec mit fflate 0.8.3 und Fehlerkorrektur M.",
+        "KGGH2 bleibt lesbar; Query, Hash, iOS-Startlink und der interne QR-Scanner validieren beide Formate.",
+        "Synthetische 1/3/7/12/20-Übungspläne werden über Decoder-, Parser-, Speicher- und Sichtbarkeits-Fingerabdrücke geprüft.",
+        "Für Altgeräte gibt es zusätzlich einen kleinen QR nur für die öffentliche Patienten-App-Adresse; der persönliche KGGH3-Plan wird danach intern gelesen."
+      ],
+      "touchedAreas": [
+        "QR/Patienten-App",
+        "KGGH2/KGGH3",
+        "Interner QR-Scanner",
+        "Geräte-Testleiter"
+      ],
+      "notTouched": [
+        "PDF",
+        "Plan-State-Quelle",
+        "Medien-/Upload-Logik",
+        "API-Key-Logik",
+        "Android/APK"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "Vor einem echten Oppo-Test müssen die automatischen KGGH3-, Kamera-, Foto-Fallback- und Geräteprofile grün sein."
+    },
     {
       "versionCode": 71,
       "versionName": "1.0.71-pdf-global-exercise-numbering",
@@ -758,7 +792,7 @@
       "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
     }
   ],
-  "latestVersionName": "1.0.71-pdf-global-exercise-numbering",
+  "latestVersionName": "1.0.81-qr-full-plan-device-ladder",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",

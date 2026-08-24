@@ -139,9 +139,52 @@ def run_patient_scan_camera() -> None:
     run([node_executable(), "release-pipeline/kgg_patient_scan_camera_smoke.js"])
 
 
+def run_patient_qr_v81_device_ladder() -> None:
+    global PATIENT_SCAN_PREPARED
+    npm = npm_executable()
+    if not npm:
+        raise BatteryError("npm not found. Install npm or set KGG_NPM for the patient QR v81 device ladder.")
+    if not PATIENT_SCAN_PREPARED:
+        run([npm, "--prefix", "release-pipeline", "ci", "--ignore-scripts"])
+        if os.environ.get("KGG_SKIP_PLAYWRIGHT_INSTALL") != "1":
+            run(
+                [
+                    node_executable(),
+                    "release-pipeline/node_modules/playwright/cli.js",
+                    "install",
+                    "chromium",
+                ]
+            )
+        PATIENT_SCAN_PREPARED = True
+    log("== Patient QR v81 full-plan device ladder ==")
+    run([node_executable(), "release-pipeline/kgg_patient_qr_v81_device_ladder.js"])
+    run([node_executable(), "release-pipeline/kgg_device_test_station_browser_smoke.js"])
+    run([node_executable(), "release-pipeline/kgg_patient_device_test_agent_smoke.js"])
+
+
 def run_patient_day_flow_smoke() -> None:
     log("== Patient continuous day-flow critical smoke ==")
     run([node_executable(), "release-pipeline/kgg_patient_continuous_days_smoke.js"])
+
+
+def run_patient_plan_link_choice_smoke() -> None:
+    log("== Patient plan-link choice critical smoke ==")
+    run([node_executable(), "release-pipeline/kgg_patient_plan_link_choice_smoke.js"])
+
+
+def run_patient_qr_v81_smoke() -> None:
+    global PATIENT_SCAN_PREPARED
+    npm = npm_executable()
+    if not npm:
+        raise BatteryError("npm not found. Install npm or set KGG_NPM for the patient QR v81 browser smoke.")
+    if not PATIENT_SCAN_PREPARED:
+        run([npm, "--prefix", "release-pipeline", "ci", "--ignore-scripts"])
+        if os.environ.get("KGG_SKIP_PLAYWRIGHT_INSTALL") != "1":
+            run([node_executable(), "release-pipeline/node_modules/playwright/cli.js", "install", "chromium"])
+        PATIENT_SCAN_PREPARED = True
+    log("== Patient KGGH2/KGGH3 link and scanner format smoke ==")
+    for script in ("kgg_patient_scan_format_smoke.js", "kgg_ios_start_smoke.js"):
+        run([node_executable(), f"release-pipeline/{script}"])
 
 
 def run_patient_day_flow_browser() -> None:
@@ -339,7 +382,7 @@ def run_android_wrapper_contract() -> None:
         ("from(\"../../therapist-app/releases/web/r0419/admin.html\")", "Admin APK bundles r0419"),
         ("from(\"../../therapist-app/releases/web/r0419/colleague.html\")", "Colleague APK bundles r0419"),
         ("applicationId \"de.kgg.preview\"", "Preview APK uses a separate package id"),
-        ("manifestPlaceholders = [appLabel: \"KGG Preview\"]", "Preview APK has a distinct launcher label"),
+        ("manifestPlaceholders = [appLabel: \"KGG QR-Teststation\"]", "Preview APK has a distinct v404 test-station label"),
         ("from(\"../../kgg-update/index.html\")", "Preview APK bundles current source HTML"),
         ("assemblePreviewDebug", "Android workflow builds the Preview profile"),
         ("PREVIEW_MANIFEST_URL", "Preview APK loads the GPT preview channel"),
@@ -362,7 +405,8 @@ def run_android_wrapper_contract() -> None:
         ("getCapabilities: function()", "JavaScript bootstrap must expose native camera capabilities"),
         ("android.permission.POST_NOTIFICATIONS", "Preview APK requests Android notification permission"),
         ("KGG_PREVIEW_STATUS_URL", "Preview APK has an isolated workflow status endpoint"),
-        ("versionName \"0.2.12-v402-preview-status\"", "Preview flavor has an updateable v402 package version"),
+        ("versionName defaultPreviewVersion", "Preview flavor has an updateable v404 package version"),
+        ("defaultPreviewVersion = \"0.2.14-v404-dual-device-qr-test\"", "Preview flavor pins the dual-device v404 identity"),
         ("androidx.work:work-runtime:2.11.2", "Preview status background checks use stable WorkManager"),
         ("KggPreviewStatusWorker", "Preview status has a background worker"),
         ('BuildConfig.DEBUG && protocol.equals("http") && host.equals("10.0.2.2")', "HTTP status access is limited to the debug emulator host"),
@@ -399,7 +443,15 @@ def run_android_wrapper_contract() -> None:
                 raise BatteryError(f"Android admin launcher icon override missing or too small: {admin_icon}")
     run([sys.executable, "release-pipeline/kgg_android_preview_probe.py", "--self-test"])
     run([sys.executable, "release-pipeline/kgg_preview_status.py", "--self-test"])
+    run([sys.executable, "release-pipeline/kgg_preview_context.py", "--self-test"])
     log("Android wrapper contract OK")
+
+
+def run_tab_s9_test_station_contract() -> None:
+    log("== Dual-device v404 Preview test-station contract ==")
+    run([sys.executable, "release-pipeline/test_kgg_tab_s9_test_station.py"])
+    run([node_executable(), "release-pipeline/kgg_dual_device_job.js", "--self-test"])
+    run([node_executable(), "release-pipeline/kgg_dual_device_package.js", "--self-test"])
 
 
 def run_gpt_payload_preflight_self_test() -> None:
@@ -604,6 +656,13 @@ TEST_REGISTRY = [
         "run": run_android_wrapper_contract,
     },
     {
+        "id": "dual-device-v404-test-station-contract",
+        "level": "critical",
+        "suite": "android",
+        "reason": "The Preview-only Tab display, real patient scanner observer, synthetic job and fixed private report host must stay isolated and token-free.",
+        "run": run_tab_s9_test_station_contract,
+    },
+    {
         "id": "gpt-payload-preflight",
         "level": "critical",
         "suite": "gpt",
@@ -663,7 +722,7 @@ TEST_REGISTRY = [
         "id": "patient-qr-critical",
         "level": "critical",
         "suite": "patient-qr",
-        "reason": "Training-plan QR links must open the root patient app with ?plan=KGGH2 payload, not old renderers or stored plans.",
+        "reason": "New training-plan QR links must open the root patient app with a complete ?plan=KGGH3 payload while retaining KGGH2 compatibility.",
         "run": lambda: run_html_logic("patient-qr-critical"),
     },
     {
@@ -672,6 +731,20 @@ TEST_REGISTRY = [
         "suite": "patient-day-flow",
         "reason": "Continuous patient plans must advance beyond their original day horizon without dropping T13+ state.",
         "run": run_patient_day_flow_smoke,
+    },
+    {
+        "id": "patient-plan-link-choice-critical",
+        "level": "critical",
+        "suite": "patient-plan",
+        "reason": "A second direct patient-plan link must ask before adding, replacing or cancelling without overwriting the active plan.",
+        "run": run_patient_plan_link_choice_smoke,
+    },
+    {
+        "id": "patient-qr-format-v81-critical",
+        "level": "critical",
+        "suite": "patient-qr",
+        "reason": "KGGH2 and KGGH3 patient links, iOS start routing and scanner validation must preserve the complete synthetic plan before device testing.",
+        "run": run_patient_qr_v81_smoke,
     },
     {
         "id": "selftest-gate-critical",
@@ -714,6 +787,13 @@ TEST_REGISTRY = [
         "suite": "patient-scan",
         "reason": "Patient plan QR photos and synthetic camera streams must reach the parser and preserve existing plan data.",
         "run": run_patient_scan_camera,
+    },
+    {
+        "id": "patient-qr-v81-device-ladder-regression",
+        "level": "regression",
+        "suite": "patient-scan",
+        "reason": "Full KGGH3 plans must survive synthetic 1/3/7/12/20 diagnostics, native/jsQR fallback, device profiles and QR photo/lifecycle paths.",
+        "run": run_patient_qr_v81_device_ladder,
     },
     {
         "id": "admin-camera-qr-regression",

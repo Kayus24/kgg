@@ -2,6 +2,172 @@ plugins {
     id "com.android.application"
 }
 
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import java.security.MessageDigest
+import java.util.Locale
+
+def javaStringLiteral = { String value ->
+    '"' + value
+            .replace("\\", "\\\\")
+            .replace('"', '\\"')
+            .replace("\r", "\\r")
+            .replace("\n", "\\n") + '"'
+}
+
+def gitHead = {
+    try {
+        def process = ["git", "rev-parse", "HEAD"].execute(null, project.projectDir)
+        process.waitFor()
+        def value = process.in.text.trim().toLowerCase(Locale.ROOT)
+        if (process.exitValue() == 0 && value ==~ /[0-9a-f]{40}/) {
+            return value
+        }
+    } catch (Exception ignored) {
+        // The source archive may not contain a Git checkout. The deterministic
+        // local fallback below keeps the Preview contract valid for builds.
+    }
+    return "0" * 40
+}
+
+def propertyOrEnvironment = { String name, String fallback ->
+    def propertyValue = project.findProperty(name)
+    if (propertyValue != null && propertyValue.toString().trim()) {
+        return propertyValue.toString().trim()
+    }
+    def environmentValue = System.getenv(name)
+    if (environmentValue != null && environmentValue.trim()) {
+        return environmentValue.trim()
+    }
+    return fallback
+}
+
+def defaultPreviewVersion = "0.2.14-v404-dual-device-qr-test"
+def defaultPreviewRequestId = "local-dual-device-v404"
+def defaultPreviewSha = gitHead()
+def defaultPreviewPatchHash = MessageDigest.getInstance("SHA-256")
+        .digest(("kgg-preview-local|" + defaultPreviewRequestId + "|" + defaultPreviewSha + "|" + defaultPreviewVersion).getBytes("UTF-8"))
+        .collect { String.format("%02x", it & 0xff) }
+        .join()
+def defaultDeviceTestSessionId = "kgg-test-" + defaultPreviewSha.substring(0, 32)
+def defaultDeviceTestJobHash = MessageDigest.getInstance("SHA-256")
+        .digest(("kgg-device-test-job|" + defaultPreviewRequestId + "|" + defaultPreviewSha).getBytes("UTF-8"))
+        .collect { String.format("%02x", it & 0xff) }
+        .join()
+def defaultDeviceTestJobUrl = "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/device-tests/local-dual-device-v404/job.json"
+def defaultPatientPwaUrl = "https://kayus24.github.io/kgg-patient-preview/device-test/"
+def defaultDeviceTestProfile = "quick"
+def defaultStationTestIds = [
+        "admin-portrait",
+        "admin-landscape",
+        "admin-split-screen",
+        "admin-package-button",
+        "admin-touch-dialog-save",
+        "admin-seven-exercises",
+        "admin-reorder-save-reload",
+        "display-pairing",
+        "display-h2-1-baseline",
+        "display-h2-7-legacy",
+        "display-h2-12-diagnostic",
+        "display-h2-20-diagnostic",
+        "display-h3-7-normal",
+        "display-h3-12-normal",
+        "display-h3-20-normal",
+        "display-h3-20-far-angle",
+        "display-h3-20-low-contrast",
+        "display-h3-20-photo",
+]
+
+def previewContextFile = project.findProperty("KGG_PREVIEW_CONTEXT_FILE")
+def previewContext = [:]
+if (previewContextFile != null && file(previewContextFile.toString()).isFile()) {
+    def parsedContext = new JsonSlurper().parse(file(previewContextFile.toString()))
+    if (!(parsedContext instanceof Map)) {
+        throw new GradleException("KGG_PREVIEW_CONTEXT_FILE must contain a JSON object")
+    }
+    previewContext.putAll(parsedContext)
+}
+def previewRequestId = propertyOrEnvironment(
+        "KGG_PREVIEW_REQUEST_ID",
+        String.valueOf(previewContext.get("requestId") ?: defaultPreviewRequestId)
+)
+def previewBaseSha = propertyOrEnvironment(
+        "KGG_PREVIEW_BASE_SHA",
+        String.valueOf(previewContext.get("baseSha") ?: defaultPreviewSha)
+).toLowerCase(Locale.ROOT)
+def previewCommitSha = propertyOrEnvironment(
+        "KGG_PREVIEW_COMMIT_SHA",
+        String.valueOf(previewContext.get("commitSha") ?: previewBaseSha)
+).toLowerCase(Locale.ROOT)
+def previewPatchHash = propertyOrEnvironment(
+        "KGG_PREVIEW_PATCH_HASH",
+        String.valueOf(previewContext.get("patchHash") ?: defaultPreviewPatchHash)
+).toLowerCase(Locale.ROOT)
+def previewVersion = propertyOrEnvironment(
+        "KGG_PREVIEW_VERSION",
+        String.valueOf(previewContext.get("previewVersion") ?: defaultPreviewVersion)
+)
+def deviceTestSessionId = propertyOrEnvironment(
+        "KGG_DEVICE_TEST_SESSION_ID",
+        String.valueOf(previewContext.get("deviceTestSessionId") ?: defaultDeviceTestSessionId)
+).toLowerCase(Locale.ROOT)
+def deviceTestJobHash = propertyOrEnvironment(
+        "KGG_DEVICE_TEST_JOB_HASH",
+        String.valueOf(previewContext.get("deviceTestJobHash") ?: defaultDeviceTestJobHash)
+).toLowerCase(Locale.ROOT)
+def deviceTestJobUrl = propertyOrEnvironment(
+        "KGG_DEVICE_TEST_JOB_URL",
+        String.valueOf(previewContext.get("deviceTestJobUrl") ?: defaultDeviceTestJobUrl)
+)
+def patientPwaUrl = propertyOrEnvironment(
+        "KGG_PATIENT_PWA_URL",
+        String.valueOf(previewContext.get("patientPwaUrl") ?: defaultPatientPwaUrl)
+)
+def deviceTestProfile = propertyOrEnvironment(
+        "KGG_DEVICE_TEST_PROFILE",
+        String.valueOf(previewContext.get("deviceTestProfile") ?: defaultDeviceTestProfile)
+).toLowerCase(Locale.ROOT)
+def previewRequiredTests = previewContext.get("requiredTests")
+if (!(previewRequiredTests instanceof List) || previewRequiredTests.isEmpty()) {
+    previewRequiredTests = defaultStationTestIds
+}
+previewRequiredTests = previewRequiredTests.collect { String.valueOf(it).replaceAll(/[\r\n\t]/, " ").trim() }.findAll { it }
+def previewStationTestIds = previewContext.get("stationTestIds")
+if (!(previewStationTestIds instanceof List) || previewStationTestIds.isEmpty()) {
+    previewStationTestIds = defaultStationTestIds
+}
+previewStationTestIds = previewStationTestIds.collect { String.valueOf(it).trim() }.findAll { it }
+if (!(previewRequestId ==~ /[a-z0-9][a-z0-9-]{5,63}/)
+        || !(previewBaseSha ==~ /[0-9a-f]{40}/)
+        || !(previewCommitSha ==~ /[0-9a-f]{40}/)
+        || !(previewPatchHash ==~ /[0-9a-f]{64}/)
+        || !(deviceTestSessionId ==~ /kgg-test-[0-9a-f]{32}/)
+        || !(deviceTestJobHash ==~ /[0-9a-f]{64}/)
+        || !(deviceTestJobUrl ==~ /https:\/\/[A-Za-z0-9._~:\/?#\[\]@!$&'()*+,;=%-]{1,500}/)
+        || !(patientPwaUrl ==~ /https:\/\/[A-Za-z0-9._~:\/?#\[\]@!$&'()*+,;=%-]{1,500}/)
+        || !(deviceTestProfile in ["quick", "full"])
+        || previewVersion != defaultPreviewVersion
+        || previewRequiredTests.any { it.length() > 240 || it ==~ /(?i).*(token|cookie|password|secret|base64|account|location|network).*/ }) {
+    throw new GradleException("Preview context failed the bounded v404 contract")
+}
+def embeddedPreviewContext = [
+        kind: "kgg_preview_context",
+        schemaVersion: 2,
+        requestId: previewRequestId,
+        patchHash: previewPatchHash,
+        baseSha: previewBaseSha,
+        commitSha: previewCommitSha,
+        previewVersion: previewVersion,
+        requiredTests: previewRequiredTests,
+        stationTestIds: previewStationTestIds,
+        deviceTestSessionId: deviceTestSessionId,
+        deviceTestJobHash: deviceTestJobHash,
+        deviceTestJobUrl: deviceTestJobUrl,
+        patientPwaUrl: patientPwaUrl,
+        deviceTestProfile: deviceTestProfile,
+]
+def embeddedPreviewContextJson = JsonOutput.toJson(embeddedPreviewContext)
+
 android {
     namespace "de.kgg.app"
     compileSdk 36
@@ -34,10 +200,20 @@ android {
         preview {
             dimension "profile"
             applicationId "de.kgg.preview"
-            versionCode 34
-            versionName "0.2.12-v402-preview-status"
-            manifestPlaceholders = [appLabel: "KGG Preview"]
-            buildConfigField "String", "KGG_PREVIEW_STATUS_URL", "\"${project.findProperty('KGG_PREVIEW_STATUS_URL') ?: 'https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/status/latest.json'}\""
+            versionCode 36
+            versionName defaultPreviewVersion
+            manifestPlaceholders = [appLabel: "KGG QR-Teststation"]
+            buildConfigField "String", "KGG_PREVIEW_STATUS_URL", javaStringLiteral(project.findProperty("KGG_PREVIEW_STATUS_URL") ?: "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/status/latest.json")
+            buildConfigField "String", "KGG_PREVIEW_REQUEST_ID", javaStringLiteral(previewRequestId)
+            buildConfigField "String", "KGG_PREVIEW_PATCH_HASH", javaStringLiteral(previewPatchHash)
+            buildConfigField "String", "KGG_PREVIEW_BASE_SHA", javaStringLiteral(previewBaseSha)
+            buildConfigField "String", "KGG_PREVIEW_COMMIT_SHA", javaStringLiteral(previewCommitSha)
+            buildConfigField "String", "KGG_PREVIEW_REQUIRED_TESTS", javaStringLiteral(JsonOutput.toJson(previewRequiredTests))
+            buildConfigField "String", "KGG_DEVICE_TEST_SESSION_ID", javaStringLiteral(deviceTestSessionId)
+            buildConfigField "String", "KGG_DEVICE_TEST_JOB_HASH", javaStringLiteral(deviceTestJobHash)
+            buildConfigField "String", "KGG_DEVICE_TEST_JOB_URL", javaStringLiteral(deviceTestJobUrl)
+            buildConfigField "String", "KGG_PATIENT_PWA_URL", javaStringLiteral(patientPwaUrl)
+            buildConfigField "String", "KGG_DEVICE_TEST_PROFILE", javaStringLiteral(deviceTestProfile)
         }
     }
 
@@ -62,6 +238,15 @@ def stagePreviewProfileAsset = tasks.register("stagePreviewProfileAsset", Copy) 
     from("../../kgg-update/index.html")
     into(layout.buildDirectory.dir("generated/kggAssets/preview"))
     rename { "preview.html" }
+    inputs.property("kggPreviewContext", embeddedPreviewContextJson)
+    doLast {
+        def contextDirectory = layout.buildDirectory.dir("generated/kggAssets/preview").get().asFile.toPath().resolve("android").toFile()
+        contextDirectory.mkdirs()
+        new File(contextDirectory, "kgg_preview_context.js").setText(
+                "window.KGGPreviewContext=Object.freeze(" + embeddedPreviewContextJson + ");\n",
+                "UTF-8"
+        )
+    }
 }
 
 afterEvaluate {

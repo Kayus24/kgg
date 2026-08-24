@@ -7,10 +7,13 @@ final class KggReleaseControllerFactory {
     }
 
     static KggReleaseController attach(MainActivity activity, WebView webView) {
+        webView.addJavascriptInterface(new KggDeviceTestStationBridge(activity), "KGGDeviceTestStation");
         return null;
     }
 
     static void onPageFinished(MainActivity activity) {
-        // Preview builds never expose release-control actions.
+        activity.injectAssetScript("android/kgg_preview_context.js");
+        activity.injectAssetScript("android/kgg_dual_device_fixtures.js");
+        activity.injectAssetScript("android/kgg_device_test_station.js");
     }
 }

@@ -20,6 +20,7 @@ from typing import Any
 import build_therapist_source as builder
 import kgg_new_patch as module_patch
 import release_pipeline as pipeline
+import kgg_preview_context as preview_context
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -369,6 +370,12 @@ def apply_planned(planned: dict[Path, bytes]) -> None:
 
 def strip_preview_banner(html: str) -> str:
     html = re.sub(
+        r'<script\b[^>]*\bid=(["\'])kgg-preview-context\1[^>]*>.*?</script>',
+        "",
+        html,
+        flags=re.I | re.S,
+    )
+    html = re.sub(
         re.escape(PREVIEW_MARKER_START) + r".*?" + re.escape(PREVIEW_MARKER_END),
         "",
         html,
@@ -382,9 +389,30 @@ def strip_preview_banner(html: str) -> str:
     )
 
 
-def inject_preview_banner(html: str, payload: dict[str, Any], digest: str) -> str:
+def inject_preview_banner(
+    html: str,
+    payload: dict[str, Any],
+    digest: str,
+    report: dict[str, Any] | None = None,
+) -> str:
     request_id = payload["request_id"]
     title = clean_ascii(str(payload.get("title") or request_id), request_id, 120)
+    context = preview_context.build_context(
+        request_id=request_id,
+        patch_hash=digest,
+        base_sha=git_sha(),
+        commit_sha=git_sha(),
+        # The legacy marker self-test intentionally uses a minimal payload.
+        # Production payloads always provide their exact required test list.
+        required_tests=payload.get("required_tests") or ["critical", "ui-stability regression"],
+        preview_version=preview_context.PREVIEW_APP_VERSION,
+        web_version=str((report or {}).get("versionName") or ""),
+    )
+    context_script = (
+        '<script id="kgg-preview-context">'
+        + preview_context.context_script(context)
+        + "</script>"
+    )
     escaped_request = escape_html(request_id, quote=True)
     escaped_title = escape_html(title, quote=True)
     escaped_digest = escape_html(digest, quote=True)
@@ -447,7 +475,13 @@ def inject_preview_banner(html: str, payload: dict[str, Any], digest: str) -> st
         + PREVIEW_MARKER_END
     )
     clean_html = strip_preview_banner(html)
-    rendered, count = re.subn(r"(<body[^>]*>)", r"\1\n" + banner, clean_html, count=1, flags=re.I)
+    rendered, count = re.subn(
+        r"(<body[^>]*>)",
+        r"\1\n" + context_script + "\n" + banner,
+        clean_html,
+        count=1,
+        flags=re.I,
+    )
     if count != 1:
         fail("Preview HTML is missing a body element for the marker.")
     return rendered
@@ -463,11 +497,21 @@ def write_preview(preview_root: Path, html: str, payload: dict[str, Any], digest
     html_path = preview_dir / "admin.html"
     meta_path = preview_dir / "meta.json"
     html_path.write_text(html, encoding="utf-8", newline="\n")
+    context = preview_context.build_context(
+        request_id=request_id,
+        patch_hash=digest,
+        base_sha=git_sha(),
+        commit_sha=git_sha(),
+        required_tests=payload["required_tests"],
+        preview_version=preview_context.PREVIEW_APP_VERSION,
+        web_version=str(report["versionName"]),
+    )
     meta = {
         "kind": "kgg_gpt_preview",
         "requestId": request_id,
         "patchHash": digest,
         "baseSha": git_sha(),
+        "commitSha": git_sha(),
         "baseVersionCode": read_json(VERSION_PATH).get("versionCode"),
         "rolloutCode": rollout_code,
         "title": clean_ascii(str(payload.get("title") or request_id), request_id, 120),
@@ -475,6 +519,10 @@ def write_preview(preview_root: Path, html: str, payload: dict[str, Any], digest
         "patchId": str(report["patchId"]),
         "patchFile": str(report["patchFile"]),
         "versionName": str(report["versionName"]),
+        "previewVersion": preview_context.PREVIEW_APP_VERSION,
+        "requiredTests": list(payload["required_tests"]),
+        "stationTestIds": list(preview_context.STATION_TEST_IDS),
+        "previewContext": context,
         "createdAt": utc_now(),
         "url": f"{PREVIEW_BASE_URL}/{request_id}/admin.html",
         "sha256": hashlib.sha256(html.encode("utf-8")).hexdigest(),
@@ -594,7 +642,7 @@ def run(
     if mode == "publish_preview":
         if preview_root is None:
             fail("--preview-root is required for publish_preview")
-        preview_html = inject_preview_banner(versioned, payload, digest)
+        preview_html = inject_preview_banner(versioned, payload, digest, report)
         meta = write_preview(preview_root, preview_html, payload, digest, report)
         write_github_output(
             github_output,

@@ -16,6 +16,7 @@ const FIRST_LOAD_GLOBALS = [
   "KGGPatientMediaRetryCache",
 ];
 const FIRST_LOAD_MODULES = [
+  "patient-plan-link-choice.js",
   "patient-start-scan.js",
   "patient-multiplan-db.js",
   "patient-plan-delete.js",

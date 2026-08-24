@@ -209,6 +209,15 @@
     <textarea class="patientLinkCopyField hidden" id="patientLinkCopyField" readonly aria-label="Patienten-Link zum manuellen Kopieren"></textarea>
     <div class="qrBox" id="patientQrBox"><span class="qrStatus">QR wird vorbereitet …</span></div>
     <div class="qrStatus" id="patientQrStatus"></div>
+    <section class="patientRootFallback" id="patientRootFallback" hidden>
+      <b>Kleine App-Adresse für ältere Geräte</b>
+      <p class="qrStatus">Wenn der persönliche QR nicht gelesen wird: zuerst nur die App-Adresse öffnen, danach den persönlichen KGGH3-Plan intern scannen.</p>
+      <div class="qrBox patientRootQrBox" id="patientRootQrBox"><span class="qrStatus">App-QR wird vorbereitet …</span></div>
+      <a class="patientLink" id="patientRootAppLink" href="#" target="_blank" rel="noopener">Kurze Patienten-App-Adresse öffnen</a>
+      <input class="patientRootAppAddress" id="patientRootAppAddress" type="text" readonly aria-label="Kurze öffentliche Patienten-App-Adresse">
+      <button class="mutedBtn" style="width:100%;margin-top:8px" id="copyPatientRootLink" type="button">App-Adresse kopieren</button>
+      <div class="qrStatus" id="patientRootQrStatus"></div>
+    </section>
   </div>
   <details class="apiBox" id="debugPayloadBox">
     <summary>⚙️ Debug/Test: Roh-Payload intern anzeigen</summary>
@@ -294,4 +303,3 @@
   <button class="mutedBtn" id="openPdfPreviewTab" type="button">Neues Fenster</button>
   <button class="mutedBtn" id="closePdfPreview" type="button">Schließen</button>
 </div></div>
-

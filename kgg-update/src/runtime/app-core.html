@@ -1,10 +1,10 @@
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v071_pdf_global_exercise_numbering';
+  const VERSION='KGG_GITHUB_UPDATE_v081_qr_full_plan_device_ladder';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v071","buildTime":"2026-08-20T21:45:00Z","buildCode":"module-v071-pdf-global-exercise-numbering","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v081","buildTime":"2026-08-23T00:00:00Z","buildCode":"module-v081-qr-full-plan-device-ladder","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -4384,8 +4384,8 @@
   }
   function makeUrlWithPayload(baseUrl,payload){
     const base=String(baseUrl||'').split('#')[0].split('?')[0];
-    const publicPayload=payload&&Array.isArray(payload.e)?payload:buildKggH2PayloadFromInternalPayload(payload);
-    return base+'?plan='+encodeURIComponent('KGGH2:'+encodeKggJsonBase64Url(publicPayload));
+    const publicPayload=payload&&Array.isArray(payload.e)?payload:buildKggH3PayloadFromInternalPayload(payload);
+    return base+'?plan='+encodeURIComponent(encodeKggH3Payload(publicPayload));
   }
   function buildExerciseMediaManifestForPatient(ex){
     return ensureExerciseMediaList(ex).filter(item=>item.type==='image').map(item=>({
@@ -4490,9 +4490,36 @@
     const plan={id:meta.planId||p.id||'',title:meta.title||'KGG Trainingsplan',days:meta.days||6};
     return buildKggH2PayloadFromPlan(plan,Array.isArray(p.plan)?p.plan:[],p.patient||{},meta.media||null);
   }
+  function buildKggH3PayloadFromPlan(plan,exercises,patient,mediaMeta){
+    const payload=buildKggH2PayloadFromPlan(plan,exercises,patient,mediaMeta);
+    payload.m={...(payload.m||{}),schema:'KGGH3'};
+    return payload;
+  }
+  function buildKggH3PayloadFromInternalPayload(payload){
+    const p=payload||{};
+    const meta=p.meta||{};
+    const plan={id:meta.planId||p.id||'',title:meta.title||'KGG Trainingsplan',days:meta.days||6};
+    return buildKggH3PayloadFromPlan(plan,Array.isArray(p.plan)?p.plan:[],p.patient||{},meta.media||null);
+  }
+  function encodeKggH3Payload(publicPayload){
+    if(!window.KGGPlanFormat||typeof window.KGGPlanFormat.encodeKggH3!=='function')throw new Error('Lokaler KGGH3-Encoder fehlt.');
+    return window.KGGPlanFormat.encodeKggH3(publicPayload);
+  }
+  function decodeKggPlanCode(code){
+    if(!window.KGGPlanFormat||typeof window.KGGPlanFormat.decodeCode!=='function')throw new Error('Lokaler KGGH2/KGGH3-Decoder fehlt.');
+    return window.KGGPlanFormat.decodeCode(code).raw;
+  }
   function makeKggH2ShareUrl(baseUrl,publicPayload){
     const base=String(baseUrl||'').split('#')[0].split('?')[0];
     return base+'?plan='+encodeURIComponent('KGGH2:'+encodeKggJsonBase64Url(publicPayload));
+  }
+  function makeKggH3ShareUrl(baseUrl,publicPayload){
+    const base=String(baseUrl||'').split('#')[0].split('?')[0];
+    return base+'?plan='+encodeURIComponent(encodeKggH3Payload(publicPayload));
+  }
+  function patientRootAppUrl(){
+    const base=String(patientBaseUrl||'').split('#')[0].split('?')[0];
+    return isShareablePatientBaseUrl(base)?base:'';
   }
   function expandKggH2Exercise(item){
     const e=Array.isArray(item)?item:[];
@@ -4522,7 +4549,7 @@
       createdAt:data.m&&data.m.createdAt||new Date().toISOString(),
       patient:data.patient||data.p||{},
       plan:Array.isArray(data.e)?data.e.map(expandKggH2Exercise):[],
-      meta:{planId:data.i||'',title:data.t||'KGG Trainingsplan',source:'KGGH2',media:data.m&&data.m.media||null}
+      meta:{planId:data.i||'',title:data.t||'KGG Trainingsplan',source:data.m&&data.m.schema==='KGGH3'?'KGGH3':'KGGH2',media:data.m&&data.m.media||null}
     };
   }
   function buildPatientShareFromCurrentPlan(planOverride,options){
@@ -4535,14 +4562,26 @@
     const mediaMeta=buildPlanMediaMeta(rawExercises,ttlSeconds);
     const payload=(window.KGGQrCore&&typeof window.KGGQrCore.makePatientPayload==='function')?window.KGGQrCore.makePatientPayload(exercises,patient,{planId:plan.id||'',updatedAt:plan.updatedAt||'',source:'current-plan-state',media:mediaMeta}):{kind:'kgg-patient-plan',version:1,createdAt:new Date().toISOString(),patient,plan:exercises,meta:{planId:plan.id||'',updatedAt:plan.updatedAt||'',source:'current-plan-state',media:mediaMeta}};
     payload.meta={...(payload.meta||{}),media:mediaMeta};
-    const publicPayload=buildKggH2PayloadFromPlan(plan,exercises,patient,mediaMeta);
+    const publicPayload=buildKggH3PayloadFromPlan(plan,exercises,patient,mediaMeta);
     const debugBase=String(location.href||'').split('#')[0];
     const debugUrl=debugBase+'#kgg='+encodePatientPayload(payload);
     const shareable=isShareablePatientBaseUrl(patientBaseUrl);
-    const patientUrl=shareable?makeKggH2ShareUrl(patientBaseUrl,publicPayload):'';
+    const patientUrl=shareable?makeKggH3ShareUrl(patientBaseUrl,publicPayload):'';
     return {url:patientUrl,debugUrl,payload,publicPayload,plan,shareable};
   }
-  function tryRenderQrCode(url){const box=$('patientQrBox'), status=$('patientQrStatus'); if(!box||!status)return; box.innerHTML=''; status.textContent=''; try{let imgData=''; if(window.KGGQrCore&&typeof window.KGGQrCore.renderQrToImg==='function'){imgData=window.KGGQrCore.renderQrToImg(url,{cellSize:10,margin:4});} else if(typeof window.qrcode==='function'){const qr=window.qrcode(0,'L'); qr.addData(url); qr.make(); imgData=qr.createDataURL(10,4);} if(imgData){const img=document.createElement('img'); img.alt='QR-Code zur Patienten-App'; img.src=imgData; box.appendChild(img); return;}}catch(err){console.warn('QR konnte nicht gerendert werden:',err);} box.innerHTML='<span class="qrStatus">QR fehlgeschlagen. Link nutzen.</span>'; status.textContent='Link nutzen.';}
+  function tryRenderQrCode(url,boxId,statusId,options){
+    const settings=options||{}, box=$(boxId||'patientQrBox'), status=$(statusId||'patientQrStatus');
+    if(!box||!status)return;
+    const cellSize=Number(settings.cellSize)||10, margin=settings.margin===undefined?4:Number(settings.margin), errorCorrection=settings.errorCorrection||'M', alt=settings.alt||'QR-Code zur Patienten-App';
+    box.innerHTML=''; status.textContent='';
+    try{
+      let imgData='';
+      if(window.KGGQrCore&&typeof window.KGGQrCore.renderQrToImg==='function')imgData=window.KGGQrCore.renderQrToImg(url,{cellSize,margin,errorCorrection});
+      else if(typeof window.qrcode==='function'){const qr=window.qrcode(0,errorCorrection); qr.addData(url); qr.make(); imgData=qr.createDataURL(cellSize,margin);}
+      if(imgData){const img=document.createElement('img'); img.alt=alt; img.src=imgData; box.appendChild(img); return;}
+    }catch(err){console.warn('QR konnte nicht gerendert werden:',err);}
+    box.innerHTML='<span class="qrStatus">QR fehlgeschlagen. Link nutzen.</span>'; status.textContent='Link nutzen.';
+  }
   function cloneSharePlan(plan){return plan?JSON.parse(JSON.stringify(plan)):null;}
   function planHasMedia(plan){
     const exercises=plan&&Array.isArray(plan.exercises)?plan.exercises:[];
@@ -4550,6 +4589,10 @@
   }
   function currentPatientLinkUrl(){
     const link=$('patientAppLink');
+    return link&&link.href&&link.href!=='#'?link.href:'';
+  }
+  function currentPatientRootUrl(){
+    const link=$('patientRootAppLink');
     return link&&link.href&&link.href!=='#'?link.href:'';
   }
   function setPatientCopyButtonLabel(){
@@ -4596,6 +4639,17 @@
       setManualPatientLinkField(url,true,true);
       if(status)status.textContent='Kopieren blockiert. Link ist markiert.';
     }
+  }
+  async function copyPatientRootLink(){
+    const status=$('patientRootQrStatus'), url=currentPatientRootUrl();
+    if(!url){if(status)status.textContent='Keine App-Adresse.';return;}
+    try{
+      const ok=await copyTextValue(url);
+      if(ok){if(status)status.textContent='App-Adresse kopiert.';return;}
+    }catch(err){console.warn('App-Adresse konnte nicht kopiert werden:',err);}
+    const field=$('patientRootAppAddress');
+    if(field){field.focus();field.select();}
+    if(status)status.textContent='Kopieren blockiert. Adresse ist markiert.';
   }
   async function enableLongMediaShare(){
     const btn=$('copyPatientLink'), status=$('patientQrStatus');
@@ -4661,10 +4715,11 @@
     if(choices)choices.classList.add('hidden');
     if(close)close.classList.remove('hidden');
     if(finishNotice)finishNotice.textContent='';
-    const link=$('patientAppLink'), notice=$('patientShareNotice'), box=$('patientQrBox'), status=$('patientQrStatus'), copyBtn=$('copyPatientLink');
+    const link=$('patientAppLink'), notice=$('patientShareNotice'), box=$('patientQrBox'), status=$('patientQrStatus'), copyBtn=$('copyPatientLink'), rootFallback=$('patientRootFallback'), rootLink=$('patientRootAppLink'), rootAddress=$('patientRootAppAddress'), rootCopy=$('copyPatientRootLink');
     $('shareText').value='INTERNE DEBUG-TESTAUSGABE – nicht an Patient:innen weitergeben\n\nLokaler Testlink:\n'+share.debugUrl+'\n\nPayload JSON:\n'+JSON.stringify(share.payload,null,2);
     const dbg=$('debugPayloadBox'); if(dbg)dbg.open=false;
     if(!share.shareable){
+      if(rootFallback)rootFallback.hidden=true;
       if(notice)notice.textContent='Lokaler Test.';
       if(link){link.classList.remove('hidden'); link.href=share.debugUrl; link.textContent='Patienten-Test öffnen';}
       if(copyBtn){copyBtn.classList.remove('hidden'); setPatientCopyButtonLabel();}
@@ -4684,6 +4739,14 @@
     setManualPatientLinkField(share.url,false,false);
     setupPatientLinkCopyLongPress();
     tryRenderQrCode(share.url);
+    const rootUrl=patientRootAppUrl();
+    if(rootFallback)rootFallback.hidden=!rootUrl;
+    if(rootUrl){
+      if(rootLink){rootLink.href=rootUrl;rootLink.textContent='Kurze Patienten-App-Adresse öffnen';}
+      if(rootAddress)rootAddress.value=rootUrl;
+      if(rootCopy)rootCopy.classList.remove('hidden');
+      tryRenderQrCode(rootUrl,'patientRootQrBox','patientRootQrStatus',{cellSize:6,margin:2,errorCorrection:'M',alt:'Kleiner QR-Code nur für die öffentliche Patienten-App-Adresse'});
+    }
     return share.url;
   }
   function makeShare(){return buildPatientShareFromCurrentPlan().url;}
@@ -4699,6 +4762,13 @@
     lastPatientSharePlanSnapshot=null;
     if(copyBtn)copyBtn.textContent='Link kopieren';
     setManualPatientLinkField('',false,false);
+    const rootFallback=$('patientRootFallback'), rootLink=$('patientRootAppLink'), rootAddress=$('patientRootAppAddress'), rootBox=$('patientRootQrBox'), rootStatus=$('patientRootQrStatus'), rootCopy=$('copyPatientRootLink');
+    if(rootFallback)rootFallback.hidden=true;
+    if(rootLink)rootLink.href='#';
+    if(rootAddress)rootAddress.value='';
+    if(rootBox)rootBox.innerHTML='<span class="qrStatus">App-QR wird vorbereitet …</span>';
+    if(rootStatus)rootStatus.textContent='';
+    if(rootCopy)rootCopy.classList.add('hidden');
   }
   function openFinishModal(){resetFinishModal(); $('shareModal').classList.add('open');}
   function closeFinishModal(){$('shareModal').classList.remove('open');}
@@ -4754,10 +4824,13 @@
 
   function decodePatientPayloadFromHash(){
     const hash=String(location.hash||'');
-    const publicMatch=hash.match(/^#KGGH2:(.+)$/i);
+    const publicMatch=hash.match(/^#(KGGH[23]):(.+)$/i);
     if(publicMatch){
-      try{return convertKggH2PayloadToPatientPayload(decodeKggJsonBase64Url(publicMatch[1]));}
-      catch(err){console.warn('KGGH2 Patienten-Link konnte nicht gelesen werden:',err); return {error:true};}
+      try{
+        const code=publicMatch[1].toUpperCase()+':'+publicMatch[2];
+        const raw=window.KGGPlanFormat?decodeKggPlanCode(code):decodeKggJsonBase64Url(publicMatch[2]);
+        return convertKggH2PayloadToPatientPayload(raw);
+      }catch(err){console.warn(publicMatch[1].toUpperCase()+' Patienten-Link konnte nicht gelesen werden:',err); return {error:true};}
     }
     const match=hash.match(/^#kgg=(.+)$/);
     if(!match)return null;
@@ -5301,6 +5374,11 @@
     try{
       const url=new URL(text);
       if(url.hash)payloadText=url.hash;
+      const plan=url.searchParams.get('plan');
+      if(plan){
+        const code=window.KGGPlanFormat&&typeof window.KGGPlanFormat.findPlanCode==='function'?window.KGGPlanFormat.findPlanCode(plan):plan;
+        if(/^KGGH[23]:/i.test(code||''))return {type:code.slice(0,5).toUpperCase(),json:decodeKggPlanCode(code),raw:text};
+      }
       const q=url.searchParams.get('kgg')||url.searchParams.get('payload')||url.searchParams.get('p');
       if(q)return {type:'query',json:decodeKggQueryPayload(q),raw:text};
     }catch(err){}
@@ -5319,8 +5397,10 @@
     if(cfg2)return {type:'KGGCFG2',json:safeBase64JsonDecode(cfg2[1]),raw:text};
     const cfg1=findCode('KGGCFG1');
     if(cfg1)return {type:'KGGCFG1',json:safeBase64JsonDecode(cfg1[1]),raw:text};
+    const h3=findCode('KGGH3');
+    if(h3)return {type:'KGGH3',json:decodeKggPlanCode('KGGH3:'+h3[1]),raw:text};
     const h2=findCode('KGGH2');
-    if(h2)return {type:'KGGH2',json:safeBase64JsonDecode(h2[1]),raw:text};
+    if(h2)return {type:'KGGH2',json:window.KGGPlanFormat?decodeKggPlanCode('KGGH2:'+h2[1]):safeBase64JsonDecode(h2[1]),raw:text};
     const sync2=findCode('KGGSYNC2');
     if(sync2)return {type:'KGGSYNC2',json:safeBase64JsonDecode(sync2[1]),raw:text};
     const sync1=findCode('KGGSYNC1');
@@ -5855,7 +5935,7 @@
   function qrParsedToScanResult(parsed){
     const json=parsed&&parsed.json;
     let payload=json;
-    if(parsed&&parsed.type==='KGGH2')payload=convertKggH2PayloadToPatientPayload(json);
+    if(parsed&&(parsed.type==='KGGH2'||parsed.type==='KGGH3'))payload=convertKggH2PayloadToPatientPayload(json);
     const exercises=scanPayloadExercises(payload);
     const planText=scanResultToPlanText(payload);
     const applyText=exercises.length?exercises.map(scanExerciseToDocText).filter(Boolean).join('\n\n'):'';
@@ -6994,6 +7074,7 @@
   $('recentToggle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; const recent=$('recentList'); const opening=recent.classList.contains('hidden'); if(isTabletLayout()){if(opening)openTabletAnchoredPanel('recent'); else closeTabletAnchoredPanel('recent');}else{openPhoneFloatingDrawer('recent');}};
   $('packageToggle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; if(isTabletLayout())toggleTabletPackageOverlay(); else openPhoneFloatingDrawer('package');};
   $('exportBtn').onclick=exportData; $('pdfBtn').onclick=finishWithPdf; $('patientBtn').onclick=finishWithPatientApp; $('closeShare').onclick=closeFinishModal; $('copyShare').onclick=()=>navigator.clipboard&&navigator.clipboard.writeText($('shareText').value); $('patientName').addEventListener('input',()=>{state.patient.name=$('patientName').value;syncStatePlanToStore('ui_patient_name_input');save();render();}); $('planDate').addEventListener('input',()=>{state.patient.date=$('planDate').value;save();syncStatePlanToStore('ui_patient_date_input');}); $('therapistName').addEventListener('input',()=>{state.patient.therapist=$('therapistName').value;save();syncStatePlanToStore('ui_patient_therapist_input');}); $('planNotes').addEventListener('input',()=>{state.patient.notes=$('planNotes').value;save();syncStatePlanToStore('ui_patient_notes_input');}); $('scanBtn').onclick=()=>window.KGGScan.pick('camera'); $('filePickBtn').onclick=()=>window.KGGScan.pick('file'); $('filePickBtn').addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();window.KGGScan.pick('file');}}); $('fileInput').onchange=ev=>window.KGGScan.handleInput(ev.target,'camera'); $('filePickerInput').onchange=ev=>window.KGGScan.handleInput(ev.target,'file'); $('closeEditor').onclick=closeEditor; $('saveExercise').onclick=saveEditedExercise; $('deleteExercise').onclick=()=>{if(state.editId){if($('deleteExercise').dataset.scope==='bank')openBankDeleteModal(state.editId); else removeExercise(state.editId);} closeEditor();};
+  $('copyPatientRootLink').onclick=copyPatientRootLink;
   $('attachExerciseImage').onclick=()=>$('editMediaFile').click();
   $('editMediaFile').onchange=handleEditorMediaFileSelected;
   $('removeExerciseImage').onclick=removeEditorMedia;

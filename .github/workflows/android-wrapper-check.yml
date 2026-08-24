@@ -4,6 +4,10 @@ on:
   pull_request:
     paths:
       - "android-wrapper/**"
+      - "device-test/**"
+      - "patient-start-scan.js"
+      - "release-pipeline/kgg_dual_device_*.js"
+      - "release-pipeline/test_kgg_dual_device_v404.py"
       - "therapist-app/android_update_manifest.json"
       - ".github/workflows/android-wrapper-check.yml"
 
@@ -34,12 +38,18 @@ jobs:
           unzip -l "$ADMIN_APK" | grep -q 'assets/android/kgg_release_control_bootstrap.js'
           ! unzip -l "$COLLEAGUE_APK" | grep -q 'kgg_release_control_bootstrap.js'
           ! unzip -l "$PREVIEW_APK" | grep -q 'kgg_release_control_bootstrap.js'
+          ! unzip -l "$ADMIN_APK" | grep -Eq 'kgg_device_test_station.js|kgg_dual_device_fixtures.js|kgg_preview_context.js'
+          ! unzip -l "$COLLEAGUE_APK" | grep -Eq 'kgg_device_test_station.js|kgg_dual_device_fixtures.js|kgg_preview_context.js'
+          unzip -l "$PREVIEW_APK" | grep -q 'assets/android/kgg_device_test_station.js'
+          unzip -l "$PREVIEW_APK" | grep -q 'assets/android/kgg_dual_device_fixtures.js'
+          unzip -l "$PREVIEW_APK" | grep -q 'assets/android/kgg_preview_context.js'
           unzip -p "$PREVIEW_APK" assets/preview.html > /tmp/preview.html
           grep -q 'KGGDataStore' /tmp/preview.html
           unzip -p "$COLLEAGUE_APK" assets/colleague.html > /tmp/colleague.html
           ! grep -Eq 'window\.KGGAdmin|id="adminConfigBtn"|id="adminSecretsModal"|kggReleaseCenter' /tmp/colleague.html
-          for apk in "$COLLEAGUE_APK" "$PREVIEW_APK"; do
+          for apk in "$ADMIN_APK" "$COLLEAGUE_APK"; do
             for dex in $(unzip -Z1 "$apk" | grep -E '^classes[0-9]*\.dex$'); do
               ! unzip -p "$apk" "$dex" | strings | grep -Eq 'KggReleaseBridge|KGGReleaseControl|Update-Zentrale'
+              ! unzip -p "$apk" "$dex" | strings | grep -Eq 'KggDeviceTestStationBridge|KGGDeviceTestStation'
             done
           done

@@ -41,9 +41,9 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 ## Current Versions
 
-- Source web version: v71 / `1.0.71-pdf-global-exercise-numbering`.
-- Source index URL: `index.html?v=71`.
-- Source notes: v071: Nummeriert Übungen in mehrseitigen Papierplänen über alle Seiten hinweg fortlaufend.
+- Source web version: v81 / `1.0.81-qr-full-plan-device-ladder`.
+- Source index URL: `index.html?v=81`.
+- Source notes: v081: Vollständige persönliche KGGH3-Plan-QRs mit lokalem fflate 0.8.3, KGGH2-Rückwärtslesbarkeit und gestuftem Scanner-Test.
 - Live Admin release: `r0426` / `1.0.65-source-control-char-guard`.
 - Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.

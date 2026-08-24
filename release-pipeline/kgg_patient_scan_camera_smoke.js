@@ -18,7 +18,7 @@ const SCANNER_PATH = process.env.KGG_PATIENT_SCANNER_PATH
 const SERVICE_WORKER_PATH = path.join(ROOT, "service-worker.js");
 const JSQR_PATH = require.resolve("jsqr");
 const OUTPUT_DIR = path.join(ROOT, "tmp", "patient-scan-camera");
-const VERSION = "patient-scan-camera-v4-main-baseline";
+const VERSION = "patient-scan-camera-v5-kgg-h3";
 const SCANNER_SOURCE = fs.readFileSync(SCANNER_PATH, "utf8");
 const SERVICE_WORKER_SOURCE = fs.readFileSync(SERVICE_WORKER_PATH, "utf8");
 const SCANNER_VERSION = (SCANNER_SOURCE.match(/const VERSION='([^']+)'/) || [])[1] || "unknown";
@@ -37,6 +37,11 @@ function sha256(value) {
 
 function encodePlan(plan) {
   return Buffer.from(JSON.stringify(plan), "utf8").toString("base64url");
+}
+
+function encodeH3Plan(plan) {
+  const fflate = require(path.join(ROOT, "vendor", "fflate-0.8.3.js"));
+  return Buffer.from(fflate.zlibSync(Buffer.from(JSON.stringify(plan), "utf8"))).toString("base64url");
 }
 
 function deepClone(value) {
@@ -136,6 +141,7 @@ const replacementUpdate = {
 };
 
 const compactText = `KGGH2:${encodePlan(compactUpdate)}`;
+const compactH3Text = `KGGH3:${encodeH3Plan(compactUpdate)}`;
 const realisticText = `https://kayus24.github.io/kgg/?plan=${encodeURIComponent(`KGGH2:${encodePlan(realisticUpdate)}`)}`;
 const replacementText = `KGGH2:${encodePlan(replacementUpdate)}`;
 
@@ -151,6 +157,7 @@ function makeMatrix(text) {
 
 const matrices = {
   compact: makeMatrix(compactText),
+  compactH3: makeMatrix(compactH3Text),
   realistic: makeMatrix(realisticText)
 };
 
@@ -955,13 +962,14 @@ async function detectAndroid() {
 
 async function generateReferenceFixtures(renderPage, writeFiles) {
   const compact = await renderFrame(renderPage, matrices.compact, { width: 1280, height: 720, qrFraction: 0.40 });
+  const compactH3 = await renderFrame(renderPage, matrices.compactH3, { width: 1280, height: 720, qrFraction: 0.40 });
   const realistic = await renderFrame(renderPage, matrices.realistic, { width: 1280, height: 720, qrFraction: 0.78 });
   if (writeFiles) {
     fs.mkdirSync(FIXTURE_DIR, { recursive: true });
     fs.writeFileSync(path.join(FIXTURE_DIR, "canonical-compact.png"), compact);
     fs.writeFileSync(path.join(FIXTURE_DIR, "canonical-realistic.png"), realistic);
   }
-  return { compact, realistic };
+  return { compact, compactH3, realistic };
 }
 
 function escapeHtml(value) {
@@ -1039,12 +1047,14 @@ async function main() {
       { id: "barcode-empty-jsqr", detectorMode: "empty", expect: "updated", expectedDecoder: "jsqr" },
       { id: "barcode-absent-jsqr", detectorMode: "absent", expect: "updated", expectedDecoder: "jsqr" },
       { id: "barcode-throws", detectorMode: "throw", expect: "updated", expectedDecoder: "jsqr", knownGap: !HAS_NATIVE_THROW_FALLBACK },
+      { id: "kgg-h3-barcode-success", detectorMode: "success", detectorRaw: compactH3Text, fixture: "compactH3", expect: "updated", expectedDecoder: "barcode-detector", expectedJsQrAttempts: 0 },
+      { id: "kgg-h3-jsqr-fallback", detectorMode: "absent", fixture: "compactH3", expect: "updated", expectedDecoder: "jsqr" },
       { id: "decoded-non-plan", detectorMode: "success", detectorRaw: "https://example.invalid/not-a-plan", expect: "unchanged", expectedDecoder: "barcode-detector", expectedJsQrAttempts: 0 },
       { id: "jsqr-throws", detectorMode: "empty", jsQrMode: "throw", expect: "unchanged", expectedDecoder: "none" }
     ];
     for (const definition of decoderCases.filter((item) => !selectedCase || item.id === selectedCase)) {
       console.log(`RUN  ${definition.id}`);
-      results.push(await runDecoderCase(browser, baseUrl, definition, references.compact));
+      results.push(await runDecoderCase(browser, baseUrl, definition, definition.fixture === "compactH3" ? references.compactH3 : references.compact));
     }
     if (selectedCase === "live-camera-full-frame") {
       console.log("RUN  live-camera-full-frame");

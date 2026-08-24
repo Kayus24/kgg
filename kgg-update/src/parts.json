@@ -25,7 +25,8 @@
     "kgg-v067-plan-text-live-master-guard",
     "kgg-v068-plan-text-boot-restore",
     "kgg-v069-plan-text-recovery-finalize",
-    "kgg-v070-tablet-package-save"
+    "kgg-v070-tablet-package-save",
+    "kgg-v081-qr-full-plan-device-ladder"
   ],
   "parts": [
     "base-head.html",
@@ -41,6 +42,8 @@
     "document/body-shell.html",
     "runtime/media-adapters.html",
     "runtime/qrcode-generator.html",
+    "runtime/fflate-0.8.3.html",
+    "runtime/kgg-plan-format.html",
     "runtime/app-core.html",
     "features/phone-state-guards.html",
     "features/qr-gallery-wrapper.html",
@@ -66,6 +69,7 @@
     "patches/v068-plan-text-boot-restore.html",
     "patches/v069-plan-text-recovery-finalize.html",
     "patches/v070-tablet-package-save.html",
+    "patches/v081-qr-full-plan-device-ladder.html",
     "footer.html"
   ]
 }

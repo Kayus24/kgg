@@ -133,7 +133,11 @@ async function main(){
     // Explicit fixed plans keep their hard end.
     mark('fixed plan hard end');
     const fixed={i:'fixed-days-playwright',t:'Fester Testplan',v:1,d:12,extendDays:false,stepDays:6,e:[['Fix',1,'B','kg','Wdh']]};
-    await page.goto(`http://127.0.0.1:${port}/kgg/?plan=${encodeURIComponent('KGGH2:'+encodePlan(fixed))}`,{waitUntil:'domcontentloaded'});await waitForRuntime(page);
+    await page.goto(`http://127.0.0.1:${port}/kgg/?plan=${encodeURIComponent('KGGH2:'+encodePlan(fixed))}`,{waitUntil:'domcontentloaded'});
+    await page.locator('#kggPlanLinkChoice').waitFor({state:'visible'});
+    await page.locator('#kggPlanLinkChoiceReplace').click();
+    await page.locator('#kggPlanLinkChoiceBackdrop').waitFor({state:'detached'});
+    await waitForRuntime(page);
     await seedCurrent(page,Array.from({length:12},(_,i)=>i+1),12);await assertHubDay(page,12);
     assert((await page.locator('#meta').innerText()).includes('12 Trainingstage'),'fixed plan lost its finite day label');
     await page.locator('#plan > button.btn').click();await page.locator('#end').waitFor({state:'visible'});

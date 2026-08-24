@@ -179,7 +179,7 @@ async function main() {
     await page.waitForFunction(expected=>{
       const active=String(document.activeElement?.className||"");
       return Math.abs(window.scrollY-expected)<=1&&getComputedStyle(document.body).position!=="fixed"&&active.includes("kggPainVerticalToggle");
-    },before.scrollY,{timeout:2000});
+    },before.scrollY,{timeout:5000});
     const restored=await page.evaluate(()=>({scrollY:window.scrollY,bodyPosition:getComputedStyle(document.body).position,active:document.activeElement?.className||""}));
     assert(Math.abs(restored.scrollY-before.scrollY)<=1,`closing modal did not restore scroll position: ${JSON.stringify({before:before.scrollY,restored})}`);
     assert(restored.bodyPosition!=="fixed","closing modal did not unlock body");

@@ -71,6 +71,9 @@ RUNTIME_EXACT = {
 }
 MODULE_SCRIPT_PATTERN = re.compile(r'<script src="(?P<src>\./[^"?]+\.js(?:\?[^"?]+)?)"></script>')
 DIRECT_FIRST_LOAD_MODULES = (
+    "vendor/fflate-0.8.3.js",
+    "patient-qr-format.js",
+    "patient-plan-link-choice.js",
     "collapse-cards.js",
     "patient-card-progress.js",
     "patient-install-guide.js",
@@ -436,7 +439,33 @@ def patient_runtime_files(root: Path = ROOT) -> list[Path]:
     }
     for pattern in ("*.js", "manifest*.json", "manifest*.webmanifest", "kgg-icon-*.png"):
         files.update(path for path in root.glob(pattern) if path.is_file())
+    vendor_root = root / "vendor"
+    files.update(path for path in vendor_root.glob("*.js") if path.is_file())
     return sorted(files)
+
+
+def patient_runtime_relative_path(source: Path, root: Path) -> Path:
+    source_root = root.resolve()
+    resolved_source = source.resolve()
+    try:
+        relative = resolved_source.relative_to(source_root)
+    except ValueError as exc:
+        raise GateError("patient runtime file escaped source root") from exc
+    if not relative.parts or any(part in {"", ".", ".."} for part in relative.parts):
+        fail("patient runtime file has an unsafe relative path")
+    return relative
+
+
+def copy_patient_runtime_file(source: Path, root: Path, destination_root: Path) -> None:
+    relative = patient_runtime_relative_path(source, root)
+    resolved_destination_root = destination_root.resolve()
+    destination = (resolved_destination_root / relative).resolve()
+    try:
+        destination.relative_to(resolved_destination_root)
+    except ValueError as exc:
+        raise GateError("patient runtime file escaped destination root") from exc
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, destination)
 
 
 def canonical_direct_first_load_modules(
@@ -514,7 +543,7 @@ def write_preview(
         shutil.rmtree(preview_dir)
     preview_dir.mkdir(parents=True)
     for source in patient_runtime_files(root):
-        shutil.copy2(source, preview_dir / source.name)
+        copy_patient_runtime_file(source, root, preview_dir)
     (preview_dir / ".nojekyll").write_text("", encoding="utf-8")
     preview_index_path = preview_dir / "index.html"
     preview_index = normalize(preview_index_path.read_text(encoding="utf-8-sig"))
@@ -824,8 +853,15 @@ def self_test(root: Path = ROOT, preview_output: Path | None = None) -> None:
         temp = Path(temp_name)
         candidate = temp / "candidate"
         candidate.mkdir()
+        try:
+            patient_runtime_relative_path(temp / "outside.js", candidate)
+        except GateError as exc:
+            if "escaped source root" not in str(exc):
+                raise
+        else:
+            fail("self-test expected patient runtime path escape to be rejected")
         for source_path in patient_runtime_files(root):
-            shutil.copy2(source_path, candidate / source_path.name)
+            copy_patient_runtime_file(source_path, root, candidate)
         shutil.copy2(root / "CHANGELOG_PATIENT_APP.md", candidate / "CHANGELOG_PATIENT_APP.md")
         apply_operations(validated, candidate)
         version = bump_patient_version(validated, candidate)
@@ -849,8 +885,13 @@ def self_test(root: Path = ROOT, preview_output: Path | None = None) -> None:
             preview_worker,
             preview_root / "previews" / validated["request_id"],
         )
-        if [source.split("?", 1)[0].removeprefix("./") for source in module_sources] != list(DIRECT_FIRST_LOAD_MODULES):
+        module_paths = [source.split("?", 1)[0].removeprefix("./") for source in module_sources]
+        if len(module_paths) != 25 or module_paths != list(DIRECT_FIRST_LOAD_MODULES):
             fail("self-test expected the canonical direct first-load module order")
+        preview_dir = preview_root / "previews" / validated["request_id"]
+        for relative in ("vendor/fflate-0.8.3.js", "patient-qr-format.js"):
+            if not (preview_dir / relative).is_file():
+                fail(f"self-test expected preview runtime file: {relative}")
         missing_module_preview = preview_html.replace(module_sources[0], "./missing-first-load-module.js", 1)
         try:
             canonical_direct_first_load_modules(
