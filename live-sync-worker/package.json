@@ -1,0 +1,25 @@
+{
+  "name": "kgg-live-sync-worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local-only KGG ticket 034 live-sync relay prototype",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "build": "wrangler deploy --dry-run --config wrangler.toml",
+    "dev": "wrangler dev --local --config wrangler.test.toml",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "test:watch": "vitest --config vitest.config.ts",
+    "check": "npm run typecheck && npm test"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "0.22.0",
+    "@cloudflare/workers-types": "5.20260823.1",
+    "typescript": "7.0.2",
+    "vitest": "4.1.11",
+    "wrangler": "4.125.0"
+  }
+}

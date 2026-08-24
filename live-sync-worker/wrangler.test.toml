@@ -1,0 +1,16 @@
+name = "kgg-live-sync-worker-local-test"
+main = "src/worker.ts"
+compatibility_date = "2026-08-15"
+
+[vars]
+LIVE_SYNC_MODE = "test"
+TEST_TTL_SECONDS = "2"
+TEST_PRIVATE_ORIGINS = "http://192.168.1.44:4173"
+
+[[durable_objects.bindings]]
+name = "LIVE_SYNC_SESSIONS"
+class_name = "LiveSyncSession"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["LiveSyncSession"]
