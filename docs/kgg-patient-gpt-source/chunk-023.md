@@ -1,12 +1,12 @@
 # KGG Patient Source Chunk 023
 
 - Source file: `patient-plan-link-choice.js`
-- Characters: 1-9118
-- Full source SHA-256: `05fb20bdfcd7274b2a48609d5650b2ad8654b539ea9af48917c9df4e96d85ad1`
+- Characters: 1-9307
+- Full source SHA-256: `29db160f0fbaffead0dcb2983d093a7cbf6b5742b35adeef1b917f99fbbc4fd5`
 
 ```
 (()=>{
-  const VERSION='v80-plan-link-choice';
+  const VERSION='v81-plan-link-choice-kgg-h3';
   const CURRENT_KEY='kggCurrentPlanV1';
   const MULTI_KEY='kggPatientMultiPlansV1';
   const PENDING_KEY='kggPendingPlanLinkV1';
@@ -18,6 +18,9 @@
   function clone(value){try{return JSON.parse(JSON.stringify(value))}catch(e){return value&&typeof value==='object'?{...value}:value}}
   function readJson(storage,key){try{return JSON.parse(storage.getItem(key)||'null')}catch(e){return null}}
   function decodePayload(value){
+    if(window.KGGPlanFormat&&typeof window.KGGPlanFormat.decodePlanText==='function'){
+      try{return window.KGGPlanFormat.decodePlanText(value).raw}catch(e){return null}
+    }
     let text=String(value||'').trim().replace(/^KGGH2:/i,'').replace(/-/g,'+').replace(/_/g,'/');
     if(!text)return null;
     try{
@@ -34,7 +37,7 @@
       const query=new URLSearchParams(location.search),queryValue=query.get('plan')||query.get('kgg')||'';
       if(queryValue)return{raw:decodePayload(queryValue),source:'query'};
       const hash=String(location.hash||'').slice(1);
-      if(/^KGGH2:/i.test(hash))return{raw:decodePayload(hash),source:'hash'};
+      if(/^KGGH[23]:/i.test(hash))return{raw:decodePayload(hash),source:'hash'};
     }catch(e){}
     return null;
   }
