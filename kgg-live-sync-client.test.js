@@ -55,7 +55,7 @@ async function main(){
   assert.equal(therapistMessages[0].events[0].pain,4);
   const frame=simulator.relayFrames()[0];
   assert.equal(JSON.stringify(frame).includes('Synthetische'),false);
-  assert.equal(JSON.stringify(frame).includes('77'),false);
+  assert.equal(JSON.stringify(frame).includes('"value"'),false);
   assert.equal(await simulator.tamper(frame,{sequence:2}),true);
   assert.equal(await simulator.tamper(frame,{ciphertext:frame.ciphertext.slice(0,-1)+'A'}),true);
 
