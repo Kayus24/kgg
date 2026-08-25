@@ -83,10 +83,12 @@ public class KggLiveCryptoCoreTest {
         byte[] pairingId = KggLiveCryptoCore.randomBytes(random, KggLiveCryptoCore.PAIRING_ID_BYTES);
         byte[] sessionId = KggLiveCryptoCore.randomBytes(random, KggLiveCryptoCore.SESSION_ID_BYTES);
         byte[] salt = KggLiveCryptoCore.randomBytes(random, KggLiveCryptoCore.SESSION_SALT_BYTES);
+        byte[] expiresAtEpochMillis = "1787651696789".getBytes(StandardCharsets.UTF_8);
         byte[] info = KggLiveCryptoCore.concat(
                 "KGG-LIVE-SESSION-V1".getBytes(StandardCharsets.UTF_8),
                 pairingId,
                 sessionId,
+                expiresAtEpochMillis,
                 "therapist".getBytes(StandardCharsets.UTF_8),
                 "patient".getBytes(StandardCharsets.UTF_8)
         );
@@ -102,6 +104,7 @@ public class KggLiveCryptoCoreTest {
                 "KGG-LIVE-SESSION-V1".getBytes(StandardCharsets.UTF_8),
                 changedPairingId,
                 sessionId,
+                expiresAtEpochMillis,
                 "therapist".getBytes(StandardCharsets.UTF_8),
                 "patient".getBytes(StandardCharsets.UTF_8)
         );

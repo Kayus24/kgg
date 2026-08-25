@@ -109,9 +109,9 @@ ihre exakt erlaubten Argumentfelder sind:
   `enableBlackout {}` und `disableBlackout {}`.
 
 `planKey` ist die bewusst begrenzte native Adapterergänzung, weil der aktuelle
-  Pairing-Speicher mehrere Planindizes unterstützt. Der spätere Root-Client
-  kann seine erwarteten Operationen 1:1 auf diese Tabelle abbilden; Root-Client
-  und Web-App werden in diesem Worktree nicht geändert. Bei fehlender
+  Pairing-Speicher mehrere Planindizes unterstützt. Der kanonische Root-Client
+  verwendet dafür einen Promise-Adapter, der die dokumentierten Operationen
+  1:1 auf diese Tabelle abbildet. Bei fehlender
   `WEB_MESSAGE_LISTENER`-Unterstützung oder fehlgeschlagener Registrierung
   bleibt nur Live-Sync aus (`available=false`/kein Listener); QR-, Offline-,
   PDF- und normale App-Flows bleiben aktiv. Eine synchrone

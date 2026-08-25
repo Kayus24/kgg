@@ -96,7 +96,7 @@ async function main(){
   const bridgeBase={role:'therapist',mode:'test',simulator:true,pairingId,relay:{},transport:{},queue:new live.CiphertextQueue({allowMemory:true}),keyStore:live.makeKeyStore({allowMemory:true}),pairingSigner:async()=>new Uint8Array(32).fill(9)};
   const rejectedBridge=live.createClient({...bridgeBase,cryptoBridge:{createEphemeralKeyPair:async()=>({privateKey:'raw-private-key',publicKey:bridgePair.publicKey})}});rejectedBridge.session=session();rejectedBridge.socket={readyState:1,send(){},close(){}};
   await rejectsCode(rejectedBridge.beginKeyExchange(),'NATIVE_CRYPTO_REQUIRED');
-  const acceptedBridge=live.createClient({...bridgeBase,cryptoBridge:{createEphemeralKeyPair:async()=>({privateKeyHandle:'opaque-1',publicKey:bridgePair.publicKey})}});acceptedBridge.session=session();acceptedBridge.socket={readyState:1,send(){},close(){}};
+  const acceptedBridge=live.createClient({...bridgeBase,cryptoBridge:{createEphemeralKeyPair:async()=>({privateKeyHandle:'opaque-1',pairingId, pairingBinding:live.base64UrlEncode(new Uint8Array(32).fill(8)),publicKey:bridgePair.publicKey})}});acceptedBridge.session=session();acceptedBridge.socket={readyState:1,send(){},close(){}};
   await acceptedBridge.beginKeyExchange();
   assert.equal(acceptedBridge.nativePrivateHandle,'opaque-1');
 

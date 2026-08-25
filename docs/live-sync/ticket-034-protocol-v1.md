@@ -43,8 +43,8 @@ Der planindividuelle Schluessel verschluesselt keine Nutzdaten direkt.
 4. Der Relay speichert nur diesen Beweis und Token-Hashes.
 5. Die Patienten-App erhaelt Code, `sessionId` und `sessionSalt`, berechnet denselben Beweis und wird nur bei konstantzeitlichem Gleichstand zugelassen.
 6. Beide Endpunkte erzeugen fuer diese Sitzung ein fluechtiges ECDH-P-256-Schluesselpaar.
-7. Jeder oeffentliche ECDH-Schluessel wird mit HMAC ueber Rolle, Sitzung und Schluessel authentifiziert. Der Relay leitet diese Anmeldung nur an eine bereits authentifizierte Gegenseite derselben Sitzung weiter und speichert sie nicht. Die Gegenseite verwirft sie bei falscher Signatur.
-8. Beide Seiten leiten den gemeinsamen AES-256-GCM-Sitzungsschluessel per HKDF-SHA-256 ab. Der feste Kontext enthaelt `KGG-LIVE-SESSION-V1`, `pairingId`, `sessionId`, `expiresAt` als Epoch-Millisekunden sowie die Rollen `therapist` und `patient` in dieser Reihenfolge.
+7. Jeder oeffentliche ECDH-Schluessel wird mit `HMAC(pairingSecret, "KGG-LIVE-ECDH-OFFER-V1" || pairingId || role || sessionId || publicKey)` authentifiziert. Der Relay leitet diese Anmeldung nur an eine bereits authentifizierte Gegenseite derselben Sitzung weiter und speichert sie nicht. Die Gegenseite verwirft sie bei falscher Signatur.
+8. Beide Seiten leiten den gemeinsamen AES-256-GCM-Sitzungsschluessel per HKDF-SHA-256 ab. Der feste Kontext ist exakt `KGG-LIVE-SESSION-V1 || pairingId || sessionId || expiresAtEpochMillis || therapist || patient`; `expiresAtEpochMillis` stammt aus dem unveraenderten kanonischen Relay-Wert.
 9. Fluechtige private ECDH-Schluessel werden nach Ende oder Ablauf verworfen.
 
 Damit sind passiv abgefangene Netzwerkdaten ohne Endgeraeteschluessel nicht lesbar. Eine spaetere Offenlegung des planindividuellen Kopplungsschluessels allein soll alte Sitzungsinhalte nicht entschluesseln koennen.
