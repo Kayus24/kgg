@@ -281,10 +281,12 @@ final class KggLiveCryptoCore {
                 || random == null) {
             throw new GeneralSecurityException("encrypt_input_invalid");
         }
-        byte[] nonce = randomBytes(random, GCM_NONCE_BYTES);
+        byte[] nonce = null;
         try {
             Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-            cipher.init(Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(GCM_TAG_BYTES * 8, nonce));
+            cipher.init(Cipher.ENCRYPT_MODE, key, random);
+            nonce = cipher.getIV();
+            requireLength(nonce, GCM_NONCE_BYTES, "nonce_invalid");
             cipher.updateAAD(aad);
             return new GcmResult(nonce, cipher.doFinal(plaintext));
         } catch (GeneralSecurityException error) {

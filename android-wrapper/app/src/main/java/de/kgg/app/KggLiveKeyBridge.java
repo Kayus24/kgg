@@ -23,6 +23,8 @@ import java.security.KeyStore;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -53,6 +55,8 @@ public final class KggLiveKeyBridge {
     private static final String MASTER_KEY_ALIAS = "kgg_live_key_master_v1";
     private static final byte[] STATE_AAD =
             "KGGLiveKeyStateV1".getBytes(StandardCharsets.UTF_8);
+    private static final DateTimeFormatter CANONICAL_INSTANT =
+            new DateTimeFormatterBuilder().appendInstant(3).toFormatter();
     private static final Set<String> STATE_KEYS = new HashSet<>(Arrays.asList("v", "pairings"));
     private static final Set<String> PAIRING_KEYS = new HashSet<>(Arrays.asList(
             "pairingId", "pairingSecret", "keyVersion", "createdAt", "qrExported"
@@ -1133,20 +1137,36 @@ public final class KggLiveKeyBridge {
                 random,
                 KggLiveCryptoCore.PAIRING_SECRET_BYTES
         );
-        return new PairingMaterial(id, secret, Instant.now().toString());
+        return new PairingMaterial(id, secret, canonicalInstant(Instant.now()));
     }
 
     private String pairingPackage(PairingMaterial material) {
-        String canonicalJson = "{\"v\":1,\"pairingId\":\""
-                + material.idBase64Url
-                + "\",\"pairingSecret\":\""
-                + material.secretBase64Url
-                + "\",\"keyVersion\":1,\"createdAt\":\""
-                + material.createdAt
-                + "\"}";
+        String canonicalJson = canonicalPairingJson(
+                material.createdAt,
+                material.idBase64Url,
+                material.secretBase64Url
+        );
         return "KGGLIVEPAIR1:" + KggLiveCryptoCore.base64Url(
                 canonicalJson.getBytes(StandardCharsets.UTF_8)
         );
+    }
+
+    static String canonicalInstant(Instant value) {
+        return CANONICAL_INSTANT.format(value);
+    }
+
+    static String canonicalPairingJson(
+            String createdAt,
+            String pairingId,
+            String pairingSecret
+    ) {
+        return "{\"createdAt\":\""
+                + createdAt
+                + "\",\"keyVersion\":1,\"pairingId\":\""
+                + pairingId
+                + "\",\"pairingSecret\":\""
+                + pairingSecret
+                + "\",\"v\":1}";
     }
 
     private PeerOffer parsePeerOffer(String offerJson) throws Exception {

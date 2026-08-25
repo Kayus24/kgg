@@ -9,6 +9,7 @@ import static org.junit.Assert.fail;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -64,6 +65,26 @@ public class KggLiveCryptoCoreTest {
         byte[] changedSalt = Arrays.copyOf(salt, salt.length);
         changedSalt[0] ^= 0x01;
         assertFalse(Arrays.equals(hmacA, KggLiveCryptoCore.joinHmac(secretA, sessionId, changedSalt)));
+    }
+
+    @Test
+    public void nativePairingUsesTheWebCanonicalFormat() {
+        assertEquals(
+                "2026-08-25T07:15:30.123Z",
+                KggLiveKeyBridge.canonicalInstant(
+                        Instant.parse("2026-08-25T07:15:30.123456789Z")
+                )
+        );
+        assertEquals(
+                "{\"createdAt\":\"2026-08-25T07:15:30.123Z\","
+                        + "\"keyVersion\":1,\"pairingId\":\"pairing-id\","
+                        + "\"pairingSecret\":\"pairing-secret\",\"v\":1}",
+                KggLiveKeyBridge.canonicalPairingJson(
+                        "2026-08-25T07:15:30.123Z",
+                        "pairing-id",
+                        "pairing-secret"
+                )
+        );
     }
 
     @Test
