@@ -12,6 +12,7 @@ Alle Punkte muessen vor einem Produktionsbuild belegt sein:
 
 - [ ] Ein eigener 256-Bit-Kopplungsschluessel pro geteiltem Plan.
 - [ ] Kopplungsschluessel nur lokal per bewusstem QR, nie ueber Relay, Git, Logs oder Handoff.
+- [ ] Plan-Kopplungen werden bei ausdruecklichem Entkoppeln, Planloeschung und App-Zuruecksetzen lokal vollstaendig entfernt. Ein normales Sitzungsende darf die weiter benoetigte Plan-Kopplung behalten.
 - [ ] Frische ECDH- und AES-GCM-Sitzungsschluessel pro zweistuendiger Sitzung.
 - [ ] Kein Name, Initial, Geburtsdatum, Adresse oder fachlicher Klartext beim Relay.
 - [ ] Manipulation, falsches Geraet, Replay, Ablauf und Quota-Fehler schlagen geschlossen fehl.
@@ -20,6 +21,7 @@ Alle Punkte muessen vor einem Produktionsbuild belegt sein:
 - [ ] Android-Keystore- und Web-Crypto-Speicherung sind getestet.
 - [ ] Automatischer Klartext-/Secret-Scan ist gruen.
 - [ ] Der echte Tab-S9-Test nutzt nur synthetische Daten.
+- [ ] Der Produktionsendpunkt ist nach DPA- und Gesamtfreigabe fest vorgegeben; ein frei eingebbarer Produktionsendpunkt ist nicht erlaubt.
 
 ## Organisatorische Freigabevoraussetzungen
 
@@ -60,4 +62,3 @@ Die echte Datei, Unterschrift, Namen und interne Unterlagen gehoeren nicht in di
 ## Harte Stop-Regel
 
 Bei einem fehlenden Punkt bleibt `KGG_LIVE_SYNC_MODE=off`. Es gibt keinen manuellen Bypass, keinen Klartext-Fallback und keine automatische kostenpflichtige Alternative.
-

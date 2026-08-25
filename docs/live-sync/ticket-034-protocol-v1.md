@@ -7,8 +7,9 @@ Basis-Commit: `04a5d3e59225985e4e536f25c1b7aea8b04690f1`
 ## Ziel und harte Grenzen
 
 - Eine Therapeut:innen-App und genau eine bereits gekoppelte Patienten-App tauschen waehrend einer hoechstens zweistuendigen Sitzung Planstaende und Trainingsergebnisse aus.
-- Der Relay-Server sieht ausschliesslich zufaellige Kennungen, Ablaufzeiten, Groessen und kryptografisch geschuetzte Frames.
-- Namen, Initialen, Geburtsdaten, Adressen, Diagnosen, Klartext-Planwerte, Klartext-Trainingsergebnisse und Schluessel duerfen den Relay nie erreichen.
+- Der Relay-Server sieht zufaellige Kennungen, Ablaufzeiten, Groessen, kurzlebige Rollen-Tokens bei der Anmeldung, authentifizierte oeffentliche Sitzungsschluessel und kryptografisch geschuetzte Datenframes.
+- Der Relay speichert von Rollen-Tokens nur SHA-256-Hashes. Oeffentliche Sitzungsschluessel und ihre Signaturen werden nur fluechtig an die verbundene Gegenseite weitergereicht und nicht gespeichert.
+- Namen, Initialen, Geburtsdaten, Adressen, Diagnosen, Klartext-Planwerte, Klartext-Trainingsergebnisse, Kopplungsschluessel und private Sitzungsschluessel duerfen den Relay nie erreichen.
 - `KGGDataStore.currentPlan` bleibt die einzige zentrale Plan-State-Quelle der Therapeut:innen-App.
 - Bei fehlender oder fehlerhafter Kryptografie gibt es keinen unsicheren Fallback. Live-Sync bleibt aus; QR und Offline-Nutzung bleiben verfuegbar.
 - Der Prototyp darf nur in `test` mit synthetischen Daten laufen. `production` bleibt bis zur externen Freigabedatei hart gesperrt.
@@ -42,8 +43,8 @@ Der planindividuelle Schluessel verschluesselt keine Nutzdaten direkt.
 4. Der Relay speichert nur diesen Beweis und Token-Hashes.
 5. Die Patienten-App erhaelt Code, `sessionId` und `sessionSalt`, berechnet denselben Beweis und wird nur bei konstantzeitlichem Gleichstand zugelassen.
 6. Beide Endpunkte erzeugen fuer diese Sitzung ein fluechtiges ECDH-P-256-Schluesselpaar.
-7. Jeder oeffentliche ECDH-Schluessel wird mit HMAC ueber Rolle, Sitzung und Schluessel authentifiziert. Die Gegenseite verwirft ihn bei falscher Signatur.
-8. Beide Seiten leiten den gemeinsamen AES-256-GCM-Sitzungsschluessel per HKDF-SHA-256 aus ECDH-Geheimnis, Sitzungssalz, Pairing-Bindung und Protokollkontext ab.
+7. Jeder oeffentliche ECDH-Schluessel wird mit HMAC ueber Rolle, Sitzung und Schluessel authentifiziert. Der Relay leitet diese Anmeldung nur an eine bereits authentifizierte Gegenseite derselben Sitzung weiter und speichert sie nicht. Die Gegenseite verwirft sie bei falscher Signatur.
+8. Beide Seiten leiten den gemeinsamen AES-256-GCM-Sitzungsschluessel per HKDF-SHA-256 ab. Der feste Kontext enthaelt `KGG-LIVE-SESSION-V1`, `pairingId`, `sessionId`, `expiresAt` als Epoch-Millisekunden sowie die Rollen `therapist` und `patient` in dieser Reihenfolge.
 9. Fluechtige private ECDH-Schluessel werden nach Ende oder Ablauf verworfen.
 
 Damit sind passiv abgefangene Netzwerkdaten ohne Endgeraeteschluessel nicht lesbar. Eine spaetere Offenlegung des planindividuellen Kopplungsschluessels allein soll alte Sitzungsinhalte nicht entschluesseln koennen.
@@ -58,7 +59,7 @@ Lokaler und spaeterer Cloudflare-Worker verwenden dieselbe API:
 - `GET /v1/sessions/{code}/challenge`: liefert `sessionId`, `sessionSalt`, `expiresAt` und Protokollversion.
 - `POST /v1/sessions/{code}/join`: vergleicht Join-Beweis konstantzeitlich und registriert den Hash eines zufaelligen Patient:innen-Tokens.
 - `GET /v1/sessions/{code}/socket`: WebSocket-Upgrade. Das erste Frame muss innerhalb von fuenf Sekunden mit dem Rollen-Token authentifizieren. Tokens stehen nie in URLs.
-- `DELETE /v1/sessions/{code}`: schliesst WebSockets, loescht Alarm und ruft `deleteAll()` auf.
+- `DELETE /v1/sessions/{code}`: verlangt den sitzungsgebundenen Therapeut:innen-Token als `Authorization: Bearer <token>`, schliesst WebSockets, loescht Alarm und ruft `deleteAll()` auf.
 
 Der Code dient nur zum Routing. Er ist ohne Kopplungsschluessel kein Zugangsbeweis.
 
@@ -69,6 +70,7 @@ Der Code dient nur zum Routing. Er ist ohne Kopplungsschluessel kein Zugangsbewe
 - Hoechstens 64 KiB pro Frame und 5 MiB verschluesselter Rueckstand.
 - Hoechstens fuenf falsche Join-Versuche; danach ist die Sitzung gesperrt.
 - Keine fachlichen Inhalte oder Request-Bodies loggen.
+- Rollen-Tokens nur im Arbeitsspeicher pruefen und nur gehasht speichern. Authentifizierte oeffentliche Sitzungsschluessel nur fluechtig weiterleiten und nie als Rueckstand speichern.
 - Abgelaufene Sitzungen antworten immer geschlossen und loeschen ihren Speicher.
 - Cloudflare Durable Object mit `jurisdiction("eu")` und WebSocket Hibernation; ueber Nacht nur lokale Emulation, keine Bereitstellung.
 
@@ -124,4 +126,3 @@ Der Live-Sync-Teil wird gestoppt und nicht fuer echte Daten freigegeben, wenn ei
 - Fehler oder fehlende Web-Crypto-Unterstuetzung fuehren sicher zu `off`, niemals zu Klartext.
 - Sitzungsspeicher wird bei Ende und Ablauf vollstaendig geloescht.
 - Produktionsmodus kann ohne lokale Datenschutzfreigabe nicht gebaut werden.
-

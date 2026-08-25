@@ -26,7 +26,7 @@ Die Test-API nutzt diese synthetischen Hüllen:
 - `GET /v1/sessions/{code}/challenge`: liefert `sessionId`, `sessionSalt`, `expiresAt` und `protocolVersion`.
 - `POST /v1/sessions/{code}/join`: `{ "joinProof": "<base64url-hmac>", "patientTokenHash": "<base64url-sha256>" }`.
 - `GET /v1/sessions/{code}/socket`: erstes WebSocket-Frame ist `{ "type": "auth", "role": "therapist|patient", "token": "<opaque>" }`.
-- `DELETE /v1/sessions/{code}`: beendet die Sitzung und leert den gesamten DO-Speicher.
+- `DELETE /v1/sessions/{code}`: verlangt `Authorization: Bearer <therapist-token>`, beendet genau diese Sitzung und leert ihren gesamten DO-Speicher.
 
 Die lokale Hibernation-Testumgebung unterstützt `jurisdiction("eu")` noch
 nicht. Nur bei `LIVE_SYNC_MODE=test` verwendet der Testpfad deshalb eine
