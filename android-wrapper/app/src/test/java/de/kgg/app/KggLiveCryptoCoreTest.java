@@ -208,6 +208,61 @@ public class KggLiveCryptoCoreTest {
     }
 
     @Test
+    public void sessionWindowExpiresAndClearsReplayState() {
+        long now = 1_000_000L;
+        KggLiveSessionWindow window = KggLiveSessionWindow.create(
+                now + 1_000L,
+                now,
+                5_000L
+        );
+        byte[] nonce = new byte[KggLiveCryptoCore.GCM_NONCE_BYTES];
+        assertTrue(window.canAttemptIncomingNonce(nonce, now + 999L, 5_999L));
+        assertTrue(window.markIncomingNonceAfterAuthentication(nonce, now + 999L, 5_999L));
+        assertFalse(window.canAttemptIncomingNonce(nonce, now + 999L, 5_999L));
+        assertFalse(window.canUseFrame(now + 1_000L, 6_000L));
+        window.clear();
+        assertFalse(window.canUseFrame(now, 5_000L));
+        assertEquals(0, window.successfulFrameCount());
+    }
+
+    @Test
+    public void failedAuthenticationDoesNotConsumeNonceAndNewSessionStartsClean() {
+        long now = 2_000_000L;
+        byte[] nonce = new byte[KggLiveCryptoCore.GCM_NONCE_BYTES];
+        KggLiveSessionWindow first = KggLiveSessionWindow.create(
+                now + 10_000L,
+                now,
+                10_000L
+        );
+        assertTrue(first.canAttemptIncomingNonce(nonce, now, 10_000L));
+        assertTrue(first.canAttemptIncomingNonce(nonce, now, 10_000L));
+        assertTrue(first.markIncomingNonceAfterAuthentication(nonce, now, 10_000L));
+        assertFalse(first.markIncomingNonceAfterAuthentication(nonce, now, 10_000L));
+        first.clear();
+
+        KggLiveSessionWindow second = KggLiveSessionWindow.create(
+                now + 10_000L,
+                now,
+                10_000L
+        );
+        assertTrue(second.canAttemptIncomingNonce(nonce, now, 10_000L));
+    }
+
+    @Test
+    public void sessionWindowStopsAtFourHundredSuccessfulFrames() {
+        long now = 3_000_000L;
+        KggLiveSessionWindow window = KggLiveSessionWindow.create(
+                now + KggLiveSessionWindow.MAX_SESSION_LIFETIME_MILLIS,
+                now,
+                20_000L
+        );
+        for (int index = 0; index < KggLiveSessionWindow.MAX_SUCCESSFUL_FRAMES; index += 1) {
+            assertTrue(window.markOutgoingFrameAfterSuccess(now, 20_000L));
+        }
+        assertFalse(window.markOutgoingFrameAfterSuccess(now, 20_000L));
+    }
+
+    @Test
     public void base64AndBridgeInputsAreStrictlyBounded() throws Exception {
         String sessionId = KggLiveCryptoCore.base64Url(
                 KggLiveCryptoCore.randomBytes(random, KggLiveCryptoCore.SESSION_ID_BYTES)

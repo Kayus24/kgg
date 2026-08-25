@@ -6,13 +6,13 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
 import org.json.JSONObject;
@@ -46,6 +46,7 @@ public final class KggLiveKeyBridge {
     private static final int KEY_VERSION = 1;
     private static final int MAX_PAIRINGS = 32;
     private static final int MAX_STATE_BYTES = 64 * 1024;
+    private static final int MAX_EXPIRES_AT_CHARS = 40;
     private static final String PREFS = "kgg_live_key_private_v1";
     private static final String PREF_STATE = "state";
     private static final String MASTER_KEY_ALIAS = "kgg_live_key_master_v1";
@@ -76,6 +77,7 @@ public final class KggLiveKeyBridge {
     private String activeRole;
     private byte[] activePairingId;
     private byte[] activeSessionId;
+    private KggLiveSessionWindow activeSessionWindow;
     private final KggLiveSessionSecrets sessionSecrets = new KggLiveSessionSecrets();
 
     public KggLiveKeyBridge(Activity activity, WebView webView) {
@@ -136,7 +138,6 @@ public final class KggLiveKeyBridge {
         deactivateForPage();
     }
 
-    @JavascriptInterface
     public synchronized String getCapabilities() {
         if (!isTrustedBridgeCallLocked()) {
             return capabilities(false, "bridge_inactive");
@@ -147,7 +148,6 @@ public final class KggLiveKeyBridge {
         return capabilities(true, "");
     }
 
-    @JavascriptInterface
     public synchronized boolean hasPairing(String planKey) {
         if (!isTrustedBridgeCallLocked() || !ensureCryptoAvailableLocked()) {
             return false;
@@ -165,7 +165,6 @@ public final class KggLiveKeyBridge {
      * Creates a pairing and returns its QR payload exactly once. Existing
      * pairings are never exported by this method.
      */
-    @JavascriptInterface
     public synchronized String createPairing(String planKey) {
         if (!isTrustedBridgeCallLocked() || !ensureCryptoAvailableLocked()) {
             return error("pairing_unavailable");
@@ -198,7 +197,6 @@ public final class KggLiveKeyBridge {
     }
 
     /** Replaces the local pairing and returns only the new one-time QR payload. */
-    @JavascriptInterface
     public synchronized String rotatePairing(String planKey) {
         if (!isTrustedBridgeCallLocked() || !ensureCryptoAvailableLocked()) {
             return error("pairing_unavailable");
@@ -228,7 +226,6 @@ public final class KggLiveKeyBridge {
         }
     }
 
-    @JavascriptInterface
     public synchronized boolean deletePairing(String planKey) {
         if (!isTrustedBridgeCallLocked() || !ensureCryptoAvailableLocked()) {
             return false;
@@ -251,7 +248,6 @@ public final class KggLiveKeyBridge {
         }
     }
 
-    @JavascriptInterface
     public synchronized String computeJoinHmac(
             String planKey,
             String sessionIdBase64Url,
@@ -295,7 +291,6 @@ public final class KggLiveKeyBridge {
     }
 
     /** Creates a P-256 offer; its private key never enters the WebView. */
-    @JavascriptInterface
     public synchronized String createPeerOffer(
             String planKey,
             String role,
@@ -351,7 +346,6 @@ public final class KggLiveKeyBridge {
         }
     }
 
-    @JavascriptInterface
     public synchronized boolean verifyPeerOffer(
             String planKey,
             String localRole,
@@ -389,10 +383,10 @@ public final class KggLiveKeyBridge {
     }
 
     /** Verifies the peer offer and stores only the derived AES session key. */
-    @JavascriptInterface
     public synchronized String deriveSessionKey(
             String planKey,
             String sessionSaltBase64Url,
+            String expiresAt,
             String offerJson
     ) {
         if (!isTrustedBridgeCallLocked() || !ensureCryptoAvailableLocked()) {
@@ -401,13 +395,16 @@ public final class KggLiveKeyBridge {
         byte[] sessionSalt = null;
         byte[] sharedSecret = null;
         byte[] info = null;
+        byte[] expiryBinding = null;
         byte[] derived = null;
         byte[] expectedMac = null;
         PairingMaterial material = null;
         PeerOffer offer = null;
+        KggLiveSessionWindow newSessionWindow = null;
         boolean stored = false;
         try {
             String checkedPlanKey = requirePlanKey(planKey);
+            long expiresAtEpochMillis = parseBoundedExpiresAt(expiresAt);
             sessionSalt = KggLiveCryptoCore.decodeBase64Url(
                     sessionSaltBase64Url,
                     KggLiveCryptoCore.SESSION_SALT_BYTES,
@@ -447,11 +444,16 @@ public final class KggLiveKeyBridge {
             );
             byte[] therapistRole = KggLiveCryptoCore.utf8("therapist", 16);
             byte[] patientRole = KggLiveCryptoCore.utf8("patient", 16);
+            expiryBinding = KggLiveCryptoCore.utf8(
+                    Long.toString(expiresAtEpochMillis),
+                    24
+            );
             try {
                 info = KggLiveCryptoCore.concat(
                         "KGG-LIVE-SESSION-V1".getBytes(StandardCharsets.UTF_8),
                         activePairingId,
                         activeSessionId,
+                        expiryBinding,
                         therapistRole,
                         patientRole
                 );
@@ -464,22 +466,24 @@ public final class KggLiveKeyBridge {
                     info,
                     KggLiveCryptoCore.AES_KEY_BYTES
             );
-            clearSessionKeyOnlyLocked();
+            newSessionWindow = KggLiveSessionWindow.create(
+                    expiresAtEpochMillis,
+                    System.currentTimeMillis(),
+                    SystemClock.elapsedRealtime()
+            );
+            clearSessionLocked();
             sessionSecrets.replace(derived);
             derived = null;
+            activePlanKey = checkedPlanKey;
+            activeSessionWindow = newSessionWindow;
+            newSessionWindow = null;
             stored = true;
-            KggLiveCryptoCore.destroy(ephemeralKeyPair.getPrivate());
-            ephemeralKeyPair = null;
-            KggLiveCryptoCore.clear(activePairingId, activeSessionId);
-            activePairingId = null;
-            activeSessionId = null;
-            activeRole = null;
             return ok();
         } catch (Exception ignored) {
             clearSessionLocked();
             return error("session_failed");
         } finally {
-            KggLiveCryptoCore.clear(sessionSalt, sharedSecret, info, expectedMac, derived);
+            KggLiveCryptoCore.clear(sessionSalt, sharedSecret, info, expiryBinding, expectedMac, derived);
             if (material != null) {
                 material.clear();
             }
@@ -489,10 +493,12 @@ public final class KggLiveKeyBridge {
             if (!stored && derived != null) {
                 KggLiveCryptoCore.clear(derived);
             }
+            if (newSessionWindow != null) {
+                newSessionWindow.clear();
+            }
         }
     }
 
-    @JavascriptInterface
     public synchronized String encrypt(
             String planKey,
             String aadBase64Url,
@@ -521,9 +527,22 @@ public final class KggLiveKeyBridge {
                             - KggLiveCryptoCore.GCM_TAG_BYTES
             );
             keyBytes = sessionSecrets.copy();
+            if (activeSessionWindow == null
+                    || !activeSessionWindow.canUseFrame(
+                            System.currentTimeMillis(),
+                            SystemClock.elapsedRealtime()
+                    )) {
+                throw new IllegalStateException("frame_limit_or_expired");
+            }
             result = KggLiveCryptoCore.encrypt(
                     new SecretKeySpec(keyBytes, "AES"), aad, plaintext, random
             );
+            if (!activeSessionWindow.markOutgoingFrameAfterSuccess(
+                    System.currentTimeMillis(),
+                    SystemClock.elapsedRealtime()
+            )) {
+                throw new IllegalStateException("frame_limit_or_expired");
+            }
             return new JSONObject()
                     .put("ok", true)
                     .put("nonce", KggLiveCryptoCore.base64Url(result.nonce))
@@ -539,7 +558,6 @@ public final class KggLiveKeyBridge {
         }
     }
 
-    @JavascriptInterface
     public synchronized String decrypt(
             String planKey,
             String nonceBase64Url,
@@ -573,10 +591,27 @@ public final class KggLiveKeyBridge {
                     -1,
                     KggLiveCryptoCore.MAX_FRAME_CIPHERTEXT_BYTES
             );
+            if (activeSessionWindow == null
+                    || !activeSessionWindow.canAttemptIncomingNonce(
+                            nonce,
+                            System.currentTimeMillis(),
+                            SystemClock.elapsedRealtime()
+                    )) {
+                throw new IllegalStateException("replay_or_frame_limit");
+            }
             keyBytes = sessionSecrets.copy();
             plaintext = KggLiveCryptoCore.decrypt(
                     new SecretKeySpec(keyBytes, "AES"), aad, nonce, ciphertext
             );
+            if (!activeSessionWindow.markIncomingNonceAfterAuthentication(
+                    nonce,
+                    System.currentTimeMillis(),
+                    SystemClock.elapsedRealtime()
+            )) {
+                KggLiveCryptoCore.clear(plaintext);
+                plaintext = null;
+                throw new IllegalStateException("replay_or_frame_limit");
+            }
             String encodedPlaintext = KggLiveCryptoCore.base64Url(plaintext);
             return new JSONObject()
                     .put("ok", true)
@@ -589,14 +624,12 @@ public final class KggLiveKeyBridge {
         }
     }
 
-    @JavascriptInterface
     public synchronized boolean closeSession() {
         clearSessionLocked();
         return true;
     }
 
     /** Debug/test-only black immersive cover; production builds always reject it. */
-    @JavascriptInterface
     public boolean enableBlackout() {
         if (!BuildConfig.DEBUG || !isCurrentPageTrusted()) {
             return false;
@@ -666,7 +699,6 @@ public final class KggLiveKeyBridge {
         return success.get();
     }
 
-    @JavascriptInterface
     public boolean disableBlackout() {
         AtomicBoolean success = new AtomicBoolean(true);
         runOnUiThreadAndWait(() -> {
@@ -990,9 +1022,21 @@ public final class KggLiveKeyBridge {
     }
 
     private boolean hasActiveSessionLocked(String planKey) {
+        expireSessionIfNeededLocked();
         return sessionSecrets.isActive()
+                && activeSessionWindow != null
                 && KggLiveBridgePolicy.isPlanKey(planKey)
                 && planKey.equals(activePlanKey);
+    }
+
+    private void expireSessionIfNeededLocked() {
+        if (activeSessionWindow != null
+                && activeSessionWindow.isExpired(
+                        System.currentTimeMillis(),
+                        SystemClock.elapsedRealtime()
+                )) {
+            clearSessionLocked();
+        }
     }
 
     private void closeSessionForPlanLocked(String planKey) {
@@ -1003,6 +1047,10 @@ public final class KggLiveKeyBridge {
 
     private void clearSessionLocked() {
         clearSessionKeyOnlyLocked();
+        if (activeSessionWindow != null) {
+            activeSessionWindow.clear();
+        }
+        activeSessionWindow = null;
         if (ephemeralKeyPair != null) {
             KggLiveCryptoCore.destroy(ephemeralKeyPair.getPrivate());
         }
@@ -1012,6 +1060,23 @@ public final class KggLiveKeyBridge {
         KggLiveCryptoCore.clear(activePairingId, activeSessionId);
         activePairingId = null;
         activeSessionId = null;
+    }
+
+    private static long parseBoundedExpiresAt(String expiresAt) {
+        if (expiresAt == null || expiresAt.length() < 20
+                || expiresAt.length() > MAX_EXPIRES_AT_CHARS
+                || expiresAt.indexOf('\u0000') >= 0
+                || !expiresAt.endsWith("Z")) {
+            throw new IllegalArgumentException("expires_at_invalid");
+        }
+        Instant parsed = Instant.parse(expiresAt);
+        long expiresAtEpochMillis = parsed.toEpochMilli();
+        long remaining = expiresAtEpochMillis - System.currentTimeMillis();
+        if (expiresAtEpochMillis <= System.currentTimeMillis()
+                || remaining > KggLiveSessionWindow.MAX_SESSION_LIFETIME_MILLIS) {
+            throw new IllegalArgumentException("expires_at_invalid");
+        }
+        return expiresAtEpochMillis;
     }
 
     private void clearSessionKeyOnlyLocked() {

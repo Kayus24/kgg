@@ -33,12 +33,23 @@ geschlossen.
 - ECDH P-256, HKDF-SHA-256, Join-HMAC und AES-256-GCM verwenden nur flüchtiges
   Sessionmaterial. AAD, Nonces, Base64URL-Eingaben und Größen werden strikt
   validiert.
+- Beim erfolgreichen Session-Key-Ableiten muss der Client die serverseitige
+  Ablaufzeit als begrenzten ISO-8601-UTC-Wert `expiresAt` (z. B.
+  `2026-08-25T12:34:56.789Z`, maximal 40 Zeichen) übergeben. Native akzeptiert
+  nur eine noch nicht abgelaufene Zeit innerhalb der nächsten zwei Stunden und
+  bindet die daraus berechnete Epoch-Millisekunde zusätzlich in die HKDF-Info.
+  Vor jeder Verschlüsselung/Entschlüsselung wird die native Wallclock- und
+  monotone Ablaufgrenze geprüft; bei Ablauf werden Schlüssel, ECDH-Zustand und
+  Replay-Daten atomar gelöscht. Pro Sitzung sind höchstens 400 erfolgreiche
+  Frames erlaubt. Eine eingehende GCM-Nonce wird erst nach erfolgreicher
+  Authentifizierung verbraucht und kann danach nicht erneut entschlüsseln.
 - Die JS-Krypto-Argumente für `sessionId`, `sessionSalt`, Public Keys, HMACs,
   Nonce, AAD, Plaintext und Ciphertext sind ungepaddete Base64URL-Bytes.
   Der Join-HMAC bindet `KGG-LIVE-JOIN-V1 || sessionId || sessionSalt`; das
   Peer-Angebot bindet `KGG-LIVE-ECDH-OFFER-V1 || pairingId || role ||
   sessionId || publicKey`. Die HKDF-Info ist fest auf
-  `KGG-LIVE-SESSION-V1 || pairingId || sessionId || therapist || patient`
+  `KGG-LIVE-SESSION-V1 || pairingId || sessionId || expiresAtEpochMillis || therapist || patient`
+  (ASCII-Dezimaldarstellung der nativen Epoch-Millisekunde).
   gebunden.
 - Die schwarze immersive Abdeckung ist ausschließlich in Debug/Test-Builds
   verfügbar und stellt Window-Flags, Helligkeit und UI-Zustand beim Ende,
