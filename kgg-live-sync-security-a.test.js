@@ -19,6 +19,11 @@ function client(onMessage){
 }
 async function frame(key,sequence,payload=plan){return live.encryptEnvelope(key,sessionId,'therapist',sequence,payload);}
 async function rejectsCode(promise,code){await assert.rejects(promise,error=>error&&error.code===code);}
+async function withDelayedCrypto(method,delay,callback){
+  const subtle=global.crypto.subtle,prototype=Object.getPrototypeOf(subtle),original=prototype[method];
+  prototype[method]=async function(...args){await new Promise(resolve=>setTimeout(resolve,delay));return original.apply(this,args);};
+  try{return await callback();}finally{prototype[method]=original;}
+}
 
 async function main(){
   const pair=await live.createEphemeralKeyPair();
@@ -49,6 +54,17 @@ async function main(){
   await expiredReceive.receiveRaw(await frame(expiredReceive.key,1));
   assert.equal(expiredReceive.closed,true);
 
+  const delayedReceiveKey=await aesKey();let delayedApplications=0;const delayedReceive=client(()=>{delayedApplications+=1;});delayedReceive.key=delayedReceiveKey;delayedReceive.session.expiresAt=new Date(Date.now()+8).toISOString();
+  await withDelayedCrypto('decrypt',30,async()=>delayedReceive.receiveRaw(await frame(delayedReceiveKey,1)));
+  assert.equal(delayedApplications,0);
+  assert.equal(delayedReceive.closed,true);
+  const delayedSend=client(()=>{});delayedSend.key=await aesKey();delayedSend.session.expiresAt=new Date(Date.now()+8).toISOString();
+  await rejectsCode(withDelayedCrypto('encrypt',30,()=>delayedSend.send('receipt',{synthetic:true,cursor:0,appliedIds:[]})),'SESSION_EXPIRED');
+  assert.equal(delayedSend.closed,true);
+
+  const contractClient=client(()=>{});contractClient.key=await aesKey();const sent=[];contractClient.socket.send=value=>sent.push(value);
+  const contractFixtures=live.testFixtures();await contractClient.sendTrainingEvents(contractFixtures.trainingEvents,contractFixtures.planRevision);assert.equal(sent.length,1);
+
   const bridgePair=await live.createEphemeralKeyPair();
   const bridgeBase={role:'therapist',mode:'test',simulator:true,pairingId,relay:{},transport:{},queue:new live.CiphertextQueue({allowMemory:true}),keyStore:live.makeKeyStore({allowMemory:true}),pairingSigner:async()=>new Uint8Array(32).fill(9)};
   const rejectedBridge=live.createClient({...bridgeBase,cryptoBridge:{createEphemeralKeyPair:async()=>({privateKey:'raw-private-key',publicKey:bridgePair.publicKey})}});rejectedBridge.session=session();rejectedBridge.socket={readyState:1,send(){},close(){}};
@@ -57,7 +73,7 @@ async function main(){
   await acceptedBridge.beginKeyExchange();
   assert.equal(acceptedBridge.nativePrivateHandle,'opaque-1');
 
-  console.log(JSON.stringify({status:'PASS',checks:['serialized-duplicate','contiguous-sequence','sequential-order','expiry-send-receive','browser-private-key','bridge-handle-contract']}));
+  console.log(JSON.stringify({status:'PASS',checks:['serialized-duplicate','contiguous-sequence','sequential-order','expiry-send-receive','expiry-during-await','training-events-contract','browser-private-key','bridge-handle-contract']}));
 }
 
 main().catch(error=>{console.error(error);process.exitCode=1;});
