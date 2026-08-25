@@ -192,10 +192,74 @@ describe("KGG ticket 034 live-sync worker", () => {
 
     const therapistClosed = nextClose(therapistSocket);
     const patientClosed = nextClose(patientSocket);
-    const deleted = await SELF.fetch(`http://localhost/v1/sessions/${code}`, { method: "DELETE" });
+    const deleted = await SELF.fetch(`http://localhost/v1/sessions/${code}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${therapistToken}` },
+    });
     expect(deleted.status).toBe(200);
     expect((await jsonBody(deleted)).deleted).toBe(true);
     expect((await storedSession(code))).toBeUndefined();
+    expect((await therapistClosed).code).toBe(4000);
+    expect((await patientClosed).code).toBe(4000);
+  });
+
+  it("requires the session-bound therapist token for deletion", async () => {
+    const { code, therapistToken } = await reserve();
+    const { patientToken } = await armAndJoin(code, therapistToken);
+    const therapistSocket = await openSocket(code);
+    const patientSocket = await openSocket(code);
+    await authenticate(therapistSocket, "therapist", therapistToken);
+    await authenticate(patientSocket, "patient", patientToken);
+
+    const unauthenticated = await SELF.fetch(`http://localhost/v1/sessions/${code}`, { method: "DELETE" });
+    expect(unauthenticated.status).toBe(401);
+    expect(await storedSession(code)).toBeDefined();
+
+    const wrongToken = await SELF.fetch(`http://localhost/v1/sessions/${code}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${randomBase64Url(32)}` },
+    });
+    expect(wrongToken.status).toBe(401);
+    expect(await storedSession(code)).toBeDefined();
+
+    const malformedAuthorization = await SELF.fetch(`http://localhost/v1/sessions/${code}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Basic ${therapistToken}` },
+    });
+    expect(malformedAuthorization.status).toBe(401);
+    expect(await storedSession(code)).toBeDefined();
+
+    const patientDelete = await SELF.fetch(`http://localhost/v1/sessions/${code}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${patientToken}` },
+    });
+    expect(patientDelete.status).toBe(401);
+    expect(await storedSession(code)).toBeDefined();
+
+    const foreign = await reserve();
+    const foreignDelete = await SELF.fetch(`http://localhost/v1/sessions/${code}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${foreign.therapistToken}` },
+    });
+    expect(foreignDelete.status).toBe(401);
+    expect(await storedSession(code)).toBeDefined();
+    expect(await storedSession(foreign.code)).toBeDefined();
+
+    const relayed = frame("therapist", 1);
+    const received = nextMessage(patientSocket);
+    therapistSocket.send(relayed);
+    expect(JSON.parse(await received)).toMatchObject(JSON.parse(relayed));
+
+    const therapistClosed = nextClose(therapistSocket);
+    const patientClosed = nextClose(patientSocket);
+    const deleted = await SELF.fetch(`http://localhost/v1/sessions/${code}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${therapistToken}` },
+    });
+    expect(deleted.status).toBe(200);
+    expect((await jsonBody(deleted)).deleted).toBe(true);
+    expect(await storedSession(code)).toBeUndefined();
+    expect(await storedSession(foreign.code)).toBeDefined();
     expect((await therapistClosed).code).toBe(4000);
     expect((await patientClosed).code).toBe(4000);
   });
@@ -334,6 +398,8 @@ describe("KGG ticket 034 live-sync worker", () => {
     await runDurableObjectAlarm(stub);
     const challengeResponse = await SELF.fetch(`http://localhost/v1/sessions/${code}/challenge`);
     expect(challengeResponse.status).toBe(404);
+    const deleteResponse = await SELF.fetch(`http://localhost/v1/sessions/${code}`, { method: "DELETE" });
+    expect(deleteResponse.status).toBe(404);
     expect(await storedSession(code)).toBeUndefined();
   });
 });

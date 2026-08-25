@@ -425,7 +425,7 @@ export class LiveSyncSession extends DurableObject<Env, unknown> {
     } else if (path === "/__internal/socket" && request.method === "GET") {
       response = await this.handleSocket(request);
     } else if (path === "/__internal/delete" && request.method === "DELETE") {
-      response = await this.handleDelete();
+      response = await this.handleDelete(request);
     } else {
       response = errorResponse("NOT_FOUND", 404);
     }
@@ -759,7 +759,7 @@ export class LiveSyncSession extends DurableObject<Env, unknown> {
     return null;
   }
 
-  private async handleDelete(): Promise<Response> {
+  private async handleDelete(request: Request): Promise<Response> {
     const record = await this.loadRecord();
     if (record === null) {
       return errorResponse("SESSION_NOT_FOUND", 404);
@@ -767,6 +767,14 @@ export class LiveSyncSession extends DurableObject<Env, unknown> {
     if (Date.parse(record.expiresAt) <= Date.now()) {
       await this.expireAndDelete();
       return errorResponse("SESSION_EXPIRED", 410);
+    }
+    const token = parseBearerToken(request);
+    if (token === null) {
+      return errorResponse("UNAUTHORIZED", 401);
+    }
+    const tokenHash = await sha256Base64Url(token);
+    if (!constantTimeEqualBase64Url(record.therapistTokenHash, tokenHash, 32)) {
+      return errorResponse("UNAUTHORIZED", 401);
     }
     await this.expireAndDelete(4000, "deleted");
     return jsonResponse({ deleted: true });
