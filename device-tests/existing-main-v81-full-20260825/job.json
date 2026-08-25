@@ -1,0 +1,117 @@
+{
+  "kind": "kgg_dual_device_test_job",
+  "schemaVersion": 1,
+  "sessionId": "kgg-test-8c964ffd81f035f607d296ec9a0fd746",
+  "requestId": "existing-main-v81-full-20260825",
+  "sourceSha": "d6f396e2c7a5942eaf7535b8d8ed1bab7e7aad8f",
+  "patchHash": "797f7462e188fa0339d733c4f7ed5115c892ad26657827e4b1260a190974b365",
+  "jobHash": "4332d0277a9e3e64653f151f0620ad249c810c4e053b5ea2ee9fd5b5d284d885",
+  "patientPwaUrl": "https://kayus24.github.io/kgg-patient-preview/device-test/",
+  "profile": "full",
+  "recipeVersion": "v404-dual-device-fixtures-1",
+  "createdAt": "2026-08-25T15:40:17.002Z",
+  "expiresAt": "2026-08-27T15:40:17.002Z",
+  "fixtures": [
+    {
+      "fixtureId": "h2-1-baseline",
+      "format": "KGGH2",
+      "exerciseCount": 1,
+      "required": true,
+      "displayVariant": "normal",
+      "importMode": "capture",
+      "expectedFingerprint": "76f23a36",
+      "expectedOrderDigest": "e207ac4e"
+    },
+    {
+      "fixtureId": "h2-7-legacy",
+      "format": "KGGH2",
+      "exerciseCount": 7,
+      "required": true,
+      "displayVariant": "normal",
+      "importMode": "capture",
+      "expectedFingerprint": "83f8438b",
+      "expectedOrderDigest": "b81addb5"
+    },
+    {
+      "fixtureId": "h2-12-diagnostic",
+      "format": "KGGH2",
+      "exerciseCount": 12,
+      "required": false,
+      "displayVariant": "normal",
+      "importMode": "capture",
+      "expectedFingerprint": "6fa9b922",
+      "expectedOrderDigest": "984811ba"
+    },
+    {
+      "fixtureId": "h2-20-diagnostic",
+      "format": "KGGH2",
+      "exerciseCount": 20,
+      "required": false,
+      "displayVariant": "normal",
+      "importMode": "capture",
+      "expectedFingerprint": "9d3c51b4",
+      "expectedOrderDigest": "b31083c7"
+    },
+    {
+      "fixtureId": "h3-7-normal",
+      "format": "KGGH3",
+      "exerciseCount": 7,
+      "required": true,
+      "displayVariant": "normal",
+      "importMode": "product",
+      "expectedFingerprint": "9c7ab840",
+      "expectedOrderDigest": "b81addb5"
+    },
+    {
+      "fixtureId": "h3-12-normal",
+      "format": "KGGH3",
+      "exerciseCount": 12,
+      "required": true,
+      "displayVariant": "normal",
+      "importMode": "capture",
+      "expectedFingerprint": "ecacf999",
+      "expectedOrderDigest": "984811ba"
+    },
+    {
+      "fixtureId": "h3-20-normal",
+      "format": "KGGH3",
+      "exerciseCount": 20,
+      "required": true,
+      "displayVariant": "normal",
+      "importMode": "capture",
+      "expectedFingerprint": "8cefc56f",
+      "expectedOrderDigest": "b31083c7"
+    },
+    {
+      "fixtureId": "h3-20-far-angle",
+      "format": "KGGH3",
+      "exerciseCount": 20,
+      "required": true,
+      "displayVariant": "far-angle",
+      "importMode": "capture",
+      "expectedFingerprint": "8cefc56f",
+      "expectedOrderDigest": "b31083c7"
+    },
+    {
+      "fixtureId": "h3-20-low-contrast",
+      "format": "KGGH3",
+      "exerciseCount": 20,
+      "required": true,
+      "displayVariant": "low-contrast",
+      "importMode": "capture",
+      "expectedFingerprint": "8cefc56f",
+      "expectedOrderDigest": "b31083c7"
+    },
+    {
+      "fixtureId": "h3-20-photo",
+      "format": "KGGH3",
+      "exerciseCount": 20,
+      "required": true,
+      "displayVariant": "photo",
+      "importMode": "capture",
+      "expectedFingerprint": "8cefc56f",
+      "expectedOrderDigest": "b31083c7"
+    }
+  ],
+  "syntheticOnly": true
+}
