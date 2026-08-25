@@ -49,15 +49,16 @@
     return {events:events.slice(-400),revision};
   }
   function pairingStorageMessage(){return 'Sicherer Kopplungsspeicher ist auf diesem Gerät nicht verfügbar. Live-Sync bleibt aus.';}
-  function clearActivePairing(reason){
-    const hadPairing=!!state.pairingId||!!state.planRef||!!state.client;
-    const client=state.client;state.client=null;state.pairingId='';state.planRef='';state.sent.clear();
-    try{if(client&&typeof client.failClosed==='function')client.failClosed(reason||'plan_changed');else if(client&&typeof client.close==='function')client.close({sendClose:false,reason:reason||'plan_changed'}).catch(()=>{});}catch(err){}
+  async function clearActivePairing(reason){
+    const hadPairing=!!state.pairingId||!!state.planRef||!!state.client,pairingId=state.pairingId,client=state.client;
+    state.client=null;state.pairingId='';state.planRef='';state.sent.clear();
+    try{if(client&&typeof client.close==='function')await client.close({sendClose:false,reason:reason||'plan_changed'});if(client&&typeof client.failClosed==='function')client.failClosed(reason||'plan_changed');}catch(err){try{if(client&&typeof client.failClosed==='function')client.failClosed(reason||'plan_changed');}catch(closeErr){}}
+    try{if(pairingId&&state.store&&typeof state.store.remove==='function')await state.store.remove(pairingId);}catch(err){}
     if(hadPairing)setStatus('Plan gewechselt. Bitte neuen Kopplungs-QR scannen.','warn');
   }
-  function ensurePlanBinding(){
+  async function ensurePlanBinding(){
     const current=currentPlanRef(localPlan());
-    if(!state.planRef||!current||state.planRef!==current){clearActivePairing('plan_changed');return false;}
+    if(!state.planRef||!current||state.planRef!==current){await clearActivePairing('plan_changed');return false;}
     return true;
   }
   function renderShell(){
@@ -79,7 +80,7 @@
     if(mode()==='off'){setStatus('Live-Sync ist deaktiviert. QR/Offline-Nutzung bleibt verfügbar.','warn');return true;}
     try{
       const plan=localPlan(),planRef=currentPlanRef(plan);if(!planRef)throw new Error('Kein aktiver Plan.');
-      if(state.client)await state.client.close({reason:'pairing_replaced'});state.client=null;state.sent.clear();
+      if(state.client||state.pairingId)await clearActivePairing('pairing_replaced');
       const result=await live.importPairingQr(raw,state.store,{planRef});if(currentPlanRef(localPlan())!==planRef)throw new Error('Plan wurde gewechselt.');state.pairingId=result.pairingId;state.planRef=planRef;
       setStatus('Kopplung gespeichert. Bitte den 8-stelligen Sitzungscode eingeben.','ok');return true;
     }catch(err){setStatus(err.code==='SECURE_STORAGE_UNAVAILABLE'?pairingStorageMessage():'Kopplungs-QR konnte nicht gespeichert werden.','warn');return true;}
@@ -91,21 +92,21 @@
   }
   async function joinSession(){
     if(!state.pairingId){setStatus('Bitte zuerst den Kopplungs-QR scannen.','warn');return;}
-    if(!ensurePlanBinding())return;
+    if(!(await ensurePlanBinding()))return;
     const input=$('kggLiveSessionCode'),code=String(input&&input.value||'').replace(/\D/g,'');if(!/^\d{8}$/.test(code)){setStatus('Bitte den 8-stelligen Sitzungscode eingeben.','warn');return;}
     if(mode()==='test'&&!global.KGG_LIVE_TEST_SYNTHETIC_DATA){setStatus('TESTMODUS: Nur die synthetische Testschnittstelle darf Daten senden.','warn');return;}
     try{state.sent.clear();setStatus('Sitzung wird sicher verbunden.','');await makeClient().join(code);}catch(err){setStatus('Sitzung konnte nicht verbunden werden.','warn');}
   }
   async function receiveMessage(message){
     if(!message||message.type!=='plan_snapshot')return;
-    if(!ensurePlanBinding())return;
+    if(!(await ensurePlanBinding()))return;
     state.lastPlanRevision=message.planRevision;
     const raw={i:(localPlan()&&localPlan().i)||'live-plan',t:String(message.title||'KGG Trainingsplan'),v:1,d:Number(message.days)||6,extendDays:message.extendDays!==false,stepDays:Number(message.stepDays)||6,e:(message.exercises||[]).filter(exercise=>!exercise.archived).map(exercise=>[exercise.name||'Übung',Number(exercise.sets)||3,exercise.side||'BI',exercise.unit||'kg',exercise.measure||'Wdh',exercise.startLoad||'',exercise.startMetric||'', '',exercise.videoUrl||'',exercise.videoLabel||'Video öffnen',exercise.painMode||'exercise',exercise.id])};
-    try{if(!ensurePlanBinding())return;if(global.KGGPatientPlanImport&&typeof global.KGGPatientPlanImport.replaceConfirmed==='function')global.KGGPatientPlanImport.replaceConfirmed(raw);setStatus('Plan aktualisiert. Trainingswerte bleiben lokal erhalten.','ok');}catch(err){setStatus('Plan konnte nicht übernommen werden.','warn');}
+    try{if(!(await ensurePlanBinding()))return;if(global.KGGPatientPlanImport&&typeof global.KGGPatientPlanImport.replaceConfirmed==='function')global.KGGPatientPlanImport.replaceConfirmed(raw);setStatus('Plan aktualisiert. Trainingswerte bleiben lokal erhalten.','ok');}catch(err){setStatus('Plan konnte nicht übernommen werden.','warn');}
   }
   async function sendCurrentEvents(){
     if(!state.client||!state.client.key)return;
-    if(!ensurePlanBinding())return;
+    if(!(await ensurePlanBinding()))return;
     try{
       if(mode()==='test'){
         if(global.KGG_LIVE_TEST_SYNTHETIC_DATA!==true)return;
@@ -116,8 +117,10 @@
   }
   async function poll(){if(mode()!=='off')await sendCurrentEvents();state.timer=setTimeout(poll,900);}
   async function endSession(reason){const client=state.client;if(client&&typeof client.close==='function')await client.close({reason:reason||'patient_requested'});state.client=null;state.sent.clear();}
+  async function removePairingForPlan(planRef){const target=String(planRef||'');if(state.planRef===target)await clearActivePairing('plan_deleted');try{if(state.store&&typeof state.store.removeByPlanRef==='function')await state.store.removeByPlanRef(target);}catch(err){}}
+  async function reset(){clearTimeout(state.timer);await clearActivePairing('app_reset');try{if(state.store&&typeof state.store.clearAll==='function')await state.store.clearAll();}catch(err){}state.sent.clear();setStatus('Live-Sync lokal zurückgesetzt.','');}
   function init(){renderShell();if(mode()!=='off'){poll();document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')sendCurrentEvents();});window.addEventListener('pagehide',()=>{if(state.client&&state.client.close)state.client.close({reason:'page_hidden'});});}}
-  global.KGGPatientLiveSync={handleScannedText,init,status:()=>state.client?state.client.status():{mode:mode(),connected:false,pairingId:!!state.pairingId}};
+  global.KGGPatientLiveSync={handleScannedText,init,removePairingForPlan,reset,status:()=>state.client?state.client.status():{mode:mode(),connected:false,pairingId:!!state.pairingId}};
   global.KGGLiveSync.handleScannedText=handleScannedText;
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
 })(typeof window!=='undefined'?window:globalThis);

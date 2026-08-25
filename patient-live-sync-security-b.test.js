@@ -24,7 +24,10 @@ async function main(){
     async available(){return true;},
     async putSecret(payload){const parsed=payload.payload;records.set(parsed.pairingId,{id:parsed.pairingId,key:{type:'secret'},planRef:payload.planRef});return {pairingId:parsed.pairingId,keyVersion:1,createdAt:parsed.createdAt,storage:'memory'};},
     async get(id){const record=records.get(id);if(!record)throw Object.assign(new Error('missing'),{code:'PAIRING_NOT_FOUND'});return record;},
-    async sign(){return new Uint8Array(32);}
+    async sign(){return new Uint8Array(32);},
+    async remove(id){records.delete(id);},
+    async removeByPlanRef(planRef){for(const [id,record] of records.entries())if(record.planRef===String(planRef))records.delete(id);},
+    async clearAll(){records.clear();}
   };
   const live={
     config:()=>({mode:runtimeMode}),
@@ -75,12 +78,19 @@ async function main(){
   await client.options.onReady();
   assert.equal(client.failedClosed,true);
   assert.equal(client.sends.length,0);
+  assert.equal(records.has('pair-a'),false);
   assert.equal(api.status().pairingId,false);
   await elements.kggLiveJoin.onclick();
   assert.equal(client.joined.length,1);
   assert.equal(replaceCount,0);
 
-  console.log(JSON.stringify({status:'PASS',checks:['pairing-plan-ref','plan-a-to-b-fail-closed','exact-values-key','missing-exact-store','normal-close-retention']}));
+  await api.handleScannedText(pairingQr);
+  assert.equal(records.has('pair-a'),true);
+  await api.reset();
+  assert.equal(records.has('pair-a'),false);
+  assert.equal(api.status().pairingId,false);
+
+  console.log(JSON.stringify({status:'PASS',checks:['pairing-plan-ref','plan-a-to-b-fail-closed','explicit-detach-deletes-key','app-reset-deletes-key','exact-values-key','missing-exact-store','normal-close-retention']}));
 }
 
 main().catch(error=>{console.error(error);process.exitCode=1;});

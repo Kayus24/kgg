@@ -181,6 +181,15 @@
       if(global.indexedDB){const database=await db();return new Promise((resolve,reject)=>{const tx=database.transaction(KEY_STORE,'readwrite');tx.objectStore(KEY_STORE).delete(id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error||failure('SECURE_STORAGE_UNAVAILABLE','Kopplung konnte nicht gelöscht werden.'));});}
       memory.delete(id);
     }
+    async function removeByPlanRef(planRef){
+      const target=String(planRef||'');
+      if(global.indexedDB){const database=await db();await new Promise((resolve,reject)=>{const tx=database.transaction(KEY_STORE,'readwrite'),store=tx.objectStore(KEY_STORE),request=store.openCursor();request.onsuccess=()=>{const cursor=request.result;if(!cursor)return;const value=cursor.value;if(value&&String(value.planRef||'')===target)cursor.delete();cursor.continue();};request.onerror=()=>reject(request.error||failure('SECURE_STORAGE_UNAVAILABLE','Kopplungen konnten nicht gelöscht werden.'));tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error||failure('SECURE_STORAGE_UNAVAILABLE','Kopplungen konnten nicht gelöscht werden.'));});return;}
+      for(const [id,value] of memory.entries())if(value&&String(value.planRef||'')===target)memory.delete(id);
+    }
+    async function clearAll(){
+      if(global.indexedDB){const database=await db();await new Promise((resolve,reject)=>{const tx=database.transaction(KEY_STORE,'readwrite');tx.objectStore(KEY_STORE).clear();tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error||failure('SECURE_STORAGE_UNAVAILABLE','Kopplungen konnten nicht zurückgesetzt werden.'));});return;}
+      memory.clear();
+    }
     return {
       async putSecret(payload){
         const parsed=payload&&payload.payload?payload.payload:payload||{};createPairingQr(parsed);
@@ -192,7 +201,7 @@
       async get(id){const record=await read(String(id));if(!record||!record.key)throw failure('PAIRING_NOT_FOUND','Kopplung ist auf diesem Gerät nicht gespeichert.');return record;},
       async sign(id,data){const record=await this.get(id);return hmac(record.key,data);},
       async verify(id,data,signature){return equalBytes(await this.sign(id,data),signature);},
-      remove,
+      remove,removeByPlanRef,clearAll,
       async available(){try{if(global.indexedDB){await db();return true;}return allowMemory;}catch(err){return false;}},
       storageMode:()=>global.indexedDB?'indexeddb':(allowMemory?'memory':'none')
     };

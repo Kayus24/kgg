@@ -22,6 +22,7 @@ assert(source.includes('plans.length>1?'),'last remaining plan still renders a d
 assert(source.includes('class="kggPlanDeleteBtn"'),'plan delete control is missing');
 assert(source.includes('font-size:25px'),'plan delete control is not rendered as a visible red x');
 assert(source.includes('class="kggPlanRenameBtn"'),'plan rename control is missing');
+assert(source.includes('removePairingForPlan'),'plan delete does not invoke the live-sync pairing cleanup hook');
 assert(source.includes("const VERSION='plan-delete-3-red-x-rename'"),'plan delete/rename internal version does not match the cache-busted module contract');
 assert(source.includes('if(window.__kggPlanDelete===VERSION)return;'),'plan delete duplicate-load guard is missing');
 vm.runInContext(source,context);
