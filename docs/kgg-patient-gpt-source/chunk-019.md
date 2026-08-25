@@ -1,45 +1,124 @@
 # KGG Patient Source Chunk 019
 
-- Source file: `patient-numpad-visibility-fix.js`
-- Characters: 1-10360
-- Full source SHA-256: `317abaac251d0bc9db75f7fa200d9da7f651351b23680bd3c780784065da1e15`
+- Source file: `patient-multiplan-db.js`
+- Characters: 1-15614
+- Full source SHA-256: `eaa7ea1c0a9b9a318036d19455d23e3e180bb890cf90db35d6ce945ad7ab36fc`
 
 ```
 (()=>{
-  const VERSION='numpad-visibility-v10-stay-open-switch';
-  if(window.__kggNumpadVisibility===VERSION)return;
-  window.__kggNumpadVisibility=VERSION;
+  const ADDON_VERSION='v9_lossless_media_plans';
+  const LANG_KEY='kggPatientLang';
+  const MULTI_KEY='kggPatientMultiPlansV1';
+  const CURRENT_KEY='kggCurrentPlanV1';
   const $=id=>document.getElementById(id);
-  let activeInput=null,activeMeta=null,editingInput=null,editingMeta=null,zoomEl=null,padValObserver=null,padSession=0;
-  function pad(){return $('pad')}
-  function box(){const p=pad();return p?p.querySelector('.padBox'):null}
-  function open(){const p=pad();return !!(p&&!p.classList.contains('hide'))}
-  function padValue(){const v=$('padVal');return v?String(v.textContent||'').trim():editingInput?String(editingInput.value||'').trim():''}
-  function h(){const b=box();return open()&&b?Math.max(280,Math.ceil(b.getBoundingClientRect().height||0)):0}
-  function css(){if($('kggNumpadVisibilityStyle'))return;const s=document.createElement('style');s.id='kggNumpadVisibilityStyle';s.textContent='body.kggPadOpen main{scroll-padding-bottom:55vh!important}#pad.kggPadPass{pointer-events:none!important;background:transparent!important}#pad.kggPadPass .padBox{pointer-events:auto!important}#pad .padBox{display:flex!important;flex-direction:column!important}#pad .padLast{order:1;margin-top:0!important;margin-bottom:8px!important}#pad .padGrid{order:2}#pad .padActions{order:3}#pad.kggPadLargeUi .padTitle,#pad.kggPadLargeUi .padVal{display:none!important}#pad.kggPadLargeUi .padLast{min-height:52px!important;font-size:18px!important}.kggPadZoomInput{position:fixed;z-index:10000;box-sizing:border-box;border:2px solid #2563eb;border-radius:16px;background:#fff;box-shadow:0 14px 34px rgba(37,99,235,.20);padding:10px 14px;pointer-events:none;overflow:hidden;transform-origin:center center;will-change:left,top,width,height,opacity,transform,border-radius;transition:left .24s cubic-bezier(.2,.8,.2,1),top .24s cubic-bezier(.2,.8,.2,1),width .24s cubic-bezier(.2,.8,.2,1),height .24s cubic-bezier(.2,.8,.2,1),border-radius .24s ease,opacity .16s ease,transform .24s cubic-bezier(.2,.8,.2,1),box-shadow .24s ease,padding .24s ease}.kggPadZoomInput .zLabel{font-size:18px;font-weight:950;color:#2563eb;line-height:1.1;transition:opacity .16s ease,transform .22s ease}.kggPadZoomInput .zVal{margin-top:6px;font-size:48px;font-weight:950;color:#2563eb;line-height:1;font-variant-numeric:tabular-nums;transition:font-size .22s ease,color .22s ease,margin .22s ease}.kggPadZoomInput .zVal:after{content:"";display:inline-block;width:2px;height:.92em;margin-left:3px;background:#2563eb;vertical-align:-.08em;animation:kggPadCaret 1s steps(1) infinite}.kggPadZoomInput.kggPadMorphStart{display:flex;align-items:center;justify-content:center;padding:0 8px;box-shadow:0 0 0 3px rgba(37,99,235,.16)}.kggPadZoomInput.kggPadMorphStart .zLabel{opacity:0;transform:translateY(6px);position:absolute}.kggPadZoomInput.kggPadMorphStart .zVal{margin:0;font-size:18px;color:#111827}.kggPadZoomInput.kggPadMorphStart .zVal:after{display:none}@media(prefers-reduced-motion:reduce){.kggPadZoomInput{transition:opacity .12s ease!important}}@keyframes kggPadCaret{50%{opacity:0}}input.num.kggPadSource{box-shadow:0 0 0 3px rgba(37,99,235,.22)!important;border-color:#60a5fa!important;background:#eff6ff!important}';document.head.appendChild(s)}
-  function largeUi(){const b=box();if(!b)return false;const vv=window.visualViewport;const vh=vv?vv.height:window.innerHeight;const fs=parseFloat(getComputedStyle(document.documentElement).fontSize)||16;const bh=b.getBoundingClientRect().height||0;return fs>=18||vh<690||bh>vh*.68}
-  function arrange(){const p=pad();if(!p)return false;css();const big=open()&&largeUi();p.classList.toggle('kggPadLargeUi',big);return big}
-  function label(meta,input){try{const ex=(typeof p!=='undefined'&&p&&p.ex&&meta)?p.ex[meta.ei]:null;const unit=meta&&meta.key==='b'?(ex&&ex.m||'Wdh'):(ex&&ex.u||input&&input.placeholder||'kg');const side=meta&&meta.side==='L'?'links':meta&&meta.side==='R'?'rechts':'';return (unit+' '+side).trim()}catch(e){return input&&input.placeholder||'Wert'}}
-  function removeZoom(){if(zoomEl){zoomEl.remove();zoomEl=null}document.querySelectorAll('input.num.kggPadSource').forEach(n=>n.classList.remove('kggPadSource'));if(padValObserver){try{padValObserver.disconnect()}catch(e){}padValObserver=null}}
-  function syncZoom(){if(!zoomEl)return;const v=padValue()||'0';const n=zoomEl.querySelector('.zVal');if(n)n.textContent=v}
-  function placeZoom(input,animate){if(!input||!open()||!arrange()){removeZoom();return}const b=box();if(!b)return;const ir=input.getBoundingClientRect();const br=b.getBoundingClientRect();const cs=getComputedStyle(input);const vw=window.innerWidth||document.documentElement.clientWidth;const targetW=Math.min(vw-24,Math.max(ir.width*1.35,220));const targetH=96;const left=Math.max(12,Math.min(vw-targetW-12,ir.left+(ir.width-targetW)/2));const top=Math.max(10,br.top-targetH-8);if(!zoomEl){zoomEl=document.createElement('div');zoomEl.className='kggPadZoomInput';zoomEl.innerHTML='<div class="zLabel"></div><div class="zVal"></div>';document.body.appendChild(zoomEl);animate=true}zoomEl.querySelector('.zLabel').textContent=label(activeMeta,input);syncZoom();document.querySelectorAll('input.num.kggPadSource').forEach(n=>n.classList.remove('kggPadSource'));input.classList.add('kggPadSource');if(animate){zoomEl.classList.add('kggPadMorphStart');zoomEl.style.left=ir.left+'px';zoomEl.style.top=ir.top+'px';zoomEl.style.width=ir.width+'px';zoomEl.style.height=ir.height+'px';zoomEl.style.borderRadius=(cs.borderRadius&&cs.borderRadius!=='0px')?cs.borderRadius:'10px';zoomEl.style.opacity='0.92';zoomEl.style.transform='scale(1)';zoomEl.getBoundingClientRect();requestAnimationFrame(()=>{zoomEl.classList.remove('kggPadMorphStart');zoomEl.style.left=left+'px';zoomEl.style.top=top+'px';zoomEl.style.width=targetW+'px';zoomEl.style.height=targetH+'px';zoomEl.style.borderRadius='16px';zoomEl.style.opacity='1';zoomEl.style.transform='scale(1)'})}else{zoomEl.classList.remove('kggPadMorphStart');zoomEl.style.left=left+'px';zoomEl.style.top=top+'px';zoomEl.style.width=targetW+'px';zoomEl.style.height=targetH+'px';zoomEl.style.borderRadius='16px';zoomEl.style.opacity='1';zoomEl.style.transform='scale(1)'}const pv=$('padVal');if(pv&&!padValObserver&&'MutationObserver'in window){padValObserver=new MutationObserver(syncZoom);padValObserver.observe(pv,{childList:true,characterData:true,subtree:true})}}
-  function space(){css();const big=arrange();const ph=h();const main=document.querySelector('main');if(main)main.style.paddingBottom=ph?Math.ceil(ph+(big?198:120))+'px':'';document.body.classList.toggle('kggPadOpen',!!ph);const p=pad();if(p)p.classList.toggle('kggPadPass',!!ph);if(big)placeZoom(activeInput,false);else removeZoom()}
-  function move(){if(!activeInput||!open())return;space();const ph=h();const r=activeInput.getBoundingClientRect();const vv=window.visualViewport;const bottom=(vv?vv.height+vv.offsetTop:window.innerHeight)-ph-28;let dy=0;if(r.bottom>bottom)dy=r.bottom-bottom;if(r.top<18)dy=r.top-18;if(Math.abs(dy)>1)window.scrollBy({top:dy,left:0,behavior:'smooth'});if(largeUi())setTimeout(()=>placeZoom(activeInput,false),70)}
-  function ensure(){[20,90,180,360,650].forEach(t=>setTimeout(move,t))}
-  function clearSoon(closedSession){setTimeout(()=>{if(closedSession!==padSession||open())return;const main=document.querySelector('main');if(main)main.style.paddingBottom='';document.body.classList.remove('kggPadOpen');const p=pad();if(p){p.classList.remove('kggPadPass');p.classList.remove('kggPadLargeUi')}removeZoom();activeInput=null;activeMeta=null;editingInput=null;editingMeta=null},120)}
-  function commitEditingInPlace(){if(!open()||!editingInput||!editingMeta||typeof window.put!=='function')return false;const value=padValue()||'0';try{editingInput.value=value;window.put(editingMeta.ei,editingMeta.s,editingMeta.side,editingMeta.key,value);return true}catch(e){return false}}
-  function closeByOutsideTap(){if(!open()||typeof window.closePad!=='function')return;try{window.closePad(true)}catch(e){try{window.closePad(false)}catch(_){}}}
-  function closeAfterLast(){if(!open()||typeof window.closePad!=='function')return;setTimeout(()=>{try{window.closePad(true)}catch(e){}},0)}
-  function isInputTarget(t){return !!(t&&t.matches&&t.matches('input.num'))}
-  function isPadTarget(t){return !!(t&&t.closest&&t.closest('#pad .padBox'))}
-  function patch(){if(window.__kggNumpadVisibilityPatchedV10)return;window.__kggNumpadVisibilityPatchedV10=1;if(typeof window.openPad==='function'){const oldOpen=window.openPad;window.openPad=function(input,meta){const switching=!!(open()&&editingInput&&input&&input!==editingInput);if(switching&&!commitEditingInPlace()&&typeof window.closePad==='function'){try{window.closePad(true)}catch(e){}}editingInput=input||document.activeElement;editingMeta=meta||editingMeta;activeInput=editingInput;activeMeta=editingMeta;padSession+=1;const r=oldOpen.apply(this,arguments);space();if(largeUi())placeZoom(activeInput,!switching);ensure();return r}}if(typeof window.closePad==='function'){const oldClose=window.closePad;window.closePad=function(){const closedSession=padSession;const r=oldClose.apply(this,arguments);clearSoon(closedSession);return r}}if(typeof window.padUseLast==='function'){const oldLast=window.padUseLast;window.padUseLast=function(){const r=oldLast.apply(this,arguments);closeAfterLast();return r}}}
-  document.addEventListener('focusin',e=>{if(!isInputTarget(e.target))return;if(!open())activeInput=e.target;else if(e.target===editingInput)ensure()},true);
-  document.addEventListener('click',e=>{if(!isInputTarget(e.target))return;if(!open())activeInput=e.target;else if(e.target===editingInput)ensure()},true);
-  document.addEventListener('pointerdown',e=>{if(!open())return;const t=e.target;if(isInputTarget(t))return;if(isPadTarget(t))return;closeByOutsideTap()},true);
-  if(window.visualViewport){visualViewport.addEventListener('resize',()=>{arrange();ensure()});visualViewport.addEventListener('scroll',()=>{arrange();ensure()})}
-  addEventListener('orientationchange',()=>setTimeout(()=>{arrange();ensure()},250));
-  if(window.__KGG_TEST__)window.__kggNumpadCommitTest={open,commitEditingInPlace,getEditingInput:()=>editingInput,getSession:()=>padSession};
-  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',patch):patch();
-  setTimeout(patch,500);setTimeout(patch,1500);
+  const isEn=()=>localStorage.getItem(LANG_KEY)==='en';
+  const t=(de,en)=>isEn()?en:de;
+  const safe=f=>{try{return f()}catch(e){return null}};
+  const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9äöüß]+/g,' ').replace(/\s+/g,' ').trim();
+  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+  function ensureStyle(){
+    const old=$('kggMultiPlanDbStyle'); if(old)old.remove();
+    const s=document.createElement('style'); s.id='kggMultiPlanDbStyle';
+    s.textContent=`
+      #installSmall{display:grid!important;grid-template-columns:auto 1fr auto!important;align-items:center!important;gap:8px!important;margin-top:10px!important}
+      #installSmall .muted,#kggPlanScanBtn,#kggPatientAddPlanBtn{display:none!important}
+      #installSmall .btnSmall:not(#kggLangSwitch):not(#kggPatientDbBtn){display:none!important}
+      #kggLangSwitch{grid-column:1!important;display:inline-flex!important;align-items:center;justify-content:center;min-height:38px;border-radius:999px;border:1px solid #cbd5e1;background:#fff;color:#111827;padding:6px 10px;font-size:13px;font-weight:950;white-space:nowrap}
+      #kggPatientDbBtn{grid-column:3!important;display:inline-flex!important;align-items:center;justify-content:center;min-height:38px;border-radius:999px;border:1px solid #cbd5e1;background:#fff;color:#111827;padding:6px 12px;font-size:13px;font-weight:950;white-space:nowrap;touch-action:manipulation}
+      #kggPatientDbBtn:active,#kggLangSwitch:active{transform:scale(.96);background:#f8fafc}
+      #kggActionFab{position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:2600;width:56px;height:56px;border-radius:999px;border:1px solid rgba(148,163,184,.62);background:rgba(31,41,55,.72);color:white;box-shadow:0 12px 30px rgba(15,23,42,.24);font-size:25px;font-weight:950;display:flex;align-items:center;justify-content:center;touch-action:manipulation;transition:transform .12s ease,background .16s ease,border-color .16s ease;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+      #kggActionFab:active{transform:scale(.92)}#kggActionFab.open{background:rgba(17,24,39,.86);border-color:rgba(203,213,225,.82)}
+      #kggActionBackdrop,#kggActionSheet{display:none!important}
+      #kggActionBubbles{position:fixed;left:14px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:2601;display:flex;flex-direction:column;gap:8px;align-items:flex-start;pointer-events:none}
+      #kggActionBubbles[hidden]{display:none!important}.kggBubble{min-height:56px;min-width:56px;border-radius:999px;border:1px solid #cbd5e1;background:#fff;color:#111827;padding:10px 16px;font-size:15px;font-weight:950;box-shadow:0 10px 28px rgba(15,23,42,.16);touch-action:manipulation;pointer-events:auto;animation:kggBubbleUp .20s cubic-bezier(.16,.84,.44,1) both;white-space:nowrap;display:flex;align-items:center;justify-content:center}.kggBubble.primary{background:#111827;color:#fff;border-color:#111827}.kggBubble:active{transform:scale(.96)}.kggBubble:nth-child(1){animation-delay:.02s}.kggBubble:nth-child(2){animation-delay:.065s}
+      @keyframes kggBubbleUp{from{opacity:0;transform:translateY(14px) scale(.94)}to{opacity:1;transform:translateY(0) scale(1)}}
+      #kggDbBackdrop{position:fixed;inset:0;z-index:2680;background:rgba(15,23,42,.12);backdrop-filter:blur(1px);animation:kggDbFade .14s ease both}#kggDbBackdrop[hidden]{display:none!important}
+      #kggDbPanel{position:fixed;z-index:2681;right:12px;top:96px;width:min(430px,calc(100vw - 24px));max-height:calc(100dvh - 126px);overflow:auto;-webkit-overflow-scrolling:touch;background:rgba(255,255,255,.98);border:1px solid #dbe3ef;border-radius:20px;padding:12px;box-shadow:0 22px 70px rgba(15,23,42,.22);animation:kggDbIn .18s cubic-bezier(.16,.84,.44,1) both}#kggDbPanel[hidden]{display:none!important}
+      .kggDbHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.kggDbHead h3{margin:0;font-size:18px}.kggDbClose{width:38px;height:38px;border-radius:999px;border:1px solid #cbd5e1;background:#fff;font-size:22px;font-weight:950}.kggDbSearch{width:100%;min-height:42px;border-radius:14px;border:1px solid #cbd5e1;padding:8px 11px;font-size:15px;margin-bottom:10px}.kggDbList{display:grid;gap:8px}.kggDbCard{border:1px solid #dbe3ef;border-radius:15px;background:#fff;padding:9px 10px;text-align:left;width:100%;touch-action:manipulation}.kggDbCard:active{transform:scale(.99);background:#eff6ff}.kggDbCard b{font-size:15px}.kggDbMeta{font-size:12px;color:#64748b;margin-top:3px}.kggDbAdd{margin-top:7px;border-radius:999px;border:1px solid #bbf7d0;background:#ecfdf5;color:#166534;padding:6px 9px;font-size:12px;font-weight:950;display:inline-flex}.kggDbAlready{margin-top:7px;border-radius:999px;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b;padding:6px 9px;font-size:12px;font-weight:950;display:inline-flex}.kggDbEmpty{font-size:13px;color:#64748b;text-align:center;padding:18px 8px}
+      @keyframes kggDbIn{from{opacity:0;transform:translateY(-8px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes kggDbFade{from{opacity:0}to{opacity:1}}
+      @media(max-width:430px){#kggActionFab{width:52px;height:52px;left:12px;bottom:12px;font-size:23px}#kggActionBubbles{left:12px;bottom:72px}.kggBubble{min-height:52px;min-width:52px;font-size:14px;padding:9px 13px}#kggDbPanel{left:10px;right:10px;top:88px;width:auto;max-height:calc(100dvh - 112px)}}
+    `;
+    document.head.appendChild(s);
+  }
+
+  function clone(v){try{return JSON.parse(JSON.stringify(v||{}))}catch(e){return v&&typeof v==='object'?{...v}:{}}}
+  function storedCurrentPlan(){const saved=safe(()=>JSON.parse(localStorage.getItem(CURRENT_KEY)||'null'));return saved&&saved.plan&&typeof saved.plan==='object'?saved.plan:null}
+  function hasMediaValue(value){if(Array.isArray(value))return value.length>0;if(value&&typeof value==='object')return true;return String(value||'').trim()!==''}
+  function exObj(e){if(!Array.isArray(e))e=[];return{n:e[0]||'Übung',sets:Number(e[1])||3,side:e[2]||'LR',u:e[3]||'kg',m:e[4]||'Wdh',sl:e[5]||'',sm:e[6]||'',media:e[7]||'',videoUrl:e[8]||'',videoLabel:e[9]||'Video öffnen',painMode:e[10]||'exercise'}}
+  function exRaw(e,base){const raw=Array.isArray(base)?base.slice():[];raw[0]=e.n;raw[1]=e.sets;raw[2]=e.side;raw[3]=e.u;raw[4]=e.m;raw[5]=e.sl||'';raw[6]=e.sm||'';if(hasMediaValue(e.media))raw[7]=e.media;else if(raw.length<8)raw[7]='';raw[8]=e.videoUrl||raw[8]||'';raw[9]=e.videoLabel||raw[9]||'Video öffnen';raw[10]=e.painMode||raw[10]||'exercise';return raw}
+  function rawFromRuntime(baseRaw){const raw=clone(baseRaw);raw.i=p?.id||raw.i||'plan';raw.t=p?.title||raw.t||'KGG Trainingsplan';raw.v=p?.version||raw.v||1;raw.d=p?.days||raw.d||6;raw.extendDays=p?p.extendDays!==false:raw.extendDays!==false;raw.stepDays=p?.stepDays||raw.stepDays||6;const old=Array.isArray(raw.e)?raw.e:[];raw.e=Array.isArray(p?.ex)?p.ex.map((ex,i)=>exRaw(ex,old[i])):old;return raw}
+  function runtimeFromRaw(raw){return{id:raw.i||'plan',title:raw.t||'KGG Trainingsplan',version:+raw.v||1,days:+raw.d||6,extendDays:raw.extendDays!==false,stepDays:+raw.stepDays||6,ex:(raw.e||[]).map(exObj)}}
+  function readState(){try{return JSON.parse(localStorage.getItem(MULTI_KEY)||'null')}catch(e){return null}}
+  function writeState(s){s.updatedAt=new Date().toISOString();localStorage.setItem(MULTI_KEY,JSON.stringify(s))}
+  function persistCurrent(raw){localStorage.setItem(CURRENT_KEY,JSON.stringify({plan:raw,importedAt:new Date().toISOString()}))}
+  function currentBasePlan(s,i){return (s&&Array.isArray(s.plans)&&s.plans[i])||storedCurrentPlan()||null}
+  function pokeMedia(){[80,300,900].forEach(delay=>setTimeout(()=>{safe(()=>window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.prefetch&&window.KGGPatientMediaRetryCache.prefetch());safe(()=>window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.render&&window.KGGPatientMediaRetryCache.render())},delay))}
+  function ensureState(){let s=readState();if(!s||!Array.isArray(s.plans))s={version:1,plans:[],active:0,day:{}};if(!s.plans.length&&safe(()=>p))s.plans.push(rawFromRuntime(storedCurrentPlan()));s.day=s.day||{};if(typeof s.active!=='number'||s.active<0||s.active>=s.plans.length)s.active=0;writeState(s);return s}
+  function saveCurrentSlot(){const s=ensureState();const i=Math.max(0,Math.min(Number(s.active)||0,s.plans.length-1));safe(()=>safeSave());s.plans[i]=rawFromRuntime(currentBasePlan(s,i));writeState(s);persistCurrent(s.plans[i])}
+  function loadValuesForPlan(){safe(()=>{v=read(sk(),'{}')});safe(()=>{const flow=window.KGGPatientDayFlow;done=flow&&typeof flow.normalizeDone==='function'?flow.normalizeDone(read(dk(),'[]')):read(dk(),'[]').map(Number).filter(n=>n>=1&&(p.extendDays!==false||n<=p.days))})}
+  function switchTo(idx){let s=ensureState();if(!s.plans[idx])return false;if(Number(s.active)===idx)return true;saveCurrentSlot();s=ensureState();if(!s.plans[idx])return false;s.active=idx;const raw=s.plans[idx];writeState(s);p=runtimeFromRaw(raw);persistCurrent(raw);loadValuesForPlan();safe(()=>typeof restoreDay==='function'&&restoreDay());safe(()=>save());safe(()=>render());pokeMedia();safe(()=>setStatus(t('Plan gewechselt. Werte bleiben erhalten.','Plan switched. Values kept.'),'ok'));return true}
+
+  function currentHas(name){const key=norm(name);return Array.isArray(p?.ex)&&p.ex.some(ex=>norm(ex.n)===key)}
+  function collectDb(){
+    const s=ensureState();const map=new Map();
+    const add=(ex,source)=>{const o=Array.isArray(ex)?exObj(ex):ex;if(!o||!o.n)return;const key=norm(o.n);if(!key)return;if(!map.has(key))map.set(key,{...o,source});};
+    (s.plans||[]).forEach((pl,pi)=>(pl.e||[]).forEach(ex=>add(ex,pl.t||t('Plan ','Plan ')+(pi+1))));
+    safe(()=>p.ex.forEach(ex=>add(ex,t('aktueller Plan','current plan'))));
+    return [...map.values()].sort((a,b)=>String(a.n).localeCompare(String(b.n),'de'));
+  }
+  function ensureDbDom(){
+    if(!$('kggDbBackdrop')){const bd=document.createElement('div');bd.id='kggDbBackdrop';bd.hidden=true;bd.onclick=closeDb;document.body.appendChild(bd)}
+    if(!$('kggDbPanel')){const pn=document.createElement('div');pn.id='kggDbPanel';pn.hidden=true;pn.onclick=e=>e.stopPropagation();document.body.appendChild(pn)}
+  }
+  function closeDb(){const bd=$('kggDbBackdrop'),pn=$('kggDbPanel');if(bd)bd.hidden=true;if(pn)pn.hidden=true}
+  function openDb(){ensureStyle();ensureDbDom();renderDb('');$('kggDbBackdrop').hidden=false;$('kggDbPanel').hidden=false;setTimeout(()=>{const s=$('kggDbSearch');if(s)s.focus({preventScroll:true})},80)}
+  function renderDb(filter){
+    const pn=$('kggDbPanel');if(!pn)return;
+    const q=norm(filter);const all=collectDb();const list=q?all.filter(ex=>norm(ex.n+' '+ex.u+' '+ex.m).includes(q)):all;
+    pn.innerHTML=`<div class="kggDbHead"><h3>${t('📚 Übungsdatenbank','📚 Exercise database')}</h3><button class="kggDbClose" id="kggDbClose" type="button">×</button></div><input id="kggDbSearch" class="kggDbSearch" value="${esc(filter||'')}" placeholder="${t('Übung suchen','Search exercise')}"><div class="kggDbList">${list.length?list.map((ex,i)=>dbCard(ex,i)).join(''):`<div class="kggDbEmpty">${t('Noch keine lokalen Übungen gespeichert.','No local exercises saved yet.')}</div>`}</div>`;
+    $('kggDbClose').onclick=closeDb;
+    $('kggDbSearch').oninput=e=>renderDb(e.target.value);
+    pn.querySelectorAll('.kggDbCard').forEach(card=>card.onclick=()=>addExerciseFromDb(list[Number(card.dataset.i)]));
+  }
+  function dbCard(ex,i){
+    const already=currentHas(ex.n);
+    return `<button type="button" class="kggDbCard" data-i="${i}"><b>${esc(ex.n)}</b><div class="kggDbMeta">${esc(String(ex.sets||3))} · ${ex.side==='LR'?t('links/rechts','left/right'):t('beidseitig','bilateral')} · ${esc(ex.u||'kg')} / ${esc(ex.m||'Wdh')}<br>${esc(ex.source||'')}</div><span class="${already?'kggDbAlready':'kggDbAdd'}">${already?t('schon im Plan','already in plan'):t('+ in Plan holen','+ add to plan')}</span></button>`;
+  }
+  function addExerciseFromDb(ex){
+    if(!ex||currentHas(ex.n)){closeDb();return}
+    saveCurrentSlot();
+    p.ex=p.ex||[];p.ex.push({...ex});
+    const s=ensureState();const i=Math.max(0,Math.min(Number(s.active)||0,s.plans.length-1));
+    s.plans[i]=rawFromRuntime(currentBasePlan(s,i));writeState(s);persistCurrent(s.plans[i]);
+    safe(()=>save());safe(()=>render());pokeMedia();safe(()=>setStatus(t('Übung aus Datenbank hinzugefügt.','Exercise added from database.'),'ok'));
+    closeDb();
+  }
+
+  function ensureSourceButtons(){
+    const row=$('installSmall'); if(!row)return; row.classList.remove('hide');
+    let db=$('kggPatientDbBtn');
+    if(!db){db=document.createElement('button');db.id='kggPatientDbBtn';db.type='button';row.appendChild(db)}
+    db.onclick=e=>{e.preventDefault();e.stopPropagation();openDb()};
+    db.textContent=t('📚 Übungsdatenbank','📚 Database');
+    let add=$('kggPatientAddPlanBtn');
+    if(!add){add=document.createElement('button');add.id='kggPatientAddPlanBtn';add.type='button';add.onclick=e=>{e.preventDefault();e.stopPropagation();const scan=$('kggPlanScanBtn');if(scan)scan.click();else alert(t('QR-Scan noch nicht geladen.','QR scan not loaded yet.'))};row.appendChild(add)}
+    add.textContent=t('2. Plan +','2nd plan +');
+  }
+  function closeBubbles(){const b=$('kggActionBubbles'),fab=$('kggActionFab');if(b)b.hidden=true;if(fab)fab.classList.remove('open')}
+  function toggleBubbles(){const b=$('kggActionBubbles'),fab=$('kggActionFab');if(!b)return;const open=b.hidden;b.hidden=!open;if(fab)fab.classList.toggle('open',open)}
+  function clickSource(id){closeBubbles();const el=$(id);if(el)el.click();else alert(t('Funktion noch nicht geladen.','Function not loaded yet.'))}
+  function ensureActionBubbles(){
+    ensureStyle(); ensureSourceButtons(); ensureState(); ensureDbDom();
+    let box=$('kggActionBubbles'); if(!box){box=document.createElement('div');box.id='kggActionBubbles';box.hidden=true;document.body.appendChild(box)}
+    box.innerHTML=`<button type="button" class="kggBubble primary" id="kggBubbleScan">📷 ${t('Aktualisieren','Update')}</button><button type="button" class="kggBubble" id="kggBubbleAdd">➕ ${t('2. Plan','2nd plan')}</button>`;
+    $('kggBubbleScan').onclick=()=>clickSource('kggPlanScanBtn');
+    $('kggBubbleAdd').onclick=()=>clickSource('kggPatientAddPlanBtn');
+    let fab=$('kggActionFab'); if(!fab){fab=document.createElement('button');fab.id='kggActionFab';fab.type='button';fab.textContent='📷';fab.title=t('Planaktionen','Plan actions');document.body.appendChild(fab)}
+    fab.textContent='📷';fab.title=t('Planaktionen','Plan actions');fab.onclick=e=>{e.preventDefault();e.stopPropagation();toggleBubbles()};
+  }
+  function patchRender(){if(window.__kggPatientMultiPlanDbRenderPatch)return;window.__kggPatientMultiPlanDbRenderPatch=true;if(typeof render==='function'){const old=render;window.render=function(){const r=old.apply(this,arguments);setTimeout(ensureActionBubbles,0);return r}}}
+  function init(){window.__kggPatientMultiPlanDbAddon=ADDON_VERSION;window.KGGPatientMultiPlan={switchTo,ensureState,saveCurrentSlot};patchRender();ensureActionBubbles();setTimeout(ensureActionBubbles,300);setTimeout(ensureActionBubbles,1000)}
+  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
 })();
 ```

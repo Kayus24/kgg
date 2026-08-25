@@ -1,33 +1,55 @@
 # KGG Patient Source Chunk 032
 
-- Source file: `patient-version-label.js`
-- Characters: 1-6579
-- Full source SHA-256: `3b510ebd2db32c91f3f63c89e1da05c1006aa502bab5d378e78ac139f1a838c0`
+- Source file: `patient-start-values-day1.js`
+- Characters: 1-2953
+- Full source SHA-256: `3ced0d7f1e19ce5d3fe71c77e25c4500607fc11f6d7d6af65e648f62f91c11e3`
 
 ```
 (()=>{
-  const ID='kggAppVersion';
-  const RELEASE='81';
-  const BANNER_ID='kggUpdateGate';
-  const RELOAD_KEY='kgg-sw-reload-v'+RELEASE;
-  const UPDATE_TIMEOUT_MS=8000;
-  let registration=null;
-  let waitingWorker=null;
-  let updateRequested=false;
-  let reloadDone=false;
-  let updateTimer=0;
-  function fallbackVersion(){try{const src=document.currentScript&&document.currentScript.src?document.currentScript.src:'';const raw=new URL(src||location.href,location.href).searchParams.get('v')||'';return raw?'v'+String(raw).replace(/^v/i,''):'v'+RELEASE}catch(e){return'v'+RELEASE}}
-  function mount(version){let el=document.getElementById(ID);if(!el){el=document.createElement('div');el.id=ID;const main=document.querySelector('main');if(main)main.insertAdjacentElement('afterend',el);else document.body.appendChild(el)}el.textContent=version;el.title='KGG App-Version '+version;el.setAttribute('aria-label','KGG App-Version '+version);el.style.cssText='max-width:760px;margin:-4px auto 0;padding:0 14px calc(10px + env(safe-area-inset-bottom));text-align:right;font:500 10px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#94a3b8;letter-spacing:.02em;user-select:text;'}
-  function currentPadIsOpen(){const pad=document.getElementById('pad');return Boolean(pad&&!pad.classList.contains('hide'))}
-  function persistCurrentValues(){try{if(typeof window.safeSave==='function')window.safeSave()}catch(e){}}
-  function setBannerStatus(text,isError){const status=document.getElementById(BANNER_ID+'Status');if(!status)return;status.textContent=text;status.style.color=isError?'#b91c1c':'#475569'}
-  function removeBanner(){const banner=document.getElementById(BANNER_ID);if(banner)banner.remove()}
-  function showUpdateBanner(worker){if(!worker||!navigator.serviceWorker.controller)return;waitingWorker=worker;let banner=document.getElementById(BANNER_ID);if(banner)return;banner=document.createElement('section');banner.id=BANNER_ID;banner.setAttribute('role','status');banner.setAttribute('aria-live','polite');banner.style.cssText='position:fixed;left:12px;right:12px;bottom:12px;z-index:9000;max-width:720px;margin:auto;padding:12px 14px;border:1px solid #cbd5e1;border-radius:16px;background:#fff;box-shadow:0 16px 42px #0f172a33;font:500 14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#111827;';const title=document.createElement('strong');title.textContent='Neue Version verfügbar';title.style.display='block';const status=document.createElement('div');status.id=BANNER_ID+'Status';status.textContent='Bitte jetzt aktualisieren, damit der Plan zuverlässig funktioniert.';status.style.cssText='margin-top:3px;color:#475569;';const actions=document.createElement('div');actions.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;';const later=document.createElement('button');later.type='button';later.textContent='Später';later.style.cssText='min-height:44px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;color:#111827;font-weight:800;';later.addEventListener('click',removeBanner);const update=document.createElement('button');update.type='button';update.id=BANNER_ID+'Button';update.textContent='Jetzt aktualisieren';update.style.cssText='min-height:44px;border:1px solid #111827;border-radius:12px;background:#111827;color:#fff;font-weight:900;';update.addEventListener('click',applyWaitingUpdate);actions.append(later,update);banner.append(title,status,actions);document.body.appendChild(banner)}
-  function monitorRegistration(reg){if(!reg)return;registration=reg;if(reg.waiting)showUpdateBanner(reg.waiting);reg.addEventListener('updatefound',()=>{const worker=reg.installing;if(!worker)return;worker.addEventListener('statechange',()=>{if(worker.state==='installed'&&navigator.serviceWorker.controller)showUpdateBanner(reg.waiting||worker)})})}
-  function applyWaitingUpdate(){if(updateRequested)return;if(currentPadIsOpen()){setBannerStatus('Bitte die offene Eingabe zuerst mit OK abschließen.',true);return}const worker=registration&&registration.waiting?registration.waiting:waitingWorker;if(!worker){setBannerStatus('Das Update ist noch nicht vollständig geladen. Bitte kurz warten.',true);return}persistCurrentValues();updateRequested=true;const button=document.getElementById(BANNER_ID+'Button');if(button){button.disabled=true;button.textContent='Aktualisierung läuft…'}setBannerStatus('Die neue Version wird aktiviert.',false);clearTimeout(updateTimer);updateTimer=setTimeout(()=>{if(reloadDone)return;updateRequested=false;if(button){button.disabled=false;button.textContent='Jetzt aktualisieren'}setBannerStatus('Aktivierung hat nicht geantwortet. Bitte erneut versuchen.',true)},UPDATE_TIMEOUT_MS);try{worker.postMessage({type:'SKIP_WAITING'})}catch(e){clearTimeout(updateTimer);updateRequested=false;if(button){button.disabled=false;button.textContent='Jetzt aktualisieren'}setBannerStatus('Update konnte nicht gestartet werden.',true)}}
-  function getActiveVersion(fallback){return new Promise(resolve=>{const controller=navigator.serviceWorker&&navigator.serviceWorker.controller;if(!controller||typeof MessageChannel==='undefined'){resolve(fallback);return}const channel=new MessageChannel();let finished=false;const finish=value=>{if(finished)return;finished=true;resolve(value||fallback)};const timer=setTimeout(()=>finish(fallback),600);channel.port1.onmessage=event=>{clearTimeout(timer);const version=event.data&&event.data.type==='APP_VERSION'?event.data.version:'';finish(version?'v'+String(version).replace(/^v/i,''):fallback)};try{controller.postMessage({type:'GET_APP_VERSION'},[channel.port2])}catch(e){clearTimeout(timer);finish(fallback)}})}
-  async function findRegistration(){for(let attempt=0;attempt<8;attempt++){try{const reg=await navigator.serviceWorker.getRegistration('./');if(reg)return reg}catch(e){}await new Promise(resolve=>setTimeout(resolve,150))}return null}
-  async function init(){const fallback=fallbackVersion();mount(fallback);if(!('serviceWorker'in navigator))return;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!updateRequested||reloadDone)return;reloadDone=true;clearTimeout(updateTimer);if(sessionStorage.getItem(RELOAD_KEY)==='1')return;sessionStorage.setItem(RELOAD_KEY,'1');location.reload()});const reg=await findRegistration();if(reg){monitorRegistration(reg);try{await reg.update()}catch(e){}if(reg.waiting)showUpdateBanner(reg.waiting)}mount(await getActiveVersion(fallback))}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init()
+  const VERSION='start-values-day1-v1';
+  const MARK_PREFIX='kggStartValuesDay1AppliedV1:';
+  let busy=false;
+  const safe=f=>{try{return f()}catch(e){return null}};
+  const txt=x=>String(x??'').trim();
+  const hasValue=x=>txt(x)!=='';
+  const isEmptyValue=x=>x===undefined||x===null||txt(x)==='';
+  const hash=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)};
+  function ready(){return typeof p!=='undefined'&&p&&Array.isArray(p.ex)&&typeof v!=='undefined'&&v&&Array.isArray(done)&&typeof k==='function'&&typeof save==='function'}
+  function signature(){return hash(JSON.stringify({id:p.id||'plan',title:p.title||'',days:p.days||0,e:p.ex.map(e=>[e.n,e.sets,e.side,e.u,e.m,e.sl||'',e.sm||''])}))}
+  function markKey(){return MARK_PREFIX+(p.id||'plan')+':'+signature()}
+  function startValuePairs(e){const out=[];if(hasValue(e.sl)&&hasValue(e.u))out.push(['a',txt(e.sl)]);if(hasValue(e.sm)&&hasValue(e.m))out.push(['b',txt(e.sm)]);return out}
+  function hasAnyStartValues(){return p.ex.some(e=>startValuePairs(e).length>0)}
+  function hasPatientProgress(){if(done&&done.length)return true;return Object.keys(v||{}).some(key=>/^[0-9]+\|/.test(key)&&hasValue(v[key]))}
+  function sidesFor(e){return e.side==='LR'?['L','R']:['B']}
+  function applyStartValues(){
+    if(busy||!ready())return false;
+    busy=true;
+    try{
+      if(!hasAnyStartValues())return false;
+      const marker=markKey();
+      if(localStorage.getItem(marker))return false;
+      if(hasPatientProgress()){localStorage.setItem(marker,'skipped-existing-progress');return false}
+      let wrote=0;
+      (p.ex||[]).forEach((e,ei)=>{
+        const sets=Number(e.sets)||3,pairs=startValuePairs(e),sides=sidesFor(e);
+        if(!pairs.length)return;
+        for(let s=1;s<=sets;s++)sides.forEach(side=>pairs.forEach(([field,value])=>{
+          const key=k(ei,s,side,field,1);
+          if(isEmptyValue(v[key])){v[key]=value;wrote++}
+        }))
+      });
+      if(!wrote){localStorage.setItem(marker,'no-empty-targets');return false}
+      if(!done.includes(1))done.push(1);
+      if(p.extendDays!==false||Number(p.days||0)>=2)d=2;else d=1;
+      save();
+      localStorage.setItem(marker,new Date().toISOString());
+      safe(()=>setStatus('Startwerte aus der Therapie wurden als Tag 1 gespeichert.','ok'));
+      safe(()=>render());
+      return true;
+    }finally{busy=false}
+  }
+  function patchRender(){if(window.__kggStartValuesDay1RenderPatch||typeof render!=='function')return;window.__kggStartValuesDay1RenderPatch=1;const old=render;render=function(){const r=old.apply(this,arguments);setTimeout(applyStartValues,0);return r}}
+  function init(){window.__kggPatientStartValuesDay1=VERSION;patchRender();setTimeout(applyStartValues,0);setTimeout(applyStartValues,300);setTimeout(applyStartValues,1200)}
+  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
 })();
 ```

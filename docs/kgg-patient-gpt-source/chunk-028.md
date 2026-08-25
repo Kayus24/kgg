@@ -1,72 +1,72 @@
 # KGG Patient Source Chunk 028
 
-- Source file: `patient-start-scan.js`
-- Characters: 1-24000
-- Full source SHA-256: `c4cc0cf64aef88ae4f6446164c5769a355e9cae9064a31cc087bcce3d8eb2e1e`
+- Source file: `patient-qr-fullscreen.js`
+- Characters: 1-3086
+- Full source SHA-256: `3979600da41d8d035afb833f8ddb371bf3a4ccf1b3c38211c4560907398463b9`
 
 ```
 (()=>{
-  const VERSION='start-scan-v81-kgg-h3';
-  if(window.__kggStartScanVersion===VERSION)return;
-  window.__kggStartScanVersion=VERSION;
-  const LANG_KEY='kggPatientLang';
-  const PLAN_KEY='kggCurrentPlanV1';
-  const MULTI_KEY='kggPatientMultiPlansV1';
+  const VERSION='qr-fullscreen-v1-high-contrast';
+  if(window.__kggQrFullscreen===VERSION)return;
+  window.__kggQrFullscreen=VERSION;
+  let wakeLock=null;
   const $=id=>document.getElementById(id);
-  const lang=()=>localStorage.getItem(LANG_KEY)==='en'?'en':'de';
-  const tr=(de,en)=>lang()==='en'?en:de;
-  let filling=false,jsQrPromise=null,scannerSession=null,scanMode='update',lastScanMetrics={decoder:'unknown'};
-  function testObserver(){const value=window.KGGPatientDeviceTestObserver;return value&&typeof value==='object'?value:null;}
-  function testEmit(event,payload){const observer=testObserver();try{if(observer&&typeof observer.emit==='function')observer.emit(event,payload||{});}catch(e){}}
-  function testConsume(raw,metrics){const observer=testObserver();try{return !!(observer&&typeof observer.consumeScan==='function'&&observer.consumeScan(raw,metrics||{}));}catch(e){return false;}}
-  function point(value){return value&&Number.isFinite(Number(value.x))&&Number.isFinite(Number(value.y))?{x:Number(value.x),y:Number(value.y)}:null;}
-  function distance(a,b){return a&&b?Math.hypot(a.x-b.x,a.y-b.y):0;}
-  function visualBands(source){try{const size=sourceSize(source);if(!size.w||!size.h)return{};const scale=Math.min(1,360/Math.max(size.w,size.h)),w=Math.max(1,Math.round(size.w*scale)),h=Math.max(1,Math.round(size.h*scale)),canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(source,0,0,w,h);const image=ctx.getImageData(0,0,w,h),data=image.data,step=Math.max(1,Math.floor(Math.sqrt((w*h)/18000)));let luminance=0,edges=0,samples=0,blue=[0,0,0,0];for(let y=0;y<h;y+=step){for(let x=0;x<w;x+=step){const i=(y*w+x)*4,r=data[i],g=data[i+1],b=data[i+2],gray=.2126*r+.7152*g+.0722*b;luminance+=gray;samples++;if(x>=step){const j=(y*w+x-step)*4,prev=.2126*data[j]+.7152*data[j+1]+.0722*data[j+2];edges+=Math.abs(gray-prev);}if(b>145&&b>r*1.3&&b>g*1.08)blue[(y<h/2?0:2)+(x<w/2?0:1)]++;}}const light=samples?luminance/samples:0,edge=samples?edges/samples:0,blueHits=blue.filter(value=>value>=3).length;return{brightnessBand:light<55?'dark':light<105?'low':light<215?'normal':'bright',blurBand:edge<5?'blurred':edge<12?'soft':'sharp',testFrameStatus:blueHits===4?'visible':blueHits>0?'clipped':'unknown'};}catch(e){return{};}}
-  function scanMetrics(decoder,source,corners){const size=sourceSize(source),points=(corners||[]).map(point).filter(Boolean),top=distance(points[0],points[1]),right=distance(points[1],points[2]),bottom=distance(points[2],points[3]),left=distance(points[3],points[0]),width=(top+bottom)/2,short=Math.min(size.w,size.h),ratio=short?Math.max(0,Math.min(100,width/short*100)):0,sides=[top,right,bottom,left].filter(value=>value>0),perspective=sides.length?Math.max(...sides)/Math.max(1,Math.min(...sides)):0;return Object.assign({decoder,frameWidth:size.w,frameHeight:size.h,qrWidthRatioPct:Math.round(ratio),distanceBand:!ratio?'unknown':ratio>=70?'very-near':ratio>=50?'near':ratio>=30?'normal':ratio>=15?'far':'very-far',angleBand:!perspective?'unknown':perspective<1.15?'front':perspective<1.45?'slight':'steep'},visualBands(source));}
-  function ready(){try{return p&&Array.isArray(p.ex)&&typeof v==='object'&&typeof k==='function'}catch(e){return false}}
-  function b64dec(s){s=String(s||'').replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return decodeURIComponent(escape(atob(s)));}
-  function normName(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9äöüß]+/g,' ').replace(/\s+/g,' ').trim();}
-  function clone(x){try{return JSON.parse(JSON.stringify(x||{}))}catch(e){return x&&typeof x==='object'?{...x}:{}}}
-  function storedCurrentPlan(){try{const saved=JSON.parse(localStorage.getItem(PLAN_KEY)||'null');return saved&&saved.plan&&typeof saved.plan==='object'?saved.plan:null}catch(e){return null}}
-  function mergeRawBase(current,next){return {...clone(current),...clone(next)}}
-  function hasMediaValue(value){if(Array.isArray(value))return value.length>0;if(value&&typeof value==='object')return true;return String(value||'').trim()!==''}
-  function exObj(e){if(!Array.isArray(e))e=[];return {n:e[0]||'Übung',sets:Number(e[1])||3,side:e[2]||'LR',u:e[3]||'kg',m:e[4]||'Wdh',sl:e[5]||'',sm:e[6]||'',media:e[7]||'',videoUrl:e[8]||'',videoLabel:e[9]||'Video öffnen',painMode:e[10]||'exercise'};}
-  function exRaw(e,base){const raw=Array.isArray(base)?base.slice():[];raw[0]=e.n;raw[1]=e.sets;raw[2]=e.side;raw[3]=e.u;raw[4]=e.m;raw[5]=e.sl||'';raw[6]=e.sm||'';if(hasMediaValue(e.media))raw[7]=e.media;else if(raw.length<8)raw[7]='';raw[8]=e.videoUrl||raw[8]||'';raw[9]=e.videoLabel||raw[9]||'Video öffnen';raw[10]=e.painMode||raw[10]||'exercise';return raw;}
-  function exerciseRawPools(list){const pools=new Map();(Array.isArray(list)?list:[]).forEach(raw=>{const key=normName(Array.isArray(raw)?raw[0]:'');if(!key)return;const pool=pools.get(key)||[];pool.push(raw);pools.set(key,pool)});return pools;}
-  function takeExerciseRaw(pools,key){const pool=pools.get(key);return pool&&pool.length?pool.shift():null;}
-  function rawFromCurrent(baseRaw){const raw=clone(baseRaw);raw.i=p&&p.id?p.id:raw.i||'plan';raw.t=p&&p.title?p.title:raw.t||'KGG Trainingsplan';raw.v=p&&p.version?p.version:raw.v||1;raw.d=p&&p.days?p.days:raw.d||6;raw.extendDays=p?p.extendDays!==false:raw.extendDays!==false;raw.stepDays=p&&p.stepDays?p.stepDays:raw.stepDays||6;const old=Array.isArray(raw.e)?raw.e:[];const pools=exerciseRawPools(old);raw.e=p&&Array.isArray(p.ex)?p.ex.map((ex,i)=>exRaw(ex,takeExerciseRaw(pools,normName(ex.n))||old[i])):old;return raw;}
-  function mergeExerciseRaw(currentRaw,nextRaw){const current=Array.isArray(currentRaw)?currentRaw:[];const incoming=Array.isArray(nextRaw)?nextRaw:[];const next=exObj(incoming);const out=current.slice();out[0]=next.n;out[1]=next.sets;out[2]=next.side;out[3]=next.u;out[4]=next.m;out[5]=next.sl;out[6]=next.sm;[7,8,9,10].forEach(index=>{if(hasMediaValue(incoming[index]))out[index]=clone(incoming[index]);else if(out.length<=index)out[index]=index===9?'Video öffnen':index===10?'exercise':''});for(let index=11;index<incoming.length;index++)if(index in incoming)out[index]=clone(incoming[index]);return out;}
-  function syncMultiPlan(raw){try{let s=JSON.parse(localStorage.getItem(MULTI_KEY)||'null');if(!s||!Array.isArray(s.plans))s={version:1,plans:[],active:0,day:{}};if(typeof s.active!=='number'||s.active<0)s.active=0;if(!s.plans.length)s.plans.push(raw);else s.plans[Math.min(s.active,s.plans.length-1)]=raw;s.updatedAt=new Date().toISOString();localStorage.setItem(MULTI_KEY,JSON.stringify(s));}catch(e){}}
-  function storeCurrentPlan(raw){localStorage.setItem(PLAN_KEY,JSON.stringify({plan:raw,importedAt:new Date().toISOString()}));syncMultiPlan(raw);}
-  function planPayloadFromText(raw){if(window.KGGPlanFormat&&typeof window.KGGPlanFormat.findPlanCode==='function'){try{return window.KGGPlanFormat.findPlanCode(raw)||''}catch(e){}}const first=String(raw||'');const variants=[first];try{variants.push(decodeURIComponent(first))}catch(e){}try{const url=new URL(first,location.href);['plan','kgg'].forEach(key=>{const value=url.searchParams.get(key);if(value){variants.push(value);try{variants.push(decodeURIComponent(value))}catch(e){}}});if(url.hash)variants.push(url.hash)}catch(e){}for(const value of variants){const m=String(value||'').match(/(KGGH[23])(?::|%3A)([A-Za-z0-9_-]+)/i);if(m&&m[2])return m[1].toUpperCase()+':'+m[2]}return ''}
-  function validPlan(raw){if(!raw||!Array.isArray(raw.e)||!raw.e.length||raw.e.length>40)return false;if(window.KGGPlanFormat&&typeof window.KGGPlanFormat.validatePlan==='function'){try{window.KGGPlanFormat.validatePlan(raw);return true}catch(e){return false}}return raw.e.every(item=>Array.isArray(item)&&item.length>=5&&typeof item[0]==='string'&&item[0].trim()&&Number.isInteger(Number(item[1]))&&Number(item[1])>0&&typeof item[2]==='string');}
-  function parsePlanFromText(raw){const code=planPayloadFromText(raw);if(!code)return null;try{const parsed=window.KGGPlanFormat&&typeof window.KGGPlanFormat.decodeCode==='function'?window.KGGPlanFormat.decodeCode(code).raw:JSON.parse(b64dec(code.replace(/^KGGH2:/i,'')));return validPlan(parsed)?parsed:null}catch(e){return null}}
-  function pokeMedia(){[80,300,900].forEach(delay=>setTimeout(()=>{try{window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.prefetch&&window.KGGPatientMediaRetryCache.prefetch()}catch(e){}try{window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.render&&window.KGGPatientMediaRetryCache.render()}catch(e){}},delay));}
-  function mergePlanUpdate(nextRaw){if(!ready()||!nextRaw||!Array.isArray(nextRaw.e))return false;try{safeSave()}catch(e){}const current=rawFromCurrent(storedCurrentPlan()||{});const mergedRaw=(Array.isArray(current.e)?current.e:[]).map(clone);const index=new Map();mergedRaw.forEach((raw,i)=>{const key=normName(Array.isArray(raw)?raw[0]:'');if(key&&!index.has(key))index.set(key,i)});let added=0;nextRaw.e.forEach(incoming=>{const key=normName(Array.isArray(incoming)?incoming[0]:'');if(key&&index.has(key)){const i=index.get(key);mergedRaw[i]=mergeExerciseRaw(mergedRaw[i],incoming);}else{const next=clone(incoming);mergedRaw.push(next);if(key)index.set(key,mergedRaw.length-1);added++;}});const baseRaw={...clone(current),...clone(nextRaw),e:mergedRaw};p.id=current.i||nextRaw.i||'plan';p.title=nextRaw.t||current.t;p.version=Number(nextRaw.v)||current.v||1;p.days=Math.max(Number(current.d)||6,Number(nextRaw.d)||6);p.extendDays=nextRaw.extendDays!==false;p.stepDays=Number(nextRaw.stepDays)||Number(current.stepDays)||6;p.ex=mergedRaw.map(exObj);const out=rawFromCurrent(baseRaw);storeCurrentPlan(out);try{save()}catch(e){}try{render()}catch(e){}pokeMedia();try{setStatus(tr('Plan aktualisiert. Werte behalten. Neue Übungen: ','Plan updated. Values kept. New exercises: ')+added,'ok')}catch(e){}return true;}
-  function normSide(side){const x=normName(side);return side==='LR'||x==='lr'||x.includes('links rechts')||x.includes('left right')?'LR':'B';}
-  function normUnit(unit){const x=normName(unit).replace(/\s+/g,'');if(!x||x==='keine'||x==='none'||x==='-')return'';if(['wdh','wiederholung','wiederholungen','rep','reps'].includes(x))return'reps';if(['s','sek','sekunde','sekunden','sec','secs','second','seconds'].includes(x))return'sec';if(['min','minute','minuten','mins','minutes'].includes(x))return'min';if(['kg','kilogramm','kilogram','kilograms'].includes(x))return'kg';if(['stufe','level'].includes(x))return'level';if(['w','watt'].includes(x))return'watt';return x;}
-  function sameUnit(a,b){const x=normUnit(a),y=normUnit(b);return !!x&&x===y;}
-  function latestStoredValue(values,ei,set,side,key){let hit='',best=-1;Object.entries(values||{}).forEach(([kk,value])=>{if(String(value??'').trim()==='')return;const parts=kk.split('|');if(parts.length<5)return;const day=Number(parts[0]),ex=Number(parts[1]),st=Number(parts[2]);if(ex===ei&&st===set&&parts[3]===side&&parts[4]===key&&day>=best){best=day;hit=String(value)}});return hit;}
-  function transferPreview(current,nextRaw,values){const oldList=Array.isArray(current.e)?current.e:[];const newList=Array.isArray(nextRaw.e)?nextRaw.e:[];const pools=new Map();oldList.forEach((raw,i)=>{const ex=exObj(raw),key=normName(ex.n)+'|'+normSide(ex.side);if(!key.startsWith('|')){const pool=pools.get(key)||[];pool.push(i);pools.set(key,pool)}});const nextValues={};let matched=0,transferred=0;newList.forEach((raw,newEi)=>{const next=exObj(raw),key=normName(next.n)+'|'+normSide(next.side),pool=pools.get(key)||[];if(!pool.length)return;const oldEi=pool.shift(),old=exObj(oldList[oldEi]);matched++;const sets=Math.min(Number(old.sets)||3,Number(next.sets)||3),sides=normSide(next.side)==='LR'?['L','R']:['B'];for(let set=1;set<=sets;set++)sides.forEach(side=>{[['a',old.u,next.u],['b',old.m,next.m]].forEach(([field,oldUnit,newUnit])=>{if(!sameUnit(oldUnit,newUnit))return;const value=latestStoredValue(values,oldEi,set,side,field);if(value==='')return;nextValues['1|'+newEi+'|'+set+'|'+side+'|'+field]=value;transferred++;});});});return{nextValues,matched,transferred,total:newList.length};}
-  function replacePlan(nextRaw,options){if(!ready()||!nextRaw||!Array.isArray(nextRaw.e))return false;try{safeSave()}catch(e){}const current=rawFromCurrent(storedCurrentPlan()||{}),oldValues=clone(v),preview=transferPreview(current,nextRaw,oldValues);const question=tr('Plan ersetzen?\n\n'+preview.total+' Übungen aus dem QR-Plan ersetzen den aktuellen Plan.\n'+preview.matched+' passende Übungen gefunden.\n'+preview.transferred+' Werte werden mit passenden Einheiten in Tag 1 übernommen.\n\nDer bisherige Plan bleibt in der Plan-Historie.','Replace plan?\n\n'+preview.total+' exercises from the QR plan will replace the current plan.\n'+preview.matched+' matching exercises found.\n'+preview.transferred+' values with matching units will be copied to day 1.\n\nThe previous plan remains in plan history.');if(!(options&&options.confirmed)&&!confirm(question)){try{setStatus(tr('Plan ersetzen abgebrochen.','Plan replacement cancelled.'))}catch(e){}return true;}let state;try{state=JSON.parse(localStorage.getItem(MULTI_KEY)||'null')}catch(e){state=null}if(!state||!Array.isArray(state.plans))state={version:1,plans:[],active:0,day:{}};state.day=state.day||{};let active=Math.max(0,Math.min(Number(state.active)||0,Math.max(0,state.plans.length-1)));if(!state.plans.length){state.plans.push(current);active=0}else state.plans[active]=current;const replacement=clone(nextRaw);replacement.sourcePlanId=replacement.i||'';replacement.i=String(replacement.i||'plan')+'-r'+Date.now().toString(36);replacement.t=replacement.t||tr('Neuer Trainingsplan','New training plan');replacement.v=Number(replacement.v)||1;replacement.d=Number(replacement.d)||6;replacement.extendDays=replacement.extendDays!==false;replacement.stepDays=Number(replacement.stepDays)||6;replacement.e=Array.isArray(replacement.e)?replacement.e.map(clone):[];state.plans.push(replacement);state.active=state.plans.length-1;state.day[state.active]=1;state.updatedAt=new Date().toISOString();localStorage.setItem(MULTI_KEY,JSON.stringify(state));localStorage.setItem(PLAN_KEY,JSON.stringify({plan:replacement,importedAt:new Date().toISOString(),source:'replace'}));p.id=replacement.i;p.title=replacement.t;p.version=replacement.v;p.days=replacement.d;p.extendDays=replacement.extendDays;p.stepDays=replacement.stepDays;p.ex=replacement.e.map(exObj);v=preview.nextValues;done=[];d=1;try{save()}catch(e){}try{render()}catch(e){}pokeMedia();try{setStatus(tr('Plan ersetzt. Übernommene Werte: ','Plan replaced. Values copied: ')+preview.transferred+'.','ok')}catch(e){}return true;}
-  function autoFillStartValues(){if(filling||!ready())return;let day=1;try{day=Number(d)||1}catch(e){}if(day!==1)return;let changed=false;const setIfEmpty=(ei,s,side,key,value)=>{value=String(value||'').trim();if(!value)return;const kk=k(ei,s,side,key,1);if(!String(v[kk]||'').trim()){v[kk]=value;changed=true;}};try{p.ex.forEach((ex,ei)=>{const load=String(ex.sl||'').trim();const reps=String(ex.sm||'').trim();if(!load&&!reps)return;const sets=Number(ex.sets)||3;const sides=ex.side==='LR'?['L','R']:['B'];for(let s=1;s<=sets;s++)sides.forEach(side=>{setIfEmpty(ei,s,side,'a',load);setIfEmpty(ei,s,side,'b',reps);});});}catch(e){}if(changed){filling=true;try{save()}catch(e){}try{setStatus(tr('Startwerte übernommen.','Start values loaded.'),'ok')}catch(e){}try{render()}catch(e){}filling=false;}}
-  function handlePlanText(raw){const mode=scanMode;scanMode='update';const payload=planPayloadFromText(raw);const nextRaw=payload?parsePlanFromText(raw):null;if(!nextRaw){alert(tr('Kein Plan-QR erkannt.','No plan QR detected.'));return;}if(mode==='replace'&&replacePlan(nextRaw))return;if(mergePlanUpdate(nextRaw))return;try{safeSave()}catch(e){}location.href=location.origin+location.pathname+'#'+payload;setTimeout(()=>location.reload(),80);}
-  function ensureScanInput(){let input=$('kggPlanScanInput');if(input)return input;input=document.createElement('input');input.id='kggPlanScanInput';input.type='file';input.accept='image/*';input.setAttribute('capture','environment');input.style.display='none';input.addEventListener('change',scanFile);document.body.appendChild(input);return input;}
-  function promptFallback(){const raw=prompt(tr('Kamera-Scan nicht verfügbar. Plan-Link oder QR-Text einfügen:','Camera scan not available. Paste plan link or QR text:'));if(raw)handlePlanText(raw);}
-  function loadJsQR(){if(window.jsQR)return Promise.resolve(window.jsQR);if(jsQrPromise)return jsQrPromise;jsQrPromise=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='./vendor/jsqr-1.4.0.js';s.onload=()=>window.jsQR?resolve(window.jsQR):reject(new Error('jsQR fehlt'));s.onerror=()=>reject(new Error('jsQR konnte nicht geladen werden'));document.head.appendChild(s);});return jsQrPromise;}
-  function imageFromFile(file){return new Promise((resolve,reject)=>{const url=URL.createObjectURL(file);const img=new Image();img.onload=()=>{URL.revokeObjectURL(url);resolve(img)};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Bild konnte nicht gelesen werden'))};img.src=url;});}
-  async function createNativeDetector(){if(!('BarcodeDetector' in window))return null;try{if(typeof BarcodeDetector.getSupportedFormats==='function'){const formats=await BarcodeDetector.getSupportedFormats();if(Array.isArray(formats)&&!formats.includes('qr_code'))return null;}return new BarcodeDetector({formats:['qr_code']});}catch(e){return null;}}
-  async function detectNative(detector,source){if(!detector)return'';try{const codes=await detector.detect(source),hit=codes&&codes[0];if(!hit||!hit.rawValue)return'';const corners=Array.isArray(hit.cornerPoints)?hit.cornerPoints:hit.boundingBox?[{x:hit.boundingBox.x,y:hit.boundingBox.y},{x:hit.boundingBox.x+hit.boundingBox.width,y:hit.boundingBox.y},{x:hit.boundingBox.x+hit.boundingBox.width,y:hit.boundingBox.y+hit.boundingBox.height},{x:hit.boundingBox.x,y:hit.boundingBox.y+hit.boundingBox.height}]:[];lastScanMetrics=scanMetrics('barcode-detector',source,corners);return hit.rawValue;}catch(e){return'';}}
-  function sourceSize(source){return{w:Number(source.videoWidth||source.naturalWidth||source.width)||0,h:Number(source.videoHeight||source.naturalHeight||source.height)||0};}
-  function renderDecodeVariant(source,variant){const size=sourceSize(source);if(!size.w||!size.h)return null;const crop=variant.crop||1;const sw=Math.max(1,Math.round(size.w*crop)),sh=Math.max(1,Math.round(size.h*crop));const sx=Math.round((size.w-sw)/2),sy=Math.round((size.h-sh)/2);const max=variant.max||1600;const scale=Math.min(variant.upscale||1,max/Math.max(sw,sh));const w=Math.max(1,Math.round(sw*scale)),h=Math.max(1,Math.round(sh*scale));const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';if(variant.contrast)ctx.filter='contrast('+variant.contrast+')';ctx.drawImage(source,sx,sy,sw,sh,0,0,w,h);return canvas;}
-  async function decodeCanvasWithJsQR(canvas){if(!canvas)return'';const qr=await loadJsQR();const ctx=canvas.getContext('2d',{willReadFrequently:true});const data=ctx.getImageData(0,0,canvas.width,canvas.height);const code=qr(data.data,canvas.width,canvas.height,{inversionAttempts:'attemptBoth'});if(code&&code.data){const location=code.location||{},corners=[location.topLeftCorner,location.topRightCorner,location.bottomRightCorner,location.bottomLeftCorner];lastScanMetrics=scanMetrics('jsqr',canvas,corners);return code.data;}return'';}
-  const PHOTO_VARIANTS=[{crop:1,max:1920},{crop:.82,max:1600,upscale:2},{crop:.62,max:1600,upscale:2},{crop:1,max:1600,contrast:1.35},{crop:.82,max:1600,upscale:2,contrast:1.35},{crop:.62,max:1600,upscale:2,contrast:1.35}];
-  const LIVE_VARIANTS=[{crop:1,max:1280},{crop:.82,max:1280,upscale:1.5},{crop:.62,max:1280,upscale:2},{crop:1,max:1280,contrast:1.35},{crop:.82,max:1280,upscale:1.5,contrast:1.35},{crop:.62,max:1280,upscale:2,contrast:1.35}];
-  async function decodePhoto(file){const img=await imageFromFile(file);const detector=await createNativeDetector();let raw=await detectNative(detector,img);if(raw)return{raw,decoder:'barcode-detector'};for(const variant of PHOTO_VARIANTS){raw=await decodeCanvasWithJsQR(renderDecodeVariant(img,variant));if(raw)return{raw,decoder:'jsqr'};}return{raw:'',decoder:'none'};}
-  function scannerStatus(text,kind){const node=$('kggLiveScanStatus');if(!node)return;node.textContent=text;node.className='kggLiveScanStatus '+(kind||'');}
-  function stopScannerTracks(session){if(!session)return;clearTimeout(session.timer);session.timer=0;let tracks=[],stopped=true;try{tracks=session.stream?session.stream.getTracks():[];tracks.forEach(track=>track.stop());stopped=tracks.every(track=>track.readyState==='ended');}catch(e){stopped=false;}session.stream=null;try{if(session.video)session.video.srcObject=null}catch(e){}testEmit('scanner-stop',{tracksStopped:stopped,trackCount:tracks.length});}
-  function closeLiveScanner(preserveMode){const session=scannerSession;if(session){session.active=false;stopScannerTracks(session);if(session.box&&session.box.parentNode)session.box.remove();scannerSession=null;}if(!preserveMode)scanMode='update';}
-  function showScannerFallback(message){const session=scannerSession;if(!session)return;session.active=false;stopScannerTracks(session);scannerStatus(message,'warn');const actions=$('kggLiveScanFallback');if(actions)actions.hidden=false;}
-  function scannerBox(){ensureStyle();const replacing=scanMode==='replace';const box=document.createElement('div');box.id='kggLiveScan';box.className='kggLiveScan';box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');box.setAttribute('aria-label',replacing?tr('Plan durch QR ersetzen','Replace plan from QR'):tr('Plan-QR scannen','Scan plan QR'));box.innerHTML='<div class="kggLiveScanPanel"><div class="kggLiveScanHead"><b>'+(replacing?tr('QR für neuen Plan scannen','Scan QR for replacement plan'):tr('Plan-QR automatisch scannen','Scan plan QR automatically'))+'</b><button type="button" class="kggLiveScanClose" aria-label="'+tr('Scanner schließen','Close scanner')+'">×</button></div><div class="kggLiveScanView"><video id="kggLiveScanVideo" muted playsinline autoplay></video><div class="kggLiveScanGuide"></div></div><div id="kggLiveScanStatus" class="kggLiveScanStatus">'+tr('Kamera wird gestartet …','Starting camera …')+'</div><div id="kggLiveScanFallback" class="kggLiveScanFallback" hidden><button type="button" class="kggLivePhoto">'+tr('Foto aufnehmen oder auswählen','Take or choose photo')+'</button><button type="button" class="kggLivePaste">'+tr('Plan-Link einfügen','Paste plan link')+'</button><button type="button" class="kggLiveRetry">'+tr('Live-Scan erneut versuchen','Retry live scan')+'</button></div><p>'+tr('QR möglichst groß in den Rahmen halten. Die App löst automatisch aus.','Hold the QR as large as possible inside the frame. The app scans automatically.')+'</p></div>';document.body.appendChild(box);box.querySelector('.kggLiveScanClose').onclick=()=>closeLiveScanner(false);box.querySelector('.kggLivePhoto').onclick=()=>{const mode=scanMode;closeLiveScanner(false);const input=ensureScanInput();input.dataset.scanMode=mode;input.click();};box.querySelector('.kggLivePaste').onclick=()=>{closeLiveScanner(true);promptFallback();};box.querySelector('.kggLiveRetry').onclick=()=>{const mode=scanMode;closeLiveScanner(true);openCameraScan(mode);};return box;}
-  async function scanLiveFrame(session){if(!session.active||scannerSession!==session)return;if(Date.now()-session.startedAt>=30000){showScannerFallback(tr('Noch kein Plan-QR erkannt. Bitte erneut versuchen oder ein Foto verwenden.','No plan QR detected yet. Retry or use a photo
+  function ensureStyle(){
+    if($('kggQrFullscreenStyle'))return;
+    const s=document.createElement('style');
+    s.id='kggQrFullscreenStyle';
+    s.textContent=`
+      #qr img{cursor:zoom-in}
+      .kggQrFull{position:fixed;inset:0;z-index:30000;background:#fff;color:#000;display:flex;align-items:center;justify-content:center;padding:8px;box-sizing:border-box;touch-action:manipulation}
+      .kggQrFull img{width:min(96vw,96vh);height:min(96vw,96vh);object-fit:contain;background:#fff;image-rendering:pixelated;image-rendering:crisp-edges;filter:contrast(120%)}
+      .kggQrFull button{position:fixed;top:calc(10px + env(safe-area-inset-top));right:10px;width:46px;height:46px;border:3px solid #000;border-radius:999px;background:#fff;color:#000;font-size:28px;font-weight:950;line-height:1}
+      .kggQrFull .hint{position:fixed;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom));text-align:center;font-size:14px;font-weight:900;color:#000;background:#fff;padding:4px 8px}
+      @media(max-width:430px){.kggQrFull{padding:4px}.kggQrFull img{width:min(98vw,92vh);height:min(98vw,92vh)}}
+    `;
+    document.head.appendChild(s);
+  }
+  async function lockScreen(){
+    try{if('wakeLock'in navigator)wakeLock=await navigator.wakeLock.request('screen')}catch(e){}
+  }
+  async function unlockScreen(){
+    try{if(wakeLock&&wakeLock.release)await wakeLock.release()}catch(e){}
+    wakeLock=null;
+  }
+  function close(){
+    const el=$('kggQrFull');
+    if(el)el.remove();
+    unlockScreen();
+    document.removeEventListener('keydown',onKey,true);
+    try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}
+  }
+  function onKey(e){if(e.key==='Escape')close()}
+  function open(src){
+    if(!src)return;
+    ensureStyle();
+    close();
+    const el=document.createElement('div');
+    el.id='kggQrFull';
+    el.className='kggQrFull';
+    el.innerHTML='<button type="button" aria-label="Schließen">×</button><img src="'+String(src).replace(/"/g,'&quot;')+'" alt="QR-Code"><div class="hint">QR groß anzeigen · Zum Schließen tippen</div>';
+    el.addEventListener('click',e=>{if(e.target===el)close()});
+    el.querySelector('button').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();close()});
+    document.body.appendChild(el);
+    document.addEventListener('keydown',onKey,true);
+    lockScreen();
+    try{if(el.requestFullscreen)el.requestFullscreen().catch(()=>{})}catch(e){}
+  }
+  function bind(){
+    ensureStyle();
+    if(window.__kggQrFullscreenBound)return;
+    window.__kggQrFullscreenBound=1;
+    document.addEventListener('click',e=>{
+      const img=e.target&&e.target.closest?e.target.closest('#qr img'):null;
+      if(!img)return;
+      e.preventDefault();
+      e.stopPropagation();
+      open(img.src);
+    },true);
+  }
+  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',bind):bind();
+})();
 ```
