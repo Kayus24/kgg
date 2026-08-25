@@ -1,7 +1,7 @@
 {
-  "versionCode": 82,
-  "versionName": "1.0.82-live-sync-v82-final-integration",
-  "indexUrl": "index.html?v=82",
-  "sha256": "40592fa15fd8977f079a2bef2c60a7d79e8b6adab2cf8cd95af0336460557a78",
-  "notes": "v082: Relay-Client-Vertrag, flüchtige Android-Schlüsselaushandlung und fail-closed Privacy-Gate sind für den lokalen synthetischen Integrationspfad ausgerichtet."
+  "versionCode": 83,
+  "versionName": "1.0.83-preview-live-sync-qr-privacy",
+  "indexUrl": "index.html?v=83",
+  "sha256": "eab217da15a4394de9aa4f2713d617b2619839ac32aae922bd7ac7e0d8b86196",
+  "notes": "v083 Preview: öffentliche QR-Exports bleiben frei von Patient:innen-/Therapeut:innen-/Geburts-/Notizfeldern; Live-Sync bleibt synthetisch und auf lokale private Test-Relays begrenzt. Nicht produktionsreif."
 }

@@ -62,3 +62,37 @@ Die echte Datei, Unterschrift, Namen und interne Unterlagen gehoeren nicht in di
 ## Harte Stop-Regel
 
 Bei einem fehlenden Punkt bleibt `KGG_LIVE_SYNC_MODE=off`. Es gibt keinen manuellen Bypass, keinen Klartext-Fallback und keine automatische kostenpflichtige Alternative.
+
+## Preview-/Debug-Grenze dieser Integration
+
+Dieser Branch ist ausschließlich ein synthetischer Preview-/Debug-Kandidat. Der
+Client akzeptiert im Testmodus nur lokale private HTTP-Relays (`localhost`,
+Loopback oder private RFC-1918-Adressen); öffentliche HTTPS-Ziele,
+`workers.dev`-Ziele und frei eintragbare Produktionsziele werden technisch
+abgelehnt. Der Standard bleibt `off`, und es gibt keinen Produktionsendpunkt,
+keine Cloudflare-Bereitstellung und keine lokale Freigabedatei im Repository.
+
+Öffentliche KGGH2-/KGGH3-Patienten-QRs enthalten in diesem Preview-Stand keine
+Patient:innen-, Geburts-, Therapeut:innen- oder Notizfelder. Der sichtbare
+Plan-Titel ist generisch, und die öffentliche Plan-ID ist nur ein lokaler
+Fingerprint. Die synthetischen Relay-Fixtures enthalten absichtliche
+Canary-Werte; die Tests prüfen, dass sie weder in QR-Exports noch in Relay-
+Speicher oder Logs erscheinen. Der HTML-Build verbietet außerdem extern
+geladene Runtime-Skripte; Live-Sync-Code wird lokal aus dem Build geladen.
+
+## Bekannte Lücken — ausdrücklich nicht produktionsreif
+
+- Es gibt keinen echten Android-/Tab-S9-Instrumentationstest und keinen
+  bereitgestellten Relay-Testdienst in dieser Arbeitsstrecke.
+- Löschen, Ablauf und `deleteAll()` sind nur in den lokalen synthetischen
+  Worker-/Memory-Relays nachgewiesen. Ein unabhängiger Backup-/Restore-Test
+  für alle Geräte- und Browser-Speicher fehlt.
+- Die lokale Ciphertext-Queue und das lokale Trainingsarchiv werden bei
+  Fehlern best-effort bereinigt; eine forensische Wiederherstellungsprüfung
+  oder zentrale Backup-Löschung ist nicht belegt.
+- Die externe Datenschutzfreigabe, DPA-/DPIA-Prüfung, Patient:inneninformation
+  und ein festgelegter Produktionsendpunkt fehlen weiterhin.
+
+Daher darf dieser Stand nicht als produktionsreif, als echte
+Patient:innenfreigabe oder als Nachweis einer Cloud-/Gerätefreigabe bezeichnet
+werden.

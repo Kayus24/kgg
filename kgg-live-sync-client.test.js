@@ -53,6 +53,7 @@ async function main(){
   const frame=simulator.relayFrames()[0];
   assert.equal(JSON.stringify(frame).includes('Synthetische'),false);
   assert.equal(JSON.stringify(frame).includes('"value"'),false);
+  Object.values(fixtures.privacyCanaries).forEach(marker=>assert.equal(JSON.stringify(frame).includes(marker),false));
   assert.equal(await simulator.tamper(frame,{sequence:2}),true);
   assert.equal(await simulator.tamper(frame,{ciphertext:frame.ciphertext.slice(0,-1)+'A'}),true);
 
@@ -77,6 +78,8 @@ async function main(){
   assert.equal(approvedProduction.mode,'off');
   assert.equal(approvedProduction.reason,'production_locked');
   await rejects(Promise.resolve().then(()=>live.makeHttpRelay(approvedProduction)),'ENDPOINT_MISSING');
+  await rejects(Promise.resolve().then(()=>live.makeHttpRelay({mode:'test',endpoint:'https://preview-relay.example.invalid'})),'ENDPOINT_BLOCKED');
+  assert.equal(typeof live.makeHttpRelay({mode:'test',endpoint:'http://127.0.0.1:8787'}).reserve,'function');
   assert.equal(live.config({mode:'off'}).mode,'off');
   global.KGG_LIVE_SYNC_MODE='off';
   await rejects(live.createTestSimulator(),'MODE_OFF');

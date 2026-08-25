@@ -3,6 +3,7 @@
 Status: verbindlicher Architekturvertrag fuer den lokalen, ausschliesslich synthetischen Prototyp.
 
 Basis-Commit: `04a5d3e59225985e4e536f25c1b7aea8b04690f1`
+Preview-Port: `codex/preview-live-sync-qr-integration-20260825`
 
 ## Ziel und harte Grenzen
 
@@ -115,6 +116,11 @@ Der verschluesselte Inhalt hat einen der Typen:
 - `production`: nur mit nicht eingecheckter Freigabedatei und bestandenem Release-Gate.
 
 Der Quellstand enthaelt niemals einen aktiven Produktionsendpunkt, Cloudflare-Token oder eine Freigabedatei.
+Der Preview-Client akzeptiert im Testmodus ausschliesslich lokale private
+HTTP-Relays; oeffentliche HTTPS- und Produktionsziele sind technisch gesperrt.
+Oeffentliche KGGH2-/KGGH3-QR-Exports enthalten keine Patienten-, Geburts-,
+Therapeuten- oder Notizfelder. Die synthetischen Exporttests verwenden
+Canary-Werte und pruefen deren Abwesenheit im dekodierten QR und im Relay.
 
 ## Stop-Regeln
 

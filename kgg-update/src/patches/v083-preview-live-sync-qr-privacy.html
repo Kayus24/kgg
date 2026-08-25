@@ -1,0 +1,21 @@
+<!-- KGG PATCH START kgg-v083-preview-live-sync-qr-privacy -->
+<!--
+  Preview-only privacy hardening for QR exports and the Ticket-034 relay path.
+  The implementation stays in the local runtime modules; this marker keeps the
+  generated artifact and its source manifest auditable.
+-->
+<script>
+(function(){
+  'use strict';
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES['kgg-v083-preview-live-sync-qr-privacy']={
+    installed:true,
+    kind:'preview-privacy-hardening',
+    qr:'no-patient-therapist-birthdate-notes',
+    relay:'synthetic-ciphertext-only',
+    endpoint:'local-private-http-test-only',
+    productionReady:false
+  };
+})();
+</script>
+<!-- KGG PATCH END kgg-v083-preview-live-sync-qr-privacy -->

@@ -248,11 +248,11 @@
   function assertSynthetic(config,value){const state=activeConfig(config);if(state.mode==='test'){assert(value&&value.synthetic===true,'TEST_DATA_REQUIRED','Der Testmodus akzeptiert ausschließlich synthetische Daten.');if(value.type==='plan_snapshot'||value.type==='training_events')assertTestFixture(value);}}
   function opaqueHandle(value){assert(typeof value==='string'&&OPAQUE_HANDLE_RE.test(value),'NATIVE_CRYPTO_REQUIRED','KGGLiveKey-Bridge lieferte kein gültiges opakes Handle.');return value;}
   function deepFreeze(value){if(value&&typeof value==='object'&&!Object.isFrozen(value)){Object.freeze(value);Object.keys(value).forEach(key=>deepFreeze(value[key]));}return value;}
-  const TEST_PLAN_FIXTURE=deepFreeze({type:'plan_snapshot',synthetic:true,planRevision:'1'.repeat(64),title:'Synthetischer Plan',days:2,extendDays:false,stepDays:2,exercises:[{id:'exercise-stable-a',order:0,name:'Synthetische Übung A',sets:3,side:'BI',unit:'kg',measure:'Wdh',archived:false},{id:'exercise-stable-b',order:1,name:'Synthetische Übung B',sets:2,side:'LR',unit:'kg',measure:'Wdh',archived:false}]});
+  const TEST_PLAN_FIXTURE=deepFreeze({type:'plan_snapshot',synthetic:true,planRevision:'1'.repeat(64),title:'Synthetischer Plan',days:2,extendDays:false,stepDays:2,exercises:[{id:'exercise-stable-a',order:0,name:'Synthetische Übung A',sets:3,side:'BI',unit:'kg',measure:'Wdh',archived:false},{id:'exercise-stable-b',order:1,name:'Synthetische Übung B',sets:2,side:'LR',unit:'kg',measure:'Wdh',archived:false}],privacyCanaries:{patientName:'SYNTHETIC_PATIENT_NAME_CANARY',birthDate:'SYNTHETIC_BIRTH_DATE_CANARY',therapist:'SYNTHETIC_THERAPIST_CANARY',notes:'SYNTHETIC_NOTES_CANARY'}});
   const TEST_EVENTS_FIXTURE=deepFreeze([{eventId:'event-stable-01',exerciseId:'exercise-stable-a',day:1,set:1,side:'B',metric:'reps',value:77,pain:4,recordedAt:'2026-01-01T00:00:00.000Z'}]);
   function cloneTestValue(value){return JSON.parse(JSON.stringify(value));}
   function assertTestFixture(value){const expected=value&&value.type==='plan_snapshot'?TEST_PLAN_FIXTURE:value&&value.type==='training_events'?{type:'training_events',synthetic:true,basePlanRevision:TEST_PLAN_FIXTURE.planRevision,events:TEST_EVENTS_FIXTURE}:null;assert(expected&&canonicalJson(value)===canonicalJson(expected),'TEST_DATA_REQUIRED','Der Testmodus akzeptiert nur die feste synthetische Fixture.');return true;}
-  function testFixtures(config){const state=activeConfig(config);assert(state.mode==='test','MODE_OFF','Testschnittstelle ist nur im expliziten Testmodus aktiv.');return {planSnapshot:cloneTestValue(TEST_PLAN_FIXTURE),trainingEvents:cloneTestValue(TEST_EVENTS_FIXTURE),planRevision:TEST_PLAN_FIXTURE.planRevision};}
+  function testFixtures(config){const state=activeConfig(config);assert(state.mode==='test','MODE_OFF','Testschnittstelle ist nur im expliziten Testmodus aktiv.');return {planSnapshot:cloneTestValue(TEST_PLAN_FIXTURE),trainingEvents:cloneTestValue(TEST_EVENTS_FIXTURE),privacyCanaries:cloneTestValue(TEST_PLAN_FIXTURE.privacyCanaries),planRevision:TEST_PLAN_FIXTURE.planRevision};}
 
   async function buildJoinProof(pairingSigner,sessionId,sessionSalt){
     const id=base64UrlDecode(String(sessionId||'')),salt=base64UrlDecode(String(sessionSalt||''));
@@ -319,10 +319,10 @@
   function endpointUrl(endpoint,path,config){
     const url=new URL(endpoint);const host=url.hostname.toLowerCase();const privateHost=TEST_RELAY_HOSTS.has(host)||/^10\.(?:\d{1,3}\.){2}\d{1,3}$/.test(host)||/^172\.(?:1[6-9]|2\d|3[01])\.(?:\d{1,3}\.)\d{1,3}$/.test(host)||/^192\.168\.(?:\d{1,3}\.)\d{1,3}$/.test(host);
     assert(!url.username&&!url.password&&!url.search&&!url.hash,'ENDPOINT_BLOCKED','Live-Sync-Endpunkt ist nicht erlaubt.');
-    assert(url.protocol==='https:'||(url.protocol==='http:'&&config&&config.mode==='test'&&privateHost),'ENDPOINT_BLOCKED','Live-Sync-Endpunkt ist nicht erlaubt.');return new URL(path,url).toString();
+    assert(config&&config.mode==='test'&&url.protocol==='http:'&&privateHost,'ENDPOINT_BLOCKED','Live-Sync-Endpunkt ist nicht erlaubt.');return new URL(path,url).toString();
   }
   function makeHttpRelay(config){
-    const state=activeConfig(config);assert(state.endpoint,'ENDPOINT_MISSING','Kein Live-Sync-Endpunkt konfiguriert.');
+    const state=activeConfig(config);assert(state.endpoint,'ENDPOINT_MISSING','Kein Live-Sync-Endpunkt konfiguriert.');endpointUrl(state.endpoint,'/',state);
     async function request(path,options){
       const response=await fetch(endpointUrl(state.endpoint,path,state),{cache:'no-store',...options,headers:{'Content-Type':'application/json',...(options&&options.headers||{})}});
       const value=await response.json().catch(()=>({}));if(!response.ok)throw failure('RELAY_ERROR','Live-Sync-Verbindung konnte nicht hergestellt werden.');return value;

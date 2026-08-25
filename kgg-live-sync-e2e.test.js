@@ -102,6 +102,7 @@ async function main(){
   await therapist.sendPlanSnapshot(FIXTURE.planSnapshot);await waitFor(()=>patientMessages.some(value=>value.type==='plan_snapshot'));
   await patient.sendTrainingEvents(FIXTURE.trainingEvents,FIXTURE.planRevision);await waitFor(()=>therapistMessages.some(value=>value.type==='training_events'));
   assert.equal(JSON.stringify(relay.storage).includes('Synthetischer Plan'),false);assert.equal(JSON.stringify(relay.storage).includes('event-stable-01'),false);assert.equal(JSON.stringify(relay.storage).includes(material.payload.pairingSecret),false);assert.equal(relay.logs.join('\n').includes('event-stable-01'),false);
+  Object.values(FIXTURE.privacyCanaries).forEach(marker=>{assert.equal(JSON.stringify(relay.storage).includes(marker),false);assert.equal(relay.logs.join('\n').includes(marker),false);});
   assert(relay.storage.length>=2);
 
   if(relay.storage[0]){await patient.receiveRaw(relay.storage[0]);assert.equal(patient.closed,true);}

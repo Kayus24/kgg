@@ -27,7 +27,8 @@
     "kgg-v069-plan-text-recovery-finalize",
     "kgg-v070-tablet-package-save",
     "kgg-v081-qr-full-plan-device-ladder",
-    "kgg-v082-live-sync-v82-final-integration"
+    "kgg-v082-live-sync-v82-final-integration",
+    "kgg-v083-preview-live-sync-qr-privacy"
   ],
   "parts": [
     "base-head.html",
@@ -73,6 +74,7 @@
     "patches/v070-tablet-package-save.html",
     "patches/v081-qr-full-plan-device-ladder.html",
     "patches/v082-live-sync-v82-final-integration.html",
+    "patches/v083-preview-live-sync-qr-privacy.html",
     "footer.html"
   ]
 }
