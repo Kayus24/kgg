@@ -3,8 +3,39 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 81,
+  "latestVersionCode": 82,
   "entries": [
+    {
+      "versionCode": 82,
+      "versionName": "1.0.82-live-sync-v82-final-integration",
+      "patchId": "kgg-v082-live-sync-v82-final-integration",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Live-Sync v82 final integration",
+      "reason": "Relay-Client-Vertrag, flüchtige Android-Schlüsselaushandlung und fail-closed Privacy-Gate sind für den lokalen synthetischen Integrationspfad ausgerichtet.",
+      "whatChanged": [
+        "Relay-Client-Vertrag, flüchtige Android-Schlüsselaushandlung und fail-closed Privacy-Gate sind für den lokalen synthetischen Integrationspfad ausgerichtet."
+      ],
+      "touchedAreas": [
+        "Android/APK",
+        "Plan-State",
+        "QR/Patienten-App"
+      ],
+      "notTouched": [
+        "PDF",
+        "Scan/OCR",
+        "Parser",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "KGG-TICKET-034 final integration; ausschließlich synthetische lokale Testdaten, keine Produktionsfreigabe."
+    },
     {
       "versionCode": 81,
       "versionName": "1.0.81-qr-full-plan-device-ladder",
@@ -792,7 +823,7 @@
       "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
     }
   ],
-  "latestVersionName": "1.0.81-qr-full-plan-device-ladder",
+  "latestVersionName": "1.0.82-live-sync-v82-final-integration",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",

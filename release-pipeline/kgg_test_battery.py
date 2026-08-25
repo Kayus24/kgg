@@ -349,6 +349,21 @@ def run_native_sync() -> None:
     run_native_sync_bridge_contract()
 
 
+def run_live_sync_critical() -> None:
+    log("== Live-Sync critical contract battery ==")
+    for script in (
+        "kgg-live-sync-client.test.js",
+        "kgg-live-sync-security-a.test.js",
+        "kgg-live-sync-security-c.test.js",
+        "kgg-live-sync-android-adapter.test.js",
+        "kgg-live-sync-e2e.test.js",
+        "patient-live-sync-security-b.test.js",
+        "release-pipeline/kgg_patient_plan_delete_smoke.js",
+    ):
+        run([node_executable(), script])
+    run([sys.executable, "-m", "unittest", "release-pipeline/test_kgg_live_sync_privacy_gate.py"])
+
+
 def run_android_wrapper_contract() -> None:
     log("== Android wrapper contract ==")
     manifest = json.loads((ROOT / "therapist-app" / "android_update_manifest.json").read_text(encoding="utf-8"))
@@ -927,6 +942,13 @@ TEST_REGISTRY = [
         "suite": "native-sync",
         "reason": "Peer mesh, auto-download rules and Android sync bridge contract must stay compatible.",
         "run": run_native_sync,
+    },
+    {
+        "id": "live-sync-critical",
+        "level": "critical",
+        "suite": "security",
+        "reason": "Relay/client authentication, ephemeral key exchange, browser/Android crypto, privacy gating and plan lifecycle must fail closed on synthetic data.",
+        "run": run_live_sync_critical,
     },
     {
         "id": "mobile-inbox-live",
