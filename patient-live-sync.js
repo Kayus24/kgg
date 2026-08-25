@@ -106,8 +106,13 @@
   async function sendCurrentEvents(){
     if(!state.client||!state.client.key)return;
     if(!ensurePlanBinding())return;
-    if(mode()==='test'&&!global.KGG_LIVE_TEST_SYNTHETIC_DATA)return;
-    try{const result=await buildEvents(),pending=result.events.filter(event=>!state.sent.has(event.eventId));if(!pending.length)return;await state.client.sendTrainingEvents(pending,result.revision);pending.forEach(event=>state.sent.set(event.eventId,true));}catch(err){if(err.code!=='KEY_NOT_READY')setStatus('Werte bleiben lokal und werden bei Verbindung gesendet.','');}
+    try{
+      if(mode()==='test'){
+        if(global.KGG_LIVE_TEST_SYNTHETIC_DATA!==true)return;
+        const fixtures=live.testFixtures(),pending=fixtures.trainingEvents.filter(event=>!state.sent.has(event.eventId));if(!pending.length)return;await state.client.sendTrainingEvents(pending,fixtures.planRevision);pending.forEach(event=>state.sent.set(event.eventId,true));return;
+      }
+      const result=await buildEvents(),pending=result.events.filter(event=>!state.sent.has(event.eventId));if(!pending.length)return;await state.client.sendTrainingEvents(pending,result.revision);pending.forEach(event=>state.sent.set(event.eventId,true));
+    }catch(err){if(err.code!=='KEY_NOT_READY')setStatus('Werte bleiben lokal und werden bei Verbindung gesendet.','');}
   }
   async function poll(){if(mode()!=='off')await sendCurrentEvents();state.timer=setTimeout(poll,900);}
   async function endSession(reason){const client=state.client;if(client&&typeof client.close==='function')await client.close({reason:reason||'patient_requested'});state.client=null;state.sent.clear();}

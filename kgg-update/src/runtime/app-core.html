@@ -5398,7 +5398,7 @@
     const cfg1=findCode('KGGCFG1');
     if(cfg1)return {type:'KGGCFG1',json:safeBase64JsonDecode(cfg1[1]),raw:text};
     const livePair=findCode('KGGLIVEPAIR1');
-    if(livePair)return {type:'KGGLIVEPAIR1',json:{code:'KGGLIVEPAIR1:'+livePair[1]},raw:text};
+    if(livePair)return {type:'KGGLIVEPAIR1',json:{code:'KGGLIVEPAIR1'}};
     const h3=findCode('KGGH3');
     if(h3)return {type:'KGGH3',json:decodeKggPlanCode('KGGH3:'+h3[1]),raw:text};
     const h2=findCode('KGGH2');
@@ -6004,8 +6004,8 @@
             scanState.jobs.splice(idx,1);
             scanState.activeIndex=Math.max(0,Math.min(scanState.activeIndex,scanState.jobs.length-1));
           }
-          if(!window.KGGLiveSync||typeof window.KGGLiveSync.handleScannedText!=='function')throw new Error('Live-Sync ist nicht verfügbar.');
-          const handled=await window.KGGLiveSync.handleScannedText(parsed.raw||raw,{source:'therapist-scanner'});
+          let handled=false;try{if(window.KGGLiveSync&&typeof window.KGGLiveSync.handleScannedText==='function')handled=await window.KGGLiveSync.handleScannedText(raw,{source:'therapist-scanner'});}catch(err){handled=false;}
+          if(!handled)setScanStatus('Kopplungs-QR bitte in der Patienten-App scannen.');
           return {type:handled?'livePairing':'livePairingError'};
         }
         if(parsed&&(parsed.type==='KGGSYNC1'||parsed.type==='KGGSYNC2')){

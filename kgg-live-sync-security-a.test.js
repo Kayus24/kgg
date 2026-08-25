@@ -8,7 +8,7 @@ const live=require('./kgg-live-sync-client.js');
 const sessionId=live.base64UrlEncode(new Uint8Array(16).fill(3));
 const sessionSalt=live.base64UrlEncode(new Uint8Array(32).fill(4));
 const pairingId=live.base64UrlEncode(new Uint8Array(16).fill(5));
-const plan={type:'plan_snapshot',synthetic:true,planRevision:'a'.repeat(64),title:'Synthetischer Plan',days:2,extendDays:false,stepDays:2,exercises:[{id:'exercise-a',order:0,name:'Synthetische Übung',sets:3,side:'BI',unit:'kg',measure:'Wdh',archived:false}]};
+const plan=live.testFixtures().planSnapshot;
 
 function session(){return {sessionId,sessionSalt,pairingId,code:'12345678',expiresAt:new Date(Date.now()+60000).toISOString()};}
 async function aesKey(){return global.crypto.subtle.importKey('raw',live.randomBytes(32),{name:'AES-GCM'},false,['encrypt','decrypt']);}

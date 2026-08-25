@@ -162,8 +162,14 @@
     return {mode,requestedMode:mode,reason:'configured',simulator,endpoint,productionApproved:approved};
   }
   function assertMode(config,needed){const state=activeConfig(config);assert(state.mode===needed||state.mode==='production'&&needed==='live'||state.mode==='test'&&needed==='live','MODE_OFF','Live-Sync ist deaktiviert.');return state;}
-  function assertSynthetic(config,value){const state=activeConfig(config);if(state.mode==='test')assert(value&&value.synthetic===true,'TEST_DATA_REQUIRED','Der Testmodus akzeptiert ausschließlich synthetische Daten.');}
+  function assertSynthetic(config,value){const state=activeConfig(config);if(state.mode==='test'){assert(value&&value.synthetic===true,'TEST_DATA_REQUIRED','Der Testmodus akzeptiert ausschließlich synthetische Daten.');if(value.type==='plan_snapshot'||value.type==='training_events')assertTestFixture(value);}}
   function opaqueHandle(value){assert(typeof value==='string'&&OPAQUE_HANDLE_RE.test(value),'NATIVE_CRYPTO_REQUIRED','KGGLiveKey-Bridge lieferte kein gültiges opakes Handle.');return value;}
+  function deepFreeze(value){if(value&&typeof value==='object'&&!Object.isFrozen(value)){Object.freeze(value);Object.keys(value).forEach(key=>deepFreeze(value[key]));}return value;}
+  const TEST_PLAN_FIXTURE=deepFreeze({type:'plan_snapshot',synthetic:true,planRevision:'1'.repeat(64),title:'Synthetischer Plan',days:2,extendDays:false,stepDays:2,exercises:[{id:'exercise-stable-a',order:0,name:'Synthetische Übung A',sets:3,side:'BI',unit:'kg',measure:'Wdh',archived:false},{id:'exercise-stable-b',order:1,name:'Synthetische Übung B',sets:2,side:'LR',unit:'kg',measure:'Wdh',archived:false}]});
+  const TEST_EVENTS_FIXTURE=deepFreeze([{eventId:'event-stable-01',exerciseId:'exercise-stable-a',day:1,set:1,side:'B',metric:'reps',value:77,pain:4,recordedAt:'2026-01-01T00:00:00.000Z'}]);
+  function cloneTestValue(value){return JSON.parse(JSON.stringify(value));}
+  function assertTestFixture(value){const expected=value&&value.type==='plan_snapshot'?TEST_PLAN_FIXTURE:value&&value.type==='training_events'?{type:'training_events',synthetic:true,basePlanRevision:TEST_PLAN_FIXTURE.planRevision,events:TEST_EVENTS_FIXTURE}:null;assert(expected&&canonicalJson(value)===canonicalJson(expected),'TEST_DATA_REQUIRED','Der Testmodus akzeptiert nur die feste synthetische Fixture.');return true;}
+  function testFixtures(config){const state=activeConfig(config);assert(state.mode==='test','MODE_OFF','Testschnittstelle ist nur im expliziten Testmodus aktiv.');return {planSnapshot:cloneTestValue(TEST_PLAN_FIXTURE),trainingEvents:cloneTestValue(TEST_EVENTS_FIXTURE),planRevision:TEST_PLAN_FIXTURE.planRevision};}
 
   async function buildJoinProof(pairingSigner,sessionId,sessionSalt){
     const id=base64UrlDecode(String(sessionId||'')),salt=base64UrlDecode(String(sessionSalt||''));
@@ -349,6 +355,7 @@
     }
     async flushQueue(){if(!this.socket||this.socket.readyState===3||(!this.key&&!this.nativeSession)||!this.session)return;this.assertSessionActive();await this.queue.clearExpired(Date.now());this.assertSessionActive();const items=await this.queue.list(this.session.sessionId);this.assertSessionActive();for(const item of items){try{if(Number(item.expiresAt)<=Date.now()){this.assertSessionActive();await this.queue.remove(item.id);continue;}this.sendRaw(item.frame);this.assertSessionActive();await this.queue.remove(item.id);}catch(err){if(err.code==='SESSION_EXPIRED')throw err;this.setStatus('offline');break;}}}
     async receiveInner(value,frame){
+      this.assertSessionActive();assertSynthetic(this.config,value);
       if(value.type==='plan_snapshot'){assert(this.role===ROLE_PATIENT,'MESSAGE_ROLE','Plan-Snapshot darf nur Patient:innen erreichen.');validatePlanSnapshot(value);await this.onMessage(value,{frame});return;}
       if(value.type==='training_events'){assert(this.role===ROLE_THERAPIST,'MESSAGE_ROLE','Trainingsergebnisse dürfen nur Therapeut:innen erreichen.');validateTrainingEvents(value);const fresh=value.events.filter(event=>!this.eventIds.has(event.eventId));fresh.forEach(event=>this.eventIds.add(event.eventId));this.receivedEvents.push(...fresh);if(this.receivedEvents.length>MAX_EVENTS)this.receivedEvents=this.receivedEvents.slice(-MAX_EVENTS);if(fresh.length)await this.onMessage({...value,events:fresh},{frame});await this.send('receipt',{synthetic:value.synthetic===true,cursor:frame.sequence,appliedIds:fresh.map(event=>event.eventId)});return;}
       if(value.type==='receipt'){assert(Number.isInteger(value.cursor)&&value.cursor>=0,'RECEIPT_INVALID','Receipt ist ungültig.');await this.onMessage(value,{frame});return;}
@@ -379,15 +386,15 @@
   }
 
   async function createTestSimulator(){
-    const config=activeConfig({mode:global.KGG_LIVE_SYNC_MODE||'off',simulator:global.KGG_LIVE_TEST_SIMULATOR===true});assert(config.mode==='test'&&config.simulator,'MODE_OFF','Testschnittstelle ist nur im expliziten Testmodus aktiv.');global.KGGLiveSyncTest=global.KGGLiveSyncTest||{createSimulator:createTestSimulator,hash:async value=>sha256Hex(canonicalJson(value)),status:()=>({mode:'test',syntheticOnly:true,relayFrames:'ciphertext-only'})};const material=createPairingMaterial(),secret=base64UrlDecode(material.payload.pairingSecret),pairingKey=await importHmacKey(secret);
+    const config=activeConfig({mode:global.KGG_LIVE_SYNC_MODE||'off',simulator:global.KGG_LIVE_TEST_SIMULATOR===true});assert(config.mode==='test'&&config.simulator,'MODE_OFF','Testschnittstelle ist nur im expliziten Testmodus aktiv.');const fixtures=testFixtures(config);global.KGGLiveSyncTest=global.KGGLiveSyncTest||{createSimulator:createTestSimulator,hash:async value=>sha256Hex(canonicalJson(value)),status:()=>({mode:'test',syntheticOnly:true,relayFrames:'ciphertext-only'})};const material=createPairingMaterial(),secret=base64UrlDecode(material.payload.pairingSecret),pairingKey=await importHmacKey(secret);
     const session={sessionId:base64UrlEncode(randomBytes(16)),sessionSalt:base64UrlEncode(randomBytes(32)),pairingId:material.payload.pairingId,code:String(Math.floor(10000000+Math.random()*90000000)),expiresAt:new Date(Date.now()+SESSION_MS).toISOString()};
     const sessionIdHash=await sha256Hex(session.sessionId),left=await createEphemeralKeyPair(),right=await createEphemeralKeyPair(),binding=await hmac(pairingKey,concatBytes(utf8(BINDING_CONTEXT),base64UrlDecode(session.pairingId)));session.pairingBinding=binding;
     const leftKey=await deriveSessionKey(left.privateKey,right.publicKey,session),rightKey=await deriveSessionKey(right.privateKey,left.publicKey,session);const leftGuard=new ReplayGuard(),rightGuard=new ReplayGuard();let leftSequence=0,rightSequence=0;const frames=[];const received={therapist:[],patient:[]};
     async function send(sender,key,guard,sequence,payload){const frame=await encryptEnvelope(key,session.sessionId,sender,sequence,payload);frames.push(JSON.parse(JSON.stringify(frame)));const target=sender===ROLE_THERAPIST?ROLE_PATIENT:ROLE_THERAPIST;const result=await decryptEnvelope(target===ROLE_PATIENT?rightKey:leftKey,session.sessionId,sender,frame,target===ROLE_PATIENT?rightGuard:leftGuard);received[target].push(result.payload);return result.payload;}
     return {
       pairingQr:material.qr,sessionCode:session.code,expiresAt:session.expiresAt,
-      async sendSyntheticPlanSnapshot(snapshot){const value={...snapshot,type:'plan_snapshot',synthetic:true};validatePlanSnapshot(value);return send(ROLE_THERAPIST,leftKey,leftGuard,++leftSequence,value);},
-      async sendSyntheticTrainingEvents(events,basePlanRevision){const value={type:'training_events',synthetic:true,basePlanRevision:String(basePlanRevision||''),events};validateTrainingEvents(value);return send(ROLE_PATIENT,rightKey,rightGuard,++rightSequence,value);},
+      async sendSyntheticPlanSnapshot(snapshot){const value=snapshot===undefined?fixtures.planSnapshot:{...snapshot,type:'plan_snapshot',synthetic:true};validatePlanSnapshot(value);assertTestFixture(value);return send(ROLE_THERAPIST,leftKey,leftGuard,++leftSequence,value);},
+      async sendSyntheticTrainingEvents(events,basePlanRevision){const value={type:'training_events',synthetic:true,basePlanRevision:basePlanRevision===undefined?fixtures.planRevision:String(basePlanRevision||''),events:events===undefined?fixtures.trainingEvents:events};validateTrainingEvents(value);assertTestFixture(value);return send(ROLE_PATIENT,rightKey,rightGuard,++rightSequence,value);},
       async receive(role){return received[role].slice();},
       async hash(value){return sha256Hex(canonicalJson(value));},
       status(){return {mode:'test',syntheticOnly:true,sessionCode:session.code,sessionIdHash,connected:true,keyReady:true,relayFrameCount:frames.length,plaintextFrames:0};},
@@ -398,7 +405,7 @@
 
   const api={
     version:PROTOCOL_VERSION,pairingPrefix:PAIRING_PREFIX,roles:{therapist:ROLE_THERAPIST,patient:ROLE_PATIENT},
-    config:activeConfig,randomBytes,base64UrlEncode,base64UrlDecode,canonicalJson,canonicalBytes,sha256Hex,createPairingMaterial,createPairingQr,parsePairingQr,isPairingQr,makeKeyStore,makeHttpRelay,buildJoinProof,createEphemeralKeyPair,deriveSessionKey,encryptEnvelope,decryptEnvelope,ReplayGuard,validatePlanSnapshot,validateTrainingEvents,LiveSession,createTestSimulator,
+    config:activeConfig,randomBytes,base64UrlEncode,base64UrlDecode,canonicalJson,canonicalBytes,sha256Hex,createPairingMaterial,createPairingQr,parsePairingQr,isPairingQr,makeKeyStore,makeHttpRelay,buildJoinProof,createEphemeralKeyPair,deriveSessionKey,encryptEnvelope,decryptEnvelope,ReplayGuard,validatePlanSnapshot,validateTrainingEvents,testFixtures,LiveSession,createTestSimulator,
     createClient:options=>new LiveSession(options||{}),CiphertextQueue,
     async importPairingQr(qr,store,metadata){const target=store||makeKeyStore({allowMemory:false});const parsed=parsePairingQr(qr);const result=await target.putSecret({payload:parsed,planRef:metadata&&metadata.planRef||''});return {pairingId:result.pairingId,keyVersion:result.keyVersion,createdAt:result.createdAt,storage:result.storage};},
     status:()=>{const value=activeConfig();return {mode:value.mode,requestedMode:value.requestedMode,reason:value.reason,syntheticOnly:value.mode==='test',productionConfigured:value.mode==='production'};}

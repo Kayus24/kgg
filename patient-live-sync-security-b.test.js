@@ -19,7 +19,7 @@ function exactValuesKey(plan){
 async function main(){
   const localStorage=makeStorage(),elements={};
   ['status','plan','kggLiveTestHint','kggLivePairScan','kggLiveJoin','kggLiveLeave','kggLiveSessionCode','kggLiveSyncPatientStatus'].forEach(id=>{elements[id]=makeElement(id);});
-  const records=new Map();let client=null,replaceCount=0;
+  const records=new Map();let client=null,replaceCount=0,runtimeMode='test';
   const store={
     async available(){return true;},
     async putSecret(payload){const parsed=payload.payload;records.set(parsed.pairingId,{id:parsed.pairingId,key:{type:'secret'},planRef:payload.planRef});return {pairingId:parsed.pairingId,keyVersion:1,createdAt:parsed.createdAt,storage:'memory'};},
@@ -27,12 +27,13 @@ async function main(){
     async sign(){return new Uint8Array(32);}
   };
   const live={
-    config:()=>({mode:'test'}),
+    config:()=>({mode:runtimeMode}),
     makeKeyStore:()=>store,
     isPairingQr:value=>String(value||'').startsWith('KGGLIVEPAIR1:'),
     importPairingQr:async(qr,target,metadata)=>target.putSecret({payload:{pairingId:'pair-a',createdAt:'2026-01-01T00:00:00.000Z'},planRef:metadata.planRef}),
     canonicalJson:value=>JSON.stringify(value),
     sha256Hex:async()=> 'b'.repeat(64),
+    testFixtures:()=>({planSnapshot:{type:'plan_snapshot',synthetic:true,planRevision:'b'.repeat(64),title:'Synthetischer Plan',days:2,extendDays:false,stepDays:2,exercises:[]},trainingEvents:[{eventId:'event-stable-01',exerciseId:'exercise-stable-a',day:1,set:1,side:'B',metric:'reps',value:77,pain:4,recordedAt:'2026-01-01T00:00:00.000Z'}],planRevision:'b'.repeat(64)}),
     createClient:options=>{
       client={pairingId:options.pairingId,key:{},closed:false,options,sends:[],joined:[],close:async function(){this.closed=true;},failClosed:function(){this.closed=true;this.failedClosed=true;},status:()=>({mode:'test',status:'ready'})};
       client.join=async code=>{client.joined.push(code);await options.onReady();};
@@ -50,7 +51,7 @@ async function main(){
   localStorage.setItem('kggCurrentPlanV1',JSON.stringify({plan:planA}));
   const oldPlan={...planA,e:[['Alte Übung',3,'BI','kg','Wdh']]};
   localStorage.setItem(exactValuesKey(oldPlan),JSON.stringify({'1|0|1|B|reps':'12'}));
-  const currentKey=exactValuesKey(planA);localStorage.setItem(currentKey,JSON.stringify({'1|0|1|B|reps':'77','1|0|1|P|pain':'4'}));
+  const currentKey=exactValuesKey(planA);localStorage.setItem(currentKey,JSON.stringify({'1|0|1|B|reps':'999','1|0|1|P|pain':'9'}));
   const pairingQr='KGGLIVEPAIR1:synthetic-secret-never-rendered';
   assert.equal(await api.handleScannedText(pairingQr),true);
   elements.kggLiveSessionCode.value='12345678';await elements.kggLiveJoin.onclick();
@@ -64,6 +65,7 @@ async function main(){
   assert.equal(client.closed,true);
   assert.equal((await store.get('pair-a')).planRef,'plan-a');
 
+  runtimeMode='production';
   localStorage.removeItem(currentKey);
   await api.handleScannedText(pairingQr);elements.kggLiveSessionCode.value='12345678';await elements.kggLiveJoin.onclick();
   assert.equal(client.sends.length,0);

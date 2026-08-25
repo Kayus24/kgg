@@ -34,10 +34,8 @@ async function main(){
 
   const simulator=await live.createTestSimulator();
   assert.match(simulator.expiresAt,/^\d{4}-\d\d-\d\dT/);
-  const plan={type:'plan_snapshot',synthetic:true,planRevision:'1'.repeat(64),title:'Synthetischer Plan',days:2,exercises:[
-    {id:'exercise-stable-a',order:0,name:'Synthetische Übung A',sets:3,side:'BI',unit:'kg',measure:'Wdh',archived:false},
-    {id:'exercise-stable-b',order:1,name:'Synthetische Übung B',sets:2,side:'LR',unit:'kg',measure:'Wdh',archived:false}
-  ]};
+  const fixtures=live.testFixtures();
+  const plan=fixtures.planSnapshot;
   await simulator.sendSyntheticPlanSnapshot(plan);
   const changedPlan={...plan,planRevision:'2'.repeat(64),exercises:[
     {...plan.exercises[1],order:0,archived:true},
@@ -48,8 +46,7 @@ async function main(){
   const patientMessages=await simulator.receive('patient');
   assert.equal(patientMessages.length,1);
   assert.equal(patientMessages[0].exercises[0].id,'exercise-stable-a');
-  const event={eventId:'event-stable-01',exerciseId:'exercise-stable-a',day:1,set:1,side:'B',metric:'reps',value:77,pain:4,recordedAt:new Date().toISOString()};
-  await simulator.sendSyntheticTrainingEvents([event],plan.planRevision);
+  await simulator.sendSyntheticTrainingEvents(fixtures.trainingEvents,plan.planRevision);
   const therapistMessages=await simulator.receive('therapist');
   assert.equal(therapistMessages[0].events[0].value,77);
   assert.equal(therapistMessages[0].events[0].pain,4);
