@@ -51,6 +51,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.core.content.FileProvider;
+import androidx.webkit.WebViewCompat;
+import androidx.webkit.WebViewFeature;
 import androidx.work.Constraints;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.NetworkType;
@@ -72,6 +74,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -135,6 +138,8 @@ public class MainActivity extends Activity {
     private boolean pendingForceCamera;
     private KggReleaseController releaseController;
     private KggLiveKeyBridge liveKeyBridge;
+    private KggLiveWebMessageBridge liveKeyMessageBridge;
+    private boolean liveKeyMessageBridgeRegistered;
     private final Handler previewStatusHandler = new Handler(Looper.getMainLooper());
     private final AtomicBoolean previewStatusRequestRunning = new AtomicBoolean(false);
     private boolean previewStatusPolling;
@@ -238,6 +243,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         detachLiveKeyBridge();
+        disposeLiveKeyMessageBridge();
         if (liveKeyBridge != null) {
             liveKeyBridge.onDestroy();
         }
@@ -297,6 +303,7 @@ public class MainActivity extends Activity {
         webView.addJavascriptInterface(new KggAppBridge(), "KGGAndroidApp");
         webView.addJavascriptInterface(new KggPdfBridge(), "KGGAndroidPdf");
         releaseController = KggReleaseControllerFactory.attach(this, webView);
+        configureLiveKeyMessageBridge();
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
@@ -331,10 +338,7 @@ public class MainActivity extends Activity {
                     WebResourceError error
             ) {
                 if (request == null || request.isForMainFrame()) {
-                    if (liveKeyBridge != null) {
-                        liveKeyBridge.onError();
-                    }
-                    detachLiveKeyBridgeInterface();
+                    detachLiveKeyBridge();
                 }
                 super.onReceivedError(view, request, error);
             }
@@ -763,12 +767,10 @@ public class MainActivity extends Activity {
             return;
         }
         try {
-            webView.removeJavascriptInterface(KggLiveKeyBridge.JS_NAME);
             liveKeyBridge.activateForPage(url, trustedUrl);
-            webView.addJavascriptInterface(liveKeyBridge, KggLiveKeyBridge.JS_NAME);
         } catch (Exception ignored) {
             liveKeyBridge.onError();
-            detachLiveKeyBridgeInterface();
+            detachLiveKeyBridge();
         }
     }
 
@@ -776,12 +778,59 @@ public class MainActivity extends Activity {
         if (liveKeyBridge != null) {
             liveKeyBridge.deactivateForPage();
         }
-        detachLiveKeyBridgeInterface();
     }
 
-    private void detachLiveKeyBridgeInterface() {
-        if (webView != null) {
-            webView.removeJavascriptInterface(KggLiveKeyBridge.JS_NAME);
+    private void configureLiveKeyMessageBridge() {
+        if (liveKeyBridge == null || webView == null) {
+            return;
+        }
+        boolean featureSupported = false;
+        try {
+            featureSupported = WebViewFeature.isFeatureSupported(
+                    WebViewFeature.WEB_MESSAGE_LISTENER
+            );
+        } catch (Exception ignored) {
+            // Keep live-sync unavailable; existing app bridges are unaffected.
+        }
+        if (!featureSupported) {
+            liveKeyBridge.setMessageTransportAvailable(
+                    KggLiveWebMessagePolicy.isTransportReady(false, false)
+            );
+            return;
+        }
+        liveKeyMessageBridge = new KggLiveWebMessageBridge(liveKeyBridge);
+        try {
+            // file:-HTML has no narrow source origin; the callback performs the
+            // exact current-file and main-frame checks before parsing anything.
+            WebViewCompat.addWebMessageListener(
+                    webView,
+                    KggLiveKeyBridge.JS_NAME,
+                    Collections.singleton("*"),
+                    liveKeyMessageBridge
+            );
+            liveKeyMessageBridgeRegistered = true;
+            liveKeyBridge.setMessageTransportAvailable(
+                    KggLiveWebMessagePolicy.isTransportReady(true, true)
+            );
+        } catch (Exception ignored) {
+            liveKeyMessageBridgeRegistered = false;
+            liveKeyBridge.setMessageTransportAvailable(
+                    KggLiveWebMessagePolicy.isTransportReady(true, false)
+            );
+        }
+    }
+
+    private void disposeLiveKeyMessageBridge() {
+        if (webView != null && liveKeyMessageBridgeRegistered) {
+            try {
+                WebViewCompat.removeWebMessageListener(webView, KggLiveKeyBridge.JS_NAME);
+            } catch (Exception ignored) {
+                // Lifecycle cleanup remains fail closed even if WebView is gone.
+            }
+        }
+        liveKeyMessageBridgeRegistered = false;
+        if (liveKeyBridge != null) {
+            liveKeyBridge.setMessageTransportAvailable(false);
         }
     }
 

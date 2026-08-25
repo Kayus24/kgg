@@ -298,6 +298,34 @@ public class KggLiveCryptoCoreTest {
         assertEquals("patient", KggLiveBridgePolicy.oppositeRole("therapist"));
     }
 
+    @Test
+    public void webMessageFrameAndFeatureGuardsAreFailClosed() {
+        String trusted = "file:///data/user/0/de.kgg.app/files/web/kgg.html";
+        assertEquals(
+                KggLiveWebMessagePolicy.ERROR_FRAME_NOT_ALLOWED,
+                KggLiveWebMessagePolicy.frameError(false, "{not-json", trusted)
+        );
+        assertEquals(
+                KggLiveWebMessagePolicy.ERROR_ORIGIN_NOT_ALLOWED,
+                KggLiveWebMessagePolicy.frameError(
+                        true,
+                        "file:///data/user/0/de.kgg.app/files/web/other.html",
+                        trusted
+                )
+        );
+        assertEquals(
+                "",
+                KggLiveWebMessagePolicy.frameError(
+                        true,
+                        trusted + "#live",
+                        trusted
+                )
+        );
+        assertFalse(KggLiveWebMessagePolicy.isTransportReady(false, true));
+        assertFalse(KggLiveWebMessagePolicy.isTransportReady(true, false));
+        assertTrue(KggLiveWebMessagePolicy.isTransportReady(true, true));
+    }
+
     private static void assertFails(CryptoAction action) throws Exception {
         try {
             action.run();

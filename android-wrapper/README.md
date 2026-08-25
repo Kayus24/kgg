@@ -55,9 +55,72 @@ geschlossen.
   verfügbar und stellt Window-Flags, Helligkeit und UI-Zustand beim Ende,
   Pause oder Fehler wieder her.
 
+Der Transport für `KGGLiveKey` ist ausschließlich die gepinnte AndroidX-
+WebMessage-Bridge `androidx.webkit:webkit:1.17.0`. Das JS-Objekt heißt
+`window.KGGLiveKey`; es wird vor der Navigation registriert. Da die lokale
+`file:`-Seite keinen engen `sourceOrigin`-Wert zulässt, wird bei der
+Registrierung nur technisch notwendiges `*` verwendet. Jeder Callback lehnt
+zuerst `isMainFrame=false` ab und prüft danach die aktuelle Hauptframe-URL mit
+`KggLiveBridgePolicy` auf genau die vertrauenswürdige lokale KGG-Datei; nur
+Query- oder Hash-Abweichungen sind erlaubt. `about:blank`, `blob:`, PDF-/andere
+Unterframes und jede untrusted Hauptframe verlieren. Bei Navigation weg von
+der Datei wird die native Sitzung geschlossen. Die anderen bestehenden
+`KGGAndroidSync`, `KGGAndroidApp`, `KGGAndroidPdf`- und Release-Bridges bleiben
+unverändert.
+
+Der exakte asynchrone Vertrag ist:
+
+```json
+{"version":1,"requestId":"bounded-id","op":"operation","args":{}}
+```
+
+`requestId` ist 1–64 Zeichen aus `[A-Za-z0-9._~-]`; `version` muss `1` sein.
+Das Objekt darf ausschließlich `version`, `requestId`, `op` und `args`
+enthalten. Jede Anfrage erhält genau eine Antwort über
+`JavaScriptReplyProxy.postMessage()` und im WebView über
+`window.KGGLiveKey.onmessage`/`addEventListener("message", ...)`:
+
+```json
+{"version":1,"requestId":"bounded-id","ok":true,"result":{}}
+{"version":1,"requestId":"bounded-id","ok":false,"error":"generic_code"}
+```
+
+Fehlercodes enthalten keine sensiblen Details. Die Operations-Allowlist und
+ihre exakt erlaubten Argumentfelder sind:
+
+- `getCapabilities {}`; `hasPairing|createPairing|rotatePairing|deletePairing`
+  jeweils `{planKey}`; `computeJoinHmac` `{planKey,sessionId,sessionSalt}`.
+- `verifyPeerOffer` `{planKey,localRole,sessionId,offer}`.
+- `createEphemeralKeyPair` `{curve,planKey,sessionId,role}`. `curve` ist
+  `P-256`; die Antwort enthält `publicKey`, `pairingId`,
+  `pairingBinding` und einen begrenzten `privateKeyHandle`, aber niemals den
+  privaten Schlüssel.
+- `deriveSessionKey` `{curve,planKey,sessionId,sessionSalt,pairingId,
+  pairingBinding,privateKeyHandle,peerPublicKey,role,expiresAt}`. Der Adapter
+  rekonstruiert daraus intern das authentifizierte Peer-Angebot und verwendet
+  ausschließlich den nativen flüchtigen Handle. `expiresAt` ist exakt der
+  Relay-Wert im UTC-ISO-Format `YYYY-MM-DDTHH:mm:ss.SSSZ`, noch gültig und
+  höchstens zwei Stunden entfernt; er wird nativ geprüft und in die HKDF-
+  Sitzungsbindung aufgenommen.
+- `encryptFrame` `{planKey,sessionId,aad,plaintext}` und `decryptFrame`
+  `{planKey,sessionId,nonce,aad,ciphertext}`. Bytefelder sind ungepaddete
+  Base64URL-Strings; AAD wird unverändert authentifiziert. `closeSession {}`
+  schließt über denselben Frame-/URL-Guard. Debug-only sind zusätzlich
+  `enableBlackout {}` und `disableBlackout {}`.
+
+`planKey` ist die bewusst begrenzte native Adapterergänzung, weil der aktuelle
+  Pairing-Speicher mehrere Planindizes unterstützt. Der spätere Root-Client
+  kann seine erwarteten Operationen 1:1 auf diese Tabelle abbilden; Root-Client
+  und Web-App werden in diesem Worktree nicht geändert. Bei fehlender
+  `WEB_MESSAGE_LISTENER`-Unterstützung oder fehlgeschlagener Registrierung
+  bleibt nur Live-Sync aus (`available=false`/kein Listener); QR-, Offline-,
+  PDF- und normale App-Flows bleiben aktiv. Eine synchrone
+  `addJavascriptInterface`-Kompatibilität für `KGGLiveKey` existiert nicht.
+
 Die JVM-Tests decken den provider-neutralen Crypto-Core, Wrapping-Roundtrip,
 Falsch-Alias/Manipulation, HMAC-/ECDH-/HKDF-/AAD-/Nonce-Grenzen, Session-Close
-und Origin-/Größenprüfung ab. Ein späterer Instrumentation-Test auf einem
+und die Frame-/Transport-Grenze ab. Ein späterer Instrumentation-Test auf einem
 echten Android-Gerät muss zusätzlich Android Keystore, SharedPreferences und
-den Tab-S9-Blackout-Restore-Vertrag nachweisen, bevor eine Produktionsfreigabe
+die echte WebMessageListener-/WebView-Navigation, den Android Keystore,
+SharedPreferences und den Tab-S9-Blackout-Restore-Vertrag nachweisen, bevor eine Produktionsfreigabe
 zulässig ist.

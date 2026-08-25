@@ -47,6 +47,7 @@ public final class KggLiveKeyBridge {
     private static final int MAX_PAIRINGS = 32;
     private static final int MAX_STATE_BYTES = 64 * 1024;
     private static final int MAX_EXPIRES_AT_CHARS = 40;
+    private static final int EPHEMERAL_HANDLE_BYTES = 16;
     private static final String PREFS = "kgg_live_key_private_v1";
     private static final String PREF_STATE = "state";
     private static final String MASTER_KEY_ALIAS = "kgg_live_key_master_v1";
@@ -77,8 +78,10 @@ public final class KggLiveKeyBridge {
     private String activeRole;
     private byte[] activePairingId;
     private byte[] activeSessionId;
+    private String activePrivateKeyHandle;
     private KggLiveSessionWindow activeSessionWindow;
     private final KggLiveSessionSecrets sessionSecrets = new KggLiveSessionSecrets();
+    private boolean messageTransportAvailable;
 
     public KggLiveKeyBridge(Activity activity, WebView webView) {
         if (activity == null || webView == null) {
@@ -110,6 +113,32 @@ public final class KggLiveKeyBridge {
         synchronized (this) {
             trustedBaseUrl = expectedBaseUrl;
             bridgeActive = true;
+        }
+    }
+
+    void setMessageTransportAvailable(boolean available) {
+        synchronized (this) {
+            messageTransportAvailable = available;
+            if (!available) {
+                clearSessionLocked();
+            }
+        }
+    }
+
+    String messageFrameError(WebView callbackView, boolean isMainFrame) {
+        synchronized (this) {
+            String frameError = KggLiveWebMessagePolicy.frameError(
+                    isMainFrame,
+                    webView == null ? null : webView.getUrl(),
+                    trustedBaseUrl
+            );
+            if (!frameError.isEmpty()) {
+                return frameError;
+            }
+            if (!messageTransportAvailable || callbackView != webView || !bridgeActive) {
+                return "bridge_inactive";
+            }
+            return "";
         }
     }
 
@@ -304,6 +333,8 @@ public final class KggLiveKeyBridge {
         KeyPair newKeyPair = null;
         byte[] publicKey = null;
         byte[] mac = null;
+        byte[] privateKeyHandleBytes = null;
+        String newPrivateKeyHandle = null;
         try {
             String checkedPlanKey = requirePlanKey(planKey);
             requireRole(role);
@@ -318,6 +349,11 @@ public final class KggLiveKeyBridge {
             mac = KggLiveCryptoCore.peerOfferMac(
                     material.secret, material.id, role, sessionId, publicKey
             );
+            privateKeyHandleBytes = KggLiveCryptoCore.randomBytes(
+                    random,
+                    EPHEMERAL_HANDLE_BYTES
+            );
+            newPrivateKeyHandle = KggLiveCryptoCore.base64Url(privateKeyHandleBytes);
             JSONObject offer = new JSONObject()
                     .put("v", PROTOCOL_VERSION)
                     .put("pairingId", material.idBase64Url)
@@ -332,6 +368,8 @@ public final class KggLiveKeyBridge {
             activeRole = role;
             activePairingId = Arrays.copyOf(material.id, material.id.length);
             activeSessionId = Arrays.copyOf(sessionId, sessionId.length);
+            activePrivateKeyHandle = newPrivateKeyHandle;
+            newPrivateKeyHandle = null;
             return offer.toString();
         } catch (Exception ignored) {
             return error("offer_failed");
@@ -339,7 +377,7 @@ public final class KggLiveKeyBridge {
             if (newKeyPair != null) {
                 KggLiveCryptoCore.destroy(newKeyPair.getPrivate());
             }
-            KggLiveCryptoCore.clear(sessionId, publicKey, mac);
+            KggLiveCryptoCore.clear(sessionId, publicKey, mac, privateKeyHandleBytes);
             if (material != null) {
                 material.clear();
             }
@@ -398,9 +436,12 @@ public final class KggLiveKeyBridge {
         byte[] expiryBinding = null;
         byte[] derived = null;
         byte[] expectedMac = null;
+        byte[] establishedPairingId = null;
+        byte[] establishedSessionId = null;
         PairingMaterial material = null;
         PeerOffer offer = null;
         KggLiveSessionWindow newSessionWindow = null;
+        String establishedRole = null;
         boolean stored = false;
         try {
             String checkedPlanKey = requirePlanKey(planKey);
@@ -471,10 +512,19 @@ public final class KggLiveKeyBridge {
                     System.currentTimeMillis(),
                     SystemClock.elapsedRealtime()
             );
+            establishedPairingId = Arrays.copyOf(activePairingId, activePairingId.length);
+            establishedSessionId = Arrays.copyOf(activeSessionId, activeSessionId.length);
+            establishedRole = activeRole;
             clearSessionLocked();
             sessionSecrets.replace(derived);
             derived = null;
             activePlanKey = checkedPlanKey;
+            activePairingId = establishedPairingId;
+            establishedPairingId = null;
+            activeSessionId = establishedSessionId;
+            establishedSessionId = null;
+            activeRole = establishedRole;
+            establishedRole = null;
             activeSessionWindow = newSessionWindow;
             newSessionWindow = null;
             stored = true;
@@ -483,7 +533,16 @@ public final class KggLiveKeyBridge {
             clearSessionLocked();
             return error("session_failed");
         } finally {
-            KggLiveCryptoCore.clear(sessionSalt, sharedSecret, info, expiryBinding, expectedMac, derived);
+            KggLiveCryptoCore.clear(
+                    sessionSalt,
+                    sharedSecret,
+                    info,
+                    expiryBinding,
+                    expectedMac,
+                    derived,
+                    establishedPairingId,
+                    establishedSessionId
+            );
             if (material != null) {
                 material.clear();
             }
@@ -497,6 +556,139 @@ public final class KggLiveKeyBridge {
                 newSessionWindow.clear();
             }
         }
+    }
+
+    /**
+     * Adapter for the asynchronous client contract. The private key remains
+     * native; privateKeyHandle is only an in-memory selector for that key.
+     */
+    synchronized String createEphemeralKeyPair(
+            String curve,
+            String planKey,
+            String sessionIdBase64Url,
+            String role
+    ) {
+        if (!"P-256".equals(curve)) {
+            return error("curve_invalid");
+        }
+        try {
+            JSONObject offer = new JSONObject(createPeerOffer(planKey, role, sessionIdBase64Url));
+            if (offer.has("ok") && !offer.optBoolean("ok", false)) {
+                return error("offer_failed");
+            }
+            if (activePrivateKeyHandle == null) {
+                return error("offer_failed");
+            }
+            return new JSONObject()
+                    .put("curve", curve)
+                    .put("sessionId", offer.getString("sessionId"))
+                    .put("role", offer.getString("role"))
+                    .put("pairingId", offer.getString("pairingId"))
+                    .put("publicKey", offer.getString("publicKey"))
+                    .put("pairingBinding", offer.getString("mac"))
+                    .put("privateKeyHandle", activePrivateKeyHandle)
+                    .toString();
+        } catch (Exception ignored) {
+            return error("offer_failed");
+        }
+    }
+
+    synchronized String deriveSessionKeyForClient(
+            String curve,
+            String planKey,
+            String sessionIdBase64Url,
+            String sessionSaltBase64Url,
+            String pairingIdBase64Url,
+            String pairingBindingBase64Url,
+            String privateKeyHandle,
+            String peerPublicKeyBase64Url,
+            String role,
+            String expiresAt
+    ) {
+        if (!"P-256".equals(curve)) {
+            return error("curve_invalid");
+        }
+        byte[] sessionId = null;
+        byte[] pairingId = null;
+        byte[] pairingBinding = null;
+        byte[] peerPublicKey = null;
+        try {
+            requirePlanKey(planKey);
+            requireRole(role);
+            sessionId = KggLiveCryptoCore.decodeBase64Url(
+                    sessionIdBase64Url,
+                    KggLiveCryptoCore.SESSION_ID_BYTES,
+                    KggLiveCryptoCore.SESSION_ID_BYTES
+            );
+            pairingId = KggLiveCryptoCore.decodeBase64Url(
+                    pairingIdBase64Url,
+                    KggLiveCryptoCore.PAIRING_ID_BYTES,
+                    KggLiveCryptoCore.PAIRING_ID_BYTES
+            );
+            pairingBinding = KggLiveCryptoCore.decodeBase64Url(
+                    pairingBindingBase64Url,
+                    KggLiveCryptoCore.HMAC_BYTES,
+                    KggLiveCryptoCore.HMAC_BYTES
+            );
+            peerPublicKey = KggLiveCryptoCore.decodeBase64Url(
+                    peerPublicKeyBase64Url,
+                    KggLiveCryptoCore.P256_PUBLIC_KEY_BYTES,
+                    KggLiveCryptoCore.P256_PUBLIC_KEY_BYTES
+            );
+            if (activePrivateKeyHandle == null
+                    || !activePrivateKeyHandle.equals(privateKeyHandle)
+                    || !KggLiveBridgePolicy.isRole(activeRole)
+                    || !role.equals(activeRole)
+                    || activeSessionId == null
+                    || activePairingId == null
+                    || !KggLiveCryptoCore.constantTimeEquals(activeSessionId, sessionId)
+                    || !KggLiveCryptoCore.constantTimeEquals(activePairingId, pairingId)) {
+                throw new IllegalStateException("session_context_invalid");
+            }
+            String peerOffer = new JSONObject()
+                    .put("v", PROTOCOL_VERSION)
+                    .put("pairingId", KggLiveCryptoCore.base64Url(pairingId))
+                    .put("role", KggLiveBridgePolicy.oppositeRole(role))
+                    .put("sessionId", KggLiveCryptoCore.base64Url(sessionId))
+                    .put("publicKey", KggLiveCryptoCore.base64Url(peerPublicKey))
+                    .put("mac", KggLiveCryptoCore.base64Url(pairingBinding))
+                    .toString();
+            return deriveSessionKey(
+                    planKey,
+                    sessionSaltBase64Url,
+                    expiresAt,
+                    peerOffer
+            );
+        } catch (Exception ignored) {
+            return error("session_failed");
+        } finally {
+            KggLiveCryptoCore.clear(sessionId, pairingId, pairingBinding, peerPublicKey);
+        }
+    }
+
+    synchronized String encryptFrame(
+            String planKey,
+            String sessionIdBase64Url,
+            String aadBase64Url,
+            String plaintextBase64Url
+    ) {
+        if (!hasActiveSessionForClientLocked(planKey, sessionIdBase64Url)) {
+            return error("encrypt_unavailable");
+        }
+        return encrypt(planKey, aadBase64Url, plaintextBase64Url);
+    }
+
+    synchronized String decryptFrame(
+            String planKey,
+            String sessionIdBase64Url,
+            String nonceBase64Url,
+            String aadBase64Url,
+            String ciphertextBase64Url
+    ) {
+        if (!hasActiveSessionForClientLocked(planKey, sessionIdBase64Url)) {
+            return error("decrypt_unavailable");
+        }
+        return decrypt(planKey, nonceBase64Url, aadBase64Url, ciphertextBase64Url);
     }
 
     public synchronized String encrypt(
@@ -631,7 +823,7 @@ public final class KggLiveKeyBridge {
 
     /** Debug/test-only black immersive cover; production builds always reject it. */
     public boolean enableBlackout() {
-        if (!BuildConfig.DEBUG || !isCurrentPageTrusted()) {
+        if (!BuildConfig.DEBUG || !isTrustedBridgeCallLocked()) {
             return false;
         }
         if (blackoutSnapshot != null) {
@@ -732,7 +924,7 @@ public final class KggLiveKeyBridge {
     }
 
     private boolean isTrustedBridgeCallLocked() {
-        return isCurrentPageTrusted();
+        return messageTransportAvailable && isCurrentPageTrusted();
     }
 
     private boolean isCurrentPageTrusted() {
@@ -1057,9 +1249,33 @@ public final class KggLiveKeyBridge {
         ephemeralKeyPair = null;
         activePlanKey = null;
         activeRole = null;
+        activePrivateKeyHandle = null;
         KggLiveCryptoCore.clear(activePairingId, activeSessionId);
         activePairingId = null;
         activeSessionId = null;
+    }
+
+    private boolean hasActiveSessionForClientLocked(
+            String planKey,
+            String sessionIdBase64Url
+    ) {
+        if (!hasActiveSessionLocked(planKey)) {
+            return false;
+        }
+        byte[] sessionId = null;
+        try {
+            sessionId = KggLiveCryptoCore.decodeBase64Url(
+                    sessionIdBase64Url,
+                    KggLiveCryptoCore.SESSION_ID_BYTES,
+                    KggLiveCryptoCore.SESSION_ID_BYTES
+            );
+            return activeSessionId != null
+                    && KggLiveCryptoCore.constantTimeEquals(activeSessionId, sessionId);
+        } catch (Exception ignored) {
+            return false;
+        } finally {
+            KggLiveCryptoCore.clear(sessionId);
+        }
     }
 
     private static long parseBoundedExpiresAt(String expiresAt) {
@@ -1121,6 +1337,8 @@ public final class KggLiveKeyBridge {
                     .put("available", available)
                     .put("protocolVersion", PROTOCOL_VERSION)
                     .put("keyVersion", KEY_VERSION)
+                    .put("transport", "web_message")
+                    .put("jsObject", KggLiveKeyBridge.JS_NAME)
                     .put("pairingExport", "create-or-rotate-once");
             if (error != null && !error.isEmpty()) {
                 value.put("error", error);
