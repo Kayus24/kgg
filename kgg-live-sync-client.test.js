@@ -55,7 +55,8 @@ async function main(){
   assert.equal(JSON.stringify(frame).includes('"value"'),false);
   Object.values(fixtures.privacyCanaries).forEach(marker=>assert.equal(JSON.stringify(frame).includes(marker),false));
   assert.equal(await simulator.tamper(frame,{sequence:2}),true);
-  assert.equal(await simulator.tamper(frame,{ciphertext:frame.ciphertext.slice(0,-1)+'A'}),true);
+  const tamperedCiphertext=frame.ciphertext.slice(0,-1)+(frame.ciphertext.endsWith('A')?'B':'A');
+  assert.equal(await simulator.tamper(frame,{ciphertext:tamperedCiphertext}),true);
 
   const aesKey=await global.crypto.subtle.importKey('raw',live.randomBytes(32),{name:'AES-GCM'},false,['encrypt','decrypt']);
   const wrongAesKey=await global.crypto.subtle.importKey('raw',live.randomBytes(32),{name:'AES-GCM'},false,['encrypt','decrypt']);
