@@ -33,6 +33,15 @@ export interface AuthFrame {
   token: string;
 }
 
+export interface KeyHelloFrame {
+  v: 1;
+  type: "key_hello";
+  sessionId: string;
+  role: Role;
+  publicKey: string;
+  signature: string;
+}
+
 export interface ReserveBody {
   therapistTokenHash: string;
 }
@@ -77,6 +86,7 @@ const AUTH_KEYS = ["role", "token", "type"] as const;
 const RESERVE_KEYS = ["therapistTokenHash"] as const;
 const ARM_KEYS = ["joinProof"] as const;
 const JOIN_KEYS = ["joinProof", "patientTokenHash"] as const;
+const KEY_HELLO_KEYS = ["publicKey", "role", "sessionId", "signature", "type", "v"] as const;
 const OUTER_FRAME_KEYS = ["ciphertext", "createdAt", "messageId", "nonce", "sender", "sequence", "v"] as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -111,6 +121,28 @@ export function parseAuthFrame(value: string): AuthFrame | null {
     return null;
   }
   return { type: "auth", role: parsed.role, token: parsed.token };
+}
+
+export function parseKeyHelloFrame(value: string): KeyHelloFrame | null {
+  const parsed = parseJson(value);
+  if (!isRecord(parsed)
+    || !hasExactKeys(parsed, KEY_HELLO_KEYS)
+    || parsed.v !== PROTOCOL_VERSION
+    || parsed.type !== "key_hello"
+    || !isRole(parsed.role)
+    || !isBase64UrlOfBytes(parsed.sessionId, 16)
+    || !isBase64UrlOfBytes(parsed.publicKey, 65)
+    || !isBase64UrlOfBytes(parsed.signature, 32)) {
+    return null;
+  }
+  return {
+    v: PROTOCOL_VERSION,
+    type: "key_hello",
+    sessionId: parsed.sessionId as string,
+    role: parsed.role,
+    publicKey: parsed.publicKey as string,
+    signature: parsed.signature as string,
+  };
 }
 
 export function parseReserveBody(value: string): ReserveBody | null {

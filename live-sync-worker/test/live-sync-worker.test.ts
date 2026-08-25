@@ -165,6 +165,21 @@ async function authenticate(socket: WebSocket, role: "therapist" | "patient", to
   expect(JSON.parse(await response)).toEqual({ type: "auth_ok", role });
 }
 
+function keyHello(role: "therapist" | "patient", sessionId: string): string {
+  return JSON.stringify({
+    v: 1,
+    type: "key_hello",
+    sessionId,
+    role,
+    publicKey: randomBase64Url(65),
+    signature: randomBase64Url(32),
+  });
+}
+
+async function consumePeerJoined(socket: WebSocket, role: "therapist" | "patient"): Promise<void> {
+  expect(JSON.parse(await nextMessage(socket))).toEqual({ type: "peer_joined", role });
+}
+
 async function storedSession(code: string): Promise<SessionRecord | undefined> {
   const namespace = testNamespace();
   const stub = namespace.get(namespace.idFromName(code));
@@ -179,6 +194,8 @@ describe("KGG ticket 034 live-sync worker", () => {
     const patientSocket = await openSocket(code);
     await authenticate(therapistSocket, "therapist", therapistToken);
     await authenticate(patientSocket, "patient", armed.patientToken);
+    await consumePeerJoined(therapistSocket, "patient");
+    await consumePeerJoined(patientSocket, "therapist");
 
     const therapistFrame = frame("therapist", 1);
     const patientReceived = nextMessage(patientSocket);
@@ -210,6 +227,8 @@ describe("KGG ticket 034 live-sync worker", () => {
     const patientSocket = await openSocket(code);
     await authenticate(therapistSocket, "therapist", therapistToken);
     await authenticate(patientSocket, "patient", patientToken);
+    await consumePeerJoined(therapistSocket, "patient");
+    await consumePeerJoined(patientSocket, "therapist");
 
     const unauthenticated = await SELF.fetch(`http://localhost/v1/sessions/${code}`, { method: "DELETE" });
     expect(unauthenticated.status).toBe(401);
@@ -316,7 +335,35 @@ describe("KGG ticket 034 live-sync worker", () => {
     expect(JSON.parse(await authOk)).toEqual({ type: "auth_ok", role: "patient" });
     const queued = nextMessage(patientSocket);
     expect(JSON.parse(await queued).ciphertext).toBe(ciphertext);
+    await consumePeerJoined(patientSocket, "therapist");
     expect((await storedSession(code))?.backlog).toHaveLength(0);
+  });
+
+  it("forwards authenticated ephemeral key_hello only to the connected peer", async () => {
+    const { code, therapistToken } = await reserve();
+    const { patientToken } = await armAndJoin(code, therapistToken);
+    const challengeBody = await challenge(code);
+    const therapistSocket = await openSocket(code);
+    const patientSocket = await openSocket(code);
+    await authenticate(therapistSocket, "therapist", therapistToken);
+    await authenticate(patientSocket, "patient", patientToken);
+    await consumePeerJoined(therapistSocket, "patient");
+    await consumePeerJoined(patientSocket, "therapist");
+
+    const therapistHello = keyHello("therapist", challengeBody.sessionId as string);
+    const patientReceived = nextMessage(patientSocket);
+    therapistSocket.send(therapistHello);
+    expect(JSON.parse(await patientReceived)).toEqual(JSON.parse(therapistHello));
+
+    const patientHello = keyHello("patient", challengeBody.sessionId as string);
+    const therapistReceived = nextMessage(therapistSocket);
+    patientSocket.send(patientHello);
+    expect(JSON.parse(await therapistReceived)).toEqual(JSON.parse(patientHello));
+    expect((await storedSession(code))?.backlog).toHaveLength(0);
+
+    const malformed = nextClose(therapistSocket);
+    therapistSocket.send(keyHello("patient", challengeBody.sessionId as string));
+    expect((await malformed).code).toBe(4002);
   });
 
   it("enforces token authentication, role replacement, frame boundaries and frame quota", async () => {
@@ -324,7 +371,7 @@ describe("KGG ticket 034 live-sync worker", () => {
     const { patientToken } = await armAndJoin(code, therapistToken);
     const wrongTokenSocket = await openSocket(code);
     const wrongClose = nextClose(wrongTokenSocket);
-    wrongTokenSocket.send(JSON.stringify({ type: "auth", role: "therapist", token: randomBase64Url(32) }));
+    wrongTokenSocket.send(JSON.stringify({ type: "auth", v: 1, role: "therapist", token: randomBase64Url(32) }));
     expect((await wrongClose).code).toBe(4003);
 
     const therapistSocket = await openSocket(code);
@@ -365,6 +412,9 @@ describe("KGG ticket 034 live-sync worker", () => {
     expect(allowed.status).toBe(200);
     expect(allowed.headers.get("Access-Control-Allow-Origin")).toBe("http://localhost:5173");
     expect((await jsonBody(allowed)).mode).toBe("test");
+    const nullOrigin = await SELF.fetch("http://localhost/health", { headers: { Origin: "null" } });
+    expect(nullOrigin.status).toBe(200);
+    expect(nullOrigin.headers.get("Access-Control-Allow-Origin")).toBe("null");
     const preflight = await SELF.fetch("http://localhost/health", {
       method: "OPTIONS",
       headers: {

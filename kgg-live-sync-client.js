@@ -18,6 +18,7 @@
   const QUEUE_STORE='frames';
   const ROLE_THERAPIST='therapist';
   const ROLE_PATIENT='patient';
+  const TEST_RELAY_HOSTS=new Set(['localhost','127.0.0.1','[::1]']);
   const CONTROL_TYPES=new Set(['auth_ok','peer_joined','peer_left','key_hello','error']);
   const INNER_TYPES=new Set(['plan_snapshot','training_events','receipt','close']);
   const OPAQUE_HANDLE_RE=/^[A-Za-z0-9][A-Za-z0-9._:-]{0,255}$/;
@@ -156,10 +157,9 @@
     let mode=String(source.mode||global.KGG_LIVE_SYNC_MODE||'off').toLowerCase();
     if(!['off','test','production'].includes(mode))mode='off';
     const simulator=source.simulator===true||global.KGG_LIVE_TEST_SIMULATOR===true;
-    const endpoint=String(source.endpoint||'').trim(),approved=source.productionApproved===true||global.KGG_LIVE_SYNC_PRODUCTION_APPROVED===true;
-    if(mode==='production'&&!approved)return {mode:'off',requestedMode:'production',reason:'production_locked',simulator:false,endpoint:'',productionApproved:false};
-    if(mode==='production'&&!endpoint)return {mode:'off',requestedMode:'production',reason:'production_endpoint_missing',simulator:false,endpoint:''};
-    return {mode,requestedMode:mode,reason:'configured',simulator,endpoint,productionApproved:approved};
+    const endpoint=String(source.endpoint||'').trim();
+    if(mode==='production')return {mode:'off',requestedMode:'production',reason:'production_locked',simulator:false,endpoint:'',productionApproved:false};
+    return {mode,requestedMode:mode,reason:'configured',simulator,endpoint,productionApproved:false};
   }
   function assertMode(config,needed){const state=activeConfig(config);assert(state.mode===needed||state.mode==='production'&&needed==='live'||state.mode==='test'&&needed==='live','MODE_OFF','Live-Sync ist deaktiviert.');return state;}
   function assertSynthetic(config,value){const state=activeConfig(config);if(state.mode==='test'){assert(value&&value.synthetic===true,'TEST_DATA_REQUIRED','Der Testmodus akzeptiert ausschließlich synthetische Daten.');if(value.type==='plan_snapshot'||value.type==='training_events')assertTestFixture(value);}}
@@ -231,23 +231,25 @@
     validateId(session.sessionId,16,'Sitzungs-ID ist ungültig.');validateId(session.sessionSalt,32,'Sitzungssalz ist ungültig.');
     session.expiresAt=strictIso(session.expiresAt);const expiresAt=new Date(session.expiresAt).getTime();assert(expiresAt>Date.now(),'SESSION_EXPIRED','Sitzung ist abgelaufen.');assert(expiresAt<=Date.now()+SESSION_MS+5*60*1000,'SESSION_TOO_LONG','Sitzung überschreitet die Zwei-Stunden-Grenze.');return session;
   }
-  function endpointUrl(endpoint,path){
-    const url=new URL(endpoint);assert(url.protocol==='https:'||url.hostname==='localhost'||url.hostname==='127.0.0.1'||url.hostname==='[::1]','ENDPOINT_BLOCKED','Live-Sync-Endpunkt ist nicht erlaubt.');return new URL(path,url).toString();
+  function endpointUrl(endpoint,path,config){
+    const url=new URL(endpoint);const host=url.hostname.toLowerCase();const privateHost=TEST_RELAY_HOSTS.has(host)||/^10\.(?:\d{1,3}\.){2}\d{1,3}$/.test(host)||/^172\.(?:1[6-9]|2\d|3[01])\.(?:\d{1,3}\.)\d{1,3}$/.test(host)||/^192\.168\.(?:\d{1,3}\.)\d{1,3}$/.test(host);
+    assert(!url.username&&!url.password&&!url.search&&!url.hash,'ENDPOINT_BLOCKED','Live-Sync-Endpunkt ist nicht erlaubt.');
+    assert(url.protocol==='https:'||(url.protocol==='http:'&&config&&config.mode==='test'&&privateHost),'ENDPOINT_BLOCKED','Live-Sync-Endpunkt ist nicht erlaubt.');return new URL(path,url).toString();
   }
   function makeHttpRelay(config){
     const state=activeConfig(config);assert(state.endpoint,'ENDPOINT_MISSING','Kein Live-Sync-Endpunkt konfiguriert.');
     async function request(path,options){
-      const response=await fetch(endpointUrl(state.endpoint,path),{cache:'no-store',...options,headers:{'Content-Type':'application/json',...(options&&options.headers||{})}});
+      const response=await fetch(endpointUrl(state.endpoint,path,state),{cache:'no-store',...options,headers:{'Content-Type':'application/json',...(options&&options.headers||{})}});
       const value=await response.json().catch(()=>({}));if(!response.ok)throw failure('RELAY_ERROR','Live-Sync-Verbindung konnte nicht hergestellt werden.');return value;
     }
     return {
       async reserve(tokenHash){return request('/v1/sessions/reserve',{method:'POST',body:JSON.stringify({therapistTokenHash:tokenHash})});},
       async arm(code,token,joinProof){return request('/v1/sessions/'+encodeURIComponent(code)+'/arm',{method:'POST',headers:{Authorization:'Bearer '+token},body:JSON.stringify({joinProof})});},
       async challenge(code){return request('/v1/sessions/'+encodeURIComponent(code)+'/challenge',{method:'GET'});},
-      async join(code,joinProof){return request('/v1/sessions/'+encodeURIComponent(code)+'/join',{method:'POST',body:JSON.stringify({joinProof})});},
+      async join(code,joinProof,patientTokenHash){return request('/v1/sessions/'+encodeURIComponent(code)+'/join',{method:'POST',body:JSON.stringify({joinProof,patientTokenHash})});},
       async close(code,token){return request('/v1/sessions/'+encodeURIComponent(code),{method:'DELETE',headers:{Authorization:'Bearer '+token}});},
       async openSocket(session,role,token){
-        const url=new URL(endpointUrl(state.endpoint,'/v1/sessions/'+encodeURIComponent(session.code)+'/socket'));url.protocol=url.protocol==='https:'?'wss:':'ws:';
+        const url=new URL(endpointUrl(state.endpoint,'/v1/sessions/'+encodeURIComponent(session.code)+'/socket',state));url.protocol=url.protocol==='https:'?'wss:':'ws:';
         return new Promise((resolve,reject)=>{const socket=new WebSocket(url.toString());const onOpen=()=>{socket.removeEventListener('open',onOpen);resolve(socket);};socket.addEventListener('open',onOpen);socket.addEventListener('error',()=>reject(failure('RELAY_SOCKET','Live-Sync-Socket konnte nicht geöffnet werden.')));});
       }
     };
@@ -282,7 +284,7 @@
   class LiveSession{
     constructor(options){
       const value=options||{};this.config=activeConfig(value);this.role=value.role;assert(this.role===ROLE_THERAPIST||this.role===ROLE_PATIENT,'ROLE_INVALID','Rolle ist ungültig.');
-      this.pairingId=String(value.pairingId||'');this.pairingSigner=value.pairingSigner;this.cryptoBridge=value.cryptoBridge||null;this.nativePrivateHandle=null;this.nativeSession=null;this.keyStore=value.keyStore||makeKeyStore({allowMemory:this.config.mode==='test'&&this.config.simulator});this.relay=value.relay||makeHttpRelay(this.config);this.transport=value.transport||this.relay;this.onStatus=typeof value.onStatus==='function'?value.onStatus:()=>{};this.onMessage=typeof value.onMessage==='function'?value.onMessage:()=>{};this.onReady=typeof value.onReady==='function'?value.onReady:()=>{};this.queue=value.queue||new CiphertextQueue({allowMemory:this.config.mode==='test'&&this.config.simulator});this.socket=null;this.session=null;this.token='';this.sendSequence=0;this.acceptedFrames=0;this.key=null;this.privateKey=null;this.publicKey='';this.peerRole=this.role===ROLE_PATIENT?ROLE_THERAPIST:ROLE_PATIENT;this.peerHello=null;this.guard=new ReplayGuard();this.receivedEvents=[];this.eventIds=new Set();this.sentNonces=new Set();this.closed=false;this.statusValue='idle';this.timer=0;this.receiveChain=Promise.resolve();}
+      this.pairingId=String(value.pairingId||'');this.pairingSigner=value.pairingSigner;this.cryptoBridge=value.cryptoBridge||null;this.nativePrivateHandle=null;this.nativeSession=null;this.keyStore=value.keyStore||makeKeyStore({allowMemory:this.config.mode==='test'&&this.config.simulator});this.relay=value.relay||makeHttpRelay(this.config);this.transport=value.transport||this.relay;this.onStatus=typeof value.onStatus==='function'?value.onStatus:()=>{};this.onMessage=typeof value.onMessage==='function'?value.onMessage:()=>{};this.onReady=typeof value.onReady==='function'?value.onReady:()=>{};this.queue=value.queue||new CiphertextQueue({allowMemory:this.config.mode==='test'&&this.config.simulator});this.socket=null;this.session=null;this.token='';this.sendSequence=0;this.acceptedFrames=0;this.key=null;this.privateKey=null;this.publicKey='';this.peerRole=this.role===ROLE_PATIENT?ROLE_THERAPIST:ROLE_PATIENT;this.peerHello=null;this.peerJoined=false;this.guard=new ReplayGuard();this.receivedEvents=[];this.eventIds=new Set();this.sentNonces=new Set();this.closed=false;this.statusValue='idle';this.timer=0;this.receiveChain=Promise.resolve();}
     assertSessionActive(){
       assert(this.session&&!this.closed,'SESSION_REQUIRED','Keine aktive Sitzung.');
       const expiresAt=new Date(this.session.expiresAt).getTime();
@@ -297,17 +299,17 @@
     }
     async reserve(){
       assertMode(this.config,'live');assert(this.role===ROLE_THERAPIST,'ROLE_INVALID','Nur Therapeut:innen reservieren Sitzungen.');assert(this.pairingId,'PAIRING_REQUIRED','Zuerst Kopplungs-QR erzeugen.');
-      this.closed=false;this.token=base64UrlEncode(randomBytes(32));const tokenHash=base64UrlEncode(await sha256(utf8(this.token)));const value=await this.relay.reserve(tokenHash);const details=normalizeSession(value.session||value,value.code);this.session={...details,pairingId:this.pairingId};
+      this.closed=false;this.token=base64UrlEncode(randomBytes(32));const tokenHash=base64UrlEncode(await sha256(utf8(this.token)));const reserved=await this.relay.reserve(tokenHash);const code=String(reserved.code||reserved.session&&reserved.session.code||'').replace(/\D/g,'');assert(/^\d{8}$/.test(code),'SESSION_FIELDS','Relay lieferte keine gültige Sitzungsroute.');const challenge=await this.relay.challenge(code);const details=normalizeSession(challenge,code);this.session={...details,pairingId:this.pairingId};
       this.assertSessionActive();const proof=await buildJoinProof(data=>this.sign(data),this.session.sessionId,this.session.sessionSalt);this.assertSessionActive();await this.relay.arm(this.session.code,this.token,proof);this.assertSessionActive();this.armExpiry();await this.connect();return this.session;
     }
     async join(code){
       assertMode(this.config,'live');assert(this.role===ROLE_PATIENT,'ROLE_INVALID','Nur Patient:innen treten Sitzungen bei.');assert(this.pairingId,'PAIRING_REQUIRED','Zuerst Kopplungs-QR scannen.');
-      this.closed=false;const challenge=await this.relay.challenge(String(code).replace(/\D/g,''));const details=normalizeSession(challenge,String(code).replace(/\D/g,''));this.session={...details,pairingId:this.pairingId};this.assertSessionActive();const proof=await buildJoinProof(data=>this.sign(data),this.session.sessionId,this.session.sessionSalt);this.assertSessionActive();const joined=await this.relay.join(this.session.code,proof);this.token=String(joined.patientToken||joined.token||'');assert(this.token,'RELAY_AUTH','Patienten-Sitzung konnte nicht autorisiert werden.');this.assertSessionActive();this.armExpiry();await this.connect();return this.session;
+      this.closed=false;const challenge=await this.relay.challenge(String(code).replace(/\D/g,''));const details=normalizeSession(challenge,String(code).replace(/\D/g,''));this.session={...details,pairingId:this.pairingId};this.assertSessionActive();const proof=await buildJoinProof(data=>this.sign(data),this.session.sessionId,this.session.sessionSalt);this.assertSessionActive();this.token=base64UrlEncode(randomBytes(32));const patientTokenHash=base64UrlEncode(await sha256(utf8(this.token)));const joined=await this.relay.join(this.session.code,proof,patientTokenHash);assert(joined&&joined.joined===true,'RELAY_AUTH','Patienten-Sitzung konnte nicht autorisiert werden.');this.assertSessionActive();this.armExpiry();await this.connect();return this.session;
     }
     async connect(){
       this.assertSessionActive();
-      const socket=await this.transport.openSocket(this.session,this.role,this.token);try{this.assertSessionActive();}catch(err){try{if(socket&&socket.close)socket.close();}catch(closeErr){}throw err;}this.socket=socket;this.bindSocket(socket);this.setStatus('connected');this.sendRaw({type:'auth',v:PROTOCOL_VERSION,role:this.role,token:this.token});
-      if(!this.key&&!this.nativeSession)await this.beginKeyExchange();else await this.flushQueue();return this.status();
+      const socket=await this.transport.openSocket(this.session,this.role,this.token);try{this.assertSessionActive();}catch(err){try{if(socket&&socket.close)socket.close();}catch(closeErr){}throw err;}this.socket=socket;this.peerJoined=false;this.bindSocket(socket);this.setStatus('connected');this.sendRaw({type:'auth',role:this.role,token:this.token});
+      return this.status();
     }
     bindSocket(socket){
       const message=event=>this.receiveRaw(typeof event==='string'?event:event&&event.data);const close=()=>{if(this.closed)return;this.socket=null;this.setStatus('disconnected');};const error=()=>{if(!this.closed)this.failClosed('SOCKET_ERROR');};
@@ -316,11 +318,13 @@
     sendRaw(value){this.assertSessionActive();assert(this.socket&&this.socket.readyState!==3,'SOCKET_CLOSED','Socket ist geschlossen.');const text=JSON.stringify(value);assert(text.length<=MAX_FRAME_BYTES,'FRAME_TOO_LARGE','Control-Frame ist zu groß.');this.socket.send(text);}
     async beginKeyExchange(){
       this.assertSessionActive();let pair;
-      if(this.cryptoBridge){
-        assert(typeof this.cryptoBridge.createEphemeralKeyPair==='function','NATIVE_CRYPTO_REQUIRED','KGGLiveKey-Bridge unterstützt kein flüchtiges ECDH.');
-        pair=await this.cryptoBridge.createEphemeralKeyPair({curve:'P-256',sessionId:this.session.sessionId,role:this.role});
-        this.assertSessionActive();this.nativePrivateHandle=opaqueHandle(pair&& (pair.privateKeyHandle||pair.handle));this.publicKey=String(pair&&pair.publicKey||'');validateId(this.publicKey,65,'ECDH-Public-Key ist ungültig.');
-      }else{pair=await createEphemeralKeyPair();this.privateKey=pair.privateKey;this.publicKey=pair.publicKey;}
+      if(!this.publicKey){
+        if(this.cryptoBridge){
+          assert(typeof this.cryptoBridge.createEphemeralKeyPair==='function','NATIVE_CRYPTO_REQUIRED','KGGLiveKey-Bridge unterstützt kein flüchtiges ECDH.');
+          pair=await this.cryptoBridge.createEphemeralKeyPair({curve:'P-256',sessionId:this.session.sessionId,role:this.role});
+          this.assertSessionActive();this.nativePrivateHandle=opaqueHandle(pair&& (pair.privateKeyHandle||pair.handle));this.publicKey=String(pair&&pair.publicKey||'');validateId(this.publicKey,65,'ECDH-Public-Key ist ungültig.');
+        }else{pair=await createEphemeralKeyPair();this.privateKey=pair.privateKey;this.publicKey=pair.publicKey;}
+      }
       this.assertSessionActive();const body={v:PROTOCOL_VERSION,type:'key_hello',sessionId:this.session.sessionId,role:this.role,publicKey:this.publicKey};const signature=base64UrlEncode(await this.sign(canonicalBytes(body)));this.assertSessionActive();this.sendRaw({...body,signature});
     }
     async receiveRaw(raw){
@@ -336,10 +340,12 @@
     }
     async receiveControl(value){
       this.assertSessionActive();assert(CONTROL_TYPES.has(value.type),'INVALID_CONTROL','Unbekannter Control-Frame.');
-      if(value.type==='error'){this.failClosed('RELAY_ERROR');return;}
-      if(value.type==='peer_left'){this.setStatus('disconnected');return;}
-      if(value.type==='auth_ok'||value.type==='peer_joined'){return;}
+      if(value.type==='error'){assert(exactKeys(value,['type','error']),'INVALID_CONTROL','Relay-Fehlerframe ist ungültig.');this.failClosed('RELAY_ERROR');return;}
+      if(value.type==='peer_left'){assert(exactKeys(value,['type','role']),'INVALID_CONTROL','Peer-Frame ist ungültig.');assert(value.role===this.peerRole,'INVALID_CONTROL','Peer-Rolle ist ungültig.');this.setStatus('disconnected');return;}
+      if(value.type==='auth_ok'){assert(exactKeys(value,['type','role']),'INVALID_CONTROL','Auth-Bestätigung ist ungültig.');assert(value.role===this.role,'INVALID_CONTROL','Auth-Rolle ist ungültig.');return;}
+      if(value.type==='peer_joined'){assert(exactKeys(value,['type','role']),'INVALID_CONTROL','Peer-Beitritt ist ungültig.');assert(value.role===this.peerRole,'INVALID_CONTROL','Peer-Rolle ist ungültig.');this.peerJoined=true;await this.beginKeyExchange();return;}
       if(value.type!=='key_hello')return;
+      assert(exactKeys(value,['v','type','sessionId','role','publicKey','signature']),'KEY_PEER_INVALID','Peer-Schlüssel-Frame ist ungültig.');
       assert(value.v===PROTOCOL_VERSION&&value.sessionId===this.session.sessionId&&value.role===this.peerRole,'KEY_PEER_INVALID','Peer-Schlüssel ist nicht für diese Sitzung.');
       validateId(value.publicKey,65,'ECDH-Public-Key ist ungültig.');validateId(value.signature,32,'Peer-HMAC ist ungültig.');
       const signed={v:value.v,type:value.type,sessionId:value.sessionId,role:value.role,publicKey:value.publicKey};this.assertSessionActive();const expected=await this.sign(canonicalBytes(signed));this.assertSessionActive();assert(equalBytes(expected,base64UrlDecode(value.signature)),'KEY_PEER_HMAC','Peer-HMAC ist ungültig.');
@@ -364,13 +370,13 @@
     }
     async sendPlanSnapshot(snapshot){assert(this.role===ROLE_THERAPIST,'ROLE_INVALID','Nur Therapeut:innen senden Planstände.');validatePlanSnapshot(snapshot);return this.send('plan_snapshot',snapshot);}
     async sendTrainingEvents(events,basePlanRevision){assert(this.role===ROLE_PATIENT,'ROLE_INVALID','Nur Patient:innen senden Trainingsergebnisse.');const value={type:'training_events',synthetic:this.config.mode==='test',basePlanRevision:String(basePlanRevision||''),events:Array.isArray(events)?events:[]};validateTrainingEvents(value);return this.send('training_events',value);}
-    failClosed(reason){if(this.closed)return;this.closed=true;clearTimeout(this.timer);try{if(this.socket&&this.socket.close)this.socket.close();}catch(err){}this.socket=null;this.key=null;this.nativeSession=null;this.nativePrivateHandle=null;this.privateKey=null;this.publicKey='';this.peerHello=null;this.queue.clear(this.session&&this.session.sessionId).catch(()=>{});this.setStatus('closed',{reason});}
+    failClosed(reason){if(this.closed)return;this.closed=true;clearTimeout(this.timer);try{if(this.socket&&this.socket.close)this.socket.close();}catch(err){}this.socket=null;this.key=null;this.nativeSession=null;this.nativePrivateHandle=null;this.privateKey=null;this.publicKey='';this.peerHello=null;this.peerJoined=false;this.queue.clear(this.session&&this.session.sessionId).catch(()=>{});this.setStatus('closed',{reason});}
     armExpiry(){clearTimeout(this.timer);if(!this.session)return;const delay=Math.max(1,new Date(this.session.expiresAt).getTime()-Date.now());this.timer=setTimeout(()=>this.failClosed('SESSION_EXPIRED'),delay);}
     async close(options){
       const value=options||{};if(this.closed)return;const reason=String(value.reason||'user_closed');
       if(value.sendClose!==false&&(this.key||this.nativeSession)){try{await this.send('close',{synthetic:this.config.mode==='test',reason});}catch(err){}}
       try{if(this.session&&this.token&&this.relay.close){this.assertSessionActive();await this.relay.close(this.session.code,this.token);this.assertSessionActive();}}catch(err){if(err.code==='SESSION_EXPIRED'){this.failClosed('SESSION_EXPIRED');return;}}
-      clearTimeout(this.timer);try{if(this.session){this.assertSessionActive();await this.queue.clear(this.session.sessionId);}}catch(err){if(err.code==='SESSION_EXPIRED'){this.failClosed('SESSION_EXPIRED');return;}}try{if(this.socket&&this.socket.close)this.socket.close();}catch(err){}this.closed=true;this.socket=null;this.key=null;this.nativeSession=null;this.nativePrivateHandle=null;this.privateKey=null;this.publicKey='';this.setStatus('closed',{reason});
+      clearTimeout(this.timer);try{if(this.session){this.assertSessionActive();await this.queue.clear(this.session.sessionId);}}catch(err){if(err.code==='SESSION_EXPIRED'){this.failClosed('SESSION_EXPIRED');return;}}try{if(this.socket&&this.socket.close)this.socket.close();}catch(err){}this.closed=true;this.socket=null;this.key=null;this.nativeSession=null;this.nativePrivateHandle=null;this.privateKey=null;this.publicKey='';this.peerJoined=false;this.setStatus('closed',{reason});
     }
     async reconnect(){this.assertSessionActive();await this.connect();return this.status();}
   }

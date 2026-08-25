@@ -12,6 +12,7 @@ const plan=live.testFixtures().planSnapshot;
 
 function session(){return {sessionId,sessionSalt,pairingId,code:'12345678',expiresAt:new Date(Date.now()+60000).toISOString()};}
 async function aesKey(){return global.crypto.subtle.importKey('raw',live.randomBytes(32),{name:'AES-GCM'},false,['encrypt','decrypt']);}
+function relaySocket(){return {readyState:1,sent:[],send(value){this.sent.push(value);},close(){this.readyState=3;}};}
 function client(onMessage){
   const socket={readyState:1,send(){},close(){this.readyState=3;}};
   const result=live.createClient({role:'patient',mode:'test',simulator:true,pairingId,transport:{},relay:{},queue:new live.CiphertextQueue({allowMemory:true}),keyStore:live.makeKeyStore({allowMemory:true}),onMessage});
@@ -48,6 +49,32 @@ async function main(){
   await sequentialClient.receiveRaw(await frame(sequentialKey,2));
   assert.equal(sequentialApplications,2);
 
+  const signing=async()=>new Uint8Array(32).fill(9),therapistSocket=relaySocket(),patientSocket=relaySocket();let reserveHash='',armBody=null,joinBody=null;
+  const challengeBody={sessionId,sessionSalt,expiresAt:new Date(Date.now()+60000).toISOString(),protocolVersion:'KGG-LIVE-V1'};
+  const therapistRelay={
+    async reserve(value){reserveHash=value;return {code:'12345678',expiresAt:challengeBody.expiresAt,protocolVersion:'KGG-LIVE-V1'};},
+    async challenge(){return challengeBody;},
+    async arm(code,token,proof){armBody={code,token,proof};return {armed:true};},
+    async openSocket(){return therapistSocket;},
+    async close(){return {deleted:true};}
+  };
+  const therapist=live.createClient({role:'therapist',mode:'test',simulator:true,pairingId,pairingSigner:signing,relay:therapistRelay,transport:therapistRelay,queue:new live.CiphertextQueue({allowMemory:true})});
+  await therapist.reserve();
+  assert.match(reserveHash,/^[A-Za-z0-9_-]{43}$/);
+  assert.equal(armBody.code,'12345678');
+  assert.deepEqual(Object.keys(JSON.parse(therapistSocket.sent[0])).sort(),['role','token','type']);
+  const patientRelay={
+    async challenge(){return challengeBody;},
+    async join(code,proof,patientTokenHash){joinBody={code,proof,patientTokenHash};return {joined:true};},
+    async openSocket(){return patientSocket;},
+    async close(){return {deleted:true};}
+  };
+  const patient=live.createClient({role:'patient',mode:'test',simulator:true,pairingId,pairingSigner:signing,relay:patientRelay,transport:patientRelay,queue:new live.CiphertextQueue({allowMemory:true})});
+  await patient.join('12345678');
+  assert.equal(joinBody.code,'12345678');
+  assert.match(joinBody.patientTokenHash,/^[A-Za-z0-9_-]{43}$/);
+  assert.deepEqual(Object.keys(JSON.parse(patientSocket.sent[0])).sort(),['role','token','type']);
+
   const expiredSend=client(()=>{});expiredSend.key=await aesKey();expiredSend.session.expiresAt=new Date(Date.now()-1).toISOString();
   await rejectsCode(expiredSend.send('receipt',{synthetic:true,cursor:0,appliedIds:[]}),'SESSION_EXPIRED');
   const expiredReceive=client(()=>{throw new Error('expired frame applied');});expiredReceive.key=await aesKey();expiredReceive.session.expiresAt=new Date(Date.now()-1).toISOString();
@@ -73,7 +100,7 @@ async function main(){
   await acceptedBridge.beginKeyExchange();
   assert.equal(acceptedBridge.nativePrivateHandle,'opaque-1');
 
-  console.log(JSON.stringify({status:'PASS',checks:['serialized-duplicate','contiguous-sequence','sequential-order','expiry-send-receive','expiry-during-await','training-events-contract','browser-private-key','bridge-handle-contract']}));
+  console.log(JSON.stringify({status:'PASS',checks:['serialized-duplicate','contiguous-sequence','sequential-order','reserve-challenge-arm','join-token-hash','auth-frame-exact','expiry-send-receive','expiry-during-await','training-events-contract','browser-private-key','bridge-handle-contract']}));
 }
 
 main().catch(error=>{console.error(error);process.exitCode=1;});

@@ -27,15 +27,17 @@ import {
   isOpaqueToken,
   parseArmBody,
   parseAuthFrame,
+  parseKeyHelloFrame,
   parseJoinBody,
   parseReserveBody,
 } from "./protocol";
-import type { JoinBody, Role, SessionRecord, SocketAttachment } from "./protocol";
+import type { JoinBody, KeyHelloFrame, Role, SessionRecord, SocketAttachment } from "./protocol";
 
 export interface Env {
   LIVE_SYNC_MODE?: string;
   TEST_TTL_SECONDS?: string;
   TEST_PRIVATE_ORIGINS?: string;
+  TEST_ALLOW_NULL_ORIGIN?: string;
   LIVE_SYNC_SESSIONS: DurableObjectNamespace;
 }
 
@@ -124,7 +126,7 @@ function isPrivateHostname(hostname: string): boolean {
 
 function isAllowedTestOrigin(origin: string, env: Env): boolean {
   if (origin === "null") {
-    return false;
+    return env.TEST_ALLOW_NULL_ORIGIN === "1";
   }
   let candidate: URL;
   try {
@@ -134,9 +136,6 @@ function isAllowedTestOrigin(origin: string, env: Env): boolean {
   }
   if ((candidate.protocol !== "http:" && candidate.protocol !== "https:") || candidate.origin !== origin || !isPrivateHostname(candidate.hostname)) {
     return false;
-  }
-  if (candidate.hostname.toLowerCase() === "localhost" || candidate.hostname === "127.0.0.1") {
-    return true;
   }
   const explicit = (env.TEST_PRIVATE_ORIGINS ?? "")
     .split(",")
@@ -635,6 +634,21 @@ export class LiveSyncSession extends DurableObject<Env, unknown> {
       await this.authenticateSocket(socket, attachment, text);
       return;
     }
+    let parsed: unknown = null;
+    try {
+      parsed = JSON.parse(text) as unknown;
+    } catch {
+      // Outer data frames are validated by relayDataFrame below.
+    }
+    if (isRecord(parsed) && parsed.type === "key_hello") {
+      const hello = parseKeyHelloFrame(text);
+      if (hello === null) {
+        this.closeSocket(socket, 4002, "invalid control frame");
+        return;
+      }
+      await this.relayKeyHello(socket, attachment.role, hello);
+      return;
+    }
     await this.relayDataFrame(socket, attachment.role, text);
   }
 
@@ -679,7 +693,43 @@ export class LiveSyncSession extends DurableObject<Env, unknown> {
       return;
     }
     await this.flushBacklog(record, auth.role, socket);
+    const peerRole: Role = auth.role === "therapist" ? "patient" : "therapist";
+    const peer = this.findSocket(peerRole);
+    if (peer !== null) {
+      this.sendControl(peer, { type: "peer_joined", role: auth.role });
+      this.sendControl(socket, { type: "peer_joined", role: peerRole });
+    }
     await this.scheduleNextAlarm(record);
+  }
+
+  private sendControl(socket: HibernatableWebSocket, value: object): void {
+    try {
+      socket.send(JSON.stringify(value));
+    } catch {
+      // Control frames are deliberately never persisted or added to the backlog.
+    }
+  }
+
+  private async relayKeyHello(socket: HibernatableWebSocket, sender: Role, hello: KeyHelloFrame): Promise<void> {
+    if (hello.role !== sender) {
+      this.closeSocket(socket, 4002, "control role mismatch");
+      return;
+    }
+    const record = await this.liveRecord();
+    if (record === null || record.locked) {
+      this.closeSocket(socket, record?.locked ? 4004 : 4001, record?.locked ? "session locked" : "session expired");
+      return;
+    }
+    if (hello.sessionId !== record.sessionId) {
+      this.closeSocket(socket, 4002, "control session mismatch");
+      return;
+    }
+    const targetRole: Role = sender === "therapist" ? "patient" : "therapist";
+    const target = this.findSocket(targetRole);
+    if (target === null) {
+      return;
+    }
+    this.sendControl(target, hello);
   }
 
   private async flushBacklog(record: SessionRecord, role: Role, socket: HibernatableWebSocket): Promise<void> {

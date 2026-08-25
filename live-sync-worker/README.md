@@ -28,6 +28,18 @@ Die Test-API nutzt diese synthetischen Hüllen:
 - `GET /v1/sessions/{code}/socket`: erstes WebSocket-Frame ist `{ "type": "auth", "role": "therapist|patient", "token": "<opaque>" }`.
 - `DELETE /v1/sessions/{code}`: verlangt `Authorization: Bearer <therapist-token>`, beendet genau diese Sitzung und leert ihren gesamten DO-Speicher.
 
+Nach erfolgreicher Authentifizierung beider Rollen meldet der Worker beiden
+Sockets flüchtig `peer_joined`. Danach werden ausschließlich exakt geformte
+`{ "v": 1, "type": "key_hello", "sessionId": "...", "role": "...", "publicKey": "...", "signature": "..." }`
+vom bereits authentifizierten passenden Absender direkt an die Gegenseite
+weitergeleitet. Diese Kontrollframes werden weder gespeichert noch in den
+Offline-Rückstand übernommen; fehlt die Gegenseite, werden sie verworfen.
+
+Die lokale Testkonfiguration akzeptiert `null`-Origin nur mit
+`LIVE_SYNC_MODE=test` und `TEST_ALLOW_NULL_ORIGIN=1`. HTTP-Origin-Adressen
+müssen zusätzlich exakt in `TEST_PRIVATE_ORIGINS` stehen. Der Default bleibt
+`off` und hat keine Null-Origin-Freigabe.
+
 Die lokale Hibernation-Testumgebung unterstützt `jurisdiction("eu")` noch
 nicht. Nur bei `LIVE_SYNC_MODE=test` verwendet der Testpfad deshalb eine
 lokale Namespace-Emulation; in allen anderen Modi gibt es keinen Fallback.

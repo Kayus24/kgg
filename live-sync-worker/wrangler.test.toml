@@ -5,7 +5,8 @@ compatibility_date = "2026-08-15"
 [vars]
 LIVE_SYNC_MODE = "test"
 TEST_TTL_SECONDS = "2"
-TEST_PRIVATE_ORIGINS = "http://192.168.1.44:4173"
+TEST_PRIVATE_ORIGINS = "http://localhost:5173,http://192.168.1.44:4173"
+TEST_ALLOW_NULL_ORIGIN = "1"
 
 [[durable_objects.bindings]]
 name = "LIVE_SYNC_SESSIONS"

@@ -74,8 +74,9 @@ async function main(){
   const production=live.config({mode:'production',productionApproved:true});
   assert.equal(production.mode,'off');
   const approvedProduction=live.config({mode:'production',productionApproved:true,endpoint:'https://127.0.0.1'});
-  assert.equal(approvedProduction.mode,'production');
-  assert.doesNotThrow(()=>live.makeHttpRelay(approvedProduction));
+  assert.equal(approvedProduction.mode,'off');
+  assert.equal(approvedProduction.reason,'production_locked');
+  await rejects(Promise.resolve().then(()=>live.makeHttpRelay(approvedProduction)),'ENDPOINT_MISSING');
   assert.equal(live.config({mode:'off'}).mode,'off');
   global.KGG_LIVE_SYNC_MODE='off';
   await rejects(live.createTestSimulator(),'MODE_OFF');
