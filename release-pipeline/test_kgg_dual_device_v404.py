@@ -220,7 +220,7 @@ class DualDeviceV404ContractTests(unittest.TestCase):
 
         self.assertIn("PREVIEW_MANIFEST_URL", main_activity)
         self.assertIn("gpt-preview/previews/index.json", main_activity)
-        self.assertIn('latest.optString("url", "")', main_activity)
+        self.assertIn('latest.optString("url")', main_activity)
         self.assertIn('latest.optString("sha256", "")', main_activity)
 
         self.assertIn('"sourceType": "existing-main"', publisher)
@@ -245,7 +245,7 @@ class DualDeviceV404ContractTests(unittest.TestCase):
         self.assertIn("x-openai-isConsequential: false", action_block)
         self.assertIn("required: [request_id, source_sha]", action_block)
         self.assertNotIn("payload_json", action_block)
-        self.assertNotRegex(action_block, r"^\s+mode:", re.MULTILINE)
+        self.assertNotRegex(action_block, re.compile(r"^\s+mode:", re.MULTILINE))
         self.assertNotIn("approval_phrase", action_block)
 
         result = subprocess.run(
