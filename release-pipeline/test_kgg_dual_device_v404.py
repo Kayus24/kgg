@@ -21,10 +21,14 @@ BRIDGE = ROOT / "android-wrapper/app/src/preview/java/de/kgg/app/KggDeviceTestSt
 FACTORY = ROOT / "android-wrapper/app/src/preview/java/de/kgg/app/KggReleaseControllerFactory.java"
 STATION = ROOT / "android-wrapper/app/src/preview/assets/android/kgg_device_test_station.js"
 FIXTURES = ROOT / "android-wrapper/app/src/preview/assets/android/kgg_dual_device_fixtures.js"
+MAIN_ACTIVITY = ROOT / "android-wrapper/app/src/main/java/de/kgg/app/MainActivity.java"
 SCANNER = ROOT / "patient-start-scan.js"
 AGENT = ROOT / "device-test/patient-device-test-agent.js"
 STORAGE = ROOT / "device-test/patient-device-test-storage.js"
 WORKFLOW = ROOT / ".github/workflows/kgg-gpt-preview-gate.yml"
+DEVICE_ACTION_WORKFLOW = ROOT / ".github/workflows/kgg-gpt-device-test.yml"
+ACTION_API = ROOT / "docs/kgg-custom-gpt-action-api-openapi.yaml"
+EXISTING_MAIN_PREVIEW = ROOT / "release-pipeline/kgg_existing_main_preview.py"
 
 
 class DualDeviceV404ContractTests(unittest.TestCase):
@@ -191,6 +195,67 @@ class DualDeviceV404ContractTests(unittest.TestCase):
         )
         self.assertNotIn("KGG_PATIENT_AUTOMATION_TOKEN", client_source)
         self.assertNotRegex(client_source, r"gh[pousr]_[A-Za-z0-9_]{20,}")
+
+    def test_persistent_existing_main_preview_contract(self) -> None:
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        device_action = DEVICE_ACTION_WORKFLOW.read_text(encoding="utf-8")
+        action_api = ACTION_API.read_text(encoding="utf-8")
+        main_activity = MAIN_ACTIVITY.read_text(encoding="utf-8")
+        publisher = EXISTING_MAIN_PREVIEW.read_text(encoding="utf-8")
+
+        self.assertIn("Stage exact pinned Admin HTML into persistent Preview channel", workflow)
+        self.assertIn("--source-html base/kgg-update/index.html", workflow)
+        self.assertIn("--version-json base/kgg-update/version.json", workflow)
+        self.assertIn('git -C base fetch --no-tags origin main:refs/remotes/origin/main', workflow)
+        self.assertIn('test "$checked_out" = "$KGG_SOURCE_SHA"', workflow)
+        self.assertIn('if [ "$main_sha" != "$KGG_SOURCE_SHA" ]; then', workflow)
+        self.assertIn('git add previews "device-tests/$KGG_REQUEST_ID/job.json"', workflow)
+        self.assertIn("inputs.mode == 'publish_device_test' || inputs.ui_stability == 'true'", workflow)
+
+        self.assertIn("kgg_gpt_write_gate.py", workflow)
+        self.assertIn("if: inputs.mode != 'publish_device_test'", workflow)
+        self.assertIn("- name: Publish preview channel", workflow)
+        self.assertIn("if: inputs.mode == 'publish_preview'", workflow)
+        self.assertIn('git commit -m "publish gpt preview ${{ inputs.request_id }}"', workflow)
+
+        self.assertIn("PREVIEW_MANIFEST_URL", main_activity)
+        self.assertIn("gpt-preview/previews/index.json", main_activity)
+        self.assertIn('latest.optString("url", "")', main_activity)
+        self.assertIn('latest.optString("sha256", "")', main_activity)
+
+        self.assertIn('"sourceType": "existing-main"', publisher)
+        self.assertIn('"sourceSha": source_sha', publisher)
+        self.assertIn('index["latest"] = meta', publisher)
+        self.assertNotIn("kgg_new_patch", publisher)
+        self.assertNotIn("patch_content", publisher)
+
+        self.assertIn("mode: publish_device_test", device_action)
+        self.assertIn("payload_json: '{}'", device_action)
+        self.assertIn('ui_stability: "true"', device_action)
+        self.assertNotIn("create_pr", device_action)
+        self.assertNotIn("publish_admin_beta", device_action)
+
+        marker = "/repos/Kayus24/kgg/actions/workflows/kgg-gpt-device-test.yml/dispatches:"
+        self.assertIn(marker, action_api)
+        action_block = action_api[action_api.index(marker) :]
+        next_path = action_block.find("\n  /", 3)
+        if next_path >= 0:
+            action_block = action_block[:next_path]
+        self.assertIn("operationId: submitKggDeviceTest", action_block)
+        self.assertIn("x-openai-isConsequential: false", action_block)
+        self.assertIn("required: [request_id, source_sha]", action_block)
+        self.assertNotIn("payload_json", action_block)
+        self.assertNotRegex(action_block, r"^\s+mode:", re.MULTILINE)
+        self.assertNotIn("approval_phrase", action_block)
+
+        result = subprocess.run(
+            [sys.executable, "release-pipeline/kgg_existing_main_preview.py", "--self-test"],
+            cwd=ROOT,
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_public_pwa_package_is_scoped_and_offline_capable(self) -> None:
         result = subprocess.run(
