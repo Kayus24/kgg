@@ -20,6 +20,7 @@ HASH_RE = re.compile(r"^[0-9a-f]{64}$")
 PREVIEW_KIND = "kgg_gpt_preview"
 MANIFEST_KIND = "kgg_gpt_preview_manifest"
 PREVIEW_BASE_URL = "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews"
+DEVICE_JOB_BASE_URL = "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/device-tests"
 
 
 class PreviewError(RuntimeError):
@@ -146,6 +147,7 @@ def stage_preview(
         "createdAt": created_at,
         "url": f"{PREVIEW_BASE_URL}/{request_id}/admin.html",
         "sha256": html_sha,
+        "deviceTestJobUrl": f"{DEVICE_JOB_BASE_URL}/{request_id}/job.json",
     }
     write_json(meta_path, meta)
 
@@ -162,6 +164,8 @@ def stage_preview(
         fail("staged Preview HTML differs from pinned source bytes")
     if read_json(meta_path).get("sourceSha") != source_sha:
         fail("staged Preview metadata lost the exact source_sha")
+    if meta.get("deviceTestJobUrl") != f"{DEVICE_JOB_BASE_URL}/{request_id}/job.json":
+        fail("staged Preview metadata lost deterministic device-test job URL")
     return meta
 
 
@@ -241,6 +245,8 @@ def self_test() -> None:
             fail("Existing-Main Preview did not preserve exact HTML bytes")
         if meta.get("sourceSha") != source_sha or meta.get("baseSha") != source_sha:
             fail("Existing-Main Preview metadata does not pin source_sha")
+        if meta.get("deviceTestJobUrl") != f"{DEVICE_JOB_BASE_URL}/existing-main-self-test/job.json":
+            fail("Existing-Main Preview metadata does not expose deterministic job URL")
         if "patchFile" in meta or "patchId" in meta:
             fail("Existing-Main Preview must not pretend to own a vNNN patch module")
         index = read_json(preview / "previews" / "index.json")
@@ -248,6 +254,8 @@ def self_test() -> None:
             fail("Existing-Main Preview was not promoted to Preview latest")
         if index.get("latest", {}).get("sourceSha") != source_sha:
             fail("Preview latest does not expose exact source_sha")
+        if index.get("latest", {}).get("deviceTestJobUrl") != meta.get("deviceTestJobUrl"):
+            fail("Preview latest does not expose current device-test job URL")
         if [item.get("requestId") for item in index["previews"]].count("existing-main-self-test") != 1:
             fail("Existing-Main Preview duplicated the request in Preview index")
 
