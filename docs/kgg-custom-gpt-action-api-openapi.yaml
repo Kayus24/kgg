@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: KGG GPT Preview and Project Memory GitHub API
-  version: "1.4.0"
+  version: "1.5.0"
   description: Pre-authorized Admin/Patient Preview operations, separately approved release gates, and private shared memory/coordination.
 servers:
   - url: https://api.github.com
@@ -55,6 +55,85 @@ paths:
       responses:
         "204":
           description: Test-only workflow dispatch accepted.
+  /repos/Kayus24/kgg/actions/workflows/kgg-gpt-device-test.yml/dispatches:
+    post:
+      operationId: submitKggDeviceTest
+      summary: Publish the exact current-main Admin HTML to the persistent Preview/Test-App channel and run device tests.
+      description: Preview-only Existing-Main test action. It accepts only an exact pinned current-main source_sha and a bounded device profile. It has no patch payload, cannot create a vNNN patch module, cannot create a PR, cannot merge main, and cannot publish an Admin beta.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ref, inputs]
+              properties:
+                ref:
+                  type: string
+                  enum: [main]
+                inputs:
+                  type: object
+                  required: [request_id, source_sha]
+                  properties:
+                    request_id:
+                      type: string
+                      pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
+                    source_sha:
+                      type: string
+                      pattern: "^[0-9a-f]{40}$"
+                      description: Exact current main commit SHA. The workflow stops if main drifts before publication.
+                    device_test_profile:
+                      type: string
+                      enum: [quick, full]
+                      default: quick
+      responses:
+        "204":
+          description: Preview-only pinned device-test workflow dispatch accepted.
+  /repos/Kayus24/kgg/actions/workflows/kgg-gpt-device-test.yml/runs:
+    get:
+      operationId: listKggDeviceTestRuns
+      summary: List recent persistent Preview/Test-App device-test runs.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: branch
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [main]
+        - name: event
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [workflow_dispatch]
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [queued, in_progress, completed]
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 30
+            default: 10
+      responses:
+        "200":
+          description: Recent persistent device-test workflow runs.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
   /repos/Kayus24/kgg/actions/workflows/kgg-gpt-preview-gate.yml/dispatches:
     post:
       operationId: submitKggMainGate
