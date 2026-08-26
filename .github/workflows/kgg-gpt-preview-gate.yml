@@ -85,7 +85,7 @@ permissions:
   statuses: read
 
 concurrency:
-  group: kgg-gpt-preview-${{ inputs.request_id }}
+  group: kgg-gpt-preview-${{ (inputs.mode == 'publish_preview' || inputs.mode == 'publish_device_test') && 'publish' || inputs.request_id }}
   cancel-in-progress: false
 
 jobs:
@@ -354,6 +354,7 @@ jobs:
           node release-pipeline/kgg_dual_device_package.js --self-test
           python release-pipeline/test_kgg_dual_device_v404.py
           python release-pipeline/kgg_test_battery.py --suite patient-scan --level regression
+          node release-pipeline/kgg_device_test_station_browser_smoke.js
           python release-pipeline/kgg_test_battery.py --suite camera-qr --level regression
 
       - name: Verify pinned main is still current before device-test publication
