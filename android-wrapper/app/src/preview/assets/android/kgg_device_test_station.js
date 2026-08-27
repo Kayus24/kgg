@@ -11,8 +11,10 @@
   var PREVIEW_HTML_PREFIX = "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/";
   var DEVICE_JOB_PREFIX = "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/device-tests/";
   var PATIENT_PWA_URL = "https://kayus24.github.io/kgg-patient-preview/device-test/";
+  var PATIENT_PWA_META_URL = PATIENT_PWA_URL + "device-test-meta.json";
   var MAX_MANIFEST_CHARS = 262144;
   var MAX_JOB_CHARS = 65536;
+  var MAX_PWA_META_CHARS = 16384;
   var ADMIN_STEPS = [
     { id: "admin-portrait", title: "Hochformat", instruction: "Prüfe die Admin-App im Hochformat.", noteCode: "layout_portrait" },
     { id: "admin-landscape", title: "Querformat", instruction: "Drehe das Tab ins Querformat und prüfe Menü und Karten.", noteCode: "layout_landscape" },
@@ -77,6 +79,18 @@
     };
   }
 
+  async function verifyPatientPwa(jobValue) {
+    var meta = await fetchJson(PATIENT_PWA_META_URL, MAX_PWA_META_CHARS, "Patient-Test-PWA-Metadaten");
+    if (!meta || meta.kind !== "kgg_device_test_pwa_meta" || meta.schemaVersion !== 1 || meta.syntheticOnly !== true) {
+      throw new Error("Patient-Test-PWA-Metadaten sind ungültig.");
+    }
+    if (String(meta.requestId || "") !== jobValue.requestId
+        || String(meta.sourceSha || "").toLowerCase() !== jobValue.sourceSha
+        || String(meta.jobHash || "").toLowerCase() !== jobValue.jobHash) {
+      throw new Error("Patient-Test-PWA und Testauftrag stammen nicht aus demselben Lauf.");
+    }
+  }
+
   async function fetchJob() {
     var manifest = await fetchJson(PREVIEW_MANIFEST_URL, MAX_MANIFEST_CHARS, "Preview-Manifest");
     if (manifest.kind !== "kgg_gpt_preview_manifest" || !manifest.latest) throw new Error("Preview-Manifest ist ungültig.");
@@ -87,6 +101,7 @@
     if (value.requestId !== current.requestId || value.sourceSha !== current.sourceSha || value.patchHash !== current.patchHash || value.patientPwaUrl !== PATIENT_PWA_URL) {
       throw new Error("Preview und Testauftrag stammen nicht aus demselben Lauf.");
     }
+    await verifyPatientPwa(value);
     current.sessionId = value.sessionId;
     current.jobHash = value.jobHash;
     current.patientPwaUrl = value.patientPwaUrl;
