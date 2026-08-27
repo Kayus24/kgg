@@ -10,8 +10,7 @@
   var PREVIEW_MANIFEST_URL = "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/index.json";
   var PREVIEW_HTML_PREFIX = "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/";
   var DEVICE_JOB_PREFIX = "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/device-tests/";
-  var PATIENT_PWA_URL = "https://kayus24.github.io/kgg-patient-preview/device-test/";
-  var PATIENT_PWA_META_URL = PATIENT_PWA_URL + "device-test-meta.json";
+  var PATIENT_PWA_BASE_URL = "https://kayus24.github.io/kgg-patient-preview/device-test/";
   var MAX_MANIFEST_CHARS = 262144;
   var MAX_JOB_CHARS = 65536;
   var MAX_PWA_META_CHARS = 16384;
@@ -79,8 +78,18 @@
     };
   }
 
+  function immutablePatientPwaUrl(value, requestId) {
+    var url = String(value || "");
+    if (url.indexOf(PATIENT_PWA_BASE_URL) !== 0) throw new Error("Patient-Test-PWA-Adresse ist ungültig.");
+    var suffix = url.slice(PATIENT_PWA_BASE_URL.length);
+    var match = suffix.match(/^([a-z0-9][a-z0-9-]{5,63})\/([0-9]+-[0-9]+)\/$/);
+    if (!match || match[1] !== requestId) throw new Error("Patient-Test-PWA ist nicht laufbezogen gepinnt.");
+    return url;
+  }
+
   async function verifyPatientPwa(jobValue) {
-    var meta = await fetchJson(PATIENT_PWA_META_URL, MAX_PWA_META_CHARS, "Patient-Test-PWA-Metadaten");
+    var patientPwaUrl = immutablePatientPwaUrl(jobValue.patientPwaUrl, jobValue.requestId);
+    var meta = await fetchJson(patientPwaUrl + "device-test-meta.json", MAX_PWA_META_CHARS, "Patient-Test-PWA-Metadaten");
     if (!meta || meta.kind !== "kgg_device_test_pwa_meta" || meta.schemaVersion !== 1 || meta.syntheticOnly !== true) {
       throw new Error("Patient-Test-PWA-Metadaten sind ungültig.");
     }
@@ -98,13 +107,15 @@
     var value = await fetchJson(current.jobUrl, MAX_JOB_CHARS, "Testauftrag");
     API.validateJob(value);
     if (!(await API.verifyJobHash(value))) throw new Error("Prüfsumme des Testauftrags stimmt nicht.");
-    if (value.requestId !== current.requestId || value.sourceSha !== current.sourceSha || value.patchHash !== current.patchHash || value.patientPwaUrl !== PATIENT_PWA_URL) {
+    immutablePatientPwaUrl(value.patientPwaUrl, value.requestId);
+    if (value.requestId !== current.requestId || value.sourceSha !== current.sourceSha || value.patchHash !== current.patchHash) {
       throw new Error("Preview und Testauftrag stammen nicht aus demselben Lauf.");
     }
     await verifyPatientPwa(value);
     current.sessionId = value.sessionId;
     current.jobHash = value.jobHash;
-    current.patientPwaUrl = value.patientPwaUrl;
+    // The native bridge keeps its stable preview-only base boundary; the synthetic run URL stays in the validated job.
+    current.patientPwaUrl = PATIENT_PWA_BASE_URL;
     current.profile = value.profile;
     runtimeContext = Object.freeze(current);
     return value;
