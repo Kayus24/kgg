@@ -57,6 +57,9 @@ jobs:
   status-validating:
     needs: editor-sync-preflight
     runs-on: ubuntu-latest
+    concurrency:
+      group: kgg-gpt-preview-publish
+      cancel-in-progress: false
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -101,6 +104,9 @@ jobs:
   status-publishing:
     needs: validate
     runs-on: ubuntu-latest
+    concurrency:
+      group: kgg-gpt-preview-publish
+      cancel-in-progress: false
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -146,6 +152,9 @@ jobs:
     if: always() && needs.editor-sync-preflight.result == 'success'
     needs: [editor-sync-preflight, status-validating, validate, status-publishing, publish]
     runs-on: ubuntu-latest
+    concurrency:
+      group: kgg-gpt-preview-publish
+      cancel-in-progress: false
     env:
       GH_TOKEN: ${{ github.token }}
       VALIDATE_RESULT: ${{ needs.validate.result }}

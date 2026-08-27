@@ -21,10 +21,15 @@ BRIDGE = ROOT / "android-wrapper/app/src/preview/java/de/kgg/app/KggDeviceTestSt
 FACTORY = ROOT / "android-wrapper/app/src/preview/java/de/kgg/app/KggReleaseControllerFactory.java"
 STATION = ROOT / "android-wrapper/app/src/preview/assets/android/kgg_device_test_station.js"
 FIXTURES = ROOT / "android-wrapper/app/src/preview/assets/android/kgg_dual_device_fixtures.js"
+MAIN_ACTIVITY = ROOT / "android-wrapper/app/src/main/java/de/kgg/app/MainActivity.java"
 SCANNER = ROOT / "patient-start-scan.js"
 AGENT = ROOT / "device-test/patient-device-test-agent.js"
 STORAGE = ROOT / "device-test/patient-device-test-storage.js"
 WORKFLOW = ROOT / ".github/workflows/kgg-gpt-preview-gate.yml"
+DEVICE_ACTION_WORKFLOW = ROOT / ".github/workflows/kgg-gpt-device-test.yml"
+ACTION_API = ROOT / "docs/kgg-custom-gpt-action-api-openapi.yaml"
+EXISTING_MAIN_PREVIEW = ROOT / "release-pipeline/kgg_existing_main_preview.py"
+BROWSER_SMOKE = ROOT / "release-pipeline/kgg_device_test_station_browser_smoke.js"
 
 
 class DualDeviceV404ContractTests(unittest.TestCase):
@@ -127,6 +132,7 @@ class DualDeviceV404ContractTests(unittest.TestCase):
     def test_v404_native_boundary_is_bounded_and_token_free(self) -> None:
         bridge = BRIDGE.read_text(encoding="utf-8")
         build = BUILD.read_text(encoding="utf-8")
+        station = STATION.read_text(encoding="utf-8")
         interfaces = re.findall(
             r"@JavascriptInterface\s+public\s+[A-Za-z0-9_<>\[\]]+\s+([A-Za-z0-9_]+)\s*\(",
             bridge,
@@ -144,6 +150,11 @@ class DualDeviceV404ContractTests(unittest.TestCase):
         self.assertIn("raw.githubusercontent.com", bridge)
         self.assertIn("kayus24.github.io", bridge)
         self.assertIn("kgg-device-test-reports/issues/new", bridge)
+        self.assertIn("beginSession(String runtimeContextJson)", bridge)
+        self.assertIn('"dynamic-preview-manifest"', bridge)
+        self.assertIn("PREVIEW_MANIFEST_URL", station)
+        self.assertIn("bridge.beginSession(JSON.stringify(runtimeContext))", station)
+        self.assertNotIn("KGGPreviewContext", station)
         for forbidden in (
             "Build.SERIAL",
             "CookieManager",
@@ -154,7 +165,18 @@ class DualDeviceV404ContractTests(unittest.TestCase):
             "ghp_",
             "github_pat_",
         ):
-            self.assertNotIn(forbidden, bridge + build)
+            self.assertNotIn(forbidden, bridge + build + station)
+        for stale_build_binding in (
+            "BuildConfig.KGG_PREVIEW_REQUEST_ID",
+            "BuildConfig.KGG_PREVIEW_PATCH_HASH",
+            "BuildConfig.KGG_PREVIEW_COMMIT_SHA",
+            "BuildConfig.KGG_DEVICE_TEST_SESSION_ID",
+            "BuildConfig.KGG_DEVICE_TEST_JOB_HASH",
+            "BuildConfig.KGG_DEVICE_TEST_JOB_URL",
+            "BuildConfig.KGG_PATIENT_PWA_URL",
+            "BuildConfig.KGG_DEVICE_TEST_PROFILE",
+        ):
+            self.assertNotIn(stale_build_binding, bridge)
 
     def test_context_and_workflow_pin_one_source_commit(self) -> None:
         context = preview_context.build_context(
@@ -191,6 +213,101 @@ class DualDeviceV404ContractTests(unittest.TestCase):
         )
         self.assertNotIn("KGG_PATIENT_AUTOMATION_TOKEN", client_source)
         self.assertNotRegex(client_source, r"gh[pousr]_[A-Za-z0-9_]{20,}")
+
+    def test_persistent_existing_main_preview_contract(self) -> None:
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        device_action = DEVICE_ACTION_WORKFLOW.read_text(encoding="utf-8")
+        action_api = ACTION_API.read_text(encoding="utf-8")
+        main_activity = MAIN_ACTIVITY.read_text(encoding="utf-8")
+        publisher = EXISTING_MAIN_PREVIEW.read_text(encoding="utf-8")
+        station = STATION.read_text(encoding="utf-8")
+
+        self.assertIn("Stage exact pinned Admin HTML into persistent Preview channel", workflow)
+        self.assertIn("--source-html base/kgg-update/index.html", workflow)
+        self.assertIn("--version-json base/kgg-update/version.json", workflow)
+        self.assertIn('git -C base fetch --no-tags origin main:refs/remotes/origin/main', workflow)
+        self.assertIn('test "$checked_out" = "$KGG_SOURCE_SHA"', workflow)
+        self.assertIn('if [ "$main_sha" != "$KGG_SOURCE_SHA" ]; then', workflow)
+        self.assertIn('git add previews "device-tests/$KGG_REQUEST_ID/job.json"', workflow)
+        self.assertIn("inputs.mode == 'publish_device_test' || inputs.ui_stability == 'true'", workflow)
+        self.assertIn("(inputs.mode == 'publish_preview' || inputs.mode == 'publish_device_test') && 'publish'", workflow)
+
+        self.assertIn("kgg_gpt_write_gate.py", workflow)
+        self.assertIn("if: inputs.mode != 'publish_device_test'", workflow)
+        self.assertIn("- name: Publish preview channel", workflow)
+        self.assertIn("if: inputs.mode == 'publish_preview'", workflow)
+        self.assertIn('git commit -m "publish gpt preview ${{ inputs.request_id }}"', workflow)
+
+        self.assertIn("PREVIEW_MANIFEST_URL", main_activity)
+        self.assertIn("gpt-preview/previews/index.json", main_activity)
+        self.assertIn('latest.optString("url")', main_activity)
+        self.assertIn('latest.optString("sha256", "")', main_activity)
+
+        self.assertIn('"sourceType": "existing-main"', publisher)
+        self.assertIn('"sourceSha": source_sha', publisher)
+        self.assertIn('"deviceTestJobUrl"', publisher)
+        self.assertIn('index["latest"] = meta', publisher)
+        self.assertNotIn("kgg_new_patch", publisher)
+        self.assertNotIn("patch_content", publisher)
+
+        self.assertIn('PREVIEW_MANIFEST_URL = "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/index.json"', station)
+        self.assertIn('DEVICE_JOB_PREFIX = "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/device-tests/"', station)
+        self.assertIn("API.verifyJobHash(value)", station)
+        self.assertIn("value.requestId !== current.requestId", station)
+        self.assertIn("value.sourceSha !== current.sourceSha", station)
+        self.assertIn("value.patchHash !== current.patchHash", station)
+
+        self.assertIn("mode: publish_device_test", device_action)
+        self.assertIn("payload_json: '{}'", device_action)
+        self.assertIn('ui_stability: "true"', device_action)
+        self.assertNotIn("create_pr", device_action)
+        self.assertNotIn("publish_admin_beta", device_action)
+
+        marker = "/repos/Kayus24/kgg/actions/workflows/kgg-gpt-device-test.yml/dispatches:"
+        self.assertIn(marker, action_api)
+        action_block = action_api[action_api.index(marker) :]
+        next_path = action_block.find("\n  /", 3)
+        if next_path >= 0:
+            action_block = action_block[:next_path]
+        self.assertIn("operationId: submitKggDeviceTest", action_block)
+        self.assertIn("x-openai-isConsequential: false", action_block)
+        self.assertIn("required: [request_id, source_sha]", action_block)
+        self.assertNotIn("payload_json", action_block)
+        self.assertNotRegex(action_block, re.compile(r"^\s+mode:", re.MULTILINE))
+        self.assertNotIn("approval_phrase", action_block)
+
+        result = subprocess.run(
+            [sys.executable, "release-pipeline/kgg_existing_main_preview.py", "--self-test"],
+            cwd=ROOT,
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_installed_apk_context_a_can_switch_to_preview_job_b(self) -> None:
+        browser_smoke = BROWSER_SMOKE.read_text(encoding="utf-8")
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        station = STATION.read_text(encoding="utf-8")
+        bridge = BRIDGE.read_text(encoding="utf-8")
+
+        self.assertIn('regression: "apk-context-a-to-preview-job-b"', browser_smoke)
+        self.assertIn("staleApkContextA", browser_smoke)
+        self.assertIn("window.KGGPreviewContext = staleApkContextA", browser_smoke)
+        self.assertIn("runtimeContextSeen.requestId !== job.requestId", browser_smoke)
+        self.assertIn("runtimeContextSeen.sourceSha !== job.sourceSha", browser_smoke)
+        self.assertIn("runtimeContextSeen.sessionId !== job.sessionId", browser_smoke)
+        self.assertIn("runtimeContextSeen.jobHash !== job.jobHash", browser_smoke)
+        self.assertIn("runtimeContextSeen.jobUrl !== jobUrl", browser_smoke)
+        self.assertIn("node release-pipeline/kgg_device_test_station_browser_smoke.js", workflow)
+
+        self.assertNotIn("window.KGGPreviewContext", station)
+        self.assertIn("fetchJson(PREVIEW_MANIFEST_URL", station)
+        self.assertIn("fetchJson(current.jobUrl", station)
+        self.assertIn("ACTIVE_CONTEXT", bridge)
+        self.assertIn("parseRuntimeContext(runtimeContextJson)", bridge)
+        self.assertNotIn("BuildConfig.KGG_DEVICE_TEST_JOB_HASH", bridge)
+        self.assertNotIn("BuildConfig.KGG_DEVICE_TEST_JOB_URL", bridge)
 
     def test_public_pwa_package_is_scoped_and_offline_capable(self) -> None:
         result = subprocess.run(

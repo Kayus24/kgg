@@ -1,0 +1,40 @@
+name: KGG GPT Device Test
+run-name: KGG GPT Device Test | ${{ inputs.request_id }} | ${{ inputs.source_sha }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      request_id:
+        description: Stable Preview-only device-test request id
+        required: true
+        type: string
+      source_sha:
+        description: Exact current main commit SHA to test
+        required: true
+        type: string
+      device_test_profile:
+        description: Physical dual-device test profile
+        required: false
+        default: quick
+        type: choice
+        options:
+          - quick
+          - full
+
+permissions:
+  contents: write
+  actions: read
+  checks: read
+  statuses: read
+
+jobs:
+  publish-device-test:
+    uses: ./.github/workflows/kgg-gpt-preview-gate.yml
+    with:
+      mode: publish_device_test
+      request_id: ${{ inputs.request_id }}
+      payload_json: '{}'
+      ui_stability: "true"
+      source_sha: ${{ inputs.source_sha }}
+      device_test_profile: ${{ inputs.device_test_profile }}
+    secrets: inherit

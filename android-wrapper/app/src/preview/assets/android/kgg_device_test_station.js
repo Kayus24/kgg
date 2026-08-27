@@ -3,12 +3,17 @@
 
   var bridge = window.KGGDeviceTestStation;
   var API = window.KGGDualDeviceFixtures;
-  var context = window.KGGPreviewContext || {};
   if (!bridge || !API) return;
 
   var ROOT_ID = "kgg-device-test-station";
   var STORAGE_PREFIX = "kgg_dual_device_display_v404_";
+  var PREVIEW_MANIFEST_URL = "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/index.json";
+  var PREVIEW_HTML_PREFIX = "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/";
+  var DEVICE_JOB_PREFIX = "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/device-tests/";
+  var PATIENT_PWA_BASE_URL = "https://kayus24.github.io/kgg-patient-preview/device-test/";
+  var MAX_MANIFEST_CHARS = 262144;
   var MAX_JOB_CHARS = 65536;
+  var MAX_PWA_META_CHARS = 16384;
   var ADMIN_STEPS = [
     { id: "admin-portrait", title: "Hochformat", instruction: "Prüfe die Admin-App im Hochformat.", noteCode: "layout_portrait" },
     { id: "admin-landscape", title: "Querformat", instruction: "Drehe das Tab ins Querformat und prüfe Menü und Karten.", noteCode: "layout_landscape" },
@@ -19,6 +24,7 @@
     { id: "admin-reorder-save-reload", title: "Reihenfolge und Neuladen", instruction: "Ändere die Reihenfolge, speichere und lade neu.", noteCode: "reorder_persistence" }
   ];
   var job = null;
+  var runtimeContext = null;
   var state = null;
   var root = null;
 
@@ -39,18 +45,79 @@
   function storageKey() { return STORAGE_PREFIX + job.sessionId; }
   function now() { return new Date().toISOString(); }
 
-  async function fetchJob() {
-    if (!/^https:\/\//.test(String(context.deviceTestJobUrl || ""))) throw new Error("Sichere Testauftrag-Adresse fehlt.");
-    var response = await fetch(context.deviceTestJobUrl, { cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer" });
-    if (!response.ok) throw new Error("Testauftrag nicht erreichbar (HTTP " + response.status + ")");
+  async function fetchJson(url, maxChars, label) {
+    var response = await fetch(url, { cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer" });
+    if (!response.ok) throw new Error(label + " nicht erreichbar (HTTP " + response.status + ")");
     var text = await response.text();
-    if (!text || text.length > MAX_JOB_CHARS) throw new Error("Testauftrag ist leer oder zu groß.");
-    var value = JSON.parse(text);
+    if (!text || text.length > maxChars) throw new Error(label + " ist leer oder zu groß.");
+    return JSON.parse(text);
+  }
+
+  function runtimeFromLatest(latest) {
+    if (!latest || typeof latest !== "object" || Array.isArray(latest)) throw new Error("Aktueller Preview-Stand fehlt.");
+    var requestId = String(latest.requestId || "");
+    var sourceSha = String(latest.sourceSha || "").toLowerCase();
+    var patchHash = String(latest.patchHash || "").toLowerCase();
+    var jobUrl = String(latest.deviceTestJobUrl || "");
+    if (latest.kind !== "kgg_gpt_preview" || latest.sourceType !== "existing-main") throw new Error("Aktueller Preview-Stand ist kein persistenter Device-Test.");
+    if (!/^[a-z0-9][a-z0-9-]{5,63}$/.test(requestId)) throw new Error("Preview Request-ID ist ungültig.");
+    if (!/^[a-f0-9]{40}$/.test(sourceSha) || String(latest.baseSha || "").toLowerCase() !== sourceSha || String(latest.commitSha || "").toLowerCase() !== sourceSha) throw new Error("Preview Source-SHA ist nicht exakt gepinnt.");
+    if (!/^[a-f0-9]{64}$/.test(patchHash) || !/^[a-f0-9]{64}$/.test(String(latest.sha256 || "").toLowerCase())) throw new Error("Preview Prüfsumme ist ungültig.");
+    if (!Number.isInteger(latest.rolloutCode) || latest.rolloutCode <= 0) throw new Error("Preview Rollout ist ungültig.");
+    var expectedHtmlUrl = PREVIEW_HTML_PREFIX + requestId + "/admin.html";
+    var expectedJobUrl = DEVICE_JOB_PREFIX + requestId + "/job.json";
+    if (String(latest.url || "") !== expectedHtmlUrl || jobUrl !== expectedJobUrl) throw new Error("Preview- und Job-Adressen passen nicht zur Request-ID.");
+    return {
+      kind: "kgg_device_test_runtime_context",
+      schemaVersion: 1,
+      requestId: requestId,
+      sourceSha: sourceSha,
+      patchHash: patchHash,
+      jobUrl: jobUrl,
+      rolloutCode: latest.rolloutCode
+    };
+  }
+
+  function immutablePatientPwaUrl(value, requestId) {
+    var url = String(value || "");
+    if (url.indexOf(PATIENT_PWA_BASE_URL) !== 0) throw new Error("Patient-Test-PWA-Adresse ist ungültig.");
+    var suffix = url.slice(PATIENT_PWA_BASE_URL.length);
+    var match = suffix.match(/^([a-z0-9][a-z0-9-]{5,63})\/([0-9]+-[0-9]+)\/$/);
+    if (!match || match[1] !== requestId) throw new Error("Patient-Test-PWA ist nicht laufbezogen gepinnt.");
+    return url;
+  }
+
+  async function verifyPatientPwa(jobValue) {
+    var patientPwaUrl = immutablePatientPwaUrl(jobValue.patientPwaUrl, jobValue.requestId);
+    var meta = await fetchJson(patientPwaUrl + "device-test-meta.json", MAX_PWA_META_CHARS, "Patient-Test-PWA-Metadaten");
+    if (!meta || meta.kind !== "kgg_device_test_pwa_meta" || meta.schemaVersion !== 1 || meta.syntheticOnly !== true) {
+      throw new Error("Patient-Test-PWA-Metadaten sind ungültig.");
+    }
+    if (String(meta.requestId || "") !== jobValue.requestId
+        || String(meta.sourceSha || "").toLowerCase() !== jobValue.sourceSha
+        || String(meta.jobHash || "").toLowerCase() !== jobValue.jobHash) {
+      throw new Error("Patient-Test-PWA und Testauftrag stammen nicht aus demselben Lauf.");
+    }
+  }
+
+  async function fetchJob() {
+    var manifest = await fetchJson(PREVIEW_MANIFEST_URL, MAX_MANIFEST_CHARS, "Preview-Manifest");
+    if (manifest.kind !== "kgg_gpt_preview_manifest" || !manifest.latest) throw new Error("Preview-Manifest ist ungültig.");
+    var current = runtimeFromLatest(manifest.latest);
+    var value = await fetchJson(current.jobUrl, MAX_JOB_CHARS, "Testauftrag");
     API.validateJob(value);
     if (!(await API.verifyJobHash(value))) throw new Error("Prüfsumme des Testauftrags stimmt nicht.");
-    if (value.sessionId !== context.deviceTestSessionId || value.jobHash !== context.deviceTestJobHash || value.requestId !== context.requestId || value.sourceSha !== context.commitSha || value.patientPwaUrl !== context.patientPwaUrl || value.profile !== context.deviceTestProfile) {
-      throw new Error("APK und Testauftrag stammen nicht aus demselben Lauf.");
+    immutablePatientPwaUrl(value.patientPwaUrl, value.requestId);
+    if (value.requestId !== current.requestId || value.sourceSha !== current.sourceSha || value.patchHash !== current.patchHash) {
+      throw new Error("Preview und Testauftrag stammen nicht aus demselben Lauf.");
     }
+    await verifyPatientPwa(value);
+    current.sessionId = value.sessionId;
+    current.jobHash = value.jobHash;
+    // The native bridge keeps its stable preview-only base boundary; the synthetic run URL stays in the validated job.
+    current.patientPwaUrl = PATIENT_PWA_BASE_URL;
+    current.profile = value.profile;
+    runtimeContext = Object.freeze(current);
     return value;
   }
 
@@ -107,8 +174,8 @@
   async function start() {
     try {
       job = await fetchJob();
-      var nativeSession = parseNative(bridge.beginSession());
-      if (!nativeSession.ok || nativeSession.sessionId !== job.sessionId || nativeSession.jobHash !== job.jobHash) throw new Error("Native Sitzung passt nicht zum Testauftrag.");
+      var nativeSession = parseNative(bridge.beginSession(JSON.stringify(runtimeContext)));
+      if (!nativeSession.ok || nativeSession.sessionId !== job.sessionId || nativeSession.jobHash !== job.jobHash || nativeSession.previewRequestId !== job.requestId) throw new Error("Native Sitzung passt nicht zum aktuellen Testauftrag.");
       state = readJson(storageKey());
       if (!state || state.sessionId !== job.sessionId || state.requestId !== job.requestId) {
         state = { active: true, sessionId: job.sessionId, requestId: job.requestId, profile: job.profile, startedAt: nativeSession.startedAt || now(), index: 0, tests: {}, stepStartedAt: Date.now() };
@@ -129,7 +196,7 @@
       sourceSha: job.sourceSha,
       jobHash: job.jobHash,
       profile: job.profile,
-      jobUrl: context.deviceTestJobUrl,
+      jobUrl: runtimeContext.jobUrl,
       patientPwaUrl: job.patientPwaUrl
     });
     return job.patientPwaUrl + (job.patientPwaUrl.indexOf("?") >= 0 ? "&" : "?") + "kggTest=" + encodeURIComponent(token);

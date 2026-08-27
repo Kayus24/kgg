@@ -38,12 +38,20 @@ public final class KggDeviceTestStationBridge {
     private static final String PREFS = "kgg_dual_device_test_station_v2";
     private static final String ACTIVE = "active";
     private static final String SESSION_ID = "session_id";
+    private static final String ACTIVE_CONTEXT = "active_context";
     private static final String STARTED_AT = "started_at";
     private static final String PREVIOUS_KEEP_SCREEN_ON = "previous_keep_screen_on";
     private static final String LAST_REPORT = "last_report";
     private static final String REPORT_ISSUE_URL =
             "https://github.com/Kayus24/kgg-device-test-reports/issues/new";
+    private static final String DEVICE_JOB_PREFIX =
+            "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/device-tests/";
+    private static final String PATIENT_PWA_URL =
+            "https://kayus24.github.io/kgg-patient-preview/device-test/";
+    private static final String RUNTIME_CONTEXT_KIND = "kgg_device_test_runtime_context";
+    private static final int RUNTIME_CONTEXT_SCHEMA_VERSION = 1;
     private static final int REPORT_SCHEMA_VERSION = 2;
+    private static final int MAX_RUNTIME_CONTEXT_CHARS = 4_096;
     private static final int MAX_REPORT_CHARS = 32_000;
     private static final int MAX_ISSUE_BODY_CHARS = 14_000;
     private static final long MAX_TEST_DURATION_MS = 24L * 60L * 60L * 1000L;
@@ -112,14 +120,21 @@ public final class KggDeviceTestStationBridge {
     }
 
     @JavascriptInterface
-    public String beginSession() {
+    public String beginSession(String runtimeContextJson) {
         synchronized (this) {
             try {
-                JSONObject context = buildContext();
+                JSONObject context = parseRuntimeContext(runtimeContextJson);
                 String expectedSession = context.getString("sessionId");
                 if (isActive() && expectedSession.equals(preferences.getString(SESSION_ID, ""))) {
-                    setKeepScreenOn(true);
-                    return sessionSnapshot(true, context).toString();
+                    try {
+                        JSONObject existingContext = buildContext();
+                        if (existingContext.toString().equals(context.toString())) {
+                            setKeepScreenOn(true);
+                            return sessionSnapshot(true, context).toString();
+                        }
+                    } catch (Exception ignored) {
+                        // A stale pre-runtime-context session is replaced below.
+                    }
                 }
                 if (isActive()) {
                     restoreScreenState(preferences.getBoolean(PREVIOUS_KEEP_SCREEN_ON, false));
@@ -128,6 +143,7 @@ public final class KggDeviceTestStationBridge {
                 preferences.edit()
                         .putBoolean(ACTIVE, true)
                         .putString(SESSION_ID, expectedSession)
+                        .putString(ACTIVE_CONTEXT, context.toString())
                         .putString(STARTED_AT, utcNow())
                         .putBoolean(PREVIOUS_KEEP_SCREEN_ON, previousKeepScreenOn)
                         .apply();
@@ -156,6 +172,7 @@ public final class KggDeviceTestStationBridge {
                         .putString(LAST_REPORT, report.toString())
                         .putBoolean(ACTIVE, false)
                         .remove(SESSION_ID)
+                        .remove(ACTIVE_CONTEXT)
                         .remove(STARTED_AT)
                         .remove(PREVIOUS_KEEP_SCREEN_ON)
                         .apply();
@@ -203,34 +220,56 @@ public final class KggDeviceTestStationBridge {
         }
     }
 
-    private JSONObject buildContext() throws JSONException {
-        String requestId = BuildConfig.KGG_PREVIEW_REQUEST_ID;
-        String patchHash = BuildConfig.KGG_PREVIEW_PATCH_HASH;
-        String sourceSha = BuildConfig.KGG_PREVIEW_COMMIT_SHA;
-        String sessionId = BuildConfig.KGG_DEVICE_TEST_SESSION_ID;
-        String jobHash = BuildConfig.KGG_DEVICE_TEST_JOB_HASH;
-        String jobUrl = BuildConfig.KGG_DEVICE_TEST_JOB_URL;
-        String patientPwaUrl = BuildConfig.KGG_PATIENT_PWA_URL;
-        String profile = BuildConfig.KGG_DEVICE_TEST_PROFILE;
-        if (!requestId.matches("[a-z0-9][a-z0-9-]{5,63}")
-                || !patchHash.matches("[0-9a-f]{64}")
+    private JSONObject parseRuntimeContext(String value) throws JSONException {
+        if (value == null || value.length() > MAX_RUNTIME_CONTEXT_CHARS) {
+            throw new IllegalArgumentException("context_size");
+        }
+        JSONObject input = new JSONObject(value);
+        String requestId = input.optString("requestId", "");
+        String sourceSha = input.optString("sourceSha", "").toLowerCase();
+        String patchHash = input.optString("patchHash", "").toLowerCase();
+        String sessionId = input.optString("sessionId", "").toLowerCase();
+        String jobHash = input.optString("jobHash", "").toLowerCase();
+        String jobUrl = input.optString("jobUrl", "");
+        String patientPwaUrl = input.optString("patientPwaUrl", "");
+        String profile = input.optString("profile", "").toLowerCase();
+        int rolloutCode = input.optInt("rolloutCode", 0);
+        String expectedJobUrl = DEVICE_JOB_PREFIX + requestId + "/job.json";
+        if (input.length() != 11
+                || !RUNTIME_CONTEXT_KIND.equals(input.optString("kind"))
+                || input.optInt("schemaVersion", 0) != RUNTIME_CONTEXT_SCHEMA_VERSION
+                || !requestId.matches("[a-z0-9][a-z0-9-]{5,63}")
                 || !sourceSha.matches("[0-9a-f]{40}")
+                || !patchHash.matches("[0-9a-f]{64}")
                 || !sessionId.matches("kgg-test-[0-9a-f]{32}")
                 || !jobHash.matches("[0-9a-f]{64}")
                 || !("quick".equals(profile) || "full".equals(profile))
-                || !allowedHttps(jobUrl, "raw.githubusercontent.com")
-                || !allowedHttps(patientPwaUrl, "kayus24.github.io")) {
+                || rolloutCode <= 0
+                || !expectedJobUrl.equals(jobUrl)
+                || !PATIENT_PWA_URL.equals(patientPwaUrl)) {
             throw new IllegalStateException("context");
         }
         return new JSONObject()
+                .put("kind", RUNTIME_CONTEXT_KIND)
+                .put("schemaVersion", RUNTIME_CONTEXT_SCHEMA_VERSION)
                 .put("requestId", requestId)
-                .put("patchHash", patchHash)
                 .put("sourceSha", sourceSha)
+                .put("patchHash", patchHash)
+                .put("jobUrl", jobUrl)
+                .put("rolloutCode", rolloutCode)
                 .put("sessionId", sessionId)
                 .put("jobHash", jobHash)
-                .put("jobUrl", jobUrl)
                 .put("patientPwaUrl", patientPwaUrl)
                 .put("profile", profile);
+    }
+
+    private JSONObject buildContext() throws JSONException {
+        String raw = preferences.getString(ACTIVE_CONTEXT, "");
+        JSONObject context = parseRuntimeContext(raw);
+        if (!context.getString("sessionId").equals(preferences.getString(SESSION_ID, ""))) {
+            throw new IllegalStateException("session_context_mismatch");
+        }
+        return context;
     }
 
     private JSONObject sessionSnapshot(boolean resumed, JSONObject context)
@@ -245,6 +284,7 @@ public final class KggDeviceTestStationBridge {
                 .put("previewVersion", BuildConfig.VERSION_NAME)
                 .put("jobHash", context.getString("jobHash"))
                 .put("profile", context.getString("profile"))
+                .put("contextSource", "dynamic-preview-manifest")
                 .put("contextPinned", true);
     }
 
@@ -535,18 +575,6 @@ public final class KggDeviceTestStationBridge {
         values.put("h3-20-low-contrast", "low-contrast");
         values.put("h3-20-photo", "photo");
         return Collections.unmodifiableMap(values);
-    }
-
-    private static boolean allowedHttps(String value, String host) {
-        try {
-            Uri uri = Uri.parse(value);
-            return "https".equals(uri.getScheme())
-                    && host.equals(uri.getHost())
-                    && !nonEmpty(uri.getUserInfo())
-                    && !nonEmpty(uri.getFragment());
-        } catch (Exception ignored) {
-            return false;
-        }
     }
 
     private static boolean isStatus(String status) {

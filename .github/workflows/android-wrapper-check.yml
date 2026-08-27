@@ -38,11 +38,12 @@ jobs:
           unzip -l "$ADMIN_APK" | grep -q 'assets/android/kgg_release_control_bootstrap.js'
           ! unzip -l "$COLLEAGUE_APK" | grep -q 'kgg_release_control_bootstrap.js'
           ! unzip -l "$PREVIEW_APK" | grep -q 'kgg_release_control_bootstrap.js'
-          ! unzip -l "$ADMIN_APK" | grep -Eq 'kgg_device_test_station.js|kgg_dual_device_fixtures.js|kgg_preview_context.js'
-          ! unzip -l "$COLLEAGUE_APK" | grep -Eq 'kgg_device_test_station.js|kgg_dual_device_fixtures.js|kgg_preview_context.js'
+          ! unzip -l "$ADMIN_APK" | grep -Eq 'kgg_device_test_station.js|kgg_dual_device_fixtures.js|kgg_preview_context.js|kgg_device_test_runtime_guard.js'
+          ! unzip -l "$COLLEAGUE_APK" | grep -Eq 'kgg_device_test_station.js|kgg_dual_device_fixtures.js|kgg_preview_context.js|kgg_device_test_runtime_guard.js'
           unzip -l "$PREVIEW_APK" | grep -q 'assets/android/kgg_device_test_station.js'
           unzip -l "$PREVIEW_APK" | grep -q 'assets/android/kgg_dual_device_fixtures.js'
           unzip -l "$PREVIEW_APK" | grep -q 'assets/android/kgg_preview_context.js'
+          unzip -l "$PREVIEW_APK" | grep -q 'assets/android/kgg_device_test_runtime_guard.js'
           unzip -p "$PREVIEW_APK" assets/preview.html > /tmp/preview.html
           grep -q 'KGGDataStore' /tmp/preview.html
           unzip -p "$COLLEAGUE_APK" assets/colleague.html > /tmp/colleague.html

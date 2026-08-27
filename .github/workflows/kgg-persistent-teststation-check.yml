@@ -1,0 +1,77 @@
+name: KGG Persistent Teststation Check
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/kgg-gpt-device-test.yml"
+      - ".github/workflows/kgg-gpt-preview-auto.yml"
+      - ".github/workflows/kgg-gpt-preview-gate.yml"
+      - ".github/workflows/kgg-persistent-teststation-check.yml"
+      - "android-wrapper/app/src/preview/**"
+      - "release-pipeline/kgg_device_test_station_browser_smoke.js"
+      - "release-pipeline/kgg_existing_main_preview.py"
+      - "release-pipeline/kgg_persistent_runtime_guard_smoke.js"
+      - "release-pipeline/test_kgg_dual_device_v404.py"
+      - "release-pipeline/test_kgg_persistent_preview_bootstrap.py"
+      - "release-pipeline/test_kgg_persistent_runtime_guard.py"
+      - "release-pipeline/test_kgg_tab_s9_test_station.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kgg-persistent-teststation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  persistent-teststation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+      - name: Run Existing-Main and persistent runtime contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python release-pipeline/kgg_existing_main_preview.py --self-test
+          python release-pipeline/test_kgg_tab_s9_test_station.py
+      - name: Run full UI stability regression
+        shell: bash
+        run: python release-pipeline/kgg_test_battery.py --suite ui-stability --level regression
+      - name: Run patient scanner compatibility regression
+        shell: bash
+        run: python release-pipeline/kgg_test_battery.py --suite patient-scan --level regression
+      - name: Run installed-APK A to Preview/Job B browser regression
+        shell: bash
+        run: node release-pipeline/kgg_device_test_station_browser_smoke.js
+      - name: Run Admin camera and cross-app QR regression
+        shell: bash
+        run: python release-pipeline/kgg_test_battery.py --suite camera-qr --level regression
+      - name: Check Custom GPT resource manifest
+        shell: bash
+        run: python release-pipeline/kgg_custom_gpt_resource_audit.py --check
+      - name: Run secret scan
+        shell: bash
+        run: python release-pipeline/kgg_secret_scan.py
+      - name: Build persistent Preview APK
+        working-directory: android-wrapper
+        shell: bash
+        run: gradle assemblePreviewDebug
