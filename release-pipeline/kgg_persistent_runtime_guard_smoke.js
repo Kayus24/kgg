@@ -32,6 +32,7 @@ function main() {
   let nativeBeginCalls = 0;
   let nativeContext = null;
   let previewUpdateRequests = 0;
+  let now = 1000;
 
   const window = {
     KGGAndroidApp: {
@@ -61,7 +62,8 @@ function main() {
     },
   };
 
-  vm.runInNewContext(source, { window, JSON, String, Number, Object, Array, Error }, { filename: GUARD });
+  const fakeDate = { now: () => now };
+  vm.runInNewContext(source, { window, JSON, String, Number, Object, Array, Error, Date: fakeDate }, { filename: GUARD });
   const bridge = window.KGGDeviceTestStation;
   if (!bridge || typeof bridge.beginSession !== "function") fail("runtime guard did not expose station bridge");
 
@@ -86,7 +88,13 @@ function main() {
 
   result = JSON.parse(bridge.beginSession(JSON.stringify(runtimeB)));
   if (result.ok !== false || result.error !== "preview_html_not_current") fail("stale loaded HTML A retry was not blocked");
-  if (previewUpdateRequests !== 1) fail("same target Preview B requested duplicate foreground updates");
+  if (previewUpdateRequests !== 1) fail("same target Preview B requested duplicate foreground updates inside retry window");
+
+  now += 10001;
+  result = JSON.parse(bridge.beginSession(JSON.stringify(runtimeB)));
+  if (result.ok !== false || result.error !== "preview_html_not_current") fail("stale HTML A after retry window was not blocked");
+  if (previewUpdateRequests !== 2) fail("same target Preview B was not re-requested after bounded retry window");
+  if (nativeBeginCalls !== 0) fail("native session started while retrying stale HTML A");
 
   status = {
     previewChannel: true,
@@ -116,6 +124,7 @@ function main() {
     staleHtmlBlocked: true,
     foregroundUpdateRequested: true,
     duplicateUpdateSuppressed: true,
+    retryAfterCooldownRequested: true,
     pendingHealthBlocked: true,
     activeRequest: nativeContext.requestId,
     activeSourceSha: nativeContext.sourceSha,
