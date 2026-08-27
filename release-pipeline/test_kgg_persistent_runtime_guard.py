@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FACTORY = ROOT / "android-wrapper/app/src/preview/java/de/kgg/app/KggReleaseControllerFactory.java"
 GUARD = ROOT / "android-wrapper/app/src/preview/assets/android/kgg_device_test_runtime_guard.js"
 SMOKE = ROOT / "release-pipeline/kgg_persistent_runtime_guard_smoke.js"
+DEVICE_WORKFLOW = ROOT / ".github/workflows/kgg-gpt-device-test.yml"
 
 
 class PersistentRuntimeGuardTests(unittest.TestCase):
@@ -43,6 +44,15 @@ class PersistentRuntimeGuardTests(unittest.TestCase):
             "github_pat_",
         ):
             self.assertNotIn(forbidden, guard)
+
+    def test_device_action_has_no_pr_or_issue_write_permission(self) -> None:
+        workflow = DEVICE_WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("mode: publish_device_test", workflow)
+        self.assertIn("contents: write", workflow)
+        self.assertNotIn("pull-requests: write", workflow)
+        self.assertNotIn("issues: write", workflow)
+        self.assertNotIn("create_pr", workflow)
+        self.assertNotIn("publish_admin_beta", workflow)
 
     def test_stale_html_a_cannot_start_runtime_b(self) -> None:
         result = subprocess.run(
