@@ -75,7 +75,7 @@
     const ask=confirmFn||window.confirm;if(!ask(t('Plan „','Delete plan “')+planTitle(raw,idx)+t('“ wirklich löschen?','” permanently?')))return false;
     if(Number(state.active)===idx&&api&&api.saveCurrentSlot)api.saveCurrentSlot();
     const fresh=api&&api.ensureState?api.ensureState():readState();const result=removePlanState(fresh,idx);if(!result.ok)return false;
-    writeState(result.state);removeLocalPlanKeys(result.removed);await deleteMediaRecords(result.removed,result.state.plans);
+    writeState(result.state);removeLocalPlanKeys(result.removed);try{const liveSync=window.KGGPatientLiveSync;if(liveSync&&typeof liveSync.removePairingForPlan==='function')await liveSync.removePairingForPlan(String(result.removed&&result.removed.i||''));}catch(e){}await deleteMediaRecords(result.removed,result.state.plans);
     const next=result.state.plans[result.newActive];if(next)loadActive(next);
     closePanel();safe(()=>setStatus(t('Plan gelöscht. Andere Pläne bleiben erhalten.','Plan deleted. Other plans were kept.'),'ok'));return true
   }

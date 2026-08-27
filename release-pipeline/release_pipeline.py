@@ -880,6 +880,17 @@ def status() -> dict:
     return {"schema": manifest["schema"], "channels": manifest["channels"]}
 
 
+def check_live_sync_production() -> dict:
+    """Run the fixed, fail-closed Live-Sync production privacy gate."""
+    try:
+        from kgg_live_sync_privacy_gate import require_production_approval
+
+        require_production_approval()
+    except Exception as exc:
+        fail(f"Live-Sync production privacy gate failed: {exc}")
+    return {"status": "approved", "approvalFile": "kgg-live-sync-privacy-approval.local.json"}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="command", required=True)
@@ -893,6 +904,7 @@ def main() -> int:
     p_rollback.add_argument("--release-id", required=True)
     p_sync_legacy = sub.add_parser("sync-legacy")
     p_sync_legacy.add_argument("--check", action="store_true")
+    sub.add_parser("check-live-sync-production")
     sub.add_parser("status")
     args = parser.parse_args()
 
@@ -905,6 +917,8 @@ def main() -> int:
             result = rollback(args.channel, args.release_id)
         elif args.command == "sync-legacy":
             result = sync_legacy_manifest(check=args.check)
+        elif args.command == "check-live-sync-production":
+            result = check_live_sync_production()
         else:
             result = status()
         print(json.dumps(result, ensure_ascii=False, indent=2))

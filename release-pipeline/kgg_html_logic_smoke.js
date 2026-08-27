@@ -471,10 +471,12 @@ function patientQrCriticalSuite() {
     assert(typeof patientRootAppUrl==='function','small public app-address fallback helper missing');
     assert(patientRootAppUrl()===KGG_PATIENT_LATEST_BASE_URL && !patientRootAppUrl().includes('?plan='),'app-address fallback must contain no personal plan payload');
     assert(!patientBaseUrl.includes('media-inline-bundle-7'),'old patient root bundle leaked into default patient base URL');
+    const privacyCanaries={patientName:'SYNTHETIC_PATIENT_NAME_CANARY',birthDate:'SYNTHETIC_BIRTH_DATE_CANARY',therapist:'SYNTHETIC_THERAPIST_CANARY',notes:'SYNTHETIC_NOTES_CANARY'};
     const plan={
-      id:'patient_qr_smoke',
+      id:'patient_qr_smoke_'+privacyCanaries.patientName,
+      title:privacyCanaries.patientName,
       updatedAt:'2026-07-01T00:00:00.000Z',
-      patient:{name:'QR Test',date:'2026-07-01'},
+      patient:{name:privacyCanaries.patientName,date:privacyCanaries.birthDate,therapist:privacyCanaries.therapist,notes:privacyCanaries.notes},
       exercises:[ensureUiExerciseShape({id:'ex_qr_1',localId:'ex_qr_1',name:'Rudern',sets:3,unit:'Wdh',weightUnit:'kg',startMetric:'12',startLoad:'30'})]
     };
     const share=buildPatientShareFromCurrentPlan(plan,{ttlSeconds:3600});
@@ -487,12 +489,23 @@ function patientQrCriticalSuite() {
     const parsed=new URL(share.url);
     const generatedCode=parsed.searchParams.get('plan');
     assert(/^KGGH3:/i.test(generatedCode),'generated patient URL has no KGGH3 code');
-    const decoded=convertKggH2PayloadToPatientPayload(window.KGGPlanFormat.decodePlanText(generatedCode).raw);
+    const decodedRaw=window.KGGPlanFormat.decodePlanText(generatedCode).raw;
+    const decoded=convertKggH2PayloadToPatientPayload(decodedRaw);
     assert(decoded.plan.length===1 && decoded.plan[0].name==='Rudern','patient QR payload decode mismatch');
+    assert(!Object.prototype.hasOwnProperty.call(decodedRaw,'patient')&&!Object.prototype.hasOwnProperty.call(decodedRaw,'p'),'patient QR exported patient fields');
+    assert(decodedRaw.t==='KGG Trainingsplan','patient QR did not use the generic non-personal title');
+    assert(!JSON.stringify(decodedRaw).includes(privacyCanaries.patientName),'patient name appeared in test QR');
+    assert(!JSON.stringify(decodedRaw).includes(privacyCanaries.birthDate),'birth date appeared in test QR');
+    assert(!JSON.stringify(decodedRaw).includes(privacyCanaries.therapist),'therapist data appeared in test QR');
+    assert(!JSON.stringify(decodedRaw).includes(privacyCanaries.notes),'notes appeared in test QR');
     const legacy=makeKggH2ShareUrl(patientBaseUrl,share.publicPayload);
     assert(legacy.includes('?plan=KGGH2%3A'),'legacy KGGH2 helper must remain available');
     const legacyCode=new URL(legacy).searchParams.get('plan');
-    assert(convertKggH2PayloadToPatientPayload(window.KGGPlanFormat.decodePlanText(legacyCode).raw).plan[0].name==='Rudern','legacy KGGH2 decode mismatch');
+    const legacyRaw=window.KGGPlanFormat.decodePlanText(legacyCode).raw;
+    assert(convertKggH2PayloadToPatientPayload(legacyRaw).plan[0].name==='Rudern','legacy KGGH2 decode mismatch');
+    const legacyRawText=JSON.stringify(legacyRaw);
+    assert(!Object.prototype.hasOwnProperty.call(legacyRaw,'patient')&&!Object.prototype.hasOwnProperty.call(legacyRaw,'p'),'legacy KGGH2 exported patient fields');
+    Object.values(privacyCanaries).forEach(marker=>assert(!legacyRawText.includes(marker),'legacy KGGH2 exported privacy canary'));
     window.__results={suite:'patient-qr-critical',base:patientBaseUrl,urlPrefix:share.url.split('?')[0],format:'KGGH3',exercise:decoded.plan[0].name};
   `);
 }

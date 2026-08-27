@@ -1,175 +1,147 @@
 # KGG Patient Source Chunk 025
 
-- Source file: `patient-qr-format.js`
-- Characters: 1-9211
-- Full source SHA-256: `ec46d964158b2e69f0b33bb19c1d39e5c2eb7197cd3cf464ffe139a8e6647153`
+- Source file: `patient-plan-link-choice.js`
+- Characters: 1-9307
+- Full source SHA-256: `29db160f0fbaffead0dcb2983d093a7cbf6b5742b35adeef1b917f99fbbc4fd5`
 
 ```
-/* KGGH3 local plan codec v81. Uses local fflate 0.8.3 only. */
-(function(global){
-  'use strict';
-  const VERSION='v81-kgg-h3-plan-format';
-  const H2='KGGH2:', H3='KGGH3:';
-  const LIMITS={maxCodeChars:12000,maxJsonBytes:96*1024,maxCompressedBytes:32*1024,maxExercises:40,maxFieldChars:4096};
-  function utf8Encode(text){
-    if(typeof TextEncoder==='function')return new TextEncoder().encode(String(text));
-    const binary=unescape(encodeURIComponent(String(text))),out=new Uint8Array(binary.length);
-    for(let i=0;i<binary.length;i++)out[i]=binary.charCodeAt(i);
-    return out;
-  }
-  function utf8Decode(bytes){
-    if(typeof TextDecoder==='function'){
-      try{return new TextDecoder('utf-8',{fatal:true}).decode(bytes)}catch(err){throw new Error('UTF-8-Daten sind beschädigt.')}
+(()=>{
+  const VERSION='v81-plan-link-choice-kgg-h3';
+  const CURRENT_KEY='kggCurrentPlanV1';
+  const MULTI_KEY='kggPatientMultiPlansV1';
+  const PENDING_KEY='kggPendingPlanLinkV1';
+  const TTL_MS=5*60*1000;
+  if(window.__kggPatientPlanLinkChoice===VERSION)return;
+  window.__kggPatientPlanLinkChoice=VERSION;
+  let pendingMemory=null;
+
+  function clone(value){try{return JSON.parse(JSON.stringify(value))}catch(e){return value&&typeof value==='object'?{...value}:value}}
+  function readJson(storage,key){try{return JSON.parse(storage.getItem(key)||'null')}catch(e){return null}}
+  function decodePayload(value){
+    if(window.KGGPlanFormat&&typeof window.KGGPlanFormat.decodePlanText==='function'){
+      try{return window.KGGPlanFormat.decodePlanText(value).raw}catch(e){return null}
     }
-    try{let binary='';for(let i=0;i<bytes.length;i++)binary+=String.fromCharCode(bytes[i]);return decodeURIComponent(escape(binary))}
-    catch(err){throw new Error('UTF-8-Daten sind beschädigt.')}
-  }
-  function b64Encode(bytes){
-    let binary='';
-    for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));
-    return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-  }
-  function b64Decode(value){
-    const body=String(value||'').trim();
-    if(!body||body.length>LIMITS.maxCodeChars||body.length%4===1||!/^[A-Za-z0-9_-]+$/.test(body))throw new Error('KGGH3-QR ist beschädigt oder zu groß.');
-    const text=body.replace(/-/g,'+').replace(/_/g,'/'),padded=text+'='.repeat((4-text.length%4)%4);
-    let binary='';
-    try{binary=atob(padded)}catch(err){throw new Error('KGGH3-Base64 ist beschädigt.')}
-    const bytes=new Uint8Array(binary.length);
-    for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
-    return bytes;
-  }
-  function isObject(value){return !!value&&typeof value==='object'&&!Array.isArray(value)}
-  function asBoundedString(value,label,required){
-    if(value==null&&!required)return;
-    if(typeof value!=='string'||value.length>LIMITS.maxFieldChars||(required&&!value.trim()))throw new Error(label+' ist ungültig.');
-  }
-  function asInteger(value,label,min,max){
-    const n=typeof value==='number'?value:(typeof value==='string'&&/^\d+$/.test(value)?Number(value):NaN);
-    if(!Number.isInteger(n)||n<min||n>max)throw new Error(label+' ist ungültig.');
-  }
-  function validatePlan(raw){
-    if(!isObject(raw))throw new Error('Plan-Schema ist ungültig.');
-    asBoundedString(raw.i,'Plan-ID',false);
-    asBoundedString(raw.t,'Plan-Titel',false);
-    if(raw.v!==undefined)asInteger(raw.v,'Plan-Version',1,10000);
-    if(raw.d!==undefined)asInteger(raw.d,'Trainingstage',1,366);
-    if(raw.stepDays!==undefined)asInteger(raw.stepDays,'Schritt-Tage',1,366);
-    if(raw.extendDays!==undefined&&typeof raw.extendDays!=='boolean')throw new Error('Plan-Fortsetzung ist ungültig.');
-    if(raw.patient!==undefined&&!isObject(raw.patient))throw new Error('Patientendaten sind ungültig.');
-    if(raw.p!==undefined&&!isObject(raw.p))throw new Error('Patientendaten sind ungültig.');
-    if(raw.m!==undefined&&!isObject(raw.m))throw new Error('Plan-Metadaten sind ungültig.');
-    if(!Array.isArray(raw.e)||raw.e.length<1||raw.e.length>LIMITS.maxExercises)throw new Error('Übungsanzahl ist ungültig.');
-    raw.e.forEach((item,index)=>{
-      if(!Array.isArray(item)||item.length<5)throw new Error('Übung '+(index+1)+' ist unvollständig.');
-      asBoundedString(item[0],'Übungsname '+(index+1),true);
-      asInteger(item[1],'Sätze '+(index+1),1,100);
-      asBoundedString(item[2],'Seite '+(index+1),true);
-      asBoundedString(item[3],'Einheit '+(index+1),false);
-      asBoundedString(item[4],'Messwert '+(index+1),false);
-      for(let i=5;i<item.length;i++){
-        const value=item[i];
-        if(typeof value==='string'&&value.length>LIMITS.maxFieldChars)throw new Error('Übungsdaten '+(index+1)+' sind zu groß.');
-        if(value&&typeof value==='object'){
-          let json='';
-          try{json=JSON.stringify(value)}catch(err){throw new Error('Übungsdaten '+(index+1)+' sind nicht lesbar.')}
-          if(json.length>LIMITS.maxFieldChars*8)throw new Error('Übungsdaten '+(index+1)+' sind zu groß.');
-        }
-      }
-    });
-    let json='';
-    try{json=JSON.stringify(raw)}catch(err){throw new Error('Plan ist nicht lesbar.')}
-    const jsonBytes=utf8Encode(json).length;
-    if(jsonBytes>LIMITS.maxJsonBytes)throw new Error('Plan ist zu groß.');
-    return {raw,json,jsonBytes};
-  }
-  function decodeCode(code){
-    const text=String(code||'').trim();
-    const match=text.match(/^(KGGH[23]):([A-Za-z0-9_-]+)$/i);
-    if(!match)throw new Error('Kein KGGH2/KGGH3-Plan.');
-    const prefix=match[1].toUpperCase()+':',body=match[2];
-    if(text.length>LIMITS.maxCodeChars)throw new Error('Plan-QR ist zu groß.');
-    const compressed=prefix===H3?b64Decode(body):null;
-    let bytes=compressed;
-    if(prefix===H2)bytes=b64Decode(body);
-    else{
-      if(!global.fflate||typeof global.fflate.unzlibSync!=='function')throw new Error('Lokaler KGGH3-Decoder fehlt.');
-      if(compressed.length>LIMITS.maxCompressedBytes)throw new Error('Komprimierter Plan ist zu groß.');
-      try{bytes=global.fflate.unzlibSync(compressed)}catch(err){throw new Error('Komprimierter Plan ist beschädigt.')}
-    }
-    if(!bytes||bytes.length>LIMITS.maxJsonBytes)throw new Error('Plan ist zu groß.');
-    let raw;
-    try{raw=JSON.parse(utf8Decode(bytes))}catch(err){throw new Error('Plan-JSON ist beschädigt.')}
-    const checked=validatePlan(raw);
-    return {format:prefix.slice(0,-1),prefix,body,raw:checked.raw,jsonBytes:checked.jsonBytes,compressedBytes:compressed?compressed.length:bytes.length};
-  }
-  function encodeCode(raw,prefix){
-    const checked=validatePlan(raw),bytes=utf8Encode(checked.json);
-    if(prefix===H3){
-      if(!global.fflate||typeof global.fflate.zlibSync!=='function')throw new Error('Lokaler KGGH3-Encoder fehlt.');
-      const compressed=global.fflate.zlibSync(bytes);
-      const body=b64Encode(compressed),code=H3+body;
-      if(code.length>LIMITS.maxCodeChars)throw new Error('Plan-QR ist zu groß.');
-      return code;
-    }
-    const code=H2+b64Encode(bytes);
-    if(code.length>LIMITS.maxCodeChars)throw new Error('Plan-Link ist zu groß.');
-    return code;
-  }
-  function candidates(input){
-    const values=[],add=value=>{const text=String(value||'').trim();if(text&&!values.includes(text))values.push(text)};
-    add(input);
-    try{add(decodeURIComponent(String(input||'')))}catch(err){}
+    let text=String(value||'').trim().replace(/^KGGH2:/i,'').replace(/-/g,'+').replace(/_/g,'/');
+    if(!text)return null;
     try{
-      const url=new URL(String(input||''),global.location&&global.location.href||undefined);
-      ['plan','kgg'].forEach(key=>{const value=url.searchParams.get(key);if(value){add(value);try{add(decodeURIComponent(value))}catch(err){}}});
-      if(url.hash){add(url.hash.slice(1));try{add(decodeURIComponent(url.hash.slice(1)))}catch(err){}}
-    }catch(err){}
-    return values;
+      while(text.length%4)text+='=';
+      const binary=atob(text),bytes=new Uint8Array(binary.length);
+      for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+      const decoded=typeof TextDecoder==='function'?new TextDecoder().decode(bytes):decodeURIComponent(escape(binary));
+      const raw=JSON.parse(decoded);
+      return raw&&typeof raw==='object'&&Array.isArray(raw.e)?raw:null;
+    }catch(e){return null}
   }
-  function findPlanCode(input){
-    for(const value of candidates(input)){
-      const match=String(value).match(/(KGGH[23]):([A-Za-z0-9_-]+)/i);
-      if(match)return match[1].toUpperCase()+':'+match[2];
-    }
-    return '';
-  }
-  function decodePlanText(input){
-    const code=findPlanCode(input);
-    if(!code)throw new Error('Kein KGGH2/KGGH3-Plan.');
-    return decodeCode(code);
-  }
-  function encodeKggH2(raw){return encodeCode(raw,H2)}
-  function encodeKggH3(raw){return encodeCode(raw,H3)}
-  function rewriteH3StartInput(){
-    const code=findPlanCode(global.location&&global.location.href||'');
-    if(!/^KGGH3:/i.test(code))return false;
+  function incomingLink(){
     try{
-      const parsed=decodeCode(code),h2=encodeKggH2(parsed.raw);
-      const query='?plan='+encodeURIComponent(h2);
-      if(global.history&&typeof global.history.replaceState==='function')global.history.replaceState(null,'',String(global.location.pathname||'')+query);
-      return true;
-    }catch(err){
-      global.__KGG_PLAN_FORMAT_ERROR=String(err&&err.message||err);
-      return false;
+      const query=new URLSearchParams(location.search),queryValue=query.get('plan')||query.get('kgg')||'';
+      if(queryValue)return{raw:decodePayload(queryValue),source:'query'};
+      const hash=String(location.hash||'').slice(1);
+      if(/^KGGH[23]:/i.test(hash))return{raw:decodePayload(hash),source:'hash'};
+    }catch(e){}
+    return null;
+  }
+  function activeStoredPlan(){
+    const state=readJson(window.localStorage,MULTI_KEY);
+    if(state&&Array.isArray(state.plans)&&state.plans.length){
+      const index=Math.max(0,Math.min(Number(state.active)||0,state.plans.length-1));
+      if(state.plans[index]&&typeof state.plans[index]==='object')return state.plans[index];
     }
+    const wrapper=readJson(window.localStorage,CURRENT_KEY);
+    return wrapper&&wrapper.plan&&typeof wrapper.plan==='object'?wrapper.plan:null;
   }
-  function guardStartInput(){
-    const code=findPlanCode(global.location&&global.location.href||'');
-    if(!code)return false;
-    try{decodeCode(code);return true}catch(err){
-      global.__KGG_PLAN_FORMAT_ERROR=String(err&&err.message||err);
-      try{if(global.history&&typeof global.history.replaceState==='function')global.history.replaceState(null,'',String(global.location.pathname||''))}catch(innerErr){}
-      return false;
-    }
+  function planKey(raw){
+    const id=raw&&String(raw.sourcePlanId||raw.i||'').trim();
+    if(id)return'id:'+id;
+    try{return'json:'+JSON.stringify(raw)}catch(e){return'object'}
   }
-  function fingerprint(raw){
-    const stable=value=>Array.isArray(value)?value.map(stable):value&&typeof value==='object'?Object.keys(value).sort().reduce((out,key)=>(out[key]=stable(value[key]),out),{}):value;
-    let json='';try{json=JSON.stringify(stable(raw))}catch(err){json=''};
-    let hash=2166136261;for(let i=0;i<json.length;i++){hash^=json.charCodeAt(i);hash=Math.imul(hash,16777619)}
-    return (hash>>>0).toString(16).padStart(8,'0');
+  function stripIncomingUrl(){
+    try{if(window.history&&typeof history.replaceState==='function')history.replaceState(null,'',location.pathname)}catch(e){}
   }
-  global.KGGPlanFormat={version:VERSION,limits:LIMITS,validatePlan,decodeCode,decodePlanText,encodeKggH2,encodeKggH3,findPlanCode,rewriteH3StartInput,fingerprint};
-  try{rewriteH3StartInput();guardStartInput()}catch(err){global.__KGG_PLAN_FORMAT_ERROR=String(err&&err.message||err)}
-})(typeof window!=='undefined'?window:globalThis);
+  function writePending(link){
+    const now=Date.now();
+    pendingMemory={version:1,source:link.source,raw:clone(link.raw),createdAt:now,expiresAt:now+TTL_MS};
+    try{sessionStorage.setItem(PENDING_KEY,JSON.stringify(pendingMemory))}catch(e){}
+  }
+  function clearPending(){
+    pendingMemory=null;
+    try{sessionStorage.removeItem(PENDING_KEY)}catch(e){}
+  }
+  function readPending(){
+    let value=pendingMemory;
+    if(!value){try{value=JSON.parse(sessionStorage.getItem(PENDING_KEY)||'null')}catch(e){value=null}}
+    if(!value||!value.raw||!Array.isArray(value.raw.e)){clearPending();return null}
+    if(Number(value.expiresAt)<=Date.now()){clearPending();return null}
+    return value;
+  }
+  function setStatus(text,kind){try{if(typeof window.setStatus==='function')window.setStatus(text,kind||'')}catch(e){}}
+  function readyForChoice(){
+    return !!(document&&document.body&&activeStoredPlan()&&
+      window.KGGPatientPlanSlots&&typeof window.KGGPatientPlanSlots.addPlan==='function'&&
+      window.KGGPatientPlanImport&&typeof window.KGGPatientPlanImport.replaceConfirmed==='function');
+  }
+  function ensureStyle(){
+    if(document.getElementById('kggPlanLinkChoiceStyle'))return;
+    const style=document.createElement('style');
+    style.id='kggPlanLinkChoiceStyle';
+    style.textContent='#kggPlanLinkChoiceBackdrop{position:fixed;inset:0;z-index:2860;background:#0f172a55;padding:14px;display:grid;place-items:center}#kggPlanLinkChoiceBackdrop[hidden],#kggPlanLinkChoice[hidden]{display:none!important}#kggPlanLinkChoice{width:min(100%,520px);box-sizing:border-box;background:#fff;border:1px solid #dbe3ef;border-radius:20px;padding:18px;box-shadow:0 22px 70px #0f172a44;font:500 15px/1.4 system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#111827}#kggPlanLinkChoice h2{margin:0;font-size:20px;line-height:1.2}#kggPlanLinkChoice p{margin:10px 0;color:#475569}#kggPlanLinkChoice .kggPlanLinkChoiceNames{display:grid;gap:8px;margin:12px 0 16px;padding:12px;border-radius:14px;background:#f8fafc;border:1px solid #e2e8f0}#kggPlanLinkChoice .kggPlanLinkChoiceNames b{display:block;color:#64748b;font-size:12px}#kggPlanLinkChoice .kggPlanLinkChoiceNames span{display:block;overflow-wrap:anywhere}#kggPlanLinkChoice .kggPlanLinkChoiceActions{display:grid;gap:8px}#kggPlanLinkChoice button{min-height:46px;border-radius:13px;padding:9px 12px;font:800 15px/1.2 system-ui,-apple-system,Segoe UI,Arial,sans-serif;cursor:pointer}#kggPlanLinkChoice button:disabled{opacity:.55;cursor:wait}#kggPlanLinkChoiceAdd{border:1px solid #166534;background:#15803d;color:#fff}#kggPlanLinkChoiceReplace{border:1px solid #1d4ed8;background:#2563eb;color:#fff}#kggPlanLinkChoiceCancel{border:1px solid #cbd5e1;background:#fff;color:#111827}';
+    document.head.appendChild(style);
+  }
+  function closeDialog(){
+    const backdrop=document.getElementById('kggPlanLinkChoiceBackdrop');
+    if(backdrop)backdrop.remove();
+  }
+  function showDialog(pending){
+    if(document.getElementById('kggPlanLinkChoiceBackdrop'))return;
+    ensureStyle();
+    const current=activeStoredPlan(),incoming=pending.raw;
+    const backdrop=document.createElement('div');backdrop.id='kggPlanLinkChoiceBackdrop';backdrop.setAttribute('role','presentation');
+    const dialog=document.createElement('section');dialog.id='kggPlanLinkChoice';dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-labelledby','kggPlanLinkChoiceTitle');
+    const title=document.createElement('h2');title.id='kggPlanLinkChoiceTitle';title.textContent='Neuen Trainingsplan öffnen?';
+    const intro=document.createElement('p');intro.textContent='Es ist bereits ein anderer Trainingsplan gespeichert. Bitte wähle, wie der neue Plan geöffnet werden soll.';
+    const names=document.createElement('div');names.className='kggPlanLinkChoiceNames';
+    const oldLabel=document.createElement('div'),oldName=document.createElement('span'),newLabel=document.createElement('div'),newName=document.createElement('span');
+    oldLabel.innerHTML='<b>Vorhandener Plan</b>';newLabel.innerHTML='<b>Neuer Plan</b>';
+    oldName.textContent=String(current&& (current.t||current.title)||'Aktueller Plan');newName.textContent=String(incoming&&(incoming.t||incoming.title)||'Neuer Plan');
+    names.append(oldLabel,oldName,newLabel,newName);
+    const actions=document.createElement('div');actions.className='kggPlanLinkChoiceActions';
+    const add=document.createElement('button');add.type='button';add.id='kggPlanLinkChoiceAdd';add.textContent='Als zusätzlichen Plan hinzufügen';
+    const replace=document.createElement('button');replace.type='button';replace.id='kggPlanLinkChoiceReplace';replace.textContent='Aktiven Plan ersetzen';
+    const cancel=document.createElement('button');cancel.type='button';cancel.id='kggPlanLinkChoiceCancel';cancel.textContent='Abbrechen';
+    actions.append(add,replace,cancel);dialog.append(title,intro,names,actions);backdrop.appendChild(dialog);document.body.appendChild(backdrop);
+    let busy=false;
+    const finish=choice=>{
+      if(busy)return;
+      if(choice==='cancel'){clearPending();closeDialog();setStatus('Import abgebrochen.','');return}
+      busy=true;[add,replace,cancel].forEach(button=>button.disabled=true);
+      let result=false;
+      try{result=choice==='add'?window.KGGPatientPlanSlots.addPlan(clone(incoming)):window.KGGPatientPlanImport.replaceConfirmed(clone(incoming))}catch(e){result=false}
+      Promise.resolve(result).then(ok=>{
+        if(ok){clearPending();closeDialog()}
+        else{busy=false;[add,replace,cancel].forEach(button=>button.disabled=false);setStatus('Der neue Plan konnte nicht übernommen werden.','warn')}
+      });
+    };
+    add.onclick=()=>finish('add');replace.onclick=()=>finish('replace');cancel.onclick=()=>finish('cancel');
+    add.focus({preventScroll:true});
+  }
+  function scheduleDialog(){
+    let attempts=0;
+    const attempt=()=>{
+      const pending=readPending();
+      if(!pending)return;
+      if(readyForChoice()){showDialog(pending);return}
+      if(attempts++<120)setTimeout(attempt,50);
+    };
+    setTimeout(attempt,0);
+  }
+
+  const first=incomingLink(),current=activeStoredPlan();
+  if(first&&first.raw&&current&&planKey(first.raw)!==planKey(current)){writePending(first);stripIncomingUrl()}
+  window.KGGPatientPlanLinkChoice={version:VERSION,pendingKey:PENDING_KEY,readPending,clearPending,showPending:scheduleDialog};
+  if(window.__KGG_TEST__)window.__kggPatientPlanLinkChoiceTest={decodePayload,planKey,readPending,clearPending,TTL_MS};
+  if(typeof document!=='undefined'){
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',scheduleDialog,{once:true});
+    else scheduleDialog();
+  }
+})();
 ```

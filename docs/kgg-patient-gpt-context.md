@@ -34,6 +34,8 @@ Reload before every diagnosis involving current code and before every Preview, P
 - `patient-install-prompt.js`
 - `patient-ios-large-pad-force.js`
 - `patient-last-value-hints.js`
+- `patient-live-sync-security-b.test.js`
+- `patient-live-sync.js`
 - `patient-media-retry-cache_v2.js`
 - `patient-multiplan-db.js`
 - `patient-numpad-card-guard.js`

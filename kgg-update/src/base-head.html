@@ -55,36 +55,34 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "plan-text-recovery-finalize",
     "tablet-package-save",
     "pdf-global-exercise-numbering",
-    "qr-full-plan-device-ladder"
+    "qr-full-plan-device-ladder",
+    "live-sync-v82-final-integration",
+    "preview-live-sync-qr-privacy"
   ],
   "currentVersion": {
-    "versionCode": 81,
-    "versionName": "1.0.81-qr-full-plan-device-ladder",
-    "lastPatchId": "kgg-v081-qr-full-plan-device-ladder",
+    "versionCode": 83,
+    "versionName": "1.0.83-preview-live-sync-qr-privacy",
+    "lastPatchId": "kgg-v083-preview-live-sync-qr-privacy",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v081-qr-full-plan-device-ladder",
+  "latestPatchId": "kgg-v083-preview-live-sync-qr-privacy",
   "lastUpdateIntent": {
-    "id": "kgg-v081-qr-full-plan-device-ladder",
-    "summary": "Erzeugt vollständige persönliche KGGH3-Plan-QRs mit lokalem fflate-Codec und liest KGGH2/KGGH3 im internen Scanner.",
+    "id": "kgg-v083-preview-live-sync-qr-privacy",
+    "summary": "Preview-Härtung: öffentliche QR-Exports bleiben frei von Patient:innen-/Therapeut:innen-/Geburts-/Notizfeldern; Live-Sync bleibt synthetisch und auf lokale private Test-Relays begrenzt.",
     "touched": [
+      "Android/APK",
+      "Plan-State",
       "QR/Patienten-App",
-      "KGGH2/KGGH3",
-      "fflate 0.8.3",
-      "Interner QR-Scanner"
+      "Live-Sync-Privacy-Preview"
     ],
     "notTouched": [
       "PDF",
       "Scan/OCR",
       "Parser",
-      "Plan-State",
-      "Storage",
       "Medien/Upload",
       "API-Key-Logik",
-      "Android/APK",
       "GitHub Manifest",
-      "Handy-Layout",
-      "Tablet-Layout"
+      "Handy-Layout"
     ]
   }
 }

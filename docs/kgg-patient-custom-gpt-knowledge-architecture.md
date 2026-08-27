@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Architecture
 
-Generated retrieval pack. Source digest: `02cc2c599f2254dc`.
+Generated retrieval pack. Source digest: `5c66c1ce5e9b23d0`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -44,6 +44,8 @@ Reload before every diagnosis involving current code and before every Preview, P
 - `patient-install-prompt.js`
 - `patient-ios-large-pad-force.js`
 - `patient-last-value-hints.js`
+- `patient-live-sync-security-b.test.js`
+- `patient-live-sync.js`
 - `patient-media-retry-cache_v2.js`
 - `patient-multiplan-db.js`
 - `patient-numpad-card-guard.js`

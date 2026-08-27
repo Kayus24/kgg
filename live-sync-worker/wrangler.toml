@@ -1,0 +1,15 @@
+name = "kgg-live-sync-worker-local"
+main = "src/worker.ts"
+compatibility_date = "2026-08-15"
+
+[vars]
+LIVE_SYNC_MODE = "off"
+TEST_PRIVATE_ORIGINS = ""
+
+[[durable_objects.bindings]]
+name = "LIVE_SYNC_SESSIONS"
+class_name = "LiveSyncSession"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["LiveSyncSession"]

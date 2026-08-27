@@ -1,25 +1,126 @@
 # KGG Patient Source Chunk 029
 
-- Source file: `patient-start-scan.js`
-- Characters: 24001-34184
-- Full source SHA-256: `c4cc0cf64aef88ae4f6446164c5769a355e9cae9064a31cc087bcce3d8eb2e1e`
+- Source file: `patient-set-summary-groups.js`
+- Characters: 1-6075
+- Full source SHA-256: `78061311ef7a80b2c6f2ee35733a192ddcc9a87ed88a34644da90f9207ff71a2`
 
 ```
-.'));return;}if(session.busy){session.timer=setTimeout(()=>scanLiveFrame(session),200);return;}session.busy=true;session.frameTimes.push(Date.now());if(session.frameTimes.length>30)session.frameTimes.shift();try{let raw='';if(session.detector)raw=await detectNative(session.detector,session.video);if(!raw){const variant=LIVE_VARIANTS[session.variant%LIVE_VARIANTS.length];session.variant++;raw=await decodeCanvasWithJsQR(renderDecodeVariant(session.video,variant));}if(raw){if(parsePlanFromText(raw)){const elapsed=Date.now()-session.startedAt,span=session.frameTimes.length>1?session.frameTimes[session.frameTimes.length-1]-session.frameTimes[0]:0,fps=span>0?(session.frameTimes.length-1)*1000/span:0;lastScanMetrics=Object.assign({},lastScanMetrics,{recognitionMs:elapsed,fpsBand:!fps?'unknown':fps<3?'under-3':fps<6?'3-5':fps<10?'6-9':'10-plus'});testEmit('scan-metrics',lastScanMetrics);scannerStatus(scanMode==='replace'?tr('Plan erkannt. Ersetzen wird vorbereitet …','Plan detected. Preparing replacement …'):tr('Plan erkannt. Wird aktualisiert …','Plan detected. Updating …'),'ok');session.active=false;stopScannerTracks(session);const consumed=testConsume(raw,lastScanMetrics);setTimeout(()=>{if(scannerSession===session){if(session.box&&session.box.parentNode)session.box.remove();scannerSession=null;}if(!consumed)handlePlanText(raw);},80);return;}scannerStatus(tr('QR erkannt, aber kein KGG-Plan. Bitte den Plan-QR zeigen.','QR detected, but it is not a KGG plan. Show the plan QR.'),'warn');}else scannerStatus(tr('Suche Plan-QR … bitte ruhig und nah halten.','Searching for plan QR … hold steady and close.'),'');}catch(e){scannerStatus(tr('Bild wird weiter geprüft …','Continuing to scan …'),'');}finally{session.busy=false;}if(session.active&&scannerSession===session)session.timer=setTimeout(()=>scanLiveFrame(session),200);}
-  async function startLiveScanner(session){try{if(!navigator.mediaDevices||typeof navigator.mediaDevices.getUserMedia!=='function')throw new Error('getUserMedia unavailable');testEmit('scanner-start',{});const stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:10,max:15}}});if(scannerSession!==session||!session.active){stream.getTracks().forEach(track=>track.stop());return;}session.stream=stream;session.video.srcObject=stream;await session.video.play();session.detector=await createNativeDetector();await loadJsQR().catch(()=>null);session.startedAt=Date.now();session.frameTimes=[];scannerStatus(tr('Suche Plan-QR … bitte ruhig und nah halten.','Searching for plan QR … hold steady and close.'),'');scanLiveFrame(session);}catch(e){if(scannerSession===session)showScannerFallback(tr('Live-Kamera nicht verfügbar. Bitte ein Foto verwenden.','Live camera unavailable. Please use a photo.'));}}
-  async function scanFile(ev){const input=ev.target;const mode=input.dataset.scanMode==='replace'?'replace':'update';input.dataset.scanMode='';scanMode=mode;const file=input.files&&input.files[0];setTimeout(()=>{try{input.value=''}catch(e){}},100);if(!file){scanMode='update';return;}try{setStatus(tr('QR-Foto wird geprüft …','Checking QR photo …'));const started=Date.now(),hit=await decodePhoto(file);if(hit.raw){lastScanMetrics=Object.assign({},lastScanMetrics,{decoder:hit.decoder,recognitionMs:Date.now()-started,fpsBand:'unknown'});testEmit('scan-metrics',lastScanMetrics);if(!testConsume(hit.raw,lastScanMetrics))handlePlanText(hit.raw);}else{alert(tr('Kein QR erkannt. Bitte näher und scharf fotografieren.','No QR detected. Please take a closer, sharp photo.'));}}catch(e){promptFallback();}}
-  function openCameraScan(mode){scanMode=mode==='replace'?'replace':'update';closeLiveScanner(true);const box=scannerBox();const session={box,video:box.querySelector('#kggLiveScanVideo'),stream:null,detector:null,active:true,busy:false,variant:0,startedAt:Date.now(),timer:0,frameTimes:[]};scannerSession=session;startLiveScanner(session);}
-  function openPhotoScan(mode){scanMode=mode==='replace'?'replace':'update';const input=ensureScanInput();input.dataset.scanMode=scanMode;input.click();}
-  function ensureStyle(){if($('kggPlanScanRescueStyle'))return;const s=document.createElement('style');s.id='kggPlanScanRescueStyle';s.textContent='.kggQrRescue{margin-top:14px;border:1px solid #bfdbfe;border-radius:18px;background:#eff6ff;padding:14px;color:#111827}.kggQrRescue b{display:block;font-size:18px;margin-bottom:6px}.kggQrRescue p{margin:0 0 10px;color:#475569;font-weight:700;line-height:1.35}.kggQrRescue .scanBig{width:100%;min-height:56px;border:0;border-radius:16px;background:#111827;color:#fff;font-weight:950;font-size:18px}.kggQrRescue .pasteLink{margin-top:8px;width:100%;min-height:46px;border:1px solid #cbd5e1;border-radius:14px;background:white;color:#111827;font-weight:900}.kggLiveScan{position:fixed;inset:0;z-index:10050;background:#020617f2;color:#fff;display:flex;align-items:center;justify-content:center;padding:14px}.kggLiveScanPanel{width:min(100%,620px);max-height:100%;overflow:auto;background:#111827;border:1px solid #334155;border-radius:22px;padding:14px;box-shadow:0 24px 70px #0008}.kggLiveScanHead{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:19px}.kggLiveScanClose{width:44px;height:44px;border:1px solid #64748b;border-radius:999px;background:#1e293b;color:#fff;font-size:29px;line-height:1}.kggLiveScanView{position:relative;margin-top:12px;overflow:hidden;border-radius:16px;background:#000;aspect-ratio:4/3}.kggLiveScanView video{width:100%;height:100%;object-fit:cover}.kggLiveScanGuide{position:absolute;left:15%;top:10%;width:70%;height:80%;border:4px solid #fff;border-radius:18px;box-shadow:0 0 0 999px #02061755}.kggLiveScanStatus{margin-top:12px;padding:11px;border-radius:13px;background:#1e293b;font-weight:900}.kggLiveScanStatus.ok{background:#14532d}.kggLiveScanStatus.warn{background:#78350f}.kggLiveScanFallback{display:grid;gap:8px;margin-top:10px}.kggLiveScanFallback[hidden]{display:none}.kggLiveScanFallback button{min-height:48px;border-radius:13px;border:1px solid #64748b;background:#fff;color:#111827;font-weight:900}.kggLiveScanPanel>p{margin:10px 2px 0;color:#cbd5e1;font-size:13px;line-height:1.4}@media(max-width:430px){.kggLiveScan{padding:8px}.kggLiveScanPanel{border-radius:18px;padding:10px}.kggLiveScanView{aspect-ratio:3/4}.kggLiveScanGuide{left:9%;top:19%;width:82%;height:62%}}';document.head.appendChild(s);}
-  function noPlanVisible(){const st=$('status');return !!(st&&/Kein Plan gefunden|No plan found/i.test(st.textContent||''));}
-  function ensureRescue(){ensureStyle();ensureScanInput();if(!noPlanVisible())return;const st=$('status');if(!st||$('kggQrRescue'))return;const box=document.createElement('div');box.id='kggQrRescue';box.className='kggQrRescue';box.innerHTML='<b>'+tr('Plan erneut öffnen','Open plan again')+'</b><p>'+tr('Wenn diese Web-App ohne Plan startet, scanne den Plan-QR-Code hier noch einmal.','If this web app opens without a plan, scan the plan QR code here again.')+'</p><button type="button" class="scanBig">📷 '+tr('Plan-QR scannen','Scan plan QR')+'</button><button type="button" class="pasteLink">'+tr('Plan-Link einfügen','Paste plan link')+'</button>';st.insertAdjacentElement('afterend',box);box.querySelector('.scanBig').onclick=()=>openCameraScan('update');box.querySelector('.pasteLink').onclick=()=>{scanMode='update';promptFallback();};}
-  function ensureReplaceBubble(){const box=$('kggActionBubbles');if(!box)return;let btn=$('kggBubbleReplace');if(!btn){btn=document.createElement('button');btn.id='kggBubbleReplace';btn.type='button';btn.className='kggBubble';const add=$('kggBubbleAdd');box.insertBefore(btn,add||null);}btn.textContent='♻ '+tr('Plan ersetzen','Replace plan');btn.onclick=e=>{e.preventDefault();e.stopPropagation();box.hidden=true;const fab=$('kggActionFab');if(fab)fab.classList.remove('open');openCameraScan('replace');};}
-  function ensureScanButton(){const row=$('installSmall');if(!row)return;row.classList.remove('hide');let btn=$('kggPlanScanBtn');if(!btn){btn=document.createElement('button');btn.id='kggPlanScanBtn';btn.type='button';btn.style.minHeight='38px';btn.style.borderRadius='999px';btn.style.border='1px solid #bfdbfe';btn.style.background='#eff6ff';btn.style.color='#111827';btn.style.fontWeight='950';btn.style.padding='6px 10px';btn.onclick=e=>{e.preventDefault();e.stopPropagation();openCameraScan('update');};row.insertBefore(btn,row.children[1]||null);}btn.textContent=tr('QR-Scan','QR scan');ensureScanInput();ensureRescue();setTimeout(ensureReplaceBubble,80);}
-  function patchRender(){if(window.__kggStartScanPatchV8)return;window.__kggStartScanPatchV8=true;if(typeof render==='function'){const old=render;window.render=function(){const r=old.apply(this,arguments);setTimeout(autoFillStartValues,0);setTimeout(ensureScanButton,0);setTimeout(ensureRescue,20);setTimeout(ensureReplaceBubble,100);return r;};}}
-  function ensureFullFrameStyle(){if($('kggQrFullFrameStyle'))return;const s=document.createElement('style');s.id='kggQrFullFrameStyle';s.textContent='.kggLiveScanView video{object-fit:contain!important;background:#000!important}';document.head.appendChild(s);}
-  function init(){patchRender();ensureFullFrameStyle();ensureScanButton();ensureRescue();ensureReplaceBubble();autoFillStartValues();setTimeout(autoFillStartValues,300);setTimeout(autoFillStartValues,1000);setTimeout(ensureScanButton,300);setTimeout(ensureReplaceBubble,500);setTimeout(ensureReplaceBubble,1200);setTimeout(ensureRescue,500);setTimeout(ensureRescue,1500);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')closeLiveScanner(false)});window.addEventListener('pagehide',()=>closeLiveScanner(false));}
-  window.__kggPatientStartScanTest={planPayloadFromText,parsePlanFromText,validPlan,openCameraScan,openPhotoScan,closeLiveScanner,scannerActive:()=>!!(scannerSession&&scannerSession.active)};
-  window.KGGPatientPlanImport={replaceConfirmed:nextRaw=>validPlan(nextRaw)&&replacePlan(nextRaw,{confirmed:true})};
+(()=>{
+  const VERSION='set-summary-groups-v2-range-label';
+  if(window.__kggSetSummaryGroups===VERSION)return;
+  window.__kggSetSummaryGroups=VERSION;
+
+  function normalizeValue(value){return String(value||'').replace(/\s+/g,' ').trim().toLowerCase()}
+  function setLine(line){return String(line||'').match(/^(\s*)(Satz|Set)\s*(\d+)\s*:\s*(.*?)\s*$/i)}
+  function labelText(label,start,end,value,indent){const head=start===end?`${label} ${start}:`:`${label} ${start}–${end}:`;return `${indent||''}${head} ${String(value||'').trim()}`.trimEnd()}
+  function flushGroup(out,group){
+    if(!group.length)return;
+    let prev=group[0],same=[group[0]];
+    const pushSame=()=>{out.push(labelText(same[0].label,same[0].no,same[same.length-1].no,same[0].value,same[0].indent))};
+    for(let i=1;i<group.length;i++){
+      const cur=group[i];
+      if(cur.no===prev.no+1&&normalizeValue(cur.value)===normalizeValue(prev.value)){same.push(cur)}
+      else{pushSame();same=[cur]}
+      prev=cur;
+    }
+    pushSame();
+  }
+  function compressLines(text){
+    const src=String(text||'');
+    const lines=src.split(/\n/);
+    const out=[];let group=[];
+    lines.forEach(line=>{const m=setLine(line);if(m){group.push({indent:m[1]||'',label:m[2],no:Number(m[3]),value:m[4]||''});return}flushGroup(out,group);group=[];out.push(line)});
+    flushGroup(out,group);
+    return out.join('\n')
+  }
+  function compressInline(text){
+    const src=String(text||'');
+    if(src.includes('\n'))return compressLines(src);
+    const re=/\b(Satz|Set)\s*(\d+)\s*:\s*([\s\S]*?)(?=(?:\s*\b(?:Satz|Set)\s*\d+\s*:)|$)/gi;
+    const group=[];let m,last=0;
+    while((m=re.exec(src))){if(src.slice(last,m.index).trim())return src;group.push({indent:'',label:m[1],no:Number(m[2]),value:(m[3]||'').trim()});last=re.lastIndex}
+    if(group.length<2||src.slice(last).trim())return src;
+    const out=[];flushGroup(out,group);return out.join('\n')
+  }
+  function compressText(text){return compressInline(compressLines(text))}
+
+  function exerciseName(ex){return String(ex&&(ex.n||ex.name||ex.title||ex[0])||'').trim()}
+  function exerciseSets(ex){return Math.max(1,Number(ex&&(ex.sets||ex[1]))||1)}
+  function valueMapSignature(values,day,exerciseIndex,setNo){
+    const prefix=`${day}|${exerciseIndex}|${setNo}|`;
+    const entries=Object.keys(values||{}).filter(key=>key.startsWith(prefix)).map(key=>[key.slice(prefix.length),String(values[key]??'').trim()]).filter(entry=>entry[1]!=='').sort((a,b)=>a[0].localeCompare(b[0]));
+    return entries.length?JSON.stringify(entries.map(entry=>[entry[0],normalizeValue(entry[1])])):''
+  }
+  function hasUniformCompletedSets(values,day,exerciseIndex,setCount){
+    if(!values||!day||setCount<2)return false;
+    const signatures=[];
+    for(let setNo=1;setNo<=setCount;setNo++){
+      const signature=valueMapSignature(values,day,exerciseIndex,setNo);
+      if(!signature)return false;
+      signatures.push(signature);
+    }
+    return signatures.every(signature=>signature===signatures[0])
+  }
+  function lineMatchesExercise(line,name){
+    const a=normalizeValue(line).replace(/^\s*(?:\d+[.)]|[-•])\s*/,'');
+    const b=normalizeValue(name);
+    return !!b&&(a===b||a.startsWith(b+':')||a.endsWith(' '+b))
+  }
+  function rangeLabel(lines,start,end,setCount){
+    const segment=lines.slice(start,end).join('\n');
+    const language=(localStorage.getItem('kggPatientLang')==='en'||/\bSet\s*\d+/i.test(segment))?'Set':'Satz';
+    return `${language} 1–${setCount}:`
+  }
+  function annotateUniformSetRanges(text,context){
+    const plan=context&&context.plan;
+    const values=context&&context.values;
+    const day=Number(context&&context.day)||0;
+    const exercises=plan&&Array.isArray(plan.ex)?plan.ex:[];
+    if(!exercises.length||!values||!day)return String(text||'');
+    const lines=String(text||'').split(/\n/);
+    const positions=[];
+    exercises.forEach((ex,index)=>{
+      const name=exerciseName(ex);
+      if(!name)return;
+      const lineIndex=lines.findIndex((line,at)=>!positions.some(pos=>pos.lineIndex===at)&&lineMatchesExercise(line,name));
+      if(lineIndex>=0)positions.push({exerciseIndex:index,lineIndex,name,setCount:exerciseSets(ex)})
+    });
+    positions.sort((a,b)=>a.lineIndex-b.lineIndex);
+    for(let posIndex=positions.length-1;posIndex>=0;posIndex--){
+      const pos=positions[posIndex];
+      if(pos.setCount<2||!hasUniformCompletedSets(values,day,pos.exerciseIndex,pos.setCount))continue;
+      const end=posIndex+1<positions.length?positions[posIndex+1].lineIndex:lines.length;
+      const segment=lines.slice(pos.lineIndex,end).join('\n');
+      const completeRange=new RegExp(`\\b(?:Satz|Set)\\s*1\\s*[–—-]\\s*${pos.setCount}\\s*:`,`i`);
+      if(completeRange.test(segment))continue;
+      if(/\b(?:Satz|Set)\s*\d+\s*:/i.test(segment))continue;
+      lines.splice(pos.lineIndex+1,0,rangeLabel(lines,pos.lineIndex,end,pos.setCount));
+    }
+    return lines.join('\n')
+  }
+  function currentContext(){
+    return {
+      plan:typeof p!=='undefined'&&p?p:null,
+      values:typeof v!=='undefined'&&v&&typeof v==='object'?v:null,
+      day:typeof d!=='undefined'?Number(d):0
+    }
+  }
+  function apply(){
+    const el=document.getElementById('sum');
+    if(!el)return;
+    const before=el.textContent||'';
+    const compressed=compressText(before);
+    const after=annotateUniformSetRanges(compressed,currentContext());
+    if(after!==before)el.textContent=after;
+  }
+  function patchShowQr(){
+    if(window.__kggSetSummaryGroupsPatched||typeof showQr!=='function')return;
+    window.__kggSetSummaryGroupsPatched=1;
+    const old=showQr;
+    window.showQr=function(){const r=old.apply(this,arguments);setTimeout(apply,0);setTimeout(apply,80);setTimeout(apply,240);return r};
+  }
+  if(window.__KGG_TEST__)window.__kggSetSummaryGroupsTest={compressText,annotateUniformSetRanges,valueMapSignature,hasUniformCompletedSets};
+  function init(){patchShowQr();setTimeout(patchShowQr,300);setTimeout(patchShowQr,1000);setTimeout(apply,1200)}
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
 })();
 ```

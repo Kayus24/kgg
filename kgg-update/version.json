@@ -1,7 +1,7 @@
 {
-  "versionCode": 81,
-  "versionName": "1.0.81-qr-full-plan-device-ladder",
-  "indexUrl": "index.html?v=81",
-  "sha256": "6f7bf47fb12b1fcf4fc1d910a06cea5043cf73ec65c57fcce055ad92e57b584d",
-  "notes": "v081: Vollständige persönliche KGGH3-Plan-QRs mit lokalem fflate 0.8.3, KGGH2-Rückwärtslesbarkeit und gestuftem Scanner-Test."
+  "versionCode": 83,
+  "versionName": "1.0.83-preview-live-sync-qr-privacy",
+  "indexUrl": "index.html?v=83",
+  "sha256": "eab217da15a4394de9aa4f2713d617b2619839ac32aae922bd7ac7e0d8b86196",
+  "notes": "v083 Preview: öffentliche QR-Exports bleiben frei von Patient:innen-/Therapeut:innen-/Geburts-/Notizfeldern; Live-Sync bleibt synthetisch und auf lokale private Test-Relays begrenzt. Nicht produktionsreif."
 }

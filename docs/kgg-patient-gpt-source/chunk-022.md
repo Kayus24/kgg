@@ -1,116 +1,331 @@
 # KGG Patient Source Chunk 022
 
-- Source file: `patient-plan-delete.js`
-- Characters: 1-12563
-- Full source SHA-256: `7b1180cb331e9edfcefc23f803f3775b82225dd6f94f5504b057c59b31337cdf`
+- Source file: `patient-pain-vertical-scale.js`
+- Characters: 1-24000
+- Full source SHA-256: `9001b6b24ce5f5b5e2b09e18ee17e6dde436426d9580f577bc33f75ee3c8cbcc`
 
 ```
 (()=>{
-  const VERSION='plan-delete-3-red-x-rename';
-  const MULTI_KEY='kggPatientMultiPlansV1';
-  const CURRENT_KEY='kggCurrentPlanV1';
-  const MEDIA_DB='kgg_patient_media_v1';
-  const MEDIA_STORE='images';
-  const PANEL_ID='kggPlanDeletePanel';
-  const BACKDROP_ID='kggPlanDeleteBackdrop';
-  if(window.__kggPlanDelete===VERSION)return;
-  window.__kggPlanDelete=VERSION;
-  const $=id=>document.getElementById(id);
-  const isEn=()=>localStorage.getItem('kggPatientLang')==='en';
-  const t=(de,en)=>isEn()?en:de;
-  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  const clone=v=>{try{return JSON.parse(JSON.stringify(v))}catch(e){return v}};
-  const safe=fn=>{try{return fn()}catch(e){return null}};
+  const VERSION='vertical-pain-v7-compact-modal';
+  const STYLE_ID='kggPainVerticalStyle';
+  const MODAL_ID='kggPainModal';
+  const DIALOG_ID='kggPainModalDialog';
+  const TITLE_ID='kggPainModalTitle';
+  const MAX_DESC_ID='kggPainModalMaxDescription';
+  const MIN_DESC_ID='kggPainModalMinDescription';
+  const LANG_KEY='kggPatientLang';
+  const ROOT_CLASS='kggPainVerticalReady';
+  const MIN=0;
+  const MAX=10;
+  let observer=null;
+  let mountTimer=0;
+  let activeRoot=null;
+  let modal=null;
+  let bodyLock=null;
+  let inerted=[];
+  const states=new WeakMap();
+  const safe=f=>{try{return f()}catch(e){return null}};
+  const clampValue=value=>Math.max(MIN,Math.min(MAX,Math.round(Number(value)||0)));
+  const valueFromY=(top,bottom,clientY)=>{
+    const start=Number(top)||0,end=Math.max(start+1,Number(bottom)||start+1);
+    const ratio=Math.max(0,Math.min(1,(Number(clientY)-start)/(end-start)));
+    return clampValue(MAX-ratio*(MAX-MIN));
+  };
+  const isEnglish=()=>safe(()=>localStorage.getItem(LANG_KEY)==='en')===true;
+  const currentText=(selected,value)=>selected?`${clampValue(value)}/10`:'–';
+  const labelText=()=>isEnglish()?'Pain during exercise?':'Schmerzen bei der Übung?';
+  const valueText=value=>isEnglish()?`${clampValue(value)} of 10`:`${clampValue(value)} von 10`;
+  const maxDescription=()=>isEnglish()?'Worst imaginable pain':'Schlimmster vorstellbarer Schmerz';
+  const minDescription=()=>isEnglish()?'No pain at all':'Gar kein Schmerz';
+  const hintText=()=>isEnglish()?'Slide or tap a number':'Schieben oder Zahl antippen';
+  const closeText=()=>isEnglish()?'Close pain scale':'Schmerzskala schließen';
 
-  function readState(){try{return JSON.parse(localStorage.getItem(MULTI_KEY)||'null')}catch(e){return null}}
-  function writeState(state){state.updatedAt=new Date().toISOString();localStorage.setItem(MULTI_KEY,JSON.stringify(state))}
-  function persistCurrent(raw){localStorage.setItem(CURRENT_KEY,JSON.stringify({plan:raw,importedAt:new Date().toISOString()}))}
-  function planTitle(raw,index){return String(raw&&raw.t||raw&&raw.title||t('Plan ','Plan ')+(index+1))}
-  function runtimeFromRaw(raw){return{id:raw.i||'plan',title:raw.t||'KGG Trainingsplan',version:+raw.v||1,days:+raw.d||6,extendDays:raw.extendDays!==false,stepDays:+raw.stepDays||6,ex:(raw.e||[]).map(e=>({n:e[0]||'Übung',sets:Number(e[1])||3,side:e[2]||'LR',u:e[3]||'kg',m:e[4]||'Wdh',sl:e[5]||'',sm:e[6]||'',media:e[7]||'',videoUrl:e[8]||'',videoLabel:e[9]||'Video öffnen',painMode:e[10]||'exercise'}))}}
-  function planHash(raw){
-    const ex=(raw.e||[]).map(e=>[e[0]||'Übung',Number(e[1])||3,e[2]||'LR',e[3]||'kg',e[4]||'Wdh']);
-    const text=JSON.stringify({i:raw.i||'plan',t:raw.t||'KGG Trainingsplan',e:ex});
-    let h=2166136261;for(let i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)
+  function ensureStyle(){
+    let style=document.getElementById(STYLE_ID);
+    if(style)return;
+    style=document.createElement('style');
+    style.id=STYLE_ID;
+    style.textContent=`
+      .pain.${ROOT_CLASS}>b,.pain.${ROOT_CLASS}>.painRow{display:none!important}
+      .kggPainVertical{margin-top:4px;width:100%}
+      .kggPainVerticalToggle{width:100%;min-height:48px;display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:9px;padding:9px 10px;border:1px solid #cbd5e1;border-radius:13px;background:#fff;color:#111827;text-align:left;font:inherit;font-weight:900;touch-action:manipulation}
+      .kggPainVerticalToggle:active{transform:scale(.99);background:#f8fafc}
+      .kggPainVerticalToggle:focus-visible{outline:3px solid rgba(37,99,235,.28);outline-offset:2px}
+      .kggPainVerticalLabel{min-width:0;line-height:1.25}
+      .kggPainVerticalCurrent{min-width:42px;text-align:right;color:#475569;font-variant-numeric:tabular-nums}
+      .kggPainVerticalChevron{font-size:17px;color:#64748b;transition:transform .18s ease}
+      .kggPainVerticalToggle[aria-expanded="true"] .kggPainVerticalChevron{transform:rotate(180deg)}
+      #${MODAL_ID}[hidden]{display:none!important}
+      #${MODAL_ID}{position:fixed;inset:0;z-index:9500;box-sizing:border-box;display:flex;align-items:center;justify-content:flex-end;padding:calc(12px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));background:rgba(15,23,42,.26);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);overscroll-behavior:contain;touch-action:none}
+      #${DIALOG_ID}{position:relative;box-sizing:border-box;width:min(196px,calc(100vw - 24px));max-height:calc(100dvh - 24px);display:flex;flex-direction:column;background:#fff;color:#111827;border:1px solid #dbe3ef;border-radius:22px;padding:12px;box-shadow:0 24px 70px rgba(15,23,42,.38);touch-action:auto;overflow:hidden;animation:kggPainModalIn .18s cubic-bezier(.16,.84,.44,1) both}
+      .kggPainModalHead{display:block;min-height:40px;margin-bottom:5px}
+      .kggPainModalBody{width:150px;max-width:100%;margin:0 auto;display:flex;flex-direction:column;align-items:stretch}
+      #${TITLE_ID}{display:block;font-size:16px;line-height:1.2;font-weight:950;padding:4px 42px 0 0}
+      .kggPainModalClose{position:absolute;top:10px;right:10px;width:40px;height:40px;border:1px solid #cbd5e1;border-radius:999px;background:#fff;color:#111827;font:900 24px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+      .kggPainModalClose:active{transform:scale(.96);background:#f8fafc}
+      .kggPainModalClose:focus-visible{outline:3px solid rgba(37,99,235,.28);outline-offset:2px}
+      .kggPainEndpoint{width:100%;margin:0;color:#475569;font-size:12px;line-height:1.25;font-weight:850;text-align:center}
+      .kggPainEndpointMax{margin-bottom:5px}
+      .kggPainEndpointMin{margin-top:5px}
+      .kggPainVerticalStage{position:relative;width:100%;height:min(484px,calc(100dvh - 182px));min-height:220px;flex:0 1 auto;touch-action:none;user-select:none;-webkit-user-select:none;outline:none;border-radius:16px;background:#f8fafc;border:1px solid #e2e8f0;overflow:hidden}
+      .kggPainVerticalStage:focus-visible{box-shadow:0 0 0 3px rgba(37,99,235,.28)}
+      .kggPainVerticalTrack{position:absolute;z-index:1;left:42px;top:calc(100% / 22);bottom:calc(100% / 22);width:5px;border-radius:999px;background:#cbd5e1;pointer-events:none}
+      .kggPainVerticalFill{position:absolute;z-index:2;left:42px;bottom:calc(100% / 22);width:5px;height:calc(var(--kgg-pain-ratio,0) * (100% - 100% / 11));border-radius:999px;background:#2563eb;pointer-events:none}
+      .kggPainVerticalThumb{position:absolute;z-index:4;left:44.5px;top:calc((100% / 22) + (1 - var(--kgg-pain-ratio,0)) * (100% - 100% / 11));width:32px;height:32px;border-radius:999px;background:#111827;border:4px solid #fff;box-shadow:0 4px 14px rgba(15,23,42,.28);transform:translate(-50%,-50%);pointer-events:none}
+      .kggPainVerticalValues{position:relative;z-index:3;height:100%;display:flex;flex-direction:column}
+      .kggPainVerticalValue{min-height:0;flex:1 1 0;width:100%;display:flex;align-items:center;justify-content:flex-end;padding:0 13px 0 70px;font-size:17px;font-weight:950;font-variant-numeric:tabular-nums;color:#475569;border-radius:10px}
+      .kggPainVerticalValue[data-active="true"]{color:#1d4ed8;background:linear-gradient(90deg,transparent 0,rgba(219,234,254,.85) 48%,#dbeafe 100%)}
+      .kggPainVerticalHint{width:100%;margin:7px 0 0;text-align:center;color:#64748b;font-size:12px;line-height:1.25;font-weight:750}
+      @keyframes kggPainModalIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+      @media(max-width:430px){#${DIALOG_ID}{width:min(184px,calc(100vw - 20px));padding:10px}.kggPainModalBody{width:150px}.kggPainVerticalValue{padding-right:11px}}
+      @media(max-height:520px){#${MODAL_ID}{padding-top:8px;padding-bottom:8px}#${DIALOG_ID}{max-height:calc(100dvh - 16px);padding:8px}.kggPainModalHead{min-height:36px;margin-bottom:2px}#${TITLE_ID}{font-size:14px;padding:3px 38px 0 0}.kggPainModalClose{top:8px;right:8px;width:36px;height:36px}.kggPainModalBody{width:144px}.kggPainEndpoint{font-size:11px}.kggPainVerticalStage{height:calc(100dvh - 142px);min-height:190px}.kggPainVerticalHint{display:none}}
+      @media(prefers-reduced-motion:reduce){.kggPainVerticalChevron,#${DIALOG_ID}{animation:none!important;transition:none!important}}
+    `;
+    document.head.appendChild(style)
   }
-  function planStoragePrefix(raw){return 'kgg-'+String(raw&&raw.i||'plan')+'-'+planHash(raw||{})}
-  function planStorageKeys(raw){const base=planStoragePrefix(raw);return[base+'-values',base+'-done',base+'-meta']}
-  function mediaIds(raw){
-    const ids=new Set();
-    (raw&&Array.isArray(raw.e)?raw.e:[]).forEach(ex=>{
-      const media=Array.isArray(ex&&ex[7])?ex[7]:(ex&&ex[7]?[ex[7]]:[]);
-      media.forEach(item=>{const id=typeof item==='string'?item:String(item&&item.id||'');if(id)ids.add(id)})
+
+  function painKey(ei){return safe(()=>typeof k==='function'?k(ei,0,'P','pain'):null)}
+  function readStored(ei){
+    const key=painKey(ei),store=safe(()=>v);
+    const selected=Boolean(key&&store&&Object.prototype.hasOwnProperty.call(store,key)&&String(store[key]??'')!=='');
+    return{selected,value:clampValue(selected?store[key]:0)}
+  }
+  function commitExisting(ei,value,root){
+    const next=clampValue(value);
+    if(typeof setPain==='function'){setPain(ei,next);return true}
+    const button=root&&root.querySelector(`.kggPainScale button[data-val="${next}"]`);
+    if(button){button.click();return true}
+    return false
+  }
+  function originalReady(root){
+    const row=root&&root.querySelector(':scope > .painRow');
+    if(!row)return false;
+    const values=[...row.querySelectorAll('.kggPainScale button[data-val]')].map(button=>Number(button.dataset.val));
+    const buttons=values.length===11&&Array.from({length:11},(_,i)=>i).every(i=>values.includes(i));
+    const range=row.querySelector('input[type="range"][min="0"][max="10"]');
+    return buttons||Boolean(range)
+  }
+  function hideOriginal(root,state){
+    const label=root.querySelector(':scope > b');
+    const row=root.querySelector(':scope > .painRow');
+    if(!row)return false;
+    if(state.row!==row){
+      state.row=row;state.rowHidden=row.hidden;state.rowAria=row.getAttribute('aria-hidden');state.rowInert=Boolean(row.inert);state.rowDisplay=row.style.getPropertyValue('display');state.rowDisplayPriority=row.style.getPropertyPriority('display')
+    }
+    if(state.oldLabel!==label){state.oldLabel=label;state.labelHidden=label?label.hidden:false}
+    if(label)label.hidden=true;
+    row.hidden=true;row.inert=true;row.setAttribute('aria-hidden','true');row.style.setProperty('display','none','important');
+    row.querySelectorAll('button,input').forEach(control=>{if(!control.hasAttribute('data-kgg-old-tabindex'))control.setAttribute('data-kgg-old-tabindex',String(control.tabIndex));control.tabIndex=-1});
+    return true
+  }
+  function restoreOriginal(state){
+    const row=state&&state.row,label=state&&state.oldLabel;
+    if(label&&label.isConnected)label.hidden=Boolean(state.labelHidden);
+    if(row&&row.isConnected){
+      row.hidden=Boolean(state.rowHidden);row.inert=Boolean(state.rowInert);
+      if(state.rowDisplay)row.style.setProperty('display',state.rowDisplay,state.rowDisplayPriority||'');else row.style.removeProperty('display');
+      if(state.rowAria==null)row.removeAttribute('aria-hidden');else row.setAttribute('aria-hidden',state.rowAria);
+      row.querySelectorAll('[data-kgg-old-tabindex]').forEach(control=>{control.tabIndex=Number(control.getAttribute('data-kgg-old-tabindex'));control.removeAttribute('data-kgg-old-tabindex')})
+    }
+  }
+
+  function lockBackground(){
+    if(bodyLock)return;
+    const body=document.body,scrollY=window.scrollY||0;
+    bodyLock={scrollY,position:body.style.position,top:body.style.top,left:body.style.left,right:body.style.right,width:body.style.width,overflow:body.style.overflow};
+    body.style.position='fixed';body.style.top=`-${scrollY}px`;body.style.left='0';body.style.right='0';body.style.width='100%';body.style.overflow='hidden';
+    inerted=[];
+    [...body.children].forEach(node=>{
+      if(node===modal.overlay||!node||/^(SCRIPT|STYLE|LINK)$/i.test(node.tagName||''))return;
+      inerted.push({node,inert:Boolean(node.inert),aria:node.getAttribute('aria-hidden')});
+      node.inert=true;node.setAttribute('aria-hidden','true')
+    })
+  }
+  function unlockBackground(){
+    inerted.forEach(entry=>{
+      if(!entry.node||!entry.node.isConnected)return;
+      entry.node.inert=entry.inert;
+      if(entry.aria==null)entry.node.removeAttribute('aria-hidden');else entry.node.setAttribute('aria-hidden',entry.aria)
     });
-    return ids
+    inerted=[];
+    if(!bodyLock)return;
+    const body=document.body,lock=bodyLock;bodyLock=null;
+    body.style.position=lock.position;body.style.top=lock.top;body.style.left=lock.left;body.style.right=lock.right;body.style.width=lock.width;body.style.overflow=lock.overflow;
+    window.scrollTo(0,lock.scrollY)
   }
-  function removePlanState(source,index){
-    const state=clone(source||{});state.plans=Array.isArray(state.plans)?state.plans:[];
-    const idx=Number(index);
-    if(state.plans.length<=1||!Number.isInteger(idx)||idx<0||idx>=state.plans.length)return{ok:false,state,removed:null,newActive:Number(state.active)||0,activeRemoved:false};
-    const oldActive=Math.max(0,Math.min(Number(state.active)||0,state.plans.length-1));
-    const removed=state.plans[idx];state.plans.splice(idx,1);
-    let newActive=oldActive;
-    if(idx===oldActive)newActive=Math.min(idx,state.plans.length-1);
-    else if(idx<oldActive)newActive=oldActive-1;
-    state.active=Math.max(0,newActive);
-    return{ok:true,state,removed,newActive:state.active,activeRemoved:idx===oldActive}
+
+  function updateCompact(state,selected,value){
+    state.selected=selected;state.committed=clampValue(value);state.current.textContent=currentText(selected,value);
+    state.toggle.setAttribute('aria-label',`${labelText()}: ${currentText(selected,value)}`)
   }
-  function renamePlanState(source,index,title){
-    const state=clone(source||{});state.plans=Array.isArray(state.plans)?state.plans:[];
-    const idx=Number(index);const nextTitle=String(title??'').trim().replace(/\s+/g,' ');
-    if(!nextTitle||nextTitle.length>80||!Number.isInteger(idx)||idx<0||idx>=state.plans.length)return{ok:false,state,oldPlan:null,newPlan:null};
-    const oldPlan=clone(state.plans[idx]||{});const newPlan=clone(oldPlan)||{};newPlan.t=nextTitle;delete newPlan.title;state.plans[idx]=newPlan;
-    return{ok:true,state,oldPlan,newPlan,index:idx}
+  function updateStage(value){
+    if(!modal)return;
+    const next=clampValue(value),ratio=next/10;
+    modal.draft=next;modal.stage.style.setProperty('--kgg-pain-ratio',String(ratio));modal.stage.setAttribute('aria-valuenow',String(next));modal.stage.setAttribute('aria-valuetext',valueText(next));
+    modal.values.forEach(row=>row.dataset.active=String(Number(row.dataset.kggPainValue)===next))
   }
-  function removeLocalPlanKeys(raw){planStorageKeys(raw).forEach(key=>localStorage.removeItem(key))}
-  function migratePlanKeys(oldRaw,newRaw){const oldKeys=planStorageKeys(oldRaw||{}),newKeys=planStorageKeys(newRaw||{});oldKeys.forEach((oldKey,index)=>{const newKey=newKeys[index];if(oldKey===newKey)return;const value=safe(()=>localStorage.getItem(oldKey));if(value!==null&&localStorage.getItem(newKey)===null)localStorage.setItem(newKey,value);if(value!==null)localStorage.removeItem(oldKey)})}
-  function deleteMediaRecords(removed,remaining){
-    if(!('indexedDB'in window))return Promise.resolve();
-    const keep=new Set();(remaining||[]).forEach(raw=>mediaIds(raw).forEach(id=>keep.add(id)));
-    const ids=[...mediaIds(removed)].filter(id=>!keep.has(id));if(!ids.length)return Promise.resolve();
-    return new Promise(resolve=>{const req=indexedDB.open(MEDIA_DB,1);req.onerror=()=>resolve();req.onupgradeneeded=()=>resolve();req.onsuccess=()=>{const db=req.result;try{const tx=db.transaction(MEDIA_STORE,'readwrite');ids.forEach(id=>tx.objectStore(MEDIA_STORE).delete(id));tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();resolve()}}catch(e){db.close();resolve()}}})
+  function refreshLanguage(){
+    document.querySelectorAll('.kggPainVerticalLabel').forEach(label=>label.textContent=labelText());
+    if(!modal)return;
+    modal.title.textContent=labelText();modal.maxDesc.textContent=maxDescription();modal.minDesc.textContent=minDescription();modal.hint.textContent=hintText();modal.close.setAttribute('aria-label',closeText());modal.stage.setAttribute('aria-label',labelText());
+    if(activeRoot){const state=states.get(activeRoot);if(state)state.toggle.setAttribute('aria-label',`${labelText()}: ${currentText(state.selected,state.committed)}`)}
   }
-  function loadActive(raw){
-    window.p=runtimeFromRaw(raw);persistCurrent(raw);
-    safe(()=>{window.v=read(sk(),'{}')});safe(()=>{const flow=window.KGGPatientDayFlow;window.done=flow&&typeof flow.normalizeDone==='function'?flow.normalizeDone(read(dk(),'[]')):read(dk(),'[]').map(Number).filter(n=>n>=1&&(p.extendDays!==false||n<=p.days))});
-    safe(()=>typeof restoreDay==='function'&&restoreDay());safe(()=>save());safe(()=>render());
-    [80,300,900].forEach(delay=>setTimeout(()=>{safe(()=>window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.prefetch&&window.KGGPatientMediaRetryCache.prefetch());safe(()=>window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.render&&window.KGGPatientMediaRetryCache.render())},delay))
+  function refreshModalFromRoot(root){
+    const state=states.get(root);if(!state||!modal)return false;
+    const stored=readStored(state.ei);updateCompact(state,stored.selected,stored.value);modal.committed=stored.value;modal.selected=stored.selected;updateStage(stored.value);refreshLanguage();return true
   }
-  async function deletePlan(index,confirmFn){
-    const api=window.KGGPatientMultiPlan;const state=api&&api.ensureState?api.ensureState():readState();
-    if(!state||!Array.isArray(state.plans)||state.plans.length<=1)return false;
-    const idx=Number(index);const raw=state.plans[idx];if(!raw)return false;
-    const ask=confirmFn||window.confirm;if(!ask(t('Plan „','Delete plan “')+planTitle(raw,idx)+t('“ wirklich löschen?','” permanently?')))return false;
-    if(Number(state.active)===idx&&api&&api.saveCurrentSlot)api.saveCurrentSlot();
-    const fresh=api&&api.ensureState?api.ensureState():readState();const result=removePlanState(fresh,idx);if(!result.ok)return false;
-    writeState(result.state);removeLocalPlanKeys(result.removed);await deleteMediaRecords(result.removed,result.state.plans);
-    const next=result.state.plans[result.newActive];if(next)loadActive(next);
-    closePanel();safe(()=>setStatus(t('Plan gelöscht. Andere Pläne bleiben erhalten.','Plan deleted. Other plans were kept.'),'ok'));return true
+  function commitModal(value){
+    if(!activeRoot||!modal)return false;
+    const state=states.get(activeRoot),next=clampValue(value);
+    if(!state||!commitExisting(state.ei,next,activeRoot))return false;
+    modal.selected=true;modal.committed=next;updateStage(next);updateCompact(state,true,next);return true
   }
-  async function renamePlan(index,promptFn){
-    const api=window.KGGPatientMultiPlan;const state=api&&api.ensureState?api.ensureState():readState();if(!state||!Array.isArray(state.plans))return false;
-    const idx=Number(index);const raw=state.plans[idx];if(!raw)return false;const ask=promptFn||window.prompt;const answer=ask(t('Neuer Name für den Plan:','New name for this plan:'),planTitle(raw,idx));if(answer===null)return false;
-    const freshTitle=String(answer).trim().replace(/\s+/g,' ');if(!freshTitle||freshTitle.length>80){safe(()=>window.alert(t('Bitte einen Namen mit 1 bis 80 Zeichen eingeben.','Enter a name with 1 to 80 characters.')));return false;}
-    if(Number(state.active)===idx&&api&&api.saveCurrentSlot)api.saveCurrentSlot();const fresh=api&&api.ensureState?api.ensureState():readState();const result=renamePlanState(fresh,idx,freshTitle);if(!result.ok)return false;
-    writeState(result.state);migratePlanKeys(result.oldPlan,result.newPlan);if(Number(result.state.active)===idx)loadActive(result.newPlan);closePanel();safe(()=>setStatus(t('Planname gespeichert.','Plan name saved.'),'ok'));return true
+
+  function restoreModalDraft(){if(modal)updateStage(modal.committed)}
+  function closeModal(options={}){
+    if(!modal||modal.overlay.hidden)return;
+    const returnFocus=options.returnFocus!==false,opener=activeRoot&&states.get(activeRoot)?.toggle;
+    restoreModalDraft();modal.gesture=null;modal.keyboardDirty=false;modal.overlay.hidden=true;
+    if(activeRoot){const state=states.get(activeRoot);if(state)state.toggle.setAttribute('aria-expanded','false')}
+    activeRoot=null;unlockBackground();
+    if(returnFocus&&opener&&opener.isConnected)setTimeout(()=>safe(()=>opener.focus({preventScroll:true})),0)
   }
-  function ensureDom(){
-    if(!$('kggPlanDeleteStyle')){const s=document.createElement('style');s.id='kggPlanDeleteStyle';s.textContent='#'+BACKDROP_ID+'{position:fixed;inset:0;z-index:2760;background:#0f172a33}#'+BACKDROP_ID+'[hidden],#'+PANEL_ID+'[hidden]{display:none!important}#'+PANEL_ID+'{position:fixed;z-index:2761;left:12px;right:12px;top:76px;max-width:520px;max-height:calc(100dvh - 104px);overflow:auto;margin:auto;background:#fff;border:1px solid #dbe3ef;border-radius:20px;padding:12px;box-shadow:0 22px 70px #0f172a38}.kggPlanManageHead{display:flex;align-items:center;justify-content:space-between;gap:8px}.kggPlanManageHead h3{margin:0;font-size:18px}.kggPlanManageClose{width:38px;height:38px;border-radius:999px;border:1px solid #cbd5e1;background:#fff;font-size:22px}.kggPlanManageList{display:grid;gap:8px;margin-top:10px}.kggPlanManageCard{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border:1px solid #dbe3ef;border-radius:15px;padding:10px}.kggPlanManageCard b{font-size:15px}.kggPlanManageMeta{font-size:12px;color:#64748b;margin-top:2px}.kggPlanManageActions{display:flex;align-items:center;gap:6px}.kggPlanRenameBtn,.kggPlanDeleteBtn{width:40px;height:40px;min-height:40px;border-radius:999px;padding:0;font-weight:900}.kggPlanRenameBtn{border:1px solid #bfdbfe;background:#eff6ff;color:#1d4ed8;font-size:19px}.kggPlanRenameBtn:active{transform:scale(.94);background:#dbeafe}.kggPlanRenameBtn:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}.kggPlanDeleteBtn{border:1px solid #fecaca;background:#fff1f2;color:#b91c1c;font-size:25px;line-height:1}.kggPlanDeleteBtn:active{transform:scale(.94);background:#ffe4e6}.kggPlanDeleteBtn:focus-visible{outline:3px solid #fda4af;outline-offset:2px}';document.head.appendChild(s)}
-    if(!$(BACKDROP_ID)){const b=document.createElement('div');b.id=BACKDROP_ID;b.hidden=true;b.onclick=closePanel;document.body.appendChild(b)}
-    if(!$(PANEL_ID)){const p=document.createElement('section');p.id=PANEL_ID;p.hidden=true;document.body.appendChild(p)}
+  function openModal(root){
+    const state=states.get(root);if(!state||!ensureModal())return;
+    if(activeRoot&&activeRoot!==root){const prior=states.get(activeRoot);if(prior)prior.toggle.setAttribute('aria-expanded','false')}
+    activeRoot=root;if(!refreshModalFromRoot(root)){activeRoot=null;return}
+    modal.overlay.hidden=false;state.toggle.setAttribute('aria-expanded','true');lockBackground();
+    requestAnimationFrame(()=>safe(()=>modal.stage.focus({preventScroll:true})))
   }
-  function closePanel(){const b=$(BACKDROP_ID),p=$(PANEL_ID);if(b)b.hidden=true;if(p)p.hidden=true}
-  function openPanel(){ensureDom();renderPanel();$(BACKDROP_ID).hidden=false;$(PANEL_ID).hidden=false}
-  function renderPanel(){
-    const panel=$(PANEL_ID);if(!panel)return;const state=window.KGGPatientMultiPlan&&window.KGGPatientMultiPlan.ensureState?window.KGGPatientMultiPlan.ensureState():readState();const plans=state&&Array.isArray(state.plans)?state.plans:[];
-    panel.innerHTML='<div class="kggPlanManageHead"><h3>'+t('Übungspläne verwalten','Manage exercise plans')+'</h3><button class="kggPlanManageClose" type="button">×</button></div><div class="kggPlanManageList">'+plans.map((raw,index)=>'<div class="kggPlanManageCard"><div><b>'+esc(planTitle(raw,index))+'</b><div class="kggPlanManageMeta">'+(Number(state.active)===index?t('Aktiver Plan','Active plan'):t('Gespeicherter Plan','Saved plan'))+'</div></div><div class="kggPlanManageActions"><button type="button" class="kggPlanRenameBtn" data-index="'+index+'" aria-label="'+esc(t('Plan umbenennen','Rename plan'))+'" title="'+esc(t('Plan umbenennen','Rename plan'))+'">✎</button>'+(plans.length>1?'<button type="button" class="kggPlanDeleteBtn" data-index="'+index+'" aria-label="'+esc(t('Plan löschen','Delete plan'))+'" title="'+esc(t('Plan löschen','Delete plan'))+'">×</button>':'')+'</div></div>').join('')+'</div>';
-    panel.querySelector('.kggPlanManageClose').onclick=closePanel;panel.querySelectorAll('.kggPlanRenameBtn').forEach(btn=>btn.onclick=async()=>{if(await renamePlan(Number(btn.dataset.index)))renderPanel()});panel.querySelectorAll('.kggPlanDeleteBtn').forEach(btn=>btn.onclick=async()=>{if(await deletePlan(Number(btn.dataset.index)))renderPanel()})
+  function toggleModal(root){if(activeRoot===root&&modal&&!modal.overlay.hidden)closeModal();else openModal(root)}
+
+  function modalKeydown(event){
+    if(!modal||modal.overlay.hidden)return;
+    if(event.key==='Escape'){event.preventDefault();event.stopPropagation();closeModal();return}
+    if(event.key!=='Tab')return;
+    const focusables=[modal.stage,modal.close].filter(node=>node&&!node.disabled);
+    if(!focusables.length)return;
+    const current=document.activeElement,index=focusables.indexOf(current);
+    event.preventDefault();
+    const next=event.shiftKey?(index<=0?focusables.length-1:index-1):(index<0||index===focusables.length-1?0:index+1);
+    focusables[next].focus()
   }
-  function ensureButton(){
-    const box=$('kggActionBubbles');if(!box)return;if($('kggBubblePlans'))return;
-    const button=document.createElement('button');button.type='button';button.id='kggBubblePlans';button.className='kggBubble';button.textContent='🗂 '+t('Pläne','Plans');button.onclick=e=>{e.preventDefault();e.stopPropagation();const fab=$('kggActionFab');box.hidden=true;if(fab)fab.classList.remove('open');openPanel()};box.appendChild(button)
+
+  function bindStage(){
+    const stage=modal.stage;
+    stage.addEventListener('pointerdown',event=>{
+      if(event.button!=null&&event.button!==0)return;
+      event.preventDefault();event.stopPropagation();
+      const exact=event.target.closest('[data-kgg-pain-value]');
+      const rect=stage.getBoundingClientRect(),rowHeight=rect.height/(MAX-MIN+1),top=rect.top+rowHeight/2,bottom=rect.bottom-rowHeight/2;
+      const next=exact?clampValue(exact.dataset.kggPainValue):valueFromY(top,bottom,event.clientY);
+      modal.gesture={pointerId:event.pointerId};try{stage.setPointerCapture&&stage.setPointerCapture(event.pointerId)}catch(e){}updateStage(next)
+    });
+    stage.addEventListener('pointermove',event=>{
+      if(!modal.gesture||modal.gesture.pointerId!==event.pointerId)return;
+      event.preventDefault();event.stopPropagation();
+      const rect=stage.getBoundingClientRect(),rowHeight=rect.height/(MAX-MIN+1);
+      updateStage(valueFromY(rect.top+rowHeight/2,rect.bottom-rowHeight/2,event.clientY))
+    });
+    stage.addEventListener('pointerup',event=>{
+      if(!modal.gesture||modal.gesture.pointerId!==event.pointerId)return;
+      event.preventDefault();event.stopPropagation();modal.gesture=null;
+      try{stage.releasePointerCapture&&stage.releasePointerCapture(event.pointerId)}catch(e){}
+      if(!commitModal(modal.draft))restoreModalDraft()
+    });
+    stage.addEventListener('pointercancel',event=>{if(!modal.gesture)return;event.preventDefault();event.stopPropagation();modal.gesture=null;restoreModalDraft()});
+    stage.addEventListener('keydown',event=>{
+      let next=modal.draft,handled=true;
+      if(event.key==='ArrowUp'||event.key==='ArrowRight')next++;
+      else if(event.key==='ArrowDown'||event.key==='ArrowLeft')next--;
+      else if(event.key==='Home')next=MIN;
+      else if(event.key==='End')next=MAX;
+      else if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();commitModal(modal.draft);modal.keyboardDirty=false;return}
+      else handled=false;
+      if(handled){event.preventDefault();event.stopPropagation();modal.keyboardDirty=true;updateStage(next)}
+    });
+    stage.addEventListener('blur',()=>{if(modal.keyboardDirty){modal.keyboardDirty=false;restoreModalDraft()}})
   }
-  function init(){ensureDom();ensureButton();setInterval(ensureButton,500)}
-  if(window.__KGG_TEST__)window.__kggPlanDeleteTest={removePlanState,renamePlanState,migratePlanKeys,planStoragePrefix,planStorageKeys,mediaIds};
-  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init,{once:true}):init()
-})();
+
+  function ensureModal(){
+    if(modal&&modal.overlay&&modal.overlay.isConnected)return true;
+    ensureStyle();
+    try{
+      const overlay=document.createElement('div');overlay.id=MODAL_ID;overlay.hidden=true;
+      const dialog=document.createElement('section');dialog.id=DIALOG_ID;dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-labelledby',TITLE_ID);
+      const head=document.createElement('div');head.className='kggPainModalHead';
+      const title=document.createElement('strong');title.id=TITLE_ID;
+      const close=document.createElement('button');close.type='button';close.className='kggPainModalClose';close.textContent='×';
+      head.append(title,close);
+      const maxDesc=document.createElement('div');maxDesc.id=MAX_DESC_ID;maxDesc.className='kggPainEndpoint kggPainEndpointMax';
+      const stage=document.createElement('div');stage.className='kggPainVerticalStage';stage.tabIndex=0;stage.setAttribute('role','slider');stage.setAttribute('aria-valuemin','0');stage.setAttribute('aria-valuemax','10');stage.setAttribute('aria-orientation','vertical');stage.setAttribute('aria-describedby',`${MAX_DESC_ID} ${MIN_DESC_ID}`);
+      const track=document.createElement('div');track.className='kggPainVerticalTrack';
+      const fill=document.createElement('div');fill.className='kggPainVerticalFill';
+      const thumb=document.createElement('div');thumb.className='kggPainVerticalThumb';
+      const values=document.createElement('div');values.className='kggPainVerticalValues';const rows=[];
+      for(let n=MAX;n>=MIN;n--){const row=document.createElement('div');row.className='kggPainVerticalValue';row.dataset.kggPainValue=String(n);row.textContent=String(n);values.appendChild(row);rows.push(row)}
+      stage.append(track,fill,thumb,values);
+      const minDesc=document.createElement('div');minDesc.id=MIN_DESC_ID;minDesc.className='kggPainEndpoint kggPainEndpointMin';
+      const hint=document.createElement('div');hint.className='kggPainVerticalHint';
+      const body=document.createElement('div');body.className='kggPainModalBody';body.append(maxDesc,stage,minDesc,hint);
+      dialog.append(head,body);overlay.appendChild(dialog);document.body.appendChild(overlay);
+      modal={overlay,dialog,title,close,maxDesc,minDesc,stage,values:rows,hint,selected:false,committed:0,draft:0,gesture:null,keyboardDirty:false};
+      overlay.addEventListener('pointerdown',event=>{if(event.target===overlay){event.preventDefault();closeModal()}});
+      dialog.addEventListener('pointerdown',event=>event.stopPropagation());
+      close.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();closeModal()});
+      overlay.addEventListener('keydown',modalKeydown,true);bindStage();refreshLanguage();return true
+    }catch(e){safe(()=>document.getElementById(MODAL_ID)?.remove());modal=null;return false}
+  }
+
+  function buildCompact(root,ei){
+    const wrap=document.createElement('div');wrap.className='kggPainVertical';
+    const toggle=document.createElement('button');toggle.type='button';toggle.className='kggPainVerticalToggle';toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-haspopup','dialog');toggle.setAttribute('aria-controls',MODAL_ID);
+    const label=document.createElement('span');label.className='kggPainVerticalLabel';
+    const current=document.createElement('span');current.className='kggPainVerticalCurrent';
+    const chevron=document.createElement('span');chevron.className='kggPainVerticalChevron';chevron.textContent='⌄';chevron.setAttribute('aria-hidden','true');
+    toggle.append(label,current,chevron);wrap.appendChild(toggle);root.appendChild(wrap);
+    const state={ei,wrap,toggle,label,current,selected:false,committed:0,row:null,oldLabel:null,labelHidden:false,rowHidden:false,rowAria:null,rowInert:false,rowDisplay:'',rowDisplayPriority:''};
+    states.set(root,state);
+    toggle.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();toggleModal(root)});
+    wrap.addEventListener('click',event=>event.stopPropagation());return state
+  }
+  function refreshState(root,state){
+    const stored=readStored(state.ei);state.label.textContent=labelText();updateCompact(state,stored.selected,stored.value)
+  }
+  function teardown(root){
+    const state=states.get(root);if(!state)return;
+    if(activeRoot===root)closeModal({returnFocus:false});restoreOriginal(state);state.wrap.remove();root.classList.remove(ROOT_CLASS);states.delete(root)
+  }
+  function exercisePainMode(ei){
+    const ex=safe(()=>p&&Array.isArray(p.ex)?p.ex[ei]:null);
+    const runtimeMode=String(ex&&ex.painMode||'').toLowerCase();
+    if(runtimeMode)return runtimeMode;
+    const settings=safe(()=>JSON.parse(localStorage.getItem('kggPatientExerciseSettingsV1')||'{}'))||{};
+    const planId=String(safe(()=>p.id)||'plan'),name=String(ex&&ex.n||'exercise');
+    const saved=settings[(planId+'|'+name).toLowerCase()];
+    return String(saved&&saved.painMode||'exercise').toLowerCase()
+  }
+  function mountRoot(root,ei){
+    const card=root.closest('.ex');
+    const setMode=exercisePainMode(ei)==='set'||Boolean(card&&card.querySelector('.kggSetPain'))||root.classList.contains('kggHiddenGlobalPain')||root.style.display==='none';
+    if(setMode){teardown(root);return}
+    if(!originalReady(root)||typeof setPain!=='function'||!ensureModal())return;
+    let state=states.get(root);if(!state){state=buildCompact(root,ei);root.classList.add(ROOT_CLASS)}else state.ei=ei;
+    if(!hideOriginal(root,state)){teardown(root);return}refreshState(root,state)
+  }
+  function mountAll(){
+    ensureStyle();ensureModal();
+    const cards=[...document.querySelectorAll('#list .ex')];
+    cards.forEach((card,ei)=>{const root=card.querySelector(':scope > .pain');if(root)mountRoot(root,ei)});
+    if(activeRoot&&!activeRoot.isConnected)closeModal({returnFocus:false});refreshLanguage()
+  }
+  function scheduleMount(delay=0){clearTimeout(mountTimer);mountTimer=setTimeout(mountAll,delay)}
+  function observe(){
+    const list=document.getElementById('list');if(!list)return;
+    if(observer)observer.disconnect();observer=new MutationObserver(()=>scheduleMount(20));observer.observe(list,{childList:true,subtree:true,attributes:true,attributeFilter:['class']})
+  }
+  function init(){
+    if(window.__kggPatientPainVertical===VERSION)return;window.__kggPatientPainVertical=VERSION;
+    ensureStyle();ensureModal();observe();mountAll();setTimeout(()=>{observe();mountAll()},250);setTimeout(mountAll,900);
+    document.addEventListener('click',event=>{if(event.target&&event.target.closest&&event.target.closest('#kggLangSwitch'))setTimeout(()=>{refreshLanguage();mo
 ```

@@ -1,10 +1,10 @@
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v081_qr_full_plan_device_ladder';
+  const VERSION='KGG_GITHUB_UPDATE_v083_preview_live_sync_qr_privacy';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v081","buildTime":"2026-08-23T00:00:00Z","buildCode":"module-v081-qr-full-plan-device-ladder","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v083","buildTime":"2026-08-25T09:00:00Z","buildCode":"module-v083-preview-live-sync-qr-privacy","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -4459,23 +4459,22 @@
       ex&&ex.videoLabel||'Video öffnen'
     ];
   }
+  function publicPlanId(value){
+    const text=String(value||'plan');let hash=2166136261;
+    for(let i=0;i<text.length;i++){hash^=text.charCodeAt(i);hash=Math.imul(hash,16777619);}
+    return 'kgg-public-'+(hash>>>0).toString(16).padStart(8,'0');
+  }
   function buildKggH2PayloadFromPlan(plan,exercises,patient,mediaMeta){
     const sourcePlan=plan||{};
-    const sourcePatient=patient||{};
+    void patient;
     return {
       v:2,
-      i:String(sourcePlan.id||sourcePlan.planId||'plan_'+Date.now()),
-      t:String(sourcePlan.title||'KGG Trainingsplan'),
+      i:publicPlanId(sourcePlan.id||sourcePlan.planId),
+      t:'KGG Trainingsplan',
       d:Number(sourcePlan.days)||6,
       extendDays:true,
       stepDays:6,
       e:(exercises||[]).map(compactKggH2Exercise),
-      patient:{
-        name:sourcePatient.name||sourcePatient.displayName||'',
-        date:sourcePatient.date||sourcePatient.startDate||'',
-        therapist:sourcePatient.therapist||'',
-        notes:sourcePatient.notes||''
-      },
       m:{
         source:'kgg-therapist-app',
         schema:'KGGH2',
@@ -5397,6 +5396,8 @@
     if(cfg2)return {type:'KGGCFG2',json:safeBase64JsonDecode(cfg2[1]),raw:text};
     const cfg1=findCode('KGGCFG1');
     if(cfg1)return {type:'KGGCFG1',json:safeBase64JsonDecode(cfg1[1]),raw:text};
+    const livePair=findCode('KGGLIVEPAIR1');
+    if(livePair)return {type:'KGGLIVEPAIR1',json:{code:'KGGLIVEPAIR1'}};
     const h3=findCode('KGGH3');
     if(h3)return {type:'KGGH3',json:decodeKggPlanCode('KGGH3:'+h3[1]),raw:text};
     const h2=findCode('KGGH2');
@@ -5995,6 +5996,17 @@
           const ok=await applyKggConfigTransferParsed(parsed);
           return {type:ok?'configTransfer':'configTransferCancelled',json:parsed.json};
         }
+        if(parsed&&parsed.type==='KGGLIVEPAIR1'){
+          setScanStatus('QR erkannt: Live-Kopplung wird lokal übergeben ...');
+          const idx=scanState.jobs.indexOf(job);
+          if(idx>=0&&!job.pages.length&&!job.result&&job.status==='new'){
+            scanState.jobs.splice(idx,1);
+            scanState.activeIndex=Math.max(0,Math.min(scanState.activeIndex,scanState.jobs.length-1));
+          }
+          let handled=false;try{if(window.KGGLiveSync&&typeof window.KGGLiveSync.handleScannedText==='function')handled=await window.KGGLiveSync.handleScannedText(raw,{source:'therapist-scanner'});}catch(err){handled=false;}
+          if(!handled)setScanStatus('Kopplungs-QR bitte in der Patienten-App scannen.');
+          return {type:handled?'livePairing':'livePairingError'};
+        }
         if(parsed&&(parsed.type==='KGGSYNC1'||parsed.type==='KGGSYNC2')){
           setScanStatus(parsed.type==='KGGSYNC2'?'QR erkannt: Sync-Verbindung mit Daten wird gelesen ...':'QR erkannt: Sync-Kopplung wird gespeichert ...');
           const idx=scanState.jobs.indexOf(job);
@@ -6436,7 +6448,7 @@
         let acceptedCount=0;
         for(const file of files){
           const accepted=await scanAcceptFile(file,normalizedKind);
-          if(accepted&&(accepted.type==='syncInvite'||accepted.type==='syncBundle'))syncCodeCount++;
+          if(accepted&&(accepted.type==='syncInvite'||accepted.type==='syncBundle'||accepted.type==='livePairing'||accepted.type==='livePairingError'))syncCodeCount++;
           else if(accepted)acceptedCount++;
         }
         if(syncCodeCount&&!acceptedCount){
@@ -6471,7 +6483,7 @@
       try{
         const accepted=await scanAcceptQrRaw(value,null,{source:String(source||'live-camera')},true);
         if(!accepted||accepted.type==='invalidQr')return accepted||{type:'invalidQr',error:'unknown'};
-        if(accepted.type==='syncInvite'||accepted.type==='syncBundle'||accepted.type==='configTransfer'||accepted.type==='configTransferCancelled'){
+        if(accepted.type==='syncInvite'||accepted.type==='syncBundle'||accepted.type==='livePairing'||accepted.type==='livePairingError'||accepted.type==='configTransfer'||accepted.type==='configTransferCancelled'){
           scanState.decision=false;
           state.scanPanelOpen='plan';
         }else{
