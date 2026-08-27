@@ -11,6 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 FACTORY = ROOT / "android-wrapper/app/src/preview/java/de/kgg/app/KggReleaseControllerFactory.java"
 GUARD = ROOT / "android-wrapper/app/src/preview/assets/android/kgg_device_test_runtime_guard.js"
+UPDATE_BRIDGE = ROOT / "android-wrapper/app/src/preview/java/de/kgg/app/KggPreviewWebUpdateBridge.java"
 SMOKE = ROOT / "release-pipeline/kgg_persistent_runtime_guard_smoke.js"
 DEVICE_WORKFLOW = ROOT / ".github/workflows/kgg-gpt-device-test.yml"
 
@@ -19,20 +20,27 @@ class PersistentRuntimeGuardTests(unittest.TestCase):
     def test_runtime_guard_is_preview_only_and_injected_before_station(self) -> None:
         factory = FACTORY.read_text(encoding="utf-8")
         guard = GUARD.read_text(encoding="utf-8")
+        update_bridge = UPDATE_BRIDGE.read_text(encoding="utf-8")
 
         self.assertIn('"KGGDeviceTestStationNative"', factory)
+        self.assertIn('"KGGPreviewWebUpdateNative"', factory)
         self.assertIn('"android/kgg_device_test_runtime_guard.js"', factory)
         self.assertLess(
             factory.index("kgg_device_test_runtime_guard.js"),
             factory.index("kgg_device_test_station.js"),
         )
         self.assertIn("KGGDeviceTestStationNative", guard)
+        self.assertIn("KGGPreviewWebUpdateNative", guard)
         self.assertIn("KGGAndroidApp", guard)
+        self.assertIn("requestPreviewWebUpdate", guard)
         self.assertIn("preview_html_not_current", guard)
         self.assertIn("preview_html_not_healthy", guard)
         self.assertIn("status.rolloutCode", guard)
         self.assertIn("status.releaseId", guard)
         self.assertIn("status.pendingHealthCheck", guard)
+        self.assertIn('getDeclaredMethod("checkForPreviewWebAppUpdate")', update_bridge)
+        self.assertNotIn("checkForAppUpdate", update_bridge)
+        self.assertNotIn("checkForAndroidAppUpdate", update_bridge)
         for forbidden in (
             "fetch(",
             "XMLHttpRequest",
@@ -54,7 +62,7 @@ class PersistentRuntimeGuardTests(unittest.TestCase):
         self.assertNotIn("create_pr", workflow)
         self.assertNotIn("publish_admin_beta", workflow)
 
-    def test_stale_html_a_cannot_start_runtime_b(self) -> None:
+    def test_stale_html_a_requests_runtime_b_without_native_session(self) -> None:
         result = subprocess.run(
             ["node", str(SMOKE.relative_to(ROOT))],
             cwd=ROOT,
@@ -64,6 +72,8 @@ class PersistentRuntimeGuardTests(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn('"staleHtmlBlocked":true', result.stdout)
+        self.assertIn('"foregroundUpdateRequested":true', result.stdout)
+        self.assertIn('"duplicateUpdateSuppressed":true', result.stdout)
         self.assertIn('"pendingHealthBlocked":true', result.stdout)
         self.assertIn('"activeRequest":"preview-job-b"', result.stdout)
         self.assertIn('"activeProfile":"quick"', result.stdout)
