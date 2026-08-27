@@ -2,8 +2,11 @@
   "use strict";
 
   var nativeBridge = root && root.KGGDeviceTestStationNative;
+  var updateBridge = root && root.KGGPreviewWebUpdateNative;
   var appBridge = root && root.KGGAndroidApp;
-  if (!root || !nativeBridge || !appBridge) return;
+  if (!root || !nativeBridge || !updateBridge || !appBridge) return;
+
+  var lastRequestedPreview = "";
 
   function parseJson(value) {
     return JSON.parse(String(value || ""));
@@ -11,6 +14,18 @@
 
   function failure(code) {
     return JSON.stringify({ ok: false, error: code });
+  }
+
+  function requestCurrentPreview(runtimeContext) {
+    if (typeof updateBridge.requestPreviewWebUpdate !== "function") {
+      throw new Error("preview_update_bridge_unavailable");
+    }
+    var key = String(runtimeContext.requestId || "") + ":" + String(runtimeContext.rolloutCode || "");
+    if (lastRequestedPreview === key) return;
+    if (updateBridge.requestPreviewWebUpdate() !== true) {
+      throw new Error("preview_update_request_failed");
+    }
+    lastRequestedPreview = key;
   }
 
   function requireLoadedPreview(runtimeContext) {
@@ -26,8 +41,10 @@
     }
     if (Number(status.rolloutCode) !== Number(runtimeContext.rolloutCode)
         || String(status.releaseId || "") !== String(runtimeContext.requestId || "")) {
+      requestCurrentPreview(runtimeContext);
       throw new Error("preview_html_not_current");
     }
+    lastRequestedPreview = "";
     if (status.pendingHealthCheck === true) {
       throw new Error("preview_html_not_healthy");
     }
