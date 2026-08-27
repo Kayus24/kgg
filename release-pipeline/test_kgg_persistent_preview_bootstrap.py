@@ -58,10 +58,23 @@ class PersistentPreviewBootstrapTests(unittest.TestCase):
             gate,
         )
         self.assertIn("group: kgg-gpt-preview-auto", auto)
-        for job_name in ("status-validating:", "status-publishing:", "status-final:"):
-            start = auto.index("  " + job_name)
-            next_job = auto.find("\n  ", start + 3)
-            block = auto[start : next_job if next_job >= 0 else len(auto)]
+
+        boundaries = (
+            ("status-validating", "validate"),
+            ("status-publishing", "publish"),
+            ("status-final", None),
+        )
+        for job_name, next_job_name in boundaries:
+            start_marker = f"\n  {job_name}:"
+            self.assertIn(start_marker, auto)
+            start = auto.index(start_marker) + 1
+            if next_job_name is None:
+                block = auto[start:]
+            else:
+                end_marker = f"\n  {next_job_name}:"
+                self.assertIn(end_marker, auto[start:])
+                end = auto.index(end_marker, start)
+                block = auto[start:end]
             self.assertIn("concurrency:", block)
             self.assertIn("group: kgg-gpt-preview-publish", block)
             self.assertIn("cancel-in-progress: false", block)
