@@ -6,10 +6,6 @@
   var appBridge = root && root.KGGAndroidApp;
   if (!root || !nativeBridge || !updateBridge || !appBridge) return;
 
-  var lastRequestedPreview = "";
-  var lastRequestedAt = 0;
-  var PREVIEW_UPDATE_RETRY_MS = 10000;
-
   function parseJson(value) {
     return JSON.parse(String(value || ""));
   }
@@ -18,18 +14,13 @@
     return JSON.stringify({ ok: false, error: code });
   }
 
-  function requestCurrentPreview(runtimeContext) {
+  function requestCurrentPreview() {
     if (typeof updateBridge.requestPreviewWebUpdate !== "function") {
       throw new Error("preview_update_bridge_unavailable");
     }
-    var key = String(runtimeContext.requestId || "") + ":" + String(runtimeContext.rolloutCode || "");
-    var now = Date.now();
-    if (lastRequestedPreview === key && (now - lastRequestedAt) < PREVIEW_UPDATE_RETRY_MS) return;
     if (updateBridge.requestPreviewWebUpdate() !== true) {
       throw new Error("preview_update_request_failed");
     }
-    lastRequestedPreview = key;
-    lastRequestedAt = now;
   }
 
   function requireLoadedPreview(runtimeContext) {
@@ -45,11 +36,9 @@
     }
     if (Number(status.rolloutCode) !== Number(runtimeContext.rolloutCode)
         || String(status.releaseId || "") !== String(runtimeContext.requestId || "")) {
-      requestCurrentPreview(runtimeContext);
+      requestCurrentPreview();
       throw new Error("preview_html_not_current");
     }
-    lastRequestedPreview = "";
-    lastRequestedAt = 0;
     if (status.pendingHealthCheck === true) {
       throw new Error("preview_html_not_healthy");
     }
