@@ -445,6 +445,58 @@ jobs:
             preview/previews/${{ inputs.request_id }}/admin.html
             preview/previews/${{ inputs.request_id }}/meta.json
 
+      - name: Publish public token-free patient test PWA
+        if: inputs.mode == 'publish_device_test'
+        shell: bash
+        env:
+          KGG_REQUEST_ID: ${{ inputs.request_id }}
+        run: |
+          set -euo pipefail
+          cd patient-preview
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add device-test
+          if git diff --cached --quiet; then
+            echo "Patient test PWA is already current."
+          else
+            git commit -m "publish patient device test $KGG_REQUEST_ID"
+            git pull --rebase origin "$(git branch --show-current)"
+            git push origin HEAD
+          fi
+          {
+            echo "Patient test PWA: ${{ steps.device_job.outputs.patient_pwa_url }}"
+            echo "Device job: ${{ steps.device_job.outputs.job_url }}"
+            echo "Session: ${{ steps.device_job.outputs.session_id }}"
+            echo "Job hash: ${{ steps.device_job.outputs.job_hash }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify public patient test PWA matches this run
+        if: inputs.mode == 'publish_device_test'
+        shell: bash
+        env:
+          KGG_REQUEST_ID: ${{ inputs.request_id }}
+          KGG_SOURCE_SHA: ${{ inputs.source_sha }}
+          KGG_JOB_HASH: ${{ steps.device_job.outputs.job_hash }}
+        run: |
+          set -euo pipefail
+          meta_url='https://kayus24.github.io/kgg-patient-preview/device-test/device-test-meta.json'
+          for attempt in $(seq 1 36); do
+            cache_bust="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${attempt}"
+            body="$(curl -fsSL --max-time 10 -H 'Cache-Control: no-cache' "${meta_url}?v=${cache_bust}" 2>/dev/null || true)"
+            if printf '%s' "$body" | jq -e \
+              --arg request "$KGG_REQUEST_ID" \
+              --arg source "$KGG_SOURCE_SHA" \
+              --arg job "$KGG_JOB_HASH" \
+              '.kind == "kgg_device_test_pwa_meta" and .schemaVersion == 1 and .syntheticOnly == true and .requestId == $request and .sourceSha == $source and .jobHash == $job' \
+              >/dev/null 2>&1; then
+              echo "Public patient test PWA matches request $KGG_REQUEST_ID."
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Public patient test PWA did not converge to request $KGG_REQUEST_ID" >&2
+          exit 1
+
       - name: Publish preview channel
         if: inputs.mode == 'publish_preview'
         shell: bash
@@ -473,6 +525,7 @@ jobs:
         shell: bash
         env:
           KGG_REQUEST_ID: ${{ inputs.request_id }}
+          KGG_SOURCE_SHA: ${{ inputs.source_sha }}
         run: |
           set -euo pipefail
           cd preview
@@ -481,42 +534,27 @@ jobs:
           git add previews "device-tests/$KGG_REQUEST_ID/job.json"
           if git diff --cached --quiet; then
             echo "Device-test Preview channel is already current."
-            exit 0
+          else
+            git commit -m "publish persistent device test $KGG_REQUEST_ID"
+            if git ls-remote --exit-code origin refs/heads/gpt-preview >/dev/null 2>&1; then
+              git pull --rebase origin gpt-preview
+            fi
           fi
-          git commit -m "publish persistent device test $KGG_REQUEST_ID"
-          if git ls-remote --exit-code origin refs/heads/gpt-preview >/dev/null 2>&1; then
-            git pull --rebase origin gpt-preview
+          git -C ../base fetch --no-tags origin main:refs/remotes/origin/main
+          checked_out="$(git -C ../base rev-parse HEAD)"
+          main_sha="$(git -C ../base rev-parse origin/main)"
+          test "$checked_out" = "$KGG_SOURCE_SHA"
+          if [ "$main_sha" != "$KGG_SOURCE_SHA" ]; then
+            echo "Main drift detected immediately before Preview activation: pinned=$KGG_SOURCE_SHA current=$main_sha" >&2
+            exit 1
           fi
-          git push origin HEAD:gpt-preview
+          if ! git diff --cached --quiet || [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/gpt-preview 2>/dev/null || git rev-parse HEAD)" ]; then
+            git push origin HEAD:gpt-preview
+          fi
           {
             echo "Preview HTML: ${{ steps.existing_main_preview.outputs.preview_url }}"
             echo "Pinned source SHA: ${{ steps.existing_main_preview.outputs.preview_source_sha }}"
             echo "Preview rollout: ${{ steps.existing_main_preview.outputs.preview_rollout_code }}"
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Publish public token-free patient test PWA
-        if: inputs.mode == 'publish_device_test'
-        shell: bash
-        env:
-          KGG_REQUEST_ID: ${{ inputs.request_id }}
-        run: |
-          set -euo pipefail
-          cd patient-preview
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add device-test
-          if git diff --cached --quiet; then
-            echo "Patient test PWA is already current."
-          else
-            git commit -m "publish patient device test $KGG_REQUEST_ID"
-            git pull --rebase origin "$(git branch --show-current)"
-            git push origin HEAD
-          fi
-          {
-            echo "Patient test PWA: ${{ steps.device_job.outputs.patient_pwa_url }}"
-            echo "Device job: ${{ steps.device_job.outputs.job_url }}"
-            echo "Session: ${{ steps.device_job.outputs.session_id }}"
-            echo "Job hash: ${{ steps.device_job.outputs.job_hash }}"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Create guarded PR from accepted preview
