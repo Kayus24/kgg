@@ -259,7 +259,8 @@ jobs:
           profile="$KGG_DEVICE_PROFILE"
           session_id="kgg-test-$(openssl rand -hex 16)"
           patch_hash="$(printf '%s' "v404|$request_id|$source_sha|$profile" | sha256sum | cut -d' ' -f1)"
-          patient_pwa_url='https://kayus24.github.io/kgg-patient-preview/device-test/'
+          run_key="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          patient_pwa_url="https://kayus24.github.io/kgg-patient-preview/device-test/$request_id/$run_key/"
           job_url="https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/device-tests/$request_id/job.json"
           cd base
           node release-pipeline/kgg_dual_device_job.js \
@@ -296,6 +297,7 @@ jobs:
             echo "patch_hash=$patch_hash"
             echo "job_url=$job_url"
             echo "patient_pwa_url=$patient_pwa_url"
+            echo "patient_pwa_rel=device-test/$request_id/$run_key"
           } >> "$GITHUB_OUTPUT"
 
       - name: Refresh generated GPT context files for PR mode
@@ -414,13 +416,24 @@ jobs:
         shell: bash
         env:
           KGG_REQUEST_ID: ${{ inputs.request_id }}
+          KGG_PATIENT_PWA_URL: ${{ steps.device_job.outputs.patient_pwa_url }}
+          KGG_PATIENT_PWA_REL: ${{ steps.device_job.outputs.patient_pwa_rel }}
         run: |
           set -euo pipefail
           mkdir -p "preview/device-tests/$KGG_REQUEST_ID"
           cp "$RUNNER_TEMP/kgg-device-test-job.json" "preview/device-tests/$KGG_REQUEST_ID/job.json"
-          rm -rf patient-preview/device-test
-          mkdir -p patient-preview/device-test
-          cp -R "$RUNNER_TEMP/kgg-device-test-pwa/." patient-preview/device-test/
+          expected_url="https://kayus24.github.io/kgg-patient-preview/${KGG_PATIENT_PWA_REL}/"
+          test "$KGG_PATIENT_PWA_URL" = "$expected_url"
+          target="patient-preview/$KGG_PATIENT_PWA_REL"
+          if [ -e "$target" ]; then
+            if ! diff -qr "$RUNNER_TEMP/kgg-device-test-pwa" "$target" >/dev/null; then
+              echo "Immutable patient test PWA path already exists with different content: $KGG_PATIENT_PWA_REL" >&2
+              exit 1
+            fi
+          else
+            mkdir -p "$target"
+            cp -R "$RUNNER_TEMP/kgg-device-test-pwa/." "$target/"
+          fi
 
       - name: Upload dual-device APK, PWA, job and pinned HTML artifacts
         if: inputs.mode == 'publish_device_test'
@@ -450,16 +463,17 @@ jobs:
         shell: bash
         env:
           KGG_REQUEST_ID: ${{ inputs.request_id }}
+          KGG_PATIENT_PWA_REL: ${{ steps.device_job.outputs.patient_pwa_rel }}
         run: |
           set -euo pipefail
           cd patient-preview
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add device-test
+          git add "$KGG_PATIENT_PWA_REL"
           if git diff --cached --quiet; then
-            echo "Patient test PWA is already current."
+            echo "Immutable patient test PWA already exists unchanged."
           else
-            git commit -m "publish patient device test $KGG_REQUEST_ID"
+            git commit -m "publish patient device test $KGG_REQUEST_ID ${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
             git pull --rebase origin "$(git branch --show-current)"
             git push origin HEAD
           fi
@@ -477,9 +491,10 @@ jobs:
           KGG_REQUEST_ID: ${{ inputs.request_id }}
           KGG_SOURCE_SHA: ${{ inputs.source_sha }}
           KGG_JOB_HASH: ${{ steps.device_job.outputs.job_hash }}
+          KGG_PATIENT_PWA_URL: ${{ steps.device_job.outputs.patient_pwa_url }}
         run: |
           set -euo pipefail
-          meta_url='https://kayus24.github.io/kgg-patient-preview/device-test/device-test-meta.json'
+          meta_url="${KGG_PATIENT_PWA_URL}device-test-meta.json"
           for attempt in $(seq 1 36); do
             cache_bust="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${attempt}"
             body="$(curl -fsSL --max-time 10 -H 'Cache-Control: no-cache' "${meta_url}?v=${cache_bust}" 2>/dev/null || true)"
@@ -489,12 +504,12 @@ jobs:
               --arg job "$KGG_JOB_HASH" \
               '.kind == "kgg_device_test_pwa_meta" and .schemaVersion == 1 and .syntheticOnly == true and .requestId == $request and .sourceSha == $source and .jobHash == $job' \
               >/dev/null 2>&1; then
-              echo "Public patient test PWA matches request $KGG_REQUEST_ID."
+              echo "Public immutable patient test PWA matches request $KGG_REQUEST_ID."
               exit 0
             fi
             sleep 5
           done
-          echo "Public patient test PWA did not converge to request $KGG_REQUEST_ID" >&2
+          echo "Public immutable patient test PWA did not converge to request $KGG_REQUEST_ID" >&2
           exit 1
 
       - name: Publish preview channel
