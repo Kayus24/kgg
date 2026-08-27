@@ -31,10 +31,17 @@ function main() {
   };
   let nativeBeginCalls = 0;
   let nativeContext = null;
+  let previewUpdateRequests = 0;
 
   const window = {
     KGGAndroidApp: {
       updateStatus: () => JSON.stringify(status),
+    },
+    KGGPreviewWebUpdateNative: {
+      requestPreviewWebUpdate: () => {
+        previewUpdateRequests += 1;
+        return true;
+      },
     },
     KGGDeviceTestStationNative: {
       getDeviceInfo: () => JSON.stringify({ class: "android-tablet" }),
@@ -75,6 +82,11 @@ function main() {
   let result = JSON.parse(bridge.beginSession(JSON.stringify(runtimeB)));
   if (result.ok !== false || result.error !== "preview_html_not_current") fail("stale loaded HTML A was not blocked");
   if (nativeBeginCalls !== 0) fail("native session started while HTML A was still loaded");
+  if (previewUpdateRequests !== 1) fail("stale HTML A did not request Preview B web update");
+
+  result = JSON.parse(bridge.beginSession(JSON.stringify(runtimeB)));
+  if (result.ok !== false || result.error !== "preview_html_not_current") fail("stale loaded HTML A retry was not blocked");
+  if (previewUpdateRequests !== 1) fail("same target Preview B requested duplicate foreground updates");
 
   status = {
     previewChannel: true,
@@ -102,6 +114,8 @@ function main() {
     ok: true,
     suite: "persistent-runtime-guard",
     staleHtmlBlocked: true,
+    foregroundUpdateRequested: true,
+    duplicateUpdateSuppressed: true,
     pendingHealthBlocked: true,
     activeRequest: nativeContext.requestId,
     activeSourceSha: nativeContext.sourceSha,
