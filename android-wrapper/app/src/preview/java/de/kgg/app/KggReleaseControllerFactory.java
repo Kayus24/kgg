@@ -8,6 +8,7 @@ final class KggReleaseControllerFactory {
 
     static KggReleaseController attach(MainActivity activity, WebView webView) {
         webView.addJavascriptInterface(new KggDeviceTestStationBridge(activity), "KGGDeviceTestStationNative");
+        webView.addJavascriptInterface(new KggPreviewWebUpdateBridge(activity), "KGGPreviewWebUpdateNative");
         return null;
     }
 
