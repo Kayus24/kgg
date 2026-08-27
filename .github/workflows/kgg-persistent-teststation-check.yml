@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - ".github/workflows/kgg-gpt-device-test.yml"
+      - ".github/workflows/kgg-gpt-preview-auto.yml"
       - ".github/workflows/kgg-gpt-preview-gate.yml"
       - ".github/workflows/kgg-persistent-teststation-check.yml"
       - "android-wrapper/app/src/preview/**"
@@ -13,6 +14,7 @@ on:
       - "release-pipeline/kgg_existing_main_preview.py"
       - "release-pipeline/kgg_persistent_runtime_guard_smoke.js"
       - "release-pipeline/test_kgg_dual_device_v404.py"
+      - "release-pipeline/test_kgg_persistent_preview_bootstrap.py"
       - "release-pipeline/test_kgg_persistent_runtime_guard.py"
       - "release-pipeline/test_kgg_tab_s9_test_station.py"
 
