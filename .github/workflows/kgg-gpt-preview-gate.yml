@@ -548,9 +548,7 @@ jobs:
             echo "Main drift detected immediately before Preview activation: pinned=$KGG_SOURCE_SHA current=$main_sha" >&2
             exit 1
           fi
-          if ! git diff --cached --quiet || [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/gpt-preview 2>/dev/null || git rev-parse HEAD)" ]; then
-            git push origin HEAD:gpt-preview
-          fi
+          git push origin HEAD:gpt-preview
           {
             echo "Preview HTML: ${{ steps.existing_main_preview.outputs.preview_url }}"
             echo "Pinned source SHA: ${{ steps.existing_main_preview.outputs.preview_source_sha }}"
