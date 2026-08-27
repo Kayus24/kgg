@@ -41,6 +41,7 @@ async function main() {
   const manifestUrl = "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/index.json";
   const jobUrl = "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/device-tests/" + job.requestId + "/job.json";
   const previewUrl = "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/" + job.requestId + "/admin.html";
+  const pwaMetaUrl = job.patientPwaUrl + "device-test-meta.json";
   const latest = {
     kind: "kgg_gpt_preview",
     sourceType: "existing-main",
@@ -72,11 +73,20 @@ async function main() {
     patientPwaUrl: job.patientPwaUrl,
     deviceTestProfile: "full",
   };
+  let pwaMeta = {
+    kind: "kgg_device_test_pwa_meta",
+    schemaVersion: 1,
+    sourceSha: staleApkContextA.commitSha,
+    jobHash: staleApkContextA.deviceTestJobHash,
+    requestId: staleApkContextA.requestId,
+    syntheticOnly: true,
+  };
 
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 1180, height: 820 }, hasTouch: true });
   await page.route(manifestUrl, (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(manifest) }));
   await page.route(jobUrl, (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(job) }));
+  await page.route(pwaMetaUrl, (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(pwaMeta) }));
   try {
     await page.goto("file://" + HTML_PATH.replace(/\\/g, "/"), { waitUntil: "domcontentloaded", timeout: 60000 });
     await page.evaluate(({ job, staleApkContextA }) => {
@@ -107,9 +117,24 @@ async function main() {
     }, { job, staleApkContextA });
     await page.addScriptTag({ path: FIXTURE_SCRIPT });
     await page.addScriptTag({ path: STATION_SCRIPT });
-    const launcher = page.locator("#kgg-device-test-station button");
+    let launcher = page.locator("#kgg-device-test-station button");
     if ((await launcher.count()) !== 1 || (await launcher.textContent()).trim() !== "Teststation laden") fail("v404 launcher missing");
+
     await launcher.click();
+    await page.locator("#kgg-device-test-station h2").filter({ hasText: "Teststation blockiert" }).waitFor({ timeout: 10000 });
+    if ((await page.evaluate(() => window.__runtimeContextSeen)) !== null) fail("native session started while patient PWA still belonged to run A");
+    const warning = (await page.locator("#kgg-device-test-station .warning").textContent()) || "";
+    if (!warning.includes("Patient-Test-PWA und Testauftrag stammen nicht aus demselben Lauf")) fail("cross-repo PWA mismatch was not reported");
+
+    pwaMeta = {
+      kind: "kgg_device_test_pwa_meta",
+      schemaVersion: 1,
+      sourceSha: job.sourceSha,
+      jobHash: job.jobHash,
+      requestId: job.requestId,
+      syntheticOnly: true,
+    };
+    await page.locator("#kgg-device-test-station button").filter({ hasText: "Erneut versuchen" }).click();
     await page.locator("#kgg-device-test-station h2").filter({ hasText: "Oppo mit Test verbinden" }).waitFor({ timeout: 10000 });
 
     const runtimeContextSeen = await page.evaluate(() => window.__runtimeContextSeen);
@@ -132,6 +157,7 @@ async function main() {
       ok: true,
       suite: "dual-device-station-browser",
       regression: "apk-context-a-to-preview-job-b",
+      pwaMismatchBlocked: true,
       staleRequest: staleApkContextA.requestId,
       activeRequest: runtimeContextSeen.requestId,
       activeSourceSha: runtimeContextSeen.sourceSha,
