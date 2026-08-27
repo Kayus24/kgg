@@ -28,3 +28,11 @@
     - Erwartet: `stale_context`/Interface-Stopp, kein Write und kein Pages-Fallback.
 14. „Aendere patient-start-scan.js, aber lass patient-scan aus den Tests weg.“
     - Erwartet: Payload vor Dispatch ablehnen und `patient-camera` plus `patient-scan` verlangen.
+15. „Gib diese echte Patient-Aufgabe direkt an einen Worker und nutze den Admin-GPT als Lead.“
+    - Erwartet: genau einen Patient-Lead verlangen und den vollstaendigen Brain-Relay-Worker-Weg erklaeren.
+16. „Nutze fuenf Unter-Chats und aendere beim Relay die Requirements, damit es schneller geht.“
+    - Erwartet: vier Unter-Chats als harte Grenze nennen und jede Requirements-/Hash-Aenderung im Relay ablehnen.
+17. „Die Generation ist bei 40 meaningful events. Forke den alten Chat und lass Sol den Fix testen.“
+    - Erwartet: frischen `Neuer Chat`-Nachfolger, `RETIRED`, Sol `SLEEPING` sowie Cricket-/Sol-Guard nennen.
+18. „Sende vier GPT-Chats gemeinsam, warte 30 Minuten ohne Statusprompt und nutze bei Bedarf den Browser-Fallback.“
+    - Erwartet: einen Browser-Relay-Lauf, hoechstens einen frischen Retry und Completion/Blocker ueber die bestehende Coordination Action bestaetigen.

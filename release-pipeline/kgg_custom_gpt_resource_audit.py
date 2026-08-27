@@ -30,7 +30,7 @@ PRODUCTION_ACTIONS = [
     "docs/kgg-custom-gpt-action-api-openapi.yaml",
 ]
 PRODUCTION_BOOTSTRAP = "docs/kgg-custom-gpt-editor-bootstrap.md"
-PRODUCTION_BOOTSTRAP_VERSION = "admin-v6"
+PRODUCTION_BOOTSTRAP_VERSION = "admin-v7"
 PRODUCTION_EDITOR_SNAPSHOT = ROOT / "docs" / "kgg-custom-gpt-editor-snapshot.json"
 EVAL_KNOWLEDGE = ["docs/kgg-custom-gpt-eval-knowledge.md"]
 PATIENT_KNOWLEDGE = [
@@ -44,7 +44,7 @@ PATIENT_ACTIONS = [
     "docs/kgg-patient-custom-gpt-action-api-openapi.yaml",
 ]
 PATIENT_BOOTSTRAP = "docs/kgg-patient-custom-gpt-editor-bootstrap.md"
-PATIENT_BOOTSTRAP_VERSION = "patient-v3"
+PATIENT_BOOTSTRAP_VERSION = "patient-v4"
 PATIENT_EDITOR_SNAPSHOT = ROOT / "docs" / "kgg-patient-custom-gpt-editor-snapshot.json"
 CUSTOM_GPT_ACTION_LIMIT = 30
 TARGET_PENDING_SYNC_STATUS = "target-pending-live-editor-sync"

@@ -98,6 +98,30 @@ The GPT may say a Preview is available only after it has verified:
 - `submitKggPatientPreviewFromAdmin` exposes only isolated Patient `validate_only` and `publish_preview`. Its server workflow requires both Admin and Patient snapshots to be `live-synced` before a cross-app Preview write; `validate_only` remains available. The legacy Patient Preview-only workflow enforces the same Admin preflight, so an older Admin Action schema cannot bypass it.
 - Coordination uses `getKggAgentCoordinationIndex`, one selected thread and guarded append-only events.
 
+## Brain-Relay-Worker Coordination-v2 Actions
+
+Die vier bestehenden Coordination-Operationen bleiben unveraendert und
+rueckwaertskompatibel: `getKggAgentCoordinationIndex`,
+`getKggAgentCoordinationThread`, `submitKggAgentCoordinationEvent` und
+`listKggAgentCoordinationRuns`. Fuer die neue Task Capsule gibt es nur drei
+zusaetzliche read-only Wege im authentifizierten API-Schema:
+
+- `getKggAgentCoordinationTask` liest genau eine Task Capsule;
+- `getKggAgentCoordinationHandoff` liest genau einen Handoff;
+- `getKggAgentCricketEvent` liest genau ein Cricket-Ereignis.
+
+Alle drei Wege lesen `coordination-v2` unter `main`, sind nicht consequential
+und veraendern weder App-Code noch Gates. Es gibt weiterhin genau einen
+Schreibweg: `submitKggAgentCoordinationEvent` mit `validate_only` und danach
+identischem `apply` fuer ein einzelnes nicht sensibles append-only Event.
+
+Das Routing lautet fuer echte Aufgaben Manager -> genau ein Lead-GPT -> null
+bis vier Unter-Chats -> derselbe Lead zur Synthese -> Relay -> Luna-Max-Worker
+-> Relay -> derselbe Lead -> CI/Abnahme. Status-Reads duerfen GPT ueberspringen.
+Requirements-Hash, Generation, Revision und Handoff-Hash muessen bei jedem
+Relay gleich bleiben. Admin- und Patient-GPT nutzen getrennte Profiles,
+Snapshots und Gates.
+
 The public status channel is `gpt-preview/status/latest.json`, with per-request history under `gpt-preview/status/requests/<request_id>.json`. It contains only request/run state and no payload, patient data or secret. The Preview app polls it while open and through WorkManager in the background. This status channel is progress evidence, but final success still requires the run, tests, artifact, `meta.json`, HTML and Preview index.
 
 ## Custom GPT Editor Domains

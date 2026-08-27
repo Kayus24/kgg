@@ -16,6 +16,7 @@ SOURCES = [
     "docs/kgg-gpt-context.md",
     "docs/kgg-custom-gpt-playbook.md",
     "docs/kgg-custom-gpt-action-schema.md",
+    "docs/kgg-brain-relay-worker-workflow.md",
     "docs/kgg-custom-gpt-preview-runbook.md",
     "docs/kgg-custom-gpt-preview-report-template.md",
     "docs/kgg-custom-gpt-negative-examples.md",
@@ -35,6 +36,7 @@ CURATED_PACKS = {
     "docs/kgg-custom-gpt-knowledge-operations.md": [
         "docs/kgg-custom-gpt-playbook.md",
         "docs/kgg-custom-gpt-action-schema.md",
+        "docs/kgg-brain-relay-worker-workflow.md",
         "docs/kgg-custom-gpt-preview-runbook.md",
         "docs/kgg-custom-gpt-preview-report-template.md",
     ],

@@ -1,5 +1,33 @@
 # KGG Patient Custom GPT Playbook
 
+## Brain-Relay-Worker-Workflow v2
+
+Der gemeinsame, additive Rollen- und Handoff-Vertrag steht in
+`docs/kgg-brain-relay-worker-workflow.md`. Lade ihn fuer echte Aufgaben neben
+diesem Patient-Playbook. Der Patient-Lead bleibt das einzige Patient-
+Hauptgehirn; Admin GPT und Patient GPT werden nie vermischt.
+
+- Pro Ticket genau ein Patient-Lead-GPT. Echte Aufgaben verwenden den
+  vollstaendigen Weg `Luna Manager -> Lead GPT -> optionale GPT-Unter-Chats ->
+  Lead-Synthese -> Luna Relay -> Luna-Max-Worker -> Relay -> derselbe Lead ->
+  CI/Abnahme`; nur reine Statusabfragen duerfen GPT ueberspringen.
+- Hoechstens vier Unter-Chats, drei Luna-Max-Worker plus ein Verifier,
+  disjunkte Scopes und keine Rekursion. Der Relay transportiert nur und darf
+  Requirements, Hashes oder Tests nicht veraendern.
+- Luna Manager, Relays, Ticket Master und Cricket sind `GPT-5.6 Luna` Low;
+  Worker und Verifier `GPT-5.6 Luna` Max. Terra bleibt ausgeschlossen.
+- Nach zwei unterschiedlichen Luna-Versuchen folgt Lead-Review; `NEEDS_SOL`
+  braucht danach Cricket. Rotation: Vorbereitung bei 35, harter frischer
+  Chatwechsel bei 40 oder fruehem Generation-/Revision-Drift.
+- Completion/Blocker werden append-only ueber die bestehende Coordination
+  Action gemeldet. Der Browser-Fallback bleibt Transport, wartet bis 30 Minuten
+  ohne Statusprompt und versucht hoechstens einmal frisch erneut.
+- Coordination-v2 ergaenzt nur sichere Lesewege: `getKggAgentCoordinationTask`,
+  `getKggAgentCoordinationHandoff` und `getKggAgentCricketEvent`. Die bestehende
+  append-only `submitKggAgentCoordinationEvent`-Action bleibt der einzige
+  Koordinations-Schreibweg. Admin-Threads werden nie als Patient-Threads
+  verarbeitet.
+
 ## Auftrag und Grenze
 
 Der Agent diagnostiziert und repariert die Root-PWA fuer Patient:innen. Er darf `index.html`, `service-worker.js`, `update-recovery.html`, Manifest-Dateien, `patient-*.js`, `collapse-cards.js` und `numpad-ui-fix.js` ueber das Patient Preview Gate bearbeiten.

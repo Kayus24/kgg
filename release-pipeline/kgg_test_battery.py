@@ -464,6 +464,19 @@ def run_gpt_eval() -> None:
     run([sys.executable, "release-pipeline/kgg_gpt_eval.py"])
 
 
+def run_brain_relay_worker_contract() -> None:
+    log("== Brain-Relay-Worker coordination contract ==")
+    run([sys.executable, "release-pipeline/kgg_brain_relay_worker.py", "--self-test"])
+    run(
+        [
+            sys.executable,
+            "-m",
+            "unittest",
+            "release-pipeline/test_kgg_brain_relay_worker.py",
+        ]
+    )
+
+
 def run_gpt_regression_contracts() -> None:
     log("== Custom GPT declarative regression contracts ==")
     run([sys.executable, "release-pipeline/kgg_gpt_regression_contracts.py"])
@@ -494,6 +507,7 @@ def run_release_contracts() -> None:
             "release-pipeline/test_kgg_secret_scan.py",
             "release-pipeline/test_kgg_gpt_source_context.py",
             "release-pipeline/test_kgg_custom_gpt_resource_audit.py",
+            "release-pipeline/test_kgg_brain_relay_worker.py",
         ]
     )
 
@@ -675,6 +689,13 @@ TEST_REGISTRY = [
         "suite": "gpt",
         "reason": "Custom GPT playbook, routing and expected-answer fixtures must stay complete and testable.",
         "run": run_gpt_eval,
+    },
+    {
+        "id": "brain-relay-worker-contract",
+        "level": "critical",
+        "suite": "gpt",
+        "reason": "Brain, Relay, Worker, Cricket, rotation and Sol guardrails must remain mechanically testable without touching app code.",
+        "run": run_brain_relay_worker_contract,
     },
     {
         "id": "gpt-regression-contracts",

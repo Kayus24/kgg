@@ -89,6 +89,18 @@ def run_mock_eval_self_test() -> None:
         fail(f"mock eval self-test failed: {output}")
 
 
+def run_brain_relay_worker_self_test() -> None:
+    proc = subprocess.run(
+        [sys.executable, "release-pipeline/kgg_brain_relay_worker.py", "--self-test"],
+        cwd=str(ROOT),
+        text=True,
+        capture_output=True,
+    )
+    if proc.returncode != 0:
+        output = (proc.stdout + "\n" + proc.stderr).strip()
+        fail(f"Brain-Relay-Worker self-test failed: {output}")
+
+
 def run_repair_lab_self_tests() -> None:
     commands = [
         [sys.executable, "release-pipeline/kgg_gpt_repair_lab.py", "--self-test"],
@@ -380,6 +392,7 @@ def check_prompt_and_expected_docs() -> None:
     expected = read("docs/kgg-custom-gpt-expected-results.md")
     report = read("docs/kgg-custom-gpt-test-report.md")
     action_schema = read("docs/kgg-custom-gpt-action-schema.md")
+    brain_relay_workflow = read("docs/kgg-brain-relay-worker-workflow.md")
     negative_examples = read("docs/kgg-custom-gpt-negative-examples.md")
     runbook = read("docs/kgg-custom-gpt-preview-runbook.md")
     report_template = read("docs/kgg-custom-gpt-preview-report-template.md")
@@ -408,15 +421,21 @@ def check_prompt_and_expected_docs() -> None:
         "ci-tooling-pdftoppm",
         "admin-beta-push-gate",
         "memory-safe-auto-update",
-            "memory-conflict-needs-approval",
-            "cross-app-camera-qr",
-            "preview-autonomy",
-            "main-approval-phrase",
-            "agent-coordination",
-            "patient-camera-visual-404",
-            "manifest-bootstrap-version",
-            "patient-camera-interface-404",
-            "patient-preview-literal-urls",
+        "memory-conflict-needs-approval",
+        "cross-app-camera-qr",
+        "preview-autonomy",
+        "main-approval-phrase",
+        "agent-coordination",
+        "patient-camera-visual-404",
+        "manifest-bootstrap-version",
+        "patient-camera-interface-404",
+        "patient-preview-literal-urls",
+        "brain-relay-routing",
+        "brain-relay-capsule",
+        "brain-relay-rotation",
+        "brain-relay-browser-fallback",
+        "brain-relay-ticket-master",
+        "brain-relay-sol-guard",
     ]
     for case in cases:
         require(prompts, f"## {case}", f"prompt fixture {case}")
@@ -466,8 +485,43 @@ def check_prompt_and_expected_docs() -> None:
             "patient-camera",
             "Preview-URL: https://...",
             "Recovery-URL: https://...",
+            "coordination-v2",
+            "Generation",
+            "meaningful events",
+            "Neuer Chat",
+            "RETIRED",
+            "SLEEPING",
+            "NEEDS_SOL",
+            "private-memory-gate",
+            "technical enforcement",
+            "policy-only",
+            "proxy",
         ],
         "expected behavior text",
+    )
+    require_all(
+        brain_relay_workflow,
+        [
+            "Luna Manager",
+            "Lead-GPT",
+            "Luna Relay",
+            "Luna-Max-Worker",
+            "CI und menschliche Abnahme",
+            "hoechstens vier",
+            "drei Luna-Max-Worker",
+            "meaningful events",
+            "30 Minuten",
+            "Neuer Chat",
+            "RETIRED",
+            "Ticket Master",
+            "SLEEPING",
+            "L0-L3",
+            "technisches Enforcement",
+            "Policy-only",
+            "Proxy",
+            "Abschluss- und Blockerbericht",
+        ],
+        "Brain-Relay-Worker workflow",
     )
     require_all(
         action_schema,
@@ -500,13 +554,16 @@ def check_prompt_and_expected_docs() -> None:
             "Gut für Main",
             "submitKggPatientPreviewFromAdmin",
             "getKggAgentCoordinationIndex",
+            "getKggAgentCoordinationTask",
+            "getKggAgentCoordinationHandoff",
+            "getKggAgentCricketEvent",
         ],
         "action schema text",
     )
     require_all(
         openapi_schema,
         [
-            "version: 1.5.0",
+            "version: 1.6.0",
             "getKggCustomGptResourceManifest",
             "getKggProjectContext",
             "getKggSourceIndex",
@@ -515,6 +572,7 @@ def check_prompt_and_expected_docs() -> None:
             "getKggPatientSourceIndexForAdmin",
             "getKggPatientSourceChunkForAdmin",
             "getKggPatientPreviewIndexForAdmin",
+            "getKggBrainRelayWorkerWorkflow",
             admin_chunk_pattern,
             patient_chunk_pattern,
         ],
@@ -577,6 +635,9 @@ def check_prompt_and_expected_docs() -> None:
             "getKggAgentCoordinationThread",
             "submitKggAgentCoordinationEvent",
             "listKggAgentCoordinationRuns",
+            "getKggAgentCoordinationTask",
+            "getKggAgentCoordinationHandoff",
+            "getKggAgentCricketEvent",
             "Gut für Main",
         ],
         "custom GPT API-only OpenAPI schema",
@@ -647,6 +708,7 @@ def check_prompt_and_expected_docs() -> None:
         [
             "KGG Custom GPT Knowledge Pack",
             "docs/kgg-custom-gpt-playbook.md",
+            "docs/kgg-brain-relay-worker-workflow.md",
             "docs/kgg-custom-gpt-preview-runbook.md",
             "ci_tooling",
             "publish_admin_beta",
@@ -750,6 +812,7 @@ def main() -> int:
         run_preview_status_self_test()
         run_stabilize_self_test()
         run_mock_eval_self_test()
+        run_brain_relay_worker_self_test()
         run_repair_lab_self_tests()
         run_validate_only_self_test()
         run_main_approval_self_test()

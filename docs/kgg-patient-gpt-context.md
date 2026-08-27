@@ -15,6 +15,7 @@ Reload before every diagnosis involving current code and before every Preview, P
 - Guard implementation: `release-pipeline/kgg_patient_gpt_write_gate.py`.
 - Private project memory: `Kayus24/kgg-project-memory`.
 - Private cross-agent coordination: `coordination/index.json` and guarded append-only threads.
+- Additive Brain-Relay-Worker contract and role runbooks: `docs/kgg-brain-relay-worker-workflow.md`.
 
 ## Patient Source Files
 
@@ -62,6 +63,9 @@ Reload before every diagnosis involving current code and before every Preview, P
 - QR/hash/storage changes use `risk_class=interface` and stay backward compatible.
 - Breaking interface changes, therapist app, PDF and Android/APK stay outside this agent.
 - A Custom GPT supplies the Preview URL but does not claim to control the Codex in-app browser.
+- Real development tasks use exactly one Patient Lead GPT and the Manager -> Lead -> optional sub-chats -> Lead synthesis -> Relay -> Luna-Max-Worker -> Relay -> same Lead -> CI route; only pure status reads may skip GPT.
+- Coordination-v2 Task, Handoff and Cricket reads are additive; the existing append-only Coordination Action remains the only write path.
+- Use at most four GPT sub-chats, three Luna-Max workers plus one verifier, two materially different Luna attempts, and fresh chat rotation at 35/40 meaningful events or early drift.
 
 ## Required Evidence
 

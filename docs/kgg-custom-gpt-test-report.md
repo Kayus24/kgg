@@ -28,6 +28,12 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | analysis-no-dispatch | PASS | Neuer Regressionstest nach Run `28853063310`: Analyse-/Warum-Fragen duerfen keinen Preview-Gate-Dispatch starten. Retest nach Instruction-Schaerfung: kein API-Aufruf. |
 | ci-tooling-pdftoppm | PASS | Browser-Test 2026-07-14: klassifiziert fehlendes `pdftoppm`/`poppler-utils` als `ci_tooling`; behauptet weder einen UI-Patchfehler noch einen gruenen App-Test. |
 | admin-beta-push-gate | PASS | Browser-Retest 2026-07-14: Erfolg erst bei gemergtem `[admin-beta]` PR, gruenen Required Checks, aktualisiertem `therapist-app/android_update_manifest.json` auf `main` und Admin-HTML HTTP 200. |
+| brain-relay-routing | PENDING | Lokaler Coordination-v2-Vertrag prueft genau einen Lead und den vollstaendigen Entwicklungsweg; echter Custom-GPT-Dialogtest folgt nach Editor-Sync. |
+| brain-relay-capsule | PENDING | Lokaler Vertrag prueft Task Capsule, Vierer-Unter-Chat-Limit, disjunkte Worker-Scopes und unveraenderten Requirements-Hash. |
+| brain-relay-rotation | PENDING | Lokaler Vertrag prueft 35/40-Event-Rotation, stale generation, frischen `Neuer Chat`-Nachfolger und `RETIRED`; Browser-Retest steht aus. |
+| brain-relay-browser-fallback | PENDING | Lokaler Vertrag prueft Single-Run, 30-Minuten-Grenze, null Statusprompts und genau einen frischen Retry. |
+| brain-relay-ticket-master | PENDING | Lokaler Vertrag prueft Dublettencheck, private Memory Gate sowie gesperrtes Programmieren/Schliessen/Erfinden. |
+| brain-relay-sol-guard | PENDING | Lokaler Vertrag prueft Sol `SLEEPING`, verbotene Aufgaben und einmalige Cricket-Freigabe fuer interne Sol-Agenten. |
 | memory-safe-auto-update | PENDING | Deterministischer Vertragstest und echter Remote-Gate-Test sind gruen; der Custom-GPT-Dialogtest folgt nach Einspielen des API-Schemas und der privaten Repo-Berechtigung. |
 | memory-conflict-needs-approval | PENDING | Das Remote-Memory-Gate lieferte `needs_approval` und schrieb nichts; der Custom-GPT-Dialogtest folgt nach Einspielen des API-Schemas. |
 | cross-app-camera-qr | PENDING | Neuer Produktiv-GPT-Test nach Schema-/Knowledge-Sync; lokaler Gate- und Browservertrag ist gruen. |

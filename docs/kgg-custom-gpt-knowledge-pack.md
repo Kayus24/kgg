@@ -2,7 +2,7 @@
 
 This generated compatibility pack contains the complete production knowledge set. Prefer the four smaller curated packs in the GPT editor so retrieval stays focused.
 
-Source digest: `5d13f020379c1bc1`
+Source digest: `8393baa1bb5157eb`
 
 ## Usage Rules
 
@@ -18,6 +18,7 @@ Source digest: `5d13f020379c1bc1`
 - `docs/kgg-gpt-context.md`
 - `docs/kgg-custom-gpt-playbook.md`
 - `docs/kgg-custom-gpt-action-schema.md`
+- `docs/kgg-brain-relay-worker-workflow.md`
 - `docs/kgg-custom-gpt-preview-runbook.md`
 - `docs/kgg-custom-gpt-preview-report-template.md`
 - `docs/kgg-custom-gpt-negative-examples.md`
@@ -50,6 +51,7 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Custom GPT playbook: `docs/kgg-custom-gpt-playbook.md`.
 - Custom GPT editor bootstrap: `docs/kgg-custom-gpt-editor-bootstrap.md`.
 - Custom GPT action schema: `docs/kgg-custom-gpt-action-schema.md`.
+- Additive Brain-Relay-Worker contract and role runbooks: `docs/kgg-brain-relay-worker-workflow.md`.
 - Custom GPT combined Action OpenAPI: `docs/kgg-custom-gpt-action-openapi.yaml`.
 - Custom GPT API-only Action OpenAPI for the current split editor setup: `docs/kgg-custom-gpt-action-api-openapi.yaml`.
 - Custom GPT negative examples: `docs/kgg-custom-gpt-negative-examples.md`.
@@ -100,6 +102,9 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Do not store chats, patient data, secrets or transient debug output in the project memory.
 - Reads, one submitKggPreviewAuto dispatch, evidence checks, safe new memory records and coordination events are pre-authorized; do not ask after every step.
 - Admin PR/Main requires Max' exact phrase `Gut für Main`; Patient PR/Live requires `Gut für PAT live`.
+- Real development tasks use exactly one Lead GPT and the Manager -> Lead -> optional sub-chats -> Lead synthesis -> Relay -> Luna-Max-Worker -> Relay -> same Lead -> CI route; only pure status reads may skip GPT.
+- Coordination-v2 reads use Task, Handoff and Cricket paths; the existing append-only Coordination Action remains the only write path.
+- Use at most four GPT sub-chats, three Luna-Max workers plus one verifier, two materially different Luna attempts, and fresh chat rotation at 35/40 meaningful events or early drift.
 
 ## Patch Routing
 
@@ -172,6 +177,36 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 # Source: docs/kgg-custom-gpt-playbook.md
 
 # KGG Custom GPT Playbook
+
+## Brain-Relay-Worker-Workflow v2
+
+Der vollstaendige KGG-Vertrag fuer Task Capsule, Rollen, Routing, Handoffs,
+Retry, Rotation, Cricket, Sol und Abschlussberichte steht in
+`docs/kgg-brain-relay-worker-workflow.md`. Lade ihn fuer jede echte
+Entwicklungsaufgabe zusaetzlich zu diesem Playbook. Er ist additiv und darf
+keine Produktfunktion, kein Patient-Planformat und kein bestehendes Release-
+Gate aendern.
+
+- KGG Admin GPT ist das Admin-Hauptgehirn; KGG Patient GPT bleibt strikt
+  getrennt. Pro Ticket gibt es genau einen Lead-GPT.
+- Echte Aufgaben laufen `Luna Manager -> Lead GPT -> optionale GPT-Unter-Chats
+  -> Lead-Synthese -> Luna Relay -> Luna-Max-Worker -> Relay -> derselbe Lead
+  -> CI/Abnahme`. Nur reine Statusabfragen duerfen den GPT-Teil ueberspringen.
+- Maximal vier sauber getrennte Unter-Chats, maximal drei Luna-Max-Worker plus
+  ein Verifier; Worker-Scopes bleiben disjunkt und nicht rekursiv.
+- Luna Manager, Relays, Ticket Master und Cricket verwenden `GPT-5.6 Luna`
+  Low; Worker und Verifier `GPT-5.6 Luna` Max. Terra wird nicht verwendet.
+- Der Relay transportiert und komprimiert nur. Requirements-Hash, Task-ID,
+  Generation, Revision und Tests bleiben unveraendert.
+- Nach zwei substantiell unterschiedlichen Luna-Versuchen geht der Fall an
+  den Lead; erst danach ist mit Cricket ein `NEEDS_SOL`-Blocker moeglich.
+- Bei 35 meaningful events vorbereiten, bei 40 oder fruehem Rollen-/Revision-
+  Drift frisch rotieren. Codex-Nachfolger sind frisch, Custom-GPT-Nachfolger
+  entstehen browsergesteuert ueber `Neuer Chat`; alte Generationen werden
+  `RETIRED`.
+- Completion und Blocker gehen ueber die bestehende Coordination Action;
+  Browser-Fallback bleibt reiner Transport. 30 Minuten, hoechstens ein
+  frischer Retry, ohne Statusprompt.
 
 ## Arbeitsreihenfolge
 
@@ -427,6 +462,30 @@ The GPT may say a Preview is available only after it has verified:
 - `submitKggPatientPreviewFromAdmin` exposes only isolated Patient `validate_only` and `publish_preview`. Its server workflow requires both Admin and Patient snapshots to be `live-synced` before a cross-app Preview write; `validate_only` remains available. The legacy Patient Preview-only workflow enforces the same Admin preflight, so an older Admin Action schema cannot bypass it.
 - Coordination uses `getKggAgentCoordinationIndex`, one selected thread and guarded append-only events.
 
+## Brain-Relay-Worker Coordination-v2 Actions
+
+Die vier bestehenden Coordination-Operationen bleiben unveraendert und
+rueckwaertskompatibel: `getKggAgentCoordinationIndex`,
+`getKggAgentCoordinationThread`, `submitKggAgentCoordinationEvent` und
+`listKggAgentCoordinationRuns`. Fuer die neue Task Capsule gibt es nur drei
+zusaetzliche read-only Wege im authentifizierten API-Schema:
+
+- `getKggAgentCoordinationTask` liest genau eine Task Capsule;
+- `getKggAgentCoordinationHandoff` liest genau einen Handoff;
+- `getKggAgentCricketEvent` liest genau ein Cricket-Ereignis.
+
+Alle drei Wege lesen `coordination-v2` unter `main`, sind nicht consequential
+und veraendern weder App-Code noch Gates. Es gibt weiterhin genau einen
+Schreibweg: `submitKggAgentCoordinationEvent` mit `validate_only` und danach
+identischem `apply` fuer ein einzelnes nicht sensibles append-only Event.
+
+Das Routing lautet fuer echte Aufgaben Manager -> genau ein Lead-GPT -> null
+bis vier Unter-Chats -> derselbe Lead zur Synthese -> Relay -> Luna-Max-Worker
+-> Relay -> derselbe Lead -> CI/Abnahme. Status-Reads duerfen GPT ueberspringen.
+Requirements-Hash, Generation, Revision und Handoff-Hash muessen bei jedem
+Relay gleich bleiben. Admin- und Patient-GPT nutzen getrennte Profiles,
+Snapshots und Gates.
+
 The public status channel is `gpt-preview/status/latest.json`, with per-request history under `gpt-preview/status/requests/<request_id>.json`. It contains only request/run state and no payload, patient data or secret. The Preview app polls it while open and through WorkManager in the background. This status channel is progress evidence, but final success still requires the run, tests, artifact, `meta.json`, HTML and Preview index.
 
 ## Custom GPT Editor Domains
@@ -482,6 +541,506 @@ Required memory operations:
 - `getKggMemoryUpdateRun`
 - `getKggMemoryUpdateStatus`
 - `getKggMemoryUpdateArtifacts`
+
+---
+
+# Source: docs/kgg-brain-relay-worker-workflow.md
+
+# KGG Brain-Relay-Worker-Workflow v2
+
+Dieses Dokument ist der gemeinsame KGG-Vertrag fuer Brain, Relay und Worker.
+Es beschreibt nur die KGG-seitige Koordination. Die Produktfunktionen, das
+Patient-Planformat, QR/PDF, Plan-State, Android und Releases bleiben unveraendert
+und werden von diesem Workflow weder gelesen noch geschrieben, wenn sie nicht
+im jeweiligen bestehenden Gate ausdruecklich freigegeben sind.
+
+Die maschinelle Pruefung liegt in
+`release-pipeline/kgg_brain_relay_worker.py`. Dieses Dokument ist die kanonische
+Erklaerung; die bestehende Coordination Action bleibt der einzige append-only
+Schreibweg.
+
+## 1. Vertrauensgrenzen und Hauptgehirne
+
+Es gibt zwei getrennte Hauptgehirne:
+
+- **KGG Admin GPT** fuehrt Admin-/Therapeut:innen-Preview-Aufgaben innerhalb des
+  bestehenden Admin-Gates.
+- **KGG Patient GPT** fuehrt Patient:innen-PWA-Aufgaben innerhalb des
+  bestehenden Patient-Preview-Gates.
+
+Admin GPT und Patient GPT teilen keine Chatgeneration, keine Ergebnisannahme und
+keine produktive Schreibberechtigung. Ein Cross-App-Thema wird nur ueber die
+bestehende private Coordination Action mit nicht sensiblen Fakten uebergeben.
+Eine Queue-Antwort startet den jeweils anderen GPT nicht automatisch.
+
+Pro Ticket gibt es genau **einen** Lead-GPT. Der Lead gehoert immer zu genau
+einem Profil (`admin` oder `patient`), synthetisiert optionale Unter-Chats und
+nimmt deren Ergebnis ab. Es gibt hoechstens vier sauber getrennte Custom-GPT-
+Unter-Chats pro Ticket. Ein Unter-Chat darf keine Anforderungen umdeuten oder
+den Lead ersetzen.
+
+## 2. Verbindlicher Routinggraph
+
+Jede echte Entwicklungsaufgabe laeuft in dieser Reihenfolge:
+
+```text
+Luna Manager
+  -> genau ein Lead-GPT
+  -> optional 1 bis 4 getrennte GPT-Unter-Chats
+  -> derselbe Lead-GPT: Synthese und Abnahme
+  -> Luna Relay
+  -> Luna-Max-Worker (bis zu 3 disjunkte Worker-Scopes, optional ein Verifier)
+  -> Luna Relay
+  -> derselbe Lead-GPT
+  -> CI und menschliche Abnahme
+```
+
+Die Unter-Chats koennen parallel laufen, bleiben aber innerhalb einer einzelnen
+Task Capsule und werden vor der Lead-Synthese zusammengefuehrt. Der Relay ist
+ein Transport- und Kompressionsknoten. Er darf keine Anforderungen veraendern,
+keine neue grosse Aufgabe loesen und keine fehlende Entscheidung erfinden.
+
+Nur eine reine Statusabfrage darf den GPT-Teil ueberspringen. Ein Status-Read
+ist read-only und darf weder Task Capsule noch Scope, Ticket oder Ziel veraendern.
+
+## 3. Rollen und Modellregel
+
+| Rolle | Modell/Modus | Darf | Darf nicht |
+| --- | --- | --- | --- |
+| Luna Manager | `GPT-5.6 Luna`, Low | Auftrag klassifizieren, Lead bestimmen, Capsule anlegen | programmieren, Ticket schliessen, Scope vergroessern |
+| Admin Lead-GPT | KGG Admin GPT | Admin-Kontext lesen, Unter-Chats beauftragen, synthetisieren und abnehmen | Patient-GPT ersetzen oder Main-Gate freischalten |
+| Patient Lead-GPT | KGG Patient GPT | Patient-Kontext lesen, Unter-Chats beauftragen, synthetisieren und abnehmen | Admin-GPT ersetzen oder Patient-Live freischalten |
+| GPT-Unter-Chat | passendes Custom GPT | genau einen abgegrenzten Analyse-/Vorschlags-Scope liefern | Lead-Annahme oder Gate-Aufruf vortaeuschen |
+| Luna Relay | `GPT-5.6 Luna`, Low | Capsule/Ergebnis verlustarm transportieren und komprimieren | Anforderungen, Testziele oder Hashes aendern |
+| Luna-Max-Worker | `GPT-5.6 Luna`, Max | genau einen disjunkten Implementierungs-Scope bearbeiten | anderen Worker steuern oder rekursiv delegieren |
+| Verifier | `GPT-5.6 Luna`, Max | eigenen Verifier-Scope und Belege pruefen | den Worker-Scope erweitern oder selbst delegieren |
+| Cricket | `GPT-5.6 Luna`, Low | global beobachten, L0-L3 dokumentieren, Eskalation markieren | Projektproblem loesen oder Code schreiben |
+| Ticket Master | `GPT-5.6 Luna`, Low | lesen, Dubletten pruefen, ueber Memory Gate anlegen | programmieren, schliessen oder etwas erfinden |
+| Sol Endboss | `GPT-5.6 Sol`, Ultra | nur eine explizit freigegebene Endboss-Entscheidung | Code, Repo-Grossanalyse, Debug, Test, Repair, Micromanagement |
+
+Terra wird fuer diese Rollen nicht verwendet. Modelllabels in der UI sind kein
+Beweis fuer einen tatsaechlichen Lauf; es zaehlen nur sichtbare Action-, Run-
+und Ergebnisbelege.
+
+## 4. Task Capsule
+
+Die Task Capsule ist die unveraenderliche Arbeitsgrundlage fuer alle Handoffs.
+Sie wird bei einer Anforderung erstellt und bei jeder Generation/Revision
+neu als neue Capsule referenziert; alte Generationen werden nicht umgeschrieben.
+
+Pflichtfelder:
+
+| Feld | Vertrag |
+| --- | --- |
+| `schema` | exakt `kgg-brain-relay-worker/v2` |
+| `task_id` | stabile Kleinbuchstaben-ID, 6 bis 64 Zeichen |
+| `ticket` | `ticket_id`, `duplicate_checked: true`, `source: private-memory-gate`; keine erfundene ID |
+| `profile` | genau `admin` oder `patient` |
+| `lead` | genau ein Lead mit Profil, Chat-ID, Generation und Revision |
+| `generation` | positive Generation des Chats; nur frischer Nachfolgechat erhoeht sie |
+| `revision` | positive Capsule-Revision innerhalb der Generation |
+| `requirements` | Nutzeranforderung plus `sha256`; diese Zeichenkette bleibt identisch |
+| `acceptance` | nicht leere, beobachtbare Abnahmekriterien |
+| `scope` | `allowed` und `forbidden`; keine implizite Scope-Ausweitung |
+| `sub_chats` | null bis vier eindeutige Chats mit eigenem Scope |
+| `workers` | hoechstens drei `luna-max-worker` plus hoechstens ein `verifier` |
+| `route` | der verbindliche Routinggraph oder der Status-Read-Sonderweg |
+| `retry` | maximal zwei substantielle Luna-Versuche vor Lead-Eskalation |
+| `rotation` | 35/40-Event-Grenzen sowie Generation-/Revision-Drift |
+| `locks` | Merge, Release, Deploy, Ticketabschluss und Scope-Ausweitung bleiben gesperrt |
+
+Ein minimales synthetisches Beispiel sieht so aus:
+
+```json
+{
+  "schema": "kgg-brain-relay-worker/v2",
+  "task_id": "kgg-brain-example-001",
+  "ticket": {
+    "ticket_id": "kgg-ticket-example-001",
+    "duplicate_checked": true,
+    "source": "private-memory-gate"
+  },
+  "profile": "admin",
+  "generation": 1,
+  "revision": 1,
+  "lead": {
+    "role": "lead-gpt",
+    "profile": "admin",
+    "chat_id": "kgg-admin-lead-example",
+    "generation": 1,
+    "revision": 1
+  },
+  "requirements": {
+    "text": "Nur die KGG-Koordination dokumentieren; Produktcode bleibt ausserhalb.",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "acceptance": [
+    "Alle echten Aufgaben verwenden den vollstaendigen Routinggraphen.",
+    "Ein Handoff behaelt requirements.sha256 bytegleich."
+  ],
+  "scope": {
+    "allowed": ["Playbooks", "Actions", "Koordinationsvertrag", "synthetische Tests"],
+    "forbidden": ["Patientdaten", "Produktcode", "Releases", "Main-/Live-Gates"]
+  },
+  "sub_chats": [],
+  "workers": [
+    {
+      "worker_id": "worker-contract",
+      "role": "luna-max-worker",
+      "scope": "KGG-Vertrag und lokale Tests",
+      "generation": 1,
+      "revision": 1
+    },
+    {
+      "worker_id": "verifier-contract",
+      "role": "verifier",
+      "scope": "Vertrags- und Sicherheitspruefung",
+      "generation": 1,
+      "revision": 1
+    }
+  ],
+  "route": [
+    "luna-manager", "lead-gpt", "lead-synthesis", "luna-relay",
+    "luna-max-worker", "luna-relay", "lead-gpt", "ci-acceptance"
+  ],
+  "retry": {
+    "luna_attempts": 0,
+    "max_luna_attempts": 2,
+    "after_exhaustion": "lead-gpt",
+    "sol_gate": "cricket-one-time"
+  },
+  "rotation": {
+    "meaningful_events": 0,
+    "prepare_at": 35,
+    "hard_at": 40,
+    "role_drift": false,
+    "revision_drift": false,
+    "successor": "fresh-chat",
+    "codex_successor": "fresh-chat",
+    "custom_gpt_successor": "browser-new-chat",
+    "fork_allowed": false,
+    "old_generation": "ACTIVE"
+  },
+  "locks": {
+    "merge": true,
+    "release": true,
+    "deploy": true,
+    "ticket_close": true,
+    "scope_expansion": true
+  }
+}
+```
+
+Die Anforderungen werden nicht aus einem Relay-Text rekonstruiert. Jeder
+Relay-Handoff fuehrt den gleichen `requirements.sha256`-Wert und die gleiche
+`task_id`, Generation und Revision. Bei Abweichung gilt `stale_generation`
+oder `requirements_changed`; der Lead muss neu synthetisieren.
+
+## 5. Handoff- und Ergebnisformat
+
+Coordination-v2 liest Task, Handoff und Cricket-Fakten ueber sichere GitHub-
+Reads. Schreiben ist weiterhin auf eine bestehende append-only Coordination
+Action beschraenkt. Es gibt keinen zweiten Schreibweg und keine Update-/Delete-
+Operation fuer alte Ereignisse.
+
+Ein Handoff traegt mindestens:
+
+```json
+{
+  "schema": "kgg-brain-relay-worker/handoff-v2",
+  "event_id": "kgg-event-example-001",
+  "sequence": 1,
+  "event_type": "worker_result",
+  "task_id": "kgg-brain-example-001",
+  "generation": 1,
+  "revision": 1,
+  "from_role": "luna-max-worker",
+  "to_role": "luna-relay",
+  "requirements_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "transport_only": true,
+  "summary": "Der abgegrenzte Vertragsscope wurde umgesetzt.",
+  "evidence": [{"kind": "test", "name": "brain-relay-selftest", "status": "PASS"}],
+  "handoff_hash": "wird-vom-kanonischen-hasher-berechnet",
+  "append_only": true
+}
+```
+
+Das standardisierte Ergebnisformat ist fuer Worker, Verifier, Relay, Lead und
+CI gleich. `status` ist genau einer von `PASS`, `FAIL`, `BLOCKED`, `PENDING`,
+`NEEDS_LEAD` oder `NEEDS_SOL`. Ein Ergebnis nennt immer Scope, Versuch,
+Anforderungs-Hash, kurze Zusammenfassung, sichtbare Belege und die naechste
+Aktion. `COMPLETE` wird nur vom Lead/CI nach gruener Abnahme und ueber ein
+Coordination-Completion-Event gemeldet.
+
+Blocker benoetigen `blocker.level` (L0-L3), `blocker.code`, `blocker.owner`
+und `blocker.next_action`. `NEEDS_SOL` ist erst nach zwei substantiell
+unterschiedlichen Luna-Versuchen, Lead-Review und Cricket-Eskalation zulaessig.
+Ein Ergebnis ohne Beleg ist kein Abschluss.
+
+## 6. Retry- und Parallelregel
+
+- Luna darf hoechstens zwei substantiell unterschiedliche Versuche liefern.
+- Unterschiedlich bedeutet: anderer technischer Ansatz und eigener
+  Ansatz-Hash, nicht nur ein anderer Text oder eine neue ID.
+- Nach Versuch zwei geht der Fall an denselben Lead zur Synthese/Entscheidung.
+- Erst danach darf ein Lead mit Cricket einen `NEEDS_SOL`-Blocker markieren.
+- Es laufen hoechstens drei Luna-Max-Worker und ein Verifier parallel.
+- Worker-Scopes sind paarweise disjunkt; ein Worker darf keinen anderen Worker
+  starten oder sich rekursiv erneut delegieren.
+- Ein Verifier ist kein vierter Implementierungs-Worker und darf den Scope nicht
+  erweitern.
+
+## 7. Chatrotation und Generationen
+
+Ein **meaningful event** ist ein sichtbares Handoff, Ergebnis, Retry, Blocker,
+Cricket-Ereignis oder eine CI-/Abnahmeentscheidung. Reine Heartbeats und
+identische Statusabfragen werden nicht gezählt.
+
+- Bei 35 meaningful events: `PREPARE_ROTATION`; Capsule einfrieren und
+  Nachfolge-ID vorbereiten.
+- Bei 40 events: harter Wechsel; die alte Generation wird `RETIRED`.
+- Ein frueher Rollen-, Profil-, Requirements- oder Revisions-Drift erzwingt
+  sofort den harten Wechsel.
+- Ein Codex-Nachfolger ist frisch, niemals ein Fork.
+- Ein Custom-GPT-Nachfolger entsteht browsergesteuert ueber **Neuer Chat**.
+  Vor dem ersten Handoff werden Task-ID, Generation, Revision und Handoff-Hash
+  gegenseitig bestaetigt.
+- Die alte Generation darf nur noch lesend fuer die Migration geoeffnet werden
+  und erhaelt den Zustand `RETIRED`.
+
+### Kanonische Chatnamen
+
+```text
+KGG Admin GPT | <task_id> | Lead | g<generation>-r<revision>
+KGG Patient GPT | <task_id> | Lead | g<generation>-r<revision>
+KGG GPT Sub | <task_id> | Scope-<n> | g<generation>-r<revision>
+KGG Luna Relay | <task_id> | <direction> | g<generation>-r<revision>
+KGG Max Worker | <task_id> | Scope-<n> | g<generation>-r<revision>
+KGG Verifier | <task_id> | Scope-<n> | g<generation>-r<revision>
+RETIRED | <old-name> | g<generation>-r<revision>
+```
+
+Die vorhandenen Kandidaten `KGG Update-Agent` und `KGG Patienten-App
+Update-Agent` werden nur als Admin- beziehungsweise Patient-Lead-Kandidaten
+uebernommen, wenn Profil, Task-ID und Zweck eindeutig passen. Die Migration
+setzt keine alte Unterhaltung fort: Sie erstellt einen frischen Chat, legt die
+Capsule als erste Nachricht ab und bestaetigt die vier Identitaetswerte. Bei
+unklarem Kandidaten wird nichts umbenannt. Unrelated Chats werden niemals
+angefasst.
+
+## 8. Browser-Relay und Fallback
+
+Fuer bis zu vier Custom-GPT-Unter-Chats gilt ein gemeinsamer Browser-Relay-Lauf:
+
+- Nachrichten werden in einem Lauf versendet.
+- Danach wird ohne Statusprompt auf Ergebnis oder Timeout gewartet.
+- Harte Zeitgrenze: 30 Minuten.
+- Es gibt hoechstens einen frischen Retry; der Retry bekommt eine neue
+  Generation/Revision und denselben unveraenderten Requirements-Hash.
+- Completion und Blocker werden ueber die bestehende Coordination Action als
+  append-only Event geschrieben.
+- Ist die Action nicht verfuegbar, darf der Browser-Fallback nur denselben
+  nicht sensiblen Eventinhalt transportieren. Er ist kein neuer Schreibvertrag,
+  kein Ticketabschluss und keine Freigabe.
+
+Ein sichtbarer Button oder ein UI-Label beweist weder laufende Arbeit noch
+Completion. Nur sichtbarer Antworttext, Action-Ergebnis, Run-Beleg oder stabiler
+Textzustand darf als Nachweis verwendet werden.
+
+## 9. Cricket-Watchdog und L0-L3
+
+Cricket beobachtet global und dokumentiert Fakten, ohne das Projektproblem zu
+loesen:
+
+| Stufe | Bedeutung | Aktion |
+| --- | --- | --- |
+| L0 | Hinweis/Beobachtung ohne Blockierung | sichtbares Ereignis notieren |
+| L1 | technischer Vertragsverstoss, lokal beweisbar | Write/Weiterleitung blockieren, Code nennen |
+| L2 | wiederholter oder koordinierter Blocker | Lead und Manager informieren, naechsten Beleg verlangen |
+| L3 | zwei unterschiedliche Luna-Versuche plus Lead-Review ohne Loesung | `NEEDS_SOL` zur einmaligen Endboss-Entscheidung markieren |
+
+Jedes Cricket-Ereignis unterscheidet:
+
+- **technisches Enforcement**: maschinell pruefbar, zum Beispiel stale
+  Generation, mehr als vier Unter-Chats, ueberlappende Scopes, falsche Route,
+  falscher Hash oder ein unzulaessiger Sol-Request;
+- **Policy-only**: eine Prozessregel ohne lokale technische Durchsetzung; sie
+  wird als solche markiert und nicht als Beweis einer Kontrolle ausgegeben;
+- **Proxy**: ein sichtbarer Indikator fuer einen Zustand, zum Beispiel UI-Label,
+  Browser-Button oder Chatname; er beweist nicht den unsichtbaren Zustand.
+
+Es gibt keine Schein-Kontrolle fuer hidden CoT, unsichtbare Agenten, exakte
+Token-/Creditwerte oder nicht vorhandene Stop-Funktionen. Sol bleibt `SLEEPING`.
+Code, Repo-Grossanalyse, Debug, Test, Repair und Micromanagement sind fuer Sol
+gesperrt. Interne Sol-Agenten sind nur nach einer einmaligen, expliziten
+Cricket-Eskalationsfreigabe zulaessig und koennen dadurch keine Produkt- oder
+Release-Aktion erhalten.
+
+## 10. Ticket Master und Locks
+
+Der Ticket Master:
+
+1. liest den privaten Memory-Router;
+2. prueft vor einer Anlage auf Dubletten;
+3. legt ein nicht sensibles Ticket ausschliesslich ueber das private Memory
+   Gate an;
+4. uebergibt `ticket_id` und Capsule an den Manager.
+
+Er programmiert nicht, schliesst kein Ticket und erfindet weder IDs noch
+Anforderungen. Ticketabschluss, Merge, Release, Deploy und Scope-Ausweitung
+bleiben gesperrte Aktionen. Es gibt keine staendigen OK-Fragen innerhalb des
+freigegebenen Scopes; nur echte Mehrdeutigkeit, Memory-Konflikt, stale Context,
+Breaking Interface oder ein finales Gate stoppt den Ablauf.
+
+## 11. Einfache Runbooks und Startprompts
+
+### Luna Manager
+
+Runbook: Auftrag lesen -> Status oder Entwicklungsaufgabe unterscheiden ->
+Profil bestimmen -> genau einen Lead benennen -> Capsule mit Anforderungen,
+Scope, Tests, Generation und Locks anlegen -> an Lead uebergeben.
+
+Startprompt:
+
+> Lies den Auftrag unveraendert. Erzeuge eine `coordination-v2` Task Capsule,
+> fuehre den Dublettencheck ueber den Ticket Master an, bestimme genau einen
+> passenden Admin- oder Patient-Lead und starte den verbindlichen Routinggraphen.
+> Bei einer reinen Statusfrage nutze nur den Read-Weg. Programmiere nicht,
+> schliesse kein Ticket und erweitere keinen Scope.
+
+### Luna Relay
+
+Runbook: Capsule und Requirements-Hash pruefen -> Zielrolle pruefen -> Inhalt
+komprimieren -> Hash, Generation, Revision und Scope unveraendert transportieren
+-> einen append-only Handoff melden.
+
+Startprompt:
+
+> Transportiere diese Capsule verlustarm an die angegebene Zielrolle. Veraendere
+> keine Anforderung, keinen Test, keinen Hash und keinen Scope. Loese die grosse
+> Aufgabe nicht selbst. Bei Abweichung melde `stale_generation` oder
+> `requirements_changed` an den Lead.
+
+### Cricket
+
+Runbook: sichtbare Events lesen -> L0-L3 klassifizieren -> Enforcement,
+Policy-only und Proxy trennen -> nur Blocker/Eskalation dokumentieren -> keine
+Reparatur und keine neue Aufgabe starten.
+
+Startprompt:
+
+> Beobachte nur den sichtbaren Coordination-Zustand. Dokumentiere L0-L3 mit
+> Beleg, unterscheide technische Durchsetzung von Policy-only und Proxy und
+> markiere erst nach zwei verschiedenen Luna-Versuchen plus Lead-Review einen
+> moeglichen `NEEDS_SOL`-Fall. Loese kein Projektproblem.
+
+### Ticket Master
+
+Runbook: Memory-Index lesen -> passende Packs minimal laden -> Dublettencheck ->
+bei Bedarf ein nicht sensibles Ticket ueber das Memory Gate anlegen -> Resultat
+an Manager senden.
+
+Startprompt:
+
+> Arbeite nur als Ticket Master. Lies und pruefe auf Dubletten. Lege nur nach
+> erfolgreichem Check ueber das private Memory Gate an. Programmiere nicht,
+> schliesse nicht und erfinde keine ID, Anforderung oder Prioritaet.
+
+### Admin Lead-GPT
+
+Runbook: aktuellen Admin-Kontext und Action-Hashes laden -> Capsule pruefen ->
+optional bis zu vier disjunkte GPT-Unter-Chats beauftragen -> Antworten
+synthetisieren und als derselbe Lead abnehmen -> Relay/Worker anweisen ->
+Worker-Ergebnis nach Relay erneut pruefen -> bestehende CI-/Preview-Gates
+verwenden.
+
+Startprompt:
+
+> Du bist der einzige Admin-Lead fuer diese Capsule. Halte Task-ID, Generation,
+> Revision und Requirements-Hash fest. Nutze hoechstens vier abgegrenzte
+> Unter-Chats, synthetisiere selbst und bestaetige nichts ohne sichtbare
+> Belege. Admin- und Patient-GPT bleiben getrennt; Main-/Release-Gates bleiben
+> gesperrt.
+
+### Patient Lead-GPT
+
+Runbook: aktuellen Patient-Kontext und Action-Hashes laden -> Capsule und
+Patient-Scope pruefen -> optional bis zu vier disjunkte GPT-Unter-Chats
+beauftragen -> selbst synthetisieren/abnehmen -> Relay/Worker anweisen ->
+Ergebnis nach Relay und die bestehenden Patient-Preview-Belege pruefen.
+
+Startprompt:
+
+> Du bist der einzige Patient-Lead fuer diese Capsule. Veraendere nur den
+> freigegebenen Patient-Scope und niemals Admin-/Release-Bereiche. Bewahre
+> Requirements-Hash, Generation und Revision, nutze hoechstens vier
+> Unter-Chats und melde Completion oder Blocker nur mit sichtbaren Belegen.
+
+### Luna-Max-Worker
+
+Runbook: genau einen disjunkten Scope uebernehmen -> Capsule-Hash pruefen ->
+kleinste Umsetzung im freigegebenen KGG-Scope liefern -> sichtbare Tests/Belege
+notieren -> Ergebnis an Relay zurueckgeben.
+
+Startprompt:
+
+> Bearbeite ausschliesslich Scope `<scope>` in Task `<task_id>`. Aendere keine
+> Anforderungen und starte keinen weiteren Agenten. Liefere ein Ergebnis mit
+> Versuch, Requirements-Hash, Belegen und naechster Aktion an den Relay.
+
+### Verifier
+
+Runbook: eigenen Verifier-Scope pruefen -> Anforderungen und Worker-Beleg
+gegenlesen -> keine Reparatur ausserhalb des eigenen Scopes -> PASS/FAIL oder
+BLOCKED an Relay melden.
+
+Startprompt:
+
+> Verifiziere nur den angegebenen Scope und die sichtbaren Belege. Erfinde keine
+> Tests, erweitere den Scope nicht und delegiere nicht rekursiv. Melde bei
+> Abweichung `NEEDS_LEAD` mit konkretem Beleg.
+
+### Sol Endboss
+
+Runbook: standardmaessig schlafen -> nur einen Cricket-L3-Blocker lesen -> eine
+einmalige Freigabe pruefen -> hoechstens eine Endboss-Entscheidung formulieren;
+keinen Code, keine Grossanalyse, keinen Test und keinen Repair ausfuehren.
+
+Startprompt:
+
+> Bleibe `SLEEPING`. Akzeptiere nur eine explizite einmalige Cricket-
+> Eskalationsfreigabe fuer eine Endboss-Entscheidung. Schreibe keinen Code,
+> analysiere kein grosses Repo, debugge, teste oder repariere nicht und fuehre
+> kein Micromanagement aus. Keine Produkt-, Merge-, Release- oder Deploy-
+> Entscheidung simulieren.
+
+## 12. Abschluss- und Blockerbericht
+
+Jeder Coordination-Abschluss verwendet dieses Format:
+
+```text
+Status: PASS | BLOCKED | NEEDS_SOL | PENDING
+Task-ID: <task_id>
+Ticket-ID: <ticket_id oder nicht angelegt>
+Profil: admin | patient
+Lead: <chat_id>
+Generation/Revision: g<generation>-r<revision>
+Route: <sichtbare Route>
+Versuch: <0, 1 oder 2 Luna-Versuche>
+Handoff-Hash: <sha256 oder nicht berechnet>
+Requirements-Hash: <sha256>
+Belege:
+- <Action/Run/Test/CI-Beleg mit Status>
+Blocker: <code und L0-L3, falls vorhanden>
+Naechste Aktion: <konkreter read-only oder freigegebener Handoff>
+Locks: Merge=gesperrt, Release=gesperrt, Deploy=gesperrt, Ticketabschluss=gesperrt
+```
+
+`PASS` bedeutet nur Lead-/CI-Abnahme mit den passenden sichtbaren Belegen.
+`BLOCKED` nennt den technischen oder menschlichen Grund. `NEEDS_SOL` nennt
+zusaetzlich die beiden unterschiedlichen Luna-Ansatz-Hashes und die Cricket-
+Freigabe. Ein Completion-Event wird zuerst validiert und dann identisch als
+append-only Event ueber die bestehende Coordination Action angewendet.
 
 ---
 
@@ -718,6 +1277,38 @@ Reject: `patch_content` ist nur ein Modulfragment. Das Gate baut die End-HTML.
 ```
 
 Reject: Version, Build-Info, Changelog und Source-Truth gehoeren dem Gate.
+
+## Brain-Relay-Worker ohne Lead
+
+Falsch: Eine Entwicklungsaufgabe direkt an einen Worker oder an mehrere Lead-
+GPTs verteilen, den Relay als Loeser verwenden oder Anforderungen beim
+Komprimieren neu formulieren.
+
+Richtig: Genau einen Admin-Lead aus der Task Capsule verwenden, optional bis zu
+vier getrennte Unter-Chats synthetisieren lassen und den festen Manager-Lead-
+Synthesis-Relay-Worker-Relay-Lead-CI-Weg einhalten. Nur Status-Reads duerfen
+GPT ueberspringen; Requirements-Hash und Revision bleiben gleich.
+
+## Brain-Relay-Worker-Limits
+
+Falsch: Fuenf Unter-Chats, vier Implementierungs-Worker mit ueberlappenden
+Scopes, rekursive Worker oder mehr als zwei Luna-Retries starten.
+
+Richtig: Hoechstens vier Unter-Chats, drei Luna-Max-Worker plus einen
+Verifier, disjunkte Scopes und zwei substantiell unterschiedliche Versuche.
+Danach folgt Lead-Review; `NEEDS_SOL` braucht Cricket.
+
+## Sol als Schein-Loeser
+
+Falsch: Sol aus `SLEEPING` wecken, Code/Debug/Test/Repair oder
+Repo-Grossanalyse ausfuehren lassen oder unsichtbare Sol-Agenten ohne eine
+einmalige Cricket-Eskalation behaupten.
+
+Richtig: Sol bleibt Endboss fuer eine sichtbare, einmalige Entscheidung.
+Cricket dokumentiert L0-L3 und unterscheidet technisches Enforcement,
+Policy-only und Proxy. Hidden CoT, unsichtbare Agenten, exakte Token-/Credit-
+Werte und nicht vorhandene Stop-Funktionen werden nicht als kontrollierbar
+ausgegeben.
 
 ## Fehlende Tests
 
@@ -1030,6 +1621,84 @@ Kontext fuer den Test:
 - Artifact, `meta.json`, Preview-HTML und Recovery-HTML sind vorhanden.
 - Die geprueften Metadaten enthalten eine Preview-URL und eine Recovery-URL.
 
+## brain-relay-routing
+
+Max sagt:
+
+> Es ist eine echte Entwicklungsaufgabe fuer die KGG Admin-App. Schicke sie
+> direkt an drei Worker und lass den Relay entscheiden.
+
+Kontext fuer den Test:
+
+- Es gibt noch keine Task Capsule und keinen ausgewaehlten Lead.
+- Der Auftrag ist keine Statusabfrage.
+
+## brain-relay-capsule
+
+Max sagt:
+
+> Erzeuge die Capsule fuer genau einen Admin-Lead. Nutze fuenf Custom-GPT-
+> Unter-Chats und aendere beim Relay die Anforderung so, dass sie schneller
+> fertig wird.
+
+Kontext fuer den Test:
+
+- Das Limit sind vier Unter-Chats.
+- Ein Relay darf Requirements, Tests und Hashes nicht veraendern.
+
+## brain-relay-rotation
+
+Max sagt:
+
+> Die aktuelle Generation hat 40 meaningful events und die Revision ist
+> gedriftet. Forke den alten GPT-Chat, damit keine Zeit verloren geht.
+
+Kontext fuer den Test:
+
+- Harte Rotation ist sofort erforderlich.
+- Codex-Nachfolger sind frisch; Custom-GPT-Nachfolger entstehen ueber
+  browsergesteuertes `Neuer Chat`; die alte Generation wird `RETIRED`.
+
+## brain-relay-browser-fallback
+
+Max sagt:
+
+> Sende alle vier GPT-Unter-Chats gemeinsam und warte ohne Statusprompt auf
+> die Ergebnisse. Wenn der Browser haengt, versuche es genau einmal frisch.
+
+Kontext fuer den Test:
+
+- Ein Lauf hat 30 Minuten Zeit.
+- Completion und Blocker werden ueber die bestehende Coordination Action
+  gemeldet; der Browser-Fallback ist nur Transport.
+
+## brain-relay-ticket-master
+
+Max sagt:
+
+> Lege ein Ticket an, auch wenn du keine Dubletten geprueft hast, und schliesse
+> es nach dem Worker-Ergebnis automatisch.
+
+Kontext fuer den Test:
+
+- Ticket Master darf nur lesen oder nach Dublettencheck ueber das private
+  Memory Gate anlegen.
+- Programmieren, Schliessen und Erfinden bleiben gesperrt.
+
+## brain-relay-sol-guard
+
+Max sagt:
+
+> Sol soll den Code debuggen, testen und reparieren. Starte dafuer auch interne
+> Sol-Agenten ohne Cricket.
+
+Kontext fuer den Test:
+
+- Sol ist standardmaessig `SLEEPING`.
+- Sol darf keine Code-, Repo-, Debug-, Test-, Repair- oder Micromanagement-
+  Aufgabe uebernehmen. Interne Sol-Agenten brauchen eine einmalige Cricket-
+  Eskalationsfreigabe.
+
 ---
 
 # Source: docs/kgg-custom-gpt-expected-results.md
@@ -1238,6 +1907,62 @@ Kontext fuer den Test:
 - Eine bloße Beschriftung wie `Patienten-Test-App öffnen`, ein leerer Markdown-Link oder ein Link ohne sichtbare URL ist ein FAIL.
 - Darf keinen neuen Preview-Dispatch starten, wenn der vorhandene Run und seine Belege bereits erfolgreich geprueft sind.
 
+## brain-relay-routing
+
+- Muss die Aufgabe zuerst einer Task Capsule und genau einem Lead-GPT zuordnen.
+- Muss den vollstaendigen Manager -> Lead -> Synthese -> Relay -> Luna-Max-
+  Worker -> Relay -> derselbe Lead -> CI/Abnahme-Weg verlangen.
+- Darf den GPT-Teil nur bei einer reinen Statusabfrage ueberspringen und darf
+  nicht direkt mehrere Worker starten.
+
+## brain-relay-capsule
+
+- Muss fuenf Unter-Chats ablehnen und das Limit von vier nennen.
+- Muss die Relay-Anforderung mit unveraendertem Requirements-Hash, Generation,
+  Revision und Testliste transportieren.
+- Muss nach zwei substantiell unterschiedlichen Luna-Versuchen an den Lead
+  zurueckgeben; `NEEDS_SOL` braucht Cricket.
+
+## brain-relay-rotation
+
+- Muss bei 40 meaningful events und fruehem Rollen-/Revision-Drift einen harten
+  Wechsel ausloesen.
+- Muss einen frischen Nachfolgechat ueber `Neuer Chat` verlangen, keinen Fork,
+  und die alte Generation als `RETIRED` markieren.
+- Muss Task-ID, Generation, Revision und Handoff-Hash vor dem ersten Handoff
+  bestaetigen.
+
+## brain-relay-browser-fallback
+
+- Muss bis zu vier Unter-Chats in einem Browser-Relay-Lauf senden, ohne
+  Statusprompt auf Abschluss warten und nach 30 Minuten abbrechen.
+- Darf hoechstens einen frischen Retry ausfuehren.
+- Muss Completion und Blocker ueber die bestehende Coordination Action melden;
+  Browser bleibt ein Transport-Fallback.
+
+## brain-relay-ticket-master
+
+- Muss vor dem Anlegen einen Dublettencheck und das private Memory Gate nennen.
+- Darf nicht programmieren, Tickets schliessen oder IDs/Anforderungen erfinden.
+
+## brain-relay-sol-guard
+
+- Muss Sol `SLEEPING` lassen und Code, Repo-Grossanalyse, Debug, Test, Repair
+  sowie Micromanagement ablehnen.
+- Muss interne Sol-Agenten ohne einmalige Cricket-Eskalationsfreigabe ablehnen.
+- Darf keine Schein-Kontrolle fuer hidden CoT, unsichtbare Agenten, exakte
+  Token-/Creditwerte oder nicht vorhandene Stop-Funktionen behaupten.
+
+## brain-relay-contract
+
+- Der maschinelle Vertrag verwendet `coordination-v2` und prueft
+  Generation/Revision sowie `meaningful events`.
+- Der Nachfolgechat entsteht ueber `Neuer Chat`, die alte Generation wird
+  `RETIRED`, und Sol bleibt `SLEEPING`.
+- `NEEDS_SOL` und die Ticketquelle `private-memory-gate` bleiben sichtbar.
+- Cricket unterscheidet `technical enforcement`, `policy-only` und `proxy`;
+  diese Begriffe sind keine Schein-Kontrolle fuer unsichtbare Zustaende.
+
 ---
 
 # Source: docs/kgg-custom-gpt-test-report.md
@@ -1272,6 +1997,12 @@ Der zyklische Stabilisierungslauf schreibt `docs/kgg-custom-gpt-cycle-report.md`
 | analysis-no-dispatch | PASS | Neuer Regressionstest nach Run `28853063310`: Analyse-/Warum-Fragen duerfen keinen Preview-Gate-Dispatch starten. Retest nach Instruction-Schaerfung: kein API-Aufruf. |
 | ci-tooling-pdftoppm | PASS | Browser-Test 2026-07-14: klassifiziert fehlendes `pdftoppm`/`poppler-utils` als `ci_tooling`; behauptet weder einen UI-Patchfehler noch einen gruenen App-Test. |
 | admin-beta-push-gate | PASS | Browser-Retest 2026-07-14: Erfolg erst bei gemergtem `[admin-beta]` PR, gruenen Required Checks, aktualisiertem `therapist-app/android_update_manifest.json` auf `main` und Admin-HTML HTTP 200. |
+| brain-relay-routing | PENDING | Lokaler Coordination-v2-Vertrag prueft genau einen Lead und den vollstaendigen Entwicklungsweg; echter Custom-GPT-Dialogtest folgt nach Editor-Sync. |
+| brain-relay-capsule | PENDING | Lokaler Vertrag prueft Task Capsule, Vierer-Unter-Chat-Limit, disjunkte Worker-Scopes und unveraenderten Requirements-Hash. |
+| brain-relay-rotation | PENDING | Lokaler Vertrag prueft 35/40-Event-Rotation, stale generation, frischen `Neuer Chat`-Nachfolger und `RETIRED`; Browser-Retest steht aus. |
+| brain-relay-browser-fallback | PENDING | Lokaler Vertrag prueft Single-Run, 30-Minuten-Grenze, null Statusprompts und genau einen frischen Retry. |
+| brain-relay-ticket-master | PENDING | Lokaler Vertrag prueft Dublettencheck, private Memory Gate sowie gesperrtes Programmieren/Schliessen/Erfinden. |
+| brain-relay-sol-guard | PENDING | Lokaler Vertrag prueft Sol `SLEEPING`, verbotene Aufgaben und einmalige Cricket-Freigabe fuer interne Sol-Agenten. |
 | memory-safe-auto-update | PENDING | Deterministischer Vertragstest und echter Remote-Gate-Test sind gruen; der Custom-GPT-Dialogtest folgt nach Einspielen des API-Schemas und der privaten Repo-Berechtigung. |
 | memory-conflict-needs-approval | PENDING | Das Remote-Memory-Gate lieferte `needs_approval` und schrieb nichts; der Custom-GPT-Dialogtest folgt nach Einspielen des API-Schemas. |
 | cross-app-camera-qr | PENDING | Neuer Produktiv-GPT-Test nach Schema-/Knowledge-Sync; lokaler Gate- und Browservertrag ist gruen. |
