@@ -16,15 +16,16 @@ const API = require(FIXTURE_SCRIPT);
 function fail(message) { throw new Error(message); }
 
 function makeJob() {
+  const requestId = "dual-device-browser-smoke";
   const job = {
     kind: API.jobKind,
     schemaVersion: 1,
     sessionId: "kgg-test-" + "c".repeat(32),
-    requestId: "dual-device-browser-smoke",
+    requestId,
     sourceSha: "b".repeat(40),
     patchHash: "d".repeat(64),
     jobHash: "0".repeat(64),
-    patientPwaUrl: "https://kayus24.github.io/kgg-patient-preview/device-test/",
+    patientPwaUrl: "https://kayus24.github.io/kgg-patient-preview/device-test/" + requestId + "/12345-1/",
     profile: "quick",
     recipeVersion: API.version,
     createdAt: new Date(Date.now() - 60_000).toISOString(),
@@ -70,7 +71,7 @@ async function main() {
     deviceTestSessionId: "kgg-test-" + "a".repeat(32),
     deviceTestJobHash: "2".repeat(64),
     deviceTestJobUrl: "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/device-tests/apk-context-a/job.json",
-    patientPwaUrl: job.patientPwaUrl,
+    patientPwaUrl: "https://kayus24.github.io/kgg-patient-preview/device-test/apk-context-a/12344-1/",
     deviceTestProfile: "full",
   };
   let pwaMeta = {
@@ -90,8 +91,6 @@ async function main() {
   try {
     await page.goto("file://" + HTML_PATH.replace(/\\/g, "/"), { waitUntil: "domcontentloaded", timeout: 60000 });
     await page.evaluate(({ job, staleApkContextA }) => {
-      // Simulates one already-installed APK that was originally built for run A.
-      // The persistent runtime must ignore this stale embedded context and use B.
       window.KGGPreviewContext = staleApkContextA;
       window.__runtimeContextSeen = null;
       window.KGGDeviceTestStation = {
@@ -145,6 +144,7 @@ async function main() {
     if (runtimeContextSeen.jobHash !== job.jobHash) fail("installed APK reused stale job hash A instead of B");
     if (runtimeContextSeen.jobUrl !== jobUrl) fail("installed APK did not use current job URL B");
     if (runtimeContextSeen.requestId === staleApkContextA.requestId || runtimeContextSeen.sourceSha === staleApkContextA.commitSha) fail("stale APK context A leaked into run B");
+    if (!job.patientPwaUrl.includes("/" + job.requestId + "/12345-1/")) fail("patient PWA URL is not immutable per run");
 
     if ((await page.locator("#kgg-device-test-station .qr-stage img").count()) !== 1) fail("pairing QR missing");
     if ((await page.locator("#kgg-device-test-station .marker").count()) !== 4) fail("test-frame markers missing");
@@ -158,12 +158,14 @@ async function main() {
       suite: "dual-device-station-browser",
       regression: "apk-context-a-to-preview-job-b",
       pwaMismatchBlocked: true,
+      immutablePatientPwa: true,
       staleRequest: staleApkContextA.requestId,
       activeRequest: runtimeContextSeen.requestId,
       activeSourceSha: runtimeContextSeen.sourceSha,
       activeSessionId: runtimeContextSeen.sessionId,
       activeJobHash: runtimeContextSeen.jobHash,
       activeJobUrl: runtimeContextSeen.jobUrl,
+      patientPwaUrl: job.patientPwaUrl,
       firstStep: "pairing",
       nextStep: "h2-1-baseline",
       screenshot: SCREENSHOT_PATH,
