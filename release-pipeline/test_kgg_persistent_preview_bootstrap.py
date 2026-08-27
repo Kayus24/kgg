@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Contracts for first-time creation of the persistent gpt-preview device-test channel."""
+"""Contracts for persistent gpt-preview publication, immutable device-test PWA runs, and writer serialization."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github/workflows/kgg-gpt-preview-gate.yml"
+AUTO_WORKFLOW = ROOT / ".github/workflows/kgg-gpt-preview-auto.yml"
 
 
 class PersistentPreviewBootstrapTests(unittest.TestCase):
@@ -29,6 +30,42 @@ class PersistentPreviewBootstrapTests(unittest.TestCase):
         self.assertLess(block.index(drift), block.index(push))
         self.assertNotIn("rev-parse origin/gpt-preview", block)
         self.assertNotIn("git diff --cached --quiet ||", block)
+
+    def test_device_test_patient_pwa_is_immutable_per_run(self) -> None:
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn('run_key="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"', workflow)
+        self.assertIn(
+            'patient_pwa_url="https://kayus24.github.io/kgg-patient-preview/device-test/$request_id/$run_key/"',
+            workflow,
+        )
+        self.assertIn('echo "patient_pwa_rel=device-test/$request_id/$run_key"', workflow)
+        self.assertIn('target="patient-preview/$KGG_PATIENT_PWA_REL"', workflow)
+        self.assertIn('diff -qr "$RUNNER_TEMP/kgg-device-test-pwa" "$target"', workflow)
+        self.assertIn("Immutable patient test PWA path already exists with different content", workflow)
+        self.assertIn('git add "$KGG_PATIENT_PWA_REL"', workflow)
+        self.assertIn('meta_url="${KGG_PATIENT_PWA_URL}device-test-meta.json"', workflow)
+        self.assertNotIn("rm -rf patient-preview/device-test", workflow)
+        self.assertNotIn(
+            "meta_url='https://kayus24.github.io/kgg-patient-preview/device-test/device-test-meta.json'",
+            workflow,
+        )
+
+    def test_all_gpt_preview_writers_share_one_serialization_group(self) -> None:
+        gate = WORKFLOW.read_text(encoding="utf-8")
+        auto = AUTO_WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn(
+            "(inputs.mode == 'publish_preview' || inputs.mode == 'publish_device_test') && 'publish'",
+            gate,
+        )
+        self.assertIn("group: kgg-gpt-preview-auto", auto)
+        for job_name in ("status-validating:", "status-publishing:", "status-final:"):
+            start = auto.index("  " + job_name)
+            next_job = auto.find("\n  ", start + 3)
+            block = auto[start : next_job if next_job >= 0 else len(auto)]
+            self.assertIn("concurrency:", block)
+            self.assertIn("group: kgg-gpt-preview-publish", block)
+            self.assertIn("cancel-in-progress: false", block)
+        self.assertEqual(auto.count("group: kgg-gpt-preview-publish"), 3)
 
 
 if __name__ == "__main__":
