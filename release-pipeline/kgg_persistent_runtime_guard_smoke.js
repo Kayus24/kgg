@@ -32,7 +32,9 @@ function main() {
   let nativeBeginCalls = 0;
   let nativeContext = null;
   let previewUpdateRequests = 0;
-  let now = 1000;
+  let nativeUpdateThreadsStarted = 0;
+  let nativeUpdateRunning = false;
+  let simulatedNativeElapsedMs = 0;
 
   const window = {
     KGGAndroidApp: {
@@ -41,6 +43,10 @@ function main() {
     KGGPreviewWebUpdateNative: {
       requestPreviewWebUpdate: () => {
         previewUpdateRequests += 1;
+        if (!nativeUpdateRunning) {
+          nativeUpdateRunning = true;
+          nativeUpdateThreadsStarted += 1;
+        }
         return true;
       },
     },
@@ -62,8 +68,7 @@ function main() {
     },
   };
 
-  const fakeDate = { now: () => now };
-  vm.runInNewContext(source, { window, JSON, String, Number, Object, Array, Error, Date: fakeDate }, { filename: GUARD });
+  vm.runInNewContext(source, { window, JSON, String, Number, Object, Array, Error }, { filename: GUARD });
   const bridge = window.KGGDeviceTestStation;
   if (!bridge || typeof bridge.beginSession !== "function") fail("runtime guard did not expose station bridge");
 
@@ -84,18 +89,22 @@ function main() {
   let result = JSON.parse(bridge.beginSession(JSON.stringify(runtimeB)));
   if (result.ok !== false || result.error !== "preview_html_not_current") fail("stale loaded HTML A was not blocked");
   if (nativeBeginCalls !== 0) fail("native session started while HTML A was still loaded");
-  if (previewUpdateRequests !== 1) fail("stale HTML A did not request Preview B web update");
+  if (previewUpdateRequests !== 1 || nativeUpdateThreadsStarted !== 1) fail("stale HTML A did not start exactly one Preview B update");
 
+  simulatedNativeElapsedMs = 15001;
   result = JSON.parse(bridge.beginSession(JSON.stringify(runtimeB)));
   if (result.ok !== false || result.error !== "preview_html_not_current") fail("stale loaded HTML A retry was not blocked");
-  if (previewUpdateRequests !== 1) fail("same target Preview B requested duplicate foreground updates inside retry window");
+  if (simulatedNativeElapsedMs <= 10000) fail("slow native update fixture did not exceed legacy JS retry window");
+  if (previewUpdateRequests !== 2) fail("stale HTML A did not reach the native single-flight bridge after the legacy window");
+  if (nativeUpdateThreadsStarted !== 1) fail("slow in-flight Preview B update started a second native update thread");
+  if (nativeBeginCalls !== 0) fail("native session started while slow Preview B update was still running");
 
-  now += 10001;
+  nativeUpdateRunning = false;
   result = JSON.parse(bridge.beginSession(JSON.stringify(runtimeB)));
-  if (result.ok !== false || result.error !== "preview_html_not_current") fail("stale HTML A after retry window was not blocked");
-  if (previewUpdateRequests !== 2) fail("same target Preview B was not re-requested after bounded retry window");
-  if (nativeBeginCalls !== 0) fail("native session started while retrying stale HTML A");
+  if (result.ok !== false || result.error !== "preview_html_not_current") fail("failed Preview B retry was not blocked until B loads");
+  if (nativeUpdateThreadsStarted !== 2) fail("failed Preview B update did not allow a fresh native retry");
 
+  nativeUpdateRunning = false;
   status = {
     previewChannel: true,
     rolloutCode: runtimeB.rolloutCode,
@@ -118,13 +127,40 @@ function main() {
   if (nativeContext.profile !== runtimeB.profile) fail("native bridge did not receive profile B");
   if (Number(nativeContext.rolloutCode) !== runtimeB.rolloutCode) fail("native bridge did not receive rollout B");
 
+  const runtimeC = {
+    ...runtimeB,
+    requestId: "preview-job-c",
+    sourceSha: "f".repeat(40),
+    patchHash: "1".repeat(64),
+    jobUrl: "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/device-tests/preview-job-c/job.json",
+    rolloutCode: 303,
+    sessionId: "kgg-test-" + "2".repeat(32),
+    jobHash: "3".repeat(64),
+  };
+  result = JSON.parse(bridge.beginSession(JSON.stringify(runtimeC)));
+  if (result.ok !== false || result.error !== "preview_html_not_current") fail("later Preview C did not trigger an update from healthy B");
+  if (nativeUpdateThreadsStarted !== 3) fail("later Preview C did not start a fresh native update thread after B completed");
+
+  nativeUpdateRunning = false;
+  status = {
+    previewChannel: true,
+    rolloutCode: runtimeC.rolloutCode,
+    releaseId: runtimeC.requestId,
+    pendingHealthCheck: false,
+  };
+  result = JSON.parse(bridge.beginSession(JSON.stringify(runtimeC)));
+  if (!result.ok) fail("current healthy HTML C was rejected after later update");
+  if (nativeBeginCalls !== 2) fail("native session was not started for later Preview C");
+
   console.log(JSON.stringify({
     ok: true,
     suite: "persistent-runtime-guard",
     staleHtmlBlocked: true,
     foregroundUpdateRequested: true,
-    duplicateUpdateSuppressed: true,
-    retryAfterCooldownRequested: true,
+    slowUpdateBeyondLegacyWindowMs: simulatedNativeElapsedMs,
+    slowUpdateSingleFlight: true,
+    failureRetryStarted: true,
+    laterPreviewUpdateStarted: true,
     pendingHealthBlocked: true,
     activeRequest: nativeContext.requestId,
     activeSourceSha: nativeContext.sourceSha,
