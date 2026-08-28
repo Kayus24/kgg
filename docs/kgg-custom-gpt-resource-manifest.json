@@ -31,7 +31,7 @@
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-operations.md",
-        "sha256": "6b38d06cf2ebc3ff975c28b4ca51c68acc93ae301dc08ab8b132c2d70dd50fd1"
+        "sha256": "4659989599ef189854bbfbf6316f95e1642e57b34240826ba9e5bc481e7120e0"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-safety.md",
@@ -49,7 +49,7 @@
       },
       {
         "path": "docs/kgg-custom-gpt-action-api-openapi.yaml",
-        "sha256": "715b8728c7d55f89fb487a39fcc0f6a677c7f5e01011838360cc4a1dad35fb02"
+        "sha256": "eadf91edc3f00b5516baaf178f84a57f46ee78675da2c0d11924553d634b8b08"
       }
     ],
     "freshness": "GitHub live context and source chunks are authoritative; generated Knowledge is a retrieval accelerator and must pass --check.",
@@ -115,7 +115,7 @@
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-operations.md",
-        "sha256": "7aaf4d62b611ab7c44f2374649e81e1b847cf9aa112e4a968cd44f959ecefd3d"
+        "sha256": "9b7a59850971836339ce35abbc767532f0241cd83851206ee59fddf194443705"
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-safety.md",
@@ -133,7 +133,7 @@
       },
       {
         "path": "docs/kgg-patient-custom-gpt-action-api-openapi.yaml",
-        "sha256": "6c6beb7ae32ea04c9a573219787789f34d5e248b21a82f2a8e8d2011e0d053fb"
+        "sha256": "316e7e32e55920ec6417888912c559d4af981b73077cc0a271950458b99cf304"
       }
     ],
     "freshness": "Live patient context, current source chunks and Preview evidence override static Knowledge.",

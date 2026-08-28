@@ -22,9 +22,11 @@ Hauptgehirn; Admin GPT und Patient GPT werden nie vermischt.
 - Completion/Blocker werden append-only ueber die bestehende Coordination
   Action gemeldet. Der Browser-Fallback bleibt Transport, wartet bis 30 Minuten
   ohne Statusprompt und versucht hoechstens einmal frisch erneut.
-- Coordination-v2 ergaenzt nur sichere Lesewege: `getKggAgentCoordinationTask`,
-  `getKggAgentCoordinationHandoff` und `getKggAgentCricketEvent`. Die bestehende
-  append-only `submitKggAgentCoordinationEvent`-Action bleibt der einzige
+- Coordination-v2 hat im API-Schema genau einen sicheren Read-Weg:
+  `getKggAgentCoordinationBridgeTask` für
+  `coordination-bridge/tasks/{task_id}.json`. Task Capsule, Handoff und Cricket
+  bleiben in der vollständigen lokalen PC-Runtime. Die bestehende append-only
+  `submitKggAgentCoordinationEvent`-Action bleibt der einzige
   Koordinations-Schreibweg. Admin-Threads werden nie als Patient-Threads
   verarbeitet.
 

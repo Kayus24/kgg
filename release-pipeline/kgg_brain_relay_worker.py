@@ -17,6 +17,20 @@ CAPSULE_SCHEMA = "kgg-brain-relay-worker/v2"
 HANDOFF_SCHEMA = "kgg-brain-relay-worker/handoff-v2"
 RESULT_SCHEMA = "kgg-brain-relay-worker/result-v2"
 BROWSER_RELAY_SCHEMA = "kgg-brain-relay-worker/browser-relay-v2"
+BRIDGE_SCHEMA_VERSION = "kgg-coordination-bridge-v1"
+BRIDGE_PATH_TEMPLATE = "coordination-bridge/tasks/{task_id}.json"
+BRIDGE_FIELDS = (
+    "schema_version",
+    "task_id",
+    "role",
+    "generation",
+    "revision",
+    "status",
+    "requirements_sha256",
+    "handoff_sha256",
+    "next_action",
+)
+BRIDGE_ALLOWED_FIELDS = frozenset(BRIDGE_FIELDS)
 TASK_ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]{5,63}$")
 CHAT_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{1,95}$")
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -29,6 +43,8 @@ ROTATION_PREPARE_AT = 35
 ROTATION_HARD_AT = 40
 BROWSER_TIMEOUT_SECONDS = 30 * 60
 MAX_BROWSER_FRESH_RETRIES = 1
+MAX_BRIDGE_STATUS_CHARS = 32
+MAX_BRIDGE_NEXT_ACTION_CHARS = 160
 
 ROLE_MODELS = {
     "luna-manager": ("gpt-5.6-luna", "low"),
@@ -42,6 +58,9 @@ ROLE_MODELS = {
     "gpt-subchat": ("custom-gpt", "actions"),
 }
 KNOWN_ROLES = set(ROLE_MODELS) | {"ci-acceptance", "status-read"}
+BRIDGE_ROLES = frozenset(KNOWN_ROLES | {"lead-synthesis"})
+TASK_STATES = frozenset({"PASS", "FAIL", "BLOCKED", "PENDING", "NEEDS_LEAD", "NEEDS_SOL"})
+BRIDGE_STATUSES = TASK_STATES
 FORBIDDEN_KEYS = {
     "api_key",
     "apikey",
@@ -135,11 +154,34 @@ def _sha(value: Any, label: str) -> str:
     return result
 
 
+def canonical_requirement_text(text: str) -> str:
+    """Return the shared Memory/Relay canonical requirement representation."""
+    value = _string(text, "requirements_text")
+    return value.replace("\r\n", "\n").replace("\r", "\n").strip()
+
+
+def requirements_sha256_for(text: str) -> str:
+    """Hash the canonical requirement text used by the local runtime and bridge."""
+    return hashlib.sha256(canonical_requirement_text(text).encode("utf-8")).hexdigest()
+
+
+SHARED_FIXTURE_REQUIREMENT_TEXT = (
+    "Use only the bounded coordination bridge; keep the full runtime local."
+)
+SHARED_FIXTURE_REQUIREMENTS_SHA256 = "723a3cb65ae66ecbbf147b29f31b04e2d16910bf0fea33505459d32cc68b5022"
+SHARED_FIXTURE_HANDOFF_SHA256 = "b92d3e051de1645bcd7b37690a8370954a2641ee60e4966c6d103adc05c8a910"
+
+
 def _task_id(value: Any, label: str = "task_id") -> str:
     result = _string(value, label)
     if TASK_ID_RE.fullmatch(result) is None:
         _fail(f"{label} must match the lowercase task-id contract")
     return result
+
+
+def bridge_path_for(task_id: str) -> str:
+    """Return the only GitHub path allowed for a v2 coordination bridge record."""
+    return BRIDGE_PATH_TEMPLATE.format(task_id=_task_id(task_id))
 
 
 def _chat_id(value: Any, label: str) -> str:
@@ -299,8 +341,10 @@ def validate_task_capsule(capsule: Mapping[str, Any]) -> dict[str, Any]:
         _fail("lead generation/revision is stale")
 
     requirements = _object(data.get("requirements"), "capsule.requirements")
-    _string(requirements.get("text"), "capsule.requirements.text")
+    requirement_text = _string(requirements.get("text"), "capsule.requirements.text")
     requirements_hash = _sha(requirements.get("sha256"), "capsule.requirements.sha256")
+    if requirements_hash != requirements_sha256_for(requirement_text):
+        _fail("requirements_sha256 does not match the canonical requirement text")
 
     _string_list(data.get("acceptance"), "capsule.acceptance", non_empty=True)
     scope = _object(data.get("scope"), "capsule.scope")
@@ -386,10 +430,34 @@ def validate_task_capsule(capsule: Mapping[str, Any]) -> dict[str, Any]:
     return copy.deepcopy(data)
 
 
+HANDOFF_HASH_FIELDS = frozenset({"handoff_hash", "handoff_sha256"})
+
+
+def canonical_handoff_representation(event: Mapping[str, Any]) -> str:
+    """Serialize the local HANDOFF record without its derived hash field."""
+    if not isinstance(event, Mapping):
+        _fail("local HANDOFF must be an object")
+    body = {key: value for key, value in event.items() if key not in HANDOFF_HASH_FIELDS}
+    try:
+        return json.dumps(
+            body,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        )
+    except (TypeError, ValueError) as exc:
+        _fail(f"local HANDOFF is not canonically serializable: {exc}")
+
+
+def handoff_sha256_for(event: Mapping[str, Any]) -> str:
+    """Hash the canonical local HANDOFF representation used by the bridge."""
+    return hashlib.sha256(canonical_handoff_representation(event).encode("utf-8")).hexdigest()
+
+
 def handoff_hash_for(event: Mapping[str, Any]) -> str:
-    body = {key: value for key, value in event.items() if key != "handoff_hash"}
-    encoded = json.dumps(body, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
-    return hashlib.sha256(encoded).hexdigest()
+    """Backward-compatible local alias for the v1 handoff hash helper."""
+    return handoff_sha256_for(event)
 
 
 def validate_handoff_event(event: Mapping[str, Any], capsule: Mapping[str, Any]) -> dict[str, Any]:
@@ -424,13 +492,121 @@ def validate_handoff_event(event: Mapping[str, Any], capsule: Mapping[str, Any])
         _fail("handoff.evidence must be a list")
     if data.get("append_only") is not True:
         _fail("coordination events are append-only")
-    expected_hash = handoff_hash_for(data)
-    if data.get("handoff_hash") != expected_hash:
-        _fail("handoff_hash does not match the visible event")
+    provided_hash = data.get("handoff_sha256")
+    legacy_hash = data.get("handoff_hash")
+    if provided_hash is None:
+        provided_hash = legacy_hash
+    elif legacy_hash is not None and legacy_hash != provided_hash:
+        _fail("handoff_sha256 and legacy handoff_hash disagree")
+    _sha(provided_hash, "handoff_sha256")
+    expected_hash = handoff_sha256_for(data)
+    if provided_hash != expected_hash:
+        _fail("handoff_sha256 does not match the canonical local HANDOFF")
     return copy.deepcopy(data)
 
 
-RESULT_STATUSES = {"PASS", "FAIL", "BLOCKED", "PENDING", "NEEDS_LEAD", "NEEDS_SOL"}
+def validate_bridge(
+    bridge: Mapping[str, Any],
+    requirements_text: str | None = None,
+    handoff: Mapping[str, Any] | None = None,
+    *,
+    capsule: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Validate the only representation that may leave the local PC runtime."""
+    data = _object(bridge, "bridge")
+    _check_forbidden_keys(data)
+    if set(data) != BRIDGE_ALLOWED_FIELDS:
+        missing = sorted(BRIDGE_ALLOWED_FIELDS - set(data))
+        extra = sorted(set(data) - BRIDGE_ALLOWED_FIELDS)
+        _fail(f"bridge fields must be exact; missing={missing}, extra={extra}")
+    if data.get("schema_version") != BRIDGE_SCHEMA_VERSION:
+        _fail(f"bridge.schema_version must be {BRIDGE_SCHEMA_VERSION}")
+    task_id = _task_id(data.get("task_id"), "bridge.task_id")
+    role = _string(data.get("role"), "bridge.role")
+    if role not in BRIDGE_ROLES:
+        _fail("bridge.role is not an allowed coordination role")
+    generation = _positive_int(data.get("generation"), "bridge.generation")
+    revision = _positive_int(data.get("revision"), "bridge.revision")
+    status = _string(data.get("status"), "bridge.status")
+    if status not in BRIDGE_STATUSES:
+        _fail("bridge.status is not a supported visible status")
+    requirements_hash = _sha(data.get("requirements_sha256"), "bridge.requirements_sha256")
+    handoff_hash = _sha(data.get("handoff_sha256"), "bridge.handoff_sha256")
+    next_action = _string(data.get("next_action"), "bridge.next_action")
+    if len(status) > MAX_BRIDGE_STATUS_CHARS:
+        _fail("bridge.status is too long")
+    if len(next_action) > MAX_BRIDGE_NEXT_ACTION_CHARS or "\r" in next_action or "\n" in next_action:
+        _fail("bridge.next_action must be one short single-line action")
+    if any(
+        marker in next_action.casefold()
+        for marker in (
+            "patient",
+            "qr",
+            "secret",
+            "token",
+            "prompt",
+            "log",
+            "base64",
+            "chat",
+            "transcript",
+            "payload",
+            "credential",
+        )
+    ):
+        _fail("bridge.next_action must not contain runtime or sensitive data")
+    if requirements_text is None:
+        _fail("bridge validation requires the local canonical requirement text")
+    expected_requirements_hash = requirements_sha256_for(requirements_text)
+    if requirements_hash != expected_requirements_hash:
+        _fail("bridge.requirements_sha256 does not match the canonical requirement text")
+    if handoff is None:
+        _fail("bridge validation requires the local canonical HANDOFF")
+    expected_handoff_hash = handoff_sha256_for(handoff)
+    if handoff_hash != expected_handoff_hash:
+        _fail("bridge.handoff_sha256 does not match the canonical local HANDOFF")
+    if capsule is not None:
+        validated_capsule = validate_task_capsule(capsule)
+        if task_id != validated_capsule["task_id"]:
+            _fail("bridge.task_id does not match the local Task Capsule")
+        if generation != validated_capsule["generation"] or revision != validated_capsule["revision"]:
+            _fail("stale_generation: bridge generation/revision does not match the local Task Capsule")
+        if requirements_hash != validated_capsule["requirements"]["sha256"]:
+            _fail("bridge.requirements_sha256 does not match the local Task Capsule")
+        validate_handoff_event(handoff, validated_capsule)
+    return copy.deepcopy(data)
+
+
+def build_bridge_from_local(
+    capsule: Mapping[str, Any],
+    handoff: Mapping[str, Any],
+    *,
+    role: str,
+    status: str,
+    next_action: str,
+) -> dict[str, Any]:
+    """Derive the exact bridge allowlist from local Capsule/HANDOFF state."""
+    validated_capsule = validate_task_capsule(capsule)
+    validated_handoff = validate_handoff_event(handoff, validated_capsule)
+    bridge = {
+        "schema_version": BRIDGE_SCHEMA_VERSION,
+        "task_id": validated_capsule["task_id"],
+        "role": role,
+        "generation": validated_capsule["generation"],
+        "revision": validated_capsule["revision"],
+        "status": status,
+        "requirements_sha256": validated_capsule["requirements"]["sha256"],
+        "handoff_sha256": handoff_sha256_for(validated_handoff),
+        "next_action": next_action,
+    }
+    return validate_bridge(
+        bridge,
+        validated_capsule["requirements"]["text"],
+        validated_handoff,
+        capsule=validated_capsule,
+    )
+
+
+RESULT_STATUSES = TASK_STATES
 
 
 def validate_result(result: Mapping[str, Any], capsule: Mapping[str, Any]) -> dict[str, Any]:
@@ -651,8 +827,8 @@ def synthetic_capsule(*, with_sub_chats: bool = False) -> dict[str, Any]:
             "revision": 1,
         },
         "requirements": {
-            "text": "Only the KGG coordination contract; no product code.",
-            "sha256": "a" * 64,
+            "text": SHARED_FIXTURE_REQUIREMENT_TEXT,
+            "sha256": SHARED_FIXTURE_REQUIREMENTS_SHA256,
         },
         "acceptance": [
             "The complete route is used for every development task.",
@@ -709,6 +885,42 @@ def synthetic_capsule(*, with_sub_chats: bool = False) -> dict[str, Any]:
     }
 
 
+def synthetic_handoff(capsule: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    """Return one deterministic local Handoff fixture for contract tests."""
+    source = synthetic_capsule() if capsule is None else validate_task_capsule(capsule)
+    event = {
+        "schema": HANDOFF_SCHEMA,
+        "event_id": "kgg-event-example-001",
+        "sequence": 1,
+        "event_type": "worker_result",
+        "task_id": source["task_id"],
+        "generation": source["generation"],
+        "revision": source["revision"],
+        "from_role": "luna-max-worker",
+        "to_role": "luna-relay",
+        "requirements_sha256": source["requirements"]["sha256"],
+        "transport_only": True,
+        "summary": "The worker returned its bounded result.",
+        "evidence": [{"kind": "test", "name": "brain-relay-selftest", "status": "PASS"}],
+        "append_only": True,
+    }
+    event["handoff_sha256"] = handoff_sha256_for(event)
+    return event
+
+
+def synthetic_bridge() -> dict[str, Any]:
+    """Return one deterministic bridge fixture derived from local runtime state."""
+    capsule = synthetic_capsule()
+    handoff = synthetic_handoff(capsule)
+    return build_bridge_from_local(
+        capsule,
+        handoff,
+        role="luna-relay",
+        status="PASS",
+        next_action="continue-local-runtime",
+    )
+
+
 def _expect_failure(name: str, callback: Any, expected: str) -> None:
     try:
         callback()
@@ -721,6 +933,8 @@ def _expect_failure(name: str, callback: Any, expected: str) -> None:
 
 def self_test() -> None:
     capsule = synthetic_capsule()
+    if requirements_sha256_for(SHARED_FIXTURE_REQUIREMENT_TEXT) != SHARED_FIXTURE_REQUIREMENTS_SHA256:
+        _fail("self-test requirement fixture hash is not deterministic")
     validate_task_capsule(capsule)
     validate_route(["luna-manager", "status-read"], task_kind="status")
     with_sub = synthetic_capsule(with_sub_chats=True)
@@ -767,32 +981,55 @@ def self_test() -> None:
     }
     _expect_failure("different-retries", lambda: validate_task_capsule(duplicate_retry), "substantively different")
 
-    handoff = {
-        "schema": HANDOFF_SCHEMA,
-        "event_id": "kgg-event-example-001",
-        "sequence": 1,
-        "event_type": "worker_result",
-        "task_id": capsule["task_id"],
-        "generation": 1,
-        "revision": 1,
-        "from_role": "luna-max-worker",
-        "to_role": "luna-relay",
-        "requirements_sha256": capsule["requirements"]["sha256"],
-        "transport_only": True,
-        "summary": "The worker returned its bounded result.",
-        "evidence": [{"kind": "test", "name": "brain-relay-selftest", "status": "PASS"}],
-        "append_only": True,
-    }
-    handoff["handoff_hash"] = handoff_hash_for(handoff)
+    handoff = synthetic_handoff(capsule)
+    if handoff["handoff_sha256"] != SHARED_FIXTURE_HANDOFF_SHA256:
+        _fail("self-test handoff fixture hash is not deterministic")
     validate_handoff_event(handoff, capsule)
     stale = copy.deepcopy(handoff)
     stale["generation"] = 2
-    stale["handoff_hash"] = handoff_hash_for(stale)
+    stale["handoff_sha256"] = handoff_sha256_for(stale)
     _expect_failure("stale-generation", lambda: validate_handoff_event(stale, capsule), "stale_generation")
     changed = copy.deepcopy(handoff)
     changed["requirement_delta"] = ["changed"]
-    changed["handoff_hash"] = handoff_hash_for(changed)
+    changed["handoff_sha256"] = handoff_sha256_for(changed)
     _expect_failure("relay-no-mutation", lambda: validate_handoff_event(changed, capsule), "requirement delta")
+    legacy = copy.deepcopy(handoff)
+    legacy["handoff_hash"] = legacy.pop("handoff_sha256")
+    validate_handoff_event(legacy, capsule)
+
+    bridge = synthetic_bridge()
+    if list(bridge) != list(BRIDGE_FIELDS):
+        _fail("self-test bridge fixture field order drifted")
+    validate_bridge(
+        bridge,
+        capsule["requirements"]["text"],
+        handoff,
+        capsule=capsule,
+    )
+    extra_bridge_field = copy.deepcopy(bridge)
+    extra_bridge_field["prompt"] = "must not leave the PC"
+    _expect_failure(
+        "bridge-allowlist",
+        lambda: validate_bridge(
+            extra_bridge_field,
+            capsule["requirements"]["text"],
+            handoff,
+            capsule=capsule,
+        ),
+        "fields must be exact",
+    )
+    sensitive_action = copy.deepcopy(bridge)
+    sensitive_action["next_action"] = "write runtime log"
+    _expect_failure(
+        "bridge-sensitive-next-action",
+        lambda: validate_bridge(
+            sensitive_action,
+            capsule["requirements"]["text"],
+            handoff,
+            capsule=capsule,
+        ),
+        "runtime or sensitive data",
+    )
 
     browser_capsule = synthetic_capsule(with_sub_chats=True)
     browser = {
@@ -919,6 +1156,9 @@ def self_test() -> None:
             {
                 "status": "PASS",
                 "contract": CAPSULE_SCHEMA,
+                "bridgeSchemaVersion": BRIDGE_SCHEMA_VERSION,
+                "bridgePath": BRIDGE_PATH_TEMPLATE,
+                "taskStates": sorted(TASK_STATES),
                 "maxSubChats": MAX_SUB_CHATS,
                 "maxLunaWorkers": MAX_LUNA_WORKERS,
                 "maxLunaAttempts": MAX_LUNA_ATTEMPTS,
@@ -945,6 +1185,7 @@ def main() -> int:
     parser.add_argument("--handoff", type=Path, help="validate a Handoff JSON with --capsule")
     parser.add_argument("--result", type=Path, help="validate a Result JSON with --capsule")
     parser.add_argument("--browser-relay", type=Path, help="validate a Browser Relay JSON with --capsule")
+    parser.add_argument("--bridge", type=Path, help="validate a coordination bridge JSON with --capsule and --handoff")
     args = parser.parse_args()
     try:
         if args.self_test:
@@ -952,13 +1193,23 @@ def main() -> int:
             return 0
         if not args.capsule:
             parser.error("one of --self-test or --capsule is required")
+        if args.bridge and not args.handoff:
+            parser.error("--bridge requires --handoff")
         capsule = validate_task_capsule(load_json(args.capsule))
+        handoff = None
         if args.handoff:
-            validate_handoff_event(load_json(args.handoff), capsule)
+            handoff = validate_handoff_event(load_json(args.handoff), capsule)
         if args.result:
             validate_result(load_json(args.result), capsule)
         if args.browser_relay:
             validate_browser_relay_batch(load_json(args.browser_relay), capsule)
+        if args.bridge:
+            validate_bridge(
+                load_json(args.bridge),
+                capsule["requirements"]["text"],
+                handoff,
+                capsule=capsule,
+            )
         print(json.dumps({"status": "PASS", "task_id": capsule["task_id"]}, ensure_ascii=False))
         return 0
     except ContractError as exc:

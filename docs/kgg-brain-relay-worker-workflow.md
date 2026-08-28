@@ -8,8 +8,20 @@ im jeweiligen bestehenden Gate ausdruecklich freigegeben sind.
 
 Die maschinelle Pruefung liegt in
 `release-pipeline/kgg_brain_relay_worker.py`. Dieses Dokument ist die kanonische
-Erklaerung; die bestehende Coordination Action bleibt der einzige append-only
-Schreibweg.
+Erklaerung. Die vollstaendige Runtime bleibt lokal auf dem PC; der optionale
+GitHub-Kurzpass ist in `docs/kgg-brain-relay-worker-bridge.md` beschrieben.
+Die bestehenden v1-Coordination-Operationen bleiben kompatibel, aber v2 legt
+keine Task-, Handoff- oder Cricket-Dateien auf GitHub ab.
+
+## 1.1 PC-Runtime und GitHub-Kurzpass
+
+Task Capsule, Handoff, Worker, Verifier, Cricket und Logs werden vollständig
+auf dem PC verarbeitet. GitHub darf für v2 höchstens
+`coordination-bridge/tasks/<task_id>.json` als kurzen, nicht sensiblen Statuspass
+enthalten. Dieser Pass hat exakt neun Felder: `schema_version`, `task_id`,
+`role`, `generation`, `revision`, `status`, `requirements_sha256`,
+`handoff_sha256` und `next_action`. Für direkte Codex-Vermittlung muss die
+lokale PC-Runtime laufen; der GitHub-Pass ersetzt sie nicht.
 
 ## 1. Vertrauensgrenzen und Hauptgehirne
 
@@ -124,7 +136,7 @@ Ein minimales synthetisches Beispiel sieht so aus:
   },
   "requirements": {
     "text": "Nur die KGG-Koordination dokumentieren; Produktcode bleibt ausserhalb.",
-    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    "sha256": "580833556747fc63032232cee6b15f3db79486b5eb3bdafdf61335cfc4bc145d"
   },
   "acceptance": [
     "Alle echten Aufgaben verwenden den vollstaendigen Routinggraphen.",
@@ -190,10 +202,12 @@ oder `requirements_changed`; der Lead muss neu synthetisieren.
 
 ## 5. Handoff- und Ergebnisformat
 
-Coordination-v2 liest Task, Handoff und Cricket-Fakten ueber sichere GitHub-
-Reads. Schreiben ist weiterhin auf eine bestehende append-only Coordination
-Action beschraenkt. Es gibt keinen zweiten Schreibweg und keine Update-/Delete-
-Operation fuer alte Ereignisse.
+Die vollstaendige Coordination-v2-Runtime liest und verarbeitet Task, Handoff
+und Cricket-Fakten lokal auf dem PC. Der optionale GitHub-Read ist für v2 auf
+`coordination-bridge/tasks/{task_id}.json` mit der exakten Neun-Felder-Allowlist
+begrenzt. Dort stehen keine Patientendaten, QR-Rohdaten, Secrets, Prompts oder
+Logs. Die bestehenden vier v1-Operationen bleiben unveraendert; es gibt keine
+separaten v2-Task-, Handoff- oder Cricket-Pfade.
 
 Ein Handoff traegt mindestens:
 
@@ -208,11 +222,11 @@ Ein Handoff traegt mindestens:
   "revision": 1,
   "from_role": "luna-max-worker",
   "to_role": "luna-relay",
-  "requirements_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "requirements_sha256": "580833556747fc63032232cee6b15f3db79486b5eb3bdafdf61335cfc4bc145d",
   "transport_only": true,
   "summary": "Der abgegrenzte Vertragsscope wurde umgesetzt.",
   "evidence": [{"kind": "test", "name": "brain-relay-selftest", "status": "PASS"}],
-  "handoff_hash": "wird-vom-kanonischen-hasher-berechnet",
+  "handoff_sha256": "8465bcf6557676415e235a8826f8fe0c79ac7c5db1bbd52024ad3cebc43feff4",
   "append_only": true
 }
 ```

@@ -353,11 +353,11 @@ paths:
           content:
             application/json:
               schema: {type: object, additionalProperties: true}
-  /repos/Kayus24/kgg-project-memory/contents/coordination-v2/tasks/{task_id}.json:
+  /repos/Kayus24/kgg-project-memory/contents/coordination-bridge/tasks/{task_id}.json:
     get:
-      operationId: getKggAgentCoordinationTask
-      summary: Read one Coordination-v2 Task Capsule selected from the coordination index.
-      description: Read-only task facts with no patient data, raw payloads, chats or secrets.
+      operationId: getKggAgentCoordinationBridgeTask
+      summary: Read one bounded v2 coordination bridge record.
+      description: Read-only short-pass state from the local PC runtime. It contains no runtime payload, patient data, raw QR data, secrets, prompts or logs.
       x-openai-isConsequential: false
       security:
         - githubBearer: []
@@ -376,64 +376,43 @@ paths:
           schema: {type: string, enum: [main], default: main}
       responses:
         "200":
-          description: Coordination-v2 Task Capsule.
+          description: Exact kgg-coordination-bridge-v1 allowlist.
           content:
             application/json:
-              schema: {type: object, additionalProperties: true}
-  /repos/Kayus24/kgg-project-memory/contents/coordination-v2/handoffs/{handoff_id}.json:
-    get:
-      operationId: getKggAgentCoordinationHandoff
-      summary: Read one Coordination-v2 Handoff selected from a Task Capsule.
-      description: Read-only handoff facts with immutable task, generation, revision and requirements hash.
-      x-openai-isConsequential: false
-      security:
-        - githubBearer: []
-      parameters:
-        - name: handoff_id
-          in: path
-          required: true
-          schema: {type: string, pattern: "^[a-z0-9][a-z0-9-]{5,63}$"}
-        - name: Accept
-          in: header
-          required: true
-          schema: {type: string, enum: [application/vnd.github.raw+json], default: application/vnd.github.raw+json}
-        - name: ref
-          in: query
-          required: false
-          schema: {type: string, enum: [main], default: main}
-      responses:
-        "200":
-          description: Coordination-v2 Handoff.
-          content:
-            application/json:
-              schema: {type: object, additionalProperties: true}
-  /repos/Kayus24/kgg-project-memory/contents/coordination-v2/cricket/{cricket_event_id}.json:
-    get:
-      operationId: getKggAgentCricketEvent
-      summary: Read one visible Cricket watchdog event for a Coordination-v2 task.
-      description: Read-only L0-L3 observation classified as technical enforcement, policy-only or proxy.
-      x-openai-isConsequential: false
-      security:
-        - githubBearer: []
-      parameters:
-        - name: cricket_event_id
-          in: path
-          required: true
-          schema: {type: string, pattern: "^[a-z0-9][a-z0-9-]{5,63}$"}
-        - name: Accept
-          in: header
-          required: true
-          schema: {type: string, enum: [application/vnd.github.raw+json], default: application/vnd.github.raw+json}
-        - name: ref
-          in: query
-          required: false
-          schema: {type: string, enum: [main], default: main}
-      responses:
-        "200":
-          description: Coordination-v2 Cricket event.
-          content:
-            application/json:
-              schema: {type: object, additionalProperties: true}
+              schema:
+                type: object
+                additionalProperties: false
+                required: [schema_version, task_id, role, generation, revision, status, requirements_sha256, handoff_sha256, next_action]
+                properties:
+                  schema_version:
+                    type: string
+                    const: kgg-coordination-bridge-v1
+                  task_id:
+                    type: string
+                    pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
+                  role:
+                    type: string
+                    enum: [luna-manager, lead-gpt, gpt-subchat, lead-synthesis, luna-relay, luna-max-worker, verifier, cricket, ticket-master, sol-endboss, ci-acceptance, status-read]
+                  generation:
+                    type: integer
+                    minimum: 1
+                  revision:
+                    type: integer
+                    minimum: 1
+                  status:
+                    type: string
+                    enum: [PASS, FAIL, BLOCKED, PENDING, NEEDS_LEAD, NEEDS_SOL]
+                  requirements_sha256:
+                    type: string
+                    pattern: "^[0-9a-f]{64}$"
+                  handoff_sha256:
+                    type: string
+                    pattern: "^[0-9a-f]{64}$"
+                  next_action:
+                    type: string
+                    minLength: 1
+                    maxLength: 160
+                    pattern: '^[^\r\n]*$'
   /repos/Kayus24/kgg-project-memory/actions/workflows/kgg-agent-coordination-gate.yml/dispatches:
     post:
       operationId: submitKggAgentCoordinationEvent

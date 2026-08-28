@@ -78,9 +78,8 @@ def main() -> int:
                 "Environment",
                 "service-worker.js",
                 "Coordination-v2",
-                "getKggAgentCoordinationTask",
-                "getKggAgentCoordinationHandoff",
-                "getKggAgentCricketEvent",
+                "getKggAgentCoordinationBridgeTask",
+                "coordination-bridge/tasks/{task_id}.json",
             ),
         )
         require(
@@ -133,9 +132,8 @@ def main() -> int:
                 "submitKggMemoryUpdate",
                 "getKggAgentCoordinationIndex",
                 "submitKggAgentCoordinationEvent",
-                "getKggAgentCoordinationTask",
-                "getKggAgentCoordinationHandoff",
-                "getKggAgentCricketEvent",
+                "getKggAgentCoordinationBridgeTask",
+                "coordination-bridge/tasks/{task_id}.json",
             ),
         )
         for label, schema in (("raw", raw_action), ("api", api_action)):

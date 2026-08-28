@@ -44,10 +44,13 @@ Die Action darf keine Patientendaten, echten Planpayloads, Secrets oder Roh-Base
 Die bestehenden Operation-IDs `getKggAgentCoordinationIndex`,
 `getKggAgentCoordinationThread`, `submitKggAgentCoordinationEvent` und
 `listKggAgentCoordinationRuns` bleiben unveraendert. Das Patient-API-Schema
-ergaenzt nur read-only Wege fuer `getKggAgentCoordinationTask`,
-`getKggAgentCoordinationHandoff` und `getKggAgentCricketEvent`. Sie lesen
-jeweils eine nicht sensible Coordination-v2-Datei und koennen keinen Patient-
-Write, keinen Admin-Write und keinen Livegang ausloesen.
+stellt für v2 genau den read-only Weg
+`getKggAgentCoordinationBridgeTask` bereit. Er liest ausschließlich
+`coordination-bridge/tasks/{task_id}.json` mit der exakten
+`kgg-coordination-bridge-v1`-Allowlist. Task Capsule, Handoff und Cricket
+bleiben in der vollständigen lokalen PC-Runtime und erhalten keine eigenen
+v2-Pfade auf GitHub. Der Kurzpass kann keinen Patient-Write, keinen Admin-Write
+und keinen Livegang ausloesen.
 
 Der Patient-Lead ist pro Ticket das einzige Patient-Hauptgehirn. Echte
 Entwicklungsaufgaben muessen Manager -> Lead -> optionale bis zu vier
