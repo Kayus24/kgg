@@ -442,6 +442,26 @@ def check_prompt_and_expected_docs() -> None:
         require(expected, f"## {case}", f"expected fixture {case}")
         require(report, case, f"report row {case}")
     require_all(
+        prompts,
+        [
+            "## dual-mode-activation",
+            "kgg-custom-gpt-workflow-start/v1",
+            "STANDALONE",
+            "WORKFLOW_BLOCKED",
+        ],
+        "dual-mode prompt suite",
+    )
+    require_all(
+        expected,
+        [
+            "## dual-mode-activation",
+            "kgg-custom-gpt-workflow-start/v1",
+            "STANDALONE",
+            "WORKFLOW_BLOCKED",
+        ],
+        "dual-mode expected suite",
+    )
+    require_all(
         expected,
         [
             "tabletLayoutFreeTools",

@@ -3,14 +3,19 @@
 ## Brain-Relay-Worker-Workflow v2
 
 Der gemeinsame, additive Rollen- und Handoff-Vertrag steht in
-`docs/kgg-brain-relay-worker-workflow.md`. Lade ihn fuer echte Aufgaben neben
-diesem Patient-Playbook. Der Patient-Lead bleibt das einzige Patient-
-Hauptgehirn; Admin GPT und Patient GPT werden nie vermischt.
+`docs/kgg-brain-relay-worker-workflow.md`. Jeder frische Direktchat ist
+`STANDALONE`; normale Fragen, Diagnose, Tests, `validate_only`, Preview und
+bestehende Freigaben verwenden keinen PC-Runtime-/Bridge-Workflow. Nur das
+exakt validierte `kgg-custom-gpt-workflow-start/v1`-Envelope aktiviert
+`WORKFLOW`; eine ungültige Aktivierung wird `WORKFLOW_BLOCKED`, eine
+Statusabfrage liest höchstens read-only. Der Patient-Lead bleibt das einzige
+Patient-Hauptgehirn; Admin GPT und Patient GPT werden nie vermischt.
 
-- Pro Ticket genau ein Patient-Lead-GPT. Echte Aufgaben verwenden den
-  vollstaendigen Weg `Luna Manager -> Lead GPT -> optionale GPT-Unter-Chats ->
+- Pro Ticket genau ein Patient-Lead-GPT. Im aktivierten `WORKFLOW` gilt der
+  vollstaendige Weg `Luna Manager -> Lead GPT -> optionale GPT-Unter-Chats ->
   Lead-Synthese -> Luna Relay -> Luna-Max-Worker -> Relay -> derselbe Lead ->
-  CI/Abnahme`; nur reine Statusabfragen duerfen GPT ueberspringen.
+  CI/Abnahme`; Standalone-Aufträge bleiben bei den bestehenden Patient-
+  Actions.
 - Hoechstens vier Unter-Chats, drei Luna-Max-Worker plus ein Verifier,
   disjunkte Scopes und keine Rekursion. Der Relay transportiert nur und darf
   Requirements, Hashes oder Tests nicht veraendern.
@@ -38,7 +43,7 @@ Nicht erlaubt sind Therapeut:innen-App, PDF, Android/APK, API-Key-Logik, binaere
 
 ## Arbeitsfolge
 
-1. Resource-Manifest, Live-Kontext und dieses Playbook live laden.
+1. Resource-Manifest, Live-Kontext und dieses Playbook live laden; den zentralen Workflow-Vertrag nur nach gültiger Workflow-Aktivierung laden.
 2. Bug-Lessons und Source-Index laden.
 3. Symptom reproduzierbar beschreiben.
 4. Hoechstens drei Hypothesen mit unterscheidenden Tests aufstellen.

@@ -2,7 +2,7 @@
   "gptId": "g-6a45fba0f3408191ac1fb2c987a2e960",
   "name": "KGG Update-Agent",
   "profileVersion": "4.2.0",
-  "bootstrapVersion": "admin-v7",
+  "bootstrapVersion": "admin-v8",
   "model": "GPT-5.6 Thinking",
   "visibility": "private",
   "syncStatus": "target-pending-live-editor-sync",
@@ -14,12 +14,12 @@
     "apps": false,
     "actions": true
   },
-  "instructionsSha256": "b2dc59a85029966311365b687c2130a5714efd9aad7f88f3b31f69d3e4003757",
+  "instructionsSha256": "589f724987f7f535b3c153881170dd49cd3c9f544f303a425dc990b313dd5a0a",
   "knowledgeSha256": [
-    "7f52d4e927f14911dd2e39e2ae7698c77ea224453be556131ae5e7b22d151628",
-    "4659989599ef189854bbfbf6316f95e1642e57b34240826ba9e5bc481e7120e0",
+    "708f445be148ded8faec90863860b9cba4503294526c5e9679f7808e599400e6",
+    "a1c3dd0a5cd36de3be545006935ce04b1801e2afcbf3febc698de0721724e030",
     "21e97d005042e80632fbc3cea67e6faa5d27f497f098ef02a093ddf07b9d8801",
-    "7b43073d570a7e5bc3482b24b99236fdaa7fb93477eb31a459bcad812bd4255c"
+    "361b1a437b4240df19cbb23a8325395d1005e8166b74fde71fbdd5c4611a1e30"
   ],
   "actionSha256": [
     "c55030bb9acd46b8940bc518c95383ba00a80c629cd85ef0ab02639fac7bd464",

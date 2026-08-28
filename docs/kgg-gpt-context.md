@@ -67,7 +67,7 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Do not store chats, patient data, secrets or transient debug output in the project memory.
 - Reads, one submitKggPreviewAuto dispatch, evidence checks, safe new memory records and coordination events are pre-authorized; do not ask after every step.
 - Admin PR/Main requires Max' exact phrase `Gut für Main`; Patient PR/Live requires `Gut für PAT live`.
-- Real development tasks use exactly one Lead GPT and the Manager -> Lead -> optional sub-chats -> Lead synthesis -> Relay -> Luna-Max-Worker -> Relay -> same Lead -> CI route; only pure status reads may skip GPT.
+- Fresh direct chats are STANDALONE. Only a fully validated `kgg-custom-gpt-workflow-start/v1` envelope activates WORKFLOW; invalid activation is WORKFLOW_BLOCKED, and status reads never activate it. See the central workflow contract.
 - Coordination-v2 reads use Task, Handoff and Cricket paths; the existing append-only Coordination Action remains the only write path.
 - Use at most four GPT sub-chats, three Luna-Max workers plus one verifier, two materially different Luna attempts, and fresh chat rotation at 35/40 meaningful events or early drift.
 

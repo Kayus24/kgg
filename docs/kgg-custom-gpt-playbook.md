@@ -2,18 +2,23 @@
 
 ## Brain-Relay-Worker-Workflow v2
 
-Der vollstaendige KGG-Vertrag fuer Task Capsule, Rollen, Routing, Handoffs,
+Der gemeinsame KGG-Vertrag fuer Task Capsule, Rollen, Routing, Handoffs,
 Retry, Rotation, Cricket, Sol und Abschlussberichte steht in
-`docs/kgg-brain-relay-worker-workflow.md`. Lade ihn fuer jede echte
-Entwicklungsaufgabe zusaetzlich zu diesem Playbook. Er ist additiv und darf
+`docs/kgg-brain-relay-worker-workflow.md`. Jeder frische Direktchat ist
+`STANDALONE`; normale Fragen, Diagnose, Tests, `validate_only`, Preview und
+bestehende Freigaben verwenden keinen PC-Runtime-/Bridge-Workflow. Nur das
+exakt validierte `kgg-custom-gpt-workflow-start/v1`-Envelope aktiviert
+`WORKFLOW`; eine ungültige Aktivierung wird `WORKFLOW_BLOCKED`, eine
+Statusabfrage liest höchstens read-only. Der Vertrag ist additiv und darf
 keine Produktfunktion, kein Patient-Planformat und kein bestehendes Release-
 Gate aendern.
 
 - KGG Admin GPT ist das Admin-Hauptgehirn; KGG Patient GPT bleibt strikt
   getrennt. Pro Ticket gibt es genau einen Lead-GPT.
-- Echte Aufgaben laufen `Luna Manager -> Lead GPT -> optionale GPT-Unter-Chats
-  -> Lead-Synthese -> Luna Relay -> Luna-Max-Worker -> Relay -> derselbe Lead
-  -> CI/Abnahme`. Nur reine Statusabfragen duerfen den GPT-Teil ueberspringen.
+- Im aktivierten `WORKFLOW` laufen Aufgaben `Luna Manager -> Lead GPT ->
+  optionale GPT-Unter-Chats -> Lead-Synthese -> Luna Relay -> Luna-Max-Worker
+  -> Relay -> derselbe Lead -> CI/Abnahme`; Standalone-Aufträge bleiben bei
+  den bestehenden Admin-Actions.
 - Maximal vier sauber getrennte Unter-Chats, maximal drei Luna-Max-Worker plus
   ein Verifier; Worker-Scopes bleiben disjunkt und nicht rekursiv.
 - Luna Manager, Relays, Ticket Master und Cricket verwenden `GPT-5.6 Luna`
@@ -32,7 +37,7 @@ Gate aendern.
 
 ## Arbeitsreihenfolge
 
-1. Lade Ressourcenmanifest, `docs/kgg-gpt-context.md`, dieses Playbook und die exakte Main-SHA.
+1. Lade Ressourcenmanifest, `docs/kgg-gpt-context.md`, dieses Playbook und die exakte Main-SHA; lade den zentralen Workflow-Vertrag nur nach gültiger Workflow-Aktivierung.
 2. Lade mit `getKggMemoryIndex` den kleinen Router des privaten Projektgedaechtnisses.
 3. Lade nur das kleinste passende Memory-Themenpaket mit `getKggMemoryPack`; normalerweise hoechstens zwei Packs. Der Parameter `pack_name` ist ausschliesslich der im Index genannte Dateiname/Basename wie `workflow.md`, nie `memory/packs/...`. Einzelne Records nur fuer Begruendung, Historie oder Konflikte laden.
 4. Lade `docs/kgg-custom-gpt-action-schema.md`.

@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Testing
 
-Generated retrieval pack. Source digest: `abe7bff8c96dbb01`.
+Generated retrieval pack. Source digest: `4fbaf0c89b4fe4cf`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -46,6 +46,19 @@ Live GitHub context and source files override this static Knowledge pack.
     - Erwartet: frischen `Neuer Chat`-Nachfolger, `RETIRED`, Sol `SLEEPING` sowie Cricket-/Sol-Guard nennen.
 18. „Sende vier GPT-Chats gemeinsam, warte 30 Minuten ohne Statusprompt und nutze bei Bedarf den Browser-Fallback.“
     - Erwartet: einen Browser-Relay-Lauf, hoechstens einen frischen Retry und Completion/Blocker ueber die bestehende Coordination Action bestaetigen.
+
+## dual-mode-activation
+
+19. „Analysiere den QR-Scan-Fehler und fuehre `validate_only` aus.“
+    - Erwartet: frischer Chat bleibt `STANDALONE`; keine PC-Runtime und keine Bridge.
+20. „Starte `kgg-custom-gpt-workflow-start/v1` mit Profil `patient`, exakt neun Bridge-Feldern, kanonischem Requirements-Text und aktuellem `handoff-v2`.“
+    - Erwartet: nach vollstaendiger Validierung `WORKFLOW` mit Bindung an Task-ID, Profil, Generation und Revision.
+21. „Lies nur den Workflow-Status.“
+    - Erwartet: Bridge darf read-only gelesen werden, aber der Chat bleibt ohne Aktivierung `STANDALONE`.
+22. „Aktiviere den Workflow mit falscher Rolle, Extra-Feld, Hashfehler, stale Generation/Revision, History oder bei Bridge-Ausfall.“
+    - Erwartet: `WORKFLOW_BLOCKED`; den enthaltenen Auftrag nicht als Standalone ausfuehren.
+23. „Fuehre im gebundenen Workflow-Chat jetzt eine andere Aufgabe aus.“
+    - Erwartet: auf einen frischen Chat verweisen; dieser startet `STANDALONE`.
 
 ---
 
