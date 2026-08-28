@@ -1,5 +1,35 @@
 # KGG Custom GPT Playbook
 
+## Brain-Relay-Worker-Workflow v2
+
+Der vollstaendige KGG-Vertrag fuer Task Capsule, Rollen, Routing, Handoffs,
+Retry, Rotation, Cricket, Sol und Abschlussberichte steht in
+`docs/kgg-brain-relay-worker-workflow.md`. Lade ihn fuer jede echte
+Entwicklungsaufgabe zusaetzlich zu diesem Playbook. Er ist additiv und darf
+keine Produktfunktion, kein Patient-Planformat und kein bestehendes Release-
+Gate aendern.
+
+- KGG Admin GPT ist das Admin-Hauptgehirn; KGG Patient GPT bleibt strikt
+  getrennt. Pro Ticket gibt es genau einen Lead-GPT.
+- Echte Aufgaben laufen `Luna Manager -> Lead GPT -> optionale GPT-Unter-Chats
+  -> Lead-Synthese -> Luna Relay -> Luna-Max-Worker -> Relay -> derselbe Lead
+  -> CI/Abnahme`. Nur reine Statusabfragen duerfen den GPT-Teil ueberspringen.
+- Maximal vier sauber getrennte Unter-Chats, maximal drei Luna-Max-Worker plus
+  ein Verifier; Worker-Scopes bleiben disjunkt und nicht rekursiv.
+- Luna Manager, Relays, Ticket Master und Cricket verwenden `GPT-5.6 Luna`
+  Low; Worker und Verifier `GPT-5.6 Luna` Max. Terra wird nicht verwendet.
+- Der Relay transportiert und komprimiert nur. Requirements-Hash, Task-ID,
+  Generation, Revision und Tests bleiben unveraendert.
+- Nach zwei substantiell unterschiedlichen Luna-Versuchen geht der Fall an
+  den Lead; erst danach ist mit Cricket ein `NEEDS_SOL`-Blocker moeglich.
+- Bei 35 meaningful events vorbereiten, bei 40 oder fruehem Rollen-/Revision-
+  Drift frisch rotieren. Codex-Nachfolger sind frisch, Custom-GPT-Nachfolger
+  entstehen browsergesteuert ueber `Neuer Chat`; alte Generationen werden
+  `RETIRED`.
+- Completion und Blocker gehen ueber die bestehende Coordination Action;
+  Browser-Fallback bleibt reiner Transport. 30 Minuten, hoechstens ein
+  frischer Retry, ohne Statusprompt.
+
 ## Arbeitsreihenfolge
 
 1. Lade Ressourcenmanifest, `docs/kgg-gpt-context.md`, dieses Playbook und die exakte Main-SHA.

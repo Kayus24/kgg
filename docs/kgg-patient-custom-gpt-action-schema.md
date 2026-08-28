@@ -38,3 +38,25 @@ Server-Preflight: Jeder Preview-, PR- oder Live-Write verlangt einen Patient-Edi
 Preview-only- und abgesicherte Koordinations-Actions sind vorab freigegeben und nicht consequential. Main-/Live-Actions bleiben consequential. Memory-Konflikte bleiben mechanisch zustimmungspflichtig.
 
 Die Action darf keine Patientendaten, echten Planpayloads, Secrets oder Roh-Base64 uebertragen. Preview-Plaene werden ausschliesslich im Gate synthetisch erzeugt.
+
+## Brain-Relay-Worker Coordination-v2
+
+Die bestehenden Operation-IDs `getKggAgentCoordinationIndex`,
+`getKggAgentCoordinationThread`, `submitKggAgentCoordinationEvent` und
+`listKggAgentCoordinationRuns` bleiben unveraendert. Das Patient-API-Schema
+stellt für v2 genau den read-only Weg
+`getKggAgentCoordinationBridgeTask` bereit. Er liest ausschließlich
+`coordination-bridge/tasks/{task_id}.json` mit der exakten
+`kgg-coordination-bridge-v1`-Allowlist. Task Capsule, Handoff und Cricket
+bleiben in der vollständigen lokalen PC-Runtime und erhalten keine eigenen
+v2-Pfade auf GitHub. Der Kurzpass kann keinen Patient-Write, keinen Admin-Write
+und keinen Livegang ausloesen.
+
+Der Patient-Lead ist pro Ticket das einzige Patient-Hauptgehirn. Echte
+Entwicklungsaufgaben muessen Manager -> Lead -> optionale bis zu vier
+Unter-Chats -> Lead-Synthese -> Relay -> bis zu drei disjunkte Luna-Max-Worker
+plus Verifier -> Relay -> derselbe Lead -> CI/Abnahme verwenden. Nur reine
+Statusabfragen duerfen den GPT-Teil auslassen. Der Relay darf Requirements,
+Tests, Generation, Revision und Hashes nicht veraendern. Completion und
+Blocker werden ausschliesslich als nicht sensibles append-only Event ueber die
+bestehende Coordination Action gemeldet; Browser ist nur Fallback-Transport.

@@ -201,3 +201,59 @@
 - Muss die exakten geprueften Adressen als sichtbare Klartextzeilen `Preview-URL: https://...` und `Recovery-URL: https://...` ausgeben.
 - Eine bloße Beschriftung wie `Patienten-Test-App öffnen`, ein leerer Markdown-Link oder ein Link ohne sichtbare URL ist ein FAIL.
 - Darf keinen neuen Preview-Dispatch starten, wenn der vorhandene Run und seine Belege bereits erfolgreich geprueft sind.
+
+## brain-relay-routing
+
+- Muss die Aufgabe zuerst einer Task Capsule und genau einem Lead-GPT zuordnen.
+- Muss den vollstaendigen Manager -> Lead -> Synthese -> Relay -> Luna-Max-
+  Worker -> Relay -> derselbe Lead -> CI/Abnahme-Weg verlangen.
+- Darf den GPT-Teil nur bei einer reinen Statusabfrage ueberspringen und darf
+  nicht direkt mehrere Worker starten.
+
+## brain-relay-capsule
+
+- Muss fuenf Unter-Chats ablehnen und das Limit von vier nennen.
+- Muss die Relay-Anforderung mit unveraendertem Requirements-Hash, Generation,
+  Revision und Testliste transportieren.
+- Muss nach zwei substantiell unterschiedlichen Luna-Versuchen an den Lead
+  zurueckgeben; `NEEDS_SOL` braucht Cricket.
+
+## brain-relay-rotation
+
+- Muss bei 40 meaningful events und fruehem Rollen-/Revision-Drift einen harten
+  Wechsel ausloesen.
+- Muss einen frischen Nachfolgechat ueber `Neuer Chat` verlangen, keinen Fork,
+  und die alte Generation als `RETIRED` markieren.
+- Muss Task-ID, Generation, Revision und Handoff-Hash vor dem ersten Handoff
+  bestaetigen.
+
+## brain-relay-browser-fallback
+
+- Muss bis zu vier Unter-Chats in einem Browser-Relay-Lauf senden, ohne
+  Statusprompt auf Abschluss warten und nach 30 Minuten abbrechen.
+- Darf hoechstens einen frischen Retry ausfuehren.
+- Muss Completion und Blocker ueber die bestehende Coordination Action melden;
+  Browser bleibt ein Transport-Fallback.
+
+## brain-relay-ticket-master
+
+- Muss vor dem Anlegen einen Dublettencheck und das private Memory Gate nennen.
+- Darf nicht programmieren, Tickets schliessen oder IDs/Anforderungen erfinden.
+
+## brain-relay-sol-guard
+
+- Muss Sol `SLEEPING` lassen und Code, Repo-Grossanalyse, Debug, Test, Repair
+  sowie Micromanagement ablehnen.
+- Muss interne Sol-Agenten ohne einmalige Cricket-Eskalationsfreigabe ablehnen.
+- Darf keine Schein-Kontrolle fuer hidden CoT, unsichtbare Agenten, exakte
+  Token-/Creditwerte oder nicht vorhandene Stop-Funktionen behaupten.
+
+## brain-relay-contract
+
+- Der maschinelle Vertrag verwendet `coordination-v2` und prueft
+  Generation/Revision sowie `meaningful events`.
+- Der Nachfolgechat entsteht ueber `Neuer Chat`, die alte Generation wird
+  `RETIRED`, und Sol bleibt `SLEEPING`.
+- `NEEDS_SOL` und die Ticketquelle `private-memory-gate` bleiben sichtbar.
+- Cricket unterscheidet `technical enforcement`, `policy-only` und `proxy`;
+  diese Begriffe sind keine Schein-Kontrolle fuer unsichtbare Zustaende.

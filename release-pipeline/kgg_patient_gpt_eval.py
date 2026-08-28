@@ -27,6 +27,7 @@ def main() -> int:
         bootstrap = (ROOT / "docs/kgg-patient-custom-gpt-editor-bootstrap.md").read_text(encoding="utf-8")
         playbook = (ROOT / "docs/kgg-patient-custom-gpt-playbook.md").read_text(encoding="utf-8")
         prompts = (ROOT / "docs/kgg-patient-custom-gpt-test-prompts.md").read_text(encoding="utf-8")
+        brain_relay = (ROOT / "docs/kgg-brain-relay-worker-workflow.md").read_text(encoding="utf-8")
         raw_action = (ROOT / "docs/kgg-patient-custom-gpt-action-openapi.yaml").read_text(encoding="utf-8")
         api_action = (ROOT / "docs/kgg-patient-custom-gpt-action-api-openapi.yaml").read_text(encoding="utf-8")
         snapshot = json.loads(
@@ -40,6 +41,7 @@ def main() -> int:
                 "getKggPatientResourceManifest",
                 "getKggPatientContext",
                 "getKggPatientPlaybook",
+                "getKggBrainRelayWorkerWorkflow",
                 "validate_only",
                 "publish_preview",
                 "publish_patient_live",
@@ -50,7 +52,7 @@ def main() -> int:
                 "exakte Fuenf-Felder-Form",
                 "vollstaendige ausgeschriebene `https://`-Klartext-URLs",
                 "Leere oder nur beschriftete Markdown-Links sind kein Nachweis",
-                "patient-v3",
+                "patient-v4",
                 "Gut für PAT live",
                 "getKggAgentCoordinationIndex",
                 "submitKggAgentCoordinationEvent",
@@ -59,6 +61,10 @@ def main() -> int:
                 "patient-start-scan.js",
                 "patient-camera",
                 "patient-scan",
+                "coordination-v2",
+                "Neuer Chat",
+                "RETIRED",
+                "SLEEPING",
             ),
         )
         require(
@@ -71,6 +77,22 @@ def main() -> int:
                 "synthet",
                 "Environment",
                 "service-worker.js",
+                "Coordination-v2",
+                "getKggAgentCoordinationBridgeTask",
+                "coordination-bridge/tasks/{task_id}.json",
+            ),
+        )
+        require(
+            brain_relay,
+            "Brain-Relay-Worker workflow",
+            (
+                "Luna Manager",
+                "Lead-GPT",
+                "Luna-Max-Worker",
+                "hoechstens vier",
+                "L0-L3",
+                "SLEEPING",
+                "Abschluss- und Blockerbericht",
             ),
         )
         require(
@@ -95,6 +117,7 @@ def main() -> int:
                 "getKggPatientResourceManifest",
                 "getKggPatientSourceChunk",
                 "getKggPatientPreviewMeta",
+                "getKggBrainRelayWorkerWorkflow",
             ),
         )
         require(
@@ -109,6 +132,8 @@ def main() -> int:
                 "submitKggMemoryUpdate",
                 "getKggAgentCoordinationIndex",
                 "submitKggAgentCoordinationEvent",
+                "getKggAgentCoordinationBridgeTask",
+                "coordination-bridge/tasks/{task_id}.json",
             ),
         )
         for label, schema in (("raw", raw_action), ("api", api_action)):
@@ -127,7 +152,7 @@ def main() -> int:
                 {
                     "status": "PASS",
                     "profile": "patientProduction",
-                    "promptCases": 14,
+                    "promptCases": 18,
                     "rawOperations": len(re.findall(r"^\s+operationId:", raw_action, re.MULTILINE)),
                     "apiOperations": len(re.findall(r"^\s+operationId:", api_action, re.MULTILINE)),
                 }

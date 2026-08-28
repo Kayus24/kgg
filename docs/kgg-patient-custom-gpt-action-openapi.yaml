@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: KGG Patient Update Agent Read API
-  version: 1.0.0
+  version: 1.1.0
   description: Read-only live context, source and preview evidence for the private KGG patient Custom GPT.
 servers:
   - url: https://raw.githubusercontent.com
@@ -123,6 +123,18 @@ paths:
       responses:
         "200":
           description: Patient source chunk Markdown.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /Kayus24/kgg/main/docs/kgg-brain-relay-worker-workflow.md:
+    get:
+      operationId: getKggBrainRelayWorkerWorkflow
+      summary: Get the additive Brain-Relay-Worker coordination contract and role runbooks.
+      x-openai-isConsequential: false
+      responses:
+        "200":
+          description: Brain-Relay-Worker workflow Markdown.
           content:
             text/plain:
               schema:

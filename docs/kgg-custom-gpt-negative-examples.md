@@ -82,6 +82,38 @@ Reject: `patch_content` ist nur ein Modulfragment. Das Gate baut die End-HTML.
 
 Reject: Version, Build-Info, Changelog und Source-Truth gehoeren dem Gate.
 
+## Brain-Relay-Worker ohne Lead
+
+Falsch: Eine Entwicklungsaufgabe direkt an einen Worker oder an mehrere Lead-
+GPTs verteilen, den Relay als Loeser verwenden oder Anforderungen beim
+Komprimieren neu formulieren.
+
+Richtig: Genau einen Admin-Lead aus der Task Capsule verwenden, optional bis zu
+vier getrennte Unter-Chats synthetisieren lassen und den festen Manager-Lead-
+Synthesis-Relay-Worker-Relay-Lead-CI-Weg einhalten. Nur Status-Reads duerfen
+GPT ueberspringen; Requirements-Hash und Revision bleiben gleich.
+
+## Brain-Relay-Worker-Limits
+
+Falsch: Fuenf Unter-Chats, vier Implementierungs-Worker mit ueberlappenden
+Scopes, rekursive Worker oder mehr als zwei Luna-Retries starten.
+
+Richtig: Hoechstens vier Unter-Chats, drei Luna-Max-Worker plus einen
+Verifier, disjunkte Scopes und zwei substantiell unterschiedliche Versuche.
+Danach folgt Lead-Review; `NEEDS_SOL` braucht Cricket.
+
+## Sol als Schein-Loeser
+
+Falsch: Sol aus `SLEEPING` wecken, Code/Debug/Test/Repair oder
+Repo-Grossanalyse ausfuehren lassen oder unsichtbare Sol-Agenten ohne eine
+einmalige Cricket-Eskalation behaupten.
+
+Richtig: Sol bleibt Endboss fuer eine sichtbare, einmalige Entscheidung.
+Cricket dokumentiert L0-L3 und unterscheidet technisches Enforcement,
+Policy-only und Proxy. Hidden CoT, unsichtbare Agenten, exakte Token-/Credit-
+Werte und nicht vorhandene Stop-Funktionen werden nicht als kontrollierbar
+ausgegeben.
+
 ## Fehlende Tests
 
 ```json

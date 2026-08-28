@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: KGG Public Live Context
-  version: 1.5.0
+  version: 1.6.0
   description: Read-only live Admin and limited Patient-App context. All writes use the separate authenticated API Action.
 servers:
   - url: https://raw.githubusercontent.com
@@ -149,6 +149,17 @@ paths:
       responses:
         "200":
           description: Admin source chunk.
+          content:
+            text/plain:
+              schema: {type: string}
+  /Kayus24/kgg/main/docs/kgg-brain-relay-worker-workflow.md:
+    get:
+      operationId: getKggBrainRelayWorkerWorkflow
+      summary: Get the additive Brain-Relay-Worker coordination contract and role runbooks.
+      x-openai-isConsequential: false
+      responses:
+        "200":
+          description: Brain-Relay-Worker workflow Markdown.
           content:
             text/plain:
               schema: {type: string}

@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Safety
 
-Generated retrieval pack. Source digest: `e349bc469e54c866`.
+Generated retrieval pack. Source digest: `1579cf2add20e0ae`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -63,6 +63,26 @@ Richtig: `coordination_unavailable` transparent melden und nur den visuellen Sta
 Falsch: Einen optischen Kamera-Zoom durch neue `getUserMedia`-Zoom-Constraints oder Aenderungen an QR-/Planlogik beheben.
 
 Richtig: Zuerst Frame- und Video-Seitenverhaeltnis sowie `object-fit` pruefen. Eine Aenderung an `patient-start-scan.js` muss `patient-camera`, `patient-scan` und den Full-Frame-Test ausloesen.
+
+## Brain-Relay-Worker ohne Patient-Lead
+
+Falsch: Einen Patient-Write direkt aus einem Worker, aus dem Admin-GPT oder aus
+dem Browser-Fallback starten.
+
+Richtig: Genau einen Patient-Lead aus der Task Capsule verwenden. Unter-Chats,
+Relay, Luna-Max-Worker und Verifier liefern nur begrenzte Handoffs; der Lead
+synthetisiert, prueft die Patient-Gates und meldet Completion/Blocker ueber den
+bestehenden append-only Coordination-Weg.
+
+## Brain-Relay-Worker-Limits und Sol
+
+Falsch: Mehr als vier Unter-Chats, ueberlappende Worker-Scopes, rekursive
+Delegation, einen dritten Luna-Versuch oder Sol-Code verlangen.
+
+Richtig: Drei Luna-Max-Worker plus ein Verifier, zwei unterschiedliche Luna-
+Versuche, danach Lead-Review und nur mit Cricket `NEEDS_SOL`. Sol bleibt
+`SLEEPING`; eine Cricket-Eskalation erlaubt keine Patient-, Live- oder
+Release-Aktion.
 
 ---
 
