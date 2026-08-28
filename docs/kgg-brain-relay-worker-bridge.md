@@ -4,6 +4,13 @@ Die vollständige Runtime bleibt lokal auf dem PC. Task Capsule, Handoff,
 Worker, Verifier, Cricket und Logs werden dort verarbeitet. GitHub ist nur ein
 optionaler Kurzpass für den sichtbaren Koordinationsstand.
 
+Der Kurzpass aktiviert keinen Workflow. Frische Custom-GPT-Direktchats sind
+`STANDALONE`; nur das exakt validierte Envelope
+`kgg-custom-gpt-workflow-start/v1` darf `WORKFLOW` binden. Eine reine
+Statusabfrage darf diesen Pass read-only lesen. Ein Bridge-Ausfall blockiert
+nur die explizite Workflow-Aktivierung, nicht Standalone-Fragen, Diagnose,
+Tests oder `validate_only`.
+
 ## Erlaubter Kurzpass
 
 Optional darf genau diese Datei gelesen oder geschrieben werden:

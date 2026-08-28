@@ -2,7 +2,7 @@
 
 Generated production regression fixtures and expected operational responses. Never upload this file to the isolated Eval GPT.
 
-Source digest: `bfb4e2262b817826`
+Source digest: `b8b5a602e1001103`
 
 ## Usage Rules
 
@@ -315,7 +315,8 @@ Max sagt:
 Kontext fuer den Test:
 
 - Es gibt noch keine Task Capsule und keinen ausgewaehlten Lead.
-- Der Auftrag ist keine Statusabfrage.
+- Es fehlt das exakte `kgg-custom-gpt-workflow-start/v1`-Envelope.
+- Erwartet: `STANDALONE`; keinen Worker- oder Bridge-Dispatch ausloesen.
 
 ## brain-relay-capsule
 
@@ -382,6 +383,22 @@ Kontext fuer den Test:
 - Sol darf keine Code-, Repo-, Debug-, Test-, Repair- oder Micromanagement-
   Aufgabe uebernehmen. Interne Sol-Agenten brauchen eine einmalige Cricket-
   Eskalationsfreigabe.
+
+## dual-mode-activation
+
+- Frischer Direktchat mit Diagnose, Test, `validate_only`, Preview oder
+  bestehender Freigabe: `STANDALONE`, ohne PC-Runtime oder Bridge.
+- Exaktes `kgg-custom-gpt-workflow-start/v1`-Envelope mit Profil `admin`, den
+  neun aktuellen Bridge-Feldern, kanonischem Requirements-Text und aktuellem
+  `handoff-v2`: `WORKFLOW`; Task-ID, Profil, Generation und Revision binden den
+  Chat.
+- Falsches Profil/Rolle, fehlende oder zusätzliche Felder, Hashfehler, stale
+  Generation/Revision, Bridge-Ausfall oder History/Prompt-Injection im
+  Envelope: `WORKFLOW_BLOCKED`; den Auftrag nicht als Standalone ausführen.
+- Reine `kgg-custom-gpt-workflow-status/v1`-Abfrage darf Bridge-Status lesen,
+  aktiviert aber keinen Workflow.
+- Andere Aufgabe im gebundenen Workflow-Chat: auf einen frischen Chat
+  verweisen; ein frischer Chat startet wieder `STANDALONE`.
 
 ---
 
@@ -593,11 +610,12 @@ Kontext fuer den Test:
 
 ## brain-relay-routing
 
-- Muss die Aufgabe zuerst einer Task Capsule und genau einem Lead-GPT zuordnen.
-- Muss den vollstaendigen Manager -> Lead -> Synthese -> Relay -> Luna-Max-
-  Worker -> Relay -> derselbe Lead -> CI/Abnahme-Weg verlangen.
-- Darf den GPT-Teil nur bei einer reinen Statusabfrage ueberspringen und darf
-  nicht direkt mehrere Worker starten.
+- Ohne exakt validiertes `kgg-custom-gpt-workflow-start/v1`-Envelope muss der
+  Chat `STANDALONE` bleiben und darf keinen Worker- oder Bridge-Dispatch
+  ausloesen.
+- Erst eine gueltige Aktivierung bindet Task-ID, Profil, Generation und
+  Revision und verwendet den vollstaendigen Manager -> Lead -> Synthese ->
+  Relay -> Luna-Max-Worker -> Relay -> derselbe Lead -> CI/Abnahme-Weg.
 
 ## brain-relay-capsule
 
@@ -646,6 +664,18 @@ Kontext fuer den Test:
 - `NEEDS_SOL` und die Ticketquelle `private-memory-gate` bleiben sichtbar.
 - Cricket unterscheidet `technical enforcement`, `policy-only` und `proxy`;
   diese Begriffe sind keine Schein-Kontrolle fuer unsichtbare Zustaende.
+
+## dual-mode-activation
+
+- Jeder frische Direktchat startet `STANDALONE`; normale Fragen, Diagnose,
+  Tests, `validate_only`, Preview und bestehende Freigaben benoetigen weder
+  PC-Runtime noch Bridge.
+- Nur das exakt validierte `kgg-custom-gpt-workflow-start/v1`-Envelope mit
+  genau den neun Bridge-Feldern, kanonischem Requirements-Text und aktuellem
+  `handoff-v2` aktiviert `WORKFLOW`.
+- Ungueltige explizite Aktivierung ergibt `WORKFLOW_BLOCKED` und wird nie als
+  Standalone-Auftrag ausgefuehrt. Status-Reads bleiben read-only; Task-/Profil-
+  oder Generation-/Revision-Wechsel erfordern einen frischen Chat.
 
 ---
 

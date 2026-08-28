@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Architecture
 
-Generated retrieval pack. Source digest: `d2eaf7810d001c93`.
+Generated retrieval pack. Source digest: `201893d2109fa2df`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -73,7 +73,7 @@ Reload before every diagnosis involving current code and before every Preview, P
 - QR/hash/storage changes use `risk_class=interface` and stay backward compatible.
 - Breaking interface changes, therapist app, PDF and Android/APK stay outside this agent.
 - A Custom GPT supplies the Preview URL but does not claim to control the Codex in-app browser.
-- Real development tasks use exactly one Patient Lead GPT and the Manager -> Lead -> optional sub-chats -> Lead synthesis -> Relay -> Luna-Max-Worker -> Relay -> same Lead -> CI route; only pure status reads may skip GPT.
+- Fresh direct chats are STANDALONE. Only a fully validated `kgg-custom-gpt-workflow-start/v1` envelope activates WORKFLOW; invalid activation is WORKFLOW_BLOCKED, and status reads never activate it. See the central workflow contract.
 - Coordination-v2 Task, Handoff and Cricket reads are additive; the existing append-only Coordination Action remains the only write path.
 - Use at most four GPT sub-chats, three Luna-Max workers plus one verifier, two materially different Luna attempts, and fresh chat rotation at 35/40 meaningful events or early drift.
 

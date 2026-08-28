@@ -52,11 +52,13 @@ bleiben in der vollständigen lokalen PC-Runtime und erhalten keine eigenen
 v2-Pfade auf GitHub. Der Kurzpass kann keinen Patient-Write, keinen Admin-Write
 und keinen Livegang ausloesen.
 
-Der Patient-Lead ist pro Ticket das einzige Patient-Hauptgehirn. Echte
-Entwicklungsaufgaben muessen Manager -> Lead -> optionale bis zu vier
-Unter-Chats -> Lead-Synthese -> Relay -> bis zu drei disjunkte Luna-Max-Worker
-plus Verifier -> Relay -> derselbe Lead -> CI/Abnahme verwenden. Nur reine
-Statusabfragen duerfen den GPT-Teil auslassen. Der Relay darf Requirements,
-Tests, Generation, Revision und Hashes nicht veraendern. Completion und
-Blocker werden ausschliesslich als nicht sensibles append-only Event ueber die
-bestehende Coordination Action gemeldet; Browser ist nur Fallback-Transport.
+Ein frischer Direktchat ist `STANDALONE`; normale Fragen, Diagnose, Tests,
+`validate_only`, Preview und bestehende Freigaben brauchen keine PC-Runtime und
+keine Bridge. Erst das exakt validierte
+`kgg-custom-gpt-workflow-start/v1`-Envelope aktiviert den zentralen Workflow;
+eine ungültige Aktivierung wird `WORKFLOW_BLOCKED` und nicht als Standalone-
+Auftrag ausgeführt. Eine Statusabfrage darf read-only Bridge-Status lesen,
+aktiviert aber nichts. Der Patient-Lead bleibt pro aktiviertem Ticket das
+einzige Patient-Hauptgehirn; Requirements, Tests, Generation, Revision und
+Hashes bleiben unverändert. Details stehen ausschließlich im zentralen
+Workflow-Vertrag.

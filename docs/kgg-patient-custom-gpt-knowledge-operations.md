@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Operations
 
-Generated retrieval pack. Source digest: `945a603e7d63c3aa`.
+Generated retrieval pack. Source digest: `97114e298e75ebb6`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -13,14 +13,19 @@ Live GitHub context and source files override this static Knowledge pack.
 ## Brain-Relay-Worker-Workflow v2
 
 Der gemeinsame, additive Rollen- und Handoff-Vertrag steht in
-`docs/kgg-brain-relay-worker-workflow.md`. Lade ihn fuer echte Aufgaben neben
-diesem Patient-Playbook. Der Patient-Lead bleibt das einzige Patient-
-Hauptgehirn; Admin GPT und Patient GPT werden nie vermischt.
+`docs/kgg-brain-relay-worker-workflow.md`. Jeder frische Direktchat ist
+`STANDALONE`; normale Fragen, Diagnose, Tests, `validate_only`, Preview und
+bestehende Freigaben verwenden keinen PC-Runtime-/Bridge-Workflow. Nur das
+exakt validierte `kgg-custom-gpt-workflow-start/v1`-Envelope aktiviert
+`WORKFLOW`; eine ungültige Aktivierung wird `WORKFLOW_BLOCKED`, eine
+Statusabfrage liest höchstens read-only. Der Patient-Lead bleibt das einzige
+Patient-Hauptgehirn; Admin GPT und Patient GPT werden nie vermischt.
 
-- Pro Ticket genau ein Patient-Lead-GPT. Echte Aufgaben verwenden den
-  vollstaendigen Weg `Luna Manager -> Lead GPT -> optionale GPT-Unter-Chats ->
+- Pro Ticket genau ein Patient-Lead-GPT. Im aktivierten `WORKFLOW` gilt der
+  vollstaendige Weg `Luna Manager -> Lead GPT -> optionale GPT-Unter-Chats ->
   Lead-Synthese -> Luna Relay -> Luna-Max-Worker -> Relay -> derselbe Lead ->
-  CI/Abnahme`; nur reine Statusabfragen duerfen GPT ueberspringen.
+  CI/Abnahme`; Standalone-Aufträge bleiben bei den bestehenden Patient-
+  Actions.
 - Hoechstens vier Unter-Chats, drei Luna-Max-Worker plus ein Verifier,
   disjunkte Scopes und keine Rekursion. Der Relay transportiert nur und darf
   Requirements, Hashes oder Tests nicht veraendern.
@@ -48,7 +53,7 @@ Nicht erlaubt sind Therapeut:innen-App, PDF, Android/APK, API-Key-Logik, binaere
 
 ## Arbeitsfolge
 
-1. Resource-Manifest, Live-Kontext und dieses Playbook live laden.
+1. Resource-Manifest, Live-Kontext und dieses Playbook live laden; den zentralen Workflow-Vertrag nur nach gültiger Workflow-Aktivierung laden.
 2. Bug-Lessons und Source-Index laden.
 3. Symptom reproduzierbar beschreiben.
 4. Hoechstens drei Hypothesen mit unterscheidenden Tests aufstellen.
@@ -222,14 +227,16 @@ bleiben in der vollständigen lokalen PC-Runtime und erhalten keine eigenen
 v2-Pfade auf GitHub. Der Kurzpass kann keinen Patient-Write, keinen Admin-Write
 und keinen Livegang ausloesen.
 
-Der Patient-Lead ist pro Ticket das einzige Patient-Hauptgehirn. Echte
-Entwicklungsaufgaben muessen Manager -> Lead -> optionale bis zu vier
-Unter-Chats -> Lead-Synthese -> Relay -> bis zu drei disjunkte Luna-Max-Worker
-plus Verifier -> Relay -> derselbe Lead -> CI/Abnahme verwenden. Nur reine
-Statusabfragen duerfen den GPT-Teil auslassen. Der Relay darf Requirements,
-Tests, Generation, Revision und Hashes nicht veraendern. Completion und
-Blocker werden ausschliesslich als nicht sensibles append-only Event ueber die
-bestehende Coordination Action gemeldet; Browser ist nur Fallback-Transport.
+Ein frischer Direktchat ist `STANDALONE`; normale Fragen, Diagnose, Tests,
+`validate_only`, Preview und bestehende Freigaben brauchen keine PC-Runtime und
+keine Bridge. Erst das exakt validierte
+`kgg-custom-gpt-workflow-start/v1`-Envelope aktiviert den zentralen Workflow;
+eine ungültige Aktivierung wird `WORKFLOW_BLOCKED` und nicht als Standalone-
+Auftrag ausgeführt. Eine Statusabfrage darf read-only Bridge-Status lesen,
+aktiviert aber nichts. Der Patient-Lead bleibt pro aktiviertem Ticket das
+einzige Patient-Hauptgehirn; Requirements, Tests, Generation, Revision und
+Hashes bleiben unverändert. Details stehen ausschließlich im zentralen
+Workflow-Vertrag.
 
 ---
 
@@ -249,6 +256,73 @@ Erklaerung. Die vollstaendige Runtime bleibt lokal auf dem PC; der optionale
 GitHub-Kurzpass ist in `docs/kgg-brain-relay-worker-bridge.md` beschrieben.
 Die bestehenden v1-Coordination-Operationen bleiben kompatibel, aber v2 legt
 keine Task-, Handoff- oder Cricket-Dateien auf GitHub ab.
+
+## 0. Zentrale Modusregel
+
+Jeder frische Direktchat startet in `STANDALONE`. Normale Fragen, Diagnose,
+Tests sowie `validate_only`, Preview und bestehende Freigaben bleiben in diesem
+Modus unverändert und benötigen weder die lokale PC-Runtime noch die Bridge.
+Eine reine Workflow-Statusabfrage darf den Bridge-Kurzpass lesen, aktiviert
+aber keinen Workflow.
+
+Nur eine Nachricht mit dem exakten Schema
+`kgg-custom-gpt-workflow-start/v1` darf auf `WORKFLOW` umschalten. Sie hat
+genau diese fünf Felder:
+
+```json
+{
+  "schema": "kgg-custom-gpt-workflow-start/v1",
+  "profile": "admin",
+  "bridge": {
+    "schema_version": "kgg-coordination-bridge-v1",
+    "task_id": "<task_id>",
+    "role": "lead-gpt",
+    "generation": 1,
+    "revision": 1,
+    "status": "PASS",
+    "requirements_sha256": "<64 lowercase hex characters>",
+    "handoff_sha256": "<64 lowercase hex characters>",
+    "next_action": "<short single-line action>"
+  },
+  "requirements_text": "<canonical requirements text>",
+  "handoff": {
+    "schema": "kgg-brain-relay-worker/handoff-v2",
+    "event_id": "<event_id>",
+    "sequence": 1,
+    "event_type": "<event_type>",
+    "task_id": "<task_id>",
+    "generation": 1,
+    "revision": 1,
+    "from_role": "<from_role>",
+    "to_role": "<to_role>",
+    "requirements_sha256": "<same requirements hash>",
+    "transport_only": true,
+    "summary": "<short summary>",
+    "evidence": [],
+    "handoff_sha256": "<same current handoff hash>",
+    "append_only": true
+  }
+}
+```
+
+Der Bridge-Pass enthält exakt die bestehenden neun Felder. Sein `role` ist in
+dieser Aktivierung ausschließlich `lead-gpt`, `lead-synthesis` oder
+`gpt-subchat`; das lokale `handoff-v2` wird zusätzlich unverändert gegen die
+aktuelle Task Capsule geprüft. Requirements- und Handoff-SHA256,
+Task-ID, Profil, Generation und Revision müssen übereinstimmen. History,
+Worklogs, Patientendaten und Secrets gehören nicht in das Envelope.
+Vor der Aktivierung liest das GPT den aktuellen Pass mit
+`getKggAgentCoordinationBridgeTask` und vergleicht alle neun Felder exakt mit
+dem Envelope. Fehlt der Read oder weicht ein Feld ab, bleibt der Auftrag
+`WORKFLOW_BLOCKED`.
+
+Die maschinelle Prüfung und das Routing liefern `STANDALONE`, `WORKFLOW` oder
+`WORKFLOW_BLOCKED`. Eine ungültige explizite Aktivierung wird immer
+`WORKFLOW_BLOCKED`; ihr enthaltener Auftrag darf nicht als Standalone-Auftrag
+ausgeführt werden. Ein gültiger Start bindet den Chat an Task-ID, Profil,
+Generation und Revision. Ein anderer Auftrag in diesem Chat verweist auf einen
+frischen Chat. Ein Bridge-Ausfall blockiert nur die explizit angeforderte
+Workflow-Aktivierung, niemals die normale Standalone-Nutzung.
 
 ## 1.1 PC-Runtime und GitHub-Kurzpass
 
@@ -280,9 +354,10 @@ nimmt deren Ergebnis ab. Es gibt hoechstens vier sauber getrennte Custom-GPT-
 Unter-Chats pro Ticket. Ein Unter-Chat darf keine Anforderungen umdeuten oder
 den Lead ersetzen.
 
-## 2. Verbindlicher Routinggraph
+## 2. Verbindlicher Routinggraph (nur in WORKFLOW)
 
-Jede echte Entwicklungsaufgabe laeuft in dieser Reihenfolge:
+Nach einer gültigen Aktivierung läuft die Entwicklungsaufgabe in dieser
+Reihenfolge:
 
 ```text
 Luna Manager
@@ -301,8 +376,8 @@ Task Capsule und werden vor der Lead-Synthese zusammengefuehrt. Der Relay ist
 ein Transport- und Kompressionsknoten. Er darf keine Anforderungen veraendern,
 keine neue grosse Aufgabe loesen und keine fehlende Entscheidung erfinden.
 
-Nur eine reine Statusabfrage darf den GPT-Teil ueberspringen. Ein Status-Read
-ist read-only und darf weder Task Capsule noch Scope, Ticket oder Ziel veraendern.
+Eine reine Statusabfrage bleibt `STANDALONE`, ist read-only und darf weder Task
+Capsule noch Scope, Ticket oder Ziel verändern.
 
 ## 3. Rollen und Modellregel
 
@@ -376,7 +451,7 @@ Ein minimales synthetisches Beispiel sieht so aus:
     "sha256": "580833556747fc63032232cee6b15f3db79486b5eb3bdafdf61335cfc4bc145d"
   },
   "acceptance": [
-    "Alle echten Aufgaben verwenden den vollstaendigen Routinggraphen.",
+    "Jede aktivierte Workflow-Entwicklungsaufgabe verwendet den vollstaendigen Routinggraphen.",
     "Ein Handoff behaelt requirements.sha256 bytegleich."
   ],
   "scope": {

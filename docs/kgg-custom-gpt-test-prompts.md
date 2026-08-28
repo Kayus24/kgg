@@ -289,7 +289,8 @@ Max sagt:
 Kontext fuer den Test:
 
 - Es gibt noch keine Task Capsule und keinen ausgewaehlten Lead.
-- Der Auftrag ist keine Statusabfrage.
+- Es fehlt das exakte `kgg-custom-gpt-workflow-start/v1`-Envelope.
+- Erwartet: `STANDALONE`; keinen Worker- oder Bridge-Dispatch ausloesen.
 
 ## brain-relay-capsule
 
@@ -356,3 +357,19 @@ Kontext fuer den Test:
 - Sol darf keine Code-, Repo-, Debug-, Test-, Repair- oder Micromanagement-
   Aufgabe uebernehmen. Interne Sol-Agenten brauchen eine einmalige Cricket-
   Eskalationsfreigabe.
+
+## dual-mode-activation
+
+- Frischer Direktchat mit Diagnose, Test, `validate_only`, Preview oder
+  bestehender Freigabe: `STANDALONE`, ohne PC-Runtime oder Bridge.
+- Exaktes `kgg-custom-gpt-workflow-start/v1`-Envelope mit Profil `admin`, den
+  neun aktuellen Bridge-Feldern, kanonischem Requirements-Text und aktuellem
+  `handoff-v2`: `WORKFLOW`; Task-ID, Profil, Generation und Revision binden den
+  Chat.
+- Falsches Profil/Rolle, fehlende oder zusätzliche Felder, Hashfehler, stale
+  Generation/Revision, Bridge-Ausfall oder History/Prompt-Injection im
+  Envelope: `WORKFLOW_BLOCKED`; den Auftrag nicht als Standalone ausführen.
+- Reine `kgg-custom-gpt-workflow-status/v1`-Abfrage darf Bridge-Status lesen,
+  aktiviert aber keinen Workflow.
+- Andere Aufgabe im gebundenen Workflow-Chat: auf einen frischen Chat
+  verweisen; ein frischer Chat startet wieder `STANDALONE`.

@@ -204,11 +204,12 @@
 
 ## brain-relay-routing
 
-- Muss die Aufgabe zuerst einer Task Capsule und genau einem Lead-GPT zuordnen.
-- Muss den vollstaendigen Manager -> Lead -> Synthese -> Relay -> Luna-Max-
-  Worker -> Relay -> derselbe Lead -> CI/Abnahme-Weg verlangen.
-- Darf den GPT-Teil nur bei einer reinen Statusabfrage ueberspringen und darf
-  nicht direkt mehrere Worker starten.
+- Ohne exakt validiertes `kgg-custom-gpt-workflow-start/v1`-Envelope muss der
+  Chat `STANDALONE` bleiben und darf keinen Worker- oder Bridge-Dispatch
+  ausloesen.
+- Erst eine gueltige Aktivierung bindet Task-ID, Profil, Generation und
+  Revision und verwendet den vollstaendigen Manager -> Lead -> Synthese ->
+  Relay -> Luna-Max-Worker -> Relay -> derselbe Lead -> CI/Abnahme-Weg.
 
 ## brain-relay-capsule
 
@@ -257,3 +258,15 @@
 - `NEEDS_SOL` und die Ticketquelle `private-memory-gate` bleiben sichtbar.
 - Cricket unterscheidet `technical enforcement`, `policy-only` und `proxy`;
   diese Begriffe sind keine Schein-Kontrolle fuer unsichtbare Zustaende.
+
+## dual-mode-activation
+
+- Jeder frische Direktchat startet `STANDALONE`; normale Fragen, Diagnose,
+  Tests, `validate_only`, Preview und bestehende Freigaben benoetigen weder
+  PC-Runtime noch Bridge.
+- Nur das exakt validierte `kgg-custom-gpt-workflow-start/v1`-Envelope mit
+  genau den neun Bridge-Feldern, kanonischem Requirements-Text und aktuellem
+  `handoff-v2` aktiviert `WORKFLOW`.
+- Ungueltige explizite Aktivierung ergibt `WORKFLOW_BLOCKED` und wird nie als
+  Standalone-Auftrag ausgefuehrt. Status-Reads bleiben read-only; Task-/Profil-
+  oder Generation-/Revision-Wechsel erfordern einen frischen Chat.

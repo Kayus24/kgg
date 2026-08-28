@@ -41,7 +41,6 @@ def main() -> int:
                 "getKggPatientResourceManifest",
                 "getKggPatientContext",
                 "getKggPatientPlaybook",
-                "getKggBrainRelayWorkerWorkflow",
                 "validate_only",
                 "publish_preview",
                 "publish_patient_live",
@@ -52,7 +51,7 @@ def main() -> int:
                 "exakte Fuenf-Felder-Form",
                 "vollstaendige ausgeschriebene `https://`-Klartext-URLs",
                 "Leere oder nur beschriftete Markdown-Links sind kein Nachweis",
-                "patient-v4",
+                "patient-v5",
                 "Gut für PAT live",
                 "getKggAgentCoordinationIndex",
                 "submitKggAgentCoordinationEvent",
@@ -61,10 +60,10 @@ def main() -> int:
                 "patient-start-scan.js",
                 "patient-camera",
                 "patient-scan",
-                "coordination-v2",
-                "Neuer Chat",
-                "RETIRED",
-                "SLEEPING",
+                "STANDALONE",
+                "WORKFLOW",
+                "WORKFLOW_BLOCKED",
+                "kgg-custom-gpt-workflow-start/v1",
             ),
         )
         require(
@@ -91,6 +90,9 @@ def main() -> int:
                 "Luna-Max-Worker",
                 "hoechstens vier",
                 "L0-L3",
+                "coordination-v2",
+                "Neuer Chat",
+                "RETIRED",
                 "SLEEPING",
                 "Abschluss- und Blockerbericht",
             ),
@@ -108,6 +110,10 @@ def main() -> int:
                 "Scanner zoomt die Kamera",
                 "Koordinationsqueue liefert 404",
                 "lass patient-scan aus den Tests weg",
+                "dual-mode-activation",
+                "STANDALONE",
+                "WORKFLOW_BLOCKED",
+                "kgg-custom-gpt-workflow-start/v1",
             ),
         )
         require(
@@ -117,7 +123,6 @@ def main() -> int:
                 "getKggPatientResourceManifest",
                 "getKggPatientSourceChunk",
                 "getKggPatientPreviewMeta",
-                "getKggBrainRelayWorkerWorkflow",
             ),
         )
         require(
@@ -152,7 +157,7 @@ def main() -> int:
                 {
                     "status": "PASS",
                     "profile": "patientProduction",
-                    "promptCases": 18,
+                    "promptCases": 23,
                     "rawOperations": len(re.findall(r"^\s+operationId:", raw_action, re.MULTILINE)),
                     "apiOperations": len(re.findall(r"^\s+operationId:", api_action, re.MULTILINE)),
                 }

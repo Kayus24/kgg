@@ -116,12 +116,14 @@ Koordinations-Schreibweg: `submitKggAgentCoordinationEvent` mit `validate_only`
 und danach identischem `apply` fuer ein einzelnes nicht sensibles append-only
 Event.
 
-Das Routing lautet fuer echte Aufgaben Manager -> genau ein Lead-GPT -> null
-bis vier Unter-Chats -> derselbe Lead zur Synthese -> Relay -> Luna-Max-Worker
--> Relay -> derselbe Lead -> CI/Abnahme. Status-Reads duerfen GPT ueberspringen.
-Requirements-Hash, Generation, Revision und Handoff-Hash muessen bei jedem
-Relay gleich bleiben. Admin- und Patient-GPT nutzen getrennte Profiles,
-Snapshots und Gates.
+Ein frischer Direktchat ist `STANDALONE`; normale Fragen, Diagnose, Tests,
+`validate_only`, Preview und bestehende Freigaben brauchen keine PC-Runtime und
+keine Bridge. Erst das exakt validierte
+`kgg-custom-gpt-workflow-start/v1`-Envelope aktiviert den zentralen Workflow;
+eine ungültige Aktivierung wird `WORKFLOW_BLOCKED` und nicht als Standalone-
+Auftrag ausgeführt. Eine Statusabfrage darf read-only Bridge-Status lesen,
+aktiviert aber nichts. Details zu Allowlist, Profil, Rollen, Hashes, Generation
+und Revision stehen ausschließlich im zentralen Workflow-Vertrag.
 
 The public status channel is `gpt-preview/status/latest.json`, with per-request history under `gpt-preview/status/requests/<request_id>.json`. It contains only request/run state and no payload, patient data or secret. The Preview app polls it while open and through WorkManager in the background. This status channel is progress evidence, but final success still requires the run, tests, artifact, `meta.json`, HTML and Preview index.
 
