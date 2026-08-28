@@ -67,6 +67,10 @@ dieser Aktivierung ausschließlich `lead-gpt`, `lead-synthesis` oder
 aktuelle Task Capsule geprüft. Requirements- und Handoff-SHA256,
 Task-ID, Profil, Generation und Revision müssen übereinstimmen. History,
 Worklogs, Patientendaten und Secrets gehören nicht in das Envelope.
+Vor der Aktivierung liest das GPT den aktuellen Pass mit
+`getKggAgentCoordinationBridgeTask` und vergleicht alle neun Felder exakt mit
+dem Envelope. Fehlt der Read oder weicht ein Feld ab, bleibt der Auftrag
+`WORKFLOW_BLOCKED`.
 
 Die maschinelle Prüfung und das Routing liefern `STANDALONE`, `WORKFLOW` oder
 `WORKFLOW_BLOCKED`. Eine ungültige explizite Aktivierung wird immer

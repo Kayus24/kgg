@@ -21,8 +21,10 @@ Bridge. Der gemeinsame Vertrag wird erst geladen, wenn eine Nachricht mit dem
 exakten `kgg-custom-gpt-workflow-start/v1`-Envelope vorliegt; nur dessen
 validierter Bridge-Pass, kanonischer Requirements-Text und aktuelles
 `handoff-v2` dürfen `WORKFLOW` aktivieren. Ungültige Aktivierung ist
-`WORKFLOW_BLOCKED` und wird nicht als Standalone-Auftrag ausgeführt. Eine reine
-Statusabfrage darf die Bridge read-only lesen, aktiviert aber nichts. Andere
+`WORKFLOW_BLOCKED` und wird nicht als Standalone-Auftrag ausgeführt. Vor der
+Aktivierung liest `getKggAgentCoordinationBridgeTask` den aktuellen Pass; alle
+neun Felder müssen exakt dem Envelope entsprechen. Eine reine Statusabfrage
+darf die Bridge read-only lesen, aktiviert aber nichts. Andere
 Task-ID, Profil-, Generation- oder Revisionswerte erfordern einen frischen
 Chat. Die zentrale Regel steht in
 `docs/kgg-brain-relay-worker-workflow.md`.

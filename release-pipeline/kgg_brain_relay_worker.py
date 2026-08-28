@@ -623,7 +623,10 @@ def _validate_workflow_handoff_shape(handoff: Mapping[str, Any]) -> None:
 
 
 def validate_workflow_start(
-    start: Mapping[str, Any], capsule: Mapping[str, Any] | None = None
+    start: Mapping[str, Any],
+    capsule: Mapping[str, Any] | None = None,
+    *,
+    current_bridge: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Validate the only message that can switch a Custom GPT into WORKFLOW."""
     data = _object(start, "workflow_start")
@@ -662,6 +665,16 @@ def validate_workflow_start(
         validated_handoff,
         capsule=validated_capsule,
     )
+    if current_bridge is None:
+        _fail("workflow_start requires the current coordination bridge")
+    validated_current_bridge = validate_bridge(
+        current_bridge,
+        canonical_text,
+        validated_handoff,
+        capsule=validated_capsule,
+    )
+    if validated_current_bridge != validated_bridge:
+        _fail("workflow_start.bridge does not match the current coordination bridge")
     result = copy.deepcopy(data)
     result["requirements_text"] = canonical_text
     result["bridge"] = validated_bridge
@@ -686,9 +699,12 @@ def _validate_workflow_binding(binding: Mapping[str, Any]) -> dict[str, Any]:
         missing = sorted(WORKFLOW_BINDING_ALLOWED_FIELDS - set(data))
         extra = sorted(set(data) - WORKFLOW_BINDING_ALLOWED_FIELDS)
         _fail(f"workflow_binding fields must be exact; missing={missing}, extra={extra}")
+    profile = _string(data.get("profile"), "workflow_binding.profile")
+    if profile not in {"admin", "patient"}:
+        _fail("workflow_binding.profile must be admin or patient")
     return {
         "task_id": _task_id(data.get("task_id"), "workflow_binding.task_id"),
-        "profile": data.get("profile"),
+        "profile": profile,
         "generation": _positive_int(data.get("generation"), "workflow_binding.generation"),
         "revision": _positive_int(data.get("revision"), "workflow_binding.revision"),
     }
@@ -811,7 +827,21 @@ def route_chat_message(
         if bridge_available is False:
             return _blocked_route("workflow activation requires an available coordination bridge")
         try:
-            validated = validate_workflow_start(parsed, capsule)
+            current_bridge = bridge
+            if bridge_reader is not None:
+                embedded_bridge = _object(parsed.get("bridge"), "workflow_start.bridge")
+                task_id = _task_id(embedded_bridge.get("task_id"), "workflow_start.bridge.task_id")
+                try:
+                    current_bridge = bridge_reader(task_id)
+                except Exception:  # noqa: BLE001 - an unavailable read must fail closed
+                    return _blocked_route(
+                        "workflow activation requires an available coordination bridge"
+                    )
+            validated = validate_workflow_start(
+                parsed,
+                capsule,
+                current_bridge=current_bridge,
+            )
             new_binding = workflow_binding_for(capsule) if capsule is not None else None
             if new_binding is None:
                 return _blocked_route("workflow activation requires the current local Task Capsule")
@@ -887,10 +917,13 @@ def route_chat_message(
 
 
 def validate_workflow_activation(
-    start: Mapping[str, Any], capsule: Mapping[str, Any] | None = None
+    start: Mapping[str, Any],
+    capsule: Mapping[str, Any] | None = None,
+    *,
+    current_bridge: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Compatibility alias with the explicit activation terminology used by the editor contract."""
-    return validate_workflow_start(start, capsule)
+    return validate_workflow_start(start, capsule, current_bridge=current_bridge)
 
 
 def route_message(message: Any, **kwargs: Any) -> dict[str, Any]:
@@ -1350,10 +1383,18 @@ def self_test() -> None:
     )
 
     activation = synthetic_workflow_start(capsule)
-    validate_workflow_start(activation, capsule)
+    validate_workflow_start(
+        activation,
+        capsule,
+        current_bridge=activation["bridge"],
+    )
     if route_chat_message({"request": "diagnose only"})["mode"] != STANDALONE_MODE:
         _fail("self-test ordinary messages must default to STANDALONE")
-    active_route = route_chat_message(activation, capsule=capsule)
+    active_route = route_chat_message(
+        activation,
+        capsule=capsule,
+        bridge=activation["bridge"],
+    )
     if active_route["mode"] != WORKFLOW_MODE or active_route["binding"] != workflow_binding_for(capsule):
         _fail("self-test valid activation must bind the workflow identity")
     status_route = route_chat_message(
@@ -1364,12 +1405,20 @@ def self_test() -> None:
         _fail("self-test status reads must not activate a workflow")
     bad_activation = copy.deepcopy(activation)
     bad_activation["bridge"]["handoff_sha256"] = "a" * 64
-    blocked_route = route_chat_message(bad_activation, capsule=capsule)
+    blocked_route = route_chat_message(
+        bad_activation,
+        capsule=capsule,
+        bridge=activation["bridge"],
+    )
     if blocked_route["mode"] != WORKFLOW_BLOCKED_MODE or blocked_route["execute_standalone"]:
         _fail("self-test invalid activation must be blocked, not standalone")
     _expect_failure(
         "activation-handoff-hash",
-        lambda: validate_workflow_start(bad_activation, capsule),
+        lambda: validate_workflow_start(
+            bad_activation,
+            capsule,
+            current_bridge=activation["bridge"],
+        ),
         "handoff_sha256",
     )
     injected_activation = copy.deepcopy(activation)

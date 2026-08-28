@@ -13,7 +13,7 @@
     "profileVersion": "4.2.0",
     "editorBootstrap": {
       "path": "docs/kgg-custom-gpt-editor-bootstrap.md",
-      "sha256": "589f724987f7f535b3c153881170dd49cd3c9f544f303a425dc990b313dd5a0a",
+      "sha256": "b123c7e0dcf770cdb8d86b62cf4af5e9501ace08eb813b40608f7ed5ce4e4676",
       "version": "admin-v8"
     },
     "capabilities": {
@@ -31,7 +31,7 @@
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-operations.md",
-        "sha256": "a1c3dd0a5cd36de3be545006935ce04b1801e2afcbf3febc698de0721724e030"
+        "sha256": "512c958cee30ee5745cac9156213b15de6441d0b84e5c29056ba42ae376fb3ed"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-safety.md",
@@ -97,7 +97,7 @@
     "profileVersion": "1.2.0",
     "editorBootstrap": {
       "path": "docs/kgg-patient-custom-gpt-editor-bootstrap.md",
-      "sha256": "b0448184d2ae73785c40cac98ff45d4c905e95095901a254749692b40694b675",
+      "sha256": "689c7b51eca49f7488f3a11a376e3ed218ee72ab6987083739f81ec5baf7a3e2",
       "version": "patient-v5"
     },
     "capabilities": {
@@ -115,7 +115,7 @@
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-operations.md",
-        "sha256": "0a5e7a21ccf5b5e723a119d20a631c619f0ab972d783e08546d4a75cb1830052"
+        "sha256": "dac78eea1be11b5b82173deab7de9396646520211a5dc82264c3f642df5e11ce"
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-safety.md",
