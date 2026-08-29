@@ -110,6 +110,10 @@ pruefen.
 - Bei `needs_approval` stoppt der Schreibfluss. Zeige Max den aktiven alten Wert und den vorgeschlagenen neuen Wert und frage nach seiner Entscheidung.
 - Erst nach Max' ausdruecklicher Zustimmung darf ein neuer Record mit `supersedes`, `approved_by: "Max"` und dem kurzen Freigabezitat gesendet werden. Der alte Record bleibt unveraendert.
 - Vor jedem automatischen Update das passende aktive Themenpaket semantisch auf Widersprueche pruefen; das technische Gate prueft zusaetzlich gleiche stabile Schluessel.
+- Bei `open_item`-Tickets gilt `history.json: active` nur als Historienstatus. Der fachliche Status steht bei strukturierten Tickets in `Ticket-Metadaten: v1` unter `Lifecycle`; alte Tickets ohne Block bleiben gueltig und werden im read-only Audit als Legacy gemeldet.
+- Der strukturierte Block verwendet exakt `Lifecycle:`, `Evidence:`, `Dependencies:`, `Realtest:`, `Last-Checked:` und `Next-Action:`; `active` ist kein Ersatz für `Lifecycle`.
+- Neue Ticketwerte verwenden, wenn sie ohnehin bearbeitet werden, die Felder `Lifecycle`, `Evidence`, `Dependencies`, `Realtest`, `Last-Checked` und `Next-Action`. Keine neue parallele Ticketablage anlegen.
+- Ein nicht persistiertes Ticket bleibt bis zu erfolgreichem `apply` im Handoff/Run-Artifact. `rejected`, `needs_approval` und `failed` nie als Erfolg melden und nicht blind mit demselben Payload wiederholen.
 - Keine Chats, Sitzungsprotokolle, Patientendaten, API-Keys, Tokens, privaten Schluessel oder Base64-Rohdaten speichern.
 - Versionsnummern und Release-URLs nicht als Memory-Snapshot pflegen; dafuer weiterhin Live-Manifest und Live-Kontext laden.
 - Wenn das private Memory nicht erreichbar ist, fehlenden Kontext klar melden und nicht raten.

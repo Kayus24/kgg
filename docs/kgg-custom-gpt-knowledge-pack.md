@@ -2,7 +2,7 @@
 
 This generated compatibility pack contains the complete production knowledge set. Prefer the four smaller curated packs in the GPT editor so retrieval stays focused.
 
-Source digest: `2c6496361efa89e4`
+Source digest: `4d1a75f45d64a0c3`
 
 ## Usage Rules
 
@@ -288,6 +288,10 @@ pruefen.
 - Bei `needs_approval` stoppt der Schreibfluss. Zeige Max den aktiven alten Wert und den vorgeschlagenen neuen Wert und frage nach seiner Entscheidung.
 - Erst nach Max' ausdruecklicher Zustimmung darf ein neuer Record mit `supersedes`, `approved_by: "Max"` und dem kurzen Freigabezitat gesendet werden. Der alte Record bleibt unveraendert.
 - Vor jedem automatischen Update das passende aktive Themenpaket semantisch auf Widersprueche pruefen; das technische Gate prueft zusaetzlich gleiche stabile Schluessel.
+- Bei `open_item`-Tickets gilt `history.json: active` nur als Historienstatus. Der fachliche Status steht bei strukturierten Tickets in `Ticket-Metadaten: v1` unter `Lifecycle`; alte Tickets ohne Block bleiben gueltig und werden im read-only Audit als Legacy gemeldet.
+- Der strukturierte Block verwendet exakt `Lifecycle:`, `Evidence:`, `Dependencies:`, `Realtest:`, `Last-Checked:` und `Next-Action:`; `active` ist kein Ersatz für `Lifecycle`.
+- Neue Ticketwerte verwenden, wenn sie ohnehin bearbeitet werden, die Felder `Lifecycle`, `Evidence`, `Dependencies`, `Realtest`, `Last-Checked` und `Next-Action`. Keine neue parallele Ticketablage anlegen.
+- Ein nicht persistiertes Ticket bleibt bis zu erfolgreichem `apply` im Handoff/Run-Artifact. `rejected`, `needs_approval` und `failed` nie als Erfolg melden und nicht blind mit demselben Payload wiederholen.
 - Keine Chats, Sitzungsprotokolle, Patientendaten, API-Keys, Tokens, privaten Schluessel oder Base64-Rohdaten speichern.
 - Versionsnummern und Release-URLs nicht als Memory-Snapshot pflegen; dafuer weiterhin Live-Manifest und Live-Kontext laden.
 - Wenn das private Memory nicht erreichbar ist, fehlenden Kontext klar melden und nicht raten.
@@ -554,6 +558,32 @@ Valid memory payload:
 - After approval, append a new record with `supersedes`, `approved_by: "Max"` and `approval_quote`. Never edit or delete the old record.
 - `rejected` must be reported and never bypassed.
 - The GPT must semantically compare the candidate with the matching active pack before dispatch. The workflow also blocks same-key value changes mechanically.
+
+### Ticket registry metadata
+
+`memory/records/*.md` remains the canonical durable ticket location. The
+`open-items-*.md` files are generated routing projections, and
+`memory/history.json` uses `active`/`superseded` only for append-only history;
+neither is the user-facing ticket lifecycle.
+
+New or edited `open_item` values may end with this backwards-compatible block:
+
+```text
+Ticket-Metadaten: v1
+Lifecycle: open | planned | in_progress | implemented | preview | live | verified | regression | blocked | replaced | discarded | research
+Evidence: none or short references
+Dependencies: none or comma-separated stable ticket keys
+Realtest: not_required | open | passed | failed
+Last-Checked: YYYY-MM-DD
+Next-Action: one concrete next step
+```
+
+Legacy tickets without the block remain valid and must be reported as
+unstructured by the read-only ticket audit. Do not create a second ticket
+registry. For a new ticket, first load the index and matching pack, verify the
+stable key, run `validate_only`, and only then apply the identical payload.
+Rejected or failed upload runs belong in a workflow/bug handoff and are not
+evidence that a ticket was persisted.
 
 Required memory operations:
 
@@ -2448,6 +2478,46 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Caution: - App-Feature-Code, PDF, QR-/Patienten-App-Vertrag, Scan/OCR, Parser, Plan-State, Medien/Upload, Android/APK, Manifest und Geheimnisse. - Keine Patientendaten, echte Plan-/QR-Payloads, Chats, Tokens oder Rohdaten im Bug-Debug-Log, in der Koordination oder im Project Memory speichern.
 - Tests: - `python release-pipeline/kgg_bug_knowledge.py --check` ist gruen. - `python release-pipeline/kgg_custom_gpt_knowledge_pack.py --check` ist gruen. - `python release-pipeline/kgg_patient_gpt_resources.py --check` ist gruen. - Der Resource-Audit akzeptiert nur passende Hashes; nach einer kanonischen Knowledge-Aenderung bleibt ein Profil bis zur echten Editor-
 
+### KGG Ticket-Queue Reihe 1 Testuebergabe
+
+- Source: `docs/bug-debug/2026-08-20-ticket-queue-row1-handoff.md`
+- Areas: modal, parser-textblocks, pdf, phone-layout, qr-patient, scan-camera, sync, tablet-layout
+- Lesson: Stand: 2026-08-20 Zweck: Uebergabe der noch offenen Nachweise an Custom GPT + Max. Wichtig: Diese Datei aendert keinen Ticketstatus und schliesst kein Ticket. - KGG-Main: `5d0f9395e6d493f84731fd8980d363c305531553`. - Admin-Main: v070 (`1.0.70-tablet-package-save`). - Patient-Main/PWA: v77. - Automatische lokale Smokes der Reihe 1: gruen. - Admin-live und Pat
+- Caution: Keep patch scoped to the requested area.
+- Tests: Run the risk-matched KGG battery.
+
+### Kurze Startprompts fuer neue Codex-Chats
+
+- Source: `docs/bug-debug/2026-08-21-codex-chat-start-prompts.md`
+- Areas: debug, pdf, qr-patient, sync
+- Lesson: Weiter mit KGG. Lies `C:\src\kgg\docs\bug-debug\2026-08-21-codex-continuation-pdf.md`. Pruefe die lokale PR-Vorbereitung fuer Ticket 012. Keine Pushes, Merges oder Releases ohne ausdrueckliche Freigabe. Weiter mit KGG. Lies `C:\src\kgg\docs\bug-debug\2026-08-21-codex-continuation-gpt-sync.md`. Arbeite zunaechst read-only; kein Preview, kein Dispatch und kein
+- Caution: Keep patch scoped to the requested area.
+- Tests: Run the risk-matched KGG battery.
+
+### Codex-Fortsetzung Custom-GPT-Synchronisierung
+
+- Source: `docs/bug-debug/2026-08-21-codex-continuation-gpt-sync.md`
+- Areas: qr-patient, sync
+- Lesson: Stand: 2026-08-21 - Admin-GPT: `g-6a45fba0f3408191ac1fb2c987a2e960`, privat, vier kanonische Knowledge-Dateien und beide Actions sichtbar. - Lokaler Produktionsaudit: `TARGET_PASS`; Snapshot steht bewusst auf `target-pending-live-editor-sync`, weil die Operations-Knowledge-Datei nach der letzten Aenderung extern erneut hochgeladen/verifiziert werden muss. -
+- Caution: Keep patch scoped to the requested area.
+- Tests: Run the risk-matched KGG battery.
+
+### Codex-Fortsetzung PDF / Ticket 012
+
+- Source: `docs/bug-debug/2026-08-21-codex-continuation-pdf.md`
+- Areas: pdf
+- Lesson: Stand: 2026-08-21 - Main: `5d0f9395e6d493f84731fd8980d363c305531553`, Admin v070. - Kandidat: `C:\src\kgg-ticket-session-1`, Branch `codex/ticket-session-1`, Commit `a136bdf07298e9926d6cf7c239655c35719c5b77`, v071. - Der Kandidat basiert direkt auf Main, ist sauber und nicht gepusht. - Fix: klassische PDF-Uebungsnummern laufen seitenuebergreifend global weit
+- Caution: Keep patch scoped to the requested area.
+- Tests: Run the risk-matched KGG battery.
+
+### Codex-Fortsetzung QR / Device-Variance / Ticket 032
+
+- Source: `docs/bug-debug/2026-08-21-codex-continuation-qr-device.md`
+- Areas: phone-layout, qr-patient, scan-camera
+- Lesson: Stand: 2026-08-21 - Admin-Kamera-Smoke gruen: BarcodeDetector, jsQR-Fallback, Berechtigungsfallback und manuelles Foto. - Patient-Scanner-Suite laeuft mit Multi-Plan-Erhalt, Track-Cleanup und vielen synthetischen Perspektiv-/Distanz-/Rotations-/Lichtfaellen. - Extreme Klein-/Dunkel-, Trapez-, Asymmetrie- und starke Yaw/Pitch-Faelle melden weiterhin `WARN` bz
+- Caution: Keep patch scoped to the requested area.
+- Tests: Run the risk-matched KGG battery.
+
 ### KGG Realgeraete-Abnahme Ticket-Session 1
 
 - Source: `docs/bug-debug/2026-08-21-real-device-acceptance-handoff.md`
@@ -2455,6 +2525,14 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Lesson: **Status:** `pending-real-device` **Erstellt:** 2026-08-21 **Lokaler Stand:** `codex/ticket-session-1` / `d898b423ee324a8f8f4f4115a8dd015e2ed34afc` **Bereich:** Admin-/Patient-App, QR, PWA, Tablet, Planverwaltung Diese Uebergabe enthaelt nur Tests, die lokale Browser-, Parser- und PDF-Pruefungen nicht vollstaendig ersetzen koennen. Es werden keine Patientend
 - Caution: Keep patch scoped to the requested area.
 - Tests: Run the risk-matched KGG battery.
+
+### 2026-08-22 KGG Ticket-Backlog und Live-Test-Merkliste
+
+- Source: `docs/bug-debug/2026-08-22-ticket-backlog-and-live-tests.md`
+- Areas: modal, parser-textblocks, pdf, phone-layout, qr-patient, scan-camera, sync, tablet-layout
+- Lesson: Diese Datei ist die dauerhafte Uebergabe fuer noch offene Live-/Realgeraet-Tests und bekannte Ticketbloecke. Sie enthaelt nur synthetische Testfaelle und keine Patientendaten. - Kanonischer Remote-Stand: `origin/main` / `ad6433a`. - Therapeut:innen-Quelle: v071, `1.0.71-pdf-global-exercise-numbering`. - Veroeffentlichtes Therapeut:innen-Web: r0426 / v1.0.65.
+- Caution: Keine Patientendaten, keine Secrets, kein Preview-/Dispatch-/Memory-Write und keine automatische Aenderung von Ticket- oder GPT-Live-Status ohne belegten Nachweis.
+- Tests: Statuswerte: `pending-real-device`, `blocked-remote-access`, `scope-open`, `passed` oder `failed`. Ein Test wird erst nach dokumentiertem Geraet, Browser, Version, Beobachtung und anonymisiertem Screenshot als `passed` markiert. | Prioritaet | Test/Ticket | Geraet/Kanal | Abnahme | |---|---|---|---| | P0 | RD-001 / Ticket 001 | Admin-Browser | Sieben Uebunge
 
 ### Debug JSON Seite
 

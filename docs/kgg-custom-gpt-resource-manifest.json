@@ -31,11 +31,11 @@
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-operations.md",
-        "sha256": "92d4c8674397cfbb8bfe742208cc0f75c0d703079d820d6ed31606991c0507bc"
+        "sha256": "00996d86c382b4740d4b1be0aa0c5f0e8f313568b96597c0a6cd5dda00f32090"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-safety.md",
-        "sha256": "21e97d005042e80632fbc3cea67e6faa5d27f497f098ef02a093ddf07b9d8801"
+        "sha256": "b31e9a01a0d1162d234107f51307782cfd9c136ab3a941679dfb6cb799fa1f82"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-testing.md",

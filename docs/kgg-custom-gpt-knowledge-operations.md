@@ -2,7 +2,7 @@
 
 Generated production knowledge for modular payloads, Actions, Preview/Test-App and Admin-Beta operations.
 
-Source digest: `21b9706c9ef76411`
+Source digest: `61879c9d52290e9b`
 
 ## Usage Rules
 
@@ -137,6 +137,10 @@ pruefen.
 - Bei `needs_approval` stoppt der Schreibfluss. Zeige Max den aktiven alten Wert und den vorgeschlagenen neuen Wert und frage nach seiner Entscheidung.
 - Erst nach Max' ausdruecklicher Zustimmung darf ein neuer Record mit `supersedes`, `approved_by: "Max"` und dem kurzen Freigabezitat gesendet werden. Der alte Record bleibt unveraendert.
 - Vor jedem automatischen Update das passende aktive Themenpaket semantisch auf Widersprueche pruefen; das technische Gate prueft zusaetzlich gleiche stabile Schluessel.
+- Bei `open_item`-Tickets gilt `history.json: active` nur als Historienstatus. Der fachliche Status steht bei strukturierten Tickets in `Ticket-Metadaten: v1` unter `Lifecycle`; alte Tickets ohne Block bleiben gueltig und werden im read-only Audit als Legacy gemeldet.
+- Der strukturierte Block verwendet exakt `Lifecycle:`, `Evidence:`, `Dependencies:`, `Realtest:`, `Last-Checked:` und `Next-Action:`; `active` ist kein Ersatz für `Lifecycle`.
+- Neue Ticketwerte verwenden, wenn sie ohnehin bearbeitet werden, die Felder `Lifecycle`, `Evidence`, `Dependencies`, `Realtest`, `Last-Checked` und `Next-Action`. Keine neue parallele Ticketablage anlegen.
+- Ein nicht persistiertes Ticket bleibt bis zu erfolgreichem `apply` im Handoff/Run-Artifact. `rejected`, `needs_approval` und `failed` nie als Erfolg melden und nicht blind mit demselben Payload wiederholen.
 - Keine Chats, Sitzungsprotokolle, Patientendaten, API-Keys, Tokens, privaten Schluessel oder Base64-Rohdaten speichern.
 - Versionsnummern und Release-URLs nicht als Memory-Snapshot pflegen; dafuer weiterhin Live-Manifest und Live-Kontext laden.
 - Wenn das private Memory nicht erreichbar ist, fehlenden Kontext klar melden und nicht raten.
@@ -403,6 +407,32 @@ Valid memory payload:
 - After approval, append a new record with `supersedes`, `approved_by: "Max"` and `approval_quote`. Never edit or delete the old record.
 - `rejected` must be reported and never bypassed.
 - The GPT must semantically compare the candidate with the matching active pack before dispatch. The workflow also blocks same-key value changes mechanically.
+
+### Ticket registry metadata
+
+`memory/records/*.md` remains the canonical durable ticket location. The
+`open-items-*.md` files are generated routing projections, and
+`memory/history.json` uses `active`/`superseded` only for append-only history;
+neither is the user-facing ticket lifecycle.
+
+New or edited `open_item` values may end with this backwards-compatible block:
+
+```text
+Ticket-Metadaten: v1
+Lifecycle: open | planned | in_progress | implemented | preview | live | verified | regression | blocked | replaced | discarded | research
+Evidence: none or short references
+Dependencies: none or comma-separated stable ticket keys
+Realtest: not_required | open | passed | failed
+Last-Checked: YYYY-MM-DD
+Next-Action: one concrete next step
+```
+
+Legacy tickets without the block remain valid and must be reported as
+unstructured by the read-only ticket audit. Do not create a second ticket
+registry. For a new ticket, first load the index and matching pack, verify the
+stable key, run `validate_only`, and only then apply the identical payload.
+Rejected or failed upload runs belong in a workflow/bug handoff and are not
+evidence that a ticket was persisted.
 
 Required memory operations:
 
