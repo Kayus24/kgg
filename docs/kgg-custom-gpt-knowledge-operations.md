@@ -2,7 +2,7 @@
 
 Generated production knowledge for modular payloads, Actions, Preview/Test-App and Admin-Beta operations.
 
-Source digest: `991cc5200e093594`
+Source digest: `21b9706c9ef76411`
 
 ## Usage Rules
 
@@ -42,10 +42,13 @@ Gate aendern.
 
 - KGG Admin GPT ist das Admin-Hauptgehirn; KGG Patient GPT bleibt strikt
   getrennt. Pro Ticket gibt es genau einen Lead-GPT.
-- Im aktivierten `WORKFLOW` laufen Aufgaben `Luna Manager -> Lead GPT ->
-  optionale GPT-Unter-Chats -> Lead-Synthese -> Luna Relay -> Luna-Max-Worker
-  -> Relay -> derselbe Lead -> CI/Abnahme`; Standalone-Aufträge bleiben bei
-  den bestehenden Admin-Actions.
+- Im aktivierten `WORKFLOW` gibt es zwei Entry-Modi, ohne die
+  `STANDALONE -> WORKFLOW`-Aktivierung zu veraendern. `SUPERVISOR_FIRST` ist
+  Standard; bei `BOSS_FIRST` fuehrt derselbe einzige Lead-GPT zuerst eine
+  modellneutrale strategische Planungsphase aus. Es gibt keine zweite
+  Lead-Rolle und keine neue Sol-Rolle. Danach routet derselbe Lead kontrolliert
+  als `reasoning`, `implementation` oder `mixed`. Standalone-Auftraege bleiben
+  bei den bestehenden Admin-Actions.
 - Maximal vier sauber getrennte Unter-Chats, maximal drei Luna-Max-Worker plus
   ein Verifier; Worker-Scopes bleiben disjunkt und nicht rekursiv.
 - Luna Manager, Relays, Ticket Master und Cricket verwenden `GPT-5.6 Luna`
@@ -61,6 +64,20 @@ Gate aendern.
 - Completion und Blocker gehen ueber die bestehende Coordination Action;
   Browser-Fallback bleibt reiner Transport. 30 Minuten, hoechstens ein
   frischer Retry, ohne Statusprompt.
+
+### Supervisor-State und 60-Sekunden-Read
+
+Luna Manager, Luna Relay und lokale Runtime bleiben getrennt. Die lokale
+PC-Runtime darf aktive Workflow-Zustaende alle 60 Sekunden read-only pruefen.
+Unveraenderte Polls erzeugen keine Chat-Statusprompts und keine meaningful
+events. Echter Idle-Eintritt erzeugt genau eine `NEEDS_LEAD`-Rueckgabe an
+denselben Lead; solange Idle unveraendert bleibt, wird sie nicht wiederholt.
+`WAITING_MAX` bleibt still.
+
+Die lokale State-Machine ist kein Bridge-Schema. Die Bridge behaelt exakt neun
+Felder. `sol-endboss` bleibt `SLEEPING` und ausschliesslich dem bestehenden
+Cricket-L3-Pfad vorbehalten.
+
 
 ## Arbeitsreihenfolge
 
@@ -540,6 +557,68 @@ keine neue grosse Aufgabe loesen und keine fehlende Entscheidung erfinden.
 Eine reine Statusabfrage bleibt `STANDALONE`, ist read-only und darf weder Task
 Capsule noch Scope, Ticket oder Ziel verändern.
 
+### 2.1 Entry-Modi und modellneutrale Strategiephase (Revision 1)
+
+Die zentrale Modusregel bleibt unveraendert: `BOSS_FIRST` und
+`SUPERVISOR_FIRST` sind keine Alternativen zur expliziten
+`STANDALONE -> WORKFLOW`-Aktivierung.
+
+- `SUPERVISOR_FIRST` ist Standard. Luna Manager bestimmt genau einen operativen `lead-gpt`.
+- `BOSS_FIRST` bedeutet, dass derselbe eine `lead-gpt` vor der operativen
+  Zerlegung eine modellneutrale strategische Planungsphase ausfuehrt.
+- Es gibt keine zweite Lead-Rolle und keine neue Sol-Rolle.
+- `sol-endboss` bleibt `SLEEPING` und nur ueber Cricket-L3 zulaessig.
+
+Work-Modes:
+
+```text
+reasoning:
+  Luna Manager -> Lead GPT -> GPT-Unter-Chat -> Lead-Synthese
+  -> derselbe Lead GPT -> CI/Abnahme
+
+implementation:
+  Luna Manager -> Lead GPT -> Lead-Synthese -> Luna Relay
+  -> Luna-Max-Worker -> Luna Relay -> derselbe Lead GPT -> CI/Abnahme
+
+mixed:
+  Luna Manager -> Lead GPT -> GPT-Unter-Chat -> Lead-Synthese -> Luna Relay
+  -> Luna-Max-Worker -> Luna Relay -> derselbe Lead GPT -> CI/Abnahme
+```
+
+`reasoning` hat 1-4 GPT-Unter-Chats und keine Implementierungsworker.
+`implementation` hat 1-3 Implementierungsworker und keine GPT-Unter-Chats.
+`mixed` hat mindestens einen GPT-Unter-Chat und mindestens einen Worker.
+Der Verifier bleibt separat und ist kein vierter Implementierungsworker.
+
+Kompatibilitaetsregel: Bestehende v2-Capsules ohne `entry_mode` und
+`work_mode` werden strukturell unveraendert validiert und behalten exakt den
+bisherigen vollstaendigen Development-Routenvertrag. Nur ein explizites
+`work_mode` aktiviert die neuen Rev1-Routenregeln. Ein fehlendes
+`entry_mode` wird semantisch als `SUPERVISOR_FIRST` interpretiert, aber nicht
+in die Capsule hineingeschrieben.
+
+### 2.2 Lokale Supervisor-State-Machine und 60-Sekunden-Read
+
+Die State-Machine gehoert nur zur lokalen PC-Runtime und erweitert weder
+Bridge-Allowlist noch `TASK_STATES`.
+
+Lokale Zustaende:
+`PLANNING`, `DISPATCH_READY`, `CHILD_RUNNING`, `RESULT_PENDING`,
+`LEAD_REVIEW`, `WAITING_MAX`, `IDLE_NEEDS_LEAD`, `VERIFYING`, `COMPLETE`,
+`BLOCKED`.
+
+`IDLE_NEEDS_LEAD` ist nur zulaessig, wenn Acceptance nicht erfuellt ist,
+kein Blocker/`WAITING_MAX` vorliegt, kein Child laeuft, kein Ergebnis wartet,
+kein Workitem dispatchbereit und kein Lead-Review ausstehend ist. Beim ersten
+Eintritt wird genau ein `NEEDS_LEAD` angefordert. Unveraenderte Folge-Polls
+erzeugen keine weitere Nachricht und kein meaningful event.
+
+Der lokale Supervisor darf alle 60 Sekunden read-only pruefen. Reine Polls
+erzeugen keine Chat-Statusprompts und zaehlen nicht als meaningful events.
+`WAITING_MAX` bleibt still. 30-Minuten-Browserlimit und maximal ein frischer
+Retry bleiben unveraendert.
+
+
 ## 3. Rollen und Modellregel
 
 | Rolle | Modell/Modus | Darf | Darf nicht |
@@ -573,6 +652,8 @@ Pflichtfelder:
 | `task_id` | stabile Kleinbuchstaben-ID, 6 bis 64 Zeichen |
 | `ticket` | `ticket_id`, `duplicate_checked: true`, `source: private-memory-gate`; keine erfundene ID |
 | `profile` | genau `admin` oder `patient` |
+| `entry_mode` | optional: `SUPERVISOR_FIRST` oder `BOSS_FIRST`; fehlt das Feld, gilt semantisch `SUPERVISOR_FIRST`, ohne die Legacy-Capsule zu veraendern |
+| `work_mode` | optional bei Development: `reasoning`, `implementation` oder `mixed`; fehlt das Feld, gilt exakt der bestehende v2-Legacy-Routenvertrag |
 | `lead` | genau ein Lead mit Profil, Chat-ID, Generation und Revision |
 | `generation` | positive Generation des Chats; nur frischer Nachfolgechat erhoeht sie |
 | `revision` | positive Capsule-Revision innerhalb der Generation |

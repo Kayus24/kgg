@@ -2,7 +2,7 @@
 
 Generated production regression fixtures and expected operational responses. Never upload this file to the isolated Eval GPT.
 
-Source digest: `b8b5a602e1001103`
+Source digest: `10864ebe32fa4efe`
 
 ## Usage Rules
 
@@ -400,6 +400,18 @@ Kontext fuer den Test:
 - Andere Aufgabe im gebundenen Workflow-Chat: auf einen frischen Chat
   verweisen; ein frischer Chat startet wieder `STANDALONE`.
 
+## brain-relay-entry-routing-rev1
+
+Max fragt:
+
+> Im aktivierten KGG-Workflow soll Revision 1 `BOSS_FIRST` und
+> `SUPERVISOR_FIRST` unterscheiden. `BOSS_FIRST` darf keine neue Sol-Rolle
+> erzeugen: derselbe einzige Lead-GPT plant zuerst strategisch. Reasoning geht
+> zu GPT-Unter-Chats, Implementierung zu Luna-Max-Workern und Mixed zuerst zum
+> GPT, dann ueber den Lead zum Worker. Der lokale Supervisor liest alle
+> 60 Sekunden und fragt bei echtem Idle genau einmal den Lead. Bridge, Hashes,
+> Sol-Endboss und Workerlimits duerfen sich nicht aendern.
+
 ---
 
 # Source: docs/kgg-custom-gpt-expected-results.md
@@ -676,6 +688,23 @@ Kontext fuer den Test:
 - Ungueltige explizite Aktivierung ergibt `WORKFLOW_BLOCKED` und wird nie als
   Standalone-Auftrag ausgefuehrt. Status-Reads bleiben read-only; Task-/Profil-
   oder Generation-/Revision-Wechsel erfordern einen frischen Chat.
+
+## brain-relay-entry-routing-rev1
+
+Erwartung:
+- ohne gueltiges Start-Envelope bleibt der Chat `STANDALONE`;
+- `BOSS_FIRST` ist nur eine strategische Phase desselben einzigen `lead-gpt`;
+- keine neue Rolle und kein Sol-Aufruf;
+- `SUPERVISOR_FIRST` ist der semantische Standard, wird aber nicht in Legacy-Capsules hineingeschrieben;
+- Legacy-Capsules ohne `entry_mode`/`work_mode` validieren strukturell unveraendert und behalten den bisherigen v2-Routenvertrag;
+- `reasoning`: 1-4 GPT-Unter-Chats, 0 Implementierungsworker;
+- `implementation`: 1-3 Worker, 0 GPT-Unter-Chats;
+- `mixed`: mindestens ein GPT-Unter-Chat und ein Worker;
+- Verifier ist kein vierter Implementierungsworker;
+- Bridge bleibt exakt neun Felder;
+- `sol-endboss` bleibt `SLEEPING`;
+- unveraenderte 60-Sekunden-Reads erzeugen keinen Chatspam/meaningful event;
+- echter Idle-Eintritt erzeugt genau einmal `NEEDS_LEAD`.
 
 ---
 

@@ -60,6 +60,22 @@ ROTATION_PREPARE_AT = 35
 ROTATION_HARD_AT = 40
 BROWSER_TIMEOUT_SECONDS = 30 * 60
 MAX_BROWSER_FRESH_RETRIES = 1
+ENTRY_MODES = frozenset({"BOSS_FIRST", "SUPERVISOR_FIRST"})
+WORK_MODES = frozenset({"reasoning", "implementation", "mixed"})
+DEFAULT_ENTRY_MODE = "SUPERVISOR_FIRST"
+SUPERVISOR_POLL_INTERVAL_SECONDS = 60
+SUPERVISOR_STATES = frozenset({
+    "PLANNING",
+    "DISPATCH_READY",
+    "CHILD_RUNNING",
+    "RESULT_PENDING",
+    "LEAD_REVIEW",
+    "WAITING_MAX",
+    "IDLE_NEEDS_LEAD",
+    "VERIFYING",
+    "COMPLETE",
+    "BLOCKED",
+})
 MAX_BRIDGE_STATUS_CHARS = 32
 MAX_BRIDGE_NEXT_ACTION_CHARS = 160
 
@@ -261,7 +277,11 @@ def validate_agent_identity(agent: Mapping[str, Any], label: str = "agent") -> N
 
 
 def validate_route(
-    route: Sequence[Any], *, has_sub_chats: bool = False, task_kind: str = "development"
+    route: Sequence[Any],
+    *,
+    has_sub_chats: bool = False,
+    task_kind: str = "development",
+    work_mode: str | None = None,
 ) -> list[str]:
     if not isinstance(route, (list, tuple)) or not route:
         _fail("route must be a non-empty list")
@@ -272,21 +292,51 @@ def validate_route(
         return values
     if task_kind != "development":
         _fail("task_kind must be development or status")
-    expected = ["luna-manager", "lead-gpt"]
-    if has_sub_chats:
-        expected.append("gpt-subchat")
-    expected.extend(
-        [
-            "lead-synthesis",
-            "luna-relay",
-            "luna-max-worker",
-            "luna-relay",
-            "lead-gpt",
-            "ci-acceptance",
+
+    if work_mode is None:
+        expected = ["luna-manager", "lead-gpt"]
+        if has_sub_chats:
+            expected.append("gpt-subchat")
+        expected.extend(
+            [
+                "lead-synthesis",
+                "luna-relay",
+                "luna-max-worker",
+                "luna-relay",
+                "lead-gpt",
+                "ci-acceptance",
+            ]
+        )
+        if values != expected:
+            _fail("activated workflow development tasks must use the complete Manager -> Lead -> Relay -> Worker -> Lead -> CI route")
+        return values
+
+    if work_mode not in WORK_MODES:
+        _fail("work_mode must be reasoning, implementation or mixed")
+    if work_mode == "reasoning":
+        if not has_sub_chats:
+            _fail("reasoning work requires at least one GPT sub-chat")
+        expected = [
+            "luna-manager", "lead-gpt", "gpt-subchat",
+            "lead-synthesis", "lead-gpt", "ci-acceptance",
         ]
-    )
+    elif work_mode == "implementation":
+        if has_sub_chats:
+            _fail("implementation work must not include GPT sub-chats; use mixed")
+        expected = [
+            "luna-manager", "lead-gpt", "lead-synthesis", "luna-relay",
+            "luna-max-worker", "luna-relay", "lead-gpt", "ci-acceptance",
+        ]
+    else:
+        if not has_sub_chats:
+            _fail("mixed work requires at least one GPT sub-chat")
+        expected = [
+            "luna-manager", "lead-gpt", "gpt-subchat", "lead-synthesis",
+            "luna-relay", "luna-max-worker", "luna-relay",
+            "lead-gpt", "ci-acceptance",
+        ]
     if values != expected:
-        _fail("activated workflow development tasks must use the complete Manager -> Lead -> Relay -> Worker -> Lead -> CI route")
+        _fail(f"activated workflow route does not match work_mode={work_mode}")
     return values
 
 
@@ -357,6 +407,14 @@ def validate_task_capsule(capsule: Mapping[str, Any]) -> dict[str, Any]:
     task_kind = data.get("task_kind", "development")
     if task_kind not in {"development", "status"}:
         _fail("capsule.task_kind must be development or status")
+    entry_mode = data.get("entry_mode")
+    if entry_mode is not None and entry_mode not in ENTRY_MODES:
+        _fail("capsule.entry_mode must be BOSS_FIRST or SUPERVISOR_FIRST")
+    requested_work_mode = data.get("work_mode")
+    if requested_work_mode is not None and requested_work_mode not in WORK_MODES:
+        _fail("capsule.work_mode must be reasoning, implementation or mixed")
+    if task_kind == "status" and requested_work_mode is not None:
+        _fail("status capsules must not declare work_mode")
     profile = _string(data.get("profile"), "capsule.profile")
     if profile not in {"admin", "patient"}:
         _fail("capsule.profile must be admin or patient")
@@ -448,13 +506,28 @@ def validate_task_capsule(capsule: Mapping[str, Any]) -> dict[str, Any]:
         if item.get("generation") != generation or item.get("revision") != revision:
             _fail("worker generation/revision is stale")
 
-    if task_kind == "development" and worker_count == 0:
-        _fail("a development task must have at least one Luna-Max worker")
-
+    if task_kind == "development":
+        if requested_work_mode is None:
+            if worker_count == 0:
+                _fail("a development task must have at least one Luna-Max worker")
+        elif requested_work_mode == "reasoning":
+            if not sub_chats:
+                _fail("reasoning work requires at least one GPT sub-chat")
+            if worker_count != 0:
+                _fail("reasoning work must not allocate implementation workers")
+        elif requested_work_mode == "implementation":
+            if sub_chats:
+                _fail("implementation work must not allocate GPT sub-chats; use mixed")
+            if worker_count == 0:
+                _fail("implementation work requires at least one Luna-Max worker")
+        elif requested_work_mode == "mixed":
+            if not sub_chats or worker_count == 0:
+                _fail("mixed work requires GPT sub-chats and at least one Luna-Max worker")
     validate_route(
         data.get("route"),
         has_sub_chats=bool(sub_chats),
         task_kind=task_kind,
+        work_mode=requested_work_mode,
     )
     validate_retry_plan(_object(data.get("retry"), "capsule.retry"))
     validate_rotation(_object(data.get("rotation"), "capsule.rotation"))
@@ -1130,6 +1203,61 @@ def validate_cricket_event(event: Mapping[str, Any]) -> dict[str, Any]:
         if normalized_action in FORBIDDEN_SOL_ACTIONS:
             _fail("Cricket observes and escalates; it does not solve project problems")
     return copy.deepcopy(data)
+
+
+def supervisor_state_for(snapshot: Mapping[str, Any]) -> str:
+    data = _object(snapshot, "supervisor_snapshot")
+    flags: dict[str, bool] = {}
+    for key in (
+        "plan_ready", "acceptance_met", "blocked", "waiting_max",
+        "child_running", "result_pending", "dispatch_ready",
+        "lead_review_pending", "verifying",
+    ):
+        value = data.get(key, False)
+        if not isinstance(value, bool):
+            _fail(f"supervisor_snapshot.{key} must be boolean")
+        flags[key] = value
+    if flags["acceptance_met"]:
+        return "COMPLETE"
+    if flags["blocked"]:
+        return "BLOCKED"
+    if flags["waiting_max"]:
+        return "WAITING_MAX"
+    if not flags["plan_ready"]:
+        return "PLANNING"
+    if flags["result_pending"]:
+        return "RESULT_PENDING"
+    if flags["lead_review_pending"]:
+        return "LEAD_REVIEW"
+    if flags["verifying"]:
+        return "VERIFYING"
+    if flags["child_running"]:
+        return "CHILD_RUNNING"
+    if flags["dispatch_ready"]:
+        return "DISPATCH_READY"
+    return "IDLE_NEEDS_LEAD"
+
+
+def supervisor_poll_decision(previous_state: str | None, current_state: str) -> dict[str, Any]:
+    if previous_state is not None and previous_state not in SUPERVISOR_STATES:
+        _fail("previous supervisor state is invalid")
+    if current_state not in SUPERVISOR_STATES:
+        _fail("current supervisor state is invalid")
+    action = "none"
+    meaningful_events = 0
+    if current_state == "IDLE_NEEDS_LEAD" and previous_state != "IDLE_NEEDS_LEAD":
+        action = "emit-needs-lead"
+        meaningful_events = 1
+    elif current_state == "RESULT_PENDING" and previous_state != "RESULT_PENDING":
+        action = "route-result"
+        meaningful_events = 1
+    return {
+        "poll_interval_seconds": SUPERVISOR_POLL_INTERVAL_SECONDS,
+        "read_only": True,
+        "chat_messages": 0,
+        "meaningful_events": meaningful_events,
+        "action": action,
+    }
 
 
 def synthetic_capsule(*, with_sub_chats: bool = False) -> dict[str, Any]:
