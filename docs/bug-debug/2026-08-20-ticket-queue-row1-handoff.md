@@ -1,7 +1,7 @@
 # KGG Ticket-Queue Reihe 1 – Testübergabe
 
-Stand: 2026-08-20  
-Zweck: Übergabe der noch offenen Nachweise an Custom GPT + Max.  
+Stand: 2026-08-20<br>
+Zweck: Übergabe der noch offenen Nachweise an Custom GPT + Max.<br>
 Wichtig: Diese Datei ändert keinen Ticketstatus und schließt kein Ticket.
 
 ## Verifizierter technischer Stand

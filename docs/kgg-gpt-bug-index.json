@@ -660,7 +660,7 @@
       ],
       "risks": "",
       "source_path": "docs/bug-debug/2026-08-20-ticket-queue-row1-handoff.md",
-      "symptom": "Stand: 2026-08-20 Zweck: Uebergabe der noch offenen Nachweise an Custom GPT + Max. Wichtig: Diese Datei aendert keinen Ticketstatus und schliesst kein Ticket. - KGG-Main: `5d0f9395e6d493f84731fd8980d363c305531553`. - Admin-Main: v070 (`1.0.70-tablet-package-save`). - Patient-Main/PWA: v77. - Automatische lokale Smokes der Reihe 1: gruen. - Admin-live und Pat",
+      "symptom": "Stand: 2026-08-20<br> Zweck: Uebergabe der noch offenen Nachweise an Custom GPT + Max.<br> Wichtig: Diese Datei aendert keinen Ticketstatus und schliesst kein Ticket. - KGG-Main: `5d0f9395e6d493f84731fd8980d363c305531553`. - Admin-Main: v070 (`1.0.70-tablet-package-save`). - Patient-Main/PWA: v77. - Automatische lokale Smokes der Reihe 1: gruen. - Admin-live",
       "tests": "",
       "title": "KGG Ticket-Queue Reihe 1 Testuebergabe"
     },

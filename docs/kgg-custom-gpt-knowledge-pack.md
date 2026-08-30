@@ -2,7 +2,7 @@
 
 This generated compatibility pack contains the complete production knowledge set. Prefer the four smaller curated packs in the GPT editor so retrieval stays focused.
 
-Source digest: `4d1a75f45d64a0c3`
+Source digest: `aad0054667e846a8`
 
 ## Usage Rules
 
@@ -2482,7 +2482,7 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 
 - Source: `docs/bug-debug/2026-08-20-ticket-queue-row1-handoff.md`
 - Areas: modal, parser-textblocks, pdf, phone-layout, qr-patient, scan-camera, sync, tablet-layout
-- Lesson: Stand: 2026-08-20 Zweck: Uebergabe der noch offenen Nachweise an Custom GPT + Max. Wichtig: Diese Datei aendert keinen Ticketstatus und schliesst kein Ticket. - KGG-Main: `5d0f9395e6d493f84731fd8980d363c305531553`. - Admin-Main: v070 (`1.0.70-tablet-package-save`). - Patient-Main/PWA: v77. - Automatische lokale Smokes der Reihe 1: gruen. - Admin-live und Pat
+- Lesson: Stand: 2026-08-20<br> Zweck: Uebergabe der noch offenen Nachweise an Custom GPT + Max.<br> Wichtig: Diese Datei aendert keinen Ticketstatus und schliesst kein Ticket. - KGG-Main: `5d0f9395e6d493f84731fd8980d363c305531553`. - Admin-Main: v070 (`1.0.70-tablet-package-save`). - Patient-Main/PWA: v77. - Automatische lokale Smokes der Reihe 1: gruen. - Admin-live
 - Caution: Keep patch scoped to the requested area.
 - Tests: Run the risk-matched KGG battery.
 
