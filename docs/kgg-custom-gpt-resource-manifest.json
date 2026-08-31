@@ -115,11 +115,11 @@
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-operations.md",
-        "sha256": "dac78eea1be11b5b82173deab7de9396646520211a5dc82264c3f642df5e11ce"
+        "sha256": "1b487391ee3d92b14999bd4d8e232003c00440fefb30377954de293261c25b78"
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-safety.md",
-        "sha256": "f7a10d97bdad9dde43597cabcfcda53b5999904030c7a2da01561f2d21cb52be"
+        "sha256": "6690fd17e3a9eb09bb7d5db8f24b7020a976a7d812e69ee799bc5b0adc8013e7"
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-testing.md",
