@@ -31,6 +31,16 @@ der kanonischen JSON-Serialisierung (`ensure_ascii=False`, sortierte Schlüssel,
 keine Leerzeichen) und hasht UTF-8. Der Requirements-Text ersetzt CRLF und CR
 durch LF, wird getrimmt und ohne angehängten Zeilenumbruch als UTF-8 gehasht.
 
+## Lokale Rev1-Zustaende sind keine Bridge-Felder
+
+`BOSS_FIRST`, `SUPERVISOR_FIRST`, `work_mode` und lokale Supervisor-Zustaende
+gehoeren nur zur PC-Runtime/Task-Capsule. Sie erweitern den Kurzpass nicht.
+
+Die neun Bridge-Felder bleiben unveraendert. Lokales `IDLE_NEEDS_LEAD` wird
+nach aussen hoechstens als bestehendes `NEEDS_LEAD` plus kurze `next_action`
+sichtbar. `WAITING_MAX` erzeugt weder neue Bridge-Felder noch Chat-Statusprompts.
+
+
 ## Gemeinsame Rollen und Zustände
 
 Die Bridge verwendet die bestehenden KGG-Rollen: `luna-manager`, `lead-gpt`,

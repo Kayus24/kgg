@@ -270,3 +270,20 @@
 - Ungueltige explizite Aktivierung ergibt `WORKFLOW_BLOCKED` und wird nie als
   Standalone-Auftrag ausgefuehrt. Status-Reads bleiben read-only; Task-/Profil-
   oder Generation-/Revision-Wechsel erfordern einen frischen Chat.
+
+## brain-relay-entry-routing-rev1
+
+Erwartung:
+- ohne gueltiges Start-Envelope bleibt der Chat `STANDALONE`;
+- `BOSS_FIRST` ist nur eine strategische Phase desselben einzigen `lead-gpt`;
+- keine neue Rolle und kein Sol-Aufruf;
+- `SUPERVISOR_FIRST` ist der semantische Standard, wird aber nicht in Legacy-Capsules hineingeschrieben;
+- Legacy-Capsules ohne `entry_mode`/`work_mode` validieren strukturell unveraendert und behalten den bisherigen v2-Routenvertrag;
+- `reasoning`: 1-4 GPT-Unter-Chats, 0 Implementierungsworker;
+- `implementation`: 1-3 Worker, 0 GPT-Unter-Chats;
+- `mixed`: mindestens ein GPT-Unter-Chat und ein Worker;
+- Verifier ist kein vierter Implementierungsworker;
+- Bridge bleibt exakt neun Felder;
+- `sol-endboss` bleibt `SLEEPING`;
+- unveraenderte 60-Sekunden-Reads erzeugen keinen Chatspam/meaningful event;
+- echter Idle-Eintritt erzeugt genau einmal `NEEDS_LEAD`.

@@ -31,15 +31,15 @@
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-operations.md",
-        "sha256": "512c958cee30ee5745cac9156213b15de6441d0b84e5c29056ba42ae376fb3ed"
+        "sha256": "00996d86c382b4740d4b1be0aa0c5f0e8f313568b96597c0a6cd5dda00f32090"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-safety.md",
-        "sha256": "21e97d005042e80632fbc3cea67e6faa5d27f497f098ef02a093ddf07b9d8801"
+        "sha256": "388584bbe581bfe01458657d3a19cbc5a7c5ebf7602a4452a5c8e4bdc1b6f611"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-testing.md",
-        "sha256": "361b1a437b4240df19cbb23a8325395d1005e8166b74fde71fbdd5c4611a1e30"
+        "sha256": "526435598da7fdf5a2081588cf18103c839389ea81fc8109ab8e7142a6348688"
       }
     ],
     "actions": [
@@ -115,11 +115,11 @@
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-operations.md",
-        "sha256": "dac78eea1be11b5b82173deab7de9396646520211a5dc82264c3f642df5e11ce"
+        "sha256": "1b487391ee3d92b14999bd4d8e232003c00440fefb30377954de293261c25b78"
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-safety.md",
-        "sha256": "f7a10d97bdad9dde43597cabcfcda53b5999904030c7a2da01561f2d21cb52be"
+        "sha256": "6690fd17e3a9eb09bb7d5db8f24b7020a976a7d812e69ee799bc5b0adc8013e7"
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-testing.md",

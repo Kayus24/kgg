@@ -169,6 +169,32 @@ Valid memory payload:
 - `rejected` must be reported and never bypassed.
 - The GPT must semantically compare the candidate with the matching active pack before dispatch. The workflow also blocks same-key value changes mechanically.
 
+### Ticket registry metadata
+
+`memory/records/*.md` remains the canonical durable ticket location. The
+`open-items-*.md` files are generated routing projections, and
+`memory/history.json` uses `active`/`superseded` only for append-only history;
+neither is the user-facing ticket lifecycle.
+
+New or edited `open_item` values may end with this backwards-compatible block:
+
+```text
+Ticket-Metadaten: v1
+Lifecycle: open | planned | in_progress | implemented | preview | live | verified | regression | blocked | replaced | discarded | research
+Evidence: none or short references
+Dependencies: none or comma-separated stable ticket keys
+Realtest: not_required | open | passed | failed
+Last-Checked: YYYY-MM-DD
+Next-Action: one concrete next step
+```
+
+Legacy tickets without the block remain valid and must be reported as
+unstructured by the read-only ticket audit. Do not create a second ticket
+registry. For a new ticket, first load the index and matching pack, verify the
+stable key, run `validate_only`, and only then apply the identical payload.
+Rejected or failed upload runs belong in a workflow/bug handoff and are not
+evidence that a ticket was persisted.
+
 Required memory operations:
 
 - `getKggMemoryIndex`

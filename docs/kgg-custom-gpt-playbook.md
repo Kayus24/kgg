@@ -15,10 +15,13 @@ Gate aendern.
 
 - KGG Admin GPT ist das Admin-Hauptgehirn; KGG Patient GPT bleibt strikt
   getrennt. Pro Ticket gibt es genau einen Lead-GPT.
-- Im aktivierten `WORKFLOW` laufen Aufgaben `Luna Manager -> Lead GPT ->
-  optionale GPT-Unter-Chats -> Lead-Synthese -> Luna Relay -> Luna-Max-Worker
-  -> Relay -> derselbe Lead -> CI/Abnahme`; Standalone-Aufträge bleiben bei
-  den bestehenden Admin-Actions.
+- Im aktivierten `WORKFLOW` gibt es zwei Entry-Modi, ohne die
+  `STANDALONE -> WORKFLOW`-Aktivierung zu veraendern. `SUPERVISOR_FIRST` ist
+  Standard; bei `BOSS_FIRST` fuehrt derselbe einzige Lead-GPT zuerst eine
+  modellneutrale strategische Planungsphase aus. Es gibt keine zweite
+  Lead-Rolle und keine neue Sol-Rolle. Danach routet derselbe Lead kontrolliert
+  als `reasoning`, `implementation` oder `mixed`. Standalone-Auftraege bleiben
+  bei den bestehenden Admin-Actions.
 - Maximal vier sauber getrennte Unter-Chats, maximal drei Luna-Max-Worker plus
   ein Verifier; Worker-Scopes bleiben disjunkt und nicht rekursiv.
 - Luna Manager, Relays, Ticket Master und Cricket verwenden `GPT-5.6 Luna`
@@ -34,6 +37,20 @@ Gate aendern.
 - Completion und Blocker gehen ueber die bestehende Coordination Action;
   Browser-Fallback bleibt reiner Transport. 30 Minuten, hoechstens ein
   frischer Retry, ohne Statusprompt.
+
+### Supervisor-State und 60-Sekunden-Read
+
+Luna Manager, Luna Relay und lokale Runtime bleiben getrennt. Die lokale
+PC-Runtime darf aktive Workflow-Zustaende alle 60 Sekunden read-only pruefen.
+Unveraenderte Polls erzeugen keine Chat-Statusprompts und keine meaningful
+events. Echter Idle-Eintritt erzeugt genau eine `NEEDS_LEAD`-Rueckgabe an
+denselben Lead; solange Idle unveraendert bleibt, wird sie nicht wiederholt.
+`WAITING_MAX` bleibt still.
+
+Die lokale State-Machine ist kein Bridge-Schema. Die Bridge behaelt exakt neun
+Felder. `sol-endboss` bleibt `SLEEPING` und ausschliesslich dem bestehenden
+Cricket-L3-Pfad vorbehalten.
+
 
 ## Arbeitsreihenfolge
 
@@ -93,6 +110,10 @@ pruefen.
 - Bei `needs_approval` stoppt der Schreibfluss. Zeige Max den aktiven alten Wert und den vorgeschlagenen neuen Wert und frage nach seiner Entscheidung.
 - Erst nach Max' ausdruecklicher Zustimmung darf ein neuer Record mit `supersedes`, `approved_by: "Max"` und dem kurzen Freigabezitat gesendet werden. Der alte Record bleibt unveraendert.
 - Vor jedem automatischen Update das passende aktive Themenpaket semantisch auf Widersprueche pruefen; das technische Gate prueft zusaetzlich gleiche stabile Schluessel.
+- Bei `open_item`-Tickets gilt `history.json: active` nur als Historienstatus. Der fachliche Status steht bei strukturierten Tickets in `Ticket-Metadaten: v1` unter `Lifecycle`; alte Tickets ohne Block bleiben gueltig und werden im read-only Audit als Legacy gemeldet.
+- Der strukturierte Block verwendet exakt `Lifecycle:`, `Evidence:`, `Dependencies:`, `Realtest:`, `Last-Checked:` und `Next-Action:`; `active` ist kein Ersatz für `Lifecycle`.
+- Neue Ticketwerte verwenden, wenn sie ohnehin bearbeitet werden, die Felder `Lifecycle`, `Evidence`, `Dependencies`, `Realtest`, `Last-Checked` und `Next-Action`. Keine neue parallele Ticketablage anlegen.
+- Ein nicht persistiertes Ticket bleibt bis zu erfolgreichem `apply` im Handoff/Run-Artifact. `rejected`, `needs_approval` und `failed` nie als Erfolg melden und nicht blind mit demselben Payload wiederholen.
 - Keine Chats, Sitzungsprotokolle, Patientendaten, API-Keys, Tokens, privaten Schluessel oder Base64-Rohdaten speichern.
 - Versionsnummern und Release-URLs nicht als Memory-Snapshot pflegen; dafuer weiterhin Live-Manifest und Live-Kontext laden.
 - Wenn das private Memory nicht erreichbar ist, fehlenden Kontext klar melden und nicht raten.

@@ -373,3 +373,15 @@ Kontext fuer den Test:
   aktiviert aber keinen Workflow.
 - Andere Aufgabe im gebundenen Workflow-Chat: auf einen frischen Chat
   verweisen; ein frischer Chat startet wieder `STANDALONE`.
+
+## brain-relay-entry-routing-rev1
+
+Max fragt:
+
+> Im aktivierten KGG-Workflow soll Revision 1 `BOSS_FIRST` und
+> `SUPERVISOR_FIRST` unterscheiden. `BOSS_FIRST` darf keine neue Sol-Rolle
+> erzeugen: derselbe einzige Lead-GPT plant zuerst strategisch. Reasoning geht
+> zu GPT-Unter-Chats, Implementierung zu Luna-Max-Workern und Mixed zuerst zum
+> GPT, dann ueber den Lead zum Worker. Der lokale Supervisor liest alle
+> 60 Sekunden und fragt bei echtem Idle genau einmal den Lead. Bridge, Hashes,
+> Sol-Endboss und Workerlimits duerfen sich nicht aendern.

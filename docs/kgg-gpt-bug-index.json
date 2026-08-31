@@ -608,6 +608,176 @@
     },
     {
       "areas": [
+        "modal",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "sync",
+        "tablet-layout"
+      ],
+      "cause": "",
+      "do_not_touch": "",
+      "fix_pattern": "",
+      "id": "docs-bug-debug-2026-08-20-ticket-queue-row1-handoff-md-kgg-ticket-queue-reihe-1-testuebergabe",
+      "keywords": [
+        "kgg-ticket-queue-reihe-1-testuebergabe",
+        "modal",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "sync",
+        "tablet-layout"
+      ],
+      "markers": [
+        "#padLast",
+        ".currentPlan",
+        "1.0.70-tablet-package-save",
+        "5d0f939",
+        "5d0f9395e6d493f84731fd8980d363c305531553",
+        "Beinpresse, Dips, Abduktion Maschine, Adduktion Maschine, Latziehen",
+        "C:\\src\\kgg-ticket-session-1",
+        "EX1",
+        "EX1EX3",
+        "EX4EX6",
+        "EX7EX9",
+        "KGGDataStore.currentPlan",
+        "KGG_ALLOW_RELEASE_DRIFT=1",
+        "LIVE_PASS",
+        "Satz 13",
+        "Schmerzen?",
+        "TARGET_PASS",
+        "WARN",
+        "[data-apply-hit]",
+        "a136bdf",
+        "adb",
+        "build_therapist_source.py",
+        "build_therapist_source.py --check",
+        "displayLabel"
+      ],
+      "risks": "",
+      "source_path": "docs/bug-debug/2026-08-20-ticket-queue-row1-handoff.md",
+      "symptom": "Stand: 2026-08-20<br> Zweck: Uebergabe der noch offenen Nachweise an Custom GPT + Max.<br> Wichtig: Diese Datei aendert keinen Ticketstatus und schliesst kein Ticket. - KGG-Main: `5d0f9395e6d493f84731fd8980d363c305531553`. - Admin-Main: v070 (`1.0.70-tablet-package-save`). - Patient-Main/PWA: v77. - Automatische lokale Smokes der Reihe 1: gruen. - Admin-live",
+      "tests": "",
+      "title": "KGG Ticket-Queue Reihe 1 Testuebergabe"
+    },
+    {
+      "areas": [
+        "debug",
+        "pdf",
+        "qr-patient",
+        "sync"
+      ],
+      "cause": "",
+      "do_not_touch": "",
+      "fix_pattern": "",
+      "id": "docs-bug-debug-2026-08-21-codex-chat-start-prompts-md-kurze-startprompts-fuer-neue-codex-chats",
+      "keywords": [
+        "debug",
+        "kurze-startprompts-fuer-neue-codex-chats",
+        "pdf",
+        "qr-patient",
+        "sync"
+      ],
+      "markers": [
+        "2026-08-21-codex-continuation-gpt-sync.md",
+        "2026-08-21-codex-continuation-pdf.md",
+        "2026-08-21-codex-continuation-qr-device.md",
+        "C:\\src\\kgg\\docs\\bug-debug\\2026-08-21-codex-continuation-gpt-sync.md",
+        "C:\\src\\kgg\\docs\\bug-debug\\2026-08-21-codex-continuation-pdf.md",
+        "C:\\src\\kgg\\docs\\bug-debug\\2026-08-21-codex-continuation-qr-device.md"
+      ],
+      "risks": "",
+      "source_path": "docs/bug-debug/2026-08-21-codex-chat-start-prompts.md",
+      "symptom": "Weiter mit KGG. Lies `C:\\src\\kgg\\docs\\bug-debug\\2026-08-21-codex-continuation-pdf.md`. Pruefe die lokale PR-Vorbereitung fuer Ticket 012. Keine Pushes, Merges oder Releases ohne ausdrueckliche Freigabe. Weiter mit KGG. Lies `C:\\src\\kgg\\docs\\bug-debug\\2026-08-21-codex-continuation-gpt-sync.md`. Arbeite zunaechst read-only; kein Preview, kein Dispatch und kein",
+      "tests": "",
+      "title": "Kurze Startprompts fuer neue Codex-Chats"
+    },
+    {
+      "areas": [
+        "qr-patient",
+        "sync"
+      ],
+      "cause": "",
+      "do_not_touch": "",
+      "fix_pattern": "",
+      "id": "docs-bug-debug-2026-08-21-codex-continuation-gpt-sync-md-codex-fortsetzung-custom-gpt-synchronisierung",
+      "keywords": [
+        "codex-fortsetzung-custom-gpt-synchronisierung",
+        "qr-patient",
+        "sync"
+      ],
+      "markers": [
+        "LIVE_PASS",
+        "TARGET_PASS",
+        "g-6a45fba0f3408191ac1fb2c987a2e960",
+        "stale_context",
+        "target-pending-live-editor-sync"
+      ],
+      "risks": "",
+      "source_path": "docs/bug-debug/2026-08-21-codex-continuation-gpt-sync.md",
+      "symptom": "Stand: 2026-08-21 - Admin-GPT: `g-6a45fba0f3408191ac1fb2c987a2e960`, privat, vier kanonische Knowledge-Dateien und beide Actions sichtbar. - Lokaler Produktionsaudit: `TARGET_PASS`; Snapshot steht bewusst auf `target-pending-live-editor-sync`, weil die Operations-Knowledge-Datei nach der letzten Aenderung extern erneut hochgeladen/verifiziert werden muss. -",
+      "tests": "",
+      "title": "Codex-Fortsetzung Custom-GPT-Synchronisierung"
+    },
+    {
+      "areas": [
+        "pdf"
+      ],
+      "cause": "",
+      "do_not_touch": "",
+      "fix_pattern": "",
+      "id": "docs-bug-debug-2026-08-21-codex-continuation-pdf-md-codex-fortsetzung-pdf-ticket-012",
+      "keywords": [
+        "codex-fortsetzung-pdf-ticket-012",
+        "pdf"
+      ],
+      "markers": [
+        "5d0f9395e6d493f84731fd8980d363c305531553",
+        "C:\\src\\kgg-ticket-session-1",
+        "a136bdf07298e9926d6cf7c239655c35719c5b77",
+        "codex/ticket-session-1",
+        "displayLabel",
+        "exNo",
+        "machineLine"
+      ],
+      "risks": "",
+      "source_path": "docs/bug-debug/2026-08-21-codex-continuation-pdf.md",
+      "symptom": "Stand: 2026-08-21 - Main: `5d0f9395e6d493f84731fd8980d363c305531553`, Admin v070. - Kandidat: `C:\\src\\kgg-ticket-session-1`, Branch `codex/ticket-session-1`, Commit `a136bdf07298e9926d6cf7c239655c35719c5b77`, v071. - Der Kandidat basiert direkt auf Main, ist sauber und nicht gepusht. - Fix: klassische PDF-Uebungsnummern laufen seitenuebergreifend global weit",
+      "tests": "",
+      "title": "Codex-Fortsetzung PDF / Ticket 012"
+    },
+    {
+      "areas": [
+        "phone-layout",
+        "qr-patient",
+        "scan-camera"
+      ],
+      "cause": "",
+      "do_not_touch": "",
+      "fix_pattern": "",
+      "id": "docs-bug-debug-2026-08-21-codex-continuation-qr-device-md-codex-fortsetzung-qr-device-variance-ticket-032",
+      "keywords": [
+        "codex-fortsetzung-qr-device-variance-ticket-032",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera"
+      ],
+      "markers": [
+        "WARN",
+        "adb"
+      ],
+      "risks": "",
+      "source_path": "docs/bug-debug/2026-08-21-codex-continuation-qr-device.md",
+      "symptom": "Stand: 2026-08-21 - Admin-Kamera-Smoke gruen: BarcodeDetector, jsQR-Fallback, Berechtigungsfallback und manuelles Foto. - Patient-Scanner-Suite laeuft mit Multi-Plan-Erhalt, Track-Cleanup und vielen synthetischen Perspektiv-/Distanz-/Rotations-/Lichtfaellen. - Extreme Klein-/Dunkel-, Trapez-, Asymmetrie- und starke Yaw/Pitch-Faelle melden weiterhin `WARN` bz",
+      "tests": "",
+      "title": "Codex-Fortsetzung QR / Device-Variance / Ticket 032"
+    },
+    {
+      "areas": [
         "drag-reorder",
         "modal",
         "parser-textblocks",
@@ -653,6 +823,56 @@
       "symptom": "**Status:** `pending-real-device` **Erstellt:** 2026-08-21 **Lokaler Stand:** `codex/ticket-session-1` / `d898b423ee324a8f8f4f4115a8dd015e2ed34afc` **Bereich:** Admin-/Patient-App, QR, PWA, Tablet, Planverwaltung Diese Uebergabe enthaelt nur Tests, die lokale Browser-, Parser- und PDF-Pruefungen nicht vollstaendig ersetzen koennen. Es werden keine Patientend",
       "tests": "",
       "title": "KGG Realgeraete-Abnahme Ticket-Session 1"
+    },
+    {
+      "areas": [
+        "modal",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "sync",
+        "tablet-layout"
+      ],
+      "cause": "",
+      "do_not_touch": "Keine Patientendaten, keine Secrets, kein Preview-/Dispatch-/Memory-Write und keine automatische Aenderung von Ticket- oder GPT-Live-Status ohne belegten Nachweis.",
+      "fix_pattern": "",
+      "id": "docs-bug-debug-2026-08-22-ticket-backlog-and-live-tests-md-2026-08-22-kgg-ticket-backlog-und-live-test-merkliste",
+      "keywords": [
+        "2026-08-22-kgg-ticket-backlog-und-live-test-merkliste",
+        "modal",
+        "parser-textblocks",
+        "pdf",
+        "phone-layout",
+        "qr-patient",
+        "scan-camera",
+        "sync",
+        "tablet-layout"
+      ],
+      "markers": [
+        "1.0.71-pdf-global-exercise-numbering",
+        "EX1EX9",
+        "LIVE_PASS",
+        "Satz 13",
+        "Schmerzen?",
+        "TARGET_PASS",
+        "ad6433a",
+        "blocked",
+        "blocked-remote-access",
+        "currentPlan",
+        "failed",
+        "origin/main",
+        "passed",
+        "pending-real-device",
+        "scope-open",
+        "target-pending-live-editor-sync"
+      ],
+      "risks": "",
+      "source_path": "docs/bug-debug/2026-08-22-ticket-backlog-and-live-tests.md",
+      "symptom": "Diese Datei ist die dauerhafte Uebergabe fuer noch offene Live-/Realgeraet-Tests und bekannte Ticketbloecke. Sie enthaelt nur synthetische Testfaelle und keine Patientendaten. - Kanonischer Remote-Stand: `origin/main` / `ad6433a`. - Therapeut:innen-Quelle: v071, `1.0.71-pdf-global-exercise-numbering`. - Veroeffentlichtes Therapeut:innen-Web: r0426 / v1.0.65.",
+      "tests": "Statuswerte: `pending-real-device`, `blocked-remote-access`, `scope-open`, `passed` oder `failed`. Ein Test wird erst nach dokumentiertem Geraet, Browser, Version, Beobachtung und anonymisiertem Screenshot als `passed` markiert. | Prioritaet | Test/Ticket | Geraet/Kanal | Abnahme | |---|---|---|---| | P0 | RD-001 / Ticket 001 | Admin-Browser | Sieben Uebunge",
+      "title": "2026-08-22 KGG Ticket-Backlog und Live-Test-Merkliste"
     },
     {
       "areas": [
@@ -935,7 +1155,13 @@
     "docs/bug-debug/2026-08-02-patient-camera-crop-coordination-404.md",
     "docs/bug-debug/2026-08-02-patient-preview-first-load-modules.md",
     "docs/bug-debug/2026-08-13-custom-gpt-answer-turn-editor-drift.md",
+    "docs/bug-debug/2026-08-20-ticket-queue-row1-handoff.md",
+    "docs/bug-debug/2026-08-21-codex-chat-start-prompts.md",
+    "docs/bug-debug/2026-08-21-codex-continuation-gpt-sync.md",
+    "docs/bug-debug/2026-08-21-codex-continuation-pdf.md",
+    "docs/bug-debug/2026-08-21-codex-continuation-qr-device.md",
     "docs/bug-debug/2026-08-21-real-device-acceptance-handoff.md",
+    "docs/bug-debug/2026-08-22-ticket-backlog-and-live-tests.md",
     "docs/bug-debug/README.md",
     "docs/bugfixes/mobile-share-modal-css-regression.md",
     "docs/release-handoffs/2026-06-18-v003a-plan-ui-stability.md",
