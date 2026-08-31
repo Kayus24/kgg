@@ -59,12 +59,12 @@ class PersistentRuntimeGuardTests(unittest.TestCase):
         ):
             self.assertNotIn(forbidden, guard)
 
-    def test_device_action_has_no_pr_or_issue_write_permission(self) -> None:
+    def test_device_action_grants_reusable_gate_permissions(self) -> None:
         workflow = DEVICE_WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("mode: publish_device_test", workflow)
         self.assertIn("contents: write", workflow)
-        self.assertNotIn("pull-requests: write", workflow)
-        self.assertNotIn("issues: write", workflow)
+        self.assertIn("pull-requests: write", workflow)
+        self.assertIn("issues: write", workflow)
         self.assertNotIn("create_pr", workflow)
         self.assertNotIn("publish_admin_beta", workflow)
 
