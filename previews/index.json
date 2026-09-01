@@ -4,6 +4,24 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "sourceType": "existing-main",
+      "requestId": "kgg-test-a-64f31b76-20260901",
+      "patchHash": "4657a880bc9f44d88911ff3de74c8c5f5c610afa153a4251292d25788a948441",
+      "sourceSha": "64f31b768d2b91912770466ec87e80390ad8c403",
+      "baseSha": "64f31b768d2b91912770466ec87e80390ad8c403",
+      "commitSha": "64f31b768d2b91912770466ec87e80390ad8c403",
+      "baseVersionCode": 81,
+      "rolloutCode": 1788275272,
+      "title": "Pinned main device test",
+      "summary": "Exact kgg-update/index.html from the pinned main commit; no GPT patch module was created.",
+      "versionName": "1.0.81-qr-full-plan-device-ladder",
+      "createdAt": "2026-09-01T15:07:52Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-test-a-64f31b76-20260901/admin.html",
+      "sha256": "6f7bf47fb12b1fcf4fc1d910a06cea5043cf73ec65c57fcce055ad92e57b584d",
+      "deviceTestJobUrl": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/device-tests/kgg-test-a-64f31b76-20260901/job.json"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "tablet-package-save-preview-20260814",
       "patchHash": "06b7966d0c1e5ce0f3ffeeecaf60a777f6db33d818b59eb51bc229978d1e8c82",
       "baseSha": "fa02dcb1e196601240c87347d1448059bb23e250",
@@ -305,38 +323,24 @@
       "createdAt": "2026-07-30T10:01:42Z",
       "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-camera-shutter-live-qr/admin.html",
       "sha256": "dffed418c9eb9490eb897cbb3f43978ec8d29ee820487aa313f779426283965f"
-    },
-    {
-      "kind": "kgg_gpt_preview",
-      "requestId": "kgg-live-qr-direct-no-auto-photo",
-      "patchHash": "5b13242f5a11b8b480beffb609b747d6b3d9ee310483d05b7948072dd42e822d",
-      "baseSha": "a367c001c1c3db4a87652e36811a08a0b74ea870",
-      "baseVersionCode": 61,
-      "rolloutCode": 1785404931,
-      "title": "Live-QR direkt ohne automatisches Foto",
-      "summary": "Die Kamera bleibt eine normale Vorschau mit manuellem Ausloeser. Der 200-ms-Live-QR-Loop verarbeitet den erkannten QR-Rohtext direkt ueber den vorhandenen QR-Parser und uebernimmt den Plan ohne Canvas-Foto, Datei-Scan od",
-      "patchId": "kgg-v061-live-qr-direct-no-auto-photo",
-      "patchFile": "patches/v061-live-qr-direct-no-auto-photo.html",
-      "versionName": "1.0.61-live-qr-direct-no-auto-photo",
-      "createdAt": "2026-07-30T09:48:51Z",
-      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-live-qr-direct-no-auto-photo/admin.html",
-      "sha256": "f7426f9de40db29783f21bba6bf0e4ef05e23000117b2d3bce172dacf2343a42"
     }
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "tablet-package-save-preview-20260814",
-    "patchHash": "06b7966d0c1e5ce0f3ffeeecaf60a777f6db33d818b59eb51bc229978d1e8c82",
-    "baseSha": "fa02dcb1e196601240c87347d1448059bb23e250",
-    "baseVersionCode": 66,
-    "rolloutCode": 1786660952,
-    "title": "Tablet-Paketbutton wiederherstellen",
-    "summary": "Zeigt den vorhandenen Paket-Speichern-Button nur im Tablet-Layout wieder in der Kopfzeile des aktuellen Plans mit 56 x 44 px Touch-Ziel; der bestehende Dialog-Handler bleibt unverndert.",
-    "patchId": "kgg-v066-tablet-package-save-preview",
-    "patchFile": "patches/v066-tablet-package-save-preview.html",
-    "versionName": "1.0.66-tablet-package-save-preview",
-    "createdAt": "2026-08-13T22:42:32Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/tablet-package-save-preview-20260814/admin.html",
-    "sha256": "c0187f8807fac9d5c406fb9ae2eec3075a4d8724121e0d245fe92e11fe1904ca"
+    "sourceType": "existing-main",
+    "requestId": "kgg-test-a-64f31b76-20260901",
+    "patchHash": "4657a880bc9f44d88911ff3de74c8c5f5c610afa153a4251292d25788a948441",
+    "sourceSha": "64f31b768d2b91912770466ec87e80390ad8c403",
+    "baseSha": "64f31b768d2b91912770466ec87e80390ad8c403",
+    "commitSha": "64f31b768d2b91912770466ec87e80390ad8c403",
+    "baseVersionCode": 81,
+    "rolloutCode": 1788275272,
+    "title": "Pinned main device test",
+    "summary": "Exact kgg-update/index.html from the pinned main commit; no GPT patch module was created.",
+    "versionName": "1.0.81-qr-full-plan-device-ladder",
+    "createdAt": "2026-09-01T15:07:52Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-test-a-64f31b76-20260901/admin.html",
+    "sha256": "6f7bf47fb12b1fcf4fc1d910a06cea5043cf73ec65c57fcce055ad92e57b584d",
+    "deviceTestJobUrl": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/device-tests/kgg-test-a-64f31b76-20260901/job.json"
   }
 }
