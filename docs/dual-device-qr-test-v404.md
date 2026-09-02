@@ -80,6 +80,14 @@ Der Volltest ergänzt:
 
 Die physischen QR-Scans werden in einem gemeinsamen Block durchgeführt.
 
+## Test-A/B-Abnahme und Testpyramide
+
+- **Test A:** `de.kgg.preview` v36 wird einmal persistent installiert; die physische A-Baseline ist akzeptiert.
+- **Test B:** Verwendet exakt dieselbe installierte APK; keine Neuinstallation.
+- **Main-SHA:** Test B verwendet einen echten späteren `main`-SHA, keinen künstlichen No-op.
+- **Testpyramide:** Browser/CI testen Web/PWA/Verträge; der Emulator testet Android-Start/Permissions/Lifecycle; das echte Tablet ist ausschließlich für Installation und A-B-Hardware-Smoke mit expliziter Kamera-/QR-Hardware zuständig.
+- **B-Belege:** Bestätigen eindeutig die aus B stammenden `request_id`, `sourceSha`, `session`, `jobHash` und `jobUrl`.
+
 ## Abnahme
 
 Ein echter Kameratest ist nur bestanden, wenn das Oppo den QR wirklich liest.
