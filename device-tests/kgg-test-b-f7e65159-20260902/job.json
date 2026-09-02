@@ -1,0 +1,77 @@
+{
+  "kind": "kgg_dual_device_test_job",
+  "schemaVersion": 1,
+  "sessionId": "kgg-test-c8a620c929fb026c786d8ae0307b01c2",
+  "requestId": "kgg-test-b-f7e65159-20260902",
+  "sourceSha": "f7e65159fa9245c7b13d229418febd8777a33adb",
+  "patchHash": "f96d17b36726c1ac07a1f0dd5cfb81a44613098ce6b0c2ac85d3d7f619c03312",
+  "jobHash": "22da72252d0fdf2948ad1f35b97db33993fd5fc3245fd46911a54c0412ad9544",
+  "patientPwaUrl": "https://kayus24.github.io/kgg-patient-preview/device-test/kgg-test-b-f7e65159-20260902/33615922768-1/",
+  "profile": "quick",
+  "recipeVersion": "v404-dual-device-fixtures-1",
+  "createdAt": "2026-09-02T09:47:17.472Z",
+  "expiresAt": "2026-09-04T09:47:17.472Z",
+  "fixtures": [
+    {
+      "fixtureId": "h2-1-baseline",
+      "format": "KGGH2",
+      "exerciseCount": 1,
+      "required": true,
+      "displayVariant": "normal",
+      "importMode": "capture",
+      "expectedFingerprint": "76f23a36",
+      "expectedOrderDigest": "e207ac4e"
+    },
+    {
+      "fixtureId": "h2-7-legacy",
+      "format": "KGGH2",
+      "exerciseCount": 7,
+      "required": true,
+      "displayVariant": "normal",
+      "importMode": "capture",
+      "expectedFingerprint": "83f8438b",
+      "expectedOrderDigest": "b81addb5"
+    },
+    {
+      "fixtureId": "h3-7-normal",
+      "format": "KGGH3",
+      "exerciseCount": 7,
+      "required": true,
+      "displayVariant": "normal",
+      "importMode": "product",
+      "expectedFingerprint": "9c7ab840",
+      "expectedOrderDigest": "b81addb5"
+    },
+    {
+      "fixtureId": "h3-12-normal",
+      "format": "KGGH3",
+      "exerciseCount": 12,
+      "required": true,
+      "displayVariant": "normal",
+      "importMode": "capture",
+      "expectedFingerprint": "ecacf999",
+      "expectedOrderDigest": "984811ba"
+    },
+    {
+      "fixtureId": "h3-20-normal",
+      "format": "KGGH3",
+      "exerciseCount": 20,
+      "required": true,
+      "displayVariant": "normal",
+      "importMode": "capture",
+      "expectedFingerprint": "8cefc56f",
+      "expectedOrderDigest": "b31083c7"
+    },
+    {
+      "fixtureId": "h3-20-far-angle",
+      "format": "KGGH3",
+      "exerciseCount": 20,
+      "required": true,
+      "displayVariant": "far-angle",
+      "importMode": "capture",
+      "expectedFingerprint": "8cefc56f",
+      "expectedOrderDigest": "b31083c7"
+    }
+  ],
+  "syntheticOnly": true
+}

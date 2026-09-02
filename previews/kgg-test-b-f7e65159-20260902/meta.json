@@ -1,0 +1,18 @@
+{
+  "kind": "kgg_gpt_preview",
+  "sourceType": "existing-main",
+  "requestId": "kgg-test-b-f7e65159-20260902",
+  "patchHash": "f96d17b36726c1ac07a1f0dd5cfb81a44613098ce6b0c2ac85d3d7f619c03312",
+  "sourceSha": "f7e65159fa9245c7b13d229418febd8777a33adb",
+  "baseSha": "f7e65159fa9245c7b13d229418febd8777a33adb",
+  "commitSha": "f7e65159fa9245c7b13d229418febd8777a33adb",
+  "baseVersionCode": 81,
+  "rolloutCode": 1788342599,
+  "title": "Pinned main device test",
+  "summary": "Exact kgg-update/index.html from the pinned main commit; no GPT patch module was created.",
+  "versionName": "1.0.81-qr-full-plan-device-ladder",
+  "createdAt": "2026-09-02T09:49:59Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-test-b-f7e65159-20260902/admin.html",
+  "sha256": "6f7bf47fb12b1fcf4fc1d910a06cea5043cf73ec65c57fcce055ad92e57b584d",
+  "deviceTestJobUrl": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/device-tests/kgg-test-b-f7e65159-20260902/job.json"
+}
