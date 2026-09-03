@@ -1,0 +1,119 @@
+name: KGG Admin Editor Sync Preflight
+run-name: KGG Admin Editor Sync Preflight | ${{ inputs.request_id }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      request_id:
+        description: Stable Admin editor sync preflight request id
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kgg-admin-editor-sync-preflight-${{ inputs.request_id }}
+  cancel-in-progress: false
+
+jobs:
+  admin-editor-sync-preflight:
+    runs-on: ubuntu-latest
+    env:
+      KGG_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      KGG_RESULT_PATH: ${{ runner.temp }}/kgg-admin-editor-sync-preflight.json
+    steps:
+      - name: Checkout current default branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Require canonical main and clean checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$KGG_DEFAULT_BRANCH" = "main"
+          test -z "$(git status --porcelain --untracked-files=all)"
+
+      - name: Run read-only Admin editor sync preflight
+        id: preflight
+        shell: bash
+        env:
+          KGG_REQUEST_ID: ${{ inputs.request_id }}
+        run: |
+          set -euo pipefail
+          set +e
+          python release-pipeline/kgg_admin_editor_sync_preflight.py \
+            --request-id "$KGG_REQUEST_ID" \
+            > "$KGG_RESULT_PATH"
+          rc=$?
+          set -e
+          echo "exit_code=$rc" >> "$GITHUB_OUTPUT"
+          python - "$KGG_RESULT_PATH" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          path = Path(sys.argv[1])
+          result = json.loads(path.read_text(encoding="utf-8"))
+          print(json.dumps(result, ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Upload compact preflight evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgg-admin-editor-sync-preflight-${{ inputs.request_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/kgg-admin-editor-sync-preflight.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Publish compact run summary
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f "$KGG_RESULT_PATH" ]; then
+            echo "Admin editor sync preflight did not produce a result." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          python - "$KGG_RESULT_PATH" "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          result = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          summary = Path(sys.argv[2])
+          lines = [
+              "## Admin Editor Sync Preflight",
+              "",
+              f"- request_id: `{result.get('request_id')}`",
+              f"- status: `{result.get('preflightStatus')}`",
+              f"- resource audit: `{result.get('resourceAudit')}`",
+              f"- candidate audit: `{result.get('candidateAudit')}`",
+              f"- start main: `{result.get('startMainSha')}`",
+              f"- end main: `{result.get('endMainSha')}`",
+              f"- changed fields: `{', '.join(result.get('changedFields') or [])}`",
+              f"- snapshot unchanged: `{result.get('snapshotUnchanged')}`",
+              f"- repository write detected: `{result.get('repositoryWriteDetected')}`",
+          ]
+          summary.write_text("\n".join(lines) + "\n", encoding="utf-8")
+          PY
+
+      - name: Enforce preflight result
+        if: always()
+        shell: bash
+        env:
+          KGG_PREFLIGHT_EXIT_CODE: ${{ steps.preflight.outputs.exit_code }}
+        run: |
+          set -euo pipefail
+          case "$KGG_PREFLIGHT_EXIT_CODE" in
+            0) exit 0 ;;
+            1|2|3) exit "$KGG_PREFLIGHT_EXIT_CODE" ;;
+            *) echo "missing or invalid preflight exit code" >&2; exit 1 ;;
+          esac
