@@ -1,0 +1,130 @@
+name: KGG Admin Editor Sync Snapshot PR Gate
+run-name: KGG Admin Editor Sync Snapshot PR Gate | ${{ inputs.request_id }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      request_id:
+        description: Stable Admin editor sync request id
+        required: true
+        type: string
+      approval_phrase:
+        description: Exact Max approval required for snapshot PR creation
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: kgg-admin-editor-sync-pr-${{ inputs.request_id }}
+  cancel-in-progress: false
+
+jobs:
+  admin-editor-sync-pr:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      KGG_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+    steps:
+      - name: Checkout current default branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Require canonical main and clean checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$KGG_DEFAULT_BRANCH" = "main"
+          test -z "$(git status --porcelain --untracked-files=all)"
+
+      - name: Run consequential Admin editor sync snapshot PR gate
+        id: gate
+        shell: bash
+        env:
+          KGG_REQUEST_ID: ${{ inputs.request_id }}
+          KGG_APPROVAL_PHRASE: ${{ inputs.approval_phrase }}
+        run: |
+          set -euo pipefail
+          result_path="$RUNNER_TEMP/kgg-admin-editor-sync-pr-gate.json"
+          set +e
+          python release-pipeline/kgg_admin_editor_sync_pr_gate.py \
+            --request-id "$KGG_REQUEST_ID" \
+            --approval-phrase "$KGG_APPROVAL_PHRASE" \
+            > "$result_path"
+          rc=$?
+          set -e
+          echo "exit_code=$rc" >> "$GITHUB_OUTPUT"
+          python - "$result_path" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          result = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          print(json.dumps(result, ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Upload compact snapshot PR evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgg-admin-editor-sync-pr-${{ inputs.request_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/kgg-admin-editor-sync-pr-gate.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Publish compact run summary
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          result_path="$RUNNER_TEMP/kgg-admin-editor-sync-pr-gate.json"
+          if [ ! -f "$result_path" ]; then
+            echo "Admin editor sync snapshot PR gate did not produce a result." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          python - "$result_path" "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          result = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          lines = [
+              "## Admin Editor Sync Snapshot PR Gate",
+              "",
+              f"- request_id: `{result.get('request_id')}`",
+              f"- status: `{result.get('endStatus')}`",
+              f"- start main: `{result.get('startMainSha')}`",
+              f"- pre-write main: `{result.get('preWriteMainSha')}`",
+              f"- final main: `{result.get('finalMainSha')}`",
+              f"- resource audit: `{result.get('resourceAudit')}`",
+              f"- candidate audit: `{result.get('candidateAudit')}`",
+              f"- branch audit: `{result.get('branchAudit')}`",
+              f"- changed fields: `{', '.join(result.get('changedFields') or [])}`",
+              f"- changed file count: `{result.get('changedFileCount')}`",
+              f"- branch: `{result.get('branchName')}`",
+              f"- PR number: `{result.get('prNumber')}`",
+              f"- PR URL: `{result.get('prUrl')}`",
+          ]
+          Path(sys.argv[2]).write_text("\n".join(lines) + "\n", encoding="utf-8")
+          PY
+
+      - name: Enforce snapshot PR gate result
+        if: always()
+        shell: bash
+        env:
+          KGG_GATE_EXIT_CODE: ${{ steps.gate.outputs.exit_code }}
+        run: |
+          set -euo pipefail
+          case "$KGG_GATE_EXIT_CODE" in
+            0) exit 0 ;;
+            1|2|3|4) exit "$KGG_GATE_EXIT_CODE" ;;
+            *) echo "missing or invalid snapshot PR gate exit code" >&2; exit 1 ;;
+          esac
