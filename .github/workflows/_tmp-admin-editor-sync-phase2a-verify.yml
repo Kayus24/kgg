@@ -1,0 +1,29 @@
+name: Temporary Admin Editor Sync Phase2A Verify
+
+on:
+  push:
+    branches:
+      - phase1-admin-editor-sync-candidate
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run Phase 1 and Phase 2A tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python release-pipeline/test_kgg_custom_gpt_resource_audit.py
+          python release-pipeline/test_kgg_admin_editor_sync_candidate.py
+          python release-pipeline/test_kgg_admin_editor_sync_preflight.py
+          python release-pipeline/kgg_custom_gpt_resource_audit.py --check
+          test -z "$(git status --porcelain --untracked-files=all)"
