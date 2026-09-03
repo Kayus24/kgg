@@ -133,6 +133,56 @@ class CustomGptResourceAuditTests(unittest.TestCase):
         with self.assertRaisesRegex(audit.AuditError, "Knowledge digest mismatch"):
             audit.validate_snapshot(path, "production")
 
+    def test_refresh_target_preserves_matching_admin_live_claim_byte_for_byte(self) -> None:
+        path = self.snapshot(
+            sync_status=audit.LIVE_SYNC_STATUS,
+            lastVerifiedAt="2026-08-11T08:09:10Z",
+            lastVerifiedMainCommit="0123456789abcdef0123456789abcdef01234567",
+        )
+        before = path.read_bytes()
+
+        audit.refresh_target_snapshot(path, "production")
+
+        self.assertEqual(before, path.read_bytes())
+        refreshed = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(audit.LIVE_SYNC_STATUS, refreshed["syncStatus"])
+        self.assertEqual("2026-08-11T08:09:10Z", refreshed["lastVerifiedAt"])
+        self.assertEqual(
+            "0123456789abcdef0123456789abcdef01234567",
+            refreshed["lastVerifiedMainCommit"],
+        )
+
+    def test_refresh_target_invalidates_each_real_admin_target_drift(self) -> None:
+        cases = {
+            "profileVersion": "4.1.0",
+            "knowledgeSha256": ["0" * 64],
+            "actionSha256": ["1" * 64],
+            "bootstrapVersion": "admin-v7",
+            "instructionsSha256": "2" * 64,
+        }
+        for field, value in cases.items():
+            with self.subTest(field=field):
+                path = self.snapshot(
+                    sync_status=audit.LIVE_SYNC_STATUS,
+                    lastVerifiedAt="2026-08-11T08:09:10Z",
+                    lastVerifiedMainCommit="0123456789abcdef0123456789abcdef01234567",
+                    **{field: value},
+                )
+
+                audit.refresh_target_snapshot(path, "production")
+
+                refreshed = json.loads(path.read_text(encoding="utf-8"))
+                self.assertEqual(
+                    audit.TARGET_PENDING_SYNC_STATUS,
+                    refreshed["syncStatus"],
+                )
+                self.assertNotIn("lastVerifiedAt", refreshed)
+                self.assertNotIn("lastVerifiedMainCommit", refreshed)
+                self.assertEqual(
+                    audit.TARGET_PASS,
+                    audit.validate_snapshot(path, "production"),
+                )
+
     def test_refresh_target_updates_hashes_and_removes_live_claim(self) -> None:
         path = self.snapshot(
             sync_status=audit.LIVE_SYNC_STATUS,
@@ -306,12 +356,13 @@ class CustomGptResourceAuditTests(unittest.TestCase):
         self.assertEqual("old\n", target.read_text(encoding="utf-8"))
         self.assertEqual(before, set(self.root.iterdir()))
 
-    def test_cli_refreshes_an_explicit_target_snapshot(self) -> None:
+    def test_cli_refresh_preserves_matching_live_snapshot(self) -> None:
         snapshot = self.snapshot(
             sync_status=audit.LIVE_SYNC_STATUS,
             lastVerifiedAt="2026-08-11T08:09:10Z",
             lastVerifiedMainCommit="0123456789abcdef0123456789abcdef01234567",
         )
+        before = snapshot.read_bytes()
         manifest = self.root / "manifest.json"
         stdout = StringIO()
         stderr = StringIO()
@@ -329,7 +380,8 @@ class CustomGptResourceAuditTests(unittest.TestCase):
             result = audit.main()
 
         self.assertEqual(0, result, stderr.getvalue())
-        self.assertEqual(audit.TARGET_PASS, json.loads(stdout.getvalue())["status"])
+        self.assertEqual(audit.LIVE_PASS, json.loads(stdout.getvalue())["status"])
+        self.assertEqual(before, snapshot.read_bytes())
         self.assertEqual(
             audit.normalize(audit.expected_manifest()),
             manifest.read_text(encoding="utf-8"),
