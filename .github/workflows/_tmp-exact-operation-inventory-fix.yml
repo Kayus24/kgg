@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   exact-inventory-fix:
-    if: github.event.head_commit.message == 'chore(gpt): trigger exact operation inventory fix'
+    if: "github.event.head_commit.message == 'chore(gpt): trigger exact operation inventory fix'"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
