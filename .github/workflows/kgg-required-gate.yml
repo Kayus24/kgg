@@ -76,11 +76,31 @@ jobs:
           echo "patient_day_flow=$patient_day_flow" >> "$GITHUB_OUTPUT"
           echo "patient_last_value_shimmer=$patient_last_value_shimmer" >> "$GITHUB_OUTPUT"
           echo "admin_camera_qr=$admin_camera_qr" >> "$GITHUB_OUTPUT"
+      - name: Run targeted Admin Action operation inventory test
+        shell: bash
+        run: python -m unittest release-pipeline/test_kgg_brain_relay_worker.py -k test_operation_id_inventories_remain_unchanged -v
       - name: Run critical KGG test battery
         shell: bash
         env:
           KGG_ALLOW_RELEASE_DRIFT: ${{ (steps.scope.outputs.pipeline_only == 'true' || contains(github.event.pull_request.labels.*.name, 'kgg-no-release')) && '1' || '' }}
         run: python release-pipeline/kgg_test_battery.py --level critical
+      - name: Run Phase 1 2A 2B and 3 Admin editor sync tests
+        shell: bash
+        run: |
+          python -m unittest \
+            release-pipeline/test_kgg_custom_gpt_resource_audit.py \
+            release-pipeline/test_kgg_admin_editor_sync_candidate.py \
+            release-pipeline/test_kgg_admin_editor_sync_preflight.py \
+            release-pipeline/test_kgg_admin_editor_sync_pr_gate.py \
+            release-pipeline/test_kgg_admin_editor_sync_action_surface.py \
+            -v
+      - name: Verify canonical Admin target Resource Audit
+        shell: bash
+        run: |
+          python release-pipeline/kgg_custom_gpt_resource_audit.py \
+            --check \
+            --editor-snapshot docs/kgg-custom-gpt-editor-snapshot.json \
+            --profile production
       - name: Run patient PWA contract smoke
         if: steps.scope.outputs.pwa_contract == 'true'
         shell: bash
