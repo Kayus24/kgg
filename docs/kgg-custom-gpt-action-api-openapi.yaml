@@ -426,7 +426,7 @@ paths:
     post:
       operationId: submitKggAdminEditorSyncPreflight
       summary: Run the write-free Admin Editor Sync Preflight after the published editor was manually checked.
-      description: Non-consequential certification preflight. The workflow freshly reads main and the Resource Manifest, requires TARGET_PASS, builds only a temporary server-owned candidate, requires LIVE_PASS, rechecks main for drift and never creates a branch, commit or PR. The human attestation phrase "Editor geprüft, Sync zertifizieren." authorizes this preflight but never substitutes for TARGET_PASS or the server checks. The GitHub dispatch envelope is fixed to ref main; the only workflow input controlled by the caller is request_id.
+      description: Write-free certification preflight after human editor attestation. Server reads main and manifest, requires TARGET_PASS, builds a temporary candidate, requires LIVE_PASS, rechecks main drift, and never creates a branch, commit or PR. Caller controls only request_id; ref is fixed to main.
       x-openai-isConsequential: false
       x-kgg-result-states: [would_certify, no_change, stale_context, stale_base, failed]
       security:
@@ -460,7 +460,7 @@ paths:
     post:
       operationId: submitKggAdminEditorSyncSnapshotPr
       summary: Create a guarded Admin editor-sync snapshot-only PR after Max's exact final approval.
-      description: Consequential certification gate. It reruns the full preflight immediately before any write, generates UTC time, main SHA and the candidate server-side, permits only syncStatus, lastVerifiedAt and lastVerifiedMainCommit to change, and may create only a snapshot-only branch/commit/PR. It never writes directly to main and never auto-merges. The GPT may call it only after Max says exactly "Gut für Main"; no alternative or implicit approval is valid. The GitHub dispatch envelope is fixed to ref main; the only workflow inputs controlled by the caller are request_id and approval_phrase.
+      description: Consequential snapshot-PR gate after exact approval "Gut für Main". Server reruns the full preflight, owns UTC time, main SHA and candidate, permits only syncStatus, lastVerifiedAt and lastVerifiedMainCommit, creates only a snapshot PR, never writes main directly and never auto-merges.
       x-openai-isConsequential: true
       x-kgg-result-states: [pr_created, existing_pr, existing_request, no_change, approval_required, stale_context, stale_base, failed]
       security:
