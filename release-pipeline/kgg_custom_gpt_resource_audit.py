@@ -222,18 +222,32 @@ def validate_snapshot_identity(
             raise AuditError(f"{profile} capability mismatch: {key} must be {wanted}")
 
 
+def target_snapshot_fields(expected: dict[str, Any]) -> dict[str, Any]:
+    fields: dict[str, Any] = {
+        "profileVersion": expected["profileVersion"],
+        "knowledgeSha256": [item["sha256"] for item in expected["knowledge"]],
+        "actionSha256": [item["sha256"] for item in expected["actions"]],
+    }
+    if expected.get("editorBootstrap"):
+        fields["bootstrapVersion"] = expected["editorBootstrap"]["version"]
+        fields["instructionsSha256"] = expected["editorBootstrap"]["sha256"]
+    return fields
+
+
 def refresh_target_snapshot(path: Path, profile: str) -> None:
     if profile not in {"production", "patientProduction"}:
         raise AuditError("target refresh is supported only for production profiles")
     snapshot = read_snapshot(path)
     expected = expected_manifest()[profile]
     validate_snapshot_identity(snapshot, profile, expected)
-    snapshot["profileVersion"] = expected["profileVersion"]
-    snapshot["knowledgeSha256"] = [item["sha256"] for item in expected["knowledge"]]
-    snapshot["actionSha256"] = [item["sha256"] for item in expected["actions"]]
-    if expected.get("editorBootstrap"):
-        snapshot["bootstrapVersion"] = expected["editorBootstrap"]["version"]
-        snapshot["instructionsSha256"] = expected["editorBootstrap"]["sha256"]
+    target_fields = target_snapshot_fields(expected)
+    target_changed = any(snapshot.get(key) != value for key, value in target_fields.items())
+
+    if profile == "production" and not target_changed:
+        return
+
+    for key, value in target_fields.items():
+        snapshot[key] = value
     snapshot["syncStatus"] = TARGET_PENDING_SYNC_STATUS
     snapshot.pop("lastVerifiedAt", None)
     snapshot.pop("lastVerifiedMainCommit", None)
