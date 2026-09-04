@@ -675,7 +675,7 @@ class BrainRelayWorkerContractTests(unittest.TestCase):
                 "to_role": "luna-manager",
                 "level": "L1",
                 "classification": "technical-enforcement",
-                "evidence": [{"kind":"contract","status":"FAIL"}],
+                "evidence": [{"kind": "contract", "status": "FAIL"}],
             }
         )
 
