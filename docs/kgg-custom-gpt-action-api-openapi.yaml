@@ -1,8 +1,33 @@
 openapi: 3.1.0
 info:
   title: KGG GPT Preview and Project Memory GitHub API
-  version: "1.6.0"
-  description: Pre-authorized Admin/Patient Preview operations, separately approved release gates, and private shared memory/coordination.
+  version: "1.7.0"
+  description: Pre-authorized Admin/Patient Preview operations, Admin editor-sync certification, separately approved release gates, and private shared memory/coordination.
+  x-kgg-admin-editor-sync-contract:
+    human_attestation: "Editor geprüft, Sync zertifizieren."
+    human_attestation_semantics: "Confirms that the real published Admin GPT editor was manually checked; it never replaces TARGET_PASS or the server preflight."
+    server_owned_values:
+      - UTC RFC3339 certification time
+      - current main SHA
+      - snapshot candidate
+    normal_flow:
+      - "Max updates and publishes the real Admin GPT editor."
+      - "A fresh chat performs the complete Admin Resource Audit and must obtain TARGET_PASS."
+      - "Max says exactly: Editor geprüft, Sync zertifizieren."
+      - "The GPT may dispatch the non-consequential Admin Editor Sync Preflight."
+      - "The preflight must return would_certify before certification can continue."
+      - "Only after Max says exactly: Gut für Main may the GPT dispatch the consequential Snapshot PR gate."
+      - "The gate creates a snapshot-only PR and never auto-merges it."
+      - "Required checks must be green before a human merge."
+      - "After merge, LIVE_PASS must be verified with the canonical strict audit."
+    idempotent_target_refresh:
+      preserve_live_synced_when_target_unchanged: true
+      invalidating_target_fields:
+        - profileVersion
+        - bootstrapVersion and instructionsSha256
+        - knowledgeSha256
+        - actionSha256
+      product_commits_do_not_invalidate_unchanged_editor_sync: true
 servers:
   - url: https://api.github.com
 paths:
@@ -397,6 +422,77 @@ paths:
                         archive_download_url:
                           type: string
                 additionalProperties: true
+  /repos/Kayus24/kgg/actions/workflows/kgg-admin-editor-sync-preflight.yml/dispatches:
+    post:
+      operationId: submitKggAdminEditorSyncPreflight
+      summary: Run the write-free Admin Editor Sync Preflight after the published editor was manually checked.
+      description: Non-consequential certification preflight. The workflow freshly reads main and the Resource Manifest, requires TARGET_PASS, builds only a temporary server-owned candidate, requires LIVE_PASS, rechecks main for drift and never creates a branch, commit or PR. The human attestation phrase "Editor geprüft, Sync zertifizieren." authorizes this preflight but never substitutes for TARGET_PASS or the server checks. The GitHub dispatch envelope is fixed to ref main; the only workflow input controlled by the caller is request_id.
+      x-openai-isConsequential: false
+      x-kgg-result-states: [would_certify, no_change, stale_context, stale_base, failed]
+      security:
+        - githubBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ref, inputs]
+              additionalProperties: false
+              properties:
+                ref:
+                  type: string
+                  enum: [main]
+                  default: main
+                  description: Fixed GitHub workflow dispatch ref; it is not a caller-selectable certification value.
+                inputs:
+                  type: object
+                  required: [request_id]
+                  additionalProperties: false
+                  properties:
+                    request_id:
+                      type: string
+                      pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
+      responses:
+        "204":
+          description: Write-free Admin Editor Sync Preflight dispatch accepted. Final workflow evidence is one of would_certify, no_change, stale_context, stale_base or failed.
+  /repos/Kayus24/kgg/actions/workflows/kgg-admin-editor-sync-snapshot-pr.yml/dispatches:
+    post:
+      operationId: submitKggAdminEditorSyncSnapshotPr
+      summary: Create a guarded Admin editor-sync snapshot-only PR after Max's exact final approval.
+      description: Consequential certification gate. It reruns the full preflight immediately before any write, generates UTC time, main SHA and the candidate server-side, permits only syncStatus, lastVerifiedAt and lastVerifiedMainCommit to change, and may create only a snapshot-only branch/commit/PR. It never writes directly to main and never auto-merges. The GPT may call it only after Max says exactly "Gut für Main"; no alternative or implicit approval is valid. The GitHub dispatch envelope is fixed to ref main; the only workflow inputs controlled by the caller are request_id and approval_phrase.
+      x-openai-isConsequential: true
+      x-kgg-result-states: [pr_created, existing_pr, existing_request, no_change, approval_required, stale_context, stale_base, failed]
+      security:
+        - githubBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ref, inputs]
+              additionalProperties: false
+              properties:
+                ref:
+                  type: string
+                  enum: [main]
+                  default: main
+                  description: Fixed GitHub workflow dispatch ref; it is not a caller-selectable certification value.
+                inputs:
+                  type: object
+                  required: [request_id, approval_phrase]
+                  additionalProperties: false
+                  properties:
+                    request_id:
+                      type: string
+                      pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
+                    approval_phrase:
+                      type: string
+                      enum: [Gut für Main]
+      responses:
+        "204":
+          description: Consequential Admin Editor Sync Snapshot PR dispatch accepted. Final workflow evidence is one of pr_created, existing_pr, existing_request, no_change, approval_required, stale_context, stale_base or failed.
   /repos/Kayus24/kgg/actions/workflows/kgg-patient-gpt-preview-from-admin.yml/dispatches:
     post:
       operationId: submitKggPatientPreviewFromAdmin
