@@ -4,10 +4,10 @@ on:
   pull_request:
     branches:
       - main
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
 
 permissions:
-  contents: write
+  contents: read
   pull-requests: read
 
 concurrency:
@@ -22,36 +22,27 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.head_ref }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
-      - name: Verify bounded schema-fix base
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify exactly seven Admin API response object properties
         shell: bash
         run: |
           set -euo pipefail
-          test "${GITHUB_HEAD_REF}" = "fix/admin-editor-response-schema-properties"
           git fetch origin main --depth=1
           test "$(git rev-parse origin/main)" = "e1693b8716e6c8f7fb30ccd4a1f8d7d90569d55b"
-
-      - name: Apply exactly seven response properties fixes and canonical target refresh
-        id: fix
-        shell: bash
-        run: |
-          set -euo pipefail
           python - <<'PY'
           from pathlib import Path
+          import json
           import re
           import subprocess
 
           path = Path('docs/kgg-custom-gpt-action-api-openapi.yaml')
           text = path.read_text(encoding='utf-8')
-          before = text
-          before_ops = re.findall(r'(?m)^\s+operationId:\s+\S+\s*$', before)
-          before_conseq = re.findall(r'(?m)^\s+x-openai-isConsequential:\s+\S+\s*$', before)
-          before_security = before.count('      security:\n')
-
+          base = subprocess.check_output(['git', 'show', 'origin/main:docs/kgg-custom-gpt-action-api-openapi.yaml'], text=True)
           targets = [
               '/repos/Kayus24/kgg/git/ref/heads/main',
               '/repos/Kayus24/kgg/actions/workflows/kgg-gpt-device-test.yml/runs',
@@ -61,71 +52,186 @@ jobs:
               '/repos/Kayus24/kgg-project-memory/contents/coordination/threads/{coordination_request_id}.json',
               '/repos/Kayus24/kgg-project-memory/actions/workflows/kgg-agent-coordination-gate.yml/runs',
           ]
-
           for target in targets:
               marker = f'  {target}:\n'
               start = text.find(marker)
-              if start < 0:
-                  raise SystemExit(f'missing target path: {target}')
+              assert start >= 0, target
               end = text.find('\n  /repos/', start + len(marker))
               if end < 0:
                   end = len(text)
               block = text[start:end]
-              if 'properties: {}' in block:
-                  continue
-              inline = 'schema: {type: object, additionalProperties: true}'
-              multiline = 'schema:\n                type: object\n                additionalProperties: true'
-              if block.count(inline) == 1:
-                  block = block.replace(inline, 'schema: {type: object, properties: {}, additionalProperties: true}', 1)
-              elif block.count(multiline) == 1:
-                  block = block.replace(multiline, 'schema:\n                type: object\n                properties: {}\n                additionalProperties: true', 1)
-              else:
-                  raise SystemExit(f'target path does not have exactly one expected object response schema: {target}')
-              text = text[:start] + block + text[end:]
-
-          if re.findall(r'(?m)^\s+operationId:\s+\S+\s*$', text) != before_ops:
-              raise SystemExit('operationId inventory changed')
-          if re.findall(r'(?m)^\s+x-openai-isConsequential:\s+\S+\s*$', text) != before_conseq:
-              raise SystemExit('consequential flags changed')
-          if text.count('      security:\n') != before_security:
-              raise SystemExit('security block count changed')
-          if text.count('properties: {}') - before.count('properties: {}') != 7:
-              raise SystemExit('expected exactly seven new properties: {} declarations')
-
-          path.write_text(text, encoding='utf-8')
-          diff = subprocess.check_output(['git', 'diff', '--', str(path)], text=True)
-          if diff.count('properties: {}') != 7:
-              raise SystemExit('OpenAPI diff does not contain exactly seven properties additions/replacements')
-          print('editor_response_schema_properties_added=7')
-          PY
-
-          python release-pipeline/kgg_custom_gpt_resource_audit.py --refresh-target-profile production
-
-          python - <<'PY'
-          import json
-          from pathlib import Path
+              assert 'properties: {}' in block, target
+          assert re.findall(r'(?m)^\s+operationId:\s+\S+\s*$', text) == re.findall(r'(?m)^\s+operationId:\s+\S+\s*$', base)
+          assert re.findall(r'(?m)^\s+x-openai-isConsequential:\s+\S+\s*$', text) == re.findall(r'(?m)^\s+x-openai-isConsequential:\s+\S+\s*$', base)
+          assert text.count('      security:\n') == base.count('      security:\n')
+          diff = subprocess.check_output(['git', 'diff', 'origin/main...HEAD', '--', str(path)], text=True)
+          additions = [line for line in diff.splitlines() if line.startswith('+') and not line.startswith('+++') and 'properties: {}' in line]
+          assert len(additions) == 7, additions
           snapshot = json.loads(Path('docs/kgg-custom-gpt-editor-snapshot.json').read_text(encoding='utf-8'))
-          if snapshot.get('syncStatus') != 'target-pending-live-editor-sync':
-              raise SystemExit('snapshot must remain target-pending-live-editor-sync')
-          if 'lastVerifiedAt' in snapshot or 'lastVerifiedMainCommit' in snapshot:
-              raise SystemExit('live verification fields must not be present')
+          assert snapshot['syncStatus'] == 'target-pending-live-editor-sync'
+          assert 'lastVerifiedAt' not in snapshot and 'lastVerifiedMainCommit' not in snapshot
+          print('verified_editor_response_properties=7')
           PY
-
-          mapfile -t changed < <(git diff --name-only)
-          printf '%s\n' "${changed[@]}" | sort > "$RUNNER_TEMP/actual.txt"
-          printf '%s\n' \
-            docs/kgg-custom-gpt-action-api-openapi.yaml \
-            docs/kgg-custom-gpt-editor-snapshot.json \
-            docs/kgg-custom-gpt-resource-manifest.json | sort > "$RUNNER_TEMP/expected.txt"
-          diff -u "$RUNNER_TEMP/expected.txt" "$RUNNER_TEMP/actual.txt"
-
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -- \
-            docs/kgg-custom-gpt-action-api-openapi.yaml \
-            docs/kgg-custom-gpt-editor-snapshot.json \
-            docs/kgg-custom-gpt-resource-manifest.json
-          git diff --cached --check
-          git commit -m 'fix(gpt): add explicit response object properties'
-          git push origin "HEAD:${GITHUB_HEAD_REF}"
-          echo "pushed=true" >> "$GITHUB_OUTPUT"
+      - name: Run Admin Editor Sync Action Surface tests
+        shell: bash
+        run: python -m unittest release-pipeline/test_kgg_admin_editor_sync_action_surface.py -v
+      - name: Run Resource Audit tests and canonical check
+        shell: bash
+        run: |
+          python -m unittest release-pipeline/test_kgg_custom_gpt_resource_audit.py -v
+          python release-pipeline/kgg_custom_gpt_resource_audit.py --check --editor-snapshot docs/kgg-custom-gpt-editor-snapshot.json --profile production
+      - name: Install Poppler for PDF readability smoke
+        shell: bash
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      - name: Classify pull request scope
+        id: scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          changed_file="$RUNNER_TEMP/kgg-changed-files.txt"
+          git diff --name-only "origin/${{ github.base_ref }}"...HEAD | tee "$changed_file"
+          runtime_identity_path="$(python release-pipeline/build_therapist_source.py --print-source-role runtimeIdentity)"
+          pipeline_only=true
+          ui_or_html=false
+          patient_scan=false
+          pwa_contract=false
+          patient_summary=false
+          patient_gpt=false
+          patient_runtime=false
+          patient_day_flow=false
+          patient_last_value_shimmer=false
+          admin_camera_qr=false
+          while IFS= read -r path; do
+            [[ -z "$path" ]] && continue
+            case "$path" in
+              .github/workflows/*|release-pipeline/*|release-pipeline/**) ;;
+              *) pipeline_only=false ;;
+            esac
+          done < "$changed_file"
+          if grep -Eq '(^|/)[^/]+\.(html|css)$|^kgg-update/|^therapist-app/test-lab/|^therapist-app/releases/web/|^release-pipeline/kgg_ui_stability_smoke\.js$|^patient-pain-vertical-scale\.js$' "$changed_file"; then ui_or_html=true; fi
+          if grep -Eq '^patient-start-scan\.js$|^patient-plan-replace-slot-fix\.js$|^index\.html$|^service-worker\.js$|^patient-(media-retry-cache_v2|multiplan-db)\.js$|^release-pipeline/kgg_patient_scan_camera_smoke\.js$|^release-pipeline/patient-scan-fixtures/|^release-pipeline/package(-lock)?\.json$' "$changed_file"; then patient_scan=true; fi
+          if grep -Eq '^index\.html$|^update-recovery\.html$|^manifest\.json$|^manifest-v[0-9]+\.webmanifest$|^service-worker\.js$|^patient-version-label\.js$|^kgg-icon-.*\.png$|^release-pipeline/kgg_(pwa_contract|update_recovery)_smoke\.py$' "$changed_file"; then pwa_contract=true; fi
+          if grep -Eq '^patient-set-summary-groups\.js$|^release-pipeline/kgg_patient_summary_smoke\.js$' "$changed_file"; then patient_summary=true; fi
+          if grep -Eq '^docs/kgg-patient-|^release-pipeline/kgg_patient_gpt_|^\.github/workflows/kgg-patient-gpt-preview-gate\.yml$|^release-pipeline/kgg_custom_gpt_resource_audit\.py$' "$changed_file"; then patient_gpt=true; fi
+          if grep -Eq '^service-worker\.js$|^patient-version-label\.js$|^update-recovery\.html$|^patient-card-progress\.js$|^collapse-cards\.js$|^release-pipeline/kgg_patient_(card_progress_smoke|runtime_progress_playwright|pain_vertical_(smoke|playwright))\.js$|^patient-pain-vertical-scale\.js$|^release-pipeline/package(-lock)?\.json$|^\.github/workflows/kgg-required-gate\.yml$' "$changed_file"; then patient_runtime=true; fi
+          if grep -Eq '^index\.html$|^patient-(day-history|multiplan-db|plan-delete|start-values-day1|card-settings)\.js$|^release-pipeline/kgg_patient_continuous_days_(smoke|playwright)\.js$|^release-pipeline/kgg_test_battery\.py$|^\.github/workflows/kgg-required-gate\.yml$' "$changed_file"; then patient_day_flow=true; fi
+          if grep -Eq '^index\.html$|^service-worker\.js$|^patient-last-value-hints\.js$|^release-pipeline/kgg_patient_last_value_shimmer_playwright\.js$|^\.github/workflows/kgg-required-gate\.yml$' "$changed_file"; then patient_last_value_shimmer=true; fi
+          if grep -Eq '^android-wrapper/app/src/main/(java/de/kgg/app/MainActivity\.java|assets/android/kgg_android_sync_bootstrap\.js)$|^kgg-update/src/patches/.*(camera|qr|scan).*$|^release-pipeline/kgg_admin_camera_qr_smoke\.js$' "$changed_file" || grep -Fxq 'kgg-update/src/parts.json' "$changed_file" || grep -Fxq "$runtime_identity_path" "$changed_file"; then admin_camera_qr=true; fi
+          echo "pipeline_only=$pipeline_only" >> "$GITHUB_OUTPUT"
+          echo "ui_or_html=$ui_or_html" >> "$GITHUB_OUTPUT"
+          echo "patient_scan=$patient_scan" >> "$GITHUB_OUTPUT"
+          echo "pwa_contract=$pwa_contract" >> "$GITHUB_OUTPUT"
+          echo "patient_summary=$patient_summary" >> "$GITHUB_OUTPUT"
+          echo "patient_gpt=$patient_gpt" >> "$GITHUB_OUTPUT"
+          echo "patient_runtime=$patient_runtime" >> "$GITHUB_OUTPUT"
+          echo "patient_day_flow=$patient_day_flow" >> "$GITHUB_OUTPUT"
+          echo "patient_last_value_shimmer=$patient_last_value_shimmer" >> "$GITHUB_OUTPUT"
+          echo "admin_camera_qr=$admin_camera_qr" >> "$GITHUB_OUTPUT"
+      - name: Run critical KGG test battery
+        shell: bash
+        env:
+          KGG_ALLOW_RELEASE_DRIFT: ${{ (steps.scope.outputs.pipeline_only == 'true' || contains(github.event.pull_request.labels.*.name, 'kgg-no-release')) && '1' || '' }}
+        run: python release-pipeline/kgg_test_battery.py --level critical
+      - name: Run patient PWA contract smoke
+        if: steps.scope.outputs.pwa_contract == 'true'
+        shell: bash
+        run: python release-pipeline/kgg_pwa_contract_smoke.py
+      - name: Run patient update recovery smoke
+        if: steps.scope.outputs.pwa_contract == 'true'
+        shell: bash
+        run: python release-pipeline/kgg_update_recovery_smoke.py
+      - name: Run patient summary range smoke
+        if: steps.scope.outputs.patient_summary == 'true'
+        shell: bash
+        run: node release-pipeline/kgg_patient_summary_smoke.js
+      - name: Run patient card progress smoke
+        shell: bash
+        run: node release-pipeline/kgg_patient_card_progress_smoke.js
+      - name: Run patient install prompt smoke
+        shell: bash
+        run: node release-pipeline/kgg_patient_install_prompt_smoke.js
+      - name: Run patient numpad commit-on-leave smoke
+        shell: bash
+        run: node release-pipeline/kgg_patient_numpad_commit_smoke.js
+      - name: Run patient plan delete smoke
+        shell: bash
+        run: node release-pipeline/kgg_patient_plan_delete_smoke.js
+      - name: Run patient plan replace active-slot smoke
+        shell: bash
+        run: node release-pipeline/kgg_patient_plan_replace_slot_smoke.js
+      - name: Run patient vertical pain logic smoke
+        if: steps.scope.outputs.patient_runtime == 'true'
+        shell: bash
+        run: node release-pipeline/kgg_patient_pain_vertical_smoke.js
+      - name: Check Patient Custom GPT resources
+        shell: bash
+        run: |
+          python release-pipeline/kgg_patient_gpt_resources.py --check
+          python release-pipeline/kgg_patient_gpt_write_gate.py --self-test --self-test-preview-root "$RUNNER_TEMP/kgg-patient-preview-smoke"
+          python release-pipeline/kgg_patient_gpt_eval.py
+      - name: Install patient browser dependencies
+        if: steps.scope.outputs.patient_gpt == 'true' || steps.scope.outputs.patient_runtime == 'true' || steps.scope.outputs.patient_day_flow == 'true' || steps.scope.outputs.patient_last_value_shimmer == 'true'
+        shell: bash
+        run: |
+          cd release-pipeline
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Run permanent patient continuous day-flow regression
+        if: steps.scope.outputs.patient_day_flow == 'true'
+        shell: bash
+        env:
+          KGG_SKIP_PLAYWRIGHT_INSTALL: '1'
+        run: python release-pipeline/kgg_test_battery.py --suite patient-day-flow --level regression
+      - name: Run patient runtime and progress Playwright smoke
+        if: steps.scope.outputs.patient_runtime == 'true'
+        shell: bash
+        run: node release-pipeline/kgg_patient_runtime_progress_playwright.js
+      - name: Run patient vertical pain Playwright smoke
+        if: steps.scope.outputs.patient_runtime == 'true'
+        shell: bash
+        run: node release-pipeline/kgg_patient_pain_vertical_playwright.js
+      - name: Run patient last-value shimmer Playwright smoke
+        if: steps.scope.outputs.patient_last_value_shimmer == 'true'
+        shell: bash
+        run: node release-pipeline/kgg_patient_last_value_shimmer_playwright.js
+      - name: Run Patient GPT browser smoke
+        if: steps.scope.outputs.patient_gpt == 'true'
+        shell: bash
+        run: |
+          node release-pipeline/kgg_patient_gpt_browser_smoke.js
+          node release-pipeline/kgg_patient_preview_first_load_smoke.js "$RUNNER_TEMP/kgg-patient-preview-smoke/previews/patient-gate-self-test"
+      - name: Check Custom GPT live context freshness
+        shell: bash
+        run: python release-pipeline/kgg_gpt_context.py --check
+      - name: Check Custom GPT bug knowledge freshness
+        shell: bash
+        run: python release-pipeline/kgg_bug_knowledge.py --check
+      - name: Check Custom GPT source context freshness
+        shell: bash
+        run: python release-pipeline/kgg_gpt_source_context.py --check
+      - name: Check Custom GPT knowledge pack freshness
+        shell: bash
+        run: python release-pipeline/kgg_custom_gpt_knowledge_pack.py --check
+      - name: Check Custom GPT resource contract freshness
+        shell: bash
+        run: python release-pipeline/kgg_custom_gpt_resource_audit.py --check
+      - name: Check blind Repair-Lab contracts
+        shell: bash
+        run: |
+          python release-pipeline/kgg_gpt_repair_lab.py --self-test
+          python release-pipeline/kgg_gpt_repair_stabilize.py --self-test
+      - name: Run UI stability regression for UI or HTML changes
+        if: steps.scope.outputs.ui_or_html == 'true'
+        shell: bash
+        run: python release-pipeline/kgg_test_battery.py --suite ui-stability --level regression
+      - name: Run patient QR camera regression
+        if: steps.scope.outputs.patient_scan == 'true'
+        shell: bash
+        run: python release-pipeline/kgg_test_battery.py --suite patient-scan --level regression
+      - name: Run Admin camera and cross-app QR regression
+        if: steps.scope.outputs.admin_camera_qr == 'true'
+        shell: bash
+        run: |
+          python release-pipeline/kgg_test_battery.py --suite camera-qr --level regression
+          python release-pipeline/kgg_test_battery.py --suite patient-scan --level regression
