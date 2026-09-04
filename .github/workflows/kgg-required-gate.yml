@@ -7,7 +7,7 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
-  contents: write
+  contents: read
   pull-requests: read
 
 concurrency:
@@ -27,103 +27,42 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Verify bounded fix base
+      - name: Verify bounded diff and description limits
         shell: bash
         run: |
           set -euo pipefail
           test "${GITHUB_HEAD_REF}" = "fix/admin-editor-action-description-limit"
           git fetch origin main --depth=1
           test "$(git rev-parse origin/main)" = "3ae969b8a08e2f03ec1ac13aef7fc65f84a753fa"
-
-      - name: Apply only the two description fixes and canonical target refresh
-        id: fix
-        shell: bash
-        run: |
-          set -euo pipefail
           python - <<'PY'
           from pathlib import Path
-          import subprocess
-
-          path = Path('docs/kgg-custom-gpt-action-api-openapi.yaml')
-          text = path.read_text(encoding='utf-8')
-          old_pre = 'Non-consequential certification preflight. The workflow freshly reads main and the Resource Manifest, requires TARGET_PASS, builds only a temporary server-owned candidate, requires LIVE_PASS, rechecks main for drift and never creates a branch, commit or PR. The human attestation phrase "Editor geprüft, Sync zertifizieren." authorizes this preflight but never substitutes for TARGET_PASS or the server checks. The GitHub dispatch envelope is fixed to ref main; the only workflow input controlled by the caller is request_id.'
-          new_pre = 'Write-free certification preflight after human editor attestation. Server reads main and manifest, requires TARGET_PASS, builds a temporary candidate, requires LIVE_PASS, rechecks main drift, and never creates a branch, commit or PR. Caller controls only request_id; ref is fixed to main.'
-          old_pr = 'Consequential certification gate. It reruns the full preflight immediately before any write, generates UTC time, main SHA and the candidate server-side, permits only syncStatus, lastVerifiedAt and lastVerifiedMainCommit to change, and may create only a snapshot-only branch/commit/PR. It never writes directly to main and never auto-merges. The GPT may call it only after Max says exactly "Gut für Main"; no alternative or implicit approval is valid. The GitHub dispatch envelope is fixed to ref main; the only workflow inputs controlled by the caller are request_id and approval_phrase.'
-          new_pr = 'Consequential snapshot-PR gate after exact approval "Gut für Main". Server reruns the full preflight, owns UTC time, main SHA and candidate, permits only syncStatus, lastVerifiedAt and lastVerifiedMainCommit, creates only a snapshot PR, never writes main directly and never auto-merges.'
-
-          assert len(new_pre) == 288 and len(new_pre) < 300
-          assert len(new_pr) == 286 and len(new_pr) < 300
-          before = text
-          for old, new, label in ((old_pre, new_pre, 'preflight'), (old_pr, new_pr, 'snapshot-pr')):
-              if text.count(old) == 1:
-                  text = text.replace(old, new)
-              elif text.count(new) == 1:
-                  pass
-              else:
-                  raise SystemExit(f'{label} description is neither the exact old nor exact new contract')
-          if text != before:
-              path.write_text(text, encoding='utf-8')
-              diff = subprocess.check_output(['git', 'diff', '--unified=0', '--', str(path)], text=True)
-              changed = [line for line in diff.splitlines() if line[:1] in {'+', '-'} and not line.startswith(('+++', '---'))]
-              expected = {
-                  '-      description: ' + old_pre,
-                  '+      description: ' + new_pre,
-                  '-      description: ' + old_pr,
-                  '+      description: ' + new_pr,
-              }
-              if set(changed) != expected or len(changed) != 4:
-                  raise SystemExit('OpenAPI diff escaped the exact two description lines')
-          print(f'preflight_description_length={len(new_pre)}')
-          print(f'snapshot_pr_description_length={len(new_pr)}')
-          PY
-
-          python release-pipeline/kgg_custom_gpt_resource_audit.py --refresh-target-profile production
-
-          python - <<'PY'
           import json
-          from pathlib import Path
+          import re
+
+          text = Path('docs/kgg-custom-gpt-action-api-openapi.yaml').read_text(encoding='utf-8')
+          pre = 'Write-free certification preflight after human editor attestation. Server reads main and manifest, requires TARGET_PASS, builds a temporary candidate, requires LIVE_PASS, rechecks main drift, and never creates a branch, commit or PR. Caller controls only request_id; ref is fixed to main.'
+          pr = 'Consequential snapshot-PR gate after exact approval "Gut für Main". Server reruns the full preflight, owns UTC time, main SHA and candidate, permits only syncStatus, lastVerifiedAt and lastVerifiedMainCommit, creates only a snapshot PR, never writes main directly and never auto-merges.'
+          assert len(pre) == 288 and text.count('description: ' + pre) == 1
+          assert len(pr) == 286 and text.count('description: ' + pr) == 1
+          assert text.count('operationId: submitKggAdminEditorSyncPreflight') == 1
+          assert text.count('operationId: submitKggAdminEditorSyncSnapshotPr') == 1
+          assert text.count('enum: [Gut für Main]') == 1
           snapshot = json.loads(Path('docs/kgg-custom-gpt-editor-snapshot.json').read_text(encoding='utf-8'))
-          if snapshot.get('syncStatus') != 'target-pending-live-editor-sync':
-              raise SystemExit('snapshot must remain target-pending-live-editor-sync')
-          if 'lastVerifiedAt' in snapshot or 'lastVerifiedMainCommit' in snapshot:
-              raise SystemExit('live verification fields must not be present')
+          assert snapshot['syncStatus'] == 'target-pending-live-editor-sync'
+          assert 'lastVerifiedAt' not in snapshot and 'lastVerifiedMainCommit' not in snapshot
+          print('preflight_description_length=288')
+          print('snapshot_pr_description_length=286')
           PY
-
-          mapfile -t changed < <(git diff --name-only)
-          if (( ${#changed[@]} == 0 )); then
-            echo "pushed=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          printf '%s\n' "${changed[@]}" | sort > "$RUNNER_TEMP/actual.txt"
-          printf '%s\n' \
-            docs/kgg-custom-gpt-action-api-openapi.yaml \
-            docs/kgg-custom-gpt-editor-snapshot.json \
-            docs/kgg-custom-gpt-resource-manifest.json | sort > "$RUNNER_TEMP/expected.txt"
-          diff -u "$RUNNER_TEMP/expected.txt" "$RUNNER_TEMP/actual.txt"
-
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -- \
-            docs/kgg-custom-gpt-action-api-openapi.yaml \
-            docs/kgg-custom-gpt-editor-snapshot.json \
-            docs/kgg-custom-gpt-resource-manifest.json
-          git diff --cached --check
-          git commit -m 'fix(gpt): shorten admin editor sync action descriptions'
-          git push origin "HEAD:${GITHUB_HEAD_REF}"
-          echo "pushed=true" >> "$GITHUB_OUTPUT"
 
       - name: Run Admin Editor Sync Action Surface tests
-        if: steps.fix.outputs.pushed != 'true'
         run: python -m unittest release-pipeline/test_kgg_admin_editor_sync_action_surface.py -v
 
       - name: Run Resource Audit tests and canonical check
-        if: steps.fix.outputs.pushed != 'true'
         run: |
           python -m unittest release-pipeline/test_kgg_custom_gpt_resource_audit.py -v
           python release-pipeline/kgg_custom_gpt_resource_audit.py --check --editor-snapshot docs/kgg-custom-gpt-editor-snapshot.json --profile production
 
       - name: Run critical KGG test battery
-        if: steps.fix.outputs.pushed != 'true'
         env:
           KGG_ALLOW_RELEASE_DRIFT: '1'
         run: python release-pipeline/kgg_test_battery.py --level critical
