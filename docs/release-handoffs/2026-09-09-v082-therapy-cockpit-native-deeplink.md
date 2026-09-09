@@ -18,6 +18,7 @@ Der Web-Patch importiert selbsttragende `KGGTC1:`-Links aus URL oder Text, valid
 - `therapy-cockpit-critical`: grün, inklusive 5/10/20/40-Übungsgrößenproben, Integritätsfehlern, unbekannten IDs, Slotgrenze, Vorwert-Roundtrip und sicherem Plan-Adapter.
 - `therapy-cockpit-browser-regression`: grün bei 820×1180, 1024×768 und 1280×800; 1/2/3 Slots, kein Overflow, Numpad, Außen-Tipp, Ansichtswechsel, vierter Import, mittlere Entfernung, Abschluss-Roundtrip, Null-Slot-Rückkehr und Reload-Grenze.
 - Vollständiger kritischer Lauf: 139 Tests, `OK (skipped=1)`; danach alle weiteren kritischen Verträge grün.
+- Remote-Gates: Android-Wrapper `34300593688`, Validate/Build `34300593652`, Required Gate `34300593638` — alle grün.
 
 ## Nativer Source-Patch
 

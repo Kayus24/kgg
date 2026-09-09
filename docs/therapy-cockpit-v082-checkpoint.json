@@ -16,12 +16,12 @@
     "TEST_CODEC",
     "IMPLEMENT_UI",
     "TEST_UI",
+    "IMPLEMENT_DEEP_LINK",
+    "TEST_DEEP_LINK",
     "INTEGRATE",
     "FULL_REGRESSION_1",
     "REPAIR",
     "FULL_REGRESSION_2",
-    "IMPLEMENT_DEEP_LINK",
-    "TEST_DEEP_LINK",
     "PREVIEW",
     "VERIFY_PREVIEW"
   ],
@@ -40,9 +40,9 @@
     "check_html_scripts",
     "therapy-cockpit-native-contract",
     "android-wrapper-contract",
-    "remote-android-wrapper-check:34300192448",
-    "remote-validate-build:34300192449",
-    "remote-required-gate:34300192447"
+    "remote-android-wrapper-check:34300593688",
+    "remote-validate-build:34300593652",
+    "remote-required-gate:34300593638"
   ],
   "redTests": [],
   "linkSizeProbes": {
@@ -65,7 +65,7 @@
         "android-wrapper/app/src/main/java/de/kgg/app/MainActivity.java",
         "release-pipeline/kgg_therapy_cockpit_native_contract.py",
         ".github/workflows/android-wrapper-check.yml",
-        "https://github.com/Kayus24/kgg/actions/runs/34300192448"
+        "https://github.com/Kayus24/kgg/actions/runs/34300593688"
       ],
       "impact": "The source contract and CI build are green; an installed Preview/Test-App artifact and physical Android app-link acceptance remain unverified.",
       "nextStep": "Install the CI-built Preview APK on an Android-capable Preview station and test a valid, tampered, wrong-host and second-link intent."
