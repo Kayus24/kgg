@@ -46,7 +46,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch --no-tags origin "${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}" --depth=1
+          git fetch --no-tags origin "${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
           mapfile -t changed < <(git diff --name-only "origin/${{ github.base_ref }}"...HEAD)
           pipeline_only=true
           for path in "${changed[@]}"; do

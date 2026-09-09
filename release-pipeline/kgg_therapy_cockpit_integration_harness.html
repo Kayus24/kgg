@@ -139,6 +139,10 @@
       function frameDocument(){try{return frame.contentDocument||frame.contentWindow.document;}catch(error){fail("Der Frame ist nicht same-origin. Starte den Node-Smoke über HTTP statt die Datei direkt zu öffnen.");}}
       function frameWindow(){try{return frame.contentWindow;}catch(error){fail("Der Frame ist nicht same-origin.");}}
       function waitFor(predicate,timeout){var started=Date.now();return new Promise(function(resolve,reject){(function poll(){var result=false;try{result=predicate();}catch(error){}if(result){resolve(result);return}if(Date.now()-started>timeout){reject(new Error("Timeout beim Warten auf die Haupt-App."));return}setTimeout(poll,60);})();});}
+      async function reloadFrame(){
+        await new Promise(function(resolve,reject){var done=false;function finish(error){if(done)return;done=true;frame.removeEventListener("load",onload);if(error)reject(error);else resolve();}function onload(){finish();}frame.addEventListener("load",onload);frameWindow().location.reload();setTimeout(function(){if(!done)finish(new Error("Die generierte Haupt-App wurde nach Reload nicht geladen."));},30000);});
+        await waitFor(function(){return frameDocument().readyState==="complete"&&frameDocument().querySelector("#kggTherapyCockpitButton")&&frameWindow().KGGTherapyCockpit;},20000);
+      }
       async function navigate(code){
         var url=new URL(appUrl.href);url.searchParams.set("integrationHarness","1");if(code)url.searchParams.set("cockpit",code);
         try{frame.contentWindow.localStorage.setItem("kgg_pwa_install_prompt_seen_v1","integration-harness");frame.contentWindow.localStorage.setItem("kgg_admin_local_secrets_v1",JSON.stringify({version:2,updatedAt:"2026-09-09T00:00:00.000Z",geminiKeys:["integration-harness"],mediaDropzoneEndpoint:"",mediaDropzoneUploadToken:""}));}catch(error){}
@@ -191,7 +195,7 @@
           var finishedFirst=api().finish(0);closeOutputIfOpen();var finishedLast=api().finish(2);closeOutputIfOpen();await wait(160);var finished=snapshot("normal-after-finish");lastReport.snapshots.normalAfterFinish=finished;
           var finishOk=finishedFirst&&finishedFirst.link&&finishedFirst.text&&finishedFirst.text.indexOf("Neuer Cockpit-Link")>=0&&finishedLast&&finishedLast.link&&finished.view==="normal"&&finished.slotCount===0;
           addCheck("Plan fertig erzeugt Link/Text und kehrt bei 0 Slots zurück","view="+finished.view+", slots="+finished.slotCount,!!finishOk);
-          await navigate(first);await wait(100);frameWindow().location.reload();await waitFor(function(){return frameDocument().querySelector("#kggTherapyCockpitButton")&&frameWindow().KGGTherapyCockpit;},20000);await wait(220);var afterReload=snapshot("after-reload");lastReport.snapshots.afterReload=afterReload;
+          await navigate(first);await wait(100);await reloadFrame();await wait(220);var afterReload=snapshot("after-reload");lastReport.snapshots.afterReload=afterReload;
           addCheck("RAM-only Reload-Grenze","slots="+afterReload.slotCount+", view="+afterReload.view,afterReload.slotCount===0&&afterReload.view==="normal"&&!afterReload.bodyCockpit);
           lastReport.finishedAt=new Date().toISOString();lastReport.pass=lastReport.checks.every(function(item){return item.status==="pass";});renderReport();setStatus(lastReport.pass?"pass":"fail",lastReport.pass?"Integrationslauf grün":"Integrationslauf mit Fehlern",lastReport.checks.filter(function(item){return item.status==="pass";}).length+"/"+lastReport.checks.length+" Prüfungen bestanden.");setMode(lastReport.pass?"Fertig · alle Integrationsprüfungen grün":"Fertig · Fehlerdetails rechts");window.KGGCockpitIntegrationReport=lastReport;
         }catch(error){if(lastReport){lastReport.pass=false;lastReport.error=String(error&&error.stack||error);lastReport.finishedAt=new Date().toISOString();window.KGGCockpitIntegrationReport=lastReport;renderReport();}reportError(error);}
