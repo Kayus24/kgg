@@ -2,7 +2,7 @@
 
 Generated production knowledge for live app structure, source routing and current release context.
 
-Source digest: `0c35fbb68389cd4e`
+Source digest: `8f82545cfc089ea8`
 
 ## Usage Rules
 
@@ -69,8 +69,8 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Source web version: v84 / `1.0.84-therapy-cockpit-start-link`.
 - Source index URL: `index.html?v=84`.
 - Source notes: v084: Erzeugt aus dem aktuellen Therapeutenplan einen Cockpit-Startlink mit kopierbarer Ausgabe.
-- Live Admin release: `r0426` / `1.0.65-source-control-char-guard`.
-- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/admin.html`.
+- Live Admin release: `r0427` / `1.0.84-therapy-cockpit-start-link`.
+- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0427/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.
 - Live colleague URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html`.
 - Latest Android shell: `v401`.
