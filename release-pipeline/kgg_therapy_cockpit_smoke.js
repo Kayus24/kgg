@@ -135,6 +135,37 @@ const tampered = "KGGTC1:" + Buffer.from(JSON.stringify(encodedPayload), "utf8")
 expectCode(() => api.decode(tampered), "integrity_failed");
 expectCode(() => api.encode({ name: "Test", exercises: [{ id: "zz", sets: 1 }] }), "unknown_exercise_id");
 
+// An explicit exercise-bank ID is authoritative. An unknown ID must fail
+// instead of silently deriving a different ID from the display name.
+const bankWindow = {
+  location: { href: "https://example.test/index.html?v=82" },
+  KGGSharedBank: {
+    exportPayload: () => ({ exercises: [] }),
+    merge: raw => raw,
+  },
+  KGG_PATCHES: {},
+  addEventListener() {},
+  dispatchEvent() {},
+};
+const bankDocument = {
+  readyState: "loading",
+  body: null,
+  title: "KGG Test",
+  addEventListener() {},
+  getElementById() { return null; },
+};
+const bankContext = { ...context, window: bankWindow, document: bankDocument };
+vm.createContext(bankContext);
+vm.runInContext(match[1], bankContext, { filename: sourcePath });
+expectCode(
+  () => bankWindow.KGGSharedBank.merge({ exercises: [{ name: "Beinpresse", cockpitId: "zz" }] }),
+  "unknown_exercise_id",
+);
+expectCode(
+  () => bankWindow.KGGSharedBank.merge({ exercises: [{ name: "Beinpresse", cockpitId: "01" }] }),
+  "exercise_id_collision",
+);
+
 const derived = api.registry.derive("Kabelzug Spezial", { sets: 2, metricUnit: "Wdh", loadUnit: "kg" });
 assert(/^[0-9A-Za-z]{2}$/.test(derived.id), "derived exercise ID is not Base62");
 assert(api.registry.derive("Kabelzug Spezial").id === derived.id, "derived exercise ID is not deterministic");

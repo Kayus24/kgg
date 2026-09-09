@@ -283,8 +283,11 @@
   function bankEntryWithCockpitId(item){
     if(!item||!item.name)return item;
     var explicit=String(item.cockpitId||item.cockpitExerciseId||"").trim(),ref=explicit&&byId[explicit];
-    if(ref&&key(ref.name)!==key(item.name))throw error("exercise_id_collision");
-    if(!ref)ref=registryLookup(item.name)||ensureDerived(item.name,item);
+    if(explicit){
+      if(explicit.length!==2||explicit.split("").some(function(ch){return BASE62.indexOf(ch)<0;}))throw error("exercise_id_invalid");
+      if(!ref)throw error("unknown_exercise_id");
+      if(key(ref.name)!==key(item.name))throw error("exercise_id_collision");
+    }else ref=registryLookup(item.name)||ensureDerived(item.name,item);
     return Object.assign({},item,{cockpitId:ref.id});
   }
   function hydrateRegistryFromBank(){
@@ -339,5 +342,3 @@
     return html+'</article>';
   }
   function renderCard(slot,slotIndex){
-    var progress=slotProgress(slot),color=COLORS[slotIndex%COLORS.length],html='<article class="kgg-tc-card" style="--tc-color:'+color+'" data-tc-card="'+slotIndex+'"><div class="kgg-tc-card-head"><span class="kgg-tc-avatar" aria-hidden="true">'+htmlEscape(initials(slot.name))+'</span><span class="kgg-tc-card-title"><strong>'+htmlEscape(slot.name)+'</strong><small>'+slot.exercises.length+' Übungen · '+progress+' % erledigt</small></span><span class="kgg-tc-card-tools"><button type="button" class="kgg-tc-icon-btn" data-tc-action="remove" data-tc-slot="'+slotIndex+'" aria-label="Patient entfernen">×</button></span></div><div class="kgg-tc-progress" aria-label="Fortschritt '+progress+' Prozent"><span style="width:'+progress+'%"></span></div><div class="kgg-tc-card-body"><div class="kgg-tc-scroll">';
-    html+=slot.exercises.map(function(ex,index){return renderExercise(slot,slotIndex,ex,index);}).join("");

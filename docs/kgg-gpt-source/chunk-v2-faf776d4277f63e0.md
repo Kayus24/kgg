@@ -1,3 +1,5 @@
+    var progress=slotProgress(slot),color=COLORS[slotIndex%COLORS.length],html='<article class="kgg-tc-card" style="--tc-color:'+color+'" data-tc-card="'+slotIndex+'"><div class="kgg-tc-card-head"><span class="kgg-tc-avatar" aria-hidden="true">'+htmlEscape(initials(slot.name))+'</span><span class="kgg-tc-card-title"><strong>'+htmlEscape(slot.name)+'</strong><small>'+slot.exercises.length+' Übungen · '+progress+' % erledigt</small></span><span class="kgg-tc-card-tools"><button type="button" class="kgg-tc-icon-btn" data-tc-action="remove" data-tc-slot="'+slotIndex+'" aria-label="Patient entfernen">×</button></span></div><div class="kgg-tc-progress" aria-label="Fortschritt '+progress+' Prozent"><span style="width:'+progress+'%"></span></div><div class="kgg-tc-card-body"><div class="kgg-tc-scroll">';
+    html+=slot.exercises.map(function(ex,index){return renderExercise(slot,slotIndex,ex,index);}).join("");
     return html+'</div></div><div class="kgg-tc-card-foot"><button type="button" class="kgg-tc-btn primary" data-tc-action="finish" data-tc-slot="'+slotIndex+'">Plan fertig</button></div></article>';
   }
   function render(){

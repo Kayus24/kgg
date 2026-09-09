@@ -1143,16 +1143,20 @@
     {
       "areas": [
         "debug",
-        "parser-textblocks"
+        "parser-textblocks",
+        "qr-patient",
+        "sync"
       ],
       "cause": "",
       "do_not_touch": "",
       "fix_pattern": "",
-      "id": "docs-release-handoffs-2026-09-09-v082-therapy-cockpit-native-deeplink-md-kgg-therapie-cockpit-v082-nativer-deep-link-handoff",
+      "id": "docs-release-handoffs-2026-09-09-v083-therapy-cockpit-native-deeplink-md-kgg-therapie-cockpit-v083-nativer-deep-link-handoff",
       "keywords": [
         "debug",
-        "kgg-therapie-cockpit-v082-nativer-deep-link-handoff",
-        "parser-textblocks"
+        "kgg-therapie-cockpit-v083-nativer-deep-link-handoff",
+        "parser-textblocks",
+        "qr-patient",
+        "sync"
       ],
       "markers": [
         ".KGGTherapyCockpit",
@@ -1165,7 +1169,6 @@
         "34300593652",
         "34300593688",
         "58ede321b2896522a660a0c184d7a83ea817e6e4",
-        "608add2d31c81a3356be9790057a375644958ea6f000f0642dbb5b01ade9c6a4",
         "BROWSABLE",
         "DEFAULT",
         "Gut fuer Main",
@@ -1177,14 +1180,15 @@
         "VIEW",
         "adb",
         "assembleAdminDebug assembleKollegenDebug assemblePreviewDebug",
+        "cockpitId",
         "codex/therapy-cockpit-v2",
-        "file://"
+        "d647eadb6e7c691a6a846133f0447a15adc2b44a3fcd04a498fc1a015d482719"
       ],
       "risks": "",
-      "source_path": "docs/release-handoffs/2026-09-09-v082-therapy-cockpit-native-deeplink.md",
-      "symptom": "- Main-Basis: `58ede321b2896522a660a0c184d7a83ea817e6e4` - Arbeitsbranch: `codex/therapy-cockpit-v2` - Web-Patch: `kgg-v082-therapy-cockpit` - Web-Quelle: `kgg-update/src/patches/v082-therapy-cockpit.html` - Generierter Kandidat: `kgg-update/index.html` - Kandidatenhash: `608add2d31c81a3356be9790057a375644958ea6f000f0642dbb5b01ade9c6a4` Der Web-Patch importi",
+      "source_path": "docs/release-handoffs/2026-09-09-v083-therapy-cockpit-native-deeplink.md",
+      "symptom": "- Main-Basis: `58ede321b2896522a660a0c184d7a83ea817e6e4` - Arbeitsbranch: `codex/therapy-cockpit-v2` - Web-Patches: `kgg-v082-therapy-cockpit`, `kgg-v083-therapy-cockpit-id-guard` - Web-Quelle: `kgg-update/src/patches/v082-therapy-cockpit.html` - ID-Guard: `kgg-update/src/patches/v083-therapy-cockpit-id-guard.html` - Generierter Kandidat: `kgg-update/index.h",
       "tests": "",
-      "title": "KGG Therapie-Cockpit v082 nativer Deep-Link-Handoff"
+      "title": "KGG Therapie-Cockpit v083 nativer Deep-Link-Handoff"
     }
   ],
   "sources": [
@@ -1212,7 +1216,7 @@
     "docs/bugfixes/mobile-share-modal-css-regression.md",
     "docs/release-handoffs/2026-06-18-v003a-plan-ui-stability.md",
     "docs/release-handoffs/2026-06-19-v007-qr-photo-upload-decode.md",
-    "docs/release-handoffs/2026-09-09-v082-therapy-cockpit-native-deeplink.md"
+    "docs/release-handoffs/2026-09-09-v083-therapy-cockpit-native-deeplink.md"
   ],
   "version": 1
 }

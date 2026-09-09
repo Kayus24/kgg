@@ -1,24 +1,29 @@
-# KGG Therapie-Cockpit v082 – nativer Deep-Link-Handoff
+# KGG Therapie-Cockpit v083 – nativer Deep-Link-Handoff
 
 ## Stand
 
 - Main-Basis: `58ede321b2896522a660a0c184d7a83ea817e6e4`
 - Arbeitsbranch: `codex/therapy-cockpit-v2`
-- Web-Patch: `kgg-v082-therapy-cockpit`
+- Web-Patches: `kgg-v082-therapy-cockpit`, `kgg-v083-therapy-cockpit-id-guard`
 - Web-Quelle: `kgg-update/src/patches/v082-therapy-cockpit.html`
+- ID-Guard: `kgg-update/src/patches/v083-therapy-cockpit-id-guard.html`
 - Generierter Kandidat: `kgg-update/index.html`
-- Kandidatenhash: `608add2d31c81a3356be9790057a375644958ea6f000f0642dbb5b01ade9c6a4`
+- Kandidatenhash: `d647eadb6e7c691a6a846133f0447a15adc2b44a3fcd04a498fc1a015d482719`
 
 ## Web-Vertrag ist fertig
 
 Der Web-Patch importiert selbsttragende `KGGTC1:`-Links aus URL oder Text, validiert Integrität, Name-Decoding, Satzstruktur, Wertebereiche und stabile zweistellige Base62-Übungs-IDs. Er hält bis zu drei Slots nur im Speicher, trennt graue Vorwerte von weißen Tageswerten, bietet die Inline-Tastatur, unabhängige Karten und Scrollbereiche, vollständige Ansichtsschalter und Abschlussdokumentation. Bei einem lokalen `file://`-WebView erzeugt `Plan fertig` einen öffentlichen Link unter `https://kayus24.github.io/kgg/kgg-update/index.html?cockpit=...`.
 
+Der v083-ID-Guard behandelt ein vorhandenes `cockpitId` als verbindlichen kanonischen Schlüssel: ungültige oder unbekannte IDs werden vor Bank-/Sync-Übernahme mit `exercise_id_invalid` bzw. `unknown_exercise_id` abgewiesen; eine Namensabweichung liefert `exercise_id_collision`. Eine fehlende explizite ID darf weiterhin deterministisch aus dem kanonischen Übungsnamen abgeleitet werden.
+
 ## Beleg
 
 - `therapy-cockpit-critical`: grün, inklusive 5/10/20/40-Übungsgrößenproben, Integritätsfehlern, unbekannten IDs, Slotgrenze, Vorwert-Roundtrip und sicherem Plan-Adapter.
+- Explizite unbekannte/ungültige Übungsbank-IDs: grün mit fail-closed Guard.
 - `therapy-cockpit-browser-regression`: grün bei 820×1180, 1024×768 und 1280×800; 1/2/3 Slots, kein Overflow, Numpad, Außen-Tipp, Ansichtswechsel, vierter Import, mittlere Entfernung, Abschluss-Roundtrip, Null-Slot-Rückkehr und Reload-Grenze.
 - Vollständiger kritischer Lauf: 139 Tests, `OK (skipped=1)`; danach alle weiteren kritischen Verträge grün.
 - Remote-Gates: Android-Wrapper `34300593688`, Validate/Build `34300593652`, Required Gate `34300593638` — alle grün.
+- Die lokale vollständige Pre-Commit-Zertifizierung stoppt zusätzlich am bestehenden `patient-qr-v81-device-ladder-regression`: der Test überschreitet unter dieser Windows-Umgebung sein 300.000-ms-Watchdog; ein isolierter Lauf mit verlängertem Diagnose-Timeout reproduziert Recognition-/Lifecycle-Fehler in diesen alten Geräteprofilen. Die Cockpit-kritischen und nativen Verträge bleiben grün; der Fehler liegt außerhalb des Cockpit-Patches.
 
 ## Nativer Source-Patch
 

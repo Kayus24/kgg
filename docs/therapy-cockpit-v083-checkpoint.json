@@ -1,12 +1,12 @@
 {
   "schema": "kgg-therapy-cockpit-checkpoint/v1",
-  "time": "2026-09-09T03:48:00+02:00",
+  "time": "2026-09-09T06:40:00+02:00",
   "mainSha": "58ede321b2896522a660a0c184d7a83ea817e6e4",
   "branch": "codex/therapy-cockpit-v2",
   "phase": "VERIFY_PREVIEW",
-  "patchId": "kgg-v082-therapy-cockpit",
-  "webVersion": "1.0.82-therapy-cockpit",
-  "sourceSha256": "608add2d31c81a3356be9790057a375644958ea6f000f0642dbb5b01ade9c6a4",
+  "patchId": "kgg-v083-therapy-cockpit-id-guard",
+  "webVersion": "1.0.83-therapy-cockpit-id-guard",
+  "sourceSha256": "d647eadb6e7c691a6a846133f0447a15adc2b44a3fcd04a498fc1a015d482719",
   "stateHistory": [
     "DISCOVER",
     "CONTRACT",
@@ -18,6 +18,8 @@
     "TEST_UI",
     "IMPLEMENT_DEEP_LINK",
     "TEST_DEEP_LINK",
+    "IMPLEMENT_ID_GUARD",
+    "TEST_ID_GUARD",
     "INTEGRATE",
     "FULL_REGRESSION_1",
     "REPAIR",
@@ -39,12 +41,15 @@
     "kgg_hook_guard",
     "check_html_scripts",
     "therapy-cockpit-native-contract",
+    "therapy-cockpit-explicit-bank-id-guard",
     "android-wrapper-contract",
     "remote-android-wrapper-check:34300593688",
     "remote-validate-build:34300593652",
     "remote-required-gate:34300593638"
   ],
-  "redTests": [],
+  "redTests": [
+    "local pre-commit/full-regression: patient-qr-v81-device-ladder-regression timed out at 300000 ms; isolated extended run reproduced pre-existing recognition/lifecycle failures under this Windows environment"
+  ],
   "linkSizeProbes": {
     "5": {"rawPayloadBytes": 980, "linkChars": 1034},
     "10": {"rawPayloadBytes": 1839, "linkChars": 1893},
@@ -76,11 +81,11 @@
       "evidence": [
         "docs/kgg-custom-gpt-playbook.md",
         "docs/kgg-custom-gpt-action-schema.md",
-        "docs/therapy-cockpit-v082-checkpoint.json"
+        "docs/therapy-cockpit-v083-checkpoint.json"
       ],
       "impact": "No remote Preview HTML/meta/APK artifact is claimed; direct gh workflow dispatch would bypass the prescribed write gate.",
       "nextStep": "Use the prescribed submitKggPreviewAuto operation when it is available, once, with the same candidate and required critical/UI checks."
     }
   ],
-  "nextStep": "Attach the native handoff to an Android-capable Preview run and verify the installed task lifecycle; do not promote to Main without the exact phrase Gut für Main."
+  "nextStep": "Commit the v083 candidate with the local patient-QR ladder environment blocker recorded, push for remote CI, then attach the native handoff to an Android-capable Preview run; do not promote to Main without the exact phrase Gut für Main."
 }

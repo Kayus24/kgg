@@ -56,21 +56,21 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "tablet-package-save",
     "pdf-global-exercise-numbering",
     "qr-full-plan-device-ladder",
-    "therapy-cockpit"
+    "therapy-cockpit",
+    "therapy-cockpit-id-guard"
   ],
   "currentVersion": {
-    "versionCode": 82,
-    "versionName": "1.0.82-therapy-cockpit",
-    "lastPatchId": "kgg-v082-therapy-cockpit",
+    "versionCode": 83,
+    "versionName": "1.0.83-therapy-cockpit-id-guard",
+    "lastPatchId": "kgg-v083-therapy-cockpit-id-guard",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v082-therapy-cockpit",
+  "latestPatchId": "kgg-v083-therapy-cockpit-id-guard",
   "lastUpdateIntent": {
-    "id": "kgg-v082-therapy-cockpit",
-    "summary": "Fuegt die additive Tablet-Cockpit-Ansicht mit selbsttragendem Linkcodec, drei RAM-Slots und Abschlussdokumentation hinzu.",
+    "id": "kgg-v083-therapy-cockpit-id-guard",
+    "summary": "Weist unbekannte explizite Übungsbank-IDs vor dem Cockpit-Sync fail-closed ab.",
     "touched": [
-      "Therapie-Cockpit",
-      "UI"
+      "Therapie-Cockpit"
     ],
     "notTouched": [
       "PDF",
@@ -137,21 +137,21 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "tablet-package-save",
     "pdf-global-exercise-numbering",
     "qr-full-plan-device-ladder",
-    "therapy-cockpit"
+    "therapy-cockpit",
+    "therapy-cockpit-id-guard"
   ],
   "currentVersion": {
-    "versionCode": 82,
-    "versionName": "1.0.82-therapy-cockpit",
-    "lastPatchId": "kgg-v082-therapy-cockpit",
+    "versionCode": 83,
+    "versionName": "1.0.83-therapy-cockpit-id-guard",
+    "lastPatchId": "kgg-v083-therapy-cockpit-id-guard",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v082-therapy-cockpit",
+  "latestPatchId": "kgg-v083-therapy-cockpit-id-guard",
   "lastUpdateIntent": {
-    "id": "kgg-v082-therapy-cockpit",
-    "summary": "Fuegt die additive Tablet-Cockpit-Ansicht mit selbsttragendem Linkcodec, drei RAM-Slots und Abschlussdokumentation hinzu.",
+    "id": "kgg-v083-therapy-cockpit-id-guard",
+    "summary": "Weist unbekannte explizite Übungsbank-IDs vor dem Cockpit-Sync fail-closed ab.",
     "touched": [
-      "Therapie-Cockpit",
-      "UI"
+      "Therapie-Cockpit"
     ],
     "notTouched": [
       "PDF",
@@ -173,8 +173,39 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 82,
+  "latestVersionCode": 83,
   "entries": [
+    {
+      "versionCode": 83,
+      "versionName": "1.0.83-therapy-cockpit-id-guard",
+      "patchId": "kgg-v083-therapy-cockpit-id-guard",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Therapie-Cockpit ID-Guard",
+      "reason": "Weist unbekannte explizite Übungsbank-IDs vor dem Cockpit-Sync fail-closed ab.",
+      "whatChanged": [
+        "Weist unbekannte explizite Übungsbank-IDs vor dem Cockpit-Sync fail-closed ab."
+      ],
+      "touchedAreas": [
+        "Therapie-Cockpit"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
     {
       "versionCode": 82,
       "versionName": "1.0.82-therapy-cockpit",
@@ -994,7 +1025,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
     }
   ],
-  "latestVersionName": "1.0.82-therapy-cockpit",
+  "latestVersionName": "1.0.83-therapy-cockpit-id-guard",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -1120,7 +1151,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v082-therapy-cockpit",
+  "lastUpdatedByPatchId": "kgg-v083-therapy-cockpit-id-guard",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
@@ -1255,7 +1286,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v082 Therapie-Cockpit fuer begleitete Plaene</title>
+  <title>KGG Update v083 Therapie-Cockpit ID-Guard</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -17163,11 +17194,11 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
 </script>
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v082_therapy_cockpit';
+  const VERSION='KGG_GITHUB_UPDATE_v083_therapy_cockpit_id_guard';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v082","buildTime":"2026-09-08T21:38:34Z","buildCode":"module-v082-therapy-cockpit","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v083","buildTime":"2026-09-09T03:04:11Z","buildCode":"module-v083-therapy-cockpit-id-guard","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -28094,8 +28125,11 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   function bankEntryWithCockpitId(item){
     if(!item||!item.name)return item;
     var explicit=String(item.cockpitId||item.cockpitExerciseId||"").trim(),ref=explicit&&byId[explicit];
-    if(ref&&key(ref.name)!==key(item.name))throw error("exercise_id_collision");
-    if(!ref)ref=registryLookup(item.name)||ensureDerived(item.name,item);
+    if(explicit){
+      if(explicit.length!==2||explicit.split("").some(function(ch){return BASE62.indexOf(ch)<0;}))throw error("exercise_id_invalid");
+      if(!ref)throw error("unknown_exercise_id");
+      if(key(ref.name)!==key(item.name))throw error("exercise_id_collision");
+    }else ref=registryLookup(item.name)||ensureDerived(item.name,item);
     return Object.assign({},item,{cockpitId:ref.id});
   }
   function hydrateRegistryFromBank(){
@@ -28248,6 +28282,16 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
 })();
 </script>
 <!-- KGG PATCH END kgg-v082-therapy-cockpit -->
+<!-- KGG PATCH START kgg-v083-therapy-cockpit-id-guard -->
+<!-- Therapie-Cockpit ID-Guard -->
+<script id="kgg-v083-therapy-cockpit-id-guard">
+(function(){
+  "use strict";
+  var patches=window.KGG_PATCHES=window.KGG_PATCHES||{};
+  patches["kgg-v083-therapy-cockpit-id-guard"]={installed:true,version:1,dependsOn:"kgg-v082-therapy-cockpit",contract:"explicit exercise IDs fail closed"};
+})();
+</script>
+<!-- KGG PATCH END kgg-v083-therapy-cockpit-id-guard -->
 
 </body>
 </html>

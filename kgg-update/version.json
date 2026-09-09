@@ -1,7 +1,7 @@
 {
-  "versionCode": 82,
-  "versionName": "1.0.82-therapy-cockpit",
-  "indexUrl": "index.html?v=82",
-  "sha256": "608add2d31c81a3356be9790057a375644958ea6f000f0642dbb5b01ade9c6a4",
-  "notes": "v082: Fuegt die additive Tablet-Cockpit-Ansicht mit selbsttragendem Linkcodec, drei RAM-Slots und Abschlussdokumentation hinzu."
+  "versionCode": 83,
+  "versionName": "1.0.83-therapy-cockpit-id-guard",
+  "indexUrl": "index.html?v=83",
+  "sha256": "d647eadb6e7c691a6a846133f0447a15adc2b44a3fcd04a498fc1a015d482719",
+  "notes": "v083: Weist unbekannte explizite Übungsbank-IDs vor dem Cockpit-Sync fail-closed ab."
 }
