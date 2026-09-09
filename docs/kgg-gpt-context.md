@@ -42,9 +42,9 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 ## Current Versions
 
-- Source web version: v83 / `1.0.83-therapy-cockpit-id-guard`.
-- Source index URL: `index.html?v=83`.
-- Source notes: v083: Weist unbekannte explizite Übungsbank-IDs vor dem Cockpit-Sync fail-closed ab.
+- Source web version: v84 / `1.0.84-therapy-cockpit-start-link`.
+- Source index URL: `index.html?v=84`.
+- Source notes: v084: Erzeugt aus dem aktuellen Therapeutenplan einen Cockpit-Startlink mit kopierbarer Ausgabe.
 - Live Admin release: `r0426` / `1.0.65-source-control-char-guard`.
 - Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.
