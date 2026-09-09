@@ -35,7 +35,7 @@
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-safety.md",
-        "sha256": "b7342c4b71d4dd858c814d58c367f6c2b6e48dcc1fff1dde94bd54629227df93"
+        "sha256": "06c1e05bde6f372410622f99abadd888c94d047c4c1d7c9b137e1401a7d58b8c"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-testing.md",
@@ -119,7 +119,7 @@
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-safety.md",
-        "sha256": "0a0cda4e9cd74d0c6104c518b9ae772a4f106755624e365a630891351e5b1007"
+        "sha256": "c11bbbbcebbf2a21580399ec2501522e6c1e73ff71163a138770e60c4f2928d4"
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-testing.md",

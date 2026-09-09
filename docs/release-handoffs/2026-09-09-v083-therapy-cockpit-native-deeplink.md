@@ -2,7 +2,7 @@
 
 ## Stand
 
-- Main-Basis: `58ede321b2896522a660a0c184d7a83ea817e6e4`
+- Main-Basis für diesen aktuellen Lauf: `ef625b87f321b0e8f4cec4980c99a42fa58da0d8` (ursprünglicher Startstand: `58ede321b2896522a660a0c184d7a83ea817e6e4`)
 - Arbeitsbranch: `codex/therapy-cockpit-v2`
 - Web-Patches: `kgg-v082-therapy-cockpit`, `kgg-v083-therapy-cockpit-id-guard`
 - Web-Quelle: `kgg-update/src/patches/v082-therapy-cockpit.html`
@@ -24,6 +24,7 @@ Der v083-ID-Guard behandelt ein vorhandenes `cockpitId` als verbindlichen kanoni
 - Vollständiger kritischer Lauf: 139 Tests, `OK (skipped=1)`; danach alle weiteren kritischen Verträge grün.
 - Remote-Gates: Android-Wrapper `34300593688`, Validate/Build `34300593652`, Required Gate `34300593638` — alle grün.
 - Die lokale vollständige Pre-Commit-Zertifizierung stoppt zusätzlich am bestehenden `patient-qr-v81-device-ladder-regression`: der Test überschreitet unter dieser Windows-Umgebung sein 300.000-ms-Watchdog; ein isolierter Lauf mit verlängertem Diagnose-Timeout reproduziert Recognition-/Lifecycle-Fehler in diesen alten Geräteprofilen. Die Cockpit-kritischen und nativen Verträge bleiben grün; der Fehler liegt außerhalb des Cockpit-Patches.
+- Der separate `release-pr`-Runner hatte bei `origin/main...HEAD` keinen Merge-Base, weil sein `git fetch origin main` keinen Remote-Tracking-Ref anlegte. Der Workflow verwendet nun einen expliziten Ref-Fetch (`main:refs/remotes/origin/main`); der zugehörige Admin-Editor-Sync-Vertrag ist lokal grün und Validate wird nach dem Push erneut geprüft.
 
 ## Nativer Source-Patch
 
@@ -44,4 +45,4 @@ Der statische Vertrag `release-pipeline/kgg_therapy_cockpit_native_contract.py` 
 3. Im laufenden Task zwei weitere gültige Links öffnen, danach einen vierten Link sowie falschen Host/Pfad, manipulierte Integrität und überlange Payload prüfen.
 4. Android-Shell-/Manifestversion erst im vorgesehenen Releaseprozess erhöhen und die gebauten Artefakte mit dem aktuellen Web-Kandidaten verknüpfen.
 
-Die APK ist in diesem Lauf weder gebaut noch veröffentlicht. Der Remote-Preview-Dispatch wurde nicht ausgeführt, weil die Sitzung keine callable `submitKggPreviewAuto`-Operation anbietet; ein direkter CLI-Dispatch würde den vorgeschriebenen Gate umgehen. Keine Main-/Live-Freigabe wurde vorweggenommen. Ein Main-/Live-Schritt bleibt bis zu Max' exakter Phrase `Gut für Main` gesperrt.
+Die APK ist in diesem Lauf weder installiert noch auf einem Gerät akzeptiert. Der Remote-Preview-Dispatch wurde nicht ausgeführt, weil die Sitzung keine callable `submitKggPreviewAuto`-Operation anbietet; ein direkter CLI-Dispatch würde den vorgeschriebenen Gate umgehen. Keine Main-/Live-Freigabe wurde vorweggenommen. Ein Main-/Live-Schritt bleibt bis zu Max' exakter Phrase `Gut für Main` gesperrt.
