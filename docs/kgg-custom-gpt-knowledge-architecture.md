@@ -2,7 +2,7 @@
 
 Generated production knowledge for live app structure, source routing and current release context.
 
-Source digest: `9188f548a032581e`
+Source digest: `a2059427dca34031`
 
 ## Usage Rules
 
@@ -66,9 +66,9 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 ## Current Versions
 
-- Source web version: v81 / `1.0.81-qr-full-plan-device-ladder`.
-- Source index URL: `index.html?v=81`.
-- Source notes: v081: Vollständige persönliche KGGH3-Plan-QRs mit lokalem fflate 0.8.3, KGGH2-Rückwärtslesbarkeit und gestuftem Scanner-Test.
+- Source web version: v82 / `1.0.82-therapy-cockpit`.
+- Source index URL: `index.html?v=82`.
+- Source notes: v082: Fuegt die additive Tablet-Cockpit-Ansicht mit selbsttragendem Linkcodec, drei RAM-Slots und Abschlussdokumentation hinzu.
 - Live Admin release: `r0426` / `1.0.65-source-control-char-guard`.
 - Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.
@@ -186,7 +186,7 @@ Generated from `kgg-update/src` modular source. Use this before loading source c
 ## phone-layout
 
 - Triggers: `phone`, `handy`, `dock`, `drawer`, `scan button`, `759`
-- Source chunks: `docs/kgg-gpt-source/chunk-v2-d40daf2c8b60ab60.md`, `docs/kgg-gpt-source/chunk-v2-91cffbc572adb9de.md`, `docs/kgg-gpt-source/chunk-v2-22071abd1ef89599.md`, `docs/kgg-gpt-source/chunk-v2-48801c41482633dd.md`, `docs/kgg-gpt-source/chunk-v2-7148376ffc56b310.md`, `docs/kgg-gpt-source/chunk-v2-f4b2d210c83d4148.md`, `docs/kgg-gpt-source/chunk-v2-b0058ed5b447e425.md`, `docs/kgg-gpt-source/chunk-v2-048facdccb5f36f0.md`, `docs/kgg-gpt-source/chunk-v2-45550afade9ceee6.md`
+- Source chunks: `docs/kgg-gpt-source/chunk-v2-d7b46de1920cc01c.md`, `docs/kgg-gpt-source/chunk-v2-f6fb7fd11cd3b385.md`, `docs/kgg-gpt-source/chunk-v2-22071abd1ef89599.md`, `docs/kgg-gpt-source/chunk-v2-48801c41482633dd.md`, `docs/kgg-gpt-source/chunk-v2-7148376ffc56b310.md`, `docs/kgg-gpt-source/chunk-v2-f4b2d210c83d4148.md`, `docs/kgg-gpt-source/chunk-v2-b0058ed5b447e425.md`, `docs/kgg-gpt-source/chunk-v2-048facdccb5f36f0.md`, `docs/kgg-gpt-source/chunk-v2-45550afade9ceee6.md`
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression`
 - Notes: Do not change the 759/760 px breakpoint incidentally.
 - Markers:
@@ -194,18 +194,18 @@ Generated from `kgg-update/src` modular source. Use this before loading source c
   - `phonePhotoMenuToggle`: `docs/kgg-gpt-source/chunk-v2-b0058ed5b447e425.md` from `kgg-update/src/patches/v041-ui-mini-series.html` line 11
   - `kggPhoneHasPlan`: `docs/kgg-gpt-source/chunk-v2-b0058ed5b447e425.md` from `kgg-update/src/patches/v041-ui-mini-series.html` line 45
   - `phoneTextFocus`: `docs/kgg-gpt-source/chunk-v2-48801c41482633dd.md` from `kgg-update/src/document/head-ui.html` line 2670
-  - `max-width:759px`: `docs/kgg-gpt-source/chunk-v2-d40daf2c8b60ab60.md` from `kgg-update/src/metadata/patch-rules.html` line 118
+  - `max-width:759px`: `docs/kgg-gpt-source/chunk-v2-d7b46de1920cc01c.md` from `kgg-update/src/metadata/patch-rules.html` line 118
 
 ## qr-patient
 
 - Triggers: `qr`, `patient`, `patienten-app`, `plan qr`
-- Source chunks: `docs/kgg-gpt-source/chunk-v2-f804e6e599cade0e.md`, `docs/kgg-gpt-source/chunk-v2-d72292cab6f87dfa.md`, `docs/kgg-gpt-source/chunk-v2-7d37c14ea7f71ec1.md`, `docs/kgg-gpt-source/chunk-v2-64dbbad2f3ff6d2c.md`, `docs/kgg-gpt-source/chunk-v2-72f9c9bf8370343c.md`, `docs/kgg-gpt-source/chunk-v2-31e3350a50123361.md`, `docs/kgg-gpt-source/chunk-v2-897ecd5a4f2ace89.md`, `docs/kgg-gpt-source/chunk-v2-6632393d0bf01abd.md`, `docs/kgg-gpt-source/chunk-v2-3a427ee8d016b5fa.md`, `docs/kgg-gpt-source/chunk-v2-45550afade9ceee6.md`, `docs/kgg-gpt-source/chunk-v2-d3cb2b3eb0e8e619.md`
+- Source chunks: `docs/kgg-gpt-source/chunk-v2-9b16b15f5b6075fd.md`, `docs/kgg-gpt-source/chunk-v2-7559ba3a626db6d7.md`, `docs/kgg-gpt-source/chunk-v2-149070a0516344a4.md`, `docs/kgg-gpt-source/chunk-v2-64dbbad2f3ff6d2c.md`, `docs/kgg-gpt-source/chunk-v2-72f9c9bf8370343c.md`, `docs/kgg-gpt-source/chunk-v2-31e3350a50123361.md`, `docs/kgg-gpt-source/chunk-v2-897ecd5a4f2ace89.md`, `docs/kgg-gpt-source/chunk-v2-6632393d0bf01abd.md`, `docs/kgg-gpt-source/chunk-v2-3a427ee8d016b5fa.md`, `docs/kgg-gpt-source/chunk-v2-45550afade9ceee6.md`, `docs/kgg-gpt-source/chunk-v2-d3cb2b3eb0e8e619.md`
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite patient-scan --level regression`
 - Notes: Patient output must not expose raw JSON, Base64 or debug payloads.
 - Markers:
   - `finishWithPatientApp`: `docs/kgg-gpt-source/chunk-v2-31e3350a50123361.md` from `kgg-update/src/runtime/app-core.html` line 4813
-  - `KGGH2`: `docs/kgg-gpt-source/chunk-v2-f804e6e599cade0e.md` from `kgg-update/src/base-head.html` line 69
-  - `KGGH3`: `docs/kgg-gpt-source/chunk-v2-f804e6e599cade0e.md` from `kgg-update/src/base-head.html` line 69
+  - `KGGH2`: `docs/kgg-gpt-source/chunk-v2-9b16b15f5b6075fd.md` from `kgg-update/src/metadata/changelog.html` line 50
+  - `KGGH3`: `docs/kgg-gpt-source/chunk-v2-9b16b15f5b6075fd.md` from `kgg-update/src/metadata/changelog.html` line 46
   - `makeKggH3ShareUrl`: `docs/kgg-gpt-source/chunk-v2-72f9c9bf8370343c.md` from `kgg-update/src/runtime/app-core.html` line 4516
   - `tryApplyKggSetupFromHash`: `docs/kgg-gpt-source/chunk-v2-64dbbad2f3ff6d2c.md` from `kgg-update/src/runtime/app-core.html` line 3047
   - `openKggTherapistAppOnlyQr`: `docs/kgg-gpt-source/chunk-v2-3a427ee8d016b5fa.md` from `kgg-update/src/runtime/app-core.html` line 7143
@@ -249,11 +249,11 @@ Generated from `kgg-update/src` modular source. Use this before loading source c
 ## sync
 
 - Triggers: `sync`, `paket`, `uebungsbank`, `peer`, `kollegen`
-- Source chunks: `docs/kgg-gpt-source/chunk-v2-f937dd139680857e.md`, `docs/kgg-gpt-source/chunk-v2-cf60284ba3246995.md`, `docs/kgg-gpt-source/chunk-v2-7bdad4bb9e8537d6.md`, `docs/kgg-gpt-source/chunk-v2-64dbbad2f3ff6d2c.md`, `docs/kgg-gpt-source/chunk-v2-7a2c828284153289.md`
+- Source chunks: `docs/kgg-gpt-source/chunk-v2-8b0e65ea0d00e164.md`, `docs/kgg-gpt-source/chunk-v2-cf60284ba3246995.md`, `docs/kgg-gpt-source/chunk-v2-7bdad4bb9e8537d6.md`, `docs/kgg-gpt-source/chunk-v2-64dbbad2f3ff6d2c.md`, `docs/kgg-gpt-source/chunk-v2-7a2c828284153289.md`
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite sync --level regression`
 - Notes: Sync export must exclude patients and secrets.
 - Markers:
-  - `KGGDataStore`: `docs/kgg-gpt-source/chunk-v2-f937dd139680857e.md` from `kgg-update/src/runtime/app-core.html` line 50
+  - `KGGDataStore`: `docs/kgg-gpt-source/chunk-v2-8b0e65ea0d00e164.md` from `kgg-update/src/runtime/app-core.html` line 50
   - `kgg_sync_bundle`: `docs/kgg-gpt-source/chunk-v2-7a2c828284153289.md` from `kgg-update/src/runtime/app-core.html` line 3149
   - `nativeExerciseBankSync`: not found
   - `KGGNativeSync`: `docs/kgg-gpt-source/chunk-v2-7bdad4bb9e8537d6.md` from `kgg-update/src/runtime/app-core.html` line 771
@@ -272,10 +272,10 @@ Generated from `kgg-update/src` modular source. Use this before loading source c
 ## preview-gate
 
 - Triggers: `preview`, `beta`, `test-html`, `custom gpt`, `write gate`
-- Source chunks: `docs/kgg-gpt-source/chunk-v2-f804e6e599cade0e.md`, `docs/kgg-gpt-source/chunk-v2-d72292cab6f87dfa.md`, `docs/kgg-gpt-source/chunk-v2-7d37c14ea7f71ec1.md`, `docs/kgg-gpt-source/chunk-v2-d40daf2c8b60ab60.md`
+- Source chunks: `docs/kgg-gpt-source/chunk-v2-ef86c78f16d6582b.md`, `docs/kgg-gpt-source/chunk-v2-ea61a3c4ffce0ea2.md`, `docs/kgg-gpt-source/chunk-v2-9b16b15f5b6075fd.md`, `docs/kgg-gpt-source/chunk-v2-d7b46de1920cc01c.md`
 - Tests: `python release-pipeline\kgg_gpt_payload_preflight.py --self-test`; `python release-pipeline\kgg_gpt_eval.py`
 - Notes: A missing preview URL is not success; inspect the GitHub run first.
 - Markers:
   - `kgg-gpt-preview-banner`: not found
-  - `kgg-source-truth`: `docs/kgg-gpt-source/chunk-v2-f804e6e599cade0e.md` from `kgg-update/src/base-head.html` line 10
-  - `kgg-changelog`: `docs/kgg-gpt-source/chunk-v2-7d37c14ea7f71ec1.md` from `kgg-update/src/metadata/changelog.html` line 2
+  - `kgg-source-truth`: `docs/kgg-gpt-source/chunk-v2-ef86c78f16d6582b.md` from `kgg-update/src/base-head.html` line 10
+  - `kgg-changelog`: `docs/kgg-gpt-source/chunk-v2-9b16b15f5b6075fd.md` from `kgg-update/src/metadata/changelog.html` line 2
