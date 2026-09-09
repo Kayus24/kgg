@@ -387,7 +387,28 @@ class AdminEditorSyncPrGateTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         source = (HERE / "kgg_admin_editor_sync_pr_gate.py").read_text(encoding="utf-8")
 
-        self.assertIn("permissions:\n  contents: write\n  pull-requests: write", workflow)
+        self.assertIn("permissions:\n  contents: read\n  pull-requests: read", workflow)
+        self.assertIn("uses: actions/create-github-app-token@v3", workflow)
+        self.assertIn("app-id: ${{ vars.KGG_RELEASE_CONTROL_APP_ID }}", workflow)
+        self.assertIn(
+            "private-key: ${{ secrets.KGG_RELEASE_CONTROL_APP_PRIVATE_KEY }}",
+            workflow,
+        )
+        self.assertIn("owner: Kayus24", workflow)
+        self.assertIn("repositories: kgg", workflow)
+        self.assertIn("permission-contents: write", workflow)
+        self.assertIn("permission-metadata: read", workflow)
+        self.assertIn("permission-pull-requests: write", workflow)
+        self.assertIn("persist-credentials: false", workflow)
+        self.assertIn("gh auth setup-git", workflow)
+        self.assertIn(
+            "GH_TOKEN: ${{ steps.app-token.outputs.token }}",
+            workflow,
+        )
+        self.assertNotIn("github.token", workflow)
+        self.assertNotIn("KGG_PATIENT_AUTOMATION_TOKEN", workflow)
+        self.assertNotIn("set -x", workflow)
+        self.assertNotIn("printenv", workflow)
         self.assertNotIn("issues: write", workflow)
         self.assertNotIn("actions: write", workflow)
         self.assertNotIn("deployments: write", workflow)
@@ -415,6 +436,18 @@ class AdminEditorSyncPrGateTests(unittest.TestCase):
             self.assertNotIn(forbidden, source)
         self.assertNotIn("kgg-custom-gpt-action-api-openapi.yaml", workflow)
         self.assertNotIn("kgg-custom-gpt-action-api-openapi.yaml", source)
+
+    def test_app_token_creation_is_limited_to_snapshot_pr_workflow(self) -> None:
+        workflows_root = HERE.parent / ".github" / "workflows"
+        token_workflows = sorted(
+            path.name
+            for path in workflows_root.glob("*.yml")
+            if "actions/create-github-app-token" in path.read_text(encoding="utf-8")
+        )
+        self.assertEqual(
+            ["kgg-admin-editor-sync-snapshot-pr.yml"],
+            token_workflows,
+        )
 
 
 if __name__ == "__main__":
