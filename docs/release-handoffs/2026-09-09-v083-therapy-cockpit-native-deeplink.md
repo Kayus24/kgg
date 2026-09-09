@@ -22,9 +22,9 @@ Der v083-ID-Guard behandelt ein vorhandenes `cockpitId` als verbindlichen kanoni
 - Explizite unbekannte/ungültige Übungsbank-IDs: grün mit fail-closed Guard.
 - `therapy-cockpit-browser-regression`: grün bei 820×1180, 1024×768 und 1280×800; 1/2/3 Slots, kein Overflow, Numpad, Außen-Tipp, Ansichtswechsel, vierter Import, mittlere Entfernung, Abschluss-Roundtrip, Null-Slot-Rückkehr und Reload-Grenze.
 - Vollständiger kritischer Lauf: 139 Tests, `OK (skipped=1)`; danach alle weiteren kritischen Verträge grün.
-- Remote-Gates: Android-Wrapper `34300593688`, Validate/Build `34300593652`, Required Gate `34300593638` — alle grün.
+- Remote-Gates auf Kandidat `78faefb`: Android-Wrapper `34313935264`, Validate/Build `34313935271`, Required Gate `34313935266` — alle grün.
 - Die lokale vollständige Pre-Commit-Zertifizierung stoppt zusätzlich am bestehenden `patient-qr-v81-device-ladder-regression`: der Test überschreitet unter dieser Windows-Umgebung sein 300.000-ms-Watchdog; ein isolierter Lauf mit verlängertem Diagnose-Timeout reproduziert Recognition-/Lifecycle-Fehler in diesen alten Geräteprofilen. Die Cockpit-kritischen und nativen Verträge bleiben grün; der Fehler liegt außerhalb des Cockpit-Patches.
-- Der separate `release-pr`-Runner hatte bei `origin/main...HEAD` keinen Merge-Base, weil sein `git fetch origin main` keinen Remote-Tracking-Ref anlegte. Der Workflow verwendet nun einen expliziten Ref-Fetch (`main:refs/remotes/origin/main`); der zugehörige Admin-Editor-Sync-Vertrag ist lokal grün und Validate wird nach dem Push erneut geprüft.
+- Der separate `release-pr`-Runner hatte bei `origin/main...HEAD` keinen Merge-Base, weil sein `git fetch origin main` keinen Remote-Tracking-Ref anlegte. Der Workflow verwendet nun einen expliziten Ref-Fetch (`main:refs/remotes/origin/main`); der zugehörige Admin-Editor-Sync-Vertrag ist lokal grün und Validate/Build `34313935271` ist nach dem Push grün.
 
 ## Nativer Source-Patch
 

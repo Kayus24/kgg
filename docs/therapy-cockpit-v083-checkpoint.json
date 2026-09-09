@@ -1,6 +1,6 @@
 {
   "schema": "kgg-therapy-cockpit-checkpoint/v1",
-  "time": "2026-09-09T07:05:00+02:00",
+  "time": "2026-09-09T07:20:12+02:00",
   "mainSha": "ef625b87f321b0e8f4cec4980c99a42fa58da0d8",
   "initialMainSha": "58ede321b2896522a660a0c184d7a83ea817e6e4",
   "branch": "codex/therapy-cockpit-v2",
@@ -45,8 +45,9 @@
     "therapy-cockpit-explicit-bank-id-guard",
     "admin-editor-sync-pr-gate-contract",
     "android-wrapper-contract",
-    "remote-android-wrapper-check:34313119112",
-    "remote-required-gate:34313119116"
+    "remote-android-wrapper-check:34313935264",
+    "remote-validate-build:34313935271",
+    "remote-required-gate:34313935266"
   ],
   "redTests": [
     "local pre-commit/full-regression: patient-qr-v81-device-ladder-regression timed out at 300000 ms; isolated extended run reproduced pre-existing recognition/lifecycle failures under this Windows environment"
@@ -71,7 +72,7 @@
         "android-wrapper/app/src/main/java/de/kgg/app/MainActivity.java",
         "release-pipeline/kgg_therapy_cockpit_native_contract.py",
         ".github/workflows/android-wrapper-check.yml",
-        "https://github.com/Kayus24/kgg/actions/runs/34300593688"
+        "https://github.com/Kayus24/kgg/actions/runs/34313935264"
       ],
       "impact": "The source contract and CI build are green; an installed Preview/Test-App artifact and physical Android app-link acceptance remain unverified.",
       "nextStep": "Install the CI-built Preview APK on an Android-capable Preview station and test a valid, tampered, wrong-host and second-link intent."
@@ -89,5 +90,5 @@
     }
   ],
   "workflowRepair": "release-pr now fetches github.base_ref into refs/remotes/origin/<base> before diffing; this fixes the runner's missing-merge-base failure.",
-  "nextStep": "Push the workflow fetch repair, verify the new Validate/Android/Required runs, then attach the native handoff to an Android-capable Preview run; do not promote to Main without the exact phrase Gut für Main."
+  "nextStep": "Remote Validate, Android and Required Gate runs are green for 78faefb; attach the native handoff to an Android-capable Preview run when the prescribed Preview gate becomes available; do not promote to Main without the exact phrase Gut für Main."
 }
