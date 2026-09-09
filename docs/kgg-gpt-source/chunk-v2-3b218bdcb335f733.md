@@ -28,7 +28,8 @@
     "kgg-v070-tablet-package-save",
     "kgg-v081-qr-full-plan-device-ladder",
     "kgg-v082-therapy-cockpit",
-    "kgg-v083-therapy-cockpit-id-guard"
+    "kgg-v083-therapy-cockpit-id-guard",
+    "kgg-v084-therapy-cockpit-start-link"
   ],
   "parts": [
     "base-head.html",
@@ -74,6 +75,7 @@
     "patches/v081-qr-full-plan-device-ladder.html",
     "patches/v082-therapy-cockpit.html",
     "patches/v083-therapy-cockpit-id-guard.html",
+    "patches/v084-therapy-cockpit-start-link.html",
     "footer.html"
   ]
 }
