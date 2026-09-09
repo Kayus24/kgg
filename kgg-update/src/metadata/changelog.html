@@ -3,8 +3,41 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 83,
+  "latestVersionCode": 84,
   "entries": [
+    {
+      "versionCode": 84,
+      "versionName": "1.0.84-therapy-cockpit-start-link",
+      "patchId": "kgg-v084-therapy-cockpit-start-link",
+      "status": "candidate",
+      "type": "module-patch",
+      "title": "Therapie-Cockpit Startlink",
+      "reason": "Erzeugt aus einem bestehenden Therapeutenplan einen selbsttragenden Cockpit-Startlink mit kopierbarer Ausgabe.",
+      "whatChanged": [
+        "Erzeugt aus einem bestehenden Therapeutenplan einen selbsttragenden Cockpit-Startlink mit kopierbarer Ausgabe.",
+        "Erreichbar über den leeren Cockpit-Zustand; die normale Therapeutenansicht bleibt unverändert."
+      ],
+      "touchedAreas": [
+        "Therapie-Cockpit",
+        "UI"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
     {
       "versionCode": 83,
       "versionName": "1.0.83-therapy-cockpit-id-guard",

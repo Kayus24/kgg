@@ -1,0 +1,93 @@
+<!-- KGG PATCH START kgg-v084-therapy-cockpit-start-link -->
+<!-- Cockpit-Startlink aus dem aktuellen Therapeutenplan erzeugen -->
+<style id="kgg-therapy-cockpit-start-link-style">
+  .kgg-tc-start-actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:14px;}
+  .kgg-tc-start-actions .kgg-tc-btn{min-width:min(100%,300px);}
+  .kgg-tc-start-actions .kgg-tc-btn:disabled{opacity:.52;cursor:not-allowed;}
+</style>
+<script id="kgg-therapy-cockpit-start-link-script">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v084-therapy-cockpit-start-link";
+  var api=window.KGGTherapyCockpit;
+  var root=null,board=null,mounted=false,observer=null;
+  function planSnapshot(){
+    var store=window.KGGDataStore;
+    if(!store||typeof store.getCurrentPlan!=="function")return null;
+    try{return store.getCurrentPlan()||null;}catch(e){return null;}
+  }
+  function planInfo(plan){
+    var patient=plan&&plan.patient||{},name=String(patient.name||plan&&plan.name||plan&&plan.patientName||"").trim();
+    var exercises=Array.isArray(plan&&plan.exercises)?plan.exercises:[];
+    return {plan:plan,name:name,exercises:exercises,ready:!!name&&exercises.length>0};
+  }
+  function installAction(){
+    if(!board)return;
+    var box=board.querySelector(".kgg-tc-empty-box");
+    if(!box)return;
+    var info=planInfo(planSnapshot()),actions=box.querySelector(".kgg-tc-start-actions");
+    if(!actions){
+      actions=document.createElement("div");
+      actions.className="kgg-tc-start-actions";
+      actions.innerHTML='<button type="button" class="kgg-tc-btn primary" data-tc-action="create-start-link">Diesen Plan als Cockpit-Link erzeugen</button>';
+      box.appendChild(actions);
+    }
+    var button=actions.querySelector('[data-tc-action="create-start-link"]');
+    if(!button)return;
+    button.disabled=!info.ready;
+    button.setAttribute("aria-disabled",String(!info.ready));
+    button.title=info.ready?"Erzeugt den Startlink aus dem aktuell erstellten Therapieplan.":"Erst Patientennamen und mindestens eine Übung im aktuellen Plan anlegen.";
+  }
+  function showToast(message){
+    var toast=document.getElementById("kggTherapyCockpitToast");
+    if(!toast)return;
+    toast.textContent=message;toast.classList.add("show");
+    setTimeout(function(){toast.classList.remove("show");},3200);
+  }
+  function createStartLink(){
+    var info=planInfo(planSnapshot());
+    if(!info.ready){showToast("Für den Cockpit-Link fehlen Patientennamen oder Übungen.");installAction();return;}
+    var payload,link;
+    try{payload=api.fromPlan(info.plan);link=api.makeLink(payload);}catch(error){showToast("Cockpit-Link konnte nicht erzeugt werden.");return;}
+    var output=document.getElementById("kggTherapyCockpitOutput"),modal=document.getElementById("kggTherapyCockpitOutputModal");
+    if(!output||!modal){showToast("Cockpit-Ausgabe ist nicht verfügbar.");return;}
+    var exerciseNames=payload.exercises.map(function(ex){return ex.name;}).join(", ");
+    output.value=[
+      "KGG Therapie-Cockpit · "+new Date().toLocaleDateString("de-DE"),
+      "Patient: "+payload.name,
+      "Cockpit-Startlink aus aktuellem Plan",
+      "",
+      "Übungen: "+exerciseNames,
+      "",
+      "Cockpit-Link:",
+      link
+    ].join("\n");
+    modal.hidden=false;
+  }
+  function handleClick(event){
+    var target=event.target&&event.target.closest?event.target.closest('[data-tc-action="create-start-link"]'):null;
+    if(!target||!root||!root.contains(target))return;
+    event.preventDefault();event.stopPropagation();createStartLink();
+  }
+  function mount(){
+    if(mounted)return;
+    root=document.getElementById("kggTherapyCockpitRoot");
+    board=document.getElementById("kggTherapyCockpitBoard");
+    if(!root||!board)return;
+    mounted=true;root.addEventListener("click",handleClick,true);installAction();
+    if(typeof MutationObserver==="function"){
+      observer=new MutationObserver(installAction);
+      observer.observe(board,{childList:true});
+    }
+  }
+  if(api&&!api.__kggTherapyCockpitStartLinkWrapped){
+    var openView=api.open;
+    api.open=function(){var result=openView.apply(this,arguments);setTimeout(installAction,0);return result;};
+    api.__kggTherapyCockpitStartLinkWrapped=true;
+  }
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES[PATCH_ID]={installed:true,version:1,dependsOn:"kgg-v082-therapy-cockpit"};
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",mount,{once:true});else mount();
+})();
+</script>
+<!-- KGG PATCH END kgg-v084-therapy-cockpit-start-link -->
