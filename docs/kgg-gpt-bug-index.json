@@ -879,6 +879,43 @@
         "debug",
         "qr-patient"
       ],
+      "cause": "PR #201 trug bewusst das Label `kgg-no-release`. Dieses Label erlaubt einen Source-/Preview-Stand, ohne einen neuen Admin-Beta-Release vorzubereiten. Das Label ist keine Release-Freigabe. Dadurch waren Source und Test-Harness aktuell, waehrend das unveraenderliche Admin-Beta-Artefakt bei `r0426` blieb. Ein erster Inbox-Kandidat fuer `r0427` wurde als PR #203",
+      "do_not_touch": "",
+      "fix_pattern": "",
+      "id": "docs-bug-debug-2026-09-09-admin-beta-release-promotion-gap-md-kgg-ticket-source-merge-wird-nicht-automatisch-in-der-admin-beta-sichtbar",
+      "keywords": [
+        "debug",
+        "kgg-ticket-source-merge-wird-nicht-automatisch-in-der-admin-beta-sichtbar",
+        "qr-patient"
+      ],
+      "markers": [
+        ".html",
+        ".json",
+        "1.0.65-source-control-char-guard",
+        "Gut fuer Main",
+        "kgg-no-release",
+        "kgg-update",
+        "kgg_update_manifest.js",
+        "kgg_update_manifest.json",
+        "main",
+        "r0426",
+        "r0427",
+        "rNNNN",
+        "therapist-app/android_update_manifest.js",
+        "therapist-app/android_update_manifest.json",
+        "therapist-app/releases/web/r0426/admin.html"
+      ],
+      "risks": "",
+      "source_path": "docs/bug-debug/2026-09-09-admin-beta-release-promotion-gap.md",
+      "symptom": "Ein erfolgreich nach `main` gemergter Admin-/Cockpit-Patch wird nicht automatisch in der installierten Admin-Beta-App sichtbar. Die normale Admin-Beta-App laedt ein unveraenderliches Web-Artefakt aus dem kanonischen Update-Manifest. Ein Merge in `main` aktualisiert dieses Artefakt nicht automatisch. Im betroffenen Fall ist der Cockpit-Startlink in `kgg-updat",
+      "tests": "",
+      "title": "KGG-Ticket: Source-Merge wird nicht automatisch in der Admin-Beta sichtbar"
+    },
+    {
+      "areas": [
+        "debug",
+        "qr-patient"
+      ],
       "cause": "",
       "do_not_touch": "",
       "fix_pattern": "",
@@ -1212,6 +1249,7 @@
     "docs/bug-debug/2026-08-21-codex-continuation-qr-device.md",
     "docs/bug-debug/2026-08-21-real-device-acceptance-handoff.md",
     "docs/bug-debug/2026-08-22-ticket-backlog-and-live-tests.md",
+    "docs/bug-debug/2026-09-09-admin-beta-release-promotion-gap.md",
     "docs/bug-debug/README.md",
     "docs/bugfixes/mobile-share-modal-css-regression.md",
     "docs/release-handoffs/2026-06-18-v003a-plan-ui-stability.md",

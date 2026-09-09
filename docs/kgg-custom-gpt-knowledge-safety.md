@@ -2,7 +2,7 @@
 
 Generated production knowledge for protected areas, regression history and safe patch patterns.
 
-Source digest: `205f1c5117cf1d1e`
+Source digest: `1f6d74faffae0067`
 
 ## Usage Rules
 
@@ -325,6 +325,14 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Lesson: Diese Datei ist die dauerhafte Uebergabe fuer noch offene Live-/Realgeraet-Tests und bekannte Ticketbloecke. Sie enthaelt nur synthetische Testfaelle und keine Patientendaten. - Kanonischer Remote-Stand: `origin/main` / `ad6433a`. - Therapeut:innen-Quelle: v071, `1.0.71-pdf-global-exercise-numbering`. - Veroeffentlichtes Therapeut:innen-Web: r0426 / v1.0.65.
 - Caution: Keine Patientendaten, keine Secrets, kein Preview-/Dispatch-/Memory-Write und keine automatische Aenderung von Ticket- oder GPT-Live-Status ohne belegten Nachweis.
 - Tests: Statuswerte: `pending-real-device`, `blocked-remote-access`, `scope-open`, `passed` oder `failed`. Ein Test wird erst nach dokumentiertem Geraet, Browser, Version, Beobachtung und anonymisiertem Screenshot als `passed` markiert. | Prioritaet | Test/Ticket | Geraet/Kanal | Abnahme | |---|---|---|---| | P0 | RD-001 / Ticket 001 | Admin-Browser | Sieben Uebunge
+
+### KGG-Ticket: Source-Merge wird nicht automatisch in der Admin-Beta sichtbar
+
+- Source: `docs/bug-debug/2026-09-09-admin-beta-release-promotion-gap.md`
+- Areas: debug, qr-patient
+- Lesson: Ein erfolgreich nach `main` gemergter Admin-/Cockpit-Patch wird nicht automatisch in der installierten Admin-Beta-App sichtbar. Die normale Admin-Beta-App laedt ein unveraenderliches Web-Artefakt aus dem kanonischen Update-Manifest. Ein Merge in `main` aktualisiert dieses Artefakt nicht automatisch. Im betroffenen Fall ist der Cockpit-Startlink in `kgg-updat
+- Caution: Keep patch scoped to the requested area.
+- Tests: Run the risk-matched KGG battery.
 
 ### Debug JSON Seite
 

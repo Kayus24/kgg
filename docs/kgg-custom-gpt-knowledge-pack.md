@@ -2,7 +2,7 @@
 
 This generated compatibility pack contains the complete production knowledge set. Prefer the four smaller curated packs in the GPT editor so retrieval stays focused.
 
-Source digest: `04d8d85b1ced7609`
+Source digest: `63575b99bc6e1769`
 
 ## Usage Rules
 
@@ -80,8 +80,8 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Source web version: v84 / `1.0.84-therapy-cockpit-start-link`.
 - Source index URL: `index.html?v=84`.
 - Source notes: v084: Erzeugt aus dem aktuellen Therapeutenplan einen Cockpit-Startlink mit kopierbarer Ausgabe.
-- Live Admin release: `r0426` / `1.0.65-source-control-char-guard`.
-- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/admin.html`.
+- Live Admin release: `r0427` / `1.0.84-therapy-cockpit-start-link`.
+- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0427/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.
 - Live colleague URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html`.
 - Latest Android shell: `v401`.
@@ -2533,6 +2533,14 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Lesson: Diese Datei ist die dauerhafte Uebergabe fuer noch offene Live-/Realgeraet-Tests und bekannte Ticketbloecke. Sie enthaelt nur synthetische Testfaelle und keine Patientendaten. - Kanonischer Remote-Stand: `origin/main` / `ad6433a`. - Therapeut:innen-Quelle: v071, `1.0.71-pdf-global-exercise-numbering`. - Veroeffentlichtes Therapeut:innen-Web: r0426 / v1.0.65.
 - Caution: Keine Patientendaten, keine Secrets, kein Preview-/Dispatch-/Memory-Write und keine automatische Aenderung von Ticket- oder GPT-Live-Status ohne belegten Nachweis.
 - Tests: Statuswerte: `pending-real-device`, `blocked-remote-access`, `scope-open`, `passed` oder `failed`. Ein Test wird erst nach dokumentiertem Geraet, Browser, Version, Beobachtung und anonymisiertem Screenshot als `passed` markiert. | Prioritaet | Test/Ticket | Geraet/Kanal | Abnahme | |---|---|---|---| | P0 | RD-001 / Ticket 001 | Admin-Browser | Sieben Uebunge
+
+### KGG-Ticket: Source-Merge wird nicht automatisch in der Admin-Beta sichtbar
+
+- Source: `docs/bug-debug/2026-09-09-admin-beta-release-promotion-gap.md`
+- Areas: debug, qr-patient
+- Lesson: Ein erfolgreich nach `main` gemergter Admin-/Cockpit-Patch wird nicht automatisch in der installierten Admin-Beta-App sichtbar. Die normale Admin-Beta-App laedt ein unveraenderliches Web-Artefakt aus dem kanonischen Update-Manifest. Ein Merge in `main` aktualisiert dieses Artefakt nicht automatisch. Im betroffenen Fall ist der Cockpit-Startlink in `kgg-updat
+- Caution: Keep patch scoped to the requested area.
+- Tests: Run the risk-matched KGG battery.
 
 ### Debug JSON Seite
 
