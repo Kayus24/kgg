@@ -1,7 +1,7 @@
 {
-  "versionCode": 83,
-  "versionName": "1.0.83-therapy-cockpit-id-guard",
-  "indexUrl": "index.html?v=83",
-  "sha256": "d647eadb6e7c691a6a846133f0447a15adc2b44a3fcd04a498fc1a015d482719",
-  "notes": "v083: Weist unbekannte explizite Übungsbank-IDs vor dem Cockpit-Sync fail-closed ab."
+  "versionCode": 84,
+  "versionName": "1.0.84-therapy-cockpit-start-link",
+  "indexUrl": "index.html?v=84",
+  "sha256": "06ccc408ad88f502defa0482130c3054a069da2f7c37e813aad6bf4150be728d",
+  "notes": "v084: Erzeugt aus dem aktuellen Therapeutenplan einen Cockpit-Startlink mit kopierbarer Ausgabe."
 }

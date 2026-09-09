@@ -30,6 +30,7 @@ async function seedAndOpen(page, viewport) {
   });
   await page.goto(HTML_URL, { waitUntil: "domcontentloaded", timeout: 30000 });
   await page.waitForSelector("#kggTherapyCockpitButton", { state: "attached", timeout: 15000 });
+  await verifyStartLinkFromCurrentPlan(page);
   const code = await page.evaluate(() => {
     const api = window.KGGTherapyCockpit;
     const ids = api.registry.entries().slice(0, 3).map(entry => entry.id);
@@ -44,6 +45,33 @@ async function seedAndOpen(page, viewport) {
   await page.waitForFunction(() => document.body.classList.contains("kggTherapyCockpitOpen"), null, { timeout: 15000 });
   await page.waitForSelector('.kgg-tc-card[data-tc-card="0"]', { timeout: 15000 });
   return code;
+}
+
+async function verifyStartLinkFromCurrentPlan(page) {
+  await page.evaluate(() => {
+    const store = window.KGGDataStore;
+    if (!store || typeof store.setCurrentPlan !== "function") throw new Error("KGGDataStore fehlt für den Startlink-Test");
+    store.setCurrentPlan({
+      id: "browser-start-plan",
+      title: "Cockpit-Starttest",
+      patient: { name: "Browser Start" },
+      exercises: [{ name: "Abduktion Maschine", sourceId: "abd", sets: 2, startLoad: "7", startMetric: "10" }],
+    }, "browser_start_link_test");
+  });
+  await page.locator("#kggTherapyCockpitButton").click();
+  await page.waitForSelector('[data-tc-action="create-start-link"]', { timeout: 5000 });
+  const ready = await page.evaluate(() => {
+    const button = document.querySelector('[data-tc-action="create-start-link"]');
+    return { exists: !!button, disabled: !!button?.disabled };
+  });
+  assert(ready.exists && !ready.disabled, `start-link action is unavailable: ${JSON.stringify(ready)}`);
+  await page.locator('[data-tc-action="create-start-link"]').click();
+  await page.waitForSelector("#kggTherapyCockpitOutputModal:not([hidden])", { timeout: 5000 });
+  const output = await page.locator("#kggTherapyCockpitOutput").inputValue();
+  assert(output.includes("Browser Start") && output.includes("Cockpit-Startlink") && output.includes("https://kayus24.github.io/kgg/kgg-update/index.html?cockpit="), "start-link output is incomplete");
+  await page.locator('[data-tc-action="output-close"]').click();
+  const closed = await page.evaluate(() => ({ view: window.KGGTherapyCockpit.getState().view, slots: window.KGGTherapyCockpit.getState().slotCount }));
+  assert(closed.view === "normal" && closed.slots === 0, `start-link output did not close cleanly: ${JSON.stringify(closed)}`);
 }
 
 async function inspectGeometry(page, viewport) {
