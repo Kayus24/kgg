@@ -26,7 +26,8 @@
     "kgg-v068-plan-text-boot-restore",
     "kgg-v069-plan-text-recovery-finalize",
     "kgg-v070-tablet-package-save",
-    "kgg-v081-qr-full-plan-device-ladder"
+    "kgg-v081-qr-full-plan-device-ladder",
+    "kgg-v082-therapy-cockpit"
   ],
   "parts": [
     "base-head.html",
@@ -70,6 +71,7 @@
     "patches/v069-plan-text-recovery-finalize.html",
     "patches/v070-tablet-package-save.html",
     "patches/v081-qr-full-plan-device-ladder.html",
+    "patches/v082-therapy-cockpit.html",
     "footer.html"
   ]
 }

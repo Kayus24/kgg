@@ -3,8 +3,40 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 81,
+  "latestVersionCode": 82,
   "entries": [
+    {
+      "versionCode": 82,
+      "versionName": "1.0.82-therapy-cockpit",
+      "patchId": "kgg-v082-therapy-cockpit",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Therapie-Cockpit fuer begleitete Plaene",
+      "reason": "Fuegt die additive Tablet-Cockpit-Ansicht mit selbsttragendem Linkcodec, drei RAM-Slots und Abschlussdokumentation hinzu.",
+      "whatChanged": [
+        "Fuegt die additive Tablet-Cockpit-Ansicht mit selbsttragendem Linkcodec, drei RAM-Slots und Abschlussdokumentation hinzu."
+      ],
+      "touchedAreas": [
+        "Therapie-Cockpit",
+        "UI"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
     {
       "versionCode": 81,
       "versionName": "1.0.81-qr-full-plan-device-ladder",
@@ -792,7 +824,7 @@
       "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
     }
   ],
-  "latestVersionName": "1.0.81-qr-full-plan-device-ladder",
+  "latestVersionName": "1.0.82-therapy-cockpit",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",

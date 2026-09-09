@@ -84,6 +84,10 @@
       ]
     },
     {
+      "glob": "patches/v082-*",
+      "testIds": ["therapy-cockpit-critical", "therapy-cockpit-native-contract", "therapy-cockpit-browser-regression", "android-wrapper-contract", "ui-contract", "ui-stability-regression", "ui-tablet-app-boot"]
+    },
+    {
       "glob": "metadata/*",
       "testIds": []
     }
