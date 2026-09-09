@@ -14,8 +14,8 @@ on:
         type: string
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+  pull-requests: read
 
 concurrency:
   group: kgg-admin-editor-sync-pr-${{ inputs.request_id }}
@@ -25,14 +25,26 @@ jobs:
   admin-editor-sync-pr:
     runs-on: ubuntu-latest
     env:
-      GH_TOKEN: ${{ github.token }}
       KGG_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
     steps:
+      - name: Create scoped GitHub App installation token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ vars.KGG_RELEASE_CONTROL_APP_ID }}
+          private-key: ${{ secrets.KGG_RELEASE_CONTROL_APP_PRIVATE_KEY }}
+          owner: Kayus24
+          repositories: kgg
+          permission-contents: write
+          permission-metadata: read
+          permission-pull-requests: write
+
       - name: Checkout current default branch
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.repository.default_branch }}
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: actions/setup-python@v5
         with:
@@ -45,12 +57,21 @@ jobs:
           test "$KGG_DEFAULT_BRANCH" = "main"
           test -z "$(git status --porcelain --untracked-files=all)"
 
+      - name: Configure Git for scoped app token
+        shell: bash
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          gh auth setup-git
+
       - name: Run consequential Admin editor sync snapshot PR gate
         id: gate
         shell: bash
         env:
           KGG_REQUEST_ID: ${{ inputs.request_id }}
           KGG_APPROVAL_PHRASE: ${{ inputs.approval_phrase }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           set -euo pipefail
           result_path="$RUNNER_TEMP/kgg-admin-editor-sync-pr-gate.json"
