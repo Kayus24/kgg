@@ -134,7 +134,7 @@ function buildPackage(args) {
 
   const sourceWorker = fs.readFileSync(path.join(ROOT, "service-worker.js"), "utf8");
   let worker = sourceWorker
-    .replace("kgg-handyplan-v81-kgg-h3-qr", "kgg-device-test-v404-" + sourceSha.slice(0, 12))
+    .replace(/kgg-handyplan-v[0-9]+-[a-z0-9-]+/, "kgg-device-test-v404-" + sourceSha.slice(0, 12))
     .replace("const APP_VERSION = '81';", "const APP_VERSION = '404-device-test';")
     .replace(
       "const CORE_ASSETS = ['./index.html','./manifest.json','./manifest-v64.webmanifest','./kgg-icon-192-v63.png','./kgg-icon-512-v63.png'];",
