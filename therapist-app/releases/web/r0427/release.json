@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0427",
+  "versionName": "1.0.84-therapy-cockpit-start-link",
+  "notes": "Mobile-Inbox r0427: KGG Update v084 Therapie-Cockpit Startlink (06ccc408ad88).",
+  "createdAt": "2026-09-09T20:59:48Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0427",
+      "profile": "admin",
+      "versionName": "1.0.84-therapy-cockpit-start-link",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0427/admin.html",
+      "sha256": "06ccc408ad88f502defa0482130c3054a069da2f7c37e813aad6bf4150be728d",
+      "notes": "Mobile-Inbox r0427: KGG Update v084 Therapie-Cockpit Startlink (06ccc408ad88)."
+    },
+    "colleague": {
+      "releaseId": "r0427",
+      "profile": "colleague",
+      "versionName": "1.0.84-therapy-cockpit-start-link",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0427/colleague.html",
+      "sha256": "8966b12364c54c465e86b516a712a7b0697c9c028cc7e6adff2645d748b48b3e",
+      "notes": "Mobile-Inbox r0427: KGG Update v084 Therapie-Cockpit Startlink (06ccc408ad88)."
+    }
+  }
+}
