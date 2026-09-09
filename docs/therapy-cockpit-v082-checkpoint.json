@@ -1,6 +1,6 @@
 {
   "schema": "kgg-therapy-cockpit-checkpoint/v1",
-  "time": "2026-09-09T02:18:00+02:00",
+  "time": "2026-09-09T03:48:00+02:00",
   "mainSha": "58ede321b2896522a660a0c184d7a83ea817e6e4",
   "branch": "codex/therapy-cockpit-v2",
   "phase": "VERIFY_PREVIEW",
@@ -39,7 +39,10 @@
     "kgg_hook_guard",
     "check_html_scripts",
     "therapy-cockpit-native-contract",
-    "android-wrapper-contract"
+    "android-wrapper-contract",
+    "remote-android-wrapper-check:34300192448",
+    "remote-validate-build:34300192449",
+    "remote-required-gate:34300192447"
   ],
   "redTests": [],
   "linkSizeProbes": {
@@ -55,16 +58,17 @@
   },
   "blockers": [
     {
-      "kind": "NATIVE_BUILD_UNVERIFIED",
-      "summary": "The bounded Android app-link source patch is present, but this machine has no Java, Gradle, Android SDK or adb and therefore cannot build/install the wrapper or prove the OS task lifecycle.",
+      "kind": "NATIVE_DEVICE_ACCEPTANCE_UNVERIFIED",
+      "summary": "The bounded Android app-link source patch is present and the remote Android wrapper build is green, but this machine has no Java, Gradle, Android SDK or adb and therefore cannot install the wrapper or prove the OS task lifecycle on a device.",
       "evidence": [
         "android-wrapper/app/src/main/AndroidManifest.xml",
         "android-wrapper/app/src/main/java/de/kgg/app/MainActivity.java",
         "release-pipeline/kgg_therapy_cockpit_native_contract.py",
-        ".github/workflows/android-wrapper-check.yml"
+        ".github/workflows/android-wrapper-check.yml",
+        "https://github.com/Kayus24/kgg/actions/runs/34300192448"
       ],
-      "impact": "The source contract is green; an installed Preview/Test-App artifact and physical Android app-link acceptance remain unverified.",
-      "nextStep": "Run the existing Android CI build for assembleAdminDebug, assembleKollegenDebug and assemblePreviewDebug, then install the Preview APK and test a valid, tampered, wrong-host and second-link intent."
+      "impact": "The source contract and CI build are green; an installed Preview/Test-App artifact and physical Android app-link acceptance remain unverified.",
+      "nextStep": "Install the CI-built Preview APK on an Android-capable Preview station and test a valid, tampered, wrong-host and second-link intent."
     },
     {
       "kind": "REMOTE_PREVIEW_GATE_UNAVAILABLE",
