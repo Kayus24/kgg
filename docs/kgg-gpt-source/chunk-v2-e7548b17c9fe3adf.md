@@ -1,0 +1,96 @@
+    return html+'</div></div><div class="kgg-tc-card-foot"><button type="button" class="kgg-tc-btn primary" data-tc-action="finish" data-tc-slot="'+slotIndex+'">Plan fertig</button></div></article>';
+  }
+  function render(){
+    var count=slotCount(),button=document.getElementById("kggTherapyCockpitButton");
+    if(button)button.textContent=count?"Cockpit "+count+"/3":"Cockpit";
+    if(!board)return;
+    var content="";
+    if(notice)content+='<div class="kgg-tc-notice" role="status">'+htmlEscape(notice)+'</div>';
+    if(!count){content+='<div class="kgg-tc-empty"><div class="kgg-tc-empty-box"><strong>Noch kein Cockpit-Link geladen</strong><span>Bis zu drei begleitete Trainingspläne können unabhängig nebeneinander geöffnet werden.</span><div style="margin-top:14px"><button type="button" class="kgg-tc-btn primary" data-tc-action="import-open">Cockpit-Link laden</button></div></div></div>';board.innerHTML=content;return;}
+    var gridClass=count===1?"one":count===2?"two":"";content+='<div class="kgg-tc-grid '+gridClass+'">';for(var i=0;i<MAX_SLOTS;i++)if(slots[i])content+=renderCard(slots[i],i);content+='</div>';board.innerHTML=content;
+    setTimeout(function(){if(!activeInput)return;var active=board.querySelector('.kgg-tc-field.active');if(active&&active.scrollIntoView)active.scrollIntoView({block:"nearest",inline:"nearest"});},0);
+  }
+  function closePad(){if(activeInput){activeInput=null;render();}}
+  function setActiveInput(slot,exercise,set,field){if(!slots[slot])return;slots[slot].openExercise=exercise;activeInput={slot:slot,exercise:exercise,set:set,field:field};render();}
+  function applyKey(slot,exercise,set,field,keyValue){
+    var target=slots[slot],ex=target&&target.exercises[exercise];if(!ex)return;var pair=ex.today[set]||(ex.today[set]=["",""]),index=field==="load"?0:1,current=String(pair[index]||"");
+    if(keyValue==="OK"){activeInput=null;render();return;}
+    if(keyValue==="⌫")current=current.slice(0,-1);else if(keyValue==="C")current="";else if(keyValue==="–")current="0";else if(keyValue===","){if(!current.includes("."))current=current?current+".":"0.";}else if(/^\d$/.test(keyValue)){if(current.length<8)current+=keyValue;}
+    pair[index]=current;render();
+  }
+  function dispatchPlanHook(slot){
+    var store=window["KGGDataStore"];if(!store||typeof store.getCurrentPlan!=="function"||typeof store.setCurrentPlan!=="function")return "hook_unavailable";
+    var current;try{current=store.getCurrentPlan()||{};}catch(e){return "hook_unavailable";}
+    if(slot.planId&&current.id&&String(slot.planId)!==String(current.id))return "plan_mismatch";
+    var changed=0,exercises=Array.isArray(current.exercises)?current.exercises.map(function(original){var ref=registryLookup(original&& (original.sourceId||original.bankId||original.name));if(!ref)return original;var hit=slot.exercises.find(function(item){return item.id===ref.id;});if(!hit)return original;changed++;return Object.assign({},original,{lastTraining:hit.today.map(function(pair){return {load:pair[0],metric:pair[1]};}),cockpitPrevious:hit.today.map(function(pair){return pair.slice();}),lastTrainingDate:new Date().toISOString().slice(0,10)});}):[];
+    if(!changed)return "exercise_mismatch";
+    try{store.setCurrentPlan(Object.assign({},current,{exercises:exercises}),"therapy_cockpit_finish");if(typeof CustomEvent!=="undefined")window.dispatchEvent(new CustomEvent("kgg:therapy-cockpit-finished",{detail:{planId:slot.planId,exerciseCount:changed}}));return "updated";}catch(e){return "hook_failed";}
+  }
+  function documentationFor(slot,link){
+    var lines=["KGG Therapie-Cockpit · "+new Date().toLocaleDateString("de-DE"),"Patient: "+slot.name,"Plan fertig · heutige Werte"];slot.exercises.forEach(function(ex){lines.push("",ex.name);ex.today.forEach(function(pair,index){lines.push("S"+(index+1)+": "+valuesLabel(pair,ex));});});lines.push("","Neuer Cockpit-Link:",link);return lines.join("\n");
+  }
+  function showOutput(results){
+    var modal=document.getElementById("kggTherapyCockpitOutputModal"),output=document.getElementById("kggTherapyCockpitOutput");if(!modal||!output)return;if(!slotCount())setCockpitOpen(true);output.value=results.map(function(result){return result.text+"\n\nStatus Planquelle: "+result.hook;}).join("\n\n--------------------\n\n");modal.hidden=false;
+  }
+  function finishSlot(index,skipRender){
+    var slot=slots[index];if(!slot)return null;var link,hook="nicht übernommen";try{link=makeLink(payloadFromSlot(slot,true));hook=dispatchPlanHook(slot);}catch(e){notice="Abschluss fehlgeschlagen ("+(e.code||"invalid_payload")+").";if(!skipRender)render();return null;}
+    var result={slot:index,link:link,text:documentationFor(slot,link),hook:hook};slot.lastCompletion=result;slots[index]=null;if(activeInput&&activeInput.slot===index)activeInput=null;if(!slotCount()){currentView="normal";setCockpitOpen(false);}if(!skipRender)render();return result;
+  }
+  function setCockpitOpen(open){if(document.body&&document.body.classList)document.body.classList.toggle("kggTherapyCockpitOpen",!!open);}
+  function finishAll(){var results=[];for(var i=0;i<MAX_SLOTS;i++){var result=finishSlot(i,true);if(result)results.push(result);}currentView="normal";setCockpitOpen(false);render();if(results.length)showOutput(results);}
+  function removeSlot(index){if(index<0||index>=MAX_SLOTS||!slots[index])return;slots[index]=null;if(activeInput&&activeInput.slot===index)activeInput=null;notice="";if(!slotCount()){currentView="normal";setCockpitOpen(false);}render();}
+  function importCode(value){
+    var code=extractCode(value)||String(value||"").trim(),decoded=decodeCode(code),index=firstFreeSlot();if(index<0)throw error("slots_full");slots[index]=normalizeSlot(decoded);notice="";currentView="cockpit";setCockpitOpen(true);render();return {slot:index,state:getState()};
+  }
+  function openView(){currentView="cockpit";setCockpitOpen(true);render();}
+  function closeView(){currentView="normal";activeInput=null;setCockpitOpen(false);render();}
+  function clearIncomingParam(){try{var url=new URL(window.location.href),changed=false;["cockpit","kggtc"].forEach(function(name){if(url.searchParams.has(name)){url.searchParams.delete(name);changed=true;}});if(changed&&window.history&&history.replaceState)history.replaceState({},document.title,url.pathname+(url.search?url.search:"")+url.hash);}catch(e){}}
+  function notify(message){var toast=document.getElementById("kggTherapyCockpitToast");if(!toast)return;toast.textContent=message;toast.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(function(){toast.classList.remove("show");},3200);}
+  function installDom(){
+    if(!document.body)return;
+    if(!document.getElementById("kggTherapyCockpitButton")){
+      var base=document.getElementById("baseToggle"),button=document.createElement(base?"span":"button");if(!base)button.type="button";button.id="kggTherapyCockpitButton";button.className="kgg-tc-entry";button.textContent="Cockpit";button.setAttribute("aria-label","Therapie-Cockpit öffnen");if(base){button.setAttribute("role","button");button.setAttribute("tabindex","0");base.appendChild(button);}else{var scanHub=document.getElementById("scanHub"),topbar=document.querySelector(".topbar"),vision=document.getElementById("visionBtn");if(scanHub)scanHub.appendChild(button);else if(topbar)topbar.insertBefore(button,vision||null);}
+    }
+    if(!document.getElementById("kggTherapyCockpitRoot")){
+      var container=document.createElement("div");container.id="kggTherapyCockpitRoot";container.innerHTML='<div class="kgg-tc-shell"><header class="kgg-tc-header"><div class="kgg-tc-title"><strong>Therapie-Cockpit</strong><small>begleitete Trainingspläne</small></div><div class="kgg-tc-actions"><button type="button" class="kgg-tc-btn" data-tc-action="normal">Therapeuten-App</button><button type="button" class="kgg-tc-btn primary" data-tc-action="import-open">+ Cockpit-Link</button></div></header><main class="kgg-tc-board" id="kggTherapyCockpitBoard"></main><footer class="kgg-tc-footer"><small id="kggTherapyCockpitStatus">RAM-Sitzung · maximal 3 Slots</small><button type="button" class="kgg-tc-btn primary" data-tc-action="finish-all">Alle Pläne speichern</button></footer></div><div class="kgg-tc-modal" id="kggTherapyCockpitImportModal" hidden><div class="kgg-tc-sheet" role="dialog" aria-modal="true" aria-labelledby="kggTherapyCockpitImportTitle"><h2 id="kggTherapyCockpitImportTitle">Cockpit-Link laden</h2><p>Den vollständigen Link aus dem offiziellen Dokumentationsprogramm einfügen.</p><textarea class="kgg-tc-input" id="kggTherapyCockpitImportInput" spellcheck="false" autocomplete="off"></textarea><div class="kgg-tc-modal-actions"><button type="button" class="kgg-tc-btn" data-tc-action="import-cancel">Abbrechen</button><button type="button" class="kgg-tc-btn primary" data-tc-action="import-submit">Slot laden</button></div></div></div><div class="kgg-tc-modal" id="kggTherapyCockpitOutputModal" hidden><div class="kgg-tc-sheet" role="dialog" aria-modal="true" aria-labelledby="kggTherapyCockpitOutputTitle"><h2 id="kggTherapyCockpitOutputTitle">Dokumentation bereit</h2><p>Link und Text können jetzt in die Dokumentation kopiert werden.</p><textarea class="kgg-tc-output" id="kggTherapyCockpitOutput" readonly></textarea><div class="kgg-tc-modal-actions"><button type="button" class="kgg-tc-btn" data-tc-action="output-close">Schließen</button><button type="button" class="kgg-tc-btn primary" data-tc-action="output-copy">Text kopieren</button></div></div></div>';
+      document.body.appendChild(container);
+    }
+    if(!document.getElementById("kggTherapyCockpitToast")){var toast=document.createElement("div");toast.id="kggTherapyCockpitToast";toast.className="kgg-tc-toast";toast.setAttribute("role","status");document.body.appendChild(toast);}
+    root=document.getElementById("kggTherapyCockpitRoot");board=document.getElementById("kggTherapyCockpitBoard");
+    var rootButton=document.getElementById("kggTherapyCockpitButton");if(rootButton){rootButton.addEventListener("click",function(event){event.stopPropagation();openView();});rootButton.addEventListener("keydown",function(event){if(event.key==="Enter"||event.key===" "){event.preventDefault();event.stopPropagation();openView();}});}
+    root.addEventListener("click",handleClick);
+    document.addEventListener("pointerdown",handleOutsidePointer,true);
+    render();
+    var incoming=extractCode(window.location.href);if(incoming){try{importCode(incoming);clearIncomingParam();}catch(e){notice="Cockpit-Link nicht geladen ("+(e.code||"invalid_format")+").";render();notify("Cockpit-Link konnte nicht geladen werden.");}}
+  }
+  function handleOutsidePointer(event){
+    if(!activeInput||!document.body.classList.contains("kggTherapyCockpitOpen"))return;
+    var target=event.target;if(target&&target.closest&& (target.closest("[data-tc-pad]")||target.closest('[data-tc-action="input"]')))return;
+    activeInput=null;render();
+    if(target&&root&&root.contains(target)){event.stopPropagation();event.preventDefault();}
+  }
+  function numberAttribute(target,name){var value=Number(target&&target.getAttribute(name));return Number.isInteger(value)?value:-1;}
+  function handleClick(event){
+    var target=event.target&&event.target.closest?event.target.closest("[data-tc-action]"):null;if(!target||!root.contains(target))return;var action=target.getAttribute("data-tc-action"),slot=numberAttribute(target,"data-tc-slot"),exercise=numberAttribute(target,"data-tc-ex"),set=numberAttribute(target,"data-tc-set"),field=target.getAttribute("data-tc-field");
+    if(action==="normal"){closeView();return;}
+    if(action==="import-open"){document.getElementById("kggTherapyCockpitImportModal").hidden=false;setTimeout(function(){var input=document.getElementById("kggTherapyCockpitImportInput");if(input)input.focus();},0);return;}
+    if(action==="import-cancel"){document.getElementById("kggTherapyCockpitImportModal").hidden=true;return;}
+    if(action==="import-submit"){var input=document.getElementById("kggTherapyCockpitImportInput"),value=input&&input.value||"";try{importCode(value);document.getElementById("kggTherapyCockpitImportModal").hidden=true;if(input)input.value="";}catch(e){notify("Link nicht geladen: "+(e.code||"invalid_format"));}return;}
+    if(action==="output-close"){document.getElementById("kggTherapyCockpitOutputModal").hidden=true;if(!slotCount())closeView();return;}
+    if(action==="output-copy"){var output=document.getElementById("kggTherapyCockpitOutput");if(output&&navigator.clipboard)navigator.clipboard.writeText(output.value).then(function(){notify("Dokumentation kopiert.");}).catch(function(){notify("Kopieren im Browser nicht verfügbar.");});return;}
+    if(action==="finish-all"){finishAll();return;}
+    if(action==="toggle"){if(slots[slot]){slots[slot].openExercise=slots[slot].openExercise===exercise?null:exercise;activeInput=null;render();}return;}
+    if(action==="input"){setActiveInput(slot,exercise,set,field);return;}
+    if(action==="mode"){setActiveInput(slot,exercise,set,field);return;}
+    if(action==="key"){applyKey(slot,exercise,set,field,target.getAttribute("data-tc-key"));return;}
+    if(action==="remove"){removeSlot(slot);return;}
+    if(action==="finish"){var result=finishSlot(slot);if(result)showOutput([result]);return;}
+  }
+  function getState(){return {version:1,view:currentView,slotCount:slotCount(),slots:slots.map(function(slot,index){return slot?{slot:index,name:slot.name,planId:slot.planId,exerciseCount:slot.exercises.length,progress:slotProgress(slot),openExercise:slot.openExercise}:null;})};}
+  installBankRegistryHooks();
+  var api={patchId:PATCH_ID,prefix:PREFIX,registry:{entries:function(){return Object.keys(byId).map(function(id){var item=byId[id];return {id:item.id,key:item.key,name:item.name,canonical:!!item.canonical};});},lookup:function(value){var item=registryLookup(value);return item?{id:item.id,name:item.name}:null;},register:registerCanonical,derive:ensureDerived},encode:encodePayload,decode:decodeCode,makeLink:makeLink,fromPlan:buildFromPlan,importCode:importCode,getState:getState,open:openView,close:closeView,finish:function(index){return finishSlot(Number(index));},remove:removeSlot};
+  window.KGGTherapyCockpit=api;window.KGG_PATCHES=window.KGG_PATCHES||{};window.KGG_PATCHES[PATCH_ID]={installed:true,version:1};
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",installDom,{once:true});else installDom();
+})();
+</script>
+<!-- KGG PATCH END kgg-v082-therapy-cockpit -->

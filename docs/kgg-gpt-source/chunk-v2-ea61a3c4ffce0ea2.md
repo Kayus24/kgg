@@ -46,36 +46,34 @@
     "plan-text-recovery-finalize",
     "tablet-package-save",
     "pdf-global-exercise-numbering",
-    "qr-full-plan-device-ladder"
+    "qr-full-plan-device-ladder",
+    "therapy-cockpit"
   ],
   "currentVersion": {
-    "versionCode": 81,
-    "versionName": "1.0.81-qr-full-plan-device-ladder",
-    "lastPatchId": "kgg-v081-qr-full-plan-device-ladder",
+    "versionCode": 82,
+    "versionName": "1.0.82-therapy-cockpit",
+    "lastPatchId": "kgg-v082-therapy-cockpit",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v081-qr-full-plan-device-ladder",
+  "latestPatchId": "kgg-v082-therapy-cockpit",
   "lastUpdateIntent": {
-    "id": "kgg-v081-qr-full-plan-device-ladder",
-    "summary": "Erzeugt vollständige persönliche KGGH3-Plan-QRs mit lokalem fflate-Codec und liest KGGH2/KGGH3 im internen Scanner.",
+    "id": "kgg-v082-therapy-cockpit",
+    "summary": "Fuegt die additive Tablet-Cockpit-Ansicht mit selbsttragendem Linkcodec, drei RAM-Slots und Abschlussdokumentation hinzu.",
     "touched": [
-      "QR/Patienten-App",
-      "KGGH2/KGGH3",
-      "fflate 0.8.3",
-      "Interner QR-Scanner"
+      "Therapie-Cockpit",
+      "UI"
     ],
     "notTouched": [
       "PDF",
+      "QR/Patienten-App",
       "Scan/OCR",
       "Parser",
       "Plan-State",
-      "Storage",
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
       "GitHub Manifest",
-      "Handy-Layout",
-      "Tablet-Layout"
+      "Handy-Layout"
     ]
   }
 }

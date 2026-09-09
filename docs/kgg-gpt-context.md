@@ -42,9 +42,9 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 ## Current Versions
 
-- Source web version: v81 / `1.0.81-qr-full-plan-device-ladder`.
-- Source index URL: `index.html?v=81`.
-- Source notes: v081: Vollständige persönliche KGGH3-Plan-QRs mit lokalem fflate 0.8.3, KGGH2-Rückwärtslesbarkeit und gestuftem Scanner-Test.
+- Source web version: v82 / `1.0.82-therapy-cockpit`.
+- Source index URL: `index.html?v=82`.
+- Source notes: v082: Fuegt die additive Tablet-Cockpit-Ansicht mit selbsttragendem Linkcodec, drei RAM-Slots und Abschlussdokumentation hinzu.
 - Live Admin release: `r0426` / `1.0.65-source-control-char-guard`.
 - Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.

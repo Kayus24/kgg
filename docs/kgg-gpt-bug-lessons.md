@@ -218,3 +218,11 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Lesson: Bereit als GitHub-Update-Patchscript. Keine grosse HTML-Datei muss ueber den Connector hochgeladen werden. Wenn andere Dateien geaendert werden: stoppen. PDF, QR-Erzeugung, Patienten-App, Scan-Kamera, Parser, Android-Wrapper, Tablet-Layout, Plan-State, Storage.
 - Caution: PDF, QR-Erzeugung, Patienten-App, Scan-Kamera, Parser, Android-Wrapper, Tablet-Layout, Plan-State, Storage.
 - Tests: Run the risk-matched KGG battery.
+
+### KGG Therapie-Cockpit v082 nativer Deep-Link-Handoff
+
+- Source: `docs/release-handoffs/2026-09-09-v082-therapy-cockpit-native-deeplink.md`
+- Areas: debug, parser-textblocks
+- Lesson: - Main-Basis: `58ede321b2896522a660a0c184d7a83ea817e6e4` - Arbeitsbranch: `codex/therapy-cockpit-v2` - Web-Patch: `kgg-v082-therapy-cockpit` - Web-Quelle: `kgg-update/src/patches/v082-therapy-cockpit.html` - Generierter Kandidat: `kgg-update/index.html` - Kandidatenhash: `608add2d31c81a3356be9790057a375644958ea6f000f0642dbb5b01ade9c6a4` Der Web-Patch importi
+- Caution: Keep patch scoped to the requested area.
+- Tests: Run the risk-matched KGG battery.
