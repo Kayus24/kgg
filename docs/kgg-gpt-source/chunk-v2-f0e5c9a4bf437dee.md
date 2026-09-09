@@ -1,13 +1,4 @@
-<!doctype html>
-<html lang="de">
-<head>
-<meta charset="utf-8">
-<!--
-KGG INTERNAL SOURCE TRUTH — READ THIS FIRST
-
-Machine-readable app state, patch rules, and changelog are embedded near the top of this HTML.
-Before editing this app, any LLM/agent/human should read these blocks:
-1. <script type="application/json" id="kgg-source-truth">
+<script type="application/json" id="kgg-source-truth">
 {
   "schema": 1,
   "app": "KGG Plan",
@@ -55,38 +46,35 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "plan-text-recovery-finalize",
     "tablet-package-save",
     "pdf-global-exercise-numbering",
-    "qr-full-plan-device-ladder"
+    "qr-full-plan-device-ladder",
+    "therapy-cockpit",
+    "therapy-cockpit-id-guard"
   ],
   "currentVersion": {
-    "versionCode": 81,
-    "versionName": "1.0.81-qr-full-plan-device-ladder",
-    "lastPatchId": "kgg-v081-qr-full-plan-device-ladder",
+    "versionCode": 83,
+    "versionName": "1.0.83-therapy-cockpit-id-guard",
+    "lastPatchId": "kgg-v083-therapy-cockpit-id-guard",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v081-qr-full-plan-device-ladder",
+  "latestPatchId": "kgg-v083-therapy-cockpit-id-guard",
   "lastUpdateIntent": {
-    "id": "kgg-v081-qr-full-plan-device-ladder",
-    "summary": "Erzeugt vollständige persönliche KGGH3-Plan-QRs mit lokalem fflate-Codec und liest KGGH2/KGGH3 im internen Scanner.",
+    "id": "kgg-v083-therapy-cockpit-id-guard",
+    "summary": "Weist unbekannte explizite Übungsbank-IDs vor dem Cockpit-Sync fail-closed ab.",
     "touched": [
-      "QR/Patienten-App",
-      "KGGH2/KGGH3",
-      "fflate 0.8.3",
-      "Interner QR-Scanner"
+      "Therapie-Cockpit"
     ],
     "notTouched": [
       "PDF",
+      "QR/Patienten-App",
       "Scan/OCR",
       "Parser",
       "Plan-State",
-      "Storage",
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
       "GitHub Manifest",
-      "Handy-Layout",
-      "Tablet-Layout"
+      "Handy-Layout"
     ]
   }
 }
 </script>
-<!-- END kgg-source-truth -->

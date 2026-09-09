@@ -1139,6 +1139,56 @@
       "symptom": "Bereit als GitHub-Update-Patchscript. Keine grosse HTML-Datei muss ueber den Connector hochgeladen werden. Wenn andere Dateien geaendert werden: stoppen. PDF, QR-Erzeugung, Patienten-App, Scan-Kamera, Parser, Android-Wrapper, Tablet-Layout, Plan-State, Storage.",
       "tests": "",
       "title": "Release Handoff v007 QR Photo Upload Decode"
+    },
+    {
+      "areas": [
+        "debug",
+        "parser-textblocks",
+        "qr-patient",
+        "sync"
+      ],
+      "cause": "",
+      "do_not_touch": "",
+      "fix_pattern": "",
+      "id": "docs-release-handoffs-2026-09-09-v083-therapy-cockpit-native-deeplink-md-kgg-therapie-cockpit-v083-nativer-deep-link-handoff",
+      "keywords": [
+        "debug",
+        "kgg-therapie-cockpit-v083-nativer-deep-link-handoff",
+        "parser-textblocks",
+        "qr-patient",
+        "sync"
+      ],
+      "markers": [
+        ".HEAD",
+        ".KGGTherapyCockpit",
+        ".github",
+        ".html",
+        ".importCode",
+        ".quote",
+        "//kayus24.github.io/kgg/kgg-update/index.html",
+        "34313935271",
+        "34314585598",
+        "34314585599",
+        "34314585602",
+        "58ede321b2896522a660a0c184d7a83ea817e6e4",
+        "99bad88",
+        "BROWSABLE",
+        "DEFAULT",
+        "Gut fuer Main",
+        "JSONObject.quote",
+        "KGGTC1:",
+        "MainActivity",
+        "OK (skipped=1)",
+        "Plan fertig",
+        "VIEW",
+        "adb",
+        "assembleAdminDebug assembleKollegenDebug assemblePreviewDebug"
+      ],
+      "risks": "",
+      "source_path": "docs/release-handoffs/2026-09-09-v083-therapy-cockpit-native-deeplink.md",
+      "symptom": "- Main-Basis fuer diesen aktuellen Lauf: `ef625b87f321b0e8f4cec4980c99a42fa58da0d8` (urspruenglicher Startstand: `58ede321b2896522a660a0c184d7a83ea817e6e4`) - Arbeitsbranch: `codex/therapy-cockpit-v2` - Web-Patches: `kgg-v082-therapy-cockpit`, `kgg-v083-therapy-cockpit-id-guard` - Web-Quelle: `kgg-update/src/patches/v082-therapy-cockpit.html` - ID-Guard: `kg",
+      "tests": "",
+      "title": "KGG Therapie-Cockpit v083 nativer Deep-Link-Handoff"
     }
   ],
   "sources": [
@@ -1165,7 +1215,8 @@
     "docs/bug-debug/README.md",
     "docs/bugfixes/mobile-share-modal-css-regression.md",
     "docs/release-handoffs/2026-06-18-v003a-plan-ui-stability.md",
-    "docs/release-handoffs/2026-06-19-v007-qr-photo-upload-decode.md"
+    "docs/release-handoffs/2026-06-19-v007-qr-photo-upload-decode.md",
+    "docs/release-handoffs/2026-09-09-v083-therapy-cockpit-native-deeplink.md"
   ],
   "version": 1
 }

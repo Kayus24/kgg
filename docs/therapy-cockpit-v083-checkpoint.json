@@ -1,0 +1,94 @@
+{
+  "schema": "kgg-therapy-cockpit-checkpoint/v1",
+  "time": "2026-09-09T07:27:30+02:00",
+  "mainSha": "ef625b87f321b0e8f4cec4980c99a42fa58da0d8",
+  "initialMainSha": "58ede321b2896522a660a0c184d7a83ea817e6e4",
+  "branch": "codex/therapy-cockpit-v2",
+  "phase": "VERIFY_PREVIEW",
+  "patchId": "kgg-v083-therapy-cockpit-id-guard",
+  "webVersion": "1.0.83-therapy-cockpit-id-guard",
+  "sourceSha256": "d647eadb6e7c691a6a846133f0447a15adc2b44a3fcd04a498fc1a015d482719",
+  "stateHistory": [
+    "DISCOVER",
+    "CONTRACT",
+    "IMPLEMENT_WEB_CORE",
+    "TEST_WEB_CORE",
+    "IMPLEMENT_LINK_CODEC",
+    "TEST_CODEC",
+    "IMPLEMENT_UI",
+    "TEST_UI",
+    "IMPLEMENT_DEEP_LINK",
+    "TEST_DEEP_LINK",
+    "IMPLEMENT_ID_GUARD",
+    "TEST_ID_GUARD",
+    "INTEGRATE",
+    "FULL_REGRESSION_1",
+    "REPAIR",
+    "FULL_REGRESSION_2",
+    "PREVIEW",
+    "VERIFY_PREVIEW"
+  ],
+  "greenTests": [
+    "therapy-cockpit-critical",
+    "therapy-cockpit-browser-regression",
+    "ui-stability regression",
+    "critical",
+    "sync regression",
+    "native-sync regression",
+    "build_therapist_source --check",
+    "kgg_patch_hygiene",
+    "kgg_encoding_guard",
+    "kgg_secret_scan",
+    "kgg_hook_guard",
+    "check_html_scripts",
+    "therapy-cockpit-native-contract",
+    "therapy-cockpit-explicit-bank-id-guard",
+    "admin-editor-sync-pr-gate-contract",
+    "android-wrapper-contract",
+    "remote-android-wrapper-check:34314585599",
+    "remote-validate-build:34314585598",
+    "remote-required-gate:34314585602"
+  ],
+  "redTests": [
+    "local pre-commit/full-regression: patient-qr-v81-device-ladder-regression timed out at 300000 ms; isolated extended run reproduced pre-existing recognition/lifecycle failures under this Windows environment"
+  ],
+  "linkSizeProbes": {
+    "5": {"rawPayloadBytes": 980, "linkChars": 1034},
+    "10": {"rawPayloadBytes": 1839, "linkChars": 1893},
+    "20": {"rawPayloadBytes": 3559, "linkChars": 3613},
+    "40": {"rawPayloadBytes": 7000, "linkChars": 7054}
+  },
+  "preview": {
+    "mode": "local-browser-preview",
+    "remoteDispatch": "not_dispatched",
+    "reason": "The session exposes no callable submitKggPreviewAuto action; no remote run or artifact is claimed."
+  },
+  "blockers": [
+    {
+      "kind": "NATIVE_DEVICE_ACCEPTANCE_UNVERIFIED",
+      "summary": "The bounded Android app-link source patch is present and the remote Android wrapper build is green, but this machine has no Java, Gradle, Android SDK or adb and therefore cannot install the wrapper or prove the OS task lifecycle on a device.",
+      "evidence": [
+        "android-wrapper/app/src/main/AndroidManifest.xml",
+        "android-wrapper/app/src/main/java/de/kgg/app/MainActivity.java",
+        "release-pipeline/kgg_therapy_cockpit_native_contract.py",
+        ".github/workflows/android-wrapper-check.yml",
+        "https://github.com/Kayus24/kgg/actions/runs/34314585599"
+      ],
+      "impact": "The source contract and CI build are green; an installed Preview/Test-App artifact and physical Android app-link acceptance remain unverified.",
+      "nextStep": "Install the CI-built Preview APK on an Android-capable Preview station and test a valid, tampered, wrong-host and second-link intent."
+    },
+    {
+      "kind": "REMOTE_PREVIEW_GATE_UNAVAILABLE",
+      "summary": "The session exposes no callable submitKggPreviewAuto operation, so the authorized remote Preview/Test-App dispatch cannot be performed.",
+      "evidence": [
+        "docs/kgg-custom-gpt-playbook.md",
+        "docs/kgg-custom-gpt-action-schema.md",
+        "docs/therapy-cockpit-v083-checkpoint.json"
+      ],
+      "impact": "No remote Preview HTML/meta/APK artifact is claimed; direct gh workflow dispatch would bypass the prescribed write gate.",
+      "nextStep": "Use the prescribed submitKggPreviewAuto operation when it is available, once, with the same candidate and required critical/UI checks."
+    }
+  ],
+  "workflowRepair": "release-pr now fetches github.base_ref into refs/remotes/origin/<base> before diffing; this fixes the runner's missing-merge-base failure.",
+  "nextStep": "Remote Validate, Android and Required Gate runs are green for 99bad88; attach the native handoff to an Android-capable Preview run when the prescribed Preview gate becomes available; do not promote to Main without the exact phrase Gut für Main."
+}

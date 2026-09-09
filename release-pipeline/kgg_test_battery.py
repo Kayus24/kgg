@@ -100,6 +100,24 @@ def run_html_logic(suite: str) -> None:
     run([node_executable(), "release-pipeline/kgg_html_logic_smoke.js", "--suite", suite])
 
 
+def run_therapy_cockpit() -> None:
+    log("== Therapie-Cockpit codec and RAM-slot contract ==")
+    run([node_executable(), "release-pipeline/kgg_therapy_cockpit_smoke.js"])
+
+
+def run_therapy_cockpit_native() -> None:
+    log("== Therapie-Cockpit Android app-link contract ==")
+    run([sys.executable, "release-pipeline/kgg_therapy_cockpit_native_contract.py"])
+
+
+def run_therapy_cockpit_browser() -> None:
+    npm = npm_executable()
+    if not npm:
+        raise BatteryError("npm not found. Install npm or set KGG_NPM for the Therapie-Cockpit browser battery.")
+    log("== Therapie-Cockpit tablet browser battery ==")
+    run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "node", "release-pipeline/kgg_therapy_cockpit_browser_smoke.js"])
+
+
 def run_pdf_readability() -> None:
     log("== PDF readability battery ==")
     run([node_executable(), "release-pipeline/kgg_pdf_readability_smoke.js"])
@@ -782,6 +800,27 @@ TEST_REGISTRY = [
         "run": lambda: run_ui_stability("critical"),
     },
     {
+        "id": "therapy-cockpit-critical",
+        "level": "critical",
+        "suite": "therapy-cockpit",
+        "reason": "Cockpit links, stable exercise IDs, RAM slots and completion roundtrips must stay deterministic before tablet preview.",
+        "run": run_therapy_cockpit,
+    },
+    {
+        "id": "therapy-cockpit-native-contract",
+        "level": "critical",
+        "suite": "therapy-cockpit",
+        "reason": "Android must accept only the bounded public Cockpit app-link and deliver it into the existing WebView task without exposing raw payloads.",
+        "run": run_therapy_cockpit_native,
+    },
+    {
+        "id": "therapy-cockpit-browser-regression",
+        "level": "regression",
+        "suite": "therapy-cockpit",
+        "reason": "Tablet viewports must keep cockpit columns, keypad, full-screen switches and independent slot actions usable in a real browser.",
+        "run": run_therapy_cockpit_browser,
+    },
+    {
         "id": "sync-regression",
         "level": "regression",
         "suite": "sync",
@@ -1006,7 +1045,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--suite",
-        choices=["all", "hygiene", "mobile-inbox", "sync", "native-sync", "textblocks", "pdf", "patient-qr", "patient-day-flow", "patient-scan", "camera-qr", "ui-stability", "syntax", "security", "release", "android", "gpt"],
+        choices=["all", "hygiene", "mobile-inbox", "sync", "native-sync", "textblocks", "pdf", "patient-qr", "patient-day-flow", "patient-scan", "camera-qr", "ui-stability", "therapy-cockpit", "syntax", "security", "release", "android", "gpt"],
         default=None,
         help="Optionally limit to one suite. Without --level this keeps legacy behavior and runs all non-live tests in that suite.",
     )

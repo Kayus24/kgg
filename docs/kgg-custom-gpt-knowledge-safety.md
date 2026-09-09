@@ -2,7 +2,7 @@
 
 Generated production knowledge for protected areas, regression history and safe patch patterns.
 
-Source digest: `eb89ac900cfdd42f`
+Source digest: `205f1c5117cf1d1e`
 
 ## Usage Rules
 
@@ -388,6 +388,14 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Areas: debug, parser-textblocks, pdf, qr-patient, scan-camera, tablet-layout
 - Lesson: Bereit als GitHub-Update-Patchscript. Keine grosse HTML-Datei muss ueber den Connector hochgeladen werden. Wenn andere Dateien geaendert werden: stoppen. PDF, QR-Erzeugung, Patienten-App, Scan-Kamera, Parser, Android-Wrapper, Tablet-Layout, Plan-State, Storage.
 - Caution: PDF, QR-Erzeugung, Patienten-App, Scan-Kamera, Parser, Android-Wrapper, Tablet-Layout, Plan-State, Storage.
+- Tests: Run the risk-matched KGG battery.
+
+### KGG Therapie-Cockpit v083 nativer Deep-Link-Handoff
+
+- Source: `docs/release-handoffs/2026-09-09-v083-therapy-cockpit-native-deeplink.md`
+- Areas: debug, parser-textblocks, qr-patient, sync
+- Lesson: - Main-Basis fuer diesen aktuellen Lauf: `ef625b87f321b0e8f4cec4980c99a42fa58da0d8` (urspruenglicher Startstand: `58ede321b2896522a660a0c184d7a83ea817e6e4`) - Arbeitsbranch: `codex/therapy-cockpit-v2` - Web-Patches: `kgg-v082-therapy-cockpit`, `kgg-v083-therapy-cockpit-id-guard` - Web-Quelle: `kgg-update/src/patches/v082-therapy-cockpit.html` - ID-Guard: `kg
+- Caution: Keep patch scoped to the requested area.
 - Tests: Run the risk-matched KGG battery.
 
 ---

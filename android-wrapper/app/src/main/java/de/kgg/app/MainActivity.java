@@ -107,6 +107,11 @@ public class MainActivity extends Activity {
             "https://kayus24.github.io/kgg/therapist-app/";
     private static final String TRUSTED_PREVIEW_PREFIX =
             "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/";
+    private static final String COCKPIT_DEEP_LINK_PREFIX = "KGGTC1:";
+    private static final String COCKPIT_DEEP_LINK_HOST = "kayus24.github.io";
+    private static final String COCKPIT_DEEP_LINK_PATH = "/kgg/kgg-update/index.html";
+    private static final int MAX_COCKPIT_DEEP_LINK_CHARS = 30_000;
+    private static final int MAX_COCKPIT_DELIVERY_ATTEMPTS = 25;
     private static final String UPDATE_PREFS = "kgg_android_update_prefs";
     private static final String PREF_WEB_VERSION = "current_web_version";
     private static final String PREF_ROLLOUT_CODE = "current_rollout_code_v2";
@@ -132,6 +137,8 @@ public class MainActivity extends Activity {
     private String nextFileChooserMode = "";
     private boolean pendingForceCamera;
     private KggReleaseController releaseController;
+    private String pendingCockpitCode = "";
+    private int pendingCockpitDeliveryAttempts;
     private final Handler previewStatusHandler = new Handler(Looper.getMainLooper());
     private final AtomicBoolean previewStatusRequestRunning = new AtomicBoolean(false);
     private boolean previewStatusPolling;
@@ -175,13 +182,33 @@ public class MainActivity extends Activity {
         configureBackHandling();
         rollbackUnhealthyPendingUpdate();
         prepareLocalWebApp();
-        webView.loadUrl(localWebAppUrl());
+        String initialCockpitCode = extractCockpitCode(getIntent());
+        webView.loadUrl(initialCockpitCode == null
+                ? localWebAppUrl()
+                : localWebAppUrlWithCockpit(initialCockpitCode));
+        if (initialCockpitCode == null && hasCockpitParameter(getIntent())) {
+            webView.post(() -> showCockpitLinkError());
+        }
         checkForWebAppUpdate();
         if (isPreviewProfile()) {
             configurePreviewStatusMonitoring();
         } else {
             checkForAndroidAppUpdate(false);
         }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        String cockpitCode = extractCockpitCode(intent);
+        if (cockpitCode == null) {
+            if (hasCockpitParameter(intent)) {
+                showCockpitLinkError();
+            }
+            return;
+        }
+        queueCockpitCode(cockpitCode);
     }
 
     private void configureBackHandling() {
@@ -287,6 +314,7 @@ public class MainActivity extends Activity {
                 super.onPageFinished(view, url);
                 injectAssetScript("android/kgg_android_sync_bootstrap.js");
                 KggReleaseControllerFactory.onPageFinished(MainActivity.this);
+                deliverPendingCockpitCode();
             }
         });
         webView.setWebChromeClient(new WebChromeClient() {
@@ -697,6 +725,153 @@ public class MainActivity extends Activity {
             return Uri.fromFile(current).toString();
         }
         return "file:///android_asset/" + bundledAppAsset();
+    }
+
+    private String localWebAppUrlWithCockpit(String cockpitCode) {
+        return Uri.parse(localWebAppUrl())
+                .buildUpon()
+                .clearQuery()
+                .appendQueryParameter("cockpit", cockpitCode)
+                .build()
+                .toString();
+    }
+
+    /**
+     * Accept only the public HTTPS entry point and a bounded KGGTC1 payload.
+     * The full payload integrity and exercise checks remain in the web codec.
+     */
+    private String extractCockpitCode(Intent intent) {
+        Uri data = intent == null ? null : intent.getData();
+        if (!isTrustedCockpitUri(data)) {
+            return null;
+        }
+        String code = null;
+        boolean found = false;
+        try {
+            for (String parameter : new String[]{"cockpit", "kggtc"}) {
+                List<String> values = data.getQueryParameters(parameter);
+                if (values.size() > 1) {
+                    return null;
+                }
+                if (!values.isEmpty()) {
+                    if (found) {
+                        return null;
+                    }
+                    found = true;
+                    code = values.get(0);
+                }
+            }
+        } catch (Exception ignored) {
+            return null;
+        }
+        if (!found || code == null) {
+            return null;
+        }
+        String clean = code.trim();
+        if (clean.length() <= COCKPIT_DEEP_LINK_PREFIX.length()
+                || clean.length() > MAX_COCKPIT_DEEP_LINK_CHARS
+                || !clean.startsWith(COCKPIT_DEEP_LINK_PREFIX)) {
+            return null;
+        }
+        for (int index = COCKPIT_DEEP_LINK_PREFIX.length(); index < clean.length(); index++) {
+            char value = clean.charAt(index);
+            if (!(value >= 'A' && value <= 'Z')
+                    && !(value >= 'a' && value <= 'z')
+                    && !(value >= '0' && value <= '9')
+                    && value != '_'
+                    && value != '-') {
+                return null;
+            }
+        }
+        return clean;
+    }
+
+    private boolean isTrustedCockpitUri(Uri data) {
+        if (data == null
+                || !"https".equalsIgnoreCase(data.getScheme())
+                || !COCKPIT_DEEP_LINK_HOST.equalsIgnoreCase(data.getHost())
+                || data.getPort() != -1
+                || !COCKPIT_DEEP_LINK_PATH.equals(data.getPath())
+                || data.getUserInfo() != null
+                || data.getFragment() != null) {
+            return false;
+        }
+        return data.isHierarchical();
+    }
+
+    private boolean hasCockpitParameter(Intent intent) {
+        Uri data = intent == null ? null : intent.getData();
+        if (!isTrustedCockpitUri(data)) {
+            return false;
+        }
+        try {
+            return data.getQueryParameterNames().contains("cockpit")
+                    || data.getQueryParameterNames().contains("kggtc");
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    private void queueCockpitCode(String cockpitCode) {
+        pendingCockpitCode = cockpitCode == null ? "" : cockpitCode;
+        pendingCockpitDeliveryAttempts = 0;
+        deliverPendingCockpitCode();
+    }
+
+    private void deliverPendingCockpitCode() {
+        if (webView == null || pendingCockpitCode.isEmpty()) {
+            return;
+        }
+        final String cockpitCode = pendingCockpitCode;
+        final int attempt = ++pendingCockpitDeliveryAttempts;
+        final String quotedCode = JSONObject.quote(cockpitCode);
+        final String javascript = "(function(){"
+                + "var api=window.KGGTherapyCockpit;"
+                + "if(!api||typeof api.importCode!=='function')return 'pending';"
+                + "try{api.importCode(" + quotedCode + ");return 'ok';}"
+                + "catch(e){return 'error';}"
+                + "})()";
+        try {
+            webView.evaluateJavascript(javascript, result -> {
+                if (!cockpitCode.equals(pendingCockpitCode)) {
+                    return;
+                }
+                if (result != null && result.contains("\"ok\"")) {
+                    pendingCockpitCode = "";
+                    pendingCockpitDeliveryAttempts = 0;
+                    return;
+                }
+                if (result != null && result.contains("\"error\"")) {
+                    pendingCockpitCode = "";
+                    pendingCockpitDeliveryAttempts = 0;
+                    showCockpitLinkError();
+                    return;
+                }
+                if (attempt < MAX_COCKPIT_DELIVERY_ATTEMPTS && webView != null) {
+                    webView.postDelayed(this::deliverPendingCockpitCode, 160L);
+                } else {
+                    pendingCockpitCode = "";
+                    pendingCockpitDeliveryAttempts = 0;
+                    showCockpitLinkError();
+                }
+            });
+        } catch (Exception ignored) {
+            if (attempt < MAX_COCKPIT_DELIVERY_ATTEMPTS && webView != null) {
+                webView.postDelayed(this::deliverPendingCockpitCode, 160L);
+            } else {
+                pendingCockpitCode = "";
+                pendingCockpitDeliveryAttempts = 0;
+                showCockpitLinkError();
+            }
+        }
+    }
+
+    private void showCockpitLinkError() {
+        runOnUiThread(() -> Toast.makeText(
+                MainActivity.this,
+                "Cockpit-Link konnte nicht geladen werden",
+                Toast.LENGTH_SHORT
+        ).show());
     }
 
     private boolean isAdminProfile() {

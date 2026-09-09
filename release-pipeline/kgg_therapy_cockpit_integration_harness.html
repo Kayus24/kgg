@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KGG Therapie-Cockpit – Integrations-Harness</title>
+  <style>
+    :root{color-scheme:light;--ink:#18243b;--muted:#65728a;--line:#dce3ee;--panel:#fff;--canvas:#eef2f7;--blue:#1769e0;--green:#138a5b;--red:#c73748;--amber:#a66709;--shadow:0 14px 34px rgba(28,49,82,.12)}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--canvas);color:var(--ink);font:14px/1.4 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    button{font:inherit}
+    .topbar{display:flex;gap:24px;align-items:flex-start;justify-content:space-between;padding:22px 28px 18px;background:#13223a;color:#fff}
+    .eyebrow{display:block;color:#a9c9ff;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+    h1{margin:3px 0 4px;font-size:clamp(21px,2.2vw,30px);line-height:1.1}
+    .topbar p{margin:0;max-width:760px;color:#c9d5e8}
+    .top-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+    .btn{border:1px solid #bdc9dc;border-radius:10px;padding:9px 13px;background:#fff;color:var(--ink);font-weight:700;cursor:pointer}
+    .btn:hover{border-color:var(--blue)}
+    .btn.primary{border-color:#77aaff;background:#1769e0;color:#fff}
+    .btn.ghost{border-color:#6d82a2;background:transparent;color:#fff}
+    .btn[disabled]{cursor:wait;opacity:.6}
+    .controlbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 28px;border-bottom:1px solid var(--line);background:#f8faff}
+    .control-label{margin-right:4px;color:var(--muted);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+    .viewport-btn{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);cursor:pointer}
+    .viewport-btn.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(23,105,224,.14);color:var(--blue);font-weight:800}
+    .mode-label{margin-left:auto;color:var(--muted);font-size:12px}
+    .workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,390px);gap:18px;padding:18px 22px 28px;max-width:1700px;margin:0 auto}
+    .panel{border:1px solid var(--line);border-radius:16px;background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
+    .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+    .panel-head strong{font-size:15px}
+    .panel-head small{color:var(--muted)}
+    .frame-canvas{display:flex;justify-content:center;align-items:flex-start;min-height:520px;padding:22px;overflow:auto;background:linear-gradient(135deg,#e8edf5,#f8faff)}
+    .frame-shell{position:relative;flex:0 0 auto;transform-origin:top left;border:0;outline:1px solid #aebbd0;border-radius:12px;background:#fff;box-shadow:0 18px 36px rgba(25,43,73,.2);overflow:hidden}
+    .frame-shell iframe{display:block;width:100%;height:100%;border:0;background:#fff}
+    .frame-note{padding:10px 16px;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}
+    .audit{display:flex;flex-direction:column;gap:14px;padding:16px}
+    .summary{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:#f4f7fc}
+    .status-dot{width:12px;height:12px;border-radius:50%;background:#91a0b6;flex:0 0 auto}
+    .status-dot.pass{background:var(--green)}
+    .status-dot.fail{background:var(--red)}
+    .status-dot.running{background:var(--amber);box-shadow:0 0 0 5px rgba(166,103,9,.12)}
+    .summary strong{display:block}
+    .summary small{display:block;color:var(--muted)}
+    .checks{width:100%;border-collapse:collapse;font-size:12px}
+    .checks th,.checks td{padding:8px 6px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+    .checks th{color:var(--muted);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+    .checks td:last-child{text-align:right;white-space:nowrap}
+    .tag{display:inline-block;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+    .tag.pass{background:#dff5e9;color:#0b7048}.tag.fail{background:#fde5e7;color:#a52233}.tag.skip{background:#edf0f5;color:#65728a}
+    .metrics{margin:0;max-height:320px;overflow:auto;padding:12px;border-radius:10px;background:#111b2c;color:#cce0ff;font:11px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap}
+    .audit-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .hint{margin:0;color:var(--muted);font-size:12px}
+    .error-box{display:none;margin:0;padding:10px;border-radius:9px;background:#fff0f1;color:#9e2133;font-size:12px;white-space:pre-wrap}
+    .error-box.show{display:block}
+    @media (max-width:1050px){.workspace{grid-template-columns:1fr}.audit{order:-1}.mode-label{margin-left:0;width:100%}}
+    @media (max-width:680px){.topbar{padding:18px;display:block}.top-actions{justify-content:flex-start;margin-top:14px}.controlbar{padding:10px 14px}.workspace{padding:12px}.frame-canvas{padding:12px;min-height:360px}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <span class="eyebrow">Test-HTML · kein Produktionscode</span>
+      <h1>KGG Therapie-Cockpit – Integrations-Harness</h1>
+      <p>Die echte generierte Therapeuten-App wird in einem isolierten Frame geladen. Der Harness misst die Original-UI vor/nach dem Ansichtswechsel und prüft die Cockpit-Fläche an Tablet-Viewports.</p>
+    </div>
+    <div class="top-actions">
+      <button class="btn primary" id="runAll" type="button">Integrationslauf starten</button>
+      <button class="btn ghost" id="copyReport" type="button">Report kopieren</button>
+    </div>
+  </header>
+
+  <nav class="controlbar" aria-label="Teststeuerung">
+    <span class="control-label">Viewport</span>
+    <button class="viewport-btn" data-viewport="820x1180" type="button">820 × 1180</button>
+    <button class="viewport-btn active" data-viewport="1024x768" type="button">1024 × 768</button>
+    <button class="viewport-btn" data-viewport="1280x800" type="button">1280 × 800</button>
+    <button class="btn" id="loadNormal" type="button">Normale App laden</button>
+    <button class="btn" id="loadCockpit" type="button">Cockpit laden</button>
+    <span class="mode-label" id="modeLabel">Bereit · synthetische Testdaten</span>
+  </nav>
+
+  <main class="workspace">
+    <section class="panel">
+      <div class="panel-head">
+        <strong>Echte generierte Haupt-App</strong>
+        <small id="frameSize">1024 × 768 CSS-Pixel</small>
+      </div>
+      <div class="frame-canvas" id="frameCanvas">
+        <div class="frame-shell" id="frameShell">
+          <iframe id="appFrame" title="KGG Haupt-App Integrationsvorschau"></iframe>
+        </div>
+      </div>
+      <p class="frame-note">Für manuelles Öffnen über <code>file://</code> kann der Browser den DOM-Zugriff sperren. Für den Messlauf den mitgelieferten Node-Smoke verwenden, der einen lokalen HTTP-Server startet.</p>
+    </section>
+
+    <aside class="panel audit">
+      <div class="summary" id="summary">
+        <span class="status-dot" id="statusDot"></span>
+        <div><strong id="statusText">Noch kein Lauf</strong><small id="statusDetail">Der Harness wartet auf den ersten Integrationslauf.</small></div>
+      </div>
+      <p class="hint">Geprüft werden Normal-UI-Fidelity, Vollflächenwechsel, 1/3 Slots, unabhängige Entfernung, Abschluss-Roundtrip, Overflow und RAM-only Reload-Grenze.</p>
+      <p class="error-box" id="errorBox"></p>
+      <table class="checks" aria-label="Integrationsprüfungen">
+        <thead><tr><th>Prüfung</th><th>Messwert</th><th>Status</th></tr></thead>
+        <tbody id="checkRows"><tr><td colspan="3">Noch keine Messwerte</td></tr></tbody>
+      </table>
+      <pre class="metrics" id="metrics">{}</pre>
+      <div class="audit-actions">
+        <button class="btn" id="copyMetrics" type="button">Messwerte kopieren</button>
+        <button class="btn" id="clearReport" type="button">Zurücksetzen</button>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    (function(){
+      "use strict";
+      var frame=document.getElementById("appFrame"),shell=document.getElementById("frameShell"),canvas=document.getElementById("frameCanvas");
+      var statusDot=document.getElementById("statusDot"),statusText=document.getElementById("statusText"),statusDetail=document.getElementById("statusDetail"),modeLabel=document.getElementById("modeLabel");
+      var rows=document.getElementById("checkRows"),metricsEl=document.getElementById("metrics"),errorBox=document.getElementById("errorBox"),frameSize=document.getElementById("frameSize");
+      var appUrl=new URL("../kgg-update/index.html",document.baseURI),viewport={width:1024,height:768},baseline=null,lastReport=null,busy=false;
+      var names=["Demo Patient A","Demo Patient B","Demo Patient C"];
+
+      function wait(ms){return new Promise(function(resolve){setTimeout(resolve,ms);});}
+      function fail(message){throw new Error(message);}
+      function assert(value,message){if(!value)fail(message);}
+      function round(value){return Math.round(Number(value)||0);}
+      function rect(doc,selector){var el=doc.querySelector(selector);if(!el)return null;var r=el.getBoundingClientRect();var s=doc.defaultView.getComputedStyle(el);return {selector:selector,left:round(r.left),top:round(r.top),right:round(r.right),bottom:round(r.bottom),width:round(r.width),height:round(r.height),display:s.display,visibility:s.visibility};}
+      function setStatus(kind,title,detail){statusDot.className="status-dot "+kind;statusText.textContent=title;statusDetail.textContent=detail;}
+      function setMode(text){modeLabel.textContent=text;}
+      function reportError(error){var text=error&&error.stack||String(error);errorBox.textContent=text;errorBox.classList.add("show");setStatus("fail","Integrationslauf fehlgeschlagen","Siehe Fehlerdetails rechts.");}
+      function clearError(){errorBox.textContent="";errorBox.classList.remove("show");}
+      function applyViewport(){
+        frameSize.textContent=viewport.width+" × "+viewport.height+" CSS-Pixel";
+        var available=Math.max(280,canvas.clientWidth-44),scale=Math.min(1,available/viewport.width);
+        shell.style.width=viewport.width+"px";shell.style.height=viewport.height+"px";shell.style.transform="scale("+scale+")";canvas.style.minHeight=Math.max(360,viewport.height*scale+44)+"px";
+      }
+      function setViewport(value){var parts=value.split("x");viewport={width:Number(parts[0]),height:Number(parts[1])};document.querySelectorAll("[data-viewport]").forEach(function(button){button.classList.toggle("active",button.getAttribute("data-viewport")===value);});applyViewport();}
+      function frameDocument(){try{return frame.contentDocument||frame.contentWindow.document;}catch(error){fail("Der Frame ist nicht same-origin. Starte den Node-Smoke über HTTP statt die Datei direkt zu öffnen.");}}
+      function frameWindow(){try{return frame.contentWindow;}catch(error){fail("Der Frame ist nicht same-origin.");}}
+      function waitFor(predicate,timeout){var started=Date.now();return new Promise(function(resolve,reject){(function poll(){var result=false;try{result=predicate();}catch(error){}if(result){resolve(result);return}if(Date.now()-started>timeout){reject(new Error("Timeout beim Warten auf die Haupt-App."));return}setTimeout(poll,60);})();});}
+      async function reloadFrame(){
+        await new Promise(function(resolve,reject){var done=false;function finish(error){if(done)return;done=true;frame.removeEventListener("load",onload);if(error)reject(error);else resolve();}function onload(){finish();}frame.addEventListener("load",onload);frameWindow().location.reload();setTimeout(function(){if(!done)finish(new Error("Die generierte Haupt-App wurde nach Reload nicht geladen."));},30000);});
+        await waitFor(function(){return frameDocument().readyState==="complete"&&frameDocument().querySelector("#kggTherapyCockpitButton")&&frameWindow().KGGTherapyCockpit;},20000);
+      }
+      async function navigate(code){
+        var url=new URL(appUrl.href);url.searchParams.set("integrationHarness","1");if(code)url.searchParams.set("cockpit",code);
+        try{frame.contentWindow.localStorage.setItem("kgg_pwa_install_prompt_seen_v1","integration-harness");frame.contentWindow.localStorage.setItem("kgg_admin_local_secrets_v1",JSON.stringify({version:2,updatedAt:"2026-09-09T00:00:00.000Z",geminiKeys:["integration-harness"],mediaDropzoneEndpoint:"",mediaDropzoneUploadToken:""}));}catch(error){}
+        await new Promise(function(resolve,reject){var done=false;function finish(error){if(done)return;done=true;frame.removeEventListener("load",onload);if(error)reject(error);else resolve();}function onload(){finish();}frame.addEventListener("load",onload);frame.src=url.href;setTimeout(function(){if(!done)finish(new Error("Die generierte Haupt-App wurde nicht geladen."));},30000);});
+        await waitFor(function(){return frameDocument().querySelector("#kggTherapyCockpitButton")&&frameWindow().KGGTherapyCockpit;},20000);
+        try{frameWindow().localStorage.setItem("kgg_pwa_install_prompt_seen_v1","integration-harness");}catch(error){}
+        await wait(180);
+      }
+      function api(){var value=frameWindow().KGGTherapyCockpit;assert(value,"KGGTherapyCockpit API fehlt in der generierten Haupt-App.");return value;}
+      function codeFor(index){var cockpit=api(),entries=cockpit.registry.entries(),entry=entries[index%entries.length];return cockpit.encode({planId:"integration-harness-"+index,name:names[index],date:"2026-09-09",exercises:[{id:entry.id,sets:2,previous:[[String(10+index),"12"],[String(11+index),"11"]],today:[[String(10+index),"12"],[String(11+index),"11"]]}]});}
+      function elementAt(doc,x,y){var el=doc.elementFromPoint(x,y);return el?{tag:el.tagName,id:el.id,className:el.className,root:!!el.closest("#kggTherapyCockpitRoot")} : null;}
+      function snapshot(label){
+        var doc=frameDocument(),win=frameWindow(),root=rect(doc,"#kggTherapyCockpitRoot"),board=rect(doc,"#kggTherapyCockpitBoard"),grid=doc.querySelector(".kgg-tc-grid"),app=rect(doc,".app"),w=doc.documentElement.clientWidth,h=doc.documentElement.clientHeight;
+        var columns=grid?String(win.getComputedStyle(grid).gridTemplateColumns||"").trim().split(/\s+/).filter(Boolean).length:0;
+        var corners=[[1,1],[w-1,1],[1,h-1],[w-1,h-1]].map(function(point){return elementAt(doc,point[0],point[1]);});
+        var anchors={};["#baseToggle","#finishBtn","#recentToggle","#packageToggle","#inputWrap","#rightPlanStack"].forEach(function(selector){anchors[selector]=rect(doc,selector);});
+        var state=api().getState();
+        return {label:label,viewport:{width:w,height:h},view:state.view,slotCount:state.slotCount,root:root,board:board,app:app,cards:doc.querySelectorAll(".kgg-tc-card").length,columns:columns,boardOverflow:board?Math.max(0,board.width?round(doc.querySelector("#kggTherapyCockpitBoard").scrollWidth-doc.querySelector("#kggTherapyCockpitBoard").clientWidth):0):null,documentOverflow:Math.max(0,doc.documentElement.scrollWidth-w),bodyCockpit:doc.body.classList.contains("kggTherapyCockpitOpen"),appVisibility:app&&app.visibility,corners:corners,anchors:anchors};
+      }
+      function delta(a,b){if(!a||!b)return null;return Math.max(Math.abs(a.left-b.left),Math.abs(a.top-b.top),Math.abs(a.width-b.width),Math.abs(a.height-b.height));}
+      function addCheck(label,value,pass){lastReport.checks.push({label:label,value:value,status:pass?"pass":"fail"});}
+      function noOverflow(state){return state&&state.documentOverflow<=1&&(state.boardOverflow===null||state.boardOverflow<=1);}
+      function fullOverlay(state){return state&&state.root&&state.root.left===0&&state.root.top===0&&state.root.width===state.viewport.width&&state.root.height===state.viewport.height&&state.appVisibility==="hidden"&&state.corners.every(function(corner){return corner&&corner.root;});}
+      function renderReport(){
+        var checks=lastReport&&lastReport.checks||[];rows.innerHTML=checks.length?checks.map(function(item){return "<tr><td>"+escapeHtml(item.label)+"</td><td>"+escapeHtml(String(item.value)) +"</td><td><span class=\"tag "+(item.status==="pass"?"pass":"fail")+">"+(item.status==="pass"?"PASS":"FAIL")+"</span></td></tr>";}).join(""):"<tr><td colspan=\"3\">Noch keine Messwerte</td></tr>";
+        metricsEl.textContent=JSON.stringify(lastReport||{},null,2);
+      }
+      function escapeHtml(text){return text.replace(/[&<>\"']/g,function(char){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[char];});}
+      function closeOutputIfOpen(){var doc=frameDocument(),button=doc.querySelector('[data-tc-action="output-close"]');if(button)button.click();}
+
+      async function loadNormal(){clearError();setMode("Lade normale Therapeuten-App …");await navigate(null);baseline=snapshot("normal-baseline");setMode("Normale App · Baseline gemessen");return baseline;}
+      async function loadCockpit(){clearError();setMode("Lade synthetischen Cockpit-Link …");var code=codeFor(0);await navigate(code);setMode("Cockpit · Slot 1 geladen");return code;}
+
+      async function runIntegration(){
+        if(busy)return;busy=true;document.getElementById("runAll").disabled=true;lastReport={harness:"kgg-therapy-cockpit-integration/v1",startedAt:new Date().toISOString(),viewport:viewport,checks:[],snapshots:{}};window.KGGCockpitIntegrationReport=lastReport;clearError();setStatus("running","Integrationslauf läuft …","Die echte Haupt-App wird schrittweise vermessen.");
+        try{
+          var normal=await loadNormal();lastReport.snapshots.normalBaseline=normal;
+          addCheck("Normale App startet mit Cockpit-Button","view="+normal.view+", button="+(!!frameDocument().querySelector("#kggTherapyCockpitButton")),normal.view==="normal"&&!!frameDocument().querySelector("#kggTherapyCockpitButton"));
+          var first=await loadCockpit(),one=snapshot("cockpit-one-slot");lastReport.snapshots.cockpitOne=one;
+          addCheck("Cockpit 1 Slot vollflächig","root="+one.root.width+"×"+one.root.height+", cards="+one.cards,fullOverlay(one)&&one.cards===1&&noOverflow(one));
+          var cockpit=api(),second=codeFor(1),third=codeFor(2);cockpit.importCode(second);cockpit.importCode(third);await wait(220);var three=snapshot("cockpit-three-slots");lastReport.snapshots.cockpitThree=three;
+          addCheck("3 Slots / 3 Spalten ohne Overflow","cards="+three.cards+", columns="+three.columns+", overflow="+three.documentOverflow,fullOverlay(three)&&three.cards===3&&three.columns===3&&noOverflow(three));
+          var normalButton=frameDocument().querySelector('[data-tc-action="normal"]');assert(normalButton,"Therapeuten-App-Button fehlt.");normalButton.click();await wait(220);var switched=snapshot("normal-after-switch");lastReport.snapshots.normalAfterSwitch=switched;
+          var anchorDelta=Object.keys(normal.anchors).map(function(key){return delta(normal.anchors[key],switched.anchors[key])||0;});var maxDelta=Math.max.apply(Math,anchorDelta.concat([0]));
+          addCheck("Zurück zur Haupt-App behält Slots und Geometrie","slots="+switched.slotCount+", maxAnchorDelta="+maxDelta+"px",switched.view==="normal"&&switched.slotCount===3&&maxDelta<=1);
+          var cockpitButton=frameDocument().querySelector("#kggTherapyCockpitButton");assert(cockpitButton,"Cockpit-Button fehlt nach Rückkehr.");cockpitButton.click();await wait(220);var reopened=snapshot("cockpit-reopened");lastReport.snapshots.cockpitReopened=reopened;
+          addCheck("Cockpit-Button öffnet vollflächig wieder","view="+reopened.view+", slots="+reopened.slotCount,fullOverlay(reopened)&&reopened.slotCount===3);
+          var remove=frameDocument().querySelector('[data-tc-action="remove"][data-tc-slot="1"]');assert(remove,"Slot-Entfernen fehlt.");remove.click();await wait(180);var removed=snapshot("cockpit-middle-removed");lastReport.snapshots.cockpitRemoved=removed;var stateAfterRemove=api().getState();
+          addCheck("Mittleren Slot entfernen verändert andere Slots nicht","slots="+removed.slotCount+", slot1="+(stateAfterRemove.slots[1]===null),removed.slotCount===2&&stateAfterRemove.slots[1]===null&&stateAfterRemove.slots[0]&&stateAfterRemove.slots[2]);
+          var finishedFirst=api().finish(0);closeOutputIfOpen();var finishedLast=api().finish(2);closeOutputIfOpen();await wait(160);var finished=snapshot("normal-after-finish");lastReport.snapshots.normalAfterFinish=finished;
+          var finishOk=finishedFirst&&finishedFirst.link&&finishedFirst.text&&finishedFirst.text.indexOf("Neuer Cockpit-Link")>=0&&finishedLast&&finishedLast.link&&finished.view==="normal"&&finished.slotCount===0;
+          addCheck("Plan fertig erzeugt Link/Text und kehrt bei 0 Slots zurück","view="+finished.view+", slots="+finished.slotCount,!!finishOk);
+          await navigate(first);await wait(100);await reloadFrame();await wait(220);var afterReload=snapshot("after-reload");lastReport.snapshots.afterReload=afterReload;
+          addCheck("RAM-only Reload-Grenze","slots="+afterReload.slotCount+", view="+afterReload.view,afterReload.slotCount===0&&afterReload.view==="normal"&&!afterReload.bodyCockpit);
+          lastReport.finishedAt=new Date().toISOString();lastReport.pass=lastReport.checks.every(function(item){return item.status==="pass";});renderReport();setStatus(lastReport.pass?"pass":"fail",lastReport.pass?"Integrationslauf grün":"Integrationslauf mit Fehlern",lastReport.checks.filter(function(item){return item.status==="pass";}).length+"/"+lastReport.checks.length+" Prüfungen bestanden.");setMode(lastReport.pass?"Fertig · alle Integrationsprüfungen grün":"Fertig · Fehlerdetails rechts");window.KGGCockpitIntegrationReport=lastReport;
+        }catch(error){if(lastReport){lastReport.pass=false;lastReport.error=String(error&&error.stack||error);lastReport.finishedAt=new Date().toISOString();window.KGGCockpitIntegrationReport=lastReport;renderReport();}reportError(error);}
+        finally{busy=false;document.getElementById("runAll").disabled=false;}
+      }
+      function copy(text){if(navigator.clipboard)return navigator.clipboard.writeText(text);var area=document.createElement("textarea");area.value=text;document.body.appendChild(area);area.select();document.execCommand("copy");area.remove();return Promise.resolve();}
+      document.querySelectorAll("[data-viewport]").forEach(function(button){button.addEventListener("click",function(){setViewport(button.getAttribute("data-viewport"));});});
+      document.getElementById("runAll").addEventListener("click",runIntegration);
+      document.getElementById("loadNormal").addEventListener("click",function(){loadNormal().catch(reportError);});
+      document.getElementById("loadCockpit").addEventListener("click",function(){loadCockpit().catch(reportError);});
+      document.getElementById("copyReport").addEventListener("click",function(){copy(JSON.stringify(lastReport||{},null,2));});
+      document.getElementById("copyMetrics").addEventListener("click",function(){copy(metricsEl.textContent);});
+      document.getElementById("clearReport").addEventListener("click",function(){lastReport=null;baseline=null;rows.innerHTML="<tr><td colspan=\"3\">Noch keine Messwerte</td></tr>";metricsEl.textContent="{}";clearError();setStatus("","Noch kein Lauf","Der Harness wartet auf den ersten Integrationslauf.");setMode("Bereit · synthetische Testdaten");});
+      window.addEventListener("resize",applyViewport);setViewport("1024x768");
+      if(new URLSearchParams(location.search).get("autorun")==="1")setTimeout(runIntegration,120);
+    }());
+  </script>
+</body>
+</html>
