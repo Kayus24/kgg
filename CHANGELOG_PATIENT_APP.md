@@ -1,5 +1,11 @@
 # Patient App Changelog
 
+## v82 - 2026-09-10
+
+- Führt die fehlende Ticket-034-Warncounter-Logik minimal in der Patient:innen-PWA ein und verwendet dafür ein zugängliches KGG-App-Modal; bestehende Finalize-, QR-, Done- und Planverträge bleiben erhalten.
+- Guarded request: `patient-ticket-034-modal-counter-20260910-1635-r1`.
+
+
 ## 2026-08-23 – v80 Auswahl beim Öffnen eines zweiten Plan-Links
 
 ### Changed
