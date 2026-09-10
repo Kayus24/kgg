@@ -54,7 +54,7 @@ async function main(){
     await page.evaluate(()=>window.showQr(true));
     await page.waitForTimeout(120);
     const afterFinish=await page.evaluate(()=>JSON.parse(localStorage.getItem('kggProgressionHistoryV1')||'{}'));
-    assert(afterFinish.groups['progression-group-1'].dominantId==='hard','dominant tie did not choose the higher stage');
+    assert(afterFinish.groups['ticket-015-browser|progression-group-1'].dominantId==='hard','dominant tie did not choose the higher stage');
     assert((await card.locator('h3').innerText())==='Schwerer','dominant stage did not become the displayed exercise name');
 
     await page.locator('.kgg015Gallery').first().locator('[data-kgg015-prev]').click();

@@ -137,6 +137,7 @@
   let originalPut=null;
   let originalText=null;
   let originalShowQr=null;
+  let currentPlanId='';
 
   function loadHistory(){
     const value=safeJson(localStorage.getItem(HISTORY_KEY),null);
@@ -148,7 +149,8 @@
   }
   function saveHistory(){try{localStorage.setItem(HISTORY_KEY,JSON.stringify(history))}catch(err){}}
   function currentDay(){return Number(typeof d!=='undefined'?d:1)||1}
-  function ensureDay(){const day=currentDay();if(Number(history.current&&history.current.day)!==day){history.current={day,records:{}}}if(!history.current.records||typeof history.current.records!=='object')history.current.records={};return history.current}
+  function planId(){return String(typeof p!=='undefined'&&p&&p.id||'plan')}
+  function ensureDay(){const day=currentDay(),pid=planId();if(String(history.current&&history.current.planId||'')!==pid||Number(history.current&&history.current.day)!==day){history.current={planId:pid,day,records:{}};sessionSelection={}}if(!history.current.records||typeof history.current.records!=='object')history.current.records={};return history.current}
   function rawPlan(){const saved=safeJson(localStorage.getItem('kggCurrentPlanV1'),null);return saved&&saved.plan?saved.plan:null}
   function rawExercise(index){const plan=rawPlan();return plan&&Array.isArray(plan.e)?plan.e[index]:null}
   function groupOf(ex,index){return String(ex&&ex.progressionGroupId||'pg_'+idPart(ex&&((ex.localId||ex.id)||('exercise_'+index))));}
@@ -168,6 +170,8 @@
   }
   function syncRawVariants(){
     if(typeof p==='undefined'||!p||!Array.isArray(p.ex))return;
+    if(currentPlanId&&currentPlanId!==planId()){sessionSelection={};originalNames=[];originalMedia=[];history.current={planId:planId(),day:currentDay(),records:{}}}
+    currentPlanId=planId();
     if(!originalNames.length)originalNames=p.ex.map(ex=>String(ex&&ex.n||''));
     if(!originalMedia.length)originalMedia=p.ex.map(ex=>clone(ex&&ex.media));
     p.ex.forEach((ex,index)=>{
@@ -182,9 +186,10 @@
   }
   function groupState(index){
     const ex=p&&p.ex&&p.ex[index],values=valuesForExercise(index),gid=values[0]&&values[0].groupId||groupOf(ex,index);
-    if(!history.groups[gid])history.groups[gid]={lastBySet:{},dominantId:''};
-    const group=history.groups[gid];group.lastBySet=group.lastBySet&&typeof group.lastBySet==='object'?group.lastBySet:{};
-    return {gid,group,values};
+    const storageKey=planId()+'|'+gid;
+    if(!history.groups[storageKey])history.groups[storageKey]={lastBySet:{},dominantId:''};
+    const group=history.groups[storageKey];group.lastBySet=group.lastBySet&&typeof group.lastBySet==='object'?group.lastBySet:{};
+    return {gid,storageKey,group,values};
   }
   function variantById(values,id){return values.find(item=>String(item.id)===String(id))||null}
   function defaultId(index,setNo){
@@ -198,6 +203,7 @@
   function selectedId(index,setNo){return defaultId(index,setNo)}
   function currentRecordKey(index,setNo){return String(index)+'|'+String(setNo)}
   function recordSuccessfulEdit(index,setNo){
+    ensureDay();
     const state=groupState(index),values=state.values;if(!values.length)return;
     const id=selectedId(index,setNo),key=currentRecordKey(index,setNo);if(!id)return;
     const dayState=ensureDay(),old=dayState.records[key];
@@ -210,7 +216,7 @@
   }
   function dominantFor(index,dayOnly){
     const state=groupState(index),values=state.values;if(!values.length)return null;
-    const counts={};const records=dayOnly&&Number(history.current.day)===currentDay()?history.current.records:state.group.lastBySet;
+    const counts={};const records=dayOnly&&String(history.current.planId||'')===planId()&&Number(history.current.day)===currentDay()?history.current.records:state.group.lastBySet;
     Object.keys(records||{}).forEach(key=>{
       const rec=records[key];if(!rec||Number(rec.exerciseIndex??String(key).split('|')[0])!==Number(index))return;
       const id=String(rec.id||rec);if(variantById(values,id))counts[id]=(counts[id]||0)+1;
@@ -273,10 +279,10 @@
   }
   function renderGalleries(onlyIndex){
     if(typeof p==='undefined'||!p||!Array.isArray(p.ex)||!document||typeof document.querySelectorAll!=='function')return;
-    css();const cards=[...document.querySelectorAll('#list .ex')];cards.forEach((card,index)=>{if(onlyIndex!==undefined&&Number(onlyIndex)!==index)return;card.querySelectorAll('.kgg015Gallery').forEach(node=>node.remove());const values=valuesForExercise(index);if(!values.length)return;const sets=[...card.querySelectorAll('.set')];sets.forEach((set,setIndex)=>galleryHtml(index,setIndex+1,set));});applyDisplayNames();
+    css();ensureDay();const cards=[...document.querySelectorAll('#list .ex')];cards.forEach((card,index)=>{if(onlyIndex!==undefined&&Number(onlyIndex)!==index)return;card.querySelectorAll('.kgg015Gallery').forEach(node=>node.remove());const values=valuesForExercise(index);if(!values.length)return;const sets=[...card.querySelectorAll('.set')];sets.forEach((set,setIndex)=>galleryHtml(index,setIndex+1,set));});applyDisplayNames();
   }
   function notesFor(day){
-    if(Number(history.current.day)!==Number(day))return '';
+    if(String(history.current.planId||'')!==planId()||Number(history.current.day)!==Number(day))return '';
     const rows=[];Object.keys(history.current.records||{}).forEach(key=>{const rec=history.current.records[key];if(!rec||!rec.previousId||String(rec.previousId)===String(rec.id))return;const index=Number(rec.exerciseIndex),values=valuesForExercise(index),from=variantById(values,rec.previousId),to=variantById(values,rec.id);if(from&&to)rows.push((originalNames[index]||'Übung')+': '+from.name+' → '+to.name)});
     return rows.length?'\n\nVariantenwechsel:\n'+[...new Set(rows)].join('\n'):'';
   }
@@ -292,10 +298,10 @@
     originalPut=put;window.put=function(e,s,x,y,z){const result=originalPut.apply(this,arguments);if(String(z??'').trim()!=='')recordSuccessfulEdit(Number(e),Number(s));return result};
   }
   function finalizeDominance(day){
-    if(Number(history.finalized[day]||0)===1)return;
-    ensureDay();if(Number(history.current.day)!==Number(day))return;
+    const finalizedKey=planId()+'|'+String(day);if(Number(history.finalized[finalizedKey]||0)===1)return;
+    ensureDay();if(String(history.current.planId||'')!==planId()||Number(history.current.day)!==Number(day))return;
     p.ex.forEach((ex,index)=>{const state=groupState(index),winner=dominantFor(index,true);if(winner)state.group.dominantId=winner.id});
-    history.finalized[day]=1;saveHistory();applyDominantMedia();
+    history.finalized[finalizedKey]=1;saveHistory();applyDominantMedia();
   }
   function wrapShowQr(){
     if(originalShowQr||typeof showQr!=='function')return;
