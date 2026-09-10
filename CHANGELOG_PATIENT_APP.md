@@ -1,5 +1,11 @@
 # Patient App Changelog
 
+## v83 - 2026-09-10
+
+- Ticket 015: geordnete Progressionsstufen pro Satz mit sicherer Dominanz- und Dokumentationslogik.
+- Guarded request: `ticket-015-progressions-20260911`.
+
+
 ## v82 - 2026-09-10
 
 - Führt die fehlende Ticket-034-Warncounter-Logik minimal in der Patient:innen-PWA ein und verwendet dafür ein zugängliches KGG-App-Modal; bestehende Finalize-, QR-, Done- und Planverträge bleiben erhalten.
