@@ -1,7 +1,7 @@
 {
-  "versionCode": 84,
-  "versionName": "1.0.84-therapy-cockpit-start-link",
-  "indexUrl": "index.html?v=84",
-  "sha256": "06ccc408ad88f502defa0482130c3054a069da2f7c37e813aad6bf4150be728d",
-  "notes": "v084: Erzeugt aus dem aktuellen Therapeutenplan einen Cockpit-Startlink mit kopierbarer Ausgabe."
+  "versionCode": 85,
+  "versionName": "1.0.85-ticket-015-progressions",
+  "indexUrl": "index.html?v=85",
+  "sha256": "4a50c9f23d9c37bbf034c0c7663082a5353ee92e04fe9eb52c23b7ad51ce0712",
+  "notes": "v085: Geordnete Progressionsstufen werden im Admin-Editor und der Patienten-App über den bestehenden Planvertrag unterstützt."
 }

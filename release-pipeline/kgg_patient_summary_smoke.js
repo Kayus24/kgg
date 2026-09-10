@@ -35,6 +35,18 @@ vm.runInContext(source,context,{filename:'patient-set-summary-groups.js'});
 
 const api=context.window.__kggSetSummaryGroupsTest;
 assert(api,'summary test API missing');
+const progression=context.window.__kggTicket015PatientTest;
+assert(progression,'ticket 015 patient test API missing');
+const variants=[
+  progression.normalizeVariant({id:'easy',name:'Leichter',order:0},0,'group-1',[]),
+  progression.normalizeVariant({id:'base',name:'Basis',order:1},1,'group-1',[]),
+  progression.normalizeVariant({id:'hard',name:'Schwerer',order:2},2,'group-1',[]),
+];
+const dominant=progression.dominant(variants,{a:{id:'base'},b:{id:'hard'},c:{id:'hard'},d:{id:'base'}});
+assert(dominant&&dominant.id==='hard','dominant progression did not choose the highest tied stage');
+assert(progression.dominant(variants,{a:{id:'base'},b:{id:'hard'}}).id==='hard','dominant tie did not prefer the harder stage');
+assert(progression.note('Basis','Basis','Kniebeuge')==='','unchanged progression created a documentation note');
+assert(progression.note('Basis','Schwerer','Kniebeuge')==='Kniebeuge: Basis → Schwerer','actual progression change was not documented');
 
 const compressed=api.compressText([
   'Kniebeuge',
