@@ -35,9 +35,11 @@ async function currentDay(page){return page.evaluate(()=>Number(d))}
 async function assertHubDay(page,day){await page.waitForFunction(day=>document.querySelector('#kggCurrentDayBox .kggCurrentDayBig')?.textContent.trim()===`Tag ${day}`,day,{timeout:8000});assert(await currentDay(page)===day,`runtime day is not T${day}`)}
 async function waitForVisibleDayButtons(page,count){await page.waitForFunction(expected=>document.querySelectorAll('#days button').length===expected,count,{timeout:8000});assert(await page.locator('#days button').count()===count,`day-button DOM did not settle at ${count}`)}
 async function dismissInstallOverlay(page){const box=page.locator('#installBox');if(await box.count()&&await box.isVisible().catch(()=>false)){const dismiss=box.getByRole('button',{name:/Nein danke|No thanks/i});if(await dismiss.count())await dismiss.click({force:true});else await page.evaluate(()=>document.getElementById('installBox')?.classList.add('hide'))}}
+async function confirmTicket034FinishIfShown(page){const modal=page.locator('#kggTicket034FinishModal');if(!(await modal.count())||!(await modal.isVisible().catch(()=>false)))return;const confirm=modal.getByRole('button',{name:'Training beenden',exact:true});assert(await confirm.count()===1,'Ticket-034 finish modal did not expose exactly one confirm button');await confirm.click();await modal.waitFor({state:'hidden'})}
 async function finishFromUi(page,expectedQrDay,expectedNextDay){
   await dismissInstallOverlay(page);
   await page.locator('#plan > button.btn').click();
+  await confirmTicket034FinishIfShown(page);
   await page.locator('#end').waitFor({state:'visible'});
   assert((await page.locator('#endTitle').innerText())===`Training T${expectedQrDay} beendet`,`end title is not T${expectedQrDay}`);
   const decoded=decodePayload(await page.locator('#qr').getAttribute('data-payload'));
@@ -107,6 +109,7 @@ async function main(){
     await page.evaluate(()=>{d=4;render()});
     await page.waitForFunction(()=>Number(d)===4);
     await page.locator('#plan > button.btn').click();
+    await confirmTicket034FinishIfShown(page);
     await page.locator('#end').waitFor({state:'visible'});
     assert(decodePayload(await page.locator('#qr').getAttribute('data-payload')).d===4,'historical QR did not stay on T4');
     assert(await currentDay(page)===4,'historical finalize unexpectedly moved the in-session selected day');
@@ -140,7 +143,7 @@ async function main(){
     await waitForRuntime(page);
     await seedCurrent(page,Array.from({length:12},(_,i)=>i+1),12);await assertHubDay(page,12);
     assert((await page.locator('#meta').innerText()).includes('12 Trainingstage'),'fixed plan lost its finite day label');
-    await page.locator('#plan > button.btn').click();await page.locator('#end').waitFor({state:'visible'});
+    await page.locator('#plan > button.btn').click();await confirmTicket034FinishIfShown(page);await page.locator('#end').waitFor({state:'visible'});
     assert(decodePayload(await page.locator('#qr').getAttribute('data-payload')).d===12,'fixed plan final QR day is wrong');
     assert(await currentDay(page)===12,'fixed plan advanced beyond its hard end');
 
