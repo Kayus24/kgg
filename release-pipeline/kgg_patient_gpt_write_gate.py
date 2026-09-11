@@ -24,7 +24,7 @@ PREVIEW_INDEX = Path("previews/index.json")
 MAX_PAYLOAD_BYTES = 60_000
 MAX_OPERATIONS = 4
 MAX_REPLACEMENT_BYTES = 40_000
-PATIENT_APPROVAL_PHRASE = "Gut für PAT live"
+PATIENT_APPROVAL_PHRASE = "Zulassen"
 
 VERSION_MARKERS = (
     "const APP_VERSION",
@@ -71,6 +71,7 @@ RUNTIME_EXACT = {
 }
 MODULE_SCRIPT_PATTERN = re.compile(r'<script src="(?P<src>\./[^"?]+\.js(?:\?[^"?]+)?)"></script>')
 DIRECT_FIRST_LOAD_MODULES = (
+    "patient-storage-scope.js",
     "vendor/fflate-0.8.3.js",
     "patient-qr-format.js",
     "patient-plan-link-choice.js",
@@ -554,6 +555,13 @@ def write_preview(
     ), preview_index.count("<head>")
     if robots_count != 1:
         fail("patient preview could not add its noindex policy")
+    preview_index, storage_scope_count = preview_index.replace(
+        "<head>",
+        '<head><script src="./patient-storage-scope.js?v=preview-storage-scope-1"></script>',
+        1,
+    ), preview_index.count("<head>")
+    if storage_scope_count != 1:
+        fail("patient preview could not add its storage scope")
     preview_worker_path = preview_dir / "service-worker.js"
     preview_worker = normalize(preview_worker_path.read_text(encoding="utf-8"))
     preview_cache_prefix = f"kgg-patient-preview-{request_id}-"
@@ -564,6 +572,12 @@ def write_preview(
         preview_worker,
         count=1,
     )
+    preview_worker, storage_asset_count = preview_worker.replace(
+        "const APP_ASSETS = [",
+        "const STORAGE_SCOPE_SCRIPT = './patient-storage-scope.js?v=preview-storage-scope-1';"
+        "const APP_ASSETS = [STORAGE_SCOPE_SCRIPT,",
+        1,
+    ), preview_worker.count("const APP_ASSETS = [")
     preview_worker, index_scope_count = re.subn(
         r"function isIndexRequest\(request\)\{[^}]+\}",
         "function isIndexRequest(request){const url=new URL(request.url);"
@@ -582,7 +596,7 @@ def write_preview(
         preview_worker,
         count=1,
     )
-    if (cache_name_count, index_scope_count, recovery_scope_count) != (1, 1, 1):
+    if (cache_name_count, storage_asset_count, index_scope_count, recovery_scope_count) != (1, 1, 1, 1):
         fail("patient preview could not isolate the service-worker scope")
     canonical_direct_first_load_modules(preview_index, preview_worker, preview_dir)
     preview_index_path.write_text(preview_index, encoding="utf-8", newline="\n")
@@ -614,6 +628,7 @@ def write_preview(
         "url": url,
         "recoveryUrl": f"{PREVIEW_BASE_URL}/{request_id}/update-recovery.html?auto=1&v={version}",
         "previewScopePatched": True,
+        "previewStorageNamespace": f"preview:{request_id}:",
         "previewCacheName": preview_cache_name,
         "firstLoadModules": True,
     }
@@ -691,7 +706,7 @@ def run(
     accepted_preview: dict[str, Any] | None = None
     if mode in {"create_pr", "publish_patient_live"}:
         if approval_phrase.strip() != PATIENT_APPROVAL_PHRASE:
-            fail(f"{mode} requires Max's exact approval phrase: {PATIENT_APPROVAL_PHRASE}")
+            fail(f"{mode} requires one immediate confirmation: {PATIENT_APPROVAL_PHRASE}")
         if preview_root is None:
             fail(f"--preview-root is required for {mode}")
         accepted_preview = verify_preview(preview_root, payload, digest, root)
@@ -886,7 +901,7 @@ def self_test(root: Path = ROOT, preview_output: Path | None = None) -> None:
             preview_root / "previews" / validated["request_id"],
         )
         module_paths = [source.split("?", 1)[0].removeprefix("./") for source in module_sources]
-        if len(module_paths) != 25 or module_paths != list(DIRECT_FIRST_LOAD_MODULES):
+        if len(module_paths) != len(DIRECT_FIRST_LOAD_MODULES) or module_paths != list(DIRECT_FIRST_LOAD_MODULES):
             fail("self-test expected the canonical direct first-load module order")
         preview_dir = preview_root / "previews" / validated["request_id"]
         for relative in ("vendor/fflate-0.8.3.js", "patient-qr-format.js"):

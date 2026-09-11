@@ -71,7 +71,7 @@ Die Reihenfolge ist immer:
 2. identischer Payload als `publish_preview`
 3. Run, Jobs, Artefakt, `meta.json`, Preview-URL und Recovery-URL pruefen
 4. Max testet die isolierte PWA im internen Browser
-5. erst nach Max' exakter Phrase `Gut für PAT live` `create_pr` oder `publish_patient_live`
+5. erst nach der einen unmittelbaren Bestaetigung `Zulassen` `create_pr` oder `publish_patient_live`
 
 Ein Custom GPT kann den Codex-internen Browser nicht selbst steuern. Gib Preview-URL und Recovery-URL immer als vollstaendige ausgeschriebene `https://`-Klartext-URLs sowie eine kurze Testliste aus und warte auf Max' Ergebnis. Leere oder nur beschriftete Markdown-Links sind kein Nachweis. Behaupte keinen Erfolg ohne abgeschlossenen erfolgreichen Run und die passenden Artefakte.
 

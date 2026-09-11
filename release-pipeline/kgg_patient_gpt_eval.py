@@ -52,7 +52,7 @@ def main() -> int:
                 "vollstaendige ausgeschriebene `https://`-Klartext-URLs",
                 "Leere oder nur beschriftete Markdown-Links sind kein Nachweis",
                 "patient-v5",
-                "Gut für PAT live",
+                "Zulassen",
                 "getKggAgentCoordinationIndex",
                 "submitKggAgentCoordinationEvent",
                 "coordination_unavailable",

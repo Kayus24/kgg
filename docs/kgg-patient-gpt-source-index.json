@@ -157,14 +157,19 @@
       "sha256": "19855a0622c64e9d211161c74fef1809e2f3b7833b80686129ad4a9f3a12165b"
     },
     {
-      "characters": 10877,
+      "characters": 4648,
       "path": "docs/kgg-patient-gpt-source/chunk-031.md",
-      "sha256": "8425af1c8ea46d9e76b460e143fa2ce50200a9f5e45149eb8e16de5e699360a9"
+      "sha256": "03a0b415c2afe9e4fadc96683ff4a6cae2bbdfa02a81c2dcf79eea24210a82d3"
+    },
+    {
+      "characters": 10877,
+      "path": "docs/kgg-patient-gpt-source/chunk-032.md",
+      "sha256": "5b08cc01e72baa3757cb076034cc16eddec9a704a63a785c5d9328457967d265"
     },
     {
       "characters": 6773,
-      "path": "docs/kgg-patient-gpt-source/chunk-032.md",
-      "sha256": "8c874afd93544c926b78637945117cf1abecec19f092560ed19b9d62ac4993fd"
+      "path": "docs/kgg-patient-gpt-source/chunk-033.md",
+      "sha256": "c6f1a12eae63675e3439dfe01b54e3e643c320532ca45cc7bc0614363295478f"
     }
   ],
   "files": [
@@ -312,6 +317,11 @@
       "characters": 2953,
       "path": "patient-start-values-day1.js",
       "sha256": "3ced0d7f1e19ce5d3fe71c77e25c4500607fc11f6d7d6af65e648f62f91c11e3"
+    },
+    {
+      "characters": 4454,
+      "path": "patient-storage-scope.js",
+      "sha256": "5ee476fb50a653ec339cc1876fa916464929bc2e196e347c3f1fd7a0406a79d7"
     },
     {
       "characters": 10680,

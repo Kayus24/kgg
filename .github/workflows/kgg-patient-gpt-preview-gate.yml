@@ -22,7 +22,7 @@ on:
         required: true
         type: string
       approval_phrase:
-        description: Exact final Max approval; required only for patient PR/live modes
+        description: One immediate confirmation; use Zulassen only for patient PR/live modes
         required: false
         default: ""
         type: string
@@ -181,6 +181,10 @@ jobs:
           node release-pipeline/kgg_patient_summary_smoke.js
           node release-pipeline/kgg_patient_gpt_browser_smoke.js
           node release-pipeline/kgg_patient_preview_first_load_smoke.js "$GITHUB_WORKSPACE/preview/previews/${{ inputs.request_id }}"
+          node release-pipeline/kgg_patient_preview_storage_isolation_smoke.js \
+            "$GITHUB_WORKSPACE/base" \
+            "$GITHUB_WORKSPACE/preview/previews/${{ inputs.request_id }}" \
+            "${{ inputs.request_id }}"
 
       - name: Run patient interface regression
         if: inputs.mode != 'validate_only' && steps.gate.outputs.run_patient_scan == 'true'
@@ -244,7 +248,9 @@ jobs:
             index.html service-worker.js update-recovery.html manifest.json \
             manifest-v*.webmanifest collapse-cards.js numpad-ui-fix.js patient-*.js \
             CHANGELOG_PATIENT_APP.md docs/kgg-patient-* \
-            docs/kgg-custom-gpt-resource-manifest.json
+            docs/kgg-custom-gpt-resource-manifest.json \
+            release-pipeline/kgg_patient_preview_storage_isolation_smoke.js \
+            release-pipeline/kgg_patient_live_version_smoke.js
           git commit -m "patient app ${{ inputs.request_id }}"
           git push -u origin "$branch"
           body="$(mktemp)"
@@ -305,3 +311,33 @@ jobs:
           done
           echo "GitHub Pages did not expose patient version v${expected} in time." >&2
           exit 1
+
+      - name: Verify live visible client version and stale-client update
+        uses: actions/checkout@v4
+        with:
+          path: live-base
+          ref: main
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: live-base/release-pipeline/package-lock.json
+
+      - name: Install live client smoke dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd live-base/release-pipeline
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Run bounded live client version smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          node live-base/release-pipeline/kgg_patient_live_version_smoke.js \
+            '${{ needs.patient-gate.outputs.patient_version }}' \
+            'https://kayus24.github.io/kgg/' \
+            "$GITHUB_WORKSPACE/live-base"
