@@ -39,8 +39,8 @@ function sourceContract() {
   const index = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
   const worker = fs.readFileSync(path.join(ROOT, "service-worker.js"), "utf8");
   const selector = "#padLast.kggPatientApplyShimmer";
-  assert(hints.includes("const V='last-value-hints-v5-open-shimmer';"), "shimmer module version marker is missing");
-  assert(hints.includes("window.__kggLastValueHintsPatchedV4"), "shimmer module patch guard was not versioned");
+  assert(hints.includes("const V='last-value-hints-v6-open-shimmer';"), "shimmer module version marker is missing");
+  assert(hints.includes("window.__kggLastValueHintsPatchedV6"), "shimmer module patch guard was not versioned");
   assert(hints.includes(selector), "shimmer must target only #padLast");
   assert(hints.includes("kggPatientApplyShimmerRun"), "shimmer must have a one-shot open-pad trigger");
   assert(hints.includes("@media (prefers-reduced-motion:reduce)"), "reduced-motion opt-out is missing");
@@ -96,7 +96,7 @@ async function main() {
 
   try {
     await page.goto(url, { waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => window.__kggLastValueHints === "last-value-hints-v5-open-shimmer");
+    await page.waitForFunction(() => window.__kggLastValueHints === "last-value-hints-v6-open-shimmer");
     await page.locator("#list .ex").first().waitFor({ state: "visible" });
     const apply = page.locator("#padLast");
     await openCard(page, 0);
@@ -155,11 +155,21 @@ async function main() {
     assert(!active.disabled && active.text.includes("42") && !active.text.includes("kein Vorwert"), "previous value no longer enables the apply button");
     assert(active.marked.length === 1 && active.marked[0] === "padLast", `shimmer escaped the apply button: ${JSON.stringify(active.marked)}`);
     assert(active.otherAnimated.length === 0, `shimmer animates another button: ${JSON.stringify(active.otherAnimated)}`);
-    assert(active.run && active.animationName === "kggPatientApplyShimmerOnce" && active.animationDuration === "0.82s" && active.animationIterationCount === "1", "apply shimmer must run once when the numpad opens");
+    assert(active.run && active.animationName === "kggPatientApplyShimmerOnce" && active.animationDuration === "0.68s" && active.animationIterationCount === "1", "apply shimmer must run once when the numpad opens");
     assert(active.pointerEvents === "none", "shimmer overlay must not intercept the button tap");
     assert(Math.abs(active.width - before.width) < 0.1 && Math.abs(active.height - before.height) < 0.1, "shimmer changed button layout");
     await apply.click();
     assert((await page.locator("#padVal").innerText()) === "42", "apply button no longer transfers the previous value");
+
+    await page.waitForTimeout(800);
+    const ended = await apply.evaluate((button) => ({ run: button.classList.contains("kggPatientApplyShimmerRun"), animationName: getComputedStyle(button, "::after").animationName }));
+    assert(!ended.run && ended.animationName === "none", `apply shimmer did not end after one run: ${JSON.stringify(ended)}`);
+
+    await page.evaluate(() => closePad(false));
+    await secondSetWeight.click();
+    await page.locator("#pad").waitFor({ state: "visible" });
+    const reopened = await apply.evaluate((button) => ({ run: button.classList.contains("kggPatientApplyShimmerRun"), animationName: getComputedStyle(button, "::after").animationName }));
+    assert(reopened.run && reopened.animationName === "kggPatientApplyShimmerOnce", "apply shimmer did not restart on a later numpad open");
 
     await page.emulateMedia({ reducedMotion: "reduce" });
     const reduced = await apply.evaluate((button) => {
