@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0428",
+  "versionName": "1.0.85-ticket-015-progressions",
+  "notes": "Mobile-Inbox r0428: KGG Update v085 Progressionsvarianten (4a50c9f23d9c).",
+  "createdAt": "2026-09-11T05:44:02Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0428",
+      "profile": "admin",
+      "versionName": "1.0.85-ticket-015-progressions",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0428/admin.html",
+      "sha256": "4a50c9f23d9c37bbf034c0c7663082a5353ee92e04fe9eb52c23b7ad51ce0712",
+      "notes": "Mobile-Inbox r0428: KGG Update v085 Progressionsvarianten (4a50c9f23d9c)."
+    },
+    "colleague": {
+      "releaseId": "r0428",
+      "profile": "colleague",
+      "versionName": "1.0.85-ticket-015-progressions",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0428/colleague.html",
+      "sha256": "cd5290b3b37c00236dc9d48af78ca18e72b48900ec974b93b6c59eadb4477ef3",
+      "notes": "Mobile-Inbox r0428: KGG Update v085 Progressionsvarianten (4a50c9f23d9c)."
+    }
+  }
+}
