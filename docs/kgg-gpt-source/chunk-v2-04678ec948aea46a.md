@@ -1,3 +1,7 @@
+      ctx.drawImage(src,0,0);
+      ctx.restore();
+      return canvas;
+    }
     if(mode==='threshold'||mode==='thresholdLow'||mode==='thresholdHigh'||mode==='invert'){
       const img=ctx.getImageData(0,0,canvas.width,canvas.height);
       const d=img.data;
@@ -418,6 +422,8 @@
     const name=scanExerciseName(source);
     if(!name)return '';
     const lines=scanStructuredSetLinesFromValues(item,source);
+    const selections=Array.isArray(source&&source.progressionSelection)?source.progressionSelection.filter(value=>value&&value.n).map(value=>'Satz '+value.s+': '+value.n):[];
+    if(selections.length)lines.push('Variantenwahl: '+selections.join(' · '));
     return [name].concat(lines).filter(Boolean).join('\n');
   }
   function formatScanExerciseLine(item){
@@ -672,8 +678,3 @@
   async function callGeminiCurrentLayoutContactSheet(file){
     const keys=localGeminiKeys();
     if(!keys.length)throw new Error('Kein QR. OCR braucht Admin-Konfig.');
-    const imageCanvas=await scanImageCanvasFromFile(file,1900);
-    const redacted=redactScanCanvasForExternalOcr(imageCanvas);
-    const strips=kggBuildCurrentLayoutT1Strips(redacted);
-    const contact=kggBuildCurrentLayoutContactSheet(strips);
-    const inline=canvasToGeminiInlineData(contact);

@@ -1,3 +1,12 @@
+    if(!parsed||!(parsed.type==='KGGCFG2'||parsed.type==='KGGCFG1'))return false;
+    let plain=parsed.json;
+    if(parsed.type==='KGGCFG2'){
+      const passCode=(prompt('Transfer-Code eingeben')||'').trim();
+      if(!passCode)return false;
+      plain=await decryptKggConfigTransferEnvelope(parsed.json,passCode);
+    }
+    applyKggConfigTransferPlain(plain);
+    setScanStatus('API-Key / Konfig lokal gespeichert. Scan/OCR kann die lokalen Daten nutzen.');
     alert('API-Key / Konfig lokal gespeichert.');
     return true;
   }

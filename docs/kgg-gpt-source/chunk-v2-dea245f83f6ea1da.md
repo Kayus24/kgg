@@ -1,3 +1,9 @@
+      press.card.style.setProperty('left',nextLeft+'px','important');
+      press.card.style.setProperty('top',nextTop+'px','important');
+      press.card.style.setProperty('transform','translate3d(0,0,0)','important');
+      press.card.style.setProperty('--drag-y','0px');
+      floatingMid=ev.clientY-anchorY+(Number.isFinite(press.cardHeight)?press.cardHeight:press.card.getBoundingClientRect().height)/2;
+    }else if(press.phoneAnchoredDrag){
       const anchorX=Number.isFinite(press.pointerOffsetX)?press.pointerOffsetX:0;
       const anchorY=Number.isFinite(press.pointerOffsetY)?press.pointerOffsetY:0;
       const fixedOffset=press.fixedOffset||{left:0,top:0};
@@ -592,12 +598,3 @@
     return true;
   }
   async function applyKggConfigTransferParsed(parsed){
-    if(!parsed||!(parsed.type==='KGGCFG2'||parsed.type==='KGGCFG1'))return false;
-    let plain=parsed.json;
-    if(parsed.type==='KGGCFG2'){
-      const passCode=(prompt('Transfer-Code eingeben')||'').trim();
-      if(!passCode)return false;
-      plain=await decryptKggConfigTransferEnvelope(parsed.json,passCode);
-    }
-    applyKggConfigTransferPlain(plain);
-    setScanStatus('API-Key / Konfig lokal gespeichert. Scan/OCR kann die lokalen Daten nutzen.');

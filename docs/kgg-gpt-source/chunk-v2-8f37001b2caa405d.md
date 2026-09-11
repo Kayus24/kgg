@@ -1,13 +1,4 @@
-<!doctype html>
-<html lang="de">
-<head>
-<meta charset="utf-8">
-<!--
-KGG INTERNAL SOURCE TRUTH — READ THIS FIRST
-
-Machine-readable app state, patch rules, and changelog are embedded near the top of this HTML.
-Before editing this app, any LLM/agent/human should read these blocks:
-1. <script type="application/json" id="kgg-source-truth">
+<script type="application/json" id="kgg-source-truth">
 {
   "schema": 1,
   "app": "KGG Plan",
@@ -57,34 +48,34 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "pdf-global-exercise-numbering",
     "qr-full-plan-device-ladder",
     "therapy-cockpit",
-    "therapy-cockpit-id-guard"
+    "therapy-cockpit-id-guard",
+    "therapy-cockpit-start-link",
+    "ticket-015-progressions"
   ],
   "currentVersion": {
-    "versionCode": 83,
-    "versionName": "1.0.83-therapy-cockpit-id-guard",
-    "lastPatchId": "kgg-v083-therapy-cockpit-id-guard",
+    "versionCode": 86,
+    "versionName": "1.0.86-ticket-015-progressions-contract",
+    "lastPatchId": "kgg-v085-ticket-015-progressions",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v083-therapy-cockpit-id-guard",
+  "latestPatchId": "kgg-v085-ticket-015-progressions",
   "lastUpdateIntent": {
-    "id": "kgg-v083-therapy-cockpit-id-guard",
-    "summary": "Weist unbekannte explizite Übungsbank-IDs vor dem Cockpit-Sync fail-closed ab.",
+    "id": "kgg-v085-ticket-015-progressions",
+    "summary": "Geordnete Progressionsstufen werden im Admin-Editor und der Patienten-App über den bestehenden Planvertrag unterstützt.",
     "touched": [
-      "Therapie-Cockpit"
+      "Plan-State",
+      "QR/Patienten-App",
+      "Handy-Layout"
     ],
     "notTouched": [
       "PDF",
-      "QR/Patienten-App",
       "Scan/OCR",
       "Parser",
-      "Plan-State",
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
-      "GitHub Manifest",
-      "Handy-Layout"
+      "GitHub Manifest"
     ]
   }
 }
 </script>
-<!-- END kgg-source-truth -->

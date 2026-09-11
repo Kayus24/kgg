@@ -4,15 +4,15 @@
   "schema": 2,
   "channels": {
     "admin": {
-      "releaseId": "r0427",
+      "releaseId": "r0429",
       "profile": "admin",
-      "versionName": "1.0.84-therapy-cockpit-start-link",
-      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0427/admin.html",
-      "sha256": "06ccc408ad88f502defa0482130c3054a069da2f7c37e813aad6bf4150be728d",
-      "notes": "Mobile-Inbox r0427: KGG Update v084 Therapie-Cockpit Startlink (06ccc408ad88).",
-      "rolloutCode": 427,
-      "previousReleaseId": "r0426",
-      "releasedAt": "2026-09-09T21:06:28Z"
+      "versionName": "1.0.86-ticket-015-progressions-contract",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0429/admin.html",
+      "sha256": "29d5707a96f4c2048f1981abd4e842abfdccbca5d7b42b7b101f2bbede97d949",
+      "notes": "KGG Update v086: Progressionsvarianten-Vertrag korrigiert; painMode, Variantenmedien, KGGD1-Auswahl und Bank-Persistenz bleiben erhalten.",
+      "rolloutCode": 429,
+      "previousReleaseId": "r0428",
+      "releasedAt": "2026-09-11T07:16:43Z"
     },
     "colleague": {
       "releaseId": "r0426",
@@ -30,8 +30,8 @@
   "latestAndroidShellVersion": "v401",
   "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html",
   "colleagueSha256": "670c47aee4205bdd80b3305d4d0ac63f0a953751564918cfb3f2d886e67c5fee",
-  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0427/admin.html",
-  "adminSha256": "06ccc408ad88f502defa0482130c3054a069da2f7c37e813aad6bf4150be728d",
+  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0429/admin.html",
+  "adminSha256": "29d5707a96f4c2048f1981abd4e842abfdccbca5d7b42b7b101f2bbede97d949",
   "sha256": "670c47aee4205bdd80b3305d4d0ac63f0a953751564918cfb3f2d886e67c5fee",
   "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",
   "androidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
@@ -39,7 +39,7 @@
   "colleagueAndroidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
   "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_ADMIN_v401_share_apk_provider_debug.apk",
   "adminAndroidApkSha256": "366c63594eeb6bdb89a7ab9c44cf4b84b43004ddfb24e5019012de0766f21499",
-  "notes": "Admin beta r0427: Mobile-Inbox r0427: KGG Update v084 Therapie-Cockpit Startlink (06ccc408ad88).",
+  "notes": "Admin beta r0429: KGG Update v086: Progressionsvarianten-Vertrag korrigiert; painMode, Variantenmedien, KGGD1-Auswahl und Bank-Persistenz bleiben erhalten.",
   "latestAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",
   "latestAndroidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
   "latestColleagueAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",

@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0429",
+  "versionName": "1.0.86-ticket-015-progressions-contract",
+  "notes": "KGG Update v086: Progressionsvarianten-Vertrag korrigiert; painMode, Variantenmedien, KGGD1-Auswahl und Bank-Persistenz bleiben erhalten.",
+  "createdAt": "2026-09-11T07:16:42Z",
+  "source": "kgg-update/index.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0429",
+      "profile": "admin",
+      "versionName": "1.0.86-ticket-015-progressions-contract",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0429/admin.html",
+      "sha256": "29d5707a96f4c2048f1981abd4e842abfdccbca5d7b42b7b101f2bbede97d949",
+      "notes": "KGG Update v086: Progressionsvarianten-Vertrag korrigiert; painMode, Variantenmedien, KGGD1-Auswahl und Bank-Persistenz bleiben erhalten."
+    },
+    "colleague": {
+      "releaseId": "r0429",
+      "profile": "colleague",
+      "versionName": "1.0.86-ticket-015-progressions-contract",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0429/colleague.html",
+      "sha256": "9c4179e90bf0c2876c557179ceb65f2b50f4de36ad9be25631c4beba68b35523",
+      "notes": "KGG Update v086: Progressionsvarianten-Vertrag korrigiert; painMode, Variantenmedien, KGGD1-Auswahl und Bank-Persistenz bleiben erhalten."
+    }
+  }
+}

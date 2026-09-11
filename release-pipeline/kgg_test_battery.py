@@ -105,6 +105,19 @@ def run_therapy_cockpit() -> None:
     run([node_executable(), "release-pipeline/kgg_therapy_cockpit_smoke.js"])
 
 
+def run_ticket_015_smoke() -> None:
+    log("== Ticket 015 Progressionsvarianten contract smoke ==")
+    run([node_executable(), "release-pipeline/kgg_ticket_015_smoke.js"])
+
+
+def run_ticket_015_browser() -> None:
+    npm = npm_executable()
+    if not npm:
+        raise BatteryError("npm not found. Install npm or set KGG_NPM for the Ticket 015 browser battery.")
+    log("== Ticket 015 Progressionsvarianten browser loop ==")
+    run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "node", "release-pipeline/kgg_ticket_015_browser_smoke.js"])
+
+
 def run_therapy_cockpit_native() -> None:
     log("== Therapie-Cockpit Android app-link contract ==")
     run([sys.executable, "release-pipeline/kgg_therapy_cockpit_native_contract.py"])
@@ -765,6 +778,13 @@ TEST_REGISTRY = [
         "run": lambda: run_html_logic("patient-qr-critical"),
     },
     {
+        "id": "ticket-015-progressions-critical",
+        "level": "critical",
+        "suite": "patient-qr",
+        "reason": "Progression stages must round-trip through the existing KGGH2/H3 wire contract and remain token-free before preview.",
+        "run": run_ticket_015_smoke,
+    },
+    {
         "id": "patient-continuous-days-critical",
         "level": "critical",
         "suite": "patient-day-flow",
@@ -868,6 +888,13 @@ TEST_REGISTRY = [
         "suite": "ui-stability",
         "reason": "Flicker/layout patches must prove phone swipe and drag/drop still work in a real browser.",
         "run": lambda: run_ui_stability("regression", "gestures"),
+    },
+    {
+        "id": "ticket-015-progressions-browser-regression",
+        "level": "regression",
+        "suite": "ui-stability",
+        "reason": "The patient phone gallery must select per-set stages, count a numeric zero once, choose dominant ties safely and document real changes.",
+        "run": run_ticket_015_browser,
     },
     {
         "id": "ui-contract",

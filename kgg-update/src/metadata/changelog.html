@@ -3,8 +3,39 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 84,
+  "latestVersionCode": 86,
   "entries": [
+    {
+      "versionCode": 86,
+      "versionName": "1.0.86-ticket-015-progressions-contract",
+      "patchId": "kgg-v085-ticket-015-progressions",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Progressionsvarianten – Vertragsfix",
+      "reason": "Der Progressionsvertrag wird releasefest ausgerichtet: painMode bleibt kompatibel, Auswahl/Medien werden sicher transportiert und Bank-Persistenz bleibt erhalten.",
+      "whatChanged": [
+        "Der Progressionsvertrag bleibt mit painMode kompatibel und transportiert Auswahl, Medien und Bank-Persistenz sicher."
+      ],
+      "touchedAreas": [
+        "Plan-State",
+        "QR/Patienten-App",
+        "Handy-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "Scan/OCR",
+        "Parser",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Ausdrücklicher Ausführungsauftrag KGG-TICKET-015; bestehende Nutzeranforderung für Variantenkette, QR und Patienten-Galerie."
+    },
     {
       "versionCode": 84,
       "versionName": "1.0.84-therapy-cockpit-start-link",
@@ -888,7 +919,7 @@
       "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
     }
   ],
-  "latestVersionName": "1.0.83-therapy-cockpit-id-guard",
+  "latestVersionName": "1.0.85-ticket-015-progressions",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
