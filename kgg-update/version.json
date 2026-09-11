@@ -1,7 +1,7 @@
 {
-  "versionCode": 86,
-  "versionName": "1.0.86-ticket-015-progressions-contract",
-  "indexUrl": "index.html?v=86",
-  "sha256": "29d5707a96f4c2048f1981abd4e842abfdccbca5d7b42b7b101f2bbede97d949",
-  "notes": "v086: Progressionsstufen bleiben mit painMode kompatibel, transportieren Auswahl/Medien sicher und werden im Editor/Bank-State persistiert."
+  "versionCode": 87,
+  "versionName": "1.0.87-ticket-015-live-fix",
+  "indexUrl": "index.html?v=87",
+  "sha256": "d444eae9f734e0743b3209e659637cc7053f35799000c92577a4db187aa008e9",
+  "notes": "v087: Make the progression editor bridge robust and keep variant metadata out of patient info text."
 }

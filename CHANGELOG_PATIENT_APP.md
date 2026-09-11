@@ -1,5 +1,11 @@
 # Patient App Changelog
 
+## v85 - 2026-09-11
+
+- Ticket 015 live-fix: Variantenobjekte werden nicht mehr als `[object Object]` im Patiententext angezeigt.
+- Admin-Editor-Sync: Progressionsstufen werden über den bestehenden Editor-Bridge-Hook geladen und gespeichert.
+- Guarded request: `ticket-015-progressions-live-fix-20260911`.
+
 ## v84 - 2026-09-10
 
 - Ticket 015: geordnete Progressionsstufen pro Satz mit sicherer Dominanz- und Dokumentationslogik.

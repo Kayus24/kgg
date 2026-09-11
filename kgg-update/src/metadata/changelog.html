@@ -3,8 +3,40 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 86,
+  "latestVersionCode": 87,
   "entries": [
+    {
+      "versionCode": 87,
+      "versionName": "1.0.87-ticket-015-live-fix",
+      "patchId": "kgg-v087-ticket-015-live-fix",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Ticket 015 Live-Editor-Bridge",
+      "reason": "Make the progression editor bridge robust and keep variant metadata out of patient info text.",
+      "whatChanged": [
+        "Make the progression editor bridge robust and keep variant metadata out of patient info text."
+      ],
+      "touchedAreas": [
+        "Admin-Editor",
+        "Patienten-App"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
     {
       "versionCode": 86,
       "versionName": "1.0.86-ticket-015-progressions-contract",
@@ -919,7 +951,7 @@
       "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
     }
   ],
-  "latestVersionName": "1.0.85-ticket-015-progressions",
+  "latestVersionName": "1.0.87-ticket-015-live-fix",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
