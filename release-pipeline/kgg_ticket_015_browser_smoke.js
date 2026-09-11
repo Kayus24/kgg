@@ -34,7 +34,7 @@ async function main(){
   ]]};
   const url=`http://127.0.0.1:${port}/?plan=KGGH2:${encodePlan(plan)}`;
   try{
-    await page.goto(url,{waitUntil:'networkidle'});
+    await page.goto(url,{waitUntil:'domcontentloaded'});
     const card=page.locator('#list .ex').first();await card.waitFor({state:'visible'});await card.locator('h3').click();
     await page.locator('.kgg015Gallery').first().waitFor({state:'visible'});
     assert(await page.locator('.kgg015Gallery').count()===2,'one progression gallery per set was not rendered');
@@ -52,6 +52,8 @@ async function main(){
     assert(afterZero.current.records['0|2'].id==='easy','default easy stage was not recorded for set 2');
 
     await page.evaluate(()=>window.showQr(true));
+    const finishConfirm=page.locator('[data-kgg-ticket034-action="confirm"]');
+    if(await finishConfirm.isVisible().catch(()=>false))await finishConfirm.click();
     await page.waitForTimeout(120);
     const afterFinish=await page.evaluate(()=>JSON.parse(localStorage.getItem('kggProgressionHistoryV1')||'{}'));
     assert(afterFinish.groups['ticket-015-browser|progression-group-1'].dominantId==='hard','dominant tie did not choose the higher stage');
@@ -67,7 +69,10 @@ async function main(){
     assert((await page.locator('#sum').innerText()).includes('Variantenwechsel:'),'actual stage change was missing from documentation');
     assert(errors.length===0,`patient preview raised page errors: ${errors.join(' | ')}`);
     console.log('Ticket 015 browser smoke: OK');
-  }finally{await browser.close();await new Promise(resolve=>server.close(resolve))}
+  }finally{
+    await Promise.race([browser.close(),new Promise(resolve=>setTimeout(resolve,5000))]);
+    await new Promise(resolve=>server.close(resolve))
+  }
 }
 
 main().catch(error=>{console.error(error.stack||error);process.exitCode=1});

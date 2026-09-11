@@ -50,13 +50,15 @@
     const count=inputs.filter(input=>String(input&&input.value!=null?input.value:'').trim()!=='').length;
     const state=stateForCount(count,inputs.length);
     const badge=ensureBadge(card);
-    badge.className=BADGE_CLASS+' kggProgress'+state.charAt(0).toUpperCase()+state.slice(1);
-    badge.textContent=labelForState(state);
-    badge.dataset.kggProgress=state;
-    badge.dataset.kggFilledCount=String(count);
-    badge.dataset.kggExpectedCount=String(inputs.length);
-    badge.title=badge.textContent;
-    badge.setAttribute('aria-label',badge.textContent)
+    const nextClass=BADGE_CLASS+' kggProgress'+state.charAt(0).toUpperCase()+state.slice(1);
+    const nextLabel=labelForState(state);
+    if(badge.className!==nextClass)badge.className=nextClass;
+    if(badge.textContent!==nextLabel)badge.textContent=nextLabel;
+    if(badge.dataset.kggProgress!==state)badge.dataset.kggProgress=state;
+    if(badge.dataset.kggFilledCount!==String(count))badge.dataset.kggFilledCount=String(count);
+    if(badge.dataset.kggExpectedCount!==String(inputs.length))badge.dataset.kggExpectedCount=String(inputs.length);
+    if(badge.title!==nextLabel)badge.title=nextLabel;
+    if(badge.getAttribute('aria-label')!==nextLabel)badge.setAttribute('aria-label',nextLabel)
   }
   function cards(){return [...document.querySelectorAll('#list .ex')]}
   function updateAll(){ensureStyle();cards().forEach(updateCard)}

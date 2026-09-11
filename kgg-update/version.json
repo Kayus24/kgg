@@ -2,6 +2,6 @@
   "versionCode": 86,
   "versionName": "1.0.86-ticket-015-progressions-contract",
   "indexUrl": "index.html?v=86",
-  "sha256": "cd6119bd6fce199dc217b95337153aa48f6687b3c4d0042d6dce147f16d438ca",
+  "sha256": "29d5707a96f4c2048f1981abd4e842abfdccbca5d7b42b7b101f2bbede97d949",
   "notes": "v086: Progressionsstufen bleiben mit painMode kompatibel, transportieren Auswahl/Medien sicher und werden im Editor/Bank-State persistiert."
 }

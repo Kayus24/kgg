@@ -53,8 +53,8 @@
     "ticket-015-progressions"
   ],
   "currentVersion": {
-    "versionCode": 85,
-    "versionName": "1.0.85-ticket-015-progressions",
+    "versionCode": 86,
+    "versionName": "1.0.86-ticket-015-progressions-contract",
     "lastPatchId": "kgg-v085-ticket-015-progressions",
     "updatedBy": "kgg-module-scaffolder"
   },

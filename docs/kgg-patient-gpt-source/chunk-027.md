@@ -1,8 +1,8 @@
 # KGG Patient Source Chunk 027
 
 - Source file: `patient-set-summary-groups.js`
-- Characters: 1-23909
-- Full source SHA-256: `3c5d53f0859f1d2b8d08f11ecf16935f94ab55640e7f7fb7ba06f1d558dc7fcc`
+- Characters: 1-23950
+- Full source SHA-256: `0041e88cb92b6276064f09b9e4bc9165d6145b8da998f0e386a3279194a76b4c`
 
 ```
 (()=>{
@@ -297,7 +297,8 @@
     const state=groupState(index),values=state.values;
     if(!values.length)return null;
     const selected=[];
-    for(let setNo=1;setNo<=Number(p&&p.ex&&p.ex[index]&&p.ex[index].sets)||1;setNo++){
+    const setCount=Math.max(1,Number(p&&p.ex&&p.ex[index]&&p.ex[index].sets)||1);
+    for(let setNo=1;setNo<=setCount;setNo++){
       const id=selectedId(index,setNo),item=variantById(values,id);
       selected.push({s:setNo,i:id,n:item&&item.name||''});
     }

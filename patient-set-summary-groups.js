@@ -290,7 +290,8 @@
     const state=groupState(index),values=state.values;
     if(!values.length)return null;
     const selected=[];
-    for(let setNo=1;setNo<=Number(p&&p.ex&&p.ex[index]&&p.ex[index].sets)||1;setNo++){
+    const setCount=Math.max(1,Number(p&&p.ex&&p.ex[index]&&p.ex[index].sets)||1);
+    for(let setNo=1;setNo<=setCount;setNo++){
       const id=selectedId(index,setNo),item=variantById(values,id);
       selected.push({s:setNo,i:id,n:item&&item.name||''});
     }

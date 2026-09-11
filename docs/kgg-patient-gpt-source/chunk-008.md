@@ -1,8 +1,8 @@
 # KGG Patient Source Chunk 008
 
 - Source file: `patient-card-progress.js`
-- Characters: 1-14998
-- Full source SHA-256: `9073f46ccf730c59fd175272195403479d851230edb6ec34f3f6e8bb6f1f4c8d`
+- Characters: 1-15326
+- Full source SHA-256: `bb62bcbb38e6dffa16560af68fbf71d54abc7e7c0a66809e1ac7eadf5ecc04f5`
 
 ```
 (()=>{
@@ -57,13 +57,15 @@
     const count=inputs.filter(input=>String(input&&input.value!=null?input.value:'').trim()!=='').length;
     const state=stateForCount(count,inputs.length);
     const badge=ensureBadge(card);
-    badge.className=BADGE_CLASS+' kggProgress'+state.charAt(0).toUpperCase()+state.slice(1);
-    badge.textContent=labelForState(state);
-    badge.dataset.kggProgress=state;
-    badge.dataset.kggFilledCount=String(count);
-    badge.dataset.kggExpectedCount=String(inputs.length);
-    badge.title=badge.textContent;
-    badge.setAttribute('aria-label',badge.textContent)
+    const nextClass=BADGE_CLASS+' kggProgress'+state.charAt(0).toUpperCase()+state.slice(1);
+    const nextLabel=labelForState(state);
+    if(badge.className!==nextClass)badge.className=nextClass;
+    if(badge.textContent!==nextLabel)badge.textContent=nextLabel;
+    if(badge.dataset.kggProgress!==state)badge.dataset.kggProgress=state;
+    if(badge.dataset.kggFilledCount!==String(count))badge.dataset.kggFilledCount=String(count);
+    if(badge.dataset.kggExpectedCount!==String(inputs.length))badge.dataset.kggExpectedCount=String(inputs.length);
+    if(badge.title!==nextLabel)badge.title=nextLabel;
+    if(badge.getAttribute('aria-label')!==nextLabel)badge.setAttribute('aria-label',nextLabel)
   }
   function cards(){return [...document.querySelectorAll('#list .ex')]}
   function updateAll(){ensureStyle();cards().forEach(updateCard)}
