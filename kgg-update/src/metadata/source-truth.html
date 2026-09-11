@@ -50,31 +50,34 @@
     "therapy-cockpit",
     "therapy-cockpit-id-guard",
     "therapy-cockpit-start-link",
-    "ticket-015-progressions"
+    "ticket-015-progressions",
+    "ticket-015-live-fix"
   ],
   "currentVersion": {
-    "versionCode": 86,
-    "versionName": "1.0.86-ticket-015-progressions-contract",
-    "lastPatchId": "kgg-v085-ticket-015-progressions",
+    "versionCode": 87,
+    "versionName": "1.0.87-ticket-015-live-fix",
+    "lastPatchId": "kgg-v087-ticket-015-live-fix",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v085-ticket-015-progressions",
+  "latestPatchId": "kgg-v087-ticket-015-live-fix",
   "lastUpdateIntent": {
-    "id": "kgg-v085-ticket-015-progressions",
-    "summary": "Geordnete Progressionsstufen werden im Admin-Editor und der Patienten-App über den bestehenden Planvertrag unterstützt.",
+    "id": "kgg-v087-ticket-015-live-fix",
+    "summary": "Make the progression editor bridge robust and keep variant metadata out of patient info text.",
     "touched": [
-      "Plan-State",
-      "QR/Patienten-App",
-      "Handy-Layout"
+      "Admin-Editor",
+      "Patienten-App"
     ],
     "notTouched": [
       "PDF",
+      "QR/Patienten-App",
       "Scan/OCR",
       "Parser",
+      "Plan-State",
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
-      "GitHub Manifest"
+      "GitHub Manifest",
+      "Handy-Layout"
     ]
   }
 }

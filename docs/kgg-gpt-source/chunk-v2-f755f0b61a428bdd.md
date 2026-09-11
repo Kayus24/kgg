@@ -147,8 +147,14 @@
   }
   function patchEditor(){
     if(window.__kggTicket015AdminPatched)return;
+    const bridge=window.KGGTicket015AdminEditor=window.KGGTicket015AdminEditor||{};
     const open=window.openEditor,saveEditor=window.saveEditedExercise;
-    if(typeof open!=='function'||typeof saveEditor!=='function')return;
+    if(typeof open!=='function'||typeof saveEditor!=='function'){
+      bridge.onOpen=ex=>startDraft(ex);
+      bridge.onSave=ex=>{persistDraft(ex||bridge.current&&bridge.current());draft=null;};
+      window.__kggTicket015AdminPatched=true;
+      return;
+    }
     window.__kggTicket015AdminPatched=true;
     window.openEditor=function(ex){const result=open.apply(this,arguments);startDraft(ex);const saveButton=$('saveExercise');if(saveButton)saveButton.onclick=window.saveEditedExercise;return result;};
     window.saveEditedExercise=function(){

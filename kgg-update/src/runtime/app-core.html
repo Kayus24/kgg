@@ -1,10 +1,10 @@
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v086_ticket_015_progressions_contract';
+  const VERSION='KGG_GITHUB_UPDATE_v087_ticket_015_live_fix';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v086","buildTime":"2026-09-11T07:03:51Z","buildCode":"module-v086-ticket-015-progressions-contract","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v087","buildTime":"2026-09-11T11:19:38Z","buildCode":"module-v087-ticket-015-live-fix","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -3479,6 +3479,8 @@
   function currentEditedPlanExercise(){const id=state.editId; return state.plan.find(x=>(x.localId||x.id)===id);}
   function currentEditedBankExercise(){const id=state.editId; return bank.find(x=>String(x.id)===String(id));}
   function currentEditedExercise(){return currentEditedPlanExercise()||currentEditedBankExercise();}
+  window.KGGTicket015AdminEditor=window.KGGTicket015AdminEditor||{};
+  window.KGGTicket015AdminEditor.current=()=>currentEditedExercise();
   function mediaSizeLabel(bytes){const n=Number(bytes)||0; if(n>=1048576)return (n/1048576).toFixed(1).replace('.',',')+' MB'; if(n>=1024)return Math.round(n/1024)+' KB'; return n+' B';}
   function clearEditorMediaPreview(){
     const preview=$('editMediaPreview');
@@ -3580,6 +3582,7 @@
     $('deleteExercise').dataset.scope=bankEdit?'bank':'plan';
     $('deleteExercise').style.visibility=(ex.localId||bankEdit)?'visible':'hidden';
     $('editorModal').classList.add('open');
+    if(window.KGGTicket015AdminEditor&&typeof window.KGGTicket015AdminEditor.onOpen==='function')window.KGGTicket015AdminEditor.onOpen(ex);
   }
   function closeEditor(){state.editId=null; $('editorModal').classList.remove('open')}
   function saveEditedExercise(){
@@ -3636,6 +3639,7 @@
         render();
       }
     }
+    if(window.KGGTicket015AdminEditor&&typeof window.KGGTicket015AdminEditor.onSave==='function')window.KGGTicket015AdminEditor.onSave(currentEditedExercise());
     closeEditor();
   }
   function escapeHtml(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}

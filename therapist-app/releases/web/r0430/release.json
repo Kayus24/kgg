@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0430",
+  "versionName": "1.0.87-ticket-015-live-fix",
+  "notes": "KGG Update v087: Live-Editor-Bridge für Progressionsstufen und sichere Patiententext-Darstellung.",
+  "createdAt": "2026-09-11T11:20:56Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0430",
+      "profile": "admin",
+      "versionName": "1.0.87-ticket-015-live-fix",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0430/admin.html",
+      "sha256": "d444eae9f734e0743b3209e659637cc7053f35799000c92577a4db187aa008e9",
+      "notes": "KGG Update v087: Live-Editor-Bridge für Progressionsstufen und sichere Patiententext-Darstellung."
+    },
+    "colleague": {
+      "releaseId": "r0430",
+      "profile": "colleague",
+      "versionName": "1.0.87-ticket-015-live-fix",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0430/colleague.html",
+      "sha256": "e954ac92232adad294d33eec653977f2f88964434092fbea7ead3cc6d933c370",
+      "notes": "KGG Update v087: Live-Editor-Bridge für Progressionsstufen und sichere Patiententext-Darstellung."
+    }
+  }
+}

@@ -407,6 +407,8 @@
   function currentEditedPlanExercise(){const id=state.editId; return state.plan.find(x=>(x.localId||x.id)===id);}
   function currentEditedBankExercise(){const id=state.editId; return bank.find(x=>String(x.id)===String(id));}
   function currentEditedExercise(){return currentEditedPlanExercise()||currentEditedBankExercise();}
+  window.KGGTicket015AdminEditor=window.KGGTicket015AdminEditor||{};
+  window.KGGTicket015AdminEditor.current=()=>currentEditedExercise();
   function mediaSizeLabel(bytes){const n=Number(bytes)||0; if(n>=1048576)return (n/1048576).toFixed(1).replace('.',',')+' MB'; if(n>=1024)return Math.round(n/1024)+' KB'; return n+' B';}
   function clearEditorMediaPreview(){
     const preview=$('editMediaPreview');

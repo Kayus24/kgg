@@ -1,3 +1,12 @@
+    }catch(err){console.warn('Native PDF-Aktion fehlgeschlagen:',err);}
+    return false;
+  }
+  let currentPdfPreview=null;
+  let pdfPreviewFallbackTimer=null;
+  function setPdfPreviewFallbackVisible(isVisible){
+    const fallback=$('pdfPreviewFallback');
+    if(fallback)fallback.classList.toggle('hidden',!isVisible);
+  }
   function shouldUsePdfMobileBridge(){
     return !!(window.matchMedia && (window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(max-width: 700px)').matches));
   }

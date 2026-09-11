@@ -42,11 +42,11 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 ## Current Versions
 
-- Source web version: v86 / `1.0.86-ticket-015-progressions-contract`.
-- Source index URL: `index.html?v=86`.
-- Source notes: v086: Progressionsstufen bleiben mit painMode kompatibel, transportieren Auswahl/Medien sicher und werden im Editor/Bank-State persistiert.
-- Live Admin release: `r0429` / `1.0.86-ticket-015-progressions-contract`.
-- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0429/admin.html`.
+- Source web version: v87 / `1.0.87-ticket-015-live-fix`.
+- Source index URL: `index.html?v=87`.
+- Source notes: v087: Make the progression editor bridge robust and keep variant metadata out of patient info text.
+- Live Admin release: `r0430` / `1.0.87-ticket-015-live-fix`.
+- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0430/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.
 - Live colleague URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html`.
 - Latest Android shell: `v401`.
