@@ -97,7 +97,7 @@
     "profileVersion": "1.2.0",
     "editorBootstrap": {
       "path": "docs/kgg-patient-custom-gpt-editor-bootstrap.md",
-      "sha256": "689c7b51eca49f7488f3a11a376e3ed218ee72ab6987083739f81ec5baf7a3e2",
+      "sha256": "60a1965c7403b23371872ebdbed64512f59b1bd86bb93a1faa9eff4b87f15634",
       "version": "patient-v5"
     },
     "capabilities": {
@@ -111,11 +111,11 @@
     "knowledge": [
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-architecture.md",
-        "sha256": "162a3956546b589271601687a0024fcea3d05214da963251c6c874bb44b6b752"
+        "sha256": "e8545aa0914ddb3549ec6a4083c3b88c59b07e0dda98cf5a80d71d330918ae04"
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-operations.md",
-        "sha256": "1b487391ee3d92b14999bd4d8e232003c00440fefb30377954de293261c25b78"
+        "sha256": "db3ae4734f74a80b45bc9630c24595b6ee09332a4ba91f6aa0aef87610897f6c"
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-safety.md",
@@ -123,7 +123,7 @@
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-testing.md",
-        "sha256": "25949464f0180ebbec1e5617c7682b6c7202b9d415bf3f9ad29081feff076407"
+        "sha256": "2d538b267169ac3384647de693ffd4a31b19ac022db6d0decb0044b976140883"
       }
     ],
     "actions": [
@@ -133,7 +133,7 @@
       },
       {
         "path": "docs/kgg-patient-custom-gpt-action-api-openapi.yaml",
-        "sha256": "316e7e32e55920ec6417888912c559d4af981b73077cc0a271950458b99cf304"
+        "sha256": "8cd2123fd6b95fce2e7484648b61723722f5ad3c408bdaf33bf33ba95ef989ad"
       }
     ],
     "freshness": "Live patient context, current source chunks and Preview evidence override static Knowledge.",

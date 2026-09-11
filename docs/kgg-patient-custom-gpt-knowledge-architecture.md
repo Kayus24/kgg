@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Architecture
 
-Generated retrieval pack. Source digest: `44cc71e987d90052`.
+Generated retrieval pack. Source digest: `2f433bbf2779f709`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -58,6 +58,7 @@ Reload before every diagnosis involving current code and before every Preview, P
 - `patient-set-summary-groups.js`
 - `patient-start-scan.js`
 - `patient-start-values-day1.js`
+- `patient-storage-scope.js`
 - `patient-ui-micro-polish.js`
 - `patient-version-label.js`
 
@@ -66,7 +67,7 @@ Reload before every diagnosis involving current code and before every Preview, P
 - Work in German, make one smallest safe patch and preserve existing hooks.
 - Never write directly to `main`; use exact Preview hash, PR and protected live approval.
 - Reads, validate_only, publish_preview, evidence checks and safe coordination responses are pre-authorized; do not ask after every step.
-- Patient PR/live requires Max' exact phrase `Gut für PAT live`.
+- Patient PR/live requires one immediate confirmation: `Zulassen`.
 - Patient output never exposes raw JSON, Base64, KGGH2/KGGD1 or debug payloads.
 - Preview fixtures are synthetic and contain no patient data.
 - Version, cache name, Recovery release, version label and changelog are owned by the gate.

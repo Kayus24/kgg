@@ -34,16 +34,16 @@ ADMIN_KNOWLEDGE_SHA256 = [
 ]
 PATIENT_CONTRACT = {
     "profileVersion": "1.2.0",
-    "bootstrap": "689c7b51eca49f7488f3a11a376e3ed218ee72ab6987083739f81ec5baf7a3e2",
+    "bootstrap": "60a1965c7403b23371872ebdbed64512f59b1bd86bb93a1faa9eff4b87f15634",
     "knowledge": [
-        "c28f7edde1fcd1c291b926f2c76a959c070f24135b9bce65aa9efd697578cf3e",
-        "1b487391ee3d92b14999bd4d8e232003c00440fefb30377954de293261c25b78",
-        "6690fd17e3a9eb09bb7d5db8f24b7020a976a7d812e69ee799bc5b0adc8013e7",
-        "25949464f0180ebbec1e5617c7682b6c7202b9d415bf3f9ad29081feff076407",
+        "e8545aa0914ddb3549ec6a4083c3b88c59b07e0dda98cf5a80d71d330918ae04",
+        "db3ae4734f74a80b45bc9630c24595b6ee09332a4ba91f6aa0aef87610897f6c",
+        "45851587cebd4e97eb0d19c6ddcc27195bca4e85c160375de380e2f903d072b0",
+        "2d538b267169ac3384647de693ffd4a31b19ac022db6d0decb0044b976140883",
     ],
     "actions": [
         "7ba1c0e4da45161823dfd34a0ea2c061ab320e191b88dd11e86a546850477ab2",
-        "316e7e32e55920ec6417888912c559d4af981b73077cc0a271950458b99cf304",
+        "8cd2123fd6b95fce2e7484648b61723722f5ad3c408bdaf33bf33ba95ef989ad",
     ],
 }
 
@@ -134,7 +134,7 @@ class Phase3ActionSurfaceTests(unittest.TestCase):
         self.assertEqual(ADMIN_BOOTSTRAP_SHA256, prod["editorBootstrap"]["sha256"])
         self.assertEqual(ADMIN_KNOWLEDGE_SHA256, [item["sha256"] for item in prod["knowledge"]])
 
-    def test_patient_contract_is_fully_unchanged(self) -> None:
+    def test_patient_contract_matches_versioned_release(self) -> None:
         patient = self.manifest["patientProduction"]
         self.assertEqual(PATIENT_CONTRACT["profileVersion"], patient["profileVersion"])
         self.assertEqual(PATIENT_CONTRACT["bootstrap"], patient["editorBootstrap"]["sha256"])

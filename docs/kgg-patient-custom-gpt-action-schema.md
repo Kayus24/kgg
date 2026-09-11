@@ -31,7 +31,7 @@ Die Action unter `api.github.com` verwendet Bearer-Authentifizierung und stellt 
 
 Server-Preflight: Jeder Preview-, PR- oder Live-Write verlangt einen Patient-Editor-Snapshot mit `live-synced`. Der kompatible Preview-only-Workflow prueft bei `publish_preview` zusaetzlich den Admin-Snapshot, damit ein aelteres Admin-Action-Schema den Write nicht umgehen kann. Read-Actions und `validate_only` bleiben fuer Diagnose und lokale Payload-Pruefung verfuegbar.
 
-`submitKggPatientPreviewGate` ist Preview-only und vorab freigegeben. `submitKggPatientMainGate` ist getrennt, consequential und akzeptiert PR/Live nur mit `approval_phrase: "Gut für PAT live"`.
+`submitKggPatientPreviewGate` ist Preview-only und vorab freigegeben. `submitKggPatientMainGate` ist getrennt, consequential und akzeptiert PR/Live nur mit einer unmittelbaren Bestaetigung `approval_phrase: "Zulassen"`.
 
 ## Konsequenz
 

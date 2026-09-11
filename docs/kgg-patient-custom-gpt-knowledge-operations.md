@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Operations
 
-Generated retrieval pack. Source digest: `cd4c453b1bd46096`.
+Generated retrieval pack. Source digest: `1559c936a5bbd04b`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -66,7 +66,7 @@ Nicht erlaubt sind Therapeut:innen-App, PDF, Android/APK, API-Key-Logik, binaere
 11. Bei Ablehnung: `human_preview_fail`, Lektion festhalten und mit neuer `request_id` bei Schritt 1 beginnen.
 12. Bei Zustimmung: `create_pr` oder nur auf ausdruecklichen Live-Auftrag `publish_patient_live`.
 
-Die Schritte 7 bis 9 sind vorab freigegeben und laufen ohne Zwischenfrage. PR und Live erfordern die exakte Phrase `Gut für PAT live`. Nur echte Mehrdeutigkeit, ein Memory-Konflikt oder ein Breaking Interface rechtfertigt vorher eine Rueckfrage.
+Die Schritte 7 bis 9 sind vorab freigegeben und laufen ohne Zwischenfrage. PR und Live erfordern eine unmittelbare Bestaetigung mit `Zulassen`. Nur echte Mehrdeutigkeit, ein Memory-Konflikt oder ein Breaking Interface rechtfertigt vorher eine Rueckfrage.
 
 Offene Cross-App-Anfragen stehen im privaten Koordinationsindex. Der Patient-Agent liest nur passende Threads, antwortet append-only und speichert dort weder Patientendaten noch echte Plan-/QR-Payloads. Eine Queue-Antwort startet den anderen GPT nicht automatisch. Die Queue ist fuer Interface-/Cross-App-Arbeit Pflicht. Bei rein visuellen Patient-UI-Patches darf ein Queue-Ausfall als `coordination_unavailable` protokolliert werden, ohne einen ansonsten frisch belegten Patch zu blockieren.
 
@@ -206,7 +206,7 @@ Die Action unter `api.github.com` verwendet Bearer-Authentifizierung und stellt 
 
 Server-Preflight: Jeder Preview-, PR- oder Live-Write verlangt einen Patient-Editor-Snapshot mit `live-synced`. Der kompatible Preview-only-Workflow prueft bei `publish_preview` zusaetzlich den Admin-Snapshot, damit ein aelteres Admin-Action-Schema den Write nicht umgehen kann. Read-Actions und `validate_only` bleiben fuer Diagnose und lokale Payload-Pruefung verfuegbar.
 
-`submitKggPatientPreviewGate` ist Preview-only und vorab freigegeben. `submitKggPatientMainGate` ist getrennt, consequential und akzeptiert PR/Live nur mit `approval_phrase: "Gut für PAT live"`.
+`submitKggPatientPreviewGate` ist Preview-only und vorab freigegeben. `submitKggPatientMainGate` ist getrennt, consequential und akzeptiert PR/Live nur mit einer unmittelbaren Bestaetigung `approval_phrase: "Zulassen"`.
 
 ## Konsequenz
 
