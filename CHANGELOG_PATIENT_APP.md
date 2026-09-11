@@ -1,5 +1,11 @@
 # Patient App Changelog
 
+## v86 - 2026-09-11
+
+- „Vorwert übernehmen“ zeigt beim Öffnen des Zahlenpads einen einmaligen, kurzen Apple-artigen Schimmer.
+- Der Effekt bleibt auf den verfügbaren Button begrenzt, verändert das Layout nicht und respektiert Reduced Motion.
+- Guarded request: `ticket-009-apply-shimmer-open-20260911`.
+
 ## v85 - 2026-09-11
 
 - Ticket 015 live-fix: Variantenobjekte werden nicht mehr als `[object Object]` im Patiententext angezeigt.

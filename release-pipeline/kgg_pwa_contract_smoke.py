@@ -72,7 +72,7 @@ def validate_static_compatibility(manifest:dict,version:str)->None:
   "./numpad-ui-fix.js?v=scroll-stable-1",
   "./patient-numpad-visibility-fix.js?v=stay-open-switch-1",
   "./patient-extra-info-display.js?v=extra-info-filter-1",
-  "./patient-last-value-hints.js?v=last-value-button-shimmer-1",
+  "./patient-last-value-hints.js?v=last-value-button-shimmer-2-open",
   "./patient-set-summary-groups.js?v=set-summary-groups-4-ticket-015-progressions",
   "./patient-qr-fullscreen.js?v=qr-fullscreen-1",
   "./patient-numpad-card-guard.js?v=numpad-input-switch-1",

@@ -1,16 +1,16 @@
 # KGG Patient Source Chunk 015
 
 - Source file: `patient-last-value-hints.js`
-- Characters: 1-4291
-- Full source SHA-256: `a3d87463e18b64922419da5e67c6bea61dd5e3c89e6e252f12d959d61411aae9`
+- Characters: 1-5034
+- Full source SHA-256: `e3452be3cea61db3b364810a96268e5391c479452177a13876a711a3bbc2eac5`
 
 ```
 (()=>{
-const V='last-value-hints-v4-apply-shimmer';
+const V='last-value-hints-v6-open-shimmer';
 if(window.__kggLastValueHints===V)return;
 window.__kggLastValueHints=V;
 const $=id=>document.getElementById(id);
-function css(){if($('kggLastValueHintsStyle'))return;const s=document.createElement('style');s.id='kggLastValueHintsStyle';s.textContent='input.num::placeholder{color:#cbd5e1!important;opacity:1!important;font-weight:900!important}input.num.kggHasLastHint{background:linear-gradient(#fff,#fff)!important}@keyframes kggPatientApplyShimmer{0%,62%{transform:translateX(-145%) skewX(-18deg)}76%,100%{transform:translateX(360%) skewX(-18deg)}}#padLast.kggPatientApplyShimmer{position:relative;overflow:hidden;isolation:isolate}#padLast.kggPatientApplyShimmer::after{content:"";position:absolute;inset:0 auto 0 0;width:38%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent);transform:translateX(-145%) skewX(-18deg);pointer-events:none;animation:kggPatientApplyShimmer 5.8s cubic-bezier(.4,0,.2,1) infinite;will-change:transform}#padLast.kggPatientApplyShimmer:disabled::after{display:none}@media (prefers-reduced-motion:reduce){#padLast.kggPatientApplyShimmer::after{display:none;animation:none}}';document.head.appendChild(s)}
+function css(){if($('kggLastValueHintsStyle'))return;const s=document.createElement('style');s.id='kggLastValueHintsStyle';s.textContent='input.num::placeholder{color:#cbd5e1!important;opacity:1!important;font-weight:900!important}input.num.kggHasLastHint{background:linear-gradient(#fff,#fff)!important}@keyframes kggPatientApplyShimmerOnce{0%{transform:translateX(-145%) skewX(-18deg);opacity:1}100%{transform:translateX(360%) skewX(-18deg);opacity:0}}#padLast.kggPatientApplyShimmer{position:relative;overflow:hidden;isolation:isolate}#padLast.kggPatientApplyShimmer::after{content:"";position:absolute;inset:0 auto 0 0;width:38%;background:linear-gradient(100deg,transparent 0%,rgba(255,255,255,0) 22%,rgba(255,255,255,.9) 50%,rgba(255,255,255,0) 78%,transparent 100%);transform:translateX(-145%) skewX(-18deg);opacity:0;pointer-events:none;will-change:transform,opacity}#padLast.kggPatientApplyShimmer.kggPatientApplyShimmerRun::after{animation:kggPatientApplyShimmerOnce .68s cubic-bezier(.22,.61,.36,1) 1 both}#padLast.kggPatientApplyShimmer:disabled::after{display:none}@media (prefers-reduced-motion:reduce){#padLast.kggPatientApplyShimmer::after,#padLast.kggPatientApplyShimmer.kggPatientApplyShimmerRun::after{display:none!important;animation:none!important}}';document.head.appendChild(s)}
 function metaFromInput(input){
  if(!input)return null;
  if(input.__kggLastMeta)return input.__kggLastMeta;
@@ -46,9 +46,10 @@ function unitFor(m){
 }
 function hintText(m,last){const unit=unitFor(m);return unit?String(last)+' '+unit:String(last)}
 function applyOne(input){const m=metaFromInput(input);const last=prevValue(m);if(last){input.placeholder=hintText(m,last);input.classList.add('kggHasLastHint')}else{if(input.classList.contains('kggHasLastHint'))input.placeholder='';input.classList.remove('kggHasLastHint')}return{m,last}}
-function syncPadButton(m,last){const b=$('padLast');if(!b)return;b.style.display='block';if(last){b.disabled=false;b.classList.remove('noLast');b.classList.add('kggPatientApplyShimmer');b.dataset.value=String(last);b.textContent=hintText(m,last)+' übernehmen'}else{b.disabled=true;b.classList.add('noLast');b.classList.remove('kggPatientApplyShimmer');b.dataset.value='';b.textContent='kein Vorwert gefunden'}}
+function runShimmer(b){if(!b)return;clearTimeout(b.__kggPatientApplyShimmerTimer);b.classList.remove('kggPatientApplyShimmerRun');if(b.disabled)return;void b.offsetWidth;b.classList.add('kggPatientApplyShimmerRun');b.__kggPatientApplyShimmerTimer=setTimeout(()=>{b.classList.remove('kggPatientApplyShimmerRun');b.__kggPatientApplyShimmerTimer=0},740)}
+function syncPadButton(m,last){const b=$('padLast');if(!b)return;b.style.display='block';if(last){b.disabled=false;b.classList.remove('noLast');b.classList.add('kggPatientApplyShimmer');b.dataset.value=String(last);b.textContent=hintText(m,last)+' übernehmen';runShimmer(b)}else{b.disabled=true;b.classList.add('noLast');b.classList.remove('kggPatientApplyShimmer');b.classList.remove('kggPatientApplyShimmerRun');clearTimeout(b.__kggPatientApplyShimmerTimer);b.__kggPatientApplyShimmerTimer=0;b.dataset.value='';b.textContent='kein Vorwert gefunden'}}
 function apply(){css();document.querySelectorAll('input.num').forEach(applyOne)}
-function patch(){if(window.__kggLastValueHintsPatchedV4)return;window.__kggLastValueHintsPatchedV4=1;if(typeof openPad==='function'){const old=openPad;window.openPad=function(input,meta){if(input&&meta)input.__kggLastMeta=meta;const r=old.apply(this,arguments);const found=applyOne(input);syncPadButton(found.m,found.last);return r}}if(typeof put==='function'){const oldPut=put;window.put=function(){const r=oldPut.apply(this,arguments);setTimeout(apply,40);return r}}}
+function patch(){if(window.__kggLastValueHintsPatchedV6)return;window.__kggLastValueHintsPatchedV6=1;if(typeof openPad==='function'){const old=openPad;window.openPad=function(input,meta){if(input&&meta)input.__kggLastMeta=meta;const r=old.apply(this,arguments);const found=applyOne(input);syncPadButton(found.m,found.last);return r}}if(typeof put==='function'){const oldPut=put;window.put=function(){const r=oldPut.apply(this,arguments);setTimeout(apply,40);return r}}}
 function init(){patch();apply();const list=$('list');if(list&&'MutationObserver'in window)new MutationObserver(()=>setTimeout(()=>{patch();apply()},40)).observe(list,{childList:true,subtree:true});setTimeout(()=>{patch();apply()},300);setTimeout(apply,1200);setTimeout(apply,2500)}
 document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
 })();
