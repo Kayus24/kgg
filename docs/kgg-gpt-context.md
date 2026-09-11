@@ -42,11 +42,11 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 ## Current Versions
 
-- Source web version: v84 / `1.0.84-therapy-cockpit-start-link`.
-- Source index URL: `index.html?v=84`.
-- Source notes: v084: Erzeugt aus dem aktuellen Therapeutenplan einen Cockpit-Startlink mit kopierbarer Ausgabe.
-- Live Admin release: `r0427` / `1.0.84-therapy-cockpit-start-link`.
-- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0427/admin.html`.
+- Source web version: v85 / `1.0.85-ticket-015-progressions`.
+- Source index URL: `index.html?v=85`.
+- Source notes: v085: Geordnete Progressionsstufen werden im Admin-Editor und der Patienten-App über den bestehenden Planvertrag unterstützt.
+- Live Admin release: `r0428` / `1.0.85-ticket-015-progressions`.
+- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0428/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.
 - Live colleague URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html`.
 - Latest Android shell: `v401`.
