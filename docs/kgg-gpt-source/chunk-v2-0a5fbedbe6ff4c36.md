@@ -1,3 +1,11 @@
+    input.style.height=hasText?Math.ceil(input.scrollHeight)+'px':'';
+    const title=$('dbTitle'), wrap=$('inputWrap');
+    if(title&&wrap)title.style.setProperty('--db-title-start-y',Math.ceil(wrap.offsetHeight+12)+'px');
+  }
+  function syncTextInputFromPlan(reason){
+    const input=$('exerciseInput');
+    if(!input)return;
+    const next=withTrailingExerciseComma((state.plan||[]).map(formatExerciseTextLine).filter(Boolean).join(', '));
     if(input.value!==next){state.textSyncing=true; input.value=next; state.textSyncing=false;}
     state.planText=next;
     resizeExerciseInputToContent();
@@ -493,9 +501,3 @@
     const id=row&&row.dataset&&row.dataset.bankId;
     if(!row||!id)return;
     const startX=ev.clientX,startY=ev.clientY;
-    const swipe={row,id,startX,startY,active:false,dx:0,pointerId:ev.pointerId};
-    const threshold=()=>Math.min(128,Math.max(74,row.offsetWidth*0.34));
-    const cleanup=()=>{document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);document.removeEventListener('pointercancel',cancel);};
-    const move=e=>{
-      const dx=e.clientX-startX,dy=e.clientY-startY;
-      if(!swipe.active){

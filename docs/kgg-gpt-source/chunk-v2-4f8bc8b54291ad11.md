@@ -11,6 +11,16 @@
   const mediaOf=ex=>{try{return typeof ensureExerciseMediaList==='function'?clone(ensureExerciseMediaList(ex)):clone(Array.isArray(ex&&ex.media)?ex.media:[]);}catch(err){return [];}};
   function groupId(ex){return String(ex&&ex.progressionGroupId||'pg_'+idPart(ex&&((ex.localId||ex.id)||'exercise')));}
   function variantId(group,index,value){return String(value&&value.id||('pv_'+idPart(group)+'_'+index));}
+  function allocateVariantId(group,preferred,index,used){
+    const taken=used||new Set();
+    let id=String(preferred||'');
+    if(!id||taken.has(id)){
+      let n=Math.max(0,Number(index)||0);
+      do{id='pv_'+idPart(group)+'_'+n++;}while(taken.has(id));
+    }
+    taken.add(id);
+    return id;
+  }
   function normalizeVariant(value,index,group,base){
     const source=value&&typeof value==='object'?value:{};
     const linked=source.sourceId||source.bankId||'';
@@ -31,12 +41,21 @@
     const values=source.length?source.map((item,index)=>normalizeVariant(item,index,group,base)):[normalizeVariant({id:'pv_'+idPart(group)+'_0',name:base.name,sourceId:base.sourceId||base.bankId||'',media:base},0,group,base)];
     if(!values.length)return [];
     values.sort((a,b)=>a.order-b.order||a.id.localeCompare(b.id));
-    return values.map((item,index)=>({...item,order:index,groupId:group}));
+    const used=new Set();
+    return values.map((item,index)=>({...item,id:allocateVariantId(group,item.id,index,used),order:index,groupId:group}));
+  }
+  function wireMedia(item){
+    try{
+      const mediaApi=window.KGGTicket015PatientMedia||{};
+      if(window.KGGTicket015PatientMediaBundleReady&&window.KGGTicket015PatientMediaBundleReady()&&typeof mediaApi.refs==='function')return clone(mediaApi.refs(item));
+      if(typeof mediaApi.manifest==='function')return clone(mediaApi.manifest(item));
+    }catch(err){}
+    return mediaOf(item);
   }
   function wireVariants(ex){
     const values=normalizeVariants(ex,false);
     if(!values.length)return null;
-    return {g:groupId(ex),v:values.map(item=>({i:item.id,n:item.name,o:item.order,s:item.sourceId||'',m:clone(item.media||[])}))};
+    return {g:groupId(ex),v:values.map(item=>({i:item.id,n:item.name,o:item.order,s:item.sourceId||'',m:wireMedia(item)}))};
   }
   function variantsFromWire(wire,ex){
     if(!wire||typeof wire!=='object'||!Array.isArray(wire.v)||!wire.v.length)return [];
@@ -97,13 +116,13 @@
     const ex=draft.exercise||{};
     const list=draft.variants||[];
     box.innerHTML='<b>Progressionsstufen</b><div class="kgg015ProgressionIntro">Leichter steht links, schwerer rechts. Bestehende Übungen können verknüpft oder neue Stufen direkt angelegt werden. Die Hauptübung bleibt Teil derselben Kette.</div><div class="kgg015ProgressionList">'+(list.length?list.map((item,index)=>'<div class="kgg015ProgressionRow" data-kgg015-index="'+index+'"><div class="kgg015ProgressionNo">'+(index+1)+'</div><div class="kgg015ProgressionFields"><input data-kgg015-name placeholder="Name der Stufe" value="'+esc(item.name)+'"><select data-kgg015-source aria-label="Bestehende Übung verknüpfen">'+sourceOptions(item.sourceId,ex)+'</select><div class="kgg015ProgressionActions"><button type="button" data-kgg015-up '+(index===0?'disabled':'')+'>↑ leichter</button><button type="button" data-kgg015-down '+(index===list.length-1?'disabled':'')+'>↓ schwerer</button><button type="button" data-kgg015-remove>Stufe entfernen</button></div></div></div>').join(''):'<div class="kgg015ProgressionEmpty">Noch keine Progressionsstufen angelegt.</div>')+'</div><button type="button" class="kgg015ProgressionAdd" id="kgg015AddProgression">+ Progressionsstufe hinzufügen</button>';
-    box.querySelectorAll('[data-kgg015-name]').forEach(input=>input.addEventListener('input',()=>{const row=input.closest('[data-kgg015-index]');const i=Number(row&&row.dataset.kgg015Index);if(draft.variants[i])draft.variants[i].name=input.value;}));
-    box.querySelectorAll('[data-kgg015-source]').forEach(select=>select.addEventListener('change',()=>{const row=select.closest('[data-kgg015-index]');const i=Number(row&&row.dataset.kgg015Index),item=draft.variants[i];if(!item)return;const linked=bankItems().find(candidate=>String(candidate&&candidate.id||'')===String(select.value||''));if(linked){item.sourceId=String(linked.id||'');item.sourceName=String(linked.name||'');item.name=String(linked.name||item.name);item.media=mediaOf(linked);}else{item.sourceId='';item.sourceName='';}renderDraft();}));
+    box.querySelectorAll('[data-kgg015-name]').forEach(input=>input.addEventListener('input',()=>{const row=input.closest('[data-kgg015-index]');const i=Number(row&&row.dataset.kgg015Index);if(draft.variants[i]){draft.variants[i].name=input.value;draft.changed=true;}}));
+    box.querySelectorAll('[data-kgg015-source]').forEach(select=>select.addEventListener('change',()=>{const row=select.closest('[data-kgg015-index]');const i=Number(row&&row.dataset.kgg015Index),item=draft.variants[i];if(!item)return;const linked=bankItems().find(candidate=>String(candidate&&candidate.id||'')===String(select.value||''));if(linked){item.sourceId=String(linked.id||'');item.sourceName=String(linked.name||'');item.name=String(linked.name||item.name);item.media=mediaOf(linked);}else{item.sourceId='';item.sourceName='';}draft.changed=true;renderDraft();}));
     box.querySelectorAll('[data-kgg015-up]').forEach(button=>button.addEventListener('click',()=>moveVariant(Number(button.closest('[data-kgg015-index]')?.dataset.kgg015Index),-1)));
     box.querySelectorAll('[data-kgg015-down]').forEach(button=>button.addEventListener('click',()=>moveVariant(Number(button.closest('[data-kgg015-index]')?.dataset.kgg015Index),1)));
     box.querySelectorAll('[data-kgg015-remove]').forEach(button=>button.addEventListener('click',()=>{const i=Number(button.closest('[data-kgg015-index]')?.dataset.kgg015Index);draft.variants.splice(i,1);draft.changed=true;renderDraft();}));
     const add=$('kgg015AddProgression');
-    if(add)add.onclick=()=>{if(!draft.variants.length)draft.variants.push(normalizeVariant({id:'pv_'+idPart(draft.groupId)+'_0',name:ex.name,sourceId:ex.sourceId||ex.bankId||'',media:ex},0,draft.groupId,ex));const base=draft.variants[0];draft.variants.push(normalizeVariant({name:String(ex.name||'Übung')+' – Stufe '+(draft.variants.length+1),media:base,sourceId:''},draft.variants.length,draft.groupId,ex));draft.changed=true;renderDraft();};
+    if(add)add.onclick=()=>{if(!draft.variants.length)draft.variants.push(normalizeVariant({id:'pv_'+idPart(draft.groupId)+'_0',name:ex.name,sourceId:ex.sourceId||ex.bankId||'',media:ex},0,draft.groupId,ex));const base=draft.variants[0],id=allocateVariantId(draft.groupId,'',draft.variants.length,new Set(draft.variants.map(item=>String(item.id||''))));draft.variants.push(normalizeVariant({id,name:String(ex.name||'Übung')+' – Stufe '+(draft.variants.length+1),media:base,sourceId:''},draft.variants.length,draft.groupId,ex));draft.changed=true;renderDraft();};
   }
   function moveVariant(index,delta){
     if(!draft||!Array.isArray(draft.variants))return;
@@ -117,12 +136,14 @@
   }
   function persistDraft(ex){
     if(!ex||!draft||!draft.changed)return;
-    const values=(draft.variants||[]).filter(item=>String(item.name||'').trim()).map((item,index)=>({...item,id:String(item.id||variantId(draft.groupId,index,item)),groupId:draft.groupId,name:String(item.name||'Progressionsstufe '+(index+1)).trim(),order:index,sourceId:String(item.sourceId||''),media:clone(item.media||[])}));
+    const used=new Set();
+    const values=(draft.variants||[]).filter(item=>String(item.name||'').trim()).map((item,index)=>({...item,id:allocateVariantId(draft.groupId,item.id,index,used),groupId:draft.groupId,name:String(item.name||'Progressionsstufe '+(index+1)).trim(),order:index,sourceId:String(item.sourceId||''),media:clone(item.media||[])}));
     ex.progressionGroupId=draft.groupId;
     ex.progressionVariants=values;
-    try{if(typeof syncStatePlanToStore==='function')syncStatePlanToStore('ticket_015_progression_variants');}catch(err){console.warn('Progressionsstufen konnten nicht synchronisiert werden:',err)}
-    try{if(typeof persistCustomBank==='function')persistCustomBank();}catch(err){console.warn('Progressionsstufen konnten nicht in der Übungsdatenbank gespeichert werden:',err)}
-    try{if(typeof save==='function')save();}catch(err){console.warn('Progressionsstufen konnten nicht gespeichert werden:',err)}
+    try{const bridge=window.KGGTicket015AdminPersistence||{};if(typeof bridge.upsert==='function')bridge.upsert(ex,'ticket_015_progression_variants');else if(typeof upsertPlanExerciseToBank==='function')upsertPlanExerciseToBank(ex,'ticket_015_progression_variants');}catch(err){console.warn('Progressionsstufen konnten nicht in der Übungsdatenbank gespeichert werden:',err)}
+    try{const bridge=window.KGGTicket015AdminPersistence||{};if(typeof bridge.sync==='function')bridge.sync('ticket_015_progression_variants');else if(typeof syncStatePlanToStore==='function')syncStatePlanToStore('ticket_015_progression_variants');}catch(err){console.warn('Progressionsstufen konnten nicht synchronisiert werden:',err)}
+    try{const bridge=window.KGGTicket015AdminPersistence||{};if(typeof bridge.persistBank==='function')bridge.persistBank();else if(typeof persistCustomBank==='function')persistCustomBank();}catch(err){console.warn('Übungsdatenbank konnte nicht gespeichert werden:',err)}
+    try{const bridge=window.KGGTicket015AdminPersistence||{};if(typeof bridge.save==='function')bridge.save();else if(typeof save==='function')save();}catch(err){console.warn('Progressionsstufen konnten nicht gespeichert werden:',err)}
   }
   function patchEditor(){
     if(window.__kggTicket015AdminPatched)return;
@@ -148,8 +169,8 @@
     const compact=window.compactKggH2Exercise,expand=window.expandKggH2Exercise,patient=window.buildPatientExercisePayload;
     if(typeof compact!=='function'||typeof expand!=='function'||typeof patient!=='function')return;
     window.__kggTicket015SerializersPatched=true;
-    window.compactKggH2Exercise=function(ex){const row=compact.apply(this,arguments);const variants=wireVariants(ex);if(variants)row[10]=variants;return row;};
-    window.expandKggH2Exercise=function(item){const ex=expand.apply(this,arguments),wire=Array.isArray(item)?item[10]:null,variants=variantsFromWire(wire,ex);if(variants.length){ex.progressionGroupId=String(wire.g||groupId(ex));ex.progressionVariants=variants;}return ex;};
+    window.compactKggH2Exercise=function(ex){const row=compact.apply(this,arguments),variants=wireVariants(ex);if(variants)row[11]=variants;return row;};
+    window.expandKggH2Exercise=function(item){const ex=expand.apply(this,arguments),wire=Array.isArray(item)&&item[11]&&typeof item[11]==='object'?item[11]:null,variants=variantsFromWire(wire,ex);if(variants.length){ex.progressionGroupId=String(wire.g||groupId(ex));ex.progressionVariants=variants;}return ex;};
     window.buildPatientExercisePayload=function(ex){const copy=patient.apply(this,arguments),variants=normalizeVariants(ex,false);if(variants.length){copy.progressionGroupId=groupId(ex);copy.progressionVariants=variants.map(item=>{const next={...item,media:clone(item.media||[])};try{if(typeof buildExerciseMediaManifestForPatient==='function'){const m=buildExerciseMediaManifestForPatient(item);if(m&&m.length)next.media=m;}}catch(err){}return next;});}return copy;};
   }
   function init(){
@@ -161,7 +182,7 @@
     setTimeout(patchEditor,800);
   }
   window.KGGTicket015Admin={version:VERSION,normalizeVariants,wireVariants,variantsFromWire};
-  if(window.__KGG_TEST__)window.__kggTicket015AdminTest={normalizeVariants,wireVariants,variantsFromWire};
+  if(window.__KGG_TEST__)window.__kggTicket015AdminTest={normalizeVariants,wireVariants,variantsFromWire,allocateVariantId};
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init,{once:true}):init();
 })();
 </script>

@@ -4,7 +4,9 @@
       startMetric:e[6]||'',
       media:media.map(entry=>typeof entry==='string'?{id:entry,type:'image',bundleRef:true}:ensureMediaShape(entry)),
       videoUrl:e[8]||'',
-      videoLabel:e[9]||'Video öffnen'
+      videoLabel:e[9]||'Video öffnen',
+      painMode:e[10]||'exercise',
+      progressionSelection:progressionSelection?progressionSelection.s||[]:[]
     };
   }
   function convertKggH2PayloadToPatientPayload(raw){
@@ -619,7 +621,3 @@
     if(mode==='softContrast'){
       ctx.save();
       ctx.filter='contrast(1.45) brightness(1.05) saturate(0)';
-      ctx.drawImage(src,0,0);
-      ctx.restore();
-      return canvas;
-    }

@@ -1,3 +1,5 @@
+        "QR helper embedded strings",
+        "Critical encoding guard",
         "Local test batteries",
         "Source Truth",
         "version.json"
