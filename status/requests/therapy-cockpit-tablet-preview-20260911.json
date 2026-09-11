@@ -1,12 +1,12 @@
 {
-  "conclusion": null,
+  "conclusion": "failure",
   "kind": "kgg_preview_run_status",
-  "message": "Validierung ist gruen. Tests und Test-App-Preview laufen.",
-  "phase": "publishing",
+  "message": "Preview fehlgeschlagen. Oeffne den Run fuer den fehlgeschlagenen Schritt.",
+  "phase": "failure",
   "requestId": "therapy-cockpit-tablet-preview-20260911",
   "runId": "34566956942",
   "runUrl": "https://github.com/Kayus24/kgg/actions/runs/34566956942",
   "schema": 1,
-  "status": "in_progress",
-  "updatedAt": "2026-09-11T05:42:42Z"
+  "status": "completed",
+  "updatedAt": "2026-09-11T05:44:36Z"
 }
