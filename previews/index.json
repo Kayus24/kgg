@@ -4,6 +4,87 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "requestId": "therapy-cockpit-tablet-preview-20260911-fix",
+      "patchHash": "25aca787f08c90fbb34c689db108ccdd05781d68688c13ff2961ee8afcd700af",
+      "baseSha": "cfa3da7246a3de11195fd582e275140e90ba7811",
+      "commitSha": "cfa3da7246a3de11195fd582e275140e90ba7811",
+      "baseVersionCode": 85,
+      "rolloutCode": 1789105728,
+      "title": "Therapie-Cockpit Tablet Preview",
+      "summary": "Verffentlicht den getesteten additiven Therapie-Cockpit-Tablet-Candidate mit unverndertem Telefonpfad und bestehender Plan-State-Quelle als isolierte Test-App-Preview.",
+      "patchId": "kgg-v085-therapy-cockpit-tablet-preview-fix",
+      "patchFile": "patches/v085-therapy-cockpit-tablet-preview-fix.html",
+      "versionName": "1.0.85-therapy-cockpit-tablet-preview-fix",
+      "previewVersion": "0.2.14-v404-dual-device-qr-test",
+      "requiredTests": [
+        "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
+        "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
+      ],
+      "stationTestIds": [
+        "admin-portrait",
+        "admin-landscape",
+        "admin-split-screen",
+        "admin-package-button",
+        "admin-touch-dialog-save",
+        "admin-seven-exercises",
+        "admin-reorder-save-reload",
+        "display-pairing",
+        "display-h2-1-baseline",
+        "display-h2-7-legacy",
+        "display-h2-12-diagnostic",
+        "display-h2-20-diagnostic",
+        "display-h3-7-normal",
+        "display-h3-12-normal",
+        "display-h3-20-normal",
+        "display-h3-20-far-angle",
+        "display-h3-20-low-contrast",
+        "display-h3-20-photo"
+      ],
+      "previewContext": {
+        "kind": "kgg_preview_context",
+        "schemaVersion": 2,
+        "requestId": "therapy-cockpit-tablet-preview-20260911-fix",
+        "patchHash": "25aca787f08c90fbb34c689db108ccdd05781d68688c13ff2961ee8afcd700af",
+        "baseSha": "cfa3da7246a3de11195fd582e275140e90ba7811",
+        "commitSha": "cfa3da7246a3de11195fd582e275140e90ba7811",
+        "previewVersion": "0.2.14-v404-dual-device-qr-test",
+        "webVersion": "1.0.85-therapy-cockpit-tablet-preview-fix",
+        "requiredTests": [
+          "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
+          "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
+        ],
+        "stationTestIds": [
+          "admin-portrait",
+          "admin-landscape",
+          "admin-split-screen",
+          "admin-package-button",
+          "admin-touch-dialog-save",
+          "admin-seven-exercises",
+          "admin-reorder-save-reload",
+          "display-pairing",
+          "display-h2-1-baseline",
+          "display-h2-7-legacy",
+          "display-h2-12-diagnostic",
+          "display-h2-20-diagnostic",
+          "display-h3-7-normal",
+          "display-h3-12-normal",
+          "display-h3-20-normal",
+          "display-h3-20-far-angle",
+          "display-h3-20-low-contrast",
+          "display-h3-20-photo"
+        ],
+        "deviceTestSessionId": "kgg-test-cfa3da7246a3de11195fd582e275140e",
+        "deviceTestJobHash": "25aca787f08c90fbb34c689db108ccdd05781d68688c13ff2961ee8afcd700af",
+        "deviceTestJobUrl": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/device-tests/therapy-cockpit-tablet-preview-20260911-fix/job.json",
+        "patientPwaUrl": "https://kayus24.github.io/kgg-patient-preview/device-test/",
+        "deviceTestProfile": "quick"
+      },
+      "createdAt": "2026-09-11T05:48:48Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/therapy-cockpit-tablet-preview-20260911-fix/admin.html",
+      "sha256": "3bdc8fbd6dd14b494b8434bda4a4968c5ddd0a21fe80326fee1db398d6bd4a7d"
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "requestId": "therapy-cockpit-ui-20260910-a",
       "patchHash": "8dc59fe7df2485362835fb2e85e5c48d38f198304f0158415b533dd1ffcc384f",
       "baseSha": "56a293e6d4eefd76a45985eb4bb4f217a569db15",
@@ -380,44 +461,25 @@
       "createdAt": "2026-08-01T23:27:27Z",
       "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/gpt-auto-canary-20260802-a/admin.html",
       "sha256": "0fae2d75f1cb696e52d94441dfd6b630c03aafdb4c92b17b1bedd1ed7b456e09"
-    },
-    {
-      "kind": "kgg_gpt_preview",
-      "requestId": "kgg-camera-flow-rollback-20260801-b",
-      "patchHash": "87e9a13bc79c12e3ed54909549d5458b6977813ea82303033226cf475dc2926b",
-      "baseSha": "13fc1c9deb68ae0ba79abb93e0bb05c6896d2a18",
-      "baseVersionCode": 61,
-      "rolloutCode": 1785602103,
-      "title": "KGG-Kameraweg wiederherstellen",
-      "summary": "Die abgelehnte Preview-Umschaltung auf die normale Systemkamera wird verworfen. Die Test-App wird neu aus main gebaut und laesst den vorhandenen KGG-Kameraweg unveraendert aktiv.",
-      "patchId": "kgg-v061-camera-flow-rollback",
-      "patchFile": "patches/v061-camera-flow-rollback.html",
-      "versionName": "1.0.61-camera-flow-rollback",
-      "createdAt": "2026-08-01T16:35:03Z",
-      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-camera-flow-rollback-20260801-b/admin.html",
-      "sha256": "114c888dc20d7237887d3470140cb13de2d7d8c74e19821fef3937c877227c0a"
     }
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "requestId": "therapy-cockpit-ui-20260910-a",
-    "patchHash": "8dc59fe7df2485362835fb2e85e5c48d38f198304f0158415b533dd1ffcc384f",
-    "baseSha": "56a293e6d4eefd76a45985eb4bb4f217a569db15",
-    "commitSha": "56a293e6d4eefd76a45985eb4bb4f217a569db15",
+    "requestId": "therapy-cockpit-tablet-preview-20260911-fix",
+    "patchHash": "25aca787f08c90fbb34c689db108ccdd05781d68688c13ff2961ee8afcd700af",
+    "baseSha": "cfa3da7246a3de11195fd582e275140e90ba7811",
+    "commitSha": "cfa3da7246a3de11195fd582e275140e90ba7811",
     "baseVersionCode": 85,
-    "rolloutCode": 1789007755,
-    "title": "Therapie Cockpit Tablet UI Integration",
-    "summary": "Integriert den vorhandenen Therapie-Cockpit-Schalter und die Tablet-Fertig-Ausgabe in die bestehende KGG-Admin-UI.",
-    "patchId": "kgg-v085-therapy-cockpit-ui-integration",
-    "patchFile": "patches/v085-therapy-cockpit-ui-integration.html",
-    "versionName": "1.0.85-therapy-cockpit-ui-integration",
+    "rolloutCode": 1789105728,
+    "title": "Therapie-Cockpit Tablet Preview",
+    "summary": "Verffentlicht den getesteten additiven Therapie-Cockpit-Tablet-Candidate mit unverndertem Telefonpfad und bestehender Plan-State-Quelle als isolierte Test-App-Preview.",
+    "patchId": "kgg-v085-therapy-cockpit-tablet-preview-fix",
+    "patchFile": "patches/v085-therapy-cockpit-tablet-preview-fix.html",
+    "versionName": "1.0.85-therapy-cockpit-tablet-preview-fix",
     "previewVersion": "0.2.14-v404-dual-device-qr-test",
     "requiredTests": [
       "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
-      "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression",
-      "cmd /c release-pipeline\\run-kgg-tests.cmd --suite therapy-cockpit --level regression",
-      "node release-pipeline/kgg_therapy_cockpit_browser_smoke.js",
-      "python release-pipeline/build_therapist_source.py --check"
+      "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
     ],
     "stationTestIds": [
       "admin-portrait",
@@ -442,18 +504,15 @@
     "previewContext": {
       "kind": "kgg_preview_context",
       "schemaVersion": 2,
-      "requestId": "therapy-cockpit-ui-20260910-a",
-      "patchHash": "8dc59fe7df2485362835fb2e85e5c48d38f198304f0158415b533dd1ffcc384f",
-      "baseSha": "56a293e6d4eefd76a45985eb4bb4f217a569db15",
-      "commitSha": "56a293e6d4eefd76a45985eb4bb4f217a569db15",
+      "requestId": "therapy-cockpit-tablet-preview-20260911-fix",
+      "patchHash": "25aca787f08c90fbb34c689db108ccdd05781d68688c13ff2961ee8afcd700af",
+      "baseSha": "cfa3da7246a3de11195fd582e275140e90ba7811",
+      "commitSha": "cfa3da7246a3de11195fd582e275140e90ba7811",
       "previewVersion": "0.2.14-v404-dual-device-qr-test",
-      "webVersion": "1.0.85-therapy-cockpit-ui-integration",
+      "webVersion": "1.0.85-therapy-cockpit-tablet-preview-fix",
       "requiredTests": [
         "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
-        "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression",
-        "cmd /c release-pipeline\\run-kgg-tests.cmd --suite therapy-cockpit --level regression",
-        "node release-pipeline/kgg_therapy_cockpit_browser_smoke.js",
-        "python release-pipeline/build_therapist_source.py --check"
+        "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression"
       ],
       "stationTestIds": [
         "admin-portrait",
@@ -475,14 +534,14 @@
         "display-h3-20-low-contrast",
         "display-h3-20-photo"
       ],
-      "deviceTestSessionId": "kgg-test-56a293e6d4eefd76a45985eb4bb4f217",
-      "deviceTestJobHash": "8dc59fe7df2485362835fb2e85e5c48d38f198304f0158415b533dd1ffcc384f",
-      "deviceTestJobUrl": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/device-tests/therapy-cockpit-ui-20260910-a/job.json",
+      "deviceTestSessionId": "kgg-test-cfa3da7246a3de11195fd582e275140e",
+      "deviceTestJobHash": "25aca787f08c90fbb34c689db108ccdd05781d68688c13ff2961ee8afcd700af",
+      "deviceTestJobUrl": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/device-tests/therapy-cockpit-tablet-preview-20260911-fix/job.json",
       "patientPwaUrl": "https://kayus24.github.io/kgg-patient-preview/device-test/",
       "deviceTestProfile": "quick"
     },
-    "createdAt": "2026-09-10T02:35:55Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/therapy-cockpit-ui-20260910-a/admin.html",
-    "sha256": "0d3c895b3637540c0ec20c91b6c955230a54a104fd4da032aa9bf3729c891d80"
+    "createdAt": "2026-09-11T05:48:48Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/therapy-cockpit-tablet-preview-20260911-fix/admin.html",
+    "sha256": "3bdc8fbd6dd14b494b8434bda4a4968c5ddd0a21fe80326fee1db398d6bd4a7d"
   }
 }
