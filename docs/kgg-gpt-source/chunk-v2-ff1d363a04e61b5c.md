@@ -29,7 +29,8 @@
     "kgg-v081-qr-full-plan-device-ladder",
     "kgg-v082-therapy-cockpit",
     "kgg-v083-therapy-cockpit-id-guard",
-    "kgg-v084-therapy-cockpit-start-link"
+    "kgg-v084-therapy-cockpit-start-link",
+    "kgg-v085-ticket-015-progressions"
   ],
   "parts": [
     "base-head.html",
@@ -76,6 +77,7 @@
     "patches/v082-therapy-cockpit.html",
     "patches/v083-therapy-cockpit-id-guard.html",
     "patches/v084-therapy-cockpit-start-link.html",
+    "patches/v085-ticket-015-progressions.html",
     "footer.html"
   ]
 }
