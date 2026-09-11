@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Testing
 
-Generated retrieval pack. Source digest: `4fbaf0c89b4fe4cf`.
+Generated retrieval pack. Source digest: `4007442e9cf7e70b`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -139,7 +139,7 @@ def validate_static_compatibility(manifest:dict,version:str)->None:
   "./patient-numpad-visibility-fix.js?v=stay-open-switch-1",
   "./patient-extra-info-display.js?v=extra-info-filter-1",
   "./patient-last-value-hints.js?v=last-value-button-shimmer-1",
-  "./patient-set-summary-groups.js?v=set-summary-groups-2-range-label",
+  "./patient-set-summary-groups.js?v=set-summary-groups-4-ticket-015-progressions",
   "./patient-qr-fullscreen.js?v=qr-fullscreen-1",
   "./patient-numpad-card-guard.js?v=numpad-input-switch-1",
   f"./patient-version-label.js?v={version}",

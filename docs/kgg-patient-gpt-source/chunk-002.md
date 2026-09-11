@@ -1,16 +1,16 @@
 # KGG Patient Source Chunk 002
 
 - Source file: `service-worker.js`
-- Characters: 1-7664
-- Full source SHA-256: `06c98eeaedf788bf5388a855b002a83ee7dbce3cff0b1c3d5b0402599a604963`
+- Characters: 1-7669
+- Full source SHA-256: `d8252773760e251106511f194a57c71b9e77fd336c1d1698d14f143b98987b60`
 
 ```
-const CACHE_NAME = 'kgg-handyplan-v82-ticket034-finish-warning-modal';
-const APP_VERSION = '82';
+const CACHE_NAME = 'kgg-handyplan-v84-ticket-015-progressions-20260911-v2';
+const APP_VERSION = '84';
 const CACHE_PREFIX = 'kgg-handyplan-';
 const RECOVERY_PATH = './update-recovery.html';
 const NUMPAD_UI_FIX_SCRIPT = './numpad-ui-fix.js?v=scroll-stable-1';
-const VERSION_LABEL_SCRIPT = './patient-version-label.js?v=82';
+const VERSION_LABEL_SCRIPT = './patient-version-label.js?v=84';
 const PLAN_LINK_CHOICE_SCRIPT = './patient-plan-link-choice.js?v=plan-link-choice-2-kgg-h3';
 const COLLAPSE_SCRIPT = './collapse-cards.js?v=plan-update-label-2-progress-visible';
 const CARD_PROGRESS_SCRIPT = './patient-card-progress.js?v=card-progress-2-complete-fields';
