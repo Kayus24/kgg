@@ -27,7 +27,7 @@
     "knowledge": [
       {
         "path": "docs/kgg-custom-gpt-knowledge-architecture.md",
-        "sha256": "c58db9dc27b320e3569d362da07b30187710c4015f77df4494fde1064ecf4dc5"
+        "sha256": "d8c06b6ea0373a53acfe1a93dc21dc6763fcbd053cf3bc6eb85870b294a7ed27"
       },
       {
         "path": "docs/kgg-custom-gpt-knowledge-operations.md",
