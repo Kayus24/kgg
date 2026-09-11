@@ -1,10 +1,3 @@
-# KGG Patient Source Chunk 031
-
-- Source file: `patient-storage-scope.js`
-- Characters: 1-4454
-- Full source SHA-256: `5ee476fb50a653ec339cc1876fa916464929bc2e196e347c3f1fd7a0406a79d7`
-
-```
 (()=>{
   const REQUEST_ID_RE=/\/previews\/([a-z0-9][a-z0-9-]{5,63})(?:\/|$)/i;
   const match=String(location.pathname||'').match(REQUEST_ID_RE);
@@ -115,4 +108,3 @@
     window.__KGG_STORAGE_SCOPE__={kind:'preview',requestId,prefix,error:'scope-install-failed'};
   }
 })();
-```

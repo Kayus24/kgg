@@ -25,7 +25,7 @@ function runAdminSmoke(){
   const document={readyState:'complete',head:null,getElementById(){return null},querySelector(){return null},addEventListener(){}};
   const context={window,document,console,setTimeout(){},clearTimeout(){},bank:[],state:{plan:[]},ensureExerciseMediaList(ex){return Array.isArray(ex&&ex.media)?ex.media:[]}};
   window.document=document;window.window=window;
-  window.compactKggH2Exercise=ex=>[ex.name||'Basis'];
+  window.compactKggH2Exercise=ex=>[ex.name||'Basis','','','','','','','','','',ex.painMode||'exercise'];
   window.expandKggH2Exercise=item=>({name:item&&item[0]||'Basis'});
   window.buildPatientExercisePayload=ex=>({...ex});
   context.globalThis=context;
@@ -44,10 +44,16 @@ function runAdminSmoke(){
   assert(wire&&wire.g&&wire.v.length===2,'admin wire format is incomplete');
   assert(wire.v[1].i==='hard'&&wire.v[1].o===1,'admin wire format lost stable id/order');
   const row=window.compactKggH2Exercise(exercise);
-  assert(row[10]&&row[10].g===wire.g,'KGGH2 optional progression field was not appended');
+  assert(row[10]==='exercise','existing painMode slot was overwritten');
+  assert(row[11]&&row[11].g===wire.g,'KGGH2 optional progression field was not appended in the reserved-free slot');
   const expanded=window.expandKggH2Exercise(row);
   assert(expanded.progressionVariants&&expanded.progressionVariants.length===2,'KGGH2 roundtrip lost progressions');
   assert(window.buildPatientExercisePayload(exercise).progressionVariants.length===2,'patient payload omitted progressions');
+  const used=new Set(['pv_group-1_0','pv_group-1_2']);
+  assert(api.allocateVariantId('group-1','',2,used)!=='pv_group-1_2','progression id allocator recreated an existing id');
+  const appCore=fs.readFileSync(path.join(ROOT,'kgg-update','src','runtime','app-core.html'),'utf8');
+  assert(appCore.includes('allExerciseMediaList'),'progression media is not included in the shared media collector');
+  assert(appCore.includes('progressionSelection'),'KGGD1 progression selection is not carried into therapist scan parsing');
 }
 
 function runPatientSmoke(){

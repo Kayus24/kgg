@@ -1,10 +1,10 @@
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v085_ticket_015_progressions';
+  const VERSION='KGG_GITHUB_UPDATE_v086_ticket_015_progressions_contract';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v085","buildTime":"2026-09-10T22:26:33Z","buildCode":"module-v085-ticket-015-progressions","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v086","buildTime":"2026-09-11T07:03:51Z","buildCode":"module-v086-ticket-015-progressions-contract","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -243,8 +243,13 @@
   function currentMediaShareTtlSeconds(){
     return Math.max(MEDIA_UPLOAD_TTL_SECONDS,Number(patientShareTtlSeconds)||MEDIA_UPLOAD_TTL_SECONDS);
   }
+  function allExerciseMediaList(ex){
+    const direct=ensureExerciseMediaList(ex);
+    const variants=Array.isArray(ex&&ex.progressionVariants)?ex.progressionVariants.flatMap(variant=>ensureExerciseMediaList(variant)):[];
+    return direct.concat(variants);
+  }
   function mediaItemsFromExercises(exercises){
-    return (exercises||[]).flatMap(ex=>ensureExerciseMediaList(ex).map(media=>({ex,media})));
+    return (exercises||[]).flatMap(ex=>allExerciseMediaList(ex).map(media=>({ex,media})));
   }
   function allPlanMediaItems(exercises){
     return mediaItemsFromExercises(exercises||state.plan||[]);
@@ -299,7 +304,7 @@
     const seen=new Set();
     const items=[];
     for(const ex of (exercises||[])){
-      for(const media of ensureExerciseMediaList(ex)){
+      for(const media of allExerciseMediaList(ex)){
         if(media.type!=='image'||!media.id||seen.has(media.id))continue;
         seen.add(media.id);
         const record=await getEncryptedMediaBlob(media.id);
@@ -339,6 +344,7 @@
     lastPatientMediaBundleManifest=bundle;
     return bundle;
   }
+  window.KGGTicket015PatientMediaBundleReady=()=>!!lastPatientMediaBundleManifest;
   async function prepareMediaUploadsForPatientShare(options){
     lastPatientMediaBundleManifest=null;
     const sourcePlan=options&&options.plan;
@@ -946,6 +952,12 @@
   function persistDeletedBankIds(){try{localStorage.setItem(deletedBankKey,JSON.stringify([...deletedBankIds]));}catch(e){console.warn(e)}}
   function loadCustomBank(){loadDeletedBankIds(); try{const raw=localStorage.getItem(customBankKey); const items=raw?JSON.parse(raw):[]; if(Array.isArray(items))items.forEach(ex=>{if(ex&&ex.name){const existing=bank.find(b=>compact(b.name)===compact(ex.name)); if(existing)Object.assign(existing,{...ex,id:existing.id||ex.id,custom:true}); else bank.push({...ex,custom:true});}});}catch(e){console.warn(e)} for(let i=bank.length-1;i>=0;i--){if(deletedBankIds.has(String(bank[i]&&bank[i].id)))bank.splice(i,1);}}
   function persistCustomBank(){try{localStorage.setItem(customBankKey,JSON.stringify(bank.filter(ex=>ex.custom||ex.createdFromPlan)));}catch(e){console.warn(e)} queueNativeExerciseBankSync('exercise_bank_changed');}
+  window.KGGTicket015AdminPersistence={
+    upsert:(ex,reason)=>upsertPlanExerciseToBank(ex,reason),
+    sync:(reason)=>syncStatePlanToStore(reason||'ticket_015_progression_variants'),
+    persistBank:()=>persistCustomBank(),
+    save:()=>save()
+  };
   function openBankDeleteModal(id){
     const ex=bank.find(item=>String(item.id)===String(id));
     if(!ex)return;
@@ -981,7 +993,9 @@
       startLoad:ex.startLoad||'',
       videoUrl:ex.videoUrl||'',
       videoLabel:ex.videoLabel||'Video öffnen',
-      media:ensureExerciseMediaList(ex)
+      media:ensureExerciseMediaList(ex),
+      progressionGroupId:ex.progressionGroupId||'',
+      progressionVariants:Array.isArray(ex.progressionVariants)?ex.progressionVariants.map(item=>({...item,media:ensureExerciseMediaList(item)})):[]
     };
   }
   function upsertPlanExerciseToBank(ex,reason){
@@ -4408,6 +4422,7 @@
     const ids=ensureExerciseMediaList(ex).filter(item=>item.type==='image'&&item.id).map(item=>item.id);
     return ids.length?ids:'';
   }
+  window.KGGTicket015PatientMedia={manifest:buildExerciseMediaManifestForPatient,refs:buildExerciseMediaRefsForPatient};
   function compactMediaBundleForQr(bundle){
     if(!bundle||!bundle.downloadUrl||!bundle.crypto)return null;
     return {
@@ -4426,7 +4441,7 @@
     return copy;
   }
   function buildPlanMediaMeta(rawExercises,ttlSeconds){
-    const items=(rawExercises||[]).flatMap(ensureExerciseMediaList);
+    const items=mediaItemsFromExercises(rawExercises||[]).map(entry=>entry.media);
     const count=items.length;
     const bundle=compactMediaBundleForQr(lastPatientMediaBundleManifest);
     const ready=bundle?count:items.filter(item=>item.downloadUrl&&item.status==='ready').length;
@@ -4456,7 +4471,8 @@
       ex&&ex.startMetric||ex&&ex.metric||ex&&ex.reps||'',
       media&&media.length?media:'',
       ex&&ex.videoUrl||'',
-      ex&&ex.videoLabel||'Video öffnen'
+      ex&&ex.videoLabel||'Video öffnen',
+      ex&&ex.painMode||'exercise'
     ];
   }
   function buildKggH2PayloadFromPlan(plan,exercises,patient,mediaMeta){
@@ -4523,7 +4539,8 @@
   }
   function expandKggH2Exercise(item){
     const e=Array.isArray(item)?item:[];
-    const media=Array.isArray(e[7])?e[7]:(e[7]?[e[7]]:[]);
+    const progressionSelection=e[7]&&typeof e[7]==='object'&&!Array.isArray(e[7])&&e[7].k==='kgg015'?e[7]:null;
+    const media=progressionSelection?[]:(Array.isArray(e[7])?e[7]:(e[7]?[e[7]]:[]));
     const loadUnit=e[3]||'kg';
     const metricUnit=e[4]||'Wdh';
     return {
@@ -4538,7 +4555,9 @@
       startMetric:e[6]||'',
       media:media.map(entry=>typeof entry==='string'?{id:entry,type:'image',bundleRef:true}:ensureMediaShape(entry)),
       videoUrl:e[8]||'',
-      videoLabel:e[9]||'Video öffnen'
+      videoLabel:e[9]||'Video öffnen',
+      painMode:e[10]||'exercise',
+      progressionSelection:progressionSelection?progressionSelection.s||[]:[]
     };
   }
   function convertKggH2PayloadToPatientPayload(raw){
@@ -5577,6 +5596,8 @@
     const name=scanExerciseName(source);
     if(!name)return '';
     const lines=scanStructuredSetLinesFromValues(item,source);
+    const selections=Array.isArray(source&&source.progressionSelection)?source.progressionSelection.filter(value=>value&&value.n).map(value=>'Satz '+value.s+': '+value.n):[];
+    if(selections.length)lines.push('Variantenwahl: '+selections.join(' · '));
     return [name].concat(lines).filter(Boolean).join('\n');
   }
   function formatScanExerciseLine(item){

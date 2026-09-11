@@ -92,7 +92,7 @@ paths:
     post:
       operationId: submitKggPatientMainGate
       summary: Create a Patient PR or request Patient live after Max's final approval.
-      description: Consequential release gate. Requires the exact phrase Gut für PAT live and a matching accepted Preview.
+      description: Consequential release gate. Requires one immediate confirmation, Zulassen, and a matching accepted Preview.
       x-openai-isConsequential: true
       security:
         - githubBearer: []
@@ -123,7 +123,7 @@ paths:
                       description: JSON string following KGG patient payload v1. It must contain no patient data or secrets.
                     approval_phrase:
                       type: string
-                      enum: [Gut für PAT live]
+                      enum: [Zulassen]
       responses:
         "204":
           description: Patient workflow dispatch accepted.

@@ -1,7 +1,7 @@
 {
-  "versionCode": 85,
-  "versionName": "1.0.85-ticket-015-progressions",
-  "indexUrl": "index.html?v=85",
-  "sha256": "4a50c9f23d9c37bbf034c0c7663082a5353ee92e04fe9eb52c23b7ad51ce0712",
-  "notes": "v085: Geordnete Progressionsstufen werden im Admin-Editor und der Patienten-App über den bestehenden Planvertrag unterstützt."
+  "versionCode": 86,
+  "versionName": "1.0.86-ticket-015-progressions-contract",
+  "indexUrl": "index.html?v=86",
+  "sha256": "cd6119bd6fce199dc217b95337153aa48f6687b3c4d0042d6dce147f16d438ca",
+  "notes": "v086: Progressionsstufen bleiben mit painMode kompatibel, transportieren Auswahl/Medien sicher und werden im Editor/Bank-State persistiert."
 }

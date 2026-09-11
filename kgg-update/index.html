@@ -17260,11 +17260,11 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
 </script>
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v085_ticket_015_progressions';
+  const VERSION='KGG_GITHUB_UPDATE_v086_ticket_015_progressions_contract';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v085","buildTime":"2026-09-10T22:26:33Z","buildCode":"module-v085-ticket-015-progressions","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v086","buildTime":"2026-09-11T07:03:51Z","buildCode":"module-v086-ticket-015-progressions-contract","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -17503,8 +17503,13 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
   function currentMediaShareTtlSeconds(){
     return Math.max(MEDIA_UPLOAD_TTL_SECONDS,Number(patientShareTtlSeconds)||MEDIA_UPLOAD_TTL_SECONDS);
   }
+  function allExerciseMediaList(ex){
+    const direct=ensureExerciseMediaList(ex);
+    const variants=Array.isArray(ex&&ex.progressionVariants)?ex.progressionVariants.flatMap(variant=>ensureExerciseMediaList(variant)):[];
+    return direct.concat(variants);
+  }
   function mediaItemsFromExercises(exercises){
-    return (exercises||[]).flatMap(ex=>ensureExerciseMediaList(ex).map(media=>({ex,media})));
+    return (exercises||[]).flatMap(ex=>allExerciseMediaList(ex).map(media=>({ex,media})));
   }
   function allPlanMediaItems(exercises){
     return mediaItemsFromExercises(exercises||state.plan||[]);
@@ -17559,7 +17564,7 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
     const seen=new Set();
     const items=[];
     for(const ex of (exercises||[])){
-      for(const media of ensureExerciseMediaList(ex)){
+      for(const media of allExerciseMediaList(ex)){
         if(media.type!=='image'||!media.id||seen.has(media.id))continue;
         seen.add(media.id);
         const record=await getEncryptedMediaBlob(media.id);
@@ -17599,6 +17604,7 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
     lastPatientMediaBundleManifest=bundle;
     return bundle;
   }
+  window.KGGTicket015PatientMediaBundleReady=()=>!!lastPatientMediaBundleManifest;
   async function prepareMediaUploadsForPatientShare(options){
     lastPatientMediaBundleManifest=null;
     const sourcePlan=options&&options.plan;
@@ -18206,6 +18212,12 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
   function persistDeletedBankIds(){try{localStorage.setItem(deletedBankKey,JSON.stringify([...deletedBankIds]));}catch(e){console.warn(e)}}
   function loadCustomBank(){loadDeletedBankIds(); try{const raw=localStorage.getItem(customBankKey); const items=raw?JSON.parse(raw):[]; if(Array.isArray(items))items.forEach(ex=>{if(ex&&ex.name){const existing=bank.find(b=>compact(b.name)===compact(ex.name)); if(existing)Object.assign(existing,{...ex,id:existing.id||ex.id,custom:true}); else bank.push({...ex,custom:true});}});}catch(e){console.warn(e)} for(let i=bank.length-1;i>=0;i--){if(deletedBankIds.has(String(bank[i]&&bank[i].id)))bank.splice(i,1);}}
   function persistCustomBank(){try{localStorage.setItem(customBankKey,JSON.stringify(bank.filter(ex=>ex.custom||ex.createdFromPlan)));}catch(e){console.warn(e)} queueNativeExerciseBankSync('exercise_bank_changed');}
+  window.KGGTicket015AdminPersistence={
+    upsert:(ex,reason)=>upsertPlanExerciseToBank(ex,reason),
+    sync:(reason)=>syncStatePlanToStore(reason||'ticket_015_progression_variants'),
+    persistBank:()=>persistCustomBank(),
+    save:()=>save()
+  };
   function openBankDeleteModal(id){
     const ex=bank.find(item=>String(item.id)===String(id));
     if(!ex)return;
@@ -18241,7 +18253,9 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
       startLoad:ex.startLoad||'',
       videoUrl:ex.videoUrl||'',
       videoLabel:ex.videoLabel||'Video öffnen',
-      media:ensureExerciseMediaList(ex)
+      media:ensureExerciseMediaList(ex),
+      progressionGroupId:ex.progressionGroupId||'',
+      progressionVariants:Array.isArray(ex.progressionVariants)?ex.progressionVariants.map(item=>({...item,media:ensureExerciseMediaList(item)})):[]
     };
   }
   function upsertPlanExerciseToBank(ex,reason){
@@ -21668,6 +21682,7 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
     const ids=ensureExerciseMediaList(ex).filter(item=>item.type==='image'&&item.id).map(item=>item.id);
     return ids.length?ids:'';
   }
+  window.KGGTicket015PatientMedia={manifest:buildExerciseMediaManifestForPatient,refs:buildExerciseMediaRefsForPatient};
   function compactMediaBundleForQr(bundle){
     if(!bundle||!bundle.downloadUrl||!bundle.crypto)return null;
     return {
@@ -21686,7 +21701,7 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
     return copy;
   }
   function buildPlanMediaMeta(rawExercises,ttlSeconds){
-    const items=(rawExercises||[]).flatMap(ensureExerciseMediaList);
+    const items=mediaItemsFromExercises(rawExercises||[]).map(entry=>entry.media);
     const count=items.length;
     const bundle=compactMediaBundleForQr(lastPatientMediaBundleManifest);
     const ready=bundle?count:items.filter(item=>item.downloadUrl&&item.status==='ready').length;
@@ -21716,7 +21731,8 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
       ex&&ex.startMetric||ex&&ex.metric||ex&&ex.reps||'',
       media&&media.length?media:'',
       ex&&ex.videoUrl||'',
-      ex&&ex.videoLabel||'Video öffnen'
+      ex&&ex.videoLabel||'Video öffnen',
+      ex&&ex.painMode||'exercise'
     ];
   }
   function buildKggH2PayloadFromPlan(plan,exercises,patient,mediaMeta){
@@ -21783,7 +21799,8 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
   }
   function expandKggH2Exercise(item){
     const e=Array.isArray(item)?item:[];
-    const media=Array.isArray(e[7])?e[7]:(e[7]?[e[7]]:[]);
+    const progressionSelection=e[7]&&typeof e[7]==='object'&&!Array.isArray(e[7])&&e[7].k==='kgg015'?e[7]:null;
+    const media=progressionSelection?[]:(Array.isArray(e[7])?e[7]:(e[7]?[e[7]]:[]));
     const loadUnit=e[3]||'kg';
     const metricUnit=e[4]||'Wdh';
     return {
@@ -21798,7 +21815,9 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
       startMetric:e[6]||'',
       media:media.map(entry=>typeof entry==='string'?{id:entry,type:'image',bundleRef:true}:ensureMediaShape(entry)),
       videoUrl:e[8]||'',
-      videoLabel:e[9]||'Video öffnen'
+      videoLabel:e[9]||'Video öffnen',
+      painMode:e[10]||'exercise',
+      progressionSelection:progressionSelection?progressionSelection.s||[]:[]
     };
   }
   function convertKggH2PayloadToPatientPayload(raw){
@@ -22837,6 +22856,8 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
     const name=scanExerciseName(source);
     if(!name)return '';
     const lines=scanStructuredSetLinesFromValues(item,source);
+    const selections=Array.isArray(source&&source.progressionSelection)?source.progressionSelection.filter(value=>value&&value.n).map(value=>'Satz '+value.s+': '+value.n):[];
+    if(selections.length)lines.push('Variantenwahl: '+selections.join(' · '));
     return [name].concat(lines).filter(Boolean).join('\n');
   }
   function formatScanExerciseLine(item){
@@ -28464,6 +28485,16 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   const mediaOf=ex=>{try{return typeof ensureExerciseMediaList==='function'?clone(ensureExerciseMediaList(ex)):clone(Array.isArray(ex&&ex.media)?ex.media:[]);}catch(err){return [];}};
   function groupId(ex){return String(ex&&ex.progressionGroupId||'pg_'+idPart(ex&&((ex.localId||ex.id)||'exercise')));}
   function variantId(group,index,value){return String(value&&value.id||('pv_'+idPart(group)+'_'+index));}
+  function allocateVariantId(group,preferred,index,used){
+    const taken=used||new Set();
+    let id=String(preferred||'');
+    if(!id||taken.has(id)){
+      let n=Math.max(0,Number(index)||0);
+      do{id='pv_'+idPart(group)+'_'+n++;}while(taken.has(id));
+    }
+    taken.add(id);
+    return id;
+  }
   function normalizeVariant(value,index,group,base){
     const source=value&&typeof value==='object'?value:{};
     const linked=source.sourceId||source.bankId||'';
@@ -28484,12 +28515,21 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     const values=source.length?source.map((item,index)=>normalizeVariant(item,index,group,base)):[normalizeVariant({id:'pv_'+idPart(group)+'_0',name:base.name,sourceId:base.sourceId||base.bankId||'',media:base},0,group,base)];
     if(!values.length)return [];
     values.sort((a,b)=>a.order-b.order||a.id.localeCompare(b.id));
-    return values.map((item,index)=>({...item,order:index,groupId:group}));
+    const used=new Set();
+    return values.map((item,index)=>({...item,id:allocateVariantId(group,item.id,index,used),order:index,groupId:group}));
+  }
+  function wireMedia(item){
+    try{
+      const mediaApi=window.KGGTicket015PatientMedia||{};
+      if(window.KGGTicket015PatientMediaBundleReady&&window.KGGTicket015PatientMediaBundleReady()&&typeof mediaApi.refs==='function')return clone(mediaApi.refs(item));
+      if(typeof mediaApi.manifest==='function')return clone(mediaApi.manifest(item));
+    }catch(err){}
+    return mediaOf(item);
   }
   function wireVariants(ex){
     const values=normalizeVariants(ex,false);
     if(!values.length)return null;
-    return {g:groupId(ex),v:values.map(item=>({i:item.id,n:item.name,o:item.order,s:item.sourceId||'',m:clone(item.media||[])}))};
+    return {g:groupId(ex),v:values.map(item=>({i:item.id,n:item.name,o:item.order,s:item.sourceId||'',m:wireMedia(item)}))};
   }
   function variantsFromWire(wire,ex){
     if(!wire||typeof wire!=='object'||!Array.isArray(wire.v)||!wire.v.length)return [];
@@ -28550,13 +28590,13 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     const ex=draft.exercise||{};
     const list=draft.variants||[];
     box.innerHTML='<b>Progressionsstufen</b><div class="kgg015ProgressionIntro">Leichter steht links, schwerer rechts. Bestehende Übungen können verknüpft oder neue Stufen direkt angelegt werden. Die Hauptübung bleibt Teil derselben Kette.</div><div class="kgg015ProgressionList">'+(list.length?list.map((item,index)=>'<div class="kgg015ProgressionRow" data-kgg015-index="'+index+'"><div class="kgg015ProgressionNo">'+(index+1)+'</div><div class="kgg015ProgressionFields"><input data-kgg015-name placeholder="Name der Stufe" value="'+esc(item.name)+'"><select data-kgg015-source aria-label="Bestehende Übung verknüpfen">'+sourceOptions(item.sourceId,ex)+'</select><div class="kgg015ProgressionActions"><button type="button" data-kgg015-up '+(index===0?'disabled':'')+'>↑ leichter</button><button type="button" data-kgg015-down '+(index===list.length-1?'disabled':'')+'>↓ schwerer</button><button type="button" data-kgg015-remove>Stufe entfernen</button></div></div></div>').join(''):'<div class="kgg015ProgressionEmpty">Noch keine Progressionsstufen angelegt.</div>')+'</div><button type="button" class="kgg015ProgressionAdd" id="kgg015AddProgression">+ Progressionsstufe hinzufügen</button>';
-    box.querySelectorAll('[data-kgg015-name]').forEach(input=>input.addEventListener('input',()=>{const row=input.closest('[data-kgg015-index]');const i=Number(row&&row.dataset.kgg015Index);if(draft.variants[i])draft.variants[i].name=input.value;}));
-    box.querySelectorAll('[data-kgg015-source]').forEach(select=>select.addEventListener('change',()=>{const row=select.closest('[data-kgg015-index]');const i=Number(row&&row.dataset.kgg015Index),item=draft.variants[i];if(!item)return;const linked=bankItems().find(candidate=>String(candidate&&candidate.id||'')===String(select.value||''));if(linked){item.sourceId=String(linked.id||'');item.sourceName=String(linked.name||'');item.name=String(linked.name||item.name);item.media=mediaOf(linked);}else{item.sourceId='';item.sourceName='';}renderDraft();}));
+    box.querySelectorAll('[data-kgg015-name]').forEach(input=>input.addEventListener('input',()=>{const row=input.closest('[data-kgg015-index]');const i=Number(row&&row.dataset.kgg015Index);if(draft.variants[i]){draft.variants[i].name=input.value;draft.changed=true;}}));
+    box.querySelectorAll('[data-kgg015-source]').forEach(select=>select.addEventListener('change',()=>{const row=select.closest('[data-kgg015-index]');const i=Number(row&&row.dataset.kgg015Index),item=draft.variants[i];if(!item)return;const linked=bankItems().find(candidate=>String(candidate&&candidate.id||'')===String(select.value||''));if(linked){item.sourceId=String(linked.id||'');item.sourceName=String(linked.name||'');item.name=String(linked.name||item.name);item.media=mediaOf(linked);}else{item.sourceId='';item.sourceName='';}draft.changed=true;renderDraft();}));
     box.querySelectorAll('[data-kgg015-up]').forEach(button=>button.addEventListener('click',()=>moveVariant(Number(button.closest('[data-kgg015-index]')?.dataset.kgg015Index),-1)));
     box.querySelectorAll('[data-kgg015-down]').forEach(button=>button.addEventListener('click',()=>moveVariant(Number(button.closest('[data-kgg015-index]')?.dataset.kgg015Index),1)));
     box.querySelectorAll('[data-kgg015-remove]').forEach(button=>button.addEventListener('click',()=>{const i=Number(button.closest('[data-kgg015-index]')?.dataset.kgg015Index);draft.variants.splice(i,1);draft.changed=true;renderDraft();}));
     const add=$('kgg015AddProgression');
-    if(add)add.onclick=()=>{if(!draft.variants.length)draft.variants.push(normalizeVariant({id:'pv_'+idPart(draft.groupId)+'_0',name:ex.name,sourceId:ex.sourceId||ex.bankId||'',media:ex},0,draft.groupId,ex));const base=draft.variants[0];draft.variants.push(normalizeVariant({name:String(ex.name||'Übung')+' – Stufe '+(draft.variants.length+1),media:base,sourceId:''},draft.variants.length,draft.groupId,ex));draft.changed=true;renderDraft();};
+    if(add)add.onclick=()=>{if(!draft.variants.length)draft.variants.push(normalizeVariant({id:'pv_'+idPart(draft.groupId)+'_0',name:ex.name,sourceId:ex.sourceId||ex.bankId||'',media:ex},0,draft.groupId,ex));const base=draft.variants[0],id=allocateVariantId(draft.groupId,'',draft.variants.length,new Set(draft.variants.map(item=>String(item.id||''))));draft.variants.push(normalizeVariant({id,name:String(ex.name||'Übung')+' – Stufe '+(draft.variants.length+1),media:base,sourceId:''},draft.variants.length,draft.groupId,ex));draft.changed=true;renderDraft();};
   }
   function moveVariant(index,delta){
     if(!draft||!Array.isArray(draft.variants))return;
@@ -28570,12 +28610,14 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   }
   function persistDraft(ex){
     if(!ex||!draft||!draft.changed)return;
-    const values=(draft.variants||[]).filter(item=>String(item.name||'').trim()).map((item,index)=>({...item,id:String(item.id||variantId(draft.groupId,index,item)),groupId:draft.groupId,name:String(item.name||'Progressionsstufe '+(index+1)).trim(),order:index,sourceId:String(item.sourceId||''),media:clone(item.media||[])}));
+    const used=new Set();
+    const values=(draft.variants||[]).filter(item=>String(item.name||'').trim()).map((item,index)=>({...item,id:allocateVariantId(draft.groupId,item.id,index,used),groupId:draft.groupId,name:String(item.name||'Progressionsstufe '+(index+1)).trim(),order:index,sourceId:String(item.sourceId||''),media:clone(item.media||[])}));
     ex.progressionGroupId=draft.groupId;
     ex.progressionVariants=values;
-    try{if(typeof syncStatePlanToStore==='function')syncStatePlanToStore('ticket_015_progression_variants');}catch(err){console.warn('Progressionsstufen konnten nicht synchronisiert werden:',err)}
-    try{if(typeof persistCustomBank==='function')persistCustomBank();}catch(err){console.warn('Progressionsstufen konnten nicht in der Übungsdatenbank gespeichert werden:',err)}
-    try{if(typeof save==='function')save();}catch(err){console.warn('Progressionsstufen konnten nicht gespeichert werden:',err)}
+    try{const bridge=window.KGGTicket015AdminPersistence||{};if(typeof bridge.upsert==='function')bridge.upsert(ex,'ticket_015_progression_variants');else if(typeof upsertPlanExerciseToBank==='function')upsertPlanExerciseToBank(ex,'ticket_015_progression_variants');}catch(err){console.warn('Progressionsstufen konnten nicht in der Übungsdatenbank gespeichert werden:',err)}
+    try{const bridge=window.KGGTicket015AdminPersistence||{};if(typeof bridge.sync==='function')bridge.sync('ticket_015_progression_variants');else if(typeof syncStatePlanToStore==='function')syncStatePlanToStore('ticket_015_progression_variants');}catch(err){console.warn('Progressionsstufen konnten nicht synchronisiert werden:',err)}
+    try{const bridge=window.KGGTicket015AdminPersistence||{};if(typeof bridge.persistBank==='function')bridge.persistBank();else if(typeof persistCustomBank==='function')persistCustomBank();}catch(err){console.warn('Übungsdatenbank konnte nicht gespeichert werden:',err)}
+    try{const bridge=window.KGGTicket015AdminPersistence||{};if(typeof bridge.save==='function')bridge.save();else if(typeof save==='function')save();}catch(err){console.warn('Progressionsstufen konnten nicht gespeichert werden:',err)}
   }
   function patchEditor(){
     if(window.__kggTicket015AdminPatched)return;
@@ -28601,8 +28643,8 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     const compact=window.compactKggH2Exercise,expand=window.expandKggH2Exercise,patient=window.buildPatientExercisePayload;
     if(typeof compact!=='function'||typeof expand!=='function'||typeof patient!=='function')return;
     window.__kggTicket015SerializersPatched=true;
-    window.compactKggH2Exercise=function(ex){const row=compact.apply(this,arguments);const variants=wireVariants(ex);if(variants)row[10]=variants;return row;};
-    window.expandKggH2Exercise=function(item){const ex=expand.apply(this,arguments),wire=Array.isArray(item)?item[10]:null,variants=variantsFromWire(wire,ex);if(variants.length){ex.progressionGroupId=String(wire.g||groupId(ex));ex.progressionVariants=variants;}return ex;};
+    window.compactKggH2Exercise=function(ex){const row=compact.apply(this,arguments),variants=wireVariants(ex);if(variants)row[11]=variants;return row;};
+    window.expandKggH2Exercise=function(item){const ex=expand.apply(this,arguments),wire=Array.isArray(item)&&item[11]&&typeof item[11]==='object'?item[11]:null,variants=variantsFromWire(wire,ex);if(variants.length){ex.progressionGroupId=String(wire.g||groupId(ex));ex.progressionVariants=variants;}return ex;};
     window.buildPatientExercisePayload=function(ex){const copy=patient.apply(this,arguments),variants=normalizeVariants(ex,false);if(variants.length){copy.progressionGroupId=groupId(ex);copy.progressionVariants=variants.map(item=>{const next={...item,media:clone(item.media||[])};try{if(typeof buildExerciseMediaManifestForPatient==='function'){const m=buildExerciseMediaManifestForPatient(item);if(m&&m.length)next.media=m;}}catch(err){}return next;});}return copy;};
   }
   function init(){
@@ -28614,7 +28656,7 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     setTimeout(patchEditor,800);
   }
   window.KGGTicket015Admin={version:VERSION,normalizeVariants,wireVariants,variantsFromWire};
-  if(window.__KGG_TEST__)window.__kggTicket015AdminTest={normalizeVariants,wireVariants,variantsFromWire};
+  if(window.__KGG_TEST__)window.__kggTicket015AdminTest={normalizeVariants,wireVariants,variantsFromWire,allocateVariantId};
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init,{once:true}):init();
 })();
 </script>

@@ -137,9 +137,9 @@
       "sha256": "fe346b437ea39280624ce5f4156f2027b3c749ac2ad14b1a4350deed032def5f"
     },
     {
-      "characters": 23277,
+      "characters": 24109,
       "path": "docs/kgg-patient-gpt-source/chunk-027.md",
-      "sha256": "c133fc863dbf9fdaecd296b1438ac0fcadfd8a015a297c785148a2a3ab3cbe4a"
+      "sha256": "8fc638924ec6469a6b1cfadc757b032e9276df822ae4c1aaaa3d4653e241344b"
     },
     {
       "characters": 24193,
@@ -157,14 +157,19 @@
       "sha256": "19855a0622c64e9d211161c74fef1809e2f3b7833b80686129ad4a9f3a12165b"
     },
     {
-      "characters": 10877,
+      "characters": 4648,
       "path": "docs/kgg-patient-gpt-source/chunk-031.md",
-      "sha256": "8425af1c8ea46d9e76b460e143fa2ce50200a9f5e45149eb8e16de5e699360a9"
+      "sha256": "03a0b415c2afe9e4fadc96683ff4a6cae2bbdfa02a81c2dcf79eea24210a82d3"
+    },
+    {
+      "characters": 10877,
+      "path": "docs/kgg-patient-gpt-source/chunk-032.md",
+      "sha256": "5b08cc01e72baa3757cb076034cc16eddec9a704a63a785c5d9328457967d265"
     },
     {
       "characters": 6773,
-      "path": "docs/kgg-patient-gpt-source/chunk-032.md",
-      "sha256": "9f041410a19896bb1b3e17d47aeef02a40fd8361f64ae15f48187587adf511f2"
+      "path": "docs/kgg-patient-gpt-source/chunk-033.md",
+      "sha256": "9fd6eaab81a9b3b3ec1fad3ef589d472958ecdb72b85569855b9a72ff71195b2"
     }
   ],
   "files": [
@@ -299,9 +304,9 @@
       "sha256": "3979600da41d8d035afb833f8ddb371bf3a4ccf1b3c38211c4560907398463b9"
     },
     {
-      "characters": 23077,
+      "characters": 23909,
       "path": "patient-set-summary-groups.js",
-      "sha256": "2c0b29ef5ab7febef1959a8c1eee6a32c21e29bec823f690e9a816ab959daff9"
+      "sha256": "3c5d53f0859f1d2b8d08f11ecf16935f94ab55640e7f7fb7ba06f1d558dc7fcc"
     },
     {
       "characters": 34184,
@@ -312,6 +317,11 @@
       "characters": 2953,
       "path": "patient-start-values-day1.js",
       "sha256": "3ced0d7f1e19ce5d3fe71c77e25c4500607fc11f6d7d6af65e648f62f91c11e3"
+    },
+    {
+      "characters": 4454,
+      "path": "patient-storage-scope.js",
+      "sha256": "5ee476fb50a653ec339cc1876fa916464929bc2e196e347c3f1fd7a0406a79d7"
     },
     {
       "characters": 10680,
