@@ -3,8 +3,26 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 87,
+  "latestVersionCode": 88,
   "entries": [
+    {
+      "versionCode": 88,
+      "versionName": "1.0.88-ticket-037-real-plan",
+      "patchId": "kgg-v088-ticket-037-real-plan",
+      "status": "candidate",
+      "type": "module-patch",
+      "title": "Therapie-Cockpit: normaler Plan direkt in Slot 1",
+      "reason": "Der sichtbare Cockpit-Einstieg und der Fertig-Dialog übernehmen den zentralen aktuellen Plan über den bestehenden Plan-/Codec-/Importpfad; Fehler bleiben fail-closed.",
+      "whatChanged": [
+        "Der sichtbare #kggTherapyCockpitButton importiert den normalen aktuellen Plan.",
+        "Der Fertig-Dialog enthält die verbindliche Cockpit-Plan-Aktion in der Reihenfolge PDF, App, Cockpit, Abbrechen.",
+        "Blocking-Real-Plan-E2E und Negativtest sichern sichtbaren Klick, Slot 1 und den echten Fehlercode."
+      ],
+      "touchedAreas": ["Therapie-Cockpit", "Test-Harness", "Tablet-Fertig-Dialog"],
+      "notTouched": ["PDF-Core", "QR/Patienten-App", "Scan/OCR", "Parser", "Medien/Upload", "Android/APK", "API-Key-Logik", "Phone-Design"],
+      "testStatus": {"local": "pending", "certification": "pending"},
+      "approvalNote": "KGG-TICKET-037; kein Main-, Live- oder Release-Auftrag."
+    },
     {
       "versionCode": 87,
       "versionName": "1.0.87-ticket-015-live-fix",

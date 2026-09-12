@@ -1,0 +1,108 @@
+<!-- KGG PATCH START kgg-v088-ticket-037-real-plan -->
+<!-- Ticket 037: normaler Plan ueber sichtbaren Cockpit-Einstieg in Slot 1 -->
+<style id="kgg-ticket-037-real-plan-style">
+  #shareModal .finishCockpitRow{display:grid;grid-template-columns:minmax(0,1fr) 58px;gap:8px}
+  #shareModal .finishCockpitBtn,#shareModal .finishCockpitGaugeBtn{background:#fff;border:1px solid var(--line);color:var(--ink);min-height:52px}
+  #shareModal .finishCockpitBtn{display:flex;align-items:center;justify-content:flex-start;gap:12px;text-align:left}
+  #shareModal .finishCockpitGaugeBtn{display:grid;place-items:center;padding:0}
+  #shareModal .finishGaugeIcon{position:relative;display:inline-block;flex:0 0 24px;width:24px;height:15px;box-sizing:border-box;border:3px solid currentColor;border-bottom:0;border-radius:20px 20px 0 0}
+  #shareModal .finishGaugeIcon::before{content:"";position:absolute;left:9px;bottom:-1px;width:2px;height:10px;background:currentColor;transform-origin:bottom center;transform:rotate(42deg)}
+  #shareModal .finishGaugeIcon::after{content:"";position:absolute;left:7px;bottom:-3px;width:6px;height:6px;border-radius:50%;background:currentColor}
+</style>
+<script id="kgg-ticket-037-real-plan-script">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v088-ticket-037-real-plan";
+  var installed=false,api=window.KGGTherapyCockpit;
+  function safeErrorCode(error){
+    var code=error&&typeof error.code==="string"?error.code:"cockpit_import_failed";
+    return /^[a-z0-9_]{1,48}$/.test(code)?code:"cockpit_import_failed";
+  }
+  function error(code){var err=new Error(code);err.code=code;return err;}
+  function notify(code){
+    var toast=document.getElementById("kggTherapyCockpitToast");
+    if(!toast)return;
+    toast.textContent="Plan konnte nicht ins Cockpit geladen werden ("+code+").";
+    toast.classList.add("show");
+    setTimeout(function(){toast.classList.remove("show");},3200);
+  }
+  function currentPlan(){
+    var store=window.KGGDataStore;
+    if(!store||typeof store.getCurrentPlan!=="function")throw error("plan_state_unavailable");
+    return store.getCurrentPlan()||{};
+  }
+  function planInfo(plan){
+    var source=plan||{},patient=source.patient||{};
+    var name=String(patient.name||source.name||source.patientName||"").trim();
+    var exercises=Array.isArray(source.exercises)?source.exercises:[];
+    return {plan:source,name:name,exercises:exercises,ready:!!name&&exercises.length>0};
+  }
+  function syncEntryVisibility(){
+    var button=document.getElementById("kggTherapyCockpitButton");
+    if(!button)return;
+    var state=api&&typeof api.getState==="function"?api.getState():null;
+    var ready=!!(state&&state.slotCount>0);
+    if(!ready){try{ready=planInfo(currentPlan()).ready;}catch(e){ready=false;}}
+    button.classList.toggle("kgg-tc-entry-ready",ready);
+  }
+  function installPlanStoreHook(){
+    var store=window.KGGDataStore;
+    if(store&&typeof store.setCurrentPlan==="function"&&!store.__kggTicket037EntryWrapped){
+      var setCurrentPlan=store.setCurrentPlan;
+      store.setCurrentPlan=function(){var result=setCurrentPlan.apply(this,arguments);syncEntryVisibility();return result;};
+      store.__kggTicket037EntryWrapped=true;
+    }
+    syncEntryVisibility();
+  }
+  function importCurrentPlan(options){
+    if(!api||typeof api.getState!=="function"||typeof api.open!=="function")throw error("cockpit_unavailable");
+    var state=api.getState(),info=planInfo(currentPlan());
+    if(!info.ready)throw error("current_plan_not_ready");
+    if(typeof api.fromPlan!=="function"||typeof api.contentKey!=="function"||typeof api.makeLink!=="function"||typeof api.importCode!=="function")throw error("cockpit_content_contract_unavailable");
+    var payload=api.fromPlan(info.plan),contentKey=api.contentKey(payload);
+    if(options&&options.dedupe&&contentKey&&Array.isArray(state&&state.slots)&&state.slots.some(function(slot){return slot&&slot.contentKey===contentKey;})){api.open();return {reused:true,state:state};}
+    if(state&&state.slotCount>=3)throw error("slots_full");
+    var link=api.makeLink(payload);
+    return api.importCode(link);
+  }
+  function failClosed(errorValue){
+    var code=safeErrorCode(errorValue);
+    window.KGGTherapyCockpitLastErrorCode=code;
+    notify(code);
+    return true;
+  }
+  function activateDirectPlan(){
+    try{
+      var state=api&&typeof api.getState==="function"?api.getState():null;
+      if(state&&state.slotCount>0){api.open();window.KGGTherapyCockpitLastErrorCode="";return true;}
+      importCurrentPlan({dedupe:true});
+      window.KGGTherapyCockpitLastErrorCode="";
+    }catch(errorValue){failClosed(errorValue);}
+    return true;
+  }
+  function activateFinish(event){
+    event.preventDefault();
+    try{
+      importCurrentPlan({dedupe:true});
+      window.KGGTherapyCockpitLastErrorCode="";
+      var finishModal=document.getElementById("shareModal");
+      if(finishModal)finishModal.classList.remove("open");
+    }catch(errorValue){failClosed(errorValue);}
+  }
+  function install(){
+    if(installed)return;
+    installed=true;
+    window.KGGTherapyCockpitDirectPlanClick=activateDirectPlan;
+    window.KGGTherapyCockpitEntryVisibilitySync=syncEntryVisibility;
+    installPlanStoreHook();
+    var finish=document.getElementById("finishCockpitBtn"),gauge=document.getElementById("finishCockpitGaugeBtn"),finishTrigger=document.getElementById("finishBtn");
+    if(finish)finish.addEventListener("click",activateFinish);
+    if(gauge)gauge.addEventListener("click",activateFinish);
+    if(finishTrigger)finishTrigger.addEventListener("click",function(){setTimeout(function(){var modal=document.getElementById("shareModal"),first=document.getElementById("finishPdfBtn");if(modal&&modal.classList.contains("open")&&first)first.focus();},0);});
+    window.KGG_PATCHES=window.KGG_PATCHES||{};
+    window.KGG_PATCHES[PATCH_ID]={installed:true,version:2,dependsOn:"kgg-v084-therapy-cockpit-start-link"};
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});else install();
+})();
+</script>
+<!-- KGG PATCH END kgg-v088-ticket-037-real-plan -->

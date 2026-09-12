@@ -31,7 +31,8 @@
     "kgg-v083-therapy-cockpit-id-guard",
     "kgg-v084-therapy-cockpit-start-link",
     "kgg-v085-ticket-015-progressions",
-    "kgg-v087-ticket-015-live-fix"
+    "kgg-v087-ticket-015-live-fix",
+    "kgg-v088-ticket-037-real-plan"
   ],
   "parts": [
     "base-head.html",
@@ -80,6 +81,7 @@
     "patches/v084-therapy-cockpit-start-link.html",
     "patches/v085-ticket-015-progressions.html",
     "patches/v087-ticket-015-live-fix.html",
+    "patches/v088-ticket-037-real-plan.html",
     "footer.html"
   ]
 }

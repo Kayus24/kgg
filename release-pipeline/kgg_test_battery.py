@@ -25,6 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 LEVEL_RANK = {"critical": 0, "regression": 1, "comfort": 2}
 PLAYWRIGHT_PREPARED = False
 PATIENT_SCAN_PREPARED = False
+TICKET_037_PLAYWRIGHT_PREPARED = False
 class BatteryError(RuntimeError):
     pass
 
@@ -129,6 +130,20 @@ def run_therapy_cockpit_browser() -> None:
         raise BatteryError("npm not found. Install npm or set KGG_NPM for the Therapie-Cockpit browser battery.")
     log("== Therapie-Cockpit tablet browser battery ==")
     run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "node", "release-pipeline/kgg_therapy_cockpit_browser_smoke.js"])
+
+
+def run_ticket_037_real_plan_browser() -> None:
+    global TICKET_037_PLAYWRIGHT_PREPARED
+    npm = npm_executable()
+    if not npm:
+        raise BatteryError("npm not found. Install npm or set KGG_NPM for the Ticket 037 browser battery.")
+    if not TICKET_037_PLAYWRIGHT_PREPARED:
+        run([npm, "--prefix", "release-pipeline", "ci", "--ignore-scripts"])
+        if os.environ.get("KGG_SKIP_PLAYWRIGHT_INSTALL") != "1":
+            run([node_executable(), "release-pipeline/node_modules/playwright/cli.js", "install", "chromium"])
+        TICKET_037_PLAYWRIGHT_PREPARED = True
+    log("== Ticket 037 normal plan to Cockpit real-button browser battery ==")
+    run([node_executable(), "release-pipeline/kgg_ticket_037_real_plan_smoke.js"])
 
 
 def run_pdf_readability() -> None:
@@ -783,6 +798,13 @@ TEST_REGISTRY = [
         "suite": "patient-qr",
         "reason": "Progression stages must round-trip through the existing KGGH2/H3 wire contract and remain token-free before preview.",
         "run": run_ticket_015_smoke,
+    },
+    {
+        "id": "ticket-037-real-plan-browser-critical",
+        "level": "critical",
+        "suite": "therapy-cockpit",
+        "reason": "The visible Cockpit button and Finish action must import the normal current plan into slot 1; invalid plans must fail closed with a structured error code.",
+        "run": run_ticket_037_real_plan_browser,
     },
     {
         "id": "patient-continuous-days-critical",
