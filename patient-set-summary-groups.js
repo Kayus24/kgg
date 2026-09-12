@@ -118,7 +118,7 @@
 })();
 
 (()=>{
-  const VERSION='ticket-015-progressions-v1';
+  const VERSION='ticket-015-progressions-v2-main-controls';
   if(window.__kggTicket015Patient===VERSION)return;
   window.__kggTicket015Patient=VERSION;
   const HISTORY_KEY='kggProgressionHistoryV1';
@@ -137,7 +137,10 @@
   let originalPut=null;
   let originalText=null;
   let originalShowQr=null;
+  let originalOpenPad=null;
   let currentPlanId='';
+  let activeSet={index:0,setNo:1};
+  let preferActiveMedia=false;
 
   function loadHistory(){
     const value=safeJson(localStorage.getItem(HISTORY_KEY),null);
@@ -224,13 +227,14 @@
     let winner=null;values.forEach(item=>{const count=counts[item.id]||0;if(!winner||count>winner.count||(count===winner.count&&item.order>winner.item.order))winner={item,count}});
     return winner&&winner.count>0?winner.item:null;
   }
-  function applyDominantMedia(){
+  function applyDominantMedia(preferActiveSet=false){
     if(typeof p==='undefined'||!p||!Array.isArray(p.ex))return;
     syncRawVariants();
     p.ex.forEach((ex,index)=>{
       const values=valuesForExercise(index);if(!values.length)return;
       const state=groupState(index),winner=state.group.dominantId&&variantById(values,state.group.dominantId)||dominantFor(index,false)||values[0];
-      ex.media=clone(winner&&winner.media||originalMedia[index]||[]);
+      const active=preferActiveSet&&activeSet&&Number(activeSet.index)===index?variantById(values,selectedId(index,activeSet.setNo)):null;
+      ex.media=clone((active||winner)&&((active||winner).media)||originalMedia[index]||[]);
     });
   }
   function displayedVariant(index){
@@ -256,10 +260,36 @@
       .kgg015GalleryDots button{min-height:25px;min-width:25px;padding:2px 7px;border-radius:999px;font-size:11px}
       .kgg015GalleryDots button[aria-current="true"]{background:#111827;color:#fff;border-color:#111827}
       .kgg015VariantBadge{display:inline-flex;align-items:center;gap:5px;margin-left:7px;padding:2px 7px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:11px;font-weight:850}
+      .kgg015MainProgressionHost{position:relative;overflow:hidden}
+      .kgg015MainProgressionControls{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 8px;pointer-events:none;z-index:4}
+      .kgg015MainProgressionControl{pointer-events:auto;width:44px;height:44px;border:1px solid rgba(255,255,255,.72);border-radius:999px;background:rgba(255,255,255,.68);color:#111827;box-shadow:0 8px 22px rgba(15,23,42,.18),inset 0 1px 0 rgba(255,255,255,.88);backdrop-filter:blur(16px) saturate(1.35);-webkit-backdrop-filter:blur(16px) saturate(1.35);font-size:25px;line-height:1;font-weight:900;display:grid;place-items:center}
+      .kgg015MainProgressionControl:disabled{opacity:.32;cursor:default}
+      .kgg015MainProgressionControl:focus-visible{outline:3px solid #2563eb;outline-offset:2px}
+      .kgg015MainProgressionStage{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);max-width:calc(100% - 112px);padding:4px 9px;border:1px solid rgba(255,255,255,.7);border-radius:999px;background:rgba(255,255,255,.7);color:#334155;font-size:11px;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+      @media(max-width:430px){.kgg015MainProgressionControl{width:40px;height:40px;font-size:23px}.kgg015MainProgressionControls{padding:0 6px}.kgg015MainProgressionStage{bottom:6px}}
       @media(max-width:430px){.kgg015Gallery{grid-template-columns:32px minmax(0,1fr) 32px;padding:7px}.kggProgressionMediaBox{min-height:70px}.kggProgressionMediaBox img{max-height:110px}}
     `;document.head.appendChild(style);
   }
-  function selectVariant(index,setNo,id){const values=valuesForExercise(index);if(!variantById(values,id))return;sessionSelection[currentRecordKey(index,setNo)]=String(id);renderGalleries(index)}
+  function mainMediaBox(index){const card=[...document.querySelectorAll('#list .ex')][index];return card&&card.querySelector('.kggMediaList .kggMediaBox');}
+  function renderMainProgressionControls(index=activeSet.index,setNo=activeSet.setNo){
+    const values=valuesForExercise(index);if(!values.length)return;
+    const box=mainMediaBox(index);if(!box)return;
+    box.classList.add('kgg015MainProgressionHost');
+    box.querySelectorAll('.kgg015MainProgressionControls').forEach(node=>node.remove());
+    const id=selectedId(index,setNo),at=Math.max(0,values.findIndex(item=>String(item.id)===String(id)));
+    const item=values[at]||values[0],controls=document.createElement('div');
+    controls.className='kgg015MainProgressionControls';
+    controls.innerHTML='<button type="button" class="kgg015MainProgressionControl" data-kgg015-main-prev aria-label="Leichtere Progressionsstufe" '+(at===0?'disabled':'')+'>−</button><span class="kgg015MainProgressionStage" aria-live="polite">'+esc(item.name)+'</span><button type="button" class="kgg015MainProgressionControl" data-kgg015-main-next aria-label="Schwerere Progressionsstufe" '+(at===values.length-1?'disabled':'')+'>+</button>';
+    controls.querySelector('[data-kgg015-main-prev]').onclick=()=>shiftVariant(index,setNo,-1);
+    controls.querySelector('[data-kgg015-main-next]').onclick=()=>shiftVariant(index,setNo,1);
+    box.appendChild(controls);
+  }
+  function refreshMainProgression(index=activeSet.index){
+    try{if(window.KGGPatientMediaRetryCache&&typeof window.KGGPatientMediaRetryCache.render==='function')window.KGGPatientMediaRetryCache.render()}catch(err){}
+    [0,80,320].forEach(delay=>setTimeout(()=>renderMainProgressionControls(index,activeSet.setNo),delay));
+  }
+  function shiftVariant(index,setNo,delta){const values=valuesForExercise(index);if(!values.length)return;const at=Math.max(0,values.findIndex(item=>String(item.id)===String(selectedId(index,setNo)))),next=values[at+delta];if(!next)return;selectVariant(index,setNo,next.id)}
+  function selectVariant(index,setNo,id){const values=valuesForExercise(index),item=variantById(values,id);if(!item)return;activeSet={index:Number(index),setNo:Number(setNo)};preferActiveMedia=true;sessionSelection[currentRecordKey(index,setNo)]=String(id);applyDominantMedia(true);renderGalleries(index);refreshMainProgression(index)}
   function mediaMarkup(item,targetId,index,setNo){
     if(!item)return '<span>Kein Bild hinterlegt</span><small>Die Stufe ist trotzdem auswählbar.</small>';
     const node='<div class="kggProgressionMediaBox loading" data-kgg-progression-media="'+esc(targetId)+'"><span>Bild wird geladen ...</span><small>Verschlüsselte Datei wird lokal verwendet.</small></div>';
@@ -279,7 +309,7 @@
   }
   function renderGalleries(onlyIndex){
     if(typeof p==='undefined'||!p||!Array.isArray(p.ex)||!document||typeof document.querySelectorAll!=='function')return;
-    css();ensureDay();const cards=[...document.querySelectorAll('#list .ex')];cards.forEach((card,index)=>{if(onlyIndex!==undefined&&Number(onlyIndex)!==index)return;card.querySelectorAll('.kgg015Gallery').forEach(node=>node.remove());const values=valuesForExercise(index);if(!values.length)return;const sets=[...card.querySelectorAll('.set')];sets.forEach((set,setIndex)=>galleryHtml(index,setIndex+1,set));});applyDisplayNames();
+    css();ensureDay();const cards=[...document.querySelectorAll('#list .ex')];cards.forEach((card,index)=>{if(onlyIndex!==undefined&&Number(onlyIndex)!==index)return;card.querySelectorAll('.kgg015Gallery').forEach(node=>node.remove());const values=valuesForExercise(index);if(!values.length)return;const sets=[...card.querySelectorAll('.set')];sets.forEach((set,setIndex)=>galleryHtml(index,setIndex+1,set));});applyDisplayNames();if(onlyIndex===undefined||Number(onlyIndex)===Number(activeSet.index))renderMainProgressionControls(activeSet.index,activeSet.setNo);
   }
   function notesFor(day){
     if(String(history.current.planId||'')!==planId()||Number(history.current.day)!==Number(day))return '';
@@ -316,15 +346,19 @@
   }
   function wrapShowQr(){
     if(originalShowQr||typeof showQr!=='function')return;
-    originalShowQr=showQr;window.showQr=function(finalize){const day=currentDay();if(finalize)finalizeDominance(day);const originalRows=window.rows;if(typeof originalRows==='function'){window.rows=function(qrDay){return originalRows(qrDay).map((row,index)=>{const selection=qrProgressionSelection(index);if(selection)row.push(selection);return row})}}let result;try{result=originalShowQr.apply(this,arguments)}finally{if(originalRows)window.rows=originalRows}setTimeout(()=>{applyDominantMedia();applyDisplayNames();renderGalleries()},0);return result};
+    originalShowQr=showQr;window.showQr=function(finalize){const day=currentDay();if(finalize)preferActiveMedia=false;if(finalize)finalizeDominance(day);const originalRows=window.rows;if(typeof originalRows==='function'){window.rows=function(qrDay){return originalRows(qrDay).map((row,index)=>{const selection=qrProgressionSelection(index);if(selection)row.push(selection);return row})}}let result;try{result=originalShowQr.apply(this,arguments)}finally{if(originalRows)window.rows=originalRows}setTimeout(()=>{applyDominantMedia(false);applyDisplayNames();renderGalleries()},0);return result};
+  }
+  function wrapOpenPad(){
+    if(originalOpenPad||typeof openPad!=='function')return;
+    originalOpenPad=openPad;window.openPad=function(input,meta){if(meta&&meta.ei!==undefined&&meta.s!==undefined){activeSet={index:Number(meta.ei),setNo:Number(meta.s)};preferActiveMedia=true;applyDominantMedia(true);refreshMainProgression(activeSet.index)}return originalOpenPad.apply(this,arguments)};
   }
   function wrapRender(){
     if(originalRender||typeof render!=='function')return;
-    originalRender=render;window.render=function(){syncRawVariants();applyDominantMedia();const result=originalRender.apply(this,arguments);[0,70,260].forEach(delay=>setTimeout(()=>{renderGalleries()},delay));return result};
+    originalRender=render;window.render=function(){syncRawVariants();applyDominantMedia(false);const result=originalRender.apply(this,arguments);[0,70,260].forEach(delay=>setTimeout(()=>{renderGalleries()},delay));return result};
   }
   function init(){
-    syncRawVariants();wrapRender();wrapPut();wrapText();wrapShowQr();css();renderGalleries();
-    [250,800,1600].forEach(delay=>setTimeout(()=>{syncRawVariants();wrapRender();wrapPut();wrapText();wrapShowQr();renderGalleries()},delay));
+    syncRawVariants();applyDominantMedia(preferActiveMedia);wrapRender();wrapPut();wrapText();wrapShowQr();wrapOpenPad();css();renderGalleries();refreshMainProgression();
+    [250,800,1600].forEach(delay=>setTimeout(()=>{syncRawVariants();applyDominantMedia(preferActiveMedia);wrapRender();wrapPut();wrapText();wrapShowQr();wrapOpenPad();renderGalleries();refreshMainProgression()},delay));
   }
   function testDominant(values,records){const counts={};Object.values(records||{}).forEach(record=>{const id=String(record&&record.id||record);if(values.some(item=>String(item.id)===id))counts[id]=(counts[id]||0)+1});let winner=null;values.forEach(item=>{const count=counts[item.id]||0;if(!winner||count>winner.count||(count===winner.count&&item.order>winner.item.order))winner={item,count}});return winner&&winner.item||null}
   function testNote(previous,current,name){return previous&&String(previous)!==String(current)?String(name||'Übung')+': '+previous+' → '+current:''}

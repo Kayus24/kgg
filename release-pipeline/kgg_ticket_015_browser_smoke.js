@@ -24,12 +24,13 @@ async function main(){
   const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
   const page=await context.newPage();
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  const stageMedia='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80"><rect width="120" height="80" fill="#dbeafe"/><circle cx="60" cy="40" r="22" fill="#2563eb"/></svg>');
   const plan={i:'ticket-015-browser',t:'Progressions-Testplan',v:1,d:6,e:[[
     'Kniebeuge',2,'B','kg','Wdh','','',[], '', '', 'exercise',
     {g:'progression-group-1',v:[
-      {i:'easy',n:'Leichter',o:0,s:'',m:[]},
-      {i:'base',n:'Basis',o:1,s:'',m:[]},
-      {i:'hard',n:'Schwerer',o:2,s:'',m:[]},
+      {i:'easy',n:'Leichter',o:0,s:'',m:[{id:'easy-media',type:'image',src:stageMedia}]},
+      {i:'base',n:'Basis',o:1,s:'',m:[{id:'base-media',type:'image',src:stageMedia}]},
+      {i:'hard',n:'Schwerer',o:2,s:'',m:[{id:'hard-media',type:'image',src:stageMedia}]},
     ]},
   ]]};
   const url=`http://127.0.0.1:${port}/?plan=KGGH2:${encodePlan(plan)}`;
@@ -39,6 +40,14 @@ async function main(){
     await page.locator('.kgg015Gallery').first().waitFor({state:'visible'});
     assert(await page.locator('.kgg015Gallery').count()===2,'one progression gallery per set was not rendered');
     assert((await page.locator('.kgg015Gallery').first().locator('.kgg015GalleryStage').innerText()).includes('Leichter'),'first set did not start at the easier stage');
+    await page.locator('.kgg015MainProgressionControls').first().waitFor({state:'visible'});
+    assert(await page.locator('[data-kgg015-main-prev]').isDisabled(),'main image minus control must be disabled at the easiest stage');
+    assert(!(await page.locator('[data-kgg015-main-next]').isDisabled()),'main image plus control must be enabled when a harder stage exists');
+    await page.locator('[data-kgg015-main-next]').click();
+    await page.waitForFunction(()=>document.querySelector('.kgg015MainProgressionStage')?.textContent.includes('Basis'));
+    assert(await page.evaluate(()=>p.ex[0].media?.[0]?.id)==='base-media','main exercise image did not switch to the selected stage');
+    await page.locator('[data-kgg015-main-prev]').click();
+    await page.waitForFunction(()=>document.querySelector('.kgg015MainProgressionStage')?.textContent.includes('Leichter'));
 
     await page.locator('.kgg015Gallery').first().locator('[data-kgg015-next]').click();
     await page.waitForFunction(()=>document.querySelector('.kgg015Gallery')?.textContent.includes('Basis'));
