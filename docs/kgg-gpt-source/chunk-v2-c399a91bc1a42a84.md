@@ -148,8 +148,9 @@
   function syncStatePlanToStore(reason){
     const ds=ensureKGGDataStore();
     state.plan=Array.isArray(state.plan)?state.plan.map(ensureUiExerciseShape):[];
+    if(!state.planId)state.planId='plan_'+(state.createdAt||Date.now());
     ds.setCurrentPlan({
-      id:state.planId||'plan_'+(state.createdAt||Date.now()),
+      id:state.planId,
       title:state.planTitle||'KGG Plan',
       patient:{...(state.patient||{}),...currentPatientData()},
       exercises:state.plan.map(ex=>({...ex})),

@@ -199,6 +199,10 @@
       <button class="mutedBtn finishPdfLargeBtn" id="finishLargePdfBtn" type="button" aria-label="Großdruck-PDF für Menschen mit Sehbeeinträchtigung">👓</button>
     </div>
     <button class="mutedBtn finishOutputBtn finishAppBtn" id="finishPatientBtn" type="button"><span class="finishIcon" aria-hidden="true">▦</span><span>App erzeugen</span></button>
+    <div class="finishCockpitRow">
+      <button class="mutedBtn finishOutputBtn finishCockpitBtn" id="finishCockpitBtn" type="button">Cockpit-Plan erzeugen</button>
+      <button class="mutedBtn finishOutputBtn finishCockpitGaugeBtn" id="finishCockpitGaugeBtn" type="button" aria-label="Cockpit-Plan erzeugen (Tacho)"><span class="finishGaugeIcon" aria-hidden="true"></span></button>
+    </div>
     <button class="mutedBtn" id="finishCancelBtn" type="button">Abbrechen</button>
   </div>
   <div class="patientOutput hidden patientQrOutput" id="patientOutputBox">
