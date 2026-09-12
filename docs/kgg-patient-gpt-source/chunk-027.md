@@ -1,8 +1,8 @@
 # KGG Patient Source Chunk 027
 
 - Source file: `patient-set-summary-groups.js`
-- Characters: 1-23950
-- Full source SHA-256: `0041e88cb92b6276064f09b9e4bc9165d6145b8da998f0e386a3279194a76b4c`
+- Characters: 1-24000
+- Full source SHA-256: `1f3645b629eef7f15921f77d131b4c1927e2f2419f621b5c67e13a01075d3c75`
 
 ```
 (()=>{
@@ -125,7 +125,7 @@
 })();
 
 (()=>{
-  const VERSION='ticket-015-progressions-v1';
+  const VERSION='ticket-015-progressions-v2-main-controls';
   if(window.__kggTicket015Patient===VERSION)return;
   window.__kggTicket015Patient=VERSION;
   const HISTORY_KEY='kggProgressionHistoryV1';
@@ -144,7 +144,10 @@
   let originalPut=null;
   let originalText=null;
   let originalShowQr=null;
+  let originalOpenPad=null;
   let currentPlanId='';
+  let activeSet={index:0,setNo:1};
+  let preferActiveMedia=false;
 
   function loadHistory(){
     const value=safeJson(localStorage.getItem(HISTORY_KEY),null);
@@ -177,7 +180,7 @@
   }
   function syncRawVariants(){
     if(typeof p==='undefined'||!p||!Array.isArray(p.ex))return;
-    if(currentPlanId&&currentPlanId!==planId()){sessionSelection={};originalNames=[];originalMedia=[];history.current={planId:planId(),day:currentDay(),records:{}}}
+    if(currentPlanId&&currentPlanId!==planId()){sessionSelection={};originalNames=[];originalMedia=[];activeSet={index:0,setNo:1};preferActiveMedia=false;history.current={planId:planId(),day:currentDay(),records:{}}}
     currentPlanId=planId();
     if(!originalNames.length)originalNames=p.ex.map(ex=>String(ex&&ex.n||''));
     if(!originalMedia.length)originalMedia=p.ex.map(ex=>clone(ex&&ex.media));
@@ -231,13 +234,14 @@
     let winner=null;values.forEach(item=>{const count=counts[item.id]||0;if(!winner||count>winner.count||(count===winner.count&&item.order>winner.item.order))winner={item,count}});
     return winner&&winner.count>0?winner.item:null;
   }
-  function applyDominantMedia(){
+  function applyDominantMedia(preferActiveSet=false){
     if(typeof p==='undefined'||!p||!Array.isArray(p.ex))return;
     syncRawVariants();
     p.ex.forEach((ex,index)=>{
       const values=valuesForExercise(index);if(!values.length)return;
       const state=groupState(index),winner=state.group.dominantId&&variantById(values,state.group.dominantId)||dominantFor(index,false)||values[0];
-      ex.media=clone(winner&&winner.media||originalMedia[index]||[]);
+      const active=preferActiveSet&&activeSet&&Number(activeSet.index)===index?variantById(values,selectedId(index,activeSet.setNo)):null;
+      ex.media=clone((active||winner)&&((active||winner).media)||originalMedia[index]||[]);
     });
   }
   function displayedVariant(index){
@@ -263,79 +267,57 @@
       .kgg015GalleryDots button{min-height:25px;min-width:25px;padding:2px 7px;border-radius:999px;font-size:11px}
       .kgg015GalleryDots button[aria-current="true"]{background:#111827;color:#fff;border-color:#111827}
       .kgg015VariantBadge{display:inline-flex;align-items:center;gap:5px;margin-left:7px;padding:2px 7px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:11px;font-weight:850}
+      .kgg015MainProgressionHost{position:relative;overflow:hidden}
+      .kgg015MainPager{position:absolute;inset:0;z-index:3;overflow:hidden;border-radius:12px;background:#e2e8f0;touch-action:pan-y}
+      .kgg015MainPagerTrack{display:flex;width:300%;height:100%;transform:translate3d(-33.333333%,0,0);transition:transform .32s cubic-bezier(.2,.78,.2,1);will-change:transform}
+      .kgg015MainPagerTrack.is-dragging{transition:none;cursor:grabbing}
+      .kgg015MainPagerSlide{position:relative;display:grid;place-items:center;flex:0 0 33.333333%;min-width:0;height:100%;opacity:.55;transform:scale(.94);transition:opacity .24s ease,transform .24s ease}
+      .kgg015MainPagerSlide[data-active="true"]{opacity:1;transform:scale(1)}
+      .kgg015MainPagerSlide .kggProgressionMediaBox{width:100%;height:100%;min-height:100%;border:0;border-radius:0;background:#e2e8f0}
+      .kgg015MainPagerSlide .kggProgressionMediaBox img{max-height:100%;height:100%;object-fit:contain}
+      .kgg015MainPagerPlaceholder{display:grid;place-items:center;height:100%;padding:12px;color:#64748b;font-size:12px;font-weight:800;text-align:center}
+      .kgg015MainProgressionControls{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 8px;pointer-events:none;z-index:4}
+      .kgg015MainProgressionControl{pointer-events:auto;width:44px;height:44px;border:1px solid rgba(255,255,255,.72);border-radius:999px;background:rgba(255,255,255,.68);color:#111827;box-shadow:0 8px 22px rgba(15,23,42,.18),inset 0 1px 0 rgba(255,255,255,.88);backdrop-filter:blur(16px) saturate(1.35);-webkit-backdrop-filter:blur(16px) saturate(1.35);line-height:1;font-weight:900;display:grid;place-items:center}
+      .kgg015MainProgressionControl:disabled{opacity:.32;cursor:default}
+      .kgg015MainProgressionControl:focus-visible{outline:3px solid #2563eb;outline-offset:2px}
+      .kgg015MainProgressionTriangle{display:block;width:0;height:0;border-top:9px solid transparent;border-bottom:9px solid transparent}
+      .kgg015MainProgressionTriangle.prev{border-right:14px solid currentColor;margin-left:-3px}
+      .kgg015MainProgressionTriangle.next{border-left:14px solid currentColor;margin-right:-3px}
+      .kgg015MainProgressionStage{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);max-width:calc(100% - 112px);padding:4px 9px;border:1px solid rgba(255,255,255,.7);border-radius:999px;background:rgba(255,255,255,.7);color:#334155;font-size:11px;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+      .kgg015MainProgressionThumbs{display:flex;justify-content:center;gap:8px;overflow-x:auto;scrollbar-width:none;margin:8px 8px 2px;padding:2px 8px 4px;touch-action:pan-x}
+      .kgg015MainProgressionThumbs::-webkit-scrollbar{display:none}
+      .kgg015MainProgressionThumb{position:relative;flex:0 0 58px;width:58px;height:46px;padding:0;border:2px solid transparent;border-radius:10px;background:#f1f5f9;overflow:hidden;cursor:pointer;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+      .kgg015MainProgressionThumb[aria-current="true"]{border-color:#2563eb;box-shadow:0 0 0 3px #dbeafe;transform:scale(1.06)}
+      .kgg015MainProgressionThumb .kggProgressionMediaBox{height:100%;min-height:100%;border:0;border-radius:0;padding:0;background:#e2e8f0}
+      .kgg015MainProgressionThumb .kggProgressionMediaBox img{display:block;width:100%;height:100%;object-fit:cover}
+      .kgg015MainProgressionThumbLabel{position:absolute;right:3px;bottom:2px;padding:1px 4px;border-radius:999px;background:rgba(255,255,255,.78);color:#334155;font-size:9px;font-weight:900}
+      @media(max-width:430px){.kgg015MainProgressionControl{width:40px;height:40px}.kgg015MainProgressionControls{padding:0 6px}.kgg015MainProgressionStage{bottom:6px}.kgg015MainProgressionThumb{flex-basis:52px;width:52px;height:42px}}
       @media(max-width:430px){.kgg015Gallery{grid-template-columns:32px minmax(0,1fr) 32px;padding:7px}.kggProgressionMediaBox{min-height:70px}.kggProgressionMediaBox img{max-height:110px}}
     `;document.head.appendChild(style);
   }
-  function selectVariant(index,setNo,id){const values=valuesForExercise(index);if(!variantById(values,id))return;sessionSelection[currentRecordKey(index,setNo)]=String(id);renderGalleries(index)}
-  function mediaMarkup(item,targetId,index,setNo){
-    if(!item)return '<span>Kein Bild hinterlegt</span><small>Die Stufe ist trotzdem auswählbar.</small>';
-    const node='<div class="kggProgressionMediaBox loading" data-kgg-progression-media="'+esc(targetId)+'"><span>Bild wird geladen ...</span><small>Verschlüsselte Datei wird lokal verwendet.</small></div>';
-    setTimeout(()=>{try{if(window.KGGPatientMediaRetryCache&&typeof window.KGGPatientMediaRetryCache.loadMedia==='function')window.KGGPatientMediaRetryCache.loadMedia(item,index,setNo,targetId)}catch(err){}},0);
+  function mainMediaBox(index){const card=[...document.querySelectorAll('#list .ex')][index];return card&&card.querySelector('.kggMediaList .kggMediaBox');}
+  function progressionThumbMarkup(item,targetId,index,setNo,stageIndex){
+    const media=item&&item.media&&item.media[0];
+    if(!media)return '<span class="kgg015MainPagerPlaceholder">Kein Bild hinterlegt</span>';
+    const node='<div class="kggProgressionMediaBox loading" data-kgg-progression-media="'+esc(targetId)+'"><span>…</span></div>';
+    setTimeout(()=>{try{if(window.KGGPatientMediaRetryCache&&typeof window.KGGPatientMediaRetryCache.loadMedia==='function')window.KGGPatientMediaRetryCache.loadMedia(media,index,setNo,targetId)}catch(err){}},0);
     return node;
   }
-  function galleryHtml(index,setNo,cardSet){
-    const state=groupState(index),values=state.values;if(!values.length)return;
-    const id=selectedId(index,setNo),at=Math.max(0,values.findIndex(item=>item.id===id)),item=values[at],target='kgg015-media-'+index+'-'+setNo+'-'+id;
-    const dots=values.map((value,i)=>'<button type="button" data-kgg015-stage="'+esc(value.id)+'" aria-current="'+(i===at?'true':'false')+'" aria-label="Stufe '+(i+1)+': '+esc(value.name)+'">'+(i+1)+'</button>').join('');
-    const box=document.createElement('div');box.className='kgg015Gallery';box.dataset.kgg015Gallery=index+'|'+setNo;box.innerHTML='<button type="button" data-kgg015-prev aria-label="Leichtere Progressionsstufe" '+(at===0?'disabled':'')+'>‹</button><div class="kgg015GalleryViewport"><div class="kgg015GalleryStage">Stufe '+(at+1)+' von '+values.length+' · '+esc(item.name)+'</div>'+mediaMarkup(item.media&&item.media[0],target,index,setNo)+'<div class="kgg015GalleryDots">'+dots+'</div></div><button type="button" data-kgg015-next aria-label="Schwerere Progressionsstufe" '+(at===values.length-1?'disabled':'')+'>›</button>';
-    box.querySelector('[data-kgg015-prev]').onclick=()=>{if(at>0)selectVariant(index,setNo,values[at-1].id)};
-    box.querySelector('[data-kgg015-next]').onclick=()=>{if(at<values.length-1)selectVariant(index,setNo,values[at+1].id)};
-    box.querySelectorAll('[data-kgg015-stage]').forEach(button=>button.onclick=()=>selectVariant(index,setNo,button.dataset.kgg015Stage));
-    let startX=null;const viewport=box.querySelector('.kgg015GalleryViewport');if(viewport){viewport.onpointerdown=event=>{startX=event.clientX};viewport.onpointerup=event=>{if(startX==null)return;const dx=event.clientX-startX;startX=null;if(Math.abs(dx)<35)return;event.preventDefault();if(dx>0&&at>0)selectVariant(index,setNo,values[at-1].id);if(dx<0&&at<values.length-1)selectVariant(index,setNo,values[at+1].id)}}
-    cardSet.appendChild(box);
+  function pagerSlide(item,targetId,index,setNo,stageIndex,active){
+    return '<div class="kgg015MainPagerSlide" data-active="'+(active?'true':'false')+'" data-stage-index="'+stageIndex+'">'+progressionThumbMarkup(item,targetId,index,setNo,stageIndex)+'</div>';
   }
-  function renderGalleries(onlyIndex){
-    if(typeof p==='undefined'||!p||!Array.isArray(p.ex)||!document||typeof document.querySelectorAll!=='function')return;
-    css();ensureDay();const cards=[...document.querySelectorAll('#list .ex')];cards.forEach((card,index)=>{if(onlyIndex!==undefined&&Number(onlyIndex)!==index)return;card.querySelectorAll('.kgg015Gallery').forEach(node=>node.remove());const values=valuesForExercise(index);if(!values.length)return;const sets=[...card.querySelectorAll('.set')];sets.forEach((set,setIndex)=>galleryHtml(index,setIndex+1,set));});applyDisplayNames();
+  function mainPagerThumbs(card,index,setNo,values,at){
+    card.querySelectorAll('.kgg015MainProgressionThumbs').forEach(node=>node.remove());
+    const thumbs=document.createElement('div');thumbs.className='kgg015MainProgressionThumbs';thumbs.setAttribute('aria-label','Progressionsstufen auswählen');
+    thumbs.innerHTML=values.map((item,i)=>{const target='kgg015-thumb-'+index+'-'+setNo+'-'+item.id;return '<button type="button" class="kgg015MainProgressionThumb" data-kgg015-main-stage="'+esc(item.id)+'" aria-current="'+(i===at?'true':'false')+'" aria-label="Stufe '+(i+1)+': '+esc(item.name)+'"><div class="kggProgressionMediaBox loading" data-kgg-progression-media="'+esc(target)+'"><span>…</span></div><span class="kgg015MainProgressionThumbLabel">'+(i+1)+'</span></button>'}).join('');
+    const mediaList=card.querySelector('.kggMediaList');if(mediaList)mediaList.insertAdjacentElement('afterend',thumbs);else card.appendChild(thumbs);
+    thumbs.querySelectorAll('[data-kgg015-main-stage]').forEach(button=>button.onclick=()=>selectVariant(index,setNo,button.dataset.kgg015MainStage));
+    values.forEach((item,i)=>{const media=item.media&&item.media[0];if(!media)return;const target='kgg015-thumb-'+index+'-'+setNo+'-'+item.id;setTimeout(()=>{try{if(window.KGGPatientMediaRetryCache&&typeof window.KGGPatientMediaRetryCache.loadMedia==='function')window.KGGPatientMediaRetryCache.loadMedia(media,index,setNo,target)}catch(err){}},0);});
+    const active=thumbs.querySelector('[aria-current="true"]');if(active)active.scrollIntoView({block:'nearest',inline:'center'});
   }
-  function notesFor(day){
-    if(String(history.current.planId||'')!==planId()||Number(history.current.day)!==Number(day))return '';
-    const rows=[];Object.keys(history.current.records||{}).forEach(key=>{const rec=history.current.records[key];if(!rec||!rec.previousId||String(rec.previousId)===String(rec.id))return;const index=Number(rec.exerciseIndex),values=valuesForExercise(index),from=variantById(values,rec.previousId),to=variantById(values,rec.id);if(from&&to)rows.push((originalNames[index]||'Übung')+': '+from.name+' → '+to.name)});
-    return rows.length?'\n\nVariantenwechsel:\n'+[...new Set(rows)].join('\n'):'';
-  }
-  function qrProgressionSelection(index){
-    const state=groupState(index),values=state.values;
-    if(!values.length)return null;
-    const selected=[];
-    const setCount=Math.max(1,Number(p&&p.ex&&p.ex[index]&&p.ex[index].sets)||1);
-    for(let setNo=1;setNo<=setCount;setNo++){
-      const id=selectedId(index,setNo),item=variantById(values,id);
-      selected.push({s:setNo,i:id,n:item&&item.name||''});
-    }
-    return {k:'kgg015',g:state.gid,s:selected};
-  }
-  function wrapText(){
-    if(originalText||typeof text!=='function')return;
-    originalText=text;window.text=function(day){
-      syncRawVariants();const savedNames=p&&p.ex?p.ex.map(ex=>ex.n):[];
-      try{if(p&&p.ex)p.ex.forEach((ex,index)=>{const variant=displayedVariant(index);if(variant)ex.n=variant.name});return String(originalText.apply(this,arguments)||'')+notesFor(day)}finally{if(p&&p.ex)p.ex.forEach((ex,index)=>{ex.n=savedNames[index]})}
-    };
-  }
-  function wrapPut(){
-    if(originalPut||typeof put!=='function')return;
-    originalPut=put;window.put=function(e,s,x,y,z){const result=originalPut.apply(this,arguments);if(String(z??'').trim()!=='')recordSuccessfulEdit(Number(e),Number(s));return result};
-  }
-  function finalizeDominance(day){
-    const finalizedKey=planId()+'|'+String(day);if(Number(history.finalized[finalizedKey]||0)===1)return;
-    ensureDay();if(String(history.current.planId||'')!==planId()||Number(history.current.day)!==Number(day))return;
-    p.ex.forEach((ex,index)=>{const state=groupState(index),winner=dominantFor(index,true);if(winner)state.group.dominantId=winner.id});
-    history.finalized[finalizedKey]=1;saveHistory();applyDominantMedia();
-  }
-  function wrapShowQr(){
-    if(originalShowQr||typeof showQr!=='function')return;
-    originalShowQr=showQr;window.showQr=function(finalize){const day=currentDay();if(finalize)finalizeDominance(day);const originalRows=window.rows;if(typeof originalRows==='function'){window.rows=function(qrDay){return originalRows(qrDay).map((row,index)=>{const selection=qrProgressionSelection(index);if(selection)row.push(selection);return row})}}let result;try{result=originalShowQr.apply(this,arguments)}finally{if(originalRows)window.rows=originalRows}setTimeout(()=>{applyDominantMedia();applyDisplayNames();renderGalleries()},0);return result};
-  }
-  function wrapRender(){
-    if(originalRender||typeof render!=='function')return;
-    originalRender=render;window.render=function(){syncRawVariants();applyDominantMedia();const result=originalRender.apply(this,arguments);[0,70,260].forEach(delay=>setTimeout(()=>{renderGalleries()},delay));return result};
-  }
-  function init(){
-    syncRawVariants();wrapRender();wrapPut();wrapText();wrapShowQr();css();renderGalleries();
-    [250,800,1600].forEach(delay=>setTimeout(()=>{syncRawVariants();wrapRender();wrapPut();wrapText();wrapShowQr();renderGalleries()},delay));
-  }
-  function testDominant(values,records){const counts={};Object.values(records||{}).forEach(record=>{const id=String(record&&record.id||record);if(values.some(item=>String(item.id)===id))counts[id]=(counts[id]||0)+1});let winner=null;values.forEach(item=>{const count=counts[item.id]||0;if(!winner||count>winner.count||(count===winner.count&&item.order>winner.item.order))winner={item,count}});return winner&&winner.item||null}
-  function testNote(previous,current,name){return previous&&String(previous)!==String(current)?String(name||'Übung')+': '+previous+' → '+current:''}
-  if(window.__KGG_TEST__)window.__kggTicket015PatientTest={version:VERSION,normalizeVariant:variantFrom,dominant:testDominant,note:testNote,qrProgressionSelection};
-  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init,{once:true}):init();
-})();
+  function bindMainPager(pager,index,setNo,values,at){
+    const track=pager.querySelector('.kgg015MainPagerTrack');let startX=null,lastX=0;
+    const finish=(event,cancelled=false)=>{if(startX===null)return;const dx=lastX-startX;startX=null;try{pager.releasePointerCapture?.(event.pointerId)}catch(err){}track.classList.remove('is-dragging');if(cancelled||Math.abs(dx)<38){track.style.transform='translate3d(-33.333333%,0,0)';return}shiftVariant(index,setNo,dx<0?1:-1)};
+    pager.onpointerdown=event=>{if(event.target.closest('button'))return;startX=event.clientX;lastX=startX;track.classList.add('is-dragging');try{pager.setPointerCapture?.(event.pointerId)}catch(err){}};
+    pager.onpointermove=event=>{if(startX===null)return;lastX=event.clientX;const raw=lastX-startX,atStart=at===0&&raw>0,atEnd=at===values.length-1&&raw<0,dx=atStart||atEnd?raw*.28:raw;track.style.trans
 ```

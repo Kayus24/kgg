@@ -24,26 +24,45 @@ async function main(){
   const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
   const page=await context.newPage();
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  const stageMedia='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80"><rect width="120" height="80" fill="#dbeafe"/><circle cx="60" cy="40" r="22" fill="#2563eb"/></svg>');
   const plan={i:'ticket-015-browser',t:'Progressions-Testplan',v:1,d:6,e:[[
     'Kniebeuge',2,'B','kg','Wdh','','',[], '', '', 'exercise',
     {g:'progression-group-1',v:[
-      {i:'easy',n:'Leichter',o:0,s:'',m:[]},
-      {i:'base',n:'Basis',o:1,s:'',m:[]},
-      {i:'hard',n:'Schwerer',o:2,s:'',m:[]},
+      {i:'easy',n:'Leichter',o:0,s:'',m:[{id:'easy-media',type:'image',src:stageMedia}]},
+      {i:'base',n:'Basis',o:1,s:'',m:[{id:'base-media',type:'image',src:stageMedia}]},
+      {i:'hard',n:'Schwerer',o:2,s:'',m:[{id:'hard-media',type:'image',src:stageMedia}]},
     ]},
   ]]};
   const url=`http://127.0.0.1:${port}/?plan=KGGH2:${encodePlan(plan)}`;
   try{
     await page.goto(url,{waitUntil:'domcontentloaded'});
     const card=page.locator('#list .ex').first();await card.waitFor({state:'visible'});await card.locator('h3').click();
-    await page.locator('.kgg015Gallery').first().waitFor({state:'visible'});
-    assert(await page.locator('.kgg015Gallery').count()===2,'one progression gallery per set was not rendered');
-    assert((await page.locator('.kgg015Gallery').first().locator('.kgg015GalleryStage').innerText()).includes('Leichter'),'first set did not start at the easier stage');
-
-    await page.locator('.kgg015Gallery').first().locator('[data-kgg015-next]').click();
-    await page.waitForFunction(()=>document.querySelector('.kgg015Gallery')?.textContent.includes('Basis'));
-    await page.locator('.kgg015Gallery').first().locator('[data-kgg015-next]').click();
-    await page.waitForFunction(()=>document.querySelector('.kgg015Gallery')?.textContent.includes('Schwerer'));
+    await page.locator('.kgg015MainPager').first().waitFor({state:'visible'});
+    assert(await page.locator('.kgg015Gallery').count()===0,'legacy per-set progression galleries must not remain visible');
+    assert(await page.locator('.kgg015MainProgressionThumb').count()===3,'all progression stages must be shown as main-image thumbnails');
+    assert(await page.locator('.kgg015MainProgressionThumb[aria-current="true"]').count()===1,'exactly one progression thumbnail must be active');
+    assert((await page.locator('.kgg015MainProgressionStage').innerText()).includes('Leichter'),'main pager did not start at the easier stage');
+    await page.locator('.kgg015MainProgressionControls').first().waitFor({state:'visible'});
+    assert(await page.locator('[data-kgg015-main-prev]').isDisabled(),'main image minus control must be disabled at the easiest stage');
+    assert(!(await page.locator('[data-kgg015-main-next]').isDisabled()),'main image plus control must be enabled when a harder stage exists');
+    await page.locator('[data-kgg015-main-next]').click();
+    await page.waitForFunction(()=>document.querySelector('.kgg015MainProgressionStage')?.textContent.includes('Basis'));
+    assert(await page.evaluate(()=>p.ex[0].media?.[0]?.id)==='base-media','main exercise image did not switch to the selected stage');
+    const pager=page.locator('.kgg015MainPager').first();
+    await page.waitForTimeout(700);
+    const pagerBox=await (await page.waitForFunction(()=>{const node=document.querySelector('.kgg015MainPager');const rect=node?.getBoundingClientRect();return rect&&rect.width>0&&rect.height>0?{x:rect.x,y:rect.y,width:rect.width,height:rect.height}:false})).jsonValue();
+    assert(pagerBox,'main pager must have a measurable swipe area');
+    await pager.evaluate((node,dx)=>{const rect=node.getBoundingClientRect(),x=rect.x+rect.width*.2,y=rect.y+rect.height*.25,base={bubbles:true,clientX:x,clientY:y,pointerId:17,pointerType:'touch'};node.dispatchEvent(new PointerEvent('pointerdown',base));node.dispatchEvent(new PointerEvent('pointermove',{...base,clientX:x+dx}));},pagerBox.width*.45);
+    const dragDebug=await page.locator('.kgg015MainPagerTrack').evaluate(node=>({dragging:node.classList.contains('is-dragging'),style:node.getAttribute('style'),pagerHandler:typeof node.parentElement?.onpointerdown}));
+    assert(dragDebug.dragging,'pager must track the pointer before release: '+JSON.stringify(dragDebug));
+    assert((await page.locator('.kgg015MainPagerTrack').getAttribute('style')||'').includes('translate3d'),'pager must move with the pointer in real time');
+    await pager.dispatchEvent('pointerup',{bubbles:true,clientX:0,clientY:0,pointerId:17,pointerType:'touch'});
+    await page.waitForFunction(()=>document.querySelector('.kgg015MainProgressionStage')?.textContent.includes('Leichter'));
+    assert(await page.evaluate(()=>p.ex[0].media?.[0]?.id)==='easy-media','swipe release did not elastically snap to the previous stage');
+    await page.locator('.kgg015MainProgressionThumb').nth(2).click();
+    await page.waitForFunction(()=>document.querySelector('.kgg015MainProgressionStage')?.textContent.includes('Schwerer'));
+    const activeThumb=await page.locator('.kgg015MainProgressionThumb[aria-current="true"]').evaluate(node=>({stage:node.dataset.kgg015MainStage,text:node.querySelector('.kgg015MainProgressionThumbLabel')?.textContent.trim(),label:node.getAttribute('aria-label')}));
+    assert(activeThumb.stage==='hard'&&activeThumb.text==='3','thumbnail selection did not use the shared progression state: '+JSON.stringify(activeThumb));
     await page.evaluate(()=>{window.put(0,1,'B','a','0');window.put(0,1,'B','b','0');window.put(0,1,'B','a','0');});
     await page.evaluate(()=>window.put(0,2,'B','a','0'));
     const afterZero=await page.evaluate(()=>JSON.parse(localStorage.getItem('kggProgressionHistoryV1')||'{}'));
@@ -62,7 +81,7 @@ async function main(){
     assert(qrWire.e&&qrWire.e[0]&&qrWire.e[0][7]&&qrWire.e[0][7].k==='kgg015','KGGD1 QR omitted the progression selection marker');
     assert(qrWire.e[0][7].s[0].i==='hard','KGGD1 QR omitted the selected hard stage');
 
-    await page.locator('.kgg015Gallery').first().locator('[data-kgg015-prev]').click();
+    await page.locator('[data-kgg015-main-prev]').click();
     await page.evaluate(()=>window.put(0,1,'B','a','0'));
     await page.evaluate(()=>window.showQr(false));
     await page.waitForTimeout(80);
