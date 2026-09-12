@@ -173,7 +173,7 @@
   }
   function syncRawVariants(){
     if(typeof p==='undefined'||!p||!Array.isArray(p.ex))return;
-    if(currentPlanId&&currentPlanId!==planId()){sessionSelection={};originalNames=[];originalMedia=[];history.current={planId:planId(),day:currentDay(),records:{}}}
+    if(currentPlanId&&currentPlanId!==planId()){sessionSelection={};originalNames=[];originalMedia=[];activeSet={index:0,setNo:1};preferActiveMedia=false;history.current={planId:planId(),day:currentDay(),records:{}}}
     currentPlanId=planId();
     if(!originalNames.length)originalNames=p.ex.map(ex=>String(ex&&ex.n||''));
     if(!originalMedia.length)originalMedia=p.ex.map(ex=>clone(ex&&ex.media));
@@ -317,14 +317,14 @@
   }
   function renderMainProgressionControls(index=activeSet.index,setNo=activeSet.setNo){
     const values=valuesForExercise(index);if(!values.length)return;
-    const box=mainMediaBox(index),card=box&&box.closest('.ex');if(!box||!card)return;
-    box.classList.add('kgg015MainProgressionHost');box.querySelectorAll('.kgg015MainPager').forEach(node=>node.remove());
+    const box=mainMediaBox(index),card=box&&box.closest('.ex'),mediaList=box&&box.closest('.kggMediaList');if(!box||!card||!mediaList)return;
+    mediaList.classList.add('kgg015MainProgressionHost');mediaList.querySelectorAll('.kgg015MainPager').forEach(node=>node.remove());
     const id=selectedId(index,setNo),at=Math.max(0,values.findIndex(item=>String(item.id)===String(id)));
     const previous=at>0?values[at-1]:null,current=values[at]||values[0],next=at<values.length-1?values[at+1]:null,pager=document.createElement('div');
     pager.className='kgg015MainPager';
     const prevTarget=previous?'kgg015-main-'+index+'-'+setNo+'-'+previous.id:'',currentTarget='kgg015-main-'+index+'-'+setNo+'-'+current.id,nextTarget=next?'kgg015-main-'+index+'-'+setNo+'-'+next.id:'';
     pager.innerHTML='<div class="kgg015MainPagerTrack">'+pagerSlide(previous,prevTarget,index,setNo,at-1,false)+pagerSlide(current,currentTarget,index,setNo,at,true)+pagerSlide(next,nextTarget,index,setNo,at+1,false)+'</div><div class="kgg015MainProgressionControls"><button type="button" class="kgg015MainProgressionControl" data-kgg015-main-prev aria-label="Leichtere Progressionsstufe" '+(at===0?'disabled':'')+'><i class="kgg015MainProgressionTriangle prev" aria-hidden="true"></i></button><span class="kgg015MainProgressionStage" aria-live="polite">Stufe '+(at+1)+' · '+esc(current.name)+'</span><button type="button" class="kgg015MainProgressionControl" data-kgg015-main-next aria-label="Schwerere Progressionsstufe" '+(at===values.length-1?'disabled':'')+'><i class="kgg015MainProgressionTriangle next" aria-hidden="true"></i></button></div>';
-    box.appendChild(pager);pager.querySelector('[data-kgg015-main-prev]').onclick=()=>shiftVariant(index,setNo,-1);pager.querySelector('[data-kgg015-main-next]').onclick=()=>shiftVariant(index,setNo,1);bindMainPager(pager,index,setNo,values,at);mainPagerThumbs(card,index,setNo,values,at);
+    mediaList.appendChild(pager);pager.querySelector('[data-kgg015-main-prev]').onclick=()=>shiftVariant(index,setNo,-1);pager.querySelector('[data-kgg015-main-next]').onclick=()=>shiftVariant(index,setNo,1);bindMainPager(pager,index,setNo,values,at);mainPagerThumbs(card,index,setNo,values,at);
   }
   function refreshMainProgression(index=activeSet.index){
     try{if(window.KGGPatientMediaRetryCache&&typeof window.KGGPatientMediaRetryCache.render==='function')window.KGGPatientMediaRetryCache.render()}catch(err){}
@@ -396,7 +396,7 @@
   }
   function wrapRender(){
     if(originalRender||typeof render!=='function')return;
-    originalRender=render;window.render=function(){syncRawVariants();applyDominantMedia(false);const result=originalRender.apply(this,arguments);[0,70,260].forEach(delay=>setTimeout(()=>{renderGalleries()},delay));return result};
+    originalRender=render;window.render=function(){syncRawVariants();applyDominantMedia(preferActiveMedia);const result=originalRender.apply(this,arguments);[0,70,260].forEach(delay=>setTimeout(()=>{renderGalleries()},delay));return result};
   }
   function init(){
     syncRawVariants();applyDominantMedia(preferActiveMedia);wrapRender();wrapPut();wrapText();wrapShowQr();wrapOpenPad();css();renderGalleries();refreshMainProgression();

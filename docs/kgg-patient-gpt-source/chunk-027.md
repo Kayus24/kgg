@@ -2,7 +2,7 @@
 
 - Source file: `patient-set-summary-groups.js`
 - Characters: 1-24000
-- Full source SHA-256: `12890f9a004eb4dda6f15450bbe4a2a7a5d9075d588187226163345db37e26c3`
+- Full source SHA-256: `1f3645b629eef7f15921f77d131b4c1927e2f2419f621b5c67e13a01075d3c75`
 
 ```
 (()=>{
@@ -180,7 +180,7 @@
   }
   function syncRawVariants(){
     if(typeof p==='undefined'||!p||!Array.isArray(p.ex))return;
-    if(currentPlanId&&currentPlanId!==planId()){sessionSelection={};originalNames=[];originalMedia=[];history.current={planId:planId(),day:currentDay(),records:{}}}
+    if(currentPlanId&&currentPlanId!==planId()){sessionSelection={};originalNames=[];originalMedia=[];activeSet={index:0,setNo:1};preferActiveMedia=false;history.current={planId:planId(),day:currentDay(),records:{}}}
     currentPlanId=planId();
     if(!originalNames.length)originalNames=p.ex.map(ex=>String(ex&&ex.n||''));
     if(!originalMedia.length)originalMedia=p.ex.map(ex=>clone(ex&&ex.media));
@@ -319,5 +319,5 @@
     const track=pager.querySelector('.kgg015MainPagerTrack');let startX=null,lastX=0;
     const finish=(event,cancelled=false)=>{if(startX===null)return;const dx=lastX-startX;startX=null;try{pager.releasePointerCapture?.(event.pointerId)}catch(err){}track.classList.remove('is-dragging');if(cancelled||Math.abs(dx)<38){track.style.transform='translate3d(-33.333333%,0,0)';return}shiftVariant(index,setNo,dx<0?1:-1)};
     pager.onpointerdown=event=>{if(event.target.closest('button'))return;startX=event.clientX;lastX=startX;track.classList.add('is-dragging');try{pager.setPointerCapture?.(event.pointerId)}catch(err){}};
-    pager.onpointermove=event=>{if(startX===null)return;lastX=event.clientX;const raw=lastX-startX,atStart=at===0&&raw>0,atEnd=at===values.length-1&&raw<0,dx=atStart||atEnd?raw*.28:raw;track.style.transform='translate3d(calc(-33.333333% + '+dx+'px),0,0)'
+    pager.onpointermove=event=>{if(startX===null)return;lastX=event.clientX;const raw=lastX-startX,atStart=at===0&&raw>0,atEnd=at===values.length-1&&raw<0,dx=atStart||atEnd?raw*.28:raw;track.style.trans
 ```
