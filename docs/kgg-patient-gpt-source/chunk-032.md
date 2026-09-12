@@ -1,64 +1,118 @@
 # KGG Patient Source Chunk 032
 
-- Source file: `patient-ui-micro-polish.js`
-- Characters: 1-10680
-- Full source SHA-256: `28eba349eecf929e40451c9ac44061362357a748bb385e14be728879f663bd02`
+- Source file: `patient-storage-scope.js`
+- Characters: 1-4454
+- Full source SHA-256: `5ee476fb50a653ec339cc1876fa916464929bc2e196e347c3f1fd7a0406a79d7`
 
 ```
 (()=>{
-  const VERSION='v9_dynamic_pain_fit_unit_labels';
-  const STYLE='kggPatientUiMicroPolishStyle';
-  const LANG='kggPatientLang';
-  const $=id=>document.getElementById(id);
-  const isEn=()=>localStorage.getItem(LANG)==='en';
+  const REQUEST_ID_RE=/\/previews\/([a-z0-9][a-z0-9-]{5,63})(?:\/|$)/i;
+  const match=String(location.pathname||'').match(REQUEST_ID_RE);
+  const requestId=match?decodeURIComponent(match[1]).toLowerCase():'';
+  if(!requestId)return;
 
-  function ensureStyle(){
-    const old=$(STYLE); if(old) old.remove();
-    const s=document.createElement('style'); s.id=STYLE;
-    s.textContent=`
-      .ex,.set,.pain,input.num,button{-webkit-tap-highlight-color:transparent!important}
-      .kggPainScale button{display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;line-height:1!important;padding:0!important;min-height:44px!important;font-variant-numeric:tabular-nums!important;-webkit-font-smoothing:antialiased!important}
-      .kggPainScale button.on{transform:translateY(-1px)!important}.kggPainScale button:active{transform:scale(.97)!important}
-      input.num{box-sizing:border-box!important;display:block!important;width:100%!important;line-height:1.15!important;transform:none!important;transition:background .22s ease,box-shadow .22s ease,border-color .22s ease!important;outline:none!important;caret-color:transparent!important}
-      input.num:focus{outline:none!important}
-      input.num.kggEditing{outline:none!important;box-shadow:0 0 0 2px rgba(15,23,42,.14)!important;border-color:#94a3b8!important;background:#fff!important;transform:none!important;position:relative!important;z-index:2!important}
-      .set input.num,.set .num{min-width:0!important}.set{align-items:stretch!important}
-      body.kggAlwaysCollapsed .ex .pain:not(.kggHiddenGlobalPain){padding-left:10px!important;padding-right:10px!important;margin-top:18px!important}
-      body.kggAlwaysCollapsed .ex .pain:not(.kggHiddenGlobalPain) .painRow{display:block!important;width:100%!important}
-      body.kggAlwaysCollapsed .ex .pain:not(.kggHiddenGlobalPain) .kggPainScale{margin-top:8px!important;min-width:0!important;width:100%!important;grid-template-columns:repeat(6,minmax(44px,1fr))!important;gap:6px!important;padding-bottom:8px!important}
-      body.kggAlwaysCollapsed .ex .pain:not(.kggHiddenGlobalPain) .kggPainScale button{min-height:48px!important;border-radius:13px!important;font-size:17px!important;font-weight:950!important;min-width:44px!important}
-      body.kggAlwaysCollapsed .ex .pain:not(.kggHiddenGlobalPain) .kggPainCaption{margin-top:7px!important;text-align:center!important;font-size:15px!important;font-weight:950!important;white-space:nowrap!important;color:#475569!important}
-      .kggSetPain .kggPainScale{grid-template-columns:repeat(6,minmax(44px,1fr))!important;gap:6px!important;padding-bottom:8px!important}.kggSetPain .kggPainScale button{min-height:44px!important;font-size:15px!important;border-radius:12px!important;min-width:44px!important}
-      body.kggAlwaysCollapsed .ex .kggPainScale.kggPainFit5{grid-template-columns:repeat(5,minmax(40px,1fr))!important}.kggSetPain .kggPainScale.kggPainFit5{grid-template-columns:repeat(5,minmax(40px,1fr))!important}
-      body.kggAlwaysCollapsed .ex .kggPainScale.kggPainFit4{grid-template-columns:repeat(4,minmax(40px,1fr))!important}.kggSetPain .kggPainScale.kggPainFit4{grid-template-columns:repeat(4,minmax(40px,1fr))!important}
-      body.kggAlwaysCollapsed .ex .kggPainScale.kggPainFit5 button,body.kggAlwaysCollapsed .ex .kggPainScale.kggPainFit4 button{min-width:40px!important}
-      body.kggAlwaysCollapsed .ex.kggHasSetPain > .pain,body.kggAlwaysCollapsed .ex .pain.kggHiddenGlobalPain{display:none!important;max-height:0!important;opacity:0!important;margin:0!important;padding:0!important;border:0!important;pointer-events:none!important}
-      body.kggAlwaysCollapsed .ex{transition:box-shadow .22s ease,border-color .22s ease,background .22s ease,transform .22s ease!important}
-      body.kggAlwaysCollapsed .ex .set,body.kggAlwaysCollapsed .ex .pain{display:block!important;overflow:hidden!important;opacity:1;transform:translateY(0);max-height:520px;transition:max-height .30s cubic-bezier(.16,.84,.44,1),opacity .22s ease,transform .28s cubic-bezier(.16,.84,.44,1),margin .24s ease,padding .24s ease,border-color .24s ease!important;will-change:max-height,opacity,transform}
-      body.kggAlwaysCollapsed .ex.kggOpen{overflow:visible!important}
-      body.kggAlwaysCollapsed .ex.kggOpen .pain{max-height:760px!important;overflow:visible!important;padding-bottom:14px!important}
-      body.kggAlwaysCollapsed .ex:not(.kggOpen) .set,body.kggAlwaysCollapsed .ex:not(.kggOpen) .pain{display:block!important;max-height:0!important;opacity:0!important;transform:translateY(-5px)!important;margin-top:0!important;margin-bottom:0!important;padding-top:0!important;padding-bottom:0!important;border-top-color:transparent!important;border-bottom-color:transparent!important;pointer-events:none!important}
-      body.kggAlwaysCollapsed .ex.kggOpen .set,body.kggAlwaysCollapsed .ex.kggOpen .pain{opacity:1!important;transform:translateY(0)!important}
-      body.kggAlwaysCollapsed .ex.kggOpen{animation:kggCardOpenSoft .24s ease both}@keyframes kggCardOpenSoft{from{transform:translateY(-2px);box-shadow:0 5px 14px rgba(15,23,42,.06)}to{transform:translateY(0)}}
-      .kggSettingsBackdrop{animation:kggSettingsBackdropIn .16s ease both!important}.kggSettingsBackdrop.kggClosing{animation:kggSettingsBackdropOut .16s ease both!important}
-      #kggSettingsSheet{transform-origin:bottom center!important;animation:kggSettingsSheetIn .22s cubic-bezier(.16,.84,.44,1) both!important;will-change:transform,opacity!important}#kggSettingsSheet.kggClosing{animation:kggSettingsSheetOut .16s ease both!important;pointer-events:none!important}
-      @keyframes kggSettingsSheetIn{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes kggSettingsSheetOut{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(14px) scale(.985)}}@keyframes kggSettingsBackdropIn{from{opacity:0}to{opacity:1}}@keyframes kggSettingsBackdropOut{from{opacity:1}to{opacity:0}}
-      @media(max-width:430px){body.kggAlwaysCollapsed .ex .pain:not(.kggHiddenGlobalPain){padding-left:0!important;padding-right:0!important}body.kggAlwaysCollapsed .ex .pain:not(.kggHiddenGlobalPain) .painRow{display:block!important}body.kggAlwaysCollapsed .ex .pain:not(.kggHiddenGlobalPain) .kggPainScale{grid-template-columns:repeat(6,minmax(42px,1fr))!important;gap:6px!important}body.kggAlwaysCollapsed .ex .pain:not(.kggHiddenGlobalPain) .kggPainScale button{min-height:46px!important;font-size:16px!important;border-radius:12px!important;min-width:42px!important}.kggSetPain .kggPainScale{grid-template-columns:repeat(6,minmax(42px,1fr))!important}.kggSetPain .kggPainScale button{min-height:44px!important;font-size:15px!important;min-width:42px!important}}
-      @media(max-width:430px){body.kggAlwaysCollapsed .ex .kggPainScale.kggPainFit5,.kggSetPain .kggPainScale.kggPainFit5{grid-template-columns:repeat(5,minmax(40px,1fr))!important}body.kggAlwaysCollapsed .ex .kggPainScale.kggPainFit4,.kggSetPain .kggPainScale.kggPainFit4{grid-template-columns:repeat(4,minmax(40px,1fr))!important}}
-      @media(prefers-reduced-motion:reduce){body.kggAlwaysCollapsed .ex,body.kggAlwaysCollapsed .ex .set,body.kggAlwaysCollapsed .ex .pain,#kggSettingsSheet,.kggSettingsBackdrop{animation:none!important;transition:none!important}}
-    `;
-    document.head.appendChild(s);
+  const prefix='preview:'+requestId+':';
+  const methodNames=new Set(['clear','getItem','key','removeItem','setItem']);
+  const nativeMethods={
+    clear:Storage.prototype.clear,
+    getItem:Storage.prototype.getItem,
+    key:Storage.prototype.key,
+    removeItem:Storage.prototype.removeItem,
+    setItem:Storage.prototype.setItem,
+  };
+  const nativeStorages=new WeakSet();
+  const proxyToNative=new WeakMap();
+  let localNative;
+  let sessionNative;
+  try{
+    localNative=window.localStorage;
+    sessionNative=window.sessionStorage;
+    nativeStorages.add(localNative);
+    nativeStorages.add(sessionNative);
+  }catch(e){return}
+
+  const nativeFor=receiver=>proxyToNative.get(receiver)||receiver;
+  const scopedReceiver=receiver=>nativeStorages.has(nativeFor(receiver));
+  const storageKey=key=>{
+    const name=String(key);
+    return name.startsWith(prefix)?name:prefix+name;
+  };
+  const visibleKeys=receiver=>{
+    const native=nativeFor(receiver),keys=[];
+    if(!nativeStorages.has(native))return keys;
+    for(let index=0;index<native.length;index+=1){
+      const key=nativeMethods.key.call(native,index);
+      if(key&&key.startsWith(prefix))keys.push(key.slice(prefix.length));
+    }
+    return keys;
+  };
+  const getItem=(receiver,key)=>{
+    const native=nativeFor(receiver);
+    return scopedReceiver(receiver)?nativeMethods.getItem.call(native,storageKey(key)):nativeMethods.getItem.call(native,key);
+  };
+  const setItem=(receiver,key,value)=>{
+    const native=nativeFor(receiver);
+    return nativeMethods.setItem.call(native,scopedReceiver(receiver)?storageKey(key):key,value);
+  };
+  const removeItem=(receiver,key)=>{
+    const native=nativeFor(receiver);
+    return nativeMethods.removeItem.call(native,scopedReceiver(receiver)?storageKey(key):key);
+  };
+  const clear=(receiver)=>{
+    const native=nativeFor(receiver);
+    if(!scopedReceiver(receiver))return nativeMethods.clear.call(native);
+    visibleKeys(native).forEach(key=>nativeMethods.removeItem.call(native,storageKey(key)));
+  };
+  const key=(receiver,index)=>{
+    const keys=visibleKeys(receiver);
+    return keys[Number(index)]??null;
+  };
+
+  Storage.prototype.getItem=function(name){return getItem(this,name)};
+  Storage.prototype.setItem=function(name,value){return setItem(this,name,value)};
+  Storage.prototype.removeItem=function(name){return removeItem(this,name)};
+  Storage.prototype.clear=function(){return clear(this)};
+  Storage.prototype.key=function(index){return key(this,index)};
+
+  function createScopedStorage(native){
+    const proxy=new Proxy(native,{
+      get(target,name,receiver){
+        if(name==='length')return visibleKeys(receiver).length;
+        if(typeof name==='symbol'||methodNames.has(name))return Reflect.get(target,name,receiver);
+        return getItem(receiver,name);
+      },
+      set(target,name,value,receiver){
+        if(typeof name==='symbol'||methodNames.has(name)||name==='length')return Reflect.set(target,name,value,receiver);
+        setItem(receiver,name,value);
+        return true;
+      },
+      deleteProperty(target,name){
+        if(typeof name==='symbol'||methodNames.has(name)||name==='length')return false;
+        removeItem(proxy,name);
+        return true;
+      },
+      ownKeys(target){return visibleKeys(proxy)},
+      has(target,name){
+        if(typeof name==='symbol'||methodNames.has(name)||name==='length')return name in target;
+        return getItem(proxy,name)!==null;
+      },
+      getOwnPropertyDescriptor(target,name){
+        if(typeof name==='string'&&getItem(proxy,name)!==null){
+          return {configurable:true,enumerable:true,value:getItem(proxy,name),writable:true};
+        }
+        return Reflect.getOwnPropertyDescriptor(target,name);
+      },
+    });
+    proxyToNative.set(proxy,native);
+    return proxy;
   }
 
-  function markPainModeCards(){document.querySelectorAll('#list .ex').forEach(card=>{const hasSetPain=!!card.querySelector('.kggSetPain');card.classList.toggle('kggHasSetPain',hasSetPain);const global=card.querySelector(':scope > .pain');if(global)global.classList.toggle('kggHiddenGlobalPain',hasSetPain)})}
-  function clipped(scale){const card=scale.closest('.ex'),pain=scale.closest('.pain,.kggSetPain');if(!card)return false;const r=scale.getBoundingClientRect(),cr=card.getBoundingClientRect(),pr=pain?pain.getBoundingClientRect():cr;const vw=innerWidth||document.documentElement.clientWidth;return r.right>vw-8||r.bottom>cr.bottom+2||r.bottom>pr.bottom+2}
-  function fitPainScales(){document.querySelectorAll('.kggPainScale').forEach(scale=>{scale.classList.remove('kggPainFit5','kggPainFit4')});requestAnimationFrame(()=>{document.querySelectorAll('.kggPainScale').forEach(scale=>{if(!clipped(scale))return;scale.classList.add('kggPainFit5');requestAnimationFrame(()=>{if(clipped(scale)){scale.classList.remove('kggPainFit5');scale.classList.add('kggPainFit4')}})})})}
-  function unitText(text){let y=String(text||'');if(isEn()){y=y.replace(/\bWdh\b/g,'reps').replace(/\bwdh\b/g,'reps').replace(/\bSek\.?\b/g,'sec').replace(/\bbeidseitig\b/g,'bilateral').replace(/links\/rechts/g,'left/right')}else{y=y.replace(/\breps\b/g,'Wdh').replace(/\bsec\.?\b/g,'Sek.').replace(/\bbilateral\b/g,'beidseitig').replace(/left\/right/g,'links/rechts')}return y}
-  function normalizeUnits(){const roots=[document.getElementById('list'),document.getElementById('kggDayHub')].filter(Boolean);roots.forEach(root=>{const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode()){const old=n.nodeValue,nu=unitText(old);if(nu!==old)n.nodeValue=nu}})}
-  function softClose(e){const sh=$('kggSettingsSheet'),bd=$('kggSettingsBackdrop');if(!sh||sh.hidden)return;const target=e.target;if(!(target&&((target.id==='kggSettingsBackdrop')||(target.closest&&target.closest('#kggSetCancel')))))return;e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();sh.classList.add('kggClosing');if(bd)bd.classList.add('kggClosing');setTimeout(()=>{sh.hidden=true;sh.classList.remove('kggClosing');if(bd){bd.hidden=true;bd.classList.remove('kggClosing')}},170)}
-  function apply(){ensureStyle();setTimeout(()=>{markPainModeCards();normalizeUnits();fitPainScales()},0);setTimeout(()=>{markPainModeCards();normalizeUnits();fitPainScales()},80);setTimeout(()=>{normalizeUnits();fitPainScales()},240)}
-  function patchRender(){if(window.__kggUiMicroPolishRenderPatch||typeof render!=='function')return;window.__kggUiMicroPolishRenderPatch=1;const old=render;render=function(){const r=old.apply(this,arguments);setTimeout(apply,30);return r}}
-  function init(){if(window.__kggPatientUiMicroPolish===VERSION)return;window.__kggPatientUiMicroPolish=VERSION;apply();patchRender();document.addEventListener('click',softClose,true);addEventListener('resize',apply,{passive:true});addEventListener('orientationchange',()=>setTimeout(apply,180),{passive:true});setTimeout(apply,300);setTimeout(apply,1000);setTimeout(apply,2000)}
-  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
+  try{
+    Object.defineProperty(window,'localStorage',{configurable:true,value:createScopedStorage(localNative)});
+    Object.defineProperty(window,'sessionStorage',{configurable:true,value:createScopedStorage(sessionNative)});
+    window.__KGG_STORAGE_SCOPE__={kind:'preview',requestId,prefix};
+  }catch(e){
+    window.__KGG_STORAGE_SCOPE__={kind:'preview',requestId,prefix,error:'scope-install-failed'};
+  }
 })();
 ```
