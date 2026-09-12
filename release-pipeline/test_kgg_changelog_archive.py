@@ -18,7 +18,7 @@ class ChangelogArchiveTests(unittest.TestCase):
     def test_required_archive_reference_cannot_be_removed(self):
         _text, changelog = archive.load_embedded()
         changelog.pop("archiveSnapshots")
-        with self.assertRaisesRegex(archive.ChangelogArchiveError, "exactly one snapshot"):
+        with self.assertRaisesRegex(archive.ChangelogArchiveError, "legacy v062"):
             archive.validate_changelog_archives(changelog, required=True)
 
     def test_archive_keeps_the_reviewed_v062_snapshot_exactly(self):
@@ -29,16 +29,25 @@ class ChangelogArchiveTests(unittest.TestCase):
             archive.entries_sha256(document["entries"]),
         )
 
-    def test_embedded_window_is_a_suffix_preserving_archive_order(self):
+    def test_current_snapshot_is_full_and_embedded_window_is_its_prefix(self):
         _text, changelog = archive.load_embedded()
         document = archive.validate_changelog_archives(changelog, required=True)
         self.assertIsNotNone(document)
         self.assertEqual(
-            document["entries"][: archive.RETAINED_ENTRY_COUNT],
-            changelog["entries"][-archive.RETAINED_ENTRY_COUNT :],
+            document["entries"][: archive.CURRENT_RETAINED_ENTRY_COUNT],
+            changelog["entries"],
         )
-        combined_count = len(document["entries"]) + len(changelog["entries"]) - archive.RETAINED_ENTRY_COUNT
-        self.assertGreaterEqual(combined_count, 35)
+        self.assertEqual(30, len(document["entries"]))
+        self.assertEqual(archive.CURRENT_RETAINED_ENTRY_COUNT, len(changelog["entries"]))
+
+    def test_legacy_snapshot_remains_referenced_after_current_compaction(self):
+        _text, changelog = archive.load_embedded()
+        snapshots = changelog["archiveSnapshots"]
+        self.assertEqual(2, len(snapshots))
+        self.assertIn(archive.archive_reference(), snapshots)
+        current = [item for item in snapshots if item != archive.archive_reference()]
+        self.assertEqual(1, len(current))
+        self.assertEqual(89, current[0]["snapshotVersionCode"])
 
 
 if __name__ == "__main__":

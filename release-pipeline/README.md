@@ -70,6 +70,20 @@ Wichtig: Jeder Live-Test erzeugt bewusst einen neuen Admin-Beta-Draft. Er veroef
 
 ## Lokale Test-Batterie
 
+### Changelog archivieren
+
+Die Archivierung erzeugt zuerst einen unveraenderlichen Voll-Snapshot des
+aktuellen eingebetteten Changelogs und behaelt danach die 15 neuesten Eintraege
+im Laufzeitfenster. Der bestehende v062-Snapshot bleibt erhalten:
+
+```powershell
+python release-pipeline/kgg_changelog_archive.py --compact-current
+python release-pipeline/kgg_changelog_archive.py --check
+```
+
+Die Operation ist transaktional und bricht bei fehlendem Snapshot, Hash-Drift
+oder einer nicht lueckenlosen Einbettung ab.
+
 Windows-PC-Standardweg ohne GitHub-Schreibaktion:
 
 ```powershell
