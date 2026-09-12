@@ -1,7 +1,7 @@
 {
-  "versionCode": 87,
-  "versionName": "1.0.87-ticket-015-live-fix",
-  "indexUrl": "index.html?v=87",
-  "sha256": "d444eae9f734e0743b3209e659637cc7053f35799000c92577a4db187aa008e9",
-  "notes": "v087: Make the progression editor bridge robust and keep variant metadata out of patient info text."
+  "versionCode": 88,
+  "versionName": "1.0.88-ticket-037-real-plan",
+  "indexUrl": "index.html?v=88",
+  "sha256": "b0d263b420744d4522b89616e89cbcd62af44c935a7bd49cebe6720a89e27ce1",
+  "notes": "v088: Der sichtbare Cockpit-Einstieg und der Fertig-Dialog importieren den normalen aktuellen Plan fail-closed in Slot 1."
 }

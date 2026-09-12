@@ -31,6 +31,8 @@
     "shareModal",
     "finishPdfBtn",
     "finishPatientBtn",
+    "finishCockpitBtn",
+    "finishCockpitGaugeBtn",
     "patientOutputBox",
     "pdfPreviewModal",
     "adminSecretsModal",

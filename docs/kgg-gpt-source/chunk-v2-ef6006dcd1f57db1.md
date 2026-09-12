@@ -3,8 +3,26 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 87,
+  "latestVersionCode": 88,
   "entries": [
+    {
+      "versionCode": 88,
+      "versionName": "1.0.88-ticket-037-real-plan",
+      "patchId": "kgg-v088-ticket-037-real-plan",
+      "status": "candidate",
+      "type": "module-patch",
+      "title": "Therapie-Cockpit: normaler Plan direkt in Slot 1",
+      "reason": "Der sichtbare Cockpit-Einstieg und der Fertig-Dialog übernehmen den zentralen aktuellen Plan über den bestehenden Plan-/Codec-/Importpfad; Fehler bleiben fail-closed.",
+      "whatChanged": [
+        "Der sichtbare #kggTherapyCockpitButton importiert den normalen aktuellen Plan.",
+        "Der Fertig-Dialog enthält die verbindliche Cockpit-Plan-Aktion in der Reihenfolge PDF, App, Cockpit, Abbrechen.",
+        "Blocking-Real-Plan-E2E und Negativtest sichern sichtbaren Klick, Slot 1 und den echten Fehlercode."
+      ],
+      "touchedAreas": ["Therapie-Cockpit", "Test-Harness", "Tablet-Fertig-Dialog"],
+      "notTouched": ["PDF-Core", "QR/Patienten-App", "Scan/OCR", "Parser", "Medien/Upload", "Android/APK", "API-Key-Logik", "Phone-Design"],
+      "testStatus": {"local": "pending", "certification": "pending"},
+      "approvalNote": "KGG-TICKET-037; kein Main-, Live- oder Release-Auftrag."
+    },
     {
       "versionCode": 87,
       "versionName": "1.0.87-ticket-015-live-fix",
@@ -877,34 +895,3 @@
       "patchId": "kgg-v050-phone-ui-mini-fix",
       "status": "active",
       "type": "local-html-patch",
-      "title": "Phone-UI: Plan-Menue, Historie und Scan-Optionen",
-      "reason": "Im Phone-Planmodus sass das 3-Punkte-Menue zu mittig, Plan-Historie kollabierte und die Foto/Galerie-Auswahl wirkte wie ein separates Floating-Menue.",
-      "whatChanged": [
-        "Das 3-Punkte-Menue wird im Plan-Header oben rechts verankert.",
-        "Plan-Historie bleibt im Phone-Planmodus als voller lesbarer Button sichtbar.",
-        "Der Scanbutton zeigt Foto/Galerie-Optionen inline und waechst beim Oeffnen nur vertikal."
-      ],
-      "touchedAreas": [
-        "Phone plan header menu",
-        "Phone Plan-Historie button",
-        "Phone scan dock photo options",
-        "UI stability tests",
-        "Source Truth",
-        "version.json"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR-Erzeugung",
-        "Patienten-App",
-        "Scan/OCR parser",
-        "Plan-State",
-        "Android-Wrapper",
-        "Sync",
-        "API-Key-Logik",
-        "Kolleg:innen-Freigabe"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "githubPages": "pending",
-        "androidApp": "not-applicable"
-      },

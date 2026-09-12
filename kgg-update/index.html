@@ -60,21 +60,23 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "therapy-cockpit-id-guard",
     "therapy-cockpit-start-link",
     "ticket-015-progressions",
-    "ticket-015-live-fix"
+    "ticket-015-live-fix",
+    "ticket-037-real-plan"
   ],
   "currentVersion": {
-    "versionCode": 87,
-    "versionName": "1.0.87-ticket-015-live-fix",
-    "lastPatchId": "kgg-v087-ticket-015-live-fix",
+    "versionCode": 88,
+    "versionName": "1.0.88-ticket-037-real-plan",
+    "lastPatchId": "kgg-v088-ticket-037-real-plan",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v087-ticket-015-live-fix",
+  "latestPatchId": "kgg-v088-ticket-037-real-plan",
   "lastUpdateIntent": {
-    "id": "kgg-v087-ticket-015-live-fix",
-    "summary": "Make the progression editor bridge robust and keep variant metadata out of patient info text.",
+    "id": "kgg-v088-ticket-037-real-plan",
+    "summary": "Der sichtbare Cockpit-Einstieg und der Fertig-Dialog importieren den normalen aktuellen Plan fail-closed in Slot 1.",
     "touched": [
-      "Admin-Editor",
-      "Patienten-App"
+      "Therapie-Cockpit",
+      "Test-Harness",
+      "Tablet-Fertig-Dialog"
     ],
     "notTouched": [
       "PDF",
@@ -145,21 +147,23 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "therapy-cockpit-id-guard",
     "therapy-cockpit-start-link",
     "ticket-015-progressions",
-    "ticket-015-live-fix"
+    "ticket-015-live-fix",
+    "ticket-037-real-plan"
   ],
   "currentVersion": {
-    "versionCode": 87,
-    "versionName": "1.0.87-ticket-015-live-fix",
-    "lastPatchId": "kgg-v087-ticket-015-live-fix",
+    "versionCode": 88,
+    "versionName": "1.0.88-ticket-037-real-plan",
+    "lastPatchId": "kgg-v088-ticket-037-real-plan",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v087-ticket-015-live-fix",
+  "latestPatchId": "kgg-v088-ticket-037-real-plan",
   "lastUpdateIntent": {
-    "id": "kgg-v087-ticket-015-live-fix",
-    "summary": "Make the progression editor bridge robust and keep variant metadata out of patient info text.",
+    "id": "kgg-v088-ticket-037-real-plan",
+    "summary": "Der sichtbare Cockpit-Einstieg und der Fertig-Dialog importieren den normalen aktuellen Plan fail-closed in Slot 1.",
     "touched": [
-      "Admin-Editor",
-      "Patienten-App"
+      "Therapie-Cockpit",
+      "Test-Harness",
+      "Tablet-Fertig-Dialog"
     ],
     "notTouched": [
       "PDF",
@@ -181,8 +185,26 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 87,
+  "latestVersionCode": 88,
   "entries": [
+    {
+      "versionCode": 88,
+      "versionName": "1.0.88-ticket-037-real-plan",
+      "patchId": "kgg-v088-ticket-037-real-plan",
+      "status": "candidate",
+      "type": "module-patch",
+      "title": "Therapie-Cockpit: normaler Plan direkt in Slot 1",
+      "reason": "Der sichtbare Cockpit-Einstieg und der Fertig-Dialog übernehmen den zentralen aktuellen Plan über den bestehenden Plan-/Codec-/Importpfad; Fehler bleiben fail-closed.",
+      "whatChanged": [
+        "Der sichtbare #kggTherapyCockpitButton importiert den normalen aktuellen Plan.",
+        "Der Fertig-Dialog enthält die verbindliche Cockpit-Plan-Aktion in der Reihenfolge PDF, App, Cockpit, Abbrechen.",
+        "Blocking-Real-Plan-E2E und Negativtest sichern sichtbaren Klick, Slot 1 und den echten Fehlercode."
+      ],
+      "touchedAreas": ["Therapie-Cockpit", "Test-Harness", "Tablet-Fertig-Dialog"],
+      "notTouched": ["PDF-Core", "QR/Patienten-App", "Scan/OCR", "Parser", "Medien/Upload", "Android/APK", "API-Key-Logik", "Phone-Design"],
+      "testStatus": {"local": "pending", "certification": "pending"},
+      "approvalNote": "KGG-TICKET-037; kein Main-, Live- oder Release-Auftrag."
+    },
     {
       "versionCode": 87,
       "versionName": "1.0.87-ticket-015-live-fix",
@@ -1255,7 +1277,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v087-ticket-015-live-fix",
+  "lastUpdatedByPatchId": "kgg-v088-ticket-037-real-plan",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
@@ -1390,7 +1412,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v087 Ticket 015 Live-Editor-Bridge</title>
+  <title>KGG Update v088 Ticket 037 Therapie-Cockpit</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -16961,6 +16983,10 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       <button class="mutedBtn finishPdfLargeBtn" id="finishLargePdfBtn" type="button" aria-label="Großdruck-PDF für Menschen mit Sehbeeinträchtigung">👓</button>
     </div>
     <button class="mutedBtn finishOutputBtn finishAppBtn" id="finishPatientBtn" type="button"><span class="finishIcon" aria-hidden="true">▦</span><span>App erzeugen</span></button>
+    <div class="finishCockpitRow">
+      <button class="mutedBtn finishOutputBtn finishCockpitBtn" id="finishCockpitBtn" type="button">Cockpit-Plan erzeugen</button>
+      <button class="mutedBtn finishOutputBtn finishCockpitGaugeBtn" id="finishCockpitGaugeBtn" type="button" aria-label="Cockpit-Plan erzeugen (Tacho)"><span class="finishGaugeIcon" aria-hidden="true"></span></button>
+    </div>
     <button class="mutedBtn" id="finishCancelBtn" type="button">Abbrechen</button>
   </div>
   <div class="patientOutput hidden patientQrOutput" id="patientOutputBox">
@@ -17298,11 +17324,11 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
 </script>
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v087_ticket_015_live_fix';
+  const VERSION='KGG_GITHUB_UPDATE_v088_ticket_037_real_plan';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v087","buildTime":"2026-09-11T11:19:38Z","buildCode":"module-v087-ticket-015-live-fix","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v088","buildTime":"2026-09-11T17:23:53Z","buildCode":"module-v088-ticket-037-real-plan","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -17811,8 +17837,9 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
   function syncStatePlanToStore(reason){
     const ds=ensureKGGDataStore();
     state.plan=Array.isArray(state.plan)?state.plan.map(ensureUiExerciseShape):[];
+    if(!state.planId)state.planId='plan_'+(state.createdAt||Date.now());
     ds.setCurrentPlan({
-      id:state.planId||'plan_'+(state.createdAt||Date.now()),
+      id:state.planId,
       title:state.planTitle||'KGG Plan',
       patient:{...(state.patient||{}),...currentPatientData()},
       exercises:state.plan.map(ex=>({...ex})),
@@ -28052,8 +28079,12 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   .kgg-tc-toast{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom,0px));z-index:2147482000;transform:translate(-50%,12px);opacity:0;pointer-events:none;max-width:min(560px,calc(100vw - 28px));padding:10px 14px;border-radius:10px;background:#17233a;color:#fff;font:700 13px/1.3 system-ui,sans-serif;box-shadow:0 6px 18px rgba(15,23,42,.25);transition:opacity .16s ease,transform .16s ease;}
   .kgg-tc-toast.show{opacity:1;transform:translate(-50%,0);}
   @media (min-width:760px){
-    .kgg-tc-entry{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;min-width:78px;min-height:40px;height:40px;padding:5px 8px;border:1px solid #2563eb;border-radius:9px;background:#eff6ff;color:#1d4ed8;font:800 11px/1 system-ui,sans-serif;cursor:pointer;touch-action:manipulation;white-space:nowrap;}
-    .kgg-tc-entry:hover{background:#dbeafe;}
+    .kgg-tc-entry.kgg-tc-entry-ready{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;min-width:78px;min-height:40px;height:40px;padding:5px 8px;border:1px solid #2563eb;border-radius:9px;background:#eff6ff;color:#1d4ed8;font:800 11px/1 system-ui,sans-serif;cursor:pointer;touch-action:manipulation;white-space:nowrap;}
+    .kgg-tc-entry.kgg-tc-entry-ready:hover{background:#dbeafe;}
+  }
+  @media (min-width:760px) and (max-width:920px){
+    /* Keep the nested entry from intercepting the base-data toggle hit target. */
+    .kgg-tc-entry.kgg-tc-entry-ready{transform:translateX(calc(100% + 10px));}
   }
   @media (max-width:759px){
     .kgg-tc-grid,.kgg-tc-grid.one,.kgg-tc-grid.two{grid-template-columns:minmax(0,1fr);}
@@ -28251,6 +28282,10 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   function buildFromPlan(plan){
     var source=plan||{},patient=source.patient||{};return {planId:source.id||"",name:patient.name||source.name||"",date:patient.date||new Date().toISOString().slice(0,10),exercises:(Array.isArray(source.exercises)?source.exercises:[]).map(exerciseInput)};
   }
+  function contentKey(input){
+    var source=input||{},items=Array.isArray(source.exercises)?source.exercises.map(exerciseInput):[],canonical={planId:cleanPlanId(source.planId||source.id||""),name:cleanName(source.name||source.patientName||""),date:cleanDate(source.date),exercises:items.map(function(ex){return {id:ex.id,sets:ex.sets,side:ex.side,loadUnit:ex.loadUnit,metricUnit:ex.metricUnit,previous:ex.previous,today:ex.today};})};
+    return fnv(JSON.stringify(canonical));
+  }
   function bankEntryWithCockpitId(item){
     if(!item||!item.name)return item;
     var explicit=String(item.cockpitId||item.cockpitExerciseId||"").trim(),ref=explicit&&byId[explicit];
@@ -28287,7 +28322,7 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   function slotCount(){return slots.reduce(function(total,slot){return total+(slot?1:0);},0);}
   function firstFreeSlot(){for(var i=0;i<MAX_SLOTS;i++)if(!slots[i])return i;return -1;}
   function slotProgress(slot){var total=0,done=0;(slot&&slot.exercises||[]).forEach(function(ex){(ex.today||[]).forEach(function(pair){total+=2;if(pair[0])done++;if(pair[1])done++;});});return total?Math.round(done/total*100):0;}
-  function normalizeSlot(decoded){return {planId:decoded.planId,name:decoded.name,date:decoded.date,exercises:decoded.exercises.map(function(ex){return {id:ex.id,name:ex.name,sets:ex.sets,side:ex.side,loadUnit:ex.loadUnit,metricUnit:ex.metricUnit,previous:ex.previous.map(function(p){return p.slice();}),today:ex.today.map(function(p){return p.slice();})};}),openExercise:null,lastCompletion:null};}
+  function normalizeSlot(decoded){return {planId:decoded.planId,name:decoded.name,date:decoded.date,exercises:decoded.exercises.map(function(ex){return {id:ex.id,name:ex.name,sets:ex.sets,side:ex.side,loadUnit:ex.loadUnit,metricUnit:ex.metricUnit,previous:ex.previous.map(function(p){return p.slice();}),today:ex.today.map(function(p){return p.slice();})};}),contentKey:contentKey(decoded),openExercise:null,lastCompletion:null};}
   function payloadFromSlot(slot,useTodayAsPrevious){return {planId:slot.planId,name:slot.name,date:new Date().toISOString().slice(0,10),exercises:slot.exercises.map(function(ex){return {id:ex.id,sets:ex.sets,side:ex.side,loadUnit:ex.loadUnit,metricUnit:ex.metricUnit,previous:(useTodayAsPrevious?ex.today:ex.previous).map(function(p){return p.slice();}),today:ex.today.map(function(p){return p.slice();})};})};}
   function valuesLabel(pair,ex){var load=pair&&pair[0]||"–",metric=pair&&pair[1]||"–";return load+" "+(ex.loadUnit||"")+" / "+metric+" "+(ex.metricUnit||"");}
   function mediaMarkup(ex){var current=ex&&ex.media&&Array.isArray(ex.media)?ex.media[0]:null;if(current&&current.downloadUrl&&/^data:image\//i.test(current.downloadUrl))return '<img alt="" src="'+htmlEscape(current.downloadUrl)+'">';return htmlEscape(initials(ex&&ex.name));}
@@ -28320,6 +28355,7 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   function render(){
     var count=slotCount(),button=document.getElementById("kggTherapyCockpitButton");
     if(button)button.textContent=count?"Cockpit "+count+"/3":"Cockpit";
+    if(typeof window.KGGTherapyCockpitEntryVisibilitySync==="function")window.KGGTherapyCockpitEntryVisibilitySync();
     if(!board)return;
     var content="";
     if(notice)content+='<div class="kgg-tc-notice" role="status">'+htmlEscape(notice)+'</div>';
@@ -28374,7 +28410,7 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     }
     if(!document.getElementById("kggTherapyCockpitToast")){var toast=document.createElement("div");toast.id="kggTherapyCockpitToast";toast.className="kgg-tc-toast";toast.setAttribute("role","status");document.body.appendChild(toast);}
     root=document.getElementById("kggTherapyCockpitRoot");board=document.getElementById("kggTherapyCockpitBoard");
-    var rootButton=document.getElementById("kggTherapyCockpitButton");if(rootButton){rootButton.addEventListener("click",function(event){event.stopPropagation();openView();});rootButton.addEventListener("keydown",function(event){if(event.key==="Enter"||event.key===" "){event.preventDefault();event.stopPropagation();openView();}});}
+    var rootButton=document.getElementById("kggTherapyCockpitButton");if(rootButton){var directPlanClick=function(event){var handler=window.KGGTherapyCockpitDirectPlanClick;return typeof handler==="function"&&handler(event)===true;};rootButton.addEventListener("click",function(event){event.stopPropagation();if(directPlanClick(event))return;openView();});rootButton.addEventListener("keydown",function(event){if(event.key==="Enter"||event.key===" "){event.preventDefault();event.stopPropagation();if(directPlanClick(event))return;openView();}});}
     root.addEventListener("click",handleClick);
     document.addEventListener("pointerdown",handleOutsidePointer,true);
     render();
@@ -28403,9 +28439,9 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     if(action==="remove"){removeSlot(slot);return;}
     if(action==="finish"){var result=finishSlot(slot);if(result)showOutput([result]);return;}
   }
-  function getState(){return {version:1,view:currentView,slotCount:slotCount(),slots:slots.map(function(slot,index){return slot?{slot:index,name:slot.name,planId:slot.planId,exerciseCount:slot.exercises.length,progress:slotProgress(slot),openExercise:slot.openExercise}:null;})};}
+  function getState(){return {version:1,view:currentView,slotCount:slotCount(),slots:slots.map(function(slot,index){return slot?{slot:index,name:slot.name,planId:slot.planId,contentKey:slot.contentKey,exerciseCount:slot.exercises.length,progress:slotProgress(slot),openExercise:slot.openExercise}:null;})};}
   installBankRegistryHooks();
-  var api={patchId:PATCH_ID,prefix:PREFIX,registry:{entries:function(){return Object.keys(byId).map(function(id){var item=byId[id];return {id:item.id,key:item.key,name:item.name,canonical:!!item.canonical};});},lookup:function(value){var item=registryLookup(value);return item?{id:item.id,name:item.name}:null;},register:registerCanonical,derive:ensureDerived},encode:encodePayload,decode:decodeCode,makeLink:makeLink,fromPlan:buildFromPlan,importCode:importCode,getState:getState,open:openView,close:closeView,finish:function(index){return finishSlot(Number(index));},remove:removeSlot};
+  var api={patchId:PATCH_ID,prefix:PREFIX,registry:{entries:function(){return Object.keys(byId).map(function(id){var item=byId[id];return {id:item.id,key:item.key,name:item.name,canonical:!!item.canonical};});},lookup:function(value){var item=registryLookup(value);return item?{id:item.id,name:item.name}:null;},register:registerCanonical,derive:ensureDerived},encode:encodePayload,decode:decodeCode,makeLink:makeLink,fromPlan:buildFromPlan,contentKey:contentKey,importCode:importCode,getState:getState,open:openView,close:closeView,finish:function(index){return finishSlot(Number(index));},remove:removeSlot};
   window.KGGTherapyCockpit=api;window.KGG_PATCHES=window.KGG_PATCHES||{};window.KGG_PATCHES[PATCH_ID]={installed:true,version:1};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",installDom,{once:true});else installDom();
 })();
@@ -28721,6 +28757,114 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
 })();
 </script>
 <!-- KGG PATCH END kgg-v087-ticket-015-live-fix -->
+<!-- KGG PATCH START kgg-v088-ticket-037-real-plan -->
+<!-- Ticket 037: normaler Plan ueber sichtbaren Cockpit-Einstieg in Slot 1 -->
+<style id="kgg-ticket-037-real-plan-style">
+  #shareModal .finishCockpitRow{display:grid;grid-template-columns:minmax(0,1fr) 58px;gap:8px}
+  #shareModal .finishCockpitBtn,#shareModal .finishCockpitGaugeBtn{background:#fff;border:1px solid var(--line);color:var(--ink);min-height:52px}
+  #shareModal .finishCockpitBtn{display:flex;align-items:center;justify-content:flex-start;gap:12px;text-align:left}
+  #shareModal .finishCockpitGaugeBtn{display:grid;place-items:center;padding:0}
+  #shareModal .finishGaugeIcon{position:relative;display:inline-block;flex:0 0 24px;width:24px;height:15px;box-sizing:border-box;border:3px solid currentColor;border-bottom:0;border-radius:20px 20px 0 0}
+  #shareModal .finishGaugeIcon::before{content:"";position:absolute;left:9px;bottom:-1px;width:2px;height:10px;background:currentColor;transform-origin:bottom center;transform:rotate(42deg)}
+  #shareModal .finishGaugeIcon::after{content:"";position:absolute;left:7px;bottom:-3px;width:6px;height:6px;border-radius:50%;background:currentColor}
+</style>
+<script id="kgg-ticket-037-real-plan-script">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v088-ticket-037-real-plan";
+  var installed=false,api=window.KGGTherapyCockpit;
+  function safeErrorCode(error){
+    var code=error&&typeof error.code==="string"?error.code:"cockpit_import_failed";
+    return /^[a-z0-9_]{1,48}$/.test(code)?code:"cockpit_import_failed";
+  }
+  function error(code){var err=new Error(code);err.code=code;return err;}
+  function notify(code){
+    var toast=document.getElementById("kggTherapyCockpitToast");
+    if(!toast)return;
+    toast.textContent="Plan konnte nicht ins Cockpit geladen werden ("+code+").";
+    toast.classList.add("show");
+    setTimeout(function(){toast.classList.remove("show");},3200);
+  }
+  function currentPlan(){
+    var store=window.KGGDataStore;
+    if(!store||typeof store.getCurrentPlan!=="function")throw error("plan_state_unavailable");
+    return store.getCurrentPlan()||{};
+  }
+  function planInfo(plan){
+    var source=plan||{},patient=source.patient||{};
+    var name=String(patient.name||source.name||source.patientName||"").trim();
+    var exercises=Array.isArray(source.exercises)?source.exercises:[];
+    return {plan:source,name:name,exercises:exercises,ready:!!name&&exercises.length>0};
+  }
+  function syncEntryVisibility(){
+    var button=document.getElementById("kggTherapyCockpitButton");
+    if(!button)return;
+    var state=api&&typeof api.getState==="function"?api.getState():null;
+    var ready=!!(state&&state.slotCount>0);
+    if(!ready){try{ready=planInfo(currentPlan()).ready;}catch(e){ready=false;}}
+    button.classList.toggle("kgg-tc-entry-ready",ready);
+  }
+  function installPlanStoreHook(){
+    var store=window.KGGDataStore;
+    if(store&&typeof store.setCurrentPlan==="function"&&!store.__kggTicket037EntryWrapped){
+      var setCurrentPlan=store.setCurrentPlan;
+      store.setCurrentPlan=function(){var result=setCurrentPlan.apply(this,arguments);syncEntryVisibility();return result;};
+      store.__kggTicket037EntryWrapped=true;
+    }
+    syncEntryVisibility();
+  }
+  function importCurrentPlan(options){
+    if(!api||typeof api.getState!=="function"||typeof api.open!=="function")throw error("cockpit_unavailable");
+    var state=api.getState(),info=planInfo(currentPlan());
+    if(!info.ready)throw error("current_plan_not_ready");
+    if(typeof api.fromPlan!=="function"||typeof api.contentKey!=="function"||typeof api.makeLink!=="function"||typeof api.importCode!=="function")throw error("cockpit_content_contract_unavailable");
+    var payload=api.fromPlan(info.plan),contentKey=api.contentKey(payload);
+    if(options&&options.dedupe&&contentKey&&Array.isArray(state&&state.slots)&&state.slots.some(function(slot){return slot&&slot.contentKey===contentKey;})){api.open();return {reused:true,state:state};}
+    if(state&&state.slotCount>=3)throw error("slots_full");
+    var link=api.makeLink(payload);
+    return api.importCode(link);
+  }
+  function failClosed(errorValue){
+    var code=safeErrorCode(errorValue);
+    window.KGGTherapyCockpitLastErrorCode=code;
+    notify(code);
+    return true;
+  }
+  function activateDirectPlan(){
+    try{
+      var state=api&&typeof api.getState==="function"?api.getState():null;
+      if(state&&state.slotCount>0){api.open();window.KGGTherapyCockpitLastErrorCode="";return true;}
+      importCurrentPlan({dedupe:true});
+      window.KGGTherapyCockpitLastErrorCode="";
+    }catch(errorValue){failClosed(errorValue);}
+    return true;
+  }
+  function activateFinish(event){
+    event.preventDefault();
+    try{
+      importCurrentPlan({dedupe:true});
+      window.KGGTherapyCockpitLastErrorCode="";
+      var finishModal=document.getElementById("shareModal");
+      if(finishModal)finishModal.classList.remove("open");
+    }catch(errorValue){failClosed(errorValue);}
+  }
+  function install(){
+    if(installed)return;
+    installed=true;
+    window.KGGTherapyCockpitDirectPlanClick=activateDirectPlan;
+    window.KGGTherapyCockpitEntryVisibilitySync=syncEntryVisibility;
+    installPlanStoreHook();
+    var finish=document.getElementById("finishCockpitBtn"),gauge=document.getElementById("finishCockpitGaugeBtn"),finishTrigger=document.getElementById("finishBtn");
+    if(finish)finish.addEventListener("click",activateFinish);
+    if(gauge)gauge.addEventListener("click",activateFinish);
+    if(finishTrigger)finishTrigger.addEventListener("click",function(){setTimeout(function(){var modal=document.getElementById("shareModal"),first=document.getElementById("finishPdfBtn");if(modal&&modal.classList.contains("open")&&first)first.focus();},0);});
+    window.KGG_PATCHES=window.KGG_PATCHES||{};
+    window.KGG_PATCHES[PATCH_ID]={installed:true,version:2,dependsOn:"kgg-v084-therapy-cockpit-start-link"};
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});else install();
+})();
+</script>
+<!-- KGG PATCH END kgg-v088-ticket-037-real-plan -->
 
 </body>
 </html>
