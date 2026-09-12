@@ -1,7 +1,7 @@
 {
-  "versionCode": 88,
-  "versionName": "1.0.88-ticket-037-real-plan",
-  "indexUrl": "index.html?v=88",
-  "sha256": "b0d263b420744d4522b89616e89cbcd62af44c935a7bd49cebe6720a89e27ce1",
-  "notes": "v088: Der sichtbare Cockpit-Einstieg und der Fertig-Dialog importieren den normalen aktuellen Plan fail-closed in Slot 1."
+  "versionCode": 89,
+  "versionName": "1.0.89-changelog-archive-window-refresh",
+  "indexUrl": "index.html?v=89",
+  "sha256": "8144849b2a00b94dab4c3b4e0fe2ad86511b4133c3bdd4d75842e963312206d0",
+  "notes": "v089: Vollständiger aktueller Changelog-Snapshot wird unveränderlich archiviert; im Laufzeitfenster bleiben die 15 neuesten Einträge."
 }

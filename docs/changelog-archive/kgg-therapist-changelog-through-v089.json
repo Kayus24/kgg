@@ -1,10 +1,60 @@
-
-<!-- BEGIN kgg-changelog: embedded Changelog; READ THIS BEFORE PATCHING -->
-<script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 88,
+  "kind": "kgg-therapist-changelog-snapshot",
+  "source": {
+    "path": "kgg-update/src/metadata/changelog.html",
+    "elementId": "kgg-changelog",
+    "versionCode": 89,
+    "versionName": "1.0.89-changelog-archive-window-refresh"
+  },
+  "createdByPatchId": "kgg-v089-changelog-archive-window-refresh",
+  "entryOrder": "newest-first",
+  "entryCount": 30,
+  "entriesSha256": "7c9c4d1d87e64c989ae670af3cd4892d7f046a3540c0dfbd4cc180bc75e4aa7e",
+  "canonicalization": {
+    "scope": "entries",
+    "encoding": "utf-8",
+    "ensureAscii": false,
+    "sortObjectKeys": true,
+    "separators": [
+      ",",
+      ":"
+    ],
+    "allowNaN": false,
+    "trailingNewline": false
+  },
   "entries": [
+    {
+      "versionCode": 89,
+      "versionName": "1.0.89-changelog-archive-window-refresh",
+      "patchId": "kgg-v089-changelog-archive-window-refresh",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Changelog-Archivfenster erweitert",
+      "reason": "Vollständiger aktueller Changelog-Snapshot wird unveränderlich archiviert; im Laufzeitfenster bleiben die 15 neuesten Einträge.",
+      "whatChanged": [
+        "Vollständiger aktueller Changelog-Snapshot wird unveränderlich archiviert; im Laufzeitfenster bleiben die 15 neuesten Einträge."
+      ],
+      "touchedAreas": [
+        "Changelog-Archivierung"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
     {
       "versionCode": 88,
       "versionName": "1.0.88-ticket-037-real-plan",
@@ -18,9 +68,25 @@
         "Der Fertig-Dialog enthält die verbindliche Cockpit-Plan-Aktion in der Reihenfolge PDF, App, Cockpit, Abbrechen.",
         "Blocking-Real-Plan-E2E und Negativtest sichern sichtbaren Klick, Slot 1 und den echten Fehlercode."
       ],
-      "touchedAreas": ["Therapie-Cockpit", "Test-Harness", "Tablet-Fertig-Dialog"],
-      "notTouched": ["PDF-Core", "QR/Patienten-App", "Scan/OCR", "Parser", "Medien/Upload", "Android/APK", "API-Key-Logik", "Phone-Design"],
-      "testStatus": {"local": "pending", "certification": "pending"},
+      "touchedAreas": [
+        "Therapie-Cockpit",
+        "Test-Harness",
+        "Tablet-Fertig-Dialog"
+      ],
+      "notTouched": [
+        "PDF-Core",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Medien/Upload",
+        "Android/APK",
+        "API-Key-Logik",
+        "Phone-Design"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
       "approvalNote": "KGG-TICKET-037; kein Main-, Live- oder Release-Auftrag."
     },
     {
@@ -895,3 +961,78 @@
       "patchId": "kgg-v050-phone-ui-mini-fix",
       "status": "active",
       "type": "local-html-patch",
+      "title": "Phone-UI: Plan-Menue, Historie und Scan-Optionen",
+      "reason": "Im Phone-Planmodus sass das 3-Punkte-Menue zu mittig, Plan-Historie kollabierte und die Foto/Galerie-Auswahl wirkte wie ein separates Floating-Menue.",
+      "whatChanged": [
+        "Das 3-Punkte-Menue wird im Plan-Header oben rechts verankert.",
+        "Plan-Historie bleibt im Phone-Planmodus als voller lesbarer Button sichtbar.",
+        "Der Scanbutton zeigt Foto/Galerie-Optionen inline und waechst beim Oeffnen nur vertikal."
+      ],
+      "touchedAreas": [
+        "Phone plan header menu",
+        "Phone Plan-Historie button",
+        "Phone scan dock photo options",
+        "UI stability tests",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Android-Wrapper",
+        "Sync",
+        "API-Key-Logik",
+        "Kolleg:innen-Freigabe"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "not-applicable"
+      },
+      "handoffNote": "v050 ist UI-only fuer Phone; bei Problemen zuerst ui-stability phone-scan-dock und phone-history-packages laufen lassen."
+    },
+    {
+      "versionCode": 50,
+      "versionName": "1.0.50-phone-ui-mini-fix",
+      "patchId": "kgg-v049-symbol-encoding-hotfix",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Mojibake-Symbolreste repariert",
+      "reason": "Nach der grossen UTF-8-Reparatur waren noch kaputte Symbolsequenzen wie Pfeile, Zahnrad und QR-ASCII-Blockzeichen sichtbar bzw. im HTML enthalten.",
+      "whatChanged": [
+        "Kaputte Pfeil-, Zahnrad-, Caret- und QR-ASCII-Symbolstrings wurden durch echte Unicode-Zeichen ersetzt.",
+        "Der Encoding-Guard erkennt jetzt auch einfache sichtbare Mojibake-Symbolfamilien.",
+        "Die Encoding-Guard-Unit-Tests enthalten gute Unicode-Zeichen und rote Symbol-Mojibake-Faelle."
+      ],
+      "touchedAreas": [
+        "HTML symbol strings",
+        "QR helper embedded strings",
+        "Critical encoding guard",
+        "Local test batteries",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Layout",
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Android-Wrapper",
+        "Sync",
+        "API-Key-Logik",
+        "Kolleg:innen-Freigabe"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
+    }
+  ]
+}

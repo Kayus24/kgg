@@ -54,8 +54,9 @@ Source-Truth, Changelog, Patch-Regeln, Build-Identitaet, Manifest und Hash als
 eine validierte Transaktion. Geschuetzte Bereiche brauchen
 `--allow-protected` plus `--approval-note`.
 
-Der vollstaendige Changelog-Stand bis v062 liegt unveraendert als versionierter
-Snapshot unter `docs/changelog-archive/`. In den Laufzeit-Metadaten bleiben v063
-und die 14 neuesten Vorgaenger, damit normale Patches wieder ohne Overflow-
-Override scaffoldbar sind. Der Archiv-Contract prueft Snapshot-Hash, Reihenfolge
-und die lueckenlose Ueberlappung mit dem eingebetteten Fenster.
+Der vollstaendige Changelog-Stand bis v062 und der aktuelle Voll-Snapshot liegen
+unveraendert als versionierte Snapshots unter `docs/changelog-archive/`. In den
+Laufzeit-Metadaten bleiben die 15 neuesten Eintraege, damit normale Patches
+wieder ohne Overflow-Override scaffoldbar sind. Der Archiv-Contract prueft
+Snapshot-Hash, Reihenfolge, den vollstaendigen Pre-Compaction-Snapshot und die
+Uebereinstimmung mit dem eingebetteten Laufzeitfenster.
