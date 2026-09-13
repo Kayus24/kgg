@@ -10,6 +10,7 @@ const vm=require('vm');
 
 const ROOT=path.resolve(__dirname,'..');
 const ADMIN_PATH=path.join(ROOT,'kgg-update','src','patches','v085-ticket-015-progressions.html');
+const ADMIN_GALLERY_PATH=path.join(ROOT,'kgg-update','src','patches','v090-ticket-015-admin-stage-gallery-drag-motion.html');
 const PATIENT_PATH=path.join(ROOT,'patient-set-summary-groups.js');
 const MEDIA_PATH=path.join(ROOT,'patient-media-retry-cache_v2.js');
 
@@ -18,11 +19,11 @@ function assert(condition,message){if(!condition)fail(message)}
 function scriptBody(file){return fs.readFileSync(file,'utf8').replace(/^[\s\S]*?<script[^>]*>/i,'').replace(/<\/script>[\s\S]*$/i,'')}
 
 function runAdminSmoke(){
-  const source=scriptBody(ADMIN_PATH);
+  const source=scriptBody(ADMIN_PATH)+scriptBody(ADMIN_GALLERY_PATH);
   assert(!source.includes('KGG_PATIENT_AUTOMATION_TOKEN'),'forbidden patient automation token is referenced');
   assert(!source.includes('github.token'),'snapshot patch unexpectedly references github.token');
   const window={__KGG_TEST__:true};
-  const document={readyState:'complete',head:null,getElementById(){return null},querySelector(){return null},addEventListener(){}};
+  const document={readyState:'complete',head:{appendChild(){}},createElement(){return {appendChild(){},classList:{add(){},remove(){},toggle(){}},setAttribute(){}}},getElementById(){return null},querySelector(){return null},addEventListener(){}};
   const context={window,document,console,setTimeout(){},clearTimeout(){},bank:[],state:{plan:[]},ensureExerciseMediaList(ex){return Array.isArray(ex&&ex.media)?ex.media:[]}};
   window.document=document;window.window=window;
   window.compactKggH2Exercise=ex=>[ex.name||'Basis','','','','','','','','','',ex.painMode||'exercise'];
@@ -36,7 +37,7 @@ function runAdminSmoke(){
   const exercise={localId:'ex-1',name:'Basis',media:[{id:'base-image',type:'image'}],progressionVariants:[
     {id:'base',name:'Basis',order:0,media:[{id:'base-image',type:'image'}]},
     {id:'hard',name:'Schwerer',order:1,media:[{id:'hard-image',type:'image'}]},
-  ]};
+  ],progressionMainId:'hard'};
   const normalized=api.normalizeVariants(exercise,false);
   assert(normalized.length===2,'admin normalization lost a progression stage');
   assert(normalized[0].order===0&&normalized[1].order===1,'admin progression order is not stable');
@@ -48,7 +49,12 @@ function runAdminSmoke(){
   assert(row[11]&&row[11].g===wire.g,'KGGH2 optional progression field was not appended in the reserved-free slot');
   const expanded=window.expandKggH2Exercise(row);
   assert(expanded.progressionVariants&&expanded.progressionVariants.length===2,'KGGH2 roundtrip lost progressions');
+  assert(expanded.progressionMainId==='hard','KGGH2 roundtrip lost the main stage');
   assert(window.buildPatientExercisePayload(exercise).progressionVariants.length===2,'patient payload omitted progressions');
+  const gallery=window.__kggTicket015AdminGalleryTest;
+  assert(gallery&&gallery.mainIdFor(exercise,normalized)==='hard','admin gallery did not retain the single configured main stage');
+  const mainRow=window.compactKggH2Exercise({...exercise,progressionMainId:'hard'});
+  assert(mainRow[11]&&mainRow[11].a==='hard','KGGH2 wire format lost the main stage');
   const used=new Set(['pv_group-1_0','pv_group-1_2']);
   assert(api.allocateVariantId('group-1','',2,used)!=='pv_group-1_2','progression id allocator recreated an existing id');
   const appCore=fs.readFileSync(path.join(ROOT,'kgg-update','src','runtime','app-core.html'),'utf8');

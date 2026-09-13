@@ -119,6 +119,14 @@ def run_ticket_015_browser() -> None:
     run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "node", "release-pipeline/kgg_ticket_015_browser_smoke.js"])
 
 
+def run_ticket_015_admin_browser() -> None:
+    npm = npm_executable()
+    if not npm:
+        raise BatteryError("npm not found. Install npm or set KGG_NPM for the Ticket 015 admin browser battery.")
+    log("== Ticket 015 Admin-Editor browser loop ==")
+    run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "node", "release-pipeline/kgg_ticket_015_admin_browser_smoke.js"])
+
+
 def run_therapy_cockpit_native() -> None:
     log("== Therapie-Cockpit Android app-link contract ==")
     run([sys.executable, "release-pipeline/kgg_therapy_cockpit_native_contract.py"])
@@ -917,6 +925,13 @@ TEST_REGISTRY = [
         "suite": "ui-stability",
         "reason": "The patient phone gallery must select per-set stages, count a numeric zero once, choose dominant ties safely and document real changes.",
         "run": run_ticket_015_browser,
+    },
+    {
+        "id": "ticket-015-admin-editor-browser-regression",
+        "level": "regression",
+        "suite": "ui-stability",
+        "reason": "The therapist editor must keep the progression gallery, catalog/new-stage add path, main-stage hold, sorting, confirmed deletion and responsive widths stable.",
+        "run": run_ticket_015_admin_browser,
     },
     {
         "id": "ui-contract",

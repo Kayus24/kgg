@@ -1,10 +1,10 @@
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v089_changelog_archive_window_refresh';
+  const VERSION='KGG_GITHUB_UPDATE_v090_ticket_015_admin_stage_gallery_drag_motion';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v089","buildTime":"2026-09-12T21:30:21Z","buildCode":"module-v089-changelog-archive-window-refresh","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v090","buildTime":"2026-09-13T10:00:00Z","buildCode":"module-v090-ticket-015-admin-stage-gallery-drag-motion","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -7623,6 +7623,15 @@
       backdrop.addEventListener('click',ev=>{ev.preventDefault();setTabletSideMenuOpen(false);},{capture:true});
     }
   }
+  // Narrow bridge for the modular progression editor. It keeps the existing
+  // catalog, plan-store and persistence functions inside this runtime closure.
+  if((window.KGG_ROLLOUT_PROFILE||'colleague').toLowerCase()==='admin')window['KGGProgressionEditorBridge']={
+    catalog:()=>bank.map(item=>({...item,media:ensureExerciseMediaList(item)})),
+    upsert:(exercise,reason)=>upsertPlanExerciseToBank(exercise,reason||'ticket_015_progression'),
+    sync:reason=>syncStatePlanToStore(reason||'ticket_015_progression'),
+    persistBank:()=>persistCustomBank(),
+    save:()=>save()
+  };
   /* KGG_LOGIC_SMOKE_BOOT_BOUNDARY */
   installKggV383UiFlowStability();
   installKggV388AndroidFlowFixes();

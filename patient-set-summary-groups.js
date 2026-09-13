@@ -188,11 +188,12 @@
     return variantsFor(p.ex[index],index);
   }
   function groupState(index){
-    const ex=p&&p.ex&&p.ex[index],values=valuesForExercise(index),gid=values[0]&&values[0].groupId||groupOf(ex,index);
+    const ex=p&&p.ex&&p.ex[index],values=valuesForExercise(index),raw=rawExercise(index),wire=raw&&raw[11]&&typeof raw[11]==='object'?raw[11]:(raw&&raw[10]&&typeof raw[10]==='object'?raw[10]:null),gid=values[0]&&values[0].groupId||groupOf(ex,index);
     const storageKey=planId()+'|'+gid;
     if(!history.groups[storageKey])history.groups[storageKey]={lastBySet:{},dominantId:''};
     const group=history.groups[storageKey];group.lastBySet=group.lastBySet&&typeof group.lastBySet==='object'?group.lastBySet:{};
-    return {gid,storageKey,group,values};
+    const requested=String(ex&&ex.progressionMainId||wire&&wire.a||'');group.mainId=values.some(item=>String(item.id)===requested)?requested:(group.mainId&&values.some(item=>String(item.id)===String(group.mainId))?String(group.mainId):(values[0]&&values[0].id||''));
+    return {gid,storageKey,group,values,mainId:group.mainId};
   }
   function variantById(values,id){return values.find(item=>String(item.id)===String(id))||null}
   function defaultId(index,setNo){
@@ -201,7 +202,7 @@
     if(selected&&variantById(values,selected))return selected;
     if(state.group.lastBySet[key]&&variantById(values,state.group.lastBySet[key]))return state.group.lastBySet[key];
     if(state.group.dominantId&&variantById(values,state.group.dominantId))return state.group.dominantId;
-    return values[0].id;
+    return state.mainId||values[0].id;
   }
   function selectedId(index,setNo){return defaultId(index,setNo)}
   function currentRecordKey(index,setNo){return String(index)+'|'+String(setNo)}
@@ -232,14 +233,14 @@
     syncRawVariants();
     p.ex.forEach((ex,index)=>{
       const values=valuesForExercise(index);if(!values.length)return;
-      const state=groupState(index),winner=state.group.dominantId&&variantById(values,state.group.dominantId)||dominantFor(index,false)||values[0];
+      const state=groupState(index),winner=state.group.dominantId&&variantById(values,state.group.dominantId)||dominantFor(index,false)||variantById(values,state.mainId)||values[0];
       const active=preferActiveSet&&activeSet&&Number(activeSet.index)===index?variantById(values,selectedId(index,activeSet.setNo)):null;
       ex.media=clone((active||winner)&&((active||winner).media)||originalMedia[index]||[]);
     });
   }
   function displayedVariant(index){
     const state=groupState(index),values=state.values;if(!values.length)return null;
-    return state.group.dominantId&&variantById(values,state.group.dominantId)||dominantFor(index,false)||values[0];
+    return state.group.dominantId&&variantById(values,state.group.dominantId)||dominantFor(index,false)||variantById(values,state.mainId)||values[0];
   }
   function applyDisplayNames(){
     if(!document||typeof document.querySelectorAll!=='function')return;

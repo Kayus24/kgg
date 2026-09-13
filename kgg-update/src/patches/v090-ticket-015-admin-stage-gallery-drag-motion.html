@@ -1,0 +1,242 @@
+<!-- KGG PATCH START kgg-v090-ticket-015-admin-stage-gallery-drag-motion -->
+<!-- Ticket 015 Admin-Editor: Progressionsgalerie, Main-Hold, sichere Gesten und Karten-Drag -->
+<script id="kgg-v090-ticket-015-admin-stage-gallery-drag-motion">
+(function(){
+  'use strict';
+  const VERSION='ticket-015-admin-stage-gallery-v3';
+  const HOLD_MS=2000;
+  const MAIN_SWAP_DELAY_MS=250;
+  const MOVE_CANCEL_PX=12;
+  const DELETE_SWIPE_PX=48;
+  const $=id=>document.getElementById(id);
+  const esc=value=>String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const clone=value=>{try{return JSON.parse(JSON.stringify(value));}catch(err){return value;}};
+  const idPart=value=>String(value||'').replace(/[^A-Za-z0-9_-]+/g,'_').slice(0,80)||'exercise';
+  const mediaOf=ex=>{try{return typeof ensureExerciseMediaList==='function'?clone(ensureExerciseMediaList(ex)):clone(Array.isArray(ex&&ex.media)?ex.media:[]);}catch(err){return [];}};
+  const groupId=ex=>String(ex&&ex.progressionGroupId||'pg_'+idPart(ex&&((ex.localId||ex.id)||'exercise')));
+  function variantId(group,index,value){return String(value&&value.id||('pv_'+idPart(group)+'_'+index));}
+  function normalizeStage(value,index,group,base){
+    const source=value&&typeof value==='object'?value:{};
+    return {
+      id:variantId(group,index,source),
+      groupId:String(source.groupId||group),
+      name:String(source.name||source.title||(index===0&&base&&base.name)||('Progressionsstufe '+(index+1))).trim(),
+      order:Number.isFinite(Number(source.order??source.o))?Number(source.order??source.o):index,
+      sourceId:String(source.sourceId||source.bankId||source.s||''),
+      sourceName:String(source.sourceName||'').trim(),
+      media:mediaOf(source.media!==undefined?source:(base&&index===0?base:{}))
+    };
+  }
+  function normalizeVariants(ex,materialize){
+    const group=groupId(ex),base=ex||{},source=Array.isArray(ex&&ex.progressionVariants)?ex.progressionVariants:[];
+    if(!source.length&&!materialize)return [];
+    const values=source.length?source.map((item,index)=>normalizeStage(item,index,group,base)):[normalizeStage({id:'pv_'+idPart(group)+'_0',name:base.name,sourceId:base.sourceId||base.bankId||'',media:base},0,group,base)];
+    values.sort((a,b)=>a.order-b.order||a.id.localeCompare(b.id));
+    const used=new Set();
+    return values.map((item,index)=>{let id=item.id;if(!id||used.has(id)){let n=index;do{id='pv_'+idPart(group)+'_'+n++;}while(used.has(id));}used.add(id);return {...item,id,order:index,groupId:group};});
+  }
+  function mainIdFor(ex,values){
+    const list=Array.isArray(values)?values:normalizeVariants(ex,true);
+    const requested=String(ex&& (ex.progressionMainId||ex.progressionMainVariantId)||'');
+    return list.some(item=>item.id===requested)?requested:(list[0]&&list[0].id||'');
+  }
+  function bankItems(){try{const bridge=window['KGGProgressionEditorBridge']||{};if(typeof bridge.catalog==='function')return bridge.catalog()||[];}catch(err){}return typeof bank!=='undefined'&&Array.isArray(bank)?bank:[];}
+  function currentExercise(){try{return typeof currentEditedExercise==='function'?currentEditedExercise():null;}catch(err){return null;}}
+  function reducedMotion(){try{return !!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);}catch(err){return false;}}
+  let draft=null;
+
+  function ensureDom(){
+    let box=$('kgg015ProgressionBox');
+    if(box)return box;
+    const media=document.querySelector('.editorMediaBox');
+    if(!media||!media.parentNode)return null;
+    box=document.createElement('section');box.id='kgg015ProgressionBox';box.className='notice kgg015ProgressionBox';media.insertAdjacentElement('afterend',box);return box;
+  }
+  function ensureStyle(){
+    if($('kgg015AdminGalleryStyle'))return;
+    const style=document.createElement('style');style.id='kgg015AdminGalleryStyle';style.textContent=`
+      .kgg015ProgressionBox{display:block;background:#f8fafc;border:1px solid #dbe3ef;border-radius:16px;padding:0;overflow:hidden;container-type:inline-size}
+      .kgg015ProgressionDetails>summary{cursor:pointer;list-style:none;padding:13px 14px;font-weight:950;color:#111827;display:flex;align-items:center;justify-content:space-between;gap:10px}
+      .kgg015ProgressionDetails>summary::-webkit-details-marker{display:none}
+      .kgg015ProgressionDetails>summary:after{content:'+';font-size:22px;line-height:1;color:#2563eb}
+      .kgg015ProgressionDetails[open]>summary:after{content:'−'}
+      .kgg015ProgressionCount{font-size:12px;font-weight:800;color:#64748b;margin-left:auto}
+      .kgg015ProgressionBody{display:grid;gap:10px;padding:0 12px 12px}
+      .kgg015ProgressionIntro{color:#475569;font-size:12px;line-height:1.35;font-weight:700}
+      .kgg015StageRail{display:flex;align-items:stretch;gap:8px;overflow-x:auto;padding:4px 2px 8px;scroll-snap-type:x proximity;touch-action:pan-x;overscroll-behavior-x:contain}
+      .kgg015StageRail::-webkit-scrollbar{height:6px}.kgg015StageRail::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px}
+      .kgg015StageCard,.kgg015AddStage{position:relative;flex:0 0 clamp(124px,24vw,164px);min-height:142px;border-radius:16px;scroll-snap-align:center}
+      .kgg015StageCard{border:2px solid #dbe3ef;background:#fff;box-shadow:0 4px 12px rgba(15,23,42,.08);touch-action:pan-x;user-select:none;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,opacity .18s ease}
+      .kgg015StageCard.is-main{border-color:#2563eb;box-shadow:0 0 0 3px #dbeafe,0 6px 16px rgba(37,99,235,.15)}
+      .kgg015StageCard.is-holding{border-color:#0ea5e9;box-shadow:0 0 0 4px #bae6fd,0 8px 20px rgba(14,165,233,.2)}
+      .kgg015StageCard.is-vibrating{animation:kgg015StageVibrate .08s linear infinite}
+      .kgg015StageRail.is-reordering{overflow-y:visible}
+      .kgg015StageRail.is-reordering .kgg015StageCard:not(.is-dragging){transition:transform .14s ease,margin .14s ease,opacity .14s ease}
+      .kgg015StageCard.is-dragging{z-index:6;opacity:.98;border-color:rgba(120,137,158,.34);box-shadow:0 1px 2px rgba(7,16,39,.08),0 8px 18px rgba(7,16,39,.18),0 22px 42px rgba(7,16,39,.16);filter:none;transform:translate3d(var(--kgg015-drag-x,0px),var(--kgg015-drag-y,0px),0) scale(1.035);transition:none;pointer-events:none;cursor:grabbing}
+      .kgg015StagePlaceholder{position:relative;flex:0 0 clamp(124px,24vw,164px);min-height:142px;border:0;background:transparent;box-shadow:none;overflow:visible;visibility:visible}
+      .kgg015StagePlaceholder:before{content:"";position:absolute;left:9%;right:9%;top:50%;height:44%;transform:translateY(-50%);border-radius:999px;background:radial-gradient(ellipse at center,rgba(7,16,39,.24) 0%,rgba(7,16,39,.15) 34%,rgba(7,16,39,.07) 58%,rgba(7,16,39,0) 78%);filter:blur(9px)}
+      @keyframes kgg015StageVibrate{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-1px) rotate(-.5deg)}75%{transform:translateX(1px) rotate(.5deg)}}
+      @media(prefers-reduced-motion:reduce){.kgg015StageCard.is-vibrating{animation:none}}
+      @media(prefers-reduced-motion:reduce){.kgg015StageRail.is-reordering .kgg015StageCard:not(.is-dragging){transition:none}}
+      .kgg015StageMedia{height:82px;margin:7px 7px 5px;border-radius:11px;background:#e2e8f0;display:grid;place-items:center;overflow:hidden;color:#64748b;font-size:11px;font-weight:850}
+      .kgg015StageMedia img{display:block;width:100%;height:100%;object-fit:cover;background:#fff}
+      .kgg015StageName{display:block;padding:0 8px 5px;min-height:32px;color:#111827;font-size:13px;line-height:1.15;font-weight:900;text-align:center;overflow:hidden;text-overflow:ellipsis}
+      .kgg015StageMeta{display:flex;align-items:center;justify-content:center;gap:5px;padding:0 7px 7px;color:#64748b;font-size:10px;font-weight:800}
+      .kgg015StageMainBadge{color:#1d4ed8}.kgg015StageHandle{cursor:grab;min-width:44px;min-height:44px;border:0;background:transparent;color:#64748b;font-size:17px;font-weight:950;line-height:1}.kgg015StageHandle:active{cursor:grabbing}
+      .kgg015StageRemove{position:absolute;right:4px;top:4px;z-index:2;width:44px;height:44px;border:0;border-radius:50%;background:#fee2e2;color:#b91c1c;font-size:18px;line-height:1;font-weight:950}
+      .kgg015AddStage{border:2px dashed #94a3b8;background:#f8fafc;color:#2563eb;display:grid;place-items:center;align-content:center;gap:5px;cursor:pointer;min-height:142px;font-weight:950;text-align:center}
+      .kgg015AddStage strong{font-size:28px;line-height:1}.kgg015AddStage span{font-size:11px;padding:0 8px}
+      .kgg015AddPanel{display:grid;gap:8px;padding:10px;border:1px solid #cbd5e1;border-radius:13px;background:#fff}
+      .kgg015AddPanel[hidden]{display:none}.kgg015AddPanel label{font-size:12px;font-weight:900;color:#334155}.kgg015AddPanel input{width:100%;min-height:44px;border:1px solid #94a3b8;border-radius:11px;padding:8px 10px;color:#111827;background:#fff;font:700 14px/1.2 system-ui}
+      .kgg015AddResults{display:grid;gap:6px;max-height:190px;overflow:auto}.kgg015AddResult,.kgg015NewResult{min-height:44px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;text-align:left;padding:7px 9px;color:#111827;font-weight:850}.kgg015AddResult small{display:block;color:#64748b;font-size:10px;margin-top:2px}.kgg015AddCancel{min-height:40px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#334155;font-weight:850}
+      .kgg015DeleteDialog{display:grid;gap:8px;padding:10px;border:1px solid #fecdd3;border-radius:12px;background:#fff1f2;color:#881337}.kgg015DeleteDialog[hidden]{display:none}.kgg015DeleteActions{display:flex;gap:7px;justify-content:flex-end}.kgg015DeleteActions button{min-height:40px;border-radius:10px;padding:7px 12px;border:1px solid #cbd5e1;background:#fff;font-weight:850}.kgg015DeleteActions [data-kgg015-delete-confirm]{border-color:#be123c;background:#be123c;color:#fff}
+      .kgg015ProgressionStatus{min-height:18px;color:#475569;font-size:11px;font-weight:800}.kgg015ProgressionStatus[data-tone="success"]{color:#166534}.kgg015ProgressionStatus[data-tone="warn"]{color:#9f1239}
+      @container (max-width:430px){.kgg015StageCard,.kgg015AddStage{flex-basis:132px}.kgg015StageMedia{height:76px}}
+      @container (min-width:760px){.kgg015StageCard,.kgg015AddStage{flex-basis:156px}.kgg015StageRail{gap:10px}}
+      @container (max-width:700px) and (min-width:560px){.kgg015StageCard,.kgg015AddStage{flex-basis:138px}.kgg015StageRail{gap:7px}}
+    `;document.head.appendChild(style);
+  }
+  function stageMediaMarkup(item){
+    const media=item&&item.media&&item.media[0];
+    if(!media)return '<span>Kein Bild</span>';
+    if(media.src&&/^data:image\//i.test(String(media.src)))return '<img src="'+esc(media.src)+'" alt="">';
+    if(media.url&&/^https?:/i.test(String(media.url)))return '<img src="'+esc(media.url)+'" alt="">';
+    return '<span data-kgg015-media-id="'+esc(media.id||'')+'">Bild vorhanden</span>';
+  }
+  function renderStage(item,index){
+    const main=item.id===draft.mainId;
+    return '<article class="kgg015StageCard'+(main?' is-main':'')+'" draggable="true" role="listitem" data-kgg015-stage-id="'+esc(item.id)+'" data-kgg015-index="'+index+'" aria-label="Progressionsstufe '+(index+1)+': '+esc(item.name)+'">'+
+      '<button type="button" class="kgg015StageRemove" data-kgg015-remove aria-label="Progressionsstufe '+(index+1)+' löschen">×</button>'+
+      '<div class="kgg015StageMedia">'+stageMediaMarkup(item)+'</div>'+
+      '<strong class="kgg015StageName">'+esc(item.name||('Stufe '+(index+1)))+'</strong>'+
+      '<div class="kgg015StageMeta"><button type="button" class="kgg015StageHandle" data-kgg015-drag-handle aria-label="Progressionsstufe verschieben" title="Zum Verschieben ziehen">⋮⋮</button>'+(main?'<span class="kgg015StageMainBadge">Hauptübung</span>':'<span>Stufe '+(index+1)+'</span>')+'</div>'+
+      '</article>';
+  }
+  function renderAddSlot(side){return '<button type="button" class="kgg015AddStage" data-kgg015-add-slot="'+side+'" aria-label="'+(side==='before'?'Leichtere':'Schwerere')+' Progressionsstufe hinzufügen"><strong>＋</strong><span>'+ (side==='before'?'Leichtere Stufe':'Schwerere Stufe')+'</span></button>';}
+  function renderDraft(){
+    const box=ensureDom();if(!box||!draft)return;ensureStyle();
+    const open=box.dataset.kgg015Open==='1';const list=draft.variants||[];
+    box.className='notice kgg015ProgressionBox';box.innerHTML='<details class="kgg015ProgressionDetails"'+(open?' open':'')+'><summary><span>Progressionsstufen</span><span class="kgg015ProgressionCount">'+list.length+' '+(list.length===1?'Stufe':'Stufen')+'</span></summary><div class="kgg015ProgressionBody"><div class="kgg015ProgressionIntro">Links leichter, rechts schwerer. Gedrückt halten macht eine Stufe zur Hauptübung; Ziehen sortiert, rotes × oder vertikales Wischen löscht nach Bestätigung.</div><div class="kgg015StageRail" role="list" aria-label="Progressionsstufen">'+renderAddSlot('before')+list.map(renderStage).join('')+renderAddSlot('after')+'</div><div class="kgg015AddPanel" data-kgg015-add-panel hidden><label for="kgg015AddName">Stufe hinzufügen</label><input id="kgg015AddName" data-kgg015-add-name autocomplete="off" placeholder="Übungsname eingeben"><div class="kgg015AddResults" data-kgg015-add-results></div><button type="button" class="kgg015AddCancel" data-kgg015-add-cancel>Abbrechen</button></div><div class="kgg015DeleteDialog" data-kgg015-delete-dialog hidden><strong>Progressionsstufe löschen?</strong><span>Die Stufe wird erst nach deiner Bestätigung entfernt.</span><div class="kgg015DeleteActions"><button type="button" data-kgg015-delete-cancel>Abbrechen</button><button type="button" data-kgg015-delete-confirm>Löschen</button></div></div><div class="kgg015ProgressionStatus" data-kgg015-status role="status" aria-live="polite"></div></div></details>';
+    const details=box.querySelector('details');if(details)details.addEventListener('toggle',()=>{box.dataset.kgg015Open=details.open?'1':'0';});
+    bindStageEvents(box);renderAddPanel(box);hydrateMedia(box);
+  }
+  function setStatus(text,tone){const node=document.querySelector('[data-kgg015-status]');if(node){node.textContent=text||'';if(tone)node.dataset.tone=tone;else delete node.dataset.tone;}}
+  function insertVariant(value,side){
+    if(!draft)return;
+    const index=side==='before'?0:draft.variants.length;const item=normalizeStage(value,index,draft.groupId,draft.exercise);const used=new Set(draft.variants.map(stage=>stage.id));let id=item.id,n=index;while(used.has(id)){id='pv_'+idPart(draft.groupId)+'_'+n++;}item.id=id;item.order=index;draft.variants.splice(index,0,item);draft.variants.forEach((stage,i)=>stage.order=i);draft.changed=true;draft.addSide=null;renderDraft();setStatus('Progressionsstufe hinzugefügt.','success');
+  }
+  function createNewStage(name,side){
+    const clean=String(name||'').trim();if(!clean){setStatus('Bitte zuerst einen Übungsnamen eingeben.','warn');return;}
+    const created={id:'custom_progression_'+Date.now(),name:clean,aliases:clean,sets:3,unit:'Wdh',weightUnit:'kg',measure:'wdh',media:[],custom:true,createdFromPlan:true};let saved=created;
+    try{const bridge=window['KGGProgressionEditorBridge']||{};if(typeof bridge.upsert==='function')saved=bridge.upsert(created,'ticket_015_progression_create')||created;else if(typeof upsertPlanExerciseToBank==='function')saved=upsertPlanExerciseToBank(created,'ticket_015_progression_create')||created;}catch(err){saved=created;}
+    insertVariant({id:saved.id,name:saved.name,sourceId:saved.id,media:saved},side);
+  }
+  function renderAddPanel(box){
+    const panel=box.querySelector('[data-kgg015-add-panel]');if(!panel)return;const input=panel.querySelector('[data-kgg015-add-name]');const results=panel.querySelector('[data-kgg015-add-results]');
+    panel.hidden=!draft.addSide;if(panel.hidden)return;
+    if(input&&!input.dataset.bound){input.dataset.bound='1';input.addEventListener('input',()=>renderAddPanel(box));setTimeout(()=>input.focus(),0);}
+    const query=String(input&&input.value||'').trim().toLocaleLowerCase('de-DE');const hits=bankItems().filter(item=>item&&String(item.name||'').toLocaleLowerCase('de-DE').includes(query)&&String(item.id||'')!==String(draft.exercise&&((draft.exercise.localId||draft.exercise.id)||''))).slice(0,6);
+    if(!results)return;results.innerHTML=hits.map(item=>'<button type="button" class="kgg015AddResult" data-kgg015-existing="'+esc(item.id)+'"><b>'+esc(item.name)+'</b><small>Vorhandene Übung übernehmen</small></button>').join('');
+    if(query&&!hits.some(item=>String(item.name||'').toLocaleLowerCase('de-DE')===query))results.innerHTML+='<button type="button" class="kgg015NewResult" data-kgg015-new="'+esc(input.value)+'">Neue Stufe „'+esc(input.value)+'“ anlegen</button>';
+    results.querySelectorAll('[data-kgg015-existing]').forEach(button=>button.onclick=()=>{const item=bankItems().find(candidate=>String(candidate&&candidate.id||'')===button.dataset.kgg015Existing);if(item)insertVariant(item,draft.addSide);});
+    results.querySelectorAll('[data-kgg015-new]').forEach(button=>button.onclick=()=>createNewStage(button.dataset.kgg015New,draft.addSide));
+    const cancel=panel.querySelector('[data-kgg015-add-cancel]');if(cancel)cancel.onclick=()=>{draft.addSide=null;renderDraft();};
+  }
+  function requestAdd(side){if(!draft)return;draft.addSide=side;renderDraft();const box=ensureDom();if(box)renderAddPanel(box);}
+  function askDelete(index){if(!draft||draft.variants.length<=1){setStatus('Die letzte Progressionsstufe kann nicht gelöscht werden.','warn');return;}draft.pendingDelete=index;const dialog=document.querySelector('[data-kgg015-delete-dialog]');if(dialog)dialog.hidden=false;}
+  function deleteVariant(index){
+    if(!draft||draft.variants.length<=1)return;const removed=draft.variants[index];draft.variants.splice(index,1);draft.variants.forEach((item,i)=>item.order=i);if(removed&&removed.id===draft.mainId)draft.mainId=draft.variants[Math.min(index,draft.variants.length-1)].id;draft.pendingDelete=null;draft.changed=true;renderDraft();setStatus('Progressionsstufe gelöscht.','success');
+  }
+  function bindDeleteDialog(box){
+    const dialog=box.querySelector('[data-kgg015-delete-dialog]');if(!dialog)return;const cancel=dialog.querySelector('[data-kgg015-delete-cancel]');const confirm=dialog.querySelector('[data-kgg015-delete-confirm]');if(cancel)cancel.onclick=()=>{draft.pendingDelete=null;dialog.hidden=true;};if(confirm)confirm.onclick=()=>{const index=draft&&Number.isInteger(draft.pendingDelete)?draft.pendingDelete:-1;dialog.hidden=true;if(index>=0)deleteVariant(index);};
+  }
+  function moveVariant(from,to){if(!draft||from===to||from<0||to<0||from>=draft.variants.length||to>=draft.variants.length)return;const item=draft.variants.splice(from,1)[0];draft.variants.splice(to,0,item);draft.variants.forEach((stage,index)=>stage.order=index);draft.changed=true;renderDraft();setStatus('Reihenfolge gespeichert.','success');}
+  function bindDrag(box){
+    const rail=box.querySelector('.kgg015StageRail');if(!rail)return;
+    const restoreInline=(node,properties)=>{Object.keys(properties||{}).forEach(name=>{const value=properties[name];if(value==null||value==='')node.style.removeProperty(name);else node.style.setProperty(name,value);});};
+    const cleanupPointerDrag=gesture=>{
+      if(!gesture)return;clearTimeout(gesture.timer);document.removeEventListener('pointermove',gesture.move);document.removeEventListener('pointerup',gesture.up);document.removeEventListener('pointercancel',gesture.cancel);
+      gesture.rail.classList.remove('is-reordering');if(gesture.placeholder)gesture.placeholder.remove();gesture.card.classList.remove('is-dragging');restoreInline(gesture.card,gesture.cardInline);restoreInline(gesture.rail,gesture.railInline);
+    };
+    const placePlaceholder=(gesture,clientX)=>{
+      const candidates=[...gesture.rail.querySelectorAll('[data-kgg015-stage-id]:not(.is-dragging)')];
+      const ref=candidates.find(node=>{const rect=node.getBoundingClientRect();return clientX<rect.left+rect.width/2;});
+      const after=gesture.rail.querySelector('[data-kgg015-add-slot="after"]');
+      if(ref)gesture.rail.insertBefore(gesture.placeholder,ref);else if(after)gesture.rail.insertBefore(gesture.placeholder,after);else gesture.rail.appendChild(gesture.placeholder);
+      gesture.targetIndex=ref?Number(ref.dataset.kgg015Index):Math.max(0,(draft&&draft.variants||[]).length-1);
+    };
+    const activatePointerDrag=gesture=>{
+      if(!gesture||gesture.active)return;const rect=gesture.card.getBoundingClientRect(),railRect=gesture.rail.getBoundingClientRect();
+      const placeholder=document.createElement('div');placeholder.className='kgg015StagePlaceholder';placeholder.setAttribute('aria-hidden','true');placeholder.style.width=rect.width+'px';placeholder.style.height=rect.height+'px';placeholder.style.flex='0 0 '+rect.width+'px';
+      gesture.placeholder=placeholder;gesture.cardInline={position:gesture.card.style.getPropertyValue('position'),left:gesture.card.style.getPropertyValue('left'),top:gesture.card.style.getPropertyValue('top'),width:gesture.card.style.getPropertyValue('width'),height:gesture.card.style.getPropertyValue('height'),margin:gesture.card.style.getPropertyValue('margin'),transform:gesture.card.style.getPropertyValue('transform'),zIndex:gesture.card.style.getPropertyValue('z-index')};gesture.railInline={position:gesture.rail.style.getPropertyValue('position')};
+      gesture.rail.style.setProperty('position','relative');gesture.card.after(placeholder);gesture.card.style.setProperty('position','absolute');gesture.card.style.setProperty('left',(rect.left-railRect.left+gesture.rail.scrollLeft)+'px');gesture.card.style.setProperty('top',(rect.top-railRect.top+gesture.rail.scrollTop)+'px');gesture.card.style.setProperty('width',rect.width+'px');gesture.card.style.setProperty('height',rect.height+'px');gesture.card.style.setProperty('margin','0');gesture.card.style.setProperty('--kgg015-drag-x','0px');gesture.card.style.setProperty('--kgg015-drag-y','0px');gesture.rail.classList.add('is-reordering');gesture.card.classList.add('is-dragging');gesture.active=true;placePlaceholder(gesture,gesture.startX);
+    };
+    box.querySelectorAll('[data-kgg015-stage-id]').forEach(card=>{
+      card.addEventListener('dragstart',event=>{draft.dragIndex=Number(card.dataset.kgg015Index);card.classList.add('is-dragging');rail.classList.add('is-reordering');if(event.dataTransfer){event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',card.dataset.kgg015StageId);}});
+      card.addEventListener('dragend',()=>{draft.dragIndex=null;card.classList.remove('is-dragging');rail.classList.remove('is-reordering');});
+      card.addEventListener('dragover',event=>{if(draft&&Number.isInteger(draft.dragIndex)){event.preventDefault();event.dataTransfer&&(event.dataTransfer.dropEffect='move');}});
+      card.addEventListener('drop',event=>{event.preventDefault();const from=draft&&Number.isInteger(draft.dragIndex)?draft.dragIndex:-1;const to=Number(card.dataset.kgg015Index);draft.dragIndex=null;if(from>=0&&from!==to)moveVariant(from,to);});
+    });
+    box.querySelectorAll('[data-kgg015-drag-handle]').forEach(handle=>{
+      handle.addEventListener('pointerdown',event=>{
+        event.preventDefault();event.stopPropagation();const card=handle.closest('[data-kgg015-stage-id]');if(!card||!draft)return;const gesture={card,rail,from:Number(card.dataset.kgg015Index),startX:event.clientX,startY:event.clientY,active:false,targetIndex:null,timer:0,placeholder:null};
+        const finish=()=>{if(!gesture)return;const to=gesture.active&&Number.isInteger(gesture.targetIndex)?gesture.targetIndex:null;cleanupPointerDrag(gesture);if(Number.isInteger(to)&&to!==gesture.from)moveVariant(gesture.from,to);};
+        const cancel=()=>cleanupPointerDrag(gesture);
+        gesture.move=ev=>{const dx=ev.clientX-gesture.startX,dy=ev.clientY-gesture.startY;if(!gesture.active){if(Math.hypot(dx,dy)>10){cleanupPointerDrag(gesture);return;}return;}ev.preventDefault();gesture.card.style.setProperty('--kgg015-drag-x',dx+'px');gesture.card.style.setProperty('--kgg015-drag-y',Math.max(-8,Math.min(8,dy*.08))+'px');placePlaceholder(gesture,ev.clientX);};
+        gesture.up=finish;gesture.cancel=cancel;gesture.timer=setTimeout(()=>activatePointerDrag(gesture),100);document.addEventListener('pointermove',gesture.move,{passive:false});document.addEventListener('pointerup',gesture.up,{once:true});document.addEventListener('pointercancel',gesture.cancel,{once:true});
+      },{passive:false});
+    });
+  }
+  function bindHoldAndDelete(box){
+    box.querySelectorAll('[data-kgg015-stage-id]').forEach(card=>{
+      let gesture=null;
+      const clear=()=>{if(!gesture)return;clearTimeout(gesture.holdTimer);clearTimeout(gesture.swapTimer);document.removeEventListener('pointermove',gesture.move);document.removeEventListener('pointerup',gesture.up);document.removeEventListener('pointercancel',gesture.cancel);card.classList.remove('is-holding','is-vibrating');gesture=null;};
+      const start=event=>{
+        if(event.button!==undefined&&event.button!==0)return;if(event.target.closest('button,[data-kgg015-drag-handle]'))return;event.preventDefault();const index=Number(card.dataset.kgg015Index);gesture={startX:event.clientX,startY:event.clientY,index,vertical:false,deleteArmed:false,holdTimer:0,swapTimer:0};
+        const finishMain=()=>{if(!gesture)return;card.classList.add('is-holding');if(!reducedMotion())card.classList.add('is-vibrating');try{if(navigator.vibrate)navigator.vibrate(18);}catch(err){}gesture.swapTimer=setTimeout(()=>{if(!gesture)return;const stage=draft&&draft.variants[gesture.index];if(stage&&stage.id!==draft.mainId){draft.mainId=stage.id;draft.changed=true;renderDraft();setStatus(stage.name+' ist jetzt die Hauptübung.','success');}card.classList.remove('is-holding','is-vibrating');},MAIN_SWAP_DELAY_MS);};
+        gesture.holdTimer=setTimeout(finishMain,HOLD_MS);gesture.move=ev=>{if(!gesture)return;const dx=ev.clientX-gesture.startX,dy=ev.clientY-gesture.startY;if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>=DELETE_SWIPE_PX){gesture.vertical=true;gesture.deleteArmed=true;clearTimeout(gesture.holdTimer);clearTimeout(gesture.swapTimer);card.classList.add('is-holding');return;}if(Math.abs(dx)>MOVE_CANCEL_PX||Math.abs(dy)>MOVE_CANCEL_PX){clearTimeout(gesture.holdTimer);clearTimeout(gesture.swapTimer);card.classList.remove('is-holding','is-vibrating');}};gesture.up=()=>{if(!gesture)return;const shouldDelete=gesture.deleteArmed;const index=gesture.index;clear();if(shouldDelete)askDelete(index);};gesture.cancel=clear;document.addEventListener('pointermove',gesture.move,{passive:true});document.addEventListener('pointerup',gesture.up,{once:true});document.addEventListener('pointercancel',gesture.cancel,{once:true});
+      };
+      card.addEventListener('pointerdown',start,{passive:false});
+    });
+  }
+  function bindStageEvents(box){
+    box.querySelectorAll('[data-kgg015-add-slot]').forEach(button=>button.onclick=()=>requestAdd(button.dataset.kgg015AddSlot));
+    box.querySelectorAll('[data-kgg015-remove]').forEach(button=>button.onclick=event=>{event.stopPropagation();askDelete(Number(button.closest('[data-kgg015-stage-id]')?.dataset.kgg015Index));});
+    bindDeleteDialog(box);bindDrag(box);bindHoldAndDelete(box);
+  }
+  async function hydrateMedia(box){
+    box.querySelectorAll('[data-kgg015-media-id]').forEach(async node=>{
+      const id=String(node.dataset.kgg015MediaId||'');const stage=[...((draft&&draft.variants)||[])].find(item=>item.media&&item.media[0]&&String(item.media[0].id||'')===id);const media=stage&&stage.media&&stage.media[0];if(!media)return;
+      try{let blobRecord=null;if(typeof getEncryptedMediaBlob==='function')blobRecord=await getEncryptedMediaBlob(id);if(!blobRecord||!blobRecord.blob||typeof patientDecryptMedia!=='function')return;const imageBlob=await patientDecryptMedia(media,blobRecord.blob);if(!node.isConnected)return;const url=URL.createObjectURL(imageBlob);node.innerHTML='<img src="'+url+'" alt="">';node.dataset.kgg015ObjectUrl=url;}catch(err){}
+    });
+  }
+  function startDraft(ex){
+    const values=normalizeVariants(ex,true);draft={exercise:ex,groupId:groupId(ex),variants:values,mainId:mainIdFor(ex,values),changed:false,addSide:null,pendingDelete:null,dragIndex:null};renderDraft();
+  }
+  function persistDraft(ex){
+    if(!ex||!draft||!draft.changed)return;const values=draft.variants.map((item,index)=>({...item,id:String(item.id),groupId:draft.groupId,name:String(item.name||('Progressionsstufe '+(index+1))).trim(),order:index,sourceId:String(item.sourceId||''),media:clone(item.media||[])}));
+    ex.progressionGroupId=draft.groupId;ex.progressionMainId=mainIdFor({progressionMainId:draft.mainId},values);ex.progressionVariants=values;
+    try{const bridge=window['KGGProgressionEditorBridge']||{};if(typeof bridge.upsert==='function')bridge.upsert(ex,'ticket_015_progression_gallery');else if(typeof upsertPlanExerciseToBank==='function')upsertPlanExerciseToBank(ex,'ticket_015_progression_gallery');}catch(err){console.warn('Progressionsstufen konnten nicht in der Übungsdatenbank gespeichert werden:',err)}
+    try{const bridge=window['KGGProgressionEditorBridge']||{};if(typeof bridge.sync==='function')bridge.sync('ticket_015_progression_gallery');else if(typeof syncStatePlanToStore==='function')syncStatePlanToStore('ticket_015_progression_gallery');}catch(err){console.warn('Progressionsstufen konnten nicht synchronisiert werden:',err)}
+    try{const bridge=window['KGGProgressionEditorBridge']||{};if(typeof bridge.persistBank==='function')bridge.persistBank();else if(typeof persistCustomBank==='function')persistCustomBank();}catch(err){console.warn('Übungsdatenbank konnte nicht gespeichert werden:',err)}
+    try{const bridge=window['KGGProgressionEditorBridge']||{};if(typeof bridge.save==='function')bridge.save();else if(typeof save==='function')save();}catch(err){console.warn('Progressionsstufen konnten nicht gespeichert werden:',err)}
+  }
+  function patchEditor(){
+    if(window.__kggTicket015AdminGalleryPatched)return;const bridge=window.KGGTicket015AdminEditor=window.KGGTicket015AdminEditor||{};const previousOpen=bridge.onOpen,previousSave=bridge.onSave;
+    bridge.onOpen=ex=>{if(typeof previousOpen==='function')previousOpen(ex);startDraft(ex);};
+    bridge.onSave=ex=>{const before=draft&&draft.exercise;const id=before&&(before.localId||before.id);if(typeof previousSave==='function')previousSave(ex||before);let edited=ex||before;try{if(typeof state!=='undefined'&&state&&Array.isArray(state.plan))edited=state.plan.find(item=>String(item.localId||item.id)===String(id))||edited;if(!edited&&typeof bank!=='undefined'&&Array.isArray(bank))edited=bank.find(item=>String(item.id)===String(id))||before;}catch(err){}persistDraft(edited);draft=null;};
+    window.__kggTicket015AdminGalleryPatched=true;
+  }
+  function patchSerializers(){
+    if(window.__kggTicket015AdminGallerySerializersPatched)return;const compact=window.compactKggH2Exercise,expand=window.expandKggH2Exercise,patient=window.buildPatientExercisePayload;if(typeof compact!=='function'||typeof expand!=='function'||typeof patient!=='function')return;window.__kggTicket015AdminGallerySerializersPatched=true;
+    window.compactKggH2Exercise=function(ex){const row=compact.apply(this,arguments),values=normalizeVariants(ex,false);if(!values.length)return row;let wire=row[11]&&typeof row[11]==='object'&&!Array.isArray(row[11])?clone(row[11]):null;if(!wire&&window.KGGTicket015Admin&&typeof window.KGGTicket015Admin.wireVariants==='function')wire=clone(window.KGGTicket015Admin.wireVariants(ex));if(wire){wire.g=groupId(ex);wire.a=mainIdFor(ex,values);row[11]=wire;}return row;};
+    window.expandKggH2Exercise=function(item){const ex=expand.apply(this,arguments),wire=Array.isArray(item)&&item[11]&&typeof item[11]==='object'&&!Array.isArray(item[11])?item[11]:null;if(wire&&wire.a){ex.progressionMainId=String(wire.a);if(!ex.progressionVariants&&window.KGGTicket015Admin&&typeof window.KGGTicket015Admin.variantsFromWire==='function'){const values=window.KGGTicket015Admin.variantsFromWire(wire,ex);if(values.length)ex.progressionVariants=values;}}return ex;};
+    window.buildPatientExercisePayload=function(ex){const copy=patient.apply(this,arguments),values=normalizeVariants(ex,false);if(values.length){copy.progressionGroupId=groupId(ex);copy.progressionMainId=mainIdFor(ex,values);}return copy;};
+  }
+  function init(){ensureStyle();patchSerializers();patchEditor();setTimeout(patchSerializers,200);setTimeout(patchEditor,200);setTimeout(patchSerializers,800);setTimeout(patchEditor,800);}
+  window.KGGTicket015AdminGallery={version:VERSION,normalizeVariants,mainIdFor,moveVariant:(items,from,to)=>{const next=items.slice();const item=next.splice(from,1)[0];next.splice(to,0,item);return next;}};
+  if(window.__KGG_TEST__)window.__kggTicket015AdminGalleryTest={normalizeVariants,mainIdFor};
+  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init,{once:true}):init();
+})();
+</script>
+<!-- KGG PATCH END kgg-v090-ticket-015-admin-stage-gallery-drag-motion -->

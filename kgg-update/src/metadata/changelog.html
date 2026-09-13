@@ -3,8 +3,39 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 89,
+  "latestVersionCode": 90,
   "entries": [
+    {
+      "versionCode": 90,
+      "versionName": "1.0.90-ticket-015-admin-stage-gallery-drag-motion",
+      "patchId": "kgg-v090-ticket-015-admin-stage-gallery-drag-motion",
+      "status": "candidate",
+      "type": "module-patch",
+      "title": "Ticket 015 Admin-Editor: Kartenorientierte Drag-Animation",
+      "reason": "Die Progressionskarten erhalten beim Sortieren dieselbe angehobene Karten-, Platzhalter- und Schattenbewegung wie die bestehenden Übungskarten.",
+      "whatChanged": [
+        "Drag-and-drop/Handle-Sortierung nutzt eine angehobene Karte, einen sichtbaren Platzhalter und weiche Zwischenkartenbewegungen.",
+        "Die bestehende Progressionsgalerie, Main-Hold-Geste, Löschbestätigung und Patientenübertragung bleiben erhalten."
+      ],
+      "touchedAreas": [
+        "Admin-Editor",
+        "Ticket-015-Smokes"
+      ],
+      "notTouched": [
+        "Numpad",
+        "Satzwerte",
+        "PDF",
+        "Scan/OCR",
+        "API-Key-Logik",
+        "Android/APK"
+      ],
+      "supersedes": "kgg-v089-changelog-archive-window-refresh",
+      "testStatus": {
+        "local": "pending",
+        "browser": "pending",
+        "certification": "pending"
+      }
+    },
     {
       "versionCode": 89,
       "versionName": "1.0.89-changelog-archive-window-refresh",
@@ -453,40 +484,9 @@
         "certification": "pending"
       },
       "approvalNote": "Max hat den separaten Parser-Hygiene-Patch im angepassten Strukturplan ausdrücklich freigegeben."
-    },
-    {
-      "versionCode": 64,
-      "versionName": "1.0.64-typed-update-versions",
-      "patchId": "kgg-v064-typed-update-versions",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Strikte Update-Versionstypen",
-      "reason": "Trennt Source-Code, Web-Release-ID, semantischen Versionsnamen und Android-Shell-Version fail-closed voneinander.",
-      "whatChanged": [
-        "Trennt Source-Code, Web-Release-ID, semantischen Versionsnamen und Android-Shell-Version fail-closed voneinander."
-      ],
-      "touchedAreas": [
-        "GitHub Manifest",
-        "Android/APK"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max hat die getrennte Manifest- und Versionsauswertung im angepassten Strukturplan ausdrücklich freigegeben."
     }
   ],
-  "latestVersionName": "1.0.89-changelog-archive-window-refresh",
+  "latestVersionName": "1.0.90-ticket-015-admin-stage-gallery-drag-motion",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -503,6 +503,14 @@
       "entriesSha256": "7c9c4d1d87e64c989ae670af3cd4892d7f046a3540c0dfbd4cc180bc75e4aa7e",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v089-changelog-archive-window-refresh"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v090.json",
+      "snapshotVersionCode": 90,
+      "entryCount": 31,
+      "entriesSha256": "5fef50cbe435df1672155dddaa218674dd6c6412cb1861b5d0d5783dba3efa1b",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v090-ticket-015-admin-stage-gallery-drag-motion"
     }
   ]
 }
