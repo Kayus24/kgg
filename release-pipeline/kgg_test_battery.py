@@ -146,6 +146,20 @@ def run_ticket_037_real_plan_browser() -> None:
     run([node_executable(), "release-pipeline/kgg_ticket_037_real_plan_smoke.js"])
 
 
+def run_therapy_cockpit_live_edit_browser() -> None:
+    global TICKET_037_PLAYWRIGHT_PREPARED
+    npm = npm_executable()
+    if not npm:
+        raise BatteryError("npm not found. Install npm or set KGG_NPM for the Cockpit live-edit browser battery.")
+    if not TICKET_037_PLAYWRIGHT_PREPARED:
+        run([npm, "--prefix", "release-pipeline", "ci", "--ignore-scripts"])
+        if os.environ.get("KGG_SKIP_PLAYWRIGHT_INSTALL") != "1":
+            run([node_executable(), "release-pipeline/node_modules/playwright/cli.js", "install", "chromium"])
+        TICKET_037_PLAYWRIGHT_PREPARED = True
+    log("== Therapie-Cockpit live-edit browser battery ==")
+    run([node_executable(), "release-pipeline/kgg_therapy_cockpit_live_edit_smoke.js"])
+
+
 def run_pdf_readability() -> None:
     log("== PDF readability battery ==")
     run([node_executable(), "release-pipeline/kgg_pdf_readability_smoke.js"])
@@ -805,6 +819,13 @@ TEST_REGISTRY = [
         "suite": "therapy-cockpit",
         "reason": "The visible Cockpit button and Finish action must import the normal current plan into slot 1; invalid plans must fail closed with a structured error code.",
         "run": run_ticket_037_real_plan_browser,
+    },
+    {
+        "id": "therapy-cockpit-live-edit-critical",
+        "level": "critical",
+        "suite": "therapy-cockpit",
+        "reason": "Cockpit exercises must be editable per slot: add from the existing bank, reorder with the visible drag handle, edit progression stages, delete, and preserve the result through the existing link codec on phone and tablet.",
+        "run": run_therapy_cockpit_live_edit_browser,
     },
     {
         "id": "patient-continuous-days-critical",

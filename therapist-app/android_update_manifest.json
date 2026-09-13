@@ -4,15 +4,15 @@
   "schema": 2,
   "channels": {
     "admin": {
-      "releaseId": "r0430",
+      "releaseId": "r0432",
       "profile": "admin",
-      "versionName": "1.0.87-ticket-015-live-fix",
-      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0430/admin.html",
-      "sha256": "d444eae9f734e0743b3209e659637cc7053f35799000c92577a4db187aa008e9",
-      "notes": "KGG Update v087: Live-Editor-Bridge für Progressionsstufen und sichere Patiententext-Darstellung.",
-      "rolloutCode": 430,
-      "previousReleaseId": "r0429",
-      "releasedAt": "2026-09-11T11:20:56Z"
+      "versionName": "1.0.95-cockpit-responsive-entry",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0432/admin.html",
+      "sha256": "9b190ab1928e9efdc2237f27ced8b53ea3095bfa74ffedc9840b2328367cfbb9",
+      "notes": "KGG-Ticket-037: Handy-Cockpit-Einstieg im Scan-Dock mit Zählung geladener Trainingspläne; Tablet-Einstieg bleibt im Leerzustand verborgen.",
+      "rolloutCode": 432,
+      "previousReleaseId": "r0431",
+      "releasedAt": "2026-09-13T20:31:14Z"
     },
     "colleague": {
       "releaseId": "r0426",
@@ -30,8 +30,8 @@
   "latestAndroidShellVersion": "v401",
   "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html",
   "colleagueSha256": "670c47aee4205bdd80b3305d4d0ac63f0a953751564918cfb3f2d886e67c5fee",
-  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0430/admin.html",
-  "adminSha256": "d444eae9f734e0743b3209e659637cc7053f35799000c92577a4db187aa008e9",
+  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0432/admin.html",
+  "adminSha256": "9b190ab1928e9efdc2237f27ced8b53ea3095bfa74ffedc9840b2328367cfbb9",
   "sha256": "670c47aee4205bdd80b3305d4d0ac63f0a953751564918cfb3f2d886e67c5fee",
   "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",
   "androidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
@@ -39,7 +39,7 @@
   "colleagueAndroidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
   "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_ADMIN_v401_share_apk_provider_debug.apk",
   "adminAndroidApkSha256": "366c63594eeb6bdb89a7ab9c44cf4b84b43004ddfb24e5019012de0766f21499",
-  "notes": "Admin beta r0430: KGG Update v087: Live-Editor-Bridge für Progressionsstufen und sichere Patiententext-Darstellung.",
+  "notes": "Admin beta r0432: KGG-Ticket-037: Handy-Cockpit-Einstieg im Scan-Dock mit Zählung geladener Trainingspläne; Tablet-Einstieg bleibt im Leerzustand verborgen.",
   "latestAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",
   "latestAndroidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
   "latestColleagueAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",

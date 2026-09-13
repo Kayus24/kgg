@@ -1,10 +1,10 @@
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v089_changelog_archive_window_refresh';
+  const VERSION='KGG_GITHUB_UPDATE_v095_cockpit_responsive_entry';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v089","buildTime":"2026-09-12T21:30:21Z","buildCode":"module-v089-changelog-archive-window-refresh","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v095","buildTime":"2026-09-13T19:46:15Z","buildCode":"module-v095-cockpit-responsive-entry","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -28,6 +28,7 @@
     ['abd','Abduktion Maschine','abd,abduktion,abductor,abduktor,hüft abduktion',3,'Wdh','kg'],['add','Adduktion Maschine','add,adduktion,adduktor,adductor,hüft adduktion',3,'Wdh','kg'],['legpress','Beinpresse','beinpresse,bein presse,leg press,presse',3,'Wdh','kg'],['bridge','Bridging','bridge,bridging,beckenheben,glute bridge',3,'Wdh','kg'],['copenhagen','Copenhagen Plank','copenhagen,adduktoren plank',3,'Zeit','keine'],['bike','Ergometer / Bike','fahrrad,bike,ergometer,warmup,cardio,rad',1,'Zeit','Stufe/Watt'],['fire','Fire Hydrants','fire hydrant,hydrants,vierfüßler abduktion',3,'Wdh','kg'],['hipthrust','Hip Thrust','hip thrust,glute thrust',3,'Wdh','kg'],['legcurl','Kniebeuger Maschine','kniebeuger,leg curl,hamstring curl,beinbeuger',3,'Wdh','kg'],['kneeext','Kniestrecker Maschine','kniestrecker,knieextension,beinstrecker,leg extension,knei ext',3,'Wdh','kg'],['row','Rudern','rudern,seated row,kabelrudern,ruderzug',3,'Wdh','kg'],['lat','Latziehen','latziehen,latzug,lat pulldown,pulldown,lat',3,'Wdh','kg'],['pallof','Pallof Press','pallof,pallof press,anti rotation',3,'Wdh','kg'],['plank','Plank','plank,blank,unterarmstütz,stütz',3,'Zeit','keine'],['squat','Squat','squat,kniebeuge,kniebeugen',3,'Wdh','kg'],['rdl','Romanian Deadlift','romanian deadlift,rdl,dead lift',3,'Wdh','kg'],['deadlift','Wadenheben','wadenheben,calf raise',3,'Wdh','kg'],['shoulder','Schulterpresse','schulter presse,shoulder press',3,'Wdh','kg']
   ].map(a=>({id:a[0],name:a[1],aliases:a[2],sets:a[3],unit:a[4],weightUnit:a[5]}));
   let state={plan:[],recent:[],packages:[{id:'pkg1',name:'Knie Standard',exercises:['Beinpresse','Kniebeuger Maschine','Kniestrecker Maschine']},{id:'pkg2',name:'Rücken Standard',exercises:['Rudern','Latziehen','Pallof Press']}],patient:{},bankOpen:false,editId:null,sortMenuId:null,reorderSuppressClick:false,largePdfMode:false,textSyncing:false};
+  let externalEditorContext=null;
   let bankSelectMode='replaceActive';
   let deletedBankIds=new Set();
   let pendingBankDeleteId=null;
@@ -2269,14 +2270,36 @@
     document.addEventListener('pointerup',up,{passive:false,once:true});
     document.addEventListener('pointercancel',cancel,{passive:true,once:true});
   }
+  // Shared by the normal plan editor and the Therapy-Cockpit live editor.
+  // Keep the geometry and array semantics in one place so both flows retain
+  // the same reorder behavior without creating a second drag engine.
+  const KGGSharedReorder={
+    targetIndex(elements,coordinate){
+      const list=Array.isArray(elements)?elements:[];
+      for(let index=0;index<list.length;index++){
+        const rect=list[index]&&typeof list[index].getBoundingClientRect==='function'?list[index].getBoundingClientRect():null;
+        if(rect&&coordinate<rect.top+rect.height/2)return index;
+      }
+      return list.length;
+    },
+    move(items,from,to){
+      const next=Array.isArray(items)?items.slice():[];
+      if(from<0||from>=next.length)return null;
+      const target=Math.max(0,Math.min(next.length-1,Number(to)));
+      const item=next.splice(from,1)[0];
+      next.splice(target,0,item);
+      return next;
+    }
+  };
+  window.KGGSharedReorder=KGGSharedReorder;
   function movePlanExerciseByButton(localId,delta){
     const idx=(state.plan||[]).findIndex(ex=>String(ex.localId||ex.id)===String(localId));
     if(idx<0)return;
     const target=idx+delta;
     if(target<0||target>=state.plan.length)return;
-    const next=state.plan.slice();
-    const item=next.splice(idx,1)[0];
-    next.splice(target,0,item);
+    const next=KGGSharedReorder.move(state.plan,idx,target);
+    if(!next)return;
+    const item=next[target];
     state.plan=next;
     state.sortMenuId=String(item.localId||item.id);
     syncStatePlanToStore('ui_reorder_plan_buttons');
@@ -2491,11 +2514,7 @@
       floatingMid=press.startTop+dy+(press.card.getBoundingClientRect().height/2);
     }
     const cards=Array.from(press.list.querySelectorAll('.planCard[data-plan-id]:not(.reorder-lifted)'));
-    let target=cards.length;
-    for(let i=0;i<cards.length;i++){
-      const r=cards[i].getBoundingClientRect();
-      if(floatingMid<r.top+r.height/2){target=i;break;}
-    }
+    const target=KGGSharedReorder.targetIndex(cards,floatingMid);
     press.targetIndex=target;
     const ref=cards[target]||null;
     if(ref)press.list.insertBefore(press.placeholder,ref); else press.list.appendChild(press.placeholder);
@@ -2509,15 +2528,14 @@
     ev.preventDefault();
     const dbAnchor=state.bankOpen&&typeof captureDbScrollAnchor==='function'?captureDbScrollAnchor():null;
     const from=(state.plan||[]).findIndex(ex=>String(ex.localId||ex.id)===press.id);
-    let to=Array.from(press.list.children).indexOf(press.placeholder);
     if(from<0){cleanupAnimatedReorder(false);return;}
-    if(to>from)to-=1;
+    let to=Number.isInteger(press.targetIndex)?press.targetIndex:Array.from(press.list.children).indexOf(press.placeholder);
+    if(!Number.isInteger(press.targetIndex)&&to>from)to-=1;
     to=Math.max(0,Math.min(state.plan.length-1,to));
     const moved=to!==from;
     if(moved){
-      const next=state.plan.slice();
-      const item=next.splice(from,1)[0];
-      next.splice(to,0,item);
+      const next=KGGSharedReorder.move(state.plan,from,to);
+      if(!next){cleanupAnimatedReorder(true);renderPlan();return;}
       state.plan=next;
       syncStatePlanToStore('ui_reorder_plan_animated');
       syncTextInputFromPlan('ui_reorder_plan_animated');
@@ -3479,7 +3497,7 @@
   }
   function currentEditedPlanExercise(){const id=state.editId; return state.plan.find(x=>(x.localId||x.id)===id);}
   function currentEditedBankExercise(){const id=state.editId; return bank.find(x=>String(x.id)===String(id));}
-  function currentEditedExercise(){return currentEditedPlanExercise()||currentEditedBankExercise();}
+  function currentEditedExercise(){return externalEditorContext&&externalEditorContext.exercise||currentEditedPlanExercise()||currentEditedBankExercise();}
   window.KGGTicket015AdminEditor=window.KGGTicket015AdminEditor||{};
   window.KGGTicket015AdminEditor.current=()=>currentEditedExercise();
   function mediaSizeLabel(bytes){const n=Number(bytes)||0; if(n>=1048576)return (n/1048576).toFixed(1).replace('.',',')+' MB'; if(n>=1024)return Math.round(n/1024)+' KB'; return n+' B';}
@@ -3531,7 +3549,9 @@
       const manifest=await prepareImageMediaFile(file);
       ex.media=[manifest];
       oldMedia.forEach(item=>deleteUnsharedMediaBlob(item,ex));
-      if(ex.localId){
+      if(externalEditorContext){
+        if(typeof externalEditorContext.onMediaChange==='function')externalEditorContext.onMediaChange(ex);
+      }else if(ex.localId){
         syncStatePlanToStore('ui_attach_exercise_image');
         save();
       }else{
@@ -3540,7 +3560,7 @@
         persistCustomBank();
       }
       renderEditorMediaStatus(ex);
-      render();
+      if(!externalEditorContext)render();
       $('editorModal').classList.add('open');
     }catch(err){
       console.warn('Bild konnte nicht vorbereitet werden:',err);
@@ -3553,7 +3573,9 @@
     const oldMedia=ensureExerciseMediaList(ex);
     ex.media=[];
     oldMedia.forEach(item=>deleteUnsharedMediaBlob(item,ex));
-    if(ex.localId){
+    if(externalEditorContext){
+      if(typeof externalEditorContext.onMediaChange==='function')externalEditorContext.onMediaChange(ex);
+    }else if(ex.localId){
       syncStatePlanToStore('ui_remove_exercise_image');
       save();
     }else{
@@ -3562,11 +3584,12 @@
       persistCustomBank();
     }
     renderEditorMediaStatus(ex);
-    render();
+    if(!externalEditorContext)render();
     $('editorModal').classList.add('open');
   }
-  function openEditor(ex){
+  function openEditor(ex,context){
     if(!ex)return;
+    externalEditorContext=context&&typeof context==='object'?context:null;
     const inferredMeasure=(String(ex.unit||ex.metricUnit||'').toLowerCase().includes('zeit')||String(ex.unit||ex.metricUnit||'').toLowerCase().includes('sek'))?'zeit':'wdh';
     state.editId=ex.localId||ex.id;
     $('editName').value=ex.name||'';
@@ -3579,14 +3602,46 @@
     $('editVideoUrl').value=ex.videoUrl||'';
     $('editVideoLabel').value=ex.videoLabel||'Video öffnen';
     renderEditorMediaStatus(ex);
-    const bankEdit=!ex.localId&&bank.some(item=>String(item.id)===String(ex.id));
-    $('deleteExercise').dataset.scope=bankEdit?'bank':'plan';
-    $('deleteExercise').style.visibility=(ex.localId||bankEdit)?'visible':'hidden';
+    const bankEdit=!externalEditorContext&&!ex.localId&&bank.some(item=>String(item.id)===String(ex.id));
+    $('deleteExercise').dataset.scope=externalEditorContext?'external':(bankEdit?'bank':'plan');
+    $('deleteExercise').style.visibility=(externalEditorContext||ex.localId||bankEdit)?'visible':'hidden';
     $('editorModal').classList.add('open');
     if(window.KGGTicket015AdminEditor&&typeof window.KGGTicket015AdminEditor.onOpen==='function')window.KGGTicket015AdminEditor.onOpen(ex);
+    if(externalEditorContext&&typeof externalEditorContext.onOpen==='function')externalEditorContext.onOpen(ex);
   }
-  function closeEditor(){state.editId=null; $('editorModal').classList.remove('open')}
+  function closeEditor(){
+    const context=externalEditorContext,ex=context&&context.exercise;
+    if(context&&typeof context.onClose==='function')context.onClose(ex);
+    externalEditorContext=null;
+    state.editId=null;
+    $('editorModal').classList.remove('open');
+  }
   function saveEditedExercise(){
+    if(externalEditorContext){
+      const context=externalEditorContext,ex=context.exercise;
+      const measure=normalizeMeasureMode($('editMeasure').value),loadUnit=normalizeLoadUnit($('editUnit').value);
+      ex.name=$('editName').value;
+      ex.sets=normalizeSetCount($('editSets').value);
+      ex.startMetric=$('editMetric').value;
+      ex.startLoad=$('editLoad').value;
+      ex.weightUnit=loadUnit;
+      ex.loadUnit=loadUnit;
+      ex.measure=measure;
+      ex.unit=measureUnitLabel(measure);
+      ex.metricUnit=measureUnitLabel(measure);
+      ex.side=normalizeSideMode($('editSide').value);
+      ex.videoUrl=String($('editVideoUrl').value||'').trim();
+      ex.videoLabel=String($('editVideoLabel').value||'').trim()||'Video öffnen';
+      ex.previous=Array.isArray(ex.previous)?ex.previous:[];
+      ex.today=Array.isArray(ex.today)?ex.today:[];
+      while(ex.previous.length<ex.sets)ex.previous.push(['','']);
+      while(ex.today.length<ex.sets)ex.today.push(['','']);
+      ex.previous=ex.previous.slice(0,ex.sets);
+      ex.today=ex.today.slice(0,ex.sets);
+      const accepted=typeof context.onSave==='function'?context.onSave(ex)!==false:true;
+      if(accepted)closeEditor();
+      return;
+    }
     const id=state.editId;
     const planEx=state.plan.find(x=>(x.localId||x.id)===id);
     if(planEx){
@@ -3643,6 +3698,10 @@
     if(window.KGGTicket015AdminEditor&&typeof window.KGGTicket015AdminEditor.onSave==='function')window.KGGTicket015AdminEditor.onSave(currentEditedExercise());
     closeEditor();
   }
+  window.KGGSharedExerciseEditor=window.KGGSharedExerciseEditor||{};
+  window.KGGSharedExerciseEditor.open=(ex,context)=>openEditor(ex,context);
+  window.KGGSharedExerciseEditor.close=closeEditor;
+  window.KGGSharedExerciseEditor.save=saveEditedExercise;
   function escapeHtml(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
   function exportData(){savePendingToBank('ui_internal_export'); const plan=getCurrentPlanForOutput('ui_internal_export'); const data={kind:'kgg-html-app-internal-export',audience:'therapist-internal-only',version:VERSION,exportedAt:new Date().toISOString(),state:{...state,plan:plan.exercises},currentPlan:plan,store:ensureKGGDataStore().getState()}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='kgg_plan_internal_export.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);}
 
@@ -7101,6 +7160,7 @@
   $('packageToggle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; if(isTabletLayout())toggleTabletPackageOverlay(); else openPhoneFloatingDrawer('package');};
   $('exportBtn').onclick=exportData; $('pdfBtn').onclick=finishWithPdf; $('patientBtn').onclick=finishWithPatientApp; $('closeShare').onclick=closeFinishModal; $('copyShare').onclick=()=>navigator.clipboard&&navigator.clipboard.writeText($('shareText').value); $('patientName').addEventListener('input',()=>{state.patient.name=$('patientName').value;syncStatePlanToStore('ui_patient_name_input');save();render();}); $('planDate').addEventListener('input',()=>{state.patient.date=$('planDate').value;save();syncStatePlanToStore('ui_patient_date_input');}); $('therapistName').addEventListener('input',()=>{state.patient.therapist=$('therapistName').value;save();syncStatePlanToStore('ui_patient_therapist_input');}); $('planNotes').addEventListener('input',()=>{state.patient.notes=$('planNotes').value;save();syncStatePlanToStore('ui_patient_notes_input');}); $('scanBtn').onclick=()=>window.KGGScan.pick('camera'); $('filePickBtn').onclick=()=>window.KGGScan.pick('file'); $('filePickBtn').addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();window.KGGScan.pick('file');}}); $('fileInput').onchange=ev=>window.KGGScan.handleInput(ev.target,'camera'); $('filePickerInput').onchange=ev=>window.KGGScan.handleInput(ev.target,'file'); $('closeEditor').onclick=closeEditor; $('saveExercise').onclick=saveEditedExercise; $('deleteExercise').onclick=()=>{if(state.editId){if($('deleteExercise').dataset.scope==='bank')openBankDeleteModal(state.editId); else removeExercise(state.editId);} closeEditor();};
   $('copyPatientRootLink').onclick=copyPatientRootLink;
+  $('deleteExercise').onclick=()=>{if(externalEditorContext){const context=externalEditorContext,ex=context.exercise,accepted=typeof context.onDelete==='function'?context.onDelete(ex)!==false:false;if(accepted)closeEditor();return;}if(state.editId){if($('deleteExercise').dataset.scope==='bank')openBankDeleteModal(state.editId); else removeExercise(state.editId);} closeEditor();};
   $('attachExerciseImage').onclick=()=>$('editMediaFile').click();
   $('editMediaFile').onchange=handleEditorMediaFileSelected;
   $('removeExerciseImage').onclick=removeEditorMedia;

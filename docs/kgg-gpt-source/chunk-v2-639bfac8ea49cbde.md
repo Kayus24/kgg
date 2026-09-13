@@ -1,4 +1,13 @@
-<script type="application/json" id="kgg-source-truth">
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<!--
+KGG INTERNAL SOURCE TRUTH — READ THIS FIRST
+
+Machine-readable app state, patch rules, and changelog are embedded near the top of this HTML.
+Before editing this app, any LLM/agent/human should read these blocks:
+1. <script type="application/json" id="kgg-source-truth">
 {
   "schema": 1,
   "app": "KGG Plan",
@@ -53,20 +62,27 @@
     "ticket-015-progressions",
     "ticket-015-live-fix",
     "ticket-037-real-plan",
-    "changelog-archive-window-refresh"
+    "changelog-archive-window-refresh",
+    "cockpit-exercises-only",
+    "plan-add-exercise-card",
+    "cockpit-live-edit",
+    "cockpit-shared-editor",
+    "shared-reorder-core",
+    "cockpit-responsive-entry"
   ],
   "currentVersion": {
-    "versionCode": 89,
-    "versionName": "1.0.89-changelog-archive-window-refresh",
-    "lastPatchId": "kgg-v089-changelog-archive-window-refresh",
+    "versionCode": 95,
+    "versionName": "1.0.95-cockpit-responsive-entry",
+    "lastPatchId": "kgg-v095-cockpit-responsive-entry",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v089-changelog-archive-window-refresh",
+  "latestPatchId": "kgg-v095-cockpit-responsive-entry",
   "lastUpdateIntent": {
-    "id": "kgg-v089-changelog-archive-window-refresh",
-    "summary": "Vollständiger aktueller Changelog-Snapshot wird unveränderlich archiviert; im Laufzeitfenster bleiben die 15 neuesten Einträge.",
+    "id": "kgg-v095-cockpit-responsive-entry",
+    "summary": "Zeigt bei geladenen Cockpit-Trainingsplänen einen gezählten Handy-Einstieg neben dem schwebenden Scan-Dock und hält den Tablet-Einstieg leerzustandsfest.",
     "touched": [
-      "Changelog-Archivierung"
+      "Therapie-Cockpit",
+      "Handy-Layout"
     ],
     "notTouched": [
       "PDF",
@@ -77,9 +93,9 @@
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
-      "GitHub Manifest",
-      "Handy-Layout"
+      "GitHub Manifest"
     ]
   }
 }
 </script>
+<!-- END kgg-source-truth -->

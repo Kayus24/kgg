@@ -103,6 +103,11 @@ function staticGestureGuardSuite() {
   assertIncludes(html, "transform:translate3d(0,0,0)!important", "phone drag local-list transform override");
   assertIncludes(html, "kgg-v11-clean-merge-original-features-phone-drag-local-list", "latest phone drag merge marker");
 
+  assertIncludes(html, "kgg-v091-plan-add-exercise-card", "plan add-card patch marker");
+  assertIncludes(html, "kggPlanAddExerciseCard", "plan add-card DOM id");
+  assertIncludes(html, "Neue Übung hinzufügen", "plan add-card accessible label");
+  assertIncludes(html, "input.focus({preventScroll:true})", "plan add-card focuses existing exercise composer");
+
   assertIncludes(html, "kggDeviceSyncOpen", "separate device sync menu entry");
   assertRegex(html, /Ger(?:\u00e4|\u00c3\u00a4|ae)te-Sync/, "device sync menu label");
   assertIncludes(html, "document.getElementById('syncQrBtn')", "device sync opens sync dialog through sync button");
@@ -234,6 +239,11 @@ function staticUiMiniSeriesGuardSuite(caseName) {
     assertIncludes(html, "kggPhonePhotoMenu", "phone photo menu");
     assertIncludes(html, "window.KGGScan.pick(\"file\")", "phone gallery picker route");
     assertIncludes(html, "kggPhoneHasPlan", "phone plan-state dock class");
+    assertIncludes(html, "kggPhoneHasCockpit", "phone cockpit-state dock class");
+    assertIncludes(html, "loadedPlanCount", "phone cockpit loaded-plan counter");
+    assertIncludes(html, "Cockpit · 1 Plan", "phone cockpit singular plan label");
+    assertIncludes(html, "body.kggPhoneHasCockpit #scanHub", "phone cockpit dock column layout");
+    assertIncludes(html, "kggPhoneHasCockpit.kggPhoneHasPlan #createPanel.planMode #finishBtn", "phone finish action collision guard");
     assertIncludes(html, "backdrop-filter:blur(30px)", "strong liquid glass dock style");
     assertIncludes(html, "kggPhoneScanMenuInline", "v050 inline scan photo menu mode");
     assertIncludes(html, "body.kggPhonePhotoMenuOpen #scanHub.kggPhoneScanMenuInline", "v050 scan button grows vertically when photo menu opens");
@@ -1633,6 +1643,41 @@ async function browserUiMiniSeriesSuite(caseName) {
         }
         await page.locator("#tabletMenuBtn").click();
         await page.waitForFunction(() => !document.body.classList.contains("tabletMenuOpen"), null, { timeout: 10000 });
+        if (caseMatches(caseName, ["tablet-card-reorder"])) {
+          const addCard = page.locator("#kggPlanAddExerciseCard");
+          await addCard.waitFor({ state: "visible", timeout: 10000 });
+          const addCardProbe = await addCard.evaluate((node) => {
+            const rect = node.getBoundingClientRect();
+            return {
+              text: node.textContent.trim(),
+              ariaLabel: node.getAttribute("aria-label"),
+              width: Math.round(rect.width),
+              height: Math.round(rect.height),
+              display: getComputedStyle(node).display,
+              borderStyle: getComputedStyle(node).borderStyle,
+            };
+          });
+          if (
+            !addCardProbe.text.includes("+") ||
+            !addCardProbe.text.includes("Übung hinzufügen") ||
+            addCardProbe.ariaLabel !== "Neue Übung hinzufügen" ||
+            addCardProbe.width < 160 ||
+            addCardProbe.height < 40 ||
+            addCardProbe.display === "none" ||
+            addCardProbe.borderStyle !== "dashed"
+          ) {
+            fail(`Plan add-card is not visible/usable: ${JSON.stringify(addCardProbe)}`);
+          }
+          await addCard.click();
+          await page.waitForFunction(() => document.activeElement && document.activeElement.id === "exerciseInput", null, { timeout: 5000 });
+          const addCardAction = await page.evaluate(() => ({
+            focused: document.activeElement ? document.activeElement.id : "",
+            bankLabel: document.getElementById("bankToggle")?.getAttribute("aria-label") || "",
+          }));
+          if (addCardAction.focused !== "exerciseInput") {
+            fail(`Plan add-card did not focus the existing exercise composer: ${JSON.stringify(addCardAction)}`);
+          }
+        }
         const card = page.locator("#planList .planCard[data-plan-id]").first();
         const center = await elementCenter(card);
         await dispatchPointer(page, "#planList .planCard[data-plan-id]", "pointerdown", center.x, center.y, 77);

@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0431",
+  "versionName": "1.0.94-shared-reorder-core",
+  "notes": "KGG-Ticket-037: Therapie-Cockpit mit Übungen-only-Plan, Live-Bearbeitung, Hinzufügen, Bearbeiten, Löschen, Verschieben und Progressionsstufen.",
+  "createdAt": "2026-09-13T17:51:59Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0431",
+      "profile": "admin",
+      "versionName": "1.0.94-shared-reorder-core",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0431/admin.html",
+      "sha256": "52d83c5b5cc93f4219afefcbade54efe3fb6589cc6c5295a6169a4b11348ff42",
+      "notes": "KGG-Ticket-037: Therapie-Cockpit mit Übungen-only-Plan, Live-Bearbeitung, Hinzufügen, Bearbeiten, Löschen, Verschieben und Progressionsstufen."
+    },
+    "colleague": {
+      "releaseId": "r0431",
+      "profile": "colleague",
+      "versionName": "1.0.94-shared-reorder-core",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0431/colleague.html",
+      "sha256": "594e57e9dd9e5f7993b89476296b6044557c0b9f3dda9141a751c0c007810b82",
+      "notes": "KGG-Ticket-037: Therapie-Cockpit mit Übungen-only-Plan, Live-Bearbeitung, Hinzufügen, Bearbeiten, Löschen, Verschieben und Progressionsstufen."
+    }
+  }
+}

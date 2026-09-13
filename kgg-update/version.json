@@ -1,7 +1,7 @@
 {
-  "versionCode": 89,
-  "versionName": "1.0.89-changelog-archive-window-refresh",
-  "indexUrl": "index.html?v=89",
-  "sha256": "8144849b2a00b94dab4c3b4e0fe2ad86511b4133c3bdd4d75842e963312206d0",
-  "notes": "v089: Vollständiger aktueller Changelog-Snapshot wird unveränderlich archiviert; im Laufzeitfenster bleiben die 15 neuesten Einträge."
+  "versionCode": 95,
+  "versionName": "1.0.95-cockpit-responsive-entry",
+  "indexUrl": "index.html?v=95",
+  "sha256": "9b190ab1928e9efdc2237f27ced8b53ea3095bfa74ffedc9840b2328367cfbb9",
+  "notes": "v095: Zeigt bei geladenen Cockpit-Trainingsplänen einen gezählten Handy-Einstieg neben dem schwebenden Scan-Dock und hält den Tablet-Einstieg leerzustandsfest."
 }
