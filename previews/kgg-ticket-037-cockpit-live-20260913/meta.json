@@ -1,0 +1,18 @@
+{
+  "kind": "kgg_gpt_preview",
+  "sourceType": "existing-main",
+  "requestId": "kgg-ticket-037-cockpit-live-20260913",
+  "patchHash": "6e6f0ab16de54aa5184e3a79b87f4bad9bf3d9853b9f8c44e8b502393df74b0e",
+  "sourceSha": "5a81ec1458647808e248bcff2c0abe27176923df",
+  "baseSha": "5a81ec1458647808e248bcff2c0abe27176923df",
+  "commitSha": "5a81ec1458647808e248bcff2c0abe27176923df",
+  "baseVersionCode": 95,
+  "rolloutCode": 1789334197,
+  "title": "Pinned main device test",
+  "summary": "Exact kgg-update/index.html from the pinned main commit; no GPT patch module was created.",
+  "versionName": "1.0.95-cockpit-responsive-entry",
+  "createdAt": "2026-09-13T21:16:37Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-ticket-037-cockpit-live-20260913/admin.html",
+  "sha256": "9b190ab1928e9efdc2237f27ced8b53ea3095bfa74ffedc9840b2328367cfbb9",
+  "deviceTestJobUrl": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/device-tests/kgg-ticket-037-cockpit-live-20260913/job.json"
+}
