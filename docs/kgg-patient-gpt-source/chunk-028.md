@@ -1,11 +1,13 @@
 # KGG Patient Source Chunk 028
 
 - Source file: `patient-set-summary-groups.js`
-- Characters: 24001-35444
-- Full source SHA-256: `1f3645b629eef7f15921f77d131b4c1927e2f2419f621b5c67e13a01075d3c75`
+- Characters: 24001-35944
+- Full source SHA-256: `26e85437840b9706eace462786c832d338ffc22180b2459fd19e2d8198cb3208`
 
 ```
-form='translate3d(calc(-33.333333% + '+dx+'px),0,0)'};
+k.style.transform='translate3d(-33.333333%,0,0)';return}shiftVariant(index,setNo,dx<0?1:-1)};
+    pager.onpointerdown=event=>{if(event.target.closest('button'))return;startX=event.clientX;lastX=startX;track.classList.add('is-dragging');try{pager.setPointerCapture?.(event.pointerId)}catch(err){}};
+    pager.onpointermove=event=>{if(startX===null)return;lastX=event.clientX;const raw=lastX-startX,atStart=at===0&&raw>0,atEnd=at===values.length-1&&raw<0,dx=atStart||atEnd?raw*.28:raw;track.style.transform='translate3d(calc(-33.333333% + '+dx+'px),0,0)'};
     pager.onpointerup=event=>finish(event);pager.onpointercancel=event=>finish(event,true);pager.onlostpointercapture=()=>{if(startX!==null){startX=null;track.classList.remove('is-dragging');track.style.transform='translate3d(-33.333333%,0,0)'}};
   }
   function renderMainProgressionControls(index=activeSet.index,setNo=activeSet.setNo){
