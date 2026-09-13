@@ -129,6 +129,21 @@ async function waitForEditUi(page) {
     const added = await page.evaluate(() => window.KGGTherapyCockpit.getSlot(0));
     assert(added.exercises.length === 3 && added.exercises[2].name === "Bridging", `plus-card add failed: ${JSON.stringify(added)}`);
     await page.waitForFunction(() => document.querySelectorAll('.kgg-tc-card[data-tc-card="0"] .kgg-tce-drag').length === 3, null, { timeout: 5000 });
+    await page.waitForFunction(() => {
+      const handles = Array.from(document.querySelectorAll('.kgg-tc-card[data-tc-card="0"] .kgg-tce-drag'));
+      if (handles.length !== 3 || handles.some(handle => !handle.isConnected)) return false;
+      const geometry = handles.map(handle => {
+        const rect = handle.getBoundingClientRect();
+        return [rect.x, rect.y, rect.width, rect.height].map(value => Math.round(value * 10) / 10).join(',');
+      }).join('|');
+      const previous = window.__kggTicket015ReorderGeometry;
+      const now = performance.now();
+      if (!previous || previous.geometry !== geometry) {
+        window.__kggTicket015ReorderGeometry = { geometry, since: now };
+        return false;
+      }
+      return now - previous.since >= 120;
+    }, null, { timeout: 5000 });
 
     const handles = page.locator('.kgg-tc-card[data-tc-card="0"] .kgg-tce-drag');
     const sourceBox = await handles.nth(1).boundingBox();
