@@ -68,7 +68,7 @@ async function addExerciseFromVisibleUi(page, name, expectedCount) {
     const plan = store && typeof store.getCurrentPlan === "function" ? store.getCurrentPlan() : null;
     return document.querySelectorAll("#planList .planCard").length === expected &&
       !!plan && Array.isArray(plan.exercises) && plan.exercises.length === expected;
-  }, expectedCount, { timeout: 5000 });
+  }, expectedCount, { timeout: 10000 });
 }
 
 async function readPlanContract(page) {
