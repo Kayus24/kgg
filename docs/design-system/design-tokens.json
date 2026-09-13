@@ -1,0 +1,44 @@
+{
+  "schema": "kgg-design-tokens",
+  "version": 1,
+  "status": "confirmed",
+  "typography": {
+    "fontFamily": "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    "weights": [400, 500],
+    "minimumSupportTextPx": 12
+  },
+  "color": {
+    "background": "#F5F7FA",
+    "surface": "#FFFFFF",
+    "surfaceSubtle": "#EEF4FA",
+    "text": "#1F2937",
+    "textMuted": "#607086",
+    "border": "#D9E2EC",
+    "primary": "#2563EB",
+    "primarySoft": "#E7F0FF",
+    "destructive": "#C2413B",
+    "destructiveSoft": "#FDECEC",
+    "success": "#2F855A",
+    "focus": "#1D4ED8"
+  },
+  "geometry": {
+    "spacingPx": [4, 8, 12, 16, 20, 24, 32],
+    "cardRadiusPx": 16,
+    "controlRadiusPx": 12,
+    "touchTargetMinPx": 44,
+    "focusRingPx": 3
+  },
+  "motion": {
+    "quickMs": 160,
+    "standardMs": 220,
+    "settleMs": 240,
+    "undoDurationMs": 5000,
+    "reducedMotion": "remove_translation_and_use_state_change"
+  },
+  "gestureDefaults": {
+    "handleActivationMs": 80,
+    "surfaceHoldMs": 220,
+    "axisLockPx": 10,
+    "actionThresholdRatio": 0.28
+  }
+}
