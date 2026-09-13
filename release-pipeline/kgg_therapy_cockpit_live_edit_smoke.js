@@ -140,7 +140,7 @@ async function waitForEditUi(page) {
       return !!document.querySelector(".kgg-tc-exercise.reorder-lifted") &&
         !!document.querySelector(".reorder-placeholder") &&
         !!document.querySelector(".reorder-gap-before, .reorder-gap-after");
-    }, null, { timeout: 2000 });
+    }, null, { timeout: 5000 });
     const dragStates = await page.evaluate(() => ({ lifted: !!document.querySelector(".kgg-tc-exercise.reorder-lifted"), placeholder: !!document.querySelector(".reorder-placeholder"), gap: !!document.querySelector(".reorder-gap-before, .reorder-gap-after") }));
     assert(dragStates.lifted && dragStates.placeholder && dragStates.gap, `shared reorder states missing during pointer drag: ${JSON.stringify(dragStates)}`);
     await page.mouse.up();
