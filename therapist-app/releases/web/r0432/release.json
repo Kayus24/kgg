@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0432",
+  "versionName": "1.0.92-ticket-015-admin-stage-release-fixes",
+  "notes": "Mobile-Inbox r0432: KGG Update v092 Ticket 015 Admin-Editor: Release- und Gesten-Fixes (c9d169ac0654).",
+  "createdAt": "2026-09-13T20:47:22Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0432",
+      "profile": "admin",
+      "versionName": "1.0.92-ticket-015-admin-stage-release-fixes",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0432/admin.html",
+      "sha256": "c9d169ac0654e77f525b0be0a3c76f3a7d10114b5f407e878578943cbc015bc4",
+      "notes": "Mobile-Inbox r0432: KGG Update v092 Ticket 015 Admin-Editor: Release- und Gesten-Fixes (c9d169ac0654)."
+    },
+    "colleague": {
+      "releaseId": "r0432",
+      "profile": "colleague",
+      "versionName": "1.0.92-ticket-015-admin-stage-release-fixes",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0432/colleague.html",
+      "sha256": "9bae12a5d872d2a0280123aae9ec11b22028faaeec1929cbf6bd8d354d79e655",
+      "notes": "Mobile-Inbox r0432: KGG Update v092 Ticket 015 Admin-Editor: Release- und Gesten-Fixes (c9d169ac0654)."
+    }
+  }
+}
