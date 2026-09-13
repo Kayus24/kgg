@@ -136,6 +136,11 @@ async function waitForEditUi(page) {
     await page.mouse.move(sourceBox.x + sourceBox.width / 2, sourceBox.y + sourceBox.height / 2);
     await page.mouse.down();
     await page.mouse.move(targetBox.x + targetBox.width / 2, targetBox.y - 18, { steps: 6 });
+    await page.waitForFunction(() => {
+      return !!document.querySelector(".kgg-tc-exercise.reorder-lifted") &&
+        !!document.querySelector(".reorder-placeholder") &&
+        !!document.querySelector(".reorder-gap-before, .reorder-gap-after");
+    }, null, { timeout: 2000 });
     const dragStates = await page.evaluate(() => ({ lifted: !!document.querySelector(".kgg-tc-exercise.reorder-lifted"), placeholder: !!document.querySelector(".reorder-placeholder"), gap: !!document.querySelector(".reorder-gap-before, .reorder-gap-after") }));
     assert(dragStates.lifted && dragStates.placeholder && dragStates.gap, `shared reorder states missing during pointer drag: ${JSON.stringify(dragStates)}`);
     await page.mouse.up();
