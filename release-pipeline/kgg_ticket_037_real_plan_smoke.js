@@ -306,12 +306,34 @@ async function runDirectMultiExercise(browser) {
     assert(contract.plan.exercises.length === 2, "Mehrübungsplan wurde nicht über die normale UI aufgebaut");
     await page.locator("#kggTherapyCockpitButton").click();
     await waitForCockpitState(page, 1);
-    const result = await readUiState(page);
+    let result = await readUiState(page);
     assert(result.state.slotCount === 1, "Direkter Mehrübungsimport erzeugte nicht genau Slot 1");
     assert(result.state.slots[0].name === PATIENT, "Direkter Mehrübungsimport verlor den Patientenbezug");
     assertSlotMatches(result.state, 0, contract, "Direkter Mehrübungsimport");
     assertNoPositiveError(result, "Direkter Mehrübungsimport");
-    return { exerciseNames: contract.exerciseNames, slotCount: result.state.slotCount };
+    await page.locator('.kgg-tce-tool[data-tce-action="edit"][data-tce-slot="0"][data-tce-ex="0"]').click();
+    await page.locator("#kggTceEditModal:not([hidden])").waitFor({ state: "visible", timeout: 5000 });
+    await page.locator('[data-tce-edit-field="name"]').fill("Abduktion direkt bearbeitet");
+    await page.locator("#kggTceEditModal [data-tce-save]").click();
+    await page.locator("#kggTceEditModal[hidden]").waitFor({ state: "hidden", timeout: 5000 });
+    await page.waitForFunction(() => {
+      const plan = window.KGGDataStore.getCurrentPlan();
+      return !!plan && plan.exercises[0] && plan.exercises[0].name === "Abduktion direkt bearbeitet";
+    }, null, { timeout: 5000 });
+    result = await readUiState(page);
+    assert(result.state.slots[0].exerciseCount === 2, "Direkter Cockpit-Edit verlor eine Übung");
+    assert(result.state.renderedExerciseNames[0][0] === "Abduktion direkt bearbeitet", "Direkter Cockpit-Edit aktualisierte Slot 1 nicht");
+    await page.locator('.kgg-tce-tool[data-tce-action="edit"][data-tce-slot="0"][data-tce-ex="1"]').click();
+    await page.locator("#kggTceEditModal:not([hidden])").waitFor({ state: "visible", timeout: 5000 });
+    await page.locator('[data-tce-edit-field="sets"]').selectOption("3");
+    await page.locator("#kggTceEditModal [data-tce-save]").click();
+    await page.waitForFunction(() => {
+      const plan = window.KGGDataStore.getCurrentPlan();
+      return !!plan && plan.exercises[1] && Number(plan.exercises[1].sets) === 3;
+    }, null, { timeout: 5000 });
+    result = await readUiState(page);
+    assert(result.state.slots[0].exerciseCount === 2, "zweiter direkter Cockpit-Edit verlor eine Übung");
+    return { exerciseNames: ["Abduktion direkt bearbeitet", contract.exerciseNames[1]], slotCount: result.state.slotCount, syncedToCurrentPlan: true, repeatedEditSync: true };
   } finally {
     await context.close();
   }
@@ -509,6 +531,7 @@ async function runInvalidIdNegative(browser, test) {
       "complete root-button visibility matrix",
       "normal UI plan plus visible root-button double-click to slot 1",
       "normal UI plan with exercises only through root button and Finish action",
+      "direct current-plan Cockpit edit sync and repeated edit sync",
       "second root click navigates without duplicating slot 1",
       "identical Finish text import deduplication",
       "same planId with normal UI content change to slot 2",

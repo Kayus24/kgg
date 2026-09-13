@@ -3,8 +3,39 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 91,
+  "latestVersionCode": 92,
   "entries": [
+    {
+      "versionCode": 92,
+      "versionName": "1.0.92-cockpit-live-edit",
+      "patchId": "kgg-v092-cockpit-live-edit",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Therapie-Cockpit direkt bearbeiten",
+      "reason": "Erweitert das Cockpit um vollständige Übungsbearbeitung pro Slot und eine mobile aktive Patient:innenkarte.",
+      "whatChanged": [
+        "Erweitert das Cockpit um vollständige Übungsbearbeitung pro Slot und eine mobile aktive Patient:innenkarte."
+      ],
+      "touchedAreas": [
+        "Handy-Layout",
+        "Plan-State",
+        "Medien/Upload"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Expliziter Nutzerauftrag: Cockpit-Pläne direkt auf Phone und Tablet vollständig bearbeiten."
+    },
     {
       "versionCode": 91,
       "versionName": "1.0.91-plan-add-exercise-card",
@@ -457,40 +488,9 @@
         "certification": "pending"
       },
       "approvalNote": "Expliziter P0-Folgefix: Textfeld bleibt Live-Master, bestehende Mehruebungsplaene duerfen beim Boot oder bei Teilbearbeitung nicht verloren gehen."
-    },
-    {
-      "versionCode": 67,
-      "versionName": "1.0.67-plan-text-live-master-guard",
-      "patchId": "kgg-v067-plan-text-live-master-guard",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Plan-Text Live-Master Schutz",
-      "reason": "Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion.",
-      "whatChanged": [
-        "Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion."
-      ],
-      "touchedAreas": [
-        "Parser",
-        "Plan-State"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max hat den P0 Parser- und Plan-State-Fix ausdruecklich beauftragt."
     }
   ],
-  "latestVersionName": "1.0.90-cockpit-exercises-only",
+  "latestVersionName": "1.0.92-cockpit-live-edit",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -523,6 +523,14 @@
       "entriesSha256": "49a8b739cbd3fb285351fcded6cd6a7e3bb0b73cb10ddbc098e7a3e4431d7e3a",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v091-plan-add-exercise-card"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v092.json",
+      "snapshotVersionCode": 92,
+      "entryCount": 33,
+      "entriesSha256": "f45be1a63673425f82fa6075a77ce0070508b80ec9022aba203a309af4e962e8",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v092-cockpit-live-edit"
     }
   ]
 }

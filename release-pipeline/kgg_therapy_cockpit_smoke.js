@@ -175,7 +175,7 @@ assert(custom.id === "zZ", "canonical registration did not retain the supplied I
 const customCode = api.encode({ name: "Test", exercises: [{ id: "zZ", sets: 2, previous: [["5", "10"], ["6", "9"]], today: [["5", "10"], ["6", "9"]] }] });
 assert(api.decode(customCode).exercises[0].id === "zZ", "registered custom exercise did not roundtrip");
 
-let storedPlan = { id: "plan-hook", patient: { name: "Hook" }, exercises: [{ name: "Abduktion Maschine", sourceId: "abd" }] };
+let storedPlan = { id: "plan-hook", patient: { name: "Hook" }, exercises: [{ name: "Abduktion Maschine", sourceId: "abd", sets: 1, previous: [["2", "6"]], today: [["3", "7"]] }] };
 window.KGGDataStore = {
   getCurrentPlan: () => JSON.parse(JSON.stringify(storedPlan)),
   setCurrentPlan: plan => { storedPlan = JSON.parse(JSON.stringify(plan)); return storedPlan; },
@@ -183,6 +183,11 @@ window.KGGDataStore = {
 api.importCode(api.encode({ planId: "plan-hook", name: "Hook", exercises: [{ id: "01", sets: 1, previous: [["2", "6"]], today: [["3", "7"]] }] }));
 const hookResult = api.finish(0);
 assert(hookResult && storedPlan.exercises[0].lastTraining[0].load === "3", "safe normal-plan completion hook did not receive today's value");
+const beforeMismatchSync = JSON.stringify(storedPlan);
+api.importCode(api.encode({ planId: "plan-hook", name: "Hook", exercises: [{ id: "01", sets: 1, previous: [["2", "6"]], today: [["9", "7"]] }] }));
+assert(api.syncSlot(0) === "plan_mismatch", "an imported same-planId but changed slot was allowed to overwrite the current plan");
+assert(JSON.stringify(storedPlan) === beforeMismatchSync, "mismatched imported slot changed the normal plan");
+api.remove(0);
 delete window.KGGDataStore;
 
 api.importCode(code);

@@ -35,7 +35,8 @@
     "kgg-v088-ticket-037-real-plan",
     "kgg-v089-changelog-archive-window-refresh",
     "kgg-v090-cockpit-exercises-only",
-    "kgg-v091-plan-add-exercise-card"
+    "kgg-v091-plan-add-exercise-card",
+    "kgg-v092-cockpit-live-edit"
   ],
   "parts": [
     "base-head.html",
@@ -88,6 +89,7 @@
     "patches/v089-changelog-archive-window-refresh.html",
     "patches/v090-cockpit-exercises-only.html",
     "patches/v091-plan-add-exercise-card.html",
+    "patches/v092-cockpit-live-edit.html",
     "footer.html"
   ]
 }
