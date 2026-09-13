@@ -34,7 +34,8 @@
     "kgg-v087-ticket-015-live-fix",
     "kgg-v088-ticket-037-real-plan",
     "kgg-v089-changelog-archive-window-refresh",
-    "kgg-v090-ticket-015-admin-stage-gallery-drag-motion"
+    "kgg-v090-ticket-015-admin-stage-gallery-drag-motion",
+    "kgg-v091-ticket-015-admin-stage-compact"
   ],
   "parts": [
     "base-head.html",
@@ -86,6 +87,7 @@
     "patches/v088-ticket-037-real-plan.html",
     "patches/v089-changelog-archive-window-refresh.html",
     "patches/v090-ticket-015-admin-stage-gallery-drag-motion.html",
+    "patches/v091-ticket-015-admin-stage-compact.html",
     "footer.html"
   ]
 }

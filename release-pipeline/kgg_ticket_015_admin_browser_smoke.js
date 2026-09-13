@@ -46,7 +46,8 @@ async function main(){
     assert(await page.locator('.kgg015StageCard').count()===3,'admin gallery did not render all existing stages');
     assert(await page.locator('[data-kgg015-add-slot]').count()===2,'admin gallery did not render both empty plus slots');
     assert(await page.locator('.kgg015StageCard.is-main').count()===1,'admin gallery must expose exactly one main stage');
-    assert(await page.locator('.kgg015StageHandle').first().evaluate(node=>{const r=node.getBoundingClientRect();return r.width>=44&&r.height>=44}),'drag handle is not finger-sized');
+    assert(await page.locator('.kgg015StageHandle').count()===0,'progression cards must not show a separate drag handle');
+    assert(await page.locator('.kgg015StageCard').first().evaluate(node=>node.getAttribute('draggable')==='true'),'progression card is not draggable');
     assert(await page.locator('.kgg015StageRemove').first().evaluate(node=>{const r=node.getBoundingClientRect();return r.width>=44&&r.height>=44}),'delete control is not finger-sized');
     await page.locator('[data-kgg015-add-slot="after"]').click();
     await page.locator('[data-kgg015-add-name]').fill('Squat');

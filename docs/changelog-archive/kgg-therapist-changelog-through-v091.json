@@ -1,0 +1,1101 @@
+{
+  "schema": 1,
+  "kind": "kgg-therapist-changelog-snapshot",
+  "source": {
+    "path": "kgg-update/src/metadata/changelog.html",
+    "elementId": "kgg-changelog",
+    "versionCode": 91,
+    "versionName": "1.0.91-ticket-015-admin-stage-compact"
+  },
+  "createdByPatchId": "kgg-v091-ticket-015-admin-stage-compact",
+  "entryOrder": "newest-first",
+  "entryCount": 32,
+  "entriesSha256": "f6116ed28b94e92155d079b676d023812409c984e68368c9f80277dd8d20842e",
+  "canonicalization": {
+    "scope": "entries",
+    "encoding": "utf-8",
+    "ensureAscii": false,
+    "sortObjectKeys": true,
+    "separators": [
+      ",",
+      ":"
+    ],
+    "allowNaN": false,
+    "trailingNewline": false
+  },
+  "entries": [
+    {
+      "versionCode": 91,
+      "versionName": "1.0.91-ticket-015-admin-stage-compact",
+      "patchId": "kgg-v091-ticket-015-admin-stage-compact",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Ticket 015 Admin-Editor: Kompakte Progressionsstufen",
+      "reason": "Progressionsstufen-Karten werden kompakter, behalten ihre Bilder und erhalten klar getrennte Tipp-, Halte-, Sortier- und Löschgesten.",
+      "whatChanged": [
+        "Progressionsstufen-Karten werden kompakter, behalten ihre Bilder und erhalten klar getrennte Tipp-, Halte-, Sortier- und Löschgesten."
+      ],
+      "touchedAreas": [
+        "Admin-Editor",
+        "Ticket-015-Smokes"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
+    {
+      "versionCode": 90,
+      "versionName": "1.0.90-ticket-015-admin-stage-gallery-drag-motion",
+      "patchId": "kgg-v090-ticket-015-admin-stage-gallery-drag-motion",
+      "status": "candidate",
+      "type": "module-patch",
+      "title": "Ticket 015 Admin-Editor: Kartenorientierte Drag-Animation",
+      "reason": "Die Progressionskarten erhalten beim Sortieren dieselbe angehobene Karten-, Platzhalter- und Schattenbewegung wie die bestehenden Übungskarten.",
+      "whatChanged": [
+        "Drag-and-drop/Handle-Sortierung nutzt eine angehobene Karte, einen sichtbaren Platzhalter und weiche Zwischenkartenbewegungen.",
+        "Die bestehende Progressionsgalerie, Main-Hold-Geste, Löschbestätigung und Patientenübertragung bleiben erhalten."
+      ],
+      "touchedAreas": [
+        "Admin-Editor",
+        "Ticket-015-Smokes"
+      ],
+      "notTouched": [
+        "Numpad",
+        "Satzwerte",
+        "PDF",
+        "Scan/OCR",
+        "API-Key-Logik",
+        "Android/APK"
+      ],
+      "supersedes": "kgg-v089-changelog-archive-window-refresh",
+      "testStatus": {
+        "local": "pending",
+        "browser": "pending",
+        "certification": "pending"
+      }
+    },
+    {
+      "versionCode": 89,
+      "versionName": "1.0.89-changelog-archive-window-refresh",
+      "patchId": "kgg-v089-changelog-archive-window-refresh",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Changelog-Archivfenster erweitert",
+      "reason": "Vollständiger aktueller Changelog-Snapshot wird unveränderlich archiviert; im Laufzeitfenster bleiben die 15 neuesten Einträge.",
+      "whatChanged": [
+        "Vollständiger aktueller Changelog-Snapshot wird unveränderlich archiviert; im Laufzeitfenster bleiben die 15 neuesten Einträge."
+      ],
+      "touchedAreas": [
+        "Changelog-Archivierung"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
+    {
+      "versionCode": 88,
+      "versionName": "1.0.88-ticket-037-real-plan",
+      "patchId": "kgg-v088-ticket-037-real-plan",
+      "status": "candidate",
+      "type": "module-patch",
+      "title": "Therapie-Cockpit: normaler Plan direkt in Slot 1",
+      "reason": "Der sichtbare Cockpit-Einstieg und der Fertig-Dialog übernehmen den zentralen aktuellen Plan über den bestehenden Plan-/Codec-/Importpfad; Fehler bleiben fail-closed.",
+      "whatChanged": [
+        "Der sichtbare #kggTherapyCockpitButton importiert den normalen aktuellen Plan.",
+        "Der Fertig-Dialog enthält die verbindliche Cockpit-Plan-Aktion in der Reihenfolge PDF, App, Cockpit, Abbrechen.",
+        "Blocking-Real-Plan-E2E und Negativtest sichern sichtbaren Klick, Slot 1 und den echten Fehlercode."
+      ],
+      "touchedAreas": [
+        "Therapie-Cockpit",
+        "Test-Harness",
+        "Tablet-Fertig-Dialog"
+      ],
+      "notTouched": [
+        "PDF-Core",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Medien/Upload",
+        "Android/APK",
+        "API-Key-Logik",
+        "Phone-Design"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "KGG-TICKET-037; kein Main-, Live- oder Release-Auftrag."
+    },
+    {
+      "versionCode": 87,
+      "versionName": "1.0.87-ticket-015-live-fix",
+      "patchId": "kgg-v087-ticket-015-live-fix",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Ticket 015 Live-Editor-Bridge",
+      "reason": "Make the progression editor bridge robust and keep variant metadata out of patient info text.",
+      "whatChanged": [
+        "Make the progression editor bridge robust and keep variant metadata out of patient info text."
+      ],
+      "touchedAreas": [
+        "Admin-Editor",
+        "Patienten-App"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
+    {
+      "versionCode": 86,
+      "versionName": "1.0.86-ticket-015-progressions-contract",
+      "patchId": "kgg-v085-ticket-015-progressions",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Progressionsvarianten – Vertragsfix",
+      "reason": "Der Progressionsvertrag wird releasefest ausgerichtet: painMode bleibt kompatibel, Auswahl/Medien werden sicher transportiert und Bank-Persistenz bleibt erhalten.",
+      "whatChanged": [
+        "Der Progressionsvertrag bleibt mit painMode kompatibel und transportiert Auswahl, Medien und Bank-Persistenz sicher."
+      ],
+      "touchedAreas": [
+        "Plan-State",
+        "QR/Patienten-App",
+        "Handy-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "Scan/OCR",
+        "Parser",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Ausdrücklicher Ausführungsauftrag KGG-TICKET-015; bestehende Nutzeranforderung für Variantenkette, QR und Patienten-Galerie."
+    },
+    {
+      "versionCode": 84,
+      "versionName": "1.0.84-therapy-cockpit-start-link",
+      "patchId": "kgg-v084-therapy-cockpit-start-link",
+      "status": "candidate",
+      "type": "module-patch",
+      "title": "Therapie-Cockpit Startlink",
+      "reason": "Erzeugt aus einem bestehenden Therapeutenplan einen selbsttragenden Cockpit-Startlink mit kopierbarer Ausgabe.",
+      "whatChanged": [
+        "Erzeugt aus einem bestehenden Therapeutenplan einen selbsttragenden Cockpit-Startlink mit kopierbarer Ausgabe.",
+        "Erreichbar über den leeren Cockpit-Zustand; die normale Therapeutenansicht bleibt unverändert."
+      ],
+      "touchedAreas": [
+        "Therapie-Cockpit",
+        "UI"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
+    {
+      "versionCode": 83,
+      "versionName": "1.0.83-therapy-cockpit-id-guard",
+      "patchId": "kgg-v083-therapy-cockpit-id-guard",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Therapie-Cockpit ID-Guard",
+      "reason": "Weist unbekannte explizite Übungsbank-IDs vor dem Cockpit-Sync fail-closed ab.",
+      "whatChanged": [
+        "Weist unbekannte explizite Übungsbank-IDs vor dem Cockpit-Sync fail-closed ab."
+      ],
+      "touchedAreas": [
+        "Therapie-Cockpit"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
+    {
+      "versionCode": 82,
+      "versionName": "1.0.82-therapy-cockpit",
+      "patchId": "kgg-v082-therapy-cockpit",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Therapie-Cockpit fuer begleitete Plaene",
+      "reason": "Fuegt die additive Tablet-Cockpit-Ansicht mit selbsttragendem Linkcodec, drei RAM-Slots und Abschlussdokumentation hinzu.",
+      "whatChanged": [
+        "Fuegt die additive Tablet-Cockpit-Ansicht mit selbsttragendem Linkcodec, drei RAM-Slots und Abschlussdokumentation hinzu."
+      ],
+      "touchedAreas": [
+        "Therapie-Cockpit",
+        "UI"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
+    {
+      "versionCode": 81,
+      "versionName": "1.0.81-qr-full-plan-device-ladder",
+      "patchId": "kgg-v081-qr-full-plan-device-ladder",
+      "status": "candidate",
+      "type": "module-patch",
+      "title": "Vollständige KGGH3-Plan-QRs und Geräte-Testleiter",
+      "reason": "Komplette persönliche Pläne müssen von normalen Oppo-Ressourcen bis zu simulierten schwachen Geräten zuverlässig gelesen werden.",
+      "whatChanged": [
+        "Neue Plan-Ausgaben verwenden den lokalen, fest angehefteten KGGH3-Codec mit fflate 0.8.3 und Fehlerkorrektur M.",
+        "KGGH2 bleibt lesbar; Query, Hash, iOS-Startlink und der interne QR-Scanner validieren beide Formate.",
+        "Synthetische 1/3/7/12/20-Übungspläne werden über Decoder-, Parser-, Speicher- und Sichtbarkeits-Fingerabdrücke geprüft.",
+        "Für Altgeräte gibt es zusätzlich einen kleinen QR nur für die öffentliche Patienten-App-Adresse; der persönliche KGGH3-Plan wird danach intern gelesen."
+      ],
+      "touchedAreas": [
+        "QR/Patienten-App",
+        "KGGH2/KGGH3",
+        "Interner QR-Scanner",
+        "Geräte-Testleiter"
+      ],
+      "notTouched": [
+        "PDF",
+        "Plan-State-Quelle",
+        "Medien-/Upload-Logik",
+        "API-Key-Logik",
+        "Android/APK"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "Vor einem echten Oppo-Test müssen die automatischen KGGH3-, Kamera-, Foto-Fallback- und Geräteprofile grün sein."
+    },
+    {
+      "versionCode": 71,
+      "versionName": "1.0.71-pdf-global-exercise-numbering",
+      "patchId": "kgg-v071-pdf-global-exercise-numbering",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Fortlaufende Papierplan-Nummerierung",
+      "reason": "Übungsnummern dürfen auf Folgeseiten nicht wieder bei EX1 beginnen.",
+      "whatChanged": [
+        "Verwendet den globalen Übungsindex für sichtbare Nummern, Maschinenzeilen und Seitenspannen.",
+        "Ergänzt Regressionstests für klassische und große mehrseitige Papierpläne."
+      ],
+      "touchedAreas": [
+        "PDF",
+        "Papierplan-Nummerierung",
+        "Regressionstests"
+      ],
+      "notTouched": [
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Plan-State",
+        "Storage",
+        "Tablet-Layout",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Ticket 012: mehrseitige Papierpläne müssen über alle Seiten fortlaufend nummeriert werden."
+    },
+    {
+      "versionCode": 70,
+      "versionName": "1.0.70-tablet-package-save",
+      "patchId": "kgg-v070-tablet-package-save",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Tablet-Paketbutton wiederherstellen",
+      "reason": "Der bereits vorhandene Paket-Speichern-Dialog war in der Tablet-Ansicht nicht sichtbar bzw. erreichbar.",
+      "whatChanged": [
+        "Verschiebt ausschließlich den bestehenden savePackageBtn im Tablet-Modus in die Kopfzeile des aktuellen Plans und lässt den vorhandenen Dialog-Handler unverändert.",
+        "Sichert für diesen Tablet-Button ein Touch-Ziel von mindestens 56 x 44 px."
+      ],
+      "touchedAreas": [
+        "Tablet-Layout",
+        "UI-Regressionstests"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Storage",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Max hat die Wiederherstellung des Tablet-Paketbuttons und ein mindestens 44px hohes Tablet-Touch-Ziel ausdrücklich freigegeben."
+    },
+    {
+      "versionCode": 69,
+      "versionName": "1.0.69-plan-text-recovery-finalize",
+      "patchId": "kgg-v069-plan-text-recovery-finalize",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Live-Plantext Recovery abschliessen",
+      "reason": "Persistiert eine tatsaechliche Boot-Reparatur und unterscheidet kurze Zwischenedits von finalen Umbenennungen.",
+      "whatChanged": [
+        "Persistiert eine tatsaechliche Boot-Reparatur und unterscheidet kurze Zwischenedits von finalen Umbenennungen."
+      ],
+      "touchedAreas": [
+        "Plan-State",
+        "Storage"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Vom Code-Review beauftragter P1-Folgepatch: Live-Text-Plan-State und lokale Persistenz muessen ohne Datenverlust korrigiert werden."
+    },
+    {
+      "versionCode": 68,
+      "versionName": "1.0.68-plan-text-boot-restore",
+      "patchId": "kgg-v068-plan-text-boot-restore",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Plan-Text Boot Restore",
+      "reason": "Stellt gueltigen gespeicherten Live-Plantext beim Start wieder her und schuetzt nur kurz unvollstaendige Namenssegmente.",
+      "whatChanged": [
+        "Stellt gueltigen gespeicherten Live-Plantext beim Start wieder her und schuetzt nur kurz unvollstaendige Namenssegmente."
+      ],
+      "touchedAreas": [
+        "Parser",
+        "Plan-State"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Expliziter P0-Folgefix: Textfeld bleibt Live-Master, bestehende Mehruebungsplaene duerfen beim Boot oder bei Teilbearbeitung nicht verloren gehen."
+    },
+    {
+      "versionCode": 67,
+      "versionName": "1.0.67-plan-text-live-master-guard",
+      "patchId": "kgg-v067-plan-text-live-master-guard",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Plan-Text Live-Master Schutz",
+      "reason": "Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion.",
+      "whatChanged": [
+        "Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion."
+      ],
+      "touchedAreas": [
+        "Parser",
+        "Plan-State"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Max hat den P0 Parser- und Plan-State-Fix ausdruecklich beauftragt."
+    },
+    {
+      "versionCode": 65,
+      "versionName": "1.0.65-source-control-char-guard",
+      "patchId": "kgg-v065-source-control-char-guard",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Source-Steuerzeichen-Guard",
+      "reason": "Ersetzt vier versehentliche U+0008-Zeichen durch Regex-Wortgrenzen, repariert den fehlkodierten SJIS-Prüfwert und blockiert C0-, C1- sowie DEL-Steuerzeichen in editierbaren Source-Teilen.",
+      "whatChanged": [
+        "Ersetzt vier versehentliche U+0008-Zeichen durch Regex-Wortgrenzen, repariert den fehlkodierten SJIS-Prüfwert und blockiert C0-, C1- sowie DEL-Steuerzeichen in editierbaren Source-Teilen."
+      ],
+      "touchedAreas": [
+        "Parser"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Max hat den separaten Parser-Hygiene-Patch im angepassten Strukturplan ausdrücklich freigegeben."
+    },
+    {
+      "versionCode": 64,
+      "versionName": "1.0.64-typed-update-versions",
+      "patchId": "kgg-v064-typed-update-versions",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Strikte Update-Versionstypen",
+      "reason": "Trennt Source-Code, Web-Release-ID, semantischen Versionsnamen und Android-Shell-Version fail-closed voneinander.",
+      "whatChanged": [
+        "Trennt Source-Code, Web-Release-ID, semantischen Versionsnamen und Android-Shell-Version fail-closed voneinander."
+      ],
+      "touchedAreas": [
+        "GitHub Manifest",
+        "Android/APK"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Max hat die getrennte Manifest- und Versionsauswertung im angepassten Strukturplan ausdrücklich freigegeben."
+    },
+    {
+      "versionCode": 63,
+      "versionName": "1.0.63-changelog-archive-window",
+      "patchId": "kgg-v063-changelog-archive-window",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Changelog-Archivfenster",
+      "reason": "Archiviert den vollständigen Changelog-Stand bis v62 und begrenzt die Laufzeit-Metadaten auf v63 plus die 14 neuesten Vorgänger.",
+      "whatChanged": [
+        "Archiviert den vollständigen Changelog-Stand bis v62 und begrenzt die Laufzeit-Metadaten auf v63 plus die 14 neuesten Vorgänger."
+      ],
+      "touchedAreas": [
+        "Release-Metadaten"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Max hat die vollständige v62-Changelog-Archivierung und das 15-Einträge-Fenster freigegeben."
+    },
+    {
+      "versionCode": 62,
+      "versionName": "1.0.62-tablet-recent-package-shell-geometry",
+      "patchId": "kgg-v062-tablet-recent-package-shell-geometry",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Plan-Historie mit stabiler Hintergrund-Geometrie",
+      "reason": "Die bereits bestätigte Tablet-Historien-Shell bleibt unverändert; zusätzlich übernimmt sie exakt die grüne Arbeitsflächen-Geometrie des Übungspakete-Overlays, damit der Hintergrund beim Öffnen nicht mehr verspringt.",
+      "whatChanged": [
+        "Die bereits bestätigte Tablet-Historien-Shell bleibt unverändert; zusätzlich übernimmt sie exakt die grüne Arbeitsflächen-Geometrie des Übungspakete-Overlays, damit der Hintergrund beim Öffnen nicht mehr verspringt."
+      ],
+      "touchedAreas": [
+        "Tablet-Layout",
+        "Historien-Overlay",
+        "Übungspakete-Overlay-Shell"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Gate-managed Custom GPT module patch; Max approved modular GPT migration with existing embedded changelog overflow."
+    },
+    {
+      "versionCode": 61,
+      "versionName": "1.0.61-cross-app-live-qr-camera",
+      "patchId": "kgg-v061-cross-app-live-qr-camera",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "PAT Live-QR-Kamera fuer Admin",
+      "reason": "Uebernimmt den bewaehrten kontinuierlichen Patienten-QR-Scan mit lokalem jsQR-Fallback und manueller Papieraufnahme in die Admin-Test-App.",
+      "whatChanged": [
+        "Uebernimmt den bewaehrten kontinuierlichen Patienten-QR-Scan mit lokalem jsQR-Fallback und manueller Papieraufnahme in die Admin-Test-App."
+      ],
+      "touchedAreas": [
+        "Scan/OCR",
+        "QR/Patienten-App",
+        "Android/APK"
+      ],
+      "notTouched": [
+        "PDF",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Max hat den PAT-Scanner-Port und den begrenzten Cross-App-Kamerazugriff am 2026-08-01 ausdruecklich beauftragt."
+    },
+    {
+      "versionCode": 60,
+      "versionName": "1.0.60-tablet-html-release-label",
+      "patchId": "kgg-v060-tablet-html-release-label",
+      "status": "certified",
+      "type": "module-patch",
+      "title": "Tablet HTML Release Label",
+      "reason": "Zeigt den Namen der aktuell geladenen HTML-Version unten rechts im ausgefahrenen Tablet-Menue.",
+      "whatChanged": [
+        "Zeigt den Namen der aktuell geladenen HTML-Version unten rechts im ausgefahrenen Tablet-Menue."
+      ],
+      "touchedAreas": [
+        "Tablet-Menue"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "passed",
+        "certification": "passed",
+        "notes": "Vollstaendige Regression plus dynamischer APK-/Web-Identitaets- und Bottom-Right-Positionstest."
+      },
+      "approvalNote": "Max hat den sichtbaren Tablet-Menue-Patch ausdruecklich beauftragt; die Changelog-Archivierung bleibt ein separater Folgepatch."
+    },
+    {
+      "versionCode": 59,
+      "versionName": "1.0.59-ui-scaler-push-canary",
+      "patchId": "kgg-v059-ui-scaler-push-canary",
+      "status": "active",
+      "type": "kgg-gpt-write-gate",
+      "title": "Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification.",
+      "reason": "Custom GPT preview was accepted by Max and routed through the guarded write gate.",
+      "whatChanged": [
+        "Visible harmless UI scaler label change for end-to-end Test-App and Admin-Beta push verification."
+      ],
+      "touchedAreas": [
+        "kgg-update/index.html"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "github": "pending",
+        "notes": "Required Gate and release-pr validate-build must pass before merge."
+      }
+    },
+    {
+      "versionCode": 58,
+      "versionName": "1.0.58-grossdruck-readability-beta",
+      "patchId": "kgg-v058-grossdruck-readability-beta",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Grossdruck-PDF mit Kurzsichtigkeits-Test",
+      "reason": "Die Grossdruck-PDF soll fuer kurzsichtige Leser:innen bei Uebungsname, Satz, Wdh, kg/Gewicht und Schmerzskala messbar lesbarer sein, bevor eine Admin-Beta gebaut wird.",
+      "whatChanged": [
+        "Grossdruck-Titel, Meta-Zeilen und Tabellenlabels werden auf 14pt, 8.6pt und 7pt Mindestgroessen angehoben.",
+        "Die Grossdruck-Vorlage bleibt bei 3 Uebungen pro A4-Seite, nutzt aber groessere Abstaende und ein L3-v3 Template.",
+        "Eine lokale PDF-Readability-Testengine erzeugt Test-PDFs, Poppler-Renderings und Kurzsichtigkeits-Simulationen."
+      ],
+      "touchedAreas": [
+        "PDF generation",
+        "Grossdruck PDF layout",
+        "PDF readability test engine",
+        "Release test battery",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "QR/Patienten-App",
+        "Scan/OCR parser",
+        "Gemini API pipeline",
+        "Parser",
+        "Plan-State",
+        "Android/APK",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "notes": "node release-pipeline/kgg_pdf_readability_smoke.js plus PDF critical und critical suite vor Admin-Beta."
+      }
+    },
+    {
+      "versionCode": 57,
+      "versionName": "1.0.57-grossdruck-pdf-readable-images",
+      "patchId": "kgg-v057-grossdruck-pdf-readable-images",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Grossdruck-PDF mit Bildern und groesserer Schrift",
+      "reason": "Die vergroesserte PDF-Version soll vorhandene Uebungsbilder zeigen und auf A4 lesbarer sein, ohne Scan/OCR, QR oder Plan-State zu aendern.",
+      "whatChanged": [
+        "Grossdruck-PDF wird als echtes A4-Portrait mit 3 Uebungen pro Seite erzeugt.",
+        "Lokale PDF-Uebungsbilder werden auch im Grossdruck-Snapshot geladen.",
+        "Grossdruck-Tabellen, Kopfzeilen und Karten nutzen groessere Fontgroessen und Abstaende."
+      ],
+      "touchedAreas": [
+        "PDF generation",
+        "Grossdruck PDF layout",
+        "PDF exercise thumbnails",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "QR/Patienten-App",
+        "Scan/OCR parser",
+        "Gemini API pipeline",
+        "Parser",
+        "Plan-State",
+        "Android/APK",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "notes": "Critical plus PDF render smoke; Gemini-Live-Smoke nur mit lokal vorhandener Admin-Konfig/API-Key."
+      }
+    },
+    {
+      "versionCode": 56,
+      "versionName": "1.0.56-patient-qr-root-query",
+      "patchId": "kgg-v056-patient-qr-root-query",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Patienten-QR nutzt Root-App mit Query-Payload",
+      "reason": "Der Trainingsplan-QR soll die aktuelle Patienten-App oeffnen und den Plan direkt ueber ?plan=KGGH2:... uebergeben, statt auf den alten Renderer-Pfad oder gespeicherte Altplaene zu fallen.",
+      "whatChanged": [
+        "Default-Patienten-App-Basis zeigt auf https://kayus24.github.io/kgg/.",
+        "Neue Patienten-QRs verwenden ?plan=KGGH2:<payload>.",
+        "Tests blockieren kgg-update/index.html, releases und media-inline-bundle-7 als Standard-Patientenlink."
+      ],
+      "touchedAreas": [
+        "Patient QR base URL",
+        "Patient share URL tests",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Parser",
+        "Scan/OCR parser",
+        "Plan-State",
+        "PDF generation",
+        "Android/APK",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "notes": "Critical plus patient-qr logic smoke vor Release."
+      }
+    },
+    {
+      "versionCode": 55,
+      "versionName": "1.0.55-colleague-share-apk-fix",
+      "patchId": "kgg-v055-colleague-share-apk-fix",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Kolleg:innen-App-Weitergabe stabilisiert",
+      "reason": "Der Phone-Menuepunkt darf nicht in den APK-Update-Installer laufen, sondern muss direkt den Kolleg:innen-App/APK-QR anzeigen.",
+      "whatChanged": [
+        "Kolleg:innen-App weitergeben nutzt den direkten QR-Handler statt Fallback-Klicks.",
+        "Android-Web-Update-Check startet keine native APK-Installation mehr automatisch."
+      ],
+      "touchedAreas": [
+        "Phone Kolleg:innen-App Weitergabe",
+        "Android APK update handoff",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Parser",
+        "Scan/OCR parser",
+        "Plan-State",
+        "PDF generation",
+        "Sync data model",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "notes": "Critical plus UI-Stability Regression vor Release."
+      }
+    },
+    {
+      "versionCode": 54,
+      "versionName": "1.0.54-patient-qr-latest",
+      "patchId": "kgg-v054-patient-qr-latest",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Patienten-QR nutzt aktuelle Patient-App",
+      "reason": "Trainingsplan-QR-Codes duerfen nicht auf das alte Root-Bundle der ersten Patient-Web-App zeigen.",
+      "whatChanged": [
+        "Default-Patienten-App-Basis zeigt auf kgg-update/index.html als aktuellen Patient-Hash-Renderer.",
+        "Logic-Smoke prueft, dass der QR-Link nicht mehr media-inline-bundle-7 verwendet."
+      ],
+      "touchedAreas": [
+        "Patient QR base URL",
+        "Patient share URL tests",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Parser",
+        "Scan/OCR parser",
+        "Plan-State",
+        "PDF generation",
+        "Android/APK",
+        "Sync data model",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "notes": "Critical plus patient-qr logic smoke vor Release."
+      }
+    },
+    {
+      "versionCode": 53,
+      "versionName": "1.0.53-ui-tablet-stability",
+      "patchId": "kgg-v053-ui-tablet-stability",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Phone-Dock und Tablet-Gesten stabilisiert",
+      "reason": "Tastatur, Header-Menue, Tablet-Swipe und Tablet-Editor duerfen nach UI-Patches nicht wieder instabil werden.",
+      "whatChanged": [
+        "Phone-Scan-Dock und Fertig-Button werden bei Tastatur-Fokus nicht nach oben geschoben.",
+        "Das Phone-Admin-Menue bleibt im Plan-Header sauber rechts verankert und ueberlappt den Paket-Button nicht.",
+        "Tablet-Side-Swipe zum Loeschen kann wieder vor dem Tablet-Reorder greifen.",
+        "Das Tablet-Editor-Modal nutzt ab Tablet-Breite eine zweispaltige Aufteilung."
+      ],
+      "touchedAreas": [
+        "Phone UI dock",
+        "Phone plan header menu",
+        "Tablet plan-card gestures",
+        "Tablet editor layout",
+        "UI stability tests",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Parser",
+        "Scan/OCR parser",
+        "Plan-State",
+        "PDF generation",
+        "QR/Patienten-App",
+        "Android/APK",
+        "Sync data model",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "not-applicable"
+      },
+      "handoffNote": "v053 ist Web-UI-only: nach jedem Folgepatch phone-scan-dock, phone-admin-menu, tablet-card-reorder und tablet-editor-layout laufen lassen."
+    },
+    {
+      "versionCode": 52,
+      "versionName": "1.0.52-pdf-plan-thumbnails",
+      "patchId": "kgg-v052-pdf-plan-thumbnails",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "PDF-Planbilder in Trainingskarten",
+      "reason": "PDF-Trainingskarten sollen vorhandene lokale Uebungsbilder oben rechts als kleine Schwarzweiss-Thumbnails zeigen, ohne die Kartenhoehe zu veraendern.",
+      "whatChanged": [
+        "PDF-Snapshot sammelt lokale Uebungsbilder aus IndexedDB und laesst fehlende Bilder still aus.",
+        "Thumbnails werden lokal entschluesselt, verkleinert und in Schwarzweiss als JPEG-DataURL in den PDF-Snapshot gelegt.",
+        "drawKggExerciseBox zeichnet das Thumbnail oben rechts im vorhandenen freien Raum.",
+        "Die Offline-PDF-Runtime kann JPEG-XObjects einbetten."
+      ],
+      "touchedAreas": [
+        "PDF snapshot",
+        "PDF exercise card rendering",
+        "Offline PDF runtime",
+        "PDF test battery",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Parser",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Phone card gestures",
+        "Tablet layout content",
+        "QR/Patienten-App",
+        "Android/APK",
+        "Sync data model",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "not-applicable"
+      },
+      "handoffNote": "v052 ist nur PDF-Planbilder; Android v399 und QR-Druck bleiben aus v051."
+    },
+    {
+      "versionCode": 51,
+      "versionName": "1.0.51-android-qr-pdf-bridge",
+      "patchId": "kgg-v051-android-qr-pdf-bridge",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Kolleg:innen-QR drucken und Android-PDF/Icon-Bridge",
+      "reason": "Kolleg:innen-App/APK-QR soll direkt druckbar sein und die Android-APK braucht v399 mit App-Icon sowie internem PDF-Fallback, wenn kein externer PDF-Viewer vorhanden ist.",
+      "whatChanged": [
+        "Das Admin-QR-Modal bekommt den Button QR drucken.",
+        "QR-Druck erzeugt lokal eine kleine PDF-Seite mit Titel, QR-Code und Link.",
+        "Android v399 stellt die native PDF-Bridge kompatibel bereit und bekommt das KGG-Launcher-Icon.",
+        "Android oeffnet PDFs intern als Vorschau, wenn kein externer PDF-Viewer gefunden wird."
+      ],
+      "touchedAreas": [
+        "Admin QR modal",
+        "QR print PDF helper",
+        "Android wrapper PDF bridge",
+        "Android launcher resources",
+        "Android update manifest",
+        "Release artifacts",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Parser",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Phone card gestures",
+        "Tablet layout content",
+        "PDF plan exercise-image thumbnails",
+        "Sync data model",
+        "API-Key-Logik"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "v051 ist QR/PDF/Android-Shell; PDF-Planbilder bleiben separat fuer v052."
+    },
+    {
+      "versionCode": 50,
+      "versionName": "1.0.50-phone-ui-mini-fix",
+      "patchId": "kgg-v050-phone-ui-mini-fix",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Phone-UI: Plan-Menue, Historie und Scan-Optionen",
+      "reason": "Im Phone-Planmodus sass das 3-Punkte-Menue zu mittig, Plan-Historie kollabierte und die Foto/Galerie-Auswahl wirkte wie ein separates Floating-Menue.",
+      "whatChanged": [
+        "Das 3-Punkte-Menue wird im Plan-Header oben rechts verankert.",
+        "Plan-Historie bleibt im Phone-Planmodus als voller lesbarer Button sichtbar.",
+        "Der Scanbutton zeigt Foto/Galerie-Optionen inline und waechst beim Oeffnen nur vertikal."
+      ],
+      "touchedAreas": [
+        "Phone plan header menu",
+        "Phone Plan-Historie button",
+        "Phone scan dock photo options",
+        "UI stability tests",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Android-Wrapper",
+        "Sync",
+        "API-Key-Logik",
+        "Kolleg:innen-Freigabe"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "not-applicable"
+      },
+      "handoffNote": "v050 ist UI-only fuer Phone; bei Problemen zuerst ui-stability phone-scan-dock und phone-history-packages laufen lassen."
+    },
+    {
+      "versionCode": 50,
+      "versionName": "1.0.50-phone-ui-mini-fix",
+      "patchId": "kgg-v049-symbol-encoding-hotfix",
+      "status": "active",
+      "type": "local-html-patch",
+      "title": "Mojibake-Symbolreste repariert",
+      "reason": "Nach der grossen UTF-8-Reparatur waren noch kaputte Symbolsequenzen wie Pfeile, Zahnrad und QR-ASCII-Blockzeichen sichtbar bzw. im HTML enthalten.",
+      "whatChanged": [
+        "Kaputte Pfeil-, Zahnrad-, Caret- und QR-ASCII-Symbolstrings wurden durch echte Unicode-Zeichen ersetzt.",
+        "Der Encoding-Guard erkennt jetzt auch einfache sichtbare Mojibake-Symbolfamilien.",
+        "Die Encoding-Guard-Unit-Tests enthalten gute Unicode-Zeichen und rote Symbol-Mojibake-Faelle."
+      ],
+      "touchedAreas": [
+        "HTML symbol strings",
+        "QR helper embedded strings",
+        "Critical encoding guard",
+        "Local test batteries",
+        "Source Truth",
+        "version.json"
+      ],
+      "notTouched": [
+        "Layout",
+        "PDF",
+        "QR-Erzeugung",
+        "Patienten-App",
+        "Scan/OCR parser",
+        "Plan-State",
+        "Android-Wrapper",
+        "Sync",
+        "API-Key-Logik",
+        "Kolleg:innen-Freigabe"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "githubPages": "pending",
+        "androidApp": "pending"
+      },
+      "handoffNote": "v049 ist ein enger Encoding-Hotfix gegen sichtbare Symbol-Mojibake-Reste; wenn dieser Guard rot wird, nicht releasen."
+    }
+  ]
+}

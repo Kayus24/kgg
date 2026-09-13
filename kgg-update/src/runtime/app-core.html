@@ -1,10 +1,10 @@
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v090_ticket_015_admin_stage_gallery_drag_motion';
+  const VERSION='KGG_GITHUB_UPDATE_v091_ticket_015_admin_stage_compact';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v090","buildTime":"2026-09-13T10:00:00Z","buildCode":"module-v090-ticket-015-admin-stage-gallery-drag-motion","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v091","buildTime":"2026-09-13T17:05:51Z","buildCode":"module-v091-ticket-015-admin-stage-compact","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -3585,6 +3585,7 @@
     $('editorModal').classList.add('open');
     if(window.KGGTicket015AdminEditor&&typeof window.KGGTicket015AdminEditor.onOpen==='function')window.KGGTicket015AdminEditor.onOpen(ex);
   }
+  window.KGGTicket015AdminEditor.open=ex=>openEditor(ex);
   function closeEditor(){state.editId=null; $('editorModal').classList.remove('open')}
   function saveEditedExercise(){
     const id=state.editId;

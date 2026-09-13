@@ -1,7 +1,7 @@
 {
-  "versionCode": 90,
-  "versionName": "1.0.90-ticket-015-admin-stage-gallery-drag-motion",
-  "indexUrl": "index.html?v=90",
-  "sha256": "7833fc83531db64b66f53df33fd4bed78365bbd365d129ba0e63e188b377b414",
-  "notes": "v090: Align progression-stage drag feedback with the existing exercise-card lift, placeholder and shadow animation."
+  "versionCode": 91,
+  "versionName": "1.0.91-ticket-015-admin-stage-compact",
+  "indexUrl": "index.html?v=91",
+  "sha256": "4e6ad61ba046fad4739d6f33e9a6526d9a148d65c7625849bc31af49259570cf",
+  "notes": "v091: Progressionsstufen-Karten werden kompakter, behalten ihre Bilder und erhalten klar getrennte Tipp-, Halte-, Sortier- und Löschgesten."
 }
