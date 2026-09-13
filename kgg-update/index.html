@@ -62,20 +62,22 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "ticket-015-progressions",
     "ticket-015-live-fix",
     "ticket-037-real-plan",
-    "changelog-archive-window-refresh"
+    "changelog-archive-window-refresh",
+    "cockpit-exercises-only"
   ],
   "currentVersion": {
-    "versionCode": 89,
-    "versionName": "1.0.89-changelog-archive-window-refresh",
-    "lastPatchId": "kgg-v089-changelog-archive-window-refresh",
+    "versionCode": 90,
+    "versionName": "1.0.90-cockpit-exercises-only",
+    "lastPatchId": "kgg-v090-cockpit-exercises-only",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v089-changelog-archive-window-refresh",
+  "latestPatchId": "kgg-v090-cockpit-exercises-only",
   "lastUpdateIntent": {
-    "id": "kgg-v089-changelog-archive-window-refresh",
-    "summary": "Vollständiger aktueller Changelog-Snapshot wird unveränderlich archiviert; im Laufzeitfenster bleiben die 15 neuesten Einträge.",
+    "id": "kgg-v090-cockpit-exercises-only",
+    "summary": "Cockpit-Pläne können aus mindestens einer gültigen Übung auch ohne Patient:innen-Basisdaten erzeugt werden; der neutrale Codec-Name bleibt flüchtig und alte Fehlerhinweise werden nach Erfolg gelöscht.",
     "touched": [
-      "Changelog-Archivierung"
+      "Therapie-Cockpit",
+      "Test-Harness"
     ],
     "notTouched": [
       "PDF",
@@ -148,20 +150,22 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "ticket-015-progressions",
     "ticket-015-live-fix",
     "ticket-037-real-plan",
-    "changelog-archive-window-refresh"
+    "changelog-archive-window-refresh",
+    "cockpit-exercises-only"
   ],
   "currentVersion": {
-    "versionCode": 89,
-    "versionName": "1.0.89-changelog-archive-window-refresh",
-    "lastPatchId": "kgg-v089-changelog-archive-window-refresh",
+    "versionCode": 90,
+    "versionName": "1.0.90-cockpit-exercises-only",
+    "lastPatchId": "kgg-v090-cockpit-exercises-only",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v089-changelog-archive-window-refresh",
+  "latestPatchId": "kgg-v090-cockpit-exercises-only",
   "lastUpdateIntent": {
-    "id": "kgg-v089-changelog-archive-window-refresh",
-    "summary": "Vollständiger aktueller Changelog-Snapshot wird unveränderlich archiviert; im Laufzeitfenster bleiben die 15 neuesten Einträge.",
+    "id": "kgg-v090-cockpit-exercises-only",
+    "summary": "Cockpit-Pläne können aus mindestens einer gültigen Übung auch ohne Patient:innen-Basisdaten erzeugt werden; der neutrale Codec-Name bleibt flüchtig und alte Fehlerhinweise werden nach Erfolg gelöscht.",
     "touched": [
-      "Changelog-Archivierung"
+      "Therapie-Cockpit",
+      "Test-Harness"
     ],
     "notTouched": [
       "PDF",
@@ -183,8 +187,40 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 89,
+  "latestVersionCode": 90,
   "entries": [
+    {
+      "versionCode": 90,
+      "versionName": "1.0.90-cockpit-exercises-only",
+      "patchId": "kgg-v090-cockpit-exercises-only",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Therapie-Cockpit ohne Basisdaten",
+      "reason": "Cockpit-Pläne können aus mindestens einer gültigen Übung auch ohne Patient:innen-Basisdaten erzeugt werden; der neutrale Codec-Name bleibt flüchtig und alte Fehlerhinweise werden nach Erfolg gelöscht.",
+      "whatChanged": [
+        "Cockpit-Pläne können aus mindestens einer gültigen Übung auch ohne Patient:innen-Basisdaten erzeugt werden; der neutrale Codec-Name bleibt flüchtig und alte Fehlerhinweise werden nach Erfolg gelöscht."
+      ],
+      "touchedAreas": [
+        "Therapie-Cockpit",
+        "Test-Harness"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
     {
       "versionCode": 89,
       "versionName": "1.0.89-changelog-archive-window-refresh",
@@ -633,40 +669,9 @@ Before editing this app, any LLM/agent/human should read these blocks:
         "certification": "pending"
       },
       "approvalNote": "Max hat den separaten Parser-Hygiene-Patch im angepassten Strukturplan ausdrücklich freigegeben."
-    },
-    {
-      "versionCode": 64,
-      "versionName": "1.0.64-typed-update-versions",
-      "patchId": "kgg-v064-typed-update-versions",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Strikte Update-Versionstypen",
-      "reason": "Trennt Source-Code, Web-Release-ID, semantischen Versionsnamen und Android-Shell-Version fail-closed voneinander.",
-      "whatChanged": [
-        "Trennt Source-Code, Web-Release-ID, semantischen Versionsnamen und Android-Shell-Version fail-closed voneinander."
-      ],
-      "touchedAreas": [
-        "GitHub Manifest",
-        "Android/APK"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max hat die getrennte Manifest- und Versionsauswertung im angepassten Strukturplan ausdrücklich freigegeben."
     }
   ],
-  "latestVersionName": "1.0.89-changelog-archive-window-refresh",
+  "latestVersionName": "1.0.90-cockpit-exercises-only",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -683,6 +688,14 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "entriesSha256": "7c9c4d1d87e64c989ae670af3cd4892d7f046a3540c0dfbd4cc180bc75e4aa7e",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v089-changelog-archive-window-refresh"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v090.json",
+      "snapshotVersionCode": 90,
+      "entryCount": 31,
+      "entriesSha256": "9338e9ab7cc88ef314427fe9e4224da1502b9fe375833e87d121be1f051ca04c",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v090-cockpit-exercises-only"
     }
   ]
 }
@@ -800,7 +813,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v089-changelog-archive-window-refresh",
+  "lastUpdatedByPatchId": "kgg-v090-cockpit-exercises-only",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
@@ -935,7 +948,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v089 Changelog-Archivfenster erweitert</title>
+  <title>KGG Update v090 Therapie-Cockpit ohne Basisdaten</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -16847,11 +16860,11 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
 </script>
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v089_changelog_archive_window_refresh';
+  const VERSION='KGG_GITHUB_UPDATE_v090_cockpit_exercises_only';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v089","buildTime":"2026-09-12T21:30:21Z","buildCode":"module-v089-changelog-archive-window-refresh","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v090","buildTime":"2026-09-13T08:58:08Z","buildCode":"module-v090-cockpit-exercises-only","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -28392,6 +28405,104 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
 <!-- Changelog-Archivfenster erweitert -->
 <!-- Metadata-only changelog archive/window refresh; no runtime behavior. -->
 <!-- KGG PATCH END kgg-v089-changelog-archive-window-refresh -->
+<!-- KGG PATCH START kgg-v090-cockpit-exercises-only -->
+<!-- Therapie-Cockpit ohne Basisdaten -->
+<!-- Therapie-Cockpit aus Übungen ohne Basisdaten -->
+<!-- Additive Ticket-037-Fortsetzung: kein neuer Plan-State, neutraler Payload-Name nur im Cockpit-Codec. -->
+<script id="kgg-v090-cockpit-exercises-only-script">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v090-cockpit-exercises-only";
+  var FALLBACK_PLAN_NAME="Übungsplan ohne Patientendaten";
+  var api=window.KGGTherapyCockpit;
+  var installed=false;
+  function error(code){var err=new Error(code);err.code=code;return err;}
+  function safeErrorCode(errorValue){
+    var code=errorValue&&typeof errorValue.code==="string"?errorValue.code:"cockpit_import_failed";
+    return /^[a-z0-9_]{1,48}$/.test(code)?code:"cockpit_import_failed";
+  }
+  function currentPlan(){
+    var store=window.KGGDataStore;
+    if(!store||typeof store.getCurrentPlan!=="function")throw error("plan_state_unavailable");
+    return store.getCurrentPlan()||{};
+  }
+  function planInfo(plan){
+    var source=plan||{},patient=source.patient||{};
+    var name=String(patient.name||source.name||source.patientName||"").trim();
+    var exercises=Array.isArray(source.exercises)?source.exercises:[];
+    return {plan:source,name:name,exercises:exercises,ready:exercises.length>0};
+  }
+  function codecPlan(info){
+    if(info.name)return info.plan;
+    var patient=Object.assign({},info.plan&&info.plan.patient||{}, {name:FALLBACK_PLAN_NAME});
+    return Object.assign({},info.plan,{patient:patient,name:FALLBACK_PLAN_NAME});
+  }
+  function clearSuccessState(){
+    window.KGGTherapyCockpitLastErrorCode="";
+    var toast=document.getElementById("kggTherapyCockpitToast");
+    if(toast){toast.classList.remove("show");toast.textContent="";}
+  }
+  function notify(errorValue){
+    var code=safeErrorCode(errorValue),toast=document.getElementById("kggTherapyCockpitToast");
+    window.KGGTherapyCockpitLastErrorCode=code;
+    if(!toast)return;
+    toast.textContent="Plan konnte nicht ins Cockpit geladen werden ("+code+").";
+    toast.classList.add("show");
+    setTimeout(function(){toast.classList.remove("show");},3200);
+  }
+  function syncEntryVisibility(){
+    var button=document.getElementById("kggTherapyCockpitButton");
+    if(!button)return;
+    var state=api&&typeof api.getState==="function"?api.getState():null;
+    var ready=!!(state&&state.slotCount>0);
+    if(!ready){try{ready=planInfo(currentPlan()).ready;}catch(e){ready=false;}}
+    button.classList.toggle("kgg-tc-entry-ready",ready);
+  }
+  function installPlanStoreHook(){
+    var store=window.KGGDataStore;
+    if(store&&typeof store.setCurrentPlan==="function"&&!store.__kggTicket090EntryWrapped){
+      var setCurrentPlan=store.setCurrentPlan;
+      store.setCurrentPlan=function(){var result=setCurrentPlan.apply(this,arguments);syncEntryVisibility();return result;};
+      store.__kggTicket090EntryWrapped=true;
+    }
+    syncEntryVisibility();
+  }
+  function importCurrentPlan(){
+    if(!api||typeof api.getState!=="function"||typeof api.open!=="function")throw error("cockpit_unavailable");
+    var state=api.getState(),info=planInfo(currentPlan());
+    if(!info.ready)throw error("current_plan_not_ready");
+    if(typeof api.fromPlan!=="function"||typeof api.contentKey!=="function"||typeof api.makeLink!=="function"||typeof api.importCode!=="function")throw error("cockpit_content_contract_unavailable");
+    var payload=api.fromPlan(codecPlan(info)),contentKey=api.contentKey(payload);
+    if(Array.isArray(state&&state.slots)&&state.slots.some(function(slot){return slot&&slot.contentKey===contentKey;})){api.open();return {reused:true,state:state};}
+    if(state&&state.slotCount>=3)throw error("slots_full");
+    return api.importCode(api.makeLink(payload));
+  }
+  function activateDirectPlan(){
+    try{var state=api&&typeof api.getState==="function"?api.getState():null;if(state&&state.slotCount>0){api.open();clearSuccessState();return true;}importCurrentPlan();clearSuccessState();}
+    catch(errorValue){notify(errorValue);}
+    return true;
+  }
+  function activateFinish(event){
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    try{importCurrentPlan();clearSuccessState();var modal=document.getElementById("shareModal");if(modal)modal.classList.remove("open");}
+    catch(errorValue){notify(errorValue);}
+  }
+  function install(){
+    if(installed)return;
+    installed=true;
+    api=window.KGGTherapyCockpit;
+    window.KGGTherapyCockpitDirectPlanClick=activateDirectPlan;
+    window.KGGTherapyCockpitEntryVisibilitySync=syncEntryVisibility;
+    installPlanStoreHook();
+    ["finishCockpitBtn","finishCockpitGaugeBtn"].forEach(function(id){var button=document.getElementById(id);if(button)button.addEventListener("click",activateFinish,true);});
+    window.KGG_PATCHES=window.KGG_PATCHES||{};
+    window.KGG_PATCHES[PATCH_ID]={installed:true,version:1,dependsOn:"kgg-v088-ticket-037-real-plan"};
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});else install();
+})();
+</script>
+<!-- KGG PATCH END kgg-v090-cockpit-exercises-only -->
 
 </body>
 </html>

@@ -3,8 +3,40 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 89,
+  "latestVersionCode": 90,
   "entries": [
+    {
+      "versionCode": 90,
+      "versionName": "1.0.90-cockpit-exercises-only",
+      "patchId": "kgg-v090-cockpit-exercises-only",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Therapie-Cockpit ohne Basisdaten",
+      "reason": "Cockpit-Pläne können aus mindestens einer gültigen Übung auch ohne Patient:innen-Basisdaten erzeugt werden; der neutrale Codec-Name bleibt flüchtig und alte Fehlerhinweise werden nach Erfolg gelöscht.",
+      "whatChanged": [
+        "Cockpit-Pläne können aus mindestens einer gültigen Übung auch ohne Patient:innen-Basisdaten erzeugt werden; der neutrale Codec-Name bleibt flüchtig und alte Fehlerhinweise werden nach Erfolg gelöscht."
+      ],
+      "touchedAreas": [
+        "Therapie-Cockpit",
+        "Test-Harness"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
     {
       "versionCode": 89,
       "versionName": "1.0.89-changelog-archive-window-refresh",
@@ -453,40 +485,9 @@
         "certification": "pending"
       },
       "approvalNote": "Max hat den separaten Parser-Hygiene-Patch im angepassten Strukturplan ausdrücklich freigegeben."
-    },
-    {
-      "versionCode": 64,
-      "versionName": "1.0.64-typed-update-versions",
-      "patchId": "kgg-v064-typed-update-versions",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Strikte Update-Versionstypen",
-      "reason": "Trennt Source-Code, Web-Release-ID, semantischen Versionsnamen und Android-Shell-Version fail-closed voneinander.",
-      "whatChanged": [
-        "Trennt Source-Code, Web-Release-ID, semantischen Versionsnamen und Android-Shell-Version fail-closed voneinander."
-      ],
-      "touchedAreas": [
-        "GitHub Manifest",
-        "Android/APK"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max hat die getrennte Manifest- und Versionsauswertung im angepassten Strukturplan ausdrücklich freigegeben."
     }
   ],
-  "latestVersionName": "1.0.89-changelog-archive-window-refresh",
+  "latestVersionName": "1.0.90-cockpit-exercises-only",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -503,6 +504,14 @@
       "entriesSha256": "7c9c4d1d87e64c989ae670af3cd4892d7f046a3540c0dfbd4cc180bc75e4aa7e",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v089-changelog-archive-window-refresh"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v090.json",
+      "snapshotVersionCode": 90,
+      "entryCount": 31,
+      "entriesSha256": "9338e9ab7cc88ef314427fe9e4224da1502b9fe375833e87d121be1f051ca04c",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v090-cockpit-exercises-only"
     }
   ]
 }

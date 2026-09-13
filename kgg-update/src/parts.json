@@ -33,7 +33,8 @@
     "kgg-v085-ticket-015-progressions",
     "kgg-v087-ticket-015-live-fix",
     "kgg-v088-ticket-037-real-plan",
-    "kgg-v089-changelog-archive-window-refresh"
+    "kgg-v089-changelog-archive-window-refresh",
+    "kgg-v090-cockpit-exercises-only"
   ],
   "parts": [
     "base-head.html",
@@ -84,6 +85,7 @@
     "patches/v087-ticket-015-live-fix.html",
     "patches/v088-ticket-037-real-plan.html",
     "patches/v089-changelog-archive-window-refresh.html",
+    "patches/v090-cockpit-exercises-only.html",
     "footer.html"
   ]
 }

@@ -8,6 +8,7 @@ const { chromium } = require("playwright");
 const ROOT = path.resolve(__dirname, "..");
 const HTML_URL = pathToFileURL(path.join(ROOT, "kgg-update", "index.html")).href;
 const PATIENT = "KGG Ticket 037 Testpatient";
+const EXERCISE_ONLY_NAME = "Übungsplan ohne Patientendaten";
 const CANONICAL_APP_BLUE = "rgb(237, 245, 255)";
 const VISIBILITY_CASES = [
   { id: "tablet-820", width: 820, height: 1180, mobile: false, cockpitButtonVisible: true },
@@ -92,6 +93,27 @@ async function createNormalPlan(page, exerciseNames) {
     await addExerciseFromVisibleUi(page, exerciseNames[index], index + 1);
   }
   return readPlanContract(page);
+}
+
+async function createExerciseOnlyPlan(page, exerciseNames) {
+  await closeAllowedAdminModal(page);
+  for (let index = 0; index < exerciseNames.length; index += 1) {
+    await addExerciseFromVisibleUi(page, exerciseNames[index], index + 1);
+  }
+  return page.evaluate(fallbackName => {
+    const plan = window.KGGDataStore.getCurrentPlan();
+    const codecPlan = {
+      ...plan,
+      name: fallbackName,
+      patient: { ...(plan.patient || {}), name: fallbackName },
+    };
+    const api = window.KGGTherapyCockpit;
+    return {
+      plan,
+      contentKey: api.contentKey(api.fromPlan(codecPlan)),
+      exerciseNames: plan.exercises.map(ex => ex.name),
+    };
+  }, EXERCISE_ONLY_NAME);
 }
 
 async function closeAllowedAdminModal(page) {
@@ -295,6 +317,39 @@ async function runDirectMultiExercise(browser) {
   }
 }
 
+async function runExerciseOnly(browser) {
+  const test = { id: "exercise-only-1024", width: 1024, height: 768, mobile: false };
+  const { context, page } = await boot(browser, test);
+  try {
+    const contract = await createExerciseOnlyPlan(page, ["Abduktion Maschine", "Adduktion Maschine"]);
+    assert(!contract.plan.patient.name && !contract.plan.name && !contract.plan.patientName, "Übungen-only-Setup enthält unerwartete Basisdaten");
+    const rootButton = page.locator("#kggTherapyCockpitButton");
+    assert(await visible(rootButton), "Übungen-only-Plan zeigt den Cockpit-Button nicht an");
+
+    await rootButton.click();
+    await waitForCockpitState(page, 1);
+    let result = await readUiState(page);
+    assert(result.state.slotCount === 1, "Übungen-only-Import erzeugte nicht Slot 1");
+    assert(result.state.slots[0].name === EXERCISE_ONLY_NAME, "Übungen-only-Import verwendet nicht den neutralen Namen");
+    assertSlotMatches(result.state, 0, contract, "Übungen-only-Import");
+    assertNoPositiveError(result, "Übungen-only-Import");
+
+    await page.locator('[data-tc-action="remove"][data-tc-slot="0"]').click();
+    await waitForNormalState(page);
+    await openFinishDialog(page);
+    await page.locator("#finishCockpitBtn").click();
+    await waitForCockpitState(page, 1);
+    result = await readUiState(page);
+    assert(result.state.slotCount === 1, "Übungen-only-Fertig-Import erzeugte nicht Slot 1");
+    assert(result.state.slots[0].name === EXERCISE_ONLY_NAME, "Übungen-only-Fertig-Import verwendet nicht den neutralen Namen");
+    assertSlotMatches(result.state, 0, contract, "Übungen-only-Fertig-Import");
+    assertNoPositiveError(result, "Übungen-only-Fertig-Import");
+    return { exerciseNames: contract.exerciseNames, slotCount: result.state.slotCount, fallbackName: EXERCISE_ONLY_NAME };
+  } finally {
+    await context.close();
+  }
+}
+
 async function runPositive(browser, test) {
   const { context, page } = await boot(browser, test);
   try {
@@ -435,11 +490,13 @@ async function runInvalidIdNegative(browser, test) {
   const flows = [];
   let completeVisibilityMatrix;
   let directMultiExercise;
+  let exerciseOnly;
   let negative;
   try {
     for (const test of VISIBILITY_CASES) visibility.push(await runVisibility(browser, test));
     completeVisibilityMatrix = await runCompleteVisibilityMatrix(browser);
     directMultiExercise = await runDirectMultiExercise(browser);
+    exerciseOnly = await runExerciseOnly(browser);
     for (const test of FLOW_CASES) flows.push(await runPositive(browser, test));
     negative = await runInvalidIdNegative(browser, FLOW_CASES.find(test => test.width === 1024) || FLOW_CASES[0]);
   } finally {
@@ -451,6 +508,7 @@ async function runInvalidIdNegative(browser, test) {
     checks: [
       "complete root-button visibility matrix",
       "normal UI plan plus visible root-button double-click to slot 1",
+      "normal UI plan with exercises only through root button and Finish action",
       "second root click navigates without duplicating slot 1",
       "identical Finish text import deduplication",
       "same planId with normal UI content change to slot 2",
@@ -464,6 +522,7 @@ async function runInvalidIdNegative(browser, test) {
     visibilityMatrix: visibility,
     completeVisibilityMatrix,
     directMultiExercise,
+    exerciseOnly,
     flows,
     negative,
   }, null, 2));
