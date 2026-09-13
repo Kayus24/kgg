@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0431",
+  "versionName": "1.0.91-ticket-015-admin-stage-compact",
+  "notes": "Mobile-Inbox r0431: KGG Update v091 Ticket 015 Admin-Editor: Kompakte Progressionsstufen (4e6ad61ba046).",
+  "createdAt": "2026-09-13T19:37:56Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0431",
+      "profile": "admin",
+      "versionName": "1.0.91-ticket-015-admin-stage-compact",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0431/admin.html",
+      "sha256": "4e6ad61ba046fad4739d6f33e9a6526d9a148d65c7625849bc31af49259570cf",
+      "notes": "Mobile-Inbox r0431: KGG Update v091 Ticket 015 Admin-Editor: Kompakte Progressionsstufen (4e6ad61ba046)."
+    },
+    "colleague": {
+      "releaseId": "r0431",
+      "profile": "colleague",
+      "versionName": "1.0.91-ticket-015-admin-stage-compact",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0431/colleague.html",
+      "sha256": "6e4611ba91854ad529108274e7154c198aadef1e0c26c213944cabf05d237574",
+      "notes": "Mobile-Inbox r0431: KGG Update v091 Ticket 015 Admin-Editor: Kompakte Progressionsstufen (4e6ad61ba046)."
+    }
+  }
+}
