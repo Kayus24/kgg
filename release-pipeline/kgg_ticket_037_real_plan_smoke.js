@@ -515,6 +515,73 @@ async function runExerciseOnly(browser) {
   }
 }
 
+async function runPhoneCockpitEntry(browser) {
+  const test = { id: "phone-cockpit-entry-390", width: 390, height: 844, mobile: true };
+  const { context, page } = await boot(browser, test);
+  try {
+    const initial = await createNormalPlan(page, ["Abduktion Maschine"]);
+    const initialButton = page.locator("#kggTherapyCockpitButton");
+    assert(!(await visible(initialButton)), `${test.id}: leerer Cockpit-State zeigt bereits den Handy-Einstieg`);
+
+    const generatedLink = await page.evaluate(() => {
+      const plan = window.KGGDataStore.getCurrentPlan();
+      const api = window.KGGTherapyCockpit;
+      return api.makeLink(api.fromPlan(plan));
+    });
+    const localRoundtripUrl = new URL(HTML_URL);
+    localRoundtripUrl.search = new URL(generatedLink).search;
+    await page.goto(localRoundtripUrl.toString(), { waitUntil: "domcontentloaded", timeout: 30000 });
+    await waitForCockpitState(page, 1);
+    await page.locator('[data-tc-action="normal"]').click();
+    await waitForNormalState(page);
+
+    const entry = page.locator("#kggTherapyCockpitButton");
+    await entry.waitFor({ state: "visible", timeout: 5000 });
+    const firstLayout = await page.evaluate(() => {
+      const scan = document.querySelector("#scanBtn");
+      const entry = document.querySelector("#kggTherapyCockpitButton");
+      const scanRect = scan.getBoundingClientRect();
+      const entryRect = entry.getBoundingClientRect();
+      const overlap = !(scanRect.right <= entryRect.left || entryRect.right <= scanRect.left || scanRect.bottom <= entryRect.top || entryRect.bottom <= scanRect.top);
+      return {
+        parentId: entry.parentElement && entry.parentElement.id,
+        text: entry.textContent.trim(),
+        scanVisible: !!(scan.offsetWidth && scan.offsetHeight),
+        entryVisible: !!(entry.offsetWidth && entry.offsetHeight),
+        overlap,
+      };
+    });
+    assert(firstLayout.parentId === "scanHub", `${test.id}: Cockpit-Einstieg liegt nicht direkt im schwebenden Scan-Dock`);
+    assert(firstLayout.text === "Cockpit · 1 Plan", `${test.id}: falsche Zählung für einen geladenen Trainingsplan: ${firstLayout.text}`);
+    assert(firstLayout.scanVisible && firstLayout.entryVisible && !firstLayout.overlap, `${test.id}: Scan- und Cockpit-Einstieg überlappen oder sind nicht sichtbar`);
+
+    await entry.click();
+    await waitForCockpitState(page, 1);
+    await page.locator('[data-tc-action="normal"]').click();
+    await waitForNormalState(page);
+    await addExerciseFromVisibleUi(page, "Adduktion Maschine", 2);
+    const secondLink = await page.evaluate(() => {
+      const plan = window.KGGDataStore.getCurrentPlan();
+      const api = window.KGGTherapyCockpit;
+      return api.makeLink(api.fromPlan(plan));
+    });
+    await entry.click();
+    await waitForCockpitState(page, 1);
+    await page.locator('[data-tc-action="import-open"]').click();
+    await page.locator("#kggTherapyCockpitImportInput").fill(secondLink);
+    await page.locator('[data-tc-action="import-submit"]').click();
+    await waitForCockpitState(page, 2);
+    await page.locator('[data-tc-action="normal"]').click();
+    await waitForNormalState(page);
+    await entry.waitFor({ state: "visible", timeout: 5000 });
+    const secondLabel = await entry.textContent();
+    assert(secondLabel.trim() === "Cockpit · 2 Pläne", `${test.id}: falsche Zählung für zwei geladene Trainingspläne: ${secondLabel}`);
+    return { id: test.id, firstLabel: firstLayout.text, secondLabel: secondLabel.trim(), parentId: firstLayout.parentId, noOverlap: !firstLayout.overlap };
+  } finally {
+    await context.close();
+  }
+}
+
 async function runPositive(browser, test) {
   const { context, page } = await boot(browser, test);
   try {
@@ -657,6 +724,7 @@ async function runInvalidIdNegative(browser, test) {
   let directMultiExercise;
   let continuousLiveEdit;
   let exerciseOnly;
+  let phoneCockpitEntry;
   let negative;
   try {
     for (const test of VISIBILITY_CASES) visibility.push(await runVisibility(browser, test));
@@ -664,6 +732,7 @@ async function runInvalidIdNegative(browser, test) {
     directMultiExercise = await runDirectMultiExercise(browser);
     continuousLiveEdit = await runContinuousCockpitLiveEdit(browser);
     exerciseOnly = await runExerciseOnly(browser);
+    phoneCockpitEntry = await runPhoneCockpitEntry(browser);
     for (const test of FLOW_CASES) flows.push(await runPositive(browser, test));
     negative = await runInvalidIdNegative(browser, FLOW_CASES.find(test => test.width === 1024) || FLOW_CASES[0]);
   } finally {
@@ -676,6 +745,7 @@ async function runInvalidIdNegative(browser, test) {
       "complete root-button visibility matrix",
       "normal UI plan plus visible root-button double-click to slot 1",
       "normal UI plan with exercises only through root button and Finish action",
+      "phone Cockpit entry appears only for loaded plans and counts loaded plans",
       "direct current-plan Cockpit edit sync and repeated edit sync",
       "continuous visible Cockpit add/edit/reorder/progression/delete/finish and fresh-link import",
       "second root click navigates without duplicating slot 1",
@@ -693,6 +763,7 @@ async function runInvalidIdNegative(browser, test) {
     directMultiExercise,
     continuousLiveEdit,
     exerciseOnly,
+    phoneCockpitEntry,
     flows,
     negative,
   }, null, 2));

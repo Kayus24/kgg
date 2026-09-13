@@ -1,7 +1,7 @@
 {
-  "versionCode": 94,
-  "versionName": "1.0.94-shared-reorder-core",
-  "indexUrl": "index.html?v=94",
-  "sha256": "52d83c5b5cc93f4219afefcbade54efe3fb6589cc6c5295a6169a4b11348ff42",
-  "notes": "v094: Teilt die bestehende Reorder-Berechnung und Array-Umordnung zwischen Planerstellung und Therapie-Cockpit."
+  "versionCode": 95,
+  "versionName": "1.0.95-cockpit-responsive-entry",
+  "indexUrl": "index.html?v=95",
+  "sha256": "9b190ab1928e9efdc2237f27ced8b53ea3095bfa74ffedc9840b2328367cfbb9",
+  "notes": "v095: Zeigt bei geladenen Cockpit-Trainingsplänen einen gezählten Handy-Einstieg neben dem schwebenden Scan-Dock und hält den Tablet-Einstieg leerzustandsfest."
 }

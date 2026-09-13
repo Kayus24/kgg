@@ -239,6 +239,11 @@ function staticUiMiniSeriesGuardSuite(caseName) {
     assertIncludes(html, "kggPhonePhotoMenu", "phone photo menu");
     assertIncludes(html, "window.KGGScan.pick(\"file\")", "phone gallery picker route");
     assertIncludes(html, "kggPhoneHasPlan", "phone plan-state dock class");
+    assertIncludes(html, "kggPhoneHasCockpit", "phone cockpit-state dock class");
+    assertIncludes(html, "loadedPlanCount", "phone cockpit loaded-plan counter");
+    assertIncludes(html, "Cockpit · 1 Plan", "phone cockpit singular plan label");
+    assertIncludes(html, "body.kggPhoneHasCockpit #scanHub", "phone cockpit dock column layout");
+    assertIncludes(html, "kggPhoneHasCockpit.kggPhoneHasPlan #createPanel.planMode #finishBtn", "phone finish action collision guard");
     assertIncludes(html, "backdrop-filter:blur(30px)", "strong liquid glass dock style");
     assertIncludes(html, "kggPhoneScanMenuInline", "v050 inline scan photo menu mode");
     assertIncludes(html, "body.kggPhonePhotoMenuOpen #scanHub.kggPhoneScanMenuInline", "v050 scan button grows vertically when photo menu opens");
