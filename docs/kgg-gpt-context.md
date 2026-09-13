@@ -42,9 +42,9 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 ## Current Versions
 
-- Source web version: v94 / `1.0.94-shared-reorder-core`.
-- Source index URL: `index.html?v=94`.
-- Source notes: v094: Teilt die bestehende Reorder-Berechnung und Array-Umordnung zwischen Planerstellung und Therapie-Cockpit.
+- Source web version: v95 / `1.0.95-cockpit-responsive-entry`.
+- Source index URL: `index.html?v=95`.
+- Source notes: v095: Zeigt bei geladenen Cockpit-Trainingsplänen einen gezählten Handy-Einstieg neben dem schwebenden Scan-Dock und hält den Tablet-Einstieg leerzustandsfest.
 - Live Admin release: `r0431` / `1.0.94-shared-reorder-core`.
 - Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0431/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.

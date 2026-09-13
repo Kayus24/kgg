@@ -3,8 +3,40 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 94,
+  "latestVersionCode": 95,
   "entries": [
+    {
+      "versionCode": 95,
+      "versionName": "1.0.95-cockpit-responsive-entry",
+      "patchId": "kgg-v095-cockpit-responsive-entry",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Cockpit-Einstieg im Phone-Dock",
+      "reason": "Zeigt bei geladenen Cockpit-Trainingsplänen einen gezählten Handy-Einstieg neben dem schwebenden Scan-Dock und hält den Tablet-Einstieg leerzustandsfest.",
+      "whatChanged": [
+        "Zeigt bei geladenen Cockpit-Trainingsplänen einen gezählten Handy-Einstieg neben dem schwebenden Scan-Dock und hält den Tablet-Einstieg leerzustandsfest."
+      ],
+      "touchedAreas": [
+        "Therapie-Cockpit",
+        "Handy-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Expliziter Nutzerauftrag: Im Handy-Dock soll bei geladenen Cockpit-Trainingsplänen ein gezählter Cockpit-Button erscheinen; der Tablet-Button darf ohne Plan nicht sichtbar sein."
+    },
     {
       "versionCode": 94,
       "versionName": "1.0.94-shared-reorder-core",
@@ -454,44 +486,9 @@
         "certification": "pending"
       },
       "approvalNote": "Ticket 012: mehrseitige Papierpläne müssen über alle Seiten fortlaufend nummeriert werden."
-    },
-    {
-      "versionCode": 70,
-      "versionName": "1.0.70-tablet-package-save",
-      "patchId": "kgg-v070-tablet-package-save",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Tablet-Paketbutton wiederherstellen",
-      "reason": "Der bereits vorhandene Paket-Speichern-Dialog war in der Tablet-Ansicht nicht sichtbar bzw. erreichbar.",
-      "whatChanged": [
-        "Verschiebt ausschließlich den bestehenden savePackageBtn im Tablet-Modus in die Kopfzeile des aktuellen Plans und lässt den vorhandenen Dialog-Handler unverändert.",
-        "Sichert für diesen Tablet-Button ein Touch-Ziel von mindestens 56 x 44 px."
-      ],
-      "touchedAreas": [
-        "Tablet-Layout",
-        "UI-Regressionstests"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Storage",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max hat die Wiederherstellung des Tablet-Paketbuttons und ein mindestens 44px hohes Tablet-Touch-Ziel ausdrücklich freigegeben."
     }
   ],
-  "latestVersionName": "1.0.94-shared-reorder-core",
+  "latestVersionName": "1.0.95-cockpit-responsive-entry",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -548,6 +545,14 @@
       "entriesSha256": "0aed8ea8e500e26ff0a23dc0561cf16d73be7ab33b4103c22630da600761f9cc",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v094-shared-reorder-core"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v095.json",
+      "snapshotVersionCode": 95,
+      "entryCount": 36,
+      "entriesSha256": "0c1b56d0a436b875e4f4bdf403b95cc23150aed2d309caba8f62241dd3ed4053",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v095-cockpit-responsive-entry"
     }
   ]
 }

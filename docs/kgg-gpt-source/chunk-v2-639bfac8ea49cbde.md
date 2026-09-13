@@ -1,4 +1,13 @@
-<script type="application/json" id="kgg-source-truth">
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<!--
+KGG INTERNAL SOURCE TRUTH — READ THIS FIRST
+
+Machine-readable app state, patch rules, and changelog are embedded near the top of this HTML.
+Before editing this app, any LLM/agent/human should read these blocks:
+1. <script type="application/json" id="kgg-source-truth">
 {
   "schema": 1,
   "app": "KGG Plan",
@@ -58,20 +67,22 @@
     "plan-add-exercise-card",
     "cockpit-live-edit",
     "cockpit-shared-editor",
-    "shared-reorder-core"
+    "shared-reorder-core",
+    "cockpit-responsive-entry"
   ],
   "currentVersion": {
-    "versionCode": 94,
-    "versionName": "1.0.94-shared-reorder-core",
-    "lastPatchId": "kgg-v094-shared-reorder-core",
+    "versionCode": 95,
+    "versionName": "1.0.95-cockpit-responsive-entry",
+    "lastPatchId": "kgg-v095-cockpit-responsive-entry",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v094-shared-reorder-core",
+  "latestPatchId": "kgg-v095-cockpit-responsive-entry",
   "lastUpdateIntent": {
-    "id": "kgg-v094-shared-reorder-core",
-    "summary": "Teilt die bestehende Reorder-Berechnung und Array-Umordnung zwischen Planerstellung und Therapie-Cockpit.",
+    "id": "kgg-v095-cockpit-responsive-entry",
+    "summary": "Zeigt bei geladenen Cockpit-Trainingsplänen einen gezählten Handy-Einstieg neben dem schwebenden Scan-Dock und hält den Tablet-Einstieg leerzustandsfest.",
     "touched": [
-      "therapy-cockpit"
+      "Therapie-Cockpit",
+      "Handy-Layout"
     ],
     "notTouched": [
       "PDF",
@@ -82,9 +93,9 @@
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
-      "GitHub Manifest",
-      "Handy-Layout"
+      "GitHub Manifest"
     ]
   }
 }
 </script>
+<!-- END kgg-source-truth -->
