@@ -1,3 +1,4 @@
+    const startX=ev.clientX,startY=ev.clientY;
     const swipe={row,id,startX,startY,active:false,dx:0,pointerId:ev.pointerId};
     const threshold=()=>Math.min(128,Math.max(74,row.offsetWidth*0.34));
     const cleanup=()=>{document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);document.removeEventListener('pointercancel',cancel);};

@@ -1,3 +1,5 @@
+    input.classList.toggle('hasText',hasText);
+    input.style.height='auto';
     input.style.height=hasText?Math.ceil(input.scrollHeight)+'px':'';
     const title=$('dbTitle'), wrap=$('inputWrap');
     if(title&&wrap)title.style.setProperty('--db-title-start-y',Math.ceil(wrap.offsetHeight+12)+'px');
@@ -500,4 +502,3 @@
     const row=ev.currentTarget;
     const id=row&&row.dataset&&row.dataset.bankId;
     if(!row||!id)return;
-    const startX=ev.clientX,startY=ev.clientY;

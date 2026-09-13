@@ -30,6 +30,8 @@
     state.editId=null;
     $('editorModal').classList.remove('open');
   }
+  window.KGGTicket015AdminEditor.open=ex=>openEditor(ex);
+  window.KGGTicket015AdminEditor.saveEditor=()=>{saveEditedExercise();return true;};
   function saveEditedExercise(){
     if(externalEditorContext){
       const context=externalEditorContext,ex=context.exercise;
@@ -689,8 +691,3 @@
     const bytes=new Uint8Array(pdf.length);
     for(let i=0;i<pdf.length;i++)bytes[i]=pdf.charCodeAt(i)&255;
     return bytes;
-  }
-  function pdfBlobFromDoc(doc){
-    if(!doc)return null;
-    if(typeof doc.output==='function'){
-      try{

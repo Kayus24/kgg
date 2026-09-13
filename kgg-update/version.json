@@ -2,6 +2,6 @@
   "versionCode": 95,
   "versionName": "1.0.95-cockpit-responsive-entry",
   "indexUrl": "index.html?v=95",
-  "sha256": "9b190ab1928e9efdc2237f27ced8b53ea3095bfa74ffedc9840b2328367cfbb9",
+  "sha256": "2697604be99ead0cdfe8f2ceda14661be7249a4eea3de7f9709b308cb3cd8b5c",
   "notes": "v095: Zeigt bei geladenen Cockpit-Trainingsplänen einen gezählten Handy-Einstieg neben dem schwebenden Scan-Dock und hält den Tablet-Einstieg leerzustandsfest."
 }

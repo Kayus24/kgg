@@ -997,6 +997,7 @@
       videoLabel:ex.videoLabel||'Video öffnen',
       media:ensureExerciseMediaList(ex),
       progressionGroupId:ex.progressionGroupId||'',
+      progressionMainId:ex.progressionMainId||ex.progressionMainVariantId||'',
       progressionVariants:Array.isArray(ex.progressionVariants)?ex.progressionVariants.map(item=>({...item,media:ensureExerciseMediaList(item)})):[]
     };
   }
@@ -3616,6 +3617,8 @@
     state.editId=null;
     $('editorModal').classList.remove('open');
   }
+  window.KGGTicket015AdminEditor.open=ex=>openEditor(ex);
+  window.KGGTicket015AdminEditor.saveEditor=()=>{saveEditedExercise();return true;};
   function saveEditedExercise(){
     if(externalEditorContext){
       const context=externalEditorContext,ex=context.exercise;
@@ -7683,6 +7686,22 @@
       backdrop.addEventListener('click',ev=>{ev.preventDefault();setTabletSideMenuOpen(false);},{capture:true});
     }
   }
+  // Narrow bridge for the modular progression editor. It keeps the existing
+  // catalog, plan-store and persistence functions inside this runtime closure.
+  if((window.KGG_ROLLOUT_PROFILE||'colleague').toLowerCase()==='admin')window['KGGProgressionEditorBridge']={
+    catalog:()=>bank.map(item=>({...item,media:ensureExerciseMediaList(item)})),
+    upsert:(exercise,reason)=>upsertPlanExerciseToBank(exercise,reason||'ticket_015_progression'),
+    sync:reason=>syncStatePlanToStore(reason||'ticket_015_progression'),
+    persistBank:()=>persistCustomBank(),
+    save:()=>save(),
+    readMedia:async media=>{
+      const id=String(media&&media.id||'');
+      if(!id)return null;
+      const record=await getEncryptedMediaBlob(id);
+      if(!record||!record.blob)return null;
+      return patientDecryptMedia(media,record.blob);
+    }
+  };
   /* KGG_LOGIC_SMOKE_BOOT_BOUNDARY */
   installKggV383UiFlowStability();
   installKggV388AndroidFlowFixes();
