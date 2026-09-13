@@ -39,9 +39,9 @@ class ChangelogArchiveTests(unittest.TestCase):
             document["entries"][: archive.CURRENT_RETAINED_ENTRY_COUNT],
             changelog["entries"],
         )
-        self.assertEqual(33, len(document["entries"]))
+        self.assertEqual(34, len(document["entries"]))
         self.assertEqual(
-            "f45be1a63673425f82fa6075a77ce0070508b80ec9022aba203a309af4e962e8",
+            "8e2320be08c56aed8ee20830ebcc2bcdd2abb6d8f4bfab360cb05df5a923da9a",
             archive.entries_sha256(document["entries"]),
         )
         self.assertEqual(archive.CURRENT_RETAINED_ENTRY_COUNT, len(changelog["entries"]))
@@ -49,17 +49,17 @@ class ChangelogArchiveTests(unittest.TestCase):
     def test_legacy_snapshot_remains_referenced_after_current_compaction(self):
         _text, changelog = archive.load_embedded()
         snapshots = changelog["archiveSnapshots"]
-        self.assertEqual(5, len(snapshots))
+        self.assertEqual(6, len(snapshots))
         self.assertIn(archive.archive_reference(), snapshots)
         current = [item for item in snapshots if item != archive.archive_reference()]
-        self.assertEqual(4, len(current))
+        self.assertEqual(5, len(current))
         self.assertEqual(89, current[0]["snapshotVersionCode"])
-        self.assertEqual(92, current[-1]["snapshotVersionCode"])
+        self.assertEqual(93, current[-1]["snapshotVersionCode"])
 
     def test_compact_current_recovers_from_previous_compact_window(self):
         _text, current = archive.load_embedded()
         current_archive = json.loads(
-            (HERE.parent / "docs/changelog-archive/kgg-therapist-changelog-through-v091.json")
+            (HERE.parent / "docs/changelog-archive/kgg-therapist-changelog-through-v092.json")
             .read_text(encoding="utf-8")
         )
         with tempfile.TemporaryDirectory() as temporary:
@@ -87,7 +87,7 @@ class ChangelogArchiveTests(unittest.TestCase):
                 newline="\n",
             )
             result = archive.compact_current(root)
-            self.assertEqual(33, result["entryCount"])
+            self.assertEqual(34, result["entryCount"])
             archive.validate_repository(root)
 
 

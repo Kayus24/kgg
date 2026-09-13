@@ -1,7 +1,7 @@
 {
-  "versionCode": 92,
-  "versionName": "1.0.92-cockpit-live-edit",
-  "indexUrl": "index.html?v=92",
-  "sha256": "133784d854b92227c00dc71745eb1b17a659326aaf9cf3b2b9a8d3ee8ef3e609",
-  "notes": "v092: Erweitert das Cockpit um vollständige Übungsbearbeitung pro Slot und eine mobile aktive Patient:innenkarte."
+  "versionCode": 93,
+  "versionName": "1.0.93-cockpit-shared-editor",
+  "indexUrl": "index.html?v=93",
+  "sha256": "c0e48f0da94f8baa1c97ef24ab32e7ed3e1fd245a99cf6f904c7c1d3e83b7755",
+  "notes": "v093: Verwendet den bestehenden Übungseditor auch für Cockpit-Slots und speichert den sichtbaren Progressionswechsel pro Slot."
 }

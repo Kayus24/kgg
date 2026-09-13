@@ -312,10 +312,10 @@ async function runDirectMultiExercise(browser) {
     assertSlotMatches(result.state, 0, contract, "Direkter Mehrübungsimport");
     assertNoPositiveError(result, "Direkter Mehrübungsimport");
     await page.locator('.kgg-tce-tool[data-tce-action="edit"][data-tce-slot="0"][data-tce-ex="0"]').click();
-    await page.locator("#kggTceEditModal:not([hidden])").waitFor({ state: "visible", timeout: 5000 });
-    await page.locator('[data-tce-edit-field="name"]').fill("Abduktion direkt bearbeitet");
-    await page.locator("#kggTceEditModal [data-tce-save]").click();
-    await page.locator("#kggTceEditModal[hidden]").waitFor({ state: "hidden", timeout: 5000 });
+    await page.locator("#editorModal.open").waitFor({ state: "visible", timeout: 5000 });
+    await page.locator("#editName").fill("Abduktion direkt bearbeitet");
+    await page.locator("#saveExercise").click();
+    await page.locator("#editorModal.open").waitFor({ state: "hidden", timeout: 5000 });
     await page.waitForFunction(() => {
       const plan = window.KGGDataStore.getCurrentPlan();
       return !!plan && plan.exercises[0] && plan.exercises[0].name === "Abduktion direkt bearbeitet";
@@ -324,9 +324,9 @@ async function runDirectMultiExercise(browser) {
     assert(result.state.slots[0].exerciseCount === 2, "Direkter Cockpit-Edit verlor eine Übung");
     assert(result.state.renderedExerciseNames[0][0] === "Abduktion direkt bearbeitet", "Direkter Cockpit-Edit aktualisierte Slot 1 nicht");
     await page.locator('.kgg-tce-tool[data-tce-action="edit"][data-tce-slot="0"][data-tce-ex="1"]').click();
-    await page.locator("#kggTceEditModal:not([hidden])").waitFor({ state: "visible", timeout: 5000 });
-    await page.locator('[data-tce-edit-field="sets"]').selectOption("3");
-    await page.locator("#kggTceEditModal [data-tce-save]").click();
+    await page.locator("#editorModal.open").waitFor({ state: "visible", timeout: 5000 });
+    await page.locator("#editSets").selectOption("3");
+    await page.locator("#saveExercise").click();
     await page.waitForFunction(() => {
       const plan = window.KGGDataStore.getCurrentPlan();
       return !!plan && plan.exercises[1] && Number(plan.exercises[1].sets) === 3;
