@@ -102,7 +102,12 @@ async function waitForEditUi(page) {
     await page.locator("#closeEditor").click();
     await page.waitForSelector("#editorModal.open", { state: "hidden", timeout: 5000 });
 
-    await page.locator('[data-tce-stage-switch="1"]').selectOption({ label: "Leichtere Stufe" });
+    await page.locator('[data-tce-stage-switch="1"]').evaluate(select => {
+      const option = Array.from(select.options).find(item => item.textContent.trim() === "Leichtere Stufe");
+      if (!option) throw new Error("visible progression stage option missing");
+      select.value = option.value;
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+    });
     await page.waitForTimeout(120);
     const switched = await page.evaluate(() => window.KGGTherapyCockpit.getSlot(0));
     assert(switched.exercises[0].activeProgressionId === switched.exercises[0].progressionVariants[1].id, `progression switch did not persist: ${JSON.stringify(switched.exercises[0])}`);

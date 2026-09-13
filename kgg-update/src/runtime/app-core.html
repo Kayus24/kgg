@@ -1,10 +1,10 @@
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v093_cockpit_shared_editor';
+  const VERSION='KGG_GITHUB_UPDATE_v094_shared_reorder_core';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v093","buildTime":"2026-09-13T14:06:46Z","buildCode":"module-v093-cockpit-shared-editor","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v094","buildTime":"2026-09-13T15:29:58Z","buildCode":"module-v094-shared-reorder-core","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -2270,14 +2270,36 @@
     document.addEventListener('pointerup',up,{passive:false,once:true});
     document.addEventListener('pointercancel',cancel,{passive:true,once:true});
   }
+  // Shared by the normal plan editor and the Therapy-Cockpit live editor.
+  // Keep the geometry and array semantics in one place so both flows retain
+  // the same reorder behavior without creating a second drag engine.
+  const KGGSharedReorder={
+    targetIndex(elements,coordinate){
+      const list=Array.isArray(elements)?elements:[];
+      for(let index=0;index<list.length;index++){
+        const rect=list[index]&&typeof list[index].getBoundingClientRect==='function'?list[index].getBoundingClientRect():null;
+        if(rect&&coordinate<rect.top+rect.height/2)return index;
+      }
+      return list.length;
+    },
+    move(items,from,to){
+      const next=Array.isArray(items)?items.slice():[];
+      if(from<0||from>=next.length)return null;
+      const target=Math.max(0,Math.min(next.length-1,Number(to)));
+      const item=next.splice(from,1)[0];
+      next.splice(target,0,item);
+      return next;
+    }
+  };
+  window.KGGSharedReorder=KGGSharedReorder;
   function movePlanExerciseByButton(localId,delta){
     const idx=(state.plan||[]).findIndex(ex=>String(ex.localId||ex.id)===String(localId));
     if(idx<0)return;
     const target=idx+delta;
     if(target<0||target>=state.plan.length)return;
-    const next=state.plan.slice();
-    const item=next.splice(idx,1)[0];
-    next.splice(target,0,item);
+    const next=KGGSharedReorder.move(state.plan,idx,target);
+    if(!next)return;
+    const item=next[target];
     state.plan=next;
     state.sortMenuId=String(item.localId||item.id);
     syncStatePlanToStore('ui_reorder_plan_buttons');
@@ -2492,11 +2514,7 @@
       floatingMid=press.startTop+dy+(press.card.getBoundingClientRect().height/2);
     }
     const cards=Array.from(press.list.querySelectorAll('.planCard[data-plan-id]:not(.reorder-lifted)'));
-    let target=cards.length;
-    for(let i=0;i<cards.length;i++){
-      const r=cards[i].getBoundingClientRect();
-      if(floatingMid<r.top+r.height/2){target=i;break;}
-    }
+    const target=KGGSharedReorder.targetIndex(cards,floatingMid);
     press.targetIndex=target;
     const ref=cards[target]||null;
     if(ref)press.list.insertBefore(press.placeholder,ref); else press.list.appendChild(press.placeholder);
@@ -2510,15 +2528,14 @@
     ev.preventDefault();
     const dbAnchor=state.bankOpen&&typeof captureDbScrollAnchor==='function'?captureDbScrollAnchor():null;
     const from=(state.plan||[]).findIndex(ex=>String(ex.localId||ex.id)===press.id);
-    let to=Array.from(press.list.children).indexOf(press.placeholder);
     if(from<0){cleanupAnimatedReorder(false);return;}
-    if(to>from)to-=1;
+    let to=Number.isInteger(press.targetIndex)?press.targetIndex:Array.from(press.list.children).indexOf(press.placeholder);
+    if(!Number.isInteger(press.targetIndex)&&to>from)to-=1;
     to=Math.max(0,Math.min(state.plan.length-1,to));
     const moved=to!==from;
     if(moved){
-      const next=state.plan.slice();
-      const item=next.splice(from,1)[0];
-      next.splice(to,0,item);
+      const next=KGGSharedReorder.move(state.plan,from,to);
+      if(!next){cleanupAnimatedReorder(true);renderPlan();return;}
       state.plan=next;
       syncStatePlanToStore('ui_reorder_plan_animated');
       syncTextInputFromPlan('ui_reorder_plan_animated');

@@ -37,7 +37,8 @@
     "kgg-v090-cockpit-exercises-only",
     "kgg-v091-plan-add-exercise-card",
     "kgg-v092-cockpit-live-edit",
-    "kgg-v093-cockpit-shared-editor"
+    "kgg-v093-cockpit-shared-editor",
+    "kgg-v094-shared-reorder-core"
   ],
   "parts": [
     "base-head.html",
@@ -92,6 +93,7 @@
     "patches/v091-plan-add-exercise-card.html",
     "patches/v092-cockpit-live-edit.html",
     "patches/v093-cockpit-shared-editor.html",
+    "patches/v094-shared-reorder-core.html",
     "footer.html"
   ]
 }
