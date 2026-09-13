@@ -33,7 +33,12 @@
     "kgg-v085-ticket-015-progressions",
     "kgg-v087-ticket-015-live-fix",
     "kgg-v088-ticket-037-real-plan",
-    "kgg-v089-changelog-archive-window-refresh"
+    "kgg-v089-changelog-archive-window-refresh",
+    "kgg-v090-cockpit-exercises-only",
+    "kgg-v091-plan-add-exercise-card",
+    "kgg-v092-cockpit-live-edit",
+    "kgg-v093-cockpit-shared-editor",
+    "kgg-v094-shared-reorder-core"
   ],
   "parts": [
     "base-head.html",
@@ -84,6 +89,11 @@
     "patches/v087-ticket-015-live-fix.html",
     "patches/v088-ticket-037-real-plan.html",
     "patches/v089-changelog-archive-window-refresh.html",
+    "patches/v090-cockpit-exercises-only.html",
+    "patches/v091-plan-add-exercise-card.html",
+    "patches/v092-cockpit-live-edit.html",
+    "patches/v093-cockpit-shared-editor.html",
+    "patches/v094-shared-reorder-core.html",
     "footer.html"
   ]
 }

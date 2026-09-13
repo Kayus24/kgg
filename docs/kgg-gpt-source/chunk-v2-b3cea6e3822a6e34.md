@@ -3,8 +3,169 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 89,
+  "latestVersionCode": 94,
   "entries": [
+    {
+      "versionCode": 94,
+      "versionName": "1.0.94-shared-reorder-core",
+      "patchId": "kgg-v094-shared-reorder-core",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Shared Reorder Core",
+      "reason": "Teilt die bestehende Reorder-Berechnung und Array-Umordnung zwischen Planerstellung und Therapie-Cockpit.",
+      "whatChanged": [
+        "Teilt die bestehende Reorder-Berechnung und Array-Umordnung zwischen Planerstellung und Therapie-Cockpit."
+      ],
+      "touchedAreas": [
+        "therapy-cockpit"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
+    {
+      "versionCode": 93,
+      "versionName": "1.0.93-cockpit-shared-editor",
+      "patchId": "kgg-v093-cockpit-shared-editor",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Cockpit gemeinsamer Editor und Progressionswechsel",
+      "reason": "Verwendet den bestehenden Übungseditor auch für Cockpit-Slots und speichert den sichtbaren Progressionswechsel pro Slot.",
+      "whatChanged": [
+        "Verwendet den bestehenden Übungseditor auch für Cockpit-Slots und speichert den sichtbaren Progressionswechsel pro Slot."
+      ],
+      "touchedAreas": [
+        "Therapie-Cockpit",
+        "Plan-State",
+        "Test-Harness"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Expliziter Zielauftrag KGG-TICKET-037: Cockpit-Übungen müssen mit denselben Planerstellungsfunktionen bearbeitbar sein; das Changelog wird über den unveränderlichen Snapshot-Mechanismus archiviert."
+    },
+    {
+      "versionCode": 92,
+      "versionName": "1.0.92-cockpit-live-edit",
+      "patchId": "kgg-v092-cockpit-live-edit",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Therapie-Cockpit direkt bearbeiten",
+      "reason": "Erweitert das Cockpit um vollständige Übungsbearbeitung pro Slot und eine mobile aktive Patient:innenkarte.",
+      "whatChanged": [
+        "Erweitert das Cockpit um vollständige Übungsbearbeitung pro Slot und eine mobile aktive Patient:innenkarte."
+      ],
+      "touchedAreas": [
+        "Handy-Layout",
+        "Plan-State",
+        "Medien/Upload"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Expliziter Nutzerauftrag: Cockpit-Pläne direkt auf Phone und Tablet vollständig bearbeiten."
+    },
+    {
+      "versionCode": 91,
+      "versionName": "1.0.91-plan-add-exercise-card",
+      "patchId": "kgg-v091-plan-add-exercise-card",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Übung hinzufügen – Plus-Karte in der Planliste",
+      "reason": "Die Planliste erhält eine kleine leere Plus-Karte, die den bestehenden Eingabe- und Übungsdatenbankweg zum Hinzufügen einer weiteren Übung öffnet.",
+      "whatChanged": [
+        "Kleine leere Plus-Karte am Ende der aktuellen Planliste ergänzt.",
+        "Der Klick fokussiert den bestehenden Übungseingang und öffnet bei Bedarf die Übungsdatenbank.",
+        "Plan-State, Übungsdatenbank, Reorder-Mechanismus und Speicherweg bleiben unverändert."
+      ],
+      "touchedAreas": [
+        "Planerstellung",
+        "UI"
+      ],
+      "notTouched": [
+        "Therapie-Cockpit",
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
+    {
+      "versionCode": 90,
+      "versionName": "1.0.90-cockpit-exercises-only",
+      "patchId": "kgg-v090-cockpit-exercises-only",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Therapie-Cockpit ohne Basisdaten",
+      "reason": "Cockpit-Pläne können aus mindestens einer gültigen Übung auch ohne Patient:innen-Basisdaten erzeugt werden; der neutrale Codec-Name bleibt flüchtig und alte Fehlerhinweise werden nach Erfolg gelöscht.",
+      "whatChanged": [
+        "Cockpit-Pläne können aus mindestens einer gültigen Übung auch ohne Patient:innen-Basisdaten erzeugt werden; der neutrale Codec-Name bleibt flüchtig und alte Fehlerhinweise werden nach Erfolg gelöscht."
+      ],
+      "touchedAreas": [
+        "Therapie-Cockpit",
+        "Test-Harness"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
     {
       "versionCode": 89,
       "versionName": "1.0.89-changelog-archive-window-refresh",
@@ -328,165 +489,9 @@
         "certification": "pending"
       },
       "approvalNote": "Max hat die Wiederherstellung des Tablet-Paketbuttons und ein mindestens 44px hohes Tablet-Touch-Ziel ausdrücklich freigegeben."
-    },
-    {
-      "versionCode": 69,
-      "versionName": "1.0.69-plan-text-recovery-finalize",
-      "patchId": "kgg-v069-plan-text-recovery-finalize",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Live-Plantext Recovery abschliessen",
-      "reason": "Persistiert eine tatsaechliche Boot-Reparatur und unterscheidet kurze Zwischenedits von finalen Umbenennungen.",
-      "whatChanged": [
-        "Persistiert eine tatsaechliche Boot-Reparatur und unterscheidet kurze Zwischenedits von finalen Umbenennungen."
-      ],
-      "touchedAreas": [
-        "Plan-State",
-        "Storage"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Vom Code-Review beauftragter P1-Folgepatch: Live-Text-Plan-State und lokale Persistenz muessen ohne Datenverlust korrigiert werden."
-    },
-    {
-      "versionCode": 68,
-      "versionName": "1.0.68-plan-text-boot-restore",
-      "patchId": "kgg-v068-plan-text-boot-restore",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Plan-Text Boot Restore",
-      "reason": "Stellt gueltigen gespeicherten Live-Plantext beim Start wieder her und schuetzt nur kurz unvollstaendige Namenssegmente.",
-      "whatChanged": [
-        "Stellt gueltigen gespeicherten Live-Plantext beim Start wieder her und schuetzt nur kurz unvollstaendige Namenssegmente."
-      ],
-      "touchedAreas": [
-        "Parser",
-        "Plan-State"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Expliziter P0-Folgefix: Textfeld bleibt Live-Master, bestehende Mehruebungsplaene duerfen beim Boot oder bei Teilbearbeitung nicht verloren gehen."
-    },
-    {
-      "versionCode": 67,
-      "versionName": "1.0.67-plan-text-live-master-guard",
-      "patchId": "kgg-v067-plan-text-live-master-guard",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Plan-Text Live-Master Schutz",
-      "reason": "Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion.",
-      "whatChanged": [
-        "Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion."
-      ],
-      "touchedAreas": [
-        "Parser",
-        "Plan-State"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max hat den P0 Parser- und Plan-State-Fix ausdruecklich beauftragt."
-    },
-    {
-      "versionCode": 65,
-      "versionName": "1.0.65-source-control-char-guard",
-      "patchId": "kgg-v065-source-control-char-guard",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Source-Steuerzeichen-Guard",
-      "reason": "Ersetzt vier versehentliche U+0008-Zeichen durch Regex-Wortgrenzen, repariert den fehlkodierten SJIS-Prüfwert und blockiert C0-, C1- sowie DEL-Steuerzeichen in editierbaren Source-Teilen.",
-      "whatChanged": [
-        "Ersetzt vier versehentliche U+0008-Zeichen durch Regex-Wortgrenzen, repariert den fehlkodierten SJIS-Prüfwert und blockiert C0-, C1- sowie DEL-Steuerzeichen in editierbaren Source-Teilen."
-      ],
-      "touchedAreas": [
-        "Parser"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max hat den separaten Parser-Hygiene-Patch im angepassten Strukturplan ausdrücklich freigegeben."
-    },
-    {
-      "versionCode": 64,
-      "versionName": "1.0.64-typed-update-versions",
-      "patchId": "kgg-v064-typed-update-versions",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Strikte Update-Versionstypen",
-      "reason": "Trennt Source-Code, Web-Release-ID, semantischen Versionsnamen und Android-Shell-Version fail-closed voneinander.",
-      "whatChanged": [
-        "Trennt Source-Code, Web-Release-ID, semantischen Versionsnamen und Android-Shell-Version fail-closed voneinander."
-      ],
-      "touchedAreas": [
-        "GitHub Manifest",
-        "Android/APK"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max hat die getrennte Manifest- und Versionsauswertung im angepassten Strukturplan ausdrücklich freigegeben."
     }
   ],
-  "latestVersionName": "1.0.89-changelog-archive-window-refresh",
+  "latestVersionName": "1.0.94-shared-reorder-core",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -503,6 +508,46 @@
       "entriesSha256": "7c9c4d1d87e64c989ae670af3cd4892d7f046a3540c0dfbd4cc180bc75e4aa7e",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v089-changelog-archive-window-refresh"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v090.json",
+      "snapshotVersionCode": 90,
+      "entryCount": 31,
+      "entriesSha256": "9338e9ab7cc88ef314427fe9e4224da1502b9fe375833e87d121be1f051ca04c",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v090-cockpit-exercises-only"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v091.json",
+      "snapshotVersionCode": 91,
+      "entryCount": 32,
+      "entriesSha256": "49a8b739cbd3fb285351fcded6cd6a7e3bb0b73cb10ddbc098e7a3e4431d7e3a",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v091-plan-add-exercise-card"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v092.json",
+      "snapshotVersionCode": 92,
+      "entryCount": 33,
+      "entriesSha256": "f45be1a63673425f82fa6075a77ce0070508b80ec9022aba203a309af4e962e8",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v092-cockpit-live-edit"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v093.json",
+      "snapshotVersionCode": 93,
+      "entryCount": 34,
+      "entriesSha256": "8e2320be08c56aed8ee20830ebcc2bcdd2abb6d8f4bfab360cb05df5a923da9a",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v093-cockpit-shared-editor"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v094.json",
+      "snapshotVersionCode": 94,
+      "entryCount": 35,
+      "entriesSha256": "0aed8ea8e500e26ff0a23dc0561cf16d73be7ab33b4103c22630da600761f9cc",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v094-shared-reorder-core"
     }
   ]
 }

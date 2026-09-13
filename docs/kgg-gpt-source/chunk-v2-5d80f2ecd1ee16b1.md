@@ -1,10 +1,10 @@
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v089_changelog_archive_window_refresh';
+  const VERSION='KGG_GITHUB_UPDATE_v094_shared_reorder_core';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v089","buildTime":"2026-09-12T21:30:21Z","buildCode":"module-v089-changelog-archive-window-refresh","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v094","buildTime":"2026-09-13T15:29:58Z","buildCode":"module-v094-shared-reorder-core","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -28,6 +28,7 @@
     ['abd','Abduktion Maschine','abd,abduktion,abductor,abduktor,hüft abduktion',3,'Wdh','kg'],['add','Adduktion Maschine','add,adduktion,adduktor,adductor,hüft adduktion',3,'Wdh','kg'],['legpress','Beinpresse','beinpresse,bein presse,leg press,presse',3,'Wdh','kg'],['bridge','Bridging','bridge,bridging,beckenheben,glute bridge',3,'Wdh','kg'],['copenhagen','Copenhagen Plank','copenhagen,adduktoren plank',3,'Zeit','keine'],['bike','Ergometer / Bike','fahrrad,bike,ergometer,warmup,cardio,rad',1,'Zeit','Stufe/Watt'],['fire','Fire Hydrants','fire hydrant,hydrants,vierfüßler abduktion',3,'Wdh','kg'],['hipthrust','Hip Thrust','hip thrust,glute thrust',3,'Wdh','kg'],['legcurl','Kniebeuger Maschine','kniebeuger,leg curl,hamstring curl,beinbeuger',3,'Wdh','kg'],['kneeext','Kniestrecker Maschine','kniestrecker,knieextension,beinstrecker,leg extension,knei ext',3,'Wdh','kg'],['row','Rudern','rudern,seated row,kabelrudern,ruderzug',3,'Wdh','kg'],['lat','Latziehen','latziehen,latzug,lat pulldown,pulldown,lat',3,'Wdh','kg'],['pallof','Pallof Press','pallof,pallof press,anti rotation',3,'Wdh','kg'],['plank','Plank','plank,blank,unterarmstütz,stütz',3,'Zeit','keine'],['squat','Squat','squat,kniebeuge,kniebeugen',3,'Wdh','kg'],['rdl','Romanian Deadlift','romanian deadlift,rdl,dead lift',3,'Wdh','kg'],['deadlift','Wadenheben','wadenheben,calf raise',3,'Wdh','kg'],['shoulder','Schulterpresse','schulter presse,shoulder press',3,'Wdh','kg']
   ].map(a=>({id:a[0],name:a[1],aliases:a[2],sets:a[3],unit:a[4],weightUnit:a[5]}));
   let state={plan:[],recent:[],packages:[{id:'pkg1',name:'Knie Standard',exercises:['Beinpresse','Kniebeuger Maschine','Kniestrecker Maschine']},{id:'pkg2',name:'Rücken Standard',exercises:['Rudern','Latziehen','Pallof Press']}],patient:{},bankOpen:false,editId:null,sortMenuId:null,reorderSuppressClick:false,largePdfMode:false,textSyncing:false};
+  let externalEditorContext=null;
   let bankSelectMode='replaceActive';
   let deletedBankIds=new Set();
   let pendingBankDeleteId=null;

@@ -1,3 +1,23 @@
+    if(raw.indexOf('KGGCFG1:')===0)return {type:'KGGCFG1',json:safeBase64JsonDecode(raw.slice(8)),raw};
+    return null;
+  }
+  function buildKggTherapistSetupUrl(appUrl,configTransferCode){
+    const payload={kind:'kgg_therapist_setup_v1',version:1,appUrl:String(appUrl||''),configTransfer:String(configTransferCode||''),createdAt:new Date().toISOString()};
+    const sep=String(appUrl||'').includes('#')?'&':'#';
+    return String(appUrl||'')+sep+'kggsetup='+safeBase64JsonEncode(payload);
+  }
+  async function tryApplyKggSetupFromHash(){
+    const hash=String(location.hash||'');
+    const match=hash.match(/[#!&]kggsetup=([^&]+)/);
+    if(!match)return false;
+    const setup=safeBase64JsonDecode(match[1]);
+    if(!setup||setup.kind!=='kgg_therapist_setup_v1')return false;
+    const parsed=parseKggConfigTransferCode(setup.configTransfer);
+    if(parsed)await applyKggConfigTransferParsed(parsed);
+    try{history.replaceState(null,'',location.pathname+location.search);}catch(err){}
+    return true;
+  }
+  async function applyKggConfigTransferParsed(parsed){
     if(!parsed||!(parsed.type==='KGGCFG2'||parsed.type==='KGGCFG1'))return false;
     let plain=parsed.json;
     if(parsed.type==='KGGCFG2'){
@@ -406,7 +426,7 @@
   }
   function currentEditedPlanExercise(){const id=state.editId; return state.plan.find(x=>(x.localId||x.id)===id);}
   function currentEditedBankExercise(){const id=state.editId; return bank.find(x=>String(x.id)===String(id));}
-  function currentEditedExercise(){return currentEditedPlanExercise()||currentEditedBankExercise();}
+  function currentEditedExercise(){return externalEditorContext&&externalEditorContext.exercise||currentEditedPlanExercise()||currentEditedBankExercise();}
   window.KGGTicket015AdminEditor=window.KGGTicket015AdminEditor||{};
   window.KGGTicket015AdminEditor.current=()=>currentEditedExercise();
   function mediaSizeLabel(bytes){const n=Number(bytes)||0; if(n>=1048576)return (n/1048576).toFixed(1).replace('.',',')+' MB'; if(n>=1024)return Math.round(n/1024)+' KB'; return n+' B';}
@@ -458,7 +478,9 @@
       const manifest=await prepareImageMediaFile(file);
       ex.media=[manifest];
       oldMedia.forEach(item=>deleteUnsharedMediaBlob(item,ex));
-      if(ex.localId){
+      if(externalEditorContext){
+        if(typeof externalEditorContext.onMediaChange==='function')externalEditorContext.onMediaChange(ex);
+      }else if(ex.localId){
         syncStatePlanToStore('ui_attach_exercise_image');
         save();
       }else{
@@ -467,7 +489,7 @@
         persistCustomBank();
       }
       renderEditorMediaStatus(ex);
-      render();
+      if(!externalEditorContext)render();
       $('editorModal').classList.add('open');
     }catch(err){
       console.warn('Bild konnte nicht vorbereitet werden:',err);
@@ -480,7 +502,9 @@
     const oldMedia=ensureExerciseMediaList(ex);
     ex.media=[];
     oldMedia.forEach(item=>deleteUnsharedMediaBlob(item,ex));
-    if(ex.localId){
+    if(externalEditorContext){
+      if(typeof externalEditorContext.onMediaChange==='function')externalEditorContext.onMediaChange(ex);
+    }else if(ex.localId){
       syncStatePlanToStore('ui_remove_exercise_image');
       save();
     }else{

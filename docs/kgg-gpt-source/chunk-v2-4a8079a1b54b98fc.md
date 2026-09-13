@@ -53,20 +53,25 @@
     "ticket-015-progressions",
     "ticket-015-live-fix",
     "ticket-037-real-plan",
-    "changelog-archive-window-refresh"
+    "changelog-archive-window-refresh",
+    "cockpit-exercises-only",
+    "plan-add-exercise-card",
+    "cockpit-live-edit",
+    "cockpit-shared-editor",
+    "shared-reorder-core"
   ],
   "currentVersion": {
-    "versionCode": 89,
-    "versionName": "1.0.89-changelog-archive-window-refresh",
-    "lastPatchId": "kgg-v089-changelog-archive-window-refresh",
+    "versionCode": 94,
+    "versionName": "1.0.94-shared-reorder-core",
+    "lastPatchId": "kgg-v094-shared-reorder-core",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v089-changelog-archive-window-refresh",
+  "latestPatchId": "kgg-v094-shared-reorder-core",
   "lastUpdateIntent": {
-    "id": "kgg-v089-changelog-archive-window-refresh",
-    "summary": "Vollständiger aktueller Changelog-Snapshot wird unveränderlich archiviert; im Laufzeitfenster bleiben die 15 neuesten Einträge.",
+    "id": "kgg-v094-shared-reorder-core",
+    "summary": "Teilt die bestehende Reorder-Berechnung und Array-Umordnung zwischen Planerstellung und Therapie-Cockpit.",
     "touched": [
-      "Changelog-Archivierung"
+      "therapy-cockpit"
     ],
     "notTouched": [
       "PDF",

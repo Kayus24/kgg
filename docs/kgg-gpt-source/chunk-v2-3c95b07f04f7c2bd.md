@@ -1,0 +1,223 @@
+<!-- KGG PATCH START kgg-v092-cockpit-live-edit -->
+<!-- Therapie-Cockpit direkt bearbeiten -->
+<style id="kgg-v092-cockpit-live-edit-style">
+  .kgg-tce-card-tools{display:flex;gap:4px;align-items:center;}
+  .kgg-tce-exercise-head{display:flex;align-items:stretch;gap:3px;padding:3px 3px 0 3px;}
+  .kgg-tce-exercise-head .kgg-tc-card-toggle{flex:1;min-width:0;}
+  .kgg-tce-drag,.kgg-tce-tool{flex:0 0 38px;min-width:38px;min-height:42px;padding:0;border:1px solid #d9e2ec;border-radius:9px;background:#fff;color:#475569;font:800 17px/1 system-ui,sans-serif;cursor:pointer;touch-action:manipulation;}
+  .kgg-tce-drag{cursor:grab;color:#2563eb;touch-action:none;}
+  .kgg-tce-drag:active{cursor:grabbing;}
+  .kgg-tce-tool[data-tce-action="delete"]{color:#b91c1c;background:#fff7f7;}
+  .kgg-tce-add-card{width:100%;min-height:58px;display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 2px;padding:10px;border:1px dashed #8fa7c2;border-radius:12px;background:#f8fbff;color:#1d4ed8;font:800 14px/1.1 system-ui,sans-serif;cursor:pointer;transition:transform .14s ease,background-color .14s ease,border-color .14s ease;}
+  .kgg-tce-add-card:hover,.kgg-tce-add-card:focus-visible{background:#edf5ff;border-color:#5ea7e8;}
+  .kgg-tce-add-card:active{transform:scale(.985);}
+  .kgg-tce-add-plus{width:27px;height:27px;display:grid;place-items:center;border:2px solid currentColor;border-radius:999px;font-size:23px;line-height:1;}
+  .kgg-tce-mobile-nav{display:none;align-items:center;gap:7px;margin:0 0 10px;padding:7px;border:1px solid #d8e1ec;border-radius:14px;background:#fff;box-shadow:0 2px 8px rgba(23,35,58,.07);}
+  .kgg-tce-mobile-slots{display:flex;min-width:0;flex:1;gap:5px;overflow:auto;scrollbar-width:none;}
+  .kgg-tce-mobile-slots::-webkit-scrollbar{display:none;}
+  .kgg-tce-slot-tab{min-width:64px;min-height:45px;display:flex;align-items:center;justify-content:center;gap:5px;padding:4px 8px;border:1px solid #d8e1ec;border-radius:10px;background:#f8fafc;color:#475569;font:800 12px/1 system-ui,sans-serif;cursor:pointer;touch-action:manipulation;}
+  .kgg-tce-slot-tab .kgg-tce-slot-dot{width:9px;height:9px;border-radius:50%;background:var(--tce-slot-color,#2563eb);}
+  .kgg-tce-slot-tab.active{border-color:var(--tce-slot-color,#2563eb);background:#eff6ff;color:#1d4ed8;box-shadow:0 0 0 2px color-mix(in srgb,var(--tce-slot-color,#2563eb) 18%,transparent);}
+  .kgg-tce-slot-tab[aria-current="false"]{opacity:.82;}
+  .kgg-tce-mobile-arrow{flex:0 0 38px;width:38px;min-height:40px;padding:0;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#1e3a5f;font-size:22px;line-height:1;cursor:pointer;touch-action:manipulation;}
+  .kgg-tce-mobile-arrow:disabled{opacity:.35;cursor:default;}
+  .kgg-tce-mobile-count{display:block;min-width:80px;color:#64748b;font-size:11px;font-weight:800;text-align:center;white-space:nowrap;}
+  .kgg-tce-mobile-grid{display:block!important;min-height:100%;}
+  .kgg-tce-mobile-grid .kgg-tc-card{display:none;min-height:100%;height:100%;}
+  .kgg-tce-mobile-grid .kgg-tc-card.kgg-tce-active-card{display:flex;}
+  .kgg-tce-mobile-grid .kgg-tc-card-body{min-height:0;}
+  .kgg-tce-mobile-grid .kgg-tc-scroll{overscroll-behavior:contain;}
+  .kgg-tce-dragging{opacity:.54;box-shadow:0 14px 30px rgba(37,99,235,.22)!important;transform:translateY(var(--tce-drag-y,0px)) scale(1.015);transition:none!important;z-index:3;}
+  .kgg-tce-drag-placeholder{min-height:58px;margin:8px 0;border:2px dashed #8bb9ed;border-radius:12px;background:#eff6ff;}
+  .kgg-tce-drag-gap{outline:2px solid rgba(37,99,235,.2);outline-offset:2px;}
+  .kgg-tce-modal{position:fixed;inset:0;z-index:2147481800;display:grid;place-items:center;padding:14px;background:rgba(15,23,42,.48);}
+  .kgg-tce-modal[hidden]{display:none;}
+  .kgg-tce-sheet{width:min(680px,100%);max-height:min(90dvh,760px);overflow:auto;padding:17px;border-radius:16px;background:#fff;box-shadow:0 20px 60px rgba(15,23,42,.3);}
+  .kgg-tce-sheet h2{margin:0 0 5px;font-size:20px;}
+  .kgg-tce-sheet p{margin:0 0 12px;color:#64748b;}
+  .kgg-tce-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;}
+  .kgg-tce-field{display:grid;gap:4px;color:#475569;font-size:12px;font-weight:800;}
+  .kgg-tce-field.full{grid-column:1 / -1;}
+  .kgg-tce-field input,.kgg-tce-field select{width:100%;box-sizing:border-box;min-height:40px;padding:8px 9px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#0f172a;font:700 14px/1.2 system-ui,sans-serif;}
+  .kgg-tce-stages{display:grid;gap:8px;margin-top:13px;padding:11px;border:1px solid #dbe3ee;border-radius:12px;background:#f8fafc;}
+  .kgg-tce-stage-row{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:6px;align-items:center;}
+  .kgg-tce-stage-main{display:grid;gap:5px;min-width:0;}
+  .kgg-tce-stage-no{display:grid;place-items:center;min-height:38px;border-radius:8px;background:#1e293b;color:#fff;font-weight:900;}
+  .kgg-tce-stage-row input{min-width:0;min-height:38px;padding:7px;border:1px solid #cbd5e1;border-radius:8px;font:700 13px/1.2 system-ui,sans-serif;}
+  .kgg-tce-stage-row select{min-width:0;min-height:34px;padding:6px 7px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#334155;font:600 12px/1.2 system-ui,sans-serif;}
+  .kgg-tce-stage-actions{display:flex;gap:4px;}
+  .kgg-tce-stage-actions button{min-width:34px;min-height:36px;padding:4px 6px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#334155;font-weight:800;cursor:pointer;}
+  .kgg-tce-stage-actions button:last-child{color:#b91c1c;background:#fff7f7;}
+  .kgg-tce-modal-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:13px;}
+  .kgg-tce-bank-list{display:grid;gap:7px;max-height:52dvh;overflow:auto;margin-top:10px;}
+  .kgg-tce-bank-search{width:100%;box-sizing:border-box;min-height:42px;padding:8px 10px;border:1px solid #cbd5e1;border-radius:9px;font:700 14px/1.2 system-ui,sans-serif;}
+  .kgg-tce-bank-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px;border:1px solid #dbe3ee;border-radius:10px;background:#fff;}
+  .kgg-tce-bank-item span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:800;}
+  .kgg-tce-bank-item small{display:block;color:#64748b;font-weight:600;}
+  .kgg-tce-bank-item button{min-height:36px;padding:6px 10px;border:1px solid #2563eb;border-radius:8px;background:#eff6ff;color:#1d4ed8;font-weight:800;cursor:pointer;}
+  .kgg-tce-empty-slot{padding:15px;border:1px dashed #b8c7d9;border-radius:11px;color:#64748b;text-align:center;font-size:13px;}
+  @media(max-width:759px){
+    .kgg-tce-mobile-nav{display:flex;}
+    .kgg-tc-board{overflow:hidden;}
+    .kgg-tce-form-grid{grid-template-columns:minmax(0,1fr);}
+    .kgg-tce-field.full{grid-column:auto;}
+    .kgg-tce-stage-row{grid-template-columns:27px minmax(0,1fr);}
+    .kgg-tce-stage-main{grid-column:2;}
+    .kgg-tce-stage-actions{grid-column:2;}
+    .kgg-tce-mobile-grid .kgg-tc-card-foot{position:sticky;bottom:0;z-index:1;}
+  }
+  @media(min-width:760px){.kgg-tce-card-tools .kgg-tce-tool{min-width:36px;flex-basis:36px;}}
+</style>
+<script id="kgg-v092-cockpit-live-edit-script">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v092-cockpit-live-edit",api=null,root=null,board=null,activeSlot=0,observer=null,reorder=null,editState=null,installed=false,enhancing=false,lastView="normal",ignoreInteractionsUntil=0;
+  var COLORS=["#2563eb","#0f766e","#c2410c"];
+  function clone(value){try{return JSON.parse(JSON.stringify(value));}catch(e){return value;}}
+  function esc(value){return String(value==null?"":value).replace(/[&<>"']/g,function(ch){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch];});}
+  function state(){return api&&typeof api.getState==="function"?api.getState():{slots:[],slotCount:0};}
+  function slot(index){return api&&typeof api.getSlot==="function"?api.getSlot(index):null;}
+  function occupied(){var result=[],current=state().slots||[];current.forEach(function(item,index){if(item)result.push({index:index,slot:slot(index)});});return result;}
+  function firstOccupied(){var list=occupied();return list.length?list[0].index:0;}
+  function safeSync(index){try{if(api&&typeof api.syncSlot==="function")api.syncSlot(index);}catch(e){} }
+  function isPhone(){return window.innerWidth<=759;}
+  function activeIndex(){var current=slot(activeSlot);return current?activeSlot:firstOccupied();}
+  function cardFor(index){return board&&board.querySelector('.kgg-tc-card[data-tc-card="'+index+'"]');}
+  function createButton(className,label,text,attrs){var button=document.createElement("button");button.type="button";button.className=className;button.setAttribute("aria-label",label);button.textContent=text;Object.keys(attrs||{}).forEach(function(key){button.setAttribute(key,attrs[key]);});return button;}
+  function addCard(slotIndex){
+    var card=cardFor(slotIndex);if(!card)return;
+    var scroll=card.querySelector(".kgg-tc-scroll");if(!scroll||scroll.querySelector('.kgg-tce-add-card'))return;
+    var add=createButton("kgg-tce-add-card","Neue Übung hinzufügen","",{"data-tce-action":"add","data-tce-slot":slotIndex});
+    add.innerHTML='<span class="kgg-tce-add-plus" aria-hidden="true">+</span><span>Übung hinzufügen</span>';scroll.appendChild(add);
+  }
+  function bindExerciseTools(card,slotIndex){
+    if(!card)return;
+    var exercises=card.querySelectorAll(".kgg-tc-exercise");
+    exercises.forEach(function(article,index){
+      if(article.dataset.tceEnhanced==="1")return;
+      article.dataset.tceEnhanced="1";
+      var toggle=article.querySelector(".kgg-tc-card-toggle");if(!toggle)return;
+      var head=document.createElement("div");head.className="kgg-tce-exercise-head";
+      var drag=createButton("kgg-tce-drag","Übung verschieben","⠿",{"data-tce-action":"drag","data-tce-slot":slotIndex,"data-tce-ex":index});
+      var edit=createButton("kgg-tce-tool","Übung bearbeiten","⚙",{"data-tce-action":"edit","data-tce-slot":slotIndex,"data-tce-ex":index});
+      var del=createButton("kgg-tce-tool","Übung löschen","×",{"data-tce-action":"delete","data-tce-slot":slotIndex,"data-tce-ex":index});
+      article.insertBefore(head,toggle);head.appendChild(drag);head.appendChild(toggle);head.appendChild(edit);head.appendChild(del);
+      drag.addEventListener("pointerdown",startReorder,{passive:false});
+    });
+    addCard(slotIndex);
+  }
+  function ensureMobileNavigation(list){
+    var nav=board.querySelector(".kgg-tce-mobile-nav");
+    if(!nav){
+      nav=document.createElement("div");nav.className="kgg-tce-mobile-nav";nav.setAttribute("aria-label","Cockpit-Patientenwahl");
+      nav.innerHTML='<button type="button" class="kgg-tce-mobile-arrow" data-tce-action="previous" aria-label="Vorheriger Patient">‹</button><div class="kgg-tce-mobile-slots"></div><span class="kgg-tce-mobile-count"></span><button type="button" class="kgg-tce-mobile-arrow" data-tce-action="next" aria-label="Nächster Patient">›</button>';
+      board.insertBefore(nav,board.firstChild);
+    }
+    var current=activeIndex(),items=occupied(),tabs=nav.querySelector(".kgg-tce-mobile-slots");
+    var tabHtml=items.map(function(item){var name=item.slot&&item.slot.name||"Ohne Patientendaten",color=COLORS[item.index%COLORS.length];return '<button type="button" class="kgg-tce-slot-tab '+(item.index===current?'active':'')+'" style="--tce-slot-color:'+color+'" data-tce-action="select" data-tce-slot="'+item.index+'" aria-current="'+(item.index===current?'true':'false')+'"><span class="kgg-tce-slot-dot" aria-hidden="true"></span><span>Slot '+(item.index+1)+'<br><small>'+esc(name.slice(0,16))+'</small></span></button>';}).join("");
+    if(tabs.innerHTML!==tabHtml)tabs.innerHTML=tabHtml;
+    var countText="Patient "+(items.findIndex(function(item){return item.index===current;})+1)+" von "+items.length,count=nav.querySelector(".kgg-tce-mobile-count");
+    if(count&&count.textContent!==countText)count.textContent=countText;
+    var position=items.findIndex(function(item){return item.index===current;}),prev=nav.querySelector('[data-tce-action="previous"]'),next=nav.querySelector('[data-tce-action="next"]');
+    if(prev)prev.disabled=position<=0;if(next)next.disabled=position<0||position>=items.length-1;
+    list.forEach(function(card){card.classList.toggle("kgg-tce-active-card",Number(card.dataset.tcCard)===current);});
+  }
+  function enhance(){
+    if(enhancing||!board||!root||!api)return;enhancing=true;
+    try{
+    var currentView=state().view;if(currentView==="cockpit"&&lastView!=="cockpit")ignoreInteractionsUntil=Date.now()+450;lastView=currentView;
+    var grid=board.querySelector(".kgg-tc-grid");if(!grid)return;
+    var cards=Array.from(grid.querySelectorAll(".kgg-tc-card[data-tc-card]"));if(!cards.length)return;
+    cards.forEach(function(card){bindExerciseTools(card,Number(card.dataset.tcCard));});
+    if(isPhone()){grid.classList.add("kgg-tce-mobile-grid");ensureMobileNavigation(cards);}else{grid.classList.remove("kgg-tce-mobile-grid");var nav=board.querySelector(".kgg-tce-mobile-nav");if(nav)nav.remove();cards.forEach(function(card){card.classList.remove("kgg-tce-active-card");});}
+    }finally{enhancing=false;}
+  }
+  function refresh(){if(board)window.setTimeout(enhance,0);}
+  function stopObserver(){if(observer){observer.disconnect();observer=null;}}
+  function updateSlot(index,next,reason){
+    if(!api||typeof api.updateSlot!=="function")return false;
+    try{api.updateSlot(index,next,reason);safeSync(index);refresh();return true;}catch(errorValue){var code=errorValue&&errorValue.code||"update_failed";var toast=document.getElementById("kggTherapyCockpitToast");if(toast){toast.textContent="Cockpit-Änderung fehlgeschlagen ("+code+")";toast.classList.add("show");}return false;}
+  }
+  function finishReorder(event){
+    var active=reorder;if(!active)return;event.preventDefault();var parent=active.article.parentNode,to=Number.isInteger(active.targetIndex)?active.targetIndex:(active.placeholder&&active.placeholder.parentNode===parent?Array.from(parent.querySelectorAll(".kgg-tc-exercise,.kgg-tce-drag-placeholder")).indexOf(active.placeholder):-1),targetWasShared=Number.isInteger(active.targetIndex);cleanupReorder();
+    active.article.classList.remove("kgg-tce-dragging","reorder-lifted","reorder-gap-before","reorder-gap-after");active.article.style.removeProperty("--tce-drag-y");
+    var current=slot(active.slotIndex);if(!current)return;
+    var from=active.from;if(to<0)to=from;
+    to=Math.max(0,Math.min(current.exercises.length-1,to));if(!targetWasShared&&to>from)to-=1;if(to===from){refresh();return;}
+    var exercises=window.KGGSharedReorder&&typeof window.KGGSharedReorder.move==='function'?window.KGGSharedReorder.move(current.exercises,from,to):null;if(!exercises){refresh();return;}var open=current.openExercise;
+    if(open===from)open=to;else if(from<open&&open<=to)open-=1;else if(to<=open&&open<from)open+=1;
+    updateSlot(active.slotIndex,{planId:current.planId,name:current.name,date:current.date,exercises:exercises,openExercise:open},"cockpit_reorder");
+  }
+  function cleanupReorder(){var active=reorder;if(!active)return;document.removeEventListener("pointermove",moveReorder);document.removeEventListener("pointerup",finishReorder);document.removeEventListener("pointercancel",cancelReorder);if(active.placeholder&&active.placeholder.parentNode)active.placeholder.parentNode.removeChild(active.placeholder);if(active.article)active.article.classList.remove("reorder-lifted","reorder-gap-before","reorder-gap-after");reorder=null;}
+  function cancelReorder(){var active=reorder;if(!active)return;cleanupReorder();active.article.classList.remove("kgg-tce-dragging");active.article.style.removeProperty("--tce-drag-y");refresh();}
+  function moveReorder(event){var active=reorder;if(!active)return;event.preventDefault();var dy=event.clientY-active.startY;active.article.style.setProperty("--tce-drag-y",dy+"px");var others=Array.from(active.article.parentNode.querySelectorAll(".kgg-tc-exercise")).filter(function(item){return item!==active.article;});var mid=event.clientY,refIndex=window.KGGSharedReorder&&typeof window.KGGSharedReorder.targetIndex==='function'?window.KGGSharedReorder.targetIndex(others,mid):others.length;active.targetIndex=refIndex;var ref=others[refIndex]||null;others.forEach(function(item){item.classList.remove("reorder-gap-before","reorder-gap-after");});if(ref){active.article.parentNode.insertBefore(active.placeholder,ref);ref.classList.add("reorder-gap-before");}else{active.article.parentNode.appendChild(active.placeholder);if(others.length)others[others.length-1].classList.add("reorder-gap-after");}}
+  function startReorder(event){
+    if(event.button!=null&&event.button!==0)return;var handle=event.currentTarget,article=handle.closest(".kgg-tc-exercise"),card=handle.closest(".kgg-tc-card"),index=Number(card&&card.dataset.tcCard),from=Array.from(card.querySelectorAll(".kgg-tc-exercise")).indexOf(article);if(!article||!card||from<0)return;var current=slot(index);if(!current||current.exercises.length<2)return;event.preventDefault();event.stopPropagation();cleanupReorder();var placeholder=document.createElement("div");placeholder.className="kgg-tce-drag-placeholder reorder-placeholder";placeholder.style.height=article.getBoundingClientRect().height+"px";article.after(placeholder);article.classList.add("kgg-tce-dragging","reorder-lifted");reorder={slotIndex:index,from:from,article:article,placeholder:placeholder,startY:event.clientY,pointerId:event.pointerId};try{handle.setPointerCapture&&handle.setPointerCapture(event.pointerId);}catch(e){}document.addEventListener("pointermove",moveReorder,{passive:false});document.addEventListener("pointerup",finishReorder,{passive:false});document.addEventListener("pointercancel",cancelReorder,{passive:false});}
+  function bankItems(){
+    var list=[];try{var shared=window.KGGSharedBank&&window.KGGSharedBank.exportPayload?window.KGGSharedBank.exportPayload():null;list=shared&&Array.isArray(shared.exercises)?shared.exercises:[];}catch(e){}
+    var seen=Object.create(null);return list.filter(function(item){var key=String(item&&item.name||"").trim().toLowerCase();if(!key||seen[key])return false;seen[key]=true;return true;});
+  }
+  function bankExercise(item){
+    if(!item)return null;var ref=api.registry.lookup(item.id)||api.registry.lookup(item.name);if(!ref){try{ref=api.registry.derive(item.name,{sets:item.sets,metricUnit:item.unit,loadUnit:item.weightUnit});}catch(e){return null;}}
+    var sets=Math.max(1,Math.min(8,Number(item.sets)||3)),metric=String(item.unit||"Wdh"),load=String(item.weightUnit||"kg");return {id:ref.id,name:String(item.name||ref.name),sets:sets,side:"BI",loadUnit:load,weightUnit:load,metricUnit:metric,unit:metric,measure:/zeit|sek/i.test(metric)?"zeit":"wdh",startLoad:String(item.startLoad||""),startMetric:String(item.startMetric||""),previous:Array.from({length:sets},function(){return ["",""]; }),today:Array.from({length:sets},function(){return ["",""]; }),media:clone(item.media||[]),progressionGroupId:String(item.progressionGroupId||""),progressionVariants:clone(item.progressionVariants||[])};
+  }
+  function openAdd(index){
+    var modal=document.getElementById("kggTceAddModal"),list=modal&&modal.querySelector(".kgg-tce-bank-list"),search=modal&&modal.querySelector(".kgg-tce-bank-search");
+    if(!modal||!list)return;
+    modal.dataset.tceSlot=String(index);
+    var items=bankItems();
+    if(!items.length)items=(api.registry.entries()||[]).map(function(item){return {id:item.id,name:item.name,sets:3,unit:"Wdh",weightUnit:"kg"};});
+    function renderItems(){
+      var query=String(search&&search.value||"").trim().toLowerCase();
+      list.innerHTML=items.filter(function(item){return !query||String(item.name||"").toLowerCase().includes(query);}).map(function(item){return '<div class="kgg-tce-bank-item"><span>'+esc(item.name)+'<small>'+esc(item.unit||"Wdh")+' · '+esc(item.weightUnit||"kg")+'</small></span><button type="button" data-tce-bank-id="'+esc(item.id||item.name)+'">Hinzufügen</button></div>';}).join("")||'<div class="kgg-tce-empty-slot">Keine passende Übung gefunden.</div>';
+      list.querySelectorAll("[data-tce-bank-id]").forEach(function(button){
+        button.onclick=function(){
+          var item=items.find(function(candidate){return String(candidate.id||candidate.name)===String(button.dataset.tceBankId);});
+          var next=slot(index);if(!item||!next)return;
+          var ex=bankExercise(item);if(!ex)return;
+          if(next.exercises.some(function(existing){return existing.id===ex.id;})){window.alert("Diese Übung ist bereits im Slot vorhanden.");return;}
+          next.exercises.push(ex);
+          if(updateSlot(index,next,"cockpit_add_exercise"))modal.hidden=true;
+        };
+      });
+    }
+    if(search){search.value="";search.oninput=renderItems;}
+    renderItems();modal.hidden=false;setTimeout(function(){if(search)search.focus();},0);
+  }
+  function stagesHtml(){
+    var variants=editState&&Array.isArray(editState.exercise.progressionVariants)?editState.exercise.progressionVariants:[];
+    if(!variants.length)return '<div class="kgg-tce-empty-slot">Noch keine Progressionsstufen.</div>';
+    var items=bankItems();if(!items.length)items=(api.registry.entries()||[]).map(function(item){return {id:item.id,name:item.name,media:[]};});
+    return variants.map(function(item,index){
+      var selected=String(item.sourceId||item.bankId||""),hasSelected=items.some(function(candidate){return String(candidate.id||"")===selected;});
+      var options='<option value="">Eigene Stufe ohne Übungsbank-Zuordnung</option>';
+      if(selected&&!hasSelected)options+='<option value="'+esc(selected)+'" selected>'+esc(item.sourceName||selected)+' (bestehend)</option>';
+      options+=items.map(function(candidate){var id=String(candidate.id||""),name=String(candidate.name||"");return '<option value="'+esc(id)+'" '+(id===selected?'selected':'')+'>'+esc(name)+'</option>';}).join('');
+      return '<div class="kgg-tce-stage-row" data-tce-stage="'+index+'"><span class="kgg-tce-stage-no">'+(index+1)+'</span><div class="kgg-tce-stage-main"><input data-tce-stage-name value="'+esc(item.name||"")+'" aria-label="Name der Progressionsstufe '+(index+1)+'"><select data-tce-stage-source aria-label="Übungsbank-Zuordnung der Progressionsstufe '+(index+1)+'">'+options+'</select></div><div class="kgg-tce-stage-actions"><button type="button" data-tce-stage-up="'+index+'" '+(index?'':'disabled')+'>↑</button><button type="button" data-tce-stage-down="'+index+'" '+(index===variants.length-1?'disabled':'')+'>↓</button><button type="button" data-tce-stage-remove="'+index+'">×</button></div></div>';
+    }).join('');
+  }
+  function renderStages(){var box=document.querySelector("#kggTceEditModal .kgg-tce-stage-list");if(box)box.innerHTML=stagesHtml();}
+  function captureStageDraft(){
+    if(!editState||!Array.isArray(editState.exercise.progressionVariants))return;
+    var modal=document.getElementById("kggTceEditModal"),names=modal?Array.from(modal.querySelectorAll("[data-tce-stage-name]")):[],sources=modal?Array.from(modal.querySelectorAll("[data-tce-stage-source]")):[],items=bankItems();
+    if(!items.length)items=(api.registry.entries()||[]).map(function(item){return {id:item.id,name:item.name,media:[]};});
+    editState.exercise.progressionVariants.forEach(function(item,index){
+      if(names[index])item.name=String(names[index].value||item.name).trim().slice(0,80);
+      var sourceId=sources[index]?String(sources[index].value||""):String(item.sourceId||"");
+      if(sourceId){var linked=items.find(function(candidate){return String(candidate.id||"")===sourceId;});item.sourceId=sourceId;item.sourceName=linked?String(linked.name||""):String(item.sourceName||sourceId);if(linked&&Array.isArray(linked.media))item.media=clone(linked.media);}
+      else{item.sourceId="";item.sourceName="";}
+    });
+  }
+  function openEdit(slotIndex,exerciseIndex){
+    var current=slot(slotIndex),ex=current&&current.exercises[exerciseIndex],modal=document.getElementById("kggTceEditModal");if(!ex||!modal)return;editState={slotIndex:slotIndex,exerciseIndex:exerciseIndex,exercise:clone(ex)};var fields={name:ex.name||"",sets:ex.sets||3,side:ex.side||"BI",loadUnit:ex.loadUnit||ex.weightUnit||"kg",metricUnit:ex.metricUnit||ex.unit||"Wdh",measure:ex.measure||"wdh",startLoad:ex.startLoad||"",startMetric:ex.startMetric||"",videoUrl:ex.videoUrl||"",videoLabel:ex.videoLabel||"Video öffnen"};Object.keys(fields).forEach(function(key){var input=modal.querySelector('[data-tce-edit-field="'+key+'"]');if(input)input.value=fields[key];});renderStages();modal.hidden=false;setTimeout(function(){var input=modal.querySelector('[data-tce-edit-field="name"]');if(input)input.focus();},0);
+  }
+  function saveEdit(){
+    if(!editState)return;var modal=document.getElementById("kggTceEditModal"),next=slot(editState.slotIndex);if(!modal||!next)return;var ex=editState.exercise,read=function(key){var input=modal.querySelector('[data-tce-edit-field="'+key+'"]');return input?input.value:"";};ex.name=String(read("name")||ex.name).trim().slice(0,80)||ex.name;ex.sets=Math.max(1,Math.min(8,Number(read("sets"))||3));ex.side=read("side")==="LR"?"LR":"BI";ex.loadUnit=String(read("loadUnit")||"kg").slice(0,12);ex.weightUnit=ex.loadUnit;ex.metricUnit=String(read("metricUnit")||"Wdh").slice(0,12);ex.unit=ex.metricUnit;ex.measure=read("measure")==="zeit"?"zeit":"wdh";ex.startLoad=String(read("startLoad")||"").trim().slice(0,24);ex.startMetric=String(read("startMetric")||"").trim().slice(0,24);ex.videoUrl=/^https?:\/\//i.test(String(read("videoUrl")||""))?String(read("videoUrl")).trim().slice(0,500):"";ex.videoLabel=String(read("videoLabel")||"Video öffnen").trim().slice(0,120)||"Video öffnen";while(ex.previous.length<ex.sets)ex.previous.push(["",""]);while(ex.today.length<ex.sets)ex.today.push(["",""]);ex.previous=ex.previous.slice(0,ex.sets);ex.today=ex.today.slice(0,ex.sets);var names=Array.from(modal.querySelectorAll("[data-tce-stage-name]")),sources=Array.from(modal.querySelectorAll("[data-tce-stage-source]")),sourceItems=bankItems();if(!sourceItems.length)sourceItems=(api.registry.entries()||[]).map(function(item){return {id:item.id,name:item.name,media:[]};});(ex.progressionVariants||[]).forEach(function(item,index){if(names[index])item.name=String(names[index].value||item.name).trim().slice(0,80);var sourceId=sources[index]?String(sources[index].value||""):String(item.sourceId||"");if(sourceId){var linked=sourceItems.find(function(candidate){return String(candidate.id||"")===sourceId;});item.sourceId=sourceId;item.sourceName=linked?String(linked.name||""):String(item.sourceName||sourceId);if(linked&&Array.isArray(linked.media))item.media=clone(linked.media);}else{item.sourceId="";item.sourceName="";}item.order=index;});ex.progressionVariants=(ex.progressionVariants||[]).filter(function(item){return String(item.name||"").trim();}).map(function(item,index){item.order=index;return item;});if(updateSlot(editState.slotIndex,{planId:next.planId,name:next.name,date:next.date,exercises:next.exercises.map(function(item,index){return index===editState.exerciseIndex?ex:item;}),openExercise:next.openExercise},"cockpit_edit_exercise")){modal.hidden=true;editState=null;}}
+  function removeExercise(slotIndex,exerciseIndex){var current=slot(slotIndex),article=cardFor(slotIndex)&&cardFor(slotIndex).querySelectorAll(".kgg-tc-exercise")[exerciseIndex];if(!current||!current.exercises[exerciseIndex])return;if(!window.confirm("Übung '"+current.exercises[exerciseIndex].name+"' aus diesem Cockpit-Slot löschen?"))return;if(article){article.classList.add("kgg-tce-dragging");article.style.setProperty("--tce-drag-y","36px");article.style.opacity="0";}setTimeout(function(){var next=slot(slotIndex);if(!next)return;next.exercises.splice(exerciseIndex,1);if(next.openExercise===exerciseIndex)next.openExercise=null;else if(Number.isInteger(next.openExercise)&&next.openExercise>exerciseIndex)next.openExercise-=1;updateSlot(slotIndex,next,"cockpit_delete_exercise");},170);}
+  function moveStage(index,delta){if(!editState||!Array.isArray(editState.exercise.progressionVariants))return;captureStageDraft();var list=editState.exercise.progressionVariants,target=index+delta;if(target<0||target>=list.length)return;var item=list.splice(index,1)[0];list.splice(target,0,item);renderStages();}
+  function addStage(){if(!editState)return;editState.exercise.progressionVariants=editState.exercise.progressionVariants||[];captureStageDraft();editState.exercise.progressionVariants.push({id:"pv_cockpit_"+Date.now()+"_"+editState.exercise.progressionVariants.length,groupId:editState.exercise.progressionGroupId||"",name:"Progressionsstufe "+(editState.exercise.progressionVariants.length+1),order:editState.exercise.progressionVariants.length,sourceId:"",sourceName:"",media:[]});renderStages();}
+  function handleCustomClick(event){var target=event.target&&event.target.closest?event.target.closest("[data-tce-action]"):null;if(!target||!root||!root.contains(target))return;var action=target.getAttribute("data-tce-action"),index=Number(target.getAttribute("data-tce-slot")),exercise=Number(target.getAttribute("data-tce-ex"));if(Date.now()<ignoreInteractionsUntil&&action==="add")return;if(action==="select"){activeSlot=index;refresh();return;}if(action==="previous"||action==="next"){var list=occupied(),pos=list.findIndex(function(item){return item.index===activeIndex();}),nextPos=pos+(action==="next"?1:-1);if(list[nextPos]){activeSlot=list[nextPos].index;refresh();}return;}if(action==="add"){openAdd(index);return;}if(action==="edit"){openEdit(index,exercise);return;}if(action==="delete"){removeExercise(index,exercise);return;}}
+  function closeModal(event){var modal=event.currentTarget.closest(".kgg-tce-modal");if(modal)modal.hidden=true;if(modal&&modal.id==="kggTceEditModal")editState=null;}
+  function installModals(){
+    if(document.getElementById("kggTceAddModal"))return;
+    var add=document.createElement("div");add.id="kggTceAddModal";add.className="kgg-tce-modal";add.hidden=true;add.innerHTML='<div class="kgg-tce-sheet" role="dialog" aria-modal="true" aria-labelledby="kggTceAddTitle"><h2 id="kggTceAddTitle">Übung ins Cockpit hinzufügen</h2><p>Eine Übung aus der bestehenden Übungsbank für den aktiven Slot wählen.</p><input class="kgg-tce-bank-search" type="search" placeholder="Übung suchen" aria-label="Übung suchen"><div class="kgg-tce-bank-list"></div><div class="kgg-tce-modal-actions"><button type="button" class="kgg-tc-btn" data-tce-close>Abbrechen</button></div></div>';root.appendChild(add);

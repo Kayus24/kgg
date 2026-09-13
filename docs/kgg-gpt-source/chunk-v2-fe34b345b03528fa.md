@@ -110,7 +110,7 @@
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v089-changelog-archive-window-refresh",
+  "lastUpdatedByPatchId": "kgg-v094-shared-reorder-core",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",

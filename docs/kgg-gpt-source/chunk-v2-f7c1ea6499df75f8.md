@@ -210,6 +210,24 @@
     return text;
   }
   function cleanUnit(value,fallback){var text=String(value||fallback||"").trim().slice(0,12);if(!text||/[^\wÄÖÜäöüß+\/-]/.test(text))return String(fallback||"").slice(0,12);return text;}
+  function cleanOptionalText(value,max){var text=String(value==null?"":value).trim();return text.slice(0,max||160);}
+  function cleanVideoUrl(value){var text=cleanOptionalText(value,500);return /^(?:https?:\/\/)/i.test(text)?text:"";}
+  function cleanMediaList(value){
+    if(!Array.isArray(value))return [];
+    return value.slice(0,4).map(function(item){
+      if(!item||typeof item!=="object")return null;
+      var out={};["id","type","mimeType","label","name","encryptedSize","compressedSize","originalSize"].forEach(function(field){if(item[field]!=null)out[field]=cleanOptionalText(item[field],field.indexOf("Size")>-1?24:160);});
+      if(/^https?:\/\//i.test(String(item.downloadUrl||"")))out.downloadUrl=cleanOptionalText(item.downloadUrl,1000);
+      return Object.keys(out).length?out:null;
+    }).filter(Boolean);
+  }
+  function cleanProgressionVariants(value,group){
+    if(!Array.isArray(value))return [];
+    return value.slice(0,12).map(function(item,index){
+      item=item&&typeof item==="object"?item:{};
+      return {id:cleanOptionalText(item.id||item.variantId||("pv_"+index),80),groupId:cleanOptionalText(item.groupId||group,80),name:cleanOptionalText(item.name||item.title||("Progressionsstufe "+(index+1)),80),order:index,sourceId:cleanOptionalText(item.sourceId||item.bankId||"",80),sourceName:cleanOptionalText(item.sourceName||"",80),media:cleanMediaList(item.media)};
+    }).filter(function(item){return !!item.name;});
+  }
   function cleanSetCount(value){var count=Number(value);if(!Number.isFinite(count))count=3;return Math.max(1,Math.min(8,Math.round(count)));}
   function valuePair(value){
     if(Array.isArray(value))return [cleanValue(value[0]),cleanValue(value[1])];
@@ -229,14 +247,29 @@
     var previous=valueArray(prevSource,sets,fallback),today=valueArray(raw.today||raw.current||raw.cockpitToday,sets,previous[0]);
     var todayProvided=Array.isArray(raw.today)||Array.isArray(raw.current)||Array.isArray(raw.cockpitToday);
     if(!todayProvided)today=previous.map(function(pair){return pair.slice();});
-    return {id:ref.id,name:ref.name,sets:sets,side:String(raw.side||raw.sides||"BI")==="LR"?"LR":"BI",loadUnit:cleanUnit(raw.loadUnit||raw.weightUnit,ref.loadUnit),metricUnit:cleanUnit(raw.metricUnit||raw.unit,ref.metricUnit),previous:previous,today:today};
+    var group=cleanOptionalText(raw.progressionGroupId||"",80),variants=cleanProgressionVariants(raw.progressionVariants,group),activeProgressionId=cleanOptionalText(raw.activeProgressionId||raw.progressionVariantId||"",80);
+    if(variants.length){if(!activeProgressionId)activeProgressionId=variants[0].id;if(!variants.some(function(item){return item.id===activeProgressionId;}))throw error("progression_id_invalid");}
+    else if(activeProgressionId)throw error("progression_id_invalid");
+    return {id:ref.id,name:cleanOptionalText(raw.name||ref.name,80)||ref.name,sets:sets,side:String(raw.side||raw.sides||"BI")==="LR"?"LR":"BI",loadUnit:cleanUnit(raw.loadUnit||raw.weightUnit,ref.loadUnit),metricUnit:cleanUnit(raw.metricUnit||raw.unit,ref.metricUnit),previous:previous,today:today,weightUnit:cleanUnit(raw.weightUnit||raw.loadUnit,ref.loadUnit),unit:cleanOptionalText(raw.unit||raw.metricUnit||ref.metricUnit,12),measure:String(raw.measure||"")==="zeit"?"zeit":"wdh",startLoad:cleanOptionalText(raw.startLoad||"",24),startMetric:cleanOptionalText(raw.startMetric||"",24),videoUrl:cleanVideoUrl(raw.videoUrl),videoLabel:cleanOptionalText(raw.videoLabel||"Video öffnen",120)||"Video öffnen",media:cleanMediaList(raw.media),progressionGroupId:group,progressionVariants:variants,activeProgressionId:activeProgressionId};
+  }
+  function compactExerciseExtras(ex){
+    var extra={};
+    if(ex.name)extra.n=cleanOptionalText(ex.name,80);
+    if(ex.measure)extra.m=String(ex.measure)==="zeit"?"zeit":"wdh";
+    if(ex.startLoad)extra.l=cleanOptionalText(ex.startLoad,24);
+    if(ex.startMetric)extra.r=cleanOptionalText(ex.startMetric,24);
+    if(ex.videoUrl)extra.v=cleanVideoUrl(ex.videoUrl);
+    if(ex.videoLabel&&ex.videoLabel!=="Video öffnen")extra.vl=cleanOptionalText(ex.videoLabel,120);
+    if(ex.media&&ex.media.length)extra.md=cleanMediaList(ex.media);
+    if(ex.progressionGroupId||ex.progressionVariants&&ex.progressionVariants.length){extra.g=cleanOptionalText(ex.progressionGroupId,80);extra.pv=cleanProgressionVariants(ex.progressionVariants,extra.g);if(ex.activeProgressionId)extra.a=cleanOptionalText(ex.activeProgressionId,80);}
+    return Object.keys(extra).length?extra:null;
   }
   function encodePayload(input){
     var source=input||{},items=Array.isArray(source.exercises)?source.exercises:[];
     if(!items.length||items.length>MAX_EXERCISES)throw error("exercise_count_invalid");
     var ids=Object.create(null),encodedExercises=items.map(function(item){
       var ex=exerciseInput(item);if(ids[ex.id])throw error("duplicate_exercise_id");ids[ex.id]=true;
-      return {i:ex.id,s:ex.sets,q:ex.side,u:ex.loadUnit,m:ex.metricUnit,p:ex.previous,t:ex.today};
+      var row={i:ex.id,s:ex.sets,q:ex.side,u:ex.loadUnit,m:ex.metricUnit,p:ex.previous,t:ex.today},extra=compactExerciseExtras(ex);if(extra)row.x=extra;return row;
     });
     var body={v:1,p:cleanPlanId(source.planId||source.id||""),n:obfuscateName(cleanName(source.name||source.patientName||"")),d:cleanDate(source.date),e:encodedExercises};
     var payload={v:body.v,p:body.p,n:body.n,d:body.d,e:body.e,h:fnv(JSON.stringify(body))};
@@ -260,9 +293,9 @@
     var ids=Object.create(null),exercises=parsed.e.map(function(raw){
       if(!raw||typeof raw.i!=="string"||raw.i.length!==2||!byId[raw.i])throw error("unknown_exercise_id");
       if(ids[raw.i])throw error("duplicate_exercise_id");ids[raw.i]=true;
-      var ref=byId[raw.i],sets=cleanSetCount(raw.s);if(sets!==Number(raw.s))throw error("set_structure_invalid");
+      var ref=byId[raw.i],sets=cleanSetCount(raw.s),extra=raw.x&&typeof raw.x==="object"?raw.x:{};if(sets!==Number(raw.s))throw error("set_structure_invalid");
       if(raw.q!=="BI"&&raw.q!=="LR")throw error("set_structure_invalid");
-      return {id:raw.i,name:ref.name,sets:sets,side:raw.q,loadUnit:cleanUnit(raw.u,ref.loadUnit),metricUnit:cleanUnit(raw.m,ref.metricUnit),previous:validateValueList(raw.p,sets),today:validateValueList(raw.t,sets)};
+      return exerciseInput({id:raw.i,name:extra.n||ref.name,sets:sets,side:raw.q,loadUnit:raw.u,metricUnit:raw.m,weightUnit:raw.u,unit:raw.m,measure:extra.m,startLoad:extra.l,startMetric:extra.r,videoUrl:extra.v,videoLabel:extra.vl,media:extra.md,progressionGroupId:extra.g,progressionVariants:extra.pv,activeProgressionId:extra.a,previous:validateValueList(raw.p,sets),today:validateValueList(raw.t,sets)});
     });
     return {version:1,planId:cleanPlanId(parsed.p),name:name,date:cleanDate(parsed.d),exercises:exercises};
   }
@@ -285,7 +318,7 @@
     var source=plan||{},patient=source.patient||{};return {planId:source.id||"",name:patient.name||source.name||"",date:patient.date||new Date().toISOString().slice(0,10),exercises:(Array.isArray(source.exercises)?source.exercises:[]).map(exerciseInput)};
   }
   function contentKey(input){
-    var source=input||{},items=Array.isArray(source.exercises)?source.exercises.map(exerciseInput):[],canonical={planId:cleanPlanId(source.planId||source.id||""),name:cleanName(source.name||source.patientName||""),date:cleanDate(source.date),exercises:items.map(function(ex){return {id:ex.id,sets:ex.sets,side:ex.side,loadUnit:ex.loadUnit,metricUnit:ex.metricUnit,previous:ex.previous,today:ex.today};})};
+    var source=input||{},items=Array.isArray(source.exercises)?source.exercises.map(exerciseInput):[],canonical={planId:cleanPlanId(source.planId||source.id||""),name:cleanName(source.name||source.patientName||""),date:cleanDate(source.date),exercises:items.map(function(ex){return {id:ex.id,name:ex.name,sets:ex.sets,side:ex.side,loadUnit:ex.loadUnit,metricUnit:ex.metricUnit,previous:ex.previous,today:ex.today,startLoad:ex.startLoad,startMetric:ex.startMetric,measure:ex.measure,progressionGroupId:ex.progressionGroupId,progressionVariants:ex.progressionVariants,activeProgressionId:ex.activeProgressionId};})};
     return fnv(JSON.stringify(canonical));
   }
   function bankEntryWithCockpitId(item){
@@ -324,28 +357,6 @@
   function slotCount(){return slots.reduce(function(total,slot){return total+(slot?1:0);},0);}
   function firstFreeSlot(){for(var i=0;i<MAX_SLOTS;i++)if(!slots[i])return i;return -1;}
   function slotProgress(slot){var total=0,done=0;(slot&&slot.exercises||[]).forEach(function(ex){(ex.today||[]).forEach(function(pair){total+=2;if(pair[0])done++;if(pair[1])done++;});});return total?Math.round(done/total*100):0;}
-  function normalizeSlot(decoded){return {planId:decoded.planId,name:decoded.name,date:decoded.date,exercises:decoded.exercises.map(function(ex){return {id:ex.id,name:ex.name,sets:ex.sets,side:ex.side,loadUnit:ex.loadUnit,metricUnit:ex.metricUnit,previous:ex.previous.map(function(p){return p.slice();}),today:ex.today.map(function(p){return p.slice();})};}),contentKey:contentKey(decoded),openExercise:null,lastCompletion:null};}
-  function payloadFromSlot(slot,useTodayAsPrevious){return {planId:slot.planId,name:slot.name,date:new Date().toISOString().slice(0,10),exercises:slot.exercises.map(function(ex){return {id:ex.id,sets:ex.sets,side:ex.side,loadUnit:ex.loadUnit,metricUnit:ex.metricUnit,previous:(useTodayAsPrevious?ex.today:ex.previous).map(function(p){return p.slice();}),today:ex.today.map(function(p){return p.slice();})};})};}
-  function valuesLabel(pair,ex){var load=pair&&pair[0]||"–",metric=pair&&pair[1]||"–";return load+" "+(ex.loadUnit||"")+" / "+metric+" "+(ex.metricUnit||"");}
-  function mediaMarkup(ex){var current=ex&&ex.media&&Array.isArray(ex.media)?ex.media[0]:null;if(current&&current.downloadUrl&&/^data:image\//i.test(current.downloadUrl))return '<img alt="" src="'+htmlEscape(current.downloadUrl)+'">';return htmlEscape(initials(ex&&ex.name));}
-  function renderPad(slotIndex,exerciseIndex,setIndex,field,ex){
-    var fieldName=field==="load"?(ex.loadUnit||"kg"):(ex.metricUnit||"Wdh"),html='<div class="kgg-tc-pad" data-tc-pad="1"><div class="kgg-tc-pad-head"><span>Wert eingeben · '+htmlEscape(fieldName)+'</span><span class="kgg-tc-pad-modes">';
-    html+='<button type="button" class="kgg-tc-pad-mode '+(field==="load"?"active":"")+'" data-tc-action="mode" data-tc-slot="'+slotIndex+'" data-tc-ex="'+exerciseIndex+'" data-tc-set="'+setIndex+'" data-tc-field="load">'+htmlEscape(ex.loadUnit||"kg")+'</button>';
-    html+='<button type="button" class="kgg-tc-pad-mode '+(field==="metric"?"active":"")+'" data-tc-action="mode" data-tc-slot="'+slotIndex+'" data-tc-ex="'+exerciseIndex+'" data-tc-set="'+setIndex+'" data-tc-field="metric">'+htmlEscape(ex.metricUnit||"Wdh")+'</button></span></div><div class="kgg-tc-pad-keys">';
-    ["1","2","3","4","5","6","7","8","9","0",",","⌫","C","–","OK"].forEach(function(keyValue){var cls=(keyValue===","||keyValue==="⌫"||keyValue==="C"||keyValue==="–"||keyValue==="OK")?" action":"";html+='<button type="button" class="kgg-tc-key'+cls+'" data-tc-action="key" data-tc-key="'+htmlEscape(keyValue)+'" data-tc-slot="'+slotIndex+'" data-tc-ex="'+exerciseIndex+'" data-tc-set="'+setIndex+'" data-tc-field="'+field+'">'+htmlEscape(keyValue)+'</button>';});
-    return html+'</div></div>';
-  }
-  function renderExercise(slot,slotIndex,ex,exerciseIndex){
-    var open=slot.openExercise===exerciseIndex,summary=(ex.today||[]).map(function(pair){return valuesLabel(pair,ex);}).join(" · ");
-    var html='<article class="kgg-tc-exercise '+(open?"open":"")+'"><button type="button" class="kgg-tc-card-toggle" data-tc-action="toggle" data-tc-slot="'+slotIndex+'" data-tc-ex="'+exerciseIndex+'"><span class="kgg-tc-thumb" aria-hidden="true">'+mediaMarkup(ex)+'</span><span class="kgg-tc-exercise-summary"><strong>'+htmlEscape(ex.name)+'</strong><small>'+ex.sets+' Sätze · '+htmlEscape(ex.side==="LR"?"links/rechts":"beidseitig")+(summary?" · "+htmlEscape(summary):"")+'</small></span><span class="kgg-tc-chevron" aria-hidden="true">'+(open?"⌃":"⌄")+'</span></button>';
-    if(open){
-      html+='<div class="kgg-tc-exercise-detail"><div class="kgg-tc-values-head"><span>Satz</span><span>Vorwert</span><span>Heute</span></div>';
-      for(var setIndex=0;setIndex<ex.sets;setIndex++){
-        var prev=ex.previous[setIndex]||["",""];var today=ex.today[setIndex]||["",""];html+='<div class="kgg-tc-set-row"><span class="kgg-tc-set-no">S'+(setIndex+1)+'</span><span class="kgg-tc-prev" aria-label="Vorwert">'+htmlEscape(valuesLabel(prev,ex))+'</span>';
-        ["load","metric"].forEach(function(field){var val=field==="load"?today[0]:today[1],active=activeInput&&activeInput.slot===slotIndex&&activeInput.exercise===exerciseIndex&&activeInput.set===setIndex&&activeInput.field===field;html+='<button type="button" class="kgg-tc-field '+(active?"active ":"")+(val?"":"empty")+'" data-tc-action="input" data-tc-slot="'+slotIndex+'" data-tc-ex="'+exerciseIndex+'" data-tc-set="'+setIndex+'" data-tc-field="'+field+'" aria-label="Heute '+htmlEscape(field==="load"?(ex.loadUnit||"kg"):(ex.metricUnit||"Wdh"))+'">'+htmlEscape(val||"—")+'</button>';if(active)html+=renderPad(slotIndex,exerciseIndex,setIndex,field,ex);});
-        html+='</div>';
-      }
-      html+='</div>';
-    }
-    return html+'</article>';
-  }
+  function normalizeSlot(decoded){var key=contentKey(decoded);return {planId:decoded.planId,name:decoded.name,date:decoded.date,exercises:(decoded.exercises||[]).map(exerciseInput),contentKey:key,sourceContentKey:key,openExercise:null,lastCompletion:null};}
+  function payloadFromSlot(slot,useTodayAsPrevious){return {planId:slot.planId,name:slot.name,date:new Date().toISOString().slice(0,10),exercises:slot.exercises.map(function(ex){var next=exerciseInput(ex);next.previous=(useTodayAsPrevious?ex.today:ex.previous).map(function(p){return p.slice();});next.today=ex.today.map(function(p){return p.slice();});return next;})};}
+  function cloneJson(value){try{return JSON.parse(JSON.stringify(value));}catch(e){return value;}}

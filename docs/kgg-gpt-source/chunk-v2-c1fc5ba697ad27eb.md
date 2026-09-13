@@ -445,14 +445,36 @@
     document.addEventListener('pointerup',up,{passive:false,once:true});
     document.addEventListener('pointercancel',cancel,{passive:true,once:true});
   }
+  // Shared by the normal plan editor and the Therapy-Cockpit live editor.
+  // Keep the geometry and array semantics in one place so both flows retain
+  // the same reorder behavior without creating a second drag engine.
+  const KGGSharedReorder={
+    targetIndex(elements,coordinate){
+      const list=Array.isArray(elements)?elements:[];
+      for(let index=0;index<list.length;index++){
+        const rect=list[index]&&typeof list[index].getBoundingClientRect==='function'?list[index].getBoundingClientRect():null;
+        if(rect&&coordinate<rect.top+rect.height/2)return index;
+      }
+      return list.length;
+    },
+    move(items,from,to){
+      const next=Array.isArray(items)?items.slice():[];
+      if(from<0||from>=next.length)return null;
+      const target=Math.max(0,Math.min(next.length-1,Number(to)));
+      const item=next.splice(from,1)[0];
+      next.splice(target,0,item);
+      return next;
+    }
+  };
+  window.KGGSharedReorder=KGGSharedReorder;
   function movePlanExerciseByButton(localId,delta){
     const idx=(state.plan||[]).findIndex(ex=>String(ex.localId||ex.id)===String(localId));
     if(idx<0)return;
     const target=idx+delta;
     if(target<0||target>=state.plan.length)return;
-    const next=state.plan.slice();
-    const item=next.splice(idx,1)[0];
-    next.splice(target,0,item);
+    const next=KGGSharedReorder.move(state.plan,idx,target);
+    if(!next)return;
+    const item=next[target];
     state.plan=next;
     state.sortMenuId=String(item.localId||item.id);
     syncStatePlanToStore('ui_reorder_plan_buttons');
@@ -630,20 +652,3 @@
     document.removeEventListener('pointermove',press.preMove);
     document.removeEventListener('pointerup',press.preUp);
     document.addEventListener('pointermove',onAnimatedReorderMove,{passive:false});
-    document.addEventListener('pointerup',finishAnimatedReorder,{passive:false,once:true});
-    document.addEventListener('pointercancel',cancelAnimatedReorder,{passive:false,once:true});
-    if(initialEv)onAnimatedReorderMove(initialEv);
-  }
-  function onAnimatedReorderMove(ev){
-    const press=animatedReorder;
-    if(!press||!press.active)return;
-    clearPhoneScrollStateForPlanGesture(520);
-    ev.preventDefault();
-    const dy=ev.clientY-press.startY;
-    let floatingMid;
-    if(press.phoneListAbsoluteDrag){
-      const anchorX=Number.isFinite(press.dragAnchorX)?press.dragAnchorX:(Number.isFinite(press.pointerOffsetX)?press.pointerOffsetX:0);
-      const anchorY=Number.isFinite(press.dragAnchorY)?press.dragAnchorY:(Number.isFinite(press.pointerOffsetY)?press.pointerOffsetY:0);
-      const listRect=press.list.getBoundingClientRect();
-      const nextLeft=ev.clientX-anchorX-listRect.left+press.list.scrollLeft;
-      const nextTop=ev.clientY-anchorY-listRect.top+press.list.scrollTop;
