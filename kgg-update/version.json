@@ -1,7 +1,7 @@
 {
-  "versionCode": 90,
-  "versionName": "1.0.90-cockpit-exercises-only",
-  "indexUrl": "index.html?v=90",
-  "sha256": "fb75a69edd83214829e8d79081df4b9b488ec337337c1655ec2266a3cfcda767",
-  "notes": "v090: Cockpit-Pläne können aus mindestens einer gültigen Übung auch ohne Patient:innen-Basisdaten erzeugt werden; der neutrale Codec-Name bleibt flüchtig und alte Fehlerhinweise werden nach Erfolg gelöscht."
+  "versionCode": 91,
+  "versionName": "1.0.91-plan-add-exercise-card",
+  "indexUrl": "index.html?v=91",
+  "sha256": "52233c620b4ab1a7b6e6655eed6c1089cea560775c7c6e9330346b12eed3a7e6",
+  "notes": "v091: Kleine Plus-Karte in der Planliste öffnet den bestehenden Weg zum Hinzufügen einer weiteren Übung; Plan-State und Übungsdatenbank bleiben unverändert."
 }

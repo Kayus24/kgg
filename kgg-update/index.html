@@ -63,21 +63,22 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "ticket-015-live-fix",
     "ticket-037-real-plan",
     "changelog-archive-window-refresh",
-    "cockpit-exercises-only"
+    "cockpit-exercises-only",
+    "plan-add-exercise-card"
   ],
   "currentVersion": {
-    "versionCode": 90,
-    "versionName": "1.0.90-cockpit-exercises-only",
-    "lastPatchId": "kgg-v090-cockpit-exercises-only",
+    "versionCode": 91,
+    "versionName": "1.0.91-plan-add-exercise-card",
+    "lastPatchId": "kgg-v091-plan-add-exercise-card",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v090-cockpit-exercises-only",
+  "latestPatchId": "kgg-v091-plan-add-exercise-card",
   "lastUpdateIntent": {
-    "id": "kgg-v090-cockpit-exercises-only",
-    "summary": "Cockpit-Pläne können aus mindestens einer gültigen Übung auch ohne Patient:innen-Basisdaten erzeugt werden; der neutrale Codec-Name bleibt flüchtig und alte Fehlerhinweise werden nach Erfolg gelöscht.",
+    "id": "kgg-v091-plan-add-exercise-card",
+    "summary": "Die Planliste erhält eine kleine Plus-Karte zum Hinzufügen weiterer Übungen über den bestehenden Eingabe- und Übungsdatenbankweg.",
     "touched": [
-      "Therapie-Cockpit",
-      "Test-Harness"
+      "Planerstellung",
+      "UI"
     ],
     "notTouched": [
       "PDF",
@@ -151,21 +152,22 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "ticket-015-live-fix",
     "ticket-037-real-plan",
     "changelog-archive-window-refresh",
-    "cockpit-exercises-only"
+    "cockpit-exercises-only",
+    "plan-add-exercise-card"
   ],
   "currentVersion": {
-    "versionCode": 90,
-    "versionName": "1.0.90-cockpit-exercises-only",
-    "lastPatchId": "kgg-v090-cockpit-exercises-only",
+    "versionCode": 91,
+    "versionName": "1.0.91-plan-add-exercise-card",
+    "lastPatchId": "kgg-v091-plan-add-exercise-card",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v090-cockpit-exercises-only",
+  "latestPatchId": "kgg-v091-plan-add-exercise-card",
   "lastUpdateIntent": {
-    "id": "kgg-v090-cockpit-exercises-only",
-    "summary": "Cockpit-Pläne können aus mindestens einer gültigen Übung auch ohne Patient:innen-Basisdaten erzeugt werden; der neutrale Codec-Name bleibt flüchtig und alte Fehlerhinweise werden nach Erfolg gelöscht.",
+    "id": "kgg-v091-plan-add-exercise-card",
+    "summary": "Die Planliste erhält eine kleine Plus-Karte zum Hinzufügen weiterer Übungen über den bestehenden Eingabe- und Übungsdatenbankweg.",
     "touched": [
-      "Therapie-Cockpit",
-      "Test-Harness"
+      "Planerstellung",
+      "UI"
     ],
     "notTouched": [
       "PDF",
@@ -187,8 +189,42 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 90,
+  "latestVersionCode": 91,
   "entries": [
+    {
+      "versionCode": 91,
+      "versionName": "1.0.91-plan-add-exercise-card",
+      "patchId": "kgg-v091-plan-add-exercise-card",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Übung hinzufügen – Plus-Karte in der Planliste",
+      "reason": "Die Planliste erhält eine kleine leere Plus-Karte, die den bestehenden Eingabe- und Übungsdatenbankweg zum Hinzufügen einer weiteren Übung öffnet.",
+      "whatChanged": [
+        "Kleine leere Plus-Karte am Ende der aktuellen Planliste ergänzt.",
+        "Der Klick fokussiert den bestehenden Übungseingang und öffnet bei Bedarf die Übungsdatenbank.",
+        "Plan-State, Übungsdatenbank, Reorder-Mechanismus und Speicherweg bleiben unverändert."
+      ],
+      "touchedAreas": [
+        "Planerstellung",
+        "UI"
+      ],
+      "notTouched": [
+        "Therapie-Cockpit",
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
     {
       "versionCode": 90,
       "versionName": "1.0.90-cockpit-exercises-only",
@@ -638,37 +674,6 @@ Before editing this app, any LLM/agent/human should read these blocks:
         "certification": "pending"
       },
       "approvalNote": "Max hat den P0 Parser- und Plan-State-Fix ausdruecklich beauftragt."
-    },
-    {
-      "versionCode": 65,
-      "versionName": "1.0.65-source-control-char-guard",
-      "patchId": "kgg-v065-source-control-char-guard",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Source-Steuerzeichen-Guard",
-      "reason": "Ersetzt vier versehentliche U+0008-Zeichen durch Regex-Wortgrenzen, repariert den fehlkodierten SJIS-Prüfwert und blockiert C0-, C1- sowie DEL-Steuerzeichen in editierbaren Source-Teilen.",
-      "whatChanged": [
-        "Ersetzt vier versehentliche U+0008-Zeichen durch Regex-Wortgrenzen, repariert den fehlkodierten SJIS-Prüfwert und blockiert C0-, C1- sowie DEL-Steuerzeichen in editierbaren Source-Teilen."
-      ],
-      "touchedAreas": [
-        "Parser"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max hat den separaten Parser-Hygiene-Patch im angepassten Strukturplan ausdrücklich freigegeben."
     }
   ],
   "latestVersionName": "1.0.90-cockpit-exercises-only",
@@ -696,6 +701,14 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "entriesSha256": "9338e9ab7cc88ef314427fe9e4224da1502b9fe375833e87d121be1f051ca04c",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v090-cockpit-exercises-only"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v091.json",
+      "snapshotVersionCode": 91,
+      "entryCount": 32,
+      "entriesSha256": "49a8b739cbd3fb285351fcded6cd6a7e3bb0b73cb10ddbc098e7a3e4431d7e3a",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v091-plan-add-exercise-card"
     }
   ]
 }
@@ -813,7 +826,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v090-cockpit-exercises-only",
+  "lastUpdatedByPatchId": "kgg-v091-plan-add-exercise-card",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
@@ -948,7 +961,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v090 Therapie-Cockpit ohne Basisdaten</title>
+  <title>KGG Update v091 Übung hinzufügen</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -16860,11 +16873,11 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
 </script>
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v090_cockpit_exercises_only';
+  const VERSION='KGG_GITHUB_UPDATE_v091_plan_add_exercise_card';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v090","buildTime":"2026-09-13T08:58:08Z","buildCode":"module-v090-cockpit-exercises-only","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v091","buildTime":"2026-09-13T10:06:55Z","buildCode":"module-v091-plan-add-exercise-card","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -28503,6 +28516,108 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
 })();
 </script>
 <!-- KGG PATCH END kgg-v090-cockpit-exercises-only -->
+<!-- KGG PATCH START kgg-v091-plan-add-exercise-card -->
+<!-- Kleine Plan-Karte zum Hinzufügen einer weiteren Übung -->
+<script id="kgg-v091-plan-add-exercise-card">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v091-plan-add-exercise-card";
+  var CARD_ID="kggPlanAddExerciseCard";
+  var installed=false;
+
+  function focusExerciseComposer(){
+    var bankToggle=document.getElementById("bankToggle");
+    if(bankToggle&&bankToggle.getAttribute("aria-label")==="Übungsdatenbank öffnen")bankToggle.click();
+    var input=document.getElementById("exerciseInput");
+    if(!input)return;
+    try{input.focus({preventScroll:true});}catch(error){input.focus();}
+    try{input.scrollIntoView({behavior:"smooth",block:"center",inline:"nearest"});}catch(error){input.scrollIntoView(false);}
+  }
+
+  function removeCard(list){
+    var old=document.getElementById(CARD_ID);
+    if(old&&old.parentNode===list)old.parentNode.removeChild(old);
+  }
+
+  function decoratePlanList(){
+    var list=document.getElementById("planList");
+    if(!list)return;
+    var hasExercise=!!list.querySelector(".planCard[data-plan-id]");
+    if(!hasExercise){removeCard(list);return;}
+    var card=document.getElementById(CARD_ID);
+    if(!card){
+      card=document.createElement("button");
+      card.id=CARD_ID;
+      card.type="button";
+      card.className="planAddCard";
+      card.setAttribute("aria-label","Neue Übung hinzufügen");
+      card.innerHTML='<span class="planAddCardPlus" aria-hidden="true">+</span><span class="planAddCardText">Übung hinzufügen</span>';
+      card.addEventListener("click",focusExerciseComposer);
+    }
+    if(card.parentNode!==list)list.appendChild(card);
+  }
+
+  function install(){
+    if(installed)return;
+    var list=document.getElementById("planList");
+    if(!list){
+      setTimeout(install,50);
+      return;
+    }
+    installed=true;
+    decoratePlanList();
+    var observer=new MutationObserver(decoratePlanList);
+    observer.observe(list,{childList:true});
+    window.KGG_PATCHES=window.KGG_PATCHES||{};
+    window.KGG_PATCHES[PATCH_ID]={installed:true,version:1,dependsOn:"kgg-v090-cockpit-exercises-only"};
+  }
+
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});else install();
+})();
+</script>
+<style id="kgg-v091-plan-add-exercise-card-style">
+  .planAddCard{
+    width:100%;
+    min-height:48px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    padding:9px 12px;
+    border:1px dashed #9aa9bb;
+    border-radius:16px;
+    background:rgba(255,255,255,.78);
+    color:#26364c;
+    box-shadow:none;
+    font:inherit;
+    font-weight:900;
+    cursor:pointer;
+    transition:transform .14s ease,background-color .14s ease,border-color .14s ease,box-shadow .14s ease;
+  }
+  .planAddCard:hover,.planAddCard:focus-visible{
+    background:#edf5ff;
+    border-color:#5ea7e8;
+    box-shadow:0 5px 14px rgba(7,16,39,.08);
+  }
+  .planAddCard:active{transform:scale(.985);}
+  .planAddCardPlus{
+    width:28px;
+    height:28px;
+    display:grid;
+    place-items:center;
+    border:2px solid currentColor;
+    border-radius:999px;
+    font-size:24px;
+    line-height:1;
+  }
+  .planAddCardText{font-size:15px;line-height:1.15;}
+  @media(max-width:759px){
+    .planAddCard{min-height:44px;padding:7px 10px;border-radius:14px;gap:7px;}
+    .planAddCardPlus{width:25px;height:25px;font-size:22px;}
+    .planAddCardText{font-size:14px;}
+  }
+</style>
+<!-- KGG PATCH END kgg-v091-plan-add-exercise-card -->
 
 </body>
 </html>
