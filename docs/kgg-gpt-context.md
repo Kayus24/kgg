@@ -42,11 +42,11 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 ## Current Versions
 
-- Source web version: v89 / `1.0.89-changelog-archive-window-refresh`.
-- Source index URL: `index.html?v=89`.
-- Source notes: v089: Vollständiger aktueller Changelog-Snapshot wird unveränderlich archiviert; im Laufzeitfenster bleiben die 15 neuesten Einträge.
-- Live Admin release: `r0430` / `1.0.87-ticket-015-live-fix`.
-- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0430/admin.html`.
+- Source web version: v92 / `1.0.92-ticket-015-admin-stage-release-fixes`.
+- Source index URL: `index.html?v=92`.
+- Source notes: v092: Bewahrt den Elternentwurf, persistiert die Hauptstufe, lädt echte Upload-Bilder und macht Touch-Sortierung erreichbar.
+- Live Admin release: `r0432` / `1.0.92-ticket-015-admin-stage-release-fixes`.
+- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0432/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.
 - Live colleague URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html`.
 - Latest Android shell: `v401`.
