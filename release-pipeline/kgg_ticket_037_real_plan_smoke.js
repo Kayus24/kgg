@@ -62,6 +62,19 @@ async function addExerciseFromVisibleUi(page, name, expectedCount) {
   }
   await addButton.waitFor({ state: "visible", timeout: 5000 });
   await closeAllowedAdminModal(page);
+  await page.waitForFunction(expectedName => {
+    const button = Array.from(document.querySelectorAll("button.bankAddBtn")).find(candidate => candidate.textContent.includes(expectedName));
+    if (!button || !button.isConnected) return false;
+    const rect = button.getBoundingClientRect();
+    const geometry = [rect.x, rect.y, rect.width, rect.height].map(value => Math.round(value * 10) / 10).join(",");
+    const previous = window.__kggTicket037BankAddGeometry;
+    const now = performance.now();
+    if (!previous || previous.name !== expectedName || previous.geometry !== geometry) {
+      window.__kggTicket037BankAddGeometry = { name: expectedName, geometry, since: now };
+      return false;
+    }
+    return now - previous.since >= 120;
+  }, name, { timeout: 10000 });
   await addButton.click();
   await page.waitForFunction(expected => {
     const store = window.KGGDataStore;
