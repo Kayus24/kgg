@@ -5,12 +5,12 @@
     "path": "kgg-update/src/metadata/changelog.html",
     "elementId": "kgg-changelog",
     "versionCode": 90,
-    "versionName": "1.0.90-ticket-015-admin-stage-gallery-drag-motion"
+    "versionName": "1.0.90-cockpit-exercises-only"
   },
-  "createdByPatchId": "kgg-v090-ticket-015-admin-stage-gallery-drag-motion",
+  "createdByPatchId": "kgg-v090-cockpit-exercises-only",
   "entryOrder": "newest-first",
   "entryCount": 31,
-  "entriesSha256": "5fef50cbe435df1672155dddaa218674dd6c6412cb1861b5d0d5783dba3efa1b",
+  "entriesSha256": "9338e9ab7cc88ef314427fe9e4224da1502b9fe375833e87d121be1f051ca04c",
   "canonicalization": {
     "scope": "entries",
     "encoding": "utf-8",
@@ -26,32 +26,33 @@
   "entries": [
     {
       "versionCode": 90,
-      "versionName": "1.0.90-ticket-015-admin-stage-gallery-drag-motion",
-      "patchId": "kgg-v090-ticket-015-admin-stage-gallery-drag-motion",
-      "status": "candidate",
+      "versionName": "1.0.90-cockpit-exercises-only",
+      "patchId": "kgg-v090-cockpit-exercises-only",
+      "status": "scaffolded",
       "type": "module-patch",
-      "title": "Ticket 015 Admin-Editor: Kartenorientierte Drag-Animation",
-      "reason": "Die Progressionskarten erhalten beim Sortieren dieselbe angehobene Karten-, Platzhalter- und Schattenbewegung wie die bestehenden Übungskarten.",
+      "title": "Therapie-Cockpit ohne Basisdaten",
+      "reason": "Cockpit-Pläne können aus mindestens einer gültigen Übung auch ohne Patient:innen-Basisdaten erzeugt werden; der neutrale Codec-Name bleibt flüchtig und alte Fehlerhinweise werden nach Erfolg gelöscht.",
       "whatChanged": [
-        "Drag-and-drop/Handle-Sortierung nutzt eine angehobene Karte, einen sichtbaren Platzhalter und weiche Zwischenkartenbewegungen.",
-        "Die bestehende Progressionsgalerie, Main-Hold-Geste, Löschbestätigung und Patientenübertragung bleiben erhalten."
+        "Cockpit-Pläne können aus mindestens einer gültigen Übung auch ohne Patient:innen-Basisdaten erzeugt werden; der neutrale Codec-Name bleibt flüchtig und alte Fehlerhinweise werden nach Erfolg gelöscht."
       ],
       "touchedAreas": [
-        "Admin-Editor",
-        "Ticket-015-Smokes"
+        "Therapie-Cockpit",
+        "Test-Harness"
       ],
       "notTouched": [
-        "Numpad",
-        "Satzwerte",
         "PDF",
+        "QR/Patienten-App",
         "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
         "API-Key-Logik",
-        "Android/APK"
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
       ],
-      "supersedes": "kgg-v089-changelog-archive-window-refresh",
       "testStatus": {
         "local": "pending",
-        "browser": "pending",
         "certification": "pending"
       }
     },

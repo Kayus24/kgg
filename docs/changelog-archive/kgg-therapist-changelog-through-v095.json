@@ -4,13 +4,13 @@
   "source": {
     "path": "kgg-update/src/metadata/changelog.html",
     "elementId": "kgg-changelog",
-    "versionCode": 92,
-    "versionName": "1.0.92-cockpit-live-edit"
+    "versionCode": 95,
+    "versionName": "1.0.95-cockpit-responsive-entry"
   },
-  "createdByPatchId": "kgg-v092-cockpit-live-edit",
+  "createdByPatchId": "kgg-v095-cockpit-responsive-entry",
   "entryOrder": "newest-first",
-  "entryCount": 33,
-  "entriesSha256": "f45be1a63673425f82fa6075a77ce0070508b80ec9022aba203a309af4e962e8",
+  "entryCount": 36,
+  "entriesSha256": "0c1b56d0a436b875e4f4bdf403b95cc23150aed2d309caba8f62241dd3ed4053",
   "canonicalization": {
     "scope": "entries",
     "encoding": "utf-8",
@@ -24,6 +24,102 @@
     "trailingNewline": false
   },
   "entries": [
+    {
+      "versionCode": 95,
+      "versionName": "1.0.95-cockpit-responsive-entry",
+      "patchId": "kgg-v095-cockpit-responsive-entry",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Cockpit-Einstieg im Phone-Dock",
+      "reason": "Zeigt bei geladenen Cockpit-Trainingsplänen einen gezählten Handy-Einstieg neben dem schwebenden Scan-Dock und hält den Tablet-Einstieg leerzustandsfest.",
+      "whatChanged": [
+        "Zeigt bei geladenen Cockpit-Trainingsplänen einen gezählten Handy-Einstieg neben dem schwebenden Scan-Dock und hält den Tablet-Einstieg leerzustandsfest."
+      ],
+      "touchedAreas": [
+        "Therapie-Cockpit",
+        "Handy-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Expliziter Nutzerauftrag: Im Handy-Dock soll bei geladenen Cockpit-Trainingsplänen ein gezählter Cockpit-Button erscheinen; der Tablet-Button darf ohne Plan nicht sichtbar sein."
+    },
+    {
+      "versionCode": 94,
+      "versionName": "1.0.94-shared-reorder-core",
+      "patchId": "kgg-v094-shared-reorder-core",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Shared Reorder Core",
+      "reason": "Teilt die bestehende Reorder-Berechnung und Array-Umordnung zwischen Planerstellung und Therapie-Cockpit.",
+      "whatChanged": [
+        "Teilt die bestehende Reorder-Berechnung und Array-Umordnung zwischen Planerstellung und Therapie-Cockpit."
+      ],
+      "touchedAreas": [
+        "therapy-cockpit"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
+    {
+      "versionCode": 93,
+      "versionName": "1.0.93-cockpit-shared-editor",
+      "patchId": "kgg-v093-cockpit-shared-editor",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Cockpit gemeinsamer Editor und Progressionswechsel",
+      "reason": "Verwendet den bestehenden Übungseditor auch für Cockpit-Slots und speichert den sichtbaren Progressionswechsel pro Slot.",
+      "whatChanged": [
+        "Verwendet den bestehenden Übungseditor auch für Cockpit-Slots und speichert den sichtbaren Progressionswechsel pro Slot."
+      ],
+      "touchedAreas": [
+        "Therapie-Cockpit",
+        "Plan-State",
+        "Test-Harness"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Expliziter Zielauftrag KGG-TICKET-037: Cockpit-Übungen müssen mit denselben Planerstellungsfunktionen bearbeitbar sein; das Changelog wird über den unveränderlichen Snapshot-Mechanismus archiviert."
+    },
     {
       "versionCode": 92,
       "versionName": "1.0.92-cockpit-live-edit",

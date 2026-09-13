@@ -8,6 +8,7 @@ const { chromium } = require("playwright");
 const ROOT = path.resolve(__dirname, "..");
 const HTML_URL = pathToFileURL(path.join(ROOT, "kgg-update", "index.html")).href;
 const PATIENT = "KGG Ticket 037 Testpatient";
+const EXERCISE_ONLY_NAME = "Übungsplan ohne Patientendaten";
 const CANONICAL_APP_BLUE = "rgb(237, 245, 255)";
 const VISIBILITY_CASES = [
   { id: "tablet-820", width: 820, height: 1180, mobile: false, cockpitButtonVisible: true },
@@ -92,6 +93,27 @@ async function createNormalPlan(page, exerciseNames) {
     await addExerciseFromVisibleUi(page, exerciseNames[index], index + 1);
   }
   return readPlanContract(page);
+}
+
+async function createExerciseOnlyPlan(page, exerciseNames) {
+  await closeAllowedAdminModal(page);
+  for (let index = 0; index < exerciseNames.length; index += 1) {
+    await addExerciseFromVisibleUi(page, exerciseNames[index], index + 1);
+  }
+  return page.evaluate(fallbackName => {
+    const plan = window.KGGDataStore.getCurrentPlan();
+    const codecPlan = {
+      ...plan,
+      name: fallbackName,
+      patient: { ...(plan.patient || {}), name: fallbackName },
+    };
+    const api = window.KGGTherapyCockpit;
+    return {
+      plan,
+      contentKey: api.contentKey(api.fromPlan(codecPlan)),
+      exerciseNames: plan.exercises.map(ex => ex.name),
+    };
+  }, EXERCISE_ONLY_NAME);
 }
 
 async function closeAllowedAdminModal(page) {
@@ -284,12 +306,277 @@ async function runDirectMultiExercise(browser) {
     assert(contract.plan.exercises.length === 2, "Mehrübungsplan wurde nicht über die normale UI aufgebaut");
     await page.locator("#kggTherapyCockpitButton").click();
     await waitForCockpitState(page, 1);
-    const result = await readUiState(page);
+    let result = await readUiState(page);
     assert(result.state.slotCount === 1, "Direkter Mehrübungsimport erzeugte nicht genau Slot 1");
     assert(result.state.slots[0].name === PATIENT, "Direkter Mehrübungsimport verlor den Patientenbezug");
     assertSlotMatches(result.state, 0, contract, "Direkter Mehrübungsimport");
     assertNoPositiveError(result, "Direkter Mehrübungsimport");
-    return { exerciseNames: contract.exerciseNames, slotCount: result.state.slotCount };
+    await page.locator('.kgg-tce-tool[data-tce-action="edit"][data-tce-slot="0"][data-tce-ex="0"]').click();
+    await page.locator("#editorModal.open").waitFor({ state: "visible", timeout: 5000 });
+    await page.locator("#editName").fill("Abduktion direkt bearbeitet");
+    await page.locator("#saveExercise").click();
+    await page.locator("#editorModal.open").waitFor({ state: "hidden", timeout: 5000 });
+    await page.waitForFunction(() => {
+      const plan = window.KGGDataStore.getCurrentPlan();
+      return !!plan && plan.exercises[0] && plan.exercises[0].name === "Abduktion direkt bearbeitet";
+    }, null, { timeout: 5000 });
+    result = await readUiState(page);
+    assert(result.state.slots[0].exerciseCount === 2, "Direkter Cockpit-Edit verlor eine Übung");
+    assert(result.state.renderedExerciseNames[0][0] === "Abduktion direkt bearbeitet", "Direkter Cockpit-Edit aktualisierte Slot 1 nicht");
+    await page.locator('.kgg-tce-tool[data-tce-action="edit"][data-tce-slot="0"][data-tce-ex="1"]').click();
+    await page.locator("#editorModal.open").waitFor({ state: "visible", timeout: 5000 });
+    await page.locator("#editSets").selectOption("3");
+    await page.locator("#saveExercise").click();
+    await page.waitForFunction(() => {
+      const plan = window.KGGDataStore.getCurrentPlan();
+      return !!plan && plan.exercises[1] && Number(plan.exercises[1].sets) === 3;
+    }, null, { timeout: 5000 });
+    result = await readUiState(page);
+    assert(result.state.slots[0].exerciseCount === 2, "zweiter direkter Cockpit-Edit verlor eine Übung");
+    return { exerciseNames: ["Abduktion direkt bearbeitet", contract.exerciseNames[1]], slotCount: result.state.slotCount, syncedToCurrentPlan: true, repeatedEditSync: true };
+  } finally {
+    await context.close();
+  }
+}
+
+async function runContinuousCockpitLiveEdit(browser) {
+  const test = { id: "continuous-live-edit-1024", width: 1024, height: 768, mobile: false };
+  const { context, page } = await boot(browser, test);
+  let freshContext;
+  let freshPage;
+  const pageErrors = [];
+  page.on("pageerror", error => pageErrors.push(error.message));
+  try {
+    const initial = await createNormalPlan(page, ["Abduktion Maschine", "Adduktion Maschine"]);
+    assert(initial.plan.exercises.length === 2, `${test.id}: normaler Ausgangsplan wurde nicht über die sichtbare UI aufgebaut`);
+    const rootButton = page.locator("#kggTherapyCockpitButton");
+    assert(await visible(rootButton), `${test.id}: sichtbarer Cockpit-Button fehlt`);
+    await rootButton.click();
+    await waitForCockpitState(page, 1);
+
+    const initialSlot = await page.evaluate(() => window.KGGTherapyCockpit.getSlot(0));
+    assert(initialSlot.name === PATIENT && initialSlot.exercises.length === 2, `${test.id}: Rootbutton erzeugte keinen vollständigen Slot 1`);
+
+    // Werte ausschließlich über das sichtbare Cockpit-Numpad setzen. Diese Werte
+    // dienen als Identitätsanker für Reorder, Löschen und den Link-Roundtrip.
+    await page.locator('[data-tc-action="toggle"][data-tc-slot="0"][data-tc-ex="0"]').click();
+    await page.locator('[data-tc-action="input"][data-tc-slot="0"][data-tc-ex="0"][data-tc-set="0"][data-tc-field="load"]').click();
+    await page.locator('[data-tc-action="key"][data-tc-slot="0"][data-tc-ex="0"][data-tc-set="0"][data-tc-field="load"][data-tc-key="8"]').click();
+    await page.locator('[data-tc-action="key"][data-tc-slot="0"][data-tc-ex="0"][data-tc-set="0"][data-tc-field="load"][data-tc-key="OK"]').click();
+    await page.locator('[data-tc-action="input"][data-tc-slot="0"][data-tc-ex="0"][data-tc-set="0"][data-tc-field="metric"]').click();
+    await page.locator('[data-tc-action="key"][data-tc-slot="0"][data-tc-ex="0"][data-tc-set="0"][data-tc-field="metric"][data-tc-key="1"]').click();
+    await page.locator('[data-tc-action="key"][data-tc-slot="0"][data-tc-ex="0"][data-tc-set="0"][data-tc-field="metric"][data-tc-key="0"]').click();
+    await page.locator('[data-tc-action="key"][data-tc-slot="0"][data-tc-ex="0"][data-tc-set="0"][data-tc-field="metric"][data-tc-key="OK"]').click();
+
+    await page.locator('.kgg-tce-tool[data-tce-action="edit"][data-tce-slot="0"][data-tce-ex="0"]').click();
+    await page.locator("#editorModal.open").waitFor({ state: "visible", timeout: 5000 });
+    await page.locator("#editName").fill("Abduktion live final");
+    await page.locator("#editSets").selectOption("4");
+    await page.locator("#editLoad").fill("33");
+    await page.locator("#editMetric").fill("12");
+    await page.locator("#kggCockpitAddStage").click();
+    await page.locator("[data-cockpit-stage-name]").last().fill("Schwerere Stufe");
+    await page.locator("#kggCockpitAddStage").click();
+    await page.locator("[data-cockpit-stage-name]").last().fill("Leichtere Stufe");
+    await page.locator("#saveExercise").click();
+    await page.locator("#editorModal.open").waitFor({ state: "hidden", timeout: 5000 });
+    let edited = await page.evaluate(() => window.KGGTherapyCockpit.getSlot(0));
+    assert(edited.exercises[0].name === "Abduktion live final" && edited.exercises[0].sets === 4 && edited.exercises[0].startLoad === "33" && edited.exercises[0].startMetric === "12", `${test.id}: Cockpit-Editor hat die Bearbeitung nicht gespeichert`);
+    assert(edited.exercises[0].progressionVariants.length === 2, `${test.id}: Progressionsstufen wurden nicht gespeichert`);
+
+    const stageSelect = page.locator('[data-tce-stage-switch="1"]').first();
+    await stageSelect.evaluate(select => {
+      const option = Array.from(select.options).find(item => item.textContent.trim() === "Leichtere Stufe");
+      if (!option) throw new Error("visible progression stage option missing");
+      select.value = option.value;
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    await page.waitForTimeout(120);
+    edited = await page.evaluate(() => window.KGGTherapyCockpit.getSlot(0));
+    assert(edited.exercises[0].activeProgressionId === edited.exercises[0].progressionVariants[1].id, `${test.id}: Progressionsstufe ließ sich nicht wechseln`);
+
+    await page.locator('.kgg-tce-add-card[data-tce-slot="0"]').click();
+    await page.waitForSelector("#kggTceAddModal:not([hidden])", { timeout: 5000 });
+    await page.locator("#kggTceAddModal .kgg-tce-bank-search").fill("Bridging");
+    await page.locator('#kggTceAddModal [data-tce-bank-id]').first().click();
+    await page.waitForSelector("#kggTceAddModal[hidden]", { state: "hidden", timeout: 5000 });
+    let afterAdd = await page.evaluate(() => window.KGGTherapyCockpit.getSlot(0));
+    assert(afterAdd.exercises.length === 3 && afterAdd.exercises[2].name === "Bridging", `${test.id}: Plus-Karte fügte keine Übung hinzu`);
+
+    const handles = page.locator('.kgg-tc-card[data-tc-card="0"] .kgg-tce-drag');
+    const sourceBox = await handles.nth(2).boundingBox();
+    const targetBox = await handles.nth(0).boundingBox();
+    assert(sourceBox && targetBox, `${test.id}: sichtbare Reorder-Handles fehlen`);
+    await page.mouse.move(sourceBox.x + sourceBox.width / 2, sourceBox.y + sourceBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(targetBox.x + targetBox.width / 2, targetBox.y - 18, { steps: 6 });
+    await page.mouse.up();
+    await page.waitForTimeout(250);
+    const afterMove = await page.evaluate(() => window.KGGTherapyCockpit.getSlot(0));
+    assert(afterMove.exercises.map(ex => ex.name).join("|") === "Bridging|Abduktion live final|Adduktion Maschine", `${test.id}: Cockpit-Reorder über sichtbaren Handle war falsch`);
+    const movedEdited = afterMove.exercises[1];
+    assert(movedEdited.today[0][0] === "8" && movedEdited.today[0][1] === "10" && movedEdited.activeProgressionId === movedEdited.progressionVariants[1].id, `${test.id}: Reorder verlor Werte oder Progressionsstufe`);
+
+    const downwardSource = await page.locator('.kgg-tc-card[data-tc-card="0"] .kgg-tce-drag').nth(0).boundingBox();
+    const downwardTarget = await page.locator('.kgg-tc-card[data-tc-card="0"] .kgg-tc-exercise').nth(2).boundingBox();
+    assert(downwardSource && downwardTarget, `${test.id}: sichtbare Handles für den zweiten Reorder fehlen`);
+    await page.evaluate(() => {
+      const exercises = Array.from(document.querySelectorAll('.kgg-tc-card[data-tc-card="0"] .kgg-tc-exercise'));
+      const source = exercises[0] && exercises[0].querySelector(".kgg-tce-drag");
+      const target = exercises[2];
+      if (!source || !target) throw new Error("downward reorder DOM target missing");
+      const sourceRect = source.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      const emit = (type, targetNode, x, y) => targetNode.dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true, pointerId: 91, pointerType: "mouse", isPrimary: true, button: 0, clientX: x, clientY: y }));
+      emit("pointerdown", source, sourceRect.left + sourceRect.width / 2, sourceRect.top + sourceRect.height / 2);
+      emit("pointermove", document, sourceRect.left + sourceRect.width / 2, targetRect.bottom + 24);
+      emit("pointerup", document, sourceRect.left + sourceRect.width / 2, targetRect.bottom + 24);
+    });
+    await page.waitForTimeout(250);
+    const afterDownwardMove = await page.evaluate(() => window.KGGTherapyCockpit.getSlot(0));
+    assert(afterDownwardMove.exercises.map(ex => ex.name).join("|") === "Abduktion live final|Adduktion Maschine|Bridging", `${test.id}: Cockpit-Reorder nach unten war falsch: ${afterDownwardMove.exercises.map(ex => ex.name).join("|")}`);
+    assert(afterDownwardMove.exercises[0].today[0][0] === "8" && afterDownwardMove.exercises[0].today[0][1] === "10", `${test.id}: Abwärts-Reorder verlor Werte`);
+
+    await page.locator('.kgg-tce-tool[data-tce-action="edit"][data-tce-slot="0"][data-tce-ex="1"]').click();
+    await page.locator("#editorModal.open").waitFor({ state: "visible", timeout: 5000 });
+    page.once("dialog", dialog => dialog.accept());
+    await page.locator("#deleteExercise").click();
+    await page.waitForTimeout(300);
+    const afterDelete = await page.evaluate(() => window.KGGTherapyCockpit.getSlot(0));
+    assert(afterDelete.exercises.length === 2 && afterDelete.exercises.map(ex => ex.name).join("|") === "Abduktion live final|Bridging", `${test.id}: Cockpit-Löschen entfernte nicht nur die Zielübung`);
+    assert(afterDelete.exercises[0].today[0][0] === "8" && afterDelete.exercises[0].today[0][1] === "10", `${test.id}: Löschen beschädigte den bearbeiteten Übungszustand`);
+
+    await page.locator('[data-tc-action="finish"][data-tc-slot="0"]').click();
+    await page.waitForSelector("#kggTherapyCockpitOutputModal:not([hidden])", { timeout: 5000 });
+    const output = await page.locator("#kggTherapyCockpitOutput").inputValue();
+    const linkMatch = output.match(/https:\/\/[^\s]+[?&]cockpit=[^\s]+/);
+    assert(linkMatch, `${test.id}: Plan-fertig-Ausgabe enthält keinen neuen Cockpit-Link`);
+    const generatedUrl = new URL(linkMatch[0]);
+    assert(generatedUrl.searchParams.has("cockpit"), `${test.id}: erzeugter Link enthält keinen Cockpit-Parameter`);
+
+    freshContext = await browser.newContext({ viewport: { width: 1024, height: 768 }, deviceScaleFactor: 1, hasTouch: true, isMobile: false, locale: "de-DE" });
+    freshPage = await freshContext.newPage();
+    freshPage.on("pageerror", error => pageErrors.push(error.message));
+    await freshPage.addInitScript(() => { localStorage.setItem("kgg_pwa_install_prompt_seen_v1", "ticket-037-continuous-live-edit"); });
+    const localRoundtripUrl = new URL(HTML_URL);
+    localRoundtripUrl.search = generatedUrl.search;
+    await freshPage.goto(localRoundtripUrl.toString(), { waitUntil: "domcontentloaded", timeout: 30000 });
+    await waitForCockpitState(freshPage, 1);
+    const imported = await freshPage.evaluate(() => ({ state: window.KGGTherapyCockpit.getState(), slot: window.KGGTherapyCockpit.getSlot(0) }));
+    assert(imported.state.slotCount === 1 && imported.slot.name === PATIENT, `${test.id}: neuer Link importierte Slot 1/Patient nicht korrekt`);
+    assert(imported.slot.exercises.map(ex => ex.name).join("|") === "Abduktion live final|Bridging", `${test.id}: neuer Link verlor Reihenfolge oder Löschung`);
+    const importedEdited = imported.slot.exercises[0];
+    assert(importedEdited.sets === 4 && importedEdited.startLoad === "33" && importedEdited.startMetric === "12" && importedEdited.today[0][0] === "8" && importedEdited.today[0][1] === "10", `${test.id}: neuer Link verlor bearbeitete Felder oder Werte`);
+    assert(importedEdited.activeProgressionId === importedEdited.progressionVariants[1].id, `${test.id}: neuer Link verlor die aktive Progressionsstufe`);
+    assert(!pageErrors.length, `${test.id}: Browserfehler: ${pageErrors.join(" | ")}`);
+    return {
+      id: test.id,
+      slotCount: imported.state.slotCount,
+      exerciseNames: imported.slot.exercises.map(ex => ex.name),
+      editedExercise: { sets: importedEdited.sets, startLoad: importedEdited.startLoad, today: importedEdited.today, activeProgressionId: importedEdited.activeProgressionId },
+      linkChars: linkMatch[0].length,
+    };
+  } finally {
+    if (freshContext) await freshContext.close();
+    await context.close();
+  }
+}
+
+async function runExerciseOnly(browser) {
+  const test = { id: "exercise-only-1024", width: 1024, height: 768, mobile: false };
+  const { context, page } = await boot(browser, test);
+  try {
+    const contract = await createExerciseOnlyPlan(page, ["Abduktion Maschine", "Adduktion Maschine"]);
+    assert(!contract.plan.patient.name && !contract.plan.name && !contract.plan.patientName, "Übungen-only-Setup enthält unerwartete Basisdaten");
+    const rootButton = page.locator("#kggTherapyCockpitButton");
+    assert(await visible(rootButton), "Übungen-only-Plan zeigt den Cockpit-Button nicht an");
+
+    await rootButton.click();
+    await waitForCockpitState(page, 1);
+    let result = await readUiState(page);
+    assert(result.state.slotCount === 1, "Übungen-only-Import erzeugte nicht Slot 1");
+    assert(result.state.slots[0].name === EXERCISE_ONLY_NAME, "Übungen-only-Import verwendet nicht den neutralen Namen");
+    assertSlotMatches(result.state, 0, contract, "Übungen-only-Import");
+    assertNoPositiveError(result, "Übungen-only-Import");
+
+    await page.locator('[data-tc-action="remove"][data-tc-slot="0"]').click();
+    await waitForNormalState(page);
+    await openFinishDialog(page);
+    await page.locator("#finishCockpitBtn").click();
+    await waitForCockpitState(page, 1);
+    result = await readUiState(page);
+    assert(result.state.slotCount === 1, "Übungen-only-Fertig-Import erzeugte nicht Slot 1");
+    assert(result.state.slots[0].name === EXERCISE_ONLY_NAME, "Übungen-only-Fertig-Import verwendet nicht den neutralen Namen");
+    assertSlotMatches(result.state, 0, contract, "Übungen-only-Fertig-Import");
+    assertNoPositiveError(result, "Übungen-only-Fertig-Import");
+    return { exerciseNames: contract.exerciseNames, slotCount: result.state.slotCount, fallbackName: EXERCISE_ONLY_NAME };
+  } finally {
+    await context.close();
+  }
+}
+
+async function runPhoneCockpitEntry(browser) {
+  const test = { id: "phone-cockpit-entry-390", width: 390, height: 844, mobile: true };
+  const { context, page } = await boot(browser, test);
+  try {
+    const initial = await createNormalPlan(page, ["Abduktion Maschine"]);
+    const initialButton = page.locator("#kggTherapyCockpitButton");
+    assert(!(await visible(initialButton)), `${test.id}: leerer Cockpit-State zeigt bereits den Handy-Einstieg`);
+
+    const generatedLink = await page.evaluate(() => {
+      const plan = window.KGGDataStore.getCurrentPlan();
+      const api = window.KGGTherapyCockpit;
+      return api.makeLink(api.fromPlan(plan));
+    });
+    const localRoundtripUrl = new URL(HTML_URL);
+    localRoundtripUrl.search = new URL(generatedLink).search;
+    await page.goto(localRoundtripUrl.toString(), { waitUntil: "domcontentloaded", timeout: 30000 });
+    await waitForCockpitState(page, 1);
+    await page.locator('[data-tc-action="normal"]').click();
+    await waitForNormalState(page);
+
+    const entry = page.locator("#kggTherapyCockpitButton");
+    await entry.waitFor({ state: "visible", timeout: 5000 });
+    const firstLayout = await page.evaluate(() => {
+      const scan = document.querySelector("#scanBtn");
+      const entry = document.querySelector("#kggTherapyCockpitButton");
+      const scanRect = scan.getBoundingClientRect();
+      const entryRect = entry.getBoundingClientRect();
+      const overlap = !(scanRect.right <= entryRect.left || entryRect.right <= scanRect.left || scanRect.bottom <= entryRect.top || entryRect.bottom <= scanRect.top);
+      return {
+        parentId: entry.parentElement && entry.parentElement.id,
+        text: entry.textContent.trim(),
+        scanVisible: !!(scan.offsetWidth && scan.offsetHeight),
+        entryVisible: !!(entry.offsetWidth && entry.offsetHeight),
+        overlap,
+      };
+    });
+    assert(firstLayout.parentId === "scanHub", `${test.id}: Cockpit-Einstieg liegt nicht direkt im schwebenden Scan-Dock`);
+    assert(firstLayout.text === "Cockpit · 1 Plan", `${test.id}: falsche Zählung für einen geladenen Trainingsplan: ${firstLayout.text}`);
+    assert(firstLayout.scanVisible && firstLayout.entryVisible && !firstLayout.overlap, `${test.id}: Scan- und Cockpit-Einstieg überlappen oder sind nicht sichtbar`);
+
+    await entry.click();
+    await waitForCockpitState(page, 1);
+    await page.locator('[data-tc-action="normal"]').click();
+    await waitForNormalState(page);
+    await addExerciseFromVisibleUi(page, "Adduktion Maschine", 2);
+    const secondLink = await page.evaluate(() => {
+      const plan = window.KGGDataStore.getCurrentPlan();
+      const api = window.KGGTherapyCockpit;
+      return api.makeLink(api.fromPlan(plan));
+    });
+    await entry.click();
+    await waitForCockpitState(page, 1);
+    await page.locator('[data-tc-action="import-open"]').click();
+    await page.locator("#kggTherapyCockpitImportInput").fill(secondLink);
+    await page.locator('[data-tc-action="import-submit"]').click();
+    await waitForCockpitState(page, 2);
+    await page.locator('[data-tc-action="normal"]').click();
+    await waitForNormalState(page);
+    await entry.waitFor({ state: "visible", timeout: 5000 });
+    const secondLabel = await entry.textContent();
+    assert(secondLabel.trim() === "Cockpit · 2 Pläne", `${test.id}: falsche Zählung für zwei geladene Trainingspläne: ${secondLabel}`);
+    return { id: test.id, firstLabel: firstLayout.text, secondLabel: secondLabel.trim(), parentId: firstLayout.parentId, noOverlap: !firstLayout.overlap };
   } finally {
     await context.close();
   }
@@ -435,11 +722,17 @@ async function runInvalidIdNegative(browser, test) {
   const flows = [];
   let completeVisibilityMatrix;
   let directMultiExercise;
+  let continuousLiveEdit;
+  let exerciseOnly;
+  let phoneCockpitEntry;
   let negative;
   try {
     for (const test of VISIBILITY_CASES) visibility.push(await runVisibility(browser, test));
     completeVisibilityMatrix = await runCompleteVisibilityMatrix(browser);
     directMultiExercise = await runDirectMultiExercise(browser);
+    continuousLiveEdit = await runContinuousCockpitLiveEdit(browser);
+    exerciseOnly = await runExerciseOnly(browser);
+    phoneCockpitEntry = await runPhoneCockpitEntry(browser);
     for (const test of FLOW_CASES) flows.push(await runPositive(browser, test));
     negative = await runInvalidIdNegative(browser, FLOW_CASES.find(test => test.width === 1024) || FLOW_CASES[0]);
   } finally {
@@ -451,6 +744,10 @@ async function runInvalidIdNegative(browser, test) {
     checks: [
       "complete root-button visibility matrix",
       "normal UI plan plus visible root-button double-click to slot 1",
+      "normal UI plan with exercises only through root button and Finish action",
+      "phone Cockpit entry appears only for loaded plans and counts loaded plans",
+      "direct current-plan Cockpit edit sync and repeated edit sync",
+      "continuous visible Cockpit add/edit/reorder/progression/delete/finish and fresh-link import",
       "second root click navigates without duplicating slot 1",
       "identical Finish text import deduplication",
       "same planId with normal UI content change to slot 2",
@@ -464,6 +761,9 @@ async function runInvalidIdNegative(browser, test) {
     visibilityMatrix: visibility,
     completeVisibilityMatrix,
     directMultiExercise,
+    continuousLiveEdit,
+    exerciseOnly,
+    phoneCockpitEntry,
     flows,
     negative,
   }, null, 2));

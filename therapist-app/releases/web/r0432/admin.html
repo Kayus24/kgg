@@ -63,23 +63,26 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "ticket-015-live-fix",
     "ticket-037-real-plan",
     "changelog-archive-window-refresh",
-    "ticket-015-admin-stage-gallery-drag-motion",
-    "ticket-015-admin-stage-compact",
-    "ticket-015-admin-stage-release-fixes"
+    "cockpit-exercises-only",
+    "plan-add-exercise-card",
+    "cockpit-live-edit",
+    "cockpit-shared-editor",
+    "shared-reorder-core",
+    "cockpit-responsive-entry"
   ],
   "currentVersion": {
-    "versionCode": 92,
-    "versionName": "1.0.92-ticket-015-admin-stage-release-fixes",
-    "lastPatchId": "kgg-v092-ticket-015-admin-stage-release-fixes",
+    "versionCode": 95,
+    "versionName": "1.0.95-cockpit-responsive-entry",
+    "lastPatchId": "kgg-v095-cockpit-responsive-entry",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v092-ticket-015-admin-stage-release-fixes",
+  "latestPatchId": "kgg-v095-cockpit-responsive-entry",
   "lastUpdateIntent": {
-    "id": "kgg-v092-ticket-015-admin-stage-release-fixes",
-    "summary": "Bewahrt den Elternentwurf, persistiert die Hauptstufe, lädt echte Upload-Bilder und macht Touch-Sortierung erreichbar.",
+    "id": "kgg-v095-cockpit-responsive-entry",
+    "summary": "Zeigt bei geladenen Cockpit-Trainingsplänen einen gezählten Handy-Einstieg neben dem schwebenden Scan-Dock und hält den Tablet-Einstieg leerzustandsfest.",
     "touched": [
-      "Admin-Editor",
-      "Ticket-015-Smokes"
+      "Therapie-Cockpit",
+      "Handy-Layout"
     ],
     "notTouched": [
       "PDF",
@@ -90,8 +93,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
-      "GitHub Manifest",
-      "Handy-Layout"
+      "GitHub Manifest"
     ]
   }
 }
@@ -153,23 +155,26 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "ticket-015-live-fix",
     "ticket-037-real-plan",
     "changelog-archive-window-refresh",
-    "ticket-015-admin-stage-gallery-drag-motion",
-    "ticket-015-admin-stage-compact",
-    "ticket-015-admin-stage-release-fixes"
+    "cockpit-exercises-only",
+    "plan-add-exercise-card",
+    "cockpit-live-edit",
+    "cockpit-shared-editor",
+    "shared-reorder-core",
+    "cockpit-responsive-entry"
   ],
   "currentVersion": {
-    "versionCode": 92,
-    "versionName": "1.0.92-ticket-015-admin-stage-release-fixes",
-    "lastPatchId": "kgg-v092-ticket-015-admin-stage-release-fixes",
+    "versionCode": 95,
+    "versionName": "1.0.95-cockpit-responsive-entry",
+    "lastPatchId": "kgg-v095-cockpit-responsive-entry",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v092-ticket-015-admin-stage-release-fixes",
+  "latestPatchId": "kgg-v095-cockpit-responsive-entry",
   "lastUpdateIntent": {
-    "id": "kgg-v092-ticket-015-admin-stage-release-fixes",
-    "summary": "Bewahrt den Elternentwurf, persistiert die Hauptstufe, lädt echte Upload-Bilder und macht Touch-Sortierung erreichbar.",
+    "id": "kgg-v095-cockpit-responsive-entry",
+    "summary": "Zeigt bei geladenen Cockpit-Trainingsplänen einen gezählten Handy-Einstieg neben dem schwebenden Scan-Dock und hält den Tablet-Einstieg leerzustandsfest.",
     "touched": [
-      "Admin-Editor",
-      "Ticket-015-Smokes"
+      "Therapie-Cockpit",
+      "Handy-Layout"
     ],
     "notTouched": [
       "PDF",
@@ -180,8 +185,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
-      "GitHub Manifest",
-      "Handy-Layout"
+      "GitHub Manifest"
     ]
   }
 }
@@ -191,22 +195,53 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 92,
+  "latestVersionCode": 95,
   "entries": [
     {
-      "versionCode": 92,
-      "versionName": "1.0.92-ticket-015-admin-stage-release-fixes",
-      "patchId": "kgg-v092-ticket-015-admin-stage-release-fixes",
+      "versionCode": 95,
+      "versionName": "1.0.95-cockpit-responsive-entry",
+      "patchId": "kgg-v095-cockpit-responsive-entry",
       "status": "scaffolded",
       "type": "module-patch",
-      "title": "Ticket 015 Admin-Editor: Release- und Gesten-Fixes",
-      "reason": "Bewahrt den Elternentwurf, persistiert die Hauptstufe, lädt echte Upload-Bilder und macht Touch-Sortierung erreichbar.",
+      "title": "Cockpit-Einstieg im Phone-Dock",
+      "reason": "Zeigt bei geladenen Cockpit-Trainingsplänen einen gezählten Handy-Einstieg neben dem schwebenden Scan-Dock und hält den Tablet-Einstieg leerzustandsfest.",
       "whatChanged": [
-        "Bewahrt den Elternentwurf, persistiert die Hauptstufe, lädt echte Upload-Bilder und macht Touch-Sortierung erreichbar."
+        "Zeigt bei geladenen Cockpit-Trainingsplänen einen gezählten Handy-Einstieg neben dem schwebenden Scan-Dock und hält den Tablet-Einstieg leerzustandsfest."
       ],
       "touchedAreas": [
-        "Admin-Editor",
-        "Ticket-015-Smokes"
+        "Therapie-Cockpit",
+        "Handy-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Expliziter Nutzerauftrag: Im Handy-Dock soll bei geladenen Cockpit-Trainingsplänen ein gezählter Cockpit-Button erscheinen; der Tablet-Button darf ohne Plan nicht sichtbar sein."
+    },
+    {
+      "versionCode": 94,
+      "versionName": "1.0.94-shared-reorder-core",
+      "patchId": "kgg-v094-shared-reorder-core",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Shared Reorder Core",
+      "reason": "Teilt die bestehende Reorder-Berechnung und Array-Umordnung zwischen Planerstellung und Therapie-Cockpit.",
+      "whatChanged": [
+        "Teilt die bestehende Reorder-Berechnung und Array-Umordnung zwischen Planerstellung und Therapie-Cockpit."
+      ],
+      "touchedAreas": [
+        "therapy-cockpit"
       ],
       "notTouched": [
         "PDF",
@@ -226,21 +261,88 @@ Before editing this app, any LLM/agent/human should read these blocks:
       }
     },
     {
-      "versionCode": 91,
-      "versionName": "1.0.91-ticket-015-admin-stage-compact",
-      "patchId": "kgg-v091-ticket-015-admin-stage-compact",
+      "versionCode": 93,
+      "versionName": "1.0.93-cockpit-shared-editor",
+      "patchId": "kgg-v093-cockpit-shared-editor",
       "status": "scaffolded",
       "type": "module-patch",
-      "title": "Ticket 015 Admin-Editor: Kompakte Progressionsstufen",
-      "reason": "Progressionsstufen-Karten werden kompakter, behalten ihre Bilder und erhalten klar getrennte Tipp-, Halte-, Sortier- und Löschgesten.",
+      "title": "Cockpit gemeinsamer Editor und Progressionswechsel",
+      "reason": "Verwendet den bestehenden Übungseditor auch für Cockpit-Slots und speichert den sichtbaren Progressionswechsel pro Slot.",
       "whatChanged": [
-        "Progressionsstufen-Karten werden kompakter, behalten ihre Bilder und erhalten klar getrennte Tipp-, Halte-, Sortier- und Löschgesten."
+        "Verwendet den bestehenden Übungseditor auch für Cockpit-Slots und speichert den sichtbaren Progressionswechsel pro Slot."
       ],
       "touchedAreas": [
-        "Admin-Editor",
-        "Ticket-015-Smokes"
+        "Therapie-Cockpit",
+        "Plan-State",
+        "Test-Harness"
       ],
       "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Expliziter Zielauftrag KGG-TICKET-037: Cockpit-Übungen müssen mit denselben Planerstellungsfunktionen bearbeitbar sein; das Changelog wird über den unveränderlichen Snapshot-Mechanismus archiviert."
+    },
+    {
+      "versionCode": 92,
+      "versionName": "1.0.92-cockpit-live-edit",
+      "patchId": "kgg-v092-cockpit-live-edit",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Therapie-Cockpit direkt bearbeiten",
+      "reason": "Erweitert das Cockpit um vollständige Übungsbearbeitung pro Slot und eine mobile aktive Patient:innenkarte.",
+      "whatChanged": [
+        "Erweitert das Cockpit um vollständige Übungsbearbeitung pro Slot und eine mobile aktive Patient:innenkarte."
+      ],
+      "touchedAreas": [
+        "Handy-Layout",
+        "Plan-State",
+        "Medien/Upload"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Expliziter Nutzerauftrag: Cockpit-Pläne direkt auf Phone und Tablet vollständig bearbeiten."
+    },
+    {
+      "versionCode": 91,
+      "versionName": "1.0.91-plan-add-exercise-card",
+      "patchId": "kgg-v091-plan-add-exercise-card",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Übung hinzufügen – Plus-Karte in der Planliste",
+      "reason": "Die Planliste erhält eine kleine leere Plus-Karte, die den bestehenden Eingabe- und Übungsdatenbankweg zum Hinzufügen einer weiteren Übung öffnet.",
+      "whatChanged": [
+        "Kleine leere Plus-Karte am Ende der aktuellen Planliste ergänzt.",
+        "Der Klick fokussiert den bestehenden Übungseingang und öffnet bei Bedarf die Übungsdatenbank.",
+        "Plan-State, Übungsdatenbank, Reorder-Mechanismus und Speicherweg bleiben unverändert."
+      ],
+      "touchedAreas": [
+        "Planerstellung",
+        "UI"
+      ],
+      "notTouched": [
+        "Therapie-Cockpit",
         "PDF",
         "QR/Patienten-App",
         "Scan/OCR",
@@ -249,8 +351,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
         "Medien/Upload",
         "API-Key-Logik",
         "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
+        "GitHub Manifest"
       ],
       "testStatus": {
         "local": "pending",
@@ -259,32 +360,33 @@ Before editing this app, any LLM/agent/human should read these blocks:
     },
     {
       "versionCode": 90,
-      "versionName": "1.0.90-ticket-015-admin-stage-gallery-drag-motion",
-      "patchId": "kgg-v090-ticket-015-admin-stage-gallery-drag-motion",
-      "status": "candidate",
+      "versionName": "1.0.90-cockpit-exercises-only",
+      "patchId": "kgg-v090-cockpit-exercises-only",
+      "status": "scaffolded",
       "type": "module-patch",
-      "title": "Ticket 015 Admin-Editor: Kartenorientierte Drag-Animation",
-      "reason": "Die Progressionskarten erhalten beim Sortieren dieselbe angehobene Karten-, Platzhalter- und Schattenbewegung wie die bestehenden Übungskarten.",
+      "title": "Therapie-Cockpit ohne Basisdaten",
+      "reason": "Cockpit-Pläne können aus mindestens einer gültigen Übung auch ohne Patient:innen-Basisdaten erzeugt werden; der neutrale Codec-Name bleibt flüchtig und alte Fehlerhinweise werden nach Erfolg gelöscht.",
       "whatChanged": [
-        "Drag-and-drop/Handle-Sortierung nutzt eine angehobene Karte, einen sichtbaren Platzhalter und weiche Zwischenkartenbewegungen.",
-        "Die bestehende Progressionsgalerie, Main-Hold-Geste, Löschbestätigung und Patientenübertragung bleiben erhalten."
+        "Cockpit-Pläne können aus mindestens einer gültigen Übung auch ohne Patient:innen-Basisdaten erzeugt werden; der neutrale Codec-Name bleibt flüchtig und alte Fehlerhinweise werden nach Erfolg gelöscht."
       ],
       "touchedAreas": [
-        "Admin-Editor",
-        "Ticket-015-Smokes"
+        "Therapie-Cockpit",
+        "Test-Harness"
       ],
       "notTouched": [
-        "Numpad",
-        "Satzwerte",
         "PDF",
+        "QR/Patienten-App",
         "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
         "API-Key-Logik",
-        "Android/APK"
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
       ],
-      "supersedes": "kgg-v089-changelog-archive-window-refresh",
       "testStatus": {
         "local": "pending",
-        "browser": "pending",
         "certification": "pending"
       }
     },
@@ -576,107 +678,9 @@ Before editing this app, any LLM/agent/human should read these blocks:
         "certification": "pending"
       },
       "approvalNote": "Ticket 012: mehrseitige Papierpläne müssen über alle Seiten fortlaufend nummeriert werden."
-    },
-    {
-      "versionCode": 70,
-      "versionName": "1.0.70-tablet-package-save",
-      "patchId": "kgg-v070-tablet-package-save",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Tablet-Paketbutton wiederherstellen",
-      "reason": "Der bereits vorhandene Paket-Speichern-Dialog war in der Tablet-Ansicht nicht sichtbar bzw. erreichbar.",
-      "whatChanged": [
-        "Verschiebt ausschließlich den bestehenden savePackageBtn im Tablet-Modus in die Kopfzeile des aktuellen Plans und lässt den vorhandenen Dialog-Handler unverändert.",
-        "Sichert für diesen Tablet-Button ein Touch-Ziel von mindestens 56 x 44 px."
-      ],
-      "touchedAreas": [
-        "Tablet-Layout",
-        "UI-Regressionstests"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Storage",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max hat die Wiederherstellung des Tablet-Paketbuttons und ein mindestens 44px hohes Tablet-Touch-Ziel ausdrücklich freigegeben."
-    },
-    {
-      "versionCode": 69,
-      "versionName": "1.0.69-plan-text-recovery-finalize",
-      "patchId": "kgg-v069-plan-text-recovery-finalize",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Live-Plantext Recovery abschliessen",
-      "reason": "Persistiert eine tatsaechliche Boot-Reparatur und unterscheidet kurze Zwischenedits von finalen Umbenennungen.",
-      "whatChanged": [
-        "Persistiert eine tatsaechliche Boot-Reparatur und unterscheidet kurze Zwischenedits von finalen Umbenennungen."
-      ],
-      "touchedAreas": [
-        "Plan-State",
-        "Storage"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Vom Code-Review beauftragter P1-Folgepatch: Live-Text-Plan-State und lokale Persistenz muessen ohne Datenverlust korrigiert werden."
-    },
-    {
-      "versionCode": 68,
-      "versionName": "1.0.68-plan-text-boot-restore",
-      "patchId": "kgg-v068-plan-text-boot-restore",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Plan-Text Boot Restore",
-      "reason": "Stellt gueltigen gespeicherten Live-Plantext beim Start wieder her und schuetzt nur kurz unvollstaendige Namenssegmente.",
-      "whatChanged": [
-        "Stellt gueltigen gespeicherten Live-Plantext beim Start wieder her und schuetzt nur kurz unvollstaendige Namenssegmente."
-      ],
-      "touchedAreas": [
-        "Parser",
-        "Plan-State"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Expliziter P0-Folgefix: Textfeld bleibt Live-Master, bestehende Mehruebungsplaene duerfen beim Boot oder bei Teilbearbeitung nicht verloren gehen."
     }
   ],
-  "latestVersionName": "1.0.92-ticket-015-admin-stage-release-fixes",
+  "latestVersionName": "1.0.95-cockpit-responsive-entry",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -698,25 +702,49 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v090.json",
       "snapshotVersionCode": 90,
       "entryCount": 31,
-      "entriesSha256": "5fef50cbe435df1672155dddaa218674dd6c6412cb1861b5d0d5783dba3efa1b",
+      "entriesSha256": "9338e9ab7cc88ef314427fe9e4224da1502b9fe375833e87d121be1f051ca04c",
       "retainedEntryCountAtCompaction": 15,
-      "createdByPatchId": "kgg-v090-ticket-015-admin-stage-gallery-drag-motion"
+      "createdByPatchId": "kgg-v090-cockpit-exercises-only"
     },
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v091.json",
       "snapshotVersionCode": 91,
       "entryCount": 32,
-      "entriesSha256": "f6116ed28b94e92155d079b676d023812409c984e68368c9f80277dd8d20842e",
+      "entriesSha256": "49a8b739cbd3fb285351fcded6cd6a7e3bb0b73cb10ddbc098e7a3e4431d7e3a",
       "retainedEntryCountAtCompaction": 15,
-      "createdByPatchId": "kgg-v091-ticket-015-admin-stage-compact"
+      "createdByPatchId": "kgg-v091-plan-add-exercise-card"
     },
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v092.json",
       "snapshotVersionCode": 92,
       "entryCount": 33,
-      "entriesSha256": "ae074f07fd863fdc26979d45b415259c2822d6493d032ee44531e0e17ca5cc33",
+      "entriesSha256": "f45be1a63673425f82fa6075a77ce0070508b80ec9022aba203a309af4e962e8",
       "retainedEntryCountAtCompaction": 15,
-      "createdByPatchId": "kgg-v092-ticket-015-admin-stage-release-fixes"
+      "createdByPatchId": "kgg-v092-cockpit-live-edit"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v093.json",
+      "snapshotVersionCode": 93,
+      "entryCount": 34,
+      "entriesSha256": "8e2320be08c56aed8ee20830ebcc2bcdd2abb6d8f4bfab360cb05df5a923da9a",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v093-cockpit-shared-editor"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v094.json",
+      "snapshotVersionCode": 94,
+      "entryCount": 35,
+      "entriesSha256": "0aed8ea8e500e26ff0a23dc0561cf16d73be7ab33b4103c22630da600761f9cc",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v094-shared-reorder-core"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v095.json",
+      "snapshotVersionCode": 95,
+      "entryCount": 36,
+      "entriesSha256": "0c1b56d0a436b875e4f4bdf403b95cc23150aed2d309caba8f62241dd3ed4053",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v095-cockpit-responsive-entry"
     }
   ]
 }
@@ -834,7 +862,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v092-ticket-015-admin-stage-release-fixes",
+  "lastUpdatedByPatchId": "kgg-v095-cockpit-responsive-entry",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
@@ -969,7 +997,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v092 Ticket 015 Admin-Editor: Release- und Gesten-Fixes</title>
+  <title>KGG Update v095 Cockpit-Einstieg im Phone-Dock</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -16881,11 +16909,11 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
 </script>
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v092_ticket_015_admin_stage_release_fixes';
+  const VERSION='KGG_GITHUB_UPDATE_v095_cockpit_responsive_entry';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v092","buildTime":"2026-09-13T19:43:16Z","buildCode":"module-v092-ticket-015-admin-stage-release-fixes","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v095","buildTime":"2026-09-13T19:46:15Z","buildCode":"module-v095-cockpit-responsive-entry","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -16909,6 +16937,7 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
     ['abd','Abduktion Maschine','abd,abduktion,abductor,abduktor,hüft abduktion',3,'Wdh','kg'],['add','Adduktion Maschine','add,adduktion,adduktor,adductor,hüft adduktion',3,'Wdh','kg'],['legpress','Beinpresse','beinpresse,bein presse,leg press,presse',3,'Wdh','kg'],['bridge','Bridging','bridge,bridging,beckenheben,glute bridge',3,'Wdh','kg'],['copenhagen','Copenhagen Plank','copenhagen,adduktoren plank',3,'Zeit','keine'],['bike','Ergometer / Bike','fahrrad,bike,ergometer,warmup,cardio,rad',1,'Zeit','Stufe/Watt'],['fire','Fire Hydrants','fire hydrant,hydrants,vierfüßler abduktion',3,'Wdh','kg'],['hipthrust','Hip Thrust','hip thrust,glute thrust',3,'Wdh','kg'],['legcurl','Kniebeuger Maschine','kniebeuger,leg curl,hamstring curl,beinbeuger',3,'Wdh','kg'],['kneeext','Kniestrecker Maschine','kniestrecker,knieextension,beinstrecker,leg extension,knei ext',3,'Wdh','kg'],['row','Rudern','rudern,seated row,kabelrudern,ruderzug',3,'Wdh','kg'],['lat','Latziehen','latziehen,latzug,lat pulldown,pulldown,lat',3,'Wdh','kg'],['pallof','Pallof Press','pallof,pallof press,anti rotation',3,'Wdh','kg'],['plank','Plank','plank,blank,unterarmstütz,stütz',3,'Zeit','keine'],['squat','Squat','squat,kniebeuge,kniebeugen',3,'Wdh','kg'],['rdl','Romanian Deadlift','romanian deadlift,rdl,dead lift',3,'Wdh','kg'],['deadlift','Wadenheben','wadenheben,calf raise',3,'Wdh','kg'],['shoulder','Schulterpresse','schulter presse,shoulder press',3,'Wdh','kg']
   ].map(a=>({id:a[0],name:a[1],aliases:a[2],sets:a[3],unit:a[4],weightUnit:a[5]}));
   let state={plan:[],recent:[],packages:[{id:'pkg1',name:'Knie Standard',exercises:['Beinpresse','Kniebeuger Maschine','Kniestrecker Maschine']},{id:'pkg2',name:'Rücken Standard',exercises:['Rudern','Latziehen','Pallof Press']}],patient:{},bankOpen:false,editId:null,sortMenuId:null,reorderSuppressClick:false,largePdfMode:false,textSyncing:false};
+  let externalEditorContext=null;
   let bankSelectMode='replaceActive';
   let deletedBankIds=new Set();
   let pendingBankDeleteId=null;
@@ -17877,7 +17906,6 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
       videoLabel:ex.videoLabel||'Video öffnen',
       media:ensureExerciseMediaList(ex),
       progressionGroupId:ex.progressionGroupId||'',
-      progressionMainId:ex.progressionMainId||ex.progressionMainVariantId||'',
       progressionVariants:Array.isArray(ex.progressionVariants)?ex.progressionVariants.map(item=>({...item,media:ensureExerciseMediaList(item)})):[]
     };
   }
@@ -19151,14 +19179,36 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
     document.addEventListener('pointerup',up,{passive:false,once:true});
     document.addEventListener('pointercancel',cancel,{passive:true,once:true});
   }
+  // Shared by the normal plan editor and the Therapy-Cockpit live editor.
+  // Keep the geometry and array semantics in one place so both flows retain
+  // the same reorder behavior without creating a second drag engine.
+  const KGGSharedReorder={
+    targetIndex(elements,coordinate){
+      const list=Array.isArray(elements)?elements:[];
+      for(let index=0;index<list.length;index++){
+        const rect=list[index]&&typeof list[index].getBoundingClientRect==='function'?list[index].getBoundingClientRect():null;
+        if(rect&&coordinate<rect.top+rect.height/2)return index;
+      }
+      return list.length;
+    },
+    move(items,from,to){
+      const next=Array.isArray(items)?items.slice():[];
+      if(from<0||from>=next.length)return null;
+      const target=Math.max(0,Math.min(next.length-1,Number(to)));
+      const item=next.splice(from,1)[0];
+      next.splice(target,0,item);
+      return next;
+    }
+  };
+  window.KGGSharedReorder=KGGSharedReorder;
   function movePlanExerciseByButton(localId,delta){
     const idx=(state.plan||[]).findIndex(ex=>String(ex.localId||ex.id)===String(localId));
     if(idx<0)return;
     const target=idx+delta;
     if(target<0||target>=state.plan.length)return;
-    const next=state.plan.slice();
-    const item=next.splice(idx,1)[0];
-    next.splice(target,0,item);
+    const next=KGGSharedReorder.move(state.plan,idx,target);
+    if(!next)return;
+    const item=next[target];
     state.plan=next;
     state.sortMenuId=String(item.localId||item.id);
     syncStatePlanToStore('ui_reorder_plan_buttons');
@@ -19373,11 +19423,7 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
       floatingMid=press.startTop+dy+(press.card.getBoundingClientRect().height/2);
     }
     const cards=Array.from(press.list.querySelectorAll('.planCard[data-plan-id]:not(.reorder-lifted)'));
-    let target=cards.length;
-    for(let i=0;i<cards.length;i++){
-      const r=cards[i].getBoundingClientRect();
-      if(floatingMid<r.top+r.height/2){target=i;break;}
-    }
+    const target=KGGSharedReorder.targetIndex(cards,floatingMid);
     press.targetIndex=target;
     const ref=cards[target]||null;
     if(ref)press.list.insertBefore(press.placeholder,ref); else press.list.appendChild(press.placeholder);
@@ -19391,15 +19437,14 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
     ev.preventDefault();
     const dbAnchor=state.bankOpen&&typeof captureDbScrollAnchor==='function'?captureDbScrollAnchor():null;
     const from=(state.plan||[]).findIndex(ex=>String(ex.localId||ex.id)===press.id);
-    let to=Array.from(press.list.children).indexOf(press.placeholder);
     if(from<0){cleanupAnimatedReorder(false);return;}
-    if(to>from)to-=1;
+    let to=Number.isInteger(press.targetIndex)?press.targetIndex:Array.from(press.list.children).indexOf(press.placeholder);
+    if(!Number.isInteger(press.targetIndex)&&to>from)to-=1;
     to=Math.max(0,Math.min(state.plan.length-1,to));
     const moved=to!==from;
     if(moved){
-      const next=state.plan.slice();
-      const item=next.splice(from,1)[0];
-      next.splice(to,0,item);
+      const next=KGGSharedReorder.move(state.plan,from,to);
+      if(!next){cleanupAnimatedReorder(true);renderPlan();return;}
       state.plan=next;
       syncStatePlanToStore('ui_reorder_plan_animated');
       syncTextInputFromPlan('ui_reorder_plan_animated');
@@ -20361,7 +20406,7 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
   }
   function currentEditedPlanExercise(){const id=state.editId; return state.plan.find(x=>(x.localId||x.id)===id);}
   function currentEditedBankExercise(){const id=state.editId; return bank.find(x=>String(x.id)===String(id));}
-  function currentEditedExercise(){return currentEditedPlanExercise()||currentEditedBankExercise();}
+  function currentEditedExercise(){return externalEditorContext&&externalEditorContext.exercise||currentEditedPlanExercise()||currentEditedBankExercise();}
   window.KGGTicket015AdminEditor=window.KGGTicket015AdminEditor||{};
   window.KGGTicket015AdminEditor.current=()=>currentEditedExercise();
   function mediaSizeLabel(bytes){const n=Number(bytes)||0; if(n>=1048576)return (n/1048576).toFixed(1).replace('.',',')+' MB'; if(n>=1024)return Math.round(n/1024)+' KB'; return n+' B';}
@@ -20413,7 +20458,9 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
       const manifest=await prepareImageMediaFile(file);
       ex.media=[manifest];
       oldMedia.forEach(item=>deleteUnsharedMediaBlob(item,ex));
-      if(ex.localId){
+      if(externalEditorContext){
+        if(typeof externalEditorContext.onMediaChange==='function')externalEditorContext.onMediaChange(ex);
+      }else if(ex.localId){
         syncStatePlanToStore('ui_attach_exercise_image');
         save();
       }else{
@@ -20422,7 +20469,7 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
         persistCustomBank();
       }
       renderEditorMediaStatus(ex);
-      render();
+      if(!externalEditorContext)render();
       $('editorModal').classList.add('open');
     }catch(err){
       console.warn('Bild konnte nicht vorbereitet werden:',err);
@@ -20435,7 +20482,9 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
     const oldMedia=ensureExerciseMediaList(ex);
     ex.media=[];
     oldMedia.forEach(item=>deleteUnsharedMediaBlob(item,ex));
-    if(ex.localId){
+    if(externalEditorContext){
+      if(typeof externalEditorContext.onMediaChange==='function')externalEditorContext.onMediaChange(ex);
+    }else if(ex.localId){
       syncStatePlanToStore('ui_remove_exercise_image');
       save();
     }else{
@@ -20444,11 +20493,12 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
       persistCustomBank();
     }
     renderEditorMediaStatus(ex);
-    render();
+    if(!externalEditorContext)render();
     $('editorModal').classList.add('open');
   }
-  function openEditor(ex){
+  function openEditor(ex,context){
     if(!ex)return;
+    externalEditorContext=context&&typeof context==='object'?context:null;
     const inferredMeasure=(String(ex.unit||ex.metricUnit||'').toLowerCase().includes('zeit')||String(ex.unit||ex.metricUnit||'').toLowerCase().includes('sek'))?'zeit':'wdh';
     state.editId=ex.localId||ex.id;
     $('editName').value=ex.name||'';
@@ -20461,16 +20511,46 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
     $('editVideoUrl').value=ex.videoUrl||'';
     $('editVideoLabel').value=ex.videoLabel||'Video öffnen';
     renderEditorMediaStatus(ex);
-    const bankEdit=!ex.localId&&bank.some(item=>String(item.id)===String(ex.id));
-    $('deleteExercise').dataset.scope=bankEdit?'bank':'plan';
-    $('deleteExercise').style.visibility=(ex.localId||bankEdit)?'visible':'hidden';
+    const bankEdit=!externalEditorContext&&!ex.localId&&bank.some(item=>String(item.id)===String(ex.id));
+    $('deleteExercise').dataset.scope=externalEditorContext?'external':(bankEdit?'bank':'plan');
+    $('deleteExercise').style.visibility=(externalEditorContext||ex.localId||bankEdit)?'visible':'hidden';
     $('editorModal').classList.add('open');
     if(window.KGGTicket015AdminEditor&&typeof window.KGGTicket015AdminEditor.onOpen==='function')window.KGGTicket015AdminEditor.onOpen(ex);
+    if(externalEditorContext&&typeof externalEditorContext.onOpen==='function')externalEditorContext.onOpen(ex);
   }
-  window.KGGTicket015AdminEditor.open=ex=>openEditor(ex);
-  window.KGGTicket015AdminEditor.saveEditor=()=>{saveEditedExercise();return true;};
-  function closeEditor(){state.editId=null; $('editorModal').classList.remove('open')}
+  function closeEditor(){
+    const context=externalEditorContext,ex=context&&context.exercise;
+    if(context&&typeof context.onClose==='function')context.onClose(ex);
+    externalEditorContext=null;
+    state.editId=null;
+    $('editorModal').classList.remove('open');
+  }
   function saveEditedExercise(){
+    if(externalEditorContext){
+      const context=externalEditorContext,ex=context.exercise;
+      const measure=normalizeMeasureMode($('editMeasure').value),loadUnit=normalizeLoadUnit($('editUnit').value);
+      ex.name=$('editName').value;
+      ex.sets=normalizeSetCount($('editSets').value);
+      ex.startMetric=$('editMetric').value;
+      ex.startLoad=$('editLoad').value;
+      ex.weightUnit=loadUnit;
+      ex.loadUnit=loadUnit;
+      ex.measure=measure;
+      ex.unit=measureUnitLabel(measure);
+      ex.metricUnit=measureUnitLabel(measure);
+      ex.side=normalizeSideMode($('editSide').value);
+      ex.videoUrl=String($('editVideoUrl').value||'').trim();
+      ex.videoLabel=String($('editVideoLabel').value||'').trim()||'Video öffnen';
+      ex.previous=Array.isArray(ex.previous)?ex.previous:[];
+      ex.today=Array.isArray(ex.today)?ex.today:[];
+      while(ex.previous.length<ex.sets)ex.previous.push(['','']);
+      while(ex.today.length<ex.sets)ex.today.push(['','']);
+      ex.previous=ex.previous.slice(0,ex.sets);
+      ex.today=ex.today.slice(0,ex.sets);
+      const accepted=typeof context.onSave==='function'?context.onSave(ex)!==false:true;
+      if(accepted)closeEditor();
+      return;
+    }
     const id=state.editId;
     const planEx=state.plan.find(x=>(x.localId||x.id)===id);
     if(planEx){
@@ -20527,6 +20607,10 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
     if(window.KGGTicket015AdminEditor&&typeof window.KGGTicket015AdminEditor.onSave==='function')window.KGGTicket015AdminEditor.onSave(currentEditedExercise());
     closeEditor();
   }
+  window.KGGSharedExerciseEditor=window.KGGSharedExerciseEditor||{};
+  window.KGGSharedExerciseEditor.open=(ex,context)=>openEditor(ex,context);
+  window.KGGSharedExerciseEditor.close=closeEditor;
+  window.KGGSharedExerciseEditor.save=saveEditedExercise;
   function escapeHtml(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
   function exportData(){savePendingToBank('ui_internal_export'); const plan=getCurrentPlanForOutput('ui_internal_export'); const data={kind:'kgg-html-app-internal-export',audience:'therapist-internal-only',version:VERSION,exportedAt:new Date().toISOString(),state:{...state,plan:plan.exercises},currentPlan:plan,store:ensureKGGDataStore().getState()}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='kgg_plan_internal_export.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);}
 
@@ -23985,6 +24069,7 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
   $('packageToggle').onclick=ev=>{if(guardPhoneScrollToggle(ev))return; if(isTabletLayout())toggleTabletPackageOverlay(); else openPhoneFloatingDrawer('package');};
   $('exportBtn').onclick=exportData; $('pdfBtn').onclick=finishWithPdf; $('patientBtn').onclick=finishWithPatientApp; $('closeShare').onclick=closeFinishModal; $('copyShare').onclick=()=>navigator.clipboard&&navigator.clipboard.writeText($('shareText').value); $('patientName').addEventListener('input',()=>{state.patient.name=$('patientName').value;syncStatePlanToStore('ui_patient_name_input');save();render();}); $('planDate').addEventListener('input',()=>{state.patient.date=$('planDate').value;save();syncStatePlanToStore('ui_patient_date_input');}); $('therapistName').addEventListener('input',()=>{state.patient.therapist=$('therapistName').value;save();syncStatePlanToStore('ui_patient_therapist_input');}); $('planNotes').addEventListener('input',()=>{state.patient.notes=$('planNotes').value;save();syncStatePlanToStore('ui_patient_notes_input');}); $('scanBtn').onclick=()=>window.KGGScan.pick('camera'); $('filePickBtn').onclick=()=>window.KGGScan.pick('file'); $('filePickBtn').addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();window.KGGScan.pick('file');}}); $('fileInput').onchange=ev=>window.KGGScan.handleInput(ev.target,'camera'); $('filePickerInput').onchange=ev=>window.KGGScan.handleInput(ev.target,'file'); $('closeEditor').onclick=closeEditor; $('saveExercise').onclick=saveEditedExercise; $('deleteExercise').onclick=()=>{if(state.editId){if($('deleteExercise').dataset.scope==='bank')openBankDeleteModal(state.editId); else removeExercise(state.editId);} closeEditor();};
   $('copyPatientRootLink').onclick=copyPatientRootLink;
+  $('deleteExercise').onclick=()=>{if(externalEditorContext){const context=externalEditorContext,ex=context.exercise,accepted=typeof context.onDelete==='function'?context.onDelete(ex)!==false:false;if(accepted)closeEditor();return;}if(state.editId){if($('deleteExercise').dataset.scope==='bank')openBankDeleteModal(state.editId); else removeExercise(state.editId);} closeEditor();};
   $('attachExerciseImage').onclick=()=>$('editMediaFile').click();
   $('editMediaFile').onchange=handleEditorMediaFileSelected;
   $('removeExerciseImage').onclick=removeEditorMedia;
@@ -24507,22 +24592,6 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
       backdrop.addEventListener('click',ev=>{ev.preventDefault();setTabletSideMenuOpen(false);},{capture:true});
     }
   }
-  // Narrow bridge for the modular progression editor. It keeps the existing
-  // catalog, plan-store and persistence functions inside this runtime closure.
-  if((window.KGG_ROLLOUT_PROFILE||'colleague').toLowerCase()==='admin')window['KGGProgressionEditorBridge']={
-    catalog:()=>bank.map(item=>({...item,media:ensureExerciseMediaList(item)})),
-    upsert:(exercise,reason)=>upsertPlanExerciseToBank(exercise,reason||'ticket_015_progression'),
-    sync:reason=>syncStatePlanToStore(reason||'ticket_015_progression'),
-    persistBank:()=>persistCustomBank(),
-    save:()=>save(),
-    readMedia:async media=>{
-      const id=String(media&&media.id||'');
-      if(!id)return null;
-      const record=await getEncryptedMediaBlob(id);
-      if(!record||!record.blob)return null;
-      return patientDecryptMedia(media,record.blob);
-    }
-  };
   /* KGG_LOGIC_SMOKE_BOOT_BOUNDARY */
   installKggV383UiFlowStability();
   installKggV388AndroidFlowFixes();
@@ -27784,6 +27853,24 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     return text;
   }
   function cleanUnit(value,fallback){var text=String(value||fallback||"").trim().slice(0,12);if(!text||/[^\wÄÖÜäöüß+\/-]/.test(text))return String(fallback||"").slice(0,12);return text;}
+  function cleanOptionalText(value,max){var text=String(value==null?"":value).trim();return text.slice(0,max||160);}
+  function cleanVideoUrl(value){var text=cleanOptionalText(value,500);return /^(?:https?:\/\/)/i.test(text)?text:"";}
+  function cleanMediaList(value){
+    if(!Array.isArray(value))return [];
+    return value.slice(0,4).map(function(item){
+      if(!item||typeof item!=="object")return null;
+      var out={};["id","type","mimeType","label","name","encryptedSize","compressedSize","originalSize"].forEach(function(field){if(item[field]!=null)out[field]=cleanOptionalText(item[field],field.indexOf("Size")>-1?24:160);});
+      if(/^https?:\/\//i.test(String(item.downloadUrl||"")))out.downloadUrl=cleanOptionalText(item.downloadUrl,1000);
+      return Object.keys(out).length?out:null;
+    }).filter(Boolean);
+  }
+  function cleanProgressionVariants(value,group){
+    if(!Array.isArray(value))return [];
+    return value.slice(0,12).map(function(item,index){
+      item=item&&typeof item==="object"?item:{};
+      return {id:cleanOptionalText(item.id||item.variantId||("pv_"+index),80),groupId:cleanOptionalText(item.groupId||group,80),name:cleanOptionalText(item.name||item.title||("Progressionsstufe "+(index+1)),80),order:index,sourceId:cleanOptionalText(item.sourceId||item.bankId||"",80),sourceName:cleanOptionalText(item.sourceName||"",80),media:cleanMediaList(item.media)};
+    }).filter(function(item){return !!item.name;});
+  }
   function cleanSetCount(value){var count=Number(value);if(!Number.isFinite(count))count=3;return Math.max(1,Math.min(8,Math.round(count)));}
   function valuePair(value){
     if(Array.isArray(value))return [cleanValue(value[0]),cleanValue(value[1])];
@@ -27803,14 +27890,29 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     var previous=valueArray(prevSource,sets,fallback),today=valueArray(raw.today||raw.current||raw.cockpitToday,sets,previous[0]);
     var todayProvided=Array.isArray(raw.today)||Array.isArray(raw.current)||Array.isArray(raw.cockpitToday);
     if(!todayProvided)today=previous.map(function(pair){return pair.slice();});
-    return {id:ref.id,name:ref.name,sets:sets,side:String(raw.side||raw.sides||"BI")==="LR"?"LR":"BI",loadUnit:cleanUnit(raw.loadUnit||raw.weightUnit,ref.loadUnit),metricUnit:cleanUnit(raw.metricUnit||raw.unit,ref.metricUnit),previous:previous,today:today};
+    var group=cleanOptionalText(raw.progressionGroupId||"",80),variants=cleanProgressionVariants(raw.progressionVariants,group),activeProgressionId=cleanOptionalText(raw.activeProgressionId||raw.progressionVariantId||"",80);
+    if(variants.length){if(!activeProgressionId)activeProgressionId=variants[0].id;if(!variants.some(function(item){return item.id===activeProgressionId;}))throw error("progression_id_invalid");}
+    else if(activeProgressionId)throw error("progression_id_invalid");
+    return {id:ref.id,name:cleanOptionalText(raw.name||ref.name,80)||ref.name,sets:sets,side:String(raw.side||raw.sides||"BI")==="LR"?"LR":"BI",loadUnit:cleanUnit(raw.loadUnit||raw.weightUnit,ref.loadUnit),metricUnit:cleanUnit(raw.metricUnit||raw.unit,ref.metricUnit),previous:previous,today:today,weightUnit:cleanUnit(raw.weightUnit||raw.loadUnit,ref.loadUnit),unit:cleanOptionalText(raw.unit||raw.metricUnit||ref.metricUnit,12),measure:String(raw.measure||"")==="zeit"?"zeit":"wdh",startLoad:cleanOptionalText(raw.startLoad||"",24),startMetric:cleanOptionalText(raw.startMetric||"",24),videoUrl:cleanVideoUrl(raw.videoUrl),videoLabel:cleanOptionalText(raw.videoLabel||"Video öffnen",120)||"Video öffnen",media:cleanMediaList(raw.media),progressionGroupId:group,progressionVariants:variants,activeProgressionId:activeProgressionId};
+  }
+  function compactExerciseExtras(ex){
+    var extra={};
+    if(ex.name)extra.n=cleanOptionalText(ex.name,80);
+    if(ex.measure)extra.m=String(ex.measure)==="zeit"?"zeit":"wdh";
+    if(ex.startLoad)extra.l=cleanOptionalText(ex.startLoad,24);
+    if(ex.startMetric)extra.r=cleanOptionalText(ex.startMetric,24);
+    if(ex.videoUrl)extra.v=cleanVideoUrl(ex.videoUrl);
+    if(ex.videoLabel&&ex.videoLabel!=="Video öffnen")extra.vl=cleanOptionalText(ex.videoLabel,120);
+    if(ex.media&&ex.media.length)extra.md=cleanMediaList(ex.media);
+    if(ex.progressionGroupId||ex.progressionVariants&&ex.progressionVariants.length){extra.g=cleanOptionalText(ex.progressionGroupId,80);extra.pv=cleanProgressionVariants(ex.progressionVariants,extra.g);if(ex.activeProgressionId)extra.a=cleanOptionalText(ex.activeProgressionId,80);}
+    return Object.keys(extra).length?extra:null;
   }
   function encodePayload(input){
     var source=input||{},items=Array.isArray(source.exercises)?source.exercises:[];
     if(!items.length||items.length>MAX_EXERCISES)throw error("exercise_count_invalid");
     var ids=Object.create(null),encodedExercises=items.map(function(item){
       var ex=exerciseInput(item);if(ids[ex.id])throw error("duplicate_exercise_id");ids[ex.id]=true;
-      return {i:ex.id,s:ex.sets,q:ex.side,u:ex.loadUnit,m:ex.metricUnit,p:ex.previous,t:ex.today};
+      var row={i:ex.id,s:ex.sets,q:ex.side,u:ex.loadUnit,m:ex.metricUnit,p:ex.previous,t:ex.today},extra=compactExerciseExtras(ex);if(extra)row.x=extra;return row;
     });
     var body={v:1,p:cleanPlanId(source.planId||source.id||""),n:obfuscateName(cleanName(source.name||source.patientName||"")),d:cleanDate(source.date),e:encodedExercises};
     var payload={v:body.v,p:body.p,n:body.n,d:body.d,e:body.e,h:fnv(JSON.stringify(body))};
@@ -27834,9 +27936,9 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     var ids=Object.create(null),exercises=parsed.e.map(function(raw){
       if(!raw||typeof raw.i!=="string"||raw.i.length!==2||!byId[raw.i])throw error("unknown_exercise_id");
       if(ids[raw.i])throw error("duplicate_exercise_id");ids[raw.i]=true;
-      var ref=byId[raw.i],sets=cleanSetCount(raw.s);if(sets!==Number(raw.s))throw error("set_structure_invalid");
+      var ref=byId[raw.i],sets=cleanSetCount(raw.s),extra=raw.x&&typeof raw.x==="object"?raw.x:{};if(sets!==Number(raw.s))throw error("set_structure_invalid");
       if(raw.q!=="BI"&&raw.q!=="LR")throw error("set_structure_invalid");
-      return {id:raw.i,name:ref.name,sets:sets,side:raw.q,loadUnit:cleanUnit(raw.u,ref.loadUnit),metricUnit:cleanUnit(raw.m,ref.metricUnit),previous:validateValueList(raw.p,sets),today:validateValueList(raw.t,sets)};
+      return exerciseInput({id:raw.i,name:extra.n||ref.name,sets:sets,side:raw.q,loadUnit:raw.u,metricUnit:raw.m,weightUnit:raw.u,unit:raw.m,measure:extra.m,startLoad:extra.l,startMetric:extra.r,videoUrl:extra.v,videoLabel:extra.vl,media:extra.md,progressionGroupId:extra.g,progressionVariants:extra.pv,activeProgressionId:extra.a,previous:validateValueList(raw.p,sets),today:validateValueList(raw.t,sets)});
     });
     return {version:1,planId:cleanPlanId(parsed.p),name:name,date:cleanDate(parsed.d),exercises:exercises};
   }
@@ -27859,7 +27961,7 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     var source=plan||{},patient=source.patient||{};return {planId:source.id||"",name:patient.name||source.name||"",date:patient.date||new Date().toISOString().slice(0,10),exercises:(Array.isArray(source.exercises)?source.exercises:[]).map(exerciseInput)};
   }
   function contentKey(input){
-    var source=input||{},items=Array.isArray(source.exercises)?source.exercises.map(exerciseInput):[],canonical={planId:cleanPlanId(source.planId||source.id||""),name:cleanName(source.name||source.patientName||""),date:cleanDate(source.date),exercises:items.map(function(ex){return {id:ex.id,sets:ex.sets,side:ex.side,loadUnit:ex.loadUnit,metricUnit:ex.metricUnit,previous:ex.previous,today:ex.today};})};
+    var source=input||{},items=Array.isArray(source.exercises)?source.exercises.map(exerciseInput):[],canonical={planId:cleanPlanId(source.planId||source.id||""),name:cleanName(source.name||source.patientName||""),date:cleanDate(source.date),exercises:items.map(function(ex){return {id:ex.id,name:ex.name,sets:ex.sets,side:ex.side,loadUnit:ex.loadUnit,metricUnit:ex.metricUnit,previous:ex.previous,today:ex.today,startLoad:ex.startLoad,startMetric:ex.startMetric,measure:ex.measure,progressionGroupId:ex.progressionGroupId,progressionVariants:ex.progressionVariants,activeProgressionId:ex.activeProgressionId};})};
     return fnv(JSON.stringify(canonical));
   }
   function bankEntryWithCockpitId(item){
@@ -27898,8 +28000,10 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   function slotCount(){return slots.reduce(function(total,slot){return total+(slot?1:0);},0);}
   function firstFreeSlot(){for(var i=0;i<MAX_SLOTS;i++)if(!slots[i])return i;return -1;}
   function slotProgress(slot){var total=0,done=0;(slot&&slot.exercises||[]).forEach(function(ex){(ex.today||[]).forEach(function(pair){total+=2;if(pair[0])done++;if(pair[1])done++;});});return total?Math.round(done/total*100):0;}
-  function normalizeSlot(decoded){return {planId:decoded.planId,name:decoded.name,date:decoded.date,exercises:decoded.exercises.map(function(ex){return {id:ex.id,name:ex.name,sets:ex.sets,side:ex.side,loadUnit:ex.loadUnit,metricUnit:ex.metricUnit,previous:ex.previous.map(function(p){return p.slice();}),today:ex.today.map(function(p){return p.slice();})};}),contentKey:contentKey(decoded),openExercise:null,lastCompletion:null};}
-  function payloadFromSlot(slot,useTodayAsPrevious){return {planId:slot.planId,name:slot.name,date:new Date().toISOString().slice(0,10),exercises:slot.exercises.map(function(ex){return {id:ex.id,sets:ex.sets,side:ex.side,loadUnit:ex.loadUnit,metricUnit:ex.metricUnit,previous:(useTodayAsPrevious?ex.today:ex.previous).map(function(p){return p.slice();}),today:ex.today.map(function(p){return p.slice();})};})};}
+  function normalizeSlot(decoded){var key=contentKey(decoded);return {planId:decoded.planId,name:decoded.name,date:decoded.date,exercises:(decoded.exercises||[]).map(exerciseInput),contentKey:key,sourceContentKey:key,openExercise:null,lastCompletion:null};}
+  function payloadFromSlot(slot,useTodayAsPrevious){return {planId:slot.planId,name:slot.name,date:new Date().toISOString().slice(0,10),exercises:slot.exercises.map(function(ex){var next=exerciseInput(ex);next.previous=(useTodayAsPrevious?ex.today:ex.previous).map(function(p){return p.slice();});next.today=ex.today.map(function(p){return p.slice();});return next;})};}
+  function cloneJson(value){try{return JSON.parse(JSON.stringify(value));}catch(e){return value;}}
+  function slotSnapshot(slot){if(!slot)return null;return {planId:slot.planId,name:slot.name,date:slot.date,exercises:cloneJson(slot.exercises||[]),openExercise:Number.isInteger(slot.openExercise)?slot.openExercise:null};}
   function valuesLabel(pair,ex){var load=pair&&pair[0]||"–",metric=pair&&pair[1]||"–";return load+" "+(ex.loadUnit||"")+" / "+metric+" "+(ex.metricUnit||"");}
   function mediaMarkup(ex){var current=ex&&ex.media&&Array.isArray(ex.media)?ex.media[0]:null;if(current&&current.downloadUrl&&/^data:image\//i.test(current.downloadUrl))return '<img alt="" src="'+htmlEscape(current.downloadUrl)+'">';return htmlEscape(initials(ex&&ex.name));}
   function renderPad(slotIndex,exerciseIndex,setIndex,field,ex){
@@ -27950,10 +28054,20 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   function dispatchPlanHook(slot){
     var store=window["KGGDataStore"];if(!store||typeof store.getCurrentPlan!=="function"||typeof store.setCurrentPlan!=="function")return "hook_unavailable";
     var current;try{current=store.getCurrentPlan()||{};}catch(e){return "hook_unavailable";}
-    if(slot.planId&&current.id&&String(slot.planId)!==String(current.id))return "plan_mismatch";
-    var changed=0,exercises=Array.isArray(current.exercises)?current.exercises.map(function(original){var ref=registryLookup(original&& (original.sourceId||original.bankId||original.name));if(!ref)return original;var hit=slot.exercises.find(function(item){return item.id===ref.id;});if(!hit)return original;changed++;return Object.assign({},original,{lastTraining:hit.today.map(function(pair){return {load:pair[0],metric:pair[1]};}),cockpitPrevious:hit.today.map(function(pair){return pair.slice();}),lastTrainingDate:new Date().toISOString().slice(0,10)});}):[];
+    if(!slot.planId||!current.id||String(slot.planId)!==String(current.id))return "plan_mismatch";
+    var currentKey;try{currentKey=contentKey(buildFromPlan(current));}catch(e){return "plan_mismatch";}
+    if(slot.sourceContentKey&&slot.sourceContentKey!==currentKey)return "plan_mismatch";
+    var originals=Array.isArray(current.exercises)?current.exercises:[],used=Object.create(null),changed=0;
+    var exercises=slot.exercises.map(function(hit){
+      var ref=registryLookup(hit&& (hit.id||hit.sourceId||hit.bankId||hit.name)),originalIndex=-1;
+      if(ref)originalIndex=originals.findIndex(function(original){var originalRef=registryLookup(original&& (original.sourceId||original.bankId||original.id||original.name));return originalRef&&originalRef.id===ref.id&&!used[originalRef.id];});
+      var original=originalIndex>=0?originals[originalIndex]:null;
+      if(original){var originalRef=registryLookup(original.sourceId||original.bankId||original.id||original.name);used[originalRef.id]=true;changed++;return Object.assign({},original,{name:hit.name,sets:hit.sets,side:hit.side,loadUnit:hit.loadUnit,weightUnit:hit.weightUnit||hit.loadUnit,metricUnit:hit.metricUnit,unit:hit.unit||hit.metricUnit,measure:hit.measure,startLoad:hit.startLoad,startMetric:hit.startMetric,videoUrl:hit.videoUrl,videoLabel:hit.videoLabel,media:cloneJson(hit.media||original.media||[]),progressionGroupId:hit.progressionGroupId,progressionVariants:cloneJson(hit.progressionVariants||[]),activeProgressionId:hit.activeProgressionId,previous:cloneJson(hit.previous||[]),today:cloneJson(hit.today||[]),lastTraining:hit.today.map(function(pair){return {load:pair[0],metric:pair[1]};}),cockpitPrevious:hit.today.map(function(pair){return pair.slice();}),lastTrainingDate:new Date().toISOString().slice(0,10)});}
+      if(ref){changed++;return {id:ref.id,name:hit.name,sourceId:ref.id,bankId:ref.id,sets:hit.sets,side:hit.side,loadUnit:hit.loadUnit,weightUnit:hit.weightUnit||hit.loadUnit,metricUnit:hit.metricUnit,unit:hit.unit||hit.metricUnit,measure:hit.measure,startLoad:hit.startLoad,startMetric:hit.startMetric,videoUrl:hit.videoUrl,videoLabel:hit.videoLabel,media:cloneJson(hit.media||[]),progressionGroupId:hit.progressionGroupId,progressionVariants:cloneJson(hit.progressionVariants||[]),activeProgressionId:hit.activeProgressionId,previous:cloneJson(hit.previous||[]),today:cloneJson(hit.today||[]),lastTraining:hit.today.map(function(pair){return {load:pair[0],metric:pair[1]};}),cockpitPrevious:hit.today.map(function(pair){return pair.slice();}),lastTrainingDate:new Date().toISOString().slice(0,10)};}
+      return null;
+    }).filter(Boolean);
     if(!changed)return "exercise_mismatch";
-    try{store.setCurrentPlan(Object.assign({},current,{exercises:exercises}),"therapy_cockpit_finish");if(typeof CustomEvent!=="undefined")window.dispatchEvent(new CustomEvent("kgg:therapy-cockpit-finished",{detail:{planId:slot.planId,exerciseCount:changed}}));return "updated";}catch(e){return "hook_failed";}
+    try{var updatedPlan=Object.assign({},current,{exercises:exercises});store.setCurrentPlan(updatedPlan,"therapy_cockpit_edit");slot.sourceContentKey=contentKey(buildFromPlan(updatedPlan));if(typeof CustomEvent!=="undefined")window.dispatchEvent(new CustomEvent("kgg:therapy-cockpit-finished",{detail:{planId:slot.planId,exerciseCount:changed}}));return "updated";}catch(e){return "hook_failed";}
   }
   function documentationFor(slot,link){
     var lines=["KGG Therapie-Cockpit · "+new Date().toLocaleDateString("de-DE"),"Patient: "+slot.name,"Plan fertig · heutige Werte"];slot.exercises.forEach(function(ex){lines.push("",ex.name);ex.today.forEach(function(pair,index){lines.push("S"+(index+1)+": "+valuesLabel(pair,ex));});});lines.push("","Neuer Cockpit-Link:",link);return lines.join("\n");
@@ -27968,6 +28082,15 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   function setCockpitOpen(open){if(document.body&&document.body.classList)document.body.classList.toggle("kggTherapyCockpitOpen",!!open);}
   function finishAll(){var results=[];for(var i=0;i<MAX_SLOTS;i++){var result=finishSlot(i,true);if(result)results.push(result);}currentView="normal";setCockpitOpen(false);render();if(results.length)showOutput(results);}
   function removeSlot(index){if(index<0||index>=MAX_SLOTS||!slots[index])return;slots[index]=null;if(activeInput&&activeInput.slot===index)activeInput=null;notice="";if(!slotCount()){currentView="normal";setCockpitOpen(false);}render();}
+  function updateSlot(index,next,reason){
+    if(index<0||index>=MAX_SLOTS||!slots[index])throw error("slot_not_found");
+    var current=slots[index],source=next||{},name=String(source.name==null?current.name:source.name).trim()||"Plan ohne Patientendaten",exercises=Array.isArray(source.exercises)?source.exercises.map(exerciseInput):[];
+    if(exercises.length>MAX_EXERCISES)throw error("exercise_count_invalid");
+    var candidate={planId:source.planId==null?current.planId:cleanPlanId(source.planId),name:name,date:cleanDate(source.date==null?current.date:source.date),exercises:exercises};
+    if(exercises.length)encodePayload(candidate);
+    var normalized=normalizeSlot(candidate);normalized.sourceContentKey=current.sourceContentKey||current.contentKey;normalized.openExercise=Number.isInteger(source.openExercise)&&source.openExercise>=0&&source.openExercise<exercises.length?source.openExercise:null;normalized.contentKey=contentKey(candidate);slots[index]=normalized;notice="";render();return slotSnapshot(normalized);
+  }
+  function syncSlotToPlan(index){if(index<0||index>=MAX_SLOTS||!slots[index])return "slot_not_found";return dispatchPlanHook(slots[index]);}
   function importCode(value){
     var code=extractCode(value)||String(value||"").trim(),decoded=decodeCode(code),index=firstFreeSlot();if(index<0)throw error("slots_full");slots[index]=normalizeSlot(decoded);notice="";currentView="cockpit";setCockpitOpen(true);render();return {slot:index,state:getState()};
   }
@@ -28017,7 +28140,7 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   }
   function getState(){return {version:1,view:currentView,slotCount:slotCount(),slots:slots.map(function(slot,index){return slot?{slot:index,name:slot.name,planId:slot.planId,contentKey:slot.contentKey,exerciseCount:slot.exercises.length,progress:slotProgress(slot),openExercise:slot.openExercise}:null;})};}
   installBankRegistryHooks();
-  var api={patchId:PATCH_ID,prefix:PREFIX,registry:{entries:function(){return Object.keys(byId).map(function(id){var item=byId[id];return {id:item.id,key:item.key,name:item.name,canonical:!!item.canonical};});},lookup:function(value){var item=registryLookup(value);return item?{id:item.id,name:item.name}:null;},register:registerCanonical,derive:ensureDerived},encode:encodePayload,decode:decodeCode,makeLink:makeLink,fromPlan:buildFromPlan,contentKey:contentKey,importCode:importCode,getState:getState,open:openView,close:closeView,finish:function(index){return finishSlot(Number(index));},remove:removeSlot};
+  var api={patchId:PATCH_ID,prefix:PREFIX,registry:{entries:function(){return Object.keys(byId).map(function(id){var item=byId[id];return {id:item.id,key:item.key,name:item.name,canonical:!!item.canonical};});},lookup:function(value){var item=registryLookup(value);return item?{id:item.id,name:item.name}:null;},register:registerCanonical,derive:ensureDerived},encode:encodePayload,decode:decodeCode,makeLink:makeLink,fromPlan:buildFromPlan,contentKey:contentKey,importCode:importCode,getState:getState,getSlot:function(index){return slotSnapshot(slots[Number(index)]);},updateSlot:updateSlot,syncSlot:syncSlotToPlan,maxSlots:MAX_SLOTS,open:openView,close:closeView,finish:function(index){return finishSlot(Number(index));},remove:removeSlot};
   window.KGGTherapyCockpit=api;window.KGG_PATCHES=window.KGG_PATCHES||{};window.KGG_PATCHES[PATCH_ID]={installed:true,version:1};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",installDom,{once:true});else installDom();
 })();
@@ -28445,279 +28568,663 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
 <!-- Changelog-Archivfenster erweitert -->
 <!-- Metadata-only changelog archive/window refresh; no runtime behavior. -->
 <!-- KGG PATCH END kgg-v089-changelog-archive-window-refresh -->
-<!-- KGG PATCH START kgg-v090-ticket-015-admin-stage-gallery-drag-motion -->
-<!-- Ticket 015 Admin-Editor: Progressionsgalerie, Main-Hold, sichere Gesten und Karten-Drag -->
-<script id="kgg-v090-ticket-015-admin-stage-gallery-drag-motion">
+<!-- KGG PATCH START kgg-v090-cockpit-exercises-only -->
+<!-- Therapie-Cockpit ohne Basisdaten -->
+<!-- Therapie-Cockpit aus Übungen ohne Basisdaten -->
+<!-- Additive Ticket-037-Fortsetzung: kein neuer Plan-State, neutraler Payload-Name nur im Cockpit-Codec. -->
+<script id="kgg-v090-cockpit-exercises-only-script">
 (function(){
-  'use strict';
-  const VERSION='ticket-015-admin-stage-gallery-v3';
-  const HOLD_MS=2000;
-  const MAIN_SWAP_DELAY_MS=250;
-  const MOVE_CANCEL_PX=10;
-  const DELETE_SWIPE_PX=48;
-  const $=id=>document.getElementById(id);
-  const esc=value=>String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const clone=value=>{try{return JSON.parse(JSON.stringify(value));}catch(err){return value;}};
-  const idPart=value=>String(value||'').replace(/[^A-Za-z0-9_-]+/g,'_').slice(0,80)||'exercise';
-  const mediaOf=ex=>{try{return typeof ensureExerciseMediaList==='function'?clone(ensureExerciseMediaList(ex)):clone(Array.isArray(ex&&ex.media)?ex.media:[]);}catch(err){return [];}};
-  const groupId=ex=>String(ex&&ex.progressionGroupId||'pg_'+idPart(ex&&((ex.localId||ex.id)||'exercise')));
-  function variantId(group,index,value){return String(value&&value.id||('pv_'+idPart(group)+'_'+index));}
-  function normalizeStage(value,index,group,base){
-    const source=value&&typeof value==='object'?value:{};
-    return {
-      id:variantId(group,index,source),
-      groupId:String(source.groupId||group),
-      name:String(source.name||source.title||(index===0&&base&&base.name)||('Progressionsstufe '+(index+1))).trim(),
-      order:Number.isFinite(Number(source.order??source.o))?Number(source.order??source.o):index,
-      sourceId:String(source.sourceId||source.bankId||source.s||''),
-      sourceName:String(source.sourceName||'').trim(),
-      media:mediaOf(source.media!==undefined?source:(base&&index===0?base:{}))
-    };
+  "use strict";
+  var PATCH_ID="kgg-v090-cockpit-exercises-only";
+  var FALLBACK_PLAN_NAME="Übungsplan ohne Patientendaten";
+  var api=window.KGGTherapyCockpit;
+  var installed=false;
+  function error(code){var err=new Error(code);err.code=code;return err;}
+  function safeErrorCode(errorValue){
+    var code=errorValue&&typeof errorValue.code==="string"?errorValue.code:"cockpit_import_failed";
+    return /^[a-z0-9_]{1,48}$/.test(code)?code:"cockpit_import_failed";
   }
-  function normalizeVariants(ex,materialize){
-    const group=groupId(ex),base=ex||{},source=Array.isArray(ex&&ex.progressionVariants)?ex.progressionVariants:[];
-    if(!source.length&&!materialize)return [];
-    const values=source.length?source.map((item,index)=>normalizeStage(item,index,group,base)):[normalizeStage({id:'pv_'+idPart(group)+'_0',name:base.name,sourceId:base.sourceId||base.bankId||'',media:base},0,group,base)];
-    values.sort((a,b)=>a.order-b.order||a.id.localeCompare(b.id));
-    const used=new Set();
-    return values.map((item,index)=>{let id=item.id;if(!id||used.has(id)){let n=index;do{id='pv_'+idPart(group)+'_'+n++;}while(used.has(id));}used.add(id);return {...item,id,order:index,groupId:group};});
+  function currentPlan(){
+    var store=window.KGGDataStore;
+    if(!store||typeof store.getCurrentPlan!=="function")throw error("plan_state_unavailable");
+    return store.getCurrentPlan()||{};
   }
-  function mainIdFor(ex,values){
-    const list=Array.isArray(values)?values:normalizeVariants(ex,true);
-    const requested=String(ex&& (ex.progressionMainId||ex.progressionMainVariantId)||'');
-    return list.some(item=>item.id===requested)?requested:(list[0]&&list[0].id||'');
+  function planInfo(plan){
+    var source=plan||{},patient=source.patient||{};
+    var name=String(patient.name||source.name||source.patientName||"").trim();
+    var exercises=Array.isArray(source.exercises)?source.exercises:[];
+    return {plan:source,name:name,exercises:exercises,ready:exercises.length>0};
   }
-  function bankItems(){try{const bridge=window['KGGProgressionEditorBridge']||{};if(typeof bridge.catalog==='function')return bridge.catalog()||[];}catch(err){}return typeof bank!=='undefined'&&Array.isArray(bank)?bank:[];}
-  function currentExercise(){try{return typeof currentEditedExercise==='function'?currentEditedExercise():null;}catch(err){return null;}}
-  function reducedMotion(){try{return !!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);}catch(err){return false;}}
-  let draft=null;
+  function codecPlan(info){
+    if(info.name)return info.plan;
+    var patient=Object.assign({},info.plan&&info.plan.patient||{}, {name:FALLBACK_PLAN_NAME});
+    return Object.assign({},info.plan,{patient:patient,name:FALLBACK_PLAN_NAME});
+  }
+  function clearSuccessState(){
+    window.KGGTherapyCockpitLastErrorCode="";
+    var toast=document.getElementById("kggTherapyCockpitToast");
+    if(toast){toast.classList.remove("show");toast.textContent="";}
+  }
+  function notify(errorValue){
+    var code=safeErrorCode(errorValue),toast=document.getElementById("kggTherapyCockpitToast");
+    window.KGGTherapyCockpitLastErrorCode=code;
+    if(!toast)return;
+    toast.textContent="Plan konnte nicht ins Cockpit geladen werden ("+code+").";
+    toast.classList.add("show");
+    setTimeout(function(){toast.classList.remove("show");},3200);
+  }
+  function syncEntryVisibility(){
+    var button=document.getElementById("kggTherapyCockpitButton");
+    if(!button)return;
+    var state=api&&typeof api.getState==="function"?api.getState():null;
+    var ready=!!(state&&state.slotCount>0);
+    if(!ready){try{ready=planInfo(currentPlan()).ready;}catch(e){ready=false;}}
+    button.classList.toggle("kgg-tc-entry-ready",ready);
+  }
+  function installPlanStoreHook(){
+    var store=window.KGGDataStore;
+    if(store&&typeof store.setCurrentPlan==="function"&&!store.__kggTicket090EntryWrapped){
+      var setCurrentPlan=store.setCurrentPlan;
+      store.setCurrentPlan=function(){var result=setCurrentPlan.apply(this,arguments);syncEntryVisibility();return result;};
+      store.__kggTicket090EntryWrapped=true;
+    }
+    syncEntryVisibility();
+  }
+  function importCurrentPlan(){
+    if(!api||typeof api.getState!=="function"||typeof api.open!=="function")throw error("cockpit_unavailable");
+    var state=api.getState(),info=planInfo(currentPlan());
+    if(!info.ready)throw error("current_plan_not_ready");
+    if(typeof api.fromPlan!=="function"||typeof api.contentKey!=="function"||typeof api.makeLink!=="function"||typeof api.importCode!=="function")throw error("cockpit_content_contract_unavailable");
+    var payload=api.fromPlan(codecPlan(info)),contentKey=api.contentKey(payload);
+    if(Array.isArray(state&&state.slots)&&state.slots.some(function(slot){return slot&&slot.contentKey===contentKey;})){api.open();return {reused:true,state:state};}
+    if(state&&state.slotCount>=3)throw error("slots_full");
+    return api.importCode(api.makeLink(payload));
+  }
+  function activateDirectPlan(){
+    try{var state=api&&typeof api.getState==="function"?api.getState():null;if(state&&state.slotCount>0){api.open();clearSuccessState();return true;}importCurrentPlan();clearSuccessState();}
+    catch(errorValue){notify(errorValue);}
+    return true;
+  }
+  function activateFinish(event){
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    try{importCurrentPlan();clearSuccessState();var modal=document.getElementById("shareModal");if(modal)modal.classList.remove("open");}
+    catch(errorValue){notify(errorValue);}
+  }
+  function install(){
+    if(installed)return;
+    installed=true;
+    api=window.KGGTherapyCockpit;
+    window.KGGTherapyCockpitDirectPlanClick=activateDirectPlan;
+    window.KGGTherapyCockpitEntryVisibilitySync=syncEntryVisibility;
+    installPlanStoreHook();
+    ["finishCockpitBtn","finishCockpitGaugeBtn"].forEach(function(id){var button=document.getElementById(id);if(button)button.addEventListener("click",activateFinish,true);});
+    window.KGG_PATCHES=window.KGG_PATCHES||{};
+    window.KGG_PATCHES[PATCH_ID]={installed:true,version:1,dependsOn:"kgg-v088-ticket-037-real-plan"};
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});else install();
+})();
+</script>
+<!-- KGG PATCH END kgg-v090-cockpit-exercises-only -->
+<!-- KGG PATCH START kgg-v091-plan-add-exercise-card -->
+<!-- Kleine Plan-Karte zum Hinzufügen einer weiteren Übung -->
+<script id="kgg-v091-plan-add-exercise-card">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v091-plan-add-exercise-card";
+  var CARD_ID="kggPlanAddExerciseCard";
+  var installed=false;
 
-  function ensureDom(){
-    let box=$('kgg015ProgressionBox');
-    if(box)return box;
-    const media=document.querySelector('.editorMediaBox');
-    if(!media||!media.parentNode)return null;
-    box=document.createElement('section');box.id='kgg015ProgressionBox';box.className='notice kgg015ProgressionBox';media.insertAdjacentElement('afterend',box);return box;
+  function focusExerciseComposer(){
+    var bankToggle=document.getElementById("bankToggle");
+    if(bankToggle&&bankToggle.getAttribute("aria-label")==="Übungsdatenbank öffnen")bankToggle.click();
+    var input=document.getElementById("exerciseInput");
+    if(!input)return;
+    try{input.focus({preventScroll:true});}catch(error){input.focus();}
+    try{input.scrollIntoView({behavior:"smooth",block:"center",inline:"nearest"});}catch(error){input.scrollIntoView(false);}
   }
-  function ensureStyle(){
-    if($('kgg015AdminGalleryStyle'))return;
-    const style=document.createElement('style');style.id='kgg015AdminGalleryStyle';style.textContent=`
-      .kgg015ProgressionBox{display:block;background:#f8fafc;border:1px solid #dbe3ef;border-radius:16px;padding:0;overflow:hidden;container-type:inline-size}
-      .kgg015ProgressionDetails>summary{cursor:pointer;list-style:none;padding:13px 14px;font-weight:950;color:#111827;display:flex;align-items:center;justify-content:space-between;gap:10px}
-      .kgg015ProgressionDetails>summary::-webkit-details-marker{display:none}
-      .kgg015ProgressionDetails>summary:after{content:'+';font-size:22px;line-height:1;color:#2563eb}
-      .kgg015ProgressionDetails[open]>summary:after{content:'−'}
-      .kgg015ProgressionCount{font-size:12px;font-weight:800;color:#64748b;margin-left:auto}
-      .kgg015ProgressionBody{display:grid;gap:10px;padding:0 12px 12px}
-      .kgg015ProgressionIntro{color:#475569;font-size:12px;line-height:1.35;font-weight:700}
-      .kgg015StageRail{display:flex;align-items:stretch;gap:8px;overflow-x:auto;padding:4px 2px 8px;scroll-snap-type:x proximity;touch-action:pan-x;overscroll-behavior-x:contain}
-      .kgg015StageRail::-webkit-scrollbar{height:6px}.kgg015StageRail::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px}
-      .kgg015StageCard,.kgg015AddStage{position:relative;flex:0 0 clamp(118px,22vw,148px);min-height:124px;border-radius:16px;scroll-snap-align:center}
-      .kgg015StageCard{border:2px solid #dbe3ef;background:#fff;box-shadow:0 4px 12px rgba(15,23,42,.08);touch-action:none;user-select:none;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,opacity .18s ease}
-      .kgg015StageCard.is-main{border-color:#2563eb;box-shadow:0 0 0 3px #dbeafe,0 6px 16px rgba(37,99,235,.15)}
-      .kgg015StageCard.is-holding{border-color:#0ea5e9;box-shadow:0 0 0 4px #bae6fd,0 8px 20px rgba(14,165,233,.2)}
-      .kgg015StageCard.is-vibrating{animation:kgg015StageVibrate .08s linear infinite}
-      .kgg015StageRail.is-reordering{overflow-y:visible}
-      .kgg015StageRail.is-reordering .kgg015StageCard:not(.is-dragging){transition:transform .14s ease,margin .14s ease,opacity .14s ease}
-      .kgg015StageCard.is-dragging{z-index:6;opacity:.98;border-color:rgba(120,137,158,.34);box-shadow:0 1px 2px rgba(7,16,39,.08),0 8px 18px rgba(7,16,39,.18),0 22px 42px rgba(7,16,39,.16);filter:none;transform:translate3d(var(--kgg015-drag-x,0px),var(--kgg015-drag-y,0px),0) scale(1.035);transition:none;pointer-events:none;cursor:grabbing}
-      .kgg015StagePlaceholder{position:relative;flex:0 0 clamp(118px,22vw,148px);min-height:124px;border:0;background:transparent;box-shadow:none;overflow:visible;visibility:visible}
-      .kgg015StagePlaceholder:before{content:"";position:absolute;left:9%;right:9%;top:50%;height:44%;transform:translateY(-50%);border-radius:999px;background:radial-gradient(ellipse at center,rgba(7,16,39,.24) 0%,rgba(7,16,39,.15) 34%,rgba(7,16,39,.07) 58%,rgba(7,16,39,0) 78%);filter:blur(9px)}
-      @keyframes kgg015StageVibrate{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-1px) rotate(-.5deg)}75%{transform:translateX(1px) rotate(.5deg)}}
-      @media(prefers-reduced-motion:reduce){.kgg015StageCard.is-vibrating{animation:none}}
-      @media(prefers-reduced-motion:reduce){.kgg015StageRail.is-reordering .kgg015StageCard:not(.is-dragging){transition:none}}
-      .kgg015StageMedia{height:68px;margin:5px 5px 4px;border-radius:10px;background:#e2e8f0;display:grid;place-items:center;overflow:hidden;color:#64748b;font-size:10px;font-weight:850}
-      .kgg015StageMedia img{display:block;width:100%;height:100%;object-fit:cover;background:#fff}
-      .kgg015StageName{display:-webkit-box;padding:0 6px 3px;min-height:28px;color:#111827;font-size:12px;line-height:1.15;font-weight:900;text-align:center;overflow:hidden;text-overflow:ellipsis;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-      .kgg015StageMeta{display:flex;align-items:center;justify-content:center;gap:4px;padding:0 5px 5px;color:#64748b;font-size:9px;font-weight:800}
-      .kgg015StageMainBadge{color:#1d4ed8}.kgg015StageHandle{display:none!important}
-      .kgg015StageRemove{position:absolute;right:0;top:0;z-index:2;width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border:0;border-radius:0;background:transparent;color:#b91c1c;display:grid;place-items:center;font-size:19px;line-height:1;font-weight:950}
-      .kgg015AddStage{border:2px dashed #94a3b8;background:#f8fafc;color:#2563eb;display:grid;place-items:center;align-content:center;gap:4px;cursor:pointer;min-height:124px;font-weight:950;text-align:center}
-      .kgg015AddStage strong{font-size:24px;line-height:1}.kgg015AddStage span{font-size:10px;padding:0 6px}
-      .kgg015AddPanel{display:grid;gap:8px;padding:10px;border:1px solid #cbd5e1;border-radius:13px;background:#fff}
-      .kgg015AddPanel[hidden]{display:none}.kgg015AddPanel label{font-size:12px;font-weight:900;color:#334155}.kgg015AddPanel input{width:100%;min-height:44px;border:1px solid #94a3b8;border-radius:11px;padding:8px 10px;color:#111827;background:#fff;font:700 14px/1.2 system-ui}
-      .kgg015AddResults{display:grid;gap:6px;max-height:190px;overflow:auto}.kgg015AddResult,.kgg015NewResult{min-height:44px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;text-align:left;padding:7px 9px;color:#111827;font-weight:850}.kgg015AddResult small{display:block;color:#64748b;font-size:10px;margin-top:2px}.kgg015AddCancel{min-height:40px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#334155;font-weight:850}
-      .kgg015DeleteDialog{display:grid;gap:8px;padding:10px;border:1px solid #fecdd3;border-radius:12px;background:#fff1f2;color:#881337}.kgg015DeleteDialog[hidden]{display:none}.kgg015DeleteActions{display:flex;gap:7px;justify-content:flex-end}.kgg015DeleteActions button{min-height:40px;border-radius:10px;padding:7px 12px;border:1px solid #cbd5e1;background:#fff;font-weight:850}.kgg015DeleteActions [data-kgg015-delete-confirm]{border-color:#be123c;background:#be123c;color:#fff}
-      .kgg015ProgressionStatus{min-height:18px;color:#475569;font-size:11px;font-weight:800}.kgg015ProgressionStatus[data-tone="success"]{color:#166534}.kgg015ProgressionStatus[data-tone="warn"]{color:#9f1239}
-      @container (max-width:430px){.kgg015StageCard,.kgg015AddStage{flex-basis:122px}.kgg015StageMedia{height:64px}}
-      @container (min-width:760px){.kgg015StageCard,.kgg015AddStage{flex-basis:144px}.kgg015StageRail{gap:10px}}
-      @container (max-width:700px) and (min-width:560px){.kgg015StageCard,.kgg015AddStage{flex-basis:130px}.kgg015StageRail{gap:7px}}
-    `;document.head.appendChild(style);
+
+  function removeCard(list){
+    var old=document.getElementById(CARD_ID);
+    if(old&&old.parentNode===list)old.parentNode.removeChild(old);
   }
-  function stageMediaMarkup(item){
-    const media=item&&item.media&&item.media[0];
-    if(!media)return '<span>Kein Bild</span>';
-    if(media.src&&/^data:image\//i.test(String(media.src)))return '<img src="'+esc(media.src)+'" alt="">';
-    if(media.url&&/^https?:/i.test(String(media.url)))return '<img src="'+esc(media.url)+'" alt="">';
-    return '<span data-kgg015-media-id="'+esc(media.id||'')+'">Bild vorhanden</span>';
+
+  function decoratePlanList(){
+    var list=document.getElementById("planList");
+    if(!list)return;
+    var hasExercise=!!list.querySelector(".planCard[data-plan-id]");
+    if(!hasExercise){removeCard(list);return;}
+    var card=document.getElementById(CARD_ID);
+    if(!card){
+      card=document.createElement("button");
+      card.id=CARD_ID;
+      card.type="button";
+      card.className="planAddCard";
+      card.setAttribute("aria-label","Neue Übung hinzufügen");
+      card.innerHTML='<span class="planAddCardPlus" aria-hidden="true">+</span><span class="planAddCardText">Übung hinzufügen</span>';
+      card.addEventListener("click",focusExerciseComposer);
+    }
+    if(card.parentNode!==list)list.appendChild(card);
   }
-  function renderStage(item,index){
-    const main=item.id===draft.mainId;
-    return '<article class="kgg015StageCard'+(main?' is-main':'')+'" draggable="true" tabindex="0" role="listitem" data-kgg015-stage-id="'+esc(item.id)+'" data-kgg015-index="'+index+'" aria-label="Progressionsstufe '+(index+1)+': '+esc(item.name)+'">'+
-      '<button type="button" class="kgg015StageRemove" data-kgg015-remove aria-label="Progressionsstufe '+(index+1)+' löschen">×</button>'+
-      '<div class="kgg015StageMedia">'+stageMediaMarkup(item)+'</div>'+
-      '<strong class="kgg015StageName">'+esc(item.name||('Stufe '+(index+1)))+'</strong>'+
-      '<div class="kgg015StageMeta">'+(main?'<span class="kgg015StageMainBadge">Hauptübung</span>':'<span>Stufe '+(index+1)+'</span>')+'</div>'+
-      '</article>';
+
+  function install(){
+    if(installed)return;
+    var list=document.getElementById("planList");
+    if(!list){
+      setTimeout(install,50);
+      return;
+    }
+    installed=true;
+    decoratePlanList();
+    var observer=new MutationObserver(decoratePlanList);
+    observer.observe(list,{childList:true});
+    window.KGG_PATCHES=window.KGG_PATCHES||{};
+    window.KGG_PATCHES[PATCH_ID]={installed:true,version:1,dependsOn:"kgg-v090-cockpit-exercises-only"};
   }
-  function renderAddSlot(side){return '<button type="button" class="kgg015AddStage" data-kgg015-add-slot="'+side+'" aria-label="'+(side==='before'?'Leichtere':'Schwerere')+' Progressionsstufe hinzufügen"><strong>＋</strong><span>'+ (side==='before'?'Leichtere Stufe':'Schwerere Stufe')+'</span></button>';}
-  function renderDraft(){
-    const box=ensureDom();if(!box||!draft)return;ensureStyle();
-    const open=box.dataset.kgg015Open==='1';const list=draft.variants||[];
-    box.className='notice kgg015ProgressionBox';box.innerHTML='<details class="kgg015ProgressionDetails"'+(open?' open':'')+'><summary><span>Progressionsstufen</span><span class="kgg015ProgressionCount">'+list.length+' '+(list.length===1?'Stufe':'Stufen')+'</span></summary><div class="kgg015ProgressionBody"><div class="kgg015StageRail" role="list" aria-label="Progressionsstufen">'+renderAddSlot('before')+list.map(renderStage).join('')+renderAddSlot('after')+'</div><div class="kgg015AddPanel" data-kgg015-add-panel hidden><label for="kgg015AddName">Stufe hinzufügen</label><input id="kgg015AddName" data-kgg015-add-name autocomplete="off" placeholder="Übungsname eingeben"><div class="kgg015AddResults" data-kgg015-add-results></div><button type="button" class="kgg015AddCancel" data-kgg015-add-cancel>Abbrechen</button></div><div class="kgg015DeleteDialog" data-kgg015-delete-dialog hidden><strong>Progressionsstufe löschen?</strong><span>Die Stufe wird erst nach deiner Bestätigung entfernt.</span><div class="kgg015DeleteActions"><button type="button" data-kgg015-delete-cancel>Abbrechen</button><button type="button" data-kgg015-delete-confirm>Löschen</button></div></div><div class="kgg015ProgressionStatus" data-kgg015-status role="status" aria-live="polite"></div></div></details>';
-    const details=box.querySelector('details');if(details)details.addEventListener('toggle',()=>{box.dataset.kgg015Open=details.open?'1':'0';});
-    bindStageEvents(box);renderAddPanel(box);hydrateMedia(box);
+
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});else install();
+})();
+</script>
+<style id="kgg-v091-plan-add-exercise-card-style">
+  .planAddCard{
+    width:100%;
+    min-height:48px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    padding:9px 12px;
+    border:1px dashed #9aa9bb;
+    border-radius:16px;
+    background:rgba(255,255,255,.78);
+    color:#26364c;
+    box-shadow:none;
+    font:inherit;
+    font-weight:900;
+    cursor:pointer;
+    transition:transform .14s ease,background-color .14s ease,border-color .14s ease,box-shadow .14s ease;
   }
-  function setStatus(text,tone){const node=document.querySelector('[data-kgg015-status]');if(node){node.textContent=text||'';if(tone)node.dataset.tone=tone;else delete node.dataset.tone;}}
-  function insertVariant(value,side){
-    if(!draft)return;
-    const index=side==='before'?0:draft.variants.length;const source=value&&typeof value==='object'&&!value.sourceId&&!value.bankId&&!value.s&&value.id?{...value,sourceId:value.id}:value;const item=normalizeStage(source,index,draft.groupId,draft.exercise);const used=new Set(draft.variants.map(stage=>stage.id));let id=item.id,n=index;while(used.has(id)){id='pv_'+idPart(draft.groupId)+'_'+n++;}item.id=id;item.order=index;draft.variants.splice(index,0,item);draft.variants.forEach((stage,i)=>stage.order=i);draft.changed=true;draft.addSide=null;renderDraft();setStatus('Progressionsstufe hinzugefügt.','success');
+  .planAddCard:hover,.planAddCard:focus-visible{
+    background:#edf5ff;
+    border-color:#5ea7e8;
+    box-shadow:0 5px 14px rgba(7,16,39,.08);
   }
-  function createNewStage(name,side){
-    const clean=String(name||'').trim();if(!clean){setStatus('Bitte zuerst einen Übungsnamen eingeben.','warn');return;}
-    const created={id:'custom_progression_'+Date.now(),name:clean,aliases:clean,sets:3,unit:'Wdh',weightUnit:'kg',measure:'wdh',media:[],custom:true,createdFromPlan:true};let saved=created;
-    try{const bridge=window['KGGProgressionEditorBridge']||{};if(typeof bridge.upsert==='function')saved=bridge.upsert(created,'ticket_015_progression_create')||created;else if(typeof upsertPlanExerciseToBank==='function')saved=upsertPlanExerciseToBank(created,'ticket_015_progression_create')||created;}catch(err){saved=created;}
-    insertVariant({id:saved.id,name:saved.name,sourceId:saved.id,media:saved},side);
+  .planAddCard:active{transform:scale(.985);}
+  .planAddCardPlus{
+    width:28px;
+    height:28px;
+    display:grid;
+    place-items:center;
+    border:2px solid currentColor;
+    border-radius:999px;
+    font-size:24px;
+    line-height:1;
   }
-  function renderAddPanel(box){
-    const panel=box.querySelector('[data-kgg015-add-panel]');if(!panel)return;const input=panel.querySelector('[data-kgg015-add-name]');const results=panel.querySelector('[data-kgg015-add-results]');
-    panel.hidden=!draft.addSide;if(panel.hidden)return;
-    if(input&&!input.dataset.bound){input.dataset.bound='1';input.addEventListener('input',()=>renderAddPanel(box));setTimeout(()=>input.focus(),0);}
-    const query=String(input&&input.value||'').trim().toLocaleLowerCase('de-DE');const hits=bankItems().filter(item=>item&&String(item.name||'').toLocaleLowerCase('de-DE').includes(query)&&String(item.id||'')!==String(draft.exercise&&((draft.exercise.localId||draft.exercise.id)||''))).slice(0,6);
-    if(!results)return;results.innerHTML=hits.map(item=>'<button type="button" class="kgg015AddResult" data-kgg015-existing="'+esc(item.id)+'"><b>'+esc(item.name)+'</b><small>Vorhandene Übung übernehmen</small></button>').join('');
-    if(query&&!hits.some(item=>String(item.name||'').toLocaleLowerCase('de-DE')===query))results.innerHTML+='<button type="button" class="kgg015NewResult" data-kgg015-new="'+esc(input.value)+'">Neue Stufe „'+esc(input.value)+'“ anlegen</button>';
-    results.querySelectorAll('[data-kgg015-existing]').forEach(button=>button.onclick=()=>{const item=bankItems().find(candidate=>String(candidate&&candidate.id||'')===button.dataset.kgg015Existing);if(item)insertVariant(item,draft.addSide);});
-    results.querySelectorAll('[data-kgg015-new]').forEach(button=>button.onclick=()=>createNewStage(button.dataset.kgg015New,draft.addSide));
-    const cancel=panel.querySelector('[data-kgg015-add-cancel]');if(cancel)cancel.onclick=()=>{draft.addSide=null;renderDraft();};
+  .planAddCardText{font-size:15px;line-height:1.15;}
+  @media(max-width:759px){
+    .planAddCard{min-height:44px;padding:7px 10px;border-radius:14px;gap:7px;}
+    .planAddCardPlus{width:25px;height:25px;font-size:22px;}
+    .planAddCardText{font-size:14px;}
   }
-  function requestAdd(side){if(!draft)return;draft.addSide=side;renderDraft();const box=ensureDom();if(box)renderAddPanel(box);}
-  function askDelete(index){if(!draft||draft.variants.length<=1){setStatus('Die letzte Progressionsstufe kann nicht gelöscht werden.','warn');return;}draft.pendingDelete=index;const dialog=document.querySelector('[data-kgg015-delete-dialog]');if(dialog)dialog.hidden=false;}
-  function deleteVariant(index){
-    if(!draft||draft.variants.length<=1)return;const removed=draft.variants[index];draft.variants.splice(index,1);draft.variants.forEach((item,i)=>item.order=i);if(removed&&removed.id===draft.mainId)draft.mainId=draft.variants[Math.min(index,draft.variants.length-1)].id;draft.pendingDelete=null;draft.changed=true;renderDraft();setStatus('Progressionsstufe gelöscht.','success');
+</style>
+<!-- KGG PATCH END kgg-v091-plan-add-exercise-card -->
+<!-- KGG PATCH START kgg-v092-cockpit-live-edit -->
+<!-- Therapie-Cockpit direkt bearbeiten -->
+<style id="kgg-v092-cockpit-live-edit-style">
+  .kgg-tce-card-tools{display:flex;gap:4px;align-items:center;}
+  .kgg-tce-exercise-head{display:flex;align-items:stretch;gap:3px;padding:3px 3px 0 3px;}
+  .kgg-tce-exercise-head .kgg-tc-card-toggle{flex:1;min-width:0;}
+  .kgg-tce-drag,.kgg-tce-tool{flex:0 0 38px;min-width:38px;min-height:42px;padding:0;border:1px solid #d9e2ec;border-radius:9px;background:#fff;color:#475569;font:800 17px/1 system-ui,sans-serif;cursor:pointer;touch-action:manipulation;}
+  .kgg-tce-drag{cursor:grab;color:#2563eb;touch-action:none;}
+  .kgg-tce-drag:active{cursor:grabbing;}
+  .kgg-tce-tool[data-tce-action="delete"]{color:#b91c1c;background:#fff7f7;}
+  .kgg-tce-add-card{width:100%;min-height:58px;display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 2px;padding:10px;border:1px dashed #8fa7c2;border-radius:12px;background:#f8fbff;color:#1d4ed8;font:800 14px/1.1 system-ui,sans-serif;cursor:pointer;transition:transform .14s ease,background-color .14s ease,border-color .14s ease;}
+  .kgg-tce-add-card:hover,.kgg-tce-add-card:focus-visible{background:#edf5ff;border-color:#5ea7e8;}
+  .kgg-tce-add-card:active{transform:scale(.985);}
+  .kgg-tce-add-plus{width:27px;height:27px;display:grid;place-items:center;border:2px solid currentColor;border-radius:999px;font-size:23px;line-height:1;}
+  .kgg-tce-mobile-nav{display:none;align-items:center;gap:7px;margin:0 0 10px;padding:7px;border:1px solid #d8e1ec;border-radius:14px;background:#fff;box-shadow:0 2px 8px rgba(23,35,58,.07);}
+  .kgg-tce-mobile-slots{display:flex;min-width:0;flex:1;gap:5px;overflow:auto;scrollbar-width:none;}
+  .kgg-tce-mobile-slots::-webkit-scrollbar{display:none;}
+  .kgg-tce-slot-tab{min-width:64px;min-height:45px;display:flex;align-items:center;justify-content:center;gap:5px;padding:4px 8px;border:1px solid #d8e1ec;border-radius:10px;background:#f8fafc;color:#475569;font:800 12px/1 system-ui,sans-serif;cursor:pointer;touch-action:manipulation;}
+  .kgg-tce-slot-tab .kgg-tce-slot-dot{width:9px;height:9px;border-radius:50%;background:var(--tce-slot-color,#2563eb);}
+  .kgg-tce-slot-tab.active{border-color:var(--tce-slot-color,#2563eb);background:#eff6ff;color:#1d4ed8;box-shadow:0 0 0 2px color-mix(in srgb,var(--tce-slot-color,#2563eb) 18%,transparent);}
+  .kgg-tce-slot-tab[aria-current="false"]{opacity:.82;}
+  .kgg-tce-mobile-arrow{flex:0 0 38px;width:38px;min-height:40px;padding:0;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#1e3a5f;font-size:22px;line-height:1;cursor:pointer;touch-action:manipulation;}
+  .kgg-tce-mobile-arrow:disabled{opacity:.35;cursor:default;}
+  .kgg-tce-mobile-count{display:block;min-width:80px;color:#64748b;font-size:11px;font-weight:800;text-align:center;white-space:nowrap;}
+  .kgg-tce-mobile-grid{display:block!important;min-height:100%;}
+  .kgg-tce-mobile-grid .kgg-tc-card{display:none;min-height:100%;height:100%;}
+  .kgg-tce-mobile-grid .kgg-tc-card.kgg-tce-active-card{display:flex;}
+  .kgg-tce-mobile-grid .kgg-tc-card-body{min-height:0;}
+  .kgg-tce-mobile-grid .kgg-tc-scroll{overscroll-behavior:contain;}
+  .kgg-tce-dragging{opacity:.54;box-shadow:0 14px 30px rgba(37,99,235,.22)!important;transform:translateY(var(--tce-drag-y,0px)) scale(1.015);transition:none!important;z-index:3;}
+  .kgg-tce-drag-placeholder{min-height:58px;margin:8px 0;border:2px dashed #8bb9ed;border-radius:12px;background:#eff6ff;}
+  .kgg-tce-drag-gap{outline:2px solid rgba(37,99,235,.2);outline-offset:2px;}
+  .kgg-tce-modal{position:fixed;inset:0;z-index:2147481800;display:grid;place-items:center;padding:14px;background:rgba(15,23,42,.48);}
+  .kgg-tce-modal[hidden]{display:none;}
+  .kgg-tce-sheet{width:min(680px,100%);max-height:min(90dvh,760px);overflow:auto;padding:17px;border-radius:16px;background:#fff;box-shadow:0 20px 60px rgba(15,23,42,.3);}
+  .kgg-tce-sheet h2{margin:0 0 5px;font-size:20px;}
+  .kgg-tce-sheet p{margin:0 0 12px;color:#64748b;}
+  .kgg-tce-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;}
+  .kgg-tce-field{display:grid;gap:4px;color:#475569;font-size:12px;font-weight:800;}
+  .kgg-tce-field.full{grid-column:1 / -1;}
+  .kgg-tce-field input,.kgg-tce-field select{width:100%;box-sizing:border-box;min-height:40px;padding:8px 9px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#0f172a;font:700 14px/1.2 system-ui,sans-serif;}
+  .kgg-tce-stages{display:grid;gap:8px;margin-top:13px;padding:11px;border:1px solid #dbe3ee;border-radius:12px;background:#f8fafc;}
+  .kgg-tce-stage-row{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:6px;align-items:center;}
+  .kgg-tce-stage-main{display:grid;gap:5px;min-width:0;}
+  .kgg-tce-stage-no{display:grid;place-items:center;min-height:38px;border-radius:8px;background:#1e293b;color:#fff;font-weight:900;}
+  .kgg-tce-stage-row input{min-width:0;min-height:38px;padding:7px;border:1px solid #cbd5e1;border-radius:8px;font:700 13px/1.2 system-ui,sans-serif;}
+  .kgg-tce-stage-row select{min-width:0;min-height:34px;padding:6px 7px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#334155;font:600 12px/1.2 system-ui,sans-serif;}
+  .kgg-tce-stage-actions{display:flex;gap:4px;}
+  .kgg-tce-stage-actions button{min-width:34px;min-height:36px;padding:4px 6px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#334155;font-weight:800;cursor:pointer;}
+  .kgg-tce-stage-actions button:last-child{color:#b91c1c;background:#fff7f7;}
+  .kgg-tce-modal-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:13px;}
+  .kgg-tce-bank-list{display:grid;gap:7px;max-height:52dvh;overflow:auto;margin-top:10px;}
+  .kgg-tce-bank-search{width:100%;box-sizing:border-box;min-height:42px;padding:8px 10px;border:1px solid #cbd5e1;border-radius:9px;font:700 14px/1.2 system-ui,sans-serif;}
+  .kgg-tce-bank-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px;border:1px solid #dbe3ee;border-radius:10px;background:#fff;}
+  .kgg-tce-bank-item span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:800;}
+  .kgg-tce-bank-item small{display:block;color:#64748b;font-weight:600;}
+  .kgg-tce-bank-item button{min-height:36px;padding:6px 10px;border:1px solid #2563eb;border-radius:8px;background:#eff6ff;color:#1d4ed8;font-weight:800;cursor:pointer;}
+  .kgg-tce-empty-slot{padding:15px;border:1px dashed #b8c7d9;border-radius:11px;color:#64748b;text-align:center;font-size:13px;}
+  @media(max-width:759px){
+    .kgg-tce-mobile-nav{display:flex;}
+    .kgg-tc-board{overflow:hidden;}
+    .kgg-tce-form-grid{grid-template-columns:minmax(0,1fr);}
+    .kgg-tce-field.full{grid-column:auto;}
+    .kgg-tce-stage-row{grid-template-columns:27px minmax(0,1fr);}
+    .kgg-tce-stage-main{grid-column:2;}
+    .kgg-tce-stage-actions{grid-column:2;}
+    .kgg-tce-mobile-grid .kgg-tc-card-foot{position:sticky;bottom:0;z-index:1;}
   }
-  function bindDeleteDialog(box){
-    const dialog=box.querySelector('[data-kgg015-delete-dialog]');if(!dialog)return;const cancel=dialog.querySelector('[data-kgg015-delete-cancel]');const confirm=dialog.querySelector('[data-kgg015-delete-confirm]');if(cancel)cancel.onclick=()=>{draft.pendingDelete=null;dialog.hidden=true;};if(confirm)confirm.onclick=()=>{const index=draft&&Number.isInteger(draft.pendingDelete)?draft.pendingDelete:-1;dialog.hidden=true;if(index>=0)deleteVariant(index);};
+  @media(min-width:760px){.kgg-tce-card-tools .kgg-tce-tool{min-width:36px;flex-basis:36px;}}
+</style>
+<script id="kgg-v092-cockpit-live-edit-script">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v092-cockpit-live-edit",api=null,root=null,board=null,activeSlot=0,observer=null,reorder=null,editState=null,installed=false,enhancing=false,lastView="normal",ignoreInteractionsUntil=0;
+  var COLORS=["#2563eb","#0f766e","#c2410c"];
+  function clone(value){try{return JSON.parse(JSON.stringify(value));}catch(e){return value;}}
+  function esc(value){return String(value==null?"":value).replace(/[&<>"']/g,function(ch){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch];});}
+  function state(){return api&&typeof api.getState==="function"?api.getState():{slots:[],slotCount:0};}
+  function slot(index){return api&&typeof api.getSlot==="function"?api.getSlot(index):null;}
+  function occupied(){var result=[],current=state().slots||[];current.forEach(function(item,index){if(item)result.push({index:index,slot:slot(index)});});return result;}
+  function firstOccupied(){var list=occupied();return list.length?list[0].index:0;}
+  function safeSync(index){try{if(api&&typeof api.syncSlot==="function")api.syncSlot(index);}catch(e){} }
+  function isPhone(){return window.innerWidth<=759;}
+  function activeIndex(){var current=slot(activeSlot);return current?activeSlot:firstOccupied();}
+  function cardFor(index){return board&&board.querySelector('.kgg-tc-card[data-tc-card="'+index+'"]');}
+  function createButton(className,label,text,attrs){var button=document.createElement("button");button.type="button";button.className=className;button.setAttribute("aria-label",label);button.textContent=text;Object.keys(attrs||{}).forEach(function(key){button.setAttribute(key,attrs[key]);});return button;}
+  function addCard(slotIndex){
+    var card=cardFor(slotIndex);if(!card)return;
+    var scroll=card.querySelector(".kgg-tc-scroll");if(!scroll||scroll.querySelector('.kgg-tce-add-card'))return;
+    var add=createButton("kgg-tce-add-card","Neue Übung hinzufügen","",{"data-tce-action":"add","data-tce-slot":slotIndex});
+    add.innerHTML='<span class="kgg-tce-add-plus" aria-hidden="true">+</span><span>Übung hinzufügen</span>';scroll.appendChild(add);
   }
-  function moveVariant(from,to){if(!draft||from===to||from<0||to<0||from>=draft.variants.length||to>=draft.variants.length)return;const item=draft.variants.splice(from,1)[0];draft.variants.splice(to,0,item);draft.variants.forEach((stage,index)=>stage.order=index);draft.changed=true;renderDraft();setStatus('Reihenfolge gespeichert.','success');}
-  function openStageEditor(index){
-    const stage=draft&&draft.variants&&draft.variants[index];if(!stage)return;
-    const linked=stage.sourceId&&bankItems().find(item=>String(item&&item.id||'')===String(stage.sourceId));
-    const target=linked||draft.exercise;
-    const bridge=window.KGGTicket015AdminEditor||{};
-    if(target&&typeof bridge.open==='function'){
-      try{
-        if(typeof bridge.saveEditor==='function')bridge.saveEditor();
-        bridge.open(target);
-      }catch(err){setStatus('Die aktuelle Übung konnte vor dem Öffnen nicht gespeichert werden.','warn');}
+  function bindExerciseTools(card,slotIndex){
+    if(!card)return;
+    var exercises=card.querySelectorAll(".kgg-tc-exercise");
+    exercises.forEach(function(article,index){
+      if(article.dataset.tceEnhanced==="1")return;
+      article.dataset.tceEnhanced="1";
+      var toggle=article.querySelector(".kgg-tc-card-toggle");if(!toggle)return;
+      var head=document.createElement("div");head.className="kgg-tce-exercise-head";
+      var drag=createButton("kgg-tce-drag","Übung verschieben","⠿",{"data-tce-action":"drag","data-tce-slot":slotIndex,"data-tce-ex":index});
+      var edit=createButton("kgg-tce-tool","Übung bearbeiten","⚙",{"data-tce-action":"edit","data-tce-slot":slotIndex,"data-tce-ex":index});
+      var del=createButton("kgg-tce-tool","Übung löschen","×",{"data-tce-action":"delete","data-tce-slot":slotIndex,"data-tce-ex":index});
+      article.insertBefore(head,toggle);head.appendChild(drag);head.appendChild(toggle);head.appendChild(edit);head.appendChild(del);
+      drag.addEventListener("pointerdown",startReorder,{passive:false});
+    });
+    addCard(slotIndex);
+  }
+  function ensureMobileNavigation(list){
+    var nav=board.querySelector(".kgg-tce-mobile-nav");
+    if(!nav){
+      nav=document.createElement("div");nav.className="kgg-tce-mobile-nav";nav.setAttribute("aria-label","Cockpit-Patientenwahl");
+      nav.innerHTML='<button type="button" class="kgg-tce-mobile-arrow" data-tce-action="previous" aria-label="Vorheriger Patient">‹</button><div class="kgg-tce-mobile-slots"></div><span class="kgg-tce-mobile-count"></span><button type="button" class="kgg-tce-mobile-arrow" data-tce-action="next" aria-label="Nächster Patient">›</button>';
+      board.insertBefore(nav,board.firstChild);
+    }
+    var current=activeIndex(),items=occupied(),tabs=nav.querySelector(".kgg-tce-mobile-slots");
+    var tabHtml=items.map(function(item){var name=item.slot&&item.slot.name||"Ohne Patientendaten",color=COLORS[item.index%COLORS.length];return '<button type="button" class="kgg-tce-slot-tab '+(item.index===current?'active':'')+'" style="--tce-slot-color:'+color+'" data-tce-action="select" data-tce-slot="'+item.index+'" aria-current="'+(item.index===current?'true':'false')+'"><span class="kgg-tce-slot-dot" aria-hidden="true"></span><span>Slot '+(item.index+1)+'<br><small>'+esc(name.slice(0,16))+'</small></span></button>';}).join("");
+    if(tabs.innerHTML!==tabHtml)tabs.innerHTML=tabHtml;
+    var countText="Patient "+(items.findIndex(function(item){return item.index===current;})+1)+" von "+items.length,count=nav.querySelector(".kgg-tce-mobile-count");
+    if(count&&count.textContent!==countText)count.textContent=countText;
+    var position=items.findIndex(function(item){return item.index===current;}),prev=nav.querySelector('[data-tce-action="previous"]'),next=nav.querySelector('[data-tce-action="next"]');
+    if(prev)prev.disabled=position<=0;if(next)next.disabled=position<0||position>=items.length-1;
+    list.forEach(function(card){card.classList.toggle("kgg-tce-active-card",Number(card.dataset.tcCard)===current);});
+  }
+  function enhance(){
+    if(enhancing||!board||!root||!api)return;enhancing=true;
+    try{
+    var currentView=state().view;if(currentView==="cockpit"&&lastView!=="cockpit")ignoreInteractionsUntil=Date.now()+450;lastView=currentView;
+    var grid=board.querySelector(".kgg-tc-grid");if(!grid)return;
+    var cards=Array.from(grid.querySelectorAll(".kgg-tc-card[data-tc-card]"));if(!cards.length)return;
+    cards.forEach(function(card){bindExerciseTools(card,Number(card.dataset.tcCard));});
+    if(isPhone()){grid.classList.add("kgg-tce-mobile-grid");ensureMobileNavigation(cards);}else{grid.classList.remove("kgg-tce-mobile-grid");var nav=board.querySelector(".kgg-tce-mobile-nav");if(nav)nav.remove();cards.forEach(function(card){card.classList.remove("kgg-tce-active-card");});}
+    }finally{enhancing=false;}
+  }
+  function refresh(){if(board)window.setTimeout(enhance,0);}
+  function stopObserver(){if(observer){observer.disconnect();observer=null;}}
+  function updateSlot(index,next,reason){
+    if(!api||typeof api.updateSlot!=="function")return false;
+    try{api.updateSlot(index,next,reason);safeSync(index);refresh();return true;}catch(errorValue){var code=errorValue&&errorValue.code||"update_failed";var toast=document.getElementById("kggTherapyCockpitToast");if(toast){toast.textContent="Cockpit-Änderung fehlgeschlagen ("+code+")";toast.classList.add("show");}return false;}
+  }
+  function finishReorder(event){
+    var active=reorder;if(!active)return;event.preventDefault();var parent=active.article.parentNode,to=Number.isInteger(active.targetIndex)?active.targetIndex:(active.placeholder&&active.placeholder.parentNode===parent?Array.from(parent.querySelectorAll(".kgg-tc-exercise,.kgg-tce-drag-placeholder")).indexOf(active.placeholder):-1),targetWasShared=Number.isInteger(active.targetIndex);cleanupReorder();
+    active.article.classList.remove("kgg-tce-dragging","reorder-lifted","reorder-gap-before","reorder-gap-after");active.article.style.removeProperty("--tce-drag-y");
+    var current=slot(active.slotIndex);if(!current)return;
+    var from=active.from;if(to<0)to=from;
+    to=Math.max(0,Math.min(current.exercises.length-1,to));if(!targetWasShared&&to>from)to-=1;if(to===from){refresh();return;}
+    var exercises=window.KGGSharedReorder&&typeof window.KGGSharedReorder.move==='function'?window.KGGSharedReorder.move(current.exercises,from,to):null;if(!exercises){refresh();return;}var open=current.openExercise;
+    if(open===from)open=to;else if(from<open&&open<=to)open-=1;else if(to<=open&&open<from)open+=1;
+    updateSlot(active.slotIndex,{planId:current.planId,name:current.name,date:current.date,exercises:exercises,openExercise:open},"cockpit_reorder");
+  }
+  function cleanupReorder(){var active=reorder;if(!active)return;document.removeEventListener("pointermove",moveReorder);document.removeEventListener("pointerup",finishReorder);document.removeEventListener("pointercancel",cancelReorder);if(active.placeholder&&active.placeholder.parentNode)active.placeholder.parentNode.removeChild(active.placeholder);if(active.article)active.article.classList.remove("reorder-lifted","reorder-gap-before","reorder-gap-after");reorder=null;}
+  function cancelReorder(){var active=reorder;if(!active)return;cleanupReorder();active.article.classList.remove("kgg-tce-dragging");active.article.style.removeProperty("--tce-drag-y");refresh();}
+  function moveReorder(event){var active=reorder;if(!active)return;event.preventDefault();var dy=event.clientY-active.startY;active.article.style.setProperty("--tce-drag-y",dy+"px");var others=Array.from(active.article.parentNode.querySelectorAll(".kgg-tc-exercise")).filter(function(item){return item!==active.article;});var mid=event.clientY,refIndex=window.KGGSharedReorder&&typeof window.KGGSharedReorder.targetIndex==='function'?window.KGGSharedReorder.targetIndex(others,mid):others.length;active.targetIndex=refIndex;var ref=others[refIndex]||null;others.forEach(function(item){item.classList.remove("reorder-gap-before","reorder-gap-after");});if(ref){active.article.parentNode.insertBefore(active.placeholder,ref);ref.classList.add("reorder-gap-before");}else{active.article.parentNode.appendChild(active.placeholder);if(others.length)others[others.length-1].classList.add("reorder-gap-after");}}
+  function startReorder(event){
+    if(event.button!=null&&event.button!==0)return;var handle=event.currentTarget,article=handle.closest(".kgg-tc-exercise"),card=handle.closest(".kgg-tc-card"),index=Number(card&&card.dataset.tcCard),from=Array.from(card.querySelectorAll(".kgg-tc-exercise")).indexOf(article);if(!article||!card||from<0)return;var current=slot(index);if(!current||current.exercises.length<2)return;event.preventDefault();event.stopPropagation();cleanupReorder();var placeholder=document.createElement("div");placeholder.className="kgg-tce-drag-placeholder reorder-placeholder";placeholder.style.height=article.getBoundingClientRect().height+"px";article.after(placeholder);article.classList.add("kgg-tce-dragging","reorder-lifted");reorder={slotIndex:index,from:from,article:article,placeholder:placeholder,startY:event.clientY,pointerId:event.pointerId};try{handle.setPointerCapture&&handle.setPointerCapture(event.pointerId);}catch(e){}document.addEventListener("pointermove",moveReorder,{passive:false});document.addEventListener("pointerup",finishReorder,{passive:false});document.addEventListener("pointercancel",cancelReorder,{passive:false});}
+  function bankItems(){
+    var list=[];try{var shared=window.KGGSharedBank&&window.KGGSharedBank.exportPayload?window.KGGSharedBank.exportPayload():null;list=shared&&Array.isArray(shared.exercises)?shared.exercises:[];}catch(e){}
+    var seen=Object.create(null);return list.filter(function(item){var key=String(item&&item.name||"").trim().toLowerCase();if(!key||seen[key])return false;seen[key]=true;return true;});
+  }
+  function bankExercise(item){
+    if(!item)return null;var ref=api.registry.lookup(item.id)||api.registry.lookup(item.name);if(!ref){try{ref=api.registry.derive(item.name,{sets:item.sets,metricUnit:item.unit,loadUnit:item.weightUnit});}catch(e){return null;}}
+    var sets=Math.max(1,Math.min(8,Number(item.sets)||3)),metric=String(item.unit||"Wdh"),load=String(item.weightUnit||"kg");return {id:ref.id,name:String(item.name||ref.name),sets:sets,side:"BI",loadUnit:load,weightUnit:load,metricUnit:metric,unit:metric,measure:/zeit|sek/i.test(metric)?"zeit":"wdh",startLoad:String(item.startLoad||""),startMetric:String(item.startMetric||""),previous:Array.from({length:sets},function(){return ["",""]; }),today:Array.from({length:sets},function(){return ["",""]; }),media:clone(item.media||[]),progressionGroupId:String(item.progressionGroupId||""),progressionVariants:clone(item.progressionVariants||[])};
+  }
+  function openAdd(index){
+    var modal=document.getElementById("kggTceAddModal"),list=modal&&modal.querySelector(".kgg-tce-bank-list"),search=modal&&modal.querySelector(".kgg-tce-bank-search");
+    if(!modal||!list)return;
+    modal.dataset.tceSlot=String(index);
+    var items=bankItems();
+    if(!items.length)items=(api.registry.entries()||[]).map(function(item){return {id:item.id,name:item.name,sets:3,unit:"Wdh",weightUnit:"kg"};});
+    function renderItems(){
+      var query=String(search&&search.value||"").trim().toLowerCase();
+      list.innerHTML=items.filter(function(item){return !query||String(item.name||"").toLowerCase().includes(query);}).map(function(item){return '<div class="kgg-tce-bank-item"><span>'+esc(item.name)+'<small>'+esc(item.unit||"Wdh")+' · '+esc(item.weightUnit||"kg")+'</small></span><button type="button" data-tce-bank-id="'+esc(item.id||item.name)+'">Hinzufügen</button></div>';}).join("")||'<div class="kgg-tce-empty-slot">Keine passende Übung gefunden.</div>';
+      list.querySelectorAll("[data-tce-bank-id]").forEach(function(button){
+        button.onclick=function(){
+          var item=items.find(function(candidate){return String(candidate.id||candidate.name)===String(button.dataset.tceBankId);});
+          var next=slot(index);if(!item||!next)return;
+          var ex=bankExercise(item);if(!ex)return;
+          if(next.exercises.some(function(existing){return existing.id===ex.id;})){window.alert("Diese Übung ist bereits im Slot vorhanden.");return;}
+          next.exercises.push(ex);
+          if(updateSlot(index,next,"cockpit_add_exercise"))modal.hidden=true;
+        };
+      });
+    }
+    if(search){search.value="";search.oninput=renderItems;}
+    renderItems();modal.hidden=false;setTimeout(function(){if(search)search.focus();},0);
+  }
+  function stagesHtml(){
+    var variants=editState&&Array.isArray(editState.exercise.progressionVariants)?editState.exercise.progressionVariants:[];
+    if(!variants.length)return '<div class="kgg-tce-empty-slot">Noch keine Progressionsstufen.</div>';
+    var items=bankItems();if(!items.length)items=(api.registry.entries()||[]).map(function(item){return {id:item.id,name:item.name,media:[]};});
+    return variants.map(function(item,index){
+      var selected=String(item.sourceId||item.bankId||""),hasSelected=items.some(function(candidate){return String(candidate.id||"")===selected;});
+      var options='<option value="">Eigene Stufe ohne Übungsbank-Zuordnung</option>';
+      if(selected&&!hasSelected)options+='<option value="'+esc(selected)+'" selected>'+esc(item.sourceName||selected)+' (bestehend)</option>';
+      options+=items.map(function(candidate){var id=String(candidate.id||""),name=String(candidate.name||"");return '<option value="'+esc(id)+'" '+(id===selected?'selected':'')+'>'+esc(name)+'</option>';}).join('');
+      return '<div class="kgg-tce-stage-row" data-tce-stage="'+index+'"><span class="kgg-tce-stage-no">'+(index+1)+'</span><div class="kgg-tce-stage-main"><input data-tce-stage-name value="'+esc(item.name||"")+'" aria-label="Name der Progressionsstufe '+(index+1)+'"><select data-tce-stage-source aria-label="Übungsbank-Zuordnung der Progressionsstufe '+(index+1)+'">'+options+'</select></div><div class="kgg-tce-stage-actions"><button type="button" data-tce-stage-up="'+index+'" '+(index?'':'disabled')+'>↑</button><button type="button" data-tce-stage-down="'+index+'" '+(index===variants.length-1?'disabled':'')+'>↓</button><button type="button" data-tce-stage-remove="'+index+'">×</button></div></div>';
+    }).join('');
+  }
+  function renderStages(){var box=document.querySelector("#kggTceEditModal .kgg-tce-stage-list");if(box)box.innerHTML=stagesHtml();}
+  function captureStageDraft(){
+    if(!editState||!Array.isArray(editState.exercise.progressionVariants))return;
+    var modal=document.getElementById("kggTceEditModal"),names=modal?Array.from(modal.querySelectorAll("[data-tce-stage-name]")):[],sources=modal?Array.from(modal.querySelectorAll("[data-tce-stage-source]")):[],items=bankItems();
+    if(!items.length)items=(api.registry.entries()||[]).map(function(item){return {id:item.id,name:item.name,media:[]};});
+    editState.exercise.progressionVariants.forEach(function(item,index){
+      if(names[index])item.name=String(names[index].value||item.name).trim().slice(0,80);
+      var sourceId=sources[index]?String(sources[index].value||""):String(item.sourceId||"");
+      if(sourceId){var linked=items.find(function(candidate){return String(candidate.id||"")===sourceId;});item.sourceId=sourceId;item.sourceName=linked?String(linked.name||""):String(item.sourceName||sourceId);if(linked&&Array.isArray(linked.media))item.media=clone(linked.media);}
+      else{item.sourceId="";item.sourceName="";}
+    });
+  }
+  function openEdit(slotIndex,exerciseIndex){
+    var current=slot(slotIndex),ex=current&&current.exercises[exerciseIndex],modal=document.getElementById("kggTceEditModal");if(!ex||!modal)return;editState={slotIndex:slotIndex,exerciseIndex:exerciseIndex,exercise:clone(ex)};var fields={name:ex.name||"",sets:ex.sets||3,side:ex.side||"BI",loadUnit:ex.loadUnit||ex.weightUnit||"kg",metricUnit:ex.metricUnit||ex.unit||"Wdh",measure:ex.measure||"wdh",startLoad:ex.startLoad||"",startMetric:ex.startMetric||"",videoUrl:ex.videoUrl||"",videoLabel:ex.videoLabel||"Video öffnen"};Object.keys(fields).forEach(function(key){var input=modal.querySelector('[data-tce-edit-field="'+key+'"]');if(input)input.value=fields[key];});renderStages();modal.hidden=false;setTimeout(function(){var input=modal.querySelector('[data-tce-edit-field="name"]');if(input)input.focus();},0);
+  }
+  function saveEdit(){
+    if(!editState)return;var modal=document.getElementById("kggTceEditModal"),next=slot(editState.slotIndex);if(!modal||!next)return;var ex=editState.exercise,read=function(key){var input=modal.querySelector('[data-tce-edit-field="'+key+'"]');return input?input.value:"";};ex.name=String(read("name")||ex.name).trim().slice(0,80)||ex.name;ex.sets=Math.max(1,Math.min(8,Number(read("sets"))||3));ex.side=read("side")==="LR"?"LR":"BI";ex.loadUnit=String(read("loadUnit")||"kg").slice(0,12);ex.weightUnit=ex.loadUnit;ex.metricUnit=String(read("metricUnit")||"Wdh").slice(0,12);ex.unit=ex.metricUnit;ex.measure=read("measure")==="zeit"?"zeit":"wdh";ex.startLoad=String(read("startLoad")||"").trim().slice(0,24);ex.startMetric=String(read("startMetric")||"").trim().slice(0,24);ex.videoUrl=/^https?:\/\//i.test(String(read("videoUrl")||""))?String(read("videoUrl")).trim().slice(0,500):"";ex.videoLabel=String(read("videoLabel")||"Video öffnen").trim().slice(0,120)||"Video öffnen";while(ex.previous.length<ex.sets)ex.previous.push(["",""]);while(ex.today.length<ex.sets)ex.today.push(["",""]);ex.previous=ex.previous.slice(0,ex.sets);ex.today=ex.today.slice(0,ex.sets);var names=Array.from(modal.querySelectorAll("[data-tce-stage-name]")),sources=Array.from(modal.querySelectorAll("[data-tce-stage-source]")),sourceItems=bankItems();if(!sourceItems.length)sourceItems=(api.registry.entries()||[]).map(function(item){return {id:item.id,name:item.name,media:[]};});(ex.progressionVariants||[]).forEach(function(item,index){if(names[index])item.name=String(names[index].value||item.name).trim().slice(0,80);var sourceId=sources[index]?String(sources[index].value||""):String(item.sourceId||"");if(sourceId){var linked=sourceItems.find(function(candidate){return String(candidate.id||"")===sourceId;});item.sourceId=sourceId;item.sourceName=linked?String(linked.name||""):String(item.sourceName||sourceId);if(linked&&Array.isArray(linked.media))item.media=clone(linked.media);}else{item.sourceId="";item.sourceName="";}item.order=index;});ex.progressionVariants=(ex.progressionVariants||[]).filter(function(item){return String(item.name||"").trim();}).map(function(item,index){item.order=index;return item;});if(updateSlot(editState.slotIndex,{planId:next.planId,name:next.name,date:next.date,exercises:next.exercises.map(function(item,index){return index===editState.exerciseIndex?ex:item;}),openExercise:next.openExercise},"cockpit_edit_exercise")){modal.hidden=true;editState=null;}}
+  function removeExercise(slotIndex,exerciseIndex){var current=slot(slotIndex),article=cardFor(slotIndex)&&cardFor(slotIndex).querySelectorAll(".kgg-tc-exercise")[exerciseIndex];if(!current||!current.exercises[exerciseIndex])return;if(!window.confirm("Übung '"+current.exercises[exerciseIndex].name+"' aus diesem Cockpit-Slot löschen?"))return;if(article){article.classList.add("kgg-tce-dragging");article.style.setProperty("--tce-drag-y","36px");article.style.opacity="0";}setTimeout(function(){var next=slot(slotIndex);if(!next)return;next.exercises.splice(exerciseIndex,1);if(next.openExercise===exerciseIndex)next.openExercise=null;else if(Number.isInteger(next.openExercise)&&next.openExercise>exerciseIndex)next.openExercise-=1;updateSlot(slotIndex,next,"cockpit_delete_exercise");},170);}
+  function moveStage(index,delta){if(!editState||!Array.isArray(editState.exercise.progressionVariants))return;captureStageDraft();var list=editState.exercise.progressionVariants,target=index+delta;if(target<0||target>=list.length)return;var item=list.splice(index,1)[0];list.splice(target,0,item);renderStages();}
+  function addStage(){if(!editState)return;editState.exercise.progressionVariants=editState.exercise.progressionVariants||[];captureStageDraft();editState.exercise.progressionVariants.push({id:"pv_cockpit_"+Date.now()+"_"+editState.exercise.progressionVariants.length,groupId:editState.exercise.progressionGroupId||"",name:"Progressionsstufe "+(editState.exercise.progressionVariants.length+1),order:editState.exercise.progressionVariants.length,sourceId:"",sourceName:"",media:[]});renderStages();}
+  function handleCustomClick(event){var target=event.target&&event.target.closest?event.target.closest("[data-tce-action]"):null;if(!target||!root||!root.contains(target))return;var action=target.getAttribute("data-tce-action"),index=Number(target.getAttribute("data-tce-slot")),exercise=Number(target.getAttribute("data-tce-ex"));if(Date.now()<ignoreInteractionsUntil&&action==="add")return;if(action==="select"){activeSlot=index;refresh();return;}if(action==="previous"||action==="next"){var list=occupied(),pos=list.findIndex(function(item){return item.index===activeIndex();}),nextPos=pos+(action==="next"?1:-1);if(list[nextPos]){activeSlot=list[nextPos].index;refresh();}return;}if(action==="add"){openAdd(index);return;}if(action==="edit"){openEdit(index,exercise);return;}if(action==="delete"){removeExercise(index,exercise);return;}}
+  function closeModal(event){var modal=event.currentTarget.closest(".kgg-tce-modal");if(modal)modal.hidden=true;if(modal&&modal.id==="kggTceEditModal")editState=null;}
+  function installModals(){
+    if(document.getElementById("kggTceAddModal"))return;
+    var add=document.createElement("div");add.id="kggTceAddModal";add.className="kgg-tce-modal";add.hidden=true;add.innerHTML='<div class="kgg-tce-sheet" role="dialog" aria-modal="true" aria-labelledby="kggTceAddTitle"><h2 id="kggTceAddTitle">Übung ins Cockpit hinzufügen</h2><p>Eine Übung aus der bestehenden Übungsbank für den aktiven Slot wählen.</p><input class="kgg-tce-bank-search" type="search" placeholder="Übung suchen" aria-label="Übung suchen"><div class="kgg-tce-bank-list"></div><div class="kgg-tce-modal-actions"><button type="button" class="kgg-tc-btn" data-tce-close>Abbrechen</button></div></div>';root.appendChild(add);
+    var edit=document.createElement("div");edit.id="kggTceEditModal";edit.className="kgg-tce-modal";edit.hidden=true;edit.innerHTML='<div class="kgg-tce-sheet" role="dialog" aria-modal="true" aria-labelledby="kggTceEditTitle"><h2 id="kggTceEditTitle">Cockpit-Übung bearbeiten</h2><p>Die Änderung gilt nur für den aktuell ausgewählten Cockpit-Slot.</p><div class="kgg-tce-form-grid"><label class="kgg-tce-field full">Name<input data-tce-edit-field="name"></label><label class="kgg-tce-field">Sätze<select data-tce-edit-field="sets"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select></label><label class="kgg-tce-field">Ausführung<select data-tce-edit-field="side"><option value="BI">beidseitig</option><option value="LR">links/rechts getrennt</option></select></label><label class="kgg-tce-field">Einheit<select data-tce-edit-field="loadUnit"><option>kg</option><option>BW</option><option>Hub</option><option>Stufe</option><option>Watt</option><option>Stufe/Watt</option><option>bar</option><option>keine</option></select></label><label class="kgg-tce-field">Messwert<select data-tce-edit-field="metricUnit"><option>Wdh</option><option>Zeit</option><option>Stufe/Watt</option></select></label><label class="kgg-tce-field">Startgewicht / Startstufe<input data-tce-edit-field="startLoad"></label><label class="kgg-tce-field">Start-Wdh / Startzeit<input data-tce-edit-field="startMetric"></label><label class="kgg-tce-field full">Messart<select data-tce-edit-field="measure"><option value="wdh">Wiederholungen</option><option value="zeit">Zeit</option></select></label><label class="kgg-tce-field full">Video-Link<input data-tce-edit-field="videoUrl" placeholder="https://..."></label><label class="kgg-tce-field full">Video-Button-Text<input data-tce-edit-field="videoLabel" placeholder="Video öffnen"></label></div><section class="kgg-tce-stages"><strong>Progressionsstufen</strong><div class="kgg-tce-stage-list"></div><button type="button" class="kgg-tc-btn" data-tce-add-stage>+ Progressionsstufe hinzufügen</button></section><div class="kgg-tce-modal-actions"><button type="button" class="kgg-tc-btn" data-tce-close>Abbrechen</button><button type="button" class="kgg-tc-btn primary" data-tce-save>Speichern</button></div></div>';root.appendChild(edit);
+    root.querySelectorAll("[data-tce-close]").forEach(function(button){button.addEventListener("click",closeModal);});var save=edit.querySelector("[data-tce-save]");if(save)save.addEventListener("click",saveEdit);var addStageButton=edit.querySelector("[data-tce-add-stage]");if(addStageButton)addStageButton.addEventListener("click",addStage);edit.addEventListener("click",function(event){var t=event.target;if(t&&t.hasAttribute("data-tce-stage-up"))moveStage(Number(t.getAttribute("data-tce-stage-up")),-1);else if(t&&t.hasAttribute("data-tce-stage-down"))moveStage(Number(t.getAttribute("data-tce-stage-down")),1);else if(t&&t.hasAttribute("data-tce-stage-remove")){captureStageDraft();editState.exercise.progressionVariants.splice(Number(t.getAttribute("data-tce-stage-remove")),1);renderStages();}});
+  }
+  function patch(){
+    if(installed)return;api=window.KGGTherapyCockpit;if(!api||!root||!board)return;installed=true;installModals();root.addEventListener("click",handleCustomClick,true);observer=new MutationObserver(function(){if(board.dataset.tceRendering==="1")return;enhance();});observer.observe(board,{childList:true,subtree:true});window.addEventListener("resize",refresh,{passive:true});enhance();
+    window.KGG_PATCHES=window.KGG_PATCHES||{};window.KGG_PATCHES[PATCH_ID]={installed:true,version:1,dependsOn:"kgg-v091-plan-add-exercise-card",contract:"cockpit live plan editing and mobile active-slot navigation"};
+  }
+  function init(){root=document.getElementById("kggTherapyCockpitRoot");board=document.getElementById("kggTherapyCockpitBoard");if(root&&board&&window.KGGTherapyCockpit)patch();else window.setTimeout(init,50);}
+  document.readyState==="loading"?document.addEventListener("DOMContentLoaded",init,{once:true}):init();
+})();
+</script>
+<!-- KGG PATCH END kgg-v092-cockpit-live-edit -->
+<!-- KGG PATCH START kgg-v093-cockpit-shared-editor -->
+<!-- Therapie-Cockpit: vorhandenen Übungseditor und Progressionswechsel verbinden -->
+<style id="kgg-v093-cockpit-shared-editor-style">
+  .kgg-tce-stage-switcher{display:flex;align-items:center;gap:7px;margin:0 9px 7px;padding:6px 8px;border:1px solid #dbe7f3;border-radius:9px;background:#f8fbff;color:#475569;font-size:11px;font-weight:800;}
+  .kgg-tce-stage-switcher label{white-space:nowrap;}
+  .kgg-tce-stage-switcher select{min-width:0;flex:1;min-height:34px;padding:5px 7px;border:1px solid #bfd5ed;border-radius:7px;background:#fff;color:#1e3a5f;font:700 12px/1.2 system-ui,sans-serif;}
+  .kgg-tce-stage-switcher small{color:#64748b;font-weight:700;}
+  #editorModal .kgg-tce-cockpit-stages{margin:13px 0 0;padding:11px;border:1px solid #dbe3ee;border-radius:12px;background:#f8fafc;}
+  #editorModal .kgg-tce-cockpit-stages>strong{display:block;margin-bottom:8px;color:#334155;}
+  #editorModal .kgg-tce-cockpit-stage-list{display:grid;gap:8px;}
+  #editorModal .kgg-tce-cockpit-stage-row{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:6px;align-items:center;}
+  #editorModal .kgg-tce-cockpit-stage-row .stageNo{display:grid;place-items:center;min-height:36px;border-radius:8px;background:#1e293b;color:#fff;font-weight:900;}
+  #editorModal .kgg-tce-cockpit-stage-row .stageMain{display:grid;gap:5px;min-width:0;}
+  #editorModal .kgg-tce-cockpit-stage-row input,#editorModal .kgg-tce-cockpit-stage-row select{width:100%;min-width:0;box-sizing:border-box;min-height:36px;padding:6px 7px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#0f172a;font:700 12px/1.2 system-ui,sans-serif;}
+  #editorModal .kgg-tce-cockpit-stage-row .stageActions{display:flex;gap:4px;}
+  #editorModal .kgg-tce-cockpit-stage-row .stageActions button{min-width:32px;min-height:34px;padding:4px 6px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#334155;font-weight:800;cursor:pointer;}
+  #editorModal .kgg-tce-cockpit-stage-row .stageActions button:last-child{color:#b91c1c;background:#fff7f7;}
+  body.kggTherapyCockpitOpen #editorModal.open{visibility:visible!important;pointer-events:auto!important;z-index:2147481900!important;}
+  @media(max-width:600px){#editorModal .kgg-tce-cockpit-stage-row{grid-template-columns:27px minmax(0,1fr);}.kgg-tce-stage-switcher{margin-left:7px;margin-right:7px;}#editorModal .kgg-tce-cockpit-stage-row .stageActions{grid-column:2;}}
+</style>
+<script id="kgg-v093-cockpit-shared-editor-script">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v093-cockpit-shared-editor",api=null,root=null,board=null,editState=null,installed=false;
+  function clone(value){try{return JSON.parse(JSON.stringify(value));}catch(e){return value;}}
+  function esc(value){return String(value==null?"":value).replace(/[&<>"']/g,function(ch){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch];});}
+  function slot(index){return api&&typeof api.getSlot==="function"?api.getSlot(index):null;}
+  function card(index){return board&&board.querySelector('.kgg-tc-card[data-tc-card="'+index+'"]');}
+  function showError(code){var toast=document.getElementById("kggTherapyCockpitToast");if(toast){toast.textContent="Cockpit-Änderung fehlgeschlagen ("+(code||"update_failed")+")";toast.classList.add("show");}}
+  function safeUpdate(index,next,reason){try{api.updateSlot(index,next,reason);if(api.syncSlot)api.syncSlot(index);return true;}catch(errorValue){showError(errorValue&&errorValue.code||"update_failed");return false;}}
+  function bankItems(){
+    var list=[];try{var shared=window.KGGSharedBank&&window.KGGSharedBank.exportPayload?window.KGGSharedBank.exportPayload():null;list=shared&&Array.isArray(shared.exercises)?shared.exercises:[];}catch(e){}
+    if(!list.length&&api&&api.registry&&api.registry.entries)list=api.registry.entries();
+    var seen=Object.create(null);return list.filter(function(item){var id=String(item&&item.id||item&&item.cockpitId||item&&item.name||"");if(!id||seen[id])return false;seen[id]=true;return true;});
+  }
+  function sourceOptions(item){
+    var selected=String(item.sourceId||item.bankId||""),items=bankItems(),html='<option value="">Keine Übungsbank-Zuordnung</option>';
+    if(selected&&!items.some(function(candidate){return String(candidate.id||candidate.cockpitId||"")===selected}))html+='<option value="'+esc(selected)+'" selected>'+esc(item.sourceName||selected)+' (bestehend)</option>';
+    return html+items.map(function(candidate){var id=String(candidate.id||candidate.cockpitId||""),name=String(candidate.name||id);return '<option value="'+esc(id)+'" '+(id===selected?'selected':'')+'>'+esc(name)+'</option>';}).join("");
+  }
+  function stageMarkup(ex){
+    var variants=Array.isArray(ex&&ex.progressionVariants)?ex.progressionVariants:[];
+    if(!variants.length)return '<div class="kgg-tce-empty-slot">Noch keine Progressionsstufen. Du kannst sie hier hinzufügen.</div>';
+    return variants.map(function(item,index){return '<div class="kgg-tce-cockpit-stage-row" data-cockpit-stage="'+index+'"><span class="stageNo">'+(index+1)+'</span><div class="stageMain"><input data-cockpit-stage-name value="'+esc(item.name||"")+'" aria-label="Name der Progressionsstufe '+(index+1)+'"><select data-cockpit-stage-source aria-label="Übungsbank-Zuordnung der Progressionsstufe '+(index+1)+'">'+sourceOptions(item)+'</select></div><div class="stageActions"><button type="button" data-cockpit-stage-up="'+index+'" '+(index?'':'disabled')+'>↑</button><button type="button" data-cockpit-stage-down="'+index+'" '+(index===variants.length-1?'disabled':'')+'>↓</button><button type="button" data-cockpit-stage-remove="'+index+'">×</button></div></div>';}).join("");
+  }
+  function captureStages(){
+    if(!editState||!editState.exercise)return;
+    var box=document.getElementById("kggCockpitStageEditor"),names=box?Array.from(box.querySelectorAll("[data-cockpit-stage-name]")):[],sources=box?Array.from(box.querySelectorAll("[data-cockpit-stage-source]")):[],items=bankItems();
+    (editState.exercise.progressionVariants||[]).forEach(function(item,index){
+      if(names[index])item.name=String(names[index].value||item.name).trim().slice(0,80);
+      var sourceId=sources[index]?String(sources[index].value||""):String(item.sourceId||"");
+      if(sourceId){var linked=items.find(function(candidate){return String(candidate.id||candidate.cockpitId||"")===sourceId;});item.sourceId=sourceId;item.bankId=sourceId;item.sourceName=linked?String(linked.name||sourceId):String(item.sourceName||sourceId);if(linked&&Array.isArray(linked.media))item.media=clone(linked.media);}
+      else{item.sourceId="";item.bankId="";item.sourceName="";}
+      item.order=index;
+    });
+  }
+  function renderStages(){var box=document.getElementById("kggCockpitStageList");if(box&&editState)box.innerHTML=stageMarkup(editState.exercise);}
+  function installStageEditor(){
+    var modal=document.getElementById("editorModal");if(!modal||document.getElementById("kggCockpitStageEditor"))return;
+    var actions=modal.querySelector(".editorActions");if(!actions)return;
+    var section=document.createElement("section");section.id="kggCockpitStageEditor";section.className="kgg-tce-cockpit-stages";section.hidden=true;section.innerHTML='<strong>Progressionsstufen im Cockpit</strong><div id="kggCockpitStageList" class="kgg-tce-cockpit-stage-list"></div><button type="button" class="mutedBtn" id="kggCockpitAddStage">+ Progressionsstufe hinzufügen</button>';
+    actions.parentNode.insertBefore(section,actions);
+    section.addEventListener("click",function(event){var target=event.target;if(!target)return;if(target.id==="kggCockpitAddStage"){captureStages();editState.exercise.progressionVariants=editState.exercise.progressionVariants||[];editState.exercise.progressionVariants.push({id:"pv_cockpit_"+Date.now()+"_"+editState.exercise.progressionVariants.length,groupId:editState.exercise.progressionGroupId||"",name:"Progressionsstufe "+(editState.exercise.progressionVariants.length+1),order:editState.exercise.progressionVariants.length,sourceId:"",sourceName:"",media:[]});renderStages();return;}var index;if(target.hasAttribute("data-cockpit-stage-up")){index=Number(target.getAttribute("data-cockpit-stage-up"));captureStages();var list=editState.exercise.progressionVariants,item=list.splice(index,1)[0];list.splice(index-1,0,item);renderStages();}else if(target.hasAttribute("data-cockpit-stage-down")){index=Number(target.getAttribute("data-cockpit-stage-down"));captureStages();var down=editState.exercise.progressionVariants,entry=down.splice(index,1)[0];down.splice(index+1,0,entry);renderStages();}else if(target.hasAttribute("data-cockpit-stage-remove")){index=Number(target.getAttribute("data-cockpit-stage-remove"));captureStages();var removed=editState.exercise.progressionVariants.splice(index,1)[0];if(removed&&editState.exercise.activeProgressionId===String(removed.id))editState.exercise.activeProgressionId=editState.exercise.progressionVariants[0]&&String(editState.exercise.progressionVariants[0].id)||"";renderStages();}});
+  }
+  function openSharedEditor(slotIndex,exerciseIndex){
+    var current=slot(slotIndex),ex=current&&current.exercises&&current.exercises[exerciseIndex];if(!ex||!window.KGGSharedExerciseEditor||typeof window.KGGSharedExerciseEditor.open!=="function")return;
+    editState={slotIndex:slotIndex,exerciseIndex:exerciseIndex,exercise:clone(ex)};installStageEditor();
+    window.KGGSharedExerciseEditor.open(editState.exercise,{exercise:editState.exercise,onOpen:function(){var section=document.getElementById("kggCockpitStageEditor");if(section)section.hidden=false;renderStages();},onSave:function(saved){captureStages();var latest=slot(editState.slotIndex);if(!latest)return false;var next=clone(latest);next.exercises=next.exercises.map(function(item,index){return index===editState.exerciseIndex?clone(saved):item;});return safeUpdate(editState.slotIndex,next,"cockpit_shared_editor_save");},onDelete:function(){var latest=slot(editState.slotIndex);if(!latest||!latest.exercises[editState.exerciseIndex])return false;if(!window.confirm("Übung '"+latest.exercises[editState.exerciseIndex].name+"' aus diesem Cockpit-Slot löschen?"))return false;var article=card(editState.slotIndex)&&card(editState.slotIndex).querySelectorAll(".kgg-tc-exercise")[editState.exerciseIndex];if(article){article.classList.add("reorder-lifted");article.style.opacity="0";}var index=editState.exerciseIndex;setTimeout(function(){var now=slot(slotIndex);if(!now)return;var next=clone(now);next.exercises.splice(index,1);if(next.openExercise===index)next.openExercise=null;else if(Number.isInteger(next.openExercise)&&next.openExercise>index)next.openExercise-=1;safeUpdate(slotIndex,next,"cockpit_shared_editor_delete");},170);return true;},onClose:function(){var section=document.getElementById("kggCockpitStageEditor");if(section)section.hidden=true;editState=null;}});
+  }
+  function stageSwitchMarkup(ex,slotIndex,exerciseIndex){
+    var variants=Array.isArray(ex&&ex.progressionVariants)?ex.progressionVariants:[];if(!variants.length)return null;
+    var active=String(ex.activeProgressionId||variants[0].id||"");
+    var wrap=document.createElement("div");wrap.className="kgg-tce-stage-switcher";wrap.setAttribute("data-tce-stage-switcher","1");
+    var label=document.createElement("label");label.textContent="Stufe";var select=document.createElement("select");select.setAttribute("aria-label","Aktive Progressionsstufe");select.setAttribute("data-tce-stage-switch","1");
+    variants.forEach(function(item){var option=document.createElement("option");option.value=String(item.id||"");option.textContent=String(item.name||"Progressionsstufe");option.selected=option.value===active;select.appendChild(option);});
+    select.addEventListener("change",function(){var current=slot(slotIndex);if(!current||!current.exercises[exerciseIndex])return;var next=clone(current);next.exercises[exerciseIndex].activeProgressionId=select.value;if(!safeUpdate(slotIndex,next,"cockpit_progression_switch"))select.value=String(current.exercises[exerciseIndex].activeProgressionId||variants[0].id||"");});
+    wrap.appendChild(label);wrap.appendChild(select);return wrap;
+  }
+  function enhanceStageSwitchers(){
+    if(!board)return;Array.from(board.querySelectorAll(".kgg-tc-card[data-tc-card]")).forEach(function(article){var slotIndex=Number(article.getAttribute("data-tc-card")),current=slot(slotIndex);if(!current)return;Array.from(article.querySelectorAll(".kgg-tc-exercise")).forEach(function(exerciseArticle,index){var old=exerciseArticle.querySelector("[data-tce-stage-switcher]");if(old)old.remove();var next=stageSwitchMarkup(current.exercises[index],slotIndex,index),head=exerciseArticle.querySelector(".kgg-tce-exercise-head");if(next&&head)head.after(next);});});
+  }
+  function interceptEdit(event){
+    var target=event.target&&event.target.closest?event.target.closest('[data-tce-action="edit"]'):null;if(!target||!root||!root.contains(target))return;event.preventDefault();event.stopPropagation();if(event.stopImmediatePropagation)event.stopImmediatePropagation();openSharedEditor(Number(target.getAttribute("data-tce-slot")),Number(target.getAttribute("data-tce-ex")));}
+  function observe(){var boardObserver=new MutationObserver(function(){window.setTimeout(enhanceStageSwitchers,0);});boardObserver.observe(board,{childList:true,subtree:true});enhanceStageSwitchers();}
+  function patch(){
+    if(installed)return;api=window.KGGTherapyCockpit;if(!api||!root||!board||!window.KGGSharedExerciseEditor)return;installed=true;var old=document.getElementById("kggTceEditModal");if(old)old.remove();installStageEditor();document.addEventListener("click",interceptEdit,true);observe();window.KGG_PATCHES=window.KGG_PATCHES||{};window.KGG_PATCHES[PATCH_ID]={installed:true,version:1,dependsOn:"kgg-v092-cockpit-live-edit",contract:"existing editor bridge, live progression selection and isolated slot edits"};
+  }
+  function init(){root=document.getElementById("kggTherapyCockpitRoot");board=document.getElementById("kggTherapyCockpitBoard");if(root&&board&&window.KGGTherapyCockpit&&window.KGGSharedExerciseEditor)patch();else window.setTimeout(init,50);}
+  document.readyState==="loading"?document.addEventListener("DOMContentLoaded",init,{once:true}):init();
+})();
+</script>
+<!-- KGG PATCH END kgg-v093-cockpit-shared-editor -->
+<!-- KGG PATCH START kgg-v094-shared-reorder-core -->
+<!-- Shared Reorder Core -->
+<script id="kgg-v094-shared-reorder-core">
+(function(){
+  "use strict";
+  const PATCH_ID="kgg-v094-shared-reorder-core";
+  var shared=window.KGGSharedReorder;
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES[PATCH_ID]={installed:!!(shared&&typeof shared.targetIndex==='function'&&typeof shared.move==='function'),version:1,contract:"normal plan and Therapy-Cockpit use the same reorder target and array semantics"};
+})();
+</script>
+<!-- KGG PATCH END kgg-v094-shared-reorder-core -->
+<!-- KGG PATCH START kgg-v095-cockpit-responsive-entry -->
+<!-- Cockpit-Einstieg im Phone-Dock -->
+<style id="kgg-v095-cockpit-responsive-entry-style">
+  @media(max-width:759px){
+    body.kggPhoneHasCockpit #scanHub{
+      right:12px!important;
+      grid-template-columns:minmax(0,1fr) minmax(108px,124px)!important;
+      gap:8px!important;
+    }
+    #scanHub #kggTherapyCockpitButton.kgg-tc-entry{
+      grid-column:2!important;
+      grid-row:1!important;
+      display:none!important;
+      pointer-events:none!important;
+    }
+    body.kggPhoneHasCockpit #scanHub #kggTherapyCockpitButton.kgg-tc-entry{
+      display:flex!important;
+      align-items:center!important;
+      justify-content:center!important;
+      min-width:0!important;
+      width:100%!important;
+      height:56px!important;
+      min-height:56px!important;
+      margin:0!important;
+      padding:0 8px!important;
+      border:1px solid rgba(255,255,255,.72)!important;
+      border-radius:16px!important;
+      background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(220,236,255,.78))!important;
+      color:#071027!important;
+      box-shadow:0 10px 24px rgba(7,16,39,.22),inset 0 1px 0 rgba(255,255,255,.96)!important;
+      backdrop-filter:blur(18px) saturate(1.38)!important;
+      -webkit-backdrop-filter:blur(18px) saturate(1.38)!important;
+      font:900 13px/1.08 system-ui,sans-serif!important;
+      text-align:center!important;
+      white-space:normal!important;
+      cursor:pointer!important;
+      pointer-events:auto!important;
+      touch-action:manipulation!important;
+      z-index:1193!important;
+    }
+    body.kggPhoneHasCockpit #scanHub #kggTherapyCockpitButton.kgg-tc-entry:active{
+      transform:translateY(1px)!important;
+    }
+    body.kggPhoneHasCockpit.kggPhoneHasPlan #createPanel.planMode #finishBtn:not(.hidden){
+      bottom:calc(76px + env(safe-area-inset-bottom))!important;
+    }
+    body.kggPhoneHasCockpit.kggPhoneHasPlan #scanHub #scanPreview:not(.hidden){
+      bottom:calc(146px + env(safe-area-inset-bottom))!important;
     }
   }
-  function bindStageGestures(box){
-    const rail=box.querySelector('.kgg015StageRail');if(!rail)return;
-    const restoreInline=(node,properties)=>{Object.keys(properties||{}).forEach(name=>{const value=properties[name];if(value==null||value==='')node.style.removeProperty(name);else node.style.setProperty(name,value);});};
-    const releasePointerCapture=gesture=>{if(!gesture||gesture.pointerId==null||!gesture.captured)return;try{if(gesture.card.hasPointerCapture(gesture.pointerId))gesture.card.releasePointerCapture(gesture.pointerId);}catch(err){}gesture.captured=false;};
-    const cleanupPointerDrag=gesture=>{
-      if(!gesture)return;releasePointerCapture(gesture);clearTimeout(gesture.dragReadyTimer);document.removeEventListener('pointermove',gesture.move);document.removeEventListener('pointerup',gesture.up);document.removeEventListener('pointercancel',gesture.cancel);
-      gesture.rail.classList.remove('is-reordering');if(gesture.placeholder)gesture.placeholder.remove();gesture.card.classList.remove('is-dragging');restoreInline(gesture.card,gesture.cardInline);restoreInline(gesture.rail,gesture.railInline);
-    };
-    const placePlaceholder=(gesture,clientX)=>{
-      const candidates=[...gesture.rail.querySelectorAll('[data-kgg015-stage-id]:not(.is-dragging)')];
-      const ref=candidates.find(node=>{const rect=node.getBoundingClientRect();return clientX<rect.left+rect.width/2;});
-      const after=gesture.rail.querySelector('[data-kgg015-add-slot="after"]');
-      if(ref)gesture.rail.insertBefore(gesture.placeholder,ref);else if(after)gesture.rail.insertBefore(gesture.placeholder,after);else gesture.rail.appendChild(gesture.placeholder);
-      gesture.targetIndex=ref?Number(ref.dataset.kgg015Index):Math.max(0,(draft&&draft.variants||[]).length-1);
-    };
-    const activatePointerDrag=gesture=>{
-      if(!gesture||gesture.active)return;const rect=gesture.card.getBoundingClientRect(),railRect=gesture.rail.getBoundingClientRect();
-      const placeholder=document.createElement('div');placeholder.className='kgg015StagePlaceholder';placeholder.setAttribute('aria-hidden','true');placeholder.style.width=rect.width+'px';placeholder.style.height=rect.height+'px';placeholder.style.flex='0 0 '+rect.width+'px';
-      gesture.placeholder=placeholder;gesture.cardInline={position:gesture.card.style.getPropertyValue('position'),left:gesture.card.style.getPropertyValue('left'),top:gesture.card.style.getPropertyValue('top'),width:gesture.card.style.getPropertyValue('width'),height:gesture.card.style.getPropertyValue('height'),margin:gesture.card.style.getPropertyValue('margin'),transform:gesture.card.style.getPropertyValue('transform'),zIndex:gesture.card.style.getPropertyValue('z-index')};gesture.railInline={position:gesture.rail.style.getPropertyValue('position')};
-      gesture.rail.style.setProperty('position','relative');gesture.card.after(placeholder);gesture.card.style.setProperty('position','absolute');gesture.card.style.setProperty('left',(rect.left-railRect.left+gesture.rail.scrollLeft)+'px');gesture.card.style.setProperty('top',(rect.top-railRect.top+gesture.rail.scrollTop)+'px');gesture.card.style.setProperty('width',rect.width+'px');gesture.card.style.setProperty('height',rect.height+'px');gesture.card.style.setProperty('margin','0');gesture.card.style.setProperty('--kgg015-drag-x','0px');gesture.card.style.setProperty('--kgg015-drag-y','0px');gesture.rail.classList.add('is-reordering');gesture.card.classList.add('is-dragging');gesture.card.dataset.kgg015SuppressClick='1';gesture.active=true;placePlaceholder(gesture,gesture.startX);
-    };
-    box.querySelectorAll('[data-kgg015-stage-id]').forEach(card=>{
-      card.addEventListener('dragstart',event=>{draft.dragIndex=Number(card.dataset.kgg015Index);card.dataset.kgg015SuppressClick='1';card.classList.add('is-dragging');rail.classList.add('is-reordering');if(event.dataTransfer){event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',card.dataset.kgg015StageId);}});
-      card.addEventListener('dragend',()=>{draft.dragIndex=null;card.classList.remove('is-dragging');rail.classList.remove('is-reordering');});
-      card.addEventListener('dragover',event=>{if(draft&&Number.isInteger(draft.dragIndex)){event.preventDefault();event.dataTransfer&&(event.dataTransfer.dropEffect='move');}});
-      card.addEventListener('drop',event=>{event.preventDefault();const from=draft&&Number.isInteger(draft.dragIndex)?draft.dragIndex:-1;const to=Number(card.dataset.kgg015Index);draft.dragIndex=null;if(from>=0&&from!==to)moveVariant(from,to);});
-      let gesture=null;
-      const clear=()=>{if(!gesture)return;releasePointerCapture(gesture);clearTimeout(gesture.holdTimer);clearTimeout(gesture.swapTimer);clearTimeout(gesture.dragReadyTimer);document.removeEventListener('pointermove',gesture.move);document.removeEventListener('pointerup',gesture.up);document.removeEventListener('pointercancel',gesture.cancel);card.classList.remove('is-holding','is-vibrating');gesture=null;};
-      const finishMain=()=>{if(!gesture||gesture.moved||gesture.active||gesture.deleteArmed)return;card.classList.add('is-holding');if(!reducedMotion())card.classList.add('is-vibrating');try{if(navigator.vibrate)navigator.vibrate(18);}catch(err){}gesture.mainTriggered=true;gesture.swapTimer=setTimeout(()=>{if(!gesture)return;const stage=draft&&draft.variants[gesture.index];if(stage&&stage.id!==draft.mainId){draft.mainId=stage.id;draft.changed=true;renderDraft();setStatus(stage.name+' ist jetzt die Hauptübung.','success');}card.classList.remove('is-holding','is-vibrating');},MAIN_SWAP_DELAY_MS);};
-      const finish=()=>{if(!gesture)return;const current=gesture;const shouldDelete=current.deleteArmed;const index=current.index;const wasActive=current.active;const to=wasActive&&Number.isInteger(current.targetIndex)?current.targetIndex:null;const suppress=current.moved||current.mainTriggered||current.active||shouldDelete||!!current.axis;if(suppress)card.dataset.kgg015SuppressClick='1';if(wasActive)cleanupPointerDrag(current);clear();if(Number.isInteger(to)&&to!==current.from)moveVariant(current.from,to);if(shouldDelete)askDelete(index);};
-      const cancel=()=>{if(gesture&&gesture.active)cleanupPointerDrag(gesture);clear();};
-      const start=event=>{
-        if(event.button!==undefined&&event.button!==0)return;if(event.target.closest('button'))return;const index=Number(card.dataset.kgg015Index);gesture={card,rail,from:index,index,startX:event.clientX,startY:event.clientY,lastX:event.clientX,pointerId:event.pointerId,captured:false,axis:null,active:false,ready:false,moved:false,deleteArmed:false,mainTriggered:false,targetIndex:null,placeholder:null,holdTimer:0,swapTimer:0,dragReadyTimer:0};
-        if(event.pointerType==='touch'||event.pointerType==='pen'){try{card.setPointerCapture(event.pointerId);gesture.captured=true;}catch(err){}}
-        gesture.holdTimer=setTimeout(finishMain,HOLD_MS);gesture.dragReadyTimer=setTimeout(()=>{if(gesture)gesture.ready=true;},180);gesture.move=ev=>{if(!gesture)return;const dx=ev.clientX-gesture.startX,dy=ev.clientY-gesture.startY,stepX=ev.clientX-gesture.lastX;const horizontal=Math.abs(dx)>=Math.abs(dy);if(!gesture.active&&Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>=DELETE_SWIPE_PX){gesture.axis='vertical';gesture.moved=true;gesture.deleteArmed=true;clearTimeout(gesture.holdTimer);clearTimeout(gesture.swapTimer);card.classList.add('is-holding');return;}if(!gesture.active&&Math.hypot(dx,dy)>MOVE_CANCEL_PX){gesture.moved=true;clearTimeout(gesture.holdTimer);clearTimeout(gesture.swapTimer);card.classList.remove('is-holding','is-vibrating');if(!gesture.axis){if(gesture.ready&&horizontal){gesture.axis='horizontal-drag';activatePointerDrag(gesture);}else if(horizontal){gesture.axis='horizontal-swipe';}else{gesture.axis='vertical';}}}if(gesture.axis==='horizontal-swipe'){rail.scrollLeft-=stepX;gesture.lastX=ev.clientX;return;}if(gesture.active){ev.preventDefault();gesture.card.style.setProperty('--kgg015-drag-x',dx+'px');gesture.card.style.setProperty('--kgg015-drag-y',Math.max(-8,Math.min(8,dy*.08))+'px');placePlaceholder(gesture,ev.clientX);}};gesture.up=finish;gesture.cancel=cancel;document.addEventListener('pointermove',gesture.move,{passive:false});document.addEventListener('pointerup',gesture.up,{once:true});document.addEventListener('pointercancel',gesture.cancel,{once:true});
-      };
-      card.addEventListener('pointerdown',start,{passive:true});
-      card.addEventListener('click',event=>{if(event.target.closest('button'))return;if(card.dataset.kgg015SuppressClick==='1'){delete card.dataset.kgg015SuppressClick;return;}openStageEditor(Number(card.dataset.kgg015Index));});
-      card.addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&!event.target.closest('button')){event.preventDefault();openStageEditor(Number(card.dataset.kgg015Index));}});
-    });
-  }
-  function bindStageEvents(box){
-    box.querySelectorAll('[data-kgg015-add-slot]').forEach(button=>button.onclick=()=>requestAdd(button.dataset.kgg015AddSlot));
-    box.querySelectorAll('[data-kgg015-remove]').forEach(button=>button.onclick=event=>{event.stopPropagation();askDelete(Number(button.closest('[data-kgg015-stage-id]')?.dataset.kgg015Index));});
-    bindDeleteDialog(box);bindStageGestures(box);
-  }
-  async function hydrateMedia(box){
-    box.querySelectorAll('[data-kgg015-media-id]').forEach(async node=>{
-      const id=String(node.dataset.kgg015MediaId||'');const stage=[...((draft&&draft.variants)||[])].find(item=>item.media&&item.media[0]&&String(item.media[0].id||'')===id);const media=stage&&stage.media&&stage.media[0];if(!media)return;
-      try{const bridge=window['KGGProgressionEditorBridge']||{};if(typeof bridge.readMedia!=='function')return;const imageBlob=await bridge.readMedia(media);if(!imageBlob||!node.isConnected)return;const url=URL.createObjectURL(imageBlob);node.innerHTML='<img src="'+url+'" alt="">';node.dataset.kgg015ObjectUrl=url;}catch(err){}
-    });
-  }
-  function startDraft(ex){
-    const values=normalizeVariants(ex,true);draft={exercise:ex,groupId:groupId(ex),variants:values,mainId:mainIdFor(ex,values),changed:false,addSide:null,pendingDelete:null,dragIndex:null};renderDraft();
-  }
-  function persistDraft(ex){
-    if(!ex||!draft||!draft.changed)return;const values=draft.variants.map((item,index)=>({...item,id:String(item.id),groupId:draft.groupId,name:String(item.name||('Progressionsstufe '+(index+1))).trim(),order:index,sourceId:String(item.sourceId||''),media:clone(item.media||[])}));
-    ex.progressionGroupId=draft.groupId;ex.progressionMainId=mainIdFor({progressionMainId:draft.mainId},values);ex.progressionVariants=values;
-    try{const bridge=window['KGGProgressionEditorBridge']||{};if(typeof bridge.upsert==='function')bridge.upsert(ex,'ticket_015_progression_gallery');else if(typeof upsertPlanExerciseToBank==='function')upsertPlanExerciseToBank(ex,'ticket_015_progression_gallery');}catch(err){console.warn('Progressionsstufen konnten nicht in der Übungsdatenbank gespeichert werden:',err)}
-    try{const bridge=window['KGGProgressionEditorBridge']||{};if(typeof bridge.sync==='function')bridge.sync('ticket_015_progression_gallery');else if(typeof syncStatePlanToStore==='function')syncStatePlanToStore('ticket_015_progression_gallery');}catch(err){console.warn('Progressionsstufen konnten nicht synchronisiert werden:',err)}
-    try{const bridge=window['KGGProgressionEditorBridge']||{};if(typeof bridge.persistBank==='function')bridge.persistBank();else if(typeof persistCustomBank==='function')persistCustomBank();}catch(err){console.warn('Übungsdatenbank konnte nicht gespeichert werden:',err)}
-    try{const bridge=window['KGGProgressionEditorBridge']||{};if(typeof bridge.save==='function')bridge.save();else if(typeof save==='function')save();}catch(err){console.warn('Progressionsstufen konnten nicht gespeichert werden:',err)}
-  }
-  function patchEditor(){
-    if(window.__kggTicket015AdminGalleryPatched)return;const bridge=window.KGGTicket015AdminEditor=window.KGGTicket015AdminEditor||{};const previousOpen=bridge.onOpen,previousSave=bridge.onSave;
-    bridge.onOpen=ex=>{if(typeof previousOpen==='function')previousOpen(ex);startDraft(ex);};
-    bridge.onSave=ex=>{const before=draft&&draft.exercise;const id=before&&(before.localId||before.id);if(typeof previousSave==='function')previousSave(ex||before);let edited=ex||before;try{if(typeof state!=='undefined'&&state&&Array.isArray(state.plan))edited=state.plan.find(item=>String(item.localId||item.id)===String(id))||edited;if(!edited&&typeof bank!=='undefined'&&Array.isArray(bank))edited=bank.find(item=>String(item.id)===String(id))||before;}catch(err){}persistDraft(edited);draft=null;};
-    window.__kggTicket015AdminGalleryPatched=true;
-  }
-  function patchSerializers(){
-    if(window.__kggTicket015AdminGallerySerializersPatched)return;const compact=window.compactKggH2Exercise,expand=window.expandKggH2Exercise,patient=window.buildPatientExercisePayload;if(typeof compact!=='function'||typeof expand!=='function'||typeof patient!=='function')return;window.__kggTicket015AdminGallerySerializersPatched=true;
-    window.compactKggH2Exercise=function(ex){const row=compact.apply(this,arguments),values=normalizeVariants(ex,false);if(!values.length)return row;let wire=row[11]&&typeof row[11]==='object'&&!Array.isArray(row[11])?clone(row[11]):null;if(!wire&&window.KGGTicket015Admin&&typeof window.KGGTicket015Admin.wireVariants==='function')wire=clone(window.KGGTicket015Admin.wireVariants(ex));if(wire){wire.g=groupId(ex);wire.a=mainIdFor(ex,values);row[11]=wire;}return row;};
-    window.expandKggH2Exercise=function(item){const ex=expand.apply(this,arguments),wire=Array.isArray(item)&&item[11]&&typeof item[11]==='object'&&!Array.isArray(item[11])?item[11]:null;if(wire&&wire.a){ex.progressionMainId=String(wire.a);if(!ex.progressionVariants&&window.KGGTicket015Admin&&typeof window.KGGTicket015Admin.variantsFromWire==='function'){const values=window.KGGTicket015Admin.variantsFromWire(wire,ex);if(values.length)ex.progressionVariants=values;}}return ex;};
-    window.buildPatientExercisePayload=function(ex){const copy=patient.apply(this,arguments),values=normalizeVariants(ex,false);if(values.length){copy.progressionGroupId=groupId(ex);copy.progressionMainId=mainIdFor(ex,values);}return copy;};
-  }
-  function init(){ensureStyle();patchSerializers();patchEditor();setTimeout(patchSerializers,200);setTimeout(patchEditor,200);setTimeout(patchSerializers,800);setTimeout(patchEditor,800);}
-  window.KGGTicket015AdminGallery={version:VERSION,normalizeVariants,mainIdFor,moveVariant:(items,from,to)=>{const next=items.slice();const item=next.splice(from,1)[0];next.splice(to,0,item);return next;}};
-  if(window.__KGG_TEST__)window.__kggTicket015AdminGalleryTest={normalizeVariants,mainIdFor};
-  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init,{once:true}):init();
-})();
-</script>
-<!-- KGG PATCH END kgg-v090-ticket-015-admin-stage-gallery-drag-motion -->
-<!-- KGG PATCH START kgg-v091-ticket-015-admin-stage-compact -->
-<!-- Ticket 015 Admin-Editor: Kompakte Progressionsstufen -->
-<script id="kgg-v091-ticket-015-admin-stage-compact">
+</style>
+
+<script id="kgg-v095-cockpit-responsive-entry">
 (function(){
   "use strict";
-  const PATCH_ID="kgg-v091-ticket-015-admin-stage-compact";
-  // Den kleinstmoeglichen Patch hier implementieren. Bestehende Hooks beibehalten.
-  window.KGG_PATCHES=window.KGG_PATCHES||{};
-  window.KGG_PATCHES[PATCH_ID]={installed:true};
+  const PATCH_ID="kgg-v095-cockpit-responsive-entry";
+  const PHONE_QUERY="(max-width:759px)";
+  var previousEntrySync=null;
+  var installed=false;
+
+  function byId(id){return document.getElementById(id);}
+  function isPhone(){
+    return !!(window.matchMedia&&window.matchMedia(PHONE_QUERY).matches&&!(window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive()));
+  }
+  function cockpitState(){
+    var api=window.KGGTherapyCockpit;
+    return api&&typeof api.getState==="function"?api.getState():null;
+  }
+  function loadedPlanCount(state){
+    if(state&&Number.isFinite(Number(state.slotCount)))return Math.max(0,Math.min(3,Number(state.slotCount)));
+    return state&&Array.isArray(state.slots)?state.slots.filter(function(slot){return !!slot;}).length:0;
+  }
+  function normalPlanHasExercises(){
+    var store=window.KGGDataStore;
+    if(!store||typeof store.getCurrentPlan!=="function")return false;
+    var plan=store.getCurrentPlan()||{};
+    return Array.isArray(plan.exercises)&&plan.exercises.length>0;
+  }
+  function planLabel(count){return count===1?"Cockpit · 1 Plan":"Cockpit · "+count+" Pläne";}
+  function sync(){
+    var button=byId("kggTherapyCockpitButton"),hub=byId("scanHub"),base=byId("baseToggle"),state=cockpitState(),count=loadedPlanCount(state),phone=isPhone();
+    if(!button)return;
+    var hasCockpit=count>0;
+    if(document.body){
+      document.body.classList.toggle("kggPhoneHasCockpit",phone&&hasCockpit);
+    }
+    if(phone&&hasCockpit&&hub){
+      if(button.parentElement!==hub)hub.appendChild(button);
+      button.textContent=planLabel(count);
+      button.setAttribute("aria-label","Therapie-Cockpit öffnen – "+count+" geladene "+(count===1?"Trainingsplan":"Trainingspläne"));
+      button.setAttribute("title",planLabel(count));
+    }else{
+      if(base&&button.parentElement!==base)base.appendChild(button);
+      if(!phone)button.textContent=count>0?"Cockpit "+count+"/3":"Cockpit";
+      else button.textContent="Cockpit";
+      button.setAttribute("aria-label","Therapie-Cockpit öffnen");
+      button.removeAttribute("title");
+    }
+    if(!phone)button.classList.toggle("kgg-tc-entry-ready",normalPlanHasExercises()||hasCockpit);
+  }
+  function install(){
+    if(installed)return;
+    installed=true;
+    previousEntrySync=window.KGGTherapyCockpitEntryVisibilitySync;
+    window.KGGTherapyCockpitEntryVisibilitySync=function(){
+      if(typeof previousEntrySync==="function")previousEntrySync();
+      sync();
+    };
+    sync();
+    window.addEventListener("resize",function(){setTimeout(sync,80);},{passive:true});
+    window.addEventListener("orientationchange",function(){setTimeout(sync,180);},{passive:true});
+    window.KGG_PATCHES=window.KGG_PATCHES||{};
+    window.KGG_PATCHES[PATCH_ID]={installed:true,version:1,dependsOn:"kgg-v094-shared-reorder-core",contract:"phone cockpit entry is visible only for loaded cockpit plans and displays loaded plan count; tablet entry stays hidden in empty state"};
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});else install();
 })();
 </script>
-<!-- KGG PATCH END kgg-v091-ticket-015-admin-stage-compact -->
-<!-- KGG PATCH START kgg-v092-ticket-015-admin-stage-release-fixes -->
-<!-- Ticket 015 Admin-Editor: Release- und Gesten-Fixes -->
-<script id="kgg-v092-ticket-015-admin-stage-release-fixes">
-(function(){
-  "use strict";
-  const PATCH_ID="kgg-v092-ticket-015-admin-stage-release-fixes";
-  // v092 vervollstaendigt die Hooks des Ticket-015-Galeriepatches: Editor-Stack,
-  // Hauptstufenprojektion, geschuetzte Medienbruecke und Touch-Achsenvertrag.
-  // Die bestehende v090-Implementierung bleibt der einzige UI-Hookpunkt.
-  window.KGG_PATCHES=window.KGG_PATCHES||{};
-  window.KGG_PATCHES[PATCH_ID]={installed:true,gestureContract:{movementAxis:'horizontal',deleteAxis:'vertical',axisLockPx:10,touchTargetMinPx:44}};
-})();
-</script>
-<!-- KGG PATCH END kgg-v092-ticket-015-admin-stage-release-fixes -->
+<!-- KGG PATCH END kgg-v095-cockpit-responsive-entry -->
 
 </body>
 </html>

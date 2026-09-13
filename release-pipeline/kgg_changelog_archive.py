@@ -174,6 +174,56 @@ def _load_archive_document(reference: dict[str, Any], root: Path, *, legacy: boo
     return document
 
 
+def _recover_incremental_entries(changelog: dict[str, Any], root: Path) -> list[dict[str, Any]]:
+    """Rebuild a full snapshot when a new entry was added to a compact window."""
+    snapshots = changelog.get("archiveSnapshots")
+    embedded = changelog.get("entries")
+    if not isinstance(snapshots, list) or not snapshots or not isinstance(embedded, list) or not embedded:
+        raise ChangelogArchiveError("Incremental changelog recovery needs archive snapshots and embedded entries")
+    if not all(isinstance(item, dict) for item in snapshots):
+        raise ChangelogArchiveError("Incremental changelog recovery needs object archive references")
+    legacy_refs = [item for item in snapshots if item == archive_reference()]
+    if len(legacy_refs) != 1:
+        raise ChangelogArchiveError("Incremental changelog recovery requires exactly one legacy v062 snapshot")
+    _load_archive_document(legacy_refs[0], root, legacy=True)
+    current_refs = [item for item in snapshots if item != archive_reference()]
+    if not current_refs:
+        raise ChangelogArchiveError("Incremental changelog recovery requires a previous current snapshot")
+    current_documents = [
+        _load_archive_document(reference, root, legacy=False)
+        for reference in current_refs
+    ]
+    latest_document = max(current_documents, key=lambda item: int(item["source"]["versionCode"]))
+    latest_reference = max(
+        current_refs,
+        key=lambda item: int(item["snapshotVersionCode"]),
+    )
+    retained = latest_reference.get("retainedEntryCountAtCompaction")
+    latest_code = latest_document.get("source", {}).get("versionCode")
+    if not isinstance(retained, int) or retained < 1 or retained > len(latest_document["entries"]):
+        raise ChangelogArchiveError("Previous changelog archive retained-entry count is invalid")
+    if not isinstance(latest_code, int):
+        raise ChangelogArchiveError("Previous changelog archive has no valid source version")
+
+    split = next(
+        (
+            index
+            for index, entry in enumerate(embedded)
+            if not isinstance(entry.get("versionCode"), int) or entry["versionCode"] <= latest_code
+        ),
+        len(embedded),
+    )
+    if split < 1 or split == len(embedded):
+        raise ChangelogArchiveError("No newer embedded changelog entry can be recovered")
+    new_entries = embedded[:split]
+    overlap = embedded[split:]
+    if overlap != latest_document["entries"][: len(overlap)]:
+        raise ChangelogArchiveError("Embedded changelog window does not match the previous full snapshot prefix")
+    if any(entry["versionCode"] <= latest_code for entry in new_entries):
+        raise ChangelogArchiveError("Incremental changelog entries must be newer than the previous snapshot")
+    return deepcopy(new_entries) + deepcopy(latest_document["entries"])
+
+
 def validate_changelog_archives(
     changelog: dict[str, Any],
     root: Path = ROOT,
@@ -251,8 +301,13 @@ def validate_repository(root: Path = ROOT) -> None:
 def compact_current(root: Path = ROOT, *, created_by_patch_id: str | None = None) -> dict[str, Any]:
     changelog_path = root / "kgg-update" / "src" / "metadata" / "changelog.html"
     original_text, changelog = load_embedded(changelog_path)
-    validate_changelog_archives(changelog, root, required=True)
-    entries = changelog.get("entries")
+    try:
+        validate_changelog_archives(changelog, root, required=True)
+        entries = changelog.get("entries")
+    except ChangelogArchiveError as validation_error:
+        if str(validation_error) != "Embedded changelog no longer matches the latest full pre-compaction snapshot":
+            raise
+        entries = _recover_incremental_entries(changelog, root)
     if not isinstance(entries, list) or len(entries) <= CURRENT_RETAINED_ENTRY_COUNT:
         raise ChangelogArchiveError(
             f"Current changelog needs more than {CURRENT_RETAINED_ENTRY_COUNT} entries before compaction"

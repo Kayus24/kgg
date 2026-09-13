@@ -5,12 +5,12 @@
     "path": "kgg-update/src/metadata/changelog.html",
     "elementId": "kgg-changelog",
     "versionCode": 91,
-    "versionName": "1.0.91-ticket-015-admin-stage-compact"
+    "versionName": "1.0.91-plan-add-exercise-card"
   },
-  "createdByPatchId": "kgg-v091-ticket-015-admin-stage-compact",
+  "createdByPatchId": "kgg-v091-plan-add-exercise-card",
   "entryOrder": "newest-first",
   "entryCount": 32,
-  "entriesSha256": "f6116ed28b94e92155d079b676d023812409c984e68368c9f80277dd8d20842e",
+  "entriesSha256": "49a8b739cbd3fb285351fcded6cd6a7e3bb0b73cb10ddbc098e7a3e4431d7e3a",
   "canonicalization": {
     "scope": "entries",
     "encoding": "utf-8",
@@ -26,18 +26,52 @@
   "entries": [
     {
       "versionCode": 91,
-      "versionName": "1.0.91-ticket-015-admin-stage-compact",
-      "patchId": "kgg-v091-ticket-015-admin-stage-compact",
+      "versionName": "1.0.91-plan-add-exercise-card",
+      "patchId": "kgg-v091-plan-add-exercise-card",
       "status": "scaffolded",
       "type": "module-patch",
-      "title": "Ticket 015 Admin-Editor: Kompakte Progressionsstufen",
-      "reason": "Progressionsstufen-Karten werden kompakter, behalten ihre Bilder und erhalten klar getrennte Tipp-, Halte-, Sortier- und Löschgesten.",
+      "title": "Übung hinzufügen – Plus-Karte in der Planliste",
+      "reason": "Die Planliste erhält eine kleine leere Plus-Karte, die den bestehenden Eingabe- und Übungsdatenbankweg zum Hinzufügen einer weiteren Übung öffnet.",
       "whatChanged": [
-        "Progressionsstufen-Karten werden kompakter, behalten ihre Bilder und erhalten klar getrennte Tipp-, Halte-, Sortier- und Löschgesten."
+        "Kleine leere Plus-Karte am Ende der aktuellen Planliste ergänzt.",
+        "Der Klick fokussiert den bestehenden Übungseingang und öffnet bei Bedarf die Übungsdatenbank.",
+        "Plan-State, Übungsdatenbank, Reorder-Mechanismus und Speicherweg bleiben unverändert."
       ],
       "touchedAreas": [
-        "Admin-Editor",
-        "Ticket-015-Smokes"
+        "Planerstellung",
+        "UI"
+      ],
+      "notTouched": [
+        "Therapie-Cockpit",
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
+    {
+      "versionCode": 90,
+      "versionName": "1.0.90-cockpit-exercises-only",
+      "patchId": "kgg-v090-cockpit-exercises-only",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Therapie-Cockpit ohne Basisdaten",
+      "reason": "Cockpit-Pläne können aus mindestens einer gültigen Übung auch ohne Patient:innen-Basisdaten erzeugt werden; der neutrale Codec-Name bleibt flüchtig und alte Fehlerhinweise werden nach Erfolg gelöscht.",
+      "whatChanged": [
+        "Cockpit-Pläne können aus mindestens einer gültigen Übung auch ohne Patient:innen-Basisdaten erzeugt werden; der neutrale Codec-Name bleibt flüchtig und alte Fehlerhinweise werden nach Erfolg gelöscht."
+      ],
+      "touchedAreas": [
+        "Therapie-Cockpit",
+        "Test-Harness"
       ],
       "notTouched": [
         "PDF",
@@ -53,37 +87,6 @@
       ],
       "testStatus": {
         "local": "pending",
-        "certification": "pending"
-      }
-    },
-    {
-      "versionCode": 90,
-      "versionName": "1.0.90-ticket-015-admin-stage-gallery-drag-motion",
-      "patchId": "kgg-v090-ticket-015-admin-stage-gallery-drag-motion",
-      "status": "candidate",
-      "type": "module-patch",
-      "title": "Ticket 015 Admin-Editor: Kartenorientierte Drag-Animation",
-      "reason": "Die Progressionskarten erhalten beim Sortieren dieselbe angehobene Karten-, Platzhalter- und Schattenbewegung wie die bestehenden Übungskarten.",
-      "whatChanged": [
-        "Drag-and-drop/Handle-Sortierung nutzt eine angehobene Karte, einen sichtbaren Platzhalter und weiche Zwischenkartenbewegungen.",
-        "Die bestehende Progressionsgalerie, Main-Hold-Geste, Löschbestätigung und Patientenübertragung bleiben erhalten."
-      ],
-      "touchedAreas": [
-        "Admin-Editor",
-        "Ticket-015-Smokes"
-      ],
-      "notTouched": [
-        "Numpad",
-        "Satzwerte",
-        "PDF",
-        "Scan/OCR",
-        "API-Key-Logik",
-        "Android/APK"
-      ],
-      "supersedes": "kgg-v089-changelog-archive-window-refresh",
-      "testStatus": {
-        "local": "pending",
-        "browser": "pending",
         "certification": "pending"
       }
     },

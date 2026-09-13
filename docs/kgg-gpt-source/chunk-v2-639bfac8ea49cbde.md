@@ -63,23 +63,26 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "ticket-015-live-fix",
     "ticket-037-real-plan",
     "changelog-archive-window-refresh",
-    "ticket-015-admin-stage-gallery-drag-motion",
-    "ticket-015-admin-stage-compact",
-    "ticket-015-admin-stage-release-fixes"
+    "cockpit-exercises-only",
+    "plan-add-exercise-card",
+    "cockpit-live-edit",
+    "cockpit-shared-editor",
+    "shared-reorder-core",
+    "cockpit-responsive-entry"
   ],
   "currentVersion": {
-    "versionCode": 92,
-    "versionName": "1.0.92-ticket-015-admin-stage-release-fixes",
-    "lastPatchId": "kgg-v092-ticket-015-admin-stage-release-fixes",
+    "versionCode": 95,
+    "versionName": "1.0.95-cockpit-responsive-entry",
+    "lastPatchId": "kgg-v095-cockpit-responsive-entry",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v092-ticket-015-admin-stage-release-fixes",
+  "latestPatchId": "kgg-v095-cockpit-responsive-entry",
   "lastUpdateIntent": {
-    "id": "kgg-v092-ticket-015-admin-stage-release-fixes",
-    "summary": "Bewahrt den Elternentwurf, persistiert die Hauptstufe, lädt echte Upload-Bilder und macht Touch-Sortierung erreichbar.",
+    "id": "kgg-v095-cockpit-responsive-entry",
+    "summary": "Zeigt bei geladenen Cockpit-Trainingsplänen einen gezählten Handy-Einstieg neben dem schwebenden Scan-Dock und hält den Tablet-Einstieg leerzustandsfest.",
     "touched": [
-      "Admin-Editor",
-      "Ticket-015-Smokes"
+      "Therapie-Cockpit",
+      "Handy-Layout"
     ],
     "notTouched": [
       "PDF",
@@ -90,8 +93,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
-      "GitHub Manifest",
-      "Handy-Layout"
+      "GitHub Manifest"
     ]
   }
 }

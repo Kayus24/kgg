@@ -3,22 +3,53 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 92,
+  "latestVersionCode": 95,
   "entries": [
     {
-      "versionCode": 92,
-      "versionName": "1.0.92-ticket-015-admin-stage-release-fixes",
-      "patchId": "kgg-v092-ticket-015-admin-stage-release-fixes",
+      "versionCode": 95,
+      "versionName": "1.0.95-cockpit-responsive-entry",
+      "patchId": "kgg-v095-cockpit-responsive-entry",
       "status": "scaffolded",
       "type": "module-patch",
-      "title": "Ticket 015 Admin-Editor: Release- und Gesten-Fixes",
-      "reason": "Bewahrt den Elternentwurf, persistiert die Hauptstufe, lädt echte Upload-Bilder und macht Touch-Sortierung erreichbar.",
+      "title": "Cockpit-Einstieg im Phone-Dock",
+      "reason": "Zeigt bei geladenen Cockpit-Trainingsplänen einen gezählten Handy-Einstieg neben dem schwebenden Scan-Dock und hält den Tablet-Einstieg leerzustandsfest.",
       "whatChanged": [
-        "Bewahrt den Elternentwurf, persistiert die Hauptstufe, lädt echte Upload-Bilder und macht Touch-Sortierung erreichbar."
+        "Zeigt bei geladenen Cockpit-Trainingsplänen einen gezählten Handy-Einstieg neben dem schwebenden Scan-Dock und hält den Tablet-Einstieg leerzustandsfest."
       ],
       "touchedAreas": [
-        "Admin-Editor",
-        "Ticket-015-Smokes"
+        "Therapie-Cockpit",
+        "Handy-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Expliziter Nutzerauftrag: Im Handy-Dock soll bei geladenen Cockpit-Trainingsplänen ein gezählter Cockpit-Button erscheinen; der Tablet-Button darf ohne Plan nicht sichtbar sein."
+    },
+    {
+      "versionCode": 94,
+      "versionName": "1.0.94-shared-reorder-core",
+      "patchId": "kgg-v094-shared-reorder-core",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Shared Reorder Core",
+      "reason": "Teilt die bestehende Reorder-Berechnung und Array-Umordnung zwischen Planerstellung und Therapie-Cockpit.",
+      "whatChanged": [
+        "Teilt die bestehende Reorder-Berechnung und Array-Umordnung zwischen Planerstellung und Therapie-Cockpit."
+      ],
+      "touchedAreas": [
+        "therapy-cockpit"
       ],
       "notTouched": [
         "PDF",
@@ -38,21 +69,88 @@
       }
     },
     {
-      "versionCode": 91,
-      "versionName": "1.0.91-ticket-015-admin-stage-compact",
-      "patchId": "kgg-v091-ticket-015-admin-stage-compact",
+      "versionCode": 93,
+      "versionName": "1.0.93-cockpit-shared-editor",
+      "patchId": "kgg-v093-cockpit-shared-editor",
       "status": "scaffolded",
       "type": "module-patch",
-      "title": "Ticket 015 Admin-Editor: Kompakte Progressionsstufen",
-      "reason": "Progressionsstufen-Karten werden kompakter, behalten ihre Bilder und erhalten klar getrennte Tipp-, Halte-, Sortier- und Löschgesten.",
+      "title": "Cockpit gemeinsamer Editor und Progressionswechsel",
+      "reason": "Verwendet den bestehenden Übungseditor auch für Cockpit-Slots und speichert den sichtbaren Progressionswechsel pro Slot.",
       "whatChanged": [
-        "Progressionsstufen-Karten werden kompakter, behalten ihre Bilder und erhalten klar getrennte Tipp-, Halte-, Sortier- und Löschgesten."
+        "Verwendet den bestehenden Übungseditor auch für Cockpit-Slots und speichert den sichtbaren Progressionswechsel pro Slot."
       ],
       "touchedAreas": [
-        "Admin-Editor",
-        "Ticket-015-Smokes"
+        "Therapie-Cockpit",
+        "Plan-State",
+        "Test-Harness"
       ],
       "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Expliziter Zielauftrag KGG-TICKET-037: Cockpit-Übungen müssen mit denselben Planerstellungsfunktionen bearbeitbar sein; das Changelog wird über den unveränderlichen Snapshot-Mechanismus archiviert."
+    },
+    {
+      "versionCode": 92,
+      "versionName": "1.0.92-cockpit-live-edit",
+      "patchId": "kgg-v092-cockpit-live-edit",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Therapie-Cockpit direkt bearbeiten",
+      "reason": "Erweitert das Cockpit um vollständige Übungsbearbeitung pro Slot und eine mobile aktive Patient:innenkarte.",
+      "whatChanged": [
+        "Erweitert das Cockpit um vollständige Übungsbearbeitung pro Slot und eine mobile aktive Patient:innenkarte."
+      ],
+      "touchedAreas": [
+        "Handy-Layout",
+        "Plan-State",
+        "Medien/Upload"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Expliziter Nutzerauftrag: Cockpit-Pläne direkt auf Phone und Tablet vollständig bearbeiten."
+    },
+    {
+      "versionCode": 91,
+      "versionName": "1.0.91-plan-add-exercise-card",
+      "patchId": "kgg-v091-plan-add-exercise-card",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Übung hinzufügen – Plus-Karte in der Planliste",
+      "reason": "Die Planliste erhält eine kleine leere Plus-Karte, die den bestehenden Eingabe- und Übungsdatenbankweg zum Hinzufügen einer weiteren Übung öffnet.",
+      "whatChanged": [
+        "Kleine leere Plus-Karte am Ende der aktuellen Planliste ergänzt.",
+        "Der Klick fokussiert den bestehenden Übungseingang und öffnet bei Bedarf die Übungsdatenbank.",
+        "Plan-State, Übungsdatenbank, Reorder-Mechanismus und Speicherweg bleiben unverändert."
+      ],
+      "touchedAreas": [
+        "Planerstellung",
+        "UI"
+      ],
+      "notTouched": [
+        "Therapie-Cockpit",
         "PDF",
         "QR/Patienten-App",
         "Scan/OCR",
@@ -61,8 +159,7 @@
         "Medien/Upload",
         "API-Key-Logik",
         "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
+        "GitHub Manifest"
       ],
       "testStatus": {
         "local": "pending",
@@ -71,32 +168,33 @@
     },
     {
       "versionCode": 90,
-      "versionName": "1.0.90-ticket-015-admin-stage-gallery-drag-motion",
-      "patchId": "kgg-v090-ticket-015-admin-stage-gallery-drag-motion",
-      "status": "candidate",
+      "versionName": "1.0.90-cockpit-exercises-only",
+      "patchId": "kgg-v090-cockpit-exercises-only",
+      "status": "scaffolded",
       "type": "module-patch",
-      "title": "Ticket 015 Admin-Editor: Kartenorientierte Drag-Animation",
-      "reason": "Die Progressionskarten erhalten beim Sortieren dieselbe angehobene Karten-, Platzhalter- und Schattenbewegung wie die bestehenden Übungskarten.",
+      "title": "Therapie-Cockpit ohne Basisdaten",
+      "reason": "Cockpit-Pläne können aus mindestens einer gültigen Übung auch ohne Patient:innen-Basisdaten erzeugt werden; der neutrale Codec-Name bleibt flüchtig und alte Fehlerhinweise werden nach Erfolg gelöscht.",
       "whatChanged": [
-        "Drag-and-drop/Handle-Sortierung nutzt eine angehobene Karte, einen sichtbaren Platzhalter und weiche Zwischenkartenbewegungen.",
-        "Die bestehende Progressionsgalerie, Main-Hold-Geste, Löschbestätigung und Patientenübertragung bleiben erhalten."
+        "Cockpit-Pläne können aus mindestens einer gültigen Übung auch ohne Patient:innen-Basisdaten erzeugt werden; der neutrale Codec-Name bleibt flüchtig und alte Fehlerhinweise werden nach Erfolg gelöscht."
       ],
       "touchedAreas": [
-        "Admin-Editor",
-        "Ticket-015-Smokes"
+        "Therapie-Cockpit",
+        "Test-Harness"
       ],
       "notTouched": [
-        "Numpad",
-        "Satzwerte",
         "PDF",
+        "QR/Patienten-App",
         "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
         "API-Key-Logik",
-        "Android/APK"
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
       ],
-      "supersedes": "kgg-v089-changelog-archive-window-refresh",
       "testStatus": {
         "local": "pending",
-        "browser": "pending",
         "certification": "pending"
       }
     },
@@ -388,107 +486,9 @@
         "certification": "pending"
       },
       "approvalNote": "Ticket 012: mehrseitige Papierpläne müssen über alle Seiten fortlaufend nummeriert werden."
-    },
-    {
-      "versionCode": 70,
-      "versionName": "1.0.70-tablet-package-save",
-      "patchId": "kgg-v070-tablet-package-save",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Tablet-Paketbutton wiederherstellen",
-      "reason": "Der bereits vorhandene Paket-Speichern-Dialog war in der Tablet-Ansicht nicht sichtbar bzw. erreichbar.",
-      "whatChanged": [
-        "Verschiebt ausschließlich den bestehenden savePackageBtn im Tablet-Modus in die Kopfzeile des aktuellen Plans und lässt den vorhandenen Dialog-Handler unverändert.",
-        "Sichert für diesen Tablet-Button ein Touch-Ziel von mindestens 56 x 44 px."
-      ],
-      "touchedAreas": [
-        "Tablet-Layout",
-        "UI-Regressionstests"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Storage",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max hat die Wiederherstellung des Tablet-Paketbuttons und ein mindestens 44px hohes Tablet-Touch-Ziel ausdrücklich freigegeben."
-    },
-    {
-      "versionCode": 69,
-      "versionName": "1.0.69-plan-text-recovery-finalize",
-      "patchId": "kgg-v069-plan-text-recovery-finalize",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Live-Plantext Recovery abschliessen",
-      "reason": "Persistiert eine tatsaechliche Boot-Reparatur und unterscheidet kurze Zwischenedits von finalen Umbenennungen.",
-      "whatChanged": [
-        "Persistiert eine tatsaechliche Boot-Reparatur und unterscheidet kurze Zwischenedits von finalen Umbenennungen."
-      ],
-      "touchedAreas": [
-        "Plan-State",
-        "Storage"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Vom Code-Review beauftragter P1-Folgepatch: Live-Text-Plan-State und lokale Persistenz muessen ohne Datenverlust korrigiert werden."
-    },
-    {
-      "versionCode": 68,
-      "versionName": "1.0.68-plan-text-boot-restore",
-      "patchId": "kgg-v068-plan-text-boot-restore",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Plan-Text Boot Restore",
-      "reason": "Stellt gueltigen gespeicherten Live-Plantext beim Start wieder her und schuetzt nur kurz unvollstaendige Namenssegmente.",
-      "whatChanged": [
-        "Stellt gueltigen gespeicherten Live-Plantext beim Start wieder her und schuetzt nur kurz unvollstaendige Namenssegmente."
-      ],
-      "touchedAreas": [
-        "Parser",
-        "Plan-State"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Expliziter P0-Folgefix: Textfeld bleibt Live-Master, bestehende Mehruebungsplaene duerfen beim Boot oder bei Teilbearbeitung nicht verloren gehen."
     }
   ],
-  "latestVersionName": "1.0.92-ticket-015-admin-stage-release-fixes",
+  "latestVersionName": "1.0.95-cockpit-responsive-entry",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -510,25 +510,49 @@
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v090.json",
       "snapshotVersionCode": 90,
       "entryCount": 31,
-      "entriesSha256": "5fef50cbe435df1672155dddaa218674dd6c6412cb1861b5d0d5783dba3efa1b",
+      "entriesSha256": "9338e9ab7cc88ef314427fe9e4224da1502b9fe375833e87d121be1f051ca04c",
       "retainedEntryCountAtCompaction": 15,
-      "createdByPatchId": "kgg-v090-ticket-015-admin-stage-gallery-drag-motion"
+      "createdByPatchId": "kgg-v090-cockpit-exercises-only"
     },
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v091.json",
       "snapshotVersionCode": 91,
       "entryCount": 32,
-      "entriesSha256": "f6116ed28b94e92155d079b676d023812409c984e68368c9f80277dd8d20842e",
+      "entriesSha256": "49a8b739cbd3fb285351fcded6cd6a7e3bb0b73cb10ddbc098e7a3e4431d7e3a",
       "retainedEntryCountAtCompaction": 15,
-      "createdByPatchId": "kgg-v091-ticket-015-admin-stage-compact"
+      "createdByPatchId": "kgg-v091-plan-add-exercise-card"
     },
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v092.json",
       "snapshotVersionCode": 92,
       "entryCount": 33,
-      "entriesSha256": "ae074f07fd863fdc26979d45b415259c2822d6493d032ee44531e0e17ca5cc33",
+      "entriesSha256": "f45be1a63673425f82fa6075a77ce0070508b80ec9022aba203a309af4e962e8",
       "retainedEntryCountAtCompaction": 15,
-      "createdByPatchId": "kgg-v092-ticket-015-admin-stage-release-fixes"
+      "createdByPatchId": "kgg-v092-cockpit-live-edit"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v093.json",
+      "snapshotVersionCode": 93,
+      "entryCount": 34,
+      "entriesSha256": "8e2320be08c56aed8ee20830ebcc2bcdd2abb6d8f4bfab360cb05df5a923da9a",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v093-cockpit-shared-editor"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v094.json",
+      "snapshotVersionCode": 94,
+      "entryCount": 35,
+      "entriesSha256": "0aed8ea8e500e26ff0a23dc0561cf16d73be7ab33b4103c22630da600761f9cc",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v094-shared-reorder-core"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v095.json",
+      "snapshotVersionCode": 95,
+      "entryCount": 36,
+      "entriesSha256": "0c1b56d0a436b875e4f4bdf403b95cc23150aed2d309caba8f62241dd3ed4053",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v095-cockpit-responsive-entry"
     }
   ]
 }

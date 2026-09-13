@@ -1,8 +1,9 @@
-    render();
+    if(!externalEditorContext)render();
     $('editorModal').classList.add('open');
   }
-  function openEditor(ex){
+  function openEditor(ex,context){
     if(!ex)return;
+    externalEditorContext=context&&typeof context==='object'?context:null;
     const inferredMeasure=(String(ex.unit||ex.metricUnit||'').toLowerCase().includes('zeit')||String(ex.unit||ex.metricUnit||'').toLowerCase().includes('sek'))?'zeit':'wdh';
     state.editId=ex.localId||ex.id;
     $('editName').value=ex.name||'';
@@ -15,16 +16,48 @@
     $('editVideoUrl').value=ex.videoUrl||'';
     $('editVideoLabel').value=ex.videoLabel||'Video öffnen';
     renderEditorMediaStatus(ex);
-    const bankEdit=!ex.localId&&bank.some(item=>String(item.id)===String(ex.id));
-    $('deleteExercise').dataset.scope=bankEdit?'bank':'plan';
-    $('deleteExercise').style.visibility=(ex.localId||bankEdit)?'visible':'hidden';
+    const bankEdit=!externalEditorContext&&!ex.localId&&bank.some(item=>String(item.id)===String(ex.id));
+    $('deleteExercise').dataset.scope=externalEditorContext?'external':(bankEdit?'bank':'plan');
+    $('deleteExercise').style.visibility=(externalEditorContext||ex.localId||bankEdit)?'visible':'hidden';
     $('editorModal').classList.add('open');
     if(window.KGGTicket015AdminEditor&&typeof window.KGGTicket015AdminEditor.onOpen==='function')window.KGGTicket015AdminEditor.onOpen(ex);
+    if(externalEditorContext&&typeof externalEditorContext.onOpen==='function')externalEditorContext.onOpen(ex);
+  }
+  function closeEditor(){
+    const context=externalEditorContext,ex=context&&context.exercise;
+    if(context&&typeof context.onClose==='function')context.onClose(ex);
+    externalEditorContext=null;
+    state.editId=null;
+    $('editorModal').classList.remove('open');
   }
   window.KGGTicket015AdminEditor.open=ex=>openEditor(ex);
   window.KGGTicket015AdminEditor.saveEditor=()=>{saveEditedExercise();return true;};
-  function closeEditor(){state.editId=null; $('editorModal').classList.remove('open')}
   function saveEditedExercise(){
+    if(externalEditorContext){
+      const context=externalEditorContext,ex=context.exercise;
+      const measure=normalizeMeasureMode($('editMeasure').value),loadUnit=normalizeLoadUnit($('editUnit').value);
+      ex.name=$('editName').value;
+      ex.sets=normalizeSetCount($('editSets').value);
+      ex.startMetric=$('editMetric').value;
+      ex.startLoad=$('editLoad').value;
+      ex.weightUnit=loadUnit;
+      ex.loadUnit=loadUnit;
+      ex.measure=measure;
+      ex.unit=measureUnitLabel(measure);
+      ex.metricUnit=measureUnitLabel(measure);
+      ex.side=normalizeSideMode($('editSide').value);
+      ex.videoUrl=String($('editVideoUrl').value||'').trim();
+      ex.videoLabel=String($('editVideoLabel').value||'').trim()||'Video öffnen';
+      ex.previous=Array.isArray(ex.previous)?ex.previous:[];
+      ex.today=Array.isArray(ex.today)?ex.today:[];
+      while(ex.previous.length<ex.sets)ex.previous.push(['','']);
+      while(ex.today.length<ex.sets)ex.today.push(['','']);
+      ex.previous=ex.previous.slice(0,ex.sets);
+      ex.today=ex.today.slice(0,ex.sets);
+      const accepted=typeof context.onSave==='function'?context.onSave(ex)!==false:true;
+      if(accepted)closeEditor();
+      return;
+    }
     const id=state.editId;
     const planEx=state.plan.find(x=>(x.localId||x.id)===id);
     if(planEx){
@@ -81,6 +114,10 @@
     if(window.KGGTicket015AdminEditor&&typeof window.KGGTicket015AdminEditor.onSave==='function')window.KGGTicket015AdminEditor.onSave(currentEditedExercise());
     closeEditor();
   }
+  window.KGGSharedExerciseEditor=window.KGGSharedExerciseEditor||{};
+  window.KGGSharedExerciseEditor.open=(ex,context)=>openEditor(ex,context);
+  window.KGGSharedExerciseEditor.close=closeEditor;
+  window.KGGSharedExerciseEditor.save=saveEditedExercise;
   function escapeHtml(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
   function exportData(){savePendingToBank('ui_internal_export'); const plan=getCurrentPlanForOutput('ui_internal_export'); const data={kind:'kgg-html-app-internal-export',audience:'therapist-internal-only',version:VERSION,exportedAt:new Date().toISOString(),state:{...state,plan:plan.exercises},currentPlan:plan,store:ensureKGGDataStore().getState()}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='kgg_plan_internal_export.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);}
 
@@ -654,53 +691,3 @@
     const bytes=new Uint8Array(pdf.length);
     for(let i=0;i<pdf.length;i++)bytes[i]=pdf.charCodeAt(i)&255;
     return bytes;
-  }
-  function pdfBlobFromDoc(doc){
-    if(!doc)return null;
-    if(typeof doc.output==='function'){
-      try{
-        const blob=doc.output('blob');
-        if(blob instanceof Blob)return blob;
-      }catch(e){}
-      try{
-        const buffer=doc.output('arraybuffer');
-        if(buffer)return new Blob([buffer],{type:'application/pdf'});
-      }catch(e){}
-      try{
-        const text=doc.output();
-        if(typeof text==='string')return new Blob([pdfBytesFromBinaryString(text)],{type:'application/pdf'});
-      }catch(e){}
-    }
-    if(typeof doc._buildPdf==='function'){
-      try{return new Blob([pdfBytesFromBinaryString(doc._buildPdf())],{type:'application/pdf'});}catch(e){}
-    }
-    return null;
-  }
-  function downloadPdfBlob(blob,filename){
-    if(!blob)return;
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;
-    a.download=filename||'kgg_trainingsplan.pdf';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},1000);
-  }
-  function pdfBlobToBase64(blob){
-    return new Promise((resolve,reject)=>{
-      const reader=new FileReader();
-      reader.onload=()=>resolve(String(reader.result||'').split(',')[1]||'');
-      reader.onerror=()=>reject(reader.error||new Error('PDF konnte nicht gelesen werden.'));
-      reader.readAsDataURL(blob);
-    });
-  }
-  function nativePdfBridge(){
-    return window.KGGNativePdf&&window.KGGNativePdf.available?window.KGGNativePdf:null;
-  }
-  async function sendPdfToNative(action){
-    if(!currentPdfPreview||!currentPdfPreview.blob)return false;
-    const bridge=nativePdfBridge();
-    if(!bridge)return false;
-    try{
-      const base64=await pdfBlobToBase64(currentPdfPreview.blob);
-      if(action==='download'&&typeof bridge.download==='function')return !!bridge.download(currentPdfPreview.filename,base64);
