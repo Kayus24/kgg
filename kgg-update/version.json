@@ -1,7 +1,7 @@
 {
-  "versionCode": 91,
-  "versionName": "1.0.91-ticket-015-admin-stage-compact",
-  "indexUrl": "index.html?v=91",
-  "sha256": "4e6ad61ba046fad4739d6f33e9a6526d9a148d65c7625849bc31af49259570cf",
-  "notes": "v091: Progressionsstufen-Karten werden kompakter, behalten ihre Bilder und erhalten klar getrennte Tipp-, Halte-, Sortier- und Löschgesten."
+  "versionCode": 92,
+  "versionName": "1.0.92-ticket-015-admin-stage-release-fixes",
+  "indexUrl": "index.html?v=92",
+  "sha256": "c9d169ac0654e77f525b0be0a3c76f3a7d10114b5f407e878578943cbc015bc4",
+  "notes": "v092: Bewahrt den Elternentwurf, persistiert die Hauptstufe, lädt echte Upload-Bilder und macht Touch-Sortierung erreichbar."
 }

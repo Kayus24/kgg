@@ -3,8 +3,40 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 91,
+  "latestVersionCode": 92,
   "entries": [
+    {
+      "versionCode": 92,
+      "versionName": "1.0.92-ticket-015-admin-stage-release-fixes",
+      "patchId": "kgg-v092-ticket-015-admin-stage-release-fixes",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Ticket 015 Admin-Editor: Release- und Gesten-Fixes",
+      "reason": "Bewahrt den Elternentwurf, persistiert die Hauptstufe, lädt echte Upload-Bilder und macht Touch-Sortierung erreichbar.",
+      "whatChanged": [
+        "Bewahrt den Elternentwurf, persistiert die Hauptstufe, lädt echte Upload-Bilder und macht Touch-Sortierung erreichbar."
+      ],
+      "touchedAreas": [
+        "Admin-Editor",
+        "Ticket-015-Smokes"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
     {
       "versionCode": 91,
       "versionName": "1.0.91-ticket-015-admin-stage-compact",
@@ -454,40 +486,9 @@
         "certification": "pending"
       },
       "approvalNote": "Expliziter P0-Folgefix: Textfeld bleibt Live-Master, bestehende Mehruebungsplaene duerfen beim Boot oder bei Teilbearbeitung nicht verloren gehen."
-    },
-    {
-      "versionCode": 67,
-      "versionName": "1.0.67-plan-text-live-master-guard",
-      "patchId": "kgg-v067-plan-text-live-master-guard",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Plan-Text Live-Master Schutz",
-      "reason": "Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion.",
-      "whatChanged": [
-        "Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion."
-      ],
-      "touchedAreas": [
-        "Parser",
-        "Plan-State"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max hat den P0 Parser- und Plan-State-Fix ausdruecklich beauftragt."
     }
   ],
-  "latestVersionName": "1.0.91-ticket-015-admin-stage-compact",
+  "latestVersionName": "1.0.92-ticket-015-admin-stage-release-fixes",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -520,6 +521,14 @@
       "entriesSha256": "f6116ed28b94e92155d079b676d023812409c984e68368c9f80277dd8d20842e",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v091-ticket-015-admin-stage-compact"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v092.json",
+      "snapshotVersionCode": 92,
+      "entryCount": 33,
+      "entriesSha256": "ae074f07fd863fdc26979d45b415259c2822d6493d032ee44531e0e17ca5cc33",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v092-ticket-015-admin-stage-release-fixes"
     }
   ]
 }

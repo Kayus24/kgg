@@ -37,17 +37,17 @@ class ChangelogArchiveTests(unittest.TestCase):
             document["entries"][: archive.CURRENT_RETAINED_ENTRY_COUNT],
             changelog["entries"],
         )
-        self.assertEqual(32, len(document["entries"]))
+        self.assertEqual(33, len(document["entries"]))
         self.assertEqual(archive.CURRENT_RETAINED_ENTRY_COUNT, len(changelog["entries"]))
 
     def test_legacy_snapshot_remains_referenced_after_current_compaction(self):
         _text, changelog = archive.load_embedded()
         snapshots = changelog["archiveSnapshots"]
-        self.assertEqual(4, len(snapshots))
+        self.assertEqual(5, len(snapshots))
         self.assertIn(archive.archive_reference(), snapshots)
         current = [item for item in snapshots if item != archive.archive_reference()]
-        self.assertEqual(3, len(current))
-        self.assertEqual({89, 90, 91}, {item["snapshotVersionCode"] for item in current})
+        self.assertEqual(4, len(current))
+        self.assertEqual({89, 90, 91, 92}, {item["snapshotVersionCode"] for item in current})
 
 
 if __name__ == "__main__":

@@ -6,7 +6,7 @@
   const VERSION='ticket-015-admin-stage-gallery-v3';
   const HOLD_MS=2000;
   const MAIN_SWAP_DELAY_MS=250;
-  const MOVE_CANCEL_PX=12;
+  const MOVE_CANCEL_PX=10;
   const DELETE_SWIPE_PX=48;
   const $=id=>document.getElementById(id);
   const esc=value=>String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -66,7 +66,7 @@
       .kgg015StageRail{display:flex;align-items:stretch;gap:8px;overflow-x:auto;padding:4px 2px 8px;scroll-snap-type:x proximity;touch-action:pan-x;overscroll-behavior-x:contain}
       .kgg015StageRail::-webkit-scrollbar{height:6px}.kgg015StageRail::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px}
       .kgg015StageCard,.kgg015AddStage{position:relative;flex:0 0 clamp(118px,22vw,148px);min-height:124px;border-radius:16px;scroll-snap-align:center}
-      .kgg015StageCard{border:2px solid #dbe3ef;background:#fff;box-shadow:0 4px 12px rgba(15,23,42,.08);touch-action:pan-x;user-select:none;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,opacity .18s ease}
+      .kgg015StageCard{border:2px solid #dbe3ef;background:#fff;box-shadow:0 4px 12px rgba(15,23,42,.08);touch-action:none;user-select:none;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,opacity .18s ease}
       .kgg015StageCard.is-main{border-color:#2563eb;box-shadow:0 0 0 3px #dbeafe,0 6px 16px rgba(37,99,235,.15)}
       .kgg015StageCard.is-holding{border-color:#0ea5e9;box-shadow:0 0 0 4px #bae6fd,0 8px 20px rgba(14,165,233,.2)}
       .kgg015StageCard.is-vibrating{animation:kgg015StageVibrate .08s linear infinite}
@@ -156,13 +156,19 @@
     const linked=stage.sourceId&&bankItems().find(item=>String(item&&item.id||'')===String(stage.sourceId));
     const target=linked||draft.exercise;
     const bridge=window.KGGTicket015AdminEditor||{};
-    if(target&&typeof bridge.open==='function')bridge.open(target);
+    if(target&&typeof bridge.open==='function'){
+      try{
+        if(typeof bridge.saveEditor==='function')bridge.saveEditor();
+        bridge.open(target);
+      }catch(err){setStatus('Die aktuelle Übung konnte vor dem Öffnen nicht gespeichert werden.','warn');}
+    }
   }
   function bindStageGestures(box){
     const rail=box.querySelector('.kgg015StageRail');if(!rail)return;
     const restoreInline=(node,properties)=>{Object.keys(properties||{}).forEach(name=>{const value=properties[name];if(value==null||value==='')node.style.removeProperty(name);else node.style.setProperty(name,value);});};
+    const releasePointerCapture=gesture=>{if(!gesture||gesture.pointerId==null||!gesture.captured)return;try{if(gesture.card.hasPointerCapture(gesture.pointerId))gesture.card.releasePointerCapture(gesture.pointerId);}catch(err){}gesture.captured=false;};
     const cleanupPointerDrag=gesture=>{
-      if(!gesture)return;clearTimeout(gesture.dragReadyTimer);document.removeEventListener('pointermove',gesture.move);document.removeEventListener('pointerup',gesture.up);document.removeEventListener('pointercancel',gesture.cancel);
+      if(!gesture)return;releasePointerCapture(gesture);clearTimeout(gesture.dragReadyTimer);document.removeEventListener('pointermove',gesture.move);document.removeEventListener('pointerup',gesture.up);document.removeEventListener('pointercancel',gesture.cancel);
       gesture.rail.classList.remove('is-reordering');if(gesture.placeholder)gesture.placeholder.remove();gesture.card.classList.remove('is-dragging');restoreInline(gesture.card,gesture.cardInline);restoreInline(gesture.rail,gesture.railInline);
     };
     const placePlaceholder=(gesture,clientX)=>{
@@ -184,13 +190,14 @@
       card.addEventListener('dragover',event=>{if(draft&&Number.isInteger(draft.dragIndex)){event.preventDefault();event.dataTransfer&&(event.dataTransfer.dropEffect='move');}});
       card.addEventListener('drop',event=>{event.preventDefault();const from=draft&&Number.isInteger(draft.dragIndex)?draft.dragIndex:-1;const to=Number(card.dataset.kgg015Index);draft.dragIndex=null;if(from>=0&&from!==to)moveVariant(from,to);});
       let gesture=null;
-      const clear=()=>{if(!gesture)return;clearTimeout(gesture.holdTimer);clearTimeout(gesture.swapTimer);clearTimeout(gesture.dragReadyTimer);document.removeEventListener('pointermove',gesture.move);document.removeEventListener('pointerup',gesture.up);document.removeEventListener('pointercancel',gesture.cancel);card.classList.remove('is-holding','is-vibrating');gesture=null;};
+      const clear=()=>{if(!gesture)return;releasePointerCapture(gesture);clearTimeout(gesture.holdTimer);clearTimeout(gesture.swapTimer);clearTimeout(gesture.dragReadyTimer);document.removeEventListener('pointermove',gesture.move);document.removeEventListener('pointerup',gesture.up);document.removeEventListener('pointercancel',gesture.cancel);card.classList.remove('is-holding','is-vibrating');gesture=null;};
       const finishMain=()=>{if(!gesture||gesture.moved||gesture.active||gesture.deleteArmed)return;card.classList.add('is-holding');if(!reducedMotion())card.classList.add('is-vibrating');try{if(navigator.vibrate)navigator.vibrate(18);}catch(err){}gesture.mainTriggered=true;gesture.swapTimer=setTimeout(()=>{if(!gesture)return;const stage=draft&&draft.variants[gesture.index];if(stage&&stage.id!==draft.mainId){draft.mainId=stage.id;draft.changed=true;renderDraft();setStatus(stage.name+' ist jetzt die Hauptübung.','success');}card.classList.remove('is-holding','is-vibrating');},MAIN_SWAP_DELAY_MS);};
-      const finish=()=>{if(!gesture)return;const current=gesture;const shouldDelete=current.deleteArmed;const index=current.index;const wasActive=current.active;const to=wasActive&&Number.isInteger(current.targetIndex)?current.targetIndex:null;const suppress=current.moved||current.mainTriggered||current.active||shouldDelete;if(suppress)card.dataset.kgg015SuppressClick='1';if(wasActive)cleanupPointerDrag(current);clear();if(Number.isInteger(to)&&to!==current.from)moveVariant(current.from,to);if(shouldDelete)askDelete(index);};
+      const finish=()=>{if(!gesture)return;const current=gesture;const shouldDelete=current.deleteArmed;const index=current.index;const wasActive=current.active;const to=wasActive&&Number.isInteger(current.targetIndex)?current.targetIndex:null;const suppress=current.moved||current.mainTriggered||current.active||shouldDelete||!!current.axis;if(suppress)card.dataset.kgg015SuppressClick='1';if(wasActive)cleanupPointerDrag(current);clear();if(Number.isInteger(to)&&to!==current.from)moveVariant(current.from,to);if(shouldDelete)askDelete(index);};
       const cancel=()=>{if(gesture&&gesture.active)cleanupPointerDrag(gesture);clear();};
       const start=event=>{
-        if(event.button!==undefined&&event.button!==0)return;if(event.target.closest('button'))return;const index=Number(card.dataset.kgg015Index);gesture={card,rail,from:index,index,startX:event.clientX,startY:event.clientY,active:false,ready:false,moved:false,deleteArmed:false,mainTriggered:false,targetIndex:null,placeholder:null,holdTimer:0,swapTimer:0,dragReadyTimer:0};
-        gesture.holdTimer=setTimeout(finishMain,HOLD_MS);gesture.dragReadyTimer=setTimeout(()=>{if(gesture)gesture.ready=true;},180);gesture.move=ev=>{if(!gesture)return;const dx=ev.clientX-gesture.startX,dy=ev.clientY-gesture.startY;if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>=DELETE_SWIPE_PX){gesture.moved=true;gesture.deleteArmed=true;clearTimeout(gesture.holdTimer);clearTimeout(gesture.swapTimer);card.classList.add('is-holding');return;}if(!gesture.active&&Math.hypot(dx,dy)>MOVE_CANCEL_PX){gesture.moved=true;clearTimeout(gesture.holdTimer);clearTimeout(gesture.swapTimer);card.classList.remove('is-holding','is-vibrating');if(gesture.ready&&Math.abs(dx)>=Math.abs(dy)){activatePointerDrag(gesture);}}if(gesture.active){ev.preventDefault();gesture.card.style.setProperty('--kgg015-drag-x',dx+'px');gesture.card.style.setProperty('--kgg015-drag-y',Math.max(-8,Math.min(8,dy*.08))+'px');placePlaceholder(gesture,ev.clientX);}};gesture.up=finish;gesture.cancel=cancel;document.addEventListener('pointermove',gesture.move,{passive:false});document.addEventListener('pointerup',gesture.up,{once:true});document.addEventListener('pointercancel',gesture.cancel,{once:true});
+        if(event.button!==undefined&&event.button!==0)return;if(event.target.closest('button'))return;const index=Number(card.dataset.kgg015Index);gesture={card,rail,from:index,index,startX:event.clientX,startY:event.clientY,lastX:event.clientX,pointerId:event.pointerId,captured:false,axis:null,active:false,ready:false,moved:false,deleteArmed:false,mainTriggered:false,targetIndex:null,placeholder:null,holdTimer:0,swapTimer:0,dragReadyTimer:0};
+        if(event.pointerType==='touch'||event.pointerType==='pen'){try{card.setPointerCapture(event.pointerId);gesture.captured=true;}catch(err){}}
+        gesture.holdTimer=setTimeout(finishMain,HOLD_MS);gesture.dragReadyTimer=setTimeout(()=>{if(gesture)gesture.ready=true;},180);gesture.move=ev=>{if(!gesture)return;const dx=ev.clientX-gesture.startX,dy=ev.clientY-gesture.startY,stepX=ev.clientX-gesture.lastX;const horizontal=Math.abs(dx)>=Math.abs(dy);if(!gesture.active&&Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>=DELETE_SWIPE_PX){gesture.axis='vertical';gesture.moved=true;gesture.deleteArmed=true;clearTimeout(gesture.holdTimer);clearTimeout(gesture.swapTimer);card.classList.add('is-holding');return;}if(!gesture.active&&Math.hypot(dx,dy)>MOVE_CANCEL_PX){gesture.moved=true;clearTimeout(gesture.holdTimer);clearTimeout(gesture.swapTimer);card.classList.remove('is-holding','is-vibrating');if(!gesture.axis){if(gesture.ready&&horizontal){gesture.axis='horizontal-drag';activatePointerDrag(gesture);}else if(horizontal){gesture.axis='horizontal-swipe';}else{gesture.axis='vertical';}}}if(gesture.axis==='horizontal-swipe'){rail.scrollLeft-=stepX;gesture.lastX=ev.clientX;return;}if(gesture.active){ev.preventDefault();gesture.card.style.setProperty('--kgg015-drag-x',dx+'px');gesture.card.style.setProperty('--kgg015-drag-y',Math.max(-8,Math.min(8,dy*.08))+'px');placePlaceholder(gesture,ev.clientX);}};gesture.up=finish;gesture.cancel=cancel;document.addEventListener('pointermove',gesture.move,{passive:false});document.addEventListener('pointerup',gesture.up,{once:true});document.addEventListener('pointercancel',gesture.cancel,{once:true});
       };
       card.addEventListener('pointerdown',start,{passive:true});
       card.addEventListener('click',event=>{if(event.target.closest('button'))return;if(card.dataset.kgg015SuppressClick==='1'){delete card.dataset.kgg015SuppressClick;return;}openStageEditor(Number(card.dataset.kgg015Index));});
@@ -205,7 +212,7 @@
   async function hydrateMedia(box){
     box.querySelectorAll('[data-kgg015-media-id]').forEach(async node=>{
       const id=String(node.dataset.kgg015MediaId||'');const stage=[...((draft&&draft.variants)||[])].find(item=>item.media&&item.media[0]&&String(item.media[0].id||'')===id);const media=stage&&stage.media&&stage.media[0];if(!media)return;
-      try{let blobRecord=null;if(typeof getEncryptedMediaBlob==='function')blobRecord=await getEncryptedMediaBlob(id);if(!blobRecord||!blobRecord.blob||typeof patientDecryptMedia!=='function')return;const imageBlob=await patientDecryptMedia(media,blobRecord.blob);if(!node.isConnected)return;const url=URL.createObjectURL(imageBlob);node.innerHTML='<img src="'+url+'" alt="">';node.dataset.kgg015ObjectUrl=url;}catch(err){}
+      try{const bridge=window['KGGProgressionEditorBridge']||{};if(typeof bridge.readMedia!=='function')return;const imageBlob=await bridge.readMedia(media);if(!imageBlob||!node.isConnected)return;const url=URL.createObjectURL(imageBlob);node.innerHTML='<img src="'+url+'" alt="">';node.dataset.kgg015ObjectUrl=url;}catch(err){}
     });
   }
   function startDraft(ex){

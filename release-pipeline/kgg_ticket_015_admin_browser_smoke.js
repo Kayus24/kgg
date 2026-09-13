@@ -49,11 +49,21 @@ async function main(){
     assert(await page.locator('.kgg015StageHandle').count()===0,'progression cards must not show a separate drag handle');
     assert(await page.locator('.kgg015StageCard').first().evaluate(node=>node.getAttribute('draggable')==='true'),'progression card is not draggable');
     assert(await page.locator('.kgg015StageRemove').first().evaluate(node=>{const r=node.getBoundingClientRect();return r.width>=44&&r.height>=44}),'delete control is not finger-sized');
+    assert(await page.locator('.kgg015StageCard').first().evaluate(node=>getComputedStyle(node).touchAction==='none'),'touch stage card must own pointer gestures');
+    assert(await page.evaluate(()=>{const bridge=window.KGGProgressionEditorBridge||{};return typeof bridge.readMedia==='function'&&typeof window.KGGTicket015AdminEditor?.saveEditor==='function';}),'admin editor bridges for media and parent save are missing');
     await page.locator('[data-kgg015-add-slot="after"]').click();
     await page.locator('[data-kgg015-add-name]').fill('Squat');
     await page.locator('[data-kgg015-existing]').first().click();
     assert(await page.locator('.kgg015StageCard').count()===4,'existing catalog exercise was not attached as a stage');
     assert((await page.locator('.kgg015StageCard').last().innerText()).includes('Squat'),'attached catalog stage has the wrong name');
+    await page.locator('#editName').fill('Basis mit Entwurf');
+    await page.locator('.kgg015StageCard').filter({hasText:'Squat'}).click();
+    assert(await page.locator('#editName').inputValue()==='Squat','opening a linked stage did not open its editor');
+    await page.locator('#closeEditor').click();
+    await page.locator('#planList [data-planedit]').click();
+    assert(await page.locator('#editName').inputValue()==='Basis mit Entwurf','parent editor draft was not saved before opening a linked stage');
+    assert(await page.evaluate(()=>{const row=(window.KGGProgressionEditorBridge.catalog()||[]).find(item=>item.name==='Basis mit Entwurf');return !!(row&&row.progressionMainId);}), 'selected main stage was not persisted to the exercise-bank projection');
+    if(!await page.locator('#kgg015ProgressionBox details').evaluate(node=>node.open))await page.locator('#kgg015ProgressionBox summary').click();
     await page.locator('[data-kgg015-add-slot="before"]').click();
     await page.locator('[data-kgg015-add-name]').fill('Neue Therapievariante');
     await page.locator('[data-kgg015-new]').click();
@@ -67,6 +77,13 @@ async function main(){
 
     const lastStage=page.locator('.kgg015StageCard').last(),firstStage=page.locator('.kgg015StageCard').first();await lastStage.dragTo(firstStage);await page.waitForTimeout(80);
     assert(await page.locator('.kgg015StageCard').count()===5,'drag sorting changed the stage count');
+    const touchBefore=await page.locator('.kgg015StageCard').nth(1).getAttribute('data-kgg015-stage-id');
+    await page.locator('.kgg015StageCard').nth(1).evaluate(async node=>{const r=node.getBoundingClientRect(),base={bubbles:true,clientX:r.left+r.width/2,clientY:r.top+r.height/2,pointerId:41,pointerType:'touch',button:0};node.dispatchEvent(new PointerEvent('pointerdown',base));await new Promise(resolve=>setTimeout(resolve,220));document.dispatchEvent(new PointerEvent('pointermove',{...base,clientX:r.left-160,clientY:base.clientY}));document.dispatchEvent(new PointerEvent('pointerup',{...base,clientX:r.left-160,clientY:base.clientY}));});
+    await page.waitForTimeout(100);
+    const touchAfter=await page.locator('.kgg015StageCard').first().getAttribute('data-kgg015-stage-id');
+    assert(touchAfter===touchBefore,'touch long-press reorder did not move the stage card');
+    const mediaBridge=await page.evaluate(async()=>{const keyBytes=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),plain=new TextEncoder().encode('ticket-015-media');const key=await crypto.subtle.importKey('raw',keyBytes,{name:'AES-GCM'},false,['encrypt','decrypt']);const encrypted=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,plain);const b64=bytes=>{let s='';for(const b of bytes)s+=String.fromCharCode(b);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};const db=await new Promise((resolve,reject)=>{const req=indexedDB.open('kgg_media_v1',1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('encryptedBlobs'))req.result.createObjectStore('encryptedBlobs',{keyPath:'id'});};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});await new Promise((resolve,reject)=>{const tx=db.transaction('encryptedBlobs','readwrite');tx.objectStore('encryptedBlobs').put({id:'ticket-015-bridge-media',blob:new Blob([encrypted],{type:'application/octet-stream'}),savedAt:new Date().toISOString()});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});const blob=await window.KGGProgressionEditorBridge.readMedia({id:'ticket-015-bridge-media',mime:'text/plain',crypto:{key:b64(keyBytes),iv:b64(iv)}});return blob instanceof Blob&&blob.size===plain.length;});
+    assert(mediaBridge,'admin editor media bridge did not decrypt an IndexedDB upload');
 
     const swipeStage=page.locator('.kgg015StageCard').nth(1);await swipeStage.scrollIntoViewIfNeeded();const swipeBox=await swipeStage.boundingBox();assert(swipeBox,'stage for vertical delete is not measurable');
     await swipeStage.evaluate(node=>{const rect=node.getBoundingClientRect(),base={bubbles:true,clientX:rect.left+rect.width/2,clientY:rect.top+rect.height/2,pointerId:31,pointerType:'touch',button:0};node.dispatchEvent(new PointerEvent('pointerdown',base));document.dispatchEvent(new PointerEvent('pointermove',{...base,clientY:base.clientY-70}));document.dispatchEvent(new PointerEvent('pointerup',{...base,clientY:base.clientY-70}));});

@@ -64,18 +64,19 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "ticket-037-real-plan",
     "changelog-archive-window-refresh",
     "ticket-015-admin-stage-gallery-drag-motion",
-    "ticket-015-admin-stage-compact"
+    "ticket-015-admin-stage-compact",
+    "ticket-015-admin-stage-release-fixes"
   ],
   "currentVersion": {
-    "versionCode": 91,
-    "versionName": "1.0.91-ticket-015-admin-stage-compact",
-    "lastPatchId": "kgg-v091-ticket-015-admin-stage-compact",
+    "versionCode": 92,
+    "versionName": "1.0.92-ticket-015-admin-stage-release-fixes",
+    "lastPatchId": "kgg-v092-ticket-015-admin-stage-release-fixes",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v091-ticket-015-admin-stage-compact",
+  "latestPatchId": "kgg-v092-ticket-015-admin-stage-release-fixes",
   "lastUpdateIntent": {
-    "id": "kgg-v091-ticket-015-admin-stage-compact",
-    "summary": "Progressionsstufen-Karten werden kompakter, behalten ihre Bilder und erhalten klar getrennte Tipp-, Halte-, Sortier- und Löschgesten.",
+    "id": "kgg-v092-ticket-015-admin-stage-release-fixes",
+    "summary": "Bewahrt den Elternentwurf, persistiert die Hauptstufe, lädt echte Upload-Bilder und macht Touch-Sortierung erreichbar.",
     "touched": [
       "Admin-Editor",
       "Ticket-015-Smokes"
@@ -153,18 +154,19 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "ticket-037-real-plan",
     "changelog-archive-window-refresh",
     "ticket-015-admin-stage-gallery-drag-motion",
-    "ticket-015-admin-stage-compact"
+    "ticket-015-admin-stage-compact",
+    "ticket-015-admin-stage-release-fixes"
   ],
   "currentVersion": {
-    "versionCode": 91,
-    "versionName": "1.0.91-ticket-015-admin-stage-compact",
-    "lastPatchId": "kgg-v091-ticket-015-admin-stage-compact",
+    "versionCode": 92,
+    "versionName": "1.0.92-ticket-015-admin-stage-release-fixes",
+    "lastPatchId": "kgg-v092-ticket-015-admin-stage-release-fixes",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v091-ticket-015-admin-stage-compact",
+  "latestPatchId": "kgg-v092-ticket-015-admin-stage-release-fixes",
   "lastUpdateIntent": {
-    "id": "kgg-v091-ticket-015-admin-stage-compact",
-    "summary": "Progressionsstufen-Karten werden kompakter, behalten ihre Bilder und erhalten klar getrennte Tipp-, Halte-, Sortier- und Löschgesten.",
+    "id": "kgg-v092-ticket-015-admin-stage-release-fixes",
+    "summary": "Bewahrt den Elternentwurf, persistiert die Hauptstufe, lädt echte Upload-Bilder und macht Touch-Sortierung erreichbar.",
     "touched": [
       "Admin-Editor",
       "Ticket-015-Smokes"
@@ -189,8 +191,40 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 91,
+  "latestVersionCode": 92,
   "entries": [
+    {
+      "versionCode": 92,
+      "versionName": "1.0.92-ticket-015-admin-stage-release-fixes",
+      "patchId": "kgg-v092-ticket-015-admin-stage-release-fixes",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Ticket 015 Admin-Editor: Release- und Gesten-Fixes",
+      "reason": "Bewahrt den Elternentwurf, persistiert die Hauptstufe, lädt echte Upload-Bilder und macht Touch-Sortierung erreichbar.",
+      "whatChanged": [
+        "Bewahrt den Elternentwurf, persistiert die Hauptstufe, lädt echte Upload-Bilder und macht Touch-Sortierung erreichbar."
+      ],
+      "touchedAreas": [
+        "Admin-Editor",
+        "Ticket-015-Smokes"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
     {
       "versionCode": 91,
       "versionName": "1.0.91-ticket-015-admin-stage-compact",
@@ -640,40 +674,9 @@ Before editing this app, any LLM/agent/human should read these blocks:
         "certification": "pending"
       },
       "approvalNote": "Expliziter P0-Folgefix: Textfeld bleibt Live-Master, bestehende Mehruebungsplaene duerfen beim Boot oder bei Teilbearbeitung nicht verloren gehen."
-    },
-    {
-      "versionCode": 67,
-      "versionName": "1.0.67-plan-text-live-master-guard",
-      "patchId": "kgg-v067-plan-text-live-master-guard",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Plan-Text Live-Master Schutz",
-      "reason": "Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion.",
-      "whatChanged": [
-        "Schuetzt Mehruebungsplaene bei strukturierter Texteingabe vor einer destruktiven Reduktion."
-      ],
-      "touchedAreas": [
-        "Parser",
-        "Plan-State"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max hat den P0 Parser- und Plan-State-Fix ausdruecklich beauftragt."
     }
   ],
-  "latestVersionName": "1.0.91-ticket-015-admin-stage-compact",
+  "latestVersionName": "1.0.92-ticket-015-admin-stage-release-fixes",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -706,6 +709,14 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "entriesSha256": "f6116ed28b94e92155d079b676d023812409c984e68368c9f80277dd8d20842e",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v091-ticket-015-admin-stage-compact"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v092.json",
+      "snapshotVersionCode": 92,
+      "entryCount": 33,
+      "entriesSha256": "ae074f07fd863fdc26979d45b415259c2822d6493d032ee44531e0e17ca5cc33",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v092-ticket-015-admin-stage-release-fixes"
     }
   ]
 }
@@ -823,7 +834,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v091-ticket-015-admin-stage-compact",
+  "lastUpdatedByPatchId": "kgg-v092-ticket-015-admin-stage-release-fixes",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
@@ -958,7 +969,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v091 Ticket 015 Admin-Editor: Kompakte Progressionsstufen</title>
+  <title>KGG Update v092 Ticket 015 Admin-Editor: Release- und Gesten-Fixes</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -16870,11 +16881,11 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
 </script>
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v091_ticket_015_admin_stage_compact';
+  const VERSION='KGG_GITHUB_UPDATE_v092_ticket_015_admin_stage_release_fixes';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v091","buildTime":"2026-09-13T17:05:51Z","buildCode":"module-v091-ticket-015-admin-stage-compact","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v092","buildTime":"2026-09-13T19:43:16Z","buildCode":"module-v092-ticket-015-admin-stage-release-fixes","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -17866,6 +17877,7 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
       videoLabel:ex.videoLabel||'Video öffnen',
       media:ensureExerciseMediaList(ex),
       progressionGroupId:ex.progressionGroupId||'',
+      progressionMainId:ex.progressionMainId||ex.progressionMainVariantId||'',
       progressionVariants:Array.isArray(ex.progressionVariants)?ex.progressionVariants.map(item=>({...item,media:ensureExerciseMediaList(item)})):[]
     };
   }
@@ -20456,6 +20468,7 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
     if(window.KGGTicket015AdminEditor&&typeof window.KGGTicket015AdminEditor.onOpen==='function')window.KGGTicket015AdminEditor.onOpen(ex);
   }
   window.KGGTicket015AdminEditor.open=ex=>openEditor(ex);
+  window.KGGTicket015AdminEditor.saveEditor=()=>{saveEditedExercise();return true;};
   function closeEditor(){state.editId=null; $('editorModal').classList.remove('open')}
   function saveEditedExercise(){
     const id=state.editId;
@@ -24501,7 +24514,14 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
     upsert:(exercise,reason)=>upsertPlanExerciseToBank(exercise,reason||'ticket_015_progression'),
     sync:reason=>syncStatePlanToStore(reason||'ticket_015_progression'),
     persistBank:()=>persistCustomBank(),
-    save:()=>save()
+    save:()=>save(),
+    readMedia:async media=>{
+      const id=String(media&&media.id||'');
+      if(!id)return null;
+      const record=await getEncryptedMediaBlob(id);
+      if(!record||!record.blob)return null;
+      return patientDecryptMedia(media,record.blob);
+    }
   };
   /* KGG_LOGIC_SMOKE_BOOT_BOUNDARY */
   installKggV383UiFlowStability();
@@ -28433,7 +28453,7 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   const VERSION='ticket-015-admin-stage-gallery-v3';
   const HOLD_MS=2000;
   const MAIN_SWAP_DELAY_MS=250;
-  const MOVE_CANCEL_PX=12;
+  const MOVE_CANCEL_PX=10;
   const DELETE_SWIPE_PX=48;
   const $=id=>document.getElementById(id);
   const esc=value=>String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -28493,7 +28513,7 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
       .kgg015StageRail{display:flex;align-items:stretch;gap:8px;overflow-x:auto;padding:4px 2px 8px;scroll-snap-type:x proximity;touch-action:pan-x;overscroll-behavior-x:contain}
       .kgg015StageRail::-webkit-scrollbar{height:6px}.kgg015StageRail::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px}
       .kgg015StageCard,.kgg015AddStage{position:relative;flex:0 0 clamp(118px,22vw,148px);min-height:124px;border-radius:16px;scroll-snap-align:center}
-      .kgg015StageCard{border:2px solid #dbe3ef;background:#fff;box-shadow:0 4px 12px rgba(15,23,42,.08);touch-action:pan-x;user-select:none;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,opacity .18s ease}
+      .kgg015StageCard{border:2px solid #dbe3ef;background:#fff;box-shadow:0 4px 12px rgba(15,23,42,.08);touch-action:none;user-select:none;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,opacity .18s ease}
       .kgg015StageCard.is-main{border-color:#2563eb;box-shadow:0 0 0 3px #dbeafe,0 6px 16px rgba(37,99,235,.15)}
       .kgg015StageCard.is-holding{border-color:#0ea5e9;box-shadow:0 0 0 4px #bae6fd,0 8px 20px rgba(14,165,233,.2)}
       .kgg015StageCard.is-vibrating{animation:kgg015StageVibrate .08s linear infinite}
@@ -28583,13 +28603,19 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     const linked=stage.sourceId&&bankItems().find(item=>String(item&&item.id||'')===String(stage.sourceId));
     const target=linked||draft.exercise;
     const bridge=window.KGGTicket015AdminEditor||{};
-    if(target&&typeof bridge.open==='function')bridge.open(target);
+    if(target&&typeof bridge.open==='function'){
+      try{
+        if(typeof bridge.saveEditor==='function')bridge.saveEditor();
+        bridge.open(target);
+      }catch(err){setStatus('Die aktuelle Übung konnte vor dem Öffnen nicht gespeichert werden.','warn');}
+    }
   }
   function bindStageGestures(box){
     const rail=box.querySelector('.kgg015StageRail');if(!rail)return;
     const restoreInline=(node,properties)=>{Object.keys(properties||{}).forEach(name=>{const value=properties[name];if(value==null||value==='')node.style.removeProperty(name);else node.style.setProperty(name,value);});};
+    const releasePointerCapture=gesture=>{if(!gesture||gesture.pointerId==null||!gesture.captured)return;try{if(gesture.card.hasPointerCapture(gesture.pointerId))gesture.card.releasePointerCapture(gesture.pointerId);}catch(err){}gesture.captured=false;};
     const cleanupPointerDrag=gesture=>{
-      if(!gesture)return;clearTimeout(gesture.dragReadyTimer);document.removeEventListener('pointermove',gesture.move);document.removeEventListener('pointerup',gesture.up);document.removeEventListener('pointercancel',gesture.cancel);
+      if(!gesture)return;releasePointerCapture(gesture);clearTimeout(gesture.dragReadyTimer);document.removeEventListener('pointermove',gesture.move);document.removeEventListener('pointerup',gesture.up);document.removeEventListener('pointercancel',gesture.cancel);
       gesture.rail.classList.remove('is-reordering');if(gesture.placeholder)gesture.placeholder.remove();gesture.card.classList.remove('is-dragging');restoreInline(gesture.card,gesture.cardInline);restoreInline(gesture.rail,gesture.railInline);
     };
     const placePlaceholder=(gesture,clientX)=>{
@@ -28611,13 +28637,14 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
       card.addEventListener('dragover',event=>{if(draft&&Number.isInteger(draft.dragIndex)){event.preventDefault();event.dataTransfer&&(event.dataTransfer.dropEffect='move');}});
       card.addEventListener('drop',event=>{event.preventDefault();const from=draft&&Number.isInteger(draft.dragIndex)?draft.dragIndex:-1;const to=Number(card.dataset.kgg015Index);draft.dragIndex=null;if(from>=0&&from!==to)moveVariant(from,to);});
       let gesture=null;
-      const clear=()=>{if(!gesture)return;clearTimeout(gesture.holdTimer);clearTimeout(gesture.swapTimer);clearTimeout(gesture.dragReadyTimer);document.removeEventListener('pointermove',gesture.move);document.removeEventListener('pointerup',gesture.up);document.removeEventListener('pointercancel',gesture.cancel);card.classList.remove('is-holding','is-vibrating');gesture=null;};
+      const clear=()=>{if(!gesture)return;releasePointerCapture(gesture);clearTimeout(gesture.holdTimer);clearTimeout(gesture.swapTimer);clearTimeout(gesture.dragReadyTimer);document.removeEventListener('pointermove',gesture.move);document.removeEventListener('pointerup',gesture.up);document.removeEventListener('pointercancel',gesture.cancel);card.classList.remove('is-holding','is-vibrating');gesture=null;};
       const finishMain=()=>{if(!gesture||gesture.moved||gesture.active||gesture.deleteArmed)return;card.classList.add('is-holding');if(!reducedMotion())card.classList.add('is-vibrating');try{if(navigator.vibrate)navigator.vibrate(18);}catch(err){}gesture.mainTriggered=true;gesture.swapTimer=setTimeout(()=>{if(!gesture)return;const stage=draft&&draft.variants[gesture.index];if(stage&&stage.id!==draft.mainId){draft.mainId=stage.id;draft.changed=true;renderDraft();setStatus(stage.name+' ist jetzt die Hauptübung.','success');}card.classList.remove('is-holding','is-vibrating');},MAIN_SWAP_DELAY_MS);};
-      const finish=()=>{if(!gesture)return;const current=gesture;const shouldDelete=current.deleteArmed;const index=current.index;const wasActive=current.active;const to=wasActive&&Number.isInteger(current.targetIndex)?current.targetIndex:null;const suppress=current.moved||current.mainTriggered||current.active||shouldDelete;if(suppress)card.dataset.kgg015SuppressClick='1';if(wasActive)cleanupPointerDrag(current);clear();if(Number.isInteger(to)&&to!==current.from)moveVariant(current.from,to);if(shouldDelete)askDelete(index);};
+      const finish=()=>{if(!gesture)return;const current=gesture;const shouldDelete=current.deleteArmed;const index=current.index;const wasActive=current.active;const to=wasActive&&Number.isInteger(current.targetIndex)?current.targetIndex:null;const suppress=current.moved||current.mainTriggered||current.active||shouldDelete||!!current.axis;if(suppress)card.dataset.kgg015SuppressClick='1';if(wasActive)cleanupPointerDrag(current);clear();if(Number.isInteger(to)&&to!==current.from)moveVariant(current.from,to);if(shouldDelete)askDelete(index);};
       const cancel=()=>{if(gesture&&gesture.active)cleanupPointerDrag(gesture);clear();};
       const start=event=>{
-        if(event.button!==undefined&&event.button!==0)return;if(event.target.closest('button'))return;const index=Number(card.dataset.kgg015Index);gesture={card,rail,from:index,index,startX:event.clientX,startY:event.clientY,active:false,ready:false,moved:false,deleteArmed:false,mainTriggered:false,targetIndex:null,placeholder:null,holdTimer:0,swapTimer:0,dragReadyTimer:0};
-        gesture.holdTimer=setTimeout(finishMain,HOLD_MS);gesture.dragReadyTimer=setTimeout(()=>{if(gesture)gesture.ready=true;},180);gesture.move=ev=>{if(!gesture)return;const dx=ev.clientX-gesture.startX,dy=ev.clientY-gesture.startY;if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>=DELETE_SWIPE_PX){gesture.moved=true;gesture.deleteArmed=true;clearTimeout(gesture.holdTimer);clearTimeout(gesture.swapTimer);card.classList.add('is-holding');return;}if(!gesture.active&&Math.hypot(dx,dy)>MOVE_CANCEL_PX){gesture.moved=true;clearTimeout(gesture.holdTimer);clearTimeout(gesture.swapTimer);card.classList.remove('is-holding','is-vibrating');if(gesture.ready&&Math.abs(dx)>=Math.abs(dy)){activatePointerDrag(gesture);}}if(gesture.active){ev.preventDefault();gesture.card.style.setProperty('--kgg015-drag-x',dx+'px');gesture.card.style.setProperty('--kgg015-drag-y',Math.max(-8,Math.min(8,dy*.08))+'px');placePlaceholder(gesture,ev.clientX);}};gesture.up=finish;gesture.cancel=cancel;document.addEventListener('pointermove',gesture.move,{passive:false});document.addEventListener('pointerup',gesture.up,{once:true});document.addEventListener('pointercancel',gesture.cancel,{once:true});
+        if(event.button!==undefined&&event.button!==0)return;if(event.target.closest('button'))return;const index=Number(card.dataset.kgg015Index);gesture={card,rail,from:index,index,startX:event.clientX,startY:event.clientY,lastX:event.clientX,pointerId:event.pointerId,captured:false,axis:null,active:false,ready:false,moved:false,deleteArmed:false,mainTriggered:false,targetIndex:null,placeholder:null,holdTimer:0,swapTimer:0,dragReadyTimer:0};
+        if(event.pointerType==='touch'||event.pointerType==='pen'){try{card.setPointerCapture(event.pointerId);gesture.captured=true;}catch(err){}}
+        gesture.holdTimer=setTimeout(finishMain,HOLD_MS);gesture.dragReadyTimer=setTimeout(()=>{if(gesture)gesture.ready=true;},180);gesture.move=ev=>{if(!gesture)return;const dx=ev.clientX-gesture.startX,dy=ev.clientY-gesture.startY,stepX=ev.clientX-gesture.lastX;const horizontal=Math.abs(dx)>=Math.abs(dy);if(!gesture.active&&Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>=DELETE_SWIPE_PX){gesture.axis='vertical';gesture.moved=true;gesture.deleteArmed=true;clearTimeout(gesture.holdTimer);clearTimeout(gesture.swapTimer);card.classList.add('is-holding');return;}if(!gesture.active&&Math.hypot(dx,dy)>MOVE_CANCEL_PX){gesture.moved=true;clearTimeout(gesture.holdTimer);clearTimeout(gesture.swapTimer);card.classList.remove('is-holding','is-vibrating');if(!gesture.axis){if(gesture.ready&&horizontal){gesture.axis='horizontal-drag';activatePointerDrag(gesture);}else if(horizontal){gesture.axis='horizontal-swipe';}else{gesture.axis='vertical';}}}if(gesture.axis==='horizontal-swipe'){rail.scrollLeft-=stepX;gesture.lastX=ev.clientX;return;}if(gesture.active){ev.preventDefault();gesture.card.style.setProperty('--kgg015-drag-x',dx+'px');gesture.card.style.setProperty('--kgg015-drag-y',Math.max(-8,Math.min(8,dy*.08))+'px');placePlaceholder(gesture,ev.clientX);}};gesture.up=finish;gesture.cancel=cancel;document.addEventListener('pointermove',gesture.move,{passive:false});document.addEventListener('pointerup',gesture.up,{once:true});document.addEventListener('pointercancel',gesture.cancel,{once:true});
       };
       card.addEventListener('pointerdown',start,{passive:true});
       card.addEventListener('click',event=>{if(event.target.closest('button'))return;if(card.dataset.kgg015SuppressClick==='1'){delete card.dataset.kgg015SuppressClick;return;}openStageEditor(Number(card.dataset.kgg015Index));});
@@ -28632,7 +28659,7 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   async function hydrateMedia(box){
     box.querySelectorAll('[data-kgg015-media-id]').forEach(async node=>{
       const id=String(node.dataset.kgg015MediaId||'');const stage=[...((draft&&draft.variants)||[])].find(item=>item.media&&item.media[0]&&String(item.media[0].id||'')===id);const media=stage&&stage.media&&stage.media[0];if(!media)return;
-      try{let blobRecord=null;if(typeof getEncryptedMediaBlob==='function')blobRecord=await getEncryptedMediaBlob(id);if(!blobRecord||!blobRecord.blob||typeof patientDecryptMedia!=='function')return;const imageBlob=await patientDecryptMedia(media,blobRecord.blob);if(!node.isConnected)return;const url=URL.createObjectURL(imageBlob);node.innerHTML='<img src="'+url+'" alt="">';node.dataset.kgg015ObjectUrl=url;}catch(err){}
+      try{const bridge=window['KGGProgressionEditorBridge']||{};if(typeof bridge.readMedia!=='function')return;const imageBlob=await bridge.readMedia(media);if(!imageBlob||!node.isConnected)return;const url=URL.createObjectURL(imageBlob);node.innerHTML='<img src="'+url+'" alt="">';node.dataset.kgg015ObjectUrl=url;}catch(err){}
     });
   }
   function startDraft(ex){
@@ -28677,6 +28704,20 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
 })();
 </script>
 <!-- KGG PATCH END kgg-v091-ticket-015-admin-stage-compact -->
+<!-- KGG PATCH START kgg-v092-ticket-015-admin-stage-release-fixes -->
+<!-- Ticket 015 Admin-Editor: Release- und Gesten-Fixes -->
+<script id="kgg-v092-ticket-015-admin-stage-release-fixes">
+(function(){
+  "use strict";
+  const PATCH_ID="kgg-v092-ticket-015-admin-stage-release-fixes";
+  // v092 vervollstaendigt die Hooks des Ticket-015-Galeriepatches: Editor-Stack,
+  // Hauptstufenprojektion, geschuetzte Medienbruecke und Touch-Achsenvertrag.
+  // Die bestehende v090-Implementierung bleibt der einzige UI-Hookpunkt.
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES[PATCH_ID]={installed:true,gestureContract:{movementAxis:'horizontal',deleteAxis:'vertical',axisLockPx:10,touchTargetMinPx:44}};
+})();
+</script>
+<!-- KGG PATCH END kgg-v092-ticket-015-admin-stage-release-fixes -->
 
 </body>
 </html>

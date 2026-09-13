@@ -1,10 +1,10 @@
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v091_ticket_015_admin_stage_compact';
+  const VERSION='KGG_GITHUB_UPDATE_v092_ticket_015_admin_stage_release_fixes';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v091","buildTime":"2026-09-13T17:05:51Z","buildCode":"module-v091-ticket-015-admin-stage-compact","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v092","buildTime":"2026-09-13T19:43:16Z","buildCode":"module-v092-ticket-015-admin-stage-release-fixes","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -996,6 +996,7 @@
       videoLabel:ex.videoLabel||'Video öffnen',
       media:ensureExerciseMediaList(ex),
       progressionGroupId:ex.progressionGroupId||'',
+      progressionMainId:ex.progressionMainId||ex.progressionMainVariantId||'',
       progressionVariants:Array.isArray(ex.progressionVariants)?ex.progressionVariants.map(item=>({...item,media:ensureExerciseMediaList(item)})):[]
     };
   }
@@ -3586,6 +3587,7 @@
     if(window.KGGTicket015AdminEditor&&typeof window.KGGTicket015AdminEditor.onOpen==='function')window.KGGTicket015AdminEditor.onOpen(ex);
   }
   window.KGGTicket015AdminEditor.open=ex=>openEditor(ex);
+  window.KGGTicket015AdminEditor.saveEditor=()=>{saveEditedExercise();return true;};
   function closeEditor(){state.editId=null; $('editorModal').classList.remove('open')}
   function saveEditedExercise(){
     const id=state.editId;
@@ -7631,7 +7633,14 @@
     upsert:(exercise,reason)=>upsertPlanExerciseToBank(exercise,reason||'ticket_015_progression'),
     sync:reason=>syncStatePlanToStore(reason||'ticket_015_progression'),
     persistBank:()=>persistCustomBank(),
-    save:()=>save()
+    save:()=>save(),
+    readMedia:async media=>{
+      const id=String(media&&media.id||'');
+      if(!id)return null;
+      const record=await getEncryptedMediaBlob(id);
+      if(!record||!record.blob)return null;
+      return patientDecryptMedia(media,record.blob);
+    }
   };
   /* KGG_LOGIC_SMOKE_BOOT_BOUNDARY */
   installKggV383UiFlowStability();
