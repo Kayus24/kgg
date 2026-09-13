@@ -48,15 +48,19 @@ async function main(){
     await page.locator('[data-kgg015-main-next]').click();
     await page.waitForFunction(()=>document.querySelector('.kgg015MainProgressionStage')?.textContent.includes('Schwerer'));
     assert(await page.evaluate(()=>p.ex[0].media?.[0]?.id)==='hard-media','main exercise image did not switch to the selected stage');
-    const pager=page.locator('.kgg015MainPager').first();
     await page.waitForTimeout(700);
-    const pagerBox=await (await page.waitForFunction(()=>{const node=document.querySelector('.kgg015MainPager');const rect=node?.getBoundingClientRect();return rect&&rect.width>0&&rect.height>0?{x:rect.x,y:rect.y,width:rect.width,height:rect.height}:false})).jsonValue();
-    assert(pagerBox,'main pager must have a measurable swipe area');
-    await pager.evaluate((node,dx)=>{const rect=node.getBoundingClientRect(),x=rect.x+rect.width*.5,y=rect.y+rect.height*.25,base={bubbles:true,clientX:x,clientY:y,pointerId:17,pointerType:'touch'};node.dispatchEvent(new PointerEvent('pointerdown',base));node.dispatchEvent(new PointerEvent('pointermove',{...base,clientX:x+dx}));},pagerBox.width*.45);
-    const dragDebug=await page.locator('.kgg015MainPagerTrack').evaluate(node=>({dragging:node.classList.contains('is-dragging'),style:node.getAttribute('style'),pagerHandler:typeof node.parentElement?.onpointerdown}));
+    const dragDebug=await page.evaluate(ratio=>{
+      const node=document.querySelector('.kgg015MainPager'),track=node?.querySelector('.kgg015MainPagerTrack'),rect=node?.getBoundingClientRect();
+      if(!node||!track||!rect||rect.width<=0||rect.height<=0)return {error:'main pager must have a measurable swipe area'};
+      const x=rect.x+rect.width*.5,y=rect.y+rect.height*.25,dx=rect.width*ratio,base={bubbles:true,clientX:x,clientY:y,pointerId:17,pointerType:'touch'};
+      node.dispatchEvent(new PointerEvent('pointerdown',base));node.dispatchEvent(new PointerEvent('pointermove',{...base,clientX:x+dx}));
+      const debug={dragging:track.classList.contains('is-dragging'),style:track.getAttribute('style'),pagerHandler:typeof node.onpointerdown};
+      node.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,clientX:0,clientY:0,pointerId:17,pointerType:'touch'}));
+      return debug;
+    },.45);
+    assert(!dragDebug.error,'main pager must have a measurable swipe area');
     assert(dragDebug.dragging,'pager must track the pointer before release: '+JSON.stringify(dragDebug));
-    assert((await page.locator('.kgg015MainPagerTrack').getAttribute('style')||'').includes('translate3d'),'pager must move with the pointer in real time');
-    await pager.dispatchEvent('pointerup',{bubbles:true,clientX:0,clientY:0,pointerId:17,pointerType:'touch'});
+    assert((dragDebug.style||'').includes('translate3d'),'pager must move with the pointer in real time');
     await page.waitForFunction(()=>document.querySelector('.kgg015MainProgressionStage')?.textContent.includes('Basis'));
     assert(await page.evaluate(()=>p.ex[0].media?.[0]?.id)==='base-media','swipe release did not elastically snap to the previous stage');
     await page.locator('.kgg015MainProgressionThumb').nth(2).click();
