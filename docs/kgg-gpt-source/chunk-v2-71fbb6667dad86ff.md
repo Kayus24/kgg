@@ -21,6 +21,8 @@
     $('editorModal').classList.add('open');
     if(window.KGGTicket015AdminEditor&&typeof window.KGGTicket015AdminEditor.onOpen==='function')window.KGGTicket015AdminEditor.onOpen(ex);
   }
+  window.KGGTicket015AdminEditor.open=ex=>openEditor(ex);
+  window.KGGTicket015AdminEditor.saveEditor=()=>{saveEditedExercise();return true;};
   function closeEditor(){state.editId=null; $('editorModal').classList.remove('open')}
   function saveEditedExercise(){
     const id=state.editId;
@@ -702,5 +704,3 @@
     try{
       const base64=await pdfBlobToBase64(currentPdfPreview.blob);
       if(action==='download'&&typeof bridge.download==='function')return !!bridge.download(currentPdfPreview.filename,base64);
-      if(action==='print'&&typeof bridge.print==='function')return !!bridge.print(currentPdfPreview.filename,base64);
-      if(typeof bridge.open==='function')return !!bridge.open(currentPdfPreview.filename,base64);

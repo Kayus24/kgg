@@ -224,6 +224,7 @@
       videoLabel:ex.videoLabel||'Video öffnen',
       media:ensureExerciseMediaList(ex),
       progressionGroupId:ex.progressionGroupId||'',
+      progressionMainId:ex.progressionMainId||ex.progressionMainVariantId||'',
       progressionVariants:Array.isArray(ex.progressionVariants)?ex.progressionVariants.map(item=>({...item,media:ensureExerciseMediaList(item)})):[]
     };
   }
@@ -545,5 +546,3 @@
     const input=$('exerciseInput');
     if(!input)return;
     const hasText=!!input.value.trim();
-    input.classList.toggle('hasText',hasText);
-    input.style.height='auto';

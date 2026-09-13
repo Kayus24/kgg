@@ -1,3 +1,5 @@
+      if(action==='print'&&typeof bridge.print==='function')return !!bridge.print(currentPdfPreview.filename,base64);
+      if(typeof bridge.open==='function')return !!bridge.open(currentPdfPreview.filename,base64);
     }catch(err){console.warn('Native PDF-Aktion fehlgeschlagen:',err);}
     return false;
   }
