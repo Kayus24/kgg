@@ -4,15 +4,15 @@
   "schema": 2,
   "channels": {
     "admin": {
-      "releaseId": "r0432",
+      "releaseId": "r0433",
       "profile": "admin",
       "versionName": "1.0.95-cockpit-responsive-entry",
-      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0432/admin.html",
-      "sha256": "9b190ab1928e9efdc2237f27ced8b53ea3095bfa74ffedc9840b2328367cfbb9",
-      "notes": "KGG-Ticket-037: Handy-Cockpit-Einstieg im Scan-Dock mit Zählung geladener Trainingspläne; Tablet-Einstieg bleibt im Leerzustand verborgen.",
-      "rolloutCode": 432,
-      "previousReleaseId": "r0431",
-      "releasedAt": "2026-09-13T20:31:14Z"
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0433/admin.html",
+      "sha256": "2697604be99ead0cdfe8f2ceda14661be7249a4eea3de7f9709b308cb3cd8b5c",
+      "notes": "Mobile-Inbox r0433: KGG Update v095 Cockpit-Einstieg im Phone-Dock (2697604be99e).",
+      "rolloutCode": 433,
+      "previousReleaseId": "r0432",
+      "releasedAt": "2026-09-13T21:23:04Z"
     },
     "colleague": {
       "releaseId": "r0426",
@@ -30,8 +30,8 @@
   "latestAndroidShellVersion": "v401",
   "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html",
   "colleagueSha256": "670c47aee4205bdd80b3305d4d0ac63f0a953751564918cfb3f2d886e67c5fee",
-  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0432/admin.html",
-  "adminSha256": "9b190ab1928e9efdc2237f27ced8b53ea3095bfa74ffedc9840b2328367cfbb9",
+  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0433/admin.html",
+  "adminSha256": "2697604be99ead0cdfe8f2ceda14661be7249a4eea3de7f9709b308cb3cd8b5c",
   "sha256": "670c47aee4205bdd80b3305d4d0ac63f0a953751564918cfb3f2d886e67c5fee",
   "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",
   "androidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
@@ -39,7 +39,7 @@
   "colleagueAndroidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
   "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_ADMIN_v401_share_apk_provider_debug.apk",
   "adminAndroidApkSha256": "366c63594eeb6bdb89a7ab9c44cf4b84b43004ddfb24e5019012de0766f21499",
-  "notes": "Admin beta r0432: KGG-Ticket-037: Handy-Cockpit-Einstieg im Scan-Dock mit Zählung geladener Trainingspläne; Tablet-Einstieg bleibt im Leerzustand verborgen.",
+  "notes": "Admin beta r0433: Mobile-Inbox r0433: KGG Update v095 Cockpit-Einstieg im Phone-Dock (2697604be99e).",
   "latestAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",
   "latestAndroidApkSha256": "bc47acaecd1e5a170c0d574958ac32560745df5b9d063e09e54aa97384d7fc0c",
   "latestColleagueAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk",

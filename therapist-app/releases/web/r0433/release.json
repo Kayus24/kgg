@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0433",
+  "versionName": "1.0.95-cockpit-responsive-entry",
+  "notes": "Mobile-Inbox r0433: KGG Update v095 Cockpit-Einstieg im Phone-Dock (2697604be99e).",
+  "createdAt": "2026-09-13T21:23:04Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0433",
+      "profile": "admin",
+      "versionName": "1.0.95-cockpit-responsive-entry",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0433/admin.html",
+      "sha256": "2697604be99ead0cdfe8f2ceda14661be7249a4eea3de7f9709b308cb3cd8b5c",
+      "notes": "Mobile-Inbox r0433: KGG Update v095 Cockpit-Einstieg im Phone-Dock (2697604be99e)."
+    },
+    "colleague": {
+      "releaseId": "r0433",
+      "profile": "colleague",
+      "versionName": "1.0.95-cockpit-responsive-entry",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0433/colleague.html",
+      "sha256": "e185795218531ab8dd0cb2a0bb8c22448565cb5055c0a90f969bf8a00f7b98d4",
+      "notes": "Mobile-Inbox r0433: KGG Update v095 Cockpit-Einstieg im Phone-Dock (2697604be99e)."
+    }
+  }
+}
