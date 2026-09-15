@@ -554,7 +554,7 @@ class BrainRelayWorkerContractTests(unittest.TestCase):
                 "getKggPatientSourceChunkForAdmin", "getKggPatientPreviewIndexForAdmin", "getKggPatientPreviewMetaForAdmin",
             ],
             "docs/kgg-custom-gpt-action-api-openapi.yaml": [
-                "getKggMainCommit", "submitKggPreviewAuto", "submitKggDeviceTest", "listKggDeviceTestRuns",
+                "getKggMainCommit", "submitKggReadOnlyValidation", "listKggReadOnlyValidationRuns", "submitKggPreviewAuto", "submitKggDeviceTest", "listKggDeviceTestRuns",
                 "submitKggMainGate", "listKggMainGateRuns", "listKggPreviewAutoRuns", "getKggPreviewGateRun",
                 "getKggPreviewGateJobs", "getKggPreviewGateArtifacts", "submitKggAdminEditorSyncPreflight",
                 "submitKggAdminEditorSyncSnapshotPr", "submitKggPatientPreviewFromAdmin",
@@ -583,7 +583,7 @@ class BrainRelayWorkerContractTests(unittest.TestCase):
             text = (ROOT / filename).read_text(encoding="utf-8")
             actual = re.findall(r"^\s+operationId:\s+(\S+)\s*$", text, re.MULTILINE)
             self.assertEqual(operation_ids, actual, filename)
-        self.assertEqual(28, len(expected["docs/kgg-custom-gpt-action-api-openapi.yaml"]), "Admin API operations")
+        self.assertEqual(30, len(expected["docs/kgg-custom-gpt-action-api-openapi.yaml"]), "Admin API operations")
         self.assertEqual(20, len(expected["docs/kgg-patient-custom-gpt-action-api-openapi.yaml"]), "Patient API operations")
 
     def test_browser_relay_is_single_run_and_bounded(self) -> None:
