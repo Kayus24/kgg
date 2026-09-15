@@ -1,0 +1,150 @@
+name: KGG GPT Read-only Validation
+run-name: KGG GPT Read-only Validation | ${{ inputs.request_id }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      request_id:
+        description: Stable GPT request id
+        required: true
+        type: string
+      source_sha:
+        description: Exact current-main SHA that must be tested
+        required: true
+        type: string
+      validation_profile:
+        description: Allowlisted read-only validation profile
+        required: true
+        type: choice
+        options:
+          - tablet-splitter-scale-drag
+          - gpt-contracts
+
+# This workflow intentionally has no repository, ticket, PR, status, preview,
+# or release write scope. It may create a run and a safe result artifact only.
+permissions:
+  contents: read
+  actions: read
+  checks: read
+  statuses: read
+  pull-requests: read
+
+concurrency:
+  group: kgg-gpt-readonly-validation-${{ inputs.request_id }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Read-only validation (${{ inputs.validation_profile }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      checks: read
+      statuses: read
+      pull-requests: read
+    steps:
+      - name: Checkout exact current Main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Verify source SHA and Main ref
+        id: source
+        continue-on-error: true
+        shell: bash
+        env:
+          EXPECTED_SOURCE_SHA: ${{ inputs.source_sha }}
+        run: |
+          set -euo pipefail
+          [[ "${GITHUB_REF_NAME}" == "main" ]] || { echo "Read-only validation is pinned to main." >&2; exit 1; }
+          [[ "$EXPECTED_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "source_sha must be a 40-character lowercase SHA." >&2; exit 1; }
+          actual_sha="$(git rev-parse HEAD)"
+          [[ "$actual_sha" == "$EXPECTED_SOURCE_SHA" ]] || {
+            echo "Requested source SHA does not match checked-out Main." >&2
+            exit 1
+          }
+          echo "source_sha=$actual_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Install pinned browser tooling for UI profile
+        id: tooling
+        continue-on-error: true
+        if: steps.source.outcome == 'success' && inputs.validation_profile == 'tablet-splitter-scale-drag'
+        working-directory: release-pipeline
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Run one allowlisted validation profile
+        id: validation
+        if: always()
+        continue-on-error: true
+        shell: bash
+        env:
+          PROFILE: ${{ inputs.validation_profile }}
+        run: |
+          set -euo pipefail
+          if [[ "${{ steps.source.outcome }}" != "success" ]]; then
+            echo "Source verification failed; validation was not run." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if [[ "${{ steps.tooling.outcome }}" == "failure" ]]; then
+            echo "Pinned validation tooling failed; validation was not run." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          case "$PROFILE" in
+            tablet-splitter-scale-drag)
+              cd release-pipeline
+              node kgg_ui_stability_smoke.js --level regression --case tablet-splitter-scale-drag
+              ;;
+            gpt-contracts)
+              python release-pipeline/kgg_gpt_result.py --self-test
+              python release-pipeline/kgg_gpt_run_reconcile.py --self-test
+              python release-pipeline/kgg_gpt_repair_stabilize.py --self-test
+              ;;
+            *)
+              echo "Unknown validation profile." >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Write safe read-only result artifact
+        if: always()
+        shell: bash
+        env:
+          KGG_MODE: read_only_validation
+          KGG_REQUEST_ID: ${{ inputs.request_id }}
+          KGG_RESULT_STATUS: ${{ steps.source.outcome == 'success' && steps.tooling.outcome != 'failure' && steps.validation.outcome == 'success' && 'success' || 'failure' }}
+          SOURCE_OUTCOME: ${{ steps.source.outcome }}
+          TOOLING_OUTCOME: ${{ steps.tooling.outcome }}
+          TOOLING_ERROR_CLASS: ci_tooling
+          VALIDATION_OUTCOME: ${{ steps.validation.outcome }}
+          VALIDATION_ERROR_CLASS: ${{ inputs.validation_profile == 'tablet-splitter-scale-drag' && 'ui_logic' || 'unknown' }}
+          REPOSITORY_WRITE_DETECTED: "false"
+          RECONCILED_AFTER_TRANSPORT_ERROR: "false"
+        run: |
+          set -euo pipefail
+          result_path="$RUNNER_TEMP/kgg-gpt-result/result.json"
+          mkdir -p "$(dirname "$result_path")"
+          python release-pipeline/kgg_gpt_result.py --write "$result_path"
+          cat "$result_path" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload safe read-only result artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgg-gpt-result-${{ inputs.request_id }}-${{ github.run_attempt }}
+          if-no-files-found: error
+          retention-days: 14
+          path: ${{ runner.temp }}/kgg-gpt-result/result.json

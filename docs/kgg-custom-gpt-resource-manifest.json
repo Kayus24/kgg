@@ -49,7 +49,7 @@
       },
       {
         "path": "docs/kgg-custom-gpt-action-api-openapi.yaml",
-        "sha256": "feb1b2acd761ac42917e4a8ea4139b209b7f8529705713875ecc891fd5e5904e"
+        "sha256": "3759e30eec78ddbc2e83804fba6cf9ceffba66d15123f5c6f50f81e0dc8a4d91"
       }
     ],
     "freshness": "GitHub live context and source chunks are authoritative; generated Knowledge is a retrieval accelerator and must pass --check.",

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: KGG GPT Preview and Project Memory GitHub API
-  version: "1.7.0"
+  version: "1.8.0"
   description: Pre-authorized Admin/Patient Preview operations, Admin editor-sync certification, separately approved release gates, and private shared memory/coordination.
   x-kgg-admin-editor-sync-contract:
     human_attestation: "Editor geprüft, Sync zertifizieren."
@@ -44,6 +44,85 @@ paths:
           content:
             application/json:
               schema: {type: object, properties: {}, additionalProperties: true}
+  /repos/Kayus24/kgg/actions/workflows/kgg-gpt-readonly-validation.yml/dispatches:
+    post:
+      operationId: submitKggReadOnlyValidation
+      summary: Run one allowlisted current-Main validation without repository or Preview writes.
+      description: "Codex-replacement path: pin main and exact source_sha. Accept only bounded validation_profile; create a run and safe result artifact without writing branches, status, tickets, previews or releases. Reconcile by request_id and source_sha."
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ref, inputs]
+              properties:
+                ref:
+                  type: string
+                  enum: [main]
+                inputs:
+                  type: object
+                  required: [request_id, source_sha, validation_profile]
+                  properties:
+                    request_id:
+                      type: string
+                      pattern: "^[a-z0-9][a-z0-9-]{5,63}$"
+                    source_sha:
+                      type: string
+                      pattern: "^[0-9a-f]{40}$"
+                      description: Exact current main commit SHA; the workflow fails closed if Main differs.
+                    validation_profile:
+                      type: string
+                      enum: [tablet-splitter-scale-drag, gpt-contracts]
+      responses:
+        "204":
+          description: Read-only validation workflow dispatch accepted; reconcile its run and safe result artifact.
+  /repos/Kayus24/kgg/actions/workflows/kgg-gpt-readonly-validation.yml/runs:
+    get:
+      operationId: listKggReadOnlyValidationRuns
+      summary: List bounded read-only validation runs for exact reconciliation.
+      x-openai-isConsequential: false
+      security:
+        - githubBearer: []
+      parameters:
+        - name: branch
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [main]
+        - name: event
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [workflow_dispatch]
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [queued, in_progress, completed]
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 10
+      responses:
+        "200":
+          description: Bounded read-only validation workflow runs.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
   /repos/Kayus24/kgg/actions/workflows/kgg-gpt-preview-auto.yml/dispatches:
     post:
       operationId: submitKggPreviewAuto
