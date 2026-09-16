@@ -60,10 +60,11 @@ Migrations-Gates (`PARITY_PASS`, `SAFETY_PASS`, `EFFICIENCY_PASS`,
 `MIGRATION_ELIGIBLE`-Ergebnis autorisiert keinen Release oder externen Write.
 
 `release-pipeline/kgg_ui_lab_fault_injection.py` führt zusätzlich eine
-deterministische, lokale Matrix für die elf im Zielauftrag genannten
+deterministische, lokale Matrix für die 23 im Zielauftrag genannten
 Fehlerfälle aus. Jede Injektion endet entweder beim begrenzten Retry/Bruder-
-Pfad oder bei `MAX_REQUIRED`; die Matrix kann selbst keinen externen Write
-auslösen.
+Pfad oder bei `MAX_REQUIRED` und dokumentiert dabei erwartete sowie tatsächliche
+Fehlerklasse, Aktion und Stop-Verhalten; die Matrix kann selbst keinen externen
+Write auslösen.
 
 ## Testschleife
 
