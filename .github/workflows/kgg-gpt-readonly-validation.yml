@@ -120,6 +120,7 @@ jobs:
           esac
 
       - name: Write safe read-only result artifact
+        id: result
         if: always()
         shell: bash
         env:
@@ -141,6 +142,7 @@ jobs:
           cat "$result_path" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload safe read-only result artifact
+        id: upload
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -148,3 +150,37 @@ jobs:
           if-no-files-found: error
           retention-days: 14
           path: ${{ runner.temp }}/kgg-gpt-result/result.json
+
+      - name: Enforce final validation outcome
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          failed=0
+
+          if [[ "${{ steps.source.outcome }}" != "success" ]]; then
+            echo "Source verification failed." >&2
+            failed=1
+          fi
+
+          if [[ "${{ inputs.validation_profile }}" == "tablet-splitter-scale-drag" && "${{ steps.tooling.outcome }}" != "success" ]]; then
+            echo "Required UI validation tooling did not complete successfully." >&2
+            failed=1
+          fi
+
+          if [[ "${{ steps.validation.outcome }}" != "success" ]]; then
+            echo "Validation profile failed." >&2
+            failed=1
+          fi
+
+          if [[ "${{ steps.result.outcome }}" != "success" ]]; then
+            echo "Safe result artifact generation failed." >&2
+            failed=1
+          fi
+
+          if [[ "${{ steps.upload.outcome }}" != "success" ]]; then
+            echo "Safe result artifact upload failed." >&2
+            failed=1
+          fi
+
+          exit "$failed"
