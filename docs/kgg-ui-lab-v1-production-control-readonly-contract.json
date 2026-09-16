@@ -23,7 +23,8 @@
         "getKggCustomGptPlaybook",
         "getKggMainCommit",
         "submitKggReadOnlyValidation",
-        "listKggReadOnlyValidationRuns"
+        "listKggReadOnlyValidationRuns",
+        "getKggPreviewGateArtifacts"
       ],
       "forbidden_actions": [
         "submitKggPreviewAuto",

@@ -469,7 +469,10 @@ paths:
   /repos/Kayus24/kgg/actions/runs/{run_id}/artifacts:
     get:
       operationId: getKggPreviewGateArtifacts
-      summary: Get uploaded artifacts for one Preview Gate run.
+      summary: Get uploaded artifacts for one guarded workflow run.
+      description: "Read-only artifact listing. The production-control contract may use this operation only after exact read-only-run reconciliation to retrieve the bounded result.json and measurement-envelope.json artifacts; it never downloads or executes arbitrary content."
+      x-kgg-read-only-validation-artifact: true
+      x-kgg-allowed-read-only-profile: read_only_validation_runner
       x-openai-isConsequential: false
       security:
         - githubBearer: []
@@ -481,7 +484,7 @@ paths:
             type: integer
       responses:
         "200":
-          description: Workflow artifacts.
+          description: Workflow artifacts, including the bounded result.json and, for the read-only validation profile, measurement-envelope.json with its provenance hash.
           content:
             application/json:
               schema:

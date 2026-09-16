@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import json
 import subprocess
 import sys
 import unittest
@@ -54,6 +55,20 @@ class ReadOnlyValidationWorkflowTests(unittest.TestCase):
         self.assertIn("kgg_gpt_result.py --write", self.workflow)
         self.assertIn("actions/upload-artifact@v4", self.workflow)
 
+    def test_ui_profile_publishes_a_separate_measurement_envelope(self) -> None:
+        for required in (
+            "Write bounded measurement envelope",
+            "kgg_gpt_measurement.py --write",
+            "measurement-envelope.json",
+            "KGG_MEASUREMENT_BASE_SHA",
+            "Upload bounded measurement envelope",
+            "id: measurement-upload",
+            "Complete authoritative measurement envelope was not produced.",
+        ):
+            self.assertIn(required, self.workflow)
+        self.assertIn("inputs.validation_profile == 'tablet-splitter-scale-drag'", self.workflow)
+        self.assertIn("measurement-envelope.json", self.workflow)
+
     def test_ui_profile_requires_successful_tooling_but_contract_profile_allows_skip(self) -> None:
         self.assertIn('if [[ "$PROFILE" == "tablet-splitter-scale-drag" && "${{ steps.tooling.outcome }}" != "success" ]]; then', self.workflow)
         self.assertIn("inputs.validation_profile != 'tablet-splitter-scale-drag' || steps.tooling.outcome == 'success'", self.workflow)
@@ -76,9 +91,16 @@ class ReadOnlyValidationWorkflowTests(unittest.TestCase):
     def test_action_schema_pins_same_workflow_and_allowlist(self) -> None:
         self.assertEqual(1, self.api.count("operationId: submitKggReadOnlyValidation"))
         self.assertEqual(1, self.api.count("operationId: listKggReadOnlyValidationRuns"))
+        self.assertEqual(1, self.api.count("x-kgg-read-only-validation-artifact: true"))
+        self.assertIn("x-kgg-allowed-read-only-profile: read_only_validation_runner", self.api)
         self.assertIn("/actions/workflows/kgg-gpt-readonly-validation.yml/dispatches:", self.api)
         self.assertIn("enum: [tablet-splitter-scale-drag, gpt-contracts]", self.api)
         self.assertIn("x-openai-isConsequential: false", self.api)
+
+    def test_runner_contract_requires_artifact_reconciliation(self) -> None:
+        contract = json.loads((ROOT / "docs" / "kgg-ui-lab-v1-production-control-readonly-contract.json").read_text(encoding="utf-8"))
+        required = contract["profiles"]["read_only_validation_runner"]["required_actions"]
+        self.assertIn("getKggPreviewGateArtifacts", required)
 
     def test_reconcile_matches_only_exact_request_id_segments(self) -> None:
         sha = "a" * 40

@@ -3,7 +3,8 @@
 
 The comparator deliberately fails closed.  It never treats missing Candidate
 evidence as a replacement decision and it emits only coarse metrics, not
-prompts, browser output, selectors or traces.
+prompts, browser output, selectors or traces.  Complete measurement envelopes
+are validated at the boundary and reduced to the exact comparator payload.
 """
 
 from __future__ import annotations
@@ -74,6 +75,13 @@ def _read(path: Path) -> dict[str, Any]:
         raise CompareError(f"cannot read metrics file: {path}") from exc
     if not isinstance(value, dict):
         raise CompareError("metrics file must contain one JSON object")
+    if value.get("schema") == "kgg-ui-lab/measurement-envelope/v1":
+        try:
+            from kgg_gpt_measurement import comparator_input
+
+            return comparator_input(value)
+        except (ImportError, ValueError) as exc:
+            raise CompareError(f"measurement envelope is invalid: {exc}") from exc
     return value
 
 

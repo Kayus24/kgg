@@ -532,6 +532,21 @@ def run_gpt_eval() -> None:
     run([sys.executable, "release-pipeline/kgg_gpt_eval.py"])
 
 
+def run_gpt_measurement_contract() -> None:
+    log("== Custom GPT measurement-envelope and read-only artifact contract ==")
+    run(
+        [
+            sys.executable,
+            "-m",
+            "unittest",
+            "test_kgg_gpt_measurement.py",
+            "test_kgg_gpt_ab_compare.py",
+            "test_kgg_readonly_validation_workflow.py",
+        ],
+        cwd=ROOT / "release-pipeline",
+    )
+
+
 def run_brain_relay_worker_contract() -> None:
     log("== Brain-Relay-Worker coordination contract ==")
     run([sys.executable, "release-pipeline/kgg_brain_relay_worker.py", "--self-test"])
@@ -757,6 +772,13 @@ TEST_REGISTRY = [
         "suite": "gpt",
         "reason": "Custom GPT playbook, routing and expected-answer fixtures must stay complete and testable.",
         "run": run_gpt_eval,
+    },
+    {
+        "id": "gpt-measurement-envelope-contract",
+        "level": "critical",
+        "suite": "gpt",
+        "reason": "Production measurement must be separate, provenance-bound and fail closed when the read-only artifact is incomplete.",
+        "run": run_gpt_measurement_contract,
     },
     {
         "id": "brain-relay-worker-contract",

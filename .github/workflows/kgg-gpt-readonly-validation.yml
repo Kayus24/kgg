@@ -151,6 +151,32 @@ jobs:
           retention-days: 14
           path: ${{ runner.temp }}/kgg-gpt-result/result.json
 
+      - name: Write bounded measurement envelope
+        id: measurement
+        if: always() && inputs.validation_profile == 'tablet-splitter-scale-drag'
+        shell: bash
+        env:
+          KGG_MEASUREMENT_REQUEST_ID: ${{ inputs.request_id }}
+          KGG_MEASUREMENT_SURFACE: production
+          KGG_MEASUREMENT_SCENARIO_ID: tablet-splitter-scale-drag-synth
+          KGG_MEASUREMENT_BASE_SHA: ${{ steps.source.outputs.source_sha }}
+        run: |
+          set -euo pipefail
+          measurement_path="$RUNNER_TEMP/kgg-gpt-result/measurement-envelope.json"
+          mkdir -p "$(dirname "$measurement_path")"
+          python release-pipeline/kgg_gpt_measurement.py --write "$measurement_path"
+          cat "$measurement_path" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload bounded measurement envelope
+        id: measurement-upload
+        if: always() && inputs.validation_profile == 'tablet-splitter-scale-drag'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgg-gpt-measurement-${{ inputs.request_id }}-${{ github.run_attempt }}
+          if-no-files-found: error
+          retention-days: 14
+          path: ${{ runner.temp }}/kgg-gpt-result/measurement-envelope.json
+
       - name: Enforce final validation outcome
         if: always()
         shell: bash
@@ -180,6 +206,16 @@ jobs:
 
           if [[ "${{ steps.upload.outcome }}" != "success" ]]; then
             echo "Safe result artifact upload failed." >&2
+            failed=1
+          fi
+
+          if [[ "${{ inputs.validation_profile }}" == "tablet-splitter-scale-drag" && "${{ steps.measurement.outcome }}" != "success" ]]; then
+            echo "Complete authoritative measurement envelope was not produced." >&2
+            failed=1
+          fi
+
+          if [[ "${{ inputs.validation_profile }}" == "tablet-splitter-scale-drag" && "${{ steps.measurement-upload.outcome }}" != "success" ]]; then
+            echo "Bounded measurement envelope upload failed." >&2
             failed=1
           fi
 
