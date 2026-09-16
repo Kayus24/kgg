@@ -17,4 +17,4 @@ data, secrets, raw browser output, or credentials into logs or handoffs.
 Candidate snapshot hashes (SHA-256): `docs/kgg-custom-gpt-knowledge-operations.md` =
 `c96e378fac04ed240e6c30ff88df6bcaf6866c84d9b392890da752e5d469c912`;
 `docs/kgg-ui-lab-v1-contracts.md` =
-`8c602f0adeab4068b64bcb327a827d4fc36dff08f9a6cf6648e289d880ae9079`.
+`dc4dda8e8477c3bd4d857565d3baa293372c35d4d2b9436207136eec99058452`.
