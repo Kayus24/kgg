@@ -99,8 +99,8 @@ jobs:
             echo "Source verification failed; validation was not run." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
-          if [[ "${{ steps.tooling.outcome }}" == "failure" ]]; then
-            echo "Pinned validation tooling failed; validation was not run." >> "$GITHUB_STEP_SUMMARY"
+          if [[ "$PROFILE" == "tablet-splitter-scale-drag" && "${{ steps.tooling.outcome }}" != "success" ]]; then
+            echo "Pinned validation tooling failed or did not run; validation was not run." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           case "$PROFILE" in
@@ -126,7 +126,7 @@ jobs:
         env:
           KGG_MODE: read_only_validation
           KGG_REQUEST_ID: ${{ inputs.request_id }}
-          KGG_RESULT_STATUS: ${{ steps.source.outcome == 'success' && steps.tooling.outcome != 'failure' && steps.validation.outcome == 'success' && 'success' || 'failure' }}
+          KGG_RESULT_STATUS: ${{ steps.source.outcome == 'success' && (inputs.validation_profile != 'tablet-splitter-scale-drag' || steps.tooling.outcome == 'success') && steps.validation.outcome == 'success' && 'success' || 'failure' }}
           SOURCE_OUTCOME: ${{ steps.source.outcome }}
           TOOLING_OUTCOME: ${{ steps.tooling.outcome }}
           TOOLING_ERROR_CLASS: ci_tooling
