@@ -54,6 +54,10 @@ class ReadOnlyValidationWorkflowTests(unittest.TestCase):
         self.assertIn("kgg_gpt_result.py --write", self.workflow)
         self.assertIn("actions/upload-artifact@v4", self.workflow)
 
+    def test_ui_profile_requires_successful_tooling_but_contract_profile_allows_skip(self) -> None:
+        self.assertIn('if [[ "$PROFILE" == "tablet-splitter-scale-drag" && "${{ steps.tooling.outcome }}" != "success" ]]; then', self.workflow)
+        self.assertIn("inputs.validation_profile != 'tablet-splitter-scale-drag' || steps.tooling.outcome == 'success'", self.workflow)
+
     def test_workflow_preserves_failure_artifact_then_fails_closed(self) -> None:
         for required in (
             "id: result",
