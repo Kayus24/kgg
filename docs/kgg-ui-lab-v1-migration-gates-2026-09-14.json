@@ -1,0 +1,105 @@
+{
+  "schema": "kgg-ui-lab/migration-gates/v1",
+  "scenario_id": "tablet-splitter-scale-drag-synth",
+  "fresh_main_sha": "444fa925dfa989cfe360442f506da9acd9fc55a4",
+  "gates": {
+    "PARITY_PASS": {
+      "status": "PASS",
+      "checks": {
+        "required_fixtures": true,
+        "required_tools": true,
+        "skills": true
+      },
+      "evidence_refs": [
+        {
+          "id": "candidate-parity-001",
+          "kind": "parity",
+          "path": "release-pipeline/kgg_plugin_candidate_parity.py",
+          "sha256": "d07fecf269ea01fa0a7026aab6e2b3949f0d3dff5248b4b4189358d040e84960"
+        }
+      ]
+    },
+    "SAFETY_PASS": {
+      "status": "PASS",
+      "checks": {
+        "no_gate_regression": true,
+        "no_writes": true,
+        "no_leaks": true,
+        "fresh_main": true
+      },
+      "evidence_refs": [
+        {
+          "id": "candidate-metrics-001",
+          "kind": "metrics",
+          "path": "docs/kgg-ui-lab-v1-candidate-metrics-2026-09-14.json",
+          "sha256": "2b2d87c0930301c96e2525f44fb8d628ca519fd10ff7aa5eca29feed9cad92ce"
+        },
+        {
+          "id": "production-handoff-001",
+          "kind": "handoff",
+          "path": "docs/kgg-ui-lab-v1-production-metrics-bruder-handoff-2026-09-14.json",
+          "sha256": "6b780093c953243048b01bbbfe08cedde636281f7f5aa9926b62357f5b7697c9"
+        }
+      ]
+    },
+    "EFFICIENCY_PASS": {
+      "status": "PENDING",
+      "checks": {
+        "candidate_quality": true,
+        "candidate_dispatches": true,
+        "candidate_runtime": false
+      },
+      "evidence_refs": [
+        {
+          "id": "candidate-surface-001",
+          "kind": "surface-run",
+          "path": "docs/kgg-ui-lab-v1-candidate-surface-run-2026-09-14.md",
+          "sha256": "f8b2e1d951b2b221bd3f636770b27c997458f28190c01c487fcd252170a6f32a"
+        }
+      ]
+    },
+    "CROSS_SURFACE_PASS": {
+      "status": "PENDING",
+      "checks": {
+        "chatgpt": false,
+        "codex": false
+      },
+      "evidence_refs": [
+        {
+          "id": "production-surface-001",
+          "kind": "surface-run",
+          "path": "docs/kgg-ui-lab-v1-production-control-run-2026-09-14.md",
+          "sha256": "380638326a54eb5d7c8d06519302c26d24f270cd83af9602ca9d99adfc61ae88"
+        },
+        {
+          "id": "candidate-surface-002",
+          "kind": "surface-run",
+          "path": "docs/kgg-ui-lab-v1-candidate-surface-run-2026-09-14.md",
+          "sha256": "f8b2e1d951b2b221bd3f636770b27c997458f28190c01c487fcd252170a6f32a"
+        }
+      ]
+    },
+    "STABILITY_PASS": {
+      "status": "PASS",
+      "checks": {
+        "fault_injection": true,
+        "round1": true,
+        "round2": true
+      },
+      "evidence_refs": [
+        {
+          "id": "fault-injection-001",
+          "kind": "fault-matrix",
+          "path": "release-pipeline/kgg_ui_lab_fault_injection.py",
+          "sha256": "b6b65a888807375a159a442fb5463c5636eb6ab3933e99de66fe403e147d7c97"
+        },
+        {
+          "id": "critical-gate-001",
+          "kind": "critical-gate",
+          "path": "release-pipeline/kgg_test_battery.py",
+          "sha256": "4edb060acb989bd93a4941085b627f56d168801495b3e30b5e6e8a9b3eb27913"
+        }
+      ]
+    }
+  }
+}
