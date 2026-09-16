@@ -1,0 +1,19 @@
+{
+  "name": "kgg-plugin",
+  "version": "0.1.0+codex.20260914202951",
+  "description": "KGG shared agent workflow and UI-Lab candidate",
+  "author": {
+    "name": "Local developer"
+  },
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "KGG Plugin Candidate",
+    "shortDescription": "Run KGG workflows with shared safety gates.",
+    "longDescription": "A candidate Skills layer for the KGG Custom GPT, Codex, and UI Lab comparison surface.",
+    "developerName": "KGG local workspace",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": "Route this small KGG ticket through the shared test loop and report evidence before suggesting a change."
+  }
+}

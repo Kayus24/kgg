@@ -1,0 +1,36 @@
+{
+  "schema": "kgg-ui-lab/production-control-contract/v1",
+  "scenario_id": "tablet-splitter-scale-drag-synth",
+  "profiles": {
+    "baseline_no_dispatch": {
+      "required_actions": [
+        "getKggCustomGptResourceManifest",
+        "getKggProjectContext",
+        "getKggCustomGptPlaybook",
+        "getKggMainCommit"
+      ],
+      "forbidden_actions": [
+        "submitKggReadOnlyValidation",
+        "submitKggPreviewAuto",
+        "submitKggMainGate"
+      ],
+      "external_preconditions": ["editor_status_verified"]
+    },
+    "read_only_validation_runner": {
+      "required_actions": [
+        "getKggCustomGptResourceManifest",
+        "getKggProjectContext",
+        "getKggCustomGptPlaybook",
+        "getKggMainCommit",
+        "submitKggReadOnlyValidation",
+        "listKggReadOnlyValidationRuns"
+      ],
+      "forbidden_actions": [
+        "submitKggPreviewAuto",
+        "submitKggMainGate",
+        "submitKggAdminEditorSyncSnapshotPr"
+      ],
+      "external_preconditions": ["editor_status_verified"]
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "schema": "kgg-ui-lab/bruder-fallback/v1",
+  "transport_schema": "kgg-brain-relay-worker/handoff-v2",
+  "task_id": "production-metrics-20260914",
+  "session_id": "surface-pilot-20260914",
+  "request_id": "production-readonly-20260914",
+  "failure_class": "payload_schema",
+  "problem_summary": "Production-Control read-only pilot returned a bounded failure because runtime and regression metrics were not verifiable. Do not retry externally; keep comparison incomplete.",
+  "observed_evidence": [
+    {
+      "kind": "result",
+      "ref": "docs/kgg-ui-lab-v1-production-control-run-2026-09-14.md",
+      "sha256": "ef7a49cfca7d5dd742d9840ca78544e074a8a2c2bd67f9afafe1612134517a0f"
+    },
+    {
+      "kind": "contract",
+      "ref": "release-pipeline/kgg_gpt_ab_compare.py",
+      "sha256": "86473bc70cde726c457306cf9e5bbd49bffa47d64229ca6cd270bd1b77b23be2"
+    }
+  ],
+  "requested_response": "small_fix_plan_or_tactical_goal_patch",
+  "constraints": [
+    "Do not change objective, scope, safety gates, hashes, permissions, or release state.",
+    "Do not send secrets, patient data, raw browser output, or raw QR payload.",
+    "Return a bounded plan with evidence and explicit blockers."
+  ],
+  "delivery": "local_queue_only",
+  "status": "PENDING_USER_CONFIRMATION"
+}

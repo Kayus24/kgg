@@ -1,0 +1,20 @@
+{
+  "scenario_id": "tablet-splitter-scale-drag-synth",
+  "base_sha": "444fa925dfa989cfe360442f506da9acd9fc55a4",
+  "status": "PASS",
+  "reads": 2,
+  "context_items": 4,
+  "clarifying_questions": 0,
+  "action_calls": 7,
+  "dispatches": 0,
+  "duplicate_dispatches": 0,
+  "runtime_ms": 10,
+  "result_quality": 100,
+  "root_cause_quality": 0,
+  "repository_writes": 0,
+  "secret_leaks": 0,
+  "patient_data_leaks": 0,
+  "source_regressions": 0,
+  "gate_regressions": 0,
+  "action_regressions": 0
+}

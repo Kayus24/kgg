@@ -1,0 +1,37 @@
+# KGG Plugin Candidate source map
+
+This candidate deliberately keeps the existing Custom GPT as Production
+Control. Skills are the reusable coordination layer; the UI Lab remains the
+deterministic runtime and trusted boundary.
+
+| Candidate surface | Canonical repository source | Snapshot SHA-256 | Responsibility |
+| --- | --- | --- | --- |
+| `kgg-supervisor` | `docs/kgg-ui-lab-v1-goal-prompt.md`, `docs/kgg-custom-gpt-goal-prompt.md` | `acb020319cf38870f3cd54bd5ab3018a3fbd0351f0361fad677d4bd0eb628f82`, `1b497af0c7ba712dc4b0a38aa21c711dcf5aa9ddcb8b7035709d075faffea67e` | scope, phase order, source-of-truth discipline, local Production-Control preflight before external runs |
+| `kgg-operations` | `docs/kgg-custom-gpt-knowledge-operations.md`, `docs/kgg-ui-lab-v1-contracts.md` | `c96e378fac04ed240e6c30ff88df6bcaf6866c84d9b392890da752e5d469c912`, `dc4dda8e8477c3bd4d857565d3baa293372c35d4d2b9436207136eec99058452` | small-ticket workflow and runtime handoff |
+| `kgg-testing` | `docs/kgg-custom-gpt-knowledge-testing.md`, `release-pipeline/kgg_test_battery.py` | `526435598da7fdf5a2081588cf18103c839389ea81fc8109ab8e7142a6348688`, `4edb060acb989bd93a4941085b627f56d168801495b3e30b5e6e8a9b3eb27913` | red/green/replay and regression loops |
+| `kgg-safety` | `docs/kgg-custom-gpt-knowledge-safety.md`, `release-pipeline/kgg_ui_lab_contract.py` | `886d16e8b5776ad41979fb2d075c28e9b4eb24341026b4b70b64b40d669c1af6`, `4ea5e4a411b7b6efceb256023d3d2cc56ceb9fbf3003869600e48a2ad8076cd7` | privacy, authorization, provenance gates |
+| `kgg-escalation` | `release-pipeline/kgg_ui_lab_runtime.py`, `release-pipeline/kgg_brain_relay_worker.py` | `b3c845b02341b0773a4a922c98feb6f3085993cf7c2e76f58c4da221fa54154f`, `33aa926607e46fa0525dff72637c6d1976562c6227ef6134ce6077b18b57b4bf` | bounded Bruder fallback |
+| UI-Lab adapter | `release-pipeline/kgg_ui_lab_browser.py`, `release-pipeline/kgg_ui_lab_mcp_adapter.py` | `6d5657202b5c871c3f9ebe04c2dac64d81ea55d635da17bf53d7a66b50e6ba21`, `7c06f98b63b09dd23d1d88a5a5a3126941485436336a218a7829cc27fd0b253d` | semantic browser and fixed MCP tool catalog |
+| Quick-Flow certificates | `release-pipeline/kgg_ui_lab_quick_flows.py` | `5396cb1d29425c9d8d171bcb1068f43ab4f922b32692f17cd82f2aff541e5d3d` | exactly three initial flows |
+| Phase 2 parity fixtures | `release-pipeline/kgg_plugin_candidate_parity.py` | `d07fecf269ea01fa0a7026aab6e2b3949f0d3dff5248b4b4189358d040e84960` | read-only `current_state`, `ticket_plan`, `safe_canary` |
+| Candidate installation gate | `release-pipeline/kgg_plugin_candidate_gate.py` | `8c641dbdfc054e9c715ea09dc0c599102be9cf5656d1527b02da75a2c98e1b3d` | accepts a Codex build cachebuster while enforcing the semantic base version |
+| Migration-gate evaluator | `release-pipeline/kgg_ui_lab_migration_gate.py` | `5c9c3381a30ebcf3e8c04073ffa755bf2eafebecaf5045d2e7804cb033aeec59` | fail-closed five-gate eligibility result; `--report` evaluates the supplied JSON and verifies optional evidence-file hashes |
+| Fault-injection matrix | `release-pipeline/kgg_ui_lab_fault_injection.py` | `b6b65a888807375a159a442fb5463c5636eb6ab3933e99de66fe403e147d7c97` | eleven named bounded failure scenarios |
+| Surface metric pilot | `release-pipeline/kgg_ui_lab_surface_metrics.py` | `7dbb9a2c0e939a49eb4ea57539cd37324d47c523ba6ebeef5510d178fa237e32` | complete local Candidate read-only metric payload; root-cause quality remains 0 until diagnostic evidence is supplied |
+| Surface comparison harness | `release-pipeline/kgg_gpt_ab_compare.py` | `86473bc70cde726c457306cf9e5bbd49bffa47d64229ca6cd270bd1b77b23be2` | fail-closed A/B/C metrics, exact-field rejection, hexadecimal Fresh-Main SHA equality and replacement guard including root-cause quality |
+| Production-Control preflight | `release-pipeline/kgg_production_control_preflight.py`, `docs/kgg-ui-lab-v1-production-control-readonly-contract.json` | `b284cee2e07229045618bef21c55116ffc1babef738b7c50c30a583f68e3bb6d`, `79b2d1e568719e2535e50ecf575aae8908fdc7ddafdf3f87342e7f93cad12c0e` | local fail-closed capability and structured dated external-editor-evidence check before any external model run; explicit no-dispatch/runner profiles |
+
+| Installed MCP transport | `kgg-plugin/.codex-plugin/plugin.json`, `kgg-plugin/.mcp.json`, `kgg-plugin/mcp/server.py`, `kgg-plugin/scripts/eval/validate_candidate.py` | `30f19bd63efc7e0258bfeca493ec3f5409c8b5bef109f1012462b70ed09bfb18`, `6b56eca8caa1c12966783e72fd2354819ef6dc8e0ea662026e472a889954aa73`, `cd82199d3c49920e45034e344e48f32558e23d7825c9934e88f666c4a5b4c02b`, `190f8eb08f24f07964193d3cf212e6b1ea5a4b3502bcb94c9ab500014c9607a8` | self-contained stdio MCP server and package-only evaluator with exactly nine bounded, synthetic, in-memory tools and the certified four-step #180 flow |
+
+The future MCP adapter must expose only contract-shaped operations such as
+session creation, runner selection, Quick Flow execution, evidence validation,
+and local handoff enqueueing. The installed candidate additionally contains a
+self-contained stdio MCP transport exposing the same nine operations. It keeps
+state in memory and must not expose arbitrary shell, editor, live, merge, or
+external-message writes. Host capability differences (Codex hooks, ChatGPT
+apps/actions, and browser availability) are measured in the comparison phase;
+they are not inferred from this static candidate.
+
+The hashes are a candidate snapshot, not proof that Fresh Main or the external
+Custom GPT editor currently carries the same bytes. A comparison run must
+recompute them and fail closed on drift.
