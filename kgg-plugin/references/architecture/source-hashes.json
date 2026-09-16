@@ -17,7 +17,7 @@
     },
     {
       "path": "docs/kgg-ui-lab-v1-contracts.md",
-      "sha256": "dc4dda8e8477c3bd4d857565d3baa293372c35d4d2b9436207136eec99058452"
+      "sha256": "895fc790a61b719cc2510bf07c73a703659ec053306844f2eb57509ab8cba016"
     },
     {
       "path": "docs/kgg-custom-gpt-knowledge-testing.md",
@@ -81,7 +81,7 @@
     },
     {
       "path": "release-pipeline/kgg_ui_lab_fault_injection.py",
-      "sha256": "b6b65a888807375a159a442fb5463c5636eb6ab3933e99de66fe403e147d7c97"
+      "sha256": "bbe25511f71a79e09f5bad018ee4f56648e757400e51d529a1eb25a4a98d3911"
     },
     {
       "path": "release-pipeline/kgg_ui_lab_surface_metrics.py",

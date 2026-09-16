@@ -91,7 +91,7 @@
           "id": "fault-injection-001",
           "kind": "fault-matrix",
           "path": "release-pipeline/kgg_ui_lab_fault_injection.py",
-          "sha256": "b6b65a888807375a159a442fb5463c5636eb6ab3933e99de66fe403e147d7c97"
+          "sha256": "bbe25511f71a79e09f5bad018ee4f56648e757400e51d529a1eb25a4a98d3911"
         },
         {
           "id": "critical-gate-001",
