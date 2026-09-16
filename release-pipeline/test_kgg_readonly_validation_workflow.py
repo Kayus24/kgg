@@ -4,14 +4,19 @@
 from __future__ import annotations
 
 from pathlib import Path
-import re
 import subprocess
 import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
+PIPELINE = ROOT / "release-pipeline"
 WORKFLOW = ROOT / ".github" / "workflows" / "kgg-gpt-readonly-validation.yml"
 API = ROOT / "docs" / "kgg-custom-gpt-action-api-openapi.yaml"
+
+if str(PIPELINE) not in sys.path:
+    sys.path.insert(0, str(PIPELINE))
+
+import kgg_gpt_run_reconcile as reconcile_helper
 
 
 class ReadOnlyValidationWorkflowTests(unittest.TestCase):
@@ -49,6 +54,21 @@ class ReadOnlyValidationWorkflowTests(unittest.TestCase):
         self.assertIn("kgg_gpt_result.py --write", self.workflow)
         self.assertIn("actions/upload-artifact@v4", self.workflow)
 
+    def test_workflow_preserves_failure_artifact_then_fails_closed(self) -> None:
+        for required in (
+            "id: result",
+            "id: upload",
+            "name: Enforce final validation outcome",
+            "steps.source.outcome",
+            "steps.tooling.outcome",
+            "steps.validation.outcome",
+            "steps.result.outcome",
+            "steps.upload.outcome",
+            "inputs.validation_profile == 'tablet-splitter-scale-drag'",
+        ):
+            self.assertIn(required, self.workflow)
+        self.assertLess(self.workflow.index("name: Upload safe read-only result artifact"), self.workflow.index("name: Enforce final validation outcome"))
+
     def test_action_schema_pins_same_workflow_and_allowlist(self) -> None:
         self.assertEqual(1, self.api.count("operationId: submitKggReadOnlyValidation"))
         self.assertEqual(1, self.api.count("operationId: listKggReadOnlyValidationRuns"))
@@ -56,9 +76,42 @@ class ReadOnlyValidationWorkflowTests(unittest.TestCase):
         self.assertIn("enum: [tablet-splitter-scale-drag, gpt-contracts]", self.api)
         self.assertIn("x-openai-isConsequential: false", self.api)
 
+    def test_reconcile_matches_only_exact_request_id_segments(self) -> None:
+        sha = "a" * 40
+        exact = {"id": 10, "display_title": "KGG GPT Read-only Validation | audit-035", "head_sha": sha}
+        prefix = {"id": 11, "display_title": "KGG GPT Read-only Validation | prefix-audit-035", "head_sha": sha}
+        suffix = {"id": 12, "display_title": "KGG GPT Read-only Validation | audit-035-extra", "head_sha": sha}
+        adjacent = {"id": 13, "display_title": "KGG GPT Read-only Validation | audit-0352", "head_sha": sha}
+        self.assertTrue(reconcile_helper.run_matches(exact, "audit-035", sha))
+        self.assertFalse(reconcile_helper.run_matches(prefix, "audit-035", sha))
+        self.assertFalse(reconcile_helper.run_matches(suffix, "audit-035", sha))
+        self.assertFalse(reconcile_helper.run_matches(adjacent, "audit-035", sha))
+
+    def test_reconcile_requires_exact_head_sha_when_base_sha_is_requested(self) -> None:
+        sha = "a" * 40
+        wrong = {"id": 20, "display_title": "KGG GPT Read-only Validation | audit-035", "head_sha": "b" * 40}
+        missing = {"id": 21, "display_title": "KGG GPT Read-only Validation | audit-035"}
+        exact = {"id": 22, "display_title": "KGG GPT Read-only Validation | audit-035", "head_sha": sha}
+        self.assertFalse(reconcile_helper.run_matches(wrong, "audit-035", sha))
+        self.assertFalse(reconcile_helper.run_matches(missing, "audit-035", sha))
+        self.assertTrue(reconcile_helper.run_matches(exact, "audit-035", sha))
+
+    def test_reconcile_stops_on_multiple_exact_matches(self) -> None:
+        sha = "a" * 40
+        payload = {
+            "workflow_runs": [
+                {"id": 30, "display_title": "KGG GPT Read-only Validation | audit-035", "head_sha": sha, "status": "completed", "conclusion": "success"},
+                {"id": 31, "display_title": "KGG GPT Read-only Validation | audit-035", "head_sha": sha, "status": "completed", "conclusion": "success"},
+            ]
+        }
+        result = reconcile_helper.reconcile("success", payload, "audit-035", sha)
+        self.assertEqual("AMBIGUOUS_MATCH", result["status"])
+        self.assertEqual(2, result["match_count"])
+        self.assertNotIn("run_id", result)
+
     def test_supporting_helpers_pass_their_self_tests(self) -> None:
         for name in ("kgg_gpt_result.py", "kgg_gpt_run_reconcile.py"):
-            proc = subprocess.run([sys.executable, str(ROOT / "release-pipeline" / name), "--self-test"], cwd=ROOT, text=True, capture_output=True)
+            proc = subprocess.run([sys.executable, str(PIPELINE / name), "--self-test"], cwd=ROOT, text=True, capture_output=True)
             self.assertEqual(0, proc.returncode, proc.stderr)
 
 
