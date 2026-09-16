@@ -1,7 +1,7 @@
 # KGG Goal-Vertrag: Control Loop, Canary und Plugin-Candidate
 
 Version: 1.1
-Status: kanonischer Arbeitsvertrag
+Status: Candidate; kanonisch ab GOAL_MERGED + FRESH_MAIN_CONTAINS_GOAL
 Gültigkeit: KGG-Repository Kayus24/kgg
 
 ## 1. Zweck und Geltungsbereich
@@ -83,9 +83,10 @@ Ein Canary meldet mindestens Run-ID, head_sha, Jobstatus, Source, Tooling, Valid
 
 - CANARY_INFRASTRUCTURE=PASS|FAIL für die Infrastruktur und Fehlerpropagation;
 - ISSUE_180_REPRODUCED=true|false|UNKNOWN für die fachliche Reproduktion;
-- ISSUE_RESULT=PASS|FAIL|UNDETERMINED für das Produkt-/Issue-Ergebnis.
+- ISSUE_RESULT=PASS|FAIL|UNDETERMINED für das Produkt-/Issue-Ergebnis;
+- CANARY_FAILURE_PROPAGATION=PASS|FAIL für die korrekte Erkennung und Weitergabe von Fehlern.
 
-Ein reproduzierter Produkttestfehler bei funktionierender Infrastruktur ist CANARY_INFRASTRUCTURE=PASS, ISSUE_180_REPRODUCED=true und ISSUE_RESULT=FAIL. Tooling-/CI-Fehler können CANARY_INFRASTRUCTURE=PASS für die korrekt getestete Fehlerpropagation sein, aber ISSUE_RESULT=UNDETERMINED. Jede Inkonsistenz ist CANARY=FAIL und stoppt weitere Dispatches.
+Ein reproduzierter Produkttestfehler bei funktionierender Infrastruktur ist CANARY_INFRASTRUCTURE=PASS, ISSUE_180_REPRODUCED=true und ISSUE_RESULT=FAIL. Tooling-/CI-Fehler bedeuten CANARY_FAILURE_PROPAGATION=PASS, CANARY_INFRASTRUCTURE=FAIL oder DEGRADED und ISSUE_RESULT=UNDETERMINED. Jede sonstige Inkonsistenz ist CANARY=FAIL und stoppt weitere Dispatches.
 
 ## 8. Goal-Kanonisierung
 
