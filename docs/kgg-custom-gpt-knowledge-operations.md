@@ -2,7 +2,7 @@
 
 Generated production knowledge for modular payloads, Actions, Preview/Test-App and Admin-Beta operations.
 
-Source digest: `a17f055f51680e26`
+Source digest: `4276f8e8f5cb0f65`
 
 ## Usage Rules
 
@@ -250,8 +250,10 @@ The GPT must patch the modular source through the gate; it must not request dire
 - `submitKggPreviewAuto`: the only production GPT Preview write. One dispatch runs `validate_only` and, only after success, the identical payload as `publish_preview`. It also publishes status JSON and a final GitHub notification. It cannot create a PR or change `main`.
 - `submitKggReadOnlyValidation`: the Codex-replacement runner for one bounded
   current-Main validation profile. It requires an exact `source_sha`, never
-  writes repository/status/ticket/Preview files, and publishes only a safe
-  result artifact. Reconcile the run by exact `request_id` and source SHA.
+  writes repository/status/ticket/Preview files, and publishes a safe task
+  result plus a separate `measurement-envelope.json` for the UI profile.
+  Reconcile the run by exact `request_id` and source SHA; a missing or
+  incomplete measurement envelope is a bounded failure, never a PASS.
 - `validate_only`: internal first stage of the automatic Preview workflow. It writes nothing.
 - `publish_preview`: internal second stage. It creates a module under `kgg-update/src/patches/`, rebuilds generated HTML, runs tests, builds Preview APK and publishes HTML/meta to `gpt-preview`.
 - `create_pr`: only after Max accepts the matching Test-App/Test-APK/Preview-APK. Creates a PR, never merges.
@@ -337,6 +339,10 @@ The GPT may say a Preview is available only after it has verified:
   (`tablet-splitter-scale-drag` or `gpt-contracts`) pinned to current Main;
   a queued/in-progress run is pending and a missing match is
   `PENDING_RECONCILIATION`. Neither state permits a second dispatch.
+- `getKggPreviewGateArtifacts` is the explicitly allowlisted, read-only
+  artifact listing for a reconciled runner run. In this profile it may only
+  retrieve the bounded `result.json` and `measurement-envelope.json`; it is
+  not permission to invoke Preview or release behavior.
 - `submitKggPreviewAuto` exposes the single pre-authorized `.github/workflows/kgg-gpt-preview-auto.yml` dispatch. Its inputs do not contain `mode`.
 - `submitKggMainGate` exposes only `create_pr` and `publish_admin_beta` and requires `approval_phrase: "Gut für Main"`.
 - `listKggPreviewAutoRuns` must be available so the GPT can find the one orchestrator run for a `request_id`.
