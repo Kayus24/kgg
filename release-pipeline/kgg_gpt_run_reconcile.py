@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 from typing import Any
 
 
@@ -20,11 +19,14 @@ def run_matches(run: dict[str, Any], request_id: str, base_sha: str = "") -> boo
     labels = [str(run.get(key) or "") for key in ("display_title", "name", "run_name")]
     direct = str(run.get("request_id") or "") == request_id
     labelled = any(request_id == part.strip() for value in labels for part in value.split("|"))
-    token = any(re.search(rf"(?<![A-Za-z0-9]){re.escape(request_id)}(?![A-Za-z0-9])", value) for value in labels)
-    if not (direct or labelled or token):
+    if not (direct or labelled):
         return False
+    if not _run_id(run):
+        return False
+    if not base_sha:
+        return True
     head_sha = str(run.get("head_sha") or "")
-    return bool(_run_id(run)) and (not base_sha or not head_sha or head_sha == base_sha)
+    return bool(head_sha) and head_sha == base_sha
 
 
 def matching_runs(payload: dict[str, Any], request_id: str, base_sha: str = "") -> list[dict[str, Any]]:
@@ -39,15 +41,32 @@ def reconcile(dispatch_status: str, payload: dict[str, Any], request_id: str, ba
     transport = dispatch_status.casefold() in {"timeout", "http_500", "http_502", "http_503", "network_error"}
     if not matches:
         return {"status": "PENDING_RECONCILIATION" if transport else "NOT_FOUND", "request_id": request_id, "base_sha": base_sha, "reconciled_after_transport_error": False}
+    if len(matches) > 1:
+        return {"status": "AMBIGUOUS_MATCH", "request_id": request_id, "base_sha": base_sha, "match_count": len(matches), "reconciled_after_transport_error": transport}
     selected = matches[0]
     return {"status": "MATCHED", "request_id": request_id, "base_sha": base_sha, "run_id": _run_id(selected), "run_status": selected.get("status"), "conclusion": selected.get("conclusion"), "reconciled_after_transport_error": transport}
 
 
 def self_test() -> None:
-    payload = {"workflow_runs": [{"id": 10, "display_title": "KGG GPT Read-only Validation | audit-035", "head_sha": "a" * 40, "status": "completed", "conclusion": "success"}]}
-    result = reconcile("http_500", payload, "audit-035", "a" * 40)
+    sha = "a" * 40
+    payload = {"workflow_runs": [{"id": 10, "display_title": "KGG GPT Read-only Validation | audit-035", "head_sha": sha, "status": "completed", "conclusion": "success"}]}
+    result = reconcile("http_500", payload, "audit-035", sha)
     assert result["status"] == "MATCHED" and result["run_id"] == 10 and result["reconciled_after_transport_error"] is True
-    assert reconcile("timeout", {"workflow_runs": []}, "audit-035", "a" * 40)["status"] == "PENDING_RECONCILIATION"
+    assert reconcile("timeout", {"workflow_runs": []}, "audit-035", sha)["status"] == "PENDING_RECONCILIATION"
+    assert not run_matches({"id": 11, "display_title": "KGG GPT Read-only Validation | audit-035-extra", "head_sha": sha}, "audit-035", sha)
+    assert not run_matches({"id": 12, "display_title": "KGG GPT Read-only Validation | prefix-audit-035", "head_sha": sha}, "audit-035", sha)
+    assert not run_matches({"id": 13, "display_title": "KGG GPT Read-only Validation | audit-035", "head_sha": "b" * 40}, "audit-035", sha)
+    assert not run_matches({"id": 14, "display_title": "KGG GPT Read-only Validation | audit-035"}, "audit-035", sha)
+    ambiguous = reconcile(
+        "success",
+        {"workflow_runs": [
+            {"id": 20, "display_title": "KGG GPT Read-only Validation | audit-035", "head_sha": sha},
+            {"id": 21, "display_title": "KGG GPT Read-only Validation | audit-035", "head_sha": sha},
+        ]},
+        "audit-035",
+        sha,
+    )
+    assert ambiguous["status"] == "AMBIGUOUS_MATCH" and ambiguous["match_count"] == 2 and "run_id" not in ambiguous
 
 
 def main() -> int:
