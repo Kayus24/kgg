@@ -6,7 +6,7 @@ deterministic runtime and trusted boundary.
 
 | Candidate surface | Canonical repository source | Snapshot SHA-256 | Responsibility |
 | --- | --- | --- | --- |
-| `kgg-supervisor` | `docs/kgg-ui-lab-v1-goal-prompt.md`, `docs/kgg-custom-gpt-goal-prompt.md` | `acb020319cf38870f3cd54bd5ab3018a3fbd0351f0361fad677d4bd0eb628f82`, `1b497af0c7ba712dc4b0a38aa21c711dcf5aa9ddcb8b7035709d075faffea67e` | scope, phase order, source-of-truth discipline, local Production-Control preflight before external runs |
+| `kgg-supervisor` | `docs/kgg-ui-lab-v1-goal-prompt.md`, `docs/kgg-custom-gpt-goal-prompt.md` | `acb020319cf38870f3cd54bd5ab3018a3fbd0351f0361fad677d4bd0eb628f82`, `b1e0e90fd8a4c404d484b92327b33cd359b46d2172aa1a58597ddf59d129cfcf` | scope, phase order, source-of-truth discipline, metric-provenance gate, local Production-Control preflight before external runs |
 | `kgg-operations` | `docs/kgg-custom-gpt-knowledge-operations.md`, `docs/kgg-ui-lab-v1-contracts.md` | `c96e378fac04ed240e6c30ff88df6bcaf6866c84d9b392890da752e5d469c912`, `895fc790a61b719cc2510bf07c73a703659ec053306844f2eb57509ab8cba016` | small-ticket workflow and runtime handoff |
 | `kgg-testing` | `docs/kgg-custom-gpt-knowledge-testing.md`, `release-pipeline/kgg_test_battery.py` | `526435598da7fdf5a2081588cf18103c839389ea81fc8109ab8e7142a6348688`, `4edb060acb989bd93a4941085b627f56d168801495b3e30b5e6e8a9b3eb27913` | red/green/replay and regression loops |
 | `kgg-safety` | `docs/kgg-custom-gpt-knowledge-safety.md`, `release-pipeline/kgg_ui_lab_contract.py` | `886d16e8b5776ad41979fb2d075c28e9b4eb24341026b4b70b64b40d669c1af6`, `4ea5e4a411b7b6efceb256023d3d2cc56ceb9fbf3003869600e48a2ad8076cd7` | privacy, authorization, provenance gates |
