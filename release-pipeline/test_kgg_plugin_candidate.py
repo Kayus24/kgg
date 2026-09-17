@@ -95,6 +95,13 @@ class KggPluginCandidateTests(unittest.TestCase):
         self.assertFalse(result["comparison_ready"])
         self.assertEqual(result["fresh_main"], "not_checked")
 
+    def test_installed_mcp_server_does_not_emit_untrusted_numeric_metrics(self) -> None:
+        source = (PLUGIN / "mcp" / "server.py").read_text(encoding="utf-8")
+        self.assertIn('"status": "FAIL", "error_class": "NUMERIC_METRICS_NOT_VERIFIABLE"', source)
+        self.assertNotIn('"context_items": 4', source)
+        self.assertNotIn('"result_quality": 100', source)
+        self.assertNotIn('"root_cause_quality": 0', source)
+
 
 if __name__ == "__main__":
     unittest.main()
