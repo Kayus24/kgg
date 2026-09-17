@@ -336,6 +336,76 @@ def comparator_input(envelope: Mapping[str, Any]) -> dict[str, Any]:
     return dict(normalized["payload"])
 
 
+def build_complete_envelope(
+    *,
+    request_id: str,
+    surface: str,
+    scenario_id: str,
+    base_sha: str,
+    captured_at: str,
+    payload: Mapping[str, Any],
+    evidence_refs: list[Mapping[str, str]],
+    field_evidence_ids: Mapping[str, list[str]] | None = None,
+) -> dict[str, Any]:
+    """Assemble a PASS envelope from already trusted observations.
+
+    This helper only assembles and validates data supplied by a trusted
+    collector and an independent evaluator.  It does not calculate counts or
+    quality scores, and it never accepts provenance definitions from callers.
+    The canonical definitions and counting rules below remain the sole source
+    for every field attestation.
+    """
+
+    _id(request_id, "request_id")
+    if surface not in SURFACES:
+        _fail("surface_invalid")
+    _safe_text(scenario_id, "scenario_id", max_length=96)
+    _sha(base_sha, "base_sha")
+    timestamp = _timestamp(captured_at, "captured_at")
+    normalized_payload = _validate_payload(payload)
+    if normalized_payload["scenario_id"] != scenario_id or normalized_payload["base_sha"] != base_sha:
+        _fail("identity_mismatch")
+
+    refs = _evidence_refs(evidence_refs, require=True)
+    ref_ids = {item["id"] for item in refs}
+    assigned = field_evidence_ids or {field: [refs[0]["id"]] for field in PAYLOAD_FIELDS}
+    if set(assigned) != set(PAYLOAD_FIELDS):
+        _fail("field_provenance_evidence_invalid")
+    provenance: dict[str, dict[str, Any]] = {}
+    for field in PAYLOAD_FIELDS:
+        ids = assigned[field]
+        if not isinstance(ids, list) or not ids or any(identifier not in ref_ids for identifier in ids):
+            _fail("field_provenance_evidence_invalid", field)
+        source, observer = FIELD_SOURCES[field]
+        provenance[field] = {
+            "source": source,
+            "definition": FIELD_DEFINITIONS[field],
+            "counting_rule": FIELD_RULES[field],
+            "observed_by": observer,
+            "captured_at": timestamp,
+            "evidence_ids": list(ids),
+        }
+
+    envelope: dict[str, Any] = {
+        "schema": MEASUREMENT_SCHEMA,
+        "envelope_id": f"{request_id[:51]}-measurement",
+        "request_id": request_id,
+        "surface": surface,
+        "scenario_id": scenario_id,
+        "base_sha": base_sha,
+        "captured_at": timestamp,
+        "status": "PASS",
+        "error_class": "",
+        "payload": dict(normalized_payload),
+        "field_provenance": provenance,
+        "evidence_refs": refs,
+        "missing_fields": [],
+        "provenance_sha256": "",
+    }
+    envelope["provenance_sha256"] = _hash(envelope)
+    return validate_envelope(envelope)
+
+
 def _now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 

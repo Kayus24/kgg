@@ -89,7 +89,7 @@
     },
     {
       "path": "release-pipeline/kgg_ui_lab_surface_metrics.py",
-      "sha256": "7dbb9a2c0e939a49eb4ea57539cd37324d47c523ba6ebeef5510d178fa237e32"
+      "sha256": "4a1e4952aab641f9952b5ba0608864b943c394cbe6e02fbb5e7cc1eb414a99e8"
     },
     {
       "path": "release-pipeline/kgg_production_control_preflight.py",
@@ -101,7 +101,7 @@
     },
     {
       "path": "docs/kgg-custom-gpt-action-api-openapi.yaml",
-      "sha256": "73f4d0436c4c68c0ef8a2ccf416b3006c7eb357e8fa676ddeaf3c71430ca9d3a"
+      "sha256": "69012522f5bcdd7fa9fb89773deb65e911e3aa8759d29ce5c497e42e36af0711"
     },
     {
       "path": "docs/kgg-custom-gpt-action-schema.md",
@@ -109,7 +109,7 @@
     },
     {
       "path": "release-pipeline/kgg_gpt_measurement.py",
-      "sha256": "7325b6f1d1bf9bd86bfeac350234933cbdf5d989d28f27a15ce53bf47a1fe40b"
+      "sha256": "fb4499eb5928489fac8038a7d6a061de24ca91265a58c17f28dfab725c6c1981"
     },
     {
       "path": "kgg-plugin/.codex-plugin/plugin.json",
@@ -121,7 +121,7 @@
     },
     {
       "path": "kgg-plugin/mcp/server.py",
-      "sha256": "cd82199d3c49920e45034e344e48f32558e23d7825c9934e88f666c4a5b4c02b"
+      "sha256": "56ee9371ff06d2754ef2227f19c5e38ba2b48a6eeee9b9249f988a4741889600"
     },
     {
       "path": "kgg-plugin/scripts/eval/validate_candidate.py",

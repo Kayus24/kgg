@@ -323,27 +323,12 @@ class Runtime:
         session["events"].append(event)
         evidence = {"schema": "kgg-ui-lab/evidence/v1", "status": "PASS", "artifacts": [screenshot]}
         self.evidence.setdefault(session["session_id"], []).append(evidence)
-        elapsed_ms = max(1, int((time.perf_counter() - (self.started_perf or time.perf_counter())) * 1000))
-        pilot_metrics = {
-            "scenario_id": "tablet-splitter-scale-drag-synth",
-            "base_sha": session["app"]["main_sha"],
-            "status": "PASS",
-            "reads": self.read_count,
-            "context_items": 4,
-            "clarifying_questions": 0,
-            "action_calls": self.call_count - self.read_count,
-            "dispatches": 0,
-            "duplicate_dispatches": 0,
-            "runtime_ms": elapsed_ms,
-            "result_quality": 100,
-            "root_cause_quality": 0,
-            "repository_writes": 0,
-            "secret_leaks": 0,
-            "patient_data_leaks": 0,
-            "source_regressions": 0,
-            "gate_regressions": 0,
-            "action_regressions": 0,
-        }
+        # This installed, self-contained server has no trusted host transcript
+        # or independent evaluator.  Returning numbers here would turn local
+        # implementation claims into counterfeit comparator telemetry.  The
+        # trusted release-pipeline collector may replace this with a complete
+        # measurement envelope after external reconciliation.
+        pilot_metrics = {"status": "FAIL", "error_class": "NUMERIC_METRICS_NOT_VERIFIABLE"}
         return {"schema": MCP_SCHEMA, "operation": operation, "result": result, "evidence": evidence, "pilot_metrics": pilot_metrics, "session_status": session["status"]}
 
     def sweep(self, session_id: Any, actor: Any, viewports: Any) -> dict[str, Any]:
