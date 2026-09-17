@@ -1,6 +1,6 @@
 {
   "schema": "kgg-plugin/source-hashes/v1",
-  "snapshot": "2026-09-16",
+  "snapshot": "2026-09-17",
   "fresh_main_required": true,
   "sources": [
     {
@@ -9,11 +9,15 @@
     },
     {
       "path": "docs/kgg-custom-gpt-goal-prompt.md",
-      "sha256": "b1e0e90fd8a4c404d484b92327b33cd359b46d2172aa1a58597ddf59d129cfcf"
+      "sha256": "96aa71c5c1a49fefb5df664e995c6f78a286eb09d1beebef5e1eb25bd19f8ae1"
+    },
+    {
+      "path": "docs/kgg-ui-lab-v1-measurement-envelope.md",
+      "sha256": "18e045b78c0b01b92e66c9aa1e277b6d16d3fcfe9754ea936ef87ec81fdbc0ae"
     },
     {
       "path": "docs/kgg-custom-gpt-knowledge-operations.md",
-      "sha256": "c96e378fac04ed240e6c30ff88df6bcaf6866c84d9b392890da752e5d469c912"
+      "sha256": "c33e37c73947f7a16fddfe3af03ddfc71676443e3d2de8f10b781c2c357066c1"
     },
     {
       "path": "docs/kgg-ui-lab-v1-contracts.md",
@@ -25,11 +29,11 @@
     },
     {
       "path": "release-pipeline/kgg_test_battery.py",
-      "sha256": "4edb060acb989bd93a4941085b627f56d168801495b3e30b5e6e8a9b3eb27913"
+      "sha256": "6c6121b47816414ebb0ac5c6daa74b61a51986182a06458f5839c023b104fc5b"
     },
     {
       "path": "release-pipeline/kgg_gpt_ab_compare.py",
-      "sha256": "86473bc70cde726c457306cf9e5bbd49bffa47d64229ca6cd270bd1b77b23be2"
+      "sha256": "9938b7c430e6da67fa9470027534106996f48b8e31a9ec8cc2980a92b84acbf9"
     },
     {
       "path": "docs/kgg-custom-gpt-knowledge-safety.md",
@@ -93,7 +97,19 @@
     },
     {
       "path": "docs/kgg-ui-lab-v1-production-control-readonly-contract.json",
-      "sha256": "79b2d1e568719e2535e50ecf575aae8908fdc7ddafdf3f87342e7f93cad12c0e"
+      "sha256": "cc8ba42694322e8f091583766c26a41ecb64d40ba40f72f80e8cc89b135733ae"
+    },
+    {
+      "path": "docs/kgg-custom-gpt-action-api-openapi.yaml",
+      "sha256": "73f4d0436c4c68c0ef8a2ccf416b3006c7eb357e8fa676ddeaf3c71430ca9d3a"
+    },
+    {
+      "path": "docs/kgg-custom-gpt-action-schema.md",
+      "sha256": "53dd8358ac51bac3c7873f79467cd13ea28ea631a84fcf16a627177116d06954"
+    },
+    {
+      "path": "release-pipeline/kgg_gpt_measurement.py",
+      "sha256": "7325b6f1d1bf9bd86bfeac350234933cbdf5d989d28f27a15ce53bf47a1fe40b"
     },
     {
       "path": "kgg-plugin/.codex-plugin/plugin.json",

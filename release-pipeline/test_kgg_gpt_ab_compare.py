@@ -4,8 +4,11 @@
 from __future__ import annotations
 
 import unittest
+import json
+import tempfile
 
 import kgg_gpt_ab_compare as compare
+import kgg_gpt_measurement as measurement
 
 
 def metrics(base_sha: str, *, quality: int = 90, runtime: int = 900) -> dict[str, object]:
@@ -176,6 +179,34 @@ class KggGptAbCompareTests(unittest.TestCase):
         self.assertIn('"error_class": "NUMERIC_METRICS_NOT_VERIFIABLE"', draft)
         self.assertIn("NOT_SENT / PENDING_USER_CONFIRMATION", draft)
         self.assertNotIn('"runtime_ms": "NOT_MEASURABLE"', draft)
+
+    def test_cli_reader_reduces_valid_measurement_envelope(self) -> None:
+        envelope = measurement._valid_complete_fixture()
+        payload = envelope["payload"]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = compare.Path(temp_dir) / "measurement-envelope.json"
+            path.write_text(json.dumps(envelope), encoding="utf-8")
+            reduced = compare._read(path)
+        self.assertEqual(reduced, payload)
+        self.assertEqual(set(reduced), set(compare.REQUIRED))
+
+    def test_cli_reader_reduces_bounded_failure_measurement_envelope(self) -> None:
+        envelope = measurement.build_failure_envelope(
+            request_id="req-failure",
+            surface="production",
+            scenario_id="tablet-splitter-scale-drag-synth",
+            base_sha="a" * 40,
+            error_class="NUMERIC_METRICS_NOT_VERIFIABLE",
+            missing_fields=["runtime_ms"],
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = compare.Path(temp_dir) / "measurement-envelope.json"
+            path.write_text(json.dumps(envelope), encoding="utf-8")
+            reduced = compare._read(path)
+        self.assertEqual(reduced, {
+            "status": "FAIL",
+            "error_class": "NUMERIC_METRICS_NOT_VERIFIABLE",
+        })
 
 
 if __name__ == "__main__":

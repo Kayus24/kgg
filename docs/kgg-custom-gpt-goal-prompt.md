@@ -92,6 +92,16 @@ dürfen weder stillschweigend weggelassen noch durch die engeren Comparator-
 Felder ersetzt werden. Ohne vollständige Provenance für die Goal-Minima bleibt
 der A/B/C-Pilot unvollständig und das Migration Gate geschlossen.
 
+Die verbindliche Measurement-Hülle ist separat in
+`docs/kgg-ui-lab-v1-measurement-envelope.md` und
+`release-pipeline/kgg_gpt_measurement.py` definiert. `kgg_gpt_result.py`
+bleibt der begrenzte Task-/Workflow-Abschluss; er darf nicht als Metrikquelle
+verwendet werden. Ein vollständiger Production-Lauf muss neben `result.json`
+ein gehashtes `measurement-envelope.json` liefern. Der read-only Runner darf
+für diesen Abruf ausschließlich die im Contract allowlistete
+`getKggPreviewGateArtifacts`-GET-Operation verwenden; Preview-/Main-Operationen
+bleiben ausgeschlossen.
+
 Verbindliche Zuordnung:
 
 | Feldgruppe | Autoritative Quelle | Regel |
