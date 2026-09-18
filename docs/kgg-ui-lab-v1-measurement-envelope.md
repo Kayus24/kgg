@@ -34,7 +34,9 @@ Comparators; sein äußerer und innerer `status` müssen beide `PASS` sein.
 `base_sha` und `scenario_id` müssen in Außenhülle und Payload identisch sein.
 Jede Payload-Property besitzt genau eine Provenance-Angabe mit
 `source`, `definition`, `counting_rule`, `observed_by`, `captured_at` und
-`evidence_ids`. Die Definitionen und Zählregeln sind im Validator kanonisch
+`evidence_ids`. Jede Evidence-Referenz enthält zusätzlich ihren typisierten
+`content`-Snapshot; dessen kanonischer SHA-256 muss exakt mit `sha256`
+übereinstimmen. Die Definitionen und Zählregeln sind im Validator kanonisch
 festgelegt und dürfen nicht vom getesteten Modell überschrieben werden.
 
 Ein `FAIL` enthält keinen Teil-Payload (`payload: null`) und keine teilweise
@@ -73,7 +75,8 @@ durch Comparator-Felder ersetzt.
 
 `provenance_sha256` ist der SHA-256-Hash der kanonisch sortierten Hülle ohne
 das Hash-Feld selbst. Alle Artefakt-Referenzen sind typisiert, nicht sensibel
-und enthalten ihren SHA-256. Vor dem Comparator müssen `request_id`,
+und enthalten ihren inhaltlich verifizierten SHA-256 sowie den unveränderten
+Content-Snapshot. Vor dem Comparator müssen `request_id`,
 `source_sha`, Run-Status, Artefaktname, Artefaktstatus und Hash exakt
 reconciliiert werden. Fehlender, doppelter, abgelaufener oder widersprüchlicher
 Nachweis ist `PILOT_INCOMPLETE`/`NOT_COMPARABLE`.

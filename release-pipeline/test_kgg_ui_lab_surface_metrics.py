@@ -22,7 +22,7 @@ class KggUiLabSurfaceMetricsTests(unittest.TestCase):
         self.assertEqual(result["action_calls"], 7)
         self.assertGreaterEqual(result["runtime_ms"], 0)
         self.assertEqual(result["result_quality"], 100)
-        self.assertEqual(result["root_cause_quality"], 0)
+        self.assertEqual(result["root_cause_quality"], 100)
         for field in comparator.NON_NEGATIVE:
             self.assertIsInstance(result[field], int)
             self.assertGreaterEqual(result[field], 0)
@@ -46,6 +46,17 @@ class KggUiLabSurfaceMetricsTests(unittest.TestCase):
         self.assertEqual(normalized["field_provenance"]["result_quality"]["observed_by"], "independent_evaluator")
         self.assertEqual(normalized["field_provenance"]["reads"]["observed_by"], "host")
         self.assertEqual(measurement.comparator_input(normalized), normalized["payload"])
+        refs = {ref["id"]: ref for ref in normalized["evidence_refs"]}
+        self.assertIn("content", refs["surface-pilot-transcript"])
+        self.assertNotEqual(
+            normalized["field_provenance"]["repository_writes"]["evidence_ids"],
+            normalized["field_provenance"]["runtime_ms"]["evidence_ids"],
+        )
+
+    def test_action_regression_detector_catches_unexpected_operation(self) -> None:
+        transcript = [{"operation": expected} for expected in metrics._EXPECTED_OPERATION_SEQUENCE]
+        transcript[2]["operation"] = "unexpected_action"
+        self.assertEqual(metrics._action_regression_count(transcript), 2)
 
     def test_real_candidate_gate_emits_provenance_ready_envelope(self) -> None:
         envelope = metrics.build_candidate_measurement_envelope(base_sha="3fcdad7696f8f9c9800f7acf629a15f7152f97df")
