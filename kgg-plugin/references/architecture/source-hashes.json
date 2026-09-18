@@ -9,11 +9,11 @@
     },
     {
       "path": "docs/kgg-custom-gpt-goal-prompt.md",
-      "sha256": "96aa71c5c1a49fefb5df664e995c6f78a286eb09d1beebef5e1eb25bd19f8ae1"
+      "sha256": "ab4d39cbb2a413bd9f2ad69115a1717766366ffbc0b30ebe24c8d788a4ca2cd4"
     },
     {
       "path": "docs/kgg-ui-lab-v1-measurement-envelope.md",
-      "sha256": "18e045b78c0b01b92e66c9aa1e277b6d16d3fcfe9754ea936ef87ec81fdbc0ae"
+      "sha256": "0c77253cc0c5512e84742d53d32fe1f0020bccc53cf3d79dd973d4d20f994b0d"
     },
     {
       "path": "docs/kgg-custom-gpt-knowledge-operations.md",
@@ -89,7 +89,7 @@
     },
     {
       "path": "release-pipeline/kgg_ui_lab_surface_metrics.py",
-      "sha256": "4a1e4952aab641f9952b5ba0608864b943c394cbe6e02fbb5e7cc1eb414a99e8"
+      "sha256": "8a86431bd4db20d79482bb3985cf8eb24e3140dfad3f763728aedf02b2fc72e1"
     },
     {
       "path": "release-pipeline/kgg_production_control_preflight.py",
@@ -109,7 +109,7 @@
     },
     {
       "path": "release-pipeline/kgg_gpt_measurement.py",
-      "sha256": "fb4499eb5928489fac8038a7d6a061de24ca91265a58c17f28dfab725c6c1981"
+      "sha256": "baa12d914a60222f219850c8b5dc3b6a14fbe815e5dee5f23df35abfe0d1cc9c"
     },
     {
       "path": "kgg-plugin/.codex-plugin/plugin.json",

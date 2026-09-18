@@ -109,7 +109,7 @@ Verbindliche Zuordnung:
 | `scenario_id`, `base_sha` | Test-Capsule und frisch gelesener Main-Ref | identisch auf allen Oberflächen |
 | Reads, Kontext, Rückfragen, Tool-/Action-Aufrufe, Dispatches, Duplikate | Host-/Action-Transcript bzw. Runtime | keine Modell-Selbstauszählung |
 | `runtime_ms` | äußerer monotoner Host-Timer | Start/Ende außerhalb des Modells |
-| Ergebnis-, Root-Cause- und Evidenzqualität | unabhängiger Evaluator | gemeinsame 0–3-Rubrik; blind, wenn möglich |
+| Ergebnis-, Root-Cause- und Evidenzqualität | unabhängiger Evaluator | Comparator-Felder verwenden die gemeinsame 0–100-Skala; zusätzliche Goal-Felder behalten ihre eigene 0–3-Rubrik; blind, wenn möglich |
 | Writes, Leaks und Regressionen | Runtime-/Gate-/Test-Harness | synthetische Daten; jeder Verstoß blockiert |
 | Fehlerklasse | kanonischer Parser/Contract-Evaluator | nur allowlistete Klassen |
 

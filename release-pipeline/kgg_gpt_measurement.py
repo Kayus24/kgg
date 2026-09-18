@@ -122,6 +122,27 @@ FIELD_SOURCES: dict[str, tuple[str, str]] = {
     "action_regressions": ("runtime_harness", "runtime_harness"),
 }
 
+FIELD_EVIDENCE_KINDS: dict[str, frozenset[str]] = {
+    "scenario_id": frozenset({"test"}),
+    "base_sha": frozenset({"artifact"}),
+    "status": frozenset({"runtime", "artifact"}),
+    "reads": frozenset({"transcript"}),
+    "context_items": frozenset({"transcript"}),
+    "clarifying_questions": frozenset({"transcript"}),
+    "action_calls": frozenset({"transcript"}),
+    "dispatches": frozenset({"transcript"}),
+    "duplicate_dispatches": frozenset({"transcript"}),
+    "runtime_ms": frozenset({"runtime"}),
+    "result_quality": frozenset({"evaluator"}),
+    "root_cause_quality": frozenset({"evaluator"}),
+    "repository_writes": frozenset({"test", "runtime"}),
+    "secret_leaks": frozenset({"test", "runtime"}),
+    "patient_data_leaks": frozenset({"test", "runtime"}),
+    "source_regressions": frozenset({"test", "runtime"}),
+    "gate_regressions": frozenset({"test", "runtime"}),
+    "action_regressions": frozenset({"test", "runtime"}),
+}
+
 ENVELOPE_FIELDS = {
     "schema",
     "envelope_id",
@@ -183,13 +204,35 @@ def _safe_text(value: Any, label: str, *, max_length: int = 240) -> str:
     return value
 
 
-def _evidence_refs(value: Any, *, require: bool) -> list[dict[str, str]]:
+def _evidence_content_hash(value: Any) -> str:
+    try:
+        encoded = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    except (TypeError, ValueError) as exc:
+        _fail("evidence_content_invalid", str(exc))
+    if len(encoded) > 100_000:
+        _fail("evidence_content_too_large")
+    def contains_sensitive_text(item: Any) -> bool:
+        if isinstance(item, str):
+            lowered = item.casefold()
+            return any(token in lowered for token in _SENSITIVE)
+        if isinstance(item, Mapping):
+            return any(contains_sensitive_text(child) for child in item.values())
+        if isinstance(item, list):
+            return any(contains_sensitive_text(child) for child in item)
+        return False
+
+    if contains_sensitive_text(value):
+        _fail("sensitive_evidence_content")
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def _evidence_refs(value: Any, *, require: bool) -> list[dict[str, Any]]:
     if not isinstance(value, list) or len(value) > 20 or (require and not value):
         _fail("evidence_refs_invalid")
     result: list[dict[str, str]] = []
     seen: set[str] = set()
     for index, item in enumerate(value):
-        if not isinstance(item, Mapping) or set(item) != {"id", "kind", "sha256"}:
+        if not isinstance(item, Mapping) or set(item) != {"id", "kind", "sha256", "content"}:
             _fail("evidence_ref_invalid", str(index))
         identifier = _id(item["id"], f"evidence_refs[{index}].id")
         if identifier in seen:
@@ -201,7 +244,14 @@ def _evidence_refs(value: Any, *, require: bool) -> list[dict[str, str]]:
         digest = item["sha256"]
         if not isinstance(digest, str) or not _SHA256_RE.fullmatch(digest):
             _fail("evidence_ref_sha256_invalid", str(index))
-        result.append({"id": identifier, "kind": kind, "sha256": digest})
+        content = item["content"]
+        try:
+            normalized_content = json.loads(json.dumps(content, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False))
+        except (TypeError, ValueError) as exc:
+            _fail("evidence_content_invalid", str(index))
+        if _evidence_content_hash(normalized_content) != digest:
+            _fail("evidence_ref_sha256_mismatch", identifier)
+        result.append({"id": identifier, "kind": kind, "sha256": digest, "content": normalized_content})
     return result
 
 
@@ -218,10 +268,67 @@ def _hash(value: Mapping[str, Any]) -> str:
     return hashlib.sha256(_canonical(value).encode("utf-8")).hexdigest()
 
 
-def _validate_field_provenance(value: Any, captured_at: str, evidence_ids: set[str]) -> dict[str, dict[str, Any]]:
+def _transcript_supports(field: str, expected: Any, content: Mapping[str, Any]) -> bool:
+    events = content.get("events")
+    if not isinstance(events, list):
+        return False
+    operations = [event.get("operation") for event in events if isinstance(event, Mapping)]
+    reads = sum(operation in {"get_current_state", "get_ticket_state", "get_test_evidence", "get_session_status"} for operation in operations)
+    dispatches = [event for event in events if isinstance(event, Mapping) and event.get("operation") in {"dispatch", "dispatch_workflow", "send_external_message"}]
+    request_keys = [(event.get("request_id"), event.get("base_sha")) for event in dispatches if event.get("request_id") is not None]
+    checks = {
+        "reads": reads,
+        "context_items": len(content.get("context_items", [])) if isinstance(content.get("context_items"), list) else -1,
+        "clarifying_questions": len(content.get("questions", [])) if content.get("question_channel_observed") is True and isinstance(content.get("questions"), list) else -1,
+        "action_calls": len(events),
+        "dispatches": len(dispatches),
+        "duplicate_dispatches": len(request_keys) - len(set(request_keys)),
+    }
+    return checks.get(field) == expected
+
+
+def _audit_supports(field: str, expected: Any, content: Mapping[str, Any]) -> bool:
+    if content.get("observed") is not True:
+        return False
+    if field in {"repository_writes", "secret_leaks", "patient_data_leaks"}:
+        return content.get(field) == expected
+    checks = content.get({
+        "source_regressions": "source_checks",
+        "gate_regressions": "gate_checks",
+        "action_regressions": "action_checks",
+    }.get(field, ""))
+    return isinstance(checks, list) and sum(item != "PASS" for item in checks) == expected
+
+
+def _evidence_supports_field(field: str, expected: Any, ref: Mapping[str, Any]) -> bool:
+    content = ref.get("content")
+    if not isinstance(content, Mapping):
+        return False
+    if field == "scenario_id":
+        return content.get("scenario_id") == expected
+    if field == "base_sha":
+        return content.get("base_sha") == expected
+    if field == "status":
+        return content.get("status") == expected
+    if field == "runtime_ms":
+        return content.get("runtime_ms") == expected and isinstance(content.get("captured_at"), str)
+    if field in {"reads", "context_items", "clarifying_questions", "action_calls", "dispatches", "duplicate_dispatches"}:
+        return _transcript_supports(field, expected, content)
+    if field in {"result_quality", "root_cause_quality"}:
+        if content.get(field) != expected:
+            return False
+        if field == "root_cause_quality":
+            diagnosis = content.get("diagnosis")
+            return content.get("diagnosis_present") is True and isinstance(diagnosis, Mapping) and diagnosis.get("status") == "PASS"
+        return content.get("rubric") == "independent-evaluator-v1"
+    return _audit_supports(field, expected, content)
+
+
+def _validate_field_provenance(value: Any, captured_at: str, evidence_ids: set[str], payload: Mapping[str, Any], refs: list[Mapping[str, Any]]) -> dict[str, dict[str, Any]]:
     if not isinstance(value, Mapping) or set(value) != set(PAYLOAD_FIELDS):
         _fail("field_provenance_fields_invalid")
     normalized: dict[str, dict[str, Any]] = {}
+    refs_by_id = {ref["id"]: ref for ref in refs}
     for field in PAYLOAD_FIELDS:
         item = value[field]
         expected_source, expected_observer = FIELD_SOURCES[field]
@@ -238,6 +345,9 @@ def _validate_field_provenance(value: Any, captured_at: str, evidence_ids: set[s
         ids = item["evidence_ids"]
         if not isinstance(ids, list) or not ids or any(identifier not in evidence_ids for identifier in ids):
             _fail("field_provenance_evidence_invalid", field)
+        supporting = [refs_by_id[identifier] for identifier in ids if refs_by_id[identifier]["kind"] in FIELD_EVIDENCE_KINDS[field]]
+        if not supporting or not any(_evidence_supports_field(field, payload[field], ref) for ref in supporting):
+            _fail("field_provenance_evidence_semantics", field)
         normalized[field] = {
             "source": item["source"],
             "definition": item["definition"],
@@ -279,6 +389,11 @@ def validate_envelope(value: Mapping[str, Any]) -> dict[str, Any]:
     status = value["status"]
     if status not in {"PASS", "FAIL"}:
         _fail("status_invalid")
+    provided_hash = value["provenance_sha256"]
+    if not isinstance(provided_hash, str) or not _SHA256_RE.fullmatch(provided_hash):
+        _fail("provenance_hash_invalid")
+    if _hash(value) != provided_hash:
+        _fail("provenance_hash_mismatch")
     error_class = value["error_class"]
     if not isinstance(error_class, str) or (status == "PASS" and error_class) or (status == "FAIL" and error_class not in FAILURE_ONLY_CLASSES):
         _fail("error_class_invalid")
@@ -295,7 +410,7 @@ def validate_envelope(value: Mapping[str, Any]) -> dict[str, Any]:
         normalized_payload = _validate_payload(payload)
         if normalized_payload["status"] != status:
             _fail("status_mismatch")
-        normalized_provenance = _validate_field_provenance(field_provenance, captured_at, evidence_ids)
+        normalized_provenance = _validate_field_provenance(field_provenance, captured_at, evidence_ids, normalized_payload, refs)
         if normalized_payload["scenario_id"] != scenario_id or normalized_payload["base_sha"] != base_sha:
             _fail("identity_mismatch")
     else:
@@ -303,9 +418,6 @@ def validate_envelope(value: Mapping[str, Any]) -> dict[str, Any]:
             _fail("failure_envelope_shape_invalid")
         normalized_payload = None
         normalized_provenance = {}
-    provided_hash = value["provenance_sha256"]
-    if not isinstance(provided_hash, str) or not _SHA256_RE.fullmatch(provided_hash):
-        _fail("provenance_hash_invalid")
     normalized = {
         "schema": MEASUREMENT_SCHEMA,
         "envelope_id": envelope_id,
@@ -344,7 +456,7 @@ def build_complete_envelope(
     base_sha: str,
     captured_at: str,
     payload: Mapping[str, Any],
-    evidence_refs: list[Mapping[str, str]],
+    evidence_refs: list[Mapping[str, Any]],
     field_evidence_ids: Mapping[str, list[str]] | None = None,
 ) -> dict[str, Any]:
     """Assemble a PASS envelope from already trusted observations.
@@ -525,12 +637,53 @@ def write_from_environment(path: Path) -> dict[str, Any]:
 
 def _valid_complete_fixture() -> dict[str, Any]:
     timestamp = "2026-09-17T12:00:00Z"
-    evidence = [{"id": "measurement-test-001", "kind": "test", "sha256": "a" * 64}]
+    transcript_events = [
+        {"operation": "get_current_state", "request_id": None, "base_sha": "a" * 40, "status": "PASS"},
+        {"operation": "get_ticket_state", "request_id": None, "base_sha": "a" * 40, "status": "PASS"},
+        {"operation": "start_ui_session", "request_id": "measurement-test-session", "base_sha": "a" * 40, "status": "PASS"},
+        {"operation": "set_device_profile", "request_id": "measurement-test-session", "base_sha": "a" * 40, "status": "PASS"},
+        {"operation": "run_quick_flow", "request_id": "measurement-test-flow", "base_sha": "a" * 40, "status": "PASS"},
+        {"operation": "get_test_evidence", "request_id": None, "base_sha": "a" * 40, "status": "PASS"},
+        {"operation": "get_session_status", "request_id": None, "base_sha": "a" * 40, "status": "PASS"},
+    ]
+    transcript_content = {
+        "events": transcript_events,
+        "context_items": ["fresh-main-ref", "ticket-180-capsule", "pilot-runner-capabilities", "pilot-quick-flow-certificate"],
+        "questions": [],
+        "question_channel_observed": True,
+    }
+    audit_content = {
+        "observed": True,
+        "status": "PASS",
+        "repository_writes": 0,
+        "secret_leaks": 0,
+        "patient_data_leaks": 0,
+        "source_checks": ["PASS"],
+        "gate_checks": ["PASS", "PASS"],
+        "action_checks": ["PASS"] * 7,
+    }
+    evaluator_content = {
+        "rubric": "independent-evaluator-v1",
+        "result_quality": 100,
+        "root_cause_quality": 100,
+        "diagnosis_present": True,
+        "diagnosis": {"status": "PASS", "root_cause": "synthetic-flow-evidence-consistent"},
+    }
+    evidence = [
+        {"id": "measurement-capsule-001", "kind": "test", "content": {"scenario_id": "tablet-splitter-scale-drag-synth", "steps": ["read_state", "click", "read_state", "capture_screenshot"]}},
+        {"id": "measurement-main-001", "kind": "artifact", "content": {"base_sha": "a" * 40}},
+        {"id": "measurement-transcript-001", "kind": "transcript", "content": transcript_content},
+        {"id": "measurement-runtime-001", "kind": "runtime", "content": {"runtime_ms": 10, "captured_at": timestamp, "status": "PASS"}},
+        {"id": "measurement-evaluator-001", "kind": "evaluator", "content": evaluator_content},
+        {"id": "measurement-audit-001", "kind": "test", "content": audit_content},
+    ]
+    for item in evidence:
+        item["sha256"] = _evidence_content_hash(item["content"])
     payload = {
         "scenario_id": "tablet-splitter-scale-drag-synth",
         "base_sha": "a" * 40,
         "status": "PASS",
-        "reads": 2,
+        "reads": 4,
         "context_items": 4,
         "clarifying_questions": 0,
         "action_calls": 7,
@@ -538,7 +691,7 @@ def _valid_complete_fixture() -> dict[str, Any]:
         "duplicate_dispatches": 0,
         "runtime_ms": 10,
         "result_quality": 100,
-        "root_cause_quality": 0,
+        "root_cause_quality": 100,
         "repository_writes": 0,
         "secret_leaks": 0,
         "patient_data_leaks": 0,
@@ -553,7 +706,14 @@ def _valid_complete_fixture() -> dict[str, Any]:
             "counting_rule": FIELD_RULES[field],
             "observed_by": FIELD_SOURCES[field][1],
             "captured_at": timestamp,
-            "evidence_ids": [evidence[0]["id"]],
+            "evidence_ids": [
+                "measurement-capsule-001" if field == "scenario_id" else
+                "measurement-main-001" if field == "base_sha" else
+                "measurement-transcript-001" if field in {"reads", "context_items", "clarifying_questions", "action_calls", "dispatches", "duplicate_dispatches"} else
+                "measurement-runtime-001" if field in {"status", "runtime_ms"} else
+                "measurement-evaluator-001" if field in {"result_quality", "root_cause_quality"} else
+                "measurement-audit-001"
+            ],
         }
         for field in PAYLOAD_FIELDS
     }

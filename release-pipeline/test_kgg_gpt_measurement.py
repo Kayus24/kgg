@@ -121,6 +121,28 @@ class KggMeasurementTests(unittest.TestCase):
         with self.assertRaisesRegex(measurement.MeasurementError, "status_mismatch"):
             measurement.validate_envelope(envelope)
 
+    def test_evidence_content_is_present_hashed_and_bound_to_field(self) -> None:
+        envelope = measurement._valid_complete_fixture()
+        self.assertIn("content", envelope["evidence_refs"][0])
+        tampered = copy.deepcopy(envelope)
+        tampered["evidence_refs"][0]["content"]["reads"] = 999
+        tampered["provenance_sha256"] = measurement._hash(tampered)
+        with self.assertRaisesRegex(measurement.MeasurementError, "evidence_ref_sha256_mismatch"):
+            measurement.validate_envelope(tampered)
+
+    def test_field_provenance_requires_semantically_matching_evidence_kind(self) -> None:
+        envelope = measurement._valid_complete_fixture()
+        envelope["field_provenance"]["reads"]["evidence_ids"] = ["measurement-runtime-002"]
+        envelope["evidence_refs"].append({
+            "id": "measurement-runtime-002",
+            "kind": "runtime",
+            "content": {"runtime_ms": 10, "captured_at": envelope["captured_at"]},
+            "sha256": measurement._evidence_content_hash({"runtime_ms": 10, "captured_at": envelope["captured_at"]}),
+        })
+        envelope["provenance_sha256"] = measurement._hash(envelope)
+        with self.assertRaisesRegex(measurement.MeasurementError, "field_provenance_evidence_semantics"):
+            measurement.validate_envelope(envelope)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
