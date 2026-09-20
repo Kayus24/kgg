@@ -59,6 +59,23 @@ class KggPluginCandidateTests(unittest.TestCase):
             self.assertIn(f"`{relative}`", source_map)
         self.assertIn("Snapshot SHA-256", source_map)
 
+    def test_source_map_mcp_hash_matches_architecture_manifest(self) -> None:
+        source_map = (PLUGIN / "references" / "source-map.md").read_text(encoding="utf-8")
+        manifest = json.loads(
+            (PLUGIN / "references" / "architecture" / "source-hashes.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        server_hash = next(
+            entry["sha256"]
+            for entry in manifest["sources"]
+            if entry["path"] == "kgg-plugin/mcp/server.py"
+        )
+        transport_line = next(
+            line for line in source_map.splitlines() if line.startswith("| Installed MCP transport |")
+        )
+        self.assertIn(f"`{server_hash}`", transport_line)
+
     def test_snapshot_hashes_and_skill_hash_claims_match(self) -> None:
         manifest_path = PLUGIN / "references" / "architecture" / "source-hashes.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
