@@ -96,6 +96,31 @@ class RawCaptureTests(unittest.TestCase):
         self.assertEqual(item.raw_stdout, b'{"type":"thread.started"}\n')
         self.assertEqual(capture.verify_record(item)["status"], "RAW_CAPTURE_VERIFIED")
 
+    def test_timeout_terminates_bounded_process_tree(self) -> None:
+        command = (
+            sys.executable,
+            "-c",
+            (
+                "import sys,time; "
+                "sys.stdout.buffer.write(b'{\\\"type\\\":\\\"thread.started\\\"}\\n'); "
+                "sys.stdout.flush(); time.sleep(5)"
+            ),
+        )
+        item = capture.capture_command(
+            command,
+            cwd=str(Path(__file__).resolve().parents[1]),
+            stdin_bytes=b"",
+            codex_version="python-fixture",
+            run_id="run-timeout",
+            surface="C",
+            scenario_id="scenario-timeout",
+            base_sha=BASE,
+            candidate_fingerprint=FINGERPRINT,
+            timeout_seconds=0.05,
+        )
+        self.assertEqual(item.terminal_state, "timed_out")
+        self.assertEqual(capture.verify_record(item)["status"], "RAW_CAPTURE_VERIFIED")
+
 
 if __name__ == "__main__":
     unittest.main()

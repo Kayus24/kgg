@@ -10,6 +10,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import hashlib
+import os
+import signal
 import subprocess
 import time
 from collections.abc import Sequence
@@ -18,6 +20,46 @@ from typing import Any
 
 class CaptureError(ValueError):
     """Raised when raw evidence or its binding cannot be trusted."""
+
+
+def _terminate_process_tree(process: subprocess.Popen[bytes]) -> None:
+    """Terminate the bounded command and descendants without an unbounded wait."""
+
+    if os.name == "nt":
+        try:
+            subprocess.run(
+                ["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=1.0,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            process.kill()
+        return
+    try:
+        os.killpg(os.getpgid(process.pid), signal.SIGKILL)
+    except (OSError, ProcessLookupError):
+        process.kill()
+
+
+def _bounded_collect(
+    process: subprocess.Popen[bytes],
+    timeout_error: subprocess.TimeoutExpired,
+) -> tuple[bytes, bytes]:
+    """Collect after tree termination, with a final bounded cleanup window."""
+
+    try:
+        return process.communicate(timeout=1.0)
+    except subprocess.TimeoutExpired as cleanup_error:
+        process.kill()
+        stdout = cleanup_error.output or timeout_error.output or b""
+        stderr = cleanup_error.stderr or timeout_error.stderr or b""
+        if process.stdout is not None:
+            process.stdout.close()
+        if process.stderr is not None:
+            process.stderr.close()
+        return stdout, stderr
 
 
 @dataclass(frozen=True)
@@ -200,14 +242,18 @@ def capture_command(
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
+        start_new_session=os.name != "nt",
+        creationflags=(
+            subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0
+        ),
     )
     try:
         stdout, stderr = process.communicate(input=stdin_bytes, timeout=timeout_seconds)
         terminal_state = "completed" if process.returncode == 0 else "failed"
         exit_code = process.returncode
     except subprocess.TimeoutExpired as error:
-        process.kill()
-        stdout, stderr = process.communicate()
+        _terminate_process_tree(process)
+        stdout, stderr = _bounded_collect(process, error)
         terminal_state = "timed_out"
         exit_code = None
         if not stdout and error.output:
