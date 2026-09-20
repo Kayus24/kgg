@@ -4,12 +4,37 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
 import unittest
 
 import kgg_ui_lab_migration_gate as gates
+
+
+def _current_bound_pending_report(root: Path) -> dict:
+    """Build current-file evidence without rewriting historical reports."""
+
+    report = gates.synthetic_pass_report()
+    report["fresh_main_sha"] = "6ab3e3ccd2ca96521b96bf9e94470cac1cde93ce"
+    evidence_path = root / "release-pipeline" / "kgg_ui_lab_migration_gate.py"
+    evidence_rel = "release-pipeline/kgg_ui_lab_migration_gate.py"
+    evidence_sha = hashlib.sha256(evidence_path.read_bytes()).hexdigest()
+    pending = {"EFFICIENCY_PASS", "CROSS_SURFACE_PASS"}
+    for name in gates.GATE_NAMES:
+        report["gates"][name] = {
+            "status": "PENDING" if name in pending else "PASS",
+            "checks": {key: name not in pending for key in sorted(gates.GATE_CHECKS[name])},
+            "evidence_refs": [{
+                "id": f"{name.casefold().replace('_', '-')}-current",
+                "kind": "result",
+                "sha256": evidence_sha,
+                "path": evidence_rel,
+            }],
+        }
+    return report
 
 
 class KggUiLabMigrationGateTests(unittest.TestCase):
@@ -52,8 +77,8 @@ class KggUiLabMigrationGateTests(unittest.TestCase):
             gates.evaluate(report)
 
     def test_current_gate_report_stays_not_eligible_without_cross_surface_proof(self) -> None:
-        path = Path(__file__).resolve().parents[1] / "docs" / "kgg-ui-lab-v1-migration-gates-2026-09-14.json"
-        report = json.loads(path.read_text(encoding="utf-8"))
+        root = Path(__file__).resolve().parents[1]
+        report = _current_bound_pending_report(root)
         result = gates.evaluate(report)
         self.assertEqual(result["status"], "NOT_ELIGIBLE")
         self.assertFalse(result["release_allowed"])
@@ -61,15 +86,18 @@ class KggUiLabMigrationGateTests(unittest.TestCase):
         self.assertEqual(result["gates"]["EFFICIENCY_PASS"]["status"], "PENDING")
 
     def test_cli_report_argument_evaluates_supplied_report(self) -> None:
-        path = Path(__file__).resolve().parents[1] / "docs" / "kgg-ui-lab-v1-migration-gates-2026-09-14.json"
+        root = Path(__file__).resolve().parents[1]
         script = Path(__file__).resolve().parent / "kgg_ui_lab_migration_gate.py"
-        completed = subprocess.run(
-            [sys.executable, str(script), "--report", str(path)],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-        result = json.loads(completed.stdout)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "current-pending-report.json"
+            path.write_text(json.dumps(_current_bound_pending_report(root)), encoding="utf-8")
+            completed = subprocess.run(
+                [sys.executable, str(script), "--report", str(path)],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            result = json.loads(completed.stdout)
         self.assertEqual(result["status"], "NOT_ELIGIBLE")
         self.assertFalse(result["release_allowed"])
 
