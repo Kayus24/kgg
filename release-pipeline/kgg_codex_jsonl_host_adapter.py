@@ -50,7 +50,9 @@ def _item(event: Mapping[str, Any], index: int) -> Mapping[str, Any]:
     if item_type == "agent_message":
         _text(item.get("text", ""), f"event[{index}].item.text", allow_empty=True, allow_newline=True)
     elif item_type == "command_execution":
-        _text(item.get("command", ""), f"event[{index}].item.command", allow_empty=True)
+        # Commands may legitimately contain heredocs or other line breaks.
+        # They are retained as host evidence, not interpreted by this parser.
+        _text(item.get("command", ""), f"event[{index}].item.command", allow_empty=True, allow_newline=True)
         if "exit_code" in item and item["exit_code"] is not None and not isinstance(item["exit_code"], int):
             raise AdapterError(f"event[{index}].item.exit_code_invalid")
     elif item_type == "file_change":
@@ -147,6 +149,8 @@ def parse_jsonl(
             item = _item(event, index)
             item_id = item["id"]
             if event_type == "item.started":
+                if item_id in completed_items:
+                    raise AdapterError("duplicate_item_started")
                 if item_id in items:
                     raise AdapterError("duplicate_item_started")
                 items[item_id] = dict(item)
@@ -249,7 +253,11 @@ def parse_jsonl(
         "action_events": normalized_actions,
         "command_executions": commands,
         "file_changes": file_changes,
-        "final_output": messages[-1] if messages else None,
+        # Keep model output out of the normalized observation.  The outer
+        # capture retains the raw bytes for an explicitly authorized
+        # evaluator; this collector exposes only bounded presence/size/hash.
+        "final_output_present": bool(messages),
+        "final_output_bytes": len(messages[-1].encode("utf-8")) if messages else 0,
         "final_output_sha256": hashlib.sha256(messages[-1].encode("utf-8")).hexdigest() if messages else None,
         "observed_fields": observed_fields,
         "missing_fields": list(dict.fromkeys(missing_fields)),
@@ -260,6 +268,7 @@ def build_measurement_envelope(
     request_id: str,
     scenario_id: str,
     base_sha: str,
+    surface: str = "codex_plugin",
     captured_at: str | None = None,
     trusted_payload: Mapping[str, Any] | None = None,
     evidence_refs: list[Mapping[str, Any]] | None = None,
@@ -272,8 +281,22 @@ def build_measurement_envelope(
     """
     if not isinstance(observation, Mapping):
         raise AdapterError("observation_invalid")
+    if observation.get("surface") != surface:
+        raise AdapterError("observation_surface_mismatch")
+    if observation.get("scenario_id") != scenario_id:
+        raise AdapterError("observation_scenario_mismatch")
+    if observation.get("base_sha") != base_sha:
+        raise AdapterError("observation_base_sha_mismatch")
     missing = list(dict.fromkeys(observation.get("missing_fields", [])))
-    surface = observation.get("surface", "codex_plugin")
+    if observation.get("status") != "PASS":
+        return measurement.build_failure_envelope(
+            request_id=request_id,
+            surface=surface,
+            scenario_id=scenario_id,
+            base_sha=base_sha,
+            missing_fields=missing or list(measurement.PAYLOAD_FIELDS),
+            captured_at=captured_at,
+        )
     if trusted_payload is None or evidence_refs is None or missing:
         return measurement.build_failure_envelope(
             request_id=request_id,

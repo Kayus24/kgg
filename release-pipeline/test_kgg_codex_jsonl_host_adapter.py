@@ -60,6 +60,9 @@ class CodexJsonlAdapterTests(unittest.TestCase):
         self.assertEqual(result["action_events"][0]["operation"], "get_current_state")
         self.assertEqual(len(result["command_executions"]), 1)
         self.assertEqual(len(result["file_changes"]), 1)
+        self.assertTrue(result["final_output_present"])
+        self.assertEqual(result["final_output_bytes"], len("reads=999; this is output, not telemetry".encode("utf-8")))
+        self.assertNotIn("final_output", result)
         self.assertNotIn("reads", result)
         self.assertEqual(
             result["final_output_sha256"],
@@ -149,6 +152,58 @@ class CodexJsonlAdapterTests(unittest.TestCase):
                 scenario_id=SCENARIO,
                 base_sha=BASE,
             )
+
+    def test_multiline_command_is_retained_as_bounded_host_evidence(self) -> None:
+        events = [json.loads(line) for line in event_stream().splitlines()]
+        multiline = "python - <<'PY'\nprint('ok')\nPY"
+        for event in events:
+            if event["type"] in {"item.started", "item.completed"} and event["item"]["type"] == "command_execution":
+                event["item"]["command"] = multiline
+        source = "\n".join(json.dumps(event, sort_keys=True) for event in events)
+        result = adapter.parse_jsonl(
+            source,
+            expected_thread_id=THREAD,
+            scenario_id=SCENARIO,
+            base_sha=BASE,
+        )
+        self.assertEqual(result["command_executions"][0]["command"], multiline)
+
+    def test_completion_only_item_cannot_start_after_completion(self) -> None:
+        events = stream_with_completion_only_item("mcp_tool_call").splitlines()
+        events.insert(3, json.dumps({
+            "type": "item.started",
+            "item": {"id": "mcp_tool_call-only", "type": "mcp_tool_call", "server": "kgg", "tool": "get_current_state"},
+        }, sort_keys=True))
+        with self.assertRaisesRegex(adapter.AdapterError, "duplicate_item_started"):
+            adapter.parse_jsonl("\n".join(events), expected_thread_id=THREAD, scenario_id=SCENARIO, base_sha=BASE)
+
+    def test_complete_envelope_requires_observation_identity_and_pass_status(self) -> None:
+        observation = adapter.parse_jsonl(
+            event_stream(),
+            expected_thread_id=THREAD,
+            scenario_id=SCENARIO,
+            base_sha=BASE,
+        )
+        with self.assertRaisesRegex(adapter.AdapterError, "observation_scenario_mismatch"):
+            adapter.build_measurement_envelope(
+                observation,
+                request_id="identity-check-001",
+                scenario_id="other-scenario",
+                base_sha=BASE,
+                trusted_payload={},
+                evidence_refs=[],
+            )
+        failed = dict(observation, status="FAIL", missing_fields=[])
+        envelope = adapter.build_measurement_envelope(
+            failed,
+            request_id="identity-check-002",
+            scenario_id=SCENARIO,
+            base_sha=BASE,
+            trusted_payload={},
+            evidence_refs=[],
+        )
+        self.assertEqual(envelope["status"], "FAIL")
+        self.assertIsNone(envelope["payload"])
     def test_exec_completion_only_items_and_missing_turn_id_are_supported(self) -> None:
         for item_type in ("agent_message", "reasoning", "error", "mcp_tool_call"):
             with self.subTest(item_type=item_type):
