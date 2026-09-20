@@ -230,4 +230,3 @@ def capture_command(
         base_sha=base_sha,
         candidate_fingerprint=candidate_fingerprint,
     )
-
