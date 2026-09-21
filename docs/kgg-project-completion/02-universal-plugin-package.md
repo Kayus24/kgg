@@ -22,8 +22,8 @@ G01. Für ChatGPT ist ein öffentlich per HTTPS erreichbarer MCP-Endpunkt oder e
 - `LIVE_EVIDENCE_STATUS=LOCAL_ONLY`
 - `GATE_STATUS=PARTIAL`
 - `EVIDENCE_LEVEL=E2_LOCAL_REAL_RUNTIME`
-- `LAST_VERIFIED_BASE_SHA=2fcac012d5463f7b690ec70971c71c51f3fa492e`
-- `LAST_VERIFIED_AT=2026-09-21T10:12:30+02:00`
+- `LAST_VERIFIED_BASE_SHA=f793aa4506dfa3b911af585ec3e44c52abf6a43d`
+- `LAST_VERIFIED_AT=2026-09-21T10:35:00+02:00`
 
 ## 6. Bestehende Evidence
 
@@ -54,13 +54,14 @@ Autoritative Referenzen (Stand 2026-09-21):
 
 ## 6.2 G02-Preflight-Evidence
 
-Read-only ausgeführt auf `BASE_SHA=fe62c8be2b48fbe7ba3f40313f2d016b5e07c69a`:
+Read-only ausgeführt auf `BASE_SHA=f793aa4506dfa3b911af585ec3e44c52abf6a43d`:
 
 - `python kgg-plugin/scripts/eval/validate_candidate.py` → `PASS` für die lokale Codex-Candidate-Prüfung.
 - `python kgg-plugin/scripts/eval/validate_candidate.py --installed-only` → `PASS` für Paketintegrität; `comparison_ready=false` bleibt korrekt.
 - `kgg-plugin/.mcp.json` verwendet nur den relativen Einstieg `python ./mcp/server.py`; keine externen Python-Pakete werden importiert.
 - `plugin.json` ist versioniert (`0.1.0+codex.20260914202951`) und verweist auf Skills und MCP-Manifest.
 - `mcp/server.py` meldet `capture_screenshot` und `run_quick_flow` ausdrücklich als synthetisch; daraus wird kein Real-Surface- oder ChatGPT-Nachweis abgeleitet.
+- Der offizielle Portable-Plugin-Check ergab, dass ein Root-`plugin.json` die kanonische portable Identität sein muss; `.codex-plugin/plugin.json` bleibt nur Kompatibilitätsfallback.
 
 Aktuelle G02-Klassifikation:
 
@@ -70,6 +71,34 @@ Aktuelle G02-Klassifikation:
 | Codex-stdio-Startpfad | PASS | lokale Host-Grenze vorhanden |
 | ChatGPT-Discovery/Installation | NOT_YET_PROVEN | G03/externes Consequence Gate |
 | echter Browser-/Screenshot-Producer | NOT_IN_G02 | G04, nicht durch Synthetic MCP ersetzen |
+
+## 6.3 G02.1 – Portable Root Manifest
+
+`EXECUTION_ENVELOPE_ID=kgg-g02-portable-manifest-f793-v1`
+
+`CANDIDATE_FINGERPRINT=7fcbb975e9f608d98328b3577238dbe28ff25f3e69278ff604620a89d651ea5a`
+
+Kleinstmögliche Umsetzung:
+
+- Root-`kgg-plugin/plugin.json` mit Agent-Plugins-Schema, stabiler Identität,
+  Repository-Metadaten und OpenAI-Interface ergänzt.
+- Bestehender `.codex-plugin/plugin.json`-Overlay und lokaler `.mcp.json`-
+  Transport unverändert erhalten.
+- `validate_candidate.py` prüft nun zusätzlich das portable Root-Manifest.
+- Der autoritative Source-Hash und die Source-Map wurden ausschließlich für
+  diese geänderte Evaluator-Datei mechanisch synchronisiert.
+
+Gezielte Evidence:
+
+- `python -m unittest discover -s release-pipeline -p 'test_kgg_plugin_candidate*.py'` → 19 Tests, PASS.
+- `python kgg-plugin/scripts/eval/validate_candidate.py` → PASS.
+- `python kgg-plugin/scripts/eval/validate_candidate.py --installed-only` → PASS.
+- `git diff --check` → PASS.
+
+`G02.1=PASS`, aber `G02=PARTIAL`: Das Root-Manifest macht das Paket
+portabler; ein Root-`mcp.json` mit Remote-URL wird erst ergänzt, wenn ein
+echter HTTPS-/Tunnel-Endpunkt vorhanden ist. Kein Platzhalter-Endpunkt und
+keine synthetische ChatGPT-Discovery.
 
 ## 7. Lücke und Root Cause
 
@@ -127,7 +156,7 @@ Bei unklarer Transportwahl soll der Brother offizielle Lösungen vergleichen und
 - `LOCAL_MCP_BOUNDARY=present`
 - `CHATGPT_DISTRIBUTION_BOUNDARY=not_yet_proven`
 - `REAL_BROWSER_BOUNDARY=not_part_of_G02`
-- `NEXT_STEP=G02.1 manifest/runtime/transport audit`
+- `NEXT_STEP=G02.2 runtime/package portability audit and transport readiness`
 
 G02 darf die lokale stdio-Fähigkeit als Candidate-Evidence verwenden, aber nicht als Beweis für eine installierbare ChatGPT-Verbindung. Ein fehlender HTTPS-/Tunnel-Endpunkt wird als konkrete externe Voraussetzung klassifiziert, nicht durch synthetische Health- oder Screenshot-Daten überdeckt.
 

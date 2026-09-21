@@ -1,8 +1,8 @@
 {
   "schema": "kgg-project-completion-gates/v1",
-  "generated_at": "2026-09-21T10:24:30+02:00",
-  "fresh_remote_main_at_generation": "2fcac012d5463f7b690ec70971c71c51f3fa492e",
-  "local_head_at_generation": "2fcac012d5463f7b690ec70971c71c51f3fa492e",
+  "generated_at": "2026-09-21T10:35:00+02:00",
+  "fresh_remote_main_at_generation": "f793aa4506dfa3b911af585ec3e44c52abf6a43d",
+  "local_head_at_generation": "f793aa4506dfa3b911af585ec3e44c52abf6a43d",
   "north_star": [
     "migrate required Custom GPT capabilities into one universal KGG plugin",
     "provide real screenshot-to-action browser control for the KGG HTML app",
@@ -14,7 +14,7 @@
   "gates": [
     {"id":"G00","title":"Source of Truth and checkpoints","status":"PASS","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":[],"document":"00-governance-and-source-of-truth.md","next_action":"resume at G01 capability parity"},
     {"id":"G01","title":"Custom GPT capability migration","status":"PASS","evidence_level":"E1_SYNTHETIC","depends_on":["G00"],"document":"01-custom-gpt-capability-migration.md","next_action":"G01 checkpoint merged; resume at G02 distributable plugin preflight"},
-    {"id":"G02","title":"Universal plugin package","status":"PARTIAL","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":["G01"],"document":"02-universal-plugin-package.md","next_action":"remove host-local assumptions and validate distributable packaging"},
+    {"id":"G02","title":"Universal plugin package","status":"PARTIAL","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":["G01"],"document":"02-universal-plugin-package.md","next_action":"G02.2 runtime/package portability audit and transport readiness"},
     {"id":"G03","title":"ChatGPT plugin connection","status":"FAIL","evidence_level":"E3_REAL_HOST","depends_on":["G02"],"document":"03-chatgpt-plugin-connection.md","next_action":"deploy or tunnel the MCP endpoint and install the personal plugin in ChatGPT"},
     {"id":"G04","title":"Real browser bridge","status":"FAIL","evidence_level":"E1_SYNTHETIC","depends_on":["G02"],"document":"04-real-browser-bridge.md","next_action":"select and implement the smallest real browser host boundary"},
     {"id":"G05","title":"Visual interaction loop","status":"BLOCKED","evidence_level":"E1_SYNTHETIC","depends_on":["G04"],"document":"05-visual-interaction-loop.md","next_action":"execute a real two-screenshot state transition after G04"},
