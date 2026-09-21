@@ -1,0 +1,45 @@
+{
+  "schema": "kgg-project-completion/checkpoint/v1",
+  "checkpoint_id": "CP_G04_REAL_BROWSER",
+  "base_sha": "1e6c6e3e28603f28bfbad3b127c688e722c823f5",
+  "head": "ab4c69ed4dce1605a4bfa58d87a8d915e971595c",
+  "goal_hash": "e908753dd8627800cc636747750eb6166fa0451f8533a153322202a9797addf6",
+  "active_gate": "G04",
+  "active_substep": "real_playwright_bridge_and_two_screenshot_proof",
+  "decision": "PASS",
+  "candidate_fingerprint": "G04_REAL_BROWSER_BRIDGE_20260921_01",
+  "input_hashes": {
+    "kgg-plugin/mcp/server.py": "fe1aa5db35b2fa6f2837ce751722ad34dc16df0f0e12835801fa08db1ede6160",
+    "kgg-plugin/mcp/real_browser.py": "54f132ec5ad062bc922068d8715d6f79938aa498da28eac7de22ceef1375d4f5",
+    "kgg-plugin/mcp/browser_host.js": "981dda42548eceb7cd53e4a9abc64a98f4f0742aaada9bfac94f41a0f5abfbf0",
+    "release-pipeline/kgg_ui_lab_real_fixture.html": "6d0f13cdaa0cd1f9699aceb5b03a66d980848ff33a4996d333c489be96d0c1d0",
+    "release-pipeline/test_kgg_real_browser_bridge.py": "ac98e79c0262ba0caa28729576e4e99a4801f537768583380e6d6dbc9ff7f381",
+    "docs/kgg-project-completion/04-real-browser-bridge.md": "bbf91fa391cd2081ed443acf82797fe142142f9f188900b9fb0f776f0ae3ba16"
+  },
+  "evidence_refs": [
+    "python -m unittest release-pipeline/test_kgg_real_browser_bridge.py -v: 2 PASS",
+    "python -m unittest discover -s release-pipeline -p 'test_kgg_ui_lab*.py' -v: 60 PASS",
+    "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical: 141 PASS, 1 SKIP",
+    "cmd /c release-pipeline\\run-kgg-tests.cmd --suite ui-stability --level regression: PASS",
+    "commit:ab4c69ed4dce1605a4bfa58d87a8d915e971595c"
+  ],
+  "observed": {
+    "surface": "CODEX_PLUGIN_LOCAL_HOST",
+    "evidence_level": "E2_LOCAL_REAL_RUNTIME",
+    "screenshots": 2,
+    "distinct_screenshot_hashes": true,
+    "state_transition": "admin-ready -> scale-drag-state",
+    "missing_host_behavior": "fail_closed_without_synthetic_fallback"
+  },
+  "open_blocker_fingerprints": [
+    "G03_NO_TRANSPORT_EFB35FF"
+  ],
+  "next_step": "G05_AGENT_VISUAL_LOOP_ON_G04_BRIDGE",
+  "global_status_snapshot": {
+    "G03": "BLOCKED",
+    "G04": "PASS",
+    "G05": "BLOCKED",
+    "G06": "PARTIAL",
+    "A_B": "NOT_COMPARABLE"
+  }
+}
