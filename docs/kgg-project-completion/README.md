@@ -2,11 +2,16 @@
 
 Stand dieses Kandidaten: 2026-09-21
 
-Fresh Remote Main nach G02.3-Transport-Check: `efb35ff796235348fd0d620ee58c0e24b0e9fc8d`
+Fresh Remote Main nach G03-Transport-Check: `1e6c6e3e28603f28bfbad3b127c688e722c823f5`
 
-Lokaler HEAD nach G02.3-Transport-Check: `efb35ff796235348fd0d620ee58c0e24b0e9fc8d`
+Lokaler HEAD nach G03-Transport-Check: `1e6c6e3e28603f28bfbad3b127c688e722c823f5`
 
 Dieses Verzeichnis ist die Arbeits- und Abschlusssteuerung für das KGG-Agentenprojekt. Es ersetzt keine Fach-, Safety-, Measurement- oder Release-Verträge. Bei Widerspruch gilt die jeweils fachlich kanonische Quelle; der Widerspruch wird als Gate-Blocker erfasst und nicht stillschweigend aufgelöst.
+
+Die kompakte Kriterienübersicht für „läuft“ versus „vollständig abgeschlossen“
+steht in [project-readiness.md](project-readiness.md). Sie ist eine lesbare
+Arbeitsansicht; `gate-status.json` bleibt die einzige maschinenlesbare
+Statusquelle.
 
 ## 1. Unveränderliches Oberziel
 
@@ -62,7 +67,7 @@ Ein Gate darf nur mit der in seinem Detaildokument verlangten Stufe auf `PASS` g
 | G01 | Vollständige Custom-GPT-Funktionsinventur und Migration | `PASS` | 30 operationIds, fünf Skills, Manifest und kanonische Quellen abgebildet; Self-Tests grün; PR #241 auf Main `fe62c8b` | Jede benötigte Fähigkeit besitzt Zielkomponente, Test und Disposition; Live-Parität bleibt nachgelagert | [G01](01-custom-gpt-capability-migration.md) |
 | G02 | Universelles Plugin-Paket | `PARTIAL` | Portable Root-Manifest, repo-lokale Marketplace-Registrierung und frische lokale Codex-Installation grün; ChatGPT-Discovery noch nicht live bewiesen | Paket in Codex und ChatGPT installierbar, versioniert und ohne lokale Pfadannahmen | [G02](02-universal-plugin-package.md) |
 | G03 | Normales ChatGPT erkennt und nutzt das Plugin | `BLOCKED` | Frische Plugin-Verzeichnissuche nach `KGG` liefert „Derzeit passen keine Plugins zu dieser Suche“; kein HTTPS-/Secure-MCP-Endpunkt vorhanden | Bereitgestellter Endpoint oder ausdrücklich aktivierter Secure-MCP-Tunnel, danach Discovery und read-only Tool-Aufruf mit E3-Evidence | [G03](03-chatgpt-plugin-connection.md) |
-| G04 | Echte Browser-/UI-Brücke | `FAIL` | MCP meldet ausdrücklich „synthetic“ und „no real screen capture“ | Echte Session, Screenshot, Koordinaten-/Semantik-Aktionen und Zustandsbeobachtung | [G04](04-real-browser-bridge.md) |
+| G04 | Echte Browser-/UI-Brücke | `PASS` | Lokaler realer Chromium-Lauf: zwei unterschiedliche Screenshot-Hashes, Zustandswechsel und fail-closed Hostfehler; E2 | Echte Session, Screenshot, Koordinaten-/Semantik-Aktionen und Zustandsbeobachtung | [G04](04-real-browser-bridge.md) |
 | G05 | Visueller Screenshot-Aktions-Regelkreis | `BLOCKED` | nur Testskripte/Fixtures, kein Agenten-End-to-End-Kanal | Zwei-Screenshot-Loop mit echter Aktion und unabhängiger Zustandsprüfung | [G05](05-visual-interaction-loop.md) |
 | G06 | Reale Quick Flows | `PARTIAL` | Contracts und synthetische Schritte vorhanden | Mindestens drei reale, versionierte Flows mit Fallback und Step Evidence | [G06](06-real-quick-flows.md) |
 | G07 | Surface-Integration A/B/C | `PARTIAL` | Custom GPT Actions und Codex-MCP getrennt vorhanden | ehrliche, live geprüfte Capability-Matrix für A/B/C | [G07](07-surface-integration.md) |
@@ -82,7 +87,7 @@ G08 und G09 werden bei jedem Implementierungsschritt mitgeführt. Sie dürfen di
 
 Der nächste produktive Schwerpunkt ist:
 
-`G02 Plugin-Paket preflighten → G03 ChatGPT-Verbindung beweisen → G04 echte Browser-Brücke implementieren.`
+`G03 ChatGPT-Verbindung beweisen → G05 visuellen Regelkreis an die lokale G04-Brücke binden → G06 drei reale Quick Flows.`
 
 Aktiver Checkpoint: `CP_G03_TRANSPORT_BLOCKED`. G02.1 (portables Root-Manifest), G02.2 (repo-lokale Marketplace-Registrierung plus frische Codex-Installation) und G02.3 (Transport-Preflight) sind abgeschlossen. Der einzige nächste Schritt ist die Bereitstellung eines autorisierten HTTPS-/Secure-MCP-Endpoints; danach kann G03 erneut mit einem frischen ChatGPT-Discovery-Canary geprüft werden. Keine lokale stdio-Evidence wird als ChatGPT-Parität gewertet.
 
@@ -118,6 +123,7 @@ Bei einem unbekannten Problem wird nicht geraten. Es gilt [G11](11-brother-gpt-e
 ## 8. Zugehörige Steuerdateien
 
 - Maschinenlesbarer Gate-Stand: [gate-status.json](gate-status.json)
-- Einheitliche Struktur: [gate-template.md](gate-template.md)
-- Driftfester Arbeitsauftrag: [kgg-project-completion-goal-prompt.md](kgg-project-completion-goal-prompt.md)
+- Kriterien- und Betriebsübersicht: [project-readiness.md](project-readiness.md)
+- Einheitliches Sub-Dokument-Schema: [gate-template.md](gate-template.md)
+- Ausführbarer driftfester Auftrag: [kgg-project-completion-goal-prompt.md](kgg-project-completion-goal-prompt.md)
 - Brother-Handoff und Herkunftsregeln: [G11](11-brother-gpt-escalation.md)

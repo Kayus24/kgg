@@ -1,8 +1,8 @@
 {
   "schema": "kgg-project-completion-gates/v1",
-  "generated_at": "2026-09-21T13:04:52+02:00",
-  "fresh_remote_main_at_generation": "efb35ff796235348fd0d620ee58c0e24b0e9fc8d",
-  "local_head_at_generation": "efb35ff796235348fd0d620ee58c0e24b0e9fc8d",
+  "generated_at": "2026-09-21T13:42:46+02:00",
+  "fresh_remote_main_at_generation": "1e6c6e3e28603f28bfbad3b127c688e722c823f5",
+  "local_head_at_generation": "1e6c6e3e28603f28bfbad3b127c688e722c823f5",
   "north_star": [
     "migrate required Custom GPT capabilities into one universal KGG plugin",
     "provide real screenshot-to-action browser control for the KGG HTML app",
@@ -16,8 +16,8 @@
     {"id":"G01","title":"Custom GPT capability migration","status":"PASS","evidence_level":"E1_SYNTHETIC","depends_on":["G00"],"document":"01-custom-gpt-capability-migration.md","next_action":"G01 checkpoint merged; resume at G02 distributable plugin preflight"},
     {"id":"G02","title":"Universal plugin package","status":"PARTIAL","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":["G01"],"document":"02-universal-plugin-package.md","next_action":"G02.3 transport readiness and G03 ChatGPT discovery"},
     {"id":"G03","title":"ChatGPT plugin connection","status":"BLOCKED","evidence_level":"E3_REAL_HOST","depends_on":["G02"],"document":"03-chatgpt-plugin-connection.md","next_action":"provide one authorized HTTPS/Secure MCP endpoint, then run a fresh ChatGPT discovery canary"},
-    {"id":"G04","title":"Real browser bridge","status":"FAIL","evidence_level":"E1_SYNTHETIC","depends_on":["G02"],"document":"04-real-browser-bridge.md","next_action":"select and implement the smallest real browser host boundary"},
-    {"id":"G05","title":"Visual interaction loop","status":"BLOCKED","evidence_level":"E1_SYNTHETIC","depends_on":["G04"],"document":"05-visual-interaction-loop.md","next_action":"execute a real two-screenshot state transition after G04"},
+    {"id":"G04","title":"Real browser bridge","status":"PASS","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":["G02"],"document":"04-real-browser-bridge.md","next_action":"continue to G05 visual loop and bind three real Quick Flows in G06"},
+    {"id":"G05","title":"Visual interaction loop","status":"BLOCKED","evidence_level":"E1_SYNTHETIC","depends_on":["G04"],"document":"05-visual-interaction-loop.md","next_action":"bind an agent decision and one real two-screenshot state transition to the now-passing G04 bridge"},
     {"id":"G06","title":"Real Quick Flows","status":"PARTIAL","evidence_level":"E1_SYNTHETIC","depends_on":["G04"],"document":"06-real-quick-flows.md","next_action":"bind three versioned flows to real browser actions"},
     {"id":"G07","title":"A/B/C surface integration","status":"PARTIAL","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":["G03","G04","G06"],"document":"07-surface-integration.md","next_action":"run independent capability discovery and bounded canaries per surface"},
     {"id":"G08","title":"Security privacy and authorization","status":"PARTIAL","evidence_level":"E1_SYNTHETIC","depends_on":["G04"],"document":"08-security-privacy-and-authorization.md","next_action":"prove browser-specific boundaries with negative real-path tests"},

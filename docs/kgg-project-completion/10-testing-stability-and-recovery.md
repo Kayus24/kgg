@@ -6,7 +6,7 @@ Der reale Plugin-/Browserpfad besteht reproduzierbar Targeted-, Negative-, Regre
 
 ## 2. Warum dieses Gate erforderlich ist
 
-Das Repo besitzt viele gute UI- und Release-Tests, aber noch keinen vollständigen Black-Box-Test der neuen Agent→Plugin→Browser→Evidence-Kette.
+Das Repo besitzt viele gute UI- und Release-Tests sowie jetzt einen Black-Box-Test der lokalen Plugin→Browser→Evidence-Kette. Der vollständige Agent→Plugin→Browser→Evidence-Regelkreis auf einer Real-Host-Surface fehlt noch.
 
 ## 3. Scope und Nicht-Ziele
 

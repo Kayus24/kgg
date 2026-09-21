@@ -18,20 +18,20 @@ G04; für den visuellen Fallback G05; Safety aus G08.
 
 ## 5. Aktueller Stand
 
-- `IMPLEMENTATION_STATUS=SYNTHETIC_FLOW_CONTRACT`
-- `LIVE_EVIDENCE_STATUS=NO_REAL_FLOW_EXECUTION`
+- `IMPLEMENTATION_STATUS=SYNTHETIC_FLOW_CONTRACT_PLUS_ONE_REAL_BRIDGE_PATH`
+- `LIVE_EVIDENCE_STATUS=ONE_LOCAL_REAL_FLOW_SHAPE; THREE_CANONICAL_FLOWS_PENDING`
 - `GATE_STATUS=PARTIAL`
 - `EVIDENCE_LEVEL=E1_SYNTHETIC`
-- `LAST_VERIFIED_BASE_SHA=2b8024e359bd0f65bcc5666b5e190d78a4b4ed6f`
-- `LAST_VERIFIED_AT=2026-09-21`
+- `LAST_VERIFIED_BASE_SHA=1e6c6e3e28603f28bfbad3b127c688e722c823f5`
+- `LAST_VERIFIED_AT=2026-09-21T13:42:46+02:00`
 
 ## 6. Bestehende Evidence
 
-UI-Lab-Goal und MCP-Kandidat enthalten Quick-Flow-Begriffe und synthetische Schritte. Der Server führt derzeit keinen Browser aus.
+UI-Lab-Goal und MCP-Kandidat enthalten Quick-Flow-Begriffe und synthetische Schritte. Der Server kann jetzt einen lokalen realen Flow-Pfad ausführen; die drei kanonischen Flows und ihr Drift-Fallback sind noch nicht vollständig gebunden.
 
 ## 7. Lücke und Root Cause
 
-Flows sind nicht an echte Ziele, echte Zustandsassertions oder einen realen Runner gebunden.
+Nur der G04-Demoflow ist an einen echten Runner gebunden; drei kanonische Flows, versionierte Fingerprints und der G05-Fallback fehlen noch.
 
 ## 8. Kleinschrittiger Arbeitsplan
 
@@ -80,4 +80,4 @@ Drei Flow-Spezifikationen, Runnerbindung, Step-Evidence, Drift-Fallback und Test
 
 ## 14. Beitragsherkunft
 
-`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
+`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PARTIAL`, `NOTE=G04 real bridge path is available; three real Quick Flows remain.`

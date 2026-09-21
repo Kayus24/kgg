@@ -18,20 +18,20 @@ G04, G08 und G09.
 
 ## 5. Aktueller Stand
 
-- `IMPLEMENTATION_STATUS=DESCRIBED_NOT_CONNECTED`
-- `LIVE_EVIDENCE_STATUS=NONE`
+- `IMPLEMENTATION_STATUS=DESCRIBED_WITH_REAL_BRIDGE_INPUT`
+- `LIVE_EVIDENCE_STATUS=G04_LOCAL_REAL_BRIDGE_ONLY`
 - `GATE_STATUS=BLOCKED`
 - `EVIDENCE_LEVEL=E1_SYNTHETIC`
-- `LAST_VERIFIED_BASE_SHA=2b8024e359bd0f65bcc5666b5e190d78a4b4ed6f`
-- `LAST_VERIFIED_AT=2026-09-21`
+- `LAST_VERIFIED_BASE_SHA=1e6c6e3e28603f28bfbad3b127c688e722c823f5`
+- `LAST_VERIFIED_AT=2026-09-21T13:42:46+02:00`
 
 ## 6. Bestehende Evidence
 
-Playwright-Smokes können klicken und Screenshots erzeugen. Es fehlt der MCP/ChatGPT-Regelkreis, der Screenshot, Entscheidung, echte Aktion und Nachprüfung verbindet.
+Die G04-Brücke kann lokal klicken und zwei echte Screenshots erzeugen. Es fehlt weiterhin der MCP/Host-Regelkreis, der aus Screenshot A eine externe/agentische Entscheidung bindet, genau eine Aktion ausführt und Screenshot B unabhängig bewertet.
 
 ## 7. Lücke und Root Cause
 
-G04 fehlt. Zusätzlich fehlt ein expliziter „observe → decide → act → verify → recover“-Vertrag.
+G04 ist lokal nachgewiesen. Zusätzlich fehlt ein expliziter „observe → decide → act → verify → recover“-Lauf auf einer unterstützten Agenten-Surface.
 
 ## 8. Kleinschrittiger Arbeitsplan
 
@@ -80,4 +80,4 @@ Loop-Vertrag, Referenzimplementierung, Evidence-Beispiel und robuste Black-Box-T
 
 ## 14. Beitragsherkunft
 
-`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
+`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PARTIAL`, `NOTE=G04 local real bridge is available; G05 agent/host decision loop remains open.`

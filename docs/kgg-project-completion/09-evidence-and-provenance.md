@@ -48,7 +48,7 @@ Real-Browser-Screenshots und Aktionen werden noch nicht vom Plugin-Run retained 
 ## 9. CONTROL_LOOP_GATE
 
 - `GATE_ID=G09_REAL_RUN_PROVENANCE`
-- `INPUT=ein G04-Real-Run mit Raw Screenshots und Events`
+- `INPUT=ein G04-Real-Run mit Raw Screenshots und Events; aktuell E2 lokal nachgewiesen`
 - `PROCEDURE=Evidence erneut hashen/parsen; IDs/Versionen abgleichen; Werte zu Quellen zurückverfolgen`
 - `PASS_CRITERIA=jede positive Behauptung besitzt akzeptierte Raw-Quelle; Manipulation wird erkannt`
 - `FAIL_CRITERIA=Self-Report, synthetic URI als Realbeweis, fehlender Hash oder erfundener Nullwert`

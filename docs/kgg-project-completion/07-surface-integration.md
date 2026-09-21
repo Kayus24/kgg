@@ -29,7 +29,7 @@ G03 bis G06. G08/G09 gelten je Surface separat.
 
 - A besitzt GitHub-/Memory-/Coordination-Actions, aber keine Browsersteuerungs-Operations.
 - B fand im Live-Test kein installiertes KGG-Plugin.
-- C besitzt lokalen Plugin-/MCP-Kandidaten und JSONL-/Raw-Capture-Bausteine; UI-Lab bleibt synthetisch.
+- C besitzt lokalen Plugin-/MCP-Kandidaten, JSONL-/Raw-Capture-Bausteine und jetzt einen opt-in lokalen Real-Browser-Pfad; ChatGPT/B bleiben separat ungeprüft.
 
 ## 7. Lücke und Root Cause
 

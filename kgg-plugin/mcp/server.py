@@ -13,7 +13,10 @@ from __future__ import annotations
 from copy import deepcopy
 from datetime import datetime, timezone
 import hashlib
+import importlib.util
 import json
+import os
+from pathlib import Path
 import re
 import sys
 import time
@@ -46,6 +49,26 @@ SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 VERSION_RE = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
 SENSITIVE = ("raw_qr", "base64", "password", "api_key", "secret", "patient_data", "selector", "stack_trace", "token")
+
+
+def _real_browser_enabled() -> bool:
+    return os.environ.get("KGG_REAL_BROWSER", "").casefold() in {"1", "true", "yes"}
+
+
+def _load_real_browser_module():
+    """Load the optional sibling bridge even when this file is imported in tests."""
+
+    try:
+        import real_browser  # type: ignore
+        return real_browser
+    except ModuleNotFoundError:
+        module_path = Path(__file__).with_name("real_browser.py")
+        spec = importlib.util.spec_from_file_location("kgg_plugin_real_browser", module_path)
+        if spec is None or spec.loader is None:
+            _fail("real_browser_helper_missing")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
 
 
 class ServerError(ValueError):
@@ -292,6 +315,32 @@ class Runtime:
         session["device_profile"] = profile
         return {"schema": MCP_SCHEMA, "operation": "set_device_profile", "session": self._public_session(session)}
 
+    def _run_real_flow(self, session: Mapping[str, Any], operation: str) -> dict[str, Any]:
+        """Run one explicitly enabled real browser flow through the host bridge."""
+
+        real_browser = _load_real_browser_module()
+        if operation == "run_quick_flow":
+            steps = [
+                {"operation": "read_state", "label": "admin-ready"},
+                {"operation": "capture_screenshot", "label": "baseline-screen"},
+                {"operation": "click", "label": "tablet-splitter-control"},
+                {"operation": "read_state", "label": "scale-drag-state"},
+                {"operation": "capture_screenshot", "label": "pilot-180-evidence"},
+            ]
+        else:
+            steps = [{"operation": "capture_screenshot", "label": "manual-capture"}]
+        try:
+            return real_browser.run_real_flow(
+                url=session["app"]["url"],
+                viewport=session["viewport"],
+                steps=steps,
+                run_id=f"{session['session_id']}-{session['request_id']}",
+                timeout_ms=session["timeout"]["timeout_ms"],
+            )
+        except real_browser.RealBrowserError as exc:
+            _fail(exc.code)
+        _fail("real_browser_failed")
+
     def run_flow(self, value: Any, operation: str) -> dict[str, Any]:
         request = _object(value, "request")
         session_id = request.get("session_id")
@@ -302,6 +351,38 @@ class Runtime:
         checked = _request(request, operation, session)
         session["status"] = "running"
         session["used_requests"].append(checked["request_id"])
+        if _real_browser_enabled():
+            real = self._run_real_flow(session, operation)
+            session["status"] = "completed" if real["status"] == "PASS" else "failed"
+            event = {"event": "real_browser_run_completed", "status": real["status"], "at": _now()}
+            session["events"].append(event)
+            evidence = {
+                "schema": "kgg-ui-lab/evidence/v1",
+                "status": real["status"],
+                "surface": "real_browser",
+                "artifacts": real["artifacts"],
+                "runtime_ms": real["runtime_ms"],
+                "final_state": real["final_state"],
+            }
+            self.evidence.setdefault(session["session_id"], []).append(evidence)
+            result = {
+                "status": real["status"],
+                "error_class": real["error_class"],
+                "steps": real["steps"],
+                "artifacts": real["artifacts"],
+                "final_state": real["final_state"],
+                "runtime_ms": real["runtime_ms"],
+            }
+            pilot_metrics = {"status": "FAIL", "error_class": "NUMERIC_METRICS_NOT_VERIFIABLE"}
+            return {
+                "schema": MCP_SCHEMA,
+                "operation": operation,
+                "result": result,
+                "evidence": evidence,
+                "pilot_metrics": pilot_metrics,
+                "session_status": session["status"],
+                "_images": real["images"],
+            }
         screenshot = _artifact("kgg-shot-001", "screenshot", "synthetic://kgg-ui-lab/tablet-splitter-scale-drag-synth/baseline")
         if operation == "run_quick_flow":
             result = {
@@ -383,8 +464,15 @@ class Runtime:
 
 
 def _result_content(value: Mapping[str, Any]) -> dict[str, Any]:
-    encoded = json.dumps(value, ensure_ascii=False, separators=(",", ":"))
-    return {"content": [{"type": "text", "text": encoded}], "structuredContent": deepcopy(dict(value))}
+    public = deepcopy(dict(value))
+    images = public.pop("_images", [])
+    encoded = json.dumps(public, ensure_ascii=False, separators=(",", ":"))
+    content: list[dict[str, Any]] = [{"type": "text", "text": encoded}]
+    if isinstance(images, list):
+        for image in images[:2]:
+            if isinstance(image, Mapping) and image.get("mime_type") == "image/png" and isinstance(image.get("data_base64"), str):
+                content.append({"type": "image", "data": image["data_base64"], "mimeType": "image/png"})
+    return {"content": content, "structuredContent": public}
 
 
 def handle(runtime: Runtime, message: Mapping[str, Any]) -> dict[str, Any] | None:

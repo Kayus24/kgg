@@ -1,6 +1,6 @@
 {
   "schema": "kgg-plugin/source-hashes/v1",
-  "snapshot": "2026-09-17",
+  "snapshot": "2026-09-21",
   "fresh_main_required": true,
   "sources": [
     {
@@ -121,7 +121,23 @@
     },
     {
       "path": "kgg-plugin/mcp/server.py",
-      "sha256": "56ee9371ff06d2754ef2227f19c5e38ba2b48a6eeee9b9249f988a4741889600"
+      "sha256": "fe1aa5db35b2fa6f2837ce751722ad34dc16df0f0e12835801fa08db1ede6160"
+    },
+    {
+      "path": "kgg-plugin/mcp/real_browser.py",
+      "sha256": "54f132ec5ad062bc922068d8715d6f79938aa498da28eac7de22ceef1375d4f5"
+    },
+    {
+      "path": "kgg-plugin/mcp/browser_host.js",
+      "sha256": "981dda42548eceb7cd53e4a9abc64a98f4f0742aaada9bfac94f41a0f5abfbf0"
+    },
+    {
+      "path": "release-pipeline/kgg_ui_lab_real_fixture.html",
+      "sha256": "6d0f13cdaa0cd1f9699aceb5b03a66d980848ff33a4996d333c489be96d0c1d0"
+    },
+    {
+      "path": "release-pipeline/test_kgg_real_browser_bridge.py",
+      "sha256": "ac98e79c0262ba0caa28729576e4e99a4801f537768583380e6d6dbc9ff7f381"
     },
     {
       "path": "kgg-plugin/scripts/eval/validate_candidate.py",
