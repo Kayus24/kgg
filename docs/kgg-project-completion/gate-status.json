@@ -1,0 +1,29 @@
+{
+  "schema": "kgg-project-completion-gates/v1",
+  "generated_at": "2026-09-21T00:00:00+02:00",
+  "fresh_remote_main_at_generation": "2b8024e359bd0f65bcc5666b5e190d78a4b4ed6f",
+  "local_head_at_generation": "4b13732b3e6ed86abc8dcf893c25254b437d14d8",
+  "north_star": [
+    "migrate required Custom GPT capabilities into one universal KGG plugin",
+    "provide real screenshot-to-action browser control for the KGG HTML app",
+    "provide real versioned Quick Flows with visual fallback"
+  ],
+  "status_enum": ["PASS", "PARTIAL", "FAIL", "BLOCKED", "UNKNOWN", "NOT_APPLICABLE"],
+  "evidence_levels": ["E0_DOCUMENTED", "E1_SYNTHETIC", "E2_LOCAL_REAL_RUNTIME", "E3_REAL_HOST", "E4_REPEATED_STABLE"],
+  "active_gate": "G00",
+  "gates": [
+    {"id":"G00","title":"Source of Truth and checkpoints","status":"PARTIAL","evidence_level":"E0_DOCUMENTED","depends_on":[],"document":"00-governance-and-source-of-truth.md","next_action":"validate and merge the completion document set"},
+    {"id":"G01","title":"Custom GPT capability migration","status":"PARTIAL","evidence_level":"E1_SYNTHETIC","depends_on":["G00"],"document":"01-custom-gpt-capability-migration.md","next_action":"freeze the complete capability mapping and acceptance tests"},
+    {"id":"G02","title":"Universal plugin package","status":"PARTIAL","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":["G01"],"document":"02-universal-plugin-package.md","next_action":"remove host-local assumptions and validate distributable packaging"},
+    {"id":"G03","title":"ChatGPT plugin connection","status":"FAIL","evidence_level":"E3_REAL_HOST","depends_on":["G02"],"document":"03-chatgpt-plugin-connection.md","next_action":"deploy or tunnel the MCP endpoint and install the personal plugin in ChatGPT"},
+    {"id":"G04","title":"Real browser bridge","status":"FAIL","evidence_level":"E1_SYNTHETIC","depends_on":["G02"],"document":"04-real-browser-bridge.md","next_action":"select and implement the smallest real browser host boundary"},
+    {"id":"G05","title":"Visual interaction loop","status":"BLOCKED","evidence_level":"E1_SYNTHETIC","depends_on":["G04"],"document":"05-visual-interaction-loop.md","next_action":"execute a real two-screenshot state transition after G04"},
+    {"id":"G06","title":"Real Quick Flows","status":"PARTIAL","evidence_level":"E1_SYNTHETIC","depends_on":["G04"],"document":"06-real-quick-flows.md","next_action":"bind three versioned flows to real browser actions"},
+    {"id":"G07","title":"A/B/C surface integration","status":"PARTIAL","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":["G03","G04","G06"],"document":"07-surface-integration.md","next_action":"run independent capability discovery and bounded canaries per surface"},
+    {"id":"G08","title":"Security privacy and authorization","status":"PARTIAL","evidence_level":"E1_SYNTHETIC","depends_on":["G04"],"document":"08-security-privacy-and-authorization.md","next_action":"prove browser-specific boundaries with negative real-path tests"},
+    {"id":"G09","title":"Evidence and provenance","status":"PARTIAL","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":["G04"],"document":"09-evidence-and-provenance.md","next_action":"retain and bind real screenshot/action evidence"},
+    {"id":"G10","title":"Testing stability and recovery","status":"PARTIAL","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":["G04","G06","G08","G09"],"document":"10-testing-stability-and-recovery.md","next_action":"add black-box bridge tests and unchanged real-host replay"},
+    {"id":"G11","title":"Brother GPT escalation","status":"PARTIAL","evidence_level":"E0_DOCUMENTED","depends_on":["G00"],"document":"11-brother-gpt-escalation.md","next_action":"validate one complete advisory and provenance cycle"},
+    {"id":"G12","title":"Release migration and operations","status":"BLOCKED","evidence_level":"E0_DOCUMENTED","depends_on":["G01","G02","G03","G04","G05","G06","G07","G08","G09","G10","G11"],"document":"12-release-migration-and-operations.md","next_action":"start only after all implementation gates reach final disposition"}
+  ]
+}
