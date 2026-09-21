@@ -29,7 +29,22 @@
       "app_url": null,
       "live_tool_catalog": [],
       "live_tool_schema_refs": [],
-      "browser_hook_status": "NOT_OBSERVED"
+      "browser_hook_status": "NOT_OBSERVED",
+      "capability_preflight": {
+        "navigate": "NOT_CHECKED",
+        "clickflow": "NOT_CHECKED",
+        "move": "NOT_CHECKED",
+        "move_to": "NOT_CHECKED",
+        "coordinate_click": "NOT_CHECKED",
+        "screenshot": "NOT_CHECKED",
+        "dom": "NOT_CHECKED",
+        "ax": "NOT_CHECKED",
+        "state_read": "NOT_CHECKED",
+        "viewport_read": "NOT_CHECKED",
+        "timeout_state": "NOT_CHECKED",
+        "permission_state": "NOT_CHECKED",
+        "channel_state": "NOT_CHECKED"
+      }
     },
     "B": {
       "id": "NORMAL_CHATGPT_WITH_KGG_PLUGIN",
@@ -43,7 +58,22 @@
       "app_url": null,
       "live_tool_catalog": [],
       "live_tool_schema_refs": [],
-      "browser_hook_status": "NOT_OBSERVED"
+      "browser_hook_status": "NOT_OBSERVED",
+      "capability_preflight": {
+        "navigate": "NOT_CHECKED",
+        "clickflow": "NOT_CHECKED",
+        "move": "NOT_CHECKED",
+        "move_to": "NOT_CHECKED",
+        "coordinate_click": "NOT_CHECKED",
+        "screenshot": "NOT_CHECKED",
+        "dom": "NOT_CHECKED",
+        "ax": "NOT_CHECKED",
+        "state_read": "NOT_CHECKED",
+        "viewport_read": "NOT_CHECKED",
+        "timeout_state": "NOT_CHECKED",
+        "permission_state": "NOT_CHECKED",
+        "channel_state": "NOT_CHECKED"
+      }
     }
   },
   "budgets": {
@@ -73,9 +103,9 @@
   "real_browser_preflight": {
     "KGG_REAL_BROWSER_required": true,
     "KGG_REAL_BROWSER_expected_value": "1",
-    "KGG_BROWSER_NODE_required": true,
+    "KGG_BROWSER_NODE_override_optional": true,
     "KGG_BROWSER_NODE_path": null,
-    "KGG_PLAYWRIGHT_NODE_PATH_required": true,
+    "KGG_PLAYWRIGHT_NODE_PATH_override_optional": true,
     "KGG_PLAYWRIGHT_NODE_PATH": null,
     "node_available": false,
     "playwright_node_module_available": false,
@@ -83,6 +113,11 @@
     "browser_host_js_available": false,
     "browser_session_host_js_path": "kgg-plugin/mcp/browser_session_host.js",
     "browser_session_host_js_available": false,
+    "resolution_policy": {
+      "node": "resolve KGG_BROWSER_NODE when supplied, otherwise shutil.which(node)",
+      "playwright": "resolve KGG_PLAYWRIGHT_NODE_PATH when supplied, otherwise normal Node module resolution",
+      "overrides_are_required": false
+    },
     "mcp_config_currently_exposes": [
       "PYTHONUTF8"
     ],
@@ -110,21 +145,6 @@
       "userinfo_forbidden": true,
       "fragment_forbidden": true
     }
-  },
-  "capability_preflight": {
-    "navigate": "NOT_CHECKED",
-    "clickflow": "NOT_CHECKED",
-    "move": "NOT_CHECKED",
-    "move_to": "NOT_CHECKED",
-    "coordinate_click": "NOT_CHECKED",
-    "screenshot": "NOT_CHECKED",
-    "dom": "NOT_CHECKED",
-    "ax": "NOT_CHECKED",
-    "state_read": "NOT_CHECKED",
-    "viewport_read": "NOT_CHECKED",
-    "timeout_state": "NOT_CHECKED",
-    "permission_state": "NOT_CHECKED",
-    "channel_state": "NOT_CHECKED"
   },
   "surface_isolation": {
     "prohibit_cross_surface_evidence": true,

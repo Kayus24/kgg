@@ -115,9 +115,11 @@ Zusätzlich je Surface den Transport getrennt prüfen:
 - B nutzt ausschließlich die live entdeckte Plugin-/MCP-Hostgrenze.
 - Ein Transport, Tool oder Budget der einen Surface aktiviert niemals die
   andere Surface.
-- Für einen Real-Browser-Hook müssen `KGG_REAL_BROWSER=1`, ein gültiger
-  `KGG_BROWSER_NODE`, ein auflösbarer `KGG_PLAYWRIGHT_NODE_PATH` sowie
-  `browser_host.js` und `browser_session_host.js` belegt sein.
+- Für einen Real-Browser-Hook müssen `KGG_REAL_BROWSER=1`, ein auflösbarer
+  Node-Interpreter (über den optionalen `KGG_BROWSER_NODE`-Override oder
+  `PATH`), ein auflösbares Playwright-Modul (über den optionalen
+  `KGG_PLAYWRIGHT_NODE_PATH`-Override oder die normale Node-Modulauflösung)
+  sowie `browser_host.js` und `browser_session_host.js` belegt sein.
 - Die aktuelle `kgg-plugin/.mcp.json` exponiert nur `PYTHONUTF8` und aktiviert
   diese Real-Browser-Voraussetzungen nicht selbst.
 - Der frühere `CONTROL_PLANE_API_KEY` für B ist `NOT_RETAINED`. Falls B für
@@ -378,7 +380,9 @@ Die betroffene Surface sofort stoppen, wenn:
 - Permission-Elevation angefordert wird;
 - Screenshot/State nicht an die aktuelle Surface gebunden werden kann;
 - ein Tool einer anderen Surface verwendet werden müsste;
-- ein neuer Runtime-Key, Real-Host-Lauf, Dispatch oder Write nötig wäre.
+- ein neuer Runtime-Key, Real-Host-Lauf, Dispatch oder Write nötig wäre, ohne
+  dass für genau diese Surface ein aktives Execution-Envelope mit positivem
+  Budget und passender Konsequenz-Autorisierung gebunden ist.
 
 Dann `NOT_OBSERVABLE`, `FAIL` oder `WAITING_HUMAN_GATE` gemäß der oben
 definierten Statusregeln setzen und nicht ausweichen.
