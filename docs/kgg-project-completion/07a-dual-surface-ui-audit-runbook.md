@@ -112,8 +112,10 @@ abschließen:
    Viewport, Fehler-/Timeout-/Permission-Status.
 6. Genau ein synthetisches, reversibles und nicht persistentes Ziel bestimmen.
 7. Save, Delete, Submit, Patienten- oder Produktionsziele ablehnen.
-8. Bestätigen, dass kein Dispatch, Write, neuer Runtime-Key oder neuer
-   Real-Host-Lauf ausgelöst würde.
+8. Bestätigen, dass kein undeclared, unbudgeted oder unauthorized Dispatch,
+   Write, Runtime-Key oder Real-Host-Lauf ausgelöst wird. Jede tatsächlich
+   benötigte Konsequenz muss im aktiven Surface-Envelope deklariert sein und
+   sowohl die Aktivierungsformel als auch `action_budget_requirements` erfüllen.
 
 Zusätzlich je Surface den Transport getrennt prüfen:
 
