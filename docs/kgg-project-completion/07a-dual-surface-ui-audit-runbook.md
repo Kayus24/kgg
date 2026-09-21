@@ -120,6 +120,11 @@ Zusätzlich je Surface den Transport getrennt prüfen:
   `PATH`), ein auflösbares Playwright-Modul (über den optionalen
   `KGG_PLAYWRIGHT_NODE_PATH`-Override oder die normale Node-Modulauflösung)
   sowie `browser_host.js` und `browser_session_host.js` belegt sein.
+- Diese KGG-Variablen und Helper gelten nur, wenn die frisch entdeckte
+  Surface tatsächlich den KGG-Real-Browser-Backendpfad verwendet. Exponiert
+  eine Surface stattdessen einen unabhängigen nativen Browser-/Computer-Use-
+  Kanal, werden ausschließlich dessen live beobachtbare Voraussetzungen
+  geprüft; die KGG-Variablen werden nicht künstlich vorausgesetzt.
 - Die aktuelle `kgg-plugin/.mcp.json` exponiert nur `PYTHONUTF8` und aktiviert
   diese Real-Browser-Voraussetzungen nicht selbst.
 - Der frühere `CONTROL_PLANE_API_KEY` für B ist `NOT_RETAINED`. Falls B für
@@ -389,14 +394,18 @@ definierten Statusregeln setzen und nicht ausweichen.
 
 ## 16. Nicht-promotender Abschluss
 
-Nach jeder ausgeführten Surface folgt zwingend:
+Nach jeder ausgeführten Surface folgt zwingend, bevor gebundene flüchtige
+Evidence verworfen werden darf:
 
 ```text
 SURFACE_CLOSE
 → G08_RECONCILIATION
 → G09_RECONCILIATION
-→ STATUS_REVIEW
+→ INDEPENDENT_REHASH_BOUND
 ```
+
+Erst nachdem alle ausgeführten Surfaces so abgeschlossen sind, folgen der
+optionale Cross-Surface-Vergleich und der nicht-promotende `STATUS_REVIEW`.
 
 - G08 bindet ausschließlich beobachtete Safety-, Autorisierungs- und
   Side-Effect-Evidence.

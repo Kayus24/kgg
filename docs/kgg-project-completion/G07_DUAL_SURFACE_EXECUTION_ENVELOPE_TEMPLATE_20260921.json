@@ -10,10 +10,33 @@
     "observed_main_sha": null,
     "expected_head_sha": "12b13767cc1667f97d428e1f7f7b7978fe2e4ac4",
     "observed_head_sha": null,
+    "fresh_state_verified": false,
     "worktree_policy": "preserve_foreign_changes_and_bind_exact_owned_diff",
     "runbook_path": "docs/kgg-project-completion/07a-dual-surface-ui-audit-runbook.md",
     "gate_status_path": "docs/kgg-project-completion/gate-status.json",
     "capability_matrix_path": "docs/kgg-project-completion/A_B_C_CAPABILITY_MATRIX_V1.md"
+  },
+  "activation": {
+    "fail_closed": true,
+    "predicate": {
+      "all": [
+        "authorizes_execution == true",
+        "template_only == false",
+        "fresh_state.fresh_state_verified == true",
+        "selected_surface.enabled == true",
+        "selected_surface.run_budget > 0",
+        "selected_surface.consequence_authorized == true",
+        "budgets.total_real_host_runs > 0",
+        "selected_surface_budget > 0",
+        "selected_surface_budget == selected_surface.run_budget"
+      ]
+    },
+    "surface_budget_binding": {
+      "A": "budgets.surface_a_runs=surfaces.A.run_budget",
+      "B": "budgets.surface_b_runs=surfaces.B.run_budget"
+    },
+    "action_specific_budgets_must_also_be_positive": true,
+    "partial_activation_is_forbidden": true
   },
   "objective": "synthetic_dual_surface_ui_audit",
   "surfaces": {
@@ -101,6 +124,8 @@
     "create_new_tunnel_allowed": false
   },
   "real_browser_preflight": {
+    "scope": "APPLIES_ONLY_WHEN_SELECTED_SURFACE_USES_KGG_REAL_BROWSER_BACKEND",
+    "native_surface_backend_may_supply_independent_prerequisites": true,
     "KGG_REAL_BROWSER_required": true,
     "KGG_REAL_BROWSER_expected_value": "1",
     "KGG_BROWSER_NODE_override_optional": true,
@@ -124,8 +149,7 @@
     "real_browser_hook_live": false
   },
   "synthetic_app": {
-    "exact_url": null,
-    "tab_id": null,
+    "runtime_binding_policy": "observed app_url and tab_id are stored only under surfaces.A or surfaces.B; this object contains canonical target policy only",
     "preview_identity_verified": false,
     "synthetic_marker": null,
     "production": false,
@@ -158,12 +182,16 @@
     "surface_a_preflight",
     "surface_a_audit",
     "surface_a_close",
+    "surface_a_g08_reconciliation",
+    "surface_a_g09_reconciliation",
+    "surface_a_independent_rehash_bound",
     "surface_b_preflight",
     "surface_b_audit",
     "surface_b_close",
+    "surface_b_g08_reconciliation",
+    "surface_b_g09_reconciliation",
+    "surface_b_independent_rehash_bound",
     "cross_surface_comparison_without_capability_inheritance",
-    "g08_reconciliation",
-    "g09_reconciliation",
     "status_review_without_automatic_promotion",
     "final_technical_limit_if_required"
   ],
@@ -233,16 +261,34 @@
     "permanent_current_host_limit": "DOCUMENT_FINAL_TECHNICAL_LIMIT"
   },
   "g08_reconciliation": {
-    "performed": false,
-    "safety_evidence_refs": [],
-    "violations": [],
-    "proposed_disposition": "NO_STATUS_CHANGE"
+    "A": {
+      "performed": false,
+      "safety_evidence_refs": [],
+      "violations": [],
+      "proposed_disposition": "NO_STATUS_CHANGE"
+    },
+    "B": {
+      "performed": false,
+      "safety_evidence_refs": [],
+      "violations": [],
+      "proposed_disposition": "NO_STATUS_CHANGE"
+    }
   },
   "g09_reconciliation": {
-    "performed": false,
-    "provenance_evidence_refs": [],
-    "independent_rehash_status": "NOT_MEASURED",
-    "proposed_disposition": "NO_STATUS_CHANGE"
+    "A": {
+      "performed": false,
+      "provenance_evidence_refs": [],
+      "independent_rehash_status": "NOT_MEASURED",
+      "evidence_disposal_allowed": false,
+      "proposed_disposition": "NO_STATUS_CHANGE"
+    },
+    "B": {
+      "performed": false,
+      "provenance_evidence_refs": [],
+      "independent_rehash_status": "NOT_MEASURED",
+      "evidence_disposal_allowed": false,
+      "proposed_disposition": "NO_STATUS_CHANGE"
+    }
   },
   "status_review": {
     "automatic_gate_changes": false,
