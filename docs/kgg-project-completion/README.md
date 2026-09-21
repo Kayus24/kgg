@@ -2,9 +2,9 @@
 
 Stand dieses Kandidaten: 2026-09-21
 
-Fresh Remote Main nach G00-Merge: `8d1193cbb19e5ec63f597aa8a2e29fd22687369f`
+Fresh Remote Main nach G01-Merge: `fe62c8be2b48fbe7ba3f40313f2d016b5e07c69a`
 
-Lokaler HEAD nach G00-Merge: `8d1193cbb19e5ec63f597aa8a2e29fd22687369f`
+Lokaler HEAD nach G01-Merge: `fe62c8be2b48fbe7ba3f40313f2d016b5e07c69a`
 
 Dieses Verzeichnis ist die Arbeits- und Abschlusssteuerung für das KGG-Agentenprojekt. Es ersetzt keine Fach-, Safety-, Measurement- oder Release-Verträge. Bei Widerspruch gilt die jeweils fachlich kanonische Quelle; der Widerspruch wird als Gate-Blocker erfasst und nicht stillschweigend aufgelöst.
 
@@ -59,7 +59,7 @@ Ein Gate darf nur mit der in seinem Detaildokument verlangten Stufe auf `PASS` g
 | Gate | Pflichtpunkt | Aktueller Status | Aktuelle Evidence | Für PASS erforderlich | Detail |
 | --- | --- | --- | --- | --- | --- |
 | G00 | Source of Truth, Statusregister, Checkpoints | `PASS` | Dokumentensatz in PR #239 gemergt; Required Gate grün; Resume-Regel getestet | Fresh-Main-gebundener Dokumentensatz und eindeutiger nächster Gate-Schritt | [G00](00-governance-and-source-of-truth.md) |
-| G01 | Vollständige Custom-GPT-Funktionsinventur und Migration | `PASS` | 30 operationIds, fünf Skills, Manifest und kanonische Quellen abgebildet; Self-Tests grün | Jede benötigte Fähigkeit besitzt Zielkomponente, Test und Disposition; Live-Parität bleibt nachgelagert | [G01](01-custom-gpt-capability-migration.md) |
+| G01 | Vollständige Custom-GPT-Funktionsinventur und Migration | `PASS` | 30 operationIds, fünf Skills, Manifest und kanonische Quellen abgebildet; Self-Tests grün; PR #241 auf Main `fe62c8b` | Jede benötigte Fähigkeit besitzt Zielkomponente, Test und Disposition; Live-Parität bleibt nachgelagert | [G01](01-custom-gpt-capability-migration.md) |
 | G02 | Universelles Plugin-Paket | `PARTIAL` | `.codex-plugin`, Skills und lokaler stdio-MCP vorhanden | Paket in Codex und ChatGPT installierbar, versioniert und ohne lokale Pfadannahmen | [G02](02-universal-plugin-package.md) |
 | G03 | Normales ChatGPT erkennt und nutzt das Plugin | `FAIL` | Live-Test fand kein installiertes KGG-Plugin | Tool Discovery und read-only Tool-Aufruf im normalen ChatGPT mit E3-Evidence | [G03](03-chatgpt-plugin-connection.md) |
 | G04 | Echte Browser-/UI-Brücke | `FAIL` | MCP meldet ausdrücklich „synthetic“ und „no real screen capture“ | Echte Session, Screenshot, Koordinaten-/Semantik-Aktionen und Zustandsbeobachtung | [G04](04-real-browser-bridge.md) |
@@ -83,6 +83,8 @@ G08 und G09 werden bei jedem Implementierungsschritt mitgeführt. Sie dürfen di
 Der nächste produktive Schwerpunkt ist:
 
 `G02 Plugin-Paket preflighten → G03 ChatGPT-Verbindung beweisen → G04 echte Browser-Brücke implementieren.`
+
+Aktiver Checkpoint: `CP_G01_CAPABILITY_MATRIX_BOUND`. G01 ist abgeschlossen; der nächste zulässige Arbeitsschritt ist der G02-Preflight. Die bisherige G01-Evidence bleibt `E1_SYNTHETIC` für Capability-Abdeckung und beweist keine Live-ChatGPT-Parität.
 
 ## 6. Globale Control-Loop-Regel
 

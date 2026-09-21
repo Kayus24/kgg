@@ -22,8 +22,8 @@ G01. Für ChatGPT ist ein öffentlich per HTTPS erreichbarer MCP-Endpunkt oder e
 - `LIVE_EVIDENCE_STATUS=LOCAL_ONLY`
 - `GATE_STATUS=PARTIAL`
 - `EVIDENCE_LEVEL=E2_LOCAL_REAL_RUNTIME`
-- `LAST_VERIFIED_BASE_SHA=2b8024e359bd0f65bcc5666b5e190d78a4b4ed6f`
-- `LAST_VERIFIED_AT=2026-09-21`
+- `LAST_VERIFIED_BASE_SHA=fe62c8be2b48fbe7ba3f40313f2d016b5e07c69a`
+- `LAST_VERIFIED_AT=2026-09-21T10:12:30+02:00`
 
 ## 6. Bestehende Evidence
 
@@ -74,6 +74,18 @@ Keine Secrets im Paket. Remote MCP authentifiziert minimal, protokolliert keine 
 ## 12. Brother-GPT-Eskalation
 
 Bei unklarer Transportwahl soll der Brother offizielle Lösungen vergleichen und den kleinsten Pfad wählen; kein eigener Backend-Stack ohne Nachweis.
+
+## 12.1 G02-Preflight-Checkpoint
+
+- `CHECKPOINT_ID=CP_G02_PREFLIGHT_START`
+- `BASE_SHA=fe62c8be2b48fbe7ba3f40313f2d016b5e07c69a`
+- `DECISION=CONTINUE_INSIDE_EXISTING_SCOPE`
+- `LOCAL_MCP_BOUNDARY=present`
+- `CHATGPT_DISTRIBUTION_BOUNDARY=not_yet_proven`
+- `REAL_BROWSER_BOUNDARY=not_part_of_G02`
+- `NEXT_STEP=G02.1 manifest/runtime/transport audit`
+
+G02 darf die lokale stdio-Fähigkeit als Candidate-Evidence verwenden, aber nicht als Beweis für eine installierbare ChatGPT-Verbindung. Ein fehlender HTTPS-/Tunnel-Endpunkt wird als konkrete externe Voraussetzung klassifiziert, nicht durch synthetische Health- oder Screenshot-Daten überdeckt.
 
 ## 13. Abschlussartefakte
 
