@@ -57,6 +57,25 @@ def _real_browser_enabled() -> bool:
     return os.environ.get("KGG_REAL_BROWSER", "").casefold() in {"1", "true", "yes"}
 
 
+def _allowed_kgg_path(path: str) -> bool:
+    return path in {"/kgg", "/kgg-patient-preview"} or path.startswith("/kgg/") or path.startswith("/kgg-patient-preview/")
+
+
+def _app_url_allowed(value: Any) -> bool:
+    parsed = urlparse(str(value))
+    if parsed.username or parsed.password or parsed.fragment:
+        return False
+    if parsed.scheme == "http":
+        return parsed.hostname in {"localhost", "127.0.0.1"} and bool(parsed.netloc)
+    if parsed.scheme != "https" or not bool(parsed.netloc):
+        return False
+    if not _real_browser_enabled():
+        # Synthetic mode keeps its historical contract fixtures; the real
+        # browser boundary applies the strict KGG origin/path allowlist below.
+        return True
+    return parsed.hostname == "kayus24.github.io" and _allowed_kgg_path(parsed.path or "/")
+
+
 def _load_real_browser_module():
     """Load the optional sibling bridge even when this file is imported in tests."""
 
@@ -400,11 +419,7 @@ class Runtime:
         preview_sha = app["preview_sha"]
         if preview_sha is not None:
             _sha(preview_sha, "preview_sha")
-        parsed_url = urlparse(str(app["url"]))
-        if not (
-            (parsed_url.scheme == "https" and bool(parsed_url.netloc))
-            or (parsed_url.scheme == "http" and parsed_url.hostname in {"localhost", "127.0.0.1"} and bool(parsed_url.netloc))
-        ):
+        if not _app_url_allowed(app["url"]):
             _fail("app_url_invalid")
         if supplied["device_profile"] not in PROFILES:
             _fail("device_profile_invalid")

@@ -18,20 +18,20 @@ G04, G06, G08 und G09. Befehle werden aus `release-pipeline/kgg_test_battery.py`
 
 ## 5. Aktueller Stand
 
-- `IMPLEMENTATION_STATUS=BROAD_EXISTING_TESTS_REAL_BRIDGE_SUITE_MISSING`
-- `LIVE_EVIDENCE_STATUS=PARTIAL`
+- `IMPLEMENTATION_STATUS=REAL_BRIDGE_BLACK_BOX_NEGATIVE_REPLAY_SUITE_PRESENT`
+- `LIVE_EVIDENCE_STATUS=TARGETED_NEGATIVE_REPLAY_CRITICAL_AND_UI_REGRESSION_PASS; E3_PENDING`
 - `GATE_STATUS=PARTIAL`
 - `EVIDENCE_LEVEL=E2_LOCAL_REAL_RUNTIME`
-- `LAST_VERIFIED_BASE_SHA=2b8024e359bd0f65bcc5666b5e190d78a4b4ed6f`
+- `LAST_VERIFIED_BASE_SHA=1e6c6e3e28603f28bfbad3b127c688e722c823f5`
 - `LAST_VERIFIED_AT=2026-09-21`
 
 ## 6. Bestehende Evidence
 
-Critical/Regression-Battery, Playwright-UI-Smokes, GPT-Evals, Measurement-Tests, Fault Injection und Hook Guard existieren. Browserdependencies können Downloads auslösen und müssen vorab klassifiziert werden.
+Critical/Regression-Battery, Playwright-UI-Smokes, GPT-Evals, Measurement-Tests, Fault Injection, Hook Guard und eine unabhängige Real-Bridge-Black-Box-Suite existieren. Browserdependencies können Downloads auslösen und müssen vorab klassifiziert werden.
 
 ## 7. Lücke und Root Cause
 
-Producer und Real-Browser-Brücke sind nicht in einer unabhängigen Black-Box-Kette getestet. Synthetic-Tests decken gemeinsame Denkfehler nicht ab.
+Die lokale Producer-/Real-Browser-Brücke ist jetzt in einer unabhängigen Black-Box-Kette mit Drift-, Origin-, Zustands-, Hash- und Replay-Fällen getestet. E3-Agent-Host-Replay fehlt weiterhin.
 
 ## 8. Kleinschrittiger Arbeitsplan
 
@@ -81,4 +81,4 @@ Testmatrix, Ergebnisse, Fingerprint, Replay-Evidence, bekannte Grenzen und Recov
 
 ## 14. Beitragsherkunft
 
-`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
+`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PARTIAL`, `NOTE=Local real bridge, negative matrix and unchanged replay are green; external host replay remains pending.`

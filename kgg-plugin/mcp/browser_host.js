@@ -16,6 +16,19 @@ const MAX_TEXT = 200;
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 const SAFE_LABEL = /^[A-Za-z0-9][A-Za-z0-9 ._:/-]{0,199}$/;
 const SAFE_RUN = /^[a-z0-9][a-z0-9-]{5,128}$/;
+const ALLOWED_HTTPS_HOST = "kayus24.github.io";
+
+function allowedKggPath(pathname) {
+  return pathname === "/kgg" || pathname === "/kgg-patient-preview" || pathname.startsWith("/kgg/") || pathname.startsWith("/kgg-patient-preview/");
+}
+
+function allowedPageUrl(value) {
+  let parsed;
+  try { parsed = new URL(value); } catch { return false; }
+  const localHttp = parsed.protocol === "http:" && (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1");
+  const https = parsed.protocol === "https:" && parsed.hostname === ALLOWED_HTTPS_HOST && allowedKggPath(parsed.pathname);
+  return (localHttp || https) && !parsed.username && !parsed.password && !parsed.hash;
+}
 
 function fail(code, detail = "") {
   const error = new Error(detail ? `${code}: ${detail}` : code);
@@ -38,8 +51,8 @@ function safeUrl(value) {
   let parsed;
   try { parsed = new URL(value); } catch { fail("app_url_invalid"); }
   const localHttp = parsed.protocol === "http:" && (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1");
-  const https = parsed.protocol === "https:" && Boolean(parsed.hostname);
-  if (!localHttp && !https) fail("app_url_invalid");
+  const https = parsed.protocol === "https:" && parsed.hostname === ALLOWED_HTTPS_HOST && allowedKggPath(parsed.pathname);
+  if ((!localHttp && !https) || parsed.username || parsed.password || parsed.hash) fail("app_url_invalid");
   return parsed.toString();
 }
 
@@ -170,17 +183,24 @@ async function run(request) {
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height }, deviceScaleFactor: viewport.deviceScaleFactor });
   const page = await context.newPage();
+  let originViolation = false;
+  page.on("framenavigated", frame => {
+    if (frame === page.mainFrame() && !allowedPageUrl(frame.url())) originViolation = true;
+  });
   const output = [];
   const artifacts = [];
   let screenshotNumber = 0;
   try {
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 10000 });
+    if (originViolation || !allowedPageUrl(page.url())) fail("origin_escape");
     for (const step of steps) {
+      if (originViolation || !allowedPageUrl(page.url())) fail("origin_escape");
       if (step.operation === "capture_screenshot") screenshotNumber += 1;
       const value = await performStep(page, step, runId, screenshotNumber);
       output.push(value);
       for (const item of value.artifacts) artifacts.push(item);
     }
+    if (originViolation || !allowedPageUrl(page.url())) fail("origin_escape");
     const finalState = await stateValue(page);
     return { status: "PASS", error_class: "", steps: output, artifacts, final_state: finalState, runtime_ms: Date.now() - started };
   } catch (error) {

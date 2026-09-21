@@ -90,6 +90,22 @@ def _visual_request(*, session_id: str, request_id: str, operation: str) -> dict
 
 
 class KggRealBrowserBridgeTests(unittest.TestCase):
+    def test_https_origin_and_path_allowlist_fail_closed(self) -> None:
+        old = os.environ.get("KGG_REAL_BROWSER")
+        os.environ["KGG_REAL_BROWSER"] = "1"
+        try:
+            active = server.Runtime()
+            rejected = server.handle(active, {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "start_ui_session", "arguments": {"session": _session("https://example.com/kgg/", session_id="origin-blocked-session", request_id="origin-blocked-request")}}})
+            self.assertTrue(rejected["result"]["isError"])
+            self.assertIn("app_url_invalid", rejected["result"]["content"][0]["text"])
+            accepted = server.handle(active, {"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "start_ui_session", "arguments": {"session": _session("https://kayus24.github.io/kgg/", session_id="origin-allowed-session", request_id="origin-allowed-request")}}})
+            self.assertFalse(accepted["result"].get("isError", False), accepted)
+        finally:
+            if old is None:
+                os.environ.pop("KGG_REAL_BROWSER", None)
+            else:
+                os.environ["KGG_REAL_BROWSER"] = old
+
     def test_quick_flow_opens_visual_fallback_on_real_locator_drift(self) -> None:
         runtime = _runtime_available()
         if runtime is None:

@@ -23,6 +23,11 @@ from urllib.parse import urlparse
 
 MAX_IMAGE_BYTES = 2 * 1024 * 1024
 MAX_RESPONSE_BYTES = 8 * 1024 * 1024
+ALLOWED_HTTPS_HOSTS = {"kayus24.github.io"}
+
+
+def _allowed_kgg_path(path: str) -> bool:
+    return path in {"/kgg", "/kgg-patient-preview"} or path.startswith("/kgg/") or path.startswith("/kgg-patient-preview/")
 
 
 class RealBrowserError(RuntimeError):
@@ -38,7 +43,9 @@ def _safe_url(value: Any) -> str:
         raise RealBrowserError("real_browser_url_invalid")
     parsed = urlparse(value)
     local_http = parsed.scheme == "http" and parsed.hostname in {"localhost", "127.0.0.1"} and bool(parsed.netloc)
-    https = parsed.scheme == "https" and bool(parsed.netloc)
+    https = parsed.scheme == "https" and parsed.hostname in ALLOWED_HTTPS_HOSTS and _allowed_kgg_path(parsed.path or "/") and bool(parsed.netloc)
+    if parsed.username or parsed.password or parsed.fragment:
+        raise RealBrowserError("real_browser_url_invalid")
     if not local_http and not https:
         raise RealBrowserError("real_browser_url_invalid")
     return value

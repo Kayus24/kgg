@@ -19,10 +19,10 @@ G04 und bestehende Measurement-/Raw-Capture-Komponenten.
 ## 5. Aktueller Stand
 
 - `IMPLEMENTATION_STATUS=MEASUREMENT_AND_CODEX_RAW_CAPTURE_PRESENT`
-- `LIVE_EVIDENCE_STATUS=BROWSER_EVIDENCE_MISSING`
+- `LIVE_EVIDENCE_STATUS=LOCAL_BROWSER_SCREENSHOT_AND_ACTION_EVIDENCE_BOUND; E3_PENDING`
 - `GATE_STATUS=PARTIAL`
 - `EVIDENCE_LEVEL=E2_LOCAL_REAL_RUNTIME`
-- `LAST_VERIFIED_BASE_SHA=2b8024e359bd0f65bcc5666b5e190d78a4b4ed6f`
+- `LAST_VERIFIED_BASE_SHA=1e6c6e3e28603f28bfbad3b127c688e722c823f5`
 - `LAST_VERIFIED_AT=2026-09-21`
 
 ## 6. Bestehende Evidence
@@ -34,7 +34,7 @@ G04 und bestehende Measurement-/Raw-Capture-Komponenten.
 
 ## 7. Lücke und Root Cause
 
-Real-Browser-Screenshots und Aktionen werden noch nicht vom Plugin-Run retained und an die vorhandene Evidence-/Field-Provenance-Grenze gebunden.
+Real-Browser-Screenshots und Aktionen werden lokal retained, gehasht und in der bestehenden MCP-Evidence-Struktur an Run/Session gebunden. Die externe Host-Überführung in die Produktions-Measurement-Envelope ist weiterhin nicht bewiesen.
 
 Für den lokalen G05-Visual-Loop gilt zusätzlich ein gebundener Evidence-Paar-
 Vertrag: `observation_id`, `state_before`, `state_after`, ein SHA-256 für
@@ -90,4 +90,4 @@ Evidence-Index, Hash-/Retention-Regeln, Browser-Adapter-Mapping und Manipulation
 
 ## 14. Beitragsherkunft
 
-`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
+`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PARTIAL`, `NOTE=Local visual-loop, drift-fallback and replay evidence are retained and hash-checked; external envelope reconciliation remains pending.`

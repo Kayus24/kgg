@@ -18,24 +18,24 @@ G04-Design, `kgg-safety`, vorhandene Privacy-/Knowledge-Safety-Regeln und Conseq
 
 ## 5. Aktueller Stand
 
-- `IMPLEMENTATION_STATUS=STRONG_EXISTING_REPO_RULES_BROWSER_RULES_UNPROVEN`
-- `LIVE_EVIDENCE_STATUS=SYNTHETIC_ONLY_FOR_UI_LAB`
+- `IMPLEMENTATION_STATUS=REAL_BROWSER_BOUNDARY_WITH_ORIGIN_AND_PATH_ALLOWLIST`
+- `LIVE_EVIDENCE_STATUS=E2_LOCAL_REAL_NEGATIVE_AND_POSITIVE_BROWSER_TESTS; E3_PENDING`
 - `GATE_STATUS=PARTIAL`
-- `EVIDENCE_LEVEL=E1_SYNTHETIC`
-- `LAST_VERIFIED_BASE_SHA=2b8024e359bd0f65bcc5666b5e190d78a4b4ed6f`
+- `EVIDENCE_LEVEL=E2_LOCAL_REAL_RUNTIME`
+- `LAST_VERIFIED_BASE_SHA=1e6c6e3e28603f28bfbad3b127c688e722c823f5`
 - `LAST_VERIFIED_AT=2026-09-21`
 
 ## 6. Bestehende Evidence
 
-KGG besitzt Schutzbereiche, Secret Scan, Write Gates, synthetische Testdatenregeln und getrennte Release-/Preview-Freigaben.
+KGG besitzt Schutzbereiche, Secret Scan, Write Gates, synthetische Testdatenregeln und getrennte Release-/Preview-Freigaben. Der Real-Runner akzeptiert lokal nur `http://localhost`/`127.0.0.1`; HTTPS ist auf `kayus24.github.io` mit `/kgg`- oder `/kgg-patient-preview`-Pfad begrenzt. Session-Kontext und Screenshots bleiben ephemer und im Speicher.
 
 ## 7. Lücke und Root Cause
 
-Eine reale Browserbrücke existiert noch nicht; deshalb sind Origin-Schutz, Session-Lease, Screenshots, unerwartete Dialoge und Action-Limits am Realpfad unbelegt.
+Die lokale reale Browserbrücke und ihre Origin-/Pfadgrenze sind jetzt mit positiven und negativen Tests belegt. E3-Host-Evidence sowie Popup-, Download-, Clipboard- und Filechooser-Negativtests auf einer externen Agent-Surface fehlen weiterhin.
 
 ## 8. Kleinschrittiger Arbeitsplan
 
-1. erlaubte Origins und Start-URLs festlegen.
+1. erlaubte Origins und Start-URLs festlegen und fail-closed validieren.
 2. Browserprofil pro Run isolieren und nach Run löschen.
 3. Session-Lease, maximale Dauer und maximale Schritte erzwingen.
 4. Toolaktionen in read-only, UI-mutating-local und external-consequence klassifizieren.
@@ -80,4 +80,4 @@ Browserpolicy, Negativtests, Auth-/Lease-Vertrag, Sanitization-Report und Incide
 
 ## 14. Beitragsherkunft
 
-`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
+`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PARTIAL`, `NOTE=Local real-browser origin/path allowlist and negative start-boundary evidence added; external host safety remains pending.`

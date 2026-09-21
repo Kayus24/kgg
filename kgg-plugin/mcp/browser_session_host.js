@@ -16,6 +16,19 @@ const MAX_TEXT = 200;
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 const SAFE_LABEL = /^[A-Za-z0-9][A-Za-z0-9 ._:/-]{0,199}$/;
 const SAFE_RUN = /^[a-z0-9][a-z0-9-]{5,128}$/;
+const ALLOWED_HTTPS_HOST = "kayus24.github.io";
+
+function allowedKggPath(pathname) {
+  return pathname === "/kgg" || pathname === "/kgg-patient-preview" || pathname.startsWith("/kgg/") || pathname.startsWith("/kgg-patient-preview/");
+}
+
+function allowedPageUrl(value) {
+  let parsed;
+  try { parsed = new URL(value); } catch { return false; }
+  const localHttp = parsed.protocol === "http:" && (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1");
+  const https = parsed.protocol === "https:" && parsed.hostname === ALLOWED_HTTPS_HOST && allowedKggPath(parsed.pathname);
+  return (localHttp || https) && !parsed.username && !parsed.password && !parsed.hash;
+}
 
 function fail(code, detail = "") {
   const error = new Error(detail ? `${code}: ${detail}` : code);
@@ -38,8 +51,8 @@ function safeUrl(value) {
   let parsed;
   try { parsed = new URL(value); } catch { fail("app_url_invalid"); }
   const localHttp = parsed.protocol === "http:" && (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1");
-  const https = parsed.protocol === "https:" && Boolean(parsed.hostname);
-  if ((!localHttp && !https) || parsed.username || parsed.password) fail("app_url_invalid");
+  const https = parsed.protocol === "https:" && parsed.hostname === ALLOWED_HTTPS_HOST && allowedKggPath(parsed.pathname);
+  if ((!localHttp && !https) || parsed.username || parsed.password || parsed.hash) fail("app_url_invalid");
   return parsed.toString();
 }
 
@@ -99,6 +112,7 @@ function artifact(runId, sequence, buffer) {
 }
 
 async function stateValue(page) {
+  assertSafePage();
   const value = await page.evaluate(() => {
     const node = document.querySelector("[data-kgg-state]");
     return node?.getAttribute("data-kgg-state") || document.body?.getAttribute("data-kgg-state") || "unknown";
@@ -138,11 +152,16 @@ async function performAction(page, step) {
 }
 
 async function screenshot(page, runId, sequence) {
+  assertSafePage();
   const image = await page.screenshot({ type: "png", animations: "disabled" });
   return { artifact: artifact(runId, sequence, image), state: await stateValue(page) };
 }
 
-const session = { browser: null, context: null, page: null, runId: null, screenshotNumber: 0 };
+const session = { browser: null, context: null, page: null, runId: null, screenshotNumber: 0, originViolation: false };
+
+function assertSafePage() {
+  if (!session.page || session.originViolation || !allowedPageUrl(session.page.url())) fail("origin_escape");
+}
 
 async function handle(request) {
   if (!request || typeof request.command !== "string") fail("host_request_invalid");
@@ -154,18 +173,25 @@ async function handle(request) {
     session.browser = await chromium.launch({ headless: true });
     session.context = await session.browser.newContext({ viewport, deviceScaleFactor: viewport.deviceScaleFactor });
     session.page = await session.context.newPage();
+    session.originViolation = false;
+    session.page.on("framenavigated", frame => {
+      if (frame === session.page.mainFrame() && !allowedPageUrl(frame.url())) session.originViolation = true;
+    });
     session.runId = String(request.run_id);
     session.screenshotNumber = 0;
     await session.page.goto(url, { waitUntil: "domcontentloaded", timeout: 10000 });
+    assertSafePage();
     return { status: "PASS", error_class: "", state: await stateValue(session.page) };
   }
   if (!session.page) fail("visual_session_not_initialized");
   if (request.command === "observe") {
+    assertSafePage();
     session.screenshotNumber += 1;
     const observed = await screenshot(session.page, session.runId, session.screenshotNumber);
     return { status: "PASS", error_class: "", state: observed.state, artifacts: [observed.artifact] };
   }
   if (request.command === "act") {
+    assertSafePage();
     const step = safeStep(request.step);
     return { status: "PASS", error_class: "", action: await performAction(session.page, step) };
   }
