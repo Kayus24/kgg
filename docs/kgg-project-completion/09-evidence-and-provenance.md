@@ -82,4 +82,3 @@ Evidence-Index, Hash-/Retention-Regeln, Browser-Adapter-Mapping und Manipulation
 ## 14. Beitragsherkunft
 
 `CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
-

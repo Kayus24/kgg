@@ -79,4 +79,3 @@ Gemergter Master, valides Register, reproduzierbarer Resume-Test und erster aktu
 ## 14. Beitragsherkunft
 
 `CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
-

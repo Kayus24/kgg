@@ -78,4 +78,3 @@ Installationsnachweis, Tool-Discovery, Canary-Transcript, Version und Disable-/R
 ## 14. Beitragsherkunft
 
 `CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
-

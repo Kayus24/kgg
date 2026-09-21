@@ -81,4 +81,3 @@ Capability-Matrix, Surface-Canaries, Versionen, Grenzen und finaler Nutzungsents
 ## 14. Beitragsherkunft
 
 `CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
-

@@ -82,4 +82,3 @@ Real-Runner-Adapter, MCP-Tools, Tests, Tool-Dokumentation, Evidence-Schema und r
 ## 14. Beitragsherkunft
 
 `CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
-

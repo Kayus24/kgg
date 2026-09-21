@@ -81,4 +81,3 @@ Browserpolicy, Negativtests, Auth-/Lease-Vertrag, Sanitization-Report und Incide
 ## 14. Beitragsherkunft
 
 `CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
-

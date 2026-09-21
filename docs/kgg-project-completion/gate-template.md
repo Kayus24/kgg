@@ -88,4 +88,3 @@ INCORPORATED_BY=<actor>
 SOURCE_SUMMARY=<bounded summary>
 DECISION_SUMMARY=<bounded summary>
 ```
-

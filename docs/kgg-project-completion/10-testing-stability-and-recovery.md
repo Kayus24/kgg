@@ -82,4 +82,3 @@ Testmatrix, Ergebnisse, Fingerprint, Replay-Evidence, bekannte Grenzen und Recov
 ## 14. Beitragsherkunft
 
 `CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
-

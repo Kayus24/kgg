@@ -89,7 +89,6 @@ CONSTRAINTS=
 REUSABLE_COMPONENTS_CHECKED=
 ONE_DECISION_QUESTION=
 ```
-
 Pflichtantwort des Brother:
 
 ```text
@@ -126,4 +125,3 @@ INCORPORATED_BY=KGG_LEAD
 SOURCE_SUMMARY=<what the Brother contributed>
 DECISION_SUMMARY=<what was incorporated and why>
 ```
-

@@ -81,4 +81,3 @@ Loop-Vertrag, Referenzimplementierung, Evidence-Beispiel und robuste Black-Box-T
 ## 14. Beitragsherkunft
 
 `CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
-

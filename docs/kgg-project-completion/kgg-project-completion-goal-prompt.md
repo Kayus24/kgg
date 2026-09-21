@@ -503,4 +503,3 @@ CONTINUE at the first unmet sub-step of active_gate
 ```
 
 Nicht erneut das gesamte Projekt auditieren, wenn Checkpoints und relevante Hashes gültig sind. Ohne vermeidbare Unterbrechung bis zum nächsten echten Consequence Gate arbeiten.
-

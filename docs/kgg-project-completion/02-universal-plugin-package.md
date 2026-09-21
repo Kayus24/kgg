@@ -82,4 +82,3 @@ Installierbares Paket, Versionsmanifest, Capability-Health, Installationsanleitu
 ## 14. Beitragsherkunft
 
 `CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
-
