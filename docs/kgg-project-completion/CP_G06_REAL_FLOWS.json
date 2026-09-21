@@ -1,21 +1,31 @@
 {
   "checkpoint_id": "CP_G06_REAL_FLOWS",
   "base_sha": "1e6c6e3e28603f28bfbad3b127c688e722c823f5",
-  "head": "26aa301d9ba07782a3252c9f4377b772c7d80b9a",
+  "head": "4acbcdb4c12ad849ec3b9e12c60b5066dedcedd6",
   "worktree_state": "CLEAN",
   "goal_hash": "1b39a5d74dd0d56121806a42e0c85854922ebf62ff1a6c487c73f78dcc0b593d",
   "active_gate": "G06",
   "active_substep": "G06_REAL_QUICK_FLOWS",
   "decision": "PARTIAL",
-  "candidate_fingerprint": "G06_REAL_FLOWS_20260921_01",
+  "candidate_fingerprint": "G06_REAL_FLOWS_20260921_02",
   "evidence_level": "E2_LOCAL_REAL_RUNTIME",
+  "input_hashes": {
+    "kgg-plugin/mcp/server.py": "d6270818b1efa7576e2c1eafef97ba7ce8265ca5a5d1c22b3d0211290abb91ad",
+    "kgg-plugin/mcp/real_browser.py": "7a97f310dcfe4d5fd2448966716525074655ff4ca169a9855bd825448e082070",
+    "kgg-plugin/mcp/browser_session_host.js": "c2bb5a14a0eb24d701c19825d62e8457eb81bbf49a608cc22f2bfabce828c7f4",
+    "release-pipeline/kgg_ui_lab_real_fixture.html": "0a1595a18bdee27b8b6ef95434d2017c54daad79ca7e8e5aa92372d846beab76",
+    "release-pipeline/test_kgg_real_browser_bridge.py": "b2612917847f500d2bbb91b7acb98fee1db65fe4da54a5c9f2e8a311e29c8537",
+    "docs/kgg-project-completion/06-real-quick-flows.md": "397cfff6df18b471718e6a2b807873721299d451eb11820ced93a9759391138d"
+  },
   "evidence_refs": [
-    "python -m unittest release-pipeline/test_kgg_real_browser_bridge.py -v (3 tests PASS)",
+    "python -m unittest release-pipeline/test_kgg_real_browser_bridge.py -v (6 tests PASS)",
     "critical battery: 141 tests PASS, 1 skip",
     "ui-stability regression battery PASS",
     "hook guard PASS",
     "three allowlisted flows use the same real Playwright bridge",
     "each flow retains two screenshot hashes and a state transition",
+    "deterministic locator drift opens a real visual fallback and marks the flow stale",
+    "fallback action is caller-supplied and independently state-verified",
     "unknown real-flow names fail closed",
     "synthetic fixture remains separate from real-browser mode"
   ],
@@ -27,15 +37,15 @@
     ],
     "real_screenshot_pair_per_flow": true,
     "state_assertion_per_flow": true,
-    "visual_drift_fallback": false,
+    "visual_drift_fallback": true,
     "unchanged_replay": false
   },
   "open_blockers": [
     "G03_NO_TRANSPORT_EFB35FF",
     "G05_AGENT_DECISION_LOOP_NOT_BOUND",
-    "G06_VISUAL_DRIFT_FALLBACK_AND_REPLAY_PENDING"
+    "G06_UNCHANGED_REPLAY_PENDING"
   ],
-  "next_step": "G05_VISUAL_DRIFT_FALLBACK",
+  "next_step": "G06_UNCHANGED_REPLAY",
   "global_status_snapshot": {
     "production_control": "PILOT_INCOMPLETE",
     "a_b": "NOT_COMPARABLE",
