@@ -2,9 +2,9 @@
 
 Stand dieses Kandidaten: 2026-09-21
 
-Fresh Remote Main nach G01-Merge: `fe62c8be2b48fbe7ba3f40313f2d016b5e07c69a`
+Fresh Remote Main nach G02-Preflight-Checkpoint: `2fcac012d5463f7b690ec70971c71c51f3fa492e`
 
-Lokaler HEAD nach G01-Merge: `fe62c8be2b48fbe7ba3f40313f2d016b5e07c69a`
+Lokaler HEAD nach G02-Preflight-Checkpoint: `2fcac012d5463f7b690ec70971c71c51f3fa492e`
 
 Dieses Verzeichnis ist die Arbeits- und Abschlusssteuerung für das KGG-Agentenprojekt. Es ersetzt keine Fach-, Safety-, Measurement- oder Release-Verträge. Bei Widerspruch gilt die jeweils fachlich kanonische Quelle; der Widerspruch wird als Gate-Blocker erfasst und nicht stillschweigend aufgelöst.
 
@@ -60,7 +60,7 @@ Ein Gate darf nur mit der in seinem Detaildokument verlangten Stufe auf `PASS` g
 | --- | --- | --- | --- | --- | --- |
 | G00 | Source of Truth, Statusregister, Checkpoints | `PASS` | Dokumentensatz in PR #239 gemergt; Required Gate grün; Resume-Regel getestet | Fresh-Main-gebundener Dokumentensatz und eindeutiger nächster Gate-Schritt | [G00](00-governance-and-source-of-truth.md) |
 | G01 | Vollständige Custom-GPT-Funktionsinventur und Migration | `PASS` | 30 operationIds, fünf Skills, Manifest und kanonische Quellen abgebildet; Self-Tests grün; PR #241 auf Main `fe62c8b` | Jede benötigte Fähigkeit besitzt Zielkomponente, Test und Disposition; Live-Parität bleibt nachgelagert | [G01](01-custom-gpt-capability-migration.md) |
-| G02 | Universelles Plugin-Paket | `PARTIAL` | `.codex-plugin`, Skills und lokaler stdio-MCP vorhanden | Paket in Codex und ChatGPT installierbar, versioniert und ohne lokale Pfadannahmen | [G02](02-universal-plugin-package.md) |
+| G02 | Universelles Plugin-Paket | `PARTIAL` | Lokale Candidate- und Paketprüfung grün; OpenAI-Transportpfad dokumentiert; ChatGPT-Discovery noch nicht live bewiesen | Paket in Codex und ChatGPT installierbar, versioniert und ohne lokale Pfadannahmen | [G02](02-universal-plugin-package.md) |
 | G03 | Normales ChatGPT erkennt und nutzt das Plugin | `FAIL` | Live-Test fand kein installiertes KGG-Plugin | Tool Discovery und read-only Tool-Aufruf im normalen ChatGPT mit E3-Evidence | [G03](03-chatgpt-plugin-connection.md) |
 | G04 | Echte Browser-/UI-Brücke | `FAIL` | MCP meldet ausdrücklich „synthetic“ und „no real screen capture“ | Echte Session, Screenshot, Koordinaten-/Semantik-Aktionen und Zustandsbeobachtung | [G04](04-real-browser-bridge.md) |
 | G05 | Visueller Screenshot-Aktions-Regelkreis | `BLOCKED` | nur Testskripte/Fixtures, kein Agenten-End-to-End-Kanal | Zwei-Screenshot-Loop mit echter Aktion und unabhängiger Zustandsprüfung | [G05](05-visual-interaction-loop.md) |
