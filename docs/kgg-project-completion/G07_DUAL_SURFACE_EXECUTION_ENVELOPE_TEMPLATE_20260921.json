@@ -126,7 +126,7 @@
   "real_browser_preflight": {
     "scope": "APPLIES_ONLY_WHEN_SELECTED_SURFACE_USES_KGG_REAL_BROWSER_BACKEND",
     "native_surface_backend_may_supply_independent_prerequisites": true,
-    "KGG_REAL_BROWSER_required": true,
+    "KGG_REAL_BROWSER_required_if_backend_selected": true,
     "KGG_REAL_BROWSER_expected_value": "1",
     "KGG_BROWSER_NODE_override_optional": true,
     "KGG_BROWSER_NODE_path": null,
