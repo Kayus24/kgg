@@ -23,7 +23,7 @@ G04 und bestehende Measurement-/Raw-Capture-Komponenten.
 - `GATE_STATUS=PARTIAL`
 - `EVIDENCE_LEVEL=E2_LOCAL_REAL_RUNTIME`
 - `LAST_VERIFIED_BASE_SHA=1e6c6e3e28603f28bfbad3b127c688e722c823f5`
-- `LAST_VERIFIED_AT=2026-09-21`
+- `LAST_VERIFIED_AT=2026-09-21T19:33:00+02:00`
 
 ## 6. Bestehende Evidence
 
@@ -42,6 +42,11 @@ Screenshot A und B sowie die normalisierte Entscheidung müssen aus derselben
 ephemeren Browser-Session stammen. Ein Screenshot aus einem getrennten Lauf,
 ein Modell-Self-Report oder ein nicht verifizierter Zielzustand darf nicht als
 Visual-Loop-Evidence übernommen werden.
+
+Die aktuelle lokale Safety-/Provenance-Suite ist in
+[`CP_G08_G09_LOCAL_SAFETY_PROVENANCE_20260921.json`](CP_G08_G09_LOCAL_SAFETY_PROVENANCE_20260921.json)
+mit 57/57 PASS gebunden. Die externe Überführung in die Produktions-
+Measurement-Envelope bleibt ausdrücklich `NOT_PROVEN`.
 
 ## 8. Kleinschrittiger Arbeitsplan
 

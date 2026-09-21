@@ -4,14 +4,19 @@ Stand dieses Kandidaten: 2026-09-21
 
 Fresh Remote Main nach G03-Transport-Check: `1e6c6e3e28603f28bfbad3b127c688e722c823f5`
 
-Letzter verifizierter Code-Checkpoint nach G05-Visual-Loop: `d9e388939761b6af5290d2575f7d28021c46ad6f`
+Letzter verifizierter Realpfad-Code-Checkpoint: `dafa352164d1a14e2c5036aac90b27459e79a0fe`
+
+Letzter Dokumentations-/Safety-Checkpoint: `211d6a2677926839fa79ba69eb09ed1389e2aa3b`
 
 Dieses Verzeichnis ist die Arbeits- und Abschlusssteuerung für das KGG-Agentenprojekt. Es ersetzt keine Fach-, Safety-, Measurement- oder Release-Verträge. Bei Widerspruch gilt die jeweils fachlich kanonische Quelle; der Widerspruch wird als Gate-Blocker erfasst und nicht stillschweigend aufgelöst.
 
 Die kompakte Kriterienübersicht für „läuft“ versus „vollständig abgeschlossen“
-steht in [project-readiness.md](project-readiness.md). Sie ist eine lesbare
-Arbeitsansicht; `gate-status.json` bleibt die einzige maschinenlesbare
-Statusquelle.
+und die vorbereitete Arbeitsgrundlage für kleinere Modelle stehen in
+[project-readiness.md](project-readiness.md). Dort ist jeder Pflichtpunkt mit
+Gate-Kriterium, Erfüllungsstand, Evidence-Lücke, nächstem Schritt und
+Detaildokument erfasst. `gate-status.json` bleibt die einzige maschinenlesbare
+Statusquelle; der Goal-Prompt ist
+[kgg-project-completion-goal-prompt.md](kgg-project-completion-goal-prompt.md).
 
 ## 1. Unveränderliches Oberziel
 
@@ -66,16 +71,16 @@ Ein Gate darf nur mit der in seinem Detaildokument verlangten Stufe auf `PASS` g
 | G00 | Source of Truth, Statusregister, Checkpoints | `PASS` | Dokumentensatz in PR #239 gemergt; Required Gate grün; Resume-Regel getestet | Fresh-Main-gebundener Dokumentensatz und eindeutiger nächster Gate-Schritt | [G00](00-governance-and-source-of-truth.md) |
 | G01 | Vollständige Custom-GPT-Funktionsinventur und Migration | `PASS` | 30 operationIds, fünf Skills, Manifest und kanonische Quellen abgebildet; Self-Tests grün; PR #241 auf Main `fe62c8b` | Jede benötigte Fähigkeit besitzt Zielkomponente, Test und Disposition; Live-Parität bleibt nachgelagert | [G01](01-custom-gpt-capability-migration.md) |
 | G02 | Universelles Plugin-Paket | `PARTIAL` | Portable Root-Manifest, repo-lokale Marketplace-Registrierung und frische lokale Codex-Installation grün; ChatGPT-Discovery noch nicht live bewiesen | Paket in Codex und ChatGPT installierbar, versioniert und ohne lokale Pfadannahmen | [G02](02-universal-plugin-package.md) |
-| G03 | Normales ChatGPT erkennt und nutzt das Plugin | `BLOCKED` | Frische Plugin-Verzeichnissuche nach `KGG` liefert „Derzeit passen keine Plugins zu dieser Suche“; kein HTTPS-/Secure-MCP-Endpunkt vorhanden | Bereitgestellter Endpoint oder ausdrücklich aktivierter Secure-MCP-Tunnel, danach Discovery und read-only Tool-Aufruf mit E3-Evidence | [G03](03-chatgpt-plugin-connection.md) |
+| G03 | Normales ChatGPT erkennt und nutzt das Plugin | `PASS` | Private Tunnelressource, offizieller Client, verbundene ChatGPT-App und genau ein read-only `get_current_state`-Canary mit `status=ready`; Client danach gestoppt; Secret nie in Evidence gespeichert | Für G07 den proven Transport verwenden; keinen zweiten G03-Canary ausführen | [G03](03-chatgpt-plugin-connection.md) |
 | G04 | Echte Browser-/UI-Brücke | `PASS` | Lokaler realer Chromium-Lauf: zwei unterschiedliche Screenshot-Hashes, Zustandswechsel und fail-closed Hostfehler; E2 | Echte Session, Screenshot, Koordinaten-/Semantik-Aktionen und Zustandsbeobachtung | [G04](04-real-browser-bridge.md) |
 | G05 | Visueller Screenshot-Aktions-Regelkreis | `PARTIAL` | lokaler persistenter Observe/Decide/Act/Verify-Loop mit E2-Evidence; Host-Parität fehlt | Autorisierten Agent-Host anbinden und E3 nachweisen | [G05](05-visual-interaction-loop.md) |
 | G06 | Reale Quick Flows | `PARTIAL` | Drei kanonische Flows, echter Locator-Drift-Fallback und unveränderter Replay lokal nachgewiesen; E3-Host-Parität fehlt | Mindestens drei reale, versionierte Flows mit Fallback, Step Evidence und unverändertem Replay | [G06](06-real-quick-flows.md) |
-| G07 | Surface-Integration A/B/C | `PARTIAL` | Custom GPT Actions und Codex-MCP getrennt vorhanden | ehrliche, live geprüfte Capability-Matrix für A/B/C | [G07](07-surface-integration.md) |
-| G08 | Safety, Datenschutz und Autorisierung | `PARTIAL` | lokale Realpfad-Origin-/Pfad-Allowlist und Negativtests grün; externe Host-Safety fehlt | Domain-Allowlist, Lease, Limits, Sanitization und Negativtests am Realpfad | [G08](08-security-privacy-and-authorization.md) |
-| G09 | Evidence und Provenance | `PARTIAL` | lokale Screenshot-/Action-Evidence retained und gehasht; externe Envelope-Reconciliation fehlt | Browser-Evidence retained, gehasht, run-gebunden; keine erfundenen Nullwerte | [G09](09-evidence-and-provenance.md) |
-| G10 | Test-, Fault- und Stabilitätsloops | `PARTIAL` | Black-Box, Drift, Origin, Replay, Critical und UI-Regression grün; E3-Replay fehlt | Black-Box-Realpfad, Negative, Regression, Full Gate, unveränderter Replay | [G10](10-testing-stability-and-recovery.md) |
-| G11 | Brother-GPT-Eskalation und Dokumentpflege | `PARTIAL` | Escalation Skill vorhanden; neue Governance lokal | einmaliger geprüfter Handoff, Self-Review, Lead-Review und Herkunftsblock | [G11](11-brother-gpt-escalation.md) |
-| G12 | Release, Migration und Betrieb | `BLOCKED` | Kandidat lokal/teilweise gemergt; Kernpfad nicht fertig | PR/Merge, Installation, Post-Merge-Canary, Rollback und finale Einsatzentscheidung | [G12](12-release-migration-and-operations.md) |
+| G07 | Surface-Integration A/B/C | `PASS` (Klassifikation) | A read-only Action-Canary E3; B ChatGPT-App-Health E3 partiell; C lokaler MCP-Health E2; vollständige Matrix in `A_B_C_CAPABILITY_MATRIX_V1.md` | ehrliche, live geprüfte Capability-Matrix und begründete NOT_TESTED/SYNTHETIC_ONLY-Zeilen; keine Capability-Vererbung; keine Aussage über vollständige UI-Parität | [G07](07-surface-integration.md) |
+| G08 | Safety, Datenschutz und Autorisierung | `PARTIAL` | lokale Realpfad-Origin-/Pfad-Allowlist und 57/57 Negativ-/Safety-Tests grün; externe Host-Safety fehlt | Domain-Allowlist, Lease, Limits, Sanitization und Negativtests am Realpfad; E3 bleibt offen | [G08](08-security-privacy-and-authorization.md) |
+| G09 | Evidence und Provenance | `PARTIAL` | lokale Screenshot-/Action-/Measurement-Evidence und 57/57 Rehash-/Tamper-Tests grün; externe Envelope-Reconciliation fehlt | Browser-Evidence retained, gehasht, run-gebunden; keine erfundenen Nullwerte; E3 bleibt offen | [G09](09-evidence-and-provenance.md) |
+| G10 | Test-, Fault- und Stabilitätsloops | `PASS` (lokale Candidate-Stabilität) | Black-Box, Drift, Origin, Replay, Critical und UI-Regression grün; genau ein unveränderter Critical-Replay; E3-Replay fehlt | Black-Box-Realpfad, Negative, Regression, Full Gate, unveränderter Replay; E3 bleibt technische Grenze | [G10](10-testing-stability-and-recovery.md) |
+| G11 | Brother-GPT-Eskalation und Dokumentpflege | `PASS` | G03-Blocker mit Handoff, Self-Review, Lead-Review und Herkunftsblock in `CP_G11_BROTHER_CYCLE_20260921.json` gebunden | Bei neuem Fingerprint denselben geprüften Ablauf wiederverwenden; unveränderte Fingerprints nicht erneut senden | [G11](11-brother-gpt-escalation.md) |
+| G12 | Release, Migration und Betrieb | `BLOCKED` | Lokale Gates dokumentiert; G05/G06/G08/G09-E3-Grenzen sowie PR/Merge/Post-Merge-Canary offen | Nur separat autorisierte PR-/Merge-Konsequenz; keine Migration oder Ersetzbarkeit behaupten | [G12](12-release-migration-and-operations.md) |
 
 ## 5. Kritischer Pfad
 
@@ -87,9 +92,9 @@ G08 und G09 werden bei jedem Implementierungsschritt mitgeführt. Sie dürfen di
 
 Der nächste produktive Schwerpunkt ist:
 
-`G03 ChatGPT-Verbindung beweisen → G05 visuellen Regelkreis an die lokale G04-Brücke binden → G06 drei reale Quick Flows.`
+`G03 ChatGPT-Verbindung ist bewiesen → G07 Surface-Matrix durchführen → G05 visuellen Regelkreis an die lokale G04-Brücke binden → G06 drei reale Quick Flows.`
 
-Aktiver Checkpoint: `CP_G03_TRANSPORT_BLOCKED`. G02.1 (portables Root-Manifest), G02.2 (repo-lokale Marketplace-Registrierung plus frische Codex-Installation) und G02.3 (Transport-Preflight) sind abgeschlossen. Der einzige nächste Schritt ist die Bereitstellung eines autorisierten HTTPS-/Secure-MCP-Endpoints; danach kann G03 erneut mit einem frischen ChatGPT-Discovery-Canary geprüft werden. Keine lokale stdio-Evidence wird als ChatGPT-Parität gewertet.
+Aktiver Checkpoint: `CP_G10_STABILITY_REPLAY_20260921`. G02.1 (portables Root-Manifest), G02.2 (repo-lokale Marketplace-Registrierung plus frische Codex-Installation), G02.3 (Transport-Preflight), die read-only Workspace-Eligibility-Prüfung, G03-Transport/Discovery, G07-Klassifikation, die lokale G08/G09-Safety-/Provenance-Suite und G10-Critical/Replay sind abgeschlossen. G08/G09 bleiben wegen fehlender externer Host-Evidence `PARTIAL`; G10 ist als lokale Candidate-Stabilität `PASS`; G12 ist jetzt der aktive, für externe Konsequenzen geblockte Gate-Schritt. Keine lokale stdio-Evidence wird als ChatGPT-Parität gewertet.
 
 ## 6. Globale Control-Loop-Regel
 
@@ -126,6 +131,14 @@ Bei einem unbekannten Problem wird nicht geraten. Es gilt [G11](11-brother-gpt-e
 - G04-Checkpoint-Capsule: [CP_G04_REAL_BROWSER.json](CP_G04_REAL_BROWSER.json)
 - G05-Checkpoint-Capsule: [CP_G05_VISUAL_LOOP.json](CP_G05_VISUAL_LOOP.json)
 - G06-Checkpoint-Capsule: [CP_G06_REAL_FLOWS.json](CP_G06_REAL_FLOWS.json)
+- G03-Aktivierungs-Runbook: [03a-g03-transport-activation-runbook.md](03a-g03-transport-activation-runbook.md)
+- G03-Human-Gate-Paket: [G03_HUMAN_GATE_REQUEST_20260921.json](G03_HUMAN_GATE_REQUEST_20260921.json)
+- G03-Runtime-Key-Gate: [G03_RUNTIME_KEY_GATE_20260921.json](G03_RUNTIME_KEY_GATE_20260921.json)
+- G07-A/B/C-Capability-Matrix: [A_B_C_CAPABILITY_MATRIX_V1.md](A_B_C_CAPABILITY_MATRIX_V1.md)
+- G07-Checkpoint-Capsule: [CP_G07_SURFACE_MATRIX_20260921.json](CP_G07_SURFACE_MATRIX_20260921.json)
+- G07-Host-Boundary-Preflight: [G07_HOST_BOUNDARY_PREFLIGHT_20260921.json](G07_HOST_BOUNDARY_PREFLIGHT_20260921.json)
+- G08/G09-Safety-/Provenance-Checkpoint: [CP_G08_G09_LOCAL_SAFETY_PROVENANCE_20260921.json](CP_G08_G09_LOCAL_SAFETY_PROVENANCE_20260921.json)
+- G10-Stabilitäts-/Replay-Checkpoint: [CP_G10_STABILITY_REPLAY_20260921.json](CP_G10_STABILITY_REPLAY_20260921.json)
 - Kriterien- und Betriebsübersicht: [project-readiness.md](project-readiness.md)
 - Einheitliches Sub-Dokument-Schema: [gate-template.md](gate-template.md)
 - Ausführbarer driftfester Auftrag: [kgg-project-completion-goal-prompt.md](kgg-project-completion-goal-prompt.md)

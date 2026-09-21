@@ -1,4 +1,4 @@
-# KGG – Betriebsfähigkeit, Erfüllungskriterien und Arbeitsindex
+# KGG – Projektanforderungen, Gate-Register und Arbeitsindex
 
 ## Zweck und Autorität
 
@@ -15,6 +15,23 @@ Detaildokument je Punkt.
 Historische Chats, alte Runs und frühere SHAs ersetzen keine Fresh-Evidence.
 Bei Widerspruch gilt Fresh Main plus `gate-status.json`.
 
+### Dokumentvertrag
+
+```text
+DOCUMENT_ROLE=MASTER_REQUIREMENTS_INDEX
+STATUS_SOURCE=gate-status.json
+DETAIL_TEMPLATE=gate-template.md
+GOAL_PROMPT=kgg-project-completion-goal-prompt.md
+ONE_ACTIVE_GATE=true
+ONE_NEXT_STEP_PER_GATE=true
+```
+
+Dieses Dokument ist damit die angeforderte Gesamtübersicht: Jeder Pflichtpunkt
+hat ein prüfbares Gate, einen aktuellen Erfüllungsgrad, eine Evidence-Lücke,
+einen nächsten zulässigen Schritt und genau ein Detaildokument. Die
+maschinenlesbare Statusquelle bleibt trotzdem `gate-status.json`; hier wird
+keine zweite Statusquelle eingeführt.
+
 Dieses Dokument ist zugleich der vorbereitete Arbeitsindex für kleinere
 Modelle. Es enthält pro Pflichtpunkt das Ergebnis, das Gate-Kriterium, die
 aktuelle Evidence-Lücke, den nächsten zulässigen Schritt und den Verweis auf
@@ -22,6 +39,24 @@ das Detaildokument. Ein Modell muss den technischen Plan daher nicht aus dem
 Chatverlauf rekonstruieren.
 
 ## Was „läuft“ und was „vollständig abgeschlossen“ bedeutet
+
+## Produktumfang, der tatsächlich abgenommen werden muss
+
+Das Projekt hat zwei gleichrangige Betriebsziele:
+
+1. Die dauerhaft benötigten Custom-GPT-Funktionen sind als versioniertes,
+   portables Plugin für die unterstützten Hosts abgebildet. ChatGPT, Custom GPT
+   und Codex werden getrennt bewertet; eine lokale MCP-Installation beweist
+   nicht automatisch ChatGPT-Verfügbarkeit.
+2. Der UI-Lab-Kanal kann eine erlaubte KGG-HTML-Testseite über eine echte
+   Browsergrenze öffnen und den Regelkreis
+   `Screenshot → Auswertung → Klick/Move/Touch → neuer Screenshot →
+   Zustandsprüfung` ausführen. Bekannte Bedienfolgen werden als versionierte
+   Quick Flows mit visueller Fallback-Route geführt.
+
+Measurement, Provenance, Safety und Release sind Abnahmekriterien für diese
+beiden Ziele, aber kein Ersatz für die echte Browseraktion oder den echten
+Plugin-Host-Nachweis.
 
 ### Mindest-Betriebsfähigkeit
 
@@ -64,16 +99,16 @@ ein Consequence Gate fehlt · `UNKNOWN` = autoritative Prüfung fehlt ·
 | G00 | Eine Fresh-Baseline, eine Statusquelle und Resume-Checkpoints existieren. | Fresh Main, Master, Register und aktives Detaildokument stimmen überein; genau ein nächster Schritt. | E2: gebundener SHA, Register, Checkpoint | `PASS` | Bei Status-/Quellenänderung gezielt neu binden. | [G00](00-governance-and-source-of-truth.md) |
 | G01 | Alle benötigten Custom-GPT-Fähigkeiten sind inventarisiert und einem Plugin-Baustein, Test und Endstatus zugeordnet. | Keine Capability-Zeile bleibt ohne Owner, Test oder Disposition. | E1: vollständige Matrix und Tests | `PASS` | Nur bei neuer Capability ergänzen. | [G01](01-custom-gpt-capability-migration.md) |
 | G02 | Das Plugin ist versioniert, portabel und installierbar. | Installation aus dem vorgesehenen Paket; keine lokale Pfadannahme; Manifest und Marketplace konsistent. | E2: frische lokale Installation; E3 für ChatGPT | `PARTIAL` | Transport- und Hostvoraussetzungen für G03/G04 klären. | [G02](02-universal-plugin-package.md) |
-| G03 | Normales ChatGPT entdeckt das Plugin und ruft mindestens ein read-only Tool auf. | Fresh Discovery plus echter read-only Tool-Canary mit E3-Evidence. | E3: Discovery, Tool-Request, Tool-Response | `BLOCKED` | Genau einen autorisierten HTTPS-/Secure-MCP-Endpunkt bereitstellen, danach Discovery erneut prüfen. | [G03](03-chatgpt-plugin-connection.md) |
+| G03 | Normales ChatGPT entdeckt das Plugin und ruft mindestens ein read-only Tool auf. | Fresh Discovery plus echter read-only Tool-Canary mit E3-Evidence. | E3: Discovery, Tool-Request, Tool-Response | `PASS` | Private Tunnelressource, Client-Health, verbundene ChatGPT-App und genau ein `get_current_state(actor=system)`-Canary mit `status=ready` sind gebunden; Client danach gestoppt, Secret nicht gespeichert. | [G03](03-chatgpt-plugin-connection.md) |
 | G04 | Eine echte, isolierte Browserbrücke steuert die erlaubte KGG-Testseite. | Session → Open → Screenshot A → echte Aktion → Screenshot/Zustand B → End; alles run-gebunden. | E2 lokal, E3 für Host-Parität | `PASS` (E2 lokal) | G05 visuellen Agentenloop und G06 drei reale Flows binden; E3-Host-Parität bleibt separat. | [G04](04-real-browser-bridge.md) |
 | G05 | Der visuelle Regelkreis funktioniert. | GPT wertet Screenshot A aus, führt genau eine Aktion aus und bestätigt den geänderten Zustand anhand B; kein behaupteter Erfolg ohne Runner-Evidence. | E2 lokal, E3 für unterstützte Host-Surface | `PARTIAL` | Persistenten Visual Loop an einen autorisierten Agent-Host binden und E3 nachweisen. | [G05](05-visual-interaction-loop.md) |
 | G06 | Mindestens drei Quick Flows laufen real und versioniert. | Jeder Schritt hat Assertion, Evidence und visuellen Fallback; stale Flows stoppen fail-closed. | E2/E3 pro Flow plus unveränderter Replay | `PARTIAL` | Lokaler Drift-Fallback und Replay sind gebunden; E3-Host-Evidence ergänzen. | [G06](06-real-quick-flows.md) |
-| G07 | A/B/C sind getrennt und ehrlich klassifiziert. | Keine Capability wird von einer Surface auf eine andere übertragen; pro Surface eigener Canary oder `NOT_SUPPORTED`. | E3 je erreichbarer Surface; begründetes `NOT_SUPPORTED` sonst | `PARTIAL` | Nach G03/G04/G06 unabhängige Canaries durchführen. | [G07](07-surface-integration.md) |
-| G08 | Safety und Autorisierung begrenzen den Realpfad. | Domain-Allowlist, Lease, Limits, Sanitization und Negativtests blockieren unzulässige Aktionen. | E2/E3 positive und negative Realpfad-Evidence | `PARTIAL` | Lokale Origin-/Pfadgrenze ist belegt; externe Popup-/Download-/Filechooser- und E3-Safety-Evidence ergänzen. | [G08](08-security-privacy-and-authorization.md) |
-| G09 | Jede Messung ist provenance-first. | Raw Evidence, Hash, Run-ID, Surface, Base-SHA und Field-Provenance sind re-hashbar; unbekannt bleibt `NOT_MEASURED`. | E2/E3 Raw-Evidence-Rehash und Envelope-Validation | `PARTIAL` | Lokale Screenshot-/Action-Evidence ist gebunden; externe Measurement-Envelope-Reconciliation ergänzen. | [G09](09-evidence-and-provenance.md) |
-| G10 | Fehler werden reproduzierbar erkannt und sicher behandelt. | RED → Fix → Targeted → Negative → Regression → Full Gate → genau ein Unchanged Replay. | E2/E3 Testresultate und Replay-Fingerprint | `PARTIAL` | Lokale Black-Box-, Negative-, Critical-, UI-Regression- und Replay-Evidence ist grün; E3-Replay ergänzen. | [G10](10-testing-stability-and-recovery.md) |
-| G11 | Ungelöste Probleme werden einmalig, geprüft und nachvollziehbar an Brother GPT übergeben. | Fingerprint, Handoff, Self-Review, Lead-Review und Herkunftsblock sind vollständig. | E1/E2 kompletter Advisory-Zyklus | `PARTIAL` | Einen vollständigen synthetischen Advisory-Zyklus validieren. | [G11](11-brother-gpt-escalation.md) |
-| G12 | Release, Installation, Canary, Rollback und Betriebsmodus sind nachgewiesen. | Gemergter SHA, Post-Merge-Canary, Evidence-Reconciliation und Rückfall auf Custom GPT sind dokumentiert. | E3/E4 Merge-, Canary- und Rollback-Evidence | `BLOCKED` | Erst alle technischen Pflicht-Gates finalisieren und Consequence Gates bündeln. | [G12](12-release-migration-and-operations.md) |
+| G07 | A/B/C sind getrennt und ehrlich klassifiziert. | Keine Capability wird von einer Surface auf eine andere übertragen; pro Surface eigener Canary oder begründetes `NOT_TESTED`/`SYNTHETIC_ONLY`. | E3 je erreichbarer Surface; E2 für lokalen Pluginpfad; keine lokale Evidence als Host-Parität | `PASS` (Klassifikation) | G08/G09 weiterführen; B/C hostabhängige Zeilen bleiben technisch begrenzt. | [G07](07-surface-integration.md) |
+| G08 | Safety und Autorisierung begrenzen den Realpfad. | Domain-Allowlist, Lease, Limits, Sanitization und Negativtests blockieren unzulässige Aktionen. | E2/E3 positive und negative Realpfad-Evidence | `PARTIAL` | Lokale Safety-Suite 57/57 PASS; externe Popup-/Download-/Filechooser- und E3-Safety-Evidence bleiben offen. | [G08](08-security-privacy-and-authorization.md) |
+| G09 | Jede Messung ist provenance-first. | Raw Evidence, Hash, Run-ID, Surface, Base-SHA und Field-Provenance sind re-hashbar; unbekannt bleibt `NOT_MEASURED`. | E2/E3 Raw-Evidence-Rehash und Envelope-Validation | `PARTIAL` | Lokale Rehash-/Tamper-Suite 57/57 PASS; externe Measurement-Envelope-Reconciliation bleibt offen. | [G09](09-evidence-and-provenance.md) |
+| G10 | Fehler werden reproduzierbar erkannt und sicher behandelt. | RED → Fix → Targeted → Negative → Regression → Full Gate → genau ein Unchanged Replay. | E2/E3 Testresultate und Replay-Fingerprint | `PASS` (lokale Candidate-Stabilität) | Lokale Black-Box-, Negative-, Critical-, UI-Regression- und Replay-Evidence ist grün; E3-Replay bleibt technische Grenze. | [G10](10-testing-stability-and-recovery.md) |
+| G11 | Ungelöste Probleme werden einmalig, geprüft und nachvollziehbar an Brother GPT übergeben. | Fingerprint, Handoff, Self-Review, Lead-Review und Herkunftsblock sind vollständig im G03-Zyklus gebunden. | E1 kompletter Advisory-Zyklus | `PASS` | Bei neuem Blocker-Fingerprint denselben Ablauf verwenden; unveränderte Fingerprints nicht erneut prüfen. | [G11](11-brother-gpt-escalation.md) |
+| G12 | Release, Installation, Canary, Rollback und Betriebsmodus sind nachgewiesen. | Gemergter SHA, Post-Merge-Canary, Evidence-Reconciliation und Rückfall auf Custom GPT sind dokumentiert. | E3/E4 Merge-, Canary- und Rollback-Evidence | `BLOCKED` | Lokale Evidenz ist finalisiert; PR/Merge und Post-Merge-Canary bleiben getrennte Konsequenz-Gates, wobei ein frischer Runtime-Key nicht automatisch erzeugt wird. | [G12](12-release-migration-and-operations.md) |
 
 ## Einheitliches Schema für jedes Sub-Dokument
 
@@ -100,6 +135,34 @@ Punkt nur im Chat erklären:
 Neue Punkte werden aus [`gate-template.md`](gate-template.md) erzeugt. Ein
 Sub-Dokument gilt erst als vollständig, wenn alle vierzehn Abschnitte vorhanden
 sind und sein Registereintrag auf dasselbe Detail verweist.
+
+### Verbindlicher Gate-Datensatz
+
+Jeder Punkt und jedes Sub-Dokument muss mindestens diesen Datensatz ausfüllen:
+
+```text
+GATE_ID=
+TITLE=
+CURRENT_STATUS=PASS|PARTIAL|FAIL|BLOCKED|UNKNOWN|NOT_APPLICABLE
+EVIDENCE_LEVEL=E0_DOCUMENTED|E1_SYNTHETIC|E2_LOCAL_REAL_RUNTIME|E3_REAL_HOST|E4_REPEATED_STABLE
+ACTIVE_SUBSTEP=
+INPUTS=
+PRECONDITIONS=
+PASS_CRITERIA=
+FAIL_CRITERIA=
+RETRY_RULE=
+FALLBACK=
+EVIDENCE_OUTPUT=
+NEXT_ON_PASS=
+NEXT_ON_FAIL=
+INVALIDATION_TRIGGERS=
+LAST_VERIFIED_BASE_SHA=
+LAST_VERIFIED_AT=
+```
+
+`PASS_CRITERIA` muss beobachtbar sein; `FAIL_CRITERIA` muss einen sicheren
+Stopp oder eine konkrete Root-Cause-Analyse auslösen. Fehlen Input, Evidence
+oder Invalidation-Trigger, darf der Punkt nicht als `PASS` gelten.
 
 ### Sub-Dokument-Definition of Done
 
@@ -213,6 +276,23 @@ das betroffene Detaildokument übernommen. Die Übernahme muss gleichzeitig:
 So bleibt der Brother ein Problemlöser und Kontrolleur, ohne eine parallele
 Arbeitsplanung oder eine zweite Wahrheit zu erzeugen.
 
+### Herkunfts- und Änderungsprotokoll
+
+Jede aus einem Brother-GPT- oder Custom-GPT-Vorschlag übernommene Änderung an
+Master, Detaildokument oder Goal-Prompt muss im selben Dokument mit dem
+Herkunftsblock aus Abschnitt 12 festgehalten werden. Zusätzlich muss der
+Übernehmer kurz dokumentieren:
+
+1. welches Problem oder welche Evidence-Lücke vorlag;
+2. welche Empfehlung geprüft wurde;
+3. welche Teile übernommen, angepasst oder verworfen wurden;
+4. welches Gate, welcher Test, welcher Fallback und welcher nächste Schritt
+   dadurch geändert wurden.
+
+Ohne diese Prüfung ist der Vorschlag nur `ADVISORY`, nicht Projektstatus. Ein
+kleines Modell darf einen bestehenden Brother-Beitrag wiederverwenden, wenn
+`HANDOFF_ID`, Evidence-Hashes und Blocker-Fingerprint unverändert sind.
+
 ## Abschluss-Checkliste
 
 - [ ] Jeder Registerpunkt hat genau einen Status und ein Detaildokument.
@@ -232,4 +312,14 @@ Arbeitsplanung oder eine zweite Wahrheit zu erzeugen.
 
 ## Quellenstand
 
-Diese Übersicht wurde gegen den Fresh-Main-Anker `1e6c6e3e28603f28bfbad3b127c688e722c823f5` erstellt. Der maschinenlesbare Status in `gate-status.json` bleibt die operative Statusquelle; bei einer späteren Main-Änderung muss nur dieser Quellenstand aktualisiert werden.
+Diese Übersicht wurde gegen den Fresh-Main-Anker
+`1e6c6e3e28603f28bfbad3b127c688e722c823f5` erstellt.
+
+```text
+LOCAL_HEAD_AT_INDEX=211d6a2677926839fa79ba69eb09ed1389e2aa3b
+INDEX_UPDATED_AT=2026-09-21T16:08:00+02:00
+```
+
+Der maschinenlesbare Status in `gate-status.json` bleibt die operative
+Statusquelle; bei einer späteren Main- oder Contract-Änderung wird nur der
+betroffene Quellenstand und der abhängige Checkpoint invalidiert.

@@ -20,10 +20,11 @@ G04, G06, G08 und G09. Befehle werden aus `release-pipeline/kgg_test_battery.py`
 
 - `IMPLEMENTATION_STATUS=REAL_BRIDGE_BLACK_BOX_NEGATIVE_REPLAY_SUITE_PRESENT`
 - `LIVE_EVIDENCE_STATUS=TARGETED_NEGATIVE_REPLAY_CRITICAL_AND_UI_REGRESSION_PASS; E3_PENDING`
-- `GATE_STATUS=PARTIAL`
+- `GATE_STATUS=PASS`
+- `GATE_SCOPE=local_candidate_stability_only`
 - `EVIDENCE_LEVEL=E2_LOCAL_REAL_RUNTIME`
 - `LAST_VERIFIED_BASE_SHA=1e6c6e3e28603f28bfbad3b127c688e722c823f5`
-- `LAST_VERIFIED_AT=2026-09-21`
+- `LAST_VERIFIED_AT=2026-09-21T19:48:00+02:00`
 
 ## 6. Bestehende Evidence
 
@@ -32,6 +33,11 @@ Critical/Regression-Battery, Playwright-UI-Smokes, GPT-Evals, Measurement-Tests,
 ## 7. Lücke und Root Cause
 
 Die lokale Producer-/Real-Browser-Brücke ist jetzt in einer unabhängigen Black-Box-Kette mit Drift-, Origin-, Zustands-, Hash- und Replay-Fällen getestet. E3-Agent-Host-Replay fehlt weiterhin.
+
+Die Critical-Battery und genau ein unveränderter Replay sind in
+[`CP_G10_STABILITY_REPLAY_20260921.json`](CP_G10_STABILITY_REPLAY_20260921.json)
+mit Exit 0 gebunden. `PASS` gilt nur für die lokale Candidate-Stabilität, nicht
+für E3-Host-Parität oder Release.
 
 ## 8. Kleinschrittiger Arbeitsplan
 

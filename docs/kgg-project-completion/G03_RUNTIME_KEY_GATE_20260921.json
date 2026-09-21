@@ -1,0 +1,56 @@
+{
+  "schema": "kgg-project-completion-runtime-key-gate/v1",
+  "request_id": "G03_RUNTIME_KEY_PROVISION_20260921_01",
+  "status": "COMPLETED_TRANSIENT_RUNTIME_KEY",
+  "base_sha": "1e6c6e3e28603f28bfbad3b127c688e722c823f5",
+  "active_gate": "G03",
+  "tunnel_resource_status": "CREATED",
+  "client_status": "DOCTOR_PASS_CLIENT_STOPPED_AFTER_CANARY",
+  "objective": "Provision one runtime CONTROL_PLANE_API_KEY transiently for the existing private KGG tunnel and one bounded read-only canary.",
+  "exact_scope": [
+    "Create or securely provide exactly one runtime key with the minimum Tunnels Read + Use scope needed for this tunnel.",
+    "Use the secret only through a transient process environment variable named CONTROL_PLANE_API_KEY.",
+    "Run tunnel-client doctor for the existing profile and then one bounded foreground runtime.",
+    "Run exactly one synthetic read-only ChatGPT discovery/tool canary.",
+    "Do not retain, print, upload, commit, or document the secret or full key value."
+  ],
+  "forbidden": [
+    "admin key in the long-lived daemon",
+    "repository or chat storage of the runtime key",
+    "additional key or tunnel",
+    "write-capable or production canary",
+    "automatic retry after key or runtime failure",
+    "public endpoint"
+  ],
+  "preconditions": [
+    "private tunnel resource exists",
+    "target ChatGPT workspace is bound",
+    "official Windows x64 client checksum passed",
+    "tunnel-client help quickstart passed"
+  ],
+  "success_evidence": [
+    "doctor reports the existing profile healthy",
+    "runtime reports connected/ready without exposing the key",
+    "ChatGPT discovery canary sees the KGG app and one read-only tool",
+    "canary result is get_current_state(actor=system), status=ready, exactly one call",
+    "raw key value is absent from repository, logs, checkpoint, and final report"
+  ],
+  "failure_fallback": "STOP_G03_WITH_KEY_OR_RUNTIME_FAILURE; do not create another key automatically.",
+  "confirmation_text": "Ich autorisiere die Erstellung eines einzelnen Runtime-CONTROL_PLANE_API_KEY, seine ausschließlich transiente Nutzung für den bestehenden KGG-Tunnel-Canary und die Speicherung weder im Repository noch in Logs oder Evidence.",
+  "result": {
+    "key_created_once": true,
+    "secret_retained": false,
+    "secret_logged": false,
+    "client_live": true,
+    "chatgpt_app_connected": true,
+    "discovery_canary": "PASS",
+    "tool": "get_current_state",
+    "actor": "system",
+    "status": "ready",
+    "call_count": 1
+  },
+  "evidence_refs": [
+    "docs/kgg-project-completion/CP_G03_TRANSPORT_BLOCKED_20260921.json",
+    "docs/kgg-project-completion/03a-g03-transport-activation-runbook.md"
+  ]
+}

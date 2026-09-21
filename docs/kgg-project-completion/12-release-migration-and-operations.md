@@ -22,8 +22,8 @@ Alle G00–G11 müssen finale Dispositionen besitzen. Push, PR, Merge, Deploymen
 - `LIVE_EVIDENCE_STATUS=CORE_BROWSER_AND_CHATGPT_GATES_OPEN`
 - `GATE_STATUS=BLOCKED`
 - `EVIDENCE_LEVEL=E0_DOCUMENTED`
-- `LAST_VERIFIED_BASE_SHA=2b8024e359bd0f65bcc5666b5e190d78a4b4ed6f`
-- `LAST_VERIFIED_AT=2026-09-21`
+- `LAST_VERIFIED_BASE_SHA=1e6c6e3e28603f28bfbad3b127c688e722c823f5`
+- `LAST_VERIFIED_AT=2026-09-21T19:56:00+02:00`
 
 ## 6. Bestehende Evidence
 
@@ -31,7 +31,10 @@ Repo besitzt Branch-/PR-/Required-Gate-/Preview-Prozesse. Frühere PRs härteten
 
 ## 7. Lücke und Root Cause
 
-G03–G06 sind offen. Daher wäre ein finaler Migrationsclaim verfrüht.
+G05/G06, G08 und G09 enthalten weiterhin ausdrücklich technische Grenzen
+(fehlende externe Host-Parität bzw. Envelope-Reconciliation). Ein finaler
+Migrationsclaim wäre daher verfrüht; ein PR kann höchstens den geprüften
+Dokument-/Candidate-Stand transportieren.
 
 ## 8. Kleinschrittiger Arbeitsplan
 

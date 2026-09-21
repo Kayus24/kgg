@@ -23,7 +23,7 @@ G04-Design, `kgg-safety`, vorhandene Privacy-/Knowledge-Safety-Regeln und Conseq
 - `GATE_STATUS=PARTIAL`
 - `EVIDENCE_LEVEL=E2_LOCAL_REAL_RUNTIME`
 - `LAST_VERIFIED_BASE_SHA=1e6c6e3e28603f28bfbad3b127c688e722c823f5`
-- `LAST_VERIFIED_AT=2026-09-21`
+- `LAST_VERIFIED_AT=2026-09-21T19:33:00+02:00`
 
 ## 6. Bestehende Evidence
 
@@ -32,6 +32,11 @@ KGG besitzt Schutzbereiche, Secret Scan, Write Gates, synthetische Testdatenrege
 ## 7. Lücke und Root Cause
 
 Die lokale reale Browserbrücke und ihre Origin-/Pfadgrenze sind jetzt mit positiven und negativen Tests belegt. E3-Host-Evidence sowie Popup-, Download-, Clipboard- und Filechooser-Negativtests auf einer externen Agent-Surface fehlen weiterhin.
+
+Der gebundene lokale Lauf in
+[`CP_G08_G09_LOCAL_SAFETY_PROVENANCE_20260921.json`](CP_G08_G09_LOCAL_SAFETY_PROVENANCE_20260921.json)
+lief mit 57/57 Tests erfolgreich. Er ändert den Status der fehlenden externen
+Host-Safety nicht.
 
 ## 8. Kleinschrittiger Arbeitsplan
 
