@@ -80,7 +80,7 @@ Ein Gate darf nur mit der in seinem Detaildokument verlangten Stufe auf `PASS` g
 | G09 | Evidence und Provenance | `PARTIAL` | lokale Screenshot-/Action-/Measurement-Evidence und 57/57 Rehash-/Tamper-Tests grün; externe Envelope-Reconciliation fehlt | Browser-Evidence retained, gehasht, run-gebunden; keine erfundenen Nullwerte; E3 bleibt offen | [G09](09-evidence-and-provenance.md) |
 | G10 | Test-, Fault- und Stabilitätsloops | `PASS` (lokale Candidate-Stabilität) | Black-Box, Drift, Origin, Replay, Critical und UI-Regression grün; genau ein unveränderter Critical-Replay; E3-Replay fehlt | Black-Box-Realpfad, Negative, Regression, Full Gate, unveränderter Replay; E3 bleibt technische Grenze | [G10](10-testing-stability-and-recovery.md) |
 | G11 | Brother-GPT-Eskalation und Dokumentpflege | `PASS` | G03-Blocker mit Handoff, Self-Review, Lead-Review und Herkunftsblock in `CP_G11_BROTHER_CYCLE_20260921.json` gebunden | Bei neuem Fingerprint denselben geprüften Ablauf wiederverwenden; unveränderte Fingerprints nicht erneut senden | [G11](11-brother-gpt-escalation.md) |
-| G12 | Release, Migration und Betrieb | `BLOCKED` | Lokale Gates dokumentiert; G05/G06/G08/G09-E3-Grenzen sowie PR/Merge/Post-Merge-Canary offen | Nur separat autorisierte PR-/Merge-Konsequenz; keine Migration oder Ersetzbarkeit behaupten | [G12](12-release-migration-and-operations.md) |
+| G12 | Release, Migration und Betrieb | `PARTIAL_COMPLETE_WITH_TECHNICAL_LIMITS` | PR #247 gemergt auf `01fc1077b153840fbef37c79f6152084268932c4`; Required Checks grün; Post-Merge-Canary wegen verbrauchtem Einzelbudget nicht erneut ausgeführt | Custom GPT bleibt Fallback; keine Migration oder Ersetzbarkeit behaupten | [G12](12-release-migration-and-operations.md) |
 
 ## 5. Kritischer Pfad
 
@@ -94,7 +94,7 @@ Der nächste produktive Schwerpunkt ist:
 
 `G03 ChatGPT-Verbindung ist bewiesen → G07 Surface-Matrix durchführen → G05 visuellen Regelkreis an die lokale G04-Brücke binden → G06 drei reale Quick Flows.`
 
-Aktiver Checkpoint: `CP_G10_STABILITY_REPLAY_20260921`. G02.1 (portables Root-Manifest), G02.2 (repo-lokale Marketplace-Registrierung plus frische Codex-Installation), G02.3 (Transport-Preflight), die read-only Workspace-Eligibility-Prüfung, G03-Transport/Discovery, G07-Klassifikation, die lokale G08/G09-Safety-/Provenance-Suite und G10-Critical/Replay sind abgeschlossen. G08/G09 bleiben wegen fehlender externer Host-Evidence `PARTIAL`; G10 ist als lokale Candidate-Stabilität `PASS`; G12 ist jetzt der aktive, für externe Konsequenzen geblockte Gate-Schritt. Keine lokale stdio-Evidence wird als ChatGPT-Parität gewertet.
+Aktiver Checkpoint: `CP_G12_FINAL_ACCEPTANCE_20260921`. PR #247 ist auf Fresh Main `01fc1077b153840fbef37c79f6152084268932c4` gemergt und beide Required Checks sind grün. Der Post-Merge-Canary wurde wegen des bereits verbrauchten einzelnen Runtime-Key-Budgets nicht erneut ausgeführt. Der belastbare Endzustand ist `PARTIAL_COMPLETE_WITH_TECHNICAL_LIMITS`; Custom GPT bleibt Fallback. Keine lokale stdio-Evidence wird als ChatGPT-Parität gewertet.
 
 ## 6. Globale Control-Loop-Regel
 
@@ -139,6 +139,7 @@ Bei einem unbekannten Problem wird nicht geraten. Es gilt [G11](11-brother-gpt-e
 - G07-Host-Boundary-Preflight: [G07_HOST_BOUNDARY_PREFLIGHT_20260921.json](G07_HOST_BOUNDARY_PREFLIGHT_20260921.json)
 - G08/G09-Safety-/Provenance-Checkpoint: [CP_G08_G09_LOCAL_SAFETY_PROVENANCE_20260921.json](CP_G08_G09_LOCAL_SAFETY_PROVENANCE_20260921.json)
 - G10-Stabilitäts-/Replay-Checkpoint: [CP_G10_STABILITY_REPLAY_20260921.json](CP_G10_STABILITY_REPLAY_20260921.json)
+- G12-Final-Acceptance: [CP_G12_FINAL_ACCEPTANCE_20260921.json](CP_G12_FINAL_ACCEPTANCE_20260921.json)
 - Kriterien- und Betriebsübersicht: [project-readiness.md](project-readiness.md)
 - Einheitliches Sub-Dokument-Schema: [gate-template.md](gate-template.md)
 - Ausführbarer driftfester Auftrag: [kgg-project-completion-goal-prompt.md](kgg-project-completion-goal-prompt.md)
