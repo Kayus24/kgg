@@ -18,12 +18,12 @@ G00. Kanonische Quellen: Custom-GPT-Goal, Bootstrap, Resource Manifest, Action-S
 
 ## 5. Aktueller Stand
 
-- `IMPLEMENTATION_STATUS=PARTIAL_MAPPING_EXISTS`
-- `LIVE_EVIDENCE_STATUS=CUSTOM_GPT_TESTS_EXIST_PLUGIN_PARITY_NOT_PROVEN`
-- `GATE_STATUS=PARTIAL`
+- `IMPLEMENTATION_STATUS=SOURCE_MAPPED_CAPABILITY_MATRIX`
+- `LIVE_EVIDENCE_STATUS=INVENTORY_SELF_TESTS_PASS_PLUGIN_PARITY_NOT_PROVEN`
+- `GATE_STATUS=PASS`
 - `EVIDENCE_LEVEL=E1_SYNTHETIC`
-- `LAST_VERIFIED_BASE_SHA=15f1782bafbd3bc358bb08e5e4fc1d9b4592242a`
-- `LAST_VERIFIED_AT=2026-09-21T09:56:20+02:00`
+- `LAST_VERIFIED_BASE_SHA=8d1193cbb19e5ec63f597aa8a2e29fd22687369f`
+- `LAST_VERIFIED_AT=2026-09-21T10:02:47+02:00`
 
 ## 6. Bestehende Evidence
 
@@ -35,7 +35,7 @@ G00. Kanonische Quellen: Custom-GPT-Goal, Bootstrap, Resource Manifest, Action-S
 
 ## 7. Lücke und Root Cause
 
-Es fehlt eine abschließende Capability-Matrix „Quelle → Plugin-Baustein → Surface → Test“. Der bisherige Fokus behandelte UI Lab zeitweise als deferierte Zusatzfähigkeit, obwohl es Kernziel ist.
+Die Capability-Matrix ist jetzt gegen Quellen, 30 operationIds, fünf Skills und das Resource-Manifest geprüft. Die eigentliche Plugin-Parität und der Real-Browserpfad bleiben bewusst nachgelagerte Gates G02–G06.
 
 ## 8. Kleinschrittiger Arbeitsplan
 
@@ -80,4 +80,4 @@ Versionierte Capability-Matrix, Testzuordnung, abgelehnte Fähigkeiten mit Begr�
 
 ## 14. Beitragsherkunft
 
-`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
+`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=ACCEPTED`, `G01_MATRIX_SELF_TEST=PASS`.

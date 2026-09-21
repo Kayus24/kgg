@@ -1,8 +1,8 @@
 {
   "schema": "kgg-project-completion-gates/v1",
-  "generated_at": "2026-09-21T09:56:20+02:00",
-  "fresh_remote_main_at_generation": "15f1782bafbd3bc358bb08e5e4fc1d9b4592242a",
-  "local_head_at_generation": "15f1782bafbd3bc358bb08e5e4fc1d9b4592242a",
+  "generated_at": "2026-09-21T10:02:47+02:00",
+  "fresh_remote_main_at_generation": "8d1193cbb19e5ec63f597aa8a2e29fd22687369f",
+  "local_head_at_generation": "8d1193cbb19e5ec63f597aa8a2e29fd22687369f",
   "north_star": [
     "migrate required Custom GPT capabilities into one universal KGG plugin",
     "provide real screenshot-to-action browser control for the KGG HTML app",
@@ -13,7 +13,7 @@
   "active_gate": "G01",
   "gates": [
     {"id":"G00","title":"Source of Truth and checkpoints","status":"PASS","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":[],"document":"00-governance-and-source-of-truth.md","next_action":"resume at G01 capability parity"},
-    {"id":"G01","title":"Custom GPT capability migration","status":"PARTIAL","evidence_level":"E1_SYNTHETIC","depends_on":["G00"],"document":"01-custom-gpt-capability-migration.md","next_action":"freeze the complete capability mapping and acceptance tests"},
+    {"id":"G01","title":"Custom GPT capability migration","status":"PASS","evidence_level":"E1_SYNTHETIC","depends_on":["G00"],"document":"01-custom-gpt-capability-migration.md","next_action":"start G02 distributable plugin preflight"},
     {"id":"G02","title":"Universal plugin package","status":"PARTIAL","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":["G01"],"document":"02-universal-plugin-package.md","next_action":"remove host-local assumptions and validate distributable packaging"},
     {"id":"G03","title":"ChatGPT plugin connection","status":"FAIL","evidence_level":"E3_REAL_HOST","depends_on":["G02"],"document":"03-chatgpt-plugin-connection.md","next_action":"deploy or tunnel the MCP endpoint and install the personal plugin in ChatGPT"},
     {"id":"G04","title":"Real browser bridge","status":"FAIL","evidence_level":"E1_SYNTHETIC","depends_on":["G02"],"document":"04-real-browser-bridge.md","next_action":"select and implement the smallest real browser host boundary"},
