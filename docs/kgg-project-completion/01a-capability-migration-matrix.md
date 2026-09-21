@@ -26,8 +26,8 @@ G00 und die in G01 genannten kanonischen Quellen.
 - `LIVE_EVIDENCE_STATUS=MIXED`
 - `GATE_STATUS=PARTIAL`
 - `EVIDENCE_LEVEL=E1_SYNTHETIC`
-- `LAST_VERIFIED_BASE_SHA=15f1782bafbd3bc358bb08e5e4fc1d9b4592242a`
-- `LAST_VERIFIED_AT=2026-09-21T09:56:20+02:00`
+- `LAST_VERIFIED_BASE_SHA=8d1193cbb19e5ec63f597aa8a2e29fd22687369f`
+- `LAST_VERIFIED_AT=2026-09-21T10:02:47+02:00`
 
 ## 6. Bestehende Evidence
 
@@ -68,22 +68,75 @@ G00 und die in G01 genannten kanonischen Quellen.
 
 Die schwerwiegendsten offenen Zeilen sind CAP-12 bis CAP-20. Sie bilden den fehlenden Transport-, Real-Browser- und Quick-Flow-Pfad. CAP-21 bis CAP-23 dürfen erst dann als Real-Evidence-Gates gelten.
 
+### 7.1 Kanonische Source-Coverage
+
+| Quelle | Aktueller Nachweis | Matrixabdeckung |
+| --- | --- | --- |
+| `docs/kgg-custom-gpt-goal-prompt.md` | gelesen, Produkt-/Safety-/Action-/Workflow-Ziel | CAP-01–CAP-24 |
+| `docs/kgg-ui-lab-v1-goal-prompt.md` | gelesen, ursprünglicher Real-UI-Lab-Scope | CAP-13–CAP-20 |
+| `docs/kgg-custom-gpt-editor-bootstrap.md` | gelesen, Editor-/Knowledge-/Action-Bootstrap | CAP-02, CAP-24, CAP-30 |
+| `docs/kgg-custom-gpt-resource-manifest.json` | gelesen, vier Knowledge-Dateien und zwei Action-Schemas; Resource-Audit-Self-Test grün | CAP-02, CAP-08, CAP-30 |
+| `docs/kgg-custom-gpt-action-api-openapi.yaml` | 30 `operationId`s einzeln unten abgebildet | CAP-01, CAP-02, CAP-05–CAP-10, CAP-25–CAP-30 |
+| `docs/kgg-custom-gpt-action-schema.md` | gelesen, Action-/Safety-Grenzen | CAP-04–CAP-07, CAP-30 |
+| `kgg-plugin/.codex-plugin/plugin.json` | gelesen, Plugin-Metadaten/Skills/MCP | CAP-03, CAP-12–CAP-24 |
+| `kgg-plugin/.mcp.json` | gelesen, lokaler stdio-MCP-Transport | CAP-12–CAP-20 |
+| `kgg-plugin/mcp/server.py` | 10 synthetische UI-Lab-Tools; Realstatus explizit belegt | CAP-12–CAP-20 |
+| `kgg-plugin/skills/**/SKILL.md` | fünf Skills: supervisor, operations, safety, testing, escalation | CAP-03, CAP-04, CAP-10, CAP-11, CAP-23 |
+
+### 7.2 Action-operationId-Abdeckung
+
+| operationId | Matrixzeile | Disposition |
+| --- | --- | --- |
+| `getKggMainCommit` | CAP-01, CAP-25 | `VERIFY` |
+| `submitKggReadOnlyValidation` | CAP-05 | `VERIFY` |
+| `listKggReadOnlyValidationRuns` | CAP-25, CAP-29 | `VERIFY` |
+| `submitKggPreviewAuto` | CAP-06 | `DEFER_WITH_REASON` |
+| `submitKggDeviceTest` | CAP-26 | `DEFER_WITH_REASON` |
+| `listKggDeviceTestRuns` | CAP-26 | `VERIFY` |
+| `submitKggMainGate` | CAP-07 | `DEFER_WITH_REASON` |
+| `listKggMainGateRuns` | CAP-25, CAP-29 | `VERIFY` |
+| `listKggPreviewAutoRuns` | CAP-25, CAP-29 | `VERIFY` |
+| `getKggPreviewGateRun` | CAP-29 | `VERIFY` |
+| `getKggPreviewGateJobs` | CAP-29 | `VERIFY` |
+| `getKggPreviewGateArtifacts` | CAP-29 | `VERIFY` |
+| `submitKggAdminEditorSyncPreflight` | CAP-27 | `DEFER_WITH_REASON` |
+| `submitKggAdminEditorSyncSnapshotPr` | CAP-27 | `DEFER_WITH_REASON` |
+| `submitKggPatientPreviewFromAdmin` | CAP-28 | `DEFER_WITH_REASON` |
+| `listKggPatientPreviewRunsFromAdmin` | CAP-28, CAP-29 | `VERIFY` |
+| `getKggMemoryIndex` | CAP-08 | `IMPLEMENT` |
+| `getKggMemoryPack` | CAP-08 | `IMPLEMENT` |
+| `getKggMemoryRecord` | CAP-08 | `IMPLEMENT` |
+| `getKggMemoryHistory` | CAP-08 | `IMPLEMENT` |
+| `getKggAgentCoordinationIndex` | CAP-10 | `VERIFY` |
+| `getKggAgentCoordinationThread` | CAP-10 | `VERIFY` |
+| `getKggAgentCoordinationBridgeTask` | CAP-10 | `VERIFY` |
+| `submitKggAgentCoordinationEvent` | CAP-10 | `DEFER_WITH_REASON` |
+| `listKggAgentCoordinationRuns` | CAP-10 | `VERIFY` |
+| `submitKggMemoryUpdate` | CAP-09 | `DEFER_WITH_REASON` |
+| `listKggMemoryUpdateRuns` | CAP-09 | `VERIFY` |
+| `getKggMemoryUpdateRun` | CAP-09 | `VERIFY` |
+| `getKggMemoryUpdateStatus` | CAP-09 | `VERIFY` |
+| `getKggMemoryUpdateArtifacts` | CAP-09 | `VERIFY` |
+
+`operationId`-Vollständigkeit ist damit eine mechanisch prüfbare G01-Bedingung; der Resource-Audit verwendet kanonische LF-normalisierte SHA-256-Werte. Die Disposition `VERIFY` oder `DEFER_WITH_REASON` bedeutet nicht, dass die Funktion bereits im Plugin live parity-fähig ist.
+
 ## 8. Kleinschrittiger Arbeitsplan
 
-1. Matrix gegen aktuelle operationIds und Skills auf fehlende Zeilen prüfen.
-2. CAP-12 abschließen.
-3. CAP-13 bis CAP-17 als kleinsten Real-Runner-Pfad umsetzen.
-4. CAP-18 und CAP-19 darauf aufbauen.
-5. CAP-20 bis CAP-23 anbinden.
-6. CAP-01 bis CAP-11 je Surface live verifizieren.
-7. CAP-24 nach G02/G03 abschließen.
+1. Matrix gegen aktuelle operationIds und Skills auf fehlende Zeilen prüfen. ✅ alle 30 operationIds einzeln abgebildet.
+2. Resource-Manifest-SHA-/Existenzprüfung und Payload-Preflight-Self-Test ausführen. ✅ beide grün.
+3. CAP-12 abschließen.
+4. CAP-13 bis CAP-17 als kleinsten Real-Runner-Pfad umsetzen.
+5. CAP-18 und CAP-19 darauf aufbauen.
+6. CAP-20 bis CAP-23 anbinden.
+7. CAP-01 bis CAP-11 je Surface live verifizieren.
+8. CAP-24 nach G02/G03 abschließen.
 
 ## 9. CONTROL_LOOP_GATE
 
 - `GATE_ID=G01A_MATRIX_COMPLETENESS`
 - `INPUT=Instructions, Resource Manifest, Actions, Skills, Expected Results, UI-Lab-Goal`
 - `PROCEDURE=jede Quelle gegen Matrix-IDs abgleichen; Duplikate zusammenführen; fehlende Fähigkeit ergänzen`
-- `PASS_CRITERIA=jede benötigte Fähigkeit besitzt Zielbaustein, A/B/C-Status, Disposition und Pflichtnachweis`
+- `PASS_CRITERIA=Jede benötigte Fähigkeit und jede aktuelle operationId besitzt Zielbaustein, A/B/C-Status, Disposition und Pflichtnachweis`
 - `FAIL_CRITERIA=unzugeordnete operationId, Skill-Funktion oder Custom-GPT-Pflichtfähigkeit`
 - `RETRY_RULE=ein gezielter Read der unklaren Quelle`
 - `FALLBACK=UNKNOWN-Zeile statt Annahme`
