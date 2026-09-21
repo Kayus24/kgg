@@ -36,6 +36,24 @@
       "B": "budgets.surface_b_runs=surfaces.B.run_budget"
     },
     "action_specific_budgets_must_also_be_positive": true,
+    "action_budget_requirements": {
+      "REAL_HOST_RUN": [
+        "budgets.total_real_host_runs",
+        "selected_surface.run_budget",
+        "selected_surface_budget"
+      ],
+      "RUNTIME_KEY": ["budgets.runtime_keys"],
+      "TUNNEL_CREATE": ["budgets.tunnels_created"],
+      "TUNNEL_RESTART": ["budgets.tunnel_restarts"],
+      "EXTERNAL_DISPATCH": ["budgets.external_dispatches"],
+      "PLUGIN_INSTALLATION": ["budgets.plugin_installations"],
+      "REPOSITORY_WRITE": ["budgets.repository_writes"],
+      "EDITOR_WRITE": ["budgets.editor_writes"],
+      "MEMORY_WRITE": ["budgets.memory_writes"],
+      "TICKET_WRITE": ["budgets.ticket_writes"],
+      "PRODUCTION_MUTATION": ["budgets.production_mutations"]
+    },
+    "only_declared_action_requirements_may_block": true,
     "partial_activation_is_forbidden": true
   },
   "objective": "synthetic_dual_surface_ui_audit",
@@ -56,6 +74,8 @@
       "browser_backend": "NOT_SELECTED",
       "browser_preflight": {
         "real_browser_opt_in": "NOT_CHECKED",
+        "KGG_BROWSER_NODE_path": null,
+        "KGG_PLAYWRIGHT_NODE_PATH": null,
         "node_resolution": "NOT_CHECKED",
         "playwright_module_resolution": "NOT_CHECKED",
         "browser_host_js": "NOT_CHECKED",
@@ -99,6 +119,8 @@
       "browser_backend": "NOT_SELECTED",
       "browser_preflight": {
         "real_browser_opt_in": "NOT_CHECKED",
+        "KGG_BROWSER_NODE_path": null,
+        "KGG_PLAYWRIGHT_NODE_PATH": null,
         "node_resolution": "NOT_CHECKED",
         "playwright_module_resolution": "NOT_CHECKED",
         "browser_host_js": "NOT_CHECKED",
@@ -157,15 +179,9 @@
     "KGG_REAL_BROWSER_required_if_backend_selected": true,
     "KGG_REAL_BROWSER_expected_value": "1",
     "KGG_BROWSER_NODE_override_optional": true,
-    "KGG_BROWSER_NODE_path": null,
     "KGG_PLAYWRIGHT_NODE_PATH_override_optional": true,
-    "KGG_PLAYWRIGHT_NODE_PATH": null,
-    "node_available": false,
-    "playwright_node_module_available": false,
     "browser_host_js_path": "kgg-plugin/mcp/browser_host.js",
-    "browser_host_js_available": false,
     "browser_session_host_js_path": "kgg-plugin/mcp/browser_session_host.js",
-    "browser_session_host_js_available": false,
     "resolution_policy": {
       "node": "resolve KGG_BROWSER_NODE when supplied, otherwise shutil.which(node)",
       "playwright": "resolve KGG_PLAYWRIGHT_NODE_PATH when supplied, otherwise normal Node module resolution",
