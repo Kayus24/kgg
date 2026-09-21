@@ -18,12 +18,12 @@ Keine. Fresh Git, die kanonischen KGG-Dokumente und ein lesbarer Worktree sind e
 
 ## 5. Aktueller Stand
 
-- `IMPLEMENTATION_STATUS=MASTER_AND_REGISTRY_CREATED_LOCALLY`
-- `LIVE_EVIDENCE_STATUS=NOT_MERGED`
-- `GATE_STATUS=PARTIAL`
-- `EVIDENCE_LEVEL=E0_DOCUMENTED`
-- `LAST_VERIFIED_BASE_SHA=2b8024e359bd0f65bcc5666b5e190d78a4b4ed6f`
-- `LAST_VERIFIED_AT=2026-09-21`
+- `IMPLEMENTATION_STATUS=MASTER_AND_REGISTRY_MERGED`
+- `LIVE_EVIDENCE_STATUS=PR_239_REQUIRED_GATE_SUCCESS`
+- `GATE_STATUS=PASS`
+- `EVIDENCE_LEVEL=E2_LOCAL_REAL_RUNTIME`
+- `LAST_VERIFIED_BASE_SHA=15f1782bafbd3bc358bb08e5e4fc1d9b4592242a`
+- `LAST_VERIFIED_AT=2026-09-21T09:56:20+02:00`
 
 ## 6. Bestehende Evidence
 
@@ -33,22 +33,22 @@ Keine. Fresh Git, die kanonischen KGG-Dokumente und ein lesbarer Worktree sind e
 
 ## 7. Lücke und Root Cause
 
-Der neue Abschlussindex ist noch ein lokaler Kandidat. Eine mechanische Konsistenzprüfung und Aufnahme in Main fehlen.
+Der Abschlussindex ist in PR #239 gemergt. G00 ist abgeschlossen; die Capability-Matrix G01 ist der nächste aktive Gate-Schritt.
 
 ## 8. Kleinschrittiger Arbeitsplan
 
 1. Alle internen Links und JSON-Syntax prüfen.
 2. Masterstatus gegen Fresh Main und tatsächliche Dateien prüfen.
-3. Dokumente reviewen und mergen.
+3. Dokumente reviewen und mergen. ✅ PR #239, Merge-SHA `15f1782bafbd3bc358bb08e5e4fc1d9b4592242a`.
 4. Pro Zyklus `active_gate`, Evidence und `next_action` aktualisieren.
-5. Einen Resume-Test durchführen: neuer Chat liest nur Master, Register und aktives Detaildokument und nennt korrekt den nächsten Schritt.
+5. Einen Resume-Test durchführen: neuer Chat liest nur Master, Register und aktives Detaildokument und nennt korrekt den nächsten Schritt. ✅ `NEXT=G01`.
 
 ## 9. CONTROL_LOOP_GATE
 
 - `GATE_ID=G00_SOURCE_OF_TRUTH`
 - `INPUT=Fresh Main, HEAD, Worktree, Master, gate-status.json`
 - `PROCEDURE=Hashes lesen; JSON und Links prüfen; aktives Gate mit Master abgleichen; Resume simulieren`
-- `PASS_CRITERIA=Eine eindeutige Baseline, genau ein aktives Gate und reproduzierbarer nächster Schritt`
+- `PASS_CRITERIA=Eine eindeutige Baseline, genau ein aktives Gate, reproduzierbarer nächster Schritt und gemergter Dokumentensatz`
 - `FAIL_CRITERIA=Widersprüchliche Statuswerte, fehlender Detailpfad oder Rückfall auf Chatgedächtnis`
 - `RETRY_RULE=Ein identischer Read der widersprüchlichen autoritativen Quelle`
 - `FALLBACK=UNKNOWN plus Blocker-Paket`
@@ -74,8 +74,8 @@ Nur bei echter Quellenkollision oder unklarer Gate-Priorität. Brother erhält d
 
 ## 13. Abschlussartefakte
 
-Gemergter Master, valides Register, reproduzierbarer Resume-Test und erster aktualisierter Checkpoint.
+Gemergter Master, valides Register, reproduzierbarer Resume-Test und erster aktualisierter Checkpoint. ✅
 
 ## 14. Beitragsherkunft
 
-`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
+`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=ACCEPTED`, `PR=239`, `MERGED_SHA=15f1782bafbd3bc358bb08e5e4fc1d9b4592242a`.
