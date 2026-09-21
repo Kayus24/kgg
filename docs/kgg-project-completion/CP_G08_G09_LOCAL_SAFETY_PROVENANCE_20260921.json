@@ -1,0 +1,45 @@
+{
+  "schema": "kgg-project-completion-checkpoint/v1",
+  "checkpoint_id": "CP_G08_G09_LOCAL_SAFETY_PROVENANCE_20260921",
+  "base_sha": "1e6c6e3e28603f28bfbad3b127c688e722c823f5",
+  "local_head": "211d6a2677926839fa79ba69eb09ed1389e2aa3b",
+  "active_gates": ["G08", "G09"],
+  "decision": "PARTIAL_WITH_LOCAL_PASS",
+  "evidence_level": "E2_LOCAL_REAL_RUNTIME",
+  "test_results": {
+    "command": "PYTHONPATH=release-pipeline python -B -m unittest -v release-pipeline/test_kgg_real_browser_bridge.py release-pipeline/test_kgg_ui_lab_browser.py release-pipeline/test_kgg_ui_lab_session.py release-pipeline/test_kgg_ui_lab_evidence.py release-pipeline/test_kgg_ui_lab_mcp_server.py release-pipeline/test_kgg_codex_raw_capture.py release-pipeline/test_kgg_gpt_measurement.py release-pipeline/test_kgg_ui_lab_fault_injection.py release-pipeline/test_kgg_ui_lab_mcp_adapter.py release-pipeline/test_kgg_ui_lab_quick_flows.py",
+    "tests_run": 57,
+    "passed": 57,
+    "failed": 0,
+    "result": "PASS",
+    "scope": [
+      "origin/path allowlist",
+      "lease/timeout/capability gates",
+      "sensitive input/evidence rejection",
+      "screenshot/event tamper detection",
+      "run/surface/base binding",
+      "fail-closed measurement",
+      "fault injection and replay",
+      "local real browser visual loop and quick flows"
+    ],
+    "environment_note": "one initial invocation had three import-path errors; the repository release-pipeline path was supplied and the bounded retry passed 57/57"
+  },
+  "g08": {
+    "local_safety": "PASS",
+    "external_host_safety": "NOT_PROVEN",
+    "gate_status": "PARTIAL"
+  },
+  "g09": {
+    "local_provenance": "PASS",
+    "external_measurement_envelope_reconciliation": "NOT_PROVEN",
+    "gate_status": "PARTIAL"
+  },
+  "global_status_unchanged": {
+    "PRODUCTION_CONTROL": "PILOT_INCOMPLETE",
+    "A_B": "NOT_COMPARABLE",
+    "replacement_eligible": false
+  },
+  "next_step": "G10_LOCAL_STABILITY_AND_REPLAY",
+  "contribution_source": "KGG_LEAD",
+  "review_status": "PENDING"
+}

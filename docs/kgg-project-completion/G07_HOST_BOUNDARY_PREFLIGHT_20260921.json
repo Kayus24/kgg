@@ -1,0 +1,45 @@
+{
+  "schema": "kgg-project-completion-preflight/v1",
+  "preflight_id": "G07_HOST_BOUNDARY_PREFLIGHT_20260921",
+  "base_sha": "1e6c6e3e28603f28bfbad3b127c688e722c823f5",
+  "active_gate": "G07",
+  "substep": "G07_HOST_BOUNDARY_DECISION",
+  "objective": "determine whether the proven B/C transports already expose a real browser host hook without expanding the consequence scope",
+  "sources": [
+    "kgg-plugin/.mcp.json",
+    "kgg-plugin/mcp/server.py",
+    "kgg-plugin/mcp/real_browser.py",
+    "kgg-plugin/mcp/README.md",
+    "CP_G03_TRANSPORT_BLOCKED_20260921.json",
+    "CP_G07_SURFACE_MATRIX_20260921.json"
+  ],
+  "findings": {
+    "mcp_enabled": true,
+    "mcp_command": "python ./mcp/server.py",
+    "configured_environment_names": ["PYTHONUTF8"],
+    "real_browser_opt_in": "KGG_REAL_BROWSER=1",
+    "current_process_has_real_browser_opt_in": false,
+    "current_process_has_browser_node": false,
+    "current_process_has_playwright_node_path": false,
+    "tunnel_client": "STOPPED_AFTER_G03_CANARY",
+    "runtime_key": "NOT_RETAINED",
+    "local_real_bridge_tests": "8_OF_8_PASS"
+  },
+  "classification": {
+    "B_REAL_BROWSER_HOST_HOOK": "NOT_OBSERVED",
+    "C_REAL_BROWSER_HOST_HOOK": "NOT_OBSERVED",
+    "C_LOCAL_OPT_IN_IMPLEMENTATION": "PRESENT_BUT_NOT_ACTIVE",
+    "B_C_PLUGIN_HOST_SCREENSHOT_ACTION": "NOT_PROVEN"
+  },
+  "decision": "NO_NEW_HOST_RUN_OR_RUNTIME_KEY",
+  "reason": "The current transport has no active real-browser environment and the one authorized runtime key was already consumed for the single G03 discovery canary.",
+  "fallback": "retain local E2 bridge evidence; keep B/C host-dependent capability rows NOT_TESTED/SYNTHETIC_ONLY until an independently authorized host hook exists",
+  "next_step": "G07 classification PASS; carry the explicit B/C host boundary into G08/G09 and do not repeat G03",
+  "global_status_unchanged": {
+    "PRODUCTION_CONTROL": "PILOT_INCOMPLETE",
+    "A_B": "NOT_COMPARABLE",
+    "replacement_eligible": false
+  },
+  "contribution_source": "KGG_LEAD",
+  "review_status": "PENDING"
+}

@@ -1,0 +1,179 @@
+{
+  "schema": "kgg-project-completion-checkpoint/v1",
+  "checkpoint_id": "CP_G03_TRANSPORT_PASS_20260921_01",
+  "base_sha": "1e6c6e3e28603f28bfbad3b127c688e722c823f5",
+  "head": "211d6a2677926839fa79ba69eb09ed1389e2aa3b",
+  "goal_hash": "1b39a5d74dd0d56121806a42e0c85854922ebf62ff1a6c487c73f78dcc0b593d",
+  "active_gate": "G03_CHATGPT_DISCOVERY",
+  "active_substep": "G03.6_READ_ONLY_DISCOVERY_CANARY",
+  "decision": "PASS",
+  "consequence_gate_status": "COMPLETED_TRANSIENT_RUNTIME_KEY",
+  "activation_attempt": {
+    "attempt_id": "G03_TUNNEL_CREATE_20260921_01",
+    "timestamp": "2026-09-21T18:02:55+02:00",
+    "authorized_scope": "one private tunnel named KGG-UI-Lab-Private bound to the selected ChatGPT workspace and Personal organization",
+    "action": "Create form submitted once after Name, Description, organization, and workspace were selected",
+    "result": "NO_RESOURCE_OBSERVED",
+    "postcondition_check": "Tunnel page still shows No tunnels yet",
+    "retry_policy": "NO_AUTOMATIC_RETRY",
+    "error_class": "PLATFORM_CREATE_UNCONFIRMED",
+    "resolved_after_delayed_read": true,
+    "resolved_evidence": "Fresh platform reload shows exactly one tunnel row; tunnel identifier deliberately not retained."
+  },
+  "transport_activation": {
+    "tunnel_resource": "CREATED",
+    "workspace_binding": "SELECTED",
+    "tunnel_id_retained": false,
+    "client_release": "v0.0.14",
+    "host_asset": "windows-amd64",
+    "archive_checksum": "PASS",
+    "client_help_quickstart": "PASS",
+    "runtime_key_status": "USED_TRANSIENTLY_NOT_RETAINED",
+    "client_profile": "doctor_pass_tunnel_client_live",
+    "next_required_gate": "NONE_FOR_G03"
+  },
+  "runtime_key_gate": {
+    "path": "docs/kgg-project-completion/G03_RUNTIME_KEY_GATE_20260921.json",
+    "sha256": "2f71734dc523ea62652f97f521d76e47b659093720f4ca5c6ec5f5c7492dc95f",
+    "status": "AUTHORIZED_AND_USED_TRANSIENTLY"
+  },
+  "runtime_key_observation": {
+    "platform_page": "https://platform.openai.com/settings/organization/api-keys",
+    "fresh_read_at": "2026-09-21T18:16:06+02:00",
+    "create_new_secret_key_ui": true,
+    "active_masked_key_count": 1,
+    "secret_value_observed": false,
+    "control_plane_key_in_environment": false,
+    "existing_key_reused": false,
+    "authorized_key_created_once": true,
+    "secret_value_retained": false,
+    "transient_use_only": true,
+    "observation_rule": "Secret was used only in the running tunnel-client process and is absent from repository, logs, and evidence."
+  },
+  "transport_runtime": {
+    "client_version": "0.0.14",
+    "profile_doctor": "PASS",
+    "health_listener": "http://127.0.0.1:8080/ui",
+    "client_process": "STOPPED_AFTER_CANARY",
+    "mcp_target": "python kgg-plugin/mcp/server.py",
+    "chatgpt_app": "KGG UI Lab Private",
+    "chatgpt_auth_mode": "NONE",
+    "tool_discovery": "PASS",
+    "available_read_only_tools": ["capture_screenshot","execute_visual_action","get_current_state","get_session_status","get_test_evidence","get_ticket_state","observe_visual_state","run_quick_flow","run_width_sweep","set_device_profile","start_ui_session"],
+    "write_tool_visible": false
+  },
+  "discovery_canary": {
+    "canary_id": "G03_DISCOVERY_CANARY_20260921_01",
+    "completed_at": "2026-09-21T19:14:04+02:00",
+    "surface": "CHATGPT_NORMAL_CHAT",
+    "operation": "get_current_state",
+    "actor": "system",
+    "call_count": 1,
+    "additional_tool_calls": 0,
+    "status": "ready",
+    "main_sha": "not_bound",
+    "raw_result_retained": true,
+    "secret_observed": false,
+    "result": "PASS"
+  },
+  "candidate_fingerprint": "kgg-plugin-0.1.0-local-stdio",
+  "evidence_refs": [
+    {
+      "kind": "browser_ax",
+      "tab_id": "264",
+      "url": "https://chatgpt.com/#settings/Plugins",
+      "observed": "Installed plugin list contains no KGG; Plugins durchsuchen is visible."
+    },
+    {
+      "kind": "browser_ax",
+      "tab_id": "264",
+      "url": "https://chatgpt.com/#settings/Security?section=developer-mode",
+      "observed": "Entwicklermodus switch Value=1; no private KGG/MCP/tunnel connection control is visible in the current settings view."
+    },
+    {
+      "kind": "browser_ax",
+      "tab_id": "262",
+      "url": "https://chatgpt.com/plugins?search=KGG",
+      "observed": "Fresh search returned no matching KGG plugin."
+    },
+    {
+      "kind": "repository_read",
+      "path": "kgg-plugin/.mcp.json",
+      "observed": "Local python ./mcp/server.py stdio boundary only."
+    },
+    {
+      "kind": "local_preflight",
+      "command": "Get-Command tunnel-client",
+      "observed": "TUNNEL_CLIENT=NOT_FOUND; no tunnel configuration in repository."
+    },
+    {
+      "kind": "official_documentation",
+      "url": "https://developers.openai.com/api/docs/guides/secure-mcp-tunnels",
+      "observed": "Secure MCP Tunnel supports private stdio/HTTP MCP; requires tunnel_id, runtime API key, Tunnels Read + Use, and a running tunnel-client."
+    },
+    {
+      "kind": "official_documentation",
+      "url": "https://help.openai.com/en/articles/12584461-developer-mode-and-mcp-apps-in-chatgpt",
+      "observed": "ChatGPT does not connect directly to local MCP; private/local servers use Secure MCP Tunnel and developer-mode workspace app setup."
+    },
+    {
+      "kind": "browser_ax",
+      "tab_id": "265",
+      "url": "https://chatgpt.com/plugins?search=KGG#settings/Connectors?create-connector=true&redirectAfter=%2Fplugins",
+      "observed": "New Plugin form is visible; connection choices Server URL and Tunnel; Tunnel selection reports Noch keine Tunnel and exposes Tunnel erstellen."
+    },
+    {
+      "kind": "browser_ax",
+      "tab_id": "265",
+      "url": "https://platform.openai.com/settings/organization/tunnels",
+      "observed": "Personal Organization Tunnels page is reachable read-only and shows Create tunnel; no tunnel was created."
+    },
+    {
+      "kind": "browser_ax",
+      "tab_id": "265",
+      "url": "https://platform.openai.com/settings/organization/tunnels",
+      "observed": "Create tunnel form exposes Name, Description, Organizations and ChatGPT workspaces; Create is disabled before complete input. IDs and keys were not retained."
+    },
+    {
+      "kind": "browser_ax",
+      "tab_id": "266",
+      "url": "https://platform.openai.com/settings/organization/tunnels",
+      "observed": "Fresh recheck after sign-in shows No tunnels yet; Create tunnel remains available; no tunnel was created."
+    },
+    {
+      "kind": "browser_ax",
+      "tab_id": "267",
+      "url": "https://platform.openai.com/settings/organization/tunnels",
+      "observed": "Second fresh recheck shows No tunnels yet; only Create tunnel is available; no tunnel resource exists."
+    }
+  ],
+  "blocker_fingerprint": "G03_NO_TRANSPORT_1E6C6E3",
+  "blocker_resolution": "RUNTIME_KEY_GATE_AUTHORIZED_AND_DISCOVERY_CANARY_PASS",
+  "root_cause": "Resolved: private Secure MCP Tunnel, live tunnel-client, ChatGPT app binding, and one read-only discovery canary are verified.",
+  "brother_advisory_status": "ACCEPTED_AFTER_SELF_REVIEW",
+  "brother_handoff_id": "G03_CHATGPT_DISCOVERY_20260921_01",
+  "brother_decision": "Reuse the existing stdio MCP; prefer Secure MCP Tunnel; do not build a second server or public HTTPS endpoint for this private proof.",
+  "official_transport_prerequisites": [
+    "tunnel_id",
+    "runtime_api_key_not_stored",
+    "Tunnels Read + Use",
+    "ChatGPT developer-mode/workspace binding",
+    "running tunnel-client reaching existing stdio command"
+  ],
+  "activation_runbook": {
+    "path": "docs/kgg-project-completion/03a-g03-transport-activation-runbook.md",
+    "sha256": "288bf00880e54f14a43aa662645fbc40515a575bd9f8fd24b97bd9afb9524243"
+  },
+  "human_gate_request": {
+    "path": "docs/kgg-project-completion/G03_HUMAN_GATE_REQUEST_20260921.json",
+    "sha256": "fa4f958a25560a9ec5f1853b8eda0801dff130a95a1693b3de1269806162ec2c",
+    "status": "COMPLETED_TRANSIENT_RUNTIME_KEY_AND_CANARY_PASS"
+  },
+  "next_step": "G07_SURFACE_MATRIX",
+  "required_consequence_gate": "NONE_FOR_G03",
+  "global_status_unchanged": {
+    "PRODUCTION_CONTROL": "PILOT_INCOMPLETE",
+    "A_B": "NOT_COMPARABLE",
+    "replacement_eligible": false
+  }
+}

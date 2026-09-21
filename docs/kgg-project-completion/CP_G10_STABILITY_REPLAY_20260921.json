@@ -1,0 +1,38 @@
+{
+  "schema": "kgg-project-completion-checkpoint/v1",
+  "checkpoint_id": "CP_G10_STABILITY_REPLAY_20260921",
+  "base_sha": "1e6c6e3e28603f28bfbad3b127c688e722c823f5",
+  "local_head": "211d6a2677926839fa79ba69eb09ed1389e2aa3b",
+  "active_gate": "G10",
+  "decision": "PASS_LOCAL_CANDIDATE_STABILITY",
+  "evidence_level": "E2_LOCAL_REAL_RUNTIME",
+  "candidate_fingerprint": "2425dde029aa0454626216d5b4d74d1889e526bd39d12519b2944836be0d2df4",
+  "full_gate": {
+    "command": "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
+    "exit_code": 0,
+    "contract_tests": "141_PASS_1_SKIP",
+    "critical_battery": "PASS",
+    "scope": "local critical candidate battery; no live dispatch or release write"
+  },
+  "unchanged_replay": {
+    "command": "cmd /c release-pipeline\\run-kgg-tests.cmd --level critical",
+    "exit_code": 0,
+    "candidate_fingerprint_before": "2425dde029aa0454626216d5b4d74d1889e526bd39d12519b2944836be0d2df4",
+    "candidate_fingerprint_after": "2425dde029aa0454626216d5b4d74d1889e526bd39d12519b2944836be0d2df4",
+    "replay_count": 1,
+    "scope": "exact unchanged local replay"
+  },
+  "technical_limits": [
+    "E3 agent-host replay not proven",
+    "external ChatGPT/Codex host measurement envelope not reconciled",
+    "no production or post-merge canary performed"
+  ],
+  "global_status_unchanged": {
+    "PRODUCTION_CONTROL": "PILOT_INCOMPLETE",
+    "A_B": "NOT_COMPARABLE",
+    "replacement_eligible": false
+  },
+  "next_step": "G11_FINAL_ADVISORY_AND_LEAD_REVIEW",
+  "contribution_source": "KGG_LEAD",
+  "review_status": "PENDING"
+}

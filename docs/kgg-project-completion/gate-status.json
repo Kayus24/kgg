@@ -1,8 +1,8 @@
 {
   "schema": "kgg-project-completion-gates/v1",
-  "generated_at": "2026-09-21T13:04:52+02:00",
-  "fresh_remote_main_at_generation": "efb35ff796235348fd0d620ee58c0e24b0e9fc8d",
-  "local_head_at_generation": "efb35ff796235348fd0d620ee58c0e24b0e9fc8d",
+  "generated_at": "2026-09-21T19:23:17+02:00",
+  "fresh_remote_main_at_generation": "1e6c6e3e28603f28bfbad3b127c688e722c823f5",
+  "local_head_at_generation": "211d6a2677926839fa79ba69eb09ed1389e2aa3b",
   "north_star": [
     "migrate required Custom GPT capabilities into one universal KGG plugin",
     "provide real screenshot-to-action browser control for the KGG HTML app",
@@ -10,20 +10,20 @@
   ],
   "status_enum": ["PASS", "PARTIAL", "FAIL", "BLOCKED", "UNKNOWN", "NOT_APPLICABLE"],
   "evidence_levels": ["E0_DOCUMENTED", "E1_SYNTHETIC", "E2_LOCAL_REAL_RUNTIME", "E3_REAL_HOST", "E4_REPEATED_STABLE"],
-  "active_gate": "G03",
+  "active_gate": "G12",
   "gates": [
     {"id":"G00","title":"Source of Truth and checkpoints","status":"PASS","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":[],"document":"00-governance-and-source-of-truth.md","next_action":"resume at G01 capability parity"},
     {"id":"G01","title":"Custom GPT capability migration","status":"PASS","evidence_level":"E1_SYNTHETIC","depends_on":["G00"],"document":"01-custom-gpt-capability-migration.md","next_action":"G01 checkpoint merged; resume at G02 distributable plugin preflight"},
     {"id":"G02","title":"Universal plugin package","status":"PARTIAL","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":["G01"],"document":"02-universal-plugin-package.md","next_action":"G02.3 transport readiness and G03 ChatGPT discovery"},
-    {"id":"G03","title":"ChatGPT plugin connection","status":"BLOCKED","evidence_level":"E3_REAL_HOST","depends_on":["G02"],"document":"03-chatgpt-plugin-connection.md","next_action":"provide one authorized HTTPS/Secure MCP endpoint, then run a fresh ChatGPT discovery canary"},
-    {"id":"G04","title":"Real browser bridge","status":"FAIL","evidence_level":"E1_SYNTHETIC","depends_on":["G02"],"document":"04-real-browser-bridge.md","next_action":"select and implement the smallest real browser host boundary"},
-    {"id":"G05","title":"Visual interaction loop","status":"BLOCKED","evidence_level":"E1_SYNTHETIC","depends_on":["G04"],"document":"05-visual-interaction-loop.md","next_action":"execute a real two-screenshot state transition after G04"},
-    {"id":"G06","title":"Real Quick Flows","status":"PARTIAL","evidence_level":"E1_SYNTHETIC","depends_on":["G04"],"document":"06-real-quick-flows.md","next_action":"bind three versioned flows to real browser actions"},
-    {"id":"G07","title":"A/B/C surface integration","status":"PARTIAL","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":["G03","G04","G06"],"document":"07-surface-integration.md","next_action":"run independent capability discovery and bounded canaries per surface"},
-    {"id":"G08","title":"Security privacy and authorization","status":"PARTIAL","evidence_level":"E1_SYNTHETIC","depends_on":["G04"],"document":"08-security-privacy-and-authorization.md","next_action":"prove browser-specific boundaries with negative real-path tests"},
-    {"id":"G09","title":"Evidence and provenance","status":"PARTIAL","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":["G04"],"document":"09-evidence-and-provenance.md","next_action":"retain and bind real screenshot/action evidence"},
-    {"id":"G10","title":"Testing stability and recovery","status":"PARTIAL","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":["G04","G06","G08","G09"],"document":"10-testing-stability-and-recovery.md","next_action":"add black-box bridge tests and unchanged real-host replay"},
-    {"id":"G11","title":"Brother GPT escalation","status":"PARTIAL","evidence_level":"E0_DOCUMENTED","depends_on":["G00"],"document":"11-brother-gpt-escalation.md","next_action":"validate one complete advisory and provenance cycle"},
-    {"id":"G12","title":"Release migration and operations","status":"BLOCKED","evidence_level":"E0_DOCUMENTED","depends_on":["G01","G02","G03","G04","G05","G06","G07","G08","G09","G10","G11"],"document":"12-release-migration-and-operations.md","next_action":"start only after all implementation gates reach final disposition"}
+    {"id":"G03","title":"ChatGPT plugin connection","status":"PASS","consequence_gate_status":"COMPLETED_TRANSIENT_RUNTIME_KEY","evidence_level":"E3_REAL_HOST","depends_on":["G02"],"document":"03-chatgpt-plugin-connection.md","checkpoint":"CP_G03_TRANSPORT_BLOCKED_20260921.json","human_gate":"G03_RUNTIME_KEY_GATE_20260921.json","next_action":"continue to G07 surface matrix; retain no runtime secret and do not repeat the discovery canary"},
+    {"id":"G04","title":"Real browser bridge","status":"PASS","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":["G02"],"document":"04-real-browser-bridge.md","checkpoint":"CP_G04_REAL_BROWSER.json","next_action":"continue to G05 visual loop and bind three real Quick Flows in G06"},
+    {"id":"G05","title":"Visual interaction loop","status":"PARTIAL","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":["G04"],"document":"05-visual-interaction-loop.md","checkpoint":"CP_G05_VISUAL_LOOP.json","next_action":"bind the persistent visual loop to an authorized agent host and obtain E3 evidence"},
+    {"id":"G06","title":"Real Quick Flows","status":"PARTIAL","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":["G04"],"document":"06-real-quick-flows.md","checkpoint":"CP_G06_REAL_FLOWS.json","next_action":"obtain E3 host evidence for the three flows; local replay is bound"},
+    {"id":"G07","title":"A/B/C surface integration","status":"PASS","evidence_level":"E3_REAL_HOST_PLUS_E2_LOCAL_REAL_RUNTIME","scope":"surface_classification_only","depends_on":["G03","G04","G06"],"document":"07-surface-integration.md","checkpoint":"CP_G07_SURFACE_MATRIX_20260921.json","next_action":"continue to G08/G09; retain B/C host-dependent rows as NOT_TESTED or SYNTHETIC_ONLY and do not repeat G03"},
+    {"id":"G08","title":"Security privacy and authorization","status":"PARTIAL","evidence_level":"E2_LOCAL_REAL_RUNTIME","checkpoint":"CP_G08_G09_LOCAL_SAFETY_PROVENANCE_20260921.json","depends_on":["G04"],"document":"08-security-privacy-and-authorization.md","next_action":"external-host popup/download/filechooser negatives and E3 safety remain unproven; retain local 57/57 PASS"},
+    {"id":"G09","title":"Evidence and provenance","status":"PARTIAL","evidence_level":"E2_LOCAL_REAL_RUNTIME","checkpoint":"CP_G08_G09_LOCAL_SAFETY_PROVENANCE_20260921.json","depends_on":["G04"],"document":"09-evidence-and-provenance.md","next_action":"external measurement-envelope reconciliation remains unproven; retain local 57/57 PASS"},
+    {"id":"G10","title":"Testing stability and recovery","status":"PASS","scope":"local_candidate_stability_only","evidence_level":"E2_LOCAL_REAL_RUNTIME","checkpoint":"CP_G10_STABILITY_REPLAY_20260921.json","depends_on":["G04","G06","G08","G09"],"document":"10-testing-stability-and-recovery.md","next_action":"proceed to G11 final advisory/lead review; retain E3 replay as an explicit technical limit"},
+    {"id":"G11","title":"Brother GPT escalation","status":"PASS","evidence_level":"E1_SYNTHETIC","depends_on":["G00"],"document":"11-brother-gpt-escalation.md","checkpoint":"CP_G11_BROTHER_CYCLE_20260921.json","next_action":"proceed to G12 final operational acceptance; do not repeat the unchanged blocker review"},
+    {"id":"G12","title":"Release migration and operations","status":"BLOCKED","evidence_level":"E0_DOCUMENTED","depends_on":["G01","G02","G03","G04","G05","G06","G07","G08","G09","G10","G11"],"document":"12-release-migration-and-operations.md","next_action":"prepare only the separately authorized PR/merge consequence; post-merge host canary remains unavailable without a fresh runtime budget"}
   ]
 }

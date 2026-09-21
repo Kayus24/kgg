@@ -6,7 +6,7 @@ Der reale Plugin-/Browserpfad besteht reproduzierbar Targeted-, Negative-, Regre
 
 ## 2. Warum dieses Gate erforderlich ist
 
-Das Repo besitzt viele gute UI- und Release-Tests, aber noch keinen vollständigen Black-Box-Test der neuen Agent→Plugin→Browser→Evidence-Kette.
+Das Repo besitzt viele gute UI- und Release-Tests sowie jetzt einen Black-Box-Test der lokalen Plugin→Browser→Evidence-Kette. Der vollständige Agent→Plugin→Browser→Evidence-Regelkreis auf einer Real-Host-Surface fehlt noch.
 
 ## 3. Scope und Nicht-Ziele
 
@@ -18,20 +18,26 @@ G04, G06, G08 und G09. Befehle werden aus `release-pipeline/kgg_test_battery.py`
 
 ## 5. Aktueller Stand
 
-- `IMPLEMENTATION_STATUS=BROAD_EXISTING_TESTS_REAL_BRIDGE_SUITE_MISSING`
-- `LIVE_EVIDENCE_STATUS=PARTIAL`
-- `GATE_STATUS=PARTIAL`
+- `IMPLEMENTATION_STATUS=REAL_BRIDGE_BLACK_BOX_NEGATIVE_REPLAY_SUITE_PRESENT`
+- `LIVE_EVIDENCE_STATUS=TARGETED_NEGATIVE_REPLAY_CRITICAL_AND_UI_REGRESSION_PASS; E3_PENDING`
+- `GATE_STATUS=PASS`
+- `GATE_SCOPE=local_candidate_stability_only`
 - `EVIDENCE_LEVEL=E2_LOCAL_REAL_RUNTIME`
-- `LAST_VERIFIED_BASE_SHA=2b8024e359bd0f65bcc5666b5e190d78a4b4ed6f`
-- `LAST_VERIFIED_AT=2026-09-21`
+- `LAST_VERIFIED_BASE_SHA=1e6c6e3e28603f28bfbad3b127c688e722c823f5`
+- `LAST_VERIFIED_AT=2026-09-21T19:48:00+02:00`
 
 ## 6. Bestehende Evidence
 
-Critical/Regression-Battery, Playwright-UI-Smokes, GPT-Evals, Measurement-Tests, Fault Injection und Hook Guard existieren. Browserdependencies können Downloads auslösen und müssen vorab klassifiziert werden.
+Critical/Regression-Battery, Playwright-UI-Smokes, GPT-Evals, Measurement-Tests, Fault Injection, Hook Guard und eine unabhängige Real-Bridge-Black-Box-Suite existieren. Browserdependencies können Downloads auslösen und müssen vorab klassifiziert werden.
 
 ## 7. Lücke und Root Cause
 
-Producer und Real-Browser-Brücke sind nicht in einer unabhängigen Black-Box-Kette getestet. Synthetic-Tests decken gemeinsame Denkfehler nicht ab.
+Die lokale Producer-/Real-Browser-Brücke ist jetzt in einer unabhängigen Black-Box-Kette mit Drift-, Origin-, Zustands-, Hash- und Replay-Fällen getestet. E3-Agent-Host-Replay fehlt weiterhin.
+
+Die Critical-Battery und genau ein unveränderter Replay sind in
+[`CP_G10_STABILITY_REPLAY_20260921.json`](CP_G10_STABILITY_REPLAY_20260921.json)
+mit Exit 0 gebunden. `PASS` gilt nur für die lokale Candidate-Stabilität, nicht
+für E3-Host-Parität oder Release.
 
 ## 8. Kleinschrittiger Arbeitsplan
 
@@ -81,4 +87,4 @@ Testmatrix, Ergebnisse, Fingerprint, Replay-Evidence, bekannte Grenzen und Recov
 
 ## 14. Beitragsherkunft
 
-`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
+`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PARTIAL`, `NOTE=Local real bridge, negative matrix and unchanged replay are green; external host replay remains pending.`

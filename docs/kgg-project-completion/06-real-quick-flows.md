@@ -18,20 +18,20 @@ G04; für den visuellen Fallback G05; Safety aus G08.
 
 ## 5. Aktueller Stand
 
-- `IMPLEMENTATION_STATUS=SYNTHETIC_FLOW_CONTRACT`
-- `LIVE_EVIDENCE_STATUS=NO_REAL_FLOW_EXECUTION`
+- `IMPLEMENTATION_STATUS=THREE_REAL_FLOWS_PLUS_BOUNDED_VISUAL_DRIFT_FALLBACK`
+- `LIVE_EVIDENCE_STATUS=THREE_CANONICAL_FLOWS_LOCAL_REAL; CONTROLLED_VISUAL_DRIFT_FALLBACK_LOCAL_REAL; UNCHANGED_REPLAY_BOUND; E3_HOST_PARITY_PENDING`
 - `GATE_STATUS=PARTIAL`
-- `EVIDENCE_LEVEL=E1_SYNTHETIC`
-- `LAST_VERIFIED_BASE_SHA=2b8024e359bd0f65bcc5666b5e190d78a4b4ed6f`
-- `LAST_VERIFIED_AT=2026-09-21`
+- `EVIDENCE_LEVEL=E2_LOCAL_REAL_RUNTIME`
+- `LAST_VERIFIED_BASE_SHA=1e6c6e3e28603f28bfbad3b127c688e722c823f5`
+- `LAST_VERIFIED_AT=2026-09-21T13:42:46+02:00`
 
 ## 6. Bestehende Evidence
 
-UI-Lab-Goal und MCP-Kandidat enthalten Quick-Flow-Begriffe und synthetische Schritte. Der Server führt derzeit keinen Browser aus.
+UI-Lab-Goal und MCP-Kandidat enthalten Quick-Flow-Begriffe und synthetische Schritte. Die drei kanonischen Flows laufen lokal real über dieselbe Brücke. Bei einem deterministischen Locator-Drift stoppt der Flow fail-closed, öffnet eine echte persistente Visual-Loop-Beobachtung und markiert den Flow als `STALE_REQUIRES_REVIEW`; ein visueller Agent kann danach genau eine explizite Aktion ausführen.
 
 ## 7. Lücke und Root Cause
 
-Flows sind nicht an echte Ziele, echte Zustandsassertions oder einen realen Runner gebunden.
+Die drei Flow-Zertifikate sind an den echten Runner gebunden. Der lokale Drift-Fallback und ein unveränderter Replay je Flow sind jetzt vorhanden; es fehlt noch E3-Host-Evidence außerhalb des lokalen Runners.
 
 ## 8. Kleinschrittiger Arbeitsplan
 
@@ -39,7 +39,7 @@ Flows sind nicht an echte Ziele, echte Zustandsassertions oder einen realen Runn
 2. Semantische Locator bevorzugen; Koordinaten nur mit gebundenem Viewport nutzen.
 3. Vor jedem Schritt Vorbedingung prüfen.
 4. nach jedem Schritt minimale Zustandsassertion ausführen.
-5. bei unerwartetem Zustand stoppen und G05-Screenshot-Fallback verwenden.
+5. bei unerwartetem Zustand stoppen, den Flow als stale markieren und G05-Screenshot-Fallback verwenden.
 6. Step Evidence, Laufzeit, Fehlerklasse und finalen Zustand ausgeben.
 7. Flow-Version an UI-/Source-Fingerprint binden.
 
@@ -65,6 +65,7 @@ Flows sind nicht an echte Ziele, echte Zustandsassertions oder einen realen Runn
 - Overlay/Modal.
 - stale Flow-Fingerprint.
 - unveränderter Replay pro Flow.
+- `python -m unittest release-pipeline/test_kgg_real_browser_bridge.py -v`: drei zertifizierte Flows real PASS plus Locator-Drift-Fallback real PASS; der Flow bleibt nach dem Fallback ausdrücklich stale.
 
 ## 11. Safety und Datenschutz
 
@@ -80,4 +81,4 @@ Drei Flow-Spezifikationen, Runnerbindung, Step-Evidence, Drift-Fallback und Test
 
 ## 14. Beitragsherkunft
 
-`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
+`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PARTIAL`, `NOTE=Three canonical flows, a fail-closed local visual drift fallback and unchanged replay run through G04/G05; E3 host parity remains.`

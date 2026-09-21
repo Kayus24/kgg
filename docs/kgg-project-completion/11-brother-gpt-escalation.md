@@ -18,16 +18,27 @@ G00 und ein konkreter neuer Blocker-Fingerprint. Der Benutzer hat den Brother al
 
 ## 5. Aktueller Stand
 
-- `IMPLEMENTATION_STATUS=ESCALATION_SKILL_PRESENT_PROCESS_NOW_DOCUMENTED`
-- `LIVE_EVIDENCE_STATUS=END_TO_END_DOC_INCORPORATION_NOT_YET_PROVEN`
-- `GATE_STATUS=PARTIAL`
-- `EVIDENCE_LEVEL=E0_DOCUMENTED`
-- `LAST_VERIFIED_BASE_SHA=2b8024e359bd0f65bcc5666b5e190d78a4b4ed6f`
-- `LAST_VERIFIED_AT=2026-09-21`
+- `IMPLEMENTATION_STATUS=ESCALATION_SKILL_PRESENT_PROCESS_PROVEN_ON_G03_BLOCKER`
+- `LIVE_EVIDENCE_STATUS=HANDOFF_SELF_REVIEW_LEAD_REVIEW_AND_PROVENANCE_BOUND`
+- `GATE_STATUS=PASS`
+- `EVIDENCE_LEVEL=E1_SYNTHETIC`
+- `CHECKPOINT=CP_G11_BROTHER_CYCLE_20260921.json`
+- `HANDOFF_ID=G03_CHATGPT_DISCOVERY_20260921_01`
+- `LAST_VERIFIED_BASE_SHA=1e6c6e3e28603f28bfbad3b127c688e722c823f5`
+- `LAST_VERIFIED_AT=2026-09-21T19:52:00+02:00`
 
 ## 6. Bestehende Evidence
 
-`kgg-escalation` existiert. Frühere Brother-Reviews wurden genutzt, aber nicht durchgehend mit stabiler Herkunfts-, Fingerprint- und Self-Review-Regel in den Zieldokumenten geführt.
+`kgg-escalation` existiert. Für den G03-Blocker ist ein vollständiger, einmaliger
+Zyklus mit stabiler Herkunfts-, Fingerprint- und Self-Review-Regel im
+Checkpoint und im betroffenen Zieldokument gebunden. Weitere Reviews desselben
+unveränderten Fingerprints sind ausdrücklich ausgeschlossen.
+
+Der aktuelle Lead-Review bestätigt, dass der G03-Fingerprint gelöst ist und
+keine neue Brother-Schleife erforderlich ist. Die verbleibenden technischen
+Grenzen (fehlende B/C-Host-Parität, externe Safety-/Envelope-Evidence und
+fehlender Merge-/Canary-Nachweis) sind in den aktiven G08/G09/G10/G12-
+Dokumenten gebunden.
 
 ## 7. Lücke und Root Cause
 

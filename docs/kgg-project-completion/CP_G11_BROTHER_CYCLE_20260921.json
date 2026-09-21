@@ -1,0 +1,56 @@
+{
+  "schema": "kgg-project-completion-checkpoint/v1",
+  "checkpoint_id": "CP_G11_BROTHER_CYCLE_20260921_01",
+  "base_sha": "1e6c6e3e28603f28bfbad3b127c688e722c823f5",
+  "head": "211d6a2677926839fa79ba69eb09ed1389e2aa3b",
+  "goal_hash": "1b39a5d74dd0d56121806a42e0c85854922ebf62ff1a6c487c73f78dcc0b593d",
+  "active_gate": "G11",
+  "active_substep": "G11_BROTHER_ADVISORY",
+  "decision": "PASS",
+  "candidate_fingerprint": "G03_NO_TRANSPORT_1E6C6E3",
+  "brother_handoff_id": "G03_CHATGPT_DISCOVERY_20260921_01",
+  "brother_review_count": 1,
+  "evidence_refs": [
+    {
+      "kind": "g03_checkpoint",
+      "path": "docs/kgg-project-completion/CP_G03_TRANSPORT_BLOCKED_20260921.json",
+      "observed": "Accepted Brother advisory, handoff identity, decision, and blocker-bound evidence are retained."
+    },
+    {
+      "kind": "detail_document",
+      "path": "docs/kgg-project-completion/03-chatgpt-plugin-connection.md",
+      "observed": "Contribution block records BROTHER_GPT source, self-review acceptance, Lead incorporation, and the bounded tunnel recommendation."
+    },
+    {
+      "kind": "process_contract",
+      "path": "docs/kgg-project-completion/11-brother-gpt-escalation.md",
+      "observed": "Handoff, self-review, Lead review, provenance block, duplicate-fingerprint rule, and no-scope-expansion rule are documented."
+    }
+  ],
+  "completed": [
+    "BLOCKER_FINGERPRINT_BOUND",
+    "BROTHER_HANDOFF_SENT",
+    "BROTHER_SELF_REVIEW_COMPLETED",
+    "LEAD_REVIEW_COMPLETED",
+    "ADVISORY_ACCEPTED_AND_INCORPORATED",
+    "PROVENANCE_BLOCK_RECORDED"
+  ],
+  "open_blockers": [],
+  "final_review": {
+    "scope": "current G03/G07/G08/G09/G10 evidence and documentation state",
+    "result": "PASS_WITH_TECHNICAL_LIMITS",
+    "new_blocker_fingerprint": false,
+    "technical_limits_retained": [
+      "B/C real-host screenshot/action parity not proven",
+      "external host safety and measurement-envelope reconciliation not proven",
+      "no PR/merge/post-merge canary performed"
+    ],
+    "lead_review": "ACCEPTED"
+  },
+  "next_step": "G12_FINAL_OPERATIONAL_ACCEPTANCE",
+  "global_status_unchanged": {
+    "PRODUCTION_CONTROL": "PILOT_INCOMPLETE",
+    "A_B": "NOT_COMPARABLE",
+    "replacement_eligible": false
+  }
+}
