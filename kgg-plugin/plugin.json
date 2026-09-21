@@ -1,0 +1,27 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "kgg-plugin",
+  "version": "0.1.0",
+  "description": "KGG shared agent workflow and bounded UI-Lab candidate",
+  "author": {
+    "name": "KGG",
+    "url": "https://github.com/Kayus24/kgg"
+  },
+  "repository": "https://github.com/Kayus24/kgg",
+  "keywords": ["kgg", "ui-lab", "safety", "provenance"],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "KGG Plugin Candidate",
+        "shortDescription": "Run KGG workflows with shared safety gates.",
+        "longDescription": "A bounded Skills package for the KGG Custom GPT, ChatGPT and Codex comparison surfaces.",
+        "developerName": "KGG",
+        "category": "Productivity",
+        "capabilities": ["Read"],
+        "defaultPrompt": [
+          "Route this small KGG ticket through the shared test loop and report evidence before suggesting a change."
+        ]
+      }
+    }
+  }
+}

@@ -125,7 +125,7 @@
     },
     {
       "path": "kgg-plugin/scripts/eval/validate_candidate.py",
-      "sha256": "190f8eb08f24f07964193d3cf212e6b1ea5a4b3502bcb94c9ab500014c9607a8"
+      "sha256": "ee25e84a8a36e5fa580f5903bd3064cd0c573980eae11f683da5f8ad938f703b"
     }
   ]
 }

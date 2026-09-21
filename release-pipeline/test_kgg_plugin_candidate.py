@@ -24,6 +24,22 @@ EXPECTED_SKILLS = {
 
 
 class KggPluginCandidateTests(unittest.TestCase):
+    def test_portable_root_manifest_is_present_and_keeps_legacy_overlay(self) -> None:
+        portable_path = PLUGIN / "plugin.json"
+        portable = json.loads(portable_path.read_text(encoding="utf-8"))
+        self.assertEqual(
+            portable["$schema"],
+            "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+        )
+        self.assertEqual(portable["name"], "kgg-plugin")
+        self.assertEqual(portable["version"], "0.1.0")
+        self.assertEqual(portable["repository"], "https://github.com/Kayus24/kgg")
+        interface = portable["extensions"]["com.openai"]["interface"]
+        self.assertEqual(interface["displayName"], "KGG Plugin Candidate")
+        self.assertEqual(interface["capabilities"], ["Read"])
+        self.assertTrue((PLUGIN / ".codex-plugin" / "plugin.json").is_file())
+        self.assertTrue((PLUGIN / ".mcp.json").is_file())
+
     def test_manifest_is_candidate_only_and_has_no_placeholder(self) -> None:
         manifest_path = PLUGIN / ".codex-plugin" / "plugin.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))

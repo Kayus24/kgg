@@ -57,12 +57,20 @@ def _installed_package_check(plugin_root: Path) -> dict[str, object]:
     """
 
     try:
+        portable = json.loads((plugin_root / "plugin.json").read_text(encoding="utf-8"))
         manifest = json.loads((plugin_root / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
         mcp = json.loads((plugin_root / ".mcp.json").read_text(encoding="utf-8"))
         source_hashes = json.loads((plugin_root / "references" / "architecture" / "source-hashes.json").read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         raise RuntimeError(f"installed package metadata invalid: {exc.__class__.__name__}") from exc
 
+    if (
+        portable.get("$schema") != "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json"
+        or portable.get("name") != "kgg-plugin"
+        or portable.get("version") != "0.1.0"
+        or not isinstance(portable.get("extensions", {}).get("com.openai", {}).get("interface"), dict)
+    ):
+        raise RuntimeError("portable plugin manifest invalid")
     if manifest.get("name") != "kgg-plugin" or not isinstance(manifest.get("version"), str) or manifest["version"].split("+", 1)[0] != "0.1.0":
         raise RuntimeError("installed package version or name invalid")
     if manifest.get("skills") != "./skills/" or manifest.get("mcpServers") != "./.mcp.json":
