@@ -1,0 +1,20 @@
+{
+  "name": "kgg-local",
+  "interface": {
+    "displayName": "KGG Local"
+  },
+  "plugins": [
+    {
+      "name": "kgg-plugin",
+      "source": {
+        "source": "local",
+        "path": "./kgg-plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

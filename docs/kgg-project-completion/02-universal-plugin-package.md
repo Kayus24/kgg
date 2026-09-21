@@ -22,8 +22,8 @@ G01. Für ChatGPT ist ein öffentlich per HTTPS erreichbarer MCP-Endpunkt oder e
 - `LIVE_EVIDENCE_STATUS=LOCAL_ONLY`
 - `GATE_STATUS=PARTIAL`
 - `EVIDENCE_LEVEL=E2_LOCAL_REAL_RUNTIME`
-- `LAST_VERIFIED_BASE_SHA=f793aa4506dfa3b911af585ec3e44c52abf6a43d`
-- `LAST_VERIFIED_AT=2026-09-21T10:35:00+02:00`
+- `LAST_VERIFIED_BASE_SHA=d75b5a53ddac5964003428400e3faccaed22902f`
+- `LAST_VERIFIED_AT=2026-09-21T11:00:00+02:00`
 
 ## 6. Bestehende Evidence
 
@@ -100,6 +100,40 @@ portabler; ein Root-`mcp.json` mit Remote-URL wird erst ergänzt, wenn ein
 echter HTTPS-/Tunnel-Endpunkt vorhanden ist. Kein Platzhalter-Endpunkt und
 keine synthetische ChatGPT-Discovery.
 
+## 6.4 G02.2 – Repo-lokale Marketplace und frische Codex-Installation
+
+`EXECUTION_ENVELOPE_ID=kgg-g02-local-marketplace-d75-v1`
+
+`BASE_SHA=d75b5a53ddac5964003428400e3faccaed22902f`
+
+Die offizielle Codex-Paketdokumentation nennt eine repo-lokale
+`.agents/plugins/marketplace.json` als Installationsweg. Dieser Pfad wurde
+minimal ergänzt:
+
+- `.agents/plugins/marketplace.json` registriert `kgg-plugin` mit einer
+  relativen lokalen Quelle `./kgg-plugin`.
+- Die neue Marketplace-Datei ist durch einen Candidate-Test gegen das
+  portable Root-Manifest gebunden.
+- `codex plugin marketplace add <repository-root> --json` registrierte die
+  Quelle als `kgg-local`.
+- `codex plugin add kgg-plugin@kgg-local --json` installierte erfolgreich
+  `kgg-plugin@kgg-local`, Version `0.1.0`.
+- `codex plugin list --json` bestätigte die Installation und den aktivierten
+  Zustand.
+
+Gezielte Evidence:
+
+- `python -m unittest discover -s release-pipeline -p 'test_kgg_plugin_candidate*.py'`
+  → 20 Tests, PASS.
+- `python -m json.tool .agents/plugins/marketplace.json` → PASS.
+- `python kgg-plugin/scripts/eval/validate_candidate.py --installed-only` → PASS.
+- `git diff --check` → PASS.
+
+Diese Evidence ist `E2_LOCAL_REAL_RUNTIME`. Sie beweist die lokale Codex-
+Marketplace-Installation, aber nicht die Discovery im normalen ChatGPT. Ein
+fehlender `tunnel-client` und ein fehlender realer HTTPS-/Secure-MCP-Endpunkt
+bleiben unverändert als G03-Voraussetzung. Deshalb bleibt `G02=PARTIAL`.
+
 ## 7. Lücke und Root Cause
 
 Das Paket setzt derzeit eine lokale Python-/Pfadumgebung voraus. Es gibt noch keinen nachgewiesenen ChatGPT-kompatiblen HTTPS-/Tunnel-Endpunkt und keine normale ChatGPT-Installation.
@@ -156,7 +190,7 @@ Bei unklarer Transportwahl soll der Brother offizielle Lösungen vergleichen und
 - `LOCAL_MCP_BOUNDARY=present`
 - `CHATGPT_DISTRIBUTION_BOUNDARY=not_yet_proven`
 - `REAL_BROWSER_BOUNDARY=not_part_of_G02`
-- `NEXT_STEP=G02.2 runtime/package portability audit and transport readiness`
+- `NEXT_STEP=G02.3 transport readiness and G03 ChatGPT discovery`
 
 G02 darf die lokale stdio-Fähigkeit als Candidate-Evidence verwenden, aber nicht als Beweis für eine installierbare ChatGPT-Verbindung. Ein fehlender HTTPS-/Tunnel-Endpunkt wird als konkrete externe Voraussetzung klassifiziert, nicht durch synthetische Health- oder Screenshot-Daten überdeckt.
 
@@ -166,4 +200,11 @@ Installierbares Paket, Versionsmanifest, Capability-Health, Installationsanleitu
 
 ## 14. Beitragsherkunft
 
-`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
+`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `CONTRIBUTION_DATE=2026-09-21`, `REVIEW_STATUS=ACCEPTED`.
+
+### Herkunft der Ergänzung G02.2
+
+`CONTRIBUTION_SOURCE=CODEX`
+`HANDOFF_ID=none`
+`SOURCE_SUMMARY=Offizielle Plugin-Paketdokumentation und lokaler Codex-CLI-Nachweis wurden auf den kleinsten repo-lokalen Marketplace-Pfad abgebildet.`
+`DECISION_SUMMARY=Marketplace-Datei und Test wurden übernommen; kein Remote-mcp.json und keine ChatGPT-Live-Evidence wurden erfunden.`

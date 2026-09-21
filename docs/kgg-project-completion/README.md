@@ -2,9 +2,9 @@
 
 Stand dieses Kandidaten: 2026-09-21
 
-Fresh Remote Main nach G02-Preflight-Checkpoint: `2fcac012d5463f7b690ec70971c71c51f3fa492e`
+Fresh Remote Main nach G02.2-Checkpoint: `d75b5a53ddac5964003428400e3faccaed22902f`
 
-Lokaler HEAD nach G02-Preflight-Checkpoint: `2fcac012d5463f7b690ec70971c71c51f3fa492e`
+Lokaler HEAD nach G02.2-Checkpoint: `d75b5a53ddac5964003428400e3faccaed22902f`
 
 Dieses Verzeichnis ist die Arbeits- und Abschlusssteuerung für das KGG-Agentenprojekt. Es ersetzt keine Fach-, Safety-, Measurement- oder Release-Verträge. Bei Widerspruch gilt die jeweils fachlich kanonische Quelle; der Widerspruch wird als Gate-Blocker erfasst und nicht stillschweigend aufgelöst.
 
@@ -60,7 +60,7 @@ Ein Gate darf nur mit der in seinem Detaildokument verlangten Stufe auf `PASS` g
 | --- | --- | --- | --- | --- | --- |
 | G00 | Source of Truth, Statusregister, Checkpoints | `PASS` | Dokumentensatz in PR #239 gemergt; Required Gate grün; Resume-Regel getestet | Fresh-Main-gebundener Dokumentensatz und eindeutiger nächster Gate-Schritt | [G00](00-governance-and-source-of-truth.md) |
 | G01 | Vollständige Custom-GPT-Funktionsinventur und Migration | `PASS` | 30 operationIds, fünf Skills, Manifest und kanonische Quellen abgebildet; Self-Tests grün; PR #241 auf Main `fe62c8b` | Jede benötigte Fähigkeit besitzt Zielkomponente, Test und Disposition; Live-Parität bleibt nachgelagert | [G01](01-custom-gpt-capability-migration.md) |
-| G02 | Universelles Plugin-Paket | `PARTIAL` | Portable Root-Manifest und lokale Candidate-/Paketprüfung grün; OpenAI-Transportpfad dokumentiert; ChatGPT-Discovery noch nicht live bewiesen | Paket in Codex und ChatGPT installierbar, versioniert und ohne lokale Pfadannahmen | [G02](02-universal-plugin-package.md) |
+| G02 | Universelles Plugin-Paket | `PARTIAL` | Portable Root-Manifest, repo-lokale Marketplace-Registrierung und frische lokale Codex-Installation grün; ChatGPT-Discovery noch nicht live bewiesen | Paket in Codex und ChatGPT installierbar, versioniert und ohne lokale Pfadannahmen | [G02](02-universal-plugin-package.md) |
 | G03 | Normales ChatGPT erkennt und nutzt das Plugin | `FAIL` | Live-Test fand kein installiertes KGG-Plugin | Tool Discovery und read-only Tool-Aufruf im normalen ChatGPT mit E3-Evidence | [G03](03-chatgpt-plugin-connection.md) |
 | G04 | Echte Browser-/UI-Brücke | `FAIL` | MCP meldet ausdrücklich „synthetic“ und „no real screen capture“ | Echte Session, Screenshot, Koordinaten-/Semantik-Aktionen und Zustandsbeobachtung | [G04](04-real-browser-bridge.md) |
 | G05 | Visueller Screenshot-Aktions-Regelkreis | `BLOCKED` | nur Testskripte/Fixtures, kein Agenten-End-to-End-Kanal | Zwei-Screenshot-Loop mit echter Aktion und unabhängiger Zustandsprüfung | [G05](05-visual-interaction-loop.md) |
@@ -84,7 +84,7 @@ Der nächste produktive Schwerpunkt ist:
 
 `G02 Plugin-Paket preflighten → G03 ChatGPT-Verbindung beweisen → G04 echte Browser-Brücke implementieren.`
 
-Aktiver Checkpoint: `CP_G01_CAPABILITY_MATRIX_BOUND`. G01 ist abgeschlossen; der nächste zulässige Arbeitsschritt ist der G02-Preflight. Die bisherige G01-Evidence bleibt `E1_SYNTHETIC` für Capability-Abdeckung und beweist keine Live-ChatGPT-Parität.
+Aktiver Checkpoint: `CP_G02_LOCAL_MARKETPLACE_BOUND`. G02.1 (portables Root-Manifest) und G02.2 (repo-lokale Marketplace-Registrierung plus frische Codex-Installation) sind abgeschlossen. Der nächste zulässige Arbeitsschritt ist die Transportbereitschaft und anschließend G03 ChatGPT-Discovery. Die bisherige G02-Evidence bleibt `E2_LOCAL_REAL_RUNTIME` und beweist keine Live-ChatGPT-Parität.
 
 ## 6. Globale Control-Loop-Regel
 

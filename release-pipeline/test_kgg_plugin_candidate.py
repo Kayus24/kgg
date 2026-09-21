@@ -24,6 +24,15 @@ EXPECTED_SKILLS = {
 
 
 class KggPluginCandidateTests(unittest.TestCase):
+    def test_repo_local_marketplace_points_to_portable_plugin(self) -> None:
+        marketplace_path = ROOT / ".agents" / "plugins" / "marketplace.json"
+        marketplace = json.loads(marketplace_path.read_text(encoding="utf-8"))
+        self.assertEqual(marketplace["name"], "kgg-local")
+        entries = [entry for entry in marketplace["plugins"] if entry.get("name") == "kgg-plugin"]
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0]["source"], {"source": "local", "path": "./kgg-plugin"})
+        self.assertTrue((ROOT / "kgg-plugin" / "plugin.json").is_file())
+
     def test_portable_root_manifest_is_present_and_keeps_legacy_overlay(self) -> None:
         portable_path = PLUGIN / "plugin.json"
         portable = json.loads(portable_path.read_text(encoding="utf-8"))
