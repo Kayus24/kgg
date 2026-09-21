@@ -90,6 +90,47 @@ def _visual_request(*, session_id: str, request_id: str, operation: str) -> dict
 
 
 class KggRealBrowserBridgeTests(unittest.TestCase):
+    def test_quick_flow_opens_visual_fallback_on_real_locator_drift(self) -> None:
+        runtime = _runtime_available()
+        if runtime is None:
+            self.skipTest("pre-provisioned Playwright runtime is not available")
+        node, module_path = runtime
+        old = {key: os.environ.get(key) for key in ("KGG_REAL_BROWSER", "KGG_BROWSER_NODE", "KGG_PLAYWRIGHT_NODE_PATH")}
+        os.environ.update({"KGG_REAL_BROWSER": "1", "KGG_BROWSER_NODE": node, "KGG_PLAYWRIGHT_NODE_PATH": module_path})
+        try:
+            with local_fixture_server() as base_url:
+                active = server.Runtime()
+                session_id = "visual-fallback-session-001"
+                request_id = "visual-fallback-request-001"
+                url = f"{base_url}?flow=pilot&drift=1"
+                capabilities = ["browser", "quick_flows", "capture", "visual_loop"]
+                started = server.handle(active, {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "start_ui_session", "arguments": {"session": _session(url, session_id=session_id, request_id=request_id, capabilities=capabilities)}}})
+                self.assertFalse(started["result"].get("isError", False), started)
+                response = server.handle(active, {"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "run_quick_flow", "arguments": {"request": _request(session_id=session_id, request_id=request_id)}}})
+                structured = response["result"]["structuredContent"]
+                self.assertEqual(structured["result"]["status"], "FAIL")
+                self.assertEqual(structured["result"]["error_class"], "action_target_not_found")
+                fallback = structured["result"]["fallback"]
+                self.assertEqual(fallback["status"], "READY")
+                self.assertEqual(fallback["flow_status"], "STALE_REQUIRES_REVIEW")
+                self.assertEqual(fallback["observation"]["state"], "pilot-area-ready")
+                self.assertEqual(len(response["result"]["content"]), 3)  # text + failed-flow shot + fallback shot
+                observation_id = fallback["observation"]["id"]
+                decision = {"operation": "click", "label": "drifted-control", "expected_state_after": "scale-drag-state", "observation_id": observation_id}
+                acted = server.handle(active, {"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "execute_visual_action", "arguments": {"request": _visual_request(session_id=session_id, request_id="visual-fallback-request-002", operation="execute_visual_action"), "decision": decision}}})
+                self.assertFalse(acted["result"].get("isError", False), acted)
+                action = acted["result"]["structuredContent"]
+                self.assertEqual(action["result"]["flow_status"], "STALE_REQUIRES_REVIEW")
+                self.assertEqual(action["session_status"], "stale_fallback_completed")
+                self.assertEqual(action["result"]["state_after"], "scale-drag-state")
+                self.assertEqual(len(active.visual_sessions), 0)
+        finally:
+            for key, value in old.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
     def test_visual_loop_reuses_page_and_verifies_agent_decision(self) -> None:
         runtime = _runtime_available()
         if runtime is None:

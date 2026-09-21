@@ -22,7 +22,9 @@
     const state = document.getElementById('kgg-state');
     const action = document.getElementById('kgg-action');
     const qr = document.getElementById('kgg-qr');
-    const flow = new URLSearchParams(location.search).get('flow');
+    const params = new URLSearchParams(location.search);
+    const flow = params.get('flow');
+    const drift = params.get('drift') === '1';
     if (flow === 'pilot') {
       document.body.dataset.kggState = 'pilot-area-ready';
       state.dataset.kggState = 'pilot-area-ready';
@@ -31,6 +33,10 @@
       document.body.dataset.kggState = 'admin-preview-ready';
       state.dataset.kggState = 'admin-preview-ready';
       state.textContent = 'admin-preview-ready';
+    }
+    if (drift) {
+      action.dataset.kggAction = 'drifted-control';
+      action.textContent = 'Drifted control (visual fallback required)';
     }
     action.addEventListener('click', () => {
       document.body.dataset.kggState = 'scale-drag-state';

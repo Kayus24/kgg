@@ -266,6 +266,79 @@ class Runtime:
             except Exception:  # noqa: BLE001 - cleanup must never mask the gate result
                 pass
 
+    def _record_visual_observation(
+        self,
+        session: Mapping[str, Any],
+        observed: Mapping[str, Any],
+        *,
+        evidence_status: str = "OBSERVED",
+        flow_status: str | None = None,
+    ) -> dict[str, Any]:
+        artifacts = observed.get("artifacts")
+        images = observed.get("images")
+        artifact = artifacts[0] if isinstance(artifacts, list) and artifacts else None
+        image = images[0] if isinstance(images, list) and images else None
+        if not isinstance(artifact, Mapping) or not isinstance(image, Mapping):
+            _fail("visual_observation_missing_screenshot")
+        state = str(observed.get("state", "unknown"))
+        observation_id = hashlib.sha256(f"{session['session_id']}|{artifact['sha256']}|{state}".encode("utf-8")).hexdigest()
+        public_observation = {
+            "id": observation_id,
+            "state": state,
+            "artifact": dict(artifact),
+            "fallback": flow_status == "STALE_REQUIRES_REVIEW",
+        }
+        stored_observation = {**public_observation, "image": dict(image)}
+        session["visual_observation"] = stored_observation
+        evidence: dict[str, Any] = {
+            "schema": "kgg-ui-lab/visual-evidence/v1",
+            "status": evidence_status,
+            "surface": "real_browser",
+            "observation_id": observation_id,
+            "state_before": state,
+            "artifacts": [dict(artifact)],
+        }
+        if flow_status is not None:
+            evidence["flow_status"] = flow_status
+        self.evidence.setdefault(session["session_id"], []).append(evidence)
+        return {"observation": public_observation, "evidence": evidence, "image": dict(image)}
+
+    def _open_visual_fallback(self, session: Mapping[str, Any], failure: str) -> dict[str, Any] | None:
+        """Open G05 only after a real, deterministic Quick-Flow drift."""
+
+        if "visual_loop" not in session["runner"]["capabilities"] or "capture" not in session["runner"]["capabilities"]:
+            return None
+        real_browser = _load_real_browser_module()
+        self._close_visual(session["session_id"])
+        try:
+            browser = real_browser.PersistentRealBrowser(
+                url=session["app"]["url"],
+                viewport=session["viewport"],
+                run_id=f"{session['session_id']}-visual-fallback",
+                timeout_ms=session["timeout"]["timeout_ms"],
+            )
+            self.visual_sessions[session["session_id"]] = browser
+            observed = browser.observe()
+            record = self._record_visual_observation(
+                session,
+                observed,
+                evidence_status="DRIFT_FALLBACK_READY",
+                flow_status="STALE_REQUIRES_REVIEW",
+            )
+            session["flow_stale"] = True
+            session["status"] = "visual_fallback"
+            return {
+                "status": "READY",
+                "reason": failure,
+                "flow_status": "STALE_REQUIRES_REVIEW",
+                "observation": record["observation"],
+                "evidence": record["evidence"],
+                "image": record["image"],
+            }
+        except real_browser.RealBrowserError:
+            self._close_visual(session["session_id"])
+            return None
+
     def _session(self, session_id: Any, actor: Any, *, lease: bool = True) -> dict[str, Any]:
         session_key = _slug(session_id, "session_id")
         actor_value = _actor(actor)
@@ -451,6 +524,11 @@ class Runtime:
                 "final_state": real["final_state"],
             }
             self.evidence.setdefault(session["session_id"], []).append(evidence)
+            fallback = None
+            if operation == "run_quick_flow" and real["status"] == "FAIL" and real["error_class"] in {"action_target_not_found", "input_target_not_found"}:
+                fallback = self._open_visual_fallback(session, real["error_class"])
+                if fallback is not None:
+                    session["events"].append({"event": "quick_flow_visual_fallback", "status": "READY", "at": _now()})
             result = {
                 "status": real["status"],
                 "error_class": real["error_class"],
@@ -459,6 +537,16 @@ class Runtime:
                 "final_state": real["final_state"],
                 "runtime_ms": real["runtime_ms"],
             }
+            images = list(real["images"])
+            if fallback is not None:
+                result["fallback"] = {
+                    "status": fallback["status"],
+                    "reason": fallback["reason"],
+                    "flow_status": fallback["flow_status"],
+                    "observation": fallback["observation"],
+                    "evidence": fallback["evidence"],
+                }
+                images.append(fallback["image"])
             pilot_metrics = {"status": "FAIL", "error_class": "NUMERIC_METRICS_NOT_VERIFIABLE"}
             return {
                 "schema": MCP_SCHEMA,
@@ -467,7 +555,7 @@ class Runtime:
                 "evidence": evidence,
                 "pilot_metrics": pilot_metrics,
                 "session_status": session["status"],
-                "_images": real["images"],
+                "_images": images,
             }
         screenshot = _artifact("kgg-shot-001", "screenshot", "synthetic://kgg-ui-lab/tablet-splitter-scale-drag-synth/baseline")
         if operation == "run_quick_flow":
@@ -510,48 +598,32 @@ class Runtime:
         session["used_requests"].append(checked["request_id"])
         real_browser = _load_real_browser_module()
         try:
+            self._close_visual(session["session_id"])
             browser = real_browser.PersistentRealBrowser(
                 url=session["app"]["url"],
                 viewport=session["viewport"],
                 run_id=f"{session['session_id']}-{checked['request_id']}",
                 timeout_ms=session["timeout"]["timeout_ms"],
             )
-            self._close_visual(session["session_id"])
             self.visual_sessions[session["session_id"]] = browser
             observed = browser.observe()
         except real_browser.RealBrowserError as exc:
             self._close_visual(session["session_id"])
             session["status"] = "failed"
             _fail(exc.code)
-        artifact = observed["artifacts"][0] if observed["artifacts"] else None
-        image = observed["images"][0] if observed["images"] else None
-        if artifact is None or image is None:
+        try:
+            record = self._record_visual_observation(session, observed)
+        except ServerError:
             self._close_visual(session["session_id"])
             session["status"] = "failed"
-            _fail("visual_observation_missing_screenshot")
-        observation_id = hashlib.sha256(f"{session['session_id']}|{artifact['sha256']}|{observed['state']}".encode("utf-8")).hexdigest()
-        session["visual_observation"] = {
-            "id": observation_id,
-            "state": observed["state"],
-            "artifact": artifact,
-            "image": image,
-        }
-        evidence = {
-            "schema": "kgg-ui-lab/visual-evidence/v1",
-            "status": "OBSERVED",
-            "surface": "real_browser",
-            "observation_id": observation_id,
-            "state_before": observed["state"],
-            "artifacts": [artifact],
-        }
-        self.evidence.setdefault(session["session_id"], []).append(evidence)
+            raise
         return {
             "schema": MCP_SCHEMA,
             "operation": "observe_visual_state",
-            "observation": {"id": observation_id, "state": observed["state"], "artifact": artifact},
-            "evidence": evidence,
+            "observation": record["observation"],
+            "evidence": record["evidence"],
             "session_status": session["status"],
-            "_images": [image],
+            "_images": [record["image"]],
         }
 
     def execute_visual_action(self, value: Any, decision_value: Any) -> dict[str, Any]:
@@ -602,7 +674,8 @@ class Runtime:
         if after_artifact is None or after_image is None:
             session["status"] = "failed"
             _fail("visual_verification_missing_screenshot")
-        session["status"] = "completed"
+        flow_stale = bool(session.get("flow_stale"))
+        session["status"] = "stale_fallback_completed" if flow_stale else "completed"
         evidence = {
             "schema": "kgg-ui-lab/visual-evidence/v1",
             "status": "PASS",
@@ -613,6 +686,8 @@ class Runtime:
             "state_after": after_state,
             "artifacts": [before_artifact, after_artifact],
         }
+        if flow_stale:
+            evidence["flow_status"] = "STALE_REQUIRES_REVIEW"
         self.evidence.setdefault(session["session_id"], []).append(evidence)
         return {
             "schema": MCP_SCHEMA,
@@ -623,6 +698,7 @@ class Runtime:
                 "state_before": observation["state"],
                 "state_after": after_state,
                 "artifacts": [before_artifact, after_artifact],
+                "flow_status": "STALE_REQUIRES_REVIEW" if flow_stale else "VISUAL_LOOP",
             },
             "evidence": evidence,
             "session_status": session["status"],
