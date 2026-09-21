@@ -22,7 +22,7 @@ G01. Für ChatGPT ist ein öffentlich per HTTPS erreichbarer MCP-Endpunkt oder e
 - `LIVE_EVIDENCE_STATUS=LOCAL_ONLY`
 - `GATE_STATUS=PARTIAL`
 - `EVIDENCE_LEVEL=E2_LOCAL_REAL_RUNTIME`
-- `LAST_VERIFIED_BASE_SHA=fe62c8be2b48fbe7ba3f40313f2d016b5e07c69a`
+- `LAST_VERIFIED_BASE_SHA=2fcac012d5463f7b690ec70971c71c51f3fa492e`
 - `LAST_VERIFIED_AT=2026-09-21T10:12:30+02:00`
 
 ## 6. Bestehende Evidence
@@ -122,7 +122,7 @@ Bei unklarer Transportwahl soll der Brother offizielle Lösungen vergleichen und
 ## 12.1 G02-Preflight-Checkpoint
 
 - `CHECKPOINT_ID=CP_G02_PREFLIGHT_START`
-- `BASE_SHA=fe62c8be2b48fbe7ba3f40313f2d016b5e07c69a`
+- `BASE_SHA=2fcac012d5463f7b690ec70971c71c51f3fa492e`
 - `DECISION=CONTINUE_INSIDE_EXISTING_SCOPE`
 - `LOCAL_MCP_BOUNDARY=present`
 - `CHATGPT_DISTRIBUTION_BOUNDARY=not_yet_proven`
