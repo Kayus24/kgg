@@ -253,7 +253,51 @@ class KggRealBrowserBridgeTests(unittest.TestCase):
                     structured = result["structuredContent"]
                     self.assertEqual(structured["result"]["status"], "PASS")
                     self.assertEqual(len(structured["result"]["artifacts"]), 1 if flow_name == "admin-start-baseline" else 2)
-                    self.assertEqual(structured["session_status"], "completed")
+                self.assertEqual(structured["session_status"], "completed")
+        finally:
+            for key, value in old.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
+    def test_three_certified_flows_have_one_unchanged_replay(self) -> None:
+        runtime = _runtime_available()
+        if runtime is None:
+            self.skipTest("pre-provisioned Playwright runtime is not available")
+        node, module_path = runtime
+        old = {key: os.environ.get(key) for key in ("KGG_REAL_BROWSER", "KGG_BROWSER_NODE", "KGG_PLAYWRIGHT_NODE_PATH")}
+        os.environ.update({"KGG_REAL_BROWSER": "1", "KGG_BROWSER_NODE": node, "KGG_PLAYWRIGHT_NODE_PATH": module_path})
+        try:
+            flows = (
+                ("admin-start-baseline", "admin"),
+                ("pilot-180-reproduce", "pilot"),
+                ("synthetic-qr-preview-link", "qr"),
+            )
+            for index, (flow_name, query) in enumerate(flows, start=1):
+                results: list[dict[str, object]] = []
+                for attempt in ("original", "replay"):
+                    with local_fixture_server() as base_url:
+                        session_id = f"replay-{index}-{attempt}-session"
+                        request_id = f"replay-{index}-{attempt}-request"
+                        active = server.Runtime()
+                        started = server.handle(active, {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "start_ui_session", "arguments": {"session": _session(f"{base_url}?flow={query}", session_id=session_id, request_id=request_id, flow_name=flow_name)}}})
+                        self.assertFalse(started["result"].get("isError", False), started)
+                        response = server.handle(active, {"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "run_quick_flow", "arguments": {"request": _request(session_id=session_id, request_id=request_id)}}})
+                        self.assertFalse(response["result"].get("isError", False), response)
+                        structured = response["result"]["structuredContent"]
+                        self.assertEqual(structured["result"]["status"], "PASS")
+                        results.append(structured["result"])
+                first, replay = results
+                self.assertEqual(first["final_state"], replay["final_state"])
+                self.assertEqual(
+                    [(step["expected"], step["actual"], step["status"]) for step in first["steps"]],
+                    [(step["expected"], step["actual"], step["status"]) for step in replay["steps"]],
+                )
+                self.assertEqual(
+                    [artifact["sha256"] for artifact in first["artifacts"]],
+                    [artifact["sha256"] for artifact in replay["artifacts"]],
+                )
         finally:
             for key, value in old.items():
                 if value is None:
