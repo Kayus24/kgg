@@ -1,0 +1,58 @@
+{
+  "schema": "kgg-project-completion-final-acceptance/v1",
+  "checkpoint_id": "CP_G12_FINAL_ACCEPTANCE_20260921",
+  "fresh_main": "01fc1077b153840fbef37c79f6152084268932c4",
+  "merged_sha": "01fc1077b153840fbef37c79f6152084268932c4",
+  "pull_request": {
+    "number": 247,
+    "url": "https://github.com/Kayus24/kgg/pull/247",
+    "state": "MERGED",
+    "required_gate": "PASS",
+    "validate_build": "PASS"
+  },
+  "final_status": "PARTIAL_COMPLETE_WITH_TECHNICAL_LIMITS",
+  "gate_status": {
+    "G00": "PASS",
+    "G01": "PASS",
+    "G02": "PARTIAL",
+    "G03": "PASS",
+    "G04": "PASS",
+    "G05": "PARTIAL",
+    "G06": "PARTIAL",
+    "G07": "PASS_CLASSIFICATION_ONLY",
+    "G08": "PARTIAL",
+    "G09": "PARTIAL",
+    "G10": "PASS_LOCAL_CANDIDATE_STABILITY",
+    "G11": "PASS",
+    "G12": "PARTIAL"
+  },
+  "post_merge_canary": {
+    "status": "NOT_RUN",
+    "reason": "The single authorized transient runtime-key/tunnel budget was already consumed by the one G03 discovery canary; no second key or duplicate canary is allowed.",
+    "new_runtime_key_created": false,
+    "external_dispatch": false
+  },
+  "surface_decision": {
+    "CUSTOM_GPT": "AVAILABLE_FALLBACK_WITH_READ_ONLY_ACTION_CANARY",
+    "CHATGPT_PLUGIN": "PARTIAL_TOOL_HEALTH_ONLY",
+    "CODEX_PLUGIN": "PARTIAL_LOCAL_MCP_AND_REAL_BRIDGE_CODE",
+    "REAL_SCREENSHOT_ACTION_HOST_PARITY": "NOT_PROVEN",
+    "A_B": "NOT_COMPARABLE",
+    "replacement_eligible": false
+  },
+  "technical_limits": [
+    "B/C external real-host screenshot/action/quick-flow parity not proven",
+    "external host popup/download/filechooser safety not proven",
+    "external production measurement-envelope reconciliation not proven",
+    "post-merge runtime canary not run because the authorized transient budget is exhausted"
+  ],
+  "fallback_mode": "CUSTOM_GPT_REMAINS_PRIMARY_FALLBACK; LOCAL_PLUGIN_CANDIDATE_FOR_DEVELOPMENT",
+  "rollback": "No production change was made by this documentation merge; no rollback execution required.",
+  "global_status_unchanged": {
+    "PRODUCTION_CONTROL": "PILOT_INCOMPLETE",
+    "A_B": "NOT_COMPARABLE",
+    "replacement_eligible": false
+  },
+  "contribution_source": "KGG_LEAD",
+  "review_status": "ACCEPTED_WITH_TECHNICAL_LIMITS"
+}

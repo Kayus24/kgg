@@ -18,12 +18,14 @@ Alle G00–G11 müssen finale Dispositionen besitzen. Push, PR, Merge, Deploymen
 
 ## 5. Aktueller Stand
 
-- `IMPLEMENTATION_STATUS=NOT_READY_FOR_FINAL_RELEASE`
-- `LIVE_EVIDENCE_STATUS=CORE_BROWSER_AND_CHATGPT_GATES_OPEN`
-- `GATE_STATUS=BLOCKED`
-- `EVIDENCE_LEVEL=E0_DOCUMENTED`
-- `LAST_VERIFIED_BASE_SHA=1e6c6e3e28603f28bfbad3b127c688e722c823f5`
-- `LAST_VERIFIED_AT=2026-09-21T19:56:00+02:00`
+- `IMPLEMENTATION_STATUS=PARTIAL_COMPLETE_WITH_TECHNICAL_LIMITS`
+- `LIVE_EVIDENCE_STATUS=MERGED_REQUIRED_CHECKS_PASS_POST_MERGE_CANARY_NOT_RUN`
+- `GATE_STATUS=PARTIAL`
+- `EVIDENCE_LEVEL=E3_REAL_HOST`
+- `LAST_VERIFIED_BASE_SHA=01fc1077b153840fbef37c79f6152084268932c4`
+- `LAST_VERIFIED_AT=2026-09-21T20:08:00+02:00`
+- `MERGED_PR=247`
+- `MERGED_SHA=01fc1077b153840fbef37c79f6152084268932c4`
 
 ## 6. Bestehende Evidence
 
@@ -34,7 +36,10 @@ Repo besitzt Branch-/PR-/Required-Gate-/Preview-Prozesse. Frühere PRs härteten
 G05/G06, G08 und G09 enthalten weiterhin ausdrücklich technische Grenzen
 (fehlende externe Host-Parität bzw. Envelope-Reconciliation). Ein finaler
 Migrationsclaim wäre daher verfrüht; ein PR kann höchstens den geprüften
-Dokument-/Candidate-Stand transportieren.
+Dokument-/Candidate-Stand transportieren. Der vollständige Abschlussbericht
+steht in
+[`CP_G12_FINAL_ACCEPTANCE_20260921.json`](CP_G12_FINAL_ACCEPTANCE_20260921.json)
+und klassifiziert den Zustand als `PARTIAL_COMPLETE_WITH_TECHNICAL_LIMITS`.
 
 ## 8. Kleinschrittiger Arbeitsplan
 
