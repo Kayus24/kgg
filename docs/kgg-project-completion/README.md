@@ -2,9 +2,9 @@
 
 Stand dieses Kandidaten: 2026-09-21
 
-Fresh Remote Main beim Erstellen: `2b8024e359bd0f65bcc5666b5e190d78a4b4ed6f`
+Fresh Remote Main nach G00-Merge: `15f1782bafbd3bc358bb08e5e4fc1d9b4592242a`
 
-Lokaler Ausgangs-HEAD: `4b13732b3e6ed86abc8dcf893c25254b437d14d8`
+Lokaler HEAD nach G00-Merge: `15f1782bafbd3bc358bb08e5e4fc1d9b4592242a`
 
 Dieses Verzeichnis ist die Arbeits- und Abschlusssteuerung für das KGG-Agentenprojekt. Es ersetzt keine Fach-, Safety-, Measurement- oder Release-Verträge. Bei Widerspruch gilt die jeweils fachlich kanonische Quelle; der Widerspruch wird als Gate-Blocker erfasst und nicht stillschweigend aufgelöst.
 
@@ -58,7 +58,7 @@ Ein Gate darf nur mit der in seinem Detaildokument verlangten Stufe auf `PASS` g
 
 | Gate | Pflichtpunkt | Aktueller Status | Aktuelle Evidence | Für PASS erforderlich | Detail |
 | --- | --- | --- | --- | --- | --- |
-| G00 | Source of Truth, Statusregister, Checkpoints | `PARTIAL` | Fresh Main gebunden; neue Abschlussdokumente lokal | Dokumente geprüft, verlinkt, gemergt; Resume-Regel getestet | [G00](00-governance-and-source-of-truth.md) |
+| G00 | Source of Truth, Statusregister, Checkpoints | `PASS` | Dokumentensatz in PR #239 gemergt; Required Gate grün; Resume-Regel getestet | Fresh-Main-gebundener Dokumentensatz und eindeutiger nächster Gate-Schritt | [G00](00-governance-and-source-of-truth.md) |
 | G01 | Vollständige Custom-GPT-Funktionsinventur und Migration | `PARTIAL` | Playbook, Actions, Knowledge und Plugin-Skills existieren | Jede benötigte Fähigkeit besitzt Zielkomponente, Test und Disposition | [G01](01-custom-gpt-capability-migration.md) |
 | G02 | Universelles Plugin-Paket | `PARTIAL` | `.codex-plugin`, Skills und lokaler stdio-MCP vorhanden | Paket in Codex und ChatGPT installierbar, versioniert und ohne lokale Pfadannahmen | [G02](02-universal-plugin-package.md) |
 | G03 | Normales ChatGPT erkennt und nutzt das Plugin | `FAIL` | Live-Test fand kein installiertes KGG-Plugin | Tool Discovery und read-only Tool-Aufruf im normalen ChatGPT mit E3-Evidence | [G03](03-chatgpt-plugin-connection.md) |
