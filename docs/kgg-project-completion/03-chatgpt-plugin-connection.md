@@ -19,19 +19,19 @@ G02, ChatGPT-Account/Workspace mit Plugin-Unterstützung, erreichbarer MCP-Endpu
 ## 5. Aktueller Stand
 
 - `IMPLEMENTATION_STATUS=NO_VERIFIED_CHATGPT_INSTALLATION`
-- `LIVE_EVIDENCE_STATUS=LIVE_TEST_FOUND_NO_KGG_PLUGIN`
-- `GATE_STATUS=FAIL`
+- `LIVE_EVIDENCE_STATUS=FRESH_PLUGIN_DIRECTORY_SEARCH_FOUND_NO_KGG_PLUGIN`
+- `GATE_STATUS=BLOCKED`
 - `EVIDENCE_LEVEL=E3_REAL_HOST`
-- `LAST_VERIFIED_BASE_SHA=2b8024e359bd0f65bcc5666b5e190d78a4b4ed6f`
-- `LAST_VERIFIED_AT=2026-09-21`
+- `LAST_VERIFIED_BASE_SHA=efb35ff796235348fd0d620ee58c0e24b0e9fc8d`
+- `LAST_VERIFIED_AT=2026-09-21T13:04:52+02:00`
 
 ## 6. Bestehende Evidence
 
-Der normale ChatGPT-Live-Test stellte keine KGG-Tools bereit. Offizielle Verbindungsschritte sind unter `https://developers.openai.com/plugins/deploy/connect-chatgpt` beschrieben.
+Der frische normale ChatGPT-Check auf `https://chatgpt.com/plugins` zeigte bei der Suche nach `KGG` sichtbar „Derzeit passen keine Plugins zu dieser Suche.“ Offizielle Verbindungsschritte sind unter `https://developers.openai.com/plugins/deploy/connect-chatgpt` beschrieben.
 
 ## 7. Lücke und Root Cause
 
-Der lokale stdio-MCP ist in ChatGPT nicht automatisch verfügbar. Deployment/Tunnel, Installation oder Workspace-Freigabe fehlen.
+Der lokale stdio-MCP ist in ChatGPT nicht automatisch verfügbar. Ein erreichbarer HTTPS-/Secure-MCP-Endpoint und die anschließende Workspace-/Plugin-Installation fehlen.
 
 ## 8. Kleinschrittiger Arbeitsplan
 
@@ -54,7 +54,7 @@ Der lokale stdio-MCP ist in ChatGPT nicht automatisch verfügbar. Deployment/Tun
 - `FALLBACK=Workspace-/Accountgrenze dokumentieren und NOT_SUPPORTED prüfen`
 - `EVIDENCE_OUTPUT=CHATGPT_PLUGIN_DISCOVERY_REPORT`
 - `NEXT_ON_PASS=G07 und nach G04 echter UI-Canary`
-- `NEXT_ON_FAIL=G02 oder G11`
+- `NEXT_ON_FAIL=genau ein autorisiertes Transport-Gate; danach G03 erneut ausführen`
 - `INVALIDATION_TRIGGERS=Plugin-Version, Endpoint, Auth oder Workspace-Policy ändert sich`
 
 ## 10. Tests
@@ -74,6 +74,14 @@ Bei fehlender Discovery erhält der Brother Screenshots, Endpoint-/Manifeststatu
 ## 13. Abschlussartefakte
 
 Installationsnachweis, Tool-Discovery, Canary-Transcript, Version und Disable-/Rollback-Nachweis.
+
+## 13.1 Aktueller Blocker-Nachweis
+
+`BLOCKER_FINGERPRINT=G03_NO_TRANSPORT_EFB35FF`
+
+`OBSERVED=KGG-Suche im frischen normalen ChatGPT-Plugin-Verzeichnis ohne Treffer; lokale Umgebung ohne tunnel-client/HTTPS-Endpoint.`
+
+`NEXT_ACTION=Autorisierter HTTPS-/Secure-MCP-Endpoint bereitstellen oder die Surface ausdrücklich als NOT_SUPPORTED abschließen.`
 
 ## 14. Beitragsherkunft
 

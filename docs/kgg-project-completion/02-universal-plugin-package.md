@@ -22,8 +22,8 @@ G01. Für ChatGPT ist ein öffentlich per HTTPS erreichbarer MCP-Endpunkt oder e
 - `LIVE_EVIDENCE_STATUS=LOCAL_ONLY`
 - `GATE_STATUS=PARTIAL`
 - `EVIDENCE_LEVEL=E2_LOCAL_REAL_RUNTIME`
-- `LAST_VERIFIED_BASE_SHA=d75b5a53ddac5964003428400e3faccaed22902f`
-- `LAST_VERIFIED_AT=2026-09-21T11:00:00+02:00`
+- `LAST_VERIFIED_BASE_SHA=efb35ff796235348fd0d620ee58c0e24b0e9fc8d`
+- `LAST_VERIFIED_AT=2026-09-21T13:04:52+02:00`
 
 ## 6. Bestehende Evidence
 
@@ -133,6 +133,30 @@ Diese Evidence ist `E2_LOCAL_REAL_RUNTIME`. Sie beweist die lokale Codex-
 Marketplace-Installation, aber nicht die Discovery im normalen ChatGPT. Ein
 fehlender `tunnel-client` und ein fehlender realer HTTPS-/Secure-MCP-Endpunkt
 bleiben unverändert als G03-Voraussetzung. Deshalb bleibt `G02=PARTIAL`.
+
+## 6.5 G02.3 – Transport-Readiness-Check
+
+`CHECKPOINT_ID=CP_G03_TRANSPORT_BLOCKED`
+
+`BASE_SHA=efb35ff796235348fd0d620ee58c0e24b0e9fc8d`
+
+Read-only geprüft am `2026-09-21T13:04:52+02:00`:
+
+- `kgg-plugin/.mcp.json` enthält ausschließlich den lokalen stdio-Start
+  `python ./mcp/server.py`; es gibt keine URL- oder Tunnel-Konfiguration.
+- `tunnel-client`, `secure-mcp-tunnel`, `mcp-tunnel` und `ngrok` sind in der
+  lokalen Umgebung nicht vorhanden.
+- Die frische normale ChatGPT-Plugin-Seite `https://chatgpt.com/plugins`
+  wurde geöffnet. Die Suche `KGG` zeigte sichtbar: „Derzeit passen keine
+  Plugins zu dieser Suche.“
+- Es wurde kein Plugin installiert, kein Tool aufgerufen und keine externe
+  Aktion ausgeführt.
+
+`G02.3=BLOCKED_WITH_ONE_CONCRETE_GATE`: Es fehlt genau ein autorisierter,
+erreichbarer HTTPS-/Secure-MCP-Transport. Kein Platzhalter-`mcp.json`, keine
+synthetische Discovery und kein zweiter Server werden angelegt.
+
+`NEXT_GATE=Bereitstellung oder Aktivierung eines autorisierten HTTPS-/Secure-MCP-Endpoints; anschließend ein frischer G03-Discovery-Canary.`
 
 ## 7. Lücke und Root Cause
 
