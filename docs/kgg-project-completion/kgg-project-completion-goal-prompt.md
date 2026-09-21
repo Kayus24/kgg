@@ -18,9 +18,10 @@ Measurement, Provenance und Telemetrie sichern diese Funktionen ab. Sie dürfen 
 Beginne jeden neuen Arbeitszyklus und jedes Resume mit genau diesen Reads:
 
 1. `docs/kgg-project-completion/README.md`
-2. `docs/kgg-project-completion/gate-status.json`
-3. genau das Detaildokument des dort eingetragenen `active_gate`
-4. nur die im Detaildokument genannten kanonischen Quellen und betroffenen Dateien
+2. `docs/kgg-project-completion/project-readiness.md`
+3. `docs/kgg-project-completion/gate-status.json`
+4. genau das Detaildokument des dort eingetragenen `active_gate`
+5. nur die im Detaildokument genannten kanonischen Quellen und betroffenen Dateien
 
 Danach gib intern aus:
 
@@ -41,6 +42,13 @@ TASK_DRIFT_DETECTED=true
 ```
 
 Verwirf diesen Schritt und kehre zum aktiven Gate zurück.
+
+`project-readiness.md` ist der vorbereitete Kriterien- und Kleinmodell-Index:
+Jeder Pflichtpunkt besitzt dort ein Gate-Kriterium, die erforderliche
+Evidence-Stufe, den aktuellen Status und genau ein Detaildokument. Bei
+Widerspruch ist `gate-status.json` die operative Statusquelle; bei
+Widerspruch zwischen Statusquelle und Code gilt Fresh Main und der Konflikt
+wird als Blocker dokumentiert.
 
 ## 2. Source-of-Truth-Reihenfolge
 
@@ -413,6 +421,25 @@ Nach jedem abgeschlossenen Sub-Step aktualisiere:
 - die Checkpoint Capsule;
 - Evidence-Referenzen und Testresultate;
 - Beitragsherkunft, wenn ein Brother-Vorschlag eingeflossen ist.
+
+Vor jedem nächsten Sub-Step muss die Dokument-Synchronisationskontrolle
+erfüllt sein:
+
+```text
+DOC_SYNC_GATE=
+MASTER_READ=
+READINESS_READ=
+ACTIVE_DETAIL_READ=
+REGISTER_STATUS_MATCH=
+CHECKPOINT_MATCH=
+NEXT_STEP_UNIQUE=
+```
+
+Bei `REGISTER_STATUS_MATCH=false`, `CHECKPOINT_MATCH=false` oder
+`NEXT_STEP_UNIQUE=false` wird nicht implementiert. Zuerst wird ein
+`DOCUMENT_DRIFT_PACKAGE` erstellt und der Widerspruch nach Abschnitt 10
+aufgelöst. Ein Google-Drive-Fortschrittsdokument darf dieselben Felder als
+lesbare Spiegelung enthalten, ist aber keine technische Statusquelle.
 
 Ein Google-Drive-Fortschrittsdokument darf als menschenlesbare Spiegelung dienen, aber nicht als zweite technische Source of Truth. Bei Aktualisierung müssen Gate-ID, Repo-SHA und Dokumentpfad enthalten sein.
 

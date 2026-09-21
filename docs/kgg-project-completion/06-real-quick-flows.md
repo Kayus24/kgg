@@ -19,19 +19,19 @@ G04; für den visuellen Fallback G05; Safety aus G08.
 ## 5. Aktueller Stand
 
 - `IMPLEMENTATION_STATUS=SYNTHETIC_FLOW_CONTRACT_PLUS_ONE_REAL_BRIDGE_PATH`
-- `LIVE_EVIDENCE_STATUS=ONE_LOCAL_REAL_FLOW_SHAPE; THREE_CANONICAL_FLOWS_PENDING`
+- `LIVE_EVIDENCE_STATUS=THREE_CANONICAL_FLOWS_LOCAL_REAL; VISUAL_DRIFT_FALLBACK_PENDING`
 - `GATE_STATUS=PARTIAL`
-- `EVIDENCE_LEVEL=E1_SYNTHETIC`
+- `EVIDENCE_LEVEL=E2_LOCAL_REAL_RUNTIME`
 - `LAST_VERIFIED_BASE_SHA=1e6c6e3e28603f28bfbad3b127c688e722c823f5`
 - `LAST_VERIFIED_AT=2026-09-21T13:42:46+02:00`
 
 ## 6. Bestehende Evidence
 
-UI-Lab-Goal und MCP-Kandidat enthalten Quick-Flow-Begriffe und synthetische Schritte. Der Server kann jetzt einen lokalen realen Flow-Pfad ausführen; die drei kanonischen Flows und ihr Drift-Fallback sind noch nicht vollständig gebunden.
+UI-Lab-Goal und MCP-Kandidat enthalten Quick-Flow-Begriffe und synthetische Schritte. Die drei kanonischen Flows laufen jetzt jeweils lokal real über dieselbe Brücke; der kontrollierte visuelle Drift-Fallback ist noch nicht gebunden.
 
 ## 7. Lücke und Root Cause
 
-Nur der G04-Demoflow ist an einen echten Runner gebunden; drei kanonische Flows, versionierte Fingerprints und der G05-Fallback fehlen noch.
+Die drei Flow-Zertifikate sind an den echten Runner gebunden. Es fehlen noch versionierte Real-Run-Fingerprints und der G05-Fallback bei UI-Drift.
 
 ## 8. Kleinschrittiger Arbeitsplan
 
@@ -65,6 +65,7 @@ Nur der G04-Demoflow ist an einen echten Runner gebunden; drei kanonische Flows,
 - Overlay/Modal.
 - stale Flow-Fingerprint.
 - unveränderter Replay pro Flow.
+- `python -m unittest release-pipeline/test_kgg_real_browser_bridge.py -v`: drei zertifizierte Flows real PASS; der Test prüft weiterhin nur den Realpfad, nicht den visuellen Fallback.
 
 ## 11. Safety und Datenschutz
 
@@ -80,4 +81,4 @@ Drei Flow-Spezifikationen, Runnerbindung, Step-Evidence, Drift-Fallback und Test
 
 ## 14. Beitragsherkunft
 
-`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PARTIAL`, `NOTE=G04 real bridge path is available; three real Quick Flows remain.`
+`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PARTIAL`, `NOTE=Three canonical flows run locally through G04; G05 visual drift fallback remains.`

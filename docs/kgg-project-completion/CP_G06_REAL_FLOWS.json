@@ -1,0 +1,41 @@
+{
+  "checkpoint_id": "CP_G06_REAL_FLOWS",
+  "base_sha": "1e6c6e3e28603f28bfbad3b127c688e722c823f5",
+  "head": "0b5ceb6f94e009b1148ce32503e3cbb9ad05c1e0",
+  "worktree_state": "UNCOMMITTED_CANDIDATE",
+  "goal_hash": "1b39a5d74dd0d56121806a42e0c85854922ebf62ff1a6c487c73f78dcc0b593d",
+  "active_gate": "G06",
+  "active_substep": "G06_REAL_QUICK_FLOWS",
+  "decision": "PARTIAL",
+  "candidate_fingerprint": "G06_REAL_FLOWS_20260921_01",
+  "evidence_level": "E2_LOCAL_REAL_RUNTIME",
+  "evidence_refs": [
+    "python -m unittest release-pipeline/test_kgg_real_browser_bridge.py -v (3 tests PASS)",
+    "three allowlisted flows use the same real Playwright bridge",
+    "each flow retains two screenshot hashes and a state transition",
+    "unknown real-flow names fail closed",
+    "synthetic fixture remains separate from real-browser mode"
+  ],
+  "observed": {
+    "flows": [
+      "admin-start-baseline",
+      "pilot-180-reproduce",
+      "synthetic-qr-preview-link"
+    ],
+    "real_screenshot_pair_per_flow": true,
+    "state_assertion_per_flow": true,
+    "visual_drift_fallback": false,
+    "unchanged_replay": false
+  },
+  "open_blockers": [
+    "G03_NO_TRANSPORT_EFB35FF",
+    "G05_AGENT_DECISION_LOOP_NOT_BOUND",
+    "G06_VISUAL_DRIFT_FALLBACK_AND_REPLAY_PENDING"
+  ],
+  "next_step": "G05_VISUAL_DRIFT_FALLBACK",
+  "global_status_snapshot": {
+    "production_control": "PILOT_INCOMPLETE",
+    "a_b": "NOT_COMPARABLE",
+    "replacement_eligible": false
+  }
+}

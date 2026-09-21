@@ -55,31 +55,31 @@ def _runtime_available() -> tuple[str, str] | None:
     return node, module_path
 
 
-def _session(url: str) -> dict[str, object]:
+def _session(url: str, *, session_id: str = "real-bridge-session-001", request_id: str = "real-bridge-request-001", flow_name: str = "pilot-180-reproduce") -> dict[str, object]:
     return {
         "schema": server.SESSION_SCHEMA,
-        "session_id": "real-bridge-session-001",
+        "session_id": session_id,
         "status": "created",
         "active_actor": "codex",
-        "request_id": "real-bridge-request-001",
+        "request_id": request_id,
         "lease": {"owner": "codex", "issued_at": "2026-01-01T00:00:00Z", "expires_at": "2030-01-01T00:00:00Z"},
         "runner": {"runner_id": "real-browser-runner-001", "version": "1.0.0", "browser_revision": "playwright-1.62.1", "capabilities": ["browser", "quick_flows", "capture"]},
         "app": {"name": "admin", "url": url, "main_sha": MAIN_SHA, "preview_sha": "b" * 40},
         "device_profile": "tab-s9",
         "viewport": {"width": 960, "height": 720, "device_scale_factor": 1},
-        "quick_flow": {"name": "pilot-180-reproduce", "version": "1.0.0"},
+        "quick_flow": {"name": flow_name, "version": "1.0.0"},
         "timeout": {"timeout_ms": 120000, "cleanup_on_cancel": True},
         "artifacts": [],
     }
 
 
-def _request() -> dict[str, object]:
+def _request(*, session_id: str = "real-bridge-session-001", request_id: str = "real-bridge-request-001", operation: str = "run_quick_flow") -> dict[str, object]:
     return {
         "schema": server.REQUEST_SCHEMA,
-        "request_id": "real-bridge-request-001",
-        "session_id": "real-bridge-session-001",
+        "request_id": request_id,
+        "session_id": session_id,
         "actor": "codex",
-        "operation": "run_quick_flow",
+        "operation": operation,
         "main_sha": MAIN_SHA,
         "payload_sha256": hashlib.sha256(b"real-browser-flow").hexdigest(),
     }
@@ -110,6 +110,39 @@ class KggRealBrowserBridgeTests(unittest.TestCase):
                 self.assertNotEqual(artifacts[0]["sha256"], artifacts[1]["sha256"])
                 self.assertEqual(len(result["content"]), 3)  # text + screenshot A + screenshot B
                 self.assertTrue(all(item["type"] == "image" for item in result["content"][1:]))
+        finally:
+            for key, value in old.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
+    def test_three_certified_flows_use_the_same_real_bridge(self) -> None:
+        runtime = _runtime_available()
+        if runtime is None:
+            self.skipTest("pre-provisioned Playwright runtime is not available")
+        node, module_path = runtime
+        old = {key: os.environ.get(key) for key in ("KGG_REAL_BROWSER", "KGG_BROWSER_NODE", "KGG_PLAYWRIGHT_NODE_PATH")}
+        os.environ.update({"KGG_REAL_BROWSER": "1", "KGG_BROWSER_NODE": node, "KGG_PLAYWRIGHT_NODE_PATH": module_path})
+        try:
+            active = server.Runtime()
+            flows = (
+                ("admin-start-baseline", "admin", "real-flow-session-001", "real-flow-request-001"),
+                ("pilot-180-reproduce", "pilot", "real-flow-session-002", "real-flow-request-002"),
+                ("synthetic-qr-preview-link", "qr", "real-flow-session-003", "real-flow-request-003"),
+            )
+            for flow_name, query, session_id, request_id in flows:
+                with local_fixture_server() as base_url:
+                    url = f"{base_url}?flow={query}"
+                    started = server.handle(active, {"jsonrpc": "2.0", "id": 10, "method": "tools/call", "params": {"name": "start_ui_session", "arguments": {"session": _session(url, session_id=session_id, request_id=request_id, flow_name=flow_name)}}})
+                    self.assertFalse(started["result"].get("isError", False), started)
+                    response = server.handle(active, {"jsonrpc": "2.0", "id": 11, "method": "tools/call", "params": {"name": "run_quick_flow", "arguments": {"request": _request(session_id=session_id, request_id=request_id)}}})
+                    result = response["result"]
+                    self.assertFalse(result.get("isError", False), result)
+                    structured = result["structuredContent"]
+                    self.assertEqual(structured["result"]["status"], "PASS")
+                    self.assertEqual(len(structured["result"]["artifacts"]), 1 if flow_name == "admin-start-baseline" else 2)
+                    self.assertEqual(structured["session_status"], "completed")
         finally:
             for key, value in old.items():
                 if value is None:

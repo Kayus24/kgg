@@ -124,6 +124,7 @@ Bei einem unbekannten Problem wird nicht geraten. Es gilt [G11](11-brother-gpt-e
 
 - Maschinenlesbarer Gate-Stand: [gate-status.json](gate-status.json)
 - G04-Checkpoint-Capsule: [CP_G04_REAL_BROWSER.json](CP_G04_REAL_BROWSER.json)
+- G06-Checkpoint-Capsule: [CP_G06_REAL_FLOWS.json](CP_G06_REAL_FLOWS.json)
 - Kriterien- und Betriebsübersicht: [project-readiness.md](project-readiness.md)
 - Einheitliches Sub-Dokument-Schema: [gate-template.md](gate-template.md)
 - Ausführbarer driftfester Auftrag: [kgg-project-completion-goal-prompt.md](kgg-project-completion-goal-prompt.md)

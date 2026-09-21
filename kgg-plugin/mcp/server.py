@@ -320,13 +320,30 @@ class Runtime:
 
         real_browser = _load_real_browser_module()
         if operation == "run_quick_flow":
-            steps = [
-                {"operation": "read_state", "label": "admin-ready"},
-                {"operation": "capture_screenshot", "label": "baseline-screen"},
-                {"operation": "click", "label": "tablet-splitter-control"},
-                {"operation": "read_state", "label": "scale-drag-state"},
-                {"operation": "capture_screenshot", "label": "pilot-180-evidence"},
-            ]
+            flow_name = session["quick_flow"]["name"]
+            real_flows = {
+                "admin-start-baseline": [
+                    {"operation": "read_state", "label": "admin-ready"},
+                    {"operation": "capture_screenshot", "label": "baseline-screen"},
+                ],
+                "pilot-180-reproduce": [
+                    {"operation": "read_state", "label": "pilot-area-ready"},
+                    {"operation": "capture_screenshot", "label": "baseline-screen"},
+                    {"operation": "click", "label": "tablet-splitter-control"},
+                    {"operation": "read_state", "label": "scale-drag-state"},
+                    {"operation": "capture_screenshot", "label": "pilot-180-evidence"},
+                ],
+                "synthetic-qr-preview-link": [
+                    {"operation": "read_state", "label": "admin-preview-ready"},
+                    {"operation": "capture_screenshot", "label": "baseline-screen"},
+                    {"operation": "click", "label": "synthetic-qr-image"},
+                    {"operation": "read_state", "label": "linked-preview-ready"},
+                    {"operation": "capture_screenshot", "label": "preview-link-evidence"},
+                ],
+            }
+            steps = real_flows.get(flow_name)
+            if steps is None:
+                _fail("real_browser_flow_not_allowlisted")
         else:
             steps = [{"operation": "capture_screenshot", "label": "manual-capture"}]
         try:

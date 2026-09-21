@@ -16,15 +16,33 @@
     <h1>KGG synthetic browser fixture</h1>
     <p data-kgg-state="admin-ready" id="kgg-state">admin-ready</p>
     <button type="button" data-kgg-action="tablet-splitter-control" id="kgg-action">Apply bounded UI action</button>
+    <button type="button" data-kgg-action="synthetic-qr-image" id="kgg-qr">Open synthetic preview link</button>
   </main>
   <script>
     const state = document.getElementById('kgg-state');
     const action = document.getElementById('kgg-action');
+    const qr = document.getElementById('kgg-qr');
+    const flow = new URLSearchParams(location.search).get('flow');
+    if (flow === 'pilot') {
+      document.body.dataset.kggState = 'pilot-area-ready';
+      state.dataset.kggState = 'pilot-area-ready';
+      state.textContent = 'pilot-area-ready';
+    } else if (flow === 'qr') {
+      document.body.dataset.kggState = 'admin-preview-ready';
+      state.dataset.kggState = 'admin-preview-ready';
+      state.textContent = 'admin-preview-ready';
+    }
     action.addEventListener('click', () => {
       document.body.dataset.kggState = 'scale-drag-state';
       state.dataset.kggState = 'scale-drag-state';
       state.textContent = 'scale-drag-state';
       action.textContent = 'Action applied';
+    });
+    qr.addEventListener('click', () => {
+      document.body.dataset.kggState = 'linked-preview-ready';
+      state.dataset.kggState = 'linked-preview-ready';
+      state.textContent = 'linked-preview-ready';
+      qr.textContent = 'Preview link opened';
     });
   </script>
 </body>
