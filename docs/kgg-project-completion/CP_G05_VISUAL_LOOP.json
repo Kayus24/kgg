@@ -1,0 +1,41 @@
+{
+  "schema": "kgg-project-completion/checkpoint/v1",
+  "checkpoint_id": "CP_G05_VISUAL_LOOP",
+  "base_sha": "1e6c6e3e28603f28bfbad3b127c688e722c823f5",
+  "head": "148ae70bedb07ebc490e554299e994ba0d1ce6aa",
+  "worktree_state": "UNCOMMITTED_CANDIDATE",
+  "goal_hash": "1b39a5d74dd0d56121806a42e0c85854922ebf62ff1a6c487c73f78dcc0b593d",
+  "active_gate": "G05",
+  "active_substep": "persistent_observe_decide_act_verify",
+  "decision": "PARTIAL",
+  "candidate_fingerprint": "G05_PERSISTENT_VISUAL_LOOP_20260921_02",
+  "evidence_level": "E2_LOCAL_REAL_RUNTIME",
+  "evidence_refs": [
+    "python -m unittest release-pipeline/test_kgg_real_browser_bridge.py -v",
+    "five local real-browser tests PASS",
+    "same persistent page verified pilot-area-ready -> scale-drag-state",
+    "before/after screenshot hashes are distinct",
+    "missing host and invalid decisions fail closed",
+    "python -m unittest discover -s release-pipeline -p 'test_kgg_ui_lab*.py' -v: 60 PASS",
+    "critical battery: 141 tests PASS, 1 skip",
+    "ui-stability regression battery PASS"
+  ],
+  "observed": {
+    "observe_screenshot": true,
+    "caller_supplied_decision": true,
+    "single_action": true,
+    "same_page_context": true,
+    "independent_after_state": true,
+    "external_agent_host": false
+  },
+  "open_blockers": [
+    "G03_NO_TRANSPORT_EFB35FF",
+    "G05_EXTERNAL_AGENT_HOST_E3_UNPROVEN"
+  ],
+  "next_step": "G05_BIND_AUTHORIZED_AGENT_HOST",
+  "global_status_snapshot": {
+    "production_control": "PILOT_INCOMPLETE",
+    "a_b": "NOT_COMPARABLE",
+    "replacement_eligible": false
+  }
+}

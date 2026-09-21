@@ -121,15 +121,19 @@
     },
     {
       "path": "kgg-plugin/mcp/server.py",
-      "sha256": "4e270a03f01a10414738d8ec24c325f727876600f82cf7891bf4274ad61aa8d2"
+      "sha256": "fab845ef7255d090f66d1ae6929679b028c19dbc42b178781bf91c9ca32b683d"
     },
     {
       "path": "kgg-plugin/mcp/real_browser.py",
-      "sha256": "54f132ec5ad062bc922068d8715d6f79938aa498da28eac7de22ceef1375d4f5"
+      "sha256": "7a97f310dcfe4d5fd2448966716525074655ff4ca169a9855bd825448e082070"
     },
     {
       "path": "kgg-plugin/mcp/browser_host.js",
       "sha256": "981dda42548eceb7cd53e4a9abc64a98f4f0742aaada9bfac94f41a0f5abfbf0"
+    },
+    {
+      "path": "kgg-plugin/mcp/browser_session_host.js",
+      "sha256": "c2bb5a14a0eb24d701c19825d62e8457eb81bbf49a608cc22f2bfabce828c7f4"
     },
     {
       "path": "release-pipeline/kgg_ui_lab_real_fixture.html",
@@ -137,11 +141,11 @@
     },
     {
       "path": "release-pipeline/test_kgg_real_browser_bridge.py",
-      "sha256": "4353cb3fdfd22a6e5039363615621019718ee89ea140a3ebc3dcc4d6e54c6c47"
+      "sha256": "35cd221387b13cc82de914d9ebb1d227553cae27d8bace16dc6c002072b31ad6"
     },
     {
       "path": "kgg-plugin/scripts/eval/validate_candidate.py",
-      "sha256": "ee25e84a8a36e5fa580f5903bd3064cd0c573980eae11f683da5f8ad938f703b"
+      "sha256": "de41f19337e50ea9b86db078c2fed7e9f2af7b779feeaa905d6525a2539f1fc8"
     }
   ]
 }

@@ -55,7 +55,7 @@ def _runtime_available() -> tuple[str, str] | None:
     return node, module_path
 
 
-def _session(url: str, *, session_id: str = "real-bridge-session-001", request_id: str = "real-bridge-request-001", flow_name: str = "pilot-180-reproduce") -> dict[str, object]:
+def _session(url: str, *, session_id: str = "real-bridge-session-001", request_id: str = "real-bridge-request-001", flow_name: str = "pilot-180-reproduce", capabilities: list[str] | None = None) -> dict[str, object]:
     return {
         "schema": server.SESSION_SCHEMA,
         "session_id": session_id,
@@ -63,7 +63,7 @@ def _session(url: str, *, session_id: str = "real-bridge-session-001", request_i
         "active_actor": "codex",
         "request_id": request_id,
         "lease": {"owner": "codex", "issued_at": "2026-01-01T00:00:00Z", "expires_at": "2030-01-01T00:00:00Z"},
-        "runner": {"runner_id": "real-browser-runner-001", "version": "1.0.0", "browser_revision": "playwright-1.62.1", "capabilities": ["browser", "quick_flows", "capture"]},
+        "runner": {"runner_id": "real-browser-runner-001", "version": "1.0.0", "browser_revision": "playwright-1.62.1", "capabilities": capabilities or ["browser", "quick_flows", "capture"]},
         "app": {"name": "admin", "url": url, "main_sha": MAIN_SHA, "preview_sha": "b" * 40},
         "device_profile": "tab-s9",
         "viewport": {"width": 960, "height": 720, "device_scale_factor": 1},
@@ -85,7 +85,77 @@ def _request(*, session_id: str = "real-bridge-session-001", request_id: str = "
     }
 
 
+def _visual_request(*, session_id: str, request_id: str, operation: str) -> dict[str, object]:
+    return _request(session_id=session_id, request_id=request_id, operation=operation)
+
+
 class KggRealBrowserBridgeTests(unittest.TestCase):
+    def test_visual_loop_reuses_page_and_verifies_agent_decision(self) -> None:
+        runtime = _runtime_available()
+        if runtime is None:
+            self.skipTest("pre-provisioned Playwright runtime is not available")
+        node, module_path = runtime
+        old = {key: os.environ.get(key) for key in ("KGG_REAL_BROWSER", "KGG_BROWSER_NODE", "KGG_PLAYWRIGHT_NODE_PATH")}
+        os.environ.update({"KGG_REAL_BROWSER": "1", "KGG_BROWSER_NODE": node, "KGG_PLAYWRIGHT_NODE_PATH": module_path})
+        try:
+            with local_fixture_server() as base_url:
+                url = f"{base_url}?flow=pilot"
+                active = server.Runtime()
+                session_id = "visual-loop-session-001"
+                request_id = "visual-loop-request-001"
+                started = server.handle(active, {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "start_ui_session", "arguments": {"session": _session(url, session_id=session_id, request_id=request_id, capabilities=["browser", "capture", "visual_loop"])}}})
+                self.assertFalse(started["result"].get("isError", False), started)
+                observed = server.handle(active, {"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "observe_visual_state", "arguments": {"request": _visual_request(session_id=session_id, request_id=request_id, operation="observe_visual_state")}}})
+                self.assertFalse(observed["result"].get("isError", False), observed)
+                before = observed["result"]["structuredContent"]["observation"]
+                self.assertEqual(before["state"], "pilot-area-ready")
+                self.assertEqual(len(observed["result"]["content"]), 2)  # text + screenshot A
+                decision = {"operation": "click", "label": "tablet-splitter-control", "expected_state_after": "scale-drag-state", "observation_id": before["id"]}
+                acted = server.handle(active, {"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "execute_visual_action", "arguments": {"request": _visual_request(session_id=session_id, request_id="visual-loop-request-002", operation="execute_visual_action"), "decision": decision}}})
+                self.assertFalse(acted["result"].get("isError", False), acted)
+                structured = acted["result"]["structuredContent"]
+                self.assertEqual(structured["result"]["status"], "PASS")
+                self.assertEqual(structured["result"]["state_before"], "pilot-area-ready")
+                self.assertEqual(structured["result"]["state_after"], "scale-drag-state")
+                self.assertEqual(len(structured["result"]["artifacts"]), 2)
+                self.assertNotEqual(structured["result"]["artifacts"][0]["sha256"], structured["result"]["artifacts"][1]["sha256"])
+                self.assertEqual(len(acted["result"]["content"]), 3)  # text + screenshot A + screenshot B
+                self.assertEqual(len(active.visual_sessions), 0)
+        finally:
+            for key, value in old.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
+    def test_visual_loop_rejects_unverified_expected_state(self) -> None:
+        runtime = _runtime_available()
+        if runtime is None:
+            self.skipTest("pre-provisioned Playwright runtime is not available")
+        node, module_path = runtime
+        old = {key: os.environ.get(key) for key in ("KGG_REAL_BROWSER", "KGG_BROWSER_NODE", "KGG_PLAYWRIGHT_NODE_PATH")}
+        os.environ.update({"KGG_REAL_BROWSER": "1", "KGG_BROWSER_NODE": node, "KGG_PLAYWRIGHT_NODE_PATH": module_path})
+        try:
+            with local_fixture_server() as base_url:
+                active = server.Runtime()
+                session_id = "visual-loop-session-002"
+                started = server.handle(active, {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "start_ui_session", "arguments": {"session": _session(f"{base_url}?flow=pilot", session_id=session_id, request_id="visual-loop-request-101", capabilities=["browser", "capture", "visual_loop"])}}})
+                self.assertFalse(started["result"].get("isError", False), started)
+                observed = server.handle(active, {"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "observe_visual_state", "arguments": {"request": _visual_request(session_id=session_id, request_id="visual-loop-request-101", operation="observe_visual_state")}}})
+                self.assertFalse(observed["result"].get("isError", False), observed)
+                observation_id = observed["result"]["structuredContent"]["observation"]["id"]
+                rejected = server.handle(active, {"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "execute_visual_action", "arguments": {"request": _visual_request(session_id=session_id, request_id="visual-loop-request-102", operation="execute_visual_action"), "decision": {"operation": "click", "label": "tablet-splitter-control", "expected_state_after": "invented-state", "observation_id": observation_id}}}})
+                self.assertTrue(rejected["result"]["isError"])
+                self.assertIn("visual_expected_state_not_reached", rejected["result"]["content"][0]["text"])
+                self.assertNotIn("synthetic://", rejected["result"]["content"][0]["text"])
+                self.assertEqual(len(active.visual_sessions), 0)
+        finally:
+            for key, value in old.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
     def test_real_flow_produces_two_hashed_screenshots_and_state_transition(self) -> None:
         runtime = _runtime_available()
         if runtime is None:

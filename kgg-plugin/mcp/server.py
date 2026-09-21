@@ -3,7 +3,7 @@
 
 The server is intentionally self-contained so the installed marketplace copy
 does not depend on the repository checkout.  It keeps all state in memory,
-uses synthetic evidence only, and exposes the same nine operations as the
+uses synthetic evidence by default, and exposes the same bounded operations as the
 repository adapter.  There is no shell, filesystem, network, editor, ticket,
 preview, merge, or external-message operation.
 """
@@ -32,7 +32,7 @@ SESSION_SCHEMA = "kgg-ui-lab/session/v1"
 REQUEST_SCHEMA = "kgg-ui-lab/request/v1"
 ACTORS = {"codex", "custom_gpt", "max", "system"}
 PROFILES = {"tab-s9", "oppo-find-x9", "custom"}
-CAPABILITIES = {"browser", "capture", "android", "quick_flows", "width_sweep", "qr_image"}
+CAPABILITIES = {"browser", "capture", "android", "quick_flows", "visual_loop", "width_sweep", "qr_image"}
 TOOL_NAMES = (
     "get_current_state",
     "get_ticket_state",
@@ -40,6 +40,8 @@ TOOL_NAMES = (
     "set_device_profile",
     "run_quick_flow",
     "capture_screenshot",
+    "observe_visual_state",
+    "execute_visual_action",
     "run_width_sweep",
     "get_test_evidence",
     "get_session_status",
@@ -123,6 +125,46 @@ def _sha256(value: Any, label: str) -> str:
     return value
 
 
+def _visual_decision(value: Any) -> dict[str, Any]:
+    decision = _object(value, "decision")
+    allowed = {"operation", "label", "coordinates", "text", "delta_y", "timeout_ms", "expected_state_after", "observation_id"}
+    if set(decision) - allowed or not {"operation", "label", "expected_state_after", "observation_id"}.issubset(decision):
+        _fail("visual_decision_invalid")
+    operation = decision["operation"]
+    if operation not in {"click", "tap", "type", "scroll", "wait"}:
+        _fail("visual_decision_invalid")
+    label = decision["label"]
+    if not isinstance(label, str) or not 1 <= len(label) <= 200 or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9 ._:/-]{0,199}", label):
+        _fail("visual_decision_invalid")
+    expected = decision["expected_state_after"]
+    if not isinstance(expected, str) or not 1 <= len(expected) <= 200 or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9 ._:/-]{0,199}", expected):
+        _fail("visual_decision_invalid")
+    observation_id = decision["observation_id"]
+    if not isinstance(observation_id, str) or not SHA256_RE.fullmatch(observation_id):
+        _fail("visual_decision_invalid")
+    normalized: dict[str, Any] = {"operation": operation, "label": label, "expected_state_after": expected, "observation_id": observation_id}
+    if "coordinates" in decision:
+        coordinates = _object(decision["coordinates"], "coordinates")
+        if set(coordinates) != {"x", "y"} or not all(isinstance(coordinates[key], int) and not isinstance(coordinates[key], bool) and coordinates[key] >= 0 for key in ("x", "y")):
+            _fail("visual_decision_invalid")
+        normalized["coordinates"] = {"x": coordinates["x"], "y": coordinates["y"]}
+    if operation == "type":
+        if not isinstance(decision.get("text"), str) or len(decision["text"]) > 200:
+            _fail("visual_decision_invalid")
+        normalized["text"] = decision["text"]
+    if operation == "scroll":
+        delta = decision.get("delta_y", 500)
+        if not isinstance(delta, int) or isinstance(delta, bool) or not -10000 <= delta <= 10000:
+            _fail("visual_decision_invalid")
+        normalized["delta_y"] = delta
+    if operation == "wait":
+        timeout = decision.get("timeout_ms", 1000)
+        if not isinstance(timeout, int) or isinstance(timeout, bool) or not 1 <= timeout <= 5000:
+            _fail("visual_decision_invalid")
+        normalized["timeout_ms"] = timeout
+    return normalized
+
+
 def _actor(value: Any) -> str:
     if value not in ACTORS:
         _fail("mcp_auth_denied")
@@ -138,7 +180,7 @@ def _artifact(identifier: str, kind: str, ref: str) -> dict[str, str]:
     return {"id": identifier, "kind": kind, "ref": ref, "sha256": digest}
 
 
-def _request(value: Any, operation: str, session: Mapping[str, Any]) -> Mapping[str, Any]:
+def _request(value: Any, operation: str, session: Mapping[str, Any], *, sequential: bool = False) -> Mapping[str, Any]:
     request = _object(value, "request")
     expected = {"schema", "request_id", "session_id", "actor", "operation", "main_sha", "payload_sha256"}
     if set(request) != expected:
@@ -156,7 +198,7 @@ def _request(value: Any, operation: str, session: Mapping[str, Any]) -> Mapping[
         _fail("mcp_auth_denied")
     if request["main_sha"] != session["app"]["main_sha"]:
         _fail("mcp_stale_main")
-    if request["request_id"] != session["request_id"]:
+    if not sequential and request["request_id"] != session["request_id"]:
         _fail("request_binding_invalid")
     if request["request_id"] in session["used_requests"]:
         _fail("duplicate_request")
@@ -176,13 +218,31 @@ def tool_catalog() -> list[dict[str, Any]]:
     actor = {"type": "string", "enum": sorted(ACTORS)}
     session_id = {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{5,63}$"}
     request = {"type": "object", "description": "kgg-ui-lab/request/v1 object; no sensitive fields"}
+    visual_decision = {
+        "type": "object",
+        "description": "One bounded agent decision derived from the previously returned screenshot; no selectors or JavaScript.",
+        "properties": {
+            "operation": {"type": "string", "enum": ["click", "tap", "type", "scroll", "wait"]},
+            "label": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._:/-]{0,199}$"},
+            "coordinates": {"type": "object", "properties": {"x": {"type": "integer", "minimum": 0}, "y": {"type": "integer", "minimum": 0}}, "required": ["x", "y"], "additionalProperties": False},
+            "text": {"type": "string", "maxLength": 200},
+            "delta_y": {"type": "integer", "minimum": -10000, "maximum": 10000},
+            "timeout_ms": {"type": "integer", "minimum": 1, "maximum": 5000},
+            "expected_state_after": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._:/-]{0,199}$"},
+            "observation_id": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        },
+        "required": ["operation", "label", "expected_state_after", "observation_id"],
+        "additionalProperties": False,
+    }
     return [
         _tool("get_current_state", "Read bounded synthetic UI-Lab state. Never writes.", {"actor": actor}, ["actor"]),
         _tool("get_ticket_state", "Read a synthetic ticket summary only. Never writes or dispatches.", {"actor": actor, "ticket_id": {"type": "string", "pattern": "^#?[0-9]{1,6}$"}}, ["actor", "ticket_id"]),
         _tool("start_ui_session", "Bind a synthetic session, actor, lease, runner, and caller-supplied Fresh-Main SHA in memory.", {"session": {"type": "object", "description": "kgg-ui-lab/session/v1 object"}}, ["session"]),
         _tool("set_device_profile", "Change only the in-memory device profile of an active session.", {"session_id": session_id, "actor": actor, "profile": {"type": "string", "enum": sorted(PROFILES)}}, ["session_id", "actor", "profile"]),
         _tool("run_quick_flow", "Run the bounded synthetic Quick Flow and return sanitized evidence; no browser or repository write.", {"request": request}, ["request"]),
-        _tool("capture_screenshot", "Return a deterministic synthetic screenshot artifact; no real screen capture.", {"request": request}, ["request"]),
+        _tool("capture_screenshot", "Return a deterministic synthetic screenshot artifact, or a real screenshot only when the opt-in real host is enabled.", {"request": request}, ["request"]),
+        _tool("observe_visual_state", "Observe one real screenshot and state from a persistent bounded browser page; the caller must decide the next action.", {"request": request}, ["request"]),
+        _tool("execute_visual_action", "Execute exactly one caller-supplied bounded action in the same page and return a second screenshot plus state verification.", {"request": request, "decision": visual_decision}, ["request", "decision"]),
         _tool("run_width_sweep", "Validate a bounded viewport list and return PREVIEW_ONLY in memory.", {"session_id": session_id, "actor": actor, "viewports": {"type": "array", "maxItems": 10}}, ["session_id", "actor", "viewports"]),
         _tool("get_test_evidence", "Read sanitized in-memory evidence for a session.", {"session_id": session_id, "actor": actor}, ["session_id", "actor"]),
         _tool("get_session_status", "Read sanitized in-memory session status and event count.", {"session_id": session_id, "actor": actor}, ["session_id", "actor"]),
@@ -193,9 +253,18 @@ class Runtime:
     def __init__(self) -> None:
         self.sessions: dict[str, dict[str, Any]] = {}
         self.evidence: dict[str, list[dict[str, Any]]] = {}
+        self.visual_sessions: dict[str, Any] = {}
         self.call_count = 0
         self.read_count = 0
         self.started_perf: float | None = None
+
+    def _close_visual(self, session_id: str) -> None:
+        browser = self.visual_sessions.pop(session_id, None)
+        if browser is not None:
+            try:
+                browser.close()
+            except Exception:  # noqa: BLE001 - cleanup must never mask the gate result
+                pass
 
     def _session(self, session_id: Any, actor: Any, *, lease: bool = True) -> dict[str, Any]:
         session_key = _slug(session_id, "session_id")
@@ -429,6 +498,137 @@ class Runtime:
         pilot_metrics = {"status": "FAIL", "error_class": "NUMERIC_METRICS_NOT_VERIFIABLE"}
         return {"schema": MCP_SCHEMA, "operation": operation, "result": result, "evidence": evidence, "pilot_metrics": pilot_metrics, "session_status": session["status"]}
 
+    def observe_visual(self, value: Any) -> dict[str, Any]:
+        if not _real_browser_enabled():
+            _fail("real_browser_not_enabled")
+        request = _object(value, "request")
+        session = self._session(request.get("session_id"), request.get("actor"))
+        if "visual_loop" not in session["runner"]["capabilities"] or "capture" not in session["runner"]["capabilities"]:
+            _fail("capability_missing")
+        checked = _request(request, "observe_visual_state", session, sequential=True)
+        session["status"] = "observing"
+        session["used_requests"].append(checked["request_id"])
+        real_browser = _load_real_browser_module()
+        try:
+            browser = real_browser.PersistentRealBrowser(
+                url=session["app"]["url"],
+                viewport=session["viewport"],
+                run_id=f"{session['session_id']}-{checked['request_id']}",
+                timeout_ms=session["timeout"]["timeout_ms"],
+            )
+            self._close_visual(session["session_id"])
+            self.visual_sessions[session["session_id"]] = browser
+            observed = browser.observe()
+        except real_browser.RealBrowserError as exc:
+            self._close_visual(session["session_id"])
+            session["status"] = "failed"
+            _fail(exc.code)
+        artifact = observed["artifacts"][0] if observed["artifacts"] else None
+        image = observed["images"][0] if observed["images"] else None
+        if artifact is None or image is None:
+            self._close_visual(session["session_id"])
+            session["status"] = "failed"
+            _fail("visual_observation_missing_screenshot")
+        observation_id = hashlib.sha256(f"{session['session_id']}|{artifact['sha256']}|{observed['state']}".encode("utf-8")).hexdigest()
+        session["visual_observation"] = {
+            "id": observation_id,
+            "state": observed["state"],
+            "artifact": artifact,
+            "image": image,
+        }
+        evidence = {
+            "schema": "kgg-ui-lab/visual-evidence/v1",
+            "status": "OBSERVED",
+            "surface": "real_browser",
+            "observation_id": observation_id,
+            "state_before": observed["state"],
+            "artifacts": [artifact],
+        }
+        self.evidence.setdefault(session["session_id"], []).append(evidence)
+        return {
+            "schema": MCP_SCHEMA,
+            "operation": "observe_visual_state",
+            "observation": {"id": observation_id, "state": observed["state"], "artifact": artifact},
+            "evidence": evidence,
+            "session_status": session["status"],
+            "_images": [image],
+        }
+
+    def execute_visual_action(self, value: Any, decision_value: Any) -> dict[str, Any]:
+        if not _real_browser_enabled():
+            _fail("real_browser_not_enabled")
+        request = _object(value, "request")
+        session = self._session(request.get("session_id"), request.get("actor"))
+        if "visual_loop" not in session["runner"]["capabilities"]:
+            _fail("capability_missing")
+        checked = _request(request, "execute_visual_action", session, sequential=True)
+        observation = session.get("visual_observation")
+        if not isinstance(observation, Mapping):
+            _fail("visual_observation_required")
+        decision = _visual_decision(decision_value)
+        if decision["observation_id"] != observation["id"]:
+            _fail("visual_observation_stale")
+        session["status"] = "acting"
+        session["used_requests"].append(checked["request_id"])
+        browser = self.visual_sessions.get(session["session_id"])
+        if browser is None:
+            session["status"] = "failed"
+            _fail("visual_session_not_initialized")
+        real_browser = _load_real_browser_module()
+        try:
+            action_result = browser.act(decision)
+            action = action_result.get("action")
+            if not isinstance(action, Mapping) or action.get("before_state") != observation["state"]:
+                _fail("visual_state_changed_before_action")
+            verified = browser.observe()
+            after_state = verified["state"]
+            if after_state != decision["expected_state_after"]:
+                _fail("visual_expected_state_not_reached")
+            if after_state == observation["state"]:
+                _fail("visual_state_unchanged")
+        except real_browser.RealBrowserError as exc:
+            self._close_visual(session["session_id"])
+            session["status"] = "failed"
+            _fail(exc.code)
+        except ServerError:
+            self._close_visual(session["session_id"])
+            session["status"] = "failed"
+            raise
+        finally:
+            self._close_visual(session["session_id"])
+        before_artifact = observation["artifact"]
+        after_artifact = verified["artifacts"][0] if verified["artifacts"] else None
+        after_image = verified["images"][0] if verified["images"] else None
+        if after_artifact is None or after_image is None:
+            session["status"] = "failed"
+            _fail("visual_verification_missing_screenshot")
+        session["status"] = "completed"
+        evidence = {
+            "schema": "kgg-ui-lab/visual-evidence/v1",
+            "status": "PASS",
+            "surface": "real_browser",
+            "observation_id": observation["id"],
+            "decision": {key: value for key, value in decision.items() if key != "text"},
+            "state_before": observation["state"],
+            "state_after": after_state,
+            "artifacts": [before_artifact, after_artifact],
+        }
+        self.evidence.setdefault(session["session_id"], []).append(evidence)
+        return {
+            "schema": MCP_SCHEMA,
+            "operation": "execute_visual_action",
+            "result": {
+                "status": "PASS",
+                "action": {key: action[key] for key in ("expected", "actual", "status", "before_state", "after_state")},
+                "state_before": observation["state"],
+                "state_after": after_state,
+                "artifacts": [before_artifact, after_artifact],
+            },
+            "evidence": evidence,
+            "session_status": session["status"],
+            "_images": [observation["image"], after_image],
+        }
+
     def sweep(self, session_id: Any, actor: Any, viewports: Any) -> dict[str, Any]:
         session = self._session(session_id, actor)
         if "width_sweep" not in session["runner"]["capabilities"]:
@@ -471,6 +671,10 @@ class Runtime:
             return self.set_profile(args.get("session_id"), args.get("actor"), args.get("profile"))
         if name in {"run_quick_flow", "capture_screenshot"}:
             return self.run_flow(args.get("request"), name)
+        if name == "observe_visual_state":
+            return self.observe_visual(args.get("request"))
+        if name == "execute_visual_action":
+            return self.execute_visual_action(args.get("request"), args.get("decision"))
         if name == "run_width_sweep":
             return self.sweep(args.get("session_id"), args.get("actor"), args.get("viewports"))
         if name == "get_test_evidence":

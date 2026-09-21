@@ -18,29 +18,29 @@ G04, G08 und G09.
 
 ## 5. Aktueller Stand
 
-- `IMPLEMENTATION_STATUS=DESCRIBED_WITH_REAL_BRIDGE_INPUT`
-- `LIVE_EVIDENCE_STATUS=G04_LOCAL_REAL_BRIDGE_ONLY`
-- `GATE_STATUS=BLOCKED`
-- `EVIDENCE_LEVEL=E1_SYNTHETIC`
+- `IMPLEMENTATION_STATUS=OPT_IN_PERSISTENT_REAL_VISUAL_LOOP`
+- `LIVE_EVIDENCE_STATUS=LOCAL_REAL_OBSERVE_DECIDE_ACT_VERIFY`
+- `GATE_STATUS=PARTIAL`
+- `EVIDENCE_LEVEL=E2_LOCAL_REAL_RUNTIME`
 - `LAST_VERIFIED_BASE_SHA=1e6c6e3e28603f28bfbad3b127c688e722c823f5`
-- `LAST_VERIFIED_AT=2026-09-21T13:42:46+02:00`
+- `LAST_VERIFIED_AT=2026-09-21T15:00:00+02:00`
 
 ## 6. Bestehende Evidence
 
-Die G04-Brücke kann lokal klicken und zwei echte Screenshots erzeugen. Es fehlt weiterhin der MCP/Host-Regelkreis, der aus Screenshot A eine externe/agentische Entscheidung bindet, genau eine Aktion ausführt und Screenshot B unabhängig bewertet.
+Die G04-Brücke kann lokal klicken und zwei echte Screenshots erzeugen. Der neue opt-in Visual-Loop hält dafür eine Seite im selben Browserkontext offen: Screenshot A wird beobachtet, eine vom aufrufenden Agenten gelieferte Entscheidung wird gegen den bounded Action-Vertrag geprüft, genau eine Aktion ausgeführt und Screenshot/Zustand B unabhängig verifiziert.
 
 ## 7. Lücke und Root Cause
 
-G04 ist lokal nachgewiesen. Zusätzlich fehlt ein expliziter „observe → decide → act → verify → recover“-Lauf auf einer unterstützten Agenten-Surface.
+Der lokale „observe → decide → act → verify“-Lauf ist nachgewiesen. Für `PASS` fehlt noch die echte unterstützte Host-Surface (ChatGPT/Custom GPT oder Codex mit angeschlossenem Plugin); deshalb bleibt das Gate `PARTIAL`.
 
 ## 8. Kleinschrittiger Arbeitsplan
 
-1. Screenshot-Metadaten und Viewport-Koordinatensystem festlegen.
-2. Aktionsrequest mit Ziel, Koordinaten, Konfidenz, erwarteter Änderung und Safety-Klasse definieren.
-3. Vorher-Screenshot und Zustandsfingerprint speichern.
-4. genau eine Aktion ausführen.
-5. Nachher-Screenshot und Zustand erfassen.
-6. erwartete Änderung unabhängig prüfen.
+1. Screenshot-Metadaten und Viewport-Koordinatensystem festlegen. ✅
+2. Aktionsrequest mit Ziel, Koordinaten, erwarteter Änderung und Safety-Klasse definieren. ✅ bounded decision contract
+3. Vorher-Screenshot und Zustandsfingerprint speichern. ✅ persistent in-memory page
+4. genau eine Aktion ausführen. ✅ one action per request
+5. Nachher-Screenshot und Zustand erfassen. ✅ same page / second screenshot
+6. erwartete Änderung unabhängig prüfen. ✅ expected state + hash pair
 7. bei Nichtänderung einmal semantisches Ziel oder frischen Screenshot nutzen; nicht blind wiederklicken.
 8. Abschluss/Fehler mit Evidence ausgeben.
 
@@ -52,7 +52,7 @@ G04 ist lokal nachgewiesen. Zusätzlich fehlt ein expliziter „observe → deci
 - `PASS_CRITERIA=beabsichtigte sichtbare Zustandsänderung mit gebundener Vorher-/Nachher-Evidence`
 - `FAIL_CRITERIA=keine Änderung, falsches Ziel, wiederholter Blindklick oder ausschließlich modellgemeldeter Erfolg`
 - `RETRY_RULE=maximal ein neuer Observe-Schritt bei plausibel veraltetem Screenshot`
-- `FALLBACK=Quick Flow falls passend; sonst fail-closed`
+- `FALLBACK=bei stale/unerwartetem Zustand keine zweite Aktion; Session schließen und Quick Flow oder frischen Observe-Schritt verwenden`
 - `EVIDENCE_OUTPUT=VISUAL_LOOP_RUN_V1`
 - `NEXT_ON_PASS=G06 und G07`
 - `NEXT_ON_FAIL=Root Cause oder G11`
@@ -64,6 +64,7 @@ G04 ist lokal nachgewiesen. Zusätzlich fehlt ein expliziter „observe → deci
 - DPI/Viewport-Skalierung.
 - Overlay, Scroll, verzögertes Rendering und nicht anklickbares Ziel.
 - Negativ: Screenshot veraltet, Aktion außerhalb Bounds, Zustand unverändert.
+- `python -m unittest release-pipeline/test_kgg_real_browser_bridge.py -v`: vier lokale Real-Bridge-Tests PASS, inklusive persistentem Visual-Loop.
 - zwei unveränderte reale Durchläufe.
 
 ## 11. Safety und Datenschutz
@@ -72,7 +73,7 @@ Keine echten Patientenscreenshots. Destruktive oder externe Aktionen benötigen 
 
 ## 12. Brother-GPT-Eskalation
 
-Bei stabil wiederholtem Wahrnehmungs-/Aktionsfehler erhält der Brother anonymisierte Screenshots, Metadaten und Events; nie Secrets oder Patientendaten.
+Bei stabil wiederholtem Wahrnehmungs-/Aktionsfehler erhält der Brother anonymisierte Screenshots, Metadaten und Events; nie Secrets oder Patientendaten. Der externe Host-Paritätsblocker bleibt separat als G03 geführt.
 
 ## 13. Abschlussartefakte
 
@@ -80,4 +81,4 @@ Loop-Vertrag, Referenzimplementierung, Evidence-Beispiel und robuste Black-Box-T
 
 ## 14. Beitragsherkunft
 
-`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PARTIAL`, `NOTE=G04 local real bridge is available; G05 agent/host decision loop remains open.`
+`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PARTIAL`, `NOTE=Local persistent observe/decide/act/verify loop is real and fail-closed; supported external agent host remains unproven.`

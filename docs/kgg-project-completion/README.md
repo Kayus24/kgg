@@ -68,7 +68,7 @@ Ein Gate darf nur mit der in seinem Detaildokument verlangten Stufe auf `PASS` g
 | G02 | Universelles Plugin-Paket | `PARTIAL` | Portable Root-Manifest, repo-lokale Marketplace-Registrierung und frische lokale Codex-Installation grün; ChatGPT-Discovery noch nicht live bewiesen | Paket in Codex und ChatGPT installierbar, versioniert und ohne lokale Pfadannahmen | [G02](02-universal-plugin-package.md) |
 | G03 | Normales ChatGPT erkennt und nutzt das Plugin | `BLOCKED` | Frische Plugin-Verzeichnissuche nach `KGG` liefert „Derzeit passen keine Plugins zu dieser Suche“; kein HTTPS-/Secure-MCP-Endpunkt vorhanden | Bereitgestellter Endpoint oder ausdrücklich aktivierter Secure-MCP-Tunnel, danach Discovery und read-only Tool-Aufruf mit E3-Evidence | [G03](03-chatgpt-plugin-connection.md) |
 | G04 | Echte Browser-/UI-Brücke | `PASS` | Lokaler realer Chromium-Lauf: zwei unterschiedliche Screenshot-Hashes, Zustandswechsel und fail-closed Hostfehler; E2 | Echte Session, Screenshot, Koordinaten-/Semantik-Aktionen und Zustandsbeobachtung | [G04](04-real-browser-bridge.md) |
-| G05 | Visueller Screenshot-Aktions-Regelkreis | `BLOCKED` | nur Testskripte/Fixtures, kein Agenten-End-to-End-Kanal | Zwei-Screenshot-Loop mit echter Aktion und unabhängiger Zustandsprüfung | [G05](05-visual-interaction-loop.md) |
+| G05 | Visueller Screenshot-Aktions-Regelkreis | `PARTIAL` | lokaler persistenter Observe/Decide/Act/Verify-Loop mit E2-Evidence; Host-Parität fehlt | Autorisierten Agent-Host anbinden und E3 nachweisen | [G05](05-visual-interaction-loop.md) |
 | G06 | Reale Quick Flows | `PARTIAL` | Contracts und synthetische Schritte vorhanden | Mindestens drei reale, versionierte Flows mit Fallback und Step Evidence | [G06](06-real-quick-flows.md) |
 | G07 | Surface-Integration A/B/C | `PARTIAL` | Custom GPT Actions und Codex-MCP getrennt vorhanden | ehrliche, live geprüfte Capability-Matrix für A/B/C | [G07](07-surface-integration.md) |
 | G08 | Safety, Datenschutz und Autorisierung | `PARTIAL` | starke Repo-/Action-Gates; Browsergrenze noch nicht real bewiesen | Domain-Allowlist, Lease, Limits, Sanitization und Negativtests am Realpfad | [G08](08-security-privacy-and-authorization.md) |
@@ -124,6 +124,7 @@ Bei einem unbekannten Problem wird nicht geraten. Es gilt [G11](11-brother-gpt-e
 
 - Maschinenlesbarer Gate-Stand: [gate-status.json](gate-status.json)
 - G04-Checkpoint-Capsule: [CP_G04_REAL_BROWSER.json](CP_G04_REAL_BROWSER.json)
+- G05-Checkpoint-Capsule: [CP_G05_VISUAL_LOOP.json](CP_G05_VISUAL_LOOP.json)
 - G06-Checkpoint-Capsule: [CP_G06_REAL_FLOWS.json](CP_G06_REAL_FLOWS.json)
 - Kriterien- und Betriebsübersicht: [project-readiness.md](project-readiness.md)
 - Einheitliches Sub-Dokument-Schema: [gate-template.md](gate-template.md)

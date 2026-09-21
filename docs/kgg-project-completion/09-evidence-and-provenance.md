@@ -36,6 +36,13 @@ G04 und bestehende Measurement-/Raw-Capture-Komponenten.
 
 Real-Browser-Screenshots und Aktionen werden noch nicht vom Plugin-Run retained und an die vorhandene Evidence-/Field-Provenance-Grenze gebunden.
 
+Für den lokalen G05-Visual-Loop gilt zusätzlich ein gebundener Evidence-Paar-
+Vertrag: `observation_id`, `state_before`, `state_after`, ein SHA-256 für
+Screenshot A und B sowie die normalisierte Entscheidung müssen aus derselben
+ephemeren Browser-Session stammen. Ein Screenshot aus einem getrennten Lauf,
+ein Modell-Self-Report oder ein nicht verifizierter Zielzustand darf nicht als
+Visual-Loop-Evidence übernommen werden.
+
 ## 8. Kleinschrittiger Arbeitsplan
 
 1. Minimalfelder pro Browserrun definieren: IDs, SHA, Versionen, Viewport, Timestamps, Eventorder, Screenshot-/Output-Hashes.
@@ -66,6 +73,8 @@ Real-Browser-Screenshots und Aktionen werden noch nicht vom Plugin-Run retained 
 - fehlende Raw Bytes.
 - unabhängiger Golden Hash ohne Producer-Helper.
 - kein `OBSERVED_ZERO` ohne vollständige Coverage.
+- Visual-Loop: Session-Bindung, Screenshot-A-/B-Hashes, genau eine Aktion und
+  erwarteter Nachzustand.
 
 ## 11. Safety und Datenschutz
 

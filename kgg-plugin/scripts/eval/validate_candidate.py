@@ -24,6 +24,8 @@ REQUIRED_TOOLS = (
     "set_device_profile",
     "run_quick_flow",
     "capture_screenshot",
+    "observe_visual_state",
+    "execute_visual_action",
     "run_width_sweep",
     "get_test_evidence",
     "get_session_status",
