@@ -18,6 +18,7 @@ Capability-Matrix. Das bloße Anlegen dieses Dokuments ändert keinen Gate- oder
 Produktstatus.
 
 ```text
+DEFAULT_SCOPE=WITHOUT_ACTIVE_EXECUTION_ENVELOPE
 MODE=READ_ONLY_SAFE_UI_INTERACTION
 DATA_CLASS=SYNTHETIC_ONLY
 NEW_RUNTIME_KEY_ALLOWED=false
@@ -28,6 +29,11 @@ EDITOR_WRITE_ALLOWED=false
 MEMORY_WRITE_ALLOWED=false
 TICKET_WRITE_ALLOWED=false
 ```
+
+Diese Werte beschreiben den sicheren Default ohne aktives Envelope. Ein später
+aktiviertes, surface-spezifisches Envelope darf ausschließlich die für genau
+diese Surface gebundenen Flags und Budgets nach der dort definierten
+Aktivierungsformel aufheben; ohne diese Bindung bleiben die Defaults zwingend.
 
 Ein späterer Audit darf nur mit einem separat aktivierten, passenden
 Consequence-/Run-Envelope ausgeführt werden. Dieses Dokument selbst führt
