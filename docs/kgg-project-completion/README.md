@@ -4,7 +4,7 @@ Stand dieses Kandidaten: 2026-09-21
 
 Fresh Remote Main nach G03-Transport-Check: `1e6c6e3e28603f28bfbad3b127c688e722c823f5`
 
-Lokaler HEAD nach G03-Transport-Check: `1e6c6e3e28603f28bfbad3b127c688e722c823f5`
+Lokaler HEAD nach G06-Real-Flow-Checkpoint: `26aa301d9ba07782a3252c9f4377b772c7d80b9a`
 
 Dieses Verzeichnis ist die Arbeits- und Abschlusssteuerung für das KGG-Agentenprojekt. Es ersetzt keine Fach-, Safety-, Measurement- oder Release-Verträge. Bei Widerspruch gilt die jeweils fachlich kanonische Quelle; der Widerspruch wird als Gate-Blocker erfasst und nicht stillschweigend aufgelöst.
 

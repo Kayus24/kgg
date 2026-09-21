@@ -1,8 +1,8 @@
 {
   "checkpoint_id": "CP_G06_REAL_FLOWS",
   "base_sha": "1e6c6e3e28603f28bfbad3b127c688e722c823f5",
-  "head": "0b5ceb6f94e009b1148ce32503e3cbb9ad05c1e0",
-  "worktree_state": "UNCOMMITTED_CANDIDATE",
+  "head": "26aa301d9ba07782a3252c9f4377b772c7d80b9a",
+  "worktree_state": "CLEAN",
   "goal_hash": "1b39a5d74dd0d56121806a42e0c85854922ebf62ff1a6c487c73f78dcc0b593d",
   "active_gate": "G06",
   "active_substep": "G06_REAL_QUICK_FLOWS",
@@ -11,6 +11,9 @@
   "evidence_level": "E2_LOCAL_REAL_RUNTIME",
   "evidence_refs": [
     "python -m unittest release-pipeline/test_kgg_real_browser_bridge.py -v (3 tests PASS)",
+    "critical battery: 141 tests PASS, 1 skip",
+    "ui-stability regression battery PASS",
+    "hook guard PASS",
     "three allowlisted flows use the same real Playwright bridge",
     "each flow retains two screenshot hashes and a state transition",
     "unknown real-flow names fail closed",
