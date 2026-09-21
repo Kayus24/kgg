@@ -19,7 +19,7 @@ G04; für den visuellen Fallback G05; Safety aus G08.
 ## 5. Aktueller Stand
 
 - `IMPLEMENTATION_STATUS=THREE_REAL_FLOWS_PLUS_BOUNDED_VISUAL_DRIFT_FALLBACK`
-- `LIVE_EVIDENCE_STATUS=THREE_CANONICAL_FLOWS_LOCAL_REAL; CONTROLLED_VISUAL_DRIFT_FALLBACK_LOCAL_REAL; UNCHANGED_REPLAY_PENDING`
+- `LIVE_EVIDENCE_STATUS=THREE_CANONICAL_FLOWS_LOCAL_REAL; CONTROLLED_VISUAL_DRIFT_FALLBACK_LOCAL_REAL; UNCHANGED_REPLAY_BOUND; E3_HOST_PARITY_PENDING`
 - `GATE_STATUS=PARTIAL`
 - `EVIDENCE_LEVEL=E2_LOCAL_REAL_RUNTIME`
 - `LAST_VERIFIED_BASE_SHA=1e6c6e3e28603f28bfbad3b127c688e722c823f5`
@@ -31,7 +31,7 @@ UI-Lab-Goal und MCP-Kandidat enthalten Quick-Flow-Begriffe und synthetische Schr
 
 ## 7. Lücke und Root Cause
 
-Die drei Flow-Zertifikate sind an den echten Runner gebunden. Der lokale Drift-Fallback ist jetzt vorhanden; es fehlen noch ein unveränderter Replay je Flow und E3-Host-Evidence außerhalb des lokalen Runners.
+Die drei Flow-Zertifikate sind an den echten Runner gebunden. Der lokale Drift-Fallback und ein unveränderter Replay je Flow sind jetzt vorhanden; es fehlt noch E3-Host-Evidence außerhalb des lokalen Runners.
 
 ## 8. Kleinschrittiger Arbeitsplan
 
@@ -81,4 +81,4 @@ Drei Flow-Spezifikationen, Runnerbindung, Step-Evidence, Drift-Fallback und Test
 
 ## 14. Beitragsherkunft
 
-`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PARTIAL`, `NOTE=Three canonical flows and a fail-closed local visual drift fallback run through G04/G05; unchanged replay and E3 host parity remain.`
+`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PARTIAL`, `NOTE=Three canonical flows, a fail-closed local visual drift fallback and unchanged replay run through G04/G05; E3 host parity remains.`
