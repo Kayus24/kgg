@@ -311,6 +311,45 @@
     "brother_review": "LOCAL_HANDOFF_PREPARED_NOT_SENT",
     "advisory_policy": "one review for this fingerprint only; accept tactical fields only"
   },
+  "current_blocker_package": {
+    "blocker_fingerprint": "9558837e5b84a46d873cf0376b188466dcb13568e794fe2bfdaef5f24381cf6c",
+    "status": "BLOCKER_DETECTED",
+    "phase": "G03_CURRENT_RECONCILIATION",
+    "step": "NORMAL_CHATGPT_TOOL_CALL",
+    "objective": "prove one current bounded read-only tool invocation on the normal ChatGPT B-surface",
+    "completed": [
+      "local tunnel health and canonical KGG source binding",
+      "local KGG plugin get_current_state read-only response",
+      "current ChatGPT plugin detail and complete tool catalog read",
+      "136 local contract/bridge tests plus GPT and security batteries"
+    ],
+    "evidence": [
+      "chatgpt_plugin_current_detail_read.tool_discovery=VISIBLE_IN_PLUGIN_DETAIL",
+      "chatgpt_plugin_current_detail_read.chat_message_or_tool_call_sent=false",
+      "latest_local_contract_test_run.overall=PASS",
+      "latest_local_battery_run.overall=PASS"
+    ],
+    "error_class": "EXTERNAL_COST_OR_COMMUNICATION_GATE",
+    "root_cause_hypotheses": [
+      "a normal-ChatGPT tool call is an external communication action",
+      "the call may consume model/runtime resources and therefore violates the active no-cost boundary"
+    ],
+    "sources_checked": [
+      "current ChatGPT plugin detail read",
+      "local tunnel healthz/readyz",
+      "local plugin read-only call",
+      "local contract and battery outputs"
+    ],
+    "attempts": [
+      "no normal-ChatGPT message or plugin tool call sent"
+    ],
+    "smallest_next_read_only_check": "one bounded normal-ChatGPT plugin call after an explicit cost/communication gate",
+    "would_require_scope_expansion": false,
+    "would_require_external_consequence": true,
+    "required_gate": "NORMAL_CHATGPT_READ_ONLY_TOOL_CALL_COST_AND_COMMUNICATION_GATE",
+    "brother_review": "NOT_REQUIRED; blocker is authorization boundary, not an unresolved architecture question",
+    "advisory_policy": "do not retry or create a second canary"
+  },
   "surface_status": {
     "A_CUSTOM_GPT_PRODUCTION_CONTROL": "NOT_OBSERVABLE_FROM_CURRENT_REPO",
     "B_PLUGIN_CANDIDATE": "DISCOVERABLE_TOOLSET_VISIBLE_EXECUTION_UNVERIFIED",
