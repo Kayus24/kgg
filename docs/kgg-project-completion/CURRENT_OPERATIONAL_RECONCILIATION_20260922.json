@@ -92,6 +92,14 @@
     "runtime_key_retention": "transient_only",
     "secret_logged": false
   },
+  "latest_local_tunnel_health_read": {
+    "observed_at": "2026-09-22T23:21:42+02:00",
+    "healthz": "HTTP_200_live",
+    "readyz": "HTTP_200_ready",
+    "new_tunnel_started": false,
+    "new_key_created": false,
+    "scope": "READ_ONLY_LOCAL_HEALTH_CHECK"
+  },
   "codex_plugin_installation": {
     "status": "MANUAL_NATIVE_INSTALL_VERIFIED",
     "bundle_source": "embedded in tunnel-client",
