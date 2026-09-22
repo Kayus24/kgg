@@ -1,0 +1,47 @@
+{
+  "schema": "kgg-g07-surface-audit-evidence/v1",
+  "evidence_date": "2026-09-22",
+  "fresh_main": "3dae49f18c5eb25f2eecf32a08bcbfa2962231f5",
+  "surface": "B",
+  "surface_context": "PLUGIN_CANDIDATE / custom_gpt",
+  "audit_scope": "exactly_one_synthetic_read_only_host_ui_audit",
+  "connector": {
+    "name": "KGG UI Lab Private",
+    "schema": "kgg-ui-lab/mcp-server/v1",
+    "discovery": "already_completed_before_this_record",
+    "tool_channel": "reachable"
+  },
+  "session": {
+    "operation": "start_ui_session",
+    "session_id": "kgg-b-audit-synth-001",
+    "actor": "custom_gpt",
+    "status": "ready",
+    "browser_revision": "synthetic",
+    "app_url": "http://127.0.0.1:4173/kgg-patient-preview",
+    "preview_sha": "12f73af8c6193d4d8192e1342782a960d904119b",
+    "result": "PASS"
+  },
+  "screenshot": {
+    "operation": "capture_screenshot",
+    "result": "PASS",
+    "artifact_id": "kgg-shot-001",
+    "reference": "synthetic://kgg-ui-lab/tablet-splitter-scale-drag-synth/baseline",
+    "sha256": "55a6f784466c43a61803ce6acf0d7f7883f35afc1e29dd0d346fb38092bf7283"
+  },
+  "numeric_metrics": "NOT_VERIFIABLE",
+  "real_browser_interaction": false,
+  "real_production_action": false,
+  "side_effects": "NONE",
+  "decision": "PARTIAL_SYNTHETIC_ONLY",
+  "gate_status_change": "NONE",
+  "limitations": [
+    "This record does not prove a real browser host, pointer movement, coordinate click, or production UI interaction.",
+    "The synthetic fixture is not transferable as host evidence for A or C.",
+    "No second discovery/canary or real browser run was performed."
+  ],
+  "provenance": {
+    "source": "internal ChatGPT connector conversation tab 299",
+    "retained_raw_connector_output": false,
+    "record_role": "documentation_only"
+  }
+}
