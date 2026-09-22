@@ -174,6 +174,46 @@
     "interpretation": "ChatGPT lists the KGG UI Lab plugin and Developer Mode is visibly active, but the plugin detail view reports that the plugin could not be loaded; the security settings page also shows a partial-load banner. This is external host discovery evidence and does not negate the locally ready tunnel or canonical MCP source binding.",
     "next_allowed_step": "READ_ONLY_PLUGIN_DISCOVERY_ROOT_CAUSE_OR_SEPARATE_HOST_REPAIR_GATE"
   },
+  "blocker_package": {
+    "blocker_fingerprint": "6206e0571f086e785d046ee5b2701f0d802179af0583cc74d5660195ecbe2200",
+    "status": "BLOCKER_DETECTED",
+    "phase": "G03_CURRENT_RECONCILIATION",
+    "step": "CHATGPT_PLUGIN_DISCOVERY_READ",
+    "objective": "prove current normal-ChatGPT discovery of the existing KGG UI Lab tunnel app",
+    "completed": [
+      "local tunnel process and readiness observed",
+      "canonical KGG MCP source binding observed",
+      "ChatGPT plugin listing and Developer Mode read"
+    ],
+    "evidence": [
+      "plugin listed as KGG UI Lab Private",
+      "plugin detail reports Plugin nicht verfügbar",
+      "Developer Mode switch Value=1",
+      "security settings page shows partial-load banner"
+    ],
+    "error_class": "PLUGIN_NOT_AVAILABLE",
+    "root_cause_hypotheses": [
+      "ChatGPT workspace/plugin discovery service did not load the existing app",
+      "transient settings/API partial-load state",
+      "stale or invalid private-app binding despite local tunnel readiness"
+    ],
+    "sources_checked": [
+      "current ChatGPT Settings > Plugins",
+      "current ChatGPT Settings > Security",
+      "local tunnel healthz/readyz/metrics",
+      "active tunnel command line and profile",
+      "canonical KGG MCP source hash"
+    ],
+    "attempts": [
+      "no plugin reload or second discovery canary performed"
+    ],
+    "smallest_next_read_only_check": "one fresh plugin-detail read after an externally authorized host-repair or rebind; no automatic retry",
+    "would_require_scope_expansion": false,
+    "would_require_external_consequence": true,
+    "required_gate": "CHATGPT_HOST_PLUGIN_REPAIR_OR_REBIND",
+    "brother_review": "LOCAL_HANDOFF_PREPARED_NOT_SENT",
+    "advisory_policy": "one review for this fingerprint only; accept tactical fields only"
+  },
   "surface_status": {
     "A_CUSTOM_GPT_PRODUCTION_CONTROL": "NOT_OBSERVABLE_FROM_CURRENT_REPO",
     "B_PLUGIN_CANDIDATE": "PARTIAL_CHATGPT_PLUGIN_LISTED_BUT_UNAVAILABLE",
