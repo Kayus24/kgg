@@ -179,6 +179,36 @@
     "interpretation": "ChatGPT lists the KGG UI Lab plugin, Developer Mode is visibly active, and low-risk plugin tools are allowed, but the plugin detail view reports that the plugin could not be loaded; the security settings page showed a partial-load banner and the direct discovery page now stops at a loading interstitial. This rules out the visible permission mode as the primary cause and leaves external app/workspace binding or host discovery unresolved.",
     "next_allowed_step": "READ_ONLY_PLUGIN_DISCOVERY_ROOT_CAUSE_OR_SEPARATE_HOST_REPAIR_GATE"
   },
+  "chatgpt_plugin_current_detail_read": {
+    "observed_at": "2026-09-22T23:16:40+02:00",
+    "surface": "B_NORMAL_CHATGPT_WITH_KGG_PLUGIN",
+    "detail_url": "https://chatgpt.com/#settings/Plugins/plugin_asdk_app_6ab162f246b8819189ab9aa21fbe5d9f",
+    "plugin_name": "KGG UI Lab Private",
+    "plugin_detail_status": "LOADED_TOOLS_VISIBLE",
+    "connection_label": "KGG UI Lab Private",
+    "developer_mode": "ACTIVE_VALUE_1_PREVIOUSLY_READ",
+    "permission_mode": "LOW_RISK_TOOLS_AUTO_ALLOWED_PREVIOUSLY_READ",
+    "app_id": "asdk_app_6ab162f246b8819189ab9aa21fbe5d9f",
+    "verification_status": "development",
+    "visible_tools": [
+      "capture_screenshot",
+      "execute_visual_action",
+      "get_current_state",
+      "get_session_status",
+      "get_test_evidence",
+      "get_ticket_state",
+      "observe_visual_state",
+      "run_quick_flow",
+      "run_width_sweep",
+      "set_device_profile",
+      "start_ui_session"
+    ],
+    "tool_discovery": "VISIBLE_IN_PLUGIN_DETAIL",
+    "tool_execution": "NOT_TESTED",
+    "chat_message_or_tool_call_sent": false,
+    "interpretation": "A fresh read-only detail view now loads and exposes the KGG tool list. This supersedes the earlier transient Plugin nicht verfügbar detail read for current discovery status, but it does not prove a successful tool invocation. No chat message, plugin call, key, tunnel, or canary was started.",
+    "next_allowed_step": "OPTIONAL_SINGLE_READ_ONLY_TOOL_EXECUTION_ONLY_WITH_COST_AND_COMMUNICATION_GATE"
+  },
   "blocker_package": {
     "blocker_fingerprint": "6206e0571f086e785d046ee5b2701f0d802179af0583cc74d5660195ecbe2200",
     "status": "BLOCKER_DETECTED",
@@ -221,8 +251,14 @@
   },
   "surface_status": {
     "A_CUSTOM_GPT_PRODUCTION_CONTROL": "NOT_OBSERVABLE_FROM_CURRENT_REPO",
-    "B_PLUGIN_CANDIDATE": "PARTIAL_CHATGPT_PLUGIN_LISTED_BUT_UNAVAILABLE",
+    "B_PLUGIN_CANDIDATE": "DISCOVERABLE_TOOLSET_VISIBLE_EXECUTION_UNVERIFIED",
     "C_CODEX_PLUS_PLUGIN": "LOCAL_MCP_AND_REAL_BRIDGE_CODE"
+  },
+  "current_status_overlay": {
+    "G03": "DISCOVERY_VISIBLE_EXECUTION_UNVERIFIED",
+    "G07": "PASS_CLASSIFICATION_WITH_B_REAL_AUDIT_PARTIAL",
+    "reason": "The historical unavailable detail read is retained, but a later read-only detail view visibly loaded the plugin and its tools. Execution remains unverified because no chat/tool call was sent.",
+    "required_for_next_promotion": "one bounded read-only plugin tool call with explicit cost/communication authorization"
   },
   "gate_status": {
     "G02": "PARTIAL",
@@ -246,7 +282,7 @@
   "remaining_limits": [
     "The manually verified native Codex plugin installation is local-only; repository packaging and ChatGPT host parity remain separate evidence requirements.",
     "The canonical visible Windows host now has an active ready tunnel process, but native bridge binding, ChatGPT tool discovery, real external host browser parity and the post-merge production canary remain unproven; the single B real-host canary timed out before visual observation.",
-    "ChatGPT lists KGG UI Lab Private but currently reports the plugin as unavailable, so B tool discovery cannot be promoted to PASS.",
+    "A later read-only plugin detail view loads KGG UI Lab Private and exposes the tool list; successful live tool execution is still unverified because no chat/tool call was sent.",
     "External measurement-envelope reconciliation remains unavailable.",
     "No second B canary or post-merge canary is authorized by the existing run budget."
   ],
