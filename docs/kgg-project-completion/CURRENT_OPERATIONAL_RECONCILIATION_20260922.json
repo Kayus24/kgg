@@ -100,6 +100,30 @@
     "new_key_created": false,
     "scope": "READ_ONLY_LOCAL_HEALTH_CHECK"
   },
+  "latest_local_contract_test_run": {
+    "observed_at": "2026-09-22T23:23:51+02:00",
+    "candidate_commit": "896180d6fcb794a29f33371b4b88497a1d5c2138",
+    "commands": [
+      "python -B -m unittest discover -s release-pipeline -p test_kgg_plugin_candidate.py -v",
+      "python -B -m unittest discover -s release-pipeline -p test_kgg_ui_lab_*.py -v",
+      "python -B -m unittest discover -s release-pipeline -p test_kgg_gpt_*.py -v",
+      "python -B -m unittest discover -s release-pipeline -p test_kgg_codex_jsonl_host_adapter.py -v",
+      "python -B -m unittest discover -s release-pipeline -p test_kgg_codex_raw_capture.py -v",
+      "python -B -m unittest discover -s release-pipeline -p test_kgg_real_browser_bridge.py -v"
+    ],
+    "results": {
+      "plugin_candidate": "10_pass",
+      "ui_lab_contracts_and_faults": "61_pass",
+      "measurement_and_source_context": "36_pass",
+      "codex_jsonl_adapter": "12_pass",
+      "codex_raw_capture": "8_pass",
+      "real_browser_bridge": "9_pass"
+    },
+    "total_tests": 136,
+    "overall": "PASS",
+    "side_effect_scope": "NO_NETWORK_NO_INSTALL_NO_REPO_WRITE",
+    "interpretation": "Local contract, provenance, fail-closed, visual-loop, and bridge tests are green. This does not promote external ChatGPT host execution or A/B comparability."
+  },
   "codex_plugin_installation": {
     "status": "MANUAL_NATIVE_INSTALL_VERIFIED",
     "bundle_source": "embedded in tunnel-client",
