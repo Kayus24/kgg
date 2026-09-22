@@ -21,17 +21,21 @@ G02, ChatGPT-Account/Workspace mit Plugin-Unterstützung, erreichbarer MCP-Endpu
 ### 5.1 Aktuelle Live-Reconciliation (2026-09-22)
 
 Die unten dokumentierte G03-E3-Evidence bleibt der historische, einmalige
-Discovery-Canary und wird nicht rückwirkend gelöscht. Ein neuer read-only
-Live-Check im aktuellen ChatGPT-Workspace zeigt jedoch:
+Discovery-Canary und wird nicht rückwirkend gelöscht. Ein späterer read-only
+Live-Check im aktuellen ChatGPT-Workspace zeigte zunächst `Plugin nicht
+verfügbar`; ein weiterer frischer Detail-Read lädt `KGG UI Lab Private` nun
+wieder und zeigt die vollständige Tool-Liste.
 
-- `KGG UI Lab Private` ist in der installierten Plugin-Liste sichtbar.
-- Die Plugin-Detailseite meldet `Plugin nicht verfügbar`.
-- Aktuelle Tool-Discovery ist damit `NOT_OBSERVABLE`; ein erneuter Canary ist
-  nicht automatisch zulässig.
+Für den aktuellen Betriebsstand gilt daher:
 
-Für den aktuellen Betriebsstand gilt daher außerhalb des historischen
-Checkpoints `B_PLUGIN_DISCOVERY=CURRENTLY_UNAVAILABLE` und insgesamt
-`G03_CURRENT=PARTIAL`. Die autoritative laufende Reconciliation steht in
+- `B_PLUGIN_DISCOVERY=CURRENTLY_VISIBLE_TOOLS`.
+- `G03_CURRENT=DISCOVERY_VISIBLE_EXECUTION_UNVERIFIED`.
+- Die Tools sind sichtbar, aber es wurde in diesem Reconciliation-Schritt
+  bewusst kein Chat und kein Plugin-Tool aufgerufen.
+- Ein Tool-Call ist ein separater Kommunikations-/Kosten-Gate und wird nicht
+  automatisch gestartet.
+
+Die autoritative laufende Reconciliation steht in
 `CURRENT_OPERATIONAL_RECONCILIATION_20260922.json`.
 
 - `IMPLEMENTATION_STATUS=CHATGPT_APP_CONNECTED_READ_ONLY_CANARY_PASS`
