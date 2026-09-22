@@ -271,7 +271,11 @@ def tool_catalog() -> list[dict[str, Any]]:
                 "type": "object",
                 "properties": {
                     "name": {"type": "string", "enum": ["admin", "patient"]},
-                    "url": {"type": "string", "format": "uri"},
+                    "url": {
+                        "type": "string",
+                        "format": "uri",
+                        "description": "Raw URI string only; do not wrap it in Markdown link syntax.",
+                    },
                     "main_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
                     "preview_sha": {"type": ["string", "null"], "pattern": "^[0-9a-f]{40}$"},
                 },
