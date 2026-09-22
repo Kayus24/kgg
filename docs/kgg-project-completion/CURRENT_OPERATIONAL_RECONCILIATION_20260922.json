@@ -124,6 +124,24 @@
     "side_effect_scope": "NO_NETWORK_NO_INSTALL_NO_REPO_WRITE",
     "interpretation": "Local contract, provenance, fail-closed, visual-loop, and bridge tests are green. This does not promote external ChatGPT host execution or A/B comparability."
   },
+  "latest_local_battery_run": {
+    "observed_at": "2026-09-22T23:27:46+02:00",
+    "commands": [
+      "python -B release-pipeline/kgg_test_battery.py --suite gpt",
+      "python -B release-pipeline/kgg_test_battery.py --suite security"
+    ],
+    "results": {
+      "gpt_payload_preflight": "PASS",
+      "gpt_eval": "PASS",
+      "gpt_measurement_envelope_contract": "34_pass",
+      "brain_relay_worker_contract": "PASS",
+      "gpt_regression_contracts": "PASS",
+      "secret_scan": "PASS"
+    },
+    "overall": "PASS",
+    "side_effect_scope": "NO_NETWORK_NO_INSTALL_NO_LIVE_RELEASE",
+    "interpretation": "The repository's registered GPT and security batteries pass locally; this remains local evidence and does not create external host or post-merge evidence."
+  },
   "codex_plugin_installation": {
     "status": "MANUAL_NATIVE_INSTALL_VERIFIED",
     "bundle_source": "embedded in tunnel-client",
