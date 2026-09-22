@@ -80,6 +80,8 @@
   "upstream_advisory_risk": {
     "status": "OPEN_ADVISORY_NO_FIX_VERIFIED",
     "source": "Fresh read-only check of official openai/tunnel-client issue #57 on 2026-09-22",
+    "latest_official_release": "v0.0.14",
+    "newer_official_release_available": false,
     "observed_boundary": "Successful main/server/discover delivery followed by no observed main/tools/list or usable ChatGPT actions",
     "related_issues": ["#55", "#71"],
     "interpretation": "The upstream report confirms a relevant open discovery-boundary risk but does not establish the root cause of the local visible-host failure or provide a verified fix.",
