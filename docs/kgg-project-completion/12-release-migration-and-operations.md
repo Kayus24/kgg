@@ -92,3 +92,18 @@ Merged SHA, Paketversion, Installationsnachweis, Canary-Evidence, Rollbacknachwe
 ## 14. Beitragsherkunft
 
 `CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
+
+## 15. Aktuelle Reconciliation (2026-09-22)
+
+- `CURRENT_FRESH_MAIN=aed7ff5c22e8c0b818fc82c91b990da5d9c5e723`
+- PR #256 (Browser-Runtime-Modulauflösung) ist auf Main gemergt.
+- PR #257 (Reconciliation der G07-Evidence) ist auf Main gemergt.
+- Der eine autorisierte B-Real-Host-Canary startete, lief aber vor der visuellen
+  Beobachtung in `real_browser_timeout`; Screenshot, Klick und Seiteneffekt
+  wurden nicht erzeugt.
+- Die statische Modulauflösung und die relevanten Contract-Tests sind grün.
+- `PRODUCTION_CONTROL=PILOT_INCOMPLETE`, `A_B=NOT_COMPARABLE` und
+  `replacement_eligible=false` bleiben unverändert.
+- Nächster zulässiger Schritt: read-only Timeout-/Child-Process-/Localhost-
+  Diagnose. Ein weiterer Real-Canary benötigt ein neues, separat gebundenes
+  Run-Budget.

@@ -1,7 +1,7 @@
 {
   "schema": "kgg-project-completion-operational-reconciliation/v1",
   "evidence_date": "2026-09-22",
-  "fresh_main": "b3e8df5c78eecb5adb602ab12fb6fdb5af3fc6a5",
+  "fresh_main": "aed7ff5c22e8c0b818fc82c91b990da5d9c5e723",
   "merged_changes": [
     {
       "pull_request": 250,
@@ -20,6 +20,18 @@
       "merge_sha": "b3e8df5c78eecb5adb602ab12fb6fdb5af3fc6a5",
       "scope": "record bounded synthetic B UI audit",
       "required_gate": "PASS"
+    },
+    {
+      "pull_request": 256,
+      "merge_sha": "c414446f6c00c6d7aece3b1a14741e49eae23c14",
+      "scope": "resolve pre-provisioned Playwright module path for the real browser bridge",
+      "required_gate": "PASS"
+    },
+    {
+      "pull_request": 257,
+      "merge_sha": "aed7ff5c22e8c0b818fc82c91b990da5d9c5e723",
+      "scope": "reconcile retained G07 real B-host canary evidence",
+      "required_gate": "PASS"
     }
   ],
   "runtime": {
@@ -31,16 +43,16 @@
     "secret_logged": false
   },
   "codex_plugin_installation": {
-    "status": "NOT_PERFORMED",
+    "status": "MANUAL_NATIVE_INSTALL_VERIFIED",
     "bundle_source": "embedded in tunnel-client",
     "command": "tunnel-client codex plugin install",
     "write_target": "CODEX_HOME",
     "requires_gate": "explicit confirmation of this new file installation",
-    "reason": "The active objective excludes installation of unconfirmed files."
+    "reason": "The embedded native tunnel plugin was manually installed and verified; no repository file installation was performed."
   },
   "surface_status": {
     "A_CUSTOM_GPT_PRODUCTION_CONTROL": "NOT_OBSERVABLE_FROM_CURRENT_REPO",
-    "B_PLUGIN_CANDIDATE": "SYNTHETIC_ONLY_FOR_CURRENT_AUDIT",
+    "B_PLUGIN_CANDIDATE": "PARTIAL_REAL_HOST_CANARY_TIMEOUT_FAIL_CLOSED",
     "C_CODEX_PLUS_PLUGIN": "LOCAL_MCP_AND_REAL_BRIDGE_CODE"
   },
   "gate_status": {
@@ -49,7 +61,7 @@
     "G04": "PASS_LOCAL_REAL_RUNTIME",
     "G05": "PARTIAL",
     "G06": "PARTIAL",
-    "G07": "PASS_CLASSIFICATION_ONLY",
+    "G07": "PASS_CLASSIFICATION_WITH_B_REAL_AUDIT_PARTIAL",
     "G08": "PARTIAL",
     "G09": "PARTIAL",
     "G10": "PASS_LOCAL_CANDIDATE_STABILITY",
@@ -63,10 +75,10 @@
     "final_status": "PARTIAL_COMPLETE_WITH_TECHNICAL_LIMITS"
   },
   "remaining_limits": [
-    "Native Codex plugin installation is not performed because it would install an unconfirmed file set.",
-    "Real external host browser parity and post-merge production canary remain unproven.",
+    "The manually verified native Codex plugin installation is local-only; repository packaging and ChatGPT host parity remain separate evidence requirements.",
+    "Real external host browser parity and post-merge production canary remain unproven; the single B real-host canary timed out before visual observation.",
     "External measurement-envelope reconciliation remains unavailable.",
-    "The single authorized synthetic B audit does not promote any gate or surface status."
+    "No second B canary or post-merge canary is authorized by the existing run budget."
   ],
   "next_allowed_mode": "CUSTOM_GPT_PRIMARY_FALLBACK_AND_LOCAL_PLUGIN_DEVELOPMENT",
   "status_promotion": "NONE",
