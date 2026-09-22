@@ -289,6 +289,22 @@
     "side_effect_scope": "NO_PERSISTENT_OR_EXTERNAL_SIDE_EFFECT",
     "interpretation": "The normal ChatGPT host accepted the bounded probe but did not expose the installed KGG plugin or requested tool at execution time. The plugin detail page's visible catalog is therefore discovery evidence only; it does not establish runtime binding. No second call is justified without a host/plugin binding change."
   },
+  "latest_plugin_binding_menu_read": {
+    "observed_at": "2026-09-23T00:19:49+02:00",
+    "surface": "B_NORMAL_CHATGPT_WITH_KGG_PLUGIN",
+    "plugin_name": "KGG UI Lab Private",
+    "menu": "Plugin-Aktionen",
+    "visible_actions": [
+      "Plugindetails anzeigen",
+      "Name bearbeiten",
+      "Beschreibung bearbeiten",
+      "Trennen",
+      "Löschen"
+    ],
+    "attach_or_rebind_action_visible": false,
+    "actions_invoked": false,
+    "interpretation": "The current plugin detail menu exposes no attach, rebind, reconnect, or use-in-chat action. Disconnect/delete were not selected. The remaining gap is an external host/workspace binding path, not a missing local tool schema."
+  },
   "codex_local_plugin_tool_read": {
     "observed_at": "2026-09-22T23:16:40+02:00",
     "tool": "get_current_state",
@@ -359,6 +375,7 @@
       "latest_normal_chatgpt_tool_call.tool_name=get_current_state",
       "latest_normal_chatgpt_tool_call.status=NOT_OBSERVABLE",
       "latest_normal_chatgpt_tool_call.writes=false",
+      "latest_plugin_binding_menu_read.attach_or_rebind_action_visible=false",
       "latest_local_contract_test_run.overall=PASS",
       "latest_local_battery_run.overall=PASS"
     ],
@@ -371,15 +388,17 @@
     "sources_checked": [
       "current ChatGPT plugin detail read",
       "current normal ChatGPT conversation response",
+      "current plugin action menu read",
       "local tunnel healthz/readyz",
       "local plugin read-only call",
       "local contract and battery outputs"
     ],
     "attempts": [
       "one bounded normal-ChatGPT availability probe; response was NOT_OBSERVABLE",
+      "one read-only plugin action-menu inspection; no attach/rebind action visible",
       "no second call, browser action, plugin rebind, key, tunnel, or canary created"
     ],
-    "smallest_next_read_only_check": "inspect or activate an explicit ChatGPT plugin attachment/binding path; do not repeat the call while the host registry is unchanged",
+    "smallest_next_read_only_check": "use an external supported ChatGPT/workspace binding path; the current plugin detail offers no attach/rebind action, so do not repeat the call while the host registry is unchanged",
     "would_require_scope_expansion": true,
     "would_require_external_consequence": true,
     "required_gate": "CHATGPT_PLUGIN_BINDING_OR_HOST_REPAIR",
@@ -394,8 +413,8 @@
   "current_status_overlay": {
     "G03": "DISCOVERY_VISIBLE_TOOL_CALL_NOT_OBSERVABLE",
     "G07": "PASS_CLASSIFICATION_WITH_B_REAL_AUDIT_PARTIAL",
-    "reason": "The detail view visibly lists the plugin and 11 tools, but one explicitly authorized bounded normal-ChatGPT probe returned NOT_OBSERVABLE for get_current_state. Discovery is visible; runtime conversation binding is not.",
-    "required_for_next_promotion": "an explicit host/plugin attachment or supported rebind, followed by one fresh bounded read-only call; do not repeat the unchanged call"
+    "reason": "The detail view visibly lists the plugin and 11 tools, but one explicitly authorized bounded normal-ChatGPT probe returned NOT_OBSERVABLE for get_current_state. A read-only action-menu inspection shows no attach/rebind option. Discovery is visible; runtime conversation binding is not.",
+    "required_for_next_promotion": "an external supported host/workspace binding or reconfiguration, followed by one fresh bounded read-only call; do not repeat the unchanged call"
   },
   "gate_status": {
     "G02": "PARTIAL",

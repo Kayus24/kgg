@@ -37,14 +37,19 @@ Für den aktuellen Betriebsstand gilt daher:
   Conversation nicht live verfügbar.
 - Der Aufruf war ohne Browseraktion, Write, Dispatch, Upload oder Installation.
   Ein zweiter Aufruf ist ohne geänderte Host-/Plugin-Bindung nicht zulässig.
+- Die read-only geöffnete Plugin-Aktionsliste bietet nur Details, Name-/
+  Beschreibung bearbeiten, Trennen und Löschen; eine Attach-/Rebind- oder
+  „in Chat verwenden“-Aktion ist nicht vorhanden. Trennen und Löschen wurden
+  nicht ausgewählt.
 
 Die autoritative laufende Reconciliation steht in
 `CURRENT_OPERATIONAL_RECONCILIATION_20260922.json`.
 
 Der aktuelle Blocker ist damit nicht mehr die fehlende Kommunikationsfreigabe,
 sondern die fehlende Laufzeitbindung zwischen sichtbarer Plugin-Detailseite und
-Conversation-Tool-Registry. Dafür ist ein Host-/Plugin-Rebind oder eine
-unterstützte Chat-Konfiguration erforderlich.
+Conversation-Tool-Registry. Die aktuelle Detailseite stellt keinen Rebind-
+Pfad bereit; dafür ist eine unterstützte externe Host-/Workspace-Konfiguration
+erforderlich.
 
 - `HISTORICAL_IMPLEMENTATION_STATUS=CHATGPT_APP_CONNECTED_READ_ONLY_CANARY_PASS`
 - `HISTORICAL_LIVE_EVIDENCE_STATUS=PRIVATE_TUNNEL_CLIENT_DISCOVERY_PASS_CLIENT_STOPPED`
