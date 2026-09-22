@@ -121,7 +121,7 @@
     },
     {
       "path": "kgg-plugin/mcp/server.py",
-      "sha256": "d403637a36a49069af78132e913d69885110aa6158773490ded3713633da6966"
+      "sha256": "a65a06df06ca6b39d5c0482104c636c607a5e3f257d0e645137bd4f70adc8d77"
     },
     {
       "path": "kgg-plugin/mcp/real_browser.py",
