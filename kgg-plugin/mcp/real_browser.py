@@ -61,6 +61,33 @@ def _node_command() -> str:
     return command
 
 
+def _playwright_module_path() -> str | None:
+    """Resolve an already provisioned Playwright runtime for the child host.
+
+    The MCP server is launched from ``kgg-plugin/mcp`` while the bundled Codex
+    runtime keeps its Node modules outside the repository.  Without an
+    explicit ``NODE_PATH`` the child process exits before it can emit a JSON
+    response, which the persistent bridge can only observe as a generic
+    timeout.  Prefer an explicit operator-provided path, then use the
+    pre-provisioned Codex runtime, and finally the repository test runtime.
+    This never installs or downloads a dependency.
+    """
+
+    configured = os.environ.get("KGG_PLAYWRIGHT_NODE_PATH")
+    if configured:
+        return configured
+
+    repo_root = Path(__file__).resolve().parents[2]
+    candidates = (
+        Path.home() / ".cache" / "codex-runtimes" / "codex-primary-runtime" / "dependencies" / "node" / "node_modules",
+        repo_root / "release-pipeline" / "node_modules",
+    )
+    for candidate in candidates:
+        if (candidate / "playwright").is_dir():
+            return str(candidate)
+    return None
+
+
 def _helper_path() -> Path:
     path = Path(__file__).with_name("browser_host.js")
     if not path.is_file():
@@ -159,7 +186,7 @@ def run_real_flow(*, url: str, viewport: Mapping[str, Any], steps: list[Mapping[
         "steps": [dict(step) for step in steps],
     }
     env = os.environ.copy()
-    module_path = env.get("KGG_PLAYWRIGHT_NODE_PATH")
+    module_path = _playwright_module_path()
     if module_path:
         env["NODE_PATH"] = module_path + os.pathsep + env.get("NODE_PATH", "")
     try:
@@ -238,7 +265,7 @@ class PersistentRealBrowser:
         if not isinstance(timeout_ms, int) or not 1000 <= timeout_ms <= 1_800_000:
             raise RealBrowserError("real_browser_timeout_invalid")
         env = os.environ.copy()
-        module_path = env.get("KGG_PLAYWRIGHT_NODE_PATH")
+        module_path = _playwright_module_path()
         if module_path:
             env["NODE_PATH"] = module_path + os.pathsep + env.get("NODE_PATH", "")
         try:

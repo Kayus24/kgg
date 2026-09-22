@@ -55,6 +55,20 @@ def _runtime_available() -> tuple[str, str] | None:
     return node, module_path
 
 
+class RealBrowserModuleResolutionTests(unittest.TestCase):
+    def test_bridge_resolves_preprovisioned_module_without_installing(self) -> None:
+        module = server._load_real_browser_module()
+        old = os.environ.pop("KGG_PLAYWRIGHT_NODE_PATH", None)
+        try:
+            resolved = module._playwright_module_path()
+            if resolved is None:
+                self.skipTest("no pre-provisioned Playwright runtime is available")
+            self.assertTrue((Path(resolved) / "playwright").is_dir())
+        finally:
+            if old is not None:
+                os.environ["KGG_PLAYWRIGHT_NODE_PATH"] = old
+
+
 def _session(url: str, *, session_id: str = "real-bridge-session-001", request_id: str = "real-bridge-request-001", flow_name: str = "pilot-180-reproduce", capabilities: list[str] | None = None) -> dict[str, object]:
     return {
         "schema": server.SESSION_SCHEMA,

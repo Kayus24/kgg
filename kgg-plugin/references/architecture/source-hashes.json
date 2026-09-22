@@ -125,7 +125,7 @@
     },
     {
       "path": "kgg-plugin/mcp/real_browser.py",
-      "sha256": "635f3a44dcda6088e7e7f3121e0dc6c89f02465a17a2d73e7630083daf285220"
+      "sha256": "49694eea2dd6cb11fb9eec607b90900dad603d4e68587b566409963f0f1dfd13"
     },
     {
       "path": "kgg-plugin/mcp/browser_host.js",
@@ -141,7 +141,7 @@
     },
     {
       "path": "release-pipeline/test_kgg_real_browser_bridge.py",
-      "sha256": "625ae6a2661dda1bc64faea2f091bd91b54af1c95cfd1d39381eb90eb8a2a55f"
+      "sha256": "2a40c4154334878e56d621c642600b87a5c2a3106514833337e9d94392444868"
     },
     {
       "path": "kgg-plugin/scripts/eval/validate_candidate.py",
