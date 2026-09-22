@@ -1,8 +1,8 @@
 {
   "schema": "kgg-project-completion-gates/v1",
-  "generated_at": "2026-09-22T22:23:10+02:00",
-  "fresh_remote_main_at_generation": "3f9225b6de45e4c46c7deedb86a3e8a2899ecdb1",
-  "local_head_at_generation": "5b0596bf8bddf89247f1db56ef190628999520b7",
+  "generated_at": "2026-09-22T23:20:03+02:00",
+  "fresh_remote_main_at_generation": "818d57415ece7e438410ce6da0ae41c2abadf71a",
+  "local_head_at_generation": "9edf15d6b2535ca93ac3d9af29f49716378d094c",
   "north_star": [
     "migrate required Custom GPT capabilities into one universal KGG plugin",
     "provide real screenshot-to-action browser control for the KGG HTML app",
@@ -15,7 +15,7 @@
     {"id":"G00","title":"Source of Truth and checkpoints","status":"PASS","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":[],"document":"00-governance-and-source-of-truth.md","next_action":"resume at G01 capability parity"},
     {"id":"G01","title":"Custom GPT capability migration","status":"PASS","evidence_level":"E1_SYNTHETIC","depends_on":["G00"],"document":"01-custom-gpt-capability-migration.md","next_action":"G01 checkpoint merged; resume at G02 distributable plugin preflight"},
     {"id":"G02","title":"Universal plugin package","status":"PARTIAL","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":["G01"],"document":"02-universal-plugin-package.md","next_action":"G02.3 transport readiness and G03 ChatGPT discovery"},
-    {"id":"G03","title":"ChatGPT plugin connection","status":"PASS","consequence_gate_status":"COMPLETED_TRANSIENT_RUNTIME_KEY","evidence_level":"E3_REAL_HOST","depends_on":["G02"],"document":"03-chatgpt-plugin-connection.md","checkpoint":"CP_G03_TRANSPORT_BLOCKED_20260921.json","human_gate":"G03_RUNTIME_KEY_GATE_20260921.json","next_action":"continue to G07 surface matrix; retain no runtime secret and do not repeat the discovery canary"},
+    {"id":"G03","title":"ChatGPT plugin connection","status":"PARTIAL","historical_status":"PASS","current_scope":"DISCOVERY_VISIBLE_EXECUTION_UNVERIFIED","consequence_gate_status":"COMPLETED_TRANSIENT_RUNTIME_KEY","evidence_level":"E3_REAL_HOST","depends_on":["G02"],"document":"03-chatgpt-plugin-connection.md","checkpoint":"CP_G03_TRANSPORT_BLOCKED_20260921.json","human_gate":"G03_RUNTIME_KEY_GATE_20260921.json","next_action":"one bounded read-only plugin tool call only with an explicit cost/communication gate; otherwise retain Custom GPT fallback","current_evidence":"fresh plugin detail read shows KGG UI Lab Private and its tool list; no normal-ChatGPT tool call was sent"},
     {"id":"G04","title":"Real browser bridge","status":"PASS","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":["G02"],"document":"04-real-browser-bridge.md","checkpoint":"CP_G04_REAL_BROWSER.json","next_action":"continue to G05 visual loop and bind three real Quick Flows in G06"},
     {"id":"G05","title":"Visual interaction loop","status":"PARTIAL","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":["G04"],"document":"05-visual-interaction-loop.md","checkpoint":"CP_G05_VISUAL_LOOP.json","next_action":"bind the persistent visual loop to an authorized agent host and obtain E3 evidence"},
     {"id":"G06","title":"Real Quick Flows","status":"PARTIAL","evidence_level":"E2_LOCAL_REAL_RUNTIME","depends_on":["G04"],"document":"06-real-quick-flows.md","checkpoint":"CP_G06_REAL_FLOWS.json","next_action":"obtain E3 host evidence for the three flows; local replay is bound"},
