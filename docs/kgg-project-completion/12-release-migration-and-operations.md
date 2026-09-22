@@ -120,6 +120,11 @@ Merged SHA, Paketversion, Installationsnachweis, Canary-Evidence, Rollbacknachwe
   Beobachtung in `real_browser_timeout`; Screenshot, Klick und Seiteneffekt
   wurden nicht erzeugt.
 - Die statische Modulauflösung und die relevanten Contract-Tests sind grün.
+- Der aktuelle Shell-Read findet Node, die Helper, Playwright und eine
+  Chromium-Executable statisch; die Codex-Runtime verwendet dabei Playwright
+  `1.62.1`, das Repository-Testmodul `1.61.1`. Die Bindung dieses Shell-/Codex-
+  Kontexts an den nativen B-Canary ist nicht bewiesen; es wurde kein Browser
+  gestartet.
 - `PRODUCTION_CONTROL=PILOT_INCOMPLETE`, `A_B=NOT_COMPARABLE` und
   `replacement_eligible=false` bleiben unverändert.
 - Nächster zulässiger Schritt: read-only Timeout-/Child-Process-/Localhost-

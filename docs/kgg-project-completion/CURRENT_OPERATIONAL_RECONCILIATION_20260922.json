@@ -4,6 +4,18 @@
   "fresh_main": "3f9225b6de45e4c46c7deedb86a3e8a2899ecdb1",
   "fresh_main_role": "RECONCILIATION_BASELINE_AT_GENERATION",
   "observed_main_after_pr_261": "818d57415ece7e438410ce6da0ae41c2abadf71a",
+  "current_shell_static_runtime_read": {
+    "kgg_real_browser": "UNSET",
+    "kgg_browser_node_override": "UNSET",
+    "kgg_playwright_node_path_override": "UNSET",
+    "node_resolution": "PRESENT",
+    "codex_runtime_playwright": "1.62.1",
+    "repository_playwright": "1.61.1",
+    "chromium_executable_resolution": "PRESENT",
+    "helper_files": "PRESENT",
+    "native_bridge_context_binding": "NOT_PROVEN",
+    "browser_launch": "NOT_RUN"
+  },
   "merged_changes": [
     {
       "pull_request": 250,
