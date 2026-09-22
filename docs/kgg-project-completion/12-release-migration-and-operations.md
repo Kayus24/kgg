@@ -98,6 +98,12 @@ Merged SHA, Paketversion, Installationsnachweis, Canary-Evidence, Rollbacknachwe
 - `CURRENT_FRESH_MAIN=aed7ff5c22e8c0b818fc82c91b990da5d9c5e723`
 - PR #256 (Browser-Runtime-Modulauflösung) ist auf Main gemergt.
 - PR #257 (Reconciliation der G07-Evidence) ist auf Main gemergt.
+- Der Codex-Ausführungskontext meldet den nativen Bridge als `ready`; das ist
+  nicht gleichbedeutend mit einer vorbereiteten kanonischen sichtbaren
+  Windows-Hostumgebung.
+- In der sichtbaren PowerShell des kanonischen Hosts waren `tunnel-client` und
+  die erwartete Profil-Datei nicht auflösbar. Keine Codex-/PTY-Evidence darf
+  diesen Hostbefund ersetzen.
 - Der eine autorisierte B-Real-Host-Canary startete, lief aber vor der visuellen
   Beobachtung in `real_browser_timeout`; Screenshot, Klick und Seiteneffekt
   wurden nicht erzeugt.
@@ -105,5 +111,9 @@ Merged SHA, Paketversion, Installationsnachweis, Canary-Evidence, Rollbacknachwe
 - `PRODUCTION_CONTROL=PILOT_INCOMPLETE`, `A_B=NOT_COMPARABLE` und
   `replacement_eligible=false` bleiben unverändert.
 - Nächster zulässiger Schritt: read-only Timeout-/Child-Process-/Localhost-
-  Diagnose. Ein weiterer Real-Canary benötigt ein neues, separat gebundenes
-  Run-Budget.
+  Diagnose beziehungsweise — falls der sichtbare Host weiter unvorbereitet
+  bleibt — ein separat zu genehmigendes Installations-/Profil-Gate. Ein weiterer
+  Real-Canary benötigt ein neues, separat gebundenes Run-Budget.
+- Vor einer solchen Vorbereitung muss die offizielle Upstream-Version und ihre
+  bekannten ChatGPT-Discovery-Risiken frisch geprüft werden. Der Brother-Hinweis
+  hierzu ist advisory und hebt keinen Gate-Status an.
