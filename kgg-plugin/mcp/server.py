@@ -237,6 +237,81 @@ def tool_catalog() -> list[dict[str, Any]]:
     actor = {"type": "string", "enum": sorted(ACTORS)}
     session_id = {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{5,63}$"}
     request = {"type": "object", "description": "kgg-ui-lab/request/v1 object; no sensitive fields"}
+    session = {
+        "type": "object",
+        "description": "kgg-ui-lab/session/v1 object; synthetic or explicitly opt-in real-browser session",
+        "properties": {
+            "schema": {"type": "string", "const": SESSION_SCHEMA},
+            "session_id": session_id,
+            "status": {"type": "string"},
+            "active_actor": actor,
+            "request_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{5,63}$"},
+            "lease": {
+                "type": "object",
+                "properties": {
+                    "owner": actor,
+                    "issued_at": {"type": "string", "format": "date-time"},
+                    "expires_at": {"type": "string", "format": "date-time"},
+                },
+                "required": ["owner", "issued_at", "expires_at"],
+                "additionalProperties": False,
+            },
+            "runner": {
+                "type": "object",
+                "properties": {
+                    "runner_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{5,63}$"},
+                    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+                    "browser_revision": {"type": "string", "minLength": 1},
+                    "capabilities": {"type": "array", "items": {"type": "string", "enum": sorted(CAPABILITIES)}, "minItems": 1, "uniqueItems": True},
+                },
+                "required": ["runner_id", "version", "browser_revision", "capabilities"],
+                "additionalProperties": False,
+            },
+            "app": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "enum": ["admin", "patient"]},
+                    "url": {"type": "string", "format": "uri"},
+                    "main_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+                    "preview_sha": {"type": ["string", "null"], "pattern": "^[0-9a-f]{40}$"},
+                },
+                "required": ["name", "url", "main_sha", "preview_sha"],
+                "additionalProperties": False,
+            },
+            "device_profile": {"type": "string", "enum": sorted(PROFILES)},
+            "viewport": {
+                "type": "object",
+                "properties": {
+                    "width": {"type": "integer", "minimum": 240, "maximum": 10000},
+                    "height": {"type": "integer", "minimum": 240, "maximum": 10000},
+                    "device_scale_factor": {"type": "number", "minimum": 0.5, "maximum": 4},
+                },
+                "required": ["width", "height", "device_scale_factor"],
+                "additionalProperties": False,
+            },
+            "quick_flow": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "minLength": 1},
+                    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+                },
+                "required": ["name", "version"],
+                "additionalProperties": False,
+            },
+            "timeout": {
+                "type": "object",
+                "properties": {
+                    "timeout_ms": {"type": "integer", "minimum": 1000, "maximum": 1800000},
+                    "cleanup_on_cancel": {"type": "boolean"},
+                },
+                "required": ["timeout_ms", "cleanup_on_cancel"],
+                "additionalProperties": False,
+            },
+            "artifacts": {"type": "array", "items": {"type": "object"}},
+        },
+        "required": ["schema", "session_id", "status", "active_actor", "request_id", "lease", "runner", "app", "device_profile", "viewport", "quick_flow", "timeout", "artifacts"],
+        "additionalProperties": False,
+    }
     visual_decision = {
         "type": "object",
         "description": "One bounded agent decision derived from the previously returned screenshot; no selectors or JavaScript.",
@@ -256,7 +331,7 @@ def tool_catalog() -> list[dict[str, Any]]:
     return [
         _tool("get_current_state", "Read bounded synthetic UI-Lab state. Never writes.", {"actor": actor}, ["actor"]),
         _tool("get_ticket_state", "Read a synthetic ticket summary only. Never writes or dispatches.", {"actor": actor, "ticket_id": {"type": "string", "pattern": "^#?[0-9]{1,6}$"}}, ["actor", "ticket_id"]),
-        _tool("start_ui_session", "Bind a synthetic session, actor, lease, runner, and caller-supplied Fresh-Main SHA in memory.", {"session": {"type": "object", "description": "kgg-ui-lab/session/v1 object"}}, ["session"]),
+        _tool("start_ui_session", "Bind a synthetic session, actor, lease, runner, and caller-supplied Fresh-Main SHA in memory.", {"session": session}, ["session"]),
         _tool("set_device_profile", "Change only the in-memory device profile of an active session.", {"session_id": session_id, "actor": actor, "profile": {"type": "string", "enum": sorted(PROFILES)}}, ["session_id", "actor", "profile"]),
         _tool("run_quick_flow", "Run the bounded synthetic Quick Flow and return sanitized evidence; no browser or repository write.", {"request": request}, ["request"]),
         _tool("capture_screenshot", "Return a deterministic synthetic screenshot artifact, or a real screenshot only when the opt-in real host is enabled.", {"request": request}, ["request"]),

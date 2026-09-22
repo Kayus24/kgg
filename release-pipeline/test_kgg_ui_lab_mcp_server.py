@@ -72,6 +72,17 @@ class KggUiLabMcpServerTests(unittest.TestCase):
         self.assertEqual([item["name"] for item in listed["result"]["tools"]], list(server.TOOL_NAMES))
         self.assertTrue(all(item["annotations"]["readOnlyHint"] for item in listed["result"]["tools"]))
 
+    def test_start_session_schema_exposes_bindable_fields(self) -> None:
+        tool = next(item for item in server.tool_catalog() if item["name"] == "start_ui_session")
+        session_schema = tool["inputSchema"]["properties"]["session"]
+        self.assertEqual(session_schema["required"], [
+            "schema", "session_id", "status", "active_actor", "request_id", "lease",
+            "runner", "app", "device_profile", "viewport", "quick_flow", "timeout", "artifacts",
+        ])
+        self.assertEqual(session_schema["properties"]["schema"]["const"], server.SESSION_SCHEMA)
+        self.assertEqual(session_schema["properties"]["app"]["properties"]["main_sha"]["pattern"], "^[0-9a-f]{40}$")
+        self.assertEqual(session_schema["properties"]["runner"]["properties"]["capabilities"]["uniqueItems"], True)
+
     def test_synthetic_flow_is_in_memory_and_replay_is_rejected(self) -> None:
         runtime = server.Runtime()
         started = server.handle(runtime, {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "start_ui_session", "arguments": {"session": session()}}})
