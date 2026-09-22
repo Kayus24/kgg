@@ -1,0 +1,374 @@
+{
+  "schema": "kgg-dual-surface-execution-envelope-template/v1",
+  "template_id": "G07_DUAL_SURFACE_EXECUTION_ENVELOPE_TEMPLATE_20260921",
+  "template_only": true,
+  "authorizes_execution": false,
+  "created_against_main_sha": "12b13767cc1667f97d428e1f7f7b7978fe2e4ac4",
+  "must_refresh_before_activation": true,
+  "fresh_state": {
+    "expected_main_sha": "12b13767cc1667f97d428e1f7f7b7978fe2e4ac4",
+    "observed_main_sha": null,
+    "expected_head_sha": "12b13767cc1667f97d428e1f7f7b7978fe2e4ac4",
+    "observed_head_sha": null,
+    "fresh_state_verified": false,
+    "worktree_policy": "preserve_foreign_changes_and_bind_exact_owned_diff",
+    "runbook_path": "docs/kgg-project-completion/07a-dual-surface-ui-audit-runbook.md",
+    "gate_status_path": "docs/kgg-project-completion/gate-status.json",
+    "capability_matrix_path": "docs/kgg-project-completion/A_B_C_CAPABILITY_MATRIX_V1.md"
+  },
+  "activation": {
+    "fail_closed": true,
+    "predicate": {
+      "all": [
+        "authorizes_execution == true",
+        "template_only == false",
+        "fresh_state.fresh_state_verified == true",
+        "selected_surface.enabled == true",
+        "selected_surface.run_budget > 0",
+        "selected_surface.consequence_authorized == true",
+        "budgets.total_real_host_runs > 0",
+        "selected_surface_budget > 0",
+        "selected_surface_budget == selected_surface.run_budget"
+      ]
+    },
+    "surface_budget_binding": {
+      "A": "budgets.surface_a_runs=surfaces.A.run_budget",
+      "B": "budgets.surface_b_runs=surfaces.B.run_budget"
+    },
+    "action_specific_budgets_must_also_be_positive": true,
+    "action_budget_requirements": {
+      "REAL_HOST_RUN": [
+        "budgets.total_real_host_runs",
+        "selected_surface.run_budget",
+        "selected_surface_budget"
+      ],
+      "RUNTIME_KEY": ["budgets.runtime_keys"],
+      "TUNNEL_CREATE": ["budgets.tunnels_created"],
+      "TUNNEL_RESTART": ["budgets.tunnel_restarts"],
+      "EXTERNAL_DISPATCH": ["budgets.external_dispatches"],
+      "PLUGIN_INSTALLATION": ["budgets.plugin_installations"],
+      "REPOSITORY_WRITE": ["budgets.repository_writes"],
+      "EDITOR_WRITE": ["budgets.editor_writes"],
+      "MEMORY_WRITE": ["budgets.memory_writes"],
+      "TICKET_WRITE": ["budgets.ticket_writes"],
+      "PRODUCTION_MUTATION": ["budgets.production_mutations"]
+    },
+    "only_declared_action_requirements_may_block": true,
+    "partial_activation_is_forbidden": true
+  },
+  "objective": "synthetic_dual_surface_ui_audit",
+  "surfaces": {
+    "A": {
+      "id": "CUSTOM_GPT_PATIENT_APP_AGENT",
+      "transport_class": "CUSTOM_GPT_ACTION_HOST",
+      "enabled": false,
+      "run_budget": 0,
+      "consequence_authorized": false,
+      "host_context_id": null,
+      "chat_id": null,
+      "tab_id": null,
+      "app_url": null,
+      "live_tool_catalog": [],
+      "live_tool_schema_refs": [],
+      "browser_hook_status": "NOT_OBSERVED",
+      "browser_backend": "NOT_SELECTED",
+      "browser_preflight": {
+        "real_browser_opt_in": "NOT_CHECKED",
+        "KGG_BROWSER_NODE_path": null,
+        "KGG_PLAYWRIGHT_NODE_PATH": null,
+        "node_resolution": "NOT_CHECKED",
+        "playwright_module_resolution": "NOT_CHECKED",
+        "browser_host_js": "NOT_CHECKED",
+        "browser_session_host_js": "NOT_CHECKED",
+        "real_browser_hook_live": "NOT_CHECKED"
+      },
+      "synthetic_preview": {
+        "preview_identity_verified": false,
+        "synthetic_marker": null,
+        "allowed_scheme_host_path_verified": false
+      },
+      "capability_preflight": {
+        "navigate": "NOT_CHECKED",
+        "clickflow": "NOT_CHECKED",
+        "move": "NOT_CHECKED",
+        "move_to": "NOT_CHECKED",
+        "coordinate_click": "NOT_CHECKED",
+        "screenshot": "NOT_CHECKED",
+        "dom": "NOT_CHECKED",
+        "ax": "NOT_CHECKED",
+        "state_read": "NOT_CHECKED",
+        "viewport_read": "NOT_CHECKED",
+        "timeout_state": "NOT_CHECKED",
+        "permission_state": "NOT_CHECKED",
+        "channel_state": "NOT_CHECKED"
+      }
+    },
+    "B": {
+      "id": "NORMAL_CHATGPT_WITH_KGG_PLUGIN",
+      "transport_class": "PLUGIN_MCP_HOST",
+      "enabled": false,
+      "run_budget": 0,
+      "consequence_authorized": false,
+      "host_context_id": null,
+      "chat_id": null,
+      "tab_id": null,
+      "app_url": null,
+      "live_tool_catalog": [],
+      "live_tool_schema_refs": [],
+      "browser_hook_status": "NOT_OBSERVED",
+      "browser_backend": "NOT_SELECTED",
+      "browser_preflight": {
+        "real_browser_opt_in": "NOT_CHECKED",
+        "KGG_BROWSER_NODE_path": null,
+        "KGG_PLAYWRIGHT_NODE_PATH": null,
+        "node_resolution": "NOT_CHECKED",
+        "playwright_module_resolution": "NOT_CHECKED",
+        "browser_host_js": "NOT_CHECKED",
+        "browser_session_host_js": "NOT_CHECKED",
+        "real_browser_hook_live": "NOT_CHECKED"
+      },
+      "synthetic_preview": {
+        "preview_identity_verified": false,
+        "synthetic_marker": null,
+        "allowed_scheme_host_path_verified": false
+      },
+      "capability_preflight": {
+        "navigate": "NOT_CHECKED",
+        "clickflow": "NOT_CHECKED",
+        "move": "NOT_CHECKED",
+        "move_to": "NOT_CHECKED",
+        "coordinate_click": "NOT_CHECKED",
+        "screenshot": "NOT_CHECKED",
+        "dom": "NOT_CHECKED",
+        "ax": "NOT_CHECKED",
+        "state_read": "NOT_CHECKED",
+        "viewport_read": "NOT_CHECKED",
+        "timeout_state": "NOT_CHECKED",
+        "permission_state": "NOT_CHECKED",
+        "channel_state": "NOT_CHECKED"
+      }
+    }
+  },
+  "budgets": {
+    "total_real_host_runs": 0,
+    "surface_a_runs": 0,
+    "surface_b_runs": 0,
+    "external_dispatches": 0,
+    "runtime_keys": 0,
+    "tunnels_created": 0,
+    "tunnel_restarts": 0,
+    "plugin_installations": 0,
+    "repository_writes": 0,
+    "editor_writes": 0,
+    "memory_writes": 0,
+    "ticket_writes": 0,
+    "production_mutations": 0
+  },
+  "g03_transport": {
+    "existing_b_connection_evidence": "G03_PASS_READ_ONLY_CANARY_ONLY",
+    "previous_runtime_key_status": "NOT_RETAINED",
+    "runtime_key_env_name": "CONTROL_PLANE_API_KEY",
+    "runtime_key_required_if_reactivation_needed": "UNKNOWN_UNTIL_PREFLIGHT",
+    "tunnel_client_required_if_b_transport_not_live": true,
+    "tunnel_resource_reuse_only": true,
+    "create_new_tunnel_allowed": false
+  },
+  "real_browser_preflight": {
+    "scope": "APPLIES_ONLY_WHEN_SELECTED_SURFACE_USES_KGG_REAL_BROWSER_BACKEND",
+    "native_surface_backend_may_supply_independent_prerequisites": true,
+    "KGG_REAL_BROWSER_required_if_backend_selected": true,
+    "KGG_REAL_BROWSER_expected_value": "1",
+    "KGG_BROWSER_NODE_override_optional": true,
+    "KGG_PLAYWRIGHT_NODE_PATH_override_optional": true,
+    "browser_host_js_path": "kgg-plugin/mcp/browser_host.js",
+    "browser_session_host_js_path": "kgg-plugin/mcp/browser_session_host.js",
+    "resolution_policy": {
+      "node": "resolve KGG_BROWSER_NODE when supplied, otherwise shutil.which(node)",
+      "playwright": "resolve KGG_PLAYWRIGHT_NODE_PATH when supplied, otherwise normal Node module resolution",
+      "overrides_are_required": false
+    },
+    "mcp_config_currently_exposes": [
+      "PYTHONUTF8"
+    ]
+  },
+  "synthetic_app": {
+    "runtime_binding_policy": "observed app_url and tab_id are stored only under surfaces.A or surfaces.B; this object contains canonical target policy only",
+    "production": false,
+    "canonical_policy_only": true,
+    "current_contract_allowlist": {
+      "local_http_hosts": [
+        "localhost",
+        "127.0.0.1"
+      ],
+      "https_host": "kayus24.github.io",
+      "https_paths": [
+        "/kgg",
+        "/kgg/*",
+        "/kgg-patient-preview",
+        "/kgg-patient-preview/*"
+      ],
+      "userinfo_forbidden": true,
+      "fragment_forbidden": true
+    }
+  },
+  "surface_isolation": {
+    "prohibit_cross_surface_evidence": true,
+    "custom_gpt_action_is_not_plugin_mcp": true,
+    "local_codex_is_not_surface_a_or_b": true,
+    "authorization_is_surface_specific": true
+  },
+  "test_sequence": [
+    "fresh",
+    "envelope_bind",
+    "surface_a_preflight",
+    "surface_a_audit",
+    "surface_a_close",
+    "surface_a_g08_reconciliation",
+    "surface_a_g09_reconciliation",
+    "surface_a_independent_rehash_bound",
+    "surface_b_preflight",
+    "surface_b_audit",
+    "surface_b_close",
+    "surface_b_g08_reconciliation",
+    "surface_b_g09_reconciliation",
+    "surface_b_independent_rehash_bound",
+    "cross_surface_comparison_without_capability_inheritance",
+    "status_review_without_automatic_promotion",
+    "final_technical_limit_if_required"
+  ],
+  "evidence_fields": [
+    "run_id",
+    "surface",
+    "host_context_id",
+    "tab_id",
+    "app_url",
+    "tool_name",
+    "tool_schema_ref",
+    "invocation_id",
+    "request_id",
+    "timestamp",
+    "viewport",
+    "target_bounds",
+    "screenshot_before_ref",
+    "screenshot_before_sha256",
+    "screenshot_after_ref",
+    "screenshot_after_sha256",
+    "dom_before_ref",
+    "dom_after_ref",
+    "ax_before_ref",
+    "ax_after_ref",
+    "state_before",
+    "state_after",
+    "actual_tool_response_ref",
+    "error_class",
+    "raw_evidence_rehash_status",
+    "evidence_level"
+  ],
+  "retention": {
+    "synthetic_only": true,
+    "patient_data_retained": false,
+    "secrets_retained": false,
+    "runtime_key_retained": false,
+    "screenshot_retention_mode": "BOUNDED_EPHEMERAL",
+    "retain_hashes_and_refs": true,
+    "independent_same_run_rehash_required": true,
+    "persistent_raw_evidence_requires_existing_policy": true
+  },
+  "stop_rules": [
+    "HOST_IDENTITY_UNPROVEN",
+    "SYNTHETIC_PREVIEW_IDENTITY_UNPROVEN",
+    "REQUIRED_CHANNEL_ABSENT",
+    "SURFACE_B_TRANSPORT_REACTIVATION_NOT_AUTHORIZED",
+    "REAL_BROWSER_OPT_IN_INACTIVE",
+    "NODE_UNAVAILABLE",
+    "PLAYWRIGHT_MODULE_UNAVAILABLE",
+    "BROWSER_HELPER_UNAVAILABLE",
+    "STALE_SCREENSHOT_OR_COORDINATE",
+    "VIEWPORT_CHANGED_AND_TARGET_NOT_REBOUND",
+    "PERMISSION_ELEVATION_REQUIRED",
+    "PATIENT_MEDICAL_SECRET_OR_QR_DATA_VISIBLE",
+    "PERSISTENT_OR_EXTERNAL_MUTATION_POSSIBLE",
+    "EVIDENCE_NOT_BOUND_TO_SURFACE",
+    "REPLAY_NOT_SAFE"
+  ],
+  "conditional_stop_rule_scopes": {
+    "REAL_BROWSER_OPT_IN_INACTIVE": "selected_surface.browser_backend == KGG_REAL_BROWSER",
+    "NODE_UNAVAILABLE": "selected_surface.browser_backend == KGG_REAL_BROWSER",
+    "PLAYWRIGHT_MODULE_UNAVAILABLE": "selected_surface.browser_backend == KGG_REAL_BROWSER",
+    "BROWSER_HELPER_UNAVAILABLE": "selected_surface.browser_backend == KGG_REAL_BROWSER"
+  },
+  "fallback_rules": {
+    "clickflow_without_pointer": "KEEP_POINTER_NOT_OBSERVABLE",
+    "dom_or_ax_without_screenshot": "SCREENSHOT_NOT_OBSERVABLE_STATE_MAY_BE_VERIFIED_SEPARATELY",
+    "inactive_b_transport": "TRANSPORT_NOT_ACTIVE",
+    "missing_browser_runtime": "BROWSER_RUNTIME_NOT_PREPARED",
+    "stale_coordinate": "ONE_FRESH_OBSERVE_AND_REBIND_ONLY",
+    "unsafe_replay": "UNCHANGED_REPLAY_NOT_SAFE_TO_EXECUTE",
+    "missing_e3_evidence": "PRESERVE_CURRENT_GATE_STATUSES",
+    "permanent_current_host_limit": "DOCUMENT_FINAL_TECHNICAL_LIMIT"
+  },
+  "g08_reconciliation": {
+    "A": {
+      "performed": false,
+      "safety_evidence_refs": [],
+      "violations": [],
+      "proposed_disposition": "NO_STATUS_CHANGE"
+    },
+    "B": {
+      "performed": false,
+      "safety_evidence_refs": [],
+      "violations": [],
+      "proposed_disposition": "NO_STATUS_CHANGE"
+    }
+  },
+  "g09_reconciliation": {
+    "A": {
+      "performed": false,
+      "provenance_evidence_refs": [],
+      "independent_rehash_status": "NOT_MEASURED",
+      "evidence_disposal_allowed": false,
+      "proposed_disposition": "NO_STATUS_CHANGE"
+    },
+    "B": {
+      "performed": false,
+      "provenance_evidence_refs": [],
+      "independent_rehash_status": "NOT_MEASURED",
+      "evidence_disposal_allowed": false,
+      "proposed_disposition": "NO_STATUS_CHANGE"
+    }
+  },
+  "status_review": {
+    "automatic_gate_changes": false,
+    "gate_status_json_write": false,
+    "proposed_g05_status_change": "NONE",
+    "proposed_g06_status_change": "NONE",
+    "proposed_g07_status_change": "NONE",
+    "proposed_g08_status_change": "NONE",
+    "proposed_g09_status_change": "NONE",
+    "proposed_g12_status_change": "NONE",
+    "separate_review_required": true
+  },
+  "final_technical_limit": {
+    "allowed_classes": [
+      "HOST_CAPABILITY_NOT_EXPOSED",
+      "TRANSPORT_NOT_ACTIVE",
+      "BROWSER_RUNTIME_NOT_PREPARED",
+      "CAPABILITY_PRESENT_BUT_FAILED"
+    ],
+    "surface_a_limit": null,
+    "surface_b_limit": null,
+    "overall_limit": null
+  },
+  "global_status_unchanged": {
+    "PRODUCTION_CONTROL": "PILOT_INCOMPLETE",
+    "A_B": "NOT_COMPARABLE",
+    "replacement_eligible": false
+  },
+  "contribution": {
+    "source": "HUMAN_CODEX_AND_BROTHER_GPT",
+    "date": "2026-09-21",
+    "handoff_id": "G07_DUAL_SURFACE_PLANNING_REVIEW_20260921",
+    "review_status": "REVISED_AND_ACCEPTED",
+    "incorporated_by": "KGG_LEAD"
+  }
+}

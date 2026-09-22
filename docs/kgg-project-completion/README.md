@@ -2,7 +2,7 @@
 
 Stand dieses Kandidaten: 2026-09-21
 
-Fresh Remote Main nach G03-Transport-Check: `1e6c6e3e28603f28bfbad3b127c688e722c823f5`
+Fresh Remote Main beim Abschluss der Planungsnachbereitung: `12b13767cc1667f97d428e1f7f7b7978fe2e4ac4`
 
 Letzter verifizierter Realpfad-Code-Checkpoint: `dafa352164d1a14e2c5036aac90b27459e79a0fe`
 
@@ -90,11 +90,22 @@ Die Ausführung folgt grundsätzlich dieser Reihenfolge:
 
 G08 und G09 werden bei jedem Implementierungsschritt mitgeführt. Sie dürfen die Kernfunktion nicht durch endlose Metaaudits verdrängen.
 
-Der nächste produktive Schwerpunkt ist:
+Der aktuelle Projektendzustand ist
+`PARTIAL_COMPLETE_WITH_TECHNICAL_LIMITS`. Der maßgebliche Abschlusscheckpoint
+bleibt `CP_G12_FINAL_ACCEPTANCE_20260921`; die nachfolgende Dual-Surface-
+Planung öffnet G07 nicht erneut und ändert keinen Gate-Status.
 
-`G03 ChatGPT-Verbindung ist bewiesen → G07 Surface-Matrix durchführen → G05 visuellen Regelkreis an die lokale G04-Brücke binden → G06 drei reale Quick Flows.`
+Der einzige vorbereitete Folgepfad ist ein später separat autorisierter,
+synthetischer A/B-Host-Audit:
 
-Aktiver Checkpoint: `CP_G12_FINAL_ACCEPTANCE_20260921`. PR #247 ist auf Fresh Main `01fc1077b153840fbef37c79f6152084268932c4` gemergt und beide Required Checks sind grün. Der Post-Merge-Canary wurde wegen des bereits verbrauchten einzelnen Runtime-Key-Budgets nicht erneut ausgeführt. Der belastbare Endzustand ist `PARTIAL_COMPLETE_WITH_TECHNICAL_LIMITS`; Custom GPT bleibt Fallback. Keine lokale stdio-Evidence wird als ChatGPT-Parität gewertet.
+`Fresh Bindung → Execution-Envelope instanziieren → A separat prüfen → B separat prüfen → G08/G09 reconciliieren → Statusänderungen nur vorschlagen.`
+
+Die ausführbare Reihenfolge steht in
+[`07a-dual-surface-ui-audit-runbook.md`](07a-dual-surface-ui-audit-runbook.md),
+die deaktivierte maschinenlesbare Vorlage in
+[`G07_DUAL_SURFACE_EXECUTION_ENVELOPE_TEMPLATE_20260921.json`](G07_DUAL_SURFACE_EXECUTION_ENVELOPE_TEMPLATE_20260921.json).
+Beide Dateien sind reine Planung: Sie erzeugen weder Run-, Key-, Tunnel- noch
+Write-Budget und ändern `gate-status.json` nicht.
 
 ## 6. Globale Control-Loop-Regel
 
@@ -135,6 +146,8 @@ Bei einem unbekannten Problem wird nicht geraten. Es gilt [G11](11-brother-gpt-e
 - G03-Human-Gate-Paket: [G03_HUMAN_GATE_REQUEST_20260921.json](G03_HUMAN_GATE_REQUEST_20260921.json)
 - G03-Runtime-Key-Gate: [G03_RUNTIME_KEY_GATE_20260921.json](G03_RUNTIME_KEY_GATE_20260921.json)
 - G07-A/B/C-Capability-Matrix: [A_B_C_CAPABILITY_MATRIX_V1.md](A_B_C_CAPABILITY_MATRIX_V1.md)
+- G07-Dual-Surface-Audit-Runbook: [07a-dual-surface-ui-audit-runbook.md](07a-dual-surface-ui-audit-runbook.md)
+- G07-Dual-Surface-Execution-Envelope-Template: [G07_DUAL_SURFACE_EXECUTION_ENVELOPE_TEMPLATE_20260921.json](G07_DUAL_SURFACE_EXECUTION_ENVELOPE_TEMPLATE_20260921.json)
 - G07-Checkpoint-Capsule: [CP_G07_SURFACE_MATRIX_20260921.json](CP_G07_SURFACE_MATRIX_20260921.json)
 - G07-Host-Boundary-Preflight: [G07_HOST_BOUNDARY_PREFLIGHT_20260921.json](G07_HOST_BOUNDARY_PREFLIGHT_20260921.json)
 - G08/G09-Safety-/Provenance-Checkpoint: [CP_G08_G09_LOCAL_SAFETY_PROVENANCE_20260921.json](CP_G08_G09_LOCAL_SAFETY_PROVENANCE_20260921.json)

@@ -103,7 +103,7 @@ ein Consequence Gate fehlt · `UNKNOWN` = autoritative Prüfung fehlt ·
 | G04 | Eine echte, isolierte Browserbrücke steuert die erlaubte KGG-Testseite. | Session → Open → Screenshot A → echte Aktion → Screenshot/Zustand B → End; alles run-gebunden. | E2 lokal, E3 für Host-Parität | `PASS` (E2 lokal) | G05 visuellen Agentenloop und G06 drei reale Flows binden; E3-Host-Parität bleibt separat. | [G04](04-real-browser-bridge.md) |
 | G05 | Der visuelle Regelkreis funktioniert. | GPT wertet Screenshot A aus, führt genau eine Aktion aus und bestätigt den geänderten Zustand anhand B; kein behaupteter Erfolg ohne Runner-Evidence. | E2 lokal, E3 für unterstützte Host-Surface | `PARTIAL` | Persistenten Visual Loop an einen autorisierten Agent-Host binden und E3 nachweisen. | [G05](05-visual-interaction-loop.md) |
 | G06 | Mindestens drei Quick Flows laufen real und versioniert. | Jeder Schritt hat Assertion, Evidence und visuellen Fallback; stale Flows stoppen fail-closed. | E2/E3 pro Flow plus unveränderter Replay | `PARTIAL` | Lokaler Drift-Fallback und Replay sind gebunden; E3-Host-Evidence ergänzen. | [G06](06-real-quick-flows.md) |
-| G07 | A/B/C sind getrennt und ehrlich klassifiziert. | Keine Capability wird von einer Surface auf eine andere übertragen; pro Surface eigener Canary oder begründetes `NOT_TESTED`/`SYNTHETIC_ONLY`. | E3 je erreichbarer Surface; E2 für lokalen Pluginpfad; keine lokale Evidence als Host-Parität | `PASS` (Klassifikation) | G08/G09 weiterführen; B/C hostabhängige Zeilen bleiben technisch begrenzt. | [G07](07-surface-integration.md) |
+| G07 | A/B/C sind getrennt und ehrlich klassifiziert. | Keine Capability wird von einer Surface auf eine andere übertragen; pro Surface eigener Canary oder begründetes `NOT_TESTED`/`SYNTHETIC_ONLY`. | E3 je erreichbarer Surface; E2 für lokalen Pluginpfad; keine lokale Evidence als Host-Parität | `PASS` (Klassifikation) | Ein künftiger A/B-Host-UI-Audit verwendet ausschließlich G07a plus das deaktivierte Execution-Envelope-Template; bis zur separaten Autorisierung bleibt der Status unverändert. | [G07](07-surface-integration.md) |
 | G08 | Safety und Autorisierung begrenzen den Realpfad. | Domain-Allowlist, Lease, Limits, Sanitization und Negativtests blockieren unzulässige Aktionen. | E2/E3 positive und negative Realpfad-Evidence | `PARTIAL` | Lokale Safety-Suite 57/57 PASS; externe Popup-/Download-/Filechooser- und E3-Safety-Evidence bleiben offen. | [G08](08-security-privacy-and-authorization.md) |
 | G09 | Jede Messung ist provenance-first. | Raw Evidence, Hash, Run-ID, Surface, Base-SHA und Field-Provenance sind re-hashbar; unbekannt bleibt `NOT_MEASURED`. | E2/E3 Raw-Evidence-Rehash und Envelope-Validation | `PARTIAL` | Lokale Rehash-/Tamper-Suite 57/57 PASS; externe Measurement-Envelope-Reconciliation bleibt offen. | [G09](09-evidence-and-provenance.md) |
 | G10 | Fehler werden reproduzierbar erkannt und sicher behandelt. | RED → Fix → Targeted → Negative → Regression → Full Gate → genau ein Unchanged Replay. | E2/E3 Testresultate und Replay-Fingerprint | `PASS` (lokale Candidate-Stabilität) | Lokale Black-Box-, Negative-, Critical-, UI-Regression- und Replay-Evidence ist grün; E3-Replay bleibt technische Grenze. | [G10](10-testing-stability-and-recovery.md) |
@@ -219,6 +219,15 @@ NEXT_STEP=
 Damit kann auch ein kleineres Modell einen einzelnen kontrollierten Schritt
 ausführen, ohne den gesamten Chatverlauf zu laden.
 
+Für den einzigen vorbereiteten A/B-Host-UI-Folgepfad gelten ergänzend:
+
+- Ablauf: [07a-dual-surface-ui-audit-runbook.md](07a-dual-surface-ui-audit-runbook.md)
+- deaktivierte Envelope-Vorlage: [G07_DUAL_SURFACE_EXECUTION_ENVELOPE_TEMPLATE_20260921.json](G07_DUAL_SURFACE_EXECUTION_ENVELOPE_TEMPLATE_20260921.json)
+
+Die Vorlage autorisiert keinen Run, Runtime-Key, Tunnel, Write oder Dispatch.
+Sie darf erst nach einer separaten, surface-spezifischen Autorisierung
+instanziiert werden. Das Verfahren wird hier nicht dupliziert.
+
 ## Arbeitsweise für kleine Modelle
 
 Ein neuer Lauf liest nur:
@@ -312,12 +321,12 @@ kleines Modell darf einen bestehenden Brother-Beitrag wiederverwenden, wenn
 
 ## Quellenstand
 
-Diese Übersicht wurde gegen den Fresh-Main-Anker
-`1e6c6e3e28603f28bfbad3b127c688e722c823f5` erstellt.
+Diese Übersicht wurde zuletzt gegen den Fresh-Main-Anker
+`12b13767cc1667f97d428e1f7f7b7978fe2e4ac4` planungsseitig abgeglichen.
 
 ```text
-LOCAL_HEAD_AT_INDEX=211d6a2677926839fa79ba69eb09ed1389e2aa3b
-INDEX_UPDATED_AT=2026-09-21T16:08:00+02:00
+LOCAL_HEAD_AT_INDEX=12b13767cc1667f97d428e1f7f7b7978fe2e4ac4
+INDEX_UPDATED_AT=2026-09-21T23:30:00+02:00
 ```
 
 Der maschinenlesbare Status in `gate-status.json` bleibt die operative

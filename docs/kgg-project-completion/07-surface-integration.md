@@ -108,3 +108,10 @@ Capability-Matrix, Surface-Canaries, Versionen, Grenzen und finaler Nutzungsents
 ## 14. Beitragsherkunft
 
 `CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
+
+## 15. Ergänzendes Ausführungs-Runbook
+
+Der konkrete, surface-isolierte A-vs-B-HTML-UI-Audit ist in
+[`07a-dual-surface-ui-audit-runbook.md`](07a-dual-surface-ui-audit-runbook.md)
+gebündelt. Das Runbook führt kein neues Gate ein und ändert ohne neue
+qualifizierte Host-Evidence keinen Status.
