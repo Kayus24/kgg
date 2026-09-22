@@ -50,6 +50,21 @@
     "requires_gate": "explicit confirmation of this new file installation",
     "reason": "The embedded native tunnel plugin was manually installed and verified; no repository file installation was performed."
   },
+  "canonical_visible_host": {
+    "evidence_source": "visible local Windows PowerShell evidence",
+    "host": "DESKTOP-69P6967",
+    "tunnel_client_command": "NOT_RESOLVABLE",
+    "profile_path": "C:/Users/Alexander Kreisle/AppData/Roaming/tunnel-client/kgg-ui-lab-local-stdio.yaml",
+    "profile_exists": false,
+    "status": "NOT_PREPARED",
+    "interpretation": "The Codex execution context has a ready native bridge, but that does not prove the canonical visible Windows host has the binary or profile."
+  },
+  "upstream_advisory_risk": {
+    "status": "UNVERIFIED_PENDING_FRESH_CHECK",
+    "source": "Brother-GPT advisory only",
+    "interpretation": "Reported upstream ChatGPT/tunnel discovery risks must be freshly checked before any future installation or host-preparation gate; they do not prove the present local failure.",
+    "status_promotion": "NONE"
+  },
   "surface_status": {
     "A_CUSTOM_GPT_PRODUCTION_CONTROL": "NOT_OBSERVABLE_FROM_CURRENT_REPO",
     "B_PLUGIN_CANDIDATE": "PARTIAL_REAL_HOST_CANARY_TIMEOUT_FAIL_CLOSED",
@@ -76,11 +91,11 @@
   },
   "remaining_limits": [
     "The manually verified native Codex plugin installation is local-only; repository packaging and ChatGPT host parity remain separate evidence requirements.",
-    "Real external host browser parity and post-merge production canary remain unproven; the single B real-host canary timed out before visual observation.",
+    "The canonical visible Windows host is not prepared (tunnel-client/profile unavailable there), and real external host browser parity and post-merge production canary remain unproven; the single B real-host canary timed out before visual observation.",
     "External measurement-envelope reconciliation remains unavailable.",
     "No second B canary or post-merge canary is authorized by the existing run budget."
   ],
-  "next_allowed_mode": "CUSTOM_GPT_PRIMARY_FALLBACK_AND_LOCAL_PLUGIN_DEVELOPMENT",
+  "next_allowed_mode": "CUSTOM_GPT_PRIMARY_FALLBACK_AND_LOCAL_PLUGIN_DEVELOPMENT; VISIBLE_HOST_PREPARATION_REQUIRES_SEPARATE_GATE",
   "status_promotion": "NONE",
   "record_role": "fresh_documentation_reconciliation"
 }
