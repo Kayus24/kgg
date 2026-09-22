@@ -167,11 +167,13 @@
     "settings_listing_present": true,
     "developer_mode": "ACTIVE_VALUE_1",
     "security_settings_load": "PARTIAL_ERROR_BANNER",
+    "plugin_permissions": "LOW_RISK_TOOLS_AUTO_ALLOWED_VALUE_1",
+    "plugin_permissions_not_root_cause": true,
     "plugin_detail_status": "PLUGIN_NOT_AVAILABLE",
     "plugin_detail_url": "https://chatgpt.com/#settings/Plugins/plugin_asdk_app_6ab162f246b8819189ab9aa21fbe5d9f",
     "tool_discovery": "NOT_OBSERVABLE",
     "permission_or_plugin_state_changed": false,
-    "interpretation": "ChatGPT lists the KGG UI Lab plugin and Developer Mode is visibly active, but the plugin detail view reports that the plugin could not be loaded; the security settings page also shows a partial-load banner. This is external host discovery evidence and does not negate the locally ready tunnel or canonical MCP source binding.",
+    "interpretation": "ChatGPT lists the KGG UI Lab plugin, Developer Mode is visibly active, and low-risk plugin tools are allowed, but the plugin detail view reports that the plugin could not be loaded; the security settings page also shows a partial-load banner. This rules out the visible permission mode as the primary cause and leaves external app/workspace binding or host discovery unresolved.",
     "next_allowed_step": "READ_ONLY_PLUGIN_DISCOVERY_ROOT_CAUSE_OR_SEPARATE_HOST_REPAIR_GATE"
   },
   "blocker_package": {
