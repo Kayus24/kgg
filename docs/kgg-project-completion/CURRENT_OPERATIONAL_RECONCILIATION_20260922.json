@@ -209,6 +209,18 @@
     "interpretation": "A fresh read-only detail view now loads and exposes the KGG tool list. This supersedes the earlier transient Plugin nicht verfügbar detail read for current discovery status, but it does not prove a successful tool invocation. No chat message, plugin call, key, tunnel, or canary was started.",
     "next_allowed_step": "OPTIONAL_SINGLE_READ_ONLY_TOOL_EXECUTION_ONLY_WITH_COST_AND_COMMUNICATION_GATE"
   },
+  "codex_local_plugin_tool_read": {
+    "observed_at": "2026-09-22T23:16:40+02:00",
+    "tool": "get_current_state",
+    "actor": "system",
+    "surface": "C_CODEX_PLUS_PLUGIN",
+    "response_schema": "kgg-ui-lab/mcp-server/v1",
+    "status": "ready",
+    "main_sha": "not_bound",
+    "writes": false,
+    "interpretation": "The locally connected KGG plugin responds read-only in the Codex host. This is local/C-surface evidence only and is not transferred to the normal ChatGPT B-surface.",
+    "evidence_scope": "LOCAL_PLUGIN_READ_ONLY"
+  },
   "blocker_package": {
     "blocker_fingerprint": "6206e0571f086e785d046ee5b2701f0d802179af0583cc74d5660195ecbe2200",
     "status": "BLOCKER_DETECTED",
