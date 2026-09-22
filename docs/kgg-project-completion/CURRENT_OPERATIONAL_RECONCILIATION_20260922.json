@@ -160,9 +160,21 @@
     "interpretation": "The upstream report confirms a relevant open discovery-boundary risk but does not establish the root cause of the local visible-host failure or provide a verified fix.",
     "status_promotion": "NONE"
   },
+  "chatgpt_plugin_discovery_read": {
+    "observed_at": "2026-09-22T21:07:42.8924644Z",
+    "surface": "B_NORMAL_CHATGPT_WITH_KGG_PLUGIN",
+    "settings_listing": "KGG UI Lab Private",
+    "settings_listing_present": true,
+    "plugin_detail_status": "PLUGIN_NOT_AVAILABLE",
+    "plugin_detail_url": "https://chatgpt.com/#settings/Plugins/plugin_asdk_app_6ab162f246b8819189ab9aa21fbe5d9f",
+    "tool_discovery": "NOT_OBSERVABLE",
+    "permission_or_plugin_state_changed": false,
+    "interpretation": "ChatGPT lists the KGG UI Lab plugin, but its detail view reports that the plugin could not be loaded. This is external host discovery evidence and does not negate the locally ready tunnel or canonical MCP source binding.",
+    "next_allowed_step": "READ_ONLY_PLUGIN_DISCOVERY_ROOT_CAUSE_OR_SEPARATE_HOST_REPAIR_GATE"
+  },
   "surface_status": {
     "A_CUSTOM_GPT_PRODUCTION_CONTROL": "NOT_OBSERVABLE_FROM_CURRENT_REPO",
-    "B_PLUGIN_CANDIDATE": "PARTIAL_REAL_HOST_CANARY_TIMEOUT_FAIL_CLOSED",
+    "B_PLUGIN_CANDIDATE": "PARTIAL_CHATGPT_PLUGIN_LISTED_BUT_UNAVAILABLE",
     "C_CODEX_PLUS_PLUGIN": "LOCAL_MCP_AND_REAL_BRIDGE_CODE"
   },
   "gate_status": {
@@ -187,6 +199,7 @@
   "remaining_limits": [
     "The manually verified native Codex plugin installation is local-only; repository packaging and ChatGPT host parity remain separate evidence requirements.",
     "The canonical visible Windows host now has an active ready tunnel process, but native bridge binding, ChatGPT tool discovery, real external host browser parity and the post-merge production canary remain unproven; the single B real-host canary timed out before visual observation.",
+    "ChatGPT lists KGG UI Lab Private but currently reports the plugin as unavailable, so B tool discovery cannot be promoted to PASS.",
     "External measurement-envelope reconciliation remains unavailable.",
     "No second B canary or post-merge canary is authorized by the existing run budget."
   ],
