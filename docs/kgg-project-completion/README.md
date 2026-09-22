@@ -75,12 +75,12 @@ Ein Gate darf nur mit der in seinem Detaildokument verlangten Stufe auf `PASS` g
 | G04 | Echte Browser-/UI-Brücke | `PASS` | Lokaler realer Chromium-Lauf: zwei unterschiedliche Screenshot-Hashes, Zustandswechsel und fail-closed Hostfehler; E2 | Echte Session, Screenshot, Koordinaten-/Semantik-Aktionen und Zustandsbeobachtung | [G04](04-real-browser-bridge.md) |
 | G05 | Visueller Screenshot-Aktions-Regelkreis | `PARTIAL` | lokaler persistenter Observe/Decide/Act/Verify-Loop mit E2-Evidence; Host-Parität fehlt | Autorisierten Agent-Host anbinden und E3 nachweisen | [G05](05-visual-interaction-loop.md) |
 | G06 | Reale Quick Flows | `PARTIAL` | Drei kanonische Flows, echter Locator-Drift-Fallback und unveränderter Replay lokal nachgewiesen; E3-Host-Parität fehlt | Mindestens drei reale, versionierte Flows mit Fallback, Step Evidence und unverändertem Replay | [G06](06-real-quick-flows.md) |
-| G07 | Surface-Integration A/B/C | `PASS` (Klassifikation) | A read-only Action-Canary E3; B ChatGPT-App-Health E3 partiell; C lokaler MCP-Health E2; vollständige Matrix in `A_B_C_CAPABILITY_MATRIX_V1.md` | ehrliche, live geprüfte Capability-Matrix und begründete NOT_TESTED/SYNTHETIC_ONLY-Zeilen; keine Capability-Vererbung; keine Aussage über vollständige UI-Parität | [G07](07-surface-integration.md) |
+| G07 | Surface-Integration A/B/C | `PASS` (Klassifikation; B Real-UI-Audit `PARTIAL`) | A bleibt aus dem aktuellen Repo nicht beobachtbar; B genau ein Real-Host-Canary fail-closed mit `real_browser_timeout`; C lokaler Bridge-/Provenance-Pfad mit statischer Playwright-Auflösung; [G07-Evidence](G07_REAL_B_HOST_CANARY_20260922.json) | ehrliche, live geprüfte Capability-Matrix und begründete NOT_TESTED/SYNTHETIC_ONLY/NOT_OBSERVABLE-Zeilen; keine Capability-Vererbung; keine Aussage über vollständige UI-Parität | [G07](07-surface-integration.md) |
 | G08 | Safety, Datenschutz und Autorisierung | `PARTIAL` | lokale Realpfad-Origin-/Pfad-Allowlist und 57/57 Negativ-/Safety-Tests grün; externe Host-Safety fehlt | Domain-Allowlist, Lease, Limits, Sanitization und Negativtests am Realpfad; E3 bleibt offen | [G08](08-security-privacy-and-authorization.md) |
 | G09 | Evidence und Provenance | `PARTIAL` | lokale Screenshot-/Action-/Measurement-Evidence und 57/57 Rehash-/Tamper-Tests grün; externe Envelope-Reconciliation fehlt | Browser-Evidence retained, gehasht, run-gebunden; keine erfundenen Nullwerte; E3 bleibt offen | [G09](09-evidence-and-provenance.md) |
 | G10 | Test-, Fault- und Stabilitätsloops | `PASS` (lokale Candidate-Stabilität) | Black-Box, Drift, Origin, Replay, Critical und UI-Regression grün; genau ein unveränderter Critical-Replay; E3-Replay fehlt | Black-Box-Realpfad, Negative, Regression, Full Gate, unveränderter Replay; E3 bleibt technische Grenze | [G10](10-testing-stability-and-recovery.md) |
 | G11 | Brother-GPT-Eskalation und Dokumentpflege | `PASS` | G03-Blocker mit Handoff, Self-Review, Lead-Review und Herkunftsblock in `CP_G11_BROTHER_CYCLE_20260921.json` gebunden | Bei neuem Fingerprint denselben geprüften Ablauf wiederverwenden; unveränderte Fingerprints nicht erneut senden | [G11](11-brother-gpt-escalation.md) |
-| G12 | Release, Migration und Betrieb | `PARTIAL_COMPLETE_WITH_TECHNICAL_LIMITS` | PR #247 gemergt auf `01fc1077b153840fbef37c79f6152084268932c4`; Required Checks grün; Post-Merge-Canary wegen verbrauchtem Einzelbudget nicht erneut ausgeführt | Custom GPT bleibt Fallback; keine Migration oder Ersetzbarkeit behaupten | [G12](12-release-migration-and-operations.md) |
+| G12 | Release, Migration und Betrieb | `PARTIAL_COMPLETE_WITH_TECHNICAL_LIMITS` | PR #256 (Browser-Runtime-Fix) und PR #257 (Evidence-Reconciliation) gemergt; aktueller Main `aed7ff5c22e8c0b818fc82c91b990da5d9c5e723`; Required Gates grün; kein zweiter B-Canary und kein Post-Merge-Canary ausgeführt | Custom GPT bleibt Fallback; keine Migration oder Ersetzbarkeit behaupten; nächster Schritt ist ausschließlich ein separat freizugebender Runtime-Diagnoselauf | [G12](12-release-migration-and-operations.md) |
 
 ## 5. Kritischer Pfad
 
@@ -91,9 +91,11 @@ Die Ausführung folgt grundsätzlich dieser Reihenfolge:
 G08 und G09 werden bei jedem Implementierungsschritt mitgeführt. Sie dürfen die Kernfunktion nicht durch endlose Metaaudits verdrängen.
 
 Der aktuelle Projektendzustand ist
-`PARTIAL_COMPLETE_WITH_TECHNICAL_LIMITS`. Der maßgebliche Abschlusscheckpoint
-bleibt `CP_G12_FINAL_ACCEPTANCE_20260921`; die nachfolgende Dual-Surface-
-Planung öffnet G07 nicht erneut und ändert keinen Gate-Status.
+`PARTIAL_COMPLETE_WITH_TECHNICAL_LIMITS`. Der historische Abschlusscheckpoint
+`CP_G12_FINAL_ACCEPTANCE_20260921` bleibt unverändert; die aktuelle G07-
+Reconciliation steht in `G07_REAL_B_HOST_CANARY_20260922.json`. Die nachfolgende
+Runtime-Diagnose öffnet die Klassifikation nicht erneut und ändert keinen
+Gate-Status.
 
 Der einzige vorbereitete Folgepfad ist ein später separat autorisierter,
 synthetischer A/B-Host-Audit:
@@ -106,6 +108,11 @@ die deaktivierte maschinenlesbare Vorlage in
 [`G07_DUAL_SURFACE_EXECUTION_ENVELOPE_TEMPLATE_20260921.json`](G07_DUAL_SURFACE_EXECUTION_ENVELOPE_TEMPLATE_20260921.json).
 Beide Dateien sind reine Planung: Sie erzeugen weder Run-, Key-, Tunnel- noch
 Write-Budget und ändern `gate-status.json` nicht.
+
+Für den aktuellen B-Timeout gilt zusätzlich: zuerst read-only die Timeout-
+Schicht, den Child-Process-/Playwright-Kontext und die Localhost-Bindung
+diagnostizieren. Ein weiterer Real-Canary ist erst nach einem neuen, separat
+gebundenen Run-Budget zulässig.
 
 ## 6. Globale Control-Loop-Regel
 
