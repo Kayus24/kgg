@@ -1,0 +1,66 @@
+{
+  "schema": "kgg-project-completion-operational-reconciliation/v1",
+  "evidence_date": "2026-09-22",
+  "fresh_main": "b3e8df5c78eecb5adb602ab12fb6fdb5af3fc6a5",
+  "merged_changes": [
+    {
+      "pull_request": 250,
+      "merge_sha": "023b7d878b904494dcf564d21a9b1840367136b4",
+      "scope": "bindable UI session schema",
+      "required_gate": "PASS"
+    },
+    {
+      "pull_request": 251,
+      "merge_sha": "3dae49f18c5eb25f2eecf32a08bcbfa2962231f5",
+      "scope": "raw session URI contract clarification",
+      "required_gate": "PASS"
+    },
+    {
+      "pull_request": 252,
+      "merge_sha": "b3e8df5c78eecb5adb602ab12fb6fdb5af3fc6a5",
+      "scope": "record bounded synthetic B UI audit",
+      "required_gate": "PASS"
+    }
+  ],
+  "runtime": {
+    "tunnel_client_version": "0.0.14+0f870e50a973fa820d4c409000059e181e8d242b",
+    "tunnel_id": "tunnel_6ab154f2c8948191811f81044c5aade5",
+    "healthz": "live",
+    "readyz": "ready",
+    "runtime_key_retention": "transient_only",
+    "secret_logged": false
+  },
+  "surface_status": {
+    "A_CUSTOM_GPT_PRODUCTION_CONTROL": "NOT_OBSERVABLE_FROM_CURRENT_REPO",
+    "B_PLUGIN_CANDIDATE": "SYNTHETIC_ONLY_FOR_CURRENT_AUDIT",
+    "C_CODEX_PLUS_PLUGIN": "LOCAL_MCP_AND_REAL_BRIDGE_CODE"
+  },
+  "gate_status": {
+    "G02": "PARTIAL",
+    "G03": "PASS",
+    "G04": "PASS_LOCAL_REAL_RUNTIME",
+    "G05": "PARTIAL",
+    "G06": "PARTIAL",
+    "G07": "PASS_CLASSIFICATION_ONLY",
+    "G08": "PARTIAL",
+    "G09": "PARTIAL",
+    "G10": "PASS_LOCAL_CANDIDATE_STABILITY",
+    "G11": "PASS",
+    "G12": "PARTIAL_COMPLETE_WITH_TECHNICAL_LIMITS"
+  },
+  "global_status": {
+    "PRODUCTION_CONTROL": "PILOT_INCOMPLETE",
+    "A_B": "NOT_COMPARABLE",
+    "replacement_eligible": false,
+    "final_status": "PARTIAL_COMPLETE_WITH_TECHNICAL_LIMITS"
+  },
+  "remaining_limits": [
+    "Native Codex plugin installation is not performed because it would install an unconfirmed file set.",
+    "Real external host browser parity and post-merge production canary remain unproven.",
+    "External measurement-envelope reconciliation remains unavailable.",
+    "The single authorized synthetic B audit does not promote any gate or surface status."
+  ],
+  "next_allowed_mode": "CUSTOM_GPT_PRIMARY_FALLBACK_AND_LOCAL_PLUGIN_DEVELOPMENT",
+  "status_promotion": "NONE",
+  "record_role": "fresh_documentation_reconciliation"
+}
