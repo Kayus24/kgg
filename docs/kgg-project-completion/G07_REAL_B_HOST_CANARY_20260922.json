@@ -55,7 +55,9 @@
     "no_second_canary": true
   },
   "bounded_local_patch": {
-    "status": "APPLIED_LOCALLY_UNCOMMITTED",
+    "status": "APPLIED_AND_MERGED",
+    "merge_commit": "c414446f6c00c6d7aece3b1a14741e49eae23c14",
+    "merged_on_fresh_main": true,
     "files": [
       "kgg-plugin/mcp/real_browser.py",
       "release-pipeline/test_kgg_real_browser_bridge.py",
