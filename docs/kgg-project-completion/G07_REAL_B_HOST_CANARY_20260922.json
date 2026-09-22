@@ -1,0 +1,113 @@
+{
+  "schema": "kgg-g07-real-b-host-canary-evidence/v1",
+  "evidence_date": "2026-09-22",
+  "fresh_main": "17c8e2a4852644abefa326d059a00afd9c244eb9",
+  "surface": "B",
+  "surface_context": "PLUGIN_CANDIDATE / custom_gpt",
+  "scope": "exactly_one_real_b_host_canary_plus_read_only_static_reconciliation",
+  "plugin": {
+    "name": "tunnel-mcp@kgg-tunnel-local",
+    "version": "0.1.4",
+    "native_install": true,
+    "codex_bridge_state": "ready",
+    "app_server_supported": true,
+    "bridge_ready": true,
+    "runtime_key_exposed": false
+  },
+  "transport": {
+    "tunnel_client_version": "0.0.14+0f870e50a973fa820d4c409000059e181e8d242b",
+    "readyz": "ready",
+    "healthz": "live"
+  },
+  "canary": {
+    "session_id": "kgg-b-real-canary-20260922",
+    "runner": "kgg-real-runner-001",
+    "runner_version": "1.0.0",
+    "browser_revision": "playwright-local-real",
+    "actor": "custom_gpt",
+    "viewport": "390x844",
+    "fixture_url": "http://127.0.0.1:43174/kgg_ui_lab_real_fixture.html",
+    "fixture_http_status": 200,
+    "session_start": "PASS",
+    "visual_observation": "FAIL",
+    "error_class": "real_browser_timeout",
+    "screenshot": "NOT_PRODUCED",
+    "observation_id": "NOT_PRODUCED",
+    "action_executed": false,
+    "side_effects": "NONE",
+    "second_canary": false,
+    "decision": "FAIL_CLOSED"
+  },
+  "read_only_reconciliation": {
+    "fresh_main_verified": true,
+    "node_resolved": true,
+    "node_version": "25.8.0",
+    "playwright_version": "1.61.1",
+    "playwright_package_location": "release-pipeline/node_modules/playwright",
+    "plugin_or_repo_playwright_resolution": "NOT_FOUND",
+    "explicit_playwright_node_path_in_mcp_config": false,
+    "playwright_browser_cache_present": true,
+    "browser_bridge_timeout_model": "timeout_ms_plus_15_seconds",
+    "child_stderr_retained": false,
+    "causal_layer": "CAUSE_NOT_OBSERVABLE",
+    "static_hypothesis": "BROWSER_RUNTIME_OR_MODULE_RESOLUTION_REQUIRES_TARGETED_FIX",
+    "no_runtime_probe": true,
+    "no_second_canary": true
+  },
+  "bounded_local_patch": {
+    "status": "APPLIED_LOCALLY_UNCOMMITTED",
+    "files": [
+      "kgg-plugin/mcp/real_browser.py",
+      "release-pipeline/test_kgg_real_browser_bridge.py",
+      "kgg-plugin/references/architecture/source-hashes.json",
+      "kgg-plugin/references/source-map.md"
+    ],
+    "purpose": "Resolve an already provisioned Playwright module path for the child browser host without installing or downloading dependencies.",
+    "resolution_order": [
+      "explicit KGG_PLAYWRIGHT_NODE_PATH",
+      "pre-provisioned Codex primary runtime",
+      "repository release-pipeline/node_modules"
+    ],
+    "static_module_resolution": "PASS",
+    "targeted_module_resolution_test": "PASS",
+    "python_compile": "PASS",
+    "source_hash_manifest": "PASS",
+    "relevant_contract_regression": {
+      "command": "python -m unittest test_kgg_plugin_candidate test_kgg_ui_lab_contract test_kgg_ui_lab_mcp_server test_kgg_ui_lab_session test_kgg_ui_lab_evidence test_kgg_real_browser_bridge.RealBrowserModuleResolutionTests",
+      "tests": 36,
+      "status": "PASS"
+    },
+    "browser_execution_after_patch": "NOT_RUN",
+    "fresh_canary_after_patch": "NOT_AUTHORIZED",
+    "next_gate": "one narrowly scoped diagnostic browser-runtime run, not a second B-canary"
+  },
+  "brother_review": {
+    "decision": "CONTINUE",
+    "root_cause": "REAL_HOST_OBSERVATION_TIMEOUT confirmed; init, navigation and observe are collapsed into one timeout class",
+    "reuse": [
+      "existing tunnel-mcp bridge",
+      "existing kgg-plugin/mcp/server.py",
+      "existing real_browser.py",
+      "existing browser_session_host.js",
+      "existing Playwright bridge",
+      "existing synthetic fixture"
+    ],
+    "next_action": "read-only reconciliation of timeout payload, execution context, Node/Playwright/helper resolution and localhost binding",
+    "required_gate": "Any Node/Playwright launch, configuration change or new MCP/browser call needs a new bounded diagnostic gate",
+    "recommendation": "Do not run a second canary; retain timeout as NOT_OBSERVABLE until a narrowly scoped diagnostic or fix is separately authorized"
+  },
+  "global_status_unchanged": {
+    "production_control": "PILOT_INCOMPLETE",
+    "a_b": "NOT_COMPARABLE",
+    "replacement_eligible": false,
+    "b_real_host_producer": "PARTIAL",
+    "b_ui_audit": "NOT_OBSERVABLE",
+    "c_real_surface_evidence": "PARTIAL_COUNTABLE"
+  },
+  "provenance": {
+    "raw_screenshot_retained": false,
+    "raw_canary_output_retained": false,
+    "secret_material_retained": false,
+    "record_role": "documentation_only"
+  }
+}
