@@ -259,6 +259,17 @@
     "interpretation": "A fresh read-only detail view now loads and exposes the KGG tool list. This supersedes the earlier transient Plugin nicht verfügbar detail read for current discovery status, but it does not prove a successful tool invocation. No chat message, plugin call, key, tunnel, or canary was started.",
     "next_allowed_step": "OPTIONAL_SINGLE_READ_ONLY_TOOL_EXECUTION_ONLY_WITH_COST_AND_COMMUNICATION_GATE"
   },
+  "latest_plugin_detail_revalidation": {
+    "observed_at": "2026-09-22T23:30:44+02:00",
+    "navigation": "settings_plugins_detail_read_only",
+    "plugin_name": "KGG UI Lab Private",
+    "plugin_detail_status": "LOADED_TOOLS_VISIBLE",
+    "visible_tool_count": 11,
+    "tool_execution": "NOT_TESTED",
+    "chat_message_or_tool_call_sent": false,
+    "state_changed": false,
+    "interpretation": "After opening the Settings > Plugins view through the visible ChatGPT UI, the plugin detail again loaded with the same 11 tools. The unchanged execution gate is confirmed; no external call was made."
+  },
   "codex_local_plugin_tool_read": {
     "observed_at": "2026-09-22T23:16:40+02:00",
     "tool": "get_current_state",
