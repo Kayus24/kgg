@@ -14,6 +14,8 @@
     "chromium_executable_resolution": "PRESENT",
     "helper_files": "PRESENT",
     "native_bridge_context_binding": "NOT_PROVEN",
+    "native_bundle_source_read": "NOT_AVAILABLE_IN_VISIBLE_HOST",
+    "post_fix_bridge_binding": "NOT_PROVEN",
     "browser_launch": "NOT_RUN"
   },
   "g07_canary_temporal_relation": {

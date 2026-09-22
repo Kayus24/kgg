@@ -129,6 +129,9 @@ Merged SHA, Paketversion, Installationsnachweis, Canary-Evidence, Rollbacknachwe
   Playwright-Auflösungsfixes PR #256 (`c414446…`). Sein Timeout ist daher
   historische Pre-Fix-Evidence und kein Gegenbeweis gegen den aktuellen Bridge-
   Code. Ein Post-Fix-Canary bleibt ohne neues Run-Budget nicht autorisiert.
+- Der native `tunnel-mcp`-Bundle ist im sichtbaren Host nicht als lesbarer
+  `real_browser.py`-/Helper-Bestand auffindbar; deshalb bleibt die Bindung des
+  installierten B-Pfads an den Post-#256-Code `NOT_PROVEN`.
 - `PRODUCTION_CONTROL=PILOT_INCOMPLETE`, `A_B=NOT_COMPARABLE` und
   `replacement_eligible=false` bleiben unverändert.
 - Nächster zulässiger Schritt: read-only Timeout-/Child-Process-/Localhost-
