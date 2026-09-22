@@ -121,6 +121,13 @@
     "profile_sha256": "EFF355647E4454EE2F81F46FD1421124FDEC74589B36B3D56B7682CDF494347B",
     "profile_mcp_command_present": true,
     "profile_mcp_target_exists": true,
+    "profile_target_source_binding": {
+      "target": "kgg-plugin/mcp/server.py",
+      "target_sha256": "B24AAF9D798B94E27B20DEF6BE0BD62D329CE4D0CF4FCC0E96908832F5134766",
+      "canonical_source_hash_match": true,
+      "real_browser_and_visual_tools_present": true,
+      "local_tunnel_to_kgg_server_binding": "PROVEN"
+    },
     "doctor_status": "FAIL_CLOSED",
     "doctor_exit_code": 2,
     "failed_check": "control_plane_api_key",
@@ -139,9 +146,9 @@
     "new_tunnel_started_during_check": false,
     "new_key_created": false,
     "new_canary_started": false,
-    "status": "VISIBLE_HOST_RUNTIME_ACTIVE_DOCTOR_CONTEXT_KEY_MISSING",
-    "interpretation": "The executable, profile, MCP target, and an already-running tunnel process are present; local health and readiness are live. The separate doctor process fails closed because its transient environment key is not set. This proves local tunnel readiness only, not native bridge binding or ChatGPT tool discovery.",
-    "next_allowed_step": "READ_ONLY_RECONCILE_ACTIVE_RUNTIME_THEN_BOUND_POST_FIX_BRIDGE_DIAGNOSTIC"
+    "status": "VISIBLE_HOST_RUNTIME_ACTIVE_LOCAL_SOURCE_BOUND_EXTERNAL_DISCOVERY_UNPROVEN",
+    "interpretation": "The executable, profile, canonical KGG server target, and an already-running tunnel process are present; local health and readiness are live and the local tunnel-to-KGG-source binding is proven. The separate doctor process fails closed because its transient environment key is not set. Native host binding and ChatGPT tool discovery remain unproven.",
+    "next_allowed_step": "READ_ONLY_RECONCILE_EXTERNAL_DISCOVERY_THEN_BOUND_POST_FIX_BRIDGE_DIAGNOSTIC"
   },
   "upstream_advisory_risk": {
     "status": "OPEN_ADVISORY_NO_FIX_VERIFIED",
