@@ -126,13 +126,22 @@
     "failed_check": "control_plane_api_key",
     "api_key_reference": "env:CONTROL_PLANE_API_KEY",
     "runtime_environment_key_present": false,
+    "active_tunnel_process": {
+      "present": true,
+      "pid": 88436,
+      "command": "tunnel-client.exe run --profile-file <profile>",
+      "process_key_context": "NOT_INSPECTED",
+      "healthz": "HTTP_200_live",
+      "readyz": "HTTP_200_ready",
+      "local_metrics_endpoint": "HTTP_200_observed"
+    },
     "secret_value_retained_or_logged": false,
-    "tunnel_started": false,
+    "new_tunnel_started_during_check": false,
     "new_key_created": false,
     "new_canary_started": false,
-    "status": "VISIBLE_HOST_PARTIALLY_PREPARED_KEY_ENV_MISSING",
-    "interpretation": "The executable, profile, and MCP target are now present. The read-only doctor reaches the key gate and fails closed because the transient environment key is not set; this does not prove or disprove native bridge binding.",
-    "next_allowed_step": "TRANSIENT_ENV_KEY_BINDING_OR_SEPARATE_RUNTIME_KEY_GATE"
+    "status": "VISIBLE_HOST_RUNTIME_ACTIVE_DOCTOR_CONTEXT_KEY_MISSING",
+    "interpretation": "The executable, profile, MCP target, and an already-running tunnel process are present; local health and readiness are live. The separate doctor process fails closed because its transient environment key is not set. This proves local tunnel readiness only, not native bridge binding or ChatGPT tool discovery.",
+    "next_allowed_step": "READ_ONLY_RECONCILE_ACTIVE_RUNTIME_THEN_BOUND_POST_FIX_BRIDGE_DIAGNOSTIC"
   },
   "upstream_advisory_risk": {
     "status": "OPEN_ADVISORY_NO_FIX_VERIFIED",
@@ -170,11 +179,11 @@
   },
   "remaining_limits": [
     "The manually verified native Codex plugin installation is local-only; repository packaging and ChatGPT host parity remain separate evidence requirements.",
-    "The canonical visible Windows host is not prepared (tunnel-client/profile unavailable there), and real external host browser parity and post-merge production canary remain unproven; the single B real-host canary timed out before visual observation.",
+    "The canonical visible Windows host now has an active ready tunnel process, but native bridge binding, ChatGPT tool discovery, real external host browser parity and the post-merge production canary remain unproven; the single B real-host canary timed out before visual observation.",
     "External measurement-envelope reconciliation remains unavailable.",
     "No second B canary or post-merge canary is authorized by the existing run budget."
   ],
-  "next_allowed_mode": "CUSTOM_GPT_PRIMARY_FALLBACK_AND_LOCAL_PLUGIN_DEVELOPMENT; VISIBLE_HOST_PREPARATION_REQUIRES_SEPARATE_GATE",
+  "next_allowed_mode": "CUSTOM_GPT_PRIMARY_FALLBACK_AND_LOCAL_PLUGIN_DEVELOPMENT; ACTIVE_TUNNEL_RECONCILIATION_AND_POST_FIX_BRIDGE_DIAGNOSTIC_REQUIRED",
   "status_promotion": "NONE",
   "architecture_review": {
     "contribution_source": "BROTHER_GPT",
