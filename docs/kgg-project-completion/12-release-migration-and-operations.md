@@ -116,6 +116,16 @@ Merged SHA, Paketversion, Installationsnachweis, Canary-Evidence, Rollbacknachwe
 - In der sichtbaren PowerShell des kanonischen Hosts waren `tunnel-client` und
   die erwartete Profil-Datei nicht auflösbar. Keine Codex-/PTY-Evidence darf
   diesen Hostbefund ersetzen.
+- Ein späterer read-only Preflight am 22.09.2026 fand `tunnel-client` v0.0.14,
+  das Profil und das darin referenzierte MCP-Skript auf demselben Host. Der
+  `doctor`-Check blieb fail-closed ausschließlich am Profilverweis
+  `env:CONTROL_PLANE_API_KEY` hängen, weil diese Umgebungsvariable im
+  Prüfprozess nicht gesetzt war. Es wurde dabei weder ein neuer Schlüssel
+  erstellt noch ein Tunnel oder Canary gestartet.
+- Damit ist der aktuelle sichtbare Host präziser als
+  `VISIBLE_HOST_PARTIALLY_PREPARED_KEY_ENV_MISSING` zu klassifizieren; das
+  beweist weiterhin keine Bindung des nativen B-Bridge-Bundles an den
+  Post-#256-Code.
 - Der eine autorisierte B-Real-Host-Canary startete, lief aber vor der visuellen
   Beobachtung in `real_browser_timeout`; Screenshot, Klick und Seiteneffekt
   wurden nicht erzeugt.
