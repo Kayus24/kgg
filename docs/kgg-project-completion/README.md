@@ -10,6 +10,13 @@ Letzter Dokumentations-/Safety-Checkpoint: `211d6a2677926839fa79ba69eb09ed1389e2
 
 Dieses Verzeichnis ist die Arbeits- und Abschlusssteuerung für das KGG-Agentenprojekt. Es ersetzt keine Fach-, Safety-, Measurement- oder Release-Verträge. Bei Widerspruch gilt die jeweils fachlich kanonische Quelle; der Widerspruch wird als Gate-Blocker erfasst und nicht stillschweigend aufgelöst.
 
+Aktuelle Live-Reconciliation: Der historische G03-Discovery-Canary bleibt
+retained, aber der aktuelle ChatGPT-Workspace listet `KGG UI Lab Private` nur
+als installiert und meldet in der Detailansicht `Plugin nicht verfügbar`.
+Deshalb darf die aktuelle B-Surface nicht als Tool-discoverable PASS behandelt
+werden; maßgeblich ist die zeitgebundene Reconciliation in
+`CURRENT_OPERATIONAL_RECONCILIATION_20260922.json`.
+
 Die kompakte Kriterienübersicht für „läuft“ versus „vollständig abgeschlossen“
 und die vorbereitete Arbeitsgrundlage für kleinere Modelle stehen in
 [project-readiness.md](project-readiness.md). Dort ist jeder Pflichtpunkt mit
