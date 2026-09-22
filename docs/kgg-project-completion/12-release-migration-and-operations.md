@@ -95,9 +95,11 @@ Merged SHA, Paketversion, Installationsnachweis, Canary-Evidence, Rollbacknachwe
 
 ## 15. Aktuelle Reconciliation (2026-09-22)
 
-- `CURRENT_FRESH_MAIN=aed7ff5c22e8c0b818fc82c91b990da5d9c5e723`
-- PR #256 (Browser-Runtime-Modulauflösung) ist auf Main gemergt.
-- PR #257 (Reconciliation der G07-Evidence) ist auf Main gemergt.
+- `CURRENT_FRESH_MAIN=3f9225b6de45e4c46c7deedb86a3e8a2899ecdb1`
+- PR #256 (Browser-Runtime-Modulauflösung), PR #257 (Reconciliation der
+  G07-Evidence), PR #258 (operative G07-Dokumentation), PR #259 (lokale
+  Browser-Verifikation) und PR #260 (Trennung von sichtbarem Host und
+  Codex-Bereitschaft) sind auf Main gemergt.
 - Der Codex-Ausführungskontext meldet den nativen Bridge als `ready`; das ist
   nicht gleichbedeutend mit einer vorbereiteten kanonischen sichtbaren
   Windows-Hostumgebung.
@@ -115,5 +117,7 @@ Merged SHA, Paketversion, Installationsnachweis, Canary-Evidence, Rollbacknachwe
   bleibt — ein separat zu genehmigendes Installations-/Profil-Gate. Ein weiterer
   Real-Canary benötigt ein neues, separat gebundenes Run-Budget.
 - Vor einer solchen Vorbereitung muss die offizielle Upstream-Version und ihre
-  bekannten ChatGPT-Discovery-Risiken frisch geprüft werden. Der Brother-Hinweis
-  hierzu ist advisory und hebt keinen Gate-Status an.
+  bekannten ChatGPT-Discovery-Risiken frisch geprüft werden. Der frische
+  Read-only-Check von Issue #57 bestätigt einen offenen Discovery-Grenzfall
+  nach erfolgreichem `main/server/discover`, aber keinen verifizierten Fix.
+  Das hebt keinen Gate-Status an.

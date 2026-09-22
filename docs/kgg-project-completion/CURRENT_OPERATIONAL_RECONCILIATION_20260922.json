@@ -1,7 +1,7 @@
 {
   "schema": "kgg-project-completion-operational-reconciliation/v1",
   "evidence_date": "2026-09-22",
-  "fresh_main": "aed7ff5c22e8c0b818fc82c91b990da5d9c5e723",
+  "fresh_main": "3f9225b6de45e4c46c7deedb86a3e8a2899ecdb1",
   "merged_changes": [
     {
       "pull_request": 250,
@@ -32,6 +32,24 @@
       "merge_sha": "aed7ff5c22e8c0b818fc82c91b990da5d9c5e723",
       "scope": "reconcile retained G07 real B-host canary evidence",
       "required_gate": "PASS"
+    },
+    {
+      "pull_request": 258,
+      "merge_sha": "1de67a5869003b41901ed17886afbea13b2d4922",
+      "scope": "reconcile current G07 operational documentation",
+      "required_gate": "PASS"
+    },
+    {
+      "pull_request": 259,
+      "merge_sha": "5d4173418ccff149bda7bd9620ca2e155ab092fd",
+      "scope": "record local browser bridge verification",
+      "required_gate": "PASS"
+    },
+    {
+      "pull_request": 260,
+      "merge_sha": "3f9225b6de45e4c46c7deedb86a3e8a2899ecdb1",
+      "scope": "separate canonical visible host boundary from Codex readiness",
+      "required_gate": "PASS"
     }
   ],
   "runtime": {
@@ -60,9 +78,11 @@
     "interpretation": "The Codex execution context has a ready native bridge, but that does not prove the canonical visible Windows host has the binary or profile."
   },
   "upstream_advisory_risk": {
-    "status": "UNVERIFIED_PENDING_FRESH_CHECK",
-    "source": "Brother-GPT advisory only",
-    "interpretation": "Reported upstream ChatGPT/tunnel discovery risks must be freshly checked before any future installation or host-preparation gate; they do not prove the present local failure.",
+    "status": "OPEN_ADVISORY_NO_FIX_VERIFIED",
+    "source": "Fresh read-only check of official openai/tunnel-client issue #57 on 2026-09-22",
+    "observed_boundary": "Successful main/server/discover delivery followed by no observed main/tools/list or usable ChatGPT actions",
+    "related_issues": ["#55", "#71"],
+    "interpretation": "The upstream report confirms a relevant open discovery-boundary risk but does not establish the root cause of the local visible-host failure or provide a verified fix.",
     "status_promotion": "NONE"
   },
   "surface_status": {
