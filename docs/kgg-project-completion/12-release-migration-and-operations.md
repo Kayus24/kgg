@@ -125,6 +125,10 @@ Merged SHA, Paketversion, Installationsnachweis, Canary-Evidence, Rollbacknachwe
   `1.62.1`, das Repository-Testmodul `1.61.1`. Die Bindung dieses Shell-/Codex-
   Kontexts an den nativen B-Canary ist nicht bewiesen; es wurde kein Browser
   gestartet.
+- Der einzige B-Canary basierte auf Main `17c8e2a…` und lief vor dem Merge des
+  Playwright-Auflösungsfixes PR #256 (`c414446…`). Sein Timeout ist daher
+  historische Pre-Fix-Evidence und kein Gegenbeweis gegen den aktuellen Bridge-
+  Code. Ein Post-Fix-Canary bleibt ohne neues Run-Budget nicht autorisiert.
 - `PRODUCTION_CONTROL=PILOT_INCOMPLETE`, `A_B=NOT_COMPARABLE` und
   `replacement_eligible=false` bleiben unverändert.
 - Nächster zulässiger Schritt: read-only Timeout-/Child-Process-/Localhost-

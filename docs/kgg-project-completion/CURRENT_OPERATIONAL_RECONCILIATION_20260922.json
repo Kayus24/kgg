@@ -16,6 +16,16 @@
     "native_bridge_context_binding": "NOT_PROVEN",
     "browser_launch": "NOT_RUN"
   },
+  "g07_canary_temporal_relation": {
+    "canary_base_sha": "17c8e2a4852644abefa326d059a00afd9c244eb9",
+    "canary_observed_at": "2026-09-22T18:54:29Z",
+    "playwright_resolution_fix_merge": "c414446f6c00c6d7aece3b1a14741e49eae23c14",
+    "fix_merged_at": "2026-09-22T19:48:27Z",
+    "canary_predates_fix": true,
+    "canary_validates_current_bridge": false,
+    "post_fix_canary": "NOT_AUTHORIZED",
+    "interpretation": "The timeout is retained pre-fix evidence; it does not disprove the current static bridge, while current real-host parity remains unproven."
+  },
   "merged_changes": [
     {
       "pull_request": 250,
