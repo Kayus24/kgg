@@ -81,6 +81,7 @@ class KggUiLabMcpServerTests(unittest.TestCase):
         ])
         self.assertEqual(session_schema["properties"]["schema"]["const"], server.SESSION_SCHEMA)
         self.assertEqual(session_schema["properties"]["app"]["properties"]["main_sha"]["pattern"], "^[0-9a-f]{40}$")
+        self.assertIn("Raw URI string only", session_schema["properties"]["app"]["properties"]["url"]["description"])
         self.assertEqual(session_schema["properties"]["runner"]["properties"]["capabilities"]["uniqueItems"], True)
 
     def test_synthetic_flow_is_in_memory_and_replay_is_rejected(self) -> None:
