@@ -79,9 +79,21 @@
       "tests": 36,
       "status": "PASS"
     },
-    "browser_execution_after_patch": "NOT_RUN",
+    "browser_execution_after_patch": "LOCAL_SYNTHETIC_BROWSER_TESTS_PASS",
+    "local_browser_verification": {
+      "tests": [
+        "test_visual_loop_reuses_page_and_verifies_agent_decision",
+        "test_real_flow_produces_two_hashed_screenshots_and_state_transition",
+        "test_quick_flow_opens_visual_fallback_on_real_locator_drift",
+        "test_visual_loop_rejects_unverified_expected_state"
+      ],
+      "status": "PASS",
+      "scope": "local synthetic fixture only",
+      "external_b_canary_repeated": false
+    },
     "fresh_canary_after_patch": "NOT_AUTHORIZED",
-    "next_gate": "one narrowly scoped diagnostic browser-runtime run, not a second B-canary"
+    "next_gate": "one narrowly scoped diagnostic browser-runtime run, not a second B-canary",
+    "updated_interpretation": "The patched local bridge resolves Playwright and passes real Chromium fixture tests; the remaining uncertainty is the external B-host observation context, not a proven local module-resolution failure."
   },
   "brother_review": {
     "decision": "CONTINUE",
