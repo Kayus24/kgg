@@ -93,13 +93,23 @@ Merged SHA, Paketversion, Installationsnachweis, Canary-Evidence, Rollbacknachwe
 
 `CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
 
+`CONTRIBUTION_SOURCE=BROTHER_GPT`
+`CONTRIBUTION_DATE=2026-09-22`
+`HANDOFF_ID=POST_MERGE_RECONCILIATION_20260922`
+`REVIEW_STATUS=ACCEPTED`
+`INCORPORATED_BY=KGG_LEAD`
+`SOURCE_SUMMARY=Nach-Merge-Reconciliation auf Baseline- versus beobachteten Main-SHA geprüft.`
+`DECISION_SUMMARY=Generation-Baseline historisch belassen; PR #261 als nachfolgend beobachteten Merge dokumentieren; keine Statuspromotion.`
+
 ## 15. Aktuelle Reconciliation (2026-09-22)
 
-- `CURRENT_FRESH_MAIN=3f9225b6de45e4c46c7deedb86a3e8a2899ecdb1`
+- `RECONCILIATION_BASELINE=3f9225b6de45e4c46c7deedb86a3e8a2899ecdb1`
+- `OBSERVED_MAIN_AFTER_PR_261=818d57415ece7e438410ce6da0ae41c2abadf71a`
 - PR #256 (Browser-Runtime-Modulauflösung), PR #257 (Reconciliation der
   G07-Evidence), PR #258 (operative G07-Dokumentation), PR #259 (lokale
   Browser-Verifikation) und PR #260 (Trennung von sichtbarem Host und
-  Codex-Bereitschaft) sind auf Main gemergt.
+  Codex-Bereitschaft) sind auf Main gemergt; PR #261 (Aktualisierung des
+  Abschlussstatus) wurde anschließend mit `818d574…` gemergt.
 - Der Codex-Ausführungskontext meldet den nativen Bridge als `ready`; das ist
   nicht gleichbedeutend mit einer vorbereiteten kanonischen sichtbaren
   Windows-Hostumgebung.
@@ -121,3 +131,5 @@ Merged SHA, Paketversion, Installationsnachweis, Canary-Evidence, Rollbacknachwe
   Read-only-Check von Issue #57 bestätigt einen offenen Discovery-Grenzfall
   nach erfolgreichem `main/server/discover`, aber keinen verifizierten Fix.
   Das hebt keinen Gate-Status an.
+- PR #262 ist ungemergt und wegen eines bestehenden CI-/Browser-Layout-Timeouts
+  blockiert; seine Release-Freshness-Felder sind keine kanonische Main-Evidence.

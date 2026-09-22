@@ -2,6 +2,8 @@
   "schema": "kgg-project-completion-operational-reconciliation/v1",
   "evidence_date": "2026-09-22",
   "fresh_main": "3f9225b6de45e4c46c7deedb86a3e8a2899ecdb1",
+  "fresh_main_role": "RECONCILIATION_BASELINE_AT_GENERATION",
+  "observed_main_after_pr_261": "818d57415ece7e438410ce6da0ae41c2abadf71a",
   "merged_changes": [
     {
       "pull_request": 250,
@@ -49,6 +51,12 @@
       "pull_request": 260,
       "merge_sha": "3f9225b6de45e4c46c7deedb86a3e8a2899ecdb1",
       "scope": "separate canonical visible host boundary from Codex readiness",
+      "required_gate": "PASS"
+    },
+    {
+      "pull_request": 261,
+      "merge_sha": "818d57415ece7e438410ce6da0ae41c2abadf71a",
+      "scope": "refresh completion status after main reconciliation",
       "required_gate": "PASS"
     }
   ],
@@ -119,5 +127,14 @@
   ],
   "next_allowed_mode": "CUSTOM_GPT_PRIMARY_FALLBACK_AND_LOCAL_PLUGIN_DEVELOPMENT; VISIBLE_HOST_PREPARATION_REQUIRES_SEPARATE_GATE",
   "status_promotion": "NONE",
+  "architecture_review": {
+    "contribution_source": "BROTHER_GPT",
+    "contribution_date": "2026-09-22",
+    "handoff_id": "POST_MERGE_RECONCILIATION_20260922",
+    "review_status": "ACCEPTED",
+    "incorporated_by": "KGG_LEAD",
+    "decision": "REVISE_PLAN",
+    "decision_summary": "Keep the generation baseline historical; record the later observed merge separately and remove live-HEAD wording from the human-readable release documents."
+  },
   "record_role": "fresh_documentation_reconciliation"
 }
