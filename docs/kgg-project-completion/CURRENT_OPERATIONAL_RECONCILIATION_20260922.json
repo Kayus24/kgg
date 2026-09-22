@@ -270,6 +270,25 @@
     "state_changed": false,
     "interpretation": "After opening the Settings > Plugins view through the visible ChatGPT UI, the plugin detail again loaded with the same 11 tools. The unchanged execution gate is confirmed; no external call was made."
   },
+  "latest_normal_chatgpt_tool_call": {
+    "observed_at": "2026-09-23T00:14:24+02:00",
+    "surface": "B_NORMAL_CHATGPT_WITH_KGG_PLUGIN",
+    "chat_tab": "UI Audit Ergebnis",
+    "chat_url": "https://chatgpt.com/c/6ab0ced1-6adc-83eb-b792-3cc37f3da928",
+    "prompt_scope": "single bounded read-only availability probe",
+    "requested_tool": "get_current_state",
+    "requested_actor": "system",
+    "tool_name": "get_current_state",
+    "status": "NOT_OBSERVABLE",
+    "result": "Plugin KGG UI Lab Private bzw. Tool get_current_state ist in diesem normalen Chat nicht live verfügbar.",
+    "browser_action": false,
+    "writes": false,
+    "dispatch": false,
+    "upload": false,
+    "installation": false,
+    "side_effect_scope": "NO_PERSISTENT_OR_EXTERNAL_SIDE_EFFECT",
+    "interpretation": "The normal ChatGPT host accepted the bounded probe but did not expose the installed KGG plugin or requested tool at execution time. The plugin detail page's visible catalog is therefore discovery evidence only; it does not establish runtime binding. No second call is justified without a host/plugin binding change."
+  },
   "codex_local_plugin_tool_read": {
     "observed_at": "2026-09-22T23:16:40+02:00",
     "tool": "get_current_state",
@@ -323,58 +342,64 @@
     "advisory_policy": "one review for this fingerprint only; accept tactical fields only"
   },
   "current_blocker_package": {
-    "blocker_fingerprint": "9558837e5b84a46d873cf0376b188466dcb13568e794fe2bfdaef5f24381cf6c",
+    "blocker_fingerprint": "076fbbb27cf20f0ca81dc2a778a6ba6bcf1a4202a5b93d211e2fc8a81b923047",
     "status": "BLOCKER_DETECTED",
     "phase": "G03_CURRENT_RECONCILIATION",
-    "step": "NORMAL_CHATGPT_TOOL_CALL",
+    "step": "NORMAL_CHATGPT_TOOL_CALL_RESULT",
     "objective": "prove one current bounded read-only tool invocation on the normal ChatGPT B-surface",
     "completed": [
       "local tunnel health and canonical KGG source binding",
       "local KGG plugin get_current_state read-only response",
       "current ChatGPT plugin detail and complete tool catalog read",
-      "136 local contract/bridge tests plus GPT and security batteries"
+      "136 local contract/bridge tests plus GPT and security batteries",
+      "one explicitly authorized bounded normal-ChatGPT probe sent"
     ],
     "evidence": [
       "chatgpt_plugin_current_detail_read.tool_discovery=VISIBLE_IN_PLUGIN_DETAIL",
-      "chatgpt_plugin_current_detail_read.chat_message_or_tool_call_sent=false",
+      "latest_normal_chatgpt_tool_call.tool_name=get_current_state",
+      "latest_normal_chatgpt_tool_call.status=NOT_OBSERVABLE",
+      "latest_normal_chatgpt_tool_call.writes=false",
       "latest_local_contract_test_run.overall=PASS",
       "latest_local_battery_run.overall=PASS"
     ],
-    "error_class": "EXTERNAL_COST_OR_COMMUNICATION_GATE",
+    "error_class": "PLUGIN_EXECUTION_NOT_OBSERVABLE",
     "root_cause_hypotheses": [
-      "a normal-ChatGPT tool call is an external communication action",
-      "the call may consume model/runtime resources and therefore violates the active no-cost boundary"
+      "the normal ChatGPT runtime does not bind the visible private plugin catalog to the active conversation",
+      "plugin detail discovery and chat-time tool registry are separate host paths",
+      "the current workspace requires an explicit plugin attach/rebind or supported host configuration before execution"
     ],
     "sources_checked": [
       "current ChatGPT plugin detail read",
+      "current normal ChatGPT conversation response",
       "local tunnel healthz/readyz",
       "local plugin read-only call",
       "local contract and battery outputs"
     ],
     "attempts": [
-      "no normal-ChatGPT message or plugin tool call sent"
+      "one bounded normal-ChatGPT availability probe; response was NOT_OBSERVABLE",
+      "no second call, browser action, plugin rebind, key, tunnel, or canary created"
     ],
-    "smallest_next_read_only_check": "one bounded normal-ChatGPT plugin call after an explicit cost/communication gate",
-    "would_require_scope_expansion": false,
+    "smallest_next_read_only_check": "inspect or activate an explicit ChatGPT plugin attachment/binding path; do not repeat the call while the host registry is unchanged",
+    "would_require_scope_expansion": true,
     "would_require_external_consequence": true,
-    "required_gate": "NORMAL_CHATGPT_READ_ONLY_TOOL_CALL_COST_AND_COMMUNICATION_GATE",
-    "brother_review": "NOT_REQUIRED; blocker is authorization boundary, not an unresolved architecture question",
-    "advisory_policy": "do not retry or create a second canary"
+    "required_gate": "CHATGPT_PLUGIN_BINDING_OR_HOST_REPAIR",
+    "brother_review": "NOT_REQUIRED_FOR_THIS_DETERMINISTIC_RUNTIME_RESULT; request one only if the host binding plan changes",
+    "advisory_policy": "do not retry or create a second canary without a changed host/plugin binding"
   },
   "surface_status": {
     "A_CUSTOM_GPT_PRODUCTION_CONTROL": "NOT_OBSERVABLE_FROM_CURRENT_REPO",
-    "B_PLUGIN_CANDIDATE": "DISCOVERABLE_TOOLSET_VISIBLE_EXECUTION_UNVERIFIED",
+    "B_PLUGIN_CANDIDATE": "DISCOVERABLE_TOOLSET_VISIBLE_EXECUTION_NOT_OBSERVABLE",
     "C_CODEX_PLUS_PLUGIN": "LOCAL_MCP_AND_REAL_BRIDGE_CODE"
   },
   "current_status_overlay": {
-    "G03": "DISCOVERY_VISIBLE_EXECUTION_UNVERIFIED",
+    "G03": "DISCOVERY_VISIBLE_TOOL_CALL_NOT_OBSERVABLE",
     "G07": "PASS_CLASSIFICATION_WITH_B_REAL_AUDIT_PARTIAL",
-    "reason": "The historical unavailable detail read is retained, but a later read-only detail view visibly loaded the plugin and its tools. Execution remains unverified because no chat/tool call was sent.",
-    "required_for_next_promotion": "one bounded read-only plugin tool call with explicit cost/communication authorization"
+    "reason": "The detail view visibly lists the plugin and 11 tools, but one explicitly authorized bounded normal-ChatGPT probe returned NOT_OBSERVABLE for get_current_state. Discovery is visible; runtime conversation binding is not.",
+    "required_for_next_promotion": "an explicit host/plugin attachment or supported rebind, followed by one fresh bounded read-only call; do not repeat the unchanged call"
   },
   "gate_status": {
     "G02": "PARTIAL",
-    "G03": "PASS",
+    "G03": "PARTIAL",
     "G04": "PASS_LOCAL_REAL_RUNTIME",
     "G05": "PARTIAL",
     "G06": "PARTIAL",

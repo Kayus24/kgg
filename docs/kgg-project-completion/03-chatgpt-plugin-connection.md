@@ -29,18 +29,27 @@ wieder und zeigt die vollständige Tool-Liste.
 Für den aktuellen Betriebsstand gilt daher:
 
 - `B_PLUGIN_DISCOVERY=CURRENTLY_VISIBLE_TOOLS`.
-- `G03_CURRENT=DISCOVERY_VISIBLE_EXECUTION_UNVERIFIED`.
-- Die Tools sind sichtbar, aber es wurde in diesem Reconciliation-Schritt
-  bewusst kein Chat und kein Plugin-Tool aufgerufen.
-- Ein Tool-Call ist ein separater Kommunikations-/Kosten-Gate und wird nicht
-  automatisch gestartet.
+- `G03_CURRENT=DISCOVERY_VISIBLE_TOOL_CALL_NOT_OBSERVABLE`.
+- Die Tools sind auf der Detailseite sichtbar, aber ein ausdrücklich
+  autorisierter einzelner read-only Probe-Aufruf im normalen Chat
+  (`get_current_state(actor=system)`) antwortete am 2026-09-23 mit
+  `NOT_OBSERVABLE`: Das Plugin beziehungsweise das Tool war in dieser
+  Conversation nicht live verfügbar.
+- Der Aufruf war ohne Browseraktion, Write, Dispatch, Upload oder Installation.
+  Ein zweiter Aufruf ist ohne geänderte Host-/Plugin-Bindung nicht zulässig.
 
 Die autoritative laufende Reconciliation steht in
 `CURRENT_OPERATIONAL_RECONCILIATION_20260922.json`.
 
-- `IMPLEMENTATION_STATUS=CHATGPT_APP_CONNECTED_READ_ONLY_CANARY_PASS`
-- `LIVE_EVIDENCE_STATUS=PRIVATE_TUNNEL_CLIENT_DISCOVERY_PASS_CLIENT_STOPPED`
-- `GATE_STATUS=PASS`
+Der aktuelle Blocker ist damit nicht mehr die fehlende Kommunikationsfreigabe,
+sondern die fehlende Laufzeitbindung zwischen sichtbarer Plugin-Detailseite und
+Conversation-Tool-Registry. Dafür ist ein Host-/Plugin-Rebind oder eine
+unterstützte Chat-Konfiguration erforderlich.
+
+- `HISTORICAL_IMPLEMENTATION_STATUS=CHATGPT_APP_CONNECTED_READ_ONLY_CANARY_PASS`
+- `HISTORICAL_LIVE_EVIDENCE_STATUS=PRIVATE_TUNNEL_CLIENT_DISCOVERY_PASS_CLIENT_STOPPED`
+- `CURRENT_GATE_STATUS=PARTIAL`
+- `CURRENT_EXECUTION_STATUS=PLUGIN_EXECUTION_NOT_OBSERVABLE`
 - `CONSEQUENCE_GATE_STATUS=COMPLETED_TRANSIENT_RUNTIME_KEY`
 - `EVIDENCE_LEVEL=E3_REAL_HOST`
 - `LAST_VERIFIED_BASE_SHA=1e6c6e3e28603f28bfbad3b127c688e722c823f5`
@@ -104,24 +113,25 @@ Schaltfläche `Create new secret key` und genau einen maskierten bestehenden
 Schlüssel. Der Secret-Wert ist nicht verfügbar, wird nicht extrahiert und
 nicht wiederverwendet.
 
-## 7. Aufgelöste Lücke und Root Cause
+## 7. Historischer Discovery-Nachweis und aktueller Root Cause
 
-Der lokale stdio-MCP ist an eine private Tunnelressource gebunden; der offizielle
-Client lief bis zum Ende des Canary und wurde danach kontrolliert beendet. Die
-ChatGPT-App ist verbunden und der Discovery-Canary hat
-`get_current_state(actor=system)` mit `status=ready` geliefert. Der
-Runtime-Key bleibt ausschließlich transient und wird nicht als Evidence
-behalten.
+Die historische einmalige Discovery-Evidence zeigt, dass der lokale stdio-MCP
+über die private Tunnelressource grundsätzlich angesprochen werden konnte.
+Der aktuelle normale-ChatGPT-Probe-Aufruf konnte diese Fähigkeit jedoch nicht
+ausführen: Die Conversation-Tool-Registry stellte `KGG UI Lab Private` und
+`get_current_state` nicht bereit. Der Runtime-Key bleibt ausschließlich
+transient und wird nicht als Evidence behalten.
 
 ## 8. Kleinschrittiger Arbeitsplan
 
 1. Host-/Workspace-Pluginfähigkeit read-only prüfen.
 2. G02-Endpunkt bereitstellen.
 3. persönliches Plugin installieren und exakte Plugin-Version notieren.
-4. in einem frischen normalen Chat Tool Discovery ausführen.
-5. read-only `health/version/capabilities` aufrufen.
+4. eine explizite Plugin-Attachment-/Rebind-Möglichkeit im normalen Chat herstellen.
+5. in einem frischen normalen Chat genau einen read-only Tool-Call ausführen.
 6. Ergebnis mit Tool-Name, Version, Request-ID und sichtbarer Antwort dokumentieren.
-7. Deinstallations-/Disable-Fallback prüfen.
+7. Bei unverändertem Tool-Registry-Status keinen zweiten Call starten und den
+   Custom-GPT-Fallback beibehalten.
 
 ## 9. CONTROL_LOOP_GATE
 
