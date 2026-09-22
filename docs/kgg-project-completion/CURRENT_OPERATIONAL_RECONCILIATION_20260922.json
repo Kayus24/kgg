@@ -30,6 +30,14 @@
     "runtime_key_retention": "transient_only",
     "secret_logged": false
   },
+  "codex_plugin_installation": {
+    "status": "NOT_PERFORMED",
+    "bundle_source": "embedded in tunnel-client",
+    "command": "tunnel-client codex plugin install",
+    "write_target": "CODEX_HOME",
+    "requires_gate": "explicit confirmation of this new file installation",
+    "reason": "The active objective excludes installation of unconfirmed files."
+  },
   "surface_status": {
     "A_CUSTOM_GPT_PRODUCTION_CONTROL": "NOT_OBSERVABLE_FROM_CURRENT_REPO",
     "B_PLUGIN_CANDIDATE": "SYNTHETIC_ONLY_FOR_CURRENT_AUDIT",
