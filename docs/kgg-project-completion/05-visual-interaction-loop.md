@@ -33,6 +33,16 @@ Die G04-Brücke kann lokal klicken und zwei echte Screenshots erzeugen. Der neue
 
 Der lokale „observe → decide → act → verify“-Lauf ist nachgewiesen. Für `PASS` fehlt noch die echte unterstützte Host-Surface (ChatGPT/Custom GPT oder Codex mit angeschlossenem Plugin); deshalb bleibt das Gate `PARTIAL`.
 
+Die aktuelle read-only Prüfung der normalen ChatGPT-Plugin-Surface verschärft
+diese Abgrenzung: `KGG UI Lab Private` ist im Plugin-Detail als „Read-only
+synthetic KGG UI-Lab MCP bridge“ gekennzeichnet und veröffentlicht keine
+Fresh-Main-/Source-Revision. Zwei gebundene Sitzungsstarts wurden vor
+Browserstart abgewiesen (`session_schema_invalid`, danach `app_url_invalid`).
+Der Chat meldete beim zweiten Versuch, dass `app.url` als Markdown-Link
+behandelt wurde. Damit existiert für B weiterhin keine Screenshot- oder
+Aktions-Evidence; der Befund ist kein Beweis für einen aktuellen
+Playwright-/Chromium-Fehler.
+
 ## 8. Kleinschrittiger Arbeitsplan
 
 1. Screenshot-Metadaten und Viewport-Koordinatensystem festlegen. ✅
@@ -66,6 +76,9 @@ Der lokale „observe → decide → act → verify“-Lauf ist nachgewiesen. F�
 - Negativ: Screenshot veraltet, Aktion außerhalb Bounds, Zustand unverändert.
 - `python -m unittest release-pipeline/test_kgg_real_browser_bridge.py -v`: vier lokale Real-Bridge-Tests PASS, inklusive persistentem Visual-Loop.
 - zwei unveränderte reale Durchläufe.
+- Normal-ChatGPT-Bindungsprüfung 2026-09-23: read-only `get_current_state`
+  einmal PASS; G04/G05-Sessionstart vor Browserstart FAIL; keine Screenshot-
+  oder Aktions-Evidence. Kein dritter Blind-Retry.
 
 ## 11. Safety und Datenschutz
 
@@ -81,4 +94,4 @@ Loop-Vertrag, Referenzimplementierung, Evidence-Beispiel und robuste Black-Box-T
 
 ## 14. Beitragsherkunft
 
-`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PARTIAL`, `NOTE=Local persistent observe/decide/act/verify loop is real and fail-closed; supported external agent host remains unproven.`
+`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX_PLUS_BROTHER_GPT`, `CONTRIBUTION_DATE=2026-09-23`, `HANDOFF_ID=G04_G05_BINDING_REVIEW_20260923`, `REVIEW_STATUS=PARTIAL`, `NOTE=Local persistent observe/decide/act/verify loop is real and fail-closed; the connected normal-ChatGPT bundle is synthetic-only by declaration, has no exposed Fresh-Main revision, and its session start was rejected before browser start. Supported external agent-host parity remains unproven.`

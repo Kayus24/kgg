@@ -316,6 +316,74 @@
     "side_effect_scope": "NO_PERSISTENT_OR_EXTERNAL_SIDE_EFFECT",
     "interpretation": "The official Im Chat testen path attached KGG UI Lab Private to a new Work conversation and the requested read-only tool executed successfully. This resolves the prior unchanged conversation-binding blocker for one read-only call. It does not prove screenshot/action/Quick-Flow execution, main-SHA binding, or cross-surface comparability. Do not repeat get_current_state solely for confirmation."
   },
+  "latest_plugin_bundle_binding_read": {
+    "observed_at": "2026-09-23T09:31:00+02:00",
+    "surface": "B_NORMAL_CHATGPT_WITH_KGG_PLUGIN",
+    "plugin_name": "KGG UI Lab Private",
+    "app_id": "asdk_app_6ab162f246b8819189ab9aa21fbe5d9f",
+    "version_id": "asdk_app_v_6ab162f246c481919c5e84878cac6725",
+    "version_name": "dev mode",
+    "verification_status": "development",
+    "connection_label": "KGG UI Lab Private",
+    "connected_at": "2026-09-21",
+    "description": "Read-only synthetic KGG UI-Lab MCP bridge",
+    "visible_tools": [
+      "capture_screenshot",
+      "execute_visual_action",
+      "get_current_state",
+      "get_session_status",
+      "get_test_evidence",
+      "get_ticket_state",
+      "observe_visual_state",
+      "run_quick_flow",
+      "run_width_sweep",
+      "set_device_profile",
+      "start_ui_session"
+    ],
+    "source_revision": "NOT_OBSERVABLE",
+    "main_sha_binding": "NOT_BOUND",
+    "plugin_contract_observation": "Tool descriptions explicitly state synthetic evidence by default; real screenshots require an opt-in real host.",
+    "argument_serialization_observation": "The normal-ChatGPT response explicitly reported that app.url was treated as a Markdown link; the subsequent start_ui_session result was app_url_invalid before browser start.",
+    "classification": "BUNDLE_BINDING_NOT_OBSERVABLE_AND_APP_URL_SERIALIZATION_INVALID",
+    "side_effect_scope": "NO_PERSISTENT_OR_EXTERNAL_SIDE_EFFECT",
+    "interpretation": "The visible plugin identity and tool catalog are bound, but no Fresh-Main/source revision is exposed and the connected app is explicitly documented as synthetic-only by default. The failed session did not reach a browser, screenshot, or action. This read-only check localizes the failure to bundle/argument binding and does not prove a real B host.",
+    "next_allowed_step": "STOP_NO_BLIND_RETRY; only a separately bound POST_FIX_DIAGNOSTIC may test a corrected plain-string app.url, and any result remains synthetic unless a real host revision is independently proven."
+  },
+  "latest_g04_g05_normal_chatgpt_canary": {
+    "observed_at": "2026-09-23T09:27:38+02:00",
+    "surface": "B_NORMAL_CHATGPT_WITH_KGG_PLUGIN",
+    "chat_tab": "UI Canary abgelehnt",
+    "chat_url": "https://chatgpt.com/c/6ab37f30-b5f4-83eb-8d71-c693b9613737",
+    "target_url": "https://kayus24.github.io/kgg-patient-preview/previews/patient-ticket-034-modal-counter-20260910-1635-r1/",
+    "main_sha": "818d57415ece7e438410ce6da0ae41c2abadf71a",
+    "scope": "one bounded read-only G04/G05 capability canary; no patient data, writes, dispatch, upload, install, or production action",
+    "first_attempt": {
+      "operation": "start_ui_session",
+      "status": "FAIL",
+      "error_class": "session_schema_invalid",
+      "browser_started": false,
+      "screenshot": false,
+      "action": false
+    },
+    "corrected_attempt": {
+      "operation": "start_ui_session",
+      "status": "FAIL",
+      "error_class": "app_url_invalid",
+      "browser_started": false,
+      "screenshot": false,
+      "action": false,
+      "artifacts": [],
+      "model_serialization_note": "The model response said app.url was a Markdown link; the raw user prompt contained the URL, but the exact tool argument cannot be independently recovered from the host transcript."
+    },
+    "real_browser_interaction": "NOT_OBSERVABLE",
+    "synthetic_evidence": "NO_SCREENSHOT_OR_ACTION_EVIDENCE",
+    "blocker_fingerprint": "6159286ff5af1da30be5522d2e150c5458e78ab3013c69ef47e6c303b2c2500e",
+    "classification": "SESSION_START_REJECTED_PRE_BROWSER; CURRENT_BUNDLE_OR_ARGUMENT_BINDING_UNPROVEN",
+    "side_effect_scope": "NO_PERSISTENT_OR_EXTERNAL_SIDE_EFFECT",
+    "interpretation": "The failure occurs during session validation, before Playwright/Chromium, observation, screenshot, or action. It is not evidence of a current browser runtime failure and does not promote G05/G06.",
+    "retry_policy": "No further start_ui_session with the same payload. A new attempt requires a separately bound diagnostic gate and a proven plain-string URL plus bundle compatibility.",
+    "status_effect": "G03 remains PASS_READ_ONLY_TOOL_EXECUTED_UI_PARITY_UNVERIFIED; G05=PARTIAL; G06=PARTIAL; B UI parity remains NOT_OBSERVABLE; global statuses unchanged."
+  },
   "latest_plugin_binding_menu_read": {
     "observed_at": "2026-09-23T00:19:49+02:00",
     "surface": "B_NORMAL_CHATGPT_WITH_KGG_PLUGIN",
@@ -436,16 +504,70 @@
     "brother_review": "NOT_REQUIRED_FOR_THIS_DETERMINISTIC_RUNTIME_RESULT; request one only if the host binding plan changes",
     "advisory_policy": "do not retry or create a second canary without a changed host/plugin binding"
   },
+  "current_g04_g05_blocker_package": {
+    "blocker_fingerprint": "6159286ff5af1da30be5522d2e150c5458e78ab3013c69ef47e6c303b2c2500e",
+    "status": "BLOCKER_DETECTED",
+    "phase": "G04_G05_NORMAL_CHATGPT_CAPABILITY_CANARY",
+    "step": "SESSION_START_VALIDATION",
+    "objective": "prove a normal-ChatGPT plugin session can reach screenshot/action capability without treating synthetic evidence as real host evidence",
+    "completed": [
+      "one bound normal-ChatGPT get_current_state read-only call",
+      "plugin-detail bundle identity and tool catalog read",
+      "two bounded session-start attempts with no browser or action side effect",
+      "Brother-GPT advisory review and self-review"
+    ],
+    "evidence": [
+      "plugin description=Read-only synthetic KGG UI-Lab MCP bridge",
+      "version_name=dev mode",
+      "version_id=asdk_app_v_6ab162f246c481919c5e84878cac6725",
+      "source_revision=NOT_OBSERVABLE",
+      "first failure=session_schema_invalid",
+      "corrected failure=app_url_invalid",
+      "model response stated app.url was treated as a Markdown link",
+      "browser_started=false",
+      "screenshot=false",
+      "action=false"
+    ],
+    "error_class": "SESSION_START_REJECTED_PRE_BROWSER; CURRENT_BUNDLE_OR_ARGUMENT_BINDING_UNPROVEN",
+    "root_cause_hypotheses": [
+      "connected normal-ChatGPT app is a synthetic-only bundle without exposed Fresh-Main binding",
+      "app.url was serialized as a Markdown/link value instead of a raw string",
+      "the bound app contract differs from the current Fresh-Main session contract"
+    ],
+    "sources_checked": [
+      "Fresh-Main kgg-plugin/mcp/server.py URL and session contract",
+      "ChatGPT plugin detail view",
+      "failed normal-ChatGPT session results",
+      "Brother-GPT advisory response"
+    ],
+    "attempts": [
+      "one initial start_ui_session with incomplete payload",
+      "one exact-payload retest; no unchanged retry after app_url_invalid",
+      "no observe_visual_state or execute_visual_action invocation"
+    ],
+    "smallest_next_read_only_check": "already completed: read plugin bundle identity, synthetic declaration, absent source revision, and argument-serialization observation",
+    "required_gate": "POST_FIX_DIAGNOSTIC_ONLY_IF_A_SEPARATE_GATE_BINDS_A_COMPATIBLE_BUNDLE_AND_PLAIN_URL",
+    "would_require_scope_expansion": true,
+    "would_require_external_consequence": false,
+    "brother_review": {
+      "decision": "REVISE_PLAN",
+      "review_status": "ACCEPTED",
+      "recommendation": "Stop before browser; do not blind-retry. Keep G05/G06 PARTIAL and B UI parity NOT_OBSERVABLE.",
+      "self_review": "The error occurs before Playwright/Chromium; Fresh-Main code alone cannot prove the connected app bundle."
+    },
+    "fallback": "B_PLUGIN_INSTANCE_NOT_BOUND_TO_CURRENT_REAL_BROWSER_CONTRACT or BUNDLE_BINDING_NOT_OBSERVABLE; retain technical limit and Custom GPT/local Codex fallback."
+  },
   "surface_status": {
     "A_CUSTOM_GPT_PRODUCTION_CONTROL": "NOT_OBSERVABLE_FROM_CURRENT_REPO",
-    "B_PLUGIN_CANDIDATE": "READ_ONLY_TOOL_EXECUTABLE_UI_CAPABILITIES_UNVERIFIED",
+    "B_PLUGIN_CANDIDATE": "READ_ONLY_TOOL_EXECUTABLE_SYNTHETIC_UI_UNVERIFIED_REAL_HOST",
     "C_CODEX_PLUS_PLUGIN": "LOCAL_MCP_AND_REAL_BRIDGE_CODE"
   },
   "current_status_overlay": {
     "G03": "PASS_READ_ONLY_TOOL_EXECUTED_UI_PARITY_UNVERIFIED",
     "G07": "PASS_CLASSIFICATION_WITH_B_REAL_AUDIT_PARTIAL",
-    "reason": "The official Im Chat testen path attached the plugin to a new Work conversation and one explicitly authorized bounded normal-ChatGPT get_current_state(actor=system) call returned status=ready. UI screenshot/action/Quick-Flow parity and main-SHA binding remain unverified.",
-    "required_for_next_promotion": "one bounded G04/G05 capability canary for screenshot/action or visual state; do not repeat G03 get_current_state"
+    "G04_G05": "PARTIAL_SESSION_REJECTED_PRE_BROWSER",
+    "reason": "The official Im Chat testen path attached the plugin and one bounded get_current_state(actor=system) call returned status=ready. The subsequent G04/G05 session attempts failed before browser start (session_schema_invalid, then app_url_invalid); the plugin detail identifies the connected bundle as read-only synthetic and exposes no Fresh-Main revision. No screenshot/action/Quick-Flow parity or main-SHA binding is proven.",
+    "required_for_next_promotion": "Do not blind-retry. Only a separately bound POST_FIX_DIAGNOSTIC with a proven plain-string app.url and independently proven bundle compatibility may proceed; otherwise retain the documented technical limit."
   },
   "gate_status": {
     "G02": "PARTIAL",
@@ -469,9 +591,9 @@
   "remaining_limits": [
     "The manually verified native Codex plugin installation is local-only; repository packaging and ChatGPT host parity remain separate evidence requirements.",
     "The canonical visible Windows host now has an active ready tunnel process, but native bridge binding, screenshot/action parity and the post-merge production canary remain unproven; the single B real-host canary timed out before visual observation.",
-    "The official Im Chat testen path now proves one bound normal-ChatGPT read-only get_current_state call with status=ready. Screenshot/action/Quick-Flow execution, main-SHA binding and external measurement-envelope reconciliation remain unproven.",
+    "The official Im Chat testen path proves one bound normal-ChatGPT read-only get_current_state call with status=ready. The connected bundle is explicitly read-only synthetic, exposes no Fresh-Main revision, and its G04/G05 session start was rejected before browser start; screenshot/action/Quick-Flow execution, main-SHA binding and external measurement-envelope reconciliation remain unproven.",
     "External measurement-envelope reconciliation remains unavailable.",
-    "No second B canary or post-merge canary is authorized by the existing run budget."
+    "No further start_ui_session retry is allowed without a separately bound post-fix diagnostic gate; no post-merge canary is authorized by the existing run budget."
   ],
   "next_allowed_mode": "CUSTOM_GPT_PRIMARY_FALLBACK_AND_LOCAL_PLUGIN_DEVELOPMENT; ACTIVE_TUNNEL_RECONCILIATION_AND_POST_FIX_BRIDGE_DIAGNOSTIC_REQUIRED",
   "status_promotion": "NONE",
