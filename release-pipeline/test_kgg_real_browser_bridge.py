@@ -69,6 +69,24 @@ class RealBrowserModuleResolutionTests(unittest.TestCase):
                 os.environ["KGG_PLAYWRIGHT_NODE_PATH"] = old
 
 
+class ToolCatalogContractTests(unittest.TestCase):
+    def test_request_schema_exposes_fields_required_by_visual_tools(self) -> None:
+        catalog = {item["name"]: item for item in server.tool_catalog()}
+        request_schema = catalog["observe_visual_state"]["inputSchema"]["properties"]["request"]
+        self.assertEqual(request_schema["properties"]["schema"]["const"], server.REQUEST_SCHEMA)
+        self.assertEqual(
+            request_schema["required"],
+            ["schema", "request_id", "session_id", "actor", "operation", "main_sha", "payload_sha256"],
+        )
+        self.assertEqual(request_schema["properties"]["operation"]["enum"], [
+            "run_quick_flow",
+            "capture_screenshot",
+            "observe_visual_state",
+            "execute_visual_action",
+        ])
+        self.assertTrue(request_schema["additionalProperties"] is False)
+
+
 def _session(url: str, *, session_id: str = "real-bridge-session-001", request_id: str = "real-bridge-request-001", flow_name: str = "pilot-180-reproduce", capabilities: list[str] | None = None) -> dict[str, object]:
     return {
         "schema": server.SESSION_SCHEMA,

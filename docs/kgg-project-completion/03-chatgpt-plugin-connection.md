@@ -18,9 +18,42 @@ G02, ChatGPT-Account/Workspace mit Plugin-Unterstützung, erreichbarer MCP-Endpu
 
 ## 5. Aktueller Stand
 
-- `IMPLEMENTATION_STATUS=CHATGPT_APP_CONNECTED_READ_ONLY_CANARY_PASS`
-- `LIVE_EVIDENCE_STATUS=PRIVATE_TUNNEL_CLIENT_DISCOVERY_PASS_CLIENT_STOPPED`
-- `GATE_STATUS=PASS`
+### 5.1 Aktuelle Live-Reconciliation (2026-09-23)
+
+Die unten dokumentierte G03-E3-Evidence bleibt der historische, einmalige
+Discovery-Canary und wird nicht rückwirkend gelöscht. Ein späterer read-only
+Live-Check im aktuellen ChatGPT-Workspace zeigte zunächst `Plugin nicht
+verfügbar`; ein weiterer frischer Detail-Read lädt `KGG UI Lab Private` nun
+wieder und zeigt die vollständige Tool-Liste.
+
+Für den aktuellen Betriebsstand gilt daher:
+
+- `B_PLUGIN_DISCOVERY=CURRENTLY_VISIBLE_TOOLS`.
+- `G03_CURRENT=PASS_READ_ONLY_TOOL_EXECUTED_UI_PARITY_UNVERIFIED`.
+- Der offizielle Button `Im Chat testen` band `KGG UI Lab Private` an die
+  Conversation `https://chatgpt.com/c/6ab35687-a964-83eb-b07c-f359edb3dbf4`.
+- Ein ausdrücklich autorisierter, exakt einmaliger read-only Aufruf lieferte:
+  `mcp__codex_apps__kgg_ui_lab_private_get_current_state`,
+  `status=ready`, Ergebnis-Schema `kgg-ui-lab/mcp-server/v1`,
+  `main_sha=not_bound`.
+- Der Aufruf war ohne Browseraktion, Write, Dispatch, Upload oder Installation.
+  Kein zweiter identischer G03-Aufruf ist erforderlich.
+- Dieser Nachweis deckt nur die read-only Tool-Ausführung ab. Screenshot-,
+  Action-, Visual-Loop- und Quick-Flow-Parität sowie Main-SHA-Bindung bleiben
+  in G04–G06 offen.
+
+Die autoritative laufende Reconciliation steht in
+`CURRENT_OPERATIONAL_RECONCILIATION_20260922.json`.
+
+Der frühere Blocker `PLUGIN_EXECUTION_NOT_OBSERVABLE` ist durch den offiziellen
+`Im Chat testen`-Bindungspfad und diesen einen erfolgreichen Call aufgelöst.
+Die verbleibende Lücke ist die noch nicht nachgewiesene UI-Capability-Parität,
+nicht die read-only Conversation-Bindung.
+
+- `HISTORICAL_IMPLEMENTATION_STATUS=CHATGPT_APP_CONNECTED_READ_ONLY_CANARY_PASS`
+- `HISTORICAL_LIVE_EVIDENCE_STATUS=PRIVATE_TUNNEL_CLIENT_DISCOVERY_PASS_CLIENT_STOPPED`
+- `CURRENT_GATE_STATUS=PASS_READ_ONLY_TOOL_EXECUTED_UI_PARITY_UNVERIFIED`
+- `CURRENT_EXECUTION_STATUS=READ_ONLY_TOOL_EXECUTED`
 - `CONSEQUENCE_GATE_STATUS=COMPLETED_TRANSIENT_RUNTIME_KEY`
 - `EVIDENCE_LEVEL=E3_REAL_HOST`
 - `LAST_VERIFIED_BASE_SHA=1e6c6e3e28603f28bfbad3b127c688e722c823f5`
@@ -31,6 +64,12 @@ G02, ChatGPT-Account/Workspace mit Plugin-Unterstützung, erreichbarer MCP-Endpu
 Der frische normale ChatGPT-Check auf `https://chatgpt.com/plugins` zeigte bei der Suche nach `KGG` sichtbar „Derzeit passen keine Plugins zu dieser Suche.“ Offizielle Verbindungsschritte sind unter `https://developers.openai.com/plugins/deploy/connect-chatgpt` beschrieben.
 
 ### 6.1 Fresh Account-/Workspace-Fähigkeit
+
+Die frühere `NOT_OBSERVABLE`-Antwort des Chats `UI Audit Ergebnis` bleibt als
+historische Evidence erhalten. Sie wurde nicht als aktuelle Wahrheit
+weitergeführt, nachdem `Im Chat testen` den Plugin-Kontext in einer neuen
+Conversation sichtbar gebunden hatte. Der aktuelle Nachweis ist als
+`latest_bound_normal_chatgpt_tool_call` in der Reconciliation gespeichert.
 
 Read-only im internen ChatGPT-Browser geprüft:
 
@@ -84,24 +123,25 @@ Schaltfläche `Create new secret key` und genau einen maskierten bestehenden
 Schlüssel. Der Secret-Wert ist nicht verfügbar, wird nicht extrahiert und
 nicht wiederverwendet.
 
-## 7. Aufgelöste Lücke und Root Cause
+## 7. Historischer Discovery-Nachweis und aktueller Root Cause
 
-Der lokale stdio-MCP ist an eine private Tunnelressource gebunden; der offizielle
-Client lief bis zum Ende des Canary und wurde danach kontrolliert beendet. Die
-ChatGPT-App ist verbunden und der Discovery-Canary hat
-`get_current_state(actor=system)` mit `status=ready` geliefert. Der
-Runtime-Key bleibt ausschließlich transient und wird nicht als Evidence
-behalten.
+Die historische einmalige Discovery-Evidence zeigt, dass der lokale stdio-MCP
+über die private Tunnelressource grundsätzlich angesprochen werden konnte.
+Der aktuelle normale-ChatGPT-Probe-Aufruf konnte diese Fähigkeit jedoch nicht
+ausführen: Die Conversation-Tool-Registry stellte `KGG UI Lab Private` und
+`get_current_state` nicht bereit. Der Runtime-Key bleibt ausschließlich
+transient und wird nicht als Evidence behalten.
 
 ## 8. Kleinschrittiger Arbeitsplan
 
 1. Host-/Workspace-Pluginfähigkeit read-only prüfen.
 2. G02-Endpunkt bereitstellen.
 3. persönliches Plugin installieren und exakte Plugin-Version notieren.
-4. in einem frischen normalen Chat Tool Discovery ausführen.
-5. read-only `health/version/capabilities` aufrufen.
+4. eine explizite Plugin-Attachment-/Rebind-Möglichkeit im normalen Chat herstellen.
+5. in einem frischen normalen Chat genau einen read-only Tool-Call ausführen.
 6. Ergebnis mit Tool-Name, Version, Request-ID und sichtbarer Antwort dokumentieren.
-7. Deinstallations-/Disable-Fallback prüfen.
+7. Bei unverändertem Tool-Registry-Status keinen zweiten Call starten und den
+   Custom-GPT-Fallback beibehalten.
 
 ## 9. CONTROL_LOOP_GATE
 

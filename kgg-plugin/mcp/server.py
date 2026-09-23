@@ -236,7 +236,24 @@ def _tool(name: str, description: str, properties: Mapping[str, Any], required: 
 def tool_catalog() -> list[dict[str, Any]]:
     actor = {"type": "string", "enum": sorted(ACTORS)}
     session_id = {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{5,63}$"}
-    request = {"type": "object", "description": "kgg-ui-lab/request/v1 object; no sensitive fields"}
+    request = {
+        "type": "object",
+        "description": "kgg-ui-lab/request/v1 object; no sensitive fields",
+        "properties": {
+            "schema": {"type": "string", "const": REQUEST_SCHEMA},
+            "request_id": session_id,
+            "session_id": session_id,
+            "actor": actor,
+            "operation": {
+                "type": "string",
+                "enum": ["run_quick_flow", "capture_screenshot", "observe_visual_state", "execute_visual_action"],
+            },
+            "main_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+            "payload_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        },
+        "required": ["schema", "request_id", "session_id", "actor", "operation", "main_sha", "payload_sha256"],
+        "additionalProperties": False,
+    }
     session = {
         "type": "object",
         "description": "kgg-ui-lab/session/v1 object; synthetic or explicitly opt-in real-browser session",

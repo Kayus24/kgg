@@ -33,6 +33,29 @@ Die G04-Brücke kann lokal klicken und zwei echte Screenshots erzeugen. Der neue
 
 Der lokale „observe → decide → act → verify“-Lauf ist nachgewiesen. Für `PASS` fehlt noch die echte unterstützte Host-Surface (ChatGPT/Custom GPT oder Codex mit angeschlossenem Plugin); deshalb bleibt das Gate `PARTIAL`.
 
+Die aktuelle read-only Prüfung der normalen ChatGPT-Plugin-Surface verschärft
+diese Abgrenzung: `KGG UI Lab Private` wird im Plugin-Detail als „Read-only
+synthetic KGG UI-Lab MCP bridge“ beschrieben und veröffentlicht keine
+Fresh-Main-/Source-Revision; diese Beschreibung allein beweist jedoch keine
+synthetic-only-Ausführung. Zwei gebundene Sitzungsstarts wurden zunächst vor
+Browserstart abgewiesen (`session_schema_invalid`, danach `app_url_invalid`).
+Ein separat gebundener Post-Fix-Diagnoselauf erreichte anschließend
+`start_ui_session=PASS` (`requested -> ready`), aber
+`observe_visual_state` wurde mit `request_schema_invalid` abgewiesen. Es gab
+weiterhin keinen Screenshot, kein Artefakt und keinen Klick. Damit existiert
+für B weiterhin keine Screenshot- oder Aktions-Evidence; der Befund ist weder
+ein Beweis für einen aktuellen Playwright-/Chromium-Fehler noch für echte
+Host-Parität. Der verbleibende Blocker liegt vorläufig auf der
+Observe-Request-/Bundle-Bindung; die korrekte Einstufung lautet
+`REAL_BROWSER_CAPABILITY_UNPROVEN_AFTER_OBSERVE_CONTRACT_REJECTION`.
+
+Die lokale Ursache wurde eingegrenzt und behoben: Der MCP-Tool-Katalog hatte
+`request` zuvor nur als unbeschriebenes Objekt veröffentlicht. Commit `75c8de1`
+publiziert nun die sieben Pflichtfelder des `kgg-ui-lab/request/v1`-Vertrags
+und einen Regressionstest. Das ändert den bereits verbundenen ChatGPT-Bundle-
+Stand nicht automatisch; vor einem neuen Lauf muss das Bundle read-only an
+diesen Contract gebunden bzw. neu verbunden werden.
+
 ## 8. Kleinschrittiger Arbeitsplan
 
 1. Screenshot-Metadaten und Viewport-Koordinatensystem festlegen. ✅
@@ -66,6 +89,14 @@ Der lokale „observe → decide → act → verify“-Lauf ist nachgewiesen. F�
 - Negativ: Screenshot veraltet, Aktion außerhalb Bounds, Zustand unverändert.
 - `python -m unittest release-pipeline/test_kgg_real_browser_bridge.py -v`: vier lokale Real-Bridge-Tests PASS, inklusive persistentem Visual-Loop.
 - zwei unveränderte reale Durchläufe.
+- Normal-ChatGPT-Bindungsprüfung 2026-09-23: read-only `get_current_state`
+  einmal PASS; zwei Sessionstarts zunächst vor Browserstart FAIL; ein
+  gebundener Post-Fix-Diagnoselauf erreichte `ready`, dessen
+  `observe_visual_state` aber mit `request_schema_invalid` scheiterte. Keine
+  Screenshot- oder Aktions-Evidence. Kein weiterer Observe-/Action-Retry.
+- Lokaler Contract-Fix `75c8de1`: vollständiges `request/v1`-Schema im
+  Tool-Katalog, 10/10 Real-Bridge-Tests, 10/10 Plugin-Candidate-Tests und
+  GPT-Critical-Battery grün. Kein externer Bundle-Rebind ausgeführt.
 
 ## 11. Safety und Datenschutz
 
@@ -81,4 +112,4 @@ Loop-Vertrag, Referenzimplementierung, Evidence-Beispiel und robuste Black-Box-T
 
 ## 14. Beitragsherkunft
 
-`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PARTIAL`, `NOTE=Local persistent observe/decide/act/verify loop is real and fail-closed; supported external agent host remains unproven.`
+`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX_PLUS_BROTHER_GPT`, `CONTRIBUTION_DATE=2026-09-23`, `HANDOFF_ID=G04_G05_BINDING_REVIEW_20260923`, `REVIEW_STATUS=PARTIAL`, `NOTE=Local persistent observe/decide/act/verify loop is real and fail-closed; the connected normal-ChatGPT bundle is described as a read-only synthetic bridge and has no exposed Fresh-Main revision, but synthetic-only execution is not proven because the post-fix session reached ready. Observation was rejected before returning a visual state; supported external agent-host parity remains unproven.`

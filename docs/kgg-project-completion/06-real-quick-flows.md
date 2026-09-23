@@ -33,6 +33,22 @@ UI-Lab-Goal und MCP-Kandidat enthalten Quick-Flow-Begriffe und synthetische Schr
 
 Die drei Flow-Zertifikate sind an den echten Runner gebunden. Der lokale Drift-Fallback und ein unveränderter Replay je Flow sind jetzt vorhanden; es fehlt noch E3-Host-Evidence außerhalb des lokalen Runners.
 
+Der aktuelle normale ChatGPT-Anschluss liefert dafür keine E3-Evidence: Das
+verbundene Plugin wird als read-only synthetische Bridge beschrieben, ohne
+offengelegte Fresh-Main-Revision; diese Beschreibung beweist allein aber keine
+synthetic-only-Ausführung. Ein späterer gebundener Diagnoselauf erreichte
+zwar `start_ui_session=ready`, aber `observe_visual_state` scheiterte mit
+`request_schema_invalid`; daher wurden weiterhin kein Browserzustand,
+Screenshot oder Quick Flow beobachtet. G06 bleibt `PARTIAL` und darf nicht aus
+dem lokalen Flow- oder Synthetic-Ergebnis auf ChatGPT-Host-Parität
+hochgestuft werden.
+
+Die lokale Contract-Ursache für `request_schema_invalid` ist mit Commit
+`75c8de1` behoben: Der Tool-Katalog veröffentlicht jetzt die vollständige
+Request-Struktur. Das verbundene externe Bundle wurde dadurch noch nicht
+aktualisiert; G06 bleibt bis zu einem read-only Rebind und einem separat
+gebundenen Diagnose-Lauf `PARTIAL`.
+
 ## 8. Kleinschrittiger Arbeitsplan
 
 1. Drei erste Flows mit Startzustand, Schritten, Endzustand und Version definieren.
@@ -66,6 +82,9 @@ Die drei Flow-Zertifikate sind an den echten Runner gebunden. Der lokale Drift-F
 - stale Flow-Fingerprint.
 - unveränderter Replay pro Flow.
 - `python -m unittest release-pipeline/test_kgg_real_browser_bridge.py -v`: drei zertifizierte Flows real PASS plus Locator-Drift-Fallback real PASS; der Flow bleibt nach dem Fallback ausdrücklich stale.
+- Normal-ChatGPT-Post-Fix-Diagnose: Session `ready`, Observe `request_schema_invalid`, keine E3-Quick-Flow-Evidence.
+- Lokaler Contract-Fix `75c8de1` und Regressionstests grün; kein externer
+  Bundle-Rebind und kein erneuter Quick-Flow-Lauf.
 
 ## 11. Safety und Datenschutz
 
@@ -81,4 +100,4 @@ Drei Flow-Spezifikationen, Runnerbindung, Step-Evidence, Drift-Fallback und Test
 
 ## 14. Beitragsherkunft
 
-`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PARTIAL`, `NOTE=Three canonical flows, a fail-closed local visual drift fallback and unchanged replay run through G04/G05; E3 host parity remains.`
+`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX_PLUS_BROTHER_GPT`, `CONTRIBUTION_DATE=2026-09-23`, `HANDOFF_ID=G04_G05_BINDING_REVIEW_20260923`, `REVIEW_STATUS=PARTIAL`, `NOTE=Three canonical flows, a fail-closed local visual drift fallback and unchanged replay run through G04/G05; the normal-ChatGPT bundle is described as synthetic but its actual capability is unproven, and the post-fix session accepted start but rejected observation, so E3 host parity remains unproven. No blind observe/action retry is allowed.`

@@ -93,23 +93,55 @@ Merged SHA, Paketversion, Installationsnachweis, Canary-Evidence, Rollbacknachwe
 
 `CONTRIBUTION_SOURCE=HUMAN_AND_CODEX`, `REVIEW_STATUS=PENDING`.
 
+`CONTRIBUTION_SOURCE=BROTHER_GPT`
+`CONTRIBUTION_DATE=2026-09-22`
+`HANDOFF_ID=POST_MERGE_RECONCILIATION_20260922`
+`REVIEW_STATUS=ACCEPTED`
+`INCORPORATED_BY=KGG_LEAD`
+`SOURCE_SUMMARY=Nach-Merge-Reconciliation auf Baseline- versus beobachteten Main-SHA geprüft.`
+`DECISION_SUMMARY=Generation-Baseline historisch belassen; PR #261 als nachfolgend beobachteten Merge dokumentieren; keine Statuspromotion.`
+
 ## 15. Aktuelle Reconciliation (2026-09-22)
 
-- `CURRENT_FRESH_MAIN=3f9225b6de45e4c46c7deedb86a3e8a2899ecdb1`
+- `RECONCILIATION_BASELINE=3f9225b6de45e4c46c7deedb86a3e8a2899ecdb1`
+- `OBSERVED_MAIN_AFTER_PR_261=818d57415ece7e438410ce6da0ae41c2abadf71a`
 - PR #256 (Browser-Runtime-Modulauflösung), PR #257 (Reconciliation der
   G07-Evidence), PR #258 (operative G07-Dokumentation), PR #259 (lokale
   Browser-Verifikation) und PR #260 (Trennung von sichtbarem Host und
-  Codex-Bereitschaft) sind auf Main gemergt.
+  Codex-Bereitschaft) sind auf Main gemergt; PR #261 (Aktualisierung des
+  Abschlussstatus) wurde anschließend mit `818d574…` gemergt.
 - Der Codex-Ausführungskontext meldet den nativen Bridge als `ready`; das ist
   nicht gleichbedeutend mit einer vorbereiteten kanonischen sichtbaren
   Windows-Hostumgebung.
 - In der sichtbaren PowerShell des kanonischen Hosts waren `tunnel-client` und
   die erwartete Profil-Datei nicht auflösbar. Keine Codex-/PTY-Evidence darf
   diesen Hostbefund ersetzen.
+- Ein späterer read-only Preflight am 22.09.2026 fand `tunnel-client` v0.0.14,
+  das Profil und das darin referenzierte MCP-Skript auf demselben Host. Der
+  `doctor`-Check blieb fail-closed ausschließlich am Profilverweis
+  `env:CONTROL_PLANE_API_KEY` hängen, weil diese Umgebungsvariable im
+  Prüfprozess nicht gesetzt war. Es wurde dabei weder ein neuer Schlüssel
+  erstellt noch ein Tunnel oder Canary gestartet.
+- Damit ist der aktuelle sichtbare Host präziser als
+  `VISIBLE_HOST_PARTIALLY_PREPARED_KEY_ENV_MISSING` zu klassifizieren; das
+  beweist weiterhin keine Bindung des nativen B-Bridge-Bundles an den
+  Post-#256-Code.
 - Der eine autorisierte B-Real-Host-Canary startete, lief aber vor der visuellen
   Beobachtung in `real_browser_timeout`; Screenshot, Klick und Seiteneffekt
   wurden nicht erzeugt.
 - Die statische Modulauflösung und die relevanten Contract-Tests sind grün.
+- Der aktuelle Shell-Read findet Node, die Helper, Playwright und eine
+  Chromium-Executable statisch; die Codex-Runtime verwendet dabei Playwright
+  `1.62.1`, das Repository-Testmodul `1.61.1`. Die Bindung dieses Shell-/Codex-
+  Kontexts an den nativen B-Canary ist nicht bewiesen; es wurde kein Browser
+  gestartet.
+- Der einzige B-Canary basierte auf Main `17c8e2a…` und lief vor dem Merge des
+  Playwright-Auflösungsfixes PR #256 (`c414446…`). Sein Timeout ist daher
+  historische Pre-Fix-Evidence und kein Gegenbeweis gegen den aktuellen Bridge-
+  Code. Ein Post-Fix-Canary bleibt ohne neues Run-Budget nicht autorisiert.
+- Der native `tunnel-mcp`-Bundle ist im sichtbaren Host nicht als lesbarer
+  `real_browser.py`-/Helper-Bestand auffindbar; deshalb bleibt die Bindung des
+  installierten B-Pfads an den Post-#256-Code `NOT_PROVEN`.
 - `PRODUCTION_CONTROL=PILOT_INCOMPLETE`, `A_B=NOT_COMPARABLE` und
   `replacement_eligible=false` bleiben unverändert.
 - Nächster zulässiger Schritt: read-only Timeout-/Child-Process-/Localhost-
@@ -121,3 +153,5 @@ Merged SHA, Paketversion, Installationsnachweis, Canary-Evidence, Rollbacknachwe
   Read-only-Check von Issue #57 bestätigt einen offenen Discovery-Grenzfall
   nach erfolgreichem `main/server/discover`, aber keinen verifizierten Fix.
   Das hebt keinen Gate-Status an.
+- PR #262 ist ungemergt und wegen eines bestehenden CI-/Browser-Layout-Timeouts
+  blockiert; seine Release-Freshness-Felder sind keine kanonische Main-Evidence.
