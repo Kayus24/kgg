@@ -83,9 +83,27 @@ def ensure_playwright_prepared(npm: str) -> None:
     global PLAYWRIGHT_PREPARED
     if PLAYWRIGHT_PREPARED:
         return
+    # A checked-in/local module is already sufficient for the browser smokes.
+    # Never invoke npm exec merely to rediscover an existing dependency.
+    local_playwright = ROOT / "release-pipeline" / "node_modules" / "playwright"
+    if local_playwright.is_dir():
+        PLAYWRIGHT_PREPARED = True
+        return
     if os.environ.get("KGG_SKIP_PLAYWRIGHT_INSTALL") != "1":
         run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "playwright", "install", "chromium"])
     PLAYWRIGHT_PREPARED = True
+
+
+def run_playwright_script(script: str, *args: str) -> None:
+    """Run a browser smoke from the local module before considering npm."""
+    local_playwright = ROOT / "release-pipeline" / "node_modules" / "playwright"
+    if local_playwright.is_dir():
+        run([node_executable(), f"release-pipeline/{script}", *args])
+        return
+    npm = npm_executable()
+    if not npm:
+        raise BatteryError(f"npm not found for the Playwright smoke: {script}")
+    run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "node", f"release-pipeline/{script}", *args])
 
 
 def run_mobile_inbox(live: bool) -> None:
@@ -112,19 +130,13 @@ def run_ticket_015_smoke() -> None:
 
 
 def run_ticket_015_browser() -> None:
-    npm = npm_executable()
-    if not npm:
-        raise BatteryError("npm not found. Install npm or set KGG_NPM for the Ticket 015 browser battery.")
     log("== Ticket 015 Progressionsvarianten browser loop ==")
-    run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "node", "release-pipeline/kgg_ticket_015_browser_smoke.js"])
+    run_playwright_script("kgg_ticket_015_browser_smoke.js")
 
 
 def run_ticket_015_admin_browser() -> None:
-    npm = npm_executable()
-    if not npm:
-        raise BatteryError("npm not found. Install npm or set KGG_NPM for the Ticket 015 admin browser battery.")
     log("== Ticket 015 Admin-Editor browser loop ==")
-    run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "node", "release-pipeline/kgg_ticket_015_admin_browser_smoke.js"])
+    run_playwright_script("kgg_ticket_015_admin_browser_smoke.js")
 
 
 def run_therapy_cockpit_native() -> None:
@@ -133,11 +145,8 @@ def run_therapy_cockpit_native() -> None:
 
 
 def run_therapy_cockpit_browser() -> None:
-    npm = npm_executable()
-    if not npm:
-        raise BatteryError("npm not found. Install npm or set KGG_NPM for the Therapie-Cockpit browser battery.")
     log("== Therapie-Cockpit tablet browser battery ==")
-    run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "node", "release-pipeline/kgg_therapy_cockpit_browser_smoke.js"])
+    run_playwright_script("kgg_therapy_cockpit_browser_smoke.js")
 
 
 def run_ticket_037_real_plan_browser() -> None:
@@ -178,10 +187,18 @@ def run_ui_stability(level: str, case_name: str | None = None) -> None:
     log(f"== UI stability battery: {label} ==")
     case_args = ["--case", case_name] if case_name else []
     if level in {"regression", "all"}:
+        # Prefer the repository's already provisioned Playwright module.  This
+        # keeps a local regression run deterministic and prevents npm exec
+        # from silently downloading an unapproved package when the dependency
+        # is already present.
+        local_playwright = ROOT / "release-pipeline" / "node_modules" / "playwright"
+        if local_playwright.is_dir():
+            run([node_executable(), "release-pipeline/kgg_ui_stability_smoke.js", "--level", level, *case_args])
+            return
         npm = npm_executable()
         if npm:
             ensure_playwright_prepared(npm)
-            run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "node", "release-pipeline/kgg_ui_stability_smoke.js", "--level", level, *case_args])
+            run_playwright_script("kgg_ui_stability_smoke.js", "--level", level, *case_args)
             return
     run([node_executable(), "release-pipeline/kgg_ui_stability_smoke.js", "--level", level, *case_args])
 
@@ -285,19 +302,23 @@ def run_admin_camera_qr() -> None:
 
 def run_ui_contract() -> None:
     log("== KGG UI/function contract ==")
-    npm = npm_executable()
-    if not npm:
-        raise BatteryError("npm is required for the browser UI contract.")
-    ensure_playwright_prepared(npm)
-    run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "node", "release-pipeline/kgg_ui_contract_smoke.js"])
+    local_playwright = ROOT / "release-pipeline" / "node_modules" / "playwright"
+    if not local_playwright.is_dir():
+        npm = npm_executable()
+        if not npm:
+            raise BatteryError("npm is required for the browser UI contract when no local Playwright module exists.")
+        ensure_playwright_prepared(npm)
+    run_playwright_script("kgg_ui_contract_smoke.js")
 
 
 def run_preview_marker_browser() -> None:
     log("== KGG Preview marker browser contract ==")
-    npm = npm_executable()
-    if not npm:
-        raise BatteryError("npm is required for the Preview marker browser contract.")
-    ensure_playwright_prepared(npm)
+    local_playwright = ROOT / "release-pipeline" / "node_modules" / "playwright"
+    if not local_playwright.is_dir():
+        npm = npm_executable()
+        if not npm:
+            raise BatteryError("npm is required for the Preview marker browser contract when no local Playwright module exists.")
+        ensure_playwright_prepared(npm)
     sys.path.insert(0, str(ROOT / "release-pipeline"))
     import kgg_gpt_write_gate as write_gate  # noqa: PLC0415
 
@@ -327,18 +348,7 @@ for(const id of ["menu","scanner","dock"]){
     fixture_dir.mkdir(parents=True, exist_ok=True)
     fixture_path = fixture_dir / "fixture.html"
     fixture_path.write_text(rendered, encoding="utf-8", newline="\n")
-    run(
-        [
-            npm,
-            "exec",
-            "--yes",
-            "--package=playwright@1.61.1",
-            "--",
-            "node",
-            "release-pipeline/kgg_preview_marker_smoke.js",
-            str(fixture_path),
-        ]
-    )
+    run_playwright_script("kgg_preview_marker_smoke.js", str(fixture_path))
 
 
 def run_selftest_gate_tests() -> None:
