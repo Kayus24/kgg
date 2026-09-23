@@ -1,0 +1,37 @@
+{
+  "schema": "kgg-editor-action-surface-preflight/v1",
+  "checkpoint_id": "CP_G01_EDITOR_ACTION_SURFACE_20260923",
+  "evidence_date": "2026-09-23",
+  "surface": "CUSTOM_GPT_KGG_UPDATE_AGENT",
+  "editor_title": "KGG Update-Agent",
+  "editor_state": "LIVE_PRIVATE",
+  "last_edit_visible": "2026-09-17",
+  "observed_action_schema_version": "1.8.0",
+  "observed_servers": [
+    "https://api.github.com"
+  ],
+  "observed_operation_families": [
+    "GitHub main/PR/run/artifact reads",
+    "bounded GitHub validation and preview dispatches",
+    "editor-sync preflight and snapshot gates",
+    "private project-memory reads and guarded coordination endpoints"
+  ],
+  "kgg_ui_action_operations_observed": [],
+  "missing_ui_operations": [
+    "start_ui_session",
+    "get_current_state",
+    "observe_visual_state",
+    "capture_screenshot",
+    "execute_visual_action",
+    "coordinate click or move"
+  ],
+  "classification": "CUSTOM_GPT_ACTION_SCHEMA_GITHUB_ONLY",
+  "consequence": "The Custom GPT editor cannot currently certify real screenshot-to-action UI control through its published Action schema. This is an integration-surface limitation, not evidence that the local MCP/browser implementation is absent.",
+  "safe_next_step": "Keep the UI bridge in the MCP/Plugin surface and treat Custom-GPT UI parity as NOT_OBSERVABLE until a separately approved, supported host channel exposes the bounded UI operations.",
+  "no_side_effect": true,
+  "global_status_unchanged": {
+    "PRODUCTION_CONTROL": "PILOT_INCOMPLETE",
+    "A_B": "NOT_COMPARABLE",
+    "replacement_eligible": false
+  }
+}
