@@ -115,6 +115,46 @@ den Projektdateien festschreiben.
 - `NEXT_ON_FAIL=BLOCKER_PACKAGE mit genau einer Root-Cause und ohne Redispatch`
 - `INVALIDATION_TRIGGERS=Main-, MCP-, Manifest-, Workspace-, Tunnel- oder Tool-Schema-Drift`
 
+### 9.1 Getrennter Real-Host-Diagnoseschritt (G04/G05, nicht G03-Retry)
+
+Der normale ChatGPT-Anschluss darf nicht dadurch als Real-Host gelten, dass
+die synthetische Tool-Liste sichtbar ist. Für einen späteren, separat
+gebundenen `POST_FIX_DIAGNOSTIC` müssen vor dem ersten Session-Aufruf alle
+folgenden Punkte read-only nachgewiesen werden:
+
+1. Das verbundene Bundle veröffentlicht eine überprüfbare Source-/Build-
+   Revision oder ist nachweislich mit dem geprüften Fresh-Main-Code gebunden.
+2. Die Plugin-Beschreibung und der Tool-Contract kennzeichnen den Pfad nicht
+   mehr nur als synthetisch; andernfalls bleibt der Lauf `SYNTHETIC_ONLY`.
+3. Der gestartete MCP-Prozess erbt `KGG_REAL_BROWSER=1`. Der Default-
+   `kgg-plugin/mcp/server.py` bleibt unverändert synthetisch; die Aktivierung
+   darf nur über eine explizite, gebundene Runner-/Profilvariante erfolgen.
+4. `KGG_BROWSER_NODE`, `KGG_PLAYWRIGHT_NODE_PATH` beziehungsweise die im
+   aktuellen `real_browser.py` vorgesehenen Fallbacks sind im selben Prozess
+   auflösbar. Fehlende Dependencies werden nicht automatisch installiert.
+5. Der `app.url`-Wert wird als nackte JSON-String-Primitive übertragen, nie als
+   Markdown-Link oder Link-Objekt.
+
+Danach gilt genau diese Reihenfolge:
+
+```text
+POST_FIX_BRIDGE_BINDING
+→ PLAYWRIGHT_RESOLUTION
+→ CHROMIUM_LAUNCH
+→ ALLOWLISTED_FIXTURE_NAVIGATION
+→ ONE_OBSERVE_SCREENSHOT
+→ OPTIONAL_ONE_SAFE_ACTION
+→ SECOND_SCREENSHOT_STATE_CHECK
+→ RECONCILE_OR_STOP
+```
+
+`SESSION_START_REJECTED_PRE_BROWSER` beendet den Diagnoseschritt. Es gibt
+keinen weiteren identischen `start_ui_session`-Retry. Ein erfolgreicher
+synthetischer Screenshot oder Quick Flow bleibt `SYNTHETIC_ONLY` und darf
+G05/G06 nicht auf `PASS` heben. Der bestehende Tunnel wird wiederverwendet;
+kein neuer Tunnel, kein neuer Runtime-Key und keine automatische Installation
+werden aus diesem Runbook abgeleitet.
+
 ## 10. Tests
 
 - Tunnel-Health/Readiness und MCP-Tool-Scan.
@@ -122,6 +162,9 @@ den Projektdateien festschreiben.
   Client, nicht erlaubtes Write-Tool.
 - Genau ein read-only Discovery-Canary.
 - Keine Browser-, Patienten- oder Produktionsaktion in G03.
+- Der Real-Host-Diagnoseschritt ist kein G03-Discovery-Canary und benötigt ein
+  eigenes, einmaliges Run-/Consequence-Gate. Ohne Bundle-Bindung oder ohne
+  `KGG_REAL_BROWSER=1` bleibt der Endzustand `B_PARTIAL / UI_PARITY_NOT_OBSERVABLE`.
 
 ## 11. Safety und Datenschutz
 
@@ -152,3 +195,9 @@ INCORPORATED_BY=KGG_LEAD
 SOURCE_SUMMARY=Secure MCP Tunnel statt zweitem Server; Eligibility vor Aktivierung; ein Canary.
 DECISION_SUMMARY=Runbook macht die einzige verbleibende externe Konsequenz reproduzierbar und fail-closed.
 ```
+
+Die Ergänzung des Real-Host-Diagnoseschritts wurde am 2026-09-23 aus der
+Brother-GPT-Prüfung des Blockers
+`SESSION_START_REJECTED_PRE_BROWSER; CURRENT_BUNDLE_OR_ARGUMENT_BINDING_UNPROVEN`
+übernommen. Sie ändert weder G03-Status noch Measurement-Contract und erteilt
+keine Tunnel-, Key- oder Produktionsfreigabe.
