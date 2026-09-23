@@ -349,6 +349,20 @@
     "interpretation": "The visible plugin identity and tool catalog are bound, but no Fresh-Main/source revision is exposed and the connected app is explicitly documented as synthetic-only by default. The failed session did not reach a browser, screenshot, or action. This read-only check localizes the failure to bundle/argument binding and does not prove a real B host.",
     "next_allowed_step": "STOP_NO_BLIND_RETRY; only a separately bound POST_FIX_DIAGNOSTIC may test a corrected plain-string app.url, and any result remains synthetic unless a real host revision is independently proven."
   },
+  "latest_tunnel_profile_binding_read": {
+    "observed_at": "2026-09-23T09:36:00+02:00",
+    "surface": "B_NORMAL_CHATGPT_WITH_KGG_PLUGIN",
+    "profile_path": "C:/Users/Alexander Kreisle/AppData/Roaming/tunnel-client/kgg-ui-lab-local-stdio.yaml",
+    "tunnel_client_version": "0.0.14+0f870e50a973fa820d4c409000059e181e8d242b",
+    "mcp_command": "python C:/Users/ALEXAN~1/DOCUME~1/VIBCOD~1/KGG-EX~1/KGG-43~1/KGG-PL~1/mcp/server.py",
+    "profile_declared_real_browser_opt_in": false,
+    "profile_declared_kgg_real_browser": "NOT_SET",
+    "process_environment_kgg_real_browser": "NOT_INSPECTED",
+    "profile_source_binding": "LOCAL_CANONICAL_MCP_SERVER_PATH",
+    "interpretation": "The active profile launches the canonical server directly and does not declare KGG_REAL_BROWSER=1. This is not proof about inherited process environment, but it explains why the connected ChatGPT bundle remains synthetic by default and identifies the exact preflight item for a future bound diagnostic.",
+    "side_effect_scope": "READ_ONLY_PROFILE_READ",
+    "next_allowed_step": "Before any restart or key use, read-only bind the running process environment and bundle revision; otherwise retain B_UI_PARITY_NOT_OBSERVABLE."
+  },
   "latest_g04_g05_normal_chatgpt_canary": {
     "observed_at": "2026-09-23T09:27:38+02:00",
     "surface": "B_NORMAL_CHATGPT_WITH_KGG_PLUGIN",
