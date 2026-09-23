@@ -2,7 +2,7 @@
   "schema": "kgg-project-completion-gates/v1",
   "generated_at": "2026-09-23T11:47:30+02:00",
   "fresh_remote_main_at_generation": "b3800e5e1301e37763a780d5d1a5f7438337c5a8",
-  "local_head_at_generation": "547266a",
+  "local_head_at_generation": "77d11ba5f23db087530830ce97fcf02d35c074cd",
   "north_star": [
     "migrate required Custom GPT capabilities into one universal KGG plugin",
     "provide real screenshot-to-action browser control for the KGG HTML app",
