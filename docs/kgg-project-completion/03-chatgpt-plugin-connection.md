@@ -18,7 +18,7 @@ G02, ChatGPT-Account/Workspace mit Plugin-Unterstützung, erreichbarer MCP-Endpu
 
 ## 5. Aktueller Stand
 
-### 5.1 Aktuelle Live-Reconciliation (2026-09-22)
+### 5.1 Aktuelle Live-Reconciliation (2026-09-23)
 
 Die unten dokumentierte G03-E3-Evidence bleibt der historische, einmalige
 Discovery-Canary und wird nicht rückwirkend gelöscht. Ein späterer read-only
@@ -29,32 +29,31 @@ wieder und zeigt die vollständige Tool-Liste.
 Für den aktuellen Betriebsstand gilt daher:
 
 - `B_PLUGIN_DISCOVERY=CURRENTLY_VISIBLE_TOOLS`.
-- `G03_CURRENT=DISCOVERY_VISIBLE_TOOL_CALL_NOT_OBSERVABLE`.
-- Die Tools sind auf der Detailseite sichtbar, aber ein ausdrücklich
-  autorisierter einzelner read-only Probe-Aufruf im normalen Chat
-  (`get_current_state(actor=system)`) antwortete am 2026-09-23 mit
-  `NOT_OBSERVABLE`: Das Plugin beziehungsweise das Tool war in dieser
-  Conversation nicht live verfügbar.
+- `G03_CURRENT=PASS_READ_ONLY_TOOL_EXECUTED_UI_PARITY_UNVERIFIED`.
+- Der offizielle Button `Im Chat testen` band `KGG UI Lab Private` an die
+  Conversation `https://chatgpt.com/c/6ab35687-a964-83eb-b07c-f359edb3dbf4`.
+- Ein ausdrücklich autorisierter, exakt einmaliger read-only Aufruf lieferte:
+  `mcp__codex_apps__kgg_ui_lab_private_get_current_state`,
+  `status=ready`, Ergebnis-Schema `kgg-ui-lab/mcp-server/v1`,
+  `main_sha=not_bound`.
 - Der Aufruf war ohne Browseraktion, Write, Dispatch, Upload oder Installation.
-  Ein zweiter Aufruf ist ohne geänderte Host-/Plugin-Bindung nicht zulässig.
-- Die read-only geöffnete Plugin-Aktionsliste bietet nur Details, Name-/
-  Beschreibung bearbeiten, Trennen und Löschen; eine Attach-/Rebind- oder
-  „in Chat verwenden“-Aktion ist nicht vorhanden. Trennen und Löschen wurden
-  nicht ausgewählt.
+  Kein zweiter identischer G03-Aufruf ist erforderlich.
+- Dieser Nachweis deckt nur die read-only Tool-Ausführung ab. Screenshot-,
+  Action-, Visual-Loop- und Quick-Flow-Parität sowie Main-SHA-Bindung bleiben
+  in G04–G06 offen.
 
 Die autoritative laufende Reconciliation steht in
 `CURRENT_OPERATIONAL_RECONCILIATION_20260922.json`.
 
-Der aktuelle Blocker ist damit nicht mehr die fehlende Kommunikationsfreigabe,
-sondern die fehlende Laufzeitbindung zwischen sichtbarer Plugin-Detailseite und
-Conversation-Tool-Registry. Die aktuelle Detailseite stellt keinen Rebind-
-Pfad bereit; dafür ist eine unterstützte externe Host-/Workspace-Konfiguration
-erforderlich.
+Der frühere Blocker `PLUGIN_EXECUTION_NOT_OBSERVABLE` ist durch den offiziellen
+`Im Chat testen`-Bindungspfad und diesen einen erfolgreichen Call aufgelöst.
+Die verbleibende Lücke ist die noch nicht nachgewiesene UI-Capability-Parität,
+nicht die read-only Conversation-Bindung.
 
 - `HISTORICAL_IMPLEMENTATION_STATUS=CHATGPT_APP_CONNECTED_READ_ONLY_CANARY_PASS`
 - `HISTORICAL_LIVE_EVIDENCE_STATUS=PRIVATE_TUNNEL_CLIENT_DISCOVERY_PASS_CLIENT_STOPPED`
-- `CURRENT_GATE_STATUS=PARTIAL`
-- `CURRENT_EXECUTION_STATUS=PLUGIN_EXECUTION_NOT_OBSERVABLE`
+- `CURRENT_GATE_STATUS=PASS_READ_ONLY_TOOL_EXECUTED_UI_PARITY_UNVERIFIED`
+- `CURRENT_EXECUTION_STATUS=READ_ONLY_TOOL_EXECUTED`
 - `CONSEQUENCE_GATE_STATUS=COMPLETED_TRANSIENT_RUNTIME_KEY`
 - `EVIDENCE_LEVEL=E3_REAL_HOST`
 - `LAST_VERIFIED_BASE_SHA=1e6c6e3e28603f28bfbad3b127c688e722c823f5`
@@ -65,6 +64,12 @@ erforderlich.
 Der frische normale ChatGPT-Check auf `https://chatgpt.com/plugins` zeigte bei der Suche nach `KGG` sichtbar „Derzeit passen keine Plugins zu dieser Suche.“ Offizielle Verbindungsschritte sind unter `https://developers.openai.com/plugins/deploy/connect-chatgpt` beschrieben.
 
 ### 6.1 Fresh Account-/Workspace-Fähigkeit
+
+Die frühere `NOT_OBSERVABLE`-Antwort des Chats `UI Audit Ergebnis` bleibt als
+historische Evidence erhalten. Sie wurde nicht als aktuelle Wahrheit
+weitergeführt, nachdem `Im Chat testen` den Plugin-Kontext in einer neuen
+Conversation sichtbar gebunden hatte. Der aktuelle Nachweis ist als
+`latest_bound_normal_chatgpt_tool_call` in der Reconciliation gespeichert.
 
 Read-only im internen ChatGPT-Browser geprüft:
 

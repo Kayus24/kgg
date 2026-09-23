@@ -11,12 +11,13 @@ Letzter Dokumentations-/Safety-Checkpoint: `211d6a2677926839fa79ba69eb09ed1389e2
 Dieses Verzeichnis ist die Arbeits- und Abschlusssteuerung für das KGG-Agentenprojekt. Es ersetzt keine Fach-, Safety-, Measurement- oder Release-Verträge. Bei Widerspruch gilt die jeweils fachlich kanonische Quelle; der Widerspruch wird als Gate-Blocker erfasst und nicht stillschweigend aufgelöst.
 
 Aktuelle Live-Reconciliation: Der historische G03-Discovery-Canary bleibt
-retained. Ein späterer read-only Detail-Read lädt `KGG UI Lab Private` wieder
-und zeigt die Tools. Ein ausdrücklich autorisierter aktueller Probe-Aufruf im
-normalen Chat für `get_current_state(actor=system)` antwortete jedoch
-`NOT_OBSERVABLE`; die Conversation-Tool-Registry bindet das Plugin aktuell
-nicht. Deshalb gilt die B-Surface als
-`DISCOVERY_VISIBLE_TOOL_CALL_NOT_OBSERVABLE`, nicht als PASS.
+retained. Über den offiziellen Button `Im Chat testen` wurde `KGG UI Lab
+Private` an eine neue Work-Conversation gebunden. Ein ausdrücklich
+autorisierter, exakt einmaliger read-only Aufruf von
+`get_current_state(actor=system)` wurde dort tatsächlich ausgeführt und gab
+`status=ready` zurück. G03 ist damit für read-only Tool-Ausführung `PASS`;
+Screenshot-, Action- und Quick-Flow-Parität sind davon ausdrücklich nicht
+abgeleitet und bleiben eigene Gates.
 Maßgeblich ist die zeitgebundene Reconciliation in
 `CURRENT_OPERATIONAL_RECONCILIATION_20260922.json`.
 
@@ -81,7 +82,7 @@ Ein Gate darf nur mit der in seinem Detaildokument verlangten Stufe auf `PASS` g
 | G00 | Source of Truth, Statusregister, Checkpoints | `PASS` | Dokumentensatz in PR #239 gemergt; Required Gate grün; Resume-Regel getestet | Fresh-Main-gebundener Dokumentensatz und eindeutiger nächster Gate-Schritt | [G00](00-governance-and-source-of-truth.md) |
 | G01 | Vollständige Custom-GPT-Funktionsinventur und Migration | `PASS` | 30 operationIds, fünf Skills, Manifest und kanonische Quellen abgebildet; Self-Tests grün; PR #241 auf Main `fe62c8b` | Jede benötigte Fähigkeit besitzt Zielkomponente, Test und Disposition; Live-Parität bleibt nachgelagert | [G01](01-custom-gpt-capability-migration.md) |
 | G02 | Universelles Plugin-Paket | `PARTIAL` | Portable Root-Manifest, repo-lokale Marketplace-Registrierung und frische lokale Codex-Installation grün; ChatGPT-Discovery noch nicht live bewiesen | Paket in Codex und ChatGPT installierbar, versioniert und ohne lokale Pfadannahmen | [G02](02-universal-plugin-package.md) |
-| G03 | Normales ChatGPT erkennt und nutzt das Plugin | `PARTIAL` (`DISCOVERY_VISIBLE_TOOL_CALL_NOT_OBSERVABLE`) | Plugin-Detailseite lädt und zeigt 11 Tools; ein aktueller ausdrücklich autorisierter `get_current_state`-Probe-Aufruf antwortete `NOT_OBSERVABLE`; historischer Canary bleibt retained | Explizite Host-/Plugin-Attachment oder Rebind herstellen, danach genau ein frischer read-only Call. Die aktuelle Plugin-Aktionsliste bietet keinen Rebind; bis dahin Custom-GPT-Fallback | [G03](03-chatgpt-plugin-connection.md) |
+| G03 | Normales ChatGPT erkennt und nutzt das Plugin | `PASS` (read-only Tool; UI-Parität offen) | Offizieller `Im Chat testen`-Pfad, Plugin attached, `mcp__codex_apps__kgg_ui_lab_private_get_current_state`, `status=ready`, keine Side Effects | Screenshot-/Action-/Quick-Flow-Tools separat in G04–G06 hostseitig nachweisen; keinen zweiten identischen G03-Call | [G03](03-chatgpt-plugin-connection.md) |
 | G04 | Echte Browser-/UI-Brücke | `PASS` | Lokaler realer Chromium-Lauf: zwei unterschiedliche Screenshot-Hashes, Zustandswechsel und fail-closed Hostfehler; E2 | Echte Session, Screenshot, Koordinaten-/Semantik-Aktionen und Zustandsbeobachtung | [G04](04-real-browser-bridge.md) |
 | G05 | Visueller Screenshot-Aktions-Regelkreis | `PARTIAL` | lokaler persistenter Observe/Decide/Act/Verify-Loop mit E2-Evidence; Host-Parität fehlt | Autorisierten Agent-Host anbinden und E3 nachweisen | [G05](05-visual-interaction-loop.md) |
 | G06 | Reale Quick Flows | `PARTIAL` | Drei kanonische Flows, echter Locator-Drift-Fallback und unveränderter Replay lokal nachgewiesen; E3-Host-Parität fehlt | Mindestens drei reale, versionierte Flows mit Fallback, Step Evidence und unverändertem Replay | [G06](06-real-quick-flows.md) |
@@ -90,7 +91,7 @@ Ein Gate darf nur mit der in seinem Detaildokument verlangten Stufe auf `PASS` g
 | G09 | Evidence und Provenance | `PARTIAL` | lokale Screenshot-/Action-/Measurement-Evidence und 57/57 Rehash-/Tamper-Tests grün; externe Envelope-Reconciliation fehlt | Browser-Evidence retained, gehasht, run-gebunden; keine erfundenen Nullwerte; E3 bleibt offen | [G09](09-evidence-and-provenance.md) |
 | G10 | Test-, Fault- und Stabilitätsloops | `PASS` (lokale Candidate-Stabilität) | Black-Box, Drift, Origin, Replay, Critical und UI-Regression grün; genau ein unveränderter Critical-Replay; E3-Replay fehlt | Black-Box-Realpfad, Negative, Regression, Full Gate, unveränderter Replay; E3 bleibt technische Grenze | [G10](10-testing-stability-and-recovery.md) |
 | G11 | Brother-GPT-Eskalation und Dokumentpflege | `PASS` | G03-Blocker mit Handoff, Self-Review, Lead-Review und Herkunftsblock in `CP_G11_BROTHER_CYCLE_20260921.json` gebunden | Bei neuem Fingerprint denselben geprüften Ablauf wiederverwenden; unveränderte Fingerprints nicht erneut senden | [G11](11-brother-gpt-escalation.md) |
-| G12 | Release, Migration und Betrieb | `PARTIAL_COMPLETE_WITH_TECHNICAL_LIMITS` | Reconciliation-Baseline `3f9225b6de45e4c46c7deedb86a3e8a2899ecdb1`; PR #261 danach mit Main-SHA `818d57415ece7e438410ce6da0ae41c2abadf71a` gemergt; Required Gates grün; normaler ChatGPT-Probe aktuell `NOT_OBSERVABLE`; kein zweiter B-Canary und kein Post-Merge-Canary ausgeführt | Custom GPT bleibt Fallback; keine Migration oder Ersetzbarkeit behaupten; nächster Schritt ist ausschließlich eine explizite Host-/Plugin-Bindung, nicht ein identischer Retry | [G12](12-release-migration-and-operations.md) |
+| G12 | Release, Migration und Betrieb | `PARTIAL_COMPLETE_WITH_TECHNICAL_LIMITS` | Reconciliation-Baseline `3f9225b6de45e4c46c7deedb86a3e8a2899ecdb1`; PR #261 danach mit Main-SHA `818d57415ece7e438410ce6da0ae41c2abadf71a` gemergt; Required Gates grün; ein read-only Plugin-Tool ist nun live nachgewiesen; UI-Parität, externe Envelope-Reconciliation und Post-Merge-Canary bleiben offen | Custom GPT bleibt Fallback für nicht nachgewiesene UI-Funktionen; nächster Schritt sind G04/G05-Capability-Canaries, kein identischer G03-Retry | [G12](12-release-migration-and-operations.md) |
 
 ## 5. Kritischer Pfad
 

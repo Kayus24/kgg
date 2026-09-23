@@ -1,6 +1,6 @@
 {
   "schema": "kgg-project-completion-operational-reconciliation/v1",
-  "evidence_date": "2026-09-22",
+  "evidence_date": "2026-09-23",
   "fresh_main": "3f9225b6de45e4c46c7deedb86a3e8a2899ecdb1",
   "fresh_main_role": "RECONCILIATION_BASELINE_AT_GENERATION",
   "observed_main_after_pr_261": "818d57415ece7e438410ce6da0ae41c2abadf71a",
@@ -289,6 +289,33 @@
     "side_effect_scope": "NO_PERSISTENT_OR_EXTERNAL_SIDE_EFFECT",
     "interpretation": "The normal ChatGPT host accepted the bounded probe but did not expose the installed KGG plugin or requested tool at execution time. The plugin detail page's visible catalog is therefore discovery evidence only; it does not establish runtime binding. No second call is justified without a host/plugin binding change."
   },
+  "latest_bound_normal_chatgpt_tool_call": {
+    "observed_at": "2026-09-23T04:16:00+02:00",
+    "surface": "B_NORMAL_CHATGPT_WITH_KGG_PLUGIN",
+    "chat_tab": "Read only Plugin Test",
+    "chat_url": "https://chatgpt.com/c/6ab35687-a964-83eb-b07c-f359edb3dbf4",
+    "plugin_name": "KGG UI Lab Private",
+    "plugin_attached": true,
+    "prompt_scope": "exactly one bounded read-only availability probe",
+    "requested_tool": "get_current_state",
+    "requested_actor": "system",
+    "tool_name": "mcp__codex_apps__kgg_ui_lab_private_get_current_state",
+    "status": "ready",
+    "result": {
+      "schema": "kgg-ui-lab/mcp-server/v1",
+      "operation": "get_current_state",
+      "actor": "system",
+      "status": "ready",
+      "main_sha": "not_bound"
+    },
+    "browser_action": false,
+    "writes": false,
+    "dispatch": false,
+    "upload": false,
+    "installation": false,
+    "side_effect_scope": "NO_PERSISTENT_OR_EXTERNAL_SIDE_EFFECT",
+    "interpretation": "The official Im Chat testen path attached KGG UI Lab Private to a new Work conversation and the requested read-only tool executed successfully. This resolves the prior unchanged conversation-binding blocker for one read-only call. It does not prove screenshot/action/Quick-Flow execution, main-SHA binding, or cross-surface comparability. Do not repeat get_current_state solely for confirmation."
+  },
   "latest_plugin_binding_menu_read": {
     "observed_at": "2026-09-23T00:19:49+02:00",
     "surface": "B_NORMAL_CHATGPT_WITH_KGG_PLUGIN",
@@ -359,7 +386,7 @@
   },
   "current_blocker_package": {
     "blocker_fingerprint": "076fbbb27cf20f0ca81dc2a778a6ba6bcf1a4202a5b93d211e2fc8a81b923047",
-    "status": "BLOCKER_DETECTED",
+    "status": "RESOLVED",
     "phase": "G03_CURRENT_RECONCILIATION",
     "step": "NORMAL_CHATGPT_TOOL_CALL_RESULT",
     "objective": "prove one current bounded read-only tool invocation on the normal ChatGPT B-surface",
@@ -380,6 +407,9 @@
       "latest_local_battery_run.overall=PASS"
     ],
     "error_class": "PLUGIN_EXECUTION_NOT_OBSERVABLE",
+    "resolution": "Resolved by the official Im Chat testen attachment path and one fresh bounded read-only get_current_state call; the bound call returned status=ready.",
+    "resolved_by": "latest_bound_normal_chatgpt_tool_call",
+    "resolved_at": "2026-09-23T04:16:00+02:00",
     "root_cause_hypotheses": [
       "the normal ChatGPT runtime does not bind the visible private plugin catalog to the active conversation",
       "plugin detail discovery and chat-time tool registry are separate host paths",
@@ -396,29 +426,30 @@
     "attempts": [
       "one bounded normal-ChatGPT availability probe; response was NOT_OBSERVABLE",
       "one read-only plugin action-menu inspection; no attach/rebind action visible",
-      "no second call, browser action, plugin rebind, key, tunnel, or canary created"
+      "no second get_current_state call, browser action, key, tunnel, or canary created",
+      "official Im Chat testen path attached the plugin and one fresh read-only call returned ready"
     ],
-    "smallest_next_read_only_check": "use an external supported ChatGPT/workspace binding path; the current plugin detail offers no attach/rebind action, so do not repeat the call while the host registry is unchanged",
-    "would_require_scope_expansion": true,
-    "would_require_external_consequence": true,
-    "required_gate": "CHATGPT_PLUGIN_BINDING_OR_HOST_REPAIR",
+    "smallest_next_read_only_check": "continue with G04/G05 visual and action capability canaries; do not repeat G03 get_current_state",
+    "would_require_scope_expansion": false,
+    "would_require_external_consequence": false,
+    "required_gate": "G04_G05_UI_CAPABILITY_CANARY",
     "brother_review": "NOT_REQUIRED_FOR_THIS_DETERMINISTIC_RUNTIME_RESULT; request one only if the host binding plan changes",
     "advisory_policy": "do not retry or create a second canary without a changed host/plugin binding"
   },
   "surface_status": {
     "A_CUSTOM_GPT_PRODUCTION_CONTROL": "NOT_OBSERVABLE_FROM_CURRENT_REPO",
-    "B_PLUGIN_CANDIDATE": "DISCOVERABLE_TOOLSET_VISIBLE_EXECUTION_NOT_OBSERVABLE",
+    "B_PLUGIN_CANDIDATE": "READ_ONLY_TOOL_EXECUTABLE_UI_CAPABILITIES_UNVERIFIED",
     "C_CODEX_PLUS_PLUGIN": "LOCAL_MCP_AND_REAL_BRIDGE_CODE"
   },
   "current_status_overlay": {
-    "G03": "DISCOVERY_VISIBLE_TOOL_CALL_NOT_OBSERVABLE",
+    "G03": "PASS_READ_ONLY_TOOL_EXECUTED_UI_PARITY_UNVERIFIED",
     "G07": "PASS_CLASSIFICATION_WITH_B_REAL_AUDIT_PARTIAL",
-    "reason": "The detail view visibly lists the plugin and 11 tools, but one explicitly authorized bounded normal-ChatGPT probe returned NOT_OBSERVABLE for get_current_state. A read-only action-menu inspection shows no attach/rebind option. Discovery is visible; runtime conversation binding is not.",
-    "required_for_next_promotion": "an external supported host/workspace binding or reconfiguration, followed by one fresh bounded read-only call; do not repeat the unchanged call"
+    "reason": "The official Im Chat testen path attached the plugin to a new Work conversation and one explicitly authorized bounded normal-ChatGPT get_current_state(actor=system) call returned status=ready. UI screenshot/action/Quick-Flow parity and main-SHA binding remain unverified.",
+    "required_for_next_promotion": "one bounded G04/G05 capability canary for screenshot/action or visual state; do not repeat G03 get_current_state"
   },
   "gate_status": {
     "G02": "PARTIAL",
-    "G03": "PARTIAL",
+    "G03": "PASS_READ_ONLY_TOOL_EXECUTED_UI_PARITY_UNVERIFIED",
     "G04": "PASS_LOCAL_REAL_RUNTIME",
     "G05": "PARTIAL",
     "G06": "PARTIAL",
@@ -437,8 +468,8 @@
   },
   "remaining_limits": [
     "The manually verified native Codex plugin installation is local-only; repository packaging and ChatGPT host parity remain separate evidence requirements.",
-    "The canonical visible Windows host now has an active ready tunnel process, but native bridge binding, ChatGPT tool discovery, real external host browser parity and the post-merge production canary remain unproven; the single B real-host canary timed out before visual observation.",
-    "A later read-only plugin detail view loads KGG UI Lab Private and exposes the tool list; successful live tool execution is still unverified because no chat/tool call was sent.",
+    "The canonical visible Windows host now has an active ready tunnel process, but native bridge binding, screenshot/action parity and the post-merge production canary remain unproven; the single B real-host canary timed out before visual observation.",
+    "The official Im Chat testen path now proves one bound normal-ChatGPT read-only get_current_state call with status=ready. Screenshot/action/Quick-Flow execution, main-SHA binding and external measurement-envelope reconciliation remain unproven.",
     "External measurement-envelope reconciliation remains unavailable.",
     "No second B canary or post-merge canary is authorized by the existing run budget."
   ],
