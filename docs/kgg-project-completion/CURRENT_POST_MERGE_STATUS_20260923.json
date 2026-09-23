@@ -1,0 +1,39 @@
+{
+  "schema": "kgg-project-completion-post-merge-status/v1",
+  "observed_at": "2026-09-23",
+  "fresh_remote_main": "eb3ad0e88bd6b98b27a5c0e37262bf9ad1cea0f1",
+  "merged_pr": 262,
+  "merged_head_contains": "12f9925379cfbe104d906c84462307d0622423d9",
+  "required_checks": {
+    "required-gate": "PASS",
+    "validate-build": "PASS"
+  },
+  "post_merge_pages_build": "PASS",
+  "local_contract_fix": {
+    "commit": "75c8de1c09e262bd8df237a202ed5bb925eaaf5a",
+    "effect": "tool_catalog exposes the complete request/v1 schema required by visual tools"
+  },
+  "surface_status": {
+    "A_CUSTOM_GPT_PRODUCTION_CONTROL": "NOT_OBSERVABLE_FROM_CURRENT_REPO",
+    "B_PLUGIN_CANDIDATE": "SESSION_START_E3_PASS_OBSERVE_CONTRACT_REJECTED_REAL_BROWSER_NOT_OBSERVED",
+    "C_CODEX_PLUS_PLUGIN": "LOCAL_REAL_BRIDGE_READY_EXTERNAL_HOST_PARITY_UNPROVEN"
+  },
+  "gates": {
+    "G03": "PASS_READ_ONLY_TOOL_EXECUTED_UI_PARITY_UNVERIFIED",
+    "G04": "PASS_LOCAL_REAL_RUNTIME",
+    "G05": "PARTIAL",
+    "G06": "PARTIAL",
+    "G12": "PARTIAL_COMPLETE_WITH_TECHNICAL_LIMITS"
+  },
+  "remaining_external_evidence": [
+    "restart/reconnect the existing tunnel so the running stdio child loads the merged contract fix",
+    "read-only bind the connected bundle/tool schema to the merged revision",
+    "if separately gated, run exactly one post-rebind observe diagnostic before any action"
+  ],
+  "global_status": {
+    "PRODUCTION_CONTROL": "PILOT_INCOMPLETE",
+    "A_B": "NOT_COMPARABLE",
+    "replacement_eligible": false
+  },
+  "source": "KGG Lead post-merge reconciliation; Brother-GPT architecture review accepted the local fix and required the external rebind before another diagnostic."
+}

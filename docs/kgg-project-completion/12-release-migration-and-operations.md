@@ -148,6 +148,25 @@ Merged SHA, Paketversion, Installationsnachweis, Canary-Evidence, Rollbacknachwe
   Diagnose beziehungsweise — falls der sichtbare Host weiter unvorbereitet
   bleibt — ein separat zu genehmigendes Installations-/Profil-Gate. Ein weiterer
   Real-Canary benötigt ein neues, separat gebundenes Run-Budget.
+
+## 16. Post-Merge-Reconciliation (2026-09-23)
+
+PR #262 ist mit `MERGED_SHA=eb3ad0e88bd6b98b27a5c0e37262bf9ad1cea0f1`
+auf `main` gelandet. Die Required Checks `required-gate` und `validate-build`
+sind für den PR grün; der nachgelagerte GitHub-Pages-Build für denselben Main-
+SHA ist ebenfalls erfolgreich.
+
+Der PR enthält den minimalen Contract-Fix `75c8de1`: Der externe Tool-Katalog
+veröffentlicht jetzt die sieben Pflichtfelder von `request/v1`. Der bereits
+laufende Tunnel-Kindprozess wurde danach noch nicht neu gestartet und ist daher
+kein Nachweis, dass der verbundene Normal-ChatGPT-Bundle den Fix bereits lädt.
+Die aktuelle, bindende Reconciliation steht in
+[`CURRENT_POST_MERGE_STATUS_20260923.json`](CURRENT_POST_MERGE_STATUS_20260923.json).
+
+Der zulässige nächste Schritt ist ausschließlich ein Reconnect des bestehenden
+Tunnels, anschließend ein read-only Schema-Binding-Check. Erst danach darf ein
+separat gebundener einzelner Observe-Diagnoselauf stattfinden; kein Blind-Retry
+gegen den alten Prozess und keine Aktion im selben ersten Nachweis.
 - Vor einer solchen Vorbereitung muss die offizielle Upstream-Version und ihre
   bekannten ChatGPT-Discovery-Risiken frisch geprüft werden. Der frische
   Read-only-Check von Issue #57 bestätigt einen offenen Discovery-Grenzfall
