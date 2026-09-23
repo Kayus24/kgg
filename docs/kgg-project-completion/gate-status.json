@@ -1,8 +1,8 @@
 {
   "schema": "kgg-project-completion-gates/v1",
-  "generated_at": "2026-09-23T12:49:50+02:00",
-  "fresh_remote_main_at_generation": "b3800e5e1301e37763a780d5d1a5f7438337c5a8",
-  "local_head_at_generation": "b18e1591b4e6df3f812440de791725ddff415751",
+  "generated_at": "2026-09-23T13:15:38+02:00",
+  "fresh_remote_main_at_generation": "f65d16a2c0e13df4ef0e26fd5b777383466a02c2",
+  "local_head_at_generation": "f65d16a2c0e13df4ef0e26fd5b777383466a02c2",
   "north_star": [
     "migrate required Custom GPT capabilities into one universal KGG plugin",
     "provide real screenshot-to-action browser control for the KGG HTML app",
@@ -24,6 +24,6 @@
     {"id":"G09","title":"Evidence and provenance","status":"PARTIAL","evidence_level":"E2_LOCAL_REAL_RUNTIME","checkpoint":"CP_G08_G09_LOCAL_SAFETY_PROVENANCE_20260921.json","depends_on":["G04"],"document":"09-evidence-and-provenance.md","next_action":"external measurement-envelope reconciliation remains unproven; retain local 57/57 PASS"},
     {"id":"G10","title":"Testing stability and recovery","status":"PASS","scope":"local_candidate_stability_only","evidence_level":"E2_LOCAL_REAL_RUNTIME","checkpoint":"CP_G10_UI_REGRESSION_20260923.json","previous_checkpoint":"CP_G10_STABILITY_REPLAY_20260921.json","depends_on":["G04","G06","G08","G09"],"document":"10-testing-stability-and-recovery.md","next_action":"retain local full-regression PASS and continue the existing G12 technical-limit path; do not repeat unchanged UI cases or claim E3 host parity"},
     {"id":"G11","title":"Brother GPT escalation","status":"PASS","evidence_level":"E1_SYNTHETIC","depends_on":["G00"],"document":"11-brother-gpt-escalation.md","checkpoint":"CP_G11_BROTHER_CYCLE_20260921.json","next_action":"proceed to G12 final operational acceptance; do not repeat the unchanged blocker review"},
-    {"id":"G12","title":"Release migration and operations","status":"PARTIAL","scope":"PARTIAL_COMPLETE_WITH_TECHNICAL_LIMITS","evidence_level":"E3_REAL_HOST","checkpoint":"CP_G12_FINAL_ACCEPTANCE_20260921.json","depends_on":["G01","G02","G03","G04","G05","G06","G07","G08","G09","G10","G11"],"document":"12-release-migration-and-operations.md","channel_preflight":"CP_G07_ACTION_CHANNEL_PREFLIGHT_20260923.json","next_action":"retain Custom GPT fallback; V3 is reconciled as read-only B evidence; the selected normal ChatGPT tab has no live KGG action/browser channel; do not claim replacement, do not repeat V3/discovery, and do not execute ACTION_THEN_VERIFY or a post-merge canary without its own bounded run/consequence gate"}
+    {"id":"G12","title":"Release migration and operations","status":"PARTIAL","scope":"PARTIAL_COMPLETE_WITH_TECHNICAL_LIMITS","evidence_level":"E3_REAL_HOST","checkpoint":"CURRENT_POST_MERGE_STATUS_20260923.json","depends_on":["G01","G02","G03","G04","G05","G06","G07","G08","G09","G10","G11"],"document":"12-release-migration-and-operations.md","channel_preflight":"CP_G07_ACTION_CHANNEL_PREFLIGHT_20260923.json","next_action":"retain Custom GPT fallback; PR #264 is merged and Fresh Main is bound to f65d16a2c0e13df4ef0e26fd5b777383466a02c2; V3 remains read-only B evidence; the selected normal ChatGPT tab has no live KGG action/browser channel; do not claim replacement, do not repeat V3/discovery, and do not execute ACTION_THEN_VERIFY or a post-merge canary without a separate bounded run/consequence gate"}
   ]
 }
