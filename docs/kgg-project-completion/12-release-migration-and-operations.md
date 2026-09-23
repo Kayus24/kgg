@@ -151,26 +151,21 @@ Merged SHA, Paketversion, Installationsnachweis, Canary-Evidence, Rollbacknachwe
 
 ## 16. Post-Merge-Reconciliation (2026-09-23)
 
-PR #262 ist mit `MERGED_SHA=eb3ad0e88bd6b98b27a5c0e37262bf9ad1cea0f1`
+PR #264 ist mit `MERGED_SHA=f65d16a2c0e13df4ef0e26fd5b777383466a02c2`
 auf `main` gelandet. Die Required Checks `required-gate` und `validate-build`
-sind für den PR grün; der nachgelagerte GitHub-Pages-Build für denselben Main-
-SHA ist ebenfalls erfolgreich.
+sind grün. Der nachgelagerte Dokumentationsabgleich wurde in PR #265 mit
+`MERGED_SHA=b00ee425e6db8cc47da2823f4d2afa4c20cd671c` gemergt; dieser Folge-PR
+enthält keine Produkt- oder Release-Codeänderung.
 
-Der PR enthält den minimalen Contract-Fix `75c8de1`: Der externe Tool-Katalog
-veröffentlicht jetzt die sieben Pflichtfelder von `request/v1`. Der bereits
-laufende Tunnel-Kindprozess wurde danach noch nicht neu gestartet und ist daher
-kein Nachweis, dass der verbundene Normal-ChatGPT-Bundle den Fix bereits lädt.
-Die aktuelle, bindende Reconciliation steht in
+Die bindende aktuelle Reconciliation steht in
 [`CURRENT_POST_MERGE_STATUS_20260923.json`](CURRENT_POST_MERGE_STATUS_20260923.json).
+Sie bestätigt die provenance-verifizierte Surface-B-Read-only-Observation und
+trennt sie ausdrücklich von den weiterhin fehlenden Action-/Verify-/Quick-Flow-
+Nachweisen.
 
-Der zulässige nächste Schritt ist ausschließlich ein Reconnect des bestehenden
-Tunnels, anschließend ein read-only Schema-Binding-Check. Erst danach darf ein
-separat gebundener einzelner Observe-Diagnoselauf stattfinden; kein Blind-Retry
-gegen den alten Prozess und keine Aktion im selben ersten Nachweis.
-- Vor einer solchen Vorbereitung muss die offizielle Upstream-Version und ihre
-  bekannten ChatGPT-Discovery-Risiken frisch geprüft werden. Der frische
-  Read-only-Check von Issue #57 bestätigt einen offenen Discovery-Grenzfall
-  nach erfolgreichem `main/server/discover`, aber keinen verifizierten Fix.
-  Das hebt keinen Gate-Status an.
-- PR #262 ist ungemergt und wegen eines bestehenden CI-/Browser-Layout-Timeouts
-  blockiert; seine Release-Freshness-Felder sind keine kanonische Main-Evidence.
+Ein Post-Merge-Visual-Canary wurde nicht ausgeführt: Der erforderliche Live-
+Action-Kanal ist im aktuellen Normal-ChatGPT-/Custom-GPT-Schema nicht exponiert
+und ein neues Runtime-Key-, Dispatch-, Installations- oder Kosten-Gate ist nicht
+autorisiert. Deshalb bleiben `G05=PARTIAL`, `G06=PARTIAL`,
+`A_B=NOT_COMPARABLE` und `replacement_eligible=false` unverändert. Kein
+Blind-Retry gegen V3 und keine weitere Discovery ohne neues Capability-Signal.
