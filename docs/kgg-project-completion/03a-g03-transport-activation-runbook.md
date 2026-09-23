@@ -129,6 +129,9 @@ folgenden Punkte read-only nachgewiesen werden:
 3. Der gestartete MCP-Prozess erbt `KGG_REAL_BROWSER=1`. Der Default-
    `kgg-plugin/mcp/server.py` bleibt unverändert synthetisch; die Aktivierung
    darf nur über eine explizite, gebundene Runner-/Profilvariante erfolgen.
+   Für den sichtbaren Windows-Host ist diese Bindung im vorhandenen
+   `g07-visible-host-run-transient-key.ps1` nachgewiesen: Das Skript setzt den
+   Wert vor `tunnel-client run` und entfernt ihn beim Beenden wieder.
 4. `KGG_BROWSER_NODE`, `KGG_PLAYWRIGHT_NODE_PATH` beziehungsweise die im
    aktuellen `real_browser.py` vorgesehenen Fallbacks sind im selben Prozess
    auflösbar. Fehlende Dependencies werden nicht automatisch installiert.

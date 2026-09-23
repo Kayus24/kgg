@@ -357,11 +357,26 @@
     "mcp_command": "python C:/Users/ALEXAN~1/DOCUME~1/VIBCOD~1/KGG-EX~1/KGG-43~1/KGG-PL~1/mcp/server.py",
     "profile_declared_real_browser_opt_in": false,
     "profile_declared_kgg_real_browser": "NOT_SET",
-    "process_environment_kgg_real_browser": "NOT_INSPECTED",
+    "process_environment_kgg_real_browser": "INHERITED_FROM_VISIBLE_HOST_LAUNCHER",
     "profile_source_binding": "LOCAL_CANONICAL_MCP_SERVER_PATH",
-    "interpretation": "The active profile launches the canonical server directly and does not declare KGG_REAL_BROWSER=1. This is not proof about inherited process environment, but it explains why the connected ChatGPT bundle remains synthetic by default and identifies the exact preflight item for a future bound diagnostic.",
+    "interpretation": "The active profile launches the canonical server directly and does not declare KGG_REAL_BROWSER=1, but the currently running parent launcher explicitly sets KGG_REAL_BROWSER=1 before starting tunnel-client and removes it only on shutdown. The profile declaration alone is therefore insufficient; the visible launcher provides the current process-environment binding.",
     "side_effect_scope": "READ_ONLY_PROFILE_READ",
-    "next_allowed_step": "Before any restart or key use, read-only bind the running process environment and bundle revision; otherwise retain B_UI_PARITY_NOT_OBSERVABLE."
+    "next_allowed_step": "Use the existing running tunnel for exactly one separately bound POST_FIX_DIAGNOSTIC, but only after the plugin call is forced to pass a plain URL string; retain synthetic-only classification unless real artifacts are returned."
+  },
+  "latest_visible_host_launcher_binding_read": {
+    "observed_at": "2026-09-23T09:41:00+02:00",
+    "launcher_path": "C:/Users/Alexander Kreisle/Documents/vibcoding verbessern/.kgg-execution/g07-visible-host-run-transient-key.ps1",
+    "parent_process_id": 87144,
+    "tunnel_process_id": 88436,
+    "profile_path": "C:/Users/Alexander Kreisle/AppData/Roaming/tunnel-client/kgg-ui-lab-local-stdio.yaml",
+    "mcp_source": "canonical kgg-plugin/mcp/server.py",
+    "real_browser_opt_in": "KGG_REAL_BROWSER=1",
+    "key_handling": "Read-Host SecureString; transient environment assignment; BSTR zeroed and environment variable removed on exit",
+    "tunnel_lifecycle": "existing tunnel process is live; no new tunnel started",
+    "evidence_scope": "READ_ONLY_LAUNCHER_SOURCE_AND_PROCESS_PARENT_BINDING",
+    "interpretation": "The active visible-host launcher does provide the real-browser opt-in to the tunnel child. This removes REAL_BROWSER_OPT_IN_INACTIVE as the primary hypothesis. It does not prove ChatGPT bundle revision or a successful external visual artifact.",
+    "side_effect_scope": "NO_NEW_KEY_NO_NEW_TUNNEL_NO_RESTART",
+    "next_allowed_step": "One POST_FIX_DIAGNOSTIC with an unambiguously plain-string app.url; no unchanged retry."
   },
   "latest_g04_g05_normal_chatgpt_canary": {
     "observed_at": "2026-09-23T09:27:38+02:00",
