@@ -446,8 +446,27 @@
     "side_effect_scope": "NO_PERSISTENT_OR_EXTERNAL_SIDE_EFFECT",
     "interpretation": "The failure occurs during session validation, before Playwright/Chromium, observation, screenshot, or action. It is not evidence of a current browser runtime failure and does not promote G05/G06.",
     "retry_policy": "No further start_ui_session with the same payload. A new attempt requires a separately bound diagnostic gate and a proven plain-string URL plus bundle compatibility.",
-    "status_effect": "G03 remains PASS_READ_ONLY_TOOL_EXECUTED_UI_PARITY_UNVERIFIED; G05=PARTIAL; G06=PARTIAL; B UI parity remains NOT_OBSERVABLE; global statuses unchanged."
-  },
+      "status_effect": "G03 remains PASS_READ_ONLY_TOOL_EXECUTED_UI_PARITY_UNVERIFIED; G05=PARTIAL; G06=PARTIAL; B UI parity remains NOT_OBSERVABLE; global statuses unchanged."
+    },
+    "latest_observe_contract_fix": {
+      "observed_at": "2026-09-23T10:05:00+02:00",
+      "local_commit": "75c8de1",
+      "files": [
+        "kgg-plugin/mcp/server.py",
+        "release-pipeline/test_kgg_real_browser_bridge.py",
+        "kgg-plugin/references/architecture/source-hashes.json",
+        "kgg-plugin/references/source-map.md"
+      ],
+      "root_cause": "The MCP tool catalog described request only as an object and did not expose the seven required request/v1 fields. A host could therefore construct an observe request that the server rejected as request_schema_invalid.",
+      "change": "Published schema, required fields, operation enum, SHA patterns, and additionalProperties=false for request-based visual tools; added a catalog regression test.",
+      "local_tests": {
+        "test_kgg_real_browser_bridge": "10/10 PASS",
+        "test_kgg_plugin_candidate": "10/10 PASS",
+        "gpt_critical_battery": "PASS"
+      },
+      "external_effect": "The connected ChatGPT bundle was not rebuilt or rebound by this local commit; no external call or browser retry was made.",
+      "next_allowed_step": "After an explicitly authorized bundle rebuild/rebind, perform read-only schema binding and at most one separately bound post-fix observation diagnostic; no retry against the old bundle."
+    },
   "latest_plugin_binding_menu_read": {
     "observed_at": "2026-09-23T00:19:49+02:00",
     "surface": "B_NORMAL_CHATGPT_WITH_KGG_PLUGIN",
@@ -615,8 +634,8 @@
       "one post-fix diagnostic; start_ui_session passed and observe_visual_state failed request_schema_invalid",
       "no execute_visual_action invocation and no screenshot/artifact evidence"
     ],
-    "smallest_next_read_only_check": "bind the connected observe_visual_state request schema and bundle revision read-only; if unavailable classify BUNDLE_BINDING_NOT_OBSERVABLE",
-    "required_gate": "NO_FURTHER_UI_RETRY_UNLESS_A_SEPARATE_GATE_BINDS_OBSERVE_SCHEMA_AND_COMPATIBLE_BUNDLE",
+    "smallest_next_read_only_check": "read-only confirm that the connected bundle exposes the request schema from local commit 75c8de1; if unavailable classify OBSERVE_SCHEMA_BINDING_NOT_OBSERVABLE",
+    "required_gate": "EXTERNAL_PLUGIN_REBIND_THEN_ONE_POST_FIX_DIAGNOSTIC_ONLY_IF_SCHEMA_BINDING_IS_PROVEN",
     "would_require_scope_expansion": true,
     "would_require_external_consequence": false,
     "brother_review": {
@@ -643,8 +662,8 @@
     "G03": "PASS_READ_ONLY_TOOL_EXECUTED_UI_PARITY_UNVERIFIED",
     "G07": "PASS_CLASSIFICATION_WITH_B_REAL_AUDIT_PARTIAL",
     "G04_G05": "PARTIAL_SESSION_READY_OBSERVE_SCHEMA_REJECTED",
-    "reason": "The official Im Chat testen path attached the plugin and one bounded get_current_state(actor=system) call returned status=ready. Two initial G04/G05 session attempts failed before browser start (session_schema_invalid, then app_url_invalid). A separately bound post-fix diagnostic then reached session ready, but observe_visual_state failed request_schema_invalid before returning a visual state; the plugin detail describes the connected bundle as read-only synthetic and exposes no Fresh-Main revision, but that description alone does not prove synthetic-only execution. No screenshot/action/Quick-Flow parity or main-SHA binding is proven.",
-    "required_for_next_promotion": "Do not blind-retry observe or action. Only a separately bound read-only check proving the connected bundle and exact observe request schema may justify a new diagnostic gate; otherwise retain the documented technical limit."
+    "reason": "The official Im Chat testen path attached the plugin and one bounded get_current_state(actor=system) call returned status=ready. Two initial G04/G05 session attempts failed before browser start (session_schema_invalid, then app_url_invalid). A separately bound post-fix diagnostic then reached session ready, but observe_visual_state failed request_schema_invalid before returning a visual state; the plugin detail describes the connected bundle as read-only synthetic and exposes no Fresh-Main revision, but that description alone does not prove synthetic-only execution. No screenshot/action/Quick-Flow parity or main-SHA binding is proven. Local commit 75c8de1 now publishes the complete request schema, but the external bundle is not rebound.",
+    "required_for_next_promotion": "Do not blind-retry observe or action. The local schema fix is verified, but the connected external bundle is not yet rebound. Only a separately bound read-only check proving that bundle and exact observe request schema may justify one new diagnostic gate; otherwise retain the documented technical limit."
   },
   "gate_status": {
     "G02": "PARTIAL",
@@ -668,7 +687,7 @@
   "remaining_limits": [
     "The manually verified native Codex plugin installation is local-only; repository packaging and ChatGPT host parity remain separate evidence requirements.",
     "The canonical visible Windows host now has an active ready tunnel process, but native bridge binding, screenshot/action parity and the post-merge production canary remain unproven; the single B real-host canary timed out before visual observation.",
-    "The official Im Chat testen path proves one bound normal-ChatGPT read-only get_current_state call with status=ready. The connected bundle is described as read-only synthetic and exposes no Fresh-Main revision; a post-fix G04/G05 session reached ready but observe_visual_state was rejected with request_schema_invalid. Screenshot/action/Quick-Flow execution, main-SHA binding and external measurement-envelope reconciliation remain unproven.",
+    "The official Im Chat testen path proves one bound normal-ChatGPT read-only get_current_state call with status=ready. The connected bundle is described as read-only synthetic and exposes no Fresh-Main revision; a post-fix G04/G05 session reached ready but observe_visual_state was rejected with request_schema_invalid. Local commit 75c8de1 now publishes the complete request schema, but the external bundle has not been rebound. Screenshot/action/Quick-Flow execution, main-SHA binding and external measurement-envelope reconciliation remain unproven.",
     "External measurement-envelope reconciliation remains unavailable.",
     "No further start_ui_session retry is allowed without a separately bound post-fix diagnostic gate; no post-merge canary is authorized by the existing run budget."
   ],

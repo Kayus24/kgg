@@ -43,6 +43,12 @@ Screenshot oder Quick Flow beobachtet. G06 bleibt `PARTIAL` und darf nicht aus
 dem lokalen Flow- oder Synthetic-Ergebnis auf ChatGPT-Host-Parität
 hochgestuft werden.
 
+Die lokale Contract-Ursache für `request_schema_invalid` ist mit Commit
+`75c8de1` behoben: Der Tool-Katalog veröffentlicht jetzt die vollständige
+Request-Struktur. Das verbundene externe Bundle wurde dadurch noch nicht
+aktualisiert; G06 bleibt bis zu einem read-only Rebind und einem separat
+gebundenen Diagnose-Lauf `PARTIAL`.
+
 ## 8. Kleinschrittiger Arbeitsplan
 
 1. Drei erste Flows mit Startzustand, Schritten, Endzustand und Version definieren.
@@ -77,6 +83,8 @@ hochgestuft werden.
 - unveränderter Replay pro Flow.
 - `python -m unittest release-pipeline/test_kgg_real_browser_bridge.py -v`: drei zertifizierte Flows real PASS plus Locator-Drift-Fallback real PASS; der Flow bleibt nach dem Fallback ausdrücklich stale.
 - Normal-ChatGPT-Post-Fix-Diagnose: Session `ready`, Observe `request_schema_invalid`, keine E3-Quick-Flow-Evidence.
+- Lokaler Contract-Fix `75c8de1` und Regressionstests grün; kein externer
+  Bundle-Rebind und kein erneuter Quick-Flow-Lauf.
 
 ## 11. Safety und Datenschutz
 

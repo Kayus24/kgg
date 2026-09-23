@@ -49,6 +49,13 @@ Host-Parität. Der verbleibende Blocker liegt vorläufig auf der
 Observe-Request-/Bundle-Bindung; die korrekte Einstufung lautet
 `REAL_BROWSER_CAPABILITY_UNPROVEN_AFTER_OBSERVE_CONTRACT_REJECTION`.
 
+Die lokale Ursache wurde eingegrenzt und behoben: Der MCP-Tool-Katalog hatte
+`request` zuvor nur als unbeschriebenes Objekt veröffentlicht. Commit `75c8de1`
+publiziert nun die sieben Pflichtfelder des `kgg-ui-lab/request/v1`-Vertrags
+und einen Regressionstest. Das ändert den bereits verbundenen ChatGPT-Bundle-
+Stand nicht automatisch; vor einem neuen Lauf muss das Bundle read-only an
+diesen Contract gebunden bzw. neu verbunden werden.
+
 ## 8. Kleinschrittiger Arbeitsplan
 
 1. Screenshot-Metadaten und Viewport-Koordinatensystem festlegen. ✅
@@ -87,6 +94,9 @@ Observe-Request-/Bundle-Bindung; die korrekte Einstufung lautet
   gebundener Post-Fix-Diagnoselauf erreichte `ready`, dessen
   `observe_visual_state` aber mit `request_schema_invalid` scheiterte. Keine
   Screenshot- oder Aktions-Evidence. Kein weiterer Observe-/Action-Retry.
+- Lokaler Contract-Fix `75c8de1`: vollständiges `request/v1`-Schema im
+  Tool-Katalog, 10/10 Real-Bridge-Tests, 10/10 Plugin-Candidate-Tests und
+  GPT-Critical-Battery grün. Kein externer Bundle-Rebind ausgeführt.
 
 ## 11. Safety und Datenschutz
 
