@@ -1,0 +1,42 @@
+{
+  "checkpoint_id": "CP_G10_UI_REGRESSION_20260923",
+  "base_sha": "715f2f1de4ee07676450acdf20f005d5407475d2",
+  "fresh_remote_main": "b3800e5e1301e37763a780d5d1a5f7438337c5a8",
+  "gate": "G10",
+  "scope": "local_candidate_ui_stability_and_browser_dependency_resolution",
+  "decision": "PASS_LOCAL_CANDIDATE_STABILITY",
+  "candidate_changes": [
+    "kgg-update/src/runtime/app-core.html",
+    "kgg-update/index.html",
+    "kgg-update/version.json",
+    "release-pipeline/kgg_ui_stability_smoke.js",
+    "release-pipeline/kgg_test_battery.py"
+  ],
+  "evidence": {
+    "module_source": "PASS sha256=8508f8e802286d41fc095a3473450e2e705c9d2396f838f0965e21fd496f702a",
+    "targeted_ui_regression": "PASS ui-stability-regression",
+    "ticket_015_browser": "PASS",
+    "ticket_015_admin_browser": "PASS",
+    "ui_contract": "PASS",
+    "preview_marker": "PASS",
+    "full_regression_hook": "PASS",
+    "release_contract_tests": "141 passed, 1 skipped",
+    "browser_external_requests": 0,
+    "patch_hygiene": "PASS",
+    "secret_scan": "PASS"
+  },
+  "safety": {
+    "synthetic_data_only": true,
+    "unapproved_npm_exec_download": false,
+    "local_playwright_reused_when_present": true,
+    "foreign_worktree_changes_touched": false
+  },
+  "interpretation": "The tablet splitter geometry and local browser regression path are green. Existing local Playwright is preferred over npm exec; the fallback remains available only when no local module exists. This is local candidate evidence, not external B-host parity or production evidence.",
+  "open_limits": [
+    "G05 remains PARTIAL until a separately bounded external ACTION_THEN_VERIFY evidence exists.",
+    "G06 remains PARTIAL; no Quick-Flow parity is inferred from this UI battery.",
+    "A_B remains NOT_COMPARABLE and replacement_eligible remains false.",
+    "The foreign kgg-plugin/mcp/__pycache__/ directory remains untracked and untouched."
+  ],
+  "next_step": "Update the G10 documentation/checkpoint index, then continue the existing G12 technical-limit path without repeating the same local UI regression."
+}

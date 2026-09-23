@@ -23,12 +23,20 @@ G04, G06, G08 und G09. Befehle werden aus `release-pipeline/kgg_test_battery.py`
 - `GATE_STATUS=PASS`
 - `GATE_SCOPE=local_candidate_stability_only`
 - `EVIDENCE_LEVEL=E2_LOCAL_REAL_RUNTIME`
-- `LAST_VERIFIED_BASE_SHA=1e6c6e3e28603f28bfbad3b127c688e722c823f5`
-- `LAST_VERIFIED_AT=2026-09-21T19:48:00+02:00`
+- `LAST_VERIFIED_BASE_SHA=715f2f1de4ee07676450acdf20f005d5407475d2`
+- `LAST_VERIFIED_AT=2026-09-23T12:41:06+02:00`
 
 ## 6. Bestehende Evidence
 
 Critical/Regression-Battery, Playwright-UI-Smokes, GPT-Evals, Measurement-Tests, Fault Injection, Hook Guard und eine unabhängige Real-Bridge-Black-Box-Suite existieren. Browserdependencies können Downloads auslösen und müssen vorab klassifiziert werden.
+
+Die lokale Regression verwendet seit dem Candidate `715f2f1` zuerst das bereits
+vorhandene `release-pipeline/node_modules/playwright`. Dadurch löst ein normaler
+UI-/Browserlauf keinen unnötigen `npm exec --yes`-Download aus. Nur wenn kein
+lokales Modul vorhanden ist, bleibt der dokumentierte Installationspfad als
+Umgebungs-Gate bestehen. Die neue Evidence ist in
+[`CP_G10_UI_REGRESSION_20260923.json`](CP_G10_UI_REGRESSION_20260923.json)
+gebunden.
 
 ## 7. Lücke und Root Cause
 
@@ -72,6 +80,13 @@ für E3-Host-Parität oder Release.
 - `cmd /c release-pipeline\run-kgg-tests.cmd --level critical` für Codeänderungen.
 - UI-Regression bei UI-/Browseränderung gemäß AGENTS.md.
 - unveränderter Replay.
+
+Für den aktuellen Candidate zusätzlich grün:
+
+- `python release-pipeline/kgg_test_battery.py --level regression` im Commit-Hook;
+- Ticket-015-Progressions- und Admin-Browser-Smokes ohne `npm exec`;
+- UI-Contract, Preview-Marker und alle registrierten UI-Stabilitätsfälle;
+- `python release-pipeline/kgg_patch_hygiene.py` nach dem Fresh-Main-Merge.
 
 ## 11. Safety und Datenschutz
 
