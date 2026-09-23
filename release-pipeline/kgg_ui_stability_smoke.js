@@ -1248,6 +1248,9 @@ async function browserUiMiniSeriesSuite(caseName) {
           })
         );
         localStorage.setItem(customBankKey, JSON.stringify(customBank));
+        // Keep the admin-only configuration prompt out of this browser probe.
+        // The value is synthetic and is never sent to a network endpoint.
+        localStorage.setItem("kgg_admin_local_secrets_v1", JSON.stringify({ version: 2, geminiKeys: ["synthetic-ui-test-key"] }));
         localStorage.setItem("kgg_tablet_layout_locked", "false");
         localStorage.removeItem("kgg_tablet_left_col_width");
         localStorage.setItem("kgg_tablet_ui_scale", "1");
@@ -1302,6 +1305,9 @@ async function browserUiMiniSeriesSuite(caseName) {
           tools: toolsBox,
           splitValue: splitValueBox,
           toolsVisible: visible(toolsBox),
+          handleToolsOverlap:
+            !!(handleBox && toolsBox && handleBox.left < toolsBox.right && handleBox.right > toolsBox.left &&
+              handleBox.top < toolsBox.bottom && handleBox.bottom > toolsBox.top),
           boundary,
           handleCenter,
           handleBoundaryDelta: boundary !== null && handleCenter !== null ? Math.abs(handleCenter - boundary) : null,
@@ -1313,7 +1319,8 @@ async function browserUiMiniSeriesSuite(caseName) {
         !initial.handle ||
         !initial.bank ||
         !initial.plan ||
-        initial.toolsVisible ||
+        !initial.toolsVisible ||
+        initial.handleToolsOverlap ||
         initial.handleBoundaryDelta === null ||
         initial.handleBoundaryDelta > 24 ||
         !initial.splitValue ||
@@ -1333,12 +1340,12 @@ async function browserUiMiniSeriesSuite(caseName) {
         fail(`Tablet split plus changed wrong state: ${JSON.stringify({ initial, afterPlus })}`);
       }
 
-      const valueCenter = await elementCenter(page.locator("#tabletSplitScaleValue"));
-      await dispatchPointer(page, "#tabletSplitScaleValue", "pointerdown", valueCenter.x, valueCenter.y, 151);
+      const handleCenter = await elementCenter(page.locator("#tabletLayoutResizeHandle"));
+      await dispatchPointer(page, "#tabletLayoutResizeHandle", "pointerdown", handleCenter.x, handleCenter.y, 151);
       await page.waitForTimeout(20);
-      await dispatchPointer(page, "document", "pointermove", valueCenter.x + 90, valueCenter.y, 151);
+      await dispatchPointer(page, "document", "pointermove", handleCenter.x + 90, handleCenter.y, 151);
       await page.waitForTimeout(80);
-      await dispatchPointer(page, "document", "pointerup", valueCenter.x + 90, valueCenter.y, 151);
+      await dispatchPointer(page, "document", "pointerup", handleCenter.x + 90, handleCenter.y, 151);
       await page.waitForTimeout(220);
       const afterDrag = await page.evaluate(() => ({
         scale: getComputedStyle(document.documentElement).getPropertyValue("--kgg-tablet-ui-scale").trim(),
@@ -1434,17 +1441,16 @@ async function browserUiMiniSeriesSuite(caseName) {
       }, seededExercises(8));
       }
       await page.waitForSelector("#planList .planCard[data-plan-id]", { timeout: 15000 });
-      if (realTabletRuntime) {
-        await page.evaluate(() => {
-          document.querySelectorAll(".modal.open").forEach((modal) => modal.classList.remove("open"));
-        });
-      }
+      await page.evaluate(() => {
+        // The admin fixture opens its local configuration prompt when no
+        // synthetic key is present.  Close any such startup modal before
+        // measuring tablet geometry; modal coverage is tested separately.
+        document.querySelectorAll(".modal.open").forEach((modal) => modal.classList.remove("open"));
+      });
       await page.waitForTimeout(500);
-      if (realTabletRuntime) {
-        await page.evaluate(() => {
-          document.querySelectorAll(".modal.open").forEach((modal) => modal.classList.remove("open"));
-        });
-      }
+      await page.evaluate(() => {
+        document.querySelectorAll(".modal.open").forEach((modal) => modal.classList.remove("open"));
+      });
       const layoutProbe = await page.evaluate(() => {
         const rect = (id) => {
           const el = id.startsWith(".") || id.startsWith("#") ? document.querySelector(id) : document.getElementById(id);
@@ -1588,7 +1594,28 @@ async function browserUiMiniSeriesSuite(caseName) {
         }
       }
       if (caseMatches(caseName, ["ui-mini-series", "tablet-layout-visual"])) {
-        await page.evaluate(() => document.body.classList.add("tabletMenuOpen"));
+        // The package-save probe intentionally returns to a phone viewport;
+        // restore the tablet boundary before exercising the tablet menu.
+        await page.setViewportSize({ width: 1180, height: 820 });
+        await page.waitForTimeout(350);
+        if (realTabletRuntime) {
+          // Exercise the real menu boundary with a coordinate click.  The
+          // button is fixed while the app is transformed, so locator
+          // actionability can report the moving app as an interceptor even
+          // though elementFromPoint resolves to the button.
+          const menuButtonBox = await page.locator("#tabletMenuBtn").boundingBox();
+          if (!menuButtonBox) fail("Tablet menu button has no hit box after viewport restore");
+          await page.mouse.click(menuButtonBox.x + menuButtonBox.width / 2, menuButtonBox.y + menuButtonBox.height / 2);
+          await page.waitForFunction(() => document.body.classList.contains("tabletMenuOpen"), null, { timeout: 10000 });
+        } else {
+          // Static layout probes intentionally strip scripts; reproduce the
+          // resulting open state without pretending to test event wiring.
+          await page.evaluate(() => {
+            document.body.classList.add("tabletMenuOpen");
+            const menu = document.getElementById("tabletSideMenu");
+            if (menu) menu.setAttribute("aria-hidden", "false");
+          });
+        }
         const menuState = await page.evaluate(() => {
           const ids = ["tabletMenuLayoutBtn", "tabletMenuTherapistShareBtn", "tabletMenuRecentBtn", "tabletMenuPackagesBtn"];
           return Object.fromEntries(ids.map((id) => {

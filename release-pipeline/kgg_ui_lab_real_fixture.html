@@ -17,6 +17,7 @@
     <p data-kgg-state="admin-ready" id="kgg-state">admin-ready</p>
     <button type="button" data-kgg-action="tablet-splitter-control" id="kgg-action">Apply bounded UI action</button>
     <button type="button" data-kgg-action="synthetic-qr-image" id="kgg-qr">Open synthetic preview link</button>
+    <button type="button" data-kgg-action="language-toggle" id="kgg-language-toggle" hidden>DE ▸ EN</button>
   </main>
   <script>
     const state = document.getElementById('kgg-state');
@@ -25,6 +26,7 @@
     const params = new URLSearchParams(location.search);
     const flow = params.get('flow');
     const drift = params.get('drift') === '1';
+    const languageFallback = params.get('fallback') === 'language';
     if (flow === 'pilot') {
       document.body.dataset.kggState = 'pilot-area-ready';
       state.dataset.kggState = 'pilot-area-ready';
@@ -37,6 +39,17 @@
     if (drift) {
       action.dataset.kggAction = 'drifted-control';
       action.textContent = 'Drifted control (visual fallback required)';
+    }
+    if (languageFallback) {
+      document.body.removeAttribute('data-kgg-state');
+      state.removeAttribute('data-kgg-state');
+      const languageToggle = document.getElementById('kgg-language-toggle');
+      languageToggle.hidden = false;
+      languageToggle.addEventListener('click', () => {
+        const next = localStorage.getItem('kggPatientLang') === 'en' ? 'de' : 'en';
+        localStorage.setItem('kggPatientLang', next);
+        languageToggle.textContent = next === 'en' ? 'EN ▸ DE' : 'DE ▸ EN';
+      });
     }
     action.addEventListener('click', () => {
       document.body.dataset.kggState = 'scale-drag-state';

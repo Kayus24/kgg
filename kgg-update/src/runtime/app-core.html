@@ -6719,8 +6719,12 @@
     const rightEdge=rightRects.length?Math.min(...rightRects.map(r=>r.left)):Math.min(rect.right,rect.left+fallbackLeft+gap);
     const handleWidth=handle.getBoundingClientRect().width||58;
     const center=(rightEdge>leftEdge+2)?((leftEdge+rightEdge)/2):leftEdge+Math.max(0,gap/2);
-    handle.style.left=Math.round(center-(handleWidth/2))+'px';
-    handle.style.top=Math.round(rect.top+8)+'px';
+    /* The handle is inside the transformed tablet app. Fixed-position
+       descendants of a transformed ancestor use that ancestor as their
+       containing block, so convert the viewport target to app-local
+       coordinates before writing the inline position. */
+    handle.style.left=Math.round(center-rect.left-(handleWidth/2))+'px';
+    handle.style.top=Math.round(8)+'px';
     handle.style.height=Math.max(160,Math.round(rect.height-16))+'px';
   }
   function updateTabletLayoutAdaptiveClasses(){

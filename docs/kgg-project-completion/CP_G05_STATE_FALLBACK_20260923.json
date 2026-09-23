@@ -1,0 +1,31 @@
+{
+  "checkpoint_id": "CP_G05_STATE_FALLBACK_20260923",
+  "gate": "G05",
+  "phase": "LOCAL_OBSERVER_STATE_FALLBACK",
+  "decision": "PASS_LOCAL_ONLY",
+  "base_sha": "b3800e5e1301e37763a780d5d1a5f7438337c5a8",
+  "candidate_scope": [
+    "kgg-plugin/mcp/browser_session_host.js",
+    "release-pipeline/kgg_ui_lab_real_fixture.html",
+    "release-pipeline/test_kgg_real_browser_bridge.py",
+    "kgg-plugin/references/architecture/source-hashes.json",
+    "kgg-plugin/references/source-map.md"
+  ],
+  "change": "When no data-kgg-state exists, expose only the allowlisted synthetic language state lang-de/lang-en; never return page text or storage contents.",
+  "targeted": "11/11 release-pipeline/test_kgg_real_browser_bridge.py",
+  "regression": "10/10 release-pipeline/test_kgg_plugin_candidate.py",
+  "critical": "KGG test battery --suite gpt --level critical PASS",
+  "proven": [
+    "local action before/after state remains bound",
+    "missing data-kgg-state does not force an unsafe raw-content fallback",
+    "source hashes and source map are synchronized"
+  ],
+  "not_proven": [
+    "external ChatGPT bundle contains this fix",
+    "Surface-B ACTION_THEN_VERIFY",
+    "G06 Quick Flow host evidence",
+    "A/B parity",
+    "production readiness"
+  ],
+  "next": "Rebind or otherwise qualify the external bundle only under a separate non-cost-free action gate; do not claim E3 action from local tests."
+}

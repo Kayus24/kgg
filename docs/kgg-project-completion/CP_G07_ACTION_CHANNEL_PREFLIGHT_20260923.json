@@ -1,0 +1,57 @@
+{
+  "schema": "kgg-project-completion-action-channel-preflight/v1",
+  "checkpoint_id": "CP_G07_ACTION_CHANNEL_PREFLIGHT_20260923",
+  "evidence_date": "2026-09-23",
+  "fresh_remote_main": "b3800e5e1301e37763a780d5d1a5f7438337c5a8",
+  "local_head": "b18e1591b4e6df3f812440de791725ddff415751",
+  "scope": "read-only live capability preflight before ACTION_THEN_VERIFY",
+  "surface": "NORMAL_CHATGPT_WITH_KGG_PLUGIN",
+  "browser_tab_title": "UI Audit Ergebnis",
+  "observation": {
+    "app_url": "NOT_OBSERVABLE",
+    "tab_id": "NOT_OBSERVABLE",
+    "live_kgg_action_channel": "NOT_OBSERVABLE",
+    "available_live_tools": [
+      "Plugin_Management.search_plugins",
+      "files.search"
+    ],
+    "missing_required_capabilities": [
+      "KGG start_ui_session",
+      "KGG get_current_state",
+      "KGG observe_visual_state",
+      "move or move_to",
+      "coordinate click",
+      "screenshot or screenshot artifact",
+      "DOM/AX browser control"
+    ]
+  },
+  "action_then_verify": {
+    "started": false,
+    "reason": "No live KGG action/browser channel was exposed by the selected normal ChatGPT tab.",
+    "external_side_effect": false,
+    "cost": false,
+    "runtime_key_created": false,
+    "installation": false
+  },
+  "decision": "WAITING_HUMAN_OR_TECHNICAL_LIMIT",
+  "evidence_class": "READ_ONLY_HOST_CAPABILITY_OBSERVATION",
+  "interpretation": [
+    "This is not evidence that the KGG plugin implementation is broken.",
+    "The tab is not the already verified Surface-B session used for V3.",
+    "No further identical discovery or observe retry is justified without a new capability signal."
+  ],
+  "brother_review": {
+    "last_completed_decision": "CONTINUE",
+    "last_completed_scope": "V3 provenance-verified Surface-B read-only observation",
+    "current_blocker_review": "REQUESTED_ONCE",
+    "advisory_only": true
+  },
+  "next_allowed_step": "Only a separately bound ACTION_THEN_VERIFY gate may proceed if a live KGG action channel becomes available; otherwise retain the technical limit and do not create a key, install, dispatch, or repeat discovery.",
+  "global_status_unchanged": {
+    "PRODUCTION_CONTROL": "PILOT_INCOMPLETE",
+    "A_B": "NOT_COMPARABLE",
+    "replacement_eligible": false,
+    "G05": "PARTIAL",
+    "G06": "PARTIAL"
+  }
+}

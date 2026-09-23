@@ -113,11 +113,22 @@ function artifact(runId, sequence, buffer) {
 
 async function stateValue(page) {
   assertSafePage();
-  const value = await page.evaluate(() => {
+  const marker = await page.evaluate(() => {
     const node = document.querySelector("[data-kgg-state]");
-    return node?.getAttribute("data-kgg-state") || document.body?.getAttribute("data-kgg-state") || "unknown";
+    const explicit = node?.getAttribute("data-kgg-state") || document.body?.getAttribute("data-kgg-state");
+    if (explicit) return { kind: "explicit", value: explicit };
+    // Some supported synthetic patient previews expose a bounded language
+    // toggle but no data-kgg-state marker. Expose only that non-sensitive
+    // state, never page text, values, or storage contents.
+    const languageToggle = document.querySelector('#kggLangSwitch,[data-kgg-action="language-toggle"]');
+    if (languageToggle) {
+      let language = "de";
+      try { language = localStorage.getItem("kggPatientLang") === "en" ? "en" : "de"; } catch {}
+      return { kind: "bounded-language", value: `lang-${language}` };
+    }
+    return { kind: "unknown", value: "unknown" };
   });
-  return safeText(String(value), "state");
+  return safeText(String(marker.value), "state");
 }
 
 async function locateAction(page, label) {
