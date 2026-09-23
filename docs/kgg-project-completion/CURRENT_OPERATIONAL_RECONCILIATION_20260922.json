@@ -404,6 +404,41 @@
       "artifacts": [],
       "model_serialization_note": "The model response said app.url was a Markdown link; the raw user prompt contained the URL, but the exact tool argument cannot be independently recovered from the host transcript."
     },
+    "post_fix_diagnostic": {
+      "observed_at": "2026-09-23T09:47:00+02:00",
+      "operation_sequence": [
+        "start_ui_session",
+        "observe_visual_state",
+        "execute_visual_action (not reached)"
+      ],
+      "binding_change": [
+        "visible-host launcher source read shows KGG_REAL_BROWSER=1 passed to tunnel child",
+        "app.url supplied as JSON Unicode escapes for the exact allowed naked URL",
+        "runner.browser_revision=host-real-opt-in"
+      ],
+      "start_ui_session": {
+        "status": "PASS",
+        "session_state": "requested -> ready",
+        "session_id": "kgg-ui-20260923-04",
+        "request_id": "kgg-ui-20260923-04"
+      },
+      "observe_visual_state": {
+        "status": "FAIL",
+        "error_class": "request_schema_invalid",
+        "browser_started": false,
+        "screenshot": false,
+        "artifacts": []
+      },
+      "execute_visual_action": {
+        "status": "NOT_CALLED"
+      },
+      "browser_revision": "host-real-opt-in (runner declaration only)",
+      "real_browser_interaction": "NOT_OBSERVABLE",
+      "synthetic_evidence": "NO_SCREENSHOT_OR_ACTION_EVIDENCE",
+      "side_effect_scope": "NO_PERSISTENT_OR_EXTERNAL_SIDE_EFFECT",
+      "interpretation": "The session validator accepted the payload, but the observation request was rejected before a visual state or browser artifact was returned. This narrows the remaining issue to the observe request contract or the connected bundle; it does not prove a real browser interaction.",
+      "retry_policy": "No further observe or action retry without a new read-only binding of the exact request schema and connected bundle; do not reuse this payload blindly."
+    },
     "real_browser_interaction": "NOT_OBSERVABLE",
     "synthetic_evidence": "NO_SCREENSHOT_OR_ACTION_EVIDENCE",
     "blocker_fingerprint": "6159286ff5af1da30be5522d2e150c5458e78ab3013c69ef47e6c303b2c2500e",
@@ -533,16 +568,18 @@
     "brother_review": "NOT_REQUIRED_FOR_THIS_DETERMINISTIC_RUNTIME_RESULT; request one only if the host binding plan changes",
     "advisory_policy": "do not retry or create a second canary without a changed host/plugin binding"
   },
-  "current_g04_g05_blocker_package": {
-    "blocker_fingerprint": "6159286ff5af1da30be5522d2e150c5458e78ab3013c69ef47e6c303b2c2500e",
+    "current_g04_g05_blocker_package": {
+    "previous_blocker_fingerprint": "6159286ff5af1da30be5522d2e150c5458e78ab3013c69ef47e6c303b2c2500e",
+    "blocker_fingerprint": "c5700d020f7d3f4e7f2a19259cbd024d1daab005e829e08262708166c6d89268",
     "status": "BLOCKER_DETECTED",
     "phase": "G04_G05_NORMAL_CHATGPT_CAPABILITY_CANARY",
-    "step": "SESSION_START_VALIDATION",
-    "objective": "prove a normal-ChatGPT plugin session can reach screenshot/action capability without treating synthetic evidence as real host evidence",
+    "step": "OBSERVE_REQUEST_VALIDATION",
+    "objective": "prove a normal-ChatGPT plugin observation request can return real visual evidence without treating synthetic evidence as real host evidence",
     "completed": [
       "one bound normal-ChatGPT get_current_state read-only call",
       "plugin-detail bundle identity and tool catalog read",
       "two bounded session-start attempts with no browser or action side effect",
+      "one post-fix diagnostic with session ready but observation rejected",
       "Brother-GPT advisory review and self-review"
     ],
     "evidence": [
@@ -552,16 +589,19 @@
       "source_revision=NOT_OBSERVABLE",
       "first failure=session_schema_invalid",
       "corrected failure=app_url_invalid",
-      "model response stated app.url was treated as a Markdown link",
+      "post-fix start_ui_session=PASS with requested->ready",
+      "post-fix observe_visual_state=request_schema_invalid",
+      "visible launcher binding KGG_REAL_BROWSER=1",
+      "model response provided no screenshot or action artifact",
       "browser_started=false",
       "screenshot=false",
       "action=false"
     ],
-    "error_class": "SESSION_START_REJECTED_PRE_BROWSER; CURRENT_BUNDLE_OR_ARGUMENT_BINDING_UNPROVEN",
+    "error_class": "OBSERVE_REQUEST_REJECTED_PRE_BROWSER; OBSERVE_SCHEMA_OR_BUNDLE_BINDING_UNPROVEN",
     "root_cause_hypotheses": [
-      "connected normal-ChatGPT app is a synthetic-only bundle without exposed Fresh-Main binding",
-      "app.url was serialized as a Markdown/link value instead of a raw string",
-      "the bound app contract differs from the current Fresh-Main session contract"
+      "connected normal-ChatGPT app is described as a synthetic bridge without exposed Fresh-Main binding, but execution mode is not proven",
+      "observe_visual_state payload shape differs from the connected bundle request contract",
+      "the bound app exposes session validation but not a compatible visual-observation contract"
     ],
     "sources_checked": [
       "Fresh-Main kgg-plugin/mcp/server.py URL and session contract",
@@ -572,31 +612,39 @@
     "attempts": [
       "one initial start_ui_session with incomplete payload",
       "one exact-payload retest; no unchanged retry after app_url_invalid",
-      "no observe_visual_state or execute_visual_action invocation"
+      "one post-fix diagnostic; start_ui_session passed and observe_visual_state failed request_schema_invalid",
+      "no execute_visual_action invocation and no screenshot/artifact evidence"
     ],
-    "smallest_next_read_only_check": "already completed: read plugin bundle identity, synthetic declaration, absent source revision, and argument-serialization observation",
-    "required_gate": "POST_FIX_DIAGNOSTIC_ONLY_IF_A_SEPARATE_GATE_BINDS_A_COMPATIBLE_BUNDLE_AND_PLAIN_URL",
+    "smallest_next_read_only_check": "bind the connected observe_visual_state request schema and bundle revision read-only; if unavailable classify BUNDLE_BINDING_NOT_OBSERVABLE",
+    "required_gate": "NO_FURTHER_UI_RETRY_UNLESS_A_SEPARATE_GATE_BINDS_OBSERVE_SCHEMA_AND_COMPATIBLE_BUNDLE",
     "would_require_scope_expansion": true,
     "would_require_external_consequence": false,
     "brother_review": {
       "decision": "REVISE_PLAN",
       "review_status": "ACCEPTED",
-      "recommendation": "Stop before browser; do not blind-retry. Keep G05/G06 PARTIAL and B UI parity NOT_OBSERVABLE.",
-      "self_review": "The error occurs before Playwright/Chromium; Fresh-Main code alone cannot prove the connected app bundle."
+      "recommendation": "Stop after the successful session validation; do not blind-retry observation. Keep G05/G06 PARTIAL and B UI parity NOT_OBSERVABLE.",
+      "root_cause": "OBSERVE_REQUEST_CONTRACT_MISMATCH; the session reached ready, but observe_visual_state was rejected before any browser observation. The exact bundle schema and exact observe payload are not independently bound.",
+      "current_status": "SESSION_START_E3_PASS / OBSERVE_CONTRACT_REJECTED / REAL_BROWSER_NOT_OBSERVED",
+      "required_read_only_check": "Bind the exposed observe_visual_state input schema and the exact failed observe payload field-by-field; if the bundle schema is not observable, classify OBSERVE_SCHEMA_BINDING_NOT_OBSERVABLE.",
+      "minimal_next_step": "No runtime attempt now. Perform only the read-only OBSERVE_CONTRACT_BINDING_CHECK. A later retry would require a newly identified causal variable plus a separate diagnostic gate.",
+      "retry_policy": "No identical observe retry, no new full canary, and no execute_visual_action until a valid observation with retained evidence exists.",
+      "fallback": "OBSERVE_SCHEMA_BINDING_NOT_OBSERVABLE, PLUGIN_BUNDLE_CONTRACT_MISMATCH, OBSERVE_PAYLOAD_INVALID, or BOUND_CONTRACT_REJECTED_UNEXPLAINED; retain G05/G06 PARTIAL.",
+      "self_review": "The successful session start changes the earlier URL diagnosis, but does not prove browser capability. KGG_REAL_BROWSER=1 and the runner declaration are insufficient without a visual artifact.",
+      "final_recommendation": "Keep G03 PASS_READ_ONLY_TOOL_EXECUTED_UI_PARITY_UNVERIFIED, G05/G06 PARTIAL, B UI parity NOT_OBSERVABLE, and all global statuses unchanged."
     },
-    "fallback": "B_PLUGIN_INSTANCE_NOT_BOUND_TO_CURRENT_REAL_BROWSER_CONTRACT or BUNDLE_BINDING_NOT_OBSERVABLE; retain technical limit and Custom GPT/local Codex fallback."
+    "fallback": "OBSERVE_SCHEMA_OR_BUNDLE_BINDING_NOT_OBSERVABLE; retain technical limit and Custom GPT/local Codex fallback."
   },
   "surface_status": {
     "A_CUSTOM_GPT_PRODUCTION_CONTROL": "NOT_OBSERVABLE_FROM_CURRENT_REPO",
-    "B_PLUGIN_CANDIDATE": "READ_ONLY_TOOL_EXECUTABLE_SYNTHETIC_UI_UNVERIFIED_REAL_HOST",
+    "B_PLUGIN_CANDIDATE": "READ_ONLY_TOOL_EXECUTABLE_REAL_UI_UNPROVEN",
     "C_CODEX_PLUS_PLUGIN": "LOCAL_MCP_AND_REAL_BRIDGE_CODE"
   },
   "current_status_overlay": {
     "G03": "PASS_READ_ONLY_TOOL_EXECUTED_UI_PARITY_UNVERIFIED",
     "G07": "PASS_CLASSIFICATION_WITH_B_REAL_AUDIT_PARTIAL",
-    "G04_G05": "PARTIAL_SESSION_REJECTED_PRE_BROWSER",
-    "reason": "The official Im Chat testen path attached the plugin and one bounded get_current_state(actor=system) call returned status=ready. The subsequent G04/G05 session attempts failed before browser start (session_schema_invalid, then app_url_invalid); the plugin detail identifies the connected bundle as read-only synthetic and exposes no Fresh-Main revision. No screenshot/action/Quick-Flow parity or main-SHA binding is proven.",
-    "required_for_next_promotion": "Do not blind-retry. Only a separately bound POST_FIX_DIAGNOSTIC with a proven plain-string app.url and independently proven bundle compatibility may proceed; otherwise retain the documented technical limit."
+    "G04_G05": "PARTIAL_SESSION_READY_OBSERVE_SCHEMA_REJECTED",
+    "reason": "The official Im Chat testen path attached the plugin and one bounded get_current_state(actor=system) call returned status=ready. Two initial G04/G05 session attempts failed before browser start (session_schema_invalid, then app_url_invalid). A separately bound post-fix diagnostic then reached session ready, but observe_visual_state failed request_schema_invalid before returning a visual state; the plugin detail describes the connected bundle as read-only synthetic and exposes no Fresh-Main revision, but that description alone does not prove synthetic-only execution. No screenshot/action/Quick-Flow parity or main-SHA binding is proven.",
+    "required_for_next_promotion": "Do not blind-retry observe or action. Only a separately bound read-only check proving the connected bundle and exact observe request schema may justify a new diagnostic gate; otherwise retain the documented technical limit."
   },
   "gate_status": {
     "G02": "PARTIAL",
@@ -620,7 +668,7 @@
   "remaining_limits": [
     "The manually verified native Codex plugin installation is local-only; repository packaging and ChatGPT host parity remain separate evidence requirements.",
     "The canonical visible Windows host now has an active ready tunnel process, but native bridge binding, screenshot/action parity and the post-merge production canary remain unproven; the single B real-host canary timed out before visual observation.",
-    "The official Im Chat testen path proves one bound normal-ChatGPT read-only get_current_state call with status=ready. The connected bundle is explicitly read-only synthetic, exposes no Fresh-Main revision, and its G04/G05 session start was rejected before browser start; screenshot/action/Quick-Flow execution, main-SHA binding and external measurement-envelope reconciliation remain unproven.",
+    "The official Im Chat testen path proves one bound normal-ChatGPT read-only get_current_state call with status=ready. The connected bundle is described as read-only synthetic and exposes no Fresh-Main revision; a post-fix G04/G05 session reached ready but observe_visual_state was rejected with request_schema_invalid. Screenshot/action/Quick-Flow execution, main-SHA binding and external measurement-envelope reconciliation remain unproven.",
     "External measurement-envelope reconciliation remains unavailable.",
     "No further start_ui_session retry is allowed without a separately bound post-fix diagnostic gate; no post-merge canary is authorized by the existing run budget."
   ],
