@@ -33,7 +33,7 @@ G02. Vorhandene Playwright- und Browser-Smoke-Komponenten sind zuerst wiederzuve
 - `release-pipeline/kgg_ui_lab_browser.py` ist eine abstrahierte Runner-Grenze, kein eigener echter Host.
 - `kgg-plugin/mcp/real_browser.py` bindet den MCP-Server opt-in und fail-closed an den Playwright-Host.
 - `kgg-plugin/mcp/browser_host.js` führt genau einen allowlisteten, ephemeren Chromium-Lauf ohne Screenshot-Datei aus.
-- `release-pipeline/test_kgg_real_browser_bridge.py` beweist mit der lokalen KGG-Fixture zwei unterschiedliche Screenshot-Hashes und `admin-ready → scale-drag-state`.
+- `release-pipeline/test_kgg_real_browser_bridge.py` beweist mit der lokalen KGG-Fixture zwei unterschiedliche Screenshot-Hashes und `admin-ready → scale-drag-state`; der fail-closed Fallback erkennt zusätzlich den explizit begrenzten Sprachzustand `lang-de → lang-en`, wenn eine unterstützte Vorschau keinen `data-kgg-state`-Marker besitzt.
 
 ## 7. Lücke und Root Cause
 
@@ -68,7 +68,7 @@ Die dünne Verbindung ist für den lokalen, vertrauenswürdigen Host geschlossen
 ## 10. Tests
 
 - unabhängiger Black-Box-Test gegen eine echte HTML-Fixture.
-- `python -m unittest release-pipeline/test_kgg_real_browser_bridge.py` mit dem vorinstallierten Codex-Playwright-Bundle: 2 Tests PASS; zwei unterschiedliche Screenshot-SHA-256 und Zustandswechsel nachgewiesen.
+- `python -m unittest release-pipeline/test_kgg_real_browser_bridge.py -v` mit dem vorinstallierten Codex-Playwright-Bundle: 11/11 Tests PASS; zwei unterschiedliche Screenshot-SHA-256, Zustandswechsel und der begrenzte Sprachzustands-Fallback nachgewiesen.
 - Negative: falsche Domain, abgelaufene Lease, falsche Session, außerhalb Viewport, unerwarteter Dialog, Timeout, Screenshot-Manipulation.
 - vorhandene UI-Stability-Suites als Regression.
 - unveränderter End-to-End-Replay.

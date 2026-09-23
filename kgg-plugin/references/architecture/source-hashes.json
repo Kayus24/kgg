@@ -133,15 +133,15 @@
     },
     {
       "path": "kgg-plugin/mcp/browser_session_host.js",
-      "sha256": "3b8ace58a93bffaa157fedeb670472f4c966107e9ff814a4750a5574d3b1e7a6"
+      "sha256": "6bcde94cc13a082501c3b7dfa3935085fe205d15514b3077b0bae883e9822a44"
     },
     {
       "path": "release-pipeline/kgg_ui_lab_real_fixture.html",
-      "sha256": "0a1595a18bdee27b8b6ef95434d2017c54daad79ca7e8e5aa92372d846beab76"
+      "sha256": "8c78ee7f3f4112a8048937ca3668af62c86ee2c2b862ce4f35ab90c4e0ab2291"
     },
     {
       "path": "release-pipeline/test_kgg_real_browser_bridge.py",
-      "sha256": "634dbbaf7693bf1baadbcbdeba60674b339c019be5306a076c9be85debe6c760"
+      "sha256": "999aecca7e557b1a94a8b4627a9a01ccfe5e3782c844afc24c2379b92af2ad2b"
     },
     {
       "path": "kgg-plugin/scripts/eval/validate_candidate.py",

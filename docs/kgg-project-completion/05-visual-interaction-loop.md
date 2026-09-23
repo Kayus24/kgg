@@ -102,7 +102,7 @@ genau einer anschließenden Observation. Siehe
 - DPI/Viewport-Skalierung.
 - Overlay, Scroll, verzögertes Rendering und nicht anklickbares Ziel.
 - Negativ: Screenshot veraltet, Aktion außerhalb Bounds, Zustand unverändert.
-- `python -m unittest release-pipeline/test_kgg_real_browser_bridge.py -v`: vier lokale Real-Bridge-Tests PASS, inklusive persistentem Visual-Loop.
+- `python -m unittest release-pipeline/test_kgg_real_browser_bridge.py -v`: 11/11 lokale Real-Bridge-Tests PASS, inklusive persistentem Visual-Loop, Negativpfaden und dem bounded Sprachzustands-Fallback ohne `data-kgg-state`.
 - zwei unveränderte reale Durchläufe.
 - Normal-ChatGPT-Bindungsprüfung 2026-09-23: read-only `get_current_state`
   einmal PASS; zwei Sessionstarts zunächst vor Browserstart FAIL; ein
@@ -112,6 +112,10 @@ genau einer anschließenden Observation. Siehe
 - Lokaler Contract-Fix `75c8de1`: vollständiges `request/v1`-Schema im
   Tool-Katalog, 10/10 Real-Bridge-Tests, 10/10 Plugin-Candidate-Tests und
   GPT-Critical-Battery grün. Kein externer Bundle-Rebind ausgeführt.
+- Nach V3: `test_visual_loop_uses_bounded_language_state_without_data_marker`
+  und die mechanische Source-Hash-Synchronisierung sind grün. Der Fix ist
+  lokal und muss vor einer späteren Host-Action-Evidence in das verbundene
+  Bundle übernommen werden; er beweist noch keine externe Action-Evidence.
 
 ## 11. Safety und Datenschutz
 

@@ -217,6 +217,38 @@ class KggRealBrowserBridgeTests(unittest.TestCase):
                 else:
                     os.environ[key] = value
 
+    def test_visual_loop_uses_bounded_language_state_without_data_marker(self) -> None:
+        runtime = _runtime_available()
+        if runtime is None:
+            self.skipTest("pre-provisioned Playwright runtime is not available")
+        node, module_path = runtime
+        old = {key: os.environ.get(key) for key in ("KGG_REAL_BROWSER", "KGG_BROWSER_NODE", "KGG_PLAYWRIGHT_NODE_PATH")}
+        os.environ.update({"KGG_REAL_BROWSER": "1", "KGG_BROWSER_NODE": node, "KGG_PLAYWRIGHT_NODE_PATH": module_path})
+        try:
+            with local_fixture_server() as base_url:
+                active = server.Runtime()
+                session_id = "visual-loop-language-001"
+                started = server.handle(active, {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "start_ui_session", "arguments": {"session": _session(f"{base_url}?fallback=language", session_id=session_id, request_id="visual-loop-language-start", capabilities=["browser", "capture", "visual_loop"])}}})
+                self.assertFalse(started["result"].get("isError", False), started)
+                observed = server.handle(active, {"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "observe_visual_state", "arguments": {"request": _visual_request(session_id=session_id, request_id="visual-loop-language-observe", operation="observe_visual_state")}}})
+                self.assertFalse(observed["result"].get("isError", False), observed)
+                before = observed["result"]["structuredContent"]["observation"]
+                self.assertEqual(before["state"], "lang-de")
+                decision = {"operation": "click", "label": "language-toggle", "expected_state_after": "lang-en", "observation_id": before["id"]}
+                acted = server.handle(active, {"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "execute_visual_action", "arguments": {"request": _visual_request(session_id=session_id, request_id="visual-loop-language-act", operation="execute_visual_action"), "decision": decision}}})
+                self.assertFalse(acted["result"].get("isError", False), acted)
+                result = acted["result"]["structuredContent"]["result"]
+                self.assertEqual(result["status"], "PASS")
+                self.assertEqual(result["state_before"], "lang-de")
+                self.assertEqual(result["state_after"], "lang-en")
+                self.assertEqual(len(result["artifacts"]), 2)
+        finally:
+            for key, value in old.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
     def test_visual_loop_rejects_unverified_expected_state(self) -> None:
         runtime = _runtime_available()
         if runtime is None:

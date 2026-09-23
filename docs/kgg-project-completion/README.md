@@ -176,6 +176,7 @@ Bei einem unbekannten Problem wird nicht geraten. Es gilt [G11](11-brother-gpt-e
 - G07-Post-Rebind-Provenance: [G07_POST_REBIND_OBSERVE_PROVENANCE_20260923.json](G07_POST_REBIND_OBSERVE_PROVENANCE_20260923.json)
 - G07-Query-gebundene Observation: [G07_QUERY_BINDING_OBSERVE_20260923.json](G07_QUERY_BINDING_OBSERVE_20260923.json) · [07c-g07-query-binding-observe.md](07c-g07-query-binding-observe.md)
 - G07d-ACTION_THEN_VERIFY-Vorbereitung: [G07_ACTION_THEN_VERIFY_20260923.json](G07_ACTION_THEN_VERIFY_20260923.json) · [07d-g07-action-then-verify-runbook.md](07d-g07-action-then-verify-runbook.md)
+- G05-Local-State-Fallback: [CP_G05_STATE_FALLBACK_20260923.json](CP_G05_STATE_FALLBACK_20260923.json)
 - Current operational reconciliation: [CURRENT_OPERATIONAL_RECONCILIATION_20260922.json](CURRENT_OPERATIONAL_RECONCILIATION_20260922.json)
 - G08/G09-Safety-/Provenance-Checkpoint: [CP_G08_G09_LOCAL_SAFETY_PROVENANCE_20260921.json](CP_G08_G09_LOCAL_SAFETY_PROVENANCE_20260921.json)
 - G10-Stabilitäts-/Replay-Checkpoint: [CP_G10_STABILITY_REPLAY_20260921.json](CP_G10_STABILITY_REPLAY_20260921.json)
