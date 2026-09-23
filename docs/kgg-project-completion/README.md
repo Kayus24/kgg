@@ -84,9 +84,9 @@ Ein Gate darf nur mit der in seinem Detaildokument verlangten Stufe auf `PASS` g
 | G02 | Universelles Plugin-Paket | `PARTIAL` | Portable Root-Manifest, repo-lokale Marketplace-Registrierung und frische lokale Codex-Installation grün; ChatGPT-Discovery noch nicht live bewiesen | Paket in Codex und ChatGPT installierbar, versioniert und ohne lokale Pfadannahmen | [G02](02-universal-plugin-package.md) |
 | G03 | Normales ChatGPT erkennt und nutzt das Plugin | `PASS` (read-only Tool; UI-Parität offen) | Offizieller `Im Chat testen`-Pfad, Plugin attached, `mcp__codex_apps__kgg_ui_lab_private_get_current_state`, `status=ready`, keine Side Effects | Screenshot-/Action-/Quick-Flow-Tools separat in G04–G06 hostseitig nachweisen; keinen zweiten identischen G03-Call | [G03](03-chatgpt-plugin-connection.md) |
 | G04 | Echte Browser-/UI-Brücke | `PASS` | Lokaler realer Chromium-Lauf: zwei unterschiedliche Screenshot-Hashes, Zustandswechsel und fail-closed Hostfehler; E2 | Echte Session, Screenshot, Koordinaten-/Semantik-Aktionen und Zustandsbeobachtung | [G04](04-real-browser-bridge.md) |
-| G05 | Visueller Screenshot-Aktions-Regelkreis | `PARTIAL` | lokaler persistenter Observe/Decide/Act/Verify-Loop mit E2-Evidence; Host-Parität fehlt | Autorisierten Agent-Host anbinden und E3 nachweisen | [G05](05-visual-interaction-loop.md) |
-| G06 | Reale Quick Flows | `PARTIAL` | Drei kanonische Flows, echter Locator-Drift-Fallback und unveränderter Replay lokal nachgewiesen; E3-Host-Parität fehlt | Mindestens drei reale, versionierte Flows mit Fallback, Step Evidence und unverändertem Replay | [G06](06-real-quick-flows.md) |
-| G07 | Surface-Integration A/B/C | `PASS` (Klassifikation; B Real-UI-Audit `PARTIAL`) | A bleibt aus dem aktuellen Repo nicht beobachtbar; B genau ein Real-Host-Canary fail-closed mit `real_browser_timeout`; C lokaler Bridge-/Provenance-Pfad mit statischer Playwright-Auflösung; [G07-Evidence](G07_REAL_B_HOST_CANARY_20260922.json) | ehrliche, live geprüfte Capability-Matrix und begründete NOT_TESTED/SYNTHETIC_ONLY/NOT_OBSERVABLE-Zeilen; keine Capability-Vererbung; keine Aussage über vollständige UI-Parität | [G07](07-surface-integration.md) |
+| G05 | Visueller Screenshot-Aktions-Regelkreis | `PARTIAL` | V3 liefert eine provenance-verifizierte Surface-B-Read-only-Observation mit echtem Screenshot; Aktion und Verify fehlen weiterhin | Separat gebundenes `ACTION_THEN_VERIFY` mit genau einer harmlosen Aktion und einer Verify-Observation | [G05](05-visual-interaction-loop.md) · [V3-Evidence](G07_QUERY_BINDING_OBSERVE_20260923.json) |
+| G06 | Reale Quick Flows | `PARTIAL` | Drei kanonische Flows, echter Locator-Drift-Fallback und unveränderter Replay lokal nachgewiesen; V3 enthält keinen Quick Flow und E3-Host-Parität fehlt | Mindestens drei reale, versionierte Flows mit Fallback, Step Evidence und unverändertem Replay | [G06](06-real-quick-flows.md) |
+| G07 | Surface-Integration A/B/C | `PASS` (Klassifikation; B Read-only-E3 `PARTIAL`) | A bleibt aus dem aktuellen Repo nicht beobachtbar; V3 bindet B an die autoritative Plan-Query und liefert `real_browser`, `fallback=false`, Observation-/Screenshot-Hash; Action, Quick Flow und A/B-Parität bleiben offen | ehrliche, live geprüfte Capability-Matrix und begründete NOT_TESTED/SYNTHETIC_ONLY/NOT_OBSERVABLE-Zeilen; keine Capability-Vererbung; keine Aussage über vollständige UI-Parität | [G07](07-surface-integration.md) · [V3-Evidence](G07_QUERY_BINDING_OBSERVE_20260923.json) |
 | G08 | Safety, Datenschutz und Autorisierung | `PARTIAL` | lokale Realpfad-Origin-/Pfad-Allowlist und 57/57 Negativ-/Safety-Tests grün; externe Host-Safety fehlt | Domain-Allowlist, Lease, Limits, Sanitization und Negativtests am Realpfad; E3 bleibt offen | [G08](08-security-privacy-and-authorization.md) |
 | G09 | Evidence und Provenance | `PARTIAL` | lokale Screenshot-/Action-/Measurement-Evidence und 57/57 Rehash-/Tamper-Tests grün; externe Envelope-Reconciliation fehlt | Browser-Evidence retained, gehasht, run-gebunden; keine erfundenen Nullwerte; E3 bleibt offen | [G09](09-evidence-and-provenance.md) |
 | G10 | Test-, Fault- und Stabilitätsloops | `PASS` (lokale Candidate-Stabilität) | Black-Box, Drift, Origin, Replay, Critical und UI-Regression grün; genau ein unveränderter Critical-Replay; E3-Replay fehlt | Black-Box-Realpfad, Negative, Regression, Full Gate, unveränderter Replay; E3 bleibt technische Grenze | [G10](10-testing-stability-and-recovery.md) |
@@ -103,10 +103,11 @@ G08 und G09 werden bei jedem Implementierungsschritt mitgeführt. Sie dürfen di
 
 Der aktuelle Projektendzustand ist
 `PARTIAL_COMPLETE_WITH_TECHNICAL_LIMITS`. Der historische Abschlusscheckpoint
-`CP_G12_FINAL_ACCEPTANCE_20260921` bleibt unverändert; die aktuelle G07-
-Reconciliation steht in `G07_REAL_B_HOST_CANARY_20260922.json`. Die nachfolgende
-Runtime-Diagnose öffnet die Klassifikation nicht erneut und ändert keinen
-Gate-Status.
+`CP_G12_FINAL_ACCEPTANCE_20260921` bleibt unverändert. Die aktuelle G07-
+Reconciliation steht in `G07_QUERY_BINDING_OBSERVE_20260923.json`: Surface B
+hat damit eine provenance-verifizierte Read-only-E3-Observation. Die
+Reconciliation öffnet G05/G06 nicht auf `PASS` und ändert keine globale
+Produktions- oder Vergleichbarkeitsaussage.
 
 Der einzige vorbereitete Folgepfad ist ein später separat autorisierter,
 synthetischer A/B-Host-Audit:
@@ -120,10 +121,12 @@ die deaktivierte maschinenlesbare Vorlage in
 Beide Dateien sind reine Planung: Sie erzeugen weder Run-, Key-, Tunnel- noch
 Write-Budget und ändern `gate-status.json` nicht.
 
-Für den aktuellen B-Timeout gilt zusätzlich: zuerst read-only die Timeout-
+Für den früheren B-Timeout gilt zusätzlich: zuerst read-only die Timeout-
 Schicht, den Child-Process-/Playwright-Kontext und die Localhost-Bindung
-diagnostizieren. Ein weiterer Real-Canary ist erst nach einem neuen, separat
-gebundenen Run-Budget zulässig.
+diagnostizieren. Der V3-Lauf hat diesen Pfad für eine query-gebundene
+Observation erfolgreich geschlossen. Ein `ACTION_THEN_VERIFY`-Lauf oder ein
+weiterer Real-Canary ist erst nach einem neuen, separat gebundenen Run-Budget
+zulässig.
 
 ## 6. Globale Control-Loop-Regel
 
@@ -169,6 +172,10 @@ Bei einem unbekannten Problem wird nicht geraten. Es gilt [G11](11-brother-gpt-e
 - G07-Checkpoint-Capsule: [CP_G07_SURFACE_MATRIX_20260921.json](CP_G07_SURFACE_MATRIX_20260921.json)
 - G07-Host-Boundary-Preflight: [G07_HOST_BOUNDARY_PREFLIGHT_20260921.json](G07_HOST_BOUNDARY_PREFLIGHT_20260921.json)
 - G07-Synthetic-B-Host-UI-Audit: [G07_SYNTHETIC_B_HOST_UI_AUDIT_20260922.json](G07_SYNTHETIC_B_HOST_UI_AUDIT_20260922.json)
+- G07b-Fixture-Provenance-Bindung: [07b-g07-fixture-provenance-binding.md](07b-g07-fixture-provenance-binding.md)
+- G07-Post-Rebind-Provenance: [G07_POST_REBIND_OBSERVE_PROVENANCE_20260923.json](G07_POST_REBIND_OBSERVE_PROVENANCE_20260923.json)
+- G07-Query-gebundene Observation: [G07_QUERY_BINDING_OBSERVE_20260923.json](G07_QUERY_BINDING_OBSERVE_20260923.json) · [07c-g07-query-binding-observe.md](07c-g07-query-binding-observe.md)
+- G07d-ACTION_THEN_VERIFY-Vorbereitung: [G07_ACTION_THEN_VERIFY_20260923.json](G07_ACTION_THEN_VERIFY_20260923.json) · [07d-g07-action-then-verify-runbook.md](07d-g07-action-then-verify-runbook.md)
 - Current operational reconciliation: [CURRENT_OPERATIONAL_RECONCILIATION_20260922.json](CURRENT_OPERATIONAL_RECONCILIATION_20260922.json)
 - G08/G09-Safety-/Provenance-Checkpoint: [CP_G08_G09_LOCAL_SAFETY_PROVENANCE_20260921.json](CP_G08_G09_LOCAL_SAFETY_PROVENANCE_20260921.json)
 - G10-Stabilitäts-/Replay-Checkpoint: [CP_G10_STABILITY_REPLAY_20260921.json](CP_G10_STABILITY_REPLAY_20260921.json)

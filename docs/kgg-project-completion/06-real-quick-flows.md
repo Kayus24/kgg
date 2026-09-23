@@ -8,6 +8,12 @@ Bekannte KGG-Navigationsfolgen laufen als versionierte, kontrollierte Makros auf
 
 Stabile Abläufe sollen nicht bei jedem Schritt einen teuren Screenshot brauchen. Quick Flows liefern Effizienz, dürfen aber bei UI-Drift nicht blind klicken.
 
+Die V3-Observation vom 2026-09-23 bestätigt nur die zugrunde liegende
+query-gebundene Browser-Observation auf Surface B. Sie enthält keinen
+Quick-Flow-Aufruf und darf deshalb weder einen Flow-PASS noch G06-E3-Evidence
+ersetzen. Ein Quick Flow folgt erst nach einem separat gebundenen
+`ACTION_THEN_VERIFY`-Nachweis und mit eigener Step-/State-Evidence.
+
 ## 3. Scope und Nicht-Ziele
 
 Zunächst drei risikoarme Flows aus dem ursprünglichen UI-Lab-Ziel. Keine Produktionswrites, kein Patientendatensatz und keine unbegrenzten Makros.
@@ -31,15 +37,16 @@ UI-Lab-Goal und MCP-Kandidat enthalten Quick-Flow-Begriffe und synthetische Schr
 
 ## 7. Lücke und Root Cause
 
-Die drei Flow-Zertifikate sind an den echten Runner gebunden. Der lokale Drift-Fallback und ein unveränderter Replay je Flow sind jetzt vorhanden; es fehlt noch E3-Host-Evidence außerhalb des lokalen Runners.
+Die drei Flow-Zertifikate sind an den echten Runner gebunden. Der lokale Drift-Fallback und ein unveränderter Replay je Flow sind jetzt vorhanden; es fehlt noch E3-Host-Evidence außerhalb des lokalen Runners. Die V3-Observation vom 2026-09-23 ist dafür nur ein read-only Browsernachweis und kein Quick-Flow-Nachweis.
 
 Der aktuelle normale ChatGPT-Anschluss liefert dafür keine E3-Evidence: Das
 verbundene Plugin wird als read-only synthetische Bridge beschrieben, ohne
 offengelegte Fresh-Main-Revision; diese Beschreibung beweist allein aber keine
 synthetic-only-Ausführung. Ein späterer gebundener Diagnoselauf erreichte
 zwar `start_ui_session=ready`, aber `observe_visual_state` scheiterte mit
-`request_schema_invalid`; daher wurden weiterhin kein Browserzustand,
-Screenshot oder Quick Flow beobachtet. G06 bleibt `PARTIAL` und darf nicht aus
+`request_schema_invalid`; der nachfolgende query-gebundene V3-Lauf lieferte
+danach einen Browserzustand und Screenshot, aber weiterhin keinen Quick Flow.
+G06 bleibt `PARTIAL` und darf nicht aus
 dem lokalen Flow- oder Synthetic-Ergebnis auf ChatGPT-Host-Parität
 hochgestuft werden.
 
@@ -82,9 +89,11 @@ gebundenen Diagnose-Lauf `PARTIAL`.
 - stale Flow-Fingerprint.
 - unveränderter Replay pro Flow.
 - `python -m unittest release-pipeline/test_kgg_real_browser_bridge.py -v`: drei zertifizierte Flows real PASS plus Locator-Drift-Fallback real PASS; der Flow bleibt nach dem Fallback ausdrücklich stale.
-- Normal-ChatGPT-Post-Fix-Diagnose: Session `ready`, Observe `request_schema_invalid`, keine E3-Quick-Flow-Evidence.
+- Normal-ChatGPT-Post-Fix-Diagnose: Session `ready`, Observe `request_schema_invalid`; V3 liefert E3-Read-only-Evidence, aber keine E3-Quick-Flow-Evidence.
 - Lokaler Contract-Fix `75c8de1` und Regressionstests grün; kein externer
-  Bundle-Rebind und kein erneuter Quick-Flow-Lauf.
+  Bundle-Rebind und kein erneuter Quick-Flow-Lauf. Der nächste Quick-Flow-Test
+  erfordert eine eigene `ACTION_THEN_VERIFY`-Reconciliation und ein separates
+  bounded Run-Budget.
 
 ## 11. Safety und Datenschutz
 
@@ -100,4 +109,4 @@ Drei Flow-Spezifikationen, Runnerbindung, Step-Evidence, Drift-Fallback und Test
 
 ## 14. Beitragsherkunft
 
-`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX_PLUS_BROTHER_GPT`, `CONTRIBUTION_DATE=2026-09-23`, `HANDOFF_ID=G04_G05_BINDING_REVIEW_20260923`, `REVIEW_STATUS=PARTIAL`, `NOTE=Three canonical flows, a fail-closed local visual drift fallback and unchanged replay run through G04/G05; the normal-ChatGPT bundle is described as synthetic but its actual capability is unproven, and the post-fix session accepted start but rejected observation, so E3 host parity remains unproven. No blind observe/action retry is allowed.`
+`CONTRIBUTION_SOURCE=HUMAN_AND_CODEX_PLUS_BROTHER_GPT`, `CONTRIBUTION_DATE=2026-09-23`, `HANDOFF_ID=G04_G05_BINDING_REVIEW_20260923`, `REVIEW_STATUS=PARTIAL`, `NOTE=Three canonical flows, a fail-closed local visual drift fallback and unchanged replay run through G04/G05; V3 now proves only a provenance-bound read-only Surface-B observation. E3 Quick-Flow parity remains unproven. No blind observe/action retry is allowed.`

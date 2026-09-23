@@ -1,0 +1,85 @@
+{
+  "schema": "kgg-g07-post-rebind-observe-provenance/v1",
+  "evidence_date": "2026-09-23",
+  "fresh_main": "b3800e5e1301e37763a780d5d1a5f7438337c5a8",
+  "local_candidate_head": "7ada26dc71c96027e00dc04b76b98075310b0876",
+  "local_schema_fix": "75c8de1",
+  "surface": "B",
+  "surface_context": "PLUGIN_CANDIDATE / real_browser_bridge",
+  "audit_scope": "one post-rebind read-only observation; no action",
+  "transport": {
+    "tunnel_health": "PASS",
+    "tunnel_ready": "PASS",
+    "mcp_server_reachable": true,
+    "schema_binding": "PASS",
+    "profile_key_reference": "environment_reference_only",
+    "runtime_secret_retained": false
+  },
+  "requests": {
+    "start_ui_session": {
+      "result": "PASS",
+      "session_status": "ready"
+    },
+    "observe_visual_state": {
+      "result": "PASS",
+      "status": "OBSERVED",
+      "surface": "real_browser",
+      "fallback": false,
+      "state": "unknown",
+      "observation_id": "167d6950748c803e226e726befc467e9510534d76dbc011db9c62c698f3f43bb",
+      "screenshot_id": "kgg-visual-rve-20260923-01",
+      "screenshot_sha256": "86bdce0503229065a524e1c4b3a3075df8331af9e50c9e33a634c931eb2cefb6"
+    },
+    "action": {
+      "performed": false,
+      "reason": "observation artifact was not cleared for safe synthetic provenance"
+    }
+  },
+  "fixture_provenance_check": {
+    "requested_url": "http://127.0.0.1:4173/kgg-patient-preview",
+    "served_application": "separate check-in-timer repository",
+    "served_application_title": "Check-in Timer",
+    "served_application_repository": "Kayus24/check-in-timer",
+    "served_application_source_path": "C:\\src\\check-in-timer",
+    "served_application_marker": "appdeploy-v77-github-pages-v2",
+    "source_contains_personal_looking_fields": true,
+    "synthetic_marker_verified": false,
+    "canonical_kgg_fixture_url": "https://kayus24.github.io/kgg-patient-preview/previews/patient-ticket-034-modal-counter-20260910-1635-r1/",
+    "canonical_fixture_static_check": "synthetic-looking KGG plan; no personal identifier observed",
+    "status": "PROVENANCE_NOT_ESTABLISHED",
+    "root_cause": "FIXTURE_SOURCE_MISMATCH"
+  },
+  "privacy": {
+    "classification": "SUSPECTED_PII_NOT_CONFIRMED",
+    "artifact_disposition": "QUARANTINED_NON_COUNTABLE",
+    "raw_personal_looking_values_retained": false
+  },
+  "evidence_disposition": {
+    "real_browser_transport_proven": true,
+    "real_surface_observation_proven": true,
+    "approved_synthetic_ui_evidence": false,
+    "comparator_evidence": "NOT_COUNTABLE",
+    "second_observe_allowed_in_this_envelope": false,
+    "action_loop_status": "NOT_RUN"
+  },
+  "brother_review": {
+    "decision": "WAITING_HUMAN_GATE",
+    "root_cause": "FIXTURE_SOURCE_MISMATCH",
+    "observation_disposition": "TECHNICALLY_VALID_BUT_KGG_NON_COUNTABLE",
+    "required_new_gate": "POST_PROVENANCE_FIX_OBSERVE_ONLY",
+    "required_target_binding": {
+      "expected_url": "https://kayus24.github.io/kgg-patient-preview/previews/patient-ticket-034-modal-counter-20260910-1635-r1/",
+      "source_repository": "Kayus24/kgg",
+      "fixture_identity": "patient-ticket-034-modal-counter-20260910-1635-r1",
+      "synthetic_provenance": "SYNTHETIC_ONLY or equivalent verifiable source",
+      "non_sensitive_markers": "required"
+    },
+    "action_allowed": false
+  },
+  "global_status_unchanged": {
+    "production_control": "PILOT_INCOMPLETE",
+    "a_b": "NOT_COMPARABLE",
+    "replacement_eligible": false
+  },
+  "next_allowed_step": "Bind the canonical synthetic KGG fixture to a separately approved diagnostic envelope; do not reuse this quarantined observation and do not perform an action in this envelope."
+}

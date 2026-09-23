@@ -58,6 +58,21 @@ diesen Contract gebunden bzw. neu verbunden werden.
 
 ## 8. Kleinschrittiger Arbeitsplan
 
+### 8.1 Post-V3-Host-Reconciliation (2026-09-23)
+
+Der gebundene Lauf `POST_QUERY_BINDING_OBSERVE_ONLY_V3` ergänzt die bisherige
+lokale Evidence um eine echte read-only Observation auf Surface B. Die
+autoritative `meta.url` mit Plan-Query wurde verwendet; `fallback=false`, ein
+Screenshot-Artefakt und eine unabhängig gebundene Observation-ID liegen vor.
+Damit ist ausschließlich `B_REAL_HOST_READ_ONLY_OBSERVATION_E3` belegt.
+
+Der Nachweis hebt G05 nicht auf `PASS`: Es fehlen weiterhin die echte Aktion,
+die Zustandsänderung und die Verify-Observation. Der nächste funktionale
+Schritt ist deshalb kein Observe-Retry, sondern ein separat gebundenes
+`ACTION_THEN_VERIFY`-Gate mit genau einer harmlosen reversiblen Aktion und
+genau einer anschließenden Observation. Siehe
+[`G07_QUERY_BINDING_OBSERVE_20260923.json`](G07_QUERY_BINDING_OBSERVE_20260923.json).
+
 1. Screenshot-Metadaten und Viewport-Koordinatensystem festlegen. ✅
 2. Aktionsrequest mit Ziel, Koordinaten, erwarteter Änderung und Safety-Klasse definieren. ✅ bounded decision contract
 3. Vorher-Screenshot und Zustandsfingerprint speichern. ✅ persistent in-memory page

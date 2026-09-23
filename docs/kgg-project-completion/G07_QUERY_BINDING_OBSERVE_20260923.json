@@ -1,0 +1,70 @@
+{
+  "checkpoint_id": "CP_G07_QUERY_BINDING_OBSERVE_20260923",
+  "gate": "G07",
+  "phase": "POST_QUERY_BINDING_OBSERVE_ONLY",
+  "decision": "PASS_FOR_B_E3_READ_ONLY_OBSERVATION",
+  "fresh_main": "b3800e5e1301e37763a780d5d1a5f7438337c5a8",
+  "preview_sha": "66e212fc2dba849a56bc7709c098c9400930937a",
+  "surface": "B_PLUGIN_CANDIDATE",
+  "session_id": "kgg-b-query-session-v3-20260923",
+  "observation_id": "11f449f88a8639eb2b2cd14eef2f00f83eae02146c2880203109841b1b093d8c",
+  "screenshot_id": "kgg-visual--v3-20260923-01",
+  "screenshot_sha256": "ab6f694d5a3bbe10daf2ab10fdce9a426911ef081ac8e3c125683588a9d29bbe",
+  "start_ui_session": "PASS",
+  "observation_status": "OBSERVED",
+  "observation_surface": "real_browser",
+  "fallback": false,
+  "fixture_binding": {
+    "source_repository": "Kayus24/kgg",
+    "fixture_identifier": "patient-ticket-034-modal-counter-20260910-1635-r1",
+    "synthetic_provenance": "SYNTHETIC_ONLY",
+    "plan_query_bound": true,
+    "markers": {
+      "KGG synthetischer Testplan": "PASS",
+      "Beinpresse": "PASS",
+      "Rudern": "PASS",
+      "2 Sätze": "PASS"
+    }
+  },
+  "provenance_status": "VERIFIED",
+  "capability_proven": [
+    "valid session/v1 start",
+    "real browser observation",
+    "non-fallback screenshot artifact",
+    "observation id and SHA-256",
+    "canonical synthetic fixture binding"
+  ],
+  "not_proven": [
+    "action execution",
+    "state-changing verify observation",
+    "observe-decide-act-verify loop",
+    "quick flow execution",
+    "A/B parity",
+    "production readiness"
+  ],
+  "older_runs": {
+    "v1": "historical/quarantined",
+    "v2": "technically real but path-only fixture variant; quarantined for UI parity"
+  },
+  "status_effect": {
+    "G05": "PARTIAL",
+    "G06": "PARTIAL",
+    "PRODUCTION_CONTROL": "PILOT_INCOMPLETE",
+    "A_B": "NOT_COMPARABLE",
+    "replacement_eligible": false
+  },
+  "next_step": "EVIDENCE_RECONCILIATION_ONLY",
+  "future_capability_gate": "ACTION_THEN_VERIFY",
+  "future_gate_constraints": [
+    "new separately bound envelope",
+    "one harmless reversible action",
+    "one verify observation",
+    "no identical observe retry",
+    "synthetic data only"
+  ],
+  "brother_review": {
+    "decision": "CONTINUE",
+    "root_cause_resolved": "PATH_ONLY_WITHOUT_PLAN_QUERY",
+    "recommendation": "Recognize V3 only as Surface-B E3 read-only provenance pass; reconcile evidence before any separate Action-Then-Verify gate."
+  }
+}
