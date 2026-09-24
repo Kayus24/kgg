@@ -1,6 +1,6 @@
 # G01 Arbeitsmatrix – Custom GPT → universelles Plugin
 
-Status: vorbereiteter Kandidat, noch nicht Gate-PASS.
+Status: G01-Wrapper `PASS`; G01A-Quellenmatrix `PASS`; Surface-Parität bleibt `PARTIAL`.
 
 Regel: `DOC` oder `SYNTHETIC` zählt nicht als Real-Host-Nachweis.
 
@@ -22,9 +22,12 @@ G00 und die in G01 genannten kanonischen Quellen.
 
 ## 5. Aktueller Stand
 
-- `IMPLEMENTATION_STATUS=DRAFT_MATRIX`
-- `LIVE_EVIDENCE_STATUS=MIXED`
-- `GATE_STATUS=PARTIAL`
+- `IMPLEMENTATION_STATUS=SOURCE_MAPPED_CAPABILITY_MATRIX`
+- `LIVE_EVIDENCE_STATUS=SOURCE_AND_LOCAL_TEST_EVIDENCE`
+- `GATE_STATUS=PASS`
+- `G01_WRAPPER_STATUS=PASS`
+- `G01A_SOURCE_MATRIX_STATUS=PASS`
+- `SURFACE_PARITY_STATUS=PARTIAL`
 - `EVIDENCE_LEVEL=E1_SYNTHETIC`
 - `LAST_VERIFIED_BASE_SHA=8d1193cbb19e5ec63f597aa8a2e29fd22687369f`
 - `LAST_VERIFIED_AT=2026-09-21T10:02:47+02:00`
@@ -80,7 +83,7 @@ Die schwerwiegendsten offenen Zeilen sind CAP-12 bis CAP-20. Sie bilden den fehl
 | `docs/kgg-custom-gpt-action-schema.md` | gelesen, Action-/Safety-Grenzen | CAP-04–CAP-07, CAP-30 |
 | `kgg-plugin/.codex-plugin/plugin.json` | gelesen, Plugin-Metadaten/Skills/MCP | CAP-03, CAP-12–CAP-24 |
 | `kgg-plugin/.mcp.json` | gelesen, lokaler stdio-MCP-Transport | CAP-12–CAP-20 |
-| `kgg-plugin/mcp/server.py` | 10 synthetische UI-Lab-Tools; Realstatus explizit belegt | CAP-12–CAP-20 |
+| `kgg-plugin/mcp/server.py` | 19 bounded UI-Lab-Tools inklusive Swipe, Visual Compare, Saved Flows und Recording; Realstatus explizit belegt | CAP-12–CAP-23 |
 | `kgg-plugin/skills/**/SKILL.md` | fünf Skills: supervisor, operations, safety, testing, escalation | CAP-03, CAP-04, CAP-10, CAP-11, CAP-23 |
 
 ### 7.2 Action-operationId-Abdeckung
@@ -119,6 +122,27 @@ Die schwerwiegendsten offenen Zeilen sind CAP-12 bis CAP-20. Sie bilden den fehl
 | `getKggMemoryUpdateArtifacts` | CAP-09 | `VERIFY` |
 
 `operationId`-Vollständigkeit ist damit eine mechanisch prüfbare G01-Bedingung; der Resource-Audit verwendet kanonische LF-normalisierte SHA-256-Werte. Die Disposition `VERIFY` oder `DEFER_WITH_REASON` bedeutet nicht, dass die Funktion bereits im Plugin live parity-fähig ist.
+
+### 7.3 VC11 – Custom-GPT Capability Parity Recheck
+
+Der G01-Wrapper und die G01A-Quellenmatrix sind getrennte Aussagen: Die
+Quellenabdeckung ist `PASS`, während vollständige A/B/C-Host-Parität wegen der
+unveränderten Host-Grenzen `PARTIAL` bleibt. Die folgenden Zeilen ergänzen nur
+die durch den v1-UI-Ausbau betroffenen UI-Fähigkeiten; sie erfinden keine neue
+Capability-Matrix und werten lokale Evidence nicht als ChatGPT-Host-Evidence.
+
+| Capability | Target component | Host boundary | Positive test | Negative test | Surface status |
+| --- | --- | --- | --- | --- | --- |
+| CAP-17 swipe | `kgg-plugin/mcp/server.py` | C-LOCAL real-browser bridge; C-STDIO synthetic contract | `test_persistent_swipe_supports_horizontal_desktop_and_vertical_mobile` | `test_persistent_swipe_rejects_bounds_and_stale_observations_without_side_effect` | C-LOCAL `E2_LOCAL_REAL_RUNTIME`; B/A `NOT_TESTED` |
+| CAP-18 visual compare | `kgg-plugin/mcp/server.py` | C-LOCAL real-browser bridge; C-STDIO synthetic contract | `test_visual_reference_identical_and_fixture_screenshot_pass` | `test_visual_reference_rejects_hash_mismatch_and_viewport_mismatch` | C-LOCAL `E2_LOCAL_REAL_RUNTIME`; B/A `NOT_TESTED` |
+| CAP-19 saved flows | `kgg-plugin/mcp/server.py + kgg-plugin/mcp/flow_store.py` | C-STDIO synthetic persistence; C-LOCAL real bridge replay | `test_all_flow_operations_cross_the_mcp_boundary` | `test_drift_toggle_and_sensitive_flow_inputs_fail_closed` | C-STDIO `SYNTHETIC_ONLY`; C-LOCAL replay evidence |
+| CAP-21 recording | `kgg-plugin/mcp/server.py` | C-LOCAL allowlisted real-browser host only; C-STDIO fails closed | `test_screen_recording_returns_traceable_keyframes_for_synthetic_motion` | `test_screen_recording_rejects_missing_capability_and_invalid_bounds_without_side_effect` | bounded keyframe evidence; no continuous video |
+
+The parity boundary is explicit: the existing Custom-GPT Action operation
+inventory remains the 30 mapped `operationId`s above, while consequential
+operations stay behind the external gate. The plugin does not claim A/B/C full
+parity, and no external Action dispatch or editor write is part of this
+recheck.
 
 ## 8. Kleinschrittiger Arbeitsplan
 

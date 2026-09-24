@@ -58,6 +58,15 @@ class KggPluginCandidateTests(unittest.TestCase):
         self.assertEqual(manifest["skills"], "./skills/")
         self.assertEqual(manifest["mcpServers"], "./.mcp.json")
 
+    def test_portable_mcp_manifest_is_rooted_and_explicitly_stdio(self) -> None:
+        mcp = json.loads((PLUGIN / "mcp.json").read_text(encoding="utf-8"))
+        self.assertEqual(mcp["$schema"], "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json")
+        server = mcp["mcpServers"]["kgg_ui_lab"]
+        self.assertEqual(server["type"], "stdio")
+        self.assertEqual(server["command"], "python")
+        self.assertEqual(server["args"], ["./mcp/server.py"])
+        self.assertEqual(server["cwd"], "${PLUGIN_ROOT}")
+
     def test_five_skills_have_valid_frontmatter_and_distinct_roles(self) -> None:
         actual = {path.name for path in (PLUGIN / "skills").iterdir() if path.is_dir()}
         self.assertEqual(actual, EXPECTED_SKILLS)
@@ -97,7 +106,9 @@ class KggPluginCandidateTests(unittest.TestCase):
             if entry["path"] == "kgg-plugin/mcp/server.py"
         )
         transport_line = next(
-            line for line in source_map.splitlines() if line.startswith("| Installed MCP transport |")
+            line
+            for line in source_map.splitlines()
+            if line.startswith("| Portable + compatibility MCP transport |")
         )
         self.assertIn(f"`{server_hash}`", transport_line)
 

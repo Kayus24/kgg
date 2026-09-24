@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Generic UI Lab synthetic fixture</title>
+  <style>
+    body { font-family: sans-serif; margin: 2rem; background: #f1f5f9; color: #0f172a; }
+    main { max-width: 42rem; padding: 2rem; background: white; border: 1px solid #94a3b8; border-radius: 1rem; }
+    button { min-height: 44px; padding: .7rem 1rem; border-radius: .6rem; border: 1px solid #334155; background: #dbeafe; }
+    [data-ui-state] { display: block; margin: 1rem 0; padding: .75rem; border-radius: .5rem; background: #dcfce7; }
+  </style>
+</head>
+<body data-ui-state="generic-ready">
+  <main>
+    <h1>Generic synthetic browser fixture</h1>
+    <p data-ui-state="generic-ready" id="generic-state">generic-ready</p>
+    <button type="button" data-ui-action="generic-toggle" id="generic-action">Apply generic UI action</button>
+  </main>
+  <script>
+    const state = document.getElementById('generic-state');
+    const action = document.getElementById('generic-action');
+    action.addEventListener('click', () => {
+      document.body.dataset.uiState = 'generic-toggled';
+      state.dataset.uiState = 'generic-toggled';
+      state.textContent = 'generic-toggled';
+      action.textContent = 'Generic action applied';
+    });
+  </script>
+</body>
+</html>
