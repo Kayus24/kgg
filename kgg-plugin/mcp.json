@@ -1,0 +1,11 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "kgg_ui_lab": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["./mcp/server.py"],
+      "cwd": "${PLUGIN_ROOT}"
+    }
+  }
+}

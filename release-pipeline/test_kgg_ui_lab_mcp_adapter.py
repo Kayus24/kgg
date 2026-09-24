@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 import hashlib
+import inspect
 import unittest
 
 import kgg_ui_lab_contract as contract
@@ -80,6 +81,47 @@ def make_adapter(clock: Clock) -> adapter.KggUiLabMcpAdapter:
 
 
 class KggUiLabMcpAdapterTests(unittest.TestCase):
+    def test_generic_core_contains_no_kgg_compatibility_symbols(self) -> None:
+        source = inspect.getsource(adapter.GenericUiLabCore)
+        self.assertNotIn("get_ticket_state", source)
+        self.assertNotIn("KGG_ACTION_OPERATIONALS", source)
+
+    def test_kgg_adapter_rebinds_to_generic_core_without_losing_bounded_ticket_read(self) -> None:
+        self.assertTrue(issubclass(adapter.KggUiLabMcpAdapter, adapter.GenericUiLabCore))
+        lab = make_adapter(Clock())
+        ticket = lab.get_ticket_state("custom_gpt", "#180")
+        self.assertEqual(ticket["operation"], "get_ticket_state")
+        self.assertEqual(ticket["ticket_id"], "#180")
+        self.assertNotIn("actions", ticket)
+        self.assertNotIn("full_ticket", ticket)
+
+    def test_kgg_action_operational_shim_is_explicit_and_fail_closed_without_remote_adapter(self) -> None:
+        lab = make_adapter(Clock())
+        capabilities = lab.get_kgg_action_capabilities()
+        operations = {item["operation"] for item in capabilities["actions"]}
+        self.assertIn("getKggMainCommit", operations)
+        self.assertIn("submitKggReadOnlyValidation", operations)
+        self.assertIn("getKggPreviewGateArtifacts", operations)
+        self.assertIn("submitKggMainGate", operations)
+        self.assertTrue(all(item["status"] == ("EXTERNAL_GATE_REQUIRED" if item["consequential"] else "NOT_BOUND") for item in capabilities["actions"]))
+        with self.assertRaisesRegex(adapter.McpAdapterError, "kgg_action_adapter_unavailable"):
+            lab.run_kgg_action("getKggMainCommit", {"request_id": "synthetic-action-001"})
+
+    def test_kgg_action_operational_shim_binds_only_synthetic_read_adapter(self) -> None:
+        calls: list[tuple[str, dict]] = []
+
+        def synthetic_action(operation: str, payload: dict) -> dict:
+            calls.append((operation, payload))
+            return {"status": "synthetic-read-only", "operation": operation}
+
+        lab = adapter.KggUiLabMcpAdapter(main_sha=MAIN_SHA, now=Clock(), action_adapter=synthetic_action)
+        result = lab.run_kgg_action("getKggMainCommit", {"request_id": "synthetic-action-002"})
+        self.assertEqual(result["status"], "PASS")
+        self.assertEqual(result["result"]["status"], "synthetic-read-only")
+        self.assertEqual(calls, [("getKggMainCommit", {"request_id": "synthetic-action-002"})])
+        with self.assertRaisesRegex(adapter.McpAdapterError, "external_gate_required"):
+            lab.run_kgg_action("submitKggMainGate", {"request_id": "synthetic-action-003"})
+
     def test_catalog_is_fixed_and_start_run_evidence_status_are_bounded(self) -> None:
         clock = Clock()
         lab = make_adapter(clock)

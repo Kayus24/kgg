@@ -70,7 +70,40 @@ class KggUiLabMcpServerTests(unittest.TestCase):
         self.assertEqual(initialized["result"]["serverInfo"]["name"], "kgg-ui-lab")
         listed = server.handle(runtime, {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}})
         self.assertEqual([item["name"] for item in listed["result"]["tools"]], list(server.TOOL_NAMES))
-        self.assertTrue(all(item["annotations"]["readOnlyHint"] for item in listed["result"]["tools"]))
+        annotations = {item["name"]: item["annotations"] for item in listed["result"]["tools"]}
+        self.assertEqual(
+            annotations,
+            {
+                "get_current_state": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+                "get_ticket_state": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+                "start_ui_session": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
+                "set_device_profile": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+                "run_quick_flow": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": True},
+                "capture_screenshot": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": True},
+                "record_screen": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": True},
+                "observe_visual_state": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": True},
+                "execute_visual_action": {"readOnlyHint": False, "destructiveHint": True, "idempotentHint": False, "openWorldHint": True},
+                "compare_visual_reference": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": True},
+                "run_width_sweep": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+                "get_test_evidence": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+                "get_session_status": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+                "save_flow": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
+                "list_flows": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+                "get_flow": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+                "run_flow": {"readOnlyHint": False, "destructiveHint": True, "idempotentHint": False, "openWorldHint": True},
+                "create_new_version": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
+                "deprecate_flow": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
+            },
+        )
+
+    def test_descriptions_do_not_claim_read_only_for_state_or_browser_tools(self) -> None:
+        catalog = {item["name"]: item for item in server.tool_catalog()}
+        self.assertIn("in-memory", catalog["start_ui_session"]["description"])
+        self.assertIn("opt-in real-browser", catalog["run_quick_flow"]["description"])
+        self.assertIn("may change app state", catalog["execute_visual_action"]["description"])
+        self.assertIn("PREVIEW_ONLY", catalog["run_width_sweep"]["description"])
+        for name in ("start_ui_session", "set_device_profile", "run_quick_flow", "capture_screenshot", "record_screen", "observe_visual_state", "execute_visual_action", "compare_visual_reference"):
+            self.assertFalse(catalog[name]["annotations"]["readOnlyHint"])
 
     def test_start_session_schema_exposes_bindable_fields(self) -> None:
         tool = next(item for item in server.tool_catalog() if item["name"] == "start_ui_session")

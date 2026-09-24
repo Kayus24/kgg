@@ -9,24 +9,40 @@
     main { max-width: 42rem; padding: 2rem; background: white; border: 1px solid #cbd5e1; border-radius: 1rem; }
     button { min-height: 44px; padding: .7rem 1rem; border-radius: .6rem; border: 1px solid #334155; background: #e2e8f0; }
     [data-kgg-state] { display: block; margin: 1rem 0; padding: .75rem; border-radius: .5rem; background: #e0f2fe; }
+    #swipe-surface { min-height: 220px; display: grid; place-items: center; margin: 1rem 0; border: 2px dashed #2563eb; border-radius: .8rem; background: #eff6ff; user-select: none; touch-action: none; }
+    #modal-backdrop { position: fixed; inset: 0; display: grid; place-items: center; background: rgb(15 23 42 / .55); }
+    #modal-backdrop[hidden] { display: none; }
+    #modal { max-width: 18rem; padding: 1.25rem; border-radius: .8rem; background: white; box-shadow: 0 1rem 3rem rgb(15 23 42 / .3); }
   </style>
 </head>
 <body data-kgg-state="admin-ready">
   <main>
     <h1>KGG synthetic browser fixture</h1>
+    <div id="swipe-surface" data-kgg-action="swipe-surface" aria-label="Swipe surface">Swipe horizontally or vertically</div>
     <p data-kgg-state="admin-ready" id="kgg-state">admin-ready</p>
     <button type="button" data-kgg-action="tablet-splitter-control" id="kgg-action">Apply bounded UI action</button>
     <button type="button" data-kgg-action="synthetic-qr-image" id="kgg-qr">Open synthetic preview link</button>
     <button type="button" data-kgg-action="language-toggle" id="kgg-language-toggle" hidden>DE ▸ EN</button>
   </main>
+  <div id="modal-backdrop" hidden>
+    <div id="modal" role="dialog" aria-modal="true">
+      <p>Overlay is active; the swipe surface is blocked.</p>
+      <button type="button" id="dismiss-overlay">Dismiss overlay</button>
+    </div>
+  </div>
   <script>
     const state = document.getElementById('kgg-state');
     const action = document.getElementById('kgg-action');
     const qr = document.getElementById('kgg-qr');
+    const swipeSurface = document.getElementById('swipe-surface');
+    const modalBackdrop = document.getElementById('modal-backdrop');
+    const dismissOverlay = document.getElementById('dismiss-overlay');
     const params = new URLSearchParams(location.search);
     const flow = params.get('flow');
     const drift = params.get('drift') === '1';
+    const motion = params.get('motion') === '1';
     const languageFallback = params.get('fallback') === 'language';
+    const overlay = params.get('overlay') === '1';
     if (flow === 'pilot') {
       document.body.dataset.kggState = 'pilot-area-ready';
       state.dataset.kggState = 'pilot-area-ready';
@@ -51,6 +67,35 @@
         languageToggle.textContent = next === 'en' ? 'EN ▸ DE' : 'DE ▸ EN';
       });
     }
+    if (overlay) modalBackdrop.hidden = false;
+    if (motion) {
+      let motionTick = 0;
+      setInterval(() => {
+        const next = `motion-${motionTick % 3}`;
+        motionTick += 1;
+        document.body.dataset.kggState = next;
+        state.dataset.kggState = next;
+        state.textContent = next;
+      }, 100);
+    }
+    dismissOverlay.addEventListener('click', () => { modalBackdrop.hidden = true; });
+    let swipeStart = null;
+    swipeSurface.addEventListener('pointerdown', event => {
+      swipeStart = { x: event.clientX, y: event.clientY };
+      swipeSurface.setPointerCapture(event.pointerId);
+    });
+    swipeSurface.addEventListener('pointerup', event => {
+      if (!swipeStart) return;
+      const horizontal = Math.abs(event.clientX - swipeStart.x);
+      const vertical = Math.abs(event.clientY - swipeStart.y);
+      if (horizontal >= 80 || vertical >= 80) {
+        document.body.dataset.kggState = 'swipe-complete';
+        state.dataset.kggState = 'swipe-complete';
+        state.textContent = 'swipe-complete';
+        swipeSurface.textContent = 'Swipe completed';
+      }
+      swipeStart = null;
+    });
     action.addEventListener('click', () => {
       document.body.dataset.kggState = 'scale-drag-state';
       state.dataset.kggState = 'scale-drag-state';

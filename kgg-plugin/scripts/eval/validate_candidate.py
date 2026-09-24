@@ -24,11 +24,19 @@ REQUIRED_TOOLS = (
     "set_device_profile",
     "run_quick_flow",
     "capture_screenshot",
+    "record_screen",
     "observe_visual_state",
     "execute_visual_action",
+    "compare_visual_reference",
     "run_width_sweep",
     "get_test_evidence",
     "get_session_status",
+    "save_flow",
+    "list_flows",
+    "get_flow",
+    "run_flow",
+    "create_new_version",
+    "deprecate_flow",
 )
 
 

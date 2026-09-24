@@ -1,6 +1,6 @@
 {
   "name": "kgg-plugin",
-  "version": "0.1.0+codex.20260914202951",
+  "version": "0.1.0",
   "description": "KGG shared agent workflow and UI-Lab candidate",
   "author": {
     "name": "Local developer"

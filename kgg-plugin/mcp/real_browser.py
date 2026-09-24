@@ -1,19 +1,22 @@
-"""Fail-closed bridge from the bounded Python MCP server to Playwright.
+"""Fail-closed, policy-driven bridge from the bounded Python server to Playwright.
 
-The bridge is opt-in through ``KGG_REAL_BROWSER=1`` and executes one
-allowlisted run in an ephemeral browser context.  It retains screenshots only
-in memory, validates the helper response, and never falls back to synthetic
-evidence when the real host is unavailable.
+The stdio launcher creates an explicit ``BrowserBootstrap`` from its host
+configuration. Embedded callers default to a synthetic, disabled bootstrap.
+The bridge executes one policy-allowlisted run in an ephemeral browser
+context, retains screenshots only in memory, validates helper responses, and
+never falls back to synthetic evidence when the real host is unavailable.
 """
 
 from __future__ import annotations
 
 import base64
+from dataclasses import dataclass, field
 import hashlib
 import json
 import os
 from pathlib import Path
 import queue
+import re
 import shutil
 import subprocess
 import threading
@@ -23,11 +26,96 @@ from urllib.parse import urlparse
 
 MAX_IMAGE_BYTES = 2 * 1024 * 1024
 MAX_RESPONSE_BYTES = 8 * 1024 * 1024
-ALLOWED_HTTPS_HOSTS = {"kayus24.github.io"}
+_ATTRIBUTE_RE = re.compile(r"^data-[a-z0-9-]{1,63}$")
+_NAMESPACE_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{1,63}$")
 
 
-def _allowed_kgg_path(path: str) -> bool:
-    return path in {"/kgg", "/kgg-patient-preview"} or path.startswith("/kgg/") or path.startswith("/kgg-patient-preview/")
+@dataclass(frozen=True)
+class BrowserPolicy:
+    """Host-neutral browser policy with KGG defaults supplied by the adapter."""
+
+    allowed_https_hosts: frozenset[str] = frozenset({"kayus24.github.io"})
+    allowed_https_path_prefixes: tuple[str, ...] = ("/kgg", "/kgg-patient-preview")
+    state_attribute: str = "data-kgg-state"
+    action_attribute: str = "data-kgg-action"
+    input_attribute: str = "data-kgg-input"
+    language_toggle_id: str | None = "kggLangSwitch"
+    evidence_namespace: str = "kgg-ui-lab"
+
+    def __post_init__(self) -> None:
+        if any(not isinstance(host, str) or not host or "/" in host for host in self.allowed_https_hosts):
+            raise ValueError("browser_policy_host_invalid")
+        if any(not isinstance(prefix, str) or not prefix.startswith("/") for prefix in self.allowed_https_path_prefixes):
+            raise ValueError("browser_policy_path_invalid")
+        for attribute in (self.state_attribute, self.action_attribute, self.input_attribute):
+            if not isinstance(attribute, str) or not _ATTRIBUTE_RE.fullmatch(attribute):
+                raise ValueError("browser_policy_attribute_invalid")
+        if self.language_toggle_id is not None and (not isinstance(self.language_toggle_id, str) or not re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]{0,63}", self.language_toggle_id)):
+            raise ValueError("browser_policy_language_toggle_invalid")
+        if not isinstance(self.evidence_namespace, str) or not _NAMESPACE_RE.fullmatch(self.evidence_namespace):
+            raise ValueError("browser_policy_namespace_invalid")
+
+    @classmethod
+    def kgg(cls) -> "BrowserPolicy":
+        return cls()
+
+    @classmethod
+    def generic(cls) -> "BrowserPolicy":
+        return cls(
+            allowed_https_hosts=frozenset(),
+            allowed_https_path_prefixes=(),
+            state_attribute="data-ui-state",
+            action_attribute="data-ui-action",
+            input_attribute="data-ui-input",
+            language_toggle_id=None,
+            evidence_namespace="generic-ui-lab",
+        )
+
+    def allows_url(self, value: str) -> bool:
+        parsed = urlparse(value)
+        local_http = parsed.scheme == "http" and parsed.hostname in {"localhost", "127.0.0.1"} and bool(parsed.netloc)
+        if local_http:
+            return True
+        if parsed.scheme != "https" or parsed.hostname not in self.allowed_https_hosts or not bool(parsed.netloc):
+            return False
+        path = parsed.path or "/"
+        return any(path == prefix.rstrip("/") or path.startswith(prefix.rstrip("/") + "/") for prefix in self.allowed_https_path_prefixes)
+
+    def to_payload(self) -> dict[str, Any]:
+        return {
+            "allowed_https_hosts": sorted(self.allowed_https_hosts),
+            "allowed_https_path_prefixes": list(self.allowed_https_path_prefixes),
+            "state_attribute": self.state_attribute,
+            "action_attribute": self.action_attribute,
+            "input_attribute": self.input_attribute,
+            "language_toggle_id": self.language_toggle_id,
+            "evidence_namespace": self.evidence_namespace,
+        }
+
+
+@dataclass(frozen=True)
+class BrowserBootstrap:
+    """Explicit per-host activation and already-provisioned runtime selection."""
+
+    enabled: bool = False
+    node_command: str | None = None
+    playwright_module_path: str | None = None
+    policy: BrowserPolicy = field(default_factory=BrowserPolicy.kgg)
+
+    @classmethod
+    def synthetic(cls) -> "BrowserBootstrap":
+        return cls(enabled=False)
+
+    @classmethod
+    def from_environment(cls) -> "BrowserBootstrap":
+        """Read launcher variables only at an explicit host bootstrap boundary."""
+
+        enabled = os.environ.get("KGG_REAL_BROWSER", "").casefold() in {"1", "true", "yes"}
+        return cls(
+            enabled=enabled,
+            node_command=os.environ.get("KGG_BROWSER_NODE"),
+            playwright_module_path=os.environ.get("KGG_PLAYWRIGHT_NODE_PATH"),
+        )
 
 
 class RealBrowserError(RuntimeError):
@@ -38,21 +126,20 @@ class RealBrowserError(RuntimeError):
         self.code = code
 
 
-def _safe_url(value: Any) -> str:
+def _safe_url(value: Any, policy: BrowserPolicy | None = None) -> str:
     if not isinstance(value, str) or len(value) > 2048:
         raise RealBrowserError("real_browser_url_invalid")
+    selected_policy = policy or BrowserPolicy.kgg()
     parsed = urlparse(value)
-    local_http = parsed.scheme == "http" and parsed.hostname in {"localhost", "127.0.0.1"} and bool(parsed.netloc)
-    https = parsed.scheme == "https" and parsed.hostname in ALLOWED_HTTPS_HOSTS and _allowed_kgg_path(parsed.path or "/") and bool(parsed.netloc)
     if parsed.username or parsed.password or parsed.fragment:
         raise RealBrowserError("real_browser_url_invalid")
-    if not local_http and not https:
+    if not selected_policy.allows_url(value):
         raise RealBrowserError("real_browser_url_invalid")
     return value
 
 
-def _node_command() -> str:
-    configured = os.environ.get("KGG_BROWSER_NODE")
+def _node_command(bootstrap: BrowserBootstrap | None = None) -> str:
+    configured = bootstrap.node_command if bootstrap is not None else None
     if configured and not Path(configured).is_file():
         raise RealBrowserError("real_browser_node_unavailable")
     command = configured or shutil.which("node")
@@ -61,7 +148,7 @@ def _node_command() -> str:
     return command
 
 
-def _playwright_module_path() -> str | None:
+def _playwright_module_path(bootstrap: BrowserBootstrap | None = None) -> str | None:
     """Resolve an already provisioned Playwright runtime for the child host.
 
     The MCP server is launched from ``kgg-plugin/mcp`` while the bundled Codex
@@ -73,7 +160,7 @@ def _playwright_module_path() -> str | None:
     This never installs or downloads a dependency.
     """
 
-    configured = os.environ.get("KGG_PLAYWRIGHT_NODE_PATH")
+    configured = bootstrap.playwright_module_path if bootstrap is not None else None
     if configured:
         return configured
 
@@ -169,10 +256,19 @@ def _validate_response(value: Any) -> dict[str, Any]:
     }
 
 
-def run_real_flow(*, url: str, viewport: Mapping[str, Any], steps: list[Mapping[str, Any]], run_id: str, timeout_ms: int) -> dict[str, Any]:
+def run_real_flow(
+    *,
+    url: str,
+    viewport: Mapping[str, Any],
+    steps: list[Mapping[str, Any]],
+    run_id: str,
+    timeout_ms: int,
+    bootstrap: BrowserBootstrap | None = None,
+) -> dict[str, Any]:
     """Run one real browser flow; never substitutes synthetic evidence."""
 
-    if os.environ.get("KGG_REAL_BROWSER", "").casefold() not in {"1", "true", "yes"}:
+    selected_bootstrap = bootstrap or BrowserBootstrap.synthetic()
+    if not selected_bootstrap.enabled:
         raise RealBrowserError("real_browser_not_enabled")
     if not isinstance(run_id, str) or not run_id or len(run_id) > 128:
         raise RealBrowserError("real_browser_run_id_invalid")
@@ -181,17 +277,18 @@ def run_real_flow(*, url: str, viewport: Mapping[str, Any], steps: list[Mapping[
     request = {
         "command": "run",
         "run_id": run_id,
-        "url": _safe_url(url),
+        "url": _safe_url(url, selected_bootstrap.policy),
         "viewport": dict(viewport),
         "steps": [dict(step) for step in steps],
+        "policy": selected_bootstrap.policy.to_payload(),
     }
     env = os.environ.copy()
-    module_path = _playwright_module_path()
+    module_path = _playwright_module_path(selected_bootstrap)
     if module_path:
         env["NODE_PATH"] = module_path + os.pathsep + env.get("NODE_PATH", "")
     try:
         completed = subprocess.run(
-            [_node_command(), str(_helper_path())],
+            [_node_command(selected_bootstrap), str(_helper_path())],
             input=json.dumps(request, ensure_ascii=False, separators=(",", ":")) + "\n",
             capture_output=True,
             text=True,
@@ -257,20 +354,29 @@ def _validate_session_response(value: Any) -> dict[str, Any]:
 class PersistentRealBrowser:
     """One bounded in-memory page for an observe/decide/act/verify loop."""
 
-    def __init__(self, *, url: str, viewport: Mapping[str, Any], run_id: str, timeout_ms: int) -> None:
-        if os.environ.get("KGG_REAL_BROWSER", "").casefold() not in {"1", "true", "yes"}:
+    def __init__(
+        self,
+        *,
+        url: str,
+        viewport: Mapping[str, Any],
+        run_id: str,
+        timeout_ms: int,
+        bootstrap: BrowserBootstrap | None = None,
+    ) -> None:
+        selected_bootstrap = bootstrap or BrowserBootstrap.synthetic()
+        if not selected_bootstrap.enabled:
             raise RealBrowserError("real_browser_not_enabled")
         if not isinstance(run_id, str) or not run_id or len(run_id) > 128:
             raise RealBrowserError("real_browser_run_id_invalid")
         if not isinstance(timeout_ms, int) or not 1000 <= timeout_ms <= 1_800_000:
             raise RealBrowserError("real_browser_timeout_invalid")
         env = os.environ.copy()
-        module_path = _playwright_module_path()
+        module_path = _playwright_module_path(selected_bootstrap)
         if module_path:
             env["NODE_PATH"] = module_path + os.pathsep + env.get("NODE_PATH", "")
         try:
             self._process = subprocess.Popen(
-                [_node_command(), str(_session_helper_path())],
+                [_node_command(selected_bootstrap), str(_session_helper_path())],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.DEVNULL,
@@ -285,7 +391,13 @@ class PersistentRealBrowser:
         self._reader.start()
         self._timeout_seconds = (timeout_ms / 1000) + 15
         try:
-            self._send({"command": "init", "run_id": run_id, "url": _safe_url(url), "viewport": dict(viewport)})
+            self._send({
+                "command": "init",
+                "run_id": run_id,
+                "url": _safe_url(url, selected_bootstrap.policy),
+                "viewport": dict(viewport),
+                "policy": selected_bootstrap.policy.to_payload(),
+            })
         except Exception:
             self.close()
             raise

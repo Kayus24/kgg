@@ -22,6 +22,16 @@ from kgg_ui_lab_session import QuickFlowRegistry, RunnerRegistry, SessionStore
 
 
 MCP_SCHEMA = "kgg-ui-lab/mcp-adapter/v1"
+CORE_TOOL_CATALOG = (
+    "get_current_state",
+    "start_ui_session",
+    "set_device_profile",
+    "run_quick_flow",
+    "capture_screenshot",
+    "run_width_sweep",
+    "get_test_evidence",
+    "get_session_status",
+)
 TOOL_CATALOG = (
     "get_current_state",
     "get_ticket_state",
@@ -46,8 +56,8 @@ def _fail(code: str, detail: str = "") -> None:
     raise McpAdapterError(code if not detail else f"{code}: {detail}")
 
 
-class KggUiLabMcpAdapter:
-    """Expose only contract-shaped local operations."""
+class GenericUiLabCore:
+    """Reusable contract-shaped UI core with no KGG ticket/action knowledge."""
 
     def __init__(
         self,
@@ -55,7 +65,6 @@ class KggUiLabMcpAdapter:
         main_sha: str,
         now: Callable[[], datetime] | None = None,
         state_provider: Callable[[], Mapping[str, Any]] | None = None,
-        ticket_provider: Callable[[str], Mapping[str, Any]] | None = None,
         runner_registry: RunnerRegistry | None = None,
         flow_registry: QuickFlowRegistry | None = None,
         session_store: SessionStore | None = None,
@@ -65,7 +74,6 @@ class KggUiLabMcpAdapter:
         self.main_sha = main_sha
         self.now = now or (lambda: datetime.now(timezone.utc))
         self.state_provider = state_provider or (lambda: {"status": "ready"})
-        self.ticket_provider = ticket_provider or (lambda ticket_id: {"ticket_id": ticket_id, "status": "unknown"})
         self.runners = runner_registry or RunnerRegistry()
         self.flows = flow_registry or QuickFlowRegistry()
         self.sessions = session_store or SessionStore(now=self.now)
@@ -73,7 +81,7 @@ class KggUiLabMcpAdapter:
 
     @staticmethod
     def tool_catalog() -> tuple[str, ...]:
-        return TOOL_CATALOG
+        return CORE_TOOL_CATALOG
 
     def _actor(self, actor: str) -> str:
         if actor not in contract.ACTORS:
@@ -101,17 +109,6 @@ class KggUiLabMcpAdapter:
             _fail("state_invalid")
         safe = {str(key): deepcopy(value) for key, value in state.items() if str(key) in {"status", "ticket_id", "branch", "head"}}
         safe.update({"schema": MCP_SCHEMA, "operation": "get_current_state", "actor": actor, "main_sha": self.main_sha})
-        return safe
-
-    def get_ticket_state(self, actor: str, ticket_id: str) -> dict[str, Any]:
-        actor = self._actor(actor)
-        if not isinstance(ticket_id, str) or not re.fullmatch(r"#?[0-9]{1,6}", ticket_id):
-            _fail("ticket_id_invalid")
-        state = self.ticket_provider(ticket_id)
-        if not isinstance(state, Mapping):
-            _fail("ticket_state_invalid")
-        safe = {str(key): deepcopy(value) for key, value in state.items() if str(key) in {"ticket_id", "status", "title", "updated_at", "main_sha"}}
-        safe.update({"schema": MCP_SCHEMA, "operation": "get_ticket_state", "actor": actor, "main_sha": self.main_sha})
         return safe
 
     def start_ui_session(self, session: Mapping[str, Any]) -> dict[str, Any]:
@@ -267,3 +264,110 @@ class KggUiLabMcpAdapter:
     def get_session_status(self, session_id: str, actor: str) -> dict[str, Any]:
         session = self._get_session(session_id, actor, lease=False)
         return {"schema": MCP_SCHEMA, "operation": "get_session_status", "session_id": session_id, "status": session["status"], "event_count": len(self.sessions.events(session_id)), "runner_id": session["runner"]["runner_id"], "main_sha": session["app"]["main_sha"]}
+
+
+# Compatibility Shim: these are KGG/CAP_03 capabilities layered above the
+# reusable UI core.  They are intentionally not embedded in GenericUiLabCore.
+KGG_ACTION_OPERATIONALS = (
+    ("getKggMainCommit", False),
+    ("submitKggReadOnlyValidation", False),
+    ("listKggReadOnlyValidationRuns", False),
+    ("getKggPreviewGateRun", False),
+    ("getKggPreviewGateJobs", False),
+    ("getKggPreviewGateArtifacts", False),
+    ("submitKggAdminEditorSyncPreflight", False),
+    ("getKggMemoryIndex", False),
+    ("getKggMemoryPack", False),
+    ("getKggMemoryRecord", False),
+    ("getKggMemoryHistory", False),
+    ("getKggAgentCoordinationIndex", False),
+    ("getKggAgentCoordinationThread", False),
+    ("getKggAgentCoordinationBridgeTask", False),
+    ("submitKggAdminEditorSyncSnapshotPr", True),
+    ("submitKggPreviewAuto", True),
+    ("submitKggMainGate", True),
+)
+
+
+class KggCompatibilityShim(GenericUiLabCore):
+    """Preserve KGG ticket and Action-surface contracts above the generic core."""
+
+    def __init__(
+        self,
+        *,
+        main_sha: str,
+        now: Callable[[], datetime] | None = None,
+        state_provider: Callable[[], Mapping[str, Any]] | None = None,
+        ticket_provider: Callable[[str], Mapping[str, Any]] | None = None,
+        action_adapter: Callable[[str, Mapping[str, Any]], Mapping[str, Any]] | None = None,
+        runner_registry: RunnerRegistry | None = None,
+        flow_registry: QuickFlowRegistry | None = None,
+        session_store: SessionStore | None = None,
+    ) -> None:
+        super().__init__(
+            main_sha=main_sha,
+            now=now,
+            state_provider=state_provider,
+            runner_registry=runner_registry,
+            flow_registry=flow_registry,
+            session_store=session_store,
+        )
+        self.ticket_provider = ticket_provider or (lambda ticket_id: {"ticket_id": ticket_id, "status": "unknown"})
+        self.action_adapter = action_adapter
+
+    @staticmethod
+    def tool_catalog() -> tuple[str, ...]:
+        return TOOL_CATALOG
+
+    def get_ticket_state(self, actor: str, ticket_id: str) -> dict[str, Any]:
+        actor = self._actor(actor)
+        if not isinstance(ticket_id, str) or not re.fullmatch(r"#?[0-9]{1,6}", ticket_id):
+            _fail("ticket_id_invalid")
+        state = self.ticket_provider(ticket_id)
+        if not isinstance(state, Mapping):
+            _fail("ticket_state_invalid")
+        safe = {str(key): deepcopy(value) for key, value in state.items() if str(key) in {"ticket_id", "status", "title", "updated_at", "main_sha"}}
+        safe.update({"schema": MCP_SCHEMA, "operation": "get_ticket_state", "actor": actor, "main_sha": self.main_sha})
+        return safe
+
+    def get_kgg_action_capabilities(self) -> dict[str, Any]:
+        return {
+            "schema": "kgg-ui-lab/kgg-action-capabilities/v1",
+            "operation": "get_kgg_action_capabilities",
+            "surface": "CUSTOM_GPT_ACTIONS",
+            "actions": [
+                {
+                    "operation": operation,
+                    "consequential": consequential,
+                    "status": "BOUND" if self.action_adapter is not None and not consequential else ("EXTERNAL_GATE_REQUIRED" if consequential else "NOT_BOUND"),
+                }
+                for operation, consequential in KGG_ACTION_OPERATIONALS
+            ],
+        }
+
+    def run_kgg_action(self, operation: str, payload: Mapping[str, Any]) -> dict[str, Any]:
+        if not isinstance(operation, str):
+            _fail("kgg_action_operation_invalid")
+        matching = next(((name, consequential) for name, consequential in KGG_ACTION_OPERATIONALS if name == operation), None)
+        if matching is None:
+            _fail("kgg_action_operation_invalid")
+        _, consequential = matching
+        if consequential:
+            _fail("external_gate_required")
+        if self.action_adapter is None:
+            _fail("kgg_action_adapter_unavailable")
+        if not isinstance(payload, Mapping):
+            _fail("kgg_action_payload_invalid")
+        result = self.action_adapter(operation, deepcopy(payload))
+        if not isinstance(result, Mapping):
+            _fail("kgg_action_result_invalid")
+        return {
+            "schema": "kgg-ui-lab/kgg-action-result/v1",
+            "operation": operation,
+            "status": "PASS",
+            "result": deepcopy(dict(result)),
+        }
+
+
+class KggUiLabMcpAdapter(KggCompatibilityShim):
+    """Named KGG entry point retained for callers of the legacy adapter."""
