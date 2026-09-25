@@ -29,7 +29,7 @@
     },
     {
       "path": "release-pipeline/kgg_test_battery.py",
-      "sha256": "6c6121b47816414ebb0ac5c6daa74b61a51986182a06458f5839c023b104fc5b"
+      "sha256": "88ca9d46f5286c10f0de117b5a7bf3c25dbc6d6cc7d77f784b22d192905ed4f2"
     },
     {
       "path": "release-pipeline/kgg_gpt_ab_compare.py",
@@ -137,11 +137,11 @@
     },
     {
       "path": "kgg-plugin/mcp/browser_host.js",
-      "sha256": "17065ea6267f0222958f27ac1eb55ef9aa2f9c65b9fafffb4957416f48fe8a4d"
+      "sha256": "dcb16d4bd41d6b72615a3babd0acb22986af37661212ebaeefb15d4fd28c179e"
     },
     {
       "path": "kgg-plugin/mcp/browser_session_host.js",
-      "sha256": "485eae0f3992ea3c7c4ce1301483725ea994ce73594802341e287ab6f5415327"
+      "sha256": "f9b9e8aa7272b1296425a53274592edb104ad355eb7cef857cd9af8a7d904675"
     },
     {
       "path": "release-pipeline/kgg_ui_lab_real_fixture.html",
