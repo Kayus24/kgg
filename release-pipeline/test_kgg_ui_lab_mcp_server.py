@@ -117,6 +117,23 @@ class KggUiLabMcpServerTests(unittest.TestCase):
         self.assertIn("Raw URI string only", session_schema["properties"]["app"]["properties"]["url"]["description"])
         self.assertEqual(session_schema["properties"]["runner"]["properties"]["capabilities"]["uniqueItems"], True)
 
+    def test_tool_schemas_are_portable_and_not_double_wrapped(self) -> None:
+        catalog = {item["name"]: item for item in server.tool_catalog()}
+
+        record_schema = catalog["record_screen"]["inputSchema"]
+        self.assertEqual(set(record_schema["properties"]), {"request", "duration_ms", "frame_interval_ms"})
+        self.assertNotIn("properties", record_schema["properties"])
+
+        run_schema = catalog["run_flow"]["inputSchema"]
+        self.assertTrue({"request", "flow_id", "project", "scope", "version", "binding_fingerprint"}.issubset(run_schema["properties"]))
+        self.assertNotIn("properties", run_schema["properties"])
+
+        preview_schema = catalog["start_ui_session"]["inputSchema"]["properties"]["session"]["properties"]["app"]["properties"]["preview_sha"]
+        branches = preview_schema["anyOf"]
+        self.assertEqual({branch["type"] for branch in branches}, {"string", "null"})
+        string_branch = next(branch for branch in branches if branch["type"] == "string")
+        self.assertEqual(string_branch["pattern"], "^[0-9a-f]{40}$")
+
     def test_synthetic_flow_is_in_memory_and_replay_is_rejected(self) -> None:
         runtime = server.Runtime()
         started = server.handle(runtime, {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "start_ui_session", "arguments": {"session": session()}}})
