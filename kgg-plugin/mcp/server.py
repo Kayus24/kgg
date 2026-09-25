@@ -1706,6 +1706,11 @@ def handle(runtime: Runtime, message: Mapping[str, Any]) -> dict[str, Any] | Non
             return {"jsonrpc": "2.0", "id": identifier, "result": _result_content(value)}
         except ServerError as exc:
             return {"jsonrpc": "2.0", "id": identifier, "result": {"isError": True, "content": [{"type": "text", "text": json.dumps({"status": "FAIL", "error_class": exc.code}, separators=(",", ":"))}]}}
+        except Exception as exc:
+            code = getattr(exc, "code", None) if exc.__class__.__name__ == "RealBrowserError" else None
+            if not isinstance(code, str) or not code:
+                code = "internal_error"
+            return {"jsonrpc": "2.0", "id": identifier, "result": {"isError": True, "content": [{"type": "text", "text": json.dumps({"status": "FAIL", "error_class": code}, separators=(",", ":"))}]}}
     if identifier is None:
         return None
     return {"jsonrpc": "2.0", "id": identifier, "error": {"code": -32601, "message": "method_not_found"}}

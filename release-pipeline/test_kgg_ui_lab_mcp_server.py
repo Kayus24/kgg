@@ -117,6 +117,34 @@ class KggUiLabMcpServerTests(unittest.TestCase):
         self.assertIn("Raw URI string only", session_schema["properties"]["app"]["properties"]["url"]["description"])
         self.assertEqual(session_schema["properties"]["runner"]["properties"]["capabilities"]["uniqueItems"], True)
 
+    def test_real_browser_errors_are_returned_as_tool_errors_without_losing_request_id(self) -> None:
+        browser = server._load_real_browser_module()
+
+        class FailingRuntime:
+            def call(self, name, args):
+                raise browser.RealBrowserError("input_target_not_found")
+
+        response = server.handle(
+            FailingRuntime(),
+            {"jsonrpc": "2.0", "id": 77, "method": "tools/call", "params": {"name": "get_current_state", "arguments": {"actor": "custom_gpt"}}},
+        )
+        self.assertEqual(response["id"], 77)
+        self.assertTrue(response["result"]["isError"])
+        self.assertIn("input_target_not_found", response["result"]["content"][0]["text"])
+
+    def test_unexpected_tool_errors_stay_inside_the_mcp_response(self) -> None:
+        class FailingRuntime:
+            def call(self, name, args):
+                raise RuntimeError("boom")
+
+        response = server.handle(
+            FailingRuntime(),
+            {"jsonrpc": "2.0", "id": 78, "method": "tools/call", "params": {"name": "get_current_state", "arguments": {"actor": "custom_gpt"}}},
+        )
+        self.assertEqual(response["id"], 78)
+        self.assertTrue(response["result"]["isError"])
+        self.assertIn("internal_error", response["result"]["content"][0]["text"])
+
     def test_tool_schemas_are_portable_and_not_double_wrapped(self) -> None:
         catalog = {item["name"]: item for item in server.tool_catalog()}
 
