@@ -74,6 +74,7 @@ class KggUiLabMcpServerTests(unittest.TestCase):
         self.assertEqual(
             annotations,
             {
+                "project_status_checkpoint": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
                 "get_current_state": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
                 "get_ticket_state": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
                 "start_ui_session": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
