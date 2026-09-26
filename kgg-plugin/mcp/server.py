@@ -38,6 +38,7 @@ ACTORS = {"codex", "custom_gpt", "max", "system"}
 PROFILES = {"tab-s9", "oppo-find-x9", "custom"}
 CAPABILITIES = {"browser", "capture", "android", "quick_flows", "visual_loop", "width_sweep", "qr_image", "screen_recording"}
 TOOL_NAMES = (
+    "project_status_checkpoint",
     "get_current_state",
     "get_ticket_state",
     "start_ui_session",
@@ -115,6 +116,23 @@ def _load_flow_store_module():
         spec = importlib.util.spec_from_file_location("kgg_plugin_flow_store", module_path)
         if spec is None or spec.loader is None:
             _fail("flow_store_helper_missing")
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)
+        return module
+
+
+def _load_project_status_module():
+    """Load the sibling bounded project-status intent helper."""
+
+    try:
+        import project_status  # type: ignore
+        return project_status
+    except ModuleNotFoundError:
+        module_path = Path(__file__).with_name("project_status.py")
+        spec = importlib.util.spec_from_file_location("kgg_plugin_project_status", module_path)
+        if spec is None or spec.loader is None:
+            _fail("project_status_helper_missing")
         module = importlib.util.module_from_spec(spec)
         sys.modules[spec.name] = module
         spec.loader.exec_module(module)
@@ -560,6 +578,20 @@ def tool_catalog() -> list[dict[str, Any]]:
         "required": ["schema", "request_id", "session_id", "actor", "operation", "main_sha", "payload_sha256"],
         "additionalProperties": False,
     }
+    project_status_checkpoint = {
+        "project_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{1,63}$"},
+        "project_name": {"type": "string", "minLength": 1, "maxLength": 200},
+        "state": {
+            "type": "string",
+            "enum": ["running", "waiting", "blocked", "paused", "failed", "complete"],
+        },
+        "step": {"type": "string", "minLength": 1, "maxLength": 200},
+        "source": {"type": "string", "format": "uri", "maxLength": 2048},
+        "completed": {"type": "integer", "minimum": 0},
+        "total": {"type": "integer", "minimum": 1},
+        "blocker": {"type": "string", "minLength": 1, "maxLength": 200},
+        "waiting_for": {"type": "string", "minLength": 1, "maxLength": 200},
+    }
     session = {
         "type": "object",
         "description": "kgg-ui-lab/session/v1 object; synthetic or explicitly opt-in real-browser session",
@@ -740,6 +772,16 @@ def tool_catalog() -> list[dict[str, Any]]:
         "additionalProperties": False,
     }
     return [
+        _tool(
+            "project_status_checkpoint",
+            "Prepare a bounded project-status enrollment/checkpoint intent. It does not write GitHub; the connected GitHub app must apply the returned intent. ChatGPT session metadata is used only as an opaque correlation reference when available.",
+            project_status_checkpoint,
+            ["project_id", "project_name", "state", "step"],
+            read_only=True,
+            destructive=False,
+            idempotent=True,
+            open_world=False,
+        ),
         _tool("get_current_state", "Read bounded synthetic UI-Lab state. Never writes or reaches a browser.", {"actor": actor}, ["actor"], read_only=True, destructive=False, idempotent=True, open_world=False),
         _tool("get_ticket_state", "Read a bounded synthetic ticket summary only. Never writes, dispatches, or reaches a ticket system.", {"actor": actor, "ticket_id": {"type": "string", "pattern": "^#?[0-9]{1,6}$"}}, ["actor", "ticket_id"], read_only=True, destructive=False, idempotent=True, open_world=False),
         _tool("start_ui_session", "Create or replace an in-memory session binding actor, lease, runner, and caller-supplied Fresh-Main SHA; it does not open a browser or write app/repository data.", {"session": session}, ["session"], read_only=False, destructive=False, idempotent=False, open_world=False),
@@ -774,6 +816,7 @@ class Runtime:
         self.browser_bootstrap = browser_bootstrap or real_browser.BrowserBootstrap.synthetic()
         self.flow_store_module = _load_flow_store_module()
         self.flow_store = self.flow_store_module.FlowStore(flow_store_path)
+        self.project_status_module = _load_project_status_module()
 
     def _close_visual(self, session_id: str) -> None:
         browser = self.visual_sessions.pop(session_id, None)
@@ -1626,7 +1669,27 @@ class Runtime:
         session = self._session(session_id, actor, lease=False)
         return {"schema": MCP_SCHEMA, "operation": "get_session_status", "session_id": session_id, "status": session["status"], "event_count": len(session["events"]), "main_sha": session["app"]["main_sha"]}
 
-    def call(self, name: str, arguments: Any) -> dict[str, Any]:
+    def project_status_checkpoint(
+        self,
+        arguments: Mapping[str, Any],
+        tool_params: Mapping[str, Any],
+    ) -> dict[str, Any]:
+        session_ref = self.project_status_module.extract_chatgpt_session_ref(tool_params)
+        try:
+            return self.project_status_module.build_checkpoint_intent(
+                arguments,
+                session_ref=session_ref,
+            )
+        except self.project_status_module.ProjectStatusError as exc:
+            _fail(exc.code)
+
+    def call(
+        self,
+        name: str,
+        arguments: Any,
+        *,
+        tool_params: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
         args = _object(arguments or {}, "arguments")
         _scan_safe(args)
         if name not in TOOL_NAMES:
@@ -1634,6 +1697,8 @@ class Runtime:
         self.call_count += 1
         if name in {"get_current_state", "get_ticket_state", "get_test_evidence", "get_session_status"}:
             self.read_count += 1
+        if name == "project_status_checkpoint":
+            return self.project_status_checkpoint(args, tool_params or {})
         if name == "get_current_state":
             return self.current(args.get("actor"))
         if name == "get_ticket_state":
@@ -1702,7 +1767,11 @@ def handle(runtime: Runtime, message: Mapping[str, Any]) -> dict[str, Any] | Non
             name = params.get("name")
             if name not in TOOL_NAMES:
                 _fail("tool_not_found")
-            value = runtime.call(str(name), params.get("arguments", {}))
+            value = runtime.call(
+                str(name),
+                params.get("arguments", {}),
+                tool_params=params,
+            )
             return {"jsonrpc": "2.0", "id": identifier, "result": _result_content(value)}
         except ServerError as exc:
             return {"jsonrpc": "2.0", "id": identifier, "result": {"isError": True, "content": [{"type": "text", "text": json.dumps({"status": "FAIL", "error_class": exc.code}, separators=(",", ":"))}]}}

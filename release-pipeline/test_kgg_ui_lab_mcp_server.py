@@ -74,6 +74,7 @@ class KggUiLabMcpServerTests(unittest.TestCase):
         self.assertEqual(
             annotations,
             {
+                "project_status_checkpoint": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
                 "get_current_state": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
                 "get_ticket_state": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
                 "start_ui_session": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
@@ -121,7 +122,7 @@ class KggUiLabMcpServerTests(unittest.TestCase):
         browser = server._load_real_browser_module()
 
         class FailingRuntime:
-            def call(self, name, args):
+            def call(self, name, args, **_kwargs):
                 raise browser.RealBrowserError("input_target_not_found")
 
         response = server.handle(
@@ -134,7 +135,7 @@ class KggUiLabMcpServerTests(unittest.TestCase):
 
     def test_unexpected_tool_errors_stay_inside_the_mcp_response(self) -> None:
         class FailingRuntime:
-            def call(self, name, args):
+            def call(self, name, args, **_kwargs):
                 raise RuntimeError("boom")
 
         response = server.handle(

@@ -1,0 +1,22 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"${PLUGIN_ROOT}/hooks/session_start.py\"",
+            "statusMessage": "Tracking KGG project session"
+          },
+          {
+            "type": "command",
+            "command": "python \"${PLUGIN_ROOT}/hooks/codex_route_sync.py\"",
+            "async": true,
+            "timeout": 20,
+            "statusMessage": "Syncing Codex project route"
+          }
+        ]
+      }
+    ]
+  }
+}
