@@ -199,6 +199,68 @@ def _real_runtime() -> server.Runtime:
 
 
 class KggRealBrowserBridgeTests(unittest.TestCase):
+    def test_host_parity_fixture_type_action_reaches_type_complete(self) -> None:
+        runtime_info = _runtime_available()
+        if runtime_info is None:
+            self.skipTest("pre-provisioned Playwright runtime is not available")
+        node, module_path = runtime_info
+        old = {key: os.environ.get(key) for key in ("KGG_REAL_BROWSER", "KGG_BROWSER_NODE", "KGG_PLAYWRIGHT_NODE_PATH")}
+        os.environ.update({"KGG_REAL_BROWSER": "1", "KGG_BROWSER_NODE": node, "KGG_PLAYWRIGHT_NODE_PATH": module_path})
+        try:
+            with local_fixture_server("kgg_ui_lab_host_parity_fixture.html") as url:
+                active = _real_runtime()
+                session_id = "type-host-parity-session-001"
+                request_id = "type-host-parity-request-001"
+                started = server.handle(active, {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "start_ui_session", "arguments": {"session": _session(url, session_id=session_id, request_id=request_id, capabilities=["browser", "capture", "visual_loop"], device_profile="custom")}}})
+                self.assertFalse(started["result"].get("isError", False), started)
+                observed = server.handle(active, {"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "observe_visual_state", "arguments": {"request": _visual_request(session_id=session_id, request_id="type-host-observe-001", operation="observe_visual_state")}}})
+                observation = observed["result"]["structuredContent"]["observation"]
+                acted = server.handle(active, {"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "execute_visual_action", "arguments": {
+                    "request": _visual_request(session_id=session_id, request_id="type-host-action-001", operation="execute_visual_action"),
+                    "decision": {"operation": "type", "label": "Host parity input", "text": "host parity", "expected_state_after": "type-complete", "observation_id": observation["id"]},
+                }}})
+                self.assertFalse(acted["result"].get("isError", False), acted)
+                structured = acted["result"]["structuredContent"]
+                self.assertEqual(structured["result"]["status"], "PASS")
+                self.assertEqual(structured["evidence"]["state_after"], "type-complete")
+        finally:
+            for key, value in old.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
+    def test_host_parity_fixture_scroll_action_reaches_scroll_complete(self) -> None:
+        runtime_info = _runtime_available()
+        if runtime_info is None:
+            self.skipTest("pre-provisioned Playwright runtime is not available")
+        node, module_path = runtime_info
+        old = {key: os.environ.get(key) for key in ("KGG_REAL_BROWSER", "KGG_BROWSER_NODE", "KGG_PLAYWRIGHT_NODE_PATH")}
+        os.environ.update({"KGG_REAL_BROWSER": "1", "KGG_BROWSER_NODE": node, "KGG_PLAYWRIGHT_NODE_PATH": module_path})
+        try:
+            with local_fixture_server("kgg_ui_lab_host_parity_fixture.html") as url:
+                active = _real_runtime()
+                session_id = "scroll-host-parity-session-001"
+                request_id = "scroll-host-parity-request-001"
+                started = server.handle(active, {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "start_ui_session", "arguments": {"session": _session(url, session_id=session_id, request_id=request_id, capabilities=["browser", "capture", "visual_loop"], device_profile="custom")}}})
+                self.assertFalse(started["result"].get("isError", False), started)
+                observed = server.handle(active, {"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "observe_visual_state", "arguments": {"request": _visual_request(session_id=session_id, request_id="scroll-host-observe-001", operation="observe_visual_state")}}})
+                observation = observed["result"]["structuredContent"]["observation"]
+                acted = server.handle(active, {"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "execute_visual_action", "arguments": {
+                    "request": _visual_request(session_id=session_id, request_id="scroll-host-action-001", operation="execute_visual_action"),
+                    "decision": {"operation": "scroll", "label": "Bounded vertical scroll", "delta_y": 240, "expected_state_after": "scroll-complete", "observation_id": observation["id"]},
+                }}})
+                self.assertFalse(acted["result"].get("isError", False), acted)
+                structured = acted["result"]["structuredContent"]
+                self.assertEqual(structured["result"]["status"], "PASS")
+                self.assertEqual(structured["evidence"]["state_after"], "scroll-complete")
+        finally:
+            for key, value in old.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
     def test_https_origin_and_path_allowlist_fail_closed(self) -> None:
         old = os.environ.get("KGG_REAL_BROWSER")
         os.environ["KGG_REAL_BROWSER"] = "1"

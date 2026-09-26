@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KGG host parity fixture</title>
+  <style>
+    body { font-family: sans-serif; margin: 0; background: #f8fafc; color: #0f172a; min-height: 1600px; }
+    main { max-width: 42rem; margin: 2rem; padding: 2rem; background: white; border: 1px solid #cbd5e1; border-radius: 1rem; }
+    label { display: block; margin-bottom: .5rem; }
+    input { width: min(100%, 28rem); min-height: 44px; padding: .6rem .75rem; font-size: 1rem; }
+    [data-kgg-state] { display: block; margin: 1rem 0; padding: .75rem; border-radius: .5rem; background: #e0f2fe; }
+    #scroll-marker { margin-top: 900px; padding: 1rem; border: 2px dashed #2563eb; background: #eff6ff; }
+  </style>
+</head>
+<body data-kgg-state="host-parity-ready">
+  <main>
+    <h1>KGG host parity fixture</h1>
+    <label for="host-parity-input">Type “host parity”</label>
+    <input id="host-parity-input" data-kgg-input="Host parity input" aria-label="Host parity input" autocomplete="off">
+    <p id="kgg-state" data-kgg-state="host-parity-ready">host-parity-ready</p>
+    <div id="scroll-marker">Scroll target</div>
+  </main>
+  <script>
+    const body = document.body;
+    const state = document.getElementById('kgg-state');
+    const input = document.getElementById('host-parity-input');
+    function setState(next) {
+      body.dataset.kggState = next;
+      state.dataset.kggState = next;
+      state.textContent = next;
+    }
+    input.addEventListener('input', () => {
+      if (input.value === 'host parity') setState('type-complete');
+    });
+    addEventListener('scroll', () => {
+      if (scrollY >= 120) setState('scroll-complete');
+    }, { passive: true });
+  </script>
+</body>
+</html>
