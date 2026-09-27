@@ -1,0 +1,9 @@
+{
+  "name": "com.kgg.project_status_route",
+  "description": "KGG Project Status ChatGPT route host",
+  "path": "__HOST_LAUNCHER__",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://__EXTENSION_ID__/"
+  ]
+}

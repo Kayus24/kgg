@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "KGG ChatGPT Route Observer",
+  "version": "0.1.0",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyF8jsMG9/ewXAG27Kwm5kBqARa3/ZZYnrQHDq/BC7dthPnBFi5rtVtNkqInPX8QjMjvS4ZFcTtvRqCmIgD/Gj/b3fP7q8DHjhH3ExpDg3ekrnJ5roReeXQtWKayPzOqz4vC0u2PvcvSmvpiJmINz0A5m20o8v9AHQ6OQDb/B7IBwikGKLZeEvJE8/VwWKCCIAnjOomu4fRNg3J/bn0FnnjHhmXnhlp4eOxnHvJq+nw9F6UCsHR6OPC8mVxaVsLs2Hf3IdvL4liiNQrwpNcJhkLBjyB+1Fc9BmN5glDm5LI9fDYzrslUdc0bzq5qKVjd5QEC2aK16Lo4S8H4Y/r1imQIDAQAB",
+  "permissions": ["nativeMessaging", "alarms"],
+  "host_permissions": ["https://chatgpt.com/*"],
+  "background": {
+    "service_worker": "service_worker.mjs",
+    "type": "module"
+  }
+}

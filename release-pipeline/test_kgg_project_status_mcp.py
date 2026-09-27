@@ -5,7 +5,10 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 from pathlib import Path
+import tempfile
+import time
 import unittest
 
 
@@ -49,6 +52,28 @@ def call_status(runtime, *, call_id=1, args=None, meta=None):
 
 
 class KggProjectStatusMcpTests(unittest.TestCase):
+    def setUp(self):
+        self.route_tmp = tempfile.TemporaryDirectory()
+        self.route_state_path = Path(self.route_tmp.name) / "route.json"
+        self.previous_route_state = os.environ.get("KGG_CHATGPT_ROUTE_STATE")
+        os.environ["KGG_CHATGPT_ROUTE_STATE"] = str(self.route_state_path)
+
+    def tearDown(self):
+        if self.previous_route_state is None:
+            os.environ.pop("KGG_CHATGPT_ROUTE_STATE", None)
+        else:
+            os.environ["KGG_CHATGPT_ROUTE_STATE"] = self.previous_route_state
+        self.route_tmp.cleanup()
+
+    def write_route_state(self, *, state="verified", url="https://chatgpt.com/c/browser-route", observed_at=None):
+        payload = {
+            "schema": "kgg-chatgpt-browser-route/v1",
+            "state": state,
+            "canonical_url": url if state == "verified" else None,
+            "observed_at": int(time.time() * 1000) if observed_at is None else observed_at,
+        }
+        self.route_state_path.write_text(json.dumps(payload), encoding="utf-8")
+
     def test_catalog_exposes_bounded_read_only_intent_tool(self):
         tool = next(
             item
@@ -65,6 +90,52 @@ class KggProjectStatusMcpTests(unittest.TestCase):
         self.assertFalse(tool["annotations"]["destructiveHint"])
         self.assertFalse(tool["annotations"]["openWorldHint"])
         self.assertIn("does not write GitHub", tool["description"])
+
+    def test_fresh_browser_route_becomes_verified_without_session_ref(self):
+        self.write_route_state()
+        runtime = server.Runtime()
+        result = call_status(
+            runtime,
+            meta={"openai/session": "opaque-chat-session-123"},
+        )
+
+        self.assertFalse(result.get("isError", False))
+        route = result["structuredContent"]["chatgpt_route"]
+        self.assertTrue(route["publish"])
+        self.assertEqual("verified", route["route_state"])
+        self.assertIn("open_url: https://chatgpt.com/c/browser-route", route["body"])
+        self.assertNotIn("session_ref:", route["body"])
+
+    def test_stale_browser_route_falls_back_to_session_correlation(self):
+        self.write_route_state(observed_at=int(time.time() * 1000) - 121_000)
+        runtime = server.Runtime()
+        result = call_status(
+            runtime,
+            meta={"openai/session": "fallback-session"},
+        )
+
+        route = result["structuredContent"]["chatgpt_route"]
+        self.assertEqual("correlation_only", route["route_state"])
+        self.assertIn("session_ref: fallback-session", route["body"])
+        self.assertNotIn("open_url:", route["body"])
+
+    def test_unavailable_browser_route_does_not_block_status(self):
+        self.write_route_state(state="unavailable", url=None)
+        runtime = server.Runtime()
+        result = call_status(runtime)
+
+        structured = result["structuredContent"]
+        self.assertEqual("upsert", structured["status_issue"]["action"])
+        self.assertFalse(structured["chatgpt_route"]["publish"])
+
+    def test_corrupt_browser_route_does_not_block_status(self):
+        self.route_state_path.write_text("{not-json", encoding="utf-8")
+        runtime = server.Runtime()
+        result = call_status(runtime)
+
+        structured = result["structuredContent"]
+        self.assertEqual("upsert", structured["status_issue"]["action"])
+        self.assertFalse(structured["chatgpt_route"]["publish"])
 
     def test_openai_session_becomes_opaque_correlation_route(self):
         runtime = server.Runtime()
