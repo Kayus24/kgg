@@ -47,6 +47,6 @@ $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 [System.IO.File]::WriteAllText($Manifest, $ManifestJson, $Utf8NoBom)
 
 New-Item -Path $RegistryPath -Force | Out-Null
-(Get-Item $RegistryPath).SetValue('', $Manifest)
+Set-Item -Path $RegistryPath -Value $Manifest
 
 Write-Output "installed:${HostName}:${Browser}:${ExtensionId}"
