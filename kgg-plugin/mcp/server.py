@@ -841,12 +841,18 @@ class Runtime:
         if not isinstance(artifact, Mapping) or not isinstance(image, Mapping):
             _fail("visual_observation_missing_screenshot")
         state = str(observed.get("state", "unknown"))
-        observation_id = hashlib.sha256(f"{session['session_id']}|{artifact['sha256']}|{state}".encode("utf-8")).hexdigest()
+        raw_elements = observed.get("elements")
+        elements = [dict(item) for item in raw_elements] if isinstance(raw_elements, list) and all(isinstance(item, Mapping) for item in raw_elements) else []
+        elements_canonical = json.dumps(elements, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+        elements_sha256 = hashlib.sha256(elements_canonical.encode("utf-8")).hexdigest()
+        observation_id = hashlib.sha256(f"{session['session_id']}|{artifact['sha256']}|{state}|{elements_sha256}".encode("utf-8")).hexdigest()
         public_observation = {
             "id": observation_id,
             "state": state,
             "artifact": dict(artifact),
             "fallback": flow_status == "STALE_REQUIRES_REVIEW",
+            "elements": elements,
+            "elements_sha256": elements_sha256,
         }
         stored_observation = {**public_observation, "image": dict(image)}
         session["visual_observation"] = stored_observation
@@ -861,6 +867,8 @@ class Runtime:
             "observation_id": observation_id,
             "state_before": state,
             "artifacts": [dict(artifact)],
+            "elements_sha256": elements_sha256,
+            "element_count": len(elements),
         }
         if flow_status is not None:
             evidence["flow_status"] = flow_status
