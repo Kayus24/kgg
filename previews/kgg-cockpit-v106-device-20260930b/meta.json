@@ -1,0 +1,24 @@
+{
+  "kind": "kgg_gpt_preview",
+  "sourceType": "local-tested-candidate",
+  "requestId": "kgg-cockpit-v106-device-20260930b",
+  "patchHash": "fb1eabfb51887bf29b94072112d527f71df5ea677b37f2615f13346cc4a89d4b",
+  "sourceSha": "8077acbbb767ac6864aa1b2b5fedac26d5bbe291",
+  "baseSha": "8077acbbb767ac6864aa1b2b5fedac26d5bbe291",
+  "commitSha": "8077acbbb767ac6864aa1b2b5fedac26d5bbe291",
+  "baseVersionCode": 106,
+  "rolloutCode": 1790785402,
+  "title": "Exact tested HTML candidate",
+  "summary": "Unchanged locally tested candidate HTML; preview only.",
+  "versionName": "1.0.106-phone-cockpit-action-dock",
+  "createdAt": "2026-09-30T16:23:22Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-cockpit-v106-device-20260930b/admin.html",
+  "sha256": "3e754de4b69f315ef803059a2f42aac56e654f9ce30f42d6b68c88e373742d4d",
+  "candidateTreeSha256": "fb1eabfb51887bf29b94072112d527f71df5ea677b37f2615f13346cc4a89d4b",
+  "tests": [
+    "critical",
+    "ui-stability-regression",
+    "cockpit-browser"
+  ],
+  "syntheticOnly": true
+}
