@@ -14,6 +14,7 @@ const { chromium } = require("playwright");
 
 const MAX_TEXT = 200;
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+const MAX_ELEMENT_REFS = 40;
 const SAFE_LABEL = /^[A-Za-z0-9][A-Za-z0-9 ._:/-]{0,199}$/;
 const SAFE_RUN = /^[a-z0-9][a-z0-9-]{5,128}$/;
 const ATTRIBUTE_RE = /^data-[a-z0-9-]{1,63}$/;
@@ -81,6 +82,78 @@ function safeText(value, label) {
     if (lowered.includes(token)) fail("sensitive_field", label);
   }
   return value;
+}
+
+function safeOptionalElementText(value) {
+  if (typeof value !== "string") return null;
+  const normalized = value.trim().replace(/\s+/g, " ");
+  if (!normalized || normalized.length > MAX_TEXT || !SAFE_LABEL.test(normalized)) return null;
+  const lowered = normalized.toLowerCase();
+  for (const token of ["token", "secret", "password", "api_key", "patient_data", "raw_qr", "base64"]) {
+    if (lowered.includes(token)) return null;
+  }
+  return normalized;
+}
+
+async function elementSnapshot(page, policy) {
+  assertSafePage();
+  const raw = await page.locator(
+    `[${policy.action_attribute}], [${policy.input_attribute}], button, a[href], input, textarea, select, [role="button"], [role="link"], [role="checkbox"], [role="radio"], [role="switch"], [role="textbox"], [role="combobox"]`
+  ).evaluateAll((nodes, config) => {
+    const roleFor = node => {
+      const explicit = node.getAttribute("role");
+      if (explicit) return explicit.toLowerCase();
+      const tag = node.tagName.toLowerCase();
+      if (tag === "button") return "button";
+      if (tag === "a") return "link";
+      if (tag === "textarea") return "textbox";
+      if (tag === "select") return "combobox";
+      if (tag === "input") {
+        const type = String(node.getAttribute("type") || "text").toLowerCase();
+        if (type === "checkbox") return "checkbox";
+        if (type === "radio") return "radio";
+        if (["button", "submit", "reset"].includes(type)) return "button";
+        return "textbox";
+      }
+      if (node.hasAttribute(config.actionAttribute)) return "action";
+      if (node.hasAttribute(config.inputAttribute)) return "textbox";
+      return "generic";
+    };
+    return nodes.map(node => {
+      const rect = node.getBoundingClientRect();
+      const style = window.getComputedStyle(node);
+      if (node.hidden || node.getAttribute("aria-hidden") === "true" || style.display === "none" ||
+          style.visibility === "hidden" || rect.width <= 0 || rect.height <= 0) return null;
+      const type = String(node.getAttribute("type") || "").toLowerCase();
+      return {
+        role: roleFor(node),
+        action_id: node.getAttribute(config.actionAttribute),
+        input_id: node.getAttribute(config.inputAttribute),
+        label: node.getAttribute("aria-label") || node.getAttribute("placeholder"),
+        sensitive: type === "password",
+      };
+    }).filter(Boolean).slice(0, config.maxItems);
+  }, {
+    actionAttribute: policy.action_attribute,
+    inputAttribute: policy.input_attribute,
+    maxItems: MAX_ELEMENT_REFS,
+  });
+
+  const allowedRoles = new Set(["button", "link", "textbox", "checkbox", "radio", "switch", "combobox", "action", "generic"]);
+  const elements = [];
+  for (const item of raw) {
+    if (!item || item.sensitive === true || !allowedRoles.has(String(item.role))) continue;
+    const actionId = safeOptionalElementText(item.action_id);
+    const inputId = safeOptionalElementText(item.input_id);
+    const label = safeOptionalElementText(item.label);
+    const element = { ref: `e${elements.length + 1}`, role: String(item.role) };
+    if (actionId) element.action_id = actionId;
+    if (inputId) element.input_id = inputId;
+    if (label) element.label = label;
+    elements.push(element);
+    if (elements.length >= MAX_ELEMENT_REFS) break;
+  }
+  return elements;
 }
 
 function safeUrl(value, policy) {
@@ -268,7 +341,8 @@ async function handle(request) {
     assertSafePage();
     session.screenshotNumber += 1;
     const observed = await screenshot(session.page, session.runId, session.screenshotNumber, session.policy);
-    return { status: "PASS", error_class: "", state: observed.state, artifacts: [observed.artifact] };
+    const elements = await elementSnapshot(session.page, session.policy);
+    return { status: "PASS", error_class: "", state: observed.state, artifacts: [observed.artifact], elements };
   }
   if (request.command === "act") {
     assertSafePage();
