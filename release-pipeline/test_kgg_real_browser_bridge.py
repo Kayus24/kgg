@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 import hashlib
+import json
 import http.server
 import importlib.util
 import os
@@ -254,6 +255,73 @@ class KggRealBrowserBridgeTests(unittest.TestCase):
                 structured = acted["result"]["structuredContent"]
                 self.assertEqual(structured["result"]["status"], "PASS")
                 self.assertEqual(structured["evidence"]["state_after"], "scroll-complete")
+        finally:
+            for key, value in old.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
+    def test_visual_observation_exposes_bounded_element_snapshot_bound_to_evidence(self) -> None:
+        runtime_info = _runtime_available()
+        if runtime_info is None:
+            self.skipTest("pre-provisioned Playwright runtime is not available")
+        node, module_path = runtime_info
+        old = {key: os.environ.get(key) for key in ("KGG_REAL_BROWSER", "KGG_BROWSER_NODE", "KGG_PLAYWRIGHT_NODE_PATH")}
+        os.environ.update({"KGG_REAL_BROWSER": "1", "KGG_BROWSER_NODE": node, "KGG_PLAYWRIGHT_NODE_PATH": module_path})
+        try:
+            with local_fixture_server() as base_url:
+                active = _real_runtime()
+                session_id = "element-snapshot-session-001"
+                started = server.handle(active, {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "start_ui_session", "arguments": {"session": _session(f"{base_url}?flow=qr", session_id=session_id, request_id="element-snapshot-start-001", capabilities=["browser", "capture", "visual_loop"])}}})
+                self.assertFalse(started["result"].get("isError", False), started)
+                observed = server.handle(active, {"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "observe_visual_state", "arguments": {"request": _visual_request(session_id=session_id, request_id="element-snapshot-observe-001", operation="observe_visual_state")}}})
+                self.assertFalse(observed["result"].get("isError", False), observed)
+                structured = observed["result"]["structuredContent"]
+                observation = structured["observation"]
+                elements = observation["elements"]
+                self.assertGreaterEqual(len(elements), 3)
+                self.assertLessEqual(len(elements), 40)
+                self.assertEqual(len({item["ref"] for item in elements}), len(elements))
+                self.assertTrue(all(re.fullmatch(r"e[1-9][0-9]{0,2}", item["ref"]) for item in elements))
+                self.assertTrue(all(set(item) <= {"ref", "role", "action_id", "input_id", "label"} for item in elements))
+                qr = next(item for item in elements if item.get("action_id") == "synthetic-qr-image")
+                self.assertEqual(qr["role"], "button")
+                serialized = json.dumps(elements, sort_keys=True, separators=(",", ":"))
+                self.assertNotIn("Open synthetic preview link", serialized)
+                self.assertNotIn('"value"', serialized)
+                self.assertNotIn('"href"', serialized)
+                expected_hash = hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+                self.assertEqual(observation["elements_sha256"], expected_hash)
+                self.assertEqual(structured["evidence"]["elements_sha256"], expected_hash)
+                self.assertEqual(structured["evidence"]["element_count"], len(elements))
+        finally:
+            for key, value in old.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
+    def test_visual_observation_element_snapshot_exposes_bounded_input_identity_not_value(self) -> None:
+        runtime_info = _runtime_available()
+        if runtime_info is None:
+            self.skipTest("pre-provisioned Playwright runtime is not available")
+        node, module_path = runtime_info
+        old = {key: os.environ.get(key) for key in ("KGG_REAL_BROWSER", "KGG_BROWSER_NODE", "KGG_PLAYWRIGHT_NODE_PATH")}
+        os.environ.update({"KGG_REAL_BROWSER": "1", "KGG_BROWSER_NODE": node, "KGG_PLAYWRIGHT_NODE_PATH": module_path})
+        try:
+            with local_fixture_server("kgg_ui_lab_host_parity_fixture.html") as url:
+                active = _real_runtime()
+                session_id = "element-input-session-001"
+                started = server.handle(active, {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "start_ui_session", "arguments": {"session": _session(url, session_id=session_id, request_id="element-input-start-001", capabilities=["browser", "capture", "visual_loop"], device_profile="custom")}}})
+                self.assertFalse(started["result"].get("isError", False), started)
+                observed = server.handle(active, {"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "observe_visual_state", "arguments": {"request": _visual_request(session_id=session_id, request_id="element-input-observe-001", operation="observe_visual_state")}}})
+                self.assertFalse(observed["result"].get("isError", False), observed)
+                elements = observed["result"]["structuredContent"]["observation"]["elements"]
+                entry = next(item for item in elements if item.get("input_id") == "Host parity input")
+                self.assertEqual(entry["role"], "textbox")
+                self.assertEqual(entry["label"], "Host parity input")
+                self.assertNotIn("value", entry)
         finally:
             for key, value in old.items():
                 if value is None:
