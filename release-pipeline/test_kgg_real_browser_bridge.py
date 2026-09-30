@@ -70,6 +70,36 @@ class RealBrowserModuleResolutionTests(unittest.TestCase):
             if old is not None:
                 os.environ["KGG_PLAYWRIGHT_NODE_PATH"] = old
 
+    def test_session_response_rejects_malformed_or_sensitive_element_snapshots(self) -> None:
+        browser = server._load_real_browser_module()
+        base = {"status": "PASS", "error_class": "", "state": "ready", "artifacts": []}
+        cases = (
+            (
+                "duplicate-ref",
+                [{"ref": "e1", "role": "button"}, {"ref": "e1", "role": "link"}],
+                "real_browser_element_ref_invalid",
+            ),
+            (
+                "too-many",
+                [{"ref": f"e{index}", "role": "button"} for index in range(1, 42)],
+                "real_browser_elements_invalid",
+            ),
+            (
+                "sensitive-label",
+                [{"ref": "e1", "role": "textbox", "label": "password"}],
+                "real_browser_element_sensitive",
+            ),
+            (
+                "unexpected-field",
+                [{"ref": "e1", "role": "button", "value": "must-not-cross-boundary"}],
+                "real_browser_element_invalid",
+            ),
+        )
+        for name, elements, expected in cases:
+            with self.subTest(name=name):
+                with self.assertRaisesRegex(browser.RealBrowserError, expected):
+                    browser._validate_session_response({**base, "elements": elements})
+
     def test_runtime_does_not_silently_activate_from_launcher_environment(self) -> None:
         old = os.environ.get("KGG_REAL_BROWSER")
         os.environ["KGG_REAL_BROWSER"] = "1"
