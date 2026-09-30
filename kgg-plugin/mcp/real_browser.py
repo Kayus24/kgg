@@ -28,6 +28,11 @@ MAX_IMAGE_BYTES = 2 * 1024 * 1024
 MAX_RESPONSE_BYTES = 8 * 1024 * 1024
 _ATTRIBUTE_RE = re.compile(r"^data-[a-z0-9-]{1,63}$")
 _NAMESPACE_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{1,63}$")
+_ELEMENT_REF_RE = re.compile(r"^e[1-9][0-9]{0,2}$")
+_ELEMENT_TEXT_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 ._:/-]{0,199}$")
+_ELEMENT_ROLES = frozenset({"button", "link", "textbox", "checkbox", "radio", "switch", "combobox", "action", "generic"})
+_SENSITIVE_ELEMENT_TOKENS = ("token", "secret", "password", "api_key", "patient_data", "raw_qr", "base64")
+MAX_ELEMENT_REFS = 40
 
 
 @dataclass(frozen=True)
@@ -312,6 +317,39 @@ def run_real_flow(
     return response
 
 
+def _validate_element_snapshot(value: Any) -> list[dict[str, str]]:
+    if value is None:
+        return []
+    if not isinstance(value, list) or len(value) > MAX_ELEMENT_REFS:
+        raise RealBrowserError("real_browser_elements_invalid")
+    allowed = {"ref", "role", "action_id", "input_id", "label"}
+    refs: set[str] = set()
+    result: list[dict[str, str]] = []
+    for raw in value:
+        if not isinstance(raw, Mapping) or set(raw) - allowed or not {"ref", "role"}.issubset(raw):
+            raise RealBrowserError("real_browser_element_invalid")
+        ref = raw["ref"]
+        role = raw["role"]
+        if not isinstance(ref, str) or not _ELEMENT_REF_RE.fullmatch(ref) or ref in refs:
+            raise RealBrowserError("real_browser_element_ref_invalid")
+        if not isinstance(role, str) or role not in _ELEMENT_ROLES:
+            raise RealBrowserError("real_browser_element_role_invalid")
+        item = {"ref": ref, "role": role}
+        refs.add(ref)
+        for key in ("action_id", "input_id", "label"):
+            field = raw.get(key)
+            if field is None:
+                continue
+            if not isinstance(field, str) or not _ELEMENT_TEXT_RE.fullmatch(field):
+                raise RealBrowserError("real_browser_element_text_invalid")
+            lowered = field.casefold()
+            if any(token in lowered for token in _SENSITIVE_ELEMENT_TOKENS):
+                raise RealBrowserError("real_browser_element_sensitive")
+            item[key] = field
+        result.append(item)
+    return result
+
+
 def _validate_session_response(value: Any) -> dict[str, Any]:
     if not isinstance(value, Mapping):
         raise RealBrowserError("real_browser_session_response_invalid")
@@ -328,12 +366,14 @@ def _validate_session_response(value: Any) -> dict[str, Any]:
         artifacts.append(public)
         if image:
             images.append(image)
+    elements = _validate_element_snapshot(value.get("elements"))
     result = {
         "status": value["status"],
         "error_class": str(value.get("error_class", ""))[:120],
         "state": str(value.get("state", "unknown"))[:200],
         "artifacts": artifacts,
         "images": images,
+        "elements": elements,
     }
     action = value.get("action")
     if action is not None:
