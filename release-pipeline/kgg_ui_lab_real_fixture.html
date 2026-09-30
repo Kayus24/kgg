@@ -43,6 +43,7 @@
     const motion = params.get('motion') === '1';
     const languageFallback = params.get('fallback') === 'language';
     const overlay = params.get('overlay') === '1';
+    const replaceRef = params.get('replace_ref') === '1';
     if (flow === 'pilot') {
       document.body.dataset.kggState = 'pilot-area-ready';
       state.dataset.kggState = 'pilot-area-ready';
@@ -79,6 +80,12 @@
       }, 100);
     }
     dismissOverlay.addEventListener('click', () => { modalBackdrop.hidden = true; });
+    if (replaceRef) {
+      setTimeout(() => {
+        const replacement = action.cloneNode(true);
+        action.replaceWith(replacement);
+      }, 2000);
+    }
     let swipeStart = null;
     swipeSurface.addEventListener('pointerdown', event => {
       swipeStart = { x: event.clientX, y: event.clientY };
