@@ -163,6 +163,107 @@ async function elementSnapshot(page, policy) {
   return { elements, refs };
 }
 
+function safeUrl(value, policy) {
+  let parsed;
+  try { parsed = new URL(value); } catch { fail("app_url_invalid"); }
+  const localHttp = parsed.protocol === "http:" && (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1");
+  if (!allowedPageUrl(value, policy) || (!localHttp && parsed.protocol !== "https:") || parsed.username || parsed.password || parsed.hash) fail("app_url_invalid");
+  return parsed.toString();
+}
+
+function safeViewport(value) {
+  if (!value || !Number.isInteger(value.width) || !Number.isInteger(value.height) ||
+      value.width < 240 || value.width > 10000 || value.height < 240 || value.height > 10000 ||
+      typeof value.device_scale_factor !== "number" || value.device_scale_factor < 0.5 || value.device_scale_factor > 4) {
+    fail("viewport_invalid");
+  }
+  return { width: value.width, height: value.height, deviceScaleFactor: value.device_scale_factor };
+}
+
+function safeCoordinates(value) {
+  if (value === undefined) return undefined;
+  if (!value || !Number.isInteger(value.x) || !Number.isInteger(value.y) || value.x < 0 || value.y < 0) {
+    fail("coordinates_invalid");
+  }
+  return { x: value.x, y: value.y };
+}
+
+function safeSwipePoint(value, label, viewport) {
+  const point = safeCoordinates(value);
+  if (!point) fail(`${label}_invalid`);
+  if (point.x >= viewport.width || point.y >= viewport.height) fail("swipe_bounds_invalid");
+  return point;
+}
+
+function safeStep(step, viewport) {
+  if (!step || typeof step !== "object" || typeof step.operation !== "string") fail("step_invalid");
+  if (!["click", "tap", "type", "scroll", "wait", "swipe"].includes(step.operation)) fail("step_operation_invalid");
+  const result = { operation: step.operation, label: safeText(step.label || step.operation, "step_label") };
+  result.coordinates = safeCoordinates(step.coordinates);
+  if (step.element_ref !== undefined) {
+    if (typeof step.element_ref !== "string" || !/^e[1-9][0-9]{0,2}$/.test(step.element_ref)) fail("element_ref_invalid");
+    if (!["click", "tap", "type"].includes(step.operation)) fail("element_ref_operation_invalid");
+    if (result.coordinates) fail("element_ref_target_conflict");
+    result.element_ref = step.element_ref;
+  }
+  if (step.operation === "type") {
+    if (typeof step.text !== "string" || step.text.length > MAX_TEXT) fail("type_text_invalid");
+    result.text = step.text;
+  }
+  if (step.operation === "scroll") {
+    const delta = step.delta_y === undefined ? 500 : step.delta_y;
+    if (!Number.isInteger(delta) || delta < -10000 || delta > 10000) fail("scroll_delta_invalid");
+    result.delta_y = delta;
+  }
+  if (step.operation === "wait") {
+    const timeout = step.timeout_ms === undefined ? 1000 : step.timeout_ms;
+    if (!Number.isInteger(timeout) || timeout < 1 || timeout > 5000) fail("wait_timeout_invalid");
+    result.timeout_ms = timeout;
+  }
+  if (step.operation === "swipe") {
+    result.start = safeSwipePoint(step.start, "swipe_start", viewport);
+    result.end = safeSwipePoint(step.end, "swipe_end", viewport);
+    if (result.start.x === result.end.x && result.start.y === result.end.y) fail("swipe_unchanged");
+    const duration = step.duration_ms === undefined ? 300 : step.duration_ms;
+    if (!Number.isInteger(duration) || duration < 50 || duration > 5000) fail("swipe_duration_invalid");
+    result.duration_ms = duration;
+  }
+  return result;
+}
+
+function hashBytes(buffer) {
+  return crypto.createHash("sha256").update(buffer).digest("hex");
+}
+
+function artifact(runId, sequence, buffer, policy) {
+  if (!Buffer.isBuffer(buffer) || buffer.length < 1 || buffer.length > MAX_IMAGE_BYTES) fail("screenshot_too_large");
+  return {
+    id: `${policy.evidence_namespace}-visual-${runId.slice(-12)}-${String(sequence).padStart(2, "0")}`,
+    kind: "screenshot",
+    ref: `memory://${policy.evidence_namespace}/${runId}/visual-${sequence}.png`,
+    sha256: hashBytes(buffer),
+    content_type: "image/png",
+    data_base64: buffer.toString("base64"),
+  };
+}
+
+async function stateValue(page, policy) {
+  assertSafePage();
+  const marker = await page.evaluate(config => {
+    const node = document.querySelector(`[${config.state_attribute}]`);
+    const explicit = node?.getAttribute(config.state_attribute) || document.body?.getAttribute(config.state_attribute);
+    if (explicit) return { kind: "explicit", value: explicit };
+    const languageToggle = (config.language_toggle_id && document.getElementById(config.language_toggle_id)) || document.querySelector(`[${config.action_attribute}="language-toggle"]`);
+    if (languageToggle) {
+      let language = "de";
+      try { language = localStorage.getItem("kggPatientLang") === "en" ? "en" : "de"; } catch {}
+      return { kind: "bounded-language", value: `lang-${language}` };
+    }
+    return { kind: "unknown", value: "unknown" };
+  }, policy);
+  return safeText(String(marker.value), "state");
+}
+
 async function locateAction(page, label, policy) {
   const escaped = label.replace(/"/g, "");
   const marked = page.locator(`[${policy.action_attribute}="${escaped}"]`).first();
