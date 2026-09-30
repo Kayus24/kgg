@@ -261,6 +261,75 @@ class KggRealBrowserBridgeTests(unittest.TestCase):
                 else:
                     os.environ[key] = value
 
+    def test_host_parity_fixture_tap_action_reaches_linked_preview_ready(self) -> None:
+        runtime_info = _runtime_available()
+        if runtime_info is None:
+            self.skipTest("pre-provisioned Playwright runtime is not available")
+        node, module_path = runtime_info
+        old = {key: os.environ.get(key) for key in ("KGG_REAL_BROWSER", "KGG_BROWSER_NODE", "KGG_PLAYWRIGHT_NODE_PATH")}
+        os.environ.update({"KGG_REAL_BROWSER": "1", "KGG_BROWSER_NODE": node, "KGG_PLAYWRIGHT_NODE_PATH": module_path})
+        try:
+            with local_fixture_server() as base_url:
+                active = _real_runtime()
+                session_id = "tap-host-parity-session-001"
+                request_id = "tap-host-parity-request-001"
+                started = server.handle(active, {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "start_ui_session", "arguments": {"session": _session(f"{base_url}?flow=qr", session_id=session_id, request_id=request_id, capabilities=["browser", "capture", "visual_loop"], device_profile="custom")}}})
+                self.assertFalse(started["result"].get("isError", False), started)
+                observed = server.handle(active, {"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "observe_visual_state", "arguments": {"request": _visual_request(session_id=session_id, request_id="tap-host-observe-001", operation="observe_visual_state")}}})
+                self.assertFalse(observed["result"].get("isError", False), observed)
+                observation = observed["result"]["structuredContent"]["observation"]
+                self.assertEqual(observation["state"], "admin-preview-ready")
+                acted = server.handle(active, {"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "execute_visual_action", "arguments": {
+                    "request": _visual_request(session_id=session_id, request_id="tap-host-action-001", operation="execute_visual_action"),
+                    "decision": {"operation": "tap", "label": "synthetic-qr-image", "expected_state_after": "linked-preview-ready", "observation_id": observation["id"]},
+                }}})
+                self.assertFalse(acted["result"].get("isError", False), acted)
+                structured = acted["result"]["structuredContent"]
+                self.assertEqual(structured["result"]["status"], "PASS")
+                self.assertEqual(structured["result"]["state_before"], "admin-preview-ready")
+                self.assertEqual(structured["result"]["state_after"], "linked-preview-ready")
+                self.assertEqual(structured["evidence"]["decision"]["operation"], "tap")
+                self.assertEqual(len(structured["result"]["artifacts"]), 2)
+                self.assertEqual(len(active.visual_sessions), 0)
+        finally:
+            for key, value in old.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
+    def test_host_parity_fixture_tap_rejects_stale_observation_without_side_effect(self) -> None:
+        runtime_info = _runtime_available()
+        if runtime_info is None:
+            self.skipTest("pre-provisioned Playwright runtime is not available")
+        node, module_path = runtime_info
+        old = {key: os.environ.get(key) for key in ("KGG_REAL_BROWSER", "KGG_BROWSER_NODE", "KGG_PLAYWRIGHT_NODE_PATH")}
+        os.environ.update({"KGG_REAL_BROWSER": "1", "KGG_BROWSER_NODE": node, "KGG_PLAYWRIGHT_NODE_PATH": module_path})
+        try:
+            with local_fixture_server() as base_url:
+                active = _real_runtime()
+                session_id = "tap-stale-session-001"
+                started = server.handle(active, {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "start_ui_session", "arguments": {"session": _session(f"{base_url}?flow=qr", session_id=session_id, request_id="tap-stale-start-001", capabilities=["browser", "capture", "visual_loop"], device_profile="custom")}}})
+                self.assertFalse(started["result"].get("isError", False), started)
+                observed = server.handle(active, {"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "observe_visual_state", "arguments": {"request": _visual_request(session_id=session_id, request_id="tap-stale-observe-001", operation="observe_visual_state")}}})
+                self.assertFalse(observed["result"].get("isError", False), observed)
+                stale = server.handle(active, {"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "execute_visual_action", "arguments": {
+                    "request": _visual_request(session_id=session_id, request_id="tap-stale-action-001", operation="execute_visual_action"),
+                    "decision": {"operation": "tap", "label": "synthetic-qr-image", "expected_state_after": "linked-preview-ready", "observation_id": "0" * 64},
+                }}})
+                self.assertTrue(stale["result"]["isError"], stale)
+                self.assertIn("visual_observation_stale", stale["result"]["content"][0]["text"])
+                self.assertEqual(len(active.visual_sessions), 1)
+                fresh = server.handle(active, {"jsonrpc": "2.0", "id": 4, "method": "tools/call", "params": {"name": "observe_visual_state", "arguments": {"request": _visual_request(session_id=session_id, request_id="tap-stale-reobserve-001", operation="observe_visual_state")}}})
+                self.assertFalse(fresh["result"].get("isError", False), fresh)
+                self.assertEqual(fresh["result"]["structuredContent"]["observation"]["state"], "admin-preview-ready")
+        finally:
+            for key, value in old.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
     def test_https_origin_and_path_allowlist_fail_closed(self) -> None:
         old = os.environ.get("KGG_REAL_BROWSER")
         os.environ["KGG_REAL_BROWSER"] = "1"
