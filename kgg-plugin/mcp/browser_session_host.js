@@ -97,9 +97,10 @@ function safeOptionalElementText(value) {
 
 async function elementSnapshot(page, policy) {
   assertSafePage();
-  const raw = await page.locator(
+  const locator = page.locator(
     `[${policy.action_attribute}], [${policy.input_attribute}], button, a[href], input, textarea, select, [role="button"], [role="link"], [role="checkbox"], [role="radio"], [role="switch"], [role="textbox"], [role="combobox"]`
-  ).evaluateAll((nodes, config) => {
+  );
+  const raw = await locator.evaluateAll((nodes, config) => {
     const roleFor = node => {
       const explicit = node.getAttribute("role");
       if (explicit) return explicit.toLowerCase();
@@ -119,13 +120,14 @@ async function elementSnapshot(page, policy) {
       if (node.hasAttribute(config.inputAttribute)) return "textbox";
       return "generic";
     };
-    return nodes.map(node => {
+    return nodes.map((node, nodeIndex) => {
       const rect = node.getBoundingClientRect();
       const style = window.getComputedStyle(node);
       if (node.hidden || node.getAttribute("aria-hidden") === "true" || style.display === "none" ||
           style.visibility === "hidden" || rect.width <= 0 || rect.height <= 0) return null;
       const type = String(node.getAttribute("type") || "").toLowerCase();
       return {
+        node_index: nodeIndex,
         role: roleFor(node),
         action_id: node.getAttribute(config.actionAttribute),
         input_id: node.getAttribute(config.inputAttribute),
@@ -141,117 +143,24 @@ async function elementSnapshot(page, policy) {
 
   const allowedRoles = new Set(["button", "link", "textbox", "checkbox", "radio", "switch", "combobox", "action", "generic"]);
   const elements = [];
+  const refs = new Map();
   for (const item of raw) {
     if (!item || item.sensitive === true || !allowedRoles.has(String(item.role))) continue;
     const actionId = safeOptionalElementText(item.action_id);
     const inputId = safeOptionalElementText(item.input_id);
     const label = safeOptionalElementText(item.label);
-    const element = { ref: `e${elements.length + 1}`, role: String(item.role) };
+    const handle = await locator.nth(item.node_index).elementHandle();
+    if (!handle) continue;
+    const ref = `e${elements.length + 1}`;
+    const element = { ref, role: String(item.role) };
     if (actionId) element.action_id = actionId;
     if (inputId) element.input_id = inputId;
     if (label) element.label = label;
+    refs.set(ref, handle);
     elements.push(element);
     if (elements.length >= MAX_ELEMENT_REFS) break;
   }
-  return elements;
-}
-
-function safeUrl(value, policy) {
-  let parsed;
-  try { parsed = new URL(value); } catch { fail("app_url_invalid"); }
-  const localHttp = parsed.protocol === "http:" && (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1");
-  if (!allowedPageUrl(value, policy) || (!localHttp && parsed.protocol !== "https:") || parsed.username || parsed.password || parsed.hash) fail("app_url_invalid");
-  return parsed.toString();
-}
-
-function safeViewport(value) {
-  if (!value || !Number.isInteger(value.width) || !Number.isInteger(value.height) ||
-      value.width < 240 || value.width > 10000 || value.height < 240 || value.height > 10000 ||
-      typeof value.device_scale_factor !== "number" || value.device_scale_factor < 0.5 || value.device_scale_factor > 4) {
-    fail("viewport_invalid");
-  }
-  return { width: value.width, height: value.height, deviceScaleFactor: value.device_scale_factor };
-}
-
-function safeCoordinates(value) {
-  if (value === undefined) return undefined;
-  if (!value || !Number.isInteger(value.x) || !Number.isInteger(value.y) || value.x < 0 || value.y < 0) {
-    fail("coordinates_invalid");
-  }
-  return { x: value.x, y: value.y };
-}
-
-function safeSwipePoint(value, label, viewport) {
-  const point = safeCoordinates(value);
-  if (!point) fail(`${label}_invalid`);
-  if (point.x >= viewport.width || point.y >= viewport.height) fail("swipe_bounds_invalid");
-  return point;
-}
-
-function safeStep(step, viewport) {
-  if (!step || typeof step !== "object" || typeof step.operation !== "string") fail("step_invalid");
-  if (!["click", "tap", "type", "scroll", "wait", "swipe"].includes(step.operation)) fail("step_operation_invalid");
-  const result = { operation: step.operation, label: safeText(step.label || step.operation, "step_label") };
-  result.coordinates = safeCoordinates(step.coordinates);
-  if (step.operation === "type") {
-    if (typeof step.text !== "string" || step.text.length > MAX_TEXT) fail("type_text_invalid");
-    result.text = step.text;
-  }
-  if (step.operation === "scroll") {
-    const delta = step.delta_y === undefined ? 500 : step.delta_y;
-    if (!Number.isInteger(delta) || delta < -10000 || delta > 10000) fail("scroll_delta_invalid");
-    result.delta_y = delta;
-  }
-  if (step.operation === "wait") {
-    const timeout = step.timeout_ms === undefined ? 1000 : step.timeout_ms;
-    if (!Number.isInteger(timeout) || timeout < 1 || timeout > 5000) fail("wait_timeout_invalid");
-    result.timeout_ms = timeout;
-  }
-  if (step.operation === "swipe") {
-    result.start = safeSwipePoint(step.start, "swipe_start", viewport);
-    result.end = safeSwipePoint(step.end, "swipe_end", viewport);
-    if (result.start.x === result.end.x && result.start.y === result.end.y) fail("swipe_unchanged");
-    const duration = step.duration_ms === undefined ? 300 : step.duration_ms;
-    if (!Number.isInteger(duration) || duration < 50 || duration > 5000) fail("swipe_duration_invalid");
-    result.duration_ms = duration;
-  }
-  return result;
-}
-
-function hashBytes(buffer) {
-  return crypto.createHash("sha256").update(buffer).digest("hex");
-}
-
-function artifact(runId, sequence, buffer, policy) {
-  if (!Buffer.isBuffer(buffer) || buffer.length < 1 || buffer.length > MAX_IMAGE_BYTES) fail("screenshot_too_large");
-  return {
-    id: `${policy.evidence_namespace}-visual-${runId.slice(-12)}-${String(sequence).padStart(2, "0")}`,
-    kind: "screenshot",
-    ref: `memory://${policy.evidence_namespace}/${runId}/visual-${sequence}.png`,
-    sha256: hashBytes(buffer),
-    content_type: "image/png",
-    data_base64: buffer.toString("base64"),
-  };
-}
-
-async function stateValue(page, policy) {
-  assertSafePage();
-  const marker = await page.evaluate(config => {
-    const node = document.querySelector(`[${config.state_attribute}]`);
-    const explicit = node?.getAttribute(config.state_attribute) || document.body?.getAttribute(config.state_attribute);
-    if (explicit) return { kind: "explicit", value: explicit };
-    // Some supported synthetic patient previews expose a bounded language
-    // toggle but no data-kgg-state marker. Expose only that non-sensitive
-    // state, never page text, values, or storage contents.
-    const languageToggle = (config.language_toggle_id && document.getElementById(config.language_toggle_id)) || document.querySelector(`[${config.action_attribute}="language-toggle"]`);
-    if (languageToggle) {
-      let language = "de";
-      try { language = localStorage.getItem("kggPatientLang") === "en" ? "en" : "de"; } catch {}
-      return { kind: "bounded-language", value: `lang-${language}` };
-    }
-    return { kind: "unknown", value: "unknown" };
-  }, policy);
-  return safeText(String(marker.value), "state");
+  return { elements, refs };
 }
 
 async function locateAction(page, label, policy) {
@@ -263,18 +172,30 @@ async function locateAction(page, label, policy) {
   fail("action_target_not_found");
 }
 
-async function performAction(page, step, policy) {
+async function performAction(page, step, policy, elementRefs) {
   const before = await stateValue(page, policy);
   if (step.operation === "click" || step.operation === "tap") {
-    if (step.coordinates) {
+    if (step.element_ref) {
+      const target = elementRefs.get(step.element_ref);
+      if (!target) fail("element_ref_not_found");
+      if (!(await target.isVisible())) fail("element_ref_stale");
+      await target.click({ timeout: 5000 });
+    } else if (step.coordinates) {
       await page.mouse.click(step.coordinates.x, step.coordinates.y, { timeout: 5000 });
     } else {
       await (await locateAction(page, step.label, policy)).click({ timeout: 5000 });
     }
   } else if (step.operation === "type") {
-    const input = page.locator(`[${policy.input_attribute}="${step.label.replace(/"/g, "")}"]`).first();
-    if (!(await input.count())) fail("input_target_not_found");
-    await input.fill(step.text);
+    if (step.element_ref) {
+      const target = elementRefs.get(step.element_ref);
+      if (!target) fail("element_ref_not_found");
+      if (!(await target.isVisible())) fail("element_ref_stale");
+      await target.fill(step.text);
+    } else {
+      const input = page.locator(`[${policy.input_attribute}="${step.label.replace(/"/g, "")}"]`).first();
+      if (!(await input.count())) fail("input_target_not_found");
+      await input.fill(step.text);
+    }
   } else if (step.operation === "scroll") {
     await page.mouse.wheel(0, step.delta_y);
   } else if (step.operation === "wait") {
@@ -307,7 +228,7 @@ async function screenshot(page, runId, sequence, policy) {
   return { artifact: artifact(runId, sequence, image, policy), state: await stateValue(page, policy) };
 }
 
-const session = { browser: null, context: null, page: null, runId: null, screenshotNumber: 0, originViolation: false, policy: DEFAULT_POLICY, viewport: null };
+const session = { browser: null, context: null, page: null, runId: null, screenshotNumber: 0, originViolation: false, policy: DEFAULT_POLICY, viewport: null, elementRefs: new Map() };
 
 function assertSafePage() {
   if (!session.page || session.originViolation || !allowedPageUrl(session.page.url(), session.policy)) fail("origin_escape");
@@ -332,6 +253,7 @@ async function handle(request) {
     });
     session.runId = String(request.run_id);
     session.screenshotNumber = 0;
+    session.elementRefs = new Map();
     await session.page.goto(url, { waitUntil: "domcontentloaded", timeout: 10000 });
     assertSafePage();
     return { status: "PASS", error_class: "", state: await stateValue(session.page, session.policy) };
@@ -341,13 +263,14 @@ async function handle(request) {
     assertSafePage();
     session.screenshotNumber += 1;
     const observed = await screenshot(session.page, session.runId, session.screenshotNumber, session.policy);
-    const elements = await elementSnapshot(session.page, session.policy);
-    return { status: "PASS", error_class: "", state: observed.state, artifacts: [observed.artifact], elements };
+    const snapshot = await elementSnapshot(session.page, session.policy);
+    session.elementRefs = snapshot.refs;
+    return { status: "PASS", error_class: "", state: observed.state, artifacts: [observed.artifact], elements: snapshot.elements };
   }
   if (request.command === "act") {
     assertSafePage();
     const step = safeStep(request.step, session.viewport);
-    return { status: "PASS", error_class: "", action: await performAction(session.page, step, session.policy) };
+    return { status: "PASS", error_class: "", action: await performAction(session.page, step, session.policy, session.elementRefs) };
   }
   if (request.command === "close") {
     await session.context?.close().catch(() => {});
@@ -357,6 +280,7 @@ async function handle(request) {
     session.page = null;
     session.viewport = null;
     session.policy = DEFAULT_POLICY;
+    session.elementRefs = new Map();
     return { status: "PASS", error_class: "", state: "closed" };
   }
   fail("host_command_invalid");
