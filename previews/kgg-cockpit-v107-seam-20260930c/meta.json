@@ -1,0 +1,24 @@
+{
+  "kind": "kgg_gpt_preview",
+  "sourceType": "local-tested-candidate",
+  "requestId": "kgg-cockpit-v107-seam-20260930c",
+  "patchHash": "7f5002eb82c362469ae7c075c426c427100e1b614cff2ca8cd7990c3a2087308",
+  "sourceSha": "8077acbbb767ac6864aa1b2b5fedac26d5bbe291",
+  "baseSha": "8077acbbb767ac6864aa1b2b5fedac26d5bbe291",
+  "commitSha": "8077acbbb767ac6864aa1b2b5fedac26d5bbe291",
+  "baseVersionCode": 107,
+  "rolloutCode": 1790790213,
+  "title": "Exact tested HTML candidate",
+  "summary": "Unchanged locally tested candidate HTML; preview only.",
+  "versionName": "1.0.107-cockpit-seam-pull-handle",
+  "createdAt": "2026-09-30T17:43:33Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-cockpit-v107-seam-20260930c/admin.html",
+  "sha256": "2933e613da3c3d84f0cf53df46a2be269f9f504f2dea42d640f12f35058b8d6e",
+  "candidateTreeSha256": "7f5002eb82c362469ae7c075c426c427100e1b614cff2ca8cd7990c3a2087308",
+  "tests": [
+    "critical",
+    "ui-stability-regression",
+    "cockpit-browser"
+  ],
+  "syntheticOnly": true
+}
