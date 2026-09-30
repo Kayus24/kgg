@@ -13,6 +13,7 @@ from pathlib import Path
 import re
 import shutil
 import threading
+import time
 import unittest
 
 
@@ -154,6 +155,24 @@ class GenericBrowserCoreTests(unittest.TestCase):
 
 
 class ToolCatalogContractTests(unittest.TestCase):
+    def test_visual_action_schema_exposes_snapshot_local_element_ref(self) -> None:
+        catalog = {item["name"]: item for item in server.tool_catalog()}
+        decision = catalog["execute_visual_action"]["inputSchema"]["properties"]["decision"]
+        self.assertEqual(decision["properties"]["element_ref"]["pattern"], "^e[1-9][0-9]{0,2}$")
+        self.assertFalse(decision["additionalProperties"])
+
+    def test_visual_decision_rejects_element_ref_for_non_targeted_or_conflicting_action(self) -> None:
+        base = {
+            "label": "bounded ref",
+            "expected_state_after": "ready",
+            "observation_id": "a" * 64,
+            "element_ref": "e1",
+        }
+        with self.assertRaisesRegex(server.ServerError, "element_ref_operation_invalid"):
+            server._visual_decision({**base, "operation": "scroll"})
+        with self.assertRaisesRegex(server.ServerError, "element_ref_target_conflict"):
+            server._visual_decision({**base, "operation": "tap", "coordinates": {"x": 10, "y": 10}})
+
     def test_request_schema_exposes_fields_required_by_visual_tools(self) -> None:
         catalog = {item["name"]: item for item in server.tool_catalog()}
         request_schema = catalog["observe_visual_state"]["inputSchema"]["properties"]["request"]
@@ -414,6 +433,38 @@ class KggRealBrowserBridgeTests(unittest.TestCase):
                 }}})
                 self.assertTrue(rejected["result"]["isError"], rejected)
                 self.assertIn("element_ref_not_found", rejected["result"]["content"][0]["text"])
+                self.assertEqual(active.visual_sessions, {})
+        finally:
+            for key, value in old.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
+    def test_visual_action_rejects_ref_after_dom_replacement_as_stale(self) -> None:
+        runtime_info = _runtime_available()
+        if runtime_info is None:
+            self.skipTest("pre-provisioned Playwright runtime is not available")
+        node, module_path = runtime_info
+        old = {key: os.environ.get(key) for key in ("KGG_REAL_BROWSER", "KGG_BROWSER_NODE", "KGG_PLAYWRIGHT_NODE_PATH")}
+        os.environ.update({"KGG_REAL_BROWSER": "1", "KGG_BROWSER_NODE": node, "KGG_PLAYWRIGHT_NODE_PATH": module_path})
+        try:
+            with local_fixture_server() as base_url:
+                active = _real_runtime()
+                session_id = "element-ref-stale-session-001"
+                started = server.handle(active, {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "start_ui_session", "arguments": {"session": _session(f"{base_url}?flow=pilot&replace_ref=1", session_id=session_id, request_id="element-ref-stale-start-001", capabilities=["browser", "capture", "visual_loop"])}}})
+                self.assertFalse(started["result"].get("isError", False), started)
+                observed = server.handle(active, {"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "observe_visual_state", "arguments": {"request": _visual_request(session_id=session_id, request_id="element-ref-stale-observe-001", operation="observe_visual_state")}}})
+                self.assertFalse(observed["result"].get("isError", False), observed)
+                observation = observed["result"]["structuredContent"]["observation"]
+                target = next(item for item in observation["elements"] if item.get("action_id") == "tablet-splitter-control")
+                time.sleep(2.25)
+                rejected = server.handle(active, {"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "execute_visual_action", "arguments": {
+                    "request": _visual_request(session_id=session_id, request_id="element-ref-stale-action-001", operation="execute_visual_action"),
+                    "decision": {"operation": "click", "label": "tablet splitter ref", "element_ref": target["ref"], "expected_state_after": "scale-drag-state", "observation_id": observation["id"]},
+                }}})
+                self.assertTrue(rejected["result"]["isError"], rejected)
+                self.assertIn("element_ref_stale", rejected["result"]["content"][0]["text"])
                 self.assertEqual(active.visual_sessions, {})
         finally:
             for key, value in old.items():
