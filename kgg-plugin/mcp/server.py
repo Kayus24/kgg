@@ -428,7 +428,7 @@ def _compare_visual_images(current: Mapping[str, Any], reference: Mapping[str, A
 
 def _visual_decision(value: Any) -> dict[str, Any]:
     decision = _object(value, "decision")
-    allowed = {"operation", "label", "coordinates", "start", "end", "duration_ms", "text", "delta_y", "timeout_ms", "expected_state_after", "observation_id"}
+    allowed = {"operation", "label", "element_ref", "coordinates", "start", "end", "duration_ms", "text", "delta_y", "timeout_ms", "expected_state_after", "observation_id"}
     if set(decision) - allowed or not {"operation", "label", "expected_state_after", "observation_id"}.issubset(decision):
         _fail("visual_decision_invalid")
     operation = decision["operation"]
@@ -444,6 +444,15 @@ def _visual_decision(value: Any) -> dict[str, Any]:
     if not isinstance(observation_id, str) or not SHA256_RE.fullmatch(observation_id):
         _fail("visual_decision_invalid")
     normalized: dict[str, Any] = {"operation": operation, "label": label, "expected_state_after": expected, "observation_id": observation_id}
+    if "element_ref" in decision:
+        element_ref = decision["element_ref"]
+        if not isinstance(element_ref, str) or not re.fullmatch(r"e[1-9][0-9]{0,2}", element_ref):
+            _fail("visual_decision_invalid")
+        if operation not in {"click", "tap", "type"}:
+            _fail("element_ref_operation_invalid")
+        if "coordinates" in decision:
+            _fail("element_ref_target_conflict")
+        normalized["element_ref"] = element_ref
     if "coordinates" in decision:
         coordinates = _object(decision["coordinates"], "coordinates")
         if set(coordinates) != {"x", "y"} or not all(isinstance(coordinates[key], int) and not isinstance(coordinates[key], bool) and coordinates[key] >= 0 for key in ("x", "y")):
@@ -673,10 +682,11 @@ def tool_catalog() -> list[dict[str, Any]]:
     }
     visual_decision = {
         "type": "object",
-        "description": "One bounded agent decision derived from the previously returned screenshot; no selectors or JavaScript.",
+        "description": "One bounded agent decision derived from the previously returned visual observation; no selectors or JavaScript.",
         "properties": {
             "operation": {"type": "string", "enum": ["click", "tap", "type", "scroll", "wait", "swipe"]},
             "label": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._:/-]{0,199}$"},
+            "element_ref": {"type": "string", "pattern": "^e[1-9][0-9]{0,2}$", "description": "Snapshot-local element reference returned by the matching visual observation."},
             "coordinates": {"type": "object", "properties": {"x": {"type": "integer", "minimum": 0}, "y": {"type": "integer", "minimum": 0}}, "required": ["x", "y"], "additionalProperties": False},
             "start": {"type": "object", "properties": {"x": {"type": "integer", "minimum": 0}, "y": {"type": "integer", "minimum": 0}}, "required": ["x", "y"], "additionalProperties": False},
             "end": {"type": "object", "properties": {"x": {"type": "integer", "minimum": 0}, "y": {"type": "integer", "minimum": 0}}, "required": ["x", "y"], "additionalProperties": False},
