@@ -193,6 +193,8 @@ async function elementSnapshot(page, policy) {
     for (const selector of selectors) {
       for (const node of document.querySelectorAll(selector)) {
         if (seen.has(node)) continue;
+        const style = getComputedStyle(node);
+        if (node.hidden || style.display === "none" || style.visibility === "hidden") continue;
         seen.add(node);
         nodes.push(node);
         if (nodes.length > limit) break;
