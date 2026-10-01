@@ -1,0 +1,24 @@
+{
+  "kind": "kgg_gpt_preview",
+  "sourceType": "local-tested-candidate",
+  "requestId": "cockpit-v116-20261001-cb67ce80",
+  "patchHash": "23bb31a439f79bc9eb85fc2a3a4ee42aec06401d30e3533a12b5c2f5054e7fd6",
+  "sourceSha": "8077acbbb767ac6864aa1b2b5fedac26d5bbe291",
+  "baseSha": "8077acbbb767ac6864aa1b2b5fedac26d5bbe291",
+  "commitSha": "8077acbbb767ac6864aa1b2b5fedac26d5bbe291",
+  "baseVersionCode": 116,
+  "rolloutCode": 1790872496,
+  "title": "Exact tested HTML candidate",
+  "summary": "Unchanged locally tested candidate HTML; preview only.",
+  "versionName": "1.0.116-cockpit-seam-title-wrap",
+  "createdAt": "2026-10-01T16:34:56Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/cockpit-v116-20261001-cb67ce80/admin.html",
+  "sha256": "cb67ce80731ae2aea589262097a89a98176e2be382ce7d3b740a40a531309d6c",
+  "candidateTreeSha256": "23bb31a439f79bc9eb85fc2a3a4ee42aec06401d30e3533a12b5c2f5054e7fd6",
+  "tests": [
+    "critical",
+    "ui-stability-regression",
+    "cockpit-browser"
+  ],
+  "syntheticOnly": true
+}
