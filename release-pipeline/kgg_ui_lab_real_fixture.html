@@ -43,6 +43,7 @@
     const motion = params.get('motion') === '1';
     const languageFallback = params.get('fallback') === 'language';
     const overlay = params.get('overlay') === '1';
+    const unsafeElement = params.get('unsafeElement') === '1';
     if (flow === 'pilot') {
       document.body.dataset.kggState = 'pilot-area-ready';
       state.dataset.kggState = 'pilot-area-ready';
@@ -55,6 +56,9 @@
     if (drift) {
       action.dataset.kggAction = 'drifted-control';
       action.textContent = 'Drifted control (visual fallback required)';
+    }
+    if (unsafeElement) {
+      action.dataset.kggAction = 'password-control';
     }
     if (languageFallback) {
       document.body.removeAttribute('data-kgg-state');

@@ -14,7 +14,10 @@ const { chromium } = require("playwright");
 
 const MAX_TEXT = 200;
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+const MAX_ELEMENT_REFS = 100;
 const SAFE_LABEL = /^[A-Za-z0-9][A-Za-z0-9 ._:/-]{0,199}$/;
+const SAFE_ELEMENT_TAG = /^[a-z][a-z0-9-]{0,31}$/;
+const SAFE_ELEMENT_ROLE = /^[a-z][a-z0-9-]{0,31}$/;
 const SAFE_RUN = /^[a-z0-9][a-z0-9-]{5,128}$/;
 const ATTRIBUTE_RE = /^data-[a-z0-9-]{1,63}$/;
 const NAMESPACE_RE = /^[a-z0-9][a-z0-9._-]{1,63}$/;
@@ -181,6 +184,68 @@ async function stateValue(page, policy) {
   return safeText(String(marker.value), "state");
 }
 
+async function elementSnapshot(page, policy) {
+  assertSafePage();
+  const raw = await page.evaluate(({ config, limit }) => {
+    const selectors = [`[${config.action_attribute}]`, `[${config.input_attribute}]`];
+    const nodes = [];
+    const seen = new Set();
+    for (const selector of selectors) {
+      for (const node of document.querySelectorAll(selector)) {
+        if (seen.has(node)) continue;
+        const style = getComputedStyle(node);
+        if (node.hidden || style.display === "none" || style.visibility === "hidden") continue;
+        seen.add(node);
+        nodes.push(node);
+        if (nodes.length > limit) break;
+      }
+      if (nodes.length > limit) break;
+    }
+    return nodes.map(node => {
+      const actionLabel = node.getAttribute(config.action_attribute);
+      const inputLabel = node.getAttribute(config.input_attribute);
+      const tag = String(node.tagName || "").toLowerCase();
+      let role = node.getAttribute("role") || "";
+      if (!role) {
+        if (tag === "button") role = "button";
+        else if (tag === "input" || tag === "textarea") role = "textbox";
+        else if (tag === "select") role = "combobox";
+        else if (tag === "a") role = "link";
+        else role = "generic";
+      }
+      return {
+        kind: actionLabel ? "action" : "input",
+        tag,
+        role: String(role).toLowerCase(),
+        label: actionLabel || inputLabel || "",
+        disabled: Boolean(node.matches(":disabled") || node.getAttribute("aria-disabled") === "true"),
+      };
+    });
+  }, { config: policy, limit: MAX_ELEMENT_REFS });
+
+  if (!Array.isArray(raw) || raw.length > MAX_ELEMENT_REFS) fail("element_snapshot_too_large");
+  const items = raw.map((item, index) => {
+    if (!item || typeof item !== "object" ||
+        !["action", "input"].includes(item.kind) ||
+        typeof item.tag !== "string" || !SAFE_ELEMENT_TAG.test(item.tag) ||
+        typeof item.role !== "string" || !SAFE_ELEMENT_ROLE.test(item.role) ||
+        typeof item.disabled !== "boolean") {
+      fail("element_snapshot_invalid");
+    }
+    return {
+      ref: `@e${index + 1}`,
+      kind: item.kind,
+      tag: item.tag,
+      role: item.role,
+      label: safeText(item.label, "element_label"),
+      disabled: item.disabled,
+    };
+  });
+  const digestRows = items.map(item => [item.ref, item.kind, item.tag, item.role, item.label, item.disabled]);
+  const snapshotId = crypto.createHash("sha256").update(JSON.stringify(digestRows)).digest("hex");
+  return { schema: "kgg-ui-lab/element-snapshot/v1", snapshot_id: snapshotId, items };
+}
+
 async function locateAction(page, label, policy) {
   const escaped = label.replace(/"/g, "");
   const marked = page.locator(`[${policy.action_attribute}="${escaped}"]`).first();
@@ -268,7 +333,8 @@ async function handle(request) {
     assertSafePage();
     session.screenshotNumber += 1;
     const observed = await screenshot(session.page, session.runId, session.screenshotNumber, session.policy);
-    return { status: "PASS", error_class: "", state: observed.state, artifacts: [observed.artifact] };
+    const element_snapshot = await elementSnapshot(session.page, session.policy);
+    return { status: "PASS", error_class: "", state: observed.state, artifacts: [observed.artifact], element_snapshot };
   }
   if (request.command === "act") {
     assertSafePage();

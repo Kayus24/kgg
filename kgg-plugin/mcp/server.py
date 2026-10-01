@@ -841,13 +841,39 @@ class Runtime:
         if not isinstance(artifact, Mapping) or not isinstance(image, Mapping):
             _fail("visual_observation_missing_screenshot")
         state = str(observed.get("state", "unknown"))
-        observation_id = hashlib.sha256(f"{session['session_id']}|{artifact['sha256']}|{state}".encode("utf-8")).hexdigest()
+        element_snapshot = observed.get("element_snapshot")
+        snapshot_id = ""
+        public_snapshot: dict[str, Any] | None = None
+        if element_snapshot is not None:
+            if not isinstance(element_snapshot, Mapping):
+                _fail("visual_element_snapshot_invalid")
+            raw_items = element_snapshot.get("items")
+            raw_snapshot_id = element_snapshot.get("snapshot_id")
+            if (
+                element_snapshot.get("schema") != "kgg-ui-lab/element-snapshot/v1"
+                or not isinstance(raw_snapshot_id, str)
+                or not isinstance(raw_items, list)
+            ):
+                _fail("visual_element_snapshot_invalid")
+            snapshot_id = raw_snapshot_id
+            public_snapshot = {
+                "schema": "kgg-ui-lab/element-snapshot/v1",
+                "snapshot_id": snapshot_id,
+                "items": [dict(item) for item in raw_items if isinstance(item, Mapping)],
+            }
+            if len(public_snapshot["items"]) != len(raw_items):
+                _fail("visual_element_snapshot_invalid")
+        observation_id = hashlib.sha256(
+            f"{session['session_id']}|{artifact['sha256']}|{state}|{snapshot_id}".encode("utf-8")
+        ).hexdigest()
         public_observation = {
             "id": observation_id,
             "state": state,
             "artifact": dict(artifact),
             "fallback": flow_status == "STALE_REQUIRES_REVIEW",
         }
+        if public_snapshot is not None:
+            public_observation["element_snapshot"] = public_snapshot
         stored_observation = {**public_observation, "image": dict(image)}
         session["visual_observation"] = stored_observation
         history = session.setdefault("visual_observations", {})
@@ -862,6 +888,9 @@ class Runtime:
             "state_before": state,
             "artifacts": [dict(artifact)],
         }
+        if public_snapshot is not None:
+            evidence["element_snapshot_id"] = snapshot_id
+            evidence["element_count"] = len(public_snapshot["items"])
         if flow_status is not None:
             evidence["flow_status"] = flow_status
         self.evidence.setdefault(session["session_id"], []).append(evidence)
