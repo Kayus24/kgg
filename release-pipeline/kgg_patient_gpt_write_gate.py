@@ -96,6 +96,7 @@ DIRECT_FIRST_LOAD_MODULES = (
     "patient-set-summary-groups.js",
     "patient-qr-fullscreen.js",
     "patient-numpad-card-guard.js",
+    "patient-set-compact-view.js",
     "patient-version-label.js",
 )
 

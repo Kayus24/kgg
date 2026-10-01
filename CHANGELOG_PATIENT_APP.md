@@ -1,5 +1,12 @@
 # Patient App Changelog
 
+## v86 - 2026-10-01
+
+- Neue kompakte Satzansicht als Standard mit kleinem ALT/NEU-Schalter oben rechts im ersten KGG-Header.
+- ALT bleibt die bestehende Patientenansicht; beide Ansichten verwenden unverändert denselben Trainings-State und dieselben Speicherpfade.
+- Das bestehende Patient-Numpad bleibt die Eingabeengine und erhält im kompakten Modus einen kg/Wdh-Paarumschalter.
+- Neue Browser-Regression für gemeinsame Werte, LR/B, 1/2/3/4 Sätze, Reload und Overflow.
+
 ## v85 - 2026-09-11
 
 - Ticket 015 live-fix: Variantenobjekte werden nicht mehr als `[object Object]` im Patiententext angezeigt.
