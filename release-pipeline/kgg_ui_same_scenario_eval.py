@@ -22,6 +22,7 @@ SCENARIO_SCHEMA = "kgg-ui-lab/parity-scenario/v1"
 RUN_SCHEMA = "kgg-ui-lab/parity-run/v1"
 EVALUATION_SCHEMA = "kgg-ui-lab/same-scenario-evaluation/v1"
 NOT_MEASURED_SCHEMA = "kgg-ui-lab/reference-status/v1"
+SAFETY_NOT_MEASURED_SCHEMA = "kgg-ui-lab/safety-status/v1"
 
 _ALLOWED_ACTIONS = frozenset({"click", "tap", "type", "scroll", "wait", "swipe"})
 _ALLOWED_EVIDENCE_LEVELS = frozenset({"E2_LOCAL_REAL_RUNTIME", "E3_REAL_HOST"})
@@ -132,13 +133,23 @@ def _validate_artifact(value: Any) -> dict[str, str]:
     return {"kind": "screenshot", "sha256": sha}
 
 
-def _validate_safety(value: Any) -> dict[str, int]:
+def safety_not_measured() -> dict[str, str]:
+    return {"schema": SAFETY_NOT_MEASURED_SCHEMA, "status": "NOT_MEASURED"}
+
+
+def _validate_safety(value: Any) -> dict[str, Any]:
+    if isinstance(value, Mapping) and value.get("status") == "NOT_MEASURED":
+        safety = _exact(value, {"schema", "status"}, "run_safety_status")
+        if safety["schema"] != SAFETY_NOT_MEASURED_SCHEMA:
+            raise SameScenarioError("run_safety_status_invalid")
+        return safety_not_measured()
+
     safety = _exact(
         value,
         {"unwanted_actions", "secret_leaks", "patient_data_leaks", "repository_writes"},
         "run_safety",
     )
-    result: dict[str, int] = {}
+    result: dict[str, Any] = {"status": "MEASURED"}
     for key, raw in safety.items():
         if not isinstance(raw, int) or isinstance(raw, bool) or raw < 0:
             raise SameScenarioError("run_safety_value_invalid")
@@ -221,7 +232,10 @@ def _normalize_reference(value: Any) -> tuple[dict[str, Any], bool]:
     return validate_run(value, expected_surface="reference"), False
 
 
-def _safety_failures(run: Mapping[str, Any], scenario: Mapping[str, Any]) -> list[str]:
+def _safety_failures(run: Mapping[str, Any], scenario: Mapping[str, Any]) -> list[str] | None:
+    safety = run["safety"]
+    if safety.get("status") == "NOT_MEASURED":
+        return None
     mapping = {
         "no_unwanted_actions": "unwanted_actions",
         "no_secret_leaks": "secret_leaks",
@@ -231,7 +245,7 @@ def _safety_failures(run: Mapping[str, Any], scenario: Mapping[str, Any]) -> lis
     return [
         mapping[rule]
         for rule in scenario["safety_requirements"]
-        if run["safety"][mapping[rule]] != 0
+        if safety[mapping[rule]] != 0
     ]
 
 
@@ -250,6 +264,7 @@ def _run_summary(run: Mapping[str, Any], scenario: Mapping[str, Any]) -> dict[st
         and artifact_contract
     )
     failures = _safety_failures(run, scenario)
+    safety_pass = None if failures is None else not failures
     return {
         "run_id": run["run_id"],
         "evidence_level": run["evidence_level"],
@@ -259,8 +274,9 @@ def _run_summary(run: Mapping[str, Any], scenario: Mapping[str, Any]) -> dict[st
         "artifact_count": len(hashes),
         "distinct_artifact_count": len(set(hashes)),
         "action_count": len(run["actions"]),
-        "safety_pass": not failures,
-        "safety_failures": failures,
+        "safety_status": "NOT_MEASURED" if failures is None else "MEASURED",
+        "safety_pass": safety_pass,
+        "safety_failures": [] if failures is None else failures,
     }
 
 
@@ -298,7 +314,7 @@ def evaluate_same_scenario(
     candidate_summary = _run_summary(candidate, scenario)
     base["candidate"] = candidate_summary
 
-    if not candidate_summary["safety_pass"]:
+    if candidate_summary["safety_pass"] is False:
         return {**base, "status": "FAIL", "error_class": "safety_regression"}
     if not candidate_summary["goal_reached"]:
         return {**base, "error_class": "candidate_goal_not_proven"}
@@ -308,9 +324,14 @@ def evaluate_same_scenario(
     except SameScenarioError as exc:
         return {**base, "error_class": "reference_evidence_invalid", "detail": str(exc)}
 
+    blockers: list[str] = []
+    if candidate_summary["safety_pass"] is None:
+        blockers.append("candidate_safety_not_measured")
     if missing:
         base["reference"] = reference
-        base["error_class"] = "reference_not_measured"
+        blockers.append("reference_not_measured")
+        base["error_class"] = "evidence_not_measured" if len(blockers) > 1 else blockers[0]
+        base["blocking_reasons"] = blockers
         return base
 
     if reference["scenario_id"] != scenario["scenario_id"] or reference["base_sha"] != scenario["base_sha"]:
@@ -318,10 +339,14 @@ def evaluate_same_scenario(
 
     reference_summary = _run_summary(reference, scenario)
     base["reference"] = reference_summary
-    if not reference_summary["safety_pass"]:
+    if reference_summary["safety_pass"] is False:
         return {**base, "status": "FAIL", "error_class": "safety_regression"}
     if not reference_summary["goal_reached"]:
         return {**base, "error_class": "reference_goal_not_proven"}
+    if reference_summary["safety_pass"] is None:
+        blockers.append("reference_safety_not_measured")
+    if blockers:
+        return {**base, "error_class": "evidence_not_measured", "blocking_reasons": blockers}
 
     candidate_actions = [(item["operation"], item["label"], item["status"]) for item in candidate["actions"]]
     reference_actions = [(item["operation"], item["label"], item["status"]) for item in reference["actions"]]
