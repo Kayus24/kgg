@@ -26,8 +26,13 @@ from urllib.parse import urlparse
 
 MAX_IMAGE_BYTES = 2 * 1024 * 1024
 MAX_RESPONSE_BYTES = 8 * 1024 * 1024
+MAX_ELEMENT_REFS = 100
 _ATTRIBUTE_RE = re.compile(r"^data-[a-z0-9-]{1,63}$")
 _NAMESPACE_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{1,63}$")
+_ELEMENT_TAG_RE = re.compile(r"^[a-z][a-z0-9-]{0,31}$")
+_ELEMENT_ROLE_RE = re.compile(r"^[a-z][a-z0-9-]{0,31}$")
+_ELEMENT_LABEL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 ._:/-]{0,199}$")
+_SENSITIVE_ELEMENT_TOKENS = ("token", "secret", "password", "api_key", "patient_data", "raw_qr", "base64")
 
 
 @dataclass(frozen=True)
@@ -312,6 +317,53 @@ def run_real_flow(
     return response
 
 
+def _validate_element_snapshot(value: Any) -> dict[str, Any]:
+    if not isinstance(value, Mapping) or set(value) != {"schema", "snapshot_id", "items"}:
+        raise RealBrowserError("real_browser_element_snapshot_invalid")
+    if value.get("schema") != "kgg-ui-lab/element-snapshot/v1":
+        raise RealBrowserError("real_browser_element_snapshot_invalid")
+    snapshot_id = value.get("snapshot_id")
+    items = value.get("items")
+    if not isinstance(snapshot_id, str) or not re.fullmatch(r"[0-9a-f]{64}", snapshot_id):
+        raise RealBrowserError("real_browser_element_snapshot_invalid")
+    if not isinstance(items, list) or len(items) > MAX_ELEMENT_REFS:
+        raise RealBrowserError("real_browser_element_snapshot_invalid")
+
+    validated: list[dict[str, Any]] = []
+    digest_rows: list[list[Any]] = []
+    for index, raw in enumerate(items, start=1):
+        if not isinstance(raw, Mapping) or set(raw) != {"ref", "kind", "tag", "role", "label", "disabled"}:
+            raise RealBrowserError("real_browser_element_snapshot_invalid")
+        ref = raw.get("ref")
+        kind = raw.get("kind")
+        tag = raw.get("tag")
+        role = raw.get("role")
+        label = raw.get("label")
+        disabled = raw.get("disabled")
+        if ref != f"@e{index}" or kind not in {"action", "input"}:
+            raise RealBrowserError("real_browser_element_snapshot_invalid")
+        if not isinstance(tag, str) or not _ELEMENT_TAG_RE.fullmatch(tag):
+            raise RealBrowserError("real_browser_element_snapshot_invalid")
+        if not isinstance(role, str) or not _ELEMENT_ROLE_RE.fullmatch(role):
+            raise RealBrowserError("real_browser_element_snapshot_invalid")
+        if not isinstance(label, str) or not _ELEMENT_LABEL_RE.fullmatch(label):
+            raise RealBrowserError("real_browser_element_snapshot_invalid")
+        if any(token in label.casefold() for token in _SENSITIVE_ELEMENT_TOKENS):
+            raise RealBrowserError("sensitive_field")
+        if not isinstance(disabled, bool):
+            raise RealBrowserError("real_browser_element_snapshot_invalid")
+        item = {"ref": ref, "kind": kind, "tag": tag, "role": role, "label": label, "disabled": disabled}
+        validated.append(item)
+        digest_rows.append([ref, kind, tag, role, label, disabled])
+
+    digest = hashlib.sha256(
+        json.dumps(digest_rows, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    if digest != snapshot_id:
+        raise RealBrowserError("real_browser_element_snapshot_hash_mismatch")
+    return {"schema": "kgg-ui-lab/element-snapshot/v1", "snapshot_id": snapshot_id, "items": validated}
+
+
 def _validate_session_response(value: Any) -> dict[str, Any]:
     if not isinstance(value, Mapping):
         raise RealBrowserError("real_browser_session_response_invalid")
@@ -335,6 +387,9 @@ def _validate_session_response(value: Any) -> dict[str, Any]:
         "artifacts": artifacts,
         "images": images,
     }
+    element_snapshot = value.get("element_snapshot")
+    if element_snapshot is not None:
+        result["element_snapshot"] = _validate_element_snapshot(element_snapshot)
     action = value.get("action")
     if action is not None:
         if not isinstance(action, Mapping) or not {"expected", "actual", "status", "before_state", "after_state"}.issubset(action):
