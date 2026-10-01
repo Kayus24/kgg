@@ -44,6 +44,7 @@
     const languageFallback = params.get('fallback') === 'language';
     const overlay = params.get('overlay') === '1';
     const unsafeElement = params.get('unsafeElement') === '1';
+    const refDrift = params.get('refDrift') === '1';
     if (flow === 'pilot') {
       document.body.dataset.kggState = 'pilot-area-ready';
       state.dataset.kggState = 'pilot-area-ready';
@@ -59,6 +60,11 @@
     }
     if (unsafeElement) {
       action.dataset.kggAction = 'password-control';
+    }
+    if (refDrift) {
+      setTimeout(() => {
+        action.dataset.kggAction = 'ref-drifted-control';
+      }, 1500);
     }
     if (languageFallback) {
       document.body.removeAttribute('data-kgg-state');

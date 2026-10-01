@@ -18,6 +18,8 @@ const MAX_ELEMENT_REFS = 100;
 const SAFE_LABEL = /^[A-Za-z0-9][A-Za-z0-9 ._:/-]{0,199}$/;
 const SAFE_ELEMENT_TAG = /^[a-z][a-z0-9-]{0,31}$/;
 const SAFE_ELEMENT_ROLE = /^[a-z][a-z0-9-]{0,31}$/;
+const SAFE_ELEMENT_REF = /^@e(?:[1-9]|[1-9][0-9]|100)$/;
+const SAFE_SHA256 = /^[0-9a-f]{64}$/;
 const SAFE_RUN = /^[a-z0-9][a-z0-9-]{5,128}$/;
 const ATTRIBUTE_RE = /^data-[a-z0-9-]{1,63}$/;
 const NAMESPACE_RE = /^[a-z0-9][a-z0-9._-]{1,63}$/;
@@ -123,6 +125,15 @@ function safeStep(step, viewport) {
   if (!["click", "tap", "type", "scroll", "wait", "swipe"].includes(step.operation)) fail("step_operation_invalid");
   const result = { operation: step.operation, label: safeText(step.label || step.operation, "step_label") };
   result.coordinates = safeCoordinates(step.coordinates);
+  if (step.target_ref !== undefined) {
+    if (!["click", "tap", "type"].includes(step.operation) ||
+        typeof step.target_ref !== "string" || !SAFE_ELEMENT_REF.test(step.target_ref) ||
+        typeof step.element_snapshot_id !== "string" || !SAFE_SHA256.test(step.element_snapshot_id)) {
+      fail("element_ref_invalid");
+    }
+    result.target_ref = step.target_ref;
+    result.element_snapshot_id = step.element_snapshot_id;
+  }
   if (step.operation === "type") {
     if (typeof step.text !== "string" || step.text.length > MAX_TEXT) fail("type_text_invalid");
     result.text = step.text;
@@ -257,6 +268,16 @@ async function locateAction(page, label, policy) {
 
 async function performAction(page, step, policy) {
   const before = await stateValue(page, policy);
+  if (step.target_ref) {
+    const current = await elementSnapshot(page, policy);
+    if (current.snapshot_id !== step.element_snapshot_id) fail("element_snapshot_stale");
+    const target = current.items.find(item => item.ref === step.target_ref);
+    if (!target) fail("element_ref_not_found");
+    if (target.label !== step.label) fail("element_ref_mismatch");
+    if ((step.operation === "click" || step.operation === "tap") && target.kind !== "action") fail("element_ref_kind_invalid");
+    if (step.operation === "type" && target.kind !== "input") fail("element_ref_kind_invalid");
+    if (target.disabled) fail("element_ref_disabled");
+  }
   if (step.operation === "click" || step.operation === "tap") {
     if (step.coordinates) {
       await page.mouse.click(step.coordinates.x, step.coordinates.y, { timeout: 5000 });

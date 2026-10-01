@@ -428,7 +428,7 @@ def _compare_visual_images(current: Mapping[str, Any], reference: Mapping[str, A
 
 def _visual_decision(value: Any) -> dict[str, Any]:
     decision = _object(value, "decision")
-    allowed = {"operation", "label", "coordinates", "start", "end", "duration_ms", "text", "delta_y", "timeout_ms", "expected_state_after", "observation_id"}
+    allowed = {"operation", "label", "coordinates", "start", "end", "duration_ms", "text", "delta_y", "timeout_ms", "expected_state_after", "observation_id", "target_ref"}
     if set(decision) - allowed or not {"operation", "label", "expected_state_after", "observation_id"}.issubset(decision):
         _fail("visual_decision_invalid")
     operation = decision["operation"]
@@ -444,6 +444,11 @@ def _visual_decision(value: Any) -> dict[str, Any]:
     if not isinstance(observation_id, str) or not SHA256_RE.fullmatch(observation_id):
         _fail("visual_decision_invalid")
     normalized: dict[str, Any] = {"operation": operation, "label": label, "expected_state_after": expected, "observation_id": observation_id}
+    if "target_ref" in decision:
+        target_ref = decision["target_ref"]
+        if operation not in {"click", "tap", "type"} or not isinstance(target_ref, str) or not re.fullmatch(r"@e(?:[1-9]|[1-9][0-9]|100)", target_ref):
+            _fail("visual_element_ref_invalid")
+        normalized["target_ref"] = target_ref
     if "coordinates" in decision:
         coordinates = _object(decision["coordinates"], "coordinates")
         if set(coordinates) != {"x", "y"} or not all(isinstance(coordinates[key], int) and not isinstance(coordinates[key], bool) and coordinates[key] >= 0 for key in ("x", "y")):
@@ -1553,6 +1558,24 @@ class Runtime:
         decision = _visual_decision(decision_value)
         if decision["observation_id"] != observation["id"]:
             _fail("visual_observation_stale")
+        action_decision = dict(decision)
+        target_ref = decision.get("target_ref")
+        if target_ref is not None:
+            snapshot = observation.get("element_snapshot")
+            if not isinstance(snapshot, Mapping) or not isinstance(snapshot.get("items"), list) or not isinstance(snapshot.get("snapshot_id"), str):
+                _fail("visual_element_snapshot_required")
+            target = next((item for item in snapshot["items"] if isinstance(item, Mapping) and item.get("ref") == target_ref), None)
+            if not isinstance(target, Mapping):
+                _fail("visual_element_ref_stale")
+            if target.get("label") != decision["label"]:
+                _fail("visual_element_ref_mismatch")
+            if decision["operation"] in {"click", "tap"} and target.get("kind") != "action":
+                _fail("visual_element_ref_kind_invalid")
+            if decision["operation"] == "type" and target.get("kind") != "input":
+                _fail("visual_element_ref_kind_invalid")
+            if target.get("disabled") is True:
+                _fail("visual_element_ref_disabled")
+            action_decision["element_snapshot_id"] = snapshot["snapshot_id"]
         _validate_swipe_bounds(decision, session["viewport"])
         session["status"] = "acting"
         session["used_requests"].append(checked["request_id"])
@@ -1562,7 +1585,7 @@ class Runtime:
             _fail("visual_session_not_initialized")
         real_browser = _load_real_browser_module()
         try:
-            action_result = browser.act(decision)
+            action_result = browser.act(action_decision)
             action = action_result.get("action")
             if not isinstance(action, Mapping) or action.get("before_state") != observation["state"]:
                 _fail("visual_state_changed_before_action")
@@ -1595,7 +1618,7 @@ class Runtime:
             "status": "PASS",
             "surface": "real_browser",
             "observation_id": observation["id"],
-            "decision": {key: value for key, value in decision.items() if key != "text"},
+            "decision": {key: value for key, value in action_decision.items() if key != "text"},
             "state_before": observation["state"],
             "state_after": after_state,
             "artifacts": [before_artifact, after_artifact],
