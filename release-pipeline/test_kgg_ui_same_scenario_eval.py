@@ -147,6 +147,20 @@ class SameScenarioEvaluationTests(unittest.TestCase):
         })
         self.assertEqual(result["status"], "NOT_COMPARABLE")
 
+    def test_unmeasured_candidate_safety_is_explicit_and_never_fabricated(self) -> None:
+        candidate = run("candidate")
+        candidate["safety"] = parity.safety_not_measured()
+        result = parity.evaluate_same_scenario(self.scenario, candidate)
+        self.assertEqual(result["status"], "NOT_COMPARABLE")
+        self.assertEqual(result["error_class"], "evidence_not_measured")
+        self.assertEqual(
+            result["blocking_reasons"],
+            ["candidate_safety_not_measured", "reference_not_measured"],
+        )
+        self.assertEqual(result["candidate"]["safety_status"], "NOT_MEASURED")
+        self.assertIsNone(result["candidate"]["safety_pass"])
+        self.assertFalse(result["replacement_eligible"])
+
     def test_malformed_reference_not_measured_payload_is_rejected(self) -> None:
         result = parity.evaluate_same_scenario(
             self.scenario,
