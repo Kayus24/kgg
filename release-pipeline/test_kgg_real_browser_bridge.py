@@ -199,6 +199,97 @@ def _real_runtime() -> server.Runtime:
 
 
 class KggRealBrowserBridgeTests(unittest.TestCase):
+    def test_element_snapshot_validator_rejects_hash_tamper(self) -> None:
+        browser = server._load_real_browser_module()
+        invalid = {
+            "status": "PASS",
+            "error_class": "",
+            "state": "fixture-ready",
+            "artifacts": [],
+            "element_snapshot": {
+                "schema": "kgg-ui-lab/element-snapshot/v1",
+                "snapshot_id": "0" * 64,
+                "items": [
+                    {
+                        "ref": "@e1",
+                        "kind": "action",
+                        "tag": "button",
+                        "role": "button",
+                        "label": "fixture-action",
+                        "disabled": False,
+                    }
+                ],
+            },
+        }
+        with self.assertRaisesRegex(browser.RealBrowserError, "real_browser_element_snapshot_hash_mismatch"):
+            browser._validate_session_response(invalid)
+
+    def test_visual_observation_exposes_bounded_element_snapshot_bound_to_observation_id(self) -> None:
+        runtime_info = _runtime_available()
+        if runtime_info is None:
+            self.skipTest("pre-provisioned Playwright runtime is not available")
+        node, module_path = runtime_info
+        old = {key: os.environ.get(key) for key in ("KGG_REAL_BROWSER", "KGG_BROWSER_NODE", "KGG_PLAYWRIGHT_NODE_PATH")}
+        os.environ.update({"KGG_REAL_BROWSER": "1", "KGG_BROWSER_NODE": node, "KGG_PLAYWRIGHT_NODE_PATH": module_path})
+        try:
+            with local_fixture_server() as base_url:
+                active = _real_runtime()
+                session_id = "element-snapshot-session-001"
+                started = server.handle(active, {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "start_ui_session", "arguments": {"session": _session(f"{base_url}?flow=pilot", session_id=session_id, request_id="element-snapshot-start-001", capabilities=["browser", "capture", "visual_loop"])}}})
+                self.assertFalse(started["result"].get("isError", False), started)
+                observed = server.handle(active, {"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "observe_visual_state", "arguments": {"request": _visual_request(session_id=session_id, request_id="element-snapshot-observe-001", operation="observe_visual_state")}}})
+                self.assertFalse(observed["result"].get("isError", False), observed)
+                structured = observed["result"]["structuredContent"]
+                observation = structured["observation"]
+                snapshot = observation["element_snapshot"]
+                self.assertEqual(snapshot["schema"], "kgg-ui-lab/element-snapshot/v1")
+                self.assertRegex(snapshot["snapshot_id"], r"^[0-9a-f]{64}$")
+                self.assertEqual([item["ref"] for item in snapshot["items"]], ["@e1", "@e2", "@e3"])
+                self.assertEqual(
+                    [item["label"] for item in snapshot["items"]],
+                    ["swipe-surface", "tablet-splitter-control", "synthetic-qr-image"],
+                )
+                self.assertTrue(all(set(item) == {"ref", "kind", "tag", "role", "label", "disabled"} for item in snapshot["items"]))
+                expected_observation_id = hashlib.sha256(
+                    f"{session_id}|{observation['artifact']['sha256']}|{observation['state']}|{snapshot['snapshot_id']}".encode("utf-8")
+                ).hexdigest()
+                self.assertEqual(observation["id"], expected_observation_id)
+                self.assertEqual(structured["evidence"]["element_snapshot_id"], snapshot["snapshot_id"])
+                self.assertEqual(structured["evidence"]["element_count"], 3)
+                active._close_visual(session_id)
+                self.assertEqual(len(active.visual_sessions), 0)
+        finally:
+            for key, value in old.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
+    def test_visual_observation_rejects_sensitive_element_label_without_evidence(self) -> None:
+        runtime_info = _runtime_available()
+        if runtime_info is None:
+            self.skipTest("pre-provisioned Playwright runtime is not available")
+        node, module_path = runtime_info
+        old = {key: os.environ.get(key) for key in ("KGG_REAL_BROWSER", "KGG_BROWSER_NODE", "KGG_PLAYWRIGHT_NODE_PATH")}
+        os.environ.update({"KGG_REAL_BROWSER": "1", "KGG_BROWSER_NODE": node, "KGG_PLAYWRIGHT_NODE_PATH": module_path})
+        try:
+            with local_fixture_server() as base_url:
+                active = _real_runtime()
+                session_id = "element-sensitive-session-001"
+                started = server.handle(active, {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "start_ui_session", "arguments": {"session": _session(f"{base_url}?flow=pilot&unsafeElement=1", session_id=session_id, request_id="element-sensitive-start-001", capabilities=["browser", "capture", "visual_loop"])}}})
+                self.assertFalse(started["result"].get("isError", False), started)
+                rejected = server.handle(active, {"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "observe_visual_state", "arguments": {"request": _visual_request(session_id=session_id, request_id="element-sensitive-observe-001", operation="observe_visual_state")}}})
+                self.assertTrue(rejected["result"]["isError"], rejected)
+                self.assertIn("sensitive_field", rejected["result"]["content"][0]["text"])
+                self.assertEqual(len(active.visual_sessions), 0)
+                self.assertEqual(active.evidence.get(session_id, []), [])
+        finally:
+            for key, value in old.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
     def test_host_parity_fixture_type_action_reaches_type_complete(self) -> None:
         runtime_info = _runtime_available()
         if runtime_info is None:
