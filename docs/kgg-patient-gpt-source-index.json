@@ -7,19 +7,19 @@
       "sha256": "03e76d07083402214af3957faca8bddb88091360db5aba176625c198585c3fcb"
     },
     {
-      "characters": 22295,
+      "characters": 22369,
       "path": "docs/kgg-patient-gpt-source/chunk-001.md",
-      "sha256": "6a939b74f171b63b1a1ff3ddf97bfc46a833662fdfe56c08992a77efd43e2d2f"
+      "sha256": "162b67877b83b39f75c99f2b10f79a154eecb767345660dbb9b276ed98de0205"
     },
     {
-      "characters": 7862,
+      "characters": 8010,
       "path": "docs/kgg-patient-gpt-source/chunk-002.md",
-      "sha256": "624d63f281e0d358d3c07dff2b11df9d5cf17550149946397874edc4d4c34b12"
+      "sha256": "a931f51e6d015b8fa240d7c77e261b1b147e01bbd33455035a1ffaaa18e3940f"
     },
     {
       "characters": 5968,
       "path": "docs/kgg-patient-gpt-source/chunk-003.md",
-      "sha256": "470b104cc226adc8ab6b7471173c8bef3f832de088b0d362efe305043bf51e18"
+      "sha256": "13a96d03789ecc8c420f59c6032304ff9479331a172b079f36f4a9ba1d7ec356"
     },
     {
       "characters": 613,
@@ -137,44 +137,49 @@
       "sha256": "fe346b437ea39280624ce5f4156f2027b3c749ac2ad14b1a4350deed032def5f"
     },
     {
-      "characters": 24201,
+      "characters": 11083,
       "path": "docs/kgg-patient-gpt-source/chunk-027.md",
-      "sha256": "730d438453c9d49736be65253dba3745947ffe010af8ee056723eb810024d313"
+      "sha256": "dfc77e3297f20e1065342f6d504523079acd5855f7bbfdcec23393df5fd7b26b"
+    },
+    {
+      "characters": 24201,
+      "path": "docs/kgg-patient-gpt-source/chunk-028.md",
+      "sha256": "290c46f79feaa23bdeaee122fbfca7955c3a7d981a0035bb8023e79cebc79208"
     },
     {
       "characters": 12148,
-      "path": "docs/kgg-patient-gpt-source/chunk-028.md",
-      "sha256": "edec82454930c256b760a34daff5ee9bbd9057987cdf0e34508a4b78c54dbfde"
+      "path": "docs/kgg-patient-gpt-source/chunk-029.md",
+      "sha256": "354c1951b78d76d92d51a6e349d07350105ef5a6fcb6492bc6cdc7d975435617"
     },
     {
       "characters": 24193,
-      "path": "docs/kgg-patient-gpt-source/chunk-029.md",
-      "sha256": "1fe2974a754433dd28f672f445dae3323a759ff260aa541941f59ccc6c54560d"
+      "path": "docs/kgg-patient-gpt-source/chunk-030.md",
+      "sha256": "fff3c7b2726ecadd18da19b75654f7ed388d769598765dfd8cca6eb4877c781b"
     },
     {
       "characters": 10380,
-      "path": "docs/kgg-patient-gpt-source/chunk-030.md",
-      "sha256": "ad9e206151f0e0c2c9d80802043d964bd13803a881fdbf56059a21a095d6814a"
+      "path": "docs/kgg-patient-gpt-source/chunk-031.md",
+      "sha256": "a9ebad605c54fce947b2ede17ef7711a187644266aa7661b66185ee4cc34910e"
     },
     {
       "characters": 3151,
-      "path": "docs/kgg-patient-gpt-source/chunk-031.md",
-      "sha256": "290478f062d1b3f6a5c0814795f4ca22b8ed053c7aff81409b1b8b1dfab08202"
+      "path": "docs/kgg-patient-gpt-source/chunk-032.md",
+      "sha256": "ff66cc25be585ae45bb89782f36f93df4867193dc94d2075d73df334ba097c07"
     },
     {
       "characters": 4648,
-      "path": "docs/kgg-patient-gpt-source/chunk-032.md",
-      "sha256": "762f4c0203f6b46525904ff68cc00a341ea885b4b8d658831b89e3d8d8efafb8"
+      "path": "docs/kgg-patient-gpt-source/chunk-033.md",
+      "sha256": "6f71bd8ca3f64f79420dbc8d43b115eeccf5cee3399e9eca4336c92ae95f3d8f"
     },
     {
       "characters": 10877,
-      "path": "docs/kgg-patient-gpt-source/chunk-033.md",
-      "sha256": "5d8ada9e3b6fd1904a77ecf2ec6aff55986f70dec178a75498d1415f559c6966"
+      "path": "docs/kgg-patient-gpt-source/chunk-034.md",
+      "sha256": "2c9f2f6e8bc9bfbcdf3d60fa74381ad942809b3be3b69e677d13d8ab56324295"
     },
     {
       "characters": 6773,
-      "path": "docs/kgg-patient-gpt-source/chunk-034.md",
-      "sha256": "fa42f13d37f02bbb5be09a3275c9d3f9732be28864c62d3cf7f87988f8407933"
+      "path": "docs/kgg-patient-gpt-source/chunk-035.md",
+      "sha256": "ab15e5e4bc76b65336beaf522c35bd4bb92397796b9e476cdb1aebe50486a040"
     }
   ],
   "files": [
@@ -184,19 +189,19 @@
       "sha256": "ca04c7a7642ebf72da9651dcb32866acc7c09add698db96181b7fac37df8e8b0"
     },
     {
-      "characters": 22114,
+      "characters": 22188,
       "path": "index.html",
-      "sha256": "154128565b8f17a24a688ad10ed5ff2d69015b8de8a4a25317f5a7fb586f9151"
+      "sha256": "7da47ff08038d55c3765ceac3a4bdcacc4c4c7952cf103f045bddce94e85e561"
     },
     {
-      "characters": 7675,
+      "characters": 7823,
       "path": "service-worker.js",
-      "sha256": "236bbbd9a0f345dc6c2fe614ef1f508a2171e5056096adbc8ea0afdd44382daf"
+      "sha256": "d12d48b1992a86ec6ee19fb86b67363f857b686106969d9b4a1d14a87be928b9"
     },
     {
       "characters": 5778,
       "path": "update-recovery.html",
-      "sha256": "61a4bd18d9f45d1077e4ccb30e97be4b7ecbd24d768192315c6f8afb33600c84"
+      "sha256": "24d0853b0e939cd3b1fc702c804ffa85a9b2a5e8eb648553f21e9b86ce193a3f"
     },
     {
       "characters": 431,
@@ -309,6 +314,11 @@
       "sha256": "3979600da41d8d035afb833f8ddb371bf3a4ccf1b3c38211c4560907398463b9"
     },
     {
+      "characters": 10885,
+      "path": "patient-set-compact-view.js",
+      "sha256": "d69d856b43e09cbaf08b7195d4f7e5e2e779b1929b3591953a5384772485cb52"
+    },
+    {
       "characters": 35944,
       "path": "patient-set-summary-groups.js",
       "sha256": "26e85437840b9706eace462786c832d338ffc22180b2459fd19e2d8198cb3208"
@@ -336,11 +346,11 @@
     {
       "characters": 6579,
       "path": "patient-version-label.js",
-      "sha256": "3dec485532317668640c4e0acefc51cba9057809b1697b05ef335b14d8b8db10"
+      "sha256": "9a66ef5ef80e0ca63e1de4bdb7866cb2ff2bc57631b7c022c4791bd2dc1ec399"
     }
   ],
   "kind": "kgg_patient_gpt_source_index",
-  "patientVersion": "85",
+  "patientVersion": "86",
   "routes": {
     "patient-camera": [
       "patient-start-scan.js"
