@@ -1,5 +1,13 @@
 # Patient App Changelog
 
+## v87 - 2026-10-02
+
+- Kompakte 3-Satz-Ansicht passt auch auf schmale Phone-Viewports in eine Zeile; echte Browser-Geometrie prueft 320/360/390/430 px.
+- Nur im NEU/Compact-Large-UI entfaellt die redundante grosse Zoom-Box; die realen Wertefelder werden dort groesser. ALT/Legacy und Normal-UI bleiben unveraendert.
+- Feld-/Einheitenlogik beruecksichtigt kg, bar, Watt, Sek./sec, Wdh/reps, Custom-Units und semantisch nicht vorhandene Felder wie keine/none/- ohne Phantomwerte in Fortschritt, Startwerten, History oder Zusammenfassung.
+- Der Uebungs-Schmerztrigger ist im NEU-Modus kompakt iconbasiert; das bestehende 0-10-Modal und die zugängliche Vollbeschriftung bleiben erhalten.
+- Adaptive Regression deckt Normal/Large, iOS-Force, dynamische Viewport-Wechsel, Single-Field/LR/B sowie lange Einheiten ab.
+
 ## v86 - 2026-10-01
 
 - Neue kompakte Satzansicht als Standard mit kleinem ALT/NEU-Schalter oben rechts im ersten KGG-Header.

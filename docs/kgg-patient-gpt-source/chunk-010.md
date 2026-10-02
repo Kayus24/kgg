@@ -1,8 +1,8 @@
 # KGG Patient Source Chunk 010
 
 - Source file: `patient-day-history.js`
-- Characters: 1-15598
-- Full source SHA-256: `78303764251b9be94fe913fa7c9cfaac75e44ed5f1eed66816d535cae57a0c33`
+- Characters: 1-15869
+- Full source SHA-256: `9c64dff51eedff9d3fafed77ac2c2f67d5daae9b194da0db336a4382124a02a8`
 
 ```
 (()=>{
@@ -56,7 +56,8 @@
   function painAt(ei,s,day){return Number(safe(()=>v[k(ei,s,'P','pain',day)])||0)}
   function dayDone(day){return Array.isArray(done)&&done.includes(day)}
   function unitLabel(x){const raw=String(x||'');return en()?raw.replace(/\bWdh\b/g,'reps').replace(/\bSek\.?\b/g,'sec'):raw.replace(/\breps\b/g,'Wdh').replace(/\bsec\.?\b/g,'Sek.')}
-  function exSummary(day,ei,ex){const sets=Number(ex.sets)||3;const sides=ex.side==='LR'?['L','R']:['B'];let doneSets=0,parts=[],painMax=0;for(let s=1;s<=sets;s++){let any=false;sides.forEach(side=>{const a=valAt(ei,s,side,'a',day), b=valAt(ei,s,side,'b',day);if(a||b){any=true;parts.push((side==='B'?'':side+': ')+(a||'?')+' '+unitLabel(ex.u||'')+' × '+(b||'?')+' '+unitLabel(ex.m||''));}});if(any)doneSets++;const pv=painAt(ei,s,day);if(pv>painMax)painMax=pv;}const globalPain=painAt(ei,0,day);if(globalPain>painMax)painMax=globalPain;if(!doneSets&&!painMax)return '';const first=parts.slice(0,1).join(' · ');return `<div class="kggDayExercise"><b>${esc(ex.n)}</b><br>${doneSets}/${sets} ${T('Sätze','sets')}${first?' · '+esc(first):''}${painMax?' · '+T('Schmerz','pain')+' '+painMax+'/10':''}</div>`}
+  function activeUnit(x){const s=String(x??'').trim();return !!s&&!/^(keine|none|-)$/i.test(s)}
+  function exSummary(day,ei,ex){const sets=Number(ex.sets)||3,sides=ex.side==='LR'?['L','R']:['B'],hasA=activeUnit(ex.u),hasB=activeUnit(ex.m);let doneSets=0,parts=[],painMax=0;const fmt=(a,b)=>hasA&&hasB?(a||'?')+' '+unitLabel(ex.u)+' × '+(b||'?')+' '+unitLabel(ex.m):hasA?(a||'?')+' '+unitLabel(ex.u):hasB?(b||'?')+' '+unitLabel(ex.m):'';for(let s=1;s<=sets;s++){let any=false;sides.forEach(side=>{const a=valAt(ei,s,side,'a',day),b=valAt(ei,s,side,'b',day),hasValue=(hasA&&!!a)||(hasB&&!!b);if(hasValue){any=true;parts.push((side==='B'?'':side+': ')+fmt(a,b));}});if(any)doneSets++;const pv=painAt(ei,s,day);if(pv>painMax)painMax=pv;}const globalPain=painAt(ei,0,day);if(globalPain>painMax)painMax=globalPain;if(!doneSets&&!painMax)return '';const first=parts.slice(0,1).join(' · ');return `<div class="kggDayExercise"><b>${esc(ex.n)}</b><br>${doneSets}/${sets} ${T('Sätze','sets')}${first?' · '+esc(first):''}${painMax?' · '+T('Schmerz','pain')+' '+painMax+'/10':''}</div>`}
   function dayHasData(day){if(dayDone(day))return true;const plan=safe(()=>p);if(!plan)return false;return (plan.ex||[]).some((ex,ei)=>!!exSummary(day,ei,ex))}
   function dayCards(day){const arr=(safe(()=>p.ex)||[]).map((ex,ei)=>exSummary(day,ei,ex)).filter(Boolean);return arr.length?arr.join(''):`<div class="kggDayExercise">${T('Noch keine Werte eingetragen.','No values entered yet.')}</div>`}
   function isToday(){return Number(d)===today()}
