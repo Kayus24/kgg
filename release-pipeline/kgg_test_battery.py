@@ -83,27 +83,27 @@ def ensure_playwright_prepared(npm: str) -> None:
     global PLAYWRIGHT_PREPARED
     if PLAYWRIGHT_PREPARED:
         return
-    # A checked-in/local module is already sufficient for the browser smokes.
-    # Never invoke npm exec merely to rediscover an existing dependency.
+    # Browser smokes import playwright from Node, so provision the pinned local
+    # package instead of relying on npm exec to expose a transient module path.
     local_playwright = ROOT / "release-pipeline" / "node_modules" / "playwright"
-    if local_playwright.is_dir():
-        PLAYWRIGHT_PREPARED = True
-        return
+    if not local_playwright.is_dir():
+        run([npm, "--prefix", "release-pipeline", "ci", "--ignore-scripts"])
     if os.environ.get("KGG_SKIP_PLAYWRIGHT_INSTALL") != "1":
-        run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "playwright", "install", "chromium"])
+        run([node_executable(), "release-pipeline/node_modules/playwright/cli.js", "install", "chromium"])
     PLAYWRIGHT_PREPARED = True
 
 
 def run_playwright_script(script: str, *args: str) -> None:
-    """Run a browser smoke from the local module before considering npm."""
+    """Run a browser smoke against the repository-pinned Playwright module."""
     local_playwright = ROOT / "release-pipeline" / "node_modules" / "playwright"
-    if local_playwright.is_dir():
-        run([node_executable(), f"release-pipeline/{script}", *args])
-        return
-    npm = npm_executable()
-    if not npm:
-        raise BatteryError(f"npm not found for the Playwright smoke: {script}")
-    run([npm, "exec", "--yes", "--package=playwright@1.61.1", "--", "node", f"release-pipeline/{script}", *args])
+    if not local_playwright.is_dir():
+        npm = npm_executable()
+        if not npm:
+            raise BatteryError(f"npm not found for the Playwright smoke: {script}")
+        ensure_playwright_prepared(npm)
+    if not local_playwright.is_dir():
+        raise BatteryError(f"Pinned Playwright module was not provisioned for: {script}")
+    run([node_executable(), f"release-pipeline/{script}", *args])
 
 
 def run_mobile_inbox(live: bool) -> None:

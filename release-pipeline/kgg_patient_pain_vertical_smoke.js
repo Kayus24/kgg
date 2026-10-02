@@ -74,7 +74,8 @@ assert(source.includes("#days button,#kggDayHub button"),"day controls are not c
 assert(!source.includes("setTimeout(()=>closeModal"),"modal must not auto-close after selecting a value");
 assert(browserSource.includes('opening modal changed exercise-card height'),"browser test does not protect card height");
 assert(browserSource.includes('firstHeight:cards[0].offsetHeight'),"browser test measures viewport geometry instead of intrinsic card height");
-assert(browserSource.includes('secondLayoutTop:layoutTop(cards[1])'),"browser test does not protect the next card document position");
+assert(browserSource.includes('interCardGap:second.top-(first.top+first.height)'),"browser test does not measure spacing to the next card");
+assert(browserSource.includes('opening modal changed spacing to following exercise by more than 1px'),"browser test does not protect the next-card spacing contract");
 assert(browserSource.includes('page.waitForTimeout(380)'),"browser test measures card geometry before its opening animation settles");
 assert(browserSource.includes('page.waitForTimeout(220)'),"browser test measures endpoint geometry before modal animation settles");
 assert(browserSource.includes('Schlimmster vorstellbarer Schmerz'),"browser test does not verify maximum description");
