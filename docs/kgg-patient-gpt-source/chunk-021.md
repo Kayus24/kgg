@@ -1,11 +1,12 @@
 # KGG Patient Source Chunk 021
 
 - Source file: `patient-pain-vertical-scale.js`
-- Characters: 24001-26756
-- Full source SHA-256: `8dcea9fef6e5b3d9b3e423c1a958dccc5b3fa279a44adb78f369b4d02ef89cb1`
+- Characters: 24001-26864
+- Full source SHA-256: `2d2aa90249d8df1b3137dbd6e98fd99e1dcd80d3f70aa6f2972313def496c8f7`
 
 ```
-.toLowerCase()
+ const saved=settings[(planId+'|'+name).toLowerCase()];
+    return String(saved&&saved.painMode||'exercise').toLowerCase()
   }
   function mountRoot(root,ei){
     const card=root.closest('.ex');

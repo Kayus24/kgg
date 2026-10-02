@@ -20,7 +20,7 @@ const START_VALUES_SCRIPT = './patient-start-values-day1.js?v=start-values-day1-
 const DAY_HISTORY_SCRIPT = './patient-day-history.js?v=day-history-2-active-units';
 const MEDIA_SCRIPT = './patient-media-retry-cache_v2.js?v=thumb-layout-2-safe-text';
 const UI_MICRO_POLISH_SCRIPT = './patient-ui-micro-polish.js?v=unit-labels-pain-fit-1';
-const PAIN_VERTICAL_SCRIPT = './patient-pain-vertical-scale.js?v=exercise-pain-vertical-5-focus-remount';
+const PAIN_VERTICAL_SCRIPT = './patient-pain-vertical-scale.js?v=exercise-pain-vertical-6-icon-only';
 const INSTALL_GUIDE_SCRIPT = './patient-install-guide.js?v=install-guide-v2-query-plan-ios';
 const NUMPAD_VISIBILITY_SCRIPT = './patient-numpad-visibility-fix.js?v=stay-open-switch-2-compact-large';
 const EXTRA_INFO_SCRIPT = './patient-extra-info-display.js?v=extra-info-filter-1';

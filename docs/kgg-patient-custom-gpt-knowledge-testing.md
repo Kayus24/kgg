@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Testing
 
-Generated retrieval pack. Source digest: `1132f705cfc5d6dd`.
+Generated retrieval pack. Source digest: `5e637ca37f93608e`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -134,7 +134,7 @@ def validate_static_compatibility(manifest:dict,version:str)->None:
   "./patient-day-history.js?v=day-history-2-active-units",
   "./patient-media-retry-cache_v2.js?v=thumb-layout-2-safe-text",
   "./patient-ui-micro-polish.js?v=unit-labels-pain-fit-1",
-  "./patient-pain-vertical-scale.js?v=exercise-pain-vertical-5-focus-remount",
+  "./patient-pain-vertical-scale.js?v=exercise-pain-vertical-6-icon-only",
   "./numpad-ui-fix.js?v=scroll-stable-1",
   "./patient-numpad-visibility-fix.js?v=stay-open-switch-2-compact-large",
   "./patient-extra-info-display.js?v=extra-info-filter-1",
@@ -1907,8 +1907,8 @@ def synthetic_plan_query() -> str:
         "v": 1,
         "d": 6,
         "e": [
-            ["Beinpresse", 2, "B", "kg", "Wdh", "40", "10"],
-            ["Rudern", 2, "LR", "kg", "Wdh", "15", "12"],
+            ["Beinpresse", 3, "B", "kg", "Wdh", "40", "10"],
+            ["Rudern", 3, "LR", "kg", "Wdh", "15", "12"],
         ],
     }
     encoded = base64.urlsafe_b64encode(
@@ -2262,6 +2262,12 @@ def self_test(root: Path = ROOT, preview_output: Path | None = None) -> None:
     validated_scanner = validate_payload(scanner_payload, root)
     if not requires_patient_scan(validated_scanner):
         fail("self-test expected patient-start-scan.js to select patient-scan")
+
+    fixture_code = synthetic_plan_query().split(":", 1)[1]
+    fixture_code += "=" * (-len(fixture_code) % 4)
+    fixture_plan = json.loads(base64.urlsafe_b64decode(fixture_code).decode("utf-8"))
+    if [exercise[1] for exercise in fixture_plan.get("e", [])] != [3, 3]:
+        fail("self-test expected the manual patient preview fixture to expose three sets per exercise")
     missing_camera_area = json.loads(json.dumps(scanner_payload))
     missing_camera_area["touched_areas"] = ["patient-ui"]
     try:
