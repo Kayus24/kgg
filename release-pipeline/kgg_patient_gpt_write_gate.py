@@ -96,6 +96,7 @@ DIRECT_FIRST_LOAD_MODULES = (
     "patient-set-summary-groups.js",
     "patient-qr-fullscreen.js",
     "patient-numpad-card-guard.js",
+    "patient-set-compact-view.js",
     "patient-version-label.js",
 )
 
@@ -500,8 +501,8 @@ def synthetic_plan_query() -> str:
         "v": 1,
         "d": 6,
         "e": [
-            ["Beinpresse", 2, "B", "kg", "Wdh", "40", "10"],
-            ["Rudern", 2, "LR", "kg", "Wdh", "15", "12"],
+            ["Beinpresse", 3, "B", "kg", "Wdh", "40", "10"],
+            ["Rudern", 3, "LR", "kg", "Wdh", "15", "12"],
         ],
     }
     encoded = base64.urlsafe_b64encode(
@@ -855,6 +856,12 @@ def self_test(root: Path = ROOT, preview_output: Path | None = None) -> None:
     validated_scanner = validate_payload(scanner_payload, root)
     if not requires_patient_scan(validated_scanner):
         fail("self-test expected patient-start-scan.js to select patient-scan")
+
+    fixture_code = synthetic_plan_query().split(":", 1)[1]
+    fixture_code += "=" * (-len(fixture_code) % 4)
+    fixture_plan = json.loads(base64.urlsafe_b64decode(fixture_code).decode("utf-8"))
+    if [exercise[1] for exercise in fixture_plan.get("e", [])] != [3, 3]:
+        fail("self-test expected the manual patient preview fixture to expose three sets per exercise")
     missing_camera_area = json.loads(json.dumps(scanner_payload))
     missing_camera_area["touched_areas"] = ["patient-ui"]
     try:

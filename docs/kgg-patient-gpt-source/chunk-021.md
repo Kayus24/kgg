@@ -1,11 +1,36 @@
 # KGG Patient Source Chunk 021
 
 - Source file: `patient-pain-vertical-scale.js`
-- Characters: 24001-25077
-- Full source SHA-256: `9001b6b24ce5f5b5e2b09e18ee17e6dde436426d9580f577bc33f75ee3c8cbcc`
+- Characters: 24001-26864
+- Full source SHA-256: `2d2aa90249d8df1b3137dbd6e98fd99e1dcd80d3f70aa6f2972313def496c8f7`
 
 ```
-untAll()},0)},true);
+ const saved=settings[(planId+'|'+name).toLowerCase()];
+    return String(saved&&saved.painMode||'exercise').toLowerCase()
+  }
+  function mountRoot(root,ei){
+    const card=root.closest('.ex');
+    const setMode=exercisePainMode(ei)==='set'||Boolean(card&&card.querySelector('.kggSetPain'))||root.classList.contains('kggHiddenGlobalPain')||root.style.display==='none';
+    if(setMode){teardown(root);return}
+    if(!originalReady(root)||typeof setPain!=='function'||!ensureModal())return;
+    let state=states.get(root);if(!state){state=buildCompact(root,ei);root.classList.add(ROOT_CLASS)}else state.ei=ei;
+    if(!hideOriginal(root,state)){teardown(root);return}refreshState(root,state)
+  }
+  function mountAll(){
+    ensureStyle();ensureModal();
+    const cards=[...document.querySelectorAll('#list .ex')];
+    cards.forEach((card,ei)=>{const root=card.querySelector(':scope > .pain');if(root)mountRoot(root,ei)});
+    if(activeRoot&&!activeRoot.isConnected)closeModal({returnFocus:false});refreshLanguage()
+  }
+  function scheduleMount(delay=0){clearTimeout(mountTimer);mountTimer=setTimeout(mountAll,delay)}
+  function observe(){
+    const list=document.getElementById('list');if(!list)return;
+    if(observer)observer.disconnect();observer=new MutationObserver(()=>scheduleMount(20));observer.observe(list,{childList:true,subtree:true,attributes:true,attributeFilter:['class']})
+  }
+  function init(){
+    if(window.__kggPatientPainVertical===VERSION)return;window.__kggPatientPainVertical=VERSION;
+    ensureStyle();ensureModal();observe();mountAll();setTimeout(()=>{observe();mountAll()},250);setTimeout(mountAll,900);
+    document.addEventListener('click',event=>{if(event.target&&event.target.closest&&event.target.closest('#kggLangSwitch'))setTimeout(()=>{refreshLanguage();mountAll()},0)},true);
     document.addEventListener('keydown',event=>{if(event.key==='Escape'&&modal&&!modal.overlay.hidden){event.preventDefault();closeModal()}},true);
     const refreshAfterLifecycleChange=()=>[0,80,250].forEach(delay=>setTimeout(()=>{observe();mountAll()},delay));
     document.addEventListener('click',event=>{

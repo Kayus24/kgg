@@ -1,3 +1,10 @@
+# KGG Patient Source Chunk 035
+
+- Source file: `patient-version-label.js`
+- Characters: 1-6579
+- Full source SHA-256: `13c9368c0fb4ec12e290d1a942ec2681af7dabec9cdaaac6fc7fa8814c6d0fb9`
+
+```
 (()=>{
   const ID='kggAppVersion';
   const RELEASE='87';
@@ -23,3 +30,4 @@
   async function init(){const fallback=fallbackVersion();mount(fallback);if(!('serviceWorker'in navigator))return;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!updateRequested||reloadDone)return;reloadDone=true;clearTimeout(updateTimer);if(sessionStorage.getItem(RELOAD_KEY)==='1')return;sessionStorage.setItem(RELOAD_KEY,'1');location.reload()});const reg=await findRegistration();if(reg){monitorRegistration(reg);try{await reg.update()}catch(e){}if(reg.waiting)showUpdateBanner(reg.waiting)}mount(await getActiveVersion(fallback))}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init()
 })();
+```

@@ -10,14 +10,17 @@
   const T=(de,enText)=>en()?enText:de;
   const safe=f=>{try{return f()}catch(e){return null}};
   const has=(o,k)=>Object.prototype.hasOwnProperty.call(o||{},k);
+  const activeUnit=x=>{const s=String(x??'').trim();return !!s&&!/^(keine|none|-)$/i.test(s)};
+  const configuredUnit=x=>{const s=String(x??'').trim();return !s||/^(keine|none|-)$/i.test(s)?'keine':s};
+  window.KGGPatientUnitSemantics=window.KGGPatientUnitSemantics||{isActive:activeUnit};
 
   function readSettings(){try{return JSON.parse(localStorage.getItem(SET_KEY)||'{}')||{}}catch(e){return{}}}
   function writeSettings(s){localStorage.setItem(SET_KEY,JSON.stringify(s||{}))}
   function exKey(e){return String((safe(()=>p.id)||'plan')+'|'+(e&&e.n||'exercise')).toLowerCase()}
   function getPainMode(e){const s=readSettings();return s[exKey(e)]&&s[exKey(e)].painMode||e.painMode||'exercise'}
   function setPainMode(e,mode){const s=readSettings(),key=exKey(e);s[key]=s[key]||{};s[key].painMode=mode;writeSettings(s);e.painMode=mode}
-  function setExerciseSettings(e,unitA,unitB,mode){const s=readSettings(),key=exKey(e);s[key]=s[key]||{};s[key].unitA=String(unitA??'').trim();s[key].unitB=String(unitB??'').trim();s[key].painMode=mode;writeSettings(s);e.u=s[key].unitA;e.m=s[key].unitB;e.painMode=mode}
-  function applySavedSettings(){safe(()=>{const s=readSettings();(p.ex||[]).forEach(e=>{const x=s[exKey(e)]||{};if(has(x,'unitA'))e.u=String(x.unitA??'');if(has(x,'unitB'))e.m=String(x.unitB??'');if(x.painMode)e.painMode=x.painMode})})}
+  function setExerciseSettings(e,unitA,unitB,mode){const s=readSettings(),key=exKey(e);s[key]=s[key]||{};s[key].unitA=configuredUnit(unitA);s[key].unitB=configuredUnit(unitB);s[key].painMode=mode;writeSettings(s);e.u=s[key].unitA;e.m=s[key].unitB;e.painMode=mode}
+  function applySavedSettings(){safe(()=>{const s=readSettings();(p.ex||[]).forEach(e=>{const x=s[exKey(e)]||{};if(has(x,'unitA'))e.u=configuredUnit(x.unitA);if(has(x,'unitB'))e.m=configuredUnit(x.unitB);if(x.painMode)e.painMode=x.painMode})})}
   function rawPlan(){return{ i:p.id||'plan', t:p.title||'KGG Trainingsplan', v:p.version||1, d:p.days||6, extendDays:p.extendDays!==false, stepDays:p.stepDays||6, e:(p.ex||[]).map(e=>[e.n,e.sets,e.side,e.u,e.m,e.sl||'',e.sm||'',e.media||'',e.videoUrl||'',e.videoLabel||'Video öffnen',e.painMode||getPainMode(e)])}}
   function storePlan(){safe(()=>localStorage.setItem(PLAN_KEY,JSON.stringify({plan:rawPlan(),importedAt:new Date().toISOString()})))}
   function unit(x){x=String(x||'');const m={Wdh:['Wdh','reps'],wdh:['Wdh','reps'],Reps:['Wdh','reps'],reps:['Wdh','reps'],'Sek.':['Sek.','sec'],Sek:['Sek.','sec'],sec:['Sek.','sec'],'Min.':['Min.','min'],Min:['Min.','min'],min:['Min.','min'],Stufe:['Stufe','level'],level:['Stufe','level'],Level:['Stufe','level']};return m[x]?T(m[x][0],m[x][1]):x}
@@ -29,6 +32,7 @@
     const old=$(STYLE);if(old)old.remove();
     const s=document.createElement('style');s.id=STYLE;s.textContent=`
       #kgg-collapse-toggle{display:none!important}
+      input.num.kggUnitInactive{display:none!important}
       body.kggAlwaysCollapsed .ex{position:relative;cursor:pointer;transition:box-shadow .18s ease,transform .16s ease,background .18s ease}
       body.kggAlwaysCollapsed .ex:not(.kggOpen) .set,body.kggAlwaysCollapsed .ex:not(.kggOpen) .pain{display:none!important}
       body.kggAlwaysCollapsed .ex:not(.kggOpen)::after{content:'Antippen zum Öffnen';display:block;margin-top:8px;color:#64748b;font-size:12px;font-weight:800}
@@ -77,7 +81,7 @@
     b.hidden=openIndex!==i;b.title=T('Übung anpassen','Edit exercise')
   }
 
-  function applyUnitVisibility(){cards().forEach((card,ei)=>{const e=safe(()=>p.ex[ei]);if(!e)return;const hideA=String(e.u??'').trim()==='',hideB=String(e.m??'').trim()==='';card.querySelectorAll('.bi,.lr').forEach(row=>{const inputs=[...row.querySelectorAll('input')].filter(x=>!x.closest('.painRow'));if(inputs.length<2)return;inputs[0].style.display=hideA?'none':'';inputs[1].style.display=hideB?'none':'';const both=hideA&&hideB;if(row.classList.contains('bi')){row.style.display=both?'none':'grid';row.style.gridTemplateColumns=(hideA||hideB)?'1fr':'1fr 1fr'}else{row.style.display=both?'none':'grid';row.style.gridTemplateColumns=(hideA||hideB)?'34px 1fr':'34px 1fr 1fr'}})})}
+  function applyUnitVisibility(){cards().forEach((card,ei)=>{const e=safe(()=>p.ex[ei]);if(!e)return;const hideA=!activeUnit(e.u),hideB=!activeUnit(e.m);card.querySelectorAll('.bi,.lr').forEach(row=>{const inputs=[...row.querySelectorAll('input')].filter(x=>!x.closest('.painRow'));if(inputs.length<2)return;inputs[0].classList.toggle('kggUnitInactive',hideA);inputs[1].classList.toggle('kggUnitInactive',hideB);inputs[0].style.display=hideA?'none':'';inputs[1].style.display=hideB?'none':'';const both=hideA&&hideB;if(row.classList.contains('bi')){row.style.display=both?'none':'grid';row.style.gridTemplateColumns=(hideA||hideB)?'1fr':'1fr 1fr'}else{row.style.display=both?'none':'grid';row.style.gridTemplateColumns=(hideA||hideB)?'34px 1fr':'34px 1fr 1fr'}})})}
 
   function valKey(ei,s){return safe(()=>k(ei,s,'P','pain'))||(`${d}|${ei}|${s}|P|pain`)}
   function painVal(ei,s){return String((safe(()=>v[valKey(ei,s)])||'0')||'0')}
@@ -138,12 +142,13 @@
     const scan=$('kggActionScan');if(scan)scan.textContent='📷 '+T('Plan scannen / aktualisieren','Scan / update plan');
     const add=$('kggActionAddPlan');if(add)add.textContent='➕ '+T('2. Plan hinzufügen','Add 2nd plan');
     document.querySelectorAll('button').forEach(b=>{const x=b.textContent.trim();const map={'Aktuelle Werte als QR zeigen':'Show current values as QR','Show current values as QR':'Show current values as QR','Training beenden & QR anzeigen':'Finish training & show QR','Finish training & show QR':'Finish training & show QR','Zurück zum Plan':'Back to plan','Back to plan':'Back to plan','Abbrechen':'Cancel','Cancel':'Cancel','OK':'OK'}; if(map[x])b.textContent=en()?map[x]:Object.keys(map).find(k=>map[k]===map[x]&&k!==map[x])||x});
-    cards().forEach((card,ei)=>{const e=safe(()=>p.ex[ei]);if(!e)return;let m=card.querySelector(':scope > .muted');if(m){const parts=[(e.sets||3)+' '+T('Sätze','sets'),sideText(e.side)];[unit(e.u),unit(e.m)].filter(Boolean).forEach(x=>parts.push(x));m.textContent=parts.join(' · ')}card.querySelectorAll('.set > b').forEach((b,i)=>b.textContent=T('Satz ','Set ')+(i+1));card.querySelectorAll('.lr span').forEach(sp=>{if(sp.textContent.trim()==='Li'||sp.textContent.trim()==='L')sp.textContent=T('Li','L');else sp.textContent=T('Re','R')})});
+    cards().forEach((card,ei)=>{const e=safe(()=>p.ex[ei]);if(!e)return;const muted=[...card.querySelectorAll(':scope > .muted')],m=muted[0];if(m){const parts=[(e.sets||3)+' '+T('Sätze','sets'),sideText(e.side)];[unit(e.u),unit(e.m)].filter(activeUnit).forEach(x=>parts.push(x));m.textContent=parts.join(' · ')}const start=muted.find((node,i)=>i>0&&/T1-Vorschlag|Day 1 suggestion/i.test(node.textContent||''));if(start){const vals=[];if(activeUnit(e.u)&&String(e.sl||'').trim())vals.push(String(e.sl).trim()+' '+unit(e.u));if(activeUnit(e.m)&&String(e.sm||'').trim())vals.push(String(e.sm).trim()+' '+unit(e.m));start.style.display=vals.length?'':'none';if(vals.length)start.textContent=T('T1-Vorschlag: ','Day 1 suggestion: ')+vals.join(' · ')}card.querySelectorAll('.set > b').forEach((b,i)=>b.textContent=T('Satz ','Set ')+(i+1));card.querySelectorAll('.lr span').forEach(sp=>{if(sp.textContent.trim()==='Li'||sp.textContent.trim()==='L')sp.textContent=T('Li','L');else sp.textContent=T('Re','R')})});
   }
 
-  function patchRows(){if(window.__kggPainRowsPatch||typeof rows!=='function')return;window.__kggPainRowsPatch=1;const old=rows;rows=function(day){const out=old(day);safe(()=>out.forEach((r,ei)=>{const e=p.ex[ei];if(getPainMode(e)==='set'){let a=[];for(let s=1;s<=e.sets;s++){let x=v[k(ei,s,'P','pain',day)]||'0';a.push('S'+s+':'+x)}r[6]=a.join(' ')}}));return out}}
+  function patchRows(){if(window.__kggPainRowsPatch||typeof rows!=='function')return;window.__kggPainRowsPatch=1;const old=rows;rows=function(day){const out=old(day);safe(()=>out.forEach((r,ei)=>{const e=p.ex[ei],hasA=activeUnit(e&&e.u),hasB=activeUnit(e&&e.m);(Array.isArray(r[5])?r[5]:[]).forEach(values=>{if(!Array.isArray(values))return;if(e&&e.side==='LR'){if(!hasA){values[0]='';values[2]=''}if(!hasB){values[1]='';values[3]=''}}else{if(!hasA)values[0]='';if(!hasB)values[1]=''}});if(getPainMode(e)==='set'){let a=[];for(let s=1;s<=e.sets;s++){let x=v[k(ei,s,'P','pain',day)]||'0';a.push('S'+s+':'+x)}r[6]=a.join(' ')}}));return out}}
+  function patchText(){if(window.__kggUnitAwareTextPatch||typeof text!=='function')return;window.__kggUnitAwareTextPatch=1;text=function(day){let out=[];rows(day).forEach(entry=>{let[n,sets,side,u,m,values,pn]=entry,lines=[],hasA=activeUnit(u),hasB=activeUnit(m);const fmt=(a,b)=>{if(hasA&&hasB)return (a||'?')+' '+u+' @ '+(b||'?')+' '+m;if(hasA)return (a||'?')+' '+u;if(hasB)return (b||'?')+' '+m;return''};(Array.isArray(values)?values:[]).forEach((x,i)=>{if(side==='LR'){const left=fmt(x[0],x[1]),right=fmt(x[2],x[3]),hasLeft=(hasA&&!!x[0])||(hasB&&!!x[1]),hasRight=(hasA&&!!x[2])||(hasB&&!!x[3]);if(hasLeft||hasRight)lines.push((i+1)+'. Satz: '+(hasLeft?left:'–')+' li    '+(hasRight?right:'–')+' re')}else{const value=fmt(x[0],x[1]),hasValue=(hasA&&!!x[0])||(hasB&&!!x[1]);if(hasValue)lines.push((i+1)+'. Satz: '+value)}});if(lines.length||Number(pn)>0)out.push(n+' — Tag '+day,...lines,Number(pn)>0?'Schmerz: '+pn+'/10':'','')});return out.join('\n').trim()}}
   function patchRender(){if(window.__kggAlwaysCardsRenderPatch||typeof render!=='function')return;window.__kggAlwaysCardsRenderPatch=1;const old=render;render=function(){const r=old.apply(this,arguments);setTimeout(apply,0);return r}}
-  function apply(){ensureStyle();ensureSettingsDom();applySavedSettings();forceCards();renderPain();i18n();applyUnitVisibility();patchRows()}
+  function apply(){ensureStyle();ensureSettingsDom();applySavedSettings();forceCards();renderPain();i18n();applyUnitVisibility();patchRows();patchText()}
   function init(){window.__kggPatientCardSettings=VERSION;patchRender();apply();setTimeout(apply,300);setTimeout(apply,1000)}
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
 })();
