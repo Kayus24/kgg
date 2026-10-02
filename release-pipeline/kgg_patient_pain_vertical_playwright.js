@@ -184,10 +184,15 @@ async function main() {
     assert(await modal.isVisible(),"click inside dialog closed modal");
     await modal.click({position:{x:8,y:8}});
     await modal.waitFor({state:"hidden"});
-    await page.waitForFunction(expected=>{
-      const active=String(document.activeElement?.className||"");
-      return Math.abs(window.scrollY-expected)<=1&&getComputedStyle(document.body).position!=="fixed"&&active.includes("kggPainVerticalToggle");
-    },before.scrollY,{timeout:5000});
+    try{
+      await page.waitForFunction(expected=>{
+        const active=String(document.activeElement?.className||"");
+        return Math.abs(window.scrollY-expected)<=1&&getComputedStyle(document.body).position!=="fixed"&&active.includes("kggPainVerticalToggle");
+      },before.scrollY,{timeout:5000});
+    }catch(error){
+      const state=await page.evaluate(()=>({scrollY:window.scrollY,bodyPosition:getComputedStyle(document.body).position,active:document.activeElement?.className||"",toggleCount:document.querySelectorAll(".kggPainVerticalToggle").length,toggleConnected:[...document.querySelectorAll(".kggPainVerticalToggle")].map(node=>node.isConnected)}));
+      throw new Error(`post-close restoration timeout: ${JSON.stringify({expectedScrollY:before.scrollY,state})}`,{cause:error})
+    }
     const restored=await page.evaluate(()=>({scrollY:window.scrollY,bodyPosition:getComputedStyle(document.body).position,active:document.activeElement?.className||""}));
     assert(Math.abs(restored.scrollY-before.scrollY)<=1,`closing modal did not restore scroll position: ${JSON.stringify({before:before.scrollY,restored})}`);
     assert(restored.bodyPosition!=="fixed","closing modal did not unlock body");

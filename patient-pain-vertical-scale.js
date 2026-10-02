@@ -179,11 +179,19 @@
   function restoreModalDraft(){if(modal)updateStage(modal.committed)}
   function closeModal(options={}){
     if(!modal||modal.overlay.hidden)return;
-    const returnFocus=options.returnFocus!==false,opener=activeRoot&&states.get(activeRoot)?.toggle;
+    const returnFocus=options.returnFocus!==false,focusRoot=activeRoot,focusState=focusRoot&&states.get(focusRoot),opener=focusState?.toggle,focusEi=focusState?.ei;
     restoreModalDraft();modal.gesture=null;modal.keyboardDirty=false;modal.overlay.hidden=true;
     if(activeRoot){const state=states.get(activeRoot);if(state)state.toggle.setAttribute('aria-expanded','false')}
     activeRoot=null;unlockBackground();
-    if(returnFocus&&opener&&opener.isConnected)setTimeout(()=>safe(()=>opener.focus({preventScroll:true})),0)
+    if(returnFocus){
+      const restoreFocus=()=>{
+        const current=focusRoot&&states.get(focusRoot)?.toggle;
+        const replacement=Number.isInteger(focusEi)?document.querySelectorAll('#list .ex')[focusEi]?.querySelector('.kggPainVerticalToggle'):null;
+        const target=current?.isConnected?current:(opener?.isConnected?opener:replacement);
+        if(target?.isConnected)safe(()=>target.focus({preventScroll:true}))
+      };
+      restoreFocus();requestAnimationFrame(restoreFocus)
+    }
   }
   function openModal(root){
     const state=states.get(root);if(!state||!ensureModal())return;

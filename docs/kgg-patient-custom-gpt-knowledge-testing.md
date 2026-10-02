@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Testing
 
-Generated retrieval pack. Source digest: `8b40e9a9c9277a4b`.
+Generated retrieval pack. Source digest: `1132f705cfc5d6dd`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -134,7 +134,7 @@ def validate_static_compatibility(manifest:dict,version:str)->None:
   "./patient-day-history.js?v=day-history-2-active-units",
   "./patient-media-retry-cache_v2.js?v=thumb-layout-2-safe-text",
   "./patient-ui-micro-polish.js?v=unit-labels-pain-fit-1",
-  "./patient-pain-vertical-scale.js?v=exercise-pain-vertical-4-focus-return",
+  "./patient-pain-vertical-scale.js?v=exercise-pain-vertical-5-focus-remount",
   "./numpad-ui-fix.js?v=scroll-stable-1",
   "./patient-numpad-visibility-fix.js?v=stay-open-switch-2-compact-large",
   "./patient-extra-info-display.js?v=extra-info-filter-1",

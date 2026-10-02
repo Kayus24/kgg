@@ -1,11 +1,18 @@
 # KGG Patient Source Chunk 021
 
 - Source file: `patient-pain-vertical-scale.js`
-- Characters: 24001-26299
-- Full source SHA-256: `7badcbef42a306879ff15b198075d6dbd3ced561653bbb3977f8093fe804c73a`
+- Characters: 24001-26756
+- Full source SHA-256: `8dcea9fef6e5b3d9b3e423c1a958dccc5b3fa279a44adb78f369b4d02ef89cb1`
 
 ```
-lassList.add(ROOT_CLASS)}else state.ei=ei;
+.toLowerCase()
+  }
+  function mountRoot(root,ei){
+    const card=root.closest('.ex');
+    const setMode=exercisePainMode(ei)==='set'||Boolean(card&&card.querySelector('.kggSetPain'))||root.classList.contains('kggHiddenGlobalPain')||root.style.display==='none';
+    if(setMode){teardown(root);return}
+    if(!originalReady(root)||typeof setPain!=='function'||!ensureModal())return;
+    let state=states.get(root);if(!state){state=buildCompact(root,ei);root.classList.add(ROOT_CLASS)}else state.ei=ei;
     if(!hideOriginal(root,state)){teardown(root);return}refreshState(root,state)
   }
   function mountAll(){
