@@ -2,7 +2,7 @@
 
 - Source file: `patient-pain-vertical-scale.js`
 - Characters: 1-24000
-- Full source SHA-256: `dfcc2598afe826250841807b538473577234993a8db96fc58275279f5483d4fd`
+- Full source SHA-256: `7badcbef42a306879ff15b198075d6dbd3ced561653bbb3977f8093fe804c73a`
 
 ```
 (()=>{
@@ -272,7 +272,7 @@
       const body=document.createElement('div');body.className='kggPainModalBody';body.append(maxDesc,stage,minDesc,hint);
       dialog.append(head,body);overlay.appendChild(dialog);document.body.appendChild(overlay);
       modal={overlay,dialog,title,close,maxDesc,minDesc,stage,values:rows,hint,selected:false,committed:0,draft:0,gesture:null,keyboardDirty:false};
-      overlay.addEventListener('pointerdown',event=>{if(event.target===overlay){event.preventDefault();closeModal()}});
+      overlay.addEventListener('click',event=>{if(event.target===overlay){event.preventDefault();closeModal()}});
       dialog.addEventListener('pointerdown',event=>event.stopPropagation());
       close.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();closeModal()});
       overlay.addEventListener('keydown',modalKeydown,true);bindStage();refreshLanguage();return true
@@ -313,5 +313,5 @@
     const setMode=exercisePainMode(ei)==='set'||Boolean(card&&card.querySelector('.kggSetPain'))||root.classList.contains('kggHiddenGlobalPain')||root.style.display==='none';
     if(setMode){teardown(root);return}
     if(!originalReady(root)||typeof setPain!=='function'||!ensureModal())return;
-    let state=states.get(root);if(!state){state=buildCompact(root,ei);
+    let state=states.get(root);if(!state){state=buildCompact(root,ei);root.c
 ```

@@ -68,7 +68,7 @@ def validate_static_compatibility(manifest:dict,version:str)->None:
   "./patient-day-history.js?v=day-history-2-active-units",
   "./patient-media-retry-cache_v2.js?v=thumb-layout-2-safe-text",
   "./patient-ui-micro-polish.js?v=unit-labels-pain-fit-1",
-  "./patient-pain-vertical-scale.js?v=exercise-pain-vertical-3-compact-icon",
+  "./patient-pain-vertical-scale.js?v=exercise-pain-vertical-4-focus-return",
   "./numpad-ui-fix.js?v=scroll-stable-1",
   "./patient-numpad-visibility-fix.js?v=stay-open-switch-2-compact-large",
   "./patient-extra-info-display.js?v=extra-info-filter-1",

@@ -265,7 +265,7 @@
       const body=document.createElement('div');body.className='kggPainModalBody';body.append(maxDesc,stage,minDesc,hint);
       dialog.append(head,body);overlay.appendChild(dialog);document.body.appendChild(overlay);
       modal={overlay,dialog,title,close,maxDesc,minDesc,stage,values:rows,hint,selected:false,committed:0,draft:0,gesture:null,keyboardDirty:false};
-      overlay.addEventListener('pointerdown',event=>{if(event.target===overlay){event.preventDefault();closeModal()}});
+      overlay.addEventListener('click',event=>{if(event.target===overlay){event.preventDefault();closeModal()}});
       dialog.addEventListener('pointerdown',event=>event.stopPropagation());
       close.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();closeModal()});
       overlay.addEventListener('keydown',modalKeydown,true);bindStage();refreshLanguage();return true
