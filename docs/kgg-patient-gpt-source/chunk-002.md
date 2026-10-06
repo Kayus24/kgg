@@ -1,18 +1,18 @@
 # KGG Patient Source Chunk 002
 
 - Source file: `service-worker.js`
-- Characters: 1-8130
-- Full source SHA-256: `e198f8cd6d1bb342a18ed48b83f228a8755613da391fe4bef86c17fa12cfc447`
+- Characters: 1-8128
+- Full source SHA-256: `00ac76bf6f22a6bb4ae3fb6976249061578a65c16c7e1bd678ad27a6912d1977`
 
 ```
-const CACHE_NAME = 'kgg-handyplan-v88-patient-media-stability';
-const APP_VERSION = '88';
+const CACHE_NAME = 'kgg-handyplan-v89-card-state-single-owner';
+const APP_VERSION = '89';
 const CACHE_PREFIX = 'kgg-handyplan-';
 const RECOVERY_PATH = './update-recovery.html';
 const NUMPAD_UI_FIX_SCRIPT = './numpad-ui-fix.js?v=scroll-stable-4-single-owner';
-const VERSION_LABEL_SCRIPT = './patient-version-label.js?v=88';
+const VERSION_LABEL_SCRIPT = './patient-version-label.js?v=89';
 const PLAN_LINK_CHOICE_SCRIPT = './patient-plan-link-choice.js?v=plan-link-choice-2-kgg-h3';
-const COLLAPSE_SCRIPT = './collapse-cards.js?v=plan-update-label-6-single-scroll-owner';
+const COLLAPSE_SCRIPT = './collapse-cards.js?v=plan-update-label-7-single-card-owner';
 const CARD_PROGRESS_SCRIPT = './patient-card-progress.js?v=card-progress-3-active-units';
 const INSTALL_PROMPT_SCRIPT = './patient-install-prompt.js?v=install-prompt-2-capability-only';
 const PLAN_REPLACE_SLOT_SCRIPT = './patient-plan-replace-slot-fix.js?v=active-slot-1';

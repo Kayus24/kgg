@@ -1,11 +1,15 @@
 # KGG Patient Source Chunk 022
 
 - Source file: `patient-pain-vertical-scale.js`
-- Characters: 24001-27613
-- Full source SHA-256: `06e0f3d957e49c4c19525483f3d9c2d8bd7d835e87d7ac5fb6e906bff3ce6be5`
+- Characters: 24001-27768
+- Full source SHA-256: `aeb8d022a6630c76de16e9d4ddb4a2d5f241e65ac86225667d4fce817f3dcc8c`
 
 ```
-const stored=readStored(state.ei);state.label.textContent=labelText();updateCompact(state,stored.selected,stored.value)
+ropagation();toggleModal(root)});
+    wrap.addEventListener('click',event=>event.stopPropagation());return state
+  }
+  function refreshState(root,state){
+    const stored=readStored(state.ei);setText(state.label,labelText());updateCompact(state,stored.selected,stored.value)
   }
   function teardown(root){
     const state=states.get(root);if(!state)return;
