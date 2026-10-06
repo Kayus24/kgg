@@ -19,9 +19,12 @@
     if(state==='partial')return en?'◐ Partial':'◐ Teilweise';
     return en?'○ Open':'○ Offen'
   }
+  function activeUnit(unit){const s=String(unit??'').trim();return !!s&&!/^(keine|none|-)$/i.test(s)}
+  function exerciseForCard(card){if(!card||typeof p==='undefined'||!p||!Array.isArray(p.ex))return null;let idx=Number(card.dataset.kggAlwaysIdx??card.dataset.kggExerciseIndex);if(!Number.isInteger(idx)||idx<0)idx=cards().indexOf(card);return idx>=0?p.ex[idx]||null:null}
   function normalValueInputs(card){
     if(!card||typeof card.querySelectorAll!=='function')return [];
-    return [...card.querySelectorAll('.set input.num')]
+    const all=[...card.querySelectorAll('.set input.num')],ex=exerciseForCard(card);if(!ex)return all;
+    return all.filter(input=>{const row=input.closest('.lr,.bi');if(!row)return true;const rowInputs=[...row.querySelectorAll('input.num')],field=rowInputs.indexOf(input)===0?'a':'b';return field==='a'?activeUnit(ex.u):activeUnit(ex.m)})
   }
   function filledCount(card){
     return normalValueInputs(card).filter(input=>String(input&&input.value!=null?input.value:'').trim()!=='').length
@@ -134,7 +137,8 @@
     const makeKey=keyFn||k;
     for(let setNo=1;setNo<=sets;setNo++){
       for(const side of sides){
-        for(const field of ['a','b']){
+        const fields=[];if(activeUnit(ex.u))fields.push('a');if(activeUnit(ex.m))fields.push('b');
+        for(const field of fields){
           if(String((sourceValues&&sourceValues[makeKey(exerciseIndex,setNo,side,field,day)])??'').trim()!=='')return true
         }
       }

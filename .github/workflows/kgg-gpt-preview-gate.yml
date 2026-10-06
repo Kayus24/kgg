@@ -156,6 +156,8 @@ jobs:
           java-version: "17"
 
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
         if: inputs.mode == 'publish_preview' || inputs.mode == 'publish_device_test'
 
       - uses: gradle/actions/setup-gradle@v4

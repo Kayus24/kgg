@@ -1,10 +1,3 @@
-# KGG Patient Source Chunk 028
-
-- Source file: `patient-set-compact-view.js`
-- Characters: 1-21822
-- Full source SHA-256: `b14070146be8aeb6b9133aa31bd227b29a12850729070c6e18a979d3166e876e`
-
-```
 (()=>{const V='patient-set-compact-view-v8-stable-pair',KEY='kggPatientSetViewModeV1',STYLE='kggSetCompactStyle',SW='kggSetViewSwitch',PAIR='kggPadPair',TRANSFER='kggPadTransfer';if(window.__kggSetCompactView===V)return;window.__kggSetCompactView=V;const $=id=>document.getElementById(id),en=()=>localStorage.getItem('kggPatientLang')==='en';
 function getMode(){try{return localStorage.getItem(KEY)==='legacy'?'legacy':'compact'}catch(e){return'compact'}}function setMode(mode){try{localStorage.setItem(KEY,mode==='legacy'?'legacy':'compact')}catch(e){}applyMode()}
 function meta(input){if(!input)return null;if(input.__kggLastMeta)return input.__kggLastMeta;if(input.__kggSetMeta)return input.__kggSetMeta;const a=input.getAttribute('onclick')||input.getAttribute('onfocus')||'',g=re=>{const m=a.match(re);return m?m[1]:''},m={ei:Number(g(/ei\s*:\s*(\d+)/)),s:Number(g(/s\s*:\s*(\d+)/)),side:g(/side\s*:\s*['"]([^'"]+)['"]/),key:g(/key\s*:\s*['"]([^'"]+)['"]/)};if(Number.isFinite(m.ei)&&Number.isFinite(m.s)&&m.side&&m.key){input.__kggSetMeta=m;return m}return null}
@@ -37,4 +30,3 @@ function showPair(input,m){const box=document.querySelector('#pad .padBox');if(!
 function patchPad(){if(window.__kggSetCompactPadPatched||typeof window.openPad!=='function')return;window.__kggSetCompactPadPatched=1;const old=window.openPad;window.openPad=function(input,m){const r=old.apply(this,arguments);if(getMode()==='compact')showPair(input,m);return r};const pv=$('padVal');if(pv&&'MutationObserver'in window)new MutationObserver(syncPairValue).observe(pv,{childList:true,characterData:true,subtree:true})}
 let timer=0;function schedule(){clearTimeout(timer);timer=setTimeout(()=>{applyMode();patchPad()},0)}function init(){applyMode();patchPad();const list=$('list');if(list&&'MutationObserver'in window)new MutationObserver(schedule).observe(list,{childList:true,subtree:true});setTimeout(schedule,250);setTimeout(schedule,900)}
 document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init,{once:true}):init()})();
-```

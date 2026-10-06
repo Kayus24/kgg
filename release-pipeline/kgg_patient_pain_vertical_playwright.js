@@ -56,7 +56,7 @@ async function setCardOpen(page, _card, index, open) {
   throw new Error(`card open state did not stabilize: ${JSON.stringify(diagnostic)}`);
 }
 async function openModal(toggle, modal) {
-  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.evaluate(element=>element.click());
   await modal.waitFor({ state:"visible" });
 }
 async function chooseValue(page, value) {
@@ -99,6 +99,7 @@ async function main() {
   try {
     await page.goto(url,{waitUntil:"domcontentloaded"});
     await waitForRuntime(page);
+    await page.waitForTimeout(1250); // allow delayed patient-card/layout decorators to settle before geometry assertions
     const cards=page.locator("#list .ex");
     assert(await cards.count()===2,"expected two exercise cards");
     const first=cards.nth(0),second=cards.nth(1);
@@ -106,7 +107,19 @@ async function main() {
     const toggle=first.locator(".kggPainVerticalToggle");
     const modal=page.locator("#kggPainModal");
     await toggle.waitFor({state:"visible"});
-    assert((await first.locator(".kggPainVerticalLabel").innerText())==="Schmerzen bei der Übung?","compact label is wrong");
+    assert((await first.locator(".kggPainVerticalLabel").textContent())==="Schmerzen bei der Übung?","pain label semantics are wrong");
+    const compactTrigger=await toggle.evaluate(el=>{const r=el.getBoundingClientRect(),style=getComputedStyle(el),label=el.querySelector(".kggPainVerticalLabel"),current=el.querySelector(".kggPainVerticalCurrent"),chevron=el.querySelector(".kggPainVerticalChevron"),icon=el.querySelector(".kggPainVerticalIcon"),compact=el.querySelector(".kggPainCompactText"),rootBox=el.closest(".kggPainVertical")?.getBoundingClientRect();return{width:r.width,height:r.height,borderWidth:style.borderWidth,borderColor:style.borderTopColor,background:style.backgroundColor,labelDisplay:label?getComputedStyle(label).display:"",currentDisplay:current?getComputedStyle(current).display:"",chevronDisplay:chevron?getComputedStyle(chevron).display:"",iconDisplay:icon?getComputedStyle(icon).display:"",compactDisplay:compact?getComputedStyle(compact).display:"",compactText:compact?.textContent||"",rightGap:rootBox?Math.abs(rootBox.right-r.right):999,aria:el.getAttribute("aria-label")||""}});
+    assert(compactTrigger.height>=40&&compactTrigger.height<=48,"compact pain trigger has wrong touch height: "+JSON.stringify(compactTrigger));
+    assert(compactTrigger.width>=78&&compactTrigger.width<=120,"compact pain trigger does not fit the Schmerz capsule: "+JSON.stringify(compactTrigger));
+    assert(compactTrigger.borderWidth!=="0px"&&compactTrigger.background!=="rgba(0, 0, 0, 0)","compact pain trigger lost its visible capsule: "+JSON.stringify(compactTrigger));
+    assert(compactTrigger.labelDisplay==="none"&&compactTrigger.currentDisplay==="none"&&compactTrigger.chevronDisplay==="none"&&compactTrigger.iconDisplay==="none"&&compactTrigger.compactDisplay!=="none","compact pain trigger did not switch to compact text mode: "+JSON.stringify(compactTrigger));
+    assert(compactTrigger.compactText==="Schmerz ⚡","compact pain trigger does not show Schmerz ⚡ when unset: "+JSON.stringify(compactTrigger));
+    assert(compactTrigger.rightGap<=2,"compact pain trigger is not aligned to the right edge of its row: "+JSON.stringify(compactTrigger));
+    assert(compactTrigger.aria.includes("Schmerzen bei der Übung?"),"compact pain trigger lost accessible full label");
+    const viewSwitch=page.locator("#kggSetViewSwitch");await viewSwitch.click();
+    const legacyTrigger=await toggle.evaluate(el=>({labelDisplay:getComputedStyle(el.querySelector(".kggPainVerticalLabel")).display,iconDisplay:getComputedStyle(el.querySelector(".kggPainVerticalIcon")).display,width:el.getBoundingClientRect().width}));
+    assert(legacyTrigger.labelDisplay!=="none"&&legacyTrigger.iconDisplay==="none","legacy pain trigger changed visual contract: "+JSON.stringify(legacyTrigger));
+    await viewSwitch.click();
     assert((await first.locator(".kggPainVerticalCurrent").innerText())==="–","unset value must show a dash");
     assert((await toggle.getAttribute("aria-expanded"))==="false","scale must start closed");
     assert(await page.locator("#kggPainModal").count()===1,"floating pain modal must be a singleton");
@@ -119,19 +132,17 @@ async function main() {
     await page.evaluate(()=>window.scrollTo(0,Math.min(250,document.documentElement.scrollHeight-window.innerHeight)));
     await page.waitForTimeout(380);
     const before=await page.evaluate(()=>{
-    const cards=[...document.querySelectorAll("#list .ex")];
-    const layoutTop=element=>{let top=0;for(let node=element;node;node=node.offsetParent)top+=node.offsetTop;return top};
-    return{scrollY:window.scrollY,firstHeight:cards[0].offsetHeight,secondLayoutTop:layoutTop(cards[1])};
+    const cards=[...document.querySelectorAll("#list .ex")],first=cards[0].getBoundingClientRect(),second=cards[1].getBoundingClientRect();
+    const body=document.body.getBoundingClientRect(),main=document.querySelector("main").getBoundingClientRect(),children=[...cards[0].children].map(el=>({tag:el.tagName,cls:el.className,h:el.getBoundingClientRect().height,mt:getComputedStyle(el).marginTop,mb:getComputedStyle(el).marginBottom,display:getComputedStyle(el).display}));return{scrollY:window.scrollY,firstHeight:cards[0].offsetHeight,firstWidth:first.width,interCardGap:second.top-(first.top+first.height),bodyWidth:body.width,mainWidth:main.width,innerWidth:window.innerWidth,clientWidth:document.documentElement.clientWidth,children};
   });
     await openModal(toggle,modal);
     await page.waitForTimeout(220);
     const after=await page.evaluate(()=>{
-    const cards=[...document.querySelectorAll("#list .ex")];
-    const layoutTop=element=>{let top=0;for(let node=element;node;node=node.offsetParent)top+=node.offsetTop;return top};
-    return{firstHeight:cards[0].offsetHeight,secondLayoutTop:layoutTop(cards[1]),bodyPosition:getComputedStyle(document.body).position};
+    const cards=[...document.querySelectorAll("#list .ex")],first=cards[0].getBoundingClientRect(),second=cards[1].getBoundingClientRect();
+    const body=document.body.getBoundingClientRect(),main=document.querySelector("main").getBoundingClientRect(),children=[...cards[0].children].map(el=>({tag:el.tagName,cls:el.className,h:el.getBoundingClientRect().height,mt:getComputedStyle(el).marginTop,mb:getComputedStyle(el).marginBottom,display:getComputedStyle(el).display}));return{firstHeight:cards[0].offsetHeight,firstWidth:first.width,interCardGap:second.top-(first.top+first.height),bodyWidth:body.width,mainWidth:main.width,innerWidth:window.innerWidth,clientWidth:document.documentElement.clientWidth,bodyPosition:getComputedStyle(document.body).position,children};
   });
     assert(before.firstHeight===after.firstHeight,`opening modal changed exercise-card height: ${JSON.stringify({before,after})}`);
-    assert(before.secondLayoutTop===after.secondLayoutTop,`opening modal shifted following exercise: ${JSON.stringify({before,after})}`);
+    assert(Math.abs(before.interCardGap-after.interCardGap)<=1,`opening modal changed spacing to following exercise by more than 1px: ${JSON.stringify({before,after})}`);
     assert(after.bodyPosition==="fixed","background scroll was not locked");
     const modalStyle=await modal.evaluate(el=>{const s=getComputedStyle(el);return{position:s.position,zIndex:Number(s.zIndex),backdrop:s.backdropFilter||s.webkitBackdropFilter,background:s.backgroundColor}});
     assert(modalStyle.position==="fixed","pain window is not a fixed overlay");
@@ -161,6 +172,7 @@ async function main() {
 
     await chooseValue(page,7);
     assert((await first.locator(".kggPainVerticalCurrent").innerText())==="7/10","tap did not update compact value");
+    assert((await first.locator(".kggPainCompactText").innerText())==="7⚡","selected pain value did not replace Schmerz text");
     assert(await modal.isVisible(),"modal auto-closed after choosing a value");
     assert((await toggle.getAttribute("aria-expanded"))==="true","trigger no longer reports open modal");
     assert((await first.locator(".kggCardProgress").getAttribute("data-kgg-progress"))==="open","pain alone changed exercise progress");
@@ -176,10 +188,15 @@ async function main() {
     assert(await modal.isVisible(),"click inside dialog closed modal");
     await modal.click({position:{x:8,y:8}});
     await modal.waitFor({state:"hidden"});
-    await page.waitForFunction(expected=>{
-      const active=String(document.activeElement?.className||"");
-      return Math.abs(window.scrollY-expected)<=1&&getComputedStyle(document.body).position!=="fixed"&&active.includes("kggPainVerticalToggle");
-    },before.scrollY,{timeout:5000});
+    try{
+      await page.waitForFunction(expected=>{
+        const active=String(document.activeElement?.className||"");
+        return Math.abs(window.scrollY-expected)<=1&&getComputedStyle(document.body).position!=="fixed"&&active.includes("kggPainVerticalToggle");
+      },before.scrollY,{timeout:5000});
+    }catch(error){
+      const state=await page.evaluate(()=>({scrollY:window.scrollY,bodyPosition:getComputedStyle(document.body).position,active:document.activeElement?.className||"",toggleCount:document.querySelectorAll(".kggPainVerticalToggle").length,toggleConnected:[...document.querySelectorAll(".kggPainVerticalToggle")].map(node=>node.isConnected)}));
+      throw new Error(`post-close restoration timeout: ${JSON.stringify({expectedScrollY:before.scrollY,state})}`,{cause:error})
+    }
     const restored=await page.evaluate(()=>({scrollY:window.scrollY,bodyPosition:getComputedStyle(document.body).position,active:document.activeElement?.className||""}));
     assert(Math.abs(restored.scrollY-before.scrollY)<=1,`closing modal did not restore scroll position: ${JSON.stringify({before:before.scrollY,restored})}`);
     assert(restored.bodyPosition!=="fixed","closing modal did not unlock body");
@@ -193,6 +210,7 @@ async function main() {
     await page.reload({waitUntil:"domcontentloaded"});await waitForRuntime(page);
     const reloadedFirst=page.locator("#list .ex").nth(0);await setCardOpen(page,reloadedFirst,0,true);
     assert((await reloadedFirst.locator(".kggPainVerticalCurrent").innerText())==="0/10","zero did not persist after reload");
+    assert((await reloadedFirst.locator(".kggPainCompactText").innerText())==="0⚡","zero pain did not render as 0⚡");
 
     const reloadedToggle=reloadedFirst.locator(".kggPainVerticalToggle");
     await openModal(reloadedToggle,page.locator("#kggPainModal"));

@@ -1,10 +1,3 @@
-# KGG Patient Source Chunk 011
-
-- Source file: `patient-exercise-media-sources.js`
-- Characters: 1-3924
-- Full source SHA-256: `b7d0d0a04242b4086804015008db76cb260127d9a308df36d2d7c206e914edb3`
-
-```
 (()=>{
   const VERSION='exercise-media-sources-v2-license-checked';
   if(window.KGGExerciseMediaSources&&window.KGGExerciseMediaSources.version===VERSION)return;
@@ -47,4 +40,3 @@
   function audit(){const out={repdb:0,workoutGuide:0,everkinetic:0,mappings:defs.length};defs.forEach(def=>{if(def.source in out)out[def.source]++});return out}
   window.KGGExerciseMediaSources={version:VERSION,lookup,describe,audit,normalize:norm};
 })();
-```

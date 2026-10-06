@@ -27,11 +27,11 @@
     return v ? (v.textContent || '0') : '0';
   }
 
-  function setCurrentValue(x){
+  function setCurrentValue(x,syncInput=true){
     x=String(x||'0');
     const v=$('padVal');
     if(v) v.textContent=x;
-    if(activeInput) activeInput.value=x;
+    if(syncInput&&activeInput) activeInput.value=x;
   }
 
   function cancelPendingScroll(){
@@ -41,25 +41,12 @@
     }
   }
 
-  function scrollInputAbovePad(input){
-    cancelPendingScroll();
-    scrollTimer=setTimeout(()=>{
-      scrollTimer=null;
-      if(!input || input!==activeInput || !input.isConnected) return;
-      const pad=$('pad');
-      if(!pad || pad.classList.contains('hide') || !document.body.classList.contains('kggPadOpen')) return;
-      const padBox=pad.querySelector('.padBox');
-      if(!padBox) return;
-      const padRect=padBox.getBoundingClientRect();
-      if(padRect.height<=0 || padRect.bottom<=0 || padRect.top>=window.innerHeight) return;
-      const r=input.getBoundingClientRect();
-      const safeTop=84;
-      const safeBottom=padRect.top-28;
-      let delta=0;
-      if(r.bottom>safeBottom) delta=r.bottom-safeBottom;
-      if(r.top<safeTop) delta=r.top-safeTop;
-      if(delta!==0) window.scrollBy({top:delta,behavior:'smooth'});
-    },90);
+  function scrollAnchor(input){
+    return input&&input.closest ? (input.closest('.lr,.bi')||input) : input;
+  }
+
+  function scrollInputAbovePad(){
+    // Viewport scrolling is owned exclusively by patient-numpad-visibility-fix.js.
   }
 
   function patch(){
@@ -72,14 +59,17 @@
 
     window.openPad=function(input,meta){
       injectStyle();
+      const previousInput=activeInput;
+      const sameAnchor=!!(previousInput&&input&&scrollAnchor(previousInput)===scrollAnchor(input));
       if(activeInput) activeInput.classList.remove('kggEditing');
       activeInput=input;
       oldValue=input ? input.value : '';
       if(activeInput) activeInput.classList.add('kggEditing');
       document.body.classList.add('kggPadOpen');
       const result=oldOpen.apply(this,arguments);
-      setCurrentValue(input && input.value ? input.value : '0');
-      scrollInputAbovePad(input);
+      setCurrentValue(input && input.value ? input.value : '0',false);
+      if(sameAnchor) cancelPendingScroll();
+      else scrollInputAbovePad(input);
       return result;
     };
 

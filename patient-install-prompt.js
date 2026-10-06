@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='install-prompt-v1-shared-reference';
+  const VERSION='install-prompt-v2-capability-only';
   const KEY='__kggInstallPrompt';
   if(window.__kggInstallPromptPatch===VERSION)return;
   window.__kggInstallPromptPatch=VERSION;
@@ -11,8 +11,10 @@
     if(!event)return null;
     try{event.preventDefault()}catch(e){}
     setPrompt(event);
-    const button=document.getElementById('installSmall');
-    if(button&&typeof standalone==='function'&&!standalone())button.classList.remove('hide');
+    const isStandalone=typeof window.standalone==='function'&&window.standalone();
+    if(isStandalone){clearPrompt(event);hideInstallUi();return null}
+    const row=document.getElementById('installSmall'),text=document.getElementById('installOfferText'),button=document.getElementById('installOfferBtn');if(row)row.classList.remove('hide');if(text)text.classList.remove('hide');if(button)button.classList.remove('hide');
+    if(typeof window.maybeAskInstall==='function')window.maybeAskInstall();
     return event
   }
   async function consumePrompt(prompt){
@@ -29,28 +31,23 @@
       clearPrompt(active)
     }
   }
-  function hideInstallBox(){
-    const box=document.getElementById('installBox');
-    if(box)box.classList.add('hide')
+  function hideInstallUi(){
+    const box=document.getElementById('installBox'),text=document.getElementById('installOfferText'),button=document.getElementById('installOfferBtn'),hint=document.getElementById('installHint');
+    if(box)box.classList.add('hide');if(text)text.classList.add('hide');if(button)button.classList.add('hide');if(hint){hint.classList.add('hide');hint.innerHTML=''}
   }
   function patchInstallApp(){
     if(window.__kggSharedInstallAppPatched||typeof window.installApp!=='function')return;
-    const fallback=window.installApp;
     window.installApp=async function(){
       const prompt=getPrompt();
-      if(prompt){
-        const result=await consumePrompt(prompt);
-        hideInstallBox();
-        return result
-      }
-      return fallback.apply(this,arguments)
+      if(!prompt||typeof prompt.prompt!=='function'){hideInstallUi();return {handled:false,choice:null}}
+      const result=await consumePrompt(prompt);hideInstallUi();return result
     };
     window.__kggSharedInstallAppPatched=1
   }
   function bind(){
     if(!window.__kggInstallPromptListenerBound){
       window.__kggInstallPromptListenerBound=1;
-      window.addEventListener('beforeinstallprompt',capturePrompt)
+      window.addEventListener('beforeinstallprompt',capturePrompt);window.addEventListener('appinstalled',()=>{setPrompt(null);hideInstallUi()})
     }
     patchInstallApp()
   }

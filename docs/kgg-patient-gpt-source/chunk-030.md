@@ -1,25 +1,105 @@
 # KGG Patient Source Chunk 030
 
-- Source file: `patient-start-scan.js`
-- Characters: 24001-34184
-- Full source SHA-256: `c4cc0cf64aef88ae4f6446164c5769a355e9cae9064a31cc087bcce3d8eb2e1e`
+- Source file: `patient-set-summary-groups.js`
+- Characters: 24001-35944
+- Full source SHA-256: `26e85437840b9706eace462786c832d338ffc22180b2459fd19e2d8198cb3208`
 
 ```
-.'));return;}if(session.busy){session.timer=setTimeout(()=>scanLiveFrame(session),200);return;}session.busy=true;session.frameTimes.push(Date.now());if(session.frameTimes.length>30)session.frameTimes.shift();try{let raw='';if(session.detector)raw=await detectNative(session.detector,session.video);if(!raw){const variant=LIVE_VARIANTS[session.variant%LIVE_VARIANTS.length];session.variant++;raw=await decodeCanvasWithJsQR(renderDecodeVariant(session.video,variant));}if(raw){if(parsePlanFromText(raw)){const elapsed=Date.now()-session.startedAt,span=session.frameTimes.length>1?session.frameTimes[session.frameTimes.length-1]-session.frameTimes[0]:0,fps=span>0?(session.frameTimes.length-1)*1000/span:0;lastScanMetrics=Object.assign({},lastScanMetrics,{recognitionMs:elapsed,fpsBand:!fps?'unknown':fps<3?'under-3':fps<6?'3-5':fps<10?'6-9':'10-plus'});testEmit('scan-metrics',lastScanMetrics);scannerStatus(scanMode==='replace'?tr('Plan erkannt. Ersetzen wird vorbereitet …','Plan detected. Preparing replacement …'):tr('Plan erkannt. Wird aktualisiert …','Plan detected. Updating …'),'ok');session.active=false;stopScannerTracks(session);const consumed=testConsume(raw,lastScanMetrics);setTimeout(()=>{if(scannerSession===session){if(session.box&&session.box.parentNode)session.box.remove();scannerSession=null;}if(!consumed)handlePlanText(raw);},80);return;}scannerStatus(tr('QR erkannt, aber kein KGG-Plan. Bitte den Plan-QR zeigen.','QR detected, but it is not a KGG plan. Show the plan QR.'),'warn');}else scannerStatus(tr('Suche Plan-QR … bitte ruhig und nah halten.','Searching for plan QR … hold steady and close.'),'');}catch(e){scannerStatus(tr('Bild wird weiter geprüft …','Continuing to scan …'),'');}finally{session.busy=false;}if(session.active&&scannerSession===session)session.timer=setTimeout(()=>scanLiveFrame(session),200);}
-  async function startLiveScanner(session){try{if(!navigator.mediaDevices||typeof navigator.mediaDevices.getUserMedia!=='function')throw new Error('getUserMedia unavailable');testEmit('scanner-start',{});const stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:10,max:15}}});if(scannerSession!==session||!session.active){stream.getTracks().forEach(track=>track.stop());return;}session.stream=stream;session.video.srcObject=stream;await session.video.play();session.detector=await createNativeDetector();await loadJsQR().catch(()=>null);session.startedAt=Date.now();session.frameTimes=[];scannerStatus(tr('Suche Plan-QR … bitte ruhig und nah halten.','Searching for plan QR … hold steady and close.'),'');scanLiveFrame(session);}catch(e){if(scannerSession===session)showScannerFallback(tr('Live-Kamera nicht verfügbar. Bitte ein Foto verwenden.','Live camera unavailable. Please use a photo.'));}}
-  async function scanFile(ev){const input=ev.target;const mode=input.dataset.scanMode==='replace'?'replace':'update';input.dataset.scanMode='';scanMode=mode;const file=input.files&&input.files[0];setTimeout(()=>{try{input.value=''}catch(e){}},100);if(!file){scanMode='update';return;}try{setStatus(tr('QR-Foto wird geprüft …','Checking QR photo …'));const started=Date.now(),hit=await decodePhoto(file);if(hit.raw){lastScanMetrics=Object.assign({},lastScanMetrics,{decoder:hit.decoder,recognitionMs:Date.now()-started,fpsBand:'unknown'});testEmit('scan-metrics',lastScanMetrics);if(!testConsume(hit.raw,lastScanMetrics))handlePlanText(hit.raw);}else{alert(tr('Kein QR erkannt. Bitte näher und scharf fotografieren.','No QR detected. Please take a closer, sharp photo.'));}}catch(e){promptFallback();}}
-  function openCameraScan(mode){scanMode=mode==='replace'?'replace':'update';closeLiveScanner(true);const box=scannerBox();const session={box,video:box.querySelector('#kggLiveScanVideo'),stream:null,detector:null,active:true,busy:false,variant:0,startedAt:Date.now(),timer:0,frameTimes:[]};scannerSession=session;startLiveScanner(session);}
-  function openPhotoScan(mode){scanMode=mode==='replace'?'replace':'update';const input=ensureScanInput();input.dataset.scanMode=scanMode;input.click();}
-  function ensureStyle(){if($('kggPlanScanRescueStyle'))return;const s=document.createElement('style');s.id='kggPlanScanRescueStyle';s.textContent='.kggQrRescue{margin-top:14px;border:1px solid #bfdbfe;border-radius:18px;background:#eff6ff;padding:14px;color:#111827}.kggQrRescue b{display:block;font-size:18px;margin-bottom:6px}.kggQrRescue p{margin:0 0 10px;color:#475569;font-weight:700;line-height:1.35}.kggQrRescue .scanBig{width:100%;min-height:56px;border:0;border-radius:16px;background:#111827;color:#fff;font-weight:950;font-size:18px}.kggQrRescue .pasteLink{margin-top:8px;width:100%;min-height:46px;border:1px solid #cbd5e1;border-radius:14px;background:white;color:#111827;font-weight:900}.kggLiveScan{position:fixed;inset:0;z-index:10050;background:#020617f2;color:#fff;display:flex;align-items:center;justify-content:center;padding:14px}.kggLiveScanPanel{width:min(100%,620px);max-height:100%;overflow:auto;background:#111827;border:1px solid #334155;border-radius:22px;padding:14px;box-shadow:0 24px 70px #0008}.kggLiveScanHead{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:19px}.kggLiveScanClose{width:44px;height:44px;border:1px solid #64748b;border-radius:999px;background:#1e293b;color:#fff;font-size:29px;line-height:1}.kggLiveScanView{position:relative;margin-top:12px;overflow:hidden;border-radius:16px;background:#000;aspect-ratio:4/3}.kggLiveScanView video{width:100%;height:100%;object-fit:cover}.kggLiveScanGuide{position:absolute;left:15%;top:10%;width:70%;height:80%;border:4px solid #fff;border-radius:18px;box-shadow:0 0 0 999px #02061755}.kggLiveScanStatus{margin-top:12px;padding:11px;border-radius:13px;background:#1e293b;font-weight:900}.kggLiveScanStatus.ok{background:#14532d}.kggLiveScanStatus.warn{background:#78350f}.kggLiveScanFallback{display:grid;gap:8px;margin-top:10px}.kggLiveScanFallback[hidden]{display:none}.kggLiveScanFallback button{min-height:48px;border-radius:13px;border:1px solid #64748b;background:#fff;color:#111827;font-weight:900}.kggLiveScanPanel>p{margin:10px 2px 0;color:#cbd5e1;font-size:13px;line-height:1.4}@media(max-width:430px){.kggLiveScan{padding:8px}.kggLiveScanPanel{border-radius:18px;padding:10px}.kggLiveScanView{aspect-ratio:3/4}.kggLiveScanGuide{left:9%;top:19%;width:82%;height:62%}}';document.head.appendChild(s);}
-  function noPlanVisible(){const st=$('status');return !!(st&&/Kein Plan gefunden|No plan found/i.test(st.textContent||''));}
-  function ensureRescue(){ensureStyle();ensureScanInput();if(!noPlanVisible())return;const st=$('status');if(!st||$('kggQrRescue'))return;const box=document.createElement('div');box.id='kggQrRescue';box.className='kggQrRescue';box.innerHTML='<b>'+tr('Plan erneut öffnen','Open plan again')+'</b><p>'+tr('Wenn diese Web-App ohne Plan startet, scanne den Plan-QR-Code hier noch einmal.','If this web app opens without a plan, scan the plan QR code here again.')+'</p><button type="button" class="scanBig">📷 '+tr('Plan-QR scannen','Scan plan QR')+'</button><button type="button" class="pasteLink">'+tr('Plan-Link einfügen','Paste plan link')+'</button>';st.insertAdjacentElement('afterend',box);box.querySelector('.scanBig').onclick=()=>openCameraScan('update');box.querySelector('.pasteLink').onclick=()=>{scanMode='update';promptFallback();};}
-  function ensureReplaceBubble(){const box=$('kggActionBubbles');if(!box)return;let btn=$('kggBubbleReplace');if(!btn){btn=document.createElement('button');btn.id='kggBubbleReplace';btn.type='button';btn.className='kggBubble';const add=$('kggBubbleAdd');box.insertBefore(btn,add||null);}btn.textContent='♻ '+tr('Plan ersetzen','Replace plan');btn.onclick=e=>{e.preventDefault();e.stopPropagation();box.hidden=true;const fab=$('kggActionFab');if(fab)fab.classList.remove('open');openCameraScan('replace');};}
-  function ensureScanButton(){const row=$('installSmall');if(!row)return;row.classList.remove('hide');let btn=$('kggPlanScanBtn');if(!btn){btn=document.createElement('button');btn.id='kggPlanScanBtn';btn.type='button';btn.style.minHeight='38px';btn.style.borderRadius='999px';btn.style.border='1px solid #bfdbfe';btn.style.background='#eff6ff';btn.style.color='#111827';btn.style.fontWeight='950';btn.style.padding='6px 10px';btn.onclick=e=>{e.preventDefault();e.stopPropagation();openCameraScan('update');};row.insertBefore(btn,row.children[1]||null);}btn.textContent=tr('QR-Scan','QR scan');ensureScanInput();ensureRescue();setTimeout(ensureReplaceBubble,80);}
-  function patchRender(){if(window.__kggStartScanPatchV8)return;window.__kggStartScanPatchV8=true;if(typeof render==='function'){const old=render;window.render=function(){const r=old.apply(this,arguments);setTimeout(autoFillStartValues,0);setTimeout(ensureScanButton,0);setTimeout(ensureRescue,20);setTimeout(ensureReplaceBubble,100);return r;};}}
-  function ensureFullFrameStyle(){if($('kggQrFullFrameStyle'))return;const s=document.createElement('style');s.id='kggQrFullFrameStyle';s.textContent='.kggLiveScanView video{object-fit:contain!important;background:#000!important}';document.head.appendChild(s);}
-  function init(){patchRender();ensureFullFrameStyle();ensureScanButton();ensureRescue();ensureReplaceBubble();autoFillStartValues();setTimeout(autoFillStartValues,300);setTimeout(autoFillStartValues,1000);setTimeout(ensureScanButton,300);setTimeout(ensureReplaceBubble,500);setTimeout(ensureReplaceBubble,1200);setTimeout(ensureRescue,500);setTimeout(ensureRescue,1500);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')closeLiveScanner(false)});window.addEventListener('pagehide',()=>closeLiveScanner(false));}
-  window.__kggPatientStartScanTest={planPayloadFromText,parsePlanFromText,validPlan,openCameraScan,openPhotoScan,closeLiveScanner,scannerActive:()=>!!(scannerSession&&scannerSession.active)};
-  window.KGGPatientPlanImport={replaceConfirmed:nextRaw=>validPlan(nextRaw)&&replacePlan(nextRaw,{confirmed:true})};
-  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
+k.style.transform='translate3d(-33.333333%,0,0)';return}shiftVariant(index,setNo,dx<0?1:-1)};
+    pager.onpointerdown=event=>{if(event.target.closest('button'))return;startX=event.clientX;lastX=startX;track.classList.add('is-dragging');try{pager.setPointerCapture?.(event.pointerId)}catch(err){}};
+    pager.onpointermove=event=>{if(startX===null)return;lastX=event.clientX;const raw=lastX-startX,atStart=at===0&&raw>0,atEnd=at===values.length-1&&raw<0,dx=atStart||atEnd?raw*.28:raw;track.style.transform='translate3d(calc(-33.333333% + '+dx+'px),0,0)'};
+    pager.onpointerup=event=>finish(event);pager.onpointercancel=event=>finish(event,true);pager.onlostpointercapture=()=>{if(startX!==null){startX=null;track.classList.remove('is-dragging');track.style.transform='translate3d(-33.333333%,0,0)'}};
+  }
+  function renderMainProgressionControls(index=activeSet.index,setNo=activeSet.setNo){
+    const values=valuesForExercise(index);if(!values.length)return;
+    const box=mainMediaBox(index),card=box&&box.closest('.ex'),mediaList=box&&box.closest('.kggMediaList');if(!box||!card||!mediaList)return;
+    mediaList.classList.add('kgg015MainProgressionHost');mediaList.querySelectorAll('.kgg015MainPager').forEach(node=>node.remove());
+    const id=selectedId(index,setNo),at=Math.max(0,values.findIndex(item=>String(item.id)===String(id)));
+    const previous=at>0?values[at-1]:null,current=values[at]||values[0],next=at<values.length-1?values[at+1]:null,pager=document.createElement('div');
+    pager.className='kgg015MainPager';
+    const prevTarget=previous?'kgg015-main-'+index+'-'+setNo+'-'+previous.id:'',currentTarget='kgg015-main-'+index+'-'+setNo+'-'+current.id,nextTarget=next?'kgg015-main-'+index+'-'+setNo+'-'+next.id:'';
+    pager.innerHTML='<div class="kgg015MainPagerTrack">'+pagerSlide(previous,prevTarget,index,setNo,at-1,false)+pagerSlide(current,currentTarget,index,setNo,at,true)+pagerSlide(next,nextTarget,index,setNo,at+1,false)+'</div><div class="kgg015MainProgressionControls"><button type="button" class="kgg015MainProgressionControl" data-kgg015-main-prev aria-label="Leichtere Progressionsstufe" '+(at===0?'disabled':'')+'><i class="kgg015MainProgressionTriangle prev" aria-hidden="true"></i></button><span class="kgg015MainProgressionStage" aria-live="polite">Stufe '+(at+1)+' · '+esc(current.name)+'</span><button type="button" class="kgg015MainProgressionControl" data-kgg015-main-next aria-label="Schwerere Progressionsstufe" '+(at===values.length-1?'disabled':'')+'><i class="kgg015MainProgressionTriangle next" aria-hidden="true"></i></button></div>';
+    mediaList.appendChild(pager);pager.querySelector('[data-kgg015-main-prev]').onclick=()=>shiftVariant(index,setNo,-1);pager.querySelector('[data-kgg015-main-next]').onclick=()=>shiftVariant(index,setNo,1);bindMainPager(pager,index,setNo,values,at);mainPagerThumbs(card,index,setNo,values,at);
+  }
+  function refreshMainProgression(index=activeSet.index){
+    try{if(window.KGGPatientMediaRetryCache&&typeof window.KGGPatientMediaRetryCache.render==='function')window.KGGPatientMediaRetryCache.render()}catch(err){}
+    [0,80,320].forEach(delay=>setTimeout(()=>renderMainProgressionControls(index,activeSet.setNo),delay));
+  }
+  function shiftVariant(index,setNo,delta){const values=valuesForExercise(index);if(!values.length)return;const at=Math.max(0,values.findIndex(item=>String(item.id)===String(selectedId(index,setNo)))),next=values[at+delta];if(!next)return;selectVariant(index,setNo,next.id)}
+  function selectVariant(index,setNo,id){const values=valuesForExercise(index),item=variantById(values,id);if(!item)return;activeSet={index:Number(index),setNo:Number(setNo)};preferActiveMedia=true;sessionSelection[currentRecordKey(index,setNo)]=String(id);applyDominantMedia(true);renderGalleries(index);refreshMainProgression(index)}
+  function mediaMarkup(item,targetId,index,setNo){
+    if(!item)return '<span>Kein Bild hinterlegt</span><small>Die Stufe ist trotzdem auswählbar.</small>';
+    const node='<div class="kggProgressionMediaBox loading" data-kgg-progression-media="'+esc(targetId)+'"><span>Bild wird geladen ...</span><small>Verschlüsselte Datei wird lokal verwendet.</small></div>';
+    setTimeout(()=>{try{if(window.KGGPatientMediaRetryCache&&typeof window.KGGPatientMediaRetryCache.loadMedia==='function')window.KGGPatientMediaRetryCache.loadMedia(item,index,setNo,targetId)}catch(err){}},0);
+    return node;
+  }
+  function galleryHtml(index,setNo,cardSet){
+    const state=groupState(index),values=state.values;if(!values.length)return;
+    const id=selectedId(index,setNo),at=Math.max(0,values.findIndex(item=>item.id===id)),item=values[at],target='kgg015-media-'+index+'-'+setNo+'-'+id;
+    const dots=values.map((value,i)=>'<button type="button" data-kgg015-stage="'+esc(value.id)+'" aria-current="'+(i===at?'true':'false')+'" aria-label="Stufe '+(i+1)+': '+esc(value.name)+'">'+(i+1)+'</button>').join('');
+    const box=document.createElement('div');box.className='kgg015Gallery';box.dataset.kgg015Gallery=index+'|'+setNo;box.innerHTML='<button type="button" data-kgg015-prev aria-label="Leichtere Progressionsstufe" '+(at===0?'disabled':'')+'>‹</button><div class="kgg015GalleryViewport"><div class="kgg015GalleryStage">Stufe '+(at+1)+' von '+values.length+' · '+esc(item.name)+'</div>'+mediaMarkup(item.media&&item.media[0],target,index,setNo)+'<div class="kgg015GalleryDots">'+dots+'</div></div><button type="button" data-kgg015-next aria-label="Schwerere Progressionsstufe" '+(at===values.length-1?'disabled':'')+'>›</button>';
+    box.querySelector('[data-kgg015-prev]').onclick=()=>{if(at>0)selectVariant(index,setNo,values[at-1].id)};
+    box.querySelector('[data-kgg015-next]').onclick=()=>{if(at<values.length-1)selectVariant(index,setNo,values[at+1].id)};
+    box.querySelectorAll('[data-kgg015-stage]').forEach(button=>button.onclick=()=>selectVariant(index,setNo,button.dataset.kgg015Stage));
+    let startX=null;const viewport=box.querySelector('.kgg015GalleryViewport');if(viewport){viewport.onpointerdown=event=>{startX=event.clientX};viewport.onpointerup=event=>{if(startX==null)return;const dx=event.clientX-startX;startX=null;if(Math.abs(dx)<35)return;event.preventDefault();if(dx>0&&at>0)selectVariant(index,setNo,values[at-1].id);if(dx<0&&at<values.length-1)selectVariant(index,setNo,values[at+1].id)}}
+    cardSet.appendChild(box);
+  }
+  function renderGalleries(onlyIndex){
+    if(typeof p==='undefined'||!p||!Array.isArray(p.ex)||!document||typeof document.querySelectorAll!=='function')return;
+    css();ensureDay();const cards=[...document.querySelectorAll('#list .ex')];cards.forEach((card,index)=>{if(onlyIndex!==undefined&&Number(onlyIndex)!==index)return;card.querySelectorAll('.kgg015Gallery').forEach(node=>node.remove());if(!valuesForExercise(index).length)return;});applyDisplayNames();if(onlyIndex===undefined||Number(onlyIndex)===Number(activeSet.index))renderMainProgressionControls(activeSet.index,activeSet.setNo);
+  }
+  function notesFor(day){
+    if(String(history.current.planId||'')!==planId()||Number(history.current.day)!==Number(day))return '';
+    const rows=[];Object.keys(history.current.records||{}).forEach(key=>{const rec=history.current.records[key];if(!rec||!rec.previousId||String(rec.previousId)===String(rec.id))return;const index=Number(rec.exerciseIndex),values=valuesForExercise(index),from=variantById(values,rec.previousId),to=variantById(values,rec.id);if(from&&to)rows.push((originalNames[index]||'Übung')+': '+from.name+' → '+to.name)});
+    return rows.length?'\n\nVariantenwechsel:\n'+[...new Set(rows)].join('\n'):'';
+  }
+  function qrProgressionSelection(index){
+    const state=groupState(index),values=state.values;
+    if(!values.length)return null;
+    const selected=[];
+    const setCount=Math.max(1,Number(p&&p.ex&&p.ex[index]&&p.ex[index].sets)||1);
+    for(let setNo=1;setNo<=setCount;setNo++){
+      const id=selectedId(index,setNo),item=variantById(values,id);
+      selected.push({s:setNo,i:id,n:item&&item.name||''});
+    }
+    return {k:'kgg015',g:state.gid,s:selected};
+  }
+  function wrapText(){
+    if(originalText||typeof text!=='function')return;
+    originalText=text;window.text=function(day){
+      syncRawVariants();const savedNames=p&&p.ex?p.ex.map(ex=>ex.n):[];
+      try{if(p&&p.ex)p.ex.forEach((ex,index)=>{const variant=displayedVariant(index);if(variant)ex.n=variant.name});return String(originalText.apply(this,arguments)||'')+notesFor(day)}finally{if(p&&p.ex)p.ex.forEach((ex,index)=>{ex.n=savedNames[index]})}
+    };
+  }
+  function wrapPut(){
+    if(originalPut||typeof put!=='function')return;
+    originalPut=put;window.put=function(e,s,x,y,z){const result=originalPut.apply(this,arguments);if(String(z??'').trim()!=='')recordSuccessfulEdit(Number(e),Number(s));return result};
+  }
+  function finalizeDominance(day){
+    const finalizedKey=planId()+'|'+String(day);if(Number(history.finalized[finalizedKey]||0)===1)return;
+    ensureDay();if(String(history.current.planId||'')!==planId()||Number(history.current.day)!==Number(day))return;
+    p.ex.forEach((ex,index)=>{const state=groupState(index),winner=dominantFor(index,true);if(winner)state.group.dominantId=winner.id});
+    history.finalized[finalizedKey]=1;saveHistory();applyDominantMedia();
+  }
+  function wrapShowQr(){
+    if(originalShowQr||typeof showQr!=='function')return;
+    originalShowQr=showQr;window.showQr=function(finalize){const day=currentDay();if(finalize)preferActiveMedia=false;if(finalize)finalizeDominance(day);const originalRows=window.rows;if(typeof originalRows==='function'){window.rows=function(qrDay){return originalRows(qrDay).map((row,index)=>{const selection=qrProgressionSelection(index);if(selection)row.push(selection);return row})}}let result;try{result=originalShowQr.apply(this,arguments)}finally{if(originalRows)window.rows=originalRows}setTimeout(()=>{applyDominantMedia(false);applyDisplayNames();renderGalleries()},0);return result};
+  }
+  function wrapOpenPad(){
+    if(originalOpenPad||typeof openPad!=='function')return;
+    originalOpenPad=openPad;window.openPad=function(input,meta){if(meta&&meta.ei!==undefined&&meta.s!==undefined){activeSet={index:Number(meta.ei),setNo:Number(meta.s)};preferActiveMedia=true;applyDominantMedia(true);refreshMainProgression(activeSet.index)}return originalOpenPad.apply(this,arguments)};
+  }
+  function wrapRender(){
+    if(originalRender||typeof render!=='function')return;
+    originalRender=render;window.render=function(){syncRawVariants();applyDominantMedia(preferActiveMedia);const result=originalRender.apply(this,arguments);[0,70,260].forEach(delay=>setTimeout(()=>{renderGalleries()},delay));return result};
+  }
+  function init(){
+    syncRawVariants();applyDominantMedia(preferActiveMedia);wrapRender();wrapPut();wrapText();wrapShowQr();wrapOpenPad();css();renderGalleries();refreshMainProgression();
+    [250,800,1600].forEach(delay=>setTimeout(()=>{syncRawVariants();applyDominantMedia(preferActiveMedia);wrapRender();wrapPut();wrapText();wrapShowQr();wrapOpenPad();renderGalleries();refreshMainProgression()},delay));
+  }
+  function testDominant(values,records){const counts={};Object.values(records||{}).forEach(record=>{const id=String(record&&record.id||record);if(values.some(item=>String(item.id)===id))counts[id]=(counts[id]||0)+1});let winner=null;values.forEach(item=>{const count=counts[item.id]||0;if(!winner||count>winner.count||(count===winner.count&&item.order>winner.item.order))winner={item,count}});return winner&&winner.item||null}
+  function testNote(previous,current,name){return previous&&String(previous)!==String(current)?String(name||'Übung')+': '+previous+' → '+current:''}
+  if(window.__KGG_TEST__)window.__kggTicket015PatientTest={version:VERSION,normalizeVariant:variantFrom,dominant:testDominant,note:testNote,qrProgressionSelection};
+  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init,{once:true}):init();
 })();
 ```

@@ -5,12 +5,13 @@
   const safe=f=>{try{return f()}catch(e){return null}};
   const txt=x=>String(x??'').trim();
   const hasValue=x=>txt(x)!=='';
+  const activeUnit=x=>{const s=txt(x);return !!s&&!/^(keine|none|-)$/i.test(s)};
   const isEmptyValue=x=>x===undefined||x===null||txt(x)==='';
   const hash=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)};
   function ready(){return typeof p!=='undefined'&&p&&Array.isArray(p.ex)&&typeof v!=='undefined'&&v&&Array.isArray(done)&&typeof k==='function'&&typeof save==='function'}
   function signature(){return hash(JSON.stringify({id:p.id||'plan',title:p.title||'',days:p.days||0,e:p.ex.map(e=>[e.n,e.sets,e.side,e.u,e.m,e.sl||'',e.sm||''])}))}
   function markKey(){return MARK_PREFIX+(p.id||'plan')+':'+signature()}
-  function startValuePairs(e){const out=[];if(hasValue(e.sl)&&hasValue(e.u))out.push(['a',txt(e.sl)]);if(hasValue(e.sm)&&hasValue(e.m))out.push(['b',txt(e.sm)]);return out}
+  function startValuePairs(e){const out=[];if(hasValue(e.sl)&&activeUnit(e.u))out.push(['a',txt(e.sl)]);if(hasValue(e.sm)&&activeUnit(e.m))out.push(['b',txt(e.sm)]);return out}
   function hasAnyStartValues(){return p.ex.some(e=>startValuePairs(e).length>0)}
   function hasPatientProgress(){if(done&&done.length)return true;return Object.keys(v||{}).some(key=>/^[0-9]+\|/.test(key)&&hasValue(v[key]))}
   function sidesFor(e){return e.side==='LR'?['L','R']:['B']}

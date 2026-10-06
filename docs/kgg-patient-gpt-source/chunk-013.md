@@ -1,68 +1,43 @@
 # KGG Patient Source Chunk 013
 
-- Source file: `patient-install-prompt.js`
-- Characters: 1-2268
-- Full source SHA-256: `5a6bd0801174d28f48a2a602f7bb180353ee354685e08a158e71066481de2ddf`
+- Source file: `patient-install-guide.js`
+- Characters: 1-6072
+- Full source SHA-256: `eea85bc2c5c8c35367810c698d3797263fdbb78d25fa92695f25f18b5f6d2b2f`
 
 ```
 (()=>{
-  const VERSION='install-prompt-v1-shared-reference';
-  const KEY='__kggInstallPrompt';
-  if(window.__kggInstallPromptPatch===VERSION)return;
-  window.__kggInstallPromptPatch=VERSION;
-
-  function getPrompt(){return window[KEY]||null}
-  function setPrompt(prompt){window[KEY]=prompt||null;return window[KEY]}
-  function clearPrompt(prompt){if(!prompt||getPrompt()===prompt)setPrompt(null)}
-  function capturePrompt(event){
-    if(!event)return null;
-    try{event.preventDefault()}catch(e){}
-    setPrompt(event);
-    const button=document.getElementById('installSmall');
-    if(button&&typeof standalone==='function'&&!standalone())button.classList.remove('hide');
-    return event
-  }
-  async function consumePrompt(prompt){
-    const active=prompt||getPrompt();
-    if(!active||typeof active.prompt!=='function')return {handled:false,choice:null};
-    clearPrompt(active);
-    try{
-      await active.prompt();
-      const choice=active.userChoice&&typeof active.userChoice.then==='function'?await active.userChoice:null;
-      return {handled:true,choice};
-    }catch(error){
-      return {handled:true,choice:null,error};
-    }finally{
-      clearPrompt(active)
-    }
-  }
-  function hideInstallBox(){
-    const box=document.getElementById('installBox');
-    if(box)box.classList.add('hide')
-  }
-  function patchInstallApp(){
-    if(window.__kggSharedInstallAppPatched||typeof window.installApp!=='function')return;
-    const fallback=window.installApp;
-    window.installApp=async function(){
-      const prompt=getPrompt();
-      if(prompt){
-        const result=await consumePrompt(prompt);
-        hideInstallBox();
-        return result
-      }
-      return fallback.apply(this,arguments)
-    };
-    window.__kggSharedInstallAppPatched=1
-  }
-  function bind(){
-    if(!window.__kggInstallPromptListenerBound){
-      window.__kggInstallPromptListenerBound=1;
-      window.addEventListener('beforeinstallprompt',capturePrompt)
-    }
-    patchInstallApp()
-  }
-  function init(){bind();setTimeout(bind,250);setTimeout(bind,900)}
-  if(window.__KGG_TEST__)window.__kggInstallPromptTest={getPrompt,setPrompt,clearPrompt,capturePrompt,consumePrompt};
-  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init,{once:true}):init()
+  const VERSION='install-guide-v82-prompt-only';
+  if(window.__kggInstallGuide===VERSION)return;
+  window.__kggInstallGuide=VERSION;
+  const KEY='kggCurrentPlanV1';
+  const $=id=>document.getElementById(id);
+  const ua=navigator.userAgent||'';
+  const isIOS=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  const isSamsung=/SamsungBrowser/i.test(ua);
+  const isEdge=/EdgA|EdgiOS|Edg\//i.test(ua);
+  const isFirefox=/Firefox|FxiOS/i.test(ua);
+  const isChrome=/Chrome|CriOS/i.test(ua)&&!isEdge&&!isSamsung;
+  const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+  function decodePlan(s){if(window.KGGPlanFormat&&typeof window.KGGPlanFormat.decodePlanText==='function')return window.KGGPlanFormat.decodePlanText(s).raw;s=String(s||'').replace(/^KGGH2:/,'').replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return JSON.parse(decodeURIComponent(escape(atob(s))))}
+  function b64enc(s){return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+  function qPlan(){const q=new URLSearchParams(location.search);return q.get('plan')||q.get('kgg')||''}
+  function storedWrap(){try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){return null}}
+  function storedPlan(){const x=storedWrap();return x&&x.plan?x.plan:null}
+  function savePlan(raw){localStorage.setItem(KEY,JSON.stringify({plan:raw,importedAt:new Date().toISOString(),source:'query-plan'}))}
+  function dir(){return location.pathname.replace(/[^\/]*$/,'')}
+  function planLink(raw){const payload=window.KGGPlanFormat&&typeof window.KGGPlanFormat.encodeKggH3==='function'?window.KGGPlanFormat.encodeKggH3(raw):'KGGH2:'+b64enc(JSON.stringify(raw));return location.origin+dir()+'ios-start.html?plan='+encodeURIComponent(payload)}
+  function currentPlanLink(){const raw=storedPlan();return raw?planLink(raw):''}
+  function importQueryPlan(){const qp=qPlan();if(!qp)return false;try{const raw=decodePlan(qp),payload=window.KGGPlanFormat&&typeof window.KGGPlanFormat.encodeKggH3==='function'?window.KGGPlanFormat.encodeKggH3(raw):'KGGH2:'+b64enc(JSON.stringify(raw));savePlan(raw);if(!/^#KGGH[23]:/i.test(location.hash)){location.replace(location.origin+dir()+'#'+payload);return true}return true}catch(e){return false}}
+  if(importQueryPlan())return;
+  function iosText(){const link=currentPlanLink();return '<b>iPhone/iPad:</b><br>1. Unten den <b>iPhone-Planlink</b> oeffnen.<br>2. Auf dieser neuen Seite in Safari <b>Teilen</b> antippen.<br>3. <b>Zum Home-Bildschirm</b> waehlen.<br>4. <b>Hinzufuegen</b> tippen.<br><br><b>Wichtig:</b> Nicht als Favorit speichern.'+(link?'<br><br><a class="btn" href="'+link+'">iPhone-Planlink oeffnen</a>':'')}
+  function text(){if(standalone())return '<b>App ist installiert.</b><br>Wenn kein Plan erscheint, den QR-Code oder iPhone-Planlink noch einmal in Safari oeffnen.';if(isIOS)return iosText();if(isSamsung)return '<b>Samsung Internet:</b><br>Menue <b>☰</b> oder <b>⋮</b> → <b>Seite hinzufuegen zu</b> → <b>Startbildschirm</b>.';if(isChrome||isEdge)return '<b>Chrome/Edge:</b><br>Wenn angeboten <b>Installieren</b> tippen. Sonst Menue <b>⋮</b> → <b>Zum Startbildschirm hinzufuegen</b>.';if(isFirefox)return '<b>Firefox:</b><br>Menue oeffnen → <b>Installieren</b> oder <b>Zum Startbildschirm hinzufuegen</b>. Falls das fehlt, Safari/Chrome verwenden.';return '<b>Installation:</b><br>Browser-Menue oeffnen und <b>Zum Startbildschirm hinzufuegen</b> waehlen.'}
+  function recover(){if(!standalone())return;const st=$('status');if(st&&/Kein Plan gefunden/i.test(st.textContent||'')){st.innerHTML='Kein Plan gefunden. Bitte den iPhone-Planlink oder QR-Code erneut in Safari oeffnen.';st.className='status warn'}}
+  function show(){const box=$('installBox'),hint=$('installHint');if(box)box.classList.remove('hide');if(hint){hint.classList.remove('hide');hint.innerHTML=text()}}
+  function updateBanner(){if($('kggUpdateGate'))return;const d=document.createElement('div');d.id='kggUpdateGate';d.style.cssText='position:fixed;left:12px;right:12px;bottom:12px;z-index:10020;max-width:720px;margin:auto;background:#fff;border:1px solid #93c5fd;border-radius:18px;padding:14px;box-shadow:0 18px 46px #0f172a33;font-weight:850';d.innerHTML='<b>Neue Version verfuegbar.</b><br><span style="color:#64748b">Bitte aktualisieren, damit der Plan richtig funktioniert.</span><button id="kggUpdateNow" style="width:100%;min-height:48px;margin-top:10px;border-radius:14px;border:0;background:#111827;color:#fff;font-size:16px;font-weight:950">Jetzt aktualisieren</button>';document.body.appendChild(d);$('kggUpdateNow').onclick=()=>location.reload()}
+  function listenUpdates(){if(!('serviceWorker'in navigator)||window.__kggUpdateGateListen)return;window.__kggUpdateGateListen=1;navigator.serviceWorker.addEventListener('message',e=>{if(e&&e.data&&e.data.type==='APP_UPDATE_READY')updateBanner()})}
+  function autoDay(){if(window.__kggAutoDayRan)return;window.__kggAutoDayRan=1;try{if(typeof p==='undefined'||!p||typeof d==='undefined'||!Array.isArray(done))return;let target=done.length?Math.max(...done)+1:d;if(target<1)target=1;if(target>p.days&&p.extendDays){p.days+=Number(p.stepDays)||6;const w=storedWrap();if(w&&w.plan){w.plan.d=p.days;localStorage.setItem(KEY,JSON.stringify(w))}}if(target<=p.days&&target!==d){d=target;if(typeof save==='function')save();if(typeof render==='function')render();if(typeof setStatus==='function')setStatus('Aktuelles Training: Tag '+d+'.','ok')}}catch(e){}}
+  function patch(){recover();listenUpdates();const box=$('installBox'),text=$('installOfferText'),button=$('installOfferBtn'),hint=$('installHint');if(!window.__kggInstallPrompt){if(box)box.classList.add('hide');if(text)text.classList.add('hide');if(button)button.classList.add('hide');if(hint){hint.classList.add('hide');hint.innerHTML=''}}}
+  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',patch):patch();
+  setTimeout(patch,500);setTimeout(patch,1500);setTimeout(autoDay,900);setTimeout(autoDay,2200);
 })();
 ```
