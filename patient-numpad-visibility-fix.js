@@ -1,9 +1,9 @@
 (()=>{
-  const VERSION='numpad-visibility-v14-dirty-commit-gate';
+  const VERSION='numpad-visibility-v15-no-native-focus-switch';
   if(window.__kggNumpadVisibility===VERSION)return;
   window.__kggNumpadVisibility=VERSION;
   const $=id=>document.getElementById(id);
-  let activeInput=null,activeMeta=null,editingInput=null,editingMeta=null,editingDirty=false,zoomEl=null,padValObserver=null,padSession=0;
+  let activeInput=null,activeMeta=null,editingInput=null,editingMeta=null,editingDirty=false,zoomEl=null,padValObserver=null,padSession=0,ensureGeneration=0;
   function pad(){return $('pad')}
   function box(){const p=pad();return p?p.querySelector('.padBox'):null}
   function open(){const p=pad();return !!(p&&!p.classList.contains('hide'))}
@@ -21,7 +21,9 @@
   function scrollAnchor(input){return input&&input.closest?(input.closest('.lr,.bi')||input):input}
   function sameScrollAnchor(a,b){return !!(a&&b&&scrollAnchor(a)===scrollAnchor(b))}
   function move(){if(!activeInput||!open())return;space();const ph=h();const target=scrollAnchor(activeInput);const r=target.getBoundingClientRect();const vv=window.visualViewport;const bottom=(vv?vv.height+vv.offsetTop:window.innerHeight)-ph-28;let dy=0;if(r.bottom>bottom)dy=r.bottom-bottom;if(r.top<18)dy=r.top-18;if(Math.abs(dy)>=3)window.scrollBy({top:dy,left:0,behavior:'smooth'});if(largeUi())setTimeout(()=>placeZoom(activeInput,false),70)}
-  function ensure(){[20,90,180,360,650].forEach(t=>setTimeout(move,t))}
+  function cancelEnsure(){ensureGeneration+=1}
+  function stopSmoothScroll(){const x=window.scrollX,y=window.scrollY;try{window.scrollTo({left:x,top:y,behavior:'auto'})}catch(e){try{window.scrollTo(x,y)}catch(_){}}}
+  function ensure(){const generation=++ensureGeneration;[20,90,180,360,650].forEach(t=>setTimeout(()=>{if(generation!==ensureGeneration)return;move()},t))}
   function clearSoon(closedSession){setTimeout(()=>{if(closedSession!==padSession||open())return;const main=document.querySelector('main');if(main)main.style.paddingBottom='';document.body.classList.remove('kggPadOpen');const p=pad();if(p){p.classList.remove('kggPadPass');p.classList.remove('kggPadLargeUi')}removeZoom();activeInput=null;activeMeta=null;editingInput=null;editingMeta=null;editingDirty=false},120)}
   function commitEditingInPlace(){if(!open()||!editingInput||!editingMeta||typeof window.put!=='function')return false;if(!editingDirty)return true;const value=padValue()||'0';try{editingInput.value=value;window.put(editingMeta.ei,editingMeta.s,editingMeta.side,editingMeta.key,value);editingDirty=false;return true}catch(e){return false}}
   function closeByOutsideTap(){if(!open()||typeof window.closePad!=='function')return;try{window.closePad(true)}catch(e){try{window.closePad(false)}catch(_){}}}
@@ -34,13 +36,14 @@
     try{input.focus({preventScroll:true})}catch(e){try{input.focus()}catch(_){}}
     if(window.scrollX!==x||window.scrollY!==y)window.scrollTo(x,y);
   }
-  function patch(){if(window.__kggNumpadVisibilityPatchedV14)return;window.__kggNumpadVisibilityPatchedV14=1;if(typeof window.openPad==='function'){const oldOpen=window.openPad;window.openPad=function(input,meta){const previousInput=editingInput;const switching=!!(open()&&editingInput&&input&&input!==editingInput);const sameRow=switching&&sameScrollAnchor(previousInput,input);if(switching&&!commitEditingInPlace()&&typeof window.closePad==='function'){try{window.closePad(true)}catch(e){}}editingInput=input||document.activeElement;editingMeta=meta||editingMeta;activeInput=editingInput;activeMeta=editingMeta;padSession+=1;const r=oldOpen.apply(this,arguments);editingDirty=false;space();if(largeUi())placeZoom(activeInput,!switching);if(!sameRow)ensure();return r}}if(typeof window.closePad==='function'){const oldClose=window.closePad;window.closePad=function(){const closedSession=padSession;const r=oldClose.apply(this,arguments);clearSoon(closedSession);return r}}if(typeof window.padPress==='function'){const oldPress=window.padPress;window.padPress=function(){const r=oldPress.apply(this,arguments);editingDirty=true;return r}}if(typeof window.padBack==='function'){const oldBack=window.padBack;window.padBack=function(){const r=oldBack.apply(this,arguments);editingDirty=true;return r}}if(typeof window.padUseLast==='function'){const oldLast=window.padUseLast;window.padUseLast=function(){const r=oldLast.apply(this,arguments);editingDirty=true;closeAfterLast();return r}}}
+  function patch(){if(window.__kggNumpadVisibilityPatchedV15)return;window.__kggNumpadVisibilityPatchedV15=1;if(typeof window.openPad==='function'){const oldOpen=window.openPad;window.openPad=function(input,meta){const previousInput=editingInput;const switching=!!(open()&&editingInput&&input&&input!==editingInput);const sameRow=switching&&sameScrollAnchor(previousInput,input);if(switching){cancelEnsure();stopSmoothScroll()}if(switching&&!commitEditingInPlace()&&typeof window.closePad==='function'){try{window.closePad(true)}catch(e){}}editingInput=input||document.activeElement;editingMeta=meta||editingMeta;activeInput=editingInput;activeMeta=editingMeta;padSession+=1;const r=oldOpen.apply(this,arguments);editingDirty=false;space();if(largeUi())placeZoom(activeInput,!switching);if(!sameRow)ensure();return r}}if(typeof window.closePad==='function'){const oldClose=window.closePad;window.closePad=function(){const closedSession=padSession;const r=oldClose.apply(this,arguments);clearSoon(closedSession);return r}}if(typeof window.padPress==='function'){const oldPress=window.padPress;window.padPress=function(){const r=oldPress.apply(this,arguments);editingDirty=true;return r}}if(typeof window.padBack==='function'){const oldBack=window.padBack;window.padBack=function(){const r=oldBack.apply(this,arguments);editingDirty=true;return r}}if(typeof window.padUseLast==='function'){const oldLast=window.padUseLast;window.padUseLast=function(){const r=oldLast.apply(this,arguments);editingDirty=true;closeAfterLast();return r}}}
   document.addEventListener('focusin',e=>{if(!isInputTarget(e.target))return;if(!open())activeInput=e.target;else if(e.target===editingInput)ensure()},true);
   document.addEventListener('click',e=>{if(!isInputTarget(e.target))return;if(!open())activeInput=e.target;else if(e.target===editingInput)ensure()},true);
   document.addEventListener('pointerdown',e=>{
     const t=e.target;
     if(isInputTarget(t)){
       if(typeof e.preventDefault==='function')e.preventDefault();
+      if(open()){cancelEnsure();stopSmoothScroll();return}
       focusWithoutScroll(t);
       return;
     }

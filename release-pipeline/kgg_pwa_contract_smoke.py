@@ -70,7 +70,7 @@ def validate_static_compatibility(manifest:dict,version:str)->None:
   "./patient-ui-micro-polish.js?v=unit-labels-pain-fit-1",
   "./patient-pain-vertical-scale.js?v=exercise-pain-vertical-8-compact-text",
   "./numpad-ui-fix.js?v=scroll-stable-4-single-owner",
-  "./patient-numpad-visibility-fix.js?v=stay-open-switch-6-dirty-commit-gate",
+  "./patient-numpad-visibility-fix.js?v=stay-open-switch-7-no-native-focus-switch",
   "./patient-extra-info-display.js?v=extra-info-filter-1",
   "./patient-last-value-hints.js?v=last-value-button-shimmer-2-transfer-api",
   "./patient-set-summary-groups.js?v=set-summary-groups-4-ticket-015-progressions",

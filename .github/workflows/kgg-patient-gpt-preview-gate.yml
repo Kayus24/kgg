@@ -182,6 +182,7 @@ jobs:
           node release-pipeline/kgg_patient_media_sources_playwright.js
           node release-pipeline/kgg_patient_media_stability_playwright.js
           node release-pipeline/kgg_patient_card_state_stability_playwright.js
+          node release-pipeline/kgg_patient_transient_flicker_blackbox.js
           node release-pipeline/kgg_patient_gpt_browser_smoke.js
           node release-pipeline/kgg_patient_preview_first_load_smoke.js "$GITHUB_WORKSPACE/preview/previews/${{ inputs.request_id }}"
           node release-pipeline/kgg_patient_preview_storage_isolation_smoke.js \
