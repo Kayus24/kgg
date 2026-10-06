@@ -1,5 +1,12 @@
 # Patient App Changelog
 
+## v89 - 2026-10-06
+
+- Behebt das verbleibende Karten-/Bildflackern beim Bedienen geöffneter Übungen: `collapse-cards.js` darf im aktuellen `kggAlwaysCollapsed`-Modus den `kggOpen`-Zustand nicht mehr schreiben.
+- `patient-card-settings.js` ist in diesem Modus der einzige Owner des offenen Kartenstatus. Dadurch entfällt der kurze Zwischenzustand „offen → geschlossen → offen“, der im Nutzer-Video als vollständiger Karten-/Bildsprung sichtbar war.
+- Neuer deterministischer Playwright-Test `kgg_patient_card_state_stability_playwright.js` reproduziert den alten Konflikt und schützt gegen transienten Verlust von `kggOpen`.
+- Der neue Test ist im Required Gate und im Patient Preview Gate verankert.
+
 ## v88 - 2026-10-06
 
 - Bereits geladene Übungsbilder und Karten-Thumbnails werden bei erneutem Media-Sync nicht mehr als neue DOM-Bilder aufgebaut.
