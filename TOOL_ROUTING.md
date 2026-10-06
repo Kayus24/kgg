@@ -15,9 +15,10 @@ Inherit: `Kayus24/vibe-shared-knowledge/tool-routing/BASELINE.md`.
 - Persistent KGG UI bug: **Superpowers workflow -> KGG UI Lab evidence -> local tests -> Context7 -> Stack Overflow edge case**
 - Real Android/WebView/permission/camera/keyboard behavior: **Test Android Apps/ADB**, after excluding ordinary web/UI causes
 - Local build/test/scripts: **Remote Desktop Commander**
-- Framework/API docs: **Context7**
-- External public-site research: **Firecrawl**
-- Long external browser flow: **TinyFish only when simpler tools are insufficient**
+- Framework/API docs: **Context7 -> official upstream/GitHub -> Firecrawl Developer Search -> Stack Overflow edge case**
+- External public web research/source retrieval: **Firecrawl Search/Scrape** as the default external-web layer
+- Independent simple public browser check: **Firecrawl Interact**
+- Long/authenticated external browser flow: **TinyFish only when Firecrawl/structured tools are insufficient**
 - Editable UI/design artifact: **Figma**
 - Scientific evidence questions supporting content/clinical background: **Consensus**; do not let research tools modify product truth
 - Generated non-patient visual asset: **OpenArt**, synthetic only
