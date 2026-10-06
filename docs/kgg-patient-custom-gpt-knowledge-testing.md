@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Testing
 
-Generated retrieval pack. Source digest: `0ca00bada4ea99ed`.
+Generated retrieval pack. Source digest: `a3a240d1a1884581`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
