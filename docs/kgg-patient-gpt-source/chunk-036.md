@@ -2,12 +2,12 @@
 
 - Source file: `patient-version-label.js`
 - Characters: 1-6579
-- Full source SHA-256: `13c9368c0fb4ec12e290d1a942ec2681af7dabec9cdaaac6fc7fa8814c6d0fb9`
+- Full source SHA-256: `4db91deaae96853b02977aca7b140177209f25af29d9ccdaacf9c3931057fada`
 
 ```
 (()=>{
   const ID='kggAppVersion';
-  const RELEASE='87';
+  const RELEASE='88';
   const BANNER_ID='kggUpdateGate';
   const RELOAD_KEY='kgg-sw-reload-v'+RELEASE;
   const UPDATE_TIMEOUT_MS=8000;

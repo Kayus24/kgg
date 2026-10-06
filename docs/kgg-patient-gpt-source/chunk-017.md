@@ -1,12 +1,12 @@
 # KGG Patient Source Chunk 017
 
 - Source file: `patient-media-retry-cache_v2.js`
-- Characters: 1-18896
-- Full source SHA-256: `985ac56786c823e6267d069e60b026543c145fd3a06ee802ba96577850985c99`
+- Characters: 1-19897
+- Full source SHA-256: `4aff32292c578cb22a9875f043dcfb01cd2b5db9f8cee435c9d1edb8a98f27f9`
 
 ```
 (()=>{
-  const VERSION='v12_larger_frameless_thumb';
+  const VERSION='v13_stable_media_nodes';
   const STYLE='kggPatientMediaStyle';
   const DB='kgg_patient_media_v1';
   const STORE='images';
@@ -74,7 +74,15 @@
   function mediaId(item,exerciseIndex,mediaIndex){if(typeof item==='string')return item;return String(item&&item.id||item&&item.url||item&&item.src||'media_'+exerciseIndex+'_'+mediaIndex);}
   function mediaBox(id){const target=String(id);return [...document.querySelectorAll('[data-kgg-media-id], [data-kgg-progression-media]')].find(node=>node.getAttribute('data-kgg-media-id')===target||node.getAttribute('data-kgg-progression-media')===target)||null;}
   function ensureThumb(card,id){if(!card)return null;let thumb=card.querySelector('.kggCardThumb');if(!thumb){thumb=document.createElement('div');thumb.className='kggCardThumb';thumb.setAttribute('aria-hidden','true');card.appendChild(thumb)}card.classList.add('kggHasThumb');card.dataset.kggThumbId=String(id||'');return thumb;}
-  function syncThumbById(id){const box=mediaBox(id);if(!box)return;const img=box.querySelector('img');const card=box.closest('.ex');if(!img||!card)return;const thumb=ensureThumb(card,id);if(box.dataset.kggMediaSource)thumb.dataset.kggMediaSource=box.dataset.kggMediaSource;else delete thumb.dataset.kggMediaSource;thumb.innerHTML='<img src="'+esc(img.src)+'" alt="">';card.classList.add('kggThumbReady');}
+  function syncThumbById(id){
+    const box=mediaBox(id);if(!box)return;
+    const img=box.querySelector('img'),card=box.closest('.ex');if(!img||!card)return;
+    const thumb=ensureThumb(card,id);if(box.dataset.kggMediaSource)thumb.dataset.kggMediaSource=box.dataset.kggMediaSource;else delete thumb.dataset.kggMediaSource;
+    let thumbImg=thumb.querySelector('img');
+    if(!thumbImg){thumbImg=document.createElement('img');thumbImg.alt='';thumb.appendChild(thumbImg)}
+    if(thumbImg.src!==img.src)thumbImg.src=img.src;
+    card.classList.add('kggThumbReady');
+  }
   function clearThumb(card){if(!card)return;card.classList.remove('kggHasThumb','kggThumbReady');delete card.dataset.kggThumbId;const t=card.querySelector('.kggCardThumb');if(t)t.remove();}
   function closeImageLightbox(){const lb=$('kggImageLightbox');if(lb)lb.remove();document.removeEventListener('keydown',lightboxKey,true);}
   function lightboxKey(e){if(e.key==='Escape')closeImageLightbox();}
@@ -90,9 +98,44 @@
   async function loadMedia(item,exerciseIndex,mediaIndex,targetId){const id=String(targetId||mediaId(item,exerciseIndex,mediaIndex));const cached=await getCached(id).catch(()=>null);if(cached&&cached.blob){const url=objectUrl(id,cached.blob);setBox(id,'<img src="'+url+'" alt="Uebungsbild">'+sourceCaption(item),'ready');markSource(id,item);return true;}const resolved=await resolveMediaItem(item);if(!isRealMediaItem(resolved))throw new Error('Keine Bildquelle');const encrypted=await fetchEncrypted(resolved);const blob=await decryptMedia(resolved,encrypted);await putCached({id,blob,mime:resolved.mime||'image/jpeg',savedAt:new Date().toISOString()}).catch(()=>null);const url=objectUrl(id,blob),display=sourceInfo(resolved)?resolved:item;setBox(id,'<img src="'+url+'" alt="Uebungsbild">'+sourceCaption(display),'ready');markSource(id,display);return true;}
   function retryMedia(item,exerciseIndex,mediaIndex,targetId){const id=String(targetId||mediaId(item,exerciseIndex,mediaIndex));if(loading.has(id))return;loading.add(id);const retryMs=Math.max(10000,Number(item.retrySeconds||0)*1000||RETRY_MS);const until=Date.now()+retryMs;const tick=async()=>{try{await loadMedia(item,exerciseIndex,mediaIndex,id);loading.delete(id);}catch(err){if(Date.now()<until){setBox(id,'<span>Bild wird geladen ...</span><small>Die App versucht es automatisch erneut.</small>','loading');setTimeout(tick,STEP_MS);}else{loading.delete(id);setBox(id,'<span>Bild konnte nicht geladen werden.</span><small>Der Trainingsplan bleibt ohne Bild nutzbar. Bitte bei Bedarf neuen QR-Code erstellen lassen.</small>','error');}}};tick();}
   function prefetchAllMedia(){const exercises=planExercises();let found=false;exercises.forEach((ex,exerciseIndex)=>{mediaList(ex).forEach((item,mediaIndex)=>{found=true;retryMedia(item,exerciseIndex,mediaIndex);});});return found;}
-  function renderMedia(){ensureStyle();bindLightbox();const exercises=planExercises();const hasPrefetch=prefetchAllMedia();const cards=[...document.querySelectorAll('#list .ex')];if(!cards.length||!exercises.length)return hasPrefetch;cards.forEach((card,exerciseIndex)=>{const media=mediaList(exercises[exerciseIndex]);const ids=media.map((item,mediaIndex)=>mediaId(item,exerciseIndex,mediaIndex)).join('|');const existing=card.querySelector('.kggMediaList');if(!media.length){if(existing)existing.remove();delete card.dataset.kggMediaIds;clearThumb(card);return;}const firstId=mediaId(media[0],exerciseIndex,0);ensureThumb(card,firstId);if(existing&&card.dataset.kggMediaIds===ids){media.forEach((item,mediaIndex)=>{const id=mediaId(item,exerciseIndex,mediaIndex);retryMedia(item,exerciseIndex,mediaIndex);syncThumbById(id)});return;}if(existing)existing.remove();card.dataset.kggMediaIds=ids;const wrap=document.createElement('div');wrap.className='kggMediaList';wrap.innerHTML=media.map((item,mediaIndex)=>{const id=mediaId(item,exerciseIndex,mediaIndex);return '<div class="kggMediaBox loading" data-kgg-media-id="'+esc(id)+'"><span>Bild wird geladen ...</span><small>Verschluesselte Datei wird geholt und lokal gespeichert.</small></div>';}).join('');const firstSet=card.querySelector('.set');if(firstSet)card.insertBefore(wrap,firstSet); else card.appendChild(wrap);media.forEach((item,mediaIndex)=>retryMedia(item,exerciseIndex,mediaIndex));});return true;}
+  function renderMedia(){
+    ensureStyle();bindLightbox();
+    const exercises=planExercises(),hasPrefetch=prefetchAllMedia(),cards=[...document.querySelectorAll('#list .ex')];
+    if(!cards.length||!exercises.length)return hasPrefetch;
+    cards.forEach((card,exerciseIndex)=>{
+      const media=mediaList(exercises[exerciseIndex]);
+      const ids=media.map((item,mediaIndex)=>mediaId(item,exerciseIndex,mediaIndex)).join('|');
+      const existing=card.querySelector('.kggMediaList');
+      if(!media.length){if(existing)existing.remove();delete card.dataset.kggMediaIds;clearThumb(card);return;}
+      const firstId=mediaId(media[0],exerciseIndex,0);ensureThumb(card,firstId);
+      if(existing&&card.dataset.kggMediaIds===ids){
+        media.forEach((item,mediaIndex)=>{
+          const id=mediaId(item,exerciseIndex,mediaIndex),url=objectUrls.get(String(id)),box=mediaBox(id),img=box&&box.querySelector('img');
+          if(url&&box&&(!img||img.src!==url||!box.classList.contains('ready'))){setBox(id,'<img src="'+esc(url)+'" alt="Uebungsbild">'+sourceCaption(item),'ready');markSource(id,item)}
+          else if(!url)retryMedia(item,exerciseIndex,mediaIndex);
+          syncThumbById(id);
+        });
+        return;
+      }
+      if(existing)existing.remove();
+      card.dataset.kggMediaIds=ids;
+      const wrap=document.createElement('div');wrap.className='kggMediaList';
+      wrap.innerHTML=media.map((item,mediaIndex)=>{
+        const id=mediaId(item,exerciseIndex,mediaIndex),url=objectUrls.get(String(id));
+        return url
+          ?'<div class="kggMediaBox ready" data-kgg-media-id="'+esc(id)+'"><img src="'+esc(url)+'" alt="Uebungsbild">'+sourceCaption(item)+'</div>'
+          :'<div class="kggMediaBox loading" data-kgg-media-id="'+esc(id)+'"><span>Bild wird geladen ...</span><small>Verschluesselte Datei wird geholt und lokal gespeichert.</small></div>';
+      }).join('');
+      const firstSet=card.querySelector('.set');if(firstSet)card.insertBefore(wrap,firstSet);else card.appendChild(wrap);
+      media.forEach((item,mediaIndex)=>{
+        const id=mediaId(item,exerciseIndex,mediaIndex),url=objectUrls.get(String(id));
+        if(url){markSource(id,item);syncThumbById(id)}else retryMedia(item,exerciseIndex,mediaIndex);
+      });
+    });
+    return true;
+  }
   function scheduleRender(delay){if(scheduled)return;scheduled=true;setTimeout(()=>{scheduled=false;renderMedia();},delay||40);}
-  function patchRender(){if(patched||typeof render!=='function')return false;patched=true;window.__kggPatientMediaPatch=VERSION;const old=render;render=function(){const result=old.apply(this,arguments);scheduleRender(30);return result;};return true;}
+  function patchRender(){if(patched||typeof render!=='function')return false;patched=true;window.__kggPatientMediaPatch=VERSION;const old=render;render=function(){const result=old.apply(this,arguments);renderMedia();scheduleRender(30);return result;};return true;}
   function observeList(){const list=$('list');if(!list||!('MutationObserver' in window))return;const observer=new MutationObserver(()=>scheduleRender(60));observer.observe(list,{childList:true,subtree:false});}
   function init(){ensureStyle();bindLightbox();patchRender();observeList();[60,300,900,1800,3200].forEach(delay=>setTimeout(()=>{patchRender();prefetchAllMedia();renderMedia();},delay));observeTimer=setInterval(()=>{if(patchRender()||prefetchAllMedia()||renderMedia())clearInterval(observeTimer);},1200);setTimeout(()=>{if(observeTimer)clearInterval(observeTimer);},12000);}
   window.KGGPatientMediaRetryCache={version:VERSION,render:renderMedia,prefetch:prefetchAllMedia,planExercises,loadMedia,retryMedia};
