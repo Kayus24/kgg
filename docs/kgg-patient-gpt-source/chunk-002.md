@@ -1,16 +1,16 @@
 # KGG Patient Source Chunk 002
 
 - Source file: `service-worker.js`
-- Characters: 1-8128
-- Full source SHA-256: `00ac76bf6f22a6bb4ae3fb6976249061578a65c16c7e1bd678ad27a6912d1977`
+- Characters: 1-8129
+- Full source SHA-256: `906f363dd7a4e69b09458f1d59af761370538d4cafbfd87ca94d28293c93365f`
 
 ```
-const CACHE_NAME = 'kgg-handyplan-v89-card-state-single-owner';
-const APP_VERSION = '89';
+const CACHE_NAME = 'kgg-handyplan-v90-numpad-scroll-flash';
+const APP_VERSION = '90';
 const CACHE_PREFIX = 'kgg-handyplan-';
 const RECOVERY_PATH = './update-recovery.html';
 const NUMPAD_UI_FIX_SCRIPT = './numpad-ui-fix.js?v=scroll-stable-4-single-owner';
-const VERSION_LABEL_SCRIPT = './patient-version-label.js?v=89';
+const VERSION_LABEL_SCRIPT = './patient-version-label.js?v=90';
 const PLAN_LINK_CHOICE_SCRIPT = './patient-plan-link-choice.js?v=plan-link-choice-2-kgg-h3';
 const COLLAPSE_SCRIPT = './collapse-cards.js?v=plan-update-label-7-single-card-owner';
 const CARD_PROGRESS_SCRIPT = './patient-card-progress.js?v=card-progress-3-active-units';
@@ -30,7 +30,7 @@ const MEDIA_SCRIPT = './patient-media-retry-cache_v2.js?v=thumb-layout-7-stable-
 const UI_MICRO_POLISH_SCRIPT = './patient-ui-micro-polish.js?v=unit-labels-pain-fit-1';
 const PAIN_VERTICAL_SCRIPT = './patient-pain-vertical-scale.js?v=exercise-pain-vertical-8-compact-text';
 const INSTALL_GUIDE_SCRIPT = './patient-install-guide.js?v=install-guide-v82-prompt-only';
-const NUMPAD_VISIBILITY_SCRIPT = './patient-numpad-visibility-fix.js?v=stay-open-switch-6-dirty-commit-gate';
+const NUMPAD_VISIBILITY_SCRIPT = './patient-numpad-visibility-fix.js?v=stay-open-switch-7-no-native-focus-switch';
 const EXTRA_INFO_SCRIPT = './patient-extra-info-display.js?v=extra-info-filter-1';
 const LAST_VALUE_HINTS_SCRIPT = './patient-last-value-hints.js?v=last-value-button-shimmer-2-transfer-api';
 const SET_SUMMARY_GROUPS_SCRIPT = './patient-set-summary-groups.js?v=set-summary-groups-4-ticket-015-progressions';

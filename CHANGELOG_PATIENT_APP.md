@@ -1,5 +1,13 @@
 # Patient App Changelog
 
+## v90 - 2026-10-06
+
+- Behebt den verbleibenden Android-Chrome-Scroll-Flash beim Wechsel zwischen kg/Wdh im bereits geöffneten Custom-NumPad.
+- Alte verzögerte NumPad-Scroll-Jobs werden beim Feldwechsel invalidiert; laufende Smooth-Scrolls werden gestoppt.
+- Bei bereits offenem Custom-NumPad wird zwischen readonly Zahlenfeldern kein nativer DOM-Fokuswechsel mehr erzwungen. Dadurch umgehen wir den dokumentierten Chrome/Android-`focus({preventScroll:true})`-Fehler.
+- Neuer Black-Box-Playwright-Test `kgg_patient_transient_flicker_blackbox.js` simuliert den Android-Fokus-Scroll-Quirk frameweise: v89 RED mit 460 px Scroll-Flash, v90 GREEN mit 0 px bei wiederholtem kg↔Wdh-Wechsel.
+- Der neue Test ist im Required Gate und Patient Preview Gate verankert.
+
 ## v89 - 2026-10-06
 
 - Behebt das verbleibende Karten-/Bildflackern beim Bedienen geöffneter Übungen: `collapse-cards.js` darf im aktuellen `kggAlwaysCollapsed`-Modus den `kggOpen`-Zustand nicht mehr schreiben.
