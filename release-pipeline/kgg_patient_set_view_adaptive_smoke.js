@@ -12,7 +12,7 @@ async function loadPage(browser,port,{width=390,height=844,rootFont=16,userAgent
  const ctx=await browser.newContext({viewport:{width,height},hasTouch:true,isMobile:width<760,userAgent:userAgent||undefined});
  const page=await ctx.newPage(),errors=[];page.on("pageerror",e=>errors.push(String(e)));
  const plan={i:"adaptive-view-smoke",t:"Adaptive Patient UI",v:1,d:6,e:[
-  ["LR3 kg",3,"LR","kg","Wdh"],
+  ["LR3 kg",3,"LR","kg","Wdh","15","12"],
   ["No load",1,"B","keine","Sek."],
   ["Bar",1,"B","bar","Wdh"],
   ["Watt time",1,"B","Watt","Sek."],
@@ -73,6 +73,18 @@ async function noValuesContract(page){
  assert(progress.expected==="0"&&progress.state==="open","no-values progress contract wrong: "+JSON.stringify(progress));
  assert(await card.locator(".kggPainVerticalToggle").isVisible(),"no-values exercise lost pain control");
 }
+async function bilateralSingleCapsuleContract(page){
+ const card=page.locator("#list .ex").nth(2);await openCard(card);
+ const ui=await card.locator(":scope > .set").first().evaluate(set=>{
+  const inner=set.querySelector(":scope > .bi"),os=getComputedStyle(set),s=getComputedStyle(inner);
+  return{outerBorder:os.borderTopWidth,innerBorder:s.borderTopWidth,innerBackground:s.backgroundColor,padding:[s.paddingTop,s.paddingRight,s.paddingBottom,s.paddingLeft],visibleInputs:[...inner.querySelectorAll("input.num")].filter(x=>getComputedStyle(x).display!=="none").length};
+ });
+ assert(ui.outerBorder!=="0px","bilateral set lost its outer capsule");
+ assert(ui.visibleInputs===2,"bilateral two-field set lost a value field: "+JSON.stringify(ui));
+ assert(ui.innerBorder==="0px","bilateral set still has the redundant inner capsule border: "+JSON.stringify(ui));
+ assert(ui.innerBackground==="rgba(0, 0, 0, 0)","bilateral inner wrapper is still visually boxed: "+JSON.stringify(ui));
+ assert(ui.padding.every(x=>x==="0px"),"bilateral inner wrapper still adds capsule padding: "+JSON.stringify(ui));
+}
 async function barContract(page){
  const bar=page.locator("#list .ex").nth(2);await openCard(bar);await bar.locator("input.num").nth(0).click();
  const labels=await page.locator("#kggPadPair button > span:first-child").allTextContents();
@@ -100,11 +112,38 @@ async function longUnitContract(page){
  assert(labels.some(x=>x.trim()==="Theraband-Stufe")&&labels.some(x=>x.trim()==="Wiederholungen"),"custom pair labels truncated semantically: "+labels.join("|"));
  await page.locator("#pad .padCancel").click();
 }
+async function compactFieldPresentationContract(page){
+ const card=page.locator("#list .ex").nth(0);await openCard(card);
+ const input=card.locator("input.num").first(),unit=card.locator(".kggCompactUnit[data-kgg-key=\"a\"]").first();
+ const initial=await Promise.all([
+  input.evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,color:s.color,placeholder:getComputedStyle(el,"::placeholder").color,value:el.value,ph:el.placeholder}}),
+  unit.evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,color:s.color}})
+ ]);
+ assert(initial[1].left>=initial[0].left-1&&initial[1].right<=initial[0].right+1&&initial[1].top>=initial[0].top-1&&initial[1].bottom<=initial[0].bottom+1,"compact unit is not inside its numeric field: "+JSON.stringify(initial));
+ await enter(page,input,"20");await page.waitForTimeout(100);
+ const committed=await Promise.all([input.evaluate(el=>getComputedStyle(el).color),unit.evaluate(el=>getComputedStyle(el).color)]);
+ assert(committed[0]===committed[1],"committed number/unit colors diverge: "+JSON.stringify(committed));
+ await card.locator(".kggPainVerticalToggle").waitFor({state:"visible"});
+ const spacing=await card.evaluate(el=>{const c=el.getBoundingClientRect(),b=el.querySelector(".kggPainVerticalToggle").getBoundingClientRect(),p=el.querySelector(":scope > .pain").getBoundingClientRect();return{bottomGap:c.bottom-b.bottom,painTopGap:p.top-[...el.querySelectorAll(":scope > .set")].reduce((m,n)=>Math.max(m,n.getBoundingClientRect().bottom),0)}});
+ assert(spacing.bottomGap<=20,"compact card keeps too much empty space below pain button: "+JSON.stringify(spacing));
+ assert(spacing.painTopGap<=12,"compact card keeps too much empty space above pain button: "+JSON.stringify(spacing));
+}
+async function securityContract(page){
+ await page.evaluate(()=>{p.ex[0].u="<b>unit-test</b>";render()});await page.waitForTimeout(180);
+ const card=page.locator("#list .ex").first();await openCard(card);
+ await card.locator("input.num").first().click();await page.waitForTimeout(80);
+ assert(await page.locator("#kggPadPair b").count()===0,"unit text was interpreted as HTML");
+ const label=await page.locator("#kggPadPair button > span:first-child").first().textContent();
+ assert(label==="<b>unit-test</b>","unit markup was not rendered as literal text: "+label);
+ await page.locator("#pad .padCancel").click();
+}
 async function normalCompactContract(page){
- const first=page.locator("#list .ex").nth(0);await openCard(first);await first.locator("input.num").first().click();await page.waitForTimeout(120);
+ const first=page.locator("#list .ex").nth(0);await openCard(first);const source=first.locator("input.num").first();await source.click();await page.waitForTimeout(120);
  assert(!(await page.locator("#pad").evaluate(el=>el.classList.contains("kggPadLargeUi"))),"normal UI incorrectly classified large");
  const pair=page.locator("#kggPadPair button").first();const h=await pair.evaluate(el=>el.getBoundingClientRect().height);
  assert(h<80,"normal Compact pair unexpectedly large: "+h);
+ await page.waitForTimeout(260);const focusColors=await Promise.all([source.evaluate(el=>getComputedStyle(el).borderTopColor),pair.evaluate(el=>getComputedStyle(el).borderTopColor)]);
+ assert(focusColors[0]===focusColors[1],"active source field border does not match active pair border: "+JSON.stringify({source:focusColors[0],pair:focusColors[1]}));
  await page.locator("#pad .padCancel").click();
 }
 async function largeCompactContract(page){
@@ -171,11 +210,11 @@ async function main(){
  await new Promise(r=>server.listen(0,"127.0.0.1",r));const port=server.address().port,browser=await chromium.launch({headless:true});
  try{
   for(const width of [320,360,390,430]){const {ctx,page,errors}=await loadPage(browser,port,{width,height:844,rootFont:16});try{await geometryContract(page,width);assert(errors.length===0,"page errors @"+width+": "+errors.join(" | "))}finally{await ctx.close()}}
-  {const {ctx,page,errors}=await loadPage(browser,port,{width:390,height:844,rootFont:16});try{await normalCompactContract(page);assert(errors.length===0,"normal page errors: "+errors.join(" | "))}finally{await ctx.close()}}
+  {const {ctx,page,errors}=await loadPage(browser,port,{width:390,height:844,rootFont:16});try{await compactFieldPresentationContract(page);await normalCompactContract(page);await securityContract(page);assert(errors.length===0,"normal page errors: "+errors.join(" | "))}finally{await ctx.close()}}
   {const {ctx,page,errors}=await loadPage(browser,port,{width:390,height:844,rootFont:16});try{await unitContract(page);assert(errors.length===0,"unit page errors: "+errors.join(" | "))}finally{await ctx.close()}}
   {const {ctx,page,errors}=await loadPage(browser,port,{width:390,height:844,rootFont:16});try{await lrSingleFieldContract(page);assert(errors.length===0,"LR single-field page errors: "+errors.join(" | "))}finally{await ctx.close()}}
   {const {ctx,page,errors}=await loadPage(browser,port,{width:390,height:844,rootFont:16});try{await noValuesContract(page);assert(errors.length===0,"no-values page errors: "+errors.join(" | "))}finally{await ctx.close()}}
-  {const {ctx,page,errors}=await loadPage(browser,port,{width:390,height:844,rootFont:16});try{await barContract(page);assert(errors.length===0,"bar page errors: "+errors.join(" | "))}finally{await ctx.close()}}
+  {const {ctx,page,errors}=await loadPage(browser,port,{width:390,height:844,rootFont:16});try{await bilateralSingleCapsuleContract(page);await barContract(page);assert(errors.length===0,"bar page errors: "+errors.join(" | "))}finally{await ctx.close()}}
   {const {ctx,page,errors}=await loadPage(browser,port,{width:390,height:844,rootFont:16,lang:"en"});try{await englishUnitContract(page);assert(errors.length===0,"English seconds page errors: "+errors.join(" | "))}finally{await ctx.close()}}
   {const {ctx,page,errors}=await loadPage(browser,port,{width:390,height:844,rootFont:16,lang:"en"});try{await englishBarContract(page);assert(errors.length===0,"English reps page errors: "+errors.join(" | "))}finally{await ctx.close()}}
   {const {ctx,page,errors}=await loadPage(browser,port,{width:320,height:844,rootFont:16});try{await longUnitContract(page);assert(errors.length===0,"custom-unit page errors: "+errors.join(" | "))}finally{await ctx.close()}}

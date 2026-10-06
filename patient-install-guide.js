@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='install-guide-v81-ios-kgg-h3';
+  const VERSION='install-guide-v82-prompt-only';
   if(window.__kggInstallGuide===VERSION)return;
   window.__kggInstallGuide=VERSION;
   const KEY='kggCurrentPlanV1';
@@ -29,7 +29,7 @@
   function updateBanner(){if($('kggUpdateGate'))return;const d=document.createElement('div');d.id='kggUpdateGate';d.style.cssText='position:fixed;left:12px;right:12px;bottom:12px;z-index:10020;max-width:720px;margin:auto;background:#fff;border:1px solid #93c5fd;border-radius:18px;padding:14px;box-shadow:0 18px 46px #0f172a33;font-weight:850';d.innerHTML='<b>Neue Version verfuegbar.</b><br><span style="color:#64748b">Bitte aktualisieren, damit der Plan richtig funktioniert.</span><button id="kggUpdateNow" style="width:100%;min-height:48px;margin-top:10px;border-radius:14px;border:0;background:#111827;color:#fff;font-size:16px;font-weight:950">Jetzt aktualisieren</button>';document.body.appendChild(d);$('kggUpdateNow').onclick=()=>location.reload()}
   function listenUpdates(){if(!('serviceWorker'in navigator)||window.__kggUpdateGateListen)return;window.__kggUpdateGateListen=1;navigator.serviceWorker.addEventListener('message',e=>{if(e&&e.data&&e.data.type==='APP_UPDATE_READY')updateBanner()})}
   function autoDay(){if(window.__kggAutoDayRan)return;window.__kggAutoDayRan=1;try{if(typeof p==='undefined'||!p||typeof d==='undefined'||!Array.isArray(done))return;let target=done.length?Math.max(...done)+1:d;if(target<1)target=1;if(target>p.days&&p.extendDays){p.days+=Number(p.stepDays)||6;const w=storedWrap();if(w&&w.plan){w.plan.d=p.days;localStorage.setItem(KEY,JSON.stringify(w))}}if(target<=p.days&&target!==d){d=target;if(typeof save==='function')save();if(typeof render==='function')render();if(typeof setStatus==='function')setStatus('Aktuelles Training: Tag '+d+'.','ok')}}catch(e){}}
-  function patch(){recover();listenUpdates();if(typeof window.installApp==='function'&&!window.__kggInstallGuidePatched){const old=window.installApp;window.installApp=async function(){if(!isIOS&&window.installPrompt){return old.apply(this,arguments)}show()};window.__kggInstallGuidePatched=1}const b=$('installSmall');if(b)b.classList.remove('hide')}
+  function patch(){recover();listenUpdates();const box=$('installBox'),text=$('installOfferText'),button=$('installOfferBtn'),hint=$('installHint');if(!window.__kggInstallPrompt){if(box)box.classList.add('hide');if(text)text.classList.add('hide');if(button)button.classList.add('hide');if(hint){hint.classList.add('hide');hint.innerHTML=''}}}
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',patch):patch();
   setTimeout(patch,500);setTimeout(patch,1500);setTimeout(autoDay,900);setTimeout(autoDay,2200);
 })();

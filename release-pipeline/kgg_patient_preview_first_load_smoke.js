@@ -21,6 +21,7 @@ const REQUIRED_MODULES = [
   "patient-card-settings.js",
   "patient-start-values-day1.js",
   "patient-day-history.js",
+  "patient-exercise-media-sources.js",
   "patient-media-retry-cache_v2.js",
   "patient-ui-micro-polish.js",
   "patient-pain-vertical-scale.js",
@@ -253,8 +254,10 @@ async function main() {
       const titleBox = title.getBoundingClientRect();
       const metadataBox = metadata.getBoundingClientRect();
       const thumbBox = thumb.getBoundingClientRect();
-      const imagePaddingRight = Number.parseFloat(getComputedStyle(imageCard).paddingRight);
-      const noImagePaddingRight = Number.parseFloat(getComputedStyle(noImageCard).paddingRight);
+      const imageStyle = getComputedStyle(imageCard);
+      const noImageStyle = getComputedStyle(noImageCard);
+      const imagePaddingRight = Number.parseFloat(imageStyle.paddingRight);
+      const noImagePaddingRight = Number.parseFloat(noImageStyle.paddingRight);
       return {
         titleRight: titleBox.right,
         metadataRight: metadataBox.right,
@@ -266,6 +269,9 @@ async function main() {
         decodedLocalImage: image.complete && image.naturalWidth > 0 && image.currentSrc.startsWith("blob:"),
         imagePaddingRight,
         noImagePaddingRight,
+        imageDisplay: imageStyle.display,
+        imageColumns: imageStyle.gridTemplateColumns,
+        thumbPosition: getComputedStyle(thumb).position,
         noImageHasThumb: noImageCard.classList.contains("kggHasThumb") || Boolean(noImageCard.querySelector(".kggCardThumb")),
       };
     });
@@ -275,9 +281,11 @@ async function main() {
     assert(!thumbGeometry.metadataOverflow, "training metadata overflows beneath the thumbnail");
     assert(thumbGeometry.titleRight <= thumbGeometry.thumbLeft, "exercise title overlaps the thumbnail");
     assert(thumbGeometry.metadataRight <= thumbGeometry.thumbLeft, "training metadata overlaps the thumbnail");
+    assert(thumbGeometry.imageDisplay === "grid", "thumbnail card is not using the reserved text/image grid");
+    assert(thumbGeometry.thumbPosition !== "absolute", "thumbnail still overlays text via absolute positioning");
+    assert(thumbGeometry.imagePaddingRight <= 24, `thumbnail card keeps obsolete right-side spacer padding: ${thumbGeometry.imagePaddingRight}px`);
     assert(!thumbGeometry.noImageHasThumb, "card without media still reserves a thumbnail element");
     assert(thumbGeometry.noImagePaddingRight <= 24, `card without media keeps thumbnail padding: ${thumbGeometry.noImagePaddingRight}px`);
-    assert(thumbGeometry.noImagePaddingRight + 48 <= thumbGeometry.imagePaddingRight, "card without media still reserves thumbnail space");
 
     await page.evaluate(() => {
       const api = window.KGGPatientMultiPlan;

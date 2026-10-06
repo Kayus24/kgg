@@ -30,6 +30,7 @@ Reload before every diagnosis involving current code and before every Preview, P
 - `patient-card-progress.js`
 - `patient-card-settings.js`
 - `patient-day-history.js`
+- `patient-exercise-media-sources.js`
 - `patient-extra-info-display.js`
 - `patient-install-guide.js`
 - `patient-install-prompt.js`

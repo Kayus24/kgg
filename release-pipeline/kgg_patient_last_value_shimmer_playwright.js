@@ -39,14 +39,14 @@ function sourceContract() {
   const index = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
   const worker = fs.readFileSync(path.join(ROOT, "service-worker.js"), "utf8");
   const selector = "#padLast.kggPatientApplyShimmer";
-  assert(hints.includes("const V='last-value-hints-v4-apply-shimmer';"), "shimmer module version marker is missing");
-  assert(hints.includes("window.__kggLastValueHintsPatchedV4"), "shimmer module patch guard was not versioned");
+  assert(hints.includes("const V='last-value-hints-v5-transfer-api';"), "shimmer module version marker is missing");
+  assert(hints.includes("window.__kggLastValueHintsPatchedV5"), "shimmer module patch guard was not versioned");
   assert(hints.includes(selector), "shimmer must target only #padLast");
   assert(hints.includes("@media (prefers-reduced-motion:reduce)"), "reduced-motion opt-out is missing");
   assert(hints.includes("b.classList.add('kggPatientApplyShimmer')"), "enabled apply state does not opt into the shimmer");
   assert(hints.includes("b.classList.remove('kggPatientApplyShimmer')"), "disabled apply state does not remove the shimmer");
   assert(!hints.includes("button::after"), "shimmer selector must not target generic buttons");
-  const script = "./patient-last-value-hints.js?v=last-value-button-shimmer-1";
+  const script = "./patient-last-value-hints.js?v=last-value-button-shimmer-2-transfer-api";
   assert((index.match(new RegExp(script.replace(/[.?]/g, "\\$&"), "g")) || []).length === 1, "index must load the shimmer module exactly once");
   assert(worker.includes(script), "service worker must cache-bust the shimmer module");
 }
@@ -94,8 +94,9 @@ async function main() {
   const url = `http://127.0.0.1:${port}/kgg/?plan=${encodeURIComponent(payload)}`;
 
   try {
+    await page.addInitScript(() => localStorage.setItem("kggPatientSetViewModeV1", "legacy"));
     await page.goto(url, { waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => window.__kggLastValueHints === "last-value-hints-v4-apply-shimmer");
+    await page.waitForFunction(() => window.__kggLastValueHints === "last-value-hints-v5-transfer-api");
     await page.locator("#list .ex").first().waitFor({ state: "visible" });
     const apply = page.locator("#padLast");
     await openCard(page, 0);

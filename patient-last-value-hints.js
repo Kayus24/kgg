@@ -1,5 +1,5 @@
 (()=>{
-const V='last-value-hints-v4-apply-shimmer';
+const V='last-value-hints-v5-transfer-api';
 if(window.__kggLastValueHints===V)return;
 window.__kggLastValueHints=V;
 const $=id=>document.getElementById(id);
@@ -38,10 +38,12 @@ function unitFor(m){
  }catch(e){return''}
 }
 function hintText(m,last){const unit=unitFor(m);return unit?String(last)+' '+unit:String(last)}
-function applyOne(input){const m=metaFromInput(input);const last=prevValue(m);if(last){input.placeholder=hintText(m,last);input.classList.add('kggHasLastHint')}else{if(input.classList.contains('kggHasLastHint'))input.placeholder='';input.classList.remove('kggHasLastHint')}return{m,last}}
+function compactMode(){return !!(document.body&&document.body.classList.contains('kggSetViewCompact'))}
+function applyOne(input){const m=metaFromInput(input);const last=prevValue(m);if(last){input.dataset.kggLastValue=String(last);input.placeholder=compactMode()?String(last):hintText(m,last);input.classList.add('kggHasLastHint')}else{delete input.dataset.kggLastValue;if(input.classList.contains('kggHasLastHint'))input.placeholder='';input.classList.remove('kggHasLastHint')}return{m,last}}
 function syncPadButton(m,last){const b=$('padLast');if(!b)return;b.style.display='block';if(last){b.disabled=false;b.classList.remove('noLast');b.classList.add('kggPatientApplyShimmer');b.dataset.value=String(last);b.textContent=hintText(m,last)+' übernehmen'}else{b.disabled=true;b.classList.add('noLast');b.classList.remove('kggPatientApplyShimmer');b.dataset.value='';b.textContent='kein Vorwert gefunden'}}
 function apply(){css();document.querySelectorAll('input.num').forEach(applyOne)}
-function patch(){if(window.__kggLastValueHintsPatchedV4)return;window.__kggLastValueHintsPatchedV4=1;if(typeof openPad==='function'){const old=openPad;window.openPad=function(input,meta){if(input&&meta)input.__kggLastMeta=meta;const r=old.apply(this,arguments);const found=applyOne(input);syncPadButton(found.m,found.last);return r}}if(typeof put==='function'){const oldPut=put;window.put=function(){const r=oldPut.apply(this,arguments);setTimeout(apply,40);return r}}}
+function patch(){if(window.__kggLastValueHintsPatchedV5)return;window.__kggLastValueHintsPatchedV5=1;if(typeof openPad==='function'){const old=openPad;window.openPad=function(input,meta){if(input&&meta)input.__kggLastMeta=meta;const r=old.apply(this,arguments);const found=applyOne(input);syncPadButton(found.m,found.last);return r}}if(typeof put==='function'){const oldPut=put;window.put=function(){const r=oldPut.apply(this,arguments);setTimeout(apply,40);return r}}}
 function init(){patch();apply();const list=$('list');if(list&&'MutationObserver'in window)new MutationObserver(()=>setTimeout(()=>{patch();apply()},40)).observe(list,{childList:true,subtree:true});setTimeout(()=>{patch();apply()},300);setTimeout(apply,1200);setTimeout(apply,2500)}
+window.__kggLastValueHintsApi={metaFromInput,prevValue,unitFor,hintText,applyOne,apply};
 document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
 })();

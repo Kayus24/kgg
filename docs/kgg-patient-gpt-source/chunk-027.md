@@ -1,23 +1,72 @@
 # KGG Patient Source Chunk 027
 
-- Source file: `patient-set-compact-view.js`
-- Characters: 1-12708
-- Full source SHA-256: `d25078b6f24912f0e32c594e13cb3f6605ce38f8c35a00e3c5eb3648be6cf477`
+- Source file: `patient-qr-fullscreen.js`
+- Characters: 1-3086
+- Full source SHA-256: `3979600da41d8d035afb833f8ddb371bf3a4ccf1b3c38211c4560907398463b9`
 
 ```
-(()=>{const V='patient-set-compact-view-v2',KEY='kggPatientSetViewModeV1',STYLE='kggSetCompactStyle',SW='kggSetViewSwitch',PAIR='kggPadPair';if(window.__kggSetCompactView===V)return;window.__kggSetCompactView=V;const $=id=>document.getElementById(id),en=()=>localStorage.getItem('kggPatientLang')==='en';
-function getMode(){try{return localStorage.getItem(KEY)==='legacy'?'legacy':'compact'}catch(e){return'compact'}}function setMode(mode){try{localStorage.setItem(KEY,mode==='legacy'?'legacy':'compact')}catch(e){}applyMode()}
-function meta(input){if(!input)return null;if(input.__kggLastMeta)return input.__kggLastMeta;if(input.__kggSetMeta)return input.__kggSetMeta;const a=input.getAttribute('onclick')||input.getAttribute('onfocus')||'',g=re=>{const m=a.match(re);return m?m[1]:''},m={ei:Number(g(/ei\s*:\s*(\d+)/)),s:Number(g(/s\s*:\s*(\d+)/)),side:g(/side\s*:\s*['"]([^'"]+)['"]/),key:g(/key\s*:\s*['"]([^'"]+)['"]/)};if(Number.isFinite(m.ei)&&Number.isFinite(m.s)&&m.side&&m.key){input.__kggSetMeta=m;return m}return null}
-function unit(m){try{const ex=p&&p.ex&&m?p.ex[m.ei]:null,raw=m&&m.key==='b'?(ex&&ex.m):(ex&&ex.u),u=String(raw||'').trim();if(!u||/^(keine|none|-)$/i.test(u))return'';const x=u.toLowerCase();if(en()){if(/^(wdh|wiederholung|wiederholungen|rep|reps)$/.test(x))return'reps';if(/^(sek\.?|sekunde|sekunden|sec\.?|secs|second|seconds)$/.test(x))return'sec';if(/^(min\.?|minute|minuten|minutes)$/.test(x))return'min'}else{if(/^(rep|reps)$/.test(x))return'Wdh';if(/^(sec\.?|secs|second|seconds)$/.test(x))return'Sek.';if(/^(min|minute|minutes)$/.test(x))return'Min.'}return u}catch(e){return''}}
-function css(){if($(STYLE))return;const s=document.createElement('style');s.id=STYLE;s.textContent=`#${SW}{position:absolute;top:8px;right:12px;z-index:6;min-width:76px;min-height:44px;padding:4px 7px;border:0;background:transparent;color:#475569;font:800 11px/1 system-ui;display:flex;align-items:center;justify-content:flex-end;gap:6px;cursor:pointer;touch-action:manipulation}#${SW}:focus-visible{outline:3px solid #94a3b8;outline-offset:2px;border-radius:12px}.kggSetViewTrack{width:32px;height:18px;padding:2px;border-radius:999px;background:#cbd5e1;display:flex;align-items:center;transition:background .16s ease}.kggSetViewThumb{width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0003;transform:translateX(0);transition:transform .16s ease}#${SW}[aria-checked="true"] .kggSetViewTrack{background:#2563eb}#${SW}[aria-checked="true"] .kggSetViewThumb{transform:translateX(14px)}main>section.card:first-of-type.kggSetViewHeader{position:relative}main>section.card:first-of-type.kggSetViewHeader>h1{padding-right:86px}.kggCompactUnit{display:none}body.kggSetViewCompact .ex.kggCompactCard.kggOpen{display:grid!important;column-gap:8px;row-gap:0}body.kggSetViewCompact .ex.kggCompactCard.kggOpen.kggSets1{grid-template-columns:1fr}body.kggSetViewCompact .ex.kggCompactCard.kggOpen.kggSets2{grid-template-columns:repeat(2,minmax(0,1fr))}body.kggSetViewCompact .ex.kggCompactCard.kggOpen.kggSets3,body.kggSetViewCompact .ex.kggCompactCard.kggOpen.kggSetsMany{grid-template-columns:repeat(3,minmax(0,1fr))}body.kggSetViewCompact .ex.kggCompactCard.kggOpen>*{grid-column:1/-1;min-width:0}body.kggAlwaysCollapsed.kggSetViewCompact .ex.kggCompactCard.kggOpen{padding-right:12px!important}body.kggAlwaysCollapsed.kggSetViewCompact .ex.kggCompactCard.kggOpen>h3{padding-right:44px}body.kggAlwaysCollapsed.kggSetViewCompact .ex.kggCompactCard.kggOpen>.set{display:grid!important;grid-column:auto;grid-template-rows:auto auto auto;gap:0;min-width:0;margin:10px 0 0!important;padding:7px!important;border:1px solid #dbe3ef!important;border-radius:13px!important;background:#fff}body.kggSetViewCompact .ex.kggCompactCard>.set>b{grid-row:1;text-align:center;font-size:12px;line-height:1.2;margin:0 0 2px}body.kggSetViewCompact .set>.kggSideR{grid-row:2}body.kggSetViewCompact .set>.kggSideL{grid-row:3}body.kggSetViewCompact .set>.bi{grid-row:2}body.kggSetViewCompact .set>.kggNoValues{display:none!important}body.kggSetViewCompact .set>.lr{position:relative;display:grid!important;grid-template-columns:minmax(0,1fr) 18px!important;grid-template-rows:18px minmax(30px,auto) minmax(30px,auto);gap:4px;margin-top:4px!important;padding:4px;border-radius:10px;align-items:center}body.kggSetViewCompact .set>.kggSideR{background:#fef2f2;border:1px solid #fecaca}body.kggSetViewCompact .set>.kggSideL{background:#f0fdf4;border:1px solid #bbf7d0}body.kggSetViewCompact .set>.lr>span:first-child{grid-column:1/3;grid-row:1;align-self:center;text-align:center;font-size:10px;font-weight:950}body.kggSetViewCompact .set>.kggSideR>span:first-child{color:#991b1b}body.kggSetViewCompact .set>.kggSideL>span:first-child{color:#166534}body.kggSetViewCompact .set>.lr>input.num,body.kggSetViewCompact .set>.bi>input.num{min-height:30px!important;padding:5px 3px!important;border:1px solid #dbe3ef!important;border-radius:8px!important;background:#fff!important;font-size:15px!important;line-height:1!important}body.kggSetViewCompact .set>.lr>input.num:nth-of-type(1){grid-column:1;grid-row:2}body.kggSetViewCompact .set>.lr>input.num:nth-of-type(2){grid-column:1;grid-row:3}body.kggSetViewCompact .set>.bi>input.num:nth-of-type(1){grid-column:1;grid-row:1}body.kggSetViewCompact .set>.bi>input.num:nth-of-type(2){grid-column:1;grid-row:2}body.kggSetViewCompact .set>.bi{position:relative;display:grid!important;grid-template-columns:minmax(0,1fr) 22px!important;grid-template-rows:minmax(30px,auto) minmax(30px,auto);gap:4px;margin-top:5px!important;padding:4px;border-radius:10px;background:#f8fafc;border:1px solid #e2e8f0}body.kggSetViewCompact .kggCompactUnit{display:block;position:static;z-index:2;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none;color:#64748b;font-size:8px;font-weight:850;line-height:1;text-align:left}body.kggSetViewCompact .lr>.kggCompactUnit[data-kgg-key="a"]{grid-column:2;grid-row:2}body.kggSetViewCompact .lr>.kggCompactUnit[data-kgg-key="b"]{grid-column:2;grid-row:3}body.kggSetViewCompact .bi>.kggCompactUnit[data-kgg-key="a"]{grid-column:2;grid-row:1}body.kggSetViewCompact .bi>.kggCompactUnit[data-kgg-key="b"]{grid-column:2;grid-row:2}body.kggSetViewCompact .lr.kggSingleA,body.kggSetViewCompact .lr.kggSingleB{grid-template-rows:18px minmax(30px,auto)}body.kggSetViewCompact .lr.kggSingleB>input.num:nth-of-type(2){grid-row:2}body.kggSetViewCompact .lr.kggSingleB>.kggCompactUnit[data-kgg-key="b"]{grid-row:2}body.kggSetViewCompact .bi.kggSingleA,body.kggSetViewCompact .bi.kggSingleB{grid-template-rows:minmax(30px,auto)}body.kggSetViewCompact .bi.kggSingleB>input.num:nth-of-type(2){grid-row:1}body.kggSetViewCompact .bi.kggSingleB>.kggCompactUnit[data-kgg-key="b"]{grid-row:1}body.kggSetViewCompact .set>.kggNoValues{display:none!important}#${PAIR}{order:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 9px}#${PAIR}[data-single="1"]{grid-template-columns:1fr}#${PAIR} button{min-height:58px;border:1px solid #cbd5e1;border-radius:14px;background:#f8fafc;color:#334155;padding:6px 8px;font:800 11px/1.1 system-ui;touch-action:manipulation}#${PAIR} button.kggPairActive{border-color:#2563eb;background:#eff6ff;color:#1d4ed8;box-shadow:0 0 0 2px #bfdbfe}#${PAIR} .kggPairValue{display:block;margin-top:3px;font-size:22px;font-weight:950;font-variant-numeric:tabular-nums;color:#111827}#${PAIR} button.kggPairActive .kggPairValue{color:#1d4ed8}body.kggSetViewCompact #pad.kggPadLargeUi #${PAIR} button{min-height:92px;padding:8px 10px;border-radius:16px;font-size:14px}body.kggSetViewCompact #pad.kggPadLargeUi #${PAIR} .kggPairValue{margin-top:5px;font-size:42px} @media(max-width:360px){body.kggSetViewCompact .ex.kggCompactCard.kggOpen{column-gap:4px}body.kggSetViewCompact .ex.kggCompactCard.kggOpen.kggSetsMany{grid-template-columns:repeat(2,minmax(0,1fr))}body.kggSetViewCompact .ex.kggCompactCard>.set{padding:4px!important}body.kggSetViewCompact .set>.lr>input.num,body.kggSetViewCompact .set>.bi>input.num{font-size:14px!important}}`;document.head.appendChild(s)}
-function ensureSwitch(){const head=document.querySelector('main>section.card:first-of-type');if(!head)return null;head.classList.add('kggSetViewHeader');let b=$(SW);if(!b){b=document.createElement('button');b.id=SW;b.type='button';b.setAttribute('role','switch');b.innerHTML='<span class="kggSetViewText"></span><span class="kggSetViewTrack" aria-hidden="true"><span class="kggSetViewThumb"></span></span>';b.addEventListener('click',()=>setMode(getMode()==='compact'?'legacy':'compact'));head.appendChild(b)}return b}
-function syncSwitch(){const b=ensureSwitch();if(!b)return;const on=getMode()==='compact';b.setAttribute('aria-checked',String(on));b.setAttribute('aria-label',en()?(on?'Compact set view on':'Compact set view off'):(on?'Kompakte Satzansicht aktiv':'Alte Satzansicht aktiv'));const t=b.querySelector('.kggSetViewText');if(t)t.textContent=on?(en()?'New':'Neu'):(en()?'Old':'Alt')}
-function decorateRow(row){const inputs=[...row.querySelectorAll('input.num')],m0=meta(inputs[0]),wanted=new Set();row.classList.toggle('kggSideR',!!(m0&&m0.side==='R'));row.classList.toggle('kggSideL',!!(m0&&m0.side==='L'));inputs.forEach(input=>{const m=meta(input),u=unit(m);if(!m||!u)return;wanted.add(m.key);let sp=row.querySelector('.kggCompactUnit[data-kgg-key="'+m.key+'"]');if(!sp){sp=document.createElement('span');sp.className='kggCompactUnit';sp.dataset.kggKey=m.key;sp.setAttribute('aria-hidden','true');row.appendChild(sp)}if(sp.textContent!==u)sp.textContent=u;if(sp.title!==u)sp.title=u});row.classList.toggle('kggSingleA',wanted.size===1&&wanted.has('a'));row.classList.toggle('kggSingleB',wanted.size===1&&wanted.has('b'));row.classList.toggle('kggNoValues',wanted.size===0);row.querySelectorAll('.kggCompactUnit').forEach(sp=>{if(!wanted.has(sp.dataset.kggKey))sp.remove()})}
-function decorateCard(card){const sets=[...card.children].filter(n=>n.classList&&n.classList.contains('set'));if(!sets.length)return;card.classList.add('kggCompactCard');card.classList.remove('kggSets1','kggSets2','kggSets3','kggSetsMany');card.classList.add(sets.length<=3?'kggSets'+sets.length:'kggSetsMany');sets.forEach(set=>set.querySelectorAll(':scope>.lr,:scope>.bi').forEach(decorateRow))}
-function applyCards(){document.querySelectorAll('#list .ex').forEach(decorateCard)}function applyMode(){css();syncSwitch();const compact=getMode()==='compact';document.body.classList.toggle('kggSetViewCompact',compact);if(!compact){const pair=$(PAIR);if(pair)pair.remove()}applyCards()}
-function pairInputs(input){const row=input&&input.closest&&input.closest('.lr,.bi');return row?[...row.querySelectorAll('input.num')]:[input].filter(Boolean)}function syncPairValue(){const pair=$(PAIR),pv=$('padVal');if(!pair||!pv)return;const active=pair.querySelector('button.kggPairActive .kggPairValue');if(active)active.textContent=String(pv.textContent||'0')}
-function showPair(input,m){const box=document.querySelector('#pad .padBox');if(!box||!input||!m)return;let pair=$(PAIR);if(!pair){pair=document.createElement('div');pair.id=PAIR;box.insertBefore(pair,box.firstChild)}pair.innerHTML='';const entries=pairInputs(input).map(n=>({input:n,m:meta(n)})).filter(x=>x.m&&unit(x.m));pair.dataset.single=entries.length===1?'1':'0';entries.forEach(x=>{const b=document.createElement('button');b.type='button';b.dataset.kggKey=x.m.key;b.className=x.input===input?'kggPairActive':'';b.innerHTML='<span>'+(unit(x.m)||'Wert')+'</span><span class="kggPairValue"></span>';b.querySelector('.kggPairValue').textContent=x.input===input?String(($('padVal')&&$('padVal').textContent)||x.input.value||'0'):String(x.input.value||'–');b.addEventListener('click',e=>{e.preventDefault();if(x.input!==input)x.input.click()});pair.appendChild(b)});syncPairValue()}
-function patchPad(){if(window.__kggSetCompactPadPatched||typeof window.openPad!=='function')return;window.__kggSetCompactPadPatched=1;const old=window.openPad;window.openPad=function(input,m){const r=old.apply(this,arguments);if(getMode()==='compact')showPair(input,m);return r};const pv=$('padVal');if(pv&&'MutationObserver'in window)new MutationObserver(syncPairValue).observe(pv,{childList:true,characterData:true,subtree:true})}
-let timer=0;function schedule(){clearTimeout(timer);timer=setTimeout(()=>{applyMode();patchPad()},0)}function init(){applyMode();patchPad();const list=$('list');if(list&&'MutationObserver'in window)new MutationObserver(schedule).observe(list,{childList:true,subtree:true});setTimeout(schedule,250);setTimeout(schedule,900)}
-document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init,{once:true}):init()})();
+(()=>{
+  const VERSION='qr-fullscreen-v1-high-contrast';
+  if(window.__kggQrFullscreen===VERSION)return;
+  window.__kggQrFullscreen=VERSION;
+  let wakeLock=null;
+  const $=id=>document.getElementById(id);
+  function ensureStyle(){
+    if($('kggQrFullscreenStyle'))return;
+    const s=document.createElement('style');
+    s.id='kggQrFullscreenStyle';
+    s.textContent=`
+      #qr img{cursor:zoom-in}
+      .kggQrFull{position:fixed;inset:0;z-index:30000;background:#fff;color:#000;display:flex;align-items:center;justify-content:center;padding:8px;box-sizing:border-box;touch-action:manipulation}
+      .kggQrFull img{width:min(96vw,96vh);height:min(96vw,96vh);object-fit:contain;background:#fff;image-rendering:pixelated;image-rendering:crisp-edges;filter:contrast(120%)}
+      .kggQrFull button{position:fixed;top:calc(10px + env(safe-area-inset-top));right:10px;width:46px;height:46px;border:3px solid #000;border-radius:999px;background:#fff;color:#000;font-size:28px;font-weight:950;line-height:1}
+      .kggQrFull .hint{position:fixed;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom));text-align:center;font-size:14px;font-weight:900;color:#000;background:#fff;padding:4px 8px}
+      @media(max-width:430px){.kggQrFull{padding:4px}.kggQrFull img{width:min(98vw,92vh);height:min(98vw,92vh)}}
+    `;
+    document.head.appendChild(s);
+  }
+  async function lockScreen(){
+    try{if('wakeLock'in navigator)wakeLock=await navigator.wakeLock.request('screen')}catch(e){}
+  }
+  async function unlockScreen(){
+    try{if(wakeLock&&wakeLock.release)await wakeLock.release()}catch(e){}
+    wakeLock=null;
+  }
+  function close(){
+    const el=$('kggQrFull');
+    if(el)el.remove();
+    unlockScreen();
+    document.removeEventListener('keydown',onKey,true);
+    try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}
+  }
+  function onKey(e){if(e.key==='Escape')close()}
+  function open(src){
+    if(!src)return;
+    ensureStyle();
+    close();
+    const el=document.createElement('div');
+    el.id='kggQrFull';
+    el.className='kggQrFull';
+    el.innerHTML='<button type="button" aria-label="Schließen">×</button><img src="'+String(src).replace(/"/g,'&quot;')+'" alt="QR-Code"><div class="hint">QR groß anzeigen · Zum Schließen tippen</div>';
+    el.addEventListener('click',e=>{if(e.target===el)close()});
+    el.querySelector('button').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();close()});
+    document.body.appendChild(el);
+    document.addEventListener('keydown',onKey,true);
+    lockScreen();
+    try{if(el.requestFullscreen)el.requestFullscreen().catch(()=>{})}catch(e){}
+  }
+  function bind(){
+    ensureStyle();
+    if(window.__kggQrFullscreenBound)return;
+    window.__kggQrFullscreenBound=1;
+    document.addEventListener('click',e=>{
+      const img=e.target&&e.target.closest?e.target.closest('#qr img'):null;
+      if(!img)return;
+      e.preventDefault();
+      e.stopPropagation();
+      open(img.src);
+    },true);
+  }
+  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',bind):bind();
+})();
 ```

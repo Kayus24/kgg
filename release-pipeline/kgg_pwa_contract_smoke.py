@@ -34,7 +34,7 @@ def validate_worker()->str:
  match=re.search(r"const APP_VERSION = '([0-9]+)';",worker)
  if not match:fail("service-worker.js has no numeric APP_VERSION")
  version=match.group(1)
- required=(f"kgg-handyplan-v{version}-",f"const APP_VERSION = '{version}';","const RECOVERY_PATH = './update-recovery.html';","./manifest-v64.webmanifest","./kgg-icon-192-v63.png","./kgg-icon-512-v63.png","./kgg-icon-maskable-512-v63.png",f"./patient-version-label.js?v={version}","./patient-set-summary-groups.js?v=set-summary-groups-2-range-label","./patient-card-progress.js?v=card-progress-3-active-units","./patient-install-prompt.js?v=install-prompt-1-shared-reference","./patient-plan-delete.js?v=plan-delete-3-red-x-rename","./patient-numpad-card-guard.js?v=numpad-input-switch-1","GET_UPDATE_DIAGNOSTICS","isRecoveryRequest(event.request)","function injectModules(response){return response}")
+ required=(f"kgg-handyplan-v{version}-",f"const APP_VERSION = '{version}';","const RECOVERY_PATH = './update-recovery.html';","./manifest-v64.webmanifest","./kgg-icon-192-v63.png","./kgg-icon-512-v63.png","./kgg-icon-maskable-512-v63.png",f"./patient-version-label.js?v={version}","./patient-set-summary-groups.js?v=set-summary-groups-4-ticket-015-progressions","./patient-card-progress.js?v=card-progress-3-active-units","./patient-install-prompt.js?v=install-prompt-2-capability-only","./patient-plan-delete.js?v=plan-delete-3-red-x-rename","./patient-numpad-card-guard.js?v=numpad-input-switch-1","GET_UPDATE_DIAGNOSTICS","isRecoveryRequest(event.request)","function injectModules(response){return response}")
  for fragment in required:
   if fragment not in worker:fail(f"service-worker.js is missing {fragment!r}")
  if "v59.png" in worker or "v59'" in worker or 'v59"' in worker:fail("service-worker.js still contains a v59 icon reference")
@@ -55,10 +55,10 @@ def validate_static_compatibility(manifest:dict,version:str)->None:
  if '<link rel="apple-touch-icon" sizes="192x192" href="./kgg-icon-192-v63.png">' not in html:fail("index.html is missing the first-load Apple icon")
  scripts=(
   "./patient-plan-link-choice.js?v=plan-link-choice-2-kgg-h3",
-  "./collapse-cards.js?v=plan-update-label-3-active-units",
+  "./collapse-cards.js?v=plan-update-label-6-single-scroll-owner",
   "./patient-card-progress.js?v=card-progress-3-active-units",
-  "./patient-install-guide.js?v=install-guide-v81-ios-kgg-h3",
-  "./patient-install-prompt.js?v=install-prompt-1-shared-reference",
+  "./patient-install-guide.js?v=install-guide-v82-prompt-only",
+  "./patient-install-prompt.js?v=install-prompt-2-capability-only",
   "./patient-plan-replace-slot-fix.js?v=active-slot-1",
   "./patient-start-scan.js?v=start-scan-v87-active-units",
   "./patient-multiplan-db.js?v=lossless-media-plans-1",
@@ -66,13 +66,13 @@ def validate_static_compatibility(manifest:dict,version:str)->None:
   "./patient-card-settings.js?v=card-settings-3-unit-semantics",
   "./patient-start-values-day1.js?v=start-values-day1-2-active-units",
   "./patient-day-history.js?v=day-history-2-active-units",
-  "./patient-media-retry-cache_v2.js?v=thumb-layout-2-safe-text",
+  "./patient-media-retry-cache_v2.js?v=thumb-layout-6-frameless-large",
   "./patient-ui-micro-polish.js?v=unit-labels-pain-fit-1",
-  "./patient-pain-vertical-scale.js?v=exercise-pain-vertical-6-icon-only",
-  "./numpad-ui-fix.js?v=scroll-stable-1",
-  "./patient-numpad-visibility-fix.js?v=stay-open-switch-2-compact-large",
+  "./patient-pain-vertical-scale.js?v=exercise-pain-vertical-8-compact-text",
+  "./numpad-ui-fix.js?v=scroll-stable-4-single-owner",
+  "./patient-numpad-visibility-fix.js?v=stay-open-switch-6-dirty-commit-gate",
   "./patient-extra-info-display.js?v=extra-info-filter-1",
-  "./patient-last-value-hints.js?v=last-value-button-shimmer-1",
+  "./patient-last-value-hints.js?v=last-value-button-shimmer-2-transfer-api",
   "./patient-set-summary-groups.js?v=set-summary-groups-4-ticket-015-progressions",
   "./patient-qr-fullscreen.js?v=qr-fullscreen-1",
   "./patient-numpad-card-guard.js?v=numpad-input-switch-1",

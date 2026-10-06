@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='vertical-pain-v8-icon-only';
+  const VERSION='vertical-pain-v10-compact-text';
   const STYLE_ID='kggPainVerticalStyle';
   const MODAL_ID='kggPainModal';
   const DIALOG_ID='kggPainModalDialog';
@@ -32,6 +32,7 @@
   const minDescription=()=>isEnglish()?'No pain at all':'Gar kein Schmerz';
   const hintText=()=>isEnglish()?'Slide or tap a number':'Schieben oder Zahl antippen';
   const closeText=()=>isEnglish()?'Close pain scale':'Schmerzskala schließen';
+  const compactButtonText=(selected,value)=>selected?`${clampValue(value)}⚡`:(isEnglish()?'Pain ⚡':'Schmerz ⚡');
 
   function ensureStyle(){
     let style=document.getElementById(STYLE_ID);
@@ -46,10 +47,10 @@
       .kggPainVerticalToggle:focus-visible{outline:3px solid rgba(37,99,235,.28);outline-offset:2px}
       .kggPainVerticalLabel{min-width:0;line-height:1.25}
       .kggPainVerticalCurrent{min-width:42px;text-align:right;color:#475569;font-variant-numeric:tabular-nums}
-      .kggPainVerticalIcon{display:none;flex:0 0 auto;width:48px;height:48px;align-items:center;justify-content:center}.kggPainVerticalIcon svg{display:block;width:48px;height:48px}
+      .kggPainVerticalIcon{display:none}.kggPainCompactText{display:none}
       .kggPainVerticalChevron{font-size:17px;color:#64748b;transition:transform .18s ease}
       .kggPainVerticalToggle[aria-expanded="true"] .kggPainVerticalChevron{transform:rotate(180deg)}
-      body.kggSetViewCompact .pain.${ROOT_CLASS}{margin-top:8px}body.kggSetViewCompact .kggPainVertical{width:auto;margin-top:0;display:flex;justify-content:flex-start}body.kggSetViewCompact .kggPainVerticalToggle{width:48px;height:48px;min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;gap:0;padding:0;border:0;border-radius:999px;background:transparent;box-shadow:none}body.kggSetViewCompact .kggPainVerticalToggle:active{background:transparent;transform:scale(.96)}body.kggSetViewCompact .kggPainVerticalIcon{display:inline-flex}body.kggSetViewCompact .kggPainVerticalLabel,body.kggSetViewCompact .kggPainVerticalCurrent,body.kggSetViewCompact .kggPainVerticalChevron{display:none}
+      body.kggSetViewCompact .pain.${ROOT_CLASS}{margin-top:6px}body.kggSetViewCompact .kggPainVertical{width:auto;margin-top:0;display:flex;justify-content:flex-end}body.kggSetViewCompact .kggPainVerticalToggle{width:auto;height:42px;min-width:86px;min-height:42px;display:flex;align-items:center;justify-content:center;gap:0;padding:0 12px;border:1px solid #8e9ec0;border-radius:999px;background:#f8f9fb;color:#111827;box-shadow:none;font-size:13px;font-weight:900;white-space:nowrap}body.kggSetViewCompact .kggPainVerticalToggle:active{background:#f1f5f9;transform:scale(.98)}body.kggSetViewCompact .kggPainVerticalIcon{display:none}body.kggSetViewCompact .kggPainCompactText{display:inline}body.kggSetViewCompact .kggPainVerticalLabel,body.kggSetViewCompact .kggPainVerticalCurrent,body.kggSetViewCompact .kggPainVerticalChevron{display:none}
       #${MODAL_ID}[hidden]{display:none!important}
       #${MODAL_ID}{position:fixed;inset:0;z-index:9500;box-sizing:border-box;display:flex;align-items:center;justify-content:flex-end;padding:calc(12px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));background:rgba(15,23,42,.26);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);overscroll-behavior:contain;touch-action:none}
       #${DIALOG_ID}{position:relative;box-sizing:border-box;width:min(196px,calc(100vw - 24px));max-height:calc(100dvh - 24px);display:flex;flex-direction:column;background:#fff;color:#111827;border:1px solid #dbe3ef;border-radius:22px;padding:12px;box-shadow:0 24px 70px rgba(15,23,42,.38);touch-action:auto;overflow:hidden;animation:kggPainModalIn .18s cubic-bezier(.16,.84,.44,1) both}
@@ -150,7 +151,7 @@
   }
 
   function updateCompact(state,selected,value){
-    state.selected=selected;state.committed=clampValue(value);state.current.textContent=currentText(selected,value);
+    state.selected=selected;state.committed=clampValue(value);state.current.textContent=currentText(selected,value);if(state.compact)state.compact.textContent=compactButtonText(selected,value);
     state.toggle.setAttribute('aria-label',`${labelText()}: ${currentText(selected,value)}`)
   }
   function updateStage(value){
@@ -160,7 +161,7 @@
     modal.values.forEach(row=>row.dataset.active=String(Number(row.dataset.kggPainValue)===next))
   }
   function refreshLanguage(){
-    document.querySelectorAll('.kggPainVerticalLabel').forEach(label=>label.textContent=labelText());
+    document.querySelectorAll('.kggPainVerticalLabel').forEach(label=>label.textContent=labelText());document.querySelectorAll('.pain.'+ROOT_CLASS).forEach(root=>{const state=states.get(root);if(state&&state.compact)state.compact.textContent=compactButtonText(state.selected,state.committed)});
     if(!modal)return;
     modal.title.textContent=labelText();modal.maxDesc.textContent=maxDescription();modal.minDesc.textContent=minDescription();modal.hint.textContent=hintText();modal.close.setAttribute('aria-label',closeText());modal.stage.setAttribute('aria-label',labelText());
     if(activeRoot){const state=states.get(activeRoot);if(state)state.toggle.setAttribute('aria-label',`${labelText()}: ${currentText(state.selected,state.committed)}`)}
@@ -283,12 +284,13 @@
   function buildCompact(root,ei){
     const wrap=document.createElement('div');wrap.className='kggPainVertical';
     const toggle=document.createElement('button');toggle.type='button';toggle.className='kggPainVerticalToggle';toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-haspopup','dialog');toggle.setAttribute('aria-controls',MODAL_ID);
-    const icon=document.createElement('span');icon.className='kggPainVerticalIcon';icon.setAttribute('aria-hidden','true');icon.innerHTML='<svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="11.5" fill="#4A4E59"/><path d="M12.8 4.6 8.9 11h3l-1 8.4 4.4-7.4h-3.1l.6-7.4Z" fill="#E65E52"/><path d="m6.9 7.8-2.1 3.3 1.7.2-.8 4 3-4.8-1.8-.2V7.8Zm10.6.5-2.4 3.8 1.9.2-1.2 4.3 3.4-5-1.9-.3.2-3Z" fill="#E65E52"/></svg>';
+    const icon=document.createElement('span');icon.className='kggPainVerticalIcon';icon.setAttribute('aria-hidden','true');icon.innerHTML='<svg viewBox="0 0 48 30" focusable="false"><rect class="kggPainIconCapsule" x="0.75" y="0.75" width="46.5" height="28.5" rx="14.25" fill="#F8F9FB" stroke="#8E9EC0" stroke-width="1.5"/><path class="kggPainBolt" d="M13.8 7.2 9.6 13.2l3.1.8-1.5 4.5 6.9-7-3.5-.9 2-3.4Z" fill="#FCD08F"/><path class="kggPainBolt" d="M23.6 4.2 20 14h3.4l-1.5 11.5 6.7-13h-3.8l2.3-8.3Z" fill="#FCD08F"/><path class="kggPainBolt" d="M35.7 7.7 30.3 14.1l3.3.8-4.2 7 9.6-8-3.5-.9 3.1-3.5Z" fill="#FCD08F"/></svg>';
     const label=document.createElement('span');label.className='kggPainVerticalLabel';
     const current=document.createElement('span');current.className='kggPainVerticalCurrent';
+    const compact=document.createElement('span');compact.className='kggPainCompactText';compact.setAttribute('aria-hidden','true');
     const chevron=document.createElement('span');chevron.className='kggPainVerticalChevron';chevron.textContent='⌄';chevron.setAttribute('aria-hidden','true');
-    toggle.append(icon,label,current,chevron);wrap.appendChild(toggle);root.appendChild(wrap);
-    const state={ei,wrap,toggle,label,current,selected:false,committed:0,row:null,oldLabel:null,labelHidden:false,rowHidden:false,rowAria:null,rowInert:false,rowDisplay:'',rowDisplayPriority:''};
+    toggle.append(icon,label,current,compact,chevron);wrap.appendChild(toggle);root.appendChild(wrap);
+    const state={ei,wrap,toggle,label,current,compact,selected:false,committed:0,row:null,oldLabel:null,labelHidden:false,rowHidden:false,rowAria:null,rowInert:false,rowDisplay:'',rowDisplayPriority:''};
     states.set(root,state);
     toggle.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();toggleModal(root)});
     wrap.addEventListener('click',event=>event.stopPropagation());return state

@@ -1,9 +1,9 @@
 (()=>{
-  const VERSION='numpad-visibility-v10-stay-open-switch';
+  const VERSION='numpad-visibility-v14-dirty-commit-gate';
   if(window.__kggNumpadVisibility===VERSION)return;
   window.__kggNumpadVisibility=VERSION;
   const $=id=>document.getElementById(id);
-  let activeInput=null,activeMeta=null,editingInput=null,editingMeta=null,zoomEl=null,padValObserver=null,padSession=0;
+  let activeInput=null,activeMeta=null,editingInput=null,editingMeta=null,editingDirty=false,zoomEl=null,padValObserver=null,padSession=0;
   function pad(){return $('pad')}
   function box(){const p=pad();return p?p.querySelector('.padBox'):null}
   function open(){const p=pad();return !!(p&&!p.classList.contains('hide'))}
@@ -18,21 +18,39 @@
   function syncZoom(){if(!zoomEl)return;const v=padValue()||'0';const n=zoomEl.querySelector('.zVal');if(n)n.textContent=v}
   function placeZoom(input,animate){if(compactMode()){removeZoom();return}if(!input||!open()||!arrange()){removeZoom();return}const b=box();if(!b)return;const ir=input.getBoundingClientRect();const br=b.getBoundingClientRect();const cs=getComputedStyle(input);const vw=window.innerWidth||document.documentElement.clientWidth;const targetW=Math.min(vw-24,Math.max(ir.width*1.35,220));const targetH=96;const left=Math.max(12,Math.min(vw-targetW-12,ir.left+(ir.width-targetW)/2));const top=Math.max(10,br.top-targetH-8);if(!zoomEl){zoomEl=document.createElement('div');zoomEl.className='kggPadZoomInput';zoomEl.innerHTML='<div class="zLabel"></div><div class="zVal"></div>';document.body.appendChild(zoomEl);animate=true}zoomEl.querySelector('.zLabel').textContent=label(activeMeta,input);syncZoom();document.querySelectorAll('input.num.kggPadSource').forEach(n=>n.classList.remove('kggPadSource'));input.classList.add('kggPadSource');if(animate){zoomEl.classList.add('kggPadMorphStart');zoomEl.style.left=ir.left+'px';zoomEl.style.top=ir.top+'px';zoomEl.style.width=ir.width+'px';zoomEl.style.height=ir.height+'px';zoomEl.style.borderRadius=(cs.borderRadius&&cs.borderRadius!=='0px')?cs.borderRadius:'10px';zoomEl.style.opacity='0.92';zoomEl.style.transform='scale(1)';zoomEl.getBoundingClientRect();requestAnimationFrame(()=>{zoomEl.classList.remove('kggPadMorphStart');zoomEl.style.left=left+'px';zoomEl.style.top=top+'px';zoomEl.style.width=targetW+'px';zoomEl.style.height=targetH+'px';zoomEl.style.borderRadius='16px';zoomEl.style.opacity='1';zoomEl.style.transform='scale(1)'})}else{zoomEl.classList.remove('kggPadMorphStart');zoomEl.style.left=left+'px';zoomEl.style.top=top+'px';zoomEl.style.width=targetW+'px';zoomEl.style.height=targetH+'px';zoomEl.style.borderRadius='16px';zoomEl.style.opacity='1';zoomEl.style.transform='scale(1)'}const pv=$('padVal');if(pv&&!padValObserver&&'MutationObserver'in window){padValObserver=new MutationObserver(syncZoom);padValObserver.observe(pv,{childList:true,characterData:true,subtree:true})}}
   function space(){css();const big=arrange();const ph=h();const main=document.querySelector('main');if(main)main.style.paddingBottom=ph?Math.ceil(ph+(big?198:120))+'px':'';document.body.classList.toggle('kggPadOpen',!!ph);const p=pad();if(p)p.classList.toggle('kggPadPass',!!ph);if(big)placeZoom(activeInput,false);else removeZoom()}
-  function move(){if(!activeInput||!open())return;space();const ph=h();const r=activeInput.getBoundingClientRect();const vv=window.visualViewport;const bottom=(vv?vv.height+vv.offsetTop:window.innerHeight)-ph-28;let dy=0;if(r.bottom>bottom)dy=r.bottom-bottom;if(r.top<18)dy=r.top-18;if(Math.abs(dy)>1)window.scrollBy({top:dy,left:0,behavior:'smooth'});if(largeUi())setTimeout(()=>placeZoom(activeInput,false),70)}
+  function scrollAnchor(input){return input&&input.closest?(input.closest('.lr,.bi')||input):input}
+  function sameScrollAnchor(a,b){return !!(a&&b&&scrollAnchor(a)===scrollAnchor(b))}
+  function move(){if(!activeInput||!open())return;space();const ph=h();const target=scrollAnchor(activeInput);const r=target.getBoundingClientRect();const vv=window.visualViewport;const bottom=(vv?vv.height+vv.offsetTop:window.innerHeight)-ph-28;let dy=0;if(r.bottom>bottom)dy=r.bottom-bottom;if(r.top<18)dy=r.top-18;if(Math.abs(dy)>=3)window.scrollBy({top:dy,left:0,behavior:'smooth'});if(largeUi())setTimeout(()=>placeZoom(activeInput,false),70)}
   function ensure(){[20,90,180,360,650].forEach(t=>setTimeout(move,t))}
-  function clearSoon(closedSession){setTimeout(()=>{if(closedSession!==padSession||open())return;const main=document.querySelector('main');if(main)main.style.paddingBottom='';document.body.classList.remove('kggPadOpen');const p=pad();if(p){p.classList.remove('kggPadPass');p.classList.remove('kggPadLargeUi')}removeZoom();activeInput=null;activeMeta=null;editingInput=null;editingMeta=null},120)}
-  function commitEditingInPlace(){if(!open()||!editingInput||!editingMeta||typeof window.put!=='function')return false;const value=padValue()||'0';try{editingInput.value=value;window.put(editingMeta.ei,editingMeta.s,editingMeta.side,editingMeta.key,value);return true}catch(e){return false}}
+  function clearSoon(closedSession){setTimeout(()=>{if(closedSession!==padSession||open())return;const main=document.querySelector('main');if(main)main.style.paddingBottom='';document.body.classList.remove('kggPadOpen');const p=pad();if(p){p.classList.remove('kggPadPass');p.classList.remove('kggPadLargeUi')}removeZoom();activeInput=null;activeMeta=null;editingInput=null;editingMeta=null;editingDirty=false},120)}
+  function commitEditingInPlace(){if(!open()||!editingInput||!editingMeta||typeof window.put!=='function')return false;if(!editingDirty)return true;const value=padValue()||'0';try{editingInput.value=value;window.put(editingMeta.ei,editingMeta.s,editingMeta.side,editingMeta.key,value);editingDirty=false;return true}catch(e){return false}}
   function closeByOutsideTap(){if(!open()||typeof window.closePad!=='function')return;try{window.closePad(true)}catch(e){try{window.closePad(false)}catch(_){}}}
   function closeAfterLast(){if(!open()||typeof window.closePad!=='function')return;setTimeout(()=>{try{window.closePad(true)}catch(e){}},0)}
   function isInputTarget(t){return !!(t&&t.matches&&t.matches('input.num'))}
   function isPadTarget(t){return !!(t&&t.closest&&t.closest('#pad .padBox'))}
-  function patch(){if(window.__kggNumpadVisibilityPatchedV10)return;window.__kggNumpadVisibilityPatchedV10=1;if(typeof window.openPad==='function'){const oldOpen=window.openPad;window.openPad=function(input,meta){const switching=!!(open()&&editingInput&&input&&input!==editingInput);if(switching&&!commitEditingInPlace()&&typeof window.closePad==='function'){try{window.closePad(true)}catch(e){}}editingInput=input||document.activeElement;editingMeta=meta||editingMeta;activeInput=editingInput;activeMeta=editingMeta;padSession+=1;const r=oldOpen.apply(this,arguments);space();if(largeUi())placeZoom(activeInput,!switching);ensure();return r}}if(typeof window.closePad==='function'){const oldClose=window.closePad;window.closePad=function(){const closedSession=padSession;const r=oldClose.apply(this,arguments);clearSoon(closedSession);return r}}if(typeof window.padUseLast==='function'){const oldLast=window.padUseLast;window.padUseLast=function(){const r=oldLast.apply(this,arguments);closeAfterLast();return r}}}
+  function focusWithoutScroll(input){
+    if(!input||typeof input.focus!=='function')return;
+    const x=window.scrollX,y=window.scrollY;
+    try{input.focus({preventScroll:true})}catch(e){try{input.focus()}catch(_){}}
+    if(window.scrollX!==x||window.scrollY!==y)window.scrollTo(x,y);
+  }
+  function patch(){if(window.__kggNumpadVisibilityPatchedV14)return;window.__kggNumpadVisibilityPatchedV14=1;if(typeof window.openPad==='function'){const oldOpen=window.openPad;window.openPad=function(input,meta){const previousInput=editingInput;const switching=!!(open()&&editingInput&&input&&input!==editingInput);const sameRow=switching&&sameScrollAnchor(previousInput,input);if(switching&&!commitEditingInPlace()&&typeof window.closePad==='function'){try{window.closePad(true)}catch(e){}}editingInput=input||document.activeElement;editingMeta=meta||editingMeta;activeInput=editingInput;activeMeta=editingMeta;padSession+=1;const r=oldOpen.apply(this,arguments);editingDirty=false;space();if(largeUi())placeZoom(activeInput,!switching);if(!sameRow)ensure();return r}}if(typeof window.closePad==='function'){const oldClose=window.closePad;window.closePad=function(){const closedSession=padSession;const r=oldClose.apply(this,arguments);clearSoon(closedSession);return r}}if(typeof window.padPress==='function'){const oldPress=window.padPress;window.padPress=function(){const r=oldPress.apply(this,arguments);editingDirty=true;return r}}if(typeof window.padBack==='function'){const oldBack=window.padBack;window.padBack=function(){const r=oldBack.apply(this,arguments);editingDirty=true;return r}}if(typeof window.padUseLast==='function'){const oldLast=window.padUseLast;window.padUseLast=function(){const r=oldLast.apply(this,arguments);editingDirty=true;closeAfterLast();return r}}}
   document.addEventListener('focusin',e=>{if(!isInputTarget(e.target))return;if(!open())activeInput=e.target;else if(e.target===editingInput)ensure()},true);
   document.addEventListener('click',e=>{if(!isInputTarget(e.target))return;if(!open())activeInput=e.target;else if(e.target===editingInput)ensure()},true);
-  document.addEventListener('pointerdown',e=>{if(!open())return;const t=e.target;if(isInputTarget(t))return;if(isPadTarget(t))return;closeByOutsideTap()},true);
+  document.addEventListener('pointerdown',e=>{
+    const t=e.target;
+    if(isInputTarget(t)){
+      if(typeof e.preventDefault==='function')e.preventDefault();
+      focusWithoutScroll(t);
+      return;
+    }
+    if(!open())return;
+    if(isPadTarget(t))return;
+    closeByOutsideTap();
+  },true);
   if(window.visualViewport){visualViewport.addEventListener('resize',()=>{arrange();ensure()});visualViewport.addEventListener('scroll',()=>{arrange();ensure()})}
   addEventListener('orientationchange',()=>setTimeout(()=>{arrange();ensure()},250));
-  if(window.__KGG_TEST__)window.__kggNumpadCommitTest={open,commitEditingInPlace,getEditingInput:()=>editingInput,getSession:()=>padSession};
+  window.__kggNumpadEditingApi={open,commitEditingInPlace,getEditingInput:()=>editingInput,getEditingMeta:()=>editingMeta,getPadValue:padValue,isDirty:()=>editingDirty,markDirty:()=>{editingDirty=true}};if(window.__KGG_TEST__)window.__kggNumpadCommitTest={open,commitEditingInPlace,getEditingInput:()=>editingInput,getSession:()=>padSession,isDirty:()=>editingDirty};
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',patch):patch();
   setTimeout(patch,500);setTimeout(patch,1500);
 })();

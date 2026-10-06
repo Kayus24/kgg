@@ -83,9 +83,9 @@ assert(browserSource.includes('page.waitForTimeout(220)'),"browser test measures
 assert(browserSource.includes('Schlimmster vorstellbarer Schmerz'),"browser test does not verify maximum description");
 assert(browserSource.includes('Gar kein Schmerz'),"browser test does not verify minimum description");
 assert(browserSource.includes('compact dialog is still too wide'),"browser test does not cap compact dialog width");
-assert(browserSource.includes('compact pain trigger still has a visible outer frame/background'),"browser test does not reject the framed compact pain control");
-assert(browserSource.includes('approved graphite/coral visual'),"browser test does not protect the approved compact pain icon palette");
-assert(source.includes('fill="#4A4E59"')&&source.includes('fill="#E65E52"'),"approved graphite/coral pain icon source is missing");
+assert(browserSource.includes('compact pain trigger lost its visible capsule'),"browser test does not protect the visible compact pain capsule");
+assert(browserSource.includes('does not show Schmerz ⚡ when unset'),"browser test does not protect the unset Schmerz label");
+assert(source.includes("'Schmerz ⚡'")&&source.includes('kggPainCompactText'),"compact Schmerz/value text contract is missing");
 assert(browserSource.includes('compact content is not centered'),"browser test does not protect symmetric modal whitespace");
 assert(browserSource.includes('wide viewport reintroduced excess white space'),"browser test does not protect tablet/desktop compactness");
 assert(browserSource.includes('modal auto-closed after choosing a value'),"browser test does not protect deliberate closing");

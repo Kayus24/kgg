@@ -86,6 +86,7 @@ DIRECT_FIRST_LOAD_MODULES = (
     "patient-card-settings.js",
     "patient-start-values-day1.js",
     "patient-day-history.js",
+    "patient-exercise-media-sources.js",
     "patient-media-retry-cache_v2.js",
     "patient-ui-micro-polish.js",
     "patient-pain-vertical-scale.js",

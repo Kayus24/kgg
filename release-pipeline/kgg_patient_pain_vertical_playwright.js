@@ -56,7 +56,7 @@ async function setCardOpen(page, _card, index, open) {
   throw new Error(`card open state did not stabilize: ${JSON.stringify(diagnostic)}`);
 }
 async function openModal(toggle, modal) {
-  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.evaluate(element=>element.click());
   await modal.waitFor({ state:"visible" });
 }
 async function chooseValue(page, value) {
@@ -108,12 +108,13 @@ async function main() {
     const modal=page.locator("#kggPainModal");
     await toggle.waitFor({state:"visible"});
     assert((await first.locator(".kggPainVerticalLabel").textContent())==="Schmerzen bei der Übung?","pain label semantics are wrong");
-    const compactTrigger=await toggle.evaluate(el=>{const r=el.getBoundingClientRect(),style=getComputedStyle(el),label=el.querySelector(".kggPainVerticalLabel"),current=el.querySelector(".kggPainVerticalCurrent"),chevron=el.querySelector(".kggPainVerticalChevron"),icon=el.querySelector(".kggPainVerticalIcon"),iconBox=icon?.getBoundingClientRect(),circle=icon?.querySelector("circle"),paths=[...(icon?.querySelectorAll("path")||[])];return{width:r.width,height:r.height,borderWidth:style.borderWidth,background:style.backgroundColor,labelDisplay:label?getComputedStyle(label).display:"",currentDisplay:current?getComputedStyle(current).display:"",chevronDisplay:chevron?getComputedStyle(chevron).display:"",iconDisplay:icon?getComputedStyle(icon).display:"",iconWidth:iconBox?.width||0,iconHeight:iconBox?.height||0,circleFill:circle?.getAttribute("fill")||"",pathFills:paths.map(path=>path.getAttribute("fill")||""),aria:el.getAttribute("aria-label")||""}});
-    assert(compactTrigger.height>=46&&compactTrigger.height<=50,"compact pain trigger is not the approved icon height: "+JSON.stringify(compactTrigger));
-    assert(compactTrigger.width>=46&&compactTrigger.width<=50&&Math.abs(compactTrigger.width-compactTrigger.height)<=1,"compact pain trigger is not circular: "+JSON.stringify(compactTrigger));
-    assert(compactTrigger.borderWidth==="0px"&&compactTrigger.background==="rgba(0, 0, 0, 0)","compact pain trigger still has a visible outer frame/background: "+JSON.stringify(compactTrigger));
-    assert(compactTrigger.labelDisplay==="none"&&compactTrigger.currentDisplay==="none"&&compactTrigger.chevronDisplay==="none"&&compactTrigger.iconDisplay!=="none","compact pain trigger is not icon-only: "+JSON.stringify(compactTrigger));
-    assert(compactTrigger.iconWidth>=46&&compactTrigger.iconHeight>=46&&compactTrigger.circleFill.toUpperCase()==="#4A4E59"&&compactTrigger.pathFills.length>=2&&compactTrigger.pathFills.every(fill=>fill.toUpperCase()==="#E65E52"),"compact pain icon does not match approved graphite/coral visual: "+JSON.stringify(compactTrigger));
+    const compactTrigger=await toggle.evaluate(el=>{const r=el.getBoundingClientRect(),style=getComputedStyle(el),label=el.querySelector(".kggPainVerticalLabel"),current=el.querySelector(".kggPainVerticalCurrent"),chevron=el.querySelector(".kggPainVerticalChevron"),icon=el.querySelector(".kggPainVerticalIcon"),compact=el.querySelector(".kggPainCompactText"),rootBox=el.closest(".kggPainVertical")?.getBoundingClientRect();return{width:r.width,height:r.height,borderWidth:style.borderWidth,borderColor:style.borderTopColor,background:style.backgroundColor,labelDisplay:label?getComputedStyle(label).display:"",currentDisplay:current?getComputedStyle(current).display:"",chevronDisplay:chevron?getComputedStyle(chevron).display:"",iconDisplay:icon?getComputedStyle(icon).display:"",compactDisplay:compact?getComputedStyle(compact).display:"",compactText:compact?.textContent||"",rightGap:rootBox?Math.abs(rootBox.right-r.right):999,aria:el.getAttribute("aria-label")||""}});
+    assert(compactTrigger.height>=40&&compactTrigger.height<=48,"compact pain trigger has wrong touch height: "+JSON.stringify(compactTrigger));
+    assert(compactTrigger.width>=78&&compactTrigger.width<=120,"compact pain trigger does not fit the Schmerz capsule: "+JSON.stringify(compactTrigger));
+    assert(compactTrigger.borderWidth!=="0px"&&compactTrigger.background!=="rgba(0, 0, 0, 0)","compact pain trigger lost its visible capsule: "+JSON.stringify(compactTrigger));
+    assert(compactTrigger.labelDisplay==="none"&&compactTrigger.currentDisplay==="none"&&compactTrigger.chevronDisplay==="none"&&compactTrigger.iconDisplay==="none"&&compactTrigger.compactDisplay!=="none","compact pain trigger did not switch to compact text mode: "+JSON.stringify(compactTrigger));
+    assert(compactTrigger.compactText==="Schmerz ⚡","compact pain trigger does not show Schmerz ⚡ when unset: "+JSON.stringify(compactTrigger));
+    assert(compactTrigger.rightGap<=2,"compact pain trigger is not aligned to the right edge of its row: "+JSON.stringify(compactTrigger));
     assert(compactTrigger.aria.includes("Schmerzen bei der Übung?"),"compact pain trigger lost accessible full label");
     const viewSwitch=page.locator("#kggSetViewSwitch");await viewSwitch.click();
     const legacyTrigger=await toggle.evaluate(el=>({labelDisplay:getComputedStyle(el.querySelector(".kggPainVerticalLabel")).display,iconDisplay:getComputedStyle(el.querySelector(".kggPainVerticalIcon")).display,width:el.getBoundingClientRect().width}));
@@ -171,6 +172,7 @@ async function main() {
 
     await chooseValue(page,7);
     assert((await first.locator(".kggPainVerticalCurrent").innerText())==="7/10","tap did not update compact value");
+    assert((await first.locator(".kggPainCompactText").innerText())==="7⚡","selected pain value did not replace Schmerz text");
     assert(await modal.isVisible(),"modal auto-closed after choosing a value");
     assert((await toggle.getAttribute("aria-expanded"))==="true","trigger no longer reports open modal");
     assert((await first.locator(".kggCardProgress").getAttribute("data-kgg-progress"))==="open","pain alone changed exercise progress");
@@ -208,6 +210,7 @@ async function main() {
     await page.reload({waitUntil:"domcontentloaded"});await waitForRuntime(page);
     const reloadedFirst=page.locator("#list .ex").nth(0);await setCardOpen(page,reloadedFirst,0,true);
     assert((await reloadedFirst.locator(".kggPainVerticalCurrent").innerText())==="0/10","zero did not persist after reload");
+    assert((await reloadedFirst.locator(".kggPainCompactText").innerText())==="0⚡","zero pain did not render as 0⚡");
 
     const reloadedToggle=reloadedFirst.locator(".kggPainVerticalToggle");
     await openModal(reloadedToggle,page.locator("#kggPainModal"));
