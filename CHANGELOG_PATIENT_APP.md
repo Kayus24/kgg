@@ -1,5 +1,12 @@
 # Patient App Changelog
 
+## v88 - 2026-10-06
+
+- Bereits geladene Übungsbilder und Karten-Thumbnails werden bei erneutem Media-Sync nicht mehr als neue DOM-Bilder aufgebaut.
+- Ein vollständiger Patienten-App-Render verwendet vorhandene lokale `blob:`-Bildquellen synchron weiter; ein bereits fertiges Bild darf dadurch nicht erneut auf „Bild wird geladen ...“ zurückfallen.
+- Neue Playwright-Regression prüft stabile Bild- und Thumbnail-Nodes sowie neun aufeinanderfolgende Frames ohne Loading-Rückfall.
+- Der Medien-Stabilitätstest ist im Required Gate und im Legacy Patient Preview Gate verankert.
+
 ## v87 - 2026-10-02
 
 - Kompakte 3-Satz-Ansicht passt auch auf schmale Phone-Viewports in eine Zeile; echte Browser-Geometrie prueft 320/360/390/430 px.
