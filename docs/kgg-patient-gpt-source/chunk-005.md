@@ -2,7 +2,7 @@
 
 - Source file: `collapse-cards.js`
 - Characters: 1-11707
-- Full source SHA-256: `0f37706f4d60867f9a83ee34acede9e10a71572c8db764b96b919980f48057ea`
+- Full source SHA-256: `f13a5f3ac3d58b2f91fbb5c105d8edd0e30705958ef9b90789ff0352ed7db69e`
 
 ```
 (()=>{const S='kgg-ui-addon-style',B='kgg-collapse-toggle',L='kggPatientLang';let col=false,open=null,act=null,old='';const $=i=>document.getElementById(i),la=()=>localStorage.getItem(L)==='en'?'en':'de',tr=(d,e)=>la()==='en'?e:d,tryN=f=>{try{return f()}catch(e){return null}};

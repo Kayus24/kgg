@@ -2,7 +2,7 @@
 
 - Source file: `update-recovery.html`
 - Characters: 1-5778
-- Full source SHA-256: `32db8bd9f7c3304667a76ded1e69c8d0ca65a2338c20e81cd1b4e141776e66e7`
+- Full source SHA-256: `fd11fbc5b5e8a4b74a83bf4a046718438abea40025b8847b7a149b29ae4b1d8e`
 
 ```
 <!doctype html>

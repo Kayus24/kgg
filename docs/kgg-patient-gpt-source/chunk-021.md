@@ -2,7 +2,7 @@
 
 - Source file: `patient-pain-vertical-scale.js`
 - Characters: 1-24000
-- Full source SHA-256: `aeb8d022a6630c76de16e9d4ddb4a2d5f241e65ac86225667d4fce817f3dcc8c`
+- Full source SHA-256: `06e0f3d957e49c4c19525483f3d9c2d8bd7d835e87d7ac5fb6e906bff3ce6be5`
 
 ```
 (()=>{
@@ -157,12 +157,9 @@
     window.scrollTo(0,lock.scrollY)
   }
 
-  function setText(node,value){if(node&&node.textContent!==value)node.textContent=value}
-  function setAttr(node,name,value){if(node&&node.getAttribute(name)!==value)node.setAttribute(name,value)}
   function updateCompact(state,selected,value){
-    state.selected=selected;state.committed=clampValue(value);
-    setText(state.current,currentText(selected,value));if(state.compact)setText(state.compact,compactButtonText(selected,value));
-    setAttr(state.toggle,'aria-label',`${labelText()}: ${currentText(selected,value)}`)
+    state.selected=selected;state.committed=clampValue(value);state.current.textContent=currentText(selected,value);if(state.compact)state.compact.textContent=compactButtonText(selected,value);
+    state.toggle.setAttribute('aria-label',`${labelText()}: ${currentText(selected,value)}`)
   }
   function updateStage(value){
     if(!modal)return;
@@ -171,10 +168,10 @@
     modal.values.forEach(row=>row.dataset.active=String(Number(row.dataset.kggPainValue)===next))
   }
   function refreshLanguage(){
-    document.querySelectorAll('.kggPainVerticalLabel').forEach(label=>setText(label,labelText()));document.querySelectorAll('.pain.'+ROOT_CLASS).forEach(root=>{const state=states.get(root);if(state&&state.compact)setText(state.compact,compactButtonText(state.selected,state.committed))});
+    document.querySelectorAll('.kggPainVerticalLabel').forEach(label=>label.textContent=labelText());document.querySelectorAll('.pain.'+ROOT_CLASS).forEach(root=>{const state=states.get(root);if(state&&state.compact)state.compact.textContent=compactButtonText(state.selected,state.committed)});
     if(!modal)return;
-    setText(modal.title,labelText());setText(modal.maxDesc,maxDescription());setText(modal.minDesc,minDescription());setText(modal.hint,hintText());setAttr(modal.close,'aria-label',closeText());setAttr(modal.stage,'aria-label',labelText());
-    if(activeRoot){const state=states.get(activeRoot);if(state)setAttr(state.toggle,'aria-label',`${labelText()}: ${currentText(state.selected,state.committed)}`)}
+    modal.title.textContent=labelText();modal.maxDesc.textContent=maxDescription();modal.minDesc.textContent=minDescription();modal.hint.textContent=hintText();modal.close.setAttribute('aria-label',closeText());modal.stage.setAttribute('aria-label',labelText());
+    if(activeRoot){const state=states.get(activeRoot);if(state)state.toggle.setAttribute('aria-label',`${labelText()}: ${currentText(state.selected,state.committed)}`)}
   }
   function refreshModalFromRoot(root){
     const state=states.get(root);if(!state||!modal)return false;
@@ -302,5 +299,8 @@
     toggle.append(icon,label,current,compact,chevron);wrap.appendChild(toggle);root.appendChild(wrap);
     const state={ei,wrap,toggle,label,current,compact,selected:false,committed:0,row:null,oldLabel:null,labelHidden:false,rowHidden:false,rowAria:null,rowInert:false,rowDisplay:'',rowDisplayPriority:''};
     states.set(root,state);
-    toggle.addEventListener('click',event=>{event.preventDefault();event.stopP
+    toggle.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();toggleModal(root)});
+    wrap.addEventListener('click',event=>event.stopPropagation());return state
+  }
+  function refreshState(root,state){
 ```
