@@ -34,3 +34,12 @@ Inherit: `Kayus24/vibe-shared-knowledge/tool-routing/BASELINE.md`.
 - Preserve patient/admin boundary and protected areas.
 - Run the test suites required by `AGENTS.md`.
 - Use synthetic test data only.
+## Directory routing
+- `/`: project rules and cross-app contracts; read `AGENTS.md`, `APP_BOUNDARIES.md`, `TOOL_ROUTING.md` before broad work.
+- `kgg-update/src/**`: editable therapist/admin source. Use for admin implementation work.
+- `index.html`, `patient-*.js`, `collapse-cards.js`, PWA files: editable patient-app surface. Keep separate from admin work.
+- `kgg-plugin/**`: KGG plugin/UI-Lab implementation and contracts.
+- `android-wrapper/**`: native Android/WebView source; use only for Android-specific tasks.
+- `release-pipeline/**`: gates, release tools and test entry points; use for verification/release work.
+- `therapist-app/releases/**`: immutable historical release evidence; read for regression/hash/history, never as patch basis.
+- `docs/**`: project documentation; distinguish active contracts from history before treating a document as instruction.
