@@ -50,6 +50,38 @@ const context={console,document,MutationObserver:function(){this.observe=()=>{};
 context.window.window=context.window;context.window.document=document;context.globalThis=context;
 vm.createContext(context);vm.runInContext(source,context,{filename:'patient-numpad-visibility-fix.js'});
 
+const controller=context.window.__kggNumpadEditingApi;
+assert(controller&&typeof controller.getSnapshot==='function','editing API is missing stable getSnapshot()');
+assert(typeof controller.subscribe==='function','editing API is missing subscribe()');
+const initialSnapshot=controller.getSnapshot();
+assert(initialSnapshot&&initialSnapshot.padOpen===false&&initialSnapshot.input===null&&initialSnapshot.meta===null&&initialSnapshot.padValue===''&&initialSnapshot.dirty===false,'initial controller snapshot is not closed/clean');
+assert(controller.getSnapshot()===initialSnapshot,'getSnapshot() is not referentially stable without a state change');
+const controllerChanges=[];
+const unsubscribeController=controller.subscribe(()=>controllerChanges.push(controller.getSnapshot()));
+const probeA=input('probeA'),probeB=input('probeB');
+context.window.openPad(probeA,{ei:9,s:1,side:'B',key:'a'});
+const openSnapshot=controller.getSnapshot();
+assert(controllerChanges.length===1&&openSnapshot.padOpen===true&&openSnapshot.input===probeA&&openSnapshot.meta.key==='a'&&openSnapshot.padValue==='0'&&!openSnapshot.dirty,'open did not publish the expected controller snapshot');
+assert(controller.getSnapshot()===openSnapshot,'open snapshot is not referentially stable');
+context.window.padPress('7');
+const typedSnapshot=controller.getSnapshot();
+assert(controllerChanges.length===2&&typedSnapshot.padValue==='7'&&typedSnapshot.dirty===true,'padPress did not publish dirty buffer state');
+context.window.openPad(probeB,{ei:9,s:1,side:'B',key:'b'});
+const switchedSnapshot=controller.getSnapshot();
+assert(controllerChanges.length===3&&probeA.value==='7'&&switchedSnapshot.input===probeB&&switchedSnapshot.meta.key==='b'&&!switchedSnapshot.dirty,'field switch did not publish exactly one clean target snapshot');
+context.window.padPress('8');
+assert(controllerChanges.length===4&&controller.getSnapshot().padValue==='8'&&controller.getSnapshot().dirty===true,'second field edit did not publish');
+assert(controller.commitEditingInPlace()===true,'controller commit failed');
+const committedSnapshot=controller.getSnapshot();
+assert(controllerChanges.length===5&&committedSnapshot.dirty===false&&probeB.value==='8','commit did not publish clean state');
+context.window.closePad(false);
+const closedSnapshot=controller.getSnapshot();
+assert(controllerChanges.length===6&&closedSnapshot.padOpen===false&&closedSnapshot.input===null&&closedSnapshot.meta===null&&closedSnapshot.padValue===''&&!closedSnapshot.dirty,'close did not publish a closed snapshot');
+unsubscribeController();
+context.window.openPad(probeA,{ei:9,s:2,side:'B',key:'a'});
+assert(controllerChanges.length===6,'unsubscribe did not stop controller notifications');
+context.window.closePad(false);flush(120);commits.length=0;closeCalls.length=0;
+
 const a=input('A'),b=input('B'),c=input('C'),d=input('D'),e=input('E'),f=input('F');
 const ma={ei:0,s:1,side:'B',key:'a'},mb={ei:0,s:1,side:'B',key:'b'},mc={ei:0,s:2,side:'B',key:'a'};
 
