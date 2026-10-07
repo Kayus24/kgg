@@ -81,6 +81,9 @@ rg --no-ignore --files therapist-app/releases
 
 Mit Max auf Deutsch arbeiten: pragmatisch, direkt und mit wenigen Rückfragen. Wenn keine Vorgabe kollidiert und nichts blockiert, sinnvoll weiterarbeiten.
 
-## Tool routing
+## Runtime routing
 
-- Für Plugin-/Tool-Auswahl und Verzeichnisrouting `TOOL_ROUTING.md` lesen; Sicherheits- und Source-of-Truth-Regeln in dieser `AGENTS.md` bleiben vorrangig.
+- Zuerst `TOOL_ROUTING.md` lesen.
+- Wenn der aktive Agent **Codex** ist: `CODEX_TOOL_ROUTING.md` lesen und `CHATGPT_TOOL_ROUTING.md` nicht als Tool-Hierarchie verwenden.
+- Wenn der aktive Agent **ChatGPT** ist: `CHATGPT_TOOL_ROUTING.md` lesen und keine Codex-Browser-/Shell-Fähigkeiten voraussetzen.
+- ChatGPT-Plugins und Codex-Fähigkeiten niemals gegenseitig vererben.
