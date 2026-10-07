@@ -1,9 +1,133 @@
 # KGG Patient Source Chunk 007
 
-- Source file: `manifest-v64.webmanifest`
-- Characters: 1-431
-- Full source SHA-256: `a774ad16639b8ed0d99d18f1d3fe356afddfa963d88112b48bd118fc591dea5f`
+- Source file: `numpad-ui-fix.js`
+- Characters: 1-3908
+- Full source SHA-256: `4936668d1bd216fa7026a8a5f32cfc14de316b0b4a7dc762d927c54f230d0d03`
 
 ```
-{"name":"KGG Handyplan","short_name":"KGG Plan","start_url":"./","scope":"./","display":"standalone","background_color":"#f4f7fb","theme_color":"#f6c21b","icons":[{"src":"kgg-icon-192-v63.png","sizes":"192x192","type":"image/png","purpose":"any"},{"src":"kgg-icon-512-v63.png","sizes":"512x512","type":"image/png","purpose":"any"},{"src":"kgg-icon-maskable-512-v63.png","sizes":"512x512","type":"image/png","purpose":"maskable"}]}
+(function(){
+  const STYLE_ID='kgg-numpad-ui-fix-style';
+  let activeInput=null;
+  let oldValue='';
+  let scrollTimer=null;
+
+  function $(id){return document.getElementById(id)}
+
+  function injectStyle(){
+    if(document.getElementById(STYLE_ID)) return;
+    const s=document.createElement('style');
+    s.id=STYLE_ID;
+    s.textContent=`
+      .pad{background:transparent!important;align-items:flex-end!important}
+      .padBox{box-shadow:0 -10px 34px rgba(15,23,42,.16)!important;border:1px solid #dbe3ef!important}
+      .padVal{display:none!important}
+      .padTitle{margin-bottom:10px!important;font-size:14px!important}
+      .num.kggEditing{outline:4px solid #111827!important;outline-offset:2px;background:#f8fafc!important}
+      body.kggPadOpen{scroll-padding-bottom:520px}
+      @media(max-width:430px){body.kggPadOpen{scroll-padding-bottom:500px}}
+    `;
+    document.head.appendChild(s);
+  }
+
+  function getCurrentValue(){
+    const api=window.__kggPadDraftApi;
+    if(api&&typeof api.getValue==='function') return api.getValue();
+    const v=$('padVal');
+    return v ? (v.textContent || '0') : '0';
+  }
+
+  function setCurrentValue(x,syncInput=true){
+    x=String(x||'0');
+    const api=window.__kggPadDraftApi;
+    if(api&&typeof api.setValue==='function') api.setValue(x);
+    else{const v=$('padVal');if(v)v.textContent=x;}
+    if(syncInput&&activeInput) activeInput.value=x;
+  }
+
+  function cancelPendingScroll(){
+    if(scrollTimer!==null){
+      clearTimeout(scrollTimer);
+      scrollTimer=null;
+    }
+  }
+
+  function scrollAnchor(input){
+    return input&&input.closest ? (input.closest('.lr,.bi')||input) : input;
+  }
+
+  function scrollInputAbovePad(){
+    // Viewport scrolling is owned exclusively by patient-numpad-visibility-fix.js.
+  }
+
+  function patch(){
+    if(window.__kggNumpadUiFixDone) return;
+    if(typeof window.openPad!=='function') return;
+    window.__kggNumpadUiFixDone=true;
+
+    const oldOpen=window.openPad;
+    const oldClose=window.closePad;
+
+    window.openPad=function(input,meta){
+      injectStyle();
+      const previousInput=activeInput;
+      const sameAnchor=!!(previousInput&&input&&scrollAnchor(previousInput)===scrollAnchor(input));
+      const switching=!!(previousInput&&input&&input!==previousInput&&document.getElementById('pad')&&!document.getElementById('pad').classList.contains('hide'));
+
+      activeInput=input;
+      oldValue=input ? input.value : '';
+      if(switching)return oldOpen.apply(this,arguments);
+
+      document.body.classList.add('kggPadOpen');
+      const result=oldOpen.apply(this,arguments);
+      setCurrentValue(input && input.value ? input.value : '0',false);
+      if(sameAnchor) cancelPendingScroll();
+      else scrollInputAbovePad(input);
+      return result;
+    };
+
+    window.padPress=function(x){
+      let cur=getCurrentValue();
+      if(cur==='0') cur='';
+      if(x===',' && cur.includes(',')) return;
+      if(cur.length>7) return;
+      setCurrentValue((cur+x)||'0');
+      scrollInputAbovePad(activeInput);
+    };
+
+    window.padBack=function(){
+      let cur=getCurrentValue();
+      cur=cur.slice(0,-1);
+      setCurrentValue(cur||'0');
+      scrollInputAbovePad(activeInput);
+    };
+
+    window.padUseLast=function(){
+      const b=$('padLast');
+      const x=b && b.dataset ? b.dataset.value : '';
+      if(x) setCurrentValue(x);
+      scrollInputAbovePad(activeInput);
+    };
+
+    window.closePad=function(ok){
+      cancelPendingScroll();
+      if(!ok && activeInput) activeInput.value=oldValue;
+      const result=oldClose.apply(this,arguments);
+
+      activeInput=null;
+      oldValue='';
+      document.body.classList.remove('kggPadOpen');
+      return result;
+    };
+  }
+
+  function init(){
+    injectStyle();
+    patch();
+    setTimeout(patch,300);
+    setTimeout(patch,1000);
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);
+  else init();
+})();
 ```
