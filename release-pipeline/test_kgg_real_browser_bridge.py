@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import sys
 import threading
 import unittest
 from unittest import mock
@@ -99,7 +100,7 @@ class RealBrowserForegroundBudgetContractTests(unittest.TestCase):
         browser = server._load_real_browser_module()
         bootstrap = browser.BrowserBootstrap(
             enabled=True,
-            node_command="node",
+            node_command=sys.executable,
             playwright_module_path=None,
             policy=browser.BrowserPolicy.generic(),
         )
@@ -135,7 +136,7 @@ class RealBrowserForegroundBudgetContractTests(unittest.TestCase):
         browser = server._load_real_browser_module()
         bootstrap = browser.BrowserBootstrap(
             enabled=True,
-            node_command="node",
+            node_command=sys.executable,
             playwright_module_path=None,
             policy=browser.BrowserPolicy.generic(),
         )
@@ -167,7 +168,7 @@ class RealBrowserForegroundBudgetContractTests(unittest.TestCase):
         browser = server._load_real_browser_module()
         bootstrap = browser.BrowserBootstrap(
             enabled=True,
-            node_command="node",
+            node_command=sys.executable,
             playwright_module_path=None,
             policy=browser.BrowserPolicy.generic(),
         )
