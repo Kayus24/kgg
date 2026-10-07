@@ -133,7 +133,7 @@
     },
     {
       "path": "kgg-plugin/mcp/real_browser.py",
-      "sha256": "34c2e23ad867b5c31992d0a283ded772515be9fce1043fa395f846b4ddf8a9e7"
+      "sha256": "cc1646e91cb82a33b2c5146d016c15bdabbf515c97107cc3cfbf1ce75dbf9f92"
     },
     {
       "path": "kgg-plugin/mcp/browser_host.js",
