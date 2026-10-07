@@ -80,3 +80,7 @@ rg --no-ignore --files therapist-app/releases
 ## Kommunikation
 
 Mit Max auf Deutsch arbeiten: pragmatisch, direkt und mit wenigen Rückfragen. Wenn keine Vorgabe kollidiert und nichts blockiert, sinnvoll weiterarbeiten.
+
+## Tool routing
+
+- Für Plugin-/Tool-Auswahl und Verzeichnisrouting `TOOL_ROUTING.md` lesen; Sicherheits- und Source-of-Truth-Regeln in dieser `AGENTS.md` bleiben vorrangig.
