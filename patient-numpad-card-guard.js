@@ -14,7 +14,7 @@
     setTimeout(mark,0);
   }
   function recent(){return Date.now()-(window.__kggPadClosedAt||closedAt||0)<450}
-  function isNumInput(t){return !!(t&&t.closest&&t.closest('input.num'))}
+  function isNumInput(t){return !!(t&&t.closest&&(t.closest('input.num')||t.closest('.kggCompactTapProxy')))}
   function guard(e){
     const p=pad();
     const t=e.target;
