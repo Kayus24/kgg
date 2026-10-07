@@ -149,7 +149,7 @@
     },
     {
       "path": "release-pipeline/test_kgg_real_browser_bridge.py",
-      "sha256": "ec7928490a1f9e0117ba65a202acc68dc020192164e0b2012219620454a46dd4"
+      "sha256": "8a53f3c5efe9633b0a609d856859833aa328616ad1df19c22f6123bd3fd2b08c"
     },
     {
       "path": "kgg-plugin/scripts/eval/validate_candidate.py",
