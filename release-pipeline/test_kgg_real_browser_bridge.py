@@ -95,6 +95,42 @@ class RealBrowserForegroundBudgetContractTests(unittest.TestCase):
         browser = server._load_real_browser_module()
         self.assertEqual(browser._foreground_wait_seconds(5000), 20)
 
+    def test_one_shot_uses_interruptible_popen_boundary_with_capped_wait(self) -> None:
+        browser = server._load_real_browser_module()
+        bootstrap = browser.BrowserBootstrap(
+            enabled=True,
+            node_command="node",
+            playwright_module_path=None,
+            policy=browser.BrowserPolicy.generic(),
+        )
+        process = mock.Mock()
+        process.communicate.return_value = (
+            '{"status":"PASS","error_class":"","steps":[],"artifacts":[],"final_state":"ok","runtime_ms":1}',
+            "",
+        )
+        process.returncode = 0
+        process.pid = 12345
+        process.poll.return_value = 0
+        with (
+            mock.patch.object(browser.subprocess, "Popen", return_value=process) as popen_mock,
+            mock.patch.object(
+                browser.subprocess,
+                "run",
+                side_effect=AssertionError("one-shot browser helper must not use the legacy blocking subprocess.run path"),
+            ),
+        ):
+            result = browser.run_real_flow(
+                url="http://127.0.0.1:8765/fixture",
+                viewport={"width": 960, "height": 720, "device_scale_factor": 1},
+                steps=[],
+                run_id="foreground-budget-one-shot",
+                timeout_ms=120000,
+                bootstrap=bootstrap,
+            )
+        self.assertEqual(result["status"], "PASS")
+        self.assertTrue(popen_mock.called)
+        self.assertLessEqual(process.communicate.call_args.kwargs["timeout"], 45)
+
     def test_persistent_browser_uses_the_same_foreground_budget(self) -> None:
         browser = server._load_real_browser_module()
         bootstrap = browser.BrowserBootstrap(
