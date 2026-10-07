@@ -13,6 +13,7 @@ import re
 import shutil
 import threading
 import unittest
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -79,6 +80,81 @@ class RealBrowserModuleResolutionTests(unittest.TestCase):
                 os.environ.pop("KGG_REAL_BROWSER", None)
             else:
                 os.environ["KGG_REAL_BROWSER"] = old
+
+
+class RealBrowserForegroundBudgetContractTests(unittest.TestCase):
+    def _bootstrap(self):
+        browser = server._load_real_browser_module()
+        return browser, browser.BrowserBootstrap(
+            enabled=True,
+            node_command="node",
+            playwright_module_path=None,
+            policy=browser.BrowserPolicy.generic(),
+        )
+
+    def test_one_shot_long_flow_does_not_expose_full_session_timeout_to_foreground_wait(self) -> None:
+        browser, bootstrap = self._bootstrap()
+        completed = browser.subprocess.CompletedProcess(
+            args=["node", "browser_host.js"],
+            returncode=0,
+            stdout='{"status":"PASS","error_class":"","steps":[],"artifacts":[],"final_state":"ok","runtime_ms":1}',
+            stderr="",
+        )
+        with mock.patch.object(browser.subprocess, "run", return_value=completed) as run_mock:
+            result = browser.run_real_flow(
+                url="http://127.0.0.1:8765/fixture",
+                viewport={"width": 960, "height": 720, "device_scale_factor": 1},
+                steps=[],
+                run_id="foreground-budget-one-shot",
+                timeout_ms=120000,
+                bootstrap=bootstrap,
+            )
+        self.assertEqual(result["status"], "PASS")
+        self.assertLessEqual(
+            run_mock.call_args.kwargs["timeout"],
+            45,
+            "a 120 s session timeout must not become a 135 s foreground MCP wait",
+        )
+
+    def test_one_shot_short_flow_keeps_existing_short_wait_contract(self) -> None:
+        browser, bootstrap = self._bootstrap()
+        completed = browser.subprocess.CompletedProcess(
+            args=["node", "browser_host.js"],
+            returncode=0,
+            stdout='{"status":"PASS","error_class":"","steps":[],"artifacts":[],"final_state":"ok","runtime_ms":1}',
+            stderr="",
+        )
+        with mock.patch.object(browser.subprocess, "run", return_value=completed) as run_mock:
+            browser.run_real_flow(
+                url="http://127.0.0.1:8765/fixture",
+                viewport={"width": 960, "height": 720, "device_scale_factor": 1},
+                steps=[],
+                run_id="foreground-budget-fast-path",
+                timeout_ms=5000,
+                bootstrap=bootstrap,
+            )
+        self.assertEqual(run_mock.call_args.kwargs["timeout"], 20)
+
+    def test_persistent_browser_caps_each_response_wait_below_client_budget(self) -> None:
+        browser, bootstrap = self._bootstrap()
+        fake_process = mock.Mock()
+        fake_process.stdout = None
+        with (
+            mock.patch.object(browser.subprocess, "Popen", return_value=fake_process),
+            mock.patch.object(browser.PersistentRealBrowser, "_send", return_value={}),
+        ):
+            persistent = browser.PersistentRealBrowser(
+                url="http://127.0.0.1:8765/fixture",
+                viewport={"width": 960, "height": 720, "device_scale_factor": 1},
+                run_id="foreground-budget-persistent",
+                timeout_ms=120000,
+                bootstrap=bootstrap,
+            )
+        self.assertLessEqual(
+            persistent._timeout_seconds,
+            45,
+            "a persistent browser step must not wait 135 s inside one MCP call",
+        )
 
 
 class GenericBrowserCoreTests(unittest.TestCase):
