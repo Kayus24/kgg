@@ -1,0 +1,93 @@
+.kgg-spike-shell {
+  min-height: 100vh;
+  margin: 0;
+  background: var(--kgg-background);
+  padding: 20px;
+}
+
+.kgg-spike-header {
+  width: min(100%, 760px);
+  margin: 0 auto 18px;
+}
+
+.kgg-spike-header h1 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.kgg-spike-header p {
+  margin: 8px 0 0;
+  color: var(--kgg-text-muted);
+  line-height: 1.45;
+}
+
+.kgg-spike-eyebrow {
+  color: var(--kgg-primary) !important;
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.kgg-spike-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  width: min(100%, 760px);
+  margin: 0 auto;
+}
+
+.kgg-spike-card {
+  border: 1px solid var(--kgg-border);
+  border-radius: var(--kgg-card-radius);
+  background: var(--kgg-surface);
+  padding: 14px;
+}
+
+.kgg-spike-label {
+  margin: 0 0 10px;
+  color: var(--kgg-text-muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.kgg-spike-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.kgg-spike-toggle {
+  min-width: 0;
+  min-height: var(--kgg-touch-min);
+  border: 2px solid var(--kgg-border);
+  border-radius: var(--kgg-control-radius);
+  background: var(--kgg-surface);
+  color: var(--kgg-text);
+  font: inherit;
+  font-size: 18px;
+  font-weight: 850;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.kgg-spike-toggle[data-pressed],
+.kgg-spike-toggle[data-selected] {
+  border-color: var(--kgg-primary);
+  background: var(--kgg-primary-soft);
+  color: var(--kgg-primary);
+}
+
+.kgg-spike-state {
+  display: block;
+  margin-top: 10px;
+  color: var(--kgg-text-muted);
+  font-size: 13px;
+}
+
+@media (max-width: 560px) {
+  .kgg-spike-grid {
+    grid-template-columns: 1fr;
+  }
+}
