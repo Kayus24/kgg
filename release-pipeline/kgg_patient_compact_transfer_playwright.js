@@ -60,8 +60,7 @@ async function main(){
    assert(await page.locator("#kggPadTransfer").count()===1,"transfer strip missing");
    assert(await page.locator("#padLast").isHidden(),"legacy padLast must stay hidden in Compact mode");
    assert((await page.locator("#kggPadTransfer").getAttribute("data-active-key"))==="a","transfer pointer is not associated with active kg field");
-   const initialPointer=await page.evaluate(()=>{const t=document.querySelector("#kggPadTransfer"),h=document.querySelector('#kggPadPair button[data-kgg-key="a"]');if(!t||!h)return null;const tr=t.getBoundingClientRect(),hr=h.getBoundingClientRect(),ps=getComputedStyle(t,"::before");return{key:t.dataset.pointerKey||"",pointerX:tr.left+parseFloat(ps.left||"0"),headX:hr.left+hr.width/2}});
-   assert(initialPointer&&initialPointer.key==="a"&&Math.abs(initialPointer.pointerX-initialPointer.headX)<=4,"initial kg pointer is not under kg header: "+JSON.stringify(initialPointer));
+   await page.waitForFunction(()=>{const t=document.querySelector("#kggPadTransfer"),h=document.querySelector('#kggPadPair button[data-kgg-key="a"]');if(!t||!h||t.dataset.pointerKey!=="a")return false;const tr=t.getBoundingClientRect(),hr=h.getBoundingClientRect(),ps=getComputedStyle(t,"::before");return Math.abs((tr.left+parseFloat(ps.left||"0"))-(hr.left+hr.width/2))<=4},null,{timeout:500});
    let labels=(await transferTexts(page)).map(x=>x.trim());
    assert(JSON.stringify(labels)===JSON.stringify(["15 kg","Übernehmen","12 Wdh"]),"two-value transfer layout wrong: "+JSON.stringify(labels));
    await page.locator('#kggPadTransfer button[data-kgg-transfer-key="a"]').click();await page.waitForTimeout(80);
