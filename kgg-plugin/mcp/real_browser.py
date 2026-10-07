@@ -49,7 +49,7 @@ def _terminate_process_tree(process: subprocess.Popen[Any]) -> None:
     if process.poll() is not None:
         return
     if os.name == "nt":
-        taskkill = Path(os.environ.get("SystemRoot", r"C:\\Windows")) / "System32" / "taskkill.exe"
+        taskkill = Path(os.environ.get("SystemRoot", "C:\\Windows")) / "System32" / "taskkill.exe"
         try:
             subprocess.run(
                 [str(taskkill), "/PID", str(process.pid), "/T", "/F"],
