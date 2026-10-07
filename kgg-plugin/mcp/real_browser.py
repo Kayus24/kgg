@@ -18,6 +18,7 @@ from pathlib import Path
 import queue
 import re
 import shutil
+import signal
 import subprocess
 import threading
 from typing import Any, Mapping
@@ -26,6 +27,57 @@ from urllib.parse import urlparse
 
 MAX_IMAGE_BYTES = 2 * 1024 * 1024
 MAX_RESPONSE_BYTES = 8 * 1024 * 1024
+MAX_FOREGROUND_WAIT_SECONDS = 45.0
+PROCESS_TREE_CLEANUP_SECONDS = 1.0
+
+
+def _foreground_wait_seconds(timeout_ms: int) -> float:
+    """Bound one MCP-facing wait while preserving the existing short-call margin."""
+
+    return min((timeout_ms / 1000) + 15, MAX_FOREGROUND_WAIT_SECONDS)
+
+
+def _process_group_kwargs() -> dict[str, Any]:
+    if os.name == "nt":
+        return {"creationflags": getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)}
+    return {"start_new_session": True}
+
+
+def _terminate_process_tree(process: subprocess.Popen[Any]) -> None:
+    """Bounded best-effort cleanup of the helper and descendants."""
+
+    if process.poll() is not None:
+        return
+    if os.name == "nt":
+        taskkill = Path(os.environ.get("SystemRoot", "C:\\Windows")) / "System32" / "taskkill.exe"
+        try:
+            subprocess.run(
+                [str(taskkill), "/PID", str(process.pid), "/T", "/F"],
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=PROCESS_TREE_CLEANUP_SECONDS,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            try:
+                process.kill()
+            except OSError:
+                pass
+    else:
+        try:
+            os.killpg(os.getpgid(process.pid), signal.SIGKILL)
+        except (OSError, ProcessLookupError):
+            try:
+                process.kill()
+            except OSError:
+                pass
+    try:
+        process.wait(timeout=PROCESS_TREE_CLEANUP_SECONDS)
+    except (OSError, subprocess.TimeoutExpired):
+        try:
+            process.kill()
+        except OSError:
+            pass
 _ATTRIBUTE_RE = re.compile(r"^data-[a-z0-9-]{1,63}$")
 _NAMESPACE_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{1,63}$")
 
@@ -287,27 +339,33 @@ def run_real_flow(
     if module_path:
         env["NODE_PATH"] = module_path + os.pathsep + env.get("NODE_PATH", "")
     try:
-        completed = subprocess.run(
+        process = subprocess.Popen(
             [_node_command(selected_bootstrap), str(_helper_path())],
-            input=json.dumps(request, ensure_ascii=False, separators=(",", ":")) + "\n",
-            capture_output=True,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
-            timeout=(timeout_ms / 1000) + 15,
             env=env,
-            check=False,
+            **_process_group_kwargs(),
+        )
+        stdout, _stderr = process.communicate(
+            input=json.dumps(request, ensure_ascii=False, separators=(",", ":")) + "\n",
+            timeout=_foreground_wait_seconds(timeout_ms),
         )
     except subprocess.TimeoutExpired as exc:
+        if "process" in locals():
+            _terminate_process_tree(process)
         raise RealBrowserError("real_browser_timeout") from exc
     except OSError as exc:
         raise RealBrowserError("real_browser_process_failed") from exc
-    if len(completed.stdout.encode("utf-8", errors="ignore")) > MAX_RESPONSE_BYTES:
+    if len(stdout.encode("utf-8", errors="ignore")) > MAX_RESPONSE_BYTES:
         raise RealBrowserError("real_browser_response_too_large")
     try:
-        raw = json.loads(completed.stdout.strip().splitlines()[-1])
+        raw = json.loads(stdout.strip().splitlines()[-1])
     except (json.JSONDecodeError, IndexError):
         raise RealBrowserError("real_browser_response_invalid") from None
     response = _validate_response(raw)
-    if completed.returncode != 0 and response["status"] == "PASS":
+    if process.returncode != 0 and response["status"] == "PASS":
         raise RealBrowserError("real_browser_process_failed")
     return response
 
@@ -383,13 +441,14 @@ class PersistentRealBrowser:
                 text=True,
                 env=env,
                 bufsize=1,
+                **_process_group_kwargs(),
             )
         except OSError as exc:
             raise RealBrowserError("real_browser_process_failed") from exc
         self._responses: queue.Queue[str] = queue.Queue()
         self._reader = threading.Thread(target=self._read_responses, daemon=True)
         self._reader.start()
-        self._timeout_seconds = (timeout_ms / 1000) + 15
+        self._timeout_seconds = _foreground_wait_seconds(timeout_ms)
         try:
             self._send({
                 "command": "init",
@@ -451,16 +510,10 @@ class PersistentRealBrowser:
                 process.stdin.flush()
                 process.wait(timeout=5)
         except (BrokenPipeError, OSError, subprocess.TimeoutExpired):
-            try:
-                process.kill()
-            except OSError:
-                pass
+            _terminate_process_tree(process)
         finally:
             if process.poll() is None:
-                try:
-                    process.kill()
-                except OSError:
-                    pass
+                _terminate_process_tree(process)
             try:
                 if process.stdin is not None:
                     process.stdin.close()
