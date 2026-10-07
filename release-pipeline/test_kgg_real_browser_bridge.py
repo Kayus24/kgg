@@ -131,6 +131,38 @@ class RealBrowserForegroundBudgetContractTests(unittest.TestCase):
         self.assertTrue(popen_mock.called)
         self.assertLessEqual(process.communicate.call_args.kwargs["timeout"], 45)
 
+    def test_one_shot_timeout_invokes_process_tree_cleanup(self) -> None:
+        browser = server._load_real_browser_module()
+        bootstrap = browser.BrowserBootstrap(
+            enabled=True,
+            node_command="node",
+            playwright_module_path=None,
+            policy=browser.BrowserPolicy.generic(),
+        )
+        process = mock.Mock()
+        process.pid = 12345
+        process.poll.return_value = None
+        process.communicate.side_effect = browser.subprocess.TimeoutExpired(cmd="node", timeout=45)
+        with (
+            mock.patch.object(browser.subprocess, "Popen", return_value=process),
+            mock.patch.object(
+                browser.subprocess,
+                "run",
+                side_effect=browser.subprocess.TimeoutExpired(cmd="node", timeout=45),
+            ),
+            mock.patch.object(browser, "_terminate_process_tree", create=True) as terminate_tree,
+        ):
+            with self.assertRaisesRegex(browser.RealBrowserError, "real_browser_timeout"):
+                browser.run_real_flow(
+                    url="http://127.0.0.1:8765/fixture",
+                    viewport={"width": 960, "height": 720, "device_scale_factor": 1},
+                    steps=[],
+                    run_id="foreground-budget-timeout-cleanup",
+                    timeout_ms=120000,
+                    bootstrap=bootstrap,
+                )
+        terminate_tree.assert_called_once()
+
     def test_persistent_browser_uses_the_same_foreground_budget(self) -> None:
         browser = server._load_real_browser_module()
         bootstrap = browser.BrowserBootstrap(
