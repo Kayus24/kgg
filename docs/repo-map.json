@@ -150,6 +150,8 @@
       "paths": [
         "PROJECT_STATE.md",
         "AGENTS.md",
+        "CONTRIBUTING.md",
+        ".github/pull_request_template.md",
         "TOOL_ROUTING.md",
         "CHATGPT_TOOL_ROUTING.md",
         "CODEX_TOOL_ROUTING.md",

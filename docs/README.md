@@ -10,6 +10,8 @@ This file is a router, not a runtime source of truth. When a linked source confl
 
 - Project snapshot and active work: `../PROJECT_STATE.md`
 - Repository/agent rules: `../AGENTS.md`
+- Human contribution workflow: `../CONTRIBUTING.md`
+- Pull-request checklist: `../.github/pull_request_template.md`
 - Runtime routing: `../TOOL_ROUTING.md`
 - Patient vs therapist/admin boundary: `../APP_BOUNDARIES.md`
 - Machine-readable repository map: `repo-map.json`
