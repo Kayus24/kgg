@@ -82,6 +82,12 @@ jobs:
           echo "patient_set_view=$patient_set_view" >> "$GITHUB_OUTPUT"
           echo "patient_media=$patient_media" >> "$GITHUB_OUTPUT"
           echo "admin_camera_qr=$admin_camera_qr" >> "$GITHUB_OUTPUT"
+      - name: Validate patient feature-test mapping (metadata-only)
+        shell: bash
+        run: |
+          python release-pipeline/kgg_patient_feature_test_map.py --self-test
+          python release-pipeline/kgg_patient_feature_test_map.py --check
+          python release-pipeline/kgg_patient_feature_test_map.py --changed-file "$RUNNER_TEMP/kgg-changed-files.txt"
       - name: Run critical KGG test battery
         shell: bash
         env:

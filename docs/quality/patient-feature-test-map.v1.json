@@ -37,7 +37,10 @@
         "release-pipeline/kgg_patient_compact_transfer_playwright.js"
       ],
       "coverage": "PARTIAL",
-      "limitation": "Nur Commit-/Transferpfade, nicht globale Persistence/Reload-Invariante."
+      "limitation": "Nur Commit-/Transferpfade, nicht globale Persistence/Reload-Invariante.",
+      "planned_source_paths": [
+        "patient-ui/src/adapters/patientInputController.ts"
+      ]
     },
     {
       "id": "PAT-STATE-002",
@@ -50,7 +53,10 @@
         "release-pipeline/kgg_patient_compact_transfer_playwright.js"
       ],
       "coverage": "PARTIAL",
-      "limitation": "LR-Transfer getestet, keine komplette Tag-/Reorder-Matrix."
+      "limitation": "LR-Transfer getestet, keine komplette Tag-/Reorder-Matrix.",
+      "planned_source_paths": [
+        "patient-ui/src/adapters/patientInputController.ts"
+      ]
     },
     {
       "id": "PAT-NUM-001",
@@ -63,7 +69,10 @@
         "release-pipeline/kgg_patient_numpad_commit_smoke.js"
       ],
       "coverage": "PARTIAL",
-      "limitation": "VM-Smoke, keine vollständige Browser-/Storage-Garantie."
+      "limitation": "VM-Smoke, keine vollständige Browser-/Storage-Garantie.",
+      "planned_source_paths": [
+        "patient-ui/src/adapters/patientInputController.ts"
+      ]
     },
     {
       "id": "PAT-NUM-002",
@@ -77,7 +86,10 @@
         "release-pipeline/kgg_patient_transient_flicker_blackbox.js"
       ],
       "coverage": "PARTIAL",
-      "limitation": "In-place-Logik und simulierter Fokus-/Scrollfehler; physischer Oppo-Paint nicht belegt."
+      "limitation": "In-place-Logik und simulierter Fokus-/Scrollfehler; physischer Oppo-Paint nicht belegt.",
+      "planned_source_paths": [
+        "patient-ui/src/adapters/patientInputController.ts"
+      ]
     },
     {
       "id": "PAT-NUM-003",
@@ -90,7 +102,10 @@
         "release-pipeline/kgg_patient_numpad_commit_smoke.js"
       ],
       "coverage": "PARTIAL",
-      "limitation": "Cancel-/Save-Pfade, keine vollständige echte OK-Taste-E2E-Matrix."
+      "limitation": "Cancel-/Save-Pfade, keine vollständige echte OK-Taste-E2E-Matrix.",
+      "planned_source_paths": [
+        "patient-ui/src/adapters/patientInputController.ts"
+      ]
     },
     {
       "id": "PAT-NUM-004",
@@ -104,7 +119,10 @@
         "release-pipeline/kgg_patient_compact_transfer_playwright.js"
       ],
       "coverage": "DIRECT",
-      "limitation": "Browser- und VM-Assertions für Dirty-Commit und Transfer."
+      "limitation": "Browser- und VM-Assertions für Dirty-Commit und Transfer.",
+      "planned_source_paths": [
+        "patient-ui/src/adapters/patientInputController.ts"
+      ]
     },
     {
       "id": "PAT-NUM-005",
@@ -117,7 +135,10 @@
         "release-pipeline/kgg_patient_numpad_commit_smoke.js"
       ],
       "coverage": "DIRECT",
-      "limitation": "Smoke prüft unberührtes Leerfeld und explizite Null getrennt."
+      "limitation": "Smoke prüft unberührtes Leerfeld und explizite Null getrennt.",
+      "planned_source_paths": [
+        "patient-ui/src/adapters/patientInputController.ts"
+      ]
     },
     {
       "id": "PAT-PREV-001",
@@ -224,5 +245,7 @@
       "coverage": "PARTIAL",
       "limitation": "LR Layout/Transfer, nicht alle History-/Persistenzpfade."
     }
-  ]
+  ],
+  "planned_source_status": "DRAFT_REACT_ADAPTER_ONLY_NOT_PRODUCT_RELEASE",
+  "planned_source_reference": "https://github.com/Kayus24/kgg/pull/293"
 }
