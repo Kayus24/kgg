@@ -145,7 +145,11 @@ async function main() {
     assert(active.pointerEvents === "none", "shimmer overlay must not intercept the button tap");
     assert(Math.abs(active.width - before.width) < 0.1 && Math.abs(active.height - before.height) < 0.1, "shimmer changed button layout");
     await apply.click();
-    assert((await page.locator("#padVal").innerText()) === "42", "apply button no longer transfers the previous value");
+    const transferred=await page.evaluate(()=>({
+      draft:window.__kggPadDraftApi&&typeof window.__kggPadDraftApi.getValue==="function"?window.__kggPadDraftApi.getValue():"",
+      editing:window.__kggNumpadEditingApi&&typeof window.__kggNumpadEditingApi.getEditingInput==="function"?(window.__kggNumpadEditingApi.getEditingInput()?.value||""):""
+    }));
+    assert(transferred.draft==="42"&&transferred.editing==="42","apply button no longer transfers the previous value: "+JSON.stringify(transferred));
 
     await page.emulateMedia({ reducedMotion: "reduce" });
     const reduced = await apply.evaluate((button) => {

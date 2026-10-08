@@ -28,6 +28,13 @@ async function openCard(page,index){
 async function inputs(page,cardIndex,setIndex){
  return page.locator("#list .ex").nth(cardIndex).locator(":scope > .set").nth(setIndex).locator("input.num");
 }
+async function clickInput(page,input){
+ const compact=await page.evaluate(()=>document.body.classList.contains("kggSetViewCompact"));
+ if(!compact){await input.click();return}
+ const proxyIndex=await input.evaluate(el=>[...el.parentElement.querySelectorAll(".kggCompactTapProxy")].findIndex(proxy=>proxy.__kggInput===el));
+ assert(proxyIndex>=0,"compact input proxy missing");
+ await input.locator("xpath=..").locator(".kggCompactTapProxy").nth(proxyIndex).click();
+}
 async function main(){
  const server=http.createServer((req,res)=>{
    const f=fileFor(req.url);if(!f){res.statusCode=404;return res.end("404")}
@@ -141,7 +148,7 @@ async function main(){
    assert(baseline.open&&baseline.h>200,"baseline card not open: "+JSON.stringify(baseline));
 
    const kg0=(await inputs(page,TARGET,0)).nth(0),wdh0=(await inputs(page,TARGET,0)).nth(1);
-   await kg0.click();await page.waitForFunction(()=>!document.getElementById("pad").classList.contains("hide"),{timeout:4000});await page.waitForTimeout(850);
+   await clickInput(page,kg0);await page.waitForFunction(()=>!document.getElementById("pad").classList.contains("hide"),{timeout:4000});await page.waitForTimeout(850);
 
    const transitions=[];
    async function transition(label,target,sameRow=false){

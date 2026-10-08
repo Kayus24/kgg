@@ -18,6 +18,7 @@
   let inerted=[];
   const states=new WeakMap();
   const safe=f=>{try{return f()}catch(e){return null}};
+  const setText=(node,value)=>{const next=String(value??'');if(node&&node.textContent!==next)node.textContent=next};
   const clampValue=value=>Math.max(MIN,Math.min(MAX,Math.round(Number(value)||0)));
   const valueFromY=(top,bottom,clientY)=>{
     const start=Number(top)||0,end=Math.max(start+1,Number(bottom)||start+1);
@@ -151,7 +152,7 @@
   }
 
   function updateCompact(state,selected,value){
-    state.selected=selected;state.committed=clampValue(value);state.current.textContent=currentText(selected,value);if(state.compact)state.compact.textContent=compactButtonText(selected,value);
+    state.selected=selected;state.committed=clampValue(value);setText(state.current,currentText(selected,value));if(state.compact)setText(state.compact,compactButtonText(selected,value));
     state.toggle.setAttribute('aria-label',`${labelText()}: ${currentText(selected,value)}`)
   }
   function updateStage(value){
@@ -161,9 +162,9 @@
     modal.values.forEach(row=>row.dataset.active=String(Number(row.dataset.kggPainValue)===next))
   }
   function refreshLanguage(){
-    document.querySelectorAll('.kggPainVerticalLabel').forEach(label=>label.textContent=labelText());document.querySelectorAll('.pain.'+ROOT_CLASS).forEach(root=>{const state=states.get(root);if(state&&state.compact)state.compact.textContent=compactButtonText(state.selected,state.committed)});
+    document.querySelectorAll('.kggPainVerticalLabel').forEach(label=>setText(label,labelText()));document.querySelectorAll('.pain.'+ROOT_CLASS).forEach(root=>{const state=states.get(root);if(state&&state.compact)setText(state.compact,compactButtonText(state.selected,state.committed))});
     if(!modal)return;
-    modal.title.textContent=labelText();modal.maxDesc.textContent=maxDescription();modal.minDesc.textContent=minDescription();modal.hint.textContent=hintText();modal.close.setAttribute('aria-label',closeText());modal.stage.setAttribute('aria-label',labelText());
+    setText(modal.title,labelText());setText(modal.maxDesc,maxDescription());setText(modal.minDesc,minDescription());setText(modal.hint,hintText());modal.close.setAttribute('aria-label',closeText());modal.stage.setAttribute('aria-label',labelText());
     if(activeRoot){const state=states.get(activeRoot);if(state)state.toggle.setAttribute('aria-label',`${labelText()}: ${currentText(state.selected,state.committed)}`)}
   }
   function refreshModalFromRoot(root){
@@ -296,7 +297,7 @@
     wrap.addEventListener('click',event=>event.stopPropagation());return state
   }
   function refreshState(root,state){
-    const stored=readStored(state.ei);state.label.textContent=labelText();updateCompact(state,stored.selected,stored.value)
+    const stored=readStored(state.ei);setText(state.label,labelText());updateCompact(state,stored.selected,stored.value)
   }
   function teardown(root){
     const state=states.get(root);if(!state)return;
