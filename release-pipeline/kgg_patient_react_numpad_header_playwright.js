@@ -2,7 +2,7 @@
 "use strict";
 
 const fs=require("fs"),http=require("http"),path=require("path"),{chromium}=require("playwright");
-const ROOT=path.resolve(__dirname,"..");
+const ROOT=path.resolve(process.argv[2]||path.resolve(__dirname,".."));
 
 function assert(value,message){if(!value)throw new Error(message)}
 function enc(plan){return Buffer.from(JSON.stringify(plan),"utf8").toString("base64url")}
