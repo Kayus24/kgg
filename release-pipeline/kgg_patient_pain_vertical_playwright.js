@@ -133,7 +133,7 @@ async function main() {
     await page.waitForTimeout(380);
     const before=await page.evaluate(()=>{
     const cards=[...document.querySelectorAll("#list .ex")],first=cards[0].getBoundingClientRect(),second=cards[1].getBoundingClientRect();
-    const body=document.body.getBoundingClientRect(),main=document.querySelector("main").getBoundingClientRect(),children=[...cards[0].children].map(el=>({tag:el.tagName,cls:el.className,h:el.getBoundingClientRect().height,mt:getComputedStyle(el).marginTop,mb:getComputedStyle(el).marginBottom,display:getComputedStyle(el).display}));return{scrollY:window.scrollY,firstHeight:cards[0].offsetHeight,firstWidth:first.width,interCardGap:second.top-(first.top+first.height),bodyWidth:body.width,mainWidth:main.width,innerWidth:window.innerWidth,clientWidth:document.documentElement.clientWidth,children};
+    const body=document.body.getBoundingClientRect(),main=document.querySelector("main").getBoundingClientRect(),children=[...cards[0].children].map(el=>({tag:el.tagName,cls:el.className,h:el.getBoundingClientRect().height,mt:getComputedStyle(el).marginTop,mb:getComputedStyle(el).marginBottom,display:getComputedStyle(el).display}));return{scrollY:window.scrollY,bodyPosition:getComputedStyle(document.body).position,bodyInlinePosition:document.body.style.position,bodyInlineTop:document.body.style.top,bodyInlineOverflow:document.body.style.overflow,firstHeight:cards[0].offsetHeight,firstWidth:first.width,interCardGap:second.top-(first.top+first.height),bodyWidth:body.width,mainWidth:main.width,innerWidth:window.innerWidth,clientWidth:document.documentElement.clientWidth,children};
   });
     await openModal(toggle,modal);
     await page.waitForTimeout(220);
@@ -190,16 +190,16 @@ async function main() {
     await modal.waitFor({state:"hidden"});
     try{
       await page.waitForFunction(expected=>{
-        const active=String(document.activeElement?.className||"");
-        return Math.abs(window.scrollY-expected)<=1&&getComputedStyle(document.body).position!=="fixed"&&active.includes("kggPainVerticalToggle");
-      },before.scrollY,{timeout:5000});
+        const body=document.body,active=String(document.activeElement?.className||"");
+        return Math.abs(window.scrollY-expected.scrollY)<=1&&getComputedStyle(body).position===expected.bodyPosition&&body.style.position===expected.bodyInlinePosition&&body.style.top===expected.bodyInlineTop&&body.style.overflow===expected.bodyInlineOverflow&&active.includes("kggPainVerticalToggle");
+      },{scrollY:before.scrollY,bodyPosition:before.bodyPosition,bodyInlinePosition:before.bodyInlinePosition,bodyInlineTop:before.bodyInlineTop,bodyInlineOverflow:before.bodyInlineOverflow},{timeout:5000});
     }catch(error){
       const state=await page.evaluate(()=>({scrollY:window.scrollY,bodyPosition:getComputedStyle(document.body).position,active:document.activeElement?.className||"",toggleCount:document.querySelectorAll(".kggPainVerticalToggle").length,toggleConnected:[...document.querySelectorAll(".kggPainVerticalToggle")].map(node=>node.isConnected)}));
       throw new Error(`post-close restoration timeout: ${JSON.stringify({expectedScrollY:before.scrollY,state})}`,{cause:error})
     }
-    const restored=await page.evaluate(()=>({scrollY:window.scrollY,bodyPosition:getComputedStyle(document.body).position,active:document.activeElement?.className||""}));
+    const restored=await page.evaluate(()=>({scrollY:window.scrollY,bodyPosition:getComputedStyle(document.body).position,bodyInlinePosition:document.body.style.position,bodyInlineTop:document.body.style.top,bodyInlineOverflow:document.body.style.overflow,active:document.activeElement?.className||""}));
     assert(Math.abs(restored.scrollY-before.scrollY)<=1,`closing modal did not restore scroll position: ${JSON.stringify({before:before.scrollY,restored})}`);
-    assert(restored.bodyPosition!=="fixed","closing modal did not unlock body");
+    assert(restored.bodyPosition===before.bodyPosition&&restored.bodyInlinePosition===before.bodyInlinePosition&&restored.bodyInlineTop===before.bodyInlineTop&&restored.bodyInlineOverflow===before.bodyInlineOverflow,`closing modal did not restore the pre-modal body lock contract: ${JSON.stringify({before,restored})}`);
     assert(String(restored.active).includes("kggPainVerticalToggle"),"focus did not return to pain trigger");
 
     await openModal(toggle,modal);
