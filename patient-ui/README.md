@@ -27,9 +27,20 @@ Do not replace the CSS imports with plain `@import "tailwindcss"`; that would ad
 
 `components.json` records the Base UI / Nova direction.
 
-Do not run `shadcn add` blindly. The upstream CLI expects a conventional Tailwind project, while KGG intentionally uses a no-Preflight, isolated integration. Before the first real component is committed, inspect the generated registry item and prove that its classes/styles cannot leak into the legacy patient DOM.
+Do not run `shadcn add` blindly. The upstream CLI expects a conventional Tailwind project, while KGG intentionally uses a no-Preflight, isolated integration. Before a shadcn component is committed, inspect the generated registry item and prove that its classes/styles cannot leak into the legacy patient DOM.
 
-Base UI is the current default candidate. React Aria remains the comparison candidate for touch/focus-critical controls.
+Base UI is the current default primitive after the P5 touch/focus comparison. React Aria remains a targeted fallback for device interactions that later prove worse with Base UI.
+
+## First live-page island candidate
+
+The P7 NumPad header is opt-in only.
+
+- `?kggReactPad=1` enables and persists the test flag.
+- `?kggReactPad=0` removes the test flag and restores the legacy header.
+- Without the flag, the React JS/CSS assets are not loaded.
+- The React pair/transfer controls mirror the existing hidden legacy controls and delegate actions back to them.
+- Legacy controls keep their layout geometry, so existing scroll/focus/transfer code remains the behavioral owner.
+- No React code writes patient values, LocalStorage, QR state, or plan state directly.
 
 ## Commands
 

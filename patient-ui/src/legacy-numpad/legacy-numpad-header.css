@@ -1,0 +1,125 @@
+body.kggReactNumpadHeaderV1 #kggPadPair,
+body.kggReactNumpadHeaderV1 #kggPadTransfer {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+body.kggReactNumpadHeaderV1 #pad .padBox {
+  position: relative;
+}
+
+#kggReactNumpadHeaderRoot {
+  position: absolute;
+  z-index: 5;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  pointer-events: auto;
+}
+
+.kgg-react-numpad-header {
+  position: relative;
+  margin: 0 0 10px;
+}
+
+.kgg-react-numpad-header__tag {
+  position: absolute;
+  top: -7px;
+  right: 9px;
+  z-index: 2;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  padding: 2px 6px;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.kgg-react-numpad-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 9px;
+}
+
+.kgg-react-numpad-pair:has(> :only-child) {
+  grid-template-columns: 1fr;
+}
+
+.kgg-react-numpad-pair__button {
+  min-height: 58px;
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  background: #f8fafc;
+  color: #334155;
+  padding: 6px 8px;
+  font: 800 11px/1.1 system-ui;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.kgg-react-numpad-pair__button[data-pressed] {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #1d4ed8;
+  box-shadow: 0 0 0 2px #bfdbfe;
+}
+
+.kgg-react-numpad-pair__label,
+.kgg-react-numpad-pair__value {
+  display: block;
+}
+
+.kgg-react-numpad-pair__value {
+  margin-top: 3px;
+  color: #111827;
+  font-size: 22px;
+  font-weight: 950;
+  font-variant-numeric: tabular-nums;
+}
+
+.kgg-react-numpad-pair__button[data-pressed] .kgg-react-numpad-pair__value {
+  color: #1d4ed8;
+}
+
+.kgg-react-numpad-transfer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(92px, 0.72fr) minmax(0, 1fr);
+  gap: 1px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.kgg-react-numpad-transfer[data-count="1"] {
+  grid-template-columns: 1fr;
+}
+
+.kgg-react-numpad-transfer__button {
+  min-height: 58px;
+  border: 0;
+  background: #e5e7eb;
+  color: #111827;
+  padding: 8px 6px;
+  font: 900 16px/1.1 system-ui;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.kgg-react-numpad-transfer__button--both {
+  font-size: 14px;
+}
+
+body.kggSetViewCompact #pad.kggPadLargeUi .kgg-react-numpad-pair__button {
+  min-height: 92px;
+  border-radius: 16px;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+body.kggSetViewCompact #pad.kggPadLargeUi .kgg-react-numpad-pair__value {
+  margin-top: 5px;
+  font-size: 42px;
+}
