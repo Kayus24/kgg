@@ -31,10 +31,10 @@
 
   function setCurrentValue(x,syncInput=true){
     x=String(x||'0');
+    if(syncInput&&activeInput) activeInput.value=x;
     const api=window.__kggPadDraftApi;
     if(api&&typeof api.setValue==='function') api.setValue(x);
     else{const v=$('padVal');if(v)v.textContent=x;}
-    if(syncInput&&activeInput) activeInput.value=x;
   }
 
   function cancelPendingScroll(){

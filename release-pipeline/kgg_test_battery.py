@@ -119,6 +119,16 @@ def run_html_logic(suite: str) -> None:
     run([node_executable(), "release-pipeline/kgg_html_logic_smoke.js", "--suite", suite])
 
 
+def run_patient_numpad_contract() -> None:
+    log("== Patient NumPad editing-controller contract ==")
+    run([node_executable(), "release-pipeline/kgg_patient_numpad_commit_smoke.js"])
+
+
+def run_patient_react_numpad_header() -> None:
+    log("== Patient React NumPad header feature-flag contract ==")
+    run_playwright_script("kgg_patient_react_numpad_header_playwright.js")
+
+
 def run_therapy_cockpit() -> None:
     log("== Therapie-Cockpit codec and RAM-slot contract ==")
     run([node_executable(), "release-pipeline/kgg_therapy_cockpit_smoke.js"])
@@ -838,6 +848,20 @@ TEST_REGISTRY = [
         "suite": "pdf",
         "reason": "Grossdruck PDFs must render readable exercise names, kg/Wdh/Satz labels and pain scales under myopia simulation.",
         "run": run_pdf_readability,
+    },
+    {
+        "id": "patient-numpad-controller-critical",
+        "level": "critical",
+        "suite": "ui-stability",
+        "reason": "Patient NumPad editing state must keep one stable observable controller contract without phantom commits or switch-time close/blink behavior.",
+        "run": run_patient_numpad_contract,
+    },
+    {
+        "id": "patient-react-numpad-header-critical",
+        "level": "critical",
+        "suite": "ui-stability",
+        "reason": "The opt-in React NumPad header must mirror the legacy pair/transfer controls without replacing storage, QR, PWA, or the legacy commit path, and kggReactPad=0 must restore the legacy header without loading React assets.",
+        "run": run_patient_react_numpad_header,
     },
     {
         "id": "patient-qr-critical",

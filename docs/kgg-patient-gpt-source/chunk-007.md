@@ -2,7 +2,7 @@
 
 - Source file: `numpad-ui-fix.js`
 - Characters: 1-3908
-- Full source SHA-256: `4936668d1bd216fa7026a8a5f32cfc14de316b0b4a7dc762d927c54f230d0d03`
+- Full source SHA-256: `9b7bd485b29e21085f25172b421b31d7e0d48524d6c957a1b5390cddba7049bd`
 
 ```
 (function(){
@@ -38,10 +38,10 @@
 
   function setCurrentValue(x,syncInput=true){
     x=String(x||'0');
+    if(syncInput&&activeInput) activeInput.value=x;
     const api=window.__kggPadDraftApi;
     if(api&&typeof api.setValue==='function') api.setValue(x);
     else{const v=$('padVal');if(v)v.textContent=x;}
-    if(syncInput&&activeInput) activeInput.value=x;
   }
 
   function cancelPendingScroll(){
