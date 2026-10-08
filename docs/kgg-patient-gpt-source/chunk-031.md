@@ -1,72 +1,322 @@
 # KGG Patient Source Chunk 031
 
-- Source file: `patient-start-scan.js`
+- Source file: `patient-set-summary-groups.js`
 - Characters: 1-24000
-- Full source SHA-256: `326effd0bb31b48fbbbeb8b70b4f6ea176784d712a7c91623d0154175ec60250`
+- Full source SHA-256: `26e85437840b9706eace462786c832d338ffc22180b2459fd19e2d8198cb3208`
 
 ```
 (()=>{
-  const VERSION='start-scan-v81-kgg-h3';
-  if(window.__kggStartScanVersion===VERSION)return;
-  window.__kggStartScanVersion=VERSION;
-  const LANG_KEY='kggPatientLang';
-  const PLAN_KEY='kggCurrentPlanV1';
-  const MULTI_KEY='kggPatientMultiPlansV1';
+  const VERSION='set-summary-groups-v2-range-label';
+  if(window.__kggSetSummaryGroups===VERSION)return;
+  window.__kggSetSummaryGroups=VERSION;
+
+  function normalizeValue(value){return String(value||'').replace(/\s+/g,' ').trim().toLowerCase()}
+  function setLine(line){return String(line||'').match(/^(\s*)(Satz|Set)\s*(\d+)\s*:\s*(.*?)\s*$/i)}
+  function labelText(label,start,end,value,indent){const head=start===end?`${label} ${start}:`:`${label} ${start}–${end}:`;return `${indent||''}${head} ${String(value||'').trim()}`.trimEnd()}
+  function flushGroup(out,group){
+    if(!group.length)return;
+    let prev=group[0],same=[group[0]];
+    const pushSame=()=>{out.push(labelText(same[0].label,same[0].no,same[same.length-1].no,same[0].value,same[0].indent))};
+    for(let i=1;i<group.length;i++){
+      const cur=group[i];
+      if(cur.no===prev.no+1&&normalizeValue(cur.value)===normalizeValue(prev.value)){same.push(cur)}
+      else{pushSame();same=[cur]}
+      prev=cur;
+    }
+    pushSame();
+  }
+  function compressLines(text){
+    const src=String(text||'');
+    const lines=src.split(/\n/);
+    const out=[];let group=[];
+    lines.forEach(line=>{const m=setLine(line);if(m){group.push({indent:m[1]||'',label:m[2],no:Number(m[3]),value:m[4]||''});return}flushGroup(out,group);group=[];out.push(line)});
+    flushGroup(out,group);
+    return out.join('\n')
+  }
+  function compressInline(text){
+    const src=String(text||'');
+    if(src.includes('\n'))return compressLines(src);
+    const re=/\b(Satz|Set)\s*(\d+)\s*:\s*([\s\S]*?)(?=(?:\s*\b(?:Satz|Set)\s*\d+\s*:)|$)/gi;
+    const group=[];let m,last=0;
+    while((m=re.exec(src))){if(src.slice(last,m.index).trim())return src;group.push({indent:'',label:m[1],no:Number(m[2]),value:(m[3]||'').trim()});last=re.lastIndex}
+    if(group.length<2||src.slice(last).trim())return src;
+    const out=[];flushGroup(out,group);return out.join('\n')
+  }
+  function compressText(text){return compressInline(compressLines(text))}
+
+  function exerciseName(ex){return String(ex&&(ex.n||ex.name||ex.title||ex[0])||'').trim()}
+  function exerciseSets(ex){return Math.max(1,Number(ex&&(ex.sets||ex[1]))||1)}
+  function valueMapSignature(values,day,exerciseIndex,setNo){
+    const prefix=`${day}|${exerciseIndex}|${setNo}|`;
+    const entries=Object.keys(values||{}).filter(key=>key.startsWith(prefix)).map(key=>[key.slice(prefix.length),String(values[key]??'').trim()]).filter(entry=>entry[1]!=='').sort((a,b)=>a[0].localeCompare(b[0]));
+    return entries.length?JSON.stringify(entries.map(entry=>[entry[0],normalizeValue(entry[1])])):''
+  }
+  function hasUniformCompletedSets(values,day,exerciseIndex,setCount){
+    if(!values||!day||setCount<2)return false;
+    const signatures=[];
+    for(let setNo=1;setNo<=setCount;setNo++){
+      const signature=valueMapSignature(values,day,exerciseIndex,setNo);
+      if(!signature)return false;
+      signatures.push(signature);
+    }
+    return signatures.every(signature=>signature===signatures[0])
+  }
+  function lineMatchesExercise(line,name){
+    const a=normalizeValue(line).replace(/^\s*(?:\d+[.)]|[-•])\s*/,'');
+    const b=normalizeValue(name);
+    return !!b&&(a===b||a.startsWith(b+':')||a.endsWith(' '+b))
+  }
+  function rangeLabel(lines,start,end,setCount){
+    const segment=lines.slice(start,end).join('\n');
+    const language=(localStorage.getItem('kggPatientLang')==='en'||/\bSet\s*\d+/i.test(segment))?'Set':'Satz';
+    return `${language} 1–${setCount}:`
+  }
+  function annotateUniformSetRanges(text,context){
+    const plan=context&&context.plan;
+    const values=context&&context.values;
+    const day=Number(context&&context.day)||0;
+    const exercises=plan&&Array.isArray(plan.ex)?plan.ex:[];
+    if(!exercises.length||!values||!day)return String(text||'');
+    const lines=String(text||'').split(/\n/);
+    const positions=[];
+    exercises.forEach((ex,index)=>{
+      const name=exerciseName(ex);
+      if(!name)return;
+      const lineIndex=lines.findIndex((line,at)=>!positions.some(pos=>pos.lineIndex===at)&&lineMatchesExercise(line,name));
+      if(lineIndex>=0)positions.push({exerciseIndex:index,lineIndex,name,setCount:exerciseSets(ex)})
+    });
+    positions.sort((a,b)=>a.lineIndex-b.lineIndex);
+    for(let posIndex=positions.length-1;posIndex>=0;posIndex--){
+      const pos=positions[posIndex];
+      if(pos.setCount<2||!hasUniformCompletedSets(values,day,pos.exerciseIndex,pos.setCount))continue;
+      const end=posIndex+1<positions.length?positions[posIndex+1].lineIndex:lines.length;
+      const segment=lines.slice(pos.lineIndex,end).join('\n');
+      const completeRange=new RegExp(`\\b(?:Satz|Set)\\s*1\\s*[–—-]\\s*${pos.setCount}\\s*:`,`i`);
+      if(completeRange.test(segment))continue;
+      if(/\b(?:Satz|Set)\s*\d+\s*:/i.test(segment))continue;
+      lines.splice(pos.lineIndex+1,0,rangeLabel(lines,pos.lineIndex,end,pos.setCount));
+    }
+    return lines.join('\n')
+  }
+  function currentContext(){
+    return {
+      plan:typeof p!=='undefined'&&p?p:null,
+      values:typeof v!=='undefined'&&v&&typeof v==='object'?v:null,
+      day:typeof d!=='undefined'?Number(d):0
+    }
+  }
+  function apply(){
+    const el=document.getElementById('sum');
+    if(!el)return;
+    const before=el.textContent||'';
+    const compressed=compressText(before);
+    const after=annotateUniformSetRanges(compressed,currentContext());
+    if(after!==before)el.textContent=after;
+  }
+  function patchShowQr(){
+    if(window.__kggSetSummaryGroupsPatched||typeof showQr!=='function')return;
+    window.__kggSetSummaryGroupsPatched=1;
+    const old=showQr;
+    window.showQr=function(){const r=old.apply(this,arguments);setTimeout(apply,0);setTimeout(apply,80);setTimeout(apply,240);return r};
+  }
+  if(window.__KGG_TEST__)window.__kggSetSummaryGroupsTest={compressText,annotateUniformSetRanges,valueMapSignature,hasUniformCompletedSets};
+  function init(){patchShowQr();setTimeout(patchShowQr,300);setTimeout(patchShowQr,1000);setTimeout(apply,1200)}
+  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
+})();
+
+(()=>{
+  const VERSION='ticket-015-progressions-v2-main-controls';
+  if(window.__kggTicket015Patient===VERSION)return;
+  window.__kggTicket015Patient=VERSION;
+  const HISTORY_KEY='kggProgressionHistoryV1';
+  const HISTORY_VERSION=1;
   const $=id=>document.getElementById(id);
-  const lang=()=>localStorage.getItem(LANG_KEY)==='en'?'en':'de';
-  const tr=(de,en)=>lang()==='en'?en:de;
-  let filling=false,jsQrPromise=null,scannerSession=null,scanMode='update',lastScanMetrics={decoder:'unknown'};
-  function testObserver(){const value=window.KGGPatientDeviceTestObserver;return value&&typeof value==='object'?value:null;}
-  function testEmit(event,payload){const observer=testObserver();try{if(observer&&typeof observer.emit==='function')observer.emit(event,payload||{});}catch(e){}}
-  function testConsume(raw,metrics){const observer=testObserver();try{return !!(observer&&typeof observer.consumeScan==='function'&&observer.consumeScan(raw,metrics||{}));}catch(e){return false;}}
-  function point(value){return value&&Number.isFinite(Number(value.x))&&Number.isFinite(Number(value.y))?{x:Number(value.x),y:Number(value.y)}:null;}
-  function distance(a,b){return a&&b?Math.hypot(a.x-b.x,a.y-b.y):0;}
-  function visualBands(source){try{const size=sourceSize(source);if(!size.w||!size.h)return{};const scale=Math.min(1,360/Math.max(size.w,size.h)),w=Math.max(1,Math.round(size.w*scale)),h=Math.max(1,Math.round(size.h*scale)),canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(source,0,0,w,h);const image=ctx.getImageData(0,0,w,h),data=image.data,step=Math.max(1,Math.floor(Math.sqrt((w*h)/18000)));let luminance=0,edges=0,samples=0,blue=[0,0,0,0];for(let y=0;y<h;y+=step){for(let x=0;x<w;x+=step){const i=(y*w+x)*4,r=data[i],g=data[i+1],b=data[i+2],gray=.2126*r+.7152*g+.0722*b;luminance+=gray;samples++;if(x>=step){const j=(y*w+x-step)*4,prev=.2126*data[j]+.7152*data[j+1]+.0722*data[j+2];edges+=Math.abs(gray-prev);}if(b>145&&b>r*1.3&&b>g*1.08)blue[(y<h/2?0:2)+(x<w/2?0:1)]++;}}const light=samples?luminance/samples:0,edge=samples?edges/samples:0,blueHits=blue.filter(value=>value>=3).length;return{brightnessBand:light<55?'dark':light<105?'low':light<215?'normal':'bright',blurBand:edge<5?'blurred':edge<12?'soft':'sharp',testFrameStatus:blueHits===4?'visible':blueHits>0?'clipped':'unknown'};}catch(e){return{};}}
-  function scanMetrics(decoder,source,corners){const size=sourceSize(source),points=(corners||[]).map(point).filter(Boolean),top=distance(points[0],points[1]),right=distance(points[1],points[2]),bottom=distance(points[2],points[3]),left=distance(points[3],points[0]),width=(top+bottom)/2,short=Math.min(size.w,size.h),ratio=short?Math.max(0,Math.min(100,width/short*100)):0,sides=[top,right,bottom,left].filter(value=>value>0),perspective=sides.length?Math.max(...sides)/Math.max(1,Math.min(...sides)):0;return Object.assign({decoder,frameWidth:size.w,frameHeight:size.h,qrWidthRatioPct:Math.round(ratio),distanceBand:!ratio?'unknown':ratio>=70?'very-near':ratio>=50?'near':ratio>=30?'normal':ratio>=15?'far':'very-far',angleBand:!perspective?'unknown':perspective<1.15?'front':perspective<1.45?'slight':'steep'},visualBands(source));}
-  function ready(){try{return p&&Array.isArray(p.ex)&&typeof v==='object'&&typeof k==='function'}catch(e){return false}}
-  function b64dec(s){s=String(s||'').replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return decodeURIComponent(escape(atob(s)));}
-  function normName(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9äöüß]+/g,' ').replace(/\s+/g,' ').trim();}
-  function clone(x){try{return JSON.parse(JSON.stringify(x||{}))}catch(e){return x&&typeof x==='object'?{...x}:{}}}
-  function storedCurrentPlan(){try{const saved=JSON.parse(localStorage.getItem(PLAN_KEY)||'null');return saved&&saved.plan&&typeof saved.plan==='object'?saved.plan:null}catch(e){return null}}
-  function mergeRawBase(current,next){return {...clone(current),...clone(next)}}
-  function hasMediaValue(value){if(Array.isArray(value))return value.length>0;if(value&&typeof value==='object')return true;return String(value||'').trim()!==''}
-  function exObj(e){if(!Array.isArray(e))e=[];return {n:e[0]||'Übung',sets:Number(e[1])||3,side:e[2]||'LR',u:e[3]||'kg',m:e[4]||'Wdh',sl:e[5]||'',sm:e[6]||'',media:e[7]||'',videoUrl:e[8]||'',videoLabel:e[9]||'Video öffnen',painMode:e[10]||'exercise'};}
-  function exRaw(e,base){const raw=Array.isArray(base)?base.slice():[];raw[0]=e.n;raw[1]=e.sets;raw[2]=e.side;raw[3]=e.u;raw[4]=e.m;raw[5]=e.sl||'';raw[6]=e.sm||'';if(hasMediaValue(e.media))raw[7]=e.media;else if(raw.length<8)raw[7]='';raw[8]=e.videoUrl||raw[8]||'';raw[9]=e.videoLabel||raw[9]||'Video öffnen';raw[10]=e.painMode||raw[10]||'exercise';return raw;}
-  function exerciseRawPools(list){const pools=new Map();(Array.isArray(list)?list:[]).forEach(raw=>{const key=normName(Array.isArray(raw)?raw[0]:'');if(!key)return;const pool=pools.get(key)||[];pool.push(raw);pools.set(key,pool)});return pools;}
-  function takeExerciseRaw(pools,key){const pool=pools.get(key);return pool&&pool.length?pool.shift():null;}
-  function rawFromCurrent(baseRaw){const raw=clone(baseRaw);raw.i=p&&p.id?p.id:raw.i||'plan';raw.t=p&&p.title?p.title:raw.t||'KGG Trainingsplan';raw.v=p&&p.version?p.version:raw.v||1;raw.d=p&&p.days?p.days:raw.d||6;raw.extendDays=p?p.extendDays!==false:raw.extendDays!==false;raw.stepDays=p&&p.stepDays?p.stepDays:raw.stepDays||6;const old=Array.isArray(raw.e)?raw.e:[];const pools=exerciseRawPools(old);raw.e=p&&Array.isArray(p.ex)?p.ex.map((ex,i)=>exRaw(ex,takeExerciseRaw(pools,normName(ex.n))||old[i])):old;return raw;}
-  function mergeExerciseRaw(currentRaw,nextRaw){const current=Array.isArray(currentRaw)?currentRaw:[];const incoming=Array.isArray(nextRaw)?nextRaw:[];const next=exObj(incoming);const out=current.slice();out[0]=next.n;out[1]=next.sets;out[2]=next.side;out[3]=next.u;out[4]=next.m;out[5]=next.sl;out[6]=next.sm;[7,8,9,10].forEach(index=>{if(hasMediaValue(incoming[index]))out[index]=clone(incoming[index]);else if(out.length<=index)out[index]=index===9?'Video öffnen':index===10?'exercise':''});for(let index=11;index<incoming.length;index++)if(index in incoming)out[index]=clone(incoming[index]);return out;}
-  function syncMultiPlan(raw){try{let s=JSON.parse(localStorage.getItem(MULTI_KEY)||'null');if(!s||!Array.isArray(s.plans))s={version:1,plans:[],active:0,day:{}};if(typeof s.active!=='number'||s.active<0)s.active=0;if(!s.plans.length)s.plans.push(raw);else s.plans[Math.min(s.active,s.plans.length-1)]=raw;s.updatedAt=new Date().toISOString();localStorage.setItem(MULTI_KEY,JSON.stringify(s));}catch(e){}}
-  function storeCurrentPlan(raw){localStorage.setItem(PLAN_KEY,JSON.stringify({plan:raw,importedAt:new Date().toISOString()}));syncMultiPlan(raw);}
-  function planPayloadFromText(raw){if(window.KGGPlanFormat&&typeof window.KGGPlanFormat.findPlanCode==='function'){try{return window.KGGPlanFormat.findPlanCode(raw)||''}catch(e){}}const first=String(raw||'');const variants=[first];try{variants.push(decodeURIComponent(first))}catch(e){}try{const url=new URL(first,location.href);['plan','kgg'].forEach(key=>{const value=url.searchParams.get(key);if(value){variants.push(value);try{variants.push(decodeURIComponent(value))}catch(e){}}});if(url.hash)variants.push(url.hash)}catch(e){}for(const value of variants){const m=String(value||'').match(/(KGGH[23])(?::|%3A)([A-Za-z0-9_-]+)/i);if(m&&m[2])return m[1].toUpperCase()+':'+m[2]}return ''}
-  function validPlan(raw){if(!raw||!Array.isArray(raw.e)||!raw.e.length||raw.e.length>40)return false;if(window.KGGPlanFormat&&typeof window.KGGPlanFormat.validatePlan==='function'){try{window.KGGPlanFormat.validatePlan(raw);return true}catch(e){return false}}return raw.e.every(item=>Array.isArray(item)&&item.length>=5&&typeof item[0]==='string'&&item[0].trim()&&Number.isInteger(Number(item[1]))&&Number(item[1])>0&&typeof item[2]==='string');}
-  function parsePlanFromText(raw){const code=planPayloadFromText(raw);if(!code)return null;try{const parsed=window.KGGPlanFormat&&typeof window.KGGPlanFormat.decodeCode==='function'?window.KGGPlanFormat.decodeCode(code).raw:JSON.parse(b64dec(code.replace(/^KGGH2:/i,'')));return validPlan(parsed)?parsed:null}catch(e){return null}}
-  function pokeMedia(){[80,300,900].forEach(delay=>setTimeout(()=>{try{window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.prefetch&&window.KGGPatientMediaRetryCache.prefetch()}catch(e){}try{window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.render&&window.KGGPatientMediaRetryCache.render()}catch(e){}},delay));}
-  function mergePlanUpdate(nextRaw){if(!ready()||!nextRaw||!Array.isArray(nextRaw.e))return false;try{safeSave()}catch(e){}const current=rawFromCurrent(storedCurrentPlan()||{});const mergedRaw=(Array.isArray(current.e)?current.e:[]).map(clone);const index=new Map();mergedRaw.forEach((raw,i)=>{const key=normName(Array.isArray(raw)?raw[0]:'');if(key&&!index.has(key))index.set(key,i)});let added=0;nextRaw.e.forEach(incoming=>{const key=normName(Array.isArray(incoming)?incoming[0]:'');if(key&&index.has(key)){const i=index.get(key);mergedRaw[i]=mergeExerciseRaw(mergedRaw[i],incoming);}else{const next=clone(incoming);mergedRaw.push(next);if(key)index.set(key,mergedRaw.length-1);added++;}});const baseRaw={...clone(current),...clone(nextRaw),e:mergedRaw};p.id=current.i||nextRaw.i||'plan';p.title=nextRaw.t||current.t;p.version=Number(nextRaw.v)||current.v||1;p.days=Math.max(Number(current.d)||6,Number(nextRaw.d)||6);p.extendDays=nextRaw.extendDays!==false;p.stepDays=Number(nextRaw.stepDays)||Number(current.stepDays)||6;p.ex=mergedRaw.map(exObj);const out=rawFromCurrent(baseRaw);storeCurrentPlan(out);try{save()}catch(e){}try{render()}catch(e){}pokeMedia();try{setStatus(tr('Plan aktualisiert. Werte behalten. Neue Übungen: ','Plan updated. Values kept. New exercises: ')+added,'ok')}catch(e){}return true;}
-  function normSide(side){const x=normName(side);return side==='LR'||x==='lr'||x.includes('links rechts')||x.includes('left right')?'LR':'B';}
-  function normUnit(unit){const x=normName(unit).replace(/\s+/g,'');if(!x||x==='keine'||x==='none'||x==='-')return'';if(['wdh','wiederholung','wiederholungen','rep','reps'].includes(x))return'reps';if(['s','sek','sekunde','sekunden','sec','secs','second','seconds'].includes(x))return'sec';if(['min','minute','minuten','mins','minutes'].includes(x))return'min';if(['kg','kilogramm','kilogram','kilograms'].includes(x))return'kg';if(['stufe','level'].includes(x))return'level';if(['w','watt'].includes(x))return'watt';return x;}
-  function sameUnit(a,b){const x=normUnit(a),y=normUnit(b);return !!x&&x===y;}
-  function latestStoredValue(values,ei,set,side,key){let hit='',best=-1;Object.entries(values||{}).forEach(([kk,value])=>{if(String(value??'').trim()==='')return;const parts=kk.split('|');if(parts.length<5)return;const day=Number(parts[0]),ex=Number(parts[1]),st=Number(parts[2]);if(ex===ei&&st===set&&parts[3]===side&&parts[4]===key&&day>=best){best=day;hit=String(value)}});return hit;}
-  function transferPreview(current,nextRaw,values){const oldList=Array.isArray(current.e)?current.e:[];const newList=Array.isArray(nextRaw.e)?nextRaw.e:[];const pools=new Map();oldList.forEach((raw,i)=>{const ex=exObj(raw),key=normName(ex.n)+'|'+normSide(ex.side);if(!key.startsWith('|')){const pool=pools.get(key)||[];pool.push(i);pools.set(key,pool)}});const nextValues={};let matched=0,transferred=0;newList.forEach((raw,newEi)=>{const next=exObj(raw),key=normName(next.n)+'|'+normSide(next.side),pool=pools.get(key)||[];if(!pool.length)return;const oldEi=pool.shift(),old=exObj(oldList[oldEi]);matched++;const sets=Math.min(Number(old.sets)||3,Number(next.sets)||3),sides=normSide(next.side)==='LR'?['L','R']:['B'];for(let set=1;set<=sets;set++)sides.forEach(side=>{[['a',old.u,next.u],['b',old.m,next.m]].forEach(([field,oldUnit,newUnit])=>{if(!sameUnit(oldUnit,newUnit))return;const value=latestStoredValue(values,oldEi,set,side,field);if(value==='')return;nextValues['1|'+newEi+'|'+set+'|'+side+'|'+field]=value;transferred++;});});});return{nextValues,matched,transferred,total:newList.length};}
-  function replacePlan(nextRaw,options){if(!ready()||!nextRaw||!Array.isArray(nextRaw.e))return false;try{safeSave()}catch(e){}const current=rawFromCurrent(storedCurrentPlan()||{}),oldValues=clone(v),preview=transferPreview(current,nextRaw,oldValues);const question=tr('Plan ersetzen?\n\n'+preview.total+' Übungen aus dem QR-Plan ersetzen den aktuellen Plan.\n'+preview.matched+' passende Übungen gefunden.\n'+preview.transferred+' Werte werden mit passenden Einheiten in Tag 1 übernommen.\n\nDer bisherige Plan bleibt in der Plan-Historie.','Replace plan?\n\n'+preview.total+' exercises from the QR plan will replace the current plan.\n'+preview.matched+' matching exercises found.\n'+preview.transferred+' values with matching units will be copied to day 1.\n\nThe previous plan remains in plan history.');if(!(options&&options.confirmed)&&!confirm(question)){try{setStatus(tr('Plan ersetzen abgebrochen.','Plan replacement cancelled.'))}catch(e){}return true;}let state;try{state=JSON.parse(localStorage.getItem(MULTI_KEY)||'null')}catch(e){state=null}if(!state||!Array.isArray(state.plans))state={version:1,plans:[],active:0,day:{}};state.day=state.day||{};let active=Math.max(0,Math.min(Number(state.active)||0,Math.max(0,state.plans.length-1)));if(!state.plans.length){state.plans.push(current);active=0}else state.plans[active]=current;const replacement=clone(nextRaw);replacement.sourcePlanId=replacement.i||'';replacement.i=String(replacement.i||'plan')+'-r'+Date.now().toString(36);replacement.t=replacement.t||tr('Neuer Trainingsplan','New training plan');replacement.v=Number(replacement.v)||1;replacement.d=Number(replacement.d)||6;replacement.extendDays=replacement.extendDays!==false;replacement.stepDays=Number(replacement.stepDays)||6;replacement.e=Array.isArray(replacement.e)?replacement.e.map(clone):[];state.plans.push(replacement);state.active=state.plans.length-1;state.day[state.active]=1;state.updatedAt=new Date().toISOString();localStorage.setItem(MULTI_KEY,JSON.stringify(state));localStorage.setItem(PLAN_KEY,JSON.stringify({plan:replacement,importedAt:new Date().toISOString(),source:'replace'}));p.id=replacement.i;p.title=replacement.t;p.version=replacement.v;p.days=replacement.d;p.extendDays=replacement.extendDays;p.stepDays=replacement.stepDays;p.ex=replacement.e.map(exObj);v=preview.nextValues;done=[];d=1;try{save()}catch(e){}try{render()}catch(e){}pokeMedia();try{setStatus(tr('Plan ersetzt. Übernommene Werte: ','Plan replaced. Values copied: ')+preview.transferred+'.','ok')}catch(e){}return true;}
-  function autoFillStartValues(){if(filling||!ready())return;let day=1;try{day=Number(d)||1}catch(e){}if(day!==1)return;let changed=false;const setIfEmpty=(ei,s,side,key,value)=>{value=String(value||'').trim();if(!value)return;const kk=k(ei,s,side,key,1);if(!String(v[kk]||'').trim()){v[kk]=value;changed=true;}};try{p.ex.forEach((ex,ei)=>{const load=String(ex.sl||'').trim();const reps=String(ex.sm||'').trim();if(!load&&!reps)return;const sets=Number(ex.sets)||3;const sides=ex.side==='LR'?['L','R']:['B'];for(let s=1;s<=sets;s++)sides.forEach(side=>{if(normUnit(ex.u))setIfEmpty(ei,s,side,'a',load);if(normUnit(ex.m))setIfEmpty(ei,s,side,'b',reps);});});}catch(e){}if(changed){filling=true;try{save()}catch(e){}try{setStatus(tr('Startwerte übernommen.','Start values loaded.'),'ok')}catch(e){}try{render()}catch(e){}filling=false;}}
-  function handlePlanText(raw){const mode=scanMode;scanMode='update';const payload=planPayloadFromText(raw);const nextRaw=payload?parsePlanFromText(raw):null;if(!nextRaw){alert(tr('Kein Plan-QR erkannt.','No plan QR detected.'));return;}if(mode==='replace'&&replacePlan(nextRaw))return;if(mergePlanUpdate(nextRaw))return;try{safeSave()}catch(e){}location.href=location.origin+location.pathname+'#'+payload;setTimeout(()=>location.reload(),80);}
-  function ensureScanInput(){let input=$('kggPlanScanInput');if(input)return input;input=document.createElement('input');input.id='kggPlanScanInput';input.type='file';input.accept='image/*';input.setAttribute('capture','environment');input.style.display='none';input.addEventListener('change',scanFile);document.body.appendChild(input);return input;}
-  function promptFallback(){const raw=prompt(tr('Kamera-Scan nicht verfügbar. Plan-Link oder QR-Text einfügen:','Camera scan not available. Paste plan link or QR text:'));if(raw)handlePlanText(raw);}
-  function loadJsQR(){if(window.jsQR)return Promise.resolve(window.jsQR);if(jsQrPromise)return jsQrPromise;jsQrPromise=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='./vendor/jsqr-1.4.0.js';s.onload=()=>window.jsQR?resolve(window.jsQR):reject(new Error('jsQR fehlt'));s.onerror=()=>reject(new Error('jsQR konnte nicht geladen werden'));document.head.appendChild(s);});return jsQrPromise;}
-  function imageFromFile(file){return new Promise((resolve,reject)=>{const url=URL.createObjectURL(file);const img=new Image();img.onload=()=>{URL.revokeObjectURL(url);resolve(img)};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Bild konnte nicht gelesen werden'))};img.src=url;});}
-  async function createNativeDetector(){if(!('BarcodeDetector' in window))return null;try{if(typeof BarcodeDetector.getSupportedFormats==='function'){const formats=await BarcodeDetector.getSupportedFormats();if(Array.isArray(formats)&&!formats.includes('qr_code'))return null;}return new BarcodeDetector({formats:['qr_code']});}catch(e){return null;}}
-  async function detectNative(detector,source){if(!detector)return'';try{const codes=await detector.detect(source),hit=codes&&codes[0];if(!hit||!hit.rawValue)return'';const corners=Array.isArray(hit.cornerPoints)?hit.cornerPoints:hit.boundingBox?[{x:hit.boundingBox.x,y:hit.boundingBox.y},{x:hit.boundingBox.x+hit.boundingBox.width,y:hit.boundingBox.y},{x:hit.boundingBox.x+hit.boundingBox.width,y:hit.boundingBox.y+hit.boundingBox.height},{x:hit.boundingBox.x,y:hit.boundingBox.y+hit.boundingBox.height}]:[];lastScanMetrics=scanMetrics('barcode-detector',source,corners);return hit.rawValue;}catch(e){return'';}}
-  function sourceSize(source){return{w:Number(source.videoWidth||source.naturalWidth||source.width)||0,h:Number(source.videoHeight||source.naturalHeight||source.height)||0};}
-  function renderDecodeVariant(source,variant){const size=sourceSize(source);if(!size.w||!size.h)return null;const crop=variant.crop||1;const sw=Math.max(1,Math.round(size.w*crop)),sh=Math.max(1,Math.round(size.h*crop));const sx=Math.round((size.w-sw)/2),sy=Math.round((size.h-sh)/2);const max=variant.max||1600;const scale=Math.min(variant.upscale||1,max/Math.max(sw,sh));const w=Math.max(1,Math.round(sw*scale)),h=Math.max(1,Math.round(sh*scale));const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';if(variant.contrast)ctx.filter='contrast('+variant.contrast+')';ctx.drawImage(source,sx,sy,sw,sh,0,0,w,h);return canvas;}
-  async function decodeCanvasWithJsQR(canvas){if(!canvas)return'';const qr=await loadJsQR();const ctx=canvas.getContext('2d',{willReadFrequently:true});const data=ctx.getImageData(0,0,canvas.width,canvas.height);const code=qr(data.data,canvas.width,canvas.height,{inversionAttempts:'attemptBoth'});if(code&&code.data){const location=code.location||{},corners=[location.topLeftCorner,location.topRightCorner,location.bottomRightCorner,location.bottomLeftCorner];lastScanMetrics=scanMetrics('jsqr',canvas,corners);return code.data;}return'';}
-  const PHOTO_VARIANTS=[{crop:1,max:1920},{crop:.82,max:1600,upscale:2},{crop:.62,max:1600,upscale:2},{crop:1,max:1600,contrast:1.35},{crop:.82,max:1600,upscale:2,contrast:1.35},{crop:.62,max:1600,upscale:2,contrast:1.35}];
-  const LIVE_VARIANTS=[{crop:1,max:1280},{crop:.82,max:1280,upscale:1.5},{crop:.62,max:1280,upscale:2},{crop:1,max:1280,contrast:1.35},{crop:.82,max:1280,upscale:1.5,contrast:1.35},{crop:.62,max:1280,upscale:2,contrast:1.35}];
-  async function decodePhoto(file){const img=await imageFromFile(file);const detector=await createNativeDetector();let raw=await detectNative(detector,img);if(raw)return{raw,decoder:'barcode-detector'};for(const variant of PHOTO_VARIANTS){raw=await decodeCanvasWithJsQR(renderDecodeVariant(img,variant));if(raw)return{raw,decoder:'jsqr'};}return{raw:'',decoder:'none'};}
-  function scannerStatus(text,kind){const node=$('kggLiveScanStatus');if(!node)return;node.textContent=text;node.className='kggLiveScanStatus '+(kind||'');}
-  function stopScannerTracks(session){if(!session)return;clearTimeout(session.timer);session.timer=0;let tracks=[],stopped=true;try{tracks=session.stream?session.stream.getTracks():[];tracks.forEach(track=>track.stop());stopped=tracks.every(track=>track.readyState==='ended');}catch(e){stopped=false;}session.stream=null;try{if(session.video)session.video.srcObject=null}catch(e){}testEmit('scanner-stop',{tracksStopped:stopped,trackCount:tracks.length});}
-  function closeLiveScanner(preserveMode){const session=scannerSession;if(session){session.active=false;stopScannerTracks(session);if(session.box&&session.box.parentNode)session.box.remove();scannerSession=null;}if(!preserveMode)scanMode='update';}
-  function showScannerFallback(message){const session=scannerSession;if(!session)return;session.active=false;stopScannerTracks(session);scannerStatus(message,'warn');const actions=$('kggLiveScanFallback');if(actions)actions.hidden=false;}
-  function scannerBox(){ensureStyle();const replacing=scanMode==='replace';const box=document.createElement('div');box.id='kggLiveScan';box.className='kggLiveScan';box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');box.setAttribute('aria-label',replacing?tr('Plan durch QR ersetzen','Replace plan from QR'):tr('Plan-QR scannen','Scan plan QR'));box.innerHTML='<div class="kggLiveScanPanel"><div class="kggLiveScanHead"><b>'+(replacing?tr('QR für neuen Plan scannen','Scan QR for replacement plan'):tr('Plan-QR automatisch scannen','Scan plan QR automatically'))+'</b><button type="button" class="kggLiveScanClose" aria-label="'+tr('Scanner schließen','Close scanner')+'">×</button></div><div class="kggLiveScanView"><video id="kggLiveScanVideo" muted playsinline autoplay></video><div class="kggLiveScanGuide"></div></div><div id="kggLiveScanStatus" class="kggLiveScanStatus">'+tr('Kamera wird gestartet …','Starting camera …')+'</div><div id="kggLiveScanFallback" class="kggLiveScanFallback" hidden><button type="button" class="kggLivePhoto">'+tr('Foto aufnehmen oder auswählen','Take or choose photo')+'</button><button type="button" class="kggLivePaste">'+tr('Plan-Link einfügen','Paste plan link')+'</button><button type="button" class="kggLiveRetry">'+tr('Live-Scan erneut versuchen','Retry live scan')+'</button></div><p>'+tr('QR möglichst groß in den Rahmen halten. Die App löst automatisch aus.','Hold the QR as large as possible inside the frame. The app scans automatically.')+'</p></div>';document.body.appendChild(box);box.querySelector('.kggLiveScanClose').onclick=()=>closeLiveScanner(false);box.querySelector('.kggLivePhoto').onclick=()=>{const mode=scanMode;closeLiveScanner(false);const input=ensureScanInput();input.dataset.scanMode=mode;input.click();};box.querySelector('.kggLivePaste').onclick=()=>{closeLiveScanner(true);promptFallback();};box.querySelector('.kggLiveRetry').onclick=()=>{const mode=scanMode;closeLiveScanner(true);openCameraScan(mode);};return box;}
-  async function scanLiveFrame(session){if(!session.active||scannerSession!==session)return;if(Date.now()-session.startedAt>=30000){showScannerFallback(tr('Noch kein Plan-QR erkannt. Bitte erneut versuchen oder ein Foto verwenden.','No plan Q
+  const clone=value=>{try{return JSON.parse(JSON.stringify(value));}catch(err){return value;}};
+  const esc=value=>String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const idPart=value=>String(value||'').replace(/[^A-Za-z0-9_-]+/g,'_').slice(0,80)||'exercise';
+  const safeJson=(value,fallback)=>{try{return JSON.parse(value||'')}catch(err){return fallback}};
+  let history=loadHistory();
+  let sessionSelection={};
+  let rawVariantsReady=false;
+  let originalNames=[];
+  let originalMedia=[];
+  let originalRender=null;
+  let originalPut=null;
+  let originalText=null;
+  let originalShowQr=null;
+  let originalOpenPad=null;
+  let currentPlanId='';
+  let activeSet={index:0,setNo:1};
+  let preferActiveMedia=false;
+
+  function loadHistory(){
+    const value=safeJson(localStorage.getItem(HISTORY_KEY),null);
+    if(!value||value.version!==HISTORY_VERSION||!value.groups||typeof value.groups!=='object')return {version:HISTORY_VERSION,groups:{},current:{day:0,records:{}},finalized:{}};
+    value.current=value.current&&typeof value.current==='object'?value.current:{day:0,records:{}};
+    value.current.records=value.current.records&&typeof value.current.records==='object'?value.current.records:{};
+    value.finalized=value.finalized&&typeof value.finalized==='object'?value.finalized:{};
+    return value;
+  }
+  function saveHistory(){try{localStorage.setItem(HISTORY_KEY,JSON.stringify(history))}catch(err){}}
+  function currentDay(){return Number(typeof d!=='undefined'?d:1)||1}
+  function planId(){return String(typeof p!=='undefined'&&p&&p.id||'plan')}
+  function ensureDay(){const day=currentDay(),pid=planId();if(String(history.current&&history.current.planId||'')!==pid||Number(history.current&&history.current.day)!==day){history.current={planId:pid,day,records:{}};sessionSelection={}}if(!history.current.records||typeof history.current.records!=='object')history.current.records={};return history.current}
+  function rawPlan(){const saved=safeJson(localStorage.getItem('kggCurrentPlanV1'),null);return saved&&saved.plan?saved.plan:null}
+  function rawExercise(index){const plan=rawPlan();return plan&&Array.isArray(plan.e)?plan.e[index]:null}
+  function groupOf(ex,index){return String(ex&&ex.progressionGroupId||'pg_'+idPart(ex&&((ex.localId||ex.id)||('exercise_'+index))));}
+  function variantFrom(value,index,group,base){
+    const item=value&&typeof value==='object'?value:{};
+    const media=Array.isArray(item.media)?clone(item.media):(item.media?clone(item.media):Array.isArray(base&&base[7])?clone(base[7]):base&&base.media?clone(base.media):[]);
+    return {id:String(item.id||item.i||('pv_'+idPart(group)+'_'+index)),groupId:String(item.groupId||group),name:String(item.name||item.n||item.title||('Progressionsstufe '+(index+1))).trim(),order:Number.isFinite(Number(item.order??item.o))?Number(item.order??item.o):index,media,sourceId:String(item.sourceId||item.s||'')};
+  }
+  function variantsFor(ex,index){
+    const group=groupOf(ex,index),raw=rawExercise(index),wire=raw&&raw[11]&&typeof raw[11]==='object'?raw[11]:(raw&&raw[10]&&typeof raw[10]==='object'?raw[10]:null);
+    let source=Array.isArray(ex&&ex.progressionVariants)?ex.progressionVariants:[];
+    if(!source.length&&wire&&typeof wire==='object'&&Array.isArray(wire.v))source=wire.v.map(item=>({id:item&&item.i,name:item&&item.n,order:item&&item.o,sourceId:item&&item.s,media:item&&item.m}));
+    if(!source.length)return [];
+    const values=source.map((item,i)=>variantFrom(item,i,String(wire&&wire.g||group),raw||ex));
+    values.sort((a,b)=>a.order-b.order||a.id.localeCompare(b.id));
+    return values.map((item,i)=>({...item,order:i,groupId:String(wire&&wire.g||group)}));
+  }
+  function syncRawVariants(){
+    if(typeof p==='undefined'||!p||!Array.isArray(p.ex))return;
+    if(currentPlanId&&currentPlanId!==planId()){sessionSelection={};originalNames=[];originalMedia=[];activeSet={index:0,setNo:1};preferActiveMedia=false;history.current={planId:planId(),day:currentDay(),records:{}}}
+    currentPlanId=planId();
+    if(!originalNames.length)originalNames=p.ex.map(ex=>String(ex&&ex.n||''));
+    if(!originalMedia.length)originalMedia=p.ex.map(ex=>clone(ex&&ex.media));
+    p.ex.forEach((ex,index)=>{
+      const values=variantsFor(ex,index);
+      if(values.length){ex.progressionGroupId=values[0].groupId;ex.progressionVariants=values}
+    });
+    rawVariantsReady=true;
+  }
+  function valuesForExercise(index){
+    if(typeof p==='undefined'||!p||!p.ex||!p.ex[index])return [];
+    return variantsFor(p.ex[index],index);
+  }
+  function groupState(index){
+    const ex=p&&p.ex&&p.ex[index],values=valuesForExercise(index),raw=rawExercise(index),wire=raw&&raw[11]&&typeof raw[11]==='object'?raw[11]:(raw&&raw[10]&&typeof raw[10]==='object'?raw[10]:null),gid=values[0]&&values[0].groupId||groupOf(ex,index);
+    const storageKey=planId()+'|'+gid;
+    if(!history.groups[storageKey])history.groups[storageKey]={lastBySet:{},dominantId:''};
+    const group=history.groups[storageKey];group.lastBySet=group.lastBySet&&typeof group.lastBySet==='object'?group.lastBySet:{};
+    const requested=String(ex&&ex.progressionMainId||wire&&wire.a||'');group.mainId=values.some(item=>String(item.id)===requested)?requested:(group.mainId&&values.some(item=>String(item.id)===String(group.mainId))?String(group.mainId):(values[0]&&values[0].id||''));
+    return {gid,storageKey,group,values,mainId:group.mainId};
+  }
+  function variantById(values,id){return values.find(item=>String(item.id)===String(id))||null}
+  function defaultId(index,setNo){
+    const state=groupState(index),values=state.values;if(!values.length)return '';
+    const key=String(index)+'|'+String(setNo),selected=sessionSelection[key];
+    if(selected&&variantById(values,selected))return selected;
+    if(state.group.lastBySet[key]&&variantById(values,state.group.lastBySet[key]))return state.group.lastBySet[key];
+    if(state.group.dominantId&&variantById(values,state.group.dominantId))return state.group.dominantId;
+    return state.mainId||values[0].id;
+  }
+  function selectedId(index,setNo){return defaultId(index,setNo)}
+  function currentRecordKey(index,setNo){return String(index)+'|'+String(setNo)}
+  function recordSuccessfulEdit(index,setNo){
+    ensureDay();
+    const state=groupState(index),values=state.values;if(!values.length)return;
+    const id=selectedId(index,setNo),key=currentRecordKey(index,setNo);if(!id)return;
+    const dayState=ensureDay(),old=dayState.records[key];
+    if(!old)dayState.records[key]={exerciseIndex:index,setNo:Number(setNo),id:String(id),previousId:state.group.lastBySet[key]?String(state.group.lastBySet[key]):''};
+    else old.id=String(id);
+    state.group.lastBySet[key]=String(id);
+    saveHistory();
+    applyDominantMedia();
+    renderGalleries(index);
+  }
+  function dominantFor(index,dayOnly){
+    const state=groupState(index),values=state.values;if(!values.length)return null;
+    const counts={};const records=dayOnly&&String(history.current.planId||'')===planId()&&Number(history.current.day)===currentDay()?history.current.records:state.group.lastBySet;
+    Object.keys(records||{}).forEach(key=>{
+      const rec=records[key];if(!rec||Number(rec.exerciseIndex??String(key).split('|')[0])!==Number(index))return;
+      const id=String(rec.id||rec);if(variantById(values,id))counts[id]=(counts[id]||0)+1;
+    });
+    let winner=null;values.forEach(item=>{const count=counts[item.id]||0;if(!winner||count>winner.count||(count===winner.count&&item.order>winner.item.order))winner={item,count}});
+    return winner&&winner.count>0?winner.item:null;
+  }
+  function applyDominantMedia(preferActiveSet=false){
+    if(typeof p==='undefined'||!p||!Array.isArray(p.ex))return;
+    syncRawVariants();
+    p.ex.forEach((ex,index)=>{
+      const values=valuesForExercise(index);if(!values.length)return;
+      const state=groupState(index),winner=state.group.dominantId&&variantById(values,state.group.dominantId)||dominantFor(index,false)||variantById(values,state.mainId)||values[0];
+      const active=preferActiveSet&&activeSet&&Number(activeSet.index)===index?variantById(values,selectedId(index,activeSet.setNo)):null;
+      ex.media=clone((active||winner)&&((active||winner).media)||originalMedia[index]||[]);
+    });
+  }
+  function displayedVariant(index){
+    const state=groupState(index),values=state.values;if(!values.length)return null;
+    return state.group.dominantId&&variantById(values,state.group.dominantId)||dominantFor(index,false)||variantById(values,state.mainId)||values[0];
+  }
+  function applyDisplayNames(){
+    if(!document||typeof document.querySelectorAll!=='function')return;
+    document.querySelectorAll('#list .ex').forEach((card,index)=>{const variant=displayedVariant(index),title=card.querySelector('h3');if(variant&&title)title.textContent=variant.name;});
+  }
+  function css(){
+    if(!document||typeof document.createElement!=='function'||!document.head)return;
+    if($('kggTicket015PatientStyle'))return;
+    const style=document.createElement('style');style.id='kggTicket015PatientStyle';style.textContent=`
+      .kgg015Gallery{display:grid;grid-template-columns:36px minmax(0,1fr) 36px;gap:7px;align-items:stretch;margin-top:10px;padding:9px;border:1px solid #d8dee9;border-radius:14px;background:#f8fafc}
+      .kgg015Gallery button{min-height:38px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#111827;font-weight:900}
+      .kgg015GalleryViewport{min-width:0;text-align:center;display:grid;gap:5px;touch-action:pan-y}
+      .kgg015GalleryStage{font-size:12px;font-weight:900;color:#334155;min-height:18px}
+      .kggProgressionMediaBox{min-height:82px;display:grid;place-items:center;overflow:hidden;border-radius:11px;background:#e2e8f0;color:#64748b;font-size:12px;font-weight:750}
+      .kggProgressionMediaBox img{display:block;width:100%;max-height:130px;object-fit:contain;background:#fff}
+      .kggProgressionMediaBox small{padding:3px 5px;font-size:10px}
+      .kgg015GalleryDots{display:flex;justify-content:center;gap:5px;flex-wrap:wrap}
+      .kgg015GalleryDots button{min-height:25px;min-width:25px;padding:2px 7px;border-radius:999px;font-size:11px}
+      .kgg015GalleryDots button[aria-current="true"]{background:#111827;color:#fff;border-color:#111827}
+      .kgg015VariantBadge{display:inline-flex;align-items:center;gap:5px;margin-left:7px;padding:2px 7px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:11px;font-weight:850}
+      .kgg015MainProgressionHost{position:relative;overflow:hidden}
+      .kgg015MainPager{position:absolute;inset:0;z-index:3;overflow:hidden;border-radius:12px;background:#e2e8f0;touch-action:pan-y}
+      .kgg015MainPagerTrack{display:flex;width:300%;height:100%;transform:translate3d(-33.333333%,0,0);transition:transform .32s cubic-bezier(.2,.78,.2,1);will-change:transform}
+      .kgg015MainPagerTrack.is-dragging{transition:none;cursor:grabbing}
+      .kgg015MainPagerSlide{position:relative;display:grid;place-items:center;flex:0 0 33.333333%;min-width:0;height:100%;opacity:.55;transform:scale(.94);transition:opacity .24s ease,transform .24s ease}
+      .kgg015MainPagerSlide[data-active="true"]{opacity:1;transform:scale(1)}
+      .kgg015MainPagerSlide .kggProgressionMediaBox{width:100%;height:100%;min-height:100%;border:0;border-radius:0;background:#e2e8f0}
+      .kgg015MainPagerSlide .kggProgressionMediaBox img{max-height:100%;height:100%;object-fit:contain}
+      .kgg015MainPagerPlaceholder{display:grid;place-items:center;height:100%;padding:12px;color:#64748b;font-size:12px;font-weight:800;text-align:center}
+      .kgg015MainProgressionControls{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 8px;pointer-events:none;z-index:4}
+      .kgg015MainProgressionControl{pointer-events:auto;width:44px;height:44px;border:1px solid rgba(255,255,255,.72);border-radius:999px;background:rgba(255,255,255,.68);color:#111827;box-shadow:0 8px 22px rgba(15,23,42,.18),inset 0 1px 0 rgba(255,255,255,.88);backdrop-filter:blur(16px) saturate(1.35);-webkit-backdrop-filter:blur(16px) saturate(1.35);line-height:1;font-weight:900;display:grid;place-items:center}
+      .kgg015MainProgressionControl:disabled{opacity:.32;cursor:default}
+      .kgg015MainProgressionControl:focus-visible{outline:3px solid #2563eb;outline-offset:2px}
+      .kgg015MainProgressionTriangle{display:block;width:0;height:0;border-top:9px solid transparent;border-bottom:9px solid transparent}
+      .kgg015MainProgressionTriangle.prev{border-right:14px solid currentColor;margin-left:-3px}
+      .kgg015MainProgressionTriangle.next{border-left:14px solid currentColor;margin-right:-3px}
+      .kgg015MainProgressionStage{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);max-width:calc(100% - 112px);padding:4px 9px;border:1px solid rgba(255,255,255,.7);border-radius:999px;background:rgba(255,255,255,.7);color:#334155;font-size:11px;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+      .kgg015MainProgressionThumbs{display:flex;justify-content:center;gap:8px;overflow-x:auto;scrollbar-width:none;margin:8px 8px 2px;padding:2px 8px 4px;touch-action:pan-x}
+      .kgg015MainProgressionThumbs::-webkit-scrollbar{display:none}
+      .kgg015MainProgressionThumb{position:relative;flex:0 0 58px;width:58px;height:46px;padding:0;border:2px solid transparent;border-radius:10px;background:#f1f5f9;overflow:hidden;cursor:pointer;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+      .kgg015MainProgressionThumb[aria-current="true"]{border-color:#2563eb;box-shadow:0 0 0 3px #dbeafe;transform:scale(1.06)}
+      .kgg015MainProgressionThumb .kggProgressionMediaBox{height:100%;min-height:100%;border:0;border-radius:0;padding:0;background:#e2e8f0}
+      .kgg015MainProgressionThumb .kggProgressionMediaBox img{display:block;width:100%;height:100%;object-fit:cover}
+      .kgg015MainProgressionThumbLabel{position:absolute;right:3px;bottom:2px;padding:1px 4px;border-radius:999px;background:rgba(255,255,255,.78);color:#334155;font-size:9px;font-weight:900}
+      @media(max-width:430px){.kgg015MainProgressionControl{width:40px;height:40px}.kgg015MainProgressionControls{padding:0 6px}.kgg015MainProgressionStage{bottom:6px}.kgg015MainProgressionThumb{flex-basis:52px;width:52px;height:42px}}
+      @media(max-width:430px){.kgg015Gallery{grid-template-columns:32px minmax(0,1fr) 32px;padding:7px}.kggProgressionMediaBox{min-height:70px}.kggProgressionMediaBox img{max-height:110px}}
+    `;document.head.appendChild(style);
+  }
+  function mainMediaBox(index){const card=[...document.querySelectorAll('#list .ex')][index];return card&&card.querySelector('.kggMediaList .kggMediaBox');}
+  function progressionThumbMarkup(item,targetId,index,setNo,stageIndex){
+    const media=item&&item.media&&item.media[0];
+    if(!media)return '<span class="kgg015MainPagerPlaceholder">Kein Bild hinterlegt</span>';
+    const node='<div class="kggProgressionMediaBox loading" data-kgg-progression-media="'+esc(targetId)+'"><span>…</span></div>';
+    setTimeout(()=>{try{if(window.KGGPatientMediaRetryCache&&typeof window.KGGPatientMediaRetryCache.loadMedia==='function')window.KGGPatientMediaRetryCache.loadMedia(media,index,setNo,targetId)}catch(err){}},0);
+    return node;
+  }
+  function pagerSlide(item,targetId,index,setNo,stageIndex,active){
+    return '<div class="kgg015MainPagerSlide" data-active="'+(active?'true':'false')+'" data-stage-index="'+stageIndex+'">'+progressionThumbMarkup(item,targetId,index,setNo,stageIndex)+'</div>';
+  }
+  function mainPagerThumbs(card,index,setNo,values,at){
+    card.querySelectorAll('.kgg015MainProgressionThumbs').forEach(node=>node.remove());
+    const thumbs=document.createElement('div');thumbs.className='kgg015MainProgressionThumbs';thumbs.setAttribute('aria-label','Progressionsstufen auswählen');
+    thumbs.innerHTML=values.map((item,i)=>{const target='kgg015-thumb-'+index+'-'+setNo+'-'+item.id;return '<button type="button" class="kgg015MainProgressionThumb" data-kgg015-main-stage="'+esc(item.id)+'" aria-current="'+(i===at?'true':'false')+'" aria-label="Stufe '+(i+1)+': '+esc(item.name)+'"><div class="kggProgressionMediaBox loading" data-kgg-progression-media="'+esc(target)+'"><span>…</span></div><span class="kgg015MainProgressionThumbLabel">'+(i+1)+'</span></button>'}).join('');
+    const mediaList=card.querySelector('.kggMediaList');if(mediaList)mediaList.insertAdjacentElement('afterend',thumbs);else card.appendChild(thumbs);
+    thumbs.querySelectorAll('[data-kgg015-main-stage]').forEach(button=>button.onclick=()=>selectVariant(index,setNo,button.dataset.kgg015MainStage));
+    values.forEach((item,i)=>{const media=item.media&&item.media[0];if(!media)return;const target='kgg015-thumb-'+index+'-'+setNo+'-'+item.id;setTimeout(()=>{try{if(window.KGGPatientMediaRetryCache&&typeof window.KGGPatientMediaRetryCache.loadMedia==='function')window.KGGPatientMediaRetryCache.loadMedia(media,index,setNo,target)}catch(err){}},0);});
+    const active=thumbs.querySelector('[aria-current="true"]');if(active)active.scrollIntoView({block:'nearest',inline:'center'});
+  }
+  function bindMainPager(pager,index,setNo,values,at){
+    const track=pager.querySelector('.kgg015MainPagerTrack');let startX=null,lastX=0;
+    const finish=(event,cancelled=false)=>{if(startX===null)return;const dx=lastX-startX;startX=null;try{pager.releasePointerCapture?.(event.pointerId)}catch(err){}track.classList.remove('is-dragging');if(cancelled||Math.abs(dx)<38){trac
 ```

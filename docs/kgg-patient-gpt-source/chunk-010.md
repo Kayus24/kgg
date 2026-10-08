@@ -1,90 +1,162 @@
 # KGG Patient Source Chunk 010
 
-- Source file: `patient-day-history.js`
-- Characters: 1-15869
-- Full source SHA-256: `9c64dff51eedff9d3fafed77ac2c2f67d5daae9b194da0db336a4382124a02a8`
+- Source file: `patient-card-settings.js`
+- Characters: 1-19412
+- Full source SHA-256: `f5be35c40cd1c776e7e29b311635e485688046de994de5384de89a7d7bc6f993`
 
 ```
 (()=>{
-  const VERSION='v6_continuous_days_history';
-  const STYLE='kggPatientDayHistoryStyle';
+  const VERSION='v3_continuous_day_meta';
+  const STYLE='kggPatientCardSettingsStyle';
   const LANG='kggPatientLang';
-  const MULTI_KEY='kggPatientMultiPlansV1';
+  const PLAN_KEY='kggCurrentPlanV1';
+  const SET_KEY='kggPatientExerciseSettingsV1';
+  let openIndex=null;
   const $=id=>document.getElementById(id);
   const en=()=>localStorage.getItem(LANG)==='en';
   const T=(de,enText)=>en()?enText:de;
   const safe=f=>{try{return f()}catch(e){return null}};
-  const today=()=>safe(()=>next())||1;
-  let switching=false;
-  let historyLimit=30;
+  const has=(o,k)=>Object.prototype.hasOwnProperty.call(o||{},k);
+  const activeUnit=x=>{const s=String(x??'').trim();return !!s&&!/^(keine|none|-)$/i.test(s)};
+  const configuredUnit=x=>{const s=String(x??'').trim();return !s||/^(keine|none|-)$/i.test(s)?'keine':s};
+  window.KGGPatientUnitSemantics=window.KGGPatientUnitSemantics||{isActive:activeUnit};
 
-  function readMulti(){try{return JSON.parse(localStorage.getItem(MULTI_KEY)||'null')}catch(e){return null}}
-  function multiPlans(){const s=readMulti();return s&&Array.isArray(s.plans)?s.plans:[]}
-  function currentPlanIndex(){const s=readMulti();return Math.max(0,Math.min(Number(s&&s.active)||0,multiPlans().length-1))}
-  function currentPlanRecord(){const arr=multiPlans();if(arr.length)return arr[currentPlanIndex()]||{};return safe(()=>p)||{}}
-  function activePlanName(){const rec=currentPlanRecord();return rec&&(rec.t||rec.title||rec.name)||''}
-  function activePlanDesc(){const rec=currentPlanRecord();return rec&&(rec.desc||rec.description||rec.info||rec.note||rec.patientInfo||rec.patientNote||rec.subtitle)||''}
+  function readSettings(){try{return JSON.parse(localStorage.getItem(SET_KEY)||'{}')||{}}catch(e){return{}}}
+  function writeSettings(s){localStorage.setItem(SET_KEY,JSON.stringify(s||{}))}
+  function exKey(e){return String((safe(()=>p.id)||'plan')+'|'+(e&&e.n||'exercise')).toLowerCase()}
+  function getPainMode(e){const s=readSettings();return s[exKey(e)]&&s[exKey(e)].painMode||e.painMode||'exercise'}
+  function setPainMode(e,mode){const s=readSettings(),key=exKey(e);s[key]=s[key]||{};s[key].painMode=mode;writeSettings(s);e.painMode=mode}
+  function setExerciseSettings(e,unitA,unitB,mode){const s=readSettings(),key=exKey(e);s[key]=s[key]||{};s[key].unitA=configuredUnit(unitA);s[key].unitB=configuredUnit(unitB);s[key].painMode=mode;writeSettings(s);e.u=s[key].unitA;e.m=s[key].unitB;e.painMode=mode}
+  function applySavedSettings(){safe(()=>{const s=readSettings();(p.ex||[]).forEach(e=>{const x=s[exKey(e)]||{};if(has(x,'unitA'))e.u=configuredUnit(x.unitA);if(has(x,'unitB'))e.m=configuredUnit(x.unitB);if(x.painMode)e.painMode=x.painMode})})}
+  function rawPlan(){return{ i:p.id||'plan', t:p.title||'KGG Trainingsplan', v:p.version||1, d:p.days||6, extendDays:p.extendDays!==false, stepDays:p.stepDays||6, e:(p.ex||[]).map(e=>[e.n,e.sets,e.side,e.u,e.m,e.sl||'',e.sm||'',e.media||'',e.videoUrl||'',e.videoLabel||'Video öffnen',e.painMode||getPainMode(e)])}}
+  function storePlan(){safe(()=>localStorage.setItem(PLAN_KEY,JSON.stringify({plan:rawPlan(),importedAt:new Date().toISOString()})))}
+  function unit(x){x=String(x||'');const m={Wdh:['Wdh','reps'],wdh:['Wdh','reps'],Reps:['Wdh','reps'],reps:['Wdh','reps'],'Sek.':['Sek.','sec'],Sek:['Sek.','sec'],sec:['Sek.','sec'],'Min.':['Min.','min'],Min:['Min.','min'],min:['Min.','min'],Stufe:['Stufe','level'],level:['Stufe','level'],Level:['Stufe','level']};return m[x]?T(m[x][0],m[x][1]):x}
+  function sideText(x){return x==='LR'?T('links/rechts','left/right'):T('beidseitig','bilateral')}
+  function st(msg){safe(()=>setStatus(msg,'ok'))}
+  function saveAll(){safe(()=>save());storePlan()}
 
   function ensureStyle(){
     const old=$(STYLE);if(old)old.remove();
     const s=document.createElement('style');s.id=STYLE;s.textContent=`
-      #kggActionFab{left:14px!important;bottom:calc(14px + env(safe-area-inset-bottom))!important}
-      #days{display:none!important}
-      #kggDayHub{border:0;border-radius:0;background:transparent;padding:0;margin:6px 0 10px;box-shadow:none}
-      #kggHistoryToggle,#kggOtherPlanBtn{width:100%;min-height:42px;margin:0 0 8px;border-radius:999px;border:1px solid #cbd5e1;background:#fff;color:#111827;font-size:14px;font-weight:950;touch-action:manipulation;box-shadow:0 4px 12px rgba(15,23,42,.04)}
-      #kggOtherPlanBtn{display:flex;align-items:center;justify-content:center;gap:8px;border-color:#93c5fd;background:linear-gradient(90deg,#eff6ff,#fff);color:#1d4ed8;box-shadow:0 7px 18px rgba(37,99,235,.10)}
-      #kggHistoryToggle:active,#kggOtherPlanBtn:active{transform:scale(.985);background:#f8fafc}
-      .kggCurrentDay{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;border:1px solid #dbe3ef;border-radius:15px;background:#fff;padding:9px 10px;min-height:46px}
-      .kggCurrentDayBig{font-size:16px;font-weight:950;letter-spacing:-.02em}.kggCurrentDayMeta{font-size:12px;color:#64748b;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44vw}.kggCurrentDayBadge{border-radius:999px;border:1px solid #cbd5e1;background:#f8fafc;color:#334155;padding:5px 8px;font-size:12px;font-weight:950;white-space:nowrap}
-      #plan.kggSwitchOut #list{animation:kggPlanOut .14s ease both}#plan.kggSwitchIn #list{animation:kggPlanIn .24s cubic-bezier(.16,.84,.44,1) both}
-      @keyframes kggPlanOut{from{opacity:1;transform:translateX(0)}to{opacity:.35;transform:translateX(-18px)}}@keyframes kggPlanIn{from{opacity:.25;transform:translateX(22px)}to{opacity:1;transform:translateX(0)}}
-      #kggHistoryBackdrop{position:fixed;inset:0;z-index:2550;background:rgba(15,23,42,.06);backdrop-filter:blur(1px);animation:kggFadeIn .14s ease both}#kggHistoryBackdrop[hidden]{display:none!important}
-      #kggHistoryList{position:fixed;z-index:2551;left:max(10px,calc(50vw - 380px));top:118px;width:min(430px,calc(100vw - 24px));max-height:calc(100dvh - 150px);overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;display:grid;gap:7px;padding:8px;background:rgba(255,255,255,.96);border:1px solid #dbe3ef;border-radius:18px;box-shadow:0 20px 64px rgba(15,23,42,.20);animation:kggFloatHistIn .18s cubic-bezier(.16,.84,.44,1) both}#kggHistoryList[hidden]{display:none!important}
-      .kggDayCard{width:100%;text-align:left;border:1px solid #dbe3ef;border-radius:14px;background:#fff;padding:8px 9px;display:block;touch-action:manipulation}.kggDayCard:active{transform:scale(.99);background:#eff6ff}.kggDayCard.done{border-color:#bbf7d0;background:#f0fdf4}.kggDayHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px}.kggDayHead b{font-size:14px}.kggDayPill{border-radius:999px;border:1px solid #cbd5e1;background:#f8fafc;padding:4px 7px;font-size:11px;font-weight:950;color:#334155}.kggDayCard.done .kggDayPill{background:#dcfce7;border-color:#86efac;color:#166534}.kggDayExerciseList{display:grid;gap:3px;margin-top:3px}.kggDayExercise{font-size:11px;color:#334155;line-height:1.22;background:rgba(248,250,252,.78);border:1px solid #e2e8f0;border-radius:9px;padding:5px 7px}.kggDayExercise b{font-size:11px}.kggEmptyHist{font-size:12px;color:#64748b;padding:12px;text-align:center}
-      #kggPlanDialogBackdrop{position:fixed;inset:0;z-index:2700;background:rgba(15,23,42,.18);animation:kggFadeIn .14s ease both}#kggPlanDialogBackdrop[hidden]{display:none!important}
-      #kggPlanDialog{position:fixed;z-index:2701;left:max(12px,calc(50vw - 220px));top:112px;width:min(440px,calc(100vw - 24px));max-height:calc(100dvh - 140px);overflow:auto;background:#fff;border:1px solid #dbe3ef;border-radius:20px;box-shadow:0 24px 70px rgba(15,23,42,.24);padding:12px;animation:kggPlanDialogIn .18s cubic-bezier(.16,.84,.44,1) both}#kggPlanDialog[hidden]{display:none!important}
-      .kggPlanDialogHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.kggPlanDialogHead b{font-size:16px}.kggPlanClose{border:1px solid #cbd5e1;border-radius:999px;background:#fff;font-weight:950;min-width:36px;min-height:36px}.kggPlanOption{width:100%;text-align:left;border:1px solid #dbe3ef;background:#fff;border-radius:15px;padding:10px;margin:0 0 8px;display:block}.kggPlanOption.active{border-color:#2563eb;background:#eff6ff}.kggPlanOption b{font-size:15px}.kggPlanOption small{display:block;margin-top:4px;color:#64748b;font-weight:800;line-height:1.3}.kggPlanOption .pill{float:right;border:1px solid #bfdbfe;border-radius:999px;padding:3px 7px;font-size:11px;color:#1d4ed8;font-weight:950;background:#dbeafe}
-      @keyframes kggFloatHistIn{from{opacity:0;transform:translateY(-8px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes kggPlanDialogIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes kggFadeIn{from{opacity:0}to{opacity:1}}
-      @media(max-width:430px){#kggActionFab{left:12px!important;bottom:12px!important}.kggCurrentDayBig{font-size:15px}.kggCurrentDayMeta{max-width:38vw}#kggHistoryList{left:10px;right:10px;top:100px;width:auto;max-height:calc(100dvh - 126px);border-radius:16px}#kggPlanDialog{left:10px;right:10px;top:96px;width:auto;max-height:calc(100dvh - 118px);border-radius:18px}.kggDayCard{padding:7px 8px}.kggDayExercise{font-size:10.8px}}
-      @media(prefers-reduced-motion:reduce){#plan.kggSwitchOut #list,#plan.kggSwitchIn #list,#kggPlanDialog{animation:none!important}}
+      #kgg-collapse-toggle{display:none!important}
+      input.num.kggUnitInactive{display:none!important}
+      body.kggAlwaysCollapsed .ex{position:relative;cursor:pointer;transition:box-shadow .18s ease,transform .16s ease,background .18s ease}
+      body.kggAlwaysCollapsed .ex:not(.kggOpen) .set,body.kggAlwaysCollapsed .ex:not(.kggOpen) .pain{display:none!important}
+      body.kggAlwaysCollapsed .ex:not(.kggOpen)::after{content:'Antippen zum Öffnen';display:block;margin-top:8px;color:#64748b;font-size:12px;font-weight:800}
+      body.kggLangEn.kggAlwaysCollapsed .ex:not(.kggOpen)::after{content:'Tap to open'}
+      body.kggAlwaysCollapsed .ex.kggOpen{box-shadow:0 12px 32px rgba(15,23,42,.12);border-color:#111827;background:#fff;padding-right:52px!important}
+      .kggCardDots{position:absolute;right:10px;top:10px;width:38px;height:38px;border-radius:999px;border:1px solid #cbd5e1;background:#fff;color:#111827;font-size:22px;font-weight:950;display:flex;align-items:center;justify-content:center;z-index:5;touch-action:manipulation}
+      .kggCardDots:active{transform:scale(.94);background:#eff6ff}
+      body.kggAlwaysCollapsed .ex:not(.kggOpen) .kggCardDots{display:none!important}
+      .kggPainScale{display:grid;grid-template-columns:repeat(11,1fr);gap:4px;width:100%;touch-action:none;user-select:none;-webkit-user-select:none;margin-top:8px}
+      .kggPainScale button{min-width:0;min-height:38px;border-radius:12px;border:1px solid #cbd5e1;background:#fff;color:#111827;font-weight:950;font-size:14px;box-shadow:none;touch-action:none}
+      .kggPainScale button.on{background:#dbeafe;border-color:#60a5fa;color:#1d4ed8;box-shadow:0 5px 14px rgba(37,99,235,.20);transform:translateY(-2px)}
+      .kggPainScale button:active{transform:scale(.94)}
+      .kggPainCaption{font-size:12px;color:#64748b;margin-top:5px;font-weight:800;text-align:right}
+      .kggSetPain{margin-top:10px;border-top:1px dashed #e2e8f0;padding-top:8px}.kggSetPain b{font-size:14px}
+      .kggSettingsBackdrop{position:fixed;inset:0;background:rgba(15,23,42,.22);z-index:2700}.kggSettingsBackdrop[hidden]{display:none!important}
+      #kggSettingsSheet{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:2701;max-width:540px;margin:0 auto;background:#fff;border:1px solid #dbe3ef;border-radius:22px;padding:14px;box-shadow:0 22px 70px rgba(15,23,42,.28);animation:kggSettingsIn .18s ease both}
+      #kggSettingsSheet[hidden]{display:none!important}#kggSettingsSheet h3{margin:0 0 10px;font-size:19px}.kggSetGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kggSetGrid label{font-size:12px;color:#64748b;font-weight:900}.kggSetGrid input,.kggSetGrid select{width:100%;margin-top:4px;border:1px solid #cbd5e1;border-radius:12px;padding:10px;font-size:15px;background:#fff}.kggSetActions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.kggSetActions button{min-height:48px;border-radius:14px;font-size:16px;font-weight:950}.kggSetCancel{background:#fff;border:1px solid #cbd5e1;color:#111827}.kggSetSave{background:#111827;border:1px solid #111827;color:#fff}
+      @keyframes kggSettingsIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+      @media(max-width:430px){.kggPainScale{gap:3px}.kggPainScale button{min-height:34px;font-size:12px;border-radius:10px}.kggSetGrid{grid-template-columns:1fr}#kggSettingsSheet{border-radius:20px 20px 0 0;left:0;right:0;bottom:0}}
     `;document.head.appendChild(s)
   }
 
-  function ensureBackdrop(){if($('kggHistoryBackdrop'))return;const bd=document.createElement('div');bd.id='kggHistoryBackdrop';bd.hidden=true;bd.onclick=closeHistory;document.body.appendChild(bd)}
-  function ensurePlanDialog(){if(!$('kggPlanDialogBackdrop')){const bd=document.createElement('div');bd.id='kggPlanDialogBackdrop';bd.hidden=true;bd.onclick=closePlanDialog;document.body.appendChild(bd)}if(!$('kggPlanDialog')){const dlg=document.createElement('div');dlg.id='kggPlanDialog';dlg.hidden=true;dlg.onclick=e=>e.stopPropagation();document.body.appendChild(dlg)}}
-  function valAt(ei,s,side,key,day){return String(safe(()=>v[k(ei,s,side,key,day)])||'').trim()}
-  function painAt(ei,s,day){return Number(safe(()=>v[k(ei,s,'P','pain',day)])||0)}
-  function dayDone(day){return Array.isArray(done)&&done.includes(day)}
-  function unitLabel(x){const raw=String(x||'');return en()?raw.replace(/\bWdh\b/g,'reps').replace(/\bSek\.?\b/g,'sec'):raw.replace(/\breps\b/g,'Wdh').replace(/\bsec\.?\b/g,'Sek.')}
-  function activeUnit(x){const s=String(x??'').trim();return !!s&&!/^(keine|none|-)$/i.test(s)}
-  function exSummary(day,ei,ex){const sets=Number(ex.sets)||3,sides=ex.side==='LR'?['L','R']:['B'],hasA=activeUnit(ex.u),hasB=activeUnit(ex.m);let doneSets=0,parts=[],painMax=0;const fmt=(a,b)=>hasA&&hasB?(a||'?')+' '+unitLabel(ex.u)+' × '+(b||'?')+' '+unitLabel(ex.m):hasA?(a||'?')+' '+unitLabel(ex.u):hasB?(b||'?')+' '+unitLabel(ex.m):'';for(let s=1;s<=sets;s++){let any=false;sides.forEach(side=>{const a=valAt(ei,s,side,'a',day),b=valAt(ei,s,side,'b',day),hasValue=(hasA&&!!a)||(hasB&&!!b);if(hasValue){any=true;parts.push((side==='B'?'':side+': ')+fmt(a,b));}});if(any)doneSets++;const pv=painAt(ei,s,day);if(pv>painMax)painMax=pv;}const globalPain=painAt(ei,0,day);if(globalPain>painMax)painMax=globalPain;if(!doneSets&&!painMax)return '';const first=parts.slice(0,1).join(' · ');return `<div class="kggDayExercise"><b>${esc(ex.n)}</b><br>${doneSets}/${sets} ${T('Sätze','sets')}${first?' · '+esc(first):''}${painMax?' · '+T('Schmerz','pain')+' '+painMax+'/10':''}</div>`}
-  function dayHasData(day){if(dayDone(day))return true;const plan=safe(()=>p);if(!plan)return false;return (plan.ex||[]).some((ex,ei)=>!!exSummary(day,ei,ex))}
-  function dayCards(day){const arr=(safe(()=>p.ex)||[]).map((ex,ei)=>exSummary(day,ei,ex)).filter(Boolean);return arr.length?arr.join(''):`<div class="kggDayExercise">${T('Noch keine Werte eingetragen.','No values entered yet.')}</div>`}
-  function isToday(){return Number(d)===today()}
-  function planDesc(pl){return pl&&(pl.desc||pl.description||pl.info||pl.note||pl.patientInfo||pl.patientNote||pl.subtitle)||''}
-  function updateHeader(){const title=activePlanName();const desc=activePlanDesc();const h=document.querySelector('h1');if(h&&title)h.textContent=title;let sub=$('kggPlanDescription');if(desc){if(!sub){sub=document.createElement('div');sub.id='kggPlanDescription';sub.style.cssText='margin:4px 0 10px;color:#64748b;font-size:14px;font-weight:800;line-height:1.35';if(h&&h.parentNode)h.parentNode.insertBefore(sub,h.nextSibling)}sub.textContent=desc}else if(sub)sub.remove()}
-  function ensureHub(){const days=$('days'); if(!days||!days.parentNode||!safe(()=>p))return;ensureBackdrop();ensurePlanDialog();updateHeader();let hub=$('kggDayHub');if(!hub){hub=document.createElement('div');hub.id='kggDayHub';days.parentNode.insertBefore(hub,days)}const cur=Number(d)||1,total=Math.max(cur,today()),arr=multiPlans();const back=!isToday();const mainLabel=back?T('Zum heutigen Training zurückkehren','Return to today’s training'):T('Frühere Trainings anzeigen','Show previous trainings');const wasOpen=$('kggHistoryList')&&!$('kggHistoryList').hidden;hub.innerHTML=`
-      <button id="kggHistoryToggle" type="button">${wasOpen?T('Frühere Trainings ausblenden','Hide previous trainings'):mainLabel}</button>
-      ${arr.length>1?`<button id="kggOtherPlanBtn" type="button">↔ ${T('Anderer Übungsplan','Other exercise plan')}</button>`:''}
-      <div id="kggHistoryList" hidden></div>
-      <div class="kggCurrentDay" id="kggCurrentDayBox">
-        <div class="kggCurrentDayBig">${T('Tag','Day')} ${cur}</div>
-        <div class="kggCurrentDayMeta">${arr.length>1?esc(activePlanName()):''}</div>
-        <div class="kggCurrentDayBadge">${dayDone(cur)?T('fertig','finished'):T('offen','open')}</div>
-      </div>`;$('kggHistoryToggle').onclick=()=> back?openDay(today()):toggleHistory(total,cur);const btn=$('kggOtherPlanBtn');if(btn)btn.onclick=()=>openPlanDialog();if(wasOpen&&!back){renderHistory(total,cur);openHistoryVisual()}}
-  function openHistoryVisual(){const list=$('kggHistoryList'),bd=$('kggHistoryBackdrop');if(list){list.hidden=false;list.onclick=e=>e.stopPropagation()}if(bd)bd.hidden=false;const btn=$('kggHistoryToggle');if(btn)btn.textContent=T('Frühere Trainings ausblenden','Hide previous trainings')}
-  function closeHistory(){const list=$('kggHistoryList'),bd=$('kggHistoryBackdrop');if(list)list.hidden=true;if(bd)bd.hidden=true;historyLimit=30;const btn=$('kggHistoryToggle');if(btn)btn.textContent=T('Frühere Trainings anzeigen','Show previous trainings')}
-  function toggleHistory(total,cur){const list=$('kggHistoryList');if(!list)return;if(!list.hidden){closeHistory();return}renderHistory(total,cur);openHistoryVisual()}
-  function renderHistory(total,cur){const list=$('kggHistoryList');if(!list)return;const upper=Math.max(1,Number(cur)||1),start=Math.max(1,upper-historyLimit),days=[];for(let day=start;day<upper;day++)days.push(day);if(!days.length){list.innerHTML=`<div class="kggEmptyHist">${T('Noch keine früheren Trainings vorhanden.','No previous trainings yet.')}</div>`;return}const more=start>1?`<button type="button" id="kggHistoryMore" class="kggDayCard"><div class="kggDayHead"><b>${T('Ältere Trainings anzeigen','Show older trainings')}</b><span class="kggDayPill">+30</span></div></button>`:'';list.innerHTML=more+days.map(day=>`<button type="button" class="kggDayCard ${dayDone(day)?'done':''}" data-day="${day}"><div class="kggDayHead"><b>${T('Tag','Day')} ${day}</b><span class="kggDayPill">${T('öffnen','open')}</span></div><div class="kggDayExerciseList">${dayCards(day)}</div></button>`).join('');list.querySelectorAll('.kggDayCard[data-day]').forEach(btn=>btn.onclick=()=>openDay(Number(btn.dataset.day)||1));const moreBtn=$('kggHistoryMore');if(moreBtn)moreBtn.onclick=()=>{historyLimit+=30;renderHistory(total,cur)}}
-  function openDay(day){safe(()=>{d=day;save()});closeHistory();safe(()=>render());setTimeout(()=>{ensureHub();window.scrollTo({top:0,behavior:'smooth'})},40)}
-  function openPlanDialog(){const arr=multiPlans();if(arr.length<2)return;const dlg=$('kggPlanDialog'),bd=$('kggPlanDialogBackdrop');if(!dlg||!bd)return;const active=currentPlanIndex();dlg.innerHTML=`<div class="kggPlanDialogHead"><b>${T('Übungsplan auswählen','Choose exercise plan')}</b><button type="button" class="kggPlanClose">×</button></div>`+arr.map((pl,i)=>`<button type="button" class="kggPlanOption ${i===active?'active':''}" data-i="${i}">${i===active?`<span class="pill">${T('aktuell','current')}</span>`:''}<b>${esc(pl.t||pl.title||pl.name||T('Plan ','Plan ')+(i+1))}</b>${planDesc(pl)?`<small>${esc(planDesc(pl))}</small>`:''}</button>`).join('');dlg.querySelector('.kggPlanClose').onclick=closePlanDialog;dlg.querySelectorAll('.kggPlanOption').forEach(b=>b.onclick=()=>{const idx=Number(b.dataset.i)||0;closePlanDialog();if(idx!==active)switchPlan(idx)});bd.hidden=false;dlg.hidden=false}
-  function closePlanDialog(){const dlg=$('kggPlanDialog'),bd=$('kggPlanDialogBackdrop');if(dlg)dlg.hidden=true;if(bd)bd.hidden=true}
-  function handlePlanSwitch(arr){if(arr.length<2||switching)return;openPlanDialog()}
-  function switchPlan(idx){const plan=$('plan');switching=true;if(plan)plan.classList.add('kggSwitchOut');setTimeout(()=>{const fn=window.KGGPatientMultiPlan&&window.KGGPatientMultiPlan.switchTo;if(typeof fn==='function')fn(idx);else{const s=readMulti();if(s&&s.plans&&s.plans[idx]){s.active=idx;localStorage.setItem(MULTI_KEY,JSON.stringify(s));safe(()=>render())}}setTimeout(()=>{if(plan){plan.classList.remove('kggSwitchOut');plan.classList.add('kggSwitchIn');setTimeout(()=>plan.classList.remove('kggSwitchIn'),260)}switching=false;ensureHub()},60)},145)}
+  function cards(){return[...document.querySelectorAll('#list .ex')]}
+  function forceCards(){
+    document.body.classList.add('kggAlwaysCollapsed');
+    document.body.classList.toggle('kggLangEn',en());
+    const tgl=$('kgg-collapse-toggle');if(tgl)tgl.style.display='none';
+    cards().forEach((card,i)=>{
+      card.dataset.kggAlwaysIdx=i;
+      card.classList.toggle('kggOpen',openIndex===i);
+      addDots(card,i);
+      if(!card.dataset.kggAlwaysBound){
+        card.dataset.kggAlwaysBound='1';
+        card.addEventListener('click',ev=>{
+          if(ev.target.closest('input,button,a,select,textarea,.kggPainScale,#kggSettingsSheet'))return;
+          openIndex=openIndex===i?null:i;
+          apply();
+          if(openIndex===i)setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'start'}),60)
+        });
+      }
+    })
+  }
+  function addDots(card,i){
+    let b=card.querySelector('.kggCardDots');
+    if(!b){b=document.createElement('button');b.type='button';b.className='kggCardDots';b.textContent='⋯';b.title=T('Übung anpassen','Edit exercise');b.onclick=e=>{e.preventDefault();e.stopPropagation();openSettings(i)};card.appendChild(b)}
+    b.hidden=openIndex!==i;b.title=T('Übung anpassen','Edit exercise')
+  }
+
+  function applyUnitVisibility(){cards().forEach((card,ei)=>{const e=safe(()=>p.ex[ei]);if(!e)return;const hideA=!activeUnit(e.u),hideB=!activeUnit(e.m);card.querySelectorAll('.bi,.lr').forEach(row=>{const inputs=[...row.querySelectorAll('input')].filter(x=>!x.closest('.painRow'));if(inputs.length<2)return;inputs[0].classList.toggle('kggUnitInactive',hideA);inputs[1].classList.toggle('kggUnitInactive',hideB);inputs[0].style.display=hideA?'none':'';inputs[1].style.display=hideB?'none':'';const both=hideA&&hideB;if(row.classList.contains('bi')){row.style.display=both?'none':'grid';row.style.gridTemplateColumns=(hideA||hideB)?'1fr':'1fr 1fr'}else{row.style.display=both?'none':'grid';row.style.gridTemplateColumns=(hideA||hideB)?'34px 1fr':'34px 1fr 1fr'}})})}
+
+  function valKey(ei,s){return safe(()=>k(ei,s,'P','pain'))||(`${d}|${ei}|${s}|P|pain`)}
+  function painVal(ei,s){return String((safe(()=>v[valKey(ei,s)])||'0')||'0')}
+  function setPainVal(ei,s,x){safe(()=>{v[valKey(ei,s)]=String(x);save()});st(T('Automatisch gespeichert.','Automatically saved.'));updatePainScales()}
+  function painScale(ei,s){const wrap=document.createElement('div');wrap.className='kggPainScale';wrap.dataset.ei=ei;wrap.dataset.s=s;for(let n=0;n<=10;n++){let b=document.createElement('button');b.type='button';b.textContent=String(n);b.dataset.val=String(n);b.onclick=e=>{e.preventDefault();e.stopPropagation();setPainVal(ei,s,n)};wrap.appendChild(b)}bindDrag(wrap);return wrap}
+  function bindDrag(wrap){if(wrap.dataset.dragBound)return;wrap.dataset.dragBound='1';let active=false;const hit=e=>{const el=document.elementFromPoint(e.clientX,e.clientY);const b=el&&el.closest&&el.closest('.kggPainScale button');if(b&&wrap.contains(b))setPainVal(+wrap.dataset.ei,+wrap.dataset.s,+b.dataset.val)};wrap.addEventListener('pointerdown',e=>{active=true;wrap.setPointerCapture&&wrap.setPointerCapture(e.pointerId);hit(e)});wrap.addEventListener('pointermove',e=>{if(active)hit(e)});wrap.addEventListener('pointerup',()=>active=false);wrap.addEventListener('pointercancel',()=>active=false)}
+  function paintScale(wrap){const v=painVal(+wrap.dataset.ei,+wrap.dataset.s);wrap.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.val===v));let cap=wrap.nextElementSibling;if(cap&&cap.classList.contains('kggPainCaption'))cap.textContent=v+'/10'}
+  function updatePainScales(){document.querySelectorAll('.kggPainScale').forEach(paintScale)}
+  function renderPain(){
+    cards().forEach((card,ei)=>{const e=safe(()=>p.ex[ei]);if(!e)return;const mode=getPainMode(e);
+      card.querySelectorAll('.kggSetPain').forEach(x=>x.remove());
+      const global=card.querySelector('.pain');
+      if(mode==='set'){
+        if(global)global.style.display='none';
+        card.querySelectorAll('.set').forEach((set,idx)=>{const s=idx+1;let box=document.createElement('div');box.className='kggSetPain';box.innerHTML='<b>'+T('Schmerz Satz ','Pain set ')+s+' · 0–10</b>';box.appendChild(painScale(ei,s));let cap=document.createElement('div');cap.className='kggPainCaption';box.appendChild(cap);set.appendChild(box)})
+      }else{
+        if(global){global.style.display='';let b=global.querySelector('b');if(b)b.textContent=T('Schmerz 0–10','Pain 0–10');let row=global.querySelector('.painRow');if(row){row.innerHTML='';row.appendChild(painScale(ei,0));let cap=document.createElement('div');cap.className='kggPainCaption';row.appendChild(cap)}}
+      }
+    });
+    updatePainScales()
+  }
+
+  function copySideValues(ei,oldSide,newSide){
+    if(oldSide===newSide)return;const ex=safe(()=>p.ex[ei]);if(!ex)return;const sets=+ex.sets||3,days=+p.days||6;
+    for(let day=1;day<=days;day++)for(let s=1;s<=sets;s++)['a','b'].forEach(key=>{
+      if(oldSide!=='LR'&&newSide==='LR'){
+        const b=safe(()=>v[k(ei,s,'B',key,day)])||''; if(b){if(!safe(()=>v[k(ei,s,'L',key,day)]))v[k(ei,s,'L',key,day)]=b;if(!safe(()=>v[k(ei,s,'R',key,day)]))v[k(ei,s,'R',key,day)]=b}
+      }else if(oldSide==='LR'&&newSide!=='LR'){
+        const l=safe(()=>v[k(ei,s,'L',key,day)])||'',r=safe(()=>v[k(ei,s,'R',key,day)])||''; if((l||r)&&!safe(()=>v[k(ei,s,'B',key,day)]))v[k(ei,s,'B',key,day)]=l||r
+      }
+    });
+  }
+  function closeSettings(){const b=$('kggSettingsBackdrop'),s=$('kggSettingsSheet');if(b)b.hidden=true;if(s)s.hidden=true}
+  function openSettings(i){
+    const e=safe(()=>p.ex[i]);if(!e)return;ensureSettingsDom();const sh=$('kggSettingsSheet'),bd=$('kggSettingsBackdrop');
+    sh.innerHTML=`<h3>${T('Übung anpassen','Edit exercise')}</h3><div class="kggSetGrid">
+      <label>${T('Gewicht / Gerät','Weight / machine')}<input id="kggSetUnitA" value="${esc(e.u==null?'kg':e.u)}"></label>
+      <label>${T('Wdh / Zeit','Reps / time')}<input id="kggSetUnitB" value="${esc(e.m==null?'Wdh':e.m)}"></label>
+      <label>${T('Seite','Side')}<select id="kggSetSide"><option value="BI">${T('beidseitig','bilateral')}</option><option value="LR">${T('links/rechts getrennt','left/right separate')}</option></select></label>
+      <label>${T('Schmerz','Pain')}<select id="kggSetPainMode"><option value="exercise">${T('einmal pro Übung','once per exercise')}</option><option value="set">${T('pro Satz','per set')}</option></select></label>
+    </div><div class="kggSetActions"><button class="kggSetCancel" id="kggSetCancel">${T('Abbrechen','Cancel')}</button><button class="kggSetSave" id="kggSetSave">${T('Speichern','Save')}</button></div>`;
+    $('kggSetSide').value=e.side==='LR'?'LR':'BI';$('kggSetPainMode').value=getPainMode(e);
+    $('kggSetCancel').onclick=closeSettings;
+    $('kggSetSave').onclick=()=>{const old=e.side,unitA=$('kggSetUnitA').value.trim(),unitB=$('kggSetUnitB').value.trim(),mode=$('kggSetPainMode').value; e.u=unitA; e.m=unitB; e.side=$('kggSetSide').value; setExerciseSettings(e,unitA,unitB,mode); copySideValues(i,old,e.side); saveAll(); closeSettings(); openIndex=i; safe(()=>render()); setTimeout(apply,0); st(T('Übung angepasst.','Exercise updated.'))};
+    bd.hidden=false;sh.hidden=false;
+  }
   function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-  function patchRender(){if(window.__kggDayHistoryRenderPatch||typeof render!=='function')return;window.__kggDayHistoryRenderPatch=1;const old=render;render=function(){const r=old.apply(this,arguments);setTimeout(apply,0);return r}}
-  function apply(){ensureStyle();ensureHub()}
-  function init(){window.__kggPatientDayHistory=VERSION;patchRender();apply();setTimeout(apply,300);setTimeout(apply,1000)}
+  function ensureSettingsDom(){if(!$('kggSettingsBackdrop')){let b=document.createElement('div');b.id='kggSettingsBackdrop';b.className='kggSettingsBackdrop';b.hidden=true;b.onclick=closeSettings;document.body.appendChild(b)}if(!$('kggSettingsSheet')){let s=document.createElement('div');s.id='kggSettingsSheet';s.hidden=true;document.body.appendChild(s)}}
+
+  function i18n(){
+    document.documentElement.lang=en()?'en':'de';document.body.classList.toggle('kggLangEn',en());
+    const h=document.querySelector('main .card h1');if(h)h.textContent=T('KGG Handyplan','KGG Phone Plan');
+    const intro=document.querySelector('main .card p.muted');if(intro)intro.textContent=T('Werte direkt am Handy eintragen. Schmerz 0–10 angeben. Daten bleiben lokal auf diesem Gerät.','Enter values directly on the phone. Pain 0–10. Data stays local on this device.');
+    const meta=$('meta');if(meta&&safe(()=>p)){const flow=window.KGGPatientDayFlow,continuous=flow&&typeof flow.isContinuousPlan==='function'?flow.isContinuousPlan():p.extendDays!==false;meta.textContent=(p.ex?.length||0)+' '+T('Übungen','exercises')+' · '+(continuous?T('fortlaufender Trainingsplan','continuous training plan'):(p.days||0)+' '+T('Trainingstage','training days'));}
+    document.querySelectorAll('#days button').forEach((b,i)=>b.textContent=T('Tag ','Day ')+(i+1));
+    const ex=$('extendBtn');if(ex&&safe(()=>p))ex.textContent=T('+ '+p.stepDays+' weitere Tage hinzufügen','Add '+p.stepDays+' more days');
+    const db=$('kggPatientDbBtn');if(db)db.textContent=T('📚 Übungsdatenbank','📚 Database');
+    const scan=$('kggActionScan');if(scan)scan.textContent='📷 '+T('Plan scannen / aktualisieren','Scan / update plan');
+    const add=$('kggActionAddPlan');if(add)add.textContent='➕ '+T('2. Plan hinzufügen','Add 2nd plan');
+    document.querySelectorAll('button').forEach(b=>{const x=b.textContent.trim();const map={'Aktuelle Werte als QR zeigen':'Show current values as QR','Show current values as QR':'Show current values as QR','Training beenden & QR anzeigen':'Finish training & show QR','Finish training & show QR':'Finish training & show QR','Zurück zum Plan':'Back to plan','Back to plan':'Back to plan','Abbrechen':'Cancel','Cancel':'Cancel','OK':'OK'}; if(map[x])b.textContent=en()?map[x]:Object.keys(map).find(k=>map[k]===map[x]&&k!==map[x])||x});
+    cards().forEach((card,ei)=>{const e=safe(()=>p.ex[ei]);if(!e)return;const muted=[...card.querySelectorAll(':scope > .muted')],m=muted[0];if(m){const parts=[(e.sets||3)+' '+T('Sätze','sets'),sideText(e.side)];[unit(e.u),unit(e.m)].filter(activeUnit).forEach(x=>parts.push(x));m.textContent=parts.join(' · ')}const start=muted.find((node,i)=>i>0&&/T1-Vorschlag|Day 1 suggestion/i.test(node.textContent||''));if(start){const vals=[];if(activeUnit(e.u)&&String(e.sl||'').trim())vals.push(String(e.sl).trim()+' '+unit(e.u));if(activeUnit(e.m)&&String(e.sm||'').trim())vals.push(String(e.sm).trim()+' '+unit(e.m));start.style.display=vals.length?'':'none';if(vals.length)start.textContent=T('T1-Vorschlag: ','Day 1 suggestion: ')+vals.join(' · ')}card.querySelectorAll('.set > b').forEach((b,i)=>b.textContent=T('Satz ','Set ')+(i+1));card.querySelectorAll('.lr span').forEach(sp=>{if(sp.textContent.trim()==='Li'||sp.textContent.trim()==='L')sp.textContent=T('Li','L');else sp.textContent=T('Re','R')})});
+  }
+
+  function patchRows(){if(window.__kggPainRowsPatch||typeof rows!=='function')return;window.__kggPainRowsPatch=1;const old=rows;rows=function(day){const out=old(day);safe(()=>out.forEach((r,ei)=>{const e=p.ex[ei],hasA=activeUnit(e&&e.u),hasB=activeUnit(e&&e.m);(Array.isArray(r[5])?r[5]:[]).forEach(values=>{if(!Array.isArray(values))return;if(e&&e.side==='LR'){if(!hasA){values[0]='';values[2]=''}if(!hasB){values[1]='';values[3]=''}}else{if(!hasA)values[0]='';if(!hasB)values[1]=''}});if(getPainMode(e)==='set'){let a=[];for(let s=1;s<=e.sets;s++){let x=v[k(ei,s,'P','pain',day)]||'0';a.push('S'+s+':'+x)}r[6]=a.join(' ')}}));return out}}
+  function patchText(){if(window.__kggUnitAwareTextPatch||typeof text!=='function')return;window.__kggUnitAwareTextPatch=1;text=function(day){let out=[];rows(day).forEach(entry=>{let[n,sets,side,u,m,values,pn]=entry,lines=[],hasA=activeUnit(u),hasB=activeUnit(m);const fmt=(a,b)=>{if(hasA&&hasB)return (a||'?')+' '+u+' @ '+(b||'?')+' '+m;if(hasA)return (a||'?')+' '+u;if(hasB)return (b||'?')+' '+m;return''};(Array.isArray(values)?values:[]).forEach((x,i)=>{if(side==='LR'){const left=fmt(x[0],x[1]),right=fmt(x[2],x[3]),hasLeft=(hasA&&!!x[0])||(hasB&&!!x[1]),hasRight=(hasA&&!!x[2])||(hasB&&!!x[3]);if(hasLeft||hasRight)lines.push((i+1)+'. Satz: '+(hasLeft?left:'–')+' li    '+(hasRight?right:'–')+' re')}else{const value=fmt(x[0],x[1]),hasValue=(hasA&&!!x[0])||(hasB&&!!x[1]);if(hasValue)lines.push((i+1)+'. Satz: '+value)}});if(lines.length||Number(pn)>0)out.push(n+' — Tag '+day,...lines,Number(pn)>0?'Schmerz: '+pn+'/10':'','')});return out.join('\n').trim()}}
+  function patchRender(){if(window.__kggAlwaysCardsRenderPatch||typeof render!=='function')return;window.__kggAlwaysCardsRenderPatch=1;const old=render;render=function(){const r=old.apply(this,arguments);setTimeout(apply,0);return r}}
+  function apply(){ensureStyle();ensureSettingsDom();applySavedSettings();forceCards();renderPain();i18n();applyUnitVisibility();patchRows();patchText()}
+  function init(){window.__kggPatientCardSettings=VERSION;patchRender();apply();setTimeout(apply,300);setTimeout(apply,1000)}
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
 })();
 ```

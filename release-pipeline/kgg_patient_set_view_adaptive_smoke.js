@@ -7,7 +7,8 @@ function typeFor(f){return f.endsWith(".html")?"text/html; charset=utf-8":f.ends
 function fileFor(url){const rel=decodeURIComponent(String(url||"/").split("?")[0]).replace(/^\/+/, "")||"index.html",target=path.resolve(ROOT,rel);return target.startsWith(ROOT)&&fs.existsSync(target)&&fs.statSync(target).isFile()?target:null}
 async function openCard(card){for(let attempt=0;attempt<4;attempt++){if(await card.evaluate(e=>e.classList.contains("kggOpen")))return;const header=card.locator("h3");await header.evaluate(el=>el.click());await card.page().waitForTimeout(80)}throw new Error("card open state did not stabilize")}
 async function clickKey(page,label){await page.locator("#pad .padGrid").getByRole("button",{name:label,exact:true}).click()}
-async function enter(page,input,value){await input.click();for(const c of String(value))await clickKey(page,c==="."?",":c);await page.locator("#pad .padOk").click()}
+async function clickInput(page,input){const compact=await page.evaluate(()=>document.body.classList.contains("kggSetViewCompact"));if(!compact){await input.click();return}const proxyIndex=await input.evaluate(el=>[...el.parentElement.querySelectorAll(".kggCompactTapProxy")].findIndex(proxy=>proxy.__kggInput===el));assert(proxyIndex>=0,"compact input proxy missing");await input.locator("xpath=..").locator(".kggCompactTapProxy").nth(proxyIndex).click()}
+async function enter(page,input,value){await clickInput(page,input);for(const c of String(value))await clickKey(page,c==="."?",":c);await page.locator("#pad .padOk").click()}
 async function loadPage(browser,port,{width=390,height=844,rootFont=16,userAgent,lang="de"}={}){
  const ctx=await browser.newContext({viewport:{width,height},hasTouch:true,isMobile:width<760,userAgent:userAgent||undefined});
  const page=await ctx.newPage(),errors=[];page.on("pageerror",e=>errors.push(String(e)));
@@ -49,7 +50,7 @@ async function unitContract(page){
  assert(visible===1,"no-load exercise exposes "+visible+" numeric fields: "+JSON.stringify(diag));
  const unitTexts=await noLoad.locator(".kggCompactUnit").allTextContents();
  assert(unitTexts.filter(Boolean).length===1&&/Sek\.?/i.test(unitTexts.join(" ")),"no-load unit display wrong: "+unitTexts.join("|"));
- const hit=await noLoad.locator("input.num").nth(1).evaluate(el=>{const r=el.getBoundingClientRect(),p=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return{rect:{left:r.left,top:r.top,width:r.width,height:r.height},hit:p?{tag:p.tagName,cls:p.className}:null}});assert(hit.hit&&hit.hit.tag==="INPUT","single active field is covered: "+JSON.stringify(hit));await enter(page,noLoad.locator("input.num").nth(1),"30");
+ const hit=await noLoad.locator("input.num").nth(1).evaluate(el=>{const r=el.getBoundingClientRect(),p=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return{rect:{left:r.left,top:r.top,width:r.width,height:r.height},hit:p?{tag:p.tagName,cls:p.className}:null,proxyMaps:!!(p&&p.classList&&p.classList.contains("kggCompactTapProxy")&&p.__kggInput===el)}});assert(hit.proxyMaps,"single active field proxy mapping is wrong: "+JSON.stringify(hit));await enter(page,noLoad.locator("input.num").nth(1),"30");
  const progress=await noLoad.locator(".kggCardProgress").evaluate(el=>({expected:el.dataset.kggExpectedCount,filled:el.dataset.kggFilledCount,state:el.dataset.kggProgress}));
  assert(progress.expected==="1","no-load progress expects phantom field: "+JSON.stringify(progress));
  const summary=await page.evaluate(()=>typeof text==="function"?text(1):"");
@@ -62,7 +63,7 @@ async function lrSingleFieldContract(page){
  assert(counts.units.length===6&&counts.units.every(x=>/Sek\.?/i.test(x)),"LR single-field units wrong: "+JSON.stringify(counts.units));
  const progress=await card.locator(".kggCardProgress").evaluate(el=>({expected:el.dataset.kggExpectedCount,filled:el.dataset.kggFilledCount}));
  assert(progress.expected==="6","LR single-field progress expects phantom fields: "+JSON.stringify(progress));
- const active=card.locator("input.num:not(.kggUnitInactive)").first();await active.click();const labels=await page.locator("#kggPadPair button > span:first-child").allTextContents();
+ const active=card.locator("input.num:not(.kggUnitInactive)").first();await clickInput(page,active);const labels=await page.locator("#kggPadPair .kggPairField > span:first-child").allTextContents();
  assert(labels.length===1&&/Sek\.?/i.test(labels[0]),"LR single-field pad pair wrong: "+labels.join("|"));await page.locator("#pad .padCancel").click();
 }
 async function noValuesContract(page){
@@ -86,8 +87,8 @@ async function bilateralSingleCapsuleContract(page){
  assert(ui.padding.every(x=>x==="0px"),"bilateral inner wrapper still adds capsule padding: "+JSON.stringify(ui));
 }
 async function barContract(page){
- const bar=page.locator("#list .ex").nth(2);await openCard(bar);await bar.locator("input.num").nth(0).click();
- const labels=await page.locator("#kggPadPair button > span:first-child").allTextContents();
+ const bar=page.locator("#list .ex").nth(2);await openCard(bar);await clickInput(page,bar.locator("input.num").nth(0));
+ const labels=await page.locator("#kggPadPair .kggPairField > span:first-child").allTextContents();
  assert(labels.some(x=>x.trim()==="bar")&&labels.some(x=>/^Wdh$/i.test(x.trim())),"bar/Wdh pair labels wrong: "+labels.join("|"));
  await page.locator("#pad .padCancel").click();
 }
@@ -95,11 +96,11 @@ async function englishUnitContract(page){
  const noLoad=page.locator("#list .ex").nth(1);await openCard(noLoad);
  const compact=await noLoad.locator(".kggCompactUnit").allTextContents();
  assert(compact.some(x=>/^sec$/i.test(x.trim())),"English compact seconds label wrong: "+compact.join("|"));
- await noLoad.locator("input.num").nth(1).click();const labels=await page.locator("#kggPadPair button > span:first-child").allTextContents();
+ await clickInput(page,noLoad.locator("input.num").nth(1));const labels=await page.locator("#kggPadPair .kggPairField > span:first-child").allTextContents();
  assert(labels.length===1&&/^sec$/i.test(labels[0].trim()),"English single-field pair label wrong: "+labels.join("|"));await page.locator("#pad .padCancel").click();
 }
 async function englishBarContract(page){
- const bar=page.locator("#list .ex").nth(2);await openCard(bar);await bar.locator("input.num").nth(0).click();const labels=await page.locator("#kggPadPair button > span:first-child").allTextContents();
+ const bar=page.locator("#list .ex").nth(2);await openCard(bar);await clickInput(page,bar.locator("input.num").nth(0));const labels=await page.locator("#kggPadPair .kggPairField > span:first-child").allTextContents();
  assert(labels.some(x=>x.trim()==="bar")&&labels.some(x=>/^reps$/i.test(x.trim())),"English bar/reps pair labels wrong: "+labels.join("|"));await page.locator("#pad .padCancel").click();
 }
 async function longUnitContract(page){
@@ -108,7 +109,7 @@ async function longUnitContract(page){
  assert(units.some(x=>x.title==="Theraband-Stufe")&&units.some(x=>x.title==="Wiederholungen"),"custom unit labels lost full semantic text: "+JSON.stringify(units));
  assert(units.every(x=>x.right<=x.rowRight+1&&x.overflow==="hidden"&&x.whiteSpace==="nowrap"),"custom compact unit overlaps row: "+JSON.stringify(units));
  const geom=await page.evaluate(()=>({doc:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}));assert(geom.doc<=geom.client+1,"custom units cause page overflow");
- await card.locator("input.num").first().click();const labels=await page.locator("#kggPadPair button > span:first-child").allTextContents();
+ await clickInput(page,card.locator("input.num").first());const labels=await page.locator("#kggPadPair .kggPairField > span:first-child").allTextContents();
  assert(labels.some(x=>x.trim()==="Theraband-Stufe")&&labels.some(x=>x.trim()==="Wiederholungen"),"custom pair labels truncated semantically: "+labels.join("|"));
  await page.locator("#pad .padCancel").click();
 }
@@ -131,60 +132,60 @@ async function compactFieldPresentationContract(page){
 async function securityContract(page){
  await page.evaluate(()=>{p.ex[0].u="<b>unit-test</b>";render()});await page.waitForTimeout(180);
  const card=page.locator("#list .ex").first();await openCard(card);
- await card.locator("input.num").first().click();await page.waitForTimeout(80);
+ await clickInput(page,card.locator("input.num").first());await page.waitForTimeout(80);
  assert(await page.locator("#kggPadPair b").count()===0,"unit text was interpreted as HTML");
- const label=await page.locator("#kggPadPair button > span:first-child").first().textContent();
+ const label=await page.locator("#kggPadPair .kggPairField > span:first-child").first().textContent();
  assert(label==="<b>unit-test</b>","unit markup was not rendered as literal text: "+label);
  await page.locator("#pad .padCancel").click();
 }
 async function normalCompactContract(page){
- const first=page.locator("#list .ex").nth(0);await openCard(first);const source=first.locator("input.num").first();await source.click();await page.waitForTimeout(120);
+ const first=page.locator("#list .ex").nth(0);await openCard(first);const source=first.locator("input.num").first();await clickInput(page,source);await page.waitForTimeout(120);
  assert(!(await page.locator("#pad").evaluate(el=>el.classList.contains("kggPadLargeUi"))),"normal UI incorrectly classified large");
- const pair=page.locator("#kggPadPair button").first();const h=await pair.evaluate(el=>el.getBoundingClientRect().height);
+ const pair=page.locator("#kggPadPair .kggPairField").first();const h=await pair.evaluate(el=>el.getBoundingClientRect().height);
  assert(h<80,"normal Compact pair unexpectedly large: "+h);
- await page.waitForTimeout(260);const focusColors=await Promise.all([source.evaluate(el=>getComputedStyle(el).borderTopColor),pair.evaluate(el=>getComputedStyle(el).borderTopColor)]);
- assert(focusColors[0]===focusColors[1],"active source field border does not match active pair border: "+JSON.stringify({source:focusColors[0],pair:focusColors[1]}));
+  await page.waitForTimeout(260);const sourceRing=first.locator(".kggCompactSourceRing.kggActive").first(),pairIndicator=page.locator("#kggPadPair .kggPairIndicator");const focusColors=await Promise.all([sourceRing.evaluate(el=>getComputedStyle(el).borderTopColor),pairIndicator.evaluate(el=>getComputedStyle(el).borderTopColor)]);
+  assert(focusColors[0]===focusColors[1],"active source ring does not match active pair indicator: "+JSON.stringify({sourceRing:focusColors[0],pairIndicator:focusColors[1]}));
  await page.locator("#pad .padCancel").click();
 }
 async function largeCompactContract(page){
- const first=page.locator("#list .ex").nth(0);await openCard(first);await first.locator("input.num").first().click();await page.waitForTimeout(160);
+ const first=page.locator("#list .ex").nth(0);await openCard(first);await clickInput(page,first.locator("input.num").first());await page.waitForTimeout(160);
  assert(await page.locator("#pad").evaluate(el=>el.classList.contains("kggPadLargeUi")),"Large UI class not active");
  assert(await page.locator(".kggPadZoomInput").count()===0,"Compact Large UI still shows redundant zoom box");
- const metrics=await page.locator("#kggPadPair button").first().evaluate(el=>({h:el.getBoundingClientRect().height,font:parseFloat(getComputedStyle(el.querySelector(".kggPairValue")).fontSize)}));
+ const metrics=await page.locator("#kggPadPair .kggPairField").first().evaluate(el=>({h:el.getBoundingClientRect().height,font:parseFloat(getComputedStyle(el.querySelector(".kggPairValue")).fontSize)}));
  assert(metrics.h>=84&&metrics.font>=36,"Large UI pair not promoted: "+JSON.stringify(metrics));
  await page.locator("#pad .padCancel").click();
  const sw=page.locator("#kggSetViewSwitch");await sw.click();
- await first.locator("input.num").first().click();await page.waitForTimeout(160);
+ await clickInput(page,first.locator("input.num").first());await page.waitForTimeout(160);
  assert(await page.locator("#pad").evaluate(el=>el.classList.contains("kggPadLargeUi")),"Legacy Large UI lost classification");
  assert(await page.locator(".kggPadZoomInput").count()===1,"Legacy Large UI lost zoom copy");
  await page.locator("#pad .padCancel").click();
 }
 async function largeSingleFieldContract(page){
- const single=page.locator("#list .ex").nth(1);await openCard(single);await single.locator("input.num").nth(1).click();await page.waitForTimeout(160);
+ const single=page.locator("#list .ex").nth(1);await openCard(single);await clickInput(page,single.locator("input.num").nth(1));await page.waitForTimeout(160);
  assert(await page.locator("#pad").evaluate(el=>el.classList.contains("kggPadLargeUi")),"single-field fixture is not Large UI");
  assert(await page.locator("#kggPadPair").getAttribute("data-single")==="1","single-field Large UI did not collapse pair");
- const metric=await page.locator("#kggPadPair button").evaluate(el=>({h:el.getBoundingClientRect().height,w:el.getBoundingClientRect().width,parent:el.parentElement.getBoundingClientRect().width,label:el.querySelector("span")?.textContent||""}));
+ const metric=await page.locator("#kggPadPair .kggPairField").evaluate(el=>({h:el.getBoundingClientRect().height,w:el.getBoundingClientRect().width,parent:el.parentElement.getBoundingClientRect().width,label:el.querySelector("span")?.textContent||""}));
  assert(metric.h>=84&&metric.w>=metric.parent-2&&/Sek\.?/i.test(metric.label),"single-field Large UI geometry wrong: "+JSON.stringify(metric));
  assert(await page.locator(".kggPadZoomInput").count()===0,"single-field Compact Large UI created zoom box");
  await page.locator("#pad .padCancel").click();
 }
 async function adaptiveTransitionContract(page){
- const first=page.locator("#list .ex").nth(0);await openCard(first);await first.locator("input.num").first().click();await page.waitForTimeout(120);
+ const first=page.locator("#list .ex").nth(0);await openCard(first);await clickInput(page,first.locator("input.num").first());await page.waitForTimeout(120);
  assert(!(await page.locator("#pad").evaluate(el=>el.classList.contains("kggPadLargeUi"))),"transition fixture did not start normal");
  await page.evaluate(()=>{document.documentElement.style.fontSize="18px";if(window.visualViewport)visualViewport.dispatchEvent(new Event("resize"));window.dispatchEvent(new Event("orientationchange"))});await page.waitForTimeout(420);
  assert(await page.locator("#pad").evaluate(el=>el.classList.contains("kggPadLargeUi")),"normal→Large transition failed");
  assert(await page.locator(".kggPadZoomInput").count()===0,"normal→Large Compact transition created zoom copy");
- const big=await page.locator("#kggPadPair button").first().evaluate(el=>el.getBoundingClientRect().height);assert(big>=84,"normal→Large pair did not grow");
+ const big=await page.locator("#kggPadPair .kggPairField").first().evaluate(el=>el.getBoundingClientRect().height);assert(big>=84,"normal→Large pair did not grow");
  await page.evaluate(()=>{document.documentElement.style.fontSize="16px";if(window.visualViewport)visualViewport.dispatchEvent(new Event("resize"));window.dispatchEvent(new Event("orientationchange"))});await page.waitForTimeout(520);
  assert(!(await page.locator("#pad").evaluate(el=>el.classList.contains("kggPadLargeUi"))),"Large→normal transition stuck in Large UI");
- const normal=await page.locator("#kggPadPair button").first().evaluate(el=>el.getBoundingClientRect().height);assert(normal<80,"Large→normal pair stayed enlarged: "+normal);
+ const normal=await page.locator("#kggPadPair .kggPairField").first().evaluate(el=>el.getBoundingClientRect().height);assert(normal<80,"Large→normal pair stayed enlarged: "+normal);
  await page.locator("#pad .padCancel").click();
 }
 async function iosForceOnlyContract(browser,port){
  const ua="Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1";
  const {ctx,page,errors}=await loadPage(browser,port,{width:390,height:800,rootFont:16,userAgent:ua});
  try{
-  const first=page.locator("#list .ex").nth(0);await openCard(first);await first.locator("input.num").first().click();await page.waitForTimeout(700);
+  const first=page.locator("#list .ex").nth(0);await openCard(first);await clickInput(page,first.locator("input.num").first());await page.waitForTimeout(700);
   const cls=await page.locator("#pad").evaluate(el=>({module:!!window.__kggIosPadForce,ios:el.classList.contains("kggIosPadForce"),large:el.classList.contains("kggPadLargeUi")}));
   if(cls.module)assert(cls.ios,"loaded iOS force module did not activate in force-only scenario: "+JSON.stringify(cls));
   assert(!cls.large,"iOS force-only scenario incorrectly became kggPadLargeUi: "+JSON.stringify(cls));
@@ -195,12 +196,12 @@ async function iosLargeContract(browser,port){
  const ua="Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1";
  const {ctx,page,errors}=await loadPage(browser,port,{width:390,height:650,rootFont:16,userAgent:ua});
  try{
-  const first=page.locator("#list .ex").nth(0);await openCard(first);await first.locator("input.num").first().click();await page.waitForTimeout(700);
+  const first=page.locator("#list .ex").nth(0);await openCard(first);await clickInput(page,first.locator("input.num").first());await page.waitForTimeout(700);
   const cls=await page.locator("#pad").evaluate(el=>({module:!!window.__kggIosPadForce,ios:el.classList.contains("kggIosPadForce"),large:el.classList.contains("kggPadLargeUi")}));
   assert(cls.large,"iOS combined scenario did not activate Large UI: "+JSON.stringify(cls));
   if(cls.module)assert(cls.ios,"iOS combined scenario lost iOS force class: "+JSON.stringify(cls));
   assert(await page.locator(".kggPadZoomInput").count()===0,"iOS + Compact Large UI created redundant zoom box");
-  const metric=await page.locator("#kggPadPair button").first().evaluate(el=>({h:el.getBoundingClientRect().height,font:parseFloat(getComputedStyle(el.querySelector(".kggPairValue")).fontSize)}));
+  const metric=await page.locator("#kggPadPair .kggPairField").first().evaluate(el=>({h:el.getBoundingClientRect().height,font:parseFloat(getComputedStyle(el.querySelector(".kggPairValue")).fontSize)}));
   assert(metric.h>=84&&metric.font>=36,"iOS + Large pair not promoted: "+JSON.stringify(metric));
   assert(errors.length===0,"iOS Large page errors: "+errors.join(" | "));
  }finally{await ctx.close()}

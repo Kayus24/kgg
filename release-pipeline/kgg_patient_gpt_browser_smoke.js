@@ -180,7 +180,16 @@ async function main() {
       await page.waitForFunction(() => document.querySelector(".ex")?.classList.contains("kggOpen"));
     }
     const firstInput = page.locator(".num").first();
-    await firstInput.click();
+    const compact = await page.evaluate(() => document.body.classList.contains("kggSetViewCompact"));
+    if (compact) {
+      const proxyIndex = await firstInput.evaluate((element) =>
+        [...element.parentElement.querySelectorAll(".kggCompactTapProxy")].findIndex((proxy) => proxy.__kggInput === element)
+      );
+      assert(proxyIndex >= 0, "compact numpad proxy missing");
+      await firstInput.locator("xpath=..").locator(".kggCompactTapProxy").nth(proxyIndex).click();
+    } else {
+      await firstInput.click();
+    }
     await page.locator("#pad").waitFor({ state: "visible" });
     await page.locator("#pad .padGrid button", { hasText: "7" }).click();
     await page.locator("#pad .padOk").click();

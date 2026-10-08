@@ -1,162 +1,321 @@
 # KGG Patient Source Chunk 009
 
-- Source file: `patient-card-settings.js`
-- Characters: 1-19412
-- Full source SHA-256: `f5be35c40cd1c776e7e29b311635e485688046de994de5384de89a7d7bc6f993`
+- Source file: `patient-card-progress.js`
+- Characters: 1-16081
+- Full source SHA-256: `03f79c0e6c4234492742048231327d952eb85744638d4ddd9e7f97ce4cbc123c`
 
 ```
 (()=>{
-  const VERSION='v3_continuous_day_meta';
-  const STYLE='kggPatientCardSettingsStyle';
-  const LANG='kggPatientLang';
-  const PLAN_KEY='kggCurrentPlanV1';
-  const SET_KEY='kggPatientExerciseSettingsV1';
-  let openIndex=null;
-  const $=id=>document.getElementById(id);
-  const en=()=>localStorage.getItem(LANG)==='en';
-  const T=(de,enText)=>en()?enText:de;
-  const safe=f=>{try{return f()}catch(e){return null}};
-  const has=(o,k)=>Object.prototype.hasOwnProperty.call(o||{},k);
-  const activeUnit=x=>{const s=String(x??'').trim();return !!s&&!/^(keine|none|-)$/i.test(s)};
-  const configuredUnit=x=>{const s=String(x??'').trim();return !s||/^(keine|none|-)$/i.test(s)?'keine':s};
-  window.KGGPatientUnitSemantics=window.KGGPatientUnitSemantics||{isActive:activeUnit};
+  const VERSION='card-progress-v2-complete-fields';
+  const STYLE_ID='kgg-card-progress-style';
+  const BADGE_CLASS='kggCardProgress';
+  if(window.__kggCardProgress===VERSION)return;
+  window.__kggCardProgress=VERSION;
 
-  function readSettings(){try{return JSON.parse(localStorage.getItem(SET_KEY)||'{}')||{}}catch(e){return{}}}
-  function writeSettings(s){localStorage.setItem(SET_KEY,JSON.stringify(s||{}))}
-  function exKey(e){return String((safe(()=>p.id)||'plan')+'|'+(e&&e.n||'exercise')).toLowerCase()}
-  function getPainMode(e){const s=readSettings();return s[exKey(e)]&&s[exKey(e)].painMode||e.painMode||'exercise'}
-  function setPainMode(e,mode){const s=readSettings(),key=exKey(e);s[key]=s[key]||{};s[key].painMode=mode;writeSettings(s);e.painMode=mode}
-  function setExerciseSettings(e,unitA,unitB,mode){const s=readSettings(),key=exKey(e);s[key]=s[key]||{};s[key].unitA=configuredUnit(unitA);s[key].unitB=configuredUnit(unitB);s[key].painMode=mode;writeSettings(s);e.u=s[key].unitA;e.m=s[key].unitB;e.painMode=mode}
-  function applySavedSettings(){safe(()=>{const s=readSettings();(p.ex||[]).forEach(e=>{const x=s[exKey(e)]||{};if(has(x,'unitA'))e.u=configuredUnit(x.unitA);if(has(x,'unitB'))e.m=configuredUnit(x.unitB);if(x.painMode)e.painMode=x.painMode})})}
-  function rawPlan(){return{ i:p.id||'plan', t:p.title||'KGG Trainingsplan', v:p.version||1, d:p.days||6, extendDays:p.extendDays!==false, stepDays:p.stepDays||6, e:(p.ex||[]).map(e=>[e.n,e.sets,e.side,e.u,e.m,e.sl||'',e.sm||'',e.media||'',e.videoUrl||'',e.videoLabel||'Video öffnen',e.painMode||getPainMode(e)])}}
-  function storePlan(){safe(()=>localStorage.setItem(PLAN_KEY,JSON.stringify({plan:rawPlan(),importedAt:new Date().toISOString()})))}
-  function unit(x){x=String(x||'');const m={Wdh:['Wdh','reps'],wdh:['Wdh','reps'],Reps:['Wdh','reps'],reps:['Wdh','reps'],'Sek.':['Sek.','sec'],Sek:['Sek.','sec'],sec:['Sek.','sec'],'Min.':['Min.','min'],Min:['Min.','min'],min:['Min.','min'],Stufe:['Stufe','level'],level:['Stufe','level'],Level:['Stufe','level']};return m[x]?T(m[x][0],m[x][1]):x}
-  function sideText(x){return x==='LR'?T('links/rechts','left/right'):T('beidseitig','bilateral')}
-  function st(msg){safe(()=>setStatus(msg,'ok'))}
-  function saveAll(){safe(()=>save());storePlan()}
-
+  function stateForCount(count,total){
+    const filled=Math.max(0,Number(count)||0);
+    const expected=Math.max(0,Number(total)||0);
+    if(filled===0)return 'open';
+    if(expected>0&&filled>=expected)return 'done';
+    return 'partial'
+  }
+  function language(){return localStorage.getItem('kggPatientLang')==='en'?'en':'de'}
+  function labelForState(state,lang){
+    const en=(lang||language())==='en';
+    if(state==='done')return en?'✓ Done':'✓ Bearbeitet';
+    if(state==='partial')return en?'◐ Partial':'◐ Teilweise';
+    return en?'○ Open':'○ Offen'
+  }
+  function activeUnit(unit){const s=String(unit??'').trim();return !!s&&!/^(keine|none|-)$/i.test(s)}
+  function exerciseForCard(card){if(!card||typeof p==='undefined'||!p||!Array.isArray(p.ex))return null;let idx=Number(card.dataset.kggAlwaysIdx??card.dataset.kggExerciseIndex);if(!Number.isInteger(idx)||idx<0)idx=cards().indexOf(card);return idx>=0?p.ex[idx]||null:null}
+  function normalValueInputs(card){
+    if(!card||typeof card.querySelectorAll!=='function')return [];
+    const all=[...card.querySelectorAll('.set input.num')],ex=exerciseForCard(card);if(!ex)return all;
+    return all.filter(input=>{const row=input.closest('.lr,.bi');if(!row)return true;const rowInputs=[...row.querySelectorAll('input.num')],field=rowInputs.indexOf(input)===0?'a':'b';return field==='a'?activeUnit(ex.u):activeUnit(ex.m)})
+  }
+  function filledCount(card){
+    return normalValueInputs(card).filter(input=>String(input&&input.value!=null?input.value:'').trim()!=='').length
+  }
   function ensureStyle(){
-    const old=$(STYLE);if(old)old.remove();
-    const s=document.createElement('style');s.id=STYLE;s.textContent=`
-      #kgg-collapse-toggle{display:none!important}
-      input.num.kggUnitInactive{display:none!important}
-      body.kggAlwaysCollapsed .ex{position:relative;cursor:pointer;transition:box-shadow .18s ease,transform .16s ease,background .18s ease}
-      body.kggAlwaysCollapsed .ex:not(.kggOpen) .set,body.kggAlwaysCollapsed .ex:not(.kggOpen) .pain{display:none!important}
-      body.kggAlwaysCollapsed .ex:not(.kggOpen)::after{content:'Antippen zum Öffnen';display:block;margin-top:8px;color:#64748b;font-size:12px;font-weight:800}
-      body.kggLangEn.kggAlwaysCollapsed .ex:not(.kggOpen)::after{content:'Tap to open'}
-      body.kggAlwaysCollapsed .ex.kggOpen{box-shadow:0 12px 32px rgba(15,23,42,.12);border-color:#111827;background:#fff;padding-right:52px!important}
-      .kggCardDots{position:absolute;right:10px;top:10px;width:38px;height:38px;border-radius:999px;border:1px solid #cbd5e1;background:#fff;color:#111827;font-size:22px;font-weight:950;display:flex;align-items:center;justify-content:center;z-index:5;touch-action:manipulation}
-      .kggCardDots:active{transform:scale(.94);background:#eff6ff}
-      body.kggAlwaysCollapsed .ex:not(.kggOpen) .kggCardDots{display:none!important}
-      .kggPainScale{display:grid;grid-template-columns:repeat(11,1fr);gap:4px;width:100%;touch-action:none;user-select:none;-webkit-user-select:none;margin-top:8px}
-      .kggPainScale button{min-width:0;min-height:38px;border-radius:12px;border:1px solid #cbd5e1;background:#fff;color:#111827;font-weight:950;font-size:14px;box-shadow:none;touch-action:none}
-      .kggPainScale button.on{background:#dbeafe;border-color:#60a5fa;color:#1d4ed8;box-shadow:0 5px 14px rgba(37,99,235,.20);transform:translateY(-2px)}
-      .kggPainScale button:active{transform:scale(.94)}
-      .kggPainCaption{font-size:12px;color:#64748b;margin-top:5px;font-weight:800;text-align:right}
-      .kggSetPain{margin-top:10px;border-top:1px dashed #e2e8f0;padding-top:8px}.kggSetPain b{font-size:14px}
-      .kggSettingsBackdrop{position:fixed;inset:0;background:rgba(15,23,42,.22);z-index:2700}.kggSettingsBackdrop[hidden]{display:none!important}
-      #kggSettingsSheet{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:2701;max-width:540px;margin:0 auto;background:#fff;border:1px solid #dbe3ef;border-radius:22px;padding:14px;box-shadow:0 22px 70px rgba(15,23,42,.28);animation:kggSettingsIn .18s ease both}
-      #kggSettingsSheet[hidden]{display:none!important}#kggSettingsSheet h3{margin:0 0 10px;font-size:19px}.kggSetGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kggSetGrid label{font-size:12px;color:#64748b;font-weight:900}.kggSetGrid input,.kggSetGrid select{width:100%;margin-top:4px;border:1px solid #cbd5e1;border-radius:12px;padding:10px;font-size:15px;background:#fff}.kggSetActions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.kggSetActions button{min-height:48px;border-radius:14px;font-size:16px;font-weight:950}.kggSetCancel{background:#fff;border:1px solid #cbd5e1;color:#111827}.kggSetSave{background:#111827;border:1px solid #111827;color:#fff}
-      @keyframes kggSettingsIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
-      @media(max-width:430px){.kggPainScale{gap:3px}.kggPainScale button{min-height:34px;font-size:12px;border-radius:10px}.kggSetGrid{grid-template-columns:1fr}#kggSettingsSheet{border-radius:20px 20px 0 0;left:0;right:0;bottom:0}}
-    `;document.head.appendChild(s)
+    if(document.getElementById(STYLE_ID))return;
+    const style=document.createElement('style');
+    style.id=STYLE_ID;
+    style.textContent=`.${BADGE_CLASS}{display:none}body.kggCardsCollapsed .ex:not(.kggOpen) .${BADGE_CLASS},body.kggAlwaysCollapsed .ex:not(.kggOpen) .${BADGE_CLASS}{display:inline-flex!important;align-items:center;width:max-content;max-width:100%;margin:0 0 2px;padding:3px 8px;border:1px solid #cbd5e1;border-radius:999px;background:#f8fafc;color:#64748b;font-size:11px;font-weight:900;line-height:1.2;white-space:nowrap}body.kggCardsCollapsed .ex:not(.kggOpen) .${BADGE_CLASS}.kggProgressPartial,body.kggAlwaysCollapsed .ex:not(.kggOpen) .${BADGE_CLASS}.kggProgressPartial{border-color:#fcd34d;background:#fffbeb;color:#92400e}body.kggCardsCollapsed .ex:not(.kggOpen) .${BADGE_CLASS}.kggProgressDone,body.kggAlwaysCollapsed .ex:not(.kggOpen) .${BADGE_CLASS}.kggProgressDone{border-color:#86efac;background:#ecfdf5;color:#166534}`;
+    document.head.appendChild(style)
   }
-
-  function cards(){return[...document.querySelectorAll('#list .ex')]}
-  function forceCards(){
-    document.body.classList.add('kggAlwaysCollapsed');
-    document.body.classList.toggle('kggLangEn',en());
-    const tgl=$('kgg-collapse-toggle');if(tgl)tgl.style.display='none';
-    cards().forEach((card,i)=>{
-      card.dataset.kggAlwaysIdx=i;
-      card.classList.toggle('kggOpen',openIndex===i);
-      addDots(card,i);
-      if(!card.dataset.kggAlwaysBound){
-        card.dataset.kggAlwaysBound='1';
-        card.addEventListener('click',ev=>{
-          if(ev.target.closest('input,button,a,select,textarea,.kggPainScale,#kggSettingsSheet'))return;
-          openIndex=openIndex===i?null:i;
-          apply();
-          if(openIndex===i)setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'start'}),60)
-        });
+  function ensureBadge(card){
+    let badge=card.querySelector('.'+BADGE_CLASS);
+    if(badge)return badge;
+    badge=document.createElement('span');
+    badge.className=BADGE_CLASS;
+    badge.setAttribute('aria-live','polite');
+    const title=card.querySelector('h3');
+    if(title&&title.insertAdjacentElement)title.insertAdjacentElement('afterend',badge);
+    else card.insertBefore(badge,card.firstChild||null);
+    return badge
+  }
+  function updateCard(card){
+    if(!card)return;
+    const inputs=normalValueInputs(card);
+    const count=inputs.filter(input=>String(input&&input.value!=null?input.value:'').trim()!=='').length;
+    const state=stateForCount(count,inputs.length);
+    const badge=ensureBadge(card);
+    const nextClass=BADGE_CLASS+' kggProgress'+state.charAt(0).toUpperCase()+state.slice(1);
+    const nextLabel=labelForState(state);
+    if(badge.className!==nextClass)badge.className=nextClass;
+    if(badge.textContent!==nextLabel)badge.textContent=nextLabel;
+    if(badge.dataset.kggProgress!==state)badge.dataset.kggProgress=state;
+    if(badge.dataset.kggFilledCount!==String(count))badge.dataset.kggFilledCount=String(count);
+    if(badge.dataset.kggExpectedCount!==String(inputs.length))badge.dataset.kggExpectedCount=String(inputs.length);
+    if(badge.title!==nextLabel)badge.title=nextLabel;
+    if(badge.getAttribute('aria-label')!==nextLabel)badge.setAttribute('aria-label',nextLabel)
+  }
+  function cards(){return [...document.querySelectorAll('#list .ex')]}
+  function updateAll(){ensureStyle();cards().forEach(updateCard)}
+  let updateTimer=0;
+  function scheduleUpdate(delay){
+    clearTimeout(updateTimer);
+    updateTimer=setTimeout(updateAll,Number(delay)||0)
+  }
+  function bindEvents(){
+    if(window.__kggCardProgressEvents)return;
+    window.__kggCardProgressEvents=1;
+    document.addEventListener('input',event=>{if(event.target&&event.target.matches&&event.target.matches('#list .set input.num'))scheduleUpdate(0)},true);
+    document.addEventListener('change',event=>{if(event.target&&event.target.matches&&event.target.matches('#list .set input.num'))scheduleUpdate(0)},true);
+    document.addEventListener('click',event=>{
+      if(event.target&&event.target.closest&&event.target.closest('.padOk,.padCancel,.padLast,.padGrid,#days')){
+        scheduleUpdate(40);setTimeout(updateAll,180);setTimeout(updateAll,360)
       }
-    })
+    },true)
   }
-  function addDots(card,i){
-    let b=card.querySelector('.kggCardDots');
-    if(!b){b=document.createElement('button');b.type='button';b.className='kggCardDots';b.textContent='⋯';b.title=T('Übung anpassen','Edit exercise');b.onclick=e=>{e.preventDefault();e.stopPropagation();openSettings(i)};card.appendChild(b)}
-    b.hidden=openIndex!==i;b.title=T('Übung anpassen','Edit exercise')
+  function observeList(){
+    const list=document.getElementById('list');
+    if(!list||list.dataset.kggCardProgressObserved==='1'||typeof MutationObserver==='undefined')return;
+    list.dataset.kggCardProgressObserved='1';
+    const observer=new MutationObserver(()=>scheduleUpdate(0));
+    observer.observe(list,{childList:true,subtree:true})
+  }
+  function patchRender(){
+    if(window.__kggCardProgressRenderPatched||typeof render!=='function')return;
+    window.__kggCardProgressRenderPatched=1;
+    const old=render;
+    window.render=function(){const result=old.apply(this,arguments);scheduleUpdate(0);setTimeout(updateAll,120);return result}
   }
 
-  function applyUnitVisibility(){cards().forEach((card,ei)=>{const e=safe(()=>p.ex[ei]);if(!e)return;const hideA=!activeUnit(e.u),hideB=!activeUnit(e.m);card.querySelectorAll('.bi,.lr').forEach(row=>{const inputs=[...row.querySelectorAll('input')].filter(x=>!x.closest('.painRow'));if(inputs.length<2)return;inputs[0].classList.toggle('kggUnitInactive',hideA);inputs[1].classList.toggle('kggUnitInactive',hideB);inputs[0].style.display=hideA?'none':'';inputs[1].style.display=hideB?'none':'';const both=hideA&&hideB;if(row.classList.contains('bi')){row.style.display=both?'none':'grid';row.style.gridTemplateColumns=(hideA||hideB)?'1fr':'1fr 1fr'}else{row.style.display=both?'none':'grid';row.style.gridTemplateColumns=(hideA||hideB)?'34px 1fr':'34px 1fr 1fr'}})})}
+  const TICKET034_META='__kggTicket034WarnCountersV1';
+  const FINISH_STYLE_ID='kggTicket034FinishStyle';
+  const FINISH_MODAL_ID='kggTicket034FinishModal';
+  const FINISH_MESSAGE_ID='kggTicket034FinishMessage';
+  let finishPending=null;
+  let finishFinalizing=false;
+  let finishBypass=false;
 
-  function valKey(ei,s){return safe(()=>k(ei,s,'P','pain'))||(`${d}|${ei}|${s}|P|pain`)}
-  function painVal(ei,s){return String((safe(()=>v[valKey(ei,s)])||'0')||'0')}
-  function setPainVal(ei,s,x){safe(()=>{v[valKey(ei,s)]=String(x);save()});st(T('Automatisch gespeichert.','Automatically saved.'));updatePainScales()}
-  function painScale(ei,s){const wrap=document.createElement('div');wrap.className='kggPainScale';wrap.dataset.ei=ei;wrap.dataset.s=s;for(let n=0;n<=10;n++){let b=document.createElement('button');b.type='button';b.textContent=String(n);b.dataset.val=String(n);b.onclick=e=>{e.preventDefault();e.stopPropagation();setPainVal(ei,s,n)};wrap.appendChild(b)}bindDrag(wrap);return wrap}
-  function bindDrag(wrap){if(wrap.dataset.dragBound)return;wrap.dataset.dragBound='1';let active=false;const hit=e=>{const el=document.elementFromPoint(e.clientX,e.clientY);const b=el&&el.closest&&el.closest('.kggPainScale button');if(b&&wrap.contains(b))setPainVal(+wrap.dataset.ei,+wrap.dataset.s,+b.dataset.val)};wrap.addEventListener('pointerdown',e=>{active=true;wrap.setPointerCapture&&wrap.setPointerCapture(e.pointerId);hit(e)});wrap.addEventListener('pointermove',e=>{if(active)hit(e)});wrap.addEventListener('pointerup',()=>active=false);wrap.addEventListener('pointercancel',()=>active=false)}
-  function paintScale(wrap){const v=painVal(+wrap.dataset.ei,+wrap.dataset.s);wrap.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.val===v));let cap=wrap.nextElementSibling;if(cap&&cap.classList.contains('kggPainCaption'))cap.textContent=v+'/10'}
-  function updatePainScales(){document.querySelectorAll('.kggPainScale').forEach(paintScale)}
-  function renderPain(){
-    cards().forEach((card,ei)=>{const e=safe(()=>p.ex[ei]);if(!e)return;const mode=getPainMode(e);
-      card.querySelectorAll('.kggSetPain').forEach(x=>x.remove());
-      const global=card.querySelector('.pain');
-      if(mode==='set'){
-        if(global)global.style.display='none';
-        card.querySelectorAll('.set').forEach((set,idx)=>{const s=idx+1;let box=document.createElement('div');box.className='kggSetPain';box.innerHTML='<b>'+T('Schmerz Satz ','Pain set ')+s+' · 0–10</b>';box.appendChild(painScale(ei,s));let cap=document.createElement('div');cap.className='kggPainCaption';box.appendChild(cap);set.appendChild(box)})
-      }else{
-        if(global){global.style.display='';let b=global.querySelector('b');if(b)b.textContent=T('Schmerz 0–10','Pain 0–10');let row=global.querySelector('.painRow');if(row){row.innerHTML='';row.appendChild(painScale(ei,0));let cap=document.createElement('div');cap.className='kggPainCaption';row.appendChild(cap)}}
+  function ticket034NormalizeCounter(value){
+    const count=Number(value);
+    if(!Number.isFinite(count)||count<=0)return 0;
+    if(count>=2)return 2;
+    return 1
+  }
+  function ticket034CounterMap(create){
+    if(typeof v==='undefined'||!v||typeof v!=='object')return {};
+    const current=v[TICKET034_META];
+    if(current&&typeof current==='object'&&!Array.isArray(current))return current;
+    if(!create)return {};
+    const next={};
+    v[TICKET034_META]=next;
+    return next
+  }
+  function ticket034CounterFor(ei){
+    return ticket034NormalizeCounter(ticket034CounterMap(false)[String(ei)])
+  }
+  function ticket034SetCounter(ei,value){
+    const key=String(ei),next=ticket034NormalizeCounter(value),map=ticket034CounterMap(true);
+    if(ticket034NormalizeCounter(map[key])===next&&Object.prototype.hasOwnProperty.call(map,key))return false;
+    map[key]=next;
+    return true
+  }
+  function ticket034HasNormalValue(exerciseIndex,day,values,plan,keyFn){
+    const sourcePlan=plan||p;
+    const sourceValues=values||v;
+    const ex=sourcePlan&&Array.isArray(sourcePlan.ex)?sourcePlan.ex[exerciseIndex]:null;
+    if(!ex)return false;
+    const sets=Math.max(1,Number(ex.sets)||1);
+    const sides=ex.side==='LR'?['L','R']:['B'];
+    const makeKey=keyFn||k;
+    for(let setNo=1;setNo<=sets;setNo++){
+      for(const side of sides){
+        const fields=[];if(activeUnit(ex.u))fields.push('a');if(activeUnit(ex.m))fields.push('b');
+        for(const field of fields){
+          if(String((sourceValues&&sourceValues[makeKey(exerciseIndex,setNo,side,field,day)])??'').trim()!=='')return true
+        }
       }
+    }
+    return false
+  }
+  function ticket034Candidates(day){
+    if(typeof p==='undefined'||!p||!Array.isArray(p.ex))return [];
+    return p.ex.map((ex,ei)=>({ei,name:String(ex&&ex.n||'Übung'),counter:ticket034CounterFor(ei)}))
+      .filter(item=>item.counter<2&&!ticket034HasNormalValue(item.ei,day))
+  }
+  function ticket034IncrementCandidates(candidates){
+    let changed=false;
+    (Array.isArray(candidates)?candidates:[]).forEach(item=>{
+      const before=ticket034NormalizeCounter(item&&item.counter);
+      if(before<2)changed=ticket034SetCounter(item.ei,before+1)||changed
     });
-    updatePainScales()
+    return changed
+  }
+  function ticket034ResetAfterNormalValue(ei,value){
+    if(String(value??'').trim()===''||ticket034CounterFor(ei)===0)return false;
+    return ticket034SetCounter(ei,0)
   }
 
-  function copySideValues(ei,oldSide,newSide){
-    if(oldSide===newSide)return;const ex=safe(()=>p.ex[ei]);if(!ex)return;const sets=+ex.sets||3,days=+p.days||6;
-    for(let day=1;day<=days;day++)for(let s=1;s<=sets;s++)['a','b'].forEach(key=>{
-      if(oldSide!=='LR'&&newSide==='LR'){
-        const b=safe(()=>v[k(ei,s,'B',key,day)])||''; if(b){if(!safe(()=>v[k(ei,s,'L',key,day)]))v[k(ei,s,'L',key,day)]=b;if(!safe(()=>v[k(ei,s,'R',key,day)]))v[k(ei,s,'R',key,day)]=b}
-      }else if(oldSide==='LR'&&newSide!=='LR'){
-        const l=safe(()=>v[k(ei,s,'L',key,day)])||'',r=safe(()=>v[k(ei,s,'R',key,day)])||''; if((l||r)&&!safe(()=>v[k(ei,s,'B',key,day)]))v[k(ei,s,'B',key,day)]=l||r
-      }
+  function ensureFinishStyle(){
+    if(document.getElementById(FINISH_STYLE_ID))return;
+    const style=document.createElement('style');
+    style.id=FINISH_STYLE_ID;
+    style.textContent=`#${FINISH_MODAL_ID}[hidden]{display:none!important}#${FINISH_MODAL_ID}{position:fixed;inset:0;z-index:2900;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(15,23,42,.58)}#${FINISH_MODAL_ID} .kggTicket034Dialog{width:min(100%,520px);max-height:calc(100dvh - 32px);overflow:auto;background:#fff;color:#111827;border:1px solid #dbe3ef;border-radius:20px;padding:18px;box-shadow:0 22px 70px rgba(15,23,42,.28)}#${FINISH_MODAL_ID} .kggTicket034Message{margin:0;font-size:16px;line-height:1.5;font-weight:700}#${FINISH_MODAL_ID} .kggTicket034Actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}#${FINISH_MODAL_ID} .kggTicket034Actions .btn,#${FINISH_MODAL_ID} .kggTicket034Actions .btn2{min-height:50px;margin-top:0}#${FINISH_MODAL_ID} button:focus-visible{outline:3px solid #94a3b8;outline-offset:2px}@media(max-width:430px){#${FINISH_MODAL_ID}{padding:12px}#${FINISH_MODAL_ID} .kggTicket034Dialog{padding:16px;border-radius:18px}#${FINISH_MODAL_ID} .kggTicket034Actions{grid-template-columns:1fr}}`;
+    document.head.appendChild(style)
+  }
+  function ensureFinishModal(){
+    ensureFinishStyle();
+    let modal=document.getElementById(FINISH_MODAL_ID);
+    if(modal)return modal;
+    modal=document.createElement('div');
+    modal.id=FINISH_MODAL_ID;
+    modal.hidden=true;
+    modal.setAttribute('role','dialog');
+    modal.setAttribute('aria-modal','true');
+    modal.setAttribute('aria-label','Training beenden');
+    modal.setAttribute('aria-describedby',FINISH_MESSAGE_ID);
+    const dialog=document.createElement('div');
+    dialog.className='kggTicket034Dialog';
+    const message=document.createElement('p');
+    message.id=FINISH_MESSAGE_ID;
+    message.className='kggTicket034Message';
+    const actions=document.createElement('div');
+    actions.className='kggTicket034Actions';
+    const cancel=document.createElement('button');
+    cancel.type='button';
+    cancel.className='btn2';
+    cancel.dataset.kggTicket034Action='cancel';
+    cancel.textContent='Weiter trainieren';
+    const confirm=document.createElement('button');
+    confirm.type='button';
+    confirm.className='btn';
+    confirm.dataset.kggTicket034Action='confirm';
+    confirm.textContent='Training beenden';
+    actions.append(cancel,confirm);
+    dialog.append(message,actions);
+    modal.appendChild(dialog);
+    modal.addEventListener('click',event=>{if(event.target===modal)ticket034CancelFinish()});
+    modal.addEventListener('keydown',event=>{
+      if(event.key==='Escape'){event.preventDefault();ticket034CancelFinish();return}
+      if(event.key!=='Tab')return;
+      const buttons=[cancel,confirm].filter(button=>!button.disabled);
+      if(!buttons.length){event.preventDefault();return}
+      const first=buttons[0],last=buttons[buttons.length-1],active=document.activeElement;
+      if(event.shiftKey&&(active===first||!modal.contains(active))){event.preventDefault();last.focus()}
+      else if(!event.shiftKey&&(active===last||!modal.contains(active))){event.preventDefault();first.focus()}
     });
+    cancel.addEventListener('click',ticket034CancelFinish);
+    confirm.addEventListener('click',ticket034ConfirmFinish);
+    document.body.appendChild(modal);
+    return modal
   }
-  function closeSettings(){const b=$('kggSettingsBackdrop'),s=$('kggSettingsSheet');if(b)b.hidden=true;if(s)s.hidden=true}
-  function openSettings(i){
-    const e=safe(()=>p.ex[i]);if(!e)return;ensureSettingsDom();const sh=$('kggSettingsSheet'),bd=$('kggSettingsBackdrop');
-    sh.innerHTML=`<h3>${T('Übung anpassen','Edit exercise')}</h3><div class="kggSetGrid">
-      <label>${T('Gewicht / Gerät','Weight / machine')}<input id="kggSetUnitA" value="${esc(e.u==null?'kg':e.u)}"></label>
-      <label>${T('Wdh / Zeit','Reps / time')}<input id="kggSetUnitB" value="${esc(e.m==null?'Wdh':e.m)}"></label>
-      <label>${T('Seite','Side')}<select id="kggSetSide"><option value="BI">${T('beidseitig','bilateral')}</option><option value="LR">${T('links/rechts getrennt','left/right separate')}</option></select></label>
-      <label>${T('Schmerz','Pain')}<select id="kggSetPainMode"><option value="exercise">${T('einmal pro Übung','once per exercise')}</option><option value="set">${T('pro Satz','per set')}</option></select></label>
-    </div><div class="kggSetActions"><button class="kggSetCancel" id="kggSetCancel">${T('Abbrechen','Cancel')}</button><button class="kggSetSave" id="kggSetSave">${T('Speichern','Save')}</button></div>`;
-    $('kggSetSide').value=e.side==='LR'?'LR':'BI';$('kggSetPainMode').value=getPainMode(e);
-    $('kggSetCancel').onclick=closeSettings;
-    $('kggSetSave').onclick=()=>{const old=e.side,unitA=$('kggSetUnitA').value.trim(),unitB=$('kggSetUnitB').value.trim(),mode=$('kggSetPainMode').value; e.u=unitA; e.m=unitB; e.side=$('kggSetSide').value; setExerciseSettings(e,unitA,unitB,mode); copySideValues(i,old,e.side); saveAll(); closeSettings(); openIndex=i; safe(()=>render()); setTimeout(apply,0); st(T('Übung angepasst.','Exercise updated.'))};
-    bd.hidden=false;sh.hidden=false;
+  function ticket034RestoreFocus(target){
+    if(target&&typeof target.focus==='function'&&document.contains(target)){
+      try{target.focus({preventScroll:true})}catch(e){target.focus()}
+    }
   }
-  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-  function ensureSettingsDom(){if(!$('kggSettingsBackdrop')){let b=document.createElement('div');b.id='kggSettingsBackdrop';b.className='kggSettingsBackdrop';b.hidden=true;b.onclick=closeSettings;document.body.appendChild(b)}if(!$('kggSettingsSheet')){let s=document.createElement('div');s.id='kggSettingsSheet';s.hidden=true;document.body.appendChild(s)}}
+  function ticket034CloseModal(restore){
+    const modal=document.getElementById(FINISH_MODAL_ID);
+    const focusTarget=finishPending&&finishPending.restoreFocus;
+    if(modal)modal.hidden=true;
+    if(restore)ticket034RestoreFocus(focusTarget)
+  }
+  function ticket034OpenFinish(candidates){
+    if(finishPending||finishFinalizing||!Array.isArray(candidates)||!candidates.length)return false;
+    const modal=ensureFinishModal();
+    const active=document.activeElement;
+    const fallback=document.querySelector('#plan .btn[onclick*="showQr(true)"]');
+    finishPending={
+      candidates:candidates.map(item=>({ei:item.ei,counter:item.counter})),
+      restoreFocus:active&&active!==document.body?active:fallback
+    };
+    const message=document.getElementById(FINISH_MESSAGE_ID);
+    message.textContent=`Sie haben noch die Übung „${candidates[0].name}“ offen. Sicher, dass Sie das Training beenden wollen?`;
+    const cancel=modal.querySelector('[data-kgg-ticket034-action="cancel"]');
+    const confirm=modal.querySelector('[data-kgg-ticket034-action="confirm"]');
+    cancel.disabled=false;
+    confirm.disabled=false;
+    modal.hidden=false;
+    setTimeout(()=>cancel.focus({preventScroll:true}),0);
+    return true
+  }
+  function ticket034CancelFinish(){
+    if(finishFinalizing||!finishPending)return;
+    const snapshot=finishPending;
+    ticket034CloseModal(false);
+    finishPending=null;
+    ticket034RestoreFocus(snapshot.restoreFocus)
+  }
+  function ticket034ConfirmFinish(){
+    if(finishFinalizing||!finishPending)return;
+    const snapshot=finishPending;
+    const modal=ensureFinishModal();
+    const cancel=modal.querySelector('[data-kgg-ticket034-action="cancel"]');
+    const confirm=modal.querySelector('[data-kgg-ticket034-action="confirm"]');
+    finishFinalizing=true;
+    cancel.disabled=true;
+    confirm.disabled=true;
+    let error=null;
+    try{
+      finishBypass=true;
+      window.showQr(true);
+      finishBypass=false;
+      if(ticket034IncrementCandidates(snapshot.candidates)&&typeof save==='function')save();
+      ticket034CloseModal(false);
+      finishPending=null
+    }catch(err){
+      error=err;
+      finishBypass=false;
+      cancel.disabled=false;
+      confirm.disabled=false
+    }finally{
+      finishFinalizing=false
+    }
+    if(error)throw error
+  }
+  function patchPut(){
+    if(window.__kggTicket034PutPatched||typeof put!=='function')return;
+    window.__kggTicket034PutPatched=1;
+    const old=put;
+    window.put=function(ei,s,side,key,value){
+      const result=old.apply(this,arguments);
+      if(ticket034ResetAfterNormalValue(ei,value)&&typeof save==='function')save();
+      return result
+    }
+  }
+  function patchShowQr(){
+    if(window.__kggTicket034ShowQrPatched||typeof showQr!=='function')return;
+    window.__kggTicket034ShowQrPatched=1;
+    const old=showQr;
+    window.showQr=function(finalize){
+      if(!finalize||finishBypass)return old.apply(this,arguments);
+      if(finishPending||finishFinalizing)return;
+      const candidates=ticket034Candidates(Number(d)||1);
+      if(!candidates.length)return old.apply(this,arguments);
+      ticket034OpenFinish(candidates)
+    }
+  }
 
-  function i18n(){
-    document.documentElement.lang=en()?'en':'de';document.body.classList.toggle('kggLangEn',en());
-    const h=document.querySelector('main .card h1');if(h)h.textContent=T('KGG Handyplan','KGG Phone Plan');
-    const intro=document.querySelector('main .card p.muted');if(intro)intro.textContent=T('Werte direkt am Handy eintragen. Schmerz 0–10 angeben. Daten bleiben lokal auf diesem Gerät.','Enter values directly on the phone. Pain 0–10. Data stays local on this device.');
-    const meta=$('meta');if(meta&&safe(()=>p)){const flow=window.KGGPatientDayFlow,continuous=flow&&typeof flow.isContinuousPlan==='function'?flow.isContinuousPlan():p.extendDays!==false;meta.textContent=(p.ex?.length||0)+' '+T('Übungen','exercises')+' · '+(continuous?T('fortlaufender Trainingsplan','continuous training plan'):(p.days||0)+' '+T('Trainingstage','training days'));}
-    document.querySelectorAll('#days button').forEach((b,i)=>b.textContent=T('Tag ','Day ')+(i+1));
-    const ex=$('extendBtn');if(ex&&safe(()=>p))ex.textContent=T('+ '+p.stepDays+' weitere Tage hinzufügen','Add '+p.stepDays+' more days');
-    const db=$('kggPatientDbBtn');if(db)db.textContent=T('📚 Übungsdatenbank','📚 Database');
-    const scan=$('kggActionScan');if(scan)scan.textContent='📷 '+T('Plan scannen / aktualisieren','Scan / update plan');
-    const add=$('kggActionAddPlan');if(add)add.textContent='➕ '+T('2. Plan hinzufügen','Add 2nd plan');
-    document.querySelectorAll('button').forEach(b=>{const x=b.textContent.trim();const map={'Aktuelle Werte als QR zeigen':'Show current values as QR','Show current values as QR':'Show current values as QR','Training beenden & QR anzeigen':'Finish training & show QR','Finish training & show QR':'Finish training & show QR','Zurück zum Plan':'Back to plan','Back to plan':'Back to plan','Abbrechen':'Cancel','Cancel':'Cancel','OK':'OK'}; if(map[x])b.textContent=en()?map[x]:Object.keys(map).find(k=>map[k]===map[x]&&k!==map[x])||x});
-    cards().forEach((card,ei)=>{const e=safe(()=>p.ex[ei]);if(!e)return;const muted=[...card.querySelectorAll(':scope > .muted')],m=muted[0];if(m){const parts=[(e.sets||3)+' '+T('Sätze','sets'),sideText(e.side)];[unit(e.u),unit(e.m)].filter(activeUnit).forEach(x=>parts.push(x));m.textContent=parts.join(' · ')}const start=muted.find((node,i)=>i>0&&/T1-Vorschlag|Day 1 suggestion/i.test(node.textContent||''));if(start){const vals=[];if(activeUnit(e.u)&&String(e.sl||'').trim())vals.push(String(e.sl).trim()+' '+unit(e.u));if(activeUnit(e.m)&&String(e.sm||'').trim())vals.push(String(e.sm).trim()+' '+unit(e.m));start.style.display=vals.length?'':'none';if(vals.length)start.textContent=T('T1-Vorschlag: ','Day 1 suggestion: ')+vals.join(' · ')}card.querySelectorAll('.set > b').forEach((b,i)=>b.textContent=T('Satz ','Set ')+(i+1));card.querySelectorAll('.lr span').forEach(sp=>{if(sp.textContent.trim()==='Li'||sp.textContent.trim()==='L')sp.textContent=T('Li','L');else sp.textContent=T('Re','R')})});
+  function init(){
+    ensureStyle();bindEvents();observeList();patchRender();patchPut();patchShowQr();ensureFinishStyle();updateAll();
+    setTimeout(()=>{observeList();patchRender();patchPut();patchShowQr();updateAll()},300);
+    setTimeout(()=>{observeList();patchRender();patchPut();patchShowQr();updateAll()},1000)
   }
-
-  function patchRows(){if(window.__kggPainRowsPatch||typeof rows!=='function')return;window.__kggPainRowsPatch=1;const old=rows;rows=function(day){const out=old(day);safe(()=>out.forEach((r,ei)=>{const e=p.ex[ei],hasA=activeUnit(e&&e.u),hasB=activeUnit(e&&e.m);(Array.isArray(r[5])?r[5]:[]).forEach(values=>{if(!Array.isArray(values))return;if(e&&e.side==='LR'){if(!hasA){values[0]='';values[2]=''}if(!hasB){values[1]='';values[3]=''}}else{if(!hasA)values[0]='';if(!hasB)values[1]=''}});if(getPainMode(e)==='set'){let a=[];for(let s=1;s<=e.sets;s++){let x=v[k(ei,s,'P','pain',day)]||'0';a.push('S'+s+':'+x)}r[6]=a.join(' ')}}));return out}}
-  function patchText(){if(window.__kggUnitAwareTextPatch||typeof text!=='function')return;window.__kggUnitAwareTextPatch=1;text=function(day){let out=[];rows(day).forEach(entry=>{let[n,sets,side,u,m,values,pn]=entry,lines=[],hasA=activeUnit(u),hasB=activeUnit(m);const fmt=(a,b)=>{if(hasA&&hasB)return (a||'?')+' '+u+' @ '+(b||'?')+' '+m;if(hasA)return (a||'?')+' '+u;if(hasB)return (b||'?')+' '+m;return''};(Array.isArray(values)?values:[]).forEach((x,i)=>{if(side==='LR'){const left=fmt(x[0],x[1]),right=fmt(x[2],x[3]),hasLeft=(hasA&&!!x[0])||(hasB&&!!x[1]),hasRight=(hasA&&!!x[2])||(hasB&&!!x[3]);if(hasLeft||hasRight)lines.push((i+1)+'. Satz: '+(hasLeft?left:'–')+' li    '+(hasRight?right:'–')+' re')}else{const value=fmt(x[0],x[1]),hasValue=(hasA&&!!x[0])||(hasB&&!!x[1]);if(hasValue)lines.push((i+1)+'. Satz: '+value)}});if(lines.length||Number(pn)>0)out.push(n+' — Tag '+day,...lines,Number(pn)>0?'Schmerz: '+pn+'/10':'','')});return out.join('\n').trim()}}
-  function patchRender(){if(window.__kggAlwaysCardsRenderPatch||typeof render!=='function')return;window.__kggAlwaysCardsRenderPatch=1;const old=render;render=function(){const r=old.apply(this,arguments);setTimeout(apply,0);return r}}
-  function apply(){ensureStyle();ensureSettingsDom();applySavedSettings();forceCards();renderPain();i18n();applyUnitVisibility();patchRows();patchText()}
-  function init(){window.__kggPatientCardSettings=VERSION;patchRender();apply();setTimeout(apply,300);setTimeout(apply,1000)}
-  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
+  if(window.__KGG_TEST__)window.__kggCardProgressTest={stateForCount,labelForState,filledCount,normalValueInputs,ticket034NormalizeCounter,ticket034HasNormalValue,ticket034Candidates,ticket034IncrementCandidates,ticket034ResetAfterNormalValue,ticket034OpenFinish,ticket034CancelFinish,ticket034ConfirmFinish,patchPut,patchShowQr};
+  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init,{once:true}):init()
 })();
 ```

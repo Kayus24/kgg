@@ -1,118 +1,25 @@
 # KGG Patient Source Chunk 034
 
-- Source file: `patient-storage-scope.js`
-- Characters: 1-4454
-- Full source SHA-256: `5ee476fb50a653ec339cc1876fa916464929bc2e196e347c3f1fd7a0406a79d7`
+- Source file: `patient-start-scan.js`
+- Characters: 24001-34220
+- Full source SHA-256: `326effd0bb31b48fbbbeb8b70b4f6ea176784d712a7c91623d0154175ec60250`
 
 ```
-(()=>{
-  const REQUEST_ID_RE=/\/previews\/([a-z0-9][a-z0-9-]{5,63})(?:\/|$)/i;
-  const match=String(location.pathname||'').match(REQUEST_ID_RE);
-  const requestId=match?decodeURIComponent(match[1]).toLowerCase():'';
-  if(!requestId)return;
-
-  const prefix='preview:'+requestId+':';
-  const methodNames=new Set(['clear','getItem','key','removeItem','setItem']);
-  const nativeMethods={
-    clear:Storage.prototype.clear,
-    getItem:Storage.prototype.getItem,
-    key:Storage.prototype.key,
-    removeItem:Storage.prototype.removeItem,
-    setItem:Storage.prototype.setItem,
-  };
-  const nativeStorages=new WeakSet();
-  const proxyToNative=new WeakMap();
-  let localNative;
-  let sessionNative;
-  try{
-    localNative=window.localStorage;
-    sessionNative=window.sessionStorage;
-    nativeStorages.add(localNative);
-    nativeStorages.add(sessionNative);
-  }catch(e){return}
-
-  const nativeFor=receiver=>proxyToNative.get(receiver)||receiver;
-  const scopedReceiver=receiver=>nativeStorages.has(nativeFor(receiver));
-  const storageKey=key=>{
-    const name=String(key);
-    return name.startsWith(prefix)?name:prefix+name;
-  };
-  const visibleKeys=receiver=>{
-    const native=nativeFor(receiver),keys=[];
-    if(!nativeStorages.has(native))return keys;
-    for(let index=0;index<native.length;index+=1){
-      const key=nativeMethods.key.call(native,index);
-      if(key&&key.startsWith(prefix))keys.push(key.slice(prefix.length));
-    }
-    return keys;
-  };
-  const getItem=(receiver,key)=>{
-    const native=nativeFor(receiver);
-    return scopedReceiver(receiver)?nativeMethods.getItem.call(native,storageKey(key)):nativeMethods.getItem.call(native,key);
-  };
-  const setItem=(receiver,key,value)=>{
-    const native=nativeFor(receiver);
-    return nativeMethods.setItem.call(native,scopedReceiver(receiver)?storageKey(key):key,value);
-  };
-  const removeItem=(receiver,key)=>{
-    const native=nativeFor(receiver);
-    return nativeMethods.removeItem.call(native,scopedReceiver(receiver)?storageKey(key):key);
-  };
-  const clear=(receiver)=>{
-    const native=nativeFor(receiver);
-    if(!scopedReceiver(receiver))return nativeMethods.clear.call(native);
-    visibleKeys(native).forEach(key=>nativeMethods.removeItem.call(native,storageKey(key)));
-  };
-  const key=(receiver,index)=>{
-    const keys=visibleKeys(receiver);
-    return keys[Number(index)]??null;
-  };
-
-  Storage.prototype.getItem=function(name){return getItem(this,name)};
-  Storage.prototype.setItem=function(name,value){return setItem(this,name,value)};
-  Storage.prototype.removeItem=function(name){return removeItem(this,name)};
-  Storage.prototype.clear=function(){return clear(this)};
-  Storage.prototype.key=function(index){return key(this,index)};
-
-  function createScopedStorage(native){
-    const proxy=new Proxy(native,{
-      get(target,name,receiver){
-        if(name==='length')return visibleKeys(receiver).length;
-        if(typeof name==='symbol'||methodNames.has(name))return Reflect.get(target,name,receiver);
-        return getItem(receiver,name);
-      },
-      set(target,name,value,receiver){
-        if(typeof name==='symbol'||methodNames.has(name)||name==='length')return Reflect.set(target,name,value,receiver);
-        setItem(receiver,name,value);
-        return true;
-      },
-      deleteProperty(target,name){
-        if(typeof name==='symbol'||methodNames.has(name)||name==='length')return false;
-        removeItem(proxy,name);
-        return true;
-      },
-      ownKeys(target){return visibleKeys(proxy)},
-      has(target,name){
-        if(typeof name==='symbol'||methodNames.has(name)||name==='length')return name in target;
-        return getItem(proxy,name)!==null;
-      },
-      getOwnPropertyDescriptor(target,name){
-        if(typeof name==='string'&&getItem(proxy,name)!==null){
-          return {configurable:true,enumerable:true,value:getItem(proxy,name),writable:true};
-        }
-        return Reflect.getOwnPropertyDescriptor(target,name);
-      },
-    });
-    proxyToNative.set(proxy,native);
-    return proxy;
-  }
-
-  try{
-    Object.defineProperty(window,'localStorage',{configurable:true,value:createScopedStorage(localNative)});
-    Object.defineProperty(window,'sessionStorage',{configurable:true,value:createScopedStorage(sessionNative)});
-    window.__KGG_STORAGE_SCOPE__={kind:'preview',requestId,prefix};
-  }catch(e){
-    window.__KGG_STORAGE_SCOPE__={kind:'preview',requestId,prefix,error:'scope-install-failed'};
-  }
+R detected yet. Retry or use a photo.'));return;}if(session.busy){session.timer=setTimeout(()=>scanLiveFrame(session),200);return;}session.busy=true;session.frameTimes.push(Date.now());if(session.frameTimes.length>30)session.frameTimes.shift();try{let raw='';if(session.detector)raw=await detectNative(session.detector,session.video);if(!raw){const variant=LIVE_VARIANTS[session.variant%LIVE_VARIANTS.length];session.variant++;raw=await decodeCanvasWithJsQR(renderDecodeVariant(session.video,variant));}if(raw){if(parsePlanFromText(raw)){const elapsed=Date.now()-session.startedAt,span=session.frameTimes.length>1?session.frameTimes[session.frameTimes.length-1]-session.frameTimes[0]:0,fps=span>0?(session.frameTimes.length-1)*1000/span:0;lastScanMetrics=Object.assign({},lastScanMetrics,{recognitionMs:elapsed,fpsBand:!fps?'unknown':fps<3?'under-3':fps<6?'3-5':fps<10?'6-9':'10-plus'});testEmit('scan-metrics',lastScanMetrics);scannerStatus(scanMode==='replace'?tr('Plan erkannt. Ersetzen wird vorbereitet …','Plan detected. Preparing replacement …'):tr('Plan erkannt. Wird aktualisiert …','Plan detected. Updating …'),'ok');session.active=false;stopScannerTracks(session);const consumed=testConsume(raw,lastScanMetrics);setTimeout(()=>{if(scannerSession===session){if(session.box&&session.box.parentNode)session.box.remove();scannerSession=null;}if(!consumed)handlePlanText(raw);},80);return;}scannerStatus(tr('QR erkannt, aber kein KGG-Plan. Bitte den Plan-QR zeigen.','QR detected, but it is not a KGG plan. Show the plan QR.'),'warn');}else scannerStatus(tr('Suche Plan-QR … bitte ruhig und nah halten.','Searching for plan QR … hold steady and close.'),'');}catch(e){scannerStatus(tr('Bild wird weiter geprüft …','Continuing to scan …'),'');}finally{session.busy=false;}if(session.active&&scannerSession===session)session.timer=setTimeout(()=>scanLiveFrame(session),200);}
+  async function startLiveScanner(session){try{if(!navigator.mediaDevices||typeof navigator.mediaDevices.getUserMedia!=='function')throw new Error('getUserMedia unavailable');testEmit('scanner-start',{});const stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:10,max:15}}});if(scannerSession!==session||!session.active){stream.getTracks().forEach(track=>track.stop());return;}session.stream=stream;session.video.srcObject=stream;await session.video.play();session.detector=await createNativeDetector();await loadJsQR().catch(()=>null);session.startedAt=Date.now();session.frameTimes=[];scannerStatus(tr('Suche Plan-QR … bitte ruhig und nah halten.','Searching for plan QR … hold steady and close.'),'');scanLiveFrame(session);}catch(e){if(scannerSession===session)showScannerFallback(tr('Live-Kamera nicht verfügbar. Bitte ein Foto verwenden.','Live camera unavailable. Please use a photo.'));}}
+  async function scanFile(ev){const input=ev.target;const mode=input.dataset.scanMode==='replace'?'replace':'update';input.dataset.scanMode='';scanMode=mode;const file=input.files&&input.files[0];setTimeout(()=>{try{input.value=''}catch(e){}},100);if(!file){scanMode='update';return;}try{setStatus(tr('QR-Foto wird geprüft …','Checking QR photo …'));const started=Date.now(),hit=await decodePhoto(file);if(hit.raw){lastScanMetrics=Object.assign({},lastScanMetrics,{decoder:hit.decoder,recognitionMs:Date.now()-started,fpsBand:'unknown'});testEmit('scan-metrics',lastScanMetrics);if(!testConsume(hit.raw,lastScanMetrics))handlePlanText(hit.raw);}else{alert(tr('Kein QR erkannt. Bitte näher und scharf fotografieren.','No QR detected. Please take a closer, sharp photo.'));}}catch(e){promptFallback();}}
+  function openCameraScan(mode){scanMode=mode==='replace'?'replace':'update';closeLiveScanner(true);const box=scannerBox();const session={box,video:box.querySelector('#kggLiveScanVideo'),stream:null,detector:null,active:true,busy:false,variant:0,startedAt:Date.now(),timer:0,frameTimes:[]};scannerSession=session;startLiveScanner(session);}
+  function openPhotoScan(mode){scanMode=mode==='replace'?'replace':'update';const input=ensureScanInput();input.dataset.scanMode=scanMode;input.click();}
+  function ensureStyle(){if($('kggPlanScanRescueStyle'))return;const s=document.createElement('style');s.id='kggPlanScanRescueStyle';s.textContent='.kggQrRescue{margin-top:14px;border:1px solid #bfdbfe;border-radius:18px;background:#eff6ff;padding:14px;color:#111827}.kggQrRescue b{display:block;font-size:18px;margin-bottom:6px}.kggQrRescue p{margin:0 0 10px;color:#475569;font-weight:700;line-height:1.35}.kggQrRescue .scanBig{width:100%;min-height:56px;border:0;border-radius:16px;background:#111827;color:#fff;font-weight:950;font-size:18px}.kggQrRescue .pasteLink{margin-top:8px;width:100%;min-height:46px;border:1px solid #cbd5e1;border-radius:14px;background:white;color:#111827;font-weight:900}.kggLiveScan{position:fixed;inset:0;z-index:10050;background:#020617f2;color:#fff;display:flex;align-items:center;justify-content:center;padding:14px}.kggLiveScanPanel{width:min(100%,620px);max-height:100%;overflow:auto;background:#111827;border:1px solid #334155;border-radius:22px;padding:14px;box-shadow:0 24px 70px #0008}.kggLiveScanHead{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:19px}.kggLiveScanClose{width:44px;height:44px;border:1px solid #64748b;border-radius:999px;background:#1e293b;color:#fff;font-size:29px;line-height:1}.kggLiveScanView{position:relative;margin-top:12px;overflow:hidden;border-radius:16px;background:#000;aspect-ratio:4/3}.kggLiveScanView video{width:100%;height:100%;object-fit:cover}.kggLiveScanGuide{position:absolute;left:15%;top:10%;width:70%;height:80%;border:4px solid #fff;border-radius:18px;box-shadow:0 0 0 999px #02061755}.kggLiveScanStatus{margin-top:12px;padding:11px;border-radius:13px;background:#1e293b;font-weight:900}.kggLiveScanStatus.ok{background:#14532d}.kggLiveScanStatus.warn{background:#78350f}.kggLiveScanFallback{display:grid;gap:8px;margin-top:10px}.kggLiveScanFallback[hidden]{display:none}.kggLiveScanFallback button{min-height:48px;border-radius:13px;border:1px solid #64748b;background:#fff;color:#111827;font-weight:900}.kggLiveScanPanel>p{margin:10px 2px 0;color:#cbd5e1;font-size:13px;line-height:1.4}@media(max-width:430px){.kggLiveScan{padding:8px}.kggLiveScanPanel{border-radius:18px;padding:10px}.kggLiveScanView{aspect-ratio:3/4}.kggLiveScanGuide{left:9%;top:19%;width:82%;height:62%}}';document.head.appendChild(s);}
+  function noPlanVisible(){const st=$('status');return !!(st&&/Kein Plan gefunden|No plan found/i.test(st.textContent||''));}
+  function ensureRescue(){ensureStyle();ensureScanInput();if(!noPlanVisible())return;const st=$('status');if(!st||$('kggQrRescue'))return;const box=document.createElement('div');box.id='kggQrRescue';box.className='kggQrRescue';box.innerHTML='<b>'+tr('Plan erneut öffnen','Open plan again')+'</b><p>'+tr('Wenn diese Web-App ohne Plan startet, scanne den Plan-QR-Code hier noch einmal.','If this web app opens without a plan, scan the plan QR code here again.')+'</p><button type="button" class="scanBig">📷 '+tr('Plan-QR scannen','Scan plan QR')+'</button><button type="button" class="pasteLink">'+tr('Plan-Link einfügen','Paste plan link')+'</button>';st.insertAdjacentElement('afterend',box);box.querySelector('.scanBig').onclick=()=>openCameraScan('update');box.querySelector('.pasteLink').onclick=()=>{scanMode='update';promptFallback();};}
+  function ensureReplaceBubble(){const box=$('kggActionBubbles');if(!box)return;let btn=$('kggBubbleReplace');if(!btn){btn=document.createElement('button');btn.id='kggBubbleReplace';btn.type='button';btn.className='kggBubble';const add=$('kggBubbleAdd');box.insertBefore(btn,add||null);}btn.textContent='♻ '+tr('Plan ersetzen','Replace plan');btn.onclick=e=>{e.preventDefault();e.stopPropagation();box.hidden=true;const fab=$('kggActionFab');if(fab)fab.classList.remove('open');openCameraScan('replace');};}
+  function ensureScanButton(){const row=$('installSmall');if(!row)return;row.classList.remove('hide');let btn=$('kggPlanScanBtn');if(!btn){btn=document.createElement('button');btn.id='kggPlanScanBtn';btn.type='button';btn.style.minHeight='38px';btn.style.borderRadius='999px';btn.style.border='1px solid #bfdbfe';btn.style.background='#eff6ff';btn.style.color='#111827';btn.style.fontWeight='950';btn.style.padding='6px 10px';btn.onclick=e=>{e.preventDefault();e.stopPropagation();openCameraScan('update');};row.insertBefore(btn,row.children[1]||null);}btn.textContent=tr('QR-Scan','QR scan');ensureScanInput();ensureRescue();setTimeout(ensureReplaceBubble,80);}
+  function patchRender(){if(window.__kggStartScanPatchV8)return;window.__kggStartScanPatchV8=true;if(typeof render==='function'){const old=render;window.render=function(){const r=old.apply(this,arguments);setTimeout(autoFillStartValues,0);setTimeout(ensureScanButton,0);setTimeout(ensureRescue,20);setTimeout(ensureReplaceBubble,100);return r;};}}
+  function ensureFullFrameStyle(){if($('kggQrFullFrameStyle'))return;const s=document.createElement('style');s.id='kggQrFullFrameStyle';s.textContent='.kggLiveScanView video{object-fit:contain!important;background:#000!important}';document.head.appendChild(s);}
+  function init(){patchRender();ensureFullFrameStyle();ensureScanButton();ensureRescue();ensureReplaceBubble();autoFillStartValues();setTimeout(autoFillStartValues,300);setTimeout(autoFillStartValues,1000);setTimeout(ensureScanButton,300);setTimeout(ensureReplaceBubble,500);setTimeout(ensureReplaceBubble,1200);setTimeout(ensureRescue,500);setTimeout(ensureRescue,1500);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')closeLiveScanner(false)});window.addEventListener('pagehide',()=>closeLiveScanner(false));}
+  window.__kggPatientStartScanTest={planPayloadFromText,parsePlanFromText,validPlan,openCameraScan,openPhotoScan,closeLiveScanner,scannerActive:()=>!!(scannerSession&&scannerSession.active)};
+  window.KGGPatientPlanImport={replaceConfirmed:nextRaw=>validPlan(nextRaw)&&replacePlan(nextRaw,{confirmed:true})};
+  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
 })();
 ```

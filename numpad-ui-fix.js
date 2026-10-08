@@ -23,14 +23,17 @@
   }
 
   function getCurrentValue(){
+    const api=window.__kggPadDraftApi;
+    if(api&&typeof api.getValue==='function') return api.getValue();
     const v=$('padVal');
     return v ? (v.textContent || '0') : '0';
   }
 
   function setCurrentValue(x,syncInput=true){
     x=String(x||'0');
-    const v=$('padVal');
-    if(v) v.textContent=x;
+    const api=window.__kggPadDraftApi;
+    if(api&&typeof api.setValue==='function') api.setValue(x);
+    else{const v=$('padVal');if(v)v.textContent=x;}
     if(syncInput&&activeInput) activeInput.value=x;
   }
 
@@ -61,10 +64,12 @@
       injectStyle();
       const previousInput=activeInput;
       const sameAnchor=!!(previousInput&&input&&scrollAnchor(previousInput)===scrollAnchor(input));
-      if(activeInput) activeInput.classList.remove('kggEditing');
+      const switching=!!(previousInput&&input&&input!==previousInput&&document.getElementById('pad')&&!document.getElementById('pad').classList.contains('hide'));
+
       activeInput=input;
       oldValue=input ? input.value : '';
-      if(activeInput) activeInput.classList.add('kggEditing');
+      if(switching)return oldOpen.apply(this,arguments);
+
       document.body.classList.add('kggPadOpen');
       const result=oldOpen.apply(this,arguments);
       setCurrentValue(input && input.value ? input.value : '0',false);
@@ -100,7 +105,7 @@
       cancelPendingScroll();
       if(!ok && activeInput) activeInput.value=oldValue;
       const result=oldClose.apply(this,arguments);
-      if(activeInput) activeInput.classList.remove('kggEditing');
+
       activeInput=null;
       oldValue='';
       document.body.classList.remove('kggPadOpen');

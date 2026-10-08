@@ -15,14 +15,14 @@ function classList(initial=[]){
   const values=new Set(initial);
   return {add(...xs){xs.forEach(x=>values.add(x))},remove(...xs){xs.forEach(x=>values.delete(x))},contains(x){return values.has(x)},toggle(x,on){if(on===undefined)on=!values.has(x);on?values.add(x):values.delete(x);return on}};
 }
-function input(name){return {name,value:'',placeholder:'kg',classList:classList(),matches(sel){return sel==='input.num'},closest(){return null},getBoundingClientRect(){return {left:20,top:100,right:140,bottom:150,width:120,height:50}}}}
+function input(name){const el={name,value:'',placeholder:'kg',classList:classList(),matches(sel){return sel==='input.num'},closest(sel){return sel==='input.num'?el:null},getBoundingClientRect(){return {left:20,top:100,right:140,bottom:150,width:120,height:50}}};return el}
 
 const timers=[];
 const listeners={};
 const padBox={getBoundingClientRect(){return {left:0,top:600,right:400,bottom:800,width:400,height:200}}};
 const pad={classList:classList(['hide']),querySelector(sel){return sel==='.padBox'?padBox:null}};
 const padVal={textContent:'0'};
-const main={style:{}};
+const main={style:{},scrollTop:0,scrollHeight:1200,clientHeight:800,getBoundingClientRect(){return {left:0,top:0,right:400,bottom:800,width:400,height:800}}};
 const body={classList:classList(),appendChild(){}};
 const document={
   readyState:'complete',activeElement:null,body,head:{appendChild(){}},documentElement:{clientWidth:400},
