@@ -36,7 +36,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin "${{ github.base_ref }}" --depth=1
+          git fetch origin "${{ github.base_ref }}"
           changed_file="$RUNNER_TEMP/kgg-changed-files.txt"
           git diff --name-only "origin/${{ github.base_ref }}"...HEAD | tee "$changed_file"
           runtime_identity_path="$(python release-pipeline/build_therapist_source.py --print-source-role runtimeIdentity)"
