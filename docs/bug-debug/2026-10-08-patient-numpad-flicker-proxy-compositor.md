@@ -4,7 +4,7 @@ Datum: 2026-10-08
 Status: RESOLVED  
 Betroffener Bereich: KGG Patienten-App, Compact Set View / NumPad / Android Chrome
 
-## Fehlerbild
+## Problem
 
 Auf einem echten Oppo/Android-Chrome trat beim Wechsel zwischen kg und Wdh ein sehr kurzes, aber klar sichtbares Flackern des Hauptbildschirms auf. Das NumPad blieb optisch stehen, während der darunterliegende Dokumentinhalt für ungefähr einen Frame sprang bzw. neu gepaintet wurde.
 
@@ -18,7 +18,7 @@ Einige frühe Fixversuche reduzierten das Problem, beseitigten es aber nicht vol
 - CDP-/Paint-Diagnostik konnte die problematischen Root-Paints gezielt nachweisen.
 - Reine Desktop-GREEN-Tests waren nicht ausreichend; der physische Oppo-Test blieb das Abnahme-Gate.
 
-## Ursachen
+## Ursache
 
 Es waren mehrere Effekte beteiligt:
 
@@ -34,9 +34,9 @@ Es waren mehrere Effekte beteiligt:
 4. **Native Input-/Focus-/Scroll-Pfade waren für die Compact-UI ungeeignet**  
    Die sichtbare Compact-UI brauchte einen eigenen Touch-Target-Pfad, ohne native Fokus-/Scroll-Nebenwirkungen.
 
-## Endgültige Lösung
+## Lösung/Fix
 
-Die stabile Lösung war eine Kombination mehrerer Änderungen:
+Die dauerhafte Lösung kombiniert einen NumPad-Draft-State ohne DOM-Neuaufbau, Tap-Ziele über `.kggCompactTapProxy` statt readonly `input.num`, aktive Markierungen über compositor-sichere `.kggCompactSourceRing`/`.kggPairIndicator`, idempotente Media-Knoten und einen internen `main`-Scroller. Das Pad bleibt beim Feldwechsel offen, ohne Layout- oder Paint-Arbeit.
 
 ### 1. Draft-State statt DOM-Rebuild
 
@@ -75,7 +75,7 @@ Die Seite verwendet für den relevanten Patienten-App-Pfad einen klaren internen
 
 Beim Öffnen des letzten Satzes wird nur der interne Scroller kontrolliert bewegt; kg↔Wdh innerhalb desselben Satzes verursacht keinen neuen Scroll.
 
-## Verifikation
+## Tests
 
 Vor dem Merge wurden unter anderem geprüft:
 
