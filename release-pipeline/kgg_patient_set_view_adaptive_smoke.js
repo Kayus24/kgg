@@ -143,8 +143,8 @@ async function normalCompactContract(page){
  assert(!(await page.locator("#pad").evaluate(el=>el.classList.contains("kggPadLargeUi"))),"normal UI incorrectly classified large");
  const pair=page.locator("#kggPadPair .kggPairField").first();const h=await pair.evaluate(el=>el.getBoundingClientRect().height);
  assert(h<80,"normal Compact pair unexpectedly large: "+h);
- await page.waitForTimeout(260);const focusColors=await Promise.all([source.evaluate(el=>getComputedStyle(el).borderTopColor),pair.evaluate(el=>getComputedStyle(el).borderTopColor)]);
- assert(focusColors[0]===focusColors[1],"active source field border does not match active pair border: "+JSON.stringify({source:focusColors[0],pair:focusColors[1]}));
+  await page.waitForTimeout(260);const sourceRing=first.locator(".kggCompactSourceRing.kggActive").first(),pairIndicator=page.locator("#kggPadPair .kggPairIndicator");const focusColors=await Promise.all([sourceRing.evaluate(el=>getComputedStyle(el).borderTopColor),pairIndicator.evaluate(el=>getComputedStyle(el).borderTopColor)]);
+  assert(focusColors[0]===focusColors[1],"active source ring does not match active pair indicator: "+JSON.stringify({sourceRing:focusColors[0],pairIndicator:focusColors[1]}));
  await page.locator("#pad .padCancel").click();
 }
 async function largeCompactContract(page){
