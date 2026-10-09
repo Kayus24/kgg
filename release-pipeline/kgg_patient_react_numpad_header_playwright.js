@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 "use strict";
 
-const fs=require("fs"),http=require("http"),path=require("path"),{chromium}=require("playwright");
+const fs=require("fs"),http=require("http"),path=require("path"),{chromium,webkit}=require("playwright");
 const ROOT=path.resolve(process.argv[2]||path.resolve(__dirname,".."));
 
 function assert(value,message){if(!value)throw new Error(message)}
@@ -73,7 +73,9 @@ async function main(){
   });
   await new Promise(resolve=>server.listen(0,"127.0.0.1",resolve));
   const port=server.address().port;
-  const browser=await chromium.launch({headless:true});
+  const engine=process.env.KGG_REACT_HEADER_BROWSER||"chromium";
+  assert(engine==="chromium"||engine==="webkit","invalid test browser "+engine);
+  const browser=await (engine==="webkit"?webkit:chromium).launch({headless:true});
 
   try{
     const ctx=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
@@ -198,7 +200,7 @@ async function main(){
     assert(legacyVisible,"legacy pair was not restored after kggReactPad=0");
 
     assert(errors.length===0,"page errors: "+JSON.stringify(errors));
-    console.log("Patient React NumPad header Playwright: PASS");
+    console.log("Patient React NumPad header Playwright ("+engine+"): PASS");
     await ctx.close();
   }finally{
     await browser.close();
