@@ -163,6 +163,14 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Caution: Keep patch scoped to the requested area.
 - Tests: Run the risk-matched KGG battery.
 
+### Patienten-App: kg/Wdh-Flackern beim Feldwechsel Ursache und Loesung
+
+- Source: `docs/bug-debug/2026-10-08-patient-numpad-flicker-proxy-compositor.md`
+- Areas: debug, modal, parser-textblocks, phone-layout, qr-patient, sync, tablet-layout
+- Lesson: Auf einem echten Oppo/Android-Chrome trat beim Wechsel zwischen kg und Wdh ein sehr kurzes, aber klar sichtbares Flackern des Hauptbildschirms auf. Das NumPad blieb optisch stehen, waehrend der darunterliegende Dokumentinhalt fuer ungefaehr einen Frame sprang bzw. neu gepaintet wurde. Einige fruehe Fixversuche reduzierten das Problem, beseitigten es aber nic
+- Caution: Keep patch scoped to the requested area.
+- Tests: Vor dem Merge wurden unter anderem geprueft: - kg Wdh im selben Satz: 0 Layout / 0 Paint - Wechsel in einen anderen Satz bei offenem NumPad - kein closePad beim direkten Touch-Wechsel - 25 kg 12 Wdh OK - letzter Satz mit ausreichendem Abstand zum NumPad - stabile Media-Nodes - physischer Oppo-Test Der Nutzer bestaetigte auf dem echten Oppo, dass das Flackern
+
 ### Debug JSON Seite
 
 - Source: `docs/bug-debug/README.md`
