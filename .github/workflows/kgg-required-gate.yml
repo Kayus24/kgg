@@ -31,7 +31,8 @@ jobs:
       patient_set_view: ${{ steps.scope.outputs.patient_set_view }}
       patient_media: ${{ steps.scope.outputs.patient_media }}
       admin_camera_qr: ${{ steps.scope.outputs.admin_camera_qr }}
-      browser_required: ${{ (steps.scope.outputs.patient_gpt == 'true' || steps.scope.outputs.patient_runtime == 'true' || steps.scope.outputs.patient_day_flow == 'true' || steps.scope.outputs.patient_last_value_shimmer == 'true' || steps.scope.outputs.patient_set_view == 'true' || steps.scope.outputs.patient_media == 'true') && 'true' || 'false' }}
+      patient_react: ${{ steps.scope.outputs.patient_react }}
+      browser_required: ${{ (steps.scope.outputs.patient_gpt == 'true' || steps.scope.outputs.patient_runtime == 'true' || steps.scope.outputs.patient_day_flow == 'true' || steps.scope.outputs.patient_last_value_shimmer == 'true' || steps.scope.outputs.patient_set_view == 'true' || steps.scope.outputs.patient_media == 'true' || steps.scope.outputs.patient_react == 'true') && 'true' || 'false' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -59,6 +60,7 @@ jobs:
           patient_last_value_shimmer=false
           patient_set_view=false
           patient_media=false
+          patient_react=false
           admin_camera_qr=false
           while IFS= read -r path; do
             [[ -z "$path" ]] && continue
@@ -76,7 +78,10 @@ jobs:
           if grep -Eq '^index\.html$|^patient-(day-history|multiplan-db|plan-delete|start-values-day1|card-settings)\.js$|^release-pipeline/kgg_patient_continuous_days_(smoke|playwright)\.js$|^release-pipeline/kgg_test_battery\.py$|^\.github/workflows/kgg-required-gate\.yml$' "$changed_file"; then patient_day_flow=true; fi
           if grep -Eq '^index\.html$|^service-worker\.js$|^patient-last-value-hints\.js$|^release-pipeline/kgg_patient_last_value_shimmer_playwright\.js$|^\.github/workflows/kgg-required-gate\.yml$' "$changed_file"; then patient_last_value_shimmer=true; fi
           if grep -Eq '^index\.html$|^service-worker\.js$|^patient-(set-compact-view|numpad-visibility-fix|card-settings|card-progress|start-values-day1|start-scan|day-history)\.js$|^collapse-cards\.js$|^release-pipeline/kgg_patient_(set_view(_adaptive)?_smoke|unit_semantics_playwright|card_state_stability_playwright|transient_flicker_blackbox)\.js$|^\.github/workflows/kgg-required-gate\.yml$' "$changed_file"; then patient_set_view=true; fi
+          if grep -Eq '^patient-ui/src/|^patient-react-dist/|^release-pipeline/kgg_patient_react_[^/]*\.js$' "$changed_file"; then patient_set_view=true; fi
           if grep -Eq '^patient-(media-retry-cache_v2|exercise-media-sources)\.js$|^release-pipeline/kgg_patient_media_(sources|stability)_playwright\.js$|^\.github/workflows/kgg-required-gate\.yml$' "$changed_file"; then patient_media=true; fi
+          if grep -Eq '^patient-ui/|^patient-react-dist/|^release-pipeline/kgg_patient_react_[^/]*\.js$' "$changed_file"; then patient_react=true; fi
+          if [[ -f patient-ui/package.json || -d patient-react-dist ]] && grep -Eq '^index\.html$|^service-worker\.js$|^numpad-ui-fix\.js$|^patient-numpad-visibility-fix\.js$' "$changed_file"; then patient_react=true; fi
           if grep -Eq '^android-wrapper/app/src/main/(java/de/kgg/app/MainActivity\.java|assets/android/kgg_android_sync_bootstrap\.js)$|^kgg-update/src/patches/.*(camera|qr|scan).*$|^release-pipeline/kgg_admin_camera_qr_smoke\.js$' "$changed_file" || grep -Fxq 'kgg-update/src/parts.json' "$changed_file" || grep -Fxq "$runtime_identity_path" "$changed_file"; then admin_camera_qr=true; fi
           echo "pipeline_only=$pipeline_only" >> "$GITHUB_OUTPUT"
           echo "ui_or_html=$ui_or_html" >> "$GITHUB_OUTPUT"
@@ -90,6 +95,7 @@ jobs:
           echo "patient_set_view=$patient_set_view" >> "$GITHUB_OUTPUT"
           echo "patient_media=$patient_media" >> "$GITHUB_OUTPUT"
           echo "admin_camera_qr=$admin_camera_qr" >> "$GITHUB_OUTPUT"
+          echo "patient_react=$patient_react" >> "$GITHUB_OUTPUT"
       - name: Validate patient feature-test mapping (metadata-only)
         shell: bash
         run: |
@@ -211,12 +217,39 @@ jobs:
           cache: 'npm'
           cache-dependency-path: release-pipeline/package-lock.json
       - name: Install patient browser dependencies
-        if: needs.scope.outputs.patient_gpt == 'true' || needs.scope.outputs.patient_runtime == 'true' || needs.scope.outputs.patient_day_flow == 'true' || needs.scope.outputs.patient_last_value_shimmer == 'true' || needs.scope.outputs.patient_set_view == 'true' || needs.scope.outputs.patient_media == 'true'
+        if: needs.scope.outputs.browser_required == 'true'
         shell: bash
         run: |
           cd release-pipeline
           npm ci
           npx playwright install --with-deps chromium
+      - name: Build and verify patient React UI (when affected)
+        if: needs.scope.outputs.patient_react == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f patient-ui/package.json
+          test -f patient-ui/package-lock.json
+          npm ci --prefix patient-ui
+          npm run --prefix patient-ui check
+          if [[ -d patient-react-dist ]]; then
+            test -f patient-ui/scripts/export-integration.mjs
+            test -f release-pipeline/kgg_patient_react_numpad_header_playwright.js
+            grep -Fq 'kgg_patient_react_numpad_header_playwright.js' release-pipeline/kgg_test_battery.py
+            node patient-ui/scripts/export-integration.mjs
+            git diff --exit-code -- patient-react-dist/
+            if [[ -n "$(git ls-files --others --exclude-standard patient-react-dist/)" ]]; then
+              echo 'Untracked generated patient React assets; update the committed bundle' >&2
+              exit 1
+            fi
+          fi
+      - name: Run patient React controller smoke (when present)
+        if: needs.scope.outputs.patient_react == 'true'
+        shell: bash
+        run: |
+          if [[ -f patient-ui/src/adapters/patientInputController.ts ]]; then
+            npm run --prefix patient-ui test:controller
+          fi
       - name: Run permanent patient continuous day-flow regression
         if: needs.scope.outputs.patient_day_flow == 'true'
         shell: bash
