@@ -914,6 +914,50 @@
     {
       "areas": [
         "debug",
+        "modal",
+        "parser-textblocks",
+        "phone-layout",
+        "qr-patient",
+        "sync",
+        "tablet-layout"
+      ],
+      "cause": "Es waren mehrere Effekte beteiligt: 1. **DOM-Neuaufbau im openPad-Pfad** Beim Feldwechsel wurde unnoetig UI neu aufgebaut bzw. paint-relevant veraendert. 2. **Asynchroner Media-DOM-Ersatz** Der Media-Renderer ersetzte Bild-/Media-Knoten nachtraeglich und konnte zusaetzliche Paints ausloesen. 3. **Paint-relevante Active-State-Markierung** Die aktive kg/Wdh-Ma",
+      "do_not_touch": "",
+      "fix_pattern": "Die dauerhafte Loesung kombiniert einen NumPad-Draft-State ohne DOM-Neuaufbau, Tap-Ziele ueber `.kggCompactTapProxy` statt readonly `input.num`, aktive Markierungen ueber compositor-sichere `.kggCompactSourceRing`/`.kggPairIndicator`, idempotente Media-Knoten und einen internen `main`-Scroller. Das Pad bleibt beim Feldwechsel offen, ohne Layout- oder Paint-A",
+      "id": "docs-bug-debug-2026-10-08-patient-numpad-flicker-proxy-compositor-md-patienten-app-kg-wdh-flackern-beim-feldwechsel-ursache-und-loesung",
+      "keywords": [
+        "debug",
+        "modal",
+        "parser-textblocks",
+        "patienten-app-kg-wdh-flackern-beim-feldwechsel-ursache-und-loesung",
+        "phone-layout",
+        "qr-patient",
+        "sync",
+        "tablet-layout"
+      ],
+      "markers": [
+        "#kggPadPair",
+        "#kggPadPair button[data-kgg-key=...]",
+        ".kggCompactSourceRing",
+        ".kggCompactTapProxy",
+        ".kggPairIndicator",
+        ".num",
+        "e52474373170719e5a146b03c378846d5e0356ec",
+        "f54a7f8abb27ec8ae2087c8bdb2383944e2e3c22",
+        "input.num",
+        "main",
+        "release-pipeline/kgg_patient_compact_transfer_playwright.js",
+        "transform: translate3d(...)"
+      ],
+      "risks": "",
+      "source_path": "docs/bug-debug/2026-10-08-patient-numpad-flicker-proxy-compositor.md",
+      "symptom": "Auf einem echten Oppo/Android-Chrome trat beim Wechsel zwischen kg und Wdh ein sehr kurzes, aber klar sichtbares Flackern des Hauptbildschirms auf. Das NumPad blieb optisch stehen, waehrend der darunterliegende Dokumentinhalt fuer ungefaehr einen Frame sprang bzw. neu gepaintet wurde. Einige fruehe Fixversuche reduzierten das Problem, beseitigten es aber nic",
+      "tests": "Vor dem Merge wurden unter anderem geprueft: - kg Wdh im selben Satz: 0 Layout / 0 Paint - Wechsel in einen anderen Satz bei offenem NumPad - kein closePad beim direkten Touch-Wechsel - 25 kg 12 Wdh OK - letzter Satz mit ausreichendem Abstand zum NumPad - stabile Media-Nodes - physischer Oppo-Test Der Nutzer bestaetigte auf dem echten Oppo, dass das Flackern",
+      "title": "Patienten-App: kg/Wdh-Flackern beim Feldwechsel Ursache und Loesung"
+    },
+    {
+      "areas": [
+        "debug",
         "qr-patient"
       ],
       "cause": "",
@@ -1250,6 +1294,7 @@
     "docs/bug-debug/2026-08-21-real-device-acceptance-handoff.md",
     "docs/bug-debug/2026-08-22-ticket-backlog-and-live-tests.md",
     "docs/bug-debug/2026-09-09-admin-beta-release-promotion-gap.md",
+    "docs/bug-debug/2026-10-08-patient-numpad-flicker-proxy-compositor.md",
     "docs/bug-debug/README.md",
     "docs/bugfixes/mobile-share-modal-css-regression.md",
     "docs/release-handoffs/2026-06-18-v003a-plan-ui-stability.md",

@@ -1,0 +1,251 @@
+{
+  "schema": "kgg/patient-feature-test-map/v1",
+  "purpose": "Read-only inventory for React/input migration; not a release approval or second feature specification.",
+  "canonical_feature_source": {
+    "title": "KGG Patienten-App – Feature & Regression Manifest",
+    "url": "https://docs.google.com/document/d/17AA3z1oGFIxdywK52yEkUlvrDPIMoH9INlP2X_Xd-oE/edit"
+  },
+  "coordination": "https://github.com/Kayus24/kgg/pull/294",
+  "policy": {
+    "no_auto_expectation_rewrite": true,
+    "tests_must_run_on_exact_candidate": true,
+    "mapping_does_not_imply_pass": true,
+    "stale_unknown_not_pass": true,
+    "unmapped_or_partial_requires_review": true,
+    "source_of_truth_is_drive": true,
+    "sha_is_provenance_not_contract_version": true
+  },
+  "audited_main_sha": "0587ee0933a94ce047521c2d0130d11890d7ef64",
+  "known_unmapped_behavior": [
+    {
+      "behavior": "Optionale Schmerzabfrage pro Satz im Übungs-Untermenü",
+      "status": "NEEDS_NORMATIVE_FEATURE_ID_AND_REAL_UI_REGRESSION",
+      "note": "Nicht mit PAT-PAIN-001 Übungsschmerz verwechseln; PS-Prüfung allein reicht nicht."
+    }
+  ],
+  "features": [
+    {
+      "id": "PAT-STATE-001",
+      "behavior": "Bestehende fachliche Trainings-/Persistenzwahrheit behalten",
+      "source_paths": [
+        "index.html",
+        "patient-numpad-visibility-fix.js",
+        "patient-set-compact-view.js"
+      ],
+      "test_paths": [
+        "release-pipeline/kgg_patient_numpad_commit_smoke.js",
+        "release-pipeline/kgg_patient_compact_transfer_playwright.js"
+      ],
+      "coverage": "PARTIAL",
+      "limitation": "Nur Commit-/Transferpfade, nicht globale Persistence/Reload-Invariante.",
+      "planned_source_paths": [
+        "patient-ui/src/adapters/patientInputController.ts"
+      ]
+    },
+    {
+      "id": "PAT-STATE-002",
+      "behavior": "Tag/Satz/Seite und LR korrekt isolieren",
+      "source_paths": [
+        "index.html",
+        "patient-set-compact-view.js"
+      ],
+      "test_paths": [
+        "release-pipeline/kgg_patient_compact_transfer_playwright.js"
+      ],
+      "coverage": "PARTIAL",
+      "limitation": "LR-Transfer getestet, keine komplette Tag-/Reorder-Matrix.",
+      "planned_source_paths": [
+        "patient-ui/src/adapters/patientInputController.ts"
+      ]
+    },
+    {
+      "id": "PAT-NUM-001",
+      "behavior": "Nur eine bestehende NumPad-/Commit-Engine",
+      "source_paths": [
+        "index.html",
+        "patient-numpad-visibility-fix.js"
+      ],
+      "test_paths": [
+        "release-pipeline/kgg_patient_numpad_commit_smoke.js"
+      ],
+      "coverage": "PARTIAL",
+      "limitation": "VM-Smoke, keine vollständige Browser-/Storage-Garantie.",
+      "planned_source_paths": [
+        "patient-ui/src/adapters/patientInputController.ts"
+      ]
+    },
+    {
+      "id": "PAT-NUM-002",
+      "behavior": "kg↔Wdh-Feldwechsel ohne NumPad-Schließen/-Blinken",
+      "source_paths": [
+        "patient-numpad-visibility-fix.js",
+        "index.html"
+      ],
+      "test_paths": [
+        "release-pipeline/kgg_patient_numpad_commit_smoke.js",
+        "release-pipeline/kgg_patient_transient_flicker_blackbox.js"
+      ],
+      "coverage": "PARTIAL",
+      "limitation": "In-place-Logik und simulierter Fokus-/Scrollfehler; physischer Oppo-Paint nicht belegt.",
+      "planned_source_paths": [
+        "patient-ui/src/adapters/patientInputController.ts"
+      ]
+    },
+    {
+      "id": "PAT-NUM-003",
+      "behavior": "OK speichert; Abbrechen speichert nicht",
+      "source_paths": [
+        "index.html",
+        "patient-numpad-visibility-fix.js"
+      ],
+      "test_paths": [
+        "release-pipeline/kgg_patient_numpad_commit_smoke.js"
+      ],
+      "coverage": "PARTIAL",
+      "limitation": "Cancel-/Save-Pfade, keine vollständige echte OK-Taste-E2E-Matrix.",
+      "planned_source_paths": [
+        "patient-ui/src/adapters/patientInputController.ts"
+      ]
+    },
+    {
+      "id": "PAT-NUM-004",
+      "behavior": "Dirty Manual Buffer beim Sibling-/Vorwerttransfer bewahren",
+      "source_paths": [
+        "patient-numpad-visibility-fix.js",
+        "patient-set-compact-view.js"
+      ],
+      "test_paths": [
+        "release-pipeline/kgg_patient_numpad_commit_smoke.js",
+        "release-pipeline/kgg_patient_compact_transfer_playwright.js"
+      ],
+      "coverage": "DIRECT",
+      "limitation": "Browser- und VM-Assertions für Dirty-Commit und Transfer.",
+      "planned_source_paths": [
+        "patient-ui/src/adapters/patientInputController.ts"
+      ]
+    },
+    {
+      "id": "PAT-NUM-005",
+      "behavior": "Leeres unberührtes Feld ≠ Phantom-0; explizite Null gültig",
+      "source_paths": [
+        "index.html",
+        "patient-numpad-visibility-fix.js"
+      ],
+      "test_paths": [
+        "release-pipeline/kgg_patient_numpad_commit_smoke.js"
+      ],
+      "coverage": "DIRECT",
+      "limitation": "Smoke prüft unberührtes Leerfeld und explizite Null getrennt.",
+      "planned_source_paths": [
+        "patient-ui/src/adapters/patientInputController.ts"
+      ]
+    },
+    {
+      "id": "PAT-PREV-001",
+      "behavior": "Vorwert-Shimmer ohne versehentliche Wertänderung",
+      "source_paths": [
+        "patient-last-value-hints.js",
+        "index.html"
+      ],
+      "test_paths": [
+        "release-pipeline/kgg_patient_last_value_shimmer_playwright.js"
+      ],
+      "coverage": "PARTIAL",
+      "limitation": "Button und Apply abgesichert; nicht alle History-/LR-Konstellationen."
+    },
+    {
+      "id": "PAT-PREV-002",
+      "behavior": "Einzelvorwert übernimmt ausschließlich gewähltes Feld",
+      "source_paths": [
+        "patient-set-compact-view.js",
+        "patient-last-value-hints.js"
+      ],
+      "test_paths": [
+        "release-pipeline/kgg_patient_compact_transfer_playwright.js"
+      ],
+      "coverage": "DIRECT",
+      "limitation": "Einzelfeldübernahme mit Browser-Assertions."
+    },
+    {
+      "id": "PAT-PREV-003",
+      "behavior": "Mittlerer Übernehmen-Button setzt beide Vorwerte",
+      "source_paths": [
+        "patient-set-compact-view.js",
+        "patient-last-value-hints.js"
+      ],
+      "test_paths": [
+        "release-pipeline/kgg_patient_compact_transfer_playwright.js"
+      ],
+      "coverage": "DIRECT",
+      "limitation": "Pair, LR und Single-Field-Assertions."
+    },
+    {
+      "id": "PAT-PAIN-001",
+      "behavior": "Schmerzskala 0–10 mit bestehendem Speicherverhalten",
+      "source_paths": [
+        "patient-pain-vertical-scale.js",
+        "index.html"
+      ],
+      "test_paths": [
+        "release-pipeline/kgg_patient_pain_vertical_smoke.js",
+        "release-pipeline/kgg_patient_pain_vertical_playwright.js"
+      ],
+      "coverage": "PARTIAL",
+      "limitation": "Exercise-Mode getestet; optionale Satzschmerz-Einstellung gesondert sichern."
+    },
+    {
+      "id": "PAT-PAIN-002",
+      "behavior": "Compact Schmerz-Pill: unset, 0, 1–10",
+      "source_paths": [
+        "patient-pain-vertical-scale.js",
+        "patient-set-compact-view.js"
+      ],
+      "test_paths": [
+        "release-pipeline/kgg_patient_pain_vertical_smoke.js",
+        "release-pipeline/kgg_patient_pain_vertical_playwright.js"
+      ],
+      "coverage": "DIRECT",
+      "limitation": "Null-Anzeige und UI-Modalkontrakt."
+    },
+    {
+      "id": "PAT-PAIN-003",
+      "behavior": "Schmerzmodal ohne dauerhafte Karten-/Scroll-/Fokusänderung",
+      "source_paths": [
+        "patient-pain-vertical-scale.js",
+        "patient-set-compact-view.js"
+      ],
+      "test_paths": [
+        "release-pipeline/kgg_patient_pain_vertical_playwright.js"
+      ],
+      "coverage": "DIRECT",
+      "limitation": "Geometrie-/Scroll-/Fokus-Assertions."
+    },
+    {
+      "id": "PAT-UI-002",
+      "behavior": "Compact Set View adaptiv nach Breite/Modus",
+      "source_paths": [
+        "patient-set-compact-view.js"
+      ],
+      "test_paths": [
+        "release-pipeline/kgg_patient_set_view_adaptive_smoke.js"
+      ],
+      "coverage": "DIRECT",
+      "limitation": "Viewport-Tests; keine physische Android-/Tablet-Abnahme."
+    },
+    {
+      "id": "PAT-UI-006",
+      "behavior": "LR-Satzkapseln und Seitenwerte getrennt",
+      "source_paths": [
+        "patient-set-compact-view.js"
+      ],
+      "test_paths": [
+        "release-pipeline/kgg_patient_compact_transfer_playwright.js",
+        "release-pipeline/kgg_patient_set_view_adaptive_smoke.js"
+      ],
+      "coverage": "PARTIAL",
+      "limitation": "LR Layout/Transfer, nicht alle History-/Persistenzpfade."
+    }
+  ],
+  "planned_source_status": "DRAFT_REACT_ADAPTER_ONLY_NOT_PRODUCT_RELEASE",
+  "planned_source_reference": "https://github.com/Kayus24/kgg/pull/293"
+}

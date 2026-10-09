@@ -15,9 +15,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  required-gate:
-    name: required-gate
+  scope:
+    name: classify-scope
     runs-on: ubuntu-latest
+    outputs:
+      pipeline_only: ${{ steps.scope.outputs.pipeline_only }}
+      ui_or_html: ${{ steps.scope.outputs.ui_or_html }}
+      patient_scan: ${{ steps.scope.outputs.patient_scan }}
+      pwa_contract: ${{ steps.scope.outputs.pwa_contract }}
+      patient_summary: ${{ steps.scope.outputs.patient_summary }}
+      patient_gpt: ${{ steps.scope.outputs.patient_gpt }}
+      patient_runtime: ${{ steps.scope.outputs.patient_runtime }}
+      patient_day_flow: ${{ steps.scope.outputs.patient_day_flow }}
+      patient_last_value_shimmer: ${{ steps.scope.outputs.patient_last_value_shimmer }}
+      patient_set_view: ${{ steps.scope.outputs.patient_set_view }}
+      patient_media: ${{ steps.scope.outputs.patient_media }}
+      admin_camera_qr: ${{ steps.scope.outputs.admin_camera_qr }}
+      patient_react: ${{ steps.scope.outputs.patient_react }}
+      browser_required: ${{ (steps.scope.outputs.patient_gpt == 'true' || steps.scope.outputs.patient_runtime == 'true' || steps.scope.outputs.patient_day_flow == 'true' || steps.scope.outputs.patient_last_value_shimmer == 'true' || steps.scope.outputs.patient_set_view == 'true' || steps.scope.outputs.patient_media == 'true' || steps.scope.outputs.patient_react == 'true') && 'true' || 'false' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -25,18 +40,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Install Poppler for PDF readability smoke
-        shell: bash
-        run: sudo apt-get update && sudo apt-get install -y poppler-utils
       - name: Classify pull request scope
         id: scope
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin "${{ github.base_ref }}" --depth=1
+          git fetch origin "${{ github.base_ref }}"
           changed_file="$RUNNER_TEMP/kgg-changed-files.txt"
           git diff --name-only "origin/${{ github.base_ref }}"...HEAD | tee "$changed_file"
           runtime_identity_path="$(python release-pipeline/build_therapist_source.py --print-source-role runtimeIdentity)"
@@ -51,6 +60,7 @@ jobs:
           patient_last_value_shimmer=false
           patient_set_view=false
           patient_media=false
+          patient_react=false
           admin_camera_qr=false
           while IFS= read -r path; do
             [[ -z "$path" ]] && continue
@@ -68,7 +78,10 @@ jobs:
           if grep -Eq '^index\.html$|^patient-(day-history|multiplan-db|plan-delete|start-values-day1|card-settings)\.js$|^release-pipeline/kgg_patient_continuous_days_(smoke|playwright)\.js$|^release-pipeline/kgg_test_battery\.py$|^\.github/workflows/kgg-required-gate\.yml$' "$changed_file"; then patient_day_flow=true; fi
           if grep -Eq '^index\.html$|^service-worker\.js$|^patient-last-value-hints\.js$|^release-pipeline/kgg_patient_last_value_shimmer_playwright\.js$|^\.github/workflows/kgg-required-gate\.yml$' "$changed_file"; then patient_last_value_shimmer=true; fi
           if grep -Eq '^index\.html$|^service-worker\.js$|^patient-(set-compact-view|numpad-visibility-fix|card-settings|card-progress|start-values-day1|start-scan|day-history)\.js$|^collapse-cards\.js$|^release-pipeline/kgg_patient_(set_view(_adaptive)?_smoke|unit_semantics_playwright|card_state_stability_playwright|transient_flicker_blackbox)\.js$|^\.github/workflows/kgg-required-gate\.yml$' "$changed_file"; then patient_set_view=true; fi
+          if grep -Eq '^patient-ui/src/|^patient-react-dist/|^release-pipeline/kgg_patient_react_[^/]*\.js$' "$changed_file"; then patient_set_view=true; fi
           if grep -Eq '^patient-(media-retry-cache_v2|exercise-media-sources)\.js$|^release-pipeline/kgg_patient_media_(sources|stability)_playwright\.js$|^\.github/workflows/kgg-required-gate\.yml$' "$changed_file"; then patient_media=true; fi
+          if grep -Eq '^patient-ui/|^patient-react-dist/|^release-pipeline/kgg_patient_react_[^/]*\.js$' "$changed_file"; then patient_react=true; fi
+          if [[ -f patient-ui/package.json || -d patient-react-dist ]] && grep -Eq '^index\.html$|^service-worker\.js$|^numpad-ui-fix\.js$|^patient-numpad-visibility-fix\.js$' "$changed_file"; then patient_react=true; fi
           if grep -Eq '^android-wrapper/app/src/main/(java/de/kgg/app/MainActivity\.java|assets/android/kgg_android_sync_bootstrap\.js)$|^kgg-update/src/patches/.*(camera|qr|scan).*$|^release-pipeline/kgg_admin_camera_qr_smoke\.js$' "$changed_file" || grep -Fxq 'kgg-update/src/parts.json' "$changed_file" || grep -Fxq "$runtime_identity_path" "$changed_file"; then admin_camera_qr=true; fi
           echo "pipeline_only=$pipeline_only" >> "$GITHUB_OUTPUT"
           echo "ui_or_html=$ui_or_html" >> "$GITHUB_OUTPUT"
@@ -82,21 +95,48 @@ jobs:
           echo "patient_set_view=$patient_set_view" >> "$GITHUB_OUTPUT"
           echo "patient_media=$patient_media" >> "$GITHUB_OUTPUT"
           echo "admin_camera_qr=$admin_camera_qr" >> "$GITHUB_OUTPUT"
+          echo "patient_react=$patient_react" >> "$GITHUB_OUTPUT"
+      - name: Validate patient feature-test mapping (metadata-only)
+        shell: bash
+        run: |
+          python release-pipeline/kgg_patient_feature_test_map.py --self-test
+          python release-pipeline/kgg_patient_feature_test_map.py --check
+          python release-pipeline/kgg_patient_feature_test_map.py --changed-file "$RUNNER_TEMP/kgg-changed-files.txt"
+  core-gate:
+    name: core-gate
+    needs: scope
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: release-pipeline/package-lock.json
+      - name: Install Poppler for PDF readability smoke
+        shell: bash
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
       - name: Run critical KGG test battery
         shell: bash
         env:
-          KGG_ALLOW_RELEASE_DRIFT: ${{ (steps.scope.outputs.pipeline_only == 'true' || contains(github.event.pull_request.labels.*.name, 'kgg-no-release')) && '1' || '' }}
+          KGG_ALLOW_RELEASE_DRIFT: ${{ (needs.scope.outputs.pipeline_only == 'true' || contains(github.event.pull_request.labels.*.name, 'kgg-no-release')) && '1' || '' }}
         run: python release-pipeline/kgg_test_battery.py --level critical
       - name: Run patient PWA contract smoke
-        if: steps.scope.outputs.pwa_contract == 'true'
+        if: needs.scope.outputs.pwa_contract == 'true'
         shell: bash
         run: python release-pipeline/kgg_pwa_contract_smoke.py
       - name: Run patient update recovery smoke
-        if: steps.scope.outputs.pwa_contract == 'true'
+        if: needs.scope.outputs.pwa_contract == 'true'
         shell: bash
         run: python release-pipeline/kgg_update_recovery_smoke.py
       - name: Run patient summary range smoke
-        if: steps.scope.outputs.patient_summary == 'true'
+        if: needs.scope.outputs.patient_summary == 'true'
         shell: bash
         run: node release-pipeline/kgg_patient_summary_smoke.js
       - name: Run patient card progress smoke
@@ -115,7 +155,7 @@ jobs:
         shell: bash
         run: node release-pipeline/kgg_patient_plan_replace_slot_smoke.js
       - name: Run patient vertical pain logic smoke
-        if: steps.scope.outputs.patient_runtime == 'true'
+        if: needs.scope.outputs.patient_runtime == 'true'
         shell: bash
         run: node release-pipeline/kgg_patient_pain_vertical_smoke.js
       - name: Check Patient Custom GPT resources
@@ -124,52 +164,6 @@ jobs:
           python release-pipeline/kgg_patient_gpt_resources.py --check
           python release-pipeline/kgg_patient_gpt_write_gate.py --self-test --self-test-preview-root "$RUNNER_TEMP/kgg-patient-preview-smoke"
           python release-pipeline/kgg_patient_gpt_eval.py
-      - name: Install patient browser dependencies
-        if: steps.scope.outputs.patient_gpt == 'true' || steps.scope.outputs.patient_runtime == 'true' || steps.scope.outputs.patient_day_flow == 'true' || steps.scope.outputs.patient_last_value_shimmer == 'true' || steps.scope.outputs.patient_set_view == 'true' || steps.scope.outputs.patient_media == 'true'
-        shell: bash
-        run: |
-          cd release-pipeline
-          npm ci
-          npx playwright install --with-deps chromium
-      - name: Run permanent patient continuous day-flow regression
-        if: steps.scope.outputs.patient_day_flow == 'true'
-        shell: bash
-        env:
-          KGG_SKIP_PLAYWRIGHT_INSTALL: '1'
-        run: python release-pipeline/kgg_test_battery.py --suite patient-day-flow --level regression
-      - name: Run patient runtime and progress Playwright smoke
-        if: steps.scope.outputs.patient_runtime == 'true'
-        shell: bash
-        run: node release-pipeline/kgg_patient_runtime_progress_playwright.js
-      - name: Run patient vertical pain Playwright smoke
-        if: steps.scope.outputs.patient_runtime == 'true'
-        shell: bash
-        run: node release-pipeline/kgg_patient_pain_vertical_playwright.js
-      - name: Run patient last-value shimmer Playwright smoke
-        if: steps.scope.outputs.patient_last_value_shimmer == 'true'
-        shell: bash
-        run: node release-pipeline/kgg_patient_last_value_shimmer_playwright.js
-      - name: Run patient adaptive set-view browser regressions
-        if: steps.scope.outputs.patient_set_view == 'true'
-        shell: bash
-        run: |
-          node release-pipeline/kgg_patient_set_view_smoke.js
-          node release-pipeline/kgg_patient_set_view_adaptive_smoke.js
-          node release-pipeline/kgg_patient_unit_semantics_playwright.js
-          node release-pipeline/kgg_patient_card_state_stability_playwright.js
-          node release-pipeline/kgg_patient_transient_flicker_blackbox.js
-      - name: Run patient media stability regression
-        if: steps.scope.outputs.patient_media == 'true'
-        shell: bash
-        run: |
-          node release-pipeline/kgg_patient_media_sources_playwright.js
-          node release-pipeline/kgg_patient_media_stability_playwright.js
-      - name: Run Patient GPT browser smoke
-        if: steps.scope.outputs.patient_gpt == 'true'
-        shell: bash
-        run: |
-          node release-pipeline/kgg_patient_gpt_browser_smoke.js
-          node release-pipeline/kgg_patient_preview_first_load_smoke.js "$RUNNER_TEMP/kgg-patient-preview-smoke/previews/patient-gate-self-test"
       - name: Check Custom GPT live context freshness
         shell: bash
         run: python release-pipeline/kgg_gpt_context.py --check
@@ -191,16 +185,136 @@ jobs:
           python release-pipeline/kgg_gpt_repair_lab.py --self-test
           python release-pipeline/kgg_gpt_repair_stabilize.py --self-test
       - name: Run UI stability regression for UI or HTML changes
-        if: steps.scope.outputs.ui_or_html == 'true'
+        if: needs.scope.outputs.ui_or_html == 'true'
         shell: bash
         run: python release-pipeline/kgg_test_battery.py --suite ui-stability --level regression
       - name: Run patient QR camera regression
-        if: steps.scope.outputs.patient_scan == 'true'
+        if: needs.scope.outputs.patient_scan == 'true'
         shell: bash
         run: python release-pipeline/kgg_test_battery.py --suite patient-scan --level regression
       - name: Run Admin camera and cross-app QR regression
-        if: steps.scope.outputs.admin_camera_qr == 'true'
+        if: needs.scope.outputs.admin_camera_qr == 'true'
         shell: bash
         run: |
           python release-pipeline/kgg_test_battery.py --suite camera-qr --level regression
           python release-pipeline/kgg_test_battery.py --suite patient-scan --level regression
+  patient-browser:
+    name: patient-browser
+    needs: scope
+    if: needs.scope.outputs.browser_required == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: release-pipeline/package-lock.json
+      - name: Install patient browser dependencies
+        if: needs.scope.outputs.browser_required == 'true'
+        shell: bash
+        run: |
+          cd release-pipeline
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Build and verify patient React UI (when affected)
+        if: needs.scope.outputs.patient_react == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f patient-ui/package.json
+          test -f patient-ui/package-lock.json
+          npm ci --prefix patient-ui
+          npm run --prefix patient-ui check
+          if [[ -d patient-react-dist ]]; then
+            test -f patient-ui/scripts/export-integration.mjs
+            test -f release-pipeline/kgg_patient_react_numpad_header_playwright.js
+            grep -Fq 'kgg_patient_react_numpad_header_playwright.js' release-pipeline/kgg_test_battery.py
+            node patient-ui/scripts/export-integration.mjs
+            git diff --exit-code -- patient-react-dist/
+            if [[ -n "$(git ls-files --others --exclude-standard patient-react-dist/)" ]]; then
+              echo 'Untracked generated patient React assets; update the committed bundle' >&2
+              exit 1
+            fi
+          fi
+      - name: Run patient React controller smoke (when present)
+        if: needs.scope.outputs.patient_react == 'true'
+        shell: bash
+        run: |
+          if [[ -f patient-ui/src/adapters/patientInputController.ts ]]; then
+            npm run --prefix patient-ui test:controller
+          fi
+      - name: Run permanent patient continuous day-flow regression
+        if: needs.scope.outputs.patient_day_flow == 'true'
+        shell: bash
+        env:
+          KGG_SKIP_PLAYWRIGHT_INSTALL: '1'
+        run: python release-pipeline/kgg_test_battery.py --suite patient-day-flow --level regression
+      - name: Run patient runtime and progress Playwright smoke
+        if: needs.scope.outputs.patient_runtime == 'true'
+        shell: bash
+        run: node release-pipeline/kgg_patient_runtime_progress_playwright.js
+      - name: Run patient vertical pain Playwright smoke
+        if: needs.scope.outputs.patient_runtime == 'true'
+        shell: bash
+        run: node release-pipeline/kgg_patient_pain_vertical_playwright.js
+      - name: Run patient last-value shimmer Playwright smoke
+        if: needs.scope.outputs.patient_last_value_shimmer == 'true'
+        shell: bash
+        run: node release-pipeline/kgg_patient_last_value_shimmer_playwright.js
+      - name: Run patient adaptive set-view browser regressions
+        if: needs.scope.outputs.patient_set_view == 'true'
+        shell: bash
+        run: |
+          node release-pipeline/kgg_patient_set_view_smoke.js
+          node release-pipeline/kgg_patient_set_view_adaptive_smoke.js
+          node release-pipeline/kgg_patient_unit_semantics_playwright.js
+          node release-pipeline/kgg_patient_card_state_stability_playwright.js
+          node release-pipeline/kgg_patient_transient_flicker_blackbox.js
+      - name: Run patient media stability regression
+        if: needs.scope.outputs.patient_media == 'true'
+        shell: bash
+        run: |
+          node release-pipeline/kgg_patient_media_sources_playwright.js
+          node release-pipeline/kgg_patient_media_stability_playwright.js
+      - name: Prepare isolated Patient GPT browser fixture
+        if: needs.scope.outputs.patient_gpt == 'true'
+        shell: bash
+        run: python release-pipeline/kgg_patient_gpt_write_gate.py --self-test --self-test-preview-root "$RUNNER_TEMP/kgg-patient-preview-smoke"
+      - name: Run Patient GPT browser smoke
+        if: needs.scope.outputs.patient_gpt == 'true'
+        shell: bash
+        run: |
+          node release-pipeline/kgg_patient_gpt_browser_smoke.js
+          node release-pipeline/kgg_patient_preview_first_load_smoke.js "$RUNNER_TEMP/kgg-patient-preview-smoke/previews/patient-gate-self-test"
+  required-gate:
+    # Keep the existing branch-protection check name; never equate SKIPPED with PASS.
+    name: required-gate
+    needs: [scope, core-gate, patient-browser]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require successful core and every applicable browser regression
+        shell: bash
+        env:
+          SCOPE_RESULT: ${{ needs.scope.result }}
+          CORE_RESULT: ${{ needs.core-gate.result }}
+          BROWSER_RESULT: ${{ needs.patient-browser.result }}
+          BROWSER_REQUIRED: ${{ needs.scope.outputs.browser_required }}
+        run: |
+          set -euo pipefail
+          [[ "$SCOPE_RESULT" == "success" ]] || { echo "Scope classification not successful: $SCOPE_RESULT"; exit 1; }
+          [[ "$CORE_RESULT" == "success" ]] || { echo "Critical/core gate not successful: $CORE_RESULT"; exit 1; }
+          if [[ "$BROWSER_REQUIRED" == "true" ]]; then
+            [[ "$BROWSER_RESULT" == "success" ]] || { echo "Required browser suite not successful: $BROWSER_RESULT"; exit 1; }
+          else
+            [[ "$BROWSER_RESULT" == "skipped" || "$BROWSER_RESULT" == "success" ]] || { echo "Unexpected browser result: $BROWSER_RESULT"; exit 1; }
+          fi
+          echo 'Required scope, core and applicable browser gates: PASS' >> "$GITHUB_STEP_SUMMARY"

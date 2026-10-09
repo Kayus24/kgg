@@ -38,6 +38,9 @@ jobs:
           python-version: '3.12'
 
       - name: Install Poppler for PDF readability smoke
+        # Critical battery on ordinary main PRs runs in KGG Required Gate.
+        # Preserve PDF tooling when building an inbox candidate or targeting a non-main base.
+        if: github.base_ref != 'main' || hashFiles('release-inbox/admin.html', 'release-inbox/release.json') != ''
         shell: bash
         run: sudo apt-get update && sudo apt-get install -y poppler-utils
 
@@ -74,7 +77,16 @@ jobs:
             echo "prepared=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Note delegated critical gate
+        if: github.base_ref == 'main' && steps.prepare.outputs.prepared != 'true'
+        shell: bash
+        run: |
+          echo 'No release-inbox payload: critical KGG battery is executed by the separate KGG Required Gate on this main-targeted PR.' >> "$GITHUB_STEP_SUMMARY"
+
       - name: Run critical KGG test battery
+        # Test generated inbox artifacts in this workflow; otherwise avoid repeating
+        # the mandatory critical battery already run by KGG Required Gate on main.
+        if: github.base_ref != 'main' || steps.prepare.outputs.prepared == 'true'
         shell: bash
         env:
           KGG_ALLOW_RELEASE_DRIFT: ${{ (steps.scope.outputs.pipeline_only == 'true' || contains(github.event.pull_request.labels.*.name, 'kgg-no-release')) && '1' || '' }}
