@@ -33,6 +33,24 @@ async function tapCompactValue(card,setIndex,key){
   await proxy.waitFor({state:"visible"});
   await proxy.click();
 }
+async function assertTransferCaret(page,key,description){
+  await page.waitForFunction((expected)=>{
+    const legacy=document.getElementById("kggPadTransfer");
+    const react=document.querySelector(".kgg-react-numpad-transfer");
+    if(!legacy||!react||legacy.dataset.pointerKey!==expected)return false;
+    const oldStyle=getComputedStyle(legacy,"::before");
+    const newStyle=getComputedStyle(react,"::before");
+    if(newStyle.content==="none"||newStyle.content==="normal")return false;
+    if(parseFloat(newStyle.borderBottomWidth)<8)return false;
+    if(getComputedStyle(react).overflowX==="hidden")return false;
+    const oldX=legacy.getBoundingClientRect().left+parseFloat(oldStyle.left);
+    const newX=react.getBoundingClientRect().left+parseFloat(newStyle.left);
+    return Number.isFinite(oldX)&&Number.isFinite(newX)&&Math.abs(oldX-newX)<=3;
+  },key,{timeout:1200,polling:"raf"}).catch(error=>{
+    throw new Error(description+": React transfer caret does not match the legacy pointer for "+key+" ("+error.message+")");
+  });
+}
+
 async function seed(page){
   await page.evaluate(()=>{
     const putDay=(ei,s,side,key,value,day=1)=>{v[k(ei,s,side,key,day)]=String(value)};
@@ -141,6 +159,7 @@ async function main(){
 
     let transferLabels=(await page.locator(".kgg-react-numpad-transfer__button").allTextContents()).map(x=>x.trim());
     assert(JSON.stringify(transferLabels)===JSON.stringify(["15 kg","Übernehmen","12 Wdh"]),"React transfer strip does not mirror legacy state: "+JSON.stringify(transferLabels));
+    await assertTransferCaret(page,"a","three segment kg active");
 
     const scrollBefore=await page.evaluate(()=>({windowY:window.scrollY,mainTop:document.querySelector("main")?.scrollTop||0}));
     await page.locator('.kgg-react-numpad-pair__button[data-kgg-key="b"]').click();
@@ -149,6 +168,7 @@ async function main(){
     const scrollAfter=await page.evaluate(()=>({windowY:window.scrollY,mainTop:document.querySelector("main")?.scrollTop||0}));
     assert(Math.abs(scrollAfter.windowY-scrollBefore.windowY)<=1&&Math.abs(scrollAfter.mainTop-scrollBefore.mainTop)<=1,"React same-row pair switch moved page scroll: "+JSON.stringify({scrollBefore,scrollAfter}));
     assert(!(await page.locator("#pad").evaluate(el=>el.classList.contains("hide"))),"React pair switch closed the legacy NumPad");
+    await assertTransferCaret(page,"b","three segment Wdh active");
 
     await page.locator('.kgg-react-numpad-transfer__button[data-kgg-transfer-key="b"]').click();
     await page.waitForTimeout(80);
@@ -156,6 +176,7 @@ async function main(){
     assert(!(await page.locator("#pad").evaluate(el=>el.classList.contains("hide"))),"React transfer closed before pair was complete");
     transferLabels=(await page.locator(".kgg-react-numpad-transfer__button").allTextContents()).map(x=>x.trim());
     assert(JSON.stringify(transferLabels)===JSON.stringify(["15 kg"]),"React transfer did not collapse to remaining kg: "+JSON.stringify(transferLabels));
+    await assertTransferCaret(page,"a","single remaining kg transfer");
 
     await page.locator('.kgg-react-numpad-transfer__button[data-kgg-transfer-key="a"]').click();
     await page.waitForTimeout(100);
