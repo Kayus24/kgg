@@ -77,6 +77,14 @@ rg --no-ignore --files therapist-app/releases
 - UI-/HTML-/Layoutänderungen zusätzlich: `cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression`.
 - GPT-Playbook-, Action- oder Memory-Integrationsänderungen zusätzlich: `python release-pipeline\kgg_gpt_payload_preflight.py --self-test`, `python release-pipeline\kgg_gpt_eval.py` und Knowledge-Pack-Freshness prüfen.
 
+## Parallele Chats und Arbeitskoordination
+
+- Vor Beginn oder Wiederaufnahme einer KGG-Arbeit `docs/ACTIVE_WORK.md` lesen und anschließend Branch-/PR-/CI-Status frisch aus GitHub prüfen.
+- Vor Änderungen an gemeinsam genutzten Dateien Überschneidungen mit anderen Workstreams prüfen; niemals uncommittete Arbeit anderer überschreiben.
+- Nach relevanten Meilensteinen einen kurzen, belegten Status im eigenen PR/Issue oder im Koordinationsindex hinterlassen (Branch, betroffene Dateien, letzter GREEN mit SHA, nächster Schritt).
+- Bei Hängern oder unklaren Tool-Ergebnissen Status UNKNOWN vermerken und vor Wiederholung tatsächlichen Zustand prüfen.
+- Der Index ist kein Lock und keine Live-Synchronisierung; Repo und aktuelle Tests bleiben maßgeblich. Fehlt die Datei auf dem gerade gelesenen Branch, ihren Status im Koordinations-PR prüfen, nicht als vorhanden voraussetzen.
+
 ## Kommunikation
 
 Mit Max auf Deutsch arbeiten: pragmatisch, direkt und mit wenigen Rückfragen. Wenn keine Vorgabe kollidiert und nichts blockiert, sinnvoll weiterarbeiten.
