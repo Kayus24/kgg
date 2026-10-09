@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Testing
 
-Generated retrieval pack. Source digest: `e091f7d29f3df6b1`.
+Generated retrieval pack. Source digest: `e01077464a27655c`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -135,8 +135,8 @@ def validate_static_compatibility(manifest:dict,version:str)->None:
   "./patient-media-retry-cache_v2.js?v=thumb-layout-7-stable-media-nodes",
   "./patient-ui-micro-polish.js?v=unit-labels-pain-fit-1",
   "./patient-pain-vertical-scale.js?v=exercise-pain-vertical-8-compact-text",
-  "./numpad-ui-fix.js?v=scroll-stable-4-single-owner",
-  "./patient-numpad-visibility-fix.js?v=stay-open-switch-7-no-native-focus-switch",
+  "./numpad-ui-fix.js?v=draft-event-order-5-d14-react",
+  "./patient-numpad-visibility-fix.js?v=proxy-controller-8-d14-react",
   "./patient-extra-info-display.js?v=extra-info-filter-1",
   "./patient-last-value-hints.js?v=last-value-button-shimmer-2-transfer-api",
   "./patient-set-summary-groups.js?v=set-summary-groups-4-ticket-015-progressions",
@@ -1850,6 +1850,13 @@ def patient_runtime_files(root: Path = ROOT) -> list[Path]:
         files.update(path for path in root.glob(pattern) if path.is_file())
     vendor_root = root / "vendor"
     files.update(path for path in vendor_root.glob("*.js") if path.is_file())
+    react_dist_root = root / "patient-react-dist"
+    files.update(
+        path
+        for pattern in ("*.js", "*.css")
+        for path in react_dist_root.glob(pattern)
+        if path.is_file()
+    )
     return sorted(files)
 
 
@@ -2318,7 +2325,12 @@ def self_test(root: Path = ROOT, preview_output: Path | None = None) -> None:
         if len(module_paths) != len(DIRECT_FIRST_LOAD_MODULES) or module_paths != list(DIRECT_FIRST_LOAD_MODULES):
             fail("self-test expected the canonical direct first-load module order")
         preview_dir = preview_root / "previews" / validated["request_id"]
-        for relative in ("vendor/fflate-0.8.3.js", "patient-qr-format.js"):
+        for relative in (
+            "vendor/fflate-0.8.3.js",
+            "patient-qr-format.js",
+            "patient-react-dist/kgg-patient-ui.js",
+            "patient-react-dist/kgg-patient-ui.css",
+        ):
             if not (preview_dir / relative).is_file():
                 fail(f"self-test expected preview runtime file: {relative}")
         missing_module_preview = preview_html.replace(module_sources[0], "./missing-first-load-module.js", 1)

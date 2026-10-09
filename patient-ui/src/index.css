@@ -1,0 +1,83 @@
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme) prefix(kgg);
+@import "tailwindcss/utilities.css" layer(utilities) prefix(kgg);
+
+/*
+ * KGG React-island CSS intentionally omits Tailwind Preflight.
+ * Tailwind theme variables and utilities are prefixed with kgg to avoid
+ * collisions with the legacy patient UI.
+ *
+ * Do not run `shadcn add` blindly here. The first real component must prove
+ * that generated utility classes respect this isolation contract.
+ */
+.kgg-react-island {
+  --kgg-background: #f5f7fa;
+  --kgg-surface: #ffffff;
+  --kgg-surface-subtle: #eef4fa;
+  --kgg-text: #1f2937;
+  --kgg-text-muted: #607086;
+  --kgg-border: #d9e2ec;
+  --kgg-primary: #2563eb;
+  --kgg-primary-soft: #e7f0ff;
+  --kgg-destructive: #c2413b;
+  --kgg-destructive-soft: #fdecec;
+  --kgg-success: #2f855a;
+  --kgg-focus: #1d4ed8;
+  --kgg-card-radius: 16px;
+  --kgg-control-radius: 12px;
+  --kgg-touch-min: 44px;
+
+  color: var(--kgg-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.kgg-react-island,
+.kgg-react-island * {
+  box-sizing: border-box;
+}
+
+.kgg-react-island :focus-visible {
+  outline: 3px solid var(--kgg-focus);
+  outline-offset: 2px;
+}
+
+.kgg-react-probe {
+  width: min(100%, 420px);
+  border: 1px solid var(--kgg-border);
+  border-radius: var(--kgg-card-radius);
+  background: var(--kgg-surface);
+  padding: 16px;
+}
+
+.kgg-react-probe__eyebrow {
+  margin: 0 0 6px;
+  color: var(--kgg-primary);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.kgg-react-probe__title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.kgg-react-probe__copy {
+  margin: 8px 0 0;
+  color: var(--kgg-text-muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kgg-react-island *,
+  .kgg-react-island *::before,
+  .kgg-react-island *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

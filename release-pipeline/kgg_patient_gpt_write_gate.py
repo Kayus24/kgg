@@ -444,6 +444,13 @@ def patient_runtime_files(root: Path = ROOT) -> list[Path]:
         files.update(path for path in root.glob(pattern) if path.is_file())
     vendor_root = root / "vendor"
     files.update(path for path in vendor_root.glob("*.js") if path.is_file())
+    react_dist_root = root / "patient-react-dist"
+    files.update(
+        path
+        for pattern in ("*.js", "*.css")
+        for path in react_dist_root.glob(pattern)
+        if path.is_file()
+    )
     return sorted(files)
 
 
@@ -912,7 +919,12 @@ def self_test(root: Path = ROOT, preview_output: Path | None = None) -> None:
         if len(module_paths) != len(DIRECT_FIRST_LOAD_MODULES) or module_paths != list(DIRECT_FIRST_LOAD_MODULES):
             fail("self-test expected the canonical direct first-load module order")
         preview_dir = preview_root / "previews" / validated["request_id"]
-        for relative in ("vendor/fflate-0.8.3.js", "patient-qr-format.js"):
+        for relative in (
+            "vendor/fflate-0.8.3.js",
+            "patient-qr-format.js",
+            "patient-react-dist/kgg-patient-ui.js",
+            "patient-react-dist/kgg-patient-ui.css",
+        ):
             if not (preview_dir / relative).is_file():
                 fail(f"self-test expected preview runtime file: {relative}")
         missing_module_preview = preview_html.replace(module_sources[0], "./missing-first-load-module.js", 1)
