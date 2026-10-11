@@ -1,0 +1,96 @@
+name: KGG Patient UI Legacy React Parity
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - '.github/workflows/kgg-patient-ui-parity.yml'
+      - 'release-pipeline/kgg_patient_ui_parity*'
+      - 'release-pipeline/kgg_gemini_ui_video_review*'
+      - 'release-pipeline/kgg_patient_per_set_pain_playwright.js'
+      - '.github/workflows/kgg-gemini-ui-video-review.yml'
+      - 'patient-card-settings.js'
+      - 'patient-pain-vertical-scale.js'
+      - 'index.html'
+      - 'numpad-ui-fix.js'
+      - 'patient-numpad-visibility-fix.js'
+      - 'patient-set-compact-view.js'
+      - 'patient-ui/**'
+      - 'patient-react-dist/**'
+      - 'service-worker.js'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: patient-ui-parity-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  parity-capture:
+    name: ${{ matrix.browser }} click/visual/video parity
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: release-pipeline/package-lock.json
+      - name: Validate recorder, report and Gemini reviewer syntax
+        shell: bash
+        run: |
+          node --check release-pipeline/kgg_patient_ui_parity_capture.js
+          node --check release-pipeline/kgg_patient_ui_parity_report.mjs
+          node --check release-pipeline/kgg_gemini_ui_video_review.mjs
+          node --test release-pipeline/kgg_patient_ui_parity_contracts.test.cjs release-pipeline/kgg_gemini_ui_video_review.test.mjs
+      - name: Install pinned browser dependencies
+        shell: bash
+        run: |
+          cd release-pipeline
+          npm ci --ignore-scripts
+          npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Play identical synthetic journeys in Legacy and React
+        shell: bash
+        env:
+          KGG_PARITY_ENGINE: ${{ matrix.browser }}
+          KGG_PARITY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: node release-pipeline/kgg_patient_ui_parity_capture.js
+      - name: Reuse per-set pain regression from main (Legacy and React)
+        shell: bash
+        env:
+          KGG_PAIN_BROWSER: ${{ matrix.browser }}
+        run: node release-pipeline/kgg_patient_per_set_pain_playwright.js
+      - name: Build offline side-by-side evidence gallery
+        if: always()
+        shell: bash
+        env:
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: node release-pipeline/kgg_patient_ui_parity_report.mjs "$KGG_PARITY_OUT"
+      - name: Smoke test Gemini handoff without credentials or upload
+        if: matrix.browser == 'chromium'
+        shell: bash
+        env:
+          GEMINI_API_KEY: ''
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: node release-pipeline/kgg_gemini_ui_video_review.mjs "$KGG_PARITY_OUT"
+      - name: Upload short-lived review evidence, including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgg-patient-ui-parity-${{ matrix.browser }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/patient-ui-parity/
+          if-no-files-found: warn
+          retention-days: 3
+          compression-level: 6
