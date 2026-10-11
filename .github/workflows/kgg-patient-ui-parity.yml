@@ -54,6 +54,12 @@ jobs:
           KGG_PARITY_ENGINE: ${{ matrix.browser }}
           KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
         run: node release-pipeline/kgg_patient_ui_parity_capture.js
+      - name: Build offline side-by-side evidence gallery
+        if: always()
+        shell: bash
+        env:
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: node release-pipeline/kgg_patient_ui_parity_report.mjs "$KGG_PARITY_OUT"
       - name: Upload short-lived review evidence, including failures
         if: always()
         uses: actions/upload-artifact@v4
