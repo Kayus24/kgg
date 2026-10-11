@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/kgg-react-numpad-webkit.yml'
       - 'release-pipeline/kgg_patient_react_numpad_header_playwright.js'
+      - 'release-pipeline/kgg_patient_per_set_pain_playwright.js'
       - 'patient-ui/**'
       - 'patient-react-dist/**'
       - 'patient-numpad-visibility-fix.js'
@@ -46,3 +47,8 @@ jobs:
         env:
           KGG_REACT_HEADER_BROWSER: webkit
         run: node release-pipeline/kgg_patient_react_numpad_header_playwright.js
+      - name: Verify per-set pain input in WebKit engine
+        shell: bash
+        env:
+          KGG_PAIN_BROWSER: webkit
+        run: node release-pipeline/kgg_patient_per_set_pain_playwright.js

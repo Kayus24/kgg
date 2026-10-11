@@ -129,6 +129,11 @@ def run_patient_react_numpad_header() -> None:
     run_playwright_script("kgg_patient_react_numpad_header_playwright.js")
 
 
+def run_patient_per_set_pain() -> None:
+    log("== Patient optional pain-per-set UI and persistence contract ==")
+    run_playwright_script("kgg_patient_per_set_pain_playwright.js")
+
+
 def run_therapy_cockpit() -> None:
     log("== Therapie-Cockpit codec and RAM-slot contract ==")
     run([node_executable(), "release-pipeline/kgg_therapy_cockpit_smoke.js"])
@@ -862,6 +867,13 @@ TEST_REGISTRY = [
         "suite": "ui-stability",
         "reason": "The opt-in React NumPad header must mirror the legacy pair/transfer controls without replacing storage, QR, PWA, or the legacy commit path, and kggReactPad=0 must restore the legacy header without loading React assets.",
         "run": run_patient_react_numpad_header,
+    },
+    {
+        "id": "patient-per-set-pain-critical",
+        "level": "critical",
+        "suite": "ui-stability",
+        "reason": "Per-exercise opt-in pain-per-set UI must retain independent set/day values, persistence, normal clicks and Legacy/React rollback without opening the NumPad.",
+        "run": run_patient_per_set_pain,
     },
     {
         "id": "patient-qr-critical",

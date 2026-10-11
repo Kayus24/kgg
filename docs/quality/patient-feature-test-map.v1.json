@@ -16,13 +16,7 @@
     "sha_is_provenance_not_contract_version": true
   },
   "audited_main_sha": "0587ee0933a94ce047521c2d0130d11890d7ef64",
-  "known_unmapped_behavior": [
-    {
-      "behavior": "Optionale Schmerzabfrage pro Satz im Übungs-Untermenü",
-      "status": "NEEDS_NORMATIVE_FEATURE_ID_AND_REAL_UI_REGRESSION",
-      "note": "Nicht mit PAT-PAIN-001 Übungsschmerz verwechseln; PS-Prüfung allein reicht nicht."
-    }
-  ],
+  "known_unmapped_behavior": [],
   "features": [
     {
       "id": "PAT-STATE-001",
@@ -219,6 +213,22 @@
       ],
       "coverage": "DIRECT",
       "limitation": "Geometrie-/Scroll-/Fokus-Assertions."
+    },
+    {
+      "id": "PAT-PAIN-004",
+      "behavior": "Optionaler Schmerz pro Satz per ?bungsmen?, unabh?ngige Tages-/Satzwerte, Reload und R?ckwechsel zu ?bungsschmerz",
+      "source_paths": [
+        "patient-card-settings.js",
+        "patient-set-compact-view.js",
+        "patient-numpad-card-guard.js",
+        "patient-pain-vertical-scale.js"
+      ],
+      "test_paths": [
+        "release-pipeline/kgg_patient_per_set_pain_playwright.js",
+        "release-pipeline/kgg_patient_pain_vertical_playwright.js"
+      ],
+      "coverage": "DIRECT",
+      "limitation": "Echte Klick-/Persistenz-/Tages-/Toggle-E2E-Pr?fung auf Chromium f?r Legacy und React opt-in; physische Oppo-/iOS-Sichtabnahme ist kein Bestandteil dieses Test-GREEN."
     },
     {
       "id": "PAT-UI-002",
