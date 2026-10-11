@@ -56,6 +56,10 @@ try {
   }
   const legacyPath = safePath("phone-legacy.webm");
   const reactPath = safePath("phone-react.webm");
+  // Keep the combined inline request below Google's short-video request budget.
+  if (fs.statSync(legacyPath).size + fs.statSync(reactPath).size > 18 * 1024 * 1024) {
+    throw new Error("video pair too large for inline review (18 MB safety cap)");
+  }
   if (!key) {
     output.status = "NOT_CONFIGURED";
     output.message = "Set GEMINI_API_KEY as a GitHub Actions secret, and enable KGG_GEMINI_VIDEO_AUTOREVIEW.";
