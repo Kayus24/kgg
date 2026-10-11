@@ -216,7 +216,7 @@
     },
     {
       "id": "PAT-PAIN-004",
-      "behavior": "Optionaler Schmerz pro Satz per ?bungsmen?, unabh?ngige Tages-/Satzwerte, Reload und R?ckwechsel zu ?bungsschmerz",
+      "behavior": "Optionaler Schmerz pro Satz per Übungsmenü, unabhängige Tages-/Satzwerte, Reload und Rückwechsel zu Übungsschmerz",
       "source_paths": [
         "patient-card-settings.js",
         "patient-set-compact-view.js",
@@ -228,7 +228,7 @@
         "release-pipeline/kgg_patient_pain_vertical_playwright.js"
       ],
       "coverage": "DIRECT",
-      "limitation": "Echte Klick-/Persistenz-/Tages-/Toggle-E2E-Pr?fung auf Chromium f?r Legacy und React opt-in; physische Oppo-/iOS-Sichtabnahme ist kein Bestandteil dieses Test-GREEN."
+      "limitation": "Echte Klick-/Persistenz-/Tages-/Toggle-E2E-Prüfung auf Chromium für Legacy und React opt-in; physische Oppo-/iOS-Sichtabnahme ist kein Bestandteil dieses Test-GREEN."
     },
     {
       "id": "PAT-UI-002",
