@@ -2,7 +2,7 @@
 
 - Source file: `patient-set-compact-view.js`
 - Characters: 1-24000
-- Full source SHA-256: `2c0c25b3a6f3e960652544d73ab92265866ea0ac16d6a83feaeb04bc86a76a13`
+- Full source SHA-256: `9cac3528698298a1ca32e2cef6a0a46301acb772d24dcce03dbb74f61d81e4a3`
 
 ```
 (()=>{const V='patient-set-compact-view-v9-nonnative-pair-proxy',KEY='kggPatientSetViewModeV1',STYLE='kggSetCompactStyle',SW='kggSetViewSwitch',PAIR='kggPadPair',TRANSFER='kggPadTransfer';if(window.__kggSetCompactView===V)return;window.__kggSetCompactView=V;const $=id=>document.getElementById(id),en=()=>localStorage.getItem('kggPatientLang')==='en';
