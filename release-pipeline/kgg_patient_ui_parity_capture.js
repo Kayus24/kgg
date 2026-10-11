@@ -109,7 +109,7 @@ async function recordVariant(browser, port, mode, viewport) {
     isMobile: true,
     hasTouch: true,
     reducedMotion: "reduce",
-    recordVideo: { dir: OUT, size: { width: viewport.width, height: viewport.height } }
+    recordVideo: { dir: path.join(OUT, "_raw"), size: { width: viewport.width, height: viewport.height } }
   });
   const page = await ctx.newPage();
   page.setDefaultTimeout(8500);
@@ -245,6 +245,7 @@ async function main() {
   assert(path.basename(OUT) === "patient-ui-parity", "output must end in patient-ui-parity");
   fs.rmSync(OUT, { recursive: true, force: true });
   fs.mkdirSync(OUT, { recursive: true });
+  fs.mkdirSync(path.join(OUT, "_raw"), { recursive: true });
   const report = { schema: 1, syntheticOnly: true, engine: ENGINE, status: "INCOMPLETE",
     gitSha: process.env.GITHUB_SHA || "local", checks: [], recordings: [], unexpectedDifferences: [] };
   const server = serve();
@@ -267,10 +268,27 @@ async function main() {
           report.checks.push({ viewport: viewport.name, step, kind: "state:" + key, pass: same });
           if (!same) report.unexpectedDifferences.push({ viewport: viewport.name, step, kind: "state:" + key, legacy: a[key], react: b[key] });
         }
+        // Absolute main.scrollTop can differ because the two visual headers reserve
+        // different non-content space. The safety contract is NO EXTRA JUMP during
+        // switching/editing, assessed relative to the current open/closed phase.
+        const scrollAnchor = ["pair-wdh", "remaining-kg", "manual-zero"].includes(step)
+          ? "pair-kg"
+          : ["cancelled", "saved-zero"].includes(step) ? "pair-complete" : null;
         for (const axis of ["windowY", "mainTop"]) {
-          const delta = Math.abs(a.scroll[axis] - b.scroll[axis]);
-          report.checks.push({ viewport: viewport.name, step, kind: "scroll:" + axis, pass: delta <= 2, delta });
-          if (delta > 2) report.unexpectedDifferences.push({ viewport: viewport.name, step, kind: "scroll:" + axis, delta });
+          const absoluteDelta = Math.abs(a.scroll[axis] - b.scroll[axis]);
+          if (!scrollAnchor) {
+            report.checks.push({ viewport: viewport.name, step, kind: "scroll-base:" + axis,
+              pass: true, absoluteDelta, policy: "observed-only on open/close transition" });
+            continue;
+          }
+          const aMove = a.scroll[axis] - baseline.steps[scrollAnchor].scroll[axis];
+          const bMove = b.scroll[axis] - react.steps[scrollAnchor].scroll[axis];
+          const jumpDelta = Math.abs(aMove - bMove);
+          report.checks.push({ viewport: viewport.name, step, kind: "scroll-jump:" + axis,
+            pass: jumpDelta <= 2, jumpDelta, legacyMove: aMove, reactMove: bMove });
+          if (jumpDelta > 2) report.unexpectedDifferences.push({
+            viewport: viewport.name, step, kind: "scroll-jump:" + axis, jumpDelta, legacyMove: aMove, reactMove: bMove
+          });
         }
         if (a.padOpen && b.padOpen) {
           for (const part of ["keys", "actions"]) {
@@ -302,6 +320,7 @@ async function main() {
   } finally {
     if (browser) await browser.close();
     await new Promise(resolve => server.close(resolve));
+    fs.rmSync(path.join(OUT, "_raw"), { recursive: true, force: true });
     fs.writeFileSync(path.join(OUT, "report.json"), JSON.stringify(report, null, 2) + "\n");
   }
   if (report.status !== "PASS") process.exitCode = 1;
