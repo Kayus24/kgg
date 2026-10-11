@@ -292,6 +292,9 @@ async function main() {
     report.status = report.unexpectedDifferences.length ? "FAIL" : "PASS";
     console.log("KGG patient React/legacy parity: " + report.status +
       " (" + report.checks.length + " checks; " + report.unexpectedDifferences.length + " differences)");
+    if (report.unexpectedDifferences.length) {
+      console.error("PARITY_DIAGNOSTIC=" + JSON.stringify(report.unexpectedDifferences.slice(0, 24)));
+    }
   } catch (error) {
     report.status = "FAIL";
     report.error = String(error && error.stack || error);
