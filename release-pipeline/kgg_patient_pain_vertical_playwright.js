@@ -127,7 +127,7 @@ async function main() {
     assert(await legacy.isHidden(),"legacy horizontal scale is still visible");
     assert(await legacy.evaluate(el=>el.inert===true&&el.getAttribute("aria-hidden")==="true"),"legacy scale is not inert and aria-hidden");
     assert(await second.locator(".kggSetPain").count()>0,"set-pain mode was not created");
-    assert(await second.locator(".kggPainVertical").count()===0,"exercise-pain trigger must not appear in set-pain mode");
+    assert(await second.locator(".kggSetPain .kggPainVerticalToggle").count()===2,"set-pain mode must show one bolt trigger per set");
 
     await page.evaluate(()=>window.scrollTo(0,Math.min(250,document.documentElement.scrollHeight-window.innerHeight)));
     await page.waitForTimeout(380);
@@ -227,7 +227,9 @@ async function main() {
     const dayOneFirst=page.locator("#list .ex").nth(0);await setCardOpen(page,dayOneFirst,0,true);
     assert((await dayOneFirst.locator(".kggPainVerticalCurrent").innerText())==="0/10","day 1 pain was overwritten by day 2");
     assert(await page.locator("#kggPainModal").count()===1,"rerender created duplicate overlays");
-    assert(await page.locator("#list .ex .kggPainVertical").count()===1,"rerender created duplicate or set-mode triggers");
+    await page.waitForFunction(()=>document.querySelectorAll("#list .ex")[1]?.querySelectorAll(".kggSetPain .kggPainVerticalToggle").length===2,null,{timeout:1500});
+    const triggerCounts=await page.evaluate(()=>[...document.querySelectorAll("#list .ex")].map(card=>({triggers:card.querySelectorAll(".kggPainVertical").length,setPain:card.querySelectorAll(".kggSetPain").length,bolts:card.querySelectorAll(".kggSetPain .kggPainVerticalToggle").length})));
+    assert(triggerCounts.length===2&&triggerCounts[0].triggers===1&&triggerCounts[1].setPain===2&&triggerCounts[1].bolts===2,"rerender created duplicate or missing per-set bolts: "+JSON.stringify(triggerCounts));
 
     await page.setViewportSize({width:844,height:390});
     await openModal(dayOneFirst.locator(".kggPainVerticalToggle"),page.locator("#kggPainModal"));

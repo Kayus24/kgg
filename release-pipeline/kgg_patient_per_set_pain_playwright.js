@@ -52,6 +52,23 @@ async function mode(page,next){
   await page.waitForTimeout(220); // allow the scheduled legacy apply() to settle
   return openCard(page,0);
 }
+
+async function chooseSetPain(page,setIndex,value){
+  const root=page.locator("#list .ex").first().locator(".kggSetPain").nth(setIndex);
+  const toggle=root.locator(".kggPainVerticalToggle");
+  await toggle.waitFor({state:"visible"});
+  assert((await toggle.getAttribute("aria-label")||"").includes("Satz "+(setIndex+1)),"per-set bolt lacks accessible set index");
+  await toggle.click();
+  const modal=page.locator("#kggPainModal");
+  await modal.waitFor({state:"visible"});
+  assert((await modal.locator("#kggPainModalTitle").textContent()||"").includes("Satz "+(setIndex+1)),"pain dialog is not bound to the selected set");
+  await modal.locator('.kggPainVerticalValue[data-kgg-pain-value="'+value+'"]').click();
+  assert((await toggle.locator(".kggPainCompactText").textContent()||"")===String(value)+"⚡","per-set bolt did not display the selected value");
+  await modal.locator(".kggPainModalClose").click();
+  await modal.waitFor({state:"hidden"});
+  assert((await toggle.getAttribute("aria-expanded"))==="false","per-set bolt did not close");
+}
+
 async function selected(page){
   return page.locator("#list .ex").first().locator(".kggSetPain .kggPainScale")
     .evaluateAll(nodes=>nodes.map(n=>n.querySelector("button.on")?.dataset.val||null));
@@ -73,12 +90,18 @@ async function caseTest(browser,origin,react){
     const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem("kggPatientExerciseSettingsV1")||"{}"));
     assert(stored["pain-per-set-e2e|set pain candidate"]?.painMode==="set","pain-mode not persisted");
     assert(await card.locator(".kggSetPain").count()===2,"expected two per-set pain controls");
+    await page.waitForFunction(()=>document.querySelectorAll("#list .ex")[0]?.querySelectorAll(".kggSetPain .kggPainVerticalToggle").length===2);
+    const triggers=card.locator(".kggSetPain .kggPainVerticalToggle");
+    assert(await triggers.count()===2,"expected one per-set bolt per set");
+    const boltSizes=await triggers.evaluateAll(nodes=>nodes.map(n=>({width:n.getBoundingClientRect().width,height:n.getBoundingClientRect().height,text:n.querySelector(".kggPainCompactText")?.textContent||""})));
+    assert(boltSizes.every(x=>x.width>=44&&x.width<=90&&x.height>=40&&x.text==="⚡"),"per-set bolt is not compact, tappable and unset: "+JSON.stringify(boltSizes));
+    assert(await card.locator(".kggSetPain .kggPainScale").evaluateAll(nodes=>nodes.every(x=>x.hidden&&x.inert&&getComputedStyle(x).display==="none")),"legacy inline pain scale must be hidden but kept for set commit");
     assert(await card.locator(".pain").isHidden(),"exercise pain remains visible");
     assert(await page.locator("#list .ex").nth(1).locator(".kggSetPain").count()===0,"other exercise changed");
-    await card.locator(".kggSetPain").nth(0).locator('button[data-val="3"]').click();
+    await chooseSetPain(page,0,3);
     assert(await page.locator("#pad").evaluate(el=>el.classList.contains("hide")),
       "pain-scale tap opened the NumPad");
-    await card.locator(".kggSetPain").nth(1).locator('button[data-val="8"]').click();
+    await chooseSetPain(page,1,8);
     assert(await page.locator("#pad").evaluate(el=>el.classList.contains("hide")),
       "second pain-scale tap opened the NumPad");
     let values=await selected(page);
@@ -92,20 +115,23 @@ async function caseTest(browser,origin,react){
     assert(await page.evaluate(()=>d)===2,"did not enter day 2");
     values=await selected(page);
     assert(JSON.stringify(values)===JSON.stringify(["0","0"]),"day 2 reused day 1: "+JSON.stringify(values));
-    await page.locator("#list .ex").first().locator(".kggSetPain").first().locator('button[data-val="5"]').click();
+    await chooseSetPain(page,0,5);
     assert(await page.evaluate(()=>v[k(0,1,"P","pain")])==="5","day 2 value not saved");
     await page.locator("#days button").nth(0).evaluate(el=>el.click());await openCard(page);
     values=await selected(page);
     assert(JSON.stringify(values)===JSON.stringify(["3","8"]),"day 1 overwritten after day switch: "+JSON.stringify(values));
+    assert((await page.locator("#list .ex").first().locator(".kggSetPain .kggPainCompactText").first().textContent())==="3⚡","day 1 per-set bolt did not restore its independent value");
     await page.reload({waitUntil:"domcontentloaded"});await ready(page);await openCard(page);
     values=await selected(page);
     assert(JSON.stringify(values)===JSON.stringify(["3","8"]),"pain not persistent on reload: "+JSON.stringify(values));
+    await page.waitForFunction(()=>document.querySelectorAll("#list .ex")[0]?.querySelectorAll(".kggSetPain .kggPainVerticalToggle").length===2);
     card=await mode(page,"exercise");
     assert(await card.locator(".kggSetPain").count()===0,"per-set remained after disable");
     assert(await card.locator(".pain").isVisible()||await card.locator(".kggPainVerticalToggle").isVisible(),"exercise pain not restored");
     await mode(page,"set");
     values=await selected(page);
     assert(JSON.stringify(values)===JSON.stringify(["3","8"]),"toggle destroyed per-set data");
+    assert(await page.locator("#list .ex").first().locator(".kggSetPain .kggPainVerticalToggle").count()===2,"reactivated per-set mode lost the bolt triggers");
     assert(errors.length===0,"page errors: "+JSON.stringify(errors));
     console.log("Patient per-set pain opt-in regression: PASS ("+(react?"React opt-in":"Legacy")+")");
   }finally{await context.close()}

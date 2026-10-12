@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kgg-handyplan-v90-d14-react-header';
+const CACHE_NAME = 'kgg-handyplan-v90-set-pain-bolt';
 const APP_VERSION = '90';
 const CACHE_PREFIX = 'kgg-handyplan-';
 const RECOVERY_PATH = './update-recovery.html';
@@ -21,7 +21,7 @@ const DAY_HISTORY_SCRIPT = './patient-day-history.js?v=day-history-2-active-unit
 const EXERCISE_MEDIA_SOURCES_SCRIPT = './patient-exercise-media-sources.js?v=exercise-media-sources-2-license-checked';
 const MEDIA_SCRIPT = './patient-media-retry-cache_v2.js?v=thumb-layout-7-stable-media-nodes';
 const UI_MICRO_POLISH_SCRIPT = './patient-ui-micro-polish.js?v=unit-labels-pain-fit-1';
-const PAIN_VERTICAL_SCRIPT = './patient-pain-vertical-scale.js?v=exercise-pain-vertical-8-compact-text';
+const PAIN_VERTICAL_SCRIPT = './patient-pain-vertical-scale.js?v=exercise-pain-vertical-11-per-set-bolt';
 const INSTALL_GUIDE_SCRIPT = './patient-install-guide.js?v=install-guide-v82-prompt-only';
 const NUMPAD_VISIBILITY_SCRIPT = './patient-numpad-visibility-fix.js?v=proxy-controller-8-d14-react';
 const EXTRA_INFO_SCRIPT = './patient-extra-info-display.js?v=extra-info-filter-1';
