@@ -1,4 +1,4 @@
-# KGG Patient UI â€“ Legacy/React parity and video review
+# KGG Patient UI – Legacy/React parity and video review
 
 Status: **candidate / not an acceptance certificate**
 First baseline: `main` at `b223fcfe6c5a27d32def04542df2d008cdec897e`
@@ -38,7 +38,7 @@ Each checkpoint has an independent expected-result oracle; equal but wrong Legac
 
 Per-set pain was already fixed and covered by PR #304 / PAT-PAIN-004 on main; the existing regression is reused in both browser jobs instead of building a duplicate pain subsystem.
 
-Runs independently in Chromium and WebKit at **390Ã—844 and 768Ã—1024**, with local synthetic data. The test blocks external network requests.
+Runs independently in Chromium and WebKit at **390×844 and 768×1024**, with local synthetic data. The test blocks external network requests.
 
 Artifact layout: `report.json`, full-view PNGs, cropped screenshots, `phone-legacy.webm`, `phone-react.webm`, `tablet-legacy.webm`, `tablet-react.webm`.
 
@@ -48,9 +48,9 @@ Artifact layout: `report.json`, full-view PNGs, cropped screenshots, `phone-lega
 
 The Gemini review runs in a separate **trusted** GitHub Actions `workflow_run` job, not inside an untrusted PR checkout. This avoids exposing Gemini credentials to PR code.
 
-To enable, an authorized repository administrator must configure these **in GitHub Settings â†’ Secrets and variables â†’ Actions**:
+To enable, an authorized repository administrator must configure these **in GitHub Settings → Secrets and variables → Actions**:
 
-- Repository secret: `GEMINI_API_KEY` â€” generated separately in Google AI Studio.
+- Repository secret: `GEMINI_API_KEY` — generated separately in Google AI Studio.
 - Repository variable: `KGG_GEMINI_VIDEO_AUTOREVIEW=true`.
 - Environment variable `KGG_GEMINI_VIDEO_UPLOAD_APPROVED=true` records explicit permission for synthetic video uploads. A key alone does not authorize uploads. Configure environment protection/review rules appropriate to the project before enabling.
 - Optional repository variable: `KGG_GEMINI_VIDEO_MODEL` (default: `gemini-3.5-flash-lite`).
