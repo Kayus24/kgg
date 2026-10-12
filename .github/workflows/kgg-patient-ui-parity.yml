@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/kgg-patient-ui-parity.yml'
       - 'release-pipeline/kgg_patient_ui_parity*'
+      - 'release-pipeline/kgg_patient_gemini_web_handoff*'
       - 'release-pipeline/kgg_patient_per_set_pain_playwright.js'
       - 'patient-card-settings.js'
       - 'patient-last-value-hints.js'
@@ -52,7 +53,8 @@ jobs:
         run: |
           node --check release-pipeline/kgg_patient_ui_parity_capture.js
           node --check release-pipeline/kgg_patient_ui_parity_report.mjs
-          node --test release-pipeline/kgg_patient_ui_parity_contracts.test.cjs
+          node --check release-pipeline/kgg_patient_gemini_web_handoff.mjs
+          node --test release-pipeline/kgg_patient_ui_parity_contracts.test.cjs release-pipeline/kgg_patient_gemini_web_handoff.test.mjs
       - name: Install pinned browser dependencies
         shell: bash
         run: |

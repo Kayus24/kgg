@@ -1,0 +1,92 @@
+# KGG – API-freie Gemini-Web-Video-QA
+
+Status: zusätzlicher Test-/Review-Baustein, **keine Produktfreigabe**.
+Workstream: Draft-PR #307, auf main nach Merge von Parity-PR #303.
+Browser-Owner: vorhandener Codex-MCP **fahrklar_gemini_web**.
+**Keine Gemini-API, kein API-Fallback, keine neuen Secrets, kein Account-Wechsel.**
+
+## Wiederverwendung statt Doppelbau
+
+- Bestehender synthetischer KGG-Playwright-Recorder und dessen phone-legacy.webm, phone-react.webm und report.json.
+- Bestehender Fahrklar-Codex-MCP fahrklar_gemini_web: @playwright/mcp@0.0.83 mit Chrome und eigenem persistentem, bereits konfiguriertem Profil.
+- Das in Fahrklar erprobte Verfahren Prepare → Browser-Upload → Generierung beobachten → Antwort zweimal prüfen → Finalize.
+- Keine Übernahme der fahrregelspezifischen Prompts/Schemas. Kein Kopieren von Browserprofilen oder Zugangsdaten.
+- Der frühere Gemini-API-Workflow wurde beim Merge von PR #303 aus main entfernt. Nicht wieder einführen.
+
+## Codex-Ablauf je genauem KGG-Kandidat
+
+1. Zuerst frische GitHub-/PR- und CI-Stände sowie docs/ACTIVE_WORK.md prüfen.
+   Aktuelle synthetische Chromium-Parity-Evidenz erzeugen, zusammen mit WebKit-Gate.
+   Echte Patientendaten niemals hochladen.
+2. KGG-Prepare mit EXAKTEM 40-stelligen Kandidaten-SHA:
+
+       node release-pipeline/kgg_patient_gemini_web_handoff.mjs prepare "C:\ABSOLUT\patient-ui-parity" <EXAKTER_SHA> "C:\ABSOLUT\handoff.json"
+
+   Prüft PASS, Chromium, synthetische Daten, Kandidaten-SHA, harte Checks,
+   beide WebM-Videos, Größen, Report-Hash, SHA-256. Falscher Stand wird abgelehnt.
+3. Codex benutzt **sein bereits installiertes** fahrklar_gemini_web-MCP für
+   https://gemini.google.com/. Profil/Login NICHT neu erzeugen. Sichtbar
+   Gemini 3.1 Pro und falls verfügbar Extended Thinking auswählen.
+   Login, Modell oder Quota nicht verfügbar → UNAVAILABLE; kein API-Fallback.
+4. Im selben Prompt zuerst handoff.videos.legacy.path und danach
+   handoff.videos.react.path anhängen. Sichtbare Anhänge BEIDER Videos bestätigen.
+   Den Text handoff.prompt unverändert senden.
+5. Beobachten: Upload, Start/Ende der Generierung, Modellanzeige; nach
+   Abschluss zwei gleiche Antwort-Snapshots mit mindestens 2 Sekunden Abstand.
+   Kleine, wiederholte Beobachtungsschritte; absolute Gesamtdauer maximal 240s.
+   Unklarer Zustand ist nicht PASS.
+6. Nach dem **wirklich beobachteten** Browserdurchlauf observation.json
+   mit tatsächlichem Modell, Thinking-Label, Upload-/Generierungs-Flags,
+   Uhrzeiten und beiden unveränderten Gemini-JSON-Textantworten erzeugen.
+   Dann:
+
+       node release-pipeline/kgg_patient_gemini_web_handoff.mjs finalize "C:\ABSOLUT\handoff.json" "C:\ABSOLUT\observation.json" "C:\ABSOLUT\gemini-web-review.json"
+
+   Finalize bindet Video-/Report-Hashes wieder an denselben Kandidaten,
+   prüft Modell/Upload/Antwortstabilität und validiert das JSON streng.
+7. Das erzeugte gemini-web-review.json der KGG-Testevidenz zuordnen.
+   Vier Statuswerte: PASS, REVIEW_REQUIRED, INCONCLUSIVE, UNAVAILABLE.
+   Modell-PASS ist ausschließlich beratend; nichts automatisch mergen,
+   veröffentlichen oder als Gesamt-App-Regressionstest zählen.
+
+### Observation-Schema (nur Beispiel, keine echte Evidenz)
+
+    {
+      "observedModel": "Gemini 3.1 Pro",
+      "thinkingLabel": "Pro · Erweitert",
+      "uploadVisible": {"legacy": true, "react": true},
+      "generationObserved": true,
+      "generationStopped": true,
+      "startedAt": "2026-10-12T10:00:00.000Z",
+      "stoppedAt": "2026-10-12T10:00:20.000Z",
+      "responseSnapshots": [
+        {"observedAt": "2026-10-12T10:00:22.000Z", "text": "<GENAUER JSON-TEXT>"},
+        {"observedAt": "2026-10-12T10:00:24.200Z", "text": "<IDENTISCHER JSON-TEXT>"}
+      ]
+    }
+
+Beispiel-Uhrzeiten und Statusflags dürfen nie als tatsächlicher Review
+ausgegeben werden. Hash- und Schema-Prüfung ersetzt keine Live-Browserbeobachtung.
+Modelltext muss aus der UI stammen, nicht aus dem Output des Modells.
+
+### Wenn die Web-Anmeldung / Quota / UI nicht funktioniert
+
+    node release-pipeline/kgg_patient_gemini_web_handoff.mjs unavailable "C:\ABSOLUT\handoff.json" LOGIN_REQUIRED "C:\ABSOLUT\gemini-web-review.json"
+
+Erlaubte Gründe: LOGIN_REQUIRED, QUOTA, BROWSER_UNAVAILABLE, UPLOAD_FAILED,
+MODEL_UNAVAILABLE, TIMEOUT, UNKNOWN. Niemals Phantom-PASS.
+
+## Grenzen, Tests und Integration
+
+- Vertrags-/Fehlertests: node --test release-pipeline/kgg_patient_gemini_web_handoff.test.mjs.
+- Bestehende deterministische Playwright-/Geometrie-/Storage-/Pixelgates
+  bleiben die harte Grundlage; Gemini darf deren RED nie in GREEN umwandeln.
+- Bewertet wird nur die synthetische Telefonansicht des NumPad-Ablaufs.
+  Tablet, komplette Patienten-App, iPhone/Safari, physisches Oppo und
+  nicht sichtbare 1-Frame-Compositor-Probleme bleiben ungeprüft.
+- Vorhandene alte Videos dürfen NUR mit ihrem damaligen exakten SHA
+  geprüft werden, nicht als aktuelle Kandidatenfreigabe.
+- Codex führt die Browsersteuerung durch; das neue KGG-Skript kopiert
+  keine Fahrklar-MCP-Implementierung, Login-Daten oder Browsercode.
+- Unterbrechungen: Arbeitsstand, aktuelle PR-Commits, laufende Prozesse
+  und bereits erfolgte Uploads **zuerst prüfen**, nicht blind wiederholen.
