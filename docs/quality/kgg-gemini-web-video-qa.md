@@ -1,7 +1,11 @@
 # KGG Gemini Web video QA (no API key)
 
-## Status
-IMPLEMENTATION PREPARED, not yet a real Gemini review. A working login/session and a complete review have to be verified independently. No production release or patient data.
+## Status (2026-10-12)
+**READY_FOR_LOGIN / NOT REVIEWED.** No API key, Gemini upload, paid call, production release or patient data. The dedicated Chrome profile was opened read-only at gemini.google.com/app: it shows **Anmelden**. KGG login is not yet established, so a real Gemini verdict cannot be claimed.
+
+**Deterministic video evidence prepared:** Chromium parity artifact 11760587590 from GitHub run 38279941046 (expires 2026-10-15), candidate SHA abc3af3e4253c77b5b777c2ecde28e251193f2b2. It contains 352 hard PASS checks, 40 observations and two verified synthetic phone WebM videos; no unexpected differences. The report's gitSha may identify GitHub's synthetic merge and must not replace candidateSha in the prepared proof.
+
+**Implementation:** the API-free adapter verifies the complete report, source SHA, videos and browser observation/nonce before accepting any advisory verdict. Nine Node built-in negative/positive tests PASS and are registered in the existing Critical test battery. A dedicated Codex MCP entry **kgg_gemini_web** was installed locally with its own Chrome profile (Fahrklar profile unchanged). Execution instructions are in .agents/skills/kgg-gemini-web-video-review/SKILL.md. A real Web review still requires one-time KGG-profile login and verified Pro/Thinking UI; otherwise UNAVAILABLE.
 
 ## Reuse
 Fahrklar already has a working Playwright MCP browser profile under the Codex server name `fahrklar_gemini_web`. The Fahrklar source of truth is Google Drive document `00_MEMORY – Fahrklar Gemini Video-QA Integration` (ID `1r6r0IHVz3C3LueAoeHHpyoZuFxzH2lHZdLcjLL9OAoc`). Reuse its **prepare → web browser → finalize** architecture, not its traffic-specific prompts.

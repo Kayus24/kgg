@@ -134,6 +134,11 @@ def run_patient_per_set_pain() -> None:
     run_playwright_script("kgg_patient_per_set_pain_playwright.js")
 
 
+def run_kgg_gemini_web_contract() -> None:
+    log("== KGG API-free Gemini Web video evidence contract (synthetic, no upload) ==")
+    run([node_executable(), "--test", "release-pipeline/kgg_gemini_web_review.test.cjs"])
+
+
 def run_therapy_cockpit() -> None:
     log("== Therapie-Cockpit codec and RAM-slot contract ==")
     run([node_executable(), "release-pipeline/kgg_therapy_cockpit_smoke.js"])
@@ -874,6 +879,13 @@ TEST_REGISTRY = [
         "suite": "ui-stability",
         "reason": "Per-exercise opt-in pain-per-set UI must retain independent set/day values, persistence, normal clicks and Legacy/React rollback without opening the NumPad.",
         "run": run_patient_per_set_pain,
+    },
+    {
+        "id": "patient-gemini-web-proof-critical",
+        "level": "critical",
+        "suite": "ui-stability",
+        "reason": "API-free Gemini Web preparation/finalization must require full 352+40 synthetic parity evidence, bind exact video/candidate hashes, and never infer a release PASS from missing browser evidence.",
+        "run": run_kgg_gemini_web_contract,
     },
     {
         "id": "patient-qr-critical",
