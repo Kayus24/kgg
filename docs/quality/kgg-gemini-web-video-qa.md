@@ -90,3 +90,13 @@ MODEL_UNAVAILABLE, TIMEOUT, UNKNOWN. Niemals Phantom-PASS.
   keine Fahrklar-MCP-Implementierung, Login-Daten oder Browsercode.
 - Unterbrechungen: Arbeitsstand, aktuelle PR-Commits, laufende Prozesse
   und bereits erfolgte Uploads **zuerst prüfen**, nicht blind wiederholen.
+
+## Verifizierter Integrationscheckpoint – 2026-10-12
+
+- KGG-Parity-PR #303 ist auf main gemergt; Ausgangs-SHA dieses Arbeitsstrangs: f59bc55e6e22e1b04061557c710069f6cf8f0b21.
+- Draft-PR #307 enthält ausschließlich fünf Web-Handoff-, Bericht-, CI-Test- und Dokumentationsdateien. Alter Gemini-API-Code bleibt entfernt.
+- Auf der aktualisierten main-Basis: 25/25 Node-Vertragstests lokal PASS, inklusive fehlerhafter/gefälschter Modellantworten; Hook-Guard und Secret-Scan PASS.
+- Ältere auf damaligem #303-Head b2f1560 frisch erzeugte Chromium-Parity-Videos: 392 Prüfungen PASS, 0 Abweichungen. Nicht auf neueren Commit übertragen.
+- Reale Gemini-Weboberfläche war im Browser-Preflight erreichbar; beim eigentlichen Lauf war das persistente Fahrklar-Profil durch einen schon laufenden Codex-MCP belegt. Vorhandene Sitzung wurde geschützt, kein Upload.
+- Bis zu einem echten Browserdurchlauf gilt die lokale Video-QA als UNAVAILABLE/BROWSER_UNAVAILABLE. Kein Modell-PASS.
+- Breite lokale Critical-Batterie auf älterem Worktree blieb in Release-Contract-Tests ohne Endstatus und wurde abgebrochen: INCOMPLETE. Neuer GitHub-CI-Stand ist separat zu verifizieren.
