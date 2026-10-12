@@ -44,42 +44,42 @@ Artifact layout: `report.json`, full-view PNGs, cropped screenshots, `phone-lega
 
 `PASS` means all covered checks passed. `FAIL` means a reproducible regression or a recorder issue requiring diagnosis. `INCOMPLETE`/missing artifacts are **not** PASS.
 
-## Gemini setup (one-time, intentionally off by default)
+## Optional video review: separate workstream
 
-The Gemini review runs in a separate **trusted** GitHub Actions `workflow_run` job, not inside an untrusted PR checkout. This avoids exposing Gemini credentials to PR code.
+This pull request is deliberately limited to a **deterministic, secret-free parity recorder**.
+It does not install a trusted GitHub workflow_run uploader, accept Gemini API keys,
+make external video-analysis requests, or automatically upload media to third parties.
+The offline HTML, PNG and WebM artifacts are available for local manual review.
 
-To enable, an authorized repository administrator must configure these **in GitHub Settings → Secrets and variables → Actions**:
-
-- Repository secret: `GEMINI_API_KEY` — generated separately in Google AI Studio.
-- Repository variable: `KGG_GEMINI_VIDEO_AUTOREVIEW=true`.
-- Environment variable `KGG_GEMINI_VIDEO_UPLOAD_APPROVED=true` records explicit permission for synthetic video uploads. A key alone does not authorize uploads. Configure environment protection/review rules appropriate to the project before enabling.
-- Optional repository variable: `KGG_GEMINI_VIDEO_MODEL` (default: `gemini-3.5-flash-lite`).
-
-Do not paste the API key into a chat, PR, code file, or logs. Gemini API charges/quotas are **separate** from a consumer Gemini subscription; review pricing and budgets before enabling.
-
-Only when the parity workflow succeeds for a same-repository PR and auto-review is enabled, the trusted workflow downloads the **data-only Chromium artifact** into `RUNNER_TEMP`, validates it, and sends two synthetic short WebM files to Gemini via inline video input. No Files API persistence. No patient data, real names, access tokens or externally navigated sites may appear in fixtures.
-
-The configured request explicitly samples 5 frames/second and includes bounded approximate checkpoint times, rather than relying on default low-frequency video sampling. The response must be consistent (a no-difference verdict cannot contain major findings); malformed responses and timeouts are inconclusive errors, never automatic passes. The artifact candidate SHA must match the upstream workflow SHA.
-
-Gemini writes an advisory `gemini-review.json` and Markdown summary. Findings must identify unexpected changes and approximate steps/timestamps, distinguish expected header design differences, and mark uncertainty. Gemini can hallucinate or miss fast flicker. It **never** authorizes an automatic merge or changes code itself.
+Optional subscription-based Gemini Web video analysis is tracked separately in
+[PR #305](https://github.com/Kayus24/kgg/pull/305). It is NOT_CONFIGURED
+until a dedicated browser profile, login, user-approved upload and complete result
+are independently verified. It is never a required CI pass or merge authority.
+No patient data may be used for these synthetic test journeys.
 
 ## Security and costs
 
-- CI permissions default to read-only.
-- PR capture workflow has **no Gemini secret**.
-- Trusted `workflow_run` checks out only reviewed `main` code; untrusted artifacts are treated strictly as data, not executable files.
-- Capture artifacts expire after **3 days**, advisory report after **7 days**.
-- Separate browser contexts and synthetic test values only.
-- No media uploads to Gemini until the user enables the repository variable and secret.
-- If no configured secret, Gemini status remains `NOT_CONFIGURED`, not PASS.
-- No unattended nightly video review or API cost without explicit repository configuration.
+- CI runs with read-only repository permissions, including on fork pull requests.
+- No API keys, protected environment secrets, paid model calls or external video uploads.
+- External network requests are aborted by the synthetic browser recorder.
+- Reports, screenshots and videos expire after 3 days.
+- Separate browser contexts isolate Legacy and React synthetic fixtures.
+- Missing artifacts or inconclusive evidence are never recorded as a pass.
 
 ## Acceptance criteria
 
-The component may be proposed for final human acceptance only after current-source required CI, phone/tablet Chromium/WebKit parity and frame/scroll checks pass. Gemini should report `no_unexpected_difference` or its findings must be explained. A low-confidence or missing Gemini result is reported as `INCONCLUSIVE`.
+The component may be proposed for final human acceptance only after current-source
+required CI, phone/tablet Chromium/WebKit parity and frame/scroll checks pass.
+Optional external video review is outside this test-only PR, is not a merge
+prerequisite, and may not override deterministic failures.
 
 The user then performs a **single overall acceptance**, preferably on the Oppo, focused on realistic training flows and any flagged differences. Merge approval is separate from automated test results. iOS/Safari hardware remains untested until a suitable device/test service exists.
 
 ## Verification note (2026-10-11 continuation)
 
-The pure synthetic expected-value oracle and the Gemini handoff have Node built-in negative tests, including matched-but-wrong state, phantom load, unintended cancel commit, false-green model verdict and request authorization. Unit tests mock network; they do not constitute a real Gemini review. The parity gallery reports hard checks separately from observed-only absolute scroll offsets. Normal-motion videos are recorded; static screenshots normalize animation only at checkpoints.
+The synthetic expected-value oracle has Node built-in negative tests for
+matched-but-wrong state, phantom load and unintended cancel commits. The parity
+gallery reports hard checks separately from observed-only absolute scroll offsets.
+Normal-motion videos are recorded; static screenshots normalize animation only at
+checkpoints. No Gemini/video-upload unit or integration test is included in this
+deterministic parity PR.
