@@ -3,7 +3,11 @@
 const fs=require('fs');
 const http=require('http');
 const path=require('path');
-const {chromium}=require('playwright');
+const {execFileSync}=require('node:child_process');
+const {chromium,webkit}=require('playwright');
+const ENGINE=process.env.KGG_DAYS_BROWSER||'chromium';
+const MODE=process.env.KGG_DAYS_MODE||'legacy';
+if(!['chromium','webkit'].includes(ENGINE)||!['legacy','react'].includes(MODE))throw new Error('Unsupported browser/mode');
 
 const ROOT=path.resolve(__dirname,'..');
 function assert(condition,message){if(!condition)throw new Error(message)}
@@ -34,7 +38,14 @@ async function seedCurrent(page,doneDays,lastOpenDay){
 async function currentDay(page){return page.evaluate(()=>Number(d))}
 async function assertHubDay(page,day){await page.waitForFunction(day=>document.querySelector('#kggCurrentDayBox .kggCurrentDayBig')?.textContent.trim()===`Tag ${day}`,day,{timeout:8000});assert(await currentDay(page)===day,`runtime day is not T${day}`)}
 async function waitForVisibleDayButtons(page,count){await page.waitForFunction(expected=>document.querySelectorAll('#days button').length===expected,count,{timeout:8000});assert(await page.locator('#days button').count()===count,`day-button DOM did not settle at ${count}`)}
-async function dismissInstallOverlay(page){const box=page.locator('#installBox');if(await box.count()&&await box.isVisible().catch(()=>false)){const dismiss=box.getByRole('button',{name:/Nein danke|No thanks/i});if(await dismiss.count())await dismiss.click({force:true});else await page.evaluate(()=>document.getElementById('installBox')?.classList.add('hide'))}}
+async function dismissInstallOverlay(page){
+  const box=page.locator('#installBox');
+  if(await box.count()&&await box.isVisible().catch(()=>false)){
+    const dismiss=box.getByRole('button',{name:/Nein danke|No thanks/i});
+    assert((await dismiss.count())===1&&await dismiss.isVisible(),'Install guide is blocking and has no usable dismiss action');
+    await dismiss.click();
+  }
+}
 async function confirmTicket034FinishIfShown(page){const modal=page.locator('#kggTicket034FinishModal');if(!(await modal.count())||!(await modal.isVisible().catch(()=>false)))return;const confirm=modal.getByRole('button',{name:'Training beenden',exact:true});assert(await confirm.count()===1,'Ticket-034 finish modal did not expose exactly one confirm button');await confirm.click();await modal.waitFor({state:'hidden'})}
 async function finishFromUi(page,expectedQrDay,expectedNextDay){
   await dismissInstallOverlay(page);
@@ -46,19 +57,40 @@ async function finishFromUi(page,expectedQrDay,expectedNextDay){
   assert(Number(decoded.d)===expectedQrDay,`QR day changed before export: ${JSON.stringify(decoded)}`);
   assert(decoded.final===true,'final QR lost finalize=true');
   assert(await currentDay(page)===expectedNextDay,`runtime did not prepare T${expectedNextDay} after finishing T${expectedQrDay}`);
+  if(expectedQrDay===7)await captureEvidence(page,'final-qr');
   await page.locator('#end .btn2').filter({hasText:'Zurück zum Plan'}).click();
   await page.locator('#end').waitFor({state:'hidden'});
   await assertHubDay(page,expectedNextDay);
 }
 function rawPlan(id,title){return{i:id,t:title,v:1,d:12,extendDays:true,stepDays:6,e:[[title+' Übung',1,'B','kg','Wdh']]}}
-
+async function captureEvidence(page,kind){
+  if(!process.env.KGG_PARITY_OUT)return;
+  const out=path.resolve(process.env.KGG_PARITY_OUT);
+  assert(path.basename(out)==='patient-ui-parity','continuous day proof requires isolated parity artifact directory');
+  fs.mkdirSync(out,{recursive:true});
+  await page.screenshot({path:path.join(out,'days-'+MODE+'-'+kind+'.png'),animations:'disabled'});
+}
+async function verifyVariantMounted(page){
+  const card=page.locator("#list .ex").first();
+  for(let attempt=0;attempt<5;attempt++){
+    if(await card.evaluate(el=>el.classList.contains("kggOpen")))break;
+    await card.locator("h3").click();
+    await page.waitForTimeout(90);
+  }
+  assert(await card.evaluate(el=>el.classList.contains("kggOpen")),"day-flow card would not open");
+  await card.locator(":scope > .set").first().locator(".kggCompactTapProxy[data-kgg-key='a']").first().click({timeout:8000});
+  if(MODE==="react")await page.locator("[data-kgg-react-numpad-header='v1']").waitFor({state:"attached",timeout:8000});
+  const mounted=await page.evaluate(()=>document.body.classList.contains("kggReactNumpadHeaderV1"));
+  assert(mounted===(MODE==="react"),"Requested React mode differs from mounted variant: "+JSON.stringify({MODE,mounted}));
+  await page.locator("#pad .padActions .padCancel").click({timeout:8000});
+}
 async function main(){
   const watchdog=setTimeout(()=>{console.error('KGG patient continuous days Playwright FAIL: global 150s watchdog');process.exit(1)},150000);
   const mark=message=>console.log('[continuous-days] '+message);
   const server=http.createServer((request,response)=>{const file=safeFile(request.url);if(!file){response.writeHead(404,{'Content-Type':'text/plain'});response.end('not found');return}response.writeHead(200,{'Content-Type':contentType(file),'Cache-Control':'no-store','Service-Worker-Allowed':'/'});fs.createReadStream(file).pipe(response)});
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const {port}=server.address();
-  const browser=await chromium.launch({headless:true});
+  const browser=await (ENGINE==='webkit'?webkit:chromium).launch({headless:true});
   const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'allow'});
   const page=await context.newPage();
   // The install guide has a separate delayed auto-day migration. Keep this
@@ -67,7 +99,7 @@ async function main(){
   page.setDefaultTimeout(8000);page.setDefaultNavigationTimeout(15000);
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   const plan={i:'continuous-days-playwright',t:'Fortlaufender Testplan',v:1,d:12,extendDays:true,stepDays:6,e:[['Beinpresse',1,'B','kg','Wdh']]};
-  const url=`http://127.0.0.1:${port}/kgg/?plan=${encodeURIComponent('KGGH2:'+encodePlan(plan))}`;
+  const url=`http://127.0.0.1:${port}/kgg/?kggReactPad=${MODE==='react'?'1':'0'}&plan=${encodeURIComponent('KGGH2:'+encodePlan(plan))}`;
   try{
     mark('boot continuous fixture');
     await page.goto(url,{waitUntil:'domcontentloaded'});
@@ -75,6 +107,7 @@ async function main(){
     const boot=await page.evaluate(()=>({planHidden:document.getElementById('plan')?.classList.contains('hide'),status:document.getElementById('status')?.textContent||'',statusClass:document.getElementById('status')?.className||'',href:location.href,currentPlan:localStorage.getItem('kggCurrentPlanV1')||'',hasDayFlow:Boolean(window.KGGPatientDayFlow)}));
     if(boot.planHidden)throw new Error('patient core boot failed before service worker: '+JSON.stringify({boot,pageErrors:errors}));
     await waitForRuntime(page);
+    await verifyVariantMounted(page);
     assert((await page.locator('#meta').innerText()).includes('fortlaufender Trainingsplan'),'continuous plan metadata still shows a fixed day count');
     assert(await page.locator('#extendBtn').isHidden(),'legacy +days button is still visible');
 
@@ -103,6 +136,7 @@ async function main(){
     assert(await page.locator('#kggHistoryMore').count()===1,'T100 history has no older-training pagination control');
     await page.locator('#kggHistoryMore').click();
     assert(await page.locator('#kggHistoryList .kggDayCard[data-day]').count()===60,'older-training pagination did not expand by 30');
+    await captureEvidence(page,'history-100');
     await page.locator('#kggHistoryBackdrop').click({position:{x:2,y:2}});
 
     mark('historical finalize preserves front');
@@ -136,7 +170,7 @@ async function main(){
     // Explicit fixed plans keep their hard end.
     mark('fixed plan hard end');
     const fixed={i:'fixed-days-playwright',t:'Fester Testplan',v:1,d:12,extendDays:false,stepDays:6,e:[['Fix',1,'B','kg','Wdh']]};
-    await page.goto(`http://127.0.0.1:${port}/kgg/?plan=${encodeURIComponent('KGGH2:'+encodePlan(fixed))}`,{waitUntil:'domcontentloaded'});
+    await page.goto(`http://127.0.0.1:${port}/kgg/?kggReactPad=${MODE==='react'?'1':'0'}&plan=${encodeURIComponent('KGGH2:'+encodePlan(fixed))}`,{waitUntil:'domcontentloaded'});
     await page.locator('#kggPlanLinkChoice').waitFor({state:'visible'});
     await page.locator('#kggPlanLinkChoiceReplace').click();
     await page.locator('#kggPlanLinkChoiceBackdrop').waitFor({state:'detached'});
@@ -149,7 +183,17 @@ async function main(){
 
     mark('final assertions');
     assert(errors.length===0,`continuous-day browser raised page errors: ${errors.join(' | ')}`);
-    console.log(JSON.stringify({status:'PASS',t7ToT8:true,t12ToT13:true,t99ToT100:true,reloadT13:true,historyCards:30,multiPlanIndependent:true,fixedPlanBounded:true}));
+    const proof={schema:1,status:'PASS',syntheticOnly:true,engine:ENGINE,mode:MODE,
+      sourceSha:process.env.KGG_PARITY_HEAD_SHA||execFileSync('git',['rev-parse','HEAD'],{cwd:ROOT,encoding:'utf8'}).trim(),
+      featureIds:['PAT-DAY-001','PAT-DAY-002','PAT-DAY-003','PAT-DAY-004','PAT-HIST-001','PAT-STOR-001','PAT-MULTI-003','PAT-FIN-001','PAT-QR-002'],
+      assertions:{t7ToT8:true,t12ToT13:true,t99ToT100:true,reloadT13:true,historyPagination:true,multiPlanIndependent:true,fixedPlanBounded:true,finalQrDays:true}};
+    if(process.env.KGG_PARITY_OUT){
+      const out=path.resolve(process.env.KGG_PARITY_OUT);
+      assert(path.basename(out)==='patient-ui-parity','day proof requires isolated parity artifact directory');
+      fs.mkdirSync(out,{recursive:true});
+      fs.writeFileSync(path.join(out,'days-'+MODE+'.json'),JSON.stringify(proof,null,2)+'\n');
+    }
+    console.log(JSON.stringify(proof));
   }finally{clearTimeout(watchdog);await context.close().catch(()=>{});await browser.close().catch(()=>{});if(typeof server.closeAllConnections==='function')server.closeAllConnections();await Promise.race([new Promise(resolve=>server.close(()=>resolve())),new Promise(resolve=>setTimeout(resolve,2000))])}
 }
 main().catch(error=>{console.error(`KGG patient continuous days Playwright FAIL: ${error.stack||error.message}`);process.exitCode=1});
