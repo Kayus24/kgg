@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='vertical-pain-v10-compact-text';
+  const VERSION='vertical-pain-v11-per-set-bolt';
   const STYLE_ID='kggPainVerticalStyle';
   const MODAL_ID='kggPainModal';
   const DIALOG_ID='kggPainModalDialog';
@@ -27,13 +27,13 @@
   };
   const isEnglish=()=>safe(()=>localStorage.getItem(LANG_KEY)==='en')===true;
   const currentText=(selected,value)=>selected?`${clampValue(value)}/10`:'–';
-  const labelText=()=>isEnglish()?'Pain during exercise?':'Schmerzen bei der Übung?';
+  const labelText=(setIndex=0)=>setIndex>0?(isEnglish()?'Pain in set '+setIndex+'?':'Schmerzen in Satz '+setIndex+'?'):(isEnglish()?'Pain during exercise?':'Schmerzen bei der Übung?');
   const valueText=value=>isEnglish()?`${clampValue(value)} of 10`:`${clampValue(value)} von 10`;
   const maxDescription=()=>isEnglish()?'Worst imaginable pain':'Schlimmster vorstellbarer Schmerz';
   const minDescription=()=>isEnglish()?'No pain at all':'Gar kein Schmerz';
   const hintText=()=>isEnglish()?'Slide or tap a number':'Schieben oder Zahl antippen';
   const closeText=()=>isEnglish()?'Close pain scale':'Schmerzskala schließen';
-  const compactButtonText=(selected,value)=>selected?`${clampValue(value)}⚡`:(isEnglish()?'Pain ⚡':'Schmerz ⚡');
+  const compactButtonText=(selected,value,setIndex=0)=>selected?`${clampValue(value)}⚡`:(setIndex>0?'⚡':(isEnglish()?'Pain ⚡':'Schmerz ⚡'));
 
   function ensureStyle(){
     let style=document.getElementById(STYLE_ID);
@@ -52,6 +52,13 @@
       .kggPainVerticalChevron{font-size:17px;color:#64748b;transition:transform .18s ease}
       .kggPainVerticalToggle[aria-expanded="true"] .kggPainVerticalChevron{transform:rotate(180deg)}
       body.kggSetViewCompact .pain.${ROOT_CLASS}{margin-top:6px}body.kggSetViewCompact .kggPainVertical{width:auto;margin-top:0;display:flex;justify-content:flex-end}body.kggSetViewCompact .kggPainVerticalToggle{width:auto;height:42px;min-width:86px;min-height:42px;display:flex;align-items:center;justify-content:center;gap:0;padding:0 12px;border:1px solid #8e9ec0;border-radius:999px;background:#f8f9fb;color:#111827;box-shadow:none;font-size:13px;font-weight:900;white-space:nowrap}body.kggSetViewCompact .kggPainVerticalToggle:active{background:#f1f5f9;transform:scale(.98)}body.kggSetViewCompact .kggPainVerticalIcon{display:none}body.kggSetViewCompact .kggPainCompactText{display:inline}body.kggSetViewCompact .kggPainVerticalLabel,body.kggSetViewCompact .kggPainVerticalCurrent,body.kggSetViewCompact .kggPainVerticalChevron{display:none}
+
+      .kggSetPain.${ROOT_CLASS}{display:flex;justify-content:flex-end;align-items:center;min-width:0;margin-top:8px;padding-top:0;border-top:0}
+      .kggSetPain.${ROOT_CLASS} > b,.kggSetPain.${ROOT_CLASS} > .kggPainScale,.kggSetPain.${ROOT_CLASS} > .kggPainCaption{display:none!important}
+      .kggSetPain.${ROOT_CLASS} .kggPainVertical{display:flex;justify-content:flex-end;max-width:100%;margin:0}
+      .kggSetPain.${ROOT_CLASS} .kggPainVerticalToggle{display:flex;align-items:center;justify-content:center;gap:0;width:min(76px,100%);min-width:44px;height:40px;min-height:40px;padding:0 5px;border:1px solid #8e9ec0;border-radius:999px;background:#f8f9fb;font-size:14px}
+      .kggSetPain.${ROOT_CLASS} .kggPainCompactText{display:inline}
+      .kggSetPain.${ROOT_CLASS} .kggPainVerticalIcon,.kggSetPain.${ROOT_CLASS} .kggPainVerticalLabel,.kggSetPain.${ROOT_CLASS} .kggPainVerticalCurrent,.kggSetPain.${ROOT_CLASS} .kggPainVerticalChevron{display:none}
       #${MODAL_ID}[hidden]{display:none!important}
       #${MODAL_ID}{position:fixed;inset:0;z-index:9500;box-sizing:border-box;display:flex;align-items:center;justify-content:flex-end;padding:calc(12px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));background:rgba(15,23,42,.26);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);overscroll-behavior:contain;touch-action:none}
       #${DIALOG_ID}{position:relative;box-sizing:border-box;width:min(196px,calc(100vw - 24px));max-height:calc(100dvh - 24px);display:flex;flex-direction:column;background:#fff;color:#111827;border:1px solid #dbe3ef;border-radius:22px;padding:12px;box-shadow:0 24px 70px rgba(15,23,42,.38);touch-action:auto;overflow:hidden;animation:kggPainModalIn .18s cubic-bezier(.16,.84,.44,1) both}
@@ -81,36 +88,39 @@
     document.head.appendChild(style)
   }
 
-  function painKey(ei){return safe(()=>typeof k==='function'?k(ei,0,'P','pain'):null)}
-  function readStored(ei){
-    const key=painKey(ei),store=safe(()=>v);
+  function painKey(ei,setIndex=0){return safe(()=>typeof k==='function'?k(ei,setIndex,'P','pain'):null)}
+  function readStored(ei,setIndex=0){
+    const key=painKey(ei,setIndex),store=safe(()=>v);
     const selected=Boolean(key&&store&&Object.prototype.hasOwnProperty.call(store,key)&&String(store[key]??'')!=='');
     return{selected,value:clampValue(selected?store[key]:0)}
   }
-  function commitExisting(ei,value,root){
+  function commitExisting(ei,value,root,setIndex=0){
     const next=clampValue(value);
+    if(setIndex>0){const button=root&&root.querySelector('.kggPainScale button[data-val="'+next+'"]');if(button){button.click();return true}return false}
     if(typeof setPain==='function'){setPain(ei,next);return true}
     const button=root&&root.querySelector(`.kggPainScale button[data-val="${next}"]`);
     if(button){button.click();return true}
     return false
   }
   function originalReady(root){
-    const row=root&&root.querySelector(':scope > .painRow');
+    const row=root&&root.querySelector(root.classList.contains('kggSetPain')?':scope > .kggPainScale':':scope > .painRow');
     if(!row)return false;
-    const values=[...row.querySelectorAll('.kggPainScale button[data-val]')].map(button=>Number(button.dataset.val));
+    const scale=row.matches('.kggPainScale')?row:row.querySelector('.kggPainScale');
+    const values=[...(scale?scale.querySelectorAll('button[data-val]'):[])].map(button=>Number(button.dataset.val));
     const buttons=values.length===11&&Array.from({length:11},(_,i)=>i).every(i=>values.includes(i));
     const range=row.querySelector('input[type="range"][min="0"][max="10"]');
     return buttons||Boolean(range)
   }
   function hideOriginal(root,state){
     const label=root.querySelector(':scope > b');
-    const row=root.querySelector(':scope > .painRow');
+    const row=root.querySelector(state.s?':scope > .kggPainScale':':scope > .painRow');
     if(!row)return false;
     if(state.row!==row){
       state.row=row;state.rowHidden=row.hidden;state.rowAria=row.getAttribute('aria-hidden');state.rowInert=Boolean(row.inert);state.rowDisplay=row.style.getPropertyValue('display');state.rowDisplayPriority=row.style.getPropertyPriority('display')
     }
     if(state.oldLabel!==label){state.oldLabel=label;state.labelHidden=label?label.hidden:false}
     if(label)label.hidden=true;
+    if(state.s){const caption=root.querySelector(':scope > .kggPainCaption');if(state.oldCaption!==caption){state.oldCaption=caption;state.captionHidden=caption?caption.hidden:false}if(caption)caption.hidden=true}
     row.hidden=true;row.inert=true;row.setAttribute('aria-hidden','true');row.style.setProperty('display','none','important');
     row.querySelectorAll('button,input').forEach(control=>{if(!control.hasAttribute('data-kgg-old-tabindex'))control.setAttribute('data-kgg-old-tabindex',String(control.tabIndex));control.tabIndex=-1});
     return true
@@ -118,6 +128,7 @@
   function restoreOriginal(state){
     const row=state&&state.row,label=state&&state.oldLabel;
     if(label&&label.isConnected)label.hidden=Boolean(state.labelHidden);
+    if(state.oldCaption&&state.oldCaption.isConnected)state.oldCaption.hidden=Boolean(state.captionHidden);
     if(row&&row.isConnected){
       row.hidden=Boolean(state.rowHidden);row.inert=Boolean(state.rowInert);
       if(state.rowDisplay)row.style.setProperty('display',state.rowDisplay,state.rowDisplayPriority||'');else row.style.removeProperty('display');
@@ -152,8 +163,8 @@
   }
 
   function updateCompact(state,selected,value){
-    state.selected=selected;state.committed=clampValue(value);setText(state.current,currentText(selected,value));if(state.compact)setText(state.compact,compactButtonText(selected,value));
-    state.toggle.setAttribute('aria-label',`${labelText()}: ${currentText(selected,value)}`)
+    state.selected=selected;state.committed=clampValue(value);setText(state.current,currentText(selected,value));if(state.compact)setText(state.compact,compactButtonText(selected,value,state.s));
+    state.toggle.setAttribute('aria-label',labelText(state.s)+': '+currentText(selected,value))
   }
   function updateStage(value){
     if(!modal)return;
@@ -162,33 +173,34 @@
     modal.values.forEach(row=>row.dataset.active=String(Number(row.dataset.kggPainValue)===next))
   }
   function refreshLanguage(){
-    document.querySelectorAll('.kggPainVerticalLabel').forEach(label=>setText(label,labelText()));document.querySelectorAll('.pain.'+ROOT_CLASS).forEach(root=>{const state=states.get(root);if(state&&state.compact)setText(state.compact,compactButtonText(state.selected,state.committed))});
+    document.querySelectorAll('.pain.'+ROOT_CLASS+',.kggSetPain.'+ROOT_CLASS).forEach(root=>{const state=states.get(root);if(!state)return;setText(state.label,labelText(state.s));if(state.compact)setText(state.compact,compactButtonText(state.selected,state.committed,state.s));state.toggle.setAttribute('aria-label',labelText(state.s)+': '+currentText(state.selected,state.committed))});
     if(!modal)return;
-    setText(modal.title,labelText());setText(modal.maxDesc,maxDescription());setText(modal.minDesc,minDescription());setText(modal.hint,hintText());modal.close.setAttribute('aria-label',closeText());modal.stage.setAttribute('aria-label',labelText());
-    if(activeRoot){const state=states.get(activeRoot);if(state)state.toggle.setAttribute('aria-label',`${labelText()}: ${currentText(state.selected,state.committed)}`)}
+    setText(modal.title,labelText(activeRoot?(states.get(activeRoot)?.s||0):0));setText(modal.maxDesc,maxDescription());setText(modal.minDesc,minDescription());setText(modal.hint,hintText());modal.close.setAttribute('aria-label',closeText());modal.stage.setAttribute('aria-label',labelText(activeRoot?(states.get(activeRoot)?.s||0):0));
+    if(activeRoot){const state=states.get(activeRoot);if(state)state.toggle.setAttribute('aria-label',labelText(state.s)+': '+currentText(state.selected,state.committed))}
   }
   function refreshModalFromRoot(root){
     const state=states.get(root);if(!state||!modal)return false;
-    const stored=readStored(state.ei);updateCompact(state,stored.selected,stored.value);modal.committed=stored.value;modal.selected=stored.selected;updateStage(stored.value);refreshLanguage();return true
+    const stored=readStored(state.ei,state.s);updateCompact(state,stored.selected,stored.value);modal.committed=stored.value;modal.selected=stored.selected;updateStage(stored.value);refreshLanguage();return true
   }
   function commitModal(value){
     if(!activeRoot||!modal)return false;
     const state=states.get(activeRoot),next=clampValue(value);
-    if(!state||!commitExisting(state.ei,next,activeRoot))return false;
+    if(!state||!commitExisting(state.ei,next,activeRoot,state.s))return false;
     modal.selected=true;modal.committed=next;updateStage(next);updateCompact(state,true,next);return true
   }
 
   function restoreModalDraft(){if(modal)updateStage(modal.committed)}
   function closeModal(options={}){
     if(!modal||modal.overlay.hidden)return;
-    const returnFocus=options.returnFocus!==false,focusRoot=activeRoot,focusState=focusRoot&&states.get(focusRoot),opener=focusState?.toggle,focusEi=focusState?.ei;
+    const returnFocus=options.returnFocus!==false,focusRoot=activeRoot,focusState=focusRoot&&states.get(focusRoot),opener=focusState?.toggle,focusEi=focusState?.ei,focusSet=focusState?.s||0;
     restoreModalDraft();modal.gesture=null;modal.keyboardDirty=false;modal.overlay.hidden=true;
     if(activeRoot){const state=states.get(activeRoot);if(state)state.toggle.setAttribute('aria-expanded','false')}
     activeRoot=null;unlockBackground();
     if(returnFocus){
       const restoreFocus=()=>{
         const current=focusRoot&&states.get(focusRoot)?.toggle;
-        const replacement=Number.isInteger(focusEi)?document.querySelectorAll('#list .ex')[focusEi]?.querySelector('.kggPainVerticalToggle'):null;
+        const card=Number.isInteger(focusEi)?document.querySelectorAll('#list .ex')[focusEi]:null;
+        const replacement=card?(focusSet?card.querySelectorAll('.kggSetPain .kggPainVerticalToggle')[focusSet-1]:card.querySelector(':scope > .pain .kggPainVerticalToggle')):null;
         const target=current?.isConnected?current:(opener?.isConnected?opener:replacement);
         if(target?.isConnected)safe(()=>target.focus({preventScroll:true}))
       };
@@ -282,7 +294,7 @@
     }catch(e){safe(()=>document.getElementById(MODAL_ID)?.remove());modal=null;return false}
   }
 
-  function buildCompact(root,ei){
+  function buildCompact(root,ei,setIndex=0){
     const wrap=document.createElement('div');wrap.className='kggPainVertical';
     const toggle=document.createElement('button');toggle.type='button';toggle.className='kggPainVerticalToggle';toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-haspopup','dialog');toggle.setAttribute('aria-controls',MODAL_ID);
     const icon=document.createElement('span');icon.className='kggPainVerticalIcon';icon.setAttribute('aria-hidden','true');icon.innerHTML='<svg viewBox="0 0 48 30" focusable="false"><rect class="kggPainIconCapsule" x="0.75" y="0.75" width="46.5" height="28.5" rx="14.25" fill="#F8F9FB" stroke="#8E9EC0" stroke-width="1.5"/><path class="kggPainBolt" d="M13.8 7.2 9.6 13.2l3.1.8-1.5 4.5 6.9-7-3.5-.9 2-3.4Z" fill="#FCD08F"/><path class="kggPainBolt" d="M23.6 4.2 20 14h3.4l-1.5 11.5 6.7-13h-3.8l2.3-8.3Z" fill="#FCD08F"/><path class="kggPainBolt" d="M35.7 7.7 30.3 14.1l3.3.8-4.2 7 9.6-8-3.5-.9 3.1-3.5Z" fill="#FCD08F"/></svg>';
@@ -291,13 +303,13 @@
     const compact=document.createElement('span');compact.className='kggPainCompactText';compact.setAttribute('aria-hidden','true');
     const chevron=document.createElement('span');chevron.className='kggPainVerticalChevron';chevron.textContent='⌄';chevron.setAttribute('aria-hidden','true');
     toggle.append(icon,label,current,compact,chevron);wrap.appendChild(toggle);root.appendChild(wrap);
-    const state={ei,wrap,toggle,label,current,compact,selected:false,committed:0,row:null,oldLabel:null,labelHidden:false,rowHidden:false,rowAria:null,rowInert:false,rowDisplay:'',rowDisplayPriority:''};
+    const state={ei,s:setIndex,wrap,toggle,label,current,compact,selected:false,committed:0,row:null,oldLabel:null,labelHidden:false,rowHidden:false,rowAria:null,rowInert:false,rowDisplay:'',rowDisplayPriority:''};
     states.set(root,state);
     toggle.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();toggleModal(root)});
     wrap.addEventListener('click',event=>event.stopPropagation());return state
   }
   function refreshState(root,state){
-    const stored=readStored(state.ei);setText(state.label,labelText());updateCompact(state,stored.selected,stored.value)
+    const stored=readStored(state.ei,state.s);setText(state.label,labelText(state.s));updateCompact(state,stored.selected,stored.value)
   }
   function teardown(root){
     const state=states.get(root);if(!state)return;
@@ -320,10 +332,15 @@
     let state=states.get(root);if(!state){state=buildCompact(root,ei);root.classList.add(ROOT_CLASS)}else state.ei=ei;
     if(!hideOriginal(root,state)){teardown(root);return}refreshState(root,state)
   }
+  function mountSetRoot(root,ei,setIndex){
+    if(!originalReady(root)||!ensureModal())return;
+    let state=states.get(root);if(!state){state=buildCompact(root,ei,setIndex);root.classList.add(ROOT_CLASS)}else{state.ei=ei;state.s=setIndex}
+    if(!hideOriginal(root,state)){teardown(root);return}refreshState(root,state)
+  }
   function mountAll(){
     ensureStyle();ensureModal();
     const cards=[...document.querySelectorAll('#list .ex')];
-    cards.forEach((card,ei)=>{const root=card.querySelector(':scope > .pain');if(root)mountRoot(root,ei)});
+    cards.forEach((card,ei)=>{const root=card.querySelector(':scope > .pain');if(root)mountRoot(root,ei);card.querySelectorAll(':scope > .set > .kggSetPain').forEach(setRoot=>{const scale=setRoot.querySelector(':scope > .kggPainScale');const setIndex=Number(scale&&scale.dataset.s);if(Number.isInteger(setIndex)&&setIndex>0)mountSetRoot(setRoot,ei,setIndex)})});
     if(activeRoot&&!activeRoot.isConnected)closeModal({returnFocus:false});refreshLanguage()
   }
   function scheduleMount(delay=0){clearTimeout(mountTimer);mountTimer=setTimeout(mountAll,delay)}

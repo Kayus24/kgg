@@ -69,7 +69,9 @@ assert(source.includes("row.inert=true"),"hidden legacy controls are not made in
 assert(source.includes("row.style.setProperty('display','none','important')"),"legacy pain row is not force-hidden");
 assert(source.includes("restoreOriginal(state)"),"legacy pain fallback cannot be restored");
 assert(source.includes("restoreFocus();requestAnimationFrame(restoreFocus)"),"focus restoration is not remount-safe");
-assert(source.includes("document.querySelectorAll('#list .ex')[focusEi]?.querySelector('.kggPainVerticalToggle')"),"focus restoration has no remounted-trigger fallback");
+assert(source.includes("card.querySelectorAll('.kggSetPain .kggPainVerticalToggle')[focusSet-1]"),"per-set focus restoration has no remounted-trigger fallback");
+assert(source.includes("function mountSetRoot(root,ei,setIndex)"),"per-set pain bolts are not mounted from the existing vertical dialog");
+assert(source.includes("commitExisting(state.ei,next,activeRoot,state.s)"),"per-set pain must use the original set commit path");
 assert(source.includes("refreshAfterLifecycleChange"),"day and plan lifecycle remount scheduler is missing");
 assert(source.includes("setTimeout(()=>{observe();mountAll()},delay)"),"observer is not rebound after lifecycle renders");
 assert(source.includes("#days button,#kggDayHub button"),"day controls are not covered by lifecycle remounting");
