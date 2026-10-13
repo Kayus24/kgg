@@ -100,3 +100,14 @@ MODEL_UNAVAILABLE, TIMEOUT, UNKNOWN. Niemals Phantom-PASS.
 - Reale Gemini-Weboberfläche war im Browser-Preflight erreichbar; beim eigentlichen Lauf war das persistente Fahrklar-Profil durch einen schon laufenden Codex-MCP belegt. Vorhandene Sitzung wurde geschützt, kein Upload.
 - Bis zu einem echten Browserdurchlauf gilt die lokale Video-QA als UNAVAILABLE/BROWSER_UNAVAILABLE. Kein Modell-PASS.
 - Breite lokale Critical-Batterie auf älterem Worktree blieb in Release-Contract-Tests ohne Endstatus und wurde abgebrochen: INCOMPLETE. Neuer GitHub-CI-Stand ist separat zu verifizieren.
+
+
+## Tatsächlich ausgeführter Gemini-Web-Review – 2026-10-13
+
+Der zuvor offene echte Browser-Review wurde jetzt abgeschlossen, nicht nur gemockt. Zwei synthetische Videos (Legacy, React) wurden in der angemeldeten Gemini-Web-App an einen Auftrag angehängt. Modell 3.1 Pro mit Hoch wurde im UI nachgewiesen; zwei getrennte Readbacks der vollständigen JSON-Antwort waren identisch. SHA-Bindung an den synthetischen PR-Kandidaten a5680798e23f0d9256ac542329a4a2ad2cb74602 ist per Finalize erfolgreich.
+
+Ergebnis: REVIEW_REQUIRED (Gemini: suspected_regression / confidence high / severity critical). Die unabhängige Video-Einzelbildprüfung bestätigt sichtbare graue Aussetzer mit oben verbleibenden Abbrechen-/OK-Schaltflächen. Die Störung ist **in beiden Aufnahmen** vorhanden: sie belegt keine React-spezifische Regression. Der genaue Ursprung App-Compositor vs. Aufzeichnungsweg bleibt unbekannt. Vergleichsbericht und Strukturresultat liegen als synthetische Evidence vor. Siehe docs/quality/evidence/kgg-video-grey-frame-audit-20261013.md und das JSON im selben Ordner.
+
+Die ursprüngliche Dauer der Webgenerierung lässt sich nachträglich nicht sekundengenau beweisen. Der Handoff unterstützt daher eine **ausdrücklich markierte POSTHOC-Readback-Auswertung** mit zwei stabilen Antworten: Modell-Funde bleiben REVIEW_REQUIRED, aber ein zeitlich unbestätigter Nullbefund kann niemals PASS ergeben, sondern nur INCONCLUSIVE. Es werden keine Uhrzeiten erfunden. Normale neue Durchläufe verlangen weiterhin die vollständige 240-Sekunden-Timingkontrolle. Die harten Playwright-/Realgeräte-Gates und die Unterscheidung von Videoartefakt und App-Bug bleiben maßgeblich.
+
+KGG-Reviewstatus offen als gesonderte Frame-/Compositor-Ursachenanalyse; automatische Video-Handoff-Implementierung durchgeführt. Draft-PR #307 wird nicht ohne Code-/Testreview gemergt.

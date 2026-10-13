@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "status": "REVIEW_REQUIRED",
+  "advisoryOnly": true,
+  "syntheticOnly": true,
+  "reviewId": "f160421a58cb56974ed5",
+  "sourceSha": "a5680798e23f0d9256ac542329a4a2ad2cb74602",
+  "reviewer": "gemini-web",
+  "observedModel": "Gemini 3.1 Pro",
+  "observedThinking": "Pro Hoch",
+  "deterministicStatus": "PASS",
+  "verdict": "suspected_regression",
+  "confidence": "high",
+  "findings": [
+    {
+      "step": "remaining-kg",
+      "timestampLegacy": "00:06",
+      "timestampReact": "00:05",
+      "severity": "critical",
+      "description": "Abrupt layout flicker and severe clipping occurs during the transfer action, resulting in a grey screen with only the 'Abbrechen' and 'OK' buttons visible at the top."
+    }
+  ],
+  "expectedDifferences": [
+    "React header redesign",
+    "NEU badge",
+    "transfer-bar style",
+    "9px pointer triangle"
+  ],
+  "videoHashes": {
+    "legacy": "d5cfbee608dee95a1fa87f8f95a6a5385c7ce3d6b4da129ecc0f2a3831a697ff",
+    "react": "47d063271d4a8d47d9629c4548d342fbb71b7da37a7874b6761e6fb53a0a83f2"
+  },
+  "coverage": "synthetic phone Legacy/React NumPad journey only",
+  "notCovered": [
+    "tablet video semantic review",
+    "iPhone/Safari",
+    "physical Oppo",
+    "entire patient app"
+  ],
+  "timingStatus": "UNVERIFIED_POSTHOC",
+  "generationFinishedAt": null,
+  "reviewedAt": "2026-10-13T06:48:58.340Z"
+}

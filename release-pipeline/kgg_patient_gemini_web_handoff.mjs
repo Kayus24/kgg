@@ -169,11 +169,24 @@ export function finalizeWebHandoff(prepared, observation) {
     observation.uploadVisible?.react === true &&
     observation.generationObserved === true && observation.generationStopped === true,
   "Browser completion or model/upload evidence missing");
-  const started = Date.parse(observation.startedAt);
-  const stopped = Date.parse(observation.stoppedAt);
-  requireThat(Number.isFinite(started) && Number.isFinite(stopped) &&
-    stopped >= started && stopped - started <= 240000,
-  "Missing/overlong browser completion bound");
+  // An earlier completed web response may be recovered from the actual browser.
+  // If original generation timestamps were not recorded, preserve only findings;
+  // this path can NEVER produce an advisory PASS.
+  const hasStart = typeof observation.startedAt === "string";
+  const hasStop = typeof observation.stoppedAt === "string";
+  requireThat(hasStart === hasStop, "Partial browser timing is not accepted");
+  const timedReview = hasStart && hasStop;
+  if (timedReview) {
+    const started = Date.parse(observation.startedAt);
+    const stopped = Date.parse(observation.stoppedAt);
+    requireThat(Number.isFinite(started) && Number.isFinite(stopped) &&
+      stopped >= started && stopped - started <= 240000,
+    "Missing/overlong browser completion bound");
+  } else {
+    requireThat(observation.startedAt == null && observation.stoppedAt == null &&
+      observation.timingStatus === "UNVERIFIED",
+    "Unverified historical readback must be explicitly marked");
+  }
   const snaps = observation.responseSnapshots;
   requireThat(Array.isArray(snaps) && snaps.length === 2 &&
     snaps.every(s => typeof s.text === "string" && s.text.trim() &&
@@ -185,7 +198,7 @@ export function finalizeWebHandoff(prepared, observation) {
   let status = "INCONCLUSIVE";
   if (parsed.verdict === "suspected_regression") status = "REVIEW_REQUIRED";
   else if (parsed.verdict === "no_unexpected_difference" &&
-    parsed.confidence !== "low") status = "PASS";
+    parsed.confidence !== "low" && timedReview) status = "PASS";
   return {
     schema: 1, status, advisoryOnly: true, syntheticOnly: true, reviewId: prepared.reviewId,
     sourceSha: prepared.sourceSha, reviewer: "gemini-web",
@@ -196,7 +209,9 @@ export function finalizeWebHandoff(prepared, observation) {
       legacy: prepared.videos.legacy.sha256, react: prepared.videos.react.sha256
     }, coverage: "synthetic phone Legacy/React NumPad journey only",
     notCovered: ["tablet video semantic review", "iPhone/Safari", "physical Oppo", "entire patient app"],
-    reviewedAt: observation.stoppedAt
+    timingStatus: timedReview ? "VERIFIED_WITHIN_240S" : "UNVERIFIED_POSTHOC",
+    generationFinishedAt: timedReview ? observation.stoppedAt : null,
+    reviewedAt: snaps[1].observedAt
   };
 }
 export function unavailableWebHandoff(prepared, reason) {

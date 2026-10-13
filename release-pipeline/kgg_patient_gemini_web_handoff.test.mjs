@@ -181,3 +181,40 @@ test("offline gallery never trusts web PASS from a different candidate", () =>
     assert.match(html, /Status: INCONCLUSIVE/);
     assert.doesNotMatch(html, /Status: PASS/);
   }));
+
+test("posthoc browser readback preserves suspected findings but not an unverified PASS", () =>
+  withFixture(({ dir }) => {
+    const f = { step: "remaining-kg", timestampLegacy: "00:06",
+      timestampReact: "00:05", severity: "critical",
+      description: "Grey full-frame compositor/recorder anomaly" };
+    const obs = observation(rawResponse({ verdict: "suspected_regression", findings: [f] }));
+    delete obs.startedAt;
+    delete obs.stoppedAt;
+    obs.timingStatus = "UNVERIFIED";
+    const result = finalizeWebHandoff(prepareWebHandoff(dir, SHA), obs);
+    assert.equal(result.status, "REVIEW_REQUIRED");
+    assert.equal(result.timingStatus, "UNVERIFIED_POSTHOC");
+    assert.equal(result.generationFinishedAt, null);
+    assert.equal(result.findings[0].severity, "critical");
+    const noFindings = observation(rawResponse());
+    delete noFindings.startedAt;
+    delete noFindings.stoppedAt;
+    noFindings.timingStatus = "UNVERIFIED";
+    assert.equal(finalizeWebHandoff(prepareWebHandoff(dir, SHA), noFindings).status,
+      "INCONCLUSIVE");
+  }));
+test("posthoc branch refuses partial, unmarked or invented timing", () =>
+  withFixture(({ dir }) => {
+    const p = prepareWebHandoff(dir, SHA);
+    const partial = observation();
+    delete partial.stoppedAt;
+    partial.timingStatus = "UNVERIFIED";
+    assert.throws(() => finalizeWebHandoff(p, partial), /Partial browser timing/);
+    const missing = observation();
+    delete missing.startedAt;
+    delete missing.stoppedAt;
+    assert.throws(() => finalizeWebHandoff(p, missing), /explicitly marked/);
+    const tooLong = observation();
+    tooLong.stoppedAt = "2026-10-12T10:06:00.000Z";
+    assert.throws(() => finalizeWebHandoff(p, tooLong), /overlong/);
+  }));
