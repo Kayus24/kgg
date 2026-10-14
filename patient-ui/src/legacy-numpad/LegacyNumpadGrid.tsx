@@ -15,8 +15,33 @@ function delegateLegacyKey(index: number) {
 
 export function LegacyNumpadGrid({ labels }: { labels: readonly string[] }) {
   useLayoutEffect(() => {
+    const keys = [...document.querySelectorAll<HTMLButtonElement>(LEGACY_KEYS)]
+    if (keys.length !== KEY_COUNT) return
+    const old = keys.map((key) => ({
+      visibility: key.style.visibility,
+      pointerEvents: key.style.pointerEvents,
+      ariaHidden: key.getAttribute("aria-hidden"),
+      tabIndex: key.getAttribute("tabindex"),
+    }))
+    keys.forEach((key) => {
+      key.style.visibility = "hidden"
+      key.style.pointerEvents = "none"
+      key.setAttribute("aria-hidden", "true")
+      key.tabIndex = -1
+    })
     document.body.classList.add("kggReactNumpadGridV1")
-    return () => document.body.classList.remove("kggReactNumpadGridV1")
+    return () => {
+      document.body.classList.remove("kggReactNumpadGridV1")
+      keys.forEach((key, index) => {
+        const previous = old[index]
+        key.style.visibility = previous.visibility
+        key.style.pointerEvents = previous.pointerEvents
+        if (previous.ariaHidden === null) key.removeAttribute("aria-hidden")
+        else key.setAttribute("aria-hidden", previous.ariaHidden)
+        if (previous.tabIndex === null) key.removeAttribute("tabindex")
+        else key.setAttribute("tabindex", previous.tabIndex)
+      })
+    }
   }, [])
 
   if (labels.length !== KEY_COUNT) return null
