@@ -102,8 +102,12 @@
     const el=document.getElementById('sum');
     if(!el)return;
     const before=el.textContent||'';
-    const compressed=compressText(before);
-    const after=annotateUniformSetRanges(compressed,currentContext());
+    if(el.__kggSummaryModel&&window.KGGPatientSummaryDisplay){const after=KGGPatientSummaryDisplay.render(el.__kggSummaryModel);el.__kggSummaryDisplay=after;if(after!==before)el.textContent=after;return;}
+    if(before!==el.__kggSummaryDisplay)el.__kggSummarySource=before;
+    const compressed=compressText(el.__kggSummarySource||before);
+    const canonical=annotateUniformSetRanges(compressed,currentContext());
+    const after=canonical;
+    el.__kggSummaryDisplay=after;
     if(after!==before)el.textContent=after;
   }
   function patchShowQr(){
@@ -113,7 +117,7 @@
     window.showQr=function(){const r=old.apply(this,arguments);setTimeout(apply,0);setTimeout(apply,80);setTimeout(apply,240);return r};
   }
   if(window.__KGG_TEST__)window.__kggSetSummaryGroupsTest={compressText,annotateUniformSetRanges,valueMapSignature,hasUniformCompletedSets};
-  function init(){patchShowQr();setTimeout(patchShowQr,300);setTimeout(patchShowQr,1000);setTimeout(apply,1200)}
+  function init(){if(window.addEventListener)window.addEventListener('kgg-patient-languagechange',apply);patchShowQr();setTimeout(patchShowQr,300);setTimeout(patchShowQr,1000);setTimeout(apply,1200)}
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
 })();
 
@@ -244,8 +248,9 @@
   }
   function applyDisplayNames(){
     if(!document||typeof document.querySelectorAll!=='function')return;
-    document.querySelectorAll('#list .ex').forEach((card,index)=>{const variant=displayedVariant(index),title=card.querySelector('h3');if(variant&&title)title.textContent=variant.name;});
+    document.querySelectorAll('#list .ex').forEach((card,index)=>{const variant=displayedVariant(index),title=card.querySelector('h3');if(variant&&title)title.textContent=window.KGGPatientI18n?KGGPatientI18n.progressionName(variant.name):variant.name;});
   }
+  if(window.addEventListener)window.addEventListener('kgg-patient-languagechange',()=>{applyDisplayNames();renderGalleries()});
   function css(){
     if(!document||typeof document.createElement!=='function'||!document.head)return;
     if($('kggTicket015PatientStyle'))return;
@@ -289,6 +294,8 @@
       @media(max-width:430px){.kgg015Gallery{grid-template-columns:32px minmax(0,1fr) 32px;padding:7px}.kggProgressionMediaBox{min-height:70px}.kggProgressionMediaBox img{max-height:110px}}
     `;document.head.appendChild(style);
   }
+  const displayName=name=>window.KGGPatientI18n?KGGPatientI18n.progressionName(name):name;
+  const stageLabel=()=>window.KGGPatientI18n?KGGPatientI18n.t('Stufe ','Stage '):'Stufe ';
   function mainMediaBox(index){const card=[...document.querySelectorAll('#list .ex')][index];return card&&card.querySelector('.kggMediaList .kggMediaBox');}
   function progressionThumbMarkup(item,targetId,index,setNo,stageIndex){
     const media=item&&item.media&&item.media[0];
@@ -303,7 +310,7 @@
   function mainPagerThumbs(card,index,setNo,values,at){
     card.querySelectorAll('.kgg015MainProgressionThumbs').forEach(node=>node.remove());
     const thumbs=document.createElement('div');thumbs.className='kgg015MainProgressionThumbs';thumbs.setAttribute('aria-label','Progressionsstufen auswählen');
-    thumbs.innerHTML=values.map((item,i)=>{const target='kgg015-thumb-'+index+'-'+setNo+'-'+item.id;return '<button type="button" class="kgg015MainProgressionThumb" data-kgg015-main-stage="'+esc(item.id)+'" aria-current="'+(i===at?'true':'false')+'" aria-label="Stufe '+(i+1)+': '+esc(item.name)+'"><div class="kggProgressionMediaBox loading" data-kgg-progression-media="'+esc(target)+'"><span>…</span></div><span class="kgg015MainProgressionThumbLabel">'+(i+1)+'</span></button>'}).join('');
+    thumbs.innerHTML=values.map((item,i)=>{const target='kgg015-thumb-'+index+'-'+setNo+'-'+item.id;return '<button type="button" class="kgg015MainProgressionThumb" data-kgg015-main-stage="'+esc(item.id)+'" aria-current="'+(i===at?'true':'false')+'" aria-label="'+stageLabel()+(i+1)+': '+esc(displayName(item.name))+'"><div class="kggProgressionMediaBox loading" data-kgg-progression-media="'+esc(target)+'"><span>…</span></div><span class="kgg015MainProgressionThumbLabel">'+(i+1)+'</span></button>'}).join('');
     const mediaList=card.querySelector('.kggMediaList');if(mediaList)mediaList.insertAdjacentElement('afterend',thumbs);else card.appendChild(thumbs);
     thumbs.querySelectorAll('[data-kgg015-main-stage]').forEach(button=>button.onclick=()=>selectVariant(index,setNo,button.dataset.kgg015MainStage));
     values.forEach((item,i)=>{const media=item.media&&item.media[0];if(!media)return;const target='kgg015-thumb-'+index+'-'+setNo+'-'+item.id;setTimeout(()=>{try{if(window.KGGPatientMediaRetryCache&&typeof window.KGGPatientMediaRetryCache.loadMedia==='function')window.KGGPatientMediaRetryCache.loadMedia(media,index,setNo,target)}catch(err){}},0);});
@@ -324,7 +331,7 @@
     const previous=at>0?values[at-1]:null,current=values[at]||values[0],next=at<values.length-1?values[at+1]:null,pager=document.createElement('div');
     pager.className='kgg015MainPager';
     const prevTarget=previous?'kgg015-main-'+index+'-'+setNo+'-'+previous.id:'',currentTarget='kgg015-main-'+index+'-'+setNo+'-'+current.id,nextTarget=next?'kgg015-main-'+index+'-'+setNo+'-'+next.id:'';
-    pager.innerHTML='<div class="kgg015MainPagerTrack">'+pagerSlide(previous,prevTarget,index,setNo,at-1,false)+pagerSlide(current,currentTarget,index,setNo,at,true)+pagerSlide(next,nextTarget,index,setNo,at+1,false)+'</div><div class="kgg015MainProgressionControls"><button type="button" class="kgg015MainProgressionControl" data-kgg015-main-prev aria-label="Leichtere Progressionsstufe" '+(at===0?'disabled':'')+'><i class="kgg015MainProgressionTriangle prev" aria-hidden="true"></i></button><span class="kgg015MainProgressionStage" aria-live="polite">Stufe '+(at+1)+' · '+esc(current.name)+'</span><button type="button" class="kgg015MainProgressionControl" data-kgg015-main-next aria-label="Schwerere Progressionsstufe" '+(at===values.length-1?'disabled':'')+'><i class="kgg015MainProgressionTriangle next" aria-hidden="true"></i></button></div>';
+    pager.innerHTML='<div class="kgg015MainPagerTrack">'+pagerSlide(previous,prevTarget,index,setNo,at-1,false)+pagerSlide(current,currentTarget,index,setNo,at,true)+pagerSlide(next,nextTarget,index,setNo,at+1,false)+'</div><div class="kgg015MainProgressionControls"><button type="button" class="kgg015MainProgressionControl" data-kgg015-main-prev aria-label="Leichtere Progressionsstufe" '+(at===0?'disabled':'')+'><i class="kgg015MainProgressionTriangle prev" aria-hidden="true"></i></button><span class="kgg015MainProgressionStage" aria-live="polite">'+stageLabel()+(at+1)+' · '+esc(displayName(current.name))+'</span><button type="button" class="kgg015MainProgressionControl" data-kgg015-main-next aria-label="Schwerere Progressionsstufe" '+(at===values.length-1?'disabled':'')+'><i class="kgg015MainProgressionTriangle next" aria-hidden="true"></i></button></div>';
     mediaList.appendChild(pager);pager.querySelector('[data-kgg015-main-prev]').onclick=()=>shiftVariant(index,setNo,-1);pager.querySelector('[data-kgg015-main-next]').onclick=()=>shiftVariant(index,setNo,1);bindMainPager(pager,index,setNo,values,at);mainPagerThumbs(card,index,setNo,values,at);
   }
   function refreshMainProgression(index=activeSet.index){
@@ -334,16 +341,16 @@
   function shiftVariant(index,setNo,delta){const values=valuesForExercise(index);if(!values.length)return;const at=Math.max(0,values.findIndex(item=>String(item.id)===String(selectedId(index,setNo)))),next=values[at+delta];if(!next)return;selectVariant(index,setNo,next.id)}
   function selectVariant(index,setNo,id){const values=valuesForExercise(index),item=variantById(values,id);if(!item)return;activeSet={index:Number(index),setNo:Number(setNo)};preferActiveMedia=true;sessionSelection[currentRecordKey(index,setNo)]=String(id);applyDominantMedia(true);renderGalleries(index);refreshMainProgression(index)}
   function mediaMarkup(item,targetId,index,setNo){
-    if(!item)return '<span>Kein Bild hinterlegt</span><small>Die Stufe ist trotzdem auswählbar.</small>';
-    const node='<div class="kggProgressionMediaBox loading" data-kgg-progression-media="'+esc(targetId)+'"><span>Bild wird geladen ...</span><small>Verschlüsselte Datei wird lokal verwendet.</small></div>';
+    if(!item)return '<span data-kgg-system-text>Kein Bild hinterlegt</span><small data-kgg-system-text>Die Stufe ist trotzdem auswählbar.</small>';
+    const node='<div class="kggProgressionMediaBox loading" data-kgg-progression-media="'+esc(targetId)+'"><span data-kgg-system-text>Bild wird geladen ...</span><small data-kgg-system-text>Verschlüsselte Datei wird lokal verwendet.</small></div>';
     setTimeout(()=>{try{if(window.KGGPatientMediaRetryCache&&typeof window.KGGPatientMediaRetryCache.loadMedia==='function')window.KGGPatientMediaRetryCache.loadMedia(item,index,setNo,targetId)}catch(err){}},0);
     return node;
   }
   function galleryHtml(index,setNo,cardSet){
     const state=groupState(index),values=state.values;if(!values.length)return;
     const id=selectedId(index,setNo),at=Math.max(0,values.findIndex(item=>item.id===id)),item=values[at],target='kgg015-media-'+index+'-'+setNo+'-'+id;
-    const dots=values.map((value,i)=>'<button type="button" data-kgg015-stage="'+esc(value.id)+'" aria-current="'+(i===at?'true':'false')+'" aria-label="Stufe '+(i+1)+': '+esc(value.name)+'">'+(i+1)+'</button>').join('');
-    const box=document.createElement('div');box.className='kgg015Gallery';box.dataset.kgg015Gallery=index+'|'+setNo;box.innerHTML='<button type="button" data-kgg015-prev aria-label="Leichtere Progressionsstufe" '+(at===0?'disabled':'')+'>‹</button><div class="kgg015GalleryViewport"><div class="kgg015GalleryStage">Stufe '+(at+1)+' von '+values.length+' · '+esc(item.name)+'</div>'+mediaMarkup(item.media&&item.media[0],target,index,setNo)+'<div class="kgg015GalleryDots">'+dots+'</div></div><button type="button" data-kgg015-next aria-label="Schwerere Progressionsstufe" '+(at===values.length-1?'disabled':'')+'>›</button>';
+    const dots=values.map((value,i)=>'<button type="button" data-kgg015-stage="'+esc(value.id)+'" aria-current="'+(i===at?'true':'false')+'" aria-label="'+stageLabel()+(i+1)+': '+esc(displayName(value.name))+'">'+(i+1)+'</button>').join('');
+    const box=document.createElement('div');box.className='kgg015Gallery';box.dataset.kgg015Gallery=index+'|'+setNo;box.innerHTML='<button type="button" data-kgg015-prev aria-label="Leichtere Progressionsstufe" '+(at===0?'disabled':'')+'>‹</button><div class="kgg015GalleryViewport"><div class="kgg015GalleryStage">'+stageLabel()+(at+1)+(window.KGGPatientI18n?KGGPatientI18n.t(' von ',' of '):' von ')+values.length+' · '+esc(displayName(item.name))+'</div>'+mediaMarkup(item.media&&item.media[0],target,index,setNo)+'<div class="kgg015GalleryDots">'+dots+'</div></div><button type="button" data-kgg015-next aria-label="Schwerere Progressionsstufe" '+(at===values.length-1?'disabled':'')+'>›</button>';
     box.querySelector('[data-kgg015-prev]').onclick=()=>{if(at>0)selectVariant(index,setNo,values[at-1].id)};
     box.querySelector('[data-kgg015-next]').onclick=()=>{if(at<values.length-1)selectVariant(index,setNo,values[at+1].id)};
     box.querySelectorAll('[data-kgg015-stage]').forEach(button=>button.onclick=()=>selectVariant(index,setNo,button.dataset.kgg015Stage));
@@ -358,6 +365,15 @@
     if(String(history.current.planId||'')!==planId()||Number(history.current.day)!==Number(day))return '';
     const rows=[];Object.keys(history.current.records||{}).forEach(key=>{const rec=history.current.records[key];if(!rec||!rec.previousId||String(rec.previousId)===String(rec.id))return;const index=Number(rec.exerciseIndex),values=valuesForExercise(index),from=variantById(values,rec.previousId),to=variantById(values,rec.id);if(from&&to)rows.push((originalNames[index]||'Übung')+': '+from.name+' → '+to.name)});
     return rows.length?'\n\nVariantenwechsel:\n'+[...new Set(rows)].join('\n'):'';
+  }
+  function registerSummaryDisplay(){
+    const display=window.KGGPatientSummaryDisplay;if(!display)return;
+    display.nameForExercise=index=>{const variant=displayedVariant(index);return variant?variant.name:originalNames[index]||p.ex[index].n;};
+    display.changesForDay=day=>{
+      if(String(history.current.planId||'')!==planId()||Number(history.current.day)!==Number(day))return [];
+      const changes=[];Object.values(history.current.records||{}).forEach(record=>{if(!record||!record.previousId||String(record.previousId)===String(record.id))return;const index=Number(record.exerciseIndex);if(!Number.isInteger(index)||index<0||!p.ex[index])return;const values=valuesForExercise(index),from=variantById(values,record.previousId),to=variantById(values,record.id);if(from&&to)changes.push({exerciseIndex:index,exerciseName:originalNames[index]||p.ex[index].n,fromId:from.id,fromName:from.name,toId:to.id,toName:to.name});});
+      return changes;
+    };
   }
   function qrProgressionSelection(index){
     const state=groupState(index),values=state.values;
@@ -400,7 +416,7 @@
     originalRender=render;window.render=function(){syncRawVariants();applyDominantMedia(preferActiveMedia);const result=originalRender.apply(this,arguments);[0,70,260].forEach(delay=>setTimeout(()=>{renderGalleries()},delay));return result};
   }
   function init(){
-    syncRawVariants();applyDominantMedia(preferActiveMedia);wrapRender();wrapPut();wrapText();wrapShowQr();wrapOpenPad();css();renderGalleries();refreshMainProgression();
+    syncRawVariants();registerSummaryDisplay();applyDominantMedia(preferActiveMedia);wrapRender();wrapPut();wrapText();wrapShowQr();wrapOpenPad();css();renderGalleries();refreshMainProgression();
     [250,800,1600].forEach(delay=>setTimeout(()=>{syncRawVariants();applyDominantMedia(preferActiveMedia);wrapRender();wrapPut();wrapText();wrapShowQr();wrapOpenPad();renderGalleries();refreshMainProgression()},delay));
   }
   function testDominant(values,records){const counts={};Object.values(records||{}).forEach(record=>{const id=String(record&&record.id||record);if(values.some(item=>String(item.id)===id))counts[id]=(counts[id]||0)+1});let winner=null;values.forEach(item=>{const count=counts[item.id]||0;if(!winner||count>winner.count||(count===winner.count&&item.order>winner.item.order))winner={item,count}});return winner&&winner.item||null}

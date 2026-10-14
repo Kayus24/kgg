@@ -1,3 +1,4 @@
+      ctx.filter='contrast(1.45) brightness(1.05) saturate(0)';
       ctx.drawImage(src,0,0);
       ctx.restore();
       return canvas;
@@ -677,4 +678,3 @@
   }
   async function callGeminiCurrentLayoutContactSheet(file){
     const keys=localGeminiKeys();
-    if(!keys.length)throw new Error('Kein QR. OCR braucht Admin-Konfig.');

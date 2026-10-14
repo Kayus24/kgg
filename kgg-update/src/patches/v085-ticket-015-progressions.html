@@ -28,6 +28,7 @@
       id:variantId(group,index,source),
       groupId:String(source.groupId||group),
       name:String(source.name||source.title||(index===0&&base&&base.name)||('Progressionsstufe '+(index+1))).trim(),
+      nameEn:typeof source.nameEn==='string'?source.nameEn.trim():index===0&&base&&source.name===base.name&&typeof base.nameEn==='string'?base.nameEn.trim():'',
       order:Number.isFinite(Number(source.order))?Number(source.order):index,
       sourceId:String(linked),
       media:mediaOf(source.media!==undefined?source:base&&index===0?base:{}),

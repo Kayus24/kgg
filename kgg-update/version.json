@@ -1,7 +1,7 @@
 {
-  "versionCode": 95,
-  "versionName": "1.0.95-cockpit-responsive-entry",
-  "indexUrl": "index.html?v=95",
-  "sha256": "8508f8e802286d41fc095a3473450e2e705c9d2396f838f0965e21fd496f702a",
-  "notes": "v095: Zeigt bei geladenen Cockpit-Trainingsplänen einen gezählten Handy-Einstieg neben dem schwebenden Scan-Dock und hält den Tablet-Einstieg leerzustandsfest."
+  "versionCode": 96,
+  "versionName": "1.0.96-patient-english-names",
+  "indexUrl": "index.html?v=96",
+  "sha256": "d9e4edcda8afd4cdfc821b4e9d155483a726cec4e9c4603e4eeee4b94a0bf2d3",
+  "notes": "v096: Englische Patienten-Anzeigenamen im Uebungseditor pflegen; deutsche Plan- und QR-Namen bleiben erhalten."
 }

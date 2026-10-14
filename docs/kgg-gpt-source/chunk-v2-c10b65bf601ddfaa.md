@@ -211,6 +211,7 @@
     return {
       name:name||ex.name||stripExerciseName(ex.rawText)||'',
       aliases:ex.aliases||name||ex.name||'',
+      ...(typeof ex.nameEn==='string'?{nameEn:ex.nameEn.trim()}:{}),
       sets:normalizeSetCount(ex.sets),
       unit:ex.unit||ex.metricUnit||'Wdh',
       weightUnit:ex.weightUnit||ex.loadUnit||'kg',
@@ -544,5 +545,3 @@
   }
   function resizeExerciseInputToContent(){
     const input=$('exerciseInput');
-    if(!input)return;
-    const hasText=!!input.value.trim();
