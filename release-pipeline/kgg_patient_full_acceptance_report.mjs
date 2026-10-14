@@ -28,11 +28,13 @@ export const GROUPS = [
     ids:["PAT-DB-001","PAT-DB-002"], screenshot:"db" },
   { id:"adaptive", label:"Responsive Satzansichten / 1–4 Sätze / Large UI / Tablet",
     ids:["PAT-UI-002","PAT-UI-003","PAT-UI-004","PAT-UI-008",
-      "PAT-UI-009","PAT-UI-010","PAT-UNIT-003"], screenshot:"adaptive" }
+      "PAT-UI-009","PAT-UI-010","PAT-UNIT-003"], screenshot:"adaptive" },
+  { id:"media", label:"Synthetische Bilder / Decoding / Thumbnail / Ready-Cache / Rerender",
+    ids:["PAT-MEDIA-006","PAT-MEDIA-011"], screenshot:"media" }
 ];
 const PENDING = [
   "KGGH2/H3-Link-/Text-Planimport ist im synthetischen Alt/Neu-Test; echte Kamera-/Foto-Scans, System-Clipboard-Kopiererfolg und Plan-Ersetzen-/Lösch-UI bleiben offen",
-  "Lokale Übungsdatenbank sowie adaptive Satzansichten im synthetischen Vergleich; externe Medien/Lightbox, patientenseitige Übungseinstellungen, Progression und weitere Detailfälle sind noch nicht durchgängig verglichen",
+  "Lokale Übungsdatenbank, adaptive Satzansichten und synthetische Medien-Stabilität im Vergleich; externe Bildquellen/Lightbox, patientenseitige Übungseinstellungen, Progression und weitere Fälle sind noch nicht durchgängig verglichen",
   "PWA-Installation, Offline-/Update-Recovery, Planverwaltung mit echten Patientendaten/Medien sowie iOS-Sonderfälle bleiben durch eigene Testbatterien und reale Geräte abzusichern",
   "Die optionale Satzschmerz-Speicherfunktion ist mit eigenem Legacy/React-Gate abgedeckt; die separate neue Blitz-Darstellung aus PR #306 bleibt ein eigener nicht gemergter Produktworkstream",
   "Physisches Oppo/Android-Chrome und iPhone/Safari sind durch Playwright Chromium/WebKit nicht real getestet",
@@ -165,7 +167,9 @@ export function renderAcceptanceHtml(summary) {
     ["db-legacy.png","Lokale Übungsdatenbank – Legacy"],
     ["db-react.png","Lokale Übungsdatenbank – React"],
     ["adaptive-legacy.png","Responsive Satzansichten – Legacy"],
-    ["adaptive-react.png","Responsive Satzansichten – React"]
+    ["adaptive-react.png","Responsive Satzansichten – React"],
+    ["media-legacy.png","Synthetische Medien – Legacy"],
+    ["media-react.png","Synthetische Medien – React"]
   ].map(a=>preview(...a)).join("");
   const coverage=summary.coverage||{status:"MISSING"};
   const mappedContent=coverage.status==="SNAPSHOT_ONLY"
