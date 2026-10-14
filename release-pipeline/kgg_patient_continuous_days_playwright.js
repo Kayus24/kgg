@@ -46,7 +46,40 @@ async function dismissInstallOverlay(page){
     await dismiss.click();
   }
 }
-async function confirmTicket034FinishIfShown(page){const modal=page.locator('#kggTicket034FinishModal');if(!(await modal.count())||!(await modal.isVisible().catch(()=>false)))return;const confirm=modal.getByRole('button',{name:'Training beenden',exact:true});assert(await confirm.count()===1,'Ticket-034 finish modal did not expose exactly one confirm button');await confirm.click();await modal.waitFor({state:'hidden'})}
+async function confirmTicket034FinishIfShown(page){
+  // The outcome may be a direct final QR or the Ticket-034 confirmation.
+  // An immediate isVisible() check can miss a delayed UI outcome in CI;
+  // wait for a real result instead of assuming confirmation is unnecessary.
+  try{
+    await page.waitForFunction(()=>{
+      const visible=id=>{
+        const el=document.getElementById(id);
+        return !!el&&!el.hidden&&!el.classList.contains('hide')&&
+          getComputedStyle(el).display!=='none'&&el.getClientRects().length>0
+      };
+      return visible('end')||visible('kggTicket034FinishModal')
+    },null,{timeout:8000});
+  }catch(error){
+    const state=await page.evaluate(()=>{
+      const describe=id=>{
+        const el=document.getElementById(id);
+        return !el?null:{hidden:el.hidden,className:String(el.className),
+          display:getComputedStyle(el).display,rectHeight:Math.round(el.getBoundingClientRect().height)}
+      };
+      return {day:Number(d),end:describe('end'),
+        modal:describe('kggTicket034FinishModal'),
+        finishButton:describe('plan'),selected:document.activeElement?.tagName||null};
+    }).catch(()=>({pageUnavailable:true}));
+    throw new Error('Finish UI produced neither QR nor confirmation: '+
+      JSON.stringify(state)+'; original='+error.message);
+  }
+  const modal=page.locator('#kggTicket034FinishModal');
+  if(!(await modal.count())||!(await modal.isVisible()))return;
+  const confirm=modal.getByRole('button',{name:'Training beenden',exact:true});
+  assert(await confirm.count()===1,'Ticket-034 finish modal did not expose exactly one confirm button');
+  await confirm.click();
+  await modal.waitFor({state:'hidden'});
+}
 async function finishFromUi(page,expectedQrDay,expectedNextDay){
   await dismissInstallOverlay(page);
   await page.locator('#plan > button.btn').click();
