@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 'use strict';
 const fs=require('fs'),http=require('http'),path=require('path'),cp=require('child_process'),assert=require('assert/strict'),{chromium}=require('playwright');
-const ROOT=path.resolve(__dirname,'..'),code=p=>'KGGH2:'+Buffer.from(JSON.stringify(p)).toString('base64url');
+const ROOT=path.resolve(__dirname,'..'),BASE_REV='f59bc55e6e22e1b04061557c710069f6cf8f0b21',code=p=>'KGGH2:'+Buffer.from(JSON.stringify(p)).toString('base64url');
 const svg='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="80" height="60"><rect width="80" height="60" fill="#2563eb"/></svg>');
 const first={i:'english-author-negative',t:'Synthetic author content',v:1,d:6,e:[['Eigene Übung',1,'B','kg','Wdh','','',[{id:'english-author-media',type:'image',src:svg,sourceMeta:{source:'Synthetic',credit:'Wert eingeben',url:'https://example.invalid'}}],'','','exercise','Neu']],m:{exerciseNamesEn:{'Eigene Übung':'Authored exercise'}}};
 const second={i:'english-second',t:'Second synthetic',v:1,d:6,e:[['Andere Übung',1,'B','kg','Wdh']],m:{exerciseNamesEn:{'Andere Übung':'Other authored exercise'}}};
 async function main(){
  let baseline=false;const original=new Map();
  const server=http.createServer((req,res)=>{let rel=new URL(req.url,'http://local').pathname.replace(/^\/kgg\/?/, '').replace(/^\/+/, '')||'index.html';const f=path.resolve(ROOT,rel);if(!f.startsWith(ROOT+path.sep)){res.statusCode=403;return res.end()}let body;
-  if(baseline){if(!original.has(rel)){try{original.set(rel,cp.execFileSync('git',['show','HEAD:'+rel],{cwd:ROOT,maxBuffer:5*1024*1024,stdio:['ignore','pipe','ignore']}))}catch(e){original.set(rel,null)}}body=original.get(rel)}else if(fs.existsSync(f)&&fs.statSync(f).isFile())body=fs.readFileSync(f);
+  if(baseline){if(!original.has(rel)){try{original.set(rel,cp.execFileSync('git',['show',BASE_REV+':'+rel],{cwd:ROOT,maxBuffer:5*1024*1024,stdio:['ignore','pipe','ignore']}))}catch(e){original.set(rel,null)}}body=original.get(rel)}else if(fs.existsSync(f)&&fs.statSync(f).isFile())body=fs.readFileSync(f);
   if(!body){res.statusCode=404;return res.end()}res.setHeader('Content-Type',f.endsWith('.html')?'text/html; charset=utf-8':f.endsWith('.js')?'text/javascript; charset=utf-8':f.endsWith('.json')?'application/json':f.endsWith('.css')?'text/css':'application/octet-stream');res.setHeader('Cache-Control','no-store');res.setHeader('Service-Worker-Allowed','/kgg/');res.end(body)});
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port+'/kgg/',browser=await chromium.launch({headless:true});
  try{

@@ -9,6 +9,7 @@ const { chromium } = require("playwright");
 const runtimeRoot = path.resolve(process.argv[2] || "");
 const REQUIRED_MODULES = [
   "patient-storage-scope.js",
+  "patient-i18n.js",
   "patient-plan-link-choice.js",
   "collapse-cards.js",
   "patient-card-progress.js",

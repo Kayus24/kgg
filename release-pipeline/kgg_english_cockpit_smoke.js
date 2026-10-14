@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 'use strict';
 const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert/strict'),cp=require('child_process');
-const ROOT=path.resolve(__dirname,'..'),rel='kgg-update/src/patches/v082-therapy-cockpit.html';
+const ROOT=path.resolve(__dirname,'..'),BASE_REV='f59bc55e6e22e1b04061557c710069f6cf8f0b21',rel='kgg-update/src/patches/v082-therapy-cockpit.html';
 function load(source){const window={location:{href:'https://example.test/'},KGG_PATCHES:{},addEventListener(){},dispatchEvent(){}},document={readyState:'loading',body:null,title:'Synthetic',addEventListener(){},getElementById(){return null}},context={window,document,TextEncoder,TextDecoder,URL,URLSearchParams,Uint8Array,Array,Object,Number,String,Math,Date,JSON,Error,RegExp,unescape,encodeURIComponent,decodeURIComponent,btoa:s=>Buffer.from(s,'binary').toString('base64'),atob:s=>Buffer.from(s,'base64').toString('binary'),navigator:{},setTimeout,clearTimeout,console};vm.createContext(context);vm.runInContext(source.match(/<script[^>]*id="kgg-therapy-cockpit-script"[^>]*>([\s\S]*?)<\/script>/)[1],context);return {api:window.KGGTherapyCockpit,window}}
-const legacy=load(cp.execFileSync('git',['show','HEAD:'+rel],{cwd:ROOT,encoding:'utf8',maxBuffer:2000000}));
+const legacy=load(cp.execFileSync('git',['show',BASE_REV+':'+rel],{cwd:ROOT,encoding:'utf8',maxBuffer:2000000}));
 const active=load(fs.readFileSync(path.join(ROOT,rel),'utf8')),id=active.api.registry.entries()[0].id;
 const exercise={id,name:active.api.registry.lookup(id).name,sets:1,side:'BI',loadUnit:'kg',metricUnit:'Wdh',previous:[['20','8']],today:[['20','8']],progressionGroupId:'pg-en',progressionVariants:[{id:'stage-en',name:'Eigene Stufe',sourceId:'',order:0,media:[]}],activeProgressionId:'stage-en'};
 const source={planId:'english-cockpit',name:'Synthetic',date:'2026-10-14',exercises:[exercise]},oldCode=legacy.api.encode(source);
@@ -13,7 +13,7 @@ assert.equal(labelDecoded.exercises[0].nameEn,'My main');assert.equal(labelDecod
 const clearWire={...labelled,exercises:[{...labelled.exercises[0],nameEn:'',progressionVariants:[{...labelled.exercises[0].progressionVariants[0],nameEn:''}]}]},clearDecoded=active.api.decode(active.api.encode(clearWire));assert.equal(clearDecoded.exercises[0].nameEn,'');assert.equal(clearDecoded.exercises[0].progressionVariants[0].nameEn,'');
 assert.throws(()=>active.api.encode({...labelled,exercises:[{...labelled.exercises[0],nameEn:'x'.repeat(201)}]}),e=>e.code==='english_name_invalid','long English label must fail closed instead of truncating');
 // Read-only compatibility probe: hypothetical added optional fields are ignored by the old reader.
-const optionalSource=cp.execFileSync('git',['show','HEAD:'+rel],{cwd:ROOT,encoding:'utf8',maxBuffer:2000000}).replace('var extra={};','var extra={ne:ex.nameEn||"My exercise"};').replace('extra.pv=cleanProgressionVariants(ex.progressionVariants,extra.g);','extra.pv=cleanProgressionVariants(ex.progressionVariants,extra.g);extra.pv.forEach(function(stage){stage.nameEn="My stage";});');
+const optionalSource=cp.execFileSync('git',['show',BASE_REV+':'+rel],{cwd:ROOT,encoding:'utf8',maxBuffer:2000000}).replace('var extra={};','var extra={ne:ex.nameEn||"My exercise"};').replace('extra.pv=cleanProgressionVariants(ex.progressionVariants,extra.g);','extra.pv=cleanProgressionVariants(ex.progressionVariants,extra.g);extra.pv.forEach(function(stage){stage.nameEn="My stage";});');
 const hypothetical=load(optionalSource),decoded=legacy.api.decode(hypothetical.api.encode(source));assert.equal(decoded.exercises[0].name,exercise.name);assert.equal(decoded.exercises[0].progressionVariants[0].name,'Eigene Stufe');assert.equal(decoded.exercises[0].nameEn,undefined);
 console.log('Cockpit optional extras compatibility: PASS (immutable old reader ignores x.ne/pv.nameEn, canonical identity preserved)');
 active.api.importCode(oldCode);const before=active.api.getSlot(0),key=active.api.contentKey(before);

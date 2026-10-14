@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Testing
 
-Generated retrieval pack. Source digest: `e01077464a27655c`.
+Generated retrieval pack. Source digest: `16fde4f9eea3a98c`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -1478,6 +1478,7 @@ RUNTIME_EXACT = {
 MODULE_SCRIPT_PATTERN = re.compile(r'<script src="(?P<src>\./[^"?]+\.js(?:\?[^"?]+)?)"></script>')
 DIRECT_FIRST_LOAD_MODULES = (
     "patient-storage-scope.js",
+    "patient-i18n.js",
     "vendor/fflate-0.8.3.js",
     "patient-qr-format.js",
     "patient-plan-link-choice.js",
