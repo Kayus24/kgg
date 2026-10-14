@@ -247,12 +247,16 @@ async function adaptiveParity(browser,port){
      }
     }
     if(config.id==="large390"){
-     await largeCompactContract(page);
-     const independent=await loadPage(browser,port,{...config,reactMode:mode==="react"});
-     try{
-      await largeSingleFieldContract(independent.page);
-      assert(independent.errors.length===0,"Large single-field page errors");
-     }finally{await independent.ctx.close()}
+     // largeCompactContract deliberately switches Compact -> Legacy set view.
+     // Run this stateful contract away from the parity page, which must stay Compact.
+     for(const check of [largeCompactContract,largeSingleFieldContract]){
+      const independent=await loadPage(browser,port,{...config,reactMode:mode==="react"});
+      try{
+       await check(independent.page);
+       assert(independent.errors.length===0,
+        "Independent Large UI page errors: "+independent.errors.join(" | "));
+      }finally{await independent.ctx.close()}
+     }
     }
     for(const [index,expected] of [[0,3],[1,1],[7,2],[8,4]]){
      const card=page.locator("#list .ex").nth(index);
