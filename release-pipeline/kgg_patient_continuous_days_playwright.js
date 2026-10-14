@@ -137,21 +137,14 @@ async function main(){
   const {port}=server.address();
   const browser=await (ENGINE==='webkit'?webkit:chromium).launch({headless:true});
   const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'allow'});
-  // The day/QR contract is not a media-source availability test.
-  // Use a deterministic, CORS-safe image for the unrelated external RepDB asset;
-  // the separate patient media suites continue to test real source failures.
-  const syntheticMedia='<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64">'+
-    '<rect width="64" height="64" fill="#dbe3ef"/></svg>';
-  await context.route(/^https:\/\/exercise-dataset\.com\/images\/flat\//,
-    route=>route.fulfill({status:200,contentType:'image/svg+xml',
-      headers:{'access-control-allow-origin':'*'},body:syntheticMedia}));
   const page=await context.newPage();
   // The install guide has a separate delayed auto-day migration. Keep this
   // continuous-day regression focused on the day-history/runtime contract.
   await page.addInitScript(()=>{window.__kggAutoDayRan=1;localStorage.setItem('kggInstallAsked','1')});
   page.setDefaultTimeout(8000);page.setDefaultNavigationTimeout(15000);
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  const plan={i:'continuous-days-playwright',t:'Fortlaufender Testplan',v:1,d:12,extendDays:true,stepDays:6,e:[['Beinpresse',1,'B','kg','Wdh']]};
+  // Unknown catalog name intentionally avoids unrelated external media in day/QR tests.
+  const plan={i:'continuous-days-playwright',t:'Fortlaufender Testplan',v:1,d:12,extendDays:true,stepDays:6,e:[['KGG Synthetic Day Exercise',1,'B','kg','Wdh']]};
   const url=`http://127.0.0.1:${port}/kgg/?kggReactPad=${MODE==='react'?'1':'0'}&plan=${encodeURIComponent('KGGH2:'+encodePlan(plan))}`;
   try{
     mark('boot continuous fixture');
