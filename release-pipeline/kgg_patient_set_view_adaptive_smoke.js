@@ -8,7 +8,7 @@ if(PARITY&&OUT&&path.basename(OUT)!=="patient-ui-parity")throw new Error("Invali
 const ROOT=path.resolve(__dirname,"..");
 function assert(x,m){if(!x)throw new Error(m)}
 function enc(plan){return Buffer.from(JSON.stringify(plan),"utf8").toString("base64url")}
-function typeFor(f){return f.endsWith(".html")?"text/html; charset=utf-8":f.endsWith(".js")?"text/javascript; charset=utf-8":f.endsWith(".json")?"application/json; charset=utf-8":f.endsWith(".png")?"image/png":"application/octet-stream"}
+function typeFor(f){return f.endsWith(".html")?"text/html; charset=utf-8":f.endsWith(".js")?"text/javascript; charset=utf-8":f.endsWith(".json")?"application/json; charset=utf-8":f.endsWith(".css")?"text/css; charset=utf-8":f.endsWith(".png")?"image/png":"application/octet-stream"}
 function fileFor(url){const rel=decodeURIComponent(String(url||"/").split("?")[0]).replace(/^\/+/, "")||"index.html",target=path.resolve(ROOT,rel);return target.startsWith(ROOT)&&fs.existsSync(target)&&fs.statSync(target).isFile()?target:null}
 async function openCard(card){for(let attempt=0;attempt<4;attempt++){if(await card.evaluate(e=>e.classList.contains("kggOpen")))return;const header=card.locator("h3");await header.evaluate(el=>el.click());await card.page().waitForTimeout(80)}throw new Error("card open state did not stabilize")}
 async function clickKey(page,label){await page.locator("#pad .padGrid").getByRole("button",{name:label,exact:true}).click()}
@@ -286,10 +286,34 @@ async function adaptiveParity(browser,port){
     await openCard(first);
     await clickInput(page,first.locator("input.num").first());
     await page.locator("#pad .padCancel").waitFor({state:"visible",timeout:8000});
-    if(mode==="react")await page.locator("[data-kgg-react-numpad-header='v1']")
-      .waitFor({state:"attached",timeout:8000});
+    if(mode==="react"){
+     try{
+      await page.locator("[data-kgg-react-numpad-header='v1']")
+        .waitFor({state:"attached",timeout:5000});
+     }catch(error){
+      const diag=await page.evaluate(()=>({
+       requested:window.__kggReactPadRequest,
+       enabled:localStorage.getItem("kggPatientReactPadV1"),
+       mounted:document.body.classList.contains("kggReactNumpadHeaderV1"),
+       root:!!document.getElementById("kggReactNumpadHeaderRoot"),
+       editor:window.__kggNumpadEditingApi?.getSnapshot?.(),
+       pair:document.querySelectorAll("#kggPadPair > .kggPairField").length,
+       padHidden:document.getElementById("pad")?.classList.contains("hide"),
+       cssLoaded:[...document.styleSheets].some(x=>x.href?.includes("kgg-patient-ui.css"))
+      })).catch(e=>({inspectError:String(e)}));
+      // Never serialize a raw Input element from the editor snapshot.
+      if(diag.editor)diag.editor={
+       padOpen:!!diag.editor.padOpen,
+       inputPresent:!!diag.editor.input,
+       key:diag.editor.meta?.key,
+       dirty:!!diag.editor.dirty
+      };
+      throw new Error("React NumPad header not attached: "+config.id+
+       " "+JSON.stringify(diag)+"; "+error.message);
+     }
+    }
     const mounted=await page.evaluate(()=>document.body.classList.contains("kggReactNumpadHeaderV1"));
-    assert(mounted===(mode==="react"),"Actual React/Legacy pad mount mismatch: "+mode);
+    assert(mounted===(mode==="react"),"Actual React/Legacy pad mount mismatch: "+mode+" "+config.id);
     if(OUT&&config.id==="phone390"){
      fs.mkdirSync(OUT,{recursive:true});
      await page.screenshot({path:path.join(OUT,"adaptive-"+mode+".png"),animations:"disabled"});
