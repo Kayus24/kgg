@@ -4,7 +4,7 @@ on:
   pull_request:
     # Temporary stacked-PR CI target: remove after #309 merges and #311 retargets main.
     # Stacked Draft-only branches; return to [main] as parents integrate.
-    branches: [main, 'test/patient-complete-react-acceptance-20261013', 'test/patient-react-interim-qr-parity-20261014', 'test/patient-react-scan-import-20261014', 'test/patient-react-plan-link-choices-20261014', 'test/patient-react-plan-manage-20261014']
+    branches: [main, 'test/patient-complete-react-acceptance-20261013', 'test/patient-react-interim-qr-parity-20261014', 'test/patient-react-scan-import-20261014', 'test/patient-react-plan-link-choices-20261014', 'test/patient-react-plan-manage-20261014', 'fix/patient-active-plan-delete-runtime-20261014']
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - '.github/workflows/kgg-patient-ui-parity.yml'
@@ -110,7 +110,7 @@ jobs:
         run: |
           KGG_DAYS_MODE=legacy node release-pipeline/kgg_patient_continuous_days_playwright.js
           KGG_DAYS_MODE=react node release-pipeline/kgg_patient_continuous_days_playwright.js
-      - name: Compare H2/H3 import, incoming link choices and plan management in both modes
+      - name: Compare H2/H3 import, plan choices, management and local exercise database
         shell: bash
         env:
           KGG_SCAN_BROWSER: ${{ matrix.browser }}
