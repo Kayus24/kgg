@@ -17,10 +17,12 @@ export const GROUPS = [
     ids:["PAT-DAY-001","PAT-DAY-002","PAT-DAY-003","PAT-DAY-004","PAT-HIST-001","PAT-STOR-001","PAT-MULTI-003","PAT-FIN-001","PAT-QR-001","PAT-QR-002","PAT-QR-004"],
     screenshot:"days" },
   { id:"pain", label:"Optionale Schmerzwerte pro Satz – Einstellungen, Tage, Reload und Wechsel",
-    ids:["PAT-PAIN-004"], screenshot:null }
+    ids:["PAT-PAIN-004"], screenshot:null },
+  { id:"scan", label:"KGGH2/H3-Link-/Text-Planimport und beschädigte Codes (keine Live-Kamera)",
+    ids:["PAT-IMPORT-001","PAT-IMPORT-002"], screenshot:"scan" }
 ];
 const PENDING = [
-  "QR-Kopieren (tatsächlicher System-Clipboard-Inhalt), Scan-/Kamera-Fallbacks und QR-Planimport sind noch nicht vollständig als Alt/Neu-Flow geprüft",
+  "KGGH2/H3-Link-/Text-Planimport ist im synthetischen Alt/Neu-Test; echte Kamera-/Foto-Scans, System-Clipboard-Kopiererfolg und Plan-Ersetzen-/Lösch-UI bleiben offen",
   "Übungsdatenbank, Zusatzübungen, Einstellungen, Medien/Lightbox und Progressionsauswahl noch nicht durchgängig als identischer Legacy/React-Flow belegt",
   "PWA-Installationsdialog, Offline-/Update-Recovery, Plan ersetzen/löschen und iOS-Sonderfälle bleiben durch eigene Testbatterien und reale Geräte abzusichern",
   "Die optionale Satzschmerz-Speicherfunktion ist mit eigenem Legacy/React-Gate abgedeckt; die separate neue Blitz-Darstellung aus PR #306 bleibt ein eigener nicht gemergter Produktworkstream",
@@ -144,7 +146,9 @@ export function renderAcceptanceHtml(summary) {
     ["days-legacy-final-qr.png","Finaler QR – Legacy"],
     ["days-react-final-qr.png","Finaler QR – React"],
     ["days-legacy-history-100.png","Tag 100 History – Legacy"],
-    ["days-react-history-100.png","Tag 100 History – React"]
+    ["days-react-history-100.png","Tag 100 History – React"],
+    ["scan-legacy.png","KGGH3-Linkplanimport – Legacy"],
+    ["scan-react.png","KGGH3-Linkplanimport – React"]
   ].map(a=>preview(...a)).join("");
   const coverage=summary.coverage||{status:"MISSING"};
   const mappedContent=coverage.status==="SNAPSHOT_ONLY"

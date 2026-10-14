@@ -30,7 +30,7 @@ test("four-mode signed candidate with proven extra flows remains final-device-pe
     const result=summarizeAcceptance(dir);
     assert.equal(result.status,"AUTOMATED_SCOPE_PASS_FINAL_PENDING");
     assert.equal(result.sourceSha,SHA);
-    assert.equal(result.blocks.length,4);
+    assert.equal(result.blocks.length,5);
     assert.ok(result.blocks.every(x=>x.status==="PASS"));
     assert.ok(result.pending.length>=4);
     assert.match(renderAcceptanceHtml(result),/kgg/ig);
@@ -120,4 +120,19 @@ test("canonical Drive-feature snapshot stays explicit and incomplete",()=>
     assert.match(html,/111/);
     assert.match(html,new RegExp(String(report.coverage.notMapped)));
     assert.equal(report.manualAcceptancePending,true);
+  }));
+
+test("scan proof cannot be missing, stale or attributed to the wrong browser",()=>
+  withFixture(({dir})=>{
+    fs.unlinkSync(path.join(dir,"scan-react.json"));
+    const absent=summarizeAcceptance(dir);
+    assert.equal(absent.status,"REVIEW_REQUIRED");
+    assert.equal(absent.blocks.find(x=>x.id==="scan").status,"NOT_EVIDENCED");
+    const p=path.join(dir,"scan-react.json");
+    const fake={schema:1,status:"PASS",engine:"webkit",mode:"react",
+      syntheticOnly:true,sourceSha:SHA,featureIds:["PAT-IMPORT-001","PAT-IMPORT-002"],
+      assertions:{h2Imported:true,h3Imported:true}};
+    fs.writeFileSync(p,JSON.stringify(fake));
+    assert.equal(summarizeAcceptance(dir).blocks.find(x=>x.id==="scan").status,
+      "REVIEW_REQUIRED");
   }));

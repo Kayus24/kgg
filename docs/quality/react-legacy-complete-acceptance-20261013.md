@@ -47,9 +47,9 @@ Das aktuelle Drive-Dokument *KGG Patienten-App – Feature & Regression
 Manifest* bleibt die fachliche Quelle. Stand-Snapshot im Repo:
 `docs/quality/patient-react-feature-inventory-20261013.json`.
 114 Manifestzeilen umfassen 111 unterschiedliche PAT-Funktions-IDs.
-Mit dem ergänzten Zwischenstands-QR-/Vollbild-Test sind 32 Funktions-IDs
-mindestens einem bisherigen oder neuen Alt/Neu-Testbaustein zugeordnet.
-Für 79 fehlt im betrachteten Vergleich noch eine solche Zuordnung.
+Auf dem neuen Folgebranch sind 34 Funktions-IDs mindestens einem bisherigen
+oder neuen Alt/Neu-Testbaustein zugeordnet (32 nach dem QR-Test, zusätzlich
+zwei mit synthetischem H2/H3-Planimport). Für 77 fehlt weiter diese Zuordnung.
 Dies gilt als Mapping-Fortschritt, erst nach bestandener CI als Testnachweis.
 **Zuordnung ist kein PASS** und **fehlende Zuordnung kein Beweis, dass eine
 Funktion generell ungetestet ist**. Weitere bestehende Tests sind in der
@@ -59,7 +59,7 @@ KGG-Testbatterie vorhanden; nicht pauschal duplizieren.
 
 **Nächste automatisierte Parity-Slices, bestehende Tests zuerst sichten:**
 1. Zwischenstands-QR (final=false, ohne Tagesabschluss), Vollbild und
-   Schließen sind im bestehenden Trainingstag-E2E ergänzt (CI-Prüfung offen).
+   Schließen sind im bestehenden Trainingstag-E2E ergänzt (PR #311 CI grün).
    Noch offen: tatsächlicher System-Clipboard-Kopiernachweis, QR-Planimport,
    Plan ersetzen/löschen, Speicherisolierung und Kamerafallback (synthetisch).
 2. DB/Übungssuche, Hinzufügen, Übungseinstellungen, Progressionsvarianten,
@@ -127,8 +127,27 @@ danach erst regulär Training beenden. Legacy/React und Chromium/WebKit
 laufen in den bestehenden CI-Jobs. Ob die OS-Clipboard-Operation
 wirklich erfolgreich war, wird NICHT behauptet – dies ist weiter offen.
 
-Solange diese neuen CI-Jobs nicht auf dem neuen Head bestanden sind,
-gilt dieser zusätzliche Scope als *Implementierung im Testbranch*,
-nicht als abgenommene Funktion. Der bereits grüne PR #309 bleibt
+Der Zwischenstands-QR-Scope wurde in PR #311 auf Head 46361d1 durch
+Chromium/WebKit und Build-CI bestätigt. Die nachfolgende Scanner-Erweiterung
+bleibt bis zu einem eigenen neuen CI-Nachweis ausdrücklich unbestätigt. Der bereits grüne PR #309 bleibt
 unangetastet. Der Gesamtabnahme-Blocker ist weiterhin die vollständige
 Testabdeckung und spätere reale Oppo-/iOS-Prüfung.
+
+## Nächster Test-Slice: synthetische H2/H3-Planimporte (14.10.2026)
+
+Neuer gestapelter **Test-only**-Branch auf bereits grünem PR #311; keine Änderung
+an der Patienten-App. Der bereits existierende
+`release-pipeline/kgg_patient_scan_format_smoke.js` wird für beide
+Anzeigemodi und Chromium/WebKit verwendet. Gültige KGGH2/KGGH3-Links und
+Hash-/Texteingaben müssen dieselben Übungen erzeugen. Beschädigte Codes
+werden abgelehnt, ein ungültiger Plan darf den bestehenden gespeicherten
+Plan nicht ersetzen. Der Test öffnet ein echtes NumPad, verifiziert den
+Legacy- bzw. React-Mount und bricht ohne Speichern ab. Synthetic-only,
+keine Fremd-Medien und kein Patientendatensatz. Scope: PAT-IMPORT-001/002;
+**keine echte Kamera-/Foto-/QR-Scan-Hardware- oder System-Clipboard-Abnahme**.
+
+Der unveränderte alte Scanner-Test lief auf dem privaten PC bereits vor der
+Änderung in einen Browser-Navigationstimeout. Daher keine wiederholten
+lokalen Langläufer; neue Änderungen werden durch die vorhandenen
+GitHub-Playwright-Gates auf exaktem Commit geprüft. Bis zum Erfolg ist
+`scan=NOT_EVIDENCED` bzw. neue CI `NOT_VERIFIED`, nicht PASS.

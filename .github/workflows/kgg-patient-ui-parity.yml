@@ -3,13 +3,15 @@ name: KGG Patient UI Legacy React Parity
 on:
   pull_request:
     # Temporary stacked-PR CI target: remove after #309 merges and #311 retargets main.
-    branches: [main, 'test/patient-complete-react-acceptance-20261013']
+    # Stacked Draft-only branches; return to [main] as parents integrate.
+    branches: [main, 'test/patient-complete-react-acceptance-20261013', 'test/patient-react-interim-qr-parity-20261014']
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - '.github/workflows/kgg-patient-ui-parity.yml'
       - 'release-pipeline/kgg_patient_ui_parity*'
       - 'release-pipeline/kgg_patient_unit_semantics_playwright.js'
       - 'release-pipeline/kgg_patient_continuous_days_playwright.js'
+      - 'release-pipeline/kgg_patient_scan_format_smoke.js'
       - 'release-pipeline/kgg_patient_full_acceptance_report*'
       - 'release-pipeline/kgg_patient_per_set_pain_playwright.js'
       - 'patient-card-settings.js'
@@ -65,6 +67,7 @@ jobs:
           node --check release-pipeline/kgg_patient_ui_parity_report.mjs
           node --check release-pipeline/kgg_patient_unit_semantics_playwright.js
           node --check release-pipeline/kgg_patient_continuous_days_playwright.js
+          node --check release-pipeline/kgg_patient_scan_format_smoke.js
           node --check release-pipeline/kgg_patient_full_acceptance_report.mjs
           node --test release-pipeline/kgg_patient_ui_parity_contracts.test.cjs release-pipeline/kgg_patient_full_acceptance_report.test.mjs
       - name: Install pinned browser dependencies
@@ -103,6 +106,13 @@ jobs:
         run: |
           KGG_DAYS_MODE=legacy node release-pipeline/kgg_patient_continuous_days_playwright.js
           KGG_DAYS_MODE=react node release-pipeline/kgg_patient_continuous_days_playwright.js
+      - name: Compare synthetic H2/H3 plan import and invalid-code protection in both UI modes
+        shell: bash
+        env:
+          KGG_SCAN_BROWSER: ${{ matrix.browser }}
+          KGG_PARITY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: node release-pipeline/kgg_patient_scan_format_smoke.js
       - name: Build offline side-by-side evidence gallery
         if: always()
         shell: bash
