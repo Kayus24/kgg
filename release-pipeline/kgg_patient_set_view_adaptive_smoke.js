@@ -246,10 +246,26 @@ async function adaptiveParity(browser,port){
       }finally{await independent.ctx.close()}
      }
     }
-    if(config.id==="large390")await largeCompactContract(page);
+    if(config.id==="large390"){
+     await largeCompactContract(page);
+     const independent=await loadPage(browser,port,{...config,reactMode:mode==="react"});
+     try{
+      await largeSingleFieldContract(independent.page);
+      assert(independent.errors.length===0,"Large single-field page errors");
+     }finally{await independent.ctx.close()}
+    }
     for(const [index,expected] of [[0,3],[1,1],[7,2],[8,4]]){
      const card=page.locator("#list .ex").nth(index);
-     await openCard(card);
+     try{await openCard(card)}catch(error){
+      const context=await card.evaluate(el=>({
+       title:el.querySelector("h3")?.textContent?.slice(0,90),
+       className:el.className,header:el.querySelector("h3")?.className,
+       hasSets:el.querySelectorAll(":scope > .set").length,
+       hidden:getComputedStyle(el).display==="none"
+      })).catch(e=>({inspectError:String(e)}));
+      throw new Error("Adaptive card open failed: "+mode+" "+config.id+
+       " index "+index+" "+JSON.stringify(context)+"; "+error.message);
+     }
      assert(await card.locator(":scope > .set").count()===expected,
       mode+" "+config.id+" expected "+expected+" visible set containers at "+index);
     }
