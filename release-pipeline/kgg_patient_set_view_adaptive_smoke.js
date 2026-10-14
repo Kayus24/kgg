@@ -1,15 +1,20 @@
 "use strict";
-const fs=require("fs"),http=require("http"),path=require("path"),{chromium}=require("playwright");
+const fs=require("fs"),http=require("http"),path=require("path"),{chromium,webkit}=require("playwright");
+const PARITY=process.env.KGG_ADAPTIVE_PARITY==="1";
+const ENGINE=process.env.KGG_ADAPTIVE_BROWSER||"chromium";
+const OUT=process.env.KGG_PARITY_OUT?path.resolve(process.env.KGG_PARITY_OUT):null;
+if(PARITY&&!["chromium","webkit"].includes(ENGINE))throw new Error("Unsupported adaptive parity browser");
+if(PARITY&&OUT&&path.basename(OUT)!=="patient-ui-parity")throw new Error("Invalid isolated evidence path");
 const ROOT=path.resolve(__dirname,"..");
 function assert(x,m){if(!x)throw new Error(m)}
 function enc(plan){return Buffer.from(JSON.stringify(plan),"utf8").toString("base64url")}
-function typeFor(f){return f.endsWith(".html")?"text/html; charset=utf-8":f.endsWith(".js")?"text/javascript; charset=utf-8":f.endsWith(".json")?"application/json; charset=utf-8":f.endsWith(".png")?"image/png":"application/octet-stream"}
+function typeFor(f){return f.endsWith(".html")?"text/html; charset=utf-8":f.endsWith(".js")?"text/javascript; charset=utf-8":f.endsWith(".json")?"application/json; charset=utf-8":f.endsWith(".css")?"text/css; charset=utf-8":f.endsWith(".png")?"image/png":"application/octet-stream"}
 function fileFor(url){const rel=decodeURIComponent(String(url||"/").split("?")[0]).replace(/^\/+/, "")||"index.html",target=path.resolve(ROOT,rel);return target.startsWith(ROOT)&&fs.existsSync(target)&&fs.statSync(target).isFile()?target:null}
 async function openCard(card){for(let attempt=0;attempt<4;attempt++){if(await card.evaluate(e=>e.classList.contains("kggOpen")))return;const header=card.locator("h3");await header.evaluate(el=>el.click());await card.page().waitForTimeout(80)}throw new Error("card open state did not stabilize")}
 async function clickKey(page,label){await page.locator("#pad .padGrid").getByRole("button",{name:label,exact:true}).click()}
 async function clickInput(page,input){const compact=await page.evaluate(()=>document.body.classList.contains("kggSetViewCompact"));if(!compact){await input.click();return}const proxyIndex=await input.evaluate(el=>[...el.parentElement.querySelectorAll(".kggCompactTapProxy")].findIndex(proxy=>proxy.__kggInput===el));assert(proxyIndex>=0,"compact input proxy missing");await input.locator("xpath=..").locator(".kggCompactTapProxy").nth(proxyIndex).click()}
 async function enter(page,input,value){await clickInput(page,input);for(const c of String(value))await clickKey(page,c==="."?",":c);await page.locator("#pad .padOk").click()}
-async function loadPage(browser,port,{width=390,height=844,rootFont=16,userAgent,lang="de"}={}){
+async function loadPage(browser,port,{width=390,height=844,rootFont=16,userAgent,lang="de",reactMode=null}={}){
  const ctx=await browser.newContext({viewport:{width,height},hasTouch:true,isMobile:width<760,userAgent:userAgent||undefined});
  const page=await ctx.newPage(),errors=[];page.on("pageerror",e=>errors.push(String(e)));
  const plan={i:"adaptive-view-smoke",t:"Adaptive Patient UI",v:1,d:6,e:[
@@ -21,8 +26,13 @@ async function loadPage(browser,port,{width=390,height=844,rootFont=16,userAgent
   ["LR no load",3,"LR","keine","Sek."],
   ["Pain only",1,"B","keine","none"]
  ]};
+ if(reactMode!==null)plan.e.push(
+  ["Two sets",2,"B","kg","Wdh"],
+  ["Four sets",4,"B","kg","Wdh"]
+ );
  await page.addInitScript(lang=>{localStorage.removeItem("kggPatientSetViewModeV1");localStorage.kggInstallAsked="1";localStorage.setItem("kggPatientLang",lang)},lang);
- await page.goto("http://127.0.0.1:"+port+"/?plan="+encodeURIComponent("KGGH2:"+enc(plan)),{waitUntil:"networkidle"});
+ const variant=reactMode===null?"":"kggReactPad="+(reactMode?"1":"0")+"&";
+ await page.goto("http://127.0.0.1:"+port+"/?"+variant+"plan="+encodeURIComponent("KGGH2:"+enc(plan)),{waitUntil:reactMode===null?"networkidle":"domcontentloaded",timeout:20000});
  await page.evaluate(rootFont=>{document.documentElement.style.fontSize=rootFont+"px"},rootFont);
  await page.waitForFunction(()=>document.body.classList.contains("kggAlwaysCollapsed"));await page.waitForTimeout(1250);
  return{ctx,page,errors};
@@ -206,10 +216,144 @@ async function iosLargeContract(browser,port){
   assert(errors.length===0,"iOS Large page errors: "+errors.join(" | "));
  }finally{await ctx.close()}
 }
+
+/** Compare the existing adaptive test contracts in both UI modes; never drive a second state owner. */
+async function adaptiveParity(browser,port){
+ const sha=process.env.KGG_PARITY_HEAD_SHA||"";
+ assert(/^[a-f0-9]{40}$/i.test(sha),"Adaptive parity requires exact candidate SHA");
+ const configs=[
+  {id:"phone320",width:320,height:844,rootFont:16},
+  {id:"phone390",width:390,height:844,rootFont:16},
+  {id:"large390",width:390,height:844,rootFont:18},
+  {id:"tablet820",width:820,height:1024,rootFont:16}
+ ];
+ const evidence=[];
+ for(const mode of ["legacy","react"]){
+  const viewResults=[];
+  for(const config of configs){
+   const {ctx,page,errors}=await loadPage(browser,port,{...config,reactMode:mode==="react"});
+   try{
+    if(config.id!=="large390")await geometryContract(page,config.width);
+    if(config.id==="phone390"){
+     // Existing standalone checks intentionally use a fresh page apiece.
+     // Keeping their independent contexts avoids accordion/overlay state leakage.
+     for(const check of [lrSingleFieldContract,noValuesContract,bilateralSingleCapsuleContract]){
+      const independent=await loadPage(browser,port,{...config,reactMode:mode==="react"});
+      try{
+       await check(independent.page);
+       assert(independent.errors.length===0,
+        "Independent adaptive check page errors: "+independent.errors.join(" | "));
+      }finally{await independent.ctx.close()}
+     }
+    }
+    if(config.id==="large390"){
+     // largeCompactContract deliberately switches Compact -> Legacy set view.
+     // Run this stateful contract away from the parity page, which must stay Compact.
+     for(const check of [largeCompactContract,largeSingleFieldContract]){
+      const independent=await loadPage(browser,port,{...config,reactMode:mode==="react"});
+      try{
+       await check(independent.page);
+       assert(independent.errors.length===0,
+        "Independent Large UI page errors: "+independent.errors.join(" | "));
+      }finally{await independent.ctx.close()}
+     }
+    }
+    for(const [index,expected] of [[0,3],[1,1],[7,2],[8,4]]){
+     const card=page.locator("#list .ex").nth(index);
+     try{await openCard(card)}catch(error){
+      const context=await card.evaluate(el=>({
+       title:el.querySelector("h3")?.textContent?.slice(0,90),
+       className:el.className,header:el.querySelector("h3")?.className,
+       hasSets:el.querySelectorAll(":scope > .set").length,
+       hidden:getComputedStyle(el).display==="none"
+      })).catch(e=>({inspectError:String(e)}));
+      throw new Error("Adaptive card open failed: "+mode+" "+config.id+
+       " index "+index+" "+JSON.stringify(context)+"; "+error.message);
+     }
+     assert(await card.locator(":scope > .set").count()===expected,
+      mode+" "+config.id+" expected "+expected+" visible set containers at "+index);
+    }
+    const signature=await page.evaluate(()=>{
+     const cards=[...document.querySelectorAll("#list .ex")];
+     const counts=[0,1,7,8].map(i=>cards[i]?.querySelectorAll(":scope > .set").length??-1);
+     return {cards:cards.length,counts,overflow:document.documentElement.scrollWidth>
+      document.documentElement.clientWidth+1,
+      noLoadVisible:[...cards[1].querySelectorAll("input.num")].filter(e=>getComputedStyle(e).display!=="none").length,
+      noValuesVisible:[...cards[6].querySelectorAll("input.num")].filter(e=>getComputedStyle(e).display!=="none").length};
+    });
+    assert(signature.cards===9&&signature.counts.join(",")==="3,1,2,4",
+     "Adaptive set-count regression: "+JSON.stringify(signature));
+    assert(!signature.overflow,"Adaptive viewport overflow "+mode+" "+config.id);
+    assert(signature.noLoadVisible===1&&signature.noValuesVisible===0,
+     "Adaptive inactive-unit visibility regression: "+JSON.stringify(signature));
+    const first=page.locator("#list .ex").first();
+    await openCard(first);
+    await clickInput(page,first.locator("input.num").first());
+    await page.locator("#pad .padCancel").waitFor({state:"visible",timeout:8000});
+    if(mode==="react"){
+     try{
+      await page.locator("[data-kgg-react-numpad-header='v1']")
+        .waitFor({state:"attached",timeout:5000});
+     }catch(error){
+      const diag=await page.evaluate(()=>({
+       requested:window.__kggReactPadRequest,
+       enabled:localStorage.getItem("kggPatientReactPadV1"),
+       mounted:document.body.classList.contains("kggReactNumpadHeaderV1"),
+       root:!!document.getElementById("kggReactNumpadHeaderRoot"),
+       editor:window.__kggNumpadEditingApi?.getSnapshot?.(),
+       pair:document.querySelectorAll("#kggPadPair > .kggPairField").length,
+       padHidden:document.getElementById("pad")?.classList.contains("hide"),
+       cssLoaded:[...document.styleSheets].some(x=>x.href?.includes("kgg-patient-ui.css"))
+      })).catch(e=>({inspectError:String(e)}));
+      // Never serialize a raw Input element from the editor snapshot.
+      if(diag.editor)diag.editor={
+       padOpen:!!diag.editor.padOpen,
+       inputPresent:!!diag.editor.input,
+       key:diag.editor.meta?.key,
+       dirty:!!diag.editor.dirty
+      };
+      throw new Error("React NumPad header not attached: "+config.id+
+       " "+JSON.stringify(diag)+"; "+error.message);
+     }
+    }
+    const mounted=await page.evaluate(()=>document.body.classList.contains("kggReactNumpadHeaderV1"));
+    assert(mounted===(mode==="react"),"Actual React/Legacy pad mount mismatch: "+mode+" "+config.id);
+    if(OUT&&config.id==="phone390"){
+     fs.mkdirSync(OUT,{recursive:true});
+     await page.screenshot({path:path.join(OUT,"adaptive-"+mode+".png"),animations:"disabled"});
+    }
+    await page.locator("#pad .padCancel").click();
+    assert(errors.length===0,"Adaptive page errors "+mode+" "+config.id+": "+errors.join(" | "));
+    viewResults.push({viewport:config.id,...signature,variantMounted:true});
+   }finally{await ctx.close()}
+  }
+  evidence.push({mode,views:viewResults});
+ }
+ assert(JSON.stringify(evidence[0].views)===JSON.stringify(evidence[1].views),
+  "Adaptive semantic layout differs between Legacy and React");
+ if(OUT){
+  for(const variant of evidence){
+   const proof={schema:1,status:"PASS",syntheticOnly:true,engine:ENGINE,mode:variant.mode,
+    sourceSha:sha,featureIds:["PAT-UI-002","PAT-UI-003","PAT-UI-004","PAT-UI-008",
+     "PAT-UI-009","PAT-UI-010","PAT-UNIT-003"],
+    assertions:{fourViewportContracts:true,oneToFourSets:true,threeSetsOneRow:true,
+     noHorizontalOverflow:true,largePadNoExtraZoom:true,inactiveFieldsHidden:true,
+     reactOwnerVerified:true,semanticParity:true,noBrowserErrors:true},
+    viewports:variant.views,
+    limitation:"Synthetic responsive DOM/Pad tests only; no real Oppo/iPhone compositor or visual pixel equivalence"};
+   fs.writeFileSync(path.join(OUT,"adaptive-"+variant.mode+".json"),JSON.stringify(proof,null,2)+"\n");
+  }
+ }
+ console.log(JSON.stringify({status:"PASS",engine:ENGINE,syntheticOnly:true,
+  sourceSha:sha,adaptive:evidence}));
+}
+
 async function main(){
  const server=http.createServer((req,res)=>{const f=fileFor(req.url);if(!f){res.statusCode=404;return res.end("404")}res.setHeader("Content-Type",typeFor(f));res.setHeader("Cache-Control","no-store");res.end(fs.readFileSync(f))});
- await new Promise(r=>server.listen(0,"127.0.0.1",r));const port=server.address().port,browser=await chromium.launch({headless:true});
+ await new Promise(r=>server.listen(0,"127.0.0.1",r));
+ const port=server.address().port,browser=await (PARITY?{chromium,webkit}[ENGINE]:chromium).launch({headless:true});
  try{
+  if(PARITY){await adaptiveParity(browser,port);return}
   for(const width of [320,360,390,430]){const {ctx,page,errors}=await loadPage(browser,port,{width,height:844,rootFont:16});try{await geometryContract(page,width);assert(errors.length===0,"page errors @"+width+": "+errors.join(" | "))}finally{await ctx.close()}}
   {const {ctx,page,errors}=await loadPage(browser,port,{width:390,height:844,rootFont:16});try{await compactFieldPresentationContract(page);await normalCompactContract(page);await securityContract(page);assert(errors.length===0,"normal page errors: "+errors.join(" | "))}finally{await ctx.close()}}
   {const {ctx,page,errors}=await loadPage(browser,port,{width:390,height:844,rootFont:16});try{await unitContract(page);assert(errors.length===0,"unit page errors: "+errors.join(" | "))}finally{await ctx.close()}}

@@ -30,7 +30,7 @@ test("four-mode signed candidate with proven extra flows remains final-device-pe
     const result=summarizeAcceptance(dir);
     assert.equal(result.status,"AUTOMATED_SCOPE_PASS_FINAL_PENDING");
     assert.equal(result.sourceSha,SHA);
-    assert.equal(result.blocks.length,8);
+    assert.equal(result.blocks.length,9);
     assert.ok(result.blocks.every(x=>x.status==="PASS"));
     assert.ok(result.pending.length>=4);
     assert.match(renderAcceptanceHtml(result),/kgg/ig);
@@ -113,7 +113,7 @@ test("canonical Drive-feature snapshot stays explicit and incomplete",()=>
     const report=summarizeAcceptance(dir);
     assert.equal(report.coverage.status,"SNAPSHOT_ONLY");
     assert.equal(report.coverage.total,111);
-    assert.ok(report.coverage.mapped>=32,"newly covered QR functions must remain mapped");
+    assert.ok(report.coverage.mapped>=48,"responsive layout mapping must remain present");
     assert.ok(report.coverage.notMapped<=79,"unmapped functions unexpectedly increased");
     assert.equal(report.coverage.mapped+report.coverage.notMapped,report.coverage.total);
     const html=renderAcceptanceHtml(report);
@@ -171,6 +171,28 @@ test("plan-management result does not pass with a missing or misattributed React
       assertions:{renamePersists:true,deleteActiveRestoresOther:true}}));
     result=summarizeAcceptance(dir);
     assert.equal(result.blocks.find(x=>x.id==="manage").status,"REVIEW_REQUIRED");
+  }));
+
+test("adaptive responsive evidence is fail-closed for missing, stale and incorrect modes",()=>
+  withFixture(({dir})=>{
+    const p=path.join(dir,"adaptive-react.json");
+    fs.unlinkSync(p);
+    let result=summarizeAcceptance(dir);
+    assert.equal(result.status,"REVIEW_REQUIRED");
+    assert.equal(result.blocks.find(x=>x.id==="adaptive").status,"NOT_EVIDENCED");
+    const proof={schema:1,status:"PASS",syntheticOnly:true,engine:"chromium",
+      mode:"react",sourceSha:"b".repeat(40),
+      featureIds:GROUPS.find(x=>x.id==="adaptive").ids,assertions:{viewport:true}};
+    fs.writeFileSync(p,JSON.stringify(proof));
+    result=summarizeAcceptance(dir);
+    assert.equal(result.blocks.find(x=>x.id==="adaptive").variants[1].status,"STALE");
+    proof.sourceSha=SHA;proof.assertions.viewport=false;
+    fs.writeFileSync(p,JSON.stringify(proof));
+    result=summarizeAcceptance(dir);
+    assert.equal(result.blocks.find(x=>x.id==="adaptive").status,"REVIEW_REQUIRED");
+    proof.assertions.viewport=true;proof.mode="legacy";
+    fs.writeFileSync(p,JSON.stringify(proof));
+    assert.equal(summarizeAcceptance(dir).blocks.find(x=>x.id==="adaptive").variants[1].status,"INVALID");
   }));
 
 test("database evidence is required for both Legacy and React and must match engine",()=>

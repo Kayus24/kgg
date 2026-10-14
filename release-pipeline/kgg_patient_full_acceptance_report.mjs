@@ -25,11 +25,14 @@ export const GROUPS = [
   { id:"manage", label:"Planverwaltung – Aktivanzeige, Umbenennen, Löschen und Werterhalt",
     ids:["PAT-MULTI-001","PAT-MULTI-004","PAT-MULTI-005","PAT-MULTI-006","PAT-DEL-001"], screenshot:"manage" },
   { id:"db", label:"Übungsdatenbank – suchen, übernehmen, speichern und Duplikate verhindern",
-    ids:["PAT-DB-001","PAT-DB-002"], screenshot:"db" }
+    ids:["PAT-DB-001","PAT-DB-002"], screenshot:"db" },
+  { id:"adaptive", label:"Responsive Satzansichten / 1–4 Sätze / Large UI / Tablet",
+    ids:["PAT-UI-002","PAT-UI-003","PAT-UI-004","PAT-UI-008",
+      "PAT-UI-009","PAT-UI-010","PAT-UNIT-003"], screenshot:"adaptive" }
 ];
 const PENDING = [
   "KGGH2/H3-Link-/Text-Planimport ist im synthetischen Alt/Neu-Test; echte Kamera-/Foto-Scans, System-Clipboard-Kopiererfolg und Plan-Ersetzen-/Lösch-UI bleiben offen",
-  "Lokale Übungsdatenbank-Suche/Übernahme geprüft; externe Medien/Lightbox, patientenseitige Übungseinstellungen, Progression und weitere Detailfälle sind noch nicht durchgängig verglichen",
+  "Lokale Übungsdatenbank sowie adaptive Satzansichten im synthetischen Vergleich; externe Medien/Lightbox, patientenseitige Übungseinstellungen, Progression und weitere Detailfälle sind noch nicht durchgängig verglichen",
   "PWA-Installation, Offline-/Update-Recovery, Planverwaltung mit echten Patientendaten/Medien sowie iOS-Sonderfälle bleiben durch eigene Testbatterien und reale Geräte abzusichern",
   "Die optionale Satzschmerz-Speicherfunktion ist mit eigenem Legacy/React-Gate abgedeckt; die separate neue Blitz-Darstellung aus PR #306 bleibt ein eigener nicht gemergter Produktworkstream",
   "Physisches Oppo/Android-Chrome und iPhone/Safari sind durch Playwright Chromium/WebKit nicht real getestet",
@@ -160,7 +163,9 @@ export function renderAcceptanceHtml(summary) {
     ["manage-legacy.png","Planverwaltung und Umbenennen – Legacy"],
     ["manage-react.png","Planverwaltung und Umbenennen – React"],
     ["db-legacy.png","Lokale Übungsdatenbank – Legacy"],
-    ["db-react.png","Lokale Übungsdatenbank – React"]
+    ["db-react.png","Lokale Übungsdatenbank – React"],
+    ["adaptive-legacy.png","Responsive Satzansichten – Legacy"],
+    ["adaptive-react.png","Responsive Satzansichten – React"]
   ].map(a=>preview(...a)).join("");
   const coverage=summary.coverage||{status:"MISSING"};
   const mappedContent=coverage.status==="SNAPSHOT_ONLY"
