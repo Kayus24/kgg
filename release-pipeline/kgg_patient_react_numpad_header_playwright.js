@@ -242,7 +242,7 @@ async function main(){
     if(!boot.bodyMode||!boot.root){
       manualImport=await page.evaluate(async()=>{
         try{
-          const module=await import("./patient-react-dist/kgg-patient-ui.js?v=p7-d14-react-header-1");
+          const module=await import("./patient-react-dist/kgg-patient-ui.js?v=p8-d14-react-grid-1");
           return{keys:Object.keys(module),mountType:typeof module.mountLegacyNumpadHeaderIsland,mountResult:!!module.mountLegacyNumpadHeaderIsland?.()};
         }catch(error){
           return{error:String(error),stack:error&&error.stack||""};
