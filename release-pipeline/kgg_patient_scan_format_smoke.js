@@ -60,6 +60,69 @@ async function checkVariant(page,react){
   await page.locator('#pad .padActions .padCancel').click();
   await page.locator('#pad').waitFor({state:'hidden'});
 }
+async function checkLocalExerciseDatabase(page,mode){
+  // The prior link test leaves plan A active, with a second preserved plan
+  // containing a different exercise. Both are synthetic and same-origin.
+  const before=await page.evaluate(()=>({
+    id:p.id,value:v[k(0,1,'B','a',1)],names:p.ex.map(x=>x.n)
+  }));
+  assert(before.id==='synthetic-link-a'&&before.value==='37'&&
+    before.names.length===1,'database precondition not met');
+  const open=page.locator('#kggPatientDbBtn');
+  await open.waitFor({state:'visible',timeout:10000});
+  await open.click();
+  const panel=page.locator('#kggDbPanel');
+  await panel.waitFor({state:'visible',timeout:8000});
+  await panel.locator('#kggDbSearch').fill('Replacement');
+  const cards=panel.locator('.kggDbCard');
+  await cards.first().waitFor({state:'visible'});
+  assert(await cards.count()===1 &&
+    (await cards.first().innerText()).includes('KGG Synthetic Replacement'),
+    'database search failed to isolate saved exercise from second plan');
+  assert((await cards.first().innerText()).includes('in Plan holen'),
+    'search result should be addable, not already in active plan');
+  await cards.first().click();
+  await panel.waitFor({state:'hidden'});
+  await page.waitForFunction(()=>p.ex.length===2 && p.ex[1].n==='KGG Synthetic Replacement',
+    null,{timeout:10000});
+  const after=await page.evaluate(()=>({
+    id:p.id,value:v[k(0,1,'B','a',1)],names:p.ex.map(x=>x.n),
+    saved:JSON.parse(localStorage.getItem('kggCurrentPlanV1')||'null')?.plan?.e?.map(x=>x[0]),
+    multi:JSON.parse(localStorage.getItem('kggPatientMultiPlansV1')||'null')
+  }));
+  assert(after.id===before.id&&after.value==='37'&&
+    after.names.length===2&&after.saved?.includes('KGG Synthetic Replacement'),
+    'adding exercise damaged active plan or failed to persist');
+  assert(after.multi?.plans?.length===2&&
+    after.multi.plans[1].e[0][0]==='KGG Synthetic Replacement',
+    'database action changed source-plan exercise');
+  await open.click();
+  await panel.waitFor({state:'visible'});
+  await panel.locator('#kggDbSearch').fill('Replacement');
+  await panel.locator('.kggDbCard').first().waitFor({state:'visible'});
+  assert((await panel.locator('.kggDbCard').first().innerText()).includes('schon im Plan'),
+    'database did not mark newly added exercise as already present');
+  if(OUT){
+    await page.screenshot({path:path.join(OUT,'db-'+mode+'.png'),animations:'disabled'});
+  }
+  await panel.locator('.kggDbCard').first().click();
+  await panel.waitFor({state:'hidden'});
+  assert(await page.evaluate(()=>p.ex.filter(x=>x.n==='KGG Synthetic Replacement').length)===1,
+    'duplicate database selection added exercise twice');
+  assert(await page.evaluate(()=>v[k(0,1,'B','a',1)])==='37',
+    'database duplicate protection altered saved exercise values');
+  if(OUT){
+    const proof={schema:1,status:'PASS',syntheticOnly:true,engine:ENGINE,mode,
+      sourceSha:SHA,featureIds:['PAT-DB-001','PAT-DB-002'],
+      assertions:{opens:true,searchFilters:true,importsFromStoredPlan:true,
+        persistsExercise:true,originalValuePreserved:true,
+        sourcePlanUnchanged:true,duplicateRejected:true,reactOwnerVerified:true},
+      limitation:'Local exercises from previously stored synthetic plans only; external catalog and media not tested'};
+    fs.writeFileSync(path.join(OUT,'db-'+mode+'.json'),JSON.stringify(proof,null,2)+'\n');
+  }
+  return {mode,status:'PASS',searched:true,added:true,duplicateRejected:true};
+}
+
 async function checkIncomingPlanChoices(browser,base,mode,sourcePlan){
   const context=await browser.newContext({viewport:{width:390,height:844},
     hasTouch:true,serviceWorkers:'block'});
@@ -159,8 +222,9 @@ async function checkIncomingPlanChoices(browser,base,mode,sourcePlan){
         limitation:'Synthetic plan-link choices only; not live camera, UI plan deletion/rename or OS clipboard'};
       fs.writeFileSync(path.join(OUT,'link-'+mode+'.json'),JSON.stringify(proof,null,2)+'\n')
     }
+    const db=await checkLocalExerciseDatabase(page,mode);
     return {mode,status:'PASS',cancel:true,add:true,replace:true,
-      originalValuePreserved:true};
+      originalValuePreserved:true,exerciseDatabase:db};
   }finally{await context.close()}
 }
 
