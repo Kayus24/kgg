@@ -92,8 +92,22 @@ async function verifyGridPilot(browser,port) {
       }
     });
     await page.goto(enabledUrl,{waitUntil:"domcontentloaded",timeout:15000});
-    await page.waitForFunction(()=>document.body.classList.contains("kggReactNumpadGridV1"),
-      null,{timeout:12000});
+    try {
+      await page.waitForFunction(()=>document.body.classList.contains("kggReactNumpadGridV1"),
+        null,{timeout:6000});
+    } catch (error) {
+      const diag=await page.evaluate(()=>({
+        request:window.__kggReactPadRequest,
+        gridFlag:new URLSearchParams(location.search).get("kggReactGrid"),
+        header:document.body.classList.contains("kggReactNumpadHeaderV1"),
+        grid:document.body.classList.contains("kggReactNumpadGridV1"),
+        root:!!document.getElementById("kggReactNumpadGridRoot"),
+        nativeKeys:document.querySelectorAll("#pad .padGrid > button").length,
+        modules:performance.getEntriesByType("resource").filter(x=>x.name.includes("patient-react-dist")).map(x=>x.name),
+        url:location.href.split("&plan=")[0]
+      }));
+      throw new Error("P8 mounting diagnostics "+JSON.stringify({diag,errors})+"; "+error.message);
+    }
     const card=page.locator("#list .ex").first();
     await openCard(card);
     const inputs=card.locator(":scope > .set").first().locator("input.num");
