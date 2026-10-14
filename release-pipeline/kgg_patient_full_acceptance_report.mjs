@@ -185,6 +185,7 @@ async function main(){
   if(process.argv.length!==3)throw new Error("Usage: node kgg_patient_full_acceptance_report.mjs PATH_TO_patient-ui-parity");
   const dir=path.resolve(process.argv[2]);
   const summary=summarizeAcceptance(dir);
+  fs.mkdirSync(dir,{recursive:true}); // INCOMPLETE artifact even after early CI failure
   fs.writeFileSync(path.join(dir,"acceptance.json"),JSON.stringify(summary,null,2)+"\n");
   fs.writeFileSync(path.join(dir,"acceptance.html"),renderAcceptanceHtml(summary));
   console.log("KGG unified acceptance: "+summary.status+"; blocks="+summary.blocks.map(x=>x.id+"="+x.status).join(","));
