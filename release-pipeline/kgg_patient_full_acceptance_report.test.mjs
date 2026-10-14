@@ -30,7 +30,7 @@ test("four-mode signed candidate with proven extra flows remains final-device-pe
     const result=summarizeAcceptance(dir);
     assert.equal(result.status,"AUTOMATED_SCOPE_PASS_FINAL_PENDING");
     assert.equal(result.sourceSha,SHA);
-    assert.equal(result.blocks.length,5);
+    assert.equal(result.blocks.length,6);
     assert.ok(result.blocks.every(x=>x.status==="PASS"));
     assert.ok(result.pending.length>=4);
     assert.match(renderAcceptanceHtml(result),/kgg/ig);
@@ -134,5 +134,25 @@ test("scan proof cannot be missing, stale or attributed to the wrong browser",()
       assertions:{h2Imported:true,h3Imported:true}};
     fs.writeFileSync(p,JSON.stringify(fake));
     assert.equal(summarizeAcceptance(dir).blocks.find(x=>x.id==="scan").status,
+      "REVIEW_REQUIRED");
+  }));
+
+test("new-plan link-choice proof cannot be missing, forged or stale",()=>
+  withFixture(({dir})=>{
+    const p=path.join(dir,"link-react.json");
+    fs.unlinkSync(p);
+    assert.equal(summarizeAcceptance(dir).blocks.find(x=>x.id==="link").status,
+      "NOT_EVIDENCED");
+    const fake={schema:1,status:"PASS",engine:"chromium",mode:"react",syntheticOnly:true,
+      sourceSha:"b".repeat(40),featureIds:["PAT-LINK-001","PAT-MULTI-002","PAT-SCAN-002"],
+      assertions:{cancelPreservesActive:true,addPreservesOldPlan:true,
+        activeReplaceOnly:true,savedValuesPreserved:true}};
+    fs.writeFileSync(p,JSON.stringify(fake));
+    assert.equal(summarizeAcceptance(dir).blocks.find(x=>x.id==="link").variants[1].status,
+      "STALE");
+    fake.sourceSha=SHA;
+    fake.assertions.activeReplaceOnly=false;
+    fs.writeFileSync(p,JSON.stringify(fake));
+    assert.equal(summarizeAcceptance(dir).blocks.find(x=>x.id==="link").status,
       "REVIEW_REQUIRED");
   }));
