@@ -60,6 +60,7 @@ jobs:
       - name: Validate recorder and report syntax
         shell: bash
         run: |
+          mkdir -p "$RUNNER_TEMP/patient-ui-parity"
           node --check release-pipeline/kgg_patient_ui_parity_capture.js
           node --check release-pipeline/kgg_patient_ui_parity_report.mjs
           node --check release-pipeline/kgg_patient_unit_semantics_playwright.js
