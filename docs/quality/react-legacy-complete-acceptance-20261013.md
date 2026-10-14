@@ -47,8 +47,10 @@ Das aktuelle Drive-Dokument *KGG Patienten-App – Feature & Regression
 Manifest* bleibt die fachliche Quelle. Stand-Snapshot im Repo:
 `docs/quality/patient-react-feature-inventory-20261013.json`.
 114 Manifestzeilen umfassen 111 unterschiedliche PAT-Funktions-IDs.
-30 sind mindestens einem bisherigen oder neuen Alt/Neu-Testbaustein
-zugeordnet. Für 81 fehlt im betrachteten Alt/Neu-Vergleich eine Zuordnung.
+Mit dem ergänzten Zwischenstands-QR-/Vollbild-Test sind 32 Funktions-IDs
+mindestens einem bisherigen oder neuen Alt/Neu-Testbaustein zugeordnet.
+Für 79 fehlt im betrachteten Vergleich noch eine solche Zuordnung.
+Dies gilt als Mapping-Fortschritt, erst nach bestandener CI als Testnachweis.
 **Zuordnung ist kein PASS** und **fehlende Zuordnung kein Beweis, dass eine
 Funktion generell ungetestet ist**. Weitere bestehende Tests sind in der
 KGG-Testbatterie vorhanden; nicht pauschal duplizieren.
@@ -56,8 +58,10 @@ KGG-Testbatterie vorhanden; nicht pauschal duplizieren.
 ## Noch offen, priorisiert nach Patientenrisiko und Testnutzen
 
 **Nächste automatisierte Parity-Slices, bestehende Tests zuerst sichten:**
-1. Zwischenstands-QR, endgültige QR-Ausgabe, Kopieren/Vollbild, QR-Planimport,
-   Ersetzen, Löschung, Speicherisolierung und Kamerafallback (synthetisch).
+1. Zwischenstands-QR (final=false, ohne Tagesabschluss), Vollbild und
+   Schließen sind im bestehenden Trainingstag-E2E ergänzt (CI-Prüfung offen).
+   Noch offen: tatsächlicher System-Clipboard-Kopiernachweis, QR-Planimport,
+   Plan ersetzen/löschen, Speicherisolierung und Kamerafallback (synthetisch).
 2. DB/Übungssuche, Hinzufügen, Übungseinstellungen, Progressionsvarianten,
    Medien/Lightbox und Karten-Ein-/Ausklappen bei 1/2/3/4+ Sätzen.
 3. PWA-/Offline-/Update-Recovery, First Load, Installationshilfe,
@@ -110,3 +114,21 @@ gestoppt. Ergebnis des **gesamten** lokalen Critical-Gates:
 `INCOMPLETE`, ausdrücklich **kein PASS**. Recovery-Notiz und Teil-Log
 stehen ausschließlich im ignorierten `.tmp`-Ordner. GitHub Required Gate
 des neuen Pull Requests bleibt ein separat nachzuweisendes Pflichtgate.
+
+## Weiterer enger Test-Slice: Zwischenstands-QR (14.10.2026)
+
+Auf dem getrennten Folgebranch des Draft-PR #309 wird der vorhandene
+Trainingstag-Browser-Test erweitert; keine Produktänderung und kein neues
+Testframework. Vor dem finalen T7-Abschluss wird ein **nicht-finaler QR**
+mit KGGD1-Payload erzeugt und verifiziert: richtiges Datum, final=false,
+kein veränderter Tages-/Done-/Wertezustand; QR-Bild öffnen, Vollbild
+schließen, Kopier-Button auslösen, QR-Payload muss erhalten bleiben,
+danach erst regulär Training beenden. Legacy/React und Chromium/WebKit
+laufen in den bestehenden CI-Jobs. Ob die OS-Clipboard-Operation
+wirklich erfolgreich war, wird NICHT behauptet – dies ist weiter offen.
+
+Solange diese neuen CI-Jobs nicht auf dem neuen Head bestanden sind,
+gilt dieser zusätzliche Scope als *Implementierung im Testbranch*,
+nicht als abgenommene Funktion. Der bereits grüne PR #309 bleibt
+unangetastet. Der Gesamtabnahme-Blocker ist weiterhin die vollständige
+Testabdeckung und spätere reale Oppo-/iOS-Prüfung.

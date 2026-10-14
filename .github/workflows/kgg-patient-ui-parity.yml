@@ -2,7 +2,8 @@ name: KGG Patient UI Legacy React Parity
 
 on:
   pull_request:
-    branches: [main]
+    # Temporary stacked-PR CI target: remove after #309 merges and #311 retargets main.
+    branches: [main, 'test/patient-complete-react-acceptance-20261013']
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - '.github/workflows/kgg-patient-ui-parity.yml'
@@ -59,6 +60,7 @@ jobs:
       - name: Validate recorder and report syntax
         shell: bash
         run: |
+          mkdir -p "$RUNNER_TEMP/patient-ui-parity"
           node --check release-pipeline/kgg_patient_ui_parity_capture.js
           node --check release-pipeline/kgg_patient_ui_parity_report.mjs
           node --check release-pipeline/kgg_patient_unit_semantics_playwright.js

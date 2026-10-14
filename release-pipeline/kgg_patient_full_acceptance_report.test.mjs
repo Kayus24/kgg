@@ -113,10 +113,11 @@ test("canonical Drive-feature snapshot stays explicit and incomplete",()=>
     const report=summarizeAcceptance(dir);
     assert.equal(report.coverage.status,"SNAPSHOT_ONLY");
     assert.equal(report.coverage.total,111);
-    assert.equal(report.coverage.mapped,30);
-    assert.equal(report.coverage.notMapped,81);
+    assert.ok(report.coverage.mapped>=32,"newly covered QR functions must remain mapped");
+    assert.ok(report.coverage.notMapped<=79,"unmapped functions unexpectedly increased");
+    assert.equal(report.coverage.mapped+report.coverage.notMapped,report.coverage.total);
     const html=renderAcceptanceHtml(report);
     assert.match(html,/111/);
-    assert.match(html,/81/);
+    assert.match(html,new RegExp(String(report.coverage.notMapped)));
     assert.equal(report.manualAcceptancePending,true);
   }));
