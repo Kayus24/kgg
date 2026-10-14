@@ -30,7 +30,7 @@ test("four-mode signed candidate with proven extra flows remains final-device-pe
     const result=summarizeAcceptance(dir);
     assert.equal(result.status,"AUTOMATED_SCOPE_PASS_FINAL_PENDING");
     assert.equal(result.sourceSha,SHA);
-    assert.equal(result.blocks.length,7);
+    assert.equal(result.blocks.length,8);
     assert.ok(result.blocks.every(x=>x.status==="PASS"));
     assert.ok(result.pending.length>=4);
     assert.match(renderAcceptanceHtml(result),/kgg/ig);
@@ -171,4 +171,25 @@ test("plan-management result does not pass with a missing or misattributed React
       assertions:{renamePersists:true,deleteActiveRestoresOther:true}}));
     result=summarizeAcceptance(dir);
     assert.equal(result.blocks.find(x=>x.id==="manage").status,"REVIEW_REQUIRED");
+  }));
+
+test("database evidence is required for both Legacy and React and must match engine",()=>
+  withFixture(({dir})=>{
+    const p=path.join(dir,"db-react.json");
+    fs.unlinkSync(p);
+    let report=summarizeAcceptance(dir);
+    assert.equal(report.status,"REVIEW_REQUIRED");
+    assert.equal(report.blocks.find(x=>x.id==="db").status,"NOT_EVIDENCED");
+    const invalid={schema:1,status:"PASS",syntheticOnly:true,
+      engine:"webkit",mode:"react",sourceSha:SHA,
+      featureIds:["PAT-DB-001","PAT-DB-002"],
+      assertions:{searchFilters:true,importsFromStoredPlan:true}};
+    fs.writeFileSync(p,JSON.stringify(invalid));
+    report=summarizeAcceptance(dir);
+    assert.equal(report.blocks.find(x=>x.id==="db").status,"REVIEW_REQUIRED");
+    invalid.engine="chromium";
+    invalid.assertions.duplicateRejected=false;
+    fs.writeFileSync(p,JSON.stringify(invalid));
+    assert.equal(summarizeAcceptance(dir).blocks.find(x=>x.id==="db").status,
+      "REVIEW_REQUIRED");
   }));
