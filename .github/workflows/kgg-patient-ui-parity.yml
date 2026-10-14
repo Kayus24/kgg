@@ -2,7 +2,8 @@ name: KGG Patient UI Legacy React Parity
 
 on:
   pull_request:
-    branches: [main]
+    # Temporary stacked-PR CI target: remove after #309 merges and #311 retargets main.
+    branches: [main, 'test/patient-complete-react-acceptance-20261013']
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - '.github/workflows/kgg-patient-ui-parity.yml'
