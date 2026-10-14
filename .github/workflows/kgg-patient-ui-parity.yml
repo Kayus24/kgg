@@ -20,6 +20,8 @@ on:
       - 'patient-start-values-day1.js'
       - 'patient-set-summary-groups.js'
       - 'patient-multiplan-db.js'
+      - 'patient-plan-delete.js'
+      - 'release-pipeline/kgg_patient_plan_delete_smoke.js'
       - 'patient-qr-format.js'
       - 'patient-last-value-hints.js'
       - 'patient-numpad-card-guard.js'
@@ -69,6 +71,8 @@ jobs:
           node --check release-pipeline/kgg_patient_continuous_days_playwright.js
           node --check release-pipeline/kgg_patient_scan_format_smoke.js
           node --check release-pipeline/kgg_patient_full_acceptance_report.mjs
+          node --check patient-plan-delete.js
+          node release-pipeline/kgg_patient_plan_delete_smoke.js
           node --test release-pipeline/kgg_patient_ui_parity_contracts.test.cjs release-pipeline/kgg_patient_full_acceptance_report.test.mjs
       - name: Install pinned browser dependencies
         shell: bash
