@@ -60,6 +60,110 @@ async function checkVariant(page,react){
   await page.locator('#pad .padActions .padCancel').click();
   await page.locator('#pad').waitFor({state:'hidden'});
 }
+async function checkIncomingPlanChoices(browser,base,mode,sourcePlan){
+  const context=await browser.newContext({viewport:{width:390,height:844},
+    hasTouch:true,serviceWorkers:'block'});
+  const page=await context.newPage();
+  const errors=[];
+  page.on('pageerror',error=>errors.push(error.message));
+  const planA={...sourcePlan,i:'synthetic-link-a',t:'Synthetic Plan A',
+    e:[['KGG Synthetic Original',1,'B','kg','Wdh']]};
+  const planB={...sourcePlan,i:'synthetic-link-b',t:'Synthetic Plan B',
+    e:[['KGG Synthetic Added',1,'B','kg','Wdh']]};
+  const planC={...sourcePlan,i:'synthetic-link-c',t:'Synthetic Plan C',
+    e:[['KGG Synthetic Replacement',1,'B','kg','Wdh']]};
+  const modeQuery='?kggReactPad='+(mode==='react'?'1':'0')+'&plan=';
+  const urlFor=(raw,format)=>base+'/index.html'+modeQuery+
+    encodeURIComponent(codeFor(raw,format));
+  try{
+    await page.addInitScript(()=>localStorage.setItem('kggInstallAsked','1'));
+    await page.goto(urlFor(planA,'KGGH2'),{waitUntil:'domcontentloaded',timeout:15000});
+    await page.waitForFunction(()=>typeof p!=='undefined'&&p?.id==='synthetic-link-a'&&
+      document.getElementById('status')?.textContent?.includes('importiert'),
+      null,{timeout:12000});
+    await page.evaluate(()=>put(0,1,'B','a','37'));
+    assert(await page.evaluate(()=>v[k(0,1,'B','a',1)])==='37',
+      'synthetic original plan value failed to persist');
+    const state=()=>page.evaluate(()=>({
+      current:JSON.parse(localStorage.getItem('kggCurrentPlanV1')||'null')?.plan?.i,
+      multi:JSON.parse(localStorage.getItem('kggPatientMultiPlansV1')||'null'),
+      active:typeof p==='undefined'?null:p.id,
+      saved:localStorage.getItem('kggCurrentPlanV1')
+    }));
+    const choose=async(raw,format,choice)=>{
+      await page.goto(urlFor(raw,format),{waitUntil:'domcontentloaded',timeout:15000});
+      const dialog=page.locator('#kggPlanLinkChoiceBackdrop');
+      await dialog.waitFor({state:'visible',timeout:12000});
+      assert(await dialog.getByRole('dialog').count()===1,
+        'link choice must be an accessible in-app dialog');
+      assert(await dialog.getByRole('button',{name:'Als zusätzlichen Plan hinzufügen'}).count()===1,
+        'link choice missing add action');
+      assert(await dialog.getByRole('button',{name:'Aktiven Plan ersetzen'}).count()===1,
+        'link choice missing replace action');
+      await page.locator('#kggPlanLinkChoice'+choice).click();
+      await dialog.waitFor({state:'detached',timeout:12000});
+    };
+    // CANCEL must not modify the active plan or silently add a slot.
+    await choose(planB,'KGGH3','Cancel');
+    let x=await state();
+    assert(x.current===planA.i&&x.active===planA.i,
+      'cancelling incoming link unexpectedly replaced the current plan');
+    assert(!x.multi||x.multi.plans.every(z=>z.i!==planB.i),
+      'cancelling incoming link added an unwanted plan');
+    assert(await page.evaluate(()=>v[k(0,1,'B','a',1)])==='37',
+      'cancel removed the original saved value');
+    // ADD must preserve A in an independent saved plan slot.
+    await choose(planB,'KGGH3','Add');
+    // Additional plans deliberately receive unique -p IDs to isolate their state.
+    await page.waitForFunction(sourceId=>{
+      const next=JSON.parse(localStorage.getItem('kggCurrentPlanV1')||'null')?.plan;
+      return typeof p!=='undefined'&&p?.id?.startsWith(sourceId+'-p') &&
+        next?.sourcePlanId===sourceId&&next.i===p.id
+    },planB.i,{timeout:12000});
+    x=await state();
+    assert(x.multi?.plans?.length===2&&x.current===x.active,
+      'adding a second plan did not create exactly two consistent slots');
+    assert(x.multi.plans.some(z=>z.i===planA.i)&&
+      x.multi.plans.some(z=>z.sourcePlanId===planB.i&&z.i===x.active),
+      'adding plan B overwrote plan A or omitted a unique new ID');
+    // REPLACE affects active B only, not the preserved A slot.
+    await choose(planC,'KGGH2','Replace');
+    // Replacement deliberately receives a unique -r ID and sourcePlanId.
+    await page.waitForFunction(sourceId=>{
+      const next=JSON.parse(localStorage.getItem('kggCurrentPlanV1')||'null')?.plan;
+      return typeof p!=='undefined'&&p?.id?.startsWith(sourceId+'-r') &&
+        next?.sourcePlanId===sourceId&&next.i===p.id
+    },planC.i,{timeout:12000});
+    x=await state();
+    assert(x.multi?.plans?.length===2&&x.current===x.active,
+      'replacing active B changed total count or current/active identity');
+    assert(x.multi.plans.some(z=>z.i===planA.i) &&
+      x.multi.plans.some(z=>z.sourcePlanId===planC.i&&z.i===x.active) &&
+      !x.multi.plans.some(z=>z.sourcePlanId===planB.i),
+      'replace operation lost A, retained B or failed to assign a new ID');
+    const switched=await page.evaluate(()=>window.KGGPatientMultiPlan.switchTo(0));
+    assert(switched===true,'could not switch to preserved original plan');
+    await page.waitForFunction(id=>typeof p!=='undefined'&&p?.id===id,
+      planA.i,{timeout:10000});
+    assert(await page.evaluate(()=>v[k(0,1,'B','a',1)])==='37',
+      'add/replace/switch altered original plan A training values');
+    await checkVariant(page,mode==='react');
+    assert(errors.length===0,'link choice browser errors: '+JSON.stringify(errors));
+    if(OUT){
+      await page.screenshot({path:path.join(OUT,'link-'+mode+'.png'),animations:'disabled'});
+      const proof={schema:1,status:'PASS',engine:ENGINE,mode,sourceSha:SHA,
+        syntheticOnly:true,featureIds:['PAT-LINK-001','PAT-MULTI-002','PAT-SCAN-002'],
+        assertions:{cancelPreservesActive:true,addPreservesOldPlan:true,
+          activeReplaceOnly:true,savedValuesPreserved:true,uiDialog:true,
+          reactOwnerVerified:true,noBrowserErrors:true},
+        limitation:'Synthetic plan-link choices only; not live camera, UI plan deletion/rename or OS clipboard'};
+      fs.writeFileSync(path.join(OUT,'link-'+mode+'.json'),JSON.stringify(proof,null,2)+'\n')
+    }
+    return {mode,status:'PASS',cancel:true,add:true,replace:true,
+      originalValuePreserved:true};
+  }finally{await context.close()}
+}
+
 async function main(){
   const raw={v:1,i:'scanner-v81',t:'SYNTHETIC Scan Contract',d:6,stepDays:6,
     extendDays:true,e:[
@@ -133,8 +237,12 @@ async function main(){
         fs.writeFileSync(path.join(OUT,'scan-'+mode+'.json'),JSON.stringify(proof,null,2)+'\n')
       }
     }
+    const planLinkChoices=[];
+    for(const mode of ['legacy','react']){
+      planLinkChoices.push(await checkIncomingPlanChoices(browser,base,mode,raw));
+    }
     assert(results.length===4,'missing engine/mode/format coverage');
-    console.log(JSON.stringify({status:'PASS',engine:ENGINE,syntheticOnly:true,sourceSha:SHA,results}))
+    console.log(JSON.stringify({status:'PASS',engine:ENGINE,syntheticOnly:true,sourceSha:SHA,results,planLinkChoices}))
   }finally{
     await browser.close();
     if(typeof server.closeAllConnections==='function')server.closeAllConnections();
