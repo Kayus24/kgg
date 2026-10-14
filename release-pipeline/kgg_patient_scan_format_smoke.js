@@ -114,23 +114,33 @@ async function checkIncomingPlanChoices(browser,base,mode,sourcePlan){
       'cancel removed the original saved value');
     // ADD must preserve A in an independent saved plan slot.
     await choose(planB,'KGGH3','Add');
-    await page.waitForFunction(id=>typeof p!=='undefined'&&p?.id===id,
-      planB.i,{timeout:12000});
+    // Additional plans deliberately receive unique -p IDs to isolate their state.
+    await page.waitForFunction(sourceId=>{
+      const next=JSON.parse(localStorage.getItem('kggCurrentPlanV1')||'null')?.plan;
+      return typeof p!=='undefined'&&p?.id?.startsWith(sourceId+'-p') &&
+        next?.sourcePlanId===sourceId&&next.i===p.id
+    },planB.i,{timeout:12000});
     x=await state();
-    assert(x.current===planB.i&&x.multi?.plans?.length===2,
-      'adding a second plan did not create exactly two slots');
-    assert(x.multi.plans.some(z=>z.i===planA.i)&&x.multi.plans.some(z=>z.i===planB.i),
-      'adding plan B overwrote plan A');
+    assert(x.multi?.plans?.length===2&&x.current===x.active,
+      'adding a second plan did not create exactly two consistent slots');
+    assert(x.multi.plans.some(z=>z.i===planA.i)&&
+      x.multi.plans.some(z=>z.sourcePlanId===planB.i&&z.i===x.active),
+      'adding plan B overwrote plan A or omitted a unique new ID');
     // REPLACE affects active B only, not the preserved A slot.
     await choose(planC,'KGGH2','Replace');
-    await page.waitForFunction(id=>typeof p!=='undefined'&&p?.id===id,
-      planC.i,{timeout:12000});
+    // Replacement deliberately receives a unique -r ID and sourcePlanId.
+    await page.waitForFunction(sourceId=>{
+      const next=JSON.parse(localStorage.getItem('kggCurrentPlanV1')||'null')?.plan;
+      return typeof p!=='undefined'&&p?.id?.startsWith(sourceId+'-r') &&
+        next?.sourcePlanId===sourceId&&next.i===p.id
+    },planC.i,{timeout:12000});
     x=await state();
-    assert(x.current===planC.i&&x.multi?.plans?.length===2,
-      'replacing active B changed total plan count');
+    assert(x.multi?.plans?.length===2&&x.current===x.active,
+      'replacing active B changed total count or current/active identity');
     assert(x.multi.plans.some(z=>z.i===planA.i) &&
-      !x.multi.plans.some(z=>z.i===planB.i),
-      'replace operation lost A or retained overwritten B');
+      x.multi.plans.some(z=>z.sourcePlanId===planC.i&&z.i===x.active) &&
+      !x.multi.plans.some(z=>z.sourcePlanId===planB.i),
+      'replace operation lost A, retained B or failed to assign a new ID');
     const switched=await page.evaluate(()=>window.KGGPatientMultiPlan.switchTo(0));
     assert(switched===true,'could not switch to preserved original plan');
     await page.waitForFunction(id=>typeof p!=='undefined'&&p?.id===id,
