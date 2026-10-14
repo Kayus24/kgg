@@ -57,8 +57,10 @@ async function runVariant(browser,port,mode){
     complete:!!img?.complete,width:img?.naturalWidth||0,height:img?.naturalHeight||0};
   });
   assert(before.ready&&before.thumbReady,"fixture media did not reach ready state: "+JSON.stringify(before));
+  // The patient media cache can convert a valid inline asset into a blob URL.
+  // Decode quality and same-page identity matter; blob IDs are context-local.
   assert(before.complete&&before.width>0&&before.height>0&&
-   before.src.startsWith("data:image/svg+xml;base64,"),
+   (before.src.startsWith("blob:")||before.src.startsWith("data:image/svg+xml;base64,")),
    "synthetic media failed decoding: "+JSON.stringify(before));
   const direct=await page.evaluate(()=>{
    const card=document.querySelector("#list .ex"),thumbBefore=card.querySelector(".kggCardThumb img"),
@@ -108,8 +110,12 @@ async function runVariant(browser,port,mode){
    }
   }
   assert(errors.length===0,"media page errors: "+errors.join(" | "));
+  const sourceKind=before.src.startsWith("blob:")?"blob":"data";
+  const thumbKind=before.thumbSrc.startsWith("blob:")?"blob":
+    before.thumbSrc.startsWith("data:")?"data":"other";
+  assert(thumbKind!=="other","unexpected thumbnail source scheme");
   return {mode:mode??"standalone",src:before.src,thumbSrc:before.thumbSrc,
-   dimensions:[before.width,before.height],ready:before.ready,
+   sourceKind,thumbKind,dimensions:[before.width,before.height],ready:before.ready,
    thumbReady:before.thumbReady,direct,frames:rerender.length,
    states:rerender.map(x=>({ready:x.ready,loading:x.loading})),
    variantMounted:PARITY};
@@ -126,7 +132,7 @@ async function main(){
   }
   const results=[];
   for(const mode of ["legacy","react"])results.push(await runVariant(browser,port,mode));
-  const comparable=entry=>({src:entry.src,thumbSrc:entry.thumbSrc,
+  const comparable=entry=>({sourceKind:entry.sourceKind,thumbKind:entry.thumbKind,
    dimensions:entry.dimensions,ready:entry.ready,thumbReady:entry.thumbReady,
    direct:entry.direct,frames:entry.frames,states:entry.states});
   assert(JSON.stringify(comparable(results[0]))===JSON.stringify(comparable(results[1])),
