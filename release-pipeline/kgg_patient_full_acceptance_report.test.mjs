@@ -30,7 +30,7 @@ test("four-mode signed candidate with proven extra flows remains final-device-pe
     const result=summarizeAcceptance(dir);
     assert.equal(result.status,"AUTOMATED_SCOPE_PASS_FINAL_PENDING");
     assert.equal(result.sourceSha,SHA);
-    assert.equal(result.blocks.length,6);
+    assert.equal(result.blocks.length,7);
     assert.ok(result.blocks.every(x=>x.status==="PASS"));
     assert.ok(result.pending.length>=4);
     assert.match(renderAcceptanceHtml(result),/kgg/ig);
@@ -155,4 +155,20 @@ test("new-plan link-choice proof cannot be missing, forged or stale",()=>
     fs.writeFileSync(p,JSON.stringify(fake));
     assert.equal(summarizeAcceptance(dir).blocks.find(x=>x.id==="link").status,
       "REVIEW_REQUIRED");
+  }));
+
+test("plan-management result does not pass with a missing or misattributed React proof",()=>
+  withFixture(({dir})=>{
+    const p=path.join(dir,"manage-react.json");
+    fs.unlinkSync(p);
+    let result=summarizeAcceptance(dir);
+    assert.equal(result.status,"REVIEW_REQUIRED");
+    assert.equal(result.blocks.find(x=>x.id==="manage").status,"NOT_EVIDENCED");
+    fs.writeFileSync(p,JSON.stringify({schema:1,status:"PASS",
+      syntheticOnly:true,engine:"webkit",mode:"react",sourceSha:SHA,
+      featureIds:["PAT-MULTI-001","PAT-MULTI-004","PAT-MULTI-005",
+        "PAT-MULTI-006","PAT-DEL-001"],
+      assertions:{renamePersists:true,deleteActiveRestoresOther:true}}));
+    result=summarizeAcceptance(dir);
+    assert.equal(result.blocks.find(x=>x.id==="manage").status,"REVIEW_REQUIRED");
   }));

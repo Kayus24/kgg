@@ -164,6 +164,137 @@ async function checkIncomingPlanChoices(browser,base,mode,sourcePlan){
   }finally{await context.close()}
 }
 
+async function checkPlanManagement(browser,base,mode,sourcePlan){
+  const context=await browser.newContext({viewport:{width:390,height:844},
+    hasTouch:true,serviceWorkers:'block'});
+  const page=await context.newPage();
+  const errors=[];
+  page.on('pageerror',error=>errors.push(error.message));
+  const planA={...sourcePlan,i:'synthetic-manage-a',t:'Synthetic Plan A',
+    e:[['KGG Synthetic Manage A',1,'B','kg','Wdh']]};
+  const planB={...sourcePlan,i:'synthetic-manage-b',t:'Synthetic Plan B',
+    e:[['KGG Synthetic Manage B',1,'B','kg','Wdh']]};
+  const state=()=>page.evaluate(()=>({
+    multi:JSON.parse(localStorage.getItem('kggPatientMultiPlansV1')||'null'),
+    current:JSON.parse(localStorage.getItem('kggCurrentPlanV1')||'null')?.plan,
+    runtime:typeof p==='undefined'?null:{id:p.id,title:p.title},
+    firstValue:typeof v==='undefined'?null:v[k(0,1,'B','a',1)]
+  }));
+  const openManager=async()=>{
+    const fab=page.locator('#kggActionFab');
+    await fab.waitFor({state:'visible',timeout:12000});
+    await fab.click();
+    await page.locator('#kggBubblePlans').waitFor({state:'visible',timeout:8000});
+    await page.locator('#kggBubblePlans').click();
+    const panel=page.locator('#kggPlanDeletePanel');
+    await panel.waitFor({state:'visible',timeout:8000});
+    return panel
+  };
+  try{
+    await page.addInitScript(()=>localStorage.setItem('kggInstallAsked','1'));
+    await page.goto(base+'/index.html?kggReactPad='+(mode==='react'?'1':'0')+
+      '&plan='+encodeURIComponent(codeFor(planA,'KGGH2')),
+      {waitUntil:'domcontentloaded',timeout:15000});
+    await page.waitForFunction(id=>typeof p!=='undefined'&&p?.id===id,
+      planA.i,{timeout:12000});
+    await page.evaluate(()=>put(0,1,'B','a','51'));
+    assert((await state()).firstValue==='51','plan-management seed not saved');
+    const added=await page.evaluate(raw=>window.KGGPatientPlanSlots.addPlan(raw),planB);
+    assert(added===true,'synthetic management setup did not add second plan');
+    await page.waitForFunction(id=>{
+      const multi=JSON.parse(localStorage.getItem('kggPatientMultiPlansV1')||'null');
+      return multi?.plans?.length===2 && multi.active===1 &&
+        multi.plans[1]?.sourcePlanId===id
+    },planB.i,{timeout:12000});
+    let panel=await openManager();
+    assert(await panel.locator('.kggPlanManageCard').count()===2,
+      'manage menu failed to show two plans');
+    assert((await panel.locator('.kggPlanManageCard').nth(0).innerText()).includes('Gespeicherter Plan'),
+      'inactive plan A is not correctly distinguished');
+    assert((await panel.locator('.kggPlanManageCard').nth(1).innerText()).includes('Aktiver Plan'),
+      'active plan B is not correctly marked');
+    page.once('dialog',dialog=>{
+      assert(dialog.type()==='prompt','rename action did not open a prompt');
+      return dialog.accept('  Preserved  Plan A  ')
+    });
+    await panel.locator('.kggPlanRenameBtn[data-index="0"]').click();
+    await page.waitForFunction(()=>{
+      const s=JSON.parse(localStorage.getItem('kggPatientMultiPlansV1')||'null');
+      return s?.plans?.[0]?.t==='Preserved Plan A'
+    },null,{timeout:10000});
+    await panel.waitFor({state:'hidden',timeout:10000});
+    panel=await openManager();
+    assert((await panel.locator('.kggPlanManageCard').first().innerText())
+      .includes('Preserved Plan A'),'management list did not update renamed plan');
+    if(OUT){
+      fs.mkdirSync(OUT,{recursive:true});
+      await page.screenshot({path:path.join(OUT,'manage-'+mode+'.png'),
+        animations:'disabled'})
+    }
+    page.once('dialog',dialog=>{
+      assert(dialog.type()==='confirm','delete action did not ask for confirmation');
+      return dialog.dismiss()
+    });
+    await panel.locator('.kggPlanDeleteBtn[data-index="1"]').click();
+    assert((await state()).multi?.plans?.length===2,
+      'cancelled plan deletion changed plan count');
+    page.once('dialog',dialog=>{
+      assert(dialog.type()==='confirm','delete confirmation missing');
+      return dialog.accept()
+    });
+    await panel.locator('.kggPlanDeleteBtn[data-index="1"]').click();
+    const afterDelete=()=>page.evaluate(()=>{
+      const saved=JSON.parse(localStorage.getItem('kggPatientMultiPlansV1')||'null');
+      const current=JSON.parse(localStorage.getItem('kggCurrentPlanV1')||'null')?.plan;
+      return {remainingIds:saved?.plans?.map(x=>x.i),activeIndex:saved?.active,
+        activeLexical:typeof p==='undefined'?null:{id:p.id,title:p.title},
+        windowPlan:window.p?{id:window.p.id,title:window.p.title}:null,
+        currentId:current?.i,renderedTitle:document.getElementById('title')?.textContent,
+        valuesLexical:typeof v==='undefined'?null:v[k(0,1,'B','a',1)],
+        valuesWindow:window.v?.['1|0|1|B|a']??null};
+    });
+    try{
+      await page.waitForFunction(id=>{
+        const s=JSON.parse(localStorage.getItem('kggPatientMultiPlansV1')||'null');
+        return s?.plans?.length===1 && s.plans[0]?.i===id
+      },planA.i,{timeout:12000});
+    }catch(error){
+      throw new Error('Deleting active plan failed to update saved plan slots: '+
+        JSON.stringify(await afterDelete())+'; original='+error.message);
+    }
+    const snapshot=await afterDelete();
+    assert(snapshot.activeLexical?.id===planA.i&&
+      snapshot.activeLexical?.title==='Preserved Plan A'&&
+      snapshot.renderedTitle==='Preserved Plan A',
+      'Deleting active plan left a stale runtime/display: '+JSON.stringify(snapshot));
+    const final=await state();
+    assert(final.firstValue==='51',
+      'rename/delete changed original plan A training value');
+    assert(final.current?.i===planA.i,
+      'deleting active B failed to restore original Plan A');
+    panel=await openManager();
+    assert(await panel.locator('.kggPlanDeleteBtn').count()===0,
+      'last remaining plan exposes destructive delete action');
+    await panel.locator('.kggPlanManageClose').click();
+    await checkVariant(page,mode==='react');
+    assert(errors.length===0,'plan management browser errors: '+JSON.stringify(errors));
+    if(OUT){
+      const proof={schema:1,status:'PASS',engine:ENGINE,mode,sourceSha:SHA,
+        syntheticOnly:true,
+        featureIds:['PAT-MULTI-001','PAT-MULTI-004','PAT-MULTI-005',
+          'PAT-MULTI-006','PAT-DEL-001'],
+        assertions:{actionMenu:true,activePlanLabel:true,renamePersists:true,
+          cancelDeletePreservesPlans:true,deleteActiveRestoresOther:true,
+          originalValuePreserved:true,cannotDeleteLastPlan:true,
+          reactOwnerVerified:true,noBrowserErrors:true},
+        limitation:'Synthetic plan-management UI (rename/delete plan only); not exercise deletion or real media cleanup'};
+      fs.writeFileSync(path.join(OUT,'manage-'+mode+'.json'),JSON.stringify(proof,null,2)+'\n')
+    }
+    return {mode,status:'PASS',renamed:true,cancelDeletion:true,
+      deletedActive:true,preservedOriginal:true};
+  }finally{await context.close()}
+}
+
 async function main(){
   const raw={v:1,i:'scanner-v81',t:'SYNTHETIC Scan Contract',d:6,stepDays:6,
     extendDays:true,e:[
@@ -241,8 +372,12 @@ async function main(){
     for(const mode of ['legacy','react']){
       planLinkChoices.push(await checkIncomingPlanChoices(browser,base,mode,raw));
     }
+    const management=[];
+    for(const mode of ['legacy','react']){
+      management.push(await checkPlanManagement(browser,base,mode,raw));
+    }
     assert(results.length===4,'missing engine/mode/format coverage');
-    console.log(JSON.stringify({status:'PASS',engine:ENGINE,syntheticOnly:true,sourceSha:SHA,results,planLinkChoices}))
+    console.log(JSON.stringify({status:'PASS',engine:ENGINE,syntheticOnly:true,sourceSha:SHA,results,planLinkChoices,management}))
   }finally{
     await browser.close();
     if(typeof server.closeAllConnections==='function')server.closeAllConnections();
