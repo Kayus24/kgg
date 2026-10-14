@@ -235,9 +235,16 @@ async function adaptiveParity(browser,port){
    try{
     if(config.id!=="large390")await geometryContract(page,config.width);
     if(config.id==="phone390"){
-     await lrSingleFieldContract(page);
-     await noValuesContract(page);
-     await bilateralSingleCapsuleContract(page);
+     // Existing standalone checks intentionally use a fresh page apiece.
+     // Keeping their independent contexts avoids accordion/overlay state leakage.
+     for(const check of [lrSingleFieldContract,noValuesContract,bilateralSingleCapsuleContract]){
+      const independent=await loadPage(browser,port,{...config,reactMode:mode==="react"});
+      try{
+       await check(independent.page);
+       assert(independent.errors.length===0,
+        "Independent adaptive check page errors: "+independent.errors.join(" | "));
+      }finally{await independent.ctx.close()}
+     }
     }
     if(config.id==="large390")await largeCompactContract(page);
     for(const [index,expected] of [[0,3],[1,1],[7,2],[8,4]]){
