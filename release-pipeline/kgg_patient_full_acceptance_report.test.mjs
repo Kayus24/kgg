@@ -30,7 +30,7 @@ test("four-mode signed candidate with proven extra flows remains final-device-pe
     const result=summarizeAcceptance(dir);
     assert.equal(result.status,"AUTOMATED_SCOPE_PASS_FINAL_PENDING");
     assert.equal(result.sourceSha,SHA);
-    assert.equal(result.blocks.length,9);
+    assert.equal(result.blocks.length,10);
     assert.ok(result.blocks.every(x=>x.status==="PASS"));
     assert.ok(result.pending.length>=4);
     assert.match(renderAcceptanceHtml(result),/kgg/ig);
@@ -113,7 +113,7 @@ test("canonical Drive-feature snapshot stays explicit and incomplete",()=>
     const report=summarizeAcceptance(dir);
     assert.equal(report.coverage.status,"SNAPSHOT_ONLY");
     assert.equal(report.coverage.total,111);
-    assert.ok(report.coverage.mapped>=48,"responsive layout mapping must remain present");
+    assert.ok(report.coverage.mapped>=50,"media lifecycle mapping must remain present");
     assert.ok(report.coverage.notMapped<=79,"unmapped functions unexpectedly increased");
     assert.equal(report.coverage.mapped+report.coverage.notMapped,report.coverage.total);
     const html=renderAcceptanceHtml(report);
@@ -193,6 +193,25 @@ test("adaptive responsive evidence is fail-closed for missing, stale and incorre
     proof.assertions.viewport=true;proof.mode="legacy";
     fs.writeFileSync(p,JSON.stringify(proof));
     assert.equal(summarizeAcceptance(dir).blocks.find(x=>x.id==="adaptive").variants[1].status,"INVALID");
+  }));
+
+test("media lifecycle proof requires same-engine, matching-SHA, two-mode evidence",()=>
+  withFixture(({dir})=>{
+    const p=path.join(dir,"media-react.json");
+    fs.unlinkSync(p);
+    assert.equal(summarizeAcceptance(dir).blocks.find(x=>x.id==="media").status,"NOT_EVIDENCED");
+    const proof={schema:1,status:"PASS",syntheticOnly:true,engine:"chromium",
+      mode:"react",sourceSha:"b".repeat(40),
+      featureIds:["PAT-MEDIA-006","PAT-MEDIA-011"],
+      assertions:{decoded:true,stable:true}};
+    fs.writeFileSync(p,JSON.stringify(proof));
+    assert.equal(summarizeAcceptance(dir).blocks.find(x=>x.id==="media").variants[1].status,"STALE");
+    proof.sourceSha=SHA;proof.assertions.stable=false;
+    fs.writeFileSync(p,JSON.stringify(proof));
+    assert.equal(summarizeAcceptance(dir).blocks.find(x=>x.id==="media").status,"REVIEW_REQUIRED");
+    proof.assertions.stable=true;proof.engine="webkit";
+    fs.writeFileSync(p,JSON.stringify(proof));
+    assert.equal(summarizeAcceptance(dir).blocks.find(x=>x.id==="media").variants[1].status,"INVALID");
   }));
 
 test("database evidence is required for both Legacy and React and must match engine",()=>
