@@ -62,6 +62,51 @@ async function finishFromUi(page,expectedQrDay,expectedNextDay){
   await page.locator('#end').waitFor({state:'hidden'});
   await assertHubDay(page,expectedNextDay);
 }
+async function interimQrFromUi(page, expectedDay){
+  await dismissInstallOverlay(page);
+  const before=await page.evaluate(()=>({
+    day:Number(d),done:JSON.stringify([...done].sort((a,b)=>a-b)),values:JSON.stringify(v)
+  }));
+  assert(before.day===expectedDay,'interim QR began on wrong day');
+  const trigger=page.locator('#plan > button.btn2[onclick="showQr(false)"]');
+  assert(await trigger.count()===1,'interim QR button not uniquely available');
+  await trigger.click();
+  await page.locator('#end').waitFor({state:'visible'});
+  const qr=page.locator('#qr'),payload=await qr.getAttribute('data-payload');
+  assert(typeof payload==='string'&&payload.startsWith('KGGD1:'),'interim QR payload missing');
+  const decoded=decodePayload(payload);
+  assert(Number(decoded.d)===expectedDay&&decoded.final===false,
+    'interim QR incorrectly finished a day: '+JSON.stringify(decoded));
+  assert((await page.locator('#endTitle').innerText())==='Aktuelle Werte T'+expectedDay,
+    'interim QR title not showing current day');
+  assert((await page.locator('#endInfo').innerText()).includes('beendet das Training nicht'),
+    'interim QR has lost its nonfinal warning');
+  const img=qr.locator('img');
+  await img.waitFor({state:'visible',timeout:8000});
+  await captureEvidence(page,'interim-qr');
+  await img.click();
+  const full=page.locator('#kggQrFull');
+  await full.waitFor({state:'visible',timeout:8000});
+  assert(await full.locator('img[alt="QR-Code"]').count()===1,
+    'interim QR fullscreen lost its image');
+  await full.getByRole('button',{name:'Schließen'}).click();
+  await full.waitFor({state:'detached',timeout:8000});
+  assert(await qr.getAttribute('data-payload')===payload,'fullscreen changed QR payload');
+  await qr.getByRole('button',{name:'QR-Code kopieren'}).click();
+  assert(await qr.getAttribute('data-payload')===payload,
+    'copy action changed QR payload');
+  // Clipboard access may be denied in CI. Button/payload safety is verified,
+  // successful OS clipboard copying is NOT claimed by this browser test.
+  const after=await page.evaluate(()=>({
+    day:Number(d),done:JSON.stringify([...done].sort((a,b)=>a-b)),values:JSON.stringify(v)
+  }));
+  assert(JSON.stringify(after)===JSON.stringify(before),
+    'nonfinal QR mutated training day/completion/values');
+  await page.locator('#end .btn2').filter({hasText:'Zurück zum Plan'}).click();
+  await page.locator('#end').waitFor({state:'hidden'});
+  await assertHubDay(page,expectedDay);
+}
+
 function rawPlan(id,title){return{i:id,t:title,v:1,d:12,extendDays:true,stepDays:6,e:[[title+' Übung',1,'B','kg','Wdh']]}}
 async function captureEvidence(page,kind){
   if(!process.env.KGG_PARITY_OUT)return;
@@ -114,6 +159,8 @@ async function main(){
     mark('T7 to T8');
     await seedCurrent(page,[1,2,3,4,5,6],7);
     await assertHubDay(page,7);
+    mark('T7 intermediate QR remains unfinalized');
+    await interimQrFromUi(page,7);
     await finishFromUi(page,7,8);
 
     mark('T12 to T13 and reload');
@@ -185,8 +232,8 @@ async function main(){
     assert(errors.length===0,`continuous-day browser raised page errors: ${errors.join(' | ')}`);
     const proof={schema:1,status:'PASS',syntheticOnly:true,engine:ENGINE,mode:MODE,
       sourceSha:process.env.KGG_PARITY_HEAD_SHA||execFileSync('git',['rev-parse','HEAD'],{cwd:ROOT,encoding:'utf8'}).trim(),
-      featureIds:['PAT-DAY-001','PAT-DAY-002','PAT-DAY-003','PAT-DAY-004','PAT-HIST-001','PAT-STOR-001','PAT-MULTI-003','PAT-FIN-001','PAT-QR-002'],
-      assertions:{t7ToT8:true,t12ToT13:true,t99ToT100:true,reloadT13:true,historyPagination:true,multiPlanIndependent:true,fixedPlanBounded:true,finalQrDays:true}};
+      featureIds:['PAT-DAY-001','PAT-DAY-002','PAT-DAY-003','PAT-DAY-004','PAT-HIST-001','PAT-STOR-001','PAT-MULTI-003','PAT-FIN-001','PAT-QR-001','PAT-QR-002','PAT-QR-004'],
+      assertions:{t7ToT8:true,t12ToT13:true,t99ToT100:true,reloadT13:true,historyPagination:true,multiPlanIndependent:true,fixedPlanBounded:true,finalQrDays:true,interimQrNonfinal:true,interimQrFullscreen:true,copyActionPreservesPayload:true}};
     if(process.env.KGG_PARITY_OUT){
       const out=path.resolve(process.env.KGG_PARITY_OUT);
       assert(path.basename(out)==='patient-ui-parity','day proof requires isolated parity artifact directory');
