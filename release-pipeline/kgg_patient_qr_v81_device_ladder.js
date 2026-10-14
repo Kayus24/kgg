@@ -14,7 +14,7 @@ const JSQR_PATH = require.resolve("jsqr");
 const FFLATE = require(path.join(ROOT, "vendor", "fflate-0.8.3.js"));
 const SCANNER_PATH = path.join(ROOT, "patient-start-scan.js");
 const OUTPUT_DIR = path.join(ROOT, "tmp", "patient-qr-v81-device-ladder");
-const VERSION = "patient-qr-v81-device-ladder-1";
+const VERSION = "patient-qr-v81-device-ladder-2-prepared-frame";
 const SCANNER_SOURCE = fs.readFileSync(SCANNER_PATH, "utf8");
 const SCANNER_VERSION = (SCANNER_SOURCE.match(/const VERSION='([^']+)'/) || [])[1] || "unknown";
 const TOTAL_TIMEOUT_MS = Number(process.env.KGG_PATIENT_QR_LADDER_TIMEOUT_MS || 300000);
@@ -318,13 +318,24 @@ function harnessScript() {
       try { return JSON.parse(localStorage.getItem(key) || "null"); } catch (error) { return null; }
     };
     window.__kggDeviceTest = {
-      startStream(width, height, fps) {
+      async startStream(width, height, fps, initialFrame) {
         const source = document.createElement("canvas");
         source.width = width;
         source.height = height;
         const context = source.getContext("2d");
         context.fillStyle = "#e7e7e7";
         context.fillRect(0, 0, width, height);
+        // Fixed-device profiles hold the QR in view before the camera starts.
+        // Drawing after captureStream can leave its first frame grey under CPU throttling.
+        if (initialFrame) {
+          const image = new Image();
+          await new Promise((resolve, reject) => {
+            image.onload = resolve;
+            image.onerror = reject;
+            image.src = initialFrame;
+          });
+          context.drawImage(image, 0, 0, width, height);
+        }
         const stream = source.captureStream(fps);
         const config = window.__kggDeviceConfig;
         config.stream = stream;
@@ -371,7 +382,8 @@ function harnessScript() {
             detectorAttempts: window.__kggDeviceConfig.detectorAttempts || 0,
             jsQrAttempts: window.__kggDeviceConfig.jsQrAttempts || 0,
             barcodeLast: window.__kggDeviceConfig.barcodeLast || "",
-            jsQrLast: window.__kggDeviceConfig.jsQrLast || ""
+            jsQrLast: window.__kggDeviceConfig.jsQrLast || "",
+            jsQrFirst: window.__kggDeviceConfig.jsQrFirst
           }
         };
       }
@@ -403,6 +415,7 @@ async function createPage(browser, baseUrl, raw, options = {}) {
       window.jsQR = function deviceLadderJsQr() {
         config.jsQrAttempts += 1;
         const result = real.apply(this, arguments);
+        if (config.jsQrFirst === undefined) config.jsQrFirst = result && result.data || "";
         config.jsQrLast = result && result.data || "";
         return result;
       };
@@ -433,12 +446,13 @@ async function openScanner(page, waitForVideo = true) {
     await button.waitFor({ state: "visible" });
     await button.click();
   }
-  await page.waitForSelector("#kggLiveScan");
+  await page.waitForFunction(() => !!document.getElementById("kggLiveScan") ||
+    !!window.__kggDeviceConfig.jsQrLast || !!window.__kggDeviceConfig.barcodeLast);
   if (waitForVideo) {
-    await page.waitForSelector("#kggLiveScanVideo");
     await page.waitForFunction(() => {
       const video = document.getElementById("kggLiveScanVideo");
-      return !!(video && video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0);
+      return !!(video && video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) ||
+        !!window.__kggDeviceConfig.jsQrLast || !!window.__kggDeviceConfig.barcodeLast;
     }, null, { timeout: 10000 });
   }
 }
@@ -520,7 +534,9 @@ async function runScanCase(browser, baseUrl, renderPage, definition) {
   };
   try {
     const generatedStages = await readStages(session.page, code);
-    await session.page.evaluate(({ width, height, fps }) => window.__kggDeviceTest.startStream(width, height, fps), definition);
+    await session.page.evaluate(({ width, height, fps, initialFrame }) =>
+      window.__kggDeviceTest.startStream(width, height, fps, initialFrame),
+    { ...definition, initialFrame: "data:image/png;base64," + frame.toString("base64") });
     await setCpu(session.client, definition.cpu || 1);
     const startedAt = Date.now();
     await openScanner(session.page);
@@ -550,12 +566,14 @@ async function runScanCase(browser, baseUrl, renderPage, definition) {
     result.visibleExercises = after.visible.length;
     result.storedExercises = after.stored && after.stored.e ? after.stored.e.length : 0;
     result.cameraTrackStops = after.trackStops;
+    result.firstDecodeRecognized = after.trace.jsQrFirst === code || after.trace.barcodeLast === code;
     result.constraints = await session.page.evaluate(() => window.__kggDeviceConfig.constraints);
     if (classified.errors.length) {
       result.status = "fail";
       result.notes.push("stage mismatch: " + classified.errors.join(", "));
     }
     assert(after.trackStops >= 1, definition.id + ": scanner did not stop the synthetic camera");
+    assert(result.firstDecodeRecognized, definition.id + ": prepared QR was not recognized in the first decoder call");
     assert(after.visible.length === definition.count, definition.id + ": visible card count " + after.visible.length + " != " + definition.count);
     assert(!after.overlay, definition.id + ": scanner overlay remained open");
     if (definition.deadlineMs) assert(elapsedMs <= definition.deadlineMs, definition.id + ": deadline " + definition.deadlineMs + " ms exceeded by " + elapsedMs + " ms");
