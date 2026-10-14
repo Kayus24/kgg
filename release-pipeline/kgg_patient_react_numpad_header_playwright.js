@@ -63,6 +63,130 @@ async function seed(page){
   });
   await page.waitForTimeout(500);
 }
+
+async function verifyGridPilot(browser,port) {
+  const ctx=await browser.newContext({
+    viewport:{width:390,height:844},hasTouch:true,isMobile:true,serviceWorkers:"block"
+  });
+  const page=await ctx.newPage(),errors=[];
+  page.on("pageerror",error=>errors.push(String(error)));
+  const plan={i:"react-grid-smoke",t:"Synthetic P8 Grid",v:1,d:6,
+    e:[["Two pairs",2,"B","kg","Wdh"]]};
+  const root="http://127.0.0.1:"+port+"/";
+  const enabledUrl=root+"?kggReactPad=1&kggReactGrid=1&plan="+
+    encodeURIComponent("KGGH2:"+enc(plan));
+  const key=index=>page.locator('[data-kgg-react-numpad-grid="v1"] > button')
+    .nth(index);
+  const snapshot=()=>page.evaluate(()=>({
+    open:!!window.__kggNumpadEditingApi?.getSnapshot?.().padOpen,
+    dirty:!!window.__kggNumpadEditingApi?.getSnapshot?.().dirty,
+    value:String(window.__kggNumpadEditingApi?.getSnapshot?.().padValue??""),
+    field:window.__kggNumpadEditingApi?.getSnapshot?.().meta?.key??null
+  }));
+  try {
+    await page.addInitScript(()=>{
+      if(!sessionStorage.kggP8TestBoot){
+        localStorage.clear();
+        localStorage.kggInstallAsked="1";
+        sessionStorage.kggP8TestBoot="1";
+      }
+    });
+    await page.goto(enabledUrl,{waitUntil:"domcontentloaded",timeout:15000});
+    await page.waitForFunction(()=>document.body.classList.contains("kggReactNumpadGridV1"),
+      null,{timeout:12000});
+    const card=page.locator("#list .ex").first();
+    await openCard(card);
+    const inputs=card.locator(":scope > .set").first().locator("input.num");
+    const kg=inputs.nth(0),wdh=inputs.nth(1);
+    await tapCompactValue(card,0,"a");
+    await page.locator('[data-kgg-react-numpad-header="v1"]')
+      .waitFor({state:"attached",timeout:8000});
+    await page.locator('[data-kgg-react-numpad-grid="v1"]')
+      .waitFor({state:"visible",timeout:8000});
+    const layout=await page.evaluate(()=>{
+      const originals=[...document.querySelectorAll("#pad .padGrid > button")],
+        react=[...document.querySelectorAll('[data-kgg-react-numpad-grid="v1"] > button')],
+        geom=el=>{const b=el.getBoundingClientRect();return{x:b.x,y:b.y,w:b.width,h:b.height}};
+      return {
+        originalCount:originals.length,reactCount:react.length,
+        labelsMatch:originals.every((el,i)=>el.textContent?.trim()===react[i]?.textContent?.trim()),
+        originalHidden:originals.every(el=>getComputedStyle(el).visibility==="hidden"&&
+          el.getAttribute("aria-hidden")==="true"),
+        keys:react.map(geom),legacyKeys:originals.map(geom),
+        allVisible:react.every(el=>getComputedStyle(el).visibility!=="hidden")
+      };
+    });
+    assert(layout.originalCount===12&&layout.reactCount===12&&layout.labelsMatch&&
+      layout.originalHidden&&layout.allVisible,"P8 key contract wrong: "+JSON.stringify(layout));
+    assert(layout.keys.every((b,i)=>{
+      const a=layout.legacyKeys[i];
+      return Math.abs(a.x-b.x)<=3&&Math.abs(a.y-b.y)<=3&&
+        Math.abs(a.w-b.w)<=3&&Math.abs(a.h-b.h)<=3;
+    }),"P8 changed legacy Grid key geometry: "+JSON.stringify(layout));
+    assert((await snapshot()).dirty===false,"untouched P8 buffer incorrectly dirty");
+    await page.locator("#pad .padOk").click();
+    assert((await kg.inputValue())==="","P8 untouched OK saved a phantom zero");
+
+    await tapCompactValue(card,0,"a");
+    await key(10).click();
+    const explicitZero=await snapshot();
+    assert(explicitZero.dirty&&explicitZero.value==="0",
+      "P8 explicit zero did not use the legacy dirty buffer: "+JSON.stringify(explicitZero));
+    await page.locator("#pad .padOk").click();
+    assert((await kg.inputValue())==="0","P8 explicit zero not committed by legacy OK");
+
+    await tapCompactValue(card,0,"b");
+    await key(0).click();
+    await key(9).click();
+    await key(1).click();
+    await key(9).click();
+    let typed=await snapshot();
+    assert(typed.value==="1,2","P8 accepted duplicate comma: "+JSON.stringify(typed));
+    await key(11).click();
+    typed=await snapshot();
+    assert(typed.value==="1,","P8 Backspace diverged from legacy: "+JSON.stringify(typed));
+    await key(11).click();
+    await key(11).click();
+    typed=await snapshot();
+    assert(typed.value==="0"&&typed.dirty,"P8 Backspace lost legacy zero display");
+    await page.locator("#pad .padCancel").click();
+    assert((await wdh.inputValue())==="","P8 cancel incorrectly committed a buffer");
+
+    await tapCompactValue(card,0,"b");
+    await key(1).click();await key(4).click();
+    const beforeSwitch=await page.evaluate(()=>({y:scrollY,main:document.querySelector("main")?.scrollTop||0}));
+    await tapCompactValue(card,0,"a");
+    const afterSwitch=await page.evaluate(()=>({y:scrollY,main:document.querySelector("main")?.scrollTop||0}));
+    assert(Math.abs(beforeSwitch.y-afterSwitch.y)<=1&&
+      Math.abs(beforeSwitch.main-afterSwitch.main)<=1,
+      "P8 pair switch moved page scroll");
+    assert((await snapshot()).open,"P8 kg/Wdh switch closed NumPad");
+    assert((await wdh.inputValue())==="25","P8 legacy commit-on-leave was lost");
+    await key(0).click();await key(4).click();
+    await page.locator("#pad .padOk").click();
+    assert((await kg.inputValue())==="15"&&(await wdh.inputValue())==="25",
+      "P8 final two-field values diverged from legacy");
+
+    await page.goto(root+"?kggReactPad=1&kggReactGrid=0",{waitUntil:"domcontentloaded"});
+    await page.waitForFunction(()=>document.body.classList.contains("kggReactNumpadHeaderV1"),
+      null,{timeout:10000});
+    assert(await page.locator("#kggReactNumpadGridRoot").count()===0,
+      "P8 only-rollback retained grid root");
+    assert(await page.locator("#pad .padGrid > button").count()===12,
+      "P8 only-rollback lost legacy buttons");
+    await page.goto(root+"?kggReactPad=0&kggReactGrid=1",{waitUntil:"domcontentloaded"});
+    await page.waitForFunction(()=>document.body.classList.contains("kggAlwaysCollapsed"),
+      null,{timeout:10000});
+    assert(!(await page.evaluate(()=>document.body.classList.contains("kggReactNumpadGridV1"))),
+      "P8 persisted after P7 feature flag rollback");
+    assert(await page.locator("#kggReactNumpadGridRoot").count()===0,
+      "React Grid root persisted after legacy rollback");
+    assert(errors.length===0,"P8 browser page errors: "+JSON.stringify(errors));
+    return {status:"PASS",reactKeys:12,legacyKeys:12,zero:true,comma:true,
+      backspace:true,cancel:true,stayOpen:true,rollback:true};
+  }finally{await ctx.close()}
+}
+
 async function main(){
   const server=http.createServer((req,res)=>{
     const file=fileFor(req.url);
@@ -200,8 +324,9 @@ async function main(){
     assert(legacyVisible,"legacy pair was not restored after kggReactPad=0");
 
     assert(errors.length===0,"page errors: "+JSON.stringify(errors));
-    console.log("Patient React NumPad header Playwright ("+engine+"): PASS");
     await ctx.close();
+    const grid=await verifyGridPilot(browser,port);
+    console.log("Patient React NumPad header + P8 Grid ("+engine+"): PASS "+JSON.stringify(grid));
   }finally{
     await browser.close();
     await new Promise(resolve=>server.close(resolve));
