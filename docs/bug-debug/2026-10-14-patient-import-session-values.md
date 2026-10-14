@@ -135,8 +135,13 @@ old-7 und weak-7. Foto- und Lifecycle-Fallbacks PASS; drei vorhandene absichtlic
 schwierige Decoderbedingungen bleiben observed-limit, keine neuen FAILs.
 Nachweise: tmp/patient-import-session-values/ladder-fixed.log und
 baseline-ladder-fixed/results.json. Testkorrektur separat als Commit aed8d33.
-Der vollständige Commit-Hook wird für den anschließenden Import-Fix erneut
-ungekürzt ausgeführt.
+Der vollständige normale Commit-Hook wurde anschließend ungekürzt ausgeführt
+und besteht vollständig: `KGG test battery OK`, `KGG self-test build PASSED`.
+Zertifizierung: `20261014T205414Z-34996`, voller Regression-Lauf inklusive
+Critical-, QR-, Scanner-, UI- und Native-Sync-Prüfungen. Code-Commit: `a1297b5`.
+Im Hook lagen medium-20 bei 1372 ms, old-7 bei 1633 ms und weak-7 bei 3195 ms;
+alle zehn Profile erkannten den exakten Inhalt beim ersten realen Decoderaufruf.
+Die frühere Commit-Blockade ist damit behoben. Hooks und Fristen bleiben aktiv.
 
 ## Grenzen
 
