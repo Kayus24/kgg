@@ -82,6 +82,14 @@ jobs:
           cd release-pipeline
           npm ci --ignore-scripts
           npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Compare responsive set views and Large UI in Legacy and React
+        shell: bash
+        env:
+          KGG_ADAPTIVE_PARITY: '1'
+          KGG_ADAPTIVE_BROWSER: ${{ matrix.browser }}
+          KGG_PARITY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: node release-pipeline/kgg_patient_set_view_adaptive_smoke.js
       - name: Play identical synthetic journeys in Legacy and React
         shell: bash
         env:
@@ -119,14 +127,6 @@ jobs:
           KGG_PARITY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
         run: node release-pipeline/kgg_patient_scan_format_smoke.js
-      - name: Compare responsive set views and Large UI in Legacy and React
-        shell: bash
-        env:
-          KGG_ADAPTIVE_PARITY: '1'
-          KGG_ADAPTIVE_BROWSER: ${{ matrix.browser }}
-          KGG_PARITY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
-        run: node release-pipeline/kgg_patient_set_view_adaptive_smoke.js
       - name: Build offline side-by-side evidence gallery
         if: always()
         shell: bash
