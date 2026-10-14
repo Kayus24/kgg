@@ -82,6 +82,13 @@ jobs:
           cd release-pipeline
           npm ci --ignore-scripts
           npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Play identical synthetic journeys in Legacy and React
+        shell: bash
+        env:
+          KGG_PARITY_ENGINE: ${{ matrix.browser }}
+          KGG_PARITY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: node release-pipeline/kgg_patient_ui_parity_capture.js
       - name: Compare responsive set views and Large UI in Legacy and React
         shell: bash
         env:
@@ -90,13 +97,6 @@ jobs:
           KGG_PARITY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
         run: node release-pipeline/kgg_patient_set_view_adaptive_smoke.js
-      - name: Play identical synthetic journeys in Legacy and React
-        shell: bash
-        env:
-          KGG_PARITY_ENGINE: ${{ matrix.browser }}
-          KGG_PARITY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
-        run: node release-pipeline/kgg_patient_ui_parity_capture.js
       - name: Reuse per-set pain regression from main (Legacy and React)
         shell: bash
         env:
@@ -139,6 +139,13 @@ jobs:
         env:
           KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
         run: node release-pipeline/kgg_patient_full_acceptance_report.mjs "$KGG_PARITY_OUT"
+      - name: Require SHA-bound automated-scope acceptance
+        if: always()
+        shell: bash
+        env:
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: |
+          node -e 'const fs=require("node:fs");const p=process.env.KGG_PARITY_OUT+"/acceptance.json";const r=JSON.parse(fs.readFileSync(p,"utf8"));const bad=(r.blocks||[]).filter(x=>x.status!=="PASS").map(x=>x.id+":"+x.status);if(r.status!=="AUTOMATED_SCOPE_PASS_FINAL_PENDING"||(r.blocks||[]).length<9||bad.length){console.error("Combined automated scope must pass; status="+r.status+" blocks="+bad.join(","));process.exit(1)}console.log("SHA-bound combined automated scope: "+r.status+"; blocks="+r.blocks.length)'
       - name: Upload short-lived review evidence, including failures
         if: always()
         uses: actions/upload-artifact@v4
