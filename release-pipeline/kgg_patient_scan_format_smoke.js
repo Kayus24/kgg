@@ -243,11 +243,30 @@ async function checkPlanManagement(browser,base,mode,sourcePlan){
       return dialog.accept()
     });
     await panel.locator('.kggPlanDeleteBtn[data-index="1"]').click();
-    await page.waitForFunction(id=>{
-      const s=JSON.parse(localStorage.getItem('kggPatientMultiPlansV1')||'null');
-      return s?.plans?.length===1 && s.plans[0]?.i===id &&
-        typeof p!=='undefined'&&p?.id===id&&p?.title==='Preserved Plan A'
-    },planA.i,{timeout:12000});
+    const afterDelete=()=>page.evaluate(()=>{
+      const saved=JSON.parse(localStorage.getItem('kggPatientMultiPlansV1')||'null');
+      const current=JSON.parse(localStorage.getItem('kggCurrentPlanV1')||'null')?.plan;
+      return {remainingIds:saved?.plans?.map(x=>x.i),activeIndex:saved?.active,
+        activeLexical:typeof p==='undefined'?null:{id:p.id,title:p.title},
+        windowPlan:window.p?{id:window.p.id,title:window.p.title}:null,
+        currentId:current?.i,renderedTitle:document.getElementById('title')?.textContent,
+        valuesLexical:typeof v==='undefined'?null:v[k(0,1,'B','a',1)],
+        valuesWindow:window.v?.['1|0|1|B|a']??null};
+    });
+    try{
+      await page.waitForFunction(id=>{
+        const s=JSON.parse(localStorage.getItem('kggPatientMultiPlansV1')||'null');
+        return s?.plans?.length===1 && s.plans[0]?.i===id
+      },planA.i,{timeout:12000});
+    }catch(error){
+      throw new Error('Deleting active plan failed to update saved plan slots: '+
+        JSON.stringify(await afterDelete())+'; original='+error.message);
+    }
+    const snapshot=await afterDelete();
+    assert(snapshot.activeLexical?.id===planA.i&&
+      snapshot.activeLexical?.title==='Preserved Plan A'&&
+      snapshot.renderedTitle==='Preserved Plan A',
+      'Deleting active plan left a stale runtime/display: '+JSON.stringify(snapshot));
     const final=await state();
     assert(final.firstValue==='51',
       'rename/delete changed original plan A training value');
