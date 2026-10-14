@@ -23,11 +23,13 @@ export const GROUPS = [
   { id:"link", label:"Neuen Planlink hinzufügen, ersetzen oder abbrechen und alte Werte schützen",
     ids:["PAT-LINK-001","PAT-MULTI-002","PAT-SCAN-002"], screenshot:"link" },
   { id:"manage", label:"Planverwaltung – Aktivanzeige, Umbenennen, Löschen und Werterhalt",
-    ids:["PAT-MULTI-001","PAT-MULTI-004","PAT-MULTI-005","PAT-MULTI-006","PAT-DEL-001"], screenshot:"manage" }
+    ids:["PAT-MULTI-001","PAT-MULTI-004","PAT-MULTI-005","PAT-MULTI-006","PAT-DEL-001"], screenshot:"manage" },
+  { id:"db", label:"Übungsdatenbank – suchen, übernehmen, speichern und Duplikate verhindern",
+    ids:["PAT-DB-001","PAT-DB-002"], screenshot:"db" }
 ];
 const PENDING = [
   "KGGH2/H3-Link-/Text-Planimport ist im synthetischen Alt/Neu-Test; echte Kamera-/Foto-Scans, System-Clipboard-Kopiererfolg und Plan-Ersetzen-/Lösch-UI bleiben offen",
-  "Übungsdatenbank, Zusatzübungen, Einstellungen, Medien/Lightbox und Progressionsauswahl noch nicht durchgängig als identischer Legacy/React-Flow belegt",
+  "Lokale Übungsdatenbank-Suche/Übernahme geprüft; externe Medien/Lightbox, patientenseitige Übungseinstellungen, Progression und weitere Detailfälle sind noch nicht durchgängig verglichen",
   "PWA-Installation, Offline-/Update-Recovery, Planverwaltung mit echten Patientendaten/Medien sowie iOS-Sonderfälle bleiben durch eigene Testbatterien und reale Geräte abzusichern",
   "Die optionale Satzschmerz-Speicherfunktion ist mit eigenem Legacy/React-Gate abgedeckt; die separate neue Blitz-Darstellung aus PR #306 bleibt ein eigener nicht gemergter Produktworkstream",
   "Physisches Oppo/Android-Chrome und iPhone/Safari sind durch Playwright Chromium/WebKit nicht real getestet",
@@ -156,7 +158,9 @@ export function renderAcceptanceHtml(summary) {
     ["link-legacy.png","Neuer Planlink: Add/Replace/Cancel – Legacy"],
     ["link-react.png","Neuer Planlink: Add/Replace/Cancel – React"],
     ["manage-legacy.png","Planverwaltung und Umbenennen – Legacy"],
-    ["manage-react.png","Planverwaltung und Umbenennen – React"]
+    ["manage-react.png","Planverwaltung und Umbenennen – React"],
+    ["db-legacy.png","Lokale Übungsdatenbank – Legacy"],
+    ["db-react.png","Lokale Übungsdatenbank – React"]
   ].map(a=>preview(...a)).join("");
   const coverage=summary.coverage||{status:"MISSING"};
   const mappedContent=coverage.status==="SNAPSHOT_ONLY"
