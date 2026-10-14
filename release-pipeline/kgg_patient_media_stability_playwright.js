@@ -20,7 +20,7 @@ function typeFor(f){return f.endsWith(".html")?"text/html; charset=utf-8":
   f.endsWith(".css")?"text/css; charset=utf-8":
   f.endsWith(".png")?"image/png":"application/octet-stream"}
 function fileFor(url){const rel=decodeURIComponent(String(url||"/").split("?")[0])
- .replace(/^\\/+/, "")||"index.html",target=path.resolve(ROOT,rel);
+ .replace(new RegExp("^/+"), "")||"index.html",target=path.resolve(ROOT,rel);
  return target.startsWith(ROOT)&&fs.existsSync(target)&&fs.statSync(target).isFile()?target:null}
 function startServer(){const server=http.createServer((req,res)=>{
  const f=fileFor(req.url);
@@ -139,7 +139,7 @@ async function main(){
      legacyReactMediaSemanticParity:true,reactOwnerVerified:true,noPageErrors:true},
     imageDimensions:entry.dimensions,frameSamples:entry.frames,
     limitation:"Inline synthetic SVG only. Does not certify external sources, licensing, visual lightbox, prefetch, hardware or network retry"};
-   fs.writeFileSync(path.join(OUT,"media-"+entry.mode+".json"),JSON.stringify(proof,null,2)+"\\n");
+   fs.writeFileSync(path.join(OUT,"media-"+entry.mode+".json"),JSON.stringify(proof,null,2)+"\n");
   }
   console.log(JSON.stringify({status:"PASS",engine:ENGINE,syntheticOnly:true,
    sourceSha:SHA,modes:results.map(x=>({mode:x.mode,frames:x.frames,dimensions:x.dimensions}))}));
