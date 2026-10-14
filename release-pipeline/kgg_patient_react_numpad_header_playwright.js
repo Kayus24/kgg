@@ -181,6 +181,17 @@ async function verifyGridPilot(browser,port) {
     assert((await kg.inputValue())==="15"&&(await wdh.inputValue())==="25",
       "P8 final two-field values diverged from legacy");
 
+    // The existing legacy action limits the editable buffer to eight digits.
+    await tapCompactValue(card,0,"a");
+    await key(11).click();await key(11).click();
+    for(let i=0;i<9;i++)await key(8).click();
+    const lengthLimit=await snapshot();
+    assert(lengthLimit.value==="99999999"&&lengthLimit.dirty,
+      "P8 changed legacy digit-buffer limit: "+JSON.stringify(lengthLimit));
+    await page.locator("#pad .padCancel").click();
+    assert((await kg.inputValue())==="15",
+      "P8 buffer-limit cancellation modified committed legacy values");
+
     await page.goto(root+"?kggReactPad=1&kggReactGrid=0",{waitUntil:"domcontentloaded"});
     await page.waitForFunction(()=>document.body.classList.contains("kggReactNumpadHeaderV1"),
       null,{timeout:10000});
