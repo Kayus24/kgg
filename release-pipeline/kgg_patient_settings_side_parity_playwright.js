@@ -40,7 +40,26 @@ async function edit(page,options){
   const card=await openCard(page);
   await card.locator(".kggCardDots").click();
   const sheet=page.locator("#kggSettingsSheet");
-  await sheet.waitFor({state:"visible"});
+  try {
+    await sheet.waitFor({state:"visible",timeout:2200});
+  } catch(error) {
+    const diagnosis=await page.evaluate(()=>{
+      const card=document.querySelector("#list .ex"),dots=card?.querySelector(".kggCardDots"),
+        sheet=document.querySelector("#kggSettingsSheet"),backdrop=document.querySelector("#kggSettingsBackdrop");
+      return {
+        open:card?.classList.contains("kggOpen"),
+        dotsHidden:dots?.hidden,dotsVisible:!!dots&&getComputedStyle(dots).display!=="none",
+        settingsPresent:!!sheet,sheetHidden:sheet?.hidden,
+        sheetDisplay:sheet?getComputedStyle(sheet).display:null,
+        backdropHidden:backdrop?.hidden,
+        padOpen:!document.querySelector("#pad")?.classList.contains("hide"),
+        renderReady:window.__kggPatientCardSettings,
+        exercise:p?.ex?.[0]?.n,
+        cardCount:document.querySelectorAll("#list .ex").length
+      };
+    });
+    throw new Error("Settings sheet did not open: "+JSON.stringify(diagnosis)+"; "+error.message);
+  }
   if(options.side)await sheet.locator("#kggSetSide").selectOption(options.side);
   if(options.unitA!==undefined)await sheet.locator("#kggSetUnitA").fill(options.unitA);
   if(options.unitB!==undefined)await sheet.locator("#kggSetUnitB").fill(options.unitB);
