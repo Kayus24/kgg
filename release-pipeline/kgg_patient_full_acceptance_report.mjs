@@ -6,7 +6,8 @@ import { fileURLToPath } from "node:url";
 
 const SHA = /^[a-f0-9]{40}$/i;
 const MODES = ["legacy", "react"];
-const EXPECTED_VARIANTS = ["phone:legacy", "phone:react", "tablet:legacy", "tablet:react"];
+const EXPECTED_VARIANTS = ["phone:legacy","phone:react","phone:react-grid",
+  "tablet:legacy","tablet:react","tablet:react-grid"];
 const MANIFEST_URL = "https://docs.google.com/document/d/17AA3z1oGFIxdywK52yEkUlvrDPIMoH9INlP2X_Xd-oE/edit";
 const INVENTORY_PATH=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..","docs","quality","patient-react-feature-inventory-20261013.json");
 export const GROUPS = [
@@ -30,16 +31,28 @@ export const GROUPS = [
     ids:["PAT-UI-002","PAT-UI-003","PAT-UI-004","PAT-UI-008",
       "PAT-UI-009","PAT-UI-010","PAT-UNIT-003"], screenshot:"adaptive" },
   { id:"media", label:"Synthetische Bilder / Decoding / Thumbnail / Ready-Cache / Rerender",
-    ids:["PAT-MEDIA-006","PAT-MEDIA-011"], screenshot:"media" }
+    ids:["PAT-MEDIA-006","PAT-MEDIA-011"], screenshot:"media" },
+  { id:"settings", label:"Übung anpassen – Seitenwerte, Einheiten und Schmerz pro Satz (3 Modi)",
+    ids:["PAT-SETTINGS-001","PAT-SETTINGS-002","PAT-UNIT-007"],
+    modes:["legacy","react-p7","react-p8"], screenshot:null },
+  { id:"progression", label:"Progressionsstufen – Auswahl, Wischen, QR, Verlauf (3 Modi)",
+    ids:["PAT-PROGRESSION-001","PAT-PROGRESSION-002"],
+    modes:["legacy","react-p7","react-p8"], screenshot:null },
+  { id:"scannerfallback", label:"Scanner-Notwege – Berechtigung, Retry, Foto/Link und Rescue (3 Modi)",
+    ids:["PAT-SCAN-001","PAT-SCAN-003","PAT-SCAN-004"],
+    modes:["legacy","react-p7","react-p8"], screenshot:null },
+  { id:"firstload", label:"Isolierter PWA-Erststart, Thumbnail und lokale Lightbox (3 Modi)",
+    ids:["PAT-PWA-002","PAT-THUMB-001","PAT-MEDIA-009"],
+    modes:["legacy","react-p7","react-p8"], screenshot:null }
 ];
 const PENDING = [
-  "KGGH2/H3-Link-/Text-Planimport ist im synthetischen Alt/Neu-Test; echte Kamera-/Foto-Scans, System-Clipboard-Kopiererfolg und Plan-Ersetzen-/Lösch-UI bleiben offen",
-  "Lokale Übungsdatenbank, adaptive Satzansichten und synthetische Medien-Stabilität im Vergleich; externe Bildquellen/Lightbox, patientenseitige Übungseinstellungen, Progression und weitere Fälle sind noch nicht durchgängig verglichen",
-  "PWA-Installation, Offline-/Update-Recovery, Planverwaltung mit echten Patientendaten/Medien sowie iOS-Sonderfälle bleiben durch eigene Testbatterien und reale Geräte abzusichern",
-  "Die optionale Satzschmerz-Speicherfunktion ist mit eigenem Legacy/React-Gate abgedeckt; die separate neue Blitz-Darstellung aus PR #306 bleibt ein eigener nicht gemergter Produktworkstream",
-  "Physisches Oppo/Android-Chrome und iPhone/Safari sind durch Playwright Chromium/WebKit nicht real getestet",
-  "Gemini-Videofund grauer Frames aus vorherigem Kandidaten ist in Issue #308 ungeklärt; er darf kein automatischer PASS sein",
-  "Die einmalige vollständige menschliche Geräte-/End-to-End-Abnahme ist noch nicht durchgeführt"
+  "Die Prüfsummen belegen nur synthetische Legacy/P7/P8-Browserabläufe. 48 inventarisierte Features ohne direkt zugeordneten Vergleich benötigen weitere gezielte Nachweise",
+  "Scanner-Fallbacks, planlose Rettung, H2/H3-Planlinks und lokale Lightbox sind im Prüflauf; echte Kamera-/Fotoerkennung, iOS-Chrome/Safari-Berechtigungen und Fremdquellen/Lizenzen bleiben ungeprüft",
+  "Isolierter PWA-Erststart ist nachgewiesen, aber echte Offline-Installation, Update-Recovery und Service-Worker-Cache auf Hardware nicht Teil der automatisierten Gesamtprüfung",
+  "Gesamte Trainings-, QR-/Rückgabe- und Medienfunktionalität ist noch nicht funktional und visuell auf echten Oppo-/iPhone-Geräten abgenommen",
+  "Issue #308: aufgezeichnete graue Video-Frames sind nicht unabhängig widerlegt und bleiben eigener manueller/Realgeräte-Blocker",
+  "Finale menschliche gebündelte Geräte-/End-to-End-Abnahme und Freigabe stehen aus; kein produktiver Release-PASS"
+
 ];
 
 function assert(condition, message) { if(!condition) throw new Error(message); }
@@ -108,17 +121,18 @@ export function summarizeAcceptance(dir) {
   const engine=report.engine;
   const hasVariants=EXPECTED_VARIANTS.every(k=>(report.variants||[]).some(v=>v.viewport+":"+v.mode===k));
   const hardChecks=(report.checks||[]).filter(c=>c.pass===true).length;
+  const p8HardChecks=(report.checks||[]).filter(c=>c.comparison==="react-grid"&&c.pass===true).length;
   const failures=(report.checks||[]).filter(c=>c.pass===false).length;
   const parityPass=(["chromium","webkit"].includes(engine) && report.status==="PASS" &&
-    hasVariants && hardChecks>=300 && failures===0 &&
+    hasVariants && hardChecks>=700 && p8HardChecks>=150 && failures===0 &&
     Array.isArray(report.unexpectedDifferences) &&
     report.unexpectedDifferences.length===0);
   const blocks=[{id:"parity",label:"NumPad / Transfer / Pixel / Persistenz",
-    status:parityPass?"PASS":"FAIL",hardChecks,failures,
+    status:parityPass?"PASS":"FAIL",hardChecks,p8HardChecks,failures,
     observations:(report.checks||[]).filter(c=>c.pass===null).length,
     featureIds:["PAT-NUM-002","PAT-NUM-003","PAT-NUM-004","PAT-NUM-005","PAT-PREV-002","PAT-PREV-003","PAT-PREV-004","PAT-PREV-007","PAT-STATE-002"]}];
   for(const group of GROUPS) {
-    const variants=MODES.map(mode=>{
+    const variants=(group.modes||MODES).map(mode=>{
       const file=group.id+"-"+mode+".json";
       const result=proofStatus(boundedJson(path.join(output,file),64000),engine,mode,sha,group.ids);
       return {mode,...result};
