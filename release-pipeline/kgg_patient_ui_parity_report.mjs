@@ -22,10 +22,13 @@ const steps = [
   ["saved-zero", "0 mit OK bestätigt"]
 ];
 const differences = report.unexpectedDifferences || [];
+const modes = (report.variants || []).some(v => v.mode === "react-grid")
+  ? ["legacy", "react", "react-grid"] : ["legacy", "react"];
+const comparisonClass = modes.length === 3 ? "comparison has-p8" : "comparison";
 let sections = "";
 for (const view of ["phone", "tablet"]) {
-  sections += "<h2>" + esc(view) + " – Videos</h2><div class='comparison'>";
-  for (const mode of ["legacy", "react"]) {
+  sections += "<h2>" + esc(view) + " – Videos</h2><div class='" + comparisonClass + "'>";
+  for (const mode of modes) {
     const name = view + "-" + mode + ".webm";
     sections += "<article><h3>" + esc(mode) + "</h3>" +
       (fs.existsSync(path.join(dir, name))
@@ -34,8 +37,8 @@ for (const view of ["phone", "tablet"]) {
   }
   sections += "</div>";
   for (const [step, label] of steps) {
-    sections += "<h3>" + esc(view + " · " + label) + "</h3><div class='comparison'>";
-    for (const mode of ["legacy", "react"]) {
+    sections += "<h3>" + esc(view + " · " + label) + "</h3><div class='" + comparisonClass + "'>";
+    for (const mode of modes) {
       const name = view + "-" + mode + "-" + step + ".png";
       sections += "<article><h4>" + esc(mode) + "</h4>" +
         (fs.existsSync(path.join(dir, name))
@@ -51,11 +54,12 @@ const findings = differences.length
   : "<p>Keine unerwarteten Unterschiede im geprüften Scope gemeldet.</p>";
 const css = "*{box-sizing:border-box}body{max-width:1300px;margin:0 auto;padding:20px;font:16px/1.45 system-ui;color:#172033;background:#f4f7fb}" +
   "h1{margin:0}h2{margin-top:44px;border-bottom:2px solid #dde5ef;padding-bottom:8px}h3{margin-top:26px}" +
-  ".comparison{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}" +
+  ".comparison{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.comparison.has-p8{grid-template-columns:repeat(3,minmax(0,1fr))}" +
   "article{background:#fff;border:1px solid #d3deed;border-radius:14px;padding:12px;min-width:0}article h3,article h4{margin:0 0 10px}" +
   "video,img{width:100%;max-height:760px;object-fit:contain;background:#fff}" +
   ".note{border-left:4px solid #64748b;background:#fff;padding:12px;margin:14px 0}" +
-  "@media(max-width:650px){.comparison{grid-template-columns:1fr}}";
+  "@media(max-width:860px){.comparison.has-p8{grid-template-columns:repeat(2,minmax(0,1fr))}}" +
+  "@media(max-width:650px){.comparison,.comparison.has-p8{grid-template-columns:1fr}}";
 const html = [
   "<!doctype html><html lang='de'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>",
   "<title>KGG UI Legacy/React Parity</title><style>" + css + "</style></head><body>",
@@ -65,7 +69,7 @@ const html = [
   "<p>Quell-SHA: <code>" + esc(report.gitSha || "unknown") + "</code></p>",
   "<div class='note'>Synthetische Daten. Erlaubte Unterschiede: neuer React-Kopf, NEU-Label und Transferleiste." +
     " Unveränderte Tasten/Aktionsbereiche werden pixelgenau geprüft." +
-    " Abgedeckt: NumPad, Übernahme, Links/Rechts, Sekunden und Neuladen; Schmerz pro Satz wird separat geprüft. Nicht die gesamte Patienten-App. Absolute Scroll-Offsets verschiedener Karten sind nur Beobachtungen, keine bestandenen Invarianten.</div>",
+    " Abgedeckt: NumPad, Übernahme, Links/Rechts, Sekunden und Neuladen; Schmerz pro Satz wird separat geprüft. Bei aktiviertem P8-Test werden zusätzliche synthetische P8-Videos und Vergleichsbilder erzeugt. Keine Aussage über reale Oppo-/iPhone-Frames oder die gesamte Patienten-App. Absolute Scroll-Offsets verschiedener Karten sind nur Beobachtungen, keine bestandenen Invarianten.</div>",
   "<h2>Abweichungen</h2>" + findings,
   sections,
   "<p>Für die endgültige Gesamtabnahme bleiben nicht automatisierte App-Flows gesondert zu prüfen.</p>",
