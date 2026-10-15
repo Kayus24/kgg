@@ -48,16 +48,23 @@ jobs:
           cd release-pipeline
           npm ci --ignore-scripts
           npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Build the existing isolated Patient GPT preview fixture
+        shell: bash
+        run: |
+          python release-pipeline/kgg_patient_gpt_write_gate.py --self-test \
+            --self-test-preview-root "$RUNNER_TEMP/kgg-firstload-${{ matrix.browser }}"
       - name: Require first-load and rescue in Legacy, P7 and P8
         shell: bash
         env:
           KGG_FIRST_LOAD_BROWSER: ${{ matrix.browser }}
           KGG_FIRST_LOAD_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          KGG_PREVIEW_ROOT: ${{ runner.temp }}/kgg-firstload-${{ matrix.browser }}/previews/patient-gate-self-test
         run: |
           set -euo pipefail
+          test -f "$KGG_PREVIEW_ROOT/index.html"
           : > firstload-parity.log
           for mode in legacy react-p7 react-p8; do
-            KGG_FIRST_LOAD_MODE="$mode" node release-pipeline/kgg_patient_preview_first_load_smoke.js . | tee -a firstload-parity.log
+            KGG_FIRST_LOAD_MODE="$mode" node release-pipeline/kgg_patient_preview_first_load_smoke.js "$KGG_PREVIEW_ROOT" | tee -a firstload-parity.log
           done
           count=$(grep -c '"status":"PASS"' firstload-parity.log)
           [ "$count" -eq 3 ] || { echo "First-load cases missing: $count/3"; exit 1; }
