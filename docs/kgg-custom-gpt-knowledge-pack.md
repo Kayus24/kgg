@@ -2,7 +2,7 @@
 
 This generated compatibility pack contains the complete production knowledge set. Prefer the four smaller curated packs in the GPT editor so retrieval stays focused.
 
-Source digest: `b7b9a7de74fffc8a`
+Source digest: `a3d8451c17b667c0`
 
 ## Usage Rules
 
@@ -2564,6 +2564,14 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Lesson: Auf einem echten Oppo/Android-Chrome trat beim Wechsel zwischen kg und Wdh ein sehr kurzes, aber klar sichtbares Flackern des Hauptbildschirms auf. Das NumPad blieb optisch stehen, waehrend der darunterliegende Dokumentinhalt fuer ungefaehr einen Frame sprang bzw. neu gepaintet wurde. Einige fruehe Fixversuche reduzierten das Problem, beseitigten es aber nic
 - Caution: Keep patch scoped to the requested area.
 - Tests: Vor dem Merge wurden unter anderem geprueft: - kg Wdh im selben Satz: 0 Layout / 0 Paint - Wechsel in einen anderen Satz bei offenem NumPad - kein closePad beim direkten Touch-Wechsel - 25 kg 12 Wdh OK - letzter Satz mit ausreichendem Abstand zum NumPad - stabile Media-Nodes - physischer Oppo-Test Der Nutzer bestaetigte auf dem echten Oppo, dass das Flackern
+
+### Planimport und Werte der letzten Trainingseinheit
+
+- Source: `docs/bug-debug/2026-10-14-patient-import-session-values.md`
+- Areas: debug, modal, parser-textblocks, qr-patient, scan-camera, sync, tablet-layout
+- Lesson: Auftrag: Bei Aktualisieren/Ergaenzen und Plan ersetzen pruefen, ob die letzte Trainingseinheit automatisch als neue Trainingseingabe uebernommen wird. Basis: `origin/main` `f59bc55e6e22e1b04061557c710069f6cf8f0b21`, Patienten-App v90. Branch: `fix/patient-import-session-values-20261014`, Kandidat v92. Verantwortlicher Schreibbereich: Patienten-Scanner, notwe
+- Caution: Keep patch scoped to the requested area.
+- Tests: Die unveraenderten Geraeteprofile oeffneten den gedrosselten Scanner mit einem bereits gestarteten grauen Canvas-Stream. Erst nach den UI-Wartebedingungen wurde das QR-Bild eingespeist. Dadurch pruefte jsQR zunaechst graue/cached Frames, waehrend die Geraetefrist bereits lief. Instrumentiert beobachtet: mehrere leere Decoderaufrufe; unter CPU-Drosselung kann
 
 ### Debug JSON Seite
 
