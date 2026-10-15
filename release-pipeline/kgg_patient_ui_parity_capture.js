@@ -12,6 +12,7 @@ const {execFileSync} = require("node:child_process");
 const ROOT = path.resolve(__dirname, "..");
 const OUT = path.resolve(process.env.KGG_PARITY_OUT || path.join(ROOT, ".tmp", "patient-ui-parity"));
 const ENGINE = process.env.KGG_PARITY_ENGINE || "chromium";
+const INCLUDE_P8 = process.env.KGG_PARITY_P8_GRID === "1";
 const VIEWPORTS = [{ name: "phone", width: 390, height: 844 },
                    { name: "tablet", width: 768, height: 1024 }];
 const STEPS = ["pair-kg", "pair-wdh", "remaining-kg", "pair-complete", "manual-zero", "cancelled", "saved-zero", "center-complete", "lr-left", "lr-right", "seconds-complete", "reloaded"];
@@ -51,8 +52,8 @@ function planUrl(port, mode) {
   const plan = { i: "synthetic-parity-v1", t: "SYNTHETIC UI PARITY", v: 1, d: 6,
     e: [["Pair", 3, "B", "kg", "Wdh"], ["Sides", 1, "LR", "kg", "Wdh"], ["Timer", 1, "B", "keine", "Sek."]] };
   const encoded = Buffer.from(JSON.stringify(plan), "utf8").toString("base64url");
-  return "http://127.0.0.1:" + port + "/?kggReactPad=" + (mode === "react" ? "1" : "0") +
-    "&plan=" + encodeURIComponent("KGGH2:" + encoded);
+  return "http://127.0.0.1:" + port + "/?kggReactPad=" + (mode === "legacy" ? "0" : "1") +
+    (mode === "react-grid" ? "&kggReactGrid=1" : "") + "&plan=" + encodeURIComponent("KGGH2:" + encoded);
 }
 
 async function openCard(card, page) {
@@ -135,6 +136,10 @@ async function recordVariant(browser, port, mode, viewport) {
   const page = await ctx.newPage();
   page.setDefaultTimeout(8500);
   const video = page.video();
+  const reactMode = mode !== "legacy";
+  const gridKey = index => mode === "react-grid"
+    ? page.locator("#kggReactNumpadGridRoot .kgg-react-numpad-grid__key").nth(index)
+    : page.locator("#pad .padGrid > button").nth(index);
   page.on("pageerror", error => evidence.consoleErrors.push(String(error)));
   await page.route("**/*", async route => {
     const url = route.request().url();
@@ -174,8 +179,12 @@ async function recordVariant(browser, port, mode, viewport) {
   try {
     await page.goto(planUrl(port, mode), { waitUntil: "networkidle" });
     await page.waitForFunction(() => document.body.classList.contains("kggAlwaysCollapsed"));
-    if (mode === "react") {
+    if (reactMode) {
       await page.waitForFunction(() => document.body.classList.contains("kggReactNumpadHeaderV1"));
+      if (mode === "react-grid") {
+        await page.waitForFunction(() => document.body.classList.contains("kggReactNumpadGridV1") &&
+          document.querySelectorAll(".kgg-react-numpad-grid__key").length === 12);
+      }
     } else {
       assert(!(await page.evaluate(() => document.body.classList.contains("kggReactNumpadHeaderV1"))), "Legacy unexpectedly loaded React");
     }
@@ -194,13 +203,13 @@ async function recordVariant(browser, port, mode, viewport) {
     await openCard(card, page);
     await tapField(card, 0, "a");
     await page.waitForFunction(() => !document.getElementById("pad").classList.contains("hide"));
-    if (mode === "react") {
+    if (reactMode) {
       await page.locator("[data-kgg-react-numpad-header='v1']").waitFor();
     }
     await page.waitForTimeout(850); // stabilize initial scroll before measuring a same-row switch
     await checkpoint("pair-kg");
 
-    const pairB = mode === "react"
+    const pairB = reactMode
       ? ".kgg-react-numpad-pair__button[data-kgg-key='b']"
       : "#kggPadPair .kggPairField[data-kgg-key='b']";
     await page.evaluate(() => {
@@ -221,13 +230,13 @@ async function recordVariant(browser, port, mode, viewport) {
     evidence.motion.push({step:"pair-wdh",samples});
     await checkpoint("pair-wdh");
 
-    const transferB = mode === "react"
+    const transferB = reactMode
       ? ".kgg-react-numpad-transfer__button[data-kgg-transfer-key='b']"
       : "#kggPadTransfer > button[data-kgg-transfer-key='b']";
     await page.locator(transferB).click();
     await checkpoint("remaining-kg");
 
-    const transferA = mode === "react"
+    const transferA = reactMode
       ? ".kgg-react-numpad-transfer__button[data-kgg-transfer-key='a']"
       : "#kggPadTransfer > button[data-kgg-transfer-key='a']";
     await page.locator(transferA).click();
@@ -235,20 +244,20 @@ async function recordVariant(browser, port, mode, viewport) {
     assert(evidence.steps["pair-complete"].padOpen === false, mode + " pair did not close");
 
     await tapField(card, 1, "a");
-    await page.locator("#pad .padGrid button").nth(6).click(); // 7
-    await page.locator("#pad .padGrid button").nth(11).click(); // backspace
-    await page.locator("#pad .padGrid button").nth(10).click(); // explicit 0
+    await gridKey(6).click(); // 7
+    await gridKey(11).click(); // backspace
+    await gridKey(10).click(); // explicit 0
     await checkpoint("manual-zero");
 
     await page.locator("#pad .padActions .padCancel").click();
     await checkpoint("cancelled");
 
     await tapField(card, 1, "a");
-    await page.locator("#pad .padGrid button").nth(10).click();
+    await gridKey(10).click();
     await page.locator("#pad .padActions .padOk").click();
     await checkpoint("saved-zero");
 
-    const both = mode === "react" ? '.kgg-react-numpad-transfer__button[data-kgg-transfer-both="1"]' : '#kggPadTransfer > button[data-kgg-transfer-both="1"]';
+    const both = reactMode ? '.kgg-react-numpad-transfer__button[data-kgg-transfer-both="1"]' : '#kggPadTransfer > button[data-kgg-transfer-both="1"]';
     await tapField(card,2,"a");
     await page.locator(both).click();
     await checkpoint("center-complete");
@@ -261,11 +270,11 @@ async function recordVariant(browser, port, mode, viewport) {
 
     const timer=page.locator("#list .ex").nth(2);await openCard(timer,page);
     await tapInput(timer.locator("input.num:not(.kggUnitInactive)").first());
-    const timerTransfer=mode==="react" ? '.kgg-react-numpad-transfer__button[data-kgg-transfer-key="b"]' : '#kggPadTransfer > button[data-kgg-transfer-key="b"]';
+    const timerTransfer=reactMode ? '.kgg-react-numpad-transfer__button[data-kgg-transfer-key="b"]' : '#kggPadTransfer > button[data-kgg-transfer-key="b"]';
     await page.locator(timerTransfer).click();await checkpoint("seconds-complete");
     await page.reload({waitUntil:"networkidle"});
     await page.waitForFunction(()=>document.querySelectorAll("#list .ex").length===3);
-    if(mode==="react")await page.waitForFunction(()=>document.body.classList.contains("kggReactNumpadHeaderV1"));
+    if(reactMode)await page.waitForFunction(()=>document.body.classList.contains("kggReactNumpadHeaderV1"));
     await checkpoint("reloaded");
 
     assert(evidence.consoleErrors.length === 0, mode + " page errors: " + evidence.consoleErrors.join("; "));
@@ -322,18 +331,27 @@ async function main() {
     const comparisonPage = await browser.newPage();
     for (const viewport of VIEWPORTS) {
       const baseline = await recordVariant(browser, port, "legacy", viewport);
-      const react = await recordVariant(browser, port, "react", viewport);
-      report.recordings.push(viewport.name + "-legacy.webm", viewport.name + "-react.webm");
-      report.variants.push(baseline,react);
-      for(const variant of [baseline,react])for(const result of variant.oracle)report.checks.push({viewport:viewport.name,mode:variant.mode,kind:"independent-fixture",...result});
-      for (const step of STEPS) {
+      const originalReact = await recordVariant(browser, port, "react", viewport);
+      const variants = [baseline, originalReact];
+      if (INCLUDE_P8) variants.push(await recordVariant(browser, port, "react-grid", viewport));
+      for (const variant of variants) {
+        report.recordings.push(viewport.name + "-" + variant.mode + ".webm");
+        report.variants.push(variant);
+        for (const result of variant.oracle) report.checks.push({
+          viewport: viewport.name, mode: variant.mode, kind: "independent-fixture", ...result
+        });
+      }
+      for (const react of variants.slice(1)) {
+        const addCheck = row => report.checks.push({comparison: react.mode, ...row});
+        const addDiff = row => report.unexpectedDifferences.push({comparison: react.mode, ...row});
+        for (const step of STEPS) {
         const a = baseline.steps[step], b = react.steps[step];
         assert(a && b, "missing step " + step);
         const keys = ["day", "done", "values", "inputs", "padOpen", "field", "draft", "dirty", "transfer", "visibleMatchesLegacy", "fixture"];
         for (const key of keys) {
           const same = JSON.stringify(a[key]) === JSON.stringify(b[key]);
-          report.checks.push({ viewport: viewport.name, step, kind: "state:" + key, pass: same });
-          if (!same) report.unexpectedDifferences.push({ viewport: viewport.name, step, kind: "state:" + key, legacy: a[key], react: b[key] });
+          addCheck({ viewport: viewport.name, step, kind: "state:" + key, pass: same });
+          if (!same) addDiff({ viewport: viewport.name, step, kind: "state:" + key, legacy: a[key], react: b[key] });
         }
         // Absolute main.scrollTop can differ because the two visual headers reserve
         // different non-content space. The safety contract is NO EXTRA JUMP during
@@ -342,16 +360,16 @@ async function main() {
         for (const axis of ["windowY", "mainTop"]) {
           const absoluteDelta = Math.abs(a.scroll[axis] - b.scroll[axis]);
           if (!scrollAnchor) {
-            report.checks.push({ viewport: viewport.name, step, kind: "scroll-base:" + axis,
+            addCheck({ viewport: viewport.name, step, kind: "scroll-base:" + axis,
               pass: null, absoluteDelta, policy: "OBSERVATION ONLY: different card/open/close phase; not a passed invariant" });
             continue;
           }
           const aMove = a.scroll[axis] - baseline.steps[scrollAnchor].scroll[axis];
           const bMove = b.scroll[axis] - react.steps[scrollAnchor].scroll[axis];
           const jumpDelta = Math.abs(aMove - bMove);
-          report.checks.push({ viewport: viewport.name, step, kind: "scroll-jump:" + axis,
+          addCheck({ viewport: viewport.name, step, kind: "scroll-jump:" + axis,
             pass: jumpDelta <= 2, jumpDelta, legacyMove: aMove, reactMove: bMove });
-          if (jumpDelta > 2) report.unexpectedDifferences.push({
+          if (jumpDelta > 2) addDiff({
             viewport: viewport.name, step, kind: "scroll-jump:" + axis, jumpDelta, legacyMove: aMove, reactMove: bMove
           });
         }
@@ -359,19 +377,23 @@ async function main() {
           for (const part of ["keys", "actions"]) {
             const x = a.geometry[part], y = b.geometry[part];
             const sameShape = x && y && ["left", "top", "width", "height"].every(k => Math.abs(x[k] - y[k]) <= 2);
-            report.checks.push({ viewport: viewport.name, step, kind: "geometry:" + part, pass: !!sameShape });
-            if (!sameShape) report.unexpectedDifferences.push({ viewport: viewport.name, step, kind: "geometry:" + part, legacy: x, react: y });
+            addCheck({ viewport: viewport.name, step, kind: "geometry:" + part, pass: !!sameShape });
+            if (!sameShape) addDiff({ viewport: viewport.name, step, kind: "geometry:" + part, legacy: x, react: y });
             const diff = await pixelDifference(comparisonPage,
               path.join(OUT, viewport.name + "-legacy-" + step + "-" + part + ".png"),
               path.join(OUT, viewport.name + "-react-" + step + "-" + part + ".png"));
             const equal = diff.dimensionsMatch && diff.ratio <= 0.01;
-            report.checks.push({ viewport: viewport.name, step, kind: "pixel:" + part, pass: equal, diff });
-            if (!equal) report.unexpectedDifferences.push({ viewport: viewport.name, step, kind: "pixel:" + part, diff });
+            addCheck({ viewport: viewport.name, step, kind: "pixel:" + part, pass: equal, diff });
+            if (!equal) addDiff({ viewport: viewport.name, step, kind: "pixel:" + part, diff });
           }
         }
       }
-      assert(baseline.consoleErrors.length === 0 && react.consoleErrors.length === 0, "unexpected runtime errors");
+        assert(baseline.consoleErrors.length === 0 && react.consoleErrors.length === 0,
+          "unexpected runtime errors in " + react.mode);
+      }
     }
+    assert(!INCLUDE_P8 || report.variants.filter(v => v.mode === "react-grid").length === VIEWPORTS.length,
+      "P8 requested but not exercised for every viewport");
     report.status = report.unexpectedDifferences.length ? "FAIL" : "PASS";
     console.log("KGG patient React/legacy parity: " + report.status +
       " (" + report.checks.length + " checks; " + report.unexpectedDifferences.length + " differences)");
