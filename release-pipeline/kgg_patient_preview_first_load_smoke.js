@@ -4,9 +4,30 @@
 const fs = require("fs");
 const http = require("http");
 const path = require("path");
-const { chromium } = require("playwright");
+const { chromium, webkit } = require("playwright");
 
 const runtimeRoot = path.resolve(process.argv[2] || "");
+const MODE = process.env.KGG_FIRST_LOAD_MODE || "original";
+const ENGINE = process.env.KGG_FIRST_LOAD_BROWSER || "chromium";
+const PARAMS = MODE === "original" ? "" :
+  "kggReactPad=" + (MODE === "legacy" ? "0" : "1") +
+  (MODE === "react-p8" ? "&kggReactGrid=1" : "");
+function patientUrl(port, plan) {
+  const query = [PARAMS, plan ? "plan=" + encodeURIComponent(plan) : ""].filter(Boolean).join("&");
+  return "http://127.0.0.1:" + port + "/" + (query ? "?" + query : "");
+}
+async function assertReactMode(page) {
+  if (MODE === "original") return;
+  if (MODE === "react-p8") {
+    await page.waitForFunction(() => document.body.classList.contains("kggReactNumpadGridV1") &&
+      document.querySelectorAll(".kgg-react-numpad-grid__key").length === 12);
+  } else {
+    assert(!await page.evaluate(() => document.body.classList.contains("kggReactNumpadGridV1")),
+      "P8 grid mounted without P8 opt-in");
+  }
+  const enabled = await page.evaluate(() => localStorage.getItem("kggPatientReactPadV1") === "1");
+  assert(enabled === (MODE !== "legacy"), "React mode opt-in/storage incorrect: " + MODE);
+}
 const REQUIRED_MODULES = [
   "patient-storage-scope.js",
   "patient-i18n.js",
@@ -137,7 +158,9 @@ async function main() {
   });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const { port } = server.address();
-  const browser = await chromium.launch({ headless: true });
+  assert(["original","legacy","react-p7","react-p8"].includes(MODE),"unsupported first-load mode");
+  assert(["chromium","webkit"].includes(ENGINE),"unsupported first-load engine");
+  const browser = await ({chromium,webkit})[ENGINE].launch({ headless: true });
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
     serviceWorkers: "block",
@@ -159,8 +182,9 @@ async function main() {
   });
 
   try {
-    await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: "networkidle" });
+    await page.goto(patientUrl(port), { waitUntil: "networkidle" });
     await page.locator("#kggQrRescue").waitFor({ state: "visible" });
+    await assertReactMode(page);
     await assertDirectFirstLoadModules(page);
     assert(rootNavigation.documentRequests === 1, `fresh preview root reloaded before module readiness: ${rootNavigation.documentRequests} document requests`);
     const rootNavigationTypes = await page.evaluate(() => performance.getEntriesByType("navigation").map((entry) => entry.type));
@@ -211,8 +235,9 @@ async function main() {
       ],
     };
     const payload = `KGGH2:${encodePlan(plan)}`;
-    await page.goto(`http://127.0.0.1:${port}/?plan=${encodeURIComponent(payload)}`, { waitUntil: "networkidle" });
+    await page.goto(patientUrl(port,payload), { waitUntil: "networkidle" });
     await page.locator("#plan").waitFor({ state: "visible" });
+    await assertReactMode(page);
     await assertDirectFirstLoadModules(page);
 
     const card = page.locator("#list .ex").first();
@@ -338,6 +363,8 @@ async function main() {
 
   console.log(JSON.stringify({
     status: "PASS",
+    engine: ENGINE, mode: MODE,
+    sourceSha: process.env.KGG_FIRST_LOAD_HEAD_SHA || "local",
     runtimeRoot,
     serviceWorkerBlocked: true,
     directFirstLoadModules: REQUIRED_MODULES.length,
