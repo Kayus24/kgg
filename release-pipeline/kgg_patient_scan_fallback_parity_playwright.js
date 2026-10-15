@@ -104,10 +104,13 @@ async function denied(page){
   return state;
 }
 async function run(browser,base,mode){
+  // Avoid catalog-recognized names: media/CDN fetching belongs to the separate media suite.
+  // The scanner suite must remain strictly synthetic and independent of network assets.
   const plan={i:"synthetic-scan-fallback",t:"Baseline scan",v:1,d:6,
-    e:[["Rudern",2,"B","kg","Wdh"]]};
+    e:[["KGG Synthetic Fixture Alpha",2,"B","kg","Wdh"]]};
   const next={i:"synthetic-scan-update",t:"Fallback Link Update",v:2,d:6,
-    e:[["Rudern",2,"B","kg","Wdh"],["Beinpresse",1,"B","kg","Wdh"]]};
+    e:[["KGG Synthetic Fixture Alpha",2,"B","kg","Wdh"],
+       ["KGG Synthetic Fixture Beta",1,"B","kg","Wdh"]]};
   const x=await makePage(browser,base,mode,plan);
   try{
     const {page}=x;
