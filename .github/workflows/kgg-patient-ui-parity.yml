@@ -59,11 +59,12 @@ jobs:
           cd release-pipeline
           npm ci --ignore-scripts
           npx playwright install --with-deps ${{ matrix.browser }}
-      - name: Play identical synthetic journeys in Legacy and React
+      - name: Play identical synthetic journeys in Legacy, React P7 and React P8
         shell: bash
         env:
           KGG_PARITY_ENGINE: ${{ matrix.browser }}
           KGG_PARITY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          KGG_PARITY_P8_GRID: '1'
           KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
         run: node release-pipeline/kgg_patient_ui_parity_capture.js
       - name: Reuse per-set pain regression from main (Legacy and React)
