@@ -313,6 +313,47 @@ async function main() {
     assert(!thumbGeometry.noImageHasThumb, "card without media still reserves a thumbnail element");
     assert(thumbGeometry.noImagePaddingRight <= 24, `card without media keeps thumbnail padding: ${thumbGeometry.noImagePaddingRight}px`);
 
+    // Opt-in: actual cached exercise image lightbox with keyboard and click close.
+    if (process.env.KGG_FIRST_LOAD_MEDIA_LIGHTBOX === "1") {
+      const valuesBefore = await page.evaluate(() =>
+        JSON.stringify(Object.fromEntries(Object.entries(v || {}).sort(([a],[b])=>a.localeCompare(b)))));
+      await setCardOpen(page, card, true);
+      const image = card.locator(".kggMediaBox.ready img").first();
+      await image.waitFor({ state: "visible" });
+      const source = await image.evaluate(node => ({
+        src: node.currentSrc || node.src,
+        decoded: node.complete && node.naturalWidth > 0
+      }));
+      assert(source.decoded && source.src.startsWith("blob:"),
+        "exercise image was not decoded/cached before opening the lightbox");
+      await image.click();
+      await page.locator("#kggImageLightbox").waitFor({ state: "visible" });
+      const expanded = await page.evaluate(() => {
+        const box = document.getElementById("kggImageLightbox");
+        const img = box?.querySelector("img"), close = box?.querySelector("button");
+        const rect = img?.getBoundingClientRect();
+        return {
+          src: img?.currentSrc || img?.src || "",
+          decoded: !!(img && img.complete && img.naturalWidth > 0),
+          closeName: close?.getAttribute("aria-label") || "",
+          visible: !!rect && rect.width > 0 && rect.height > 0
+        };
+      });
+      assert(expanded.src === source.src && expanded.decoded && expanded.visible &&
+        expanded.closeName.length > 0,
+        "lightbox did not show the cached source with accessible close: " + JSON.stringify(expanded));
+      await page.locator("#kggImageLightbox button").click();
+      await page.locator("#kggImageLightbox").waitFor({ state: "detached" });
+      await image.click();
+      await page.locator("#kggImageLightbox").waitFor({ state: "visible" });
+      await page.keyboard.press("Escape");
+      await page.locator("#kggImageLightbox").waitFor({ state: "detached" });
+      await setCardOpen(page, card, false);
+      const valuesAfter = await page.evaluate(() =>
+        JSON.stringify(Object.fromEntries(Object.entries(v || {}).sort(([a],[b])=>a.localeCompare(b)))));
+      assert(valuesAfter === valuesBefore,"lightbox interactions changed patient training values");
+    }
+
     await page.evaluate(() => {
       const api = window.KGGPatientMultiPlan;
       const state = api.ensureState();
@@ -373,6 +414,7 @@ async function main() {
     progressCheckedForAllFields: true,
     redXPlanDeletionChecked: true,
     localThumbnailGeometryChecked: true,
+    mediaLightboxChecked: process.env.KGG_FIRST_LOAD_MEDIA_LIGHTBOX === "1",
   }));
 }
 
