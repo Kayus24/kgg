@@ -58,6 +58,7 @@ jobs:
         env:
           KGG_FIRST_LOAD_BROWSER: ${{ matrix.browser }}
           KGG_FIRST_LOAD_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          KGG_FIRST_LOAD_MEDIA_LIGHTBOX: '1'
           KGG_PREVIEW_ROOT: ${{ runner.temp }}/kgg-firstload-${{ matrix.browser }}/previews/patient-gate-self-test
         run: |
           set -euo pipefail
