@@ -381,7 +381,7 @@ async function main() {
             if (!sameShape) addDiff({ viewport: viewport.name, step, kind: "geometry:" + part, legacy: x, react: y });
             const diff = await pixelDifference(comparisonPage,
               path.join(OUT, viewport.name + "-legacy-" + step + "-" + part + ".png"),
-              path.join(OUT, viewport.name + "-react-" + step + "-" + part + ".png"));
+              path.join(OUT, viewport.name + "-" + react.mode + "-" + step + "-" + part + ".png"));
             const equal = diff.dimensionsMatch && diff.ratio <= 0.01;
             addCheck({ viewport: viewport.name, step, kind: "pixel:" + part, pass: equal, diff });
             if (!equal) addDiff({ viewport: viewport.name, step, kind: "pixel:" + part, diff });
