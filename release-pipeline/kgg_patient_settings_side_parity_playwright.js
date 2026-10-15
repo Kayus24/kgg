@@ -37,6 +37,10 @@ async function openCard(page,index=0){
   throw new Error("exercise card not opening: "+index);
 }
 async function edit(page,options){
+  // Existing card guard intentionally swallows card taps for 450 ms after pad closes.
+  // Never bypass its capture handler; wait for a real user-safe tap window.
+  await page.waitForFunction(()=>!window.__kggPadClosedAt ||
+    Date.now()-window.__kggPadClosedAt>=475,null,{timeout:2500});
   const card=await openCard(page);
   await card.locator(".kggCardDots").click();
   const sheet=page.locator("#kggSettingsSheet");
