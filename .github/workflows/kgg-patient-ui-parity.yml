@@ -2,13 +2,33 @@ name: KGG Patient UI Legacy React Parity
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, 'feat/patient-react-padgrid-p8-20261014']
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - '.github/workflows/kgg-patient-ui-parity.yml'
       - 'release-pipeline/kgg_patient_ui_parity*'
+      - 'release-pipeline/kgg_patient_unit_semantics_playwright.js'
+      - 'release-pipeline/kgg_patient_continuous_days_playwright.js'
+      - 'release-pipeline/kgg_patient_scan_format_smoke.js'
+      - 'release-pipeline/kgg_patient_set_view_adaptive_smoke.js'
+      - 'release-pipeline/kgg_patient_media_stability_playwright.js'
+      - 'release-pipeline/kgg_patient_full_acceptance_report*'
+      - 'release-pipeline/kgg_patient_unified_extra_proofs*'
+      - 'release-pipeline/kgg_patient_settings_side_parity_playwright.js'
+      - 'release-pipeline/kgg_ticket_015_browser_smoke.js'
+      - 'release-pipeline/kgg_patient_scan_fallback_parity_playwright.js'
+      - 'release-pipeline/kgg_patient_preview_first_load_smoke.js'
+      - 'release-pipeline/kgg_patient_english_playwright.js'
       - 'release-pipeline/kgg_patient_per_set_pain_playwright.js'
       - 'patient-card-settings.js'
+      - 'patient-card-progress.js'
+      - 'patient-day-history.js'
+      - 'patient-start-values-day1.js'
+      - 'patient-set-summary-groups.js'
+      - 'patient-multiplan-db.js'
+      - 'patient-plan-delete.js'
+      - 'release-pipeline/kgg_patient_plan_delete_smoke.js'
+      - 'patient-qr-format.js'
       - 'patient-last-value-hints.js'
       - 'patient-numpad-card-guard.js'
       - 'collapse-cards.js'
@@ -33,7 +53,7 @@ jobs:
   parity-capture:
     name: ${{ matrix.browser }} click/visual/video parity
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
@@ -50,9 +70,23 @@ jobs:
       - name: Validate recorder and report syntax
         shell: bash
         run: |
+          mkdir -p "$RUNNER_TEMP/patient-ui-parity"
           node --check release-pipeline/kgg_patient_ui_parity_capture.js
           node --check release-pipeline/kgg_patient_ui_parity_report.mjs
-          node --test release-pipeline/kgg_patient_ui_parity_contracts.test.cjs
+          node --check release-pipeline/kgg_patient_unit_semantics_playwright.js
+          node --check release-pipeline/kgg_patient_continuous_days_playwright.js
+          node --check release-pipeline/kgg_patient_scan_format_smoke.js
+          node --check release-pipeline/kgg_patient_set_view_adaptive_smoke.js
+          node --check release-pipeline/kgg_patient_media_stability_playwright.js
+          node --check release-pipeline/kgg_patient_full_acceptance_report.mjs
+          node --check release-pipeline/kgg_patient_unified_extra_proofs.mjs
+          node --check release-pipeline/kgg_patient_settings_side_parity_playwright.js
+          node --check release-pipeline/kgg_ticket_015_browser_smoke.js
+          node --check release-pipeline/kgg_patient_scan_fallback_parity_playwright.js
+          node --check release-pipeline/kgg_patient_preview_first_load_smoke.js
+          node --check patient-plan-delete.js
+          node release-pipeline/kgg_patient_plan_delete_smoke.js
+          node --test release-pipeline/kgg_patient_ui_parity_contracts.test.cjs release-pipeline/kgg_patient_full_acceptance_report.test.mjs release-pipeline/kgg_patient_unified_extra_proofs.test.mjs
       - name: Install pinned browser dependencies
         shell: bash
         run: |
@@ -63,21 +97,132 @@ jobs:
         shell: bash
         env:
           KGG_PARITY_ENGINE: ${{ matrix.browser }}
-          KGG_PARITY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           KGG_PARITY_P8_GRID: '1'
+          KGG_PARITY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
         run: node release-pipeline/kgg_patient_ui_parity_capture.js
+      - name: Compare responsive set views and Large UI in Legacy and React
+        shell: bash
+        env:
+          KGG_ADAPTIVE_PARITY: '1'
+          KGG_ADAPTIVE_BROWSER: ${{ matrix.browser }}
+          KGG_PARITY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: node release-pipeline/kgg_patient_set_view_adaptive_smoke.js
+      - name: Compare synthetic media stability in Legacy and React
+        shell: bash
+        env:
+          KGG_MEDIA_PARITY: '1'
+          KGG_MEDIA_BROWSER: ${{ matrix.browser }}
+          KGG_PARITY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: node release-pipeline/kgg_patient_media_stability_playwright.js
       - name: Reuse per-set pain regression from main (Legacy and React)
         shell: bash
         env:
           KGG_PAIN_BROWSER: ${{ matrix.browser }}
+          KGG_PARITY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
         run: node release-pipeline/kgg_patient_per_set_pain_playwright.js
+      - name: Compare dynamic units, progress, summary and history in Legacy and React
+        shell: bash
+        env:
+          KGG_UNIT_BROWSER: ${{ matrix.browser }}
+          KGG_PARITY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: node release-pipeline/kgg_patient_unit_semantics_playwright.js
+      - name: Compare continuous/fixed days, multi-plan history and final QR in both modes
+        shell: bash
+        env:
+          KGG_DAYS_BROWSER: ${{ matrix.browser }}
+          KGG_PARITY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: |
+          KGG_DAYS_MODE=legacy node release-pipeline/kgg_patient_continuous_days_playwright.js
+          KGG_DAYS_MODE=react node release-pipeline/kgg_patient_continuous_days_playwright.js
+      - name: Compare H2/H3 import, plan choices, management and local exercise database
+        shell: bash
+        env:
+          KGG_SCAN_BROWSER: ${{ matrix.browser }}
+          KGG_PARITY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: node release-pipeline/kgg_patient_scan_format_smoke.js
+      - name: Verify patient settings and B/LR side-copy in 3 modes
+        shell: bash
+        env:
+          KGG_SETTINGS_BROWSER: ${{ matrix.browser }}
+          KGG_SETTINGS_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: |
+          set -euo pipefail
+          node release-pipeline/kgg_patient_settings_side_parity_playwright.js |
+            tee "$KGG_PARITY_OUT/settings-parity.log"
+      - name: Verify progression gallery, stage history and QR in 3 modes
+        shell: bash
+        env:
+          KGG_PROGRESSION_BROWSER: ${{ matrix.browser }}
+          KGG_PROGRESSION_PARITY: '1'
+          KGG_PROGRESSION_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: |
+          set -euo pipefail
+          node release-pipeline/kgg_ticket_015_browser_smoke.js |
+            tee "$KGG_PARITY_OUT/progression-parity.log"
+      - name: Verify denied camera, photo/link/retry and rescue in 3 modes
+        shell: bash
+        env:
+          KGG_SCAN_FALLBACK_BROWSER: ${{ matrix.browser }}
+          KGG_SCAN_FALLBACK_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: |
+          set -euo pipefail
+          node release-pipeline/kgg_patient_scan_fallback_parity_playwright.js |
+            tee "$KGG_PARITY_OUT/scanner-fallback-parity.log"
+      - name: Reuse canonical isolated patient preview generator
+        shell: bash
+        run: |
+          python release-pipeline/kgg_patient_gpt_write_gate.py --self-test \
+            --self-test-preview-root "$RUNNER_TEMP/kgg-unified-preview-${{ matrix.browser }}"
+      - name: Verify first-load, offline-scope isolation and local lightbox in 3 modes
+        shell: bash
+        env:
+          KGG_FIRST_LOAD_BROWSER: ${{ matrix.browser }}
+          KGG_FIRST_LOAD_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          KGG_FIRST_LOAD_MEDIA_LIGHTBOX: '1'
+          KGG_PREVIEW_ROOT: ${{ runner.temp }}/kgg-unified-preview-${{ matrix.browser }}/previews/patient-gate-self-test
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: |
+          set -euo pipefail
+          test -f "$KGG_PREVIEW_ROOT/index.html"
+          : > "$KGG_PARITY_OUT/firstload-parity.log"
+          for mode in legacy react-p7 react-p8; do
+            KGG_FIRST_LOAD_MODE="$mode" node release-pipeline/kgg_patient_preview_first_load_smoke.js "$KGG_PREVIEW_ROOT" |
+              tee -a "$KGG_PARITY_OUT/firstload-parity.log"
+          done
+      - name: Convert only verified 3-mode logs into SHA-bound acceptance proofs
+        shell: bash
+        env:
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: node release-pipeline/kgg_patient_unified_extra_proofs.mjs "$KGG_PARITY_OUT"
       - name: Build offline side-by-side evidence gallery
         if: always()
         shell: bash
         env:
           KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
         run: node release-pipeline/kgg_patient_ui_parity_report.mjs "$KGG_PARITY_OUT"
+      - name: Build single-page acceptance overview (not an app release approval)
+        if: always()
+        shell: bash
+        env:
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: node release-pipeline/kgg_patient_full_acceptance_report.mjs "$KGG_PARITY_OUT"
+      - name: Require SHA-bound automated-scope acceptance
+        if: always()
+        shell: bash
+        env:
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: |
+          node -e 'const fs=require("node:fs");const p=process.env.KGG_PARITY_OUT+"/acceptance.json";const r=JSON.parse(fs.readFileSync(p,"utf8"));const bad=(r.blocks||[]).filter(x=>x.status!=="PASS").map(x=>x.id+":"+x.status);if(r.status!=="AUTOMATED_SCOPE_PASS_FINAL_PENDING"||(r.blocks||[]).length!==14||bad.length){console.error("Combined automated scope must pass; status="+r.status+" blocks="+bad.join(","));process.exit(1)}console.log("SHA-bound combined automated scope: "+r.status+"; blocks="+r.blocks.length)'
       - name: Upload short-lived review evidence, including failures
         if: always()
         uses: actions/upload-artifact@v4
