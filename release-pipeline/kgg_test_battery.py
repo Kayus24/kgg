@@ -946,6 +946,13 @@ TEST_REGISTRY = [
         "run": run_patient_plan_link_choice_smoke,
     },
     {
+        "id": "patient-import-session-values",
+        "level": "regression",
+        "suite": "ui-stability",
+        "reason": "Plan update, add and replacement must not enter previous session values into current training, including after reload.",
+        "run": lambda: run_playwright_script("kgg_patient_import_session_values_playwright.js"),
+    },
+    {
         "id": "patient-qr-format-v81-critical",
         "level": "critical",
         "suite": "patient-qr",

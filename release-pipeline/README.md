@@ -219,6 +219,7 @@ python release-pipeline/kgg_test_battery.py --suite hygiene --level critical
 Er blockiert typische schmutzige Chat-Patches:
 
 - Branch basiert nicht auf aktuellem `origin/main` (`KGG_ALLOW_STALE_BRANCH=1` nur fuer bewusste Rettungsarbeiten).
+  Eine noch nicht committete Main-Merge gilt nur mit Git-aufgeloester echter MERGE_HEAD-Datei, genau dem vollen aktuellen Main-Commit, gemeinsamer Historie und vollstaendig aufgeloestem Index als frisch; der bisherige HEAD-Vorfahrpfad bleibt erhalten.
 - `therapist-app/test-lab/**` landet in einem normalen App-/Release-PR.
 - `release-inbox/admin.html` und `release-inbox/release.json` sind nur halb vorhanden.
 - `kgg-update/index.html` wurde geaendert, aber `kgg-update/version.json` fehlt oder der LF-normalisierte Hash passt nicht.

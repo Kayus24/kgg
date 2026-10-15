@@ -12,11 +12,12 @@ function fail(message){throw new Error(message)}
 function assert(condition,message){if(!condition)fail(message)}
 
 let lang='de';
+let storedPlan=null;
 const context={
   console,
   window:{__KGG_TEST__:true},
   document:{readyState:'loading',addEventListener(){},getElementById(){return null}},
-  localStorage:{getItem(key){return key==='kggPatientLang'?lang:null}},
+  localStorage:{getItem(key){return key==='kggPatientLang'?lang:key==='kggCurrentPlanV1'?JSON.stringify(storedPlan):null}},
   setTimeout(){return 0},
   clearTimeout(){},
   MutationObserver:function(){}
@@ -59,6 +60,25 @@ assert(api.filledCount(card)===0,'pain value must not affect card progress');
 
 lang='en';
 assert(api.labelForState('done')==='✓ Done','stored patient language was not respected');
+assert(typeof api.ticket034FinishCopy==='function','finish dialog copy contract missing');
+vm.runInContext(fs.readFileSync(path.join(ROOT,'patient-i18n.js'),'utf8'),context,{filename:'patient-i18n.js'});
+lang='de';
+let copy=api.ticket034FinishCopy('Wadenheben');
+assert(copy.title==='Training beenden'&&copy.confirm==='Training beenden'&&copy.cancel==='Weiter trainieren','German finish controls changed');
+assert(copy.message==='Sie haben noch die Übung „Wadenheben“ offen. Sicher, dass Sie das Training beenden wollen?','German finish message changed');
+lang='en';copy=api.ticket034FinishCopy('Wadenheben');
+assert(copy.title==='Finish training'&&copy.confirm==='Finish training'&&copy.cancel==='Continue training','English finish controls missing');
+assert(copy.message==='You still have the exercise “Calf Raise” open. Are you sure you want to finish training?','known finish exercise was not translated');
+const authored='Eigene Übung: Satz: A → Tag 2 — X',english='Own exercise: Set: A → Day 2 — Y';
+storedPlan={plan:{m:{exerciseNamesEn:{[authored]:english}}}};
+const storedBefore=JSON.stringify(storedPlan);
+assert(api.ticket034FinishCopy(authored).message.includes('“'+english+'”'),'exact authored finish label was changed');
+assert(api.ticket034FinishCopy('Unbekannt: Satz: A → Tag 2 — X').message.includes('“Unbekannt: Satz: A → Tag 2 — X”'),'unknown finish label must remain original');
+lang='de';assert(api.ticket034FinishCopy(authored).message.includes('„'+authored+'“'),'German authored finish name changed');
+lang='en';const provider=context.window.KGGPatientI18n;delete context.window.KGGPatientI18n;
+assert(api.ticket034FinishCopy(authored).message.includes('“'+authored+'”'),'missing-provider finish name fallback changed');
+context.window.KGGPatientI18n=provider;
+assert(JSON.stringify(storedPlan)===storedBefore,'finish copy changed canonical metadata');
 const collapseSource=fs.readFileSync(path.join(ROOT,'collapse-cards.js'),'utf8');
 assert(collapseSource.includes('function progress(c)'),'collapse fallback progress renderer missing');
 assert(collapseSource.includes('function patchProgressPut()'),'collapse fallback does not refresh after canonical put/save');

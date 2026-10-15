@@ -18,6 +18,7 @@ const ROOT_FILES = [
   "kgg-icon-512-v63.png",
   "kgg-icon-maskable-512-v63.png",
   "numpad-ui-fix.js",
+  "patient-i18n.js",
   "patient-version-label.js",
   "patient-plan-link-choice.js",
   "collapse-cards.js",
@@ -121,7 +122,7 @@ function buildPackage(args) {
 
   const indexPath = path.join(output, "index.html");
   let html = fs.readFileSync(indexPath, "utf8");
-  const scannerTag = '<script src="./patient-start-scan.js?v=start-scan-v87-active-units"></script>';
+  const scannerTag = '<script src="./patient-start-scan.js?v=start-scan-v92-no-session-copy"></script>';
   const injected = '<script src="./kgg-dual-device-fixtures.js?v=v404-1"></script><script src="./patient-device-test-agent.js?v=v404-1"></script>' + scannerTag;
   if (!html.includes(scannerTag)) fail("Scanner-Einfügepunkt fehlt");
   html = html

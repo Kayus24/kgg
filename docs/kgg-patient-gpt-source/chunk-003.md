@@ -1,8 +1,8 @@
 # KGG Patient Source Chunk 003
 
 - Source file: `service-worker.js`
-- Characters: 1-8224
-- Full source SHA-256: `e7c4c785995340d7be2eebce8bae924c00deb7756d01231338d15f76a9cf9469`
+- Characters: 1-8227
+- Full source SHA-256: `025613ed790cb2796f64c41fc9720c1b5a5d8495968503a725e49f88a3c3e6cc`
 
 ```
 const CACHE_NAME = 'kgg-handyplan-v93-english-complete';
@@ -16,7 +16,7 @@ const COLLAPSE_SCRIPT = './collapse-cards.js?v=plan-update-label-7-single-card-o
 const CARD_PROGRESS_SCRIPT = './patient-card-progress.js?v=card-progress-3-active-units';
 const INSTALL_PROMPT_SCRIPT = './patient-install-prompt.js?v=install-prompt-2-capability-only';
 const PLAN_REPLACE_SLOT_SCRIPT = './patient-plan-replace-slot-fix.js?v=active-slot-1';
-const START_SCAN_SCRIPT = './patient-start-scan.js?v=start-scan-v87-active-units';
+const START_SCAN_SCRIPT = './patient-start-scan.js?v=start-scan-v92-no-session-copy';
 const JSQR_SCRIPT = './vendor/jsqr-1.4.0.js';
 const FFLATE_SCRIPT = './vendor/fflate-0.8.3.js?v=fflate-0.8.3';
 const PLAN_FORMAT_SCRIPT = './patient-qr-format.js?v=v81-kgg-h3-plan-format';

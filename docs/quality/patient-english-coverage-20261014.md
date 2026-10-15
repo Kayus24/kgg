@@ -834,3 +834,1527 @@ Konkreter weiterer lokaler Preview-RED bestätigt. Erste Interpretation (fehlend
 Root/Cloud-GO und native unabhängige Codeprüfung **PASS** für exakt vier Testdateien, keine Produktänderung: zwei feste f59-Altbasisbindungen wie oben; zusätzlich ausschließlich je eine Pflichtlisten-Zeile `patient-i18n.js` nach Preview-Storage in write_gate und Firstload-Smoke. Alle anderen Reihenfolgen, Existenz-/Duplikat-/missing-/version-/negative Guards, Assertions und Fristen bytegleich; Preview-only Injektion unverändert. Neue Frozen-Testhashes write_gate `db621e231bfea72dd2addaca3b3db942b3a26e084f6aefef2a44eda81c349cd1`, Firstload `37db546492635a4f27d51320d9cc46e6dfa72c00b264c07a670a61a61c9ad6a4`; zwei Altbasis-Testhashes oben unverändert. Prüfer Start/End und eigener finaler Hashcheck **31/31 Produkte Freeze4**.
 
 Tatsächliche Gates: write_gate self-test mit isoliertem output/-Preview **PASS**, Firstload-Browser **PASS** (27 Pflichtmodule, freshRoot ohne Reload, scanner einmal, Eingabefortschritt/redX/lokale Thumbnail-Geometrie), Storage-Isolation **PASS** (Live-Plan, Preview-Reload und zwei requestbezogene Namespaces). Erster Isolation-Aufruf hatte irrtümlich nur einen Rootparameter und scheiterte expectedTitle; korrekt bestehendem CLIvertrag `. previewRoot patient-gate-self-test` Exit0 PASS, keinerlei Isolationharness-/Produktänderung daraus. Stale `knowledge-testing.md` über vorhandenen PatientResources-Generator aufgefrischt, ausschließlich zugehöriger Knowledge-Digest in Manifest/pending patientProduction-Snapshot aktualisiert; keine Modell-/Capabilities-/Syncstatus-/Liveänderung. PatientResources46 PASS, resource audit TARGET_PASS; context/bug/sourceContext/knowledgePack PASS. Vier-Testdateien-Nachtrag unabhängig angenommen. **Next actual action:** normaler Hook/Test-/Nachweiscommit, Branchpush und neue aktuelle Head-CI; keine zusätzliche identische Vorab-Vollbatterie.
+
+
+### Main-Abgleich — Revision2 / kombinierter Freeze1
+
+Verifiziert 2026-10-15T07:03:48Z. Normale Main-Merge mit `--no-ff --no-commit` auf dem vorhandenen Englishbranch; noch kein Commit/Push. Gebundene Parents unten. Patient93/Therapeutsource96 bleiben erhalten. Von den bisherigen 31 Freeze4-Produkten sind 29 tatsächliche Arbeitsdateihashes exakt erhalten; index/SW ändern ausschließlich den Main-Scannerref. Der zusätzliche 32. Produktpfad patient-start-scan.js ist exakt der festgepinnte Main-Gitblob. `sha256` bindet tatsächliche Arbeitsbytes; `lfSha256` trennt Git-/Parentinhalt von den fünf bereits vorher vorhandenen Aux-JS-CRLF-Checkouts. Kein funktionaler EOL-Patch aus diesen fünf Unterschieden.
+
+Vier Produktkonflikte wie genehmigt aufgelöst, Generated-Konflikte über bestehende Generatoren abgeleitet. Notwendiger zweiter Scannerchunk035 ausdrücklich angenommen. Die drei Manifest-/Editor-Snapshot-JSONs stimmen rekursiv außerhalb der Knowledge-Digests mit beiden Parents überein; Modell/Capabilities/Identity/Pending unverändert. Sourcebuild/Changelog und sechs Freshnesschecks PASS; resource audit TARGET_PASS. Metadata-/SharedBank-/Companion-, Cockpit-Altreader/Wire/State- und Summary-Producer-VM PASS.
+
+Cloud/Root-GO Revision2: DualDevice ROOT_FILES ergänzt genau einmal den vorhandenen i18n-Helper; vorhandene Kopier-/Storageisolation wird weiterverwendet. Bestehender Compatibilitytest behält default f59/v90 und wählt ausschließlich mit `--cache-from-v92` den festgepinnten Main4bbe/v92. Alle bisherigen Assertions/Fristen/Profile erhalten; zusätzliche GET_APP_VERSION-Antworten belegen die aktive Baseline sowie Ziel93 vor/nach Offline-Reload. Fehlende Altressourcen bleiben404, kein Arbeitsdateifallback. Diese Testergänzungen ändern kein Produkt.
+
+Gezielte kombinierte Paket-/Import-/English-/beide Cache-/Preview-Storage-Gates und unabhängiger Candidate-Review jetzt offen. Alle laufen gegen genau diesen Freeze; alte8CI/Hooks bleiben historische Evidenz. Normaler FullHook/aktuelle Head-CI, Merge/Release/Manifest/APK weiterhin offen. Output/Traces bleiben lokal ungestagt.
+
+```json
+{
+  "id": "main-alignment-r2-freeze1",
+  "task_id": "patient-english-main-alignment-20261015",
+  "generation": 2,
+  "revision": 2,
+  "englishParent": "d34e90f6ef4890e345c1559e75e2a5c22df4d27a",
+  "mainParent": "4bbe3905126741c042e21331d7485067470b6640",
+  "products": [
+    {
+      "file": "collapse-cards.js",
+      "sha256": "ac8afec81349ecb3ae8d9b5dd9fd9a39c476d4dedc7148907939ebd4fae8aafc",
+      "lfSha256": "ac8afec81349ecb3ae8d9b5dd9fd9a39c476d4dedc7148907939ebd4fae8aafc",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "index.html",
+      "sha256": "12f4d469d042909d6e7b0b835b16616a0a6a35602fac18b6ada7fc6753c56b76",
+      "lfSha256": "12f4d469d042909d6e7b0b835b16616a0a6a35602fac18b6ada7fc6753c56b76",
+      "parent": "English-scanner-ref-only"
+    },
+    {
+      "file": "kgg-update/index.html",
+      "sha256": "d9e4edcda8afd4cdfc821b4e9d155483a726cec4e9c4603e4eeee4b94a0bf2d3",
+      "lfSha256": "d9e4edcda8afd4cdfc821b4e9d155483a726cec4e9c4603e4eeee4b94a0bf2d3",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/document/body-shell.html",
+      "sha256": "52fc54134ed60677b787d798a1caf21f86215f17f467bad532e52f2e9236cc80",
+      "lfSha256": "52fc54134ed60677b787d798a1caf21f86215f17f467bad532e52f2e9236cc80",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/document/head-ui.html",
+      "sha256": "c74cca199993b498cbb9d50de132c1fa5dd5a0f89b1e468165b54e7cc18fd9bb",
+      "lfSha256": "c74cca199993b498cbb9d50de132c1fa5dd5a0f89b1e468165b54e7cc18fd9bb",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/metadata/changelog.html",
+      "sha256": "a919cbbe18ba7d8015b561699e5a1e44cc153452c8583b9188bc5d0c26a17f27",
+      "lfSha256": "a919cbbe18ba7d8015b561699e5a1e44cc153452c8583b9188bc5d0c26a17f27",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/metadata/source-truth.html",
+      "sha256": "7fed7106b40c946e0f113edd221dc76c17f532ab5dc93a4b19a25624718b3a2d",
+      "lfSha256": "7fed7106b40c946e0f113edd221dc76c17f532ab5dc93a4b19a25624718b3a2d",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/patches/v082-therapy-cockpit.html",
+      "sha256": "94564723f8d292cf9cf23a88da3076c7cf6393e47880a6c50b06bdc7836ac673",
+      "lfSha256": "94564723f8d292cf9cf23a88da3076c7cf6393e47880a6c50b06bdc7836ac673",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/patches/v085-ticket-015-progressions.html",
+      "sha256": "43ed681276dac3f5394d3e05880fca683c1d3cc6dd44f00c5c50a4f9be599975",
+      "lfSha256": "43ed681276dac3f5394d3e05880fca683c1d3cc6dd44f00c5c50a4f9be599975",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/patches/v090-ticket-015-admin-stage-gallery-drag-motion.html",
+      "sha256": "bbae05b6d45927c7f14b19dcfe8b193cd0fcf1414b27adced0105e43e06ad1e6",
+      "lfSha256": "bbae05b6d45927c7f14b19dcfe8b193cd0fcf1414b27adced0105e43e06ad1e6",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/patches/v093-cockpit-shared-editor.html",
+      "sha256": "76da5d4c09e1b941127b0cb1b0ea7873c4ae7436708ed3c5779b8e362f2de42b",
+      "lfSha256": "76da5d4c09e1b941127b0cb1b0ea7873c4ae7436708ed3c5779b8e362f2de42b",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/runtime/app-core.html",
+      "sha256": "80548924281b10af79c1d2645a60956b42728a905ac934e5c0b8e3d09447149f",
+      "lfSha256": "80548924281b10af79c1d2645a60956b42728a905ac934e5c0b8e3d09447149f",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/version.json",
+      "sha256": "44407021580e051dd1719882c921a0aa477ccf59660f7966bec8171a36ad237f",
+      "lfSha256": "44407021580e051dd1719882c921a0aa477ccf59660f7966bec8171a36ad237f",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-card-settings.js",
+      "sha256": "06c04bcb84d6eec3bad892f48c1434f6aab7060e0601bfe2a01eb417405ee045",
+      "lfSha256": "06c04bcb84d6eec3bad892f48c1434f6aab7060e0601bfe2a01eb417405ee045",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-day-history.js",
+      "sha256": "2e904b1b6578aef5a7fccc5128bc633c5367c966b4eb5dd484e79a98bdf7661e",
+      "lfSha256": "c8664dff338e682fbf2df380d05aeee8daeecce5b7afa1beb812fe8d5d5414c0",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-i18n.js",
+      "sha256": "efc1a0b7fbc9bce500951b36d35a21d9b615d4294efa7a5f91faf1e06cbaf898",
+      "lfSha256": "efc1a0b7fbc9bce500951b36d35a21d9b615d4294efa7a5f91faf1e06cbaf898",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-install-guide.js",
+      "sha256": "11d2fb9edd3f290a4f75bd7a1526daee53faa55bccbe041129f3f04fdf729e86",
+      "lfSha256": "0ff8e9e3c7802f2891873762e66770d3c8e38230011cacee0eed4e6a390e8643",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-last-value-hints.js",
+      "sha256": "879131abf73d0e66234abe33670c43e9eb963a1371527262db617ee1a817d685",
+      "lfSha256": "879131abf73d0e66234abe33670c43e9eb963a1371527262db617ee1a817d685",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-media-retry-cache_v2.js",
+      "sha256": "1ae19634aa7973dbe1546333b7d2e6d0138e04e175290ce2e11310092a4651ca",
+      "lfSha256": "1ae19634aa7973dbe1546333b7d2e6d0138e04e175290ce2e11310092a4651ca",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-multiplan-db.js",
+      "sha256": "40946ffbc7200254f9f813dc0a6048437171256e7f2f2de9470c78d4338528eb",
+      "lfSha256": "40946ffbc7200254f9f813dc0a6048437171256e7f2f2de9470c78d4338528eb",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-plan-delete.js",
+      "sha256": "2b37629bfbabb202e04c04cec8f6a883c173343411a4c57814771b9fb5b43ad7",
+      "lfSha256": "273f3c1a9e8d76161e924e4c03d55afd1e0266502215531daf09c2ed01903073",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-plan-link-choice.js",
+      "sha256": "19e7edb65e02717b8e36f0062e6422b0bffb3b4e9987e4b31638fb7cea2d0917",
+      "lfSha256": "786a6663c4eb5ab5fcd8681a940401aa92b4450f1f2f11c0b5f00b9310adee16",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-qr-fullscreen.js",
+      "sha256": "a9245be9a5bbc7d1582b42a587b7de72d4261b9f6946dd196edb74992b3e23dc",
+      "lfSha256": "0485f687e98c3e03a45414f0459ac1b8958dfab9ad795fd07f76409e07160c07",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-react-dist/kgg-patient-ui.js",
+      "sha256": "57d37fa3dacfddcd1050b7507436ba5f3499d8eaa678cedcce87f8054161c9f8",
+      "lfSha256": "57d37fa3dacfddcd1050b7507436ba5f3499d8eaa678cedcce87f8054161c9f8",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-set-compact-view.js",
+      "sha256": "b9a7218388913774d7d151cced14a29522ebcc6f95dd8bad50b96f2d50a4e533",
+      "lfSha256": "b9a7218388913774d7d151cced14a29522ebcc6f95dd8bad50b96f2d50a4e533",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-set-summary-groups.js",
+      "sha256": "505c5aab315c2d4d955c75c17f6514be04b88f24d81289376008e6f2a066974c",
+      "lfSha256": "505c5aab315c2d4d955c75c17f6514be04b88f24d81289376008e6f2a066974c",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-ui-micro-polish.js",
+      "sha256": "5bce46af62a0b793da0a850121429c704ac8294150aea0c1fcd148e3eda767a2",
+      "lfSha256": "5bce46af62a0b793da0a850121429c704ac8294150aea0c1fcd148e3eda767a2",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-ui/src/legacy-numpad/LegacyNumpadHeader.tsx",
+      "sha256": "16c2b4870d35d165dd7ec2f6d8fe74ca6e8dbd087a37afd4b99fb62b49bfae78",
+      "lfSha256": "16c2b4870d35d165dd7ec2f6d8fe74ca6e8dbd087a37afd4b99fb62b49bfae78",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-version-label.js",
+      "sha256": "8aacac7fc3e25380200e5bef46d7055b421cfe6189a8af8116bc759b540187b3",
+      "lfSha256": "8aacac7fc3e25380200e5bef46d7055b421cfe6189a8af8116bc759b540187b3",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "service-worker.js",
+      "sha256": "025613ed790cb2796f64c41fc9720c1b5a5d8495968503a725e49f88a3c3e6cc",
+      "lfSha256": "025613ed790cb2796f64c41fc9720c1b5a5d8495968503a725e49f88a3c3e6cc",
+      "parent": "English-scanner-ref-only"
+    },
+    {
+      "file": "update-recovery.html",
+      "sha256": "6f57568a48f65daaf63492d4c7098a76171dbe55bb8ca9b51a2fde6e3fcb11e3",
+      "lfSha256": "6f57568a48f65daaf63492d4c7098a76171dbe55bb8ca9b51a2fde6e3fcb11e3",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-start-scan.js",
+      "sha256": "f458b586572fc381195057be9ba56e86b0a29b70809bb1177a892abb6deb00ec",
+      "lfSha256": "f458b586572fc381195057be9ba56e86b0a29b70809bb1177a892abb6deb00ec",
+      "parent": "Main-exact"
+    }
+  ],
+  "tests": [
+    {
+      "file": "release-pipeline/kgg_english_progression_baseline_playwright.js",
+      "sha256": "e865fdc5e8ed2b3d9388f18c1e1394097f665344c8ccacded228cd155d4c05f3"
+    },
+    {
+      "file": "release-pipeline/kgg_english_metadata_smoke.js",
+      "sha256": "a6490412d1d2a835158a32176d80132a7a398d61ee8d5c507cf4a4fbcc7cdeb2"
+    },
+    {
+      "file": "release-pipeline/kgg_english_editor_playwright.js",
+      "sha256": "515933e9f591fb7ca624256b169cbe07752c6bcd851ef56082e21074f0775fd6"
+    },
+    {
+      "file": "release-pipeline/kgg_english_cockpit_smoke.js",
+      "sha256": "1f99bd139bf1bf6dc1c4f064f5d8160ce4b213c80ade02b0371cfe9e96cc0595"
+    },
+    {
+      "file": "release-pipeline/kgg_english_cockpit_playwright.js",
+      "sha256": "4fe7eda0ab021996600fb0e45085a4019290cfdfef80bf4ffbdd242403e00f67"
+    },
+    {
+      "file": "release-pipeline/kgg_dual_device_package.js",
+      "sha256": "0b5c79fa0b7324cecf2768b397b6e1a4d88e27eecdfbbcce053e39578a7e4047"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_title_playwright.js",
+      "sha256": "a961c1f1f3069993475832855cee09fd5159dad48dd40340055382ea6bc3e757"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_summary_smoke.js",
+      "sha256": "6549062a8af1064189af604b07a55c7ac82039a4d357bd8ae835574c484c8994"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_summary_playwright.js",
+      "sha256": "9a3a1042f93e050cbd515e6b464675d5fc6355bfccb8d69d47cd6ed602805b99"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_review_playwright.js",
+      "sha256": "40e04374b14d3ec0c2221be54069f499406fa114aa9f76d5e3ecbd52983d5c9c"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_playwright.js",
+      "sha256": "28b9d3b0153570b040491ca2241660b30a0cddb708b97dbdd4825c054cecd0af"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_compatibility_playwright.js",
+      "sha256": "0fbda81a25fd236d4af0cca5f872309e6ba1fd9656870d2790bb51fb19802f03"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_import_session_values_playwright.js",
+      "sha256": "e426348734f1e01571321dd49459606de26af747f6c60c30c6731eff1d091aed"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_gpt_write_gate.py",
+      "sha256": "db621e231bfea72dd2addaca3b3db942b3a26e084f6aefef2a44eda81c349cd1"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_preview_first_load_smoke.js",
+      "sha256": "37db546492635a4f27d51320d9cc46e6dfa72c00b264c07a670a61a61c9ad6a4"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_qr_v81_device_ladder.js",
+      "sha256": "52b9b9c6eac8bb11e4529b507a6c4a94e46bbb5f8acdc28d177a2e27af1883e9"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_preview_storage_isolation_smoke.js",
+      "sha256": "a0485ad60ca432c254ffd78a8155d9aea22f87a1781fc60f22c908fe26bbf40b"
+    },
+    {
+      "file": "release-pipeline/kgg_pwa_contract_smoke.py",
+      "sha256": "74d973ebae4dcb4e8be42fdaa0bbcfe90dead17e7dd57ae00dbf93d9b15b5e94"
+    },
+    {
+      "file": "release-pipeline/kgg_test_battery.py",
+      "sha256": "7dff67422c62e77f3dd5f88b64ce632d8759b796bd0e37f6b09346f0651446ac"
+    }
+  ],
+  "manifestSha256": "aed26db8b869690c1eed07322203b795b08e57fe99a6a5dc5b4d78f0507d00ee"
+}
+```
+
+
+### Main-Abgleich — Revision2 / kombinierter Freeze2
+
+2026-10-15T07:08:27Z: unabhängige Freeze1-Leserunde beendet, 32/32 Produkte und19/19Tests unverändert. Genau ein Important: bestehender PWA-Smoke verlangte den neuen Helper weder im Index noch im Worker. Enger, von Root angenommener Contractnachtrag ergänzt ausschließlich dessen Referenz in beide bestehenden Pflichtlisten; Scanner-v92-Eintrag und alle bisherigen Guards bleiben. Vorher akzeptierten reine Leseshims jeweils fehlenden Index-/Workerhelper (reproduzierte Guardlücke), danach werden beide spezifisch abgewiesen; unveränderter realer PWA-Contract PASS. Keine Produktdatei geändert.
+
+Nur bestehende PatientResources-/PatientProduction-Digestableitungen erneut erzeugt: 46 Resources --check PASS, audit TARGET_PASS. Freeze2 bindet dieselben32Produkte, die19aktuellenTests und die erforderlichen generierten Nachweise. Freeze1 samt damaligem PWA-Testhash bleibt oben historisch. Targeted Runtime-Gates und unabhängiger Recheck jetzt offen; keine neue Hook-/CI-Freigabe behauptet.
+
+```json
+{
+  "id": "main-alignment-r2-freeze2",
+  "task_id": "patient-english-main-alignment-20261015",
+  "generation": 2,
+  "revision": 2,
+  "englishParent": "d34e90f6ef4890e345c1559e75e2a5c22df4d27a",
+  "mainParent": "4bbe3905126741c042e21331d7485067470b6640",
+  "products": [
+    {
+      "file": "collapse-cards.js",
+      "sha256": "ac8afec81349ecb3ae8d9b5dd9fd9a39c476d4dedc7148907939ebd4fae8aafc",
+      "lfSha256": "ac8afec81349ecb3ae8d9b5dd9fd9a39c476d4dedc7148907939ebd4fae8aafc",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "index.html",
+      "sha256": "12f4d469d042909d6e7b0b835b16616a0a6a35602fac18b6ada7fc6753c56b76",
+      "lfSha256": "12f4d469d042909d6e7b0b835b16616a0a6a35602fac18b6ada7fc6753c56b76",
+      "parent": "English-scanner-ref-only"
+    },
+    {
+      "file": "kgg-update/index.html",
+      "sha256": "d9e4edcda8afd4cdfc821b4e9d155483a726cec4e9c4603e4eeee4b94a0bf2d3",
+      "lfSha256": "d9e4edcda8afd4cdfc821b4e9d155483a726cec4e9c4603e4eeee4b94a0bf2d3",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/document/body-shell.html",
+      "sha256": "52fc54134ed60677b787d798a1caf21f86215f17f467bad532e52f2e9236cc80",
+      "lfSha256": "52fc54134ed60677b787d798a1caf21f86215f17f467bad532e52f2e9236cc80",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/document/head-ui.html",
+      "sha256": "c74cca199993b498cbb9d50de132c1fa5dd5a0f89b1e468165b54e7cc18fd9bb",
+      "lfSha256": "c74cca199993b498cbb9d50de132c1fa5dd5a0f89b1e468165b54e7cc18fd9bb",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/metadata/changelog.html",
+      "sha256": "a919cbbe18ba7d8015b561699e5a1e44cc153452c8583b9188bc5d0c26a17f27",
+      "lfSha256": "a919cbbe18ba7d8015b561699e5a1e44cc153452c8583b9188bc5d0c26a17f27",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/metadata/source-truth.html",
+      "sha256": "7fed7106b40c946e0f113edd221dc76c17f532ab5dc93a4b19a25624718b3a2d",
+      "lfSha256": "7fed7106b40c946e0f113edd221dc76c17f532ab5dc93a4b19a25624718b3a2d",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/patches/v082-therapy-cockpit.html",
+      "sha256": "94564723f8d292cf9cf23a88da3076c7cf6393e47880a6c50b06bdc7836ac673",
+      "lfSha256": "94564723f8d292cf9cf23a88da3076c7cf6393e47880a6c50b06bdc7836ac673",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/patches/v085-ticket-015-progressions.html",
+      "sha256": "43ed681276dac3f5394d3e05880fca683c1d3cc6dd44f00c5c50a4f9be599975",
+      "lfSha256": "43ed681276dac3f5394d3e05880fca683c1d3cc6dd44f00c5c50a4f9be599975",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/patches/v090-ticket-015-admin-stage-gallery-drag-motion.html",
+      "sha256": "bbae05b6d45927c7f14b19dcfe8b193cd0fcf1414b27adced0105e43e06ad1e6",
+      "lfSha256": "bbae05b6d45927c7f14b19dcfe8b193cd0fcf1414b27adced0105e43e06ad1e6",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/patches/v093-cockpit-shared-editor.html",
+      "sha256": "76da5d4c09e1b941127b0cb1b0ea7873c4ae7436708ed3c5779b8e362f2de42b",
+      "lfSha256": "76da5d4c09e1b941127b0cb1b0ea7873c4ae7436708ed3c5779b8e362f2de42b",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/runtime/app-core.html",
+      "sha256": "80548924281b10af79c1d2645a60956b42728a905ac934e5c0b8e3d09447149f",
+      "lfSha256": "80548924281b10af79c1d2645a60956b42728a905ac934e5c0b8e3d09447149f",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/version.json",
+      "sha256": "44407021580e051dd1719882c921a0aa477ccf59660f7966bec8171a36ad237f",
+      "lfSha256": "44407021580e051dd1719882c921a0aa477ccf59660f7966bec8171a36ad237f",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-card-settings.js",
+      "sha256": "06c04bcb84d6eec3bad892f48c1434f6aab7060e0601bfe2a01eb417405ee045",
+      "lfSha256": "06c04bcb84d6eec3bad892f48c1434f6aab7060e0601bfe2a01eb417405ee045",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-day-history.js",
+      "sha256": "2e904b1b6578aef5a7fccc5128bc633c5367c966b4eb5dd484e79a98bdf7661e",
+      "lfSha256": "c8664dff338e682fbf2df380d05aeee8daeecce5b7afa1beb812fe8d5d5414c0",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-i18n.js",
+      "sha256": "efc1a0b7fbc9bce500951b36d35a21d9b615d4294efa7a5f91faf1e06cbaf898",
+      "lfSha256": "efc1a0b7fbc9bce500951b36d35a21d9b615d4294efa7a5f91faf1e06cbaf898",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-install-guide.js",
+      "sha256": "11d2fb9edd3f290a4f75bd7a1526daee53faa55bccbe041129f3f04fdf729e86",
+      "lfSha256": "0ff8e9e3c7802f2891873762e66770d3c8e38230011cacee0eed4e6a390e8643",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-last-value-hints.js",
+      "sha256": "879131abf73d0e66234abe33670c43e9eb963a1371527262db617ee1a817d685",
+      "lfSha256": "879131abf73d0e66234abe33670c43e9eb963a1371527262db617ee1a817d685",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-media-retry-cache_v2.js",
+      "sha256": "1ae19634aa7973dbe1546333b7d2e6d0138e04e175290ce2e11310092a4651ca",
+      "lfSha256": "1ae19634aa7973dbe1546333b7d2e6d0138e04e175290ce2e11310092a4651ca",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-multiplan-db.js",
+      "sha256": "40946ffbc7200254f9f813dc0a6048437171256e7f2f2de9470c78d4338528eb",
+      "lfSha256": "40946ffbc7200254f9f813dc0a6048437171256e7f2f2de9470c78d4338528eb",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-plan-delete.js",
+      "sha256": "2b37629bfbabb202e04c04cec8f6a883c173343411a4c57814771b9fb5b43ad7",
+      "lfSha256": "273f3c1a9e8d76161e924e4c03d55afd1e0266502215531daf09c2ed01903073",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-plan-link-choice.js",
+      "sha256": "19e7edb65e02717b8e36f0062e6422b0bffb3b4e9987e4b31638fb7cea2d0917",
+      "lfSha256": "786a6663c4eb5ab5fcd8681a940401aa92b4450f1f2f11c0b5f00b9310adee16",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-qr-fullscreen.js",
+      "sha256": "a9245be9a5bbc7d1582b42a587b7de72d4261b9f6946dd196edb74992b3e23dc",
+      "lfSha256": "0485f687e98c3e03a45414f0459ac1b8958dfab9ad795fd07f76409e07160c07",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-react-dist/kgg-patient-ui.js",
+      "sha256": "57d37fa3dacfddcd1050b7507436ba5f3499d8eaa678cedcce87f8054161c9f8",
+      "lfSha256": "57d37fa3dacfddcd1050b7507436ba5f3499d8eaa678cedcce87f8054161c9f8",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-set-compact-view.js",
+      "sha256": "b9a7218388913774d7d151cced14a29522ebcc6f95dd8bad50b96f2d50a4e533",
+      "lfSha256": "b9a7218388913774d7d151cced14a29522ebcc6f95dd8bad50b96f2d50a4e533",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-set-summary-groups.js",
+      "sha256": "505c5aab315c2d4d955c75c17f6514be04b88f24d81289376008e6f2a066974c",
+      "lfSha256": "505c5aab315c2d4d955c75c17f6514be04b88f24d81289376008e6f2a066974c",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-ui-micro-polish.js",
+      "sha256": "5bce46af62a0b793da0a850121429c704ac8294150aea0c1fcd148e3eda767a2",
+      "lfSha256": "5bce46af62a0b793da0a850121429c704ac8294150aea0c1fcd148e3eda767a2",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-ui/src/legacy-numpad/LegacyNumpadHeader.tsx",
+      "sha256": "16c2b4870d35d165dd7ec2f6d8fe74ca6e8dbd087a37afd4b99fb62b49bfae78",
+      "lfSha256": "16c2b4870d35d165dd7ec2f6d8fe74ca6e8dbd087a37afd4b99fb62b49bfae78",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-version-label.js",
+      "sha256": "8aacac7fc3e25380200e5bef46d7055b421cfe6189a8af8116bc759b540187b3",
+      "lfSha256": "8aacac7fc3e25380200e5bef46d7055b421cfe6189a8af8116bc759b540187b3",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "service-worker.js",
+      "sha256": "025613ed790cb2796f64c41fc9720c1b5a5d8495968503a725e49f88a3c3e6cc",
+      "lfSha256": "025613ed790cb2796f64c41fc9720c1b5a5d8495968503a725e49f88a3c3e6cc",
+      "parent": "English-scanner-ref-only"
+    },
+    {
+      "file": "update-recovery.html",
+      "sha256": "6f57568a48f65daaf63492d4c7098a76171dbe55bb8ca9b51a2fde6e3fcb11e3",
+      "lfSha256": "6f57568a48f65daaf63492d4c7098a76171dbe55bb8ca9b51a2fde6e3fcb11e3",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-start-scan.js",
+      "sha256": "f458b586572fc381195057be9ba56e86b0a29b70809bb1177a892abb6deb00ec",
+      "lfSha256": "f458b586572fc381195057be9ba56e86b0a29b70809bb1177a892abb6deb00ec",
+      "parent": "Main-exact"
+    }
+  ],
+  "tests": [
+    {
+      "file": "release-pipeline/kgg_english_progression_baseline_playwright.js",
+      "sha256": "e865fdc5e8ed2b3d9388f18c1e1394097f665344c8ccacded228cd155d4c05f3"
+    },
+    {
+      "file": "release-pipeline/kgg_english_metadata_smoke.js",
+      "sha256": "a6490412d1d2a835158a32176d80132a7a398d61ee8d5c507cf4a4fbcc7cdeb2"
+    },
+    {
+      "file": "release-pipeline/kgg_english_editor_playwright.js",
+      "sha256": "515933e9f591fb7ca624256b169cbe07752c6bcd851ef56082e21074f0775fd6"
+    },
+    {
+      "file": "release-pipeline/kgg_english_cockpit_smoke.js",
+      "sha256": "1f99bd139bf1bf6dc1c4f064f5d8160ce4b213c80ade02b0371cfe9e96cc0595"
+    },
+    {
+      "file": "release-pipeline/kgg_english_cockpit_playwright.js",
+      "sha256": "4fe7eda0ab021996600fb0e45085a4019290cfdfef80bf4ffbdd242403e00f67"
+    },
+    {
+      "file": "release-pipeline/kgg_dual_device_package.js",
+      "sha256": "0b5c79fa0b7324cecf2768b397b6e1a4d88e27eecdfbbcce053e39578a7e4047"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_title_playwright.js",
+      "sha256": "a961c1f1f3069993475832855cee09fd5159dad48dd40340055382ea6bc3e757"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_summary_smoke.js",
+      "sha256": "6549062a8af1064189af604b07a55c7ac82039a4d357bd8ae835574c484c8994"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_summary_playwright.js",
+      "sha256": "9a3a1042f93e050cbd515e6b464675d5fc6355bfccb8d69d47cd6ed602805b99"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_review_playwright.js",
+      "sha256": "40e04374b14d3ec0c2221be54069f499406fa114aa9f76d5e3ecbd52983d5c9c"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_playwright.js",
+      "sha256": "28b9d3b0153570b040491ca2241660b30a0cddb708b97dbdd4825c054cecd0af"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_compatibility_playwright.js",
+      "sha256": "0fbda81a25fd236d4af0cca5f872309e6ba1fd9656870d2790bb51fb19802f03"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_import_session_values_playwright.js",
+      "sha256": "e426348734f1e01571321dd49459606de26af747f6c60c30c6731eff1d091aed"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_gpt_write_gate.py",
+      "sha256": "db621e231bfea72dd2addaca3b3db942b3a26e084f6aefef2a44eda81c349cd1"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_preview_first_load_smoke.js",
+      "sha256": "37db546492635a4f27d51320d9cc46e6dfa72c00b264c07a670a61a61c9ad6a4"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_qr_v81_device_ladder.js",
+      "sha256": "52b9b9c6eac8bb11e4529b507a6c4a94e46bbb5f8acdc28d177a2e27af1883e9"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_preview_storage_isolation_smoke.js",
+      "sha256": "a0485ad60ca432c254ffd78a8155d9aea22f87a1781fc60f22c908fe26bbf40b"
+    },
+    {
+      "file": "release-pipeline/kgg_pwa_contract_smoke.py",
+      "sha256": "ad7a8448bd6cf2a305bb4cbf75def1022ed75470d5897304a9ebc2a2f5046b27"
+    },
+    {
+      "file": "release-pipeline/kgg_test_battery.py",
+      "sha256": "7dff67422c62e77f3dd5f88b64ce632d8759b796bd0e37f6b09346f0651446ac"
+    }
+  ],
+  "previousFreezeManifestSha256": "aed26db8b869690c1eed07322203b795b08e57fe99a6a5dc5b4d78f0507d00ee",
+  "previousPwaContractSha256": "74d973ebae4dcb4e8be42fdaa0bbcfe90dead17e7dd57ae00dbf93d9b15b5e94",
+  "generatedEvidence": [
+    {
+      "file": "docs/kgg-custom-gpt-editor-snapshot.json",
+      "sha256": "a8d5191975add6c81713c3b803205130c3e08342f6a6e9f552498709323f87f2"
+    },
+    {
+      "file": "docs/kgg-custom-gpt-knowledge-pack.md",
+      "sha256": "a23f0929f9a8711e527f4359a84cdc0723879f91e66c049195f86eec8890efa5"
+    },
+    {
+      "file": "docs/kgg-custom-gpt-knowledge-safety.md",
+      "sha256": "9c7b48617c50be2581ed6223011a45c0e5f75c4d3d766452a4b05f87d5d8c9ee"
+    },
+    {
+      "file": "docs/kgg-custom-gpt-resource-manifest.json",
+      "sha256": "cedcc131e5d66b62ec05eadb84552fbc6f588fb24e57435e7aee5a0e4225e0ad"
+    },
+    {
+      "file": "docs/kgg-gpt-bug-index.json",
+      "sha256": "d3c7001351d03a722ad50a8f6e79ee0f0d0d533f1eeb96da6735b55ffa2310c1"
+    },
+    {
+      "file": "docs/kgg-gpt-bug-lessons.md",
+      "sha256": "6155e1b3501ffba0aef79a1fb05eb85ba15f573198a6d5c6202a0c7006098e33"
+    },
+    {
+      "file": "docs/kgg-patient-custom-gpt-editor-snapshot.json",
+      "sha256": "d31c86bdb68c26a9878eb1efa5cb05a953f7ef8b94b8eacd697dfb5b2feb05dc"
+    },
+    {
+      "file": "docs/kgg-patient-custom-gpt-knowledge-safety.md",
+      "sha256": "1622b825d6b3c0a24c6c322f51b18c43d1a8c3a293f44d7740deeb9f05790277"
+    },
+    {
+      "file": "docs/kgg-patient-custom-gpt-knowledge-testing.md",
+      "sha256": "04e1c2f5e1644777cd37cd1a91155e3c4830af91d6882f535920f81845c9b35e"
+    },
+    {
+      "file": "docs/kgg-patient-gpt-source-index.json",
+      "sha256": "b2f676798f1bdc7e824ab9556cd8a726514c4d7284c513ecbd07bed3d5ee2fe2"
+    },
+    {
+      "file": "docs/kgg-patient-gpt-source/chunk-001.md",
+      "sha256": "e561bab5a9dd148ef2cec684f2e2e837a9443c0bae956642eb121ed4652addc8"
+    },
+    {
+      "file": "docs/kgg-patient-gpt-source/chunk-002.md",
+      "sha256": "0d7ca5e77f92d1c883195aa7d1bc75ea7c426ed318131d339b63640e94850c51"
+    },
+    {
+      "file": "docs/kgg-patient-gpt-source/chunk-003.md",
+      "sha256": "e8a04e0c222effc3df0d62b121d3d3d40139c234da522bc09c09c78dcc83b210"
+    },
+    {
+      "file": "docs/kgg-patient-gpt-source/chunk-034.md",
+      "sha256": "14abffef2ee4dbc74ab67e5f4076fd796a80d34f5361ca93ba95726601753150"
+    },
+    {
+      "file": "docs/kgg-patient-gpt-source/chunk-035.md",
+      "sha256": "52a169096884ccdab28cd7f57932351895e233db901880995291b83b982018e8"
+    }
+  ],
+  "manifestSha256": "296b09d6a243b618c8de16e12a7435a6c5ceeefd455695387dd35f5136e1cddb"
+}
+```
+
+
+### Main-Abgleich — gezielte Kombigates / Freeze2
+
+2026-10-15T07:14:38Z: unabhängiger enger Code-/Generated-Recheck PASS, keine offenen Findings; Start/End32Produkte+19Tests+15GeneratedEvidence=66/66 stabil. Alle nachfolgenden Writer-Gates binden Freeze2 `296b09d6a243b618c8de16e12a7435a6c5ceeefd455695387dd35f5136e1cddb`; keine Produkt-/Teständerung während der Läufe.
+
+Bestehender DualDevice-self-test PASS. Zusätzlich tatsächlich gebautes synthetisches Paket geprüft: Helperbytes exakt aus vorhandener Storage-Isolationstransformation, genau eine auflösbare Indexreferenz; tatsächlich kopierter Storageadapter und Helper im VM-Kontext ausgeführt. Isolierte Locale-/authored-EN-Map gelesen, native Locale-/Planbytes unverändert. Paketmetadaten nennen als synthetischen sourceSha den damaligen Parent-HEAD, nicht einen noch nicht existierenden Mergecommit; Kandidatennachweis sind die separat gebundenen tatsächlichen Freeze-/Paketbytes. [Paketprotokoll](/C:/src/kgg-worktrees/patient-english-complete-20261014/output/patient-english-main-alignment-20261015-r2-freeze2/package.log).
+
+Neun seriell ausgeführte projektinterne Headlessgates Exit0 PASS (zusammen 144.23s): Import update/add/replace/replace-link inkl. Reload/leerer echter Inputs/leerer Summary/alter Storagebytes; vollständige EnglishBank/UI Legacy+React; echter Editor→Bankreload→Plan→KGGH3→deutscherReturnQR; strukturierte Summary; H3-Sprachroundtrip; echter Cockpit-Editor; authored-content/Install/Status/DB-Review; zwei frische Cacheläufe f59/v90→v93 und fest4bbe/v92→v93. Beide beweisen aktive Altworker-Version per GET_APP_VERSION, Ziel93 vor und nach echtem Offline-Coldreload sowie erhaltene rohe Daten/EN-Metadaten. Summary-/Titelrunner binden die tatsächlich servierten vier Ressourcenkörper. Vor/nach jedem Gate32/19/15Hashes unverändert. [Ergebnisliste](/C:/src/kgg-worktrees/patient-english-complete-20261014/output/patient-english-main-alignment-20261015-r2-freeze2/targeted-results.json); Einzelprotokolle im selben Verzeichnis.
+
+Zusätzlich kleine CLI-Gates: Preview-write_gate-Selbsttest, PlanSlot, Planlink, QRwire und Recovery PASS. Normal erzeugtes isoliertes Previewfixture v94 aus dem Quellkandidaten93; keine Produktversionserhöhung. Runtime `output/patient-english-main-alignment-20261015-r2-freeze2/preview-fixture/previews/patient-gate-self-test`, RequestId `patient-gate-self-test`. Korrekter bestehender Storage-Isolationvertrag: liveRoot, previewRuntime, requestId.
+
+Alle Writer-Browser/Contexts und lokalen Server via finally geschlossen, Lease an den von Root koordinierten unabhängigen Browserauditor abgegeben. Dessen betroffene UI-/Preview-Firstload-/Storage-Isolationsabnahme, regulärer vollständiger Hook, Commit/Push und aktuelle Head-CI noch offen. Keine Vorab-Vollbatterie, kein Merge nach Main/Release/Manifest/APK.
+
+
+### Main-Abgleich — Revision3 / Finishdialog-Freeze1
+
+2026-10-15T07:40:14Z: unabhängige Freeze2-IAB-/Headlessabnahme beendet, einzig neuer Important: der bisher nicht übersetzte Ticket034-Finishdialog zeigte nach Stage/Wert→CurrentQR→Back→Reload in beiden Padmodes deutsche ARIA/Message/Buttons über englischem Hintergrund. Root-/Cloud-Minimalplan angenommen; Revision3 nur ein zusätzlicher Produktpfad patient-card-progress.js. Alle32bisherigen Produkt-Arbeitsdateien bleiben exakt Freeze2. Ziel93/Therapeutsource96 weiter unveröffentlicht.
+
+Kleinster Producerfix: bestehendes language() und vorhandenes exerciseName(rawName) für reine Finish-Copy; aktueller offener Kandidat weiterhin ausschließlich über bestehenden ersten Pending-Index. Vorhandene Nodes/ARIA/Text nur bei tatsächlicher Abweichung aktualisieren; vorhandenes updateAll/List-Observer-Sprachschreibersignal wiederverwendet. Keine zusätzlichen Listener/Observer, Namenscache, Kandidatenauswahl, Counter-/Pending-/Confirm-/Cancel-/Storage-/QR-/Fokus-/Stylingänderung.
+
+Drei bestehende Tests eng ergänzt. Auf unverändertem Producer (SHA unten) zwei RED-Protokolle: Copy-Vertrag fehlt; echter Titelrunner Legacy+React reproduziert EN-ARIA/Message/Buttons und authored/unknown-Roundtrips. Der erste neue Testentwurf enthielt zusätzlich zu strikte Datenannahmen: bestehender summary-wrapShowQr finalisiert/speichert Dominanz bereits vor dem Modal und ergänzt QR-Progressionsslots; Confirm führt den normalen Tages-/Historywechsel aus. Root verifizierte den bestehenden Pfad. Ausschließlich neue Assertions fachlich korrigiert: Sprach-/Cancel-Statebaseline direkt nach tatsächlichem Modalöffnen; Confirm-Rows aus dem echten vorherigen CurrentQR statt kurzer rows()-Form; Werte sowie vorhandene Day/Done/Counter-Outcomes statt unzulässiger History-Stillstandsannahme. Keine bestehende Assertion entfernt, kein Businesscode umgeordnet. Historische REDs bleiben offen einsehbar.
+
+Danach CardProgress-VM GREEN (realer Helper, DE-Original, CalfRaise, exakte authored Interpunktion, unknown/noProvider-Rawfallback). Echter Titelrunner **144/144 Assertions PASS** in Legacy+React, fünf tatsächlich servierte Ressourcen gebunden: Stage/Wert→CurrentQR→Back→Reload→Finish, offener EN→DE→EN-Handlervertrag mit unveränderten Modalnodes/Confirmfokus; tatsächlicher Cancel mit Fokusrestore und unverändertem State ab Modalöffnung; erneutes Öffnen/Confirm mit kanonischen echten QR-Rows, einmaligem Counter, Day2/Done1 und unveränderten Trainingswerten; zusätzliche authored/unknown-Namen mit Doppelpunkten, Gedankenstrich und Pfeil. Der Header ist durch Backdrop für Pointer blockiert; der offene Sprachroundtrip ist ausdrücklich bestehender Handlervertrag via DOMclick, kein physischer Pointer-Nachweis.
+
+Bestehender PatientResources-Generator aktualisierte genau source-index.json und source/chunk-009.md (Producer17926Bytes, unter24k); keine weiteren Quellchunks/Digests/Profilfelder geändert. Sechs Freshnesschecks PASS, audit TARGET_PASS. Dokumentierter RED-/GREEN-Logpfad im Manifest. Beide v90/v92→93+Offline-Modalgates und bestehender ContinuousDays-Schutz sowie unabhängiger betroffener Code/UI-Recheck jetzt offen; noch kein regulärer FullHook/Commit/Push/neueCI. Keine erneute volle9Batterie.
+
+```json
+{
+  "id": "main-alignment-r3-finish-freeze1",
+  "task_id": "patient-english-main-alignment-20261015",
+  "generation": 2,
+  "revision": 3,
+  "englishParent": "d34e90f6ef4890e345c1559e75e2a5c22df4d27a",
+  "mainParent": "4bbe3905126741c042e21331d7485067470b6640",
+  "products": [
+    {
+      "file": "collapse-cards.js",
+      "sha256": "ac8afec81349ecb3ae8d9b5dd9fd9a39c476d4dedc7148907939ebd4fae8aafc",
+      "lfSha256": "ac8afec81349ecb3ae8d9b5dd9fd9a39c476d4dedc7148907939ebd4fae8aafc",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "index.html",
+      "sha256": "12f4d469d042909d6e7b0b835b16616a0a6a35602fac18b6ada7fc6753c56b76",
+      "lfSha256": "12f4d469d042909d6e7b0b835b16616a0a6a35602fac18b6ada7fc6753c56b76",
+      "parent": "English-scanner-ref-only"
+    },
+    {
+      "file": "kgg-update/index.html",
+      "sha256": "d9e4edcda8afd4cdfc821b4e9d155483a726cec4e9c4603e4eeee4b94a0bf2d3",
+      "lfSha256": "d9e4edcda8afd4cdfc821b4e9d155483a726cec4e9c4603e4eeee4b94a0bf2d3",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/document/body-shell.html",
+      "sha256": "52fc54134ed60677b787d798a1caf21f86215f17f467bad532e52f2e9236cc80",
+      "lfSha256": "52fc54134ed60677b787d798a1caf21f86215f17f467bad532e52f2e9236cc80",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/document/head-ui.html",
+      "sha256": "c74cca199993b498cbb9d50de132c1fa5dd5a0f89b1e468165b54e7cc18fd9bb",
+      "lfSha256": "c74cca199993b498cbb9d50de132c1fa5dd5a0f89b1e468165b54e7cc18fd9bb",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/metadata/changelog.html",
+      "sha256": "a919cbbe18ba7d8015b561699e5a1e44cc153452c8583b9188bc5d0c26a17f27",
+      "lfSha256": "a919cbbe18ba7d8015b561699e5a1e44cc153452c8583b9188bc5d0c26a17f27",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/metadata/source-truth.html",
+      "sha256": "7fed7106b40c946e0f113edd221dc76c17f532ab5dc93a4b19a25624718b3a2d",
+      "lfSha256": "7fed7106b40c946e0f113edd221dc76c17f532ab5dc93a4b19a25624718b3a2d",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/patches/v082-therapy-cockpit.html",
+      "sha256": "94564723f8d292cf9cf23a88da3076c7cf6393e47880a6c50b06bdc7836ac673",
+      "lfSha256": "94564723f8d292cf9cf23a88da3076c7cf6393e47880a6c50b06bdc7836ac673",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/patches/v085-ticket-015-progressions.html",
+      "sha256": "43ed681276dac3f5394d3e05880fca683c1d3cc6dd44f00c5c50a4f9be599975",
+      "lfSha256": "43ed681276dac3f5394d3e05880fca683c1d3cc6dd44f00c5c50a4f9be599975",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/patches/v090-ticket-015-admin-stage-gallery-drag-motion.html",
+      "sha256": "bbae05b6d45927c7f14b19dcfe8b193cd0fcf1414b27adced0105e43e06ad1e6",
+      "lfSha256": "bbae05b6d45927c7f14b19dcfe8b193cd0fcf1414b27adced0105e43e06ad1e6",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/patches/v093-cockpit-shared-editor.html",
+      "sha256": "76da5d4c09e1b941127b0cb1b0ea7873c4ae7436708ed3c5779b8e362f2de42b",
+      "lfSha256": "76da5d4c09e1b941127b0cb1b0ea7873c4ae7436708ed3c5779b8e362f2de42b",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/runtime/app-core.html",
+      "sha256": "80548924281b10af79c1d2645a60956b42728a905ac934e5c0b8e3d09447149f",
+      "lfSha256": "80548924281b10af79c1d2645a60956b42728a905ac934e5c0b8e3d09447149f",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/version.json",
+      "sha256": "44407021580e051dd1719882c921a0aa477ccf59660f7966bec8171a36ad237f",
+      "lfSha256": "44407021580e051dd1719882c921a0aa477ccf59660f7966bec8171a36ad237f",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-card-settings.js",
+      "sha256": "06c04bcb84d6eec3bad892f48c1434f6aab7060e0601bfe2a01eb417405ee045",
+      "lfSha256": "06c04bcb84d6eec3bad892f48c1434f6aab7060e0601bfe2a01eb417405ee045",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-day-history.js",
+      "sha256": "2e904b1b6578aef5a7fccc5128bc633c5367c966b4eb5dd484e79a98bdf7661e",
+      "lfSha256": "c8664dff338e682fbf2df380d05aeee8daeecce5b7afa1beb812fe8d5d5414c0",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-i18n.js",
+      "sha256": "efc1a0b7fbc9bce500951b36d35a21d9b615d4294efa7a5f91faf1e06cbaf898",
+      "lfSha256": "efc1a0b7fbc9bce500951b36d35a21d9b615d4294efa7a5f91faf1e06cbaf898",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-install-guide.js",
+      "sha256": "11d2fb9edd3f290a4f75bd7a1526daee53faa55bccbe041129f3f04fdf729e86",
+      "lfSha256": "0ff8e9e3c7802f2891873762e66770d3c8e38230011cacee0eed4e6a390e8643",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-last-value-hints.js",
+      "sha256": "879131abf73d0e66234abe33670c43e9eb963a1371527262db617ee1a817d685",
+      "lfSha256": "879131abf73d0e66234abe33670c43e9eb963a1371527262db617ee1a817d685",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-media-retry-cache_v2.js",
+      "sha256": "1ae19634aa7973dbe1546333b7d2e6d0138e04e175290ce2e11310092a4651ca",
+      "lfSha256": "1ae19634aa7973dbe1546333b7d2e6d0138e04e175290ce2e11310092a4651ca",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-multiplan-db.js",
+      "sha256": "40946ffbc7200254f9f813dc0a6048437171256e7f2f2de9470c78d4338528eb",
+      "lfSha256": "40946ffbc7200254f9f813dc0a6048437171256e7f2f2de9470c78d4338528eb",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-plan-delete.js",
+      "sha256": "2b37629bfbabb202e04c04cec8f6a883c173343411a4c57814771b9fb5b43ad7",
+      "lfSha256": "273f3c1a9e8d76161e924e4c03d55afd1e0266502215531daf09c2ed01903073",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-plan-link-choice.js",
+      "sha256": "19e7edb65e02717b8e36f0062e6422b0bffb3b4e9987e4b31638fb7cea2d0917",
+      "lfSha256": "786a6663c4eb5ab5fcd8681a940401aa92b4450f1f2f11c0b5f00b9310adee16",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-qr-fullscreen.js",
+      "sha256": "a9245be9a5bbc7d1582b42a587b7de72d4261b9f6946dd196edb74992b3e23dc",
+      "lfSha256": "0485f687e98c3e03a45414f0459ac1b8958dfab9ad795fd07f76409e07160c07",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-react-dist/kgg-patient-ui.js",
+      "sha256": "57d37fa3dacfddcd1050b7507436ba5f3499d8eaa678cedcce87f8054161c9f8",
+      "lfSha256": "57d37fa3dacfddcd1050b7507436ba5f3499d8eaa678cedcce87f8054161c9f8",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-set-compact-view.js",
+      "sha256": "b9a7218388913774d7d151cced14a29522ebcc6f95dd8bad50b96f2d50a4e533",
+      "lfSha256": "b9a7218388913774d7d151cced14a29522ebcc6f95dd8bad50b96f2d50a4e533",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-set-summary-groups.js",
+      "sha256": "505c5aab315c2d4d955c75c17f6514be04b88f24d81289376008e6f2a066974c",
+      "lfSha256": "505c5aab315c2d4d955c75c17f6514be04b88f24d81289376008e6f2a066974c",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-ui-micro-polish.js",
+      "sha256": "5bce46af62a0b793da0a850121429c704ac8294150aea0c1fcd148e3eda767a2",
+      "lfSha256": "5bce46af62a0b793da0a850121429c704ac8294150aea0c1fcd148e3eda767a2",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-ui/src/legacy-numpad/LegacyNumpadHeader.tsx",
+      "sha256": "16c2b4870d35d165dd7ec2f6d8fe74ca6e8dbd087a37afd4b99fb62b49bfae78",
+      "lfSha256": "16c2b4870d35d165dd7ec2f6d8fe74ca6e8dbd087a37afd4b99fb62b49bfae78",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-version-label.js",
+      "sha256": "8aacac7fc3e25380200e5bef46d7055b421cfe6189a8af8116bc759b540187b3",
+      "lfSha256": "8aacac7fc3e25380200e5bef46d7055b421cfe6189a8af8116bc759b540187b3",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "service-worker.js",
+      "sha256": "025613ed790cb2796f64c41fc9720c1b5a5d8495968503a725e49f88a3c3e6cc",
+      "lfSha256": "025613ed790cb2796f64c41fc9720c1b5a5d8495968503a725e49f88a3c3e6cc",
+      "parent": "English-scanner-ref-only"
+    },
+    {
+      "file": "update-recovery.html",
+      "sha256": "6f57568a48f65daaf63492d4c7098a76171dbe55bb8ca9b51a2fde6e3fcb11e3",
+      "lfSha256": "6f57568a48f65daaf63492d4c7098a76171dbe55bb8ca9b51a2fde6e3fcb11e3",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-start-scan.js",
+      "sha256": "f458b586572fc381195057be9ba56e86b0a29b70809bb1177a892abb6deb00ec",
+      "lfSha256": "f458b586572fc381195057be9ba56e86b0a29b70809bb1177a892abb6deb00ec",
+      "parent": "Main-exact"
+    },
+    {
+      "file": "patient-card-progress.js",
+      "sha256": "5151406061f51bd6cd90e979874237e90f87e1972a9d31ee3fac698ad769cf8f",
+      "lfSha256": "cc6179f83d1a7327f90adc5d12e4cedb47b26edfd6c1d07cf069dc5d48fee557",
+      "parent": "English-additional-finish-copy-only"
+    }
+  ],
+  "tests": [
+    {
+      "file": "release-pipeline/kgg_english_progression_baseline_playwright.js",
+      "sha256": "e865fdc5e8ed2b3d9388f18c1e1394097f665344c8ccacded228cd155d4c05f3"
+    },
+    {
+      "file": "release-pipeline/kgg_english_metadata_smoke.js",
+      "sha256": "a6490412d1d2a835158a32176d80132a7a398d61ee8d5c507cf4a4fbcc7cdeb2"
+    },
+    {
+      "file": "release-pipeline/kgg_english_editor_playwright.js",
+      "sha256": "515933e9f591fb7ca624256b169cbe07752c6bcd851ef56082e21074f0775fd6"
+    },
+    {
+      "file": "release-pipeline/kgg_english_cockpit_smoke.js",
+      "sha256": "1f99bd139bf1bf6dc1c4f064f5d8160ce4b213c80ade02b0371cfe9e96cc0595"
+    },
+    {
+      "file": "release-pipeline/kgg_english_cockpit_playwright.js",
+      "sha256": "4fe7eda0ab021996600fb0e45085a4019290cfdfef80bf4ffbdd242403e00f67"
+    },
+    {
+      "file": "release-pipeline/kgg_dual_device_package.js",
+      "sha256": "0b5c79fa0b7324cecf2768b397b6e1a4d88e27eecdfbbcce053e39578a7e4047"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_title_playwright.js",
+      "sha256": "dd0d3291b55102bdabba84e7db02d5fcf824d60c0d319e1b9dc62c82319c92ee"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_summary_smoke.js",
+      "sha256": "6549062a8af1064189af604b07a55c7ac82039a4d357bd8ae835574c484c8994"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_summary_playwright.js",
+      "sha256": "9a3a1042f93e050cbd515e6b464675d5fc6355bfccb8d69d47cd6ed602805b99"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_review_playwright.js",
+      "sha256": "40e04374b14d3ec0c2221be54069f499406fa114aa9f76d5e3ecbd52983d5c9c"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_playwright.js",
+      "sha256": "28b9d3b0153570b040491ca2241660b30a0cddb708b97dbdd4825c054cecd0af"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_compatibility_playwright.js",
+      "sha256": "eae06368c3521f91cff58b01fe80cc4272213ff539a5df0dc4a82b463317cecb"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_import_session_values_playwright.js",
+      "sha256": "e426348734f1e01571321dd49459606de26af747f6c60c30c6731eff1d091aed"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_gpt_write_gate.py",
+      "sha256": "db621e231bfea72dd2addaca3b3db942b3a26e084f6aefef2a44eda81c349cd1"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_preview_first_load_smoke.js",
+      "sha256": "37db546492635a4f27d51320d9cc46e6dfa72c00b264c07a670a61a61c9ad6a4"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_qr_v81_device_ladder.js",
+      "sha256": "52b9b9c6eac8bb11e4529b507a6c4a94e46bbb5f8acdc28d177a2e27af1883e9"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_preview_storage_isolation_smoke.js",
+      "sha256": "a0485ad60ca432c254ffd78a8155d9aea22f87a1781fc60f22c908fe26bbf40b"
+    },
+    {
+      "file": "release-pipeline/kgg_pwa_contract_smoke.py",
+      "sha256": "ad7a8448bd6cf2a305bb4cbf75def1022ed75470d5897304a9ebc2a2f5046b27"
+    },
+    {
+      "file": "release-pipeline/kgg_test_battery.py",
+      "sha256": "7dff67422c62e77f3dd5f88b64ce632d8759b796bd0e37f6b09346f0651446ac"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_card_progress_smoke.js",
+      "sha256": "aaf4a40d881884aec5bee71cab688a020763bdc2c60ee6d125f1af906f1b94b9"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_continuous_days_playwright.js",
+      "sha256": "f4897ee618712948aaefe83cdc78f694282fea535100a3f09175a618783cd699"
+    }
+  ],
+  "previousFreezeManifestSha256": "296b09d6a243b618c8de16e12a7435a6c5ceeefd455695387dd35f5136e1cddb",
+  "previousPwaContractSha256": "74d973ebae4dcb4e8be42fdaa0bbcfe90dead17e7dd57ae00dbf93d9b15b5e94",
+  "generatedEvidence": [
+    {
+      "file": "docs/kgg-custom-gpt-editor-snapshot.json",
+      "sha256": "a8d5191975add6c81713c3b803205130c3e08342f6a6e9f552498709323f87f2"
+    },
+    {
+      "file": "docs/kgg-custom-gpt-knowledge-pack.md",
+      "sha256": "a23f0929f9a8711e527f4359a84cdc0723879f91e66c049195f86eec8890efa5"
+    },
+    {
+      "file": "docs/kgg-custom-gpt-knowledge-safety.md",
+      "sha256": "9c7b48617c50be2581ed6223011a45c0e5f75c4d3d766452a4b05f87d5d8c9ee"
+    },
+    {
+      "file": "docs/kgg-custom-gpt-resource-manifest.json",
+      "sha256": "cedcc131e5d66b62ec05eadb84552fbc6f588fb24e57435e7aee5a0e4225e0ad"
+    },
+    {
+      "file": "docs/kgg-gpt-bug-index.json",
+      "sha256": "d3c7001351d03a722ad50a8f6e79ee0f0d0d533f1eeb96da6735b55ffa2310c1"
+    },
+    {
+      "file": "docs/kgg-gpt-bug-lessons.md",
+      "sha256": "6155e1b3501ffba0aef79a1fb05eb85ba15f573198a6d5c6202a0c7006098e33"
+    },
+    {
+      "file": "docs/kgg-patient-custom-gpt-editor-snapshot.json",
+      "sha256": "d31c86bdb68c26a9878eb1efa5cb05a953f7ef8b94b8eacd697dfb5b2feb05dc"
+    },
+    {
+      "file": "docs/kgg-patient-custom-gpt-knowledge-safety.md",
+      "sha256": "1622b825d6b3c0a24c6c322f51b18c43d1a8c3a293f44d7740deeb9f05790277"
+    },
+    {
+      "file": "docs/kgg-patient-custom-gpt-knowledge-testing.md",
+      "sha256": "04e1c2f5e1644777cd37cd1a91155e3c4830af91d6882f535920f81845c9b35e"
+    },
+    {
+      "file": "docs/kgg-patient-gpt-source-index.json",
+      "sha256": "dcc0e22582bfe8247216e2383bb8d91c51b5eaa087fb37f035a317a4fc4ba802"
+    },
+    {
+      "file": "docs/kgg-patient-gpt-source/chunk-001.md",
+      "sha256": "e561bab5a9dd148ef2cec684f2e2e837a9443c0bae956642eb121ed4652addc8"
+    },
+    {
+      "file": "docs/kgg-patient-gpt-source/chunk-002.md",
+      "sha256": "0d7ca5e77f92d1c883195aa7d1bc75ea7c426ed318131d339b63640e94850c51"
+    },
+    {
+      "file": "docs/kgg-patient-gpt-source/chunk-003.md",
+      "sha256": "e8a04e0c222effc3df0d62b121d3d3d40139c234da522bc09c09c78dcc83b210"
+    },
+    {
+      "file": "docs/kgg-patient-gpt-source/chunk-009.md",
+      "sha256": "e1f7dcae94cb45d1679807fac69a8b96d11d6eab930a237274e945a5839645ed"
+    },
+    {
+      "file": "docs/kgg-patient-gpt-source/chunk-034.md",
+      "sha256": "14abffef2ee4dbc74ab67e5f4076fd796a80d34f5361ca93ba95726601753150"
+    },
+    {
+      "file": "docs/kgg-patient-gpt-source/chunk-035.md",
+      "sha256": "52a169096884ccdab28cd7f57932351895e233db901880995291b83b982018e8"
+    }
+  ],
+  "redProducerSha256": "b5b3737577c21d482365e19cf41b4ddea9270ba22c30230ad5f2833e12fa5da9",
+  "redGreenEvidence": [
+    {
+      "file": "output/patient-english-main-alignment-20261015-r3/card-progress-red.log",
+      "sha256": "d14753cbecd7a8bbd81541630b9855253a03684687c765cac4265a629a459fb6"
+    },
+    {
+      "file": "output/patient-english-main-alignment-20261015-r3/finish-title-red.log",
+      "sha256": "7b70208af402ca9d9c1e2555549640e954e40a1dead4d160708efa07d1c665ce"
+    },
+    {
+      "file": "output/patient-english-main-alignment-20261015-r3/card-progress-green.log",
+      "sha256": "c4f237559f22e0aef60010218df101c354f3c9a05286f80fd7ff720f7be6baab"
+    },
+    {
+      "file": "output/patient-english-main-alignment-20261015-r3/finish-title-green.log",
+      "sha256": "d9b1447f77a36c65896bc334e8f0e4ee467da4dc8b0f12089a262f22f06c429d"
+    }
+  ],
+  "manifestSha256": "88c3eb46935f99f157d4e727358b2cff165fa9c2cb22171a088f691265adbb92"
+}
+```
+
+
+### Main-Abgleich — Revision3 gezielte GREEN-Abnahme
+
+2026-10-15T07:42:38Z: gegen unveränderten 33er-Freeze `88c3eb46935f99f157d4e727358b2cff165fa9c2cb22171a088f691265adbb92` alle eng betroffenen Writer-Gates Exit0 PASS. CardProgress-VM und Titel144/144 wie oben; zusätzlich beide festgepinnten realen v90/v92→v93-Serviceworker-Upgrades mit anschließender echter Offline-Coldreload und tatsächlich geöffnetem/canceltem korrigiertem Dialog. EN-ARIA/Message/Buttons und exakter authored Anzeigename aus bestehender Map sowie volle Statebytes ab Modalöffnung erhalten. No-store allein wurde nicht als Offlinebeweis verwendet. [Ergebnisliste](/C:/src/kgg-worktrees/patient-english-complete-20261014/output/patient-english-main-alignment-20261015-r3/finish-targeted-results.json), [v90-Dialog](/C:/src/kgg-worktrees/patient-english-complete-20261014/output/patient-english-main-alignment-20261015-r3/offline-modal-v90.log), [v92-Dialog](/C:/src/kgg-worktrees/patient-english-complete-20261014/output/patient-english-main-alignment-20261015-r3/offline-modal-v92.log).
+
+Bestehender ContinuousDays-Schutz mit realem Finish PASS: T7→8, T12→13 plus Reload, T99→100/paginierteHistory, historischer Abschluss erhält die Front, unabhängige Tage in mehreren Plänen und begrenzter fixer Plan. [Protokoll](/C:/src/kgg-worktrees/patient-english-complete-20261014/output/patient-english-main-alignment-20261015-r3/continuous-days.log). Keine neue Geschäftslogik und keine erneute neunfache Gesamtprüfung.
+
+Vor/nach jedem dieser Läufe33/21/16Produkt-/Test-/GeneratedHashes sowie alle vier RED-/GREEN-Loghashes unverändert. Alle Writer-Browser/Contexts/Server via finally geschlossen; CPU-/Browserlease an Root zur unabhängigen betroffenen33er-Abnahme freigegeben. Noch keine unabhängige finale Revision3-Abnahme/FullHook/Commit/Push/aktuelleCI, kein Merge nach Main/Release. Root übernimmt die endgültige PR323-Beschreibung; kein konkurrierender PRbodywrite.
+
+
+### Main-Abgleich — finale unabhängige Revision3-Abnahme
+
+2026-10-15T07:50:00Z: Root nimmt unabhängigen finalen Code-/Test-/Generatedreview PASS (0 Findings,70/70Freeze-Dateien plus4RED/GREEN-Logs stabil) und den tatsächlich gelesenen [Browserbericht](/C:/src/kgg-worktrees/patient-english-complete-20261014/output/playwright/patient-english-main-alignment-review/r3-finish/acceptance-report.json) an. Sechs betroffene Legacy-/React-UI-Fälle sowie realer festgepinnt4bbe/v92→93-Offline-Dialog PASS,33Start-/Endprodukthashes gleich;360tatsächliche Ressourcenkörper gebunden. Root hat den aktuellen englischen Belegscreenshot selbst visuell geprüft.
+
+Aktuelles IAB war in der tatsächlichen CUA-Inventur nicht verfügbar und der reale Öffnungsversuch schlug fehl; kein neuer IAB-PASS behauptet. Autorisierter projektinterner Playwright1.61.1-Fallback mit frischen isolierten Chromiumkontexten, keine privaten Profile. Tatsächliche Pointer-/Tastaturhandlungen für Stage/NumPad/QR/Reload/Open/Cancel/Confirm; offener Dialogsprachwechsel bleibt wegen Backdrop als bestehender DOMclick-Handlervertrag benannt. Cancel-Statebezug beginnt ab Modalöffnung, kein Rückrollen der bestehenden vorgezogenen Historyfinalisierung behauptet. Alle Auditor-/Writerkontexte und Server laut finaler Leadannahme geschlossen, Lease für normalen Hook freigegeben.
+
+Tatsächlich erneute Cloud-Abschlussplanprüfung PASS laut Root, Thread `6acfb2a8-c608-83eb-88f2-ba42f7e3de42`, Turn `8f8c6619-8a70-4a5a-9735-9d532022653c`; keine zusätzliche Planlücke. Das ist die gebundene Cloud-Gegenprüfung der mitgeteilten lokalen Code-/Laufzeitnachweise, kein eigener Cloud-Repo-/Runtime-PASS. Main unmittelbar vor Abschluss weiterhin4bbe390.
+
+Autorisiert jetzt: explizites Source/Test/Generated/Doc-Staging ohne Output/Traces, genau ein regulärer vollständiger Commit-Hook und normaler Mergecommit, danach normaler Branchpush in bestehenden DraftPR323. Ausschließlich dokumentiertes KGG_ALLOW_RELEASE_DRIFT=1 für No-Release96; keine Guards/Fristen umgehen. Produkt-/Testfreeze unverändert. Kein Merge nach Main, Release, Manifest oder APK. Root besitzt endgültige PRbeschreibung/aktuelle Head-CI-Abschlussprüfung.
+
+
+### Main-Abgleich — Revision4 / Pending-Main-Merge-Guard
+
+2026-10-15T08:04:39Z: erster normaler Mergecommit-Hook unverändert gestartet, SecretScan/Modulsource PASS, dann tatsächlicher FAIL im FreshMain-Hygieneguard (Zertifikat20261015T075025Z-54564, fullRegression=true,2.469s, restoredLastGreen=true). Der alte Guard verlangte Main als HEAD-Vorfahren, obwohl beim normalen noch nicht abgeschlossenen Merge HEAD weiterE und MERGE_HEAD=M bleibt. Kein Commit/Push, kein Stale-/Hookbypass. Nach Transaktionsrollback alle33Produkte/21Tests/16GeneratedEvidence und4RED/GREEN-Logs unverändert. [Historisches Fehlerzertifikat](/C:/src/kgg-worktrees/patient-english-complete-20261014/tmp/kgg-selftest/runs/20261015T075025Z-54564/report.json).
+
+Search-first: vorhandenen Guard, native Tests/README und vorhandenes sanitized_git_environment geprüft; kein PendingMergepfad vorhanden. Vorhandene GitCLI-/Helper-/Teststruktur wiederverwendet, keine Dependency/Installation und kein übernommener Fremdcode. Offizielle Git-[True-Merge-Dokumentation](https://git-scm.com/docs/git-merge#_true_merge) und [rev-parse-Dokumentation](https://git-scm.com/docs/git-rev-parse) dienten laut Leadprüfung zur Orientierung. Unabhängiger enger Planreview PASS; tatsächliche Cloud-Präzisierung PASS Turn `7bb7e2b4-fd6c-4f8a-977a-9747d7aee968` (ersetzt allgemeinePlanreferenz f0e9acc1-0f6e-430f-b4cf-2337e0eead8c); kein Cloud-Runtime-PASS behauptet.
+
+Revision4 nur Guard/Begleittest/1README-Satz: ursprünglicher HEAD-Vorfahrpfad und alle anderen Hygiene-/Releaseguards erhalten. Separater Pendingpfad liest ausschließlich erfolgreiches Git-rev-parse --git-path MERGE_HEAD (LinkedWorktree korrekt), akzeptiert ausschließlich exakte kanonische volle Main-Commitbytes optional1LF/CRLF, bestätigt Committyp ohne Tagpeeling, echte gemeinsame Mergebase und vollständig leeren erfolgreich gelesenen Unmergedindex. Fehlende/falsche/mehrfache/abgekürzte/Whitespace-OIDs, Refnamefallback, Nichtcommits, andererParent, Main-Descendant, unrelatedHistories, Konflikte und technische Read-/Gitfehler bleiben gesperrt. Kein neuer Flag, kein Graph-/Index-/Reftrick.
+
+Echte frische TempGit-RED-Reproduktion auf unverändertem alten Guard: gültiger aufgelöster Mainmerge wird als stale abgewiesen. Danach11gezielte neue Tests mit echten Gitcommits/normalen Merges/LinkedWorktree und Negativsubfällen PASS (23.984s),7bestehende Release-/Hygieneschutztests PASS; native Hygiene auf tatsächlichem gebundenen E/M-Merge mit ausschließlich erlaubtem KGG_ALLOW_RELEASE_DRIFT=1 PASS. Sämtliche Tempfixture-Gitprozesse verwenden vorhandenes sanitized_git_environment; Parent-Hook-GIT_DIR/INDEX werden nicht in Fixtures geerbt. Registry/Hook unverändert. Protokolle unten separat gebunden.
+
+Freezeprodukte33 und alle bisherigen21Tests/16GeneratedEvidence exakt gleichRevision3; keine erneute Browserabnahme nötig. Neue Guard-/Selftest-/READMEhashes bilden Revision4. Tatsächlicher unabhängiger Guard-/Testdiffreview FINAL PASS ohne Findings: Start/End73/73Dateihashes, StageLF und8/8Loghashes stabil; Root hat diese Hashes, den tatsächlichen Diff und11+7Exit0-Testausgänge selbst geprüft und Revision4 angenommen. Erneuter normaler vollständiger Hook/Commit/Push freigegeben, Ergebnis noch offen. Main vor neuem Hook einmal frisch gegen gebundenesM prüfen; bei echtem Delta melden. Keine breite Vorab-Vollbatterie, kein Merge nach Main/Release/Manifest/APK.
+
+Zweiter normaler Hook `20261015T081128Z-42108` tatsächlich FAILED: äußerer cp1252-Logwrapper scheiterte am Pfeilzeichen und verursachte beim gepufferten Hookdruck BrokenPipe; Zertifikat bestätigt Rollback, kein Commit/Push. Separat enthält der frische vollständige Scanreport einen echten PflichtFAIL `contrast-noise-to-clean` (5000ms Feedtimeout). [Originalreport](/C:/src/kgg-worktrees/patient-english-complete-20261014/output/patient-english-main-alignment-20261015-r4/original-hook-scan-failure/scan-results.json), SHA256 `bed9add2e0f49a7b53d66d08b51f67c38373d048718cf6dfb4973d7a5eb212dc`, Markdown, tatsächlich erfasster Hooklog und Fehlerzertifikat separat unverändert gesichert. Alle73Dateien+8Logs unverändert. Unveränderter Einzelcase einmal Exit0/Frame1; dies erklärt den ursprünglichen FAIL nicht.
+
+Anschließend genau ein vollständiger Kamera-Diagnoselauf mit gleicher60erFallfolge/Stimuli/Fristen und ausschließlich passiver Output-Telemetrie: Exit0,45PASS/15observed-limit, alle34PflichtfällePASS;60eindeutige frische Kontexte/Baselines und neuer Import im betroffenen Context59 belegt (08:40:28.145Z,2→5Übungen,12Erhaltungschecks,Trackstop1/Overlayfalse). Kein Catch/kein bereits dekodierter Feedbaseline; Race unbewiesen, Ursache offen. [Ergebnis](/C:/src/kgg-worktrees/patient-english-complete-20261014/output/patient-english-main-alignment-20261015-r4/scan-camera-telemetry-full/results.json) SHA256 `3b8cda2615d512df9272a5f8045ff647125facdc70577c2408ee7b5d81ca4892`; Telemetrie `6edec61f41e0100bb35a2ed9ee2a6de8b01cc5865cdc1373d08f04679867f31f`, vollständiger Kameralog `092be9e8d987cc06b83923a1d197dcbfb55edc0ac2b23ef37fd9489e0fd265d5`. Original-ROOT/Modulpfade erhalten, Source/Harness/Fixture unverändert;86/86StartEndbindungen stabil. Unabhängige tatsächliche Delta- und Ergebnisreviews FINAL PASS, Root selbst geprüft; tatsächlicher Cloudcheck Turn `3d3d8303-f37e-4354-a4fb-800e766e63db` bestätigt den nächsten normalen FullHook, keinen Ursachen-PASS/Cloud-Runtime behauptet.
+
+Logtransport separat mit Unicode-stdout/stderr Exit0 und exakten42Bytes validiert (ProbeSHA256 `ee89cf2e167c24d4c09d45d9a7dd5b214be23f35567bb64a96a7d06b494161bf`): Gitstdout+stderr direkt in binäre Datei, Kind-PYTHONIOENCODING=utf-8; Wrapper ausschließlich ASCII-JSON mit tatsächlichem Gitexitcode. Ein neuer normaler Commit-Hook freigegeben, kein separater Fulltest/Retryloop; bei PflichtFAIL stoppen und Nachweise sichern.
+
+```json
+{
+  "id": "main-alignment-r4-pending-merge-freeze1",
+  "task_id": "patient-english-main-alignment-20261015",
+  "generation": 2,
+  "revision": 4,
+  "englishParent": "d34e90f6ef4890e345c1559e75e2a5c22df4d27a",
+  "mainParent": "4bbe3905126741c042e21331d7485067470b6640",
+  "products": [
+    {
+      "file": "collapse-cards.js",
+      "sha256": "ac8afec81349ecb3ae8d9b5dd9fd9a39c476d4dedc7148907939ebd4fae8aafc",
+      "lfSha256": "ac8afec81349ecb3ae8d9b5dd9fd9a39c476d4dedc7148907939ebd4fae8aafc",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "index.html",
+      "sha256": "12f4d469d042909d6e7b0b835b16616a0a6a35602fac18b6ada7fc6753c56b76",
+      "lfSha256": "12f4d469d042909d6e7b0b835b16616a0a6a35602fac18b6ada7fc6753c56b76",
+      "parent": "English-scanner-ref-only"
+    },
+    {
+      "file": "kgg-update/index.html",
+      "sha256": "d9e4edcda8afd4cdfc821b4e9d155483a726cec4e9c4603e4eeee4b94a0bf2d3",
+      "lfSha256": "d9e4edcda8afd4cdfc821b4e9d155483a726cec4e9c4603e4eeee4b94a0bf2d3",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/document/body-shell.html",
+      "sha256": "52fc54134ed60677b787d798a1caf21f86215f17f467bad532e52f2e9236cc80",
+      "lfSha256": "52fc54134ed60677b787d798a1caf21f86215f17f467bad532e52f2e9236cc80",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/document/head-ui.html",
+      "sha256": "c74cca199993b498cbb9d50de132c1fa5dd5a0f89b1e468165b54e7cc18fd9bb",
+      "lfSha256": "c74cca199993b498cbb9d50de132c1fa5dd5a0f89b1e468165b54e7cc18fd9bb",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/metadata/changelog.html",
+      "sha256": "a919cbbe18ba7d8015b561699e5a1e44cc153452c8583b9188bc5d0c26a17f27",
+      "lfSha256": "a919cbbe18ba7d8015b561699e5a1e44cc153452c8583b9188bc5d0c26a17f27",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/metadata/source-truth.html",
+      "sha256": "7fed7106b40c946e0f113edd221dc76c17f532ab5dc93a4b19a25624718b3a2d",
+      "lfSha256": "7fed7106b40c946e0f113edd221dc76c17f532ab5dc93a4b19a25624718b3a2d",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/patches/v082-therapy-cockpit.html",
+      "sha256": "94564723f8d292cf9cf23a88da3076c7cf6393e47880a6c50b06bdc7836ac673",
+      "lfSha256": "94564723f8d292cf9cf23a88da3076c7cf6393e47880a6c50b06bdc7836ac673",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/patches/v085-ticket-015-progressions.html",
+      "sha256": "43ed681276dac3f5394d3e05880fca683c1d3cc6dd44f00c5c50a4f9be599975",
+      "lfSha256": "43ed681276dac3f5394d3e05880fca683c1d3cc6dd44f00c5c50a4f9be599975",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/patches/v090-ticket-015-admin-stage-gallery-drag-motion.html",
+      "sha256": "bbae05b6d45927c7f14b19dcfe8b193cd0fcf1414b27adced0105e43e06ad1e6",
+      "lfSha256": "bbae05b6d45927c7f14b19dcfe8b193cd0fcf1414b27adced0105e43e06ad1e6",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/patches/v093-cockpit-shared-editor.html",
+      "sha256": "76da5d4c09e1b941127b0cb1b0ea7873c4ae7436708ed3c5779b8e362f2de42b",
+      "lfSha256": "76da5d4c09e1b941127b0cb1b0ea7873c4ae7436708ed3c5779b8e362f2de42b",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/src/runtime/app-core.html",
+      "sha256": "80548924281b10af79c1d2645a60956b42728a905ac934e5c0b8e3d09447149f",
+      "lfSha256": "80548924281b10af79c1d2645a60956b42728a905ac934e5c0b8e3d09447149f",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "kgg-update/version.json",
+      "sha256": "44407021580e051dd1719882c921a0aa477ccf59660f7966bec8171a36ad237f",
+      "lfSha256": "44407021580e051dd1719882c921a0aa477ccf59660f7966bec8171a36ad237f",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-card-settings.js",
+      "sha256": "06c04bcb84d6eec3bad892f48c1434f6aab7060e0601bfe2a01eb417405ee045",
+      "lfSha256": "06c04bcb84d6eec3bad892f48c1434f6aab7060e0601bfe2a01eb417405ee045",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-day-history.js",
+      "sha256": "2e904b1b6578aef5a7fccc5128bc633c5367c966b4eb5dd484e79a98bdf7661e",
+      "lfSha256": "c8664dff338e682fbf2df380d05aeee8daeecce5b7afa1beb812fe8d5d5414c0",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-i18n.js",
+      "sha256": "efc1a0b7fbc9bce500951b36d35a21d9b615d4294efa7a5f91faf1e06cbaf898",
+      "lfSha256": "efc1a0b7fbc9bce500951b36d35a21d9b615d4294efa7a5f91faf1e06cbaf898",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-install-guide.js",
+      "sha256": "11d2fb9edd3f290a4f75bd7a1526daee53faa55bccbe041129f3f04fdf729e86",
+      "lfSha256": "0ff8e9e3c7802f2891873762e66770d3c8e38230011cacee0eed4e6a390e8643",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-last-value-hints.js",
+      "sha256": "879131abf73d0e66234abe33670c43e9eb963a1371527262db617ee1a817d685",
+      "lfSha256": "879131abf73d0e66234abe33670c43e9eb963a1371527262db617ee1a817d685",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-media-retry-cache_v2.js",
+      "sha256": "1ae19634aa7973dbe1546333b7d2e6d0138e04e175290ce2e11310092a4651ca",
+      "lfSha256": "1ae19634aa7973dbe1546333b7d2e6d0138e04e175290ce2e11310092a4651ca",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-multiplan-db.js",
+      "sha256": "40946ffbc7200254f9f813dc0a6048437171256e7f2f2de9470c78d4338528eb",
+      "lfSha256": "40946ffbc7200254f9f813dc0a6048437171256e7f2f2de9470c78d4338528eb",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-plan-delete.js",
+      "sha256": "2b37629bfbabb202e04c04cec8f6a883c173343411a4c57814771b9fb5b43ad7",
+      "lfSha256": "273f3c1a9e8d76161e924e4c03d55afd1e0266502215531daf09c2ed01903073",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-plan-link-choice.js",
+      "sha256": "19e7edb65e02717b8e36f0062e6422b0bffb3b4e9987e4b31638fb7cea2d0917",
+      "lfSha256": "786a6663c4eb5ab5fcd8681a940401aa92b4450f1f2f11c0b5f00b9310adee16",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-qr-fullscreen.js",
+      "sha256": "a9245be9a5bbc7d1582b42a587b7de72d4261b9f6946dd196edb74992b3e23dc",
+      "lfSha256": "0485f687e98c3e03a45414f0459ac1b8958dfab9ad795fd07f76409e07160c07",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-react-dist/kgg-patient-ui.js",
+      "sha256": "57d37fa3dacfddcd1050b7507436ba5f3499d8eaa678cedcce87f8054161c9f8",
+      "lfSha256": "57d37fa3dacfddcd1050b7507436ba5f3499d8eaa678cedcce87f8054161c9f8",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-set-compact-view.js",
+      "sha256": "b9a7218388913774d7d151cced14a29522ebcc6f95dd8bad50b96f2d50a4e533",
+      "lfSha256": "b9a7218388913774d7d151cced14a29522ebcc6f95dd8bad50b96f2d50a4e533",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-set-summary-groups.js",
+      "sha256": "505c5aab315c2d4d955c75c17f6514be04b88f24d81289376008e6f2a066974c",
+      "lfSha256": "505c5aab315c2d4d955c75c17f6514be04b88f24d81289376008e6f2a066974c",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-ui-micro-polish.js",
+      "sha256": "5bce46af62a0b793da0a850121429c704ac8294150aea0c1fcd148e3eda767a2",
+      "lfSha256": "5bce46af62a0b793da0a850121429c704ac8294150aea0c1fcd148e3eda767a2",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-ui/src/legacy-numpad/LegacyNumpadHeader.tsx",
+      "sha256": "16c2b4870d35d165dd7ec2f6d8fe74ca6e8dbd087a37afd4b99fb62b49bfae78",
+      "lfSha256": "16c2b4870d35d165dd7ec2f6d8fe74ca6e8dbd087a37afd4b99fb62b49bfae78",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-version-label.js",
+      "sha256": "8aacac7fc3e25380200e5bef46d7055b421cfe6189a8af8116bc759b540187b3",
+      "lfSha256": "8aacac7fc3e25380200e5bef46d7055b421cfe6189a8af8116bc759b540187b3",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "service-worker.js",
+      "sha256": "025613ed790cb2796f64c41fc9720c1b5a5d8495968503a725e49f88a3c3e6cc",
+      "lfSha256": "025613ed790cb2796f64c41fc9720c1b5a5d8495968503a725e49f88a3c3e6cc",
+      "parent": "English-scanner-ref-only"
+    },
+    {
+      "file": "update-recovery.html",
+      "sha256": "6f57568a48f65daaf63492d4c7098a76171dbe55bb8ca9b51a2fde6e3fcb11e3",
+      "lfSha256": "6f57568a48f65daaf63492d4c7098a76171dbe55bb8ca9b51a2fde6e3fcb11e3",
+      "parent": "English-raw-unchanged"
+    },
+    {
+      "file": "patient-start-scan.js",
+      "sha256": "f458b586572fc381195057be9ba56e86b0a29b70809bb1177a892abb6deb00ec",
+      "lfSha256": "f458b586572fc381195057be9ba56e86b0a29b70809bb1177a892abb6deb00ec",
+      "parent": "Main-exact"
+    },
+    {
+      "file": "patient-card-progress.js",
+      "sha256": "5151406061f51bd6cd90e979874237e90f87e1972a9d31ee3fac698ad769cf8f",
+      "lfSha256": "cc6179f83d1a7327f90adc5d12e4cedb47b26edfd6c1d07cf069dc5d48fee557",
+      "parent": "English-additional-finish-copy-only"
+    }
+  ],
+  "tests": [
+    {
+      "file": "release-pipeline/kgg_english_progression_baseline_playwright.js",
+      "sha256": "e865fdc5e8ed2b3d9388f18c1e1394097f665344c8ccacded228cd155d4c05f3"
+    },
+    {
+      "file": "release-pipeline/kgg_english_metadata_smoke.js",
+      "sha256": "a6490412d1d2a835158a32176d80132a7a398d61ee8d5c507cf4a4fbcc7cdeb2"
+    },
+    {
+      "file": "release-pipeline/kgg_english_editor_playwright.js",
+      "sha256": "515933e9f591fb7ca624256b169cbe07752c6bcd851ef56082e21074f0775fd6"
+    },
+    {
+      "file": "release-pipeline/kgg_english_cockpit_smoke.js",
+      "sha256": "1f99bd139bf1bf6dc1c4f064f5d8160ce4b213c80ade02b0371cfe9e96cc0595"
+    },
+    {
+      "file": "release-pipeline/kgg_english_cockpit_playwright.js",
+      "sha256": "4fe7eda0ab021996600fb0e45085a4019290cfdfef80bf4ffbdd242403e00f67"
+    },
+    {
+      "file": "release-pipeline/kgg_dual_device_package.js",
+      "sha256": "0b5c79fa0b7324cecf2768b397b6e1a4d88e27eecdfbbcce053e39578a7e4047"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_title_playwright.js",
+      "sha256": "dd0d3291b55102bdabba84e7db02d5fcf824d60c0d319e1b9dc62c82319c92ee"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_summary_smoke.js",
+      "sha256": "6549062a8af1064189af604b07a55c7ac82039a4d357bd8ae835574c484c8994"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_summary_playwright.js",
+      "sha256": "9a3a1042f93e050cbd515e6b464675d5fc6355bfccb8d69d47cd6ed602805b99"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_review_playwright.js",
+      "sha256": "40e04374b14d3ec0c2221be54069f499406fa114aa9f76d5e3ecbd52983d5c9c"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_playwright.js",
+      "sha256": "28b9d3b0153570b040491ca2241660b30a0cddb708b97dbdd4825c054cecd0af"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_english_compatibility_playwright.js",
+      "sha256": "eae06368c3521f91cff58b01fe80cc4272213ff539a5df0dc4a82b463317cecb"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_import_session_values_playwright.js",
+      "sha256": "e426348734f1e01571321dd49459606de26af747f6c60c30c6731eff1d091aed"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_gpt_write_gate.py",
+      "sha256": "db621e231bfea72dd2addaca3b3db942b3a26e084f6aefef2a44eda81c349cd1"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_preview_first_load_smoke.js",
+      "sha256": "37db546492635a4f27d51320d9cc46e6dfa72c00b264c07a670a61a61c9ad6a4"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_qr_v81_device_ladder.js",
+      "sha256": "52b9b9c6eac8bb11e4529b507a6c4a94e46bbb5f8acdc28d177a2e27af1883e9"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_preview_storage_isolation_smoke.js",
+      "sha256": "a0485ad60ca432c254ffd78a8155d9aea22f87a1781fc60f22c908fe26bbf40b"
+    },
+    {
+      "file": "release-pipeline/kgg_pwa_contract_smoke.py",
+      "sha256": "ad7a8448bd6cf2a305bb4cbf75def1022ed75470d5897304a9ebc2a2f5046b27"
+    },
+    {
+      "file": "release-pipeline/kgg_test_battery.py",
+      "sha256": "7dff67422c62e77f3dd5f88b64ce632d8759b796bd0e37f6b09346f0651446ac"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_card_progress_smoke.js",
+      "sha256": "aaf4a40d881884aec5bee71cab688a020763bdc2c60ee6d125f1af906f1b94b9"
+    },
+    {
+      "file": "release-pipeline/kgg_patient_continuous_days_playwright.js",
+      "sha256": "f4897ee618712948aaefe83cdc78f694282fea535100a3f09175a618783cd699"
+    },
+    {
+      "file": "release-pipeline/test_kgg_selftest_build.py",
+      "sha256": "966485778ba940756fb6390c86cdc6549834e393df4b2c71d8fb2e68e4e932d3"
+    }
+  ],
+  "previousFreezeManifestSha256": "88c3eb46935f99f157d4e727358b2cff165fa9c2cb22171a088f691265adbb92",
+  "previousPwaContractSha256": "74d973ebae4dcb4e8be42fdaa0bbcfe90dead17e7dd57ae00dbf93d9b15b5e94",
+  "generatedEvidence": [
+    {
+      "file": "docs/kgg-custom-gpt-editor-snapshot.json",
+      "sha256": "a8d5191975add6c81713c3b803205130c3e08342f6a6e9f552498709323f87f2"
+    },
+    {
+      "file": "docs/kgg-custom-gpt-knowledge-pack.md",
+      "sha256": "a23f0929f9a8711e527f4359a84cdc0723879f91e66c049195f86eec8890efa5"
+    },
+    {
+      "file": "docs/kgg-custom-gpt-knowledge-safety.md",
+      "sha256": "9c7b48617c50be2581ed6223011a45c0e5f75c4d3d766452a4b05f87d5d8c9ee"
+    },
+    {
+      "file": "docs/kgg-custom-gpt-resource-manifest.json",
+      "sha256": "cedcc131e5d66b62ec05eadb84552fbc6f588fb24e57435e7aee5a0e4225e0ad"
+    },
+    {
+      "file": "docs/kgg-gpt-bug-index.json",
+      "sha256": "d3c7001351d03a722ad50a8f6e79ee0f0d0d533f1eeb96da6735b55ffa2310c1"
+    },
+    {
+      "file": "docs/kgg-gpt-bug-lessons.md",
+      "sha256": "6155e1b3501ffba0aef79a1fb05eb85ba15f573198a6d5c6202a0c7006098e33"
+    },
+    {
+      "file": "docs/kgg-patient-custom-gpt-editor-snapshot.json",
+      "sha256": "d31c86bdb68c26a9878eb1efa5cb05a953f7ef8b94b8eacd697dfb5b2feb05dc"
+    },
+    {
+      "file": "docs/kgg-patient-custom-gpt-knowledge-safety.md",
+      "sha256": "1622b825d6b3c0a24c6c322f51b18c43d1a8c3a293f44d7740deeb9f05790277"
+    },
+    {
+      "file": "docs/kgg-patient-custom-gpt-knowledge-testing.md",
+      "sha256": "04e1c2f5e1644777cd37cd1a91155e3c4830af91d6882f535920f81845c9b35e"
+    },
+    {
+      "file": "docs/kgg-patient-gpt-source-index.json",
+      "sha256": "dcc0e22582bfe8247216e2383bb8d91c51b5eaa087fb37f035a317a4fc4ba802"
+    },
+    {
+      "file": "docs/kgg-patient-gpt-source/chunk-001.md",
+      "sha256": "e561bab5a9dd148ef2cec684f2e2e837a9443c0bae956642eb121ed4652addc8"
+    },
+    {
+      "file": "docs/kgg-patient-gpt-source/chunk-002.md",
+      "sha256": "0d7ca5e77f92d1c883195aa7d1bc75ea7c426ed318131d339b63640e94850c51"
+    },
+    {
+      "file": "docs/kgg-patient-gpt-source/chunk-003.md",
+      "sha256": "e8a04e0c222effc3df0d62b121d3d3d40139c234da522bc09c09c78dcc83b210"
+    },
+    {
+      "file": "docs/kgg-patient-gpt-source/chunk-009.md",
+      "sha256": "e1f7dcae94cb45d1679807fac69a8b96d11d6eab930a237274e945a5839645ed"
+    },
+    {
+      "file": "docs/kgg-patient-gpt-source/chunk-034.md",
+      "sha256": "14abffef2ee4dbc74ab67e5f4076fd796a80d34f5361ca93ba95726601753150"
+    },
+    {
+      "file": "docs/kgg-patient-gpt-source/chunk-035.md",
+      "sha256": "52a169096884ccdab28cd7f57932351895e233db901880995291b83b982018e8"
+    }
+  ],
+  "redProducerSha256": "b5b3737577c21d482365e19cf41b4ddea9270ba22c30230ad5f2833e12fa5da9",
+  "redGreenEvidence": [
+    {
+      "file": "output/patient-english-main-alignment-20261015-r3/card-progress-red.log",
+      "sha256": "d14753cbecd7a8bbd81541630b9855253a03684687c765cac4265a629a459fb6"
+    },
+    {
+      "file": "output/patient-english-main-alignment-20261015-r3/finish-title-red.log",
+      "sha256": "7b70208af402ca9d9c1e2555549640e954e40a1dead4d160708efa07d1c665ce"
+    },
+    {
+      "file": "output/patient-english-main-alignment-20261015-r3/card-progress-green.log",
+      "sha256": "c4f237559f22e0aef60010218df101c354f3c9a05286f80fd7ff720f7be6baab"
+    },
+    {
+      "file": "output/patient-english-main-alignment-20261015-r3/finish-title-green.log",
+      "sha256": "d9b1447f77a36c65896bc334e8f0e4ee467da4dc8b0f12089a262f22f06c429d"
+    }
+  ],
+  "toolingEvidence": [
+    {
+      "file": "release-pipeline/kgg_patch_hygiene.py",
+      "sha256": "13527c6ca2aeac3b18dd94b85030275d16512ecb50125789877e62912e87438c"
+    },
+    {
+      "file": "release-pipeline/README.md",
+      "sha256": "66762aaacee11d5983d622b4a9dfcd5d3efe67c0f383a2d94f380d1743dcb80a"
+    }
+  ],
+  "guardEvidence": [
+    {
+      "file": "output/patient-english-main-alignment-20261015-r4/pending-merge-red.log",
+      "sha256": "5192c4cb7036f6a622f54b6ef037176b033bbd72b4a6f297ce2e061e80e0dacc"
+    },
+    {
+      "file": "output/patient-english-main-alignment-20261015-r4/pending-merge-green.log",
+      "sha256": "957a1aea1996dbe5cba04b71b9711c06735cb33103c1ae99ece20f4bd1baccf6"
+    },
+    {
+      "file": "output/patient-english-main-alignment-20261015-r4/existing-release-guards.log",
+      "sha256": "f97a41b8582424b43e54d58d595a3d61d7b8bd13206a6ccca0e69f2315da6a1a"
+    },
+    {
+      "file": "output/patient-english-main-alignment-20261015-r4/actual-pending-hygiene.log",
+      "sha256": "cc61333e21319494f981de6b335139196abfc7923be92b5daeaf70d9809fca13"
+    }
+  ],
+  "firstMergeHookFailure": {
+    "runId": "20261015T075025Z-54564",
+    "status": "failed",
+    "fullRegression": true,
+    "restoredLastGreen": true,
+    "report": "tmp/kgg-selftest/runs/20261015T075025Z-54564/report.json"
+  },
+  "manifestSha256": "fbc72f17518d44e53ee711ef15c6e3c7c8b2523fa92515d2aa3205e4243c951f"
+}
+```

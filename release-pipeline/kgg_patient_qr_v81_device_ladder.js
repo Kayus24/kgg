@@ -712,7 +712,7 @@ function reportMarkdown(run) {
 }
 
 async function main() {
-  assert(SCANNER_VERSION === "start-scan-v81-kgg-h3", "unexpected patient scanner version: " + SCANNER_VERSION);
+  assert(SCANNER_VERSION === "start-scan-v92-no-session-copy", "unexpected patient scanner version: " + SCANNER_VERSION);
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
   const browser = await chromium.launch({ headless: true });
   const renderContext = await browser.newContext({ viewport: { width: 1920, height: 1080 }, serviceWorkers: "block" });

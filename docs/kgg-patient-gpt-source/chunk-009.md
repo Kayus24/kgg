@@ -1,8 +1,8 @@
 # KGG Patient Source Chunk 009
 
 - Source file: `patient-card-progress.js`
-- Characters: 1-16081
-- Full source SHA-256: `03f79c0e6c4234492742048231327d952eb85744638d4ddd9e7f97ce4cbc123c`
+- Characters: 1-17563
+- Full source SHA-256: `cc6179f83d1a7327f90adc5d12e4cedb47b26edfd6c1d07cf069dc5d48fee557`
 
 ```
 (()=>{
@@ -71,7 +71,7 @@
     if(badge.getAttribute('aria-label')!==nextLabel)badge.setAttribute('aria-label',nextLabel)
   }
   function cards(){return [...document.querySelectorAll('#list .ex')]}
-  function updateAll(){ensureStyle();cards().forEach(updateCard)}
+  function updateAll(){ensureStyle();cards().forEach(updateCard);ticket034RefreshFinishLanguage()}
   let updateTimer=0;
   function scheduleUpdate(delay){
     clearTimeout(updateTimer);
@@ -177,6 +177,33 @@
     style.textContent=`#${FINISH_MODAL_ID}[hidden]{display:none!important}#${FINISH_MODAL_ID}{position:fixed;inset:0;z-index:2900;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(15,23,42,.58)}#${FINISH_MODAL_ID} .kggTicket034Dialog{width:min(100%,520px);max-height:calc(100dvh - 32px);overflow:auto;background:#fff;color:#111827;border:1px solid #dbe3ef;border-radius:20px;padding:18px;box-shadow:0 22px 70px rgba(15,23,42,.28)}#${FINISH_MODAL_ID} .kggTicket034Message{margin:0;font-size:16px;line-height:1.5;font-weight:700}#${FINISH_MODAL_ID} .kggTicket034Actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}#${FINISH_MODAL_ID} .kggTicket034Actions .btn,#${FINISH_MODAL_ID} .kggTicket034Actions .btn2{min-height:50px;margin-top:0}#${FINISH_MODAL_ID} button:focus-visible{outline:3px solid #94a3b8;outline-offset:2px}@media(max-width:430px){#${FINISH_MODAL_ID}{padding:12px}#${FINISH_MODAL_ID} .kggTicket034Dialog{padding:16px;border-radius:18px}#${FINISH_MODAL_ID} .kggTicket034Actions{grid-template-columns:1fr}}`;
     document.head.appendChild(style)
   }
+  function ticket034FinishCopy(canonicalName){
+    const rawName=String(canonicalName??''),locale=window.KGGPatientI18n;
+    const name=locale&&typeof locale.exerciseName==='function'?locale.exerciseName(rawName):rawName;
+    const en=language()==='en';
+    return {
+      title:en?'Finish training':'Training beenden',
+      message:en?`You still have the exercise “${name}” open. Are you sure you want to finish training?`:`Sie haben noch die Übung „${name}“ offen. Sicher, dass Sie das Training beenden wollen?`,
+      cancel:en?'Continue training':'Weiter trainieren',
+      confirm:en?'Finish training':'Training beenden'
+    }
+  }
+  function ticket034RefreshFinishLanguage(canonicalName){
+    const modal=document.getElementById(FINISH_MODAL_ID);
+    if(!modal||!finishPending)return;
+    if(typeof canonicalName!=='string'){
+      const candidate=finishPending.candidates[0],ex=candidate&&typeof p!=='undefined'&&p&&Array.isArray(p.ex)?p.ex[candidate.ei]:null;
+      if(!ex)return;
+      canonicalName=String(ex.n||'Übung')
+    }
+    const copy=ticket034FinishCopy(canonicalName),message=document.getElementById(FINISH_MESSAGE_ID);
+    if(modal.getAttribute('aria-label')!==copy.title)modal.setAttribute('aria-label',copy.title);
+    if(message&&message.textContent!==copy.message)message.textContent=copy.message;
+    for(const action of ['cancel','confirm']){
+      const button=modal.querySelector('[data-kgg-ticket034-action="'+action+'"]');
+      if(button&&button.textContent!==copy[action])button.textContent=copy[action]
+    }
+  }
   function ensureFinishModal(){
     ensureFinishStyle();
     let modal=document.getElementById(FINISH_MODAL_ID);
@@ -186,7 +213,8 @@
     modal.hidden=true;
     modal.setAttribute('role','dialog');
     modal.setAttribute('aria-modal','true');
-    modal.setAttribute('aria-label','Training beenden');
+    const copy=ticket034FinishCopy('');
+    modal.setAttribute('aria-label',copy.title);
     modal.setAttribute('aria-describedby',FINISH_MESSAGE_ID);
     const dialog=document.createElement('div');
     dialog.className='kggTicket034Dialog';
@@ -199,12 +227,12 @@
     cancel.type='button';
     cancel.className='btn2';
     cancel.dataset.kggTicket034Action='cancel';
-    cancel.textContent='Weiter trainieren';
+    cancel.textContent=copy.cancel;
     const confirm=document.createElement('button');
     confirm.type='button';
     confirm.className='btn';
     confirm.dataset.kggTicket034Action='confirm';
-    confirm.textContent='Training beenden';
+    confirm.textContent=copy.confirm;
     actions.append(cancel,confirm);
     dialog.append(message,actions);
     modal.appendChild(dialog);
@@ -243,8 +271,7 @@
       candidates:candidates.map(item=>({ei:item.ei,counter:item.counter})),
       restoreFocus:active&&active!==document.body?active:fallback
     };
-    const message=document.getElementById(FINISH_MESSAGE_ID);
-    message.textContent=`Sie haben noch die Übung „${candidates[0].name}“ offen. Sicher, dass Sie das Training beenden wollen?`;
+    ticket034RefreshFinishLanguage(candidates[0].name);
     const cancel=modal.querySelector('[data-kgg-ticket034-action="cancel"]');
     const confirm=modal.querySelector('[data-kgg-ticket034-action="confirm"]');
     cancel.disabled=false;
@@ -315,7 +342,7 @@
     setTimeout(()=>{observeList();patchRender();patchPut();patchShowQr();updateAll()},300);
     setTimeout(()=>{observeList();patchRender();patchPut();patchShowQr();updateAll()},1000)
   }
-  if(window.__KGG_TEST__)window.__kggCardProgressTest={stateForCount,labelForState,filledCount,normalValueInputs,ticket034NormalizeCounter,ticket034HasNormalValue,ticket034Candidates,ticket034IncrementCandidates,ticket034ResetAfterNormalValue,ticket034OpenFinish,ticket034CancelFinish,ticket034ConfirmFinish,patchPut,patchShowQr};
+  if(window.__KGG_TEST__)window.__kggCardProgressTest={stateForCount,labelForState,filledCount,normalValueInputs,ticket034FinishCopy,ticket034NormalizeCounter,ticket034HasNormalValue,ticket034Candidates,ticket034IncrementCandidates,ticket034ResetAfterNormalValue,ticket034OpenFinish,ticket034CancelFinish,ticket034ConfirmFinish,patchPut,patchShowQr};
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init,{once:true}):init()
 })();
 ```

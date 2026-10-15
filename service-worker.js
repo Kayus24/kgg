@@ -9,7 +9,7 @@ const COLLAPSE_SCRIPT = './collapse-cards.js?v=plan-update-label-7-single-card-o
 const CARD_PROGRESS_SCRIPT = './patient-card-progress.js?v=card-progress-3-active-units';
 const INSTALL_PROMPT_SCRIPT = './patient-install-prompt.js?v=install-prompt-2-capability-only';
 const PLAN_REPLACE_SLOT_SCRIPT = './patient-plan-replace-slot-fix.js?v=active-slot-1';
-const START_SCAN_SCRIPT = './patient-start-scan.js?v=start-scan-v87-active-units';
+const START_SCAN_SCRIPT = './patient-start-scan.js?v=start-scan-v92-no-session-copy';
 const JSQR_SCRIPT = './vendor/jsqr-1.4.0.js';
 const FFLATE_SCRIPT = './vendor/fflate-0.8.3.js?v=fflate-0.8.3';
 const PLAN_FORMAT_SCRIPT = './patient-qr-format.js?v=v81-kgg-h3-plan-format';
