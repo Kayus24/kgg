@@ -1,0 +1,165 @@
+name: KGG Patient React Unified Synthetic Acceptance
+
+on:
+  pull_request:
+    branches: [feat/patient-react-padgrid-p8-20261014]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - '.github/workflows/kgg-patient-react-unified-parity.yml'
+      - 'release-pipeline/kgg_patient_react_combined_gate.mjs'
+      - 'release-pipeline/kgg_patient_settings_side_parity_playwright.js'
+      - 'release-pipeline/kgg_ticket_015_browser_smoke.js'
+      - 'release-pipeline/kgg_patient_scan_fallback_parity_playwright.js'
+      - 'release-pipeline/kgg_patient_preview_first_load_smoke.js'
+      - 'release-pipeline/kgg_patient_english_playwright.js'
+      - 'release-pipeline/kgg_patient_ui_parity_capture.js'
+      - 'patient-ui/**'
+      - 'patient-react-dist/**'
+      - 'index.html'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: patient-react-unified-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  browser-evidence:
+    name: ${{ matrix.browser }} five-suite evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: release-pipeline/package-lock.json
+      - name: Verify existing test sources and combined verifier syntax
+        shell: bash
+        run: |
+          node --check release-pipeline/kgg_patient_react_combined_gate.mjs
+          node --check release-pipeline/kgg_patient_settings_side_parity_playwright.js
+          node --check release-pipeline/kgg_ticket_015_browser_smoke.js
+          node --check release-pipeline/kgg_patient_scan_fallback_parity_playwright.js
+          node --check release-pipeline/kgg_patient_preview_first_load_smoke.js
+          node --check release-pipeline/kgg_patient_english_playwright.js
+          node --check release-pipeline/kgg_patient_ui_parity_capture.js
+      - name: Install pinned test dependencies and target browser once
+        shell: bash
+        run: |
+          cd release-pipeline
+          npm ci --ignore-scripts --no-audit --no-fund
+          npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Settings, progression, scanner, first load, visual parity
+        shell: bash
+        env:
+          KGG_COMBINED_SHA: ${{ github.event.pull_request.head.sha }}
+          KGG_COMBINED_BROWSER: ${{ matrix.browser }}
+        run: |
+          set -euo pipefail
+          mkdir -p combined-proof
+          export KGG_SETTINGS_BROWSER="$KGG_COMBINED_BROWSER"
+          export KGG_SETTINGS_HEAD_SHA="$KGG_COMBINED_SHA"
+          node release-pipeline/kgg_patient_settings_side_parity_playwright.js | tee "$RUNNER_TEMP/settings.log"
+          node release-pipeline/kgg_patient_react_combined_gate.mjs proof settings "$KGG_COMBINED_BROWSER" "$KGG_COMBINED_SHA" "$RUNNER_TEMP/settings.log" "combined-proof/settings-$KGG_COMBINED_BROWSER.json"
+
+          export KGG_PROGRESSION_BROWSER="$KGG_COMBINED_BROWSER"
+          export KGG_PROGRESSION_PARITY=1
+          export KGG_PROGRESSION_HEAD_SHA="$KGG_COMBINED_SHA"
+          node release-pipeline/kgg_ticket_015_browser_smoke.js | tee "$RUNNER_TEMP/progression.log"
+          node release-pipeline/kgg_patient_react_combined_gate.mjs proof progression "$KGG_COMBINED_BROWSER" "$KGG_COMBINED_SHA" "$RUNNER_TEMP/progression.log" "combined-proof/progression-$KGG_COMBINED_BROWSER.json"
+
+          export KGG_SCAN_FALLBACK_BROWSER="$KGG_COMBINED_BROWSER"
+          export KGG_SCAN_FALLBACK_HEAD_SHA="$KGG_COMBINED_SHA"
+          node release-pipeline/kgg_patient_scan_fallback_parity_playwright.js | tee "$RUNNER_TEMP/scanner.log"
+          node release-pipeline/kgg_patient_react_combined_gate.mjs proof scanner "$KGG_COMBINED_BROWSER" "$KGG_COMBINED_SHA" "$RUNNER_TEMP/scanner.log" "combined-proof/scanner-$KGG_COMBINED_BROWSER.json"
+
+          export KGG_FIRST_LOAD_BROWSER="$KGG_COMBINED_BROWSER"
+          export KGG_FIRST_LOAD_HEAD_SHA="$KGG_COMBINED_SHA"
+          export KGG_FIRST_LOAD_MEDIA_LIGHTBOX=1
+          FIRST_LOAD_ROOT="$RUNNER_TEMP/kgg-combined-preview-$KGG_COMBINED_BROWSER"
+          python release-pipeline/kgg_patient_gpt_write_gate.py --self-test --self-test-preview-root "$FIRST_LOAD_ROOT"
+          : > "$RUNNER_TEMP/firstload.log"
+          for mode in legacy react-p7 react-p8; do
+            KGG_FIRST_LOAD_MODE="$mode" node release-pipeline/kgg_patient_preview_first_load_smoke.js "$FIRST_LOAD_ROOT/previews/patient-gate-self-test" | tee -a "$RUNNER_TEMP/firstload.log"
+          done
+          node release-pipeline/kgg_patient_react_combined_gate.mjs proof firstload "$KGG_COMBINED_BROWSER" "$KGG_COMBINED_SHA" "$RUNNER_TEMP/firstload.log" "combined-proof/firstload-$KGG_COMBINED_BROWSER.json"
+
+          export KGG_PARITY_ENGINE="$KGG_COMBINED_BROWSER"
+          export KGG_PARITY_HEAD_SHA="$KGG_COMBINED_SHA"
+          export KGG_PARITY_P8_GRID=1
+          export KGG_PARITY_OUT="$RUNNER_TEMP/patient-ui-parity"
+          node release-pipeline/kgg_patient_ui_parity_capture.js | tee "$RUNNER_TEMP/video.log"
+          node release-pipeline/kgg_patient_ui_parity_report.mjs "$KGG_PARITY_OUT"
+          node release-pipeline/kgg_patient_react_combined_gate.mjs proof video "$KGG_COMBINED_BROWSER" "$KGG_COMBINED_SHA" "$RUNNER_TEMP/video.log" "combined-proof/video-$KGG_COMBINED_BROWSER.json" "$KGG_PARITY_OUT"
+      - name: Upload machine-readable independent proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgg-combined-proof-${{ matrix.browser }}-${{ github.run_id }}
+          path: combined-proof/
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Upload short-lived visual evidence and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgg-combined-video-${{ matrix.browser }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/patient-ui-parity/
+          if-no-files-found: warn
+          retention-days: 3
+          compression-level: 6
+
+  unified-scope-gate:
+    name: Unified automatic scope gate (device approval pending)
+    needs: [browser-evidence]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify fail-closed acceptance evaluator
+        run: |
+          node --check release-pipeline/kgg_patient_react_combined_gate.mjs
+          node release-pipeline/kgg_patient_react_combined_gate.mjs self-test
+      - name: Require BOTH browser jobs successful before combining
+        shell: bash
+        env:
+          BROWSER_RESULT: ${{ needs.browser-evidence.result }}
+        run: |
+          test "$BROWSER_RESULT" = success || { echo "Browser matrix is not fully green: $BROWSER_RESULT"; exit 1; }
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: kgg-combined-proof-*-${{ github.run_id }}
+          merge-multiple: true
+          path: combined-proof
+      - name: Require exactly ten matching-head evidence records
+        shell: bash
+        env:
+          KGG_COMBINED_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          node release-pipeline/kgg_patient_react_combined_gate.mjs combine combined-proof "$KGG_COMBINED_SHA" combined-acceptance.json
+          grep -q '"status": "AUTOMATED_SCOPE_PASS_DEVICE_PENDING"' combined-acceptance.json
+          echo "## KGG combined synthetic Legacy/P7/P8 acceptance" >> "$GITHUB_STEP_SUMMARY"
+          echo "**10/10 engine-suite records PASS on exact PR head**; 11 scoped feature IDs; real devices and full 111-feature acceptance remain pending." >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload signed aggregate acceptance for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgg-combined-acceptance-${{ github.run_id }}
+          path: combined-acceptance.json
+          if-no-files-found: error
+          retention-days: 14
