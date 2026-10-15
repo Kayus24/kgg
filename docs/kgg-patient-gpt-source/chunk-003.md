@@ -1,8 +1,8 @@
 # KGG Patient Source Chunk 003
 
 - Source file: `service-worker.js`
-- Characters: 1-8227
-- Full source SHA-256: `025613ed790cb2796f64c41fc9720c1b5a5d8495968503a725e49f88a3c3e6cc`
+- Characters: 1-8727
+- Full source SHA-256: `488cfbd014351186eab71d9d042795c343378e3d0de3b4cfa07f3706c7904a28`
 
 ```
 const CACHE_NAME = 'kgg-handyplan-v93-english-complete';
@@ -47,4 +47,14 @@ self.addEventListener('install',event=>{event.waitUntil((async()=>{const cache=a
 self.addEventListener('message',event=>{const data=event.data||{};if(data.type==='SKIP_WAITING'){event.waitUntil(self.skipWaiting());return}if(data.type==='GET_APP_VERSION'&&event.ports&&event.ports[0]){event.ports[0].postMessage({type:'APP_VERSION',version:APP_VERSION});return}if(data.type==='GET_UPDATE_DIAGNOSTICS'&&event.ports&&event.ports[0]){event.ports[0].postMessage({type:'UPDATE_DIAGNOSTICS',version:APP_VERSION,cacheName:CACHE_NAME,scope:self.registration.scope,recoveryPath:RECOVERY_PATH})}});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith(CACHE_PREFIX)&&key!==CACHE_NAME).map(key=>caches.delete(key)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',event=>{if(event.request.method!=='GET')return;if(isRecoveryRequest(event.request)){event.respondWith(fetch(event.request,{cache:'no-store'}));return}if(isIndexRequest(event.request)){event.respondWith(fetch(event.request,{cache:'no-store'}).then(async response=>{const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put('./index.html',copy)).catch(()=>{});return injectModules(response)}).catch(async()=>{const cached=await caches.match('./index.html');return cached?injectModules(cached):Response.error()}));return}const url=new URL(event.request.url);if(url.pathname.endsWith('/manifest.json')||url.pathname.endsWith('/manifest-v64.webmanifest')||url.pathname.endsWith('/kgg-icon-192-v63.png')||url.pathname.endsWith('/kgg-icon-512-v63.png')||url.pathname.endsWith('/kgg-icon-maskable-512-v63.png')){event.respondWith(fetch(event.request,{cache:'no-store'}).then(response=>{const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put(event.request,copy)).catch(()=>{});return response}).catch(()=>caches.match(event.request)));return}if(url.pathname.endsWith('/patient-i18n.js')||url.pathname.endsWith('/collapse-cards.js')||url.pathname.endsWith('/patient-card-progress.js')||url.pathname.endsWith('/patient-install-prompt.js')||url.pathname.endsWith('/patient-plan-link-choice.js')||url.pathname.endsWith('/patient-plan-replace-slot-fix.js')||url.pathname.endsWith('/patient-plan-delete.js')||url.pathname.endsWith('/numpad-ui-fix.js')||url.pathname.endsWith('/patient-version-label.js')||url.pathname.endsWith('/patient-start-scan.js')||url.pathname.endsWith('/patient-multiplan-db.js')||url.pathname.endsWith('/patient-card-settings.js')||url.pathname.endsWith('/patient-start-values-day1.js')||url.pathname.endsWith('/patient-day-history.js')||url.pathname.endsWith('/patient-exercise-media-sources.js')||url.pathname.endsWith('/patient-media-retry-cache_v2.js')||url.pathname.endsWith('/patient-ui-micro-polish.js')||url.pathname.endsWith('/patient-pain-vertical-scale.js')||url.pathname.endsWith('/patient-install-guide.js')||url.pathname.endsWith('/patient-numpad-visibility-fix.js')||url.pathname.endsWith('/patient-extra-info-display.js')||url.pathname.endsWith('/patient-last-value-hints.js')||url.pathname.endsWith('/patient-set-summary-groups.js')||url.pathname.endsWith('/patient-qr-fullscreen.js')||url.pathname.endsWith('/patient-numpad-card-guard.js')||url.pathname.endsWith('/patient-set-compact-view.js')||url.pathname.endsWith('/patient-qr-format.js')||url.pathname.endsWith('/fflate-0.8.3.js')){event.respondWith(fetch(event.request,{cache:'no-store'}).then(response=>{const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put(event.request,copy)).catch(()=>{});return response}).catch(()=>caches.match(event.request)));return}event.respondWith(caches.match(event.request).then(cached=>{if(cached){fetch(event.request).then(response=>{const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put(event.request,copy)).catch(()=>{})}).catch(()=>{});return cached}return fetch(event.request).then(response=>{const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put(event.request,copy)).catch(()=>{});return response}).catch(()=>caches.match('./index.html'))}))});
+
+// Only opted-in React clients request these assets. Legacy startup stays unchanged.
+// Fixed same-origin build paths; never cache URLs supplied by a message sender.
+self.addEventListener('message',event=>{
+  if(!event.data||event.data.type!=='CACHE_REACT_UI')return;
+  event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll([
+    './patient-react-dist/kgg-patient-ui.js?v=p8-d14-react-grid-1',
+    './patient-react-dist/kgg-patient-ui.css?v=p8-d14-react-grid-1'
+  ])).catch(()=>{}));
+});
 ```

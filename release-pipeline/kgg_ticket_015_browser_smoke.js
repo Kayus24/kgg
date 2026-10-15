@@ -7,23 +7,24 @@
 const fs=require('fs');
 const http=require('http');
 const path=require('path');
-const {chromium}=require('playwright');
+const {chromium,webkit}=require('playwright');
 
 const ROOT=path.resolve(__dirname,'..');
+const ENGINE=process.env.KGG_PROGRESSION_BROWSER||'chromium';
+const MODES=process.env.KGG_PROGRESSION_PARITY==='1'
+  ? ['legacy','react-p7','react-p8'] : ['legacy'];
 function fail(message){throw new Error(message)}
 function assert(condition,message){if(!condition)fail(message)}
 function encodePlan(plan){return Buffer.from(JSON.stringify(plan),'utf8').toString('base64url')}
-function contentType(file){return {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.png':'image/png'}[path.extname(file).toLowerCase()]||'application/octet-stream'}
+function contentType(file){return {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.png':'image/png'}[path.extname(file).toLowerCase()]||'application/octet-stream'}
 function safeFile(urlPath){const relative=decodeURIComponent(String(urlPath||'/').split('?')[0]).replace(/^\/+/, '')||'index.html';const target=path.resolve(ROOT,relative);if(!target.startsWith(ROOT+path.sep)&&target!==ROOT)return null;if(!fs.existsSync(target)||!fs.statSync(target).isFile())return null;return target}
 
 async function main(){
   const server=http.createServer((request,response)=>{const file=safeFile(request.url);if(!file){response.writeHead(404);response.end('not found');return}response.writeHead(200,{'Content-Type':contentType(file),'Cache-Control':'no-store','Service-Worker-Allowed':'/'});fs.createReadStream(file).pipe(response)});
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const port=server.address().port;
-  const browser=await chromium.launch({headless:true});
-  const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
-  const page=await context.newPage();
-  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  assert(['chromium','webkit'].includes(ENGINE),'unsupported progression browser');
+  const browser=await ({chromium,webkit})[ENGINE].launch({headless:true});
   const stageMedia='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80"><rect width="120" height="80" fill="#dbeafe"/><circle cx="60" cy="40" r="22" fill="#2563eb"/></svg>');
   const plan={i:'ticket-015-browser',t:'Progressions-Testplan',v:1,d:6,e:[[
     'Kniebeuge',2,'B','kg','Wdh','','',[], '', '', 'exercise',
@@ -33,11 +34,30 @@ async function main(){
       {i:'hard',n:'Schwerer',o:2,s:'',m:[{id:'hard-media',type:'image',src:stageMedia}]},
     ]},
   ]]};
-  const url=`http://127.0.0.1:${port}/?plan=KGGH2:${encodePlan(plan)}`;
   try{
+    for(const mode of MODES){
+      const context=await browser.newContext({viewport:{width:390,height:844},
+        hasTouch:true,isMobile:true,serviceWorkers:'block'});
+      const page=await context.newPage(),errors=[];
+      page.on('pageerror',error=>errors.push(error.message));
+      await page.addInitScript(()=>{localStorage.kggInstallAsked='1'});
+      const flag=mode==='legacy'?'kggReactPad=0':
+        mode==='react-p8'?'kggReactPad=1&kggReactGrid=1':'kggReactPad=1';
+      const url=`http://127.0.0.1:${port}/?${flag}&plan=KGGH2:${encodePlan(plan)}`;
+      try{
     await page.goto(url,{waitUntil:'domcontentloaded'});
     const card=page.locator('#list .ex').first();await card.waitFor({state:'visible'});await card.locator('h3').click();
     await page.locator('.kgg015MainPager').first().waitFor({state:'visible'});
+    if(mode!=='legacy'){
+      await page.waitForFunction(()=>document.body.classList.contains('kggReactNumpadHeaderV1'));
+      if(mode==='react-p8')await page.waitForFunction(()=>document.body.classList.contains('kggReactNumpadGridV1')&&
+        document.querySelectorAll('.kgg-react-numpad-grid__key').length===12);
+      else assert(!await page.evaluate(()=>document.body.classList.contains('kggReactNumpadGridV1')),
+        'P7 unexpectedly mounted P8 Grid');
+    }else{
+      assert(!await page.evaluate(()=>document.body.classList.contains('kggReactNumpadHeaderV1')),
+        'Legacy mode loaded React');
+    }
     assert(await page.locator('.kgg015Gallery').count()===0,'legacy per-set progression galleries must not remain visible');
     assert(await page.locator('.kgg015MainProgressionThumb').count()===3,'all progression stages must be shown as main-image thumbnails');
     assert(await page.locator('.kgg015MainProgressionThumb[aria-current="true"]').count()===1,'exactly one progression thumbnail must be active');
@@ -91,7 +111,15 @@ async function main(){
     await page.waitForTimeout(80);
     assert((await page.locator('#sum').innerText()).includes('Variantenwechsel:'),'actual stage change was missing from documentation');
     assert(errors.length===0,`patient preview raised page errors: ${errors.join(' | ')}`);
-    console.log('Ticket 015 browser smoke: OK');
+    console.log('Ticket 015 browser smoke: OK ('+ENGINE+' / '+mode+')');
+    if(process.env.KGG_PROGRESSION_PARITY==='1')
+      console.log('KGG_PROGRESSION_PARITY_PASS '+JSON.stringify({
+        engine:ENGINE,mode,threeStages:true,thumbnailSelection:true,
+        swipeAndClick:true,zeroValue:true,dominance:true,qrMarker:true,
+        historyNote:true,sourceSha:process.env.KGG_PROGRESSION_HEAD_SHA||'local'
+      }));
+      }finally{await context.close()}
+    }
   }finally{
     await Promise.race([browser.close(),new Promise(resolve=>setTimeout(resolve,5000))]);
     await new Promise(resolve=>server.close(resolve))

@@ -1,8 +1,8 @@
 # KGG Patient Source Chunk 025
 
 - Source file: `patient-plan-delete.js`
-- Characters: 1-13794
-- Full source SHA-256: `273f3c1a9e8d76161e924e4c03d55afd1e0266502215531daf09c2ed01903073`
+- Characters: 1-13773
+- Full source SHA-256: `b0ec927b6ff4070978ca41e3eb4aa29aa80e18d3b25df3ef43aeb53072dba932`
 
 ```
 (()=>{
@@ -70,8 +70,8 @@
     return new Promise(resolve=>{const req=indexedDB.open(MEDIA_DB,1);req.onerror=()=>resolve();req.onupgradeneeded=()=>resolve();req.onsuccess=()=>{const db=req.result;try{const tx=db.transaction(MEDIA_STORE,'readwrite');ids.forEach(id=>tx.objectStore(MEDIA_STORE).delete(id));tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();resolve()}}catch(e){db.close();resolve()}}})
   }
   function loadActive(raw){
-    window.p=runtimeFromRaw(raw);persistCurrent(raw);
-    safe(()=>{window.v=read(sk(),'{}')});safe(()=>{const flow=window.KGGPatientDayFlow;window.done=flow&&typeof flow.normalizeDone==='function'?flow.normalizeDone(read(dk(),'[]')):read(dk(),'[]').map(Number).filter(n=>n>=1&&(p.extendDays!==false||n<=p.days))});
+    p=runtimeFromRaw(raw);persistCurrent(raw);
+    safe(()=>{v=read(sk(),'{}')});safe(()=>{const flow=window.KGGPatientDayFlow;done=flow&&typeof flow.normalizeDone==='function'?flow.normalizeDone(read(dk(),'[]')):read(dk(),'[]').map(Number).filter(n=>n>=1&&(p.extendDays!==false||n<=p.days))});
     safe(()=>typeof restoreDay==='function'&&restoreDay());safe(()=>save());safe(()=>render());
     [80,300,900].forEach(delay=>setTimeout(()=>{safe(()=>window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.prefetch&&window.KGGPatientMediaRetryCache.prefetch());safe(()=>window.KGGPatientMediaRetryCache&&window.KGGPatientMediaRetryCache.render&&window.KGGPatientMediaRetryCache.render())},delay))
   }

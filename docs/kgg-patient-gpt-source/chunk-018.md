@@ -1,8 +1,8 @@
 # KGG Patient Source Chunk 018
 
 - Source file: `patient-last-value-hints.js`
-- Characters: 1-4799
-- Full source SHA-256: `879131abf73d0e66234abe33670c43e9eb963a1371527262db617ee1a817d685`
+- Characters: 1-4944
+- Full source SHA-256: `7ca34e7813d6e248b4c58fd439aee75e04f696d04aa3af2ba39d3df1830dba61`
 
 ```
 (()=>{
@@ -47,7 +47,7 @@ function unitFor(m){
 function hintText(m,last){const unit=unitFor(m);return unit?String(last)+' '+unit:String(last)}
 function compactMode(){return !!(document.body&&document.body.classList.contains('kggSetViewCompact'))}
 function applyOne(input){const m=metaFromInput(input);const last=prevValue(m);if(last){input.dataset.kggLastValue=String(last);input.placeholder=compactMode()?String(last):hintText(m,last);input.classList.add('kggHasLastHint')}else{delete input.dataset.kggLastValue;if(input.classList.contains('kggHasLastHint'))input.placeholder='';input.classList.remove('kggHasLastHint')}return{m,last}}
-function syncPadButton(m,last){const b=$('padLast');if(!b)return;b.style.display='block';if(last){b.disabled=false;b.classList.remove('noLast');b.classList.add('kggPatientApplyShimmer');b.dataset.value=String(last);b.textContent=hintText(m,last)+' übernehmen'}else{b.disabled=true;b.classList.add('noLast');b.classList.remove('kggPatientApplyShimmer');b.dataset.value='';b.textContent='kein Vorwert gefunden'}}
+function syncPadButton(m,last){const locale=window.KGGPatientI18n,display=value=>locale&&typeof locale.systemText==='function'?locale.systemText(value):value;const b=$('padLast');if(!b)return;b.style.display='block';if(last){b.disabled=false;b.classList.remove('noLast');b.classList.add('kggPatientApplyShimmer');b.dataset.value=String(last);b.textContent=display(hintText(m,last)+' übernehmen')}else{b.disabled=true;b.classList.add('noLast');b.classList.remove('kggPatientApplyShimmer');b.dataset.value='';b.textContent=display('kein Vorwert gefunden')}}
 function apply(){css();document.querySelectorAll('input.num').forEach(applyOne)}
 function patch(){if(window.__kggLastValueHintsPatchedV5)return;window.__kggLastValueHintsPatchedV5=1;if(typeof openPad==='function'){const old=openPad;window.openPad=function(input,meta){if(input&&meta)input.__kggLastMeta=meta;const wasOpen=!!($('pad')&&!$('pad').classList.contains('hide'));const r=old.apply(this,arguments);if(wasOpen&&compactMode())return r;const found=applyOne(input);syncPadButton(found.m,found.last);return r}}if(typeof put==='function'){const oldPut=put;window.put=function(){const r=oldPut.apply(this,arguments);setTimeout(apply,40);return r}}}
 function init(){window.addEventListener('kgg-patient-languagechange',apply);patch();apply();const list=$('list');if(list&&'MutationObserver'in window)new MutationObserver(()=>setTimeout(()=>{patch();apply()},40)).observe(list,{childList:true,subtree:true});setTimeout(()=>{patch();apply()},300);setTimeout(apply,1200);setTimeout(apply,2500)}
