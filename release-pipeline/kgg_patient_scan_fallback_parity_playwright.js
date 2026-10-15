@@ -70,9 +70,22 @@ async function capture(page){
     storedCurrent:JSON.parse(localStorage.getItem("kggCurrentPlanV1")||"null")?.plan?.i||null
   }));
 }
+// Reuse the existing scanner smoke's visible-button / FAB action-bubble path.
+async function openPatientScanner(page){
+  const bubble=page.locator("#kggBubbleScan"),fab=page.locator("#kggActionFab");
+  if(await bubble.count()&&await bubble.isVisible().catch(()=>false)){
+    await bubble.click();return;
+  }
+  if(await fab.count()&&await fab.isVisible().catch(()=>false)){
+    await fab.click();await bubble.waitFor({state:"visible"});await bubble.click();return;
+  }
+  const direct=page.locator("#kggPlanScanBtn");
+  await direct.waitFor({state:"visible"});
+  await direct.click();
+}
 async function denied(page){
   const attempts=await page.evaluate(()=>window.__kggCameraDeniedCount);
-  await page.locator("#kggPlanScanBtn").click();
+  await openPatientScanner(page);
   await page.locator("#kggLiveScanFallback:not([hidden])").waitFor({state:"visible"});
   assert(await page.locator("#kggLiveScan").getAttribute("role")==="dialog",
     "fallback is not a scanner dialog");
