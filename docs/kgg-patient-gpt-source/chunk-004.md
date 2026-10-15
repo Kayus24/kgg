@@ -1,8 +1,8 @@
 # KGG Patient Source Chunk 004
 
 - Source file: `update-recovery.html`
-- Characters: 1-5778
-- Full source SHA-256: `dc96cfc82d0763b42ad140e9791f6dbc92e939537a7c63a9f56b6db1b43d7ec7`
+- Characters: 1-6094
+- Full source SHA-256: `6f57568a48f65daaf63492d4c7098a76171dbe55bb8ca9b51a2fde6e3fcb11e3`
 
 ```
 <!doctype html>
@@ -16,28 +16,30 @@
   <style>
     *{box-sizing:border-box}body{margin:0;background:#f4f7fb;color:#111827;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}main{max-width:560px;margin:auto;padding:18px}.card{margin-top:10vh;background:#fff;border:1px solid #dbe3ef;border-radius:20px;padding:18px;box-shadow:0 14px 40px #0f172a14}h1{font-size:24px;margin:0 0 8px}.muted{color:#64748b;line-height:1.45}.status{margin-top:14px;padding:12px;border:1px solid #dbe3ef;border-radius:14px;background:#f8fafc;font-weight:750}.status.ok{background:#ecfdf5;border-color:#bbf7d0;color:#166534}.status.err{background:#fff1f2;border-color:#fecaca;color:#b91c1c}.actions{display:grid;gap:10px;margin-top:14px}button,a{min-height:48px;border-radius:14px;font-size:16px;font-weight:900;display:flex;align-items:center;justify-content:center;text-decoration:none}button{border:1px solid #111827;background:#111827;color:#fff}button:disabled{opacity:.58}a{border:1px solid #cbd5e1;background:#fff;color:#111827}.note{margin-top:12px;font-size:13px;color:#64748b}
   </style>
+  <script src="./patient-i18n.js?v=english-v93"></script>
 </head>
 <body>
   <main>
     <section class="card">
-      <h1>KGG Update reparieren</h1>
-      <p class="muted">Trainingsdaten, Pläne, Historien und Bilder bleiben erhalten. Erneuert werden nur der KGG-Service-Worker und dessen App-Cache.</p>
+      <h1 data-kgg-system-text>KGG Update reparieren</h1>
+      <p class="muted" data-kgg-system-text>Trainingsdaten, Pläne, Historien und Bilder bleiben erhalten. Erneuert werden nur der KGG-Service-Worker und dessen App-Cache.</p>
       <div id="status" class="status" role="status" aria-live="polite">Bereit.</div>
       <div class="actions">
-        <button id="run" type="button">Update jetzt reparieren</button>
-        <a href="./">Abbrechen</a>
+        <button id="run" type="button" data-kgg-system-text>Update jetzt reparieren</button>
+        <a href="./" data-kgg-system-text>Abbrechen</a>
       </div>
-      <div class="note">Diese Seite löscht weder Websitedaten noch lokale Trainingsdaten.</div>
+      <div class="note" data-kgg-system-text>Diese Seite löscht weder Websitedaten noch lokale Trainingsdaten.</div>
     </section>
   </main>
   <script>
   (()=>{
-    const RELEASE='92';
+    const RELEASE='93';
     const CACHE_PREFIX='kgg-handyplan-';
+    document.title=window.KGGPatientI18n?KGGPatientI18n.systemText(document.title):document.title;
     const statusEl=document.getElementById('status');
     const runButton=document.getElementById('run');
     const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-    const setStatus=(text,kind='')=>{statusEl.textContent=text;statusEl.className='status'+(kind?' '+kind:'')};
+    const setStatus=(text,kind='')=>{statusEl.textContent=window.KGGPatientI18n?KGGPatientI18n.systemText(text):text;statusEl.className='status'+(kind?' '+kind:'')};
     const appScope=()=>new URL('./',location.href).href;
     const isOwnRegistration=registration=>Boolean(registration&&registration.scope&&registration.scope.startsWith(appScope()));
 

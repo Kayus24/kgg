@@ -7,6 +7,8 @@
   if(window.__kggPatientPlanLinkChoice===VERSION)return;
   window.__kggPatientPlanLinkChoice=VERSION;
   let pendingMemory=null;
+  let refreshDialogLanguage=null;
+  const T=(de,en)=>{const i18n=window.KGGPatientI18n;if(i18n&&typeof i18n.t==='function')return i18n.t(de,en);try{return localStorage.getItem('kggPatientLang')==='en'?en:de}catch(e){return de}};
 
   function clone(value){try{return JSON.parse(JSON.stringify(value))}catch(e){return value&&typeof value==='object'?{...value}:value}}
   function readJson(storage,key){try{return JSON.parse(storage.getItem(key)||'null')}catch(e){return null}}
@@ -83,6 +85,7 @@
   function closeDialog(){
     const backdrop=document.getElementById('kggPlanLinkChoiceBackdrop');
     if(backdrop)backdrop.remove();
+    refreshDialogLanguage=null;
   }
   function showDialog(pending){
     if(document.getElementById('kggPlanLinkChoiceBackdrop'))return;
@@ -90,28 +93,34 @@
     const current=activeStoredPlan(),incoming=pending.raw;
     const backdrop=document.createElement('div');backdrop.id='kggPlanLinkChoiceBackdrop';backdrop.setAttribute('role','presentation');
     const dialog=document.createElement('section');dialog.id='kggPlanLinkChoice';dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-labelledby','kggPlanLinkChoiceTitle');
-    const title=document.createElement('h2');title.id='kggPlanLinkChoiceTitle';title.textContent='Neuen Trainingsplan öffnen?';
-    const intro=document.createElement('p');intro.textContent='Es ist bereits ein anderer Trainingsplan gespeichert. Bitte wähle, wie der neue Plan geöffnet werden soll.';
+    const title=document.createElement('h2');title.id='kggPlanLinkChoiceTitle';
+    const intro=document.createElement('p');
     const names=document.createElement('div');names.className='kggPlanLinkChoiceNames';
     const oldLabel=document.createElement('div'),oldName=document.createElement('span'),newLabel=document.createElement('div'),newName=document.createElement('span');
-    oldLabel.innerHTML='<b>Vorhandener Plan</b>';newLabel.innerHTML='<b>Neuer Plan</b>';
-    oldName.textContent=String(current&& (current.t||current.title)||'Aktueller Plan');newName.textContent=String(incoming&&(incoming.t||incoming.title)||'Neuer Plan');
     names.append(oldLabel,oldName,newLabel,newName);
     const actions=document.createElement('div');actions.className='kggPlanLinkChoiceActions';
-    const add=document.createElement('button');add.type='button';add.id='kggPlanLinkChoiceAdd';add.textContent='Als zusätzlichen Plan hinzufügen';
-    const replace=document.createElement('button');replace.type='button';replace.id='kggPlanLinkChoiceReplace';replace.textContent='Aktiven Plan ersetzen';
-    const cancel=document.createElement('button');cancel.type='button';cancel.id='kggPlanLinkChoiceCancel';cancel.textContent='Abbrechen';
+    const add=document.createElement('button');add.type='button';add.id='kggPlanLinkChoiceAdd';
+    const replace=document.createElement('button');replace.type='button';replace.id='kggPlanLinkChoiceReplace';
+    const cancel=document.createElement('button');cancel.type='button';cancel.id='kggPlanLinkChoiceCancel';
+    refreshDialogLanguage=()=>{
+      title.textContent=T('Neuen Trainingsplan öffnen?','Open a new training plan?');
+      intro.textContent=T('Es ist bereits ein anderer Trainingsplan gespeichert. Bitte wähle, wie der neue Plan geöffnet werden soll.','Another training plan is already saved. Please choose how to open the new plan.');
+      oldLabel.innerHTML='<b>'+T('Vorhandener Plan','Existing plan')+'</b>';newLabel.innerHTML='<b>'+T('Neuer Plan','New plan')+'</b>';
+      oldName.textContent=String(current&&(current.t||current.title)||T('Aktueller Plan','Current plan'));newName.textContent=String(incoming&&(incoming.t||incoming.title)||T('Neuer Plan','New plan'));
+      add.textContent=T('Als zusätzlichen Plan hinzufügen','Add as an additional plan');replace.textContent=T('Aktiven Plan ersetzen','Replace active plan');cancel.textContent=T('Abbrechen','Cancel');
+    };
+    refreshDialogLanguage();
     actions.append(add,replace,cancel);dialog.append(title,intro,names,actions);backdrop.appendChild(dialog);document.body.appendChild(backdrop);
     let busy=false;
     const finish=choice=>{
       if(busy)return;
-      if(choice==='cancel'){clearPending();closeDialog();setStatus('Import abgebrochen.','');return}
+      if(choice==='cancel'){clearPending();closeDialog();setStatus(T('Import abgebrochen.','Import cancelled.'),'');return}
       busy=true;[add,replace,cancel].forEach(button=>button.disabled=true);
       let result=false;
       try{result=choice==='add'?window.KGGPatientPlanSlots.addPlan(clone(incoming)):window.KGGPatientPlanImport.replaceConfirmed(clone(incoming))}catch(e){result=false}
       Promise.resolve(result).then(ok=>{
         if(ok){clearPending();closeDialog()}
-        else{busy=false;[add,replace,cancel].forEach(button=>button.disabled=false);setStatus('Der neue Plan konnte nicht übernommen werden.','warn')}
+        else{busy=false;[add,replace,cancel].forEach(button=>button.disabled=false);setStatus(T('Der neue Plan konnte nicht übernommen werden.','The new plan could not be imported.'),'warn')}
       });
     };
     add.onclick=()=>finish('add');replace.onclick=()=>finish('replace');cancel.onclick=()=>finish('cancel');
@@ -133,6 +142,7 @@
   window.KGGPatientPlanLinkChoice={version:VERSION,pendingKey:PENDING_KEY,readPending,clearPending,showPending:scheduleDialog};
   if(window.__KGG_TEST__)window.__kggPatientPlanLinkChoiceTest={decodePayload,planKey,readPending,clearPending,TTL_MS};
   if(typeof document!=='undefined'){
+    if(typeof window.addEventListener==='function')window.addEventListener('kgg-patient-languagechange',()=>{if(refreshDialogLanguage)refreshDialogLanguage()});
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',scheduleDialog,{once:true});
     else scheduleDialog();
   }

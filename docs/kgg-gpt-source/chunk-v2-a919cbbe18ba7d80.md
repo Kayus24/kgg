@@ -3,8 +3,43 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 95,
+  "latestVersionCode": 96,
   "entries": [
+    {
+      "versionCode": 96,
+      "versionName": "1.0.96-patient-english-names",
+      "patchId": "kgg-v096-patient-english-names",
+      "status": "candidate-no-release",
+      "type": "module-patch",
+      "title": "Englische Patienten-Anzeigenamen",
+      "reason": "Englische Anzeigenamen eigener Übungen im Therapieeditor pflegen und kompatibel in optionalen Patienten-Metadaten übertragen; deutsche kanonische Namen bleiben erhalten.",
+      "whatChanged": [
+        "Optionales English-Feld im Übungseditor; Speicherung in der bestehenden Übungsbank.",
+        "Optionale m.exerciseNamesEn-Map mit exakt deutschen Schlüsseln; KGGH2/KGGH3 und bestehende Tupel bleiben kompatibel.",
+        "Explizite Leerung eines English-Felds bleibt im Shared-Bank-Transfer erhalten; Legacy-Abwesenheit löscht keine vorhandene Übersetzung."
+      ],
+      "touchedAreas": [
+        "Übungseditor",
+        "Übungsbank",
+        "Patienten-Anzeigenamen",
+        "Optionale QR-Metadaten"
+      ],
+      "notTouched": [
+        "PDF",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "in-progress",
+        "certification": "pending"
+      },
+      "approvalNote": "Expliziter Nutzerauftrag: Englische Bezeichnung eigener Übungen in der Therapeuten-App pflegen. No-Release-Kandidat für lokale Preview und Prüfung; keine Freigabe für Merge oder Release."
+    },
     {
       "versionCode": 95,
       "versionName": "1.0.95-cockpit-responsive-entry",
@@ -455,37 +490,6 @@
         "androidApp": "pending"
       },
       "handoffNote": "Vor einem echten Oppo-Test müssen die automatischen KGGH3-, Kamera-, Foto-Fallback- und Geräteprofile grün sein."
-    },
-    {
-      "versionCode": 71,
-      "versionName": "1.0.71-pdf-global-exercise-numbering",
-      "patchId": "kgg-v071-pdf-global-exercise-numbering",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Fortlaufende Papierplan-Nummerierung",
-      "reason": "Übungsnummern dürfen auf Folgeseiten nicht wieder bei EX1 beginnen.",
-      "whatChanged": [
-        "Verwendet den globalen Übungsindex für sichtbare Nummern, Maschinenzeilen und Seitenspannen.",
-        "Ergänzt Regressionstests für klassische und große mehrseitige Papierpläne."
-      ],
-      "touchedAreas": [
-        "PDF",
-        "Papierplan-Nummerierung",
-        "Regressionstests"
-      ],
-      "notTouched": [
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Plan-State",
-        "Storage",
-        "Tablet-Layout",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Ticket 012: mehrseitige Papierpläne müssen über alle Seiten fortlaufend nummeriert werden."
     }
   ],
   "latestVersionName": "1.0.95-cockpit-responsive-entry",
@@ -553,6 +557,14 @@
       "entriesSha256": "0c1b56d0a436b875e4f4bdf403b95cc23150aed2d309caba8f62241dd3ed4053",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v095-cockpit-responsive-entry"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v096.json",
+      "snapshotVersionCode": 96,
+      "entryCount": 37,
+      "entriesSha256": "49767017066c2fbecb49bdec329c3c0c18231747883aa9d2fe3e662ca7c1a9cd",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v096-patient-english-names"
     }
   ]
 }

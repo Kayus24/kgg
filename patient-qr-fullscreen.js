@@ -4,6 +4,14 @@
   window.__kggQrFullscreen=VERSION;
   let wakeLock=null;
   const $=id=>document.getElementById(id);
+  const T=(de,en)=>{const i18n=window.KGGPatientI18n;if(i18n&&typeof i18n.t==='function')return i18n.t(de,en);try{return localStorage.getItem('kggPatientLang')==='en'?en:de}catch(e){return de}};
+  function refreshLanguage(){
+    const el=$('kggQrFull');if(!el)return;
+    const button=el.querySelector('button'),img=el.querySelector('img'),hint=el.querySelector('.hint');
+    if(button)button.setAttribute('aria-label',T('Schließen','Close'));
+    if(img)img.setAttribute('alt',T('QR-Code','QR code'));
+    if(hint)hint.textContent=T('QR groß anzeigen · Zum Schließen tippen','Enlarge QR code · Tap to close');
+  }
   function ensureStyle(){
     if($('kggQrFullscreenStyle'))return;
     const s=document.createElement('style');
@@ -40,7 +48,7 @@
     const el=document.createElement('div');
     el.id='kggQrFull';
     el.className='kggQrFull';
-    el.innerHTML='<button type="button" aria-label="Schließen">×</button><img src="'+String(src).replace(/"/g,'&quot;')+'" alt="QR-Code"><div class="hint">QR groß anzeigen · Zum Schließen tippen</div>';
+    el.innerHTML='<button type="button" aria-label="'+T('Schließen','Close')+'">×</button><img src="'+String(src).replace(/"/g,'&quot;')+'" alt="'+T('QR-Code','QR code')+'"><div class="hint">'+T('QR groß anzeigen · Zum Schließen tippen','Enlarge QR code · Tap to close')+'</div>';
     el.addEventListener('click',e=>{if(e.target===el)close()});
     el.querySelector('button').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();close()});
     document.body.appendChild(el);
@@ -60,5 +68,6 @@
       open(img.src);
     },true);
   }
+  if(typeof window.addEventListener==='function')window.addEventListener('kgg-patient-languagechange',refreshLanguage);
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',bind):bind();
 })();

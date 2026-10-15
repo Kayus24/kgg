@@ -1,3 +1,5 @@
+    if(!input)return;
+    const hasText=!!input.value.trim();
     input.classList.toggle('hasText',hasText);
     input.style.height='auto';
     input.style.height=hasText?Math.ceil(input.scrollHeight)+'px':'';
@@ -500,5 +502,3 @@
     if(ev.button!=null&&ev.button!==0)return;
     if(ev.target&&ev.target.closest&&ev.target.closest('[data-edit],input,textarea,select,a'))return;
     const row=ev.currentTarget;
-    const id=row&&row.dataset&&row.dataset.bankId;
-    if(!row||!id)return;

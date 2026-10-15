@@ -42,9 +42,9 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 ## Current Versions
 
-- Source web version: v95 / `1.0.95-cockpit-responsive-entry`.
-- Source index URL: `index.html?v=95`.
-- Source notes: v095: Zeigt bei geladenen Cockpit-Trainingsplänen einen gezählten Handy-Einstieg neben dem schwebenden Scan-Dock und hält den Tablet-Einstieg leerzustandsfest.
+- Source web version: v96 / `1.0.96-patient-english-names`.
+- Source index URL: `index.html?v=96`.
+- Source notes: v096: Englische Patienten-Anzeigenamen im Uebungseditor pflegen; deutsche Plan- und QR-Namen bleiben erhalten.
 - Live Admin release: `r0433` / `1.0.95-cockpit-responsive-entry`.
 - Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0433/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.

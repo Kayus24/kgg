@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import shutil
+import subprocess
 import tempfile
 import unittest
 from contextlib import ExitStack
@@ -18,6 +20,7 @@ import kgg_new_patch as scaffolder
 import kgg_patch_hygiene as hygiene
 import kgg_selftest_build as gate
 import kgg_test_battery as battery
+from kgg_git_environment import sanitized_git_environment
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -123,6 +126,156 @@ class ReleaseDriftBaselineTests(unittest.TestCase):
         ):
             with self.assertRaisesRegex(battery.BatteryError, "expected release drift failure"):
                 battery.run_release_drift_check()
+
+
+class PendingMainMergeTests(unittest.TestCase):
+    def setUp(self) -> None:
+        environment = mock.patch.dict(os.environ, sanitized_git_environment(), clear=True)
+        environment.start()
+        self.addCleanup(environment.stop)
+        self.temp = tempfile.TemporaryDirectory(prefix="kgg-pending-main-merge-")
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name) / "repo"
+        self.root.mkdir()
+        self._git("init", "--quiet", "--initial-branch=main")
+        self._git("config", "user.email", "merge-test@example.invalid")
+        self._git("config", "user.name", "KGG Pending Merge Test")
+        self._commit("base.txt", "base\n", "base")
+        self.base = self._oid("HEAD")
+        self._git("checkout", "--quiet", "-b", "feature")
+        self._commit("feature.txt", "feature\n", "feature")
+        self._git("checkout", "--quiet", "main")
+        self._commit("main.txt", "main\n", "main")
+        self.main = self._oid("HEAD")
+        self._git("update-ref", "refs/remotes/origin/main", self.main)
+        self._git("checkout", "--quiet", "feature")
+        self._git("merge", "--no-ff", "--no-commit", "main")
+        self.merge_head = self._merge_path(self.root)
+
+    def _git(self, *args: str, root: Path | None = None, check: bool = True) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            ["git", *args], cwd=root or self.root, env=sanitized_git_environment(),
+            text=True, capture_output=True, check=check,
+        )
+
+    def _oid(self, ref: str) -> str:
+        return self._git("rev-parse", "--verify", ref).stdout.removesuffix("\n")
+
+    def _merge_path(self, root: Path) -> Path:
+        path = Path(self._git("rev-parse", "--git-path", "MERGE_HEAD", root=root).stdout.removesuffix("\n"))
+        return path if path.is_absolute() else root / path
+
+    def _commit(self, relative: str, text: str, message: str) -> None:
+        (self.root / relative).write_text(text, encoding="utf-8", newline="\n")
+        self._git("add", "--", relative)
+        self._git("commit", "--quiet", "-m", message)
+
+    def test_real_resolved_pending_main_merge_passes_all_guards(self) -> None:
+        self.assertFalse(hygiene.is_origin_main_ancestor(self.root))
+        hygiene.run(self.root)
+
+    def test_normal_head_ancestry_keeps_original_path(self) -> None:
+        self._git("merge", "--abort")
+        self._git("checkout", "--quiet", "main")
+        with mock.patch.object(hygiene, "is_resolved_pending_main_merge", side_effect=AssertionError("pending path must not run")):
+            hygiene.run(self.root)
+
+    def test_linked_worktree_uses_git_resolved_merge_file(self) -> None:
+        self._git("merge", "--abort")
+        linked = Path(self.temp.name) / "linked"
+        self._git("worktree", "add", "--quiet", "--detach", str(linked), "feature")
+        self._git("merge", "--no-ff", "--no-commit", "main", root=linked)
+        self.assertTrue((linked / ".git").is_file())
+        self.assertTrue(self._merge_path(linked).is_file())
+        self.assertTrue(hygiene.is_resolved_pending_main_merge(linked))
+        hygiene.run(linked)
+
+    def test_missing_merge_file_has_no_refname_fallback(self) -> None:
+        self.merge_head.unlink()
+        self._git("branch", "MERGE_HEAD", "main")
+        self.assertFalse(hygiene.is_resolved_pending_main_merge(self.root))
+        with self.assertRaisesRegex(hygiene.HygieneError, "Current branch is stale"):
+            hygiene.run(self.root)
+
+    def test_merge_file_requires_exact_full_oid_and_only_normal_final_newline(self) -> None:
+        oid = self.main.encode("ascii")
+        for value in [oid, oid + b"\n", oid + b"\r\n"]:
+            with self.subTest(valid=value):
+                self.merge_head.write_bytes(value)
+                self.assertTrue(hygiene.is_resolved_pending_main_merge(self.root))
+        for value in [b"", oid[:12], b"main\n", b"origin/main\n", b" " + oid,
+                      oid + b" ", oid + b"\n\n", b"\n" + oid, oid + b"\r",
+                      oid + b"\v", oid + b"\x00", oid + b"\n" + oid + b"\n",
+                      b"g" + oid[1:], oid.upper()]:
+            with self.subTest(invalid=value):
+                self.merge_head.write_bytes(value)
+                self.assertFalse(hygiene.is_resolved_pending_main_merge(self.root))
+
+    def test_wrong_parent_and_noncommit_objects_are_rejected(self) -> None:
+        self._git("tag", "-a", "main-tag", "-m", "annotated main tag", "main")
+        blob = self._oid("HEAD:feature.txt")
+        for oid in [self.base, self._oid("HEAD"), self._oid("main-tag"), blob]:
+            with self.subTest(oid=oid):
+                self.merge_head.write_text(oid + "\n", encoding="ascii")
+                self.assertFalse(hygiene.is_resolved_pending_main_merge(self.root))
+
+    def test_main_descendant_is_not_the_pending_main_parent(self) -> None:
+        self._git("merge", "--abort")
+        self._git("checkout", "--quiet", "-b", "descendant", "main")
+        self._commit("later.txt", "later\n", "later than main")
+        self._git("checkout", "--quiet", "feature")
+        self._git("merge", "--no-ff", "--no-commit", "descendant")
+        self.assertFalse(hygiene.is_resolved_pending_main_merge(self.root))
+
+    def test_unrelated_main_is_rejected_even_when_pending_oid_matches(self) -> None:
+        self._git("merge", "--abort")
+        self._git("checkout", "--quiet", "--orphan", "unrelated")
+        self._git("commit", "--quiet", "--allow-empty", "-m", "unrelated root")
+        unrelated = self._oid("HEAD")
+        self._git("update-ref", "refs/remotes/origin/main", unrelated)
+        self._git("checkout", "--quiet", "feature")
+        self._git("merge", "--allow-unrelated-histories", "--no-ff", "--no-commit", "unrelated")
+        self.assertFalse(hygiene.is_resolved_pending_main_merge(self.root))
+
+    def test_real_unmerged_index_is_rejected(self) -> None:
+        self._git("merge", "--abort")
+        self._commit("base.txt", "feature conflict\n", "feature conflict")
+        self._git("checkout", "--quiet", "main")
+        self._commit("base.txt", "main conflict\n", "main conflict")
+        self._git("update-ref", "refs/remotes/origin/main", self._oid("HEAD"))
+        self._git("checkout", "--quiet", "feature")
+        self.assertEqual(1, self._git("merge", "--no-ff", "--no-commit", "main", check=False).returncode)
+        self.assertTrue(self._git("ls-files", "--unmerged").stdout)
+        self.assertFalse(hygiene.is_resolved_pending_main_merge(self.root))
+
+    def test_command_errors_and_empty_positive_proofs_fail_closed(self) -> None:
+        original = hygiene.git
+        commands = [
+            ["rev-parse", "--git-path", "MERGE_HEAD"],
+            ["rev-parse", "--verify", "refs/remotes/origin/main^{commit}"],
+            ["cat-file", "-t", self.main],
+            ["merge-base", "HEAD", self.main],
+            ["ls-files", "--unmerged"],
+        ]
+        for command in commands:
+            for code in [1, 128]:
+                with self.subTest(command=command, code=code):
+                    def failed(args, root, *, check=True):
+                        return subprocess.CompletedProcess(["git", *args], code, "", "expected failure") if args == command else original(args, root, check=check)
+                    with mock.patch.object(hygiene, "git", side_effect=failed):
+                        self.assertFalse(hygiene.is_resolved_pending_main_merge(self.root))
+        for command in commands[:-1]:
+            with self.subTest(empty_proof=command):
+                def empty(args, root, *, check=True):
+                    return subprocess.CompletedProcess(["git", *args], 0, "", "") if args == command else original(args, root, check=check)
+                with mock.patch.object(hygiene, "git", side_effect=empty):
+                    self.assertFalse(hygiene.is_resolved_pending_main_merge(self.root))
+        with mock.patch.object(hygiene, "git", side_effect=OSError("expected command error")):
+            self.assertFalse(hygiene.is_resolved_pending_main_merge(self.root))
+
+    def test_merge_file_read_failure_is_rejected(self) -> None:
+        with mock.patch.object(Path, "read_bytes", side_effect=PermissionError("expected unreadable merge file")):
+            self.assertFalse(hygiene.is_resolved_pending_main_merge(self.root))
 
 
 def patch_block(patch_id: str) -> str:

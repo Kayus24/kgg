@@ -40,7 +40,7 @@
   function hasMediaValue(value){if(Array.isArray(value))return value.length>0;if(value&&typeof value==='object')return true;return String(value||'').trim()!==''}
   function exObj(e){if(!Array.isArray(e))e=[];return{n:e[0]||'Übung',sets:Number(e[1])||3,side:e[2]||'LR',u:e[3]||'kg',m:e[4]||'Wdh',sl:e[5]||'',sm:e[6]||'',media:e[7]||'',videoUrl:e[8]||'',videoLabel:e[9]||'Video öffnen',painMode:e[10]||'exercise'}}
   function exRaw(e,base){const raw=Array.isArray(base)?base.slice():[];raw[0]=e.n;raw[1]=e.sets;raw[2]=e.side;raw[3]=e.u;raw[4]=e.m;raw[5]=e.sl||'';raw[6]=e.sm||'';if(hasMediaValue(e.media))raw[7]=e.media;else if(raw.length<8)raw[7]='';raw[8]=e.videoUrl||raw[8]||'';raw[9]=e.videoLabel||raw[9]||'Video öffnen';raw[10]=e.painMode||raw[10]||'exercise';return raw}
-  function rawFromRuntime(baseRaw){const raw=clone(baseRaw);raw.i=p?.id||raw.i||'plan';raw.t=p?.title||raw.t||'KGG Trainingsplan';raw.v=p?.version||raw.v||1;raw.d=p?.days||raw.d||6;raw.extendDays=p?p.extendDays!==false:raw.extendDays!==false;raw.stepDays=p?.stepDays||raw.stepDays||6;const old=Array.isArray(raw.e)?raw.e:[];raw.e=Array.isArray(p?.ex)?p.ex.map((ex,i)=>exRaw(ex,old[i])):old;return raw}
+  function rawFromRuntime(baseRaw){const raw=clone(baseRaw);raw.i=p?.id||raw.i||'plan';raw.t=p?.title||raw.t||'KGG Trainingsplan';raw.v=p?.version||raw.v||1;raw.d=p?.days||raw.d||6;raw.extendDays=p?p.extendDays!==false:raw.extendDays!==false;raw.stepDays=p?.stepDays||raw.stepDays||6;const old=Array.isArray(raw.e)?raw.e:[];raw.e=Array.isArray(p?.ex)?p.ex.map((ex,i)=>exRaw(ex,old[i])):old;(p?.ex||[]).forEach(ex=>{if(typeof ex.englishName==='string'&&ex.englishName.trim()){raw.m=raw.m||{};raw.m.exerciseNamesEn={...(raw.m.exerciseNamesEn||{}),[ex.n]:ex.englishName.trim()}}});return raw}
   function runtimeFromRaw(raw){return{id:raw.i||'plan',title:raw.t||'KGG Trainingsplan',version:+raw.v||1,days:+raw.d||6,extendDays:raw.extendDays!==false,stepDays:+raw.stepDays||6,ex:(raw.e||[]).map(exObj)}}
   function readState(){try{return JSON.parse(localStorage.getItem(MULTI_KEY)||'null')}catch(e){return null}}
   function writeState(s){s.updatedAt=new Date().toISOString();localStorage.setItem(MULTI_KEY,JSON.stringify(s))}
@@ -55,8 +55,8 @@
   function currentHas(name){const key=norm(name);return Array.isArray(p?.ex)&&p.ex.some(ex=>norm(ex.n)===key)}
   function collectDb(){
     const s=ensureState();const map=new Map();
-    const add=(ex,source)=>{const o=Array.isArray(ex)?exObj(ex):ex;if(!o||!o.n)return;const key=norm(o.n);if(!key)return;if(!map.has(key))map.set(key,{...o,source});};
-    (s.plans||[]).forEach((pl,pi)=>(pl.e||[]).forEach(ex=>add(ex,pl.t||t('Plan ','Plan ')+(pi+1))));
+    const add=(ex,source,plan)=>{const o=Array.isArray(ex)?exObj(ex):ex;if(!o||!o.n)return;const key=norm(o.n);if(!key)return;if(!map.has(key))map.set(key,{...o,source,englishName:plan&&plan.m&&plan.m.exerciseNamesEn&&plan.m.exerciseNamesEn[o.n]||''});};
+    (s.plans||[]).forEach((pl,pi)=>(pl.e||[]).forEach(ex=>add(ex,pl.t||t('Plan ','Plan ')+(pi+1),pl)));
     safe(()=>p.ex.forEach(ex=>add(ex,t('aktueller Plan','current plan'))));
     return [...map.values()].sort((a,b)=>String(a.n).localeCompare(String(b.n),'de'));
   }
@@ -68,15 +68,15 @@
   function openDb(){ensureStyle();ensureDbDom();renderDb('');$('kggDbBackdrop').hidden=false;$('kggDbPanel').hidden=false;setTimeout(()=>{const s=$('kggDbSearch');if(s)s.focus({preventScroll:true})},80)}
   function renderDb(filter){
     const pn=$('kggDbPanel');if(!pn)return;
-    const q=norm(filter);const all=collectDb();const list=q?all.filter(ex=>norm(ex.n+' '+ex.u+' '+ex.m).includes(q)):all;
+    const q=norm(filter);const all=collectDb();const list=q?all.filter(ex=>norm(ex.n+' '+ex.u+' '+ex.m+' '+(window.KGGPatientI18n?KGGPatientI18n.exerciseName(ex.n,{englishName:ex.englishName}):'')).includes(q)):all;
     pn.innerHTML=`<div class="kggDbHead"><h3>${t('📚 Übungsdatenbank','📚 Exercise database')}</h3><button class="kggDbClose" id="kggDbClose" type="button">×</button></div><input id="kggDbSearch" class="kggDbSearch" value="${esc(filter||'')}" placeholder="${t('Übung suchen','Search exercise')}"><div class="kggDbList">${list.length?list.map((ex,i)=>dbCard(ex,i)).join(''):`<div class="kggDbEmpty">${t('Noch keine lokalen Übungen gespeichert.','No local exercises saved yet.')}</div>`}</div>`;
     $('kggDbClose').onclick=closeDb;
     $('kggDbSearch').oninput=e=>renderDb(e.target.value);
-    pn.querySelectorAll('.kggDbCard').forEach(card=>card.onclick=()=>addExerciseFromDb(list[Number(card.dataset.i)]));
+    pn.querySelectorAll('.kggDbCard').forEach(card=>{card.__kggDbExercise=list[Number(card.dataset.i)];card.onclick=()=>addExerciseFromDb(card.__kggDbExercise)});
   }
   function dbCard(ex,i){
     const already=currentHas(ex.n);
-    return `<button type="button" class="kggDbCard" data-i="${i}"><b>${esc(ex.n)}</b><div class="kggDbMeta">${esc(String(ex.sets||3))} · ${ex.side==='LR'?t('links/rechts','left/right'):t('beidseitig','bilateral')} · ${esc(ex.u||'kg')} / ${esc(ex.m||'Wdh')}<br>${esc(ex.source||'')}</div><span class="${already?'kggDbAlready':'kggDbAdd'}">${already?t('schon im Plan','already in plan'):t('+ in Plan holen','+ add to plan')}</span></button>`;
+    return `<button type="button" class="kggDbCard" data-i="${i}"><b>${esc(window.KGGPatientI18n?KGGPatientI18n.exerciseName(ex.n,{englishName:ex.englishName}):ex.n)}</b><div class="kggDbMeta">${esc(String(ex.sets||3))} · ${ex.side==='LR'?t('links/rechts','left/right'):t('beidseitig','bilateral')} · ${esc(window.KGGPatientI18n?KGGPatientI18n.unitLabel(ex.u||'kg'):ex.u||'kg')} / ${esc(window.KGGPatientI18n?KGGPatientI18n.unitLabel(ex.m||'Wdh'):ex.m||'Wdh')}<br>${esc(ex.source||'')}</div><span class="${already?'kggDbAlready':'kggDbAdd'}">${already?t('schon im Plan','already in plan'):t('+ in Plan holen','+ add to plan')}</span></button>`;
   }
   function addExerciseFromDb(ex){
     if(!ex||currentHas(ex.n)){closeDb();return}
@@ -111,6 +111,16 @@
     fab.textContent='📷';fab.title=t('Planaktionen','Plan actions');fab.onclick=e=>{e.preventDefault();e.stopPropagation();toggleBubbles()};
   }
   function patchRender(){if(window.__kggPatientMultiPlanDbRenderPatch)return;window.__kggPatientMultiPlanDbRenderPatch=true;if(typeof render==='function'){const old=render;window.render=function(){const r=old.apply(this,arguments);setTimeout(ensureActionBubbles,0);return r}}}
-  function init(){window.__kggPatientMultiPlanDbAddon=ADDON_VERSION;window.KGGPatientMultiPlan={switchTo,ensureState,saveCurrentSlot};patchRender();ensureActionBubbles();setTimeout(ensureActionBubbles,300);setTimeout(ensureActionBubbles,1000)}
+  function refreshLanguage(){
+    ensureSourceButtons();
+    const labels={kggBubbleScan:t('📷 Aktualisieren','📷 Update'),kggBubbleAdd:t('➕ 2. Plan','➕ 2nd plan'),kggBubbleReplace:t('♻ Plan ersetzen','♻ Replace plan')};
+    Object.keys(labels).forEach(id=>{const el=$(id);if(el)el.textContent=labels[id]});
+    const fab=$('kggActionFab');if(fab)fab.title=t('Planaktionen','Plan actions');
+    const panel=$('kggDbPanel');if(!panel||panel.hidden)return;
+    const title=panel.querySelector('h3');if(title)title.textContent=t('📚 Übungsdatenbank','📚 Exercise database');
+    const search=$('kggDbSearch');if(search)search.placeholder=t('Übung suchen','Search exercise');
+    panel.querySelectorAll('.kggDbCard').forEach(card=>{const ex=card.__kggDbExercise;if(!ex)return;const name=card.querySelector('b');if(name)name.textContent=window.KGGPatientI18n?KGGPatientI18n.exerciseName(ex.n,{englishName:ex.englishName}):ex.n;const meta=card.querySelector('.kggDbMeta');if(meta)meta.innerHTML=esc(String(ex.sets||3))+' · '+(ex.side==='LR'?t('links/rechts','left/right'):t('beidseitig','bilateral'))+' · '+esc(window.KGGPatientI18n?KGGPatientI18n.unitLabel(ex.u):ex.u)+' / '+esc(window.KGGPatientI18n?KGGPatientI18n.unitLabel(ex.m):ex.m)+'<br>'+esc(ex.source||'');const state=card.querySelector('.kggDbAlready,.kggDbAdd');if(state)state.textContent=currentHas(ex.n)?t('schon im Plan','already in plan'):t('+ in Plan holen','+ add to plan')});
+  }
+  function init(){window.addEventListener('kgg-patient-languagechange',refreshLanguage);window.__kggPatientMultiPlanDbAddon=ADDON_VERSION;window.KGGPatientMultiPlan={switchTo,ensureState,saveCurrentSlot};patchRender();ensureActionBubbles();setTimeout(ensureActionBubbles,300);setTimeout(ensureActionBubbles,1000)}
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
 })();
