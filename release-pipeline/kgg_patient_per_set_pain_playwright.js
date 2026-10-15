@@ -5,6 +5,7 @@
 const fs=require("fs");
 const http=require("http");
 const path=require("path");
+const {execFileSync}=require("node:child_process");
 const {chromium,webkit}=require("playwright");
 const ROOT=path.resolve(__dirname,"..");
 function assert(ok,message){if(!ok)throw new Error(message)}
@@ -42,11 +43,21 @@ async function openCard(page,idx=0){
   }
   throw new Error("could not open exercise card "+idx);
 }
+async function dismissUpdateGateIfShown(page){
+  const gate=page.locator("#kggUpdateGate");
+  if(await gate.count()&&await gate.isVisible().catch(()=>false)){
+    const later=gate.getByRole("button",{name:"Später",exact:true});
+    assert((await later.count())===1&&await later.isVisible(),"Update gate blocks synthetic test without a safe Later action");
+    await later.click();
+    await gate.waitFor({state:"hidden",timeout:3000});
+  }
+}
 async function mode(page,next){
   const card=await openCard(page,0);
   await card.locator(".kggCardDots").click();
   await page.locator("#kggSettingsSheet").waitFor({state:"visible"});
   await page.locator("#kggSetPainMode").selectOption(next);
+  await dismissUpdateGateIfShown(page);
   await page.locator("#kggSetSave").click();
   await page.waitForFunction(()=>document.querySelector("#kggSettingsSheet")?.hidden===true);
   await page.waitForTimeout(220); // allow the scheduled legacy apply() to settle
@@ -107,6 +118,14 @@ async function caseTest(browser,origin,react){
     values=await selected(page);
     assert(JSON.stringify(values)===JSON.stringify(["3","8"]),"toggle destroyed per-set data");
     assert(errors.length===0,"page errors: "+JSON.stringify(errors));
+    // Check the actual NumPad rendering owner only after the pain workflow:
+    // an early pad open/close can interfere with the exercise-settings sheet.
+    card=await openCard(page);
+    await card.locator(":scope > .set").first().locator(".kggCompactTapProxy[data-kgg-key='a']").first().click();
+    if(react)await page.locator("[data-kgg-react-numpad-header='v1']").waitFor({state:"attached"});
+    const mounted=await page.evaluate(()=>document.body.classList.contains("kggReactNumpadHeaderV1"));
+    assert(mounted===react,"React per-set pain browser variant not actually mounted");
+    await page.locator("#pad .padActions .padCancel").click();
     console.log("Patient per-set pain opt-in regression: PASS ("+(react?"React opt-in":"Legacy")+")");
   }finally{await context.close()}
 }
@@ -126,6 +145,20 @@ async function main(){
     const origin="http://127.0.0.1:"+server.address().port;
     await caseTest(browser,origin,false);
     await caseTest(browser,origin,true);
+    if(process.env.KGG_PARITY_OUT){
+      const out=path.resolve(process.env.KGG_PARITY_OUT);
+      assert(path.basename(out)==="patient-ui-parity","pain proof requires isolated parity artifact directory");
+      const sourceSha=process.env.KGG_PARITY_HEAD_SHA||execFileSync("git",["rev-parse","HEAD"],{cwd:ROOT,encoding:"utf8"}).trim();
+      assert(/^[0-9a-f]{40}$/i.test(sourceSha),"pain proof source SHA invalid");
+      fs.mkdirSync(out,{recursive:true});
+      for(const mode of ["legacy","react"]){
+        const proof={schema:1,status:"PASS",engine,mode,syntheticOnly:true,sourceSha,
+          featureIds:["PAT-PAIN-004"],
+          assertions:{settingsToggle:true,independentSetValues:true,dayIsolation:true,reload:true,
+            togglePreservesValues:true,otherExerciseUnchanged:true,numpadUntouched:true,reactOwnerVerified:true}};
+        fs.writeFileSync(path.join(out,"pain-"+mode+".json"),JSON.stringify(proof,null,2)+"\n");
+      }
+    }
   }finally{if(browser)await browser.close();await new Promise(resolve=>server.close(resolve))}
 }
 const alarm=setTimeout(()=>{console.error("Patient per-set pain regression: bounded 90s timeout");process.exit(124)},90000);
