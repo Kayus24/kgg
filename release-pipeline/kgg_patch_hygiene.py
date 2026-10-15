@@ -103,6 +103,35 @@ def is_origin_main_ancestor(root: Path) -> bool:
     return git(["merge-base", "--is-ancestor", "origin/main", "HEAD"], root, check=False).returncode == 0
 
 
+def is_resolved_pending_main_merge(root: Path) -> bool:
+    try:
+        location = git(["rev-parse", "--git-path", "MERGE_HEAD"], root, check=False)
+        paths = location.stdout.splitlines()
+        if location.returncode != 0 or len(paths) != 1 or not paths[0]:
+            return False
+        merge_path = Path(paths[0])
+        if not merge_path.is_absolute():
+            merge_path = root / merge_path
+        pending = merge_path.read_bytes()
+        main = git(["rev-parse", "--verify", "refs/remotes/origin/main^{commit}"], root, check=False)
+        oid = main.stdout.removesuffix("\n")
+        if main.returncode != 0 or not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", oid):
+            return False
+        canonical = oid.encode("ascii")
+        if pending not in (canonical, canonical + b"\n", canonical + b"\r\n"):
+            return False
+        kind = git(["cat-file", "-t", oid], root, check=False)
+        if kind.returncode != 0 or kind.stdout.removesuffix("\n") != "commit":
+            return False
+        common = git(["merge-base", "HEAD", oid], root, check=False)
+        if common.returncode != 0 or not re.fullmatch(r"[0-9a-f]{" + str(len(oid)) + r"}", common.stdout.removesuffix("\n")):
+            return False
+        unmerged = git(["ls-files", "--unmerged"], root, check=False)
+        return unmerged.returncode == 0 and unmerged.stdout == "" and unmerged.stderr == ""
+    except (OSError, ValueError, subprocess.SubprocessError, HygieneError):
+        return False
+
+
 def file_exists(root: Path, path: str) -> bool:
     return (root / path).exists()
 
@@ -229,7 +258,7 @@ def assert_source_release_alignment(root: Path) -> None:
 def run(root: Path) -> None:
     touched = touched_paths(root)
 
-    if not is_origin_main_ancestor(root):
+    if not is_origin_main_ancestor(root) and not is_resolved_pending_main_merge(root):
         message = "Current branch is stale: origin/main is not an ancestor of HEAD. Start from fresh origin/main."
         if os.environ.get("KGG_ALLOW_STALE_BRANCH") == "1":
             log("WARN: " + message + " Continuing because KGG_ALLOW_STALE_BRANCH=1.")

@@ -18,6 +18,7 @@ const ROOT_FILES = [
   "kgg-icon-512-v63.png",
   "kgg-icon-maskable-512-v63.png",
   "numpad-ui-fix.js",
+  "patient-i18n.js",
   "patient-version-label.js",
   "patient-plan-link-choice.js",
   "collapse-cards.js",

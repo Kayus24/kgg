@@ -59,25 +59,27 @@
     "cockpit-live-edit",
     "cockpit-shared-editor",
     "shared-reorder-core",
-    "cockpit-responsive-entry"
+    "cockpit-responsive-entry",
+    "patient-english-names"
   ],
   "currentVersion": {
-    "versionCode": 95,
-    "versionName": "1.0.95-cockpit-responsive-entry",
-    "lastPatchId": "kgg-v095-cockpit-responsive-entry",
-    "updatedBy": "kgg-module-scaffolder"
+    "versionCode": 96,
+    "versionName": "1.0.96-patient-english-names",
+    "lastPatchId": "kgg-v096-patient-english-names",
+    "updatedBy": "patient-english-implementation"
   },
-  "latestPatchId": "kgg-v095-cockpit-responsive-entry",
+  "latestPatchId": "kgg-v096-patient-english-names",
   "lastUpdateIntent": {
-    "id": "kgg-v095-cockpit-responsive-entry",
-    "summary": "Zeigt bei geladenen Cockpit-Trainingsplänen einen gezählten Handy-Einstieg neben dem schwebenden Scan-Dock und hält den Tablet-Einstieg leerzustandsfest.",
+    "id": "kgg-v096-patient-english-names",
+    "summary": "Englische Anzeigenamen eigener Übungen im Therapieeditor pflegen und kompatibel in optionalen Patienten-Metadaten übertragen; deutsche kanonische Namen bleiben erhalten.",
     "touched": [
-      "Therapie-Cockpit",
-      "Handy-Layout"
+      "Übungseditor",
+      "Übungsbank",
+      "Patienten-Anzeigenamen",
+      "Optionale QR-Metadaten"
     ],
     "notTouched": [
       "PDF",
-      "QR/Patienten-App",
       "Scan/OCR",
       "Parser",
       "Plan-State",

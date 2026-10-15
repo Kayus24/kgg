@@ -286,7 +286,7 @@
       archiveAndCloseCurrentPlan('ui_finish_patient_app');
     }catch(err){
       console.warn('Patienten-Ausgabe konnte nicht erzeugt werden:',err);
-      if(notice)notice.textContent='Ausgabe fehlgeschlagen. Plan bleibt offen.';
+      if(notice)notice.textContent=err&&err.kggEnglishNameConflict?err.message:'Ausgabe fehlgeschlagen. Plan bleibt offen.';
     }
   }
 
@@ -620,4 +620,3 @@
     }
     if(mode==='softContrast'){
       ctx.save();
-      ctx.filter='contrast(1.45) brightness(1.05) saturate(0)';

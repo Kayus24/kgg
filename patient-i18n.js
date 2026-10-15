@@ -1,0 +1,91 @@
+(()=>{
+  'use strict';
+  const LANG='kggPatientLang';
+  const isEnglish=()=>{try{return localStorage.getItem(LANG)==='en'}catch(e){return false}};
+  const t=(de,en)=>isEnglish()?en:de;
+  const normalize=value=>String(value||'').trim().toLocaleLowerCase('de-DE').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/ß/g,'ss').replace(/[^a-z0-9]+/g,' ').trim();
+  // Exact, verified movement names only. Ambiguous search aliases are not labels.
+  const names=[
+    [['Abduktion Maschine'],'Hip Abduction Machine'],[['Adduktion Maschine'],'Hip Adduction Machine'],[['Beinpresse','Leg Press'],'Leg Press'],
+    [['Bridging','Glute Bridge'],'Glute Bridge'],[['Copenhagen Plank'],'Copenhagen Plank'],[['Ergometer / Bike'],'Exercise Bike / Ergometer'],
+    [['Fire Hydrants'],'Fire Hydrants'],[['Hip Thrust'],'Hip Thrust'],[['Kniebeuger Maschine'],'Leg Curl Machine'],[['Kniestrecker Maschine'],'Leg Extension Machine'],
+    [['Rudern'],'Row'],[['Latziehen','Latzug','Lat Pulldown'],'Lat Pulldown'],[['Pallof Press'],'Pallof Press'],[['Plank','Unterarmstütz','Unterarmstuetz'],'Plank'],
+    [['Squat','Kniebeuge','Kniebeugen'],'Squat'],[['Romanian Deadlift'],'Romanian Deadlift'],[['Wadenheben'],'Calf Raise'],[['Schulterpresse','Schulterdrücken','Schulterdruecken'],'Shoulder Press'],
+    [['Rudern sitzend'],'Seated Row'],[['Sitzendes Kabelrudern','Seated Cable Row'],'Seated Cable Row'],[['Brustpresse Maschine','Machine Chest Press'],'Machine Chest Press'],[['Brustpresse'],'Chest Press'],
+    [['Beinbeuger sitzend','Seated Leg Curl'],'Seated Leg Curl'],[['Seitstütz mit Hüftsenken','Seitstuetz mit Hueftsenken','Side Plank Hip Dips'],'Side Plank Hip Dips'],
+    [['Rückenstrecker','Rueckenstrecker','Back Extension'],'Back Extension'],[['Beinschwünge','Beinschwuenge','Leg Swings'],'Leg Swings']
+  ];
+  const catalog=new Map();names.forEach(([aliases,label])=>aliases.forEach(name=>catalog.set(normalize(name),label)));
+  const validLabel=value=>typeof value==='string'&&value.trim()&&value.length<=200?value.trim():'';
+  function currentRaw(){try{const saved=JSON.parse(localStorage.getItem('kggCurrentPlanV1')||'null');return saved&&saved.plan||null}catch(e){return null}}
+  function exerciseName(name,options={}){
+    const canonical=String(name??'');if(!isEnglish())return canonical;
+    const raw=options.plan||currentRaw(),map=raw&&raw.m&&raw.m.exerciseNamesEn;
+    const authored=validLabel(options.englishName)||validLabel(map&&Object.prototype.hasOwnProperty.call(map,canonical)?map[canonical]:'');
+    return authored||catalog.get(normalize(canonical))||canonical;
+  }
+  // Stage names are authored exercise labels too; fixed stage badges translate separately.
+  function progressionName(name,options={}){return exerciseName(name,options)}
+  function unitLabel(value){const raw=String(value??''),key=raw.toLowerCase().trim();const units={wert:['Wert','value'],wdh:['Wdh','reps'],wiederholungen:['Wiederholungen','repetitions'],reps:['Wdh','reps'],'sek.':['Sek.','sec'],sek:['Sek.','sec'],sec:['Sek.','sec'],zeit:['Zeit','time'],'min.':['Min.','min'],min:['Min.','min'],stufe:['Stufe','level'],level:['Stufe','level'],'stufe/watt':['Stufe/Watt','level/watt'],keine:['keine','none'],none:['keine','none']};return units[key]?t(...units[key]):raw}
+  function displayUnitInput(input,canonical){if(!input)return;if(canonical!==undefined){input.dataset.kggCanonicalUnit=String(canonical);input.dataset.kggDisplayUnit=String(canonical)}const original=input.dataset.kggCanonicalUnit;if(original===undefined)return;const previous=input.dataset.kggDisplayUnit;if(input.value!==previous)return;const next=unitLabel(original);input.value=next;input.dataset.kggDisplayUnit=next}
+  function readUnitInput(input){return input.value===input.dataset.kggDisplayUnit?input.dataset.kggCanonicalUnit:input.value}
+  const pairs=[
+    ['KGG Handyplan','KGG Training Plan'],['Plan zum Startbildschirm hinzufügen?','Add plan to the home screen?'],['Dann findest du diesen Trainingsplan später schneller wieder.','You can find this training plan more easily later.'],['Nein danke','No thanks'],['Installieren','Install'],
+    ['Plan wird geladen…','Loading plan…'],['Kein Plan gefunden. Bitte den QR-Code oder Plan-Link einmal öffnen.','No plan found. Please open the QR code or plan link once.'],
+    ['Plan lokal geladen.','Plan loaded locally.'],['Plan importiert und lokal gespeichert.','Plan imported and saved locally.'],['Startwerte übernommen.','Start values loaded.'],['Startwerte aus der Therapie wurden als Tag 1 gespeichert.','Therapy start values saved as day 1.'],['Automatisch gespeichert.','Automatically saved.'],
+    ['Wert eingeben','Enter value'],['Wert','Value'],['Abbrechen','Cancel'],['Vorwert übernehmen','Use previous value'],['kein Vorwert gefunden','No previous value found'],
+    ['Keine Werte eingetragen.','No values entered.'],['QR-Code kopieren','Copy QR code'],['QR-Code kopiert.','QR code copied.'],['QR-Bibliothek nicht geladen.','QR library not loaded.'],
+    ['Kopieren nicht erlaubt. QR-Code gedrueckt halten oder Screenshot nutzen.','Copying is not allowed. Hold the QR code or use a screenshot.'],
+    ['Training wurde als abgeschlossen markiert. Zeige diesen QR dem Therapeuten.','Training was marked as finished. Show this QR to your therapist.'],
+    ['Zwischenstand: Dieser QR beendet das Training nicht. Danach kannst du weiter eintragen.','Interim values: this QR does not finish the training. You can keep entering values afterwards.'],
+    ['Übung anpassen','Edit exercise'],['Gewicht / Gerät','Weight / machine'],['Wdh / Zeit','Reps / time'],['Seite','Side'],['Schmerz','Pain'],['beidseitig','bilateral'],['links/rechts getrennt','left/right separate'],['einmal pro Übung','once per exercise'],['pro Satz','per set'],['Speichern','Save'],
+    ['Plan erneut öffnen','Open plan again'],['Wenn diese Web-App ohne Plan startet, scanne den Plan-QR-Code hier noch einmal.','If this web app opens without a plan, scan the plan QR code here again.'],['📷 Plan-QR scannen','📷 Scan plan QR'],['Plan-Link einfügen','Paste plan link'],
+    ['Planaktionen','Plan actions'],['📷 Aktualisieren','📷 Update'],['♻ Plan ersetzen','♻ Replace plan'],['➕ 2. Plan','➕ 2nd plan'],['📚 Übungsdatenbank','📚 Database'],
+    ['Neu','New'],['Alt','Old'],['Werteingabe','Value entry'],['Aktives Wertefeld','Active value field'],
+    ['Neue Version verfügbar','New version available'],['Bitte jetzt aktualisieren, damit der Plan zuverlässig funktioniert.','Please update now so the plan works reliably.'],['Später','Later'],['Jetzt aktualisieren','Update now'],
+    ['Bitte die offene Eingabe zuerst mit OK abschließen.','Please finish the open entry with OK first.'],['Das Update ist noch nicht vollständig geladen. Bitte kurz warten.','The update has not finished loading. Please wait briefly.'],['Aktualisierung läuft…','Updating…'],['Die neue Version wird aktiviert.','Activating the new version.'],['Aktivierung hat nicht geantwortet. Bitte erneut versuchen.','Activation did not respond. Please try again.'],['Update konnte nicht gestartet werden.','Could not start the update.'],
+    ['Uebungsbild','Exercise image'],['Bild schließen','Close image'],['Bild lokal gespeichert.','Image saved locally.'],['Kein Bild hinterlegt','No image available'],['Bild wird geladen ...','Loading image ...'],['Die Stufe ist trotzdem auswählbar.','You can still select this stage.'],['Verschlüsselte Datei wird lokal verwendet.','The encrypted file is used locally.'],['Die App versucht es automatisch erneut.','The app retries automatically.'],['Verschluesselte Datei wird geholt und lokal gespeichert.','The encrypted file is downloaded and saved locally.'],['Bild konnte nicht geladen werden.','Could not load image.'],['Der Trainingsplan bleibt ohne Bild nutzbar. Bitte bei Bedarf neuen QR-Code erstellen lassen.','You can use the training plan without the image. Ask for a new QR code if needed.'],
+    ['Progressionsstufen auswählen','Choose progression stages'],['Leichtere Progressionsstufe','Easier progression stage'],['Schwerere Progressionsstufe','Harder progression stage'],
+    ['Komprimierter Plan ist beschädigt.','Compressed plan is damaged.'],['Plan-JSON ist beschädigt.','Plan JSON is damaged.'],['Plan-Schema ist ungültig.','Invalid plan schema.'],['Plan ist zu groß.','Plan is too large.'],['Plan-Metadaten sind ungültig.','Invalid plan metadata.'],['Kein KGGH2/KGGH3-Plan.','No KGGH2/KGGH3 plan.'],['Lokaler KGGH3-Decoder fehlt.','Local KGGH3 decoder is unavailable.'],['UTF-8-Daten sind beschädigt.','UTF-8 data is damaged.'],['KGGH3-QR ist beschädigt oder zu groß.','KGGH3 QR is damaged or too large.'],['KGGH3-Base64 ist beschädigt.','KGGH3 Base64 is damaged.'],['Plan-Link ist zu groß.','Plan link is too large.'],['Plan-QR ist zu groß.','Plan QR is too large.'],['Komprimierter Plan ist zu groß.','Compressed plan is too large.'],['Übungsanzahl ist ungültig.','Invalid exercise count.']
+  ];
+  pairs.push(...[["Plan aktualisiert. Werte behalten. Neue Übungen: ","Plan updated. Values kept. New exercises: "],["Plan ersetzen abgebrochen.","Plan replacement cancelled."],["Neuer Trainingsplan","New training plan"],["Plan ersetzt. Übernommene Werte: ","Plan replaced. Values copied: "],["Startwerte übernommen.","Start values loaded."],["Kein Plan-QR erkannt.","No plan QR detected."],["Kamera-Scan nicht verfügbar. Plan-Link oder QR-Text einfügen:","Camera scan not available. Paste plan link or QR text:"],["Plan durch QR ersetzen","Replace plan from QR"],["Plan-QR scannen","Scan plan QR"],["QR für neuen Plan scannen","Scan QR for replacement plan"],["Plan-QR automatisch scannen","Scan plan QR automatically"],["Scanner schließen","Close scanner"],["Kamera wird gestartet …","Starting camera …"],["Foto aufnehmen oder auswählen","Take or choose photo"],["Plan-Link einfügen","Paste plan link"],["Live-Scan erneut versuchen","Retry live scan"],["QR möglichst groß in den Rahmen halten. Die App löst automatisch aus.","Hold the QR as large as possible inside the frame. The app scans automatically."],["Noch kein Plan-QR erkannt. Bitte erneut versuchen oder ein Foto verwenden.","No plan QR detected yet. Retry or use a photo."],["Plan erkannt. Ersetzen wird vorbereitet …","Plan detected. Preparing replacement …"],["Plan erkannt. Wird aktualisiert …","Plan detected. Updating …"],["QR erkannt, aber kein KGG-Plan. Bitte den Plan-QR zeigen.","QR detected, but it is not a KGG plan. Show the plan QR."],["Suche Plan-QR … bitte ruhig und nah halten.","Searching for plan QR … hold steady and close."],["Bild wird weiter geprüft …","Continuing to scan …"],["Suche Plan-QR … bitte ruhig und nah halten.","Searching for plan QR … hold steady and close."],["Live-Kamera nicht verfügbar. Bitte ein Foto verwenden.","Live camera unavailable. Please use a photo."],["QR-Foto wird geprüft …","Checking QR photo …"],["Kein QR erkannt. Bitte näher und scharf fotografieren.","No QR detected. Please take a closer, sharp photo."],["Plan erneut öffnen","Open plan again"],["Wenn diese Web-App ohne Plan startet, scanne den Plan-QR-Code hier noch einmal.","If this web app opens without a plan, scan the plan QR code here again."],["Plan-QR scannen","Scan plan QR"],["Plan-Link einfügen","Paste plan link"],["Plan ersetzen","Replace plan"],["QR-Scan","QR scan"]]);
+  pairs.push(...[["KGG Update reparieren","Repair KGG update"],["Trainingsdaten, Pläne, Historien und Bilder bleiben erhalten. Erneuert werden nur der KGG-Service-Worker und dessen App-Cache.","Training data, plans, histories and images are preserved. Only the KGG service worker and its app cache are refreshed."],["Bereit.","Ready."],["Update jetzt reparieren","Repair update now"],["Diese Seite löscht weder Websitedaten noch lokale Trainingsdaten.","This page does not delete website data or local training data."],["Dieser Browser unterstützt keine Service Worker.","This browser does not support service workers."],["Alten KGG-Service-Worker lösen …","Remove the old KGG service worker …"],["Nur den KGG-App-Cache erneuern …","Refresh only the KGG app cache …"],["Aktuelle KGG-Version laden …","Load the current KGG version …"],["Update repariert. Die App wird neu geöffnet.","Update repaired. Reopening the app."]]);
+  pairs.push(...[["Plan-ID ist ungültig.","Invalid plan ID."],["Plan-Titel ist ungültig.","Invalid plan title."],["Plan-Version ist ungültig.","Invalid plan version."],["Trainingstage ist ungültig.","Invalid training days."],["Schritt-Tage ist ungültig.","Invalid day step."],["Plan-Fortsetzung ist ungültig.","Invalid plan continuation."],["Patientendaten sind ungültig.","Invalid patient data."],["Plan ist nicht lesbar.","Plan cannot be read."]]);
+  const dictionary=new Map();pairs.forEach(([de,en])=>{dictionary.set(de,{de,en});dictionary.set(en,{de,en})});
+  const templates=[
+    [/^Weitere Trainingstage hinzugefügt: bis T(\d+)\.$/,/^More training days added: through day (\d+)\.$/,n=>'Weitere Trainingstage hinzugefügt: bis T'+n+'.',n=>'More training days added: through day '+n+'.'],
+    [/^Plan aktualisiert\. Übungen: (\d+)\.$/,/^Plan updated\. Exercises: (\d+)\.$/,n=>'Plan aktualisiert. Übungen: '+n+'.',n=>'Plan updated. Exercises: '+n+'.'],
+    [/^Plan aktualisiert\. Werte behalten\. Neue Übungen: (\d+)(\.?)$/,/^Plan updated\. Values kept\. New exercises: (\d+)(\.?)$/,(n,dot)=>'Plan aktualisiert. Werte behalten. Neue Übungen: '+n+dot,(n,dot)=>'Plan updated. Values kept. New exercises: '+n+dot],
+    [/^Plan ersetzt\. Übernommene Werte: (\d+)\.$/,/^Plan replaced\. Values copied: (\d+)\.$/,n=>'Plan ersetzt. Übernommene Werte: '+n+'.',n=>'Plan replaced. Values copied: '+n+'.'],
+    [/^(\d+)\. Plan erkannt\. Wird separat hinzugefügt …$/,/^Plan (\d+) detected\. Adding as a separate plan …$/,n=>n+'. Plan erkannt. Wird separat hinzugefügt …',n=>'Plan '+n+' detected. Adding as a separate plan …'],
+    [/^Übung (\d+) ist unvollständig\.$/,/^Exercise (\d+) is incomplete\.$/,n=>'Übung '+n+' ist unvollständig.',n=>'Exercise '+n+' is incomplete.'],
+    [/^Übungsdaten (\d+) sind zu groß\.$/,/^Exercise data (\d+) is too large\.$/,n=>'Übungsdaten '+n+' sind zu groß.',n=>'Exercise data '+n+' is too large.'],
+    [/^Reparatur fehlgeschlagen: (.*)$/,/^Repair failed: (.*)$/,n=>'Reparatur fehlgeschlagen: '+systemText(n),n=>'Repair failed: '+systemText(n)],
+    [/^Geladen wurde v(.+) statt v(.+)\.$/,/^Loaded v(.+) instead of v(.+)\.$/,(a,b)=>'Geladen wurde v'+a+' statt v'+b+'.',(a,b)=>'Loaded v'+a+' instead of v'+b+'.'],
+    [/^Offenes Training T(\d+) wiederhergestellt\.$/,/^Open training day (\d+) restored\.$/,n=>'Offenes Training T'+n+' wiederhergestellt.',n=>'Open training day '+n+' restored.'],
+    [/^Aktuelle Werte T(\d+)$/,/^Current values day (\d+)$/,n=>'Aktuelle Werte T'+n,n=>'Current values day '+n],
+    [/^Training T(\d+) beendet$/,/^Training day (\d+) finished$/,n=>'Training T'+n+' beendet',n=>'Training day '+n+' finished'],
+    [/^KGG App-Version (.+)$/,/^KGG app version (.+)$/,n=>'KGG App-Version '+n,n=>'KGG app version '+n],
+    [/^Stufe (\d+)(.*)$/,/^Stage (\d+)(.*)$/,(n,s)=>'Stufe '+n+s,(n,s)=>'Stage '+n+s],
+    [/^Progressionsstufe (\d+)$/,/^Progression stage (\d+)$/,n=>'Progressionsstufe '+n,n=>'Progression stage '+n],
+    [/^(.+) übernehmen$/,/^Use (.+)$/,n=>valueUnit(n)+' übernehmen',n=>'Use '+valueUnit(n)],
+    [/^(.+) eingeben$/,/^Enter (.+)$/,n=>valueUnit(n)+' eingeben',n=>'Enter '+valueUnit(n)]
+  ];
+  function valueUnit(value){const match=String(value).match(/^([-+]?\d+(?:[.,]\d+)?)\s+(.+)$/);return match?match[1]+' '+unitLabel(match[2]):unitLabel(value)}
+  for(const [de,en]of [['Übungsname','exercise name'],['Sätze','sets'],['Seite','side'],['Einheit','unit'],['Messwert','measure']])templates.push([new RegExp('^'+de+' (\\d+) ist ungültig\\.$'),new RegExp('^Invalid '+en+' (\\d+)\\.$'),n=>de+' '+n+' ist ungültig.',n=>'Invalid '+en+' '+n+'.']);
+  function systemText(value){const raw=String(value??''),trim=raw.trim(),entry=dictionary.get(trim);if(entry)return raw.replace(trim,t(entry.de,entry.en));for(const [de,en,deText,enText]of templates){const match=trim.match(de)||trim.match(en);if(match)return raw.replace(trim,(isEnglish()?enText:deText)(...match.slice(1)))}return raw}
+  function translateLeaves(root){if(!root)return;const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let node;while((node=walker.nextNode())){const next=systemText(node.nodeValue);if(next!==node.nodeValue)node.nodeValue=next}}
+  const roots='#status,#endTitle,#endInfo,#qr > button,#padTitle,#padLast,#pad .padCancel,#kggPadTransfer,#kggSettingsSheet h3,#kggSettingsSheet label,#kggSettingsSheet option,#kggSettingsSheet .kggSetActions button,#kggQrRescue,#kggLiveScan .kggLiveScanHead b,#kggLiveScanStatus,#kggLiveScanFallback,#kggLiveScan .kggLiveScanPanel > p,#kggUpdateGate,#kggSetViewSwitch,.kgg-react-numpad-header__tag,[data-kgg-system-text],.kgg015MainPagerPlaceholder,#installBox h3,#installBox > p,#installBox .installBtns button,#installHint';
+  function refresh(){
+    document.documentElement.lang=isEnglish()?'en':'de';
+    document.title=systemText(document.title);
+    document.querySelectorAll(roots).forEach(translateLeaves);
+    document.querySelectorAll('#list input.num').forEach(input=>{const next=unitLabel(input.placeholder);if(next!==input.placeholder)input.placeholder=next});
+    document.querySelectorAll('#pad [aria-label],#kggAppVersion[aria-label],#kggAppVersion[title],#kggActionFab[title],#kggImageLightbox [aria-label],#kggLiveScan[aria-label],#kggLiveScan [aria-label],#list [aria-label],#list img[alt],#kggImageLightbox img[alt]').forEach(el=>{for(const attr of ['aria-label','title','alt']){if(!el.hasAttribute(attr))continue;const next=systemText(el.getAttribute(attr));if(next!==el.getAttribute(attr))el.setAttribute(attr,next)}});
+  }
+  window.KGGPatientI18n={isEnglish,t,exerciseName,progressionName,unitLabel,displayUnitInput,readUnitInput,systemText,refresh};
+  let pending=0;
+  const schedule=()=>{if(pending)return;pending=setTimeout(()=>{pending=0;refresh()},0)};
+  function init(){refresh();new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true,characterData:true});window.addEventListener('kgg-patient-languagechange',refresh)}
+  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init,{once:true}):init();
+})();

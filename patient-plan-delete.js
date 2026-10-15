@@ -95,13 +95,22 @@
   function openPanel(){ensureDom();renderPanel();$(BACKDROP_ID).hidden=false;$(PANEL_ID).hidden=false}
   function renderPanel(){
     const panel=$(PANEL_ID);if(!panel)return;const state=window.KGGPatientMultiPlan&&window.KGGPatientMultiPlan.ensureState?window.KGGPatientMultiPlan.ensureState():readState();const plans=state&&Array.isArray(state.plans)?state.plans:[];
-    panel.innerHTML='<div class="kggPlanManageHead"><h3>'+t('Übungspläne verwalten','Manage exercise plans')+'</h3><button class="kggPlanManageClose" type="button">×</button></div><div class="kggPlanManageList">'+plans.map((raw,index)=>'<div class="kggPlanManageCard"><div><b>'+esc(planTitle(raw,index))+'</b><div class="kggPlanManageMeta">'+(Number(state.active)===index?t('Aktiver Plan','Active plan'):t('Gespeicherter Plan','Saved plan'))+'</div></div><div class="kggPlanManageActions"><button type="button" class="kggPlanRenameBtn" data-index="'+index+'" aria-label="'+esc(t('Plan umbenennen','Rename plan'))+'" title="'+esc(t('Plan umbenennen','Rename plan'))+'">✎</button>'+(plans.length>1?'<button type="button" class="kggPlanDeleteBtn" data-index="'+index+'" aria-label="'+esc(t('Plan löschen','Delete plan'))+'" title="'+esc(t('Plan löschen','Delete plan'))+'">×</button>':'')+'</div></div>').join('')+'</div>';
+    panel.innerHTML='<div class="kggPlanManageHead"><h3>'+t('Übungspläne verwalten','Manage exercise plans')+'</h3><button class="kggPlanManageClose" type="button" aria-label="'+t('Schließen','Close')+'" title="'+t('Schließen','Close')+'">×</button></div><div class="kggPlanManageList">'+plans.map((raw,index)=>'<div class="kggPlanManageCard"><div><b>'+esc(planTitle(raw,index))+'</b><div class="kggPlanManageMeta">'+(Number(state.active)===index?t('Aktiver Plan','Active plan'):t('Gespeicherter Plan','Saved plan'))+'</div></div><div class="kggPlanManageActions"><button type="button" class="kggPlanRenameBtn" data-index="'+index+'" aria-label="'+esc(t('Plan umbenennen','Rename plan'))+'" title="'+esc(t('Plan umbenennen','Rename plan'))+'">✎</button>'+(plans.length>1?'<button type="button" class="kggPlanDeleteBtn" data-index="'+index+'" aria-label="'+esc(t('Plan löschen','Delete plan'))+'" title="'+esc(t('Plan löschen','Delete plan'))+'">×</button>':'')+'</div></div>').join('')+'</div>';
     panel.querySelector('.kggPlanManageClose').onclick=closePanel;panel.querySelectorAll('.kggPlanRenameBtn').forEach(btn=>btn.onclick=async()=>{if(await renamePlan(Number(btn.dataset.index)))renderPanel()});panel.querySelectorAll('.kggPlanDeleteBtn').forEach(btn=>btn.onclick=async()=>{if(await deletePlan(Number(btn.dataset.index)))renderPanel()})
   }
   function ensureButton(){
-    const box=$('kggActionBubbles');if(!box)return;if($('kggBubblePlans'))return;
+    const box=$('kggActionBubbles');if(!box)return;const existing=$('kggBubblePlans');if(existing){existing.textContent='🗂 '+t('Pläne','Plans');return}
     const button=document.createElement('button');button.type='button';button.id='kggBubblePlans';button.className='kggBubble';button.textContent='🗂 '+t('Pläne','Plans');button.onclick=e=>{e.preventDefault();e.stopPropagation();const fab=$('kggActionFab');box.hidden=true;if(fab)fab.classList.remove('open');openPanel()};box.appendChild(button)
   }
+  function refreshLanguage(){
+    const button=$('kggBubblePlans');if(button)button.textContent='🗂 '+t('Pläne','Plans');
+    const panel=$(PANEL_ID);if(!panel)return;
+    const title=panel.querySelector('.kggPlanManageHead h3'),close=panel.querySelector('.kggPlanManageClose');if(title)title.textContent=t('Übungspläne verwalten','Manage exercise plans');
+    if(close){close.setAttribute('aria-label',t('Schließen','Close'));close.setAttribute('title',t('Schließen','Close'))}
+    const state=readState();panel.querySelectorAll('.kggPlanManageMeta').forEach((meta,index)=>meta.textContent=Number(state&&state.active)===index?t('Aktiver Plan','Active plan'):t('Gespeicherter Plan','Saved plan'));
+    [['.kggPlanRenameBtn','Plan umbenennen','Rename plan'],['.kggPlanDeleteBtn','Plan löschen','Delete plan']].forEach(([selector,de,en])=>panel.querySelectorAll(selector).forEach(btn=>{btn.setAttribute('aria-label',t(de,en));btn.setAttribute('title',t(de,en))}));
+  }
+  if(typeof window.addEventListener==='function')window.addEventListener('kgg-patient-languagechange',refreshLanguage);
   function init(){ensureDom();ensureButton();setInterval(ensureButton,500)}
   if(window.__KGG_TEST__)window.__kggPlanDeleteTest={removePlanState,renamePlanState,migratePlanKeys,planStoragePrefix,planStorageKeys,mediaIds};
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init,{once:true}):init()

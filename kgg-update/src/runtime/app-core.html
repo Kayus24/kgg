@@ -1,10 +1,10 @@
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v095_cockpit_responsive_entry';
+  const VERSION='KGG_GITHUB_UPDATE_v096_patient_english_names';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v095","buildTime":"2026-09-13T19:46:15Z","buildCode":"module-v095-cockpit-responsive-entry","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v096","buildTime":"2026-09-13T19:46:15Z","buildCode":"module-v096-patient-english-names","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -984,6 +984,7 @@
     return {
       name:name||ex.name||stripExerciseName(ex.rawText)||'',
       aliases:ex.aliases||name||ex.name||'',
+      ...(typeof ex.nameEn==='string'?{nameEn:ex.nameEn.trim()}:{}),
       sets:normalizeSetCount(ex.sets),
       unit:ex.unit||ex.metricUnit||'Wdh',
       weightUnit:ex.weightUnit||ex.loadUnit||'kg',
@@ -2686,6 +2687,7 @@
       id:String(ex.id||ex.sourceId||('shared_'+compact(ex.name))).slice(0,80),
       name:String(ex.name||'').trim(),
       aliases:String(ex.aliases||ex.name||'').trim(),
+      ...(typeof ex.nameEn==='string'?{nameEn:ex.nameEn.trim()}:{}),
       sets:normalizeSetCount(ex.sets||3),
       unit:String(ex.unit||'Wdh'),
       weightUnit:normalizeLoadUnit(ex.weightUnit||'kg'),
@@ -2712,6 +2714,7 @@
       if(existing){
         if(syncTimestamp(ex.updatedAt)>=syncTimestamp(existing.updatedAt||existing.createdAt)){
           existing.aliases=ex.aliases||existing.aliases;
+          if(typeof ex.nameEn==='string')existing.nameEn=ex.nameEn;
           existing.sets=ex.sets||existing.sets;
           existing.unit=ex.unit||existing.unit;
           existing.weightUnit=ex.weightUnit||existing.weightUnit;
@@ -3594,6 +3597,7 @@
     const inferredMeasure=(String(ex.unit||ex.metricUnit||'').toLowerCase().includes('zeit')||String(ex.unit||ex.metricUnit||'').toLowerCase().includes('sek'))?'zeit':'wdh';
     state.editId=ex.localId||ex.id;
     $('editName').value=ex.name||'';
+    $('editNameEn').value=typeof ex.nameEn==='string'?ex.nameEn:'';
     $('editSets').value=String(normalizeSetCount(ex.sets));
     $('editMetric').value=ex.startMetric||'';
     $('editLoad').value=ex.startLoad||'';
@@ -3624,6 +3628,7 @@
       const context=externalEditorContext,ex=context.exercise;
       const measure=normalizeMeasureMode($('editMeasure').value),loadUnit=normalizeLoadUnit($('editUnit').value);
       ex.name=$('editName').value;
+      ex.nameEn=String($('editNameEn').value||'').trim();
       ex.sets=normalizeSetCount($('editSets').value);
       ex.startMetric=$('editMetric').value;
       ex.startLoad=$('editLoad').value;
@@ -3651,6 +3656,7 @@
       const measure=normalizeMeasureMode($('editMeasure').value);
       const loadUnit=normalizeLoadUnit($('editUnit').value);
       planEx.name=$('editName').value;
+      planEx.nameEn=String($('editNameEn').value||'').trim();
       planEx.sets=normalizeSetCount($('editSets').value);
       planEx.startMetric=$('editMetric').value;
       planEx.startLoad=$('editLoad').value;
@@ -3680,6 +3686,7 @@
         const measure=normalizeMeasureMode($('editMeasure').value);
         const loadUnit=normalizeLoadUnit($('editUnit').value);
         bankEx.name=$('editName').value;
+      bankEx.nameEn=String($('editNameEn').value||'').trim();
         bankEx.aliases=bankEx.aliases||bankEx.name;
         bankEx.sets=normalizeSetCount($('editSets').value);
         bankEx.startMetric=$('editMetric').value;
@@ -4528,7 +4535,7 @@
     const media=lastPatientMediaBundleManifest?buildExerciseMediaRefsForPatient(ex):buildExerciseMediaManifestForPatient(ex);
     const loadUnit=ex&&ex.weightUnit||ex&&ex.loadUnit||'kg';
     const metricUnit=ex&&ex.unit||ex&&ex.metricUnit||'Wdh';
-    return [
+    const row=[
       ex&&ex.name||'Übung',
       normalizeSetCount(ex&&ex.sets),
       normalizeSideMode(ex&&ex.side||ex&&ex.laterality||'BI'),
@@ -4541,10 +4548,37 @@
       ex&&ex.videoLabel||'Video öffnen',
       ex&&ex.painMode||'exercise'
     ];
+    const progression=window.KGGTicket015Admin,gallery=window.KGGTicket015AdminGallery;
+    if(progression&&typeof progression.wireVariants==='function'){
+      const wire=progression.wireVariants(ex);
+      if(wire&&Array.isArray(wire.v)&&wire.v.length){
+        const requested=String(ex&& (ex.progressionMainId||ex.progressionMainVariantId)||'');
+        const active=wire.v.some(item=>item.i===requested)?requested:gallery&&typeof gallery.mainIdFor==='function'?gallery.mainIdFor(ex):'';
+        if(active&&wire.v.some(item=>item.i===active))wire.a=active;
+        row[11]=wire;
+      }
+    }
+    return row;
+  }
+  function buildPatientEnglishNames(exercises){
+    const labels=Object.create(null);
+    const add=item=>{
+      if(!item||typeof item.name!=='string'||typeof item.nameEn!=='string')return;
+      const canonical=item.name,label=item.nameEn.trim();
+      if(!canonical.trim()||!label||label.length>200)return;
+      if(Object.prototype.hasOwnProperty.call(labels,canonical)&&labels[canonical]!==label){
+        const error=new Error('Widerspruechliche englische Bezeichnungen fuer '+canonical+'. Bitte in der Uebung dieselbe englische Bezeichnung verwenden.');
+        error.kggEnglishNameConflict=true;throw error;
+      }
+      labels[canonical]=label;
+    };
+    (exercises||[]).forEach(ex=>{add(ex);(Array.isArray(ex&&ex.progressionVariants)?ex.progressionVariants:[]).forEach(add)});
+    return labels;
   }
   function buildKggH2PayloadFromPlan(plan,exercises,patient,mediaMeta){
     const sourcePlan=plan||{};
     const sourcePatient=patient||{};
+    const englishNames=buildPatientEnglishNames(exercises);
     return {
       v:2,
       i:String(sourcePlan.id||sourcePlan.planId||'plan_'+Date.now()),
@@ -4562,6 +4596,7 @@
       m:{
         source:'kgg-therapist-app',
         schema:'KGGH2',
+        ...(Object.keys(englishNames).length?{exerciseNamesEn:englishNames}:{}),
         createdAt:new Date().toISOString(),
         media:mediaMeta||{expected:false,count:0,ready:0,status:'none'}
       }
@@ -4904,7 +4939,7 @@
       archiveAndCloseCurrentPlan('ui_finish_patient_app');
     }catch(err){
       console.warn('Patienten-Ausgabe konnte nicht erzeugt werden:',err);
-      if(notice)notice.textContent='Ausgabe fehlgeschlagen. Plan bleibt offen.';
+      if(notice)notice.textContent=err&&err.kggEnglishNameConflict?err.message:'Ausgabe fehlgeschlagen. Plan bleibt offen.';
     }
   }
 

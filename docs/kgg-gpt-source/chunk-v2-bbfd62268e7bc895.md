@@ -1,3 +1,5 @@
+    const raw=String(code||'').trim();
+    if(raw.indexOf('KGGCFG2:')===0)return {type:'KGGCFG2',json:safeBase64JsonDecode(raw.slice(8)),raw};
     if(raw.indexOf('KGGCFG1:')===0)return {type:'KGGCFG1',json:safeBase64JsonDecode(raw.slice(8)),raw};
     return null;
   }

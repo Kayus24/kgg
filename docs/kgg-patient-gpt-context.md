@@ -7,7 +7,7 @@ Reload before every diagnosis involving current code and before every Preview, P
 
 - Repository: `https://github.com/Kayus24/kgg`, branch `main`.
 - Live patient app: `https://kayus24.github.io/kgg/`.
-- Current patient PWA version from `service-worker.js`: `v92`.
+- Current patient PWA version from `service-worker.js`: `v93`.
 - Recovery: `https://kayus24.github.io/kgg/update-recovery.html`.
 - Isolated preview host: `https://kayus24.github.io/kgg-patient-preview/`.
 - Pre-authorized Patient Preview workflow: `.github/workflows/kgg-patient-gpt-preview-only.yml`.
@@ -32,6 +32,7 @@ Reload before every diagnosis involving current code and before every Preview, P
 - `patient-day-history.js`
 - `patient-exercise-media-sources.js`
 - `patient-extra-info-display.js`
+- `patient-i18n.js`
 - `patient-install-guide.js`
 - `patient-install-prompt.js`
 - `patient-ios-large-pad-force.js`

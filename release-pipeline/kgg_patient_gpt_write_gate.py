@@ -72,6 +72,7 @@ RUNTIME_EXACT = {
 MODULE_SCRIPT_PATTERN = re.compile(r'<script src="(?P<src>\./[^"?]+\.js(?:\?[^"?]+)?)"></script>')
 DIRECT_FIRST_LOAD_MODULES = (
     "patient-storage-scope.js",
+    "patient-i18n.js",
     "vendor/fflate-0.8.3.js",
     "patient-qr-format.js",
     "patient-plan-link-choice.js",

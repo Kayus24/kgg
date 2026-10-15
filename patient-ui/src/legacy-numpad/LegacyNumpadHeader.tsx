@@ -38,6 +38,15 @@ const CLOSED: EditingSnapshot = {
   dirty: false,
 }
 
+function getLanguageSnapshot() {
+  try { return localStorage.getItem("kggPatientLang") === "en" } catch { return false }
+}
+
+function subscribeLanguage(listener: () => void) {
+  window.addEventListener("kgg-patient-languagechange", listener)
+  return () => window.removeEventListener("kgg-patient-languagechange", listener)
+}
+
 function getEditingSnapshot() {
   return window.__kggNumpadEditingApi?.getSnapshot?.() ?? CLOSED
 }
@@ -69,7 +78,7 @@ function readLegacyModel() {
           key: field.dataset.kggKey ?? "",
           label:
             field.querySelector<HTMLElement>(".kggPairLabel")?.textContent?.trim() ??
-            "Wert",
+            (getLanguageSnapshot() ? "Value" : "Wert"),
           value:
             field.querySelector<HTMLElement>(".kggPairValue")?.textContent?.trim() ??
             "–",
@@ -167,6 +176,7 @@ function useLegacyRevision(padOpen: boolean) {
 }
 
 export function LegacyNumpadHeader() {
+  const english = useSyncExternalStore(subscribeLanguage, getLanguageSnapshot, () => false)
   const editing = useSyncExternalStore(
     subscribeEditing,
     getEditingSnapshot,
@@ -185,14 +195,14 @@ export function LegacyNumpadHeader() {
     <section
       className="kgg-react-numpad-header"
       data-kgg-react-numpad-header="v1"
-      aria-label="Werteingabe"
+      aria-label={english ? "Value entry" : "Werteingabe"}
     >
       <div className="kgg-react-numpad-header__tag" aria-hidden="true">
-        Neu
+        {english ? "New" : "Neu"}
       </div>
 
       <ToggleGroup
-        aria-label="Aktives Wertefeld"
+        aria-label={english ? "Active value field" : "Aktives Wertefeld"}
         className="kgg-react-numpad-pair"
         value={activeKey ? [activeKey] : []}
         onValueChange={(next) => {

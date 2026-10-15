@@ -1,3 +1,4 @@
+    document.addEventListener('pointermove',onAnimatedReorderMove,{passive:false});
     document.addEventListener('pointerup',finishAnimatedReorder,{passive:false,once:true});
     document.addEventListener('pointercancel',cancelAnimatedReorder,{passive:false,once:true});
     if(initialEv)onAnimatedReorderMove(initialEv);
@@ -206,6 +207,7 @@
       id:String(ex.id||ex.sourceId||('shared_'+compact(ex.name))).slice(0,80),
       name:String(ex.name||'').trim(),
       aliases:String(ex.aliases||ex.name||'').trim(),
+      ...(typeof ex.nameEn==='string'?{nameEn:ex.nameEn.trim()}:{}),
       sets:normalizeSetCount(ex.sets||3),
       unit:String(ex.unit||'Wdh'),
       weightUnit:normalizeLoadUnit(ex.weightUnit||'kg'),
@@ -232,6 +234,7 @@
       if(existing){
         if(syncTimestamp(ex.updatedAt)>=syncTimestamp(existing.updatedAt||existing.createdAt)){
           existing.aliases=ex.aliases||existing.aliases;
+          if(typeof ex.nameEn==='string')existing.nameEn=ex.nameEn;
           existing.sets=ex.sets||existing.sets;
           existing.unit=ex.unit||existing.unit;
           existing.weightUnit=ex.weightUnit||existing.weightUnit;
@@ -588,5 +591,3 @@
     });
   }
   function parseKggConfigTransferCode(code){
-    const raw=String(code||'').trim();
-    if(raw.indexOf('KGGCFG2:')===0)return {type:'KGGCFG2',json:safeBase64JsonDecode(raw.slice(8)),raw};

@@ -1,3 +1,10 @@
+    pdfText(doc,PDF_RUNTIME_FINGERPRINT,layout.margin,layout.pageH-3.2);
+  }
+
+  function pdfBytesFromBinaryString(pdf){
+    const bytes=new Uint8Array(pdf.length);
+    for(let i=0;i<pdf.length;i++)bytes[i]=pdf.charCodeAt(i)&255;
+    return bytes;
   }
   function pdfBlobFromDoc(doc){
     if(!doc)return null;
@@ -248,7 +255,7 @@
     const media=lastPatientMediaBundleManifest?buildExerciseMediaRefsForPatient(ex):buildExerciseMediaManifestForPatient(ex);
     const loadUnit=ex&&ex.weightUnit||ex&&ex.loadUnit||'kg';
     const metricUnit=ex&&ex.unit||ex&&ex.metricUnit||'Wdh';
-    return [
+    const row=[
       ex&&ex.name||'Übung',
       normalizeSetCount(ex&&ex.sets),
       normalizeSideMode(ex&&ex.side||ex&&ex.laterality||'BI'),
@@ -261,10 +268,37 @@
       ex&&ex.videoLabel||'Video öffnen',
       ex&&ex.painMode||'exercise'
     ];
+    const progression=window.KGGTicket015Admin,gallery=window.KGGTicket015AdminGallery;
+    if(progression&&typeof progression.wireVariants==='function'){
+      const wire=progression.wireVariants(ex);
+      if(wire&&Array.isArray(wire.v)&&wire.v.length){
+        const requested=String(ex&& (ex.progressionMainId||ex.progressionMainVariantId)||'');
+        const active=wire.v.some(item=>item.i===requested)?requested:gallery&&typeof gallery.mainIdFor==='function'?gallery.mainIdFor(ex):'';
+        if(active&&wire.v.some(item=>item.i===active))wire.a=active;
+        row[11]=wire;
+      }
+    }
+    return row;
+  }
+  function buildPatientEnglishNames(exercises){
+    const labels=Object.create(null);
+    const add=item=>{
+      if(!item||typeof item.name!=='string'||typeof item.nameEn!=='string')return;
+      const canonical=item.name,label=item.nameEn.trim();
+      if(!canonical.trim()||!label||label.length>200)return;
+      if(Object.prototype.hasOwnProperty.call(labels,canonical)&&labels[canonical]!==label){
+        const error=new Error('Widerspruechliche englische Bezeichnungen fuer '+canonical+'. Bitte in der Uebung dieselbe englische Bezeichnung verwenden.');
+        error.kggEnglishNameConflict=true;throw error;
+      }
+      labels[canonical]=label;
+    };
+    (exercises||[]).forEach(ex=>{add(ex);(Array.isArray(ex&&ex.progressionVariants)?ex.progressionVariants:[]).forEach(add)});
+    return labels;
   }
   function buildKggH2PayloadFromPlan(plan,exercises,patient,mediaMeta){
     const sourcePlan=plan||{};
     const sourcePatient=patient||{};
+    const englishNames=buildPatientEnglishNames(exercises);
     return {
       v:2,
       i:String(sourcePlan.id||sourcePlan.planId||'plan_'+Date.now()),
@@ -282,6 +316,7 @@
       m:{
         source:'kgg-therapist-app',
         schema:'KGGH2',
+        ...(Object.keys(englishNames).length?{exerciseNamesEn:englishNames}:{}),
         createdAt:new Date().toISOString(),
         media:mediaMeta||{expected:false,count:0,ready:0,status:'none'}
       }

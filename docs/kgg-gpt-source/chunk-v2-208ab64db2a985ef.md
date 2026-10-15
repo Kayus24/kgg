@@ -1,3 +1,5 @@
+    const id=row&&row.dataset&&row.dataset.bankId;
+    if(!row||!id)return;
     const startX=ev.clientX,startY=ev.clientY;
     const swipe={row,id,startX,startY,active:false,dx:0,pointerId:ev.pointerId};
     const threshold=()=>Math.min(128,Math.max(74,row.offsetWidth*0.34));
@@ -652,4 +654,3 @@
     try{press.handle.setPointerCapture&&press.handle.setPointerCapture(press.pointerId);}catch(e){}
     document.removeEventListener('pointermove',press.preMove);
     document.removeEventListener('pointerup',press.preUp);
-    document.addEventListener('pointermove',onAnimatedReorderMove,{passive:false});
