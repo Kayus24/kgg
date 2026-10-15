@@ -11,13 +11,13 @@ function buildFixture(){
   const dir=path.join(root,"patient-ui-parity");
   fs.mkdirSync(dir);
   const report={schema:2,syntheticOnly:true,status:"PASS",engine:"chromium",
-    candidateSha:SHA,checks:Array.from({length:352},()=>({pass:true})),
+    candidateSha:SHA,checks:Array.from({length:760},(_,i)=>({pass:true,comparison:i<300?"react-grid":"react"})),
     unexpectedDifferences:[],variants:[
-      {viewport:"phone",mode:"legacy"},{viewport:"phone",mode:"react"},
-      {viewport:"tablet",mode:"legacy"},{viewport:"tablet",mode:"react"}
+      {viewport:"phone",mode:"legacy"},{viewport:"phone",mode:"react"},{viewport:"phone",mode:"react-grid"},
+      {viewport:"tablet",mode:"legacy"},{viewport:"tablet",mode:"react"},{viewport:"tablet",mode:"react-grid"}
     ]};
   fs.writeFileSync(path.join(dir,"report.json"),JSON.stringify(report));
-  for(const group of GROUPS)for(const mode of ["legacy","react"]){
+  for(const group of GROUPS)for(const mode of (group.modes||["legacy","react"])){
     const result={schema:1,status:"PASS",engine:"chromium",mode,syntheticOnly:true,
       sourceSha:SHA,featureIds:group.ids,assertions:{clicks:true,storage:true}};
     fs.writeFileSync(path.join(dir,group.id+"-"+mode+".json"),JSON.stringify(result));
@@ -25,12 +25,12 @@ function buildFixture(){
   return {dir,root,cleanup:()=>fs.rmSync(root,{recursive:true,force:true})};
 }
 function withFixture(fn){const f=buildFixture();try{return fn(f)}finally{f.cleanup()}}
-test("four-mode signed candidate with proven extra flows remains final-device-pending",()=>
+test("six-variant, fourteen-block signed candidate remains final-device-pending",()=>
   withFixture(({dir})=>{
     const result=summarizeAcceptance(dir);
     assert.equal(result.status,"AUTOMATED_SCOPE_PASS_FINAL_PENDING");
     assert.equal(result.sourceSha,SHA);
-    assert.equal(result.blocks.length,10);
+    assert.equal(result.blocks.length,14);
     assert.ok(result.blocks.every(x=>x.status==="PASS"));
     assert.ok(result.pending.length>=4);
     assert.match(renderAcceptanceHtml(result),/kgg/ig);
@@ -113,7 +113,7 @@ test("canonical Drive-feature snapshot stays explicit and incomplete",()=>
     const report=summarizeAcceptance(dir);
     assert.equal(report.coverage.status,"SNAPSHOT_ONLY");
     assert.equal(report.coverage.total,111);
-    assert.ok(report.coverage.mapped>=50,"media lifecycle mapping must remain present");
+    assert.ok(report.coverage.mapped>=63,"11 new scoped feature mappings must remain present");
     assert.ok(report.coverage.notMapped<=79,"unmapped functions unexpectedly increased");
     assert.equal(report.coverage.mapped+report.coverage.notMapped,report.coverage.total);
     const html=renderAcceptanceHtml(report);
@@ -233,4 +233,37 @@ test("database evidence is required for both Legacy and React and must match eng
     fs.writeFileSync(p,JSON.stringify(invalid));
     assert.equal(summarizeAcceptance(dir).blocks.find(x=>x.id==="db").status,
       "REVIEW_REQUIRED");
+  }));
+
+test("missing P8 video variant or SHA-bound P8 frame checks blocks aggregate PASS",()=>
+  withFixture(({dir})=>{
+    const p=path.join(dir,"report.json"),r=JSON.parse(fs.readFileSync(p,"utf8"));
+    r.variants=r.variants.filter(v=>v.mode!=="react-grid");
+    fs.writeFileSync(p,JSON.stringify(r));
+    assert.equal(summarizeAcceptance(dir).blocks.find(b=>b.id==="parity").status,"FAIL");
+    r.variants.push({viewport:"phone",mode:"react-grid"},{viewport:"tablet",mode:"react-grid"});
+    r.checks=r.checks.map(c=>({...c,comparison:"react"}));
+    fs.writeFileSync(p,JSON.stringify(r));
+    assert.equal(summarizeAcceptance(dir).blocks.find(b=>b.id==="parity").status,"FAIL");
+  }));
+test("new settings/progression/scanner/firstload groups require all three signed modes",()=>
+  withFixture(({dir})=>{
+    for(const group of ["settings","progression","scannerfallback","firstload"]){
+      const p=path.join(dir,group+"-react-p8.json");
+      const proof=JSON.parse(fs.readFileSync(p,"utf8"));
+      fs.unlinkSync(p);
+      let r=summarizeAcceptance(dir);
+      assert.equal(r.status,"REVIEW_REQUIRED");
+      assert.equal(r.blocks.find(b=>b.id===group).status,"NOT_EVIDENCED");
+      proof.sourceSha="b".repeat(40);fs.writeFileSync(p,JSON.stringify(proof));
+      r=summarizeAcceptance(dir);
+      assert.equal(r.blocks.find(b=>b.id===group).variants[2].status,"STALE");
+      proof.sourceSha=SHA;proof.assertions.clicks=false;
+      fs.writeFileSync(p,JSON.stringify(proof));
+      r=summarizeAcceptance(dir);
+      assert.equal(r.blocks.find(b=>b.id===group).status,"REVIEW_REQUIRED");
+      proof.assertions.clicks=true;
+      fs.writeFileSync(p,JSON.stringify(proof));
+      assert.equal(summarizeAcceptance(dir).status,"AUTOMATED_SCOPE_PASS_FINAL_PENDING");
+    }
   }));
