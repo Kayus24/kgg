@@ -1,0 +1,65 @@
+name: KGG Patient Scanner Fallback Legacy React Parity
+
+on:
+  pull_request:
+    branches:
+      - main
+      - feat/patient-react-padgrid-p8-20261014
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - '.github/workflows/kgg-patient-scan-fallback-parity.yml'
+      - 'release-pipeline/kgg_patient_scan_fallback_parity_playwright.js'
+      - 'patient-start-scan.js'
+      - 'patient-ui/**'
+      - 'patient-react-dist/**'
+      - 'index.html'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kgg-scanner-fallback-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  fallback-parity:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    name: Scanner fallback ${{ matrix.browser }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: release-pipeline/package-lock.json
+      - name: Validate parity test syntax
+        run: node --check release-pipeline/kgg_patient_scan_fallback_parity_playwright.js
+      - name: Install pinned browser and Playwright
+        shell: bash
+        run: |
+          cd release-pipeline
+          npm ci --ignore-scripts
+          npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Verify permission-denied scanner paths in Legacy P7 and P8
+        shell: bash
+        env:
+          KGG_SCAN_FALLBACK_BROWSER: ${{ matrix.browser }}
+          KGG_SCAN_FALLBACK_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -o pipefail
+          node release-pipeline/kgg_patient_scan_fallback_parity_playwright.js | tee scanner-fallback-parity.log
+          count=$(grep -c '^KGG_SCAN_FALLBACK_PARITY_PASS ' scanner-fallback-parity.log)
+          if [ "$count" -ne 3 ]; then
+            echo "Required scanner fallback mode proofs missing: $count/3"
+            exit 1
+          fi
+          grep -q '"mode":"react-p8"' scanner-fallback-parity.log
+          grep -q 'KGG scanner fallback parity: PASS ${{ matrix.browser }} (3 modes)' scanner-fallback-parity.log
