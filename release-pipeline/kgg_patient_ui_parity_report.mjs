@@ -49,6 +49,36 @@ const findings = differences.length
   ? "<ul>" + differences.map(d => "<li><strong>" + esc(d.viewport + " / " + d.step) +
       "</strong> · " + esc(d.kind) + " · " + esc(JSON.stringify(d).slice(0, 350)) + "</li>").join("") + "</ul>"
   : "<p>Keine unerwarteten Unterschiede im geprüften Scope gemeldet.</p>";
+const webEvidenceFile = path.join(dir, "gemini-web-review.json");
+let webEvidence = null;
+if (fs.existsSync(webEvidenceFile)) {
+  try {
+    if (fs.statSync(webEvidenceFile).size > 64000) throw new Error("oversized");
+    const data = JSON.parse(fs.readFileSync(webEvidenceFile, "utf8"));
+    if (data.advisoryOnly !== true || data.reviewer !== "gemini-web" ||
+        data.sourceSha !== report.candidateSha ||
+        !["PASS", "REVIEW_REQUIRED", "UNAVAILABLE", "INCONCLUSIVE"].includes(data.status)) {
+      throw new Error("untrusted or stale evidence");
+    }
+    webEvidence = data;
+  } catch {
+    webEvidence = { status: "INCONCLUSIVE", findings: [],
+      reason: "ungültiger oder nicht zum Kandidaten passender Web-Befund" };
+  }
+}
+const webFindings = Array.isArray(webEvidence?.findings) ? webEvidence.findings : [];
+const webHtml = "<h2>Gemini-Web-Videoanalyse (nur beratend)</h2>" +
+  (webEvidence
+    ? "<p><strong>Status: " + esc(webEvidence.status) + "</strong>" +
+      " · SHA: <code>" + esc(webEvidence.sourceSha || "nicht bestätigt") + "</code>" +
+      (webEvidence.reason ? " · Grund: " + esc(webEvidence.reason) : "") + "</p>" +
+      (webFindings.length
+        ? "<ul>" + webFindings.map(f => "<li>" + esc(f.step) + " · " +
+            esc(f.timestampLegacy) + " / " + esc(f.timestampReact) + " · " +
+            esc(f.description) + "</li>").join("") + "</ul>"
+        : "<p>Keine Hinweise gemeldet oder keine erfolgreiche Videoanalyse.</p>")
+    : "<p>NOT_RUN – kein gültiger Web-Review-Befund hinterlegt.</p>") +
+  "<p>Kein Ersatz für deterministische Gates, reale Geräte oder die Gesamt-App-Abnahme.</p>";
 const css = "*{box-sizing:border-box}body{max-width:1300px;margin:0 auto;padding:20px;font:16px/1.45 system-ui;color:#172033;background:#f4f7fb}" +
   "h1{margin:0}h2{margin-top:44px;border-bottom:2px solid #dde5ef;padding-bottom:8px}h3{margin-top:26px}" +
   ".comparison{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}" +
@@ -67,6 +97,7 @@ const html = [
     " Unveränderte Tasten/Aktionsbereiche werden pixelgenau geprüft." +
     " Abgedeckt: NumPad, Übernahme, Links/Rechts, Sekunden und Neuladen; Schmerz pro Satz wird separat geprüft. Nicht die gesamte Patienten-App. Absolute Scroll-Offsets verschiedener Karten sind nur Beobachtungen, keine bestandenen Invarianten.</div>",
   "<h2>Abweichungen</h2>" + findings,
+  webHtml,
   sections,
   "<p>Für die endgültige Gesamtabnahme bleiben nicht automatisierte App-Flows gesondert zu prüfen.</p>",
   "</body></html>"
