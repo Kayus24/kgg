@@ -329,7 +329,16 @@ async function main() {
         const keys=(await Promise.all((await caches.keys()).map(async n=>(await (await caches.open(n)).keys()).map(r=>r.url)))).flat();
         return !keys.some(u=>u.includes('/patient-react-dist/'));
       }),'legacy opt-out unexpectedly precached React assets');
-      await context.setOffline(true);
+      if (RUNTIME_ENGINE === "webkit") {
+         // Playwright WebKit offline emulation blocks even SW-cached requests (microsoft/playwright#42775).
+         // Shut down the actual origin instead; cache, navigation and saved-state assertions stay intact.
+         const stopped = new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
+         server.closeAllConnections();
+         await stopped;
+         assert(!server.listening, "offline origin is still running");
+       } else {
+         await context.setOffline(true);
+       }
       // Explicit pilot flags are re-supplied; P8 is intentionally not a persisted rollout.
       await page.goto(`http://127.0.0.1:${port}/kgg/?${flags}`,{waitUntil:'domcontentloaded',timeout:15000});
       await page.waitForFunction(()=>window.__kggPatientCardSettings&&document.querySelector('#list .ex'),null,{timeout:15000});
@@ -366,7 +375,7 @@ async function main() {
   } finally {
     await context.close();
     await browser.close();
-    await new Promise((resolve) => server.close(resolve));
+    if (server.listening) await new Promise((resolve) => server.close(resolve));
   }
 }
 
