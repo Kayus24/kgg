@@ -6,7 +6,28 @@ function assert(x,m){if(!x)throw new Error(m)}
 function enc(plan){return Buffer.from(JSON.stringify(plan),"utf8").toString("base64url")}
 function typeFor(f){return f.endsWith(".html")?"text/html; charset=utf-8":f.endsWith(".js")?"text/javascript; charset=utf-8":f.endsWith(".json")?"application/json; charset=utf-8":f.endsWith(".png")?"image/png":"application/octet-stream"}
 function fileFor(url){const rel=decodeURIComponent(String(url||"/").split("?")[0]).replace(/^\/+/, "")||"index.html",target=path.resolve(ROOT,rel);return target.startsWith(ROOT)&&fs.existsSync(target)&&fs.statSync(target).isFile()?target:null}
-async function openCard(card){for(let i=0;i<5;i++){if(await card.evaluate(e=>e.classList.contains("kggOpen")))return;await card.locator("h3").evaluate(el=>el.click());await card.page().waitForTimeout(100)}throw new Error("card open state did not stabilize")}
+async function openCard(card){
+  const page=card.page();
+  // The existing capture-phase card guard intentionally rejects clicks for 450ms
+  // after the NumPad closes. Wait for an actual user-safe tap window.
+  await page.waitForFunction(()=>!window.__kggPadClosedAt ||
+    Date.now()-window.__kggPadClosedAt>=475,null,{timeout:1800});
+  for(let i=0;i<5;i++){
+    if(await card.evaluate(el=>el.classList.contains("kggOpen")))return;
+    await card.locator("h3").click();
+    if(await card.evaluate(el=>el.classList.contains("kggOpen")))return;
+    await page.waitForTimeout(125);
+  }
+  const diag=await card.evaluate(el=>({
+    cardOpen:el.classList.contains("kggOpen"),
+    padOpen:!document.getElementById("pad")?.classList.contains("hide"),
+    closedAgoMs:Date.now()-(window.__kggPadClosedAt||0),
+    bodyClass:document.body.className,
+    heading:el.querySelector("h3")?.textContent,
+    headingVisible:!!el.querySelector("h3")&&getComputedStyle(el.querySelector("h3")).display!=="none"
+  }));
+  throw new Error("card open state did not stabilize after guard window: "+JSON.stringify(diag));
+}
 async function key(page,label){await page.locator("#pad .padGrid").getByRole("button",{name:label,exact:true}).click()}
 async function seed(page){
  await page.evaluate(()=>{

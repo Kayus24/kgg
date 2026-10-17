@@ -4,6 +4,16 @@ run-name: KGG Patient GPT Preview Gate | ${{ inputs.mode }} | ${{ inputs.request
 on:
   workflow_dispatch:
     inputs:
+      existing_pr:
+        description: Existing same-repository patient PR; empty uses the existing payload workflow
+        required: false
+        default: ""
+        type: string
+      expected_head_sha:
+        description: Exact tested head for existing_pr
+        required: false
+        default: ""
+        type: string
       mode:
         description: validate_only, publish_preview, create_pr or publish_patient_live
         required: true
@@ -28,6 +38,16 @@ on:
         type: string
   workflow_call:
     inputs:
+      existing_pr:
+        description: Existing same-repository patient PR; empty uses the existing payload workflow
+        required: false
+        default: ""
+        type: string
+      expected_head_sha:
+        description: Exact tested head for existing_pr
+        required: false
+        default: ""
+        type: string
       mode:
         required: true
         type: string
@@ -55,6 +75,7 @@ concurrency:
 
 jobs:
   patient-gate:
+    if: inputs.existing_pr == ''
     runs-on: ubuntu-latest
     outputs:
       patch_hash: ${{ steps.gate.outputs.patch_hash }}
@@ -278,7 +299,7 @@ jobs:
           echo "Patient PR: $url" >> "$GITHUB_STEP_SUMMARY"
 
   merge-patient-live:
-    if: inputs.mode == 'publish_patient_live'
+    if: inputs.mode == 'publish_patient_live' && inputs.existing_pr == ''
     needs: patient-gate
     runs-on: ubuntu-latest
     environment: patient-live
@@ -345,3 +366,81 @@ jobs:
             '${{ needs.patient-gate.outputs.patient_version }}' \
             'https://kayus24.github.io/kgg/' \
             "$GITHUB_WORKSPACE/live-base"
+
+  merge-existing-patient-live:
+    name: Release exact accepted patient PR
+    if: inputs.mode == 'publish_patient_live' && inputs.existing_pr != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: patient-live
+    concurrency:
+      group: kgg-patient-existing-release
+      cancel-in-progress: false
+    env:
+      GH_TOKEN: ${{ secrets.KGG_PATIENT_AUTOMATION_TOKEN || github.token }}
+      EXISTING_PR: ${{ inputs.existing_pr }}
+      EXPECTED_HEAD: ${{ inputs.expected_head_sha }}
+      APPROVAL: ${{ inputs.approval_phrase }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify immutable accepted PR and required checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$APPROVAL" == 'Zulassen' ]]
+          [[ "$EXISTING_PR" =~ ^[1-9][0-9]*$ ]]
+          [[ "$EXPECTED_HEAD" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$GITHUB_SHA" == "$EXPECTED_HEAD" ]]
+          gh api "repos/$GITHUB_REPOSITORY/pulls/$EXISTING_PR" > "$RUNNER_TEMP/patient-pr.json"
+          python - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          pr=json.loads((Path(os.environ['RUNNER_TEMP'])/'patient-pr.json').read_text())
+          assert pr['state']=='open' and not pr['draft'] and not pr['merged']
+          assert pr['base']['ref']=='main'
+          assert pr['head']['repo']['full_name']==os.environ['GITHUB_REPOSITORY']
+          assert pr['head']['sha']==os.environ['EXPECTED_HEAD']
+          sw=Path('service-worker.js').read_text()
+          version=re.search(r"const APP_VERSION = '(\d+)';",sw).group(1)
+          with open(os.environ['GITHUB_ENV'],'a') as env: env.write('PATIENT_VERSION='+version+'\n')
+          PY
+          gh pr checks "$EXISTING_PR" --repo "$GITHUB_REPOSITORY" --required
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Prepare bounded live verification before merging
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --prefix release-pipeline --ignore-scripts
+          node release-pipeline/node_modules/playwright/cli.js install --with-deps chromium
+          python release-pipeline/kgg_pwa_contract_smoke.py
+          python release-pipeline/kgg_update_recovery_smoke.py
+      - name: Merge only the tested head through ordinary branch protection
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh pr checks "$EXISTING_PR" --repo "$GITHUB_REPOSITORY" --required
+          gh pr merge "$EXISTING_PR" --repo "$GITHUB_REPOSITORY" --squash --match-head-commit "$EXPECTED_HEAD"
+          test "$(gh pr view "$EXISTING_PR" --repo "$GITHUB_REPOSITORY" --json state --jq .state)" = MERGED
+      - name: Verify deployed v94 client and old-client update
+        shell: bash
+        run: |
+          set -euo pipefail
+          ready=false
+          for attempt in {1..12}; do
+            if curl --fail --silent --show-error --max-time 10 "https://kayus24.github.io/kgg/service-worker.js?release=$GITHUB_RUN_ID-$attempt" | grep -Fq "const APP_VERSION = '$PATIENT_VERSION';"; then
+              ready=true
+              break
+            fi
+            sleep 10
+          done
+          test "$ready" = true
+          node release-pipeline/kgg_patient_live_version_smoke.js "$PATIENT_VERSION" 'https://kayus24.github.io/kgg/' "$GITHUB_WORKSPACE"
+          echo "Released PR #$EXISTING_PR at tested $EXPECTED_HEAD; verified v$PATIENT_VERSION" >> "$GITHUB_STEP_SUMMARY"
