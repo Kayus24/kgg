@@ -7,8 +7,17 @@ on:
     paths:
       - '.github/workflows/kgg-patient-ui-parity.yml'
       - 'release-pipeline/kgg_patient_ui_parity*'
+      - 'release-pipeline/kgg_patient_unit_semantics_playwright.js'
+      - 'release-pipeline/kgg_patient_continuous_days_playwright.js'
+      - 'release-pipeline/kgg_patient_full_acceptance_report*'
       - 'release-pipeline/kgg_patient_per_set_pain_playwright.js'
       - 'patient-card-settings.js'
+      - 'patient-card-progress.js'
+      - 'patient-day-history.js'
+      - 'patient-start-values-day1.js'
+      - 'patient-set-summary-groups.js'
+      - 'patient-multiplan-db.js'
+      - 'patient-qr-format.js'
       - 'patient-last-value-hints.js'
       - 'patient-numpad-card-guard.js'
       - 'collapse-cards.js'
@@ -52,7 +61,10 @@ jobs:
         run: |
           node --check release-pipeline/kgg_patient_ui_parity_capture.js
           node --check release-pipeline/kgg_patient_ui_parity_report.mjs
-          node --test release-pipeline/kgg_patient_ui_parity_contracts.test.cjs
+          node --check release-pipeline/kgg_patient_unit_semantics_playwright.js
+          node --check release-pipeline/kgg_patient_continuous_days_playwright.js
+          node --check release-pipeline/kgg_patient_full_acceptance_report.mjs
+          node --test release-pipeline/kgg_patient_ui_parity_contracts.test.cjs release-pipeline/kgg_patient_full_acceptance_report.test.mjs
       - name: Install pinned browser dependencies
         shell: bash
         run: |
@@ -70,13 +82,37 @@ jobs:
         shell: bash
         env:
           KGG_PAIN_BROWSER: ${{ matrix.browser }}
+          KGG_PARITY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
         run: node release-pipeline/kgg_patient_per_set_pain_playwright.js
+      - name: Compare dynamic units, progress, summary and history in Legacy and React
+        shell: bash
+        env:
+          KGG_UNIT_BROWSER: ${{ matrix.browser }}
+          KGG_PARITY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: node release-pipeline/kgg_patient_unit_semantics_playwright.js
+      - name: Compare continuous/fixed days, multi-plan history and final QR in both modes
+        shell: bash
+        env:
+          KGG_DAYS_BROWSER: ${{ matrix.browser }}
+          KGG_PARITY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: |
+          KGG_DAYS_MODE=legacy node release-pipeline/kgg_patient_continuous_days_playwright.js
+          KGG_DAYS_MODE=react node release-pipeline/kgg_patient_continuous_days_playwright.js
       - name: Build offline side-by-side evidence gallery
         if: always()
         shell: bash
         env:
           KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
         run: node release-pipeline/kgg_patient_ui_parity_report.mjs "$KGG_PARITY_OUT"
+      - name: Build single-page acceptance overview (not an app release approval)
+        if: always()
+        shell: bash
+        env:
+          KGG_PARITY_OUT: ${{ runner.temp }}/patient-ui-parity
+        run: node release-pipeline/kgg_patient_full_acceptance_report.mjs "$KGG_PARITY_OUT"
       - name: Upload short-lived review evidence, including failures
         if: always()
         uses: actions/upload-artifact@v4
