@@ -147,6 +147,22 @@ async function securityContract(page){
  const label=await page.locator("#kggPadPair .kggPairField > span:first-child").first().textContent();
  assert(label==="<b>unit-test</b>","unit markup was not rendered as literal text: "+label);
  await page.locator("#pad .padCancel").click();
+
+ // Safe quote-only fixture: HTML escaping does not escape a JavaScript string
+ // inside an inline onclick attribute. No active/executable payload is used.
+ const quoteUnit="Bob's load";
+ await page.waitForTimeout(480); // existing NumPad card-guard interval
+ await page.evaluate(next=>{p.ex[0].u=next;render()},quoteUnit);
+ await page.waitForTimeout(140);
+ const quoteCard=page.locator("#list .ex").first();await openCard(quoteCard);
+ const quoteInput=quoteCard.locator("input.num").first();
+ const handlerType=await quoteInput.evaluate(el=>typeof el.onclick);
+ assert(handlerType==="function","custom unit apostrophe broke inline handler: "+handlerType);
+ await clickInput(page,quoteInput);await page.waitForTimeout(100);
+ const quoteLabel=await page.locator("#kggPadPair .kggPairField > span:first-child").first().textContent();
+ assert(quoteLabel===quoteUnit,"custom unit quote was lost in the NumPad: "+quoteLabel);
+ await page.locator("#pad .padCancel").click();
+
 }
 async function normalCompactContract(page){
  const first=page.locator("#list .ex").nth(0);await openCard(first);const source=first.locator("input.num").first();await clickInput(page,source);await page.waitForTimeout(120);
