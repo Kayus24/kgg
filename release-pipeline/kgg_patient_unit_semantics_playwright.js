@@ -1,14 +1,18 @@
 "use strict";
-const fs=require("fs"),http=require("http"),path=require("path"),{chromium}=require("playwright");
+const fs=require("fs"),http=require("http"),path=require("path"),{chromium,webkit}=require("playwright");
+const ENGINE=process.env.KGG_UNIT_BROWSER||"chromium";
+if(!["chromium","webkit"].includes(ENGINE))throw new Error("Unsupported KGG_UNIT_BROWSER: "+ENGINE);
 const ROOT=path.resolve(__dirname,"..");
+const {execFileSync}=require("node:child_process");
 function assert(x,m){if(!x)throw new Error(m)}
 function enc(x){return Buffer.from(JSON.stringify(x),"utf8").toString("base64url")}
-function typeFor(f){return f.endsWith(".html")?"text/html; charset=utf-8":f.endsWith(".js")?"text/javascript; charset=utf-8":f.endsWith(".json")?"application/json; charset=utf-8":f.endsWith(".png")?"image/png":"application/octet-stream"}
+function typeFor(f){return f.endsWith(".html")?"text/html; charset=utf-8":f.endsWith(".js")?"text/javascript; charset=utf-8":f.endsWith(".json")?"application/json; charset=utf-8":f.endsWith(".css")?"text/css; charset=utf-8":f.endsWith(".png")?"image/png":"application/octet-stream"}
 function fileFor(url){const rel=decodeURIComponent(String(url||"/").split("?")[0]).replace(/^\/+/, "")||"index.html",target=path.resolve(ROOT,rel);return target.startsWith(ROOT)&&fs.existsSync(target)&&fs.statSync(target).isFile()?target:null}
 async function waitRuntime(page){await page.locator("#plan").waitFor({state:"visible"});await page.waitForFunction(()=>window.__kggPatientStartValuesDay1&&window.__kggPatientCardSettings);await page.waitForTimeout(1300)}
 async function main(){
+ for(const mode of ["legacy","react"]){
  const server=http.createServer((req,res)=>{const f=fileFor(req.url);if(!f){res.statusCode=404;return res.end("404")}res.setHeader("Content-Type",typeFor(f));res.setHeader("Cache-Control","no-store");res.end(fs.readFileSync(f))});
- await new Promise(r=>server.listen(0,"127.0.0.1",r));const port=server.address().port,browser=await chromium.launch({headless:true}),ctx=await browser.newContext({viewport:{width:390,height:844},hasTouch:true}),page=await ctx.newPage(),errors=[];
+ await new Promise(r=>server.listen(0,"127.0.0.1",r));const port=server.address().port,browser=await (ENGINE==="webkit"?webkit:chromium).launch({headless:true}),ctx=await browser.newContext({viewport:{width:390,height:844},hasTouch:true}),page=await ctx.newPage(),errors=[];
  page.on("pageerror",e=>errors.push(String(e)));
  const plan={i:"unit-semantics",t:"Unit semantics",v:1,d:6,e:[
   ["Timed hold",1,"B","keine","Sek.","99","30"],
@@ -17,8 +21,23 @@ async function main(){
  ]};
  try{
   await page.addInitScript(()=>{localStorage.kggInstallAsked="1"});
-  await page.goto("http://127.0.0.1:"+port+"/?plan="+encodeURIComponent("KGGH2:"+enc(plan)),{waitUntil:"networkidle"});
+  await page.goto("http://127.0.0.1:"+port+"/?kggReactPad="+(mode==="react"?"1":"0")+"&plan="+encodeURIComponent("KGGH2:"+enc(plan)),{waitUntil:"networkidle"});
   await waitRuntime(page);
+  // Prove the two runs actually exercise different NumPad presentation owners.
+  // Merely setting kggReactPad=1 without mounting would be a false parity PASS.
+  const pressure=page.locator("#list .ex").nth(1);
+  for(let attempt=0;attempt<5;attempt++){
+    if(await pressure.evaluate(el=>el.classList.contains("kggOpen")))break;
+    await pressure.locator("h3").click();
+    await page.waitForTimeout(90);
+  }
+  assert(await pressure.evaluate(el=>el.classList.contains("kggOpen")),"pressure card would not open");
+  await pressure.locator(":scope > .set").first().locator(".kggCompactTapProxy[data-kgg-key='a']").first().click();
+  await page.locator("#pad .padActions .padCancel").waitFor({state:"visible"});
+  if(mode==="react")await page.locator("[data-kgg-react-numpad-header='v1']").waitFor({state:"attached"});
+  const actuallyReact=await page.evaluate(()=>document.body.classList.contains("kggReactNumpadHeaderV1"));
+  assert(actuallyReact===(mode==="react"),"React NumPad mode not actually active: "+JSON.stringify({mode,actuallyReact}));
+  await page.locator("#pad .padActions .padCancel").click();
   const state=await page.evaluate(()=>({
     day:Number(d),done:[...done],unit:p.ex[0].u,
     a:v[k(0,1,"B","a",1)]||"",b:v[k(0,1,"B","b",1)]||"",
@@ -48,7 +67,19 @@ async function main(){
   assert(/Timed hold/.test(hist)&&/30 Sek\.?/.test(hist),"history lost active single field: "+hist);
   assert(!/\?\s*keine|keine\s*[×@]/i.test(hist),"history exposes phantom inactive field: "+hist);
   assert(errors.length===0,"page errors: "+errors.join(" | "));
-  console.log(JSON.stringify({status:"PASS",noLoadStart:true,reload:true,history:true,units:["keine/Sek.","bar/Wdh","Watt/Sek."]}));
+  const proof={schema:1,status:"PASS",syntheticOnly:true,engine:ENGINE,mode,
+    sourceSha:process.env.KGG_PARITY_HEAD_SHA||execFileSync("git",["rev-parse","HEAD"],{cwd:ROOT,encoding:"utf8"}).trim(),
+    featureIds:["PAT-UNIT-001","PAT-UNIT-002","PAT-START-001","PAT-PROG-001","PAT-SUM-001","PAT-HIST-001","PAT-STOR-001"],
+    assertions:{noLoadStart:true,unitPairs:true,activeFieldProgress:true,summary:true,reload:true,history:true,reactOwnerVerified:actuallyReact===(mode==="react")}};
+  if(process.env.KGG_PARITY_OUT){
+    const out=path.resolve(process.env.KGG_PARITY_OUT);
+    assert(path.basename(out)==="patient-ui-parity","unit proof requires isolated parity artifact directory");
+    fs.mkdirSync(out,{recursive:true});
+    await page.screenshot({path:path.join(out,"unit-"+mode+".png"),animations:"disabled"});
+    fs.writeFileSync(path.join(out,"unit-"+mode+".json"),JSON.stringify(proof,null,2)+"\n");
+  }
+  console.log(JSON.stringify(proof));
  }finally{await ctx.close();await browser.close();await new Promise(r=>server.close(r))}
+ }
 }
 main().catch(e=>{console.error("KGG patient unit semantics Playwright FAIL: "+(e.stack||e.message));process.exitCode=1});

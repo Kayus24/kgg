@@ -36,7 +36,37 @@ async function main(){
       assert((await page.locator('#kggSettingsSheet').innerText()).includes('Edit exercise'),'settings English missing');
       assert(await page.locator('#kggSetUnitB').inputValue()==='reps','settings unit shows canonical German unit');
       await toggle(page,true);assert((await page.locator('#kggSettingsSheet').innerText()).includes('Übung anpassen'),'open settings reverse toggle missing');await toggle(page,true);await page.locator('#kggSetCancel').click();
+      if(process.env.KGG_I18N_SYNC_ASSERT==='1')await page.evaluate(()=>{
+        const previous=window.openPad;
+        window.openPad=function(...args){const result=previous.apply(this,args);
+          window.__kggSyncLocaleObservation={title:document.getElementById('padTitle')?.textContent,
+            previous:document.getElementById('padLast')?.textContent};return result;};
+      });
       const proxy=card.locator('.kggCompactTapProxy').first();await proxy.click();
+      if(process.env.KGG_I18N_SYNC_ASSERT==='1'){
+        const instant=await page.evaluate(()=>window.__kggSyncLocaleObservation);
+        assert(instant&&!/eingeben|Wert|\u00fcbernehmen|Vorwert/.test(JSON.stringify(instant)),
+          'Synchronous English NumPad contract failed: '+JSON.stringify(instant));
+      }
+
+      // The existing i18n MutationObserver schedules translation after the tap.
+      // Require the same English-only UI contract as soon as it actually settles.
+      try {
+        await page.waitForFunction(() => {
+          const pad=document.getElementById('pad');
+          return pad && !pad.classList.contains('hide') && document.documentElement.lang==='en' &&
+            !/eingeben|Wert|übernehmen|Vorwert/.test(pad.innerText);
+        },null,{timeout:2000,polling:'raf'});
+      } catch(error) {
+        const details=await page.evaluate(() => ({
+          htmlLang:document.documentElement.lang,
+          selectedLang:localStorage.getItem('kggPatientLang'),
+          open:!document.getElementById('pad')?.classList.contains('hide'),
+          padText:document.getElementById('pad')?.innerText||'',
+          reactHeader:document.body.classList.contains('kggReactNumpadHeaderV1')
+        }));
+        throw new Error('English NumPad did not settle to English: '+JSON.stringify(details)+'; '+error.message);
+      }
       assert(!/eingeben|Wert|übernehmen|Vorwert/.test(await page.locator('#pad').innerText()),'English NumPad has German text');
       if(react){await page.locator('.kgg-react-numpad-header').waitFor();assert(await page.locator('.kgg-react-numpad-header').getAttribute('aria-label')==='Value entry','React aria remains German')}
       await page.locator('#pad .padGrid button').filter({hasText:/^2$/}).click();await page.locator('#pad .padOk').click();

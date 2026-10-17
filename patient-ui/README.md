@@ -42,6 +42,17 @@ The P7 NumPad header is opt-in only.
 - Legacy controls keep their layout geometry, so existing scroll/focus/transfer code remains the behavioral owner.
 - No React code writes patient values, LocalStorage, QR state, or plan state directly.
 
+## P8 opt-in NumPad Grid pilot
+
+- `?kggReactPad=1&kggReactGrid=1` mounts P7 header and P8 12-key renderer.
+- `?kggReactPad=1` keeps P7 header only. `?kggReactPad=1&kggReactGrid=0` explicitly restores the legacy Grid while retaining the header.
+- `?kggReactPad=0` turns off both islands and does not load React assets.
+- P8 mirrors the labels of the 12 legacy NumPad keys, overlays their existing geometric layout, and forwards each click to the corresponding original legacy button.
+- No React input buffer, value commit, LocalStorage/QR persistence, media, scroll or camera handling is added.
+- Both rollout modes are preview/test opt-ins; the default live patient UI remains legacy.
+- Before promoting P8, require Chromium/WebKit parity, existing NumPad/transfer/pain regression, unchanged build isolation and a bundled real-device Oppo/iOS acceptance. A browser PASS alone cannot clear frame flicker or hardware keyboard behavior.
+
+
 ## Commands
 
 - `npm run lint`

@@ -1,0 +1,392 @@
+{
+  "schema": 1,
+  "profile": "kgg-integrated-acceptance-v1",
+  "requiredSteps": [
+    "core",
+    "adaptive",
+    "media",
+    "pain",
+    "unit",
+    "days-legacy",
+    "days-react",
+    "scan",
+    "settings",
+    "progression",
+    "scan-fallback",
+    "preview-build",
+    "firstload-legacy",
+    "firstload-react-p7",
+    "firstload-react-p8",
+    "offline-legacy",
+    "offline-react-p7",
+    "offline-react-p8",
+    "locale",
+    "pwa-contract",
+    "resource-freshness",
+    "retained-media-sources",
+    "retained-english-compatibility",
+    "retained-transfer",
+    "retained-install",
+    "retained-ios-start",
+    "retained-update-recovery",
+    "report-contracts"
+  ],
+  "jobs": [
+    {
+      "id": "core",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_ui_parity_capture.js"
+      ],
+      "timeoutSeconds": 360,
+      "env": {
+        "KGG_PARITY_ENGINE": "{engine}",
+        "KGG_PARITY_P8_GRID": "1"
+      }
+    },
+    {
+      "id": "adaptive",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_set_view_adaptive_smoke.js"
+      ],
+      "timeoutSeconds": 240,
+      "env": {
+        "KGG_ADAPTIVE_BROWSER": "{engine}",
+        "KGG_ADAPTIVE_PARITY": "1"
+      }
+    },
+    {
+      "id": "media",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_media_stability_playwright.js"
+      ],
+      "timeoutSeconds": 240,
+      "env": {
+        "KGG_MEDIA_BROWSER": "{engine}",
+        "KGG_MEDIA_PARITY": "1"
+      }
+    },
+    {
+      "id": "pain",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_per_set_pain_playwright.js"
+      ],
+      "timeoutSeconds": 240,
+      "env": {
+        "KGG_PAIN_BROWSER": "{engine}"
+      }
+    },
+    {
+      "id": "unit",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_unit_semantics_playwright.js"
+      ],
+      "timeoutSeconds": 240,
+      "env": {
+        "KGG_UNIT_BROWSER": "{engine}"
+      }
+    },
+    {
+      "id": "days-legacy",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_continuous_days_playwright.js"
+      ],
+      "timeoutSeconds": 240,
+      "env": {
+        "KGG_DAYS_BROWSER": "{engine}",
+        "KGG_DAYS_MODE": "legacy"
+      }
+    },
+    {
+      "id": "days-react",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_continuous_days_playwright.js"
+      ],
+      "timeoutSeconds": 240,
+      "env": {
+        "KGG_DAYS_BROWSER": "{engine}",
+        "KGG_DAYS_MODE": "react"
+      }
+    },
+    {
+      "id": "scan",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_scan_format_smoke.js"
+      ],
+      "timeoutSeconds": 240,
+      "env": {
+        "KGG_SCAN_BROWSER": "{engine}"
+      }
+    },
+    {
+      "id": "settings",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_settings_side_parity_playwright.js"
+      ],
+      "timeoutSeconds": 240,
+      "env": {
+        "KGG_SETTINGS_BROWSER": "{engine}",
+        "KGG_SETTINGS_HEAD_SHA": "{sha}"
+      },
+      "group": "settings",
+      "prefix": "KGG_PATIENT_SETTINGS_PARITY_PASS ",
+      "mode": null
+    },
+    {
+      "id": "progression",
+      "command": [
+        "node",
+        "release-pipeline/kgg_ticket_015_browser_smoke.js"
+      ],
+      "timeoutSeconds": 240,
+      "env": {
+        "KGG_PROGRESSION_BROWSER": "{engine}",
+        "KGG_PROGRESSION_HEAD_SHA": "{sha}",
+        "KGG_PROGRESSION_PARITY": "1"
+      },
+      "group": "progression",
+      "prefix": "KGG_PROGRESSION_PARITY_PASS ",
+      "mode": null
+    },
+    {
+      "id": "scan-fallback",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_scan_fallback_parity_playwright.js"
+      ],
+      "timeoutSeconds": 240,
+      "env": {
+        "KGG_SCAN_FALLBACK_BROWSER": "{engine}",
+        "KGG_SCAN_FALLBACK_HEAD_SHA": "{sha}"
+      },
+      "group": "scan-fallback",
+      "prefix": "KGG_SCAN_FALLBACK_PARITY_PASS ",
+      "mode": null
+    },
+    {
+      "id": "preview-build",
+      "command": [
+        "python",
+        "release-pipeline/kgg_patient_gpt_write_gate.py",
+        "--self-test",
+        "--self-test-preview-root",
+        "{previewRoot}"
+      ],
+      "timeoutSeconds": 240,
+      "env": {}
+    },
+    {
+      "id": "firstload-legacy",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_preview_first_load_smoke.js",
+        "{preview}"
+      ],
+      "timeoutSeconds": 240,
+      "env": {
+        "KGG_FIRST_LOAD_BROWSER": "{engine}",
+        "KGG_FIRST_LOAD_MODE": "legacy",
+        "KGG_FIRST_LOAD_HEAD_SHA": "{sha}",
+        "KGG_FIRST_LOAD_MEDIA_LIGHTBOX": "1"
+      },
+      "group": "firstload",
+      "prefix": "",
+      "mode": "legacy"
+    },
+    {
+      "id": "firstload-react-p7",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_preview_first_load_smoke.js",
+        "{preview}"
+      ],
+      "timeoutSeconds": 240,
+      "env": {
+        "KGG_FIRST_LOAD_BROWSER": "{engine}",
+        "KGG_FIRST_LOAD_MODE": "react-p7",
+        "KGG_FIRST_LOAD_HEAD_SHA": "{sha}",
+        "KGG_FIRST_LOAD_MEDIA_LIGHTBOX": "1"
+      },
+      "group": "firstload",
+      "prefix": "",
+      "mode": "react-p7"
+    },
+    {
+      "id": "firstload-react-p8",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_preview_first_load_smoke.js",
+        "{preview}"
+      ],
+      "timeoutSeconds": 240,
+      "env": {
+        "KGG_FIRST_LOAD_BROWSER": "{engine}",
+        "KGG_FIRST_LOAD_MODE": "react-p8",
+        "KGG_FIRST_LOAD_HEAD_SHA": "{sha}",
+        "KGG_FIRST_LOAD_MEDIA_LIGHTBOX": "1"
+      },
+      "group": "firstload",
+      "prefix": "",
+      "mode": "react-p8"
+    },
+    {
+      "id": "offline-legacy",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_runtime_progress_playwright.js"
+      ],
+      "timeoutSeconds": 150,
+      "env": {
+        "KGG_RUNTIME_MODE": "legacy",
+        "KGG_RUNTIME_BROWSER": "{engine}",
+        "KGG_RUNTIME_OFFLINE": "1",
+        "KGG_RUNTIME_HEAD_SHA": "{sha}"
+      },
+      "group": "offline",
+      "prefix": "",
+      "mode": "legacy"
+    },
+    {
+      "id": "offline-react-p7",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_runtime_progress_playwright.js"
+      ],
+      "timeoutSeconds": 150,
+      "env": {
+        "KGG_RUNTIME_MODE": "react-p7",
+        "KGG_RUNTIME_BROWSER": "{engine}",
+        "KGG_RUNTIME_OFFLINE": "1",
+        "KGG_RUNTIME_HEAD_SHA": "{sha}"
+      },
+      "group": "offline",
+      "prefix": "",
+      "mode": "react-p7"
+    },
+    {
+      "id": "offline-react-p8",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_runtime_progress_playwright.js"
+      ],
+      "timeoutSeconds": 150,
+      "env": {
+        "KGG_RUNTIME_MODE": "react-p8",
+        "KGG_RUNTIME_BROWSER": "{engine}",
+        "KGG_RUNTIME_OFFLINE": "1",
+        "KGG_RUNTIME_HEAD_SHA": "{sha}"
+      },
+      "group": "offline",
+      "prefix": "",
+      "mode": "react-p8"
+    },
+    {
+      "id": "locale",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_english_playwright.js"
+      ],
+      "timeoutSeconds": 240,
+      "env": {
+        "KGG_I18N_SYNC_ASSERT": "1"
+      }
+    },
+    {
+      "id": "pwa-contract",
+      "command": [
+        "python",
+        "release-pipeline/kgg_pwa_contract_smoke.py"
+      ],
+      "timeoutSeconds": 240,
+      "env": {}
+    },
+    {
+      "id": "resource-freshness",
+      "command": [
+        "python",
+        "release-pipeline/kgg_patient_gpt_resources.py",
+        "--check"
+      ],
+      "timeoutSeconds": 240,
+      "env": {}
+    },
+    {
+      "id": "retained-media-sources",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_media_sources_playwright.js"
+      ],
+      "timeoutSeconds": 200,
+      "env": {},
+      "coverageNote": "Existing regression executed unchanged; not attributed to selected engine unless test itself supports it."
+    },
+    {
+      "id": "retained-english-compatibility",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_english_compatibility_playwright.js"
+      ],
+      "timeoutSeconds": 200,
+      "env": {},
+      "coverageNote": "Existing regression executed unchanged; not attributed to selected engine unless test itself supports it."
+    },
+    {
+      "id": "retained-transfer",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_compact_transfer_playwright.js"
+      ],
+      "timeoutSeconds": 200,
+      "env": {},
+      "coverageNote": "Existing regression executed unchanged; not attributed to selected engine unless test itself supports it."
+    },
+    {
+      "id": "retained-install",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_install_capability_playwright.js"
+      ],
+      "timeoutSeconds": 200,
+      "env": {},
+      "coverageNote": "Existing regression executed unchanged; not attributed to selected engine unless test itself supports it."
+    },
+    {
+      "id": "retained-ios-start",
+      "command": [
+        "node",
+        "release-pipeline/kgg_ios_start_smoke.js"
+      ],
+      "timeoutSeconds": 200,
+      "env": {},
+      "coverageNote": "Existing regression executed unchanged; not attributed to selected engine unless test itself supports it."
+    },
+    {
+      "id": "retained-update-recovery",
+      "command": [
+        "python",
+        "release-pipeline/kgg_update_recovery_smoke.py"
+      ],
+      "timeoutSeconds": 200,
+      "env": {},
+      "coverageNote": "Existing regression executed unchanged; not attributed to selected engine unless test itself supports it."
+    },
+    {
+      "id": "report-contracts",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_full_acceptance_report.test.mjs"
+      ],
+      "timeoutSeconds": 200,
+      "env": {},
+      "coverageNote": "Existing regression executed unchanged; not attributed to selected engine unless test itself supports it."
+    }
+  ]
+}

@@ -4,7 +4,9 @@
 const fs = require("fs");
 const http = require("http");
 const path = require("path");
-const { chromium } = require("playwright");
+const { chromium, webkit } = require("playwright");
+const RUNTIME_MODE=process.env.KGG_RUNTIME_MODE||"original";
+const RUNTIME_ENGINE=process.env.KGG_RUNTIME_BROWSER||"chromium";
 
 const ROOT = path.resolve(__dirname, "..");
 const FIRST_LOAD_GLOBALS = [
@@ -61,6 +63,7 @@ function contentType(filename) {
   return {
     ".html": "text/html; charset=utf-8",
     ".js": "text/javascript; charset=utf-8",
+    ".css": "text/css; charset=utf-8",
     ".json": "application/json; charset=utf-8",
     ".webmanifest": "application/manifest+json; charset=utf-8",
     ".png": "image/png",
@@ -248,7 +251,8 @@ async function main() {
   });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const { port } = server.address();
-  const browser = await chromium.launch({ headless: true });
+  assert(["chromium","webkit"].includes(RUNTIME_ENGINE),"unsupported runtime engine");
+  const browser = await ({chromium,webkit})[RUNTIME_ENGINE].launch({ headless: true });
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
     serviceWorkers: "allow",
@@ -263,7 +267,8 @@ async function main() {
     e: [["Beinpresse", 3, "B", "kg", "Wdh", "", ""]],
   };
   const payload = `KGGH2:${encodePlan(plan)}`;
-  const url = `http://127.0.0.1:${port}/kgg/?plan=${encodeURIComponent(payload)}`;
+  const flags=RUNTIME_MODE==="original"?"":"kggReactPad="+(RUNTIME_MODE==="legacy"?"0":"1")+(RUNTIME_MODE==="react-p8"?"&kggReactGrid=1":"")+"&";
+  const url = `http://127.0.0.1:${port}/kgg/?${flags}plan=${encodeURIComponent(payload)}`;
 
   try {
     await page.goto(url, { waitUntil: "domcontentloaded" });
@@ -312,9 +317,54 @@ async function main() {
     await setCardOpen(page, card, false);
     await assertVisibleBadge(page, card, "open", "○ Offen");
 
+    if(process.env.KGG_RUNTIME_OFFLINE==="1"){
+      await page.evaluate(()=>{put(0,1,'B','a','17');put(0,1,'B','b','9')});
+      if(RUNTIME_MODE==='react-p8')await page.waitForFunction(()=>document.body.classList.contains('kggReactNumpadGridV1'));
+      const original=await page.evaluate(()=>JSON.stringify({id:p.id,v,done,d}));
+      if(RUNTIME_MODE==='react-p7'||RUNTIME_MODE==='react-p8')await page.waitForFunction(async()=>{
+        const urls=(await Promise.all((await caches.keys()).map(async n=>(await (await caches.open(n)).keys()).map(r=>r.url)))).flat();
+        return urls.some(u=>u.includes('/patient-react-dist/kgg-patient-ui.js?'))&&urls.some(u=>u.includes('/patient-react-dist/kgg-patient-ui.css?'));
+      },null,{timeout:10000});
+      if(RUNTIME_MODE==='legacy')assert(await page.evaluate(async()=>{
+        const keys=(await Promise.all((await caches.keys()).map(async n=>(await (await caches.open(n)).keys()).map(r=>r.url)))).flat();
+        return !keys.some(u=>u.includes('/patient-react-dist/'));
+      }),'legacy opt-out unexpectedly precached React assets');
+      if (RUNTIME_ENGINE === "webkit") {
+         // Playwright WebKit offline emulation blocks even SW-cached requests (microsoft/playwright#42775).
+         // Shut down the actual origin instead; cache, navigation and saved-state assertions stay intact.
+         const stopped = new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
+         server.closeAllConnections();
+         await stopped;
+         assert(!server.listening, "offline origin is still running");
+       } else {
+         await context.setOffline(true);
+       }
+      // Explicit pilot flags are re-supplied; P8 is intentionally not a persisted rollout.
+      await page.goto(`http://127.0.0.1:${port}/kgg/?${flags}`,{waitUntil:'domcontentloaded',timeout:15000});
+      await page.waitForFunction(()=>window.__kggPatientCardSettings&&document.querySelector('#list .ex'),null,{timeout:15000});
+      if(RUNTIME_MODE==='react-p8')try{await page.waitForFunction(()=>document.body.classList.contains('kggReactNumpadGridV1'),null,{timeout:6000})}catch(error){
+        const diagnosis=await page.evaluate(async()=>({requested:window.__kggReactGridRequest,
+          header:document.body.classList.contains('kggReactNumpadHeaderV1'),grid:document.body.classList.contains('kggReactNumpadGridV1'),
+          caches:await Promise.all((await caches.keys()).map(async name=>({name,react:(await (await caches.open(name)).keys()).map(x=>x.url).filter(x=>x.includes('react-dist'))}))) }));
+        throw new Error('Offline React cache diagnostic: '+JSON.stringify(diagnosis)+'; '+error.message);
+      }
+      if(RUNTIME_MODE==='react-p7')await page.waitForFunction(()=>document.body.classList.contains('kggReactNumpadHeaderV1'),null,{timeout:10000});
+      assert(await page.evaluate(()=>JSON.stringify({id:p.id,v,done,d}))===original,'offline navigation changed plan/training state');
+      if(RUNTIME_MODE==='react-p8')assert(await page.evaluate(()=>getComputedStyle(document.querySelector('.kgg-react-numpad-grid')).display==='grid'),'offline React stylesheet not applied');
+      await page.evaluate(()=>put(0,1,'B','b','11'));
+      const updated=await page.evaluate(()=>JSON.stringify({id:p.id,v,done,d}));
+      await page.goto(`http://127.0.0.1:${port}/kgg/?${flags}`,{waitUntil:'domcontentloaded',timeout:15000});
+      await page.waitForFunction(()=>window.__kggPatientCardSettings&&document.querySelector('#list .ex'),null,{timeout:15000});
+      assert(await page.evaluate(()=>JSON.stringify({id:p.id,v,done,d}))===updated,'offline edit was not retained');
+      await context.setOffline(false);
+    }
     console.log(JSON.stringify({
       status: "PASS",
       test: "patient-runtime-progress",
+      engine:RUNTIME_ENGINE,mode:RUNTIME_MODE,sourceSha:process.env.KGG_RUNTIME_HEAD_SHA||"local",
+      offlineChecked:process.env.KGG_RUNTIME_OFFLINE==="1",
+      offlineTrainingRetained:process.env.KGG_RUNTIME_OFFLINE==="1",
+      cacheOptInVerified:process.env.KGG_RUNTIME_OFFLINE==="1",
       version: workerVersion,
       freshControlledNoReload: true,
       mainDocumentNavigations: firstLoadEvidence.mainDocumentNavigations,
@@ -325,7 +375,7 @@ async function main() {
   } finally {
     await context.close();
     await browser.close();
-    await new Promise((resolve) => server.close(resolve));
+    if (server.listening) await new Promise((resolve) => server.close(resolve));
   }
 }
 

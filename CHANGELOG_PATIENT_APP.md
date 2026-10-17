@@ -1,5 +1,11 @@
 # Patient App Changelog
 
+## v94 - 2026-10-17
+
+- Integriert das optionale React-NumPad mit Legacy-Zustand und sichert den Offline-Cache auch beim Wechsel auf einen wartenden oder neu aktivierten Service Worker.
+- Guarded request: `patient-react-pr329-live-20261017`.
+
+
 ## v90 - 2026-10-06
 
 - Behebt den verbleibenden Android-Chrome-Scroll-Flash beim Wechsel zwischen kg/Wdh im bereits geöffneten Custom-NumPad.
