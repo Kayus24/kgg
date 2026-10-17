@@ -260,6 +260,13 @@ jobs:
         if: needs.scope.outputs.patient_runtime == 'true'
         shell: bash
         run: node release-pipeline/kgg_patient_runtime_progress_playwright.js
+      - name: Verify installed-worker React upgrade and guarded existing-PR release
+        if: needs.scope.outputs.patient_runtime == 'true'
+        shell: bash
+        run: |
+          node release-pipeline/kgg_patient_react_sw_upgrade_playwright.js
+          python -m unittest release-pipeline/test_kgg_patient_existing_release.py
+
       - name: Run patient vertical pain Playwright smoke
         if: needs.scope.outputs.patient_runtime == 'true'
         shell: bash
