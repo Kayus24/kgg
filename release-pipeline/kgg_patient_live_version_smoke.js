@@ -15,6 +15,20 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+async function withDeadline(operation, timeoutMs, label) {
+  let timer;
+  try {
+    return await Promise.race([
+      operation,
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`${label}: timed out after ${timeoutMs}ms`)), timeoutMs);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function encodePlan(plan) {
   return Buffer.from(JSON.stringify(plan), "utf8").toString("base64url");
 }
@@ -184,10 +198,10 @@ async function verifyStaleClientUpdate(browser, currentVersion) {
     assert(staleEvidence.worker === staleVersion, `stale client has wrong controller version: ${JSON.stringify(staleEvidence)}`);
 
     runtime.setServeNew();
-    await page.evaluate(async () => {
+    await withDeadline(page.evaluate(async () => {
       const registration = await navigator.serviceWorker.ready;
       await registration.update();
-    });
+    }), 15000, "STALE_CLIENT_UPDATE");
     await page.locator("#kggUpdateGate").waitFor({ state: "visible", timeout: 15000 });
     assert((await page.locator("#kggUpdateGate").innerText()).includes("Jetzt aktualisieren"), "stale client did not show update action");
     await page.locator("#kggUpdateGateButton").click();
@@ -203,7 +217,7 @@ async function verifyStaleClientUpdate(browser, currentVersion) {
   } catch (error) {
     let diagnostics = { unavailable: true };
     try {
-      diagnostics = await page.evaluate(async () => {
+      diagnostics = await withDeadline(page.evaluate(async () => {
         const registration = await navigator.serviceWorker.getRegistration("./");
         const describe = worker => worker ? { state: worker.state, scriptURL: worker.scriptURL } : null;
         return {
@@ -212,7 +226,7 @@ async function verifyStaleClientUpdate(browser, currentVersion) {
           waiting: describe(registration?.waiting),
           installing: describe(registration?.installing),
         };
-      });
+      }), 2000, "STALE_CLIENT_UPDATE_DIAGNOSTICS");
     } catch (_) { /* Diagnostics must preserve the original failure. */ }
     try {
       console.error(`STALE_CLIENT_UPDATE_STATE ${JSON.stringify(diagnostics)}`);
