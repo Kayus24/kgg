@@ -54,23 +54,68 @@ async function startDiagnostics(ctx,mode,hasPlan){
     page.on("crash",()=>diagnosticLog("page-crash",{page:tag}));
     page.on("close",()=>diagnosticLog("page-close",{page:tag}));
     page.on("console",message=>{
-      const prefix="KGG_SCAN_NATIVE ",text=message.text();
-      if(text.startsWith(prefix)){
-        try{diagnosticLog("native-capture",{page:tag,...JSON.parse(text.slice(prefix.length))})}catch{}
+      const text=message.text();
+      for(const [prefix,event] of [["KGG_SCAN_NATIVE ","native-capture"],["KGG_SCAN_MUTATION ","dom-mutation"]]){
+        if(text.startsWith(prefix)){
+          try{diagnosticLog(event,{page:tag,...JSON.parse(text.slice(prefix.length))})}catch{}
+          break;
+        }
       }
     });
   });
   await ctx.addInitScript({content:`(()=>{
     const state=${scannerDiagnosticState.toString()};
+    const nodeIdentities=new WeakMap();let nextNodeIdentity=0;
+    const describe=node=>{
+      if(!(node instanceof Node))return null;
+      if(!nodeIdentities.has(node))nodeIdentities.set(node,++nextNodeIdentity);
+      return {identity:nodeIdentities.get(node),nodeName:node.nodeName,
+        id:node instanceof Element?node.id||null:null};
+    };
+    const fabNodes=()=>{
+      const fab=document.getElementById("kggActionFab");
+      return {node:describe(fab),children:fab?Array.from(fab.childNodes,describe):[]};
+    };
     for(const type of ["pointerdown","pointerup","mousedown","mouseup","click"]){
       document.addEventListener(type,event=>{
         try{
-          const target=event.target instanceof Element&&event.target.closest("#kggActionFab,#kggBubbleScan,#kggPlanScanBtn");
-          if(target)console.debug("KGG_SCAN_NATIVE "+JSON.stringify({type,target:target.id,
-            isTrusted:event.isTrusted,browserMs:performance.now(),state:state()}));
+          const raw=event.target,element=raw instanceof Element?raw:raw?.parentElement;
+          const target=element?.closest("#kggActionFab,#kggBubbleScan,#kggPlanScanBtn")||null;
+          console.debug("KGG_SCAN_NATIVE "+JSON.stringify({type,target:target?.id||null,
+            rawTarget:describe(raw),detail:event.detail,isTrusted:event.isTrusted,
+            clientX:event.clientX,clientY:event.clientY,pageX:event.pageX,pageY:event.pageY,
+            screenX:event.screenX,screenY:event.screenY,button:event.button,buttons:event.buttons,
+            pointerId:event.pointerId,pointerType:event.pointerType,
+            browserMs:performance.now(),documentTimeOrigin:performance.timeOrigin,fab:fabNodes(),
+            ...(target?{state:state()}:{})}));
         }catch{}
       },true);
     }
+    const trackedSelector="#kggActionFab,#kggActionBubbles";
+    const withinTracked=node=>{
+      const element=node instanceof Element?node:node?.parentElement;
+      return Boolean(element?.closest(trackedSelector));
+    };
+    const includesTracked=node=>node instanceof Element&&
+      (node.matches(trackedSelector)||Boolean(node.querySelector(trackedSelector)));
+    new MutationObserver(records=>{
+      for(const record of records){
+        try{
+          const inside=withinTracked(record.target);
+          const added=Array.from(record.addedNodes),removed=Array.from(record.removedNodes);
+          if(!inside&&!added.some(includesTracked)&&!removed.some(includesTracked))continue;
+          console.debug("KGG_SCAN_MUTATION "+JSON.stringify({type:record.type,
+            observedAt:"observer-delivery",browserMs:performance.now(),documentTimeOrigin:performance.timeOrigin,
+            target:describe(record.target),attribute:record.attributeName,oldValue:record.oldValue,
+            valueAtDelivery:record.type==="attributes"?record.target.getAttribute(record.attributeName):
+              record.type==="characterData"?record.target.data:null,
+            added:(inside?added:added.filter(includesTracked)).map(describe),
+            removed:(inside?removed:removed.filter(includesTracked)).map(describe),
+            fab:fabNodes(),state:state()}));
+        }catch{}
+      }
+    }).observe(document,{subtree:true,childList:true,characterData:true,characterDataOldValue:true,
+      attributes:true,attributeOldValue:true,attributeFilter:["hidden","class"]});
   })();`});
   await ctx.tracing.start({screenshots:true,snapshots:true,sources:true});
   meta.started=true;
@@ -85,12 +130,12 @@ async function finishDiagnostics(ctx){
 }
 async function diagnosticFailure(ctx,page,error){
   diagnosticLog("failure",{page:diagnosticContexts.get(ctx)?.tag,error:String(error?.message||error)});
-  await Promise.allSettled([
-    page?diagnosticSnapshot(page,"failure-state"):Promise.resolve(),
-    page?diagnosticBounded(page.screenshot({path:path.join(diagnosticDir,
-      diagnosticContexts.get(ctx).tag+"-failure.png"),timeout:1000}),1000):Promise.resolve(),
-    finishDiagnostics(ctx)
-  ]);
+  if(page){
+    await diagnosticSnapshot(page,"failure-state").catch(()=>{});
+    await diagnosticBounded(page.screenshot({path:path.join(diagnosticDir,
+      diagnosticContexts.get(ctx).tag+"-failure.png"),timeout:1000}),1000).catch(()=>{});
+  }
+  await finishDiagnostics(ctx);
 }
 function server(){
   return http.createServer((request,response)=>{
