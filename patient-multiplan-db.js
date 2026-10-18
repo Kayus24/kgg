@@ -108,7 +108,7 @@
     $('kggBubbleScan').onclick=()=>clickSource('kggPlanScanBtn');
     $('kggBubbleAdd').onclick=()=>clickSource('kggPatientAddPlanBtn');
     let fab=$('kggActionFab'); if(!fab){fab=document.createElement('button');fab.id='kggActionFab';fab.type='button';fab.textContent='📷';fab.title=t('Planaktionen','Plan actions');document.body.appendChild(fab)}
-    fab.textContent='📷';fab.title=t('Planaktionen','Plan actions');fab.onclick=e=>{e.preventDefault();e.stopPropagation();toggleBubbles()};
+    if(fab.textContent!=='📷')fab.textContent='📷';fab.title=t('Planaktionen','Plan actions');fab.onclick=e=>{e.preventDefault();e.stopPropagation();toggleBubbles()};
   }
   function patchRender(){if(window.__kggPatientMultiPlanDbRenderPatch)return;window.__kggPatientMultiPlanDbRenderPatch=true;if(typeof render==='function'){const old=render;window.render=function(){const r=old.apply(this,arguments);setTimeout(ensureActionBubbles,0);return r}}}
   function refreshLanguage(){
