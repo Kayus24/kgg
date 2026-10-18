@@ -2,6 +2,13 @@ name: KGG Patient UI Legacy React Parity
 
 on:
   workflow_dispatch:
+    inputs:
+      profile:
+        description: Full integrated acceptance or temporary scanner diagnostics
+        type: choice
+        required: true
+        default: integrated
+        options: [integrated, scan-diagnostics]
   pull_request:
     branches: [main, feat/patient-react-padgrid-p8-20261014]
     types: [opened, synchronize, reopened, ready_for_review]
@@ -30,7 +37,7 @@ jobs:
       fail-fast: false
       matrix:
         browser: [chromium, webkit]
-    name: ${{ matrix.browser }} integrated Legacy P7 P8 acceptance
+    name: ${{ matrix.browser }} ${{ github.event_name == 'workflow_dispatch' && inputs.profile == 'scan-diagnostics' && 'scanner diagnostics (4 required replays)' || 'integrated Legacy P7 P8 acceptance' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -57,6 +64,7 @@ jobs:
           npm ci --ignore-scripts --no-audit --no-fund
           npx playwright install --with-deps ${{ matrix.browser }} chromium
       - name: Require one immutable combined acceptance candidate
+        if: github.event_name != 'workflow_dispatch' || inputs.profile != 'scan-diagnostics'
         shell: bash
         env:
           PYTHONUNBUFFERED: '1'
@@ -64,6 +72,26 @@ jobs:
           python release-pipeline/kgg_patient_integrated_acceptance.py \
             --engine ${{ matrix.browser }} \
             --out "$RUNNER_TEMP/kgg-integrated-${{ matrix.browser }}/patient-ui-parity"
+      - name: Diagnose scanner on four required fresh replays
+        if: github.event_name == 'workflow_dispatch' && inputs.profile == 'scan-diagnostics'
+        shell: bash
+        env:
+          KGG_SCAN_FALLBACK_BROWSER: ${{ matrix.browser }}
+          KGG_SCAN_FALLBACK_HEAD_SHA: ${{ github.sha }}
+          KGG_SCAN_FALLBACK_DIAGNOSTICS: '1'
+          DEBUG: pw:browser
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = diagnostic/patient-webkit-scan-20261018
+          test "$(git rev-parse HEAD)" = "$KGG_SCAN_FALLBACK_HEAD_SHA"
+          for attempt in 1 2 3 4; do
+            out="$RUNNER_TEMP/kgg-integrated-${{ matrix.browser }}/patient-ui-parity/attempt-$attempt"
+            test ! -e "$out"
+            mkdir -p "$out"
+            KGG_SCAN_FALLBACK_DIAGNOSTIC_ATTEMPT="$attempt" \
+              node release-pipeline/kgg_patient_scan_fallback_parity_playwright.js 2>&1 | tee "$out/process.log"
+          done
+          echo "SCAN_DIAGNOSTICS_4_OF_4_PASS $KGG_SCAN_FALLBACK_BROWSER $KGG_SCAN_FALLBACK_HEAD_SHA"
       - name: Keep complete evidence including failures
         if: always()
         uses: actions/upload-artifact@v4

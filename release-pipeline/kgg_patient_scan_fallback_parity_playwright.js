@@ -6,6 +6,9 @@ const {chromium,webkit}=require("playwright");
 const ROOT=path.resolve(__dirname,"..");
 const ENGINE=process.env.KGG_SCAN_FALLBACK_BROWSER||"chromium";
 const MODES=["legacy","react-p7","react-p8"];
+const DIAGNOSTICS=process.env.KGG_SCAN_FALLBACK_DIAGNOSTICS==="1";
+const diagnosticContexts=new WeakMap(),diagnosticPages=new WeakMap();
+let diagnosticDir;
 const assert=(ok,message)=>{if(!ok)throw new Error(message)};
 const encode=value=>"KGGH2:"+Buffer.from(JSON.stringify(value),"utf8").toString("base64url");
 const mime=file=>({
@@ -13,6 +16,82 @@ const mime=file=>({
   ".css":"text/css; charset=utf-8",".json":"application/json; charset=utf-8",
   ".png":"image/png",".webmanifest":"application/manifest+json; charset=utf-8"
 })[path.extname(file).toLowerCase()]||"application/octet-stream";
+function diagnosticLog(event,details={}){
+  const row=JSON.stringify({event,engine:ENGINE,sourceSha:process.env.KGG_SCAN_FALLBACK_HEAD_SHA,
+    hostTime:new Date().toISOString(),...details});
+  console.log("KGG_SCAN_DIAGNOSTIC "+row);
+  try{fs.appendFileSync(path.join(diagnosticDir,"events.jsonl"),row+"\n")}catch{}
+}
+function scannerDiagnosticState(){
+  const fab=document.getElementById("kggActionFab"),box=document.getElementById("kggActionBubbles");
+  const bubble=document.getElementById("kggBubbleScan"),source=document.getElementById("kggPlanScanBtn");
+  const fallback=document.getElementById("kggLiveScanFallback");
+  return {readyState:document.readyState,scannerMarker:window.__kggStartScanVersion||null,
+    menuMarker:window.__kggPatientMultiPlanDbAddon||null,
+    fab:{exists:!!fab,handler:typeof fab?.onclick,open:fab?.classList.contains("open")??null},
+    bubble:{exists:!!bubble,handler:typeof bubble?.onclick,hidden:bubble?.hidden??null,
+      boxHidden:box?.hidden??null,display:bubble?getComputedStyle(bubble).display:null},
+    source:{exists:!!source,handler:typeof source?.onclick},
+    scanner:{exists:!!document.getElementById("kggLiveScan"),fallbackHidden:fallback?.hidden??null,
+      deniedCount:window.__kggCameraDeniedCount??null}};
+}
+function diagnosticBounded(promise,ms){
+  let timer;
+  return Promise.race([promise,new Promise((_,reject)=>{
+    timer=setTimeout(()=>reject(new Error("diagnostic collection deadline")),ms);
+  })]).finally(()=>clearTimeout(timer));
+}
+async function diagnosticSnapshot(page,phase){
+  try{diagnosticLog(phase,{page:diagnosticPages.get(page),
+    state:await diagnosticBounded(page.evaluate(scannerDiagnosticState),1000)})}
+  catch{diagnosticLog("snapshot-unavailable",{page:diagnosticPages.get(page),phase})}
+}
+async function startDiagnostics(ctx,mode,hasPlan){
+  const tag=mode+(hasPlan?"-plan":"-rescue"),meta={tag,started:false,stopped:false};
+  diagnosticContexts.set(ctx,meta);
+  ctx.on("page",page=>{
+    diagnosticPages.set(page,tag);
+    page.on("crash",()=>diagnosticLog("page-crash",{page:tag}));
+    page.on("close",()=>diagnosticLog("page-close",{page:tag}));
+    page.on("console",message=>{
+      const prefix="KGG_SCAN_NATIVE ",text=message.text();
+      if(text.startsWith(prefix)){
+        try{diagnosticLog("native-capture",{page:tag,...JSON.parse(text.slice(prefix.length))})}catch{}
+      }
+    });
+  });
+  await ctx.addInitScript({content:`(()=>{
+    const state=${scannerDiagnosticState.toString()};
+    for(const type of ["pointerdown","pointerup","mousedown","mouseup","click"]){
+      document.addEventListener(type,event=>{
+        try{
+          const target=event.target instanceof Element&&event.target.closest("#kggActionFab,#kggBubbleScan,#kggPlanScanBtn");
+          if(target)console.debug("KGG_SCAN_NATIVE "+JSON.stringify({type,target:target.id,
+            isTrusted:event.isTrusted,browserMs:performance.now(),state:state()}));
+        }catch{}
+      },true);
+    }
+  })();`});
+  await ctx.tracing.start({screenshots:true,snapshots:true,sources:true});
+  meta.started=true;
+  diagnosticLog("context-start",{page:tag});
+}
+async function finishDiagnostics(ctx){
+  const meta=diagnosticContexts.get(ctx);
+  if(!meta?.started||meta.stopped)return;
+  meta.stopped=true;
+  try{await diagnosticBounded(ctx.tracing.stop({path:path.join(diagnosticDir,meta.tag+"-trace.zip")}),2000)}
+  catch{diagnosticLog("trace-unavailable",{page:meta.tag})}
+}
+async function diagnosticFailure(ctx,page,error){
+  diagnosticLog("failure",{page:diagnosticContexts.get(ctx)?.tag,error:String(error?.message||error)});
+  await Promise.allSettled([
+    page?diagnosticSnapshot(page,"failure-state"):Promise.resolve(),
+    page?diagnosticBounded(page.screenshot({path:path.join(diagnosticDir,
+      diagnosticContexts.get(ctx).tag+"-failure.png"),timeout:1000}),1000):Promise.resolve(),
+    finishDiagnostics(ctx)
+  ]);
+}
 function server(){
   return http.createServer((request,response)=>{
     try{
@@ -32,6 +111,9 @@ const flags=mode=>"kggReactPad="+(mode==="legacy"?"0":"1")+
 async function makePage(browser,base,mode,plan){
   const ctx=await browser.newContext({viewport:{width:390,height:844},
     isMobile:true,hasTouch:true,serviceWorkers:"block"});
+  let page;
+  try{
+  if(DIAGNOSTICS)await startDiagnostics(ctx,mode,Boolean(plan));
   await ctx.addInitScript(()=>{
     localStorage.setItem("kggInstallAsked","1");
     window.__kggCameraDeniedCount=0;
@@ -40,7 +122,7 @@ async function makePage(browser,base,mode,plan){
         throw new DOMException("synthetic permission denied","NotAllowedError")}
     }});
   });
-  const page=await ctx.newPage(),errors=[],dialogs=[],prompts=[];
+  page=await ctx.newPage();const errors=[],dialogs=[],prompts=[];
   page.setDefaultTimeout(7000);
   page.on("pageerror",e=>errors.push(String(e)));
   page.on("dialog",async dialog=>{
@@ -61,6 +143,10 @@ async function makePage(browser,base,mode,plan){
   const reactFlag=await page.evaluate(()=>localStorage.getItem("kggPatientReactPadV1")==="1");
   assert(reactFlag===(mode!=="legacy"),"React opt-in flag inconsistent in "+mode);
   return {ctx,page,errors,dialogs,prompts};
+  }catch(error){
+    if(DIAGNOSTICS){await diagnosticFailure(ctx,page,error).catch(()=>{});await ctx.close().catch(()=>{})}
+    throw error;
+  }
 }
 async function capture(page){
   return page.evaluate(()=>({
@@ -73,11 +159,15 @@ async function capture(page){
 // Reuse the existing scanner smoke's visible-button / FAB action-bubble path.
 async function openPatientScanner(page){
   const bubble=page.locator("#kggBubbleScan"),fab=page.locator("#kggActionFab");
+  if(DIAGNOSTICS)await diagnosticSnapshot(page,"scanner-open-entry");
   if(await bubble.count()&&await bubble.isVisible().catch(()=>false)){
     await bubble.click();return;
   }
   if(await fab.count()&&await fab.isVisible().catch(()=>false)){
-    await fab.click();await bubble.waitFor({state:"visible"});await bubble.click();return;
+    if(DIAGNOSTICS)await diagnosticSnapshot(page,"before-fab-click");
+    await fab.click();
+    if(DIAGNOSTICS)await diagnosticSnapshot(page,"after-fab-click");
+    await bubble.waitFor({state:"visible"});await bubble.click();return;
   }
   const direct=page.locator("#kggPlanScanBtn");
   await direct.waitFor({state:"visible"});
@@ -182,21 +272,32 @@ async function run(browser,base,mode){
       await rescue.page.locator(".kggLiveScanClose").click();
       await rescue.page.locator("#kggLiveScan").waitFor({state:"detached"});
       assert(rescue.errors.length===0,"plan-rescue page errors: "+rescue.errors.join(" | "));
-    }finally{await rescue.ctx.close()}
+    }catch(error){if(DIAGNOSTICS)await diagnosticFailure(rescue.ctx,rescue.page,error).catch(()=>{});throw error}
+    finally{if(DIAGNOSTICS)await finishDiagnostics(rescue.ctx);await rescue.ctx.close()}
 
     console.log("KGG_SCAN_FALLBACK_PARITY_PASS "+JSON.stringify({
       engine:ENGINE,mode,denied:true,retry:true,photoChooser:true,
       invalidCodeSafe:true,validLinkUpdate:true,reload:true,noPlanRescue:true,
       sourceSha:process.env.KGG_SCAN_FALLBACK_HEAD_SHA||"local"
     }));
-  }finally{await x.ctx.close()}
+  }catch(error){if(DIAGNOSTICS)await diagnosticFailure(x.ctx,x.page,error).catch(()=>{});throw error}
+  finally{if(DIAGNOSTICS)await finishDiagnostics(x.ctx);await x.ctx.close()}
 }
 async function main(){
   assert(ENGINE==="chromium"||ENGINE==="webkit","unsupported browser "+ENGINE);
+  if(DIAGNOSTICS){
+    const attempt=process.env.KGG_SCAN_FALLBACK_DIAGNOSTIC_ATTEMPT;
+    assert(/^[1-4]$/.test(attempt||"")&&process.env.RUNNER_TEMP,"diagnostics require runner temp and attempt1–4");
+    assert(/^[0-9a-f]{40}$/.test(process.env.KGG_SCAN_FALLBACK_HEAD_SHA||""),"diagnostics require bound source SHA");
+    diagnosticDir=path.join(process.env.RUNNER_TEMP,"kgg-integrated-"+ENGINE,"patient-ui-parity","attempt-"+attempt);
+    fs.mkdirSync(diagnosticDir,{recursive:true});
+    diagnosticLog("process-start",{attempt});
+  }
   const app=server();await new Promise(ok=>app.listen(0,"127.0.0.1",ok));
   let browser;
   try{
     browser=await (ENGINE==="chromium"?chromium:webkit).launch({headless:true});
+    if(DIAGNOSTICS)browser.on("disconnected",()=>diagnosticLog("browser-disconnected"));
     const base="http://127.0.0.1:"+app.address().port;
     for(const mode of MODES)await run(browser,base,mode);
     console.log("KGG scanner fallback parity: PASS "+ENGINE+" (3 modes)");
