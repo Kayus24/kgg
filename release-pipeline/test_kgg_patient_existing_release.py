@@ -37,5 +37,22 @@ class ExistingPatientRelease(unittest.TestCase):
         self.assertIn("  merge-patient-live:\n    if: inputs.mode == 'publish_patient_live' && inputs.existing_pr == ''", self.workflow)
         self.assertEqual(self.workflow.count('      existing_pr:'), 2)
 
+    def test_both_release_routes_verify_local_update_before_merging(self):
+        payload = self.workflow.split('  patient-gate:', 1)[1].split('  merge-patient-live:', 1)[0]
+        regression = 'node --test release-pipeline/kgg_patient_live_version_smoke.test.cjs'
+        smoke = 'node release-pipeline/kgg_patient_live_version_smoke.js'
+        self.assertIn("      - name: Verify local stale-client update before release\n"
+                      "        if: inputs.mode == 'publish_patient_live'", payload)
+        for job, mutation in ((payload, 'gh pr create'), (self.job, 'gh pr merge')):
+            with self.subTest(route=mutation):
+                self.assertIn(regression, job)
+                self.assertIn('--local-only', job)
+                self.assertLess(job.index(regression), job.index(smoke))
+                self.assertLess(job.index('--local-only'), job.index(mutation))
+        self.assertIn("'${{ steps.gate.outputs.patient_version }}'", payload)
+        self.assertIn('"$GITHUB_WORKSPACE/base" --local-only', payload)
+        self.assertIn('"$PATIENT_VERSION"', self.job)
+        self.assertIn('"$GITHUB_WORKSPACE" --local-only', self.job)
+
 if __name__ == '__main__':
     unittest.main()
