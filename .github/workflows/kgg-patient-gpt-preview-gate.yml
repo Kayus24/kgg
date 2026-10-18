@@ -211,6 +211,17 @@ jobs:
             "$GITHUB_WORKSPACE/preview/previews/${{ inputs.request_id }}" \
             "${{ inputs.request_id }}"
 
+      - name: Verify local stale-client update before release
+        if: inputs.mode == 'publish_patient_live'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd base
+          node --test release-pipeline/kgg_patient_live_version_smoke.test.cjs
+          node release-pipeline/kgg_patient_live_version_smoke.js \
+            '${{ steps.gate.outputs.patient_version }}' 'https://kayus24.github.io/kgg/' \
+            "$GITHUB_WORKSPACE/base" --local-only
+
       - name: Run patient interface regression
         if: inputs.mode != 'validate_only' && steps.gate.outputs.run_patient_scan == 'true'
         shell: bash
@@ -422,6 +433,10 @@ jobs:
           node release-pipeline/node_modules/playwright/cli.js install --with-deps chromium
           python release-pipeline/kgg_pwa_contract_smoke.py
           python release-pipeline/kgg_update_recovery_smoke.py
+          node --test release-pipeline/kgg_patient_live_version_smoke.test.cjs
+          node release-pipeline/kgg_patient_live_version_smoke.js \
+            "$PATIENT_VERSION" 'https://kayus24.github.io/kgg/' \
+            "$GITHUB_WORKSPACE" --local-only
       - name: Merge only the tested head through ordinary branch protection
         shell: bash
         run: |

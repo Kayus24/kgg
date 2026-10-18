@@ -15,6 +15,20 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+async function withDeadline(operation, timeoutMs, label) {
+  let timer;
+  try {
+    return await Promise.race([
+      operation,
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`${label}: timed out after ${timeoutMs}ms`)), timeoutMs);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function encodePlan(plan) {
   return Buffer.from(JSON.stringify(plan), "utf8").toString("base64url");
 }
@@ -107,8 +121,7 @@ function startStaleRuntimeServer(currentVersion, staleVersion) {
 async function activeWorkerVersion(page) {
   return page.evaluate(async () => {
     if (!("serviceWorker" in navigator)) return "";
-    const registration = await navigator.serviceWorker.ready;
-    const worker = registration.active || navigator.serviceWorker.controller;
+    const worker = navigator.serviceWorker.controller;
     if (!worker || typeof MessageChannel === "undefined") return "";
     return new Promise((resolve) => {
       const channel = new MessageChannel();
@@ -178,13 +191,17 @@ async function verifyStaleClientUpdate(browser, currentVersion) {
       timeout: 30000,
     });
     await page.locator("#title").waitFor({ state: "visible", timeout: 30000 });
+    // As in the React SW-upgrade test, the old document must be controlled first.
+    await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller), null, { timeout: 15000 });
     const staleEvidence = await liveVersionEvidence(page);
     assert(staleEvidence.visible === `v${staleVersion}`, `stale client did not expose v${staleVersion}: ${JSON.stringify(staleEvidence)}`);
+    assert(staleEvidence.worker === staleVersion, `stale client has wrong controller version: ${JSON.stringify(staleEvidence)}`);
 
     runtime.setServeNew();
-    await page.evaluate(() => {
-      navigator.serviceWorker.ready.then((registration) => registration.update().catch(() => {}));
-    });
+    await withDeadline(page.evaluate(async () => {
+      const registration = await navigator.serviceWorker.ready;
+      await registration.update();
+    }), 15000, "STALE_CLIENT_UPDATE");
     await page.locator("#kggUpdateGate").waitFor({ state: "visible", timeout: 15000 });
     assert((await page.locator("#kggUpdateGate").innerText()).includes("Jetzt aktualisieren"), "stale client did not show update action");
     await page.locator("#kggUpdateGateButton").click();
@@ -197,6 +214,24 @@ async function verifyStaleClientUpdate(browser, currentVersion) {
     assert(updatedEvidence.visible === `v${currentVersion}`, `stale client update kept old visible version: ${JSON.stringify(updatedEvidence)}`);
     assert(updatedEvidence.worker === currentVersion, `stale client update kept old worker: ${JSON.stringify(updatedEvidence)}`);
     return { stale: staleEvidence, updated: updatedEvidence };
+  } catch (error) {
+    let diagnostics = { unavailable: true };
+    try {
+      diagnostics = await withDeadline(page.evaluate(async () => {
+        const registration = await navigator.serviceWorker.getRegistration("./");
+        const describe = worker => worker ? { state: worker.state, scriptURL: worker.scriptURL } : null;
+        return {
+          controller: describe(navigator.serviceWorker.controller),
+          active: describe(registration?.active),
+          waiting: describe(registration?.waiting),
+          installing: describe(registration?.installing),
+        };
+      }), 2000, "STALE_CLIENT_UPDATE_DIAGNOSTICS");
+    } catch (_) { /* Diagnostics must preserve the original failure. */ }
+    try {
+      console.error(`STALE_CLIENT_UPDATE_STATE ${JSON.stringify(diagnostics)}`);
+    } catch (_) { /* Logging is best effort too. */ }
+    throw error;
   } finally {
     await context.close();
     await new Promise((resolve) => runtime.server.close(resolve));

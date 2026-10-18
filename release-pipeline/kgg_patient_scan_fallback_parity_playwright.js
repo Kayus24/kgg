@@ -3,6 +3,7 @@
 // Synthetic permission-denied scanner fallback parity. No real camera or patient data.
 const fs=require("node:fs"),path=require("node:path"),http=require("node:http");
 const {chromium,webkit}=require("playwright");
+const {verifyActionButtonStability}=require("./kgg_patient_action_button_stability_playwright.js");
 const ROOT=path.resolve(__dirname,"..");
 const ENGINE=process.env.KGG_SCAN_FALLBACK_BROWSER||"chromium";
 const MODES=["legacy","react-p7","react-p8"];
@@ -197,6 +198,7 @@ async function main(){
   let browser;
   try{
     browser=await (ENGINE==="chromium"?chromium:webkit).launch({headless:true});
+    await verifyActionButtonStability(browser,ENGINE);
     const base="http://127.0.0.1:"+app.address().port;
     for(const mode of MODES)await run(browser,base,mode);
     console.log("KGG scanner fallback parity: PASS "+ENGINE+" (3 modes)");

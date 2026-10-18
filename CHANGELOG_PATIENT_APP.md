@@ -1,5 +1,11 @@
 # Patient App Changelog
 
+## v95 - 2026-10-18
+
+- Erhält beim erneuten Aufbau des Planaktionsmenüs den bestehenden FAB-Textknoten, damit ein laufender nativer Klick das Menü weiterhin öffnet.
+- Guarded request: `patient-action-button-stability-20261018`.
+
+
 ## v94 - 2026-10-17
 
 - Integriert das optionale React-NumPad mit Legacy-Zustand und sichert den Offline-Cache auch beim Wechsel auf einen wartenden oder neu aktivierten Service Worker.

@@ -73,7 +73,7 @@ jobs:
           if grep -Eq '^patient-start-scan\.js$|^patient-plan-replace-slot-fix\.js$|^index\.html$|^service-worker\.js$|^patient-(media-retry-cache_v2|multiplan-db)\.js$|^release-pipeline/kgg_patient_scan_camera_smoke\.js$|^release-pipeline/patient-scan-fixtures/|^release-pipeline/package(-lock)?\.json$' "$changed_file"; then patient_scan=true; fi
           if grep -Eq '^index\.html$|^update-recovery\.html$|^manifest\.json$|^manifest-v[0-9]+\.webmanifest$|^service-worker\.js$|^patient-version-label\.js$|^kgg-icon-.*\.png$|^release-pipeline/kgg_(pwa_contract|update_recovery)_smoke\.py$' "$changed_file"; then pwa_contract=true; fi
           if grep -Eq '^patient-set-summary-groups\.js$|^release-pipeline/kgg_patient_summary_smoke\.js$' "$changed_file"; then patient_summary=true; fi
-          if grep -Eq '^docs/kgg-patient-|^release-pipeline/kgg_patient_gpt_|^\.github/workflows/kgg-patient-gpt-preview-gate\.yml$|^release-pipeline/kgg_custom_gpt_resource_audit\.py$' "$changed_file"; then patient_gpt=true; fi
+          if grep -Eq '^docs/kgg-patient-|^release-pipeline/kgg_patient_gpt_|^\.github/workflows/kgg-patient-gpt-preview-gate\.yml$|^release-pipeline/kgg_custom_gpt_resource_audit\.py$|^release-pipeline/kgg_patient_live_version_smoke(\.js|\.test\.cjs)$|^release-pipeline/test_kgg_patient_existing_release\.py$' "$changed_file"; then patient_gpt=true; fi
           if grep -Eq '^service-worker\.js$|^patient-version-label\.js$|^update-recovery\.html$|^patient-card-progress\.js$|^collapse-cards\.js$|^release-pipeline/kgg_patient_(card_progress_smoke|runtime_progress_playwright|pain_vertical_(smoke|playwright))\.js$|^patient-pain-vertical-scale\.js$|^release-pipeline/package(-lock)?\.json$|^\.github/workflows/kgg-required-gate\.yml$' "$changed_file"; then patient_runtime=true; fi
           if grep -Eq '^index\.html$|^patient-(day-history|multiplan-db|plan-delete|start-values-day1|card-settings)\.js$|^release-pipeline/kgg_patient_continuous_days_(smoke|playwright)\.js$|^release-pipeline/kgg_test_battery\.py$|^\.github/workflows/kgg-required-gate\.yml$' "$changed_file"; then patient_day_flow=true; fi
           if grep -Eq '^index\.html$|^service-worker\.js$|^patient-last-value-hints\.js$|^release-pipeline/kgg_patient_last_value_shimmer_playwright\.js$|^\.github/workflows/kgg-required-gate\.yml$' "$changed_file"; then patient_last_value_shimmer=true; fi
@@ -300,6 +300,16 @@ jobs:
         run: |
           node release-pipeline/kgg_patient_gpt_browser_smoke.js
           node release-pipeline/kgg_patient_preview_first_load_smoke.js "$RUNNER_TEMP/kgg-patient-preview-smoke/previews/patient-gate-self-test"
+      - name: Run local patient update verification
+        if: needs.scope.outputs.patient_gpt == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test release-pipeline/kgg_patient_live_version_smoke.test.cjs
+          patient_version="$(node -p "require('fs').readFileSync('service-worker.js', 'utf8').match(/const APP_VERSION = '([0-9]+)';/)[1]")"
+          node release-pipeline/kgg_patient_live_version_smoke.js \
+            "$patient_version" 'https://kayus24.github.io/kgg/' \
+            "$GITHUB_WORKSPACE" --local-only
   required-gate:
     # Keep the existing branch-protection check name; never equate SKIPPED with PASS.
     name: required-gate
