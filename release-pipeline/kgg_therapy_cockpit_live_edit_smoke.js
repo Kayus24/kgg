@@ -44,6 +44,9 @@ async function waitForEditUi(page) {
       localStorage.setItem("kgg_pwa_install_prompt_seen_v1", "cockpit-live-edit");
     });
     await page.goto(codeUrl(initial.code), { waitUntil: "domcontentloaded", timeout: 30000 });
+    await page.locator("#adminSecretsModal.open").waitFor();
+    await page.locator("#closeAdminSecrets").click();
+    await page.locator("#adminSecretsModal.open").waitFor({state:"hidden"});
     await page.waitForFunction(() => document.body.classList.contains("kggTherapyCockpitOpen"), null, { timeout: 15000 });
 
     await page.waitForSelector('.kgg-tc-card[data-tc-card="0"] .kgg-tce-add-card', { state: "visible", timeout: 5000 });
@@ -54,6 +57,25 @@ async function waitForEditUi(page) {
       boardFits: document.querySelector("#kggTherapyCockpitBoard").scrollWidth <= document.querySelector("#kggTherapyCockpitBoard").clientWidth + 1,
     }));
     assert(tabletBefore.visibleCards === 1 && tabletBefore.addCards === 1 && tabletBefore.mobileNavAbsent && tabletBefore.boardFits, `tablet Cockpit edit UI missing: ${JSON.stringify(tabletBefore)}`);
+
+    await page.locator('.kgg-tce-tool[data-tce-action="edit"][data-tce-slot="0"][data-tce-ex="0"]').click();
+    await page.waitForSelector("#editorModal.open", { timeout: 5000 });
+    const tabletEditorFlow = await page.evaluate(() => {
+      const stage = document.getElementById("kggCockpitStageEditor");
+      const actions = document.querySelector("#editorModal .editorActions");
+      const cancel = document.querySelector("#editorModal .editorCancelBtn");
+      const follows = (a, b) => !!(a && b && (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING));
+      return {
+        stageVisible: !!stage && !stage.hidden,
+        stageBeforeActions: follows(stage, actions),
+        actionsBeforeCancel: follows(actions, cancel),
+        actionsPosition: actions ? getComputedStyle(actions).position : "missing",
+        cancelPosition: cancel ? getComputedStyle(cancel).position : "missing",
+      };
+    });
+    await page.locator("#closeEditor").click();
+    await page.waitForSelector("#editorModal.open", { state: "hidden", timeout: 5000 });
+    assert(tabletEditorFlow.stageVisible && tabletEditorFlow.stageBeforeActions && tabletEditorFlow.actionsBeforeCancel && tabletEditorFlow.actionsPosition !== "sticky" && tabletEditorFlow.cancelPosition !== "sticky", `cockpit progression/editor action flow is visually reordered by sticky actions: ${JSON.stringify(tabletEditorFlow)}`);
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.waitForTimeout(500);
@@ -70,6 +92,8 @@ async function waitForEditUi(page) {
 
     await page.locator('.kgg-tce-tool[data-tce-action="edit"][data-tce-slot="0"][data-tce-ex="0"]').click();
     await page.waitForSelector("#editorModal.open", { timeout: 5000 });
+    const advancedLabel = (await page.locator("#editorModal .editorAdvanced summary").innerText()).trim();
+    assert(advancedLabel === "Video", `shared editor video section still has generic label: ${advancedLabel}`);
     await page.locator("#editName").fill("Abduktion live bearbeitet");
     await page.locator("#editSets").selectOption("4");
     await page.locator("#editSide").selectOption("LR");
@@ -120,6 +144,26 @@ async function waitForEditUi(page) {
       catch (error) { return { code: error.code, after: api.getSlot(0), before }; }
     });
     assert(invalidStage.code === "progression_id_invalid" && JSON.stringify(invalidStage.after) === JSON.stringify(invalidStage.before), `invalid progression stage was not rejected fail-closed: ${JSON.stringify(invalidStage)}`);
+
+    await page.locator('.kgg-tce-add-card[data-tce-slot="0"]').click();
+    await page.waitForSelector("#kggTceAddModal:not([hidden])", { timeout: 5000 });
+    await page.locator("#kggTceAddModal [data-tce-close]").tap();
+    await page.waitForSelector("#kggTceAddModal[hidden]", { state: "hidden", timeout: 5000 });
+
+    await page.locator('.kgg-tce-add-card[data-tce-slot="0"]').click();
+    await page.waitForSelector("#kggTceAddModal:not([hidden])", { timeout: 5000 });
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(120);
+    const escapeClosed = await page.locator("#kggTceAddModal").evaluate(modal => modal.hidden);
+    if (!escapeClosed) await page.locator("#kggTceAddModal [data-tce-close]").tap();
+
+    await page.locator('.kgg-tce-add-card[data-tce-slot="0"]').click();
+    await page.waitForSelector("#kggTceAddModal:not([hidden])", { timeout: 5000 });
+    await page.locator("#kggTceAddModal").click({ position: { x: 5, y: 5 } });
+    await page.waitForTimeout(120);
+    const backdropClosed = await page.locator("#kggTceAddModal").evaluate(modal => modal.hidden);
+    if (!backdropClosed) await page.locator("#kggTceAddModal [data-tce-close]").tap();
+    assert(escapeClosed && backdropClosed, `add-exercise modal dismissal contract failed: ${JSON.stringify({ escapeClosed, backdropClosed })}`);
 
     await page.locator('.kgg-tce-add-card[data-tce-slot="0"]').click();
     await page.waitForSelector("#kggTceAddModal:not([hidden])", { timeout: 5000 });
@@ -191,19 +235,21 @@ async function waitForEditUi(page) {
 
     await page.locator('.kgg-tce-tool[data-tce-action="edit"][data-tce-slot="0"][data-tce-ex="2"]').click();
     await page.waitForSelector("#editorModal.open", { timeout: 5000 });
-    page.once("dialog", dialog => dialog.dismiss());
     await page.locator("#deleteExercise").click();
     await page.waitForTimeout(80);
+    const undoableDelete = await page.evaluate(() => window.KGGTherapyCockpit.getSlot(0));
+    assert(undoableDelete.exercises.length === 2, "editor delete did not remove the exercise before Undo");
+    await page.locator('#kggSharedUndoToast.is-visible button').click();
     const cancelledDelete = await page.evaluate(() => window.KGGTherapyCockpit.getSlot(0));
-    assert(cancelledDelete.exercises.length === 3 && cancelledDelete.exercises[2].name === "Abduktion live bearbeitet", `delete cancel removed an exercise: ${JSON.stringify(cancelledDelete)}`);
-    page.once("dialog", dialog => dialog.accept());
+    assert(cancelledDelete.exercises.length === 3 && cancelledDelete.exercises[2].name === "Abduktion live bearbeitet", `delete Undo did not restore original position: ${JSON.stringify(cancelledDelete)}`);
+    await page.locator('.kgg-tce-tool[data-tce-action="edit"][data-tce-slot="0"][data-tce-ex="2"]').click();
+    await page.waitForSelector("#editorModal.open", { timeout: 5000 });
     await page.locator("#deleteExercise").click();
     await page.waitForTimeout(250);
     const deletedFromEditor = await page.evaluate(() => window.KGGTherapyCockpit.getSlot(0));
     assert(deletedFromEditor.exercises.length === 2 && deletedFromEditor.exercises.every(ex => ex.name !== "Abduktion live bearbeitet"), `shared editor delete failed: ${JSON.stringify(deletedFromEditor)}`);
     await page.waitForSelector("#editorModal.open", { state: "hidden", timeout: 5000 });
 
-    page.once("dialog", dialog => dialog.accept());
     await page.locator('.kgg-tce-tool[data-tce-action="delete"][data-tce-slot="0"][data-tce-ex="0"]').click();
     await page.waitForTimeout(300);
     const deleted = await page.evaluate(() => window.KGGTherapyCockpit.getSlot(0));
@@ -250,7 +296,7 @@ async function waitForEditUi(page) {
     const previousSlot = await page.evaluate(() => ({ active: document.querySelector('.kgg-tce-slot-tab.active')?.dataset.tceSlot, visible: Array.from(document.querySelectorAll(".kgg-tc-card")).filter(card => getComputedStyle(card).display !== "none").map(card => card.dataset.tcCard) }));
     assert(previousSlot.active === "0" && JSON.stringify(previousSlot.visible) === JSON.stringify(["0"]), `mobile previous navigation failed: ${JSON.stringify(previousSlot)}`);
     assert(!pageErrors.length, `page errors: ${pageErrors.join(" | ")}`);
-    console.log(JSON.stringify({ status: "PASS", checks: ["mobile active slot", "tablet multi-card", "shared editor full fields", "progression add/rename/switch", "progression bank association", "progression reorder/delete", "invalid progression rejection", "plus add", "pointer reorder states", "touch reorder states", "delete cancel/confirm", "codec roundtrip", "slot isolation", "mobile slot navigation"], finalExerciseNames: deleted.exercises.map(ex => ex.name), codeChars: roundtrip.codeChars }, null, 2));
+    console.log(JSON.stringify({ status: "PASS", checks: ["mobile active slot", "tablet multi-card", "shared editor full fields", "progression add/rename/switch", "progression bank association", "progression reorder/delete", "invalid progression rejection", "plus add", "pointer reorder states", "touch reorder states", "delete with Undo and original-position restoration", "codec roundtrip", "slot isolation", "mobile slot navigation"], finalExerciseNames: deleted.exercises.map(ex => ex.name), codeChars: roundtrip.codeChars }, null, 2));
   } finally {
     await context.close();
     await browser.close();

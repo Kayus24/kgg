@@ -378,7 +378,7 @@
     if(open){
       html+='<div class="kgg-tc-exercise-detail"><div class="kgg-tc-values-head"><span>Satz</span><span>Vorwert</span><span>Heute</span></div>';
       for(var setIndex=0;setIndex<ex.sets;setIndex++){
-        var prev=ex.previous[setIndex]||["",""];var today=ex.today[setIndex]||["",""];html+='<div class="kgg-tc-set-row"><span class="kgg-tc-set-no">S'+(setIndex+1)+'</span><span class="kgg-tc-prev" aria-label="Vorwert">'+htmlEscape(valuesLabel(prev,ex))+'</span>';
+        var prev=ex.previous[setIndex]||["",""];var today=ex.today[setIndex]||["",""];html+='<div class="kgg-tc-set-row"><span class="kgg-tc-set-no">S'+(setIndex+1)+'</span><button type="button" class="kgg-tc-prev" data-tc-action="use-previous" data-tc-slot="'+slotIndex+'" data-tc-ex="'+exerciseIndex+'" data-tc-set="'+setIndex+'" aria-label="Vorwerte für Satz '+(setIndex+1)+' übernehmen" '+(!prev[0]&&!prev[1]?'disabled':'')+'>'+htmlEscape(valuesLabel(prev,ex))+'</button>';
         ["load","metric"].forEach(function(field){var val=field==="load"?today[0]:today[1],active=activeInput&&activeInput.slot===slotIndex&&activeInput.exercise===exerciseIndex&&activeInput.set===setIndex&&activeInput.field===field;html+='<button type="button" class="kgg-tc-field '+(active?"active ":"")+(val?"":"empty")+'" data-tc-action="input" data-tc-slot="'+slotIndex+'" data-tc-ex="'+exerciseIndex+'" data-tc-set="'+setIndex+'" data-tc-field="'+field+'" aria-label="Heute '+htmlEscape(field==="load"?(ex.loadUnit||"kg"):(ex.metricUnit||"Wdh"))+'">'+htmlEscape(val||"—")+'</button>';if(active)html+=renderPad(slotIndex,exerciseIndex,setIndex,field,ex);});
         html+='</div>';
       }
@@ -392,6 +392,7 @@
     return html+'</div></div><div class="kgg-tc-card-foot"><button type="button" class="kgg-tc-btn primary" data-tc-action="finish" data-tc-slot="'+slotIndex+'">Plan fertig</button></div></article>';
   }
   function render(){
+    var scrollPositions={};if(board)board.querySelectorAll('.kgg-tc-card[data-tc-card]').forEach(function(card){var scroller=card.querySelector('.kgg-tc-scroll');if(scroller)scrollPositions[card.dataset.tcCard]=scroller.scrollTop;});
     var count=slotCount(),button=document.getElementById("kggTherapyCockpitButton");
     if(button)button.textContent=count?"Cockpit "+count+"/3":"Cockpit";
     if(typeof window.KGGTherapyCockpitEntryVisibilitySync==="function")window.KGGTherapyCockpitEntryVisibilitySync();
@@ -400,6 +401,7 @@
     if(notice)content+='<div class="kgg-tc-notice" role="status">'+htmlEscape(notice)+'</div>';
     if(!count){content+='<div class="kgg-tc-empty"><div class="kgg-tc-empty-box"><strong>Noch kein Cockpit-Link geladen</strong><span>Bis zu drei begleitete Trainingspläne können unabhängig nebeneinander geöffnet werden.</span><div style="margin-top:14px"><button type="button" class="kgg-tc-btn primary" data-tc-action="import-open">Cockpit-Link laden</button></div></div></div>';board.innerHTML=content;return;}
     var gridClass=count===1?"one":count===2?"two":"";content+='<div class="kgg-tc-grid '+gridClass+'">';for(var i=0;i<MAX_SLOTS;i++)if(slots[i])content+=renderCard(slots[i],i);content+='</div>';board.innerHTML=content;
+    board.querySelectorAll('.kgg-tc-card[data-tc-card]').forEach(function(card){var scroller=card.querySelector('.kgg-tc-scroll');if(scroller&&scrollPositions[card.dataset.tcCard]!=null)scroller.scrollTop=scrollPositions[card.dataset.tcCard];});
     setTimeout(function(){if(!activeInput)return;var active=board.querySelector('.kgg-tc-field.active');if(active&&active.scrollIntoView)active.scrollIntoView({block:"nearest",inline:"nearest"});},0);
   }
   function closePad(){if(activeInput){activeInput=null;render();}}
@@ -432,7 +434,7 @@
     var lines=["KGG Therapie-Cockpit · "+new Date().toLocaleDateString("de-DE"),"Patient: "+slot.name,"Plan fertig · heutige Werte"];slot.exercises.forEach(function(ex){lines.push("",ex.name);ex.today.forEach(function(pair,index){lines.push("S"+(index+1)+": "+valuesLabel(pair,ex));});});lines.push("","Neuer Cockpit-Link:",link);return lines.join("\n");
   }
   function showOutput(results){
-    var modal=document.getElementById("kggTherapyCockpitOutputModal"),output=document.getElementById("kggTherapyCockpitOutput");if(!modal||!output)return;if(!slotCount())setCockpitOpen(true);output.value=results.map(function(result){return result.text+"\n\nStatus Planquelle: "+result.hook;}).join("\n\n--------------------\n\n");modal.hidden=false;
+    var modal=document.getElementById("kggTherapyCockpitOutputModal"),output=document.getElementById("kggTherapyCockpitOutput");if(!modal||!output)return;if(!slotCount())setCockpitOpen(true);var allUpdated=results.length>0&&results.every(function(result){return result.hook==="updated";}),title=modal.querySelector("h2"),hint=modal.querySelector("p");if(title)title.textContent=allUpdated?"Dokumentation bereit":"Dokumentationstext bereit";if(hint)hint.textContent=allUpdated?"Die verknüpften Planquellen wurden mit der vorhandenen Aktion aktualisiert.":"Link und Text sind bereit. Mindestens eine Planquelle wurde nicht übernommen; bitte den Status im Text prüfen.";var labels={updated:"Planquelle aktualisiert",plan_mismatch:"Planquelle nicht übernommen: Plan stimmt nicht überein",exercise_mismatch:"Planquelle nicht übernommen: keine Übung zugeordnet",hook_unavailable:"Planquelle nicht übernommen: Aktualisierung nicht verfügbar",hook_failed:"Planquelle nicht übernommen: Aktualisierung fehlgeschlagen","nicht übernommen":"Planquelle nicht übernommen"};output.value=results.map(function(result){return result.text+"\n\n"+(labels[result.hook]||"Planquelle nicht übernommen");}).join("\n\n--------------------\n\n");modal.hidden=false;
   }
   function finishSlot(index,skipRender){
     var slot=slots[index];if(!slot)return null;var link,hook="nicht übernommen";try{link=makeLink(payloadFromSlot(slot,true));hook=dispatchPlanHook(slot);}catch(e){notice="Abschluss fehlgeschlagen ("+(e.code||"invalid_payload")+").";if(!skipRender)render();return null;}
@@ -484,6 +486,7 @@
   function handleClick(event){
     var target=event.target&&event.target.closest?event.target.closest("[data-tc-action]"):null;if(!target||!root.contains(target))return;var action=target.getAttribute("data-tc-action"),slot=numberAttribute(target,"data-tc-slot"),exercise=numberAttribute(target,"data-tc-ex"),set=numberAttribute(target,"data-tc-set"),field=target.getAttribute("data-tc-field");
     if(action==="normal"){closeView();return;}
+    if(action==="use-previous"){var previousExercise=slots[slot]&&slots[slot].exercises[exercise];if(previousExercise&&previousExercise.previous[set]){previousExercise.today[set]=previousExercise.previous[set].slice();activeInput=null;render();}return;}
     if(action==="import-open"){document.getElementById("kggTherapyCockpitImportModal").hidden=false;setTimeout(function(){var input=document.getElementById("kggTherapyCockpitImportInput");if(input)input.focus();},0);return;}
     if(action==="import-cancel"){document.getElementById("kggTherapyCockpitImportModal").hidden=true;return;}
     if(action==="import-submit"){var input=document.getElementById("kggTherapyCockpitImportInput"),value=input&&input.value||"";try{importCode(value);document.getElementById("kggTherapyCockpitImportModal").hidden=true;if(input)input.value="";}catch(e){notify("Link nicht geladen: "+(e.code||"invalid_format"));}return;}

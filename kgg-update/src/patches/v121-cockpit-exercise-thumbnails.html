@@ -1,0 +1,47 @@
+<!-- KGG PATCH START kgg-v121-cockpit-exercise-thumbnails -->
+<style id="kgg-v121-cockpit-exercise-thumbnails-style">
+.kgg-tc-thumb img{display:block;width:100%;height:100%;object-fit:contain;}
+.kgg-tc-thumb[data-media-state="missing"]{font-size:18px;color:#607086;}
+</style>
+<script id="kgg-v121-cockpit-exercise-thumbnails">
+(function(){
+  "use strict";
+  const PATCH_ID="kgg-v121-cockpit-exercise-thumbnails";
+  const visited=new WeakSet(),urls=new Map();
+  function candidates(ex){
+    const bridge=window.KGGProgressionEditorBridge;
+    let catalog=[];try{catalog=bridge&&bridge.catalog?bridge.catalog():[];}catch(e){}
+    let plan=[];try{const current=window.KGGDataStore.getCurrentPlan();plan=current.exercises||[];}catch(e){}
+    const owners=plan.concat(catalog),owner=owners.find(item=>String(item.name||'')===String(ex.name||''));
+    const variant=(ex.progressionVariants||[]).find(v=>v.id===ex.activeProgressionId);
+    const list=variant&&variant.media&&variant.media.length?variant.media:ex.media&&ex.media.length?ex.media:owner&&owner.media||[];
+    return list.filter(m=>m&&(m.type==='image'||/^image\//.test(m.mimeType||m.mime||''))).map(m=>{const full=owners.flatMap(o=>o.media||[]).find(x=>x.id&&x.id===m.id);return Object.assign({},full||{},m);});
+  }
+  async function hydrate(node,ex){
+    if(visited.has(node))return;visited.add(node);node.dataset.mediaState='missing';node.textContent='▧';node.title='Kein Bild verfügbar';
+    for(const media of candidates(ex)){
+      try{
+        let src='',local=false;const bridge=window.KGGProgressionEditorBridge;
+        if(media.id&&bridge&&bridge.readMedia){const blob=await bridge.readMedia(media);if(blob){src=URL.createObjectURL(blob);local=true;}}
+        if(!src&&!media.crypto&&/^https?:\/\//i.test(media.downloadUrl||''))src=media.downloadUrl;
+        if(!src)continue;
+        if(!node.isConnected){if(local)URL.revokeObjectURL(src);return;}
+        const img=new Image();img.alt=ex.name;img.referrerPolicy='no-referrer';img.src=src;
+        await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;if(img.complete&&img.naturalWidth)resolve();});
+        if(!node.isConnected){if(local)URL.revokeObjectURL(src);return;}
+        node.replaceChildren(img);node.dataset.mediaState='ready';node.title=ex.name;if(local)urls.set(node,src);return;
+      }catch(e){/* Keep an explicit placeholder for unavailable media. */}
+    }
+  }
+  function sync(){
+    urls.forEach((url,node)=>{if(!node.isConnected){URL.revokeObjectURL(url);urls.delete(node);}});
+    const api=window.KGGTherapyCockpit;if(!api)return;
+    document.querySelectorAll('.kgg-tc-card[data-tc-card]').forEach(card=>{const slot=api.getSlot(Number(card.dataset.tcCard));if(!slot)return;card.querySelectorAll('.kgg-tc-exercise').forEach((article,index)=>{const thumb=article.querySelector('.kgg-tc-thumb');if(thumb&&slot.exercises[index])hydrate(thumb,slot.exercises[index]);});});
+  }
+  function boot(){const board=document.getElementById('kggTherapyCockpitBoard');if(!board){setTimeout(boot,50);return;}new MutationObserver(sync).observe(board,{childList:true,subtree:true});sync();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES[PATCH_ID]={installed:true};
+})();
+</script>
+<!-- KGG PATCH END kgg-v121-cockpit-exercise-thumbnails -->

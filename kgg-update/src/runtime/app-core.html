@@ -1,10 +1,10 @@
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v096_patient_english_names';
+  const VERSION='KGG_GITHUB_UPDATE_v124_cockpit_main_integration';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v096","buildTime":"2026-09-13T19:46:15Z","buildCode":"module-v096-patient-english-names","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v124","buildTime":"2026-10-19T23:43:59Z","buildCode":"module-v124-cockpit-main-integration","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -1528,7 +1528,10 @@
     bankSelectMode=keepBankOpen?'append':'replaceActive';
   }
   function addExercise(ex){const item=ensureUiExerciseShape(ex||{}); state.plan.push(item); syncStatePlanToStore('ui_add_exercise'); syncTextInputFromPlan('ui_add_exercise'); state.bankOpen=false; state.liveDraftId=null; save(); render();}
-  function removeExercise(localId){const input=$('exerciseInput'); const keepTrailingComma=!!(input&&/,\s*$/.test(input.value)); state.plan=state.plan.filter(x=>(x.localId||x.id)!==localId); if(state.liveDraftId===localId)state.liveDraftId=null; if(state.sortMenuId===localId)state.sortMenuId=null; syncStatePlanToStore('ui_remove_exercise'); syncTextInputFromPlan('ui_remove_exercise'); restoreTrailingCommaAfterPlanSync(keepTrailingComma); save(); render();}
+  function planUndoSignature(plan){return JSON.stringify((Array.isArray(plan)?plan:[]).map(function(ex){return {id:String(ex&&(ex.localId||ex.id)||''),name:String(ex&&ex.name||''),sets:Number(ex&&ex.sets)||0,side:String(ex&&ex.side||''),load:String(ex&&(ex.weightUnit||ex.loadUnit)||''),metric:String(ex&&(ex.unit||ex.metricUnit)||''),startLoad:String(ex&&ex.startLoad||''),startMetric:String(ex&&ex.startMetric||''),previous:JSON.stringify(ex&&ex.previous||[]),today:JSON.stringify(ex&&ex.today||[]),progression:JSON.stringify((ex&&ex.progressionVariants||[]).map(function(stage){return [stage&&stage.id||'',stage&&stage.name||''];})),activeProgression:String(ex&&ex.activeProgressionId||''),media:JSON.stringify((ensureExerciseMediaList(ex)||[]).map(function(item){return item&&item.id||'';}))};}));}
+  function planUndoOwner(){let plan={};try{plan=ensureKGGDataStore().getCurrentPlan()||{};}catch(err){}return {id:String(plan.id||state.planId||''),updatedAt:String(plan.updatedAt||''),patient:String(plan.patient&&plan.patient.name||state.patient&&state.patient.name||''),date:String(plan.patient&&plan.patient.date||state.patient&&state.patient.date||''),signature:planUndoSignature(state.plan)};}
+  function samePlanUndoOwner(left,right){return !!left&&!!right&&left.id===right.id&&left.updatedAt===right.updatedAt&&left.patient===right.patient&&left.date===right.date&&left.signature===right.signature;}
+  function removeExercise(localId){const input=$('exerciseInput'),keepTrailingComma=!!(input&&/,\s*$/.test(input.value)),removedIndex=(state.plan||[]).findIndex(x=>(x.localId||x.id)===localId),removed=removedIndex>=0?state.plan[removedIndex]:null,restoredDraftId=state.liveDraftId;state.plan=state.plan.filter(x=>(x.localId||x.id)!==localId);if(state.liveDraftId===localId)state.liveDraftId=null;if(state.sortMenuId===localId)state.sortMenuId=null;syncStatePlanToStore('ui_remove_exercise');syncTextInputFromPlan('ui_remove_exercise');restoreTrailingCommaAfterPlanSync(keepTrailingComma);save();render();if(removed&&window.KGGSharedUndo&&typeof window.KGGSharedUndo.show==='function'){const owner=planUndoOwner();window.KGGSharedUndo.show('Übung aus dem Plan entfernt',()=>{if(!samePlanUndoOwner(owner,planUndoOwner())||(state.plan||[]).some(item=>(item.localId||item.id)===localId))return;const at=Math.max(0,Math.min(removedIndex,(state.plan||[]).length));state.plan.splice(at,0,removed);if(restoredDraftId===localId)state.liveDraftId=localId;syncStatePlanToStore('ui_undo_remove_exercise');syncTextInputFromPlan('ui_undo_remove_exercise');save();render();},5000);}}
   function clearInputAndRemoveLiveTextExercises(){state.plan=[]; state.liveDraftId=null; $('exerciseInput').value=''; resizeExerciseInputToContent(); state.bankOpen=false; syncStatePlanToStore('ui_clear_text_master_plan'); save(); render();}
   function confirmExerciseInput(){syncPlanFromTextInput('ui_confirm_text_master',{finalizeShortTextEdit:true});}
   function upsertLiveExerciseFromText(){const input=$('exerciseInput'); const value=String(input&&input.value||''); const parts=splitPlanText(value).map(p=>String(p.text||'').trim()).filter(Boolean); const committed=/[,;\\n]\\s*$/.test(value)||parts.length>1; if(!committed){const hadDraft=!!state.liveDraftId||(state.plan||[]).some(ex=>ex&&ex.liveDraft); if(hadDraft){state.plan=(state.plan||[]).filter(ex=>!(ex&&ex.liveDraft)); state.liveDraftId=null; syncStatePlanToStore('ui_textfield_unconfirmed_not_plan'); save();} render(); return;} syncPlanFromTextInput('ui_textfield_master_input');}
@@ -1552,7 +1555,7 @@
       typeof window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive==='function'&&
       window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive());
   }
-  function isTabletLayout(){return !!((window.matchMedia&&window.matchMedia('(min-width:760px)').matches)||isLandscapeTabletViewport());}
+  function isTabletLayout(){if(document.body.classList.contains('kggTcMainPanePhone'))return false;return !!((window.matchMedia&&window.matchMedia('(min-width:760px)').matches)||isLandscapeTabletViewport());}
   let tabletSoftKeyboardBaseHeight=0;
   function isKeyboardRelevantField(el){
     if(!el||el.closest&&el.closest('.modal'))return false;
@@ -1586,7 +1589,7 @@
       window.visualViewport.addEventListener('scroll',()=>{if(!isPhoneLayout())schedule();});
     }
   }
-  function isPhoneLayout(){return !!(window.matchMedia&&window.matchMedia('(max-width:759px)').matches&&!isLandscapeTabletViewport());}
+  function isPhoneLayout(){if(document.body.classList.contains('kggTcMainPanePhone'))return true;return !!(window.matchMedia&&window.matchMedia('(max-width:759px)').matches&&!isLandscapeTabletViewport());}
   let kggPhoneScrollTimer=0;
   let kggPhoneTouchStart=null;
   let kggPhoneLastMoveAt=0;
@@ -2099,13 +2102,30 @@
           '</div>'+
         '</div>';
       }).join('');
-      list.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>removeExercise(b.dataset.del));
+      bindPlanDeleteUndo(list);
+      list.querySelectorAll('[data-del]').forEach(b=>{b.type='button';});
+      list.querySelectorAll('[data-planedit]').forEach(b=>{b.type='button';});
       list.querySelectorAll('[data-planedit]').forEach(b=>b.onclick=()=>openEditor(state.plan.find(x=>(x.localId||x.id)===b.dataset.planedit)));
       bindPlanSwipeDelete(list);
       bindPlanReorderButtons(list);
       hydratePlanThumbnails(list);
     }
     renderScannedPlansInbox();
+  }
+
+  function bindPlanDeleteUndo(list){
+    if(!list||list.dataset.kggPlanDeleteUndoBound==='1')return;
+    list.dataset.kggPlanDeleteUndoBound='1';
+    list.addEventListener('click',ev=>{
+      const button=ev.target&&ev.target.closest?ev.target.closest('[data-del]'):null;
+      if(!button||!list.contains(button))return;
+      const card=button.closest('.planCard[data-plan-id]');
+      if(card&&Number(card.dataset.swipeSuppressClickUntil||0)>Date.now()){ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation();return;}
+      const id=String(button.dataset.del||'');
+      if(!id)return;
+      ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation();
+      removeExercise(id);
+    },true);
   }
 
   function bindPlanReorderButtons(list){
@@ -2250,7 +2270,10 @@
         card.style.setProperty('--kgg-plan-swipe-x',(dir*(card.offsetWidth+96))+'px');
         card.style.transform='translateX(var(--kgg-plan-swipe-x,0px))';
         card.style.opacity='0';
-        setTimeout(()=>{document.body.classList.remove('kggPlanCardSwiping');removeExercise(id);},190);
+        setTimeout(()=>{
+          document.body.classList.remove('kggPlanCardSwiping');
+          removeExercise(id);
+        },190);
         return;
       }
       card.style.transition='transform .22s cubic-bezier(.2,.9,.2,1), opacity .18s ease, box-shadow .18s ease';
@@ -7741,6 +7764,7 @@
       return patientDecryptMedia(media,record.blob);
     }
   };
+  window.KGGMainPaneLayoutRefresh=function(){applyTabletLayoutSettings();render();};
   /* KGG_LOGIC_SMOKE_BOOT_BOUNDARY */
   installKggV383UiFlowStability();
   installKggV388AndroidFlowFixes();

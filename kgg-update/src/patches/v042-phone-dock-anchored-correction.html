@@ -118,7 +118,7 @@
   var PHONE_QUERY="(max-width:759px)";
   var observer=null;
   function byId(id){return document.getElementById(id);}
-  function isPhone(){return !!(window.matchMedia&&window.matchMedia(PHONE_QUERY).matches&&!(window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive()));}
+  function isPhone(){if(document.body.classList.contains('kggTcMainPanePhone'))return true;return !!(window.matchMedia&&window.matchMedia(PHONE_QUERY).matches&&!(window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive()));}
   function closePhotoMenu(){
     if(document.body)document.body.classList.remove("kggPhonePhotoMenuOpen");
     var toggle=byId("phonePhotoMenuToggle");

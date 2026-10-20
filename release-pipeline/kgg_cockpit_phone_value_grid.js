@@ -1,0 +1,21 @@
+"use strict";
+const fs=require('fs'),path=require('path');
+const {chromium}=require('playwright');
+const {pathToFileURL}=require('url');const root=path.resolve(__dirname,'..');
+const dir=path.join(process.env.KGG_SMOKE_SCREENSHOT_DIR||path.join(root,'tmp/cockpit-layout-canaries'),'phone-value-grid');fs.mkdirSync(dir,{recursive:true});
+(async()=>{const browser=await chromium.launch();const results=[];
+ try{for(const width of [320,390,430,759]){
+  const viewport={width,height:width===320?700:857};const context=await browser.newContext({viewport,screen:viewport,isMobile:true,hasTouch:true});
+  await context.route(/^https?:\/\//,r=>r.abort());const page=await context.newPage();
+  await page.addInitScript(()=>localStorage.setItem('kgg_pwa_install_prompt_seen_v1','synthetic'));
+  await page.goto(pathToFileURL(path.join(root,'kgg-update/index.html')).href);
+  await page.locator('#adminSecretsModal.open').waitFor();await page.locator('#closeAdminSecrets').tap();
+  await page.evaluate(()=>{const a=window.KGGTherapyCockpit;a.importCode(a.encode({planId:'synthetic-values',name:'Synthetic',exercises:a.registry.entries().slice(0,2).map(e=>({id:e.id,sets:2,previous:[['10','12'],['10','12']],today:[['10','12'],['10','12']]}))}));});
+  await page.locator('.kgg-tc-card-toggle').first().tap();await page.locator('.kgg-tc-field[data-tc-field="load"]').first().tap();
+  const data=await page.evaluate(()=>{const row=document.querySelector('.kgg-tc-set-row'),rect=s=>{const e=row.querySelector(s),r=e.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height,bottom:r.bottom};},pad=row.querySelector('.kgg-tc-pad'),ok=pad.querySelector('[data-tc-key="OK"]'),r=ok.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return {number:rect('.kgg-tc-set-no'),previous:rect('.kgg-tc-prev'),load:rect('.kgg-tc-field[data-tc-field="load"]'),metric:rect('.kgg-tc-field[data-tc-field="metric"]'),pad:rect('.kgg-tc-pad'),floating:pad.classList.contains('kgg-tc-pad-floating'),visibleValue:pad.querySelector('.kgg-tc-pad-current')?.textContent,okReachable:r.bottom<=innerHeight&&!!hit&&ok.contains(hit),keys:[...row.querySelectorAll('.kgg-tc-key')].map(e=>({w:e.getBoundingClientRect().width,h:e.getBoundingClientRect().height})),overflow:document.documentElement.scrollWidth>innerWidth+1};});
+  const aligned=Math.abs(data.load.y-data.metric.y)<=1&&(data.floating?!!data.visibleValue&&data.okReachable:data.pad.y>=Math.max(data.load.bottom,data.metric.bottom)-1);
+  const targets=[data.load,data.metric,...data.keys].every(r=>r.w>=44&&r.h>=44);
+  const result={width,status:aligned&&targets&&!data.overflow?'PASS':'FAIL',...data};results.push(result);console.log(JSON.stringify(result));
+  await page.screenshot({path:path.join(dir,`phone-values-${'actual'}-${width}.png`)});await context.close();
+ }}finally{await browser.close();}fs.writeFileSync(path.join(dir,`phone-values-${'actual'}-report.json`),JSON.stringify({sha256:require('crypto').createHash('sha256').update(fs.readFileSync(path.join(root,'kgg-update/index.html'))).digest('hex'),results},null,2));if(results.some(r=>r.status==='FAIL'))process.exitCode=1;
+})().catch(e=>{console.error(e.stack);process.exitCode=1;});

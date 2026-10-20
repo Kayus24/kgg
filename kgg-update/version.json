@@ -1,7 +1,7 @@
 {
-  "versionCode": 96,
-  "versionName": "1.0.96-patient-english-names",
-  "indexUrl": "index.html?v=96",
-  "sha256": "d9e4edcda8afd4cdfc821b4e9d155483a726cec4e9c4603e4eeee4b94a0bf2d3",
-  "notes": "v096: Englische Patienten-Anzeigenamen im Uebungseditor pflegen; deutsche Plan- und QR-Namen bleiben erhalten."
+  "versionCode": 124,
+  "versionName": "1.0.124-cockpit-main-integration",
+  "indexUrl": "index.html?v=124",
+  "sha256": "fc12291a3568c7994abd13a7f174c9769f1209595f7eb9895ad4995e521d1fe9",
+  "notes": "v124: Gesichertes Cockpit v096-v123 mit Main-Englischfunktion zusammengefuehrt; beide v096-Historien bleiben getrennte Evidenz, kein Beta- oder Alpha-Release."
 }

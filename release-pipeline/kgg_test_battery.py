@@ -164,6 +164,25 @@ def run_therapy_cockpit_browser() -> None:
     run_playwright_script("kgg_therapy_cockpit_browser_smoke.js")
 
 
+def run_cockpit_device_canaries() -> None:
+    log("== Cockpit device layout touch canaries ==")
+    run_playwright_script("kgg_cockpit_device_canaries.js")
+
+
+def run_cockpit_layout_interactions() -> None:
+    log("== Cockpit main pane, value row and gesture contracts ==")
+    for script in (
+        "kgg_cockpit_stage_undo_smoke.js",
+        "kgg_cockpit_main_phone_flow.js",
+        "kgg_cockpit_narrow_readability.js",
+        "kgg_cockpit_phone_value_grid.js",
+        "kgg_cockpit_seam_gesture.js",
+        "kgg_cockpit_reorder_parity.js",
+        "kgg_cockpit_reported_scenarios.js",
+    ):
+        run_playwright_script(script)
+
+
 def run_ticket_037_real_plan_browser() -> None:
     global TICKET_037_PLAYWRIGHT_PREPARED
     npm = npm_executable()
@@ -930,6 +949,20 @@ TEST_REGISTRY = [
         "suite": "therapy-cockpit",
         "reason": "Cockpit exercises must be editable per slot: add from the existing bank, reorder with the visible drag handle, edit progression stages, delete, and preserve the result through the existing link codec on phone and tablet.",
         "run": run_therapy_cockpit_live_edit_browser,
+    },
+    {
+        "id": "cockpit-device-layout-touch-critical",
+        "level": "critical",
+        "suite": "therapy-cockpit",
+        "reason": "Fresh phone/tablet contexts with one to three plans must preserve field commits, real Back/Finish/editor hit testing and slot counts across responsive layouts.",
+        "run": run_cockpit_device_canaries,
+    },
+    {
+        "id": "cockpit-layout-interactions-critical",
+        "level": "critical",
+        "suite": "therapy-cockpit",
+        "reason": "Two-slot main phone presentation, touch targets, value rows, seam cancellation and visual reorder parity must preserve plan and slot state.",
+        "run": run_cockpit_layout_interactions,
     },
     {
         "id": "patient-continuous-days-critical",

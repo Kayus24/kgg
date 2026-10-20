@@ -1,0 +1,92 @@
+<!-- KGG PATCH START kgg-v107-cockpit-seam-pull-handle -->
+<!-- Cockpit-Lasche an der Trennkante -->
+<style id="kgg-v107-cockpit-seam-pull-handle-style">
+@media(min-width:760px){
+  body.kggTherapyCockpitOpen.kggTcTabletSplit #kggTherapyCockpitRoot{padding-left:44px!important;box-sizing:border-box!important;}
+  body.kggTherapyCockpitOpen #kggTherapyCockpitButton.kggTcTabletEdge{
+    left:var(--kgg-cockpit-seam,66.666667vw)!important;right:auto!important;
+    width:44px!important;min-width:44px!important;max-width:44px!important;
+    border-left:0!important;border-right:1px solid #d9e2ec!important;border-radius:0 12px 12px 0!important;
+    transform:translateY(-50%)!important;touch-action:none!important;user-select:none!important;cursor:ew-resize!important;
+  }
+  body.kggTherapyCockpitOpen.kggTcSlots3 #kggTherapyCockpitButton.kggTcTabletEdge{transform:translateY(-50%)!important;}
+  body.kggTherapyCockpitOpen.kggTcTabletSplit.kggTcSeamDragging .app.app{
+    display:block!important;visibility:visible!important;pointer-events:none!important;transition:none!important;
+    width:var(--kgg-cockpit-cover-width)!important;max-width:none!important;z-index:2147481400!important;
+  }
+  #kggTherapyCockpitButton.kggTcTabletEdge:focus-visible{outline:3px solid #1d4ed8!important;outline-offset:2px!important;}
+}
+</style>
+<script id="kgg-v107-cockpit-seam-pull-handle">
+(function(){
+  "use strict";
+  var api,button,drag=null,suppressClickUntil=0;
+  var contract={movementAxis:"horizontal",movementDirections:{positive:"cover cockpit with main KGG app",negative:"settle back"},deleteAxis:"vertical",deleteDirections:"none: navigation handle never deletes content",handleActivationMs:80,surfaceHoldMs:null,axisLockPx:10,actionThresholdRatio:.28,undoDurationMs:0};
+  function tablet(){return window.matchMedia("(min-width:760px)").matches;}
+  function open(){return document.body.classList.contains("kggTherapyCockpitOpen");}
+  function sync(){
+    if(!button||!tablet()||!open()||drag)return;
+    var root=document.getElementById("kggTherapyCockpitRoot");if(!root)return;
+    document.body.style.setProperty("--kgg-cockpit-seam",root.getBoundingClientRect().left+"px");
+    button.textContent="KGG ›";button.setAttribute("aria-label","Haupt-KGG anzeigen – nach rechts ziehen oder antippen");
+    button.title="Nach rechts ziehen: Haupt-KGG über das Cockpit ziehen";
+  }
+  function reset(){
+    var previous=drag;drag=null;
+    document.body.classList.remove("kggTcSeamDragging");
+    document.body.style.removeProperty("--kgg-cockpit-cover-width");
+    if(previous){previous.styles.forEach(function(item){if(item.value)previous.app.style.setProperty(item.name,item.value,item.priority);else previous.app.style.removeProperty(item.name);});try{button.releasePointerCapture(previous.id);}catch(ignore){}}
+    sync();
+  }
+  function down(event){
+    if(!tablet()||!open()||event.isPrimary===false||(event.button!=null&&event.button!==0))return;
+    var root=document.getElementById("kggTherapyCockpitRoot");if(!root)return;
+    var rect=root.getBoundingClientRect();
+    var app=document.querySelector(".app");if(!app)return;
+    drag={id:event.pointerId,x:event.clientX,y:event.clientY,start:Date.now(),seam:rect.left,remaining:rect.width,delta:0,axis:null,app:app,styles:["width","right","z-index"].map(function(name){return {name:name,value:app.style.getPropertyValue(name),priority:app.style.getPropertyPriority(name)};})};
+    button.setPointerCapture(event.pointerId);
+  }
+  function move(event){
+    if(!drag||event.pointerId!==drag.id)return;
+    var dx=event.clientX-drag.x,dy=event.clientY-drag.y;
+    if(!drag.axis&&Math.max(Math.abs(dx),Math.abs(dy))>=contract.axisLockPx){
+      drag.axis=Math.abs(dx)>Math.abs(dy)*1.25?"horizontal":"cancel";
+    }
+    if(!drag.axis)return;
+    suppressClickUntil=Date.now()+500;
+    if(drag.axis!=="horizontal"||Date.now()-drag.start<contract.handleActivationMs)return;
+    event.preventDefault();
+    drag.delta=Math.max(0,Math.min(drag.remaining,dx));
+    document.body.classList.add("kggTcSeamDragging");
+    document.body.style.setProperty("--kgg-cockpit-cover-width",(drag.seam+drag.delta)+"px");
+    drag.app.style.setProperty("width",(drag.seam+drag.delta)+"px","important");
+    drag.app.style.setProperty("right","auto","important");
+    drag.app.style.setProperty("z-index","2147481400","important");
+    document.body.style.setProperty("--kgg-cockpit-seam",Math.min(innerWidth-44,drag.seam+drag.delta)+"px");
+  }
+  function up(event){
+    if(!drag||event.pointerId!==drag.id)return;
+    var commit=drag.axis==="horizontal"&&drag.delta>=Math.max(44,drag.remaining*contract.actionThresholdRatio);
+    reset();if(commit)api.close();
+  }
+  function install(){
+    api=window.KGGTherapyCockpit;button=document.getElementById("kggTherapyCockpitButton");
+    if(!api||!button){setTimeout(install,50);return;}
+    var previous=window.KGGTherapyCockpitEntryVisibilitySync;
+    window.KGGTherapyCockpitEntryVisibilitySync=function(){if(typeof previous==="function")previous();sync();requestAnimationFrame(sync);};
+    new MutationObserver(function(){requestAnimationFrame(sync);}).observe(document.body,{attributes:true,attributeFilter:["class"]});
+    button.addEventListener("pointerdown",down);
+    button.addEventListener("pointermove",move,{passive:false});
+    button.addEventListener("pointerup",up);
+    button.addEventListener("pointercancel",reset);
+    button.addEventListener("lostpointercapture",function(){if(drag)reset();});
+    button.addEventListener("click",function(event){if(Date.now()<suppressClickUntil){event.preventDefault();event.stopImmediatePropagation();}},{capture:true});
+    window.addEventListener("resize",function(){reset();setTimeout(sync,160);},{passive:true});
+    sync();setTimeout(sync,200);
+    window.KGG_PATCHES=window.KGG_PATCHES||{};
+    window.KGG_PATCHES["kgg-v107-cockpit-seam-pull-handle"]={installed:true,version:1,contract:contract};
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});else install();
+})();
+</script>
+<!-- KGG PATCH END kgg-v107-cockpit-seam-pull-handle -->

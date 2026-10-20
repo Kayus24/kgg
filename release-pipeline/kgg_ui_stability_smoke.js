@@ -1671,38 +1671,15 @@ async function browserUiMiniSeriesSuite(caseName) {
         await page.locator("#tabletMenuBtn").click();
         await page.waitForFunction(() => !document.body.classList.contains("tabletMenuOpen"), null, { timeout: 10000 });
         if (caseMatches(caseName, ["tablet-card-reorder"])) {
-          const addCard = page.locator("#kggPlanAddExerciseCard");
-          await addCard.waitFor({ state: "visible", timeout: 10000 });
-          const addCardProbe = await addCard.evaluate((node) => {
-            const rect = node.getBoundingClientRect();
-            return {
-              text: node.textContent.trim(),
-              ariaLabel: node.getAttribute("aria-label"),
-              width: Math.round(rect.width),
-              height: Math.round(rect.height),
-              display: getComputedStyle(node).display,
-              borderStyle: getComputedStyle(node).borderStyle,
-            };
-          });
-          if (
-            !addCardProbe.text.includes("+") ||
-            !addCardProbe.text.includes("Übung hinzufügen") ||
-            addCardProbe.ariaLabel !== "Neue Übung hinzufügen" ||
-            addCardProbe.width < 160 ||
-            addCardProbe.height < 40 ||
-            addCardProbe.display === "none" ||
-            addCardProbe.borderStyle !== "dashed"
-          ) {
-            fail(`Plan add-card is not visible/usable: ${JSON.stringify(addCardProbe)}`);
-          }
-          await addCard.click();
-          await page.waitForFunction(() => document.activeElement && document.activeElement.id === "exerciseInput", null, { timeout: 5000 });
-          const addCardAction = await page.evaluate(() => ({
-            focused: document.activeElement ? document.activeElement.id : "",
-            bankLabel: document.getElementById("bankToggle")?.getAttribute("aria-label") || "",
+          const addCardCount = await page.locator("#kggPlanAddExerciseCard").count();
+          if (addCardCount !== 0) fail(`Normal plan must not render the removed add-card; found ${addCardCount}`);
+          const addPath = await page.evaluate(() => ({
+            exerciseInput: !!document.getElementById("exerciseInput"),
+            bankToggle: !!document.getElementById("bankToggle"),
+            bankContent: !!document.getElementById("bankContent"),
           }));
-          if (addCardAction.focused !== "exerciseInput") {
-            fail(`Plan add-card did not focus the existing exercise composer: ${JSON.stringify(addCardAction)}`);
+          if (!addPath.exerciseInput || !addPath.bankToggle || !addPath.bankContent) {
+            fail(`Existing exercise-add paths disappeared with add-card removal: ${JSON.stringify(addPath)}`);
           }
         }
         const card = page.locator("#planList .planCard[data-plan-id]").first();

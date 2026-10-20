@@ -90,6 +90,8 @@ async function main() {
   await page.route(pwaMetaUrl, (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(pwaMeta) }));
   try {
     await page.goto("file://" + HTML_PATH.replace(/\\/g, "/"), { waitUntil: "domcontentloaded", timeout: 60000 });
+    await page.locator('#adminSecretsModal.open').waitFor();
+    await page.locator('#closeAdminSecrets').click();
     await page.evaluate(({ job, staleApkContextA }) => {
       window.KGGPreviewContext = staleApkContextA;
       window.__runtimeContextSeen = null;

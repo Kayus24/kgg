@@ -1,0 +1,13 @@
+<!-- KGG PATCH START kgg-v110-cockpit-video-disclosure-label -->
+<!-- Video im gemeinsamen Editor benennen -->
+<script id="kgg-v110-cockpit-video-disclosure-label">
+(function(){
+  "use strict";
+  const PATCH_ID="kgg-v110-cockpit-video-disclosure-label";
+  const label=document.querySelector("#editorModal .editorAdvanced summary b");
+  if(label) label.textContent="Video";
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES[PATCH_ID]={installed:!!label,version:1,contract:"shared exercise editor names its video-only disclosure Video; existing video fields and save hooks remain in use"};
+})();
+</script>
+<!-- KGG PATCH END kgg-v110-cockpit-video-disclosure-label -->
