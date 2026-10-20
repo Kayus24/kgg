@@ -43,6 +43,24 @@ async function boot(browser, test) {
   const page = await context.newPage();
   await page.addInitScript(() => {
     localStorage.setItem("kgg_pwa_install_prompt_seen_v1", "ticket-037");
+    // Failure-only evidence: keep native focus/pointer behavior and avoid layout reads.
+    window.__kgg037FocusCalls = [];
+    const nativeFocus = HTMLElement.prototype.focus;
+    HTMLElement.prototype.focus = function (...args) {
+      if (this.closest("#shareModal")) window.__kgg037FocusCalls.push({ id: this.id, time: performance.now(), stack: new Error().stack });
+      return nativeFocus.apply(this, args);
+    };
+    window.__kgg037ReorderEvents = [];
+    let dragging = false;
+    for (const type of ["pointerdown", "pointermove", "pointerup", "pointercancel"]) document.addEventListener(type, event => {
+      const handle = event.target.closest?.(".kgg-tce-drag");
+      if (type === "pointerdown") dragging = !!handle;
+      if (!dragging) return;
+      const record = { type, x: event.clientX, y: event.clientY, target: String(event.target.className || ""), time: performance.now() };
+      window.__kgg037ReorderEvents.push(record);
+      queueMicrotask(() => { record.lifted = !!document.querySelector(".kgg-tc-exercise.reorder-lifted"); });
+      if (type === "pointerup" || type === "pointercancel") dragging = false;
+    }, true);
   });
   await page.goto(HTML_URL, { waitUntil: "domcontentloaded", timeout: 30000 });
   await page.waitForSelector("#kggTherapyCockpitButton", { state: "attached", timeout: 15000 });
@@ -247,12 +265,7 @@ async function assertFinishFocusOrder(page) {
     document.addEventListener("keydown", event => {
       if (event.key !== "Tab" || !document.querySelector("#shareModal.open")) return;
       window.__kggFinishTabDiagnostics.push({
-        from: event.target.id, active: document.activeElement?.id, prevented: event.defaultPrevented,
-        controls: Array.from(document.querySelectorAll("#shareModal button")).map(node => ({
-          id: node.id, disabled: node.disabled, hidden: node.hidden, tabIndex: node.tabIndex,
-          inertAncestor: node.closest("[inert]")?.id || node.closest("[inert]")?.className || null,
-          rendered: !!node.getClientRects().length, visibility: getComputedStyle(node).visibility,
-        })),
+        from: event.target.id, active: document.activeElement?.id, prevented: event.defaultPrevented, time: performance.now(),
       });
     }, true);
   });
@@ -265,6 +278,12 @@ async function assertFinishFocusOrder(page) {
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
     console.error("Finish focus diagnostics", JSON.stringify(await page.evaluate(() => ({
       viewport: {width: innerWidth, height: innerHeight}, trace: window.__kggFinishTabDiagnostics,
+      focusCalls: window.__kgg037FocusCalls,
+      controls: Array.from(document.querySelectorAll("#shareModal button")).map(node => ({
+        id: node.id, disabled: node.disabled, hidden: node.hidden, tabIndex: node.tabIndex,
+        inertAncestor: node.closest("[inert]")?.id || node.closest("[inert]")?.className || null,
+        rendered: !!node.getClientRects().length, visibility: getComputedStyle(node).visibility,
+      })),
       openModals: Array.from(document.querySelectorAll('.modal.open,.kgg-tce-modal:not([hidden]),.kgg-tc-modal:not([hidden])')).map(node => ({id:node.id,rendered:!!node.getClientRects().length,hidden:node.hidden,visibility:getComputedStyle(node).visibility})),
     }))));
   }
@@ -468,6 +487,9 @@ async function runContinuousCockpitLiveEdit(browser) {
     await page.mouse.up();
     await page.waitForTimeout(250);
     const afterMove = await page.evaluate(() => window.KGGTherapyCockpit.getSlot(0));
+    if (afterMove.exercises.map(ex => ex.name).join("|") !== "Bridging|Abduktion live final|Adduktion Maschine") {
+      console.error("Reorder diagnostics", JSON.stringify({ sourceBox, targetBox, actual: afterMove.exercises.map(ex => ex.name), evidence: await page.evaluate(() => ({ events: window.__kgg037ReorderEvents, articles: Array.from(document.querySelectorAll('.kgg-tc-card[data-tc-card="0"] .kgg-tc-exercise')).map(node => ({name: node.querySelector('.kgg-tc-card-toggle')?.textContent, rect: node.getBoundingClientRect().toJSON(), className: node.className})) })) }));
+    }
     assert(afterMove.exercises.map(ex => ex.name).join("|") === "Bridging|Abduktion live final|Adduktion Maschine", `${test.id}: Cockpit-Reorder über sichtbaren Handle war falsch`);
     const movedEdited = afterMove.exercises[1];
     assert(movedEdited.today[0][0] === "8" && movedEdited.today[0][1] === "10" && movedEdited.activeProgressionId === movedEdited.progressionVariants[1].id, `${test.id}: Reorder verlor Werte oder Progressionsstufe`);
