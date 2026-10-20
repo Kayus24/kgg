@@ -42,9 +42,9 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 ## Current Versions
 
-- Source web version: v96 / `1.0.96-patient-english-names`.
-- Source index URL: `index.html?v=96`.
-- Source notes: v096: Englische Patienten-Anzeigenamen im Uebungseditor pflegen; deutsche Plan- und QR-Namen bleiben erhalten.
+- Source web version: v124 / `1.0.124-cockpit-main-integration`.
+- Source index URL: `index.html?v=124`.
+- Source notes: v124: Gesichertes Cockpit v096-v123 mit Main-Englischfunktion zusammengefuehrt; beide v096-Historien bleiben getrennte Evidenz, kein Beta- oder Alpha-Release.
 - Live Admin release: `r0433` / `1.0.95-cockpit-responsive-entry`.
 - Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0433/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.
