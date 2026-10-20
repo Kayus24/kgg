@@ -242,11 +242,31 @@ async function assertFinishFocusOrder(page) {
     "finishCockpitGaugeBtn",
     "finishCancelBtn",
   ];
+  await page.evaluate(() => {
+    window.__kggFinishTabDiagnostics = [];
+    document.addEventListener("keydown", event => {
+      if (event.key !== "Tab" || !document.querySelector("#shareModal.open")) return;
+      window.__kggFinishTabDiagnostics.push({
+        from: event.target.id, active: document.activeElement?.id, prevented: event.defaultPrevented,
+        controls: Array.from(document.querySelectorAll("#shareModal button")).map(node => ({
+          id: node.id, disabled: node.disabled, hidden: node.hidden, tabIndex: node.tabIndex,
+          inertAncestor: node.closest("[inert]")?.id || node.closest("[inert]")?.className || null,
+          rendered: !!node.getClientRects().length, visibility: getComputedStyle(node).visibility,
+        })),
+      });
+    }, true);
+  });
   await page.waitForFunction(() => document.activeElement && document.activeElement.id === "finishPdfBtn", null, { timeout: 5000 });
   const actual = [await page.evaluate(() => document.activeElement.id)];
   for (let index = 1; index < expected.length; index += 1) {
     await page.keyboard.press("Tab");
     actual.push(await page.evaluate(() => document.activeElement.id));
+  }
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+    console.error("Finish focus diagnostics", JSON.stringify(await page.evaluate(() => ({
+      viewport: {width: innerWidth, height: innerHeight}, trace: window.__kggFinishTabDiagnostics,
+      openModals: Array.from(document.querySelectorAll('.modal.open,.kgg-tce-modal:not([hidden]),.kgg-tc-modal:not([hidden])')).map(node => ({id:node.id,rendered:!!node.getClientRects().length,hidden:node.hidden,visibility:getComputedStyle(node).visibility})),
+    }))));
   }
   assert(JSON.stringify(actual) === JSON.stringify(expected), `Finish-Tab-Fokusfolge falsch: ${JSON.stringify(actual)}`);
   return actual;
