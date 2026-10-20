@@ -252,6 +252,9 @@ async function inspectFinishDialog(page) {
 }
 
 async function assertFinishFocusOrder(page) {
+  // v117 focuses during the opening mutation; v088 also queues PDF focus.
+  // Let opening tasks finish across a render cycle before sending native Tab.
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
   const expected = [
     "finishPdfBtn",
     "finishLargePdfBtn",
