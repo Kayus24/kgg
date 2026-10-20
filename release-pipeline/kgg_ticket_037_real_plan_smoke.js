@@ -458,8 +458,42 @@ async function runContinuousCockpitLiveEdit(browser) {
     const openToggle = page.locator('.kgg-tc-card[data-tc-card="0"] .kgg-tc-exercise.open .kgg-tc-card-toggle').first();
     if (await openToggle.count()) await openToggle.click();
     const handles = page.locator('.kgg-tc-card[data-tc-card="0"] .kgg-tce-drag');
-    const sourceBox = await handles.nth(2).boundingBox();
-    const targetBox = await handles.nth(0).boundingBox();
+    // As with Bank Add above, coordinates must settle before real mouse input.
+    // Read both boxes atomically; a stale box can otherwise hit Edit/Delete.
+    const stableHandles = await page.waitForFunction(() => {
+      const controls = Array.from(document.querySelectorAll('.kgg-tc-card[data-tc-card="0"] .kgg-tce-drag'));
+      const source = controls[2], target = controls[0];
+      if (!source || !target) return false;
+      const box = node => {
+        const { x, y, width, height } = node.getBoundingClientRect();
+        return { x, y, width, height };
+      };
+      const sourceBox = box(source), targetBox = box(target);
+      const hit = (node, rect) => rect.width > 0 && rect.height > 0 &&
+        document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)?.closest('.kgg-tce-drag') === node;
+      if (!hit(source, sourceBox) || !hit(target, targetBox)) {
+        window.__kggTicket037ReorderGeometry = null;
+        return false;
+      }
+      const geometry = JSON.stringify([sourceBox, targetBox]);
+      const previous = window.__kggTicket037ReorderGeometry, now = performance.now();
+      if (!previous || previous.geometry !== geometry) {
+        window.__kggTicket037ReorderGeometry = { geometry, since: now };
+        return false;
+      }
+      return now - previous.since >= 120 && { sourceBox, targetBox };
+    }, null, { timeout: 5000 }).catch(async error => {
+      console.error("Reorder readiness diagnostics", JSON.stringify(await page.evaluate(() => ({
+        previous: window.__kggTicket037ReorderGeometry,
+        handles: Array.from(document.querySelectorAll('.kgg-tc-card[data-tc-card="0"] .kgg-tce-drag')).map(node => {
+          const rect = node.getBoundingClientRect(), hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
+          return { rect: rect.toJSON(), hitClass: String(hit?.className || ""), hitAction: hit?.getAttribute("data-tce-action"), correctHandle: hit?.closest('.kgg-tce-drag') === node };
+        }),
+      })).catch(() => null)));
+      throw error;
+    });
+    const { sourceBox, targetBox } = await stableHandles.jsonValue();
+    await stableHandles.dispose();
     assert(sourceBox && targetBox, `${test.id}: sichtbare Reorder-Handles fehlen`);
     const handleHitTest = await page.evaluate(({ sourceX, sourceY, targetX, targetY }) => {
       const inspect = (x, y) => {
