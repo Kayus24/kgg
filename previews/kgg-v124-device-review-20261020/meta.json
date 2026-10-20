@@ -1,0 +1,24 @@
+{
+  "kind": "kgg_gpt_preview",
+  "sourceType": "local-tested-candidate",
+  "requestId": "kgg-v124-device-review-20261020",
+  "patchHash": "ce34d151713c276e72156b8d1652f6cfe847faa7968a17671d474e41ff2d060f",
+  "sourceSha": "10847974b5dd370c442b0f75f8de789a5a74789c",
+  "baseSha": "8e4ba096f49f533d244875c8b47cd294d6e267aa",
+  "commitSha": "10847974b5dd370c442b0f75f8de789a5a74789c",
+  "baseVersionCode": 124,
+  "rolloutCode": 1792488105,
+  "title": "Exact tested HTML candidate",
+  "summary": "Unchanged locally tested candidate HTML; preview only.",
+  "versionName": "1.0.124-cockpit-main-integration",
+  "createdAt": "2026-10-20T09:21:45Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v124-device-review-20261020/admin.html",
+  "sha256": "fc12291a3568c7994abd13a7f174c9769f1209595f7eb9895ad4995e521d1fe9",
+  "candidateTreeSha256": "ce34d151713c276e72156b8d1652f6cfe847faa7968a17671d474e41ff2d060f",
+  "tests": [
+    "critical",
+    "ui-stability-regression",
+    "cockpit-browser"
+  ],
+  "syntheticOnly": true
+}
