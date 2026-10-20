@@ -47,7 +47,11 @@ async function swipe(page,context,x,y,dy){const c=await context.newCDPSession(pa
    await card.locator('.kgg-tc-field').first().tap();
    const ok=page.locator('.kgg-tc-pad [data-tc-key="OK"]');await ok.tap();
    await card.locator('.kgg-tc-field').first().tap();
-   assert(await page.evaluate(()=>{const key=document.querySelector('.kgg-tc-pad [data-tc-key="OK"]'),r=key.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return r.bottom<=innerHeight&&!!hit&&key.contains(hit)}),'OK key covered');
+   // v120 places/reveals the newly rendered pad in requestAnimationFrame.
+   // Await the actual hit-test contract; do not assert before that render task.
+   const okReady=()=>{const key=document.querySelector('.kgg-tc-pad [data-tc-key="OK"]');if(!key)return false;const r=key.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return r.width>0&&r.height>0&&r.bottom<=innerHeight&&!!hit&&key.contains(hit)};
+   await page.waitForFunction(okReady,null,{timeout:5000}).catch(async error=>{console.error('Keypad readiness diagnostics',JSON.stringify(await page.evaluate(()=>{const key=document.querySelector('.kgg-tc-pad [data-tc-key="OK"]'),r=key?.getBoundingClientRect(),hit=r&&document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return {viewport:{width:innerWidth,height:innerHeight},rect:r?.toJSON(),hitClass:String(hit?.className||''),hitAction:hit?.getAttribute('data-tc-action'),padClass:key?.closest('.kgg-tc-pad')?.className}}).catch(()=>null)));throw error;});
+   assert(await page.evaluate(okReady),'OK key covered');
    await page.locator('.kgg-tc-pad [data-tc-key="C"]').tap();await page.locator('.kgg-tc-pad [data-tc-key="7"]').tap();await card.locator('.kgg-tc-field[data-tc-field="metric"]').first().tap();
    assert(await page.evaluate(()=>KGGTherapyCockpit.getSlot(0).exercises[0].today[0][0])==='7','field switch lost value');await page.locator('.kgg-tc-header .kgg-tc-title').tap();
   });
