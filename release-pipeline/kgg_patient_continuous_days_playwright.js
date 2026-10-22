@@ -62,14 +62,14 @@ async function confirmTicket034FinishIfShown(page){
     },null,{timeout:8000});
   }catch(error){
     const state=await page.evaluate(()=>{
-      const describe=id=>{
-        const el=document.getElementById(id);
+      const describe=selector=>{
+        const el=document.querySelector(selector);
         return !el?null:{hidden:el.hidden,className:String(el.className),
           display:getComputedStyle(el).display,rectHeight:Math.round(el.getBoundingClientRect().height)}
       };
-      return {day:Number(d),end:describe('end'),
-        modal:describe('kggTicket034FinishModal'),
-        finishButton:describe('plan'),selected:document.activeElement?.tagName||null};
+      return {day:Number(d),end:describe('#end'),
+        modal:describe('#kggTicket034FinishModal'),
+        finishButton:describe('#plan > button.btn'),selected:document.activeElement?.tagName||null};
     }).catch(()=>({pageUnavailable:true}));
     throw new Error('Finish UI produced neither QR nor confirmation: '+
       JSON.stringify(state)+'; original='+error.message);
@@ -82,10 +82,13 @@ async function confirmTicket034FinishIfShown(page){
   await modal.waitFor({state:'hidden'});
 }
 async function finishFromUi(page,expectedQrDay,expectedNextDay){
+  phase=`T${expectedQrDay} finish QR`;
   await dismissInstallOverlay(page);
-  await page.locator('#plan > button.btn').click();
-  await confirmTicket034FinishIfShown(page);
-  await page.locator('#end').waitFor({state:'visible'});
+  await withQrClickDiagnostics(page,'finish','#plan > button.btn',async()=>{
+    await page.locator('#plan > button.btn').click();
+    await confirmTicket034FinishIfShown(page);
+    await page.locator('#end').waitFor({state:'visible'});
+  });
   assert((await page.locator('#endTitle').innerText())===`Training T${expectedQrDay} beendet`,`end title is not T${expectedQrDay}`);
   const decoded=decodePayload(await page.locator('#qr').getAttribute('data-payload'));
   assert(Number(decoded.d)===expectedQrDay,`QR day changed before export: ${JSON.stringify(decoded)}`);
@@ -96,22 +99,16 @@ async function finishFromUi(page,expectedQrDay,expectedNextDay){
   await page.locator('#end').waitFor({state:'hidden'});
   await assertHubDay(page,expectedNextDay);
 }
-async function interimQrFromUi(page, expectedDay){
-  await dismissInstallOverlay(page);
-  const before=await page.evaluate(()=>({
-    day:Number(d),done:JSON.stringify([...done].sort((a,b)=>a-b)),values:JSON.stringify(v)
-  }));
-  assert(before.day===expectedDay,'interim QR began on wrong day');
-  const selector='#plan > button.btn2[onclick="showQr(false)"]',trigger=page.locator(selector);
-  assert(await trigger.count()===1,'interim QR button not uniquely available');
+async function withQrClickDiagnostics(page,kind,selector,action){
   try{
     await page.evaluate(selector=>{
-      const events=[],types=['pointerdown','mousedown','pointerup','mouseup','click'];
+      const events=[],types=['pointerdown','mousedown','pointerup','mouseup','click','focusin','focusout','fullscreenchange','fullscreenerror'],windowTypes=['focus','blur'];
       const describe=el=>el?{tag:el.tagName,id:el.id,className:String(el.className||'').slice(0,120),onclick:(el.getAttribute?.('onclick')||'').slice(0,120)}:null;
       const rect=el=>{if(!el)return null;const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height}};
       const snapshot=()=>{
-        const button=document.querySelector(selector),header=document.querySelector('h1'),end=document.getElementById('end'),qr=document.getElementById('qr');
-        return {atMs:performance.now(),button:describe(button),buttonRect:rect(button),mainScrollTop:document.querySelector('main')?.scrollTop,windowScrollY:window.scrollY,
+        const button=document.querySelector(selector),header=document.querySelector('h1'),end=document.getElementById('end'),qr=document.getElementById('qr'),main=document.querySelector('main'),status=document.getElementById('status');
+        return {atMs:performance.now(),button:describe(button),buttonRect:rect(button),mainScrollTop:main?.scrollTop,mainScrollHeight:main?.scrollHeight,mainClientHeight:main?.clientHeight,windowScrollY:window.scrollY,
+          statusText:(status?.textContent||'').slice(0,160),statusRect:rect(status),fullscreenElement:describe(document.fullscreenElement),documentHasFocus:document.hasFocus(),
           headerText:(header?.textContent||'').slice(0,120),headerRect:rect(header),active:describe(document.activeElement),
           end:{className:end?.className,hidden:end?.hidden,display:end?getComputedStyle(end).display:null,title:(document.getElementById('endTitle')?.textContent||'').slice(0,120)},
           qr:{hasPayload:Boolean(qr?.dataset.payload),payloadLength:(qr?.dataset.payload||'').length,hasImage:Boolean(qr?.querySelector('img'))},
@@ -120,25 +117,39 @@ async function interimQrFromUi(page, expectedDay){
       const add=entry=>{events.push(entry);if(events.length>32)events.shift()};
       const observeEvent=event=>add({type:event.type,eventPhase:event.eventPhase,isTrusted:event.isTrusted,defaultPrevented:event.defaultPrevented,
         target:describe(event.target),button:describe(event.target?.closest?.('button')),x:event.clientX,y:event.clientY,
-        hit:describe(document.elementFromPoint(event.clientX,event.clientY)),state:snapshot()});
+        hit:Number.isFinite(event.clientX)&&Number.isFinite(event.clientY)?describe(document.elementFromPoint(event.clientX,event.clientY)):null,state:snapshot()});
       const observer=new MutationObserver(records=>add({type:'mutation',attributes:records.slice(0,8).map(r=>({id:r.target.id,name:r.attributeName})),state:snapshot()}));
-      window.__kggInterimQrDiagnostics={events,snapshot,stop(){types.forEach(type=>document.removeEventListener(type,observeEvent,true));document.removeEventListener('click',observeEvent,false);observer.disconnect()}};
+      window.__kggQrClickDiagnostics={events,snapshot,stop(){types.forEach(type=>document.removeEventListener(type,observeEvent,true));windowTypes.forEach(type=>window.removeEventListener(type,observeEvent));document.removeEventListener('click',observeEvent,false);observer.disconnect()}};
       types.forEach(type=>document.addEventListener(type,observeEvent,{capture:true,passive:true}));
+      windowTypes.forEach(type=>window.addEventListener(type,observeEvent,{passive:true}));
       document.addEventListener('click',observeEvent,{passive:true});
       const end=document.getElementById('end'),qr=document.getElementById('qr');
       if(end)observer.observe(end,{attributes:true,attributeFilter:['class','hidden']});
       if(qr)observer.observe(qr,{attributes:true,attributeFilter:['data-payload']});
       add({type:'armed',state:snapshot()});
     },selector);
-    await trigger.click();
-    await page.locator('#end').waitFor({state:'visible'});
+    await action();
   }catch(error){
-    const diagnosis=await page.evaluate(()=>{const trace=window.__kggInterimQrDiagnostics;return trace?{events:trace.events,final:trace.snapshot()}:null}).catch(failure=>({unavailable:failure.message}));
-    console.error('[continuous-days] interim QR diagnostics '+JSON.stringify({phase,diagnosis}));
+    const diagnosis=await page.evaluate(()=>{const trace=window.__kggQrClickDiagnostics;return trace?{events:trace.events,final:trace.snapshot()}:null}).catch(failure=>({unavailable:failure.message}));
+    console.error('[continuous-days] '+kind+' QR diagnostics '+JSON.stringify({phase,diagnosis}));
     throw error;
   }finally{
-    await page.evaluate(()=>{window.__kggInterimQrDiagnostics?.stop();delete window.__kggInterimQrDiagnostics}).catch(()=>{});
+    await page.evaluate(()=>{window.__kggQrClickDiagnostics?.stop();delete window.__kggQrClickDiagnostics}).catch(()=>{});
   }
+}
+async function interimQrFromUi(page, expectedDay){
+  phase=`T${expectedDay} interim QR`;
+  await dismissInstallOverlay(page);
+  const before=await page.evaluate(()=>({
+    day:Number(d),done:JSON.stringify([...done].sort((a,b)=>a-b)),values:JSON.stringify(v)
+  }));
+  assert(before.day===expectedDay,'interim QR began on wrong day');
+  const selector='#plan > button.btn2[onclick="showQr(false)"]',trigger=page.locator(selector);
+  assert(await trigger.count()===1,'interim QR button not uniquely available');
+  await withQrClickDiagnostics(page,'interim',selector,async()=>{
+    await trigger.click();
+    await page.locator('#end').waitFor({state:'visible'});
+  });
   const qr=page.locator('#qr'),payload=await qr.getAttribute('data-payload');
   assert(typeof payload==='string'&&payload.startsWith('KGGD1:'),'interim QR payload missing');
   const decoded=decodePayload(payload);
