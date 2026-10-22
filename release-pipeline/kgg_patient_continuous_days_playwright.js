@@ -10,6 +10,7 @@ const MODE=process.env.KGG_DAYS_MODE||'legacy';
 if(!['chromium','webkit'].includes(ENGINE)||!['legacy','react'].includes(MODE))throw new Error('Unsupported browser/mode');
 
 const ROOT=path.resolve(__dirname,'..');
+const pageErrors=[];let phase='setup';
 function assert(condition,message){if(!condition)throw new Error(message)}
 function encodePlan(plan){return Buffer.from(JSON.stringify(plan),'utf8').toString('base64url')}
 function decodePayload(payload){const raw=String(payload||'').replace(/^KGGD1:/,'');return JSON.parse(Buffer.from(raw,'base64url').toString('utf8'))}
@@ -101,10 +102,43 @@ async function interimQrFromUi(page, expectedDay){
     day:Number(d),done:JSON.stringify([...done].sort((a,b)=>a-b)),values:JSON.stringify(v)
   }));
   assert(before.day===expectedDay,'interim QR began on wrong day');
-  const trigger=page.locator('#plan > button.btn2[onclick="showQr(false)"]');
+  const selector='#plan > button.btn2[onclick="showQr(false)"]',trigger=page.locator(selector);
   assert(await trigger.count()===1,'interim QR button not uniquely available');
-  await trigger.click();
-  await page.locator('#end').waitFor({state:'visible'});
+  try{
+    await page.evaluate(selector=>{
+      const events=[],types=['pointerdown','mousedown','pointerup','mouseup','click'];
+      const describe=el=>el?{tag:el.tagName,id:el.id,className:String(el.className||'').slice(0,120),onclick:(el.getAttribute?.('onclick')||'').slice(0,120)}:null;
+      const rect=el=>{if(!el)return null;const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height}};
+      const snapshot=()=>{
+        const button=document.querySelector(selector),header=document.querySelector('h1'),end=document.getElementById('end'),qr=document.getElementById('qr');
+        return {atMs:performance.now(),button:describe(button),buttonRect:rect(button),mainScrollTop:document.querySelector('main')?.scrollTop,windowScrollY:window.scrollY,
+          headerText:(header?.textContent||'').slice(0,120),headerRect:rect(header),active:describe(document.activeElement),
+          end:{className:end?.className,hidden:end?.hidden,display:end?getComputedStyle(end).display:null,title:(document.getElementById('endTitle')?.textContent||'').slice(0,120)},
+          qr:{hasPayload:Boolean(qr?.dataset.payload),payloadLength:(qr?.dataset.payload||'').length,hasImage:Boolean(qr?.querySelector('img'))},
+          visibleOverlays:['installBox','kggUpdateGate','kggTicket034FinishModal','kggHistoryBackdrop','kggPlanDialogBackdrop','kggSettingsBackdrop','kggQrFull'].filter(id=>{const el=document.getElementById(id);return el&&!el.hidden&&getComputedStyle(el).display!=='none'&&el.getClientRects().length})};
+      };
+      const add=entry=>{events.push(entry);if(events.length>32)events.shift()};
+      const observeEvent=event=>add({type:event.type,eventPhase:event.eventPhase,isTrusted:event.isTrusted,defaultPrevented:event.defaultPrevented,
+        target:describe(event.target),button:describe(event.target?.closest?.('button')),x:event.clientX,y:event.clientY,
+        hit:describe(document.elementFromPoint(event.clientX,event.clientY)),state:snapshot()});
+      const observer=new MutationObserver(records=>add({type:'mutation',attributes:records.slice(0,8).map(r=>({id:r.target.id,name:r.attributeName})),state:snapshot()}));
+      window.__kggInterimQrDiagnostics={events,snapshot,stop(){types.forEach(type=>document.removeEventListener(type,observeEvent,true));document.removeEventListener('click',observeEvent,false);observer.disconnect()}};
+      types.forEach(type=>document.addEventListener(type,observeEvent,{capture:true,passive:true}));
+      document.addEventListener('click',observeEvent,{passive:true});
+      const end=document.getElementById('end'),qr=document.getElementById('qr');
+      if(end)observer.observe(end,{attributes:true,attributeFilter:['class','hidden']});
+      if(qr)observer.observe(qr,{attributes:true,attributeFilter:['data-payload']});
+      add({type:'armed',state:snapshot()});
+    },selector);
+    await trigger.click();
+    await page.locator('#end').waitFor({state:'visible'});
+  }catch(error){
+    const diagnosis=await page.evaluate(()=>{const trace=window.__kggInterimQrDiagnostics;return trace?{events:trace.events,final:trace.snapshot()}:null}).catch(failure=>({unavailable:failure.message}));
+    console.error('[continuous-days] interim QR diagnostics '+JSON.stringify({phase,diagnosis}));
+    throw error;
+  }finally{
+    await page.evaluate(()=>{window.__kggInterimQrDiagnostics?.stop();delete window.__kggInterimQrDiagnostics}).catch(()=>{});
+  }
   const qr=page.locator('#qr'),payload=await qr.getAttribute('data-payload');
   assert(typeof payload==='string'&&payload.startsWith('KGGD1:'),'interim QR payload missing');
   const decoded=decodePayload(payload);
@@ -164,7 +198,7 @@ async function verifyVariantMounted(page){
 }
 async function main(){
   const watchdog=setTimeout(()=>{console.error('KGG patient continuous days Playwright FAIL: global 150s watchdog');process.exit(1)},150000);
-  const mark=message=>console.log('[continuous-days] '+message);
+  const mark=message=>{phase=message;console.log('[continuous-days] '+message)};
   const server=http.createServer((request,response)=>{const file=safeFile(request.url);if(!file){response.writeHead(404,{'Content-Type':'text/plain'});response.end('not found');return}response.writeHead(200,{'Content-Type':contentType(file),'Cache-Control':'no-store','Service-Worker-Allowed':'/'});fs.createReadStream(file).pipe(response)});
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const {port}=server.address();
@@ -175,7 +209,7 @@ async function main(){
   // continuous-day regression focused on the day-history/runtime contract.
   await page.addInitScript(()=>{window.__kggAutoDayRan=1;localStorage.setItem('kggInstallAsked','1')});
   page.setDefaultTimeout(8000);page.setDefaultNavigationTimeout(15000);
-  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  const errors=[];page.on('pageerror',e=>{errors.push(e.message);pageErrors.push({phase,message:String(e.message).slice(0,1000)});if(pageErrors.length>32)pageErrors.shift()});
   // Unknown catalog name intentionally avoids unrelated external media in day/QR tests.
   const plan={i:'continuous-days-playwright',t:'Fortlaufender Testplan',v:1,d:12,extendDays:true,stepDays:6,e:[['KGG Synthetic Day Exercise',1,'B','kg','Wdh']]};
   const url=`http://127.0.0.1:${port}/kgg/?kggReactPad=${MODE==='react'?'1':'0'}&plan=${encodeURIComponent('KGGH2:'+encodePlan(plan))}`;
@@ -277,4 +311,4 @@ async function main(){
     console.log(JSON.stringify(proof));
   }finally{clearTimeout(watchdog);await context.close().catch(()=>{});await browser.close().catch(()=>{});if(typeof server.closeAllConnections==='function')server.closeAllConnections();await Promise.race([new Promise(resolve=>server.close(()=>resolve())),new Promise(resolve=>setTimeout(resolve,2000))])}
 }
-main().catch(error=>{console.error(`KGG patient continuous days Playwright FAIL: ${error.stack||error.message}`);process.exitCode=1});
+main().catch(error=>{console.error(`KGG patient continuous days Playwright FAIL: ${error.stack||error.message}`);console.error('[continuous-days] page errors '+JSON.stringify({phase,errors:pageErrors}));process.exitCode=1});
