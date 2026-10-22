@@ -82,10 +82,10 @@ public class MainActivity extends Activity {
     private static final int PREVIEW_NOTIFICATION_PERMISSION_REQUEST = 4204;
     private static final int WEB_VIDEO_CAPTURE_VERSION = 1;
     private static final int RELEASE_HTML_REQUEST = 4301;
-    private static final int ANDROID_SHELL_VERSION = 402;
+    private static final int ANDROID_SHELL_VERSION = 401;
     private static final int BUNDLED_WEB_VERSION = 419;
-    private static final String BUILD_TIME = "2026-10-22T17:36:00+02:00";
-    private static final String BUILD_CODE = "v402-r0419-native-drive-saf";
+    private static final String BUILD_TIME = "2026-07-01T00:00:00+02:00";
+    private static final String BUILD_CODE = "v401-r0419-share-apk-provider";
     private static final int MAX_HTML_UPDATE_BYTES = 5_500_000;
     private static final int MAX_APK_UPDATE_BYTES = 80_000_000;
     private static final long APK_UPDATE_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000L;
@@ -1076,7 +1076,7 @@ public class MainActivity extends Activity {
                     return;
                 }
                 int latestShellVersion = parseVersionNumber(manifest.optString("latestAndroidShellVersion"));
-                if (latestShellVersion <= ANDROID_SHELL_VERSION) {
+                if (latestShellVersion <= (BuildConfig.KGG_ISOLATED_ADMIN_SAF_TEST ? 402 : ANDROID_SHELL_VERSION)) {
                     return;
                 }
                 String apkUrl = manifestValue(manifest,
@@ -1252,9 +1252,9 @@ public class MainActivity extends Activity {
             SharedPreferences prefs = getSharedPreferences(UPDATE_PREFS, MODE_PRIVATE);
             status.put("available", true);
             status.put("platform", "android");
-            status.put("currentShellVersion", ANDROID_SHELL_VERSION);
+            status.put("currentShellVersion", BuildConfig.KGG_ISOLATED_ADMIN_SAF_TEST ? 402 : ANDROID_SHELL_VERSION);
             status.put("buildTime", BUILD_TIME);
-            status.put("buildCode", BUILD_CODE);
+            status.put("buildCode", BuildConfig.KGG_ISOLATED_ADMIN_SAF_TEST ? "v402-r0419-native-drive-saf-test" : BUILD_CODE);
             status.put("packageName", getPackageName());
             status.put("profile", isPreviewProfile() ? "preview" : (isAdminProfile() ? "admin" : "kollegen"));
             status.put("previewChannel", isPreviewProfile());

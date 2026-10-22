@@ -52,6 +52,16 @@ if (isolatedPreviewTest && !(gradle.startParameter.taskNames in [["assemblePrevi
     throw new GradleException("Isolated Preview is permitted only with the single assemblePreviewDebug task")
 }
 
+// Isolated proof APK: a different app ID, never an in-place Admin upgrade.
+def isolatedAdminSafApplicationId = String.valueOf(project.findProperty("KGG_ADMIN_SAF_TEST_APPLICATION_ID") ?: "").trim()
+def isolatedAdminSafTest = !isolatedAdminSafApplicationId.isEmpty()
+if (isolatedAdminSafTest && isolatedAdminSafApplicationId != "de.kgg.admin.safbeta") {
+    throw new GradleException("Only de.kgg.admin.safbeta is permitted for KGG_ADMIN_SAF_TEST_APPLICATION_ID")
+}
+if (isolatedAdminSafTest && !(gradle.startParameter.taskNames in [["assembleAdminDebug"], [":app:assembleAdminDebug"]])) {
+    throw new GradleException("Isolated Admin SAF test is permitted only with the single assembleAdminDebug task")
+}
+
 def defaultPreviewVersion = "0.2.14-v404-dual-device-qr-test"
 def defaultPreviewRequestId = "local-dual-device-v404"
 def defaultPreviewSha = gitHead()
@@ -186,12 +196,13 @@ android {
         applicationId "de.kgg.app"
         minSdk 26
         targetSdk 36
-        versionCode 34
-        versionName "0.2.12-v402-native-drive-saf"
+        versionCode 33
+        versionName "0.2.11-v401-share-apk-provider"
         manifestPlaceholders = [appLabel: "KGG Physio"]
         buildConfigField "String", "KGG_GITHUB_CLIENT_ID", "\"${project.findProperty('KGG_GITHUB_CLIENT_ID') ?: ''}\""
         buildConfigField "String", "KGG_PREVIEW_STATUS_URL", '""'
         buildConfigField "boolean", "KGG_ISOLATED_PREVIEW_TEST", "false"
+        buildConfigField "boolean", "KGG_ISOLATED_ADMIN_SAF_TEST", "false"
     }
 
     buildFeatures { buildConfig true }
@@ -207,6 +218,13 @@ android {
             dimension "profile"
             applicationId "de.kgg.admin"
             manifestPlaceholders = [appLabel: "KGG Admin"]
+            if (isolatedAdminSafTest) {
+                applicationId isolatedAdminSafApplicationId
+                versionCode 34
+                versionName "0.2.12-v402-native-drive-saf-test"
+                manifestPlaceholders = [appLabel: "KGG Admin SAF Test"]
+                buildConfigField "boolean", "KGG_ISOLATED_ADMIN_SAF_TEST", "true"
+            }
         }
         preview {
             dimension "profile"
