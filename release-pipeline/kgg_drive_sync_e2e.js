@@ -10,6 +10,7 @@ const crypto = require('crypto');
 const zlib = require('zlib');
 const assert = require('assert/strict');
 const cp = require('child_process');
+const { performance } = require('node:perf_hooks');
 
 const ROOT = path.resolve(__dirname, '..');
 const OUTPUT_ROOT = path.join(ROOT, 'output', 'drive-sync-e2e-20261015');
@@ -18,6 +19,7 @@ const OUTPUT_ROOT = path.join(ROOT, 'output', 'drive-sync-e2e-20261015');
 const BASE_URL = 'http://127.0.0.1:37843';
 const MAX_BYTES = 8_000_000;
 const POLL_MS = 15_000;
+const ADAPTER_DELAY_MS = 65;
 const DEVICE_A = 'synthetic_drive_a_20261015';
 const DEVICE_B = 'synthetic_drive_b_20261015';
 const ROOM = 'synthetic_drive_room_20261015';
@@ -30,7 +32,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const json = value => Buffer.from(JSON.stringify(value, null, 2) + '\n', 'utf8');
 
 function args(argv) {
-  const out = { mode: '', runId: 'run-20261015', round: 1, cloudHold: false, cloudWaitMs: 600_000, resetOwned: false, driveDir: '', cloudFolderId: '' };
+  const out = { mode: '', runId: 'run-20261015', round: 1, cloudHold: false, cloudWaitMs: 600_000, resetOwned: false, driveDir: '', cloudFolderId: '', uiDelayProbeMs: 0 };
   for (let i = 0; i < argv.length; i++) {
     const key = argv[i];
     if (['--prepare', '--run', '--self-test'].includes(key)) {
@@ -42,12 +44,15 @@ function args(argv) {
     else if (key === '--cloud-hold') out.cloudHold = true;
     else if (key === '--reset-owned') out.resetOwned = true;
     else if (key === '--cloud-wait-ms') out.cloudWaitMs = Number(argv[++i]);
+    else if (key === '--ui-delay-probe-ms') out.uiDelayProbeMs = Number(argv[++i]);
     else if (key === '--help' || key === '-h') out.help = true;
     else throw new Error('unsupported argument: ' + key);
   }
   assert(/^[A-Za-z0-9][A-Za-z0-9._-]{0,70}$/.test(out.runId), 'invalid run-id');
   assert([1, 2].includes(out.round), 'round must be 1 or 2');
   assert(Number.isInteger(out.cloudWaitMs) && out.cloudWaitMs >= 10_000 && out.cloudWaitMs <= 1_800_000, 'cloud wait must be 10s..30min');
+  assert(Number.isInteger(out.uiDelayProbeMs) && out.uiDelayProbeMs >= 0 && out.uiDelayProbeMs <= 2000, 'UI delay probe must be 0..2000ms');
+  if (out.uiDelayProbeMs) assert(!out.driveDir && !out.cloudHold, 'UI delay probe is restricted to the local synthetic transport');
   assert(!(out.cloudHold && out.round !== 1), 'cloud hold is for round 1');
   if (out.driveDir) assert(path.isAbsolute(out.driveDir), 'drive-dir must be an explicit absolute path');
   if (out.cloudFolderId) assert(/^[A-Za-z0-9_-]{10,100}$/.test(out.cloudFolderId), 'invalid cloud folder ID');
@@ -75,7 +80,7 @@ function makeConfig(options) {
     externalDrive: !!options.driveDir, outputDir,
     files: { a: 'drive-a' + suffix + '.json', b: 'drive-b' + suffix + '.json' },
     deviceIds: { a: DEVICE_A, b: DEVICE_B }, roomId: ROOM, transport: 'filesystem-test',
-    cloudHold: options.cloudHold, cloudWaitMs: options.cloudWaitMs };
+    cloudHold: options.cloudHold, cloudWaitMs: options.cloudWaitMs, uiDelayProbeMs: options.uiDelayProbeMs };
 }
 
 function checkDrive(config) {
@@ -153,7 +158,7 @@ class DriveAdapter {
     document.active++; document.maxActive = Math.max(document.maxActive, document.active); document[operation + 's']++;
     this.log({ ...metadata, operation: 'operation-start', active: state.active, documentActive: document.active });
     let success = false;
-    try { await sleep(65); const result = await callback(metadata); success = true; return result; }
+    try { await sleep(ADAPTER_DELAY_MS); const result = await callback(metadata); success = true; return result; }
     catch (error) { state.failures++; this.log({ ...metadata, operation, success: false, error: error.code || 'synthetic_transport_error' }); throw error; }
     finally { state.active--; document.active--; this.log({ ...metadata, operation: 'operation-end', success, active: state.active, documentActive: document.active }); }
   }
@@ -250,6 +255,107 @@ async function openBankEditor(page, id) {
   await page.locator('#editorModal.open').waitFor();
 }
 async function saveEditor(page) { await page.locator('#saveExercise').click(); await page.locator('#editorModal.open').waitFor({ state: 'hidden' }); }
+
+// Observe the real rendered name, not the catalog bridge. Re-query after every
+// render because the app replaces Bank rows. The observer never scrolls or syncs.
+async function armRenameTiming(page, selector, expectedName, local, delayMs) {
+  return page.evaluate(({ selector, expectedName, local, delayMs }) => {
+    if (window.__kggDriveRenameTiming) throw new Error('rename timing already armed');
+    const previousName = document.querySelector(selector)?.textContent.trim();
+    if (!previousName || previousName === expectedName) throw new Error('rename timing needs the previous visible name');
+    const data = { armedAtMs: performance.now(), previousName, clickCount: 0, clickAtMs: null, visibleAtMs: null,
+      delayRequestedMs: delayMs, delayInvocations: 0, delayActualMs: 0, visibleRect: null };
+    let frame = 0, stopped = false;
+    const click = event => {
+      if (!event.target.closest?.('#saveExercise')) return;
+      document.removeEventListener('click', click, true);
+      data.clickCount++; data.clickAtMs = performance.now();
+      // Opt-in sensitivity control on this actual Save event only. This is a
+      // bounded test stimulus, never a product latency budget or app patch.
+      if (delayMs) {
+        data.delayInvocations++;
+        const start = performance.now();
+        while (performance.now() - start < delayMs) { /* deliberate UI-thread stall */ }
+        data.delayActualMs = performance.now() - start;
+      }
+    };
+    function visibleName() {
+      const node = document.querySelector(selector);
+      if (!node || node.textContent.trim() !== expectedName || document.querySelector('#editorModal.open')) return null;
+      const box = node.getBoundingClientRect();
+      let left = Math.max(0, box.left), top = Math.max(0, box.top), right = Math.min(innerWidth, box.right), bottom = Math.min(innerHeight, box.bottom);
+      for (let parent = node; parent; parent = parent.parentElement) {
+        const style = getComputedStyle(parent);
+        if (style.display === 'none' || style.visibility !== 'visible' || Number(style.opacity) === 0) return null;
+        const rect = parent.getBoundingClientRect();
+        if (parent !== node && /auto|scroll|hidden|clip/.test(style.overflowX)) { left = Math.max(left, rect.left); right = Math.min(right, rect.right); }
+        if (parent !== node && /auto|scroll|hidden|clip/.test(style.overflowY)) { top = Math.max(top, rect.top); bottom = Math.min(bottom, rect.bottom); }
+      }
+      if (right <= left || bottom <= top) return null;
+      const hit = document.elementFromPoint((left + right) / 2, (top + bottom) / 2);
+      if (!node.closest('[data-add]')?.contains(hit)) return null;
+      return { left, top, width: right - left, height: bottom - top };
+    }
+    const stop = () => { stopped = true; cancelAnimationFrame(frame); document.removeEventListener('click', click, true); };
+    const sample = () => {
+      if (stopped) return;
+      if (!local || data.clickAtMs !== null) {
+        const rect = visibleName();
+        if (rect) { data.visibleAtMs = performance.now(); data.visibleRect = rect; stop(); return; }
+      }
+      frame = requestAnimationFrame(sample);
+    };
+    window.__kggDriveRenameTiming = { data, stop };
+    if (local) document.addEventListener('click', click, true);
+    frame = requestAnimationFrame(sample);
+    return { armedAtMs: data.armedAtMs, previousName };
+  }, { selector, expectedName, local, delayMs });
+}
+
+async function measureRenameSave(a, b, exerciseId, expectedName, report, delayMs) {
+  const sample = { case: 'edit-rename-stable-id-english-clear-and-reload', exerciseId, status: 'INCOMPLETE',
+    endCondition: 'same Bank ID has expected name, editor closed, text visible in viewport and scroll container, unobscured at a sampled animation frame' };
+  report.timings.samples.push(sample);
+  const selector = '#bankContent [data-add="' + exerciseId + '"] .bankText b';
+  try {
+    await a.locator('#saveExercise').waitFor({ state: 'visible' });
+    sample.armed = await Promise.all([armRenameTiming(a, selector, expectedName, true, delayMs), armRenameTiming(b, selector, expectedName, false, 0)]);
+    sample.armedBeforeAction = true;
+    // A uses its own monotonic event clock. Cross-client elapsed time uses one
+    // Node clock, including automation observation overhead; never subtract the
+    // unrelated performance.now() origins of the two browser pages.
+    const localVisible = a.waitForFunction(() => window.__kggDriveRenameTiming.data.visibleAtMs !== null, null, { polling: 'raf', timeout: 45_000 });
+    const peerVisible = b.waitForFunction(() => window.__kggDriveRenameTiming.data.visibleAtMs !== null, null, { polling: 'raf', timeout: 45_000 })
+      .then(async handle => { const observedAtMs = performance.now(); await handle.dispose(); return observedAtMs; });
+    sample.actionDispatchRootMs = performance.now();
+    const [, localHandle, peerObservedRootMs] = await Promise.all([saveEditor(a), localVisible, peerVisible]);
+    await localHandle.dispose();
+    const [local, peer] = await Promise.all([a.evaluate(() => window.__kggDriveRenameTiming.data), b.evaluate(() => window.__kggDriveRenameTiming.data)]);
+    sample.local = local; sample.peer = peer; sample.peerObservedRootMs = peerObservedRootMs;
+    sample.saveClickToLocalVisibleFrameMs = local.visibleAtMs - local.clickAtMs;
+    sample.saveDispatchToPeerVisibleObservedMs = peerObservedRootMs - sample.actionDispatchRootMs;
+    assert.equal(local.clickCount, 1, 'timing did not observe the actual Save click');
+    assert(Number.isFinite(sample.saveClickToLocalVisibleFrameMs) && sample.saveClickToLocalVisibleFrameMs >= 0, 'local UI timing missing');
+    assert(Number.isFinite(sample.saveDispatchToPeerVisibleObservedMs) && sample.saveDispatchToPeerVisibleObservedMs >= 0, 'peer visible timing missing');
+    assert.equal(local.delayInvocations, delayMs ? 1 : 0, 'requested UI delay probe did not execute on the Save event');
+    if (delayMs) {
+      assert(local.delayActualMs >= delayMs, 'actual UI delay shorter than the requested control stimulus');
+      assert(sample.saveClickToLocalVisibleFrameMs >= local.delayActualMs, 'local UI measurement missed the executed delay');
+    }
+    sample.delayProbeStatus = delayMs ? 'EXECUTED_AND_OBSERVED' : 'NOT_REQUESTED';
+    sample.status = 'MEASURED'; report.timings.status = 'MEASURED';
+  } finally {
+    const partial = await Promise.allSettled([a, b].map(page => page.evaluate(() => {
+      const probe = window.__kggDriveRenameTiming, data = probe?.data;
+      probe?.stop(); delete window.__kggDriveRenameTiming;
+      return data;
+    })));
+    for (const [index, key] of ['local', 'peer'].entries()) {
+      if (partial[index].status === 'fulfilled' && partial[index].value) sample[key] = partial[index].value;
+    }
+  }
+}
+
 async function enterExercise(page, name) {
   await quietEditor(page); await page.locator('#exerciseInput').fill(name); await page.locator('#exerciseInput').press('Enter');
   return until('confirmed Enter persisted to library without editor Save', () => catalog(page), items => items.some(item => item.name === name));
@@ -377,9 +483,17 @@ async function runSuite(config, resetOwned = false) {
     sourceSha: cp.execFileSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim(),
     htmlSha256: hash(fs.readFileSync(path.join(ROOT, 'kgg-update/index.html'))), harnessSha256: hash(fs.readFileSync(__filename)),
     runId: config.runId, round: config.round, externalDrive: config.externalDrive, cloudFolderId: config.cloudFolderId, files: config.files,
-    cases: [], browserErrors: [], transportEvents: [] };
+    cases: [], browserErrors: [], transportEvents: [],
+    timings: { schema: 'kgg-drive-sync-timing/v1', status: 'INCOMPLETE', scope: 'synthetic-filesystem-two-browser-contexts',
+      performanceVerdict: 'NOT_EVALUATED_NO_PRODUCT_BUDGET', nodeVersion: process.version,
+      viewport: { width: 1280, height: 900 }, adapterDelayMs: ADAPTER_DELAY_MS,
+      scheduling: 'production polling and debounce unchanged; no manual sync trigger in the measured rename',
+      localClock: 'page A performance.now: actual Save click to visible DOM at animation-frame observation; not a physical paint measurement',
+      peerClock: 'single Node performance.now: Save dispatch to peer-visible observation, including automation overhead',
+      uiDelayProbeMs: config.uiDelayProbeMs || 0, samples: [] } };
   const adapter = new DriveAdapter(config, report);
   const browser = await playwright.chromium.launch({ headless: true });
+  report.timings.browserVersion = browser.version();
   let a, b;
   async function test(name, callback) {
     const item = { name, startedAt: new Date().toISOString(), status: 'RUNNING' }; report.cases.push(item);
@@ -412,13 +526,26 @@ async function runSuite(config, resetOwned = false) {
       originalSnapshot = adapter.snapshot('a');
     });
     await test('edit-rename-stable-id-english-clear-and-reload', async () => {
+      // A real search keeps the known row in view after the app replaces Bank
+      // DOM. Prepare both clients before timing; never scroll after Save starts.
+      for (const client of [a, b]) {
+        await quietEditor(client.page);
+        await client.page.locator('#exerciseInput').fill(prefix);
+        const name = client.page.locator('#bankContent [data-add="' + exerciseId + '"] .bankText b');
+        await name.waitFor({ state: 'visible' }); await name.scrollIntoViewIfNeeded();
+        assert.equal((await name.textContent()).trim(), prefix + ' Create', 'timing setup lost the original visible name');
+      }
+      report.timings.fixture = { operation: 'rename-before-fixture-image-upload', bankQuery: prefix,
+        catalogEntriesA: (await catalog(a.page)).length, catalogEntriesB: (await catalog(b.page)).length };
       await openBankEditor(a.page, exerciseId); await a.page.locator('#editName').fill(prefix + ' Renamed');
-      await a.page.locator('#editNameEn').fill('Synthetic renamed exercise'); await a.page.locator('#editNameDe').fill('Synthetische Kataloguebung'); await a.page.locator('#editSets').selectOption('4'); await saveEditor(a.page);
+      await a.page.locator('#editNameEn').fill('Synthetic renamed exercise'); await a.page.locator('#editNameDe').fill('Synthetische Kataloguebung'); await a.page.locator('#editSets').selectOption('4');
+      await measureRenameSave(a.page, b.page, exerciseId, prefix + ' Renamed', report, config.uiDelayProbeMs || 0);
       await waitEntry(b.page, exerciseId, item => item.name === prefix + ' Renamed' && item.nameEn === 'Synthetic renamed exercise' && item.nameDe === 'Synthetische Kataloguebung' && item.sets === 4);
       assert.equal((await catalog(b.page)).filter(item => item.id === exerciseId).length, 1, 'rename duplicated stable ID');
       assert(!(await catalog(b.page)).some(item => item.name === prefix + ' Create'), 'rename retained old name');
       await openBankEditor(a.page, exerciseId); await a.page.locator('#editNameEn').fill(''); await saveEditor(a.page);
       await waitEntry(b.page, exerciseId, item => item.nameEn === '');
+      await b.page.locator('#exerciseInput').fill('');
       await b.page.reload({ waitUntil: 'domcontentloaded' }); await waitEntry(b.page, exerciseId, item => item.nameEn === '' && item.nameDe === 'Synthetische Kataloguebung' && item.sets === 4);
     });
     await test('image-bytes-add-peer-decode-and-reload', async () => {
@@ -651,6 +778,8 @@ async function runSuite(config, resetOwned = false) {
       for (const client of ['a', 'b']) adapter.assertExport(adapter.snapshot(client), client);
       assert.equal(report.browserErrors.length, 0, 'browser raised uncaught errors');
     });
+    assert.equal(report.timings.status, 'MEASURED', 'required visible UI/sync measurement is incomplete');
+    assert.equal(report.timings.samples.length, 1, 'expected one observed rename sample');
     report.status = 'PASS';
   } catch (error) {
     report.status = 'FAIL'; report.error = error.message;
@@ -662,6 +791,7 @@ async function runSuite(config, resetOwned = false) {
   finally {
     try {
       report.finishedAt = new Date().toISOString(); report.adapter = adapter.state;
+      report.timings.sampleCount = report.timings.samples.length;
       report.finalFiles = Object.fromEntries(['a', 'b'].map(client => {
         try { return [client, fileMeta(drivePath(config, client))]; } catch (_) { return [client, { unavailable: true }]; }
       }));
@@ -681,6 +811,9 @@ async function selfTest() {
   assert.throws(() => args(['--run', '--run-id', '../escape']));
   assert.throws(() => args(['--run', '--round', '2', '--cloud-hold']));
   assert.throws(() => args(['--run', '--cloud-hold']));
+  assert.equal(args(['--run', '--ui-delay-probe-ms', '250']).uiDelayProbeMs, 250);
+  for (const value of ['-1', '2001', 'NaN']) assert.throws(() => args(['--run', '--ui-delay-probe-ms', value]));
+  assert.throws(() => args(['--run', '--ui-delay-probe-ms', '250', '--drive-dir', path.resolve('synthetic-test-folder')]));
   const image = png([20, 40, 60]); assert.equal(image.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
   assert.equal(image.readUInt32BE(16), 40); assert.equal(image.readUInt32BE(20), 30);
   assert.equal(makeConfig(args(['--prepare'])).files.a, 'drive-a.json');
@@ -708,7 +841,7 @@ async function selfTest() {
 async function main() {
   const options = args(process.argv.slice(2));
   if (options.help || !options.mode) {
-    console.log('Usage: node release-pipeline/kgg_drive_sync_e2e.js --prepare|--run|--self-test [--run-id ID] [--round 1|2] [--drive-dir ABSOLUTE_SYNTHETIC_TEST_FOLDER --cloud-folder-id ID] [--cloud-hold] [--cloud-wait-ms N] [--reset-owned]');
+    console.log('Usage: node release-pipeline/kgg_drive_sync_e2e.js --prepare|--run|--self-test [--run-id ID] [--round 1|2] [--drive-dir ABSOLUTE_SYNTHETIC_TEST_FOLDER --cloud-folder-id ID] [--cloud-hold] [--cloud-wait-ms N] [--reset-owned] [--ui-delay-probe-ms 0..2000]');
     return;
   }
   if (options.mode === 'self-test') return selfTest();
