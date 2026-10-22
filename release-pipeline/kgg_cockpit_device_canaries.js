@@ -63,6 +63,9 @@ const assert=(ok,message)=>{if(!ok)throw new Error(message);};
     await test("normal-plan-editor",async()=>{
      await page.locator("#planList [data-planedit]").first().tap();
      await page.locator("#editorModal.open").waitFor();
+     const nameAction=await page.locator('#suggestExerciseNames').evaluate(button=>{const r=button.getBoundingClientRect(),sheet=document.querySelector('#editorModal .editorSheet').getBoundingClientRect();return{left:r.left,right:r.right,sheetLeft:sheet.left,sheetRight:sheet.right,viewport:innerWidth,scroll:button.scrollWidth,client:button.clientWidth};});
+     assert(nameAction.left>=nameAction.sheetLeft&&nameAction.right<=Math.min(nameAction.sheetRight,nameAction.viewport)&&nameAction.scroll<=nameAction.client+1,'new name action is clipped: '+JSON.stringify(nameAction));
+
      await page.locator("#closeEditor").tap();
      await page.locator("#editorModal.open").waitFor({state:"hidden"});
     });

@@ -4,19 +4,48 @@
   }
 
   if (!window.KGGNativeSync && window.KGGAndroidSync) {
+    function driveStatus(){
+      if (!window.KGGAndroidDriveSync) return {transport:'local',driveConfigured:false,pending:false,providerAccepted:false,lastError:''};
+      try {
+        var status = JSON.parse(window.KGGAndroidDriveSync.getStatus());
+        if (!status || typeof status.driveConfigured !== 'boolean') throw new Error('invalid_status');
+        return status;
+      } catch (err) {
+        return {transport:'saf-document',driveConfigured:true,pending:true,providerAccepted:false,lastError:'status_failed'};
+      }
+    }
+    function readDrive(){
+      var document;
+      try { document = JSON.parse(window.KGGAndroidDriveSync.readSyncJson()); }
+      catch (err) { throw new Error('read_failed'); }
+      if (!document || document.kind === 'kgg_sync_transport_error') throw new Error(document && document.error || 'read_failed');
+      if (document.kind !== 'kgg_cross_data_safe_sync_mesh' || !Array.isArray(document.peers) || typeof document.roomId !== 'string') throw new Error('invalid_payload');
+      return document;
+    }
     window.KGGNativeSync = {
       available: true,
       platform: 'android',
       status: function(){
-        return safeParse(window.KGGAndroidSync.getStatus(), {available:true, platform:'android'});
+        var status = driveStatus();
+        if (status.driveConfigured) return Object.assign({available:true, platform:'android'}, status);
+        var local = safeParse(window.KGGAndroidSync.getStatus(), {available:true, platform:'android'});
+        return Object.assign({}, local, status);
       },
       read: function(){
+        if (driveStatus().driveConfigured) return readDrive();
         return safeParse(window.KGGAndroidSync.readSyncJson(), null);
       },
       write: function(syncDocument){
-        return window.KGGAndroidSync.writeSyncJson(JSON.stringify(syncDocument || {}));
+        var payload = JSON.stringify(syncDocument || {});
+        if (window.KGGAndroidDriveSync) {
+          var configured = driveStatus().driveConfigured;
+          var accepted = window.KGGAndroidDriveSync.writeSyncJson(payload);
+          if (configured) return !!accepted;
+        }
+        return window.KGGAndroidSync.writeSyncJson(payload);
       },
       listPeers: function(){
+        if (driveStatus().driveConfigured) return readDrive();
         if (typeof window.KGGAndroidSync.listPeerSyncJson !== 'function') {
           return {kind:'kgg_cross_data_safe_sync_mesh', peers:[]};
         }
@@ -27,6 +56,15 @@
       },
       setFollowConfig: function(config){
         return window.KGGAndroidSync.writeFollowConfig(JSON.stringify(config || {}));
+      },
+      configureOwnDriveFile: function(options){
+        return !!(window.KGGAndroidDriveSync && window.KGGAndroidDriveSync.configureOwnDriveFile(JSON.stringify(options || {})));
+      },
+      selectDrivePeerFiles: function(options){
+        return !!(window.KGGAndroidDriveSync && window.KGGAndroidDriveSync.selectDrivePeerFiles(JSON.stringify(options || {})));
+      },
+      disconnectDrive: function(){
+        return !!(window.KGGAndroidDriveSync && window.KGGAndroidDriveSync.disconnectDrive());
       }
     };
   }

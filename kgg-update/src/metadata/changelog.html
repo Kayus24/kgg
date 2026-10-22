@@ -3,8 +3,39 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 124,
+  "latestVersionCode": 125,
   "entries": [
+    {
+      "versionCode": 125,
+      "versionName": "1.0.125-library-image-names",
+      "patchId": "kgg-v125-library-image-names",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Uebungskatalog, Bilder und Namenshilfe gemeinsam",
+      "reason": "Vorbereitete Bibliotheks-/Bildsynchronisation und fehlende DE/EN-Bezeichnungen gemeinsam integrieren; kompatible Metadaten erhalten.",
+      "whatChanged": [
+        "Vorbereitete Bibliotheks-/Bildsynchronisation und fehlende DE/EN-Bezeichnungen gemeinsam integrieren; kompatible Metadaten erhalten."
+      ],
+      "touchedAreas": [
+        "Medien/Upload",
+        "QR/Patienten-App",
+        "Android/APK"
+      ],
+      "notTouched": [
+        "PDF",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "API-Key-Logik",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Max Handoff COMPLETENESS_PUSH_20261022 generation1 revision1: existing drafts plus narrowly authorized R2 metadata and isolated native sync; no live release."
+    },
     {
       "versionCode": 124,
       "versionName": "1.0.124-cockpit-main-integration",
@@ -447,41 +478,9 @@
         "certification": "pending"
       },
       "approvalNote": "Autorisierter Cockpit-Bildabgleich mit reproduzierbarem Touch-Fehler in sechs Tablet-Szenarien."
-    },
-    {
-      "versionCode": 110,
-      "versionName": "1.0.110-cockpit-video-disclosure-label",
-      "patchId": "kgg-v110-cockpit-video-disclosure-label",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Video im gemeinsamen Editor benennen",
-      "reason": "Der aufklappbare Video-Bereich ist als Video erkennbar und verwendet die bestehenden Eingabe- und Speicherwege.",
-      "whatChanged": [
-        "Der aufklappbare Video-Bereich ist als Video erkennbar und verwendet die bestehenden Eingabe- und Speicherwege."
-      ],
-      "touchedAreas": [
-        "UI"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Fortsetzung des autorisierten Cockpit-Bildabgleichs und der RED-GREEN-Pruefschleife."
     }
   ],
-  "latestVersionName": "1.0.124-cockpit-main-integration",
+  "latestVersionName": "1.0.125-library-image-names",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -570,6 +569,14 @@
       "entriesSha256": "1c392f792b1af2fd8945017d8f233d294829e9e485ad78462ddfe4fd77d2589a",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v124-cockpit-main-integration"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v125.json",
+      "snapshotVersionCode": 125,
+      "entryCount": 66,
+      "entriesSha256": "9dee263e6c97707b4ba0af7f7f8c7168273f47b98e73eb1478ded68c2045a8a3",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v125-library-image-names"
     }
   ]
 }

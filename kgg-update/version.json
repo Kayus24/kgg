@@ -1,7 +1,7 @@
 {
-  "versionCode": 124,
-  "versionName": "1.0.124-cockpit-main-integration",
-  "indexUrl": "index.html?v=124",
-  "sha256": "fc12291a3568c7994abd13a7f174c9769f1209595f7eb9895ad4995e521d1fe9",
-  "notes": "v124: Gesichertes Cockpit v096-v123 mit Main-Englischfunktion zusammengefuehrt; beide v096-Historien bleiben getrennte Evidenz, kein Beta- oder Alpha-Release."
+  "versionCode": 125,
+  "versionName": "1.0.125-library-image-names",
+  "indexUrl": "index.html?v=125",
+  "sha256": "43157a42b7e06d88af071ca5eb5ee2b26a370e97be151c02d69d78915a5b6213",
+  "notes": "v125: Vorbereitete Bibliotheks-/Bildsynchronisation und fehlende DE/EN-Bezeichnungen gemeinsam integrieren; kompatible Metadaten erhalten."
 }

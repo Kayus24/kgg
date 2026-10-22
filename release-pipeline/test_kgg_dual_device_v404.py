@@ -33,6 +33,27 @@ BROWSER_SMOKE = ROOT / "release-pipeline/kgg_device_test_station_browser_smoke.j
 
 
 class DualDeviceV404ContractTests(unittest.TestCase):
+    def test_optional_isolated_preview_preserves_standard_and_native_boundaries(self) -> None:
+        build = BUILD.read_text(encoding="utf-8")
+        main = MAIN_ACTIVITY.read_text(encoding="utf-8")
+        factory = FACTORY.read_text(encoding="utf-8")
+        self.assertIn('buildConfigField "boolean", "KGG_ISOLATED_PREVIEW_TEST", "false"', build)
+        self.assertIn('applicationId "de.kgg.preview"', build)
+        self.assertIn('isolatedPreviewApplicationId != "de.kgg.preview.drivesync20261015"', build)
+        self.assertRegex(main, r'if \(!BuildConfig\.KGG_ISOLATED_PREVIEW_TEST\) \{\s*webView\.addJavascriptInterface\(new KggSyncBridge\(this\), "KGGAndroidSync"\);\s*\}')
+        self.assertLess(main.index('injectAssetScript("android/kgg_isolated_preview_sync_setup.js")'), main.index('injectAssetScript("android/kgg_android_sync_bootstrap.js")'))
+        for method in ("checkForPreviewWebAppUpdate()", "checkForAndroidAppUpdate(boolean force)", "installPendingApkIfAllowed()"):
+            self.assertRegex(main, re.escape("private void " + method) + r' \{\s*if \(BuildConfig\.KGG_ISOLATED_PREVIEW_TEST\) \{\s*return;')
+        self.assertRegex(factory, r'attach\(MainActivity activity, WebView webView\) \{\s*if \(BuildConfig\.KGG_ISOLATED_PREVIEW_TEST\) \{\s*return null;')
+        self.assertRegex(factory, r'onPageFinished\(MainActivity activity\) \{\s*if \(BuildConfig\.KGG_ISOLATED_PREVIEW_TEST\) \{\s*return;')
+
+    def test_isolated_preview_private_setup_and_late_native_ready(self) -> None:
+        result = subprocess.run(
+            ["node", "release-pipeline/kgg_isolated_preview_sync_smoke.js"],
+            cwd=ROOT, check=False, text=True, capture_output=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_roles_are_correct_and_preview_only(self) -> None:
         station = STATION.read_text(encoding="utf-8")
         agent = AGENT.read_text(encoding="utf-8")
