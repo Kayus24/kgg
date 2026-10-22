@@ -142,3 +142,33 @@ jobs:
           if-no-files-found: error
           retention-days: 3
           compression-level: 0
+
+      # A side-by-side isolated test package; production manifests and APK signatures stay untouched.
+      - name: Build isolated Admin SAF test APK
+        if: github.head_ref == 'feat/android-saf-shell-v402-20261022'
+        working-directory: android-wrapper
+        run: gradle -PKGG_ADMIN_SAF_TEST_APPLICATION_ID=de.kgg.admin.safbeta :app:assembleAdminDebug --rerun-tasks
+      - name: Verify isolated Admin SAF test identity
+        if: github.head_ref == 'feat/android-saf-shell-v402-20261022'
+        run: |
+          APK=android-wrapper/app/build/outputs/apk/admin/debug/app-admin-debug.apk
+          AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort -V | tail -n 1)
+          test -s "$APK"
+          test -n "$AAPT"
+          "$AAPT" dump badging "$APK" > "$RUNNER_TEMP/kgg-admin-saf-test-badging.txt"
+          grep -Fq "package: name='de.kgg.admin.safbeta' versionCode='34' versionName='0.2.12-v402-native-drive-saf-test'" "$RUNNER_TEMP/kgg-admin-saf-test-badging.txt"
+          unzip -l "$APK" | grep -Fq 'assets/android/kgg_android_sync_bootstrap.js'
+          unzip -l "$APK" | grep -Fq 'assets/android/kgg_release_control_bootstrap.js'
+          grep -Fq 'KGGAndroidDriveSync' android-wrapper/app/src/main/java/de/kgg/app/MainActivity.java
+          grep -Fq 'configureOwnDriveFile' android-wrapper/app/src/main/assets/android/kgg_android_sync_bootstrap.js
+          grep -Fq 'selectDrivePeerFiles' android-wrapper/app/src/main/assets/android/kgg_android_sync_bootstrap.js
+          sha256sum "$APK"
+      - name: Upload isolated Admin SAF APK (not a live release)
+        if: github.head_ref == 'feat/android-saf-shell-v402-20261022'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgg-admin-saf-isolated-test-${{ github.event.pull_request.head.sha }}
+          path: android-wrapper/app/build/outputs/apk/admin/debug/app-admin-debug.apk
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0

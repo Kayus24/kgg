@@ -470,6 +470,7 @@ def run_android_wrapper_contract() -> None:
     bootstrap = (ROOT / "android-wrapper" / "app" / "src" / "main" / "assets" / "android" / "kgg_android_sync_bootstrap.js").read_text(
         encoding="utf-8"
     )
+    saf_bridge = (ROOT / "android-wrapper" / "app" / "src" / "main" / "java" / "de" / "kgg" / "app" / "KggDriveSyncBridge.java").read_text(encoding="utf-8")
     build_gradle = (ROOT / "android-wrapper" / "app" / "build.gradle").read_text(encoding="utf-8")
     android_manifest = (ROOT / "android-wrapper" / "app" / "src" / "main" / "AndroidManifest.xml").read_text(encoding="utf-8")
     debug_android_manifest = (ROOT / "android-wrapper" / "app" / "src" / "debug" / "AndroidManifest.xml").read_text(
@@ -485,6 +486,7 @@ def run_android_wrapper_contract() -> None:
         (f"ANDROID_SHELL_VERSION = {expected_shell}", "MainActivity shell version must match android_update_manifest"),
         ("BUNDLED_WEB_VERSION = 419", "Android bundled web version must point at r0419"),
         ("BUILD_CODE = \"v401-r0419-share-apk-provider\"", "Android v401 build code"),
+        ("resolver.takePersistableUriPermission(uri, required);", "SAF must persist verified read/write grants"),
         ("PdfRenderer", "internal Android PDF renderer fallback"),
         ("openPdfFileInternally", "internal Android PDF preview method"),
         ("intent.resolveActivity(getPackageManager()) == null", "external PDF viewer absence check"),
@@ -533,12 +535,14 @@ def run_android_wrapper_contract() -> None:
         path.read_text(encoding="utf-8")
         for path in (ROOT / "android-wrapper" / "app" / "src" / "main" / "java" / "de" / "kgg" / "app").glob("KggPreviewStatus*.java")
     )
-    haystacks = "\n".join([main_activity, bootstrap, build_gradle, android_manifest, debug_android_manifest, file_paths, android_workflow, preview_auto_workflow, preview_status_sources])
+    haystacks = "\n".join([main_activity, bootstrap, saf_bridge, build_gradle, android_manifest, debug_android_manifest, file_paths, android_workflow, preview_auto_workflow, preview_status_sources])
     missing = [reason for token, reason in required if token not in haystacks]
     if missing:
         raise BatteryError("Android wrapper contract missing: " + ", ".join(missing))
     if "if (window.KGGNativeSync || !window.KGGAndroidSync) return;" in bootstrap:
         raise BatteryError("Android bootstrap must not let Sync availability block PDF/Camera/AppUpdate bridges.")
+    if "(granted & Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) == 0" in saf_bridge:
+        raise BatteryError("SAF picker must not require the optional persistable result flag.")
     if "PermissionRequest.RESOURCE_AUDIO_CAPTURE" in main_activity:
         raise BatteryError("Android WebView camera bridge must never grant microphone capture.")
     if 'android:usesCleartextTraffic="true"' in android_manifest:

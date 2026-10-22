@@ -1076,7 +1076,7 @@ public class MainActivity extends Activity {
                     return;
                 }
                 int latestShellVersion = parseVersionNumber(manifest.optString("latestAndroidShellVersion"));
-                if (latestShellVersion <= ANDROID_SHELL_VERSION) {
+                if (latestShellVersion <= (BuildConfig.KGG_ISOLATED_ADMIN_SAF_TEST ? 402 : ANDROID_SHELL_VERSION)) {
                     return;
                 }
                 String apkUrl = manifestValue(manifest,
@@ -1252,9 +1252,9 @@ public class MainActivity extends Activity {
             SharedPreferences prefs = getSharedPreferences(UPDATE_PREFS, MODE_PRIVATE);
             status.put("available", true);
             status.put("platform", "android");
-            status.put("currentShellVersion", ANDROID_SHELL_VERSION);
+            status.put("currentShellVersion", BuildConfig.KGG_ISOLATED_ADMIN_SAF_TEST ? 402 : ANDROID_SHELL_VERSION);
             status.put("buildTime", BUILD_TIME);
-            status.put("buildCode", BUILD_CODE);
+            status.put("buildCode", BuildConfig.KGG_ISOLATED_ADMIN_SAF_TEST ? "v402-r0419-native-drive-saf-test" : BUILD_CODE);
             status.put("packageName", getPackageName());
             status.put("profile", isPreviewProfile() ? "preview" : (isAdminProfile() ? "admin" : "kollegen"));
             status.put("previewChannel", isPreviewProfile());
