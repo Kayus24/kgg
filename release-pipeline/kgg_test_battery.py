@@ -11,9 +11,11 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 from pathlib import Path
@@ -34,11 +36,58 @@ def log(message: str) -> None:
     print(message, flush=True)
 
 
+def stop_command_tree(proc: subprocess.Popen) -> None:
+    """Stop only this command's process tree, as in the integrated runner."""
+    try:
+        if os.name == "nt":
+            result = subprocess.run(
+                ["taskkill", "/PID", str(proc.pid), "/T", "/F"],
+                capture_output=True, timeout=12,
+            )
+            if result.returncode and proc.poll() is None:
+                raise BatteryError("Command-tree cleanup failed (taskkill)")
+        else:
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+    finally:
+        # Reap the direct child even if tree cleanup reported a problem.
+        if proc.poll() is None:
+            proc.kill()
+        proc.wait(timeout=5)
+
+
 def run(args: list[str], *, cwd: Path = ROOT) -> None:
+    raw_timeout = os.environ.get("KGG_TEST_COMMAND_TIMEOUT_SECONDS", "600")
+    try:
+        timeout = float(raw_timeout)
+    except ValueError as exc:
+        raise BatteryError("KGG_TEST_COMMAND_TIMEOUT_SECONDS must be positive finite seconds") from exc
+    if not math.isfinite(timeout) or timeout <= 0:
+        raise BatteryError("KGG_TEST_COMMAND_TIMEOUT_SECONDS must be positive finite seconds")
     log("+ " + " ".join(args))
-    proc = subprocess.run(args, cwd=str(cwd))
-    if proc.returncode != 0:
-        raise BatteryError(f"Command failed ({proc.returncode}): {' '.join(args)}")
+    proc = subprocess.Popen(
+        args, cwd=str(cwd),
+        creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0,
+        start_new_session=os.name != "nt",
+    )
+    try:
+        returncode = proc.wait(timeout=timeout)
+    except subprocess.TimeoutExpired as exc:
+        try:
+            stop_command_tree(proc)
+        except (OSError, subprocess.SubprocessError, BatteryError) as cleanup:
+            raise BatteryError(f"TIMEOUT after {timeout:g}s; cleanup incomplete: {cleanup}; {' '.join(args)}") from exc
+        raise BatteryError(f"TIMEOUT after {timeout:g}s: {' '.join(args)}") from exc
+    except KeyboardInterrupt:
+        try:
+            stop_command_tree(proc)
+        except (OSError, subprocess.SubprocessError, BatteryError) as cleanup:
+            log(f"Interrupted command; cleanup incomplete: {cleanup}")
+        raise
+    if returncode != 0:
+        raise BatteryError(f"Command failed ({returncode}): {' '.join(args)}")
 
 
 def node_executable() -> str:
@@ -630,6 +679,7 @@ def run_release_contracts() -> None:
             "release-pipeline/test_encoding_guard.py",
             "release-pipeline/test_kgg_changelog_archive.py",
             "release-pipeline/test_kgg_hook_guard.py",
+            "release-pipeline/test_kgg_battery_command_timeout.py",
             "release-pipeline/test_kgg_workspace_preservation.py",
             "release-pipeline/test_kgg_secret_scan.py",
             "release-pipeline/test_kgg_gpt_source_context.py",
