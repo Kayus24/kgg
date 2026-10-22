@@ -2,7 +2,7 @@
 
 This generated compatibility pack contains the complete production knowledge set. Prefer the four smaller curated packs in the GPT editor so retrieval stays focused.
 
-Source digest: `ba35cd869c9e57e2`
+Source digest: `2edcc5ad2c126932`
 
 ## Usage Rules
 
@@ -80,8 +80,8 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Source web version: v125 / `1.0.125-library-image-names`.
 - Source index URL: `index.html?v=125`.
 - Source notes: v125: Vorbereitete Bibliotheks-/Bildsynchronisation und fehlende DE/EN-Bezeichnungen gemeinsam integrieren; kompatible Metadaten erhalten.
-- Live Admin release: `r0433` / `1.0.95-cockpit-responsive-entry`.
-- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0433/admin.html`.
+- Live Admin release: `r0434` / `1.0.125-library-image-names`.
+- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0434/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.
 - Live colleague URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html`.
 - Latest Android shell: `v401`.
