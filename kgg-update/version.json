@@ -1,7 +1,7 @@
 {
-  "versionCode": 96,
-  "versionName": "1.0.96-patient-english-names",
-  "indexUrl": "index.html?v=96",
-  "sha256": "d9e4edcda8afd4cdfc821b4e9d155483a726cec4e9c4603e4eeee4b94a0bf2d3",
-  "notes": "v096: Englische Patienten-Anzeigenamen im Uebungseditor pflegen; deutsche Plan- und QR-Namen bleiben erhalten."
+  "versionCode": 125,
+  "versionName": "1.0.125-library-image-names",
+  "indexUrl": "index.html?v=125",
+  "sha256": "43157a42b7e06d88af071ca5eb5ee2b26a370e97be151c02d69d78915a5b6213",
+  "notes": "v125: Vorbereitete Bibliotheks-/Bildsynchronisation und fehlende DE/EN-Bezeichnungen gemeinsam integrieren; kompatible Metadaten erhalten."
 }

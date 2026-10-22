@@ -277,6 +277,8 @@ async function exerciseCoreFlows(page, viewportId) {
 
   const edit = page.locator("#planList [data-planedit]").first();
   await edit.scrollIntoViewIfNeeded();
+  const editHit = await edit.evaluate((node) => { const r=node.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,hit=document.elementFromPoint(x,y); return { owns:!!(hit&&(hit===node||node.contains(hit))), x, y, hitId:hit&&hit.id||'', hitClass:hit&&String(hit.className||''), hitTag:hit&&hit.tagName||'' }; });
+  if (!editHit.owns) fail(`${viewportId}: plan edit target obstructed: ${JSON.stringify(editHit)}`);
   await edit.click();
   await page.locator("#editorModal.open").waitFor({ state: "visible", timeout: 5000 });
   const name = await page.locator("#editName").inputValue();

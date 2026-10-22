@@ -97,7 +97,7 @@
   var observer=null;
 
   function byId(id){return document.getElementById(id);}
-  function isPhone(){return !!(window.matchMedia&&window.matchMedia(PHONE_QUERY).matches&&!(window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive()));}
+  function isPhone(){if(document.body.classList.contains('kggTcMainPanePhone'))return true;return !!(window.matchMedia&&window.matchMedia(PHONE_QUERY).matches&&!(window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive()));}
   function clickExisting(id){
     var target=byId(id);
     if(target&&typeof target.click==="function"){target.click();return true;}
@@ -215,7 +215,7 @@
   else install();
   window.addEventListener("resize",function(){setTimeout(install,80);},{passive:true});
   window.addEventListener("orientationchange",function(){setTimeout(install,180);},{passive:true});
-  window.KGG_UI_MINI_SERIES={
+  window.KGG_UI_MINI_SERIES={install:install,
     patchId:PATCH_ID,
     check:function(){
       return {

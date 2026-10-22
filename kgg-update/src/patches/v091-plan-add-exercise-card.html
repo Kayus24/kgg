@@ -24,19 +24,7 @@
   function decoratePlanList(){
     var list=document.getElementById("planList");
     if(!list)return;
-    var hasExercise=!!list.querySelector(".planCard[data-plan-id]");
-    if(!hasExercise){removeCard(list);return;}
-    var card=document.getElementById(CARD_ID);
-    if(!card){
-      card=document.createElement("button");
-      card.id=CARD_ID;
-      card.type="button";
-      card.className="planAddCard";
-      card.setAttribute("aria-label","Neue Übung hinzufügen");
-      card.innerHTML='<span class="planAddCardPlus" aria-hidden="true">+</span><span class="planAddCardText">Übung hinzufügen</span>';
-      card.addEventListener("click",focusExerciseComposer);
-    }
-    if(card.parentNode!==list)list.appendChild(card);
+    removeCard(list);
   }
 
   function install(){

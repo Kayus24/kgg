@@ -164,6 +164,25 @@ def run_therapy_cockpit_browser() -> None:
     run_playwright_script("kgg_therapy_cockpit_browser_smoke.js")
 
 
+def run_cockpit_device_canaries() -> None:
+    log("== Cockpit device layout touch canaries ==")
+    run_playwright_script("kgg_cockpit_device_canaries.js")
+
+
+def run_cockpit_layout_interactions() -> None:
+    log("== Cockpit main pane, value row and gesture contracts ==")
+    for script in (
+        "kgg_cockpit_stage_undo_smoke.js",
+        "kgg_cockpit_main_phone_flow.js",
+        "kgg_cockpit_narrow_readability.js",
+        "kgg_cockpit_phone_value_grid.js",
+        "kgg_cockpit_seam_gesture.js",
+        "kgg_cockpit_reorder_parity.js",
+        "kgg_cockpit_reported_scenarios.js",
+    ):
+        run_playwright_script(script)
+
+
 def run_ticket_037_real_plan_browser() -> None:
     global TICKET_037_PLAYWRIGHT_PREPARED
     npm = npm_executable()
@@ -834,6 +853,48 @@ TEST_REGISTRY = [
         "run": lambda: run_html_logic("sync-critical"),
     },
     {
+        "id": "library-name-image-roundtrip-critical",
+        "level": "critical",
+        "suite": "native-sync",
+        "reason": "Actual name fields, variants and image bytes must converge together across automatic sync and reload.",
+        "run": lambda: run([node_executable(), "release-pipeline/kgg_library_name_roundtrip_smoke.js"]),
+    },
+    {
+        "id": "patient-primary-provenance-critical",
+        "level": "critical",
+        "suite": "patient-qr",
+        "reason": "Optional primary provenance must preserve legacy return bytes and reject ambiguous imports atomically.",
+        "run": lambda: run([node_executable(), "release-pipeline/kgg_exercise_primary_names_smoke.js"]),
+    },
+    {
+        "id": "patient-settings-metadata-critical",
+        "level": "critical",
+        "suite": "patient-qr",
+        "reason": "Actual settings save must retain English/primary metadata and progression/future tuple tails.",
+        "run": lambda: run([node_executable(), "release-pipeline/kgg_patient_settings_metadata_smoke.js"]),
+    },
+    {
+        "id": "primary-name-complete-roundtrip-critical",
+        "level": "critical",
+        "suite": "patient-qr",
+        "reason": "Actual therapist/stage serializer through patient rename/settings/reload/return must resolve the exact original catalog name.",
+        "run": lambda: run([node_executable(), "release-pipeline/kgg_primary_names_roundtrip_smoke.js"]),
+    },
+    {
+        "id": "drive-sync-core-critical",
+        "level": "critical",
+        "suite": "native-sync",
+        "reason": "Confirmed library changes must persist, converge and retry automatically; image hashes, file budgets and patient-plan isolation must fail closed without a browser or device.",
+        "run": lambda: run([node_executable(), "release-pipeline/kgg_drive_sync_core_smoke.js"]),
+    },
+    {
+        "id": "drive-sync-bootstrap-critical",
+        "level": "critical",
+        "suite": "native-sync",
+        "reason": "Configured document-provider errors must reach retry handling without local-success fallback, while legacy local mode and private pending outbox remain compatible.",
+        "run": lambda: run([node_executable(), "release-pipeline/kgg_drive_sync_bootstrap_smoke.js"]),
+    },
+    {
         "id": "textblocks-critical",
         "level": "critical",
         "suite": "textblocks",
@@ -874,6 +935,13 @@ TEST_REGISTRY = [
         "suite": "ui-stability",
         "reason": "Per-exercise opt-in pain-per-set UI must retain independent set/day values, persistence, normal clicks and Legacy/React rollback without opening the NumPad.",
         "run": run_patient_per_set_pain,
+    },
+    {
+        "id": "exercise-image-name-assist-critical",
+        "level": "critical",
+        "suite": "patient-qr",
+        "reason": "Shared image editor suggestions must preserve primary/authored names, remain drafts until Save, bound external data and discard stale or unsafe replies.",
+        "run": lambda: run([node_executable(), "release-pipeline/kgg_image_name_assist_smoke.js"]),
     },
     {
         "id": "patient-english-metadata-critical",
@@ -930,6 +998,20 @@ TEST_REGISTRY = [
         "suite": "therapy-cockpit",
         "reason": "Cockpit exercises must be editable per slot: add from the existing bank, reorder with the visible drag handle, edit progression stages, delete, and preserve the result through the existing link codec on phone and tablet.",
         "run": run_therapy_cockpit_live_edit_browser,
+    },
+    {
+        "id": "cockpit-device-layout-touch-critical",
+        "level": "critical",
+        "suite": "therapy-cockpit",
+        "reason": "Fresh phone/tablet contexts with one to three plans must preserve field commits, real Back/Finish/editor hit testing and slot counts across responsive layouts.",
+        "run": run_cockpit_device_canaries,
+    },
+    {
+        "id": "cockpit-layout-interactions-critical",
+        "level": "critical",
+        "suite": "therapy-cockpit",
+        "reason": "Two-slot main phone presentation, touch targets, value rows, seam cancellation and visual reorder parity must preserve plan and slot state.",
+        "run": run_cockpit_layout_interactions,
     },
     {
         "id": "patient-continuous-days-critical",

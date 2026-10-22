@@ -1,0 +1,24 @@
+"use strict";
+const fs=require('fs'),path=require('path'),{pathToFileURL}=require('url');
+const {chromium}=require('playwright');
+const root=path.resolve(__dirname,'..');
+const dir=path.join(process.env.KGG_SMOKE_SCREENSHOT_DIR||path.join(root,'tmp/cockpit-layout-canaries'),'reorder-parity');fs.mkdirSync(dir,{recursive:true});
+(async()=>{const browser=await chromium.launch();const results=[];
+try{for(const width of [390,1280]){
+ const viewport={width,height:width===390?857:800},context=await browser.newContext({viewport,screen:viewport,isMobile:true,hasTouch:true});await context.route(/^https?:\/\//,r=>r.abort());const page=await context.newPage();page.setDefaultTimeout(4000);
+ await page.addInitScript(()=>{const ex=(id,name)=>({id,localId:id,name,sets:2,side:'BI',unit:'Wdh',weightUnit:'kg',previous:[],today:[],progressionVariants:[],media:[]});localStorage.setItem('kgg_pwa_install_prompt_seen_v1','synthetic');localStorage.setItem('kgg_html_app_v2_state',JSON.stringify({planId:'synthetic-reorder',patient:{name:'Synthetic',date:'2026-10-01'},plan:[ex('one','Abduktion Maschine'),ex('two','Adduktion Maschine')]}));});
+ await page.goto(pathToFileURL(path.join(root,'kgg-update/index.html')).href);await page.locator('#adminSecretsModal.open').waitFor();await page.locator('#closeAdminSecrets').tap();
+ const cdp=await context.newCDPSession(page),touch=(type,x,y)=>cdp.send('Input.dispatchTouchEvent',{type,touchPoints:type==='touchEnd'||type==='touchCancel'?[]:[{x,y,id:1}]});
+ const start=async(selector)=>{const b=await page.locator(selector).first().boundingBox();const x=b.x+b.width/2,y=b.y+b.height/2;await touch('touchStart',x,y);await page.waitForTimeout(160);return {x,y};};
+ const read=selector=>page.locator(selector).first().evaluate(e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect(),m=new DOMMatrix(s.transform==='none'?undefined:s.transform);return {opacity:s.opacity,shadow:s.boxShadow,filter:s.filter,position:s.position,scale:m.a,top:r.top,height:r.height};});
+ const p=await start('#planList .drag');const normal=await read('#planList .reorder-lifted');await touch('touchCancel');await page.waitForTimeout(150);
+ await page.evaluate(()=>{const a=window.KGGTherapyCockpit;for(let i=0;i<2;i++)a.importCode(a.encode({planId:'synthetic-slot-'+i,name:'Synthetic '+i,exercises:a.registry.entries().slice(0,3).map(e=>({id:e.id,sets:2}))}));});await page.waitForTimeout(500);
+ const slot0='.kgg-tc-card[data-tc-card="0"]',lift=slot0+' .reorder-lifted',ids=()=>page.evaluate(()=>[0,1].map(i=>window.KGGTherapyCockpit.getSlot(i).exercises.map(e=>e.id)));
+ const before=await ids();const q=await start(slot0+' .kgg-tce-drag');const cockpit=await read(lift);await touch('touchMove',q.x,q.y+35);await page.waitForTimeout(60);const moved=await read(lift);await page.screenshot({path:path.join(dir,`reorder-${width}-lift.png`)});await touch('touchCancel');await page.waitForTimeout(150);const afterCancel=await ids();
+ const q2=await start(slot0+' .kgg-tce-drag');const last=await page.locator(slot0+' .kgg-tc-exercise').last().boundingBox();await touch('touchMove',q2.x,last.y+last.height-2);await touch('touchEnd');await page.waitForTimeout(200);const after=await ids();
+ const style=normal.opacity===cockpit.opacity&&normal.shadow===cockpit.shadow&&normal.filter===cockpit.filter&&Math.abs(normal.scale-cockpit.scale)<.001;
+ const following=Math.abs((moved.top-cockpit.top)-35)<3,cancel=JSON.stringify(before)===JSON.stringify(afterCancel),drop=after[0][2]===before[0][0]&&JSON.stringify(after[1])===JSON.stringify(before[1]);
+ const clean=await page.evaluate(()=>!document.querySelector('#kggTherapyCockpitRoot .reorder-lifted,#kggTherapyCockpitRoot .reorder-placeholder'));
+ const result={width,status:style&&following&&cancel&&drop&&clean?'PASS':'FAIL',normal,cockpit,moved,style,following,cancel,drop,clean};results.push(result);console.log(JSON.stringify(result));await context.close();
+}}finally{await browser.close();}fs.writeFileSync(path.join(dir,'report.json'),JSON.stringify({sha256:require('crypto').createHash('sha256').update(fs.readFileSync(path.join(root,'kgg-update/index.html'))).digest('hex'),results},null,2));if(results.some(r=>r.status==='FAIL'))process.exitCode=1;
+})().catch(e=>{console.error(e.stack);process.exitCode=1;});

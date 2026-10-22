@@ -3,57 +3,52 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 96,
+  "latestVersionCode": 125,
   "entries": [
     {
-      "versionCode": 96,
-      "versionName": "1.0.96-patient-english-names",
-      "patchId": "kgg-v096-patient-english-names",
-      "status": "candidate-no-release",
+      "versionCode": 125,
+      "versionName": "1.0.125-library-image-names",
+      "patchId": "kgg-v125-library-image-names",
+      "status": "scaffolded",
       "type": "module-patch",
-      "title": "Englische Patienten-Anzeigenamen",
-      "reason": "Englische Anzeigenamen eigener Übungen im Therapieeditor pflegen und kompatibel in optionalen Patienten-Metadaten übertragen; deutsche kanonische Namen bleiben erhalten.",
+      "title": "Uebungskatalog, Bilder und Namenshilfe gemeinsam",
+      "reason": "Vorbereitete Bibliotheks-/Bildsynchronisation und fehlende DE/EN-Bezeichnungen gemeinsam integrieren; kompatible Metadaten erhalten.",
       "whatChanged": [
-        "Optionales English-Feld im Übungseditor; Speicherung in der bestehenden Übungsbank.",
-        "Optionale m.exerciseNamesEn-Map mit exakt deutschen Schlüsseln; KGGH2/KGGH3 und bestehende Tupel bleiben kompatibel.",
-        "Explizite Leerung eines English-Felds bleibt im Shared-Bank-Transfer erhalten; Legacy-Abwesenheit löscht keine vorhandene Übersetzung."
+        "Vorbereitete Bibliotheks-/Bildsynchronisation und fehlende DE/EN-Bezeichnungen gemeinsam integrieren; kompatible Metadaten erhalten."
       ],
       "touchedAreas": [
-        "Übungseditor",
-        "Übungsbank",
-        "Patienten-Anzeigenamen",
-        "Optionale QR-Metadaten"
+        "Medien/Upload",
+        "QR/Patienten-App",
+        "Android/APK"
       ],
       "notTouched": [
         "PDF",
         "Scan/OCR",
         "Parser",
         "Plan-State",
-        "Medien/Upload",
         "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest"
+        "GitHub Manifest",
+        "Handy-Layout"
       ],
       "testStatus": {
-        "local": "in-progress",
+        "local": "pending",
         "certification": "pending"
       },
-      "approvalNote": "Expliziter Nutzerauftrag: Englische Bezeichnung eigener Übungen in der Therapeuten-App pflegen. No-Release-Kandidat für lokale Preview und Prüfung; keine Freigabe für Merge oder Release."
+      "approvalNote": "Max Handoff COMPLETENESS_PUSH_20261022 generation1 revision1: existing drafts plus narrowly authorized R2 metadata and isolated native sync; no live release."
     },
     {
-      "versionCode": 95,
-      "versionName": "1.0.95-cockpit-responsive-entry",
-      "patchId": "kgg-v095-cockpit-responsive-entry",
+      "versionCode": 124,
+      "versionName": "1.0.124-cockpit-main-integration",
+      "patchId": "kgg-v124-cockpit-main-integration",
       "status": "scaffolded",
       "type": "module-patch",
-      "title": "Cockpit-Einstieg im Phone-Dock",
-      "reason": "Zeigt bei geladenen Cockpit-Trainingsplänen einen gezählten Handy-Einstieg neben dem schwebenden Scan-Dock und hält den Tablet-Einstieg leerzustandsfest.",
+      "title": "Cockpit und englische Uebungsnamen integriert",
+      "reason": "Gesichertes Cockpit v096-v123 mit Main-Englischfunktion zusammengefuehrt; beide v096-Historien bleiben getrennte Evidenz, kein Beta- oder Alpha-Release.",
       "whatChanged": [
-        "Zeigt bei geladenen Cockpit-Trainingsplänen einen gezählten Handy-Einstieg neben dem schwebenden Scan-Dock und hält den Tablet-Einstieg leerzustandsfest."
+        "Gesichertes Cockpit v096-v123 mit Main-Englischfunktion zusammengefuehrt; beide v096-Historien bleiben getrennte Evidenz, kein Beta- oder Alpha-Release."
       ],
       "touchedAreas": [
-        "Therapie-Cockpit",
-        "Handy-Layout"
+        "UI"
       ],
       "notTouched": [
         "PDF",
@@ -64,27 +59,28 @@
         "Medien/Upload",
         "API-Key-Logik",
         "Android/APK",
-        "GitHub Manifest"
+        "GitHub Manifest",
+        "Handy-Layout"
       ],
       "testStatus": {
         "local": "pending",
         "certification": "pending"
       },
-      "approvalNote": "Expliziter Nutzerauftrag: Im Handy-Dock soll bei geladenen Cockpit-Trainingsplänen ein gezählter Cockpit-Button erscheinen; der Tablet-Button darf ohne Plan nicht sichtbar sein."
+      "approvalNote": "Nutzerauftrag 20.10.2026: lokale Integration und Tests, keine Release-Freigabe."
     },
     {
-      "versionCode": 94,
-      "versionName": "1.0.94-shared-reorder-core",
-      "patchId": "kgg-v094-shared-reorder-core",
+      "versionCode": 123,
+      "versionName": "1.0.123-cockpit-previous-value-action",
+      "patchId": "kgg-v123-cockpit-previous-value-action",
       "status": "scaffolded",
       "type": "module-patch",
-      "title": "Shared Reorder Core",
-      "reason": "Teilt die bestehende Reorder-Berechnung und Array-Umordnung zwischen Planerstellung und Therapie-Cockpit.",
+      "title": "Vorwerte im Cockpit uebernehmen",
+      "reason": "Wie in der Patienten-App kann das Vorwert-Paar eines Satzes bewusst in Heute uebernommen werden.",
       "whatChanged": [
-        "Teilt die bestehende Reorder-Berechnung und Array-Umordnung zwischen Planerstellung und Therapie-Cockpit."
+        "Wie in der Patienten-App kann das Vorwert-Paar eines Satzes bewusst in Heute uebernommen werden."
       ],
       "touchedAreas": [
-        "therapy-cockpit"
+        "UI"
       ],
       "notTouched": [
         "PDF",
@@ -104,29 +100,28 @@
       }
     },
     {
-      "versionCode": 93,
-      "versionName": "1.0.93-cockpit-shared-editor",
-      "patchId": "kgg-v093-cockpit-shared-editor",
+      "versionCode": 122,
+      "versionName": "1.0.122-teststation-collapsible-entry",
+      "patchId": "kgg-v122-teststation-collapsible-entry",
       "status": "scaffolded",
       "type": "module-patch",
-      "title": "Cockpit gemeinsamer Editor und Progressionswechsel",
-      "reason": "Verwendet den bestehenden Übungseditor auch für Cockpit-Slots und speichert den sichtbaren Progressionswechsel pro Slot.",
+      "title": "Einklappbare Teststation",
+      "reason": "Die Teststation erhaelt einen kleinen einklappbaren Einstieg und bleibt bei App-Dialogen verborgen.",
       "whatChanged": [
-        "Verwendet den bestehenden Übungseditor auch für Cockpit-Slots und speichert den sichtbaren Progressionswechsel pro Slot."
+        "Die Teststation erhaelt einen kleinen einklappbaren Einstieg und bleibt bei App-Dialogen verborgen."
       ],
       "touchedAreas": [
-        "Therapie-Cockpit",
-        "Plan-State",
-        "Test-Harness"
+        "UI",
+        "Android/APK"
       ],
       "notTouched": [
         "PDF",
         "QR/Patienten-App",
         "Scan/OCR",
         "Parser",
+        "Plan-State",
         "Medien/Upload",
         "API-Key-Logik",
-        "Android/APK",
         "GitHub Manifest",
         "Handy-Layout"
       ],
@@ -134,22 +129,21 @@
         "local": "pending",
         "certification": "pending"
       },
-      "approvalNote": "Expliziter Zielauftrag KGG-TICKET-037: Cockpit-Übungen müssen mit denselben Planerstellungsfunktionen bearbeitbar sein; das Changelog wird über den unveränderlichen Snapshot-Mechanismus archiviert."
+      "approvalNote": "Max hat den einklappbaren Teststations-Einstieg im angenommenen Plan ausdruecklich ausgewaehlt; Preview-Wrapper wird getrennt getestet."
     },
     {
-      "versionCode": 92,
-      "versionName": "1.0.92-cockpit-live-edit",
-      "patchId": "kgg-v092-cockpit-live-edit",
+      "versionCode": 121,
+      "versionName": "1.0.121-cockpit-exercise-thumbnails",
+      "patchId": "kgg-v121-cockpit-exercise-thumbnails",
       "status": "scaffolded",
       "type": "module-patch",
-      "title": "Therapie-Cockpit direkt bearbeiten",
-      "reason": "Erweitert das Cockpit um vollständige Übungsbearbeitung pro Slot und eine mobile aktive Patient:innenkarte.",
+      "title": "Vorhandene Cockpit Uebungsbilder",
+      "reason": "Cockpit zeigt vorhandene lokale entschluesselte Bilder oder Bild-URLs und einen klaren Platzhalter bei fehlenden Medien.",
       "whatChanged": [
-        "Erweitert das Cockpit um vollständige Übungsbearbeitung pro Slot und eine mobile aktive Patient:innenkarte."
+        "Cockpit zeigt vorhandene lokale entschluesselte Bilder oder Bild-URLs und einen klaren Platzhalter bei fehlenden Medien."
       ],
       "touchedAreas": [
-        "Handy-Layout",
-        "Plan-State",
+        "UI",
         "Medien/Upload"
       ],
       "notTouched": [
@@ -157,72 +151,7 @@
         "QR/Patienten-App",
         "Scan/OCR",
         "Parser",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Expliziter Nutzerauftrag: Cockpit-Pläne direkt auf Phone und Tablet vollständig bearbeiten."
-    },
-    {
-      "versionCode": 91,
-      "versionName": "1.0.91-plan-add-exercise-card",
-      "patchId": "kgg-v091-plan-add-exercise-card",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Übung hinzufügen – Plus-Karte in der Planliste",
-      "reason": "Die Planliste erhält eine kleine leere Plus-Karte, die den bestehenden Eingabe- und Übungsdatenbankweg zum Hinzufügen einer weiteren Übung öffnet.",
-      "whatChanged": [
-        "Kleine leere Plus-Karte am Ende der aktuellen Planliste ergänzt.",
-        "Der Klick fokussiert den bestehenden Übungseingang und öffnet bei Bedarf die Übungsdatenbank.",
-        "Plan-State, Übungsdatenbank, Reorder-Mechanismus und Speicherweg bleiben unverändert."
-      ],
-      "touchedAreas": [
-        "Planerstellung",
-        "UI"
-      ],
-      "notTouched": [
-        "Therapie-Cockpit",
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
         "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      }
-    },
-    {
-      "versionCode": 90,
-      "versionName": "1.0.90-cockpit-exercises-only",
-      "patchId": "kgg-v090-cockpit-exercises-only",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Therapie-Cockpit ohne Basisdaten",
-      "reason": "Cockpit-Pläne können aus mindestens einer gültigen Übung auch ohne Patient:innen-Basisdaten erzeugt werden; der neutrale Codec-Name bleibt flüchtig und alte Fehlerhinweise werden nach Erfolg gelöscht.",
-      "whatChanged": [
-        "Cockpit-Pläne können aus mindestens einer gültigen Übung auch ohne Patient:innen-Basisdaten erzeugt werden; der neutrale Codec-Name bleibt flüchtig und alte Fehlerhinweise werden nach Erfolg gelöscht."
-      ],
-      "touchedAreas": [
-        "Therapie-Cockpit",
-        "Test-Harness"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
         "API-Key-Logik",
         "Android/APK",
         "GitHub Manifest",
@@ -231,150 +160,21 @@
       "testStatus": {
         "local": "pending",
         "certification": "pending"
-      }
-    },
-    {
-      "versionCode": 89,
-      "versionName": "1.0.89-changelog-archive-window-refresh",
-      "patchId": "kgg-v089-changelog-archive-window-refresh",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Changelog-Archivfenster erweitert",
-      "reason": "Vollständiger aktueller Changelog-Snapshot wird unveränderlich archiviert; im Laufzeitfenster bleiben die 15 neuesten Einträge.",
-      "whatChanged": [
-        "Vollständiger aktueller Changelog-Snapshot wird unveränderlich archiviert; im Laufzeitfenster bleiben die 15 neuesten Einträge."
-      ],
-      "touchedAreas": [
-        "Changelog-Archivierung"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      }
-    },
-    {
-      "versionCode": 88,
-      "versionName": "1.0.88-ticket-037-real-plan",
-      "patchId": "kgg-v088-ticket-037-real-plan",
-      "status": "candidate",
-      "type": "module-patch",
-      "title": "Therapie-Cockpit: normaler Plan direkt in Slot 1",
-      "reason": "Der sichtbare Cockpit-Einstieg und der Fertig-Dialog übernehmen den zentralen aktuellen Plan über den bestehenden Plan-/Codec-/Importpfad; Fehler bleiben fail-closed.",
-      "whatChanged": [
-        "Der sichtbare #kggTherapyCockpitButton importiert den normalen aktuellen Plan.",
-        "Der Fertig-Dialog enthält die verbindliche Cockpit-Plan-Aktion in der Reihenfolge PDF, App, Cockpit, Abbrechen.",
-        "Blocking-Real-Plan-E2E und Negativtest sichern sichtbaren Klick, Slot 1 und den echten Fehlercode."
-      ],
-      "touchedAreas": [
-        "Therapie-Cockpit",
-        "Test-Harness",
-        "Tablet-Fertig-Dialog"
-      ],
-      "notTouched": [
-        "PDF-Core",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Medien/Upload",
-        "Android/APK",
-        "API-Key-Logik",
-        "Phone-Design"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
       },
-      "approvalNote": "KGG-TICKET-037; kein Main-, Live- oder Release-Auftrag."
+      "approvalNote": "Max hat die Anzeige vorhandener Bilder im angenommenen Plan ausdruecklich beauftragt; Upload und Datenformate bleiben unveraendert."
     },
     {
-      "versionCode": 87,
-      "versionName": "1.0.87-ticket-015-live-fix",
-      "patchId": "kgg-v087-ticket-015-live-fix",
+      "versionCode": 120,
+      "versionName": "1.0.120-cockpit-keypad-visibility",
+      "patchId": "kgg-v120-cockpit-keypad-visibility",
       "status": "scaffolded",
       "type": "module-patch",
-      "title": "Ticket 015 Live-Editor-Bridge",
-      "reason": "Make the progression editor bridge robust and keep variant metadata out of patient info text.",
+      "title": "Cockpit Tastatur vollstaendig erreichbar",
+      "reason": "Die Tastatur und der aktive Wert bleiben auch bei geringer Bildschirmhoehe erreichbar; Feldwechsel erhaelt Eingaben.",
       "whatChanged": [
-        "Make the progression editor bridge robust and keep variant metadata out of patient info text."
+        "Die Tastatur und der aktive Wert bleiben auch bei geringer Bildschirmhoehe erreichbar; Feldwechsel erhaelt Eingaben."
       ],
       "touchedAreas": [
-        "Admin-Editor",
-        "Patienten-App"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      }
-    },
-    {
-      "versionCode": 86,
-      "versionName": "1.0.86-ticket-015-progressions-contract",
-      "patchId": "kgg-v085-ticket-015-progressions",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Progressionsvarianten – Vertragsfix",
-      "reason": "Der Progressionsvertrag wird releasefest ausgerichtet: painMode bleibt kompatibel, Auswahl/Medien werden sicher transportiert und Bank-Persistenz bleibt erhalten.",
-      "whatChanged": [
-        "Der Progressionsvertrag bleibt mit painMode kompatibel und transportiert Auswahl, Medien und Bank-Persistenz sicher."
-      ],
-      "touchedAreas": [
-        "Plan-State",
-        "QR/Patienten-App",
-        "Handy-Layout"
-      ],
-      "notTouched": [
-        "PDF",
-        "Scan/OCR",
-        "Parser",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Ausdrücklicher Ausführungsauftrag KGG-TICKET-015; bestehende Nutzeranforderung für Variantenkette, QR und Patienten-Galerie."
-    },
-    {
-      "versionCode": 84,
-      "versionName": "1.0.84-therapy-cockpit-start-link",
-      "patchId": "kgg-v084-therapy-cockpit-start-link",
-      "status": "candidate",
-      "type": "module-patch",
-      "title": "Therapie-Cockpit Startlink",
-      "reason": "Erzeugt aus einem bestehenden Therapeutenplan einen selbsttragenden Cockpit-Startlink mit kopierbarer Ausgabe.",
-      "whatChanged": [
-        "Erzeugt aus einem bestehenden Therapeutenplan einen selbsttragenden Cockpit-Startlink mit kopierbarer Ausgabe.",
-        "Erreichbar über den leeren Cockpit-Zustand; die normale Therapeutenansicht bleibt unverändert."
-      ],
-      "touchedAreas": [
-        "Therapie-Cockpit",
         "UI"
       ],
       "notTouched": [
@@ -395,49 +195,17 @@
       }
     },
     {
-      "versionCode": 83,
-      "versionName": "1.0.83-therapy-cockpit-id-guard",
-      "patchId": "kgg-v083-therapy-cockpit-id-guard",
+      "versionCode": 119,
+      "versionName": "1.0.119-cockpit-main-plan-width",
+      "patchId": "kgg-v119-cockpit-main-plan-width",
       "status": "scaffolded",
       "type": "module-patch",
-      "title": "Therapie-Cockpit ID-Guard",
-      "reason": "Weist unbekannte explizite Übungsbank-IDs vor dem Cockpit-Sync fail-closed ab.",
+      "title": "Breiter Plan neben Galerie",
+      "reason": "Bei einem Cockpit-Plan bekommt die Planliste mehr Platz und Einstellungen links neben dem Namen.",
       "whatChanged": [
-        "Weist unbekannte explizite Übungsbank-IDs vor dem Cockpit-Sync fail-closed ab."
+        "Bei einem Cockpit-Plan bekommt die Planliste mehr Platz und Einstellungen links neben dem Namen."
       ],
       "touchedAreas": [
-        "Therapie-Cockpit"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      }
-    },
-    {
-      "versionCode": 82,
-      "versionName": "1.0.82-therapy-cockpit",
-      "patchId": "kgg-v082-therapy-cockpit",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Therapie-Cockpit fuer begleitete Plaene",
-      "reason": "Fuegt die additive Tablet-Cockpit-Ansicht mit selbsttragendem Linkcodec, drei RAM-Slots und Abschlussdokumentation hinzu.",
-      "whatChanged": [
-        "Fuegt die additive Tablet-Cockpit-Ansicht mit selbsttragendem Linkcodec, drei RAM-Slots und Abschlussdokumentation hinzu."
-      ],
-      "touchedAreas": [
-        "Therapie-Cockpit",
         "UI"
       ],
       "notTouched": [
@@ -458,41 +226,261 @@
       }
     },
     {
-      "versionCode": 81,
-      "versionName": "1.0.81-qr-full-plan-device-ladder",
-      "patchId": "kgg-v081-qr-full-plan-device-ladder",
-      "status": "candidate",
+      "versionCode": 118,
+      "versionName": "1.0.118-cockpit-scroll-position",
+      "patchId": "kgg-v118-cockpit-scroll-position",
+      "status": "scaffolded",
       "type": "module-patch",
-      "title": "Vollständige KGGH3-Plan-QRs und Geräte-Testleiter",
-      "reason": "Komplette persönliche Pläne müssen von normalen Oppo-Ressourcen bis zu simulierten schwachen Geräten zuverlässig gelesen werden.",
+      "title": "Cockpit Scrollposition erhalten",
+      "reason": "Scrollposition bleibt beim Eingeben pro Cockpit-Plan erhalten.",
       "whatChanged": [
-        "Neue Plan-Ausgaben verwenden den lokalen, fest angehefteten KGGH3-Codec mit fflate 0.8.3 und Fehlerkorrektur M.",
-        "KGGH2 bleibt lesbar; Query, Hash, iOS-Startlink und der interne QR-Scanner validieren beide Formate.",
-        "Synthetische 1/3/7/12/20-Übungspläne werden über Decoder-, Parser-, Speicher- und Sichtbarkeits-Fingerabdrücke geprüft.",
-        "Für Altgeräte gibt es zusätzlich einen kleinen QR nur für die öffentliche Patienten-App-Adresse; der persönliche KGGH3-Plan wird danach intern gelesen."
+        "Scrollposition bleibt beim Eingeben pro Cockpit-Plan erhalten."
       ],
       "touchedAreas": [
-        "QR/Patienten-App",
-        "KGGH2/KGGH3",
-        "Interner QR-Scanner",
-        "Geräte-Testleiter"
+        "UI"
       ],
       "notTouched": [
         "PDF",
-        "Plan-State-Quelle",
-        "Medien-/Upload-Logik",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
         "API-Key-Logik",
-        "Android/APK"
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
       ],
       "testStatus": {
         "local": "pending",
-        "githubPages": "pending",
-        "androidApp": "pending"
+        "certification": "pending"
+      }
+    },
+    {
+      "versionCode": 117,
+      "versionName": "1.0.117-cockpit-modal-isolation",
+      "patchId": "kgg-v117-cockpit-modal-isolation",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Cockpit Dialoge ohne ueberlagernde Navigation",
+      "reason": "Modale Dialoge sperren die Lasche und den Hintergrund.",
+      "whatChanged": [
+        "Modale Dialoge sperren die Lasche und den Hintergrund."
+      ],
+      "touchedAreas": [
+        "UI"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
+    {
+      "versionCode": 116,
+      "versionName": "1.0.116-cockpit-seam-title-wrap",
+      "patchId": "kgg-v116-cockpit-seam-title-wrap",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Cockpit Trennkante ohne Titelsprung",
+      "reason": "Der Titel der schmalen Haupt-App behaelt beim Ziehen der Trennkante seine Ausgangsbreite; Abbruch und Loslassen geben die responsive Breite wieder frei.",
+      "whatChanged": [
+        "Der Titel der schmalen Haupt-App behaelt beim Ziehen der Trennkante seine Ausgangsbreite; Abbruch und Loslassen geben die responsive Breite wieder frei."
+      ],
+      "touchedAreas": [
+        "UI"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
       },
-      "handoffNote": "Vor einem echten Oppo-Test müssen die automatischen KGGH3-, Kamera-, Foto-Fallback- und Geräteprofile grün sein."
+      "approvalNote": "Review des von Max angeforderten Trennkanten-Fixes zeigt einen reproduzierten 22px Titelsprung; bestehende Archivierung wird fortgesetzt."
+    },
+    {
+      "versionCode": 115,
+      "versionName": "1.0.115-cockpit-reorder-plan-parity",
+      "patchId": "kgg-v115-cockpit-reorder-plan-parity",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Cockpit Verschieben wie im normalen Plan",
+      "reason": "Karte, Schatten, Platzhalter und Luecken entsprechen dem normalen Plan; die Karte folgt dem Finger ohne doppelte Hoehenreserve und Abbrechen stellt die Darstellung wieder her.",
+      "whatChanged": [
+        "Karte, Schatten, Platzhalter und Luecken entsprechen dem normalen Plan; die Karte folgt dem Finger ohne doppelte Hoehenreserve und Abbrechen stellt die Darstellung wieder her."
+      ],
+      "touchedAreas": [
+        "UI",
+        "Handy-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Max fordert in 296053 die identische Verschiebedarstellung wie bei Uebungen im Plan; bestehende Archivierung wird fortgesetzt."
+    },
+    {
+      "versionCode": 114,
+      "versionName": "1.0.114-cockpit-seam-stable-cover",
+      "patchId": "kgg-v114-cockpit-seam-stable-cover",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Cockpit Trennkante ohne Leerstreifen",
+      "reason": "Die Trennkante reserviert keinen leeren Streifen; beim Ziehen bleibt die Haupt-App in ihrer bestehenden Darstellung.",
+      "whatChanged": [
+        "Die Trennkante reserviert keinen leeren Streifen; beim Ziehen bleibt die Haupt-App in ihrer bestehenden Darstellung."
+      ],
+      "touchedAreas": [
+        "UI"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Max fordert anhand 296064 und Bildschirmvideo die kompakte Trennkante und stabile Haupt-App beim Ziehen; bestehende Archivierung wird fortgesetzt."
+    },
+    {
+      "versionCode": 113,
+      "versionName": "1.0.113-cockpit-phone-value-row",
+      "patchId": "kgg-v113-cockpit-phone-value-row",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Cockpit Wertezeile auf Smartphone",
+      "reason": "Satznummer, Vorwerte und beide heutigen Werte bleiben nebeneinander; die bestehende Tastatur steht darunter mit mindestens 44 Pixel Touchflaechen.",
+      "whatChanged": [
+        "Satznummer, Vorwerte und beide heutigen Werte bleiben nebeneinander; die bestehende Tastatur steht darunter mit mindestens 44 Pixel Touchflaechen."
+      ],
+      "touchedAreas": [
+        "UI",
+        "Handy-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Max fordert anhand 296051 und 296053 die Smartphone-Werteingabe wie in der Patienten-App; bestehende Archivierung wird fortgesetzt."
+    },
+    {
+      "versionCode": 112,
+      "versionName": "1.0.112-cockpit-main-pane-phone-layout",
+      "patchId": "kgg-v112-cockpit-main-pane-phone-layout",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Smartphone-Ansicht im schmalen KGG-Drittel",
+      "reason": "Bei zwei Cockpit-Plänen verwendet die Haupt-App ihre vorhandene Smartphone-Darstellung und Bedienwege im eigenen Drittel. Die Cockpit-Pläne behalten ihre Tablet-Aufteilung.",
+      "whatChanged": [
+        "Bei zwei Cockpit-Plänen verwendet die Haupt-App ihre vorhandene Smartphone-Darstellung und Bedienwege im eigenen Drittel. Die Cockpit-Pläne behalten ihre Tablet-Aufteilung."
+      ],
+      "touchedAreas": [
+        "UI"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Expliziter Bildauftrag 296074: gesamte linke KGG-Fläche bei zwei Cockpit-Plänen in Smartphone-UI wechseln."
+    },
+    {
+      "versionCode": 111,
+      "versionName": "1.0.111-cockpit-finish-dialog-layer",
+      "patchId": "kgg-v111-cockpit-finish-dialog-layer",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Fertig-Dialog über der Cockpit-Aufteilung",
+      "reason": "Der bestehende Abschlussdialog bleibt in der geteilten Cockpit-Ansicht sichtbar und per Berührung bedienbar.",
+      "whatChanged": [
+        "Der bestehende Abschlussdialog bleibt in der geteilten Cockpit-Ansicht sichtbar und per Berührung bedienbar."
+      ],
+      "touchedAreas": [
+        "UI"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Autorisierter Cockpit-Bildabgleich mit reproduzierbarem Touch-Fehler in sechs Tablet-Szenarien."
     }
   ],
-  "latestVersionName": "1.0.95-cockpit-responsive-entry",
+  "latestVersionName": "1.0.125-library-image-names",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -565,6 +553,30 @@
       "entriesSha256": "49767017066c2fbecb49bdec329c3c0c18231747883aa9d2fe3e662ca7c1a9cd",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v096-patient-english-names"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v123.json",
+      "snapshotVersionCode": 123,
+      "entryCount": 64,
+      "entriesSha256": "297e106ad70f8dca2ad9b91dafea728ffed0c39af795c2988e23816a5bc81b35",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v123-cockpit-previous-value-action"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v124.json",
+      "snapshotVersionCode": 124,
+      "entryCount": 65,
+      "entriesSha256": "1c392f792b1af2fd8945017d8f233d294829e9e485ad78462ddfe4fd77d2589a",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v124-cockpit-main-integration"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v125.json",
+      "snapshotVersionCode": 125,
+      "entryCount": 66,
+      "entriesSha256": "9dee263e6c97707b4ba0af7f7f8c7168273f47b98e73eb1478ded68c2045a8a3",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v125-library-image-names"
     }
   ]
 }
