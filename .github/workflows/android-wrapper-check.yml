@@ -142,3 +142,27 @@ jobs:
           if-no-files-found: error
           retention-days: 3
           compression-level: 0
+# Candidate artifact only: no APK release or manifest promotion.
+      - name: Verify Admin SAF candidate identity
+        if: github.head_ref == 'feat/android-saf-shell-v402-20261022'
+        run: |
+          APK=android-wrapper/app/build/outputs/apk/admin/debug/app-admin-debug.apk
+          AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort -V | tail -n 1)
+          test -s "$APK"
+          test -n "$AAPT"
+          "$AAPT" dump badging "$APK" > "$RUNNER_TEMP/kgg-admin-saf-candidate-badging.txt"
+          grep -Fq "package: name='de.kgg.admin' versionCode='34' versionName='0.2.12-v402-native-drive-saf'" "$RUNNER_TEMP/kgg-admin-saf-candidate-badging.txt"
+          unzip -l "$APK" | grep -Fq 'assets/android/kgg_android_sync_bootstrap.js'
+          grep -Fq 'KGGAndroidDriveSync' android-wrapper/app/src/main/java/de/kgg/app/MainActivity.java
+          grep -Fq 'configureOwnDriveFile' android-wrapper/app/src/main/assets/android/kgg_android_sync_bootstrap.js
+          grep -Fq 'selectDrivePeerFiles' android-wrapper/app/src/main/assets/android/kgg_android_sync_bootstrap.js
+          sha256sum "$APK"
+      - name: Upload v402 Admin SAF test APK (not released)
+        if: github.head_ref == 'feat/android-saf-shell-v402-20261022'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgg-admin-v402-saf-test-${{ github.event.pull_request.head.sha }}
+          path: android-wrapper/app/build/outputs/apk/admin/debug/app-admin-debug.apk
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0

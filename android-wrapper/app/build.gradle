@@ -186,8 +186,8 @@ android {
         applicationId "de.kgg.app"
         minSdk 26
         targetSdk 36
-        versionCode 33
-        versionName "0.2.11-v401-share-apk-provider"
+        versionCode 34
+        versionName "0.2.12-v402-native-drive-saf"
         manifestPlaceholders = [appLabel: "KGG Physio"]
         buildConfigField "String", "KGG_GITHUB_CLIENT_ID", "\"${project.findProperty('KGG_GITHUB_CLIENT_ID') ?: ''}\""
         buildConfigField "String", "KGG_PREVIEW_STATUS_URL", '""'
