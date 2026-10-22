@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0434",
+  "versionName": "1.0.125-library-image-names",
+  "notes": "KGG v125 Beta: Cockpit, exercise library and image sync, DE/EN name assistance and provenance. Android SAF device validation remains pending.",
+  "createdAt": "2026-10-22T12:41:12Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0434",
+      "profile": "admin",
+      "versionName": "1.0.125-library-image-names",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0434/admin.html",
+      "sha256": "43157a42b7e06d88af071ca5eb5ee2b26a370e97be151c02d69d78915a5b6213",
+      "notes": "KGG v125 Beta: Cockpit, exercise library and image sync, DE/EN name assistance and provenance. Android SAF device validation remains pending."
+    },
+    "colleague": {
+      "releaseId": "r0434",
+      "profile": "colleague",
+      "versionName": "1.0.125-library-image-names",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0434/colleague.html",
+      "sha256": "503e7b93c62011c7576a67d87e6a7afc78ec6ce203cb03874bc9d8f10bd9a3e6",
+      "notes": "KGG v125 Beta: Cockpit, exercise library and image sync, DE/EN name assistance and provenance. Android SAF device validation remains pending."
+    }
+  }
+}

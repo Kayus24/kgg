@@ -42,6 +42,16 @@ def propertyOrEnvironment = { String name, String fallback ->
     return fallback
 }
 
+// Optional, campaign-specific Debug proof package. No arbitrary package override.
+def isolatedPreviewApplicationId = String.valueOf(project.findProperty("KGG_PREVIEW_TEST_APPLICATION_ID") ?: "").trim()
+def isolatedPreviewTest = !isolatedPreviewApplicationId.isEmpty()
+if (isolatedPreviewTest && isolatedPreviewApplicationId != "de.kgg.preview.drivesync20261015") {
+    throw new GradleException("Only de.kgg.preview.drivesync20261015 is permitted for KGG_PREVIEW_TEST_APPLICATION_ID")
+}
+if (isolatedPreviewTest && !(gradle.startParameter.taskNames in [["assemblePreviewDebug"], [":app:assemblePreviewDebug"]])) {
+    throw new GradleException("Isolated Preview is permitted only with the single assemblePreviewDebug task")
+}
+
 def defaultPreviewVersion = "0.2.14-v404-dual-device-qr-test"
 def defaultPreviewRequestId = "local-dual-device-v404"
 def defaultPreviewSha = gitHead()
@@ -181,6 +191,7 @@ android {
         manifestPlaceholders = [appLabel: "KGG Physio"]
         buildConfigField "String", "KGG_GITHUB_CLIENT_ID", "\"${project.findProperty('KGG_GITHUB_CLIENT_ID') ?: ''}\""
         buildConfigField "String", "KGG_PREVIEW_STATUS_URL", '""'
+        buildConfigField "boolean", "KGG_ISOLATED_PREVIEW_TEST", "false"
     }
 
     buildFeatures { buildConfig true }
@@ -203,7 +214,12 @@ android {
             versionCode 36
             versionName defaultPreviewVersion
             manifestPlaceholders = [appLabel: "KGG QR-Teststation"]
-            buildConfigField "String", "KGG_PREVIEW_STATUS_URL", javaStringLiteral(project.findProperty("KGG_PREVIEW_STATUS_URL") ?: "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/status/latest.json")
+            if (isolatedPreviewTest) {
+                applicationId isolatedPreviewApplicationId
+                manifestPlaceholders = [appLabel: "KGG Drive-Pruefung 15.10."]
+            }
+            buildConfigField "boolean", "KGG_ISOLATED_PREVIEW_TEST", String.valueOf(isolatedPreviewTest)
+            buildConfigField "String", "KGG_PREVIEW_STATUS_URL", javaStringLiteral(isolatedPreviewTest ? "" : (project.findProperty("KGG_PREVIEW_STATUS_URL") ?: "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/status/latest.json"))
             buildConfigField "String", "KGG_PREVIEW_REQUEST_ID", javaStringLiteral(previewRequestId)
             buildConfigField "String", "KGG_PREVIEW_PATCH_HASH", javaStringLiteral(previewPatchHash)
             buildConfigField "String", "KGG_PREVIEW_BASE_SHA", javaStringLiteral(previewBaseSha)

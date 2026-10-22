@@ -56,3 +56,89 @@ jobs:
               ! unzip -p "$apk" "$dex" | strings | grep -Eq 'KggDeviceTestStationBridge|KGGDeviceTestStation'
             done
           done
+      - name: Bind checkout provenance and exercise real Gradle isolation guards
+        id: drive_provenance
+        if: github.head_ref == 'feat/exercise-library-drive-sync-20261015' || github.head_ref == 'codex/therapist-beta-v123-integration-20261020'
+        working-directory: android-wrapper
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          CHECKOUT_SHA=$(git rev-parse HEAD)
+          [[ "$CHECKOUT_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$PR_HEAD_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$CHECKOUT_SHA" = "$GITHUB_SHA"
+          printf 'Actual checkout SHA: %s\nPR head SHA: %s\n' "$CHECKOUT_SHA" "$PR_HEAD_SHA"
+          printf 'checkout_sha=%s\nhead_sha=%s\n' "$CHECKOUT_SHA" "$PR_HEAD_SHA" >> "$GITHUB_OUTPUT"
+          expect_guard_failure() {
+            expected="$1"
+            shift
+            if gradle "$@" > "$RUNNER_TEMP/kgg-drive-preview-negative.log" 2>&1; then
+              cat "$RUNNER_TEMP/kgg-drive-preview-negative.log"
+              echo "Isolation guard unexpectedly accepted a forbidden Gradle invocation"
+              exit 1
+            fi
+            if ! grep -Fq "$expected" "$RUNNER_TEMP/kgg-drive-preview-negative.log"; then
+              cat "$RUNNER_TEMP/kgg-drive-preview-negative.log"
+              echo "Failure did not prove the expected isolation guard"
+              exit 1
+            fi
+            printf 'Verified expected Gradle rejection: %s\n' "$*"
+          }
+          PACKAGE_GUARD='Only de.kgg.preview.drivesync20261015 is permitted for KGG_PREVIEW_TEST_APPLICATION_ID'
+          TASK_GUARD='Isolated Preview is permitted only with the single assemblePreviewDebug task'
+          expect_guard_failure "$PACKAGE_GUARD" -PKGG_PREVIEW_TEST_APPLICATION_ID=de.kgg.preview :app:assemblePreviewDebug
+          expect_guard_failure "$PACKAGE_GUARD" -PKGG_PREVIEW_TEST_APPLICATION_ID=de.kgg.admin :app:assemblePreviewDebug
+          expect_guard_failure "$TASK_GUARD" -PKGG_PREVIEW_TEST_APPLICATION_ID=de.kgg.preview.drivesync20261015 :app:assemblePreviewRelease
+          expect_guard_failure "$TASK_GUARD" -PKGG_PREVIEW_TEST_APPLICATION_ID=de.kgg.preview.drivesync20261015 :app:assemble
+          expect_guard_failure "$TASK_GUARD" -PKGG_PREVIEW_TEST_APPLICATION_ID=de.kgg.preview.drivesync20261015 clean :app:assemblePreviewDebug
+      - name: Build isolated Drive proof Preview Debug APK
+        if: github.head_ref == 'feat/exercise-library-drive-sync-20261015' || github.head_ref == 'codex/therapist-beta-v123-integration-20261020'
+        working-directory: android-wrapper
+        run: |
+          cp app/build/outputs/apk/preview/debug/app-preview-debug.apk "$RUNNER_TEMP/kgg-standard-preview.apk"
+          gradle -PKGG_PREVIEW_TEST_APPLICATION_ID=de.kgg.preview.drivesync20261015 :app:assemblePreviewDebug
+      - name: Verify isolated package and exact embedded candidate
+        if: github.head_ref == 'feat/exercise-library-drive-sync-20261015' || github.head_ref == 'codex/therapist-beta-v123-integration-20261020'
+        run: |
+          APK=android-wrapper/app/build/outputs/apk/preview/debug/app-preview-debug.apk
+          AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort -V | tail -n 1)
+          test -n "$AAPT"
+          "$AAPT" dump badging "$APK" > "$RUNNER_TEMP/kgg-drive-preview-badging.txt"
+          grep -Fq "package: name='de.kgg.preview.drivesync20261015'" "$RUNNER_TEMP/kgg-drive-preview-badging.txt"
+          "$AAPT" dump badging "$RUNNER_TEMP/kgg-standard-preview.apk" > "$RUNNER_TEMP/kgg-standard-preview-badging.txt"
+          grep -Fq "package: name='de.kgg.preview'" "$RUNNER_TEMP/kgg-standard-preview-badging.txt"
+          set -o pipefail
+          normalize_permissions() {
+            "$AAPT" dump permissions "$1" |
+              awk -v own="name='$2.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION'" \
+                  -v canonical="name='<APPLICATION_ID>.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION'" '
+                /^uses-permission/ {
+                  at = index($0, own)
+                  if (at) {
+                    count++
+                    $0 = substr($0, 1, at - 1) canonical substr($0, at + length(own))
+                  }
+                  print
+                }
+                END { if (count != 1) exit 1 }
+              ' | LC_ALL=C sort > "$3"
+          }
+          normalize_permissions "$RUNNER_TEMP/kgg-standard-preview.apk" de.kgg.preview "$RUNNER_TEMP/kgg-standard-preview.permissions"
+          normalize_permissions "$APK" de.kgg.preview.drivesync20261015 "$RUNNER_TEMP/kgg-drive-preview.permissions"
+          cmp "$RUNNER_TEMP/kgg-standard-preview.permissions" "$RUNNER_TEMP/kgg-drive-preview.permissions"
+          unzip -p "$APK" assets/preview.html > "$RUNNER_TEMP/kgg-drive-preview.html"
+          cmp kgg-update/index.html "$RUNNER_TEMP/kgg-drive-preview.html"
+          unzip -l "$APK" | grep -q 'assets/android/kgg_isolated_preview_sync_setup.js'
+          ! unzip -l "$APK" | grep -q 'assets/android/kgg_release_control_bootstrap.js'
+          grep -F 'KGG_ISOLATED_PREVIEW_TEST = true;' android-wrapper/app/build/generated/source/buildConfig/preview/debug/de/kgg/app/BuildConfig.java
+          sha256sum "$APK" kgg-update/index.html
+          git rev-parse HEAD
+      - name: Upload only isolated Preview Debug APK
+        if: github.head_ref == 'feat/exercise-library-drive-sync-20261015' || github.head_ref == 'codex/therapist-beta-v123-integration-20261020'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgg-drive-saf-preview-${{ steps.drive_provenance.outputs.checkout_sha }}-head-${{ steps.drive_provenance.outputs.head_sha }}-${{ github.run_attempt }}
+          path: android-wrapper/app/build/outputs/apk/preview/debug/app-preview-debug.apk
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 0

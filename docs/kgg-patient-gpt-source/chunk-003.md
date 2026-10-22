@@ -1,28 +1,28 @@
 # KGG Patient Source Chunk 003
 
 - Source file: `service-worker.js`
-- Characters: 1-8734
-- Full source SHA-256: `3953c70ae2f953e65dddb88aae1f3d686d72e4035f01fabfd0d9b10e02bc6100`
+- Characters: 1-8731
+- Full source SHA-256: `ff9c3d557de8bc9c131c010c86be9755731381bdbba4d15929223971ed686e28`
 
 ```
-const CACHE_NAME = 'kgg-handyplan-v95-action-button-stability';
-const APP_VERSION = '95';
+const CACHE_NAME = 'kgg-handyplan-v96-primary-metadata';
+const APP_VERSION = '96';
 const CACHE_PREFIX = 'kgg-handyplan-';
 const RECOVERY_PATH = './update-recovery.html';
 const NUMPAD_UI_FIX_SCRIPT = './numpad-ui-fix.js?v=draft-event-order-5-d14-react';
-const VERSION_LABEL_SCRIPT = './patient-version-label.js?v=95';
+const VERSION_LABEL_SCRIPT = './patient-version-label.js?v=96';
 const PLAN_LINK_CHOICE_SCRIPT = './patient-plan-link-choice.js?v=plan-link-choice-2-kgg-h3';
 const COLLAPSE_SCRIPT = './collapse-cards.js?v=plan-update-label-7-single-card-owner';
 const CARD_PROGRESS_SCRIPT = './patient-card-progress.js?v=card-progress-3-active-units';
 const INSTALL_PROMPT_SCRIPT = './patient-install-prompt.js?v=install-prompt-2-capability-only';
 const PLAN_REPLACE_SLOT_SCRIPT = './patient-plan-replace-slot-fix.js?v=active-slot-1';
-const START_SCAN_SCRIPT = './patient-start-scan.js?v=start-scan-v92-no-session-copy';
+const START_SCAN_SCRIPT = './patient-start-scan.js?v=start-scan-v96-primary-metadata';
 const JSQR_SCRIPT = './vendor/jsqr-1.4.0.js';
 const FFLATE_SCRIPT = './vendor/fflate-0.8.3.js?v=fflate-0.8.3';
 const PLAN_FORMAT_SCRIPT = './patient-qr-format.js?v=v81-kgg-h3-plan-format';
 const MULTIPLAN_DB_SCRIPT = './patient-multiplan-db.js?v=lossless-media-plans-1';
 const PLAN_DELETE_SCRIPT = './patient-plan-delete.js?v=plan-delete-3-red-x-rename';
-const CARD_SETTINGS_SCRIPT = './patient-card-settings.js?v=card-settings-3-unit-semantics';
+const CARD_SETTINGS_SCRIPT = './patient-card-settings.js?v=card-settings-4-preserve-metadata';
 const START_VALUES_SCRIPT = './patient-start-values-day1.js?v=start-values-day1-2-active-units';
 const DAY_HISTORY_SCRIPT = './patient-day-history.js?v=day-history-2-active-units';
 const EXERCISE_MEDIA_SOURCES_SCRIPT = './patient-exercise-media-sources.js?v=exercise-media-sources-2-license-checked';

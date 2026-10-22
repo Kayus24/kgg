@@ -8,6 +8,7 @@
     <nav class="tabletSideMenuGroup tabletSideMenuMain" aria-label="Tablet-Menue">
       <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuRecentBtn" type="button"><span class="tabletMenuActionIcon" aria-hidden="true">&#128337;</span><span>Letzte Pl&auml;ne</span></button>
       <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuPackagesBtn" type="button"><span class="tabletMenuActionIcon" aria-hidden="true">&#128230;</span><span>&Uuml;bungspakete</span></button>
+      <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuSyncQrBtn" type="button"><span class="tabletMenuActionIcon" aria-hidden="true">&#128260;</span><span>Bibliothek &amp; Drive-Sync</span></button>
       <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuTherapistShareBtn" type="button"><span class="tabletMenuActionIcon" aria-hidden="true">&#128188;</span><span>Therapeuten-App weitergeben</span></button>
       <button class="tabletSideMenuAction tabletMenuNavAction" id="tabletMenuLayoutBtn" type="button" aria-expanded="false"><span class="tabletMenuActionIcon" aria-hidden="true">&#9881;</span><span>Layout anpassen</span></button>
       <div class="tabletSideMenuLayoutPanel" id="tabletMenuLayoutPanel" hidden>
@@ -146,8 +147,9 @@
 
 <div class="modal" id="editorModal"><div class="sheet editorSheet">
   <div class="editorHeader"><h2>Übung bearbeiten</h2><button class="iconBtn danger editorDeleteBtn" id="deleteExercise" type="button" aria-label="Übung löschen" title="Übung löschen">🗑️</button></div>
-  <div class="field"><label>Name</label><input id="editName"></div>
-  <div class="field"><label for="editNameEn">Englische Bezeichnung (Patienten-App)</label><input id="editNameEn" maxlength="200" aria-describedby="editNameEnHint"><small id="editNameEnHint">Für eigene Übungen hier den englischen Anzeigenamen pflegen. Der deutsche Name bleibt für Plan und QR erhalten.</small></div>
+  <div class="field"><label for="editName">Hauptname</label><input id="editName"></div>
+  <div class="field"><label for="editNameDe">Deutsche Bezeichnung (Patienten-App / QR)</label><input id="editNameDe" maxlength="200"></div>
+  <div class="field"><label for="editNameEn">Englische Bezeichnung (Patienten-App)</label><input id="editNameEn" maxlength="200" aria-describedby="editNameEnHint"><small id="editNameEnHint">Der zuerst eingetragene Hauptname bleibt erhalten. Deutsche und englische Anzeigenamen können getrennt gepflegt werden.</small></div>
   <div class="grid2">
     <div class="field"><label>Sätze</label><select id="editSets"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div>
     <div class="field"><label>Ausführung</label><select id="editSide"><option value="BI">beidseitig</option><option value="LR">links/rechts getrennt</option></select></div>
@@ -165,11 +167,13 @@
       <div><b>Bild</b><small class="editorMediaStatus" id="editMediaStatus">Kein Bild.</small></div>
     </div>
     <div id="editMediaPreview" class="editorMediaPreview hidden"></div>
-    <div class="editorMediaActions">
+    <div class="editorMediaActions kggNameAssistActions">
       <button class="mutedBtn" id="attachExerciseImage" type="button">Bild wählen</button>
       <button class="mutedBtn danger hidden" id="removeExerciseImage" type="button">Entfernen</button>
+      <button class="mutedBtn" id="suggestExerciseNames" type="button">Fehlende Namen ergänzen</button>
     </div>
     <input id="editMediaFile" class="hidden" type="file" accept="image/*">
+    <small id="editNameAssistStatus" role="status" aria-live="polite"></small>
   </div>
   <details class="notice editorAdvanced">
     <summary><b>Mehr</b></summary>
@@ -283,7 +287,8 @@
 
 <div class="modal" id="syncPairModal"><div class="sheet syncPairSheet">
   <h2>Sync koppeln</h2>
-  <p class="notice">Diesen QR auf weiteren Android-Geraeten mit <b>Plan scannen</b> einlesen. Alle Geraete im selben Sync-Raum schreiben eigene Dateien und koennen ausgewaehlte Therapeut:innen automatisch lesen. Keine Patientendaten, keine API-Keys.</p>
+  <p class="notice">Eigene Bibliotheksdatei einmal in Google Drive anlegen und Partnerdateien auswaehlen. Bestaetigte Uebungen, Bilder und Stufen werden automatisch abgeglichen. Plaene, Patientenpakete und API-Keys bleiben ausgeschlossen. Den QR auf dem Partnergeraet mit <b>Plan scannen</b> einlesen.</p>
+  <div class="syncPairActions"><button class="mutedBtn" id="configureDriveSyncBtn" type="button">Eigene Drive-Datei einrichten</button><button class="mutedBtn" id="selectDriveSyncPeersBtn" type="button">Partnerdateien auswaehlen</button><button class="mutedBtn" id="disconnectDriveSyncBtn" type="button">Drive-Verbindung loesen</button></div>
   <div class="qrBox syncPairQrBox" id="syncPairQrBox"><span class="qrStatus">QR wird vorbereitet ...</span></div>
   <span class="syncPairStatus" id="syncPairStatus"></span>
   <div class="syncPeerList hidden" id="syncPeerList"></div>

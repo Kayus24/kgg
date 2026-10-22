@@ -1,0 +1,98 @@
+<!-- KGG PATCH START kgg-v102-phone-cockpit-dock-navigation -->
+<!-- Phone: feste App/Cockpit-Navigation, Fertig und bestehender Scan-Hook -->
+<style id="kgg-v102-phone-cockpit-dock-navigation-style">
+  @media(max-width:759px){
+    #kggPhoneCockpitDock{position:fixed!important;left:12px!important;right:12px!important;bottom:0!important;z-index:2147481600!important;display:none;align-items:center!important;gap:8px!important;box-sizing:border-box!important;width:auto!important;max-width:560px!important;margin:0 auto!important;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px))!important;border:1px solid rgba(255,255,255,.72)!important;border-bottom:0!important;border-radius:18px 18px 0 0!important;background:rgba(239,246,255,.9)!important;box-shadow:0 -8px 26px rgba(7,16,39,.16),inset 0 1px 0 rgba(255,255,255,.9)!important;backdrop-filter:blur(18px) saturate(1.35)!important;-webkit-backdrop-filter:blur(18px) saturate(1.35)!important;pointer-events:none!important;}
+    #kggPhoneCockpitDock[hidden],#kggPhoneCockpitCamera[hidden],#kggPhoneCockpitSaveAll[hidden]{display:none!important;}
+    body.kggPhoneHasCockpit #kggPhoneCockpitDock{display:flex!important;}
+    #kggPhoneCockpitDock #kggTherapyCockpitButton,#kggPhoneCockpitDock #finishBtn,#kggPhoneCockpitDock #kggPhoneCockpitCamera,#kggPhoneCockpitDock #kggPhoneCockpitSaveAll{position:static!important;display:flex!important;flex:1 1 0!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:auto!important;min-width:0!important;height:48px!important;min-height:48px!important;margin:0!important;padding:6px 9px!important;border:1px solid #cbd5e1!important;border-radius:13px!important;background:#fff!important;color:#17233a!important;box-shadow:0 3px 8px rgba(15,23,42,.1)!important;font:800 14px/1.15 system-ui,sans-serif!important;text-align:center!important;white-space:normal!important;pointer-events:auto!important;touch-action:manipulation!important;}
+    #kggPhoneCockpitDock #kggTherapyCockpitButton{background:linear-gradient(180deg,#fff,#dbeafe)!important;color:#1e3a8a!important;}
+    #kggPhoneCockpitDock #finishBtn{background:#0a1024!important;border-color:#0a1024!important;color:#fff!important;}
+    #kggPhoneCockpitDock #finishBtn.hidden{display:none!important;}
+    #kggPhoneCockpitDock #kggPhoneCockpitCamera{flex:0 0 48px!important;width:48px!important;min-width:48px!important;padding:0!important;background:#17233a!important;border-color:#17233a!important;color:#fff!important;font-size:20px!important;}
+    #kggPhoneCockpitDock #kggPhoneCockpitSaveAll{background:#0a1024!important;border-color:#0a1024!important;color:#fff!important;}
+    body.kggTherapyCockpitOpen #kggTherapyCockpitRoot .kgg-tc-header [data-tc-action="normal"]{display:none!important;}
+    body.kggTherapyCockpitOpen #kggTherapyCockpitRoot .kgg-tc-footer [data-tc-action="finish-all"]{display:none!important;}
+    body.kggPhoneHasCockpit #createPanel.planMode #finishBtn:not(.hidden){bottom:calc(76px + env(safe-area-inset-bottom,0px))!important;}
+    body.kggTherapyCockpitOpen #kggTherapyCockpitRoot{will-change:transform,opacity;}
+    body.kggTherapyCockpitOpen #kggTherapyCockpitRoot .kgg-tc-footer{padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))!important;}
+    body.kggTherapyCockpitOpen #kggTherapyCockpitRoot .kgg-tc-toast{bottom:calc(76px + env(safe-area-inset-bottom,0px))!important;}
+    body.kggTherapyCockpitOpen .kgg-tc-modal{z-index:2147482000!important;}
+    body.kggTherapyCockpitOpen .kgg-tc-toast{z-index:2147482100!important;}
+    body.kggTherapyCockpitOpen #kggPhoneCockpitDock{z-index:2147482200!important;}
+  }
+  @media(max-width:759px) and (prefers-reduced-motion:no-preference){
+    body.kggTherapyCockpitOpen #kggTherapyCockpitRoot{animation:kggPhoneCockpitEnter .2s cubic-bezier(.2,.8,.2,1) both;}
+    body.kggPhoneHasCockpit #kggPhoneCockpitDock{animation:kggPhoneDockEnter .16s ease-out both;}
+    @keyframes kggPhoneCockpitEnter{from{transform:translateX(7vw);opacity:.88}to{transform:translateX(0);opacity:1}}
+    @keyframes kggPhoneDockEnter{from{transform:translateY(8px);opacity:.86}to{transform:translateY(0);opacity:1}}
+  }
+</style>
+<script id="kgg-v102-phone-cockpit-dock-navigation">
+(function(){
+  "use strict";
+  const PATCH_ID="kgg-v102-phone-cockpit-dock-navigation";
+  const PHONE_QUERY="(max-width:759px)";
+  var api=null,installed=false,previousEntrySync=null,finishButton=null,planActions=null,dock=null,cameraButton=null,saveAllButton=null,allowFinishClick=false,syncTimer=0;
+  function isPhone(){return !!(window.matchMedia&&window.matchMedia(PHONE_QUERY).matches&&!(window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive&&window.KGG_LANDSCAPE_TABLET_VIEWPORT_V047.isActive()));}
+  function countSlots(){try{var state=api&&api.getState?api.getState():{};return Number.isFinite(Number(state&&state.slotCount))?Math.max(0,Math.min(3,Number(state.slotCount))):Array.isArray(state&&state.slots)?state.slots.filter(Boolean).length:0;}catch(error){return 0;}}
+  function isOpen(){return !!(document.body&&document.body.classList.contains("kggTherapyCockpitOpen"));}
+  function ensureDock(){
+    if(!dock){dock=document.getElementById("kggPhoneCockpitDock");if(!dock){dock=document.createElement("nav");dock.id="kggPhoneCockpitDock";dock.setAttribute("aria-label","App-Navigation");document.body.appendChild(dock);}}
+    if(!cameraButton){cameraButton=document.getElementById("kggPhoneCockpitCamera");if(!cameraButton){cameraButton=document.createElement("button");cameraButton.type="button";cameraButton.id="kggPhoneCockpitCamera";cameraButton.hidden=true;cameraButton.setAttribute("aria-label","Trainingsplan mit der Kamera scannen");cameraButton.setAttribute("title","Trainingsplan scannen");cameraButton.textContent="📷";dock.appendChild(cameraButton);cameraButton.addEventListener("click",function(){var scan=document.getElementById("scanBtn");if(scan)scan.click();else if(window.KGGScan&&typeof window.KGGScan.pick==="function")window.KGGScan.pick("camera");});}}
+    if(!saveAllButton){saveAllButton=document.getElementById("kggPhoneCockpitSaveAll");if(!saveAllButton){saveAllButton=document.createElement("button");saveAllButton.type="button";saveAllButton.id="kggPhoneCockpitSaveAll";saveAllButton.hidden=true;saveAllButton.textContent="Alle Pläne speichern";saveAllButton.setAttribute("aria-label","Alle Cockpit-Pläne speichern");dock.appendChild(saveAllButton);saveAllButton.addEventListener("click",function(){var target=document.querySelector('#kggTherapyCockpitRoot [data-tc-action="finish-all"]');if(target)target.click();});}}
+  }
+  function sync(){
+    if(!document.body)return;
+    var phone=isPhone(),button=document.getElementById("kggTherapyCockpitButton"),count=countSlots();
+    ensureDock();finishButton=document.getElementById("finishBtn");planActions=document.getElementById("planActions");
+    var showDock=phone&&count>0&&!!button,open=showDock&&isOpen();
+    document.body.classList.toggle("kggPhoneCockpitOpen",open);
+    if(!showDock){
+      if(finishButton&&planActions&&finishButton.parentElement!==planActions)planActions.appendChild(finishButton);
+      if(cameraButton)cameraButton.hidden=true;if(saveAllButton)saveAllButton.hidden=true;if(dock)dock.hidden=true;
+      return;
+    }
+    dock.hidden=false;
+    if(button){button.textContent=open?"Zurück":"Cockpit";button.setAttribute("aria-label",open?"Zur Therapeuten-App zurückkehren":"Therapie-Cockpit öffnen");button.setAttribute("title",open?"Therapeuten-App":"Therapie-Cockpit");if(button.parentElement!==dock)dock.insertBefore(button,dock.firstChild);}
+    if(open){
+      if(finishButton&&planActions&&finishButton.parentElement===dock)planActions.appendChild(finishButton);
+      if(cameraButton){if(cameraButton.parentElement!==dock)dock.appendChild(cameraButton);cameraButton.hidden=false;}
+      if(saveAllButton){if(saveAllButton.parentElement!==dock)dock.appendChild(saveAllButton);saveAllButton.hidden=false;}
+    }else{
+      if(cameraButton)cameraButton.hidden=true;if(saveAllButton)saveAllButton.hidden=true;
+      if(finishButton&&!finishButton.classList.contains("hidden")){if(finishButton.parentElement!==dock)dock.appendChild(finishButton);finishButton.setAttribute("aria-label","Plan abschließen");}
+      else if(finishButton&&planActions&&finishButton.parentElement===dock)planActions.appendChild(finishButton);
+    }
+  }
+  function scheduleSync(){clearTimeout(syncTimer);syncTimer=window.setTimeout(sync,30);}
+  function interceptNavigation(event){
+    if(!isPhone()||!isOpen())return;
+    var target=event.target&&event.target.closest?event.target.closest("#kggTherapyCockpitButton"):null;
+    if(!target)return;
+    event.preventDefault();event.stopPropagation();if(event.stopImmediatePropagation)event.stopImmediatePropagation();
+    if(api&&typeof api.close==="function")api.close();sync();
+  }
+  function interceptFinish(event){
+    var target=event.target&&event.target.closest?event.target.closest("#kggPhoneCockpitDock #finishBtn"):null;
+    if(!target||allowFinishClick||!isPhone()||!isOpen())return;
+    event.preventDefault();event.stopPropagation();if(event.stopImmediatePropagation)event.stopImmediatePropagation();
+    if(api&&typeof api.close==="function")api.close();
+    window.setTimeout(function(){allowFinishClick=true;target.click();allowFinishClick=false;},50);
+  }
+  function install(){
+    if(installed)return;api=window.KGGTherapyCockpit;
+    if(!api||typeof api.getState!=="function"||typeof api.open!=="function"||typeof api.close!=="function"||!document.getElementById("kggTherapyCockpitButton")||!document.body){window.setTimeout(install,50);return;}
+    installed=true;previousEntrySync=window.KGGTherapyCockpitEntryVisibilitySync;
+    window.KGGTherapyCockpitEntryVisibilitySync=function(){if(typeof previousEntrySync==="function")previousEntrySync();sync();};
+    document.addEventListener("click",interceptNavigation,true);document.addEventListener("keydown",function(event){if((event.key==="Enter"||event.key===" ")&&event.target&&event.target.closest&&event.target.closest("#kggTherapyCockpitButton"))interceptNavigation(event);},true);
+    document.addEventListener("click",interceptFinish,true);
+    window.addEventListener("resize",scheduleSync,{passive:true});window.addEventListener("orientationchange",scheduleSync,{passive:true});
+    finishButton=document.getElementById("finishBtn");if(finishButton&&window.MutationObserver)new MutationObserver(scheduleSync).observe(finishButton,{attributes:true,attributeFilter:["class"]});
+    sync();window.KGG_PATCHES=window.KGG_PATCHES||{};
+    window.KGG_PATCHES[PATCH_ID]={installed:true,version:1,dependsOn:"kgg-v101-cockpit-layout-feedback-polish",contract:"phone keeps the original cockpit and finish buttons in a fixed dock; a Cockpit-only camera control delegates to the existing scan button; view return uses api.close; reduced-motion users get no transition"};
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});else install();
+})();
+</script>
+<!-- KGG PATCH END kgg-v102-phone-cockpit-dock-navigation -->

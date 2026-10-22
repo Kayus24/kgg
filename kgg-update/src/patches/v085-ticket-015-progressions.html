@@ -28,6 +28,7 @@
       id:variantId(group,index,source),
       groupId:String(source.groupId||group),
       name:String(source.name||source.title||(index===0&&base&&base.name)||('Progressionsstufe '+(index+1))).trim(),
+      ...(typeof source.nameDe==='string'&&source.nameDe.length<=200&&!/[\x00-\x1f\x7f]/.test(source.nameDe)?{nameDe:source.nameDe.trim()}:source.nameDe===undefined&&index===0&&base&&source.name===base.name&&typeof base.nameDe==='string'&&base.nameDe.length<=200&&!/[\x00-\x1f\x7f]/.test(base.nameDe)?{nameDe:base.nameDe.trim()}:{}),
       nameEn:typeof source.nameEn==='string'?source.nameEn.trim():index===0&&base&&source.name===base.name&&typeof base.nameEn==='string'?base.nameEn.trim():'',
       order:Number.isFinite(Number(source.order))?Number(source.order):index,
       sourceId:String(linked),

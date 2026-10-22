@@ -43,6 +43,24 @@ async function boot(browser, test) {
   const page = await context.newPage();
   await page.addInitScript(() => {
     localStorage.setItem("kgg_pwa_install_prompt_seen_v1", "ticket-037");
+    // Failure-only evidence: keep native focus/pointer behavior and avoid layout reads.
+    window.__kgg037FocusCalls = [];
+    const nativeFocus = HTMLElement.prototype.focus;
+    HTMLElement.prototype.focus = function (...args) {
+      if (this.closest("#shareModal")) window.__kgg037FocusCalls.push({ id: this.id, time: performance.now(), stack: new Error().stack });
+      return nativeFocus.apply(this, args);
+    };
+    window.__kgg037ReorderEvents = [];
+    let dragging = false;
+    for (const type of ["pointerdown", "pointermove", "pointerup", "pointercancel"]) document.addEventListener(type, event => {
+      const handle = event.target.closest?.(".kgg-tce-drag");
+      if (type === "pointerdown") dragging = !!handle;
+      if (!dragging) return;
+      const record = { type, x: event.clientX, y: event.clientY, target: String(event.target.className || ""), time: performance.now() };
+      window.__kgg037ReorderEvents.push(record);
+      queueMicrotask(() => { record.lifted = !!document.querySelector(".kgg-tc-exercise.reorder-lifted"); });
+      if (type === "pointerup" || type === "pointercancel") dragging = false;
+    }, true);
   });
   await page.goto(HTML_URL, { waitUntil: "domcontentloaded", timeout: 30000 });
   await page.waitForSelector("#kggTherapyCockpitButton", { state: "attached", timeout: 15000 });
@@ -234,6 +252,9 @@ async function inspectFinishDialog(page) {
 }
 
 async function assertFinishFocusOrder(page) {
+  // v117 focuses during the opening mutation; v088 also queues PDF focus.
+  // Let opening tasks finish across a render cycle before sending native Tab.
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
   const expected = [
     "finishPdfBtn",
     "finishLargePdfBtn",
@@ -242,11 +263,32 @@ async function assertFinishFocusOrder(page) {
     "finishCockpitGaugeBtn",
     "finishCancelBtn",
   ];
+  await page.evaluate(() => {
+    window.__kggFinishTabDiagnostics = [];
+    document.addEventListener("keydown", event => {
+      if (event.key !== "Tab" || !document.querySelector("#shareModal.open")) return;
+      window.__kggFinishTabDiagnostics.push({
+        from: event.target.id, active: document.activeElement?.id, prevented: event.defaultPrevented, time: performance.now(),
+      });
+    }, true);
+  });
   await page.waitForFunction(() => document.activeElement && document.activeElement.id === "finishPdfBtn", null, { timeout: 5000 });
   const actual = [await page.evaluate(() => document.activeElement.id)];
   for (let index = 1; index < expected.length; index += 1) {
     await page.keyboard.press("Tab");
     actual.push(await page.evaluate(() => document.activeElement.id));
+  }
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+    console.error("Finish focus diagnostics", JSON.stringify(await page.evaluate(() => ({
+      viewport: {width: innerWidth, height: innerHeight}, trace: window.__kggFinishTabDiagnostics,
+      focusCalls: window.__kgg037FocusCalls,
+      controls: Array.from(document.querySelectorAll("#shareModal button")).map(node => ({
+        id: node.id, disabled: node.disabled, hidden: node.hidden, tabIndex: node.tabIndex,
+        inertAncestor: node.closest("[inert]")?.id || node.closest("[inert]")?.className || null,
+        rendered: !!node.getClientRects().length, visibility: getComputedStyle(node).visibility,
+      })),
+      openModals: Array.from(document.querySelectorAll('.modal.open,.kgg-tce-modal:not([hidden]),.kgg-tc-modal:not([hidden])')).map(node => ({id:node.id,rendered:!!node.getClientRects().length,hidden:node.hidden,visibility:getComputedStyle(node).visibility})),
+    }))));
   }
   assert(JSON.stringify(actual) === JSON.stringify(expected), `Finish-Tab-Fokusfolge falsch: ${JSON.stringify(actual)}`);
   return actual;
@@ -416,16 +458,75 @@ async function runContinuousCockpitLiveEdit(browser) {
     let afterAdd = await page.evaluate(() => window.KGGTherapyCockpit.getSlot(0));
     assert(afterAdd.exercises.length === 3 && afterAdd.exercises[2].name === "Bridging", `${test.id}: Plus-Karte fügte keine Übung hinzu`);
 
+    const openToggle = page.locator('.kgg-tc-card[data-tc-card="0"] .kgg-tc-exercise.open .kgg-tc-card-toggle').first();
+    if (await openToggle.count()) await openToggle.click();
     const handles = page.locator('.kgg-tc-card[data-tc-card="0"] .kgg-tce-drag');
-    const sourceBox = await handles.nth(2).boundingBox();
-    const targetBox = await handles.nth(0).boundingBox();
+    // As with Bank Add above, coordinates must settle before real mouse input.
+    // Read both boxes atomically; a stale box can otherwise hit Edit/Delete.
+    const stableHandles = await page.waitForFunction(() => {
+      const controls = Array.from(document.querySelectorAll('.kgg-tc-card[data-tc-card="0"] .kgg-tce-drag'));
+      const source = controls[2], target = controls[0];
+      if (!source || !target) return false;
+      const box = node => {
+        const { x, y, width, height } = node.getBoundingClientRect();
+        return { x, y, width, height };
+      };
+      const sourceBox = box(source), targetBox = box(target);
+      const hit = (node, rect) => rect.width > 0 && rect.height > 0 &&
+        document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)?.closest('.kgg-tce-drag') === node;
+      if (!hit(source, sourceBox) || !hit(target, targetBox)) {
+        window.__kggTicket037ReorderGeometry = null;
+        return false;
+      }
+      const geometry = JSON.stringify([sourceBox, targetBox]);
+      const previous = window.__kggTicket037ReorderGeometry, now = performance.now();
+      if (!previous || previous.geometry !== geometry) {
+        window.__kggTicket037ReorderGeometry = { geometry, since: now };
+        return false;
+      }
+      return now - previous.since >= 120 && { sourceBox, targetBox };
+    }, null, { timeout: 5000 }).catch(async error => {
+      console.error("Reorder readiness diagnostics", JSON.stringify(await page.evaluate(() => ({
+        previous: window.__kggTicket037ReorderGeometry,
+        handles: Array.from(document.querySelectorAll('.kgg-tc-card[data-tc-card="0"] .kgg-tce-drag')).map(node => {
+          const rect = node.getBoundingClientRect(), hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
+          return { rect: rect.toJSON(), hitClass: String(hit?.className || ""), hitAction: hit?.getAttribute("data-tce-action"), correctHandle: hit?.closest('.kgg-tce-drag') === node };
+        }),
+      })).catch(() => null)));
+      throw error;
+    });
+    const { sourceBox, targetBox } = await stableHandles.jsonValue();
+    await stableHandles.dispose();
     assert(sourceBox && targetBox, `${test.id}: sichtbare Reorder-Handles fehlen`);
+    const handleHitTest = await page.evaluate(({ sourceX, sourceY, targetX, targetY }) => {
+      const inspect = (x, y) => {
+        const node = document.elementFromPoint(x, y);
+        return {
+          hit: !!(node && node.closest && node.closest('.kgg-tce-drag')),
+          tag: node ? node.tagName : null,
+          id: node ? node.id : null,
+          className: node ? String(node.className || '') : null,
+          x, y,
+          viewport: { width: innerWidth, height: innerHeight },
+        };
+      };
+      return { source: inspect(sourceX, sourceY), target: inspect(targetX, targetY) };
+    }, {
+      sourceX: sourceBox.x + sourceBox.width / 2,
+      sourceY: sourceBox.y + sourceBox.height / 2,
+      targetX: targetBox.x + targetBox.width / 2,
+      targetY: targetBox.y + targetBox.height / 2,
+    });
+    assert(handleHitTest.source.hit && handleHitTest.target.hit, `${test.id}: Reorder-Testziel war nicht wirklich sichtbar/hit-testbar: ${JSON.stringify(handleHitTest)}`);
     await page.mouse.move(sourceBox.x + sourceBox.width / 2, sourceBox.y + sourceBox.height / 2);
     await page.mouse.down();
     await page.mouse.move(targetBox.x + targetBox.width / 2, targetBox.y - 18, { steps: 6 });
     await page.mouse.up();
     await page.waitForTimeout(250);
     const afterMove = await page.evaluate(() => window.KGGTherapyCockpit.getSlot(0));
+    if (afterMove.exercises.map(ex => ex.name).join("|") !== "Bridging|Abduktion live final|Adduktion Maschine") {
+      console.error("Reorder diagnostics", JSON.stringify({ sourceBox, targetBox, actual: afterMove.exercises.map(ex => ex.name), evidence: await page.evaluate(() => ({ events: window.__kgg037ReorderEvents, articles: Array.from(document.querySelectorAll('.kgg-tc-card[data-tc-card="0"] .kgg-tc-exercise')).map(node => ({name: node.querySelector('.kgg-tc-card-toggle')?.textContent, rect: node.getBoundingClientRect().toJSON(), className: node.className})) })) }));
+    }
     assert(afterMove.exercises.map(ex => ex.name).join("|") === "Bridging|Abduktion live final|Adduktion Maschine", `${test.id}: Cockpit-Reorder über sichtbaren Handle war falsch`);
     const movedEdited = afterMove.exercises[1];
     assert(movedEdited.today[0][0] === "8" && movedEdited.today[0][1] === "10" && movedEdited.activeProgressionId === movedEdited.progressionVariants[1].id, `${test.id}: Reorder verlor Werte oder Progressionsstufe`);
@@ -439,9 +540,9 @@ async function runContinuousCockpitLiveEdit(browser) {
       const target = exercises[2];
       if (!source || !target) throw new Error("downward reorder DOM target missing");
       const sourceRect = source.getBoundingClientRect();
-      const targetRect = target.getBoundingClientRect();
       const emit = (type, targetNode, x, y) => targetNode.dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true, pointerId: 91, pointerType: "mouse", isPrimary: true, button: 0, clientX: x, clientY: y }));
       emit("pointerdown", source, sourceRect.left + sourceRect.width / 2, sourceRect.top + sourceRect.height / 2);
+      const targetRect = target.getBoundingClientRect();
       emit("pointermove", document, sourceRect.left + sourceRect.width / 2, targetRect.bottom + 24);
       emit("pointerup", document, sourceRect.left + sourceRect.width / 2, targetRect.bottom + 24);
     });
@@ -532,9 +633,10 @@ async function runPhoneCockpitEntry(browser) {
   const test = { id: "phone-cockpit-entry-390", width: 390, height: 844, mobile: true };
   const { context, page } = await boot(browser, test);
   try {
-    const initial = await createNormalPlan(page, ["Abduktion Maschine"]);
+    await createNormalPlan(page, ["Abduktion Maschine"]);
     const initialButton = page.locator("#kggTherapyCockpitButton");
     assert(!(await visible(initialButton)), `${test.id}: leerer Cockpit-State zeigt bereits den Handy-Einstieg`);
+    assert(!(await visible(page.locator("#kggPhoneCockpitDock"))), `${test.id}: leerer Cockpit-State zeigt einen toten Phone-Dock`);
 
     const generatedLink = await page.evaluate(() => {
       const plan = window.KGGDataStore.getCurrentPlan();
@@ -545,33 +647,61 @@ async function runPhoneCockpitEntry(browser) {
     localRoundtripUrl.search = new URL(generatedLink).search;
     await page.goto(localRoundtripUrl.toString(), { waitUntil: "domcontentloaded", timeout: 30000 });
     await waitForCockpitState(page, 1);
-    await page.locator('[data-tc-action="normal"]').click();
-    await waitForNormalState(page);
 
     const entry = page.locator("#kggTherapyCockpitButton");
     await entry.waitFor({ state: "visible", timeout: 5000 });
-    const firstLayout = await page.evaluate(() => {
-      const scan = document.querySelector("#scanBtn");
+    const openLayout = await page.evaluate(() => {
+      const dock = document.querySelector("#kggPhoneCockpitDock");
       const entry = document.querySelector("#kggTherapyCockpitButton");
-      const scanRect = scan.getBoundingClientRect();
-      const entryRect = entry.getBoundingClientRect();
-      const overlap = !(scanRect.right <= entryRect.left || entryRect.right <= scanRect.left || scanRect.bottom <= entryRect.top || entryRect.bottom <= scanRect.top);
+      const camera = document.querySelector("#kggPhoneCockpitCamera");
+      const saveAll = document.querySelector("#kggPhoneCockpitSaveAll");
+      const finish = document.querySelector("#finishBtn");
+      const headerBack = document.querySelector('#kggTherapyCockpitRoot .kgg-tc-header [data-tc-action="normal"]');
+      return {
+        dockVisible: !!(dock && dock.offsetWidth && dock.offsetHeight),
+        entryParent: entry && entry.parentElement && entry.parentElement.id,
+        entryText: entry && entry.textContent.trim(),
+        cameraParent: camera && camera.parentElement && camera.parentElement.id,
+        cameraVisible: !!(camera && camera.offsetWidth && camera.offsetHeight),
+        saveParent: saveAll && saveAll.parentElement && saveAll.parentElement.id,
+        saveVisible: !!(saveAll && saveAll.offsetWidth && saveAll.offsetHeight),
+        saveText: saveAll && saveAll.textContent.trim(),
+        finishInDock: !!(finish && finish.parentElement && finish.parentElement.id === "kggPhoneCockpitDock"),
+        headerBackDisplay: headerBack ? getComputedStyle(headerBack).display : "missing",
+      };
+    });
+    assert(openLayout.dockVisible && openLayout.entryParent === "kggPhoneCockpitDock" && openLayout.entryText === "Zurück", `${test.id}: Cockpit-Phone-Dock zeigt keine funktionierende Zurück-Aktion: ${JSON.stringify(openLayout)}`);
+    assert(openLayout.cameraParent === "kggPhoneCockpitDock" && openLayout.cameraVisible, `${test.id}: Kamera fehlt im geöffneten Cockpit-Dock`);
+    assert(openLayout.saveParent === "kggPhoneCockpitDock" && openLayout.saveVisible && openLayout.saveText === "Alle Pläne speichern", `${test.id}: Alle-Pläne-speichern fehlt im geöffneten Cockpit-Dock`);
+    assert(!openLayout.finishInDock && openLayout.headerBackDisplay === "none", `${test.id}: geöffneter Cockpit-Dock enthält redundante Normalplan-/Header-Navigation`);
+
+    await entry.click();
+    await waitForNormalState(page);
+    const firstLayout = await page.evaluate(() => {
+      const dock = document.querySelector("#kggPhoneCockpitDock");
+      const entry = document.querySelector("#kggTherapyCockpitButton");
+      const finish = document.querySelector("#finishBtn");
+      const scan = document.querySelector("#scanBtn");
+      const entryRect = entry.getBoundingClientRect(), finishRect = finish.getBoundingClientRect();
+      const overlap = !(entryRect.right <= finishRect.left || finishRect.right <= entryRect.left || entryRect.bottom <= finishRect.top || finishRect.bottom <= entryRect.top);
       return {
         parentId: entry.parentElement && entry.parentElement.id,
+        finishParentId: finish.parentElement && finish.parentElement.id,
         text: entry.textContent.trim(),
-        scanVisible: !!(scan.offsetWidth && scan.offsetHeight),
+        finishText: finish.textContent.trim(),
+        dockVisible: !!(dock && dock.offsetWidth && dock.offsetHeight),
+        scanVisible: !!(scan && scan.offsetWidth && scan.offsetHeight),
         entryVisible: !!(entry.offsetWidth && entry.offsetHeight),
+        finishVisible: !!(finish.offsetWidth && finish.offsetHeight),
+        finishBackground: getComputedStyle(finish).backgroundColor,
         overlap,
       };
     });
-    assert(firstLayout.parentId === "scanHub", `${test.id}: Cockpit-Einstieg liegt nicht direkt im schwebenden Scan-Dock`);
-    assert(firstLayout.text === "Cockpit · 1 Plan", `${test.id}: falsche Zählung für einen geladenen Trainingsplan: ${firstLayout.text}`);
-    assert(firstLayout.scanVisible && firstLayout.entryVisible && !firstLayout.overlap, `${test.id}: Scan- und Cockpit-Einstieg überlappen oder sind nicht sichtbar`);
+    assert(firstLayout.parentId === "kggPhoneCockpitDock" && firstLayout.finishParentId === "kggPhoneCockpitDock", `${test.id}: Cockpit + Fertig liegen nicht gemeinsam im Phone-Dock`);
+    assert(firstLayout.text === "Cockpit" && firstLayout.finishText === "Fertig", `${test.id}: falsche Phone-Dock-Beschriftung: ${firstLayout.text} / ${firstLayout.finishText}`);
+    assert(firstLayout.dockVisible && firstLayout.scanVisible && firstLayout.entryVisible && firstLayout.finishVisible && !firstLayout.overlap, `${test.id}: Phone-Dock ist nicht vollständig sichtbar oder Aktionen überlappen`);
+    assert(firstLayout.finishBackground === "rgb(10, 16, 36)", `${test.id}: Fertig ist nicht dunkel wie freigegeben: ${firstLayout.finishBackground}`);
 
-    await entry.click();
-    await waitForCockpitState(page, 1);
-    await page.locator('[data-tc-action="normal"]').click();
-    await waitForNormalState(page);
     await addExerciseFromVisibleUi(page, "Adduktion Maschine", 2);
     const secondLink = await page.evaluate(() => {
       const plan = window.KGGDataStore.getCurrentPlan();
@@ -584,12 +714,14 @@ async function runPhoneCockpitEntry(browser) {
     await page.locator("#kggTherapyCockpitImportInput").fill(secondLink);
     await page.locator('[data-tc-action="import-submit"]').click();
     await waitForCockpitState(page, 2);
-    await page.locator('[data-tc-action="normal"]').click();
+    const countTwo = await page.evaluate(() => ({ count: window.KGGTherapyCockpit.getState().slotCount, saveVisible: !!document.querySelector("#kggPhoneCockpitSaveAll")?.offsetWidth }));
+    assert(countTwo.count === 2 && countTwo.saveVisible, `${test.id}: zwei Cockpit-Pläne werden im Phone-Dock nicht korrekt weitergeführt`);
+    await entry.click();
     await waitForNormalState(page);
     await entry.waitFor({ state: "visible", timeout: 5000 });
-    const secondLabel = await entry.textContent();
-    assert(secondLabel.trim() === "Cockpit · 2 Pläne", `${test.id}: falsche Zählung für zwei geladene Trainingspläne: ${secondLabel}`);
-    return { id: test.id, firstLabel: firstLayout.text, secondLabel: secondLabel.trim(), parentId: firstLayout.parentId, noOverlap: !firstLayout.overlap };
+    const secondState = await page.evaluate(() => ({ label: document.querySelector("#kggTherapyCockpitButton")?.textContent.trim(), count: window.KGGTherapyCockpit.getState().slotCount }));
+    assert(secondState.label === "Cockpit" && secondState.count === 2, `${test.id}: Phone-Dock verlor den Zwei-Plan-State: ${JSON.stringify(secondState)}`);
+    return { id: test.id, firstLabel: firstLayout.text, openActions: ["Zurück", "Kamera", "Alle Pläne speichern"], slotCount: secondState.count, parentId: firstLayout.parentId, noOverlap: !firstLayout.overlap };
   } finally {
     await context.close();
   }

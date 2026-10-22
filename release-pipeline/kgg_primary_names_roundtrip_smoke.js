@@ -1,0 +1,34 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict');
+const root=path.resolve(__dirname,'..');
+const english=fs.readFileSync(path.join(__dirname,'kgg_english_metadata_smoke.js'),'utf8').replace(/^#!.*\r?\n/,'');
+const {context:c,realFunction}=new Function('require','__dirname',english.slice(0,english.indexOf('const ex='))+';return{context,realFunction};')(require,__dirname);
+const patientSource=fs.readFileSync(path.join(__dirname,'kgg_exercise_primary_names_smoke.js'),'utf8').replace(/^#!.*\r?\n/,'');
+const {patient}=new Function('require','__dirname',patientSource.slice(0,patientSource.indexOf('const tests=[];'))+';return{patient};')(require,__dirname);
+Object.assign(c,{document:{readyState:'loading',addEventListener(){},getElementById(){return null}},setTimeout(){},bank:[],compact:s=>String(s).toLowerCase().replace(/\s+/g,'')});
+c.window.KGGTicket015PatientMedia={manifest:c.buildExerciseMediaManifestForPatient};
+for(const file of ['v085-ticket-015-progressions.html','v090-ticket-015-admin-stage-gallery-drag-motion.html'])vm.runInContext(fs.readFileSync(path.join(root,'kgg-update/src/patches',file),'utf8').match(/<script[^>]*>([\s\S]*?)<\/script>/)[1],c);
+for(const name of ['expandKggH2Exercise','convertKggH2PayloadToPatientPayload','scanPayloadExercises','exactBankExercise','safeJsonRepair','parseLooseJson','safeBase64JsonDecode','parseScannedQrRaw'])vm.runInContext(realFunction(name),c);
+Object.assign(c,{URL,atob:s=>Buffer.from(s,'base64').toString('binary'),escape,decodeURIComponent,ensureMediaShape:x=>x});
+const clone=x=>JSON.parse(JSON.stringify(x));
+const original={id:'stable-primary',name:'Single-leg stance',nameEn:'Authored English',nameDe:'Einbeinstand',sets:1,side:'B',weightUnit:'kg',unit:'Wdh',media:[],progressionGroupId:'synthetic-group',progressionMainId:'easy',progressionVariants:[{id:'easy',name:'Easy',nameDe:'Leicht',nameEn:'Authored easy',media:[]},{id:'hard',name:'Hard',nameDe:'Schwer',media:[]}]};
+c.bank=[original];const inputBefore=JSON.stringify(original);
+const first=clone(c.buildKggH2PayloadFromPlan({id:'roundtrip'},[original],{},null));
+assert.equal(first.e[0][0],'Einbeinstand');assert.equal(first.e[0][11].v[0].n,'Leicht');assert.equal(first.e[0][11].a,'easy');assert.deepEqual(first.m.exercisePrimaryNames,{Einbeinstand:'Single-leg stance',Leicht:'Easy',Schwer:'Hard'});assert.equal(first.m.exerciseNamesEn.Einbeinstand,'Authored English');assert.equal(JSON.stringify(original),inputBefore,'export mutated catalog');
+const env=patient(first,true);env.run("v={'2|0|1|B|a':'23','2|0|1|B|b':'11'};");
+const second=clone(c.buildKggH2PayloadFromPlan({id:'roundtrip'},[{...original,nameDe:'Einbeiniger Stand'}],{},null));env.context.incoming=second;
+assert.equal(env.run('__primaryNamesSmoke.mergePlanUpdate(incoming)'),true);assert.equal(env.stored().e.length,1);assert.equal(env.stored().e[0][0],'Einbeiniger Stand');
+const settings=fs.readFileSync(path.join(root,'patient-card-settings.js'),'utf8');const fn=name=>{const a=settings.indexOf('  function '+name+'('),b=settings.indexOf('\n  function ',a+12);return settings.slice(a,b)};
+vm.runInContext("(()=>{const PLAN_KEY='kggCurrentPlanV1',safe=f=>f(),getPainMode=()=> 'exercise';"+fn('rawPlan')+fn('storePlan')+';window.__roundtripSettings=storePlan;})()',env.context);
+env.run('__roundtripSettings()');const reloaded=patient(env.stored(),true);reloaded.run("v={'2|0|1|B|a':'23','2|0|1|B|b':'11'};showQr(false)");
+const returned=reloaded.elements.get('qr').dataset.payload,parsed=c.parseScannedQrRaw(returned).json;
+assert.equal(parsed.e[0][0],'Einbeiniger Stand');assert.deepEqual(clone(parsed.m.exercisePrimaryNames),{'Einbeiniger Stand':'Single-leg stance',Leicht:'Easy'});
+const exercises=c.scanPayloadExercises(parsed);assert.equal(exercises.length,1);assert.equal(exercises[0].name,'Single-leg stance');assert.equal(exercises[0].progressionSelection[0].n,'Easy');assert.equal(exercises[0].progressionSelection[0].i,'easy');assert.deepEqual(clone(exercises[0].startLoad),[['23','11']]);assert.equal(c.exactBankExercise(exercises[0].name),original);
+assert.equal(c.exactBankExercise('Einbeinstand'),original);c.bank.push({...original,id:'ambiguous-alias',name:'Another primary'});assert.equal(c.exactBankExercise('Einbeinstand'),null,'ambiguous aliases must never pick a card');c.bank.pop();
+c.bank.push({...original,id:'ambiguous-primary'});const beforeAmbiguous=JSON.stringify(c.bank);assert.throws(()=>c.scanPayloadExercises(parsed),e=>e.kggPrimaryMetadataError,'ambiguous primary catalog lookup must fail before import');assert.throws(()=>c.buildKggH2PayloadFromPlan({id:'ambiguous-export'},[original],{},null),e=>e.kggPrimaryMetadataError,'ambiguous primary catalog lookup must fail before export');assert.equal(JSON.stringify(c.bank),beforeAmbiguous,'rejection changed the catalog');c.bank.pop();
+for(const bad of [{Einbeinstand:12},{Einbeinstand:'Single-leg stance','Einbeinstand!':'Other'}])assert.throws(()=>c.scanPayloadExercises({...parsed,m:{exercisePrimaryNames:bad}}),/ungültig|Mehrdeutig/);
+assert.throws(()=>c.buildKggH2PayloadFromPlan({},[original,{...original,id:'collision',name:'Another primary',nameDe:'Einbeinstand!'}],{},null),/ungültig|Mehrdeutig/);
+for(const [names,map] of [[['Einbeinstand','Einbeinstand!'],{Einbeinstand:'Single-leg stance','Einbeinstand!':'Another primary'}],[['A','B'],{A:'Same primary',B:'Same-primary'}]]){
+ const probe=patient(first),before=JSON.stringify(probe.storage),state=probe.run('JSON.stringify({p,v,done,d})');probe.context.input='KGGH2:'+Buffer.from(JSON.stringify({...first,e:names.map(n=>[n,1,'B','kg','Wdh']),m:{exercisePrimaryNames:map}})).toString('base64url');probe.run('__primaryNamesSmoke.handlePlanText(input)');assert.equal(JSON.stringify(probe.storage),before);assert.equal(probe.run('JSON.stringify({p,v,done,d})'),state);assert(probe.events.alerts.length);
+}
+console.log('Complete R2 PASS: actual therapist/stage producer -> patient DE1/DE2 -> settings/reload -> return/parser -> primary lookup; matrix/stage IDs and collision atomicity retained');

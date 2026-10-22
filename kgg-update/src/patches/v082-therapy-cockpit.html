@@ -211,6 +211,7 @@
   }
   function cleanUnit(value,fallback){var text=String(value||fallback||"").trim().slice(0,12);if(!text||/[^\wÄÖÜäöüß+\/-]/.test(text))return String(fallback||"").slice(0,12);return text;}
   function cleanOptionalText(value,max){var text=String(value==null?"":value).trim();return text.slice(0,max||160);}
+  function germanNameField(value){return typeof value==="string"&&value.length<=200&&!/[\x00-\x1f\x7f]/.test(value)?{nameDe:value.trim()}:{};}
   function cleanEnglishName(value){var text=String(value).trim();if(text.length>200)throw error("english_name_invalid");return text;}
   function cleanVideoUrl(value){var text=cleanOptionalText(value,500);return /^(?:https?:\/\/)/i.test(text)?text:"";}
   function cleanMediaList(value){
@@ -226,7 +227,7 @@
     if(!Array.isArray(value))return [];
     return value.slice(0,12).map(function(item,index){
       item=item&&typeof item==="object"?item:{};
-      return {id:cleanOptionalText(item.id||item.variantId||("pv_"+index),80),groupId:cleanOptionalText(item.groupId||group,80),name:cleanOptionalText(item.name||item.title||("Progressionsstufe "+(index+1)),80),...(typeof item.nameEn==="string"?{nameEn:cleanEnglishName(item.nameEn)}:{}),order:index,sourceId:cleanOptionalText(item.sourceId||item.bankId||"",80),sourceName:cleanOptionalText(item.sourceName||"",80),media:cleanMediaList(item.media)};
+      return {id:cleanOptionalText(item.id||item.variantId||("pv_"+index),80),groupId:cleanOptionalText(item.groupId||group,80),name:cleanOptionalText(item.name||item.title||("Progressionsstufe "+(index+1)),80),...germanNameField(item.nameDe),...(typeof item.nameEn==="string"?{nameEn:cleanEnglishName(item.nameEn)}:{}),order:index,sourceId:cleanOptionalText(item.sourceId||item.bankId||"",80),sourceName:cleanOptionalText(item.sourceName||"",80),media:cleanMediaList(item.media)};
     }).filter(function(item){return !!item.name;});
   }
   function cleanSetCount(value){var count=Number(value);if(!Number.isFinite(count))count=3;return Math.max(1,Math.min(8,Math.round(count)));}
@@ -251,11 +252,12 @@
     var group=cleanOptionalText(raw.progressionGroupId||"",80),variants=cleanProgressionVariants(raw.progressionVariants,group),activeProgressionId=cleanOptionalText(raw.activeProgressionId||raw.progressionVariantId||"",80);
     if(variants.length){if(!activeProgressionId)activeProgressionId=variants[0].id;if(!variants.some(function(item){return item.id===activeProgressionId;}))throw error("progression_id_invalid");}
     else if(activeProgressionId)throw error("progression_id_invalid");
-    return {id:ref.id,name:cleanOptionalText(raw.name||ref.name,80)||ref.name,...(typeof raw.nameEn==="string"?{nameEn:cleanEnglishName(raw.nameEn)}:{}),sets:sets,side:String(raw.side||raw.sides||"BI")==="LR"?"LR":"BI",loadUnit:cleanUnit(raw.loadUnit||raw.weightUnit,ref.loadUnit),metricUnit:cleanUnit(raw.metricUnit||raw.unit,ref.metricUnit),previous:previous,today:today,weightUnit:cleanUnit(raw.weightUnit||raw.loadUnit,ref.loadUnit),unit:cleanOptionalText(raw.unit||raw.metricUnit||ref.metricUnit,12),measure:String(raw.measure||"")==="zeit"?"zeit":"wdh",startLoad:cleanOptionalText(raw.startLoad||"",24),startMetric:cleanOptionalText(raw.startMetric||"",24),videoUrl:cleanVideoUrl(raw.videoUrl),videoLabel:cleanOptionalText(raw.videoLabel||"Video öffnen",120)||"Video öffnen",media:cleanMediaList(raw.media),progressionGroupId:group,progressionVariants:variants,activeProgressionId:activeProgressionId};
+    return {id:ref.id,name:cleanOptionalText(raw.name||ref.name,80)||ref.name,...germanNameField(raw.nameDe),...(typeof raw.nameEn==="string"?{nameEn:cleanEnglishName(raw.nameEn)}:{}),sets:sets,side:String(raw.side||raw.sides||"BI")==="LR"?"LR":"BI",loadUnit:cleanUnit(raw.loadUnit||raw.weightUnit,ref.loadUnit),metricUnit:cleanUnit(raw.metricUnit||raw.unit,ref.metricUnit),previous:previous,today:today,weightUnit:cleanUnit(raw.weightUnit||raw.loadUnit,ref.loadUnit),unit:cleanOptionalText(raw.unit||raw.metricUnit||ref.metricUnit,12),measure:String(raw.measure||"")==="zeit"?"zeit":"wdh",startLoad:cleanOptionalText(raw.startLoad||"",24),startMetric:cleanOptionalText(raw.startMetric||"",24),videoUrl:cleanVideoUrl(raw.videoUrl),videoLabel:cleanOptionalText(raw.videoLabel||"Video öffnen",120)||"Video öffnen",media:cleanMediaList(raw.media),progressionGroupId:group,progressionVariants:variants,activeProgressionId:activeProgressionId};
   }
   function compactExerciseExtras(ex){
     var extra={};
     if(ex.name)extra.n=cleanOptionalText(ex.name,80);
+    var german=germanNameField(ex.nameDe);if(typeof german.nameDe==="string")extra.nd=german.nameDe;
     if(typeof ex.nameEn==="string")extra.ne=cleanEnglishName(ex.nameEn);
     if(ex.measure)extra.m=String(ex.measure)==="zeit"?"zeit":"wdh";
     if(ex.startLoad)extra.l=cleanOptionalText(ex.startLoad,24);
@@ -297,7 +299,7 @@
       if(ids[raw.i])throw error("duplicate_exercise_id");ids[raw.i]=true;
       var ref=byId[raw.i],sets=cleanSetCount(raw.s),extra=raw.x&&typeof raw.x==="object"?raw.x:{};if(sets!==Number(raw.s))throw error("set_structure_invalid");
       if(raw.q!=="BI"&&raw.q!=="LR")throw error("set_structure_invalid");
-      return exerciseInput({id:raw.i,name:extra.n||ref.name,...(typeof extra.ne==="string"?{nameEn:extra.ne}:{}),sets:sets,side:raw.q,loadUnit:raw.u,metricUnit:raw.m,weightUnit:raw.u,unit:raw.m,measure:extra.m,startLoad:extra.l,startMetric:extra.r,videoUrl:extra.v,videoLabel:extra.vl,media:extra.md,progressionGroupId:extra.g,progressionVariants:extra.pv,activeProgressionId:extra.a,previous:validateValueList(raw.p,sets),today:validateValueList(raw.t,sets)});
+      return exerciseInput({id:raw.i,name:extra.n||ref.name,...germanNameField(extra.nd),...(typeof extra.ne==="string"?{nameEn:extra.ne}:{}),sets:sets,side:raw.q,loadUnit:raw.u,metricUnit:raw.m,weightUnit:raw.u,unit:raw.m,measure:extra.m,startLoad:extra.l,startMetric:extra.r,videoUrl:extra.v,videoLabel:extra.vl,media:extra.md,progressionGroupId:extra.g,progressionVariants:extra.pv,activeProgressionId:extra.a,previous:validateValueList(raw.p,sets),today:validateValueList(raw.t,sets)});
     });
     return {version:1,planId:cleanPlanId(parsed.p),name:name,date:cleanDate(parsed.d),exercises:exercises};
   }
@@ -320,7 +322,7 @@
     var source=plan||{},patient=source.patient||{};return {planId:source.id||"",name:patient.name||source.name||"",date:patient.date||new Date().toISOString().slice(0,10),exercises:(Array.isArray(source.exercises)?source.exercises:[]).map(exerciseInput)};
   }
   function contentKey(input){
-    var source=input||{},items=Array.isArray(source.exercises)?source.exercises.map(exerciseInput):[],canonical={planId:cleanPlanId(source.planId||source.id||""),name:cleanName(source.name||source.patientName||""),date:cleanDate(source.date),exercises:items.map(function(ex){return {id:ex.id,name:ex.name,sets:ex.sets,side:ex.side,loadUnit:ex.loadUnit,metricUnit:ex.metricUnit,previous:ex.previous,today:ex.today,startLoad:ex.startLoad,startMetric:ex.startMetric,measure:ex.measure,progressionGroupId:ex.progressionGroupId,progressionVariants:ex.progressionVariants.map(function(item){var identity=Object.assign({},item);delete identity.nameEn;return identity;}),activeProgressionId:ex.activeProgressionId};})};
+    var source=input||{},items=Array.isArray(source.exercises)?source.exercises.map(exerciseInput):[],canonical={planId:cleanPlanId(source.planId||source.id||""),name:cleanName(source.name||source.patientName||""),date:cleanDate(source.date),exercises:items.map(function(ex){return {id:ex.id,name:ex.name,sets:ex.sets,side:ex.side,loadUnit:ex.loadUnit,metricUnit:ex.metricUnit,previous:ex.previous,today:ex.today,startLoad:ex.startLoad,startMetric:ex.startMetric,measure:ex.measure,progressionGroupId:ex.progressionGroupId,progressionVariants:ex.progressionVariants.map(function(item){var identity=Object.assign({},item);delete identity.nameEn;delete identity.nameDe;return identity;}),activeProgressionId:ex.activeProgressionId};})};
     return fnv(JSON.stringify(canonical));
   }
   function bankEntryWithCockpitId(item){
@@ -378,7 +380,7 @@
     if(open){
       html+='<div class="kgg-tc-exercise-detail"><div class="kgg-tc-values-head"><span>Satz</span><span>Vorwert</span><span>Heute</span></div>';
       for(var setIndex=0;setIndex<ex.sets;setIndex++){
-        var prev=ex.previous[setIndex]||["",""];var today=ex.today[setIndex]||["",""];html+='<div class="kgg-tc-set-row"><span class="kgg-tc-set-no">S'+(setIndex+1)+'</span><span class="kgg-tc-prev" aria-label="Vorwert">'+htmlEscape(valuesLabel(prev,ex))+'</span>';
+        var prev=ex.previous[setIndex]||["",""];var today=ex.today[setIndex]||["",""];html+='<div class="kgg-tc-set-row"><span class="kgg-tc-set-no">S'+(setIndex+1)+'</span><button type="button" class="kgg-tc-prev" data-tc-action="use-previous" data-tc-slot="'+slotIndex+'" data-tc-ex="'+exerciseIndex+'" data-tc-set="'+setIndex+'" aria-label="Vorwerte für Satz '+(setIndex+1)+' übernehmen" '+(!prev[0]&&!prev[1]?'disabled':'')+'>'+htmlEscape(valuesLabel(prev,ex))+'</button>';
         ["load","metric"].forEach(function(field){var val=field==="load"?today[0]:today[1],active=activeInput&&activeInput.slot===slotIndex&&activeInput.exercise===exerciseIndex&&activeInput.set===setIndex&&activeInput.field===field;html+='<button type="button" class="kgg-tc-field '+(active?"active ":"")+(val?"":"empty")+'" data-tc-action="input" data-tc-slot="'+slotIndex+'" data-tc-ex="'+exerciseIndex+'" data-tc-set="'+setIndex+'" data-tc-field="'+field+'" aria-label="Heute '+htmlEscape(field==="load"?(ex.loadUnit||"kg"):(ex.metricUnit||"Wdh"))+'">'+htmlEscape(val||"—")+'</button>';if(active)html+=renderPad(slotIndex,exerciseIndex,setIndex,field,ex);});
         html+='</div>';
       }
@@ -392,6 +394,7 @@
     return html+'</div></div><div class="kgg-tc-card-foot"><button type="button" class="kgg-tc-btn primary" data-tc-action="finish" data-tc-slot="'+slotIndex+'">Plan fertig</button></div></article>';
   }
   function render(){
+    var scrollPositions={};if(board)board.querySelectorAll('.kgg-tc-card[data-tc-card]').forEach(function(card){var scroller=card.querySelector('.kgg-tc-scroll');if(scroller)scrollPositions[card.dataset.tcCard]=scroller.scrollTop;});
     var count=slotCount(),button=document.getElementById("kggTherapyCockpitButton");
     if(button)button.textContent=count?"Cockpit "+count+"/3":"Cockpit";
     if(typeof window.KGGTherapyCockpitEntryVisibilitySync==="function")window.KGGTherapyCockpitEntryVisibilitySync();
@@ -400,6 +403,7 @@
     if(notice)content+='<div class="kgg-tc-notice" role="status">'+htmlEscape(notice)+'</div>';
     if(!count){content+='<div class="kgg-tc-empty"><div class="kgg-tc-empty-box"><strong>Noch kein Cockpit-Link geladen</strong><span>Bis zu drei begleitete Trainingspläne können unabhängig nebeneinander geöffnet werden.</span><div style="margin-top:14px"><button type="button" class="kgg-tc-btn primary" data-tc-action="import-open">Cockpit-Link laden</button></div></div></div>';board.innerHTML=content;return;}
     var gridClass=count===1?"one":count===2?"two":"";content+='<div class="kgg-tc-grid '+gridClass+'">';for(var i=0;i<MAX_SLOTS;i++)if(slots[i])content+=renderCard(slots[i],i);content+='</div>';board.innerHTML=content;
+    board.querySelectorAll('.kgg-tc-card[data-tc-card]').forEach(function(card){var scroller=card.querySelector('.kgg-tc-scroll');if(scroller&&scrollPositions[card.dataset.tcCard]!=null)scroller.scrollTop=scrollPositions[card.dataset.tcCard];});
     setTimeout(function(){if(!activeInput)return;var active=board.querySelector('.kgg-tc-field.active');if(active&&active.scrollIntoView)active.scrollIntoView({block:"nearest",inline:"nearest"});},0);
   }
   function closePad(){if(activeInput){activeInput=null;render();}}
@@ -421,8 +425,8 @@
       var ref=registryLookup(hit&& (hit.id||hit.sourceId||hit.bankId||hit.name)),originalIndex=-1;
       if(ref)originalIndex=originals.findIndex(function(original){var originalRef=registryLookup(original&& (original.sourceId||original.bankId||original.id||original.name));return originalRef&&originalRef.id===ref.id&&!used[originalRef.id];});
       var original=originalIndex>=0?originals[originalIndex]:null;
-      if(original){var originalRef=registryLookup(original.sourceId||original.bankId||original.id||original.name);used[originalRef.id]=true;changed++;return Object.assign({},original,{name:hit.name,...(typeof hit.nameEn==="string"?{nameEn:hit.nameEn}:{}),sets:hit.sets,side:hit.side,loadUnit:hit.loadUnit,weightUnit:hit.weightUnit||hit.loadUnit,metricUnit:hit.metricUnit,unit:hit.unit||hit.metricUnit,measure:hit.measure,startLoad:hit.startLoad,startMetric:hit.startMetric,videoUrl:hit.videoUrl,videoLabel:hit.videoLabel,media:cloneJson(hit.media||original.media||[]),progressionGroupId:hit.progressionGroupId,progressionVariants:(hit.progressionVariants||[]).map(function(stage){var old=(original&&original.progressionVariants||[]).find(function(item){return item.id===stage.id;});return Object.assign({},old||{},stage);}),activeProgressionId:hit.activeProgressionId,previous:cloneJson(hit.previous||[]),today:cloneJson(hit.today||[]),lastTraining:hit.today.map(function(pair){return {load:pair[0],metric:pair[1]};}),cockpitPrevious:hit.today.map(function(pair){return pair.slice();}),lastTrainingDate:new Date().toISOString().slice(0,10)});}
-      if(ref){changed++;return {id:ref.id,name:hit.name,...(typeof hit.nameEn==="string"?{nameEn:hit.nameEn}:{}),sourceId:ref.id,bankId:ref.id,sets:hit.sets,side:hit.side,loadUnit:hit.loadUnit,weightUnit:hit.weightUnit||hit.loadUnit,metricUnit:hit.metricUnit,unit:hit.unit||hit.metricUnit,measure:hit.measure,startLoad:hit.startLoad,startMetric:hit.startMetric,videoUrl:hit.videoUrl,videoLabel:hit.videoLabel,media:cloneJson(hit.media||[]),progressionGroupId:hit.progressionGroupId,progressionVariants:cloneJson(hit.progressionVariants||[]),activeProgressionId:hit.activeProgressionId,previous:cloneJson(hit.previous||[]),today:cloneJson(hit.today||[]),lastTraining:hit.today.map(function(pair){return {load:pair[0],metric:pair[1]};}),cockpitPrevious:hit.today.map(function(pair){return pair.slice();}),lastTrainingDate:new Date().toISOString().slice(0,10)};}
+      if(original){var originalRef=registryLookup(original.sourceId||original.bankId||original.id||original.name);used[originalRef.id]=true;changed++;return Object.assign({},original,{name:hit.name,...germanNameField(hit.nameDe),...(typeof hit.nameEn==="string"?{nameEn:hit.nameEn}:{}),sets:hit.sets,side:hit.side,loadUnit:hit.loadUnit,weightUnit:hit.weightUnit||hit.loadUnit,metricUnit:hit.metricUnit,unit:hit.unit||hit.metricUnit,measure:hit.measure,startLoad:hit.startLoad,startMetric:hit.startMetric,videoUrl:hit.videoUrl,videoLabel:hit.videoLabel,media:cloneJson(hit.media||original.media||[]),progressionGroupId:hit.progressionGroupId,progressionVariants:(hit.progressionVariants||[]).map(function(stage){var old=(original&&original.progressionVariants||[]).find(function(item){return item.id===stage.id;});return Object.assign({},old||{},stage);}),activeProgressionId:hit.activeProgressionId,previous:cloneJson(hit.previous||[]),today:cloneJson(hit.today||[]),lastTraining:hit.today.map(function(pair){return {load:pair[0],metric:pair[1]};}),cockpitPrevious:hit.today.map(function(pair){return pair.slice();}),lastTrainingDate:new Date().toISOString().slice(0,10)});}
+      if(ref){changed++;return {id:ref.id,name:hit.name,...germanNameField(hit.nameDe),...(typeof hit.nameEn==="string"?{nameEn:hit.nameEn}:{}),sourceId:ref.id,bankId:ref.id,sets:hit.sets,side:hit.side,loadUnit:hit.loadUnit,weightUnit:hit.weightUnit||hit.loadUnit,metricUnit:hit.metricUnit,unit:hit.unit||hit.metricUnit,measure:hit.measure,startLoad:hit.startLoad,startMetric:hit.startMetric,videoUrl:hit.videoUrl,videoLabel:hit.videoLabel,media:cloneJson(hit.media||[]),progressionGroupId:hit.progressionGroupId,progressionVariants:cloneJson(hit.progressionVariants||[]),activeProgressionId:hit.activeProgressionId,previous:cloneJson(hit.previous||[]),today:cloneJson(hit.today||[]),lastTraining:hit.today.map(function(pair){return {load:pair[0],metric:pair[1]};}),cockpitPrevious:hit.today.map(function(pair){return pair.slice();}),lastTrainingDate:new Date().toISOString().slice(0,10)};}
       return null;
     }).filter(Boolean);
     if(!changed)return "exercise_mismatch";
@@ -432,7 +436,7 @@
     var lines=["KGG Therapie-Cockpit · "+new Date().toLocaleDateString("de-DE"),"Patient: "+slot.name,"Plan fertig · heutige Werte"];slot.exercises.forEach(function(ex){lines.push("",ex.name);ex.today.forEach(function(pair,index){lines.push("S"+(index+1)+": "+valuesLabel(pair,ex));});});lines.push("","Neuer Cockpit-Link:",link);return lines.join("\n");
   }
   function showOutput(results){
-    var modal=document.getElementById("kggTherapyCockpitOutputModal"),output=document.getElementById("kggTherapyCockpitOutput");if(!modal||!output)return;if(!slotCount())setCockpitOpen(true);output.value=results.map(function(result){return result.text+"\n\nStatus Planquelle: "+result.hook;}).join("\n\n--------------------\n\n");modal.hidden=false;
+    var modal=document.getElementById("kggTherapyCockpitOutputModal"),output=document.getElementById("kggTherapyCockpitOutput");if(!modal||!output)return;if(!slotCount())setCockpitOpen(true);var allUpdated=results.length>0&&results.every(function(result){return result.hook==="updated";}),title=modal.querySelector("h2"),hint=modal.querySelector("p");if(title)title.textContent=allUpdated?"Dokumentation bereit":"Dokumentationstext bereit";if(hint)hint.textContent=allUpdated?"Die verknüpften Planquellen wurden mit der vorhandenen Aktion aktualisiert.":"Link und Text sind bereit. Mindestens eine Planquelle wurde nicht übernommen; bitte den Status im Text prüfen.";var labels={updated:"Planquelle aktualisiert",plan_mismatch:"Planquelle nicht übernommen: Plan stimmt nicht überein",exercise_mismatch:"Planquelle nicht übernommen: keine Übung zugeordnet",hook_unavailable:"Planquelle nicht übernommen: Aktualisierung nicht verfügbar",hook_failed:"Planquelle nicht übernommen: Aktualisierung fehlgeschlagen","nicht übernommen":"Planquelle nicht übernommen"};output.value=results.map(function(result){return result.text+"\n\n"+(labels[result.hook]||"Planquelle nicht übernommen");}).join("\n\n--------------------\n\n");modal.hidden=false;
   }
   function finishSlot(index,skipRender){
     var slot=slots[index];if(!slot)return null;var link,hook="nicht übernommen";try{link=makeLink(payloadFromSlot(slot,true));hook=dispatchPlanHook(slot);}catch(e){notice="Abschluss fehlgeschlagen ("+(e.code||"invalid_payload")+").";if(!skipRender)render();return null;}
@@ -484,6 +488,7 @@
   function handleClick(event){
     var target=event.target&&event.target.closest?event.target.closest("[data-tc-action]"):null;if(!target||!root.contains(target))return;var action=target.getAttribute("data-tc-action"),slot=numberAttribute(target,"data-tc-slot"),exercise=numberAttribute(target,"data-tc-ex"),set=numberAttribute(target,"data-tc-set"),field=target.getAttribute("data-tc-field");
     if(action==="normal"){closeView();return;}
+    if(action==="use-previous"){var previousExercise=slots[slot]&&slots[slot].exercises[exercise];if(previousExercise&&previousExercise.previous[set]){previousExercise.today[set]=previousExercise.previous[set].slice();activeInput=null;render();}return;}
     if(action==="import-open"){document.getElementById("kggTherapyCockpitImportModal").hidden=false;setTimeout(function(){var input=document.getElementById("kggTherapyCockpitImportInput");if(input)input.focus();},0);return;}
     if(action==="import-cancel"){document.getElementById("kggTherapyCockpitImportModal").hidden=true;return;}
     if(action==="import-submit"){var input=document.getElementById("kggTherapyCockpitImportInput"),value=input&&input.value||"";try{importCode(value);document.getElementById("kggTherapyCockpitImportModal").hidden=true;if(input)input.value="";}catch(e){notify("Link nicht geladen: "+(e.code||"invalid_format"));}return;}

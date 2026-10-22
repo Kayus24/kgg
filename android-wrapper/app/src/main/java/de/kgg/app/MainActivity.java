@@ -130,6 +130,7 @@ public class MainActivity extends Activity {
     private static final String APK_MIME_TYPE = "application/vnd.android.package-archive";
 
     private WebView webView;
+    private KggDriveSyncBridge driveSyncBridge;
     private ValueCallback<Uri[]> filePathCallback;
     private WebChromeClient.FileChooserParams pendingFileChooserParams;
     private PermissionRequest pendingWebCameraRequest;
@@ -240,6 +241,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        dispatchNativeSyncEvent("kgg:native-sync-resume");
         installPendingApkIfAllowed();
         checkForWebAppUpdate();
         if (isPreviewProfile()) {
@@ -304,7 +306,11 @@ public class MainActivity extends Activity {
         settings.setAllowContentAccess(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
 
-        webView.addJavascriptInterface(new KggSyncBridge(this), "KGGAndroidSync");
+        if (!BuildConfig.KGG_ISOLATED_PREVIEW_TEST) {
+            webView.addJavascriptInterface(new KggSyncBridge(this), "KGGAndroidSync");
+        }
+        driveSyncBridge = new KggDriveSyncBridge(this, () -> dispatchNativeSyncEvent("kgg:native-sync-ready"));
+        webView.addJavascriptInterface(driveSyncBridge, "KGGAndroidDriveSync");
         webView.addJavascriptInterface(new KggAppBridge(), "KGGAndroidApp");
         webView.addJavascriptInterface(new KggPdfBridge(), "KGGAndroidPdf");
         releaseController = KggReleaseControllerFactory.attach(this, webView);
@@ -312,6 +318,9 @@ public class MainActivity extends Activity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+                if (BuildConfig.KGG_ISOLATED_PREVIEW_TEST) {
+                    injectAssetScript("android/kgg_isolated_preview_sync_setup.js");
+                }
                 injectAssetScript("android/kgg_android_sync_bootstrap.js");
                 KggReleaseControllerFactory.onPageFinished(MainActivity.this);
                 deliverPendingCockpitCode();
@@ -720,6 +729,9 @@ public class MainActivity extends Activity {
     }
 
     private String localWebAppUrl() {
+        if (BuildConfig.KGG_ISOLATED_PREVIEW_TEST) {
+            return "file:///android_asset/" + bundledAppAsset();
+        }
         File current = localWebAppFile();
         if (current.exists()) {
             return Uri.fromFile(current).toString();
@@ -954,6 +966,9 @@ public class MainActivity extends Activity {
     }
 
     private void checkForPreviewWebAppUpdate() {
+        if (BuildConfig.KGG_ISOLATED_PREVIEW_TEST) {
+            return;
+        }
         new Thread(() -> {
             try {
                 JSONObject manifest = new JSONObject(downloadText(PREVIEW_MANIFEST_URL, 512_000));
@@ -1044,6 +1059,9 @@ public class MainActivity extends Activity {
     }
 
     private void checkForAndroidAppUpdate(boolean force) {
+        if (BuildConfig.KGG_ISOLATED_PREVIEW_TEST) {
+            return;
+        }
         SharedPreferences prefs = getSharedPreferences(UPDATE_PREFS, MODE_PRIVATE);
         long now = System.currentTimeMillis();
         long lastCheckAt = prefs.getLong(PREF_LAST_APK_CHECK_AT, 0L);
@@ -1213,6 +1231,9 @@ public class MainActivity extends Activity {
     }
 
     private void installPendingApkIfAllowed() {
+        if (BuildConfig.KGG_ISOLATED_PREVIEW_TEST) {
+            return;
+        }
         try {
             SharedPreferences prefs = getSharedPreferences(UPDATE_PREFS, MODE_PRIVATE);
             String path = prefs.getString(PREF_PENDING_APK_PATH, "");
@@ -1244,7 +1265,7 @@ public class MainActivity extends Activity {
             status.put("hasRollbackFile", previousWebAppFile().exists());
             status.put("bundledAsset", bundledAppAsset());
             status.put("localWebFile", LOCAL_WEB_FILE_NAME);
-            status.put("loadedHtmlSource", localWebAppFile().exists() ? LOCAL_WEB_FILE_NAME : bundledAppAsset());
+            status.put("loadedHtmlSource", BuildConfig.KGG_ISOLATED_PREVIEW_TEST ? bundledAppAsset() : (localWebAppFile().exists() ? LOCAL_WEB_FILE_NAME : bundledAppAsset()));
             android.content.pm.PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
             long versionCode = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
                     ? info.getLongVersionCode()
@@ -1686,6 +1707,9 @@ public class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (driveSyncBridge != null && driveSyncBridge.onActivityResult(requestCode, resultCode, data)) {
+            return;
+        }
         if (requestCode == RELEASE_HTML_REQUEST) {
             Uri selected = resultCode == RESULT_OK && data != null ? data.getData() : null;
             if (releaseController != null) {
@@ -1711,6 +1735,12 @@ public class MainActivity extends Activity {
     @Override
     public void onBackPressed() {
         handleAndroidBack();
+    }
+
+    private void dispatchNativeSyncEvent(String event) {
+        if (webView == null) return;
+        webView.post(() -> webView.evaluateJavascript(
+                "window.dispatchEvent(new CustomEvent(" + JSONObject.quote(event) + "));", null));
     }
 
     private void handleAndroidBack() {
