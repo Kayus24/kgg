@@ -110,7 +110,7 @@
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v126-responsive-library-sync",
+  "lastUpdatedByPatchId": "kgg-v127-menu-sync-qr-responsiveness",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",

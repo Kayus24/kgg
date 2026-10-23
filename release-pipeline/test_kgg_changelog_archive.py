@@ -41,7 +41,7 @@ class ChangelogArchiveTests(unittest.TestCase):
         )
         reviewed = json.loads((HERE.parent / "docs/changelog-archive/kgg-therapist-changelog-through-v096.json").read_text(encoding="utf-8"))
         self.assertEqual(37, len(reviewed["entries"]))
-        self.assertEqual(67, len(document["entries"]))
+        self.assertEqual(68, len(document["entries"]))
         self.assertEqual(
             "49767017066c2fbecb49bdec329c3c0c18231747883aa9d2fe3e662ca7c1a9cd",
             archive.entries_sha256(reviewed["entries"]),
@@ -51,12 +51,12 @@ class ChangelogArchiveTests(unittest.TestCase):
     def test_legacy_snapshot_remains_referenced_after_current_compaction(self):
         _text, changelog = archive.load_embedded()
         snapshots = changelog["archiveSnapshots"]
-        self.assertEqual(13, len(snapshots))
+        self.assertEqual(14, len(snapshots))
         self.assertIn(archive.archive_reference(), snapshots)
         current = [item for item in snapshots if item != archive.archive_reference()]
-        self.assertEqual(12, len(current))
+        self.assertEqual(13, len(current))
         self.assertEqual(89, current[0]["snapshotVersionCode"])
-        self.assertEqual([*range(89, 97), 123, 124, 125, 126], [item["snapshotVersionCode"] for item in current])
+        self.assertEqual([*range(89, 97), 123, 124, 125, 126, 127], [item["snapshotVersionCode"] for item in current])
 
     def test_compact_current_recovers_from_previous_compact_window(self):
         _text, current = archive.load_embedded()

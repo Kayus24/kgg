@@ -1,7 +1,7 @@
 {
-  "versionCode": 126,
-  "versionName": "1.0.126-responsive-library-sync",
-  "indexUrl": "index.html?v=126",
-  "sha256": "d351a3194cd1523ba9ab498056812efe381aafa8d5fd6cf52531ab9ee829b31b",
-  "notes": "v126: Bibliothekssync im Hintergrund mit ehrlichem Abschluss und schnellen Status-/Partneranzeigen; keine Anzeigeexporte, schnellere Bildbyte-Konvertierung."
+  "versionCode": 127,
+  "versionName": "1.0.127-menu-sync-qr-responsiveness",
+  "indexUrl": "index.html?v=127",
+  "sha256": "7bf312e143043e14b129edd324368bd849d0cabfc4f7a071bb8307df2313a5e7",
+  "notes": "v127: Das Menue verarbeitet einen Pointergestus genau einmal; der Sync-QR nutzt vorhandene SVG-Ausgabe statt pixelweiser GIF-Erzeugung. QR-Inhalt und Layout bleiben erhalten."
 }

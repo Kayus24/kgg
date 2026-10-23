@@ -1,10 +1,10 @@
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v126_responsive_library_sync';
+  const VERSION='KGG_GITHUB_UPDATE_v127_menu_sync_qr_responsiveness';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v126","buildTime":"2026-10-23T12:49:04Z","buildCode":"module-v126-responsive-library-sync","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v127","buildTime":"2026-10-23T16:23:05Z","buildCode":"module-v127-menu-sync-qr-responsiveness","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();

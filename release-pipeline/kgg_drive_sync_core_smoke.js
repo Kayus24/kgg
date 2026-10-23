@@ -33,7 +33,7 @@ function client(id,files=new Map(),stored=null,blobStore=new Map(),mainScript=nu
   vm.runInContext((mainScript||helpers.readMainAppScript())+`
     render=function(){};
     load();
-    window.__core={get bank(){return bank;},get state(){return state;},get running(){return typeof nativeExerciseSyncRunning==='undefined'?null:nativeExerciseSyncRunning;},get dirty(){return nativeExerciseSyncDirty;},save,persistCustomBank,deleteBankExercise,confirmExerciseInput,upsertLiveExerciseFromText,applySelectedExerciseToText,openEditor,saveEditedExercise,openSyncPairModal,closeSyncPairModal,configureNativeDriveSync:typeof configureNativeDriveSync==='function'?configureNativeDriveSync:null,applyNativeSyncInvite:typeof applyNativeSyncInvite==='function'?applyNativeSyncInvite:null,initNativeExerciseBankSync,buildNativeExerciseBankSyncDocument,mergeNativeExerciseBankSyncDocument,mergeSharedExerciseBank,putEncryptedMediaBlob,getEncryptedMediaBlob,encryptMediaBlob,patientDecryptMedia};
+    window.__core={get bank(){return bank;},get state(){return state;},get running(){return typeof nativeExerciseSyncRunning==='undefined'?null:nativeExerciseSyncRunning;},get dirty(){return nativeExerciseSyncDirty;},get syncPairCode(){return lastSyncPairCode;},save,persistCustomBank,deleteBankExercise,confirmExerciseInput,upsertLiveExerciseFromText,applySelectedExerciseToText,openEditor,saveEditedExercise,openSyncPairModal,closeSyncPairModal,buildNativeSyncQrPayload,configureNativeDriveSync:typeof configureNativeDriveSync==='function'?configureNativeDriveSync:null,applyNativeSyncInvite:typeof applyNativeSyncInvite==='function'?applyNativeSyncInvite:null,initNativeExerciseBankSync,buildNativeExerciseBankSyncDocument,mergeNativeExerciseBankSyncDocument,mergeSharedExerciseBank,putEncryptedMediaBlob,getEncryptedMediaBlob,encryptMediaBlob,patientDecryptMedia};
   })();`,ctx);
   return {ctx,core:ctx.window.__core,transport,files,storage,blobStore,warnings,eval(code){return vm.runInContext(code,ctx);},async tick(ms=400){const target=time+ms;for(let guard=0;guard<100;guard++){await settle();if(ctx.window.__core.running)await ctx.window.__core.running;let found=null;for(const [key,timer]of timers)if(timer.at<=target&&(!found||timer.at<found[1].at))found=[key,timer];if(!found)break;timers.delete(found[0]);time=found[1].at;found[1].fn();}time=target;await settle();if(ctx.window.__core.running)await ctx.window.__core.running;},async event(type){for(const fn of listeners.get(type)||[])fn({type});await settle();},create(name){ctx.document.getElementById('exerciseInput').value=name;this.core.confirmExerciseInput();},edit(ex,name){this.core.openEditor(ex);ctx.document.getElementById('editName').value=name;this.core.saveEditedExercise();}};
 }
@@ -71,9 +71,69 @@ async function richLibraryClient(){
   assert.equal(a.core.dirty,false);assert.equal(a.storage.getItem('kgg_library_sync_pending_v1'),'0');
   return {a,expectedImages};
 }
+// Exercise the actual embedded production QR generator, not the older npm test
+// dependency. Only the existing DOM boundary remains fake in this CLI suite;
+// real browser image decoding/scanning is a separate integration gate.
+function syncQrClient(kind='invite'){
+  const a=client('a'),instant=Date.parse('2026-10-23T12:00:00Z');
+  a.ctx.Date=class extends Date{constructor(...args){super(...(args.length?args:[instant]));}static now(){return instant;}};
+  const source=fs.readFileSync(path.join(ROOT,'kgg-update/src/runtime/qrcode-generator.html'),'utf8');
+  assert.match(source,/qrcode-generator 1\.5\.2 \| MIT License/,'test must use the actual embedded production generator');
+  const scripts=[...source.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)];assert.equal(scripts.length,1);
+  vm.runInContext(scripts[0][1],a.ctx,{filename:'kgg-update/src/runtime/qrcode-generator.html#production-1.5.2'});
+  const factory=a.eval('qrcode');assert.equal(typeof factory,'function');
+  const exercise={id:'sync_qr_names',name:'Audit Rückenübung',nameDe:'Audit Rückenübung',nameEn:'Audit back exercise',sets:3,unit:'Wdh',weightUnit:'kg',media:kind==='invite'?[{id:'sync_qr_image',type:'image',mime:'image/png',width:1,height:1}]:[]};
+  a.core.bank.splice(0,a.core.bank.length,exercise);
+  const expected=a.core.buildNativeSyncQrPayload();assert.equal(expected.type,kind);assert.match(expected.code,kind==='invite'?/^KGGSYNC1:/:/^KGGSYNC2:/);
+  const calls={factory:[],payloads:[],make:0,svg:0,gif:0,svgArgs:[],gifArgs:[]};
+  a.ctx.window.qrcode=(...args)=>{
+    calls.factory.push(args);const qr=factory(...args),add=qr.addData,make=qr.make,svg=qr.createSvgTag,gif=qr.createDataURL;
+    qr.addData=(value,...rest)=>{calls.payloads.push(value);return add.call(qr,value,...rest);};
+    qr.make=(...args)=>{calls.make++;return make.apply(qr,args);};
+    qr.createSvgTag=(...args)=>{calls.svg++;calls.svgArgs.push(args);return svg.apply(qr,args);};
+    qr.createDataURL=(...args)=>{calls.gif++;calls.gifArgs.push(args);return gif.apply(qr,args);};
+    return qr;
+  };
+  return {a,factory,expected,calls,exercise};
+}
+function renderedSyncImage(a){
+  assert(a.ctx.document.getElementById('syncPairModal').classList.contains('open'));
+  const image=a.ctx.document.getElementById('syncPairQrBox').children.at(-1);
+  assert(image&&image.id==='img','real Sync renderer did not append the existing image element');
+  assert.equal(image.alt,'Sync-QR fuer Uebungsdatenbank');return image;
+}
 async function main(){
   const results=[];let failures=0;
   async function test(name,fn){try{await fn();results.push({name,ok:true});}catch(err){failures++;results.push({name,ok:false,error:err.message});}}
+  for(const kind of ['invite','bundle'])await test('Sync QR '+kind+' prefers embedded SVG without GIF work and preserves the exact existing payload',()=>{
+    const {a,factory,expected,calls,exercise}=syncQrClient(kind),names=clone({name:exercise.name,nameDe:exercise.nameDe,nameEn:exercise.nameEn});
+    a.core.openSyncPairModal();const image=renderedSyncImage(a);
+    assert.equal(a.core.syncPairCode,expected.code,'rendering changed the existing Sync code');
+    assert.deepEqual(calls.payloads,[expected.code],'QR generator received a different payload');
+    assert.deepEqual(calls.factory,[[0,'L']]);assert.equal(calls.make,1);
+    assert.deepEqual({svg:calls.svg,gif:calls.gif},{svg:1,gif:0},'Sync QR must use the available SVG renderer without pixelwise GIF work');
+    assert.deepEqual(calls.svgArgs,[[10,4]],'cell size or quiet margin changed');
+    assert.match(image.src,/^data:image\/svg\+xml[^,]*,/);
+    const actualSvg=decodeURIComponent(image.src.slice(image.src.indexOf(',')+1)),reference=factory(0,'L');reference.addData(expected.code);reference.make();
+    assert.equal(actualSvg,reference.createSvgTag(10,4),'image does not contain the unchanged production QR matrix/geometry');
+    assert.deepEqual(clone({name:exercise.name,nameDe:exercise.nameDe,nameEn:exercise.nameEn}),names);
+  });
+  await test('Sync QR retains the actual GIF renderer when an older QR object has no SVG method',()=>{
+    const {a,factory,expected,calls}=syncQrClient(),wrapped=a.ctx.window.qrcode;
+    a.ctx.window.qrcode=(...args)=>{const qr=wrapped(...args);delete qr.createSvgTag;return qr;};
+    a.core.openSyncPairModal();const image=renderedSyncImage(a);
+    assert.equal(a.core.syncPairCode,expected.code);assert.deepEqual(calls.payloads,[expected.code]);
+    assert.deepEqual({svg:calls.svg,gif:calls.gif},{svg:0,gif:1});assert.deepEqual(calls.gifArgs,[[10,4]]);
+    const reference=factory(0,'L');reference.addData(expected.code);reference.make();assert.equal(image.src,reference.createDataURL(10,4));
+  });
+  await test('Sync QR preserves KGGQrCore priority and its unchanged payload/options without the fallback factory',()=>{
+    const {a,factory,expected,calls}=syncQrClient(),coreCalls=[];
+    a.ctx.window.KGGQrCore={renderQrToImg(value,options){coreCalls.push({value,options:clone(options)});const qr=factory(0,'L');qr.addData(value);qr.make();return qr.createDataURL(options.cellSize,options.margin);}};
+    a.ctx.window.qrcode=()=>{throw Error('preferred KGGQrCore must not enter fallback factory');};
+    a.core.openSyncPairModal();const image=renderedSyncImage(a);
+    assert.equal(a.core.syncPairCode,expected.code);assert.deepEqual(coreCalls,[{value:expected.code,options:{cellSize:10,margin:4}}]);
+    assert.equal(calls.factory.length,0);assert.match(image.src,/^data:image\/gif;base64,/);
+  });
   await test('loaded input listeners commit Enter and delimiters while blur only finalizes the plan',async()=>{
     for(const delimiter of ['\n',',',';']){
       const a=client('a');a.core.initNativeExerciseBankSync();await a.tick();const input=a.ctx.document.getElementById('exerciseInput'),name='Audit event '+(delimiter==='\n'?'newline':delimiter===','?'comma':'semicolon');

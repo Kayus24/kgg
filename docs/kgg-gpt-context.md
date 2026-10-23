@@ -42,9 +42,9 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 ## Current Versions
 
-- Source web version: v126 / `1.0.126-responsive-library-sync`.
-- Source index URL: `index.html?v=126`.
-- Source notes: v126: Bibliothekssync im Hintergrund mit ehrlichem Abschluss und schnellen Status-/Partneranzeigen; keine Anzeigeexporte, schnellere Bildbyte-Konvertierung.
+- Source web version: v127 / `1.0.127-menu-sync-qr-responsiveness`.
+- Source index URL: `index.html?v=127`.
+- Source notes: v127: Das Menue verarbeitet einen Pointergestus genau einmal; der Sync-QR nutzt vorhandene SVG-Ausgabe statt pixelweiser GIF-Erzeugung. QR-Inhalt und Layout bleiben erhalten.
 - Live Admin release: `r0434` / `1.0.125-library-image-names`.
 - Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0434/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.

@@ -100,22 +100,21 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "patient-english-names",
     "cockpit-main-integration",
     "library-image-names",
-    "responsive-library-sync"
+    "responsive-library-sync",
+    "menu-sync-qr-responsiveness"
   ],
   "currentVersion": {
-    "versionCode": 126,
-    "versionName": "1.0.126-responsive-library-sync",
-    "lastPatchId": "kgg-v126-responsive-library-sync",
+    "versionCode": 127,
+    "versionName": "1.0.127-menu-sync-qr-responsiveness",
+    "lastPatchId": "kgg-v127-menu-sync-qr-responsiveness",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v126-responsive-library-sync",
+  "latestPatchId": "kgg-v127-menu-sync-qr-responsiveness",
   "lastUpdateIntent": {
-    "id": "kgg-v126-responsive-library-sync",
-    "summary": "Bibliothekssync verarbeitet native Datei-/Providerarbeit seriell im Hintergrund; Status und Partneranzeige lesen kleine Snapshots. Reines Oeffnen exportiert nicht erneut, und Bildbytes werden ohne teure Callback-Konvertierung uebernommen.",
+    "id": "kgg-v127-menu-sync-qr-responsiveness",
+    "summary": "Das Menue verarbeitet einen Pointergestus genau einmal; der Sync-QR nutzt vorhandene SVG-Ausgabe statt pixelweiser GIF-Erzeugung. QR-Inhalt und Layout bleiben erhalten.",
     "touched": [
-      "UI",
-      "Medien/Upload",
-      "Android/APK"
+      "UI"
     ],
     "notTouched": [
       "PDF",
@@ -123,7 +122,9 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Scan/OCR",
       "Parser",
       "Plan-State",
+      "Medien/Upload",
       "API-Key-Logik",
+      "Android/APK",
       "GitHub Manifest",
       "Handy-Layout"
     ]
@@ -224,22 +225,21 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "patient-english-names",
     "cockpit-main-integration",
     "library-image-names",
-    "responsive-library-sync"
+    "responsive-library-sync",
+    "menu-sync-qr-responsiveness"
   ],
   "currentVersion": {
-    "versionCode": 126,
-    "versionName": "1.0.126-responsive-library-sync",
-    "lastPatchId": "kgg-v126-responsive-library-sync",
+    "versionCode": 127,
+    "versionName": "1.0.127-menu-sync-qr-responsiveness",
+    "lastPatchId": "kgg-v127-menu-sync-qr-responsiveness",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v126-responsive-library-sync",
+  "latestPatchId": "kgg-v127-menu-sync-qr-responsiveness",
   "lastUpdateIntent": {
-    "id": "kgg-v126-responsive-library-sync",
-    "summary": "Bibliothekssync verarbeitet native Datei-/Providerarbeit seriell im Hintergrund; Status und Partneranzeige lesen kleine Snapshots. Reines Oeffnen exportiert nicht erneut, und Bildbytes werden ohne teure Callback-Konvertierung uebernommen.",
+    "id": "kgg-v127-menu-sync-qr-responsiveness",
+    "summary": "Das Menue verarbeitet einen Pointergestus genau einmal; der Sync-QR nutzt vorhandene SVG-Ausgabe statt pixelweiser GIF-Erzeugung. QR-Inhalt und Layout bleiben erhalten.",
     "touched": [
-      "UI",
-      "Medien/Upload",
-      "Android/APK"
+      "UI"
     ],
     "notTouched": [
       "PDF",
@@ -247,7 +247,9 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Scan/OCR",
       "Parser",
       "Plan-State",
+      "Medien/Upload",
       "API-Key-Logik",
+      "Android/APK",
       "GitHub Manifest",
       "Handy-Layout"
     ]
@@ -259,8 +261,42 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 126,
+  "latestVersionCode": 127,
   "entries": [
+    {
+      "versionCode": 127,
+      "versionName": "1.0.127-menu-sync-qr-responsiveness",
+      "patchId": "kgg-v127-menu-sync-qr-responsiveness",
+      "status": "implemented",
+      "type": "module-patch",
+      "title": "Reaktionssicheres Menue und schneller Sync-QR",
+      "reason": "Das Menue verarbeitet einen Pointergestus genau einmal; der Sync-QR nutzt vorhandene SVG-Ausgabe statt pixelweiser GIF-Erzeugung. QR-Inhalt und Layout bleiben erhalten.",
+      "whatChanged": [
+        "Ein zusammengehoerender Pointerdruck und sein nachfolgender Click loesen nur eine Menueaktivierung aus; Tastatur- und Assistenzaktivierung bleiben erhalten.",
+        "Der Sync-QR verwendet die SVG-Ausgabe der vorhandenen QR-Bibliothek, behaelt Matrix, Groesse, Rand und GIF-Legacyfallback.",
+        "Tatsaechliche Pointergesten und die Pixeldekodierung der angezeigten QR-Grafik werden im vorhandenen UI-Testpfad geprueft."
+      ],
+      "touchedAreas": [
+        "UI"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "Gezielte und abschliessende Nachweise am zugehoerigen PR/Commit; keine physische Geraeteabnahme behauptet.",
+        "certification": "pending"
+      },
+      "approvalNote": "Max 23.10.2026: KGG-Arbeit fortsetzen und offene Performancebefunde abschliessen. Nur Sync-QR-Bilddarstellung und Menueeingabe; kein QR-Datenformat-/Layout-/Patienten-/Native-/Releasewechsel."
+    },
     {
       "versionCode": 126,
       "versionName": "1.0.126-responsive-library-sync",
@@ -705,41 +741,9 @@ Before editing this app, any LLM/agent/human should read these blocks:
         "certification": "pending"
       },
       "approvalNote": "Max fordert anhand 296051 und 296053 die Smartphone-Werteingabe wie in der Patienten-App; bestehende Archivierung wird fortgesetzt."
-    },
-    {
-      "versionCode": 112,
-      "versionName": "1.0.112-cockpit-main-pane-phone-layout",
-      "patchId": "kgg-v112-cockpit-main-pane-phone-layout",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Smartphone-Ansicht im schmalen KGG-Drittel",
-      "reason": "Bei zwei Cockpit-Plänen verwendet die Haupt-App ihre vorhandene Smartphone-Darstellung und Bedienwege im eigenen Drittel. Die Cockpit-Pläne behalten ihre Tablet-Aufteilung.",
-      "whatChanged": [
-        "Bei zwei Cockpit-Plänen verwendet die Haupt-App ihre vorhandene Smartphone-Darstellung und Bedienwege im eigenen Drittel. Die Cockpit-Pläne behalten ihre Tablet-Aufteilung."
-      ],
-      "touchedAreas": [
-        "UI"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Expliziter Bildauftrag 296074: gesamte linke KGG-Fläche bei zwei Cockpit-Plänen in Smartphone-UI wechseln."
     }
   ],
-  "latestVersionName": "1.0.126-responsive-library-sync",
+  "latestVersionName": "1.0.127-menu-sync-qr-responsiveness",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -844,6 +848,14 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "entriesSha256": "b2c30b10b41c07e0f0453f3a401cd6c9d6dafdc745bcb7dd6ed100784d13f8fc",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v126-responsive-library-sync"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v127.json",
+      "snapshotVersionCode": 127,
+      "entryCount": 68,
+      "entriesSha256": "7cd6fc09b4d4f6bbad5e31063dd38f7b78f3f4f97e1c22b499e766a91adb351a",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v127-menu-sync-qr-responsiveness"
     }
   ]
 }
@@ -961,7 +973,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v126-responsive-library-sync",
+  "lastUpdatedByPatchId": "kgg-v127-menu-sync-qr-responsiveness",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
@@ -1096,7 +1108,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v126 Reaktionsfaehiger Bibliothekssync</title>
+  <title>KGG Update v127 Reaktionssicheres Menue und schneller Sync-QR</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -17014,11 +17026,11 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
 </script>
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v126_responsive_library_sync';
+  const VERSION='KGG_GITHUB_UPDATE_v127_menu_sync_qr_responsiveness';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v126","buildTime":"2026-10-23T12:49:04Z","buildCode":"module-v126-responsive-library-sync","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v127","buildTime":"2026-10-23T16:23:05Z","buildCode":"module-v127-menu-sync-qr-responsiveness","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -20406,7 +20418,7 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
         const qr=window.qrcode(0,'L');
         qr.addData(value);
         qr.make();
-        imgData=qr.createDataURL(10,4);
+        imgData=typeof qr.createSvgTag==='function'?'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(qr.createSvgTag(10,4)):qr.createDataURL(10,4);
       }
       if(imgData){
         const img=document.createElement('img');
@@ -25018,16 +25030,25 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
   }
   function installKggV388AndroidFlowFixes(){
     let lastTabletMenuToggleAt=0;
+    let pendingMenuPointer=null;
     const menu=tabletMenuBtn;
+    const consumeMenuEvent=ev=>{if(ev){ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();}};
     const toggle=ev=>{
       if(!isTabletLayout())return;
+      if(ev&&ev.type==='touchstart'&&window.PointerEvent){consumeMenuEvent(ev);return;}
+      if(ev&&ev.type==='click'&&ev.detail>0&&pendingMenuPointer&&
+        (pendingMenuPointer.id===null||ev.pointerId===undefined||ev.pointerId===pendingMenuPointer.id)){
+        pendingMenuPointer=null;consumeMenuEvent(ev);return;
+      }
+      if(ev&&ev.type==='pointerdown')pendingMenuPointer={id:ev.pointerId};
+      else if(ev&&ev.type==='touchstart')pendingMenuPointer={id:null};
       const now=Date.now();
       if(now-lastTabletMenuToggleAt<220){
-        if(ev){ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();}
+        consumeMenuEvent(ev);
         return;
       }
       lastTabletMenuToggleAt=now;
-      if(ev){ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();}
+      consumeMenuEvent(ev);
       setTabletSideMenuOpen(!document.body.classList.contains('tabletMenuOpen'));
     };
     const isMenuHit=ev=>{
@@ -25047,9 +25068,11 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
         toggle(ev);
       },true);
       document.addEventListener('pointerdown',ev=>{
-        if(!isTabletLayout()||!isMenuHit(ev))return;
+        if(!isTabletLayout()||!isMenuHit(ev)){pendingMenuPointer=null;return;}
         toggle(ev);
       },true);
+      document.addEventListener('pointercancel',ev=>{if(pendingMenuPointer&&pendingMenuPointer.id===ev.pointerId)pendingMenuPointer=null;},true);
+      document.addEventListener('touchcancel',()=>{pendingMenuPointer=null;},true);
       document.addEventListener('touchstart',ev=>{
         if(!isTabletLayout()||!isMenuHit(ev))return;
         toggle(ev);
