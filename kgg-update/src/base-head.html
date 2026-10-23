@@ -99,25 +99,27 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "cockpit-previous-value-action",
     "patient-english-names",
     "cockpit-main-integration",
-    "library-image-names"
+    "library-image-names",
+    "responsive-library-sync"
   ],
   "currentVersion": {
-    "versionCode": 125,
-    "versionName": "1.0.125-library-image-names",
-    "lastPatchId": "kgg-v125-library-image-names",
+    "versionCode": 126,
+    "versionName": "1.0.126-responsive-library-sync",
+    "lastPatchId": "kgg-v126-responsive-library-sync",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v125-library-image-names",
+  "latestPatchId": "kgg-v126-responsive-library-sync",
   "lastUpdateIntent": {
-    "id": "kgg-v125-library-image-names",
-    "summary": "Vorbereitete Bibliotheks-/Bildsynchronisation und fehlende DE/EN-Bezeichnungen gemeinsam integrieren; kompatible Metadaten erhalten.",
+    "id": "kgg-v126-responsive-library-sync",
+    "summary": "Bibliothekssync verarbeitet native Datei-/Providerarbeit seriell im Hintergrund; Status und Partneranzeige lesen kleine Snapshots. Reines Oeffnen exportiert nicht erneut, und Bildbytes werden ohne teure Callback-Konvertierung uebernommen.",
     "touched": [
+      "UI",
       "Medien/Upload",
-      "QR/Patienten-App",
       "Android/APK"
     ],
     "notTouched": [
       "PDF",
+      "QR/Patienten-App",
       "Scan/OCR",
       "Parser",
       "Plan-State",

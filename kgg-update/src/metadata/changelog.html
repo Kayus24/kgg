@@ -3,8 +3,43 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 125,
+  "latestVersionCode": 126,
   "entries": [
+    {
+      "versionCode": 126,
+      "versionName": "1.0.126-responsive-library-sync",
+      "patchId": "kgg-v126-responsive-library-sync",
+      "status": "implemented",
+      "type": "module-patch",
+      "title": "Reaktionsfaehiger Bibliothekssync",
+      "reason": "Bibliothekssync verarbeitet native Datei-/Providerarbeit seriell im Hintergrund; Status und Partneranzeige lesen kleine Snapshots. Reines Oeffnen exportiert nicht erneut, und Bildbytes werden ohne teure Callback-Konvertierung uebernommen.",
+      "whatChanged": [
+        "Native Datei-/Providerarbeit laeuft ueber eine begrenzte serielle Queue; Promise-Ergebnisse bestaetigen den Abschluss statt nur die Annahme.",
+        "Status-/Partneranzeigen nutzen kleine Snapshots mit Generation und ehrlicher Frische; alte Shell-Vertraege und isolierter Preview bleiben beruecksichtigt.",
+        "Reines Oeffnen loest keinen Voll-Export unveraenderter Uebungen/Bilder aus.",
+        "Base64-Bildbytes werden nach unveraenderter Validierung mit einem direkten Byte-Loop uebernommen."
+      ],
+      "touchedAreas": [
+        "UI",
+        "Medien/Upload",
+        "Android/APK"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "API-Key-Logik",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "Gezielte Bootstrap-/Core-/JVM-Pruefungen PASS; finale Integration und Geraeteabnahme siehe Aufgabenbericht.",
+        "certification": "pending"
+      },
+      "approvalNote": "Max 23.10.2026: belegte Verzoegerung ohne angeschlossenes Tablet beheben und testen; kein Merge/Release. Eigener Emulator ersetzt keine physische Tablet-/Drive-SAF-Abnahme."
+    },
     {
       "versionCode": 125,
       "versionName": "1.0.125-library-image-names",
@@ -446,41 +481,9 @@
         "certification": "pending"
       },
       "approvalNote": "Expliziter Bildauftrag 296074: gesamte linke KGG-Fläche bei zwei Cockpit-Plänen in Smartphone-UI wechseln."
-    },
-    {
-      "versionCode": 111,
-      "versionName": "1.0.111-cockpit-finish-dialog-layer",
-      "patchId": "kgg-v111-cockpit-finish-dialog-layer",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Fertig-Dialog über der Cockpit-Aufteilung",
-      "reason": "Der bestehende Abschlussdialog bleibt in der geteilten Cockpit-Ansicht sichtbar und per Berührung bedienbar.",
-      "whatChanged": [
-        "Der bestehende Abschlussdialog bleibt in der geteilten Cockpit-Ansicht sichtbar und per Berührung bedienbar."
-      ],
-      "touchedAreas": [
-        "UI"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Autorisierter Cockpit-Bildabgleich mit reproduzierbarem Touch-Fehler in sechs Tablet-Szenarien."
     }
   ],
-  "latestVersionName": "1.0.125-library-image-names",
+  "latestVersionName": "1.0.126-responsive-library-sync",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -577,6 +580,14 @@
       "entriesSha256": "9dee263e6c97707b4ba0af7f7f8c7168273f47b98e73eb1478ded68c2045a8a3",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v125-library-image-names"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v126.json",
+      "snapshotVersionCode": 126,
+      "entryCount": 67,
+      "entriesSha256": "b2c30b10b41c07e0f0453f3a401cd6c9d6dafdc745bcb7dd6ed100784d13f8fc",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v126-responsive-library-sync"
     }
   ]
 }

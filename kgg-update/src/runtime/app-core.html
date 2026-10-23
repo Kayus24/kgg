@@ -1,10 +1,10 @@
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v125_library_image_names';
+  const VERSION='KGG_GITHUB_UPDATE_v126_responsive_library_sync';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v125","buildTime":"2026-10-22T08:34:03Z","buildCode":"module-v125-library-image-names","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v126","buildTime":"2026-10-23T12:49:04Z","buildCode":"module-v126-responsive-library-sync","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -3050,7 +3050,7 @@
     for(const peer of docs){
       if(!syncAutoDownloadAllowed(peer.origin,opts))continue;
       const wire=new Map();if(peer.mediaBlobs!==undefined&&!Array.isArray(peer.mediaBlobs))throw new Error('Bildbytes ungueltig.');
-      for(const item of peer.mediaBlobs||[]){nativeSyncAssertKeys(item,['id','mime','sha256','base64'],'Bildbytes');if(typeof item.id!=='string'||wire.has(item.id)||!['image/jpeg','image/png','image/webp'].includes(item.mime)||typeof item.base64!=='string'||item.base64.length>2666670||!item.base64.length||!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(item.base64)||typeof item.sha256!=='string'||!/^[a-f0-9]{64}$/.test(item.sha256))throw new Error('Bildbytes ungueltig.');const bytes=Uint8Array.from(atob(item.base64),char=>char.charCodeAt(0));if(!bytes.length||bytes.length>2000000||await nativeSyncDigest(bytes)!==item.sha256)throw new Error('Bildhash stimmt nicht ueberein.');wire.set(item.id,{item,bytes});}
+      for(const item of peer.mediaBlobs||[]){nativeSyncAssertKeys(item,['id','mime','sha256','base64'],'Bildbytes');if(typeof item.id!=='string'||wire.has(item.id)||!['image/jpeg','image/png','image/webp'].includes(item.mime)||typeof item.base64!=='string'||item.base64.length>2666670||!item.base64.length||!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(item.base64)||typeof item.sha256!=='string'||!/^[a-f0-9]{64}$/.test(item.sha256))throw new Error('Bildbytes ungueltig.');const bytes=(()=>{const binary=atob(item.base64),bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);return bytes;})();if(!bytes.length||bytes.length>2000000||await nativeSyncDigest(bytes)!==item.sha256)throw new Error('Bildhash stimmt nicht ueberein.');wire.set(item.id,{item,bytes});}
       for(const ref of nativeSyncAllMedia(peer)){
         const blob=wire.get(ref.id);if(!blob||blob.item.mime!==ref.mime)throw new Error('Bildbytes fehlen oder stimmen nicht ueberein.');
         const known=media.get(ref.id);if(known&&known.syncSha256!==blob.item.sha256)throw new Error('Bild-ID hat widerspruechliche Bytes.');if(known)continue;
@@ -3409,6 +3409,7 @@
     try{
       if(!window.KGGNativeSync||typeof window.KGGNativeSync.status!=='function')return '';
       const status=window.KGGNativeSync.status()||{};
+      if(status.initialized===false||status.transport==='initializing')return ' Android-Verbindung wird initialisiert; Abgleich noch ausstehend.';
       if(status.transport==='saf-document')return status.driveConfigured?' Bibliotheksdatei eingerichtet; Anbieterannahme ist noch kein Nachweis der Cloud-Replikation.':' Eigene Bibliotheksdatei noch nicht eingerichtet.';
       if(status.usingSharedFolder||status.writeUsesSharedFolder){
         return ' Android-Sync-Raum: KGG Sync / '+syncPeerIdShort(status.syncRoomId||syncPairRoomId())+'.';
@@ -3478,7 +3479,7 @@
     const info=syncDiagnosticStatus();
     const status=info.status||{};
     const peerCount=Number(status.peerCount)||syncPeerDisplayEntries().length||0;
-    const mode=!info.native?'Web-Modus / keine Android-Bridge':(status.transport==='saf-document'?(status.driveConfigured?'Dokumentanbieter eingerichtet':'Dokumentanbieter noch nicht eingerichtet'):(info.shared?'Lokaler Android-Sync-Ordner':'Privater Rueckfall-Speicher'));
+    const mode=status.initialized===false?'Android-Verbindung wird initialisiert':(!info.native?'Web-Modus / keine Android-Bridge':(status.transport==='saf-document'?(status.driveConfigured?'Dokumentanbieter eingerichtet':'Dokumentanbieter noch nicht eingerichtet'):(info.shared?'Lokaler Android-Sync-Ordner':'Privater Rueckfall-Speicher')));
     const warn=info.privateFallback?' <span class="warn">Privater Speicher synchronisiert nicht automatisch zwischen Geraeten.</span>':'';
     const path=status.transport==='saf-document'?'':String(status.writePath||status.syncPath||status.sharedSyncPath||status.privateSyncPath||'').replace(/\\/g,'/');
     const shortPath=path.length>88?'...'+path.slice(-85):path;
@@ -3558,7 +3559,6 @@
     });
   }
   function openSyncPairModal(){
-    try{queueNativeExerciseBankSync('sync_pair_modal_open');}catch(err){}
     const payload=buildNativeSyncQrPayload();
     lastSyncPairCode=payload.code;
     const modal=$('syncPairModal');
@@ -3573,10 +3573,10 @@
     if(modal)modal.classList.add('open');
   }
   function closeSyncPairModal(){const modal=$('syncPairModal'); if(modal)modal.classList.remove('open');}
-  function configureNativeDriveSync(action){
-    const bridge=window.KGGNativeSync||{},method=action==='own'?'configureOwnDriveFile':(action==='peers'?'selectDrivePeerFiles':'disconnectDrive');
+  async function configureNativeDriveSync(action){
+    const bridge=window.KGGNativeSync||{},legacyMethod=action==='own'?'configureOwnDriveFile':(action==='peers'?'selectDrivePeerFiles':'disconnectDrive'),method=typeof bridge[legacyMethod+'Async']==='function'?legacyMethod+'Async':legacyMethod;
     if(typeof bridge[method]!=='function'){setNativeExerciseSyncStatus('Diese App-Version unterstuetzt die Drive-Dateiauswahl noch nicht.',nativeExerciseSyncDirty);return false;}
-    try{const result=bridge[method]({deviceId:syncPairDeviceId(),roomId:syncPairRoomId()});if(result===false)throw new Error('Auswahl konnte nicht gestartet werden.');setNativeExerciseSyncStatus(action==='disconnect'?'Drive-Verbindung geloest.':'Im Dateidialog Google Drive und die Bibliotheksdatei auswaehlen.',nativeExerciseSyncDirty);return true;}catch(err){setNativeExerciseSyncStatus('Dateiauswahl nicht verfuegbar. App-Berechtigungen pruefen.',true);return false;}
+    try{const result=await resolveNativeSyncValue(bridge[method]({deviceId:syncPairDeviceId(),roomId:syncPairRoomId()}));if(result===false)throw new Error('Auswahl konnte nicht gestartet werden.');setNativeExerciseSyncStatus(action==='disconnect'?'Drive-Verbindung geloest.':'Im Dateidialog Google Drive und die Bibliotheksdatei auswaehlen.',nativeExerciseSyncDirty);return true;}catch(err){setNativeExerciseSyncStatus('Dateiauswahl nicht verfuegbar. App-Berechtigungen pruefen.',true);return false;}
   }
   async function copySyncPairCode(){
     const status=$('syncPairStatus');

@@ -1,7 +1,7 @@
 {
-  "versionCode": 125,
-  "versionName": "1.0.125-library-image-names",
-  "indexUrl": "index.html?v=125",
-  "sha256": "43157a42b7e06d88af071ca5eb5ee2b26a370e97be151c02d69d78915a5b6213",
-  "notes": "v125: Vorbereitete Bibliotheks-/Bildsynchronisation und fehlende DE/EN-Bezeichnungen gemeinsam integrieren; kompatible Metadaten erhalten."
+  "versionCode": 126,
+  "versionName": "1.0.126-responsive-library-sync",
+  "indexUrl": "index.html?v=126",
+  "sha256": "d351a3194cd1523ba9ab498056812efe381aafa8d5fd6cf52531ab9ee829b31b",
+  "notes": "v126: Bibliothekssync im Hintergrund mit ehrlichem Abschluss und schnellen Status-/Partneranzeigen; keine Anzeigeexporte, schnellere Bildbyte-Konvertierung."
 }

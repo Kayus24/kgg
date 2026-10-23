@@ -40,6 +40,13 @@ public final class KggDriveSyncBridge {
     private int pendingRequest;
     private String pendingDevice = "";
     private String pendingRoom = "";
+    private volatile KggSyncRequestCoordinator syncOwner;
+    private Runnable configurationChanged=()->{};
+    void attachSyncOwner(KggSyncRequestCoordinator owner,Runnable changed){syncOwner=owner;configurationChanged=changed;}
+    private void reportError(String code){
+        KggSyncRequestCoordinator owner=syncOwner;
+        if(owner!=null&&!owner.isOwnerThread())owner.reportError(code);else transport.reportError(code);
+    }
 
     KggDriveSyncBridge(Activity activity, Runnable ready) {
         this.activity = activity;
@@ -48,9 +55,12 @@ public final class KggDriveSyncBridge {
         this.preferences = activity.getSharedPreferences("kgg_drive_sync_v1", Activity.MODE_PRIVATE);
         File directory = new File(activity.getFilesDir(), "drive-sync");
         KggDriveSyncTransport.State state = new KggDriveSyncTransport.State() {
-            private volatile String cachedConfiguration = initialConfiguration();
+            private volatile String cachedConfiguration;
             public String read(String key) throws IOException {
-                if ("configuration".equals(key)) return cachedConfiguration;
+                if ("configuration".equals(key)) {
+                    if(cachedConfiguration==null)cachedConfiguration=initialConfiguration();
+                    return cachedConfiguration;
+                }
                 if (!fileKey(key)) return preferences.getString(key, "");
                 File outbox = new File(directory, key + ".json");
                 if (!outbox.exists()) return "";
@@ -111,19 +121,21 @@ public final class KggDriveSyncBridge {
     @JavascriptInterface public boolean configureOwnDriveFile(String optionsJson) {
         try {
             JSONObject options = new JSONObject(optionsJson);
+            if(syncOwner!=null&&!syncOwner.isOwnerThread())return syncOwner.runBooleanWhenIdle(()->configureOwnDriveFile(optionsJson));
             return startPicker(OWN_REQUEST, options.getString("deviceId"), options.getString("roomId"));
-        } catch (Exception failure) { transport.reportError("invalid_identity"); return false; }
+        } catch (Exception failure) { reportError("invalid_identity"); return false; }
     }
 
     @JavascriptInterface public boolean selectDrivePeerFiles(String optionsJson) {
         try {
             JSONObject options = new JSONObject(optionsJson);
+            if(syncOwner!=null&&!syncOwner.isOwnerThread())return syncOwner.runBooleanWhenIdle(()->selectDrivePeerFiles(optionsJson));
             if (!transport.status().optBoolean("driveConfigured")) {
-                transport.reportError("not_configured");
+                reportError("not_configured");
                 return false;
             }
             return startPicker(PEERS_REQUEST, "", options.getString("roomId"));
-        } catch (Exception failure) { transport.reportError("invalid_identity"); return false; }
+        } catch (Exception failure) { reportError("invalid_identity"); return false; }
     }
 
     private synchronized boolean startPicker(int request, String device, String room) {
@@ -147,7 +159,7 @@ public final class KggDriveSyncBridge {
                 activity.startActivityForResult(intent, request);
             } catch (Exception failure) {
                 clearPending();
-                transport.reportError("picker_unavailable");
+                reportError("picker_unavailable");
                 ready.run();
             }
         });
@@ -174,14 +186,17 @@ public final class KggDriveSyncBridge {
         if (clip != null) {
             if (clip.getItemCount() > KggDriveSyncTransport.MAX_PEERS) {
                 clearPending();
-                transport.reportError("invalid_peer_selection");
+                reportError("invalid_peer_selection");
                 ready.run();
                 return true;
             }
             for (int i = 0; i < clip.getItemCount(); i++) if (clip.getItemAt(i).getUri() != null) selected.add(clip.getItemAt(i).getUri().toString());
         }
         int granted = data.getFlags();
-        new Thread(() -> acceptSelection(request, selected.toArray(new String[0]), device, room, granted), "kgg-drive-selection").start();
+        Runnable selection=()->acceptSelection(request,selected.toArray(new String[0]),device,room,granted);
+        if(syncOwner!=null){
+            if(!syncOwner.enqueueControl(selection,ready)){clearPending();syncOwner.reportError("queue_busy");activity.runOnUiThread(ready);}
+        }else new Thread(selection,"kgg-drive-selection").start();
         return true;
     }
 
@@ -209,6 +224,7 @@ public final class KggDriveSyncBridge {
                 for (Map.Entry<Uri, Integer> grant : newGrants.entrySet()) release(grant.getKey(), grant.getValue());
                 return;
             }
+            configurationChanged.run();
             LinkedHashSet<String> active = new LinkedHashSet<>(java.util.Arrays.asList(transport.selectedDocuments()));
             for (String old : previous) if (!active.contains(old)) release(Uri.parse(old), request == OWN_REQUEST ? READ | WRITE : READ);
         } catch (Exception failure) {
@@ -217,16 +233,22 @@ public final class KggDriveSyncBridge {
             transport.reportError("selection_failed");
         } finally {
             clearPending();
-            activity.runOnUiThread(ready);
+            if(syncOwner==null)activity.runOnUiThread(ready);
         }
     }
 
     @JavascriptInterface public boolean disconnectDrive() {
+        if(syncOwner!=null&&!syncOwner.isOwnerThread()){
+            boolean result=syncOwner.runBooleanWhenIdle(this::disconnectDrive);
+            if(result)activity.runOnUiThread(ready);
+            return result;
+        }
         synchronized (this) { if (pendingRequest != 0) return false; }
         String[] selected = transport.selectedDocuments();
         if (!transport.disconnect()) return false;
+        configurationChanged.run();
         for (int i = 0; i < selected.length; i++) release(Uri.parse(selected[i]), i == 0 ? READ | WRITE : READ);
-        activity.runOnUiThread(ready);
+        if(syncOwner==null)activity.runOnUiThread(ready);
         return true;
     }
 

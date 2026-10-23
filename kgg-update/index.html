@@ -99,25 +99,27 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "cockpit-previous-value-action",
     "patient-english-names",
     "cockpit-main-integration",
-    "library-image-names"
+    "library-image-names",
+    "responsive-library-sync"
   ],
   "currentVersion": {
-    "versionCode": 125,
-    "versionName": "1.0.125-library-image-names",
-    "lastPatchId": "kgg-v125-library-image-names",
+    "versionCode": 126,
+    "versionName": "1.0.126-responsive-library-sync",
+    "lastPatchId": "kgg-v126-responsive-library-sync",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v125-library-image-names",
+  "latestPatchId": "kgg-v126-responsive-library-sync",
   "lastUpdateIntent": {
-    "id": "kgg-v125-library-image-names",
-    "summary": "Vorbereitete Bibliotheks-/Bildsynchronisation und fehlende DE/EN-Bezeichnungen gemeinsam integrieren; kompatible Metadaten erhalten.",
+    "id": "kgg-v126-responsive-library-sync",
+    "summary": "Bibliothekssync verarbeitet native Datei-/Providerarbeit seriell im Hintergrund; Status und Partneranzeige lesen kleine Snapshots. Reines Oeffnen exportiert nicht erneut, und Bildbytes werden ohne teure Callback-Konvertierung uebernommen.",
     "touched": [
+      "UI",
       "Medien/Upload",
-      "QR/Patienten-App",
       "Android/APK"
     ],
     "notTouched": [
       "PDF",
+      "QR/Patienten-App",
       "Scan/OCR",
       "Parser",
       "Plan-State",
@@ -221,25 +223,27 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "cockpit-previous-value-action",
     "patient-english-names",
     "cockpit-main-integration",
-    "library-image-names"
+    "library-image-names",
+    "responsive-library-sync"
   ],
   "currentVersion": {
-    "versionCode": 125,
-    "versionName": "1.0.125-library-image-names",
-    "lastPatchId": "kgg-v125-library-image-names",
+    "versionCode": 126,
+    "versionName": "1.0.126-responsive-library-sync",
+    "lastPatchId": "kgg-v126-responsive-library-sync",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v125-library-image-names",
+  "latestPatchId": "kgg-v126-responsive-library-sync",
   "lastUpdateIntent": {
-    "id": "kgg-v125-library-image-names",
-    "summary": "Vorbereitete Bibliotheks-/Bildsynchronisation und fehlende DE/EN-Bezeichnungen gemeinsam integrieren; kompatible Metadaten erhalten.",
+    "id": "kgg-v126-responsive-library-sync",
+    "summary": "Bibliothekssync verarbeitet native Datei-/Providerarbeit seriell im Hintergrund; Status und Partneranzeige lesen kleine Snapshots. Reines Oeffnen exportiert nicht erneut, und Bildbytes werden ohne teure Callback-Konvertierung uebernommen.",
     "touched": [
+      "UI",
       "Medien/Upload",
-      "QR/Patienten-App",
       "Android/APK"
     ],
     "notTouched": [
       "PDF",
+      "QR/Patienten-App",
       "Scan/OCR",
       "Parser",
       "Plan-State",
@@ -255,8 +259,43 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 125,
+  "latestVersionCode": 126,
   "entries": [
+    {
+      "versionCode": 126,
+      "versionName": "1.0.126-responsive-library-sync",
+      "patchId": "kgg-v126-responsive-library-sync",
+      "status": "implemented",
+      "type": "module-patch",
+      "title": "Reaktionsfaehiger Bibliothekssync",
+      "reason": "Bibliothekssync verarbeitet native Datei-/Providerarbeit seriell im Hintergrund; Status und Partneranzeige lesen kleine Snapshots. Reines Oeffnen exportiert nicht erneut, und Bildbytes werden ohne teure Callback-Konvertierung uebernommen.",
+      "whatChanged": [
+        "Native Datei-/Providerarbeit laeuft ueber eine begrenzte serielle Queue; Promise-Ergebnisse bestaetigen den Abschluss statt nur die Annahme.",
+        "Status-/Partneranzeigen nutzen kleine Snapshots mit Generation und ehrlicher Frische; alte Shell-Vertraege und isolierter Preview bleiben beruecksichtigt.",
+        "Reines Oeffnen loest keinen Voll-Export unveraenderter Uebungen/Bilder aus.",
+        "Base64-Bildbytes werden nach unveraenderter Validierung mit einem direkten Byte-Loop uebernommen."
+      ],
+      "touchedAreas": [
+        "UI",
+        "Medien/Upload",
+        "Android/APK"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "API-Key-Logik",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "Gezielte Bootstrap-/Core-/JVM-Pruefungen PASS; finale Integration und Geraeteabnahme siehe Aufgabenbericht.",
+        "certification": "pending"
+      },
+      "approvalNote": "Max 23.10.2026: belegte Verzoegerung ohne angeschlossenes Tablet beheben und testen; kein Merge/Release. Eigener Emulator ersetzt keine physische Tablet-/Drive-SAF-Abnahme."
+    },
     {
       "versionCode": 125,
       "versionName": "1.0.125-library-image-names",
@@ -698,41 +737,9 @@ Before editing this app, any LLM/agent/human should read these blocks:
         "certification": "pending"
       },
       "approvalNote": "Expliziter Bildauftrag 296074: gesamte linke KGG-Fläche bei zwei Cockpit-Plänen in Smartphone-UI wechseln."
-    },
-    {
-      "versionCode": 111,
-      "versionName": "1.0.111-cockpit-finish-dialog-layer",
-      "patchId": "kgg-v111-cockpit-finish-dialog-layer",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Fertig-Dialog über der Cockpit-Aufteilung",
-      "reason": "Der bestehende Abschlussdialog bleibt in der geteilten Cockpit-Ansicht sichtbar und per Berührung bedienbar.",
-      "whatChanged": [
-        "Der bestehende Abschlussdialog bleibt in der geteilten Cockpit-Ansicht sichtbar und per Berührung bedienbar."
-      ],
-      "touchedAreas": [
-        "UI"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Autorisierter Cockpit-Bildabgleich mit reproduzierbarem Touch-Fehler in sechs Tablet-Szenarien."
     }
   ],
-  "latestVersionName": "1.0.125-library-image-names",
+  "latestVersionName": "1.0.126-responsive-library-sync",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -829,6 +836,14 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "entriesSha256": "9dee263e6c97707b4ba0af7f7f8c7168273f47b98e73eb1478ded68c2045a8a3",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v125-library-image-names"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v126.json",
+      "snapshotVersionCode": 126,
+      "entryCount": 67,
+      "entriesSha256": "b2c30b10b41c07e0f0453f3a401cd6c9d6dafdc745bcb7dd6ed100784d13f8fc",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v126-responsive-library-sync"
     }
   ]
 }
@@ -946,7 +961,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v125-library-image-names",
+  "lastUpdatedByPatchId": "kgg-v126-responsive-library-sync",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
@@ -1081,7 +1096,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v125 Uebungskatalog, Bilder und Namenshilfe gemeinsam</title>
+  <title>KGG Update v126 Reaktionsfaehiger Bibliothekssync</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -16999,11 +17014,11 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
 </script>
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v125_library_image_names';
+  const VERSION='KGG_GITHUB_UPDATE_v126_responsive_library_sync';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v125","buildTime":"2026-10-22T08:34:03Z","buildCode":"module-v125-library-image-names","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v126","buildTime":"2026-10-23T12:49:04Z","buildCode":"module-v126-responsive-library-sync","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -20049,7 +20064,7 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
     for(const peer of docs){
       if(!syncAutoDownloadAllowed(peer.origin,opts))continue;
       const wire=new Map();if(peer.mediaBlobs!==undefined&&!Array.isArray(peer.mediaBlobs))throw new Error('Bildbytes ungueltig.');
-      for(const item of peer.mediaBlobs||[]){nativeSyncAssertKeys(item,['id','mime','sha256','base64'],'Bildbytes');if(typeof item.id!=='string'||wire.has(item.id)||!['image/jpeg','image/png','image/webp'].includes(item.mime)||typeof item.base64!=='string'||item.base64.length>2666670||!item.base64.length||!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(item.base64)||typeof item.sha256!=='string'||!/^[a-f0-9]{64}$/.test(item.sha256))throw new Error('Bildbytes ungueltig.');const bytes=Uint8Array.from(atob(item.base64),char=>char.charCodeAt(0));if(!bytes.length||bytes.length>2000000||await nativeSyncDigest(bytes)!==item.sha256)throw new Error('Bildhash stimmt nicht ueberein.');wire.set(item.id,{item,bytes});}
+      for(const item of peer.mediaBlobs||[]){nativeSyncAssertKeys(item,['id','mime','sha256','base64'],'Bildbytes');if(typeof item.id!=='string'||wire.has(item.id)||!['image/jpeg','image/png','image/webp'].includes(item.mime)||typeof item.base64!=='string'||item.base64.length>2666670||!item.base64.length||!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(item.base64)||typeof item.sha256!=='string'||!/^[a-f0-9]{64}$/.test(item.sha256))throw new Error('Bildbytes ungueltig.');const bytes=(()=>{const binary=atob(item.base64),bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);return bytes;})();if(!bytes.length||bytes.length>2000000||await nativeSyncDigest(bytes)!==item.sha256)throw new Error('Bildhash stimmt nicht ueberein.');wire.set(item.id,{item,bytes});}
       for(const ref of nativeSyncAllMedia(peer)){
         const blob=wire.get(ref.id);if(!blob||blob.item.mime!==ref.mime)throw new Error('Bildbytes fehlen oder stimmen nicht ueberein.');
         const known=media.get(ref.id);if(known&&known.syncSha256!==blob.item.sha256)throw new Error('Bild-ID hat widerspruechliche Bytes.');if(known)continue;
@@ -20408,6 +20423,7 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
     try{
       if(!window.KGGNativeSync||typeof window.KGGNativeSync.status!=='function')return '';
       const status=window.KGGNativeSync.status()||{};
+      if(status.initialized===false||status.transport==='initializing')return ' Android-Verbindung wird initialisiert; Abgleich noch ausstehend.';
       if(status.transport==='saf-document')return status.driveConfigured?' Bibliotheksdatei eingerichtet; Anbieterannahme ist noch kein Nachweis der Cloud-Replikation.':' Eigene Bibliotheksdatei noch nicht eingerichtet.';
       if(status.usingSharedFolder||status.writeUsesSharedFolder){
         return ' Android-Sync-Raum: KGG Sync / '+syncPeerIdShort(status.syncRoomId||syncPairRoomId())+'.';
@@ -20477,7 +20493,7 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
     const info=syncDiagnosticStatus();
     const status=info.status||{};
     const peerCount=Number(status.peerCount)||syncPeerDisplayEntries().length||0;
-    const mode=!info.native?'Web-Modus / keine Android-Bridge':(status.transport==='saf-document'?(status.driveConfigured?'Dokumentanbieter eingerichtet':'Dokumentanbieter noch nicht eingerichtet'):(info.shared?'Lokaler Android-Sync-Ordner':'Privater Rueckfall-Speicher'));
+    const mode=status.initialized===false?'Android-Verbindung wird initialisiert':(!info.native?'Web-Modus / keine Android-Bridge':(status.transport==='saf-document'?(status.driveConfigured?'Dokumentanbieter eingerichtet':'Dokumentanbieter noch nicht eingerichtet'):(info.shared?'Lokaler Android-Sync-Ordner':'Privater Rueckfall-Speicher')));
     const warn=info.privateFallback?' <span class="warn">Privater Speicher synchronisiert nicht automatisch zwischen Geraeten.</span>':'';
     const path=status.transport==='saf-document'?'':String(status.writePath||status.syncPath||status.sharedSyncPath||status.privateSyncPath||'').replace(/\\/g,'/');
     const shortPath=path.length>88?'...'+path.slice(-85):path;
@@ -20557,7 +20573,6 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
     });
   }
   function openSyncPairModal(){
-    try{queueNativeExerciseBankSync('sync_pair_modal_open');}catch(err){}
     const payload=buildNativeSyncQrPayload();
     lastSyncPairCode=payload.code;
     const modal=$('syncPairModal');
@@ -20572,10 +20587,10 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
     if(modal)modal.classList.add('open');
   }
   function closeSyncPairModal(){const modal=$('syncPairModal'); if(modal)modal.classList.remove('open');}
-  function configureNativeDriveSync(action){
-    const bridge=window.KGGNativeSync||{},method=action==='own'?'configureOwnDriveFile':(action==='peers'?'selectDrivePeerFiles':'disconnectDrive');
+  async function configureNativeDriveSync(action){
+    const bridge=window.KGGNativeSync||{},legacyMethod=action==='own'?'configureOwnDriveFile':(action==='peers'?'selectDrivePeerFiles':'disconnectDrive'),method=typeof bridge[legacyMethod+'Async']==='function'?legacyMethod+'Async':legacyMethod;
     if(typeof bridge[method]!=='function'){setNativeExerciseSyncStatus('Diese App-Version unterstuetzt die Drive-Dateiauswahl noch nicht.',nativeExerciseSyncDirty);return false;}
-    try{const result=bridge[method]({deviceId:syncPairDeviceId(),roomId:syncPairRoomId()});if(result===false)throw new Error('Auswahl konnte nicht gestartet werden.');setNativeExerciseSyncStatus(action==='disconnect'?'Drive-Verbindung geloest.':'Im Dateidialog Google Drive und die Bibliotheksdatei auswaehlen.',nativeExerciseSyncDirty);return true;}catch(err){setNativeExerciseSyncStatus('Dateiauswahl nicht verfuegbar. App-Berechtigungen pruefen.',true);return false;}
+    try{const result=await resolveNativeSyncValue(bridge[method]({deviceId:syncPairDeviceId(),roomId:syncPairRoomId()}));if(result===false)throw new Error('Auswahl konnte nicht gestartet werden.');setNativeExerciseSyncStatus(action==='disconnect'?'Drive-Verbindung geloest.':'Im Dateidialog Google Drive und die Bibliotheksdatei auswaehlen.',nativeExerciseSyncDirty);return true;}catch(err){setNativeExerciseSyncStatus('Dateiauswahl nicht verfuegbar. App-Berechtigungen pruefen.',true);return false;}
   }
   async function copySyncPairCode(){
     const status=$('syncPairStatus');

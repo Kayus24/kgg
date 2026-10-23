@@ -131,6 +131,7 @@ public class MainActivity extends Activity {
 
     private WebView webView;
     private KggDriveSyncBridge driveSyncBridge;
+    private KggAsyncSyncBridge asyncSyncBridge;
     private ValueCallback<Uri[]> filePathCallback;
     private WebChromeClient.FileChooserParams pendingFileChooserParams;
     private PermissionRequest pendingWebCameraRequest;
@@ -256,6 +257,10 @@ public class MainActivity extends Activity {
         stopPreviewStatusPolling();
         super.onPause();
     }
+    @Override protected void onDestroy(){
+        if(asyncSyncBridge!=null)asyncSyncBridge.close();
+        super.onDestroy();
+    }
 
     private void configurePreviewStatusMonitoring() {
         if (BuildConfig.KGG_PREVIEW_STATUS_URL.trim().isEmpty()) {
@@ -306,11 +311,18 @@ public class MainActivity extends Activity {
         settings.setAllowContentAccess(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
 
+        KggSyncBridge localSync=null;
         if (!BuildConfig.KGG_ISOLATED_PREVIEW_TEST) {
-            webView.addJavascriptInterface(new KggSyncBridge(this), "KGGAndroidSync");
+            localSync=new KggSyncBridge(this);webView.addJavascriptInterface(localSync,"KGGAndroidSync");
         }
         driveSyncBridge = new KggDriveSyncBridge(this, () -> dispatchNativeSyncEvent("kgg:native-sync-ready"));
         webView.addJavascriptInterface(driveSyncBridge, "KGGAndroidDriveSync");
+        // The isolated Preview intentionally supplies its own empty-mesh shim.
+        if(localSync!=null){
+            asyncSyncBridge=new KggAsyncSyncBridge(localSync,driveSyncBridge,this::dispatchNativeSyncResult,
+                    ()->dispatchNativeSyncEvent("kgg:native-sync-ready"));
+            webView.addJavascriptInterface(asyncSyncBridge,"KGGAndroidSyncAsync");
+        }
         webView.addJavascriptInterface(new KggAppBridge(), "KGGAndroidApp");
         webView.addJavascriptInterface(new KggPdfBridge(), "KGGAndroidPdf");
         releaseController = KggReleaseControllerFactory.attach(this, webView);
@@ -1741,6 +1753,11 @@ public class MainActivity extends Activity {
         if (webView == null) return;
         webView.post(() -> webView.evaluateJavascript(
                 "window.dispatchEvent(new CustomEvent(" + JSONObject.quote(event) + "));", null));
+    }
+    private void dispatchNativeSyncResult(String response){
+        if(webView==null)return;
+        String script="window.dispatchEvent(new CustomEvent('kgg:native-sync-result',{detail:"+JSONObject.quote(response)+"}));";
+        webView.post(()->{if(!isDestroyed())webView.evaluateJavascript(script,null);});
     }
 
     private void handleAndroidBack() {
