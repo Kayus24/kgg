@@ -206,7 +206,7 @@ public final class KggDriveSyncBridge {
         String[] previous = transport.selectedDocuments();
         try {
             if (selected.length == 0 || selected.length > KggDriveSyncTransport.MAX_PEERS || (request == OWN_REQUEST && selected.length != 1)
-                    || (granted & required) != required || (granted & Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) == 0) throw new IOException("permission_missing");
+                    || (granted & required) != required) throw new IOException("permission_missing");
             for (String document : selected) {
                 Uri uri = Uri.parse(document);
                 if (!"content".equals(uri.getScheme())) throw new IOException("invalid_document");
