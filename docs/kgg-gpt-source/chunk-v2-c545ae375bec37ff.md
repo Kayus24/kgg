@@ -334,6 +334,7 @@
     try{
       if(!window.KGGNativeSync||typeof window.KGGNativeSync.status!=='function')return '';
       const status=window.KGGNativeSync.status()||{};
+      if(status.initialized===false||status.transport==='initializing')return ' Android-Verbindung wird initialisiert; Abgleich noch ausstehend.';
       if(status.transport==='saf-document')return status.driveConfigured?' Bibliotheksdatei eingerichtet; Anbieterannahme ist noch kein Nachweis der Cloud-Replikation.':' Eigene Bibliotheksdatei noch nicht eingerichtet.';
       if(status.usingSharedFolder||status.writeUsesSharedFolder){
         return ' Android-Sync-Raum: KGG Sync / '+syncPeerIdShort(status.syncRoomId||syncPairRoomId())+'.';
