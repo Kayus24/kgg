@@ -3,8 +3,40 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 127,
+  "latestVersionCode": 128,
   "entries": [
+    {
+      "versionCode": 128,
+      "versionName": "1.0.128-button-touch-responsiveness",
+      "patchId": "kgg-v128-button-touch-responsiveness",
+      "status": "implemented",
+      "type": "module-patch",
+      "title": "Direkte Touchreaktion fuer Buttons",
+      "reason": "Buttons deklarieren touch-action:manipulation gegen verzoegerte Touch-Clicks; spezifische Scroll- und Ziehgesten sowie bestehende Handler bleiben erhalten.",
+      "whatChanged": [
+        "Die vorhandene globale button-Regel ergaenzt ausschliesslich touch-action:manipulation. Spezifischere none-/pan-Regeln, Click-/Tastaturhandler, Viewport und Layout bleiben unveraendert."
+      ],
+      "touchedAreas": [
+        "UI"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "Physische A/B/A-Kontrolle auf dem isolierten v127-Kandidaten: 9/9 Close-Proben; touchend-bis-click in B 1.8-2.0 ms statt 137-210.1 ms in den A-Phasen. Pflichtpruefungen des v128-Artefakts noch ausstehend.",
+        "certification": "pending"
+      },
+      "approvalNote": "Max 23.10.2026: am physischen Tablet weiter pruefen und verbessern. Enger, kausal kontrollierter CSS-Eingriff; kein Handler-, Viewport-, Layout-, Native-, Merge- oder Releasewechsel."
+    },
     {
       "versionCode": 127,
       "versionName": "1.0.127-menu-sync-qr-responsiveness",
@@ -451,41 +483,9 @@
         "certification": "pending"
       },
       "approvalNote": "Max fordert anhand 296064 und Bildschirmvideo die kompakte Trennkante und stabile Haupt-App beim Ziehen; bestehende Archivierung wird fortgesetzt."
-    },
-    {
-      "versionCode": 113,
-      "versionName": "1.0.113-cockpit-phone-value-row",
-      "patchId": "kgg-v113-cockpit-phone-value-row",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Cockpit Wertezeile auf Smartphone",
-      "reason": "Satznummer, Vorwerte und beide heutigen Werte bleiben nebeneinander; die bestehende Tastatur steht darunter mit mindestens 44 Pixel Touchflaechen.",
-      "whatChanged": [
-        "Satznummer, Vorwerte und beide heutigen Werte bleiben nebeneinander; die bestehende Tastatur steht darunter mit mindestens 44 Pixel Touchflaechen."
-      ],
-      "touchedAreas": [
-        "UI",
-        "Handy-Layout"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max fordert anhand 296051 und 296053 die Smartphone-Werteingabe wie in der Patienten-App; bestehende Archivierung wird fortgesetzt."
     }
   ],
-  "latestVersionName": "1.0.127-menu-sync-qr-responsiveness",
+  "latestVersionName": "1.0.128-button-touch-responsiveness",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -598,6 +598,14 @@
       "entriesSha256": "7cd6fc09b4d4f6bbad5e31063dd38f7b78f3f4f97e1c22b499e766a91adb351a",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v127-menu-sync-qr-responsiveness"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v128.json",
+      "snapshotVersionCode": 128,
+      "entryCount": 69,
+      "entriesSha256": "75972d0e60271435587871786bd0407538b61c6cc7c340be3fb2df78a5a57f0f",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v128-button-touch-responsiveness"
     }
   ]
 }

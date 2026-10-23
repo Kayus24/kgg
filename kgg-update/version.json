@@ -1,7 +1,7 @@
 {
-  "versionCode": 127,
-  "versionName": "1.0.127-menu-sync-qr-responsiveness",
-  "indexUrl": "index.html?v=127",
-  "sha256": "7bf312e143043e14b129edd324368bd849d0cabfc4f7a071bb8307df2313a5e7",
-  "notes": "v127: Das Menue verarbeitet einen Pointergestus genau einmal; der Sync-QR nutzt vorhandene SVG-Ausgabe statt pixelweiser GIF-Erzeugung. QR-Inhalt und Layout bleiben erhalten."
+  "versionCode": 128,
+  "versionName": "1.0.128-button-touch-responsiveness",
+  "indexUrl": "index.html?v=128",
+  "sha256": "eb3579a676f22644824c94568f6034a1800f1a4c5af29b6bd3b879ddf2585689",
+  "notes": "v128: Buttons deklarieren touch-action:manipulation gegen verzoegerte Touch-Clicks; spezifische Scroll- und Ziehgesten sowie bestehende Handler bleiben erhalten."
 }

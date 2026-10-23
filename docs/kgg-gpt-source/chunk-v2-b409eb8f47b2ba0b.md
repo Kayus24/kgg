@@ -1,4 +1,13 @@
-<script type="application/json" id="kgg-source-truth">
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<!--
+KGG INTERNAL SOURCE TRUTH — READ THIS FIRST
+
+Machine-readable app state, patch rules, and changelog are embedded near the top of this HTML.
+Before editing this app, any LLM/agent/human should read these blocks:
+1. <script type="application/json" id="kgg-source-truth">
 {
   "schema": 1,
   "app": "KGG Plan",
@@ -92,18 +101,19 @@
     "cockpit-main-integration",
     "library-image-names",
     "responsive-library-sync",
-    "menu-sync-qr-responsiveness"
+    "menu-sync-qr-responsiveness",
+    "button-touch-responsiveness"
   ],
   "currentVersion": {
-    "versionCode": 127,
-    "versionName": "1.0.127-menu-sync-qr-responsiveness",
-    "lastPatchId": "kgg-v127-menu-sync-qr-responsiveness",
+    "versionCode": 128,
+    "versionName": "1.0.128-button-touch-responsiveness",
+    "lastPatchId": "kgg-v128-button-touch-responsiveness",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v127-menu-sync-qr-responsiveness",
+  "latestPatchId": "kgg-v128-button-touch-responsiveness",
   "lastUpdateIntent": {
-    "id": "kgg-v127-menu-sync-qr-responsiveness",
-    "summary": "Das Menue verarbeitet einen Pointergestus genau einmal; der Sync-QR nutzt vorhandene SVG-Ausgabe statt pixelweiser GIF-Erzeugung. QR-Inhalt und Layout bleiben erhalten.",
+    "id": "kgg-v128-button-touch-responsiveness",
+    "summary": "Buttons deklarieren touch-action:manipulation gegen verzoegerte Touch-Clicks; spezifische Scroll- und Ziehgesten sowie bestehende Handler bleiben erhalten.",
     "touched": [
       "UI"
     ],
@@ -122,3 +132,4 @@
   }
 }
 </script>
+<!-- END kgg-source-truth -->
