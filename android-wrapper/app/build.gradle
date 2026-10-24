@@ -186,8 +186,8 @@ android {
         applicationId "de.kgg.app"
         minSdk 26
         targetSdk 36
-        versionCode 33
-        versionName "0.2.11-v401-share-apk-provider"
+        versionCode 38
+        versionName "0.2.16-v406-responsive-drive"
         manifestPlaceholders = [appLabel: "KGG Physio"]
         buildConfigField "String", "KGG_GITHUB_CLIENT_ID", "\"${project.findProperty('KGG_GITHUB_CLIENT_ID') ?: ''}\""
         buildConfigField "String", "KGG_PREVIEW_STATUS_URL", '""'
@@ -201,16 +201,19 @@ android {
         kollegen {
             dimension "profile"
             applicationId "de.kgg.app"
+            buildConfigField "int", "KGG_BUNDLED_WEB_ROLLOUT_CODE", "399"
             manifestPlaceholders = [appLabel: "KGG Kolleg:innen"]
         }
         admin {
             dimension "profile"
             applicationId "de.kgg.admin"
+            buildConfigField "int", "KGG_BUNDLED_WEB_ROLLOUT_CODE", "435"
             manifestPlaceholders = [appLabel: "KGG Admin"]
         }
         preview {
             dimension "profile"
             applicationId "de.kgg.preview"
+            buildConfigField "int", "KGG_BUNDLED_WEB_ROLLOUT_CODE", "419"
             versionCode 36
             versionName defaultPreviewVersion
             manifestPlaceholders = [appLabel: "KGG QR-Teststation"]
@@ -241,12 +244,12 @@ android {
 }
 
 def stageAdminProfileAsset = tasks.register("stageAdminProfileAsset", Copy) {
-    from("../../therapist-app/releases/web/r0419/admin.html")
+    from("../../therapist-app/releases/web/r0435/admin.html")
     into(layout.buildDirectory.dir("generated/kggAssets/admin"))
 }
 
 def stageColleagueProfileAsset = tasks.register("stageColleagueProfileAsset", Copy) {
-    from("../../therapist-app/releases/web/r0419/colleague.html")
+    from("../../therapist-app/releases/web/r0426/colleague.html")
     into(layout.buildDirectory.dir("generated/kggAssets/kollegen"))
 }
 

@@ -82,10 +82,10 @@ public class MainActivity extends Activity {
     private static final int PREVIEW_NOTIFICATION_PERMISSION_REQUEST = 4204;
     private static final int WEB_VIDEO_CAPTURE_VERSION = 1;
     private static final int RELEASE_HTML_REQUEST = 4301;
-    private static final int ANDROID_SHELL_VERSION = 401;
-    private static final int BUNDLED_WEB_VERSION = 419;
+    private static final int ANDROID_SHELL_VERSION = 406;
+    private static final int BUNDLED_WEB_VERSION = BuildConfig.KGG_BUNDLED_WEB_ROLLOUT_CODE;
     private static final String BUILD_TIME = "2026-07-01T00:00:00+02:00";
-    private static final String BUILD_CODE = "v401-r0419-share-apk-provider";
+    private static final String BUILD_CODE = "v406-responsive-drive";
     private static final int MAX_HTML_UPDATE_BYTES = 5_500_000;
     private static final int MAX_APK_UPDATE_BYTES = 80_000_000;
     private static final long APK_UPDATE_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000L;

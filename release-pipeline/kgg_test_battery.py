@@ -481,18 +481,19 @@ def run_android_wrapper_contract() -> None:
     android_workflow = (ROOT / ".github" / "workflows" / "android-wrapper-check.yml").read_text(encoding="utf-8")
     preview_auto_workflow = (ROOT / ".github" / "workflows" / "kgg-gpt-preview-auto.yml").read_text(encoding="utf-8")
     expected_shell = str(manifest.get("latestAndroidShellVersion", "")).lstrip("v")
+    channels = manifest["channels"]
     required = [
         (f"ANDROID_SHELL_VERSION = {expected_shell}", "MainActivity shell version must match android_update_manifest"),
-        ("BUNDLED_WEB_VERSION = 419", "Android bundled web version must point at r0419"),
-        ("BUILD_CODE = \"v401-r0419-share-apk-provider\"", "Android v401 build code"),
+        ("BUNDLED_WEB_VERSION = BuildConfig.KGG_BUNDLED_WEB_ROLLOUT_CODE", "Android bundled rollout must use its own profile BuildConfig"),
+        ("BUILD_CODE = \"v406-responsive-drive\"", "Android v406 build code"),
         ("PdfRenderer", "internal Android PDF renderer fallback"),
         ("openPdfFileInternally", "internal Android PDF preview method"),
         ("intent.resolveActivity(getPackageManager()) == null", "external PDF viewer absence check"),
         ("window.KGGNativePdf", "native PDF bootstrap bridge"),
         ("if (!window.KGGNativePdf && window.KGGAndroidPdf)", "native PDF bridge must register independently"),
         ("print: function(filename, base64)", "native PDF print wrapper"),
-        ("from(\"../../therapist-app/releases/web/r0419/admin.html\")", "Admin APK bundles r0419"),
-        ("from(\"../../therapist-app/releases/web/r0419/colleague.html\")", "Colleague APK bundles r0419"),
+        (f"from(\"../../therapist-app/releases/web/{channels['admin']['releaseId']}/admin.html\")", "Admin APK must bundle the current immutable Admin release"),
+        (f"from(\"../../therapist-app/releases/web/{channels['colleague']['releaseId']}/colleague.html\")", "Colleague APK must bundle its unchanged current channel release"),
         ("applicationId \"de.kgg.preview\"", "Preview APK uses a separate package id"),
         ("manifestPlaceholders = [appLabel: \"KGG QR-Teststation\"]", "Preview APK has a distinct v404 test-station label"),
         ("from(\"../../kgg-update/index.html\")", "Preview APK bundles current source HTML"),
@@ -501,7 +502,7 @@ def run_android_wrapper_contract() -> None:
         ("gpt-preview/previews/index.json", "Preview APK points at the isolated preview manifest"),
         ("TRUSTED_PREVIEW_PREFIX", "Preview HTML trust boundary is separate from release HTML"),
         ("return isAdminProfile() && !isPreviewProfile();", "Preview build must not expose Admin release control"),
-        ("versionName \"0.2.11-v401-share-apk-provider\"", "Android v401 gradle version name"),
+        ("versionName \"0.2.16-v406-responsive-drive\"", "Android v406 gradle version name"),
         ("android:icon=\"@mipmap/ic_launcher\"", "launcher icon manifest entry"),
         ("android:roundIcon=\"@mipmap/ic_launcher_round\"", "round launcher icon manifest entry"),
         ('<cache-path name="apk_cache" path="apk/" />', "FileProvider must expose APK cache files"),
@@ -537,6 +538,19 @@ def run_android_wrapper_contract() -> None:
     missing = [reason for token, reason in required if token not in haystacks]
     if missing:
         raise BatteryError("Android wrapper contract missing: " + ", ".join(missing))
+    defaults = re.search(r"(?ms)^    defaultConfig \{(.*?)^    \}", build_gradle)
+    if not defaults or not re.search(r"(?m)^        versionCode 38\s*$", defaults[1]):
+        raise BatteryError("Regular Android upgrade must use versionCode 38 (> installed v403/code35).")
+    for flavor, channel in (("admin", "admin"), ("kollegen", "colleague"), ("preview", None)):
+        block = re.search(rf"(?ms)^        {flavor} \{{(.*?)^        \}}", build_gradle)
+        rollout = channels[channel]["rolloutCode"] if channel else 419
+        field = f'buildConfigField "int", "KGG_BUNDLED_WEB_ROLLOUT_CODE", "{rollout}"'
+        if not block or field not in block[1]:
+            raise BatteryError(f"{flavor} bundled rollout must match its own channel ({rollout}).")
+        if channel:
+            artifact = ROOT / "therapist-app" / "releases" / "web" / channels[channel]["releaseId"] / f"{channel}.html"
+            if not artifact.is_file() or hashlib.sha256(artifact.read_bytes()).hexdigest() != channels[channel]["sha256"]:
+                raise BatteryError(f"{flavor} bundled HTML must match its immutable channel artifact hash.")
     if "if (window.KGGNativeSync || !window.KGGAndroidSync) return;" in bootstrap:
         raise BatteryError("Android bootstrap must not let Sync availability block PDF/Camera/AppUpdate bridges.")
     if "PermissionRequest.RESOURCE_AUDIO_CAPTURE" in main_activity:
