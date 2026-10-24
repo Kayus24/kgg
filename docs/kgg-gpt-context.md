@@ -45,13 +45,13 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Source web version: v128 / `1.0.128-button-touch-responsiveness`.
 - Source index URL: `index.html?v=128`.
 - Source notes: v128: Buttons deklarieren touch-action:manipulation gegen verzoegerte Touch-Clicks; spezifische Scroll- und Ziehgesten sowie bestehende Handler bleiben erhalten.
-- Live Admin release: `r0434` / `1.0.125-library-image-names`.
-- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0434/admin.html`.
+- Live Admin release: `r0435` / `1.0.128-button-touch-responsiveness`.
+- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0435/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.
 - Live colleague URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html`.
-- Latest Android shell: `v401`.
-- Latest colleague APK: `https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_KOLLEGEN_v401_share_apk_provider_debug.apk`.
-- Latest Admin APK: `https://kayus24.github.io/kgg/therapist-app/releases/v401/android/KGG_ANDROID_ADMIN_v401_share_apk_provider_debug.apk`.
+- Latest Android shell: `v406`.
+- Latest colleague APK: `https://kayus24.github.io/kgg/therapist-app/releases/v406/android/KGG_ANDROID_KOLLEGEN_v406_responsive_drive_debug.apk`.
+- Latest Admin APK: `https://kayus24.github.io/kgg/therapist-app/releases/v406/android/KGG_ANDROID_ADMIN_v406_responsive_drive_debug.apk`.
 
 ## Hard Rules For The GPT
 
