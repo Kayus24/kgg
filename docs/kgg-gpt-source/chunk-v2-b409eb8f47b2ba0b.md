@@ -99,29 +99,33 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "cockpit-previous-value-action",
     "patient-english-names",
     "cockpit-main-integration",
-    "library-image-names"
+    "library-image-names",
+    "responsive-library-sync",
+    "menu-sync-qr-responsiveness",
+    "button-touch-responsiveness"
   ],
   "currentVersion": {
-    "versionCode": 125,
-    "versionName": "1.0.125-library-image-names",
-    "lastPatchId": "kgg-v125-library-image-names",
+    "versionCode": 128,
+    "versionName": "1.0.128-button-touch-responsiveness",
+    "lastPatchId": "kgg-v128-button-touch-responsiveness",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v125-library-image-names",
+  "latestPatchId": "kgg-v128-button-touch-responsiveness",
   "lastUpdateIntent": {
-    "id": "kgg-v125-library-image-names",
-    "summary": "Vorbereitete Bibliotheks-/Bildsynchronisation und fehlende DE/EN-Bezeichnungen gemeinsam integrieren; kompatible Metadaten erhalten.",
+    "id": "kgg-v128-button-touch-responsiveness",
+    "summary": "Buttons deklarieren touch-action:manipulation gegen verzoegerte Touch-Clicks; spezifische Scroll- und Ziehgesten sowie bestehende Handler bleiben erhalten.",
     "touched": [
-      "Medien/Upload",
-      "QR/Patienten-App",
-      "Android/APK"
+      "UI"
     ],
     "notTouched": [
       "PDF",
+      "QR/Patienten-App",
       "Scan/OCR",
       "Parser",
       "Plan-State",
+      "Medien/Upload",
       "API-Key-Logik",
+      "Android/APK",
       "GitHub Manifest",
       "Handy-Layout"
     ]

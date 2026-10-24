@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0435",
+  "versionName": "1.0.128-button-touch-responsiveness",
+  "notes": "v128: Native Hintergrund-Synchronisierung mit Status-Snapshots, schnellere Bildimporte und QR-Darstellung sowie direkte, eindeutige Touch-Bedienung. Reguläres Android-Upgrade v406 wird passend dazu vorbereitet.",
+  "createdAt": "2026-10-24T13:20:06Z",
+  "source": "kgg-update/index.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0435",
+      "profile": "admin",
+      "versionName": "1.0.128-button-touch-responsiveness",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0435/admin.html",
+      "sha256": "eb3579a676f22644824c94568f6034a1800f1a4c5af29b6bd3b879ddf2585689",
+      "notes": "v128: Native Hintergrund-Synchronisierung mit Status-Snapshots, schnellere Bildimporte und QR-Darstellung sowie direkte, eindeutige Touch-Bedienung. Reguläres Android-Upgrade v406 wird passend dazu vorbereitet."
+    },
+    "colleague": {
+      "releaseId": "r0435",
+      "profile": "colleague",
+      "versionName": "1.0.128-button-touch-responsiveness",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0435/colleague.html",
+      "sha256": "86fe02759d0c70c3de91407ee30e340f1b56dc0861d617da050930c295d5c951",
+      "notes": "v128: Native Hintergrund-Synchronisierung mit Status-Snapshots, schnellere Bildimporte und QR-Darstellung sowie direkte, eindeutige Touch-Bedienung. Reguläres Android-Upgrade v406 wird passend dazu vorbereitet."
+    }
+  }
+}

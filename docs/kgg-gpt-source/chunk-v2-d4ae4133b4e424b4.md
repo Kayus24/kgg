@@ -16,7 +16,7 @@
     const info=syncDiagnosticStatus();
     const status=info.status||{};
     const peerCount=Number(status.peerCount)||syncPeerDisplayEntries().length||0;
-    const mode=!info.native?'Web-Modus / keine Android-Bridge':(status.transport==='saf-document'?(status.driveConfigured?'Dokumentanbieter eingerichtet':'Dokumentanbieter noch nicht eingerichtet'):(info.shared?'Lokaler Android-Sync-Ordner':'Privater Rueckfall-Speicher'));
+    const mode=status.initialized===false?'Android-Verbindung wird initialisiert':(!info.native?'Web-Modus / keine Android-Bridge':(status.transport==='saf-document'?(status.driveConfigured?'Dokumentanbieter eingerichtet':'Dokumentanbieter noch nicht eingerichtet'):(info.shared?'Lokaler Android-Sync-Ordner':'Privater Rueckfall-Speicher')));
     const warn=info.privateFallback?' <span class="warn">Privater Speicher synchronisiert nicht automatisch zwischen Geraeten.</span>':'';
     const path=status.transport==='saf-document'?'':String(status.writePath||status.syncPath||status.sharedSyncPath||status.privateSyncPath||'').replace(/\\/g,'/');
     const shortPath=path.length>88?'...'+path.slice(-85):path;
@@ -96,7 +96,6 @@
     });
   }
   function openSyncPairModal(){
-    try{queueNativeExerciseBankSync('sync_pair_modal_open');}catch(err){}
     const payload=buildNativeSyncQrPayload();
     lastSyncPairCode=payload.code;
     const modal=$('syncPairModal');
@@ -111,10 +110,10 @@
     if(modal)modal.classList.add('open');
   }
   function closeSyncPairModal(){const modal=$('syncPairModal'); if(modal)modal.classList.remove('open');}
-  function configureNativeDriveSync(action){
-    const bridge=window.KGGNativeSync||{},method=action==='own'?'configureOwnDriveFile':(action==='peers'?'selectDrivePeerFiles':'disconnectDrive');
+  async function configureNativeDriveSync(action){
+    const bridge=window.KGGNativeSync||{},legacyMethod=action==='own'?'configureOwnDriveFile':(action==='peers'?'selectDrivePeerFiles':'disconnectDrive'),method=typeof bridge[legacyMethod+'Async']==='function'?legacyMethod+'Async':legacyMethod;
     if(typeof bridge[method]!=='function'){setNativeExerciseSyncStatus('Diese App-Version unterstuetzt die Drive-Dateiauswahl noch nicht.',nativeExerciseSyncDirty);return false;}
-    try{const result=bridge[method]({deviceId:syncPairDeviceId(),roomId:syncPairRoomId()});if(result===false)throw new Error('Auswahl konnte nicht gestartet werden.');setNativeExerciseSyncStatus(action==='disconnect'?'Drive-Verbindung geloest.':'Im Dateidialog Google Drive und die Bibliotheksdatei auswaehlen.',nativeExerciseSyncDirty);return true;}catch(err){setNativeExerciseSyncStatus('Dateiauswahl nicht verfuegbar. App-Berechtigungen pruefen.',true);return false;}
+    try{const result=await resolveNativeSyncValue(bridge[method]({deviceId:syncPairDeviceId(),roomId:syncPairRoomId()}));if(result===false)throw new Error('Auswahl konnte nicht gestartet werden.');setNativeExerciseSyncStatus(action==='disconnect'?'Drive-Verbindung geloest.':'Im Dateidialog Google Drive und die Bibliotheksdatei auswaehlen.',nativeExerciseSyncDirty);return true;}catch(err){setNativeExerciseSyncStatus('Dateiauswahl nicht verfuegbar. App-Berechtigungen pruefen.',true);return false;}
   }
   async function copySyncPairCode(){
     const status=$('syncPairStatus');

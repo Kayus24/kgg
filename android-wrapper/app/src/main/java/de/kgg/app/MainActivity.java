@@ -82,10 +82,10 @@ public class MainActivity extends Activity {
     private static final int PREVIEW_NOTIFICATION_PERMISSION_REQUEST = 4204;
     private static final int WEB_VIDEO_CAPTURE_VERSION = 1;
     private static final int RELEASE_HTML_REQUEST = 4301;
-    private static final int ANDROID_SHELL_VERSION = 401;
-    private static final int BUNDLED_WEB_VERSION = 419;
+    private static final int ANDROID_SHELL_VERSION = 406;
+    private static final int BUNDLED_WEB_VERSION = BuildConfig.KGG_BUNDLED_WEB_ROLLOUT_CODE;
     private static final String BUILD_TIME = "2026-07-01T00:00:00+02:00";
-    private static final String BUILD_CODE = "v401-r0419-share-apk-provider";
+    private static final String BUILD_CODE = "v406-responsive-drive";
     private static final int MAX_HTML_UPDATE_BYTES = 5_500_000;
     private static final int MAX_APK_UPDATE_BYTES = 80_000_000;
     private static final long APK_UPDATE_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000L;
@@ -131,6 +131,7 @@ public class MainActivity extends Activity {
 
     private WebView webView;
     private KggDriveSyncBridge driveSyncBridge;
+    private KggAsyncSyncBridge asyncSyncBridge;
     private ValueCallback<Uri[]> filePathCallback;
     private WebChromeClient.FileChooserParams pendingFileChooserParams;
     private PermissionRequest pendingWebCameraRequest;
@@ -256,6 +257,10 @@ public class MainActivity extends Activity {
         stopPreviewStatusPolling();
         super.onPause();
     }
+    @Override protected void onDestroy(){
+        if(asyncSyncBridge!=null)asyncSyncBridge.close();
+        super.onDestroy();
+    }
 
     private void configurePreviewStatusMonitoring() {
         if (BuildConfig.KGG_PREVIEW_STATUS_URL.trim().isEmpty()) {
@@ -306,11 +311,18 @@ public class MainActivity extends Activity {
         settings.setAllowContentAccess(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
 
+        KggSyncBridge localSync=null;
         if (!BuildConfig.KGG_ISOLATED_PREVIEW_TEST) {
-            webView.addJavascriptInterface(new KggSyncBridge(this), "KGGAndroidSync");
+            localSync=new KggSyncBridge(this);webView.addJavascriptInterface(localSync,"KGGAndroidSync");
         }
         driveSyncBridge = new KggDriveSyncBridge(this, () -> dispatchNativeSyncEvent("kgg:native-sync-ready"));
         webView.addJavascriptInterface(driveSyncBridge, "KGGAndroidDriveSync");
+        // The isolated Preview intentionally supplies its own empty-mesh shim.
+        if(localSync!=null){
+            asyncSyncBridge=new KggAsyncSyncBridge(localSync,driveSyncBridge,this::dispatchNativeSyncResult,
+                    ()->dispatchNativeSyncEvent("kgg:native-sync-ready"));
+            webView.addJavascriptInterface(asyncSyncBridge,"KGGAndroidSyncAsync");
+        }
         webView.addJavascriptInterface(new KggAppBridge(), "KGGAndroidApp");
         webView.addJavascriptInterface(new KggPdfBridge(), "KGGAndroidPdf");
         releaseController = KggReleaseControllerFactory.attach(this, webView);
@@ -1741,6 +1753,11 @@ public class MainActivity extends Activity {
         if (webView == null) return;
         webView.post(() -> webView.evaluateJavascript(
                 "window.dispatchEvent(new CustomEvent(" + JSONObject.quote(event) + "));", null));
+    }
+    private void dispatchNativeSyncResult(String response){
+        if(webView==null)return;
+        String script="window.dispatchEvent(new CustomEvent('kgg:native-sync-result',{detail:"+JSONObject.quote(response)+"}));";
+        webView.post(()->{if(!isDestroyed())webView.evaluateJavascript(script,null);});
     }
 
     private void handleAndroidBack() {

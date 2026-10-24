@@ -27,10 +27,17 @@ public class KggSyncBridge {
     private static final int MAX_PEER_FILES = 80;
 
     private final Context appContext;
+    private final SharedPreferences preferences;
+    private volatile String followConfiguration;
+    private volatile KggSyncRequestCoordinator syncOwner;
+    private Runnable configurationChanged=()->{};
 
     public KggSyncBridge(Context context) {
         this.appContext = context.getApplicationContext();
+        preferences=appContext.getSharedPreferences(PREFS,Context.MODE_PRIVATE);
+        followConfiguration=preferences.getString(FOLLOW_CONFIG,"{\"therapistId\":\"\",\"syncRoomId\":\"\",\"followedTherapists\":[]}");
     }
+    void attachSyncOwner(KggSyncRequestCoordinator owner,Runnable changed){syncOwner=owner;configurationChanged=changed;}
 
     @JavascriptInterface
     public String getStatus() {
@@ -43,7 +50,7 @@ public class KggSyncBridge {
             File sharedRoot = sharedSyncRoot();
             File privateRoot = privateSyncRoot();
             boolean sharedWritable = canUseSharedSyncFolder(true);
-            statusEnsureRoom(config, roomId);
+            statusEnsureRoom(roomId);
 
             JSONObject status = new JSONObject();
             status.put("available", true);
@@ -69,8 +76,11 @@ public class KggSyncBridge {
 
     @JavascriptInterface
     public String readSyncJson() {
+        return readSyncJson(readFollowConfig());
+    }
+    String readSyncJson(String boundFollowConfiguration) {
         try {
-            JSONObject config = followConfigJson();
+            JSONObject config = new JSONObject(boundFollowConfiguration);
             String roomId = syncRoomId(config);
             JSONObject mesh = meshSyncDocument(roomId, config);
             JSONArray peers = mesh.optJSONArray("peers");
@@ -106,12 +116,15 @@ public class KggSyncBridge {
 
     @JavascriptInterface
     public boolean writeSyncJson(String json) {
+        return writeSyncJson(json,readFollowConfig());
+    }
+    boolean writeSyncJson(String json,String boundFollowConfiguration) {
         try {
             if (!isSafeExerciseBankSyncPayload(json)) {
                 return false;
             }
             JSONObject parsed = new JSONObject(json);
-            JSONObject config = followConfigJson();
+            JSONObject config = new JSONObject(boundFollowConfiguration);
             String roomId = syncRoomIdFromDocument(parsed, config);
             JSONObject origin = parsed.optJSONObject("origin");
             if (origin == null) {
@@ -143,30 +156,41 @@ public class KggSyncBridge {
 
     @JavascriptInterface
     public String readFollowConfig() {
-        SharedPreferences prefs = appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        return prefs.getString(FOLLOW_CONFIG, "{\"therapistId\":\"\",\"syncRoomId\":\"\",\"followedTherapists\":[]}");
+        KggSyncRequestCoordinator owner=syncOwner;
+        return owner==null?followConfiguration:owner.readConfiguration(()->followConfiguration);
     }
 
     @JavascriptInterface
     public boolean writeFollowConfig(String json) {
         try {
-            JSONObject parsed = new JSONObject(json);
-            SharedPreferences prefs = appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-            prefs.edit().putString(FOLLOW_CONFIG, parsed.toString()).apply();
-            return true;
+            String value = new JSONObject(json).toString();
+            KggSyncRequestCoordinator owner=syncOwner;
+            return owner==null?storeFollowConfiguration(value):owner.updateConfiguration(()->storeFollowConfiguration(value));
         } catch (Exception err) {
             return false;
         }
     }
+    private boolean storeFollowConfiguration(String value){
+        if(value.equals(followConfiguration))return true;
+        preferences.edit().putString(FOLLOW_CONFIG,value).apply();
+        followConfiguration=value;configurationChanged.run();return true;
+    }
 
-    private void statusEnsureRoom(JSONObject config, String roomId) {
+    private void statusEnsureRoom(String roomId) {
+        KggSyncRequestCoordinator owner=syncOwner;
+        if(owner==null)initializeCurrentRoom(roomId);
+        else owner.updateConfiguration(()->initializeCurrentRoom(roomId));
+    }
+
+    private boolean initializeCurrentRoom(String roomId) {
         try {
-            if (config.optString("syncRoomId", "").trim().isEmpty()) {
-                config.put("syncRoomId", roomId);
-                writeFollowConfig(config.toString());
-            }
-        } catch (Exception ignored) {
-        }
+            // The scan's earlier config may predate a completed pairing. Only
+            // fill a still-empty room on the current cache under its write lock.
+            JSONObject current=new JSONObject(followConfiguration);
+            if(!current.optString("syncRoomId","").trim().isEmpty())return true;
+            current.put("syncRoomId",roomId);
+            return storeFollowConfiguration(current.toString());
+        } catch (Exception ignored) {return false;}
     }
 
     private JSONObject followConfigJson() {

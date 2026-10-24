@@ -48,7 +48,7 @@ function parseArgs() {
 }
 
 function usage() {
-  console.log("Usage: node release-pipeline/kgg_ui_stability_smoke.js --level critical|regression [--case all|gestures|ui-mini-series|bank-thumbnails|phone-admin-menu|phone-scan-dock|phone-history-packages|phone-bank-align|tablet-layout-button|tablet-package-save|tablet-card-reorder|tablet-layout-visual|tablet-editor-layout|tablet-split-phone-layout|phone-landscape-tablet-menu|tablet-app-boot|tablet-splitter-scale-drag] [--browser]");
+  console.log("Usage: node release-pipeline/kgg_ui_stability_smoke.js --level critical|regression [--case all|gestures|ui-mini-series|bank-thumbnails|phone-admin-menu|phone-scan-dock|phone-history-packages|phone-bank-align|tablet-layout-button|tablet-menu-gestures|tablet-sync-qr|tablet-package-save|tablet-card-reorder|tablet-layout-visual|tablet-editor-layout|tablet-split-phone-layout|phone-landscape-tablet-menu|tablet-app-boot|tablet-splitter-scale-drag] [--browser]");
   console.log("Optional: set KGG_UI_SMOKE_HTML to test a release HTML instead of kgg-update/index.html.");
 }
 
@@ -428,6 +428,144 @@ async function elementCenter(locator) {
   return { x: box.x + box.width / 2, y: box.y + box.height / 2, box };
 }
 
+async function tabletMenuGestureContracts(page) {
+  await page.evaluate(() => {
+    const state = window.__kggMenuGestureContract = { events: [], toggles: [] };
+    state.capture = event => {
+      const record = { type: event.type, trusted: event.isTrusted, target: event.target.id || event.target.tagName,
+        inButton: !!event.target.closest?.('#tabletMenuBtn'), pointerId: event.pointerId, detail: event.detail, key: event.key,
+        at: event.timeStamp, before: document.body.classList.contains('tabletMenuOpen') };
+      state.events.push(record);
+      queueMicrotask(() => { record.after = document.body.classList.contains('tabletMenuOpen'); });
+    };
+    for (const kind of ['pointerdown', 'pointerup', 'click', 'touchstart', 'keydown', 'keyup']) window.addEventListener(kind, state.capture, true);
+    state.observer = new MutationObserver(records => {
+      for (let i = 0; i < records.length; i++) {
+        const before = (records[i].oldValue || '').split(/\s+/).includes('tabletMenuOpen');
+        const afterClass = i + 1 < records.length ? records[i + 1].oldValue || '' : document.body.className;
+        const after = afterClass.split(/\s+/).includes('tabletMenuOpen');
+        if (before !== after) state.toggles.push({ before, after, at: performance.now() });
+      }
+    });
+    state.observer.observe(document.body, { attributes: true, attributeFilter: ['class'], attributeOldValue: true });
+  });
+  const opened = () => page.evaluate(() => document.body.classList.contains('tabletMenuOpen'));
+  const point = selector => page.evaluate(selector => {
+    const node = document.querySelector(selector), r = node.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+    const hit = document.elementFromPoint(x, y);
+    if (!r.width || !r.height || !(hit === node || node.contains(hit))) throw Error('Menu contract target is not hit-testable: ' + selector);
+    return { x, y };
+  }, selector);
+  const start = async () => {
+    await page.waitForTimeout(300); // separate deliberate activations, never the press/release interval
+    if (await opened()) fail('Menu gesture control must begin closed');
+    await page.evaluate(() => { const state = window.__kggMenuGestureContract; state.observer.takeRecords(); state.events = []; state.toggles = []; });
+  };
+  const finish = async (label, validate) => {
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    const result = await page.evaluate(() => ({ open: document.body.classList.contains('tabletMenuOpen'),
+      expanded: document.getElementById('tabletMenuBtn').getAttribute('aria-expanded'), events: window.__kggMenuGestureContract.events, toggles: window.__kggMenuGestureContract.toggles }));
+    if (!result.open || result.expanded !== 'true' || result.toggles.length !== 1 || !validate(result.events)) fail(`One menu activation must toggle once (${label}): ${JSON.stringify(result)}`);
+    await page.waitForTimeout(300);
+    const close = await point('#tabletMenuClose'); await page.mouse.click(close.x, close.y);
+    if (await opened()) fail('Actual menu Close did not close after ' + label);
+    await page.waitForTimeout(300);
+  };
+  try {
+    for (const holdMs of [50, 350, 600]) for (let repeat = 0; repeat < 3; repeat++) {
+      await start(); const p = await point('#tabletMenuBtn');
+      await page.mouse.move(p.x, p.y); await page.mouse.down();
+      await page.waitForTimeout(holdMs);
+      const sameHit = await page.evaluate(p => { const node = document.getElementById('tabletMenuBtn'), hit = document.elementFromPoint(p.x, p.y); return hit === node || node.contains(hit); }, p);
+      await page.mouse.up();
+      if (!sameHit) fail('Menu moved away from the held pointer; single-button control is inconclusive');
+      await finish(`${holdMs}ms #${repeat + 1}`, events => {
+        const down = events.filter(e => e.type === 'pointerdown'), up = events.filter(e => e.type === 'pointerup'), click = events.filter(e => e.type === 'click');
+        return down.length === 1 && up.length === 1 && click.length === 1 && [...down, ...up, ...click].every(e => e.trusted && e.inButton)
+          && down[0].pointerId === up[0].pointerId && click[0].detail === 1 && up[0].at - down[0].at >= holdMs - 15;
+      });
+    }
+    await start(); const touch = await point('#tabletMenuBtn'); await page.touchscreen.tap(touch.x, touch.y);
+    await finish('actual touchscreen tap', events => events.some(e => e.type === 'pointerdown' && e.trusted && e.inButton));
+    for (const key of ['Enter', 'Space']) {
+      await start(); await page.locator('#tabletMenuBtn').focus(); await page.keyboard.press(key);
+      await finish('keyboard ' + key, events => events.some(e => e.type === 'keydown' && e.trusted && e.key === (key === 'Space' ? ' ' : key)) && !events.some(e => e.type === 'pointerdown'));
+    }
+    await start();
+    // Explicit click-without-pointer contract for assistive/programmatic callers;
+    // unlike the actual pointer/keyboard controls above, this event is untrusted.
+    await page.locator('#tabletMenuBtn').evaluate(node => node.click());
+    await finish('click without pointer', events => events.length === 1 && events[0].type === 'click' && events[0].detail === 0);
+    await start();
+    const padded = await page.evaluate(() => {
+      const node = document.getElementById('tabletMenuBtn'), r = node.getBoundingClientRect();
+      for (const p of [{ x: r.left - 5, y: r.top + r.height / 2 }, { x: r.right + 5, y: r.top + r.height / 2 }]) {
+        const hit = document.elementFromPoint(p.x, p.y);
+        if (hit && !node.contains(hit) && hit !== node && !hit.closest('button,input,textarea,select,a')) return p;
+      }
+      throw Error('Fixture has no safe point in the existing expanded menu hit area');
+    });
+    await page.mouse.click(padded.x, padded.y);
+    await finish('existing 10px hit area', events => events.some(e => e.type === 'pointerdown' && e.trusted && !e.inButton));
+    console.log('Tablet menu gesture contracts OK: 3 x 50/350/600ms, touch, Enter, Space, pointer-free click, hit area and Close');
+  } finally {
+    await page.evaluate(() => { const state = window.__kggMenuGestureContract; if (state) { state.observer.disconnect(); for (const kind of ['pointerdown', 'pointerup', 'click', 'touchstart', 'keydown', 'keyup']) window.removeEventListener(kind, state.capture, true); } delete window.__kggMenuGestureContract; });
+  }
+}
+
+async function tabletSyncQrImageContract(page, context) {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.addScriptTag({ path: path.join(ROOT, 'vendor', 'jsqr-1.4.0.js') });
+  await page.evaluate(() => {
+    if ([...document.scripts].filter(node => node.textContent.includes('qrcode-generator 1.5.2 | MIT License')).length !== 1) throw Error('Actual embedded qrcode-generator 1.5.2 missing');
+    if (typeof window.jsQR !== 'function' || typeof window.qrcode !== 'function') throw Error('Actual QR generator/decoder missing');
+    if (window.KGGQrCore?.renderQrToImg) throw Error('Expected the actual embedded fallback renderer in this fixture');
+    const original = window.qrcode, state = window.__kggSyncQrImageContract = { original, svg: 0, gif: 0, payloads: [] };
+    // Forward every call into the unchanged real embedded renderer; only count.
+    state.wrapped = function (...args) {
+      const qr = original(...args), add = qr.addData, svg = qr.createSvgTag, gif = qr.createDataURL;
+      qr.addData = function (value, ...rest) { state.payloads.push(value); return add.call(qr, value, ...rest); };
+      qr.createSvgTag = function (...values) { state.svg++; return svg.apply(qr, values); };
+      qr.createDataURL = function (...values) { state.gif++; return gif.apply(qr, values); };
+      return qr;
+    };
+    Object.assign(state.wrapped, original); window.qrcode = state.wrapped;
+  });
+  try {
+    await page.waitForTimeout(300);
+    const menu = await elementCenter(page.locator('#tabletMenuBtn')); await page.mouse.click(menu.x, menu.y);
+    await page.waitForFunction(() => document.body.classList.contains('tabletMenuOpen'));
+    await page.locator('#tabletMenuSyncQrBtn').click();
+    await page.locator('#syncPairModal.open #syncPairQrBox img').waitFor({ state: 'visible' });
+    await page.evaluate(async () => { const img = document.querySelector('#syncPairQrBox img'); await img.decode(); if (!img.complete || !img.naturalWidth) throw Error('Real Sync IMG did not load/decode'); });
+    const rendering = await page.evaluate(() => {
+      const state = window.__kggSyncQrImageContract, img = document.querySelector('#syncPairQrBox img');
+      return { svg: state.svg, gif: state.gif, payloads: state.payloads, srcPrefix: img.currentSrc.slice(0, 40) };
+    });
+    if (rendering.svg !== 1 || rendering.gif !== 0 || rendering.payloads.length !== 1 || !rendering.srcPrefix.startsWith('data:image/svg+xml')) fail('Sync QR must use real embedded SVG without GIF work: ' + JSON.stringify(rendering));
+    await page.locator('#copySyncPairCode').click();
+    await page.waitForFunction(() => document.getElementById('syncPairStatus').textContent === 'Sync-Code kopiert.');
+    const decoded = await page.evaluate(async () => {
+      const expected = await navigator.clipboard.readText(), img = document.querySelector('#syncPairQrBox img'), r = img.getBoundingClientRect();
+      if (!/^KGGSYNC[12]:/.test(expected)) throw Error('Actual clipboard has no Sync code');
+      const sizes = [{ kind: 'natural', width: img.naturalWidth, height: img.naturalHeight }, { kind: 'css', width: Math.round(r.width), height: Math.round(r.height) }];
+      return { expected, renderedPayload: window.__kggSyncQrImageContract.payloads[0], images: sizes.map(size => {
+        if (!size.width || !size.height) throw Error('Sync IMG has no ' + size.kind + ' size');
+        const canvas = document.createElement('canvas'); canvas.width = size.width; canvas.height = size.height;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true }); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.imageSmoothingEnabled = false; ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height), result = window.jsQR(pixels.data, canvas.width, canvas.height, { inversionAttempts: 'attemptBoth' });
+        return { ...size, decoded: result?.data || null };
+      }) };
+    });
+    if (decoded.renderedPayload !== decoded.expected || decoded.images.some(image => image.decoded !== decoded.expected)) fail('Real jsQR 1.4.0 did not decode the actual Sync image exactly to its copied code: ' + JSON.stringify(decoded));
+    await page.locator('#closeSyncPairModal').click();
+    await page.waitForFunction(() => !document.getElementById('syncPairModal').classList.contains('open'));
+    console.log('Sync QR real IMG/jsQR contract OK: SVG, no GIF, loaded/decoded, exact clipboard match at natural and CSS sizes');
+  } finally {
+    await page.evaluate(() => { const state = window.__kggSyncQrImageContract; if (state && window.qrcode === state.wrapped) window.qrcode = state.original; delete window.__kggSyncQrImageContract; });
+  }
+}
+
 async function browserGestureSuite() {
   const { chromium } = requirePlaywright();
   const htmlUrl = pathToFileURL(HTML_PATH).href;
@@ -613,7 +751,7 @@ function wantsPhoneMiniSeries(caseName) {
 }
 
 function wantsTabletMiniSeries(caseName) {
-  return caseMatches(caseName, ["tablet-layout-button", "tablet-package-save", "tablet-card-reorder", "tablet-layout-visual", "tablet-editor-layout"]);
+  return caseMatches(caseName, ["tablet-layout-button", "tablet-menu-gestures", "tablet-sync-qr", "tablet-package-save", "tablet-card-reorder", "tablet-layout-visual", "tablet-editor-layout"]);
 }
 
 function wantsTabletSplitPhoneMiniSeries(caseName) {
@@ -1370,7 +1508,7 @@ async function browserUiMiniSeriesSuite(caseName) {
         externalRequests.push(route.request().url());
         await route.fulfill({ status: 204, contentType: "application/json", body: "{}" });
       });
-      const realTabletRuntime = caseMatches(caseName, ["tablet-layout-button", "tablet-package-save", "tablet-card-reorder", "tablet-editor-layout"]);
+      const realTabletRuntime = caseMatches(caseName, ["tablet-layout-button", "tablet-menu-gestures", "tablet-sync-qr", "tablet-package-save", "tablet-card-reorder", "tablet-editor-layout"]);
       if (realTabletRuntime) {
         await context.addInitScript(({ storageKey, customBankKey, exercises, customBank }) => {
           localStorage.setItem(
@@ -1451,6 +1589,8 @@ async function browserUiMiniSeriesSuite(caseName) {
       await page.evaluate(() => {
         document.querySelectorAll(".modal.open").forEach((modal) => modal.classList.remove("open"));
       });
+      if (realTabletRuntime && caseMatches(caseName, ['tablet-menu-gestures', 'tablet-layout-button'])) await tabletMenuGestureContracts(page);
+      if (realTabletRuntime && caseMatches(caseName, ['tablet-sync-qr', 'tablet-layout-button'])) await tabletSyncQrImageContract(page, context);
       const layoutProbe = await page.evaluate(() => {
         const rect = (id) => {
           const el = id.startsWith(".") || id.startsWith("#") ? document.querySelector(id) : document.getElementById(id);
@@ -1892,7 +2032,7 @@ async function main() {
   if (!["critical", "regression", "all"].includes(args.level)) {
     fail(`Unknown level: ${args.level}`);
   }
-  const knownCases = ["all", "gestures", "ui-mini-series", "bank-thumbnails", "phone-admin-menu", "phone-scan-dock", "phone-history-packages", "phone-bank-align", "tablet-layout-button", "tablet-package-save", "tablet-card-reorder", "tablet-layout-visual", "tablet-editor-layout", "tablet-split-phone-layout", "phone-landscape-tablet-menu", "tablet-app-boot", "tablet-splitter-scale-drag"];
+  const knownCases = ["all", "gestures", "ui-mini-series", "bank-thumbnails", "phone-admin-menu", "phone-scan-dock", "phone-history-packages", "phone-bank-align", "tablet-layout-button", "tablet-menu-gestures", "tablet-sync-qr", "tablet-package-save", "tablet-card-reorder", "tablet-layout-visual", "tablet-editor-layout", "tablet-split-phone-layout", "phone-landscape-tablet-menu", "tablet-app-boot", "tablet-splitter-scale-drag"];
   if (!knownCases.includes(args.caseName)) {
     fail(`Unknown case: ${args.caseName}`);
   }
