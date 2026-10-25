@@ -192,19 +192,19 @@
       "sha256": "1c7d66f373a9e683b85171e4dba4330ab26a8c3ec649e3dc74d6ea7c0168405c"
     },
     {
-      "bytes": 13062,
+      "bytes": 13393,
       "chunks": [
         {
-          "name": "chunk-v2-2e32a0b406f69fce.md",
-          "path": "docs/kgg-gpt-source/chunk-v2-2e32a0b406f69fce.md",
-          "payloadBytes": 13062,
-          "payloadLines": 384,
-          "payloadSha256": "2e32a0b406f69fced1fbbac5d767e92fd3e3e807ba13a784ec84f2602f1e3e76"
+          "name": "chunk-v2-7ce71a07479bd21c.md",
+          "path": "docs/kgg-gpt-source/chunk-v2-7ce71a07479bd21c.md",
+          "payloadBytes": 13393,
+          "payloadLines": 390,
+          "payloadSha256": "7ce71a07479bd21ca7fbf4a8f927ef3ef6171b2dd8a364cbfabf4c474c3242fd"
         }
       ],
-      "lines": 384,
+      "lines": 390,
       "path": "kgg-update/src/features/head-ui-guards.html",
-      "sha256": "2e32a0b406f69fced1fbbac5d767e92fd3e3e807ba13a784ec84f2602f1e3e76"
+      "sha256": "7ce71a07479bd21ca7fbf4a8f927ef3ef6171b2dd8a364cbfabf4c474c3242fd"
     },
     {
       "bytes": 257148,

@@ -2,11 +2,11 @@
   "kind": "kgg_app_update_manifest",
   "version": 1,
   "latestVersion": "r0426",
-  "latestAdminReleaseId": "r0435",
+  "latestAdminReleaseId": "r0436",
   "latestColleagueReleaseId": "r0426",
   "latestAdminVersion": "1.0.128-button-touch-responsiveness",
   "latestColleagueVersion": "1.0.65-source-control-char-guard",
-  "adminUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0435/admin.html",
+  "adminUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0436/admin.html",
   "colleagueUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html",
   "latestUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html",
   "latestAndroidShellVersion": "v406",
@@ -16,5 +16,5 @@
   "latestColleagueAndroidApkSha256": "66c335098310265d85de7f460fe6782ea26cc9db0e2ae2ea981acf51b84ad3d1",
   "latestAdminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v406/android/KGG_ANDROID_ADMIN_v406_responsive_drive_debug.apk",
   "latestAdminAndroidApkSha256": "2cd6ec13ae01652c5f5e851f1d1b06747a9208f86d88cfa4ef2c2756a4bb5e93",
-  "releaseNotes": "Admin beta r0435: v128: Native Hintergrund-Synchronisierung mit Status-Snapshots, schnellere Bildimporte und QR-Darstellung sowie direkte, eindeutige Touch-Bedienung. Reguläres Android-Upgrade v406 wird passend dazu vorbereitet."
+  "releaseNotes": "Admin beta r0436: Tablet/Cockpit-Fix: Das geschlossene Fenster 'Therapeuten-App weitergeben' bleibt bei Hoch-/Querformat und Layoutwechseln ausgeblendet. Bestehende Plan-, QR-, Scan- und Sync-Funktionen bleiben unveraendert."
 }

@@ -1,3 +1,9 @@
+<style id="kgg-share-modal-closed-state-guard">
+  /* The share dialog must never occupy the tablet app grid when closed.
+     Tablet/cockpit layout classes can change without opening this dialog. */
+  #kggTherapistShareModal:not(.isOpen){display:none!important;visibility:hidden!important;pointer-events:none!important;}
+</style>
+
 <style id="kgg-mini-patch-v400-01-menu-icon-stays-hamburger">
   /* v400 mini01: Tablet-Menü-Icon bleibt Hamburger.
      Nur UI-CSS. Keine PDF/QR/Scan/Parser/Plan-State-Logik. */
