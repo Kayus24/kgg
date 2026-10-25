@@ -45,8 +45,8 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 - Source web version: v128 / `1.0.128-button-touch-responsiveness`.
 - Source index URL: `index.html?v=128`.
 - Source notes: v128: Buttons deklarieren touch-action:manipulation gegen verzoegerte Touch-Clicks; spezifische Scroll- und Ziehgesten sowie bestehende Handler bleiben erhalten.
-- Live Admin release: `r0435` / `1.0.128-button-touch-responsiveness`.
-- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0435/admin.html`.
+- Live Admin release: `r0436` / `1.0.128-button-touch-responsiveness`.
+- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0436/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.
 - Live colleague URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html`.
 - Latest Android shell: `v406`.
