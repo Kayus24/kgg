@@ -2016,6 +2016,34 @@ async function browserTabletAppBootSuite() {
     if (!boot.scan || !boot.current || boot.current.width < 300 || boot.cardCount < 6 || !boot.tabletMenuBtn) {
       fail(`Tablet app boot probe failed: ${JSON.stringify(boot)}`);
     }
+    // Regression: the closed share dialog must not leak into the landscape/tablet grid.
+    // Exercise both sides of the runtime tabletLayoutCustom class boundary.
+    for (const viewport of [{ width: 1180, height: 820 }, { width: 820, height: 1180 }]) {
+      await page.setViewportSize(viewport);
+      const state = await page.evaluate(() => {
+        const modal = document.getElementById("kggTherapistShareModal");
+        if (!modal) return { missing: true };
+        const original = document.body.classList.contains("tabletLayoutCustom");
+        const display = () => getComputedStyle(modal).display;
+        const initial = display();
+        document.body.classList.remove("tabletLayoutCustom");
+        const withoutTabletClass = display();
+        document.body.classList.add("tabletLayoutCustom");
+        const withTabletClass = display();
+        modal.classList.add("isOpen");
+        const open = { display: display(), position: getComputedStyle(modal).position };
+        modal.classList.remove("isOpen");
+        document.body.classList.toggle("tabletLayoutCustom", original);
+        const restored = display();
+        return { missing: false, initial, withoutTabletClass, withTabletClass, open, restored };
+      });
+      if (state.missing || state.initial !== "none" ||
+          state.withoutTabletClass !== "none" || state.withTabletClass !== "none" ||
+          state.restored !== "none" || state.open.display !== "grid" ||
+          state.open.position !== "fixed") {
+        fail(`Tablet share dialog closed-state regression at ${viewport.width}x${viewport.height}: ${JSON.stringify(state)}`);
+      }
+    }
     if (pageErrors.length) fail(`Page error during tablet app boot: ${pageErrors.join(" | ")}`);
     await context.close();
     console.log(`Browser tablet app boot OK (${externalRequests.length} external request(s) blocked)`);
