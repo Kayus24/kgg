@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0436",
+  "versionName": "1.0.128-button-touch-responsiveness",
+  "notes": "Tablet/Cockpit-Fix: Das geschlossene Fenster 'Therapeuten-App weitergeben' bleibt bei Hoch-/Querformat und Layoutwechseln ausgeblendet. Bestehende Plan-, QR-, Scan- und Sync-Funktionen bleiben unveraendert.",
+  "createdAt": "2026-10-25T19:04:08Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0436",
+      "profile": "admin",
+      "versionName": "1.0.128-button-touch-responsiveness",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0436/admin.html",
+      "sha256": "e264fead1248c0aa503467bc26555fbe55a0e11c8584e161efd7750162e7e04a",
+      "notes": "Tablet/Cockpit-Fix: Das geschlossene Fenster 'Therapeuten-App weitergeben' bleibt bei Hoch-/Querformat und Layoutwechseln ausgeblendet. Bestehende Plan-, QR-, Scan- und Sync-Funktionen bleiben unveraendert."
+    },
+    "colleague": {
+      "releaseId": "r0436",
+      "profile": "colleague",
+      "versionName": "1.0.128-button-touch-responsiveness",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0436/colleague.html",
+      "sha256": "bbb807c981da3cc8bf39bac2b4d794bffe2bb2d06c26c3bb5ecd1d2b679f84a1",
+      "notes": "Tablet/Cockpit-Fix: Das geschlossene Fenster 'Therapeuten-App weitergeben' bleibt bei Hoch-/Querformat und Layoutwechseln ausgeblendet. Bestehende Plan-, QR-, Scan- und Sync-Funktionen bleiben unveraendert."
+    }
+  }
+}
