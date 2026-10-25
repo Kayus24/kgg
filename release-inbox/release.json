@@ -1,0 +1,5 @@
+{
+  "releaseId": "r0436",
+  "versionName": "1.0.128-button-touch-responsiveness",
+  "notes": "Tablet/Cockpit-Fix: Das geschlossene Fenster 'Therapeuten-App weitergeben' bleibt bei Hoch-/Querformat und Layoutwechseln ausgeblendet. Bestehende Plan-, QR-, Scan- und Sync-Funktionen bleiben unveraendert."
+}
