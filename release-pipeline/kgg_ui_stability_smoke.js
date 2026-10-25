@@ -130,6 +130,7 @@ function staticGestureGuardSuite() {
   assertIncludes(html, "doc.addImage(thumb.dataUrl,'JPEG'", "PDF card draws JPEG thumbnail");
   assertIncludes(html, "target.grid==='1x3'", "large-print PDF thumbnail skip guard");
   assertIncludes(html, "window.KGG_PDF_PLAN_THUMBNAILS_V052", "v052 public probe");
+  assertIncludes(html, "#kggTherapistShareModal:not(.isOpen){display:none!important;visibility:hidden!important;pointer-events:none!important;}", "closed therapist share dialog stays outside tablet layout");
   assertIncludes(html, "kgg-v053-ui-tablet-stability", "v053 UI/tablet stability marker");
   assertIncludes(html, "window.KGG_UI_TABLET_STABILITY_V053", "v053 public probe");
 
