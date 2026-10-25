@@ -79,6 +79,9 @@ function readChangelogArchive() {
 function staticGestureGuardSuite() {
   const html = readHtml();
 
+  assertIncludes(html, "kgg-v103-plan-card-action-touch-spacing", "mobile plan-card layout patch");
+  assertIncludes(html, ".planCard:has(.planThumb img) .planBadge.media", "redundant media badge hiding");
+  assertIncludes(html, "-webkit-line-clamp:2!important", "two-line exercise title contract");
   assertIncludes(html, "function startPlanCardSwipeDelete", "plan-card swipe handler");
   assertIncludes(html, "function resetPlanCardSwipe", "plan-card swipe cleanup");
   assertIncludes(html, "card.style.setProperty('--kgg-plan-swipe-x'", "swipe CSS variable update");
@@ -566,6 +569,45 @@ async function tabletSyncQrImageContract(page, context) {
   }
 }
 
+async function assertReadablePhonePlanCards(page) {
+  for (const width of [320, 390, 430]) {
+    await page.setViewportSize({ width, height: 844 });
+    const state = await page.evaluate(() => {
+      const card = document.querySelector("#planList .planCard[data-plan-id]");
+      const name = card && card.querySelector(".planName");
+      const edit = card && card.querySelector("[data-planedit]");
+      const del = card && card.querySelector("[data-del]");
+      const drag = card && card.querySelector(".drag");
+      if (!card || !name || !edit || !del || !drag) return { missing: true };
+      const saved = name.textContent;
+      name.textContent = "Statisches Seitheben links/rechts mit kontrollierter Schulterblattstabilisierung";
+      const rect = el => el.getBoundingClientRect();
+      const bounds = el => { const r=rect(el); return {x:r.x,y:r.y,left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}; };
+      const overlap = (a,b) => a.left < b.right-1 && a.right > b.left+1 && a.top < b.bottom-1 && a.bottom > b.top+1;
+      const n=bounds(name), e=bounds(edit), d=bounds(del), g=bounds(drag), c=bounds(card);
+      const css=getComputedStyle(name);
+      const state = {
+        viewport: window.innerWidth, whiteSpace: css.whiteSpace, lineClamp: css.webkitLineClamp,
+        nameHeight: n.height, lineHeight: parseFloat(css.lineHeight),
+        editSize:[e.width,e.height], deleteSize:[d.width,d.height], dragSize:[g.width,g.height],
+        buttonsOverlap:overlap(e,d), titleUnderDelete:overlap(n,d),
+        withinCard: e.left>=c.left-1 && e.right<=c.right+1 && d.left>=c.left-1 && d.right<=c.right+1,
+        horizontalOverflow:card.scrollWidth>card.clientWidth+1
+      };
+      name.textContent=saved;
+      return state;
+    });
+    if (state.missing || state.whiteSpace !== "normal" || state.lineClamp !== "2" ||
+        !(state.lineHeight>0) || state.nameHeight>state.lineHeight*2+3 ||
+        state.editSize?.some(x=>x<43.5) || state.deleteSize?.some(x=>x<43.5) ||
+        state.dragSize?.some(x=>x<43.5) || state.buttonsOverlap ||
+        state.titleUnderDelete || !state.withinCard || state.horizontalOverflow) {
+      fail("Mobile plan card readability/touch layout regression: "+JSON.stringify(state));
+    }
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+}
+
 async function browserGestureSuite() {
   const { chromium } = requirePlaywright();
   const htmlUrl = pathToFileURL(HTML_PATH).href;
@@ -617,6 +659,8 @@ async function browserGestureSuite() {
 
     const count = await page.locator("#planList .planCard[data-plan-id]").count();
     if (count !== 30) fail(`Expected 30 seeded plan cards, got ${count}`);
+
+    await assertReadablePhonePlanCards(page);
 
     await assertPageCondition(
       page,

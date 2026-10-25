@@ -2,6 +2,6 @@
   "versionCode": 128,
   "versionName": "1.0.128-button-touch-responsiveness",
   "indexUrl": "index.html?v=128",
-  "sha256": "eb3579a676f22644824c94568f6034a1800f1a4c5af29b6bd3b879ddf2585689",
+  "sha256": "c3989f17a4463a1a7679d312cd94fe75b2918c9c32db62d0af6e6f8bd981423c",
   "notes": "v128: Buttons deklarieren touch-action:manipulation gegen verzoegerte Touch-Clicks; spezifische Scroll- und Ziehgesten sowie bestehende Handler bleiben erhalten."
 }
