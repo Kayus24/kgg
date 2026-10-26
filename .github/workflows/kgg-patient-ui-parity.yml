@@ -1,9 +1,19 @@
 name: KGG Patient UI Legacy React Parity
 
 on:
+  workflow_call:
+    inputs:
+      candidate_sha:
+        description: Exact candidate checked by the calling required gate
+        required: true
+        type: string
+    outputs:
+      accepted:
+        description: Runner completed its automated acceptance scope successfully
+        value: ${{ jobs.parity.outputs.accepted }}
   workflow_dispatch:
   pull_request:
-    branches: [main, feat/patient-react-padgrid-p8-20261014]
+    branches: [feat/patient-react-padgrid-p8-20261014]
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - 'index.html'
@@ -31,12 +41,24 @@ jobs:
       matrix:
         browser: [chromium, webkit]
     name: ${{ matrix.browser }} integrated Legacy P7 P8 acceptance
+    outputs:
+      accepted: ${{ steps.acceptance.outputs.accepted }}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ inputs.candidate_sha || github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
+      - name: Verify exact acceptance candidate
+        id: candidate
+        shell: bash
+        env:
+          EXPECTED_CANDIDATE_SHA: ${{ inputs.candidate_sha || github.event.pull_request.head.sha || github.sha }}
+        run: |
+          actual_sha="$(git rev-parse HEAD)"
+          [[ "$EXPECTED_CANDIDATE_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo 'Acceptance candidate must be a full commit SHA'; exit 1; }
+          [[ "$actual_sha" == "$EXPECTED_CANDIDATE_SHA" ]] || { echo "Unexpected acceptance checkout: $actual_sha"; exit 1; }
+          echo "sha=$actual_sha" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -57,6 +79,7 @@ jobs:
           npm ci --ignore-scripts --no-audit --no-fund
           npx playwright install --with-deps ${{ matrix.browser }} chromium
       - name: Require one immutable combined acceptance candidate
+        id: acceptance
         shell: bash
         env:
           PYTHONUNBUFFERED: '1'
@@ -64,11 +87,12 @@ jobs:
           python release-pipeline/kgg_patient_integrated_acceptance.py \
             --engine ${{ matrix.browser }} \
             --out "$RUNNER_TEMP/kgg-integrated-${{ matrix.browser }}/patient-ui-parity"
+          echo 'accepted=true' >> "$GITHUB_OUTPUT"
       - name: Keep complete evidence including failures
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: integrated-patient-${{ matrix.browser }}-${{ github.event.pull_request.head.sha || github.sha }}
+          name: integrated-patient-${{ matrix.browser }}-${{ steps.candidate.outputs.sha }}
           path: ${{ runner.temp }}/kgg-integrated-${{ matrix.browser }}/patient-ui-parity
           retention-days: 7
           if-no-files-found: error
